@@ -5067,6 +5067,19 @@ sub load_user
     return undef;
 }
 
+# <LJFUNC>
+# name: LJ::u_equals
+# des: Compares two user objects to see if they're the same user.
+# args: userobj1, userobj2
+# des-userobj1: First user to compare.
+# des-userobj2: Second user to compare.
+# returns: Boolean, true if userobj1 and userobj2 are defined and have equal userids.
+# </LJFUNC>
+sub u_equals {
+    my ($u1, $u2) = @_;
+    return $u1 && $u2 && $u1->{'userid'} == $u2->{'userid'};
+}
+
 sub memcache_get_u
 {
     my @keys = @_;
@@ -7509,6 +7522,7 @@ sub alloc_global_counter
 # </LJFUNC>
 sub mark_user_active {
     my ($u, $type) = @_;  # not currently using type
+    return 0 unless $u;   # do not auto-vivify $u
     my $uid = $u->{userid};
     return 0 unless $uid && $u->{clusterid};
 

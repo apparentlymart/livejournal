@@ -42,7 +42,7 @@ _code?>
                         "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                         "opt_whoscreened", "journaltitle", "journalsubtitle", 
                         "friendspagetitle", "opt_weblogscom", "opt_stylemine",
-                        "opt_imagelinks"
+                        "opt_imagelinks", "opt_getselfemail",
                         );
 
     # to store values before they undergo normalisation
@@ -414,6 +414,13 @@ _code?>
                                 $extra ? ("$maxwidth|$maxheight", $extra) : ());
         $ret .= "</td></tr>\n";
 
+        # opt_bdaymail
+        $ret .= "<tr valign='middle'><td>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_getselfemail', 'id' => 'opt_getselfemail',
+                                 'selected' => $u->{'opt_getselfemail'} });
+        $ret .= "</td><td><b><label for='opt_getselfemail'>$ML{'.getselfemails.header'}</label></b></td></tr>\n";
+        $ret .= "<tr><td>&nbsp;</td><td>$ML{'.getselfemails.about'}</td></tr>\n";
+
         # opt_showtalklinks
         $ret .= "<tr valign='middle'><td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showtalklinks', 'id' => 'opt_showtalklinks',
@@ -701,6 +708,7 @@ _code?>
             $POST{'friendspagetitle'} = LJ::text_trim($POST{'friendspagetitle'}, 0, 80) if $POST{'friendspagetitle'};
 
             # opts
+            $POST{'opt_getselfemail'} = $POST{'opt_getselfemail'} ? 1 : 0;
             $POST{'opt_stylemine'} = $POST{'opt_stylemine'} ? 1 : 0;
             $POST{'opt_blockrobots'} = $POST{'opt_blockrobots'} ? 1 : 0;
             $POST{'opt_bdaymail'} = $POST{'opt_bdaymail'} ? 1 : 0;
@@ -747,7 +755,7 @@ _code?>
                           "opt_bdaymail", "opt_hidefriendofs",
                           "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                           "opt_whoscreened", "journaltitle", "journalsubtitle", "friendspagetitle",
-                          "opt_stylemine", "opt_imagelinks",
+                          "opt_stylemine", "opt_imagelinks", "opt_getselfemail",
                           );
 
             # weblogs.com requires a special cap
