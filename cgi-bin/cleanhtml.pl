@@ -138,7 +138,9 @@ sub clean
         my $type = $token->[0];
 
         # See if this tag should be treated as an alias
-        $token->[1] = $tag_substitute{$token->[1]} if defined $tag_substitute{$token->[1]};
+
+        $token->[1] = $tag_substitute{$token->[1]} if defined $tag_substitute{$token->[1]} &&
+            ($type eq 'S' || $type eq 'E');
 
         if ($type eq "S")     # start tag
         {
