@@ -11,7 +11,7 @@ my $sth;
 sub magic_links
 {
     my $des = shift;
-    $$des =~ s!table\[(\w+?)\]!<dbtblref tblid="$1">$1</dbtblref>!g;
+    $$des =~ s!\[dbtable\[(\w+?)\]\]!<dbtblref tblid="$1">$1</dbtblref>!g;
 }
 
 sub dump_xml
@@ -31,7 +31,7 @@ sub dump_xml
         # description of table
         if ($tables->{$table}->{'des'}) {
             my $des = $tables->{$table}->{'des'};
-            &magic_links(\$des);
+            magic_links(\$des);
             print "<description>$des</description>\n";
         }
 
@@ -42,7 +42,7 @@ sub dump_xml
             print "<name>$col->{'name'}</name>\n";
             if ($col->{'des'}) {
                 my $des = $col->{'des'};
-                &magic_links(\$des);
+                magic_links(\$des);
                 print "<description>$des</description>\n";
             }
             print "</dbcol>\n";
@@ -120,8 +120,6 @@ foreach my $table (sort keys %table)
         $table{$table}->{'index'}->{$name}->{'type'} = $type;
         push @{$table{$table}->{'index'}->{$name}->{'cols'}}, "$table.$r->{'Column_name'}";
     }
-
 }
 
-
-&dump_xml(\%table);
+dump_xml(\%table);

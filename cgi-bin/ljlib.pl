@@ -298,12 +298,13 @@ sub get_friend_items
             # load all user's friends
             my %f;
             my $sth = $dbh->prepare(qq{
-                SELECT f.friendid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate) 
-                FROM friends f, userusage uu WHERE f.userid=$userid AND f.friendid=uu.userid
+                SELECT f.friendid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.journaltype
+                FROM friends f, userusage uu, user u
+                WHERE f.userid=$userid AND f.friendid=uu.userid AND u.userid=f.friendid
             });
             $sth->execute;
-            while (my ($id, $time, $c) = $sth->fetchrow_array) {
-                $f{$id} = { 'userid' => $id, 'timeupdate' => $time, 'clusterid' => $c };
+            while (my ($id, $time, $jt) = $sth->fetchrow_array) {
+                $f{$id} = { 'userid' => $id, 'timeupdate' => $time, 'jt' => $jt };
             }
             
             # load some friends of friends (most 20 queries)
@@ -311,6 +312,7 @@ sub get_friend_items
             my $fct = 0;
             foreach my $fid (sort { $f{$a}->{'timeupdate'} <=> $f{$b}->{'timeupdate'} } keys %f)
             {
+                next unless $f{$fid}->{'jt'} eq "P";
                 last if ++$fct > 20;
                 my $sth = $dbh->prepare(qq{
                     SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid 

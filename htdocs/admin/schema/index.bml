@@ -15,7 +15,7 @@
  sub magic_links
  {
      my $des = shift;
-     $$des =~ s!table\[(\w+?)\]!<a href="./?mode=viewtable&amp;table=$1">$1</a>!g;
+     $$des =~ s!\[dbtable\[(\w+?)\]\]!<a href="./?mode=viewtable&amp;table=$1">$1</a>!g;
  }
 
  if ($FORM{'mode'} eq "") 
@@ -32,6 +32,7 @@
      $sth->execute;
      while (my ($table) = $sth->fetchrow_array) {
          my $des = $table{$table}->{'des'} || "<i>no description, yet</i>";
+         magic_links(\$des);
          $body .= "<tr valign=top><td nowrap><b><a href=\"./?mode=viewtable&amp;table=$table\">$table</a></b>";
          if ($table{$table}->{'public'}) {
              $body .= " (<a href=\"./?mode=viewdata&amp;table=$table\">data</a>)";
@@ -209,6 +210,7 @@
      $sth = $dbh->prepare("SELECT tablename, des FROM schematables WHERE tablename=$qtable");
      $sth->execute;
      my ($tablename, $tabledes) = $sth->fetchrow_array;
+     $FORM{'table-des'} =~ s/\r//;
      my $qdes = $dbh->quote($FORM{'table-des'});
      if ($tablename) {
          # row exists, update.
@@ -236,6 +238,7 @@
          my $name = $row->{'Field'};
          my $type = $row->{'Type'};
 
+         $FORM{"col-$name"} =~ s/\r//;
          if ($FORM{"col-$name"} ne $olddes{$name}) {
              $newdes{$name} = $FORM{"col-$name"};
          }
