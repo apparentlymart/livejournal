@@ -822,7 +822,7 @@ sub auth_fields
         $ret .= "<tr align='left'><td>Username:</td><td align='left'><input type='text' name='user' size='15' maxlength='15' value='";
         my $user = $form->{'user'};
         unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
-        $ret .= BMLUtil::escapeall($user) unless ($form->{'altlogin'});
+        $ret .= BML::eall($user) unless ($form->{'altlogin'});
         $ret .= "' /></td></tr>\n";
         $ret .= "<tr><td>Password:</td><td align='left'>\n";
         my $epass = LJ::ehtml($form->{'password'});
@@ -859,7 +859,7 @@ sub auth_fields_2
         $ret .= "<tr><td align='right'><u>U</u>sername:</td><td align='left'><input type=\"text\" name='user' size='15' maxlength='15' accesskey='u' value=\"";
         my $user = $form->{'user'};
         unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
-        $ret .= BMLUtil::escapeall($user) unless ($form->{'altlogin'});
+        $ret .= BML::eall($user) unless ($form->{'altlogin'});
         $ret .= "\" /></td></tr>\n";
         $ret .= "<tr><td align='right'><u>P</u>assword:</td><td align='left'>\n";
         $ret .= "<input type='password' name='password' size='15' maxlength='30' accesskey='p' value=\"" .

@@ -826,7 +826,6 @@ sub register_hook
 sub register_ml_getter
 {
     my $getter = shift;
-    $Apache::BML::cur_req->{'r'}->log_error("getter = $getter");
     $Apache::BML::ML_GETTER = $getter;
 }
 
