@@ -8,6 +8,7 @@
     # put variables here so that we can access them later
     # outside of this _code block
     my $title = \$_[1]->{'title'};
+    my $head = \$_[1]->{'head'};
     my $body = \$_[1]->{'body'};
     my $bodyopts = \$_[1]->{'bodyopts'};
 
@@ -55,13 +56,19 @@
         $did_spellcheck++;
     }
 
-    if (LJ::did_post() && ! $spellcheck_html && ! $POST{'showform'}) {
+    ### define some bools with common logic ###
+    my $did_post = LJ::did_post();
+    my $user_is_remote = $remote && $remote->{'user'} eq $POST{'user'};           # user is remote
+    my $auth_as_remote = $remote && (! $GET{'altlogin'} || $user_is_remote);      # auth as remote
+    my $auth_missing = $POST{'user'} && ! $POST{'password'} && ! $user_is_remote; # user w/o password
+    my $showform = $POST{'showform'} || $auth_missing;                            # show entry form
+
+    if ($did_post && ! $spellcheck_html && ! $showform) {
 
         # what's our authentication scheme for subsequent protocol actions?
         my $flags = {};
         my $user;
 
-        my $user_is_remote = $remote && $remote->{'user'} eq $POST{'user'};
         if ($POST{'user'} &&                            # user argument given
             ! $user_is_remote) {                        # user != remote
             
@@ -100,7 +107,7 @@
 
             # server login message for user?
             if ($res{'message'}) {
-                $login_message = LJ::eall($res{'message'});
+                $login_message = LJ::ehtml($res{'message'});
                 $login_message =~ s!(&quot;|&\#39;)?(https?://\S+[a-zA-Z0-9_/&=\-])!$1 ? $& : "<a href=\"$2\">$2</a>"!eg;
             }
         }
@@ -158,7 +165,7 @@
             # examine response
             my $update_message;
             if ($res{'success'} eq "OK" && $res{'message'}) {
-                $update_message = LJ::eall($res{'message'});
+                $update_message = LJ::ehtml($res{'message'});
                 $update_message =~ s!(&quot;|&\#39;)?(https?://\S+[a-zA-Z0-9_/&=\-])!$1 ? $& : "<a href=\"$2\">$2</a>"!eg;
             }
      
@@ -201,23 +208,26 @@
     ###
 
     $$body .= "<?h1 $ML{'.update.head'} h1?><?p $ML{'.update.about'} p?><?hr?>";
-    
-    # if they submit the form and are spellchecking, remember
-    # their settings from the GET requests
-    my $getextra;
-    $getextra .= "altlogin=1&" if $GET{'altlogin'};
-    $getextra .= "mode=full&" if $GET{'mode'} eq 'full';
-    chop $getextra;
-    $getextra = "?$getextra" if $getextra;
 
-    $$body .= "<form method='post' action='update.bml$getextra' name='updateForm'>";
+    {
+        # if they submit the form and are spellchecking, remember
+        # their settings from the GET requests
+        my $getextra;
+        $getextra .= "altlogin=1&" if $GET{'altlogin'};
+        $getextra .= "mode=full&" if $GET{'mode'} eq 'full';
+        chop $getextra;
+        $getextra = "?$getextra" if $getextra;
+
+        $$body .= "<form method='post' action='update.bml$getextra' name='updateForm'>";
+    }
+
     $$body .= "<table align='center' width='80%'>\n<tr><td width='50%'>\n";
 
     {
         # which authentication option do we display by default?
         my $altlogin_display = 'none';
         my $remotelogin_display = 'none';
-        if ($remote && (! $GET{'altlogin'} || $remote->{'user'} eq $POST{'user'})) {
+        if ($auth_as_remote) {
             $remotelogin_display = 'inline';
         } else {
             $altlogin_display = 'block';
@@ -233,15 +243,20 @@
 
         # table with username/password fields
         $$body .= "<table id='altlogin' style='display: $altlogin_display;'>\n";
-        $$body .= "<tr><td align='right'>Username:</td>";
+        $$body .= "<tr valign='top'><td align='right'>Username:</td>";
         $$body .= "<td align='left'>";
         $$body .= LJ::html_text({ 'name' => 'user', 'size' => '15', 'maxlength' => '15',
                                   'value' => $POST{'user'} || $GET{'user'} });
         $$body .= "</td></tr>\n";
-        $$body .= "<tr><td align='right'>Password:</td>";
+        $$body .= "<tr valign='top'><td align='right'>Password:</td>";
         $$body .= "<td align='left'>";
         $$body .= LJ::html_text({ 'type' => 'password', 'name' => 'password',
                                   'size' => '15', 'maxlength' => '30' });
+
+        # posted with a user, but no password
+        if ($did_post && $auth_missing) {
+            $$body .= "<br /><?inerr Enter Password inerr?>";
+        }
         $$body .= "</td></tr>\n";
         $$body .= "</table>\n";
     }
@@ -319,17 +334,24 @@
     }
     $$body .= "</p></td></tr><tr><td>";
 
-    # simple mode block
-    my $simple_display = $GET{'mode'} eq 'full' ? 'none' : 'block';
-    $$body .= "<div id='simplemsg' style='margin-top: 10px; display: $simple_display;'>";
-    my $fullget = $GET{'altlogin'} ? "?altlogin=1&mode=full" : "?mode=full";
-    $$body .= BML::ml(".simple", {'url' => "update.bml$fullget" }) ."</p>";
-    $$body .= "<link href='update.bml$fullget' rel='alternate' title='$ML{'.full'}'>\n";
-    $$body .= "</div>";
+    {
+        # simple mode block
+        my $simple_display = $GET{'mode'} eq 'full' ? 'none' : 'block';
+        $$body .= "<div id='simplemsg' style='margin-top: 10px; display: $simple_display;'>";
+        my $fullget = $GET{'altlogin'} ? "?altlogin=1&mode=full" : "?mode=full";
+        $$body .= BML::ml(".simple", {'url' => "update.bml$fullget" }) ."</p>";
+        $$body .= "</div>";
 
-    # full mode block
-    my $full_display = $GET{'mode'} eq 'full' ? 'block' : 'none';
-    $$body .= "<div id='fullopts' style='display: $full_display;'>";
+        # put alternate link in head if not already viewing full mode
+        $$head .= "<link href='update.bml$fullget' rel='alternate' title='$ML{'.full'}' />\n"
+            unless $GET{'mode'} eq 'full';
+    }
+
+    {
+        # full mode block
+        my $full_display = $GET{'mode'} eq 'full' ? 'block' : 'none';
+        $$body .= "<div id='fullopts' style='display: $full_display;'>";
+    }
 
     $$body .= "<table>\n<tr><td nowrap='nowrap'>\n";
     $$body .= "<?h2 $ML{'.options'} h2?>\n";
@@ -338,7 +360,7 @@
 
     # do a login action to get pics and usejournals, but only if using remote
     my $res;
-    if ($remote && (! $GET{'altlogin'} || $remote->{'user'} eq $POST{'user'})) {
+    if ($auth_as_remote) {
 
         $res = LJ::Protocol::do_request("login", {
             "ver" => $LJ::PROTOCOL_VER,
@@ -356,7 +378,7 @@
         $$body .= LJ::html_select({ 'name' => 'usejournal', 
                                     'selected' => $POST{'usejournal'} },
                                     "", BML::ml(".defaultjournal", { 'user' => $remote->{'user'} }),
-                                    map { $_, $_ } @{$res->{'usejournals'}}) . "</p>";
+                                    map { $_, $_ } @{$res->{'usejournals'}}) . "</p>\n";
     }
     
     # possible security groups
@@ -384,8 +406,9 @@
 
             $$body .= "<label for='custom_bit_$fg->{'id'}'>" . LJ::ehtml($fg->{'name'}) . "</label><br />";
         }
-        $$body .= "</div>\n";
+        $$body .= "</div>";
     }
+    $$body .= "\n";
 
     ### opt_ checkboxes
     my $prop_check = sub {
@@ -419,7 +442,7 @@
                                    'selected' => $POST{'prop_picture_keyword'} },
                                   "", $ML{'.opt.defpic'},
                                   map { ($_, $_) } sort { lc($a) cmp lc($b) } @{$res->{'pickws'}});
-        $$body .= LJ::help_icon("userpics", " ") . "</p>";
+        $$body .= LJ::help_icon("userpics", " ") . "</p>\n";
     }
 
     # mood
@@ -443,7 +466,7 @@
                                   'selected' => $sel }, @moodlist);
         $$body .= " $ML{'.other'} " . LJ::html_text({ 'name' => 'prop_current_mood',
                                                       'value' => $sel ? '' : $POST{'prop_current_mood'},
-                                                      'size' => '15', 'maxlength' => '30' });
+                                                      'size' => '15', 'maxlength' => '30' }) . "\n";
     }
     
     # current music
@@ -471,6 +494,7 @@ title=><?_code return $_[1]->{'title'}; _code?>
 body=><?_code return $_[1]->{'body'}; _code?>
 bodyopts=><?_code return $_[1]->{'bodyopts'}; _code?>
 head<=
+<?_code return $_[1]->{'head'}; _code?>
 <script language="JavaScript"><!--
 
     function settime() {
@@ -489,6 +513,8 @@ head<=
         f.day.value = twodigit(now.getDate());
         f.hour.value = twodigit(now.getHours());
         f.min.value = twodigit(now.getMinutes());
+
+        return false;
     }
 
     function showfull (e) {
@@ -512,8 +538,10 @@ head<=
         if (altlogin.style.display == 'inline')
             f.action += '&altlogin=1'
 
-        e.cancelBubble = true;
-        if (e.stopPropagation) e.stopPropagation();
+        if (e) {
+            e.cancelBubble = true;
+            if (e.stopPropagation) e.stopPropagation();
+        }
         return false;
     }
 
@@ -551,8 +579,10 @@ head<=
         if (fullopts.style.display == 'block')
             f.action += '&mode=full'
 
-        e.cancelBubble = true;
-        if (e.stopPropagation) e.stopPropagation();
+        if (e) {
+            e.cancelBubble = true;
+            if (e.stopPropagation) e.stopPropagation();
+        }
         return false;
     }
 
@@ -582,8 +612,10 @@ head<=
             custom_boxes.style.display = 'block';
         }
 
-        e.cancelBubble = true;
-        if (e.stopPropagation) e.stopPropagation();
+        if (e) {
+            e.cancelBubble = true;
+            if (e.stopPropagation) e.stopPropagation();
+        }
         return false;
     }
 
@@ -601,6 +633,20 @@ head<=
         var simplemsg = document.getElementById('simplemsg');
         if (! simplemsg) return false;
         simplemsg.onclick = showfull;
+
+        // force full mode if any values are not defaults
+        if (f.usejournal && f.usejournal.value ||
+            f.prop_picture_keyword && f.prop_picture_keyword.value ||
+            f.security.value != 'public' ||
+            f.prop_opt_backdated.checked ||
+            f.prop_opt_preformatted.checked ||
+            f.prop_opt_nocomments.checked ||
+            f.prop_opt_noemail.checked ||
+            f.prop_current_moodid.value ||
+            f.prop_current_mood.value ||
+            f.prop_current_music.value) showfull();
+
+        return false;
     }
 
 // -->
