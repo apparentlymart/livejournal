@@ -634,7 +634,7 @@ if ($u->{'journaltitle'}) {
              my $base = POSIX::floor($ct / $order);
              $ct = $base * $order;
          }
-         my $ct_str = BML::ml('.fbpictures.' . ($ct == 10 ? 'less than' : 'over'), { count => $ct });
+         my $ct_str = BML::ml('.fbpictures.' . ($ct == 10 ? 'lessthan' : 'over'), { count => $ct });
 
          $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.fbpictures'}</b></td><td colspan='$span'><a href='$LJ::FB_SITEROOT/$user/'>$ct_str</a></td></tr>\n";
      }
