@@ -433,7 +433,8 @@ sub load_comments
                 $post->{'state'} eq "D" ||
                 ($post->{'state'} eq "S" && ! ($remote && ($remote->{'userid'} == $u->{'userid'} ||
                                                            $remote->{'userid'} == $uposterid ||
-                                                           $remote->{'userid'} == $post->{'posterid'})));
+                                                           $remote->{'userid'} == $post->{'posterid'} ||
+                                                           LJ::check_rel($u, $remote, 'A') )));
             $post->{'_show'} = $should_show;
             $post_count += $should_show;
 
