@@ -67,7 +67,7 @@ BODY<=
 
      # textarea for their message body
      $ret .= '<tr valign="top"><td align="right">Message:</td><td colspan="2">';
-     $ret .= '<textarea rows="10" cols="50" wrap="virtual" name="body"></textarea><br />";
+     $ret .= '<textarea rows="10" cols="50" wrap="virtual" name="body"></textarea><br />';
      $ret .= "\n(=DE No HTML allowed, so don't worry about about escaping &lt; and &gt;<br />URLs are automatically link-ified, so just reference those. DE=)<br />\n";
      $ret .= '<input type="submit" name="submitpost" value="Post Comment/Solution">';
      $ret .= "\n</td></tr></table>";
