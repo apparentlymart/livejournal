@@ -125,4 +125,9 @@ if ($dbh->err) { die $dbh->errstr; }
 LJ::strip_bad_code(\$ret);
 return $ret;
 
-_CODE=)
+_CODE=)(=_C <LJDEP>
+link: htdocs/userinfo.bml, htdocs/delcomment.bml, htdocs/talkpost.bml
+link: htdocs/users
+img: htdocs/img/dot.gif, htdocs/img/userinfo.gif, htdocs/img/delcomment.gif
+img: htdocs/userpic
+</LJDEP> _C=)

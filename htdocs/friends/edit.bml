@@ -25,4 +25,7 @@ If you forgot your username or password, <a href="/lostinfo.bml">recover it here
 P=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/create.bml, htdocs/lostinfo.bml
+post: htdocs/friends/edit_do.bml
+</LJDEP> _C=)

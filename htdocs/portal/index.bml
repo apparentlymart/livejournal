@@ -32,4 +32,5 @@ _CODE=)
 <=HEAD
 BODYOPTS=>(=_CODE return $bodyopts; _CODE=)
 BODY=>(=_CODE return $body; _CODE=)
-PAGE=)
+PAGE=)(=_C <LJDEP>
+</LJDEP> _C=)

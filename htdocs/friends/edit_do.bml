@@ -241,4 +241,9 @@ d.close();
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/users
+img: htdocs/img/dot.gif
+form: htdocs/friends/edit_do.bml
+post: htdocs/friends/edit_do.bml
+</LJDEP> _C=)

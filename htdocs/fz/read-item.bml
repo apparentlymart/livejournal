@@ -93,4 +93,7 @@ LJ::strip_bad_code(\$ret);
 return $ret;
 
 _CODE=)
-</BODY>
+</BODY> (=_C <LJDEP>
+link: htdocs/userinfo.bml, htdocs/users, htdocs/talkpost.bml
+img: htdocs/userpic, htdocs/img/userinfo.gif
+</LJDEP> _C=)

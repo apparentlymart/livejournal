@@ -135,5 +135,7 @@
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
 BODY=>(=_CODE return $body; _CODE=)
-PAGE=)
-
+PAGE=)(=_C <LJDEP>
+link: htdocs/portal/moz.bml, htdocs/portal/index.bml
+post: htdocs/portal/alter.bml
+</LJDEP> _C=)

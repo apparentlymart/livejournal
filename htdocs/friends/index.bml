@@ -19,4 +19,7 @@ Your friends list is also used for posts with restricted access.<br>
 </ul>
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/friends/edit.bml, htdocs/friends/editgroups.bml
+link: htdocs/friends/filter.bml, htdocs/download/index.bml
+</LJDEP> _C=)
