@@ -1168,7 +1168,7 @@ sub ItemRange_fromopts
     my $page = $opts->{'page'}+0 || 1;
     my $num_items = scalar @$items;
 
-    my $pages = POSIX::ceil($num_items / $page_size);
+    my $pages = POSIX::ceil($num_items / $page_size) || 1;
     if ($page > $pages) { $page = $pages; }
 
     splice(@$items, 0, ($page-1)*$page_size) if $page > 1;

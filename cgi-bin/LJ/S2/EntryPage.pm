@@ -179,6 +179,14 @@ sub EntryPage
 
     $p->{'viewing_thread'} = $get->{'thread'} ? 1 : 0;
 
+    # default values if there were no comments, because
+    # LJ::Talk::load_comments() doesn't provide them.
+    if ($copts->{'out_error'} eq 'noposts') {
+        $copts->{'out_pages'} = $copts->{'out_page'} = 1;
+        $copts->{'out_items'} = 0;
+        $copts->{'out_itemfirst'} = $copts->{'out_itemlast'} = undef;
+    }
+
     $p->{'comment_pages'} = ItemRange({
         'all_subitems_displayed' => ($copts->{'out_pages'} == 1),
         'current' => $copts->{'out_page'},
