@@ -667,7 +667,7 @@ sub create_view_friends
 	    ! $logprops{$datakey}->{'opt_nocomments'}
 	    ) 
 	{
-	    my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs",
+	    my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
 	    $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
 		'itemid' => $ditemid,
 		'itemargs' => $itemargs,
