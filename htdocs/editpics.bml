@@ -154,7 +154,7 @@
 
                 # Find if they changed the comment and then save the new one
                 if ($u->{'dversion'} > 6 && $POST{"com_$pic->{'picid'}"} ne $exist_comments{$pic->{'picid'}}) {
-                    my $comment = LJ::text_trim($POST{"com_$pic->{'picid'}"}, LJ::BMAX_UPI_COMMENT, LJ::CMAX_UPI_COMMENT);
+                    my $comment = LJ::text_trim($POST{"com_$pic->{'picid'}"}, LJ::BMAX_UPIC_COMMENT, LJ::CMAX_UPIC_COMMENT);
                     $dbcm->do("UPDATE userpic2 SET comment=? WHERE userid=? AND picid=?", undef, $comment, $u->{'userid'}, $pic->{'picid'});
                 }
             }
@@ -549,7 +549,7 @@
                 $body .= "<tr><td align='right'><b><label for='$pid-com'>$ML{'.label.comment'}</label></b></td><td> ";
                 $body .= LJ::html_text({ 'name' => "com_$pid", 'id' => "$pid-com",
                                          'size' => '30', 'value' => $pic->{'comment'},
-                                         'maxlength' => LJ::CMAX_UPI_COMMENT,
+                                         'maxlength' => LJ::CMAX_UPIC_COMMENT,
                                          'disabled' => $pic->{'state'} eq 'I' });
 
                 $body .= "</td></tr>\n";

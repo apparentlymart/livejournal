@@ -115,8 +115,8 @@ use constant BMAX_EVENT   => 65535;
 use constant CMAX_EVENT   => 65535;
 use constant BMAX_INTEREST => 100;
 use constant CMAX_INTEREST => 50;
-use constant BMAX_UPI_COMMENT => 255;
-use constant CMAX_UPI_COMMENT => 120;
+use constant BMAX_UPIC_COMMENT => 255;
+use constant CMAX_UPIC_COMMENT => 120;
 
 # declare views (calls into ljviews.pl)
 @LJ::views = qw(lastn friends calendar day);
