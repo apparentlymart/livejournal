@@ -595,7 +595,8 @@ sub register_authaction
 # des-type: What type of client this is. "user", "guest" or "ip".
 # des-url: An optional URL of what the client hit.
 # </LJFUNC>
-sub send_statserv {
+sub send_statserv
+{
     my $user = shift;
     my $ip = shift;
     my $type = shift;
@@ -5351,7 +5352,8 @@ sub is_utf8 {
 # des-text: reference to text to pass to output. Text if modified in-place.
 # returns: nothing.
 # </LJFUNC>
-sub text_out {
+sub text_out
+{
     my $rtext = shift;
 
     # if we're not Unicode, do nothing
@@ -5368,12 +5370,13 @@ sub text_out {
 # <LJFUNC>
 # name: LJ::text_in
 # des: do appropriate checks on input text. Should be called on all
-# user-generated text.
+#      user-generated text.
 # args: text
 # des-text: text to check
 # returns: 1 if the text is valid, 0 if not.
 # </LJFUNC>
-sub text_in {
+sub text_in
+{
     my $text = shift;
     return 1 unless $LJ::UNICODE;
     if (ref ($text) eq "HASH") {
@@ -5393,8 +5396,8 @@ sub text_in {
 #            text needs to be translated)
 # returns: converted text or undef on error
 # </LJFUNC>
-
-sub text_convert {
+sub text_convert
+{
     my ($dbs, $text, $u, $error) = @_;
 
     # maybe it's pure ASCII?
@@ -5404,12 +5407,12 @@ sub text_convert {
     LJ::load_codes($dbs, { "encoding" => \%LJ::CACHE_ENCODINGS } )
         unless %LJ::CACHE_ENCODINGS;
 
-    if ($u->{'oldenc'} == 0 || 
+    if ($u->{'oldenc'} == 0 ||
         not defined $LJ::CACHE_ENCODINGS{$u->{'oldenc'}}) {
         $$error = 1;
         return undef;
     };
-    
+
     # convert!
     my $name = $LJ::CACHE_ENCODINGS{$u->{'oldenc'}};
     unless (Unicode::MapUTF8::utf8_supported_charset($name)) {
@@ -5431,9 +5434,8 @@ sub text_convert {
 # des-byte_max: maximum allowed length in bytes; if 0, there's no restriction
 # des-char_max: maximum allowed length in chars; if 0, there's no restriction
 # returns: the truncated string.
-
-sub text_trim {
-
+sub text_trim
+{
     my ($text, $byte_max, $char_max) = @_;
     return $text unless $byte_max or $char_max;
     if ($char_max == 0 || !$LJ::UNICODE) {
@@ -5447,12 +5449,12 @@ sub text_trim {
     while ($text =~ m/$utf_char/gco) {
 	last unless $char_max;
         last if $cur + length($1) > $byte_max and $byte_max;
-        $cur += length($1); 
+        $cur += length($1);
         $char_max--;
     }
     return substr($text,0,$cur);
 }
-        
+
 # <LJFUNC>
 # name: LJ::item_toutf8
 # des: convert one item's subject, text and props to UTF8.
@@ -5464,8 +5466,8 @@ sub text_trim {
 # des-text: ref to the item's text
 # des-props: hashref of the item's props
 # returns: nothing.
-
-sub item_toutf8 {
+sub item_toutf8
+{
     my ($dbs, $u, $subject, $text, $props) = @_;
     return unless $LJ::UNICODE;
 
