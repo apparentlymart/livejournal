@@ -1254,29 +1254,48 @@ then be accessible to the new group.
 
 /interests.bml.addint=If you're also interested in this and would like to be added to this list, <a href="/interests.bml?mode=add&amp;intid=[[qintid]]">click here</A>.
 
+/interests.bml.btn.switch=Switch
+
 /interests.bml.communities.head=Relevant Communities
 
 /interests.bml.communities.text=The following communities are also interested in <b>"[[interest]]"</b>.
 
 /interests.bml.count=Count
 
+/interests.bml.enmasse.body.other<<
+Below are the interests of [[user]]. Check the boxes next to the interests you would like
+to add to your own, and uncheck the checkboxes next to the interests you would like to remove
+from your own. When you're done, click "Save Changes".
+.
+
+/interests.bml.enmasse.body.other_authas<<
+Below are the interests of [[user]]. Check the boxes next to the interests you would like
+to add to those of [[target]], and uncheck the checkboxes next to the interests you would
+like to remove. When you're done, click "Save Changes".
+.
+
+/interests.bml.enmasse.body.you<<
+Uncheck the checkboxes next to the interests you would like to remove.
+When you're done, click "Save Changes".
+.
+
+/interests.bml.enmasse.btn=Show list
+
+/interests.bml.enmasse.header=Add/Remove interests
+
+/interests.bml.enmasse.intro=Modify your interests based on those of:
+
 /interests.bml.error.add.mustlogin=You have to be logged in to add an interest this way. 
+
+/interests.bml.error.enmasse.mustlogin=You must be <a href='/login.bml?ret=1'>logged in</a> to use this feature.
+
+/interests.bml.error.enmasse.noaccess=You do not appear to have access to the journal [[user]].
 
 /interests.bml.error.findsim_do.intnotfound=Interest wasn't found.
 
-/interests.bml.findsim.account.notallowed=However, your account type doesn't let you use this tool.
-
-/interests.bml.findsim.account.notloggedin=You're also not <a href='/login.bml?ret=1'>logged in</a>, so your account type can't be determined.
-
-/interests.bml.findsim.btn.find=Find!
-
-/interests.bml.findsim.head=Similar Users
+/interests.bml.error.nointerests=The selected user does not exist or has not specified any interests.
 
 /interests.bml.findsim.searchwait=<b>Please note:</b> Search will take several seconds.  Be patient.
-
-/interests.bml.findsim.simtouser=Similar to User:
-
-/interests.bml.findsim.text=This tool lets you find users with the most similar interests to a given user.  More fun stuff can be found on the <A HREF="/interests.bml">interests page</A>.
 
 /interests.bml.findsim_do.account.notallowed=Sorry, your account type doesn't let you use this tool.
 
@@ -1296,21 +1315,29 @@ then be accessible to the new group.
 
 /interests.bml.findsim_do.similar.text=The following are the most related users to [[user]]
 
+/interests.bml.finished.about=When you're done, press the "Save Changes" button below:
+
+/interests.bml.finished.header=Done?
+
+/interests.bml.finished.save_button=Save Changes
+
 /interests.bml.interest=Interest
 
 /interests.bml.interested.btn.find=Find
 
 /interests.bml.interested.in=Find people interested in:
 
-/interests.bml.interests.findsim1=Find similar people
-
-/interests.bml.interests.findsim2=see who has the most number of common interests with you
+/interests.bml.interests.findsim=Find users with interests similar to those of:
 
 /interests.bml.interests.head=Interests
 
 /interests.bml.interests.text=Here are some fun things you can do with interests.
 
 /interests.bml.interests.viewpop=View popular interests
+
+/interests.bml.login.enterinfo=Enter your username and password to modify your interests.
+
+/interests.bml.login.proceed=Proceed...
 
 /interests.bml.match=[[count]] match:
 
@@ -1323,6 +1350,33 @@ then be accessible to the new group.
 /interests.bml.popular.head=Popular Interests
 
 /interests.bml.popular.text=The following are the most popular interests.
+
+/interests.bml.results.added=The interests you selected were successfully added to your interests list.
+
+/interests.bml.results.both=The interests you selected were successfully added to your interests list, and those you deselected were removed.
+
+/interests.bml.results.deleted=The interests you deselected were successfully removed from your interests list.
+
+/interests.bml.results.del_and_toomany<<
+The interests you deselected were successfully removed from your interests list.
+However, you selected too many interests to add. You may only have [[intcount]]
+interests in total. None of the selected interests were added to your interests list.
+You may wish to go back and try again, selecting fewer interests to add.
+.
+
+/interests.bml.results.goback=You may wish to go back to [[user]]'s <a href='[[url]]'>profile</a> which you were viewing previously.
+
+/interests.bml.results.header=Results
+
+/interests.bml.results.message=See your updated <a href='[[url]]'>profile page</a>.
+
+/interests.bml.results.nothing=You did not make any changes.
+
+/interests.bml.results.toomany<<
+You selected too many interests to add. You may only have [[intcount]] interests
+in total. None of the selected interests were added to your interests list.
+You may wish to go back and try again, selecting fewer interests to add.
+.
 
 /interests.bml.title=Interests
 
@@ -2246,6 +2300,10 @@ This could be because: <ol>
 /userinfo.bml.label.icquin=ICQ UIN:
 
 /userinfo.bml.label.interests=Interests
+
+/userinfo.bml.label.interests.modifyyours=Modify yours
+
+/userinfo.bml.label.interests.removesome=Remove some
 
 /userinfo.bml.label.intsnotshown=<b>... [[intnotshown]] interests not shown</b>
 
