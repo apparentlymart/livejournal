@@ -8,7 +8,6 @@ use Getopt::Long;
 my $help = 0;
 my $opt_fh = 0;
 my $opt_fix = 0;
-my $opt_ex = 0;
 my $opt_start = 0;
 my $opt_stop = 0;
 my $opt_err = 0;
@@ -19,7 +18,6 @@ exit 1 unless GetOptions('help' => \$help,
                          'stop' => \$opt_stop,
                          'fix' => \$opt_fix,
                          'run=s' => \@opt_run,
-                         'exampleconf' => \$opt_ex,
                          'onlyerrors' => \$opt_err,
                          );
 
@@ -32,7 +30,6 @@ if ($help) {
          "    --help          Get this help\n" .
          "    --flushhosts    Send 'FLUSH HOSTS' to each db as root.\n".
          "    --fix           Fix (once) common problems.\n".
-         "    --exampleconf   Dump out prototype ~/var/dbcheck.conf file.\n".
          "    --stop          Stop replication.\n".
          "    --start         Start replication.\n".
          "    --run <sql>     Run arbitrary SQL.\n".
@@ -44,45 +41,52 @@ if ($help) {
          );
 }
 
+require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
-if ($opt_ex) {
-    print <DATA>;
-    exit 0;
+unless ($LJ::DBWEIGHTS_FROM_DB) {
+    die "This tool only works when using \$DBWEIGHTS_FROM_DB (db weights ".
+	"& info stored in database, not in ljconfig)\n";
 }
 
-my $flush_host = sub {
-    return unless $opt_fh;
-    my $name = shift;
-    my $dbh = shift;
-    print "Flushing hosts on '$name' ... ";
-    $dbh->do("FLUSH HOSTS");
-    if ($dbh->err) {
-        print "ERROR: " . $dbh->errstr . "\n";
-    } else { 
-        print "done.\n";
-    }
-};
+my $dbh = LJ::get_dbh("master");
 
-my $conf_file = "$ENV{'LJHOME'}/var/dbcheck.conf";
-unless (-e $conf_file) {
-    die "No db_check.conf in ~/var/.  For help on syntax, run dbcheck.pl --exampleconf\n";
-}
-require $conf_file;
-
-my $master = $LJ::DBCheck::master;
-my $slaves = $LJ::DBCheck::slaves;
+my %dbinfo;  # dbid -> hashref
+my %slaves;  # dbid -> arrayref<dbid>
+my %name2id; # name -> dbid
 my $sth;
+my $masterid = 0;
+$sth = $dbh->prepare("SELECT dbid, name, masterid, rootfdsn FROM dbinfo");
+$sth->execute;
+while ($_ = $sth->fetchrow_hashref) {
+    next unless $_->{'dbid'};
+    $dbinfo{$_->{'dbid'}} = $_;
+    $name2id{$_->{'name'}} = $_->{'dbid'};
+    push @{$slaves{$_->{'masterid'}}}, $_->{'dbid'};
+    if ($_->{'masterid'} == 0) { 
+	if ($masterid) { die "Config problem: two master dbs?\n"; }
+	$masterid = $_->{'dbid'}; 
+    }
+}
 
+$sth = $dbh->prepare("SELECT dbid, role, norm, curr FROM dbweights");
+$sth->execute;
+while ($_ = $sth->fetchrow_hashref) {
+    next unless defined $dbinfo{$_->{'dbid'}};
+    $dbinfo{$_->{'dbid'}}->{'totalweight'} += $_->{'curr'};
+}
+
+die "No master found?" unless $masterid;
+
+my $sth;
 my $cmd = shift @ARGV;
 
 if ($cmd eq "queries") {
     my $host = shift @ARGV;
-    my $s = $slaves->{$host};
+    my $s = $dbinfo{$name2id{$host}};
     unless ($s) { die "Unknown slave: $host\n"; }
 
-    my $dbh = DBI->connect("DBI:mysql:mysql:$s->{'ip'}",
-                           $s->{'user'}, $s->{'pass'});
-    die "Can't connect to slave: $host\n" unless ($dbh);
+    my $dbh = LJ::_get_dbh_conn($s->{'rootfdsn'});
+    die "Can't connect to slave: $host\n" unless $dbh;
 
     my $ts = $dbh->selectall_hashref("SHOW FULL PROCESSLIST");
     foreach my $t (sort { $a->{'Time'} <=> $b->{'Time'} } @$ts) {
@@ -97,190 +101,190 @@ if ($cmd eq "queries") {
     die "Unknown command: $cmd\n";
 }
 
+my $pr = sub {
+    return if $opt_err;
+    print $_[0];
+};
 
-my @errors = ();
+my $flush_host = sub {
+    return unless $opt_fh;
+    my $id = shift;
+    my $dbh = shift;
+    my $name = $dbinfo{$id}->{'name'};
+    print "Flushing hosts on '$name' ... ";
+    $dbh->do("FLUSH HOSTS");
+    if ($dbh->err) {
+        print "ERROR: " . $dbh->errstr . "\n";
+    } else { 
+        print "done.\n";
+    }
+};
 
-$| = 1;
-print "Connecting to master... " unless $opt_err;
-
-my $mdb = DBI->connect("DBI:mysql:mysql:$master->{'ip'}",
-                       $master->{'user'}, $master->{'pass'});
-print "done.\n" unless $opt_err;
-
-unless ($mdb) {
-    print "error!\n";
-    push @errors, "Can't connect to master db.";
-    check_errors();
-}
-
-$flush_host->('master', $mdb);
-
-$sth = $mdb->prepare("SHOW MASTER LOGS");
-$sth->execute;
-my @master_logs;
-my $log_count = 0;
-while (my ($log) = $sth->fetchrow_array) {
-    push @master_logs, $log;
-    $log_count++;
-    print "Log: $log ($log_count)\n" unless $opt_err;
-}
-$sth->finish;
-
-$sth = $mdb->prepare("SHOW MASTER STATUS");
-$sth->execute;
-my ($masterfile, $masterpos) = $sth->fetchrow_array;
-$sth->finish;
-printf "Master in $masterfile at $masterpos\n" unless $opt_err;
-
-my $minlog = "";
-
-foreach my $skey (keys %$slaves)
+# check a master and all its slaves' positions
+my $check = sub 
 {
-    my $s = $slaves->{$skey};
-    printf "%-20s", $skey unless $opt_err;
+    my @errors;
 
-    if ($s->{'dead'}) {
-        print "dead, skipping.\n" unless $opt_err;
-        push @errors, "$skey is dead.";
-        next;
+    my $id = shift;
+    my $chkref = shift;
+
+    my $d = $dbinfo{$id};
+
+    $pr->("$d->{'name'}:\n");
+    my $db = LJ::_get_dbh_conn($d->{'rootfdsn'});
+    unless ($db) {
+	push @errors, "Can't connect to $d->{'name'}";
+	return 0;
     }
 
-    my $dbh = DBI->connect("DBI:mysql:mysql:$s->{'ip'}",
-                           $s->{'user'}, $s->{'pass'});
-    unless ($dbh) {
-        push @errors, "Can't connect to slave: $skey";
-        next;
-    }
-
-    $flush_host->($skey, $dbh);
-
-    if ($opt_start) { $dbh->do("SLAVE START"); }
-    if ($opt_stop) { $dbh->do("SLAVE STOP"); }
-    foreach (@opt_run) { 
-        print "Running: $_\n";
-        $dbh->do($_); 
-        print $dbh->err ? $dbh->errstr : "OK";
-        print "\n";
-    }
-
-    my $sth;
-    my $stalled = 0;
-    my $ccount = 0;
-    $sth = $dbh->prepare("SHOW PROCESSLIST");
+    $sth = $db->prepare("SHOW MASTER LOGS");
     $sth->execute;
-    while (my $c = $sth->fetchrow_hashref) {
-        $ccount++;
-        next unless ($c->{'User'} eq "system user");
-        if ($c->{'State'} =~ /after a failed read/) {
-            push @errors, "Neg22: $skey";
-            $stalled = 1;
-        }
+    my @master_logs;
+    my $log_count = 0;
+    while (my ($log) = $sth->fetchrow_array) {
+	push @master_logs, $log;
+	$log_count++;
+	$pr->("  Log: $log ($log_count)\n");
     }
 
-    my $recheck = 0;
-    $sth = $dbh->prepare("SHOW SLAVE STATUS");
+    $sth = $db->prepare("SHOW MASTER STATUS");
     $sth->execute;
-    my $sl = $sth->fetchrow_hashref;
+    my ($masterfile, $masterpos) = $sth->fetchrow_array;
     $sth->finish;
+    $pr->("  Master in $masterfile at $masterpos\n");
 
-    if ($opt_fix && $sl->{'Slave_Running'} eq "No" &&
-        (
-         $sl->{'Last_error'} =~ /drop table livejournal\.tmp_selecttype_day/ ||
-         $sl->{'Last_error'} =~ /Duplicate entry.*hintlastnview/ ||
-         $sl->{'Last_error'} =~ /REPLACE INTO batchdelete/ ||
-         0
-         ))
-    {
-        $dbh->do("SET SQL_SLAVE_SKIP_COUNTER=1");
-        $dbh->do("SLAVE START");	
-        push @errors, "Slave restarted: $skey";
-        $recheck = 1;
-    }
+    my $minlog = "";
 
-    if ($opt_fix && $sl->{'Slave_Running'} eq "Yes" && $stalled)
+    $pr->("  Slaves:\n");
+    foreach my $sid (@{$slaves{$id}})
     {
-        my $new = $sl->{'Pos'} - 22;
-        push @errors, "Moving back from $sl->{'Pos'} to $new";
-        $dbh->do("CHANGE MASTER TO MASTER_LOG_POS=$new");
-        $recheck = 1;
-    }
+	my $s = $dbinfo{$sid};
+	my $skey = $s->{'name'};
+
+	if (defined $slaves{$sid}) {
+	    push @$chkref, $sid;
+	}
+	
+	$pr->(sprintf("    %-30s", $skey));
+
+	unless ($s->{'totalweight'}) {
+	    $pr->("dead, skipping.\n");
+	    push @errors, "$s->{'name'} is dead.";
+	    next;
+	}
+
+	my $dbsl = LJ::_get_dbh_conn($s->{'rootfdsn'});
+	unless ($dbsl) {
+	    push @errors, "Can't connect to slave: $s->{'name'}";
+	    next;
+	}
+
+	$flush_host->($sid, $dbh);
+
+	if ($opt_start) { $dbsl->do("SLAVE START"); }
+	if ($opt_stop) { $dbsl->do("SLAVE STOP"); }
+	foreach (@opt_run) { 
+	    print "Running: $_\n";
+	    $dbsl->do($_); 
+	    print $dbh->err ? $dbh->errstr : "OK";
+	    print "\n";
+	}
+	
+	my $sth;
+	my $stalled = 0;
+	my $ccount = 0;
+	$sth = $dbsl->prepare("SHOW PROCESSLIST");
+	$sth->execute;
+	while (my $c = $sth->fetchrow_hashref) {
+	    $ccount++;
+	    next unless ($c->{'User'} eq "system user");
+	    if ($c->{'State'} =~ /after a failed read/) {
+		push @errors, "Neg22: $skey";
+		$stalled = 1;
+	    }
+	}
+
+	my $recheck = 0;
+	$sth = $dbsl->prepare("SHOW SLAVE STATUS");
+	$sth->execute;
+	my $sl = $sth->fetchrow_hashref;
+	$sth->finish;
+
+	if ($opt_fix && $sl->{'Slave_Running'} eq "No" &&
+	    (
+	     $sl->{'Last_error'} =~ /drop table livejournal\.tmp_selecttype_day/ ||
+	     $sl->{'Last_error'} =~ /Duplicate entry.*hintlastnview/ ||
+	     $sl->{'Last_error'} =~ /REPLACE INTO batchdelete/ ||
+	     0
+	     ))
+	{
+	    $dbsl->do("SET SQL_SLAVE_SKIP_COUNTER=1");
+	    $dbsl->do("SLAVE START");	
+	    push @errors, "Slave restarted: $skey";
+	    $recheck = 1;
+	}
+
+	if ($opt_fix && $sl->{'Slave_Running'} eq "Yes" && $stalled)
+	{
+	    my $new = $sl->{'Pos'} - 22;
+	    push @errors, "Moving back from $sl->{'Pos'} to $new";
+	    $dbsl->do("CHANGE MASTER TO MASTER_LOG_POS=$new");
+	    $recheck = 1;
+	}
     
-    unless ($sl->{'Slave_Running'} eq "Yes") {
-        push @errors, "Slave not running: $skey";
+	unless ($sl->{'Slave_Running'} eq "Yes") {
+	    push @errors, "Slave not running: $skey";
+	}
+
+	if ($recheck) {
+	    my $sth = $dbsl->prepare("SHOW SLAVE STATUS");
+	    $sth->execute;
+	    $sl = $sth->fetchrow_hashref;
+	    $sth->finish;
+	}
+
+	$s->{'logfile'} = $sl->{'Log_File'};
+	$s->{'pos'} = $sl->{'Pos'};
+
+	unless ($s->{'logfile'}) {
+	    push @errors, "No log file for: $skey";
+	}
+
+	$pr->(sprintf ("is in %s at %10d [%10d] c=%d\n", $s->{'logfile'}, 
+		       $s->{'pos'}, $s->{'pos'} - $masterpos,
+		       $ccount));
+
+	if ($minlog eq "" || $s->{'logfile'} lt $minlog) { 
+	    $minlog = $s->{'logfile'};
+	}
     }
 
-    if ($recheck) {
-        my $sth = $dbh->prepare("SHOW SLAVE STATUS");
-        $sth->execute;
-        $sl = $sth->fetchrow_hashref;
-        $sth->finish;
-    }
-
-    $s->{'logfile'} = $sl->{'Log_File'};
-    $s->{'pos'} = $sl->{'Pos'};
-
-    unless ($s->{'logfile'}) {
-        push @errors, "No log file for: $skey";
-    }
-
-    printf ("is in %s at %10d [%10d] c=%d\n", $s->{'logfile'}, 
-            $s->{'pos'}, $s->{'pos'} - $masterpos,
-            $ccount) unless $opt_err;
-    $dbh->disconnect();
-
-    if ($minlog eq "" || $s->{'logfile'} lt $minlog) { 
-        $minlog = $s->{'logfile'};
-    }
-}
-
-check_errors();
-
-unless ($opt_err) {
-    print "All slaves running.\n";
-    print "Minlog: $minlog\n";
-}
-
-if ($log_count >= 2 && $master_logs[0] lt $minlog)
-{
-    my $sql = "PURGE MASTER LOGS TO " . $mdb->quote($minlog);
-    print $sql, "\n" unless ($opt_err);
-    $mdb->do($sql);
-}
-
-$mdb->disconnect;
-
-
-sub check_errors
-{
     if (@errors) {
         print STDERR "\nERRORS:\n";
         foreach (@errors) {
             print STDERR "  * $_\n";
         }
-        exit 1;
+	return 0;
     }
+
+    if ($log_count >= 2 && $master_logs[0] lt $minlog)
+    {
+	my $sql = "PURGE MASTER LOGS TO " . $db->quote($minlog);
+	$pr->("$sql\n");
+	$db->do($sql);
+    }
+    
+    return 1;
+};
+
+my @to_check = ($masterid);
+$flush_host->($masterid, $dbh);
+my $good = 1;
+while (@to_check) {
+    $good = 0 unless $check->(shift @to_check, \@to_check);
 }
 
+exit 1 unless $good;
+$pr->("Alles gut.\n");
 
-# And now, the example conf file:
-__DATA__
-#!/usr/bin/perl
-#
 
-package LJ::DBCheck;
-
-$master = { 
-    'ip' => '10.0.0.2',
-    'user' => 'root',
-    'pass' => 'rootpassword', 
-};
-
-$slaves = {
-    'orange' => { 'ip' => '10.0.0.5',
-                   'user' => 'root',
-                   'pass' => 'somepass', },
-    'green' => { 'ip' => '10.0.0.7',
-                  'user' => 'root',
-                  'pass' => 'anotherpass', },
-    # ...
-};
