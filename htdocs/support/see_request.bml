@@ -27,10 +27,32 @@ head<=
 
         return false;
     }
+    
+    function updateFaqLink () {
+        if (! document.getElementById) return false;
+    
+        f = document.supportForm;
+        if (! f) return false;
+    
+        var faqDropdown = f.faqid;
+        if (! faqDropdown) return false;
+    
+        var faqUrl = document.getElementById('faqlink');
+        if (! faqUrl) return false; 
+        
+        if (faqDropdown.value == 0)
+            faqUrl.style.display = 'none';
+        else
+        {
+            faqUrl.style.display = 'inline';
+            faqUrl.href = 'faqbrowse.bml?faqid=' + faqDropdown.value;
+        }
+        return false;
+    }
 // -->
 </script>
 <=head
-bodyopts=>onLoad="check_replytype();"
+bodyopts=>onLoad="check_replytype();updateFaqLink();"
 body<=
         
 <?_code
@@ -431,7 +453,11 @@ body<=
                 push @faqlist, ($faqid, $q);
             }
         }
-        $ret .= LJ::html_select({ 'name' => 'faqid' }, @faqlist) . "\n";
+        $ret .= LJ::html_select({ 'name' => 'faqid', 'onchange' => 'updateFaqLink()' }, @faqlist) . "\n";
+        $ret .= qq(<script language="JavaScript"><!--
+            if (document.getElementById)
+                document.write("<a href='faq.bml' id='faqlink'>View FAQ</a>");
+        //--></script>);
         $ret .= "</td></tr>\n";
     }
 
