@@ -47,14 +47,14 @@ sub change_community_admin
     # so old maintainers can't regain access:
     $dbh->do("DELETE FROM infohistory WHERE userid=$commid");
 
-    # change password & email of community to new maintainer's password
-    LJ::update_user($ucomm, { password => $unew->{'password'}, email => $unew->{'email'} });
+    # change password to blank & set email of community to new maintainer's email
+    LJ::update_user($ucomm, { password => '', email => $unew->{'email'} });
 
     ## log to status history
     LJ::statushistory_add($commid, $remote->{'userid'}, "communityxfer", "Changed maintainer to '$unew->{'user'}'($newid)");
     LJ::statushistory_add($newid, $remote->{'userid'}, "communityxfer", "Control of '$ucomm->{'user'}'($commid) given.");
 
-    push @$out, [ "info", "Transfered ownership of \"$ucomm->{'user'}\"." ];
+    push @$out, [ "info", "Transferred ownership of \"$ucomm->{'user'}\" to \"$unew->{'user'}\"." ];
     return 1;
 }
 
