@@ -140,6 +140,19 @@ $caps_general{'emailpost'} = {
     type => 'boolean',
     desc => "User has ability to post via an email gateway.",
 };
+$caps_general{'disable_can_post'} = {
+    type => "boolean",
+    desc => "Posting new journal entries is disabled for this account, presumably because a trial period of some sort has expired.",
+};
+$caps_general{'disable_get_comments'} = {
+    type => "boolean",
+    desc => "Getting new comments in this journal is disabled, presumably because a trial period of some sort has expired.",
+};
+$caps_general{'disable_leave_comments'} = {
+    type => "boolean",
+    desc => "This account can no longer leave comments, presumably because a trial period of some sort has expired.",
+};
+
 
 sub dump_caps
 {

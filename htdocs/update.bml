@@ -43,6 +43,16 @@
             $$body = $LJ::MSG_NO_POST || "Sorry, you cannot post at this time.";
             return;
         }
+
+        if (LJ::get_cap($remote, "disable_can_post")) {
+            unless (LJ::run_hook("update.bml_disable_can_post", {
+                title => $title, body => $body,
+            })) {
+                $$title = "Posting access disabled";
+                $$body = "Your account type does not permit posting.";
+            }
+            return;
+        }
     }
 
     # are we spellchecking before we post?
