@@ -65,19 +65,22 @@ while (LJ::start_request())
 
     # do main cluster updates
     my $dbh = LJ::get_dbh("master");
-    my $sth = $dbh->prepare("SELECT tablename, COUNT(*) FROM querybuffer GROUP BY 1");
-    $sth->execute;
-    my @tables;
-    while (my ($table, $count) = $sth->fetchrow_array) {
-	push @tables, $table;
+    if ($dbh) {
+	my $sth = $dbh->prepare("SELECT tablename, COUNT(*) FROM querybuffer GROUP BY 1");
+	$sth->execute;
+	my @tables;
+	while (my ($table, $count) = $sth->fetchrow_array) {
+	    push @tables, $table;
+	}
+	foreach my $table (@tables) {
+	    my $count = LJ::query_buffer_flush($dbh, $table);
+	}
     }
-    foreach my $table (@tables) {
-	my $count = LJ::query_buffer_flush($dbh, $table);
-    }
-
+	
     # handle clusters
     foreach my $c (@LJ::CLUSTERS) {
 	my $db = LJ::get_cluster_master($c);
+	next unless $db;
 
 	my $sth = $db->prepare("SELECT cmd, COUNT(*) FROM cmdbuffer GROUP BY 1");
 	$sth->execute;
