@@ -5317,10 +5317,17 @@ sub is_ascii {
 sub is_utf8 {
     my $text = shift;
 
-    $text =~ m/^([\x00-\x7f]|[\xc2-\xdf][\x80-\xbf]|\xe0[\xa0-\xbf][\x80-\xbf]|[\xe1-\xef][\x80-\xbf][\x80-\xbf]|\xf0[\x90-\xbf][\x80-\xbf][\x80-\xbf]|[\xf1-\xf7][\x80-\xbf][\x80-\xbf][\x80-\xbf])*(.*)/;
+    if (LJ::are_hooks("is_utf8")) {
+        my @r = LJ::run_hooks("is_utf8", $text);
+        return 0 if grep { ! $_->[0] } @r;
+        return 1;
+    }
+    else {
+        $text =~ m/^([\x00-\x7f]|[\xc2-\xdf][\x80-\xbf]|\xe0[\xa0-\xbf][\x80-\xbf]|[\xe1-\xef][\x80-\xbf][\x80-\xbf]|\xf0[\x90-\xbf][\x80-\xbf][\x80-\xbf]|[\xf1-\xf7][\x80-\xbf][\x80-\xbf][\x80-\xbf])*(.*)/;
 
-    return 1 unless $2;
-    return 0;
+        return 1 unless $2;
+        return 0;
+    }
 }
 
 # <LJFUNC>
