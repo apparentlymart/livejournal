@@ -147,7 +147,7 @@
             return;
         }
 
-        LJ::S2::delete_layer($id);
+        LJ::S2::delete_layer($u, $id);
         return BML::redirect("layers.bml?authas=$authas");
     }
 

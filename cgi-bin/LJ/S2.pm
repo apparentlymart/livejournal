@@ -535,14 +535,35 @@ sub create_layer
     return $dbh->{'mysql_insertid'};
 }
 
+# takes optional $u as first argument... if user argument is specified, will
+# look through s2stylelayers and delete all mappings that this user has to
+# this particular layer.
 sub delete_layer
 {
+    my $u = LJ::isu($_[0]) ? shift : undef;
     my $lid = shift;
     return 1 unless $lid;
     my $dbh = LJ::get_db_writer();
     foreach my $t (qw(s2layers s2compiled s2info s2source s2checker)) {
         $dbh->do("DELETE FROM $t WHERE s2lid=?", undef, $lid);
     }
+
+    # now delete the mappings for this particular layer
+    if ($u) {
+        my $styles = LJ::S2::load_user_styles($u);
+        my @ids = keys %{$styles || {}};
+        if (@ids) {
+            # map in the ids we got from the user's styles and clear layers referencing
+            # this particular layer id
+            my $in = join(',', map { $_ + 0 } @ids);
+            $dbh->do("DELETE FROM s2stylelayers WHERE styleid IN ($in) AND s2lid = ?",
+                     undef, $lid);
+
+            # now clean memcache so this change is immediately visible
+            LJ::MemCache::delete([ $_, "s2sl:$_" ]) foreach @ids;
+        }
+    }
+
     return 1;
 }
 
