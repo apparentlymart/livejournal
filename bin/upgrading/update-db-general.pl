@@ -1728,7 +1728,7 @@ CREATE TABLE spamreports (
     body        BLOB NOT NULL,
     PRIMARY KEY (reporttime, journalid),
     INDEX       (ip),
-    INDEX       (posterid),
+    INDEX       (posterid)
 )
 EOC
 
@@ -1739,7 +1739,7 @@ CREATE TABLE tempanonips (
     journalid   INT(10) UNSIGNED NOT NULL,
     jtalkid     MEDIUMINT(8) UNSIGNED NOT NULL,
     PRIMARY KEY (journalid, jtalkid),
-    INDEX       (reporttime),
+    INDEX       (reporttime)
 )
 EOC
 
