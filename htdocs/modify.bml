@@ -94,7 +94,7 @@ body<=
         
 
         # all of these options should only be processed for S1 users
-        if ($u->{'stylesys'} == 1) {
+        if ($u->{'stylesys'} != 2) {
 
             # color themes
             $update{'themeid'} = $POST{'themetype'} eq "custom" ? 0 : $POST{'themeid'};
@@ -282,7 +282,7 @@ body<=
     $ret .= "<form method='post' action='modify.bml?authas=$authas'>\n";
 
     # using S1, need to take style input
-    if ($u->{'stylesys'} == 1)
+    if ($u->{'stylesys'} != 2)
     {
         my $and = $capstyles ? "" : "<?_ml .pagelayoutstyle.warning _ml?>";
         $ret .= "<?h2 $ML{'.pagelayoutstyle.head'} h2?><?p $ML{'.pagelayoutstyle.about'}  $and p?>\n";
