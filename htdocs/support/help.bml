@@ -147,7 +147,9 @@ body<=
                               "WHERE s.spid=sl.spid AND sl.userid=$remote->{'userid'} $filterwhere " .
                               "AND (s.state='open' OR (s.state='closed' AND s.timeclosed>UNIX_TIMESTAMP()-(3600*24)))");
      } else { # triggers on green, open
-         $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='open' $filterwhere");
+         $sth = $dbr->prepare("SELECT s.*, COUNT(sl.type) AS screened FROM support s " .
+                              "LEFT JOIN supportlog sl ON (s.spid = sl.spid AND sl.type = 'screened') WHERE " .
+                              "s.state='open' $filterwhere GROUP BY s.spid");
      }
      $sth->execute;
 
@@ -214,6 +216,8 @@ body<=
  $ret .= "<td><b>Posted</b></td>\n";
  $ret .= "<td><b>Status</b></td>\n";
  $ret .= "</tr>";
+
+ my @screened_view;
 
  foreach my $sp (@support_log)
  {
@@ -291,6 +295,30 @@ body<=
      $ret .= "<td><b>$summary</b>$des</td>\n";
      $ret .= "<td>$probarea</td>\n";
      $ret .= "<td nowrap='nowrap'><font size='-1'>$age</font></td>\n";
+
+     # All depends on them having supportviewscreened for this category
+     # If a private category, do not show at all
+     my $show = 0;
+     if (defined $screened_view[$sp->{'spid'}] && $screened_view[$sp->{'spid'}] == 0) {
+         $show = 0;
+     } elsif (defined $screened_view[$sp->{'spid'}] && $screened_view[$sp->{'spid'}] == 1) {
+         $show = 1;
+     } elsif ($cats->{$sp->{'spcatid'}}->{'public_read'}) {
+         my $cat_name = $cats->{$sp->{'spcatid'}}->{'catkey'};
+         if (LJ::check_priv($remote, 'supportviewscreened', $cat_name) || LJ::check_priv($remote, 'supportviewscreened')) {
+             $show = 1;
+             $screened_view[$sp->{'spid'}] = 1;
+         } else {
+             $show = 0;
+             $screened_view[$sp->{'spid'}] = 0;
+         }
+     } else {
+         $show = 0;
+         $screened_view[$sp->{'spid'}] = 0;
+     }
+
+     $status .= "<br /><i>($sp->{'screened'} screened)</i>\n" if $show;
+
      $ret .= "<td nowrap='nowrap'><font size='-1'>$status</font></td>\n";
      $ret .= "</tr>";
 
