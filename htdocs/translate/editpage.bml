@@ -124,7 +124,7 @@
              $ret .= "<dt><b>$lp->{'lnname'}:</b></dt>";
              my $t = $ml_text{"$plat->{'dmid'}-$plat->{'txtid'}"}->{'text'};
              $t = LJ::ehtml($t);
-             $t =~ s/\n/<br \/>/g;
+             $t =~ s/\n( *)/"<br \/>" . "&nbsp;"x length($1)/eg;
              $ret .= "<dd>$t</dd>";
          }
 
