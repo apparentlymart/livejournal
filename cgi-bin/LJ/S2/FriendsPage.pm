@@ -255,13 +255,10 @@ sub FriendsPage
 
         # do the picture
         my $picid = 0;
-        {
-            # use shared pic for community?
-            $picid = $friends{$friendid}->{defaultpicid} 
-                if $friendid != $posterid && 
-                   S2::get_property_value($opts->{ctx}, 'use_shared_pic');
-            last if $picid;
-
+        if ($friendid != $posterid && S2::get_property_value($opts->{ctx}, 'use_shared_pic')) {
+            # use shared pic for community
+            $picid = $friends{$friendid}->{defaultpicid};
+        } else {
             # check if they specified one
             $picid = LJ::get_picid_from_keyword($po, $logprops{$datakey}->{picture_keyword})
                 if $logprops{$datakey}->{picture_keyword};
