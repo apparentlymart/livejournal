@@ -414,7 +414,7 @@ BODY<=
          recurse_post(\%posts, \$ret, $thread, {}, { "newfirst" => 0,
                                                      "children" => \%children,
                                                  });
-         $ret .= "<p><hr /><center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>(=_ML talk.commentpost _ML=)</a></b></center></p>";
+         $ret .= "<p><hr /><center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>(=_ML talk.commentpost _ML=))</a></b></center></p>";
      }
 
      if ($navcrap) {
