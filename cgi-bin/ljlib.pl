@@ -40,7 +40,7 @@ do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
                     "s1usercache", "modlog", "modblob", "counter",
                     "userproplite2", "links", "s1overrides", "s1style",
                     "s1stylecache", "userblob", "userpropblob",
-                    "clustertrack2", "captcha_session",
+                    "clustertrack2", "captcha_session", "reluser2",
                     );
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"
@@ -1300,7 +1300,8 @@ sub set_userprop
     my %action;  # $table -> {"replace"|"delete"} -> [ "($userid, $propid, $qvalue)" | propid ]
 
     foreach $propname (keys %$hash) {
-        my $p = LJ::get_prop("user", $propname) or next;
+        my $p = LJ::get_prop("user", $propname) or 
+            die "Invalid userprop $propname passed to LJ::set_userprop.";
         my $table = $p->{'indexed'} ? "userprop" : "userproplite";
         if ($p->{datatype} eq 'blobchar') {
             $table = 'userpropblob';
@@ -2526,7 +2527,7 @@ sub load_user_props
         foreach (@props) {
             next if exists $u->{$_};
             my $p = LJ::get_prop("user", $_);
-            next unless $p;
+            die "Invalid userprop $_ passed to LJ::load_user_props." unless $p;
             push @keys, [$uid,"uprop:$uid:$p->{'id'}"];
         }
         $mem = LJ::MemCache::get_multi(@keys) || {};
@@ -4328,9 +4329,15 @@ sub make_journal
     my $eff_view = $LJ::viewinfo{$view}->{'styleof'} || $view;
     my $s1prop = "s1_${eff_view}_style";
 
-    my @needed_props = ("stylesys", "s2_style", "url", "urlname", $s1prop, "opt_nctalklinks",
+    my @needed_props = ("stylesys", "s2_style", "url", "urlname", "opt_nctalklinks",
                         "renamedto",  "opt_blockrobots", "opt_usesharedpic",
                         "journaltitle", "journalsubtitle", "external_foaf_url");
+
+    # S2 is more fully featured than S1, so sometimes we get here and $eff_view
+    # is reply/month/entry and that means it *has* to be S2--S1 defaults to a
+    # BML page to handle those, but we don't want to attempt to load a userprop
+    # because now load_user_props dies if you try to load something invalid
+    push @needed_props, $s1prop unless $eff_view =~ /(?:reply|month|entry)/;
 
     # preload props the view creation code will need later (combine two selects)
     if (ref $LJ::viewinfo{$eff_view}->{'owner_props'} eq "ARRAY") {
@@ -5611,6 +5618,20 @@ sub want_userid
     return ($uuserid + 0);
 }
 
+# <LJFUNC>
+# name: LJ::want_user
+# des: Returns user object when passed either userid or the user hash. Useful to functions that
+#      want to accept either.
+# args: user
+# des-user: Either a userid, or a user hash with the userid in its 'userid' key.
+# returns: The user hash represented by said userid.
+# </LJFUNC>
+sub want_user
+{
+    my $uuser = shift;
+    return $uuser if ref $uuser;
+    return LJ::load_userid($uuser+0);
+}
 
 # <LJFUNC>
 # name: LJ::get_username
@@ -7319,6 +7340,29 @@ sub kill_session
 }
 
 # <LJFUNC>
+# name: LJ::get_reluser_id
+# des: for reluser2, numbers 1 - 31999 are reserved for livejournal stuff, whereas
+#       numbers 32000-65535 are used for local sites.  if you wish to add your
+#       own hooks to this, you should define a hook "get_reluser_id" in ljlib-local.pl
+#       no reluser2 types can be a single character, those are reserved for the
+#       reluser table so we don't have namespace problems.
+# args: type
+# des-type: the name of the type you're trying to access, e.g. "hide_comm_assoc"
+# returns: id of type, 0 means it's not a reluser2 type
+# </LJFUNC>
+sub get_reluser_id {
+    my $type = shift;
+    return 0 if length $type == 1; # must be more than a single character
+    my $val = 
+        {
+            'hide_comm_assoc' => 1,
+        }->{$type}+0;                   
+    return $val if $val;               
+    return 0 unless $type =~ /^local-/;
+    return LJ::run_hook('get_reluser_id', $type)+0;
+}
+
+# <LJFUNC>
 # name: LJ::load_rel_user
 # des: Load user relationship information. Loads all relationships of type 'type' in
 #      which user 'userid' participates on the left side (is the source of the
@@ -7333,10 +7377,20 @@ sub load_rel_user
     my $db = isdb($_[0]) ? shift : undef;
     my ($userid, $type) = @_;
     return undef unless $type and $userid;
+    my $u = LJ::want_user($userid);
     $userid = LJ::want_userid($userid);
-    $db ||= LJ::get_db_reader();
-    return $db->selectcol_arrayref("SELECT targetid FROM reluser WHERE userid=? AND type=?",
-                                   undef, $userid, $type);
+    my $typeid = LJ::get_reluser_id($type)+0;
+    if ($typeid) {
+        # clustered reluser2 table
+        $db = LJ::get_cluster_reader($u);
+        return $db->selectcol_arrayref("SELECT targetid FROM reluser2 WHERE userid=? AND type=?",
+                                       undef, $userid, $typeid);
+    } else {
+        # non-clustered reluser global table
+        $db ||= LJ::get_db_reader();
+        return $db->selectcol_arrayref("SELECT targetid FROM reluser WHERE userid=? AND type=?",
+                                       undef, $userid, $type);
+    }
 }
 
 # <LJFUNC>
@@ -7354,11 +7408,20 @@ sub load_rel_target
     my $db = isdb($_[0]) ? shift : undef;
     my ($targetid, $type) = @_;
     return undef unless $type and $targetid;
+    my $u = LJ::want_user($targetid);
     $targetid = LJ::want_userid($targetid);
-    my $dbr;
-    $db ||= LJ::get_db_reader();
-    return $db->selectcol_arrayref("SELECT userid FROM reluser WHERE targetid=? AND type=?",
-                                   undef, $targetid, $type);
+    my $typeid = LJ::get_reluser_id($type)+0;
+    if ($typeid) {
+        # clustered reluser2 table
+        $db = LJ::get_cluster_reader($u);
+        return $db->selectcol_arrayref("SELECT userid FROM reluser2 WHERE targetid=? AND type=?",
+                                       undef, $targetid, $typeid);
+    } else {
+        # non-clustered reluser global table
+        $db ||= LJ::get_db_reader();
+        return $db->selectcol_arrayref("SELECT userid FROM reluser WHERE targetid=? AND type=?",
+                                       undef, $targetid, $type);
+    }
 }
 
 # <LJFUNC>
@@ -7375,16 +7438,28 @@ sub check_rel
     my $db = isdb($_[0]) ? shift : undef;
     my ($userid, $targetid, $type) = @_;
     return undef unless $type and $userid and $targetid;
+    my $u = LJ::want_user($userid);
     $userid = LJ::want_userid($userid);
     $targetid = LJ::want_userid($targetid);
+    my $typeid = LJ::get_reluser_id($type)+0;
 
     my $key = "$userid-$targetid-$type";
     return $LJ::REQ_CACHE_REL{$key} if defined $LJ::REQ_CACHE_REL{$key};
 
-    $db ||= LJ::get_db_reader();
-    my $res = $db->selectrow_array("SELECT COUNT(*) FROM reluser ".
-                                   "WHERE userid=$userid AND type=? ".
-                                   "AND targetid=$targetid", undef, $type);
+    my $res;
+    if ($typeid) {
+        # clustered reluser2 table
+        $db = LJ::get_cluster_reader($u);
+        $res = $db->selectrow_array("SELECT COUNT(*) FROM reluser2 ".
+                                    "WHERE userid=$userid AND type=? ".
+                                    "AND targetid=$targetid", undef, $typeid);
+    } else {
+        # non-clustered reluser table
+        $db ||= LJ::get_db_reader();
+        $res = $db->selectrow_array("SELECT COUNT(*) FROM reluser ".
+                                    "WHERE userid=$userid AND type=? ".
+                                    "AND targetid=$targetid", undef, $type);
+    }
     return $LJ::REQ_CACHE_REL{$key} = ($res ? 1 : 0);
 }
 
@@ -7401,12 +7476,22 @@ sub set_rel
     &nodb;
     my ($userid, $targetid, $type) = @_;
     return undef unless $type and $userid and $targetid;
+    my $u = LJ::want_user($userid);
     $userid = LJ::want_userid($userid);
     $targetid = LJ::want_userid($targetid);
+    my $typeid = LJ::get_reluser_id($type)+0;
 
-    my $dbh = LJ::get_db_writer();
-    $dbh->do("REPLACE INTO reluser (userid,targetid,type) ".
-             "VALUES ($userid,$targetid,?)", undef, $type);
+    if ($typeid) {
+        # clustered reluser2 table
+        my $dbcm = LJ::get_cluster_master($u);
+        $dbcm->do("REPLACE INTO reluser2 (userid,targetid,type) ".
+                  "VALUES ($userid,$targetid,?)", undef, $typeid);
+    } else {
+        # non-clustered reluser global table
+        my $dbh = LJ::get_db_writer();
+        $dbh->do("REPLACE INTO reluser (userid,targetid,type) ".
+                 "VALUES ($userid,$targetid,?)", undef, $type);
+    }
     return;
 }
 
@@ -7429,14 +7514,25 @@ sub clear_rel
     return undef unless $type and $userid or $targetid;
     return undef if $userid eq '*' and $targetid eq '*';
 
+    my $u = LJ::want_user($userid);
     $userid = LJ::want_userid($userid) unless $userid eq '*';
     $targetid = LJ::want_userid($targetid) unless $targetid eq '*';
+    my $typeid = LJ::get_reluser_id($type)+0;
 
-    my $dbh = LJ::get_db_writer();
-    my $qtype = $dbh->quote($type);
-    my $sql = "DELETE FROM reluser WHERE " . ($userid ne '*' ? "userid=$userid AND " : "") .
-              ($targetid ne '*' ? "targetid=$targetid AND " : "") . "type=$qtype";
-    $dbh->do($sql);
+    if ($typeid) {
+        # clustered reluser2 table
+        my $dbcm = LJ::get_cluster_master($u);
+        my $sql = "DELETE FROM reluser2 WHERE " . ($userid ne '*' ? "userid=$userid AND " : "") .
+                  ($targetid ne '*' ? "targetid=$targetid AND " : "") . "type=$typeid";
+        $dbcm->do($sql);
+    } else {
+        # non-clustered global reluser table
+        my $dbh = LJ::get_db_writer();
+        my $qtype = $dbh->quote($type);
+        my $sql = "DELETE FROM reluser WHERE " . ($userid ne '*' ? "userid=$userid AND " : "") .
+                  ($targetid ne '*' ? "targetid=$targetid AND " : "") . "type=$qtype";
+        $dbh->do($sql);
+    }
     return;
 }
 

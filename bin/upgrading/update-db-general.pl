@@ -1442,6 +1442,18 @@ CREATE TABLE sysban (
 )
 EOC
 
+# clustered relationship types are defined in ljlib.pl and ljlib-local.pl in
+# the LJ::get_reluser_id function
+register_tablecreate("reluser2", <<'EOC');
+CREATE TABLE reluser2 (
+  userid    INT UNSIGNED NOT NULL,
+  type      SMALLINT UNSIGNED NOT NULL,
+  targetid  INT UNSIGNED NOT NULL,
+  PRIMARY KEY (userid,type,targetid),
+  INDEX (userid,targetid)
+)
+EOC
+
 # relationship types:
 # 'A' means targetid can administrate userid as a community maintainer
 # 'B' means targetid is banned in userid
