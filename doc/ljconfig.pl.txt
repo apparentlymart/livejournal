@@ -219,7 +219,14 @@
             'paid' => 1,
             'useremail' => 1,
         },
-        );
+	# a capability class with a name of "_moveinprogress" is required
+	# if you want to be able to move users between clusters with the 
+	# provided tool.  further, this class must define 'readonly' => 1
+        '5' => { 
+	    '_name' => '_moveinprogress',
+	    'readonly' => 1,
+	},
+	);
     }
 
     # keep this next line.  it lets you upgrade LiveJournal without

@@ -30,6 +30,11 @@ LiveJournal capabilities:
  * moodthemecreate
    boolean; can create new mood themes
 
+ * readonly
+   boolean; no writes to the database for this journal are permitted.
+   (this is used by cluster management tool:  a journal is readonly 
+    while it is being moved to another cluster)
+
  * styles
    boolean; can user use & create their own styles
 
