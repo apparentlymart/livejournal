@@ -612,9 +612,9 @@ if ($u->{'journaltitle'}) {
 
  ### Fotobilder gallery count
  {
-     if (LJ::get_cap($u, 'fb_account') && LJ::get_cap($u, 'fb_can_upload')) {
+     if (LJ::get_cap($u, 'fb_account') && LJ::get_cap($u, 'fb_can_upload') && $u->{'fb_num_pubpics'}+0 > 0) {
          my $span = ($narrow_left-- >= 0) ? 1 : 2;
-         my $count = BML::ml('.fbpictures', {'count' => $u->{'fb_num_pubpics'}});
+         my $count = BML::ml('.fbpictures', {'count' => $u->{'fb_num_pubpics'}+0});
 
          $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.fbpictures'}</b></td><td colspan='$span'><a href='$LJ::FB_SITEROOT/$user/'>$count</a></td></tr>\n";
      }
