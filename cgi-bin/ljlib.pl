@@ -2038,6 +2038,7 @@ sub load_user_props
             my $p = LJ::get_prop("user", $_);
             next unless $p;
             my $source = $p->{'indexed'} ? "userprop" : "userproplite";
+            next if exists $uref->{$_};
             push @{$loadfrom{$source}}, $p->{'id'};
         }
     }
