@@ -76,7 +76,7 @@
         LJ::Talk::unscreen_comment($u, $itemid, @unscreen);
         # FIXME: race condition here... somebody could get lucky and view items while unscreened. 
         # then delete, updating the log2 replycount as necessary
-        my $num = LJ::delete_talkitem($dbcm, $jid, \@talkids, "LIGHT");
+        my $num = LJ::delete_comments($u, "L", $itemid, @talkids);
         $dbcm->do("UPDATE log2 SET replycount=replycount-$num WHERE journalid=$jid AND jitemid=$itemid");
         LJ::Talk::update_commentalter($u, $itemid);
         $body = "<?h1 $ML{'.deleted.title'} h1?><?p " . BML::ml('.deleted.body', {'link'=>$commentlink}) . " p?>";

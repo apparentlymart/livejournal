@@ -66,8 +66,8 @@ body<=
         LJ::Talk::unscreen_comment($u, $tp->{'itemid'}, $tpid)
             if $tp->{'state'} eq 'S';
 
-        LJ::delete_talkitem($dbcm, $u->{'userid'}, $tpid, "LIGHT");
-        $dbcm->do("UPDATE log2 SET replycount=replycount-1 WHERE ".
+        my $num = LJ::delete_comments($u, "L", $tp->{'itemid'}, $tpid);
+        $dbcm->do("UPDATE log2 SET replycount=replycount-$num WHERE ".
                   "journalid=? AND jitemid=?",
                   undef, $u->{'userid'}, $tp->{'itemid'});
 

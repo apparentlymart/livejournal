@@ -690,35 +690,23 @@ sub delete_talk
     return $err->("Third argument must be a positive integer (the talkid).")
         unless $qtalkid;
 
-    if ($u->{'clusterid'}) 
-    {
-        my $dbcm = LJ::get_cluster_master($u);
-        my $rid = int($qitemid / 256);  # real post ID
-        my $rtid = int($qtalkid / 256); # realk talk ID
-        my $state = $dbcm->selectrow_array("SELECT state FROM talk2 WHERE ".
-                                           "journalid=$u->{'userid'} AND ".
-                                           "jtalkid=$rtid AND nodetype='L' ".
-                                           "AND nodeid=$rid");
-        return $err->("No talkid with that number found for that itemid.") 
-            unless $state;
-        return $inf->("Talkid $qtalkid is already deleted.") 
-            if $state eq "D";
-        
-        return $inf->("Success.") 
-            if LJ::delete_talkitem($dbcm, $u->{'userid'}, $qtalkid, "light");
-        return $err->("Error deleting.");
-    }
+    my $dbcm = LJ::get_cluster_master($u);
+    return $err->("DB unavailable") unless $dbcm;
 
-    my $state = $dbh->selectrow_array("SELECT state FROM talk WHERE ".
-                                      "talkid=$qtalkid AND nodetype='L' ".
-                                      "AND nodeid=$qitemid");
-
-    return $err->("No talkid with that number found for that itemid.") unless $state;
-    return $inf->("Talkid $qtalkid is already deleted.") if $state eq "D";
-
-    $dbh->do("UPDATE talk SET state='D' WHERE talkid=$qtalkid");
-    return $err->($dbh->errstr) if $dbh->err;
-    return $inf->("talkid $qtalkid state changed to deleted");
+    my $rid = int($qitemid / 256);  # real post ID
+    my $rtid = int($qtalkid / 256); # realk talk ID
+    my $state = $dbcm->selectrow_array("SELECT state FROM talk2 WHERE ".
+                                       "journalid=$u->{'userid'} AND ".
+                                       "jtalkid=$rtid AND nodetype='L' ".
+                                       "AND nodeid=$rid");
+    return $err->("No talkid with that number found for that itemid.") 
+        unless $state;
+    return $inf->("Talkid $qtalkid is already deleted.") 
+        if $state eq "D";
+    
+    return $inf->("Success.") 
+        if LJ::delete_comments($u, "L", $rid, $rtid);
+    return $err->("Error deleting.");
 }
 
 sub change_journal_type

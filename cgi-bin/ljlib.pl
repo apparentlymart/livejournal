@@ -5734,65 +5734,80 @@ sub delete_entry
         $dbh->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$aitemid");
     }
 
-    # delete comments
-    my ($t, $loop) = (undef, 1);
-    while ($loop &&
-           ($t = $dbcm->selectcol_arrayref("SELECT jtalkid FROM talk2 WHERE ".
-                                           "nodetype='L' AND journalid=$jid ".
-                                           "AND nodeid=$jitemid LIMIT 50"))
-           && $t && @$t)
-    {
-        LJ::delete_talkitem($dbcm, $jid, $t);
-        $loop = 0 unless @$t == 50;
-    }
+    LJ::delete_all_comments($u, 'L', $jitemid);
+
     return 1;
 }
 
 # <LJFUNC>
-# name: LJ::delete_talkitem
-# des: Deletes a comment (or multiple) and associated metadata.
+# name: LJ::delete_all_comments
+# des: deletes all comments from a post, permanently, for when a post is deleted
 # info: The tables [dbtable[talk2]], [dbtable[talkprop2]], [dbtable[talktext2]],
-#       and [dbtable[dudata]] are all
-#       deleted from, immediately. Unlike [func[LJ::delete_entry]], there is
-#       no $quick flag to queue the delete for later, nor is one really
-#       necessary, since deleting from 4 tables won't be too slow.
-# args: dbcm, journalid, jtalkid, light?
-# des-journalid: Journalid (userid from [dbtable[user]] to delete comment from).
-#                The journal must reside on the $dbcm you provide.
-# des-jtalkid: The jtalkid of the comment.  Or, an arrayref of jtalkids to delete multiple
-# des-dbcm: Cluster master db to delete item from.
-# des-light: boolean; if true, only mark entry as deleted, so children will thread.
-# returns: boolean; number of items deleted on success (or zero-but-true), 0 on failure.
+#       are deleted from, immediately.
+# args: u, nodetype, nodeid
+# des-nodetype: The thread nodetype (probably 'L' for log items)
+# des-nodeid: The thread nodeid for the given nodetype (probably the jitemid from the log2 row)
+# returns: boolean; success value
 # </LJFUNC>
-sub delete_talkitem
-{
-    my ($dbcm, $jid, $jtalkid, $light) = @_;
-    $jid += 0;
-    $jtalkid = [ $jtalkid ] unless ref $jtalkid eq "ARRAY";
+sub delete_all_comments {
+    my ($u, $nodetype, $nodeid) = @_;
 
-    my $in = join(',', map { $_+0 } @$jtalkid);
+    my $dbcm = LJ::get_cluster_master($u);
+    return 0 unless $dbcm;
+
+    # delete comments
+    my ($t, $loop) = (undef, 1);
+    my $chunk_size = 200;
+    while ($loop &&
+           ($t = $dbcm->selectcol_arrayref("SELECT jtalkid FROM talk2 WHERE ".
+                                           "nodetype=? AND journalid=? ".
+                                           "AND nodeid=? LIMIT $chunk_size", undef,
+                                           $nodetype, $u->{'userid'}, $nodeid))
+           && $t && @$t)
+    {
+        my $in = join(',', map { $_+0 } @$t);
+        return 1 unless $in;
+        foreach my $table (qw(talkprop2 talktext2 talk2)) {
+            $dbcm->do("DELETE FROM $table WHERE journalid=? AND jtalkid IN ($in)",
+                      undef, $u->{'userid'});
+        }
+        $loop = 0 unless @$t == $chunk_size;
+    }
+    return 1;
+    
+}
+
+# <LJFUNC>
+# name: LJ::delete_comments
+# des: deletes comments, but not the relational information, so threading doesn't break
+# info: The tables [dbtable[talkprop2]] and [dbtable[talktext2]] are deleted from.  [dbtable[talk2]]
+#       just has its state column modified to 'D'.
+# args: u, nodetype, nodeid, talkids+
+# des-nodetype: The thread nodetype (probably 'L' for log items)
+# des-nodeid: The thread nodeid for the given nodetype (probably the jitemid from the log2 row)
+# des-talkids: List of talkids to delete.
+# returns: scalar integer; number of items deleted.
+# </LJFUNC>
+sub delete_comments {
+    my ($u, $nodetype, $nodeid, @talkids) = @_;
+
+    my $dbcm = LJ::get_cluster_master($u);
+    return 0 unless $dbcm;
+
+    my $jid = $u->{'userid'}+0;
+    my $in = join(',', map { $_+0 } @talkids);
     return 1 unless $in;
     my $where = "WHERE journalid=$jid AND jtalkid IN ($in)";
 
-    my $ret;
-    my @delfrom = qw(talkprop2);
-    if ($light) {
-        $ret = $dbcm->do("UPDATE talk2 SET state='D' $where");
+    my $num = $dbcm->do("UPDATE talk2 SET state='D' $where");
+    $num = 0 if $num == -1;
+
+    if ($num > 0) {
         $dbcm->do("UPDATE talktext2 SET subject=NULL, body=NULL $where");
-    } else {
-        push @delfrom, qw(talk2 talktext2);
+        $dbcm->do("DELETE FROM talkprop2 WHERE $where");
     }
-
-    foreach my $t (@delfrom) {
-        my $num = $dbcm->do("DELETE FROM $t $where");
-        if (! defined $ret && $t eq "talk2") { $ret = $num; }
-        return 0 if $dbcm->err;
-    }
-    
-    return 0 if $dbcm->err;
-    return $ret;
+    return $num;
 }
-
 
 # <LJFUNC>
 # name: LJ::dudata_set
