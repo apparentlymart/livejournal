@@ -404,15 +404,25 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         $p.journal_type == "C" or
         $e.poster.username != $e.journal.username)
     {
+        var UserLite linkto;
+        var bool showposter;
+        if ($p.view == "recent" and $p.journal_type == "C") {
+            $linkto = $e.poster;
+            $showposter = false;
+        } else {
+            $linkto = $e.journal;
+            $showposter = true;
+        }
+
         """<table cellpadding="1" align="right" cellspacing="0" border="0" summary=""><tr align='left'><td bgcolor="$*stronger_back">""";
         """<table cellpadding="2" align="center" cellspacing="0" border="0" summary="">""";
-        """<tr align='left'><td bgcolor="$bgcolor" align="center"><a class="index" href=\"""" + $e.journal->base_url() + "/\">";
+        """<tr align='left'><td bgcolor="$bgcolor" align="center"><a class="index" href=\"""" + $linkto->base_url() + "\">";
         if (defined $e.userpic) {
             """<img border="0" src="$e.userpic.url" width="$e.userpic.width" height="$e.userpic.height" alt=""><br>""";
         }
 
-        "<font color=\"$fgcolor\">$e.journal.username</font></a>";
-        if ($e.poster.username != $e.journal.username) {
+        "<font color=\"$fgcolor\">$linkto.username</font></a>";
+        if ($e.poster.username != $e.journal.username and $showposter) {
             "<br>[<a class=\"index\" href=\"" +
                 $e.poster->base_url() + "/\"><font color=\"$fgcolor\">$e.poster.username</font></a>]";
         }
