@@ -211,7 +211,7 @@
          $size = 15 if $size > 15;
          $body .= "<small>$ML{'.keywords.select'}</small><div style='margin-left: 30px;'>";
          $body .= LJ::html_select( { name => 'oldkeywords', size => $size, multiple => 1,
-                                     selected => [ keys %selected_keyword ], },
+                                     selected => [ keys %selected_keyword ], noescape => 1 },
                                    map { (LJ::ehtml($_), LJ::ehtml($_)) } @all_keywords);
          $body .= "</div><small>$ML{'.multiple_selections'}</small>";
      } else {
