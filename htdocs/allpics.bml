@@ -66,9 +66,9 @@
  while (my $pic = $sth->fetchrow_hashref)
  {
      if ($piccount++ == 0) {
-         my $edit;
+         my $edit = '';
          if ($remote && $remote->{'user'} eq $u->{'user'}) {
-             $edit = $ML{'.edit'};
+             $edit = ' ' . $ML{'.edit'};
          }
          $body .= "<?h1 $ML{'.current'} h1?><?p ";
          $body .= BML::ml('.pics', {'user'=> LJ::ljuser($user)});
