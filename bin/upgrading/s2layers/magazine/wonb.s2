@@ -4,6 +4,7 @@ layerinfo "type" = "theme";
 layerinfo "name" = "White on Black";
 layerinfo "redist_uniq" = "magazine/wonb";
 
+set title_color = "#ffffff";
 set main_bgcolor = "#000000";
 set main_fgcolor = "#ffffff";
 set sidebar_color = "#555555";
@@ -14,7 +15,7 @@ set link_color = "#eeeeee";
 set alink_color = "#ffffff";
 set vlink_color = "#dddddd";
 set meta_color = "#ffffff";
-set highlight_bgcolor = "#999999";
+set highlight_bgcolor = "#666666";
 set highlight_fgcolor = "#dddddd";
 set border_color = "#ffffff";
 
