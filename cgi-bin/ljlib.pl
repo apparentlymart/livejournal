@@ -412,6 +412,9 @@ sub get_friend_itemids
     my $owners_ref = (ref $opts->{'owners'} eq "HASH") ? $opts->{'owners'} : {};
     my $filter = $opts->{'filter'}+0;
 
+    # sanity check:
+    $skip = 0 if ($skip < 0);
+
     ### what do your friends think of remote viewer?  what security level?
     my %usermask;
     if ($remoteid) 
@@ -495,7 +498,7 @@ sub get_friend_itemids
 	my $size = scalar(@items);
 	if ($size < $getitems) { next; }
 	@items = @items[0..($getitems-1)];
-	$oldest = $items[$getitems-1]->[1];
+	$oldest = $items[$getitems-1]->[1] if (@items);
     }
 
     my $size = scalar(@items);
