@@ -8655,22 +8655,22 @@ sub alloc_user_counter
     # Make sure the counter table is populated for this uid/dom.
     if ($dom eq "L") {
         $newmax = $dbcm->selectrow_array("SELECT MAX(jitemid) FROM log2 WHERE journalid=?",
-                    undef, $uid);
+                                         undef, $uid);
     } elsif ($dom eq "T") {
         $newmax = $dbcm->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
-                undef, $uid);
+                                         undef, $uid);
     } elsif ($dom eq "M") {
         $newmax = $dbcm->selectrow_array("SELECT MAX(modid) FROM modlog WHERE journalid=?",
-                undef, $uid);
+                                         undef, $uid);
     } elsif ($dom eq "S") {
         $newmax = $dbcm->selectrow_array("SELECT MAX(sessid) FROM sessions WHERE userid=?",
-                undef, $uid);
+                                         undef, $uid);
     } elsif ($dom eq "R") {
         $newmax = $dbcm->selectrow_array("SELECT MAX(memid) FROM memorable2 WHERE userid=?",
-                undef, $uid);
+                                         undef, $uid);
     } elsif ($dom eq "K") {
         $newmax = $dbcm->selectrow_array("SELECT MAX(kwid) FROM userkeywords WHERE userid=?",
-                undef, $uid);
+                                         undef, $uid);
     }
     $newmax += 0;
     $dbcm->do("INSERT IGNORE INTO counter (journalid, area, max) VALUES (?,?,?)",
