@@ -1944,7 +1944,7 @@ sub list_friends
             $u->{'bdate'} ne "0000-00-00" &&
             $u->{'allow_infoshow'} eq 'Y') 
         {
-            $r->{'birthday'} = $f->{'bdate'};            
+            $r->{'birthday'} = $u->{'bdate'};            
         }
 
         unless ($opts->{'friendof'}) {
