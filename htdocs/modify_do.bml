@@ -136,14 +136,24 @@ if ($FORM{'remoteuser'} eq $user) {
          
          # get the user's custom colors
          my %custcolors = ();
+
          if ($u->{'themeid'} == 0) {
-             $sth = $dbr->prepare("SELECT coltype, color FROM themecustom WHERE user=$quser");
+             my $dbcr = LJ::get_cluster_reader($u);
+             my $stor = $dbcr->selectrow_array("SELECT color_stor FROM s1usercache WHERE userid=?", undef, $u->{'userid'});
+             if ($stor) {
+                 %custcolors = %{ Storable::thaw($stor) };
+             } else {
+                 # ancient table.
+                 $sth = $dbr->prepare("SELECT coltype, color FROM themecustom WHERE user=?");
+                 $sth->execute($u->{'user'});
+                 $custcolors{$_->{'coltype'}} = $_->{'color'} while $_ = $sth->fetchrow_hashref;
+             }
          } else {
              my $qthemeid = $dbr->quote($u->{'themeid'});
              $sth = $dbr->prepare("SELECT coltype, color FROM themedata WHERE themeid=$qthemeid");
+             $sth->execute;
+             $custcolors{$_->{'coltype'}} = $_->{'color'} while $_ = $sth->fetchrow_hashref;
          }
-         $sth->execute;
-         $custcolors{$_->{'coltype'}} = $_->{'color'} while ($_ = $sth->fetchrow_hashref);
          
          my $dig;
          foreach my $col (@LJ::S1::themecoltypes) {
@@ -152,6 +162,7 @@ if ($FORM{'remoteuser'} eq $user) {
          }
          $dig = Digest::MD5::md5_hex($dig);
          $ret .= LJ::html_hidden("themecolors_dig", $dig) unless $u->{'themeid'};
+         
          $ret .= "</table></center>\n";
          $ret .= "</div>\n";
      }
@@ -284,16 +295,23 @@ if ($FORM{'remoteuser'} eq $user) {
          my $dig = Digest::MD5::md5_hex(join(",", map { $FORM{"theme_cust:$_"} }
                                              map { $_->[0] } @LJ::S1::themecoltypes));
          if ($dig ne $FORM{'themecolors_dig'}) {
+             my %cols;
              foreach my $col (@LJ::S1::themecoltypes) {
-                 next if $FORM{"theme_cust:$col->[0]"} =~ /^\#[a-f0-9]{6,6}$/i;
-                 next unless $FORM{"theme_cust:$col->[0]"} =~ /[^\s\w]/;
-                 delete $FORM{"theme_cust:$col->[0]"};
+                 my $val = $FORM{"theme_cust:$col->[0]"};
+                 next if length($val) > 20;
+                 next unless ($val =~ /^\#[a-f0-9]{6,6}$/i ||
+                              $val !~ /[^\s\w]/);
+                 $cols{$col->[0]} = $val;
              }
-             my $vals = join(",", map { "($quser, '$_', " . $dbh->quote($FORM{"theme_cust:$_"}) . ")" } map { $_->[0] } @LJ::S1::themecoltypes);
-             $dbh->do("DELETE FROM themecustom WHERE user=$quser");
-             $dbh->do("INSERT INTO themecustom (user, coltype, color) VALUES $vals");
+
              my $dbcm = LJ::get_cluster_master($u, 1);
-             $dbcm->do("UPDATE s1usercache SET color_stor=NULL WHERE userid=?", undef, $u->{'userid'});
+             $dbcm->do("INSERT IGNORE INTO s1usercache (userid) VALUES (?)", undef, $u->{'userid'});
+             $dbcm->do("UPDATE s1usercache SET color_stor=? WHERE userid=?", undef, 
+                       Storable::freeze(\%cols), $u->{'userid'});
+
+             $dbh->do("DELETE FROM themecustom WHERE user=$quser")
+                 if $dbh->selectrow_array("SELECT user FROM themecustom ".
+                                          "WHERE user=? LIMIT 1", undef, $u->{'user'});
          }
      }
 

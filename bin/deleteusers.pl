@@ -116,7 +116,6 @@ foreach my $du (@delusers)
     $runsql->($user, "DELETE FROM userprop WHERE userid=$uid");
     $runsql->($user, "DELETE FROM userproplite WHERE userid=$uid");   
     $runsql->($user, "DELETE FROM txtmsg WHERE userid=$uid");   
-    $runsql->($user, "DELETE FROM themecustom WHERE user='$du->{'user'}'");   
     $runsql->($user, "DELETE FROM overrides WHERE user='$du->{'user'}'");
     $runsql->($user, "DELETE FROM syncupdates WHERE userid=$uid");
     $runsql->($user, "DELETE FROM priv_map WHERE userid=$uid");

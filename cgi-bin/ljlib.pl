@@ -3258,7 +3258,10 @@ sub make_journal
             $set .= "$k=" . $dbh->quote($update{$k});
         }
         $dbcm ||= LJ::get_cluster_master($u, 1);
-        $dbcm->do("UPDATE s1usercache SET $set WHERE userid=?", undef, $u->{'userid'});
+        my $rv = $dbcm->do("UPDATE s1usercache SET $set WHERE userid=?", undef, $u->{'userid'});
+        if ($rv && $update{'color_stor'}) {
+            $dbh->do("DELETE FROM themecustom WHERE user=?", undef, $u->{'user'});
+        }
     }
 
     # load the style

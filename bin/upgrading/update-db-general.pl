@@ -566,15 +566,6 @@ CREATE TABLE talkproplist (
 ) 
 EOC
 
-register_tablecreate("themecustom", <<'EOC');
-CREATE TABLE themecustom (
-  user varchar(15) NOT NULL default '',
-  coltype varchar(30) default NULL,
-  color varchar(30) default NULL,
-  KEY (user)
-) PACK_KEYS=1
-EOC
-
 register_tablecreate("themedata", <<'EOC');
 CREATE TABLE themedata (
   themeid mediumint(8) unsigned NOT NULL default '0',
