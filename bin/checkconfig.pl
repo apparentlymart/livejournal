@@ -29,6 +29,7 @@ my %modules = (
                "HTML::Parser" => { 'deb' => 'libhtml-parser-perl', },
                "LWP::Simple" => { 'deb' => 'libwww-perl', },
                "LWP::UserAgent" => { 'deb' => 'libwww-perl', },
+               "GD" => { 'deb' => 'libgd-perl' },
                "GD::Graph" => { 
                    'deb' => 'libgd-graph-perl', 
                    'opt' => 'Required to make graphs for the statistics page.',
