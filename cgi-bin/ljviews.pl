@@ -77,8 +77,12 @@ sub create_view_lastn
         $lastn_page{'head'} = "<meta name=\"robots\" content=\"noindex,nofollow\">\n";
     }
     if ($LJ::UNICODE) {
-        $lastn_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'">';
+        $lastn_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\">\n";
     }
+
+    # "Automatic Discovery of RSS feeds"
+    $lastn_page{'head'} .= qq{<link rel="alternate" type="text/xml" title="XML" href="$journalbase/rss" />\n};
+
     $lastn_page{'head'} .= 
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'LASTN_HEAD'};
 
