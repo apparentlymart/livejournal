@@ -10,6 +10,8 @@ BODY<=
 
  my @errors = ();
 
+ unless (LJ::did_post()) { push @errors, "(=REQUIREPOST=)"; }
+
  my $u;
  my $user;
  my $remote;
