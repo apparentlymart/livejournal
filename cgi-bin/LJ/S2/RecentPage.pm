@@ -13,10 +13,8 @@ sub RecentPage
     my $dbs = LJ::get_dbs();
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    my $dbcr;
-    if ($u->{'clusterid'}) {
-        $dbcr = LJ::get_cluster_reader($u);
-    }
+    my $dbcr = LJ::get_cluster_reader($u);
+
     my $user = $u->{'user'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
 
@@ -90,14 +88,9 @@ sub RecentPage
     ### load the log properties
     my %logprops = ();
     my $logtext;
-    if ($u->{'clusterid'}) {
-        LJ::load_props($dbs, "log");
-        LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
-        $logtext = LJ::get_logtext2($u, @itemids);
-    } else {
-        LJ::load_log_props($dbs, \@itemids, \%logprops);
-        $logtext = LJ::get_logtext($dbs, @itemids);
-    }
+    LJ::load_props($dbs, "log");
+    LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
+    $logtext = LJ::get_logtext2($u, @itemids);
     LJ::load_moods($dbs);
 
     my $lastdate = "";
@@ -145,8 +138,7 @@ sub RecentPage
         $itemnum++;
         LJ::CleanHTML::clean_subject(\$subject) if $subject;
 
-        my $ditemid = $u->{'clusterid'} ? ($itemid * 256 + $item->{'anum'}) : $itemid;
-        my $itemargs = $u->{'clusterid'} ? "journal=$user&itemid=$ditemid" : "itemid=$ditemid";
+        my $ditemid = $itemid * 256 + $item->{'anum'};
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                               'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}), });
         LJ::expand_embedded($dbs, $ditemid, $remote, \$text);
@@ -154,18 +146,10 @@ sub RecentPage
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
-        my ($permalink, $readurl, $posturl);
-        if ($u->{'clusterid'}) {
-            $permalink = "$journalbase/$ditemid.html";
-            $readurl = $permalink;
-            $readurl .= "?$nc" if $nc;
-            $posturl = $permalink . "?mode=reply";
-        } else {
-            $permalink = "$LJ::SITEROOT/talkread.bml?$itemargs";
-            $readurl = $permalink;
-            $readurl .= "&amp;$nc" if $nc;
-            $posturl = "$LJ::SITEROOT/talkpost.bml?$itemargs";
-        }
+        my $permalink = "$journalbase/$ditemid.html";
+        my $readurl = $permalink;
+        $readurl .= "?$nc" if $nc;
+        my $posturl = $permalink . "?mode=reply";
 
         my $comments = CommentInfo({
             'read_url' => $readurl,

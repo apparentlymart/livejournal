@@ -16,10 +16,7 @@ sub DayPage
     my $dbs = LJ::get_dbs();
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    my $dbcr;
-    if ($u->{'clusterid'}) {
-        $dbcr = LJ::get_cluster_reader($u);
-    }
+    my $dbcr = LJ::get_cluster_reader($u);
 
     my $user = $u->{'user'};
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
@@ -76,22 +73,14 @@ sub DayPage
         }
     }
 
-    my ($sth, $logdb);
-    if ($u->{'clusterid'}) { 
-        $logdb = LJ::get_cluster_reader($u);
-        unless ($logdb) {
-            push @{$opts->{'errors'}}, "Database temporarily unavailable";
-            return;
-        }
-        $sth = $logdb->prepare("SELECT jitemid FROM log2 WHERE journalid=$u->{'userid'} ".
-                               "AND year=$year AND month=$month AND day=$day $secwhere ".
-                               "ORDER BY eventtime LIMIT 200");
-    } else {
-        $logdb = $dbr;
-        $sth = $logdb->prepare("SELECT itemid FROM log WHERE ownerid=$u->{'userid'} ".
-                               "AND year=$year AND month=$month AND day=$day $secwhere ".
-                               "ORDER BY eventtime LIMIT 200");
+    my $logdb = LJ::get_cluster_reader($u);
+    unless ($logdb) {
+        push @{$opts->{'errors'}}, "Database temporarily unavailable";
+        return;
     }
+    my $sth = $logdb->prepare("SELECT jitemid FROM log2 WHERE journalid=$u->{'userid'} ".
+                              "AND year=$year AND month=$month AND day=$day $secwhere ".
+                              "ORDER BY eventtime LIMIT 200");
     $sth->execute;
 
     push @itemids, $_ while ($_ = $sth->fetchrow_array);
@@ -101,25 +90,15 @@ sub DayPage
     ### load the log properties
     my %logprops = ();
     my $logtext;
-    if ($u->{'clusterid'}) {
-        LJ::load_props($dbs, "log");
-        LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
-        $logtext = LJ::get_logtext2($u, @itemids);
-    } else {
-        LJ::load_log_props($dbs, \@itemids, \%logprops);
-        $logtext = LJ::get_logtext($dbs, @itemids);
-    }
+    LJ::load_props($dbs, "log");
+    LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
+    $logtext = LJ::get_logtext2($u, @itemids);
     LJ::load_moods($dbs);
 
     # load the log items
     my $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
-    if ($u->{'clusterid'}) {
-        $sth = $logdb->prepare("SELECT posterid, jitemid, security, replycount, DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
-                               "FROM log2 WHERE journalid=$u->{'userid'} AND jitemid IN ($itemid_in) ORDER BY eventtime, logtime");
-    } else {
-        $sth = $dbr->prepare("SELECT posterid, itemid, security, replycount, DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart' ".
-                             "FROM log WHERE itemid IN ($itemid_in) ORDER BY eventtime, logtime");
-    }
+    $sth = $logdb->prepare("SELECT posterid, jitemid, security, replycount, DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
+                           "FROM log2 WHERE journalid=$u->{'userid'} AND jitemid IN ($itemid_in) ORDER BY eventtime, logtime");
     $sth->execute;
 
     my @items;
@@ -157,8 +136,7 @@ sub DayPage
 
         LJ::CleanHTML::clean_subject(\$subject) if $subject;
 
-        my $ditemid = $u->{'clusterid'} ? ($itemid*256 + $anum) : $itemid;
-        my $itemargs = $u->{'clusterid'} ? "journal=$user&itemid=$ditemid" : "itemid=$ditemid";
+        my $ditemid = $itemid*256 + $anum;
 
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($u, $itemid, $anum), });
@@ -167,18 +145,10 @@ sub DayPage
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
-        my ($permalink, $readurl, $posturl);
-        if ($u->{'clusterid'}) {
-            $permalink = "$journalbase/$ditemid.html";
-            $readurl = $permalink;
-            $readurl .= "?$nc" if $nc;
-            $posturl = $permalink . "?mode=reply";
-        } else {
-            $permalink = "$LJ::SITEROOT/talkread.bml?$itemargs";
-            $readurl = $permalink;
-            $readurl .= "&amp;$nc" if $nc;
-            $posturl = "$LJ::SITEROOT/talkpost.bml?$itemargs";
-        }
+        my $permalink = "$journalbase/$ditemid.html";
+        my $readurl = $permalink;
+        $readurl .= "?$nc" if $nc;
+        my $posturl = $permalink . "?mode=reply";
 
         my $comments = CommentInfo({
             'read_url' => $readurl,

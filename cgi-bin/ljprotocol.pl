@@ -74,6 +74,7 @@ sub error_message
              "502" => "Database temporarily unavailable",
              "503" => "Error obtaining necessary database lock",
              "504" => "Protocol mode no longer supported.",
+             "505" => "Account data format on server is old and needs to be upgraded.", # cluster0
              );
 
     my $prefix = "";
@@ -371,16 +372,12 @@ sub getdaycounts
     my $ownerid = $flags->{'ownerid'};
 
     my $res = {};
-    my ($db, $table, $ownercol) = ($dbs->{'reader'}, "log", "ownerid");
-    if ($uowner->{'clusterid'}) {
-        $db = LJ::get_cluster_reader($uowner);
-        ($table, $ownercol) = ("log2", "journalid");
-    }
+    my $db = LJ::get_cluster_reader($uowner);
     return fail($err,502) unless $db;
 
     my $sth = $db->prepare("SELECT year, month, day, COUNT(*) AS 'count' ".
-                           "FROM $table WHERE $ownercol=$ownerid GROUP BY 1, 2, 3");
-    $sth->execute;
+                           "FROM log2 WHERE journalid=? GROUP BY 1, 2, 3");
+    $sth->execute($ownerid);
     while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
         my $date = sprintf("%04d-%02d-%02d", $y, $m, $d);
         push @{$res->{'daycounts'}}, { 'date' => $date, 'count' => $c };
@@ -643,7 +640,6 @@ sub postevent
     }
 
     my $dbcm = $dbh;
-    my $clustered = 0;
     my $anum  = int(rand(256));
     my $udbh_now;  # current time on the master user db
 
@@ -674,51 +670,38 @@ sub postevent
             # duplicate!  let's make the client think this was just the
             # normal first response.
             $res->{'itemid'} = $parts[1];
-            $res->{'anum'} = $parts[2] if $clustered;
+            $res->{'anum'} = $parts[2];
             $res_done = 1;
             $release->();
         }
     };
 
-    if ($uowner->{'clusterid'}) {
-        $dbcm = LJ::get_cluster_master($uowner);
-        $clustered = 1;
+    $dbcm = LJ::get_cluster_master($uowner);
+    return fail($err,306) unless $dbcm;
 
-        return fail($err,306) unless $dbcm;
-
-        # before we get going here, we want to make sure to purge this user's
-        # delitem cmd buffer, otherwise we could have a race and that might
-        # wake up later and delete this item which is replacing in the database
-        # the old last item which is marked for deletion:
-        # NOTE: cmd_buffer_flush uses GET_LOCK!  So we can't lock until after this.
-        #       (but it'd be kinda silly to lock before this, anyway)
-        LJ::cmd_buffer_flush($dbh, $dbcm, "delitem", $ownerid);
-
-        $udbh_now = $dbcm->selectrow_array("SELECT NOW()");
-        $rlogtime =~ s/\?/\'$udbh_now\'/;  # replace parameter above with current time
-
-        $getlock->(); return $res if $res_done;
-
-        # do rate-checking
-        if ($u->{'journaltype'} ne "Y" && ! LJ::rate_log($u, "post", 1)) {
-            return fail($err,405);
-        }
-
-        $dbcm->do("INSERT INTO log2 (journalid, posterid, eventtime, logtime, security, ".
-                  "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
-                  "VALUES ($qownerid, $qposterid, $qeventtime, '$udbh_now', $qsecurity, $qallowmask, ".
-                  "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
-                  "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
-    } else {
-        $rlogtime =~ s/\?//;  # kill the parameter, which we don't use in this case.
-
-        $getlock->(); return $res if $res_done;
-        $dbcm->do("INSERT INTO log (ownerid, posterid, eventtime, logtime, security, ".
-                  "allowmask, replycount, year, month, day, revttime, rlogtime) ".
-                  "VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, ".
-                  "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
-                  "UNIX_TIMESTAMP($qeventtime), $rlogtime)");
+    # before we get going here, we want to make sure to purge this user's
+    # delitem cmd buffer, otherwise we could have a race and that might
+    # wake up later and delete this item which is replacing in the database
+    # the old last item which is marked for deletion:
+    # NOTE: cmd_buffer_flush uses GET_LOCK!  So we can't lock until after this.
+    #       (but it'd be kinda silly to lock before this, anyway)
+    LJ::cmd_buffer_flush($dbh, $dbcm, "delitem", $ownerid);
+    
+    $udbh_now = $dbcm->selectrow_array("SELECT NOW()");
+    $rlogtime =~ s/\?/\'$udbh_now\'/;  # replace parameter above with current time
+    
+    $getlock->(); return $res if $res_done;
+    
+    # do rate-checking
+    if ($u->{'journaltype'} ne "Y" && ! LJ::rate_log($u, "post", 1)) {
+        return fail($err,405);
     }
+    
+    $dbcm->do("INSERT INTO log2 (journalid, posterid, eventtime, logtime, security, ".
+              "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
+              "VALUES ($qownerid, $qposterid, $qeventtime, '$udbh_now', $qsecurity, $qallowmask, ".
+              "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
+              "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     return $fail->($err,501,$dbcm->errstr) if $dbcm->err;
 
     my $itemid = $dbcm->{'mysql_insertid'};
@@ -730,7 +713,7 @@ sub postevent
     # end duplicate locking section
     $release->();
 
-    my $ditemid = $clustered ? ($itemid * 256 + $anum) : $itemid;
+    my $ditemid = $itemid * 256 + $anum;
 
     ### finish embedding stuff now that we have the itemid
     {
@@ -748,8 +731,7 @@ sub postevent
             $req->{'security'} eq "private")
     {
         foreach my $url (LJ::get_urls($event)) {
-            my $jid = $clustered ? $ownerid : 0;
-            LJ::record_meme($dbs, $url, $posterid, $ditemid, $jid);
+            LJ::record_meme($dbs, $url, $posterid, $ditemid, $ownerid);
         }
     }
 
@@ -757,57 +739,29 @@ sub postevent
     LJ::set_userprop($dbs, $posterid, 'newesteventtime', $eventtime)
         if $posterid == $ownerid and not $req->{'props'}->{'opt_backdated'};
 
-    # record journal's disk usage (clustered users only)
-    if ($clustered)
-    {
-        my $bytes = length($event) + length($req->{'subject'});
-        LJ::dudata_set($dbcm, $ownerid, 'L', $itemid, $bytes);
-    }
+    # record journal's disk usage
+    my $bytes = length($event) + length($req->{'subject'});
+    LJ::dudata_set($dbcm, $ownerid, 'L', $itemid, $bytes);
 
     my $qevent = $dbh->quote($event);
     $event = "";
-
-    if ($clustered) {
-        $dbcm->do("REPLACE INTO logtext2 (journalid, jitemid, subject, event) ".
-                  "VALUES ($ownerid, $itemid, $qsubject, $qevent)");
-        if ($dbcm->err) {
-            my $msg = $dbcm->errstr;
-            LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
-            return fail($err,501,"logtext:$msg");
-        }
-    } else {
-        my @prefix = ("");
-        if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
-        foreach my $pfx (@prefix)
-        {
-            $dbh->do("INSERT INTO ${pfx}logtext (itemid, subject, event) ".
-                     "VALUES ($itemid, $qsubject, $qevent)");
-            if ($dbh->err) {
-                my $msg = $dbh->errstr;
-                LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-                return fail($err,501,$msg);
-            }
-        }
+    
+    $dbcm->do("REPLACE INTO logtext2 (journalid, jitemid, subject, event) ".
+              "VALUES ($ownerid, $itemid, $qsubject, $qevent)");
+    if ($dbcm->err) {
+        my $msg = $dbcm->errstr;
+        LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
+        return fail($err,501,"logtext:$msg");
     }
 
     # keep track of custom security stuff in other table.
     if ($uselogsec) {
-        if ($clustered) {
-            $dbcm->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) ".
-                      "VALUES ($qownerid, $itemid, $qallowmask)");
-            if ($dbcm->err) {
-                my $msg = $dbcm->errstr;
-                LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
-                return fail($err,501,"logsec2:$msg");
-            }
-        } else {
-            $dbh->do("INSERT INTO logsec (ownerid, itemid, allowmask) ".
-                     "VALUES ($qownerid, $itemid, $qallowmask)");
-            if ($dbh->err) {
-                my $msg = $dbh->errstr;
-                LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-                return fail($err,501,$msg);
-            }
+        $dbcm->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) ".
+                  "VALUES ($qownerid, $itemid, $qallowmask)");
+        if ($dbcm->err) {
+            my $msg = $dbcm->errstr;
+            LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
+            return fail($err,501,"logsec2:$msg");
         }
     }
 
@@ -820,31 +774,19 @@ sub postevent
             if ($propinsert) {
                 $propinsert .= ", ";
             } else {
-                if ($clustered) {
-                    $propinsert = "REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ";
-                } else {
-                    $propinsert = "INSERT INTO logprop (itemid, propid, value) VALUES ";
-                }
+                $propinsert = "REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ";
             }
             my $p = LJ::get_prop("log", $pname);
             if ($p) {
                 my $qvalue = $dbh->quote($req->{'props'}->{$pname});
-                if ($clustered) {
-                    $propinsert .= "($ownerid, $itemid, $p->{'id'}, $qvalue)";
-                } else {
-                    $propinsert .= "($itemid, $p->{'id'}, $qvalue)";
-                }
+                $propinsert .= "($ownerid, $itemid, $p->{'id'}, $qvalue)";
             }
         }
         if ($propinsert) {
             $dbcm->do($propinsert);   # note: $dbcm may be $dbh
             if ($dbcm->err) {
                 my $msg = $dbh->errstr;
-                if ($clustered) {
-                    LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
-                } else {
-                    LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-                }
+                LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
                 return fail($err,501,"logprop2:$msg");
             }
         }
@@ -882,7 +824,7 @@ sub postevent
              undef, $weeknum, $ownerid, $ubefore);
 
     $res->{'itemid'} = $itemid;  # by request of mart
-    $res->{'anum'} = $anum if $clustered;
+    $res->{'anum'} = $anum;
     return $res;
 }
 
@@ -914,11 +856,7 @@ sub editevent
     # can't edit in deleted/suspended community
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";
 
-    my ($dbcm, $dbcr, $clustered) = ($dbh, $dbr, 0);
-    if ($uowner->{'clusterid'}) {
-        $dbcm = LJ::get_cluster_master($uowner);
-        $clustered = 1;
-    }
+    my $dbcm = LJ::get_cluster_master($uowner);
     return fail($err,306) unless $dbcm;
 
     ### make sure user can't change a post to "custom/private security" on shared journals
@@ -930,34 +868,23 @@ sub editevent
     # really have to update later.  usually people just edit one part,
     # not every field in every table.  reads are quicker than writes,
     # so this is worth it.
-    my $oldevent;
-    if ($clustered)
-    {
+    my $oldevent = $dbcm->selectrow_hashref
+        ("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, l.logtime, ".
+         "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, ".
+         "MD5(lt.event) AS 'md5event', l.rlogtime, l.anum FROM log2 l, logtext2 lt ".
+         "WHERE l.journalid=$ownerid AND lt.journalid=$ownerid ".
+         "AND l.jitemid=$qitemid AND lt.jitemid=$qitemid");
+    
+    # a few times, logtext2 has been empty, with log2 existing,
+    # and then the post is undeletable since the join matches
+    # nothing.  this is a ugly hack work-around, but without using
+    # transactions to guarantee we never bomb out between log2 and
+    # logtext2 insertion, this is the price we way.
+    unless ($oldevent) {
         $oldevent = $dbcm->selectrow_hashref
             ("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, l.logtime, ".
-             "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, ".
-             "MD5(lt.event) AS 'md5event', l.rlogtime, l.anum FROM log2 l, logtext2 lt ".
-             "WHERE l.journalid=$ownerid AND lt.journalid=$ownerid ".
-             "AND l.jitemid=$qitemid AND lt.jitemid=$qitemid");
-
-	# a few times, logtext2 has been empty, with log2 existing,
-	# and then the post is undeletable since the join matches
-	# nothing.  this is a ugly hack work-around, but without using
-	# transactions to guarantee we never bomb out between log2 and
-	# logtext2 insertion, this is the price we way.
-	unless ($oldevent) {
-	    $oldevent = $dbcm->selectrow_hashref
-		("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, l.logtime, ".
-		 "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, ".
-		 "l.rlogtime, l.anum FROM log2 l WHERE l.journalid=$ownerid AND l.jitemid=$qitemid");
-	}
-
-    } else {
-        $oldevent = $dbcm->selectrow_hashref
-            ("SELECT l.ownerid, l.posterid, l.eventtime, l.logtime, ".
-             "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, ".
-             "MD5(lt.event) AS 'md5event', l.rlogtime FROM log l, logtext lt ".
-             "WHERE l.itemid=$qitemid AND lt.itemid=$qitemid");
+             "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, ".
+             "l.rlogtime, l.anum FROM log2 l WHERE l.journalid=$ownerid AND l.jitemid=$qitemid");
     }
 
     # kill seconds in eventtime, since we don't use it, then we can use 'eq' and such
@@ -998,12 +925,8 @@ sub editevent
             }
         }
 
-        if ($clustered) {
-            LJ::delete_item2($dbh, $dbcm, $ownerid, $req->{'itemid'},
-                             'quick', $oldevent->{'anum'});
-        } else {
-            LJ::delete_item($dbh, $ownerid, $req->{'itemid'});
-        }
+        LJ::delete_item2($dbh, $dbcm, $ownerid, $req->{'itemid'},
+                         'quick', $oldevent->{'anum'});
 
         # clear their duplicate protection, so they can later repost
         # what they just deleted.  (or something... probably rare.)
@@ -1026,12 +949,8 @@ sub editevent
     ### load existing meta-data
     my %curprops;
 
-    if ($clustered) {
-        LJ::load_props($dbs, "log");
-        LJ::load_log_props2($dbcm, $ownerid, [ $qitemid ], \%curprops);
-    } else {
-        LJ::load_log_props($dbh, [ $qitemid ], \%curprops);
-    }
+    LJ::load_props($dbs, "log");
+    LJ::load_log_props2($dbcm, $ownerid, [ $qitemid ], \%curprops);
 
     ## handle meta-data (properties)
     my %props_byname = ();
@@ -1087,36 +1006,21 @@ sub editevent
         }
         
         my $qsecurity = $dbh->quote($security);
-        if ($clustered) {
-            $dbcm->do("UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
-                      "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
-                      "security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid ".
-                      "AND jitemid=$qitemid");
-        } else {
-            $dbh->do("UPDATE log SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
-                     "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
-                     "security=$qsecurity, allowmask=$qallowmask WHERE itemid=$qitemid");
-        }
+        $dbcm->do("UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
+                  "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
+                  "security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid ".
+                  "AND jitemid=$qitemid");
     }
 
     if ($security ne $oldevent->{'security'} ||
         $qallowmask != $oldevent->{'allowmask'})
     {
         if ($security eq "public" || $security eq "private") {
-            if ($clustered) {
-                $dbcm->do("DELETE FROM logsec2 WHERE journalid=$ownerid AND jitemid=$qitemid");
-            } else {
-                $dbh->do("DELETE FROM logsec WHERE ownerid=$ownerid AND itemid=$qitemid");
-            }
+            $dbcm->do("DELETE FROM logsec2 WHERE journalid=$ownerid AND jitemid=$qitemid");
         } else {
             my $qsecurity = $dbh->quote($security);
-            if ($clustered) {
-                $dbcm->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) ".
-                          "VALUES ($ownerid, $qitemid, $qallowmask)");
-            } else {
-                $dbh->do("REPLACE INTO logsec (ownerid, itemid, allowmask) ".
-                         "VALUES ($ownerid, $qitemid, $qallowmask)");
-            }
+            $dbcm->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) ".
+                      "VALUES ($ownerid, $qitemid, $qallowmask)");
         }
         return fail($err,501,$dbcm->errstr) if $dbcm->err;
     }
@@ -1126,23 +1030,11 @@ sub editevent
     {
         my $qsubject = $dbh->quote($req->{'subject'});
 
-        if ($clustered) {
-            $dbcm->do("UPDATE logtext2 SET event=$qevent, subject=$qsubject ".
-                      "WHERE journalid=$ownerid AND jitemid=$qitemid");
-        } else {
-            my @prefix = ("");
-            if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
-            foreach my $pfx (@prefix) {
-                $dbh->do("UPDATE ${pfx}logtext SET event=$qevent, subject=$qsubject ".
-                         "WHERE itemid=$qitemid");
-            }
-            return fail($err,501,$dbcm->errstr) if $dbcm->err;
-        }
+        $dbcm->do("UPDATE logtext2 SET event=$qevent, subject=$qsubject ".
+                  "WHERE journalid=$ownerid AND jitemid=$qitemid");
 
         # update disk usage
-        if ($clustered) {
-            LJ::dudata_set($dbcm, $ownerid, 'L', $qitemid, $bytes);
-        }
+        LJ::dudata_set($dbcm, $ownerid, 'L', $qitemid, $bytes);
 
         return fail($err,501,$dbcm->errstr) if $dbcm->err;
     }
@@ -1166,28 +1058,16 @@ sub editevent
             if ($propinsert) {
                 $propinsert .= ", ";
             } else {
-                if ($clustered) {
-                    $propinsert = "REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ";
-                } else {
-                    $propinsert = "REPLACE INTO logprop (itemid, propid, value) VALUES ";
-                }
+                $propinsert = "REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ";
             }
             my $qvalue = $dbh->quote($val);
-            if ($clustered) {
-                $propinsert .= "($ownerid, $qitemid, $p->{'id'}, $qvalue)";
-            } else {
-                $propinsert .= "($qitemid, $p->{'id'}, $qvalue)";
-            }
+            $propinsert .= "($ownerid, $qitemid, $p->{'id'}, $qvalue)";
         }
         if ($propinsert) { $dbcm->do($propinsert); }
         if (@props_to_delete) {
             my $propid_in = join(", ", @props_to_delete);
-            if ($clustered) {
-                $dbcm->do("DELETE FROM logprop2 WHERE journalid=$ownerid AND ".
-                          "jitemid=$qitemid AND propid IN ($propid_in)");
-            } else {
-                $dbh->do("DELETE FROM logprop WHERE itemid=$qitemid AND propid IN ($propid_in)");
-            }
+            $dbcm->do("DELETE FROM logprop2 WHERE journalid=$ownerid AND ".
+                      "jitemid=$qitemid AND propid IN ($propid_in)");
         }
     }
 
@@ -1197,23 +1077,13 @@ sub editevent
     # rlogtime to $EndOfTime if they're turning backdate on.
     if ($req->{'props'}->{'opt_backdated'} eq "1" &&
         $oldevent->{'rlogtime'} != $LJ::EndOfTime) {
-        if ($clustered) {
-            $dbcm->do("UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
-                      "journalid=$ownerid AND jitemid=$qitemid");
-        } else {
-            $dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime WHERE ".
-                     "itemid=$qitemid");
-        }
+        $dbcm->do("UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
+                  "journalid=$ownerid AND jitemid=$qitemid");
     }
     if ($req->{'props'}->{'opt_backdated'} eq "0" &&
         $oldevent->{'rlogtime'} == $LJ::EndOfTime) {
-        if ($clustered) {
-            $dbcm->do("UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
-                      "WHERE journalid=$ownerid AND jitemid=$qitemid");
-        } else {
-            $dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
-                     "WHERE itemid=$qitemid");
-        }
+        $dbcm->do("UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
+                  "WHERE journalid=$ownerid AND jitemid=$qitemid");
     }
 
     return fail($err,501,$dbcm->errstr) if $dbcm->err;
@@ -1240,11 +1110,7 @@ sub getevents
     my $dbh = $dbs->{'dbh'};
     my $sth;
 
-    my ($dbcr, $clustered) = ($dbr, 0);
-    if ($uowner->{'clusterid'}) {
-        $dbcr = LJ::get_cluster_reader($uowner);
-        $clustered = 1;
-    }
+    my $dbcr =  LJ::get_cluster_reader($uowner);
     return fail($err,502) unless $dbcr;
 
     # can't pull events from deleted/suspended journal
@@ -1321,13 +1187,10 @@ sub getevents
     elsif ($req->{'selecttype'} eq "one")
     {
         my $id = $req->{'itemid'} + 0;
-        $where = $clustered ? "AND jitemid=$id" : "AND itemid=$id";
+        $where = "AND jitemid=$id";
     }
     elsif ($req->{'selecttype'} eq "syncitems")
     {
-        return fail($err,504,"syncitems selecttype is no longer supported for cluster0.")
-            unless $clustered;
-
         my $date = $req->{'lastsync'} || "0000-00-00 00:00:00";
         return fail($err,203,"Invalid syncitems date format")
             unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
@@ -1389,7 +1252,7 @@ sub getevents
         my $limit = 100;
         return fail($err,209,"Can't retrieve more than $limit entries at once") if @ids > $limit;
         my $in = join(',', @ids);
-        $where = $clustered ? "AND jitemid IN ($in)" : "AND itemid IN ($in)";
+        $where = "AND jitemid IN ($in)";
     }
     else
     {
@@ -1398,18 +1261,12 @@ sub getevents
 
     # common SQL template:
     unless ($sql) {
-        if ($clustered) {
-            $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid ".
-                   "FROM log2 WHERE journalid=$ownerid $where $orderby $limit";
-        } else {
-            $sql = "SELECT itemid, eventtime, security, allowmask, posterid ".
-                      "FROM log WHERE ownerid=$ownerid $where $orderby $limit";
-        }
+        $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid ".
+            "FROM log2 WHERE journalid=$ownerid $where $orderby $limit";
     }
 
     # whatever selecttype might have wanted us to use the master db.
-    $dbcr = $clustered ? LJ::get_cluster_master($uowner) : $dbh
-        if $use_master;
+    $dbcr = LJ::get_cluster_master($uowner) if $use_master;
 
     return fail($err,502) unless $dbcr;
 
@@ -1437,7 +1294,7 @@ sub getevents
             $evt->{'security'} = $sec;
             $evt->{'allowmask'} = $mask if $sec eq "usemask";
         }
-        $evt->{'anum'} = $anum if $clustered;
+        $evt->{'anum'} = $anum;
         $evt->{'poster'} = LJ::get_username($dbs, $jposterid) if $jposterid != $ownerid;
         push @$events, $evt;
     }
@@ -1450,12 +1307,8 @@ sub getevents
 	### do the properties now
 	$count = 0;
 	my %props = ();
-	if ($clustered) {
-            LJ::load_props($dbs, "log");
-            LJ::load_log_props2($dbcr, $ownerid, \@itemids, \%props);
-	} else {
-            LJ::load_log_props($dbcr, \@itemids, \%props);
-	}
+        LJ::load_props($dbs, "log");
+        LJ::load_log_props2($dbcr, $ownerid, \@itemids, \%props);
 	foreach my $itemid (keys %props) {
 	    my $evt = $evt_from_itemid{$itemid};
 	    $evt->{'props'} = {};
@@ -1473,11 +1326,8 @@ sub getevents
         'prefersubjects' => $req->{'prefersubject'} ,
         'usemaster' => $use_master,
     };
-    if ($clustered) {
-        $text = LJ::get_logtext2($uowner, $gt_opts, @itemids);
-    } else {
-        $text = LJ::get_logtext($dbs, $gt_opts, @itemids);
-    }
+    $text = LJ::get_logtext2($uowner, $gt_opts, @itemids);
+
     foreach my $i (@itemids)
     {
         my $t = $text->{$i};
@@ -1780,12 +1630,8 @@ sub editfriendgroups
 
     ## do deletions ('delete' array)
 
-    my ($dbcm, $dbcr, $clustered);
-    if ($u->{'clusterid'}) {
-        $dbcm = LJ::get_cluster_master($u);
-        $dbcr = LJ::get_cluster_reader($u);
-        $clustered = 1;
-    }
+    my $dbcm = LJ::get_cluster_master($u);
+    my $dbcr = LJ::get_cluster_reader($u);
 
     # ignore bits that aren't integers or that are outside 1-30 range
     my @delete_bits = grep {$_ >= 1 and $_ <= 30} map {$_+0} @{$req->{'delete'}};
@@ -1805,11 +1651,7 @@ sub editfriendgroups
     {
         # remove all posts from allowing that group:
         my @posts_to_clean = ();
-        if ($clustered) {
-            $sth = $dbcr->prepare("SELECT jitemid FROM logsec2 WHERE journalid=$userid AND allowmask & (1 << $bit)");
-        } else {
-            $sth = $dbr->prepare("SELECT itemid FROM logsec WHERE ownerid=$userid AND allowmask & (1 << $bit)");
-        }
+        $sth = $dbcr->prepare("SELECT jitemid FROM logsec2 WHERE journalid=$userid AND allowmask & (1 << $bit)");
         $sth->execute;
         while (my ($id) = $sth->fetchrow_array) { push @posts_to_clean, $id; }
         while (@posts_to_clean) {
@@ -1821,18 +1663,10 @@ sub editfriendgroups
                 @batch = splice(@posts_to_clean, 0, 20);
             }
             my $in = join(",", @batch);
-            if ($clustered) {
-                $dbcm->do("UPDATE log2 SET allowmask=allowmask & ~(1 << $bit) ".
-                         "WHERE journalid=$userid AND jitemid IN ($in) AND security='usemask'");
-                $dbcm->do("UPDATE logsec2 SET allowmask=allowmask & ~(1 << $bit) ".
-                         "WHERE journalid=$userid AND jitemid IN ($in)");
-            } else {
-                $dbh->do("UPDATE log SET allowmask=allowmask & ~(1 << $bit) ".
-                         "WHERE itemid IN ($in) AND security='usemask'");
-                $dbh->do("UPDATE logsec SET allowmask=allowmask & ~(1 << $bit) ".
-                         "WHERE ownerid=$userid AND itemid IN ($in)");
-            }
-
+            $dbcm->do("UPDATE log2 SET allowmask=allowmask & ~(1 << $bit) ".
+                      "WHERE journalid=$userid AND jitemid IN ($in) AND security='usemask'");
+            $dbcm->do("UPDATE logsec2 SET allowmask=allowmask & ~(1 << $bit) ".
+                      "WHERE journalid=$userid AND jitemid IN ($in)");
         }
 
         # remove the friend group, unless we just added it this transaction
@@ -1917,10 +1751,6 @@ sub syncitems
     my $dbr = $dbs->{'reader'};
     my $sth;
 
-    return fail($err,504,"syncitems is no longer supported for cluster0.")
-        unless $uowner->{'clusterid'};
-
-    # cluster differences
     my $db = LJ::get_cluster_reader($uowner);
     return fail($err,502) unless $db;
 
@@ -2224,6 +2054,7 @@ sub authenticate
 
     return fail($err,100) unless $u;
     return fail($err,100) if ($u->{'statusvis'} eq "X");
+    return fail($err,505) unless $u->{'clusterid'};
 
     my $ip_banned = 0;
     unless ($flags->{'nopassword'} ||

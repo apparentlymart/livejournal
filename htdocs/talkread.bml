@@ -72,16 +72,12 @@ if ($uri =~ m!/(\d+)\.html$!) {
  return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
  return $ML{'talk.error.nojournal'} unless $u;
 
- my $clustered = $init->{'clustered'};
  my $thread = $init->{'thread'};
  $itemid = $init->{'itemid'}+0;
 
- my ($dbcs, $dbcm, $dbcr) = ($dbs, $dbh, $dbr);
- if ($clustered) {
-     $dbcs = LJ::get_cluster_set($u);
-     $dbcm = $dbcs->{'dbh'};
-     $dbcr = $dbcs->{'reader'};
- }
+ my $dbcs = LJ::get_cluster_set($u);
+ my $dbcm = $dbcs->{'dbh'};
+ my $dbcr = $dbcs->{'reader'};
 
  my $item = LJ::Talk::get_journal_item($dbs, $dbcs, $u, $itemid);
 
@@ -95,13 +91,10 @@ if ($uri =~ m!/(\d+)\.html$!) {
  }
 
  my $ditemid = $init->{'ditemid'}+0;
- my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
- my $jargent = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
+ my $jarg = "journal=$u->{'user'}&";
+ my $jargent ="journal=$u->{'user'}&amp;";
 
- my $talkurl = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
- if ($clustered) {
-     $talkurl = LJ::journal_base($u) . "/$ditemid.html";
- }
+ my $talkurl = LJ::journal_base($u) . "/$ditemid.html";
 
  my $talkargs = sub {
      my $args = shift;
@@ -114,7 +107,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
  # redirect if account was renamed
  if ($u->{'journaltype'} eq "R") {
      LJ::load_user_props($dbs, $u, "renamedto");
-     if ($u->{'clusterid'} && $u->{'renamedto'} ne "") {
+     if ($u->{'renamedto'} ne "") {
          my $id = $FORM{'itemid'}+0;
          return BML::redirect(LJ::journal_base($u) . "/$id.html");
      }
@@ -145,7 +138,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
  ####  Check security before viewing this post
  return $errtxt unless LJ::Talk::check_viewable($dbs, $remote, $item, \%FORM, \$errtxt);
 
- my $showmultiform = $remote && $clustered &&
+ my $showmultiform = $remote &&
     ($remote->{'user'} eq $u->{'user'} ||
      $remote->{'user'} eq $up->{'user'} ||
      LJ::check_rel($dbs, $u, $remote, 'A'));
@@ -287,43 +280,19 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  # get all talk rows. will load needed body & subject text later.
  {
-     # clustered always gets from a reader (no recent tables exist).
-     # otherwise, need to decide if it's safe to get all data from a
-     # slave.  if the owning post is newer than $LJ::RECENT_DAYS, then
-     # obviously all replies are newer to, and they all exist on a
-     # slave.  or, if slaves are full copies, then it's also okay.
-     # for clustered, also try the lite role.
-     my $db = $dbcr;
-     my $recent = "";
-     if ($clustered) {
-         my $n = $u->{'clusterid'};
-         $db = LJ::get_dbh("cluster${n}lite", "cluster${n}slave", "cluster$n");
-     } elsif ($LJ::USE_RECENT_TABLES) {
-         if ($item->{'secondsold'} < $LJ::RECENT_DAYS*86400) {
-             $recent = "recent_";
-         } else {
-             $db = $dbh;
-         }
-     }
+     my $n = $u->{'clusterid'};
+     my $db = LJ::get_dbh("cluster${n}lite", "cluster${n}slave", "cluster$n");
 
      unless ($db) {
          return $ML{'error.nodbmaintenance'};
      }
 
-     if ($clustered) {
-         $sth = $db->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, u.user AS 'userpost', ".
-                             "t.datepost, t.parenttalkid, t.state ".
-                             "FROM talk2 t ".
-                             "LEFT JOIN useridmap u ON u.userid=t.posterid ".
-                             "WHERE t.journalid=$u->{'userid'} AND t.nodetype='L' ".
-                             "AND t.nodeid=$itemid ORDER BY t.jtalkid");
-     } else {
-         $sth = $db->prepare("SELECT t.talkid, t.posterid, u.user AS 'userpost', ".
-                             "t.datepost, t.parenttalkid, t.state ".
-                             "FROM talk t LEFT JOIN useridmap u ON u.userid=t.posterid ".
-                             "WHERE t.nodetype='L' AND t.nodeid=$itemid ".
-                             "ORDER BY t.talkid");
-     }
+     $sth = $db->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, u.user AS 'userpost', ".
+                         "t.datepost, t.parenttalkid, t.state ".
+                         "FROM talk2 t ".
+                         "LEFT JOIN useridmap u ON u.userid=t.posterid ".
+                         "WHERE t.journalid=$u->{'userid'} AND t.nodetype='L' ".
+                         "AND t.nodeid=$itemid ORDER BY t.jtalkid");
      $sth->execute;
      die $db->errstr if $db->err;
  }
@@ -353,7 +322,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
  my $page_from_view = 0;
  if ($FORM{'view'} && !$FORM{'page'}) {
      # find top-level comment that this comment is under
-     my $viewid = $clustered ? $FORM{'view'} >> 8 : $FORM{'view'}+0;
+     my $viewid = $FORM{'view'} >> 8;
      while ($posts{$viewid} && $posts{$viewid}->{'parenttalkid'}) {
          $viewid = $posts{$viewid}->{'parenttalkid'};
      }
@@ -420,15 +389,9 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  ### loads more of some of the posts, uses slaves if possible.
  my ($posts_loaded, $subjects_loaded);
- if ($clustered) {
-     $posts_loaded = LJ::get_talktext2($u, @posts_to_load);
-     $subjects_loaded = LJ::get_talktext2($u, {'onlysubjects'=>1}, @subjects_to_load)
-         if @subjects_to_load;
- } else {
-     $posts_loaded = LJ::get_talktext($dbs, @posts_to_load);
-     $subjects_loaded = LJ::get_talktext($dbs, {'onlysubjects'=>1}, @subjects_to_load)
-         if @subjects_to_load;
- }
+ $posts_loaded = LJ::get_talktext2($u, @posts_to_load);
+ $subjects_loaded = LJ::get_talktext2($u, {'onlysubjects'=>1}, @subjects_to_load)
+     if @subjects_to_load;
  foreach my $talkid (keys %{$posts_loaded}) {
      $posts{$talkid}->{'subject'} = $posts_loaded->{$talkid}->[0];
      $posts{$talkid}->{'body'} = $posts_loaded->{$talkid}->[1];
@@ -441,12 +404,8 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  ### load meta-data
  my $talkid_in = join(",", @posts_to_load);
- if ($clustered) {
-     LJ::load_props($dbs, "talk");
-     LJ::load_talk_props2($dbcr, $u->{'userid'}, \@posts_to_load, \%posts);
- } else {
-     LJ::load_talk_props($dbs, \@posts_to_load, \%posts);
- }
+ LJ::load_props($dbs, "talk");
+ LJ::load_talk_props2($dbcr, $u->{'userid'}, \@posts_to_load, \%posts);
 
  if ($LJ::UNICODE) {
      foreach (@posts_to_load) {
@@ -551,7 +510,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
     if ($tid)
     {
-        my $dtid = $clustered ? ($tid * 256 + $init->{'anum'}) : $tid;
+        my $dtid = $tid * 256 + $init->{'anum'};
 
         my $datepost = "<font size='-1'>" . substr($post->{'datepost'}, 0, 16) . "</font>";
         my $userpost = $post->{'userpost'};
@@ -671,12 +630,11 @@ if ($uri =~ m!/(\d+)\.html$!) {
                 $$ret .= $post->{'body'};
 
                 $$ret .= "<p style='margin: 0.7em 0 0.2em 0'><font size='-2'>";
-                my $replyurl = $clustered ? $talkargs->("replyto=$dtid") :
-                    "$LJ::SITEROOT/talkpost.bml?${jargent}replyto=$dtid";
+                my $replyurl = $talkargs->("replyto=$dtid");
                 $$ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
 
                 if ($post->{'parenttalkid'} != 0) {
-                    my $dpid =  $clustered ? ($post->{'parenttalkid'} * 256 + $init->{'anum'}) : $post->{'parenttalkid'};
+                    my $dpid = $post->{'parenttalkid'} * 256 + $init->{'anum'};
                     $$ret .= "(<a href='" . $talkargs->("thread=$dpid") . "'>$T{'parent'}</a>) ";
                 }
                 if (defined $opts->{'children'}->{$tid}) {

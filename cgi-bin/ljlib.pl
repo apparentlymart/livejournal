@@ -734,11 +734,7 @@ sub get_recent_items
     # because LJ::get_friend_items needs rlogtime for sorting.
     my $extra_sql;
     if ($opts->{'friendsview'}) {
-        if ($clusterid) {
-            $extra_sql .= "journalid AS 'ownerid', rlogtime, ";
-        } else {
-            $extra_sql .= "ownerid, rlogtime, ";
-        }
+        $extra_sql .= "journalid AS 'ownerid', rlogtime, ";
     }
 
     my $sql;
@@ -748,20 +744,11 @@ sub get_recent_items
         $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
     }
 
-    if ($clusterid) {
-        $sql = ("SELECT jitemid AS 'itemid', posterid, security, replycount, $extra_sql ".
-                "DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
-                "FROM log2 USE INDEX ($sort_key) WHERE journalid=$userid AND $sort_key <= $notafter $secwhere ".
-                "ORDER BY journalid, $sort_key ".
-                "LIMIT $skip,$itemshow");
-    } else {
-        # old tables ("cluster 0")
-        $sql = ("SELECT itemid, posterid, security, replycount, $extra_sql ".
-                "DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart' ".
-                "FROM log USE INDEX ($sort_key) WHERE ownerid=$userid AND $sort_key <= $notafter $secwhere ".
-                "ORDER BY ownerid, $sort_key ".
-                "LIMIT $skip,$itemshow");
-    }
+    $sql = ("SELECT jitemid AS 'itemid', posterid, security, replycount, $extra_sql ".
+            "DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
+            "FROM log2 USE INDEX ($sort_key) WHERE journalid=$userid AND $sort_key <= $notafter $secwhere ".
+            "ORDER BY journalid, $sort_key ".
+            "LIMIT $skip,$itemshow");
 
     unless ($logdb) {
         $$err = "nodb" if ref $err eq "SCALAR";
@@ -1387,8 +1374,7 @@ sub get_urls
 # args: dbarg, url, posterid, itemid, journalid?
 # des-url: URL to log
 # des-posterid: Userid of person posting
-# des-itemid: Itemid URL appears in.  For non-clustered users, this is just
-#             the itemid.  For clustered users, this is the display itemid,
+# des-itemid: Itemid URL appears in.  This is the display itemid,
 #             which is the jitemid*256+anum from the [dbtable[log2]] table.
 # des-journalid: Optional, journal id of item, if item is clustered.  Otherwise
 #                this should be zero or undef.
@@ -2379,120 +2365,6 @@ sub can_view
     my ($gmask) = $sth->fetchrow_array;
     my $allowed = (int($gmask) & int($item->{'allowmask'}));
     return $allowed ? 1 : 0;  # no need to return matching mask
-}
-
-# <LJFUNC>
-# name: LJ::get_talktext
-# des: Efficiently retrieves a large number of comments, trying first
-#      slave database servers for recent items, then the master in
-#      cases of old items the slaves have already disposed of.  See also:
-#      [func[LJ::get_logtext]].
-# args: dbs, opts?, talkid*
-# returns: hashref with keys being talkids, values being [ $subject, $body ]
-# des-opts: Optional hashref of flags.  Currently supported key: 'onlysubjects',
-#           which won't return body text:  $body will be undef.
-# des-talkid: List of talkids to retrieve the subject & text for.
-# </LJFUNC>
-sub get_talktext
-{
-    my $dbs = shift;
-    my $opts = ref $_[0] eq "HASH" ? shift : {};
-
-    # return structure.
-    my $lt = {};
-
-    # keep track of itemids we still need to load.
-    my %need;
-    foreach (@_) { $need{$_+0} = 1; }
-
-    # always consider hitting the master database, but if a slave is
-    # available, hit that first.
-    my @sources = ([$dbs->{'dbh'}, "talktext"]);
-    if ($dbs->{'has_slave'}) {
-        if ($LJ::USE_RECENT_TABLES) {
-            my $dbt = LJ::get_dbh("recenttext");
-            unshift @sources, [ $dbt || $dbs->{'dbr'}, "recent_talktext" ];
-        } else {
-            unshift @sources, [ $dbs->{'dbr'}, "talktext" ];
-        }
-    }
-
-    my $bodycol = $opts->{'onlysubjects'} ? "" : ", body";
-
-    while (@sources && %need)
-    {
-        my $s = shift @sources;
-        my ($db, $table) = ($s->[0], $s->[1]);
-        my $talkid_in = join(", ", keys %need);
-
-        my $sth = $db->prepare("SELECT talkid, subject $bodycol FROM $table ".
-                               "WHERE talkid IN ($talkid_in)");
-        $sth->execute;
-        while (my ($id, $subject, $body) = $sth->fetchrow_array) {
-            $lt->{$id} = [ $subject, $body ];
-            delete $need{$id};
-        }
-    }
-    return $lt;
-}
-
-# <LJFUNC>
-# name: LJ::get_logtext
-# des: Efficiently retrieves a large number of journal entry text, trying first
-#      slave database servers for recent items, then the master in
-#      cases of old items the slaves have already disposed of.  See also:
-#      [func[LJ::get_talktext]].
-# args: dbs, opts?, itemid*
-# des-opts: Optional hashref of special options.  Currently only 'prefersubjects'
-#           key is supported, which returns subjects instead of events when
-#           there's a subject, and the subject always being undef.
-# des-itemid: List of itemids to retrieve the subject & text for.
-# returns: hashref with keys being itemids, values being [ $subject, $body ]
-# </LJFUNC>
-sub get_logtext
-{
-    my $dbs = shift;
-
-    my $opts = ref $_[0] ? shift : {};
-
-    # return structure.
-    my $lt = {};
-
-    # keep track of itemids we still need to load.
-    my %need;
-    foreach (@_) { $need{$_+0} = 1; }
-
-    # always consider hitting the master database, but if a slave is
-    # available, hit that first.
-    my @sources = ([$dbs->{'dbh'}, "logtext"]);
-    if ($dbs->{'has_slave'} && ! $opts->{'usemaster'}) {
-        if ($LJ::USE_RECENT_TABLES) {
-            my $dbt = LJ::get_dbh("recenttext");
-            unshift @sources, [ $dbt || $dbs->{'dbr'}, "recent_logtext" ];
-        } else {
-            unshift @sources, [ $dbs->{'dbr'}, "logtext" ];
-        }
-    }
-
-    my $snag_what = "subject, event";
-    $snag_what = "NULL, IF(LENGTH(subject), subject, event)"
-        if $opts->{'prefersubjects'};
-
-    while (@sources && %need)
-    {
-        my $s = shift @sources;
-        my ($db, $table) = ($s->[0], $s->[1]);
-        my $itemid_in = join(", ", keys %need);
-
-        my $sth = $db->prepare("SELECT itemid, $snag_what FROM $table ".
-                               "WHERE itemid IN ($itemid_in)");
-        $sth->execute;
-        while (my ($id, $subject, $event) = $sth->fetchrow_array) {
-            $lt->{$id} = [ $subject, $event ];
-            delete $need{$id};
-        }
-    }
-    return $lt;
 }
 
 # <LJFUNC>
@@ -3676,11 +3548,8 @@ sub date_to_view_links
 sub item_link
 {
     my ($u, $itemid, $anum) = @_;
-    if ($u->{'clusterid'}) {
-        my $ditemid = $itemid*256 + $anum;
-        return LJ::journal_base($u) . "/$ditemid.html";
-    }
-    return "$LJ::SITEROOT/talkread.bml?itemid=$itemid";
+    my $ditemid = $itemid*256 + $anum;
+    return LJ::journal_base($u) . "/$ditemid.html";
 }
 
 # <LJFUNC>
@@ -4409,82 +4278,6 @@ sub get_username
     return ($user);
 }
 
-# <LJFUNC>
-# name: LJ::get_itemid_near
-# class:
-# des:
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub get_itemid_near
-{
-    my $dbarg = shift;
-    my $itemid = shift;
-    my $after_before = shift;
-
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    my ($inc, $order);
-    if ($after_before eq "after") {
-        ($inc, $order) = (-1, "DESC");
-    } elsif ($after_before eq "before") {
-        ($inc, $order) = (1, "ASC");
-    } else {
-        return 0;
-    }
-
-    $itemid += 0;
-    my $lr = $dbr->selectrow_hashref("SELECT u.userid, u.journaltype, l.rlogtime, l.revttime ".
-                                     "FROM user u, log l WHERE l.itemid=$itemid ".
-                                     "AND l.ownerid=u.userid");
-    return 0 unless $lr;
-    my $jid = $lr->{'userid'};
-    my $field = $lr->{'journaltype'} eq "P" ? "revttime" : "rlogtime";
-    my $stime = $lr->{$field};
-
-    my $day = 86400;
-    foreach my $distance ($day, $day*7, $day*30, $day*90) {
-        my ($one_away, $further) = ($stime + $inc, $stime + $inc*$distance);
-        if ($further < $one_away) {
-            # swap them, BETWEEN needs lower number first
-            ($one_away, $further) = ($further, $one_away);
-        }
-        my ($id, $anum) =
-            $dbr->selectrow_array("SELECT itemid FROM log WHERE ownerid=$jid ".
-                                  "AND $field BETWEEN $one_away AND $further ".
-                                  "ORDER BY $field $order LIMIT 1");
-        return $id if $id;
-    }
-    return 0;
-}
-
-
-# <LJFUNC>
-# name: LJ::get_itemid_after
-# class:
-# des:
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub get_itemid_after  { return get_itemid_near(@_, "after");  }
-# <LJFUNC>
-# name: LJ::get_itemid_before
-# class:
-# des:
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub get_itemid_before { return get_itemid_near(@_, "before"); }
-
-
 sub get_itemid_near2
 {
     my $u = shift;
@@ -4721,35 +4514,6 @@ sub can_add_syndicated
     return 1;
 }
 
-# <LJFUNC>
-# name: LJ::load_log_props
-# class:
-# des:
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub load_log_props
-{
-    my ($dbarg, $listref, $hashref) = @_;
-
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbr = $dbs->{'reader'};
-
-    my $itemin = join(", ", map { $_+0; } @{$listref});
-    unless ($itemin) { return ; }
-    unless (ref $hashref eq "HASH") { return; }
-
-    my $sth = $dbr->prepare("SELECT p.itemid, l.name, p.value ".
-                            "FROM logprop p, logproplist l ".
-                            "WHERE p.propid=l.propid AND p.itemid IN ($itemin)");
-    $sth->execute;
-    while ($_ = $sth->fetchrow_hashref) {
-        $hashref->{$_->{'itemid'}}->{$_->{'name'}} = $_->{'value'};
-    }
-}
-
 # Note: requires caller to first call LJ::load_props($dbs, "log")
 # <LJFUNC>
 # name: LJ::load_log_props2
@@ -4789,69 +4553,23 @@ sub load_log_props2
 # </LJFUNC>
 sub load_log_props2multi
 {
-    # ids by cluster (hashref),  output hashref (keys = "$ownerid $jitemid",
-    # where ownerid could be 0 for unclustered)
+    # ids by cluster (hashref),  output hashref (keys = "$ownerid $jitemid")
     my ($dbs, $idsbyc, $hashref) = @_;
     my $sth;
     return unless ref $idsbyc eq "HASH";
     return unless defined $LJ::CACHE_PROPID{'log'};
 
-    foreach my $c (keys %$idsbyc)
-    {
-        if ($c) {
-            # clustered:
-            my $fattyin = join(" OR ", map {
-                "(journalid=" . ($_->[0]+0) . " AND jitemid=" . ($_->[1]+0) . ")"
+    foreach my $c (keys %$idsbyc) {
+        my $fattyin = join(" OR ", map {
+            "(journalid=" . ($_->[0]+0) . " AND jitemid=" . ($_->[1]+0) . ")"
             } @{$idsbyc->{$c}});
-            my $db = LJ::get_cluster_reader($c);
-            $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
-                                "FROM logprop2 WHERE $fattyin");
-            $sth->execute;
-            while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
-                $hashref->{"$jid $jitemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
-            }
-        } else {
-            # unclustered:
-            my $dbr = $dbs->{'reader'};
-            my $in = join(",", map { $_+0 } @{$idsbyc->{'0'}});
-            $sth = $dbr->prepare("SELECT itemid, propid, value FROM logprop ".
-                                 "WHERE itemid IN ($in)");
-            $sth->execute;
-            while (my ($itemid, $propid, $value) = $sth->fetchrow_array) {
-                $hashref->{"0 $itemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
-            }
-
+        my $db = LJ::get_cluster_reader($c);
+        $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
+                            "FROM logprop2 WHERE $fattyin");
+        $sth->execute;
+        while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
+            $hashref->{"$jid $jitemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
         }
-    }
-}
-
-# <LJFUNC>
-# name: LJ::load_talk_props
-# class:
-# des:
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub load_talk_props
-{
-    my ($dbarg, $listref, $hashref) = @_;
-    my $itemin = join(", ", map { $_+0; } @{$listref});
-    unless ($itemin) { return ; }
-    unless (ref $hashref eq "HASH") { return; }
-
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    my $sth = $dbr->prepare("SELECT tp.talkid, tpl.name, tp.value ".
-                            "FROM talkproplist tpl, talkprop tp ".
-                            "WHERE tp.tpropid=tpl.tpropid ".
-                            "AND tp.talkid IN ($itemin)");
-    $sth->execute;
-    while (my ($id, $name, $val) = $sth->fetchrow_array) {
-        $hashref->{$id}->{$name} = $val;
     }
 }
 
@@ -5033,60 +4751,6 @@ sub day_of_week
     my ($year, $month, $day) = @_;
     my $time = Time::Local::timelocal(0,0,0,$day,$month-1,$year);
     return (localtime($time))[6];
-}
-
-# <LJFUNC>
-# name: LJ::delete_item
-# des: Deletes a journal item from a user's journal that resides in the old schema (cluster0).
-# info: This function is deprecated, just as the old schema is deprecated.  In a
-#       few months this function will be removed.  The new equivalent to this
-#       function is [func[LJ::delete_item2]].
-# args: dbarg, journalid, itemid, quick?, deleter?
-# des-journalid: Userid of journal to delete item from.
-# des-itemid: Itemid of item to delete.
-# des-quick: Optional flag to make the delete be a little quicker when many deletes
-#            are occuring.  It just doesn't update lastitemid in [dbtable[userusage]].
-# des-deleter: Optional code reference to run to handle a deletion.  Mass-delete
-#              tools can use this to batch deletes in table locks for speed.  Arguments
-#              to this coderef are ($tablename, $col, @ids).  The default implementation
-#              is: "DELETE FROM $table WHERE $col IN (@ids)"
-# returns:
-# </LJFUNC>
-sub delete_item
-{
-    my ($dbarg, $ownerid, $itemid, $quick, $deleter) = @_;
-    my $sth;
-
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    $ownerid += 0;
-    $itemid += 0;
-
-    $deleter ||= sub {
-        my $table = shift;
-        my $col = shift;
-        my @ids = @_;
-        return unless @ids;
-        my $in = join(",", @ids);
-        $dbh->do("DELETE FROM $table WHERE $col IN ($in)");
-    };
-
-    $deleter->("memorable", "itemid", $itemid);
-    $dbh->do("UPDATE userusage SET lastitemid=0 WHERE userid=$ownerid AND lastitemid=$itemid") unless ($quick);
-    foreach my $t (qw(log logtext logprop)) {
-        $deleter->($t, "itemid", $itemid);
-    }
-    $dbh->do("DELETE FROM logsec WHERE ownerid=$ownerid AND itemid=$itemid");
-
-    my @talkids = ();
-    $sth = $dbh->prepare("SELECT talkid FROM talk WHERE nodetype='L' AND nodeid=$itemid");
-    $sth->execute;
-    push @talkids, $_ while ($_ = $sth->fetchrow_array);
-    foreach my $t (qw(talk talktext talkprop)) {
-        $deleter->($t, "talkid", @talkids);
-    }
 }
 
 # <LJFUNC>

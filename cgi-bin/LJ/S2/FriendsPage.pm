@@ -220,9 +220,7 @@ sub FriendsPage
         $p->{'friends'}->{$fr->{'user'}} ||= Friend($fr);
 
         my $clusterid = $item->{'clusterid'}+0;
-        
-        my $datakey = "0 $itemid";   # no cluster
-        $datakey = "$friendid $itemid" if $clusterid;
+        my $datakey = "$friendid $itemid";
             
         my $subject = $logtext->{$datakey}->[0];
         my $text = $logtext->{$datakey}->[1];
@@ -243,8 +241,7 @@ sub FriendsPage
         $eventnum++;
         LJ::CleanHTML::clean_subject(\$subject) if $subject;
 
-        my $ditemid = $clusterid ? ($itemid * 256 + $item->{'anum'}) : $itemid;
-        my $itemargs = $clusterid ? "journal=$friend&itemid=$ditemid" : "itemid=$ditemid";
+        my $ditemid = $itemid * 256 + $item->{'anum'};
 
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}), });
@@ -276,20 +273,11 @@ sub FriendsPage
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
-        my ($permalink, $readurl, $posturl);
         my $journalbase = LJ::journal_base($friends{$friendid});
-
-        if ($clusterid) {
-            $permalink = "$journalbase/$ditemid.html";
-            $readurl = $permalink;
-            $readurl .= "?$nc" if $nc;
-            $posturl = $permalink . "?mode=reply";
-        } else {
-            $permalink = "$LJ::SITEROOT/talkread.bml?$itemargs";
-            $readurl = $permalink;
-            $readurl .= "&amp;$nc" if $nc;
-            $posturl = "$LJ::SITEROOT/talkpost.bml?$itemargs";
-        }
+        my $permalink = "$journalbase/$ditemid.html";
+        my $readurl = $permalink;
+        $readurl .= "?$nc" if $nc;
+        my $posturl = $permalink . "?mode=reply";
 
         my $comments = CommentInfo({
             'read_url' => $readurl,

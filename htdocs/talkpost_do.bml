@@ -3,913 +3,847 @@ title=><?_ml .title _ml?>
 body<=
 
 <?_code
+{
+    use strict;
+    use vars qw(%FORM %ML);
 
- use strict;
- use vars qw(%FORM %ML);
+    foreach my $re (@LJ::TALKSPAM) {
+        return if ($FORM{'body'} =~ /$re/);
+    }
 
- foreach my $re (@LJ::TALKSPAM) {
-     return if ($FORM{'body'} =~ /$re/);
- }
+    return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
- return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+    # as an exception, we do NOT call LJ::text_in() to check for bad
+    # input, since it may be not in UTF-8 in replies coming from mail
+    # clients. We call it later.
 
- # as an exception, we do NOT call LJ::text_in() to check for bad
- # input, since it may be not in UTF-8 in replies coming from mail
- # clients. We call it later.
 
+    $Text::Wrap::columns = 76;
+    my $dbs = LJ::get_dbs();
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    my $sth;
 
- $Text::Wrap::columns = 76;
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
- my $sth;
+    my $remote = LJ::get_remote($dbs);
 
- my $remote = LJ::get_remote($dbs);
+    my $init = LJ::Talk::init($dbs, \%FORM);
+    my $u = $init->{'journalu'};
 
- my $init = LJ::Talk::init($dbs, \%FORM);
- my $u = $init->{'journalu'};
+    my $r = Apache->request;
+    $r->notes("journalid" => $u->{'userid'});
 
- my $r = Apache->request;
- $r->notes("journalid" => $u->{'userid'});
+    return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
+    return $ML{'talk.error.nojournal'} unless $u;
+    return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
- return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
- return $ML{'talk.error.nojournal'} unless $u;
- return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+    my $pics = LJ::Talk::get_subjecticons();
 
- my $pics = LJ::Talk::get_subjecticons();
- my $clustered = $init->{'clustered'};
+    my $dbcs = LJ::get_cluster_set($u);
+    my $dbcm = $dbcs->{'dbh'};
+    my $dbcr = $dbcs->{'reader'};
 
- my ($dbcs, $dbcm, $dbcr) = ($dbs, $dbh, $dbr);
- if ($clustered) {
-     $dbcs = LJ::get_cluster_set($u);
-     $dbcm = $dbcs->{'dbh'};
-     $dbcr = $dbcs->{'reader'};
- }
+    return $ML{'error.nodb'} unless $dbcr && $dbr;
+    return $LJ::MSG_READONLY_USER unless $dbcm && $dbh;
 
- return $ML{'error.nodb'} unless $dbcr && $dbr;
- return $LJ::MSG_READONLY_USER unless $dbcm && $dbh;
+    my $jarg = "journal=$u->{'user'}&";
+    my $jargent = "journal=$u->{'user'}&amp;";
 
- my $jarg = $clustered ? "journal=$u->{'user'}&" : "";
- my $jargent = $clustered ? "journal=$u->{'user'}&amp;" : "";
+    my $ret = "";
+    my @errors = ();
 
- my $ret = "";
- my @errors = ();
+    my ($DEBUG, $debug) = (0, "");  # flag, data
 
- my ($DEBUG, $debug) = (0, "");  # flag, data
+    # start quoting shit to insert
+    my $itemid = $init->{'itemid'}+0;
 
- # start quoting shit to insert
- my $itemid = $init->{'itemid'}+0;
+    my $item = LJ::Talk::get_journal_item($dbs, $dbcs, $u, $itemid);
 
- my $item = LJ::Talk::get_journal_item($dbs, $dbcs, $u, $itemid);
+    if ($init->{'oldurl'} && $item) {
+        $init->{'anum'} = $item->{'anum'};
+        $init->{'ditemid'} = $init->{'itemid'}*256 + $item->{'anum'};
+    }
 
- if ($init->{'oldurl'} && $item) {
-     $init->{'anum'} = $item->{'anum'};
-     $init->{'ditemid'} = $init->{'itemid'}*256 + $item->{'anum'};
- }
+    unless ($item && $item->{'anum'} == $init->{'anum'}) {
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
+    }
 
- unless ($item && $item->{'anum'} == $init->{'anum'}) {
-     return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
- }
+    my %logprops = %{$item->{'logprops'}};
+    my $ditemid = $init->{'ditemid'}+0;
 
- my %logprops = %{$item->{'logprops'}};
- my $ditemid = $init->{'ditemid'}+0;
+    my $talkurl = LJ::journal_base($u) . "/$ditemid.html";
 
- my $talkurl = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
- if ($clustered) {
-     $talkurl = LJ::journal_base($u) . "/$ditemid.html";
- }
+    my $talkargs = sub {
+        my $args = shift;
+        my $sep = ($talkurl =~ /\?/) ? "&" : "?";
+        return "$talkurl$sep$args";
+    };
 
-my $talkargs = sub {
-    my $args = shift;
-    my $sep = ($talkurl =~ /\?/) ? "&" : "?";
-    return "$talkurl$sep$args";
-};
+    ### load users
+    my $ujp;                 # poster of item 
+    LJ::load_userids_multiple($dbs, [
+                                     $item->{'posterid'} => \$ujp,
+                                     ], [ $u ]);
+    my ($quser, $qjpuser) = map { $dbr->quote($_) } ($u->{'user'}, $ujp->{'user'});
+    LJ::load_user_props($dbs, $u, "opt_logcommentips", "opt_whoscreened");
 
- ### load users
- my $ujp;                 # poster of item 
- LJ::load_userids_multiple($dbs, [
-                                  $item->{'posterid'} => \$ujp,
-                                  ], [ $u ]);
- my ($quser, $qjpuser) = map { $dbr->quote($_) } ($u->{'user'}, $ujp->{'user'});
- LJ::load_user_props($dbs, $u, "opt_logcommentips", "opt_whoscreened");
+    if ($FORM{'userpost'} && $FORM{'usertype'} ne "user") {
+        unless ($FORM{'usertype'} eq "cookieuser" &&
+                $FORM{'userpost'} eq $FORM{'cookieuser'}) {
+            push @errors, $ML{'.error.confused_identity'};
+        }
+    }
 
- if ($FORM{'userpost'} && $FORM{'usertype'} ne "user") {
-     unless ($FORM{'usertype'} eq "cookieuser" &&
-             $FORM{'userpost'} eq $FORM{'cookieuser'}) {
-         push @errors, $ML{'.error.confused_identity'};
-     }
- }
-
- my $cookie_auth;
- if ($FORM{'usertype'} eq "cookieuser") {
-     push @errors, $ML{'.error.lostcookie'}
-         unless ($remote && $remote->{'user'} eq $FORM{'cookieuser'});
-     return LJ::bad_input(@errors) if @errors;
-     
-     $cookie_auth = 1;
-     $FORM{'userpost'} = $remote->{'user'};
-     $FORM{'usertype'} = "user";
- }
-
- if ((grep { $FORM{'userpost'} eq $_ } @LJ::TESTACCTS) && !
-     (grep { $u->{'user'}      eq $_ } @LJ::TESTACCTS))
- {
-     push @errors, $ML{'.error.testacct'};
- }
-
- my $userpost = lc($FORM{'userpost'});
- my $up;
- my $didlogin = 0;	# true if user logged in while commenting
-
- if ($FORM{'usertype'} eq "user") {
-     if ($FORM{'userpost'}) {
-         $up = LJ::load_user($dbs, $FORM{'userpost'});
-         if ($up) 
-         {
-             ### see if the user is banned from posting here
-             if (LJ::is_banned($dbr, $up, $u)) {
-                 push @errors, $ML{'.error.banned'};
-
-             }
-
-             if ($up->{'journaltype'} ne "P") {
-                 push @errors, $ML{'.error.postshared'};
-             }
-
-             unless ($cookie_auth || 
-                     LJ::auth_okay($up, $FORM{'password'}, $FORM{'hpassword'}) ||
-                     ecphash($itemid, $FORM{'parenttalkid'}, 
-                             $up->{'password'}) eq $FORM{'ecphash'} )
-             {
-                 push @errors, $ML{'.error.badpassword'};
-             }
-
-             # if the user chooses to log in, do so
-             if ($FORM{'do_login'} && ! @errors) {
-
-                 my $etime = 0;
-                 eval { Apache->request->notes('ljuser' => $up->{'user'}); };
-
-                 my $sess_opts = {
-                     'exptype' => 'short',
-                     'ipfixed' => undef,
-                 };
-                 my $sess = LJ::generate_session($up, $sess_opts);
-                 $COOKIE{'ljsession'} = [  "ws:$up->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime, 1 ];
-                 LJ::set_remote($up);
-
-                 LJ::load_user_props($dbs, $up, "browselang");
-                 my $bl = LJ::Lang::get_lang($up->{'browselang'});
-                 if ($bl) {
-                     BML::set_cookie("langpref", $bl->{'lncode'} . "/" . time(), 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
-                     BML::set_language($bl->{'lncode'});
-                 }
-
-                 LJ::run_hooks("post_login", {
-                     "u" => $up,
-                     "form" => \%FORM,
-                     "expiretime" => $etime,
-                 });
-
-                 $didlogin = 1;
-             }
-
-         } else {
-             push @errors, $ML{'.error.badusername'};
-
-         }
-     } else {
-         push @errors, $ML{'.error.nousername'};
-
-     }
- }
-
- # check that user can even view this post, which is required
- # to reply to it
- ####  Check security before viewing this post
- unless (LJ::can_view($dbs, $up, $item)) {
-     push @errors, $ML{'.error.mustlogin'}
-         unless (defined $up);
-     push @errors, $ML{'.error.noauth'};
-     return LJ::bad_input(@errors);     
- }
-
- # If the reply is to a comment, check that it exists.
- # if it's screened, check that the user has permission to
- # reply and unscreen it
-
- my $parpost;
- my $partid = $FORM{'parenttalkid'};
- my $qpartid = $dbh->quote($partid);
-
- if ($partid) {
-     if ($clustered) {
-         $sth = $dbcm->prepare("SELECT posterid, state FROM talk2 ".
-                               "WHERE journalid=$u->{'userid'} AND jtalkid=$qpartid");
-     } else {
-         $sth = $dbh->prepare("SELECT posterid, state FROM talk ".
-                              "WHERE talkid=$qpartid");
-     }
-     $sth->execute;
-     $parpost = $sth->fetchrow_hashref;
-
-     unless ($parpost) {
-         push @errors, $ML{'.error.noparent'};
-     }
-
-     # can't use $remote because we may get here
-     # with a reply from email. so use $up instead of $remote
-     # in the call below.
-
-     if ($parpost && $parpost->{'state'} eq "S" && 
-         !LJ::Talk::can_unscreen($dbs, $up, $u, $ujp, $ujp->{'user'})) {
-         push @errors, $ML{'.error.screened'};
-     }
- }
-
- if ($FORM{'usertype'} ne "user" && $u->{'opt_whocanreply'} ne "all") {
-     push @errors, $ML{'.error.noanon'};
- }
-
- if ($logprops{$itemid}->{'opt_nocomments'}) {
-     push @errors, $ML{'.error.nocomments'};
- }
-
- if ($up && $up->{'status'} eq "N") {
-     push @errors, $ML{'.error.noverify'};
-
- }
-
- if ($up && $up->{'statusvis'} eq "D") {
-     push @errors, $ML{'.error.deleted'};
- }
- if ($up && $up->{'statusvis'} eq "S") {
-     push @errors, $ML{'.error.suspended'};
- }
-
- if ($u->{'opt_whocanreply'} eq "friends") {
-     if ($up) {
-         if ($up->{'userid'} != $u->{'userid'}) 
-         {
-             unless (LJ::is_friend($dbs, $u, $up)) {
-                 push @errors, BML::ml('.error.notafriend', {'user'=>$u->{'user'}});
-             }
-         }
-     } else {
-         push @errors, BML::ml('.error.friendsonly', {'user'=>$u->{'user'}});
-     }
- }
-
- unless ($FORM{'body'} =~ /\S/) {
-     push @errors, $ML{'.error.blankmessage'};
- }
-
- # in case this post comes directly from the user's mail client, it
- # may have an encoding field for us.
- if ($FORM{'encoding'}) {
-     $FORM{'body'} = Unicode::MapUTF8::to_utf8({-string=>$FORM{'body'}, -charset=>$FORM{'encoding'}});
-     $FORM{'subject'} = Unicode::MapUTF8::to_utf8({-string=>$FORM{'subject'}, -charset=>$FORM{'encoding'}});
- }
- 
- # unixify line-endings
- $FORM{'body'} =~ s/\r\n/\n/g;
-
- # now check for UTF-8 correctness, it must hold
-
- return "<?badinput?>" unless LJ::text_in(\%FORM);
-
- my $unknown8bit = 0;
- unless (LJ::is_ascii($FORM{'body'}) && LJ::is_ascii($FORM{'subject'})) {
-     if ($LJ::UNICODE) {
-         # no need to check if they're well-formed, we did that above
-     } else {
-         # so rest of site can change chars to ? marks until
-         # default user's encoding is set.  (legacy support)
-         $unknown8bit = 1;
-     }
- }
-
- my ($bl, $cl) = LJ::text_length($FORM{'body'});
- if ($cl > LJ::CMAX_COMMENT) {
-     push @errors, BML::ml('.error.manychars', {'current'=>$cl, 'limit'=>LJ::CMAX_COMMENT});
-
- } elsif ($bl > LJ::BMAX_COMMENT) {
-     push @errors, BML::ml('.error.manybytes', {'current'=>$bl, 'limit'=>LJ::BMAX_COMMENT});
- }
- # the Subject can be silently shortened, no need to reject the whole comment
- $FORM{'subject'} = LJ::text_trim($FORM{'subject'}, 100, 100);
-
- return LJ::bad_input(@errors) if @errors;
-
- ###################################################3
-
- my $textsubject = $FORM{'subject'};
- LJ::CleanHTML::clean_subject_all(\$textsubject);
- my $cleansubject = $FORM{'subject'};
- LJ::CleanHTML::clean_subject(\$cleansubject);
-
- ## preview
-
- if ($FORM{'submitpreview'}) {
-     $ret .= "<?h1 $ML{'.preview.title'} h1?><?p $ML{'.preview'} p?><?hr?>";
-     $ret .= "<div align=\"center\"><b>(<a href=\"$talkurl\">$ML{'talk.commentsread'}</a>)</b></div>";
-
-     my $event = $FORM{'body'};
-     my $spellcheck_html;
-     if ($LJ::SPELLER && $FORM{'do_spellcheck'}) {
-	     my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
-                 'color' => '<?hotcolor?>', };
-	     $spellcheck_html = $s->check_html(\$event);
-     }
-     LJ::CleanHTML::clean_comment(\$event, $FORM{'prop_opt_preformatted'});
-
-     $ret .= "$ML{'.preview.subject'} " . LJ::eall($cleansubject) . "<hr>\n";
-     if ($spellcheck_html) {
-         $ret .= "<b>$ML{'.spellchecked'}</b><br />";
-         $ret .= $spellcheck_html;
-         $ret .= "<p>";
-     } else {
-         $ret .= $event;
-     }
-
-     $ret .= "<hr />";
-     $ret .= "<form method='post'>\n";
-     $ret .= "<input name='subject' size='50' maxlength='100' value='" . LJ::ehtml($FORM{'subject'}) . "'><p>";
-     $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' style='width: 99%'>";
-     $ret .= LJ::ehtml($FORM{'body'});
-     $ret .= "</textarea>";
-     # change mode:
-     delete $FORM{'submitpreview'}; $FORM{'submitpost'} = 1;
-     if ($cookie_auth) {
-         $FORM{'usertype'} = "cookieuser";
-         delete $FORM{'userpost'};
-     }
-     delete $FORM{'do_spellcheck'};
-     foreach (keys %FORM) {
-         $ret .= "<input type='hidden' name=\"$_\" value=\"" . LJ::ehtml($FORM{$_}) . "\">\n"
-		unless $_ eq 'body' || $_ eq 'subject';
-     }
-
-     $ret .= "<br /><input type='submit' value='$ML{'.preview.submit'}'>\n";
-     $ret .= "<input type='submit' name='submitpreview' value='$ML{'talk.btn.preview'}'>\n";
-     if ($LJ::SPELLER) {
-        $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck'> <label for='spellcheck'>$ML{'talk.spellcheck'}</label>";
-     }
-     $ret .= "</form>";
-     return $ret;
-}
-
- ## insertion
-
- my $qsubject = $dbh->quote($FORM{'subject'});
- my $subjecticon = ($FORM{'subjecticon'} eq "none" || $FORM{'subjecticon'} eq "") ? "" : LJ::trim(lc($FORM{'subjecticon'}));
- my $qbody = $dbh->quote($FORM{'body'});
- my $datepost = LJ::mysql_time();
- my $qdatepost = $dbh->quote($datepost);
- my $icon = LJ::Talk::show_image($pics, $subjecticon); 
-
- my $insertid;
- my $dtalkid;
- my $md5_body = md5_hex($FORM{'body'});
- 
- # figure out whether to post this comment screened
- my $state = 'A';
- if ($u->{'opt_whoscreened'} eq 'A' ||
-     ($u->{'opt_whoscreened'} eq 'R' && ! $up) ||
-     ($u->{'opt_whoscreened'} eq 'F' && !($up && LJ::is_friend($dbs, $u, $up)))) {
-     $state = 'S';
- }
-
- # unscreen the parent comment if needed
- my $unscreened = 0;
- if ($parpost->{'state'} eq 'S') {
-     LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $itemid, $partid);
-     $unscreened = 1;
- }
- 
- ### check for duplicate entry (double submission)
- my $posterid = $up ? $up->{'userid'} : 0;
- if ($clustered) 
- {
-     $insertid = $dbcm->selectrow_array
-         (
-          "SELECT t.jtalkid FROM talk2 t, talktext2 tt WHERE ".
-          "t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
-          "AND t.jtalkid=tt.jtalkid ".
-          "AND t.nodetype='L' AND t.nodeid=$itemid ".
-          "AND t.datepost > DATE_SUB(NOW(), INTERVAL 10 MINUTE) ".
-          "AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' ".
-          "AND t.parenttalkid=$qpartid"
-          );
- } else {
-     $insertid = $dbh->selectrow_array
-         (
-          "SELECT t.talkid FROM talk t, talktext tt WHERE t.talkid=tt.talkid ".
-          "AND t.journalid=$u->{'userid'} AND t.nodetype='L' AND t.nodeid=$itemid ".
-          "AND t.datepost > DATE_SUB(NOW(), INTERVAL 10 MINUTE) ".
-          "AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' ".
-          "AND t.parenttalkid=$qpartid"
-          );
- }
-
- $dtalkid = $clustered ? $insertid * 256 + $item->{'anum'} : $insertid;
- my $threadurl = $talkargs->("thread=$dtalkid");
-
- # they don't have a duplicate...
- unless ($insertid)
- {
-     # insert the comment
-     my $table = $clustered ? "talk2" : "talk";
-     my $now = $dbcm->selectrow_array("SELECT NOW()");
-     $sth = $dbcm->prepare("INSERT INTO $table (nodetype, nodeid, parenttalkid, ".
-                           "journalid, posterid, datepost, state) ".
-                           "VALUES ('L', $itemid, $qpartid, ".
-                           "$u->{'userid'}, $posterid, '$now', '$state')");
-     $sth->execute;
-     
-     # uh oh?  is there an error?  show them if there is.
-     if ($dbcm->err) {
-         return "<h2>Database Error</h2>There was an error posting your comment to the database.  Please report this to <b>$LJ::SUPPORT_EMAIL</b>.  The error is: <b>" . $dbcm->errstr . "</b>";
-     }
-     
-     # what's the tid of the newly inserted message?
-     $insertid = $sth->{'mysql_insertid'};
-
-     $dtalkid = $clustered ? $insertid * 256 + $item->{'anum'} : $insertid;
-     $threadurl = $talkargs->("thread=$dtalkid");
-
-     # add to poster's talkleft table, or the xfer place
-     if ($posterid && $clustered) {
-         my ($db, $table) = ($dbh, "talkleft_xfp");
-         if ($up->{'clusterid'}) {
-             $db = LJ::get_cluster_master($up);
-             if ($db) {
-                 # remote's cluster is writable
-                 $table = "talkleft";
-             } else {
-                 # do it later, as if user was not yet clustered
-                 $db = $dbh;
-             }
-         }
-         my $pub  = $item->{'security'} eq "public" ? 1 : 0;
-         $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
-                 "nodeid, jtalkid, publicitem) VALUES ($posterid, UNIX_TIMESTAMP('$now'), ".
-                 "$u->{'userid'}, 'L', $init->{'itemid'}, $insertid, '$pub')");
-     }
-
-     if ($clustered) {
-         $dbcm->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
-                   "VALUES ($u->{'userid'}, $insertid, $qsubject, $qbody)");
-         die $dbcm->errstr if $dbcm->err;
-     } else {
-         my @prefix = ("");
-         if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
-         foreach my $pfx (@prefix) {
-             $dbh->do("INSERT INTO ${pfx}talktext (talkid, subject, body) ".
-                      "VALUES ($insertid, $qsubject, $qbody)");
-         }
-     }
-
-     # dudata
-     if ($clustered) {
-         my $bytes = length($FORM{'subject'}) + length($FORM{'body'});
-         # we used to do a LJ::dudata_set(..) on 'T' here, but decided
-         # we could defer that.  to find size of a journal, summing
-         # bytes in dudata is too slow (too many seeks)
-     }
-
-     my %talkprop;   # propname -> value
-
-
-     # meta-data
-     $talkprop{'unknown8bit'} = 1 if $unknown8bit;
-     $talkprop{'subjecticon'} = $subjecticon;
-
-     $talkprop{'picture_keyword'} = $FORM{'prop_picture_keyword'};
-     # do select and delete $talkprop{'picture_keyword'} if they're lying
-     my $pic = LJ::get_pic_from_keyword($u, $FORM{'prop_picture_keyword'});
-     $talkprop{'picture_keyword'} = '' if $pic->{'state'} eq 'I';
-
-     $talkprop{'opt_preformatted'} = $FORM{'prop_opt_preformatted'} ? 1 : 0;
-     if ($u->{'opt_logcommentips'} eq "A" || 
-         ($u->{'opt_logcommentips'} eq "S" && $FORM{'usertype'} ne "user")) 
-     {
-         my $ip = BML::get_remote_ip();
-         my $forwarded = BML::get_client_header('X-Forwarded-For');
-         $ip = "$forwarded, via $ip" if $forwarded && $forwarded ne $ip;
-         $talkprop{'poster_ip'} = $ip;
-     }
-
-     # remove blank/0 values (defaults)
-     foreach (keys %talkprop) { delete $talkprop{$_} unless $talkprop{$_}; }
-
-     LJ::load_props($dbs, "talk");
-     if (%talkprop) {
-         my $values;
-         foreach (keys %talkprop) {
-             my $p = LJ::get_prop("talk", $_);
-             next unless $p;
-             my $tpropid = $p->{'tpropid'};
-             my $qv = $dbh->quote($talkprop{$_});
-             if ($clustered) {
-                 $values .= "($u->{'userid'}, $insertid, $tpropid, $qv),";
-             } else {
-                 $values .= "($insertid, $tpropid, $qv),";
-             }
-         }
-         if ($values) {
-             chop $values;
-             if ($clustered) {
-                 $dbcm->do("INSERT INTO talkprop2 (journalid, jtalkid, tpropid, value) ".
-                           "VALUES $values");
-             } else {
-                 $dbcm->do("INSERT INTO talkprop (talkid, tpropid, value) ".
-                           "VALUES $values");
-             }
-             die $dbcm->errstr if $dbcm->err;
-         }
-     }
-     
-     # update the "replycount" summary field of the log table
-     if ($state eq 'A') {
-         if ($clustered) {
-             $dbcm->do("UPDATE log2 SET replycount=replycount+1 WHERE ".
-                       "journalid=$u->{'userid'} AND jitemid=$itemid");
-         } else {
-             LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");	
-         }
-     }
-
-     # update the "hasscreened" property of the log item if needed
-     if ($state eq 'S') {
-         LJ::load_props($dbs, "log");
-         my $prop = LJ::get_prop("log", "hasscreened");
-         if ($clustered) {
-             $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ($u->{'userid'}, $itemid, $prop->{'id'}, '1')");
-         } else {
-             $dbcm->do("INSERT INTO logprop (itemid, propid, value) VALUES ($itemid, $prop->{'id'}, '1')");
-         }
-     }
-
-     # update the comment alter property
-     LJ::Talk::update_commentalter($dbs, $dbcs, $u, $itemid);   
-
-     # log the event
-     if ($clustered) {
-         LJ::event_register($dbs, $dbcm, "R", $u->{'userid'}, $ditemid);
-         # FUTURE: log events type 'T' (thread) up to root
-     }
-     
-     # send some emails
-     my $who = $up->{'name'} || "Somebody";
-     my $whouser = $up->{'user'} ? " ($up->{'user'})" : "";
-     my $whouserhtml = $up->{'user'} ? " (<a href=\"$LJ::SITEROOT/userinfo.bml?user=$up->{'user'}\">$up->{'user'}</a>)" : "";
-     my $whopic;
-     if ($up->{'defaultpicid'} || $FORM{'prop_picture_keyword'}) {
-         my $picid;
-         if ($FORM{'prop_picture_keyword'}) {
-             my $qkw = $dbr->quote($FORM{'prop_picture_keyword'});
-             $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
-                                            "WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid ".
-                                            "AND k.keyword=$qkw");
-         }
-         $picid ||= $up->{'defaultpicid'};
-         if ($picid) {
-             my %pics;
-             LJ::load_userpics($dbs, \%pics, [ $picid ]);
-             $whopic = "<img src=\"$LJ::USERPIC_ROOT/$picid/$up->{'userid'}\" align='absmiddle' ".
-                 "width='$pics{$picid}->{'width'}' height='$pics{$picid}->{'height'}' ".
-                 "hspace='1' vspace='2'> ";
-         }
-     }
-
-     # check to see if parent post is from a registerd livejournal user, and 
-     # mail them the response
-     my $parentcomment = "";
-     my $parentmailed = "";  # who if anybody was just mailed
-     my $parentpreformatted = 0;
-
-     if ($partid) 
-     {  
-         if ($clustered) {
-             $sth = $dbcm->prepare("SELECT t.posterid, tt.body FROM talk2 t, talktext2 tt ".
-                                   "WHERE t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
-                                   "AND t.jtalkid=$qpartid AND tt.jtalkid=$qpartid");
-         } else {
-             $sth = $dbh->prepare("SELECT t.posterid, tt.body FROM talk t, talktext tt ".
-                                  "WHERE t.talkid=$qpartid AND tt.talkid=$qpartid");
-         }
-         $sth->execute;
-         my ($paruserid, $parbody) = $sth->fetchrow_array;
-         $parentcomment = $parbody;
-
-         my %props = ($partid => {});
-         if ($clustered) {
-             LJ::load_props($dbs, "talk");
-             LJ::load_talk_props2($dbcr, $u->{'userid'}, [$partid], \%props);
-         } else {
-             LJ::load_talk_props($dbs, [$partid], \%props);
-         }
-         $parentpreformatted = $props{$partid}->{'opt_preformatted'};
-
-         # convert to UTF-8 if necessary
-         if ($LJ::UNICODE && $props{$partid}->{'unknown8bit'}) {
-             LJ::item_toutf8($dbs, $u, \$textsubject, \$parentcomment, {});
-             LJ::item_toutf8($dbs, $u, \$cleansubject, undef, {});
-         }
+    my $cookie_auth;
+    if ($FORM{'usertype'} eq "cookieuser") {
+        push @errors, $ML{'.error.lostcookie'}
+        unless ($remote && $remote->{'user'} eq $FORM{'cookieuser'});
+        return LJ::bad_input(@errors) if @errors;
         
-         if ($paruserid) {
-             my $qparuserid = $dbr->quote($paruserid);
-             $sth = $dbr->prepare("SELECT user, email, opt_htmlemail, password, status, ".
-                                  "opt_gettalkemail FROM user WHERE userid=$qparuserid");
-             $sth->execute;
-             my $paru = $sth->fetchrow_hashref;
-             LJ::load_user_props($dbs, $paru, 'mailencoding');
-             LJ::load_codes($dbs, { "encoding" => \%LJ::CACHE_ENCODINGS } )
-                 unless %LJ::CACHE_ENCODINGS;
-             
-             if ($paru->{'opt_gettalkemail'} eq "Y" &&
-                 $paru->{'email'} ne $up->{'email'} &&
-                 $paru->{'status'} eq "A")
-             {
-                 if ($DEBUG) {
-                     $debug .= "Parent mailed ($paru->{'user'}, $paru->{'email'})<br>\n";
-                 }
-                 $parentmailed = $paru->{'email'};
-                 my $encoding = $paru->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$paru->{'mailencoding'}} : "UTF-8";
-                 my $part;
+        $cookie_auth = 1;
+        $FORM{'userpost'} = $remote->{'user'};
+        $FORM{'usertype'} = "user";
+    }
 
-                 my $headersubject = $textsubject;
-                 if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                     $headersubject = Unicode::MapUTF8::from_utf8({-string=>$textsubject, -charset=>$encoding}); 
-                 }
+    if ((grep { $FORM{'userpost'} eq $_ } @LJ::TESTACCTS) && !
+        (grep { $u->{'user'}      eq $_ } @LJ::TESTACCTS))
+    {
+        push @errors, $ML{'.error.testacct'};
+    }
 
-                 if (!LJ::is_ascii($headersubject)) {
-                     $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
-                 }
+    my $userpost = lc($FORM{'userpost'});
+    my $up;
+    my $didlogin = 0;	# true if user logged in while commenting
 
-                 my $fromname = $up->{'user'} ? "$up->{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT  Comment";
-                 my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
-                                            'To' => $paru->{'email'},
-                                            'Subject' => ($headersubject || "Reply to your comment..."),
-                                            'Type' => 'multipart/alternative');
-                 
-                 my $text = "";
-                 $text .= "$who$whouser replied to your $LJ::SITENAMESHORT comment in which you said:\n\n";
-                 $text .= &indent($parentcomment, ">");
-                 $text .= "\n\nTheir reply was:\n\n";
-                 $text .= &indent("Subject: $cleansubject\n\n$FORM{'body'}");
-                 $text .= "\n\nYou can view the discussion here:\n\n";
-                 $text .= "     $threadurl\n\n";
-                 $text .= "You can reply to the comment directly here:\n\n";
-                 $text .= "     " . $talkargs->("replyto=$dtalkid") . "\n\n";
-                 $text .= "Or you can view all comments to the entry on this page:\n\n";
-                 $text .= "     $talkurl\n\n";
-                 $text .= "-- $LJ::SITENAME\n\n";
+    if ($FORM{'usertype'} eq "user") {
+        if ($FORM{'userpost'}) {
+            $up = LJ::load_user($dbs, $FORM{'userpost'});
+            if ($up) 
+            {
+                ### see if the user is banned from posting here
+                if (LJ::is_banned($dbr, $up, $u)) {
+                    push @errors, $ML{'.error.banned'};
 
-                 if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                     $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding}); 
-                 }
-                 $part = $msg->attach('Type' => 'TEXT',
-                              'Data' => $text,
-                              'Encoding' => 'quoted-printable',
-                              );
-                 $part->attr("content-type.charset" => $encoding)
-                     if $LJ::UNICODE;
+                }
 
-                 my $html = "";
-                 $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\"></head><BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
-                 $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$talkurl\">your $LJ::SITENAMESHORT comment</A> in which you said:</TD></TR></TABLE>\n\n";
-                 my $htmlbody = $parentcomment;
-                 LJ::CleanHTML::clean_comment(\$htmlbody, $parentpreformatted);
-                 $html .= &blockquote($htmlbody);
-                 
-                 $html .= "\n\nTheir reply was:\n\n";
-                 my $cleanbody = $FORM{'body'};
-                 LJ::CleanHTML::clean_comment(\$cleanbody, $FORM{'prop_opt_preformatted'});
-                 $html .= &blockquote("<TT><B>Subject:</B> $cleansubject</TT> $icon<P>$cleanbody");
+                if ($up->{'journaltype'} ne "P") {
+                    push @errors, $ML{'.error.postshared'};
+                }
 
-                 $html .= "You can <a href=\"$threadurl\">view the thread</a> starting from this comment, or <a href=\"$talkurl\">view all comments</a> to this entry.<br />";
-                 $html .= "You can also reply <a href=\"" . $talkargs->("replyto=$dtalkid") . "\">at the webpage</a>, or here:";
-                 $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
-                 $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
-                 $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
-                 $html .= "<INPUT TYPE=HIDDEN NAME=journal VALUE='$u->{'user'}'>" if $clustered;
-                 $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$ditemid>";
-                 $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$paru->{'user'}\">";
-                 $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $paru->{'password'})) . "\">";
-                 $html .= "<input type=hidden name=encoding value=$encoding>" unless $encoding eq "UTF-8";
-                 my $newsub = $FORM{'subject'};
-                 unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
-                 $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . LJ::ehtml($newsub) . "\">";
-                 $html .= "<P><B>Message</B><BR><TEXTAREA ROWS=10 COLS=50 WRAP=SOFT NAME=body></TEXTAREA>";
-                 $html .= "<BR><INPUT TYPE=SUBMIT VALUE=\"Post Reply\">";
-                 $html .= "</FORM></BLOCKQUOTE>\n";
-                 $html .= "<FONT SIZE=-1>(if you'd prefer to not get these updates, go to <A HREF=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</A> and turn off the relevant options)</FONT>\n";
-                 $html .= "</BODY>\n";
+                unless ($cookie_auth || 
+                        LJ::auth_okay($up, $FORM{'password'}, $FORM{'hpassword'}) ||
+                        ecphash($itemid, $FORM{'parenttalkid'}, 
+                                $up->{'password'}) eq $FORM{'ecphash'} )
+                {
+                    push @errors, $ML{'.error.badpassword'};
+                }
 
-                 if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                     $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
-                 }
+                # if the user chooses to log in, do so
+                if ($FORM{'do_login'} && ! @errors) {
 
-                 if ($paru->{'opt_htmlemail'} eq "Y") 
-                 {
+                    my $etime = 0;
+                    eval { Apache->request->notes('ljuser' => $up->{'user'}); };
 
-                     $part = $msg->attach('Type' => 'text/html',
-                                  'Data' => $html,
-                                  'Encoding' => 'quoted-printable',
-                                  );
-                     $part->attr("content-type.charset" => $encoding)
-                         if $LJ::UNICODE;
+                    my $sess_opts = {
+                        'exptype' => 'short',
+                        'ipfixed' => undef,
+                    };
+                    my $sess = LJ::generate_session($up, $sess_opts);
+                    $COOKIE{'ljsession'} = [  "ws:$up->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime, 1 ];
+                    LJ::set_remote($up);
 
-                 }
+                    LJ::load_user_props($dbs, $up, "browselang");
+                    my $bl = LJ::Lang::get_lang($up->{'browselang'});
+                    if ($bl) {
+                        BML::set_cookie("langpref", $bl->{'lncode'} . "/" . time(), 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+                          BML::set_language($bl->{'lncode'});
+                      }
 
-                 $msg->send;
-             } else {
-                 if ($DEBUG) {
-                     $debug .= "Parent not mailed<br>\n";
-                 }
-             }
-         }
-     }
+                    LJ::run_hooks("post_login", {
+                        "u" => $up,
+                        "form" => \%FORM,
+                        "expiretime" => $etime,
+                    });
 
-     # send mail to journal owner
-     if ($ujp->{'opt_gettalkemail'} eq "Y" &&
-         !$logprops{$itemid}->{'opt_noemail'} &&
-         $userpost ne $ujp->{'user'} &&
-         $ujp->{'email'} ne $parentmailed &&
-         $ujp->{'status'} eq "A") 
-     {
-         if ($DEBUG) { 
-             $debug .= "send mail to journal owner. (to $ujp->{'email'})<br>\n";
-         }
+                    $didlogin = 1;
+                }
 
-         LJ::load_user_props($dbs, $ujp, 'mailencoding');
-         LJ::load_codes($dbs, { "encoding" => \%LJ::CACHE_ENCODINGS } )
-             unless %LJ::CACHE_ENCODINGS;
-         my $encoding = $ujp->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$ujp->{'mailencoding'}} : "UTF-8";
-         my $part;
+            } else {
+                push @errors, $ML{'.error.badusername'};
 
-         my $headersubject = $textsubject;
-         if ($LJ::UNICODE && $encoding ne "UTF-8") {
-             $headersubject = Unicode::MapUTF8::from_utf8({-string=>$textsubject, -charset=>$encoding}); 
-         }
+            }
+        } else {
+            push @errors, $ML{'.error.nousername'};
 
-         if (!LJ::is_ascii($headersubject)) {
-             $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
-         }
+        }
+    }
+
+    # check that user can even view this post, which is required
+    # to reply to it
+    ####  Check security before viewing this post
+    unless (LJ::can_view($dbs, $up, $item)) {
+        push @errors, $ML{'.error.mustlogin'}
+        unless (defined $up);
+        push @errors, $ML{'.error.noauth'};
+        return LJ::bad_input(@errors);     
+    }
+
+    # If the reply is to a comment, check that it exists.
+    # if it's screened, check that the user has permission to
+    # reply and unscreen it
+
+    my $parpost;
+    my $partid = $FORM{'parenttalkid'};
+    my $qpartid = $dbh->quote($partid);
+
+    if ($partid) {
+        $sth = $dbcm->prepare("SELECT posterid, state FROM talk2 ".
+                              "WHERE journalid=$u->{'userid'} AND jtalkid=$qpartid");
+        $sth->execute;
+        $parpost = $sth->fetchrow_hashref;
+
+        unless ($parpost) {
+            push @errors, $ML{'.error.noparent'};
+        }
+
+        # can't use $remote because we may get here
+        # with a reply from email. so use $up instead of $remote
+        # in the call below.
+
+        if ($parpost && $parpost->{'state'} eq "S" && 
+            !LJ::Talk::can_unscreen($dbs, $up, $u, $ujp, $ujp->{'user'})) {
+            push @errors, $ML{'.error.screened'};
+        }
+    }
+
+    if ($FORM{'usertype'} ne "user" && $u->{'opt_whocanreply'} ne "all") {
+        push @errors, $ML{'.error.noanon'};
+    }
+
+    if ($logprops{$itemid}->{'opt_nocomments'}) {
+        push @errors, $ML{'.error.nocomments'};
+    }
+
+    if ($up && $up->{'status'} eq "N") {
+        push @errors, $ML{'.error.noverify'};
+
+    }
+
+    if ($up && $up->{'statusvis'} eq "D") {
+        push @errors, $ML{'.error.deleted'};
+    }
+    if ($up && $up->{'statusvis'} eq "S") {
+        push @errors, $ML{'.error.suspended'};
+    }
+
+    if ($u->{'opt_whocanreply'} eq "friends") {
+        if ($up) {
+            if ($up->{'userid'} != $u->{'userid'}) 
+            {
+                unless (LJ::is_friend($dbs, $u, $up)) {
+                    push @errors, BML::ml('.error.notafriend', {'user'=>$u->{'user'}});
+                }
+            }
+        } else {
+            push @errors, BML::ml('.error.friendsonly', {'user'=>$u->{'user'}});
+        }
+    }
+
+    unless ($FORM{'body'} =~ /\S/) {
+        push @errors, $ML{'.error.blankmessage'};
+    }
+
+    # in case this post comes directly from the user's mail client, it
+    # may have an encoding field for us.
+    if ($FORM{'encoding'}) {
+        $FORM{'body'} = Unicode::MapUTF8::to_utf8({-string=>$FORM{'body'}, -charset=>$FORM{'encoding'}});
+        $FORM{'subject'} = Unicode::MapUTF8::to_utf8({-string=>$FORM{'subject'}, -charset=>$FORM{'encoding'}});
+    }
+    
+    # unixify line-endings
+    $FORM{'body'} =~ s/\r\n/\n/g;
+
+    # now check for UTF-8 correctness, it must hold
+
+    return "<?badinput?>" unless LJ::text_in(\%FORM);
+
+    my $unknown8bit = 0;
+    unless (LJ::is_ascii($FORM{'body'}) && LJ::is_ascii($FORM{'subject'})) {
+        if ($LJ::UNICODE) {
+            # no need to check if they're well-formed, we did that above
+        } else {
+            # so rest of site can change chars to ? marks until
+            # default user's encoding is set.  (legacy support)
+            $unknown8bit = 1;
+        }
+    }
+
+    my ($bl, $cl) = LJ::text_length($FORM{'body'});
+    if ($cl > LJ::CMAX_COMMENT) {
+        push @errors, BML::ml('.error.manychars', {'current'=>$cl, 'limit'=>LJ::CMAX_COMMENT});
+
+    } elsif ($bl > LJ::BMAX_COMMENT) {
+        push @errors, BML::ml('.error.manybytes', {'current'=>$bl, 'limit'=>LJ::BMAX_COMMENT});
+    }
+    # the Subject can be silently shortened, no need to reject the whole comment
+    $FORM{'subject'} = LJ::text_trim($FORM{'subject'}, 100, 100);
+
+    return LJ::bad_input(@errors) if @errors;
+
+    ###################################################3
+
+    my $textsubject = $FORM{'subject'};
+    LJ::CleanHTML::clean_subject_all(\$textsubject);
+    my $cleansubject = $FORM{'subject'};
+    LJ::CleanHTML::clean_subject(\$cleansubject);
+
+    ## preview
+
+    if ($FORM{'submitpreview'}) {
+        $ret .= "<?h1 $ML{'.preview.title'} h1?><?p $ML{'.preview'} p?><?hr?>";
+        $ret .= "<div align=\"center\"><b>(<a href=\"$talkurl\">$ML{'talk.commentsread'}</a>)</b></div>";
+
+        my $event = $FORM{'body'};
+        my $spellcheck_html;
+        if ($LJ::SPELLER && $FORM{'do_spellcheck'}) {
+            my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
+                                         'color' => '<?hotcolor?>', };
+            $spellcheck_html = $s->check_html(\$event);
+        }
+        LJ::CleanHTML::clean_comment(\$event, $FORM{'prop_opt_preformatted'});
+
+        $ret .= "$ML{'.preview.subject'} " . LJ::eall($cleansubject) . "<hr>\n";
+        if ($spellcheck_html) {
+            $ret .= "<b>$ML{'.spellchecked'}</b><br />";
+            $ret .= $spellcheck_html;
+            $ret .= "<p>";
+        } else {
+            $ret .= $event;
+        }
+
+        $ret .= "<hr />";
+        $ret .= "<form method='post'>\n";
+        $ret .= "<input name='subject' size='50' maxlength='100' value='" . LJ::ehtml($FORM{'subject'}) . "'><p>";
+        $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' style='width: 99%'>";
+        $ret .= LJ::ehtml($FORM{'body'});
+        $ret .= "</textarea>";
+        # change mode:
+        delete $FORM{'submitpreview'}; $FORM{'submitpost'} = 1;
+        if ($cookie_auth) {
+            $FORM{'usertype'} = "cookieuser";
+            delete $FORM{'userpost'};
+        }
+        delete $FORM{'do_spellcheck'};
+        foreach (keys %FORM) {
+            $ret .= "<input type='hidden' name=\"$_\" value=\"" . LJ::ehtml($FORM{$_}) . "\">\n"
+		unless $_ eq 'body' || $_ eq 'subject';
+        }
+
+        $ret .= "<br /><input type='submit' value='$ML{'.preview.submit'}'>\n";
+        $ret .= "<input type='submit' name='submitpreview' value='$ML{'talk.btn.preview'}'>\n";
+        if ($LJ::SPELLER) {
+            $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck'> <label for='spellcheck'>$ML{'talk.spellcheck'}</label>";
+        }
+        $ret .= "</form>";
+        return $ret;
+    }
+
+    ## insertion
+
+    my $qsubject = $dbh->quote($FORM{'subject'});
+    my $subjecticon = ($FORM{'subjecticon'} eq "none" || $FORM{'subjecticon'} eq "") ? "" : LJ::trim(lc($FORM{'subjecticon'}));
+    my $qbody = $dbh->quote($FORM{'body'});
+    my $datepost = LJ::mysql_time();
+    my $qdatepost = $dbh->quote($datepost);
+    my $icon = LJ::Talk::show_image($pics, $subjecticon); 
+
+    my $insertid;
+    my $dtalkid;
+    my $md5_body = md5_hex($FORM{'body'});
+    
+    # figure out whether to post this comment screened
+    my $state = 'A';
+    if ($u->{'opt_whoscreened'} eq 'A' ||
+        ($u->{'opt_whoscreened'} eq 'R' && ! $up) ||
+        ($u->{'opt_whoscreened'} eq 'F' && !($up && LJ::is_friend($dbs, $u, $up)))) {
+        $state = 'S';
+    }
+
+    # unscreen the parent comment if needed
+    my $unscreened = 0;
+    if ($parpost->{'state'} eq 'S') {
+        LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $itemid, $partid);
+          $unscreened = 1;
+      }
+    
+    ### check for duplicate entry (double submission)
+    my $posterid = $up ? $up->{'userid'} : 0;
+    $insertid = $dbcm->selectrow_array
+        (
+         "SELECT t.jtalkid FROM talk2 t, talktext2 tt WHERE ".
+         "t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
+         "AND t.jtalkid=tt.jtalkid ".
+         "AND t.nodetype='L' AND t.nodeid=$itemid ".
+         "AND t.datepost > DATE_SUB(NOW(), INTERVAL 10 MINUTE) ".
+         "AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' ".
+         "AND t.parenttalkid=$qpartid"
+         );
+
+    $dtalkid = $insertid * 256 + $item->{'anum'};
+    my $threadurl = $talkargs->("thread=$dtalkid");
+
+    # they don't have a duplicate...
+    unless ($insertid)
+    {
+        # insert the comment
+        my $now = $dbcm->selectrow_array("SELECT NOW()");
+        $sth = $dbcm->prepare("INSERT INTO talk2 (nodetype, nodeid, parenttalkid, ".
+                              "journalid, posterid, datepost, state) ".
+                              "VALUES ('L', $itemid, $qpartid, ".
+                              "$u->{'userid'}, $posterid, '$now', '$state')");
+        $sth->execute;
+        
+        # uh oh?  is there an error?  show them if there is.
+        if ($dbcm->err) {
+            return "<h2>Database Error</h2>There was an error posting your comment to the database.  Please report this to <b>$LJ::SUPPORT_EMAIL</b>.  The error is: <b>" . $dbcm->errstr . "</b>";
+        }
+        
+        # what's the tid of the newly inserted message?
+        $insertid = $sth->{'mysql_insertid'};
+
+        $dtalkid = $insertid * 256 + $item->{'anum'};
+        $threadurl = $talkargs->("thread=$dtalkid");
+
+        # add to poster's talkleft table, or the xfer place
+        if ($posterid) {
+            my $table;
+            my $db = LJ::get_cluster_master($up);
+            if ($db) {
+                # remote's cluster is writable
+                $table = "talkleft";
+            } else {
+                # log to global cluster, another job will move it later.
+                $db = $dbh;
+                $table = "talkleft_xfp";
+            }
+            my $pub  = $item->{'security'} eq "public" ? 1 : 0;
+            $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
+                    "nodeid, jtalkid, publicitem) VALUES ($posterid, UNIX_TIMESTAMP('$now'), ".
+                    "$u->{'userid'}, 'L', $init->{'itemid'}, $insertid, '$pub')");
+        }
+
+        $dbcm->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
+                  "VALUES ($u->{'userid'}, $insertid, $qsubject, $qbody)");
+        die $dbcm->errstr if $dbcm->err;
+
+        # dudata
+        my $bytes = length($FORM{'subject'}) + length($FORM{'body'});
+        # we used to do a LJ::dudata_set(..) on 'T' here, but decided
+        # we could defer that.  to find size of a journal, summing
+        # bytes in dudata is too slow (too many seeks)
+
+        my %talkprop;   # propname -> value
 
 
-         my $fromname = $up->{'user'} ? "$up->{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
-         my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
-                                    'To' => $ujp->{'email'},
-                                    'Subject' => ($headersubject || "Reply to your post..."),
-                                    'Type' => 'multipart/alternative');
-         my $text = "";
-         if ($parentcomment)  {
-             $text .= "$who$whouser replied to another comment somebody left in your $LJ::SITENAMESHORT post.  The comment they replied to was:\n\n";
-             $text .= &indent($parentcomment, ">");
-         } else {
-             $text .= "$who$whouser replied to your $LJ::SITENAMESHORT post in which you said:\n\n";
-             $text .= &indent($item->{'event'}, ">");
-         }
-         $text .= "\n\nTheir reply was:\n\n";
-         $text .= &indent("Subject: $textsubject\n\n$FORM{'body'}");
-         $text .= "\n\nYou can view the discussion here:\n\n";
-         $text .= "     $threadurl\n\n";
-         $text .= "You can reply to the comment directly here:\n\n";
-         $text .= "     " . $talkargs->("replyto=$dtalkid") . "\n\n";
-         $text .= "Or you can view all comments to the entry on this page:\n\n";
-         $text .= "     $talkurl\n\n";
-         $text .= "-- $LJ::SITENAME\n\n";
-         $text .= "(if you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options)\n";
+        # meta-data
+        $talkprop{'unknown8bit'} = 1 if $unknown8bit;
+        $talkprop{'subjecticon'} = $subjecticon;
 
-         if ($LJ::UNICODE && $encoding ne "UTF-8") {
-             $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding}); 
-         }
-         $part = $msg->attach('Type' => 'TEXT',
-                      'Data' => $text,
-                      'Encoding' => 'quoted-printable',
-                      );
-         $part->attr("content-type.charset" => $encoding)
-             if $LJ::UNICODE;
+        $talkprop{'picture_keyword'} = $FORM{'prop_picture_keyword'};
+        # do select and delete $talkprop{'picture_keyword'} if they're lying
+        my $pic = LJ::get_pic_from_keyword($u, $FORM{'prop_picture_keyword'});
+        $talkprop{'picture_keyword'} = '' if $pic->{'state'} eq 'I';
 
-         
-         my $html = "";
-         $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\"></head><BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
-         if ($parentcomment)  {
-             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$talkurl\">your $LJ::SITENAMESHORT post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
-             my $cleancom = $parentcomment;
-             LJ::CleanHTML::clean_comment(\$cleancom, $parentpreformatted);
-             $html .= &blockquote($cleancom);
-         } else {
-             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$talkurl\">your $LJ::SITENAMESHORT post</A> in which you said:</TD></TR></TABLE>\n";
-             my $clean = $item->{'event'};
-             LJ::CleanHTML::clean_event(\$clean, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'}});
-             $html .= &blockquote($clean);
-         }
-         $html .= "\n\nTheir reply was:\n\n";
-         my $clean = $FORM{'body'};
-         LJ::CleanHTML::clean_comment(\$clean, $FORM{'prop_opt_preformatted'});
-         $html .= &blockquote("<TT><B>Subject: </B> $textsubject</TT> $icon<HR>$clean");
+        $talkprop{'opt_preformatted'} = $FORM{'prop_opt_preformatted'} ? 1 : 0;
+        if ($u->{'opt_logcommentips'} eq "A" || 
+            ($u->{'opt_logcommentips'} eq "S" && $FORM{'usertype'} ne "user")) 
+        {
+            my $ip = BML::get_remote_ip();
+            my $forwarded = BML::get_client_header('X-Forwarded-For');
+            $ip = "$forwarded, via $ip" if $forwarded && $forwarded ne $ip;
+            $talkprop{'poster_ip'} = $ip;
+        }
 
-         # begin form
-         $html .= "You can <a href=\"$threadurl\">view the thread</a> starting from this comment, or <a href=\"$talkurl\">view all comments</a> to this entry.<br />";
-         $html .= "You can also reply <a href=\"" . $talkargs->("replyto=$dtalkid") . "\">at the webpage</a>, or here:";
+        # remove blank/0 values (defaults)
+        foreach (keys %talkprop) { delete $talkprop{$_} unless $talkprop{$_}; }
 
-         $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
-         $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
-         $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
-         $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$ditemid>";
-         $html .= "<INPUT TYPE=HIDDEN NAME=journal VALUE='$u->{'user'}'>" if $clustered;
-         $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$ujp->{'user'}\">";
-         $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $ujp->{'password'})) . "\">";
-         $html .= "<input type=hidden name=encoding value=$encoding>" unless $encoding eq "UTF-8";
+        LJ::load_props($dbs, "talk");
+        if (%talkprop) {
+            my $values;
+            foreach (keys %talkprop) {
+                my $p = LJ::get_prop("talk", $_);
+                next unless $p;
+                my $tpropid = $p->{'tpropid'};
+                my $qv = $dbh->quote($talkprop{$_});
+                $values .= "($u->{'userid'}, $insertid, $tpropid, $qv),";
+            }
+            if ($values) {
+                chop $values;
+                $dbcm->do("INSERT INTO talkprop2 (journalid, jtalkid, tpropid, value) ".
+                          "VALUES $values");
+                die $dbcm->errstr if $dbcm->err;
+            }
+        }
+        
+        # update the "replycount" summary field of the log table
+        if ($state eq 'A') {
+            $dbcm->do("UPDATE log2 SET replycount=replycount+1 WHERE ".
+                      "journalid=$u->{'userid'} AND jitemid=$itemid");
+        }
 
-         my $newsub = $FORM{'subject'};
-         unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
-         $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . LJ::ehtml($newsub) . "\">";
-         $html .= "<P><B>Message</B><BR><TEXTAREA ROWS=10 COLS=50 WRAP=SOFT NAME=body></TEXTAREA>";
-         $html .= "<BR><INPUT TYPE=SUBMIT VALUE=\"Post Reply\">";
-         $html .= "</FORM></BLOCKQUOTE>\n";
-         # end form
+        # update the "hasscreened" property of the log item if needed
+        if ($state eq 'S') {
+            LJ::load_props($dbs, "log");
+            my $prop = LJ::get_prop("log", "hasscreened");
+            $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ($u->{'userid'}, $itemid, $prop->{'id'}, '1')");
+        }
+        
+        # update the comment alter property
+        LJ::Talk::update_commentalter($dbs, $dbcs, $u, $itemid);   
 
-         $html .= "<FONT SIZE=-1>(if you'd prefer to not get these updates, go to <A HREF=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</A> and turn off the relevant options)</FONT>\n";
-         $html .= "</BODY>\n";
+        # log the event
+        LJ::event_register($dbs, $dbcm, "R", $u->{'userid'}, $ditemid);
+        # FUTURE: log events type 'T' (thread) up to root
+        
+        # send some emails
+        my $who = $up->{'name'} || "Somebody";
+        my $whouser = $up->{'user'} ? " ($up->{'user'})" : "";
+        my $whouserhtml = $up->{'user'} ? " (<a href=\"$LJ::SITEROOT/userinfo.bml?user=$up->{'user'}\">$up->{'user'}</a>)" : "";
+        my $whopic;
+        if ($up->{'defaultpicid'} || $FORM{'prop_picture_keyword'}) {
+            my $picid;
+            if ($FORM{'prop_picture_keyword'}) {
+                my $qkw = $dbr->quote($FORM{'prop_picture_keyword'});
+                $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
+                                               "WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid ".
+                                               "AND k.keyword=$qkw");
+            }
+            $picid ||= $up->{'defaultpicid'};
+            if ($picid) {
+                my %pics;
+                LJ::load_userpics($dbs, \%pics, [ $picid ]);
+                $whopic = "<img src=\"$LJ::USERPIC_ROOT/$picid/$up->{'userid'}\" align='absmiddle' ".
+                    "width='$pics{$picid}->{'width'}' height='$pics{$picid}->{'height'}' ".
+                    "hspace='1' vspace='2'> ";
+            }
+        }
 
-         if ($LJ::UNICODE && $encoding ne "UTF-8") {
-             $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
-         }
+        # check to see if parent post is from a registerd livejournal user, and 
+        # mail them the response
+        my $parentcomment = "";
+        my $parentmailed = "";  # who if anybody was just mailed
+        my $parentpreformatted = 0;
 
-         if ($ujp->{'opt_htmlemail'} eq "Y") 
-         {
-             $part = $msg->attach('Type' => 'text/html',
-                          'Data' => $html,
-                          'Encoding' => 'quoted-printable',
-                          );
-             $part->attr("content-type.charset" => $encoding)
-                 if $LJ::UNICODE;
-         }
-         
-         $msg->send;
-     } else {
-         $debug .= "don't send mail to journal owner.<ul>\n";
-         $debug .= "<li>ujp--opt_gettalkemail = $ujp->{'opt_gettalkemail'}\n";
-         $debug .= "<li>userpost = $userpost\n";
-         $debug .= "<li>ujp--user = $ujp->{'user'}\n";
-         $debug .= "<li>ujp--email = $ujp->{'email'}\n";
-         $debug .= "<li>parentmailed = $parentmailed\n";
-         $debug .= "<li>ujp--status = $ujp->{'status'}\n";
-         $debug .= "</ul>\n";
+        if ($partid) 
+        {  
+            $sth = $dbcm->prepare("SELECT t.posterid, tt.body FROM talk2 t, talktext2 tt ".
+                                  "WHERE t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
+                                  "AND t.jtalkid=$qpartid AND tt.jtalkid=$qpartid");
+            $sth->execute;
+            my ($paruserid, $parbody) = $sth->fetchrow_array;
+            $parentcomment = $parbody;
 
-     }
- }
+            my %props = ($partid => {});
+            LJ::load_props($dbs, "talk");
+            LJ::load_talk_props2($dbcr, $u->{'userid'}, [$partid], \%props);
+            $parentpreformatted = $props{$partid}->{'opt_preformatted'};
 
- # Yeah, we're done.
- my $commentlink = $talkargs->("view=$dtalkid#t$dtalkid");
+            # convert to UTF-8 if necessary
+            if ($LJ::UNICODE && $props{$partid}->{'unknown8bit'}) {
+                LJ::item_toutf8($dbs, $u, \$textsubject, \$parentcomment, {});
+                  LJ::item_toutf8($dbs, $u, \$cleansubject, undef, {});
+              }
+            
+            if ($paruserid) {
+                my $qparuserid = $dbr->quote($paruserid);
+                $sth = $dbr->prepare("SELECT user, email, opt_htmlemail, password, status, ".
+                                     "opt_gettalkemail FROM user WHERE userid=$qparuserid");
+                $sth->execute;
+                my $paru = $sth->fetchrow_hashref;
+                LJ::load_user_props($dbs, $paru, 'mailencoding');
+                LJ::load_codes($dbs, { "encoding" => \%LJ::CACHE_ENCODINGS } )
+                    unless %LJ::CACHE_ENCODINGS;
+                
+                if ($paru->{'opt_gettalkemail'} eq "Y" &&
+                    $paru->{'email'} ne $up->{'email'} &&
+                    $paru->{'status'} eq "A")
+                {
+                    if ($DEBUG) {
+                        $debug .= "Parent mailed ($paru->{'user'}, $paru->{'email'})<br>\n";
+                    }
+                    $parentmailed = $paru->{'email'};
+                    my $encoding = $paru->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$paru->{'mailencoding'}} : "UTF-8";
+                    my $part;
 
- $ret .= "<?h1 $ML{'.success.title'} h1?>";
- if ($state eq 'A') {
-     $ret .= "<?p " . BML::ml('.success.message', {'link'=>$commentlink}) . " p?>";
- } elsif ($state eq 'S' && $u->{'journaltype'} eq 'C') {
-     $ret .= "<?p " . BML::ml('.success.screened.comm', {'link'=>$commentlink}) . " p?>";
- } else {
-     $ret .= "<?p " . BML::ml('.success.screened.user', {'link'=>$commentlink}) . " p?>";
- }
+                    my $headersubject = $textsubject;
+                    if ($LJ::UNICODE && $encoding ne "UTF-8") {
+                        $headersubject = Unicode::MapUTF8::from_utf8({-string=>$textsubject, -charset=>$encoding}); 
+                    }
 
- if ($unscreened) {
-     $ret .= "<?p $ML{'.success.unscreened'} p?>";
- }
+                    if (!LJ::is_ascii($headersubject)) {
+                        $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
+                    }
 
- if ($didlogin) {
-     $ret .= "<?p $ML{'.success.loggedin'} p?>";
- }
+                    my $fromname = $up->{'user'} ? "$up->{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT  Comment";
+                    my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
+                                               'To' => $paru->{'email'},
+                                               'Subject' => ($headersubject || "Reply to your comment..."),
+                                               'Type' => 'multipart/alternative');
+                    
+                    my $text = "";
+                    $text .= "$who$whouser replied to your $LJ::SITENAMESHORT comment in which you said:\n\n";
+                    $text .= &indent($parentcomment, ">");
+                    $text .= "\n\nTheir reply was:\n\n";
+                    $text .= &indent("Subject: $cleansubject\n\n$FORM{'body'}");
+                    $text .= "\n\nYou can view the discussion here:\n\n";
+                    $text .= "     $threadurl\n\n";
+                    $text .= "You can reply to the comment directly here:\n\n";
+                    $text .= "     " . $talkargs->("replyto=$dtalkid") . "\n\n";
+                    $text .= "Or you can view all comments to the entry on this page:\n\n";
+                    $text .= "     $talkurl\n\n";
+                    $text .= "-- $LJ::SITENAME\n\n";
 
- if ($DEBUG) {
-     $ret .= "<p>$debug</p>";
- }
- return $ret;
+                    if ($LJ::UNICODE && $encoding ne "UTF-8") {
+                        $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding}); 
+                    }
+                    $part = $msg->attach('Type' => 'TEXT',
+                                         'Data' => $text,
+                                         'Encoding' => 'quoted-printable',
+                                         );
+                    $part->attr("content-type.charset" => $encoding)
+                        if $LJ::UNICODE;
 
- # entryid-commentid-password hash
- sub ecphash {
-     my ($itemid, $talkid, $password) = @_;
-     return "ecph-" . md5_hex($itemid . $talkid . $password);
- }
+                    my $html = "";
+                    $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\"></head><BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
+                    $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$talkurl\">your $LJ::SITENAMESHORT comment</A> in which you said:</TD></TR></TABLE>\n\n";
+                    my $htmlbody = $parentcomment;
+                    LJ::CleanHTML::clean_comment(\$htmlbody, $parentpreformatted);
+                    $html .= &blockquote($htmlbody);
+                    
+                    $html .= "\n\nTheir reply was:\n\n";
+                    my $cleanbody = $FORM{'body'};
+                    LJ::CleanHTML::clean_comment(\$cleanbody, $FORM{'prop_opt_preformatted'});
+                    $html .= &blockquote("<TT><B>Subject:</B> $cleansubject</TT> $icon<P>$cleanbody");
 
- sub indent {
-     my $a = shift;
-     my $leadchar = shift || " ";
-     return Text::Wrap::fill("$leadchar  ", "$leadchar  ", $a);
- }
+                    $html .= "You can <a href=\"$threadurl\">view the thread</a> starting from this comment, or <a href=\"$talkurl\">view all comments</a> to this entry.<br />";
+                    $html .= "You can also reply <a href=\"" . $talkargs->("replyto=$dtalkid") . "\">at the webpage</a>, or here:";
+                    $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
+                    $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
+                    $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
+                    $html .= "<INPUT TYPE=HIDDEN NAME=journal VALUE='$u->{'user'}'>";
+                    $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$ditemid>";
+                    $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$paru->{'user'}\">";
+                    $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $paru->{'password'})) . "\">";
+                    $html .= "<input type=hidden name=encoding value=$encoding>" unless $encoding eq "UTF-8";
+                    my $newsub = $FORM{'subject'};
+                    unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
+                    $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . LJ::ehtml($newsub) . "\">";
+                    $html .= "<P><B>Message</B><BR><TEXTAREA ROWS=10 COLS=50 WRAP=SOFT NAME=body></TEXTAREA>";
+                    $html .= "<BR><INPUT TYPE=SUBMIT VALUE=\"Post Reply\">";
+                    $html .= "</FORM></BLOCKQUOTE>\n";
+                    $html .= "<FONT SIZE=-1>(if you'd prefer to not get these updates, go to <A HREF=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</A> and turn off the relevant options)</FONT>\n";
+                    $html .= "</BODY>\n";
 
-sub blockquote {
-     my $a = shift;
-     return "<blockquote style='BORDER-LEFT: #000040 2px solid; MARGIN-LEFT: 0px; MARGIN-RIGHT: 0px; PADDING-LEFT: 15px; PADDING-RIGHT: 0px'>$a</blockquote>";
+                    if ($LJ::UNICODE && $encoding ne "UTF-8") {
+                        $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
+                    }
+
+                    if ($paru->{'opt_htmlemail'} eq "Y") 
+                    {
+
+                        $part = $msg->attach('Type' => 'text/html',
+                                             'Data' => $html,
+                                             'Encoding' => 'quoted-printable',
+                                             );
+                        $part->attr("content-type.charset" => $encoding)
+                            if $LJ::UNICODE;
+
+                    }
+
+                    $msg->send;
+                } else {
+                    if ($DEBUG) {
+                        $debug .= "Parent not mailed<br>\n";
+                    }
+                }
+            }
+        }
+
+        # send mail to journal owner
+        if ($ujp->{'opt_gettalkemail'} eq "Y" &&
+            !$logprops{$itemid}->{'opt_noemail'} &&
+            $userpost ne $ujp->{'user'} &&
+            $ujp->{'email'} ne $parentmailed &&
+            $ujp->{'status'} eq "A") 
+        {
+            if ($DEBUG) { 
+                $debug .= "send mail to journal owner. (to $ujp->{'email'})<br>\n";
+            }
+
+            LJ::load_user_props($dbs, $ujp, 'mailencoding');
+            LJ::load_codes($dbs, { "encoding" => \%LJ::CACHE_ENCODINGS } )
+                unless %LJ::CACHE_ENCODINGS;
+            my $encoding = $ujp->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$ujp->{'mailencoding'}} : "UTF-8";
+            my $part;
+
+            my $headersubject = $textsubject;
+            if ($LJ::UNICODE && $encoding ne "UTF-8") {
+                $headersubject = Unicode::MapUTF8::from_utf8({-string=>$textsubject, -charset=>$encoding}); 
+            }
+
+            if (!LJ::is_ascii($headersubject)) {
+                $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
+            }
+
+
+            my $fromname = $up->{'user'} ? "$up->{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
+            my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
+                                       'To' => $ujp->{'email'},
+                                       'Subject' => ($headersubject || "Reply to your post..."),
+                                       'Type' => 'multipart/alternative');
+            my $text = "";
+            if ($parentcomment)  {
+                $text .= "$who$whouser replied to another comment somebody left in your $LJ::SITENAMESHORT post.  The comment they replied to was:\n\n";
+                $text .= &indent($parentcomment, ">");
+            } else {
+                $text .= "$who$whouser replied to your $LJ::SITENAMESHORT post in which you said:\n\n";
+                $text .= &indent($item->{'event'}, ">");
+            }
+            $text .= "\n\nTheir reply was:\n\n";
+            $text .= &indent("Subject: $textsubject\n\n$FORM{'body'}");
+            $text .= "\n\nYou can view the discussion here:\n\n";
+            $text .= "     $threadurl\n\n";
+            $text .= "You can reply to the comment directly here:\n\n";
+            $text .= "     " . $talkargs->("replyto=$dtalkid") . "\n\n";
+            $text .= "Or you can view all comments to the entry on this page:\n\n";
+            $text .= "     $talkurl\n\n";
+            $text .= "-- $LJ::SITENAME\n\n";
+            $text .= "(if you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options)\n";
+
+            if ($LJ::UNICODE && $encoding ne "UTF-8") {
+                $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding}); 
+            }
+            $part = $msg->attach('Type' => 'TEXT',
+                                 'Data' => $text,
+                                 'Encoding' => 'quoted-printable',
+                                 );
+            $part->attr("content-type.charset" => $encoding)
+                if $LJ::UNICODE;
+
+            
+            my $html = "";
+            $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\"></head><BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
+            if ($parentcomment)  {
+                $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$talkurl\">your $LJ::SITENAMESHORT post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
+                my $cleancom = $parentcomment;
+                LJ::CleanHTML::clean_comment(\$cleancom, $parentpreformatted);
+                $html .= &blockquote($cleancom);
+            } else {
+                $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$talkurl\">your $LJ::SITENAMESHORT post</A> in which you said:</TD></TR></TABLE>\n";
+                my $clean = $item->{'event'};
+                LJ::CleanHTML::clean_event(\$clean, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'}});
+                $html .= &blockquote($clean);
+            }
+            $html .= "\n\nTheir reply was:\n\n";
+            my $clean = $FORM{'body'};
+            LJ::CleanHTML::clean_comment(\$clean, $FORM{'prop_opt_preformatted'});
+            $html .= &blockquote("<TT><B>Subject: </B> $textsubject</TT> $icon<HR>$clean");
+
+            # begin form
+            $html .= "You can <a href=\"$threadurl\">view the thread</a> starting from this comment, or <a href=\"$talkurl\">view all comments</a> to this entry.<br />";
+            $html .= "You can also reply <a href=\"" . $talkargs->("replyto=$dtalkid") . "\">at the webpage</a>, or here:";
+
+            $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
+            $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
+            $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
+            $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$ditemid>";
+            $html .= "<INPUT TYPE=HIDDEN NAME=journal VALUE='$u->{'user'}'>";
+            $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$ujp->{'user'}\">";
+            $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $ujp->{'password'})) . "\">";
+            $html .= "<input type=hidden name=encoding value=$encoding>" unless $encoding eq "UTF-8";
+
+            my $newsub = $FORM{'subject'};
+            unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
+            $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . LJ::ehtml($newsub) . "\">";
+            $html .= "<P><B>Message</B><BR><TEXTAREA ROWS=10 COLS=50 WRAP=SOFT NAME=body></TEXTAREA>";
+            $html .= "<BR><INPUT TYPE=SUBMIT VALUE=\"Post Reply\">";
+            $html .= "</FORM></BLOCKQUOTE>\n";
+            # end form
+
+            $html .= "<FONT SIZE=-1>(if you'd prefer to not get these updates, go to <A HREF=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</A> and turn off the relevant options)</FONT>\n";
+            $html .= "</BODY>\n";
+
+            if ($LJ::UNICODE && $encoding ne "UTF-8") {
+                $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
+            }
+
+            if ($ujp->{'opt_htmlemail'} eq "Y") 
+            {
+                $part = $msg->attach('Type' => 'text/html',
+                                     'Data' => $html,
+                                     'Encoding' => 'quoted-printable',
+                                     );
+                $part->attr("content-type.charset" => $encoding)
+                    if $LJ::UNICODE;
+            }
+            
+            $msg->send;
+        } else {
+            $debug .= "don't send mail to journal owner.<ul>\n";
+            $debug .= "<li>ujp--opt_gettalkemail = $ujp->{'opt_gettalkemail'}\n";
+            $debug .= "<li>userpost = $userpost\n";
+            $debug .= "<li>ujp--user = $ujp->{'user'}\n";
+            $debug .= "<li>ujp--email = $ujp->{'email'}\n";
+            $debug .= "<li>parentmailed = $parentmailed\n";
+            $debug .= "<li>ujp--status = $ujp->{'status'}\n";
+            $debug .= "</ul>\n";
+
+        }
+    }
+
+    # Yeah, we're done.
+    my $commentlink = $talkargs->("view=$dtalkid#t$dtalkid");
+
+    $ret .= "<?h1 $ML{'.success.title'} h1?>";
+    if ($state eq 'A') {
+        $ret .= "<?p " . BML::ml('.success.message', {'link'=>$commentlink}) . " p?>";
+    } elsif ($state eq 'S' && $u->{'journaltype'} eq 'C') {
+        $ret .= "<?p " . BML::ml('.success.screened.comm', {'link'=>$commentlink}) . " p?>";
+    } else {
+        $ret .= "<?p " . BML::ml('.success.screened.user', {'link'=>$commentlink}) . " p?>";
+    }
+
+    if ($unscreened) {
+        $ret .= "<?p $ML{'.success.unscreened'} p?>";
+    }
+
+    if ($didlogin) {
+        $ret .= "<?p $ML{'.success.loggedin'} p?>";
+    }
+
+    if ($DEBUG) {
+        $ret .= "<p>$debug</p>";
+    }
+    return $ret;
+
+    # entryid-commentid-password hash
+    sub ecphash {
+        my ($itemid, $talkid, $password) = @_;
+        return "ecph-" . md5_hex($itemid . $talkid . $password);
+    }
+
+    sub indent {
+        my $a = shift;
+        my $leadchar = shift || " ";
+        return Text::Wrap::fill("$leadchar  ", "$leadchar  ", $a);
+    }
+
+    sub blockquote {
+        my $a = shift;
+        return "<blockquote style='BORDER-LEFT: #000040 2px solid; MARGIN-LEFT: 0px; MARGIN-RIGHT: 0px; PADDING-LEFT: 15px; PADDING-RIGHT: 0px'>$a</blockquote>";
+    }
+
 }
-
 _code?>
-
-
 
 <=body
 page?><?_c <LJDEP>
