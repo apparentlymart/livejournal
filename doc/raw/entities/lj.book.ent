@@ -12,9 +12,11 @@
 <!-- Installation Procedures -->
 
 <!ENTITY lj.install.index                 SYSTEM "../lj.book/install/index.xml">
+<!ENTITY lj.install.reqs                  SYSTEM "../lj.book/install/reqs.xml">
 <!ENTITY lj.install.general_setup         SYSTEM "../lj.book/install/general_setup.xml">
 <!ENTITY lj.install.apache_setup          SYSTEM "../lj.book/install/apache_setup.xml">
 <!ENTITY lj.install.perl_setup            SYSTEM "../lj.book/install/perl_setup.xml">
+<!ENTITY lj.install.perl.module.list      SYSTEM "../lj.book/install/perl.module.gen.xml">
 <!ENTITY lj.install.mysql_setup           SYSTEM "../lj.book/install/mysql_setup.xml">
 <!ENTITY lj.install.ljconfig              SYSTEM "../lj.book/install/ljconfig.xml">
 <!ENTITY lj.install.ljconfig.vars         SYSTEM "../lj.book/install/ljconfig.vars.xml">

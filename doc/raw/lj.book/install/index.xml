@@ -16,6 +16,7 @@
       Community.
     </para>
   </partintro>
+  &lj.install.reqs;
   &lj.install.perl_setup;
   &lj.install.general_setup;
   &lj.install.apache_setup;

@@ -144,6 +144,11 @@ chdir "$docraw_dir/s1" or die;
 system("./s1ref2db.pl > $docraw_dir/ljp.book/styles/s1/ref.gen.xml")
     and die "Error generating s1 variable reference\n";
 
+print "Generating Perl Module List\n";
+chdir "$docraw_dir/build/install" or die;
+system("./modulelist2db.pl > $docraw_dir/lj.book/install/perl.module.gen.xml")
+    and die "Error generating perl module list\n";
+
 print "Converting to HTML\n";
 mkdir $output_dir, 0755 unless -d $output_dir;
 chdir $output_dir or die "Couldn't chdir to $output_dir\n";

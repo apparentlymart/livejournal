@@ -1,0 +1,43 @@
+<chapter id="lj.install.reqs">
+  <title>Requirements</title>
+  <formalpara><title>Software</title><para>
+    The main software components you need for a working LiveJournal installation
+    are as follows (the recommended version is noted):
+    <variablelist>
+      <varlistentry>
+        <term>Perl</term>
+        <listitem><simpara>Version 5.6.1</simpara></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>MySQL</term>
+        <listitem><simpara>Version 3.23.57</simpara></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Apache</term>
+        <listitem><simpara>Version 1.3.28</simpara></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>mod_perl</term>
+        <listitem><simpara>Version 1.28</simpara></listitem>
+      </varlistentry>
+    </variablelist>
+  </para></formalpara>
+  <formalpara><title>Perl Module Dependencies</title>
+    A complete list of modules need to run a LiveJournal installation can be found at <xref linkend="lj.install.perl_setup.modules" />.
+    Some modules such as GD and Compress::Zlib require certain system libraries to be pre-installed
+    on your machine in order to work. The author-provided README files for perl modules explain what is necessary.
+  </formalpara>
+  <formalpara><title>Hardware</title><para>
+    There are no specific hardware requirements for a LiveJournal installation, but Apache/mod_perl
+    and MySQL can utilize a lot of memory very quickly. Determining the right amount of processor
+    speed, storage space, and RAM depends on how busy your LiveJournal installation will be. A
+    simple rule of thumb to remember is that posts and comments drive site traffic, not necessarily the presence
+    of more users.
+  </para></formalpara>
+</chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "chapter")
+End:
+-->

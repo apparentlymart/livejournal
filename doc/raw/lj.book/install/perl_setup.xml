@@ -37,72 +37,8 @@
       on your machine in order to work. Please read the author-provided README files for each
       module before proceeding further.  
     </para></note>
-    <formalpara><title>Debian Install</title><para>
-      If you're using Debian this should get every required module:
-    </para></formalpara>
-
-<screen><prompt>#</prompt> <userinput>apt-get install libdbi-perl libdbd-mysql-perl libdigest-md5-perl \
-libimage-size-perl libmime-lite-perl libmime-perl \
-libmime-base64-perl liburi-perl libhtml-tagset-perl \
-libhtml-parser-perl libwww-perl libmailtools-perl \
-libunicode-maputf8-perl libstorable-perl</userinput></screen>
-
-    <para>For the optional modules just run:</para>
-
-<screen><prompt>#</prompt> <userinput>apt-get install libcompress-zlib-perl libnet-perl \
-libgd-graph-perl libproc-process-perl libsoap-lite-perl \
-libxml-rss-perl libstring-crc32-perl</userinput></screen>
-        
-    <formalpara><title>Using CPAN</title><para>
-      Otherwise you'll want to use CPAN to install the modules by performing the following steps:
-    </para></formalpara>
-
-    <para>From the root prompt on your server, invoke the CPAN shell:</para>
-
-<screen><prompt>#</prompt> <userinput>perl -MCPAN -e shell</userinput></screen>
-
-    <para>
-      Once the Perl interpreter has loaded (and been configured), you can install
-      modules by issuing the command <literal>install <replaceable>MODULENAME</replaceable></literal>.
-    </para>
-    <para>The first thing you should do is upgrade your CPAN:</para>
-
-<screen><prompt>cpan></prompt> <userinput>install Bundle::CPAN</userinput></screen>
-
-    <para>Once it's done, type:</para>
-
-      <screen><prompt>cpan></prompt> <userinput>reload cpan</userinput></screen>
-
-    <para>Now, install the following modules:</para>
-    <itemizedlist>
-      <title>Required</title>
-      <listitem><simpara>DBD::mysql</simpara></listitem>
-      <listitem><simpara>DBI</simpara></listitem>
-      <listitem><simpara>Digest::MD5</simpara></listitem>
-      <listitem><simpara>Image::Size</simpara></listitem>
-      <listitem><simpara>MIME::Lite</simpara></listitem>
-      <listitem><simpara>MIME::Words</simpara></listitem>
-      <listitem><simpara>MIME::Base64</simpara></listitem>
-      <listitem><simpara>URI::URL</simpara></listitem>
-      <listitem><simpara>HTML::Tagset</simpara></listitem>
-      <listitem><simpara>HTML::Parser</simpara></listitem>
-      <listitem><simpara>LWP::Simple</simpara></listitem>
-      <listitem><simpara>LWP::UserAgent</simpara></listitem>
-      <listitem><simpara>Mail::Address</simpara></listitem>
-      <listitem><simpara>Unicode::MapUTF8</simpara></listitem>
-      <listitem><simpara>Storable</simpara></listitem>
-    </itemizedlist>
-    <itemizedlist>
-      <title>Optional</title>
-      <listitem><simpara>Compress::Zlib</simpara></listitem>
-      <listitem><simpara>Net::SMTP</simpara></listitem>
-      <listitem><simpara>GD::Graph</simpara></listitem>
-      <listitem><simpara>Proc::ProcessTable</simpara></listitem>
-      <listitem><simpara>SOAP::Lite</simpara></listitem>
-      <listitem><simpara>XML::RSS</simpara></listitem>
-      <listitem><simpara>String::CRC32</simpara></listitem>
-    </itemizedlist>
-    <note>
+    &lj.install.perl.module.list;
+    <warning>
       <para>
         There used to be a few custom <filename>LJ::</filename> modules that
         needed installing. Those no longer need to be installed on the system,
@@ -111,7 +47,7 @@ libxml-rss-perl libstring-crc32-perl</userinput></screen>
         remove them since Perl will prefer system-level ones over the (newer)
         local ones.
       </para>
-    </note>
+    </warning>
     <important><para>
       To ensure that you have installed the necessary modules, be sure to
       run the included tool: <filename><envar>$LJHOME</envar>/bin/checkconfig.pl</filename>. 
