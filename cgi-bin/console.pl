@@ -4,6 +4,7 @@
 # lib: cgi-bin/conmoodtheme.pl, cgi-bin/contopic.pl
 # lib: cgi-bin/conban.pl. cgi-bin/conshared.pl
 # lib: cgi-bin/consuspend.pl, cgi-bin/confaq.pl
+# lib: cgi-bin/console-local.pl
 # </LJDEP>
 
 package LJ::Con;
@@ -46,6 +47,12 @@ sub execute
     my $rv = &{$cmd->{'handler'}}($dbh, $remote, $args, $outlist);
     return $rv;
 }
+
+# load the site-specific console commands, if present.
+if (-e "$LJ::HOME/cgi-bin/console-local.pl") {
+    do "$LJ::HOME/cgi-bin/console-local.pl";
+}
+
 
 $cmd{'foreach_entry'} = {
     'handler' => \&foreach_entry,
