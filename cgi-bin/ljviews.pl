@@ -751,15 +751,17 @@ sub create_view_friends
     my %owners;
     my $filter;
     my $group;
+    my $common_filter = 1;
 
     if (defined $FORM{'filter'} && $remote && $remote->{'user'} eq $user) {
         $filter = $FORM{'filter'}; 
+        $common_filter = 0;
     } else {
         if ($opts->{'pathextra'}) {
             $group = $opts->{'pathextra'};
             $group =~ s!^/!!;
             $group =~ s!/$!!;
-            if ($group) { $group = LJ::durl($group); }
+            if ($group) { $group = LJ::durl($group); $common_filter = 0;}
         }
         my $qgroup = $dbr->quote($group || "Default View");
         my ($bit, $public) = $dbr->selectrow_array("SELECT groupnum, is_public " .
@@ -780,6 +782,7 @@ sub create_view_friends
             'itemshow' => 1,
             'skip' => 0,
             'filter' => $filter,
+            'common_filter' => $common_filter,
         });
         my $first = @items ? $items[0]->{'itemid'} : 0;
 
@@ -810,6 +813,7 @@ sub create_view_friends
         'itemshow' => $itemshow,
         'skip' => $skip,
         'filter' => $filter,
+        'common_filter' => $common_filter,
         'owners' => \%owners,
         'idsbycluster' => \%idsbycluster,
         'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
