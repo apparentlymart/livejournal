@@ -32,8 +32,6 @@
  
  my $etime = 0;
  if ($FORM{'expire'} eq "never") { $etime = time()+60*60*24*60; }
- BMLClient::set_cookie("ljuser", $user, $etime, $LJ::COOKIE_PATH);
- BMLClient::set_cookie("ljhpass", "$user:$hpassword", $etime, $LJ::COOKIE_PATH);
  BMLClient::set_cookie("ljuser", $user, $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
  BMLClient::set_cookie("ljhpass", "$user:$hpassword", $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
 

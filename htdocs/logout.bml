@@ -6,18 +6,13 @@
  my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
  $body = "";
 
+ LJ::run_hooks("post_logout");
+
  if ($BMLClient::COOKIE{'ljuser'}) 
  {
-     my $site_domain = $SITEROOT;
-     $site_domain =~ s,^\w+://,,;
-     $site_domain =~ s,(:\d+)?/.*,,;
+     BMLClient::set_cookie("ljuser", "", undef, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+     BMLClient::set_cookie("ljhpass", "", undef, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
 
-     foreach my $dom ($LJ::DOMAIN, $LJ::COOKIE_DOMAIN, $site_domain)
-     {
-	 BMLClient::set_cookie("ljuser", "", undef, $LJ::COOKIE_PATH, $dom);
-	 BMLClient::set_cookie("ljhpass", "", undef, $LJ::COOKIE_PATH, $dom);
-	 BMLClient::set_cookie("ljfastserver", "", undef, $LJ::COOKIE_PATH, $dom);
-     }
      delete $BMLClient::COOKIE{'ljhpass'};
      delete $BMLClient::COOKIE{'ljuser'};
 

@@ -21,12 +21,9 @@ sub reset
     $USERID = "";
 
     $ENV{'HTTP_COOKIE'} .= "";  # quiet warning
-    foreach (split(/;\s+/, $ENV{'HTTP_COOKIE'}))
-    {
-	if ($_ =~ /(.*)=(.*)/)
-	{
-	    $COOKIE{$1} = $2;
-	}
+    foreach (split(/;\s+/, $ENV{'HTTP_COOKIE'})) {
+	next unless ($_ =~ /(.*)=(.*)/);
+	$COOKIE{BMLUtil::durl($1)} = BMLUtil::durl($2);
     }
 }
 
@@ -102,6 +99,16 @@ sub user_id
 sub set_cookie
 {
     my ($name, $value, $expires, $path, $domain) = @_;
+
+    # let the domain argument be an array ref, so callers can set
+    # cookies in both .foo.com and foo.com, for some broken old browsers.
+    if ($domain && ref $domain eq "ARRAY") {
+	foreach (@$domain) {
+	    set_cookie($name, $value, $expires, $path, $_);
+	}
+	return;
+    }
+
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($expires);
     $year+=1900;
 

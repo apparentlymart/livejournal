@@ -5,6 +5,7 @@
 # lib: cgi-bin/ljconfig.pl, cgi-bin/ljlang.pl, cgi-bin/ljpoll.pl
 # link: htdocs/paidaccounts/index.bml, htdocs/users, htdocs/view/index.bml
 # hook: canonicalize_url, name_caps, name_caps_short, post_create
+# hook: validate_get_remote
 # </LJDEP>
 
 use strict;
@@ -989,7 +990,7 @@ sub get_urls
 {
     my $text = shift;
     my @urls;
-    while ($text =~ s!http://[^\s\"\'\>]+!!) {
+    while ($text =~ s!http://[^\s\"\'\<\>]+!!) {
 	push @urls, $&;
     }
     return @urls;
@@ -1940,48 +1941,88 @@ sub make_text_link
 #      and returns a hashref representing them
 # returns: hashref containing 'user' and 'userid' if valid user, else
 #          undef.
-# args: dbarg, errors?, cgi?
-# des-errors: <b>FIXME:</b> no longer used. use undef or nothing.
+# args: dbarg, criterr?, cgi?
+# des-criterr: scalar ref to set critical error flag.  if set, caller
+#              should stop processing whatever it's doing and complain
+#              about an invalid login with a link to the logout page.
 # des-cgi: Optional CGI.pm reference if using in a script which
 #          already uses CGI.pm.
 # </LJFUNC>
 sub get_remote
 {
     my $dbarg = shift;	
-    my $errors = shift;
-    my $cgi = shift;   # optional CGI.pm reference
+    my $criterr = shift; 
+    my $cgi = shift;
 
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
-    ### are they logged in?
-    my $remuser = $cgi ? $cgi->cookie('ljuser') : $BMLClient::COOKIE{"ljuser"};
-    return undef unless ($remuser);
+    $$criterr = 0;
 
-    my $hpass = $cgi ? $cgi->cookie('ljhpass') : $BMLClient::COOKIE{"ljhpass"};
+    my $cookie = sub {
+	return $cgi ? $cgi->cookie($_[0]) : $BMLClient::COOKIE{$_[0]};
+    };
+
+    my ($user, $userid, $caps);
+
+    my $validate = sub {
+	my $a = shift;
+	# let hooks reject credentials, or set criterr true:
+	my $hookparam = {
+	    'user' => $a->{'user'},
+	    'userid' => $a->{'userid'},
+	    'dbs' => $dbs,
+	    'caps' => $a->{'caps'},
+	    'criterr' => $criterr,
+	    'cookiesource' => $cookie,
+	};
+	my @r = LJ::run_hooks("validate_get_remote", $hookparam);
+	return undef if grep { ! $_->[0] } @r;
+	return 1;
+    };
+
+    ### are they logged in?
+    unless ($user = $cookie->('ljuser')) {
+	$validate->();
+	return undef;
+    }
 
     ### does their login password match their login?
-    return undef unless ($hpass =~ /^$remuser:(.+)/);
-    my $remhpass = $1;
-
-    ### do they exist?
-    my $userid = LJ::get_userid($dbh, $remuser);
-    $userid += 0;
-    return undef unless ($userid);
-
-    ### is their password correct?
-    my $correctpass;
-    unless (ref $LJ::AUTH_CHECK eq "CODE") {
-	my $sth = $dbr->prepare("SELECT password FROM ".
-				"user WHERE userid=$userid");
-	$sth->execute;
-	($correctpass) = $sth->fetchrow_array;
+    my $hpass = $cookie->('ljhpass');
+    unless ($hpass =~ /^$user:(.+)/) {
+	$validate->();
+	return undef;
     }
-    return undef unless
-      LJ::auth_okay($remuser, undef, $remhpass, $correctpass);
+    my $remhpass = $1;
+    my $correctpass;     # find this out later.
 
-    return { 'user' => $remuser,
+    unless (ref $LJ::AUTH_CHECK eq "CODE") {
+	my $quser = $dbr->quote($user);
+	($userid, $correctpass, $caps) = 
+	    $dbr->selectrow_array("SELECT userid, password, caps ".
+				  "FROM user WHERE user=$quser");
+
+	# each handler must return true, else credentials are ignored:
+	return undef unless $validate->({
+	    'userid' => $userid,
+	    'user' => $user,
+	    'caps' => $caps,
+	});
+
+    } else {
+	$userid = LJ::get_userid($dbh, $user);
+    }
+    
+    unless ($userid) {
+	$validate->();
+	return undef;
+    }
+
+    return undef unless
+      LJ::auth_okay($user, undef, $remhpass, $correctpass);
+
+    return { 'user' => $user,
 	     'userid' => $userid, };
 }
 

@@ -36,6 +36,10 @@
     form
     expiretime  - unix time cookie expires or 0 for on browser close
 
+* post_logout()
+
+  clear cookies your local code might've set.
+
 * post_changepassword(\%args)
 
   action to take after changing password, before HTML is sent to 
@@ -74,3 +78,20 @@
     dbs
     u
     remote
+
+* validate_get_remote(\%args)
+
+  This hook lets you ignore the remote user's cookies or flag them
+  as intentionally forged to LJ::get_remote().  If you return a 
+  true value, no action is taken.  If you return false, LJ::get_remote()
+  returns undef.  You can optionally set $$criterr to something true
+  as well.
+
+  arg keys:
+    user          - may be "" or undef
+    userid        - may be 0
+    dbs
+    caps	
+    criterr       - scalar ref
+    cookiesource  - sub ref: takes cookie name, returns cookie value
+

@@ -144,7 +144,15 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
 	next REQUEST;
     }
 
-    my $remote = LJ::get_remote($dbs, undef, $cgi);
+    my $criterr = 0;
+    my $remote = LJ::get_remote($dbs, \$criterr, $cgi);
+
+    # check for faked cookies here, since this is pretty central.
+    if ($criterr) {
+	print "Content-type: text/html\n\n";
+	print "Invalid cookies.  Try <a href='$LJ::SITEROOT/logout.bml'>logging out</a> and then logging back in.\n";
+	next REQUEST;
+    }
 
     my %headers = ();
     my $opts = {
