@@ -17,7 +17,7 @@ and also:
 
    %%siteroot%%/~%%username%%/
 
-Below is your LiveJournal username and password:
+Below is your %%sitename%% username and password:
 
    Username: %%username%%
    Password: %%password%%
