@@ -159,6 +159,7 @@ body<=
          $FORM{"prop_opt_preformatted"} = $FORM{"prop_opt_preformatted"} ? 1 : 0;
          $FORM{"prop_opt_nocomments"} = $FORM{"prop_opt_nocomments"} ? 1 : 0;
          $FORM{"prop_opt_backdated"} = $FORM{"prop_opt_backdated"} ? 1 : 0;
+         $FORM{"prop_opt_noemail"} = $FORM{"prop_opt_noemail"} ? 1 : 0;
 
          ## see if an "other" mood they typed in has an equivalent moodid
          if ($FORM{'prop_current_mood'} ne "") 
@@ -298,6 +299,12 @@ body<=
          {
              my $check = $props{'opt_nocomments'} ? "CHECKED" : "";
              $ret .= "&nbsp;<B>Disallow Comments:</B> <INPUT TYPE=CHECKBOX NAME=\"prop_opt_nocomments\" VALUE=1 $check>";
+         }
+
+         ### don't email the poster
+         {
+             my $check = $props{'opt_noemail'} ? "checked" : "";
+             $ret .= "&nbsp;<b>Don't email Comments:</b> <input type=\"checkbox\" name=\"prop_opt_noemail\" value=\"1\" $check>";
          }
 
          ### backdating

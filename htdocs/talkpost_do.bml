@@ -619,6 +619,7 @@ body<=
 
      # send mail to journal owner
      if ($ujp->{'opt_gettalkemail'} eq "Y" &&
+         !$logprops{$itemid}->{'opt_noemail'} &&
          $userpost ne $ujp->{'user'} &&
          $ujp->{'email'} ne $parentmailed &&
          $ujp->{'status'} eq "A") 

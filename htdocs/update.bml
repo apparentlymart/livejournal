@@ -290,6 +290,8 @@
          $$body .= "&nbsp; ";
          $checked = $FORM{'prop_opt_nocomments'} ? "CHECKED" : "";
          $$body .= "<B>Disallow Comments:</B><INPUT TYPE=CHECKBOX NAME=\"prop_opt_nocomments\" VALUE=1 $checked>";
+         $checked = $FORM{'prop_opt_noemail'} ? "checked" : "";
+         $$body .= "&nbsp; <b>Don't email Comments:</b><input type=\"checkbox\" name=\"prop_opt_noemail\" value=\"1\" $checked>";
 
          $checked = $FORM{'prop_opt_backdated'} ? "CHECKED" : "";
          $$body .= "<P><b>Backdate Entry:</b><INPUT TYPE=CHECKBOX NAME=\"prop_opt_backdated\" VALUE=1 $checked> (won't show on friends view)";
