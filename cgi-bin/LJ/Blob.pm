@@ -8,6 +8,7 @@ package LJ::Blob;
 
 my %bc_cache = ();
 my %bc_reader_cache = ();
+my %bc_path_reader_cache = ();
 
 # read-write (i.e. HTTP connection to BlobServer, with NetApp NFS mounted)
 sub get_blobclient {
@@ -59,6 +60,22 @@ sub get {
     my $bc = get_blobclient_reader($u);
     return $bc->get($u->{blob_clusterid}, $u->{userid}, $domain, $fmt, $bid);
 }
+
+# Return a path relative to the specified I<root> for the given arguments.
+# args: root, u, domain, fmt, bid
+# des-root: Root path
+# des-fmt: string file extension ("jpg", "gif", etc)
+# des-bid: numeric blob id for this domain
+# des-domain: string name of domain ("userpic", "phonephost", etc)
+sub get_rel_path {
+    my ( $root, $u, $domain, $fmt, $bid ) = @_;
+
+    my $bcid = _load_bcid( $u );
+    my $bc = $bc_path_reader_cache{ "$bcid:$root" } ||= new BlobClient::Local ({ path => $root });
+
+    return $bc->make_path( $bcid, $u->{userid}, $domain, $fmt, $bid );
+}
+
 
 sub get_stream {
     my ($u, $domain, $fmt, $bid, $callback) = @_;
