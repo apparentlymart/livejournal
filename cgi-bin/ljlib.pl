@@ -105,6 +105,21 @@ sub dbs_selectrow_array
     return undef;
 }
 
+# takes a dbset and query.  will try query on slave first, then master if not in slave yet.
+sub dbs_selectrow_hashref
+{
+    my $dbs = shift;
+    my $query = shift;
+
+    my @dbl = ($dbs->{'dbh'});
+    if ($dbs->{'has_slave'}) { unshift @dbl, $dbs->{'dbr'}; }
+    foreach my $db (@dbl) {
+	my $ans = $db->selectrow_hashref($query);
+	return $ans if defined $ans;
+    }
+    return undef;
+}
+
 sub get_friend_items
 {
     my $dbarg = shift;
@@ -3128,6 +3143,18 @@ sub get_cluster_master
     return LJ::get_dbh("cluster${id}");
 }
 
+sub get_cluster_set
+{
+    my $arg = shift;
+    my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
+    my $dbs = {};
+    $dbs->{'dbh'} = LJ::get_dbh("cluster${id}");
+    $dbs->{'dbr'} = LJ::get_dbh("cluster${id}slave");
+    $dbs->{'has_slave'} = defined $dbs->{'dbr'};
+    $dbs->{'reader'} = $dbs->{'has_slave'} ? $dbs->{'dbr'} : $dbs->{'dbh'};
+    return $dbs;    
+}
+
 # <LJFUNC>
 # name: LJ::make_dbs
 # des: Makes a $dbs structure from a master db
@@ -3826,7 +3853,6 @@ sub load_log_props
     my ($dbarg, $listref, $hashref) = @_;
 
     my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
     my $itemin = join(", ", map { $_+0; } @{$listref});

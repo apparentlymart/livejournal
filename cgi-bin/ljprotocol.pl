@@ -502,6 +502,14 @@ sub postevent
 	}
     }
 
+    # record journal's disk usage (clustered users only)
+    if ($clustered)
+    {
+	my $bytes = length($event) + length($req->{'subject'});
+	$dbcm->do("REPLACE INTO dudata (userid, area, areaid, bytes) ".
+		  "VALUES ($ownerid, 'L', $itemid, $bytes)");
+    }    
+
     my $qevent = $dbh->quote($event);
     $event = "";
 
@@ -835,6 +843,14 @@ sub editevent
 	} else {
 	    $dbh->do("REPLACE INTO logsubject (itemid, subject) VALUES ($qitemid, $qsubject)");
 	}
+
+	# update disk usage
+	if ($clustered) {
+	    my $bytes = length($event) + length($req->{'subject'});
+	    $dbcm->do("REPLACE INTO dudata (userid, area, areaid, bytes) ".
+		      "VALUES ($ownerid, 'L', $qitemid, $bytes)");
+	}
+
 	return fail($err,501,$dbcm->errstr) if $dbcm->err;
     }
     
@@ -1121,8 +1137,7 @@ sub getevents
 	$count = 0;
 	my %props = ();
 	if ($clustered) {
-	    LJ::load_props($dbs, "log");
-	    LJ::load_log_props2($dbh, $ownerid, \@itemids, \%props);
+	    LJ::load_log_props2($dbcr, $ownerid, \@itemids, \%props);
 	} else {
 	    LJ::load_log_props($dbcr, \@itemids, \%props);
 	}
