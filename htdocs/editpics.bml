@@ -1,6 +1,6 @@
 (=_CODE
 
- $title = "";
+ $title = "Edit User Pictures";
  $body = "";
  @errors = ();
  
