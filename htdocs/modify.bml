@@ -13,14 +13,6 @@ body<=
     use vars qw(%GET %POST);
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
-    return "<?badinput?>" unless LJ::text_in(\%POST);
-
-    my $ret;
-    
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-    my $sth;
 
     my $remote = LJ::get_remote();
     return LJ::bad_input("You must be logged in to modify your journal")
@@ -30,6 +22,15 @@ body<=
     my $u = LJ::get_authas_user($authas);
     return LJ::bad_input("You could not be authenticated as the specified user.")
         unless $u;
+
+    return $LJ::MSG_READONLY_USER if LJ::get_cap($remote, "readonly");
+
+    ### user is now authenticated ###
+
+    my $dbs = LJ::get_dbs();
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    my $sth;
 
     my $capstyles = LJ::get_cap($u, "styles");
     
@@ -42,6 +43,7 @@ body<=
 
     # not submitting a post, show edit form
     unless (LJ::did_post()) {
+        my $ret;
 
         # user switcher
         $ret .= "<form action='modify.bml' method='get'>\n";
@@ -253,6 +255,8 @@ body<=
 
     # if a POST, update their info
     if (LJ::did_post()) {
+
+        return "<?badinput?>" unless LJ::text_in(\%POST);
 
         # database error reporting
         my $dberr = sub {
