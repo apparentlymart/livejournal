@@ -152,8 +152,8 @@
     }
 
     $body .= "<?h1 $ML{'.login.head'} h1?>";
-    $body .= "<?p\n" .BML::ml(".login.text1", {'sitename' => $LJ::SITENAME}) ."p?>\n";
-    $body .= "<?p\n $ML{'.login.text2'} p?>\n";
+    $body .= "<?p " . BML::ml(".login.text1", {'sitename' => $LJ::SITENAME}) . " p?>\n";
+    $body .= "<?p $ML{'.login.text2'} p?>\n";
         
     $body .= "<form action='login.bml' method='post'>\n";
 
