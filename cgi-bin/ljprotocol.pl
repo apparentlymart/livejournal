@@ -27,6 +27,7 @@ sub error_message
              "150" => "Can't post as non-user",
              "151" => "Banned from journal",
              "152" => "Can't make back-dated entries in non-personal journal.",
+             "153" => "Incorrect time value",
 
              # Client Errors
              "200" => "Missing required argument(s)",
@@ -510,10 +511,19 @@ sub postevent
     my $posterid = $u->{'userid'};
 
     # make the proper date format
-    my $qeventtime = $dbh->quote(sprintf("%04d-%02d-%02d %02d:%02d",
-                                         $req->{'year'}, $req->{'mon'},
-                                         $req->{'day'}, $req->{'hour'},
-                                         $req->{'min'}));
+    my $eventtime = sprintf("%04d-%02d-%02d %02d:%02d",
+                                $req->{'year'}, $req->{'mon'},
+                                $req->{'day'}, $req->{'hour'},
+                                $req->{'min'});
+    my $qeventtime = $dbh->quote($eventtime);
+
+    # are they trying to post back in time?
+    LJ::load_user_props($dbs, $u, "newesteventtime");
+    if ($posterid == $ownerid && $u->{'newesteventtime'} && 
+        $eventtime lt $u->{'newesteventtime'} &&!$req->{'props'}->{'opt_backdated'}) {
+        return fail($err, 153, "You're trying to post an entry in the past without the backdate option turned on. Please check your computer's clock or, if you really mean to post in the past, use the backdate option.");
+    }
+
     my $qsubject = $dbh->quote($req->{'subject'});
     my $qallowmask = $req->{'allowmask'}+0;
     my $qsecurity = "public";
@@ -625,6 +635,10 @@ sub postevent
             LJ::record_meme($dbs, $url, $posterid, $ditemid, $jid);
         }
     }
+
+    # record the eventtime of the last update (for own journals only)
+    LJ::set_userprop($dbs, $posterid, 'newesteventtime', $eventtime)
+        if $posterid == $ownerid and not $req->{'props'}->{'opt_backdated'};
 
     # record journal's disk usage (clustered users only)
     if ($clustered)

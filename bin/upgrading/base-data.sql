@@ -1003,6 +1003,8 @@ INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope
 UPDATE userproplist SET des='Encoding in which to mail comments to the user. Defaults to UTF-8.',prettyname='Mail Encoding',indexed='0',scope='general',datatype='num' WHERE name='mailencoding';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('msn', '1', 'MSN Username', 'char', 'MSN Username', 'general');
 UPDATE userproplist SET des='MSN Username',prettyname='MSN Username',indexed='1',scope='general',datatype='char' WHERE name='msn';
+INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('newesteventtime', '0', 'Newest event time', 'char', 'Time (user-side) of the user\'s last entry in their personal journal', 'general');
+UPDATE userproplist SET des='Time (user-side) of the user\'s last entry in their personal journal',prettyname='Newest event time',indexed='0',scope='general',datatype='char' WHERE name='newesteventtime';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('opt_bdaymail', '1', 'Get Birthday Reminders', 'bool', '0: don\'t get birthday reminder mail, 1: do get birthday reminder mail', 'general');
 UPDATE userproplist SET des='0: don\'t get birthday reminder mail, 1: do get birthday reminder mail',prettyname='Get Birthday Reminders',indexed='1',scope='general',datatype='bool' WHERE name='opt_bdaymail';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('opt_blockrobots', '1', 'Block Robots & Spiders', 'bool', '1: don\'t allow robots, 0: do', 'general');
