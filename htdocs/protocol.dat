@@ -187,6 +187,14 @@ The most important mode, this is how a user actually submits a new log entry to 
 .des
 The unique number the server assigned to this post.  Currently nothing else in the protocol requires the use of this number so it's pretty much useless, but somebody requested it be returned, so it is.
 }
+{ anum
+.des
+The authentication number generated for this entry.  It can be used by the client to generate URLs, but that is not recommended.  (See the returned 'url' element if you want to link to a post.)
+}
+{ url
+.des
+The permanent link address to this post.  This is an opaque string--you should store it as is.  While it will generally follow a predictable pattern, there is no guarantee of any particular format for these, and it may change in the future.
+}
 .request
 { event
 .des
@@ -586,6 +594,19 @@ Set an arbitrary (but restricted) meta-data property to this log item.  If a key
 If editing a shared journal entry, include this key and the username you wish to edit the entry in.  By default, you edit the entry as if it were in user "user"'s journal, as specified above.
 .optional
 1
+}
+.response
+{ itemid
+.des
+The unique number the server assigned to this post.
+}
+{ anum
+.des
+The authentication number for this entry.  It can be used by the client to generate URLs, but that is not recommended.  (See the returned 'url' element if you want to link to a post.)
+}
+{ url
+.des
+The permanent link address to this post.  This is an opaque string--you should store it as is.  While it will generally follow a predictable pattern, there is no guarantee of any particular format for these, and it may change in the future.
 }
 }
 

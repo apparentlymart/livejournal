@@ -138,6 +138,14 @@ The key number used to calculate the public itemid ID number for URLs.
 The unique number the server assigned to this post. Currently nothing else in the protocol requires the use of this number so it's pretty much useless, but somebody requested it be returned, so it is.
 </des></scalar></key>
 
+<key name="anum" count="1"><scalar><des>
+The authentication number generated for this entry.  It can be used by the client to generate URLs, but that is not recommended.  (See the returned 'url' element if you want to link to a post.)
+</des></scalar></key>
+
+<key name="url" count="1"><scalar><des>
+The permanent link address to this post.  This is an opaque string--you should store it as is.  While it will generally follow a predictable pattern, there is no guarantee of any particular format for these, and it may change in the future.
+</des></scalar></key>
+
 </struct>
 </returns>
 

@@ -1040,6 +1040,7 @@ sub postevent
 
     $res->{'itemid'} = $jitemid;  # by request of mart
     $res->{'anum'} = $anum;
+    $res->{'url'} = LJ::item_link($uowner, $jitemid, $anum);
     return $res;
 }
 
@@ -1310,7 +1311,10 @@ sub editevent
     LJ::memcache_kill($ownerid, "dayct");
 
     my $res = { 'itemid' => $itemid };
-    $res->{'anum'} = $oldevent->{'anum'} if defined $oldevent->{'anum'};
+    if (defined $oldevent->{'anum'}) {
+        $res->{'anum'} = $oldevent->{'anum'};
+        $res->{'url'} = LJ::item_link($uowner, $itemid, $oldevent->{'anum'});
+    }
     return $res;
 }
 
@@ -2983,6 +2987,7 @@ sub postevent
     $res->{'success'} = "OK";
     $res->{'itemid'} = $rs->{'itemid'};
     $res->{'anum'} = $rs->{'anum'} if defined $rs->{'anum'};
+    $res->{'url'} = $rs->{'url'} if defined $rs->{'url'};
     return 1;
 }
 
@@ -3005,6 +3010,7 @@ sub editevent
     $res->{'success'} = "OK";
     $res->{'itemid'} = $rs->{'itemid'};
     $res->{'anum'} = $rs->{'anum'} if defined $rs->{'anum'};
+    $res->{'url'} = $rs->{'url'} if defined $rs->{'url'};
     return 1;
 }
 
