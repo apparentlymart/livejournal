@@ -1154,6 +1154,20 @@ sub editevent
                   "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
                   "security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid ".
                   "AND jitemid=$itemid");
+          
+        # update memcached
+        my $sec = $qallowmask;
+        $sec = 0 if $security eq 'private';
+        $sec = 2**31 if $security eq 'public';
+
+        my $row = pack("NNNNN", $oldevent->{'posterid'},
+                       LJ::mysqldate_to_time($eventtime, 1),
+                       LJ::mysqldate_to_time($oldevent->{'logtime'}, 1),
+                       $sec,
+                       $itemid*256 + $oldevent->{'anum'});
+
+        LJ::MemCache::set([$ownerid, "log2:$ownerid:$itemid"], $row);
+
     }
 
     if ($security ne $oldevent->{'security'} ||
@@ -1798,6 +1812,12 @@ sub editfriendgroups
             } else {
                 @batch = splice(@posts_to_clean, 0, 20);
             }
+            if (@LJ::MEMCACHE_SERVERS) {
+                foreach my $id (@batch) {
+                    LJ::MemCache::delete([$userid, "log2:$userid:$id"]);
+                }
+            }
+
             my $in = join(",", @batch);
             $dbcm->do("UPDATE log2 SET allowmask=allowmask & ~(1 << $bit) ".
                       "WHERE journalid=$userid AND jitemid IN ($in) AND security='usemask'");

@@ -398,6 +398,57 @@ sub get_groupmask
     return $mask;
 }
 
+#
+# returns a row from log2, trying memcache
+# accepts $u + $jitemid
+# returns hash with: posterid, eventtime, logtime, 
+# security, allowmask, journalid, jitemid, anum.
+
+sub get_log2_row
+{
+    my ($u, $jitemid) = @_;
+    my $jid = $u->{'userid'};
+
+    my $memkey = [$jid, "log2:$jid:$jitemid"];
+    my ($row, $item);
+
+    $row = LJ::MemCache::get($memkey);
+
+    if ($row) {
+        @$item{'posterid', 'eventtime', 'logtime', 'allowmask', 'ditemid'} = unpack("NNNNN", $row);
+        $item->{'security'} = ($item->{'allowmask'} == 0 ? 'private' :
+                               ($item->{'allowmask'} == 2**31 ? 'public' : 'usemask'));
+        $item->{'journalid'} = $jid;
+        @$item{'jitemid', 'anum'} = ($item->{'ditemid'} >> 8, $item->{'ditemid'} % 256);
+        $item->{'eventtime'} = LJ::mysql_time($item->{'eventtime'}, 1);
+        $item->{'logtime'} = LJ::mysql_time($item->{'logtime'}, 1);
+
+        return $item;
+    }
+    
+    my $db = LJ::get_cluster_master($u);
+    my $sql = "SELECT posterid, eventtime, logtime, security, allowmask, " .
+              "anum FROM log2 WHERE journalid=? AND jitemid=?";
+
+    $item = $db->selectrow_hashref($sql, undef, $jid, $jitemid);
+    return undef unless $item;
+    $item->{'journalid'} = $jid;
+    $item->{'jitemid'} = $jitemid;
+
+    my ($sec, $ditemid, $eventtime, $logtime);
+    $sec = $item->{'allowmask'};
+    $sec = 0 if $item->{'security'} eq 'private';
+    $sec = 2**31 if $item->{'security'} eq 'public';
+    $ditemid = $jitemid*256 + $item->{'anum'};
+    $eventtime = LJ::mysqldate_to_time($item->{'eventtime'}, 1);
+    $logtime = LJ::mysqldate_to_time($item->{'logtime'}, 1);
+
+    $row = pack("NNNNN", $item->{'posterid'}, $eventtime, $logtime, $sec, $ditemid);
+    LJ::MemCache::set($memkey, $row);
+    
+    return $item;
+}
+
 # <LJFUNC>
 # name: LJ::get_friend_items
 # des: Return friend items for a given user, filter, and period.
@@ -5184,6 +5235,25 @@ sub mysql_time
                    $ltime[0]);
 }
 
+# gets date in MySQL format, produces s2dateformat
+# s2 dateformat is: yyyy mm dd hh mm ss day_of_week
+sub alldatepart_s2 
+{
+    my $time = shift;
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday) =
+        gmtime(LJ::mysqldate_to_time($time, 1));
+    return 
+        sprintf("%04d %02d %02d %02d %02d %02d %01d",
+                $year+1900, 
+                $mon+1, 
+                $mday, 
+                $hour, 
+                $min, 
+                $sec, 
+                $wday);
+}
+                                                                                
+
 # <LJFUNC>
 # name: LJ::get_keyword_id
 # class:
@@ -5672,6 +5742,8 @@ sub delete_entry
 
     my $and;
     if (defined $anum) { $and = "AND anum=" . ($anum+0); }
+
+    LJ::MemCache::delete([$jid, "log2:$jid:$jitemid"]);
     my $dc = $dbcm->do("DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
     # if this is running the second time (started by the cmd buffer),
     # the log2 row will already be gone and we shouldn't check for it.

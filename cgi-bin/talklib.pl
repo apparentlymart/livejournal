@@ -221,22 +221,13 @@ sub get_journal_item
     my $uid = $u->{'userid'}+0;
     $itemid += 0;
 
-    my $s2datefmt = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
-    my $sql = "SELECT journalid, posterid, eventtime, security, allowmask, anum, replycount, ".
-        "DATE_FORMAT(eventtime, '${s2datefmt}') AS 'alldatepart', ".
-        "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(logtime) AS 'secondsold' ".
-        "FROM log2 WHERE journalid=$uid AND jitemid=$itemid";
-
-    my $item;
-    foreach my $role ("slave", "master") {
-        next if $item;
-        my $db = $role eq "slave" ? LJ::get_cluster_reader($u) : LJ::get_cluster_master($u);
-        $item = $db->selectrow_hashref($sql);
-    }
+    my $item = LJ::get_log2_row($u, $itemid);
     return undef unless $item;
 
-    $item->{'itemid'} = $item->{'jitemid'} = $itemid;   # support old & new keys
-    $item->{'ownerid'} = $item->{'journalid'};          # support old & news keys
+    $item->{'alldatepart'} = LJ::alldatepart_s2($item->{'eventtime'});
+    
+    $item->{'itemid'} = $item->{'jitemid'};    # support old & new keys
+    $item->{'ownerid'} = $item->{'journalid'}; # support old & news keys
 
     my $lt = LJ::get_logtext2($u, $itemid);
     my $v = $lt->{$itemid};
