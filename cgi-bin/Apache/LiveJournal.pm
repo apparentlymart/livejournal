@@ -264,7 +264,7 @@ sub trans
             # FIXME: this doesn't anti-squat user domains yet
             if ($uri !~ m!^/404!) {
                 # So hacky!  (see note below)
-                $LJ::SQUAT_URL = "http://$host$uri$args_wq";
+                $LJ::SQUAT_URL = "http://$host$hostport$uri$args_wq";
             } else {
                 # then Apache's 404 handler takes over and we get here
                 # FIXME: why??  why doesn't it just work to return OK
