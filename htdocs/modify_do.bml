@@ -17,7 +17,14 @@ body<=
 
  my $quser = $dbh->quote($user);
  
- my $u = LJ::load_user($dbs, $user);
+my $u;
+my $as_remote = 0;
+if ($FORM{'remoteuser'} eq $user) {
+    $u = LJ::get_remote($dbs);
+    $as_remote = 1;
+} else {
+    $u = LJ::load_user($dbs, $user);
+}
  unless ($u) { push @errors, $ML{'error.username_notfound'}; }
  my $capstyles = LJ::get_cap($u, "styles");
 
@@ -27,8 +34,10 @@ body<=
                      "journaldomain",
                      );
 
-my $ipbanned = 0;
- if (scalar(@errors)==0 && ! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'}, undef, \$ipbanned)) { 
+ my $ipbanned = 0;
+ if (! $as_remote && 
+     scalar(@errors)==0 && 
+     ! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'}, undef, \$ipbanned)) { 
      if ($ipbanned) {
          push @errors, "$ML{'error.ipbanned'}"; 
      } else {
@@ -51,7 +60,11 @@ my $ipbanned = 0;
      $ret .= "<FORM METHOD=POST>\n";
      $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=domodify>\n";
      $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=<?_eh $user _eh?>>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
+     if ($as_remote){
+         $ret .= LJ::html_hidden("remoteuser", $u->{'user'});
+     } else {
+         $ret .= LJ::html_hidden("hpassword", $hpassword);
+     }
 
      ### journal style
      $ret .= "<?h1 $ML{'.journaloptions.head'} h1?><?p $ML{'.journaloptions.about'} p?>\n";
@@ -279,10 +292,20 @@ my $ipbanned = 0;
          LJ::parse_vars(\$oldoverrides,\%overrides);
          LJ::parse_vars(\$FORM{'overrides'},\%newoverrides);
          
-         # global head shouldn't have body tags in it.
+         # head overrides should only have valid head elements in them
          foreach my $a (qw(GLOBAL LASTN FRIENDS CALENDAR DAY)) {
-             $newoverrides{"${a}_HEAD"} =~ s/\<body/<xx-body/ig
-                 if defined $newoverrides{"${a}_HEAD"};
+             my $sec = "${a}_HEAD";
+             next unless $newoverrides{$sec} ne $overrides{$sec};
+
+             my $testtag = sub {
+                 my $tag = shift;
+                 return "<$tag" if ($tag eq "title" || $tag eq "base" ||
+                                 $tag eq "style" || $tag eq "link" ||
+                                 $tag eq "meta");
+                 return "<xx-$tag";
+             };
+             $newoverrides{$sec} =~ s/\<(\w+)/$testtag->($1)/eig;
+             $newoverrides{$sec} =~ s/\<\/head/\<\/xx-head/ig;
          }
 
          # load all the properties to see which ones are overridable
