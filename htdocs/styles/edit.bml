@@ -2,25 +2,63 @@
 title=>Edit Style
 
 body<=
-
-<?h1 Edit a Style h1?>
-<?p
-After you <a href="/styles/create.bml"><b>create a style</b></a>, you can edit it here.  To read more about the style system, go <a href="/developer/styles.bml">here</a>.
-p?>
-
-<form action="edit_do.bml" method="post">
-
-<?standout
-<table>
 <?_code
- return LJ::auth_fields(\%FORM);
- _code?>
-<tr><td></td><td align="center"><input type="submit" value="Proceed..."></td></tr>
-</table>
-standout?>
+{
+    use strict;
+    use vars qw(%GET);
 
-</form>
+    my $remote = LJ::get_remote();
+    return LJ::bad_input($ML{'error.noremote'})
+        unless $remote;
 
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input("You could not be authenticated as the specified user.")
+        unless $u;
+
+    # authenticated
+    my $dbr = LJ::get_db_reader();
+    my $sth;
+
+    my $ret;
+
+    # user switcher
+    $ret .= "<form action='edit.bml' method='get'>\n";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+    $ret .= "</form>\n\n";
+
+    my $getextra = "?authas=$authas" if $u->{'user'} ne $remote->{'user'};
+
+    $ret .= "<?h1 Edit which style? h1?>\n";
+    $ret .= "<?p After you <a href='$LJ::SITEROOT/styles/create.bml'><b>create a style</b></a>, you can edit it here. ";
+    $ret .= "To read more about the style system, go <a href='$LJ::SITEROOT/developer/styles.bml'>here</a>. p?>\n\n";
+    $ret .= "<?p You own the following styles.  Choose which one you want to modify.  p?>\n";
+    $ret .= "<form method='post' action='edit_do.bml$getextra'>";
+    $ret .= "<?standout Pick a style:<br />";
+
+    my @list = ();
+    $sth = $dbr->prepare("SELECT styleid, type, styledes FROM style WHERE user=? ORDER BY type, styledes");
+    $sth->execute($u->{'user'});
+    push @list, ($_->{'styleid'}, "$_->{'type'}($_->{'styleid'}): $_->{'styledes'}") while $_ = $sth->fetchrow_hashref;
+
+    $ret .= LJ::html_select({ 'name' => 'styleid', 'size' => '10', 'style' => 'width: 100%;' },
+                            @list ? @list : ('', 'no styles')) . "<br />\n";
+
+    $ret .= "<div style='margin-top: 3px;'>Action: ";
+    $ret .= LJ::html_select({ 'name' => 'ide' },
+                            'v2', 'Edit in Easy Mode',
+                            'v1', 'Edit in Raw Mode (Old)',
+                            'delete', 'Delete this style!' ) . "</div>\n";
+
+    $ret .= "<div align='center' style='margin-top: 5px;'>";
+    $ret .= LJ::html_submit(undef, "Proceed", { 'disabled' => ! @list });
+    $ret .= "</div> standout?>\n";
+    $ret .= "</form>\n";
+
+    return $ret;
+
+}
+_code?>
 <=body
 page?><?_c <LJDEP>
 link: htdocs/styles/create.bml, htdocs/developer/styles.bml
