@@ -42,7 +42,9 @@ If <TT>efg_set_<I>groupnum</I>_sort</TT> is sent, this field should be sent to i
 }
 { efg_set_<I>groupnum</I>_public
 .des
-<I>(Optional)</I> If <TT>efg_set_<I>groupnum</I>_public</TT> is "1", then this group is marked as public.  If public, other users can see the name of the group and the people that are in it.
+If <TT>efg_set_<I>groupnum</I>_public</TT> is "1", then this group is marked as public.  If public, other users can see the name of the group and the people that are in it.
+.optional
+1
 }
 }
 
@@ -53,6 +55,8 @@ Log in to the server, while announcing your client version.  The server returns 
 { clientversion
 .des
 Although optional, this <B>should</B> be a string of the form <tt>Platform-ProductName/ClientVersionMajor.Minor.Rev</tt>, like <B><tt>Win32-MFC/1.2.7</tt></B> or <B><tt>Gtk-LoserJabber/1.0.4</tt></B>.  Note in this case that "Gtk" is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make the judge what is best to send, but if it's of this form, we'll give you cool statistics about your users.
+.optional
+1
 }
 { getmoods
 .des
@@ -156,7 +160,9 @@ calendar widgets in GUI clients.
 .request
 { usejournal
 .des
-<I>Optional.</I> If getting the day counts of a shared journal, include this key and the username you wish to get the counts of.  By default, you load the counts of "user" as specified above.
+If getting the day counts of a shared journal, include this key and the username you wish to get the counts of.  By default, you load the counts of "user" as specified above.
+.optional
+1
 }
 .response
 { <I>yyyy-mm-dd</I>
@@ -188,7 +194,9 @@ The subject for this post.  Limited to 255 characters.  No newlines.
 }
 { security
 .des
-[Optional]  Specifies who can read this post.  Valid values are <B><TT>public</TT></B> (default), <B><TT>private</TT></B> and <B><TT>usemask</TT></B>.  When value is <TT>usemask</TT>, viewability is controlled by the <TT>allowmask</TT>.
+Specifies who can read this post.  Valid values are <B><TT>public</TT></B> (default), <B><TT>private</TT></B> and <B><TT>usemask</TT></B>.  When value is <TT>usemask</TT>, viewability is controlled by the <TT>allowmask</TT>.
+.optional
+1
 }
 { allowmask
 .des
@@ -220,7 +228,9 @@ Set an arbitrary (but restricted) meta-data property to this log item.  See the 
 }
 { usejournal
 .des
-<I>Optional.</I> If posting to a shared journal, include this key and the username you wish to post to.  By default, you post to the journal of "user" as specified above.
+If posting to a shared journal, include this key and the username you wish to post to.  By default, you post to the journal of "user" as specified above.
+.optional
+1
 }
 }
 
@@ -230,7 +240,9 @@ Returns a list of which other LiveJournal users list this user as their friend.
 .request
 { friendoflimit
 .des
-<i>(Optional)</i> If set to a numeric value greater than zero, this mode will only return the number of results indicated. Useful only for building pretty lists for display which might have a button to view the full list nearby.
+If set to a numeric value greater than zero, this mode will only return the number of results indicated. Useful only for building pretty lists for display which might have a button to view the full list nearby.
+.optional
+1
 }
 .response
 { friendof_count
@@ -266,15 +278,21 @@ Returns a list of which other LiveJournal users this user lists as their friend.
 .request
 { includefriendof
 .des
-<I>(Optional)</I> If set to <TT>1</TT>, you will also get back the info from the "friendof" mode.  Some clients show friends and friendof data in separate tabs/panes.  If you're always going to load both, then use this flag (as opposed to a tabbed dialog approach, where the user may not go to the second tab and thus would not need to load the friendof data.) friendof request variables can be used.
+If set to <TT>1</TT>, you will also get back the info from the "friendof" mode.  Some clients show friends and friendof data in separate tabs/panes.  If you're always going to load both, then use this flag (as opposed to a tabbed dialog approach, where the user may not go to the second tab and thus would not need to load the friendof data.) friendof request variables can be used.
+.optional
+1
 }
 { includegroups
 .des
-<I>(Optional)</I> If set to <TT>1</TT>, you will also get back the info from the "getfriendgroups" mode.  See above for the reason why this would be useful.
+If set to <TT>1</TT>, you will also get back the info from the "getfriendgroups" mode.  See above for the reason why this would be useful.
+.optional
+1
 }
 { friendlimit
 .des
-<i>(Optional)</i> If set to a numeric value greater than zero, this mode will only return the number of results indicated. Useful only for building pretty lists for display which might have a button to view the full list nearby.
+If set to a numeric value greater than zero, this mode will only return the number of results indicated. Useful only for building pretty lists for display which might have a button to view the full list nearby.
+.optional
+1
 }
 .response
 { friend_count
@@ -322,17 +340,21 @@ To add a friend, send a variable of this form, where <I>i</I> is any unique inte
 }
 { editfriend_add_<I>i</I>_fg
 .des
-Optional.  Sets the text color of the friend <I>i</I> being added.  This value is a HTML-style
-hex-triplet, and must either be of the form <B><TT>#rrggbb</TT></B> or not sent
-at all.  By default, the value assumed is <TT>#000000</TT>, black.
+Sets the text color of the friend <I>i</I> being added.  This value is a HTML-style hex-triplet, and must either be of the form <B><TT>#rrggbb</TT></B> or not sent at all.  By default, the value assumed is <TT>#000000</TT>, black.
+.optional
+1
 }
 { editfriend_add_<I>i</I>_bg
 .des
-Optional.  Sets the background color of the friend <I>i</I> being added.  This value is a HTML-style hex-triplet, and must either be of the form <B><TT>#rrggbb</TT></B> or not sent at all.  By default, the value assumed is <TT>#FFFFFF</TT>, white.
+Sets the background color of the friend <I>i</I> being added.  This value is a HTML-style hex-triplet, and must either be of the form <B><TT>#rrggbb</TT></B> or not sent at all.  By default, the value assumed is <TT>#FFFFFF</TT>, white.
+.optional
+1
 }
 { editfriend_add_<I>i</I>_groupmask
 .des
-Optional.  Sets this user's groupmask.  Only use this in clients if you've very recently loaded the friend groups.  If your client has been loaded on the end user's desktop for days and you haven't loaded friend groups since it started, they may be inaccurate if they've modified their friend groups through the website or another client.  In general, don't use this key unless you know what you're doing.
+Sets this user's groupmask.  Only use this in clients if you've very recently loaded the friend groups.  If your client has been loaded on the end user's desktop for days and you haven't loaded friend groups since it started, they may be inaccurate if they've modified their friend groups through the website or another client.  In general, don't use this key unless you know what you're doing.
+.optional
+1
 }
 .response
 { friends_added
@@ -356,6 +378,8 @@ Download parts of the user's journal.
 { truncate
 .des
 An optional value that if greater than or equal to 4, truncates the length of the returned events (after being decoded) to the value specified.  Entries less than or equal to this length are left untouched.  Values greater than this length are truncated to the specified length minus 3, and then have "<TT>...</TT>" appended to them, bringing the total length back up to what you specified.  This is good for populating list boxes where only the beginning of the entry is important, and you'll double-click it to bring up the full entry.
+.optional
+1
 }
 { prefersubject
 .des
@@ -392,6 +416,8 @@ For a <TT>selecttype</TT> of <B><TT>lastn</TT></B>, how many entries to get.  De
 { beforedate
 .des
 For a <TT>selecttype</TT> of <B><TT>lastn</TT></B>, you can optionally include this variable and restrict all entries returned to be <I>before</I> the date you specify, which must be of the form <B><TT>yyyy-mm-dd hh:mm:ss</TT></B>.
+.optional
+1
 }
 { itemid
 .des
@@ -409,7 +435,9 @@ as a default because it contains both Unix and Mac line endings in it, so if a c
 }
 { usejournal
 .des
-<I>Optional.</I> If getting the history of a shared journal, include this key and the username you wish to get the history of.  By default, you load the history of "user" as specified above.
+If getting the history of a shared journal, include this key and the username you wish to get the history of.  By default, you load the history of "user" as specified above.
+.optional
+1
 }
 .response
 { events_count
@@ -480,7 +508,9 @@ The subject for this post.  Limited to 255 characters.  No newlines.
 }
 { security
 .des
-[Optional]  Specifies who can read this post.  Valid values are <B><TT>public</TT></B> (default), <B><TT>private</TT></B> and <B><TT>usemask</TT></B>.  When value is <TT>usemask</TT>, viewability is controlled by the <TT>allowmask</TT>.
+Specifies who can read this post.  Valid values are <B><TT>public</TT></B> (default), <B><TT>private</TT></B> and <B><TT>usemask</TT></B>.  When value is <TT>usemask</TT>, viewability is controlled by the <TT>allowmask</TT>.
+.optional
+1
 }
 { allowmask
 .des
@@ -512,7 +542,9 @@ Set an arbitrary (but restricted) meta-data property to this log item.  If a key
 }
 { usejournal
 .des
-<I>Optional.</I> If editing a shared journal entry, include this key and the username you wish to edit the entry in.  By default, you edit the entry as if it were in user "user"'s journal, as specified above.
+If editing a shared journal entry, include this key and the username you wish to edit the entry in.  By default, you edit the entry as if it were in user "user"'s journal, as specified above.
+.optional
+1
 }
 }
 
@@ -522,7 +554,9 @@ Returns a list (or part of a list) of all the items (journal entries, to-do item
 .request
 { lastsync
 .des
-<i>Optional.</i>  The date you last downloaded synced, in "yyyy-mm-dd hh:mm:ss" format.  <b>Note:</b> do not make this date up from the client's local computer... send the date from this mode's response of the newest item you have saved on disk.
+The date you last downloaded synced, in "yyyy-mm-dd hh:mm:ss" format.  <b>Note:</b> do not make this date up from the client's local computer... send the date from this mode's response of the newest item you have saved on disk.
+.optional
+1
 }
 .response
 { sync_total
@@ -559,7 +593,9 @@ The time that this mode request returned last time you called it.  If this is th
 }
 { mask
 .des
-<i>Optional.</i> The friend group(s) in which the client is checking for new entries, represented as a 32-bit unsigned int.  Turn on any combination of bits 1-30 to check for entries by friends in the respective friend groups.  Turn on bit 0, or leave the mask off entirely, to check for entries by any friends.
+The friend group(s) in which the client is checking for new entries, represented as a 32-bit unsigned int.  Turn on any combination of bits 1-30 to check for entries by friends in the respective friend groups.  Turn on bit 0, or leave the mask off entirely, to check for entries by any friends.
+.optional
+1
 }
 .response
 { lastupdate
