@@ -15,6 +15,7 @@ body<=
 <input type="submit" value="<?_ML .btn.proceed _ML?>"></td></tr>
 </table>
 standout?>
+</form>
 
 <?h1 <?_ML lostinfo.head _ML?> h1?> <?p <?_ML lostinfo.text _ML?> p?>
 
