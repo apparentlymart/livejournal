@@ -2657,8 +2657,6 @@ that area. p?>
 
 /syn/index.bml.invalid.accountname=Invalid account name.
 
-/syn/index.bml.invalid.address=IP addresses not allowed
-
 /syn/index.bml.invalid.cantadd=You can't add RSS feeds from this site.
 
 /syn/index.bml.invalid.http.text=There was an error retrieving this URL.  The server may be down or the content unavailable at this time.  Please verify the URL you have provided and try again.

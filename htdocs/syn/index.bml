@@ -57,8 +57,6 @@ body<=
             my $port = $2;
             return $error->($ML{'.invalid.cantadd'})
                 if $hostname =~ /\Q$LJ::DOMAIN\E/i;
-            return $error->($ML{'.invalid.address'})
-                unless $hostname =~ /\.[a-z]/i;
 
             return $error->($ML{'.invalid.port'})
                 if defined $port && $port != 80 && $port < 1024;
