@@ -793,12 +793,14 @@ sub getevents
 			/^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$/);
 	    $beforedatewhere = "AND l.eventtime < " . $dbh->quote($req->{'beforedate'});		
 	}
-	
-	my @itemids = LJ::get_recent_itemids($dbs, {
-	    'view' => 'lastn',
+
+	# FIXME: this isn't ideal, but whatever.
+	my @itemids;
+	my @items = LJ::get_recent_items($dbs, {
 	    'userid' => $ownerid,
 	    'remoteid' => $ownerid,
 	    'itemshow' => $LJ::MAX_HINTS_LASTN,
+	    'itemids' => \@itemids,
 	});
 	
 	my $itemid_in = join(",", 0, @itemids);

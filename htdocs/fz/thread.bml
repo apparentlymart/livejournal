@@ -17,11 +17,12 @@ my $u = LJ::load_user($dbs, $user);
 
 my $remote = LJ::get_remote($dbs);
 
-my @itemids = LJ::get_recent_itemids($dbs, {
-	'view' => 'lastn',
+my @itemids;
+my @items = LJ::get_recent_items($dbs, {
 	'userid' => $u->{'userid'},
 	'itemshow' => 10,
 	'remoteid' => $remote->{'userid'},
+	'itemids' => \@itemids,
 });
 
 my %com = ();
