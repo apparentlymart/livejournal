@@ -111,8 +111,10 @@ body<=
         $ret .= "</label></div>";
     }
 
-    $ret .= "<div>" . LJ::html_check({name => 'spam', id => 'spam'});
-    $ret .= "<label for='spam'>$ML{'.confirm.spam'}</label></div>";
+    if ($tp->{'posterid'} != $u->{'userid'}) { # Despite the idea of natural selection, don't let users report their own comments as spam
+        $ret .= "<div>" . LJ::html_check({name => 'spam', id => 'spam'});
+        $ret .= "<label for='spam'>$ML{'.confirm.spam'}</label></div>";
+    }
 
     $ret .= " standout?>";
 
