@@ -93,7 +93,7 @@
 		       );
 	foreach my $k (keys %defuser) {
 	    next if (defined $LJ::USERPROP_DEF{$k});
-	    $LJ::USERPROP_DEF{$k} = $defcap{$k};	    
+	    $LJ::USERPROP_DEF{$k} = $defuser{$k};
 	}
     }
 }
