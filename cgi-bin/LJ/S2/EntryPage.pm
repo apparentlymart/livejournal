@@ -238,11 +238,11 @@ sub EntryPage_entry
     # do they have the viewall priv?
     my $viewall = 0;
     my $viewsome = 0;
-    if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
+    if ($get->{'viewall'} && LJ::check_priv($remote, "canview")) {
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
                               "viewall", "entry: $u->{'user'}, itemid: $itemid, statusvis: $u->{'statusvis'}");
-        $viewall = LJ::check_priv($remote, 'viewall', '');
-        $viewsome = $viewall || LJ::check_priv($remote, 'viewall', 'suspended');
+        $viewall = LJ::check_priv($remote, 'canview', '*');
+        $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
     }
 
     # check using normal rules

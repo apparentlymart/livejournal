@@ -43,11 +43,11 @@ sub RecentPage
     # do they want to view all entries, regardless of security?
     my $viewall = 0;
     my $viewsome = 0;
-    if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
+    if ($get->{'viewall'} && LJ::check_priv($remote, "canview")) {
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
                               "viewall", "lastn: $user, statusvis: $u->{'statusvis'}");
-        $viewall = LJ::check_priv($remote, 'viewall', '');
-        $viewsome = $viewall || LJ::check_priv($remote, 'viewall', 'suspended');
+        $viewall = LJ::check_priv($remote, 'canview', '*');
+        $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
     }
 
     ## load the itemids
