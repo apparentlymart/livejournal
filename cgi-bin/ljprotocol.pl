@@ -50,6 +50,9 @@ sub error_message
              "306" => "This journal is temporarily in read-only mode.  Try again in a couple minutes.",
              "307" => "Selected shared journal no longer exists.",
 
+             # Limit errors
+             "401" => "Your account type doesn't permit adding syndicated accounts as friends.",
+
              # Server Errors
              "500" => "Internal server error",
              "501" => "Database error",
@@ -1503,6 +1506,10 @@ sub editfriends
         }
 
         my $row = LJ::load_user($dbs, $aname);
+        if ($row && $row->{'journaltype'} eq "Y" && ! LJ::get_cap($u, "synd_befriend")) {
+            return fail($err,401);
+        }
+
         unless ($row && $row->{'statusvis'} eq "V") {
             $error_flag = 1;
         } else {
