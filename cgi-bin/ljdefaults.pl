@@ -93,6 +93,9 @@
                       'can_post' => 1,
                       'get_comments' => 1,
                       'leave_comments' => 1,
+                      'mod_queue' => 50,
+                      'mod_queue_per_poster' => 1,
+                      'weblogscom' => 0,
                       );
         foreach my $k (keys %defcap) {
             next if (defined $LJ::CAP_DEF{$k});

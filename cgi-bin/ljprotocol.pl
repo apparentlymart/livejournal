@@ -567,6 +567,8 @@ sub postevent
     # load userprops all at once
     my @poster_props = qw(newesteventtime dupsig_post);
     my @owner_props = qw(newpost_minsecurity moderated);
+    push @owner_props, 'opt_weblogscom' unless $req->{'props'}->{'opt_backdated'};
+
     LJ::load_user_props($dbs, $u, @poster_props, @owner_props);
     if ($uowner->{'userid'} == $u->{'userid'}) {
         $uowner->{$_} = $u->{$_} foreach (@owner_props);
@@ -894,6 +896,17 @@ sub postevent
     my ($weeknum, $ubefore) = LJ::weekuu_parts(time());
     $dbh->do("REPLACE INTO weekuserusage (wknum, userid, ubefore) VALUES (?,?,?)",
              undef, $weeknum, $ownerid, $ubefore);
+
+     # notify weblogs.com of post if necessary
+    if ($u->{'opt_weblogscom'} && LJ::get_cap($u, "weblogscom") &&
+        ! $req->{'props'}->{'opt_backdated'})
+    {
+        LJ::cmd_buffer_add($dbcm, $u->{'userid'}, 'weblogscom', {
+            'user' => $u->{'user'}, 
+            'title' => $u->{'journaltitle'} || $u->{'name'},
+            'url' => LJ::journal_base($u)
+        });
+      }
 
     # run local site-specific actions
     LJ::run_hooks("postpost", {

@@ -36,6 +36,7 @@ eval { require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"; };
 
 # determine how we're going to send mail
 $LJ::OPTMOD_NETSMTP = eval "use Net::SMTP (); 1;";
+
 if ($LJ::SMTP_SERVER) {
     die "Net::SMTP not installed\n" unless $LJ::OPTMOD_NETSMTP;
     MIME::Lite->send('smtp', $LJ::SMTP_SERVER, Timeout => 10);
@@ -3906,6 +3907,27 @@ sub cmd_buffer_flush
                 my $a = $c->{'args'};
                 LJ::delete_item2($dbh, $db, $c->{'journalid'}, $a->{'itemid'},
                                  0, $a->{'anum'});
+            },
+        },
+        # ping weblogs.com with updates?  takes a $u argument
+        'weblogscom' => {
+            'run' => sub {
+                # user, title, url
+                my ($dbh, $db, $c) = @_;
+                my $a = $c->{'args'};
+                my $unixtime = LJ::mysql_time($c->{'instime'});
+                # if more than 6 hours old (qbufferd not running?)
+                return if $unixtime < time() - 60*60*6;
+                eval {
+                    eval "use XMLRPC::Lite;";
+                    XMLRPC::Lite
+                        ->new( proxy => "http://rpc.weblogs.com/RPC2",
+                               timeout => 5 )
+                        ->call('weblogUpdates.ping', # xml-rpc method call
+                               LJ::ehtml($a->{'title'}),
+                               $a->{'url'},
+                               "$LJ::SITEROOT/misc/weblogs-change.bml?user=$a->{'user'}");
+                };
             },
         },
     };
