@@ -152,6 +152,7 @@ sub trans
     foreach (@req_hosts) {
         return FORBIDDEN if $LJ::IP_BANNED{$_}; 
     }
+    return FORBIDDEN if LJ::run_hook("forbid_request", $r);
 
     my $journal_view = sub { 
         my $opts = shift;
@@ -171,10 +172,23 @@ sub trans
 
         %RQ = %$opts;
 
+        # bounce communities 
+        my $dbr = LJ::get_db_reader();
+        my $u = LJ::load_user($dbr, $opts->{'user'});
+        if ($u && $u->{'journaltype'} eq "C" && 
+            ($opts->{'vhost'} eq "" || $opts->{'vhost'} eq "tilde")) {
+            my $newurl = $uri;
+            $newurl =~ s!^/(users/|~)$opts->{'user'}+!!;
+            $newurl = "$LJ::SITEROOT/community/$opts->{'user'}$newurl";
+            return redir($r, $newurl);
+        }
+
         # can't show BML on user domains... redirect them
         if ($opts->{'vhost'} eq "users" && ($opts->{'mode'} eq "item" || 
                                             $opts->{'mode'} eq "month")) {
-            return redir($r, "$LJ::SITEROOT/users/$opts->{'user'}$uri");
+            my $base = "$LJ::SITEROOT/users/$opts->{'user'}";
+            $base = "$LJ::SITEROOT/community/$opts->{'user'}" if $u && $u->{'journaltype'} eq "C";
+            return redir($r, "$base$uri");
         }
 
         if ($opts->{'mode'} eq "item") {

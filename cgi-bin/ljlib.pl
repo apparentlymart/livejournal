@@ -1530,7 +1530,7 @@ sub run_hooks
 {
     my ($hookname, @args) = @_;
     my @ret;
-    foreach my $hook (@{$LJ::HOOKS{$hookname}}) {
+    foreach my $hook (@{$LJ::HOOKS{$hookname} || []}) {
         push @ret, [ $hook->(@args) ];
     }
     return @ret;
@@ -1546,7 +1546,7 @@ sub run_hooks
 sub run_hook
 {
     my ($hookname, @args) = @_;
-    return undef unless @{$LJ::HOOKS{$hookname}};
+    return undef unless @{$LJ::HOOKS{$hookname} || []};
     return $LJ::HOOKS{$hookname}->[0]->(@args);
     return undef;
 }
@@ -3493,11 +3493,12 @@ sub date_to_view_links
     my ($y, $m, $d) = ($1, $2, $3);
     my ($nm, $nd) = ($m+0, $d+0);   # numeric, without leading zeros
     my $user = $u->{'user'};
+    my $base = LJ::journal_base($u);
 
     my $ret;
-    $ret .= "<a href=\"$LJ::SITEROOT/users/$user/$y/\">$y</a>-";
-    $ret .= "<a href=\"$LJ::SITEROOT/users/$user/$y/$m/\">$m</a>-";
-    $ret .= "<a href=\"$LJ::SITEROOT/users/$user/$y/$m/$d/\">$d</a>";
+    $ret .= "<a href=\"$base/$y/\">$y</a>-";
+    $ret .= "<a href=\"$base/$y/$m/\">$m</a>-";
+    $ret .= "<a href=\"$base/$y/$m/$d/\">$d</a>";
     return $ret;
 }
 
