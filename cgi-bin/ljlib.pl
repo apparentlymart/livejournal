@@ -3298,7 +3298,7 @@ sub get_userpic_info
     my $userid = want_userid($uuid);
     return $LJ::CACHE_USERPIC_INFO{$userid} if $LJ::CACHE_USERPIC_INFO{$userid};
     
-    my $VERSION_PICINFO = 2;
+    my $VERSION_PICINFO = 3;
 
     my $memkey = [$userid,"upicinf:$userid"];
     my ($info, $minfo);
@@ -3311,7 +3311,7 @@ sub get_userpic_info
             # old data in the cache.  delete.
             LJ::MemCache::delete($memkey);
         } else {
-            my (undef, $userid, $picstr, $kwstr) = @$minfo;
+            my (undef, $picstr, $kwstr) = @$minfo;
             while (length $picstr >= 7) {
                 my $pic = { userid => $userid };
                 ($pic->{picid},
@@ -3362,7 +3362,7 @@ sub get_userpic_info
         }
         $kwstr = join('', map { pack("Z*N", $_, $minfokw{$_}) } keys %minfokw);
 
-        $minfo = [ $VERSION_PICINFO, $userid+0, $picstr, $kwstr ];
+        $minfo = [ $VERSION_PICINFO, $picstr, $kwstr ];
         LJ::MemCache::add($memkey, $minfo);
     }
 
