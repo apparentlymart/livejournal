@@ -10,8 +10,10 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 my $opt_foreground;
 my $opt_debug;
+my $opt_stop;
 exit 1 unless GetOptions('foreground' => \$opt_foreground,
                          'debug' => \$opt_debug,
+                         'stop' => \$opt_stop,
                          );
 
 BEGIN {
@@ -28,15 +30,30 @@ if (-e $pidfile) {
     open (PID, $pidfile);
     chomp ($pid = <PID>);
     close PID;
+    if ($opt_stop) {
+        if (kill 15, $pid) {
+            print "Shutting down qbufferd.\n";
+        } else {
+            print "qbufferd not running?\n";
+        }
+        exit;
+    }
+
     if ($LJ::OPTMOD_PROCTABLE) {
         my $processes = Proc::ProcessTable->new()->table;
         if (grep { $_->cmndline =~ /perl.+qbufferd/ && $_->pid != $$ } @$processes) {
             exit;
         }
     } else {
-        # since we can't really check
-        exit;
+        if (kill 0, $pid) {
+            # seems to still be running (at least something is with that pid)
+            exit;
+        }
     }
+}
+if ($opt_stop) {
+    print "qbufferd not running?\n";
+    exit;
 }
 
 my $is_parent = 0;
@@ -117,6 +134,15 @@ while (LJ::start_request())
     my $cycle_start = time();
     print "Starting cycle.\n" if $opt_debug;
 
+    # syndication (checks RSS that need to be checked)
+    if ($my_job eq "synsuck") {
+        system("$ENV{'LJHOME'}/bin/ljmaint.pl", "-v0", "synsuck");
+        print "Sleeping.\n" if $opt_debug;
+        my $elapsed = time() - $cycle_start;
+        sleep ($DELAY-$elapsed) if $elapsed < $DELAY;
+        next;
+    }
+
     # do main cluster updates
     my $dbh = LJ::get_dbh("master");
     unless ($dbh) {
@@ -151,7 +177,7 @@ while (LJ::start_request())
         }
     }
 
-    # run the end hook for all commands we've rn
+    # run the end hook for all commands we've run
     foreach my $cmd (keys %started) {
         LJ::cmd_buffer_flush($dbh, undef, "$cmd:finish");
     }
