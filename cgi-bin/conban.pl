@@ -30,12 +30,11 @@ sub ban_set_unset
             push @$out, [ "error", "2nd argument not 'from'" ];
         }
 
-        $j = LJ::load_user($dbh, $args->[3]);
-        my $dbs = LJ::make_dbs_from_arg($dbh);
+        $j = LJ::load_user($args->[3]);
         if (! $j) {
             $error = 1;
             push @$out, [ "error", "Unknown community." ],
-        } elsif (! LJ::check_rel($dbs, $j, $remote, 'A')) {
+        } elsif (! LJ::check_rel($j, $remote, 'A')) {
             $error = 1;
             push @$out, [ "error", "Not maintainer of this community." ],
         }
@@ -65,15 +64,14 @@ sub ban_set_unset
     my $qbanid = $banid+0;
     my $quserid = $j->{'userid'}+0;
 
-    my $dbs = LJ::make_dbs_from_arg($dbh);
     if ($args->[0] eq "ban_set") {
-        LJ::set_rel($dbs, $quserid, $qbanid, 'B');
+        LJ::set_rel($quserid, $qbanid, 'B');
         push @$out, [ "info", "User $user ($banid) banned from $j->{'user'}." ];
         return 1;
     }
 
     if ($args->[0] eq "ban_unset") {
-        LJ::clear_rel($dbs, $quserid, $qbanid, 'B');
+        LJ::clear_rel($quserid, $qbanid, 'B');
         push @$out, [ "info", "User $user ($banid) un-banned from $j->{'user'}." ];
         return 1;
     }

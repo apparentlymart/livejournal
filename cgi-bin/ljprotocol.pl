@@ -90,25 +90,18 @@ sub error_message
     return $totalerror;
 }
 
-# returns result, or undef on failure
-sub do_request_without_db
-{
-    my ($method, $req, $err, $flags) = @_;
-    my $dbs = LJ::get_dbs();
-    return fail($err,500) unless $dbs;
-    return do_request($dbs, $method, $req, $err, $flags);
-}
-
 sub do_request
 {
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    
     # get the request and response hash refs
-    my ($dbs, $method, $req, $err, $flags) = @_;
+    my ($method, $req, $err, $flags) = @_;
 
     # if version isn't specified explicitly, it's version 0
     $req->{'ver'} = 0 unless defined $req->{'ver'};
 
     $flags ||= {};
-    my @args = ($dbs, $req, $err, $flags);
+    my @args = ($req, $err, $flags);
 
     my $r = eval { Apache->request };
     $r->notes("codepath" => "protocol.$method") 
@@ -134,11 +127,8 @@ sub do_request
 
 sub login
 {
-    my ($dbs, $req, $err, $flags) = @_;
-    return undef unless authenticate($dbs, $req, $err, $flags);
-
-    my $dbh = $dbs->{'dbh'};
-    return fail($err,502) unless $dbh && $dbs->{'reader'};
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
 
     my $u = $flags->{'u'};
     my $res = {};
@@ -151,14 +141,14 @@ sub login
         if $ver>=1 and not $LJ::UNICODE;
 
     ## return a message to the client to be displayed (optional)
-    login_message($dbs, $req, $res, $flags);
+    login_message($req, $res, $flags);
     LJ::text_out(\$res->{'message'}) if $ver>=1 and defined $res->{'message'};
 
     ## report what shared journals this user may post in
-    $res->{'usejournals'} = list_usejournals($dbs, $u);
+    $res->{'usejournals'} = list_usejournals($u);
 
     ## return their friend groups
-    $res->{'friendgroups'} = list_friendgroups($dbs, $u);
+    $res->{'friendgroups'} = list_friendgroups($u);
     if ($ver >= 1) {
         foreach (@{$res->{'friendgroups'}}) {
             LJ::text_out(\$_->{'name'});
@@ -167,7 +157,7 @@ sub login
 
     ## if they gave us a number of moods to get higher than, then return them
     if (defined $req->{'getmoods'}) {
-        $res->{'moods'} = list_moods($dbs, $req->{'getmoods'});
+        $res->{'moods'} = list_moods($req->{'getmoods'});
         if ($ver >= 1) {
             # currently all moods are in English, but this might change
             foreach (@{$res->{'moods'}}) { LJ::text_out(\$_->{'name'}) }
@@ -176,7 +166,7 @@ sub login
 
     ### picture keywords, if they asked for them.
     if ($req->{'getpickws'}) {
-        my $pickws = list_pickws($dbs, $u);
+        my $pickws = list_pickws($u);
         $res->{'pickws'} = [ map { $_->[0] } @$pickws ];
         if ($req->{'getpickwurls'}) {
             if ($u->{'defaultpicid'}) {
@@ -196,7 +186,7 @@ sub login
 
     ## return client menu tree, if requested
     if ($req->{'getmenus'}) {
-        $res->{'menus'} = hash_menus($dbs, $u);
+        $res->{'menus'} = hash_menus($u);
         if ($ver >= 1) {
             # validate all text, just in case, even though currently
             # it's all English
@@ -222,6 +212,7 @@ sub login
         return fail($err, 208, "Bad clientversion string")
             if $ver >= 1 and not LJ::text_in($client);
 
+        my $dbh = LJ::get_db_writer();
         my $qclient = $dbh->quote($client);
         my $cu_sql = "REPLACE INTO clientusage (userid, clientid, lastlogin) " .
             "SELECT $u->{'userid'}, clientid, NOW() FROM clients WHERE client=$qclient";
@@ -242,11 +233,11 @@ sub login
 
 sub getfriendgroups
 {
-    my ($dbs, $req, $err, $flags) = @_;
-    return undef unless authenticate($dbs, $req, $err, $flags);
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{'u'};
     my $res = {};
-    $res->{'friendgroups'} = list_friendgroups($dbs, $u);
+    $res->{'friendgroups'} = list_friendgroups($u);
     if ($req->{'ver'} >= 1) {
         foreach (@{$res->{'friendgroups'}}) {
 	    LJ::text_out(\$_->{'name'});
@@ -257,13 +248,13 @@ sub getfriendgroups
 
 sub getfriends
 {
-    my ($dbs, $req, $err, $flags) = @_;
-    return undef unless authenticate($dbs, $req, $err, $flags);
-    return fail($req,502) unless $dbs->{'reader'};
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    return fail($req,502) unless LJ::get_db_reader();
     my $u = $flags->{'u'};
     my $res = {};
     if ($req->{'includegroups'}) {
-        $res->{'friendgroups'} = list_friendgroups($dbs, $u);
+        $res->{'friendgroups'} = list_friendgroups($u);
         if ($req->{'ver'} >= 1) {
             foreach (@{$res->{'friendgroups'}}) {
                 LJ::text_out(\$_->{'name'});
@@ -271,7 +262,7 @@ sub getfriends
         }
     }
     if ($req->{'includefriendof'}) {
-        $res->{'friendofs'} = list_friends($dbs, $u, {
+        $res->{'friendofs'} = list_friends($u, {
             'limit' => $req->{'friendoflimit'},
             'friendof' => 1,
         });
@@ -279,7 +270,7 @@ sub getfriends
             foreach(@{$res->{'friendofs'}}) { LJ::text_out(\$_->{'fullname'}) };
         }
     }
-    $res->{'friends'} = list_friends($dbs, $u, {
+    $res->{'friends'} = list_friends($u, {
         'limit' => $req->{'friendlimit'},
         'includebdays' => $req->{'includebdays'},
     });
@@ -291,12 +282,12 @@ sub getfriends
 
 sub friendof
 {
-    my ($dbs, $req, $err, $flags) = @_;
-    return undef unless authenticate($dbs, $req, $err, $flags);
-    return fail($req,502) unless $dbs->{'reader'};
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    return fail($req,502) unless LJ::get_db_reader();
     my $u = $flags->{'u'};
     my $res = {};
-    $res->{'friendofs'} = list_friends($dbs, $u, {
+    $res->{'friendofs'} = list_friends($u, {
         'friendof' => 1,
         'limit' => $req->{'friendoflimit'},
     });
@@ -308,8 +299,8 @@ sub friendof
 
 sub checkfriends
 {
-    my ($dbs, $req, $err, $flags) = @_;
-    return undef unless authenticate($dbs, $req, $err, $flags);
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
     my $u = $flags->{'u'};
     my $res = {};
 
@@ -320,7 +311,7 @@ sub checkfriends
         return $res;
     }
 
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my ($lastdate, $sth);
 
     ## have a valid date?
@@ -367,9 +358,9 @@ sub checkfriends
 
 sub getdaycounts
 {
-    my ($dbs, $req, $err, $flags) = @_;
-    return undef unless authenticate($dbs, $req, $err, $flags);
-    return undef unless check_altusage($dbs, $req, $err, $flags);
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
     my $uowner = $flags->{'u_owner'} || $u;
@@ -391,8 +382,7 @@ sub getdaycounts
 
 sub common_event_validation
 {
-    my ($dbs, $req, $err, $flags) = @_;
-    my $dbr = $dbs->{'reader'};
+    my ($req, $err, $flags) = @_;
 
     # date validation
     if ($req->{'year'} !~ /^\d\d\d\d$/ ||
@@ -466,7 +456,7 @@ sub common_event_validation
     }
 
     ## handle meta-data (properties)
-    LJ::load_props($dbs, "log");
+    LJ::load_props("log");
     foreach my $pname (keys %{$req->{'props'}})
     {
         my $p = LJ::get_prop("log", $pname);
@@ -506,15 +496,15 @@ sub common_event_validation
 
 sub postevent
 {
-    my ($dbs, $req, $err, $flags) = @_;
-    return undef unless authenticate($dbs, $req, $err, $flags);
-    return undef unless check_altusage($dbs, $req, $err, $flags);
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
     my $ownerid = $flags->{'ownerid'}+0;
     my $uowner = $flags->{'u_owner'} || $u;
-    my $dbr = $dbs->{'reader'};
-    my $dbh = $dbs->{'dbh'};
+
+    my $dbh = LJ::get_db_writer();
 
     return fail($err,306) unless $dbh;
     return fail($err,200) unless ($req->{'event'} =~ /\S/);
@@ -553,7 +543,7 @@ sub postevent
     }
 
     return undef
-        unless common_event_validation($dbs, $req, $err, $flags);
+        unless common_event_validation($req, $err, $flags);
 
     ### allow for posting to journals that aren't yours (if you have permission)
     my $posterid = $u->{'userid'}+0;
@@ -570,11 +560,11 @@ sub postevent
     my @owner_props = qw(newpost_minsecurity moderated);
     push @owner_props, 'opt_weblogscom' unless $req->{'props'}->{'opt_backdated'};
 
-    LJ::load_user_props($dbs, $u, @poster_props, @owner_props);
+    LJ::load_user_props($u, @poster_props, @owner_props);
     if ($uowner->{'userid'} == $u->{'userid'}) {
         $uowner->{$_} = $u->{$_} foreach (@owner_props);
     } else {
-        LJ::load_user_props($dbs, $uowner, @owner_props);
+        LJ::load_user_props($uowner, @owner_props);
     }
 
     # are they trying to post back in time?
@@ -613,7 +603,7 @@ sub postevent
     # make sure this user isn't banned from posting here (if
     # this is a community journal)
     return fail($err,151) if
-        LJ::is_banned($dbs, $posterid, $ownerid);
+        LJ::is_banned($posterid, $ownerid);
 
     # don't allow backdated posts in communities
     return fail($err,152) if
@@ -629,10 +619,10 @@ sub postevent
             unless (LJ::get_cap($u, "makepoll")
                     || ($uowner->{'journaltype'} eq "C"
                         && LJ::get_cap($uowner, "makepoll")
-                        && LJ::check_rel($dbs, $uowner, $u, 'A')));
+                        && LJ::check_rel($uowner, $u, 'A')));
 
         my $error = "";
-        @polls = LJ::Poll::parse($dbs, \$event, \$error, {
+        @polls = LJ::Poll::parse(\$event, \$error, {
             'journalid' => $ownerid,
             'posterid' => $posterid,
         });
@@ -690,6 +680,7 @@ sub postevent
     # if posting to a moderated community, store and bail out here
     if ($uowner->{'journaltype'} eq 'C' && $uowner->{'moderated'} && !$flags->{'nomod'}) {
         # don't moderate admins, moderators & pre-approved users
+        my $dbh = LJ::get_db_writer();
         my $relcount = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
                                              "WHERE userid=$ownerid AND targetid=$posterid ".
                                              "AND type IN ('A','M','N')");
@@ -725,10 +716,10 @@ sub postevent
             }
 
             # alert moderator(s)
-            my $mods = LJ::load_rel_user($dbs, $ownerid, 'M') || [];
+            my $mods = LJ::load_rel_user($dbh, $ownerid, 'M') || [];
             if (@$mods) {
                 my $in = join(", ", map { $_+0 } @$mods );
-                my $emails = $dbr->selectcol_arrayref("SELECT email FROM user ".
+                my $emails = $dbh->selectcol_arrayref("SELECT email FROM user ".
                                                       "WHERE userid IN ($in) AND status='A'") || [];
                 my $ct;
                 foreach my $to (@$emails) {
@@ -755,18 +746,6 @@ sub postevent
 
     # posting:
 
-    # before we get going here, we want to make sure to purge this user's
-    # delitem cmd buffer, otherwise we could have a race and that might
-    # wake up later and delete this item which is replacing in the database
-    # the old last item which is marked for deletion:
-    # NOTE: cmd_buffer_flush uses GET_LOCK!  So we can't lock until after this.
-    #       (but it'd be kinda silly to lock before this, anyway)
-    # Update 24-Apr-03: with LJ::alloc_user_counter(), no numbers are ever re-used,
-    #         so this can really go away.  before a user has data in their counter
-    #         table, though, it is possible, so we'll keep it for now.  remove
-    #         in a couple months.
-    LJ::cmd_buffer_flush($dbh, $dbcm, "delitem", $ownerid);
-    
     $getlock->(); return $res if $res_done;
     
     # do rate-checking
@@ -795,7 +774,7 @@ sub postevent
         $set_userprop{"newesteventtime"} = $eventtime
             if $posterid == $ownerid and not $req->{'props'}->{'opt_backdated'};
 
-        LJ::set_userprop($dbs, $u, \%set_userprop);
+        LJ::set_userprop($u, \%set_userprop);
     }
 
     # end duplicate locking section
@@ -810,7 +789,7 @@ sub postevent
         ### not going to check it for now.
 
         my $error = "";
-        LJ::Poll::register($dbs, \$event, \$error, $ditemid, @polls);
+        LJ::Poll::register(\$event, \$error, $ditemid, @polls);
     }
     #### /embedding
 
@@ -819,7 +798,7 @@ sub postevent
             $req->{'security'} eq "private")
     {
         foreach my $url (LJ::get_urls($event)) {
-            LJ::record_meme($dbs, $url, $posterid, $ditemid, $ownerid);
+            LJ::record_meme($url, $posterid, $ditemid, $ownerid);
         }
     }
 
@@ -831,7 +810,7 @@ sub postevent
               "VALUES ($ownerid, $itemid, $qsubject, ?)", undef, $event);
     if ($dbcm->err) {
         my $msg = $dbcm->errstr;
-        LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
+        LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
         return fail($err,501,"logtext:$msg");
     }
 
@@ -841,7 +820,7 @@ sub postevent
                   "VALUES ($ownerid, $itemid, $qallowmask)");
         if ($dbcm->err) {
             my $msg = $dbcm->errstr;
-            LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
+            LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
             return fail($err,501,"logsec2:$msg");
         }
     }
@@ -864,10 +843,10 @@ sub postevent
             }
         }
         if ($propinsert) {
-            $dbcm->do($propinsert);   # note: $dbcm may be $dbh
+            $dbcm->do($propinsert);
             if ($dbcm->err) {
                 my $msg = $dbh->errstr;
-                LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
+                LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
                 return fail($err,501,"logprop2:$msg");
             }
         }
@@ -940,21 +919,20 @@ sub postevent
 
 sub editevent
 {
-    my ($dbs, $req, $err, $flags) = @_;
-    return undef unless authenticate($dbs, $req, $err, $flags);
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
 
     # we check later that user owns entry they're modifying, so all
     # we care about for check_altusage is that the target journal
     # exists, and we want it to setup some data in $flags.
     $flags->{'ignorecanuse'} = 1;
-    return undef unless check_altusage($dbs, $req, $err, $flags);
+    return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
     my $ownerid = $flags->{'ownerid'};
     my $uowner = $flags->{'u_owner'} || $u;
     my $posterid = $u->{'userid'};
-    my $dbr = $dbs->{'reader'};
-    my $dbh = $dbs->{'dbh'};
+    my $dbh = LJ::get_db_writer();
     my $qallowmask = $req->{'allowmask'}+0;
     my $sth;
 
@@ -1013,7 +991,7 @@ sub editevent
                 ($ownerid == $u->{'userid'} ||
                  # community account can delete it (ick)
 
-                 LJ::check_rel($dbs, $ownerid, $posterid, 'A')
+                 LJ::check_rel($ownerid, $posterid, 'A')
                  # if user is a community maintainer they can delete
                  # it too (good)
                  ));
@@ -1029,18 +1007,18 @@ sub editevent
         # if their newesteventtime prop equals the time of the one they're deleting
         # then delete their newesteventtime.
         if ($u->{'userid'} == $uowner->{'userid'}) {
-            LJ::load_user_props($dbs, $u, "newesteventtime");
+            LJ::load_user_props($dbh, $u, "newesteventtime");
             if ($u->{'newesteventtime'} eq $oldevent->{'eventtime'}) {
-                LJ::set_userprop($dbs, $u, "newesteventtime", undef);
+                LJ::set_userprop($u, "newesteventtime", undef);
             }
         }
 
-        LJ::delete_item2($dbh, $dbcm, $ownerid, $req->{'itemid'},
+        LJ::delete_item2($dbcm, $ownerid, $req->{'itemid'},
                          'quick', $oldevent->{'anum'});
 
         # clear their duplicate protection, so they can later repost
         # what they just deleted.  (or something... probably rare.)
-        LJ::set_userprop($dbs, $u, "dupsig_post", undef);
+        LJ::set_userprop($u, "dupsig_post", undef);
         
         my $res = { 'itemid' => $qitemid,
                     'anum' => $oldevent->{'anum'} };
@@ -1054,12 +1032,11 @@ sub editevent
 
     # updating an entry:
     return undef
-        unless common_event_validation($dbs, $req, $err, $flags);
+        unless common_event_validation($req, $err, $flags);
 
     ### load existing meta-data
     my %curprops;
 
-    LJ::load_props($dbs, "log");
     LJ::load_log_props2($dbcm, $ownerid, [ $qitemid ], \%curprops);
 
     ## handle meta-data (properties)
@@ -1109,9 +1086,9 @@ sub editevent
         if ($eventtime ne $oldevent->{'eventtime'} &&
             $u->{'userid'} == $uowner->{'userid'}) 
         {
-            LJ::load_user_props($dbs, $u, "newesteventtime");
+            LJ::load_user_props($dbh, $u, "newesteventtime");
             if ($u->{'newesteventtime'} eq $oldevent->{'eventtime'}) {
-                LJ::set_userprop($dbs, $u, "newesteventtime", $eventtime);
+                LJ::set_userprop($u, "newesteventtime", $eventtime);
             }
         }
         
@@ -1205,9 +1182,9 @@ sub editevent
 
 sub getevents
 {
-    my ($dbs, $req, $err, $flags) = @_;
-    return undef unless authenticate($dbs, $req, $err, $flags);
-    return undef unless check_altusage($dbs, $req, $err, $flags);
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    return undef unless check_altusage($req, $err, $flags);
 
     my $u = $flags->{'u'};
     my $uowner = $flags->{'u_owner'} || $u;
@@ -1216,12 +1193,11 @@ sub getevents
     my $posterid = $u->{'userid'};
     my $ownerid = $flags->{'ownerid'};
 
-    my $dbr = $dbs->{'reader'};
-    my $dbh = $dbs->{'dbh'};
+    my $dbr = LJ::get_db_reader();
     my $sth;
 
     my $dbcr =  LJ::get_cluster_reader($uowner);
-    return fail($err,502) unless $dbcr;
+    return fail($err,502) unless $dbcr && $dbr;
 
     # can't pull events from deleted/suspended journal
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";
@@ -1261,9 +1237,9 @@ sub getevents
                     $req->{'month'} >= 1 && $req->{'month'} <= 12 &&
                     $req->{'day'} >= 1 && $req->{'day'} <= 31);
 
-        my $qyear = $dbh->quote($req->{'year'});
-        my $qmonth = $dbh->quote($req->{'month'});
-        my $qday = $dbh->quote($req->{'day'});
+        my $qyear = $dbr->quote($req->{'year'});
+        my $qmonth = $dbr->quote($req->{'month'});
+        my $qday = $dbr->quote($req->{'day'});
         $where = "AND year=$qyear AND month=$qmonth AND day=$qday";
         $limit = "LIMIT 200";  # FIXME: unhardcode this constant (also in ljviews.pl)
 
@@ -1288,7 +1264,7 @@ sub getevents
             return fail($err,203,"Invalid beforedate format.")
                 unless ($req->{'beforedate'} =~
                         /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$/);
-            my $qd = $dbh->quote($req->{'beforedate'});
+            my $qd = $dbr->quote($req->{'beforedate'});
             $rtime_after = "$LJ::EndOfTime-UNIX_TIMESTAMP($qd)";
         }
         $where .= "AND $rtime_what > $rtime_after ";
@@ -1309,14 +1285,15 @@ sub getevents
         # broken client loop prevention
         if ($req->{'lastsync'}) {
             my $pname = "rl_syncitems_getevents_loop";
-            LJ::load_user_props($dbs, $u, $pname);
+            my $dbh = LJ::get_db_writer();
+            LJ::load_user_props($dbh, $u, $pname);
             # format is:  time/date/time/date/time/date/... so split
             # it into a hash, then delete pairs that are older than an hour
             my %reqs = split(m!/!, $u->{$pname});
             foreach (grep { $_ < $now - 60*60 } keys %reqs) { delete $reqs{$_}; }
             my $count = grep { $_ eq $date } values %reqs;
             $reqs{$now} = $date;
-            LJ::set_userprop($dbs, $u, $pname, 
+            LJ::set_userprop($u, $pname, 
                              join('/', map { $_, $reqs{$_} }
                                   sort { $b <=> $a } keys %reqs));
             if ($count >= 2) {
@@ -1334,7 +1311,6 @@ sub getevents
             $item{$id} = $dt;
         }
 
-        LJ::load_props($dbs, "log");
         my $p_revtime = LJ::get_prop("log", "revtime");
         $sth = $dbcr->prepare("SELECT jitemid, FROM_UNIXTIME(value) ".
                               "FROM logprop2 WHERE journalid=? ".
@@ -1405,7 +1381,7 @@ sub getevents
             $evt->{'allowmask'} = $mask if $sec eq "usemask";
         }
         $evt->{'anum'} = $anum;
-        $evt->{'poster'} = LJ::get_username($dbs, $jposterid) if $jposterid != $ownerid;
+        $evt->{'poster'} = LJ::get_username($dbr, $jposterid) if $jposterid != $ownerid;
         push @$events, $evt;
     }
 
@@ -1417,7 +1393,6 @@ sub getevents
 	### do the properties now
 	$count = 0;
 	my %props = ();
-        LJ::load_props($dbs, "log");
         LJ::load_log_props2($dbcr, $ownerid, \@itemids, \%props);
 	foreach my $itemid (keys %props) {
 	    my $evt = $evt_from_itemid{$itemid};
@@ -1448,11 +1423,10 @@ sub getevents
         if ($LJ::UNICODE && $req->{'ver'} >= 1 && 
                 $evt->{'props'}->{'unknown8bit'}) {
             my $error = 0;
-            $t->[0] = LJ::text_convert($dbs, $t->[0], $uowner, \$error);
-            $t->[1] = LJ::text_convert($dbs, $t->[1], $uowner, \$error);
+            $t->[0] = LJ::text_convert($t->[0], $uowner, \$error);
+            $t->[1] = LJ::text_convert($t->[1], $uowner, \$error);
             foreach (keys %{$evt->{'props'}}) {
-                $evt->{'props'}->{$_} = LJ::text_convert($dbs, 
-                    $evt->{'props'}->{$_}, $uowner, \$error);
+                $evt->{'props'}->{$_} = LJ::text_convert($evt->{'props'}->{$_}, $uowner, \$error);
             }
             return fail($err,208,"Cannot display this post. Please see $LJ::SITEROOT/support/encodings.bml for more information.")
                 if $error;
@@ -1517,13 +1491,12 @@ sub getevents
 
 sub editfriends
 {
-    my ($dbs, $req, $err, $flags) = @_;
-    return undef unless authenticate($dbs, $req, $err, $flags);
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
 
     my $u = $flags->{'u'};
     my $userid = $u->{'userid'};
-    my $dbr = $dbs->{'reader'};
-    my $dbh = $dbs->{'dbh'};
+    my $dbh = LJ::get_db_writer();
     my $sth;
 
     return fail($err,306) unless $dbh;
@@ -1586,7 +1559,7 @@ sub editfriends
             return fail($err,203,"Invalid color values");
         }
 
-        my $row = LJ::load_user($dbs, $aname);
+        my $row = LJ::load_user($aname);
 
         # XXX - on some errors we fail out, on others we continue and try adding
         # any other users in the request. also, error message for redirect should
@@ -1647,17 +1620,15 @@ sub editfriends
 
 sub editfriendgroups
 {
-    my ($dbs, $req, $err, $flags) = @_;
-    return undef unless authenticate($dbs, $req, $err, $flags);
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
 
     my $u = $flags->{'u'};
     my $userid = $u->{'userid'};
-    my $dbr = $dbs->{'reader'};
-    my $dbh = $dbs->{'dbh'};
+    my $dbh = LJ::get_db_writer();
     my $sth;
 
     return fail($err,306) unless $dbh;
-    return fail($err,502) unless $dbr;
 
     my $res = {};
 
@@ -1672,7 +1643,7 @@ sub editfriendgroups
     # Keep track of what bits are already set, so we can know later
     # whether to INSERT or UPDATE.
     my %bitset;
-    $sth = $dbr->prepare("SELECT groupnum FROM friendgroup WHERE userid=$userid");
+    $sth = $dbh->prepare("SELECT groupnum FROM friendgroup WHERE userid=$userid");
     $sth->execute;
     while (my ($bit) = $sth->fetchrow_array) {
         $bitset{$bit} = 1;
@@ -1739,9 +1710,7 @@ sub editfriendgroups
 
 
     ## do deletions ('delete' array)
-
     my $dbcm = LJ::get_cluster_master($u);
-    my $dbcr = LJ::get_cluster_reader($u);
 
     # ignore bits that aren't integers or that are outside 1-30 range
     my @delete_bits = grep {$_ >= 1 and $_ <= 30} map {$_+0} @{$req->{'delete'}};
@@ -1761,7 +1730,7 @@ sub editfriendgroups
     {
         # remove all posts from allowing that group:
         my @posts_to_clean = ();
-        $sth = $dbcr->prepare("SELECT jitemid FROM logsec2 WHERE journalid=$userid AND allowmask & (1 << $bit)");
+        $sth = $dbcm->prepare("SELECT jitemid FROM logsec2 WHERE journalid=$userid AND allowmask & (1 << $bit)");
         $sth->execute;
         while (my ($id) = $sth->fetchrow_array) { push @posts_to_clean, $id; }
         while (@posts_to_clean) {
@@ -1793,7 +1762,7 @@ sub editfriendgroups
         my $mask = int($req->{'groupmasks'}->{$friend}) | 1;
         $dbh->do("UPDATE friends SET groupmask=$mask ".
                  "WHERE userid=$userid AND friendid=?",
-                 undef, LJ::get_userid($dbs, $friend));
+                 undef, LJ::get_userid($dbh, $friend));
     }
 
     # return value for this is nothing.
@@ -1802,8 +1771,8 @@ sub editfriendgroups
 
 sub list_friends
 {
-    my ($dbs, $u, $opts) = @_;
-    my $dbr = $dbs->{'reader'};
+    my ($u, $opts) = @_;
+    my $dbr = LJ::get_db_reader();
 
     my $limitnum = $opts->{'limit'}+0;
     my $where = "u.userid=f.friendid AND f.userid=$u->{'userid'}";
@@ -1854,13 +1823,12 @@ sub list_friends
 
 sub syncitems
 {
-    my ($dbs, $req, $err, $flags) = @_;
-    return undef unless authenticate($dbs, $req, $err, $flags);
-    return undef unless check_altusage($dbs, $req, $err, $flags);
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    return undef unless check_altusage($req, $err, $flags);
 
     my $ownerid = $flags->{'ownerid'};
     my $uowner = $flags->{'u_owner'} || $flags->{'u'};
-    my $dbr = $dbs->{'reader'};
     my $sth;
 
     my $db = LJ::get_cluster_reader($uowner);
@@ -1886,7 +1854,6 @@ sub syncitems
     }
 
     my %cmt;
-    LJ::load_props($dbs, "log");
     my $p_calter = LJ::get_prop("log", "commentalter");
     my $p_revtime = LJ::get_prop("log", "revtime");
     $sth = $db->prepare("SELECT jitemid, propid, FROM_UNIXTIME(value) ".
@@ -1921,15 +1888,14 @@ sub syncitems
 
 sub consolecommand
 {
-    my ($dbs, $req, $err, $flags) = @_;
+    my ($req, $err, $flags) = @_;
 
-    # TODO: LJ::Con doesn't yet support $dbs/$dbarg
-    my $dbh = $dbs->{'dbh'};
+    my $dbh = LJ::get_db_writer();
     return fail($err,502) unless $dbh;
 
     # logging in isn't necessary, but most console commands do require it
     my $remote = undef;
-    $remote = $flags->{'u'} if authenticate($dbs, $req, $err, $flags);
+    $remote = $flags->{'u'} if authenticate($req, $err, $flags);
 
     my $res = {};
     my $cmdout = $res->{'results'} = [];
@@ -1952,7 +1918,7 @@ sub consolecommand
 
 sub login_message
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
     my $u = $flags->{'u'};
 
     my $msg = sub {
@@ -1978,11 +1944,10 @@ sub login_message
 
 sub list_friendgroups
 {
-    my $dbs = shift;
     my $u = shift;
 
     my $res = [];
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
 
     my $sth = $dbr->prepare("SELECT groupnum, groupname, sortorder, is_public ".
                             "FROM friendgroup WHERE userid=$u->{'userid'} ".
@@ -1994,18 +1959,16 @@ sub list_friendgroups
                       'sortorder' => $sort,
                       'public' => $public };
     }
-    $sth->finish;
     return $res;
 }
 
 sub list_usejournals
 {
-    my $dbs = shift;
     my $u = shift;
 
     my @res;
 
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my $sth = $dbr->prepare("SELECT u.user FROM user u, reluser ru ".
                             "WHERE ru.userid=u.userid AND ru.type='P' AND ".
                             "u.statusvis='V' AND ".
@@ -2020,7 +1983,6 @@ sub list_usejournals
 
 sub hash_menus
 {
-    my $dbs = shift;
     my $u = shift;
     my $user = $u->{'user'};
 
@@ -2048,7 +2010,6 @@ sub hash_menus
                 ];
 
     LJ::run_hooks("modify_login_menu", {
-        'dbs' => $dbs,
         'menu' => $menu,
         'u' => $u,
         'user' => $user,
@@ -2059,10 +2020,9 @@ sub hash_menus
 
 sub list_pickws
 {
-    my $dbs = shift;
     my $u = shift;
 
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my @res;
 
     my $sth = $dbr->prepare("SELECT k.keyword, m.picid, p.state " .
@@ -2083,13 +2043,11 @@ sub list_pickws
 
 sub list_moods
 {
-    my $dbs = shift;
     my $mood_max = int(shift);
-
-    LJ::load_moods($dbs);
+    LJ::load_moods();
 
     my $res = [];
-    return $res unless ($mood_max < $LJ::CACHED_MOOD_MAX);
+    return $res if $mood_max >= $LJ::CACHED_MOOD_MAX;
 
     for (my $id = $mood_max+1; $id <= $LJ::CACHED_MOOD_MAX; $id++) {
         next unless defined $LJ::CACHE_MOODS{$id};
@@ -2105,7 +2063,7 @@ sub list_moods
 
 sub check_altusage
 {
-    my ($dbs, $req, $err, $flags) = @_;
+    my ($req, $err, $flags) = @_;
 
     # see note in ljlib.pl::can_use_journal about why we return
     # both 'ownerid' and 'u_owner' in $flags
@@ -2124,7 +2082,7 @@ sub check_altusage
 
     # allow usage if we're told explicitly that it's okay
     if ($flags->{'usejournal_okay'}) {
-        $flags->{'u_owner'} = LJ::load_user($dbs, $alt);
+        $flags->{'u_owner'} = LJ::load_user($alt);
         $flags->{'ownerid'} = $flags->{'u_owner'}->{'userid'};
         $r->notes("journalid" => $flags->{'ownerid'}) if $r && !$r->notes("journalid");
         return 1 if $flags->{'ownerid'};
@@ -2133,7 +2091,7 @@ sub check_altusage
 
     # otherwise, check for access:
     my $info = {};
-    my $canuse = LJ::can_use_journal($dbs, $u->{'userid'}, $req->{'usejournal'}, $info);
+    my $canuse = LJ::can_use_journal($u->{'userid'}, $req->{'usejournal'}, $info);
     $flags->{'ownerid'} = $info->{'ownerid'};
     $flags->{'u_owner'} = $info->{'u_owner'};
     $r->notes("journalid" => $flags->{'ownerid'}) if $r && !$r->notes("journalid");
@@ -2146,7 +2104,7 @@ sub check_altusage
 
 sub authenticate
 {
-    my ($dbs, $req, $err, $flags) = @_;
+    my ($req, $err, $flags) = @_;
 
     my $username = $req->{'username'};
     return fail($err,200) unless $username;
@@ -2154,7 +2112,7 @@ sub authenticate
 
     my $u = $flags->{'u'};
     unless ($u) {
-        my $dbr = $dbs->{'reader'};
+        my $dbr = LJ::get_db_reader();
         return fail($err,502) unless $dbr;
         my $quser = $dbr->quote($username);
         my $other = $LJ::UNICODE ? ", oldenc" : "";
@@ -2210,24 +2168,16 @@ package LJ;
 
 sub do_request
 {
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+
     # get the request and response hash refs
-    my ($db_arg, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     # initialize some stuff
-    my $dbs = LJ::make_dbs_from_arg($db_arg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
     %{$res} = ();                      # clear the given response hash
     $flags = {} unless (ref $flags eq "HASH");
 
     my $user = LJ::canonical_username($req->{'user'});
-
-    # check for an alive database connection
-    unless ($dbh) {
-        $res->{'success'} = "FAIL";
-        $res->{'errmsg'} = "Server error: cannot connect to database.";
-        return;
-    }
 
     # did they send a mode?
     unless ($req->{'mode'}) {
@@ -2251,43 +2201,43 @@ sub do_request
 
     ## dispatch wrappers
     if ($req->{'mode'} eq "login") {
-        return login($dbs, $req, $res, $flags);
+        return login($req, $res, $flags);
     }
     if ($req->{'mode'} eq "getfriendgroups") {
-        return getfriendgroups($dbs, $req, $res, $flags);
+        return getfriendgroups($req, $res, $flags);
     }
     if ($req->{'mode'} eq "getfriends") {
-        return getfriends($dbs, $req, $res, $flags);
+        return getfriends($req, $res, $flags);
     }
     if ($req->{'mode'} eq "friendof") {
-        return friendof($dbs, $req, $res, $flags);
+        return friendof($req, $res, $flags);
     }
     if ($req->{'mode'} eq "checkfriends") {
-        return checkfriends($dbs, $req, $res, $flags);
+        return checkfriends($req, $res, $flags);
     }
     if ($req->{'mode'} eq "getdaycounts") {
-        return getdaycounts($dbs, $req, $res, $flags);
+        return getdaycounts($req, $res, $flags);
     }
     if ($req->{'mode'} eq "postevent") {
-        return postevent($dbs, $req, $res, $flags);
+        return postevent($req, $res, $flags);
     }
     if ($req->{'mode'} eq "editevent") {
-        return editevent($dbs, $req, $res, $flags);
+        return editevent($req, $res, $flags);
     }
     if ($req->{'mode'} eq "syncitems") {
-        return syncitems($dbs, $req, $res, $flags);
+        return syncitems($req, $res, $flags);
     }
     if ($req->{'mode'} eq "getevents") {
-        return getevents($dbs, $req, $res, $flags);
+        return getevents($req, $res, $flags);
     }
     if ($req->{'mode'} eq "editfriends") {
-        return editfriends($dbs, $req, $res, $flags);
+        return editfriends($req, $res, $flags);
     }
     if ($req->{'mode'} eq "editfriendgroups") {
-        return editfriendgroups($dbs, $req, $res, $flags);
+        return editfriendgroups($req, $res, $flags);
     }
     if ($req->{'mode'} eq "consolecommand") {
-        return consolecommand($dbs, $req, $res, $flags);
+        return consolecommand($req, $res, $flags);
     }
 
     ### unknown mode!
@@ -2299,12 +2249,12 @@ sub do_request
 ## flat wrapper
 sub login
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
 
-    my $rs = LJ::Protocol::do_request($dbs, "login", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request("login", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -2372,12 +2322,12 @@ sub login
 ## flat wrapper
 sub getfriendgroups
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
 
-    my $rs = LJ::Protocol::do_request($dbs, "getfriendgroups", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request("getfriendgroups", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -2392,12 +2342,12 @@ sub getfriendgroups
 ## flat wrapper
 sub getfriends
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
 
-    my $rs = LJ::Protocol::do_request($dbs, "getfriends", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request("getfriends", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -2419,12 +2369,12 @@ sub getfriends
 ## flat wrapper
 sub friendof
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
 
-    my $rs = LJ::Protocol::do_request($dbs, "friendof", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request("friendof", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -2439,12 +2389,12 @@ sub friendof
 ## flat wrapper
 sub checkfriends
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
 
-    my $rs = LJ::Protocol::do_request($dbs, "checkfriends", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request("checkfriends", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -2461,12 +2411,12 @@ sub checkfriends
 ## flat wrapper
 sub getdaycounts
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
 
-    my $rs = LJ::Protocol::do_request($dbs, "getdaycounts", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request("getdaycounts", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -2483,12 +2433,12 @@ sub getdaycounts
 ## flat wrapper
 sub syncitems
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
 
-    my $rs = LJ::Protocol::do_request($dbs, "syncitems", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request("syncitems", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -2512,7 +2462,7 @@ sub syncitems
 ## flat wrapper: limited functionality.  (1 command only, server-parsed only)
 sub consolecommand
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
@@ -2520,7 +2470,7 @@ sub consolecommand
 
     $rq->{'commands'} = [ $req->{'command'} ];
 
-    my $rs = LJ::Protocol::do_request($dbs, "consolecommand", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request("consolecommand", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -2544,7 +2494,7 @@ sub consolecommand
 ## flat wrapper
 sub editfriends
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
@@ -2567,7 +2517,7 @@ sub editfriends
         }
     }
 
-    my $rs = LJ::Protocol::do_request($dbs, "editfriends", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request("editfriends", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -2591,7 +2541,7 @@ sub editfriends
 ## flat wrapper
 sub editfriendgroups
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
@@ -2624,7 +2574,7 @@ sub editfriendgroups
         }
     }
 
-    my $rs = LJ::Protocol::do_request($dbs, "editfriendgroups", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request("editfriendgroups", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -2649,13 +2599,13 @@ sub flatten_props
 ## flat wrapper
 sub postevent
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
     flatten_props($req, $rq);
 
-    my $rs = LJ::Protocol::do_request($dbs, "postevent", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request("postevent", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -2672,13 +2622,13 @@ sub postevent
 ## flat wrapper
 sub editevent
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
     flatten_props($req, $rq);
 
-    my $rs = LJ::Protocol::do_request($dbs, "editevent", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request("editevent", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -2694,12 +2644,12 @@ sub editevent
 ## flat wrapper
 sub getevents
 {
-    my ($dbs, $req, $res, $flags) = @_;
+    my ($req, $res, $flags) = @_;
 
     my $err = 0;
     my $rq = upgrade_request($req);
 
-    my $rs = LJ::Protocol::do_request($dbs, "getevents", $rq, \$err, $flags);
+    my $rs = LJ::Protocol::do_request("getevents", $rq, \$err, $flags);
     unless ($rs) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = LJ::Protocol::error_message($err);

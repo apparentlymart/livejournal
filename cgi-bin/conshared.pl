@@ -40,10 +40,10 @@ sub change_community_admin
     my $newid = $unew->{'userid'};
 
     # remove old maintainers' power over it
-    LJ::clear_rel($dbs, $ucomm, '*', 'A');
+    LJ::clear_rel($ucomm, '*', 'A');
 
     # add a new sole maintainer
-    LJ::set_rel($dbs, $ucomm, $newid, 'A');
+    LJ::set_rel($ucomm, $newid, 'A');
 
     # so old maintainers can't regain access:
     $dbh->do("DELETE FROM infohistory WHERE userid=$commid");
@@ -106,11 +106,11 @@ sub shared
     
     my $dbs = LJ::make_dbs_from_arg($dbh);
     if ($action eq "add") {
-        LJ::set_rel($dbs, $shared_id, $target_id, 'P');
+        LJ::set_rel($shared_id, $target_id, 'P');
         push @$out, [ "info", "User \"$target_user\" can now post in \"$shared_user\"." ];
     } 
     if ($action eq "remove") {
-        LJ::clear_rel($dbs, $shared_id, $target_id, 'P');
+        LJ::clear_rel($shared_id, $target_id, 'P');
         push @$out, [ "info", "User \"$target_user\" can no longer post in \"$shared_user\"." ];
     }
 
@@ -186,7 +186,7 @@ sub community
         push @$out, [ "info", "User \"$target_user\" is now a member of \"$com_user\"." ];
         
         if ($ci->{'postlevel'} eq "members") {
-            LJ::set_rel($dbs, $com_id, $target_id, 'P');
+            LJ::set_rel($com_id, $target_id, 'P');
             push @$out, [ "info", "User \"$target_user\" can now post in \"$com_user\"." ];
         } 
     }
@@ -195,7 +195,7 @@ sub community
         $dbh->do("DELETE FROM friends WHERE userid=$com_id AND friendid=$target_id");
         push @$out, [ "info", "User \"$target_user\" is no longer a member of \"$com_user\"." ];
 
-        LJ::clear_rel($dbs, $com_id, $target_id, 'P');
+        LJ::clear_rel($com_id, $target_id, 'P');
         push @$out, [ "info", "User \"$target_user\" can no longer post in \"$com_user\"." ];
     }
 

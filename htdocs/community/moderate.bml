@@ -60,7 +60,7 @@ body<=
         my $posturl;
 
         if ($mode eq 'approve_do') {
-            my $res = LJ::Protocol::do_request($dbs, 'postevent', $req, \$prot_err, {'nomod'=>1, 'noauth'=>1});
+            my $res = LJ::Protocol::do_request('postevent', $req, \$prot_err, {'nomod'=>1, 'noauth'=>1});
             if ($res) { # succeeded
                 $success = 1;
                 $ret .= "<?h1 $ML{'.posted.header'} h1?><?p $ML{'.posted.text'} p?>";

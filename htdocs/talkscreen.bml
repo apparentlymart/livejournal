@@ -83,7 +83,7 @@ body<=
          return $ret;
      }
      if ($state ne 'S') {
-         LJ::Talk::screen_comment($dbs, $dbcs, $u, $qitemid, $qtalkid);
+         LJ::Talk::screen_comment($u, $qitemid, $qtalkid);
      }
      return "<?h1 $ML{'.screened.title'} h1?><?p " . BML::ml('.screened.body', {'link'=>$commentlink}) . " p?>";
  }
@@ -104,7 +104,7 @@ body<=
          return $ret;
      }
      if ($state ne 'A') {
-         LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $qitemid, $qtalkid);
+         LJ::Talk::unscreen_comment($u, $qitemid, $qtalkid);
      }
      return "<?h1 $ML{'.unscreened.title'} h1?><?p " . BML::ml('.unscreened.body', {'link'=>$commentlink}) . " p?>";
  }

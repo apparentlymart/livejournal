@@ -3,16 +3,9 @@
     use strict;
     use vars qw(%FORM);
 
-    use Data::Dumper;
-
     if (LJ::did_post() && $FORM{'scheme'}) {
 
-        my $dbs = LJ::get_dbs();
-        my $dbh = $dbs->{'dbh'};
-        my $dbr = $dbs->{'reader'};
-        
-        my $remote = LJ::get_remote($dbs);
-        my $ret = "<pre>" . Dumper($remote) . "</pre>\n";
+        my $remote = LJ::get_remote();
 
         return unless grep { $FORM{'scheme'} eq $_->{'scheme'} } @LJ::SCHEMES;
         my $cval = $FORM{'scheme'};
@@ -24,7 +17,7 @@
 
         if ($remote) {
             # they are logged in, set a userprop
-            LJ::set_userprop($dbs, $remote->{'userid'}, 'schemepref', $cval);
+            LJ::set_userprop($remote, 'schemepref', $cval);
 
             if ($remote->{'_session'}->{'exptype'} eq 'long') {
                 $cval = [ $FORM{'scheme'}, $remote->{'_session'}->{'timeexpire'} ];

@@ -840,7 +840,7 @@ sub set_userprop
         }
         if (my $list = $action{$table}->{"delete"}) {
             $list = join(',', @$list);
-            $->do("DELETE FROM $table WHERE userid=$userid AND upropid IN ($list)");
+            $db->do("DELETE FROM $table WHERE userid=$userid AND upropid IN ($list)");
         }
     }
     return 1;
@@ -1530,7 +1530,7 @@ sub get_urls
 # <LJFUNC>
 # name: LJ::record_meme
 # des: Records a URL reference from a journal entry to the meme table.
-# args: dbarg, url, posterid, itemid, journalid?
+# args: dbarg?, url, posterid, itemid, journalid?
 # des-url: URL to log
 # des-posterid: Userid of person posting
 # des-itemid: Itemid URL appears in.  This is the display itemid,
@@ -1540,9 +1540,8 @@ sub get_urls
 # </LJFUNC>
 sub record_meme
 {
-    my ($dbarg, $url, $posterid, $itemid, $jid) = @_;
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my ($url, $posterid, $itemid, $jid) = @_;
 
     $url =~ s!/$!!;  # strip / at end
     LJ::run_hooks("canonicalize_url", \$url);
@@ -1551,6 +1550,7 @@ sub record_meme
     # we don't want to record it.
     return unless $url;
 
+    my $dbh = LJ::get_db_writer();
     $dbh->do("REPLACE DELAYED INTO meme (url, posterid, journalid, itemid) " .
              "VALUES (?, ?, ?, ?)", undef, $url, $posterid, $jid, $itemid);
 }
@@ -1756,7 +1756,7 @@ register_setter("newpost_minsecurity", sub {
         return 0;
     }
     $value = "" if $value eq "public";
-    LJ::set_userprop($dba, $u->{'userid'}, "newpost_minsecurity", $value);
+    LJ::set_userprop($u, "newpost_minsecurity", $value);
     return 1;
 });
 
@@ -1768,7 +1768,7 @@ register_setter("stylesys", sub {
         return 0;
     }
     $value = $1 + 0;
-    LJ::set_userprop($dba, $u->{'userid'}, "stylesys", $value);
+    LJ::set_userprop($u, "stylesys", $value);
     return 1;
 });
 
@@ -2348,24 +2348,21 @@ sub auth_okay
 #      not really too useful but should be extended to be useful so
 #      htdocs/create.bml can use it, rather than doing the work itself.
 # returns: integer of userid created, or 0 on failure.
-# args: dbarg, opts
+# args: dbarg?, opts
 # des-opts: hashref containing keys 'user', 'name', and 'password'
 # </LJFUNC>
 sub create_account
 {
-    my $dbarg = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
     my $o = shift;
-
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
 
     my $user = LJ::canonical_username($o->{'user'});
     unless ($user)  {
         return 0;
     }
 
-    my $quser = $dbr->quote($user);
+    my $dbh = LJ::get_db_writer();
+    my $quser = $dbh->quote($user);
     my $cluster = defined $o->{'cluster'} ? $o->{'cluster'} : LJ::new_account_cluster();
     my $caps = $o->{'caps'} || $LJ::NEWUSER_CAPS;
 
@@ -2373,16 +2370,17 @@ sub create_account
     return 0 unless $cluster;
 
     $dbh->do("INSERT INTO user (user, name, password, clusterid, dversion, caps) ".
-             "VALUES ($quser, ?, ?, ?, 2, ?)", undef,
+             "VALUES ($quser, ?, ?, ?, $LJ::MAX_DVERSION, ?)", undef,
              $o->{'name'}, $o->{'password'}, $cluster, $caps);
     return 0 if $dbh->err;
     
     my $userid = $dbh->{'mysql_insertid'};
+    return 0 unless $userid;
+
     $dbh->do("INSERT INTO useridmap (userid, user) VALUES ($userid, $quser)");
     $dbh->do("INSERT INTO userusage (userid, timecreate) VALUES ($userid, NOW())");
 
     LJ::run_hooks("post_create", {
-        'dbs' => $dbs,
         'userid' => $userid,
         'user' => $user,
         'code' => undef,
@@ -2407,39 +2405,33 @@ sub new_account_cluster
 # name: LJ::is_friend
 # des: Checks to see if a user is a friend of another user.
 # returns: boolean; 1 if user B is a friend of user A or if A == B
-# args: dbarg, usera, userb
+# args: usera, userb
 # des-usera: Source user hashref or userid.
 # des-userb: Destination user hashref or userid. (can be undef)
 # </LJFUNC>
 sub is_friend
 {
-    my $dbarg = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $ua = shift;
     my $ub = shift;
 
     my $uaid = (ref $ua ? $ua->{'userid'} : $ua)+0;
     my $ubid = (ref $ub ? $ub->{'userid'} : $ub)+0;
 
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
     return 0 unless $uaid;
     return 0 unless $ubid;
     return 1 if ($uaid == $ubid);
 
-    my $sth = $dbr->prepare("SELECT COUNT(*) FROM friends WHERE ".
-                            "userid=$uaid AND friendid=$ubid");
-    $sth->execute;
-    my ($is_friend) = $sth->fetchrow_array;
-    return $is_friend;
+    my $dbr = LJ::get_db_reader();
+    return $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE ".
+                                 "userid=$uaid AND friendid=$ubid");
 }
 
 # <LJFUNC>
 # name: LJ::is_banned
 # des: Checks to see if a user is banned from a journal.
 # returns: boolean; 1 iff user B is banned from journal A
-# args: dbarg?, user, journal
+# args: user, journal
 # des-user: User hashref or userid.
 # des-journal: Journal hashref or userid.
 # </LJFUNC>
@@ -2468,12 +2460,12 @@ sub is_banned
 #      <b>Note:</b> This is meant for use on single entries at a time,
 #      not for calling many times on every entry in a journal.
 # returns: boolean; 1 if remote user can see item
-# args: dbarg, remote, item
+# args: remote, item
 # des-item: Hashref from the 'log' table.
 # </LJFUNC>
 sub can_view
 {
-    my $dbarg = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $remote = shift;
     my $item = shift;
 
@@ -2497,17 +2489,14 @@ sub can_view
     return 0 unless ($item->{'security'} eq "usemask");
 
     # usemask
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
 
     # if it's usemask, we have to refuse non-personal journals,
     # so we have to load the user
     return 0 unless $remote->{'journaltype'} eq 'P';
 
-    my $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE ".
-                            "userid=$userid AND friendid=$remoteid");
-    $sth->execute;
-    my ($gmask) = $sth->fetchrow_array;
+    my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE ".
+                                      "userid=$userid AND friendid=$remoteid");
     my $allowed = (int($gmask) & int($item->{'allowmask'}));
     return $allowed ? 1 : 0;  # no need to return matching mask
 }
@@ -2971,7 +2960,7 @@ sub start_request
 
 sub end_request
 {
-    
+    # TODO: optionally close DB connections
 }
 
 # <LJFUNC>
@@ -4434,23 +4423,27 @@ sub remote_has_priv
 #       to use this many times in a row... only once or twice perhaps
 #       per request.  Tons of serialized db requests, even when small,
 #       are slow.  Opposite of [func[LJ::get_username]].
-# args: dbarg, user
+# args: dbarg?, user
 # des-user: Username whose userid to look up.
 # returns: Userid, or 0 if invalid user.
 # </LJFUNC>
 sub get_userid
 {
-    my $dbarg = shift;
+    my $dbarg = ref $_[0] ? shift : undef;
     my $user = shift;
 
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    $user = canonical_username($user);
+    $user = LJ::canonical_username($user);
 
     my $userid;
     if ($LJ::CACHE_USERID{$user}) { return $LJ::CACHE_USERID{$user}; }
+
+    my $dbr;
+    if ($dbarg) {
+        my $dbs = LJ::make_dbs_from_arg($dbarg);
+        $dbr = $dbs->{'reader'};
+    } else {
+        $dbr = LJ::get_db_reader();
+    }
 
     my $quser = $dbr->quote($user);
     my $sth = $dbr->prepare("SELECT userid FROM useridmap WHERE user=$quser");
@@ -4462,8 +4455,7 @@ sub get_userid
     # auth mechanism
     if (! $userid && ref $LJ::AUTH_EXISTS eq "CODE")
     {
-        # TODO: eventual $dbs conversion (even though create_account will ALWAYS
-        # use the master)
+        my $dbh = LJ::get_db_writer();
         $userid = LJ::create_account($dbh, { 'user' => $user,
                                              'name' => $user,
                                              'password' => '', });
@@ -4495,33 +4487,34 @@ sub want_userid
 #       to use this many times in a row... only once or twice perhaps
 #       per request.  Tons of serialized db requests, even when small,
 #       are slow.  Opposite of [func[LJ::get_userid]].
-# args: dbarg, user
+# args: dbarg?, user
 # des-user: Username whose userid to look up.
 # returns: Userid, or 0 if invalid user.
 # </LJFUNC>
 sub get_username
 {
-    my $dbarg = shift;
+    my $dbarg = ref $_[0] ? shift : undef;
     my $userid = shift;
-    my $user;
     $userid += 0;
 
     # Checked the cache first.
     if ($LJ::CACHE_USERNAME{$userid}) { return $LJ::CACHE_USERNAME{$userid}; }
 
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbr = $dbs->{'reader'};
+    my $dbr;
+    my $dbs;
+    if ($dbarg) {
+        $dbs = LJ::make_dbs_from_arg($dbarg);
+        $dbr = $dbs->{'reader'};
+    } else {
+        $dbr = LJ::get_db_reader();
+    }
 
-    my $sth = $dbr->prepare("SELECT user FROM useridmap WHERE userid=$userid");
-    $sth->execute;
-    $user = $sth->fetchrow_array;
+    my $user = $dbr->seletrow_array("SELECT user FROM useridmap WHERE userid=$userid");
 
     # Fall back to master if it doesn't exist.
-    if (! defined($user) && $dbs->{'has_slave'}) {
-        my $dbh = $dbs->{'dbh'};
-        $sth = $dbh->prepare("SELECT user FROM useridmap WHERE userid=$userid");
-        $sth->execute;
-        $user = $sth->fetchrow_array;
+    if (! defined($user) && ($dbs->{'has_slave'} || ! $dbarg)) {
+        my $dbh = $dbs ? $dbs->{'dbh'} : LJ::get_db_writer();
+        $user = $dbr->seletrow_array("SELECT user FROM useridmap WHERE userid=$userid");
     }
     if (defined($user)) { $LJ::CACHE_USERNAME{$userid} = $user; }
     return ($user);
@@ -4687,7 +4680,6 @@ sub hash_password
     return Digest::MD5::md5_hex($_[0]);
 }
 
-# $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
 # <LJFUNC>
 # name: LJ::can_use_journal
 # class:
@@ -4699,13 +4691,13 @@ sub hash_password
 # </LJFUNC>
 sub can_use_journal
 {
-    my ($dbarg, $posterid, $reqownername, $res) = @_;
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my ($posterid, $reqownername, $res) = @_;
 
     my $qposterid = $posterid+0;
 
     ## find the journal owner's info
-    my $uowner = LJ::load_user($dbs, $reqownername);
+    my $uowner = LJ::load_user($reqownername);
     unless ($uowner) {
         $res->{'errmsg'} = "Journal \"$reqownername\" does not exist.";
         return 0;
@@ -4720,13 +4712,14 @@ sub can_use_journal
     $res->{'u_owner'} = $uowner;
 
     ## check if user has access
-    return 1 if LJ::check_rel($dbs, $ownerid, $qposterid, 'P');
+    return 1 if LJ::check_rel($ownerid, $qposterid, 'P');
 
     # let's check if this is community allowing post access to non-members 
-    LJ::load_user_props($dbs, $uowner, "nonmember_posting");
+    my $dbr = LJ::get_db_reader();
+    LJ::load_user_props($dbr, $uowner, "nonmember_posting");
     if ($uowner->{'nonmember_posting'}) {
-        my ($membership, $postlevel) = dbs_selectrow_array($dbs, "SELECT membership, postlevel FROM ".
-                                                           "community WHERE userid=$ownerid");
+        my ($membership, $postlevel) = $dbr->selectrow_array("SELECT membership, postlevel FROM ".
+                                                             "community WHERE userid=$ownerid");
         return 1 if $membership eq 'open' && $postlevel eq 'members';
     }
 
@@ -5157,7 +5150,7 @@ sub color_todb
 # <LJFUNC>
 # name: LJ::add_friend
 # des: Simple interface to add a friend edge.
-# args: dbs, userida, useridb, opts?
+# args: userida, useridb, opts?
 # des-userida: Userid of source user (befriender)
 # des-useridb: Userid of target user (befriendee)
 # des-opts: hashref; 'defaultview' key means add $useridb to $userida's Default View friends group
@@ -5165,22 +5158,20 @@ sub color_todb
 # </LJFUNC>
 sub add_friend
 {
-    my ($dbarg, $ida, $idb, $opts) = @_;
-    return 0 unless $dbarg;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
+    my ($ida, $idb, $opts) = @_;
 
     $ida += 0; $idb += 0; 
     return 0 unless $ida and $idb;
     
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbh = LJ::get_db_writer();
 
     my $black = LJ::color_todb("#000000");
     my $white = LJ::color_todb("#ffffff");
 
     my $groupmask = 1;
     if ($opts->{'defaultview'}) {
-        my $grp = $dbr->selectrow_array("SELECT groupnum FROM friendgroup WHERE userid=? AND groupname='Default View'", undef, $ida);
+        my $grp = $dbh->selectrow_array("SELECT groupnum FROM friendgroup WHERE userid=? AND groupname='Default View'", undef, $ida);
         $groupmask |= (1 << $grp) if $grp;
     }
 
@@ -5891,19 +5882,20 @@ sub check_rel
 # <LJFUNC>
 # name: LJ::set_rel
 # des: Sets relationship information for two users.
-# args: dbs, userid, targetid, type
+# args: dbs?, userid, targetid, type
 # arg-userid: source userid, or a user hash
 # arg-targetid: target userid, or a user hash
 # arg-type: type of the relationship
 # </LJFUNC>
 sub set_rel 
 {
-    my ($dbs, $userid, $targetid, $type) = @_;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my ($userid, $targetid, $type) = @_;
     return undef unless $type and $userid and $targetid;
     $userid = LJ::want_userid($userid);
     $targetid = LJ::want_userid($targetid);
 
-    my $dbh = $dbs->{'dbh'};
+    my $dbh = LJ::get_db_writer();
     my $qtype = $dbh->quote($type);
     my $sql = "REPLACE INTO reluser (userid,targetid,type) VALUES ($userid,$targetid,$qtype)";
     $dbh->do($sql);
@@ -5917,21 +5909,22 @@ sub set_rel
 #      both -- may be '*'. In that case, if, say, userid is '*', then all relationship 
 #      edges with target equal to targetid and of the specified type are deleted. 
 #      If both userid and targetid are numbers, just one edge is deleted.
-# args: dbs, userid, targetid, type
+# args: dbs?, userid, targetid, type
 # arg-userid: source userid, or a user hash, or '*'
 # arg-targetid: target userid, or a user hash, or '*'
 # arg-type: type of the relationship
 # </LJFUNC>
 sub clear_rel 
 {
-    my ($dbs, $userid, $targetid, $type) = @_;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my ($userid, $targetid, $type) = @_;
     return undef unless $type and $userid or $targetid;
     return undef if $userid eq '*' and $targetid eq '*';
 
     $userid = LJ::want_userid($userid) unless $userid eq '*';
     $targetid = LJ::want_userid($targetid) unless $targetid eq '*';
 
-    my $dbh = $dbs->{'dbh'};
+    my $dbh = LJ::get_db_writer();
     my $qtype = $dbh->quote($type);
     my $sql = "DELETE FROM reluser WHERE " . ($userid ne '*' ? "userid=$userid AND " : "") .
               ($targetid ne '*' ? "targetid=$targetid AND " : "") . "type=$qtype";

@@ -99,8 +99,8 @@ body<=
         my $nonmembers = $POST{'nonmember_posting'} + 0;
         my $moderated = $POST{'moderated'} + 0;
 
-        LJ::set_userprop($dbs, $cu->{'userid'}, 'nonmember_posting', $nonmembers);
-        LJ::set_userprop($dbs, $cu->{'userid'}, 'moderated', $moderated);
+        LJ::set_userprop($cu, 'nonmember_posting', $nonmembers);
+        LJ::set_userprop($cu, 'moderated', $moderated);
  
         $ret .= "<?h1 $ML{'.success'} h1?>";
         if ($mode eq 'create') {

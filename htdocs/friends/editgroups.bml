@@ -14,10 +14,7 @@
      return;
  }
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
-
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
  unless ($remote) {
      $body = "<?h1 $ML{'.login.header'} h1?><?p $ML{'.login.text'} p?>";
      return;
@@ -28,7 +25,7 @@
      $FORM{'mode'} = "editfriendgroups";
      $FORM{'user'} = $remote->{'user'};
      $FORM{'ver'} = $LJ::PROTOCOL_VER;
-     LJ::do_request($dbs, \%FORM, \%res, {
+     LJ::do_request(\%FORM, \%res, {
          'userid' => $remote->{'userid'},
          'noauth' => 1, 
      });
@@ -42,11 +39,11 @@
  }
 
  my %res;
- LJ::do_request($dbs, { 'mode' => 'getfriends',
-                        'user' => $remote->{'user'}, 
-                        'ver'  => $LJ::PROTOCOL_VER,
-                        'includegroups' => 1,
-                    },
+ LJ::do_request({ 'mode' => 'getfriends',
+                  'user' => $remote->{'user'}, 
+                  'ver'  => $LJ::PROTOCOL_VER,
+                  'includegroups' => 1,
+              },
                 \%res, { 'userid' => $remote->{'userid'},
                          'noauth' => 1, });
  my @num_used;

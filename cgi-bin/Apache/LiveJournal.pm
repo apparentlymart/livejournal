@@ -53,7 +53,8 @@ sub handler
 
     $r->set_handlers(PerlTransHandler => [ \&trans ]);
     $r->set_handlers(PerlCleanupHandler => [ sub { %RQ = () },
-                                             "Apache::LiveJournal::db_logger" ]);
+                                             "Apache::LiveJournal::db_logger",
+                                             "LJ::end_request", ]);
 
     # if we're behind a lite mod_proxy front-end, we need to trick future handlers
     # into thinking they know the real remote IP address.  problem is, it's complicated
@@ -767,7 +768,7 @@ sub interface_content
     
     # the protocol needs the remote IP in just one place, where tracking is done.
     $ENV{'_REMOTE_IP'} = $r->connection()->remote_ip();
-    LJ::do_request($dbs, \%FORM, \%out);
+    LJ::do_request(\%FORM, \%out);
 
     if ($FORM{'responseenc'} eq "urlenc") {
         $r->send_http_header;
@@ -873,7 +874,7 @@ sub xmlrpc_method {
             ->faultcode(202);
     }
     my $error = 0;
-    my $res = LJ::Protocol::do_request_without_db($method, $req, \$error);
+    my $res = LJ::Protocol::do_request($method, $req, \$error);
     if ($error) {
         die SOAP::Fault
             ->faultstring(LJ::Protocol::error_message($error))

@@ -8,12 +8,11 @@
     return unless $l;
 
     if (LJ::did_post()) {
-        my $dbs = LJ::get_dbs();
-        my $remote = LJ::get_remote($dbs);
+        my $remote = LJ::get_remote();
 
         my $cval = $l->{'lncode'};
         if ($remote) {
-            LJ::set_userprop($dbs, $remote->{'userid'}, "browselang", $l->{'lncode'});
+            LJ::set_userprop($remote, "browselang", $l->{'lncode'});
 
             if ($remote->{'_session'}->{'exptype'} eq 'long') {
                 $cval = [ $l->{'lncode'}, $remote->{'_session'}->{'timeexpire'} ];

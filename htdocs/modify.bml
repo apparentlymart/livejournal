@@ -466,8 +466,8 @@ body<=
 
         ### change any of the userprops ?
         foreach my $uprop (keys %uprop) {
-            next if ($POST{$uprop} eq $u->{$uprop});
-            LJ::set_userprop($dbs, $u->{'userid'}, $uprop, $uprop{$uprop});
+            next if $POST{$uprop} eq $u->{$uprop};
+            LJ::set_userprop($u, $uprop, $uprop{$uprop});
         }
 
         # tell the user all is well

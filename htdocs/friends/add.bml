@@ -60,7 +60,7 @@
      }
      
      my %res = ();
-     LJ::do_request($dbh, $req, \%res, 
+     LJ::do_request($req, \%res, 
                     { "noauth" => 1, "userid" => $remote->{'userid'} } );
      
      if ($res{'success'} eq "OK") 
@@ -113,7 +113,7 @@
  ## let them pick friend groups
  $body .= "<?h1 $ML{'.groups.header'} h1?><?p $ML{'.groups.text'} p?><blockquote>";
  my $err;
- my $greq = LJ::Protocol::do_request($dbs, "getfriendgroups", {
+ my $greq = LJ::Protocol::do_request("getfriendgroups", {
      'username' => $remote->{'user'},
      'ver'      => $LJ::PROTOCOL_VER,
  }, \$err, { 'noauth' => 1 });

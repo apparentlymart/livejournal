@@ -294,27 +294,26 @@ sub can_view_screened {
 }
 
 sub update_commentalter {
-    my ($dbs, $dbcs, $u, $itemid) = @_;
-    my $dbcm = $dbcs->{'dbh'};
-    my $userid = $u->{'userid'};
+    my ($u, $itemid) = @_;
+    my $dbcm = LJ::get_cluster_master($u);
+    return 0 unless $dbcm;
     my $prop = LJ::get_prop("log", "commentalter");
 
     $itemid = $itemid + 0;
 
     $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) ".
-              "VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, $userid, $itemid, $prop->{'id'});
+              "VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, 
+              $u->{'userid'}, $itemid, $prop->{'id'});
 }
 
 sub screen_comment {
-    my $dbs = shift;
-    my $dbcs = shift;
     my $u = shift;
     my $itemid = shift(@_) + 0;
+    my $dbcm = LJ::get_cluster_master($u);
 
     my $in = join (',', map { $_+0 } @_);
     return unless $in;
 
-    my $dbcm = $dbcs->{'dbh'};
     my $userid = $u->{'userid'} + 0;
     my $prop = LJ::get_prop("log", "hasscreened");
 
@@ -327,21 +326,18 @@ sub screen_comment {
         $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ($userid, $itemid, $prop->{'id'}, '1')");
     }
 
-    LJ::Talk::update_commentalter($dbs, $dbcs, $u, $itemid);
+    LJ::Talk::update_commentalter($u, $itemid);
     return;
 }
 
 sub unscreen_comment {
-    my $dbs = shift;
-    my $dbcs = shift;
     my $u = shift;
     my $itemid = shift(@_) + 0;
+    my $dbcm = LJ::get_cluster_master($u);
 
     my $in = join (',', map { $_+0 } @_);
     return unless $in;
 
-    my $dbcm = $dbcs->{'dbh'};
-    my $dbcr = $dbcs->{'reader'};
     my $userid = $u->{'userid'} + 0;
     my $prop = LJ::get_prop("log", "hasscreened");
 
@@ -358,7 +354,7 @@ sub unscreen_comment {
             unless $hasscreened;
     }
 
-    LJ::Talk::update_commentalter($dbs, $dbcs, $u, $itemid);
+    LJ::Talk::update_commentalter($u, $itemid);
     return;
 }
 

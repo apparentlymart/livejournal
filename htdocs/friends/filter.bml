@@ -18,17 +18,14 @@
      return BML::redirect("$LJ::SITEROOT/users/$user/friends${extra}");
  }
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  unless ($remote) { $body .= "<?needlogin?>"; return; }
 
  my %res;
- LJ::do_request($dbs, { 'mode' => 'getfriendgroups',
-                        'ver'  => $LJ::PROTOCOL_VER,
-                        'user' => $remote->{'user'}, },
+ LJ::do_request({ 'mode' => 'getfriendgroups',
+                  'ver'  => $LJ::PROTOCOL_VER,
+                  'user' => $remote->{'user'}, },
                 \%res, { 'noauth' => 1, 'userid' => $remote->{'userid'} });
  
  

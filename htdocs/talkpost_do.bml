@@ -362,9 +362,9 @@ body<=
     # unscreen the parent comment if needed
     my $unscreened = 0;
     if ($parpost->{'state'} eq 'S') {
-        LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $itemid, $partid);
-          $unscreened = 1;
-      }
+        LJ::Talk::unscreen_comment($u, $itemid, $partid);
+        $unscreened = 1;
+    }
     
     # check for duplicate entry (double submission)
     # Note:  we don't do it inside a locked section like ljprotocol.pl's postevent,
@@ -491,7 +491,7 @@ body<=
         }
         
         # update the comment alter property
-        LJ::Talk::update_commentalter($dbs, $dbcs, $u, $itemid);   
+        LJ::Talk::update_commentalter($u, $itemid);   
 
         # log the event
         LJ::event_register($dbs, $dbcm, "R", $u->{'userid'}, $ditemid);

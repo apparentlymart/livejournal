@@ -96,7 +96,7 @@ $maint{'synsuck'} = sub
             my $err = $@;
             $err =~ s! at /.*!!;
             $err =~ s/^\n//; # cleanup of newline at the beggining of the line
-            LJ::set_userprop($dbs, $userid, "rssparseerror", $err);
+            LJ::set_userprop($userid, "rssparseerror", $err);
             next;
         }
 
@@ -149,7 +149,6 @@ $maint{'synsuck'} = sub
         # instead of a new post.
         my %existing_item = ();
         if ($good_links && $udbh) {
-            LJ::load_props($dbh, "log");
             my $p = LJ::get_prop("log", "syn_link");
             my $sth = $udbh->prepare("SELECT jitemid, value FROM logprop2 WHERE ".
                                      "journalid=? AND propid=? LIMIT 1000");
@@ -229,7 +228,7 @@ $maint{'synsuck'} = sub
 
             my $err;
             my $pre_time = time();
-            my $res = LJ::Protocol::do_request($dbs, $command, $req, \$err, $flags);
+            my $res = LJ::Protocol::do_request($command, $req, \$err, $flags);
             my $post_time = time();
             if ($res && ! $err) {
                 # so 20 items in a row don't get the same logtime 
@@ -254,12 +253,12 @@ $maint{'synsuck'} = sub
             if ($title && $title ne $su->{'name'}) {
                 $dbh->do("UPDATE user SET name=? WHERE userid=?", undef,
                          $title, $su->{'userid'});
-                LJ::set_userprop($dbh, $su, "urlname", $title);
+                LJ::set_userprop($su, "urlname", $title);
             }
 
             my $link = $rss->channel('link');
             if ($link && $link ne $su->{'url'}) {
-                LJ::set_userprop($dbh, $su, "url", $link);
+                LJ::set_userprop($su, "url", $link);
             }
 
             my $des = $rss->channel('description');

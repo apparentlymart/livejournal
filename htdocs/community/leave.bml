@@ -3,13 +3,10 @@
  $title = $ML{'.title'};
  $body = "";
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
+ my $dbr = LJ::get_db_reader();
  my $sth;
 
- ### is there a user out there?
- ###
- my $remote = LJ::get_remote($dbh);
+ my $remote = LJ::get_remote();
  unless ($remote) {
      $body = "<?h1 $ML{'Sorry'}.. h1?><?p $ML{'.label.logoutfirst'} p?>";
      return;
@@ -18,11 +15,10 @@
  ### get info about the community
  ###
  my $cuserid = $FORM{'cuserid'}+0;
- my $qcomm = $dbh->quote($FORM{'comm'});
+ my $qcomm = $dbr->quote($FORM{'comm'});
  my $extrawhere = $FORM{'comm'} ? "AND u.user=$qcomm" : "AND c.userid=$cuserid";
- $sth = $dbh->prepare("SELECT u.user, u.userid, u.name, c.membership, c.postlevel FROM user u, community c WHERE u.userid=c.userid $extrawhere");
- $sth->execute;
- my $ci = $sth->fetchrow_hashref();
+ my $ci = $dbr->selectrow_hashref("SELECT u.user, u.userid, u.name, c.membership, c.postlevel ".
+                                  "FROM user u, community c WHERE u.userid=c.userid $extrawhere");
 
  ### does this community even exit?
  ###
@@ -35,11 +31,12 @@
  {
      ### remove user from community's friends list
      ###
+     my $dbh = LJ::get_db_writer();
      $dbh->do("DELETE FROM friends WHERE userid=$ci->{'userid'} AND friendid=$remote->{'userid'}");
      
      $body .= "<?h1 $ML{'.success'} h1?><?p ".BML::ml('.label.removed',{'commuser'=>$ci->{'user'},'commname'=>$ci->{'name'}})." p?>";
 
-     LJ::clear_rel($dbs, $ci, $remote, 'P');
+     LJ::clear_rel($ci, $remote, 'P');
      
  }   
  else 

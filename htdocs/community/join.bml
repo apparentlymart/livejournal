@@ -3,13 +3,12 @@
  $title = $ML{'.title'};
  $body = "";
  
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
+ my $dbr = LJ::get_db_reader();
  my $sth;
 
  ### is there a user out there?
  ###
- my $remote = LJ::get_remote($dbs);
+my $remote = LJ::get_remote();
  unless ($remote) {
      $body = "<?h1 $ML{'Sorry'}.. h1?><?p $ML{'.label.loginfirst'} p?>";
      return;
@@ -18,11 +17,10 @@
  ### get info about the community
  ###
  my $cuserid = $FORM{'cuserid'}+0;
- my $qcomm = $dbh->quote($FORM{'comm'});
+ my $qcomm = $dbr->quote($FORM{'comm'});
  my $extrawhere = $FORM{'comm'} ? "AND u.user=$qcomm" : "AND c.userid=$cuserid";
- $sth = $dbh->prepare("SELECT u.user, u.userid, u.name, c.membership, c.postlevel FROM user u, community c WHERE u.userid=c.userid $extrawhere");
- $sth->execute;
- my $ci = $sth->fetchrow_hashref;
+ my $ci = $dbr->selectrow_hashref("SELECT u.user, u.userid, u.name, c.membership, c.postlevel ".
+                                  "FROM user u, community c WHERE u.userid=c.userid $extrawhere");
 
  LJ::text_out(\$ci->{'name'});
  my $ecname = LJ::ehtml($ci->{'name'});
@@ -37,9 +35,10 @@
  $cuserid = $ci->{'userid'};
 
  # get the list of maintainers and their usernames
- my $admins = $dbh->selectcol_arrayref("SELECT u.user FROM user u, reluser r WHERE r.userid=$cuserid AND r.targetid=u.userid AND r.type='A' ORDER BY u.user") || [];
+ my $admins = $dbr->selectcol_arrayref("SELECT u.user FROM user u, reluser r ".
+                                       "WHERE r.userid=$cuserid AND r.targetid=u.userid AND r.type='A'") || [];
  my $list = "<ul>";
- foreach(@$admins) { $list .= "<li><?ljuser $_ ljuser?></li>"};
+ foreach (sort @$admins) { $list .= "<li><?ljuser $_ ljuser?></li>"};
  $list .= "</ul>";
 
  ### can members join this community even?
@@ -58,7 +57,7 @@
  }
  
  ## ensure this user isn't banned
- if (LJ::is_banned($dbs, $remote, $ci->{'userid'})) {
+ if (LJ::is_banned($remote, $ci->{'userid'})) {
      $body .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.label.banned'} p?>";
      return;
  }
@@ -67,19 +66,19 @@
  {
      ### make remote user a friend of the community
      ###
-     LJ::add_friend($dbs, $ci->{'userid'}, $remote->{'userid'});
+     LJ::add_friend($ci->{'userid'}, $remote->{'userid'});
      
      ### make community a friend of the remote user
      ###
      if ($FORM{'addfriend'}) { 
-         LJ::add_friend($dbs, $remote->{'userid'}, $ci->{'userid'}, {'defaultview' => 1});
+         LJ::add_friend($remote->{'userid'}, $ci->{'userid'}, {'defaultview' => 1});
      }
      
      $body .= "<?h1 $ML{'.success'} h1?><?p ".BML::ml('.label.membernow',{ 'username' => $ci->{'user'}, 'commname'=> $ecname})." p?>";
      
      ### if community permits it, give remote user access to post in this community
      if ($ci->{'postlevel'} eq "members") {
-         LJ::set_rel($dbs, $ci, $remote, 'P');
+         LJ::set_rel($ci, $remote, 'P');
          $body .= "<?p $ML{'.label.allowposting'} p?>";
      } else {
          $body .= "<?p ".BML::ml('.label.auth',{'admins'=>$list})." p?>";

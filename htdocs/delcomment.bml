@@ -12,14 +12,14 @@ body<=
 
  my $ret = "";
 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  unless ($remote) {
      return "<?h1 Error h1?><?p You must be logged in to delete a comment. p?>";
  }
 
  my $qid = $FORM{'id'}+0;
- my $u = LJ::load_user($dbs, $FORM{'journal'});
+ my $u = LJ::load_user($FORM{'journal'});
  return "<?h1 Error h1?><?p Bogus journal arg p?>" unless $u;
  my $dbcs = LJ::get_cluster_set($u);
  my $dbcm = $dbcs->{'dbh'};
@@ -42,11 +42,11 @@ body<=
      return "<?h1 Error h1?><?p This comment has already been deleted. p?>";
  }
 
- $u ||= LJ::load_userid($dbs, $tp->{'journalid'});
+ $u ||= LJ::load_userid($tp->{'journalid'});
  return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
  if ($tp->{'posterid'}) {
-     $tp->{'userpost'} = LJ::get_username($dbs, $tp->{'posterid'});
+     $tp->{'userpost'} = LJ::get_username($tp->{'posterid'});
  }
 
  my $qitemid = $tp->{'itemid'}+0;
@@ -56,7 +56,7 @@ body<=
                    $tp->{'posterid'} == $remote->{'userid'});
 
  # or, a community admin can:
- $can_delete ||= LJ::check_rel($dbs, $tp->{'journalid'}, $remote, 'A');
+ $can_delete ||= LJ::check_rel($tp->{'journalid'}, $remote, 'A');
 
  # or, for a journal item (nodetype == "L"), the poster can delete it,
  # if this happens to be in a community journal (so the
@@ -94,9 +94,7 @@ body<=
 
  # if it's screened, unscreen it first to properly adjust
  # replycount and the hasscreened logprop
-
- LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $tp->{'itemid'}, $qid)
-     if $tp->{'state'} eq 'S';
+ LJ::Talk::unscreen_comment($u, $tp->{'itemid'}, $qid) if $tp->{'state'} eq 'S';
 
  my $jid = $u->{'userid'};
  LJ::delete_talkitem($dbcm, $jid, $qid, "LIGHT");
@@ -105,7 +103,7 @@ body<=
                "journalid=$jid AND jitemid=$tp->{'itemid'}");
  }
 
- LJ::Talk::update_commentalter($dbs, $dbcs, $u, $qitemid);
+ LJ::Talk::update_commentalter($u, $qitemid);
 
  # ban the user, if selected
  my $and;

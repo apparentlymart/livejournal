@@ -24,11 +24,7 @@
      return;
  }
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
- my $remote = LJ::get_remote($dbs);
-
+ my $remote = LJ::get_remote();
  my $dbcm = LJ::get_cluster_master($remote);
 
  # portal uses this, to avoid putting username/auth in hidden fields:
@@ -90,7 +86,7 @@ if ($remote && ! LJ::get_cap($remote, "can_post")) {
      if ($LJ::UNICODE) {
          $FORM{'ver'} = "1";
      }
-     LJ::do_request($dbs, \%FORM, \%res, $flags);
+     LJ::do_request(\%FORM, \%res, $flags);
      
      my $message = "";
      if ($res{'success'} eq "OK") {
@@ -135,7 +131,7 @@ if ($remote && ! LJ::get_cap($remote, "can_post")) {
      # next, postevent
      $FORM{'mode'} = "postevent";
      delete $FORM{'clientversion'};
-     LJ::do_request($dbs, \%FORM, \%res, $flags);
+     LJ::do_request(\%FORM, \%res, $flags);
 
      my $updmessage = "";
      if ($res{'success'} eq "OK" && $res{'message'}) {
@@ -267,7 +263,7 @@ if ($remote && ! LJ::get_cap($remote, "can_post")) {
      {
          my $err;
          
-         $res = LJ::Protocol::do_request($dbs, "login", {
+         $res = LJ::Protocol::do_request("login", {
              "ver" => $LJ::PROTOCOL_VER,
              "username" => $remote->{'user'},
              "getpickws" => 1,
@@ -340,7 +336,7 @@ if ($remote && ! LJ::get_cap($remote, "can_post")) {
 
      $$body .= "<p><b>$ML{'.currmood'}</b>";
 
-     LJ::load_moods($dbs);
+     LJ::load_moods();
      my @sel;
      foreach my $moodid (sort { $LJ::CACHE_MOODS{$a}->{'name'} cmp 
                                     $LJ::CACHE_MOODS{$b}->{'name'} } keys %LJ::CACHE_MOODS)

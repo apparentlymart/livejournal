@@ -61,7 +61,7 @@ if ($remote && $user eq $remote->{'user'} &&
      $FORM{'mode'} = "getevents";
      $FORM{'selecttype'} = "one";
      
-     LJ::do_request($dbs, \%FORM, \%res, { "noauth" => 1});     
+     LJ::do_request(\%FORM, \%res, { "noauth" => 1});     
  }
 
  if ($FORM{'metamode'} eq "choose_editrange") 
@@ -73,7 +73,7 @@ if ($remote && $user eq $remote->{'user'} &&
          $FORM{'howmany'} = 1;
          $just_last = 1;
      }
-     LJ::do_request($dbs, \%FORM, \%res);
+     LJ::do_request(\%FORM, \%res);
  
      if ($res{'success'} eq "OK")
      {
@@ -174,7 +174,7 @@ if ($remote && $user eq $remote->{'user'} &&
          $FORM{'allowmask'} = $amask;
      }
 
-     LJ::do_request($dbs, \%FORM, \%res);
+     LJ::do_request(\%FORM, \%res);
  }
  
  if ($res{'success'} eq "OK")
@@ -188,7 +188,7 @@ if ($remote && $user eq $remote->{'user'} &&
          }
 
          my $gfg;
-         $gfg = LJ::Protocol::do_request($dbs, "getfriendgroups", {
+         $gfg = LJ::Protocol::do_request("getfriendgroups", {
              'username' => $user,
              'ver' => $LJ::PROTOCOL_VER,
          }, undef, {

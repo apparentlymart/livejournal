@@ -36,7 +36,7 @@ sub contains_new_poll
 
 sub parse
 {
-    my $dbs = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $postref = shift;
     my $error = shift;
     my $iteminfo = shift; 
@@ -441,8 +441,8 @@ sub preview {
 # note: $itemid is a $ditemid (display itemid, *256 + anum)
 sub register
 {
-    my $dbs = shift;
-    my $dbh = $dbs->{'dbh'};
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my $dbh = LJ::get_db_writer();
     my $post = shift;
     my $error = shift;
     my $itemid = shift;
