@@ -55,7 +55,22 @@ BODY<=
  $sth->execute;
 
 
- $ret .= "<form method=get>Show only requests of type: <select name=cat>";
+ # filter line:
+ $ret .= "<form method=get>Show only ";
+ $ret .= "<select name=state>";
+ {
+     my @states = ("" => "Open",
+		   "closed" => "Closed",
+		   "green" => "Green");
+     while (@states) {
+	 my ($skey, $sname) = splice(@states, 0, 2);
+	 my $sel = $FORM{'state'} eq $skey ? " selected" : "";
+	 $ret .= "<option value=\"$skey\"$sel>$sname</option>";
+     }
+ }
+ $ret .= "</select>";
+
+ $ret .= " requests of type: <select name=cat>";
  $ret .= "<option value=\"\">(All)</option>";
  my @filter_cats = LJ::Support::filter_cats($remote, $cats);
  if (LJ::check_priv($dbh, $remote, "supportread")) {
@@ -68,8 +83,9 @@ BODY<=
      $ret .= "<option value=\"$cat->{'catkey'}\"$sel>$cat->{'catname'}</option>";
  }
  $ret .= "</select>\n";
- $ret .= "<input type=hidden name=state value=\"" . ($FORM{'state'} eq "closed" ? "closed" : "") . "\">";
  $ret .= "<input type=submit value=\"Filter\"></form>";
+ # /filter line
+ 
 
  $ret .= "<p><table cellpadding=4 cellspacing=1 border=1 bgcolor=#ffffff><tr bgcolor=#d0d0d0>\n";
  $ret .= "<td><b>ID#</b></td>\n";
@@ -98,7 +114,9 @@ BODY<=
 	 $status = "answered<BR><B>still needs help</B>"; 
 	 $barbg = "BGCOLOR=#D0EED0";	 
      }
-
+       
+     next if ($FORM{'state'} eq "green" && $barbg ne "BGCOLOR=#D0EED0");
+       
      my $summary = &BMLUtil::ehtml($sp->{'subject'});
      my $secold = time() - $sp->{'timecreate'};
      my $age = &ago_text($secold);
