@@ -516,7 +516,7 @@ sub get_friend_items
     } if $opts->{'friendsoffriends'};
 
     my $loop = 1;
-    my $itemsleft = $getitems - @items;  # items might've been filled by common case cache 
+    my $itemsleft = $getitems;  # even though we got a bunch, potentially, they could be old
     my $fr;
 
     while ($loop && ($fr = $get_next_friend->()))
