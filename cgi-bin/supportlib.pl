@@ -118,6 +118,19 @@ sub is_poster
     return 0;
 }
 
+sub can_see_helper
+{
+    my ($dbh, $sp, $remote) = @_;
+    my $see = 1;
+    if ($sp->{_cat}->{'hide_helpers'}) { 
+	$see = 0; 
+	if (can_help($dbh, $sp, $remote)) {
+	    $see = 1;
+	}
+    }
+    return $see;
+}
+
 sub can_read
 {
     my ($dbh, $sp, $remote) = @_;
