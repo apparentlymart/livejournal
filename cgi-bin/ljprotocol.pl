@@ -1675,7 +1675,7 @@ sub list_friends
     }
 
     my $limit = $limitnum ? "LIMIT $limitnum" : "";
-    my $sth = $dbr->prepare("SELECT u.user AS 'friend', u.name, u.journaltype, f.fgcolor, f.bgcolor, f.groupmask ".
+    my $sth = $dbr->prepare("SELECT u.user AS 'friend', u.name, u.journaltype, u.statusvis, f.fgcolor, f.bgcolor, f.groupmask ".
                             "FROM user u, friends f WHERE $where ORDER BY u.user $limit");
     $sth->execute;
     my @friends;
@@ -1696,6 +1696,11 @@ sub list_friends
         if ($f->{'journaltype'} eq "C") {
             $r->{"type"} = "community";
         }
+        $r->{"status"} = {
+            'D' => "deleted",
+            'S' => "suspended",
+            'X' => "purged",
+        }->{$f->{'statusvis'}} if $f->{'statusvis'} ne 'V';
 
         push @$res, $r;
     }
@@ -2564,6 +2569,9 @@ sub populate_friends
         }
         if (defined $f->{'type'}) {
             $res->{"${pfx}_${count}_type"} = $f->{'type'};
+        }
+        if (defined $f->{'status'}) {
+            $res->{"${pfx}_${count}_status"} = $f->{'status'};
         }
     }
     $res->{"${pfx}_count"} = $count;

@@ -469,7 +469,16 @@
          my $count = 0;
          for (my $i=1; $i<=$res_fr{'friend_count'}; $i++) {
              my $fr = $res_fr{"friend_${i}_user"};
-             $body .= "<A HREF=\"/userinfo.bml?user=$fr\">$fr</A>, ";
+             my $status = $res_fr{"friend_${i}_status"};
+             my $frlink = "<a href='/userinfo.bml?user=$fr'>$fr</a>";
+             unless ($status) {
+                 $body .= $frlink;
+             } elsif ($status eq 'deleted' || $status eq 'purged' || $status eq 'suspended') {
+                 $body .= "<strike>$frlink</strike>";
+             } else {
+                 $body .= $frlink;
+             }
+             $body .= ", ";
          }
          chop $body; chop $body;
      } else {
