@@ -622,7 +622,7 @@ sub get_style_layers
     unless ($u) {
         my $sty = LJ::S2::load_style($styleid) or
 	    die "couldn't load styleid $styleid";
-        $u = LJ::load_userd($sty->{userid}) or
+        $u = LJ::load_userid($sty->{userid}) or
             die "couldn't load userid $sty->{userid} for styleid $styleid";
     }
 
