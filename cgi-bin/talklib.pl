@@ -626,7 +626,7 @@ sub get_talk_data
         # if we're doing innodb, begin a transaction, else lock tables
         my $sharedmode = "";
         if ($LJ::INNODB_DB{$u->{clusterid}}) {
-            $sharedmode = "LOCK IN SHARED MODE";
+            $sharedmode = "LOCK IN SHARE MODE";
             $dbcm->begin_work;
         } else {
             $dbcm->do("LOCK TABLES log2 WRITE, talk2 READ");
