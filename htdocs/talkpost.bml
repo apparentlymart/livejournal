@@ -151,7 +151,7 @@ body<=
      if $parpost->{'state'} eq "S" 
          and not LJ::Talk::can_unscreen($dbs, $remote, $u, $up, $ur->{'user'});
 
- LJ::load_user_props($dbs, $u, "opt_notalkicons", "opt_logcommentips");
+ LJ::load_user_props($dbs, $u, "opt_notalkicons", "opt_logcommentips", "opt_whoscreened");
 
 
  ####  Check security before viewing this post
@@ -334,8 +334,13 @@ body<=
      $ret .= "<tr valign='middle'>";
      $ret .= "<td align='right'>$ML{'.opt.from'}</td>";
      $ret .= "<td align='middle'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon'></td>";
-     $ret .= "<td align='left'><b><label for='talkpostfromanon'>$ML{'.opt.anonymous'}</label></b></td>";
-     $ret .= "</tr>\n";
+     $ret .= "<td align='left'><b><label for='talkpostfromanon'>$ML{'.opt.anonymous'}</label></b>";
+     if ($u->{'opt_whoscreened'} eq 'A' ||
+           $u->{'opt_whoscreened'} eq 'R' ||
+           $u->{'opt_whoscreened'} eq 'F') {
+         $ret .= " " . $ML{'.opt.willscreen'};
+     }
+     $ret .= "</td></tr>\n";
  } elsif ($u->{'opt_whocanreply'} eq "reg") {
      $ret .= "<tr valign='middle'>";
      $ret .= "<td align='right'>$ML{'.opt.from'}</td><td align='middle'>(  )</td>";
@@ -362,6 +367,11 @@ body<=
          $ret .= "<td align='middle'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' $checked></td>";
          $ret .= "<td align='left'><label for='talkpostfromremote'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</label>\n";
          $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}'>\n";
+         if ($u->{'opt_whoscreened'} eq 'A' ||
+             ($u->{'opt_whoscreened'} eq 'F' &&
+              !LJ::is_friend($dbs, $u, $remote))) {
+             $ret .= " " . $ML{'.opt.willscreen'};
+         }
          $ret .= "</td>";
          $checked = "";
      }
@@ -371,8 +381,10 @@ body<=
  # ( ) LiveJournal user:
  $ret .= "<tr valign=middle>";
  $ret .= "<td>&nbsp;</td>";
- $ret .= "<td align=middle><input type='radio' name='usertype' value='user' id='talkpostfromlj' $checked></td>";
- $ret .= "<td align=left><b><label for='talkpostfromlj'>$ML{'.opt.ljuser'}</label></b>";
+ $ret .= "<td align=middle><input type='radio' name='usertype' value='user' id='talkpostfromlj' $checked>";
+ $ret .= "</td><td align=left><b><label for='talkpostfromlj'>$ML{'.opt.ljuser'}</label></b> ";
+ $ret .= $ML{'.opt.willscreenfriend'} if $u->{'opt_whoscreened'} eq 'F';
+ $ret .= $ML{'.opt.willscreen'} if $u->{'opt_whoscreened'} eq 'A';
  $ret .= "</tr>\n";
 
  # Username: [    ] Password: [    ]  Login? [ ]

@@ -1540,6 +1540,10 @@ that area. p?>
 
 /talkpost.bml.opt.submit=Post Comment
 
+/talkpost.bml.opt.willscreen=(will be screened)
+
+/talkpost.bml.opt.willscreenfriend=(will be screened if not a friend)
+
 /talkpost.bml.paraformat=Paragraphs will be automatically formatted by default.
 
 /talkpost.bml.postresponse=Post a comment in response:
