@@ -630,4 +630,5 @@ link: htdocs/tools/memories.bml, htdocs/tools/tellafriend.bml, htdocs/site/suppo
 link: htdocs/tools/textmessage.bml, htdocs/interests.bml, htdocs/support/faqbrowse.bml, htdocs/download/index.bml
 link: htdocs/support/index.bml
 img: img/btn_addfriend.gif, img/btn_todo.gif, img/btn_memories.gif, img/btn_tellfriend.gif, img/talk/md10_thumbup.gif
+hook: userinfo_html_by_user, userinfo_rows
 </LJDEP> _C=)
