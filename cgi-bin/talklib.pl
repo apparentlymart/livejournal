@@ -1349,10 +1349,10 @@ sub mark_comment_as_spam {
     my $dbh = LJ::get_db_writer();
 
     # step 1: get info we need
-    my $sql = 'SELECT tt.subject, tt.body, t.posterid FROM talk2 t, talktext2 tt ' .
-              'WHERE t.journalid=? AND t.jtalkid=? AND tt.journalid=t.journalid AND tt.jtalkid=t.jtalkid';
-    my ($subject, $body, $posterid) = $dbcr->selectrow_array($sql, undef, $journalu->{userid}, $jtalkid);
-    return 0 if $dbcr->err;
+    my $row = LJ::Talk::get_talk2_row($dbcr, $journalu->{userid}, $jtalkid);
+    my $temp = LJ::get_talktext2($journalu, $jtalkid);
+    my ($subject, $body, $posterid) = ($temp->{$jtalkid}[0], $temp->{$jtalkid}[1], $row->{posterid});
+    return 0 unless $body;
 
     # step 2: get ip if anon
     my $ip;
@@ -1372,6 +1372,22 @@ sub mark_comment_as_spam {
              undef, $ip, $journalu->{userid}, $posterid, $subject, $body);
     return 0 if $dbh->err;
     return 1;
+}
+
+# <LJFUNC>
+# name: LJ::Talk::get_talk2_row
+# class: web
+# des: Gets a row of data from talk2.
+# args: dbcr, journalid, jtalkid
+# des-dbcr: Database handle to read from.
+# des-journalid: Journal id that comment is posted in.
+# des-jtalkid: Journal talkid of comment.
+# returns: Hashref of row data, or undef on error.
+# </LJFUNC>
+sub get_talk2_row {
+    my ($dbcr, $journalid, $jtalkid) = @_;
+    return $dbcr->selectrow_hashref('SELECT posterid, state FROM talk2 WHERE journalid = ? AND jtalkid = ?',
+                                    undef, $journalid+0, $jtalkid+0);
 }
 
 # get a comment count for a journal entry.
@@ -1642,12 +1658,14 @@ sub mail_comments {
     # if a response to another comment, send a mail to the parent commenter.
     if ($parent->{talkid}) {  
         my $dbcr = LJ::get_cluster_def_reader($journalu);
-        # FIXME: remove this query:
-        my $sth = $dbcr->prepare("SELECT t.posterid, tt.body FROM talk2 t, talktext2 tt ".
-                                 "WHERE t.journalid=? AND tt.journalid=? ".
-                                 "AND   t.jtalkid=?   AND tt.jtalkid=?");
-        $sth->execute($journalu->{userid}, $journalu->{userid}, $parent->{talkid}, $parent->{talkid});
-        my ($paruserid, $parbody) = $sth->fetchrow_array;
+
+        # get row of data
+        my $row = LJ::Talk::get_talk2_row($dbcr, $journalu->{userid}, $parent->{talkid});
+        my $paruserid = $row->{posterid};
+
+        # now get body of comment
+        my $temp = LJ::get_talktext2($journalu, $parent->{talkid});
+        my $parbody = $temp->{$parent->{talkid}}[1];
         LJ::text_uncompress(\$parbody);
         $parentcomment = $parbody;
 
@@ -2221,11 +2239,7 @@ sub init {
     my $partid = $form->{'parenttalkid'}+0;
 
     if ($partid) {
-        $sth = $dbcr->prepare("SELECT posterid, state FROM talk2 ".
-                              "WHERE journalid=? AND jtalkid=?");
-        $sth->execute($journalu->{userid}, $partid);
-        $parpost = $sth->fetchrow_hashref;
-
+        my $parpost = LJ::Talk::get_talk2_row($dbcr, $journalu->{userid}, $partid);
         unless ($parpost) {
             $bmlerr->("$SC.error.noparent");
         }
