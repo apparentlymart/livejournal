@@ -1,5 +1,8 @@
 <?_code
 
+ use strict;
+ use vars qw(%FORM $title $body);
+ 
  $title = "Tell a Friend!";
  $body = "";
 
@@ -102,10 +105,10 @@
      my $jarg = $uj ? "journal=$uj->{'user'}&" : "";
      my $url = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
 
-     if ($user eq $u->{'user'}) {
+     if ($up->{'user'} eq $u->{'user'}) {
          $msg .= "Hey,\n\nCheck out this journal entry of mine:\n\n";
      } else {
-         $msg .= "Hey,\n\nCheck this out... I saw this journal entry while reading ${user}'s journal:\n\n";
+         $msg .= "Hey,\n\nCheck this out... I saw this journal entry while reading " . $up->{'user'} . "'s journal:\n\n";
      }
      $msg .= " $subject\n" if $subject;
      $msg .= " $url\n\n";
@@ -128,13 +131,13 @@
      if ($user eq $u->{'user'}) {
          $msg .= "Hey,\n\nCheck out my journal that I'm keeping online:\n\n";
          $msg .= "  $url\n\n";
-         $name = $u->{'name'};
+         my $name = $u->{'name'};
          $name =~ s/\s.+//;
          $msg .= "- $name\n";
      } else {
          $msg .= "Hey,\n\nCheck out my friend's journal online:\n\n";
          $msg .= "  $url\n\n";
-         $name = $u->{'name'};
+         my $name = $u->{'name'};
          $name =~ s/\s.+//;
          $msg .= "- $name\n";
      }
