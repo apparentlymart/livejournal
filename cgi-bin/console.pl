@@ -840,7 +840,7 @@ sub change_journal_type
 
         # clear out or set relations
         update_rels => sub {
-            if (scalar(@_) > 0) {
+            if (scalar(@_) > 0 && ref $_[0]) {
                 # user passed edges to set
                 LJ::set_rel_multi(@_);
             } else {
