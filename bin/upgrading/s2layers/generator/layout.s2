@@ -69,11 +69,13 @@ function Page::print ()
 <td class="meta"><a href="$.journal.website_url">$.journal.website_name</a></td>
 <td class="meta">]</td></tr>""";
     }
-    
-    
 
-"""
-<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+    var string links;
+    $links = $links + ($.view == "recent" ? "<b>entries</b>" : "<a class='index' href='$.base_url/'>entries</a>") + "|";
+    $links = $links + ($.view == "friends" ? "<b>friends</b>" : "<a class='index' href='$.base_url/friends'>friends</a>") + "|";
+    $links = $links + ($.view == "calendar" ? "<b>calendar</b>" : "<a class='index' href='$.base_url/calendar'>calendar</a>");
+    
+"""<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head>
 <style type="text/css">
 body, td {
@@ -120,7 +122,7 @@ border="0"
 summary="">
 <tr class="caption">
 <td class="caption"><b>$title</b></td>
-<td class="index" align="right">[<b>entries</b>|<a class="index" href="$.base_url/friends">friends</a>|<a class="index" href="$.base_url/calendar">calendar</a>]</td>
+<td class="index" align="right">[$links]</td>
 </tr></table>
 <table width="100%" cellpadding="3" cellspacing="0"
 border="0"
@@ -307,4 +309,53 @@ function CommentInfo::print ()
     }
     $this->print_postlink();
     "</td></tr>";
+}
+
+function CalendarPage::print_year_links ()
+{
+    """<table cellpadding="2" cellspacing="0" border="0" summary="">
+<tr><td bgcolor="$*stronger_back" align="center">
+<table cellpadding="5" cellspacing="0" border="0" summary="">
+<tr><td class="caption">Years</td></tr><tr>
+<td colspan="2" bgcolor="$*page_back">""";
+    foreach var CalendarPageYear y ($.years) {
+        if ($y.displayed) {
+            "<b>$y.year</b>&nbsp;";
+        } else {
+            "<a href=\"$y.url\">$y.year</a>&nbsp;";
+        }
+    }
+   """</td></tr></table></td></tr></table><p>""";
+
+}
+
+function CalendarPage::print_month (CalendarPageMonth m)
+{       
+    """<table cellpadding="2" cellspacing="0" border="0" summary="">
+<tr><td bgcolor="$*stronger_back" align="center">
+<table cellpadding="5" cellspacing="0" border="0" summary="">
+<tr>
+<td class="caption">""";
+        print $m->month_format();
+        """</td> 
+<td class="caption" align="right">[<a href="$m.url" class="index">subjects</a>]</td>
+</tr>
+<tr>
+<td colspan="2" bgcolor="$*page_back">
+<!-- now the headings for the week -->
+<table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
+<tr align="center">
+""";
+    foreach var int d ($.weekdays) {
+        "<td>"+$*lang_dayname_short[$d]+"</td>\n";
+    }
+    
+    "</tr>";
+
+    foreach var CalendarPageWeek w ($m.weeks) {
+        $w->print();
+    }
+
+    """</table></td></tr></table></td></tr></table><p>""";
+
 }

@@ -382,8 +382,10 @@ class CalendarPageMonth
     var CalendarPageWeek[] weeks "An array of the weeks of the month (for ease of building a row-per-week calendar)";
     var string url "A url to link to in order to view this month.";
 
-    function name() : string
-    "Outputs the name of the month in natural language (eg: 'January 1999', 'Noviembre, 2000' or 'Marzo 1233')";
+    function builtin month_format () : string
+    "Returns month formatted long (February 1980)";
+    function builtin month_format (string fmt) : string
+    "Returns time formatted as indicated by \$fmt, or long if blank .";
 }
 
 class CalendarPage extends Page 
@@ -391,10 +393,10 @@ class CalendarPage extends Page
 {
     var int year "The year being viewed";
     var CalendarPageYear[] years "Information for linking to other years";
-    var CalendarPageMonth[] months "An array of months (indexed 1-12 to match the month)";
+    var CalendarPageMonth[] months "12 months objects, even if no entries are in that month.";
     var int[] weekdays 
-    "Integers representing the days of the week. This will start on Monday or Sunday depending on 
-     the property setting for start-of-week";
+    "Integers representing the days of the week. This will start on Monday (2) or Sunday (1) depending on 
+     the property setting for start-of-week and go to Sunday (1) or Saturday (7)";
 
     function print_month(CalendarPageMonth m)
     "Print the calendar cell for the given month";
@@ -528,6 +530,23 @@ property string lang_fmt_time_short {
 }
 set lang_fmt_time_short = "%%hh%%:%%mm%% %%a%%m";
 
+property string lang_fmt_month_short {
+    noui = 1; 
+    des = "Short month format.";
+}
+set lang_fmt_month_short = "%%m%%/%%yy%%";
+
+property string lang_fmt_month_med {
+    noui = 1; 
+    des = "Medium month format.";
+}
+set lang_fmt_month_med = "%%mon%% %%yyyy%%";
+
+property string lang_fmt_month_long {
+    noui = 1; 
+    des = "Long month format.";
+}
+set lang_fmt_month_long = "%%month%% %%yyyy%%";
 
 property string[] lang_monthname_long {
     noui = 1;
@@ -938,8 +957,14 @@ function CalendarPage::view_title() : string {
     return string($.year);
 }
 function Page::title() : string {
-    return $.global_title+" - "+$this->view_title();
-    return $.global_title+($.view != "recent" ? " - "+$this->view_title() : "");
+    var string title = $.global_title;
+    if ($title == "") {
+        $title = $.journal.name;
+    }
+    if ($.view != "recent") {
+        $title = $title + " - " + $this->view_title();
+    }
+    return $title;
 }
 function server_sig() {
     """Powered by <a href="$*SITEROOT/">$*SITENAME</a>""";
@@ -1090,7 +1115,7 @@ function CalendarPage::print_month(CalendarPageMonth m) {
     """<table style="margin-left: 25%; margin-right: 25%; margin-top: 1em; margin-bottom: 1em;
        border-collapse: collapse; border: 1px solid;" border="1">\n
        <tr><th colspan="7" style="text-align: center; border: 1px solid;">""";
-    print $m->name();
+    print $m->month_format();
     """</th></tr>\n""";
     foreach var int d ($.weekdays) {
         "<th>"+$*lang_dayname_short[$d]+"</th>\n";
@@ -1103,10 +1128,7 @@ function CalendarPage::print_month(CalendarPageMonth m) {
         <a href="$m.url">$*text_view_month</a></td></tr>\n""";
     "</table>";
 }
-function CalendarPageMonth::name() : string {
-    var string monthtitle = $*lang_monthname_long[$.month]+" $.year";
-    return $monthtitle->upperfirst();
-}
+
 function CalendarPageWeek::print() {
    """<tr valign="top" style="height: 2em;">\n""";
    if ($.pre_empty > 0) {

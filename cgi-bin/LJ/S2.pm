@@ -37,6 +37,9 @@ sub make_journal
     if ($view eq "lastn") {
         $entry = "RecentPage::print()";
         $page = RecentPage($u, $remote, $opts);
+    } elsif ($view eq "calendar") {
+        $entry = "CalendarPage::print()";
+        $page = CalendarPage($u, $remote, $opts);
     }
 
     my $run_opts = {
@@ -571,6 +574,48 @@ sub load_layer_info
 
 #######################################
 
+sub CalendarPage
+{
+    my ($u, $remote, $opts) = @_;
+
+    my $p = Page($u, $opts->{'vhost'});
+    $p->{'_type'} = "CalendarPage";
+    $p->{'view'} = "calendar";
+    $p->{'weekdays'} = [ 1..7 ];
+
+    my $year = 2000;
+    $p->{'year'} = $year;
+    $p->{'years'} = [];
+    for (1998..2001) {
+        push @{$p->{'years'}}, CalendarPageYear($_, "$p->{'base_url'}/calendar/$_", $_ == $p->{'year'});
+    }
+    $p->{'months'} = [];
+    for (1..12) {
+        my $weeks = [];
+        push @{$p->{'months'}}, CalendarPageMonth({
+            'month' => $_,
+            'year' => $year, 
+            'url' => "$LJ::SITEROOT/view/?type=month&user=$p->{'journal'}->{'username'}&y=$year&m=$_",
+            'weeks' => $weeks,
+            'has_entries' => 1,
+        });
+    }
+
+    return $p;
+}
+
+sub CalendarPageMonth {
+    my $opts = shift;
+    $opts->{'_type'} = 'CalendarPageMonth';
+    return $opts;
+}
+
+sub CalendarPageYear {
+    my ($year, $url, $displayed) = @_;
+    return { '_type' => "CalendarPageYear",
+             'year' => $year, 'url' => $url, 'displayed' => $displayed };
+}
+
 sub CommentInfo
 {
     my $opts = shift;
@@ -1102,6 +1147,30 @@ sub DateTime__time_format
     my $realfmt = $fmt;
     if (defined $ctx->[S2::PROPS]->{"lang_fmt_time_$fmt"}) {
         $realfmt = $ctx->[S2::PROPS]->{"lang_fmt_time_$fmt"};
+    }
+    my @parts = split(/\%\%/, $realfmt);
+    my $code = "\$\$c = sub { my \$time = shift; return join(";
+    my $i = 0;
+    foreach (@parts) {
+        if ($i % 2) { $code .= $dt_vars{$_} . ","; }
+        else { $_ = LJ::ehtml($_); $code .= "\$parts[$i],"; }
+        $i++;
+    }
+    $code .= "); };";
+    eval $code;
+    return $$c->($this);
+}
+
+sub CalendarPageMonth__month_format
+{
+    my ($ctx, $this, $fmt) = @_;
+    $fmt ||= "long";
+    my $c = \$ctx->[S2::SCRATCH]->{'_code_monthfmt'}->{$fmt};
+    return $$c->($this) if ref $$c eq "CODE";
+    if (++$ctx->[S2::SCRATCH]->{'_code_timefmt_count'} > 15) { return "[too_many_fmts]"; }
+    my $realfmt = $fmt;
+    if (defined $ctx->[S2::PROPS]->{"lang_fmt_month_$fmt"}) {
+        $realfmt = $ctx->[S2::PROPS]->{"lang_fmt_month_$fmt"};
     }
     my @parts = split(/\%\%/, $realfmt);
     my $code = "\$\$c = sub { my \$time = shift; return join(";
