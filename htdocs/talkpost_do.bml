@@ -307,7 +307,9 @@ BODY<=
           "AND t.parenttalkid=$qpartid"
           );
  }
- 
+
+ $dtalkid = $clustered ? $insertid * 256 + $item->{'anum'} : $insertid;
+
  # they don't have a duplicate...
  unless ($insertid)
  {
@@ -327,6 +329,8 @@ BODY<=
      
      # what's the tid of the newly inserted message?
      $insertid = $sth->{'mysql_insertid'};
+
+     $dtalkid = $clustered ? $insertid * 256 + $item->{'anum'} : $insertid;
 
      # add to poster's talkleft table, or the xfer place
      if ($posterid && $clustered) {
@@ -527,8 +531,10 @@ BODY<=
                  $text .= &indent($parentcomment, ">");
                  $text .= "\n\nTheir reply was:\n\n";
                  $text .= &indent("Subject: $cleansubject\n\n$FORM{'body'}");
-                 $text .= "\n\nYou can view the discussion and reply here:\n\n";
-                 $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid\n\n";
+                 $text .= "\n\nYou can view the discussion here:\n\n";
+                 $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid&thread=$dtalkid\n\n";
+                 $text .= "Or you can reply to the comment directly here:\n\n";
+                 $text .= "     $LJ::SITEROOT/talkpost.bml?${jarg}replyto=$dtalkid\n\n";
                  $text .= "-- $LJ::SITENAME\n\n";
 
                  if ($LJ::UNICODE && $encoding ne "UTF-8") {
@@ -553,7 +559,8 @@ BODY<=
                  LJ::CleanHTML::clean_comment(\$cleanbody, $FORM{'prop_opt_preformatted'});
                  $html .= &blockquote("<TT><B>Subject:</B> $cleansubject</TT> $icon<P>$cleanbody");
 
-                 $html .= "You can reply at the webpage, or here...";
+                 $html .= "You can <a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid&amp;thread=$dtalkid\">view the thread</a> starting from this comment.<br />";
+                 $html .= "You can also reply <a href=\"$LJ::SITEROOT/talkpost.bml?${jargent}replyto=$dtalkid\">at the webpage</a>, or here:";
                  $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
                  $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
                  $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
@@ -639,8 +646,10 @@ BODY<=
          }
          $text .= "\n\nTheir reply was:\n\n";
          $text .= &indent("Subject: $textsubject\n\n$FORM{'body'}");
-         $text .= "\n\nYou can view the discussion and reply here:\n\n";
-         $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid\n\n";
+         $text .= "\n\nYou can view the discussion here:\n\n";
+         $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid&thread=$dtalkid\n\n";
+         $text .= "Or you can reply to the comment directly here:\n\n";
+         $text .= "     $LJ::SITEROOT/talkpost.bml?${jarg}replyto=$dtalkid\n\n";
          $text .= "-- $LJ::SITENAME\n\n";
          $text .= "(if you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options)\n";
 
@@ -674,7 +683,9 @@ BODY<=
          $html .= &blockquote("<TT><B>Subject: </B> $textsubject</TT> $icon<HR>$clean");
 
          # begin form
-         $html .= "You can reply at the webpage, or here...";
+         $html .= "You can <a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid&amp;thread=$dtalkid\">view the thread</a> starting from this comment.<br />";
+         $html .= "You can also reply <a href=\"$LJ::SITEROOT/talkpost.bml?${jargent}replyto=$dtalkid\">at the webpage</a>, or here:";
+
          $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
          $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
          $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
@@ -725,8 +736,6 @@ BODY<=
      }
  }
 
- $dtalkid = $clustered ? $insertid * 256 + $item->{'anum'} : $insertid;
- 
  # Yeah, we're done.
  my $commentlink = "<a href='talkread.bml?${jargent}itemid=$ditemid&amp;view=$dtalkid#t$dtalkid'>here</a>";
  $ret .= "(=H1 Success H1=)(=P Your comment has been added.  You can view it $commentlink. P=)";
