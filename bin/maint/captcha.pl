@@ -139,10 +139,10 @@ $maint{gen_audio_captchas} = sub {
         # Insert the blob
         print "uploading (capid = $capid, anum = $anum)...";
         if ($location eq 'mogile') {
-            LJ::mogclient(); # force load
+            my $mogfs = LJ::mogclient(); # force load
             die "Requested to store captchas on MogileFS, but it's not loaded.\n"
-                unless $LJ::MogileFS;
-            my $fh = $LJ::MogileFS->new_file("captcha:$capid", 'captcha')
+                unless $mogfs;
+            my $fh = $mogfs->new_file("captcha:$capid", 'captcha')
                 or die "Unable to contact MogileFS server for storage.\n";
             $fh->print($data);
             $fh->close
@@ -164,7 +164,7 @@ $maint{gen_audio_captchas} = sub {
         if ( !$rval || $@ ) {
             my $err = $@ || $dbh->errstr;
             if ( $location eq 'mogile' ) {
-                $LJ::MogileFS->delete( "captcha:$capid" );
+                LJ::mogclient()->delete( "captcha:$capid" );
             } else {
                 LJ::Blob::delete( $u, 'captcha_audio', 'wav', $capid );
             }
@@ -245,10 +245,10 @@ $maint{gen_image_captchas} = sub {
         # Insert the blob
         print "uploading (capid = $capid, anum = $anum)...";
         if ($location eq 'mogile') {
-            LJ::mogclient(); # force load
+            my $mogfs = LJ::mogclient(); # force load
             die "Requested to store captchas on MogileFS, but it's not loaded.\n"
-                unless $LJ::MogileFS;
-            my $fh = $LJ::MogileFS->new_file("captcha:$capid", 'captcha')
+                unless $mogfs;
+            my $fh = $mogfs->new_file("captcha:$capid", 'captcha')
                 or die "Unable to contact MogileFS server for storage.\n";
             $fh->print($png);
             $fh->close
@@ -270,7 +270,7 @@ $maint{gen_image_captchas} = sub {
         if ( !$rval || $@ ) {
             my $err = $@ || $dbh->errstr;
             if ( $location eq 'mogile' ) {
-                $LJ::MogileFS->delete( "captcha:$capid" );
+                LJ::mogclient()->delete( "captcha:$capid" );
             } else {
                 LJ::Blob::delete( $u, 'captcha_image', 'png', $capid );
             }
@@ -340,10 +340,10 @@ $maint{clean_captchas} = sub {
         my $ext = $type eq 'audio' ? 'wav' : 'png';
 
         if ($location eq 'mogile') {
-            LJ::mogclient(); # force load
+            my $mogfs = LJ::mogclient(); # force load
             die "Requested to delete captchas from MogileFS, but it's not loaded.\n"
-                unless $LJ::MogileFS;
-            $LJ::MogileFS->delete("captcha:$capid")
+                unless $mogfs;
+            $mogfs->delete("captcha:$capid")
                 or die "Unable to delete captcha from MogileFS server for capid = $capid.\n";
         } else {
             LJ::Blob::delete( $u, "captcha_$type", $ext, $capid, \$err )
