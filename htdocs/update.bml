@@ -307,4 +307,9 @@ _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
 BODY=>(=_CODE return $body; _CODE=)
 BODYOPTS=>(=_CODE return $bodyopts; _CODE=)
-PAGE=)
+PAGE=)(=_C <LJDEP>
+lib: LJ::SpellCheck
+link: htdocs/users, htdocs/download/index.bml, htdocs/moodlist.bml
+link: htdocs/update.bml, htdocs/lostinfo.bml, htdocs/support/faqbrowse.bml
+post: htdocs/update.bml
+</LJDEP> _C=)
