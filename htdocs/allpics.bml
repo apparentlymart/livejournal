@@ -67,18 +67,21 @@ $user = $u->{'user'};
          $body .= "<?h1 $ML{'.current'} h1?><?p ";
          $body .= BML::ml('.pics', {'user'=>"<?ljuser $user ljuser?>"});
          $body .= "$edit p?>";
-         $body .= "<ul><table cellpadding='5' border='0' cellspacing='1'>";
+         $body .= "<div style='margin-left: 50px;'><table cellpadding='5' border='0' cellspacing='1'>";
              
      }
+
+     ### Keywords
+     my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}});
+     $eh_keywords = LJ::eall($eh_keywords);
+
      $body .= "<tr valign='middle'>";
-     $body .= "<td align='center'><img src='$LJ::USERPIC_ROOT/$pic->{'picid'}/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
+     $body .= "<td align='center'><img src='$LJ::USERPIC_ROOT/$pic->{'picid'}/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}' alt='$eh_keywords' /></td>";
      $body .= "<td>";
      if ($u->{'defaultpicid'} == $pic->{'picid'}) {
          $body .= "$ML{'.default'}<br />";
      }
 
-     my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}});
-     $eh_keywords = LJ::eall($eh_keywords);
      if ($eh_keywords) {
          $body .= "<b>$ML{'.keywords'}</b> $eh_keywords\n";
      }
@@ -89,7 +92,7 @@ $user = $u->{'user'};
  }
 
  if ($piccount) {
-     $body .= "</table>";
+     $body .= "</table></div>";
  } else {
      if ($remote && $remote->{'user'} eq $u->{'user'}) {
          $body = "<?h1 $ML{'.nopics.title'} h1?><?p $ML{'.nopics.text'} p?>";
