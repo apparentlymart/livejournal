@@ -1,8 +1,10 @@
 #!/usr/bin/perl
 #
 
+use strict;
+
 unless (-d $ENV{'LJHOME'}) { 
-    die "$LJHOME not set.\n";
+    die "\$LJHOME not set.\n";
 }
 
 if ($ARGV[0] eq "-h" || $ARGV[0] eq "--help") {
