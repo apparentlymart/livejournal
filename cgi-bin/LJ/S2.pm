@@ -1009,7 +1009,7 @@ sub Null
 
 sub Page
 {
-    my ($u) = @_;
+    my ($u, $opts) = @_;
     my $styleid = $u->{'_s2styleid'} + 0;
     my $base_url = $u->{'_journalbase'};
     my $p = {
@@ -1031,6 +1031,11 @@ sub Page
         'global_subtitle' => LJ::ehtml($u->{'journalsubtitle'}),
         'head_content' => '',
     };
+    if ($LJ::UNICODE && $opts) {
+        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
+        # "Automatic Discovery of RSS feeds"
+        $p->{'head_content'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$p->{'base_url'}/rss" />\n};
+    }
     return $p;
 }
 

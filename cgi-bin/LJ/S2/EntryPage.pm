@@ -8,11 +8,10 @@ sub EntryPage
 {
     my ($u, $remote, $opts) = @_;
 
-    my $r = $opts->{'r'};
-    my %GET = $r->args;
+    my $get = $opts->{'getargs'};
     my $dbs = LJ::get_dbs();
 
-    my $p = Page($u, $opts->{'vhost'});
+    my $p = Page($u, $opts);
     $p->{'_type'} = "EntryPage";
     $p->{'view'} = "entry";
     $p->{'comment_pages'} = undef;
@@ -21,15 +20,19 @@ sub EntryPage
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
     return if $opts->{'handler_return'};
 
+    if ($u->{'opt_blockrobots'}) {
+        $p->{'head_content'} .= "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
+    }
+
     $p->{'entry'} = $s2entry;
 
     # add the comments
     my %userpic;
     my %user;
     my $copts = {
-        'thread' => ($GET{'thread'} >> 8),
-        'page' => $GET{'page'},
-        'view' => $GET{'view'},
+        'thread' => ($get->{'thread'} >> 8),
+        'page' => $get->{'page'},
+        'view' => $get->{'view'},
         'userpicref' => \%userpic,
         'userref' => \%user,
     };
@@ -111,7 +114,7 @@ sub EntryPage
     $p->{'comments'} = [];
     $convert_comments->($convert_comments, $p->{'comments'}, \@comments, 1);
 
-    $p->{'viewing_thread'} = $GET{'thread'} ? 1 : 0;
+    $p->{'viewing_thread'} = $get->{'thread'} ? 1 : 0;
 
     $p->{'comment_pages'} = ItemRange({
         'all_subitems_displayed' => ($copts->{'out_pages'} == 1),

@@ -5,7 +5,7 @@ sub RecentPage
 {
     my ($u, $remote, $opts) = @_;
 
-    my $p = Page($u);
+    my $p = Page($u, $opts);
     $p->{'_type'} = "RecentPage";
     $p->{'view'} = "recent";
     $p->{'entries'} = [];
@@ -25,41 +25,29 @@ sub RecentPage
 
     LJ::load_user_props($dbs, $remote, "opt_nctalklinks");
 
-    my %FORM = ();
-    LJ::decode_url_string($opts->{'args'}, \%FORM);
+    my $get = $opts->{'getargs'};
 
     if ($opts->{'pathextra'}) {
         $opts->{'badargs'} = 1;
         return 1;
     }
     
-    if ($u->{'opt_blockrobots'}) {
-        $p->{'head_content'} = "<meta name=\"robots\" content=\"noindex\" />\n";
+    if ($u->{'opt_blockrobots'} || $get->{'skip'}) {
+        $p->{'head_content'} .= "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
     }
 
-    if ($FORM{'skip'}) {
-        # if followed a skip link back, prevent it from going back further
-        $p->{'head_content'} = "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
-    }
-    if ($LJ::UNICODE) {
-        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
-    }
-
-    # "Automatic Discovery of RSS feeds"
-    $p->{'head_content'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$p->{'base_url'}/rss" />\n};
-    
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_recent_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }
     elsif ($itemshow > 50) { $itemshow = 50; }
     
-    my $skip = $FORM{'skip'}+0;
+    my $skip = $get->{'skip'}+0;
     my $maxskip = $LJ::MAX_HINTS_LASTN-$itemshow;
     if ($skip < 0) { $skip = 0; }
     if ($skip > $maxskip) { $skip = $maxskip; }
 
     # do they want to view all entries, regardless of security?
     my $viewall = 0;
-    if ($FORM{'viewall'} && LJ::check_priv($dbs, $remote, "viewall")) {
+    if ($get->{'viewall'} && LJ::check_priv($dbs, $remote, "viewall")) {
         LJ::statushistory_add($dbs, $u->{'userid'}, $remote->{'userid'}, 
                               "viewall", "lastn: $user");
         $viewall = 1;

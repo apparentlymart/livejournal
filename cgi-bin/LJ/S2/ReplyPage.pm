@@ -8,16 +8,16 @@ sub ReplyPage
 {
     my ($u, $remote, $opts) = @_;
 
-    my $r = $opts->{'r'};
-    my %GET = $r->args;
-    my $dbs = LJ::get_dbs();
-
-    my $p = Page($u, $opts->{'vhost'});
+    my $p = Page($u, $opts);
     $p->{'_type'} = "ReplyPage";
     $p->{'view'} = "reply";
 
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
     return if $opts->{'handler_return'};
+
+    if ($u->{'opt_blockrobots'}) {
+        $p->{'head_content'} .= "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
+    }
 
     $p->{'entry'} = $s2entry;
 

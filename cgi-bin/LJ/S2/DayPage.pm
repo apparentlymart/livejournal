@@ -8,7 +8,7 @@ sub DayPage
 {
     my ($u, $remote, $opts) = @_;
 
-    my $p = Page($u, $opts->{'vhost'});
+    my $p = Page($u, $opts);
     $p->{'_type'} = "DayPage";
     $p->{'view'} = "day";
     $p->{'entries'} = [];
@@ -28,10 +28,7 @@ sub DayPage
     }
 
     if ($u->{'opt_blockrobots'}) {
-        $p->{'head_content'} = "<meta name=\"robots\" content=\"noindex\" />\n";
-    }
-    if ($LJ::UNICODE) {
-        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
+        $p->{'head_content'} = "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
     }
 
     my %FORM = ();

@@ -8,7 +8,7 @@ sub FriendsPage
 {
     my ($u, $remote, $opts) = @_;
 
-    my $p = Page($u, $opts->{'vhost'});
+    my $p = Page($u, $opts);
     $p->{'_type'} = "FriendsPage";
     $p->{'view'} = "friends";
     $p->{'entries'} = [];
@@ -72,10 +72,7 @@ sub FriendsPage
 
     ## never have spiders index friends pages (change too much, and some 
     ## people might not want to be indexed)
-    $p->{'head_content'} = "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
-    if ($LJ::UNICODE) {
-        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
-    }
+    $p->{'head_content'} .= "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
 
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_friends_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }
