@@ -26,6 +26,7 @@ body<=
      LJ::load_user_props($dbs, $u, 
                          "s1_lastn_style", "s1_calendar_style",
                          "s1_day_style", "s1_friends_style",
+                         "stylesys", "s2_style",
                          );
  }
 
@@ -85,11 +86,32 @@ body<=
  $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT><B>$LJ::SITENAMESHORT:</B></TD><TD>";
  if ($u->{'userid'}) {
      $ret .= "username: <?ljuserf $u->{'user'} ljuserf?>";
-     $ret .= "<BR>styles: ";
-     foreach my $view (@LJ::views) {
-         my $styid = $u->{"s1_${view}_style"};
-         $ret .= "$view: <A HREF=\"/styles/browse/styleinfo.bml?styleid=$styid\">$styid</A> ";
+     $ret .= "<BR>style: ";
+     if ($u->{'stylesys'} == 2) {
+         $ret .= "(S2) ";
+         if ($u->{'s2_style'}) {
+             my $s2style = LJ::S2::load_style($dbr, $u->{'s2_style'});
+             my $pub = LJ::S2::get_public_layers(); # cached
+             foreach my $lay (keys %{$s2style->{'layer'}}) {
+                 my $lid = $s2style->{'layer'}->{$lay};
+                 $ret .= "$lay: <a href='$LJ::SITEROOT/customize/advanced/layerbrowse.bml?id=$lid'>";
+                 $ret .= (defined $pub->{$lid} ? 'public' : 'user') . "</a>, ";
+             }
+
+         } else {
+             $ret .= "none";
+         }
+     } else {
+         $ret .= "(S1) ";
+         foreach my $view (@LJ::views) {
+             my $styid = $u->{"s1_${view}_style"};
+             $ret .= "$view: <A HREF=\"$LJ::SITEROOT/styles/browse/styleinfo.bml?styleid=$styid\">$styid</A> ";
+         }
+         if ($u->{'useoverrides'} eq 'Y') {
+             $ret .= "<br>overrides: <a href='see_overrides.bml?user=$u->{'user'}'>view</a> ";
+         }
      }
+
      $ret .= "<BR>email validated? ";
      if ($u->{'status'} eq "A") { $ret .= "<B>yes</B>"; }
      if ($u->{'status'} eq "N") { $ret .= "<B>no</B>"; }

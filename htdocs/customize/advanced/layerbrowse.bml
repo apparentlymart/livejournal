@@ -86,6 +86,8 @@
     return $err->("Layer not found") unless $layer;
     return $err->("Can't view other people's layers") 
         unless defined $pub->{$id} ||
+        LJ::check_priv($dbr, $remote, "supportviewinternal") ||
+        LJ::check_priv($dbr, $remote, "supporthelp") ||
         $layer->{'userid'} == $remote->{'userid'};
     
     my $rv = S2::load_layers_from_db($dbr, $id);

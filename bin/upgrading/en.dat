@@ -1657,6 +1657,16 @@ that area. p?>
 
 /support/faqbrowse.bml.title=FAQ Question
 
+/support/see_overrides.bml.error.noprivs=Only users with the supportviewinternal or supporthelp privilege can view another user's overrides.
+
+/support/see_overrides.bml.error.nos1=This user is not using S1.
+
+/support/see_overrides.bml.header=Overrides for <?ljuser [[user]] ljuser?>:
+
+/support/see_overrides.bml.nooverrides=No overrides found for <?ljuser [[user]] ljuser?>.
+
+/support/see_overrides.bml.title=User Overrides
+
 /talkmulti.bml.deleted.body=The comments have been deleted. You can view the rest of the thread <a href="[[link]]">here</a>.
 
 /talkmulti.bml.deleted.title=Comments deleted
