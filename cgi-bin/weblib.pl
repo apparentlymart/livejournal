@@ -1127,7 +1127,7 @@ MOODS
         my $userpic_preview = "";
         # User Picture
         if ($res && ref $res->{'pickws'} eq 'ARRAY' && scalar @{$res->{'pickws'}} > 0) {
-            my @pickws = map { ($_, $_) } sort { lc($a) cmp lc($b) } @{$res->{'pickws'}};
+            my @pickws = map { ($_, $_) } @{$res->{'pickws'}};
             my $num = 0;
             $userpics .= "    userpics[$num] = \"$res->{'defaultpicurl'}\";\n";
             foreach (@{$res->{'pickwurls'}}) {
