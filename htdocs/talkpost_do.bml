@@ -131,17 +131,21 @@ BODY<=
              if ($FORM{'do_login'} && ! @errors) {
                  my $hp = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
                  my $etime = 0;
-                 BMLClient::set_cookie("ljuser", $up->{'user'}, $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
-                 BMLClient::set_cookie("ljhpass", "$up->{'user'}:$hp", $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+                 BML::set_cookie("ljuser", $up->{'user'}, $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+                 BML::set_cookie("ljhpass", "$up->{'user'}:$hp", $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+
+                 LJ::load_user_props($dbs, $u, "browselang");
+                 my $bl = LJ::Lang::get_lang($u->{'browselang'});
+                 if ($bl) {
+                     BML::set_cookie("langpref", $bl->{'lncode'} . "/" . time(), 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+                     BML::set_language($bl->{'lncode'});
+                 }
 
                  LJ::run_hooks("post_login", {
                      "u" => $up,
                      "form" => \%FORM,
                      "expiretime" => $etime,
                  });
-
-                 $BMLClient::COOKIE{"ljuser"} = $up->{'user'};
-                 $BMLClient::COOKIE{"ljhpass"} = "$up->{'user'}:$hp";
 
                  $didlogin = 1;
              }
