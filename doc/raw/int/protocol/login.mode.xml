@@ -1,4 +1,10 @@
 <method name="login">
+<shortdes>
+validate user's password and get base information needed for client to function
+</shortdes>
+<des>
+Login to the server, while announcing your client version.  The server returns with whether the password is good or not, the user's name, an optional message to be displayed to the user, the list of the user's friend groups, and other things.
+</des>
 <arguments><struct count="1">
 
 &authInfo;
