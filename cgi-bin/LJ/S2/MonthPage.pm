@@ -17,7 +17,6 @@ sub MonthPage
 
     my $ctx = $opts->{'ctx'};
 
-    my $dbr = LJ::get_db_reader();
     my $dbcr = LJ::get_cluster_reader($u);
 
     my $user = $u->{'user'};
@@ -64,8 +63,7 @@ sub MonthPage
         if ($remote->{'userid'} == $u->{'userid'} || $viewall) {
             $secwhere = "";   # see everything
         } elsif ($remote->{'journaltype'} eq 'P') {
-            my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} ".
-                                              "AND friendid=$remote->{'userid'}");
+            my $gmask = LJ::get_groupmask($u, $remote);
             $secwhere = "AND (l.security='public' OR (l.security='usemask' AND l.allowmask & $gmask))"
                 if $gmask;
         }
@@ -94,7 +92,7 @@ sub MonthPage
     foreach (@items) {
         $pu{$_->{'posterid'}} = undef;
     }
-    LJ::load_userids_multiple($dbr, [map { $_, \$pu{$_} } keys %pu], [$u]);
+    LJ::load_userids_multiple([map { $_, \$pu{$_} } keys %pu], [$u]);
     $pu_lite{$_} = UserLite($pu{$_}) foreach keys %pu;
 
     my %day_entries;  # <day> -> [ Entry+ ]
@@ -138,7 +136,7 @@ sub MonthPage
             'post_url' => $posturl,
             'count' => $replycount,
             'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0,
-            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbr, $u, $remote, 'A'))) ? 1 : 0,
+            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($u, $remote, 'A'))) ? 1 : 0,
         });
         
         my $userlite_poster = $userlite_journal;
