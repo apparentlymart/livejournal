@@ -78,7 +78,7 @@ if ($user) {
     # move a single user
     my $u = LJ::load_user($user);
     die "No such user: $user\n" unless $u;
-    handle_userid($u->{userid});
+    handle_userid($u->{userid}, $u->{clusterid});
     
 } else {
     # parse the clusters
