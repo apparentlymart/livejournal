@@ -573,7 +573,10 @@ sub postevent
     if (LJ::Poll::contains_new_poll(\$event))
     {
         return fail($err,301,"Your account type doesn't permit creating polls.")
-            unless (LJ::get_cap($u, "makepoll"));
+            unless (LJ::get_cap($u, "makepoll")
+                    || ($uowner->{'journaltype'} eq "C"
+                        && LJ::get_cap($uowner, "makepoll")
+                        && LJ::check_priv($dbs, $u, "sharedjournal", $uowner->{'user'})));
 
         my $error = "";
         @polls = LJ::Poll::parse($dbs, \$event, \$error, {
