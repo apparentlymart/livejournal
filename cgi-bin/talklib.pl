@@ -121,7 +121,7 @@ sub link_bar
                             $remote->{'user'} eq $up->{'user'} || 
                             LJ::can_manage($remote, $u)))
     {
-        push @linkele, $mlink->("/editjournal_do.bml?${jargent}itemid=$itemid", "editentry");
+        push @linkele, $mlink->("/editjournal.bml?${jargent}itemid=$itemid", "editentry");
     }
     
     unless ($LJ::DISABLED{'tellafriend'}) {

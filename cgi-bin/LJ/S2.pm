@@ -1777,7 +1777,7 @@ sub Entry__get_link
                                             LJ::can_manage($remote, LJ::load_user($journal)));
             return {
                 '_type' => "Link",
-                'url' => "$LJ::SITEROOT/editjournal_do.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
+                'url' => "$LJ::SITEROOT/editjournal.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
                 'caption' => "Edit Entry",
                 'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20),
             }
