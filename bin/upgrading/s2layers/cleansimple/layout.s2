@@ -13,21 +13,53 @@ property string opt_margin_size {
 property Color body_bgcolor {
     des = "Page border color";
     note = "If you set the border size to 'None', this won't show up.";
+    s1color = "stronger_back";
 }
-property Color entry_bgcolor { des = "Background of entries"; }
-property Color entry_fgcolor { des = "Text color of entries"; }
-property Color meta_color { des = "Color of entry headings and meta-information"; }
-property Color link_color { des = "Link color"; }
-property Color vlink_color { des = "Visited link color"; }
-property Color alink_color { des = "Active link color"; }
-property Color topbar_bgcolor { des = "Background color of titlebar and userpic"; }
-property Color topbar_fgcolor { des = "Titlebar text color"; }
+property Color entry_bgcolor {
+    des = "Background of entries";
+    s1color = "page_back";
+}
+property Color entry_fgcolor {
+    des = "Text color of entries"; 
+    s1color = "page_text";
+}
+property Color meta_color {
+    des = "Color of entry headings and meta-information";
+    s1color = "page_text_em";
+}
+property Color link_color {
+    des = "Link color";
+    s1color = "page_link";
+}
+property Color vlink_color { 
+    des = "Visited link color";
+    s1color = "page_vlink";
+}
+property Color alink_color {
+    des = "Active link color";
+    s1color = "page_alink";
+}
+property Color topbar_bgcolor {
+    des = "Background color of titlebar and userpic"; 
+    s1color = "strong_back";
+}
+property Color topbar_fgcolor {
+    des = "Titlebar text color"; 
+    s1color = "strong_text";
+}
+
 property string opt_navbar_pos {
     des = "Side Navbar Position";
     values = "left|Left|right|Right";
 }
-property Color navbar_bgcolor { des = "Background color of sidebar"; }
-property Color navbar_fgcolor { des = "Sidebar text color"; }
+property Color navbar_bgcolor {
+    des = "Background color of sidebar";
+    s1color = "weak_back";
+}
+property Color navbar_fgcolor {
+    des = "Sidebar text color"; 
+    s1color = "weak_text";
+}
 property string opt_daylines_style {
     des = "Style of Lines Around Day Headings";
     values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
@@ -610,4 +642,45 @@ function DayPage::print_body() {
         $this->print_entry($e);
     }
     println "</div>";
+}
+
+function print_theme_preview ()
+{
+    print """
+<div style="background: $*body_bgcolor none; color: $*entry_fgcolor; 
+            padding-left: 50px; padding-right: 50px; padding-top: 10px; 
+            padding-bottom: 10px; margin: 0;">
+
+<table border="0" cellpadding="0" cellspacing="0">
+  <tr><td colspan="2" style="background: $*topbar_bgcolor none; color: $*topbar_fgcolor" valign="top">
+      <h1 style="margin-top: 5px; margin-bottom: 5px; text-align: center; font-size: 1.5em;">John Doe</h1>
+      <h2 style="margin-top: 0;   margin-bottom: 5px; text-align: center; font-size: 1.25em;">Recent Entries</h2>
+  </td></tr>
+  <tr><td style="background: $*navbar_bgcolor none; color: $*navbar_fgcolor; width: 25%;" valign="top">
+<ul style="list-style: none; margin: 10px">
+  <li style="margin: 0; font-weight: bold;">Recent Entries</li>
+  <li><a style="background: $*navbar_bgcolor none; color: $*navbar_fgcolor;" href="#">Archive</a></li>
+  <li><a style="background: $*navbar_bgcolor none; color: $*navbar_fgcolor;" href="#">Friends</a></li>
+  <li><a style="background: $*navbar_bgcolor none; color: $*navbar_fgcolor;" href="#">User Info</a></li>
+</ul>
+  </td><td style="width: 75%; background: $*entry_bgcolor none; color: $*entry_fgcolor" valign="top">
+<div style="margin: 10px;">
+  <div style="border-top: 1px dashed $*entry_fgcolor; clear: both;">
+    <h3 style="border-bottom: 1px dashed $*entry_fgcolor; padding: 2px; margin: 0; font-size: 1.1em; text-align: center;">December 17th, 2002</h3>
+    <div style="clear: both;" id="entry2839"><div style="padding: 2px; text-align: justify">
+      <span style="font-weight: bold;">
+        <span style="font-weight: bold; color: $*meta_color; background: $*entry_bgcolor none;">06:42 pm</span>: 
+        <span style="font-weight: bold; color: $*meta_color; background: $*entry_bgcolor none;">Neque porro quisquam&hellip;</span>
+      </span>
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit 
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit 
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit 
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit 
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+<div style="font-size: 0.75em; text-align: right; margin-bottom: 2px; clear: right;" >
+<a href="#" style="color: $*link_color;">2 Comments Posted</a> | <a href="#" style="color: $*vlink_color">Leave a comment</a></div>
+  </div></div></div></div>
+</td></tr></table>
+</div>
+    """;
 }

@@ -91,4 +91,288 @@ set link_color = "#5f5cd5";
 set vlink_color = "#2a2ab2";
 set alink_color = "#4a92eb";
 
+#NEWLAYER: punquin/shrinkvio
+layerinfo type = theme;
+layerinfo name = "Shrinking Violet";
+layerinfo redist_uniq = "punquin/shrinkvio";
 
+set body_bgcolor = "#ad22e7";
+set main_bgcolor = "#ffffff";
+set main_fgcolor = "#000000";
+set border_color = "#381a45";
+set title_color = "#5d0383";
+set subject_color = "#d9a1f1";
+set link_color = "#2e053f";
+set vlink_color = "#611627";
+set alink_color = "#ff00c0";
+
+#NEWLAYER: punquin/pistmint
+layerinfo type = theme;
+layerinfo name = "Pistachio Mint";
+layerinfo redist_uniq = "punquin/pistmint";
+
+set body_bgcolor = "#133422";
+set main_bgcolor = "#a7c4b4";
+set main_fgcolor = "#000000";
+set border_color = "#096d36";
+set title_color = "#096d36";
+set subject_color = "#096d36";
+set link_color = "#8afabc";
+set vlink_color = "#1da65a";
+set alink_color = "#f9f5f5";
+
+#NEWLAYER: punquin/mexicanfood
+layerinfo type = theme;
+layerinfo name = "Mexican Food";
+layerinfo redist_uniq = "punquin/mexicanfood";
+
+set body_bgcolor = "#ff0000";
+set main_bgcolor = "#f8ff3e";
+set main_fgcolor = "#f15601";
+set border_color = "#f50701";
+set title_color = "#bdbf3e";
+set subject_color = "#f9ff9d";
+set link_color = "#f49e08";
+set vlink_color = "#b05403";
+set alink_color = "#ff7405";
+
+#NEWLAYER: punquin/ashfire
+layerinfo type = theme;
+layerinfo name = "Ash and Fire";
+layerinfo redist_uniq = "punquin/ashfire";
+
+set body_bgcolor = "#b5b5b5";
+set main_bgcolor = "#ffb6af";
+set main_fgcolor = "#000000";
+set border_color = "#d90308";
+set title_color = "#e75454";
+set subject_color = "#ff1106";
+set link_color = "#f70208";
+set vlink_color = "#b0161d";
+set alink_color = "#d70106";
+
+#NEWLAYER: punquin/desktop
+# for layout: 13 (punquin/layout)
+layerinfo type = theme;
+layerinfo name = "Classic Desktop";
+layerinfo redist_uniq = "punquin/desktop";
+
+set body_bgcolor = "#00545c";
+set main_bgcolor = "#ffffff";
+set main_fgcolor = "#000000";
+set border_color = "#000000";
+set title_color = "#ff7b05";
+set subject_color = "#ff7b05";
+set link_color = "#000050";
+set vlink_color = "#500050";
+set alink_color = "#5a76ff";
+
+#NEWLAYER: punquin/satinhandshake
+layerinfo type = theme;
+layerinfo name = "Satin Handshake";
+layerinfo redist_uniq = "punquin/satinhandshake";
+
+set body_bgcolor = "#480c0c";
+set main_bgcolor = "#d06464";
+set main_fgcolor = "#00001d";
+set border_color = "#000000";
+set title_color = "#aaaaaa";
+set subject_color = "#9d0404";
+set link_color = "#000050";
+set vlink_color = "#500050";
+set alink_color = "#ff00c0";
+
+#NEWLAYER: punquin/deepmelodrama
+layerinfo type = theme;
+layerinfo name = "Deep MeloDrama";
+layerinfo redist_uniq = "punquin/deepmelodrama";
+
+set body_bgcolor = "#872d89";
+set main_bgcolor = "#719cff";
+set main_fgcolor = "#8e48b2";
+set border_color = "#8e48b2";
+set title_color = "#3794b3";
+set subject_color = "#8e48b2";
+set link_color = "#000050";
+set vlink_color = "#500050";
+set alink_color = "#dfd3ff";
+
+#NEWLAYER: punquin/everwhite
+layerinfo type = theme;
+layerinfo name = "Everwhite";
+layerinfo redist_uniq = "punquin/everwhite";
+
+set body_bgcolor = "#ffffff";
+set main_bgcolor = "#ffffff";
+set main_fgcolor = "#000000";
+set border_color = "#000000";
+set title_color = "#ffffff";
+set subject_color = "#ffffff";
+set link_color = "#e60000";
+set vlink_color = "#c10602";
+set alink_color = "#ff0600";
+
+#NEWLAYER: punquin/everblue
+layerinfo type = theme;
+layerinfo name = "Everblue with Greys";
+layerinfo redist_uniq = "punquin/everblue";
+
+set body_bgcolor = "#0f0c6d";
+set main_bgcolor = "#ffffff";
+set main_fgcolor = "#000000";
+set border_color = "#000000";
+set title_color = "#000000";
+set subject_color = "#000000";
+set link_color = "#2f00f2";
+set vlink_color = "#060667";
+set alink_color = "#6691ff";
+
+#NEWLAYER: punquin/brownleather
+layerinfo type = theme;
+layerinfo name = "Brown Leather Coat";
+layerinfo redist_uniq = "punquin/brownleather";
+
+set body_bgcolor = "#d2b48c";
+set main_bgcolor = "#ffebcd";
+set main_fgcolor = "#8b4513";
+set border_color = "#000000";
+set title_color = "#d48014";
+set subject_color = "#d48014";
+set link_color = "#000050";
+set vlink_color = "#867a55";
+set alink_color = "#fffab3";
+
+#NEWLAYER: punquin/bruise
+layerinfo type = theme;
+layerinfo name = "Bruise";
+layerinfo redist_uniq = "punquin/bruise";
+
+set body_bgcolor = "#000000";
+set main_bgcolor = "#bcbcbc";
+set main_fgcolor = "#000000";
+set border_color = "#000000";
+set title_color = "#1114a0";
+set subject_color = "#1114a0";
+set link_color = "#0000cc";
+set vlink_color = "#000088";
+set alink_color = "#0000ff";
+
+#NEWLAYER: punquin/ranchhand
+layerinfo type = theme;
+layerinfo name = "Ranch Hand";
+layerinfo redist_uniq = "punquin/ranchhand";
+
+set body_bgcolor = "#2999c2";
+set main_bgcolor = "#cfe0ff";
+set main_fgcolor = "#000000";
+set border_color = "#060667";
+set title_color = "#54442c";
+set subject_color = "#9d995d";
+set link_color = "#000050";
+set vlink_color = "#500050";
+set alink_color = "#6a20ff";
+
+#NEWLAYER: punquin/victim
+layerinfo type = theme;
+layerinfo name = "Victim";
+layerinfo redist_uniq = "punquin/victim";
+
+set body_bgcolor = "#2cd0ff";
+set main_bgcolor = "#505050";
+set main_fgcolor = "#ffffff";
+set border_color = "#000000";
+set title_color = "#166bac";
+set subject_color = "#26b6ff";
+set link_color = "#000050";
+set vlink_color = "#500050";
+set alink_color = "#ff00c0";
+
+#NEWLAYER: punquin/forest
+layerinfo type = theme;
+layerinfo name = "Forest";
+layerinfo redist_uniq = "punquin/forest";
+
+set body_bgcolor = "#778e64";
+set main_bgcolor = "#9b9ba5";
+set main_fgcolor = "#000000";
+set border_color = "#ffffff";
+set title_color = "#72784c";
+set subject_color = "#a0ac62";
+set link_color = "#3811e1";
+set vlink_color = "#310cbb";
+set alink_color = "#4e7bef";
+
+#NEWLAYER: punquin/drone
+layerinfo type = theme;
+layerinfo name = "Drone";
+layerinfo redist_uniq = "punquin/drone";
+
+set body_bgcolor = "#395f82";
+set main_bgcolor = "#f9fcfe";
+set main_fgcolor = "#000000";
+set border_color = "#000000";
+set title_color = "#904094";
+set subject_color = "#ff93ff";
+set link_color = "#395f82";
+set vlink_color = "#395f82";
+set alink_color = "#5266ce";
+
+#NEWLAYER: punquin/lowercurtain
+layerinfo type = theme;
+layerinfo name = "Lower the Curtain";
+layerinfo redist_uniq = "punquin/lowercurtain";
+
+set body_bgcolor = "#000000";
+set main_bgcolor = "#6b6b6b";
+set main_fgcolor = "#ffffff";
+set border_color = "#ffffff";
+set title_color = "#363636";
+set subject_color = "#363636";
+set link_color = "#000050";
+set vlink_color = "#500050";
+set alink_color = "#3314ba";
+
+#NEWLAYER: punquin/sunny
+layerinfo type = theme;
+layerinfo name = "Sunny Day";
+layerinfo redist_uniq = "punquin/sunny";
+
+set body_bgcolor = "#55e0f9";
+set main_bgcolor = "#e38202";
+set main_fgcolor = "#ffffff";
+set border_color = "#000000";
+set title_color = "#e38202";
+set subject_color = "#efe052";
+set link_color = "#df0d12";
+set vlink_color = "#ac1b25";
+set alink_color = "#fe3b3b";
+
+#NEWLAYER: punquin/valentine
+layerinfo type = theme;
+layerinfo name = "Be Mine";
+layerinfo redist_uniq = "punquin/valentine";
+
+set body_bgcolor = "#6f104a";
+set main_bgcolor = "#f2bce9";
+set main_fgcolor = "#000000";
+set border_color = "#ff24ab";
+set title_color = "#ff37ff";
+set subject_color = "#ae1774";
+set link_color = "#ffffff";
+set vlink_color = "#a51014";
+set alink_color = "#ed8188";
+
+#NEWLAYER: punquin/stripes
+layerinfo type = theme;
+layerinfo name = "Stripes";
+layerinfo redist_uniq = "punquin/stripes";
+
+set body_bgcolor = "#ffffff";
+set main_bgcolor = "#ffffff";
+set main_fgcolor = "#000000";
+set border_color = "#ff0000";
+set title_color = "#e7212a";
+set subject_color = "#ffffff";
+set link_color = "#000050";
+set vlink_color = "#500050";
+set alink_color = "#ffafc1";
