@@ -94,6 +94,11 @@ body<=
      if ($u->{'status'} eq "A") { $ret .= "<B>yes</B>"; }
      if ($u->{'status'} eq "N") { $ret .= "<B>no</B>"; }
      if ($u->{'status'} eq "T") { $ret .= "<B>transitioning</B> (used to be validated, but changed email addresses and hasn't reconfirmed)"; }
+     if ($u->{'clusterid'}) {
+         $ret .= "<br>cluster: <b>";
+         $ret .= $LJ::CLUSTERNAME{$u->{'clusterid'}} || $u->{'clusterid'};
+         $ret .= "</b>";
+     }
  } else {
      $ret .= "<I>not a user</I>";
  }
