@@ -606,7 +606,7 @@ sub check_form_auth {
 # </LJFUNC>
 sub create_qr_div {
 
-    my ($user, $ditemid, $stylemine, $userpic) = @_;
+    my ($user, $ditemid, $stylemine, $userpic, $viewing_thread) = @_;
     my $u = LJ::want_user($user);
     my $remote = LJ::get_remote();
     return undef unless $u && $remote && $ditemid;
@@ -627,6 +627,13 @@ sub create_qr_div {
                                 {'name' => 'dtid', 'id' => 'dtid', 'value' => ''},
                                 {'name' => 'basepath', 'id' => 'basepath', 'value' => $basepath},
                                 {'name' => 'stylemine', 'id' => 'stylemine', 'value' => $stylemine},
+                                {'name' => 'saved_subject', 'id' => 'saved_subject'},
+                                {'name' => 'saved_body', 'id' => 'saved_body'},
+                                {'name' => 'saved_spell', 'id' => 'saved_spell'},
+                                {'name' => 'saved_upic', 'id' => 'saved_upic'},
+                                {'name' => 'saved_dtid', 'id' => 'saved_dtid'},
+                                {'name' => 'saved_ptid', 'id' => 'saved_ptid'},
+                                {'name' => 'viewing_thread', 'id' => 'viewing_thread', 'value' => $viewing_thread},
                                 );
 
         # rate limiting challenge
@@ -664,7 +671,7 @@ sub create_qr_div {
                 }
                 @pics = sort { lc($a) cmp lc($b) } @pics;
                 $qrhtml .= LJ::html_select({'name' => 'prop_picture_keyword',
-                                         'selected' => $userpic, },
+                                         'selected' => $userpic, 'id' => 'prop_picture_keyword' },
                                         ("", BML::ml('/talkpost.bml.opt.defpic'), map { ($_, $_) } @pics));
 
                 $qrhtml .= ' ' . BML::fill_template('help', { 'DATA' => $LJ::HELPURL{'userpics'} } )
@@ -700,7 +707,7 @@ sub create_qr_div {
                                              "raw" => "onclick='if (moreopts()) {submitform();}'"
                                              });
         if ($LJ::SPELLER) {
-            $qrhtml .= "&nbsp;<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>";
+            $qrhtml .= "&nbsp;<input type='checkbox' name='do_spellcheck' value='1' id='do_spellcheck' /> <label for='do_spellcheck'>";
             $qrhtml .= BML::ml('/talkread.bml.qr.spellcheck');
             $qrhtml .= "</label>";
         }
@@ -875,35 +882,35 @@ $LJ::COMMON_CODE{'autoradio_check'} = q{
 
 # Common Javascript functions for Quick Reply
 $LJ::COMMON_CODE{'quickreply'} = q{
+    <script language="JavaScript" type="text/javascript" src="/js/xbDOM.js"></script>
+    <script language="JavaScript" type="text/javascript" src="/js/browserdetect.js"></script>
     <script language='Javascript' type='text/javascript'>
     <!--
     var lastDiv;
     lastDiv = 'qrdiv';
 
     function quickreply(dtid, pid, newsubject) {
-        if (! document.getElementById) return true;
-
         // Mac IE 5.x does not like the replaceChild function!
         // Cannot understand a crash report since it has no useful debug info in it.
-        if ((navigator.userAgent.indexOf('Mac') != -1) && (navigator.appName == 'Microsoft Internet Explorer')) return true;
+        if (browser.isIE && browser.isMac) { return true;}
 
         // Netscape 6 and below does not do Quick Reply anyway so make sure it doesn't try to
-        if ((navigator.appName == 'Netscape') && (parseInt(navigator.appVersion) < 5)) return true;
+        if (browser.isNS && ! browser.isNS6up) return true;
 
-        var ptalkid = document.getElementById('parenttalkid');
+        var ptalkid = xbGetElementById('parenttalkid');
         ptalkid.value = pid;
 
-        var rto = document.getElementById('replyto');
+        var rto = xbGetElementById('replyto');
         rto.value = pid;
 
-        var subject = document.getElementById('subject');
+        var subject = xbGetElementById('subject');
         subject.value = newsubject;
 
-        var dtid_field = document.getElementById('dtid');
+        var dtid_field = xbGetElementById('dtid');
         dtid_field.value = dtid;
 
-        var qr_div = document.getElementById('qrdiv');
-        var cur_div = document.getElementById(dtid);
+        var qr_div = xbGetElementById('qrdiv');
+        var cur_div = xbGetElementById(dtid);
 
         if (lastDiv == 'qrdiv') {
             qr_div.style.display = 'inline';
@@ -911,7 +918,7 @@ $LJ::COMMON_CODE{'quickreply'} = q{
             // only one swap
             swapnodes(qr_div, cur_div);
         } else if (lastDiv != dtid) {
-              var last_div = document.getElementById(lastDiv);
+              var last_div = xbGetElementById(lastDiv);
 
               // Two swaps
               swapnodes(last_div, cur_div);
@@ -920,7 +927,7 @@ $LJ::COMMON_CODE{'quickreply'} = q{
 
         lastDiv = dtid;
 
-        var multi_form = document.getElementById('multiform');
+        var multi_form = xbGetElementById('multiform');
         multi_form.action = '/talkpost_do.bml';
 
         // So it doesn't follow the link
@@ -929,9 +936,9 @@ $LJ::COMMON_CODE{'quickreply'} = q{
 
     function moreopts()
     {
-        var multi_form = document.getElementById('multiform');
-        var basepath = document.getElementById('basepath');
-        var dtid = document.getElementById('dtid');
+        var multi_form = xbGetElementById('multiform');
+        var basepath = xbGetElementById('basepath');
+        var dtid = xbGetElementById('dtid');
 
         multi_form.action = basepath.value + dtid.value;
         return true;
@@ -939,19 +946,19 @@ $LJ::COMMON_CODE{'quickreply'} = q{
 
    function submitform()
    {
-        var submit = document.getElementById('submitpost');
+        var submit = xbGetElementById('submitpost');
         submit.disabled = true;
 
-        var submitmore = document.getElementById('submitmoreopts');
+        var submitmore = xbGetElementById('submitmoreopts');
         submitmore.disabled = true;
 
         // New top-level comments
-        var dtid = document.getElementById('dtid');
+        var dtid = xbGetElementById('dtid');
         if (dtid.value == 'top' || dtid.value == 'bottom') {
             dtid.value = 0;
         }
 
-        var multi_form = document.getElementById('multiform');
+        var multi_form = xbGetElementById('multiform');
         multi_form.submit();
    }
 
@@ -964,8 +971,7 @@ $LJ::COMMON_CODE{'quickreply'} = q{
    }
 
    function checkLength() {
-        if (!document.getElementById) return true;
-        var textbox = document.getElementById('body');
+        var textbox = xbGetElementById('body');
         if (!textbox) return true;
         if (textbox.value.length > 4300) {
              alert('Sorry, but your comment of ' + textbox.value.length + ' characters exceeds the maximum character length of 4300.  Please try shortening it and then post again.');
@@ -973,6 +979,66 @@ $LJ::COMMON_CODE{'quickreply'} = q{
         }
         return true;
    }
+
+    // Maintain entry through browser navigations.
+    function save_entry() {
+        var qr_body = xbGetElementById('body');
+        var qr_subject = xbGetElementById('subject');
+        var do_spellcheck = xbGetElementById('do_spellcheck');
+        var qr_upic = xbGetElementById('prop_picture_keyword');
+        var qr_dtid = xbGetElementById('dtid');
+        var qr_ptid = xbGetElementById('parenttalkid');
+
+        document.multiform.saved_body.value = qr_body.value;
+        document.multiform.saved_subject.value = qr_subject.value;
+        document.multiform.saved_spell.value = do_spellcheck.checked;
+        document.multiform.saved_upic.value = qr_upic.selectedIndex;
+        document.multiform.saved_dtid.value = qr_dtid.value;
+        document.multiform.saved_ptid.value = qr_ptid.value;
+
+        return false;
+    }
+
+    // Restore saved_entry text across platforms.
+    function restore_entry() {
+        var saved_body = xbGetElementById('saved_body');
+        if (saved_body.value == "") return false;
+
+        setTimeout(
+            function () {
+
+                var dtid = xbGetElementById('saved_dtid');
+                if (! dtid) return false;
+                var ptid = xbGetElementById('saved_ptid');
+                if (! ptid) return false;
+
+                quickreply(dtid.value, ptid.value, document.multiform.saved_subject.value);
+
+                var body = xbGetElementById('body');
+                if (! body) return false;
+                body.value = saved_body.value;
+
+                // Some browsers require we explicitly set this after the div has moved
+                // and is now no longer hidden
+                var subject = xbGetElementById('subject');
+                if (! subject) return false;
+                subject.value = document.multiform.saved_subject.value
+
+                var prop_picture_keyword = xbGetElementById('prop_picture_keyword');
+                if (! prop_picture_keyword) return false;
+                prop_picture_keyword.selectedIndex = document.multiform.saved_upic.value;
+
+                var spell_check = xbGetElementById('do_spellcheck');
+                if (! spell_check) return false;
+                if (document.multiform.saved_spell.value == 'true') {
+                    spell_check.checked = true;
+                } else {
+                    spell_check.checked = false;
+                }
+
+            }, 100);
+        return false;
+    }
 
     //  -->
     </script>

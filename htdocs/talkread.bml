@@ -3,7 +3,7 @@ body<=
 <?_code
 
  use strict;
- use vars qw($r_head $r_title %GET %ML);
+ use vars qw($r_head $r_title %GET %ML $r_bodyopts);
 
  # make refs to both title and head, that work in cached or non-cached contexts
  # $_[0] is the BML $req object, $_[1] is a pre-request scratch area.
@@ -11,10 +11,13 @@ body<=
  $r_title = "";
  my $head = $_[1] ? \$_[1]->{'head'} : \$r_head;
  my $title = $_[1] ? \$_[1]->{'title'} : \$r_title;
+ my $bodyopts = $_[1] ? \$_[1]->{'bodyopts'} : \$r_bodyopts;
 
  return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
  $$head .= $LJ::COMMON_CODE{'quickreply'};
+
+ $$bodyopts .= 'onload="restore_entry();" onunload="save_entry()"';
 
  my $pics = LJ::Talk::get_subjecticons();
 
@@ -494,7 +497,12 @@ body<=
      $ret .= "<div align='center'>" . LJ::make_qr_target('top') . "</div>" if $remote;
 
      my $stylemine = $GET{'style'} eq 'mine' ? 1 : 0;
-     $ret .= LJ::create_qr_div($u, $ditemid, $stylemine, $GET{'prop_picture_keyword'});
+
+     my $viewing_thread;
+     if (defined $GET{'thread'}) {
+         $viewing_thread = $GET{'thread'};
+     }
+     $ret .= LJ::create_qr_div($u, $ditemid, $stylemine, $GET{'prop_picture_keyword'}, $viewing_thread);
 
      $ret .= LJ::html_hidden("ditemid", $ditemid);
      $ret .= LJ::html_hidden("journal", $u->{'user'});
@@ -537,6 +545,7 @@ _code?>
 <=body
 windowtitle=><?_code return $_[1] ? $_[1]->{'title'} : $r_title _code?>
 head=><?_code return $_[1] ? $_[1]->{'head'} : $r_head _code?>
+bodyopts=><?_code return $_[1]->{'bodyopts'}; _code?>
 page?><?_c <LJDEP>
 link: htdocs/talkpost.bml, htdocs/talkread.bml, htdocs/delcomment.bml
 img: htdocs/img/dot.gif, htdocs/img/delcomment.gif
