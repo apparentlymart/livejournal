@@ -16,6 +16,7 @@
  my $cu = $FORM{comm} ? 
           LJ::load_user($FORM{comm}) : # they gave us the comm name
           LJ::load_userid($cuserid);   # they gave us the comm id
+ my $ecname = LJ::ehtml($cu->{'name'});
 
  # does this community even exist?
  unless ($cu) {
@@ -29,14 +30,14 @@
 
      # success message
      $body .= "<?h1 $ML{'.success'} h1?><?p " . BML::ml('.label.removed', 
-                    { commuser => $cu->{user}, commname => $cu->{name} }) . " p?>";
+                    { commuser => $cu->{user}, commname => $ecname }) . " p?>";
  } else {
      # show a confirmation form
-     $body .= "<?h1 $ML{'.sure'} h1?><?p " . BML::ml('.label.buttontoleave', { commname => $cu->{name} }) . " p?>";
+     $body .= "<?h1 $ML{'.sure'} h1?><?p " . BML::ml('.label.buttontoleave', { commname => $ecname }) . " p?>";
      $body .= '<form method="post" action="leave.bml">';
      $body .= LJ::html_hidden("cuserid", $cu->{userid}, "confirm", 1) . "<p align='center'>";
      $body .= LJ::html_check({ name => 'removefriend', selected => 1, value => 1 }) . " ";
-     $body .= BML::ml('.label.removefromfriends', { user => $cu->{user} });
+     $body .= BML::ml('.label.removefromfriends', { user => $ecname });
      $body .= '<br /><br />' . LJ::html_submit(undef, $ML{'.button.leave'}) . '</p></form>';
  } 
 
