@@ -92,26 +92,29 @@ P=)
  $ret .= "<LI><B>Users getting promotions by mail: </B> $allow_getpromos\n";
  $ret .= "</UL> P=)\n";
 
- $ret .= "(=H1 Recent Updates H1=)\n";
- $ret .= "(=P The following are the 10 most recently updated journals: <UL>";
- $sth = $dbr->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 30 DAY) ORDER BY uu.timeupdate DESC LIMIT 10");
- $sth->execute;
- while (my ($iuser, $iname, $itime) = $sth->fetchrow_array)
- {
-     $ret .= "<LI><A HREF=\"/users/$iuser/\">(=_EH $iname _EH=)</A>, $itime\n";
+ unless ($LJ::DISABLED{'stats-recentupdates'}) 
+ { 
+     $ret .= "(=H1 Recent Updates H1=)\n";
+     $ret .= "(=P The following are the 10 most recently updated journals: <ul>";
+     $sth = $dbr->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 30 DAY) ORDER BY uu.timeupdate DESC LIMIT 10");
+     $sth->execute;
+     while (my ($iuser, $iname, $itime) = $sth->fetchrow_array) {
+	 $ret .= "<li><a href='/users/$iuser/'>(=_EH $iname _EH=)</a>, $itime</li>\n";
+     }
+     $ret .= "</ul> P=)\n";
  }
- $ret .= "</UL> P=)\n";
 
- $ret .= "(=H1 New Journals H1=)\n";
- $ret .= "(=P The following are the 10 most recently created journals.  It's very likely these users haven't modified their journals much, and probably haven't wrote much in them yet either... <UL>";
- $sth = $dbr->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate IS NOT NULL ORDER BY uu.timecreate DESC LIMIT 10");
- $sth->execute;
- while (my ($iuser, $iname, $itime) = $sth->fetchrow_array)
+ unless ($LJ::DISABLED{'stats-newjournals'}) 
  {
-     $ret .= "<LI><A HREF=\"/users/$iuser/\">(=_EH $iname _EH=)</A>, $itime\n";
-
+     $ret .= "(=H1 New Journals H1=)\n";
+     $ret .= "(=P The following are the 10 most recently created journals.  It's very likely these users haven't modified their journals much, and probably haven't wrote much in them yet either... <ul>";
+     $sth = $dbr->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate IS NOT NULL ORDER BY uu.timecreate DESC LIMIT 10");
+     $sth->execute;
+     while (my ($iuser, $iname, $itime) = $sth->fetchrow_array) {
+	 $ret .= "<li><a href='/users/$iuser/'>(=_EH $iname _EH=)</a>, $itime</li>\n";
+     }
+     $ret .= "</ul> P=)\n";
  }
- $ret .= "</UL> P=)\n";
 
  $ret .= "(=H1 Demographics H1=)\n";
  $ret .= "(=P The following are the 15 most popular countries LiveJournal is used in: <UL>";
