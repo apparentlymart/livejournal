@@ -3867,8 +3867,8 @@ sub load_userid
     my $u = $sth->fetchrow_hashref();
 
     if (!$u && $dbs->{'has_slave'}) {
-        $u = $dbh->selectrow_array("SELECT * FROM user WHERE userid=?",
-                                   undef, $userid);
+        $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?",
+                                     undef, $userid);
     }
 
     $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u if $u;
