@@ -44,6 +44,7 @@ general /editjournal.bml.lostinfo.head
 general /editjournal.bml.lostinfo.text
 
 general /editjournal_do.bml.error.mustlogin
+general /editjournal_do.bml.success.edit
 
 general /friends/editgroups.bml.login.header
 general /friends/editgroups.bml.login.text
