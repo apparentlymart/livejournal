@@ -381,7 +381,7 @@ body<=
 
  # Username: [    ] Password: [    ]  Login? [ ]
  $ret .= "<tr valign='middle' align='left'><td></td><td></td><td>";
- $ret .= "$ML{'Username'}:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='18' id='username'> ";
+ $ret .= "$ML{'Username'}:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='15' id='username'> ";
  $ret .= "$ML{'Password'}:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13'> <label for='logincheck'>$ML{'.loginq'}&nbsp;</label><input type='checkbox' name='do_login' id='logincheck'></td></tr>\n";
  
  my $basesubject = "";
