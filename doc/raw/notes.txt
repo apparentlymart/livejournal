@@ -1,0 +1,16 @@
+Debian packages:
+   psgml
+   jade
+   docbook-xml
+   sp  (contains nsgmls)
+
+Documentation of note:
+   http://people.debian.org/~bortz/SGML-HOWTO/
+   http://www.docbook.org/tdg/en/html/docbook.html
+
+
+nsgmls -s -wxml /usr/lib/sgml/declaration/xml.dcl book.xml
+
+# make HTML:
+jade -t sgml -d /usr/lib/sgml/stylesheet/dsssl/docbook/nwalsh/html/docbook.dsl /usr/lib/sgml/declaration/xml.dcl book.xml
+

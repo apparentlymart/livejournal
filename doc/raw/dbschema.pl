@@ -3,7 +3,7 @@
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
-&connect_db();
+my $dbr = LJ::get_dbh("slave");
 
 sub magic_links
 {
@@ -60,20 +60,20 @@ sub dump_xml
 
 
 my %table;
-$sth = $dbh->prepare("SELECT tablename, public_browsable, des FROM schematables");
+$sth = $dbr->prepare("SELECT tablename, public_browsable, des FROM schematables");
 $sth->execute;
 while (my ($name, $public, $des) = $sth->fetchrow_array) {
     $table{$name} = { 'public' => $public, 'des' => $des };
 }
 
-$sth = $dbh->prepare("SELECT tablename, colname, des FROM schemacols");
+$sth = $dbr->prepare("SELECT tablename, colname, des FROM schemacols");
 $sth->execute;
 while (my ($table, $col, $des) = $sth->fetchrow_array) {
     $coldes{$table}->{$col} = $des;
 }
 
 
-$sth = $dbh->prepare("SHOW TABLES");
+$sth = $dbr->prepare("SHOW TABLES");
 $sth->execute;
 while (my ($table) = $sth->fetchrow_array) {
     unless (defined $table{$table}) { $table{$table} = {} }
@@ -81,7 +81,7 @@ while (my ($table) = $sth->fetchrow_array) {
 
 foreach my $table (sort keys %table)
 {
-    $sth = $dbh->prepare("DESCRIBE $table");
+    $sth = $dbr->prepare("DESCRIBE $table");
     $sth->execute;
     while (my $r = $sth->fetchrow_hashref)
     {
@@ -103,7 +103,7 @@ foreach my $table (sort keys %table)
 	push @{$table{$table}->{'cols'}}, $col;
     }
 
-    $sth = $dbh->prepare("SHOW INDEX FROM $table");
+    $sth = $dbr->prepare("SHOW INDEX FROM $table");
     $sth->execute;
     while (my $r = $sth->fetchrow_hashref)
     {

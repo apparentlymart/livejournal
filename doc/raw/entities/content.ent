@@ -1,0 +1,13 @@
+<!ENTITY bookinfo 		SYSTEM "../bookinfo.xml">
+<!ENTITY bookbody 		SYSTEM "../bookbody.xml">
+
+<!ENTITY chAbout 		SYSTEM "../about.xml">
+<!ENTITY chUsingLJ 		SYSTEM "../using.xml">
+<!ENTITY chAdvanced 		SYSTEM "../advanced.xml">
+<!ENTITY chInstall 		SYSTEM "../install.xml">
+<!ENTITY chInternals 		SYSTEM "../internals.xml">
+<!ENTITY chSite 		SYSTEM "../site.xml">
+<!ENTITY sec-Int-ProgGuide 	SYSTEM "../int/programming-guidelines.xml">
+
+<!ENTITY % entities 		SYSTEM "entities.xml">
+%entities;

@@ -1,0 +1,35 @@
+<chapter id="ch-internals">
+<?dbhtml filename="internals.html"?>
+<title>LiveJournal Internals</title>
+
+<para>
+Info on internals.
+</para>
+
+<sect1>
+<?dbhtml filename="protocol.html"?>
+ <title>Client/Server Protocol</title>
+<para>foo</para>
+</sect1>
+
+<sect1>
+<?dbhtml filename="api.html"?>
+ <title>API Documentation</title>
+<para>foo</para>
+</sect1>
+
+<sect1>
+<?dbhtml filename="extending.html"?>
+ <title>Extending LiveJournal</title>
+<para>foo</para>
+</sect1>
+
+<sect1>
+<?dbhtml filename="schema.html"?>
+ <title>Database Schema</title>
+<para>foo</para>
+</sect1>
+
+&sec-Int-ProgGuide;
+
+</chapter>

@@ -1,0 +1,30 @@
+<chapter id="ch-about">
+<?dbhtml filename="about.html"?>
+<title>What is LiveJournal?</title>
+<para>
+What is LiveJournal?
+</para>
+
+<sect1 id="about-overview">
+<?dbhtml filename="overview.html"?>
+<title>Brief Overview</title>
+<para>LiveJournal is an online journal web application, released as open source and actively developed by many people around the world.</para>
+</sect1>
+
+<sect1 id="about-features">
+<?dbhtml filename="features.html"?>
+<title>Features</title>
+<para>
+Some of LiveJournal's notable features include:
+<itemizedlist>
+<listitem>
+   <simpara><emphasis role='bold'>Per-entry security</emphasis> - each journal entry can have its own security restrictions indicating who can read it.
+   </simpara></listitem>
+
+</itemizedlist>
+
+</para>
+</sect1>
+
+
+</chapter>
