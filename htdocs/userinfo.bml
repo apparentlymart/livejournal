@@ -21,7 +21,7 @@
  my $MAX_FRIENDOF_SHOW = 150;
  my $MAX_FRIENDOF_LOAD = 5000;
         
- my $remote = LJ::get_remote($dbr);
+ my $remote = LJ::get_remote();
  if ($FORM{'user'} eq "" && !$remote) {
      $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notloggedin'} p?>";
      return;
@@ -30,7 +30,7 @@
  my $sth;
  my %countries = ();
  my %states = ();
- LJ::load_codes($dbr, { "country" => \%countries, "state" => \%states });
+ LJ::load_codes({ "country" => \%countries, "state" => \%states });
 
  my $error = sub {
      my $e = shift;
@@ -53,12 +53,12 @@
 
  {
      return $error->($ML{'.label.reqfinduser'})
-         if ($userid && ! LJ::check_priv($dbr, $remote, "finduser"));
+         if ($userid && ! LJ::check_priv($remote, "finduser"));
 
      if ($userid) {
-         $u = LJ::load_userid($dbr, $userid);
+         $u = LJ::load_userid($userid);
      } else {
-         $u = LJ::load_user($dbr, $user);
+         $u = LJ::load_user($user);
      }
 
      $user = $u->{'user'} if $u;
@@ -89,7 +89,7 @@
  $dbcr = LJ::get_cluster_reader($u);
 
  my $remote_isowner = $remote && $remote->{'user'} eq $u->{'user'};
- my $remote_isfriend = LJ::is_friend($dbr, $u, $remote);
+ my $remote_isfriend = LJ::is_friend($u, $remote);
  my $com = $u->{'journaltype'} eq "C" ? 1 : 0;
  my $synd;
  if ($u->{'journaltype'} eq "Y") {
