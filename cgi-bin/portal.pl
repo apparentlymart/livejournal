@@ -482,7 +482,7 @@ $box{'login'} =
 			      'align' => "center",
 			      'url' => '/login.bml', });
 
-	$$b .= "<form method=post action=/login_do.bml>";
+	$$b .= "<form method='post' action='/login.bml'>";
 	$$b .= "<table><tr><td align=left>";
 	$$b .= "<b>Username:</b><br><input name=user size=14 maxlength=15><br> ";
 	$$b .= "<b>Password:</b><br><input name=password type=password size=14><br>";

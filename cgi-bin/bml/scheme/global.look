@@ -172,7 +172,7 @@ LOAD_PAGE_INFO<=
 					  'uri' => '/logout.bml', },
 					]
 					};
- } elsif ($ENV{'REQUEST_URI'} ne "/login_do.bml") {
+ } elsif ($ENV{'REQUEST_URI'} ne "/login.bml") {
      unshift @sidebar, { 'name' => "Log In",
 			 'uri' => '/login.bml', }
  }
