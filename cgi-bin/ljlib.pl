@@ -895,9 +895,7 @@ sub set_userprop
                 my $vals = join(',', map { "($userid,$_->[0]," . $db->quote($_->[1]) . ")" } @$list);
                 $db->do("REPLACE INTO $table (userid, upropid, value) VALUES $vals");
             }
-            foreach (@$list) {
-                LJ::MemCache::set([$userid,"uprop:$userid:$_->[0]"], $_->[1], $expire) foreach (@$list);
-            }
+            LJ::MemCache::set([$userid,"uprop:$userid:$_->[0]"], $_->[1], $expire) foreach (@$list);
         }
         if (my $list = $action{$table}->{"delete"}) {
             if ($db) {
