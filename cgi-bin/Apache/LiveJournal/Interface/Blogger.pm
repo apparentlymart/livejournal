@@ -9,10 +9,10 @@ sub blogger_deserialize {
     if ($content =~ s!<title>(.*?)</title>!!) {
         $event->{'subject'} = $1;
     }
-    if ($content =~ s/(^|\n)lj-mood:\s*(.*)\n//) {
+    if ($content =~ s/(^|\n)lj-mood:\s*(.*)\n//i) {
         $event->{'props'}->{'current_mood'} = $2;
     }
-    if ($content =~ s/(^|\n)lj-music:\s*(.*)\n//) {
+    if ($content =~ s/(^|\n)lj-music:\s*(.*)\n//i) {
         $event->{'props'}->{'current_music'} = $2;
     }
     $content =~ s/^\s+//; $content =~ s/\s+$//;
