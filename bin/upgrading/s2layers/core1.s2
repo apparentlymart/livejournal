@@ -202,33 +202,51 @@ class UserLite
     function print ();
 }
 
-class Entry
+class EntryLite
+"Base class for both journal entries and comments."
+{
+    var readonly string subject "Subject";
+    var readonly string text "Text (will be blank on some viewtypes, like 'month' view, or with collapsed threads)";
+    var DateTime time "The user-specified time of the post, or the GMT time if it's a comment.";
+
+    var UserLite poster "Author of the entry, or null if an anonymous comment";
+    var UserLite journal "Journal the entry has been posted to";
+    
+    var Image userpic "The userpic selected to relate to this entry.";
+
+    var readonly string{} metadata "Post metadata. Keys: 'music', 'mood'";
+
+    var readonly string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
+   
+}
+
+class Entry extends EntryLite
 "A journal entry"
 {
-    var readonly string subject "Entry subject";
-    var readonly string text "Entry text. (Will be blank on some viewtypes, like 'month' view)";
-    var DateTime time "The user specificed time of this entry";
-
     var readonly string security "The security level of the entry ('private', 'protected'), or blank if public.";
     var Image security_icon "A little icon which should be displayed somewhere on an entry to represent the security setting";
 
-    var UserLite poster "Author of the journal entry";
-    var UserLite journal "Journal the entry has been posted to";
-
-    var readonly string{} metadata "Post metadata. Keys: 'music', 'mood'";
     var Image mood_icon "Mood icon, or null.";
     var CommentInfo comments "Comment information on this entry";
 
     var bool new_day "Is this entry on a different day to the previous one?";
     var bool end_day "Is this the last entry of a day?";
-    var Image userpic "The userpic selected to relate to this entry";
+
     var Link{} links "Hash of links that the server suggests be linked from this entry, eg to edit an entry if a user is viewing their own journal.";
+
     var int itemid "Server stored ID number for this entry";
-    var readonly string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
 
     function print_metadata ();
     function builtin plain_subject () : string
         "Return entry's subject as plain text, with all HTML removed.";
+}
+
+class Comment extends EntryLite
+"A comment"
+{
+    var Image subject_icon "Subject icon, or null.";
+    var int talkid "Server stored ID number for this comment.";
+    var Comment[] replies;
 }
 
 ### Userinfo
@@ -458,6 +476,19 @@ class MonthPage extends Page
     var readonly string prev_url "URL of previous month, or empty string if none.";
     var readonly string next_url "URL of next month, or empty string if none.";
     var Redirector redir "Necessary to make a form which POSTs to a redirector";
+}
+
+class EntryPage extends Page
+{
+    var Entry entry;
+    var ItemRange comment_pages;
+    var Comment[] comments;
+}
+
+class ReplyPage extends Page
+{
+    var Entry entry "The journal entry for this talk page";
+    var EntryLite source "The object which is being replied to, either the entry or a comment";
 }
 
 ##[ Built-in Functions ]
