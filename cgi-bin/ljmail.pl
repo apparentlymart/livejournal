@@ -8,7 +8,6 @@ require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 use MIME::Lite ();
 use Text::Wrap ();
 use Time::HiRes ('gettimeofday', 'tv_interval');
-use Sys::Hostname ('hostname');
 
 package LJ;
 
@@ -87,7 +86,8 @@ sub send_mail
                              $msg->get('to'),
                              $rval ? "succeeded" : "failed",
                              $msg->get('subject') );
-        LJ::blocking_report( hostname(), 'send_mail', tv_interval($starttime), $notes );
+        LJ::blocking_report( $LJ::SMTP_SERVER || $LJ::SENDMAIL, 'send_mail',
+                             tv_interval($starttime), $notes );
 
         $rval; # return
     };
@@ -98,7 +98,8 @@ sub send_mail
                          $msg->get('to'),
                          $rv ? "succeeded" : "failed",
                          $msg->get('subject') );
-    LJ::blocking_report( hostname(), 'send_mail', tv_interval($starttime), $notes );
+    LJ::blocking_report( $LJ::SMTP_SERVER || $LJ::SENDMAIL, 'send_mail',
+                         tv_interval($starttime), $notes );
     return 1 if $rv;
     return 0 if $@ =~ /no data in this part/;  # encoding conversion error higher
     return $buffer->($msg);

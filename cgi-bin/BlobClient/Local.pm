@@ -5,7 +5,6 @@ use strict;
 use IO::File;
 use File::Path;
 use Time::HiRes qw{gettimeofday tv_interval};
-use Sys::Hostname qw{hostname};
 
 package BlobClient::Local;
 
@@ -24,11 +23,11 @@ sub new {
 ### Time a I<block> and send a report for the specified I<op> with the given
 ### I<notes> when it finishes.
 sub report_blocking_time (&@) {
-    my ( $block, $op, $notes ) = ( @_ );
+    my ( $block, $op, $notes, $host ) = ( @_ );
 
     my $start = [gettimeofday()];
     my $rval = $block->();
-    LJ::blocking_report( hostname(), "blob_$op", tv_interval($start), $notes );
+    LJ::blocking_report( $host, "blob_$op", tv_interval($start), $notes );
 
     return $rval;
 }
@@ -48,7 +47,7 @@ sub get {
         print STDERR "Blob::Local: serving $path\n" if DEBUG;
         $data = <$fh>;
         close($fh);
-    } "get", $path;
+    } "get", $path, $self->{path};
 
     return $data;
 }
@@ -69,7 +68,7 @@ sub get_stream {
             $callback->($data);
         }
         close($fh);
-    } "get_stream", $path;
+    } "get_stream", $path, $self->{path};
 
     return 1;
 }
@@ -90,7 +89,7 @@ sub put {
         }
         print $fh $content;
         close $fh;
-    } "put", $filename;
+    } "put", $filename, $self->{path};
 
     return 1;
 }
@@ -105,7 +104,7 @@ sub delete {
     report_blocking_time {
         # FIXME: rmdir up the tree
         $rval = unlink($filename);
-    } "delete", $filename;
+    } "delete", $filename, $self->{path};
 
     return $rval;
 }

@@ -6,7 +6,6 @@ package BlobClient::Remote;
 use BlobClient;
 use LWP::UserAgent;
 use Time::HiRes qw{gettimeofday tv_interval};
-use Sys::Hostname qw{hostname};
 use vars qw(@ISA);
 @ISA = qw(BlobClient);
 
@@ -20,11 +19,11 @@ use BlobClient;
 ### Time a I<block> and send a report for the specified I<op> with the given
 ### I<notes> when it finishes.
 sub report_blocking_time (&@) {
-    my ( $block, $op, $notes ) = ( @_ );
+    my ( $block, $op, $notes, $host ) = ( @_ );
 
     my $start = [gettimeofday()];
     my $rval = $block->();
-    LJ::blocking_report( hostname(), "blob_$op", tv_interval($start), $notes );
+    LJ::blocking_report( "blob_$op", tv_interval($start), $notes );
 
     return $rval;
 }
@@ -48,7 +47,7 @@ sub get {
     my $res;
     report_blocking_time {
         $res = $self->{ua}->request($req);
-    } "get", $path;
+    } "get", $path, $self->{path};
     return $res->content if $res->is_success;
 
     # two types of failure: server dead, or just a 404.
@@ -69,7 +68,7 @@ sub get_stream {
     my $res;
     report_blocking_time {
         $res = $self->{ua}->request($req, $callback, 1024*50);
-    } "get_stream", $path;
+    } "get_stream", $path, $self->{path};
 
     return $res->is_success;
 }
@@ -85,7 +84,7 @@ sub put {
     my $res;
     report_blocking_time {
         $res = $self->{ua}->request($req);
-    } "put", $path;
+    } "put", $path, $self->{path};
 
     unless ($res->is_success) {
         $$errref = "$path: " . $res->status_line if $errref;
@@ -102,7 +101,7 @@ sub delete {
     my $res;
     report_blocking_time {
         $res = $self->{ua}->request($req);
-    } "delete", $path;
+    } "delete", $path, $self->{path};
 
     return 0 unless $res->is_success;
     return 1;
