@@ -310,10 +310,58 @@ sub get_text
     }
 
     if ($vars) {
+        $text =~ s/\[\[\?([\w\-]+)\|(.+?)\]\]/resolve_plural($lang, $vars, $1, $2)/eg;
         $text =~ s/\[\[([^\[]+?)\]\]/$vars->{$1}/g;
     }
 
     return $text;
 }
-   
+
+# The translation system now supports the ability to add multiple plural forms of the word
+# given different rules in a languge.  This functionality is much like the plural support
+# in the S2 styles code.  To use this code you must use the BML::ml function and pass
+# the number of items as one of the variables.  To make sure that you are allowing the
+# utmost compatibility for each language you should not hardcode the placement of the
+# number of items in relation to the noun.  Let the translation string do this for you.
+# A translation string is in the format of, with num being the variable storing the
+# number of items.
+# =[[num]] [[?num|singular|plural1|plural2|pluralx]]
+
+sub resolve_plural {
+    my ($lang, $vars, $varname, $wordlist) = @_;
+    my $count = $vars->{$varname};
+    my @wlist = split(/\|/, $wordlist);
+    my $plural_form = plural_form($lang, $count);
+    return $wlist[$plural_form];
+}
+
+# TODO: make this faster, using AUTOLOAD and symbol tables pointing to dynamically
+# generated subs which only use $_[0] for $count.
+sub plural_form {
+    my ($lang, $count) = @_;
+    return plural_form_en($count) if $lang =~ /^en/;
+    return plural_form_ru($count) if $lang =~ /^ru/;
+    return plural_form_fr($count) if $lang =~ /^fr/;
+    return plural_form_en($count);  # default
+}
+
+sub plural_form_en {
+    my ($count) = shift;
+    return 0 if $count == 1;
+    return 1;
+}
+
+sub plural_form_fr {
+    my ($count) = shift;
+    return 1 if $count > 1;
+    return 0;
+}
+
+sub plural_form_ru {
+    my ($count) = shift;
+    return 0 if ($count%10 == 1 and $count%100 != 11);
+    return 1 if ($count%10 >= 2 and $count%10 <= 4 and ($count%100 < 10 or $count%100>=20));
+    return 2;
+}
+
 1;
