@@ -82,7 +82,7 @@
      }
 
      ### Keywords
-     my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}});
+     my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}||[]});
      $eh_keywords = LJ::eall($eh_keywords);
 
      $body .= "<tr valign='middle'>";
