@@ -44,7 +44,7 @@ my $get_db_handles = sub {
     my $dbcm = LJ::get_cluster_master({ raw => 1 }, $cid) if $cid;
 
     # if we have undef, we have a problem (although, $cid == 0 makes a $dbcm undef okay)
-    die "Unable to get database handles" unless $dbh && (!$cid || $dbcm);
+    die "Unable to get database handles (dbh=$dbh, cid=$cid, dbcm=$dbcm)" unless $dbh && (!$cid || $dbcm);
 
     # update handles to raise errors and not timeout for a while
     if ($gotnew) {
@@ -257,9 +257,13 @@ while (1) {
     $sth->execute();
     $ct = 0;
     my %us;
+
+    my %fast;  # people to move fast
+
     while (my $u = $sth->fetchrow_hashref()) {
         $us{$u->{userid}} = $u;
         $ct++;
+        $fast{$u->{userid}} = 1;
     }
 
     # jump out if we got nothing
@@ -270,7 +274,24 @@ while (1) {
     my $has_memorable = $dbh->selectcol_arrayref("SELECT DISTINCT userid FROM memorable WHERE userid IN ($ids)");
     my $has_fgroups = $dbh->selectcol_arrayref("SELECT DISTINCT userid FROM friendgroup WHERE userid IN ($ids)");
     my %uids = ( map { $_ => 1 } (@$has_memorable, @$has_fgroups) );
-    my %moved_slow;
+
+    # these people actually have data to migrate; don't move them fast
+    delete $fast{$_} foreach keys %uids;
+
+    # now see who we can do in a fast way
+    my @fast_ids = map { $_+0 } keys %fast;
+    if (@fast_ids) {
+        print "Converting ", scalar(@fast_ids), " users quickly...\n";
+        # update stats for counting and print
+        $stats{'fast_moved'} += @fast_ids;
+        print $status->($stats{'slow_moved'}+$stats{'fast_moved'}, $stats{'total_users'}, "users");
+
+        # block update
+        LJ::update_user(\@fast_ids, { dversion => 6 });
+    }
+
+    my $slow_todo = scalar keys %uids;
+    print "Of $BLOCK_MOVE, $slow_todo have to be slow-converted...\n";
     foreach my $id (keys %uids) {
         # this person has memories, move them the slow way
         die "Userid $id in \$has_memorable, but not in \%us...fatal error\n" unless $us{$id};
@@ -280,18 +301,6 @@ while (1) {
         # now move the user
         bless $us{$id}, 'LJ::User';
         $move_user->($us{$id});
-        $moved_slow{$id} = 1;
-    }
-
-    # now see who we can do in a fast way
-    my @fast_ids = map { $_+0 } grep { !$moved_slow{$_} } keys %us;
-    if (@fast_ids) {
-        # update stats for counting and print
-        $stats{'fast_moved'} += @fast_ids;
-        print $status->($stats{'slow_moved'}+$stats{'fast_moved'}, $stats{'total_users'}, "users");
-
-        # block update
-        LJ::update_user(\@fast_ids, { dversion => 6 });
     }
 
 }
