@@ -175,6 +175,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
  LJ::CleanHTML::clean_event(\$event, $preformatted);
+ BML::ebml(\$event);
  $ret .= "<p>";
  $ret .= "<table><tr valign='middle'>";
  my $picid;
