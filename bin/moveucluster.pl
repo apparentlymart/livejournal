@@ -7,11 +7,20 @@ use strict;
 use Getopt::Long;
 
 my $opt_del = 0;
-exit 1 unless GetOptions('delete' => \$opt_del);
+my $opt_useslow = 0;
+exit 1 unless GetOptions('delete' => \$opt_del,
+                         'useslow' => \$opt_useslow, # use slow db role for read
+                         );
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 my $dbh = LJ::get_dbh("master");
+my $dbr = $dbh;
+
+if ($opt_useslow) {
+    $dbr = LJ::get_dbh("slow");
+    unless ($dbr) { die "Can't get slow db from which to read.\n"; }
+}
 
 my $user = shift @ARGV;
 my $dclust = shift @ARGV;
@@ -82,6 +91,25 @@ $dbh->do("UPDATE user SET caps=caps|(1<<$readonly_bit) WHERE userid=$userid");
 my $secidle = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
                                     "FROM userusage WHERE userid=$userid");
 sleep(3) unless $secidle > 86400*7;
+sleep(2) unless $secidle > 86400;
+
+# make sure slow is caught up:
+if ($opt_useslow) 
+{
+    my $ms = $dbh->selectrow_hashref("SHOW MASTER STATUS");
+    my $loop = 1;
+    while ($loop) {
+        my $ss = $dbr->selectrow_hashref("SHOW SLAVE STATUS");
+        $loop = 0;
+        unless ($ss->{'Log_File'} gt $ms->{'File'} ||
+                ($ss->{'Log_File'} eq $ms->{'File'} && $ss->{'Pos'} >= $ms->{'Position'}))
+        {
+            $loop = 1;
+            print "Waiting for slave ($ss->{'Pos'} < $ms->{'Position'})\n";
+            sleep 1;
+        }
+    }
+}
 
 my $last = time();
 my $stmsg = sub {
@@ -140,7 +168,7 @@ if ($sclust == 0)
 {
     # do bio stuff
     {
-        my $bio = $dbh->selectrow_array("SELECT bio FROM userbio WHERE userid=$userid");
+        my $bio = $dbr->selectrow_array("SELECT bio FROM userbio WHERE userid=$userid");
         my $bytes = length($bio);
         $dbch->do("REPLACE INTO dudata (userid, area, areaid, bytes) VALUES ($userid, 'B', 0, $bytes)");
         if ($separate_cluster) {
@@ -149,7 +177,7 @@ if ($sclust == 0)
         }
     }
 
-    my @itemids = reverse @{$dbh->selectcol_arrayref("SELECT itemid FROM log ".
+    my @itemids = reverse @{$dbr->selectcol_arrayref("SELECT itemid FROM log ".
                                                      "WHERE ownerid=$u->{'userid'} ".
                                                      "ORDER BY ownerid, rlogtime")};
 
@@ -215,11 +243,11 @@ if ($sclust == 0)
 
     # move userpics
     print "Copying over userpics.\n";
-    my @pics = @{$dbh->selectcol_arrayref("SELECT picid FROM userpic WHERE ".
+    my @pics = @{$dbr->selectcol_arrayref("SELECT picid FROM userpic WHERE ".
                                           "userid=$u->{'userid'}")};
     foreach my $picid (@pics) {
         print "  picid\#$picid...\n";
-        my $imagedata = $dbh->selectrow_array("SELECT imagedata FROM userpicblob ".
+        my $imagedata = $dbr->selectrow_array("SELECT imagedata FROM userpicblob ".
                                               "WHERE picid=$picid");
         $imagedata = $dbh->quote($imagedata);
         $dbch->do("REPLACE INTO userpicblob2 (userid, picid, imagedata) VALUES ".
@@ -359,7 +387,7 @@ sub movefrom0_logitem
 
     # copy its talk shit over:
     my %newtalkids = (0 => 0);  # 0 maps back to 0 still
-    my $talkids = $dbh->selectcol_arrayref("SELECT talkid FROM talk ".
+    my $talkids = $dbr->selectcol_arrayref("SELECT talkid FROM talk ".
                                            "WHERE nodetype='L' AND nodeid=$itemid");
     my @talkids = sort { $a <=> $b } @$talkids;
     my $treader = make_buffer_reader("talkid", \@talkids);
@@ -467,7 +495,7 @@ sub make_buffer_reader
 
             if (@todo) {
                 my $sql = "$hq WHERE $pricol IN (" . join(",", @todo) . ")";
-                my $sth = $dbh->prepare($sql);
+                my $sth = $dbr->prepare($sql);
                 $sth->execute;
                 while (my $r = $sth->fetchrow_hashref) {
                     push @{$bfd{$hq}->{'rows'}->{$r->{$pricol}}}, $r;
