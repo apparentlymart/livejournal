@@ -9,7 +9,7 @@ exit unless ($LJ::BUFFER_QUERIES);
 
 use Proc::ProcessTable;
 
-$DELAY = 11;
+$DELAY = $LJ::QBUFFERD_DELAY || 15;
 
 $pidfile = '/home/lj/var/qbufferd.pid';
 if (-e $pidfile) {
