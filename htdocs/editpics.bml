@@ -228,18 +228,23 @@
      $body .= "<td>";
      $body .= "<table>";
 
-     my $dis = $pic->{'state'} eq 'I' ? "disabled='disabled' " : "";
-     {
-         my $chk = $u->{'defaultpicid'} == $pic->{'picid'} ? "checked='checked' " : "";
+     my ($dis, $distxt);
+     if ($pic->{'state'} eq 'I') {
+         $dis = " disabled='disabled'";
+         $distxt = " &nbsp;<i>[$ML{'userpic.inactive'}]</i> " . LJ::help_icon('userpic_inactive');
+     }
 
-         $body .= "<tr><td align='right'><b><label for='$pid-def'>Default:</label></b></td><td> <input id='$pid-def' type='radio' name='defaultpic' value='$pid'$chk$dis>&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>Delete:</label></b> <input type='checkbox' name='delete_$pid' value='1' id='$pid-del'></td></tr>\n";
+     {
+         my $chk = $u->{'defaultpicid'} == $pic->{'picid'} ? " checked='checked'" : "";
+
+         $body .= "<tr><td align='right'><b><label for='$pid-def'>Default:</label></b></td><td> <input id='$pid-def' type='radio' name='defaultpic' value='$pid'$chk$dis />&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>Delete:</label></b> <input type='checkbox' name='delete_$pid' value='1' id='$pid-del' />$distxt</td></tr>\n";
      }
 
      {
          my $eh_keywords;
          $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}}) if $keywords{$pic->{'picid'}};
          $eh_keywords = LJ::eall($eh_keywords);
-         $body .= "<tr><td align='right'><b><label for='$pid-key'>Keywords:</label></b></td><td> <input id='$pid-key' size='30' name='kw_$pic->{'picid'}' value=\"$eh_keywords\"$dis></td></tr>\n";
+         $body .= "<tr><td align='right'><b><label for='$pid-key'>Keywords:</label></b></td><td> <input id='$pid-key' size='30' name='kw_$pic->{'picid'}' value=\"$eh_keywords\"$dis /></td></tr>\n";
      }
 
      $body .= "</table>\n";
