@@ -30,6 +30,8 @@ $maint{'genstats'} = sub
 
     my %to_pop;
 
+    LJ::load_props($dbs, "user");
+
     if ($do{'pop_faq'}) {
         $sth = $dbr->prepare("SELECT faqid, COUNT(*) FROM faquses WHERE ".
                              "faqid<>0 GROUP BY 1 ORDER BY 2 DESC LIMIT 50");
@@ -152,12 +154,16 @@ $maint{'genstats'} = sub
         }
     }
 
+    my $upc = LJ::get_prop("user", "country");
+    die "Can't find country userprop.  Database populated?\n" unless $upc;
+
     if ($do{'countries'})
     {
         $to_pop{'country'} = \%country;
 
         print "-I- Countries.\n";
-        $sth = $dbr->prepare("SELECT value, COUNT(*) AS 'count' FROM userprop WHERE upropid=3 AND value<>'' GROUP BY 1 ORDER BY 2");
+        $sth = $dbr->prepare("SELECT value, COUNT(*) AS 'count' FROM userprop ".
+                             "WHERE upropid=$upc->{'id'} AND value<>'' GROUP BY 1 ORDER BY 2");
         $sth->execute;
         while ($_ = $sth->fetchrow_hashref) {
             $country{$_->{'value'}} = $_->{'count'};
@@ -168,8 +174,11 @@ $maint{'genstats'} = sub
     {
         $to_pop{'stateus'} = \%stateus;
 
+        my $ups = LJ::get_prop("user", "state");
+        die "Can't find state userprop.  Database populated?\n" unless $ups;
+
         print "-I- US States.\n";
-        $sth = $dbr->prepare("SELECT ua.value, COUNT(*) AS 'count' FROM userprop ua, userprop ub WHERE ua.userid=ub.userid AND ua.upropid=4 and ub.upropid=3 and ub.value='US' AND ub.value<>'' GROUP BY 1 ORDER BY 2");
+        $sth = $dbr->prepare("SELECT ua.value, COUNT(*) AS 'count' FROM userprop ua, userprop ub WHERE ua.userid=ub.userid AND ua.upropid=$ups->{'id'} and ub.upropid=$upc->{'id'} and ub.value='US' AND ub.value<>'' GROUP BY 1 ORDER BY 2");
         $sth->execute;
         while ($_ = $sth->fetchrow_hashref) {
             $stateus{$_->{'value'}} = $_->{'count'};
@@ -180,8 +189,12 @@ $maint{'genstats'} = sub
     {
         $to_pop{'gender'} = \%gender;
 
+        my $upg = LJ::get_prop("user", "gender");
+        die "Can't find gender userprop.  Database populated?\n" unless $upg;
+
         print "-I- Gender.\n";
-        $sth = $dbr->prepare("SELECT up.value, COUNT(*) AS 'count' FROM userprop up, userproplist upl WHERE up.upropid=upl.upropid AND upl.name='gender' GROUP BY 1");
+        $sth = $dbr->prepare("SELECT value, COUNT(*) AS 'count' ".
+                             "FROM userprop WHERE upropid=$upg->{'id'} GROUP BY 1");
         $sth->execute;
         while ($_ = $sth->fetchrow_hashref) {
             $gender{$_->{'value'}} = $_->{'count'};
