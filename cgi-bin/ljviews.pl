@@ -1451,7 +1451,6 @@ sub create_view_day
         return 0;
     }
 
-    my %talkcount = ();
     my @itemids = ();
 
     my $optDESC = $vars->{'DAY_SORT_MODE'} eq "reverse" ? "DESC" : "";

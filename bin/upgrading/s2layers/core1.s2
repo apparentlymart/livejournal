@@ -1197,7 +1197,7 @@ function DayPage::print_body() {
 
     "<div class=\"skiplinks\">\n";
     "<a href=\""+ehtml($.prev_url)+"\">"+ehtml($*text_day_prev)+"</a> | ";
-    "<a href=\""+ehtml($.prev_url)+"\">"+ehtml($*text_day_next)+"</a>\n</div>";
+    "<a href=\""+ehtml($.next_url)+"\">"+ehtml($*text_day_next)+"</a>\n</div>";
 
 }
 

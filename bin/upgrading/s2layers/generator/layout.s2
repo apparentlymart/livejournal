@@ -375,3 +375,57 @@ function CalendarPageWeek::print () {
     "</tr>";
 }
 
+function DayPage::print_body() {
+
+    """<table cellpadding="2" cellspacing="0" border="0" summary="">
+<tr><td bgcolor="$*stronger_back" align="center">
+<table cellpadding="5" cellspacing="0" border="0" summary="">
+<tr><td bgcolor="$*page_back">""";
+
+    if ($.has_entries) {
+        print $.date->date_format("long");
+    } else {
+        print ehtml($*text_noentries_day);
+    }
+
+    """</td></tr></table></td></tr></table><p>""";
+
+    foreach var Entry e ($.entries) {
+        $this->print_entry($e);
+    }
+
+    var string tprev = ehtml($*text_day_prev);
+    var string tnext = ehtml($*text_day_next);
+    var string daylong = $.date->date_format("long");
+
+"""<table cellpadding="2" cellspacing="0" border="0" summary="">
+<tr><td bgcolor="$*stronger_back">
+<table cellpadding="3" cellspacing="0" border="0" summary="">
+<tr>
+<td align="center" class="index">navigation</td>
+</tr>
+<tr>
+<td bgcolor="$*page_back" align="center">
+<table cellspacing="0" cellpadding="0" border="0" summary="">
+<tr>
+<td class="meta">[</td>
+<td class="meta" align="right"><b>viewing</b></td>
+<td class="meta" align="center">|</td>
+<td class="meta">$daylong</td>
+<td class="meta">]</td>
+</tr>
+
+<tr>
+<td class="meta">[</td>
+<td class="meta" align="right"><b>go</b></td>
+<td class="meta" align="center">|</td>
+<td class="meta"><a href="$.prev_url">$tprev</a>|<a href="$.next_url">$tnext</a></td>
+<td class="meta">]</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</table>""";
+
+}
