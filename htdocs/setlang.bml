@@ -39,14 +39,11 @@ body<=
 
     $ret .= "<?_ml .select _ml?><form method='post' action='setlang.bml'>";
 
-    my @langs = ("en");
-    @langs = @LJ::LANGS if @LJ::LANGS;
-
     $ret .= "<table cellpadding='10'><tr valign='top' align='left'><td>";
     my $ct = 0;
-    my $switch = @langs / 2;
+    my $switch = @LJ::LANGS / 2;
     
-    foreach my $code (@langs) {
+    foreach my $code (@LJ::LANGS) {
         my $l = LJ::Lang::get_lang($code);
         my $checked = $code eq $curr ? "checked='checked'" : "";
         my $item = "langname.$code";

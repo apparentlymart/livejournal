@@ -24,6 +24,9 @@
 
     $UNICODE = 1 unless defined $UNICODE;
 
+    @LANGS = ("en") unless @LANGS;
+    $DEFAULT_LANG ||= $LANGS[0];
+
     $SITENAMESHORT = "LiveJournal";
     $SITENAMEABBREV = "LJ";
 
@@ -68,7 +71,7 @@
                                     [ 'login', '', ],
                                     ],
                           };
-
+    
    
     $MAX_HINTS_LASTN ||= 100;
     $MAX_SCROLLBACK_FRIENDS ||= 1000;
