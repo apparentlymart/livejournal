@@ -143,6 +143,9 @@ body<=
         if $parpost->{'state'} eq "S" 
         and not LJ::Talk::can_unscreen($dbr, $remote, $u, $up, $ur->{'user'});
 
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_deleted'} p?>"
+        if $parpost->{'state'} eq "D";
+    
     # don't allow anonymous comments on syndicated items
     if ($u->{'journaltype'} eq "Y" && $u->{'opt_whocanreply'} eq "all") {
         $u->{'opt_whocanreply'} = "reg";

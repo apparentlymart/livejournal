@@ -1807,6 +1807,8 @@ if you would like to screen, unscreen, or delete the comments.
 
 /talkpost.bml.error.noreplypost=Replyto post not found (deleted?)
 
+/talkpost.bml.error.noreply_deleted=This comment had been deleted. You cannot reply to it.
+
 /talkpost.bml.error.noreply_screened=This comment is screened and you have no permissions to see it or reply to it.
 
 /talkpost.bml.label.picturetouse= <a href='/allpics.bml?user=[[username]]'>Picture</a> to use: 
@@ -2248,6 +2250,8 @@ This could be because: <ol>
 /update.bml.update.success=Update successful.  You may view your updated journal <a href="[[uri]]">here</a>.
 
 /update.bml.updating=Updating journal...
+
+/uploadpic.bml.error.unsupportedtype=Files of type [[filetype]] are not supported.  You can only upload GIF, PNG or JPG files.  Nearly all image/photo programs can do this conversion for you.
 
 /userinfo.bml.about.comm=About:
 
