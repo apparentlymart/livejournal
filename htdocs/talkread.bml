@@ -69,11 +69,6 @@ body<=
 
    function submitform()
    {
-        var subject = document.getElementById('subject');
-        if (subject.value == 'Re: ' || subject.value == 'Re:') {
-            subject.value = '';
-        }
-
         var submit = document.getElementById('submitpost');
         submit.disabled = true;
 
@@ -527,7 +522,7 @@ body<=
                  my $pid = int($dtid / 256);
                  my $basesubject = $post->{'subject'};
                  $basesubject =~ s/^(Re:\s*)*//i;
-                 $basesubject = "Re: $basesubject";
+                 $basesubject = "Re: $basesubject" if $basesubject;
                  $basesubject = LJ::ejs($basesubject);
 
                  my $onclick = "return quickreply($dtid, $pid, '$basesubject')";
@@ -610,15 +605,47 @@ body<=
              $ret .= "<div id='qrdiv' name='qrdiv' style='display:none;'>";
              $ret .= "<table style='border: 1px solid black'>";
              $ret .= "<tr valign='center'>";
-             $ret .= "<td align='right'>";
+             $ret .= "<td align='right'><b>$ML{'/talkpost.bml.opt.from'}:</b></td><td>";
              $ret .= LJ::ljuser($remote->{'user'});
-             $ret .= ":</td><td colspan='4'>";
+             $ret .= "</td><td align='center'>";
+
+             my %res;
+             if ($remote) {
+                 LJ::do_request({ "mode" => "login",
+                                  "ver" => ($LJ::UNICODE ? "1" : "0"),
+                                  "user" => $remote->{'user'},
+                                  "getpickws" => 1,
+                              }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
+               }
+             if ($res{'pickw_count'}) {
+                 $ret .= BML::ml('/talkpost.bml.label.picturetouse',{'username'=>$remote->{'user'}});
+                 my @pics;
+                 for (my $i=1; $i<=$res{'pickw_count'}; $i++) {
+                     push @pics, $res{"pickw_$i"};
+                 }
+                 @pics = sort { lc($a) cmp lc($b) } @pics;
+                 $ret .= LJ::html_select({'name' => 'prop_picture_keyword',
+                                          'selected' => $GET{'prop_picture_keyword'}, },
+                                         ("", $BML::ML{'/talkpost.bml.opt.defpic'}, map { ($_, $_) } @pics));
+                 $ret .= LJ::help_icon("userpics", " ");
+             }
+             $ret .= "</td></tr>";
+
+             $ret .= "<tr><td align='right'>";
+             $ret .= "<b>$ML{'/talkpost.bml.opt.subject'}:</b></td>";
+             $ret .= "<td colspan='2'>";
              $ret .= "<input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value='' />";
              $ret .= "</td></tr>";
-             $ret .= "<tr valign='top'><td align='right'>Message:</td><td colspan='4' style='width: 90%'>";
+
+             $ret .= "<tr valign='top'>";
+             $ret .= "<td align='right'><b>$ML{'/talkpost.bml.opt.message'}:</b></td>";
+             $ret .= "<td colspan='3' style='width: 90%'>";
 
              $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='body' style='width: 100%'></textarea>";
-             $ret .= "<br />";
+             $ret .= "</td></tr>";
+
+             $ret .= "<tr><td>&nbsp;</td>";
+             $ret .= "<td colspan='3'>";
 
              $ret .= LJ::html_submit('submitpost', $ML{'.button.post'},
                                      { "id" => "submitpost",
@@ -629,6 +656,10 @@ body<=
                                                 { "id" => "submitmoreopts",
                                                   "raw" => "onclick='if (moreopts()) {submitform();}'"
                                                   });
+             if ($LJ::SPELLER) {
+                 $ret .= "&nbsp;<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>$ML{'.qr.spellcheck'}</label>";
+             }
+
              $ret .= "</td></tr></table>";
              $ret .= "</div>";
 

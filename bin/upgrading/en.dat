@@ -3199,6 +3199,8 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkread.bml.title=Read Comments
 
+/talkread.bml.qr.spellcheck=Check spelling and preview
+
 /talkscreen.bml.error.login=You must be logged in to work with screened comments.
 
 /talkscreen.bml.error.privs.freeze=You do not have permission to freeze this thread.

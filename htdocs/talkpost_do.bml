@@ -41,7 +41,7 @@ body<=
 
     ## preview
     # ignore errors for previewing
-    if ($POST{'submitpreview'}) {
+    if ($POST{'submitpreview'} || ($POST{'qr'} && $POST{'do_spellcheck'})) {
         my $cookie_auth;
         $cookie_auth = 1 if $POST{usertype} eq "cookieuser";
         my $talkurl = LJ::journal_base($journalu) . "/$POST{itemid}.html";
