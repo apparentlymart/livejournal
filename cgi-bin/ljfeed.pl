@@ -386,7 +386,7 @@ sub create_view_foaf {
     # channel attributes
     $ret .= ($comm ? "  <foaf:Group>\n" : "  <foaf:Person>\n");
     $ret .= "    <foaf:nick>$u->{user}</foaf:nick>\n";
-    if ($u->{bdate} && $u->{bdate} ne "0000-00-00" && !$comm) {
+    if ($u->{bdate} && $u->{bdate} ne "0000-00-00" && !$comm && $u->{allow_infoshow} eq 'Y') {
         my $bdate = $u->{bdate};
         $bdate =~ s/^0000-//;
         $ret .= "    <foaf:dateOfBirth>$bdate</foaf:dateOfBirth>\n";
@@ -402,7 +402,7 @@ sub create_view_foaf {
     # we want to bail out if they have an external foaf file, because 
     # we want them to be able to provide their own information. 
     if ($u->{external_foaf_url}) {
-        $ret .= "    <rdfs:seeAlso rdf:resource=\"" . LJ::eurl($u->{external_foaf_url}) . "\">\n";
+        $ret .= "    <rdfs:seeAlso rdf:resource=\"" . LJ::eurl($u->{external_foaf_url}) . "\" />\n";
         $ret .= ($comm ? "  </foaf:Group>\n" : "  </foaf:Person>\n");
         $ret .= "</rdf:RDF>\n";
         return $ret;
