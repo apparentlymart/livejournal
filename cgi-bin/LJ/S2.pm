@@ -1229,6 +1229,7 @@ sub UserLite
     my ($u) = @_;
     my $o = {
         '_type' => 'UserLite',
+        '_userid' => $u->{'userid'},
         'username' => $u->{'user'},
         'name' => LJ::ehtml($u->{'name'}),
         'journal_type' => $u->{'journaltype'},
@@ -1923,6 +1924,11 @@ sub ItemRange__url_of
     return $this->{'_url_of'}->($n+0);
 }
 
+sub UserLite__equals
+{
+    return $_[1]->{'_userid'} == $_[2]->{'_userid'};
+}
+*User__equals = \&UserLite__equals;
 
 sub string__substr
 {

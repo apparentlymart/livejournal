@@ -218,6 +218,7 @@ class UserLite
     var readonly string name "User's formatted name, ex: John Q. Public";
     var readonly string journal_type "Type of account: P (personal), C (community), Y (syndicated), S (shared), etc";
 
+    function builtin equals(UserLite u) : bool "Returns true if the two user objects refer to the same user. Use this rather than comparing usernames, since usernames aren't globally unique.";
     function base_url () : string "Returns URL of user's journal.";
     function as_string() : string;
     function print ();
