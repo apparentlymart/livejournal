@@ -483,6 +483,7 @@ $box{'login'} =
 			      'url' => '/login.bml', });
 
 	$$b .= "<form method='post' action='/login.bml'>";
+	$$b .= "<input type='hidden' name='mode' value='login'>";
 	$$b .= "<table><tr><td align=left>";
 	$$b .= "<b>Username:</b><br><input name=user size=14 maxlength=15><br> ";
 	$$b .= "<b>Password:</b><br><input name=password type=password size=14><br>";
