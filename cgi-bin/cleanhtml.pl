@@ -345,7 +345,7 @@ sub clean
             } 
 
             if ($auto_format) {
-                $token->[1] =~ s/(\r)?\n/<br>/g;
+                $token->[1] =~ s/(\r)?\n/<br \/>/g;
                 if (! $opencount{'a'}) {
                     $token->[1] =~ s/&url(\d+);/<a href=\"$url{$1}\">$url{$1}<\/a>/g;
                 }
