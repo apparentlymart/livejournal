@@ -39,6 +39,19 @@ LiveJournal programming/style guidelines.
   -- all files should have <LJDEP> edge dependency somewhere, usually
      at the bottom.
 
+  -- all patches sent in should be in diff -u format
+
+  -- using userids (integers) for things is better than using
+     users (strings), except in URL arguments, where pretty
+     is more important than speed.
+
+  -- in BML page, use BML blocks defined in global.look: 
+        LJUSER, P, H1, H2, STANDOUT, HR, etc...
+
+  -- don't send in patches that comment out old code.  if
+     we want the old code, we'll go get it from CVS.. that's
+     what it's for.
+
 
 [ FUTURE - low priority now, higher later ]
 
