@@ -937,6 +937,11 @@ sub xmlrpc_method {
             ->faultcode(202);
     }
     my $error = 0;
+    foreach my $key ('subject', 'event') {
+        # get rid of the UTF8 flag in scalars
+        $req->{$key} = pack('C*', unpack('C*', $req->{$key}))
+            if $req->{$key};
+    }
     my $res = LJ::Protocol::do_request($method, $req, \$error);
     if ($error) {
         die SOAP::Fault
