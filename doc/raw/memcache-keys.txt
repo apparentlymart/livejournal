@@ -8,13 +8,13 @@
 <uid> talksubject:<cid>:<uid>:<jtalkid> == scalar
 <uid> talkbody:<cid>:<uid>:<jtalkid> == scalar
 <uid> talk2:<uid>:<nodetype>:<nodeid> == packed data
-<uid> talk2ct:<uid> == rows for user
-<uid> talkleftct:<uid> == rows for user
+<uid> talk2ct:<uid> == # rows for user
+<uid> talkleftct:<uid> == # rows for user
 
 <uid> logtext:<cid>:<uid>:<jitemid> == [ subject, text ]
 <uid> logprop:<uid>:<jitemid> == { propname => $value, ... }
 <uid> log2:<uid>:<jitemid> == packed data
-<uid> log2ct:<uid> == rows for user
+<uid> log2ct:<uid> == # of rows for user
 <uid> log2lt:<uid> == packed data: array of recent log2 entries in rlogtime order, last 2 weeks by default
 <uid> rp:<uid>:<jitemid> == scalar, the replycount value 
 
@@ -33,12 +33,12 @@
 
 <uid> checkfriends:<uid>:<mask> == scalar maxupdate, expires after refresh interval
 <uid> frgmask:<uid>:<uid_friend>  -- scalar numeric mask, 15 minutes
-<uid> fgrp:<uid> == friendgroup rows for a given user
-<uid> friends:<uid> == packed friends rows for a user
+<uid> fgrp:<uid> == packed data, friendgroup rows for a given user
+<uid> friends:<uid> == packed data, friends rows for a user
 <uid> tu:<uid> == unixtime when user last updated
       popsyn == 100 most read syndicated accounts [user, userid, synurl, numreaders], 1 hour
 
-<uid> upicinfo:<uid> == packed data
+<uid> upicinf:<uid> == packed data, userpic keywords
 
       rate_eperr:<email_address> == rate limiting errors sent via email for email gateway
       rate:tracked:<userid> == cluster tracking on login, posts, and comments
