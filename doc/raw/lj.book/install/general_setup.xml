@@ -103,8 +103,9 @@
       </para>
         <screen><prompt>$</prompt> <userinput>mkdir $LJHOME/cvs</userinput>
 <prompt>$</prompt> <userinput>cd $LJHOME/cvs</userinput>
-<prompt>$</prompt> <userinput>cvs -z3 -d:pserver:anonymous@danga.com:/home/cvslj co livejournal</userinput>
-<prompt>$</prompt> <userinput>livejournal/bin/cvsreport.pl -c -s</userinput></screen>
+<prompt>$</prompt> <userinput>cvs -z3 -d:pserver:anonymous@cvs.livejournal.org:/home/cvslj co livejournal</userinput>
+<prompt>$</prompt> <userinput>cvs -z3 -d:pserver:anonymous@danga.com:/home/cvspub co wcmtools bml</userinput>
+<prompt>$</prompt> <userinput>wcmtools/bin/multicvs.pl --conf=livejournal/cvs/multicvs.conf --init</userinput></screen>
       <para>
         That last command will copy everything from the CVS directory
         over to <literal>$LJHOME</literal>, the live area.
