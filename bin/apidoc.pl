@@ -12,14 +12,18 @@ my $opt_warn = 0;
 my $opt_file;
 my $opt_stubs = 0;  # generate stubs of undoced funcs
 my $opt_class = 0;  # group by class
+my ($opt_include, $opt_exclude);  # which packages to inc/excl
 die unless GetOptions(
-           'warn' => \$opt_warn,
-           'file=s' => \$opt_file,
-           'stubs' => \$opt_stubs,
-           'class' => \$opt_class,
+                      'warn' => \$opt_warn,
+                      'file=s' => \$opt_file,
+                      'stubs' => \$opt_stubs,
+                      'class' => \$opt_class,
+                      'include=s' => \$opt_include,
+                      'exclude=s' => \$opt_exclude,                      
            );
 
 die "Unknown arguments.\n" if @ARGV;
+die "Can't exclude and include at same time!\n" if $opt_include && $opt_exclude;
 
 unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
@@ -158,7 +162,14 @@ sub check_file
             $prefix = "";
             $curkey = "";
             $contlen = 0;
-            if ($f->{'name'}) {
+            my $include = 0;
+            if ($opt_exclude) {
+                $include = 1;
+                $include = 0 if $f->{'name'} =~ /^$opt_exclude/;
+            } elsif ($opt_include) {
+                $include = 1 if $f->{'name'} =~ /^$opt_include/;
+            }
+            if ($f->{'name'} && $include) {
                 $f->{'source'} = $file;
                 $f->{'class'} ||= "general";
                 unless ($classname{$f->{'class'}}) {
