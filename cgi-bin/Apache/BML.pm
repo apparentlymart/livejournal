@@ -690,7 +690,7 @@ sub split_vars
 sub parsein
 {
     my ($data, $hashref) = @_;
-    $data =~ s/%%(\w+)%%/$hashref->{$1}/eg;
+    $data =~ s/%%(\w+)%%/$hashref->{uc($1)}/eg;
     return $data;
 }
 
