@@ -35,22 +35,18 @@ body<=
     $r->notes("journalid" => $u->{'userid'});
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
-    my $dbcs = LJ::get_cluster_set($u);
-    my $dbcm = $dbcs->{'dbh'};
-    my $dbcr = $dbcs->{'reader'};
+    my $dbcm = LJ::get_cluster_master($u);
 
-    return $ML{'error.nodb'} unless $dbcr;
     return $LJ::MSG_READONLY_USER if $LJ::CLUSTER_DOWN{0} || ! $dbcm;
 
     # redirect if account was renamed
     if ($u->{'journaltype'} eq "R") {
         LJ::load_user_props($u, "renamedto");
-          if ($u->{'renamedto'} ne "") {
-              my $id = $FORM{'itemid'}+0;
-              return BML::redirect("$LJ::SITEROOT/talkpost.bml?journal=$u->{'renamedto'}&itemid=$id");
-          }
-      }
-
+        if ($u->{'renamedto'} ne "") {
+            my $id = $FORM{'itemid'}+0;
+            return BML::redirect("$LJ::SITEROOT/talkpost.bml?journal=$u->{'renamedto'}&itemid=$id");
+        }
+    }
 
     my $ret = "";
 
@@ -61,11 +57,16 @@ body<=
     {
         my $qparentid = $init->{'replyto'};
 
+        my $parpost;
         my $sql = "SELECT t.posterid, t.nodetype, t.nodeid AS 'itemid', ".
             "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(t.datepost) AS 'secondsold', ".
             "t.state, l.anum FROM talk2 t, log2 l WHERE l.journalid=$u->{'userid'} AND ".
             "l.jitemid=t.nodeid AND t.journalid=$u->{'userid'} AND t.jtalkid=$qparentid";
-        $parpost = LJ::dbs_selectrow_hashref($dbcs, $sql);
+        foreach my $pass (1, 2) {
+            my $db = $pass == 1 ? LJ::get_cluster_reader($u) : $dbcm;
+            $parpost = $db->selectrow_hashref($sql);
+            last if $parpost;
+        }
         return $ML{'.error.noreplypost'} unless $parpost;
         
         unless ($parpost->{'nodetype'} eq "L" && $parpost->{'itemid'}) {

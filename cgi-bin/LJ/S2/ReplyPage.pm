@@ -34,11 +34,16 @@ sub ReplyPage
             $opts->{'handler_return'} = 404;
             return;
         }
-        my $dbcs = LJ::get_cluster_set($u);
+
+        my $parpost;
         my $sql = "SELECT jtalkid, posterid, state, datepost FROM talk2 ".
             "WHERE journalid=$u->{'userid'} AND jtalkid=$re_talkid ".
             "AND nodetype='L' AND nodeid=$entry->{'jitemid'}";
-        $parpost = LJ::dbs_selectrow_hashref($dbcs, $sql);
+        foreach my $pass (1, 2) {
+            my $db = $pass == 1 ? LJ::get_cluster_reader($u) : LJ::get_cluster_master($u);
+            $parpost = $db->selectrow_hashref($sql);
+            last if $parpost;
+        }
         unless ($parpost) {
             $opts->{'handler_return'} = 404;
             return;

@@ -4167,41 +4167,6 @@ sub decode_url_string
     return 1;
 }
 
-# <LJFUNC>
-# name: LJ::get_dbs
-# des: Returns a set of database handles to master and a slave,
-#      if this site is using slave databases.  Only use this
-#      once per connection and pass around the same $dbs, since
-#      this function calls [func[LJ::get_dbh]] which uses cached
-#      connections, but validates the connection is still live.
-# returns: $dbs (see [func[LJ::make_dbs]])
-# </LJFUNC>
-sub get_dbs
-{
-    if ($LJ::DEBUG{'get_dbs'}) {
-        my $errmsg = "sloppy use of LJ::get_dbs() ?\n";
-        my $i = 0;
-        while (my ($p, $f, $l) = caller($i++)) {
-            next if $i > 3;
-            $errmsg .= "  $p, $f, $l\n";
-        }
-        warn $errmsg;
-    }
-    return $LJ::REQ_CACHE_DBS{0} if $LJ::REQ_CACHE_DBS{0};
-
-    my $dbh = LJ::get_dbh("master");
-    my $dbr = LJ::get_dbh("slave");
-
-    # check to see if fdsns of connections we just got match.  if
-    # slave ends up being master, we want to pretend we just have no
-    # slave (avoids some queries being run twice on master).  this is
-    # common when somebody sets up a master and 2 slaves, but has the
-    # master doing 1 of the 3 configured slave roles
-    $dbr = undef if $LJ::DBIRole->same_cached_handle("slave", "master");
-
-    return $LJ::REQ_CACHE_DBS{0} = make_dbs($dbh, $dbr);
-}
-
 sub get_db_reader {
     return LJ::get_dbh("slave", "master");
 }
@@ -4240,33 +4205,6 @@ sub get_cluster_master
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
     my $role = "cluster${id}";
     return LJ::get_dbh($role);
-}
-
-# <LJFUNC>
-# name: LJ::get_cluster_set
-# class: db
-# des: Returns a dbset structure for a user's db clusters.
-# args: uarg
-# des-uarg: Either a userid scalar or a user object.
-# returns: dbset.
-# </LJFUNC>
-sub get_cluster_set
-{
-    my $arg = shift;
-    my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
-    return $LJ::REQ_CACHE_DBS{$id} if $LJ::REQ_CACHE_DBS{$id};
-    my $dbs = {};
-    $dbs->{'dbh'} = LJ::get_dbh("cluster${id}");
-    $dbs->{'dbr'} = LJ::get_dbh("cluster${id}slave");
-
-    # see note in LJ::get_dbs about why we do this:
-    $dbs->{'dbr'} = undef
-        if $LJ::DBIRole->same_cached_handle("cluster${id}", "cluster${id}slave");
-
-    $dbs->{'has_slave'} = defined $dbs->{'dbr'};
-    $dbs->{'reader'} = $dbs->{'has_slave'} ? $dbs->{'dbr'} : $dbs->{'dbh'};
-    bless $dbs, "LJ::DBSet";
-    return $LJ::REQ_CACHE_DBS{$id} = $dbs;
 }
 
 # <LJFUNC>
@@ -6590,11 +6528,8 @@ sub kill_all_sessions
 {
     my $u = shift;
     return 0 unless $u;
-    my $udbs = LJ::get_cluster_set($u);
-    my $udbh = $udbs->{'dbh'};
-    my $udbr = $udbs->{'reader'};
-
-    my $sessions = $udbr->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
+    my $udbh = LJ::get_cluster_master($u);
+    my $sessions = $udbh->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
 					     "userid=$u->{'userid'}");
     LJ::kill_sessions($udbh, $u->{'userid'}, @$sessions) if @$sessions;
 }

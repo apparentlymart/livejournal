@@ -41,9 +41,7 @@
     $body .= "<blockquote><input type='submit' value='$ML{'.logout.btn'}'></blockquote> p?></form>";
 
     # do they have any other sessions?
-
-    my $udbs = LJ::get_cluster_set($u);
-    my $udbr = $udbs->{'reader'};
+    my $udbr = LJ::get_cluster_reader($u);
 
     my $curid = $u->{'_session'}->{'sessid'} || 0;
 
