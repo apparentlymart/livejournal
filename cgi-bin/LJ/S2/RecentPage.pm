@@ -175,6 +175,8 @@ sub RecentPage
 
     } # end huge while loop
 
+    # mark last entry as closing.
+    $p->{'entries'}->[-1]->{'end_day'} = 1 if $itemnum;
 
     #### make the skip links
     my $nav = {
