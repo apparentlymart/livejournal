@@ -334,6 +334,9 @@ if ($uri =~ m!/(\d+)\.html$!) {
      push @{$children{$post->{'parenttalkid'}}}, $post->{'talkid'};
  }
 
+ # with a wrong thread number, silently default to the whole page
+ $thread = 0 unless $posts{$thread};
+
  # we let the page size initially get bigger than normal for awhile,
  # but if it passes threading_point, then everything's in page_size
  # chunks:
