@@ -14,6 +14,10 @@
 {
     package LJ;
 
+    ###
+    ### Site Information
+    ###
+
     $HOME = $ENV{'LJHOME'};
     $HTDOCS = "$HOME/htdocs";
     $BIN = "$HOME/bin";
@@ -26,29 +30,18 @@
     $SITENAMESHORT = "YourSite";
     $SITENAMEABBREV = "YS";
     
-    ## turn $SERVER_DOWN on while you do any maintenance
-    $SERVER_DOWN = 0;
-    $SERVER_DOWN_SUBJECT = "Maintenance";
-    $SERVER_DOWN_MESSAGE = "$SITENAME is down right now while we upgrade.  It should be up in a few minutes.";
-
     # the base domain of your site.
-    # CHANGE THIS.
+    # CHANGE THIS
     $DOMAIN = "ljsite.com"; 
 
     # this is what gets prepended to all URLs 
     $SITEROOT = "http://www.$DOMAIN";
 
+    # prefix for images
     $IMGPREFIX = "$SITEROOT/img";
-  
+    
     # set this if you're running an FTP server that mirrors your htdocs/files
-    # $FTPPREFIX = "ftp://ftp.$DOMAIN";  
-
-    # path to sendmail and any necessary options
-    $SENDMAIL = "/usr/sbin/sendmail -t";
-
-    # command-line to spell checker, or undefined if you don't want spell checking
-    # $SPELLER = "/usr/local/bin/ispell -a";
-    # $SPELLER = "/usr/local/bin/aspell pipe --sug-mode=fast --ignore-case";
+    #$FTPPREFIX = "ftp://ftp.$DOMAIN";  
 
     # where we set the cookies (note the period before the domain)
     # can be one value or an array ref (to accomodate certain old
@@ -61,107 +54,195 @@
     $SUPPORT_EMAIL = "support\@$DOMAIN";
     $BOGUS_EMAIL = "lj_dontreply\@$DOMAIN";
 
-    # Support URLs of the form http://username.yoursite.com/ ? 
-    # If so, what's the part after "username." ?
-    $USER_VHOSTS = 1;
-    $USER_DOMAIN = $DOMAIN;
-  
-    # schemes available to users.
-    # schemes will be displayed according to their order in the array,
-    # but the first item in the array is the default scheme
-    # 'title' is the printed name, while 'scheme' is the scheme name.
-    #@LJ::SCHEMES = (
-    #                { scheme => 'lynx', title => 'Lynx',
-    #                  thumb  => [ 'schemethumb/lynx.png', 200, 166 ]},
-    #                { scheme => 'bluewhite', title => 'Blue White' },
-    #               );
-
-    # initial friends for new accounts.
-    # leave undefined if you don't want to use it.
-    #@INITIAL_FRIENDS = qw(news);
-
     # news site support. if set, that journal loads on the main page.
     #$FRONTPAGE_JOURNAL = "news";
 
-    # do paid users get email addresses?  username@$USER_DOMAIN ?
-    # (requires additional mail system configuration)
-    $USER_EMAIL  = 0;
+    # if you define these, little help bubbles appear next to common
+    # widgets to the URL you define:
+    %HELPURL = (
+                #"accounttype" => "",
+                #"renaming"            => "$SITEROOT/support/faqbrowse.bml?faqid=25",
+                #"security"            => "$SITEROOT/support/faqbrowse.bml?faqid=24",
+                #"noautoformat"        => "$SITEROOT/support/faqbrowse.bml?faqid=26",
+                #"userpics"            => "$SITEROOT/support/faqbrowse.bml?faqid=46",
+                #"iplogging"           => "$SITEROOT/support/faqbrowse.bml?faqid=66",
+                #"s2propoff"           => '$SITEROOT/support/faqbrowse.bml?faqid=145',
+                #"userpic_inactive"    => "$SITEROOT/support/faqbrowse.bml?faqid=46",
+                #"textmessaging_about" => "$SITEROOT/support/faqbrowse.bml?faqid=30",
+                #"linklist_support"    => "$SITEROOT/manage/links.bml",
+                );
 
-    # directory optimizations
-    $DIR_DB = "";   # by default, hit the main database (bad for big sites!)
 
-    # DB role to use when connecting to directory DB   
-    $DIR_DB_HOST = "master";
 
-    # database info.  only the master is necessary.  
-    # you should probably CHANGE THIS
-    %DBINFO = (
-           'master' => {  # master must be named 'master'
-               'host' => "localhost",
-               'port' => 3306,
-               'user' => 'lj',
-               'pass' => 'ljpass',
-               'role' => {
-                   'cluster1' => 1,
+    ###
+    ### Policy Options
+    ###
 
-                   # optionally, apache write its access logs to a mysql database
-                   #logs => 1,
-               },
-           },
-           # example of a TCP-based DB connection
-           #'somehostname' => {
-           #    'host' => "somehost",
-           #    'port' => 1234,
-           #    'user' => 'username',
-           #    'pass' => 'password',
-           #},
-           # example of a UNIX domain-socket DB connection
-           #'otherhost' => {
-           #    'sock' => "$LJ::HOME/var/mysqld.sock",
-           #    'user' => 'username',
-           #    'pass' => 'password',
-           #},
-           );
+    $COPPA_CHECK = 1;   # require users to be 13+
+    $TOS_CHECK = 1;     # require users to agree to TOS
+    #$UNIQ_COOKIES = 1; # give users uniq cookies to help fight abuse
 
-    # if database logging is enabled above, should we log images or just page requests?
-    #$DONT_LOG_IMAGES = 1;
+    # filter comments for spam using this list of regular expressions:
+    #@TALKSPAM = (
+    #             "morphese",
+    #             );
 
-    # list of all clusters - each one needs a 'cluster$i' role in %DBINFO
-    @CLUSTERS = (1);    # eg: (1, 2, 3) (for scalability)
+    # require new free acounts to be referred by an existing user?
+    # NOTE: mostly ljcom-specific.  some features unimplemented in 
+    # the livejournal-only tree.
+    #$USE_ACCT_CODES = 1;
 
-    # which cluster(s) get new users?
-    # if it's an arrayref, choose one of the listed clusters at random.
-    $DEFAULT_CLUSTER = 1;
+    #$EVERYONE_PAID  = 1; # are all users paid by default?
+    #$EVERYONE_VALID = 1; # are all users validated by default?
 
-    # can users choose which cluster they're assigned to?  leave this off.
-    $ALLOW_CLUSTER_SELECT = 0; 
 
-    # list of regular expressions matching usernames that people can't have.
-    @PROTECTED_USERNAMES = ("^ex_", "^lj_");
-    
+    ###
+    ### System Information
+    ###
+
+    # on a larger installation, it's useful to have multiple qbufferd.pl
+    # processes, one for each command type.  this is unecessary on a 
+    # small installation.  you can also specify a delay between runs.
+    #@QBUFFERD_ISOLATE = ('weblogscom', 'ljcom_newpost');
+    #$QBUFFERD_DELAY   = 10;
+
+    # MemCache information, if you have MemCache servers running
+    #@MEMCACHE_SERVERS = ('hostname:port');
+    #$MEMCACHE_COMPRESS_THRESHOLD = 1_000; # bytes
+
+    # path to sendmail and any necessary options
+    $SENDMAIL = "/usr/sbin/sendmail -t";
+
+    # command-line to spell checker, or undefined if you don't want spell checking
+    #$SPELLER = "/usr/local/bin/ispell -a";
+    #$SPELLER = "/usr/local/bin/aspell pipe --sug-mode=fast --ignore-case";
+
+    # to save bandwidth, should we compress pages before they go out?
+    # require Compress::Zlib to be installed
+    #$DO_GZIP = 1;
+
     # HINTS:
     #   how far you can scroll back on lastn and friends pages.
     #   big performance implications if you make these too high.
     #   also, once you lower them, increasing them won't change anything
     #   until there are new posts numbering the difference you increased 
     #   it by.
-
     $MAX_HINTS_LASTN = 100;
     $MAX_SCROLLBACK_LASTN = 400;
 
-    # should users be given unique identifiers?  helpful for dealing with abuse.
-    #$UNIQ_COOKIES = 1;
+    # do paid users get email addresses?  username@$USER_DOMAIN ?
+    # (requires additional mail system configuration)
+    #$USER_EMAIL  = 1;
 
-    # which users' s2 layers should always run trusted un-cleaned?
-    #%S2_TRUSTED = ( '2' => 'whitaker' ); # userid => username
+    # Support URLs of the form http://username.yoursite.com/ ? 
+    # If so, what's the part after "username." ?
+    #$USER_VHOSTS = 1;
+    #$USER_DOMAIN = $DOMAIN;
 
-    # on a larger installation, it's useful to have multiple qbufferd.pl processes,
-    # one for each command type.  this is optional.
-    #@LJ::QBUFFERD_ISOLATE = ('weblogscom', 'ljcom_newpost');
+    # Allow users to point their own domains here?
+    #OTHER_VHOSTS = 1;
 
-    # MemCache information
-    #@LJ::MEMCACHE_SERVERS = ('hostname:port');
-    #$LJ::MEMCACHE_COMPRESS_THRESHOLD = 1_000; # bytes
+    # turns these from 0 to 1 to disable parts of the site that are
+    # CPU & database intensive or that you simply don't want to use
+    %DISABLED = (
+                 'interests-findsim' => 0,
+                 'directory' => 0,
+                 'stats-recentupdates' => 0,
+                 'stats-newjournals' => 0,
+                 'show-talkleft' => 0,
+                 'memories' => 0,
+                 'topicdir' => 0,
+                 'tellafriend' => 0,
+                 );
+
+    # turn $SERVER_DOWN on while you do any maintenance
+    $SERVER_TOTALLY_DOWN = 0;
+    $SERVER_DOWN = 0;
+    $SERVER_DOWN_SUBJECT = "Maintenance";
+    $SERVER_DOWN_MESSAGE = "$SITENAME is down right now while we upgrade.  It should be up in a few minutes.";
+    $MSG_READONLY_USER   = "This journal is in read-only mode right now while database maintenance is performed " .
+                           "on the server where the journal is located.  Try again in several minutes.";
+    $MSG_NO_POST    = "Due to hardware maintenance, you cannot post at this time.  Watch the news page for updates.";
+    $MSG_NO_COMMENT = "Due to hardware maintenance, you cannot leave comments at this time.  Watch the news " .
+                      "page for updates.";
+
+  
+    ###
+    ### Lanaguage / Scheme support
+    ###
+
+    # schemes available to users.
+    # schemes will be displayed according to their order in the array,
+    # but the first item in the array is the default scheme
+    # 'title' is the printed name, while 'scheme' is the scheme name.
+    @SCHEMES = (
+                { scheme => 'lynx', title => 'Lynx',
+                  #thumb  => [ 'schemethumb/lynx.png', 200, 166 ]
+                  },
+                { scheme => 'bluewhite', title => 'Blue White' },
+               );
+
+    # supported languages
+    #@LANGS = qw(en_LJ en_GB de da es fr it ru ja pt eo he nl hu ga is fi nb sv pl zh lv tr ms);
+
+    # support unicode (posts in multiple languages)?  leave enabled.
+    $UNICODE = 1;
+
+
+    ###
+    ### Database Configuration
+    ###
+
+    # database info.  only the master is necessary.  
+    # you should probably CHANGE THIS
+    %DBINFO = (
+               'master' => {  # master must be named 'master'
+                   'host' => "localhost",
+                   'port' => 3306,
+                   'user' => 'lj',
+                   'pass' => 'ljpass',
+                   'role' => {
+                       'cluster1' => 1,
+
+                       # optionally, apache write its access logs to a mysql database
+                       #logs => 1,
+                   },
+               },
+               # example of a TCP-based DB connection
+               #'somehostname' => {
+               #    'host' => "somehost",
+               #    'port' => 1234,
+               #    'user' => 'username',
+               #    'pass' => 'password',
+               #},
+               # example of a UNIX domain-socket DB connection
+               #'otherhost' => {
+               #    'sock' => "$HOME/var/mysqld.sock",
+               #    'user' => 'username',
+               #    'pass' => 'password',
+               #},
+               );
+
+    # if database logging is enabled above, should we log images or just page requests?
+    #$DONT_LOG_IMAGES = 1;
+
+    # directory optimizations
+    $DIR_DB_HOST = "master";  # DB role to use when connecting to directory DB   
+    $DIR_DB = "";             # by default, hit the main database (bad for big sites!)
+    #$DIRECTORY_SEPARATE = 1; # don't let the directory use master databases
+
+    # list of all clusters - each one needs a 'cluster$i' role in %DBINFO
+    @CLUSTERS = (1);    # eg: (1, 2, 3) (for scalability)
+
+    # can users choose which cluster they're assigned to?  leave this off.
+    $ALLOW_CLUSTER_SELECT = 0; 
+
+    # which cluster(s) get new users?
+    # if it's an arrayref, choose one of the listed clusters at random.
+    $DEFAULT_CLUSTER = 1;
+
+    # which cluster should syndication accounts live on?
+    $SYND_CLUSTER = 1;
 
     # Only turn this on if you are using MySQL replication between
     # multiple databases and have one or more slaves set to not
@@ -174,44 +255,37 @@
     # database for journal text is the slowest part.
     $USE_RECENT_TABLES = 0;
 
-    # turns these from 0 to 1 to disable parts of the site that are
-    # CPU & database intensive or that you simply don't want to use
-    %DISABLED = (
-                 'interests-findsim' => 0,
-                 'directory' => 0,
-                 'stats-recentupdates' => 1,
-                 'stats-newjournals' => 0,
-                 'show-talkleft' => 0,
-                 'memories' => 0,
-                 'topicdir' => 0,
-                 'tellafriend' => 0,
-         );
 
-    # require new free acounts to be referred by an existing user?
-    # NOTE: new and mostly ljcom-specific.  some features
-    # unimplemented in the livejournal-only tree.
-    $USE_ACCT_CODES = 0;
+    ###
+    ### Account Information
+    ###
 
-    # if you define these, little help bubbles appear next to common
-    # widgets to the URL you define:
-    %HELPURL = (
-        #"accounttype" =>
-        #"",
-        #"security" => 
-        #"http://www.livejournal.com/support/faqbrowse.bml?faqid=24",
-        #"noautoformat" => 
-        #"http://www.livejournal.com/support/faqbrowse.bml?faqid=26",
-        #"userpics" =>
-        #"http://www.livejournal.com/support/faqbrowse.bml?faqid=46",
-        #"iplogging" =>
-        #"http://www.livejournal.com/support/faqbrowse.bml?faqid=66",
-        );
+    # initial friends for new accounts.
+    # leave undefined if you don't want to use it.
+    #@INITIAL_FRIENDS = qw(news);
 
-    # USER CAPABILITIES CLASSES:
-    {
-    # default capability class mask for new users: 
-    # (16 bit unsigned int ... each bit is capability class flag)
-    $NEWUSER_CAPS = 2;
+    # some system accounts have so many friends it is harmful to display
+    # them.  list these accounts here.
+    #%FORCE_EMPTY_FRIENDS = (
+    #                        '81752' => 'paidmembers'
+    #                        );
+
+    # list of regular expressions matching usernames that people can't have.
+    @PROTECTED_USERNAMES = ("^ex_", "^lj_");
+
+    # test accounts are special
+    @TESTACCTS = qw(test);
+
+    # props users should have by default
+    #%USERPROP_DEF = (
+    #                 's1_lastn_style' => 29,
+    #                 's1_friends_style' => 20,
+    #                 's1_calendar_style' => 2,
+    #                 's1_day_style' => 11,
+    #                 );
+
+
+    ### User Capabilities Classes:
 
     # default capability limits, used only when no other
     # class-specific limit below matches.
@@ -264,13 +338,73 @@
         # a capability class with a name of "_moveinprogress" is required
         # if you want to be able to move users between clusters with the 
         # provided tool.  further, this class must define 'readonly' => 1
-        '5' => { 
+            '5' => { 
             '_name' => '_moveinprogress',
             'readonly' => 1,
         },
-        );
-    }
-    
+       );
+
+    # default capability class mask for new users: 
+    # (16 bit unsigned int ... each bit is capability class flag)
+    $NEWUSER_CAPS = 2;
+
+
+    ### S1 style options
+
+    $SYN_LASTN_S1 = 1;      # lastn style to use for syndication accounts 
+    $DONT_TOUCH_STYLES = 0; # don't touch existing styles
+
+    $DEFAULT_STYLE = { 
+        'core' => 'core1',
+        'layout' => 'generator/layout',
+        'i18n' => 'generator/en',
+    };
+
+
+    ### S2 Style Options
+
+    # which users' s2 layers should always run trusted un-cleaned?
+    #%S2_TRUSTED = ( '2' => 'whitaker' ); # userid => username
+
+
+    ###
+    ### Portal Options
+    ###
+
+    # most of the portal options have sane default values, but if you
+    # need to override them, here's the format:
+
+    #@PORTAL_COLS = qw(main right moz);  # can also include left, if you want.
+    #$PORTAL_URI = "/portal/";           # either "/" or "/portal/"    
+
+    #$PORTAL_LOGGED_IN ||= {'main'   => [
+    #                                    [ 'newtolj', ''], 
+    #                                    [ 'update', 'mode=full'],
+    #                                    ],
+    #                       'right' => [ 
+    #                                    [ 'goat', '', ],
+    #                                    [ 'stats', '', ],
+    #                                    [ 'bdays', '', ],
+    #                                    [ 'memories', '', ],
+    #                                    [ 'popfaq', '', ],
+    #                                    ] };
+
+    #$PORTAL_LOGGED_OUT ||= {'main'  => [ 
+    #                                     [ 'newtolj', ''],
+    #                                     [ 'update', 'mode='],
+    #                                     ],
+    #                        'right' => [ 
+    #                                     [ 'goat', '', ],
+    #                                     [ 'login', '', ],
+    #                                     [ 'stats', '', ],
+    #                                     [ 'randuser', '', ],
+    #                                     [ 'popfaq', '', ],
+    #                                     ],
+    #                        'moz' => [
+    #                                  [ 'login', '', ],
+    #                                  ],
+    #                    };
+
 }
 
 1;  # return true
