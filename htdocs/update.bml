@@ -22,9 +22,11 @@
 
  my $spellcheck_html;
  if ($LJ::SPELLER && $FORM{'do_spellcheck'}) {
+     $FCGI && $FCGI->Detach();  # hack work around for perl5.6+fcgi bad interaction
      my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
 				  'color' => '(=HOTCOLOR=)', };
      $spellcheck_html = $s->check_html(\$FORM{'event'});
+     $FCGI && $FCGI->Attach();  # </hack>
  }
  if ($mode eq "update" && $FORM{'do_spellcheck'} && $spellcheck_html) { $mode = $FORM{'oldmode'}; }
 

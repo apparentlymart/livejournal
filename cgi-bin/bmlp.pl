@@ -48,7 +48,8 @@ sub reset_caches
 }
 
 use FCGI;
-while(($time_a = time()) && FCGI::accept() >= 0) 
+my $fcgi_req = FCGI::Request();
+while(($time_a = time()) && $fcgi_req->Accept() >= 0) 
 {
     $SERVING = 1;
     $time_b = time();
@@ -114,6 +115,7 @@ sub handle_request
     $FILE = $ENV{'PATH_TRANSLATED'};
     $most_recent_mod = "";
     %BMLCodeBlock::FORM = ();
+    $BMLCodeBlock::FCGI = $fcgi_req;
     %blockdata = ();
     %blockflags = ();
     $CONTENT_TYPE = "text/html";
