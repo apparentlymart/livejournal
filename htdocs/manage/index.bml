@@ -1,6 +1,10 @@
 <?page
 title=><?_ml .title _ml?>
 body<=
+<?_code
+    LJ::set_active_crumb('manage');
+    return;
+_code?>
 <?p <?_ml .about _ml?> p?>
 <?_code return LJ::get_remote() ? "" : "<?p <?de $ML{'.login'} de?> p?>"; _code?>
 
