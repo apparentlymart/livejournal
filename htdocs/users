@@ -202,7 +202,7 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
                 print "$hname: $_\n";
             }
         } else {
-	    print "$hname: $headers{$_}\n";
+	    print "$hname: $headers{$hname}\n";
         }
     }
     print "Status: $status\n";

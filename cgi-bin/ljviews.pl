@@ -348,8 +348,9 @@ sub create_view_friends
     # modified" header after a quick check here, and the "fvbo" cookie
     # (friends view back off) which is meant to have a longer delay,
     # and gets handled by apache and mod_rewrite instead of this
-    # codepath.  first check is for the cookie.  my $nowtime = time();
-    # my $backofftime = LJ::get_cap_min($remote, "cookiebackoff");
+    # codepath.  first check is for the cookie.  
+    my $nowtime = time();
+    my $backofftime = LJ::get_cap_min($remote, "cookiebackoff");
 
     # If there is a non-zero value returned, we're setting the back off:
     if ($backofftime)  {
