@@ -65,6 +65,7 @@ $body =~ s/\s+$//;
 
 ### spam
 if ($body =~ /I send you this file in order to have your advice/) {
+    $parser->filer->purge;
     exit 0;
 }
 
