@@ -1800,6 +1800,7 @@ sub get_recent_itemids
     my $sort_key = "eventtime";
     if ($view eq "lastn") { $max_hints = $LJ::MAX_HINTS_LASTN; }
     if ($view eq "friends") { 
+	# THIS IS DEAD CODE!  this is never called with friends anymore.
 	$max_hints = $LJ::MAX_HINTS_FRIENDS; 
 	$sort_key = "logtime";
     }
