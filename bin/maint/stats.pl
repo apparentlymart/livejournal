@@ -446,7 +446,7 @@ $maint{'build_randomuserset'} = sub
     ## note that if a user changes their privacy setting to not be in the database, it'll take
     ## up to 24 hours for them to be removed from the random.bml listing, but that's acceptable.
 
-    my $dbh = LJ::get_db_master();
+    my $dbh = LJ::get_db_writer();
 
     print "-I- Building randomuserset.\n";
     $dbh->do("TRUNCATE TABLE randomuserset");
@@ -463,7 +463,7 @@ $maint{'build_randomuserset'} = sub
 
 $maint{'memeclean'} = sub
 {
-    my $dbh = LJ::get_db_master();
+    my $dbh = LJ::get_db_writer();
 
     print "-I- Cleaning memes.\n";
     my $sth = $dbh->prepare("SELECT statkey FROM stats WHERE statcat='popmeme'");
