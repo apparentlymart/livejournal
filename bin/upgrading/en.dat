@@ -1814,6 +1814,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /update.bml.updating=Updating journal...
 
+/uploadpic_do.bml.error.urlerror=An error ocurred while trying to fetch your image.
+
 /userinfo.bml.about.comm=About
 
 /userinfo.bml.about.user=Bio

@@ -77,7 +77,7 @@ body<=
          $FORM{'userpic'} .= $data;
          die if ($size > $MAX_UPLOAD);
      }, 10_000);
-
+     return LJ::bad_input(BML::ml(".error.urlerror")) if $res->is_error();
      if (length($FORM{'userpic'}) > $MAX_UPLOAD) {
          return LJ::bad_input(BML::ml("uploadpic.error.toolarge", 
                                       { 'maxsize' => int($MAX_UPLOAD / 1024) . "kB" }));
@@ -164,7 +164,6 @@ body<=
      $dbh->do("UPDATE user SET defaultpicid=$picid WHERE userid=$userid");
      if ($dbh->err) { return $dbh->errstr; }
  }
- 
  return "<?h1 Success h1?><?p Your image has been uploaded.  It looks like this: <p align='center'><img src='/userpic/$picid' width='$sx' height='$sy'></p>You can <a href=\"editpics.bml$authaslink\">edit your picture keywords</a> to be able to use this picture selectively in the future. p?><?p You can view your journal <a href='/users/${user}'>here</a>. p?>";
  
 _code?>
