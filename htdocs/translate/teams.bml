@@ -1,15 +1,15 @@
-(=PAGE
+<?page
 TITLE=>Translation Teams
 BODY<=
 
  <a href="./">&lt;&lt;</a> Back to progress page.
 
-(=H1 Teams H1=)
-(=P
+<?h1 Teams h1?>
+<?p
 Translation is being done by the following teams:
-P=)
+p?>
 
-(=_CODE
+<?_code
 
  my $dbr = LJ::get_dbh("slave", "master");
  my ($ret, $sth);
@@ -48,7 +48,7 @@ P=)
  {
      $ret .= "<tr valign='top' align='left'><td><b>$l->{'lnname'}</b></td>";
      $ret .= "<td>";
-     $ret .= "(=LJCOMM $l->{'community'} LJCOMM=)" if $l->{'community'};
+     $ret .= "<?ljcomm $l->{'community'} ljcomm?>" if $l->{'community'};
      $ret .= "</td><td>";
      if ($team{$l->{'lncode'}}) {
          $ret .= join(", ", map { LJ::ljuser($_) } @{$team{$l->{'lncode'}}});
@@ -59,7 +59,7 @@ P=)
  $ret .= "</table>";
  return $ret;
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)
+page?>

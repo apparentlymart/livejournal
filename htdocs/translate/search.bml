@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  my $lang = $FORM{'lang'};
  my $l = LJ::Lang::get_lang($lang);
@@ -45,4 +45,4 @@
 
  return $ret;
 
-_CODE=)
+_code?>

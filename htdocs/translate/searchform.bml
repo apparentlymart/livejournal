@@ -3,15 +3,15 @@
 </head>
 <body marginwidth='0' marginheight='0'>
 <form target='res' action='search.bml' method='get'>
-<input type='hidden' name='lang' value='(=_CODE $FORM{'lang'} _CODE=)'>
+<input type='hidden' name='lang' value='<?_code $FORM{'lang'} _code?>'>
 
 [<a href="./" target='_top'>&lt;-- Back</a>]
-(=_CODE
+<?_code
  my $lang = $FORM{'lang'};
  my $l = LJ::Lang::get_lang($lang);
  BML::finish() unless $l;
  return "<b>" . ($l ? $l->{'lnname'} : "Invalid language") . "</b>";
-_CODE=)
+_code?>
 
 <p>By Severity: (<a href='help-severity.bml' target='main'>help</a>)<br /><select name='stale'>
 <option value="0">0</option>
@@ -27,7 +27,7 @@ _CODE=)
 </p>
 
 <p>Search 
-(=_CODE
+<?_code
  my $ret;
  my $l = LJ::Lang::get_lang($FORM{'lang'});
  my $pl = LJ::Lang::get_lang_id($l->{'parentlnid'});
@@ -41,7 +41,7 @@ _CODE=)
                          map { $_->{'dmid'}, $_->{'uniq'} }  
                          sort { $a->{'dmid'} <=> $b->{'dmid'} } LJ::Lang::get_domains());
  return $ret;
-_CODE=)
+_code?>
     <br />Text: <input name='searchtext' size='15'><input type='submit' name='search:txt' value='Search'>
 </p>
 
