@@ -89,7 +89,7 @@ sub clean
 			onresizeend onresizestart onrowenter onrowexit
 			onrowsdelete onrowsinserted onscroll onselect
 			onselectionchange onselectstart onstart onstop
-			onsubmit onunload);
+			onsubmit onunload datasrc datafld);
 
     if (ref $opts->{'attrstrip'} eq "ARRAY") {
         foreach (@{$opts->{'attrstrip'}}) { push @attrstrip, $_; }
