@@ -19,11 +19,8 @@ head<=
 <!--
 
 function doClick(spid) {
+    if (!document.getElementById) { return; }
     var row = document.getElementById('r' + spid);
-    if (!row) {
-        // maybe they do not have a new enough browser?
-        return;
-    }
     var check = document.getElementById('check_' + spid);
     check.checked = !check.checked;
     if (check.checked) {
@@ -102,12 +99,14 @@ body<=
  if ($filtercat && $LJ::SUPPORT_ABSTRACTS{$filtercat} && $fcat && $can_read && $state ne 'youreplied') {
      # yes, we should show abstracts for this category, so do so
      if ($state eq "closed") {
-         $sth = $dbr->prepare("SELECT s.*, sl.message FROM support s, supportlog sl " .
+         $sth = $dbr->prepare("SELECT s.*, SUBSTRING(sl.message, 1, 100) AS 'message' " .
+                              "FROM support s, supportlog sl " .
                               "WHERE s.state='closed' AND s.spid = sl.spid AND sl.type = 'req' " .
                               "AND s.timeclosed > (UNIX_TIMESTAMP() - (3600*24)) " .
                               "AND s.spcatid = ?");
      } else { # triggers on green, open
-         $sth = $dbr->prepare("SELECT s.*, sl.message FROM support s, supportlog sl " .
+         $sth = $dbr->prepare("SELECT s.*, SUBSTRING(sl.message, 1, 100) AS 'message' " .
+                              "FROM support s, supportlog sl " .
                               "WHERE s.state='open' AND s.spid = sl.spid AND sl.type = 'req' " .
                               "AND s.spcatid = ?");
      }
@@ -254,11 +253,7 @@ body<=
      };
 
      # fix up the message if we have one
-     if (length $sp->{message} > 100) {
-        $sp->{message} = substr($sp->{message}, 0, 100) . "...";
-     } else {
-        $sp->{message} .= " <b>&#x00b6;</b>";
-     }
+     $sp->{message} .= (length $sp->{message} >= 100) ? '...' : " <b>&#x00b6;</b>";
      my $des = $abstracts ? "<br /><i>$sp->{message}</i>" : '';
 
      # other content for this request
@@ -276,18 +271,18 @@ body<=
 
      my ($style, $js) = ("class='$barbg'", '');
      if ($can_close) {
-        $js = "id='r$sp->{spid}' onClick='doClick($sp->{spid});'"; 
+        $js = "id='r$sp->{spid}' onclick='doClick($sp->{spid});'"; 
      }
      
      # generate the HTML for this row
      $ret .= "<tr valign='top' $style $js>\n";
      if ($can_close) {
          $ret .= "<td>" . LJ::html_check({ name => "check_$sp->{spid}", id => "check_$sp->{spid}",
-                                           onClick => "doClick($sp->{spid});", }) . 
+                                           onclick => "doClick($sp->{spid});", }) . 
                  "<input type='hidden' name='c$sp->{spid}' id='c$sp->{spid}' value='$barbg' /></td>\n";
      }
      $ret .= "<td><b><a href=\"see_request.bml?id=$sp->{'spid'}\" " .
-             "onClick='return doClick($sp->{spid});'>$sp->{'spid'}</a></b></td>";
+             "onclick='return doClick($sp->{spid});'>$sp->{'spid'}</a></b></td>";
      $ret .= "<td><b>$summary</b>$des</td>\n";
      $ret .= "<td>$probarea</td>\n";
      $ret .= "<td nowrap='nowrap'><font size='-1'>$age</font></td>\n";
@@ -303,7 +298,7 @@ body<=
                              'spcatid', $fcat->{spcatid},
                              'ret', "/support/help.bml?state=$state&cat=$filtercat");
      $ret .= "<br />" . LJ::html_submit('action:close', 'Close Marked Requests', {
-                            onClick => 'return confirm("Are you sure you want to close the marked requests?");' }) if $rct;
+                            onclick => 'return confirm("Are you sure you want to close the marked requests?");' }) if $rct;
      $ret .= "</form>";
  }
 
