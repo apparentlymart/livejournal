@@ -2063,7 +2063,7 @@ sub get_cap
 	die "Hook 'check_cap_$cname' requires full user object"
 	    unless defined $u;
 
-	my $val = LJ::run_hooks("check_cap_$cname", $u);
+	my $val = LJ::run_hook("check_cap_$cname", $u);
 	return $val if defined $val;
 
 	# otherwise fall back to standard means
@@ -3973,14 +3973,15 @@ sub load_userpics
 # <LJFUNC>
 # name: LJ::modify_caps
 # des: Given a list of caps to add and caps to remove, updates a user's caps
-# args: uuid, cap_add, cap_del
+# args: uuid, cap_add, cap_del, res
 # arg-cap_add: arrayref of bit numbers to turn on
 # arg-cap_del: arrayref of bit numbers to turn off
+# arg-res: hashref returned from 'modify_caps' hook
 # returns: updated u object, retrieved from $dbh, then 'caps' key modified
 #          otherwise, returns 0 unless all  hooks run properly
 # </LJFUNC>
 sub modify_caps {
-    my ($argu, $cap_add, $cap_del) = @_;
+    my ($argu, $cap_add, $cap_del, $res) = @_;
     my $userid = LJ::want_userid($argu);
     return unless $userid;
 
@@ -3988,6 +3989,16 @@ sub modify_caps {
     $cap_del ||= [];
     my %cap_add_mod = ();
     my %cap_del_mod = ();
+
+    # convert capnames to bit numbers
+    if (LJ::are_hooks("get_cap_bit")) {
+        foreach my $bit (@$cap_add, @$cap_del) {
+            next if $bit =~ /^\d+$/;
+
+            # bit is a magical reference into the array
+            $bit = LJ::run_hook("get_cap_bit", $bit);
+        }
+    }
 
     # get a u object directly from the db
     my $u = LJ::load_userid($userid, "force");
@@ -4012,18 +4023,20 @@ sub modify_caps {
     }
 
     # run hooks for modified bits
-    my $res = LJ::run_hook("modify_caps",
-                           { 'u' => $u,
-                             'newcaps' => $newcaps,
-                             'oldcaps' => $u->{'caps'},
-                             'cap_on_req'  => { map { $_ => 1 } @$cap_add },
-                             'cap_off_req' => { map { $_ => 1 } @$cap_del },
-                             'cap_on_mod'  => \%cap_add_mod,
-                             'cap_off_mod' => \%cap_del_mod,
-                           });
+    if (LJ::are_hooks("modify_caps")) {
+        $res = LJ::run_hook("modify_caps",
+                            { 'u' => $u,
+                              'newcaps' => $newcaps,
+                              'oldcaps' => $u->{'caps'},
+                              'cap_on_req'  => { map { $_ => 1 } @$cap_add },
+                              'cap_off_req' => { map { $_ => 1 } @$cap_del },
+                              'cap_on_mod'  => \%cap_add_mod,
+                              'cap_off_mod' => \%cap_del_mod,
+                          });
 
-    # hook should return a status code
-    return 0 if defined $res && ! $res;
+        # hook should return a status code
+        return 0 unless defined $res;
+    }
 
     # update user row
     LJ::update_user($u, { 'caps' => $newcaps });
