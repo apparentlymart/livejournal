@@ -5163,7 +5163,7 @@ sub event_register
 # des-cmd: Command name.  Currently recognized: "DBI::Role::reload" and "rename_user"
 # des-args: Hashref with key/value arguments for the given command.  See
 #           relevant parts of [func[LJ::procnotify_callback]] for required args for different commands.
-# returns: boolean; 1 on success; 0 on fail.
+# returns: new serial number on success; 0 on fail.
 # </LJFUNC>
 sub procnotify_add
 {
@@ -5177,7 +5177,7 @@ sub procnotify_add
     $dbh->do("INSERT INTO procnotify (cmd, args) VALUES (?,?)",
              undef, $cmd, $args);
     return 0 if $dbh->err;
-    return 1;
+    return $dbh->{'mysql_insertid'};
 }
 
 # called by DBI::Role.

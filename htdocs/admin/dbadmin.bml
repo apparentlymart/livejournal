@@ -70,13 +70,16 @@
      }
 
      if ($curr_changed) {
-         my $newserial;
-         my $rows = $dbh->do("UPDATE dbinfo SET fdsn=fdsn+1 WHERE dbid=0");
-         if ($rows == 1) {
-             $newserial = $dbh->selectrow_array("SELECT fdsn FROM dbinfo WHERE dbid=0");
-         } else {
-             $dbh->do("INSERT INTO dbinfo (dbid, name, fdsn) VALUES (0, 'lastupdate', 1)");
-             $newserial = 1;
+         my $newserial = LJ::procnotify_add($dbh, "DBI::Role::reload");
+         # old way: (might still be useful one day?)
+         if (0) {
+             my $rows = $dbh->do("UPDATE dbinfo SET fdsn=fdsn+1 WHERE dbid=0");
+             if ($rows == 1) {
+                 $newserial = $dbh->selectrow_array("SELECT fdsn FROM dbinfo WHERE dbid=0");
+             } else {
+                 $dbh->do("INSERT INTO dbinfo (dbid, name, fdsn) VALUES (0, 'lastupdate', 1)");
+                 $newserial = 1;
+             }
          }
          $status .= "<p>New Serial: $newserial</p>\n";
      }
