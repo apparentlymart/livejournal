@@ -55,7 +55,7 @@
  $body .= "<form method=post><input type=hidden name=mode value=mail>";
  $body .= "<table cellpadding=3 border=0>";
  
- $body .= "<tr><td align=right nowrap><b>From:</b></td><td><input name=fromname size=30 value=\"" . &ehtml($u->{'name'} || "LiveJournal User") . "\"></td></tr>\n";
+ $body .= "<tr><td align=right nowrap><b>From:</b></td><td><input name=fromname size=30 value=\"" . &ehtml($u->{'name'} || "$LJ::SITENAME User") . "\"></td></tr>\n";
  $body .= "<tr><td align=right nowrap><b>&nbsp;</b></td><td>$u->{'emailpref'}</td></tr>\n"; 
 
  $body .= "<tr><td align=right nowrap><b>To (Name):</b></td><td><input name=toname size=30></td></tr>\n";
