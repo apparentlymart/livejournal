@@ -26,10 +26,18 @@ sub handler
 {
     my $r = shift;
     return OK if $r->main;
-    return OK unless $LJ::HAVE_INLINE && $LJ::HAVE_GTOP && $LJ::SUICIDE_AT;
+    return OK unless $LJ::HAVE_INLINE && $LJ::HAVE_GTOP && $LJ::SUICIDE;
+
+    my $meminfo;
+    return OK unless open (MI, "/proc/meminfo");
+    $meminfo = join('', <MI>);
+    close MI;
+    return OK unless $meminfo =~ /MemFree:\s+(\d+)\skB/;
+    my $memfree = $1;
+    my $goodfree = $LJ::SUICIDE_UNDER{$LJ::SERVER_NAME} || $LJ::SUICIDE_UNDER || 150_000;
+    return OK if $memfree > $goodfree;
 
     my @pids = (getppid(), get_sibling_pids());
-
     $gtop ||= GTop->new;
 
     my %stats;
@@ -42,19 +50,11 @@ sub handler
 
     @pids = sort { $stats{$a}->[0] <=> $stats{$b}->[0] } @pids;
 
-    my $self = $stats{$$};
-    my $using_k = $sum_uniq >> 10;
-    my $death_at = $ENV{'MAX_LJ_MEM_USE'} || $LJ::SUICIDE_AT{$LJ::SERVER_NAME} ||
-        ($LJ::SUICIDE_AT > 1 ? $LJ::SUICIDE_AT : 1000);
-    my $death_at_k = $death_at << 10;
-
-    if ($sum_uniq > $death_at << 20) {
-        if (grep { $$ == $_ } @pids[-2..-1]) {
-            my $my_use_k = $stats{$$}[0] >> 10;
-            $r->log_error("Suicide [$$]: total memory ${using_k}k of max ${death_at_k}k; i'm big, using ${my_use_k}k") if $LJ::DEBUG{'suicide'};
-            Apache::LiveJournal::db_logger($r) unless $r->pnotes('did_lj_logging');
-            CORE::exit();
-        }
+    if (grep { $$ == $_ } @pids[-2..-1]) {
+        my $my_use_k = $stats{$$}[0] >> 10;
+        $r->log_error("Suicide [$$]: system memory free = ${memfree}k; i'm big, using ${my_use_k}k") if $LJ::DEBUG{'suicide'};
+        Apache::LiveJournal::db_logger($r) unless $r->pnotes('did_lj_logging');
+        CORE::exit();
     }
 
     return OK;
