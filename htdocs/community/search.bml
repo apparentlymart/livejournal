@@ -42,7 +42,6 @@ form<=
 
 <table>
 <tr><td align='right'><?_ml .label.country _ml?></td><td>
-<select name="loc_cn">
 <?_code
 
  my $dbs = LJ::get_dbs();
@@ -55,7 +54,7 @@ form<=
  return $ret; 
  
 _code?>
-</select></td></tr>
+</td></tr>
 <tr><td align='right'><?_ml .label.stateprovince _ml?></td><td><input name="loc_st" /></td></tr>
 <tr><td align='right'><?_ml .label.city _ml?></td><td><input name="loc_ci" /></td></tr>
 </table>
