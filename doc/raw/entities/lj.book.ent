@@ -16,6 +16,7 @@
 <!ENTITY lj.install.perl_setup            SYSTEM "../lj.book/install/perl_setup.xml">
 <!ENTITY lj.install.mysql_setup           SYSTEM "../lj.book/install/mysql_setup.xml">
 <!ENTITY lj.install.ljconfig              SYSTEM "../lj.book/install/ljconfig.xml">
+<!ENTITY lj.install.ljconfig.vars         SYSTEM "../lj.book/install/ljconfig.vars.xml">
 <!ENTITY lj.install.schedule_tasks        SYSTEM "../lj.book/install/schedule_tasks.xml">
 <!ENTITY lj.install.finishing             SYSTEM "../lj.book/install/finishing.xml">
 

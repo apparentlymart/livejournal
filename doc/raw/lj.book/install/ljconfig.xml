@@ -15,4 +15,5 @@
   <para>
     The reason it's not there already is so that future upgrades don't destroy your configuration.  The end of <filename>ljconfig.pl</filename> reads in <filename>ljdefaults.pl</filename> so that if we add new options, <filename>ljdefaults.pl</filename> will be updated and will set sane defaults.  After an upgrade you want to glance at <filename>ljdefaults.pl</filename> (or the original <filename>doc/ljconfig.pl.txt</filename>) and see if there are any new options.
   </para>
+  &lj.install.ljconfig.vars;
 </chapter>

@@ -1,0 +1,53 @@
+  <section id="lj.install.ljconfig.vars">
+    <title><literal>$LJ::</literal> Variables</title>
+    <para>
+      Each <literal>$LJ::</literal> variable is explained below:
+    </para>
+    <variablelist>     
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::HOME</literal></term>
+        <listitem><para>This should be set to the top level directory which you have LiveJournal installed in.</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::HTDOCS</literal></term>
+        <listitem><para>This should be set to the htdocs directory from where you're serving <filename>.bml</filename> pages.</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::DBINFO</literal></term>
+        <listitem><para><literal role="variable">%DBINFO</literal> is a hash that contains the necessary information to connect to your database, as well as the configuration for multiple database clusters, if your installation supports them. For example:
+          <programlisting>
+          <![CDATA[
+          %DBINFO = (
+           'master' => {  # master must be named 'master'
+               'host' => "localhost",
+               'port' => 3306,
+               'user' => 'lj',
+               'pass' => 'ljpass',
+               'role' => {
+                   'cluster1' => 1,
+               },
+           },
+           # example of a TCP-based DB connection
+           #'somehostname' => {
+           #    'host' => "somehost",
+           #    'port' => 1234,
+           #    'user' => 'username',
+           #    'pass' => 'password',
+           #},
+           # example of a UNIX domain-socket DB connection
+           #'otherhost' => {
+           #    'sock' => "$LJ::HOME/var/mysqld.sock",
+           #    'user' => 'username',
+           #    'pass' => 'password',
+           #},
+           );
+           ]]>
+           </programlisting>
+        </para></listitem>
+      </varlistentry>
+
+    </variablelist>
+  </section>
