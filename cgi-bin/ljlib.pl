@@ -3430,11 +3430,12 @@ sub get_posts
 # </LJFUNC>
 sub get_remote
 {
+    my $opts = ref $_[0] eq "HASH" ? shift : {};
     my $dbarg = shift;
     my $criterr = shift;
     my $cgi = shift;
 
-    return $LJ::CACHE_REMOTE if $LJ::CACHED_REMOTE;
+    return $LJ::CACHE_REMOTE if $LJ::CACHED_REMOTE && ! $opts->{'ignore_ip'};
 
     $$criterr = 0;
 
@@ -3508,7 +3509,7 @@ sub get_remote
     return $no_remote->("Invalid auth") unless $sess->{'auth'} eq $auth;
     my $now = time();
     return $no_remote->("Session old") if $sess->{'timeexpire'} < $now;
-    if ($sess->{'ipfixed'}) {
+    if ($sess->{'ipfixed'} && ! $opts->{'ignore_ip'}) {
         my $remote_ip = $LJ::_XFER_REMOTE_IP || LJ::get_remote_ip();
         return $no_remote->("Session wrong IP") 
             if $sess->{'ipfixed'} ne $remote_ip;
