@@ -231,7 +231,7 @@ sub FriendsPage
 
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
                                              'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine) });
-        LJ::expand_embedded($ditemid, $remote, \$text);
+        LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$text);
 
         my $userlite_poster = $get_lite->($posterid);
         my $userlite_journal = $get_lite->($friendid);

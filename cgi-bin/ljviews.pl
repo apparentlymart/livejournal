@@ -1154,7 +1154,7 @@ sub create_view_lastn
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}), });
-        LJ::expand_embedded($ditemid, $remote, \$event);
+        LJ::expand_embedded($u, $ditemid, $remote, \$event);
         $lastn_event{'event'} = $event;
 
         if ($u->{'opt_showtalklinks'} eq "Y" && 
@@ -1599,7 +1599,7 @@ sub create_view_friends
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
                                               'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine) });
-        LJ::expand_embedded($ditemid, $remote, \$event);
+        LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$event);
         $friends_event{'event'} = $event;
         
         # do the picture
@@ -2183,7 +2183,7 @@ sub create_view_day
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($u, $itemid, $anum), });
-        LJ::expand_embedded($ditemid, $remote, \$event);
+        LJ::expand_embedded($u, $ditemid, $remote, \$event);
         $day_event{'event'} = $event;
 
         if ($u->{'opt_showtalklinks'} eq "Y" &&

@@ -274,7 +274,7 @@ sub EntryPage_entry
     my $raw_subj = $entry->{'subject'};
     LJ::CleanHTML::clean_subject(\$entry->{'subject'});
     LJ::CleanHTML::clean_event(\$entry->{'event'}, $entry->{'props'}->{'opt_preformatted'});
-    LJ::expand_embedded($ditemid, $remote, \$entry->{'event'});
+    LJ::expand_embedded($u, $ditemid, $remote, \$entry->{'event'});
 
     my $s2entry = Entry($u, {
         '_rawsubject' => $raw_subj,

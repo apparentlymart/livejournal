@@ -4972,12 +4972,10 @@ sub make_graphviz_dot_file
 sub expand_embedded
 {
     &nodb;
-    my $ditemid = shift;
-    my $remote = shift;
-    my $eventref = shift;
+    my ($u, $ditemid, $remote, $eventref) = @_;
 
     LJ::Poll::show_polls($ditemid, $remote, $eventref);
-    LJ::run_hooks("expand_embedded", $ditemid, $remote, $eventref);
+    LJ::run_hooks("expand_embedded", $u, $ditemid, $remote, $eventref);
 }
 
 # <LJFUNC>

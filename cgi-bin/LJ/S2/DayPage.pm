@@ -133,7 +133,7 @@ sub DayPage
 
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($u, $itemid, $anum), });
-        LJ::expand_embedded($ditemid, $remote, \$text);
+        LJ::expand_embedded($u, $ditemid, $remote, \$text);
 
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};

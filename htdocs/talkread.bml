@@ -140,7 +140,7 @@ body<=
 
  my $event = $item->{'event'};
 
- LJ::expand_embedded($ditemid, $remote, \$event);
+ LJ::expand_embedded($u, $ditemid, $remote, \$event);
  LJ::CleanHTML::clean_event(\$event, $props->{'opt_preformatted'});
  BML::ebml(\$event);
 
