@@ -52,7 +52,7 @@
     # we tried to compile something
     if ($POST{'action'} eq "compile") {
         $ret .= "<div style='margin: 20px 0 20px 40px'>\n";
-        $ret .= "<b>Compiler Output</b><br />\n";
+        $ret .= "<b>S2 Compiler Output</b> <em>at " . scalar(localtime) . "</em><br />\n";
 
         my $error;
         $POST{'s2code'} =~ s/\r//g;  # just in case
@@ -61,7 +61,7 @@
             $error =~ s/LJ::S2,.+//s;
             $error =~ s!, .+?(src/s2|cgi-bin)/!, !g;
 
-            $ret .= "Error compiling layer:\n<pre>$error</pre>";
+            $ret .= "Error compiling layer:\n<pre style=\"border-left: 1px red solid\">$error</pre>";
 
             # display error with helpful context
             if ($error =~ /^compile error: line (\d+)/i) {
@@ -80,7 +80,7 @@
                     LJ::ehtml($1) . "\n"!ge;                      # add line breaks and numbering
 
                 $snippet =~ s!^((?:.*?\n){$kill,$kill})           # kill before relevant lines
-                               ((?:.*?\n){$prehilite,$prehilite}) # captuure context before error
+                               ((?:.*?\n){$prehilite,$prehilite}) # capture context before error
                                (.*?\n){0,1}                       # capture error
                                ((?:.*?\n){0,4})                   # capture context after error
                                .*                                 # kill after relevant lines
@@ -96,7 +96,11 @@
     }
 
     $ret .= LJ::html_hidden("action", "compile") . "\n";
-    $ret .= "<p>" . LJ::html_submit('submit', 'Compile', { 'style' => 'float: right; margin-bottom: 2px' } ) . "\n";
+    $ret .= "<p>" . LJ::html_submit('submit', 'Compile', {
+        'style' => 'float: right; margin-bottom: 2px',
+        'accesskey' => 'c', 
+        'title' => 'alt-C: compile',
+      } ) . "\n";
     $ret .= "<b>Edit layer source</b>\n";
     $ret .= LJ::html_textarea({ 'name' => 's2code', 'class' => 's2code', 'wrap' => 'off',
                                 'cols' => '50', 'rows' => '40', 'value' => $s2code }) . "\n";
