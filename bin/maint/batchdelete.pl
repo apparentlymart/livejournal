@@ -6,19 +6,14 @@ $maint{'db_batchdelete'} = sub
     &connect_db();
     my @ids;
 
+    # there used to be many tables here, but it's been 'simplified' to this.
     my %what = (
-		'hintfriends' => { 'table' => 'hintfriendsview',
-				   'column' => 'hintid',
-				   'minbatch' => 150,
-				   'maxbatch' => 500,
-			       },
 		'hintlastn' => { 'table' => 'hintlastnview',
 				 'column' => 'hintid',
 				 'minbatch' => 100,
 				 'maxbatch' => 500,
 			     },
 		);
-		
     
     foreach my $what (sort keys %what)
     {
@@ -44,7 +39,6 @@ $maint{'db_batchdelete'} = sub
 	    print "Done.\n";
 	}
     }
-    
 };
 
 1;
