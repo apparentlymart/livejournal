@@ -1,11 +1,11 @@
 <?_code
 
  use strict;
- use vars qw(%FORM %cmd);
+ use vars qw(%POST %cmd);
 
  my ($ret, $sth);
 
- my $commands = $FORM{'commands'};
+ my $commands = $POST{'commands'};
  my $remote = LJ::get_remote();
 
  if ($commands) 
@@ -14,7 +14,7 @@
          return "<b>Error:</b> requires post.";
      }
 
-     if ($remote && $remote->{'user'} ne $FORM{'remoteuser'}) {
+     if ($remote && $remote->{'user'} ne $POST{'remoteuser'}) {
          return "<b>Error:</b> invalid user.";
      }
 
