@@ -1884,7 +1884,7 @@ sub load_props
 
 # <LJFUNC>
 # name: LJ::get_prop
-# des: This is used after [func[LJ::load_props]] is called to retrieve
+# des: This is used to retrieve
 #      a hashref of a row from the given tablename's proplist table.
 #      One difference from getting it straight from the database is
 #      that the 'id' key is always present, as a copy of the real
@@ -1899,7 +1899,11 @@ sub get_prop
 {
     my $table = shift;
     my $name = shift;
-    return 0 unless defined $LJ::CACHE_PROP{$table};
+    unless (defined $LJ::CACHE_PROP{$table}) {
+        my $dbs = LJ::get_dbs() or return undef;
+        LJ::load_props($dbs, $table);
+        return undef unless $LJ::CACHE_PROP{$table};
+    }
     return $LJ::CACHE_PROP{$table}->{$name};
 }
 
@@ -4975,7 +4979,7 @@ sub delete_item2
 # des-jtalkid: The jtalkid of the comment.  Or, an arrayref of jtalkids to delete multiple
 # des-dbcm: Cluster master db to delete item from.
 # des-light: boolean; if true, only mark entry as deleted, so children will thread.
-# returns: boolean; 1 on success, 0 on failure.# des-dbh: Master database handle.
+# returns: boolean; number of items deleted on success (or zero-but-true), 0 on failure.
 # </LJFUNC>
 sub delete_talkitem
 {
@@ -4987,22 +4991,24 @@ sub delete_talkitem
     return 1 unless $in;
     my $where = "WHERE journalid=$jid AND jtalkid IN ($in)";
 
+    my $ret;
     my @delfrom = qw(talkprop2);
     if ($light) {
-        $dbcm->do("UPDATE talk2 SET state='D' $where");
+        $ret = $dbcm->do("UPDATE talk2 SET state='D' $where");
         $dbcm->do("UPDATE talktext2 SET subject=NULL, body=NULL $where");
     } else {
         push @delfrom, qw(talk2 talktext2);
     }
 
     foreach my $t (@delfrom) {
-        $dbcm->do("DELETE FROM $t $where");
+        my $num = $dbcm->do("DELETE FROM $t $where");
+        if (! defined $ret && $t eq "talk2") { $ret = $num; }
         return 0 if $dbcm->err;
     }
     
     LJ::dudata_set($dbcm, $jid, 'T', $_, 0) foreach (@$jtalkid);
     return 0 if $dbcm->err;
-    return 1;
+    return $ret;
 }
 
 

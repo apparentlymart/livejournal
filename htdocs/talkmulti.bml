@@ -1,0 +1,104 @@
+<?_code
+{
+    use strict;
+    use vars qw(%POST $title $body);
+
+    my $err = sub {
+        my $errmsg = shift;
+        $body = "<?h1 $ML{'Error'} h1?><?p $errmsg p?>";
+        return;
+    };
+
+    my $mode = $POST{'mode'};
+    if ($mode eq 'screen') {
+        $title = $ML{'.title.screen'};
+    } elsif ($mode eq 'unscreen') {
+        $title = $ML{'.title.unscreen'};
+    } elsif ($mode eq 'delete') {
+        $title = $ML{'.title.delete'};
+    } else {
+        $title = $ML{'Error'};
+        return $err->($ML{'.error.invalid_mode'});
+    }
+
+    my $dbs = LJ::get_dbs();
+    my $sth;
+   
+    my $remote = LJ::get_remote($dbs);
+    return $err->($ML{'.error.login'}) unless $remote;
+    return $err->("<?requirepost?>") unless LJ::did_post();
+
+    my @talkids;
+    foreach (keys %POST) {
+        push @talkids, $1 if /^selected_(\d+)$/;
+    }
+    return $err->($ML{'.error.none_selected'}) unless @talkids;
+
+    my $u = LJ::load_user($dbs, $POST{'journal'});
+    return $err->($ML{'talk.error.bogusargs'}) unless $u && $u->{'clusterid'};
+    return $err->($LJ::MSG_READONLY_USER) if LJ::get_cap($u, "readonly");
+
+    my $dbcs = LJ::get_cluster_set($u);
+    my $dbcm = $dbcs->{'dbh'};
+
+    my $jid = $u->{'userid'};
+    my $ditemid = $POST{'ditemid'}+0;
+    my $commentlink = "talkread.bml?journal=$u->{'user'}&amp;itemid=$ditemid";
+    my $itemid = $ditemid >> 8;
+    my $log = $dbcm->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=?",
+                                       undef, $jid, $itemid);
+    return $err->($ML{'.error.inconsistent_data'}) unless $log && $log->{'anum'} == ($ditemid & 255);
+    my $up = LJ::load_userid($dbs, $log->{'posterid'});
+
+    # check permissions
+    return $err->($ML{'.error.privs.screen'})
+        if $mode eq "screen" && ! LJ::Talk::can_screen($dbs, $remote, $u, $up);
+    return $err->($ML{'.error.privs.unscreen'})
+        if $mode eq "unscreen" && ! LJ::Talk::can_unscreen($dbs, $remote, $u, $up);
+    return $err->($ML{'.error.privs.delete'})
+        if $mode eq "delete" && ! LJ::Talk::can_delete($dbs, $remote, $u, $up);
+
+    # filter our talkids down to those that are actually attached to the log2
+    # specified.  also, learn the state of all the items.
+    my $in = join (',', @talkids);
+    $sth = $dbcm->prepare("SELECT jtalkid, state FROM talk2 ".
+                          "WHERE journalid=? AND jtalkid IN ($in) ".
+                          "AND nodetype='L' AND nodeid=?");
+    $sth->execute($jid, $itemid);
+    my %state;
+    while (my ($id, $state) = $sth->fetchrow_array) {
+        $state{$id} = $state;
+    }
+    @talkids = keys %state;
+
+    # do the work:
+    if ($mode eq "delete") {
+        # first, unscreen everything for replycount and hasscreened to adjust
+        my @unscreen = grep { $state{$_} eq "S" } @talkids;
+        LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $itemid, @unscreen);
+        # FIXME: race condition here... somebody could get lucky and view items while unscreened. 
+        # then delete, updating the log2 replycount as necessary
+        my $num = LJ::delete_talkitem($dbcm, $jid, \@talkids, "LIGHT");
+        $dbcm->do("UPDATE log2 SET replycount=replycount-$num WHERE journalid=$jid AND jitemid=$itemid");
+        LJ::Talk::update_commentalter($dbs, $dbcs, $u, $itemid);
+        $body = "<?h1 $ML{'.deleted.title'} h1?><?p " . BML::ml('.deleted.body', {'link'=>$commentlink}) . " p?>";
+        return;
+
+    } elsif ($mode eq "unscreen") {
+        LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $itemid, @talkids);
+        $body = "<?h1 $ML{'.unscreened.title'} h1?><?p " . BML::ml('.unscreened.body', {'link'=>$commentlink}) . " p?>";
+        return;
+
+    } elsif ($mode eq "screen") {
+        LJ::Talk::screen_comment($dbs, $dbcs, $u, $itemid, @talkids);
+        $commentlink .= "&amp;showscreened=1";
+        $body = "<?h1 $ML{'.screened.title'} h1?><?p " . BML::ml('.screened.body', {'link'=>$commentlink}) . " p?>";
+        return;
+    }
+}
+_code?>
+<?page
+title=><?_code return $title; _code?>
+body=><?_code return $body; _code?>
+page?><?_c <LJDEP>
+</LJDEP> _c?>

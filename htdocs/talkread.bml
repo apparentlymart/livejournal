@@ -117,6 +117,11 @@ body<=
  ####  Check security before viewing this post
  return $errtxt unless LJ::Talk::check_viewable($dbs, $remote, $item, \%FORM, \$errtxt);
 
+ my $showmultiform = $remote && $clustered &&
+    ($remote->{'user'} eq $u->{'user'} ||
+     $remote->{'user'} eq $up->{'user'} ||
+     LJ::check_rel($dbs, $u, $remote, 'A'));
+
  my $event = $item->{'event'};
 
  LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
@@ -591,8 +596,11 @@ body<=
                     $$ret .= "<a href='talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
                 }
 
-                $$ret .= "</td></tr>";
-                $$ret .= "<tr><td>\n";
+                if ($showmultiform) {
+                    $$ret .= " <nobr><input type='checkbox' name='selected_$tid' id='s$tid' />";
+                    $$ret .= " <label for='s$tid'>$ML{'.select'}</label></nobr>";
+                }
+                $$ret .= "</td></tr><tr><td>";
 
                 ## escape BML block codes.  so <?tag ... tag?> turns into (&#0061; ... tag?>
                 $post->{'body'} =~ s/\(=/\(&\#0061\;/g;
@@ -661,19 +669,35 @@ body<=
 
      if ($post_count > 0)
      {
+         $ret .= "<form style='display: inline' method='post' action='talkmulti.bml'>";
+         $ret .= LJ::html_hidden("ditemid", $ditemid);
+         $ret .= LJ::html_hidden("journal", $u->{'user'});
+
          $recurse_post->($recurse_post, \%posts, \$ret, $thread, {}, { "newfirst" => 0,
                                                                        "children" => \%children,
                                                                    });
-         $ret .= "<p><hr /><center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></center></p>";
-     }
 
+         $ret .= "<p><hr /><center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></center></p>";
+
+         if ($showmultiform) {
+             $ret .= $ML{'.talkmulti.des'} . " ";
+             $ret .= LJ::html_select({'name' => 'mode' },
+                                     "" => "",
+                                     "unscreen" => $ML{'.talkmulti.unscreen'},
+                                     "screen" => $ML{'.talkmulti.screen'},
+                                     "delete" => $ML{'.talkmulti.delete'});
+             $ret .= " " . LJ::html_submit('', $ML{'.talkmulti.submit'});
+         }
+         $ret .= "</form>";
+
+     }
      if ($navcrap) {
          $ret .= "<p>$navcrap</p>";
      }
  }
 
-LJ::strip_bad_code(\$ret);
-return $ret;
+ LJ::strip_bad_code(\$ret);
+ return $ret;
 
 _code?>
 <=body
