@@ -69,10 +69,11 @@ sub do_request
 	  $res->{'errmsg'} = "User error: Invalid Username";
 	  return;
         }
-        unless ($flags->{'nopassword'} || &valid_password($correctpassword, { 
-	  "password" => $req->{'password'}, 
-	  "hpassword" => $req->{'hpassword'}
-        }))
+        unless ($flags->{'nopassword'} || 
+	        LJ::auth_okay($user, 
+			      $req->{'password'}, 
+			      $req->{'hpassword'},
+			      $correctpassword))
         {
 	  $res->{'success'} = "FAIL";
 	  $res->{'errmsg'} = "User error: Invalid Password";

@@ -164,39 +164,11 @@ sub abs_url
     return url($uri)->abs($base)->as_string;
 }
 
+# deprecated.  use LJ::load_user_props
 sub load_user_props
 {
     &connect_db();
-
-    ## user reference
-    my ($uref, @props) = @_;
-    my $uid = $uref->{'userid'}+0;
-    unless ($uid) {
-	$uid = LJ::get_userid($dbh, $uref->{'user'});
-    }
-    
-    my $propname_where;
-    if (@props) {
-	$propname_where = "AND upl.name IN (" . join(",", map { $dbh->quote($_) } @props) . ")";
-    }
-    
-    my ($sql, $sth);
-
-    # FIXME: right now we read userprops from both tables (indexed and lite).  we always have to do this
-    #        for cases when we're loading all props, but when loading a subset, we might be able to
-    #        eliminate one query or the other if we cache somewhere the userproplist and which props
-    #        are in which table.  For now, though, this works:
-
-    foreach my $table (qw(userprop userproplite))
-    {
-	$sql = "SELECT upl.name, up.value FROM $table up, userproplist upl WHERE up.userid=$uid AND up.upropid=upl.upropid $propname_where";
-	$sth = $dbh->prepare($sql);
-	$sth->execute;
-	while ($_ = $sth->fetchrow_hashref) {
-	    $uref->{$_->{'name'}} = $_->{'value'};
-	}
-	$sth->finish;
-    }
+    LJ::load_user_props($dbh, @_);
 }
 
 sub set_userprop
@@ -725,6 +697,95 @@ sub get_friend_itemids { return LJ::get_friend_itemids($dbh, @_); }
 
 package LJ;
 
+sub load_user_props
+{
+    my $dbh = shift;
+
+    ## user reference
+    my ($uref, @props) = @_;
+    my $uid = $uref->{'userid'}+0;
+    unless ($uid) {
+	$uid = LJ::get_userid($dbh, $uref->{'user'});
+    }
+    
+    my $propname_where;
+    if (@props) {
+	$propname_where = "AND upl.name IN (" . join(",", map { $dbh->quote($_) } @props) . ")";
+    }
+    
+    my ($sql, $sth);
+
+    # FIXME: right now we read userprops from both tables (indexed and
+    # lite).  we always have to do this for cases when we're loading
+    # all props, but when loading a subset, we might be able to
+    # eliminate one query or the other if we cache somewhere the
+    # userproplist and which props are in which table.  For now,
+    # though, this works:
+
+    foreach my $table (qw(userprop userproplite))
+    {
+	$sql = "SELECT upl.name, up.value FROM $table up, userproplist upl WHERE up.userid=$uid AND up.upropid=upl.upropid $propname_where";
+	$sth = $dbh->prepare($sql);
+	$sth->execute;
+	while ($_ = $sth->fetchrow_hashref) {
+	    $uref->{$_->{'name'}} = $_->{'value'};
+	}
+	$sth->finish;
+    }
+}
+
+
+sub bad_input
+{
+    my @errors = @_;
+    my $ret = "";
+    $ret .= "(=BADCONTENT=)\n<ul>\n";
+    foreach (@errors) {
+	$ret .= "<li>$_\n";
+    }
+    $ret .= "</ul>\n";
+    return $ret;
+}
+
+sub debug 
+{
+    return 1 unless ($LJ::DEBUG);
+    open (L, ">>$LJ::VAR/debug.log") or return 0;
+    print L scalar(time), ": $_[0]\n";
+    close L;
+    return 1;
+}
+
+sub auth_okay
+{
+    my $user = shift;
+    my $clear = shift;
+    my $md5 = shift;
+    my $actual = shift;
+
+    # first argument can be a user object instead of a string, in
+    # which case the actual password (last argument) is got from the
+    # user object.
+    if (ref $user eq "HASH") {
+	$actual = $user->{'password'};
+	$user = $user->{'user'};
+    }
+
+  LJ::debug("auth_okay(user=$user, clear=$clear, md5=$md5, act=$actual)");
+
+    ## custom authorization:
+    if (ref $LJ::AUTH_CHECK eq "CODE") {
+	my $type = $md5 ? "md5" : "clear";
+	my $try = $md5 || $clear;
+	return $LJ::AUTH_CHECK->($user, $try, $type);
+    }
+    
+    ## LJ default authorization:
+    return 1 if ($md5 && $md5 eq LJ::hash_password($actual));
+    return 1 if ($clear eq $actual);
+    return 0;
+}
+
 # the caller is responsible for making sure the username isn't reserved.  this
 # function only ensures that it's a valid username.
 sub create_account
@@ -741,8 +802,11 @@ sub create_account
     my $qpassword = $dbh->quote($o->{'password'});
     my $qname = $dbh->quote($o->{'name'});
 
-    $dbh->do("INSERT INTO user (user, name, password) VALUES ($quser, $qname, $qpassword)");
-    return $dbh->err ? 0 : 1;
+    my $sth = $dbh->prepare("INSERT INTO user (user, name, password) VALUES ($quser, $qname, $qpassword)");
+    $sth->execute;
+    my $userid = $sth->{'mysql_insertid'};
+    
+    return $dbh->err ? 0 : $userid;
 }
 
 # returns true if user B is a friend of user A (or if A == B)
@@ -836,6 +900,8 @@ sub get_remote
     my $errors = shift;
     my $cgi = shift;   # optional CGI.pm reference
 
+  LJ::debug("get_remote");
+
     ### are they logged in?
     my $remuser = $cgi ? $cgi->cookie('ljuser') : $BMLClient::COOKIE{"ljuser"};
     return undef unless ($remuser);
@@ -846,17 +912,23 @@ sub get_remote
     return undef unless ($hpass =~ /^$remuser:(.+)/);
     my $remhpass = $1;
 
+  LJ::debug("get_remote: remuser=$remuser");
+    
     ### do they exist?
     my $userid = get_userid($dbh, $remuser);
     $userid += 0;
     return undef unless ($userid);
 
     ### is their password correct?
-    my $password;
-    my $sth = $dbh->prepare("SELECT password FROM user WHERE userid=$userid");
-    $sth->execute;
-    ($password) = $sth->fetchrow_array;
-    return undef unless (valid_password($password, { 'hpassword' => $remhpass }));
+    my $correctpass;
+    unless (ref $LJ::AUTH_CHECK eq "CODE") {
+	my $sth = $dbh->prepare("SELECT password FROM ".
+				"user WHERE userid=$userid");
+	$sth->execute;
+	($correctpass) = $sth->fetchrow_array;
+    }
+    return undef unless
+      LJ::auth_okay($remuser, undef, $remhpass, $correctpass);
 
     return { 'user' => $remuser,
 	     'userid' => $userid, };
@@ -1262,10 +1334,14 @@ sub html_check
 
     my $disabled = $opts->{'disabled'} ? " DISABLED" : "";
     my $ret;
-    $ret .= "<input type=checkbox ";
+    if ($opts->{'type'} eq "radio") {
+	$ret .= "<input type=radio ";
+    } else {
+	$ret .= "<input type=checkbox ";
+    }
     if ($opts->{'selected'}) { $ret .= " checked"; }
     if ($opts->{'name'}) { $ret .= " name=\"$opts->{'name'}\""; }
-    if ($opts->{'value'}) { $ret .= " value=\"$opts->{'value'}\""; }
+    if (defined $opts->{'value'}) { $ret .= " value=\"$opts->{'value'}\""; }
     $ret .= "$disabled>";
     return $ret;
 }
@@ -1536,11 +1612,36 @@ sub load_user
 {
     my $dbh = shift;
     my $user = shift;
+    $user = LJ::canonical_username($user);
+
     my $quser = $dbh->quote($user);
     my $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
     $sth->execute;
     my $u = $sth->fetchrow_hashref;
     $sth->finish;
+
+    # if user doesn't exist in the LJ database, it's possible we're using
+    # an external authentication source and we should create the account
+    # implicitly.
+    if (! $u && ref $LJ::AUTH_EXISTS eq "CODE") {
+	if ($LJ::AUTH_EXISTS->($user)) {
+	    if (LJ::create_account($dbh, {
+		'user' => $user,
+		'name' => $user,
+		'password' => "",
+	    }))
+	    {
+		$sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+		$sth->execute;
+		$u = $sth->fetchrow_hashref;
+		$sth->finish;
+		return $u;		
+	    } else {
+		return undef;
+	    }
+	}
+    }
+
     return $u;
 }
 
@@ -1731,6 +1832,16 @@ sub get_userid
     $sth->execute;
     ($userid) = $sth->fetchrow_array;
     if ($userid) { $CACHE_USERID{$user} = $userid; }
+
+    # implictly create an account if we're using an external
+    # auth mechanism
+    if (! $userid && ref $LJ::AUTH_EXISTS eq "CODE")
+    {
+	$userid = LJ::create_account($dbh, { 'user' => $user,
+					     'name' => $user,
+					     'password' => '', });
+    }
+
     return ($userid+0);
 }
 
