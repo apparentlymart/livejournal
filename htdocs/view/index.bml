@@ -128,7 +128,7 @@ if (LJ::did_post()) {
  } else {
      $sth = $db->prepare("SELECT l.jitemid, l.anum, l.day, ls.subject, l.eventtime, u.user, ".
                          "l.replycount, l.security ".
-                         "FROM log2 l, logtext2 ls, useridmap u ".
+                         "FROM log2 l, logtext2 ls, ${LJ::DB_USERIDMAP}useridmap u ".
                          "WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} ".
                          "AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid ".
                          "AND l.posterid=u.userid $secwhere ORDER BY l.eventtime");

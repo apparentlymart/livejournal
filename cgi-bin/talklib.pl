@@ -407,7 +407,7 @@ sub load_comments
     $sth = $db->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, u.user AS 'userpost', ".
                         "t.datepost, t.parenttalkid, t.state ".
                         "FROM talk2 t ".
-                        "LEFT JOIN useridmap u ON u.userid=t.posterid ".
+                        "LEFT JOIN ${LJ::DB_USERIDMAP}useridmap u ON u.userid=t.posterid ".
                         "WHERE t.journalid=? AND t.nodetype=? ".
                         "AND t.nodeid=?");
     $sth->execute($u->{'userid'}, $nodetype, $nodeid);
