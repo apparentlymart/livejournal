@@ -43,7 +43,7 @@ body<=
         my $max = $dbcr->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
                                          undef, $u->{userid});
         $sth = $dbcr->prepare("SELECT jtalkid, nodetype, nodeid, parenttalkid, ".
-                              "       posterid, datepost, state ".
+                              "       posterid, UNIX_TIMESTAMP(datepost) as 'datepostunix', state ".
                               "FROM talk2 ".
                               "WHERE journalid=? AND jtalkid > ?");
         $sth->execute($u->{userid}, $max - $count);
@@ -80,7 +80,7 @@ body<=
     $ret .= "<?h1 Latest Received h1?>";
     $ret .= "<?p " . (%talkids ? "Last $count comments posted in " : "No comments have been posted in ") . LJ::ljuser($u) . " p?>";
 
-    @recv = sort { $b->{datepost} cmp $a->{datepost} } @recv;
+    @recv = sort { $b->{datepostunix} <=> $a->{datepostunix} } @recv;
     my @recv_talkids = map { $_->{'jtalkid'} } @recv;
 
     my %props;
@@ -127,7 +127,7 @@ body<=
         $ret .= "<tr valign='top'><td style='width: 150px; line-height: 1.5em; border-top: 1px solid #999; background-color: $bgcolor'>";
 	$ret .= ($pu ? LJ::ljuser($pu) : "Anonymous") . "<br />";
 
-        $ret .= LJ::ago_text(time() - LJ::mysqldate_to_time($r->{datepost})) . "<br />";
+        $ret .= LJ::ago_text($now - $r->{datepostunix}) . "<br />";
         $ret .= "$state<br />" if $state ne "";
 
         {
@@ -207,7 +207,6 @@ body<=
         my %jcount;  # jid -> ct
         $ret .= "<table style='text-align: left'>";
         $ret .= "<tr><th>Time</th><th>Location</th></tr>";
-        @posted = sort { $b->{datepost} cmp $a->{datepost} } @posted;
 
         foreach my $r (@posted) {
             $jcount{$r->{'journalid'}}++;
@@ -220,7 +219,7 @@ body<=
             my $logurl = "$LJ::SITEROOT/users/$ju->{user}/$lrow->{ditemid}.html";
             my $talkurl = "$logurl?thread=$talkid\#t$talkid";
 
-            my $hr_ago = LJ::ago_text(time() - $r->{'posttime'});
+            my $hr_ago = LJ::ago_text($now - $r->{'posttime'});
             my $subject;
             if (defined $lrow->{ditemid}) {
                 $hr_ago = "<a href='$talkurl'>$hr_ago</a>";
