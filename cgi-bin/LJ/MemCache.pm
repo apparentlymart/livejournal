@@ -78,6 +78,7 @@ sub disconnect_all
 }
 
 sub set {
+    return 0 unless @LJ::MEMCACHE_SERVERS;
     my ($key, $val) = @_;
     my $sock = get_sock($key);
     return 0 unless $sock;
@@ -98,14 +99,43 @@ sub set {
 
 sub get {
     my ($key) = @_;
-    my $sock = get_sock($key);
-    return undef unless $sock;
-    $key = ref $key eq "ARRAY" ? $key->[1] : $key;
-    my $cmd = "get $key\n";
+    my $val = get_multi($key);
+    return undef unless $val;
+    return $val->{$key};
+}
+
+sub get_multi {
+    return undef unless @LJ::MEMCACHE_SERVERS;
+    my %val;        # what we'll be returning a reference to (realkey -> value)
+    my %sock_keys;  # sockref_as_scalar -> [ realkeys ]
+    my @socks;      # unique socket refs
+    foreach my $key (@_) {
+        my $sock = get_sock($key);
+        next unless $sock;
+        $key = ref $key eq "ARRAY" ? $key->[1] : $key;
+        unless ($sock_keys{$sock}) {
+            $sock_keys{$sock} = [];
+            push @socks, $sock;
+        }
+        push @{$sock_keys{$sock}}, $key;
+    }
+    foreach my $sock (@socks) {
+        _load_items($sock, \%val, @{$sock_keys{$sock}});
+    }
+    return \%val;
+}
+
+sub _load_items
+{
+    my $sock = shift;
+    my $outref = shift;
+
+    my %flags;
+    my %val;
+
+    my $cmd = "get @_\n";
     $sock->print($cmd);
     $sock->flush;
-    my %val;
-    my %flags;
   ITEM:
     while (1) {
         my $line = $sock->getline;
@@ -130,18 +160,21 @@ sub get {
                 }
                 if ($bytes_read > $len) {
                     # invalid crap from server
-                    return undef;
+                    return 0;
                 }
             }
             next ITEM;
         }
         if ($line eq "END\n") {
-            my $val = $val{$key};
-            $val = Storable::thaw($val) if $flags{$key} =~ /S/;
-            return $val;
+            foreach (@_) {
+                next unless $val{$_};
+                $val{$_} = Storable::thaw($val{$_}) if $flags{$_} =~ /S/;
+                $outref->{$_} = $val{$_};
+            }
+            return 1;
         }
         if (length($line) == 0) {
-            return undef;
+            return 0;
         }
     }
 }
