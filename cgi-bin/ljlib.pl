@@ -45,6 +45,9 @@ do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
                     "clustertrack2", "captcha_session", "reluser2",
                     "tempanonips");
 
+# keep track of what db locks we have out
+%LJ::LOCK_OUT = (); # {global|user} => caller_with_lock
+
 require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"
     if -e "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl";
 
@@ -284,6 +287,80 @@ sub get_dbirole_dbh {
     return $dbh;
 }
 
+# <LJFUNC>
+# name: LJ::get_lock
+# des: get a mysql lock on a given key/dbrole combination
+# returns: undef if called improperly, true on success, die() on failure
+# args: db, dbrole, lockname, wait_time?
+# des-dbrole: the role this lock should be gotten on, either 'global' or 'user'
+# des-lockname: the name to be used for this lock
+# des-wait_time: an optional timeout argument, defaults to 10 seconds
+# </LJFUNC>
+sub get_lock
+{
+    my ($db, $dbrole, $lockname, $wait_time) = @_;
+    return undef unless $db && $lockname;
+    return undef unless $dbrole eq 'global' || $dbrole eq 'user';
+
+    my $curr_sub = (caller 1)[3]; # caller of current sub
+
+    # die if somebody already has a lock
+    die "LOCK ERROR: $curr_sub; can't get lock from: $LJ::LOCK_OUT{$dbrole}\n"
+        if exists $LJ::LOCK_OUT{$dbrole};
+
+    # get a lock from mysql
+    $wait_time ||= 10;
+    $db->do("SELECT GET_LOCK(?,?)", undef, $lockname, $wait_time);
+    $LJ::LOCK_OUT{$dbrole} = $curr_sub;
+
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::may_lock
+# des: see if we COULD get a mysql lock on a given key/dbrole combination,
+#      but don't actually get it.
+# returns: undef if called improperly, true on success, die() on failure
+# args: db, dbrole
+# des-dbrole: the role this lock should be gotten on, either 'global' or 'user'
+# </LJFUNC>
+sub may_lock
+{
+    my ($db, $dbrole) = @_;
+    return undef unless $db && ($dbrole eq 'global' || $dbrole eq 'user');
+
+    # die if somebody already has a lock
+    if ($LJ::LOCK_OUT{$dbrole}) {
+        my $curr_sub = (caller 1)[3]; # caller of current sub
+        die "LOCK ERROR: $curr_sub; can't get lock from $LJ::LOCK_OUT{$dbrole}\n";
+    }
+
+    # see if a lock is already out
+    return undef if exists $LJ::LOCK_OUT{$dbrole};
+
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::release_lock
+# des: release a mysql lock on a given key/dbrole combination
+# returns: undef if called improperly, true on success, die() on failure
+# args: db, dbrole, lockname
+# des-dbrole: the role this lock should be gotten on, either 'global' or 'user'
+# des-lockname: the name to be used for this lock
+# </LJFUNC>
+sub release_lock
+{
+    my ($db, $dbrole, $lockname) = @_;
+    return undef unless $db && $lockname;
+    return undef unless $dbrole eq 'global' || $dbrole eq 'user';
+
+    # get a lock from mysql
+    $db->do("SELECT RELEASE_LOCK(?)", undef, $lockname);
+    delete $LJ::LOCK_OUT{$dbrole};
+
+    return 1;
+}
 
 # <LJFUNC>
 # name: LJ::get_newids
