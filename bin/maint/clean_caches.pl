@@ -30,7 +30,7 @@ $maint{'clean_caches'} = sub
     my $maxid;
 
     print "-I- Cleaning recent_logtext.\n";    
-    $sth = $dbh->prepare("SELECT itemid FROM log WHERE logtime > DATE_SUB(NOW(), INTERVAL 21 DAY) LIMIT 1");
+    $sth = $dbh->prepare("SELECT itemid FROM log WHERE logtime > DATE_SUB(NOW(), INTERVAL $LJ::RECENT_DAYS DAY) LIMIT 1");
     $sth->execute;
     ($maxid) = $sth->fetchrow_array;
     
@@ -49,7 +49,7 @@ $maint{'clean_caches'} = sub
     }
 
     print "-I- Cleaning recent_talktext.\n";    
-    $sth = $dbh->prepare("SELECT talkid FROM talk WHERE datepost > DATE_SUB(NOW(), INTERVAL 21 DAY) LIMIT 1");
+    $sth = $dbh->prepare("SELECT talkid FROM talk WHERE datepost > DATE_SUB(NOW(), INTERVAL $LJ::RECENT_DAYS DAY) LIMIT 1");
     $sth->execute;
     ($maxid) = $sth->fetchrow_array;
     
