@@ -8079,76 +8079,6 @@ sub get_secret
     return ($time, $secret);
 }
 
-sub generate_session
-{
-    my ($u, $opts) = @_;
-    my $udbh = LJ::get_cluster_master($u);
-    my $sess = {};
-    $opts->{'exptype'} = "short" unless $opts->{'exptype'} eq "long";
-    $sess->{'auth'} = LJ::rand_chars(10);
-    my $expsec = $opts->{'exptype'} eq "short" ? 60*60*24 : 60*60*24*7;
-    my $id = LJ::alloc_user_counter($u, 'S');
-    return undef unless $id;
-    $udbh->do("REPLACE INTO sessions (userid, sessid, auth, exptype, ".
-              "timecreate, timeexpire, ipfixed) VALUES (?,?,?,?,UNIX_TIMESTAMP(),".
-              "UNIX_TIMESTAMP()+$expsec,?)", undef,
-              $u->{'userid'}, $id, $sess->{'auth'}, $opts->{'exptype'}, $opts->{'ipfixed'});
-    return undef if $udbh->err;
-    $sess->{'sessid'} = $id;
-    $sess->{'userid'} = $u->{'userid'};
-    $sess->{'ipfixed'} = $opts->{'ipfixed'};
-    $sess->{'exptype'} = $opts->{'exptype'};
-
-    # clean up old sessions
-    my $old = $udbh->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
-                                        "userid=$u->{'userid'} AND ".
-                                        "timeexpire < UNIX_TIMESTAMP()");
-    LJ::kill_sessions($udbh, $u->{'userid'}, @$old) if $old;
-
-    # mark account as being used
-    LJ::mark_user_active($u, 'login');
-
-    return $sess;
-}
-
-sub kill_all_sessions
-{
-    my $u = shift;
-    return 0 unless $u;
-    my $udbh = LJ::get_cluster_master($u);
-    my $sessions = $udbh->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
-                                             "userid=$u->{'userid'}");
-    LJ::kill_sessions($udbh, $u->{'userid'}, @$sessions) if @$sessions;
-}
-
-sub kill_sessions
-{
-    my ($udbh, $userid, @sessids) = @_;
-    my $in = join(',', map { $_+0 } @sessids);
-    return 1 unless $in;
-    foreach (qw(sessions sessions_data)) {
-        $udbh->do("DELETE FROM $_ WHERE userid=? AND ".
-                  "sessid IN ($in)", undef, $userid);
-    }
-    foreach my $id (@sessids) {
-        $id += 0;
-        my $memkey = [$userid,"sess:$userid:$id"];
-        LJ::MemCache::delete($memkey);
-    }
-    return 1;
-}
-
-sub kill_session
-{
-    my $u = shift;
-    return 0 unless $u;
-    return 0 unless exists $u->{'_session'};
-    my $udbh = LJ::get_cluster_master($u);
-    LJ::kill_sessions($udbh, $u->{'userid'}, $u->{'_session'}->{'sessid'});
-    delete $BML::COOKIE{'ljsession'};
-    return 1;
-}
-
 # <LJFUNC>
 # name: LJ::get_reluser_id
 # des: for reluser2, numbers 1 - 31999 are reserved for livejournal stuff, whereas
@@ -8777,47 +8707,6 @@ sub weekuu_after_to_time
     my $time = ($week-1) * $WEEKSEC + 86400*3;
     $time += 10 * $uafter;
     return $time;
-}
-
-sub make_login_session
-{
-    my ($u, $exptype, $ipfixed) = @_;
-    $exptype ||= 'short';
-    return 0 unless $u;
-
-    my $etime = 0;
-    eval { Apache->request->notes('ljuser' => $u->{'user'}); };
-
-    my $sess_opts = {
-        'exptype' => $exptype,
-        'ipfixed' => $ipfixed,
-    };
-    my $sess = LJ::generate_session($u, $sess_opts);
-    $BML::COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime, 1 ];
-    LJ::set_remote($u);
-
-    LJ::load_user_props($u, "browselang", "schemepref" );
-    my $bl = LJ::Lang::get_lang($u->{'browselang'});
-    if ($bl) {
-        BML::set_cookie("langpref", $bl->{'lncode'} . "/" . time(), 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
-        BML::set_language($bl->{'lncode'});
-    }
-
-    # restore default scheme
-    if ($u->{'schemepref'} ne "") {
-      BML::set_cookie("BMLschemepref", $u->{'schemepref'}, 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
-      BML::set_scheme($u->{'schemepref'});
-    }
-
-    LJ::run_hooks("post_login", {
-        "u" => $u,
-        "form" => {},
-        "expiretime" => $etime,
-    });
-
-    LJ::mark_user_active($u, 'login');
-
-    return 1;
 }
 
 sub is_open_proxy

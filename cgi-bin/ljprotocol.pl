@@ -795,15 +795,15 @@ sub postevent
             my $modid = LJ::alloc_user_counter($uowner, "M");
             return fail($err, 501) unless $modid;
 
-            $dbcm->do("INSERT INTO modlog (journalid, modid, posterid, subject, logtime) ".
-                      "VALUES ($ownerid, $modid, $posterid, ?, NOW())", undef,
-                      LJ::text_trim($req->{'subject'}, 30, 0));
-            return fail($err, 501) if $dbcm->err;
+            $uowner->do("INSERT INTO modlog (journalid, modid, posterid, subject, logtime) ".
+                        "VALUES ($ownerid, $modid, $posterid, ?, NOW())", undef,
+                        LJ::text_trim($req->{'subject'}, 30, 0));
+            return fail($err, 501) if $uowner->err;
 
-            $dbcm->do("INSERT INTO modblob (journalid, modid, request_stor) ".
-                      "VALUES ($ownerid, $modid, $fr)");
-            if ($dbcm->err) {
-                $dbcm->do("DELETE FROM modlog WHERE journalid=$ownerid AND modid=$modid");
+            $uowner->do("INSERT INTO modblob (journalid, modid, request_stor) ".
+                        "VALUES ($ownerid, $modid, $fr)");
+            if ($uowner->err) {
+                $uowner->do("DELETE FROM modlog WHERE journalid=$ownerid AND modid=$modid");
                 return fail($err, 501);
             }
 
@@ -853,7 +853,7 @@ sub postevent
     LJ::replycount_do($uowner, $jitemid, "init");
 
     # remove comments and logprops on new entry ... see comment by this sub for clarification
-    LJ::Protocol::new_entry_cleanup_hack($dbcm, $u, $jitemid) if $LJ::NEW_ENTRY_CLEANUP_HACK;
+    LJ::Protocol::new_entry_cleanup_hack($u, $jitemid) if $LJ::NEW_ENTRY_CLEANUP_HACK;
     my $verb = $LJ::NEW_ENTRY_CLEANUP_HACK ? 'REPLACE' : 'INSERT';
 
     my $dberr;
@@ -910,11 +910,11 @@ sub postevent
     my $bytes = length($event) + length($req->{'subject'});
     $uowner->dudata_set('L', $jitemid, $bytes);
 
-    $dbcm->do("$verb INTO logtext2 (journalid, jitemid, subject, event) ".
-              "VALUES ($ownerid, $jitemid, ?, ?)", undef, $req->{'subject'}, 
-              LJ::text_compress($event));
-    if ($dbcm->err) {
-        my $msg = $dbcm->errstr;
+    $uowner->do("$verb INTO logtext2 (journalid, jitemid, subject, event) ".
+                "VALUES ($ownerid, $jitemid, ?, ?)", undef, $req->{'subject'}, 
+                LJ::text_compress($event));
+    if ($uowner->err) {
+        my $msg = $uowner->errstr;
         LJ::delete_entry($uowner, $jitemid);   # roll-back
         return fail($err,501,"logtext:$msg");
     }
@@ -923,10 +923,10 @@ sub postevent
 
     # keep track of custom security stuff in other table.
     if ($uselogsec) {
-        $dbcm->do("INSERT INTO logsec2 (journalid, jitemid, allowmask) ".
-                  "VALUES ($ownerid, $jitemid, $qallowmask)");
-        if ($dbcm->err) {
-            my $msg = $dbcm->errstr;
+        $uowner->do("INSERT INTO logsec2 (journalid, jitemid, allowmask) ".
+                    "VALUES ($ownerid, $jitemid, $qallowmask)");
+        if ($uowner->err) {
+            my $msg = $uowner->errstr;
             LJ::delete_entry($uowner, $jitemid);   # roll-back
             return fail($err,501,"logsec2:$msg");
         }
@@ -1205,12 +1205,12 @@ sub editevent
         $qallowmask != $oldevent->{'allowmask'})
     {
         if ($security eq "public" || $security eq "private") {
-            $dbcm->do("DELETE FROM logsec2 WHERE journalid=$ownerid AND jitemid=$itemid");
+            $uowner->do("DELETE FROM logsec2 WHERE journalid=$ownerid AND jitemid=$itemid");
         } else {
-            $dbcm->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) ".
-                      "VALUES ($ownerid, $itemid, $qallowmask)");
+            $uowner->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) ".
+                        "VALUES ($ownerid, $itemid, $qallowmask)");
         }
-        return fail($err,501,$dbcm->errstr) if $dbcm->err;
+        return fail($err,501,$dbcm->errstr) if $uowner->err;
     }
 
     LJ::MemCache::set([$ownerid,"logtext:$clusterid:$ownerid:$itemid"],
@@ -1219,10 +1219,10 @@ sub editevent
     if ($event ne $oldevent->{'event'} ||
         $req->{'subject'} ne $oldevent->{'subject'})
     {
-        $dbcm->do("UPDATE logtext2 SET subject=?, event=? ".
-                  "WHERE journalid=$ownerid AND jitemid=$itemid", undef,
-                  $req->{'subject'}, LJ::text_compress($event));
-        return fail($err,501,$dbcm->errstr) if $dbcm->err;
+        $uowner->do("UPDATE logtext2 SET subject=?, event=? ".
+                    "WHERE journalid=$ownerid AND jitemid=$itemid", undef,
+                    $req->{'subject'}, LJ::text_compress($event));
+        return fail($err,501,$uowner->errstr) if $uowner->err;
 
         # update disk usage
         $uowner->dudata_set('L', $itemid, $bytes);
@@ -1854,10 +1854,10 @@ sub editfriendgroups
             }
 
             my $in = join(",", @batch);
-            $dbcm->do("UPDATE log2 SET allowmask=allowmask & ~(1 << $bit) ".
-                      "WHERE journalid=$userid AND jitemid IN ($in) AND security='usemask'");
-            $dbcm->do("UPDATE logsec2 SET allowmask=allowmask & ~(1 << $bit) ".
-                      "WHERE journalid=$userid AND jitemid IN ($in)");
+            $u->do("UPDATE log2 SET allowmask=allowmask & ~(1 << $bit) ".
+                   "WHERE journalid=$userid AND jitemid IN ($in) AND security='usemask'");
+            $u->do("UPDATE logsec2 SET allowmask=allowmask & ~(1 << $bit) ".
+                   "WHERE journalid=$userid AND jitemid IN ($in)");
 
             foreach my $id (@batch) {
                 LJ::MemCache::delete([$userid, "log2:$userid:$id"]);
@@ -1903,14 +1903,15 @@ sub sessionexpire {
 
     # expunge one? or all?
     if ($req->{expireall}) {
-        LJ::kill_all_sessions($u);
+        $u->kill_all_sessions;
         return {};
     }
 
     # just expire a list
     my $list = $req->{expire} || [];
-    my $dbcm = LJ::get_cluster_master($u);
-    LJ::kill_sessions($dbcm, $u->{userid}, @$list) if @$list;
+    return {} unless @$list;
+    return fail($err,502) unless $u->writer;
+    $u->kill_sessions(@$list);
     return {};
 }
 
@@ -1930,7 +1931,7 @@ sub sessiongenerate {
         ipfixed => $boundip,
     };
 
-    my $sess = LJ::generate_session($u, $sess_opts);
+    my $sess = $u->generate_session($sess_opts);
 
     # return our hash
     return {
@@ -2379,7 +2380,7 @@ sub fail
 
 # PROBLEM: a while back we used auto_increment fields in our tables so that we could have
 # automatically incremented itemids and such.  this was eventually phased out in favor of
-# the more portably alloc_user_counter function which uses the 'counter' table.  when the
+# the more portable alloc_user_counter function which uses the 'counter' table.  when the
 # counter table has no data, it finds the highest id already in use in the database and adds
 # one to it.
 #
@@ -2394,7 +2395,7 @@ sub fail
 #
 # this code here removes any comments that happen to exist for the id we're now using.
 sub new_entry_cleanup_hack {
-    my ($dbcm, $u, $jitemid) = @_;
+    my ($u, $jitemid) = @_;
 
     # sanitize input
     $jitemid += 0;
@@ -2403,15 +2404,15 @@ sub new_entry_cleanup_hack {
     return unless $ownerid;
 
     # delete logprops
-    $dbcm->do("DELETE FROM logprop2 WHERE journalid=$ownerid AND jitemid=$jitemid");
+    $u->do("DELETE FROM logprop2 WHERE journalid=$ownerid AND jitemid=$jitemid");
 
     # delete comments
     my $ids = LJ::Talk::get_talk_data($u, 'L', $jitemid);
     return unless ref $ids eq 'HASH' && %$ids;
     my $list = join ',', map { $_+0 } keys %$ids;
-    $dbcm->do("DELETE FROM talk2 WHERE journalid=$ownerid AND jtalkid IN ($list)");
-    $dbcm->do("DELETE FROM talktext2 WHERE journalid=$ownerid AND jtalkid IN ($list)");
-    $dbcm->do("DELETE FROM talkprop2 WHERE journalid=$ownerid AND jtalkid IN ($list)");
+    $u->do("DELETE FROM talk2 WHERE journalid=$ownerid AND jtalkid IN ($list)");
+    $u->do("DELETE FROM talktext2 WHERE journalid=$ownerid AND jtalkid IN ($list)");
+    $u->do("DELETE FROM talkprop2 WHERE journalid=$ownerid AND jtalkid IN ($list)");
 }
 
 #### Old interface (flat key/values) -- wrapper aruond LJ::Protocol

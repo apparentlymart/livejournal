@@ -1337,7 +1337,7 @@ sub reset_password
     LJ::update_user($u, { password => $newpass, })
         or return $err->("Failed to update user table");
 
-    LJ::kill_all_sessions($u);
+    $u->kill_all_sessions;
 
     my $body = "The password for your $LJ::SITENAME account '$u->{'user'}' has been reset to:\n\n";
     $body .= "     $newpass\n\n";

@@ -17,21 +17,18 @@
     }
 
     if ($POST{'action:killall'}) {
-        LJ::kill_session($u);     # destroys the current cookie
-        LJ::kill_all_sessions($u);
-        LJ::set_remote(undef);
+        $u->kill_all_sessions;
         delete $COOKIE{'BMLschemepref'};
         BML::set_scheme(undef);
         $body = $ML{'.loggedout.killedall'};
         return;
     }
 
-    if ($u->{'_session'} && 
+    if ($u->{'_session'} &&
         $user eq $u->{'user'} &&
         $sessid == $u->{'_session'}->{'sessid'})
     {
-        LJ::kill_session($u);
-        LJ::set_remote(undef);
+        $u->kill_session;
         delete $COOKIE{'BMLschemepref'};
         BML::set_scheme(undef);
         $body = "$ML{'.loggedout.success'}";

@@ -188,7 +188,7 @@
         }
 
         if ($do_logout) {
-            LJ::kill_session($remote);
+            $remote->kill_session if $remote;
             foreach (qw(ljsession langpref)) {
                 delete $COOKIE{$_};
             }
@@ -228,9 +228,9 @@
             LJ::MemCache::delete($memkey);
         }
 
-        if ($do_login) 
+        if ($do_login)
         {
-            LJ::kill_session($remote);
+            $remote->kill_session if $remote;
             undef $remote;
             undef $cursess;
             LJ::set_remote(undef);
@@ -291,8 +291,8 @@
                 $etime = time()+60*60*24*60; 
                 $sess_opts->{'exptype'} = "long";
             }
-            
-            my $sess = LJ::generate_session($u, $sess_opts);
+
+            my $sess = $u->generate_session($sess_opts);
             $cursess = $sess;
 
             my @sopts;

@@ -2225,7 +2225,7 @@ sub init {
 
                 # if the user chooses to log in, do so
                 if ($form->{'do_login'} && ! @$errret) {
-                    $init->{didlogin} = LJ::make_login_session($up, $exptype, $ipfixed);
+                    $init->{didlogin} = $up->make_login_session($exptype, $ipfixed);
                 }
             } else {
                 $bmlerr->("$SC.error.badusername");
