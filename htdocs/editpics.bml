@@ -27,9 +27,15 @@
     return $err->($ML{'error.invalidauth'})
         unless $u;
 
-    my $returl = LJ::CleanHTML::canonical_url(LJ::durl($GET{'ret'}));
-    my $picurl = LJ::CleanHTML::canonical_url(LJ::durl($GET{'urlpic'}));
-    my $fotobilder = index($returl, $LJ::FB_DOMAIN >= 0) &&
+    # extra arguments for get requests
+    my $getextra;
+    if ($authas ne $remote->{'user'}) {
+        $getextra = "?authas=$authas";
+    }
+
+    my $returl = LJ::CleanHTML::canonical_url($POST{'ret'});
+    my $picurl = LJ::CleanHTML::canonical_url($POST{'urlpic'});
+    my $fotobilder = index($returl, $LJ::FB_DOMAIN) >= 0 &&
                      $picurl =~ m!^$LJ::FB_SITEROOT/~?$remote->{'user'}/pic/!;
 
     if ($fotobilder &&
@@ -560,57 +566,63 @@
                 }
             }
 
-            # set default comments?
-            if ($POST{'comments'} ne '' && $u->{'dversion'} > 6) {
-                my $comment = LJ::text_trim($POST{'comments'}, LJ::BMAX_UPIC_COMMENT, LJ::CMAX_UPIC_COMMENT);
-                $u->do("UPDATE userpic2 SET comment=? WHERE userid=? AND picid=?",
-                       undef, $POST{'comments'}, $u->{'userid'}, $picid);
+            # set default comments and the url
+            if ($u->{'dversion'} > 6) {
+                my (@data, @set);
+                if ($POST{'comments'} ne '') {
+                    push @set, 'comment=?';
+                    push @data, LJ::text_trim($POST{'comments'}, LJ::BMAX_UPIC_COMMENT, LJ::CMAX_UPIC_COMMENT);
+                }
+
+                if ($POST{'url'} ne '') {
+                    push @set, 'url=?';
+                    push @data, $POST{'url'};
+                }
+
+                if (@set) {
+                    my $set = join(',', @set);
+
+                    $u->do("UPDATE userpic2 SET $set WHERE userid=? AND picid=?",
+                           undef, @data, $u->{'userid'}, $picid);
+                }
             }
 
             my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
             LJ::MemCache::delete($memkey);
-        }
 
-        if ($fotobilder) {
-            my $redir_host = $1 if $returl =~ m#^http://([\.:\w-]+)#i;
-            BML::redirect($returl) if $LJ::REDIRECT_ALLOWED{$redir_host};
+            $returl = LJ::CleanHTML::canonical_url($POST{'ret'});
+            if ($returl) {
+                my $redir_host = $1 if $returl =~ m#^http://([\.:\w-]+)#i;
+                return BML::redirect($returl) if $LJ::REDIRECT_ALLOWED{$redir_host};
+            }
         }
 
         # now fall through to edit page and show the updated userpic info
     }
 
-    if ($fotobilder && $GET{'md5sum'}) {
+    if ($fotobilder && $POST{'md5sum'}) {
         my $id;
         if ($u->{'dversion'} > 6) {
             $id = $dbcm->selectrow_array("SELECT picid FROM userpic2 WHERE userid=? " .
-                                         "AND md5base64=?", undef, $u->{'userid'}, $GET{'md5sum'});
+                                         "AND md5base64=?", undef, $u->{'userid'}, $POST{'md5sum'});
         } else {
             $id = $dbh->selectrow_array("SELECT picid FROM userpic WHERE userid=? " .
-                                        "AND md5base64=?", undef, $u->{'userid'}, $GET{'md5sum'});
+                                        "AND md5base64=?", undef, $u->{'userid'}, $POST{'md5sum'});
         }
 
         $fotobilder = 0 if $id;
     }
 
-    # extra arguments for get requests
-    my $getextra;
-    if ($authas ne $remote->{'user'}) {
-        $getextra = "?authas=$authas";
-        $getextra .= "&ret=" . LJ::eurl($returl) if $fotobilder;
-    } else {
-        $getextra = "?ret=" . LJ::eurl($returl) if $fotobilder;
-    }
-
-
     # show the form to let people edit
     $title = "Edit User Pictures";
 
-    # authas switcher form
-    $body .= "<form method='get' action='editpics.bml'>\n";
-    $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
-    $body .= LJ::html_hidden('ret', $returl, 'urlpic', $picurl) if $fotobilder;
-    $body .= "</form>\n\n";
-
+    # Fixme: Make this work with Fotobilder
+    if (!$fotobilder) {
+        # authas switcher form
+        $body .= "<form method='get' action='editpics.bml'>\n";
+        $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+        $body .= "</form>\n\n";
+    }
 
     if (@errors) {
          $body .= "<?standout <strong>$ML{'error.procrequest'}</strong><ul><li>";
@@ -751,7 +763,8 @@
         if ($fotobilder) {
             $body .= "<tr><td colspan='3' align='center'>\n";
             $body .= "<img src='$picurl' />";
-            $body .= LJ::html_hidden('src', 'url', 'urlpic', $picurl);
+            my $url = LJ::CleanHTML::canonical_url($POST{'url'});
+            $body .= LJ::html_hidden('src', 'url', 'urlpic', $picurl, 'url', $url, 'ret' => $returl);
         } else {
             $body .= "<tr><td align='right'>\n";
             $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
@@ -782,7 +795,8 @@
             $body .= "<tr><td align='right'>";
             $body .= "<?help $LJ::HELPURL{'upic_comments'} help?>";
             $body .= "</td><td align='right'><label for='comments'>$ML{'.label.comment'}</label></td><td align='left'>";
-            $body .= LJ::html_text({ 'name' => 'comments', 'size' => '40', 'maxlength' => LJ::CMAX_UPIC_COMMENT });
+            my $comments = $POST{'comments'} if $fotobilder;
+            $body .= LJ::html_text({ 'name' => 'comments', 'size' => '40', 'maxlength' => LJ::CMAX_UPIC_COMMENT, 'value', $comments });
             $body .= "</td></tr>";
         }
 
