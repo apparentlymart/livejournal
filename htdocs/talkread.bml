@@ -155,7 +155,7 @@ body<=
 
  LJ::load_user_props($u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
  if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
-     $$head = LJ::robot_meta_tags();
+     $$head .= LJ::robot_meta_tags();
  }
 
  $r->notes("journalid" => $u->{'userid'});
