@@ -1,0 +1,25 @@
+<?_code
+{
+    use strict;
+    use vars qw(%GET);
+
+    BML::set_content_type("text/plain");
+    my $user = LJ::canonical_username($GET{'user'});
+    return "! bogus username\n" unless $user;
+    my $u = LJ::load_user($user);
+    return "! invalid user, or no interests\n" unless $u;
+
+    my $ret;
+    
+    my $ints = LJ::get_interests($u) || [];
+    foreach my $int (@$ints) {
+        $ret .= "$int->[0] $int->[2] $int->[1]\n";
+    }
+
+    return "! invalid user, or no interests\n" unless $ret;
+    $ret = "# Note: Polite data miners cache on their end.  Impolite ones get banned.\n" .
+           "# <intid> <intcount> <interest ...>\n" .
+           $ret;
+    return $ret;
+}
+_code?>
