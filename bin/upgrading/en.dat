@@ -1677,6 +1677,8 @@ if you would like to screen, unscreen, or delete the comments.
 
 /talkread.bml.replysuspended=<b>(Reply from suspended user)</b>
 
+/talkread.bml.select=Select
+
 /talkread.bml.screenedpost=<b>(Screened Post)</b>
 
 /talkread.bml.subjectdeleted=[deleted]
