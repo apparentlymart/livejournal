@@ -1392,7 +1392,7 @@ sub Color__set_hsl
 
 sub Color__red {
     my ($ctx, $this, $r) = @_;
-    if ($r) { 
+    if (defined $r) { 
         $this->{'r'} = $r % 256;
         delete $this->{'_hslset'};
         Color__make_string($this); 
@@ -1402,7 +1402,7 @@ sub Color__red {
 
 sub Color__green {
     my ($ctx, $this, $g) = @_;
-    if ($g) {
+    if (defined $g) {
         $this->{'g'} = $g % 256;
         delete $this->{'_hslset'};
         Color__make_string($this);
@@ -1412,7 +1412,7 @@ sub Color__green {
 
 sub Color__blue {
     my ($ctx, $this, $b) = @_;
-    if ($b) {
+    if (defined $b) {
         $this->{'b'} = $b % 256;
         delete $this->{'_hslset'};
         Color__make_string($this);
@@ -1423,7 +1423,7 @@ sub Color__blue {
 sub Color__hue {
     my ($ctx, $this, $h) = @_;
 
-    if ($h) {
+    if (defined $h) {
         $this->{'_h'} = $h % 256;
         $this->{'_hslset'} = 1;
         Color__update_rgb($this);
@@ -1435,7 +1435,7 @@ sub Color__hue {
 
 sub Color__saturation {
     my ($ctx, $this, $s) = @_;
-    if ($s) { 
+    if (defined $s) { 
         $this->{'_s'} = $s % 256;
         $this->{'_hslset'} = 1;
         Color__update_rgb($this);
@@ -1448,7 +1448,7 @@ sub Color__saturation {
 sub Color__lightness {
     my ($ctx, $this, $l) = @_;
 
-    if ($l) {
+    if (defined $l) {
         $this->{'_l'} = $l % 256;
         $this->{'_hslset'} = 1;
         Color__update_rgb($this);
