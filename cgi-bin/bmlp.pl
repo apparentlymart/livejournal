@@ -274,10 +274,17 @@ sub handle_request
 			$BMLEnv{'DefaultScheme'};
 
 	if ($BMLEnv{'VarInitScript'}) {
+	    my $err;
 	    foreach my $is (split(/\s*,\s*/, $BMLEnv{'VarInitScript'})) {
-		&load_look_from_initscript($is);
+		last unless &load_look_from_initscript($is, \$err);
+	    }
+	    if ($err) {
+		print "Content-type: text/html\n\n";
+		print "<b>Error loading VarInitScript:</b><br />\n$err";
+		return 0;
 	    }
 	}
+
 	&load_look("", "global");
 	&load_look($BMLSCHEME, "generic");
 
@@ -933,6 +940,13 @@ sub load_elements
 sub load_look_from_initscript
 {
     my $file = shift;
+    my $errref = shift;
+    my $dummy;
+    $errref ||= \$dummy;
+    unless (-e $file) {
+	$$errref = "Can't find VarInitScript: $file";
+	return 0;
+    }
     return 0 unless (-e $file);
 
     my $modtime;
@@ -944,8 +958,6 @@ sub load_look_from_initscript
     &note_mod_time($modtime);
     if ($modtime > $FileModTime{$file})
     {
-	$FileModTime{$file} = $modtime;
-
 	my $init;
 	open (IS, $file);
 	while (<IS>) {
@@ -958,6 +970,12 @@ sub load_look_from_initscript
 	&BML::register_block_setup({ 'data' => $FileBlockData{$file},
 				     'flags' => $FileBlockFlags{$file}, });
 	eval($init);
+	if ($@) {
+	    $$errref = $@;
+	    return 0;
+	}
+
+	$FileModTime{$file} = $modtime;
     } 
     
     my @expandconstants;
