@@ -535,7 +535,7 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
             $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
             $$ret .= "<td>$ML{'.replysuspended'}";
             if (LJ::Talk::can_delete($dbs, $remote, $u, $up, $userpost)) {
-                $$ret .= " <a href='delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+                $$ret .= " <a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
             }
             $$ret .= "</td></tr></table>\n";
         } else {
@@ -604,13 +604,13 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
                 if ($post->{'state'} eq 'A' && 
                     LJ::Talk::can_screen($dbs, $remote, $u, $up, $userpost))
                 {
-                    $$ret .= "<a href='talkscreen.bml?mode=screen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+                    $$ret .= "<a href='/talkscreen.bml?mode=screen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
                 }
 
                 if ($post->{'state'} eq 'S' && 
                     LJ::Talk::can_unscreen($dbs, $remote, $u, $up, $userpost))
                 {
-                    $$ret .= "<a href='talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+                    $$ret .= "<a href='/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
                 }
 
                 if ($showmultiform) {
@@ -687,7 +687,7 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
 
      if ($post_count > 0)
      {
-         $ret .= "<form style='display: inline' method='post' action='talkmulti.bml'>";
+         $ret .= "<form style='display: inline' method='post' action='/talkmulti.bml'>";
          $ret .= LJ::html_hidden("ditemid", $ditemid);
          $ret .= LJ::html_hidden("journal", $u->{'user'});
 
