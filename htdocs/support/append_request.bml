@@ -7,6 +7,9 @@ body<=
     use strict;
     use vars qw(%FORM);
 
+    my $apache_req = shift;
+    my $r = $apache_req->{'r'};
+
     my $status = "";
 
     my $spid = $FORM{'spid'}+0;
@@ -15,11 +18,6 @@ body<=
 
     if ($sp->{'state'} eq "closed") {
         return "<?h1 Closed h1?><?p This support request has since been closed. p?>";
-    }
-
-    my $u;
-    if ($sp->{'reqtype'} eq "user") {
-        $u = LJ::load_userid($sp->{'requserid'});
     }
 
     my $remote = LJ::get_remote();
@@ -142,8 +140,10 @@ body<=
         # append notice that this message was bounced
         my $splid = LJ::Support::append_request($sp, {
             'body' => "(Bouncing mail to '" . join(', ', @emails) . "' and closing)\n\n" . $FORM{'body'},
-            'posterid' => $remote ? $remote->{'userid'} : 0,
+            'posterid' => $remote,
             'type' => 'internal',
+            'uniq' => $r->notes('uniq'),
+            'remote' => $remote,
         });
 
         # bounce original request to email
@@ -214,9 +214,10 @@ body<=
 
     my $splid = LJ::Support::append_request($sp, {
         'body' => $status . $FORM{'body'},
-        'posterid' => $remote ? $remote->{'userid'} : 0,
         'type' => $type,
         'faqid' => $faqid,
+        'uniq' => $r->notes('uniq'),
+        'remote' => $remote,
     });
 
     LJ::Support::mail_response_to_user($sp, $splid);

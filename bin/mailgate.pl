@@ -118,7 +118,6 @@ if ($toarg =~ /^(\d+)z(.+)$/)
     my $splid = LJ::Support::append_request($sp, {
         'type' => 'comment',
         'body' => $body,
-        'posterid' => 0,
     }) or die "Error appending request?";
 
     LJ::Support::touch_request($spid);

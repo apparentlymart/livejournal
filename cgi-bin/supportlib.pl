@@ -334,6 +334,34 @@ sub file_request
     my $errors = shift;
     my $o = shift;
 
+    my $email = $o->{'reqtype'} eq "email" ? $o->{'reqemail'} : "";
+    my $log = { 'uniq' => $o->{'uniq'},
+                'email' => $email };
+    my $userid = 0;
+
+    unless ($email) {
+        if ($o->{'reqtype'} eq "user") {
+            my $u = LJ::load_userid($o->{'requserid'});
+            $userid = $u->{'userid'};
+
+            $log->{'user'} = $u->{'user'};
+            $log->{'email'} = $u->{'email'};
+
+            if (LJ::sysban_check('support_user', $u->{'user'})) {
+                return LJ::sysban_block($userid, "Support request blocked based on user", $log);
+            }
+
+            $email = $u->{'email'};
+        }
+    }
+
+    if (LJ::sysban_check('support_email', $email)) {
+        return LJ::sysban_block($userid, "Support request blocked based on email", $log);
+    }
+    if (LJ::sysban_check('support_uniq', $o->{'uniq'})) {
+        return LJ::sysban_block($userid, "Support request blocked based on uniq", $log);
+    }
+
     my $reqsubject = LJ::trim($o->{'subject'});
     my $reqbody = LJ::trim($o->{'body'});
 
@@ -406,15 +434,7 @@ sub file_request
         
     $sth = $dbh->prepare("INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) VALUES (NULL, $spid, UNIX_TIMESTAMP(), 'req', 0, $qrequserid, $qbody)");
     $sth->execute;
-    
-    my $email = $o->{'reqtype'} eq "email" ? $o->{'reqemail'} : "";
-    unless ($email) {
-        if ($o->{'reqtype'} eq "user") {
-            my $u = LJ::load_userid($o->{'requserid'});
-            $email = $u->{'email'};
-        }
-    }
-    
+
     my $body;
     my $miniauth = mini_auth({ 'authcode' => $authcode });
     $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
@@ -476,7 +496,31 @@ sub append_request
     # $re->{'body'}
     # $re->{'type'}    (req, answer, comment, internal, screened)
     # $re->{'faqid'}
-    # $re->{'posterid'}  (or 0 if no username known)
+    # $re->{'remote'}  (remote if known)
+    # $re->{'uniq'}    (uniq of remote)
+
+    my $remote = $re->{'remote'};
+    my $posterid = $remote ? $remote->{'userid'} : 0;
+
+    # check for a sysban
+    my $log = { 'uniq' => $re->{'uniq'} };
+    if ($remote) {
+
+        $log->{'user'} = $remote->{'user'};
+        $log->{'email'} = $remote->{'email'};
+
+        if (LJ::sysban_check('support_user', $remote->{'user'})) {
+            return LJ::sysban_block($remote->{'userid'}, "Support request blocked based on user", $log);
+        }
+        if (LJ::sysban_check('support_email', $remote->{'email'})) {
+            return LJ::sysban_block($remote->{'userid'}, "Support request blocked based on email", $log);
+        }
+    }
+
+    if (LJ::sysban_check('support_uniq', $re->{'uniq'})) {
+        my $userid = $remote ? $remote->{'userid'} : 0;
+        return LJ::sysban_block($userid, "Support request blocked based on uniq", $log);
+    }
 
     my $message = $re->{'body'};
     $message =~ s/^\s+//;
@@ -488,7 +532,7 @@ sub append_request
     my $qtype = $dbh->quote($re->{'type'});
 
     my $qfaqid = $re->{'faqid'}+0;
-    my $quserid = $re->{'posterid'}+0;
+    my $quserid = $posterid+0;
     my $spid = $sp->{'spid'}+0;
 
     my $sql = "INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) VALUES (NULL, $spid, UNIX_TIMESTAMP(), $qtype, $qfaqid, $quserid, $qmessage)";
@@ -506,7 +550,7 @@ sub append_request
     $sth->execute;
     my @to_notify;
     while (my ($email, $userid, $user) = $sth->fetchrow_array) {
-        next if $re->{'posterid'} == $userid;
+        next if $posterid == $userid;
         next if ($re->{'type'} eq "screened" &&
                  ! can_read_screened($sp, LJ::make_remote($user, $userid)));
         next if ($re->{'type'} eq "internal" &&
