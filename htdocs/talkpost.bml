@@ -57,7 +57,6 @@ body<=
     {
         my $qparentid = $init->{'replyto'};
 
-        my $parpost;
         my $sql = "SELECT t.posterid, t.nodetype, t.nodeid AS 'itemid', ".
             "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(t.datepost) AS 'secondsold', ".
             "t.state, l.anum FROM talk2 t, log2 l WHERE l.journalid=$u->{'userid'} AND ".
