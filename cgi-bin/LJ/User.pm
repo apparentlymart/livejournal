@@ -251,6 +251,11 @@ sub generate_session
     my ($u, $opts) = @_;
     my $udbh = LJ::get_cluster_master($u);
     return undef unless $udbh;
+
+    # clean up any old, expired sessions they might have (lazy clean)
+    $u->do("DELETE FROM sessions WHERE userid=? AND timeexpire < UNIX_TIMESTAMP()",
+           undef, $u->{userid});
+
     my $sess = {};
     $opts->{'exptype'} = "short" unless $opts->{'exptype'} eq "long" ||
                                         $opts->{'exptype'} eq "once";

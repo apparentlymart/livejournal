@@ -2415,6 +2415,12 @@ register_alter(sub {
 		 "ALTER TABLE syndicated ADD oldest_ourdate DATETIME AFTER lastnew");
     }
 
+    if (column_type("sessions", "userid") =~ /mediumint/) {
+        do_alter("sessions",
+                "ALTER TABLE sessions MODIFY COLUMN userid INT UNSIGNED NOT NULL");
+    }
+
+
 });
 
 1; # return true
