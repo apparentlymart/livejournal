@@ -171,6 +171,7 @@ function deleteComment (ditemid) {
     killPopup();
 
     var todel = document.getElementById("ljcmt" + ditemid);
+
     var col = 0;
     var pulse = 0;
     var is_deleted = 0;
@@ -391,16 +392,28 @@ function poofAt (pos) {
 }
 
 function updateLink (ae, resObj, clickTarget) {
-    //ae.style.display = 'none';  /* hide it for now? */
     ae.href = resObj.newurl;
-    //alert(resObj.oldimage + ", " + resObj.newimage + ", link to: " + resObj.newurl);
+
+    var userhook = window["userhook_" + resObj.mode + "_comment_ARG"];
+    var did_something = 0;
 
     if (clickTarget && clickTarget.src && clickTarget.src == resObj.oldimage) {
         clickTarget.src = resObj.newimage;
+        did_something = 1;
     }
 
-    var userhook = window["userhook_" + resObj.mode + "_comment_ARG"];
-    if (userhook) userhook(resObj.id);
+    if (userhook) {
+        userhook(resObj.id);
+        did_something = 1;
+    }
+
+    // if all else fails, at least remove the link so they're not as confused
+    if (! did_something) {
+        if (ae && ae.style)
+            ae.style.display = 'none';
+        if (clickTarget && clickTarget.style)
+            clickTarget.style.dispay = 'none';
+    }
 
 }
 
