@@ -1555,4 +1555,11 @@ sub find_user_cluster
     return 1;
 }
 
+sub fb_push
+{
+    my $u = LJ::want_user( shift() );
+    return unless $u && LJ::get_cap( $u, 'fb_account' );
+    return Apache::LiveJournal::Interface::FotoBilder::push_user_info( $u->{userid} );
+}
+
 1;

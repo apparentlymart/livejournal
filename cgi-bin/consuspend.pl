@@ -206,10 +206,13 @@ sub suspend
         }
 
         LJ::update_user($u->{'userid'}, { statusvis => $status, raw => 'statusvisdate=NOW()' });
+        $u->{statusvis} = $status;
 
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, $cmd, $reason);
 
-        push @$out, [ "info", "$username ${cmd}ed." ];
+        LJ::Con::fb_push( $u );
+
+        push @$out, [ "info", "User ${cmd}ed." ];
     }
 
     return 1;

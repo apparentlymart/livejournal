@@ -91,6 +91,25 @@ sub get_user_info
     return \%ret;
 }
 
+# Forcefully push user info out to FB.
+# We use this for cases where we don't want to wait for 
+# sync cache timeouts, such as user suspensions.
+sub push_user_info
+{
+    my $uid = LJ::want_userid( shift() );
+    return unless $uid;
+
+    my $ret = get_user_info({ uid => $uid });
+
+    eval "use XMLRPC::Lite;";
+    return if $@;
+
+    return XMLRPC::Lite
+        -> proxy("$LJ::FB_SITEROOT/interface/xmlrpc")
+        -> call('FB.XMLRPC.update_userinfo', $ret)
+        -> result;
+}
+
 # get_user_info above used to be called 'checksession', maintain
 # an alias for compatibility
 sub checksession { get_user_info(@_); }
