@@ -199,7 +199,7 @@ body<=
      # in the call below.
 
      if ($parpost && $parpost->{'state'} eq "S" && 
-         !LJ::Talk::can_unscreen($dbs, $up, $u, $ujp->{'user'})) {
+         !LJ::Talk::can_unscreen($dbs, $up, $u, $ujp, $ujp->{'user'})) {
          push @errors, $ML{'.error.screened'};
      }
  }
