@@ -555,6 +555,7 @@ body<=
      # mail them the response
      my $parentcomment = "";
      my $parentmailed = "";  # who if anybody was just mailed
+     my $parentpreformatted = 0;
 
      if ($partid) 
      {  
@@ -570,22 +571,20 @@ body<=
          my ($paruserid, $parbody) = $sth->fetchrow_array;
          $parentcomment = $parbody;
 
-         # convert to UTF-8 if necessary
-         if ($LJ::UNICODE) {
-             my %props = ($partid => {});
-
-             if ($clustered) {
-                 LJ::load_props($dbs, "talk");
-                 LJ::load_talk_props2($dbcr, $u->{'userid'}, [$partid], \%props);
-             } else {
-                 LJ::load_talk_props($dbs, [$partid], \%props);
-             }
-             if ($props{$partid}->{'unknown8bit'}) {
-                 LJ::item_toutf8($dbs, $u, \$textsubject, \$parentcomment, {});
-                 LJ::item_toutf8($dbs, $u, \$cleansubject, undef, {});
-             }
+         my %props = ($partid => {});
+         if ($clustered) {
+             LJ::load_props($dbs, "talk");
+             LJ::load_talk_props2($dbcr, $u->{'userid'}, [$partid], \%props);
+         } else {
+             LJ::load_talk_props($dbs, [$partid], \%props);
          }
+         $parentpreformatted = $props{$partid}->{'opt_preformatted'};
 
+         # convert to UTF-8 if necessary
+         if ($LJ::UNICODE && $props{$partid}->{'unknown8bit'}) {
+             LJ::item_toutf8($dbs, $u, \$textsubject, \$parentcomment, {});
+             LJ::item_toutf8($dbs, $u, \$cleansubject, undef, {});
+         }
         
          if ($paruserid) {
              my $qparuserid = $dbr->quote($paruserid);
@@ -650,7 +649,7 @@ body<=
                  $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\"></head><BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
                  $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your LiveJournal comment</A> in which you said:</TD></TR></TABLE>\n\n";
                  my $htmlbody = $parentcomment;
-                 LJ::CleanHTML::clean_comment(\$htmlbody);
+                 LJ::CleanHTML::clean_comment(\$htmlbody, $parentpreformatted);
                  $html .= &blockquote($htmlbody);
                  
                  $html .= "\n\nTheir reply was:\n\n";
@@ -771,12 +770,12 @@ body<=
          if ($parentcomment)  {
              $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your LiveJournal post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
              my $cleancom = $parentcomment;
-             LJ::CleanHTML::clean_comment(\$cleancom);
+             LJ::CleanHTML::clean_comment(\$cleancom, $parentpreformatted);
              $html .= &blockquote($cleancom);
          } else {
              $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your LiveJournal post</A> in which you said:</TD></TR></TABLE>\n";
              my $clean = $item->{'event'};
-             LJ::CleanHTML::clean_event(\$clean);
+             LJ::CleanHTML::clean_event(\$clean, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'}});
              $html .= &blockquote($clean);
          }
          $html .= "\n\nTheir reply was:\n\n";
