@@ -50,31 +50,23 @@
      }
  }
 
-# load the item being shown
-{
-    my $id = $po->{'itemid'}+0;
-    my $log;
-    if ($u->{'clusterid'}) { 
-        $id = int($id / 256); 
-        my $udbr = LJ::get_cluster_reader($u);
-        $log = $udbr->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=? AND anum=?",
-                                        undef, $u->{'userid'}, int($po->{'itemid'} / 256), $po->{'itemid'} % 256);
-        $log->{'ownerid'} = $log->{'journalid'};
-    } else {
-        $log = $dbr->selectrow_hashref("SELECT * FROM log WHERE itemid=?",
-                                       undef, $po->{'itemid'});
-    }
-    unless ($log) {
-        return "Owning post deleted, so poll no longer accessible.";
-    }
+ # load the item being shown
+ my $udbr = LJ::get_cluster_reader($u);
+ my $itemid = int($po->{'itemid'} / 256);
+ my $anum = $po->{'itemid'} % 256;
+ my $log = $udbr->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=? AND anum=?",
+                                     undef, $u->{'userid'}, $itemid, $anum);
+ $log->{'ownerid'} = $log->{'journalid'};
+ unless ($log) {
+     return "Owning post deleted, so poll no longer accessible.";
+ }
 
-    unless (LJ::can_view($dbs, $remote, $log)) {
-        $body = "Sorry, you're not permitted to see this poll.";
-        return;
-    }
-}
+ unless (LJ::can_view($dbs, $remote, $log)) {
+     $body = "Sorry, you're not permitted to see this poll.";
+     return;
+ }
 
- $body .= "<a href=\"$LJ::SITEROOT/talkread.bml?${jarg}itemid=$po->{'itemid'}\">[ Discuss Results ]</a> ";
+ $body .= "<a href='" . LJ::item_link($u, $itemid, $anum) . "'>[ Discuss Results ]</a> ";
  
  if ($FORM{'mode'} eq "ans") { $mode = "ans"; } # also allowed, but not shown
 
