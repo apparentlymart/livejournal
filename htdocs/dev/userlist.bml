@@ -1,0 +1,80 @@
+<?page
+title=>Users on this server
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET);
+    return "Not a dev server." unless $LJ::IS_DEV_SERVER;
+
+    my $ret = "";
+    my $dbr = LJ::get_db_reader();
+    my %ss;
+    my $h = $dbr->prepare("SELECT userid,user,journaltype,statusvis FROM user LIMIT 500");
+    $h->execute;
+    while (my $row = $h->fetchrow_hashref) {
+        $ss{$row->{'userid'}} = $row;
+    }
+    $h = $dbr->prepare("SELECT * FROM reluser");
+    $h->execute;
+    while (my $row = $h->fetchrow_hashref) {
+        push @{$ss{$row->{'userid'}}->{'reluser'}}, $row;
+    }
+
+    # sort bar
+    $ret .= "<?p <strong>Sort by:</strong> [<a href='users.bml'> Nothing
+	    </a>|<a href='users.bml?sort=id'> User ID
+	    </a>|<a href='users.bml?sort=user'> Username
+	    </a>|<a href='users.bml?sort=jt'> Journal Type
+	    </a>|<a href='users.bml?sort=sv'> Status Vis
+	    </a>|<a href='users.bml?sort=re'> Number of reluser edges
+	    </a>] <br /><br /> p?>";
+
+    my @keyorder;
+    if ($GET{'sort'} eq 'id') {
+        @keyorder = sort { $a <=> $b } keys %ss;
+    } elsif ($GET{'sort'} eq 'user') {
+        @keyorder = sort { $ss{$a}->{'user'} cmp $ss{$b}->{'user'} } keys %ss;
+    } elsif ($GET{'sort'} eq 'jt') {
+        @keyorder = sort { $ss{$a}->{'journaltype'} cmp $ss{$b}->{'journaltype'}
+                           || $ss{$a}->{'user'} cmp $ss{$b}->{'user'} } keys %ss;
+    } elsif ($GET{'sort'} eq 'sv') {
+        @keyorder = sort { $ss{$a}->{'statusvis'} cmp $ss{$b}->{'statusvis'}
+                           || $ss{$a}->{'user'} cmp $ss{$b}->{'user'} } keys %ss;
+    } elsif ($GET{'sort'} eq 're') {
+        my $g = sub {
+            my $r = shift;
+            return 0 unless $r;
+            return scalar(@$r);
+        };
+        @keyorder = sort { $g->($ss{$a}->{'reluser'}) <=>
+			       $g->($ss{$b}->{'reluser'}) } keys %ss;
+    }
+
+    $ret .= "<table width='100%' border='1'>
+	    <tr valign='bottom'><td><b>User ID</b></td><td><b>Username</b></td>
+	    <td><b>T/S</b></td><td><b>Reluser Edges</b></td></tr>";
+
+    foreach my $userid (@keyorder) {
+        my $hr = $ss{$userid};
+        $ret .= "<tr><td><b>$userid</b></td><td>";
+        $ret .= LJ::ljuser($hr->{'user'}, {type=> $hr->{'journaltype'}});
+        $ret .= "</td><td><b>$hr->{'journaltype'}</b>/<b>$hr->{'statusvis'}</b></td><td>";
+        if ($hr->{'reluser'} && scalar(@{$hr->{'reluser'}})) {
+            my $c = 0;
+            foreach my $t (sort { $a->{'type'} cmp $b->{'type'} }
+                           @{$hr->{'reluser'}}) {
+                $ret .= "; " if $c;
+                $ret .= "<b>$t->{'type'}</b>/";
+                $ret .= LJ::ljuser($ss{$t->{'targetid'}}->{'user'}, {type=>
+                                                                         $ss{$t->{'targetid'}}->{'journaltype'}});
+                $c = 1;
+            }
+        }
+        $ret .= "</td></tr>";
+    }
+    $ret .= "</table>";
+    return $ret;
+}
+_code?>
+page?>
