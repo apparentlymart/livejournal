@@ -67,14 +67,15 @@ sub validate
 
 #
 # entry point to do a search: give it 
-#    a db handle, 
+#    a db-read handle
+#    db-master handle, 
 #    hashref of the request,
 #    a listref of where to put the user hashrefs returned,
 #    hashref of where to return results of the query
 
 sub do_search
 {
-    my ($dbh, $req, $users, $info) = @_;
+    my ($dbh, $dbmaster, $req, $users, $info) = @_;
     my $sth;
 
     # clear return buffers
@@ -209,7 +210,7 @@ sub do_search
     ## let's see if it's cached.
     {
 	my $csql = "SELECT userids FROM ${pfx}dirsearchres2 WHERE qdigest=$qdig AND dateins > DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
-	my $sth = $dbh->prepare($csql);
+	my $sth = $dbmaster->prepare($csql);
 	$sth->execute;
 	if ($dbh->err) {  $info->{'errmsg'} = $dbh->errstr; return 0; }
 
@@ -237,7 +238,7 @@ sub do_search
 
 	# insert it into the cache
 	my $ids = $dbh->quote(join(",", @ids));
-	$dbh->do("REPLACE INTO ${pfx}dirsearchres2 (qdigest, dateins, userids) VALUES ($qdig, NOW(), $ids)");
+	$dbmaster->do("REPLACE INTO ${pfx}dirsearchres2 (qdigest, dateins, userids) VALUES ($qdig, NOW(), $ids)");
 	$count = scalar(@ids);
     }
 
