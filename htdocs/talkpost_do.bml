@@ -267,9 +267,9 @@ BODY<=
      $insertid = $dbcm->selectrow_array
 	 (
 	  "SELECT t.jtalkid FROM talk2 t, talktext2 tt WHERE ".
-	  "t.journalid=$u->{'userid'} AND tt.journalid=tt.$u->{'userid'} ".
+	  "t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
 	  "AND t.jtalkid=tt.jtalkid ".
-	  "AND AND t.nodetype='L' AND t.nodeid=$itemid ".
+	  "AND t.nodetype='L' AND t.nodeid=$itemid ".
 	  "AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' ".
 	  "AND t.parenttalkid=$qpartid"
 	  );
@@ -383,7 +383,8 @@ BODY<=
      
      # update the "replycount" summary field of the log table
      if ($clustered) {
-	 LJ::cmd_buffer_add($dbcm, $u->{'userid'}, "replycount", { 'itemid' => $itemid });
+	 $dbcm->do("UPDATE log2 SET replycount=replycount+1 WHERE ".
+		   "journalid=$u->{'userid'} AND jitemid=$itemid");
      } else {
 	 LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");	 
      }

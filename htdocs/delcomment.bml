@@ -103,11 +103,10 @@ BODY<=
 
  if ($clustered) {
      my $jid = $u->{'userid'};
-     $dbcm->do("UPDATE talk2 SET state='D' WHERE journalid=$jid AND jtalkid=$qid");
-     $dbcm->do("UPDATE talktext2 SET subject=NULL, body=NULL WHERE journalid=$jid AND jtalkid=$qid");
-     $dbcm->do("DELETE FROM talkprop2 WHERE journalid=$jid AND jtalkid=$qid");
+     LJ::delete_talkitem($dbcm, $jid, $qid);
      if ($tp->{'nodetype'} eq "L") {
-     	 LJ::cmd_buffer_add($dbcm, $jid, "replycount", { 'itemid' => $qitemid, 'del' => 1 });
+	 $dbcm->do("UPDATE log2 SET replycount=replycount-1 WHERE ".
+		   "journalid=$jid AND jitemid=$tp->{'itemid'}");
      }
  } else {
      $dbh->do("UPDATE talk SET state='D' WHERE talkid=$qid");

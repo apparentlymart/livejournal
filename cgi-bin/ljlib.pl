@@ -942,6 +942,13 @@ sub get_form_data
     }
     
     # Split the name-value pairs
+    LJ::urlargs_to_hash($buffer, $hashref);
+}
+
+sub urlargs_to_hash
+{
+    my ($buffer, $hashref) = @_;
+
     my $pair;
     my @pairs = split(/&/, $buffer);
     my ($name, $value);
@@ -954,6 +961,7 @@ sub get_form_data
         $name =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
         $hashref->{$name} .= $hashref->{$name} ? "\0$value" : $value;
     }
+    return 1;
 }
 
 # <LJFUNC>
@@ -3627,6 +3635,56 @@ sub cmd_buffer_add
 	    "VALUES ($journalid, $qcmd, NOW(), $qargs)");
 }
 
+sub cmd_buffer_flush
+{
+    my ($dbh, $db, $cmd, $userid) = @_;
+    return 0 unless $cmd;
+    
+    my $cmds = {
+	'delitem' => {
+	    'run' => sub {
+		my ($dbh, $db, $c) = @_;
+		my $a = $c->{'args'};
+		LJ::delete_item2($dbh, $db, $c->{'journalid'}, $a->{'itemid'}, 
+				 0, $a->{'anum'});
+	    },
+	},
+    };
+    # TODO: call hook to augment dispatch table with site-defined commands
+    return 0 unless defined $cmds->{$cmd};
+
+    my $clist;
+    my $loop = 1;
+    my $cd = $cmds->{$cmd};
+    my $where = "cmd=" . $dbh->quote($cmd);
+    if ($userid) {
+	$where .= " AND journalid=" . $dbh->quote($userid);
+    }
+    
+    while ($loop &&
+	   ($clist = $db->selectcol_arrayref("SELECT cbid FROM cmdbuffer ".
+					     "WHERE $where ORDER BY cbid LIMIT 20")) &&
+	   $clist && @$clist)
+    {
+	foreach my $cbid (@$clist) {
+	    my $got_lock = $db->selectrow_array("SELECT GET_LOCK('cbid-$cbid',10)");
+	    return 0 unless $got_lock;
+	    my $c = $db->selectrow_hashref("SELECT * FROM cmdbuffer WHERE cbid=$cbid");
+	    next unless $c;
+
+	    my $a = {};
+	    LJ::urlargs_to_hash($c->{'args'}, $a);
+	    $c->{'args'} = $a;
+	    $cmds->{$cmd}->{'run'}->($dbh, $db, $c);
+
+	    $db->do("DELETE FROM cmdbuffer WHERE cbid=$cbid");
+	    $db->do("SELECT RELEASE_LOCK('cbid-$cbid')");
+	}
+	$loop = 0 unless scalar(@$clist) == 20;
+    }
+    return 1;
+}
+
 sub query_buffer_flush
 {
     my ($dbarg, $table) = @_;
@@ -4299,27 +4357,64 @@ sub delete_item
 # <LJFUNC>
 # name: LJ::delete_item2
 # des: Deletes a user's journal item from a cluster.
-# args: dbcm, journalid, jitemid, quick?
-# des-dbcm: Cluster master db handle to delete item from.
+# args: dbh, dbcm, journalid, jitemid, quick?, anum?
+# des-dbcm: Cluster master db to delete item from.
 # des-journalid: Journal ID item is in.
 # des-jitemid: Journal itemid of item to delete.
 # des-quick: Optional boolean.  If set, only [dbtable[log2]] table
 #            is deleted from and the rest of the content is deleted
 #            later using [func[LJ::cmd_buffer_add]].
+# des-anum: The log item's anum, which'll be needed to delete lazily
+#           some data in tables which includes the anum, but the
+#           log row will already be gone so we'll need to store it for later.
 # returns: boolean; 1 on sucess, 0 on failure.
 # </LJFUNC>
 sub delete_item2
 {
-    my ($dbcm, $journalid, $jitemid, $quick) = @_;
-    $journalid += 0; $jitemid += 0;
+    my ($dbh, $dbcm, $jid, $jitemid, $quick, $anum) = @_;
+    $jid += 0; $jitemid += 0;
 
-    $dbcm->do("DELETE FROM log2 WHERE journalid=$journalid AND jitemid=$jitemid");
+    $dbcm->do("DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid");
 
-    return LJ::cmd_buffer_add($dbcm, $journalid, "delitem", {
+    return LJ::cmd_buffer_add($dbcm, $jid, "delitem", {
 	'itemid' => $jitemid,
+	'anum' => $anum,
     }) if $quick;
     
-    # FIXME: TODO: actually delete the rest.
+    # delete from clusters
+    foreach my $t (qw(logtext2 recent_logtext2 logprop2 logsec2 logsubject2)) {
+	$dbcm->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$jitemid");
+    }
+
+    # delete stuff from meta cluster
+    my $aitemid = $jitemid * 256 + $anum;
+    foreach my $t (qw(memorable topic_map)) {
+	$dbh->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$aitemid");
+    }
+
+    # delete comments
+    my ($t, $loop) = (undef, 1);
+    while ($loop && 
+	   ($t = $dbcm->selectall_arrayref("SELECT jtalkid FROM talk2 WHERE ".
+					   "nodetype='L' AND journalid=$jid ".
+					   "AND nodeid=$jitemid LIMIT 50"))
+	   && $t && @$t)
+    {
+	foreach my $jtalkid (@$t) {
+	    LJ::delete_talkitem($dbcm, $jid, $jtalkid);
+	}
+	$loop = 0 unless @$t == 50;
+    }
+    return 1;
+}
+
+sub delete_talkitem
+{
+    my ($dbcm, $jid, $jtalkid) = @_;
+    $jid += 0; $jtalkid += 0;
+    foreach my $t (qw(talk2 talkprop2 talktext2 recent_talktext2)) {
+	$dbcm->do("DELETE FROM $t WHERE journalid=$jid AND jtalkid=$jtalkid");
+    }
     return 1;
 }
 

@@ -475,6 +475,12 @@ sub postevent
 	$dbcm = LJ::get_cluster_master($uowner);
 	$clustered = 1;
 
+	# before we get going here, we want to make sure to purge this user's
+	# delitem cmd buffer, otherwise we could have a race and that might
+	# wake up later and delete this item which is replacing in the database
+	# the old last item which is marked for deletion:
+	LJ::cmd_buffer_flush($dbh, $dbcm, "delitem", $ownerid);
+
 	$dbcm->do("INSERT INTO log2 (journalid, posterid, eventtime, logtime, security, ".
 		  "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
 		  "VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, ".
@@ -536,7 +542,7 @@ sub postevent
 		      "VALUES ($ownerid, $itemid, $qsubject, $qevent $ev)");
 	    if ($dbcm->err) {
 		my $msg = $dbcm->errstr;
-		LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
+		LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
 		return fail($err,501,"logtext:$msg");
 	    }
 	} else {
@@ -556,7 +562,7 @@ sub postevent
 		  "VALUES ($ownerid, $itemid, $qsubject)");
 	if ($dbcm->err) {
 	    my $msg = $dbcm->errstr;
-	    LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
+	    LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
 	    return fail($err,501,"logsubject:$msg");
 	}
     } else {
@@ -575,7 +581,7 @@ sub postevent
 		  "WHERE journalid=$ownerid AND jitemid=$itemid");
 	if ($dbcm->err) {
 	    my $msg = $dbcm->errstr;
-	    LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
+	    LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
 	    return fail($err,501,$msg);
 	}
     } else {
@@ -595,7 +601,7 @@ sub postevent
 		      "VALUES ($qownerid, $itemid, $qallowmask)");
 	    if ($dbcm->err) {
 		my $msg = $dbcm->errstr;
-		LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
+		LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
 		return fail($err,501,"logsec2:$msg");
 	    }
 	} else {
@@ -638,7 +644,7 @@ sub postevent
 	    if ($dbcm->err) {
 		my $msg = $dbh->errstr;
 		if ($clustered) {
-		    LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
+		    LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
 		} else {
 		    LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
 		}
@@ -754,7 +760,8 @@ sub editevent
     if ($req->{'event'} !~ /\S/)
     {
 	if ($clustered) {
-	    LJ::delete_item2($dbcm, $ownerid, $req->{'itemid'});
+	    LJ::delete_item2($dbh, $dbcm, $ownerid, $req->{'itemid'}, 
+			     'quick', $oldevent->{'anum'});
         } else {
 	    LJ::delete_item($dbh, $ownerid, $req->{'itemid'});	    
 	}

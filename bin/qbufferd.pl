@@ -4,17 +4,17 @@
 # lib: Proc::ProcessTable, cgi-bin/ljlib.pl
 # </LJDEP>
 
+use strict;
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-exit unless ($LJ::BUFFER_QUERIES);
 
 use Proc::ProcessTable;
 
-$DELAY = $LJ::QBUFFERD_DELAY || 15;
+my $DELAY = $LJ::QBUFFERD_DELAY || 15;
 
-$pidfile = '/home/lj/var/qbufferd.pid';
+my $pidfile = '/home/lj/var/qbufferd.pid';
+my $pid;
 if (-e $pidfile) {
     open (PID, $pidfile);
-    my $pid;
     chomp ($pid = <PID>);
     close PID;
     my $processes = Proc::ProcessTable->new()->table;
@@ -23,8 +23,8 @@ if (-e $pidfile) {
     }
 }
 
-$is_parent = 0;
-$running = 0;
+my $is_parent = 0;
+my $running = 0;
 
 END {
     unless ($is_parent || ! $running) {
@@ -59,21 +59,34 @@ sub stop_qbufferd
 }
 
 $running = 1;
-while (1)
+while (LJ::start_request())
 {
-    my $dbh = LJ::get_dbh("master");
+    my $cycle_start = time();
 
-    $sth = $dbh->prepare("SELECT tablename, count(*) FROM querybuffer GROUP BY 1");
+    # do main cluster updates
+    my $dbh = LJ::get_dbh("master");
+    my $sth = $dbh->prepare("SELECT tablename, COUNT(*) FROM querybuffer GROUP BY 1");
     $sth->execute;
     my @tables;
     while (my ($table, $count) = $sth->fetchrow_array) {
-	next if ($table =~ /^do:/);
 	push @tables, $table;
     }
-    $sth->finish;
-    
     foreach my $table (@tables) {
 	my $count = LJ::query_buffer_flush($dbh, $table);
     }
-    sleep $DELAY;
+
+    # handle clusters
+    foreach my $c (@LJ::CLUSTERS) {
+	my $db = LJ::get_cluster_master($c);
+
+	my $sth = $db->prepare("SELECT cmd, COUNT(*) FROM cmdbuffer GROUP BY 1");
+	$sth->execute;
+	my @cmds;
+	while (my ($cmd, $count) = $sth->fetchrow_array) {
+	    LJ::cmd_buffer_flush($dbh, $db, $cmd);
+	}
+    }
+
+    my $elapsed = time() - $cycle_start;
+    sleep ($DELAY-$elapsed) if $elapsed < $DELAY;
 };
