@@ -351,9 +351,12 @@ sub clean
                         (! defined $hash->{'height'} ||
                          $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
 
-                    $hash->{src} = LJ::eurl(canonical_url($hash->{src}));
+                    $hash->{src} = canonical_url($hash->{src});
 
                     if ($img_bad) {
+                        # don't allow bad src links to break out of our href
+                        $hash->{src} =~ s/(['"])/uc sprintf("%%%02x", ord($1))/eg;
+
                         $newdata .= "<a class=\"ljimgplaceholder\" href=\"$hash->{'src'}\">" .
                                     LJ::img('placeholder') . '</a>';
                         $alt_output = 1;
