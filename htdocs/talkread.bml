@@ -152,7 +152,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  # make the title
 {
-    my $subject = $item->{'subject'} || $item->{'event'};
+    my $subject = $item->{'subject'} || $event;
     LJ::CleanHTML::clean_subject_all(\$subject);
     $subject =~ s/\n.*//s;
     # yes, the 3 param to text_trim is chars, and length returns bytes, but
