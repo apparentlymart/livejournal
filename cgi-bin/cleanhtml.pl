@@ -397,6 +397,7 @@ sub clean
                 }
             }
         }
+        # end tag
         elsif ($type eq "E") 
         {
             my $tag = $token->[1];
@@ -420,6 +421,12 @@ sub clean
 
                 if ($allow && ! $remove{$tag})
                 {
+
+                    if ($opts->{'tablecheck'}) {
+                        if ($tag eq 'table' && $opencount{'tr'}) { $allow = 0; }
+                        elsif ($tag eq 'tr' && $opencount{'td'}) { $allow = 0; }
+                    }
+
                     if ($allow && ! ($opts->{'noearlyclose'} && ! $opencount{$tag})) {
                         $newdata .= "</$tag>";
                         $opencount{$tag}--;
