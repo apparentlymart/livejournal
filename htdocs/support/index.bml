@@ -4,7 +4,9 @@ body<=
 
 <?h1 Welcome! h1?>
 <?p
-Welcome to the LiveJournal community support center.  Listed below are some of the most frequent questions people ask.  If you don't find what you're looking for, you can submit a support request below.
+Welcome to the LiveJournal community support center.  Listed below are
+some of the most frequent questions people ask.  If you don't find
+what you're looking for, you can submit a support request below.
 p?>
 
 <?_include
@@ -13,33 +15,37 @@ code=>0
 file=>support-currentproblems
 _include?>
 
-<?hr?>
-
 <?_include
 bml=>0
 code=>0
 file=>support-links
 _include?>
 
-<?h1 Support Areas h1?><?p Here are the three major things you can do here in the support area. p?>
+<?h1 Support Areas h1?>
+<?p 
+Here are the three major things you can do here in the support area.
+p?>
 
-<UL>
-<LI><FONT SIZE=+1><B><A HREF="faq.bml">Read the Frequently Asked Questions</A></B></FONT><BR>
-Try and solve the problem first by yourself before asking other people.  You'll probably get the answer faster, too!
+<ul>
+<li><font size='+1'><b><a href="faq.bml">Read the Frequently Asked Questions</a></b></font><br />
+Try and solve the problem first by yourself before asking other people.  You'll probably get the answer faster, too!</li>
 
-<P><LI><FONT SIZE=+1><B><A HREF="submit.bml">Ask a question</A></B></FONT><BR>
-Is your question not in the FAQ?  Click "Ask a question" and you can submit a new support request and somebody in the LiveJournal community will read it and get back to you with an answer.  If they don't help you, your support request stays open until somebody does help and you confirm that your problem is solved.
+<li style='margin-top: 1em'><font size='+1'><b><a href="submit.bml">Ask a question</a></b></font><br />
+Is your question not in the FAQ?  Click "Ask a question" and you can submit a new support request and somebody in the LiveJournal community will read it and get back to you with an answer.  If they don't help you, your support request stays open until somebody does help and you confirm that your problem is solved.</li>
 
-<p><LI><FONT SIZE=+1><B><A HREF="help.bml">Help somebody out</A></B></FONT><BR>
+<li style='margin-top: 1em'><font size='+1'><b><a href="help.bml">Help somebody out</a></b></font><br />
 Got some extra time on your hands?  Help out a LiveJournal user that has an open support request.  Users that help other users out will get "support points" that will show up on your userinfo page.  There are multiple reasons for helping other users out:
-<p><UL>
-<LI>Just to be nice
-<LI>To get points just for fun and competition
-</UL>
-<P>If you're curious, check out the list of <A HREF="highscores.bml">high scores</A>, showing who helps the most.
-<P>If you want to be notified when new support requests come in, <A HREF="changenotify.bml">set your notification settings</A>.
 
-</UL>
+<ul style='margin-top: 0.8em'>
+<li>Just to be nice</li>
+<li>To get points just for fun and competition</li>
+</ul>
+<p>If you're curious, check out the list of <A HREF="highscores.bml">high scores</A>, showing who helps the most.</p>
+<p>If you want to be notified when new support requests come in, <a href="changenotify.bml">set your notification settings</a>.</p>
+
+</li>
+
+</ul>
 
 
 <=body
