@@ -17,11 +17,12 @@ my $email2cat = LJ::Support::load_email_to_cat_map($dbh);
 
 my $parser = new MIME::Parser;
 $parser->output_dir("/tmp");
-    
+
 my $entity;
 eval { $entity = $parser->parse(\*STDIN) };
 if ($@) {
     my $results  = $parser->results;
+    $parser->filer->purge;
     die "Can't parse MIME.\n";
 }
 
@@ -47,16 +48,19 @@ foreach my $a (Mail::Address->parse($head->get('To')),
     }
 }
 unless ($to) {
+    $parser->filer->purge;
     die "Not deliverable to support system (no match To:)\n";
 }
 
 # ignore vacation/auto-reply messages
 if ($subject =~ /auto.?(response|reply)/i) {
+    $parser->filer->purge;
     exit 0;
 }
 
 my $tent = get_text_entity($entity);
 unless ($tent) {
+    $parser->filer->purge;
     die "Can't find text entity";
 }
 my $body = $tent->bodyhandle->as_string;
