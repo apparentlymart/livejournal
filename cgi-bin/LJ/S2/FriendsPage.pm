@@ -344,6 +344,7 @@ sub FriendsPage
         '_type' => 'RecentNav',
         'version' => 1,
         'skip' => $skip,
+        'count' => $eventnum,
     };
 
     my $base = "$u->{'_journalbase'}/$opts->{'view'}";

@@ -132,6 +132,7 @@ sub EntryPage
                 'parent_url' => $par_url,
                 'screened' => $com->{'state'} eq "S" ? 1 : 0,
                 'link_keyseq' => [ 'delete_comment' ],
+                'anchor' => "t$dtalkid",
             };
 
             # don't show info from suspended users

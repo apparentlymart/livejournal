@@ -182,6 +182,7 @@ sub RecentPage
         '_type' => 'RecentNav',
         'version' => 1,
         'skip' => $skip,
+        'count' => $itemnum,
     };
 
     # if we've skipped down, then we can skip back up
