@@ -164,6 +164,7 @@
                  'memories' => 0,
                  'topicdir' => 0,
                  'tellafriend' => 0,
+                 'feedster_search' => 0
                  );
 
     # turn $SERVER_DOWN on while you do any maintenance

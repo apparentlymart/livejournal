@@ -2924,6 +2924,8 @@ This could be because: <ol>
 
 /userinfo.bml.label.reqfinduser=Only users with 'finduser' priv can lookup users by userid.
 
+/userinfo.bml.label.searchjournal=Search This Journal
+
 /userinfo.bml.label.sendmessage=Send Message
 
 /userinfo.bml.label.shared=Posting Access:
