@@ -694,7 +694,7 @@ sub load_user_styles
     my %styles;
     my $load_using = sub {
         my $db = shift;
-        my $sth = $db->prepare("SELECT styleid, name, modtime FROM s2styles WHERE userid=?");
+        my $sth = $db->prepare("SELECT styleid, name FROM s2styles WHERE userid=?");
         $sth->execute($u->{'userid'});
         while (my ($id, $name) = $sth->fetchrow_array) {
             $styles{$id} = $name;

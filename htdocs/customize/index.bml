@@ -93,6 +93,14 @@ body<=
 
             $u->{'s2_style'} = $_;
             LJ::set_userprop($u, "s2_style", $u->{'s2_style'});
+
+            # now we have to populate %style from this style, but not core and layout,
+            # as those are reset below
+            my $stylay = LJ::S2::get_style_layers($u, $u->{'s2_style'});
+            foreach my $layer (qw(user theme i18nc i18n)) {
+                $style{$layer} = exists $stylay->{$layer} ? $stylay->{$layer} : 0;
+            }
+
             last;
         }
 
