@@ -946,6 +946,8 @@ INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope
 UPDATE userproplist SET datatype='char',des='Base Title of Journal',indexed='0',prettyname='Journal Title',scope='general' WHERE name='journaltitle';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('num', 'Encoding in which to mail comments to the user. Defaults to UTF-8.', '0', 'mailencoding', 'Mail Encoding', 'general');
 UPDATE userproplist SET datatype='num',des='Encoding in which to mail comments to the user. Defaults to UTF-8.',indexed='0',prettyname='Mail Encoding',scope='general' WHERE name='mailencoding';
+INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('bool', '1: This community is moderated', '0', 'moderated', 'Moderation status', 'general');
+UPDATE userproplist SET datatype='bool',des='1: This community is moderated',indexed='0',prettyname='Moderation status',scope='general' WHERE name='moderated';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'MSN Username', '1', 'msn', 'MSN Username', 'general');
 UPDATE userproplist SET datatype='char',des='MSN Username',indexed='1',prettyname='MSN Username',scope='general' WHERE name='msn';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Time (user-side) of the user\'s last entry in their personal journal', '0', 'newesteventtime', 'Newest event time', 'general');
@@ -976,6 +978,8 @@ INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope
 UPDATE userproplist SET datatype='char',des='Y: include links to topic directory, N: don\'t.',indexed='1',prettyname='Topic Directory Integration',scope='general' WHERE name='opt_showtopicstuff';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('bool', '1: friends view uses shared pictures, 0: uses poster\'s picture', '1', 'opt_usesharedpic', 'Use Shared Journal Pic', 'general');
 UPDATE userproplist SET datatype='bool',des='1: friends view uses shared pictures, 0: uses poster\'s picture',indexed='1',prettyname='Use Shared Journal Pic',scope='general' WHERE name='opt_usesharedpic';
+INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', '1: ping weblogs.com with updates', '0', 'opt_weblogscom', 'Ping Weblogs.com', 'general');
+UPDATE userproplist SET datatype='char',des='1: ping weblogs.com with updates',indexed='0',prettyname='Ping Weblogs.com',scope='general' WHERE name='opt_weblogscom';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'N: none, A: actual, L: livejournal, B: both', '1', 'opt_whatemailshow', 'Which email address to display', 'general');
 UPDATE userproplist SET datatype='char',des='N: none, A: actual, L: livejournal, B: both',indexed='1',prettyname='Which email address to display',scope='general' WHERE name='opt_whatemailshow';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Screen new comments: A=All, N=None, F=from non-Friends, R=from non-users', '0', 'opt_whoscreened', 'Screening comments', 'general');
@@ -1014,5 +1018,3 @@ INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope
 UPDATE userproplist SET datatype='char',des='Yahoo ID',indexed='1',prettyname='Yahoo ID',scope='general' WHERE name='yahoo';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', '5 digit zip code (if in US)', '1', 'zip', 'ZIP code', 'general');
 UPDATE userproplist SET datatype='char',des='5 digit zip code (if in US)',indexed='1',prettyname='ZIP code',scope='general' WHERE name='zip';
-INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('bool', '1: This community is moderated', '0', 'moderated', 'Moderation status', 'general');
-UPDATE userproplist SET datatype='bool',des='1: This community is moderated',indexed='0',prettyname='Moderation status',scope='general' WHERE name='moderated';
