@@ -21,6 +21,8 @@
         return;
     }
 
+    LJ::set_active_crumb('update');
+
     # invalid text input?
     unless (LJ::text_in(\%POST)) {
         $$body = "<?badinput?>";

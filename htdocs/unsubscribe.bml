@@ -7,6 +7,8 @@ body<=
  my $aaid = $POST{'aaid'} || $GET{'aaid'};
  my $auth = $POST{'auth'} || $GET{'auth'};
  my $confirm = $POST{'confirm'};
+
+ LJ::set_active_crumb('unsubscribe');
  
 unless ($aaid && $auth) {
      return "<?h1 Error h1?><?p How did you get to this page?  You should only get here via a link in a newsletter. p?><?p Another way to unsubscribe from the newsletter is to visit the <a href=\"/editinfo.bml\">edit info</a> page and change the setting there. p?>";

@@ -6,6 +6,8 @@ body<=
     use strict;
     use vars qw(%POST);
 
+    LJ::set_active_crumb('setpgpkey');
+
     return "This site is not configured with PGP support." unless $LJ::USE_PGP;
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 

@@ -17,6 +17,8 @@ _include?>
  my $remote = LJ::get_remote();
  my $ret;
 
+ LJ::set_active_crumb('supportsubmit');
+
  my $u;
  my %eh;
  if ($remote) {

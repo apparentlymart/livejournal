@@ -6,6 +6,8 @@ body<=
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
+ LJ::set_active_crumb('searchregion');
+
  my @errors = ();
  my @filters = LJ::Dir::validate(\%FORM, \@errors);
  return LJ::bad_input(@errors) if @errors;

@@ -3,6 +3,8 @@
  use strict;
  use vars qw($title $body %FORM);
 
+ LJ::set_active_crumb('addtodo');
+
  my $dbh = LJ::get_db_writer();
 
  $title = "";

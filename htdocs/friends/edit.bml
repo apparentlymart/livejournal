@@ -9,6 +9,8 @@ body<=
     return LJ::server_down_html() if ($LJ::SERVER_DOWN);
     return "<?badinput?>" unless LJ::text_in(\%POST);
 
+    LJ::set_active_crumb('editfriends');
+
     # this file used to be edit_do.bml, but edit.bml died, so we moved this
     # functionality to edit.bml, but we don't want the translators to have to
     # retranslate all of the phrases, so we're still using /edit_do.bml scope

@@ -6,6 +6,8 @@ body<=
     use strict;
     use vars qw(%GET %POST %FORM);
 
+    LJ::set_active_crumb('customize');
+
     my $remote = LJ::get_remote();
     return LJ::bad_input($ML{'error.noremote'})
         unless $remote;

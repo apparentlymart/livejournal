@@ -6,6 +6,8 @@ body<=
     use strict;
     use vars qw(%POST);
 
+    LJ::set_active_crumb('lostinfo');
+
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     # no post action, just show query form

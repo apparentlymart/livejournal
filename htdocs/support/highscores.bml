@@ -9,6 +9,8 @@ The following people have helped other users in the support area:
  use strict;
  use vars qw(%GET);
 
+ LJ::set_active_crumb('supportscores');
+
  my $dbr = LJ::get_db_reader();
 
  my $sth;

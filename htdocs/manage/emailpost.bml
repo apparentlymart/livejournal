@@ -6,6 +6,8 @@ body<=
     use strict;
     use vars qw(%POST %GET);
 
+    LJ::set_active_crumb('emailgateway');
+
     return "Sorry, this site is not configured to allow updating your
         journal via email." unless $LJ::EMAIL_POST_DOMAIN;
     return LJ::server_down_html() if $LJ::SERVER_DOWN;

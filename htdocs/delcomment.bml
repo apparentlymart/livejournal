@@ -9,6 +9,8 @@ body<=
     use strict;
     use vars qw(%GET %POST);
 
+    LJ::set_active_crumb('delcomment');
+
     my $remote = LJ::get_remote();
     return LJ::bad_input($ML{'error.noremote'})
         unless $remote;

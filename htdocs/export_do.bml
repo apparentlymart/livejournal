@@ -1,5 +1,7 @@
 <?_code
 
+        LJ::set_active_crumb('export');
+
         my $req = shift;
         my $r = $req->{'r'};
 

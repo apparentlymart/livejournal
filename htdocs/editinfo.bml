@@ -2,6 +2,11 @@
 title=><?_ml .title _ml?>
 body<=
 <?_code
+    LJ::set_active_crumb('editinfo');
+    return;
+_code?>
+
+<?_code
 {
     use strict;
     use vars qw(%POST %GET);

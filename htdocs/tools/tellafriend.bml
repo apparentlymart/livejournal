@@ -2,6 +2,8 @@
 
  use strict;
  use vars qw(%FORM $title $body);
+
+ LJ::set_active_crumb('tellfriend');
  
  $title = "Tell a Friend!";
  $body = "";

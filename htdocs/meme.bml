@@ -2,6 +2,8 @@
 
  $title = "Meme Tracker";
  $body = "";
+
+ LJ::set_active_crumb('meme');
  
  my $dbr = LJ::get_db_reader();
  my $sth;

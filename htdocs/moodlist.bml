@@ -22,6 +22,8 @@ body<=
     use strict;
     use vars qw(%GET);
 
+    LJ::set_active_crumb('moodlist');
+
     my $ret;
     my $sth;
     my $dbr = LJ::get_db_reader();

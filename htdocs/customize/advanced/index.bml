@@ -1,6 +1,10 @@
 <?page
 title=>Advanced Customization
 body<=
+<?_code
+    LJ::set_active_crumb('advcustomize');
+return;
+_code?>
 
 <?h1 Disclaimer h1?>
 <?p

@@ -12,6 +12,8 @@ p?>
  use strict;
  use vars qw(%GET);
 
+ LJ::set_active_crumb('faq');
+
  my $curlang = BML::get_language();
  my $deflang = BML::get_language_default();
  my $altlang = $curlang ne $deflang;

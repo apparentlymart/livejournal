@@ -17,6 +17,9 @@ bar<=
 _info?><?page
 title=>Directory Search
 body<=
+<?_code
+    LJ::set_active_crumb('advsearch');
+_code?>
 
 <?h1 Search Directory h1?>
 <?p

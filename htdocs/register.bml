@@ -10,6 +10,8 @@ body<=
  use strict;
  use vars qw(%POST %GET);
 
+ LJ::set_active_crumb('register');
+
  my $ret;
  my $qs = BML::get_query_string();
 

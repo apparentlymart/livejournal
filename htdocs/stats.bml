@@ -12,6 +12,8 @@ p?>
 
  use strict;
 
+ LJ::set_active_crumb('stats');
+
  my $dbr = LJ::get_db_reader();
  my $sth;
 

@@ -8,6 +8,8 @@ body<=
     use strict;
     use vars qw(%GET %POST);
 
+    LJ::set_active_crumb('searchinterests');
+
     return "<?badinput?>" unless LJ::text_in(\%GET) && LJ::text_in(\%POST);
 
     my $did_post = LJ::did_post();

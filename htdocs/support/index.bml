@@ -1,7 +1,9 @@
 <?page
 title=>LiveJournal Support
 body<=
-
+<?_code
+    LJ::set_active_crumb('support');
+_code?>
 <?h1 Welcome! h1?>
 <?p
 Welcome to the LiveJournal community support center.  Listed below are

@@ -3,6 +3,8 @@
     use strict;
     use vars qw(%GET %POST $title $body);
 
+    LJ::set_active_crumb('siteopts');
+
     # set $title later because we may be changing languages
     $title = "";
     $body = "";

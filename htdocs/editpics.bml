@@ -3,6 +3,8 @@
     use strict;
     use vars qw(%GET %POST $title $body @errors);
 
+    LJ::set_active_crumb('editpics');
+
     $body = "";
     @errors = ();
 

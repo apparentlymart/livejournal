@@ -6,6 +6,8 @@ body<=
  use strict;
  use vars qw(%FORM);
 
+ LJ::set_active_crumb('supporthelp');
+
  my ($ret, $sth);
  my $r = Apache->request;
 

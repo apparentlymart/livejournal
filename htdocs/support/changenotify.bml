@@ -6,6 +6,8 @@ body<=
 
 <?_code
 
+ LJ::set_active_crumb('supportnotify');
+
  my @errors = ();
 
  my $remote = LJ::get_remote();

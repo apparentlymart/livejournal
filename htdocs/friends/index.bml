@@ -1,6 +1,10 @@
 <?page
 title=><?_ml .title _ml?>
 body<=
+<?_code
+    LJ::set_active_crumb('friends');
+_code?>
+
 <?p <?_ml .about _ml?> p?>
 <?h1 <?_ml .tools _ml?> h1?>
 <dl>

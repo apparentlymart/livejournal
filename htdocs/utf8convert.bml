@@ -3,6 +3,8 @@
     use strict;
     use vars qw(%POST %GET $title $body);
 
+    LJ::set_active_crumb('utf8convert');
+
     $title = "UTF-8 Conversion Page";
     $body = "";
 

@@ -25,11 +25,6 @@ body<=
 
  my $remote = LJ::get_remote();
 
- $ret .= BML::ml('Backlink', {
-     'link'=>'/community/manage.bml',
-     'text'=>$ML{'.manage2'},
- });
-
  unless ($remote) {
     $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.noremote'} p?>";
     return $ret;
@@ -164,6 +159,7 @@ body<=
  }
 
  if ($mode eq 'create') {
+    LJ::set_active_crumb('createcommunity');
     $ret .= "<?h2 $ML{'.label.commheader'} h2?>" .
        ($mode eq 'modify' ? "<?p $ML{'.label.commchange'} p?>" : "<?p $ML{'.label.commcreate'} p?>");
     $ret .= "<?standout <table width='350' cellpadding='7'><tr valign='top'><td><b>$ML{'.label.maintainer'}</b></td>";

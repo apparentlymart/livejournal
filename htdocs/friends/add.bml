@@ -5,6 +5,8 @@
  my $userid = LJ::get_userid($user);
  $body = "";
 
+ LJ::set_active_crumb('addfriends');
+
  unless ($remote) 
  {
      $title = $ML{'.error1.title'};
