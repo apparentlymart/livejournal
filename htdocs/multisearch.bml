@@ -56,7 +56,7 @@
          return;
      } else {
          my $qemail = $dbr->quote($email);
-         my $sth = $dbr->prepare("SELECT u.user, up.value FROM user u, userproplist upl, userprop up WHERE u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND u.email=$qemail AND u.userid=up.userid AND up.upropid=upl.upropid AND upl.name='opt_whatemailshow' ORDER BY u.userid");
+         my $sth = $dbr->prepare("SELECT u.user, up.value FROM user u, userproplist upl, userprop up WHERE u.journaltype='P' AND u.statusvis='V' AND u.allow_contactshow='Y' AND u.email=$qemail AND u.userid=up.userid AND up.upropid=upl.upropid AND upl.name='opt_whatemailshow' ORDER BY u.userid");
          $sth->execute;
          my ($user, $emailshow) = $sth->fetchrow_array;
          unless ($emailshow eq "A" || $emailshow eq "B") {
