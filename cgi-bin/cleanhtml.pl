@@ -252,7 +252,8 @@ sub clean
                 $token->[1] =~ s/about://g;
                 $token->[1] =~ s/expression//g;
             }
-            if ($addbreaks && ! $opencount{'a'}) {
+            my $auto_format = $addbreaks && ! $opencount{'table'} && ! $opencount{'pre'};
+            if ($auto_format && ! $opencount{'a'}) {
                 $token->[1] =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=\~\:\;\#\&\,]+!$url{++$urlcount}=$&;"\{url$urlcount\}";!egi;
             }
             if ($wordlength) {
@@ -267,7 +268,7 @@ sub clean
                 }
                 $token->[1] =~ s/(($match){$wordlength})\B/$1<wbr>/go;
             } 
-            if ($addbreaks) {
+            if ($auto_format) {
                 $token->[1] =~ s/(\r)?\n/<br>/g;
                 if (! $opencount{'a'}) {
                     $token->[1] =~ s/\{url(\d+)\}/<a href=\"$url{$1}\">$url{$1}<\/a>/g;
