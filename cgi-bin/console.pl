@@ -286,6 +286,18 @@ $cmd{'shared'} = {
 	       ],
     };
 
+$cmd{'change_community_admin'} = {
+    'def' => 'conshared.pl',
+    'privs' => [qw(sharedjournal communityxfer)],
+    'des' => 'Change the ownership of a community.',
+    'argsummary' => '<community> <new_owner>',
+    'args' => [
+	       'community' => "The username of the community.",
+	       'new_owner' => "The username of the new owner of the community.",
+	       ],
+
+};
+
 $cmd{'community'} = {
     'def' => 'conshared.pl',
     'privs' => [qw(sharedjournal)],

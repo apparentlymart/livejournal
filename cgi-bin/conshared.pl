@@ -1,10 +1,73 @@
 #!/usr/bin/perl
 #
 
+use strict;
 package LJ::Con;
+
+use vars qw(%cmd);
 
 $cmd{'shared'}->{'handler'} = \&shared;
 $cmd{'community'}->{'handler'} = \&community;
+$cmd{'change_community_admin'}->{'handler'} = \&change_community_admin;
+
+sub change_community_admin
+{
+    my ($dbh, $remote, $args, $out) = @_;
+    my $sth;
+    my $err = sub { push @$out, [ "error", $_[0] ]; return 0; };
+
+    my ($comm_name, $newowner_name) = ($args->[1], $args->[2]);
+    my $ucomm = LJ::load_user($dbh, $comm_name);
+    my $unew  = LJ::load_user($dbh, $newowner_name);
+
+    return $err->("You do not have access to transfer ownership of this community.")
+	unless ($remote->{'privarg'}->{'sharedjournal'}->{$ucomm->{'user'}} ||
+		$remote->{'priv'}->{'communityxfer'} );
+    
+    return $err->("This command takes exactly 2 arguments.  Consult the reference.")
+	unless scalar(@$args) == 3;
+
+    return $err->("Given community doesn't exist or isn't a community.")
+	unless ($ucomm && $ucomm->{'journaltype'} eq "C");
+
+    return $err->("New owner doesn't exist or isn't a person account.")
+	unless ($unew && $unew->{'journaltype'} eq "P");
+
+    return $err->("New owner's email address isn't validated.")
+	unless ($unew->{'status'} eq "A");
+    
+    my $commid = $ucomm->{'userid'};
+    my $newid = $unew->{'userid'};
+
+    my $prlid = $dbh->selectrow_array("SELECT prlid FROM priv_list WHERE privcode='sharedjournal'");
+    return $err->("No sharedjournal priv.  (broken LJ installation?)")
+	unless $prlid;
+
+    my $oldid = $dbh->selectrow_array("SELECT ownerid FROM community WHERE userid=$commid");
+    my $uold = LJ::load_userid($dbh, $oldid);
+
+    # remove old maintainer's power over it
+    $dbh->do("DELETE FROM priv_map WHERE prlid=$prlid AND arg='$ucomm->{'user'}'");
+    $dbh->do("UPDATE community SET ownerid=$newid WHERE userid=$commid");
+    $dbh->do("INSERT INTO priv_map (userid, prlid, arg) VALUES ($newid, $prlid, '$ucomm->{'user'}')");
+
+    # so old maintainer can't regain access:
+    $dbh->do("DELETE FROM infohistory WHERE userid=$commid");
+
+    # change password of community to new maintainer's password
+    my $qpass = $dbh->quote($unew->{'password'});
+    $dbh->do("UPDATE user SET password=$qpass WHERE userid=$commid");
+
+    ## log to status history
+    if ($uold) {
+	LJ::statushistory_add($dbh, $oldid, $remote->{'userid'}, "communityxfer", "Control of '$ucomm->{'user'}'($commid) taken away.");
+    }
+    LJ::statushistory_add($dbh, $commid, $remote->{'userid'}, "communityxfer", "Changed maintainer from '$uold->{'user'}'($oldid) to '$unew->{'user'}'($newid)");
+    LJ::statushistory_add($dbh, $newid, $remote->{'userid'}, "communityxfer", "Control of '$ucomm->{'user'}'($commid) given.");
+
+    push @$out, [ "info", "Transfered ownership of \"$ucomm->{'user'}\"." ];
+    return 1;
+}
 
 sub shared
 {
@@ -19,8 +82,8 @@ sub shared
     return 0 if ($error);
 
     my ($shared_user, $action, $target_user) = ($args->[1], $args->[2], $args->[3]);
-    my $shared_id = &LJ::get_userid($dbh, $shared_user);
-    my $target_id = &LJ::get_userid($dbh, $target_user);
+    my $shared_id = LJ::get_userid($dbh, $shared_user);
+    my $target_id = LJ::get_userid($dbh, $target_user);
 
     unless ($action eq "add" || $action eq "remove") {
 	$error = 1;
@@ -74,8 +137,8 @@ sub community
     return 0 if ($error);
 
     my ($com_user, $action, $target_user) = ($args->[1], $args->[2], $args->[3]);
-    my $com_id = &LJ::get_userid($dbh, $com_user);
-    my $target_id = &LJ::get_userid($dbh, $target_user);
+    my $com_id = LJ::get_userid($dbh, $com_user);
+    my $target_id = LJ::get_userid($dbh, $target_user);
 
     my $ci;
     
