@@ -17,7 +17,7 @@ body<=
     return BML::redirect("$LJ::SITEROOT/agecheck/?s=1")
         if $u->underage;
 
-    return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+    return $LJ::MSG_READONLY_USER if $u->readonly;
 
     my $check_key = sub {
         my $key = shift;
@@ -41,25 +41,22 @@ body<=
     };
 
     # Update settings
+    my $error;
     if ($POST{userid} == $u->{userid}) {
         my @errors;
         my $key = $POST{key};
         push(@errors, $ML{'.error.invalidkey'})
             if ! $check_key->($key) && length $key != 0;
-        return LJ::bad_input(@errors) if @errors;
+        $error =  LJ::error_list(@errors) if @errors;
 
-        $key = LJ::trim($key);
-        LJ::set_userprop($u, 'public_key', $key);
+        unless (@errors) {
+            $key = LJ::trim($key);
+            LJ::set_userprop($u, 'public_key', $key);
 
-        my $ret;
-        $ret .= "<?h1 $ML{'.successhead'} h1?>";
-        $ret .= "<?p " . BML::ml('.successtext', { aopts => "href='/pubkey.bml'" }) . " p?>";
-
-        if ($LJ::HELPURL{publickey}) {
-            $ret .= "<?h1 Instructions h1?>";
-            $ret .= "<?p FIXME: link to helpurl p?>";
+            # This page shows them their key saved
+            # eventually add a confirmation bar on it
+            return BML::redirect('/pubkey.bml');
         }
-        return $ret;
     }
 
     # Initial page
@@ -81,9 +78,11 @@ body<=
 
     $ret .= "<?h1 $ML{'.header'} <img src='/img/key.gif' height='16' width='16'> h1?>";
     $ret .= "<form method='post' action='pubkey.bml'>\n";
+    $ret .= $error if $error;
     $ret .= "<?p $ML{'.pastekey'} p?>\n";
     $ret .= LJ::html_hidden(userid => $u->{userid});
-    $ret .= LJ::html_textarea({name=>'key', value=>$u->{public_key}, rows=>20, cols=>70 });
+    my $val = LJ::did_post() ? $POST{'key'} : $u->{'public_key'};
+    $ret .= LJ::html_textarea({name=>'key', value=>$val, rows=>20, cols=>70 });
     $ret .= "<br /><br /><?standout ";
     $ret .= LJ::html_submit($ML{'.save'});
     $ret .= " standout?>";
