@@ -127,6 +127,13 @@ body<=
  $ret .= "<tr><td align='right'><b>Summary:</b></td><td><font face='Arial' size='+1'><b>" . LJ::ehtml($sp->{'subject'}) . "</b></font></td></tr>\n";
  $ret .= "</TABLE>\n";
 
+LJ::run_hooks("support_see_request_html", {
+    'u' => $u,
+    'email' => $email,
+    'sp' => $sp,
+    'retref' => \$ret,
+});
+
  my %userinfo;
  $sth = $dbh->prepare("SELECT DISTINCT u.userid, u.user, u.name, u.defaultpicid FROM supportlog s, user u WHERE s.spid=$spid AND u.userid=s.userid");
  $sth->execute;
