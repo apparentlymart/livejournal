@@ -39,6 +39,11 @@ LiveJournal capabilities:
  * maxfriends
    integer; number of friends that are allowed
 
+ * todomax
+   integer: maximum number of todo items allowed
+
+ * todosec
+   boolean: can use make non-public todo items?
 
 ljcom-specific:
 ---------------

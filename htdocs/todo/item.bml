@@ -109,13 +109,13 @@
 	 
 	 ## check to see if user's todo list is full
 	 my $max_items = LJ::get_cap($u, "todomax");
-	 if ($todo_count >= $max_items) {
+	 if (defined $max_items && $todo_count >= $max_items) {
 	     $title = "Sorry...";
 	     my $atype = "account type";
 	     if ($LJ::HELPURL{'accounttype'}) {
 		 $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
 	     }
-	     $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time.  ";
+	     $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time.  P=)";
 	     return "";
 	 }
 
@@ -177,13 +177,13 @@
      }
      
      my $max_items = LJ::get_cap($u, "todomax");
-     if ($todo_count >= $max_items) {
+     if (defined $max_items && $todo_count >= $max_items) {
 	 $title = "Sorry...";
 	 my $atype = "account type";
 	 if ($LJ::HELPURL{'accounttype'}) {
 	     $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
 	 }
-	 $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time.  ";
+	 $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time. P=)";
 	 return "";
      }
 
