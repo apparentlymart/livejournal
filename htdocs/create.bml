@@ -160,13 +160,7 @@ body<=
      unless ($name) { 
          $errors{'name'} = "$ML{'.error.username.blank'}"; 
      }
-     unless ($email) { 
-         $errors{'email'} = "$ML{'.error.email.blank'}";
-     }
-     if ($email =~ /\s/) { 
-         $errors{'email'} = "$ML{'.error.email.nospaces'}"; 
-     }
- 
+
      $FORM{'password1'} = LJ::trim($FORM{'password1'});
      $FORM{'password2'} = LJ::trim($FORM{'password2'});
 
@@ -190,10 +184,14 @@ body<=
          return "$ML{'.error.coppa.under13'}";
      }
 
-     unless ($errors{'email'})
+     # check the email address
      {
          my @email_errors;
          check_email($email, \@email_errors);
+         if ($LJ::USER_EMAIL and $email =~ /\@\Q$LJ::USER_DOMAIN\E$/i) {
+             push @email_errors, BML::ml(".error.email.lj_domain",
+                                         {domain => $LJ::USER_DOMAIN});
+         }
          $errors{'email'} = join(", ", @email_errors) if @email_errors;
      }
 
