@@ -3,20 +3,16 @@
  use strict;
  use vars qw(%FORM);
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
  my ($sth, $ret);
  my $mode = $FORM{'mode'};
 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  $mode ||= $FORM{'user'} ? "viewuser" : "intro";
 
  my $user = LJ::canonical_username($FORM{'user'});
  my $u;
- $u = LJ::load_user($dbs, $user) if $user;
+ $u = LJ::load_user($user) if $user;
  
  if ($mode eq "intro")
  {
@@ -34,7 +30,7 @@
          unless (LJ::did_post());
 
      return"<b>Error:</b> You don't have access to change a user's capability class."
-         unless (LJ::check_priv($dbs, $remote, "admin", "all"));
+         unless (LJ::check_priv($remote, "admin", "all"));
 
      unless ($u) {
          $ret .= "Unknown user.\n";

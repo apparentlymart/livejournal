@@ -11,11 +11,9 @@ body<=
 
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbh = LJ::get_db_writer();
 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
  my %ac_edit;
  my %ac_add;
 

@@ -4,13 +4,11 @@
     use strict;
     use vars qw(%FORM);
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
 
     # check privs
-    my $remote = LJ::get_remote($dbs);
-    unless (LJ::check_priv($dbs, $remote, "historyview")) {
+    my $remote = LJ::get_remote();
+    unless (LJ::check_priv($remote, "historyview")) {
         return "Sorry, you don't have access to view this page.";
     }
 
@@ -32,19 +30,19 @@
     # build query
     my @where;
     if ($FORM{'user'} ne "") {
-        my $userid = LJ::get_userid($dbs, $FORM{'user'});
+        my $userid = LJ::get_userid($FORM{'user'});
         unless ($userid) { return "unknown user"; }
         push @where, "s.userid=$userid";
     }
 
     if ($FORM{'admin'} ne "") {
-        my $userid = LJ::get_userid($dbs, $FORM{'admin'});
+        my $userid = LJ::get_userid($FORM{'admin'});
         unless ($userid) { return "unknown admin"; }
         push @where, "s.adminid=$userid";
     }
 
     if ($FORM{'type'} ne "") {
-        my $qt = $dbh->quote($FORM{'type'});
+        my $qt = $dbr->quote($FORM{'type'});
         push @where, "s.shtype=$qt";
     }
 
@@ -65,7 +63,7 @@
                             $where .
                             "ORDER BY $orderby $flow LIMIT 1000");
     $sth->execute;
-    return $dbh->errstr if $dbh->err;
+    return $dbr->errstr if $dbr->err;
 
     # column headings w/ sort links
     $ret .= "<p><b>Query:";
