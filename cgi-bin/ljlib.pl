@@ -1675,7 +1675,7 @@ sub comm_member_request {
 
     LJ::send_mail({
         'to' => $u->{'email'},
-        'from' => $LJ::ADMIN_EMAIL,
+        'from' => $LJ::COMMUNITY_EMAIL,
         'fromname' => $LJ::SITENAME,
         'charset' => 'utf-8',
         'subject' => "Community Membership: $cuser",

@@ -143,6 +143,9 @@
         }
     }
 
+    # Send community invites from the admin address unless otherwise specified
+    $COMMUNITY_EMAIL ||= $ADMIN_EMAIL;
+
     # By default, auto-detect account types for
     # <lj user> tags only if using memcache
     unless (defined $LJ::DYNAMIC_LJUSER) {
