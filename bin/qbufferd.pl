@@ -20,8 +20,6 @@ BEGIN {
     $LJ::OPTMOD_PROCTABLE = eval "use Proc::ProcessTable; 1;";
 }
 
-
-
 my $DELAY = $LJ::QBUFFERD_DELAY || 15;
 
 my $pidfile = $LJ::QBUFFERD_PIDFILE || "$ENV{'LJHOME'}/var/qbufferd.pid";
@@ -56,16 +54,6 @@ if ($opt_stop) {
     exit;
 }
 
-my $is_parent = 0;
-my $running = 0;
-
-END {
-    unless ($is_parent || ! $running) {
-        print "END-STOP\n";
-        &stop_qbufferd();
-    }
-}
-
 $SIG{'INT'} = \&stop_qbufferd;
 $SIG{'TERM'} = \&stop_qbufferd;
 $SIG{'HUP'} = sub { 
@@ -74,7 +62,6 @@ $SIG{'HUP'} = sub {
 
 if (!$opt_foreground && ($pid = fork)) 
 {
-    $is_parent = 1;
     unless (open (PID, ">$pidfile")) {
         kill 15, $pid;
         die "Couldn't write PID file.  Exiting.\n";
@@ -87,57 +74,97 @@ if (!$opt_foreground && ($pid = fork))
 } 
 
 # fork off a separate qbufferd process for all specified
-# jobs types in @LJ::QBUFFERD_ISOLATE
+# job types in @LJ::QBUFFERD_ISOLATE, and then
+# another process for all other job types. The current process
+# will keep tabs on all of those
+
 my %isolated;
+my %pids;         # job -> pid
+my %jobs;         # pid -> job
+my $working = 0;  # 1 for processes that do actual work 
+
+my $my_job;
+
 foreach my $job (@LJ::QBUFFERD_ISOLATE) {
     $isolated{$job} = 1;
 }
-my $my_job;
-foreach my $job (@LJ::QBUFFERD_ISOLATE, "") {
-    $my_job = $job;
-    if ($job) {
-        if (my $child = fork) {
-            # we're the parent.  keep track of children pids.
-            print "Child qbuffer for $job started ($child)\n";
-            $isolated{$job} = $child;
-            next;
-        } else {
-            # we are the child.  get to work below.
-            last;
-        }
+
+foreach my $job (@LJ::QBUFFERD_ISOLATE, "_others_") {
+    if (my $child = fork) { 
+        # parent.
+        $pids{$job} = $child;
+        $jobs{$child} = $job;
+        next;
+    } else {
+        # child.
+        $my_job = $job;
+        $working = 1;
+        last;  
     }
 }
+
 # at this point, $my_job is either the specialized 'cmd' to run, or
-# empty to mean everything but things marked in %isolated (which have
-# their own processes)
+# '_others_' to mean everything besides stuff with their own processes.
+# $working is 1 for nonempty values of $my_job .
 
 sub stop_qbufferd
 {
     # stop children
-    unless ($my_job) {
-        foreach my $job (keys %isolated) {
-            my $child = $isolated{$job};
-            next if $child == 1;  # should never be just 1, but be safe.
-            print "Killing child job: $job\n";
+    unless ($working) {
+        foreach my $job (keys %pids) {
+            my $child = $pids{$job};
+            print "Killing child pid $child job: $job\n" if $opt_debug;
             kill 15, $child;
         }
+
+        unlink $pidfile;
     }
 
-    print "Quitting.\n";
-    unlink $pidfile;
+    print "Quitting: " . ($working ? "job $my_job" : "parent") . "\n" if $opt_debug;
     exit;
 }
 
-$running = 1;
+
+while(not $working) {
+    # controlling process's cycle
+    my $pid;
+
+    $pid = wait();
+
+    print "Child exited, pid $pid, job $jobs{$pid}\n" if $opt_debug;
+    if ($jobs{$pid}) {
+        my $job = $jobs{$pid};
+        print "Restarting job $job\n" if $opt_debug;
+        delete $pids{$job};
+        delete $jobs{$pid};
+        if (my $child = fork) {
+            # parent.
+            $pids{$job} = $child;
+            $jobs{$child} = $job;
+        } else {
+            # child.
+            $my_job = $job;
+            $working = 1; # go work
+        }
+    }
+}
+
+# the actual work begins here
+my @all_jobs = qw(delitem weblogscom);
+foreach my $hook (keys %LJ::HOOKS) {
+    next unless $hook =~ /^cmdbuf:(\w+):run$/;
+    push @all_jobs, $1;
+}
+        
 while (LJ::start_request())
 {
     my $cycle_start = time();
-    print "Starting cycle.\n" if $opt_debug;
+    print "Starting cycle. Job $my_job\n" if $opt_debug;
 
     # syndication (checks RSS that need to be checked)
     if ($my_job eq "synsuck") {
         system("$ENV{'LJHOME'}/bin/ljmaint.pl", "-v0", "synsuck");
-        print "Sleeping.\n" if $opt_debug;
+        print "Sleeping. Job $my_job\n" if $opt_debug;
         my $elapsed = time() - $cycle_start;
         sleep ($DELAY-$elapsed) if $elapsed < $DELAY;
         next;
@@ -155,25 +182,24 @@ while (LJ::start_request())
 
     # handle clusters
     foreach my $c (@LJ::CLUSTERS) {
-        print "Cluster: $c\n" if $opt_debug;
+        print "Cluster: $c Job: $my_job\n" if $opt_debug;
         my $db = LJ::get_cluster_master($c);
         next unless $db;
 
-        my $sth = $db->prepare("SELECT cmd, COUNT(*) FROM cmdbuffer GROUP BY 1");
-        $sth->execute;
-        my @cmds;
-        while (my ($cmd, $count) = $sth->fetchrow_array) {
-            # my process is doing something else:
-            next if $my_job && $my_job ne $cmd;
+        my @check_jobs = ($my_job);
+        if ($my_job eq "_others_") { @check_jobs = map { ! $isolated{$_} } @all_jobs; }
 
-            # my process is doing everything but this:
-            next if $my_job eq "" && $isolated{$cmd};
+        foreach my $cmd (@check_jobs) {
+            my $have_jobs = $db->selectrow_array("SELECT cbid FROM cmdbuffer WHERE cmd=?",
+                                                 undef, $cmd);
+            next unless $have_jobs;
 
-            print "  $cmd ($count)\n" if $opt_debug;
+            print "  Starting $cmd...\n" if $opt_debug;
             unless ($started{$cmd}++) {
                 LJ::cmd_buffer_flush($dbh, $db, "$cmd:start");
             }
             LJ::cmd_buffer_flush($dbh, $db, $cmd);
+            print "  Finished $cmd.\n" if $opt_debug;
         }
     }
 
@@ -183,7 +209,7 @@ while (LJ::start_request())
     }
     
 
-    print "Sleeping.\n" if $opt_debug;
+    print "Sleeping. Job $my_job\n" if $opt_debug;
     my $elapsed = time() - $cycle_start;
     sleep ($DELAY-$elapsed) if $elapsed < $DELAY;
 };
