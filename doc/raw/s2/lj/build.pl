@@ -5,14 +5,16 @@ use Getopt::Long;
 
 my $XSL_VERSION_RECOMMENDED = "1.55.0";
 my $opt_clean;
-my ($opt_myxsl, $opt_getxsl);
+my ($opt_myxsl, $opt_getxsl, $opt_single);
 exit 1 unless GetOptions('clean' => \$opt_clean,
                          'myxsl' => \$opt_myxsl,
                          'getxsl' => \$opt_getxsl,
+                         'single' => \$opt_single,
                          );
 
 my $home = $ENV{'LJHOME'};
 require "$home/cgi-bin/ljlib.pl";
+require "$home/cgi-bin/LJ/S2.pm";
 
 $ENV{'SGML_CATALOG_FILES'} = $LJ::CATALOG_FILES || "/usr/share/sgml/docbook/dtd/xml/4.1/docbook.cat";
 unless (-e $ENV{'SGML_CATALOG_FILES'}) {
@@ -86,9 +88,15 @@ if (-e "$docraw_dir/build/style.css") {
 }
 
 system("xsltproc --nonet --catalogs $cssparam ".
-       "$docraw_dir/build/ljdocs2html.xsl $docraw_dir/s2/lj/index.xml")
-    and die "Error generating HTML.  (no xsltproc?)\n";
+       "$docraw_dir/build/chunk.xsl $docraw_dir/s2/lj/index.xml")
+    and die "Error generating chunked HTML.  (no xsltproc?)\n";
 
+if ($opt_single)
+{
+    system("xsltproc --nonet --catalogs --output manual.html $cssparam ".
+           "$docraw_dir/build/nochunk.xsl $docraw_dir/s2/lj/index.xml")
+        and die "Error generating single HTML.  (no xsltproc?)\n";
+}
 
 sub autogen_core
 {

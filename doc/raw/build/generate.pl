@@ -7,10 +7,11 @@ use Getopt::Long;
 my $XSL_VERSION_RECOMMENDED = "1.55.0";
 
 my $opt_clean;
-my ($opt_myxsl, $opt_getxsl);
+my ($opt_myxsl, $opt_getxsl, $opt_single);
 exit 1 unless GetOptions('clean' => \$opt_clean,
                          'myxsl' => \$opt_myxsl,
                          'getxsl' => \$opt_getxsl,
+                         'single' => \$opt_single,
                          );
 
 my $home = $ENV{'LJHOME'};
@@ -161,8 +162,15 @@ if (-e "$docraw_dir/build/style.css") {
 }
 
 system("xsltproc --nonet --catalogs $cssparam ".
-       "$docraw_dir/build/ljdocs2html.xsl $docraw_dir/index.xml")
-    and die "Error generating final HTML.\n";
+       "$docraw_dir/build/chunk.xsl $docraw_dir/index.xml")
+    and die "Error generating chunked HTML.\n";
+
+if ($opt_single) 
+{
+    system("xsltproc --nonet --catalogs --output manual.html $cssparam ".
+       "$docraw_dir/build/nochunk.xsl $docraw_dir/index.xml")
+    and die "Error generating single HTML.\n";
+}
 
 if ($opt_clean) {
     print "Removing Auto-generated files\n";
