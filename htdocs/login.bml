@@ -62,7 +62,7 @@
             $cursess->{'ipfixed'} = $bindip;
             $cursess->{'exptype'} = $len;
 
-            $COOKIE{'ljsession'} = [ $COOKIE{'ljsession'}, $etime ];
+            $COOKIE{'ljsession'} = [ $COOKIE{'ljsession'}, $etime, 1 ]; # 1 => HttpOnly
             $COOKIE{'langpref'} = [ $COOKIE{'langpref'}, $etime ];
             $COOKIE{'permlogin'} = [ $POST{'expire'} eq "never", $etime ];
             $COOKIE{'ljfastserver'} = [ $COOKIE{'ljfastserver'}, $etime ]
@@ -118,7 +118,7 @@
             
             my $sess = LJ::generate_session($u, $sess_opts);
             $cursess = $sess;
-            $COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime ];
+            $COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime, 1 ]; # 1 => HttpOnly
             
             # kill the old-style cookies:
             delete $COOKIE{'ljuser'};

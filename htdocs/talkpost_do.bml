@@ -138,7 +138,7 @@ body<=
                      'ipfixed' => undef,
                  };
                  my $sess = LJ::generate_session($up, $sess_opts);
-                 $COOKIE{'ljsession'} = [  "ws:$up->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime ];
+                 $COOKIE{'ljsession'} = [  "ws:$up->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime, 1 ];
                  LJ::set_remote($up);
 
                  LJ::load_user_props($dbs, $up, "browselang");
