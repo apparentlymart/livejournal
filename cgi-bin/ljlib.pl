@@ -2777,6 +2777,10 @@ sub auth_digest {
 
     return $decline->(0) unless $u;
 
+    # don't allow empty passwords
+
+    return $decline->(0) unless $u->{'password'};
+
     # recalculate the hash and compare to response
     
     my $a1src="$u->{'user'}:lj:$u->{'password'}";
