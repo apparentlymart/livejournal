@@ -2583,8 +2583,7 @@ sub get_logtext2
 #       servers first. See also [func[LJ::get_logtext2]].
 # returns: Hashref with the talkids as keys, values being [ $subject, $event ].
 # args: u, opts?, jtalkids
-# des-opts: A hashref of options. 'usermaster' will force checking of the
-#           master only. 'onlysubjects' will only retrieve subjects.
+# des-opts: A hashref of options. 'onlysubjects' will only retrieve subjects.
 # des-jtalkids: A list of talkids to get text for.
 # </LJFUNC>
 sub get_talktext2
@@ -2601,8 +2600,33 @@ sub get_talktext2
 
     # keep track of itemids we still need to load.
     my %need;
-    foreach (@_) { $need{$_+0} = 1; }
+    my @mem_keys;
+    foreach my $id (@_) {
+        $id += 0;
+        $need{$id} = 1;
+        push @mem_keys, [$journalid,"talksubject:$clusterid:$journalid:$id"];
+        unless ($opts->{'onlysubjects'}) {
+            push @mem_keys, [$journalid,"talkbody:$clusterid:$journalid:$id"];
+        }
+    }
 
+    # try the memory cache
+    my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
+    while (my ($k, $v) = each %$mem) {
+        next unless $v;
+        $k =~ /^talk(.*):(\d+):(\d+):(\d+)/;
+        if ($opts->{'onlysubjects'} && $1 eq "subject") {
+            delete $need{$4};
+            $lt->{$3} = [ $v ];
+        }
+        if (! $opts->{'onlysubjects'} && $1 eq "body" &&
+            exists $mem->{"talksubject:$2:$3:$4"}) {
+            delete $need{$4};
+            $lt->{$3} = [ $mem->{"talksubject:$2:$3:$4"}, $v ];
+        }
+    }
+    return $lt unless %need;
+    
     my $bodycol = $opts->{'onlysubjects'} ? "" : ", body";
 
     # pass 1 (slave) and pass 2 (master)
@@ -2617,6 +2641,9 @@ sub get_talktext2
         $sth->execute;
         while (my ($id, $subject, $body) = $sth->fetchrow_array) {
             $lt->{$id} = [ $subject, $body ];
+            LJ::MemCache::add([$journalid,"talkbody:$clusterid:$journalid:$id"], $body)
+                unless $opts->{'onlysubjects'};
+            LJ::MemCache::add([$journalid,"talksubject:$clusterid:$journalid:$id"], $subject);
             delete $need{$id};
         }
     }
