@@ -753,8 +753,7 @@ sub change_journal_type
     # be able to do, since journaltype=='P'.
     my $ids = $dbh->selectcol_arrayref("SELECT userid FROM friends WHERE friendid=?",
                                        undef, $u->{'userid'});
-    my $bind = join(",", map { "?" } @$ids);
-    $dbh->do("DELETE FROM friends WHERE friendid IN ($bind)", undef, @$ids);
+    $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $u->{'userid'});
     LJ::memcache_kill($_, "friends") foreach @$ids;
     
     if ($type eq "person") {
