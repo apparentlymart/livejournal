@@ -407,6 +407,55 @@ sub register_authaction
 }
 
 # <LJFUNC>
+# name: LJ::make_cookie
+# des: Prepares cookie header lines.
+# returns: An array of cookie lines.
+# args: name, value, expires, path, domain
+# des-name: The name of the cookie.
+# des-value: The value to set the cookie to.
+# des-expires: The time (in seconds) when the cookie is supposed to expire.
+#              Set this to 0 to expire when the browser closes. Set it to
+#              undef to delete the cookie.
+# des-path: The directory path to bind the cookie to.
+# des-domain: The domain (or domains) to bind the cookie to.
+# </LJFUNC>
+sub make_cookie                     
+{             
+    my ($name, $value, $expires, $path, $domain) = @_;
+    my $cookie = "";
+    my @cookies = ();
+    
+    # let the domain argument be an array ref, so callers can set
+    # cookies in both .foo.com and foo.com, for some broken old browsers.
+    if ($domain && ref $domain eq "ARRAY") {
+        foreach (@$domain) {                
+            push(@cookies, LJ::make_cookie($name, $value, $expires, $path, $_));
+        }
+        return;
+    }
+    
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($expires);
+    $year+=1900;
+
+    my @day = qw{Sunday Monday Tuesday Wednesday Thursday Friday Saturday};
+    my @month = qw{Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec};
+
+    $cookie = sprintf "%s=%s", LJ::eurl($name), LJ::eurl($value);
+
+    # this logic is confusing potentially
+    unless (defined $expires && $expires==0) {
+        $cookie .= sprintf "; expires=$day[$wday], %02d-$month[$mon]-%04d %02d:%02d:%02d GMT",
+                $mday, $year, $hour, $min, $sec;
+    }
+
+    $cookie .= "; path=$path" if $path;
+    $cookie .= "; domain=$domain" if $domain;
+    push(@cookies, $cookie);
+    return @cookies;
+}
+
+
+# <LJFUNC>
 # name: LJ::statushistory_add
 # des: Adds a row to a user's statushistory
 # returns: boolean; 1 on success, 0 on failure

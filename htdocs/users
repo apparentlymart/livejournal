@@ -196,8 +196,14 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
 	dump_error();
     }
     
-    foreach (keys %headers) {
-	print "$_: $headers{$_}\n";
+    foreach my $hname (keys %headers) {
+        if (ref($headers{$hname}) && ref($headers{$hname}) eq "ARRAY") {
+            foreach (@{$headers{$hname}}) {
+                print "$hname: $_\n";
+            }
+        } else {
+	    print "$hname: $headers{$_}\n";
+        }
     }
     print "Status: $status\n";
 
