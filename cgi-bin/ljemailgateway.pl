@@ -138,6 +138,10 @@ sub process {
           HTML::Entities::decode_entities(
             $xml->{messageContents}->{mediaItems}->{mediaItem}->{url} );
 
+        return $err->(
+            "Invalid remote SprintPCS URL.", { sendmail => 1 }
+          ) unless $url =~ m#^http://pictures.sprintpcs.com/#;
+
         # we've got the url to the full sized image.
         # fetch!
         my ($tmpdir, $tempfile);
