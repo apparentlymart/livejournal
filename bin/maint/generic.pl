@@ -66,4 +66,11 @@ $maint{joinmail} = sub {
     }
 };
 
+$maint{clean_spamreports} = sub {
+    my $dbh = LJ::get_db_writer();
+    my $len = 86400 * 90; # 90 days
+    my $ct = $dbh->do("DELETE FROM spamreports WHERE reporttime < UNIX_TIMESTAMP() - $len")+0;
+    print "Deleted $ct reports.\n";
+};
+
 1;

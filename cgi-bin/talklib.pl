@@ -1374,9 +1374,9 @@ sub mark_comment_as_spam {
     }
     
     # step 3: insert into spamreports
-    $dbh->do('INSERT INTO spamreports (reporttime, ip, journalid, posterid, subject, body) ' .
-             'VALUES (UNIX_TIMESTAMP(), ?, ?, ?, ?, ?)', 
-             undef, $ip, $journalu->{userid}, $posterid, $subject, $body);
+    $dbh->do('INSERT INTO spamreports (reporttime, posttime, ip, journalid, posterid, subject, body) ' .
+             'VALUES (UNIX_TIMESTAMP(), UNIX_TIMESTAMP(?), ?, ?, ?, ?, ?)', 
+             undef, $row->{datepost}, $ip, $journalu->{userid}, $posterid, $subject, $body);
     return 0 if $dbh->err;
     return 1;
 }

@@ -24,3 +24,4 @@ captcha.pl:
 
 generic.pl:
   joinmail - Generates daily email digests for community join requests
+  clean_spamreports - Clean out data from the spamreports table older than 90 days.

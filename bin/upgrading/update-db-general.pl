@@ -2273,6 +2273,12 @@ register_alter(sub {
                  "ADD url VARCHAR(255) default NULL AFTER location");
     }
 
+    unless (column_type("spamreports", "posttime") ne '') {
+        do_alter("spamreports", "ALTER TABLE spamreports ADD COLUMN posttime INT(10) UNSIGNED " .
+                 "NOT NULL AFTER reporttime, ADD COLUMN state ENUM('open', 'closed') DEFAULT 'open' " .
+                 "NOT NULL AFTER posttime");
+    }
+
 });
 
 1; # return true
