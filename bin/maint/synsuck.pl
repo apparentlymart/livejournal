@@ -32,7 +32,7 @@ $maint{'synsuck'} = sub
 
         my $ua = LWP::UserAgent->new("timeout" => 10);
         my $reader_info = $readers ? "; $readers readers" : "";
-        $ua->agent("$LJ::SITENAME ($LJ::ADMIN_EMAIL; for $LJ::SITEROOT/users/$user/" . $reader_info);
+        $ua->agent("$LJ::SITENAME ($LJ::ADMIN_EMAIL; for $LJ::SITEROOT/users/$user/" . $reader_info . ")");
 
         my $delay = sub {
             my $minutes = shift;
