@@ -358,27 +358,27 @@ body<=
         });
 
         ### communities
+        my $LIMIT = 500;
 
         unless ($LJ::DISABLED{'interests-community'}) {
-            $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, comminterests ui " .
-                                 "WHERE u.userid=ui.userid AND ui.intid=? " .
-                                 "AND u.statusvis='V' LIMIT 500");
+            my @uids;
+            $sth = $dbr->prepare("SELECT userid FROM comminterests WHERE intid=? LIMIT $LIMIT");
             $sth->execute($intid);
-            my @cl;
-            while (my ($iuser, $iname) = $sth->fetchrow_array) {
-                push @cl, [ $iuser, $iname ];
-            }
-            @cl = sort { $a->[0] cmp $b->[0] } @cl;
+            push @uids, $_ while $_ = $sth->fetchrow_array;
+            my $us = LJ::load_userids(@uids);
+            my $count = @uids;
+            my @cl = grep { $_->{statusvis} eq "V" } values %$us;
+            @cl = sort { $a->{user} cmp $b->{user} } @cl;
 
             my $list;
             foreach (@cl) {
-                LJ::text_out(\$_[1]);
-                $list .= "<li>" . LJ::ljuser($_->[0], { 'type' => 'C' }) . " - " .
-                    LJ::ehtml($_->[1]) . "</li>";
+                my $name = $_->{name};
+                LJ::text_out(\$name);
+                $list .= "<li>" . LJ::ljuser($_) . " - " . LJ::ehtml($name) . "</li>";
             }
 
             if (@cl) {
-                my $matchcount = BML::ml(@cl == 1 ? ".match" : ".matches", {'count' => scalar(@cl) });
+                my $matchcount = BML::ml(@cl == 1 ? ".match" : ".matches", {'count' => $count });
                 $ret .= "<?h1 $ML{'.communities.head'} h1?><?p " .
                     BML::ml(".communities.text", {'interest' => $interest}) ." p?>";
                 $ret .= "<p><b>$matchcount</b><ul>$list</ul></p>";
@@ -393,23 +393,23 @@ body<=
         }
         $ret .= " $ML{'.morestuff'} p?>";
 
-        $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, userinterests ui " .
-                             "WHERE u.userid=ui.userid AND ui.intid=? AND u.journaltype<>'C' " .
-                             "AND u.statusvis='V' LIMIT 500");
+        my @uids;
+        $sth = $dbr->prepare("SELECT userid FROM userinterests WHERE intid=? LIMIT $LIMIT");
         $sth->execute($intid);
-        my @ul;
-        while (my ($iuser, $iname) = $sth->fetchrow_array) {
-            push @ul, [ $iuser, $iname ];
-        }
-        @ul = sort { $a->[0] cmp $b->[0] } @ul;
+        push @uids, $_ while $_ = $sth->fetchrow_array;
+        my $count = @uids;
+        my $us = LJ::load_userids(@uids);
+        my @ul = grep { $_->{statusvis} eq "V" && $_->{journaltype} ne "C" } values %$us;
+        @ul = sort { $a->{user} cmp $b->{user} } @ul;
 
         my $list;
         foreach (@ul) {
-            LJ::text_out(\$_->[1]);
-            $list .= "<li>" . LJ::ljuser($_->[0], { 'type' => 'P' }) . " - " . LJ::ehtml($_->[1]) . "</li>";
+            my $name = $_->{name};
+            LJ::text_out(\$name);
+            $list .= "<li>" . LJ::ljuser($_) . " - " . LJ::ehtml($name) . "</li>";
         }
 
-        my $matchcount = BML::ml(@ul == 1 ? ".match" : ".matches", { 'count' => scalar(@ul) });
+        my $matchcount = BML::ml(@ul == 1 ? ".match" : ".matches", { 'count' => $count });
         $ret .= "<p><b>$matchcount</b><ul>$list</ul></p>";
 
         return $ret;
