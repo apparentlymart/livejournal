@@ -1055,6 +1055,8 @@ INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope
 UPDATE userproplist SET des='MSN Username',prettyname='MSN Username',indexed='1',scope='general',datatype='char' WHERE name='msn';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('newesteventtime', '0', 'Newest event time', 'char', 'Time (user-side) of the user\'s last entry in their personal journal', 'general');
 UPDATE userproplist SET des='Time (user-side) of the user\'s last entry in their personal journal',prettyname='Newest event time',indexed='0',scope='general',datatype='char' WHERE name='newesteventtime';
+INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('newpost_minsecurity', '0', 'Minimal Security', 'char', 'Minimal security for new events; values are: public, private or friends', 'general');
+UPDATE userproplist SET des='Minimal security for new events; values are: public, private or friends',prettyname='Minimal Security',indexed='0',scope='general',datatype='char' WHERE name='newpost_minsecurity';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('opt_bdaymail', '1', 'Get Birthday Reminders', 'bool', '0: don\'t get birthday reminder mail, 1: do get birthday reminder mail', 'general');
 UPDATE userproplist SET des='0: don\'t get birthday reminder mail, 1: do get birthday reminder mail',prettyname='Get Birthday Reminders',indexed='1',scope='general',datatype='bool' WHERE name='opt_bdaymail';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('opt_blockrobots', '1', 'Block Robots & Spiders', 'bool', '1: don\'t allow robots, 0: do', 'general');
@@ -1079,6 +1081,8 @@ INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope
 UPDATE userproplist SET des='1: friends view uses shared pictures, 0: uses poster\'s picture',prettyname='Use Shared Journal Pic',indexed='1',scope='general',datatype='bool' WHERE name='opt_usesharedpic';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('opt_whatemailshow', '1', 'Which email address to display', 'char', 'N: none, A: actual, L: livejournal, B: both', 'general');
 UPDATE userproplist SET des='N: none, A: actual, L: livejournal, B: both',prettyname='Which email address to display',indexed='1',scope='general',datatype='char' WHERE name='opt_whatemailshow';
+INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('opt_whoscreened', '0', 'Screening comments', 'char', 'Screen new comments: A=All, N=None, F=from non-Friends, R=from non-users', 'general');
+UPDATE userproplist SET des='Screen new comments: A=All, N=None, F=from non-Friends, R=from non-users',prettyname='Screening comments',indexed='0',scope='general',datatype='char' WHERE name='opt_whoscreened';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('s1_calendar_style', '0', 'Calendar View StyleID', 'num', 'The style ID# of the S1 style for the calendar view.', 'general');
 UPDATE userproplist SET des='The style ID# of the S1 style for the calendar view.',prettyname='Calendar View StyleID',indexed='0',scope='general',datatype='num' WHERE name='s1_calendar_style';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('s1_day_style', '0', 'Day View StyleID', 'num', 'The style ID# of the S1 style for the day view view.', 'general');
@@ -1101,5 +1105,3 @@ INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope
 UPDATE userproplist SET des='Yahoo ID',prettyname='Yahoo ID',indexed='1',scope='general',datatype='char' WHERE name='yahoo';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('zip', '1', 'ZIP code', 'char', '5 digit zip code (if in US)', 'general');
 UPDATE userproplist SET des='5 digit zip code (if in US)',prettyname='ZIP code',indexed='1',scope='general',datatype='char' WHERE name='zip';
-INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('newpost_minsecurity', '0', 'Minimal Security', 'char', 'Minimal security for new events; values are: public, private or friends', 'general');
-UPDATE userproplist SET des='Minimal security for new events; values are: public, private or friends',prettyname='Minimal Security',indexed='0',scope='general',datatype='char' WHERE name='newpost_minsecurity';
