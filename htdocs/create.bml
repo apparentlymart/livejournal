@@ -320,16 +320,20 @@ body<=
      $ret .= "<?p ".BML::ml(".username.text", {'sitename' => $LJ::SITENAME}) ." p?>";
      
      $v = LJ::ehtml($FORM{'user'});
-     $ret .= "<?standout <table><tr><td align=\"center\"><table><tr><td>$ML{'.username.box.head'}<br /><input value=\"$v\" type=\"text\" name=\"user\" size=\"15\" maxlength=\"15\"></td></tr></table></td></tr>";
-     $ret .= "<tr><td>";
-     $ret .= $error_msg->('username', '', '<br>');
-     $ret .= "<font face=\"Arial,Helvetica\" size=\"-1\">&nbsp;<br />";
-     $ret .= "<b>$ML{'.username.ljaddress'}</b><br />&nbsp;&nbsp;&nbsp;&nbsp;<?siteroot?>/users/<i>$ML{'.username.username'}</i>/<br />&nbsp;&nbsp;&nbsp;&nbsp;<?siteroot?>/<i>~$ML{'.username.username'}</i>/<br />";
+     $ret .= "<?standout <table width='260'><tr><td align='center'>";
+     $ret .= "<table><tr><td>$ML{'.username.box.head'}<br />";
+     $ret .= "<input value='$v' type='text' name='user' size='15' maxlength='15' />";
+     $ret .= "</td></tr></table></td></tr><tr><td>";
+     $ret .= $error_msg->('username', '', '<br />');
+     $ret .= "<font face='Arial,Helvetica' size='-1'>$ML{'.username.charsallowed'}<br /><br />";
+     $ret .= "<b>$ML{'.username.ljaddress'}</b><br />";
+     $ret .= "&nbsp;&nbsp;&nbsp;&nbsp;<?siteroot?>/users/<i>$ML{'.username.username'}</i>/<br />";
+     $ret .= "&nbsp;&nbsp;&nbsp;&nbsp;<?siteroot?>/<i>~$ML{'.username.username'}</i>/<br />";
      if ($LJ::USER_VHOSTS) {
          unless ($LJ::EVERYONE_PAID) {
              $ret .= "<b>$ML{'.username.forpaidaccts'}</b><br />";
          }
-         $ret .= "&nbsp;&nbsp;&nbsp;&nbsp;http://<I>$ML{'.username.username'}</I>.$LJ::USER_DOMAIN/<br>";
+         $ret .= "&nbsp;&nbsp;&nbsp;&nbsp;http://<i>$ML{'.username.username'}</i>.$LJ::USER_DOMAIN/<br />";
      }
      $ret .= "</font></td></tr>";
      $ret .= "</table> standout?>";
