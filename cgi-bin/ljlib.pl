@@ -1957,7 +1957,7 @@ sub bad_input
     my $ret = "";
     $ret .= "(=BADCONTENT=)\n<ul>\n";
     foreach (@errors) {
-        $ret .= "<li>$_\n";
+        $ret .= "<li>$_</li>\n";
     }
     $ret .= "</ul>\n";
     return $ret;

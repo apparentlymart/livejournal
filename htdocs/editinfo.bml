@@ -630,42 +630,34 @@ BODY<=
          $FORM{'interests'} =~ s/\s+$//;
          $FORM{'interests'} =~ s/\n/,/g;
          my @ints = split (/\s*,\s*/, $FORM{'interests'});
-         my $errorflag = 0;
          my $intcount = scalar(@ints);
          if ($intcount > 150) {
-             $errorflag = 1;
-             push @errors, "Sorry, you listed too many interests.  The limit is 150, but you've listed $intcount.  Any changes you made to your interests were not saved.  Go back and cut down your list, then save again.";
+             return LJ::bad_input("Sorry, you listed too many interests.  The limit is 150, but you've listed $intcount.  Any changes you made to your interests were not saved.  Go back and cut down your list, then save again.");
          }
-         else 
+
+         foreach my $int (@ints)
          {
-             foreach my $int (@ints)
-             {
-                 $int = lc($int);
-                 # The following two lines prevent diacritics in other languages, thus bad.
-                 # $int =~ s/^[^\w]+//;
-                 # $int =~ s/[^\w]+$//;
-                 $int =~ s/^i like //;
-                 next unless ($int);
-                 next if ($int =~ / .+ .+ .+ /);
-                 next if ($int =~ /[\<\>]/);
-                 next if (length($int) > 35);
-                 unless ($interests{$int}) { $int_new{$int} = 1; }
-                 delete $int_del{$int};
-             }
+             $int = lc($int);
+             $int =~ s/^i like //;          # *sigh*
+             next unless $int;
+             next if $int =~ / .+ .+ .+ /;  # prevent sentences
+             next if $int =~ /[\<\>]/;
+             next if length($int) > 35;
+             $int_new{$int} = 1 unless $interests{$int};
+             delete $int_del{$int};
          }
-             
+
          ### were interests removed?
-         if (!$errorflag && %int_del) 
+         if (%int_del)
          {
              ## easy, we know their IDs, so delete them en masse
-
              my $intid_in = join(", ", values %int_del);
              $dbh->do("DELETE FROM userinterests WHERE userid=$u->{'userid'} AND intid IN ($intid_in)");
              $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)");
          }
 
          ### do we have new interests to add?
-         if (!$error_flag && %int_new) 
+         if (%int_new)
          {
              ## difficult, have to find intids of interests, and create new ints for interests
              ## that nobody has ever entered before
@@ -682,7 +674,7 @@ BODY<=
                  delete $int_new{$_->{'interest'}};   # - so we don't have to make a new intid for
                                                       #   this next pass.
              }
-             
+
              if (@new_intids) {
                  my $sql = "";
                  foreach my $newid (@new_intids) {
@@ -698,41 +690,34 @@ BODY<=
          }
 
          ### do we STILL have interests to add?  (must make new intids)
-         if (!$error_flag && %int_new) 
+         if (%int_new)
          {
-             foreach my $int (keys %int_new) 
+             foreach my $int (keys %int_new)
              {
                  my $intid;
-
-                 ## need to do this atomically so we don't get duplicate interests (there's no unique
-                 ## constraint on the interest column... that'd make for a big index)
-                 $dbh->do("LOCK TABLES interests WRITE");
                  my $qint = $dbh->quote($int);
 
-                 # let's double-check that some other connection didn't insert it since we last checked
-                 $sth = $dbh->prepare("SELECT intid FROM interests WHERE interest=$qint");
-                 $sth->execute;
-                 ($intid) = $sth->fetchrow_array;
-
-                 # more than likely it's still missing, so we have to make it:
-                 unless ($intid)
-                 {
-                     $sth = $dbh->prepare("INSERT INTO interests (intid, intcount, interest) VALUES (NULL, 1, $qint)");
-                     $sth->execute;
+                 $dbh->do("INSERT INTO interests (intid, intcount, interest) ".
+                          "VALUES (NULL, 1, $qint)");
+                 if ($dbh->err) {
+                     # somebody beat us to creating it.  find its id.
+                     $intid = $dbh->selectrow_array("SELECT intid FROM interests WHERE interest=$qint");
+                     $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid=$intid");
+                 } else {
+                     # newly created
                      $intid = $dbh->{'mysql_insertid'};
                  }
-                 $dbh->do("UNLOCK TABLES");
-
-                 ## now we can actually insert it into the userinterests table:
-                 $dbh->do("INSERT INTO userinterests (userid, intid) VALUES ($u->{'userid'}, $intid)");
+                 if ($intid) {
+                     ## now we can actually insert it into the userinterests table:
+                     $dbh->do("INSERT INTO userinterests (userid, intid) ".
+                              "VALUES ($u->{'userid'}, $intid)");
+                 }
              }
          }
-         
      }
 
      #### now unban users they selected to be unbanned
-     
-     if ($FORM{'unban'}) 
+     if ($FORM{'unban'})
      {
          my $bannedin = join(",", map { $dbh->quote($_); } split(/\0/, $FORM{'unban'}));
          my $quserid = $u->{'userid'}+0;
@@ -762,13 +747,6 @@ BODY<=
 
      # tell the user all is well
      my $ret = "(=H1 Success H1=)(=P Your information and <a href=\"/users/$user/\">journal</a> settings and <a href=\"/userinfo.bml?user=$user\">profile</a> have been updated. P=)";
-     if (@errors) {
-         $ret .= "(=P However, one or more errors occured while processing your request:\n<ul>\n";
-         foreach (@errors) {
-           $ret .= "<li>$_\n";
-         }
-         $ret .= "</ul> P=)\n";
-     }
      return $ret;
  }
 

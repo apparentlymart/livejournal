@@ -182,8 +182,8 @@ CREATE TABLE interests (
   interest varchar(255) NOT NULL default '',
   intcount mediumint(8) unsigned default NULL,
   PRIMARY KEY  (intid),
-  KEY (interest)
-) 
+  UNIQUE interest (interest)
+)
 EOC
 
 register_tablecreate("keywords", <<'EOC');
@@ -1560,6 +1560,19 @@ register_alter(sub {
         do_alter("keywords",
                  "ALTER TABLE keywords ".
                  "MODIFY keyword VARCHAR(80) BINARY NOT NULL");
+    }
+
+    # change interest.interest key to being unique, if it's not already
+    {
+        my $sth = $dbh->prepare("SHOW INDEX FROM interests");
+        $sth->execute;
+        while (my $i = $sth->fetchrow_hashref) {
+            if ($i->{'Key_name'} eq "interest" && $i->{'Non_unique'}) {
+                do_alter("interests", "ALTER IGNORE TABLE interests ".
+                         "DROP INDEX interest, ADD UNIQUE interest (interest)");
+                last;
+            }
+        }
     }
 
 });
