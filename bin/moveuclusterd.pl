@@ -522,9 +522,9 @@ sub prelockSomeUsers {
             # to the next cluster
             next CLUSTER if $i > $#$jobs;
 
-            # Skip jobs that're already prelocked, or try to lock. If locking
-            # fails, assume there's some database problems and don't try to
-            # prelock any more until next time.
+            # Skip jobs that are already prelocked. If locking fails, assume
+            # there's some database problem and don't try to prelock any more
+            # until next time.
             next JOB if $jobs->[$i]->isPrelocked;
             $jobs->[$i]->prelock or last CLUSTER;
         }
@@ -1397,6 +1397,7 @@ sub prelock {
 
     if ( $rval ) {
         $self->setPrelocktime;
+        $self->{options}{prelocked} = 1;
         $self->{server}->debugMsg( 4, q{Prelocked user %d}, $self->{userid} );
     } else {
         $self->{server}->logMsg( 'warn', q{Couldn't prelock user %d: %s},
