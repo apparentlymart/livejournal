@@ -184,7 +184,7 @@ my $move_user = sub {
         }
         if (@insertbind) {
             my $insertbind = join ',', @insertbind;
-            $u->do("INSERT INTO userblob (journalid, domain, blobid, length) " .
+            $u->do("INSERT IGNORE INTO userblob (journalid, domain, blobid, length) " .
                    "VALUES $insertbind", undef, @insertvars);
             die "error in userblob insert: " . $u->errstr . "\n" if $u->err;
         }
