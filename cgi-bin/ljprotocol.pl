@@ -34,6 +34,7 @@ sub error_message
 	     "203" => "Invalid argument(s)",
 	     "204" => "Invalid metadata datatype",
 	     "205" => "Unknown metadata",
+	     "206" => "Invalid destination journal username.",
 
 	     # Access Errors
 	     "300" => "Don't have access to shared/community journal",
@@ -1430,10 +1431,14 @@ sub check_altusage
     return 1 unless $alt;
 
     # complain if the username is invalid
-    return fail($err,203) unless LJ::canonical_username($alt);
+    return fail($err,206) unless LJ::canonical_username($alt);
    
     # allow usage if we're told explicitly that it's okay
-    return 1 if ($flags->{'usejournal_okay'});
+    if ($flags->{'usejournal_okay'}) {
+	$flags->{'ownerid'} = LJ::get_userid($dbs, $alt);
+	return 1 if $flags->{'ownerid'};
+	return fail($err,206);
+    }
     
     # otherwise, check logaccess table:
     my $info = {};
