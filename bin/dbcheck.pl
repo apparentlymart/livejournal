@@ -163,25 +163,31 @@ my $check = sub {
     }
 
     my $ss = $db->selectrow_hashref("show slave status");
+    if ($ss) {
+	foreach my $k (sort keys %$ss) {
+	    $ss->{lc $k} = $ss->{$k};
+	}
+    }
+
     my $diff;
     if ($ss) {
-	if ($ss->{'Slave_IO_Running'} eq "Yes" && $ss->{'Slave_SQL_Running'} eq "Yes") {
-	    if ($ss->{'Master_Log_File'} eq $ss->{'Relay_Master_Log_File'}) {
-		$diff = $ss->{'Read_Master_Log_Pos'} - $ss->{'Exec_master_log_pos'};
+	if ($ss->{'slave_io_running'} eq "Yes" && $ss->{'slave_sql_running'} eq "Yes") {
+	    if ($ss->{'master_log_file'} eq $ss->{'relay_master_log_file'}) {
+		$diff = $ss->{'read_master_log_pos'} - $ss->{'exec_master_log_pos'};
 	    } else {
 		$diff = "XXXXXXX";
 		push @errors, "Wrong log file: $d->{name}";
 	    }
 	} else {
 	    $diff = "XXXXXXX";
-	    $ss->{Last_error} =~ s/[^\n\r\t\x20-\x7e]//g;
-	    push @errors, "Slave not running: $d->{name}: $ss->{Last_error}";
+	    $ss->{last_error} =~ s/[^\n\r\t\x20-\x7e]//g;
+	    push @errors, "Slave not running: $d->{name}: $ss->{last_error}";
 	}
 
 	my $ms = $master_status{$d->{masterid}} || [];
-	#print "  master: [@$ms], slave at: [$ss->{Master_Log_File}, $ss->{Read_Master_Log_Pos}]\n";
-	if ($ss->{Master_Log_File} ne $ms->[0] || $ss->{Read_Master_Log_Pos} < $ms->[1] - 20_000) {
-	    push @errors, "$d->{name}: Relay log behind: master=[@$ms], $d->{name}=[$ss->{Master_Log_File}, $ss->{Read_Master_Log_Pos}]";
+	#print "  master: [@$ms], slave at: [$ss->{master_log_file}, $ss->{read_master_log_pos}]\n";
+	if ($ss->{master_log_file} ne $ms->[0] || $ss->{read_master_log_pos} < $ms->[1] - 20_000) {
+	    push @errors, "$d->{name}: Relay log behind: master=[@$ms], $d->{name}=[$ss->{master_log_file}, $ss->{read_master_log_pos}]";
 	}
 
     } else {
