@@ -55,7 +55,6 @@ $SIG{'HUP'} = sub {
     # nothing.  maybe later make a HUP force a flush?
 };
 
-# Perhaps I should give it a command to not do this in the future.
 if (!$opt_foreground && ($pid = fork)) 
 {
     $is_parent = 1;
@@ -70,8 +69,43 @@ if (!$opt_foreground && ($pid = fork))
     exit;
 } 
 
+# fork off a separate qbufferd process for all specified
+# jobs types in @LJ::QBUFFERD_ISOLATE
+my %isolated;
+foreach my $job (@LJ::QBUFFERD_ISOLATE) {
+    $isolated{$job} = 1;
+}
+my $my_job;
+foreach my $job (@LJ::QBUFFERD_ISOLATE, "") {
+    $my_job = $job;
+    if ($job) {
+        if (my $child = fork) {
+            # we're the parent.  keep track of children pids.
+            print "Child qbuffer for $job started ($child)\n";
+            $isolated{$job} = $child;
+            next;
+        } else {
+            # we are the child.  get to work below.
+            last;
+        }
+    }
+}
+# at this point, $my_job is either the specialized 'cmd' to run, or
+# empty to mean everything but things marked in %isolated (which have
+# their own processes)
+
 sub stop_qbufferd
 {
+    # stop children
+    unless ($my_job) {
+        foreach my $job (keys %isolated) {
+            my $child = $isolated{$job};
+            next if $child == 1;  # should never be just 1, but be safe.
+            print "Killing child job: $job\n";
+            kill 15, $child;
+        }
+    }
+
     print "Quitting.\n";
     unlink $pidfile;
     exit;
@@ -103,6 +137,12 @@ while (LJ::start_request())
         $sth->execute;
         my @cmds;
         while (my ($cmd, $count) = $sth->fetchrow_array) {
+            # my process is doing something else:
+            next if $my_job && $my_job ne $cmd;
+
+            # my process is doing everything but this:
+            next if $my_job eq "" && $isolated{$cmd};
+
             print "  $cmd ($count)\n" if $opt_debug;
             unless ($started{$cmd}++) {
                 LJ::cmd_buffer_flush($dbh, $db, "$cmd:start");
