@@ -18,10 +18,7 @@ my %modules = (
                "Image::Size" => { 'deb' => 'libimage-size-perl', },
                "MIME::Lite" => { 'deb' => 'libmime-lite-perl', },
                "MIME::Words" => { 'deb' => 'libmime-perl', },
-               "Compress::Zlib" => {
-                   'deb' => 'libcompress-zlib-perl',
-                   'opt' => 'When available, turn on $LJ::DO_GZIP to cut bandwidth usage in half.',
-               },
+               "Compress::Zlib" => { 'deb' => 'libcompress-zlib-perl', },
                "Net::SMTP" => { 
                    'deb' => 'libnet-perl',
                    'opt' => "Alternative to piping into sendmail to send mail.",

@@ -23,6 +23,7 @@ use LJ::MemCache;
 use Time::Local ();
 use Storable ();
 use Text::Wrap ();
+use Compress::Zlib ();
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
@@ -6805,6 +6806,60 @@ sub text_trim
         $char_max--;
     }
     return substr($text,0,$cur);
+}
+
+# <LJFUNC>
+# name: LJ::text_compress
+# des: Compresses a chunk of text, to gzip, if configured for site.  Can compress
+#      a scalarref in place, or return a compressed copy.  Won't compress if
+#      value is too small, already compressed, or size would grow by compressing.
+# args: text
+# des-test: either a scalar or scalarref
+# returns: nothing if given a scalarref (to compress in-place), or original/compressed value,
+#          depending on site config
+# </LJFUNC>
+sub text_compress
+{
+    my $text = shift;
+    my $ref = ref $text;
+    return $ref ? undef : $text unless $LJ::COMPRESS_TEXT;
+    die "Invalid reference" if $ref && $ref ne "SCALAR";
+
+    my $tref = $ref ? $text : \$text;
+    my $pre_len = length($$tref);
+    unless (substr($$tref,0,2) eq "\037\213" || $pre_len < 100) {
+        my $gz = Compress::Zlib::memGzip($$tref);
+        if (length($gz) < $pre_len) {
+            $$tref = $gz;
+        }
+    }
+
+    return $ref ? undef : $$tref;
+}
+
+# <LJFUNC>
+# name: LJ::text_uncompress
+# des: Uncompresses a chunk of text, from gzip, if configured for site.  Can uncompress
+#      a scalarref in place, or return a compressed copy.  Won't uncompress unless
+#      it finds the gzip magic number at the beginning of the text.
+# args: text
+# des-test: either a scalar or scalarref.
+# returns: nothing if given a scalarref (to uncompress in-place), or original/uncompressed value,
+#          depending on if test was compressed or not
+# </LJFUNC>
+sub text_uncompress
+{
+    my $text = shift;
+    my $ref = ref $text;
+    die "Invalid reference" if $ref && $ref ne "SCALAR";
+    my $tref = $ref ? $text : \$text;
+
+    # check for gzip's magic number
+    if (substr($$tref,0,2) eq "\037\213") {
+        $$tref = Compress::Zlib::memGunzip($$tref);
+    }
+    
+    return $ref ? undef : $$tref;
 }
 
 # <LJFUNC>
