@@ -243,7 +243,7 @@ $LJ::S1::PROPS = {
 sub get_themeid
 {
     shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
-    my $themeid = @_;
+    my $themeid = shift;
     return $LJ::S1::CACHE_THEMEID{$themeid} if $LJ::S1::CACHE_THEMEID{$themeid};
     my $dbr = LJ::get_db_reader();
     my $ret = {};
