@@ -39,10 +39,20 @@
           matured, it will likely be included on the Downloads page.  If your program has reached a
           point where you feel it should be included in the page and it hasn't been yet, feel free to
           drop a post to <ulink url="http://www.livejournal.com/community/lj_clients/info">lj_clients</ulink>
-          asking why.  It may be because your client does not have an expected feature, has not had enough
-          time to mature, does not have its own community, or just because the next update to the page has
-          not yet been coded.
+          asking why.
         </simpara>
+        <itemizedlist>
+          <title>Client Listing Guidelines for the <ulink url="http://www.livejournal.com/download/">Download a Client</ulink> page</title>
+          <listitem><simpara>As a minimum, clients MUST support the basic features of LiveJournal,
+              such as logging in, posting new entries, editing old entries, history views, etc.</simpara></listitem>
+          <listitem><simpara>Client MUST be mature and well-established before being listed. Having minor bugs is ok, but
+              we don't want to link to clients that have the potential to mess up an account.</simpara></listitem>
+          <listitem><simpara>Client MUST be free to use. You're welcome to create and maintain a
+              client that isn't free/open, we just don't want to provide free advertising for such a client.</simpara></listitem>
+          <listitem><simpara>Client MUST be originally written for LiveJournal. We support the Blogger and Atom APIs, and
+              we encourage interoperational clients, but we don't want to get in the habit of listing clients for
+              competitor services.</simpara></listitem>
+        </itemizedlist>
       </answer>
     </qandaentry>
     <qandaentry id="ljp.csp.faq.userinfopage">
