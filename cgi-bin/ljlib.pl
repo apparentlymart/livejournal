@@ -1,4 +1,10 @@
 #!/usr/bin/perl
+#
+# <LJDEP>
+# lib: DBI::, Digest::MD5, URI::URL, HTML::TokeParser
+# lib: cgi-bin/ljconfig.pl, cgi-bin/ljlang.pl, cgi-bin/ljpoll.pl
+# link: htdocs/paidaccounts/index.bml, htdocs/users, htdocs/view/index.bml
+# </LJDEP>
 
 use DBI;
 use Digest::MD5 qw(md5_hex);
