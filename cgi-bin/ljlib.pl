@@ -5817,11 +5817,17 @@ sub make_login_session
     $BML::COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime, 1 ];
     LJ::set_remote($u);
 
-    LJ::load_user_props($dbs, $u, "browselang");
+    LJ::load_user_props($dbs, $u, "browselang", "schemepref" );
     my $bl = LJ::Lang::get_lang($u->{'browselang'});
     if ($bl) {
         BML::set_cookie("langpref", $bl->{'lncode'} . "/" . time(), 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
         BML::set_language($bl->{'lncode'});
+    }
+    
+    # restore default scheme
+    if ($u->{'schemepref'} ne "") {
+      BML::set_cookie("BMLschemepref", $u->{'schemepref'}, 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+      BML::set_scheme($u->{'schemepref'});
     }
     
     LJ::run_hooks("post_login", {
