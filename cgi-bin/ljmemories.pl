@@ -46,3 +46,5 @@ sub updated_keywords {
     LJ::MemCache::delete([$u->{userid},"memkwid:$u->{userid}"]);
     return undef;
 }
+
+1;
