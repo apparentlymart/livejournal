@@ -19,25 +19,7 @@ function writeRichText(rte, postvar, html, width, height, buttons) {
 }
 
 function initRTE() {
-    //determine if browser can write rich text
-    if (browser.isIE55up) {
-        isRichText = true;
-    }
-    else if (browser.isGecko) {
-        //check to see if midas is enabled
-        var isMidasEnabled = false;
-        document.getElementById('testFrame').contentDocument.designMode = "on";
-        try {
-            document.getElementById('testFrame').contentWindow.document.execCommand("undo", false, null);
-            isRichText = true;
-        }  catch (e) {
-            isRichText = false;
-        }
-    }
-    else {
-        //other browser
-        isRichText = false;
-    }
+    isRichText = browser.isRichText;
 }
 
 function writeRTE(rte, postvar, html, width, height, buttons) {

@@ -1,7 +1,7 @@
 // Browser Detect Lite  v2.1.4
 // http://www.dithered.com/javascript/browser_detect/index.html
 // modified by Chris Nott (chris@NOSPAMdithered.com - remove NOSPAM)
-
+// Modified further to detect rich text support
 
 function BrowserDetectLite() {
    var ua = navigator.userAgent.toLowerCase(); 
@@ -16,6 +16,7 @@ function BrowserDetectLite() {
    this.isKonqueror = (ua.indexOf('konqueror') != -1 && !this.isSafari); 
    this.isIcab      = (ua.indexOf('icab') != -1); 
    this.isAol       = (ua.indexOf('aol') != -1); 
+   this.isAppleWebKit = (ua.indexOf('applewebkit') != -1);
    
    // spoofing and compatible browsers
    this.isIECompatible = ( (ua.indexOf('msie') != -1) && !this.isIE);
@@ -100,5 +101,10 @@ function BrowserDetectLite() {
    this.isIE6up = (this.isIE && this.versionMajor >= 6);
    
    this.isIE4xMac = (this.isIE4x && this.isMac);
+
+   this.isRichText = this.isIE55up ? true : false;
+   if (this.isGecko || this.isAppleWebKit) {
+        if (document.designMode && document.execCommand) { this.isRichText = true; }
+   }
 }
 var browser = new BrowserDetectLite();
