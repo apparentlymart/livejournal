@@ -62,7 +62,7 @@ body<=
     if ($LJ::SUPPORT_DIAGNOSTICS{'track_useragent'}) {
         $req{'body'} = $POST{'message'} . "\n";
         $req{'body'} .= "-------------------------------------------\n";
-        $req{'body'} .= "Diagnostics: $ENV{'HTTP_USER_AGENT'}";
+        $req{'body'} .= "Diagnostics: " . BML::get_client_header('User-Agent');
     }
 
     return LJ::bad_input(@errors) if @errors;
