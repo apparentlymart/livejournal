@@ -1247,13 +1247,14 @@ USERPICS
             }
         }
         if ($LJ::SPELLER && !$opts->{'disabled_save'}) {
-            my $onclick = "UpdateRTE('rte');" if $opts->{'richtext_on'};
+            my $onclick = "updateRTE('rte');" if $opts->{'richtext_on'};
             $out .= LJ::html_submit('action:spellcheck', BML::ml('entryform.spellcheck'), { 'onclick' => $onclick,
                                                                                             'tabindex' => $tabindex->() }) . "&nbsp;";
         }
 
         my $preview = "var f=this.form; var action=f.action; f.action='/preview/entry.bml'; f.target='preview'; ";
         $preview   .= "window.open('','preview','width=760,height=600,resizable=yes,status=yes,toolbar=no,location=no,menubar=no,scrollbars=yes'); ";
+        $preview   .= "updateRTE('rte'); " if $opts->{'richtext_on'};
         $preview   .= "f.submit(); f.action=action; f.target='_self'; return false; ";
         $preview    = LJ::ejs(LJ::html_submit('action:preview', BML::ml('entryform.preview'), { 'onclick' => $preview,
                                                                                                 'tabindex' => $tabindex->() }));
