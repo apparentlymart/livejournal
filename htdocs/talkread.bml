@@ -485,10 +485,10 @@ sub recurse_post
 		
 		$$ret .= "<p><font size='-2'>";
 		if ($post->{'parenttalkid'} != 0 && $post_count >= $PAGE_SIZE) {
-		    $$ret .= "<a href='$SELF?${jargent}itemid=$itemid&amp;thread=$post->{'parenttalkid'}'>(Parent)</a> ";
+		    $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$post->{'parenttalkid'}'>(Parent)</a> ";
 		}
 		if (defined $opts->{'children'}->{$tid} && $post_count >= $PAGE_SIZE) {
-		    $$ret .= "<a href='$SELF?${jargent}itemid=$itemid&amp;thread=$tid'>(Thread)</a> ";
+		    $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid'>(Thread)</a> ";
 		}
 		
 		my $dtid = $clustered ? ($tid * 256 + $init->{'anum'}) : $tid;
@@ -498,7 +498,7 @@ sub recurse_post
 		# link to message
 		$$ret .= "<a name='t$tid'></a><table><tr>";
 		$$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-		$$ret .= "<td><a href='$SELF?${jargent}itemid=$itemid&amp;thread=$tid'>" . BML::eall($post->{'subject'} || "(no subject)") . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
+		$$ret .= "<td><a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid'>" . BML::eall($post->{'subject'} || "(no subject)") . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
 	    }
 	}
     }
