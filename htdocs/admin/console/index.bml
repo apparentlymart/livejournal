@@ -1,3 +1,6 @@
+<html>
+<head><title>Admin Console</title></head>
+<body>
 <?_code
 
  use strict;
@@ -91,7 +94,10 @@
      return $ret;
  }
 
-_code?><?_c <LJDEP>
+_code?>
+</body>
+</html>
+<?_c <LJDEP>
 lib: cgi-bin/console.pl, cgi-bin/ljlib.pl
 link: htdocs/admin/console/reference.bml
 post: htdocs/admin/console/index.bml

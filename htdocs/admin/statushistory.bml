@@ -1,6 +1,8 @@
+<html>
+<head><title>Status History</title></head>
+<body>
 <?_code
 {
-
     use strict;
     use vars qw(%FORM);
 
@@ -114,6 +116,7 @@
 
     return $ret;
 }
-_code?><?_c <LJDEP>
-</LJDEP> _c?>
+_code?>
+</body>
+</html>
 
