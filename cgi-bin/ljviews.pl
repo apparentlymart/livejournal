@@ -1243,7 +1243,7 @@ sub create_view_rss
 	$clink = "$LJ::SITEROOT/community/$user/";
     }
 
-    $$ret .= "<?xml version='1.0' ?>\n";
+    $$ret .= "<?xml version='1.0' encoding='utf-8' ?>\n";
     $$ret .= "<!DOCTYPE rss PUBLIC \"-//Netscape Communications//DTD RSS 0.91//EN\"\n";
     $$ret .= "             \"http://my.netscape.com/publish/formats/rss-0.91.dtd\">\n";
     $$ret .= "<rss version='0.91'>\n";
@@ -1261,14 +1261,14 @@ sub create_view_rss
 
 	my $subject = $logtext->{$itemid}->[0] || 
 	    substr($logtext->{$itemid}->[1], 0, 40);
- 
+
 	# remove HTML crap and encode it:
         LJ::CleanHTML::clean_subject_all(\$subject);
 	$subject ||= "(No subject or text)";
 	$subject = LJ::exml($subject);
 
 	$$ret .= "<title>$subject</title>\n";
-	$$ret .= "<url>$LJ::SITEROOT/talkread.bml?itemid=$itemid</url>\n";
+	$$ret .= "<link>$LJ::SITEROOT/talkread.bml?itemid=$itemid</link>\n";
 
 	$$ret .= "</item>\n";
     } # end huge while loop
