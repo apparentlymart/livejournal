@@ -1616,7 +1616,7 @@ sub get_authas_list {
 
 
 # <LJFUNC>
-# name: LJ::comm_member_request
+# name: LJ::comm_join_request
 # des: Registers an authaction to add a user to a
 #      community and sends an approval email to the maintainers
 # returns: Hashref; output of LJ::register_authaction()
@@ -1625,7 +1625,7 @@ sub get_authas_list {
 # des-comm: Community user object
 # des-u: User object to add to community
 # </LJFUNC>
-sub comm_member_request {
+sub comm_join_request {
     my ($comm, $u) = @_;
     return undef unless ref $comm && ref $u;
 

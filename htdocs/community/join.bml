@@ -23,7 +23,16 @@
  my $cu = $FORM{comm} ? 
           LJ::load_user($FORM{comm}) : # they gave us the comm name
           LJ::load_userid($cuserid);   # they gave us the comm id
- my $ci = LJ::get_community_row($cu);
+
+ # NOTE: we wrapped this in an eval due to code going live; the library isn't going to go
+ # live at the same time as the BML file, and we don't want weird things happening, so we
+ # verify that this is all good and return an error if it's not okay.
+ my $ci;
+ eval { $ci = LJ::get_community_row($cu); };
+ if ($@) {
+     $body = "<?h1 Temporarily Disabled h1?><?p This page is disabled while we update the site.  Please try again later. p?>";
+     return;
+ }
  $cuserid = $ci->{'userid'};
 
  LJ::text_out(\$ci->{'name'});
@@ -67,7 +76,7 @@
      # can members join this community openly?
      if ($ci->{membership} ne 'open') {
          # hit up the maintainers to let them know a join was requested
-         LJ::comm_member_request($cu, $remote);
+         LJ::comm_join_request($cu, $remote);
          $body .= "<?h1 $ML{'.reqsubmitted.title'} h1?><?p $ML{'.reqsubmitted.body'} $list p?>";
          return;
      }
