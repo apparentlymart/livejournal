@@ -2308,7 +2308,31 @@ sub get_cap
         ($LJ::READONLY_CLUSTER{$u->{clusterid}} ||
          $LJ::READONLY_CLUSTER_ADVISORY{$u->{clusterid}} &&
          ! LJ::get_cap($u, "avoid_readonly"))) {
-        return 1;
+
+        # HACK for desperate moments.  in when_needed mode, see if
+        # database is locky first
+        my $cid = $u->{clusterid};
+        if ($LJ::READONLY_CLUSTER_ADVISORY{$cid} eq "when_needed") {
+            my $now = time();
+            return 1 if $LJ::LOCKY_CACHE{$cid} > $now - 15;
+
+            my $dbcm = LJ::get_cluster_master($u->{clusterid});
+            return 1 unless $dbcm;
+            my $sth = $dbcm->prepare("SHOW PROCESSLIST");
+            $sth->execute;
+            return 1 if $dbcm->err;
+            my $busy = 0;
+            my $too_busy = $LJ::WHEN_NEEDED_THRES || 300;
+            while (my $r = $sth->fetchrow_hashref) {
+                $busy++ if $r->{Command} ne "Sleep";
+            }
+            if ($busy > $too_busy) {
+                $LJ::LOCKY_CACHE{$cid} = $now;
+                return 1;
+            }
+        } else {
+            return 1;
+        }
     }
 
     # underage/coppa check etc
