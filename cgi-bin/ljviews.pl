@@ -1914,7 +1914,7 @@ sub create_view_calendar
         my $yearlinks = "";
         foreach my $year (@allyears) {
             my $yy = sprintf("%02d", $year % 100);
-            my $url = "$journalbase/$year";
+            my $url = "$journalbase/$year/";
             if ($year != $dispyear) { 
                 $yearlinks .= LJ::fill_var_props($vars, 'CALENDAR_YEAR_LINK', {
                     "url" => $url, "yyyy" => $year, "yy" => $yy });
