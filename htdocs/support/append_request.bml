@@ -22,9 +22,9 @@ BODY<=
  }
 
  my $remote = LJ::get_remote($dbh);
- LJ::Support::init_remote($dbh, $remote, \%FORM);
+ LJ::Support::init_remote($dbh, $remote);
 
- unless (LJ::Support::can_append($dbh, $sp, $remote) || $remote) {
+ unless (LJ::Support::can_append($dbh, $sp, $remote, $FORM{'auth'}) || $remote) {
      return LJ::bad_input("You must <a href=\"/login.bml\">login</a> to help people out.");
  }
 
@@ -38,7 +38,7 @@ BODY<=
  ### insert record
  my $faqid = $FORM{'faqid'}+0;
  
- my %answer_types = LJ::Support::get_answer_types($dbh, $sp, $remote);
+ my %answer_types = LJ::Support::get_answer_types($dbh, $sp, $remote, $FORM{'auth'});
 
  my $type = $FORM{'replytype'};
  unless (defined $answer_types{$type}) {
@@ -60,12 +60,24 @@ BODY<=
                        "/ Action\" and explain why you're changing it.");
  }
 
+ if ($FORM{'touch'} &&
+     ($type ne "internal" || ! LJ::Support::can_help($dbh, $sp, $remote)))
+ {
+     return LJ::bad_input("To touch this request, you must select \"Internal Comment ".
+                       "/ Action\" and explain why you're touching it.");
+ }
+
 
  unless ($FORM{'body'} =~ /\S/ || $FORM{'faqid'} || 
          ($type eq "internal" && $FORM{'approveans'})) {
      return LJ::bad_input("Your message was blank.  Please type at least something in the message field.");
  }
 
+ ## touch request
+ if ($FORM{'touch'}) {
+     $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
+     $FORM{'body'} = "Touching support request\n\n$FORM{'body'}";
+ }
  ## change category
  if ($FORM{'changecat'}) {
      my $newcat = $FORM{'changecat'}+0;

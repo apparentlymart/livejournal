@@ -47,7 +47,6 @@ sub init_remote
 {
     my $dbh = shift;
     my $remote = shift;
-    my $form = shift;
     return unless ($remote);
 
     if ($remote->{'userid'}) {
@@ -56,12 +55,6 @@ sub init_remote
         LJ::load_user_privs($dbh, $remote, 
                             qw(supportclose supporthelp 
                                supportdelete supportread));
-    }
-
-    # on see_request.bml page, an 'auth' argument can be passed in
-    # to let the requester see their own stuff, regardless of login status.
-    if (defined $form->{'auth'}) { 
-        $remote->{'_support'}->{'miniauth'} = $form->{'auth'};
     }
 }
 
@@ -103,11 +96,14 @@ sub fill_request_with_cat
 
 sub is_poster
 {
-    my ($sp, $remote) = @_;
-    return 0 unless ($remote);
-    if ($remote->{'_support'}->{'miniauth'} eq mini_auth($sp)) {
+    my ($sp, $remote, $auth) = @_;
+
+    # special case with non-logged in requesters that use miniauth
+    if ($auth && $auth eq mini_auth($sp)) {
         return 1;
     }
+    return 0 unless $remote;
+
     if ($sp->{'reqtype'} eq "email") {
         if ($remote->{'email'} eq $sp->{'reqemail'} && $remote->{'status'} eq "A") {
             return 1;
@@ -133,8 +129,8 @@ sub can_see_helper
 
 sub can_read
 {
-    my ($dbh, $sp, $remote) = @_;
-    return (is_poster($sp, $remote) ||
+    my ($dbh, $sp, $remote, $auth) = @_;
+    return (is_poster($sp, $remote, $auth) ||
             can_read_cat($dbh, $sp->{_cat}, $remote));
 }
 
@@ -148,8 +144,8 @@ sub can_read_cat
 
 sub can_close
 {
-    my ($dbh, $sp, $remote) = @_;
-    if (is_poster($sp, $remote)) { return 1; }
+    my ($dbh, $sp, $remote, $auth) = @_;
+    if (is_poster($sp, $remote, $auth)) { return 1; }
     if ($sp->{_cat}->{'public_read'}) {
         if (LJ::check_priv($dbh, $remote, "supportclose", "")) { return 1; }
     }
@@ -160,8 +156,8 @@ sub can_close
 
 sub can_append
 {
-    my ($dbh, $sp, $remote) = @_;    
-    if (is_poster($sp, $remote)) { return 1; }
+    my ($dbh, $sp, $remote, $auth) = @_;    
+    if (is_poster($sp, $remote, $auth)) { return 1; }
     if ($sp->{_cat}->{'allow_screened'}) { return 1; }
     if (can_help($dbh, $sp, $remote)) { return 1; }
     return 0;
@@ -233,17 +229,17 @@ sub load_response
 
 sub get_answer_types
 {
-    my ($dbh, $sp, $remote) = @_;
+    my ($dbh, $sp, $remote, $auth) = @_;
     my @ans_type;
 
-    if (is_poster($sp, $remote)) {
+    if (is_poster($sp, $remote, $auth)) {
         push @ans_type, ("comment", "More information");
         return @ans_type;
     } 
 
     if (can_help($dbh, $sp, $remote)) {
-        push @ans_type, ("answer" => "Answer", 
-                         "screened" => "Screened Answer (if unsure)", 
+        push @ans_type, ("screened" => "Screened Answer (if unsure)", 
+                         "answer" => "Answer",                         
                          "comment" => "Comment or Question");
     }
 

@@ -11,6 +11,7 @@ BODY<=
  my $sth;
  
  my $spid = $FORM{'id'}+0;
+ my $auth = $FORM{'auth'};
  my $sp = LJ::Support::load_request($dbh, $spid);
  unless ($sp) { return "(=H1 Error H1=)(=P Unknown support number. P=)"; }
 
@@ -38,17 +39,17 @@ BODY<=
  my $owner_mode = 0;
  my $remote = LJ::get_remote($dbh);
  
- LJ::Support::init_remote($dbh, $remote, \%FORM);
+ LJ::Support::init_remote($dbh, $remote);
  
  # load category this request is in
  my $problemarea = $sp->{_cat}->{'catname'};
  my $catkey = $sp->{_cat}->{'catkey'};
 
- unless (LJ::Support::can_read($dbh, $sp, $remote)) {
+ unless (LJ::Support::can_read($dbh, $sp, $remote, $auth)) {
      return "(=H1 Error H1=)(=P You don't have <b>supportread</b> priv on topic <b>$catkey</b>. P=)";
  }
 
- if (LJ::Support::can_close($dbh, $sp, $remote)) {
+ if (LJ::Support::can_close($dbh, $sp, $remote, $auth)) {
      $owner_mode = 1;
  }
 
@@ -105,8 +106,9 @@ BODY<=
  }
  $ret .= "</td></tr>\n";
 
+ my $timecreate = LJ::time_to_http($sp->{'timecreate'});
  my $age = LJ::ago_text(time() - $sp->{'timecreate'});
- $ret .= "<tr><td align=right><b>Time opened:</b></td><td>$age</td></tr>\n";
+ $ret .= "<tr><td align=right><b>Time posted:</b></td><td>$timecreate ($age)</td></tr>\n";
  my $state = $sp->{'state'};
  if ($state eq "open") { 
      $state = "<B><FONT COLOR=#FF0000>open</FONT></B>"; 
@@ -136,7 +138,7 @@ BODY<=
 
  my @screened;
 
- $sth = $dbh->prepare("SELECT splid, UNIX_TIMESTAMP()-timelogged AS 'age', type, faqid, userid, message FROM supportlog WHERE spid=$spid ORDER BY timelogged");
+ $sth = $dbh->prepare("SELECT splid, timelogged, UNIX_TIMESTAMP()-timelogged AS 'age', type, faqid, userid, message FROM supportlog WHERE spid=$spid ORDER BY timelogged");
  $sth->execute;
  while ($le = $sth->fetchrow_hashref)
  {
@@ -180,7 +182,10 @@ BODY<=
      elsif ($le->{'type'} eq "comment") { $what = "Comment"; }
      elsif ($le->{'type'} eq "screened") { $what = "Screened Answer"; }
 
-     $header .= "<FONT SIZE=-1><b>$what</b> (\#$le->{'splid'})</FONT>";
+     $header .= "<FONT SIZE=-1><b>$what</b> (\#$le->{'splid'})</FONT><br />";
+     my $timehelped = LJ::time_to_http($le->{'timelogged'});
+     my $age = LJ::ago_text($le->{'age'});
+     $header .= "<b>Posted:</b> $timehelped ($age)";
      if ($owner_mode && $sp->{'state'} eq "open" && $le->{'type'} eq "answer") {
          $header .= ", <A HREF=\"act.bml?close;$sp->{'spid'};$sp->{'authcode'};$le->{'splid'}\"><B>credit fix here</B></A>";
      }
@@ -211,25 +216,25 @@ BODY<=
  
  $ret .= "<P><B>Post a comment or solution:</B><br>";
  
- unless ($remote) {
+ unless ($remote || LJ::Support::is_poster($sp, $remote, $auth)) {
      $ret .= "You must <a href=\"/login.bml?ret=1\">login</a> to help people out.";
      return $ret;
  }
  
- unless (LJ::Support::can_append($dbh, $sp, $remote))
+ unless (LJ::Support::can_append($dbh, $sp, $remote, $auth))
  {
      $ret .= "Sorry, you do not have access to answer people's support requests in this category.";
      return $ret;
  }
 
- my @ans_type = LJ::Support::get_answer_types($dbh, $sp, $remote);
+ my @ans_type = LJ::Support::get_answer_types($dbh, $sp, $remote, $auth);
  my %ans_type = @ans_type;
 
  if ($ans_type{'answer'} || $ans_type{'screened'})
  {
      $ret .= "(=STANDOUT <B>Important Notes:</B>";
      $ret .= "<ul>";
-     $ret .= "<li>Before answering somebody's question, read the <b><a href=\"/guide/support.bml\">support guide</a></b>.";
+     $ret .= "<li>Before answering somebody's question, read the <b><a href=\"/doc/find?guide=support\">support guide</a></b>.";
      $ret .= "<li>Do <b>NOT</b> answer people if you're not sure of your answer.  Don't answer if your solution is just a guess.  Only answer if you really know what you're talking about ... guessing only makes other people in the support area think you might be right and spread the misinformation further, until it's accepted as truth.";
      if ($LJ::LJDOTCOM) {
          $ret .= "<li>Never recommend asking someone else, or somewhere else.  That qualifies as not knowing the answer.  If a support request is open for a day or two, one of the support leaders will find out the answer and reply, and likely post about it in (=LJUSER lj_support LJUSER=) so all the support people will know the answer in the future.";
@@ -240,7 +245,7 @@ BODY<=
  $ret .= "<BR><FORM METHOD=POST ACTION=append_request.bml>";
  # hidden values
  $ret .= "<INPUT TYPE=HIDDEN NAME=\"spid\" VALUE=\"$spid\">\n";
- $ret .= "<INPUT TYPE=HIDDEN NAME=\"auth\" VALUE=\"$FORM{'auth'}\">\n";
+ $ret .= "<INPUT TYPE=HIDDEN NAME=\"auth\" VALUE=\"$auth\">\n";
  $ret .= "<TABLE BORDER=0>\n";
  
  $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>From:</TD><td>";
@@ -309,7 +314,7 @@ BODY<=
 
  # helpers can do actions:
  if (LJ::Support::can_help($dbh, $sp, $remote) &&
-     ! LJ::Support::is_poster($sp, $remote))
+     ! LJ::Support::is_poster($sp, $remote, $auth))
  {
      $ret .= "<tr><td align=right></td><td>";
 
@@ -335,6 +340,11 @@ BODY<=
      $ret .= "</td>";
      $ret .= "</tr></table>\n";
      $ret .= "</td></tr>";
+     if (LJ::Support::can_help($dbh, $sp, $remote)) {
+         $ret .= "<tr><td>Touch request:</td><td>";
+         $ret .= '<input type="checkbox" name="touch" /> (=DE (Use this to re-open the request.) DE=)';
+         $ret .= "</td></tr>";
+     }
  }
 
  # textarea for their message body

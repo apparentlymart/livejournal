@@ -25,7 +25,9 @@ BODY<=
  if ($title eq "Error") { 
      return "(=H1 Error H1=)(=P Improper arguments. P=)";
  }
-
+ my $remote = LJ::get_remote($dbh);
+ 
+ LJ::Support::init_remote($dbh, $remote);
  my $sp = LJ::Support::load_request($dbh, $spid);
 
  if ($sp->{'authcode'} ne $authcode) {
@@ -35,11 +37,42 @@ BODY<=
  if ($action eq "touch") {
      $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
      if ($sp->{'state'} eq "open") {
-         return "(=H1 Touched H1=)(=P Your support request will stay open now. P=)";
+         $ret .= "(=H1 Touched H1=)(=P Your support request will stay open now. ";
      } else {
          $dbh->do("DELETE FROM supportpoints WHERE spid=$spid");
-         return "(=H1 Touched H1=)(=P Your support request has been re-opened now. P=)";
+         $ret .= "(=H1 Touched H1=)(=P Your support request has been re-opened now. ";
      }
+     $ret .= "Please comment back telling us why you've touched this request: P=)";
+     my $auth = LJ::Support::mini_auth($sp);
+
+     $ret .= '<br /><form method="post" action="append_request.bml">';
+     # hidden values
+     $ret .= "<input type=\"hidden\" name=\"spid\" value=\"$spid\">\n";
+     $ret .= "<input type=\"hidden\" name=\"auth\" value=\"$auth\">\n";
+     $ret .= "<table border=\"0\">\n";
+ 
+     $ret .= '<tr valign="middle"><td align="right">From:</td><td>';
+     if ($remote && $remote->{'userid'}) {
+         $ret .= "(=LJUSER $remote->{'user'} LJUSER=)";
+     } else {
+         $ret .= "(not logged in)";
+     }
+     $ret .= "</td></tr>\n";
+
+     $ret .= "<tr><td align=right>Reply Type:</td><td>";
+     $ret .= '<input type="hidden" name="replytype" value="comment">';
+     $ret .= "<b>More Information</b>";
+
+     $ret .= "</td></tr>";
+
+     # textarea for their message body
+     $ret .= '<tr valign="top"><td align="right">Message:</td><td colspan="2">';
+     $ret .= '<textarea rows="10" cols="50" wrap="virtual" name="body"></textarea><br />";
+     $ret .= "\n(=DE No HTML allowed, so don't worry about about escaping &lt; and &gt;<br />URLs are automatically link-ified, so just reference those. DE=)<br />\n";
+     $ret .= '<input type="submit" name="submitpost" value="Post Comment/Solution">';
+     $ret .= "\n</td></tr></table>";
+
+     return $ret;
  }
 
  if ($action eq "close") {
