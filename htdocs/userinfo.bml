@@ -395,7 +395,7 @@
      my $span = ($narrow_left-- > 0) ? 1 : 2;
      my $label = $com ? "About" : "Bio";
 
-     &LJ::CleanHTML::clean(\$u->{'bio'}, { 
+     LJ::CleanHTML::clean(\$u->{'bio'}, { 
          'wordlength' => 100,
          'addbreaks' => 1,
          'attrstrip' => [qw[style]],
@@ -403,6 +403,9 @@
          'mode' => 'allow',
          'deny' => [qw[]],
          'remove' => [qw[marquee bgsound embed object caption link]],
+	 'noearlyclose' => 1,
+	 'tablecheck' => 1,
+	 'autoclose' => [qw[table tr th td]],
      });
 
      $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>$label:</B></TD><TD COLSPAN=$span>$u->{'bio'}</TD></TR>\n";

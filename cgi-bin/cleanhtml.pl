@@ -180,6 +180,11 @@ sub clean
 
                     if ($allow && ! $remove{$tag})
                     {
+			if ($opts->{'tablecheck'}) {
+			    if (($tag eq 'td' || $tag eq 'th') && ! $opencount{'tr'}) { $allow = 0; }
+			    elsif ($tag eq 'tr' && ! $opencount{'table'}) { $allow = 0; }
+			}
+
                         if ($allow) { $newdata .= "<$tag"; }
                         else { $newdata .= "&lt;$tag"; }
                         my $slashclose = delete $hash->{'/'};
@@ -190,10 +195,11 @@ sub clean
                             $newdata .= " /";
                             $opencount{$tag}--;
                         }
-                        if ($allow) { $newdata .= ">"; }
+                        if ($allow) { 
+			    $newdata .= ">"; 
+			    $opencount{$tag}++;
+			}
                         else { $newdata .= "&gt;"; }
-
-                        $opencount{$tag}++;
                     }
                 }
             }
@@ -213,10 +219,10 @@ sub clean
             
             if ($allow && ! $remove{$tag})
             {
-                if ($allow) {
+                if ($allow && ! ($opts->{'noearlyclose'} && ! $opencount{$tag})) {
                     $newdata .= "</$tag>";
                     $opencount{$tag}--;
-                } else { $newdata .= "&lt;$tag&gt;"; }
+                } else { $newdata .= "&lt;/$tag&gt;"; }
             }
         }
         elsif ($type eq "T" || $type eq "D") {
