@@ -344,6 +344,9 @@ body<=
          $ret .= "<tr><td>Touch request:</td><td>";
          $ret .= '<input type="checkbox" name="touch" /> <?de (Use this to re-open the request.) de?>';
          $ret .= "</td></tr>";
+         $ret .= "<tr><td>Change summary:</td><td>";
+         $ret .= '<input type="checkbox" name="changesum" /> <?de (Use this to change the request summary.) de?>';
+         $ret .= "</td></tr>";
      }
  }
 
