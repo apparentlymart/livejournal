@@ -1,3 +1,39 @@
-<?_code
-    return BML::redirect("$LJ::SITEROOT/login.bml");
-_code?>
+<?_code # -*- mode: bml -*- 
+{
+    use strict;
+    use vars qw($body %FORM);
+
+    $body = "";
+
+    my $dbs = LJ::get_dbs();
+    my $u = LJ::get_remote($dbs);
+
+    unless ($u) {
+        $body = "Already logged out.";
+        return;
+    }
+
+    if ($u->{'_session'} && 
+        $FORM{'user'} eq $u->{'user'} &&
+        $FORM{'sessid'} == $u->{'_session'}->{'sessid'})
+    {
+        LJ::kill_session($u);
+        LJ::set_remote(undef);
+        $body = "Logged out.";
+        return;
+    }
+
+    $body .= "<form>";
+    $body .= LJ::html_hidden("user", $u->{'user'});
+    $body .= LJ::html_hidden("sessid", $u->{'_session'}->{'sessid'});
+    $body .= "<?h1 Logout? h1?><?p Click the logout button below to confirm your desire to logout. ";
+    $body .= "<blockquote><input type='submit' value='Yes, logout.'></blockquote> p?></form>";
+
+    return;
+
+}
+
+_code?><?page
+title=>Logout
+body=><?_code return $body; _code?>
+page?>
