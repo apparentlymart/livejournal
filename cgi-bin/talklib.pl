@@ -55,14 +55,13 @@ sub ecphash {
     return "ecph-" . Digest::MD5::md5_hex($itemid . $talkid . $password);
 }
 
-# Returns talkurl with GET args added
+# Returns talkurl with GET args added (don't pass #anchors to this :-)
 sub talkargs {
     my $talkurl = shift;
-    my $anc = "";
-    my $args = join("&", grep {$_} map { /(.*)(#.*)/ ? ($anc = $2 and $1) : $_ } @_);
+    my $args = join("&", grep {$_} @_);
     my $sep;
     $sep = ($talkurl =~ /\?/ ? "&" : "?") if $args;
-    return "$talkurl$sep$args$anc";
+    return "$talkurl$sep$args";
 }
 
 # Returns HTML to display an image, given the image id as an argument.

@@ -365,7 +365,7 @@ body<=
                  $ret .= BML::ml('.fromip', {'ip'=>$post->{'props'}->{'poster_ip'}});
              }
              
-             $ret .= " <font size='-1'>(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid#t$dtid") . "'>$T{'link'}</a>)</font> ";
+             $ret .= " <font size='-1'>(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid") . "#t$dtid'>$T{'link'}</a>)</font> ";
              
              if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
@@ -398,10 +398,10 @@ body<=
              
              if ($post->{'parenttalkid'} != 0) {
                  my $dpid = $post->{'parenttalkid'} * 256 + $init->{'anum'};
-                 $ret .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid#t$dpid", $stylemine) . "'>$T{'parent'}</a>) ";
+                 $ret .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine) . "#t$dpid'>$T{'parent'}</a>) ";
              }
              if ($post->{'children'} && @{$post->{'children'}}) {
-                 my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid#t$dtid", $stylemine);
+                 my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine) . "#t$dtid";
                  $ret .= "(<a href='$url'>$T{'thread'}</a>)";
              }
              $ret .= "</font></p>";
@@ -411,7 +411,7 @@ body<=
 
              $ret .= "<a name='t$dtid'></a><table><tr>";
              $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-             $ret .= "<td><a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid#t$dtid", $stylemine) . "'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
+             $ret .= "<td><a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine) . "#t$dtid'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
          }
      }
      
