@@ -144,7 +144,8 @@ sub clean
                     if ($hash->{$attr} =~ /(javascript|about):/i) { delete $hash->{$attr}; }
                 }
                 foreach my $attr (qw(href)) {
-                    $hash->{$attr} =~ s/^lj:(?:\/\/)?(.*)$/ExpandLJURL($1)/ei;
+                    $hash->{$attr} =~ s/^lj:(?:\/\/)?(.*)$/ExpandLJURL($1)/ei
+                        if exists $hash->{$attr};
                 }
                 if ($hash->{'style'} =~ /expression/i) {
                     delete $hash->{'style'};
