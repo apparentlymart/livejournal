@@ -114,7 +114,7 @@ if ($toarg =~ /^(\d+)z(.+)$/)
         'posterid' => 0,
     }) or die "Error appending request?";
 
-    LJ::Support::touch_request($dbh, $spid) if $sp->{state} eq "closed";
+    LJ::Support::touch_request($dbh, $spid);
 
     exit 0;
 }
