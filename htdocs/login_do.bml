@@ -40,6 +40,7 @@
  LJ::run_hooks("post_login", {
      "u" => $u,
      "form" => \%FORM,
+     "expiretime" => $etime,
  });
 	
  $BMLClient::COOKIE{"ljuser"} = $user;
