@@ -47,5 +47,7 @@ tabularindent/themes    theme+          tabularindent/layout
 sturdygesture/layout    layout          core1
 sturdygesture/themes    theme+          sturdygesture/layout
 
+variableflow/layout     layout          core1
+
 # include local file
 s2layers-local.dat      INCLUDE
