@@ -154,12 +154,15 @@ if ($toarg =~ /^(\d+)z(.+)$/)
     exit 0;
 }
 
-# Now see if we want to ignore this particular post and bounce it back with
+# Now see if we want to ignore this particular email and bounce it back with
 # the contents from a file.  Check $LJ::DENY_REQUEST_FROM_EMAIL first.  Note
-# that this will only bounce initial comments; if a user replies to an email
+# that this will only bounce initial emails; if a user replies to an email
 # from a request that's open, it'll be accepted above.
-my $file = $LJ::DENY_REQUEST_FROM_EMAIL{$to};
-my $content = LJ::load_include($file);
+my ($file, $content);
+if (%LJ::DENY_REQUEST_FROM_EMAIL && $LJ::DENY_REQUEST_FROM_EMAIL{$to}) {
+    $file = $LJ::DENY_REQUEST_FROM_EMAIL{$to};
+    $content = LJ::load_include($file);
+}
 if ($file && $content) {
     # construct mail to send to user
     my $email = <<EMAIL_END;
