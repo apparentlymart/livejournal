@@ -1,48 +1,60 @@
 <?page
-title=><?sitename?>
-head<=
+TITLE=><?sitename?>
+HEAD<=
 <meta name="description" content="<?sitename?> ... words words.">
 <meta name="keywords" content="diary,journal">
 <meta name="rating" content="General"> 
 <meta name="ROBOTS" content="All">
 <meta name="revisit-after" Content="14 days">
-<=head
-body<=
+<=HEAD
+BODYOPTS<=<?_code
+#  return "onLoad=\""";
+	   _code?>
+<=BODYOPTS
+BODY<=
 
-<?h1 <?_code return BML::ml('.whatis.head'); _code?> h1?>
-<?p <?_ml .whatis.desc _ml?> p?>
+<?h1 What is <?sitename?>? h1?>
+<?p
+Word words.
+p?>
+<?p
+You'll want to customize this page.  Read the instructions at 
+<a href="http://www.livejournal.com/doc/server/lj.customize.index.html">http://www.livejournal.com/doc/server/lj.customize.index.html</a> for help.
+p?>
 
-<?h1 <?_ml .gettingstarted.head _ml?> h1?>
+
+<?h1 Getting Started h1?>
 <?choices
 ITEMS<=
-<?choice <?_ml .getstarted.create.head _ml?>|/create.bml|<?_ml .getstarted.create.desc _ml?> choice?>
-<?choice <?_ml .getstarted.update.head _ml?>|/update.bml|<?_ml .getstarted.update.desc _ml?> choice?>
+<?choice Create A Journal|create.bml|Come and create your very own LiveJournal! choice?>
+<?choice Update Journal|update.bml|Update your LiveJournal from the web. choice?>
 <=ITEMS
 ITEMSB<=
-<?choice <?_ml .getstarted.manage.head _ml?>|/manage/|<?_ml .getstarted.manage.desc _ml?> choice?>
+<?choice Download|/download/|Download the LiveJournal update tool for your computer. choice?>
+<?choice Modify Journal|modify.bml|Customize the your LiveJournal's appearance and options. choice?>
 <=ITEMSB
 choices?>
 
-<?h1 <?_ml .otheropts.head _ml?> h1?>
+<?h1 Other Options h1?>
 <?choices
 ITEMS<=
-<?choice <?_ml .otheropts.info.head _ml?>|/editinfo.bml|<?_ml .otheropts.info.desc _ml?> choice?>
-<?choice <?_ml .otheropts.journal.head _ml?>|/editjournal.bml|<?_ml .otheropts.journal.desc _ml?> choice?>
+<?choice Edit Personal Information|editinfo.bml|Edit your personal information and preferences.  choice?>
+<?choice Edit Journal Entries|editjournal.bml|Edit or delete journal entries you've made in the past.  choice?>
 <=ITEMS
 ITEMSB<=
-<?choice <?_ml .otheropts.friends.head _ml?>|/friends/edit.bml|<?_ml .otheropts.friends.desc _ml?> choice?>
+<?choice Edit Friends|/friends/edit.bml|Edit your list of online LiveJournal friends to track from your LiveJournal friends page.  choice?>
 <=ITEMSB
 choices?>
 
-<?h1 <?_ml .tech.head _ml?> h1?>
+<?h1 Tech Support & Documentation h1?>
 <?choices
 ITEMS<=
-<?choice <?_ml .tech.support.head _ml?>|/support/|<?_ml .tech.support.desc _ml?> choice?>
+<?choice Support|/support/|Mail the support team and get a quick answer to your question.  choice?>
 <=ITEMS
 ITEMSB<=
 
 <=ITEMSB
 choices?>
 
-<=body
+<=BODY
 page?>

@@ -1612,44 +1612,6 @@ pick a specific friend group to view.
 
 /go.bml.error.noentry.prev=There is no entry preceding this one.
 
-/index.bml.getstarted.head=Getting Started
-
-/index.bml.getstarted.create.head=Create a Journal
-
-/index.bml.getstarted.create.desc=Come and create your very own journal!
-
-/index.bml.getstarted.update.head=Update Journal
-
-/index.bml.getstarted.update.desc=Update your journal from the web.
-
-/index.bml.getstarted.manage.head=Manage Journal
-
-/index.bml.getstarted.manage.desc=Manage your journal's appearance and options.
-
-/index.bml.otheropts.head=Other Options
-
-/index.bml.otheropts.info.head=Edit Personal Information
-
-/index.bml.otheropts.info.desc=Edit your personal information and preferences.
-
-/index.bml.otheropts.journal.head=Edit Journal Entries
-
-/index.bml.otheropts.journal.desc=Edit or delete journal entries you've made in the past.
-
-/index.bml.otheropts.friends.head=Edit Friends
-
-/index.bml.otheropts.friends.desc=Edit your list of friends to track from your friends page.
-
-/index.bml.tech.head=Tech Support &amp; Documentation
-
-/index.bml.tech.support.head=Support
-
-/index.bml.tech.support.desc=Mail the support team and get a quick answer to your question.
-
-/index.bml.whatis.desc=You'll want to customize this page.  Read the instructions at <a href="http://www.livejournal.com/doc/server/lj.customize.index.html">http://www.livejournal.com/doc/server/lj.customize.index.html</a> for help.
-
-/index.bml.whatis.head=What is <?sitename?>?
-
 /interests.bml.add.added.head=Added!
 
 /interests.bml.add.added.text=The interest has been added to your list.
