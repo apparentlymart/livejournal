@@ -62,6 +62,7 @@
  sub remote_can_grant
  {
      my ($remote, $priv, $arg) = @_;
+     return 0 unless defined $priv;
      return LJ::check_priv($remote, 'admin', $priv) || LJ::check_priv($remote, 'admin', '*') || LJ::check_priv($remote, 'admin', "$priv/$arg");
  }
 
@@ -201,7 +202,7 @@
      }
      $ret .= "</table>";
 
-     if (LJ::check_priv($remote, 'admin')) {
+     if (LJ::check_priv($remote, 'admin', '*')) {
          $ret .= "<p>Grant <b>$user</b> privilege:<div style='margin-left: 20px;'>\n";
          $ret .= "<select name='grantpriv'><option value='' selected='1'></option>";
          foreach my $priv (@privs) {
