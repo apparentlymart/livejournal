@@ -3809,37 +3809,62 @@ sub make_journal
 
     my $stylesys = 1;
     if ($styleid == -1) {
-        # force s2 style id
-        if ($geta->{'s2id'} && LJ::get_cap($u, "s2styles")) {
-            $stylesys = 2;
-            $styleid = $geta->{'s2id'};
-        } elsif ($geta->{'style'} eq 'mine') {
 
-            # get remote props and decide what style remote uses
-            LJ::load_user_props($remote, { 'cache' => 1 }, "stylesys", "s2_style");
-            if ($remote->{'stylesys'} == 2 && $remote->{'s2_style'}) {
-                $stylesys = 2;
-                $styleid = $remote->{'s2_style'};
-            } else {
-                $stylesys = 1;
-                $styleid = $u->{$s1prop};
+        my $get_styleinfo = sub {
+
+            my $get_s1_styleid = sub {
+                my $id = $u->{$s1prop};
+                LJ::run_hooks("s1_style_select", {
+                    'styleid' => \$id,
+                    'u' => $u,
+                    'view' => $view,
+                });
+                return $id;
+            };
+
+            # forced s2 style id
+            if ($geta->{'s2id'} && LJ::get_cap($u, "s2styles")) {
+
+                # see if they own the requested style
+                my $dbr = LJ::get_db_reader();
+                my $style_userid = $dbr->selectrow_array("SELECT userid FROM s2styles WHERE styleid=?",
+                                                         undef, $geta->{'s2id'});
+
+                if ($u->{'userid'} == $style_userid) {
+                    return (2, $geta->{'s2id'});
+                }
             }
 
-        } elsif ($view eq "res" && $opts->{'pathextra'} =~ m!^/(\d+)/!) {
+            # style=mine passed in GET?
+            if ($geta->{'style'} eq 'mine') {
+
+                # get remote props and decide what style remote uses
+                LJ::load_user_props($remote, { 'cache' => 1 }, "stylesys", "s2_style");
+
+                # remote using s2
+                if ($remote->{'stylesys'} == 2 && $remote->{'s2_style'}) {
+                    return (2, $remote->{'s2_style'});
+                }
+
+                # remote using s1
+                return (1, $get_s1_styleid->());
+            }
+
             # resource URLs have the styleid in it
-            $stylesys = 2;
-            $styleid = $1;
-        } elsif ($u->{'stylesys'} == 2) {
-            $stylesys = 2;
-            $styleid = $u->{'s2_style'};
-        } else {
-            $styleid = $u->{$s1prop};    
-            LJ::run_hooks("s1_style_select", {
-                'styleid' => \$styleid,
-                'u' => $u,
-                'view' => $view,
-            });
-        }
+            if ($view eq "res" && $opts->{'pathextra'} =~ m!^/(\d+)/!) {
+                return (2, $1);
+            }
+
+            # if none of the above match, they fall through to here
+            if ($u->{'stylesys'} == 2) {
+                return (2, $u->{'s2_style'});
+            }
+
+            # no special case and not s2, fall through to s1
+            return (1, $get_s1_styleid->());
+        };
+
+        ($stylesys, $styleid) = $get_styleinfo->();
     }
 
     # signal to LiveJournal.pm that we can't handle this
