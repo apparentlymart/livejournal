@@ -30,7 +30,7 @@ BODY<=
 
  return "(=H1 Error H1=)(=P $init->{'error'} P=)" if $init->{'error'};
  return "Error: couldn't determine journal from arguments." unless $u;
- 
+
  my $clustered = $init->{'clustered'};
 
  my ($dbcs, $dbcm, $dbcr) = ($dbs, $dbh, $dbr);
@@ -42,7 +42,7 @@ BODY<=
 
  my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
  my $jargent = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
- 
+
  my $SELF = "/talkread.bml";
  my $ret = "";
 
@@ -71,7 +71,7 @@ BODY<=
  } else {
      LJ::load_log_props($dbs, [ $init->{'itemid'} ], \%logprops);
  }
- 
+
  ### load users
  my ($up);  # $up = user posted journal item
  LJ::load_userids_multiple($dbs, [
@@ -92,7 +92,7 @@ BODY<=
 
  LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
  $event = BML::ebml(LJ::CleanHTML::clean_event(\$event, $logprops{$itemid}->{'opt_preformatted'}));
- 
+
  $ret .= "<p>";
  $ret .= "<table><tr valign='middle'>";
 
@@ -116,7 +116,7 @@ BODY<=
          "height='$userpics{$picid}->{'height'}' align='absmiddle' ".
          "hspace='3' title='$alt' alt=''></td>";
  }
- 
+
  $ret .= "<td>";
  $ret .= BML::eall($up->{'name'}) . " ((=LJUSER $up->{'user'} LJUSER=)) wrote,";
  if ($up->{'user'} ne $u->{'user'}) {
@@ -226,8 +226,8 @@ BODY<=
      $post_count++ unless ($post->{'state'} eq "D");
      $posts{$post->{'talkid'}} = $post;
      push @{$children{$post->{'parenttalkid'}}}, $post->{'talkid'};
- } 
- 
+ }
+
  # some magic:
  $PAGE_SIZE = $THREADING_POINT if $post_count < $THREADING_POINT;
 
@@ -250,7 +250,7 @@ BODY<=
  if (@posts_to_load < $PAGE_SIZE) {
      # then let's show some more!
      my @check_for_children = @posts_to_load;
-     while (@check_for_children && @posts_to_load < $PAGE_SIZE) 
+     while (@check_for_children && @posts_to_load < $PAGE_SIZE)
      {
          my $cfc = shift @check_for_children;
          next unless (defined $children{$cfc});
@@ -261,7 +261,7 @@ BODY<=
          }
      }
  }
- 
+
  unless (@posts_to_load) {
      $ret .= "No replies";
  }
@@ -327,10 +327,10 @@ BODY<=
          $user{$_->{'user'}} = $_;
          push @pics_to_load, $_->{'defaultpicid'} if $_->{'defaultpicid'};
      }
-     LJ::load_userpics($dbs, \%userpics, [ @pics_to_load ]);     
+     LJ::load_userpics($dbs, \%userpics, [ @pics_to_load ]);
 
  }
- 
+
  ########## make the navcrap
  my $navcrap;
  if ($pages > 1) {
@@ -352,32 +352,32 @@ BODY<=
  }
  ####### end navcrap
 
- unless ($logprops{$itemid}->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N") 
+ unless ($logprops{$itemid}->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N")
  {
      $ret .= "<p>$navcrap</p>" if $navcrap;
      $ret .= "<center><b><a href='talkpost.bml?${jargent}itemid=$ditemid'>(Post a new comment)</a></b></center>";
 
-     if ($post_count > 0) 
+     if ($post_count > 0)
      {
-         recurse_post(\%posts, \$ret, $thread, {}, { "newfirst" => 0, 
-                                                     "children" => \%children,  
+         recurse_post(\%posts, \$ret, $thread, {}, { "newfirst" => 0,
+                                                     "children" => \%children,
                                                  });
          $ret .= "<p><hr /><center><b><a href='talkpost.bml?${jargent}itemid=$ditemid'>(Post a new comment)</a></b></center></p>";
      }
-         
+
      if ($navcrap) {
          $ret .= "<p>$navcrap</p>";
      }
  }
 
 
-sub recurse_post 
+sub recurse_post
 {
     my ($postref, $ret, $tid, $mark, $opts) = @_;
     # don't let people make circular references
     return if ($mark->{$tid});
     $mark->{$tid} = 1;
-    
+
     my $bgcolor = ($opts->{'depth'} % 2) ? "(=EMCOLORLITE=)" : "(=EMCOLOR=)";
 
     # find child messages (replys to $tid)
@@ -394,7 +394,7 @@ sub recurse_post
     # display new or old first?
     if ($opts->{'newfirst'}) { @childs = reverse @childs; }
 
-    if ($tid) 
+    if ($tid)
     {
         my $datepost = "<font size='-1'>" . substr($post->{'datepost'}, 0, 16) . "</font>";
         my $userpost = $post->{'userpost'};
@@ -453,18 +453,21 @@ sub recurse_post
                         $$ret .= " height='$userpics{$picid}->{'height'}' />";
                     }
                 }
-                
+
                 my $cleansubject = LJ::ehtml($post->{'subject'});
 
                 $$ret .= "<font size='+1' face='Arial,Helvetica'><b>$cleansubject</b></font> $icon";
                 $$ret .= "<br />$user\n";
                 $$ret .= "<br />$datepost\n";
-                if ($post->{'poster_ip'} && $remote && $remote->{'user'} eq $up->{'user'}) {
+                if ($post->{'poster_ip'} && $remote &&
+                    ($remote->{'user'} eq $up->{'user'} ||
+                     LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
+                {
                     $$ret .= "(from $post->{'poster_ip'})";
                 }
 
                 $$ret .= " <font size='-1'>(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid#t$tid'>link</a>)</font> ";
-                
+
                 if ($remote && ($remote->{'user'} eq $userpost ||
                                 $remote->{'user'} eq $u->{'user'} ||
                                 $remote->{'user'} eq $up->{'user'} ||
@@ -472,15 +475,15 @@ sub recurse_post
                 {
                     $$ret .= "<a href='delcomment.bml?${jargent}id=$tid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
                 }
-            
+
                 $$ret .= "</td></tr>";
                 $$ret .= "<tr><td>\n";
-                
+
                 ## escape BML block codes.  so (=TAG ... TAG=) turns into (&#0061; ... TAG=)
                 $post->{'body'} =~ s/\(=/\(&\#0061\;/g;
                 LJ::CleanHTML::clean_comment(\$post->{'body'}, $post->{'opt_preformatted'});
                 $$ret .= $post->{'body'};
-                
+
                 $$ret .= "<p><font size='-2'>";
                 if ($post->{'parenttalkid'} != 0 && $post_count >= $PAGE_SIZE) {
                     $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$post->{'parenttalkid'}'>(Parent)</a> ";
@@ -488,7 +491,7 @@ sub recurse_post
                 if (defined $opts->{'children'}->{$tid} && $post_count >= $PAGE_SIZE) {
                     $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid'>(Thread)</a> ";
                 }
-                
+
                 my $dtid = $clustered ? ($tid * 256 + $init->{'anum'}) : $tid;
                 $$ret .= "<a href='/talkpost.bml?${jargent}replyto=$dtid'>(Reply to this)</a></font>";
                 $$ret .= "</td></tr></table>\n";  # close colored table
@@ -501,7 +504,7 @@ sub recurse_post
         }
     }
 
-    if (@childs) 
+    if (@childs)
     {
         my $count;
         # go through children and show them too.
@@ -512,7 +515,7 @@ sub recurse_post
                                                    });
         }
     } else {
-#	$$ret .= "No sub-posts.";
+#       $$ret .= "No sub-posts.";
     }
 }
 
