@@ -129,6 +129,7 @@ my $move_user = sub {
         # insert data into cluster master
         my $bind = join(",", @bind);
         $dbcm->do("REPLACE INTO $table ($cols) VALUES $bind", undef, @vars);
+        die "error in flush $table: " . $dbcm->errstr . "\n" if $dbcm->err;
 
         # reset values
         @bind = ();
@@ -177,7 +178,7 @@ my $move_user = sub {
     if (%bindings) {
         my $memids = join ',', map { $_+0 } keys %bindings;
         my $rows = $dbh->selectall_arrayref("SELECT memid, kwid FROM memkeyword WHERE memid IN ($memids)");
-        %kwmap = map { $_->[1] => $_->[0] } @$rows; # kwid -> memid (since kwid is unique)
+        push @{$kwmap{$_->[1]}}, $_->[0] foreach @$rows; # kwid -> [ memid, memid, memid ... ]
     }
 
     # step 4: get the actual keywords associated with these keyword ids
@@ -206,17 +207,19 @@ my $move_user = sub {
     $flush->('userkeywords', 'userid, kwid, keyword');
 
     # step 6: now we have to do some mapping conversions and put new data into memkeyword2 table
-    while (my ($oldkwid, $oldmemid) = each %kwmap) {
-        # get new data
-        my ($newkwid, $newmemid) = ($mappings{$oldkwid}, $bindings{$oldmemid});
+    while (my ($oldkwid, $oldmemids) = each %kwmap) {
+        foreach my $oldmemid (@$oldmemids) {
+            # get new data
+            my ($newkwid, $newmemid) = ($mappings{$oldkwid}, $bindings{$oldmemid});
 
-        # push data
-        push @bind, "($u->{userid}, ?, ?)";
-        push @vars, ($newmemid, $newkwid);
+            # push data
+            push @bind, "($u->{userid}, ?, ?)";
+            push @vars, ($newmemid, $newkwid);
 
-        # flush?
-        $flush->('memkeyword2', 'userid, memid, kwid')
-            if @bind > $BLOCK_INSERT;
+            # flush?
+            $flush->('memkeyword2', 'userid, memid, kwid')
+                if @bind > $BLOCK_INSERT;
+        }
     }
     $flush->('memkeyword2', 'userid, memid, kwid');
 
@@ -263,8 +266,10 @@ while (1) {
     # now that we have %us, we can see who has data
     my $ids = join ',', map { $_+0 } keys %us;
     my $has_memorable = $dbh->selectcol_arrayref("SELECT DISTINCT userid FROM memorable WHERE userid IN ($ids)");
+    my $has_fgroups = $dbh->selectcol_arrayref("SELECT DISTINCT userid FROM friendgroup WHERE userid IN ($ids)");
+    my %uids = ( map { $_ => 1 } (@$has_memorable, @$has_fgroups) );
     my %moved_slow;
-    foreach my $id (@$has_memorable) {
+    foreach my $id (keys %uids) {
         # this person has memories, move them the slow way
         die "Userid $id in \$has_memorable, but not in \%us...fatal error\n" unless $us{$id};
         $stats{'slow_moved'}++;
