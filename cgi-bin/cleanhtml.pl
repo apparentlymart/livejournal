@@ -759,7 +759,7 @@ sub clean_s1_style
     LJ::parse_vars(\$s1, \%tmpl);
     foreach my $v (keys %tmpl) {
         clean(\$tmpl{$v}, {
-            'eat' => [qw[layer iframe script object embed]],
+            'eat' => [qw[layer iframe script object embed applet]],
             'mode' => 'allow',
             'keepcomments' => 1, # allows CSS to work
             's1var' => $v,
