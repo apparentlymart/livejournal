@@ -1,0 +1,323 @@
+(=_CODE
+
+ $title = "Edit Friend Groups";
+ $body = "";
+
+ &connect_db();
+ 
+ my $remote = &get_remote();
+ unless ($remote) {
+     $body = "(=H1 Login First H1=)(=P To edit your friend groups you must first <A HREF=\"/login.bml?ret=1\">log in</A>. P=)";
+     return "";
+ }
+
+ if ($FORM{'mode'} eq "save") {
+     my %res;
+     $FORM{'mode'} = "editfriendgroups";
+     $FORM{'user'} = $remote->{'user'};
+     &LJ::do_request($dbh, \%FORM, \%res, {
+	 'userid' => $remote->{'userid'},
+	 'noauth' => 1, 
+     });
+
+     if ($res{'success'} eq "OK") {
+	 $body .= "(=H1 Saved H1=)(=P Your friend groups are now saved. P=)\n";     
+     } else {
+	 $body .= "(=H1 Error H1=)(=P Server says: <B>$res{'errmsg'}</B> P=)";
+     }
+     return "";
+ }
+
+ my %resfg;
+ my %resfr;
+ &LJ::do_request($dbh, { 'mode' => 'getfriendgroups',
+			 'user' => $remote->{'user'}, },
+		 \%resfg, { 'userid' => $remote->{'userid'},
+			    'noauth' => 1, });
+ &LJ::do_request($dbh, { 'mode' => 'getfriends',
+			 'user' => $remote->{'user'}, },
+		 \%resfr, { 'userid' => $remote->{'userid'},
+			    'noauth' => 1, });
+ my @num_used;
+ my @num_free;
+
+ $body .= "(=H1 Friend Groups H1=)(=P From here you can edit your groups of friends.  Friend groups are used for setting security on items and for filtering your friends page.  This page requires JavaScript to work. P=)";
+ $body .= "(=P <b>Security note:</b> If you want to delete a group and make a new group, do <B>NOT</B> simply rename one group to something else and change the people that are in the group.  If you do, all the people in the new group can see all your old entries you made for people in the old group. P=)";
+ $body .= "<P>";
+ $body .= "\n<FORM METHOD=POST NAME=\"fg\">\n";
+ $body .= "<input type=hidden name=mode value=save>\n";
+ for (my $i=1; $i<=30; $i++) {
+     my $sort = 255;
+     my $name = "";
+     if ($resfg{"frgrp_${i}_name"}) {
+	 $sort = $resfg{"frgrp_${i}_sortorder"}+0;
+	 $name = &ehtml($resfg{"frgrp_${i}_name"});
+	 push @num_used, $i;
+     } else {
+	 push @num_free, $i;
+     }
+     $body .= "<input type=hidden name=efg_set_${i}_name value=\"$name\">\n";
+     $body .= "<input type=hidden name=efg_set_${i}_sort value=\"$sort\">\n";
+     $body .= "<input type=hidden name=efg_delete_${i} value=\"0\">\n";
+ }
+ for (my $i=1; $i<=$resfr{'friend_count'}; $i++) {
+     my $user = $resfr{"friend_${i}_user"};
+     my $mask = $resfr{"friend_${i}_groupmask"} || 1;
+     $body .= "<input type=hidden name=editfriend_groupmask_$user value=\"$mask\">\n";
+ }
+
+ $body .= <<'END_JS';
+<SCRIPT LANGUAGE="JavaScript"><!--
+
+ var selectedGroup = 0;
+
+ function eraseList (list)
+ {
+     while (list.length) {
+	 list.options[0] = null;
+     }
+ }
+ 
+ function groupClicked ()
+ {
+     var selIndex;
+
+     var form = document.fg;
+     var grouplist = form.list_groups;
+     var inlist = form.list_in;
+     var outlist = form.list_out;
+     
+     // figure out what they clicked, and bring their focus up to first free blank
+
+     selIndex = grouplist.selectedIndex;
+     if (selIndex == -1) { return; }
+     var groupname = grouplist.options[selIndex].text;
+
+     var newSelGroup = grouplist.options[selIndex].value;
+     if (newSelGroup == selectedGroup) { return; }
+     selectedGroup = newSelGroup;
+     
+     // clears the other "not in" and "in" boxes
+     eraseList(inlist);
+     eraseList(outlist);
+   
+     // iterate over all friends, putting them in one group or the other
+     var i;
+     for (i=0; i<form.elements.length; i++) {
+	 var name = form.elements[i].name;
+	 var mask = form.elements[i].value;
+	 if (name.substring(0, 21) == "editfriend_groupmask_") {
+	     var user = name.substring(21, name.length);
+	     
+	     var list = mask & (1 << selectedGroup) ? inlist : outlist;
+	     var optionName = new Option(user, user, false, false)
+		 list.options[list.length] = optionName;
+	 }
+     }
+ }
+
+ function moveItems (from, to, bitstatus)
+ {
+     var selindex;
+     while ((selindex=from.selectedIndex) != -1)
+     {
+	 var i;
+	 var item = from.options[selindex];
+
+	 from.options[selindex] = null;
+	 //to.options[to.options.length] = item;
+
+	 // find spot to put new item
+         for (i=0; i<to.options.length && to.options[i].text < item.text; i++) { }
+         var newindex = i;
+
+	 // move everything else down
+         for (i=to.options.length; i>newindex; i--) {
+     	     to.options[i] = new Option(to.options[i-1].text,
+					to.options[i-1].value,
+					false,
+					to.options[i-1].selected);
+	 }
+	 to.options[newindex] = item;
+
+	 // turn the groupmask bit on or off
+         var user = item.value;
+         var element = document.fg["editfriend_groupmask_"+user];
+	 var mask = element.value;
+	 if (bitstatus) {
+	     mask |= (1 << selectedGroup);
+	 } else {
+	     mask &= ~(1 << selectedGroup);
+	 }
+	 element.value = mask;
+     }
+ }
+
+ function moveIn ()
+ {
+     if (! selectedGroup) { return; }
+     var form = document.fg;
+     var inlist = form.list_in;
+     var outlist = form.list_out;
+     moveItems(document.fg.list_out, document.fg.list_in, true);
+ }
+ function moveOut ()
+ {
+     if (! selectedGroup) { return; }
+     moveItems(document.fg.list_in, document.fg.list_out, false);
+ }
+
+ function moveGroup (dir)
+ {
+     var list = document.fg.list_groups;
+     var selindex = list.selectedIndex;
+     if (selindex==-1) { return; }
+     var toindex = selindex+dir;
+     if (toindex < 0 || toindex >= list.options.length) { return; }
+     var selopt = new Option(list.options[selindex].text,
+			     list.options[selindex].value,
+			     false,
+			     list.options[selindex].selected);
+     var toopt = new Option(list.options[toindex].text,
+			    list.options[toindex].value,
+			    false,
+			    list.options[toindex].selected);
+     list.options[toindex] = selopt;
+     list.options[selindex] = toopt;    
+
+     // stupid mozilla necessity:
+     list.selectedIndex = toindex;
+
+     setSortOrders();
+ }
+
+ function setSortOrders ()
+ {
+     var list = document.fg.list_groups;
+
+     // set all their sort orders now
+     var i;
+     for (i=0; i<list.options.length; i++) {
+	 var item = list.options[i];
+	 var key = "efg_set_"+item.value+"_sort";
+	 document.fg[key].value = (i+1)*5;
+     }
+ }
+
+ function renameGroup ()
+ {
+     var list = document.fg.list_groups;
+     var selindex = list.selectedIndex;
+     if (selindex==-1) { return; }
+     var item = list.options[selindex];
+
+     var newtext = prompt("Rename group:", item.text);
+     if (newtext==null || newtext == "") { return; }
+
+     item.text = newtext;
+     var gnum = item.value;
+     document.fg["efg_set_"+gnum+"_name"].value = newtext;     
+ }
+
+ function deleteGroup ()
+ {
+     var list = document.fg.list_groups;
+     var selindex = list.selectedIndex;
+     if (selindex==-1) { return; }
+     var item = list.options[selindex];
+
+     var conf = confirm("Are you sure you want to delete this group?");
+     if (!conf) { return; }
+
+     // mark it to be deleted later
+     var gnum = item.value;
+     document.fg["efg_delete_"+gnum].value = "1";
+
+     // as per the protocol documentation, unset bit on all friends
+     var i;
+     var form = document.fg;
+     for (i=0; i<form.elements.length; i++) {
+	 var name = form.elements[i].name;
+	 if (name.substring(0, 21) == "editfriend_groupmask_") {
+	     var user = name.substring(21, name.length);
+	     var mask = form.elements[i].value;
+	     mask &= ~(1 << gnum);
+	     form.elements[i].value = mask;
+	 }
+     }
+
+     // clean up the UI
+     list.options[selindex] = null;
+     eraseList(document.fg.list_in);
+     eraseList(document.fg.list_out);
+ }
+
+ function newGroup ()
+ {
+     var form = document.fg;
+     var i;
+     var foundg = false;
+     for (i=1; i<=30; i++) {
+	 if (form["efg_delete_"+i].value==1) { continue; }
+	 if (form["efg_set_"+i+"_name"].value!="") { continue; }
+	 foundg = true;
+	 break;	 
+     }
+     if (! foundg) {
+	 alert("Sorry, you can only have 30 groups of friends.  If you've deleted friends but haven't saved yet, do so now and then come back.  You'll then be able to create new groups to fill the voids that the delete groups leave.");
+	 return;
+     }
+     var gnum = i;
+     var groupname = prompt("Enter name of new group:", "");
+     if (groupname==null || groupname=="") { return; }
+     
+     form["efg_set_"+gnum+"_name"].value = groupname;
+     var item = new Option(groupname, gnum, false, true);
+     var list = form.list_groups;
+     list.options[list.options.length] = item;
+     list.options.selectedIndex = list.options.length-1;
+     setSortOrders();
+     groupClicked();
+ }
+
+--></SCRIPT>
+END_JS
+
+ $body .= "<TABLE CELLSPACING=5><TR VALIGN=TOP>";
+
+ $body .= "\n<TD><B>Your groups:</B><BR><SELECT NAME=list_groups STYLE=\"width: 150px;\" SIZE=15 onClick=\"groupClicked();\">";
+ foreach my $num (sort { $resfg{"frgrp_${a}_sortorder"} <=> 
+			 $resfg{"frgrp_${b}_sortorder"} } @num_used) 
+ {
+     $body .= "\n<OPTION VALUE=\"$num\">" . &ehtml($resfg{"frgrp_${num}_name"});
+ }
+# foreach my $num (sort { $a <=> $b } @num_free) {
+#     $body .= "\n<OPTION VALUE=\"$num\">";
+# }
+ $body .= "</SELECT><BR><NOBR>";
+ $body .= "<input type=button value=\"New\" onClick=\"newGroup();\"> ";
+ $body .= "<input type=button value=\"Del\" onClick=\"deleteGroup();\"> ";
+ $body .= "<input type=button value=\"Rename\" onClick=\"renameGroup();\">";
+ $body .= "</NOBR></TD>";
+
+ $body .= "\n<TD VALIGN=MIDDLE><INPUT TYPE=BUTTON VALUE=\"Up\" onClick=\"moveGroup(-1);\"><P><INPUT TYPE=BUTTON VALUE=\"Down\" onClick=\"moveGroup(1);\"></td>";
+
+ $body .= "\n<TD WIDTH=120><B>Not in group:</B><BR><SELECT NAME=list_out MULTIPLE SIZE=15>";
+ $body .= "<OPTION VALUE=\"\">---------------</SELECT></TD>";
+
+ $body .= "\n<TD VALIGN=MIDDLE><INPUT TYPE=BUTTON onClick=\"moveIn();\" VALUE=\"&gt;&gt;\"><P><INPUT TYPE=BUTTON onClick=\"moveOut();\" VALUE=\"&lt;&lt;\"></td>";
+
+ $body .= "\n<TD><B>In group:</B><BR><SELECT NAME=list_in MULTIPLE SIZE=15>";
+ $body .= "<OPTION VALUE=\"\">---------------</SELECT></TD>";
+
+ $body .= "</TR></TABLE>\n";
+
+ $body .= "(=H1 Done? H1=)(=P When you're all done, press <INPUT TYPE=submit VALUE=\"Save\"> P=)\n";
+ $body .= "</FORM>\n";
+
+ return "";
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)

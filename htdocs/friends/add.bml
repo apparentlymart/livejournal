@@ -1,0 +1,65 @@
+(=_CODE
+
+ &connect_db();
+ my $remote = &get_remote();
+ my $user = $FORM{'user'};
+ my $userid = &get_userid($user);
+ $body = "";
+
+ unless ($remote) 
+ {
+     $title = "Add Friend";
+     $body = "(=H1 Login First H1=)(=P To add a user to your friends list you must first go and <A HREF=\"/login.bml?ret=1\">log in</A>.  If you don't already have an account you can <a href=\"/create.bml\">create one</a> to track your friend's journals. P=)";
+     return "";
+ }
+
+ unless ($user && $userid) 
+ {
+     $title = "Error";
+     $body = "Invalid or missing username given.  To add a friend, go to the <A HREF=\"/friends/edit.bml\">edit friends</A> page.";
+     return "";
+ }
+ 
+ if ($FORM{'mode'} eq "add") 
+ {
+     my %res = ();
+     &LJ::do_request($dbh, {
+	 "user" => $remote->{'user'},
+	 "mode" => "editfriends",
+	 "editfriend_add_1_user" => $user,
+     }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
+     
+     
+     if ($res{'success'} eq "OK") 
+     {
+	 $title = "Friend Added!";
+	 $body = "(=H1 Success H1=)(=P User <B>$user</B> was added to your friend list.  You can view your friends page <A HREF=\"$LJ::SITEROOT/users/$remote->{'user'}/friends\">here</A>. P=)";
+ } 
+     else 
+     {
+	 $title = "Error";
+	 $body = "(=H1 Error H1=)(=P $res{'errmsg'} P=)";
+     }
+     return "";
+ }
+
+ $title .= "Add Friend";
+ $body .= "(=H1 Add $user as a friend? H1=)(=P To add <B>$user</B> to your friends list, click the button below. P=)";
+ $body .= "<form method=post>";
+ $body .= "<input type=hidden name=mode value=add>";
+ $body .= "<input type=hidden name=user value=\"$user\">";
+ $body .= "<center><input type=submit value=\"Add $user!\">";
+ $body .= "</form>";
+
+
+ return "";
+     
+_CODE=)
+(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY<=
+(=_CODE
+return $body;
+_CODE=)
+<=BODY
+PAGE=)

@@ -1,0 +1,26 @@
+(=_INFO
+NOCACHE=>1
+_INFO=)
+(=_CODE
+
+ require 'ljlib.pl';
+ &connect_db;
+ 
+ my $user = lc($FORM{'user'});
+ my $u = LJ::load_user($dbh, $user);
+ unless ($u) {
+     return "(=H1 Unknown user H1=)(=P No user with that username.  Sorry. P=)";
+ }
+
+ my $ret = ""; 
+ $ret .= "User: <B>$user</B> (<A HREF=\"/userinfo.bml?user=$user\">user info</A>)<BR><I>If image doesn't load, press reload.</I><P>";
+
+ $ret .= "<A HREF=http://www.research.att.com/~north/cgi-bin/webdot.cgi/";
+ $ret .= "$LJ::SITEROOT/friends/graph/$user.dot.map>";
+ $ret .= "<IMG SRC=http://www.research.att.com/~north/cgi-bin/webdot.cgi/";
+ $ret .= "$LJ::SITEROOT/friends/graph/$user.dot.gif ismap border=0>";
+ $ret .= "</A>\n";   
+
+ return $ret;
+
+_CODE=)

@@ -1,0 +1,29 @@
+(=PAGE
+TITLE=>Edit Friends
+BODY<=
+
+(=H1 Edit Your Friends H1=)
+(=P
+Enter your username and password to modify your friends.  To use this, you must already have your own LiveJournal account.  You can make your own LiveJournal from the <A HREF="/create.bml">create journal page</A>.  Once you have defined your fellow LiveJournal-using friends, you'll be able to easily keep track of what they're all doing, as they're doing it.
+P=)
+
+<FORM ACTION="edit_do.bml" METHOD="POST">
+
+(=STANDOUT
+<TABLE>
+(=_CODE
+ return &auth_fields();
+ _CODE=)
+<TR><TD COLSPAN=2 ALIGN=CENTER>
+<INPUT TYPE="SUBMIT" VALUE="Proceed..."></TD></TR>
+</TABLE>
+STANDOUT=)
+
+(=H1 Forget something? H1=)
+(=P
+If you forgot your username or password, <A HREF="/lostinfo.bml">recover it here!</A>.
+P=)
+
+
+<=BODY
+PAGE=)

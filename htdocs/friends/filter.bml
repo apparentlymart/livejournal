@@ -1,0 +1,72 @@
+(=_CODE
+
+ $title = "Friends Filter";
+ $body = "";
+ 
+ if ($FORM{'mode'} eq "view") 
+ {
+     my $user = lc($FORM{'user'});
+     my $filter = 0;
+     foreach my $k (keys %FORM) {
+	 next unless ($k =~ /^bit_(\d+)$/);
+	 my $bit = $1;
+	 next if ($bit < 1 || $bit > 30);
+	 $filter |= (1 << $bit);
+     }
+     my $extra;
+#     if ($filter) {
+	 $extra = "?filter=$filter";
+#     }
+     
+     print "Location: $LJ::SITEROOT/users/$user/friends${extra}\n\n";
+     &BML::finish();
+     return "";
+ }
+
+ &connect_db();
+
+ my $remote = &get_remote();
+
+ unless ($remote) {
+     $body .= "(=H1 Login required H1=)(=P Before using the friends filter, you must first <A HREF=\"/login.bml?ret=1\">login</A>. P=)";
+     return "";
+ }
+
+ my %res;
+ &LJ::do_request($dbh, { 'mode' => 'getfriendgroups',
+			 'user' => $remote->{'user'}, },
+		 \%res, { 'noauth' => 1, 'userid' => $remote->{'userid'} });
+ 
+ 
+ unless ($res{'frgrp_maxnum'}) {
+     $body = "(=H1 Sorry... H1=)(=P You cannot filter your friends list because you must first <A HREF=\"/friends/editgroups.bml\">setup your friend groups</A>. P=)";
+     return "";
+ }
+
+ my %group;
+ foreach $k (keys %res) {
+     if ($k =~ /^frgrp_(\d+)_name/) {
+	 $group{$1}->{'name'} = $res{$k};
+     } 
+     elsif ($k =~ /^frgrp_(\d+)_sortorder/) {
+	 $group{$1}->{'sortorder'} = $res{$k};
+     } 
+ }
+ 
+ $body .= "(=H1 Select groups... H1=)(=P Check the group(s) of friends you want to view right now on your friends list. P=)";
+ $body .= "<FORM METHOD=POST><input type=hidden name=user value=$remote->{'user'}><input type=hidden name=mode value=view><UL>";
+ 
+ foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group)
+ {
+     my $url = "$LJ::SITEROOT/users/$remote->{'user'}/friends/" . &eurl($group{$g}->{'name'});
+     $body .= "<INPUT TYPE=CHECKBOX VALUE=1 NAME=\"bit_$g\"> <a href=\"$url\">" . &ehtml($group{$g}->{'name'}) . "</a><br>\n";
+ }
+
+ $body .= "<P><input type=submit value=\"View!\"> <input type=reset value=\"Clear\"></ul>If you want to edit your friends groups, <A HREF=\"editgroups.bml\">go here</A>.";
+
+ return "";
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)

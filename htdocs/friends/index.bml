@@ -1,0 +1,22 @@
+(=PAGE
+TITLE=>Friends Tools
+BODY<=
+
+LiveJournal has the concept of a "friends list".<p>
+By adding other LiveJournal uses to your friends list, you can easily
+track what is going on in the lives of multiple other people simultaneously.
+Pick the "Friends" link under "Your Journal" on the sidebar to view your friends page.<p>
+<ul><li><a href="edit.bml"><b>Edit Friends</b></a> -- add, edit, or remove users from your friends list.</ul>
+In addition, subgroups of friends can be specified.
+<ul><li><a href="editgroups.bml"><b>Edit Friend Groups</b></a> -- create, edit, or delete subgroups of your friends list.</ul>
+These friend groups can be used to filter your friends list: you can pick a
+specific friend group to view.
+<ul><li><a href="filter.bml"><b>Filter</b></a> -- filter your friends list to display a specific friend group.</ul>
+<hr>
+Your friends list is also used for posts with restricted access.<br>
+<ul><li>"Friends-Only" posts are (as you'd expect) viewable only by other users on your friends list.
+<li>On "Custom" posts, you can specify which friend groups can view your post.  (Custom security can only currently be used with the <a href="/download/">Windows client</a>.)
+</ul>
+
+<=BODY
+PAGE=)

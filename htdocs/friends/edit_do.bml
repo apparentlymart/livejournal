@@ -1,0 +1,264 @@
+(=_INFO
+NOCACHE=>1
+_INFO=)(=PAGE
+TITLE=>Edit Friends
+BODY<=
+
+<SCRIPT language="JavaScript"><!--
+
+previewOn = 0;
+lastFriend = 0;
+
+function setFriend (curfriend)
+{
+    lastFriend = curfriend;
+}
+
+function togglePreview()
+{
+   if (previewOn==0 || winPreview.closed)
+   {
+       winPreview = window.open("", "preview", "toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=0,resizable=0,copyhistory=0,width=400,height=270");
+       previewOn = 1;
+       updatePreview();
+   }
+   else
+   {
+       winPreview.close();
+       previewOn = 0;
+   }
+
+}
+
+function updatePreview () {
+
+if (previewOn == 0 || winPreview.closed) { return; }
+
+frm = document.editFriends;
+
+dropdown = frm["editfriend_add_"+lastFriend+"_fg"]
+fg_color = dropdown.options[dropdown.selectedIndex].value;
+fg_color_text = dropdown.options[dropdown.selectedIndex].text;
+
+dropdown = frm["editfriend_add_"+lastFriend+"_bg"]
+bg_color = dropdown.options[dropdown.selectedIndex].value;
+bg_color_text = dropdown.options[dropdown.selectedIndex].text;
+
+user_name = frm["editfriend_add_"+lastFriend+"_user"].value;
+if (user_name.length==0) { user_name = "username"; }
+
+d = winPreview.document;
+d.open();
+d.write("<HTML><HEAD>");
+d.write("<TITLE>Mr. Color Viewer</TITLE>");
+d.write("</HEAD><BODY BGCOLOR=#FFFFFF TEXT=#000000>");
+d.write("<FORM><B><FONT FACE='Trebuchet MS, Arial, Helvetica' SIZE=4 COLOR=#000066><I>Color Viewer</I></FONT></B><HR>");
+d.write("<BR><CENTER><TABLE WIDTH=350 ALIGN=CENTER CELLPADDING=5><TR VALIGN=MIDDLE>");
+d.write("<TD WIDTH=80%><B><FONT FACE='Arial, Helvetica' SIZE=2>");
+d.write("Text Color:&nbsp; <FONT COLOR=#000066>" + fg_color_text + "");
+d.write("</FONT></B><BR></TD><TD WIDTH=20% BGCOLOR=");
+d.write("" + fg_color + "");
+d.write(">&nbsp;</TD>");
+d.write("</TR><TR><TD WIDTH=80%><B><FONT FACE='Arial, Helvetica' SIZE=2>");
+d.write("Background Color:&nbsp; <FONT COLOR=#000066>" + bg_color_text + "");
+d.write("</FONT></B><BR></TD><TD WIDTH=20% BGCOLOR=");
+d.write("" + bg_color + "");
+d.write(">&nbsp;</TD>");
+d.write("</TR><TR><TD><BR></TR><TR><TD COLSPAN=3 BGCOLOR=" + bg_color + "><FONT COLOR=" + fg_color + ">");
+d.write("<CENTER><B>" + user_name + "</B></CENTER></TD>");
+d.write("</TR></TABLE><BR>");
+d.write("<HR><FORM><INPUT TYPE='button' VALUE='Close' onClick='self.close();'></FORM>");
+d.write("</CENTER>");
+d.write("</BODY></HTML>");
+d.close();
+    }
+
+// -->
+</SCRIPT>
+
+
+(=_CODE
+
+ return &server_down_html() if ($LJ::SERVER_DOWN);
+
+ my @errors = ();
+ my $user = lc($FORM{'user'});
+ my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+
+ &connect_db;
+
+ my $quser = $dbh->quote($user);
+
+ $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+ $sth->execute;
+ unless ($sth->rows) { push @errors, "Invalid username"; }
+
+ my $u = $sth->fetchrow_hashref;
+
+ if (scalar(@errors)==0 && !&valid_password($u->{'password'}, \%FORM)) { push @errors, "Incorrect password."; }
+
+ if (@errors)
+ {
+     my $ret = "";
+     $ret .= "(=BADCONTENT=)\n<UL>\n";		
+     foreach (@errors)
+     {
+         $ret .= "<LI>$_\n";
+     }
+     $ret .= "</UL>\n";
+     return $ret;
+ }
+
+ my %countries;
+ my %states;
+ &load_codes({ "country" => \%countries, "state" => \%states });
+
+ my $mode = $FORM{'mode'} || "modify";
+
+ if ($mode eq "modify")
+ {
+     my $ret = "";
+     ### who has you defined as a friend?
+     my %res = ();
+     &LJ::do_request($dbh, {
+         "user" => $user,
+         "password" => $FORM{'password'},
+         "hpassword" => $FORM{'hpassword'},
+         "mode" => "friendof"
+         }, \%res, { "noauth" => 1 });
+     if ($res{'friendof_count'})
+     {
+         $ret .= "(=H1 Fellow Friends H1=)(=P The following people have listed you as their friend... You may want to list them as your friend too.  More than anything this is provided as a reference so you know their LiveJournal usernames too.  You are under no obligation to add them to your list. P=)\n";
+         $ret .= "<CENTER><P ALIGN=CENTER><TABLE><TR BGCOLOR=(=EMCOLOR=)><TD WIDTH=150><B>User</B></TD><TD WIDTH=150><B>Name</B></TD></TR>\n";
+         for (my $i=1; $i <= $res{'friendof_count'}; $i++)
+         {
+	   $ret .= "<TR><TD>(=LJUSER " . $res{"friendof_${i}_user"}. " LJUSER=)</TD><TD>" . $res{"friendof_${i}_name"} . "</TD>";
+#	   $ret .= "<TD BGCOLOR=" . $res{"friendof_${i}_bg"} . "><FONT COLOR=" . $res{"friendof_${i}_fg"} . "><B>$user</B></FONT></TD></TR>\n";
+         }
+         $ret .= "</TABLE></P></CENTER>";
+     }
+
+     ### who do you have defiend as a friend?
+
+     $ret .= "<FORM METHOD=POST NAME=editFriends>\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=domodify>\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=(=_EH $user _EH=)>\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
+
+     %res = ();
+     &LJ::do_request($dbh, {
+         "user" => $user,
+         "password" => $FORM{'password'},
+         "hpassword" => $FORM{'hpassword'},
+         "mode" => "getfriends"
+         }, \%res, { "noauth" => 1 });
+
+     if ($res{'friend_count'})
+     {
+         $ret .= "(=H1 Your Friends H1=)(=P You have the following friends currently defined: P=)\n";
+         $ret .= "<P><center><TABLE><TR><TD WIDTH=150><B>Friend</B></TD><TD WIDTH=250><B>Name</B></TD><TD ALIGN=CENTER><B>Delete?</B></TD></TR>\n";
+         for (my $i=1; $i<=$res{'friend_count'}; $i++)
+         {
+	     my $fruser = $res{"friend_${i}_user"};
+	     my $bgcolor = $res{"friend_${i}_bg"} || "#FFFFFF";
+	     my $fgcolor = $res{"friend_${i}_fg"} || "#000000";
+	     $ret .= "<TR><TD>(=LJUSER $fruser LJUSER=)</FONT></TD>";
+	     $ret .= "<TD BGCOLOR=$bgcolor><FONT COLOR=$fgcolor>" . &BMLUtil::escapeall($res{"friend_${i}_name"}) . "</FONT></TD>";
+	     $ret .= "<TD ALIGN=CENTER><INPUT TYPE=checkbox VALUE=1 NAME=\"editfriend_delete_${fruser}\"></TD></TR>\n";
+         }
+         $ret .= "</TABLE></center>\n";
+         
+     }
+     else
+     {
+         $ret .= "(=H1 No Friends? H1=)(=P You do not currently have any friends defined.  However, we're sure you have to have a few friends!  <tt>:)</tt>  Just enter their LiveJournal names below.... P=)\n";
+     }
+    
+     $ret .= "(=H1 Add Friends H1=)(=P Enter your friends' LiveJournal user names in the boxes below, and pick what background and foreground colors you want to associate with them.... P=)\n";
+     $ret .= "<SCRIPT LANGUAGE=\"JavaScript\"><!--\ndocument.write(\"<P><CENTER><INPUT TYPE=BUTTON VALUE=\\\"Toggle Preview Window\\\" onClick='togglePreview(); return true;'></CENTER></P>\");\n// -->\n</SCRIPT>\n";
+     $ret .= "<P><CENTER><TABLE CELLPADDING=4><TR><TD><B>Friend</B></TD><TD><B>Foreground</B></TD><TD><B>Background</B></TD></TR>\n";
+
+     # load the colors
+     my @color = ();
+     &load_codes({ "color" => \@color });
+
+     for (my $i=0; $i<6; $i++)
+     {
+         $ret .= "<TR><TD><INPUT SIZE=15 MAXLENGTH=15 NAME=\"editfriend_add_${i}_user\" onChange=\"updatePreview(); return true;\" onFocus=\"setFriend($i);\"></TD>";
+         $ret .= "<TD><SELECT NAME=\"editfriend_add_${i}_fg\" onChange=\"updatePreview(); return true;\" onFocus=\"setFriend($i);\">";
+         foreach (@color) {
+	   my $selected = $_->{'code'} eq "#000000" ? " SELECTED" : "";
+	   $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
+         }
+         $ret .= "</SELECT></TD>\n";
+
+         $ret .= "<TD><SELECT NAME=\"editfriend_add_${i}_bg\" onChange=\"updatePreview(); return true;\" onFocus=\"setFriend($i);\">";
+         foreach (@color) {
+	   my $selected = $_->{'code'} eq "#FFFFFF" ? " SELECTED" : "";
+	   $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
+         }
+         $ret .= "</SELECT></TD>\n";
+
+         $ret .= "</TR>\n";
+     }
+     $ret .= "</TABLE>\n";
+
+     ### color swatch
+     my $col = 0;
+     $ret .= "<P><TABLE border=0 cellspacing=0 cellpadding=0>";
+     foreach (@color) {
+	 if ($col==0) { $ret .= "<TR>\n"; }
+	 $col++;
+	 my $ecolor = &BMLUtil::ehtml($_->{'item'});
+	 $ret .= "<TD bgcolor=$_->{'code'}><IMG SRC=\"/img/dot.gif\" WIDTH=14 HEIGHT=14 TITLE=\"$ecolor\" ALT=\"$ecolor\"></TD>\n";
+	 if ($col==23) { $ret .= "</TR>\n"; $col==0; }
+     }
+     if ($col) { $ret .= "</TR>\n"; $col==0; }
+     $ret .= "</TABLE>\n";
+     $ret .= "<FONT SIZE=-2 FACE=\"Arial,Helvetica\">(Hover your mouse over a color to see its name)</FONT>";
+
+
+     $ret .= "</CENTER>\n";
+     $ret .= "<P>If you need to add more friends than you have room for on this form, save the changes below, then come back to add more.\n";
+
+     ### ending submit block
+     $ret .= "(=H1 Done? H1=)(=P When done, press the \"Save Changes\" button below... P=)\n";
+     $ret .= "(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> STANDOUT=)\n";
+     $ret .= "</FORM>\n";
+
+     return $ret;
+ }
+
+ if ($mode eq "domodify")
+ {
+     my @errors = ();
+
+     my %request = ();
+     $request{'mode'} = "editfriends";
+     $request{'user'} = $FORM{'user'};
+     $request{'password'} = $FORM{'password'};
+     $request{'hpassword'} = $FORM{'hpassword'};
+     foreach (grep { /^editfriend_/ } keys %FORM)
+     {
+         $request{$_} = $FORM{$_};
+     }
+     my %response = ();
+     &LJ::do_request($dbh, \%request, \%response);
+
+     if ($response{'success'} eq "OK")
+     {
+         # tell the user all is well
+         return "(=H1 Success H1=)(=P Your friends have been updated.  You may view your newly updated friends page <A HREF=\"/users/$user/friends\">here</A>. P=)";
+     }
+     else
+     {
+         return "(=H1 Error H1=)(=P There was an error updating your friends list:<UL><LI><B>$response{'errmsg'}</B></UL> P=)\n";
+     }
+ }
+
+ return "Unknown mode."
+
+_CODE=)
+
+<=BODY
+PAGE=)
