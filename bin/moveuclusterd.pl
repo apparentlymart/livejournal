@@ -473,6 +473,9 @@ sub addJobs {
         $newJobCount++;
     }
 
+    # we might've learned some new clusterids
+    %{$self->{ratelimits}} = ();
+
     # Scan the task table for users to lock and then send notifications to
     # anyone who's waiting on new jobs if there were any added.
     $self->prelockSomeUsers;
