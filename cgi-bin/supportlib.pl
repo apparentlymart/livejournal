@@ -456,6 +456,14 @@ sub mail_response_to_user
 	    $body .= "\n\n";
 	}
     }
+
+    # Need to escape HTML for AOL's crappy client.
+    if ($email =~ /\@aol.com$/i) {
+	$res->{'message'} =~ s/\&/&amp;/g;
+	$res->{'message'} =~ s/</&lt;/g;
+	$res->{'message'} =~ s/>/&gt;/g;
+    } 
+
     $body .= $res->{'message'};
     $body .= "\n\n" . "="x70 . "\n";
     $body .= "Did this answer your question?  If so, please CLOSE THIS SUPPORT REQUEST\n";
