@@ -272,6 +272,10 @@ body<=
          LJ::parse_vars(\$oldoverrides,\%overrides);
          LJ::parse_vars(\$FORM{'overrides'},\%newoverrides);
          
+         # global head shouldn't have body tags in it.
+         $newoverrides{'GLOBAL_HEAD'} =~ s/\<body/<xx-body/ig
+             if defined $newoverrides{'GLOBAL_HEAD'};
+
          # load all the properties to see which ones are overridable
          my @vars;
          LJ::load_objects_from_file("$LJ::HTDOCS/vars.dat", \@vars);
