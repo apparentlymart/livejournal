@@ -233,7 +233,7 @@ sub trans
         if (Apache->header_in("Cookie") =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15}):(\d+)/) {
             ($uniq, $uniq_time) = ($1, $2);
             $r->notes("uniq" => $uniq);
-            if (LJ::sysban_check('uniq', $uniq) && index($r->uri, $LJ::BLOCKED_BOT_URI) != 0) {
+            if (LJ::sysban_check('uniq', $uniq) && index($uri, $LJ::BLOCKED_BOT_URI) != 0) {
                 $r->handler("perl-script");
                 $r->push_handlers(PerlHandler => \&blocked_bot );
                 return OK;
@@ -259,13 +259,13 @@ sub trans
 
     # check for sysbans on ip address
     foreach my $ip (@req_hosts) {
-        if (LJ::sysban_check('ip', $ip) && index($r->uri, $LJ::BLOCKED_BOT_URI) != 0) {
+        if (LJ::sysban_check('ip', $ip) && index($uri, $LJ::BLOCKED_BOT_URI) != 0) {
             $r->handler("perl-script");
             $r->push_handlers(PerlHandler => \&blocked_bot );
             return OK;
         }
     }
-    if (LJ::run_hook("forbid_request", $r) && index($r->uri, $LJ::BLOCKED_BOT_URI) != 0) {
+    if (LJ::run_hook("forbid_request", $r) && index($uri, $LJ::BLOCKED_BOT_URI) != 0) {
         $r->handler("perl-script");
         $r->push_handlers(PerlHandler => \&blocked_bot );
         return OK;
@@ -275,7 +275,7 @@ sub trans
     # referer.  clients and such don't, so ignore them.
     my $referer = $r->header_in("Referer");
     if ($referer && $r->method eq 'POST' && !LJ::check_referer('', $referer)) {
-       $r->log_error("REFERER WARNING: POST to " . $r->uri . " from " . $referer);
+       $r->log_error("REFERER WARNING: POST to $uri from $referer");
     }
 
     my %GET = $r->args;
@@ -414,7 +414,11 @@ sub trans
     # user domains
     if ($LJ::USER_VHOSTS &&
         $host =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/ &&
-        $1 ne "www")
+        $1 ne "www" &&
+
+        # 1xx: info, 2xx: success, 3xx: redirect, 4xx: client err, 5xx: server err
+        # let the main server handle any errors
+        $r->status < 400)
     {
         my $user = $1;
 
