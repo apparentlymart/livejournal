@@ -70,15 +70,18 @@ chdir "$docraw_dir/build/db" or die;
 system("./dbschema.pl > dbschema.gen.xml")
     and die "Error generating DB schema\n";
 
-system("xsltproc", "-o", "$docraw_dir/ljp.book/db/schema.gen.xml",
-       "db2ref.xsl", "dbschema.gen.xml")
-    and "Error transforming DB schema.\n";
+my $err = system("xsltproc", "-o", "$docraw_dir/ljp.book/db/schema.gen.xml",
+                 "db2ref.xsl", "dbschema.gen.xml");
+if ($err == -1) { die "Error; Package 'xsltproc' not installed?\n"; }
+elsif ($err) { $err<<8; die "Error transforming DB schema. (error=$err)\n"; }
+
 unlink "dbschema.gen.xml";
 
 print "Generating XML-RPC protocol reference\n";
 chdir "$docraw_dir/build/protocol" or die;
 system("xsltproc", "-o", "$docraw_dir/ljp.book/csp/xml-rpc/protocol.gen.xml",
-       "xml-rpc2db.xsl", "xmlrpc.xml");
+       "xml-rpc2db.xsl", "xmlrpc.xml") 
+    and die "Error processing protocol reference.\n";
 
 print "Converting to HTML\n";
 mkdir $output_dir, 0755 unless -d $output_dir;
