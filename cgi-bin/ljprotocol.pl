@@ -2001,19 +2001,19 @@ sub list_usejournals
     my $dbs = shift;
     my $u = shift;
 
-    my $res = [];
+    my @res;
 
     my $dbr = $dbs->{'reader'};
     my $sth = $dbr->prepare("SELECT u.user FROM user u, reluser ru ".
                             "WHERE ru.userid=u.userid AND ru.type='P' AND ".
                             "u.statusvis='V' AND ".
-                            "ru.targetid=$u->{'userid'} ORDER BY u.user");
-    $sth->execute;
+                            "ru.targetid=?");
+    $sth->execute($u->{'userid'});
     while (my $u = $sth->fetchrow_array) {
-        push @$res, $u;
+        push @res, $u;
     }
-    $sth->finish;
-    return $res;
+    @res = sort @res;
+    return \@res;
 }
 
 sub hash_menus
