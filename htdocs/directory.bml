@@ -7,7 +7,7 @@ body<=
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
  my @errors = ();
- LJ::Dir::validate(\%FORM, \@errors);
+ my @filters = LJ::Dir::validate(\%FORM, \@errors);
  return LJ::bad_input(@errors) if @errors;
 
  my $dbs = LJ::get_dbs();
@@ -137,7 +137,8 @@ body<=
  LJ::load_remote($dbs, $remote);
 
  unless (LJ::check_priv($dbs, $remote, "betatest", "directory") ||
-         LJ::get_cap($remote, "directory"))
+         LJ::get_cap($remote, "directory") ||
+         (@filters == 1 && $filters[0] eq "int" && $FORM{'opt_format'} eq "simple"))
  {
      return "Sorry, your account type doesn't permit usage of the directory.";
  }

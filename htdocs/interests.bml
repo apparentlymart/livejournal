@@ -198,10 +198,8 @@ body<=
      $qintid = $intid+0;
 
      if ($intcount > 2000) {
-         # temporary hack.  saves the database, though.
-         # FIXME: make this redirect to a directory.bml text-results search, which knows how to do it efficiently.
-         return "<?h1 $ML{'.toomany.head'} h1?><?p " . 
-             BML::ml('.toomany.body', { 'intcount' => $intcount }) . " p?>";
+         my $eint = LJ::eurl($interest);
+         return BML::redirect("$LJ::SITEROOT/directory.bml?int_like=$eint&opt_format=simple");
      }
      
      my $ret = "";

@@ -45,10 +45,14 @@ my %filters = (
 sub validate
 {
     my ($req, $errors) = @_;
+    my @filters;
     foreach my $f (sort keys %filters) {
         next unless $filters{$f}->{'validate'};
-        $filters{$f}->{'validate'}->($req, $errors);
+        if ($filters{$f}->{'validate'}->($req, $errors)) {
+            push @filters, $f;
+        }
     }
+    return sort @filters;
 }
 
 # entry point to do a search: give it
