@@ -313,8 +313,8 @@ body<=
         }
         delete $FORM{'do_spellcheck'};
         foreach (keys %FORM) {
-            $ret .= "<input type='hidden' name=\"$_\" value=\"" . LJ::ehtml($FORM{$_}) . "\" />\n"
-		unless $_ eq 'body' || $_ eq 'subject';
+            $ret .= LJ::html_hidden($_, $FORM{$_})
+		unless $_ eq 'body' || $_ eq 'subject' || $_ eq 'prop_opt_preformatted';
         }
 
         $ret .= "<br /><input type='submit' value='$ML{'.preview.submit'}' />\n";
@@ -322,6 +322,19 @@ body<=
         if ($LJ::SPELLER) {
             $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>$ML{'talk.spellcheck'}</label>";
         }
+        $ret .= "<p>";
+        $ret .= "$ML{'/talkpost.bml.opt.noautoformat'} ".
+            LJ::html_check({ 'name' => 'prop_opt_preformatted', 
+                             selected => $FORM{'prop_opt_preformatted'} });
+        $ret .= LJ::help_icon("noautoformat", " ");
+        $ret .= "</p>";
+
+        $ret .= "<p> <?de $ML{'/talkpost.bml.allowedhtml'}: ";
+        foreach (sort &LJ::CleanHTML::get_okay_comment_tags()) {
+            $ret .= "&lt;$_&gt; ";
+        }
+        $ret .= "de?> </p>";
+
         $ret .= "</form>";
         return $ret;
     }

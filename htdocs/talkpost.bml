@@ -343,7 +343,7 @@ body<=
     } elsif ($u->{'opt_whocanreply'} eq "reg") {
         $ret .= "<tr valign='middle'>";
         $ret .= "<td align='right'>$ML{'.opt.from'}</td><td align='middle'>(  )</td>";
-        $ret .= "<td align='left' colspan=3><font color='#c0c0c0'><b>$ML{'.opt.anonymous'}</b></font>$ML{'.opt.noanonpost'}</td>";
+        $ret .= "<td align='left' colspan='3'><font color='#c0c0c0'><b>$ML{'.opt.anonymous'}</b></font>$ML{'.opt.noanonpost'}</td>";
         $ret .= "</tr>\n";
     } else {
         $ret .= "<tr valign='middle'>";
@@ -485,14 +485,6 @@ body<=
         $ret .= "<br />$ML{'.loganonip'}";
         $ret .= LJ::help_icon("iplogging", " ");
     }
-
-
-    $ret .= "<br />$ML{'.paraformat'}<br /> <?de $ML{'.allowedhtml'}: ";
-    foreach (sort &LJ::CleanHTML::get_okay_comment_tags()) {
-        $ret .= "&lt;$_&gt; ";
-    }
-    $ret .= "de?>";
-
 
     $ret .= "</td></tr></table>\n";
 
