@@ -4,6 +4,9 @@ body<=
 
 <?_code
 {
+    use strict;
+    use vars qw(%FORM);
+
     my $status = "";
 
     my $spid = $FORM{'spid'}+0;
