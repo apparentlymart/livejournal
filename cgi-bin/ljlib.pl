@@ -323,16 +323,17 @@ sub get_log2_row
     return undef unless $item;
     $item->{'journalid'} = $jid;
     $item->{'jitemid'} = $jitemid;
+    $item->{'ditemid'} = $jitemid*256 + $item->{'anum'};
 
-    my ($sec, $ditemid, $eventtime, $logtime);
+    my ($sec, $eventtime, $logtime);
     $sec = $item->{'allowmask'};
     $sec = 0 if $item->{'security'} eq 'private';
     $sec = 2**31 if $item->{'security'} eq 'public';
-    $ditemid = $jitemid*256 + $item->{'anum'};
     $eventtime = LJ::mysqldate_to_time($item->{'eventtime'}, 1);
     $logtime = LJ::mysqldate_to_time($item->{'logtime'}, 1);
 
-    $row = pack("NNNNN", $item->{'posterid'}, $eventtime, $logtime, $sec, $ditemid);
+    $row = pack("NNNNN", $item->{'posterid'}, $eventtime, $logtime, $sec, 
+                $item->{'ditemid'});
     LJ::MemCache::set($memkey, $row);
     
     return $item;
