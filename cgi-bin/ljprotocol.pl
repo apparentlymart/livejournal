@@ -6,15 +6,16 @@ use strict;
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
-# constants (FIXME: can remove this when new ljlib is in use)
-$LJ::EndOfTime = 2147483647;
-
 #### New interface (meta handler) ... other handlers should call into this.
 package LJ::Protocol;
 
 sub error_message
 {
     my $code = shift;
+    my $des;
+    if ($code =~ /^(\d\d\d):(.+)/) {
+	($code, $des) = ($1, $2);
+    }
     my %e = (
 	     # User Errors
 	     "100" => "Invalid username",
@@ -48,7 +49,9 @@ sub error_message
     my $error = $e{$code} || "BUG: Unknown error code!";
     if ($code >= 200) { $prefix = "Client error: "; }
     if ($code >= 500) { $prefix = "Server error: "; }
-    return "$prefix$error";
+    my $totalerror = "$prefix$error";
+    $totalerror .= ": $des" if $des;
+    return $totalerror;
 }
 
 # returns result, or undef on failure
@@ -931,8 +934,9 @@ sub editfriends
     ## first, figure out who the current friends are to save us work later
     my %curfriend;
     my $friend_count = 0;
-    $sth = $dbh->prepare("SELECT u.user FROM useridmap u, friends f ".
-			 "WHERE u.userid=f.friendid AND f.userid=$userid");
+    $sth = $dbh->prepare("SELECT u.user FROM user u, friends f ".
+			 "WHERE u.userid=f.friendid AND f.userid=$userid ".
+			 "AND u.statusvis='V'");
     $sth->execute;
     while (my ($friend) = $sth->fetchrow_array) {
 	$curfriend{$friend} = 1;
@@ -973,8 +977,9 @@ sub editfriends
 
 	$friend_count++ unless $curfriend{$aname};
 
-	return fail($err,104,"Exceeded max number of friends")
-	    if ($friend_count > LJ::get_cap($u, "maxfriends"));
+	my $maxfriends = LJ::get_cap($u, "maxfriends");
+	return fail($err,104,"Exceeded $maxfriends friends limit (now: $friend_count)")
+	    if ($friend_count > $maxfriends);
 
 	my $fg = $fa->{'fgcolor'} || "#000000";
 	my $bg = $fa->{'bgcolor'} || "#FFFFFF"; 
@@ -1431,6 +1436,8 @@ sub fail
 {
     my $err = shift;
     my $code = shift;
+    my $des = shift;
+    $code .= ":$des" if $des;
     $$err = $code if (ref $err eq "SCALAR");
     return undef;
 }
