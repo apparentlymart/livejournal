@@ -3,6 +3,7 @@
 layerinfo type = "layout";
 layerinfo name = "Notepad";
 layerinfo redist_uniq = "notepad/layout";
+layerinfo previews = "notepad/notepad.jpg";
 
 property bool show_entry_userpic { des = "Show the userpic on the journal entries?"; }
 set show_entry_userpic = false;
