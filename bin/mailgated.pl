@@ -67,6 +67,7 @@ if (!$opt->{'foreground'}) {
     $pid = fork;
     die "Couldn't fork.\n" unless defined $pid;
     umask 0;
+    chdir('/');
 
     if ($pid != 0) {  # we are the parent
         unless (open (PID, ">$pidfile")) {
