@@ -48,7 +48,7 @@ BODY<=
 	 return "(=H1 Error H1=)(=P You must be logged in to filter on requests that you've replied to. P=)";
      }
      
-     $sth = $dbh->prepare("SELECT s.*, MAX(sl.timelogged) AS 'timelogged' FROM support s, supportlog sl WHERE s.spid=sl.spid AND s.state='open' AND sl.userid=$remote->{'userid'} $filterwhere GROUP BY s.spid ORDER BY timecreate DESC");
+     $sth = $dbh->prepare("SELECT DISTINCT s.* FROM support s, supportlog sl WHERE s.spid=sl.spid AND s.state='open' AND sl.userid=$remote->{'userid'} $filterwhere GROUP BY s.spid ORDER BY timecreate DESC");
      
  }
  else 
@@ -61,7 +61,7 @@ BODY<=
      unless ($count) {
 	 return "(=H1 No support requests! H1=)(=P The support queue is currently empty.  :-) P=)";
      }
-     $sth = $dbh->prepare("SELECT s.*, MAX(sl.timelogged) AS 'timelogged' FROM support s, supportlog sl WHERE s.spid=sl.spid AND s.state='open' AND sl.type IN ('req','answer') $filterwhere GROUP BY s.spid ORDER BY timecreate DESC");
+     $sth = $dbh->prepare("SELECT s.* FROM support s WHERE s.state='open' $filterwhere ORDER BY timecreate DESC");
  }
  $sth->execute;
 
@@ -120,11 +120,11 @@ BODY<=
 	 $status = "closed"; 
 	 $barbg = "BGCOLOR=#EED0D0";
      }
-     elsif ($sp->{'timelogged'} > $sp->{'timetouched'}+5) { 
+     elsif ($sp->{'timelasthelp'} > $sp->{'timetouched'}+5) { 
 	 $status = "answered<BR>awaiting close"; 
 	 $barbg = "BGCOLOR=#EEEED0";
      }
-     elsif ($sp->{'timetouched'} > $sp->{'timelogged'}+5) { 
+     elsif ($sp->{'timetouched'} > $sp->{'timelasthelp'}+5) { 
 	 $status = "answered<BR><B>still needs help</B>"; 
 	 $barbg = "BGCOLOR=#D0EED0";	 
      }
