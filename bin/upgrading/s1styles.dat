@@ -893,7 +893,7 @@ lastupdate: 2003-04-15 21:55:24
 
 CALENDAR_YEAR_DISPLAYED=>
 
-CALENDAR_YEAR_LINK=><A HREF="%%url%%">%%yyyy%%</A>
+CALENDAR_YEAR_LINK=> <A HREF="%%url%%">%%yyyy%%</A>
 
 CALENDAR_DAY=><TD VALIGN=TOP><B><FONT SIZE=-1>%%d%%</FONT></B>%%dayevent%%%%daynoevent%%</TD>
 
