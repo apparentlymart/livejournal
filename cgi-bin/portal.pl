@@ -956,7 +956,7 @@ $box{'randuser'} =
 
         my @ruser;
         my $sth = $dbr->prepare(qq{
-            SELECT user, name, defaultpicid FROM user WHERE userid IN
+            SELECT userid, user, name, defaultpicid FROM user WHERE userid IN
         } . "(" . join(",", keys %ruserid) . ")");
         $sth->execute;
         push @ruser, $_ while $_ = $sth->fetchrow_hashref;
