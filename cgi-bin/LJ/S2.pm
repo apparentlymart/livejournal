@@ -57,9 +57,9 @@ sub s2_run
     }
 
     my $send_header = sub {
-        my $status = $ctx->[3]->{'status'} || 200;
+        my $status = $ctx->[S2::SCRATCH]->{'status'} || 200;
         $r->status($status);
-        $r->content_type($ctx->[3]->{'ctype'} || $ctype);
+        $r->content_type($ctx->[S2::SCRATCH]->{'ctype'} || $ctype);
         $r->send_http_header();
     };
     
@@ -601,7 +601,7 @@ sub Entry
         'links' => {}, # TODO: finish
     };
     foreach (qw(subject text journal poster new_day end_day comments 
-                userpic permalink_url)) {
+                userpic permalink_url itemid)) {
         $e->{$_} = $arg->{$_};
     }
 
@@ -829,7 +829,7 @@ sub RecentPage
             'dateparts' => $alldatepart,
             'security' => $security,
             'props' => \%logprops,
-            'itemid' => $itemid,
+            'itemid' => $ditemid,
             'journal' => $userlite_journal,
             'poster' => $userlite_poster,
             'comments' => $comments,
@@ -1028,5 +1028,76 @@ sub Date__day_of_week
     die "FIXME: finish Date::day_of_week";
 }
 *DateTime__day_of_week = \&Date__day_of_week;
+
+my %dt_vars = (
+               'm' => "\$time->{month}",
+               'mm' => "sprintf('%02d', \$time->{month})",
+               'd' => "\$time->{day}",
+               'dd' => "sprintf('%02d', \$time->{day})",
+               'yy' => "sprintf('%02d', \$time->{year} % 100)",
+               'yyyy' => "\$time->{year}",
+               'mon' => "\$ctx->[S2::PROPS]->{lang_monthname_short}->[\$time->{month}]",
+               'month' => "\$ctx->[S2::PROPS]->{lang_monthname_long}->[\$time->{month}]",
+               'da' => "\$ctx->[S2::PROPS]->{lang_dayname_short}->[Date__day_of_week(\$ctx, \$time)]",
+               'day' => "\$ctx->[S2::PROPS]->{lang_dayname_long}->[Date__day_of_week(\$ctx, \$time)]",
+               'dayord' => "S2::run_function(\$ctx, \"lang_ordinal(int)\", \$time->{day})",
+               'H' => "\$time->{hour}",
+               'HH' => "sprintf('%02d', \$time->{hour})",
+               'h' => "(\$time->{hour} % 12 || 12)",
+               'hh' => "sprintf('%02d', (\$time->{hour} % 12 || 12))",
+               'mm' => "sprintf('%02d', \$time->{min})",
+               'a' => "(\$time->{hour} < 12 ? 'a' : 'p')",
+               'A' => "(\$time->{hour} < 12 ? 'A' : 'P')",
+            );
+
+sub Date__date_format
+{
+    my ($ctx, $this, $fmt) = @_;
+    $fmt ||= "short";
+    my $c = \$ctx->[S2::SCRATCH]->{'_code_datefmt'}->{$fmt};
+    return $$c->($this) if ref $$c eq "CODE";
+    if (++$ctx->[S2::SCRATCH]->{'_code_datefmt_count'} > 15) { return "[too_many_fmts]"; }
+    my $realfmt = $fmt;
+    if (defined $ctx->[S2::PROPS]->{"lang_fmt_date_$fmt"}) {
+        $realfmt = $ctx->[S2::PROPS]->{"lang_fmt_date_$fmt"};
+    }
+    my @parts = split(/\%\%/, $realfmt);
+    my $code = "\$\$c = sub { my \$time = shift; return join(";
+    my $i = 0;
+    foreach (@parts) {
+        if ($i % 2) { $code .= $dt_vars{$_} . ","; }
+        else { $_ = LJ::ehtml($_); $code .= "\$parts[$i],"; }
+        $i++;
+    }
+    $code .= "); };";
+    eval $code;
+    return $$c->($this);
+}
+*DateTime__date_format = \&Date__date_format;
+
+sub DateTime__time_format
+{
+    my ($ctx, $this, $fmt) = @_;
+    $fmt ||= "short";
+    my $c = \$ctx->[S2::SCRATCH]->{'_code_timefmt'}->{$fmt};
+    return $$c->($this) if ref $$c eq "CODE";
+    if (++$ctx->[S2::SCRATCH]->{'_code_timefmt_count'} > 15) { return "[too_many_fmts]"; }
+    my $realfmt = $fmt;
+    if (defined $ctx->[S2::PROPS]->{"lang_fmt_time_$fmt"}) {
+        $realfmt = $ctx->[S2::PROPS]->{"lang_fmt_time_$fmt"};
+    }
+    my @parts = split(/\%\%/, $realfmt);
+    my $code = "\$\$c = sub { my \$time = shift; return join(";
+    my $i = 0;
+    foreach (@parts) {
+        if ($i % 2) { $code .= $dt_vars{$_} . ","; }
+        else { $_ = LJ::ehtml($_); $code .= "\$parts[$i],"; }
+        $i++;
+    }
+    $code .= "); };";
+    eval $code;
+    return $$c->($this);
+}
+
 
 1;

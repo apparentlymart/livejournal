@@ -48,6 +48,7 @@ set weak_text = "#000000";
 set text_post_comment = "post comment";
 set text_post_comment_friends = "post comment";
 
+
 function Page::print () 
 {
     var string title = $this->title();

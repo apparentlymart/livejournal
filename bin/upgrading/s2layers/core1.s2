@@ -522,11 +522,11 @@ property string lang_fmt_date_long_day {
 }
 set lang_fmt_date_long_day = "%%day%%, %%month%% %%dayord%%, %%yyyy%%";
 
-property string lang_fmt_time {
+property string lang_fmt_time_short {
     noui = 1; 
     des = "Time format.";
 }
-set lang_fmt_time = "%%hh%%:%%mm%% %%a%%m";
+set lang_fmt_time_short = "%%hh%%:%%mm%% %%a%%m";
 
 
 property string[] lang_monthname_long {
@@ -786,8 +786,7 @@ function external_stylesheet() {
 function lang_ordinal(int num) : string
 "Make an ordinal number from a cardinal number"
 {
-    if ($num % 100 >= 11 and
-        $num % 100 <= 13) { return $num+"th"; }
+    if ($num % 100 >= 4 and $num % 100 <= 20) { return $num+"th"; }
     if ($num % 10 == 1) { return $num+"st"; }
     if ($num % 10 == 2) { return $num+"nd"; }
     if ($num % 10 == 3) { return $num+"rd"; }
