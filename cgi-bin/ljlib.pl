@@ -8872,12 +8872,13 @@ sub get_public_styles {
 
     my $opts = shift;
 
-    # now try memcache
+    # Try memcache if no extra options are requested
     my $memkey = "s1pubstyc";
-    my $pubstyc = LJ::MemCache::get($memkey);
-    return $pubstyc if $pubstyc;
-
-    $pubstyc = {};
+    my $pubstyc = {};
+    unless ($opts) {
+        my $pubstyc = LJ::MemCache::get($memkey);
+        return $pubstyc if $pubstyc;
+    }
 
     # not cached, build from db
     my $sysid = LJ::get_userid("system");
@@ -8903,8 +8904,10 @@ sub get_public_styles {
     return undef unless %$pubstyc;
 
     # set in memcache
-    my $expire = time() + 60*30; # 30 minutes
-    LJ::MemCache::set($memkey, $pubstyc, $expire);
+    unless ($opts) {
+        my $expire = time() + 60*30; # 30 minutes
+        LJ::MemCache::set($memkey, $pubstyc, $expire);
+    }
 
     return $pubstyc;
 }
