@@ -135,25 +135,29 @@ sub multiMove {
             $dbh->do("SET wait_timeout=28800");
 
             my $rv = $sock->write("get_job\r\n");
-            print "RV: $rv, ! = $!, pipe = $pipe\n";
+
             if ($pipe || ! $rv) {
                 $sock = undef;
                 sleep 1;
                 next ITER;
             }
             my $line = <$sock>;
-            print "Heard: $line\n";
             if ($line =~ /^OK IDLE/) {
+                print "Idling.\n";
                 sleep 5;
                 next ITER;
-            } elsif ($line =~ /^OK JOB (\d+):(\d+):(\d+)\s+([\d.]+)(?:\s*([\w ]+))?$/) {
+            } elsif ($line =~ /^OK JOB (\d+):(\d+):(\d+)\s+([\d.]+)(?:\s+([\w= ]+))?\r?\n/) {
                 my ($uid, $srcid, $dstid, $locktime) = ($1, $2, $3, $4);
                 my $opts = parseOpts($5);
+
+                print "Got a job: $uid:$srcid:$dstid, locked for=$locktime, opts: [",
+                  join(", ", map { "$_=$opts->{$_}" } grep { $opts->{$_} } keys %$opts),
+                "]\n";
 
                 my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?",
                                                 undef, $uid);
                 next ITER unless $u;
-                next ITER unless $u->{clusterid} == $u->{srcid};
+                next ITER unless $u->{clusterid} == $srcid;
 
                 my $verify = sub {
                     my $pipe = 0;
@@ -177,6 +181,8 @@ sub multiMove {
                 } else {
                     print "moveUser($u->{user}/$u->{userid}) = fail: $@\n";
                 }
+            } else {
+                die "Unknown response from server: $line\n";
             }
         } else {
             print "Need job server sock...\n";
@@ -188,7 +194,9 @@ sub multiMove {
                 next ITER;
             }
             my $ready = <$sock>;
-            unless ($ready =~ /Ready/) {
+            if ($ready =~ /Ready/) {
+                print "Connected.\n";
+            } else {
                 print "Bogus greeting.\n";
                 $sock = undef;
                 sleep 1;
