@@ -57,10 +57,10 @@
      return $contents;
  };
 
- if ($files{'all'}) 
+ if ($files{'*'}) 
  {
      # if user has access to edit all files, find what those files are!
-     delete $files{'all'};
+     delete $files{'*'};
      opendir (DIR, $INC_DIR);
      while (my $file = readdir(DIR)) {
          $files{$file} = 1;

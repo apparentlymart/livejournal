@@ -48,7 +48,7 @@ body<=
          $q =~ s/^\s+//; $q =~ s/\s+$//;
          $q =~ s/\n/<BR>/g;
          $ret .= "<LI>";
-         if ($ac_edit{'all'} || $ac_edit{$faqcat}) {
+         if ($ac_edit{'*'} || $ac_edit{$faqcat}) {
              $ret .= "<A HREF=\"faqedit.bml?id=$faqid\">[edit]</A> ($fe->{'sortorder'}) ";
          }
          $ret .= "<B>{$faqid}</B> $q\n";
