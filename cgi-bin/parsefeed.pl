@@ -352,7 +352,7 @@ sub EndTag {
             delete $item->{'contents'};
 
             # generate time
-            my $w3time = $item->{'_atom_modified'};
+            my $w3time = $item->{'_atom_modified'} || $item->{'_atom_created'};
             my $time;
             if ($w3time) {
                 # see http://www.w3.org/TR/NOTE-datetime for format
