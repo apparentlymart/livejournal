@@ -21,7 +21,7 @@ body<=
     }
 
     if (LJ::did_post() && $POST{'userid'} != $u->{'userid'}) {
-        return "<?h1 $ML{'.invalid.submission'} h1?><?p $ML{'.user.nomatch'}p?>";
+        return "<?h1 $ML{'.invalid.submission'} h1?><?p $ML{'.user.nomatch'} p?>";
     }
 
     my $sth = $dbh->prepare("SELECT s.userid, us.user, s.synurl, COUNT(*) ".
@@ -98,7 +98,7 @@ body<=
                     'caps' => $LJ::SYND_CAPS,
                     'cluster' => $LJ::SYND_CLUSTER,
                 });
-                return "<?h1 $ML{'.invalid.inuse.title'}h1?><?p $ML{'.invalid.inuse.text'} p?>"
+                return "<?h1 $ML{'.invalid.inuse.title'} h1?><?p $ML{'.invalid.inuse.text'} p?>"
                     unless $id;
 
                 LJ::update_user($id, { journaltype => 'Y' });
