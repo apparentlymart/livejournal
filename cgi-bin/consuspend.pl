@@ -3,6 +3,9 @@
 
 package LJ::Con;
 
+use strict;
+use vars qw(%cmd);
+
 $cmd{'suspend'}->{'handler'} = \&suspend;
 $cmd{'unsuspend'}->{'handler'} = \&suspend;
 $cmd{'getemail'}->{'handler'} = \&getemail;
@@ -154,13 +157,10 @@ sub get_maintainer
         return 0;
     }
     
-    $commname = $dbh->quote($user);
-
     my $dbs = LJ::make_dbs_from_arg($dbh);
     my $admins = LJ::load_rel_user($dbs, $userid, 'A') || [];
     foreach (@$admins) {
-        $username = LJ::get_username($dbh, $_);
-        finduser($dbh, $remote, ['finduser', 'user', $username], $out);
+        finduser($dbh, $remote, ['finduser', 'userid', $_], $out);
     }
 
     return 1;
