@@ -1,6 +1,9 @@
 (=_CODE
  
- &connect_db();
+ $dbs = LJ::get_dbs();
+ $dbh = $dbs->{'dbh'};
+ $dbr = $dbs->{'reader'};
+
  my $cmd = &get_query_string();
  if ($cmd =~ /^(\w+);(\d+);(\w{15})(?:;(\d+))?$/) {
      ($action, $spid, $authcode, $splid) = ($1, $2, $3, $4);
@@ -57,6 +60,17 @@ BODY<=
 	     }
 	 }
      }
+
+     my $remote = LJ::get_remote($dbs);
+     my $is_admin = LJ::check_priv($dbs, $remote, "supportclose");
+     if ($is_admin)
+     {
+	 # TODO: load and redirect to the next highest open case that
+	 # has already been answered (yellow not green), instead of
+	 # the "your support case has been closed"?  Note also though
+	 # that not all supportclose helpers can see the same requests.
+     } 
+     
      return "(=H1 Closed H1=)(=P The support request has been closed. P=)";
  }
 
