@@ -101,7 +101,9 @@ body<=
         $ret .= "<?p Category: " . LJ::html_select({ name => 'spcatid', selected => $spcatid },
                                                0, "( please select )",
                                                map { $_, $cats->{$_}->{catname} }
-                                                   grep { $canview{$_} } keys %$cats) . "<br />";
+                                                   grep { $canview{$_} } 
+                                                   sort { $cats->{$a}->{catname} cmp $cats->{$b}->{catname} }
+                                                   keys %$cats) . "<br />";
         $ret .= "Subject: " . LJ::html_text({ name => 'subject', maxlength => 255, size => 40 }) . "<br />";
         $ret .= LJ::html_textarea({ name => 'body', rows => 15, cols => 80 }) . "<br />";
         $ret .= LJ::html_submit('action:new', "Save Answer");
@@ -139,7 +141,8 @@ body<=
     $ret .= "<?p Filter: ";
     $ret .= LJ::html_select({ name => 'spcatid', selected => $spcatid },
                             0, "( none )",
-                            map { $_, $cats->{$_}->{catname} } keys %$cats);
+                            map { $_, $cats->{$_}->{catname} }
+                                sort { $cats->{$a}->{catname} cmp $cats->{$b}->{catname} } keys %$cats);
     $ret .= LJ::html_submit(undef, "Show") . "</form> p?>";
 
     my %answers;
