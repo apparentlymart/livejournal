@@ -8,6 +8,7 @@ require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 use MIME::Lite ();
 use Text::Wrap ();
 use Time::HiRes ('gettimeofday', 'tv_interval');
+use IO::Socket::INET ();
 
 package LJ;
 
@@ -87,7 +88,28 @@ sub send_mail
     return $buffer->($msg) if $LJ::ASYNC_MAIL && ! $async_caller;
 
     my $starttime = [gettimeofday()];
-    my $rv = eval { $msg->send && 1; };
+    my $rv;
+    if ($LJ::DMTP_SERVER) {
+        my $host = $LJ::DMTP_SERVER;
+        unless ($host =~ /:/) {
+            $host .= ":7005";
+        }
+        # DMTP (Danga Mail Transfer Protocol)
+        $LJ::DMTP_SOCK ||= IO::Socket::INET->new(PeerAddr => $host,
+                                                 Proto    => 'tcp');
+        if ($LJ::DMTP_SOCK) {
+            my $as = $msg->as_string;
+            my $len = length($as);
+            my $env = $opt->{'from'};
+            $LJ::DMTP_SOCK->print("Content-Length: $len\r\n" .
+                                  "Envelope-Sender: $env\r\n\r\n$as");
+            my $ok = $LJ::DMTP_SOCK->getline;
+            $rv = ($ok =~ /^OK/);
+        }
+    } else {
+        # SMTP or sendmail case
+        $rv = eval { $msg->send && 1; };
+    }
     my $notes = sprintf( "Direct mail send to %s %s: %s",
                          $msg->get('to'),
                          $rv ? "succeeded" : "failed",
