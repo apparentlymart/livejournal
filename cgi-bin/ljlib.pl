@@ -480,7 +480,7 @@ sub get_friend_group {
 
     # sanity check bitnum
     delete $opt->{'bit'} if
-        $opt->{'bit'} > 31 || $opt->{'bitnum'} < 0;
+        $opt->{'bit'} > 31 || $opt->{'bit'} < 0;
 
     my $fg;
     my $find_grp = sub {
