@@ -165,6 +165,7 @@ my $check = sub
     my $minlog = "";
 
     $pr->("  Slaves:\n");
+    $| = 1;
     foreach my $sid (@{$slaves{$id}})
     {
 	my $s = $dbinfo{$sid};
