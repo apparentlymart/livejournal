@@ -161,7 +161,7 @@ if ($opt_pop)
         # get the system account
         my $su = LJ::load_user($dbh, "system");
         unless ($su) {
-            die "No system user found.  Run \$LJHOME/bin/upgrading/make-system.pl\n";
+            die "No system user found.  Run \$LJHOME/bin/upgrading/make_system.pl\n";
         }
         my $sysid = $su->{'userid'};
     
