@@ -7434,6 +7434,49 @@ sub rand_chars
     return $chal;
 }
 
+# with no arg, returns list:  ($time, $secret).
+# with arg, return secret for that $time
+sub get_secret
+{
+    my $time = int($_[0]);
+    return undef if $_[0] && ! $time;
+    my $want_new = 0;
+
+    if (! $time) {
+        $want_new = 1;
+        $time = time();
+        $time -= $time % 3600;  # one hour granularity
+    }
+
+    my $memkey = "secret:$time";
+    my $secret = LJ::MemCache::get($memkey);
+    return $want_new ? ($time, $secret) : $secret if $secret;
+
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
+    $secret = $dbh->selectrow_array("SELECT secret FROM secrets ".
+                                    "WHERE stime=?", undef, $time);
+    if ($secret) {
+        LJ::MemCache::set($memkey, $secret) if $secret;
+        return $want_new ? ($time, $secret) : $secret;
+    }
+    
+    # return if they specified an explicit time they wanted.
+    # (calling with no args means generate a new one if secret
+    # doesn't exist)
+    return undef unless $want_new;
+
+    # don't generate new times that don't fall in our granularity
+    return undef if $time % 3600;
+    
+    my $secret = LJ::rand_chars(32);
+    $dbh->do("INSERT IGNORE INTO secrets SET stime=?, secret=?",
+             undef, $time, $secret);
+    # check for races:
+    $secret = get_secret($time);
+    return ($time, $secret);
+}
+
 sub generate_session
 {
     my ($u, $opts) = @_;

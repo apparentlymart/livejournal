@@ -1647,6 +1647,15 @@ CREATE TABLE clustertrack (
 )
 EOC
 
+# rotating site secret values 
+register_tablecreate("secrets", <<'EOC'); # global
+CREATE TABLE secrets  (
+    stime   INT UNSIGNED NOT NULL,
+    secret  CHAR(32) NOT NULL,
+    PRIMARY KEY (stime)
+)
+EOC
+
 
 
 # NOTE: new table declarations go here
