@@ -107,9 +107,15 @@
 
 /community/manage.bml.title=Community Management
 
+/community/members.bml.error.invaliduser=Cannot add community or syndicated account: [[user]]
+
 /community/members.bml.error.noaccess=Only community maintainers are able to edit membership lists. You are not a maintainer of community [[comm]].
 
+/community/members.bml.error.noattr=No attributes selected for user: [[user]]
+
 /community/members.bml.error.nocomm=Community not found.
+
+/community/members.bml.error.nouser=User does not exist: <b>[[user]]</b>
 
 /community/members.bml.key.admin=<b>Maintainer</b>
 

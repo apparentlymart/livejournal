@@ -50,16 +50,31 @@ body<=
 
         # add new users
         my $adding = 0;
+        my @add_errors;
         foreach my $num (1..5) {
             next unless $POST{"add_$num"} =~ /^\w+$/;
 
             my $target = LJ::load_user($POST{"add_$num"});
-            next unless $target->{'journaltype'} eq 'P';
-            
-            # make a urlencoded arg string
-            my @attr = grep { defined $POST{"add_${num}_$_"} } @saveattribs;
-            next unless @attr;
+            unless ($target) {
+                push @add_errors, BML::ml('.error.nouser',
+                                          { 'user' => $POST{"add_$num"} });
+                next;
+            }
 
+            my @attr = grep { defined $POST{"add_${num}_$_"} } @saveattribs;
+            unless (@attr) {
+                push @add_errors, BML::ml('.error.noattr',
+                                          { 'user' => LJ::ljuser($POST{"add_$num"}) });
+                next;
+            }
+
+            unless ($target->{'journaltype'} eq 'P') {
+                push @add_errors, BML::ml('.error.invaliduser',
+                                          { 'user' => LJ::ljuser($POST{"add_$num"},
+                                            { 'type' => $target->{'journaltype'} }) });
+                next;
+            }
+            
             # insert authactions row
             my $aa = LJ::comm_member_request($c, $target, \@attr);
             unless ($aa) {
@@ -69,6 +84,7 @@ body<=
 
             $adding = 1;
         }
+        return LJ::bad_input(@add_errors) if @add_errors;
 
         # initialize lists of users to update and delete
         # keyed on attribute type
