@@ -259,7 +259,7 @@ body<=
  $ret .= $event;
  $ret .= "</div>";
 
- $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' />";
+ $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' /><div id='Comments'>";
 
  my %user;
  my $opts = {
@@ -548,6 +548,8 @@ body<=
      if ($navcrap) {
          $ret .= "<p>$navcrap</p>";
      }
+
+     $ret .= "</div>";
  }
 
  BML::noparse();

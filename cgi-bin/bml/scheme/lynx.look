@@ -27,6 +27,9 @@ page<=
     }
     return $crumb_up;
 _code?>
+<style>
+    #Comments q { padding-left: 2.5em; font-style: italic; }
+</style>
 <title><?_code {
     my $elhash = $_[2];
     return $elhash->{'WINDOWTITLE'} || $elhash->{'TITLE'};
