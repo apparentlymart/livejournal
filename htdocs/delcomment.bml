@@ -19,7 +19,7 @@ BODY<=
  }
 
  my $qid = $FORM{'id'}+0;
- 
+
  my ($clustered, $dbcm) = (0, $dbh);
  my $u;
  if ($FORM{'journal'}) {
@@ -34,12 +34,12 @@ BODY<=
  my $tp;
  if ($clustered) {
      $tp = $dbcm->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, nodeid AS 'itemid', ".
-				    "parenttalkid, journalid, posterid FROM talk2 ".
-				    "WHERE journalid=$u->{'userid'} AND jtalkid=$qid");
+                                    "parenttalkid, journalid, posterid FROM talk2 ".
+                                    "WHERE journalid=$u->{'userid'} AND jtalkid=$qid");
  } else {
      $tp = $dbh->selectrow_hashref("SELECT talkid, nodetype, state, nodeid AS 'itemid', ".
-				   "parenttalkid, journalid, posterid FROM talk ".
-				   "WHERE talkid=$qid");
+                                   "parenttalkid, journalid, posterid FROM talk ".
+                                   "WHERE talkid=$qid");
  }
  unless ($tp) {
      return "(=H1 Error H1=)(=P The comment doesn't even exist... P=)";
@@ -47,7 +47,7 @@ BODY<=
  if ($tp->{'state'} eq "D") {
      return "(=H1 Error H1=)(=P This comment has already been deleted. P=)";
  }
- 
+
  $u ||= LJ::load_userid($dbs, $tp->{'journalid'});
  return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
@@ -59,7 +59,7 @@ BODY<=
 
  # the poster of a comment or the journal owner can delete a comment
  my $can_delete = ($tp->{'journalid'} == $remote->{'userid'} ||
-		   $tp->{'posterid'} == $remote->{'userid'});
+                   $tp->{'posterid'} == $remote->{'userid'});
 
  # or, a community admin can:
  unless ($can_delete) {
@@ -73,10 +73,10 @@ BODY<=
  if (! $can_delete && $tp->{'nodetype'} eq "L") {
      my $posterid;
      if ($clustered) {
-	 $posterid = $dbcm->selectrow_array("SELECT posterid FROM log2 WHERE ".
-					    "journalid=$u->{'userid'} AND jitemid=$qitemid");
+         $posterid = $dbcm->selectrow_array("SELECT posterid FROM log2 WHERE ".
+                                            "journalid=$u->{'userid'} AND jitemid=$qitemid");
      } else {
-	 $posterid = $dbh->selectrow_array("SELECT posterid FROM log WHERE itemid=$qitemid");
+         $posterid = $dbh->selectrow_array("SELECT posterid FROM log WHERE itemid=$qitemid");
      }
      $can_delete = 1 if ($posterid == $remote->{'userid'});
  }
@@ -84,7 +84,7 @@ BODY<=
  unless ($can_delete) {
      return "(=H1 Error H1=)(=P A comment may only be deleted by the journal owner or the one who posted it. (pid=$tp->{'posterid'}; jid=$tp->{'journalid'}; ruid=$remote->{'userid'}) P=)";
  }
- 
+
  unless ($FORM{'confirm'} eq "Y") {
      $ret .= "(=H1 Delete this comment? H1=)(=P Are you sure you want to delete this comment? P=)";
      $ret .= "<P><FORM METHOD=POST ACTION=\"delcomment.bml\"><CENTER>\n";
@@ -93,13 +93,13 @@ BODY<=
      $ret .= "<INPUT TYPE=HIDDEN NAME=confirm VALUE=\"Y\">\n";
      $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Yes, delete it!\">";
      $ret .= "</CENTER>";
-     if ($tp->{'posterid'} && 
-	 $tp->{'posterid'} != $remote->{'userid'} &&
-	 $remote->{'userid'} == $tp->{'journalid'}) {
-	 $ret .= "<P><INPUT TYPE=CHECKBOX NAME=\"ban\"> And also ban user <B>$tp->{'userpost'}</B> from ever posting again.";
+     if ($tp->{'posterid'} &&
+         $tp->{'posterid'} != $remote->{'userid'} &&
+         $remote->{'userid'} == $tp->{'journalid'}) {
+         $ret .= "<P><INPUT TYPE=CHECKBOX NAME=\"ban\"> And also ban user <B>$tp->{'userpost'}</B> from ever commenting again.";
      }
      if ($remote->{'userid'} == $tp->{'journalid'}) {
-	 $ret .= "<P><B>Note:</B> From the <A HREF=\"/editinfo.bml\">Edit Personal Info & Settings</A> page you can choose whether to allow <I>all</I>, <I>registered users</I>, or <I>friends only</I> to post.";
+         $ret .= "<P><B>Note:</B> From the <A HREF=\"/editinfo.bml\">Edit Personal Info & Settings</A> page you can choose whether to allow <I>all</I>, <I>registered users</I>, or <I>friends only</I> to post.";
      }
      $ret .= "</FORM>\n";
      return $ret;
@@ -109,24 +109,24 @@ BODY<=
      my $jid = $u->{'userid'};
      LJ::delete_talkitem($dbcm, $jid, $qid, "LIGHT");
      if ($tp->{'nodetype'} eq "L") {
-	 $dbcm->do("UPDATE log2 SET replycount=replycount-1 WHERE ".
-		   "journalid=$jid AND jitemid=$tp->{'itemid'}");
+         $dbcm->do("UPDATE log2 SET replycount=replycount-1 WHERE ".
+                   "journalid=$jid AND jitemid=$tp->{'itemid'}");
      }
  } else {
      $dbh->do("UPDATE talk SET state='D' WHERE talkid=$qid");
      $dbh->do("UPDATE talktext SET subject=NULL, body=NULL WHERE talkid=$qid");
      $dbh->do("DELETE FROM talkprop WHERE talkid=$qid");
      if ($tp->{'nodetype'} eq "L") {
-	 LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount-1 WHERE itemid=$qitemid");
+         LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount-1 WHERE itemid=$qitemid");
      }
  }
 
  # ban the user, if selected
  my $and;
- if ($FORM{'ban'}) 
+ if ($FORM{'ban'})
  {
      $dbh->do("REPLACE INTO ban (userid, banneduserid) VALUES ($remote->{'userid'}, $tp->{'posterid'})");
-     $and .= "Additionally, user <B>$tp->{'userpost'}</B> has been banned from posting anything else in your journal.";
+     $and .= "Additionally, user <B>$tp->{'userpost'}</B> has been banned from commenting in your journal.";
  }
 
  $ret .= "(=H1 Deleted H1=)(=P The comment has been deleted. $and P=)";
