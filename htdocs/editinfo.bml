@@ -5,6 +5,7 @@ BODY<=
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
+ $FORM{'unban'} =~ s/\0/,/g;
  return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
 
  my $dbs = LJ::get_dbs();
@@ -667,7 +668,7 @@ BODY<=
      #### now unban users they selected to be unbanned
      if ($FORM{'unban'})
      {
-         my $bannedin = join(",", map { $dbh->quote($_); } split(/\0/, $FORM{'unban'}));
+         my $bannedin = join(",", map { $dbh->quote($_); } split(/,/, $FORM{'unban'}));
          my $quserid = $u->{'userid'}+0;
          $dbh->do("DELETE FROM ban WHERE userid=$quserid AND banneduserid IN ($bannedin)");
      }
