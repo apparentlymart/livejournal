@@ -206,54 +206,20 @@ sub autogen_core
         print AC "</section>\n";
     }
         
-
-
-    close AC;
-
-    return;
-}
-__END__
-
-
     if (%$class) 
     {
-        # class index
-        $body .= "<?h1 Classes h1?>";
-        $body .= "<table class='postheading' style='margin-bottom: 10px'><tr valign='top' align='left'>";
-        $body .= "<td width='50%'>Alphabetical";
-        $body .= "<ul>";
+        print AC "<section id='&s2.idroot;siteapi.core$cv.classes'>\n";
+        print AC "  <title>Classes</title>\n";
         foreach my $cname (sort { lc($a) cmp lc($b) } keys %$class) {
-            $body .= "<li><a href='#class.$cname'><b>$cname</b></a></li>\n";
-        }
-        $body .= "</ul>";
-        $body .= "</td>";
-        $body .= "<td width='50%'>Hierarchical";
-        my $dumpsub = sub {
-            my $self = shift;
-            my $parent = shift;
-            $body .= "<li><a href='#class.$parent'><b>$parent</b></a></li>\n"
-                if $parent;
-            my $didul = 0;
-            foreach my $cname (sort { lc($a) cmp lc($b) } keys %$class) {
-                next unless $class->{$cname}->{'parent'} eq $parent;
-                unless ($didul++) { $body .= "<ul>"; }
-                $self->($self, $cname);
-            }
-            if ($didul) { $body .= "</ul>"; }
-        };
-        $dumpsub->($dumpsub, "");
-        $body .= "</td></tr></table>";
-
-        # classes
-        foreach my $cname (sort { lc($a) cmp lc($b) } keys %$class) {
-            $body .= "<a name='class.$cname'><?h1 $cname Class h1?></a>";
-            my $ds = $class->{$cname}->{'docstring'};
+            print AC "<refentry id='&s2.idroot;core$cv.class.$cname'>";
+            print AC "<refmeta><refentrytitle>$cname Class</refentrytitle></refmeta>";
+            my $ds = "<refnamediv><refname>$cname Class</refname><refpurpose>$class->{$cname}->{'docstring'}</refpurpose></refnamediv>";
             if ($class->{$cname}->{'parent'}) {
-                $ds = "Child class of [class[$class->{$cname}->{'parent'}]].  $ds";
+                $ds .= "<refsect1><title>Parent Class</title><para> Child class of [class[$class->{$cname}->{'parent'}]].</para></refsect1>";
             }
             if ($ds) {
                 $xlink->(\$ds);
-                $body .= "<?p $ds p?>";
+                print AC $ds;
             }
 
             # build functions & methods
@@ -274,42 +240,50 @@ __END__
             };
             $add->($add, $cname);
 
-            $body .= "<table class='postheading' style='margin-bottom: 10px' border='1' cellpadding='2'><?h2 Members h2?>" if %var;
+            print AC "<refsect1><title>Members</title><variablelist>" if %var;
             foreach (sort keys %var) {
                 my $type = $var{$_}->{'type'};
                 $type =~ s/(\w+)/defined $class->{$1} ? "[class[$1]]" : $1/eg;
                 $xlink->(\$type);
 
-                my $ds = $var{$_}->{'docstring'};
+                my $ds = LJ::ehtml($var{$_}->{'docstring'});
                 $xlink->(\$ds);
 
                 if ($var{$_}->{'readonly'}) {
-                    $ds = "<i>(Read-only)</i> $ds";
+                    $ds = "<emphasis role='bold'>(Read-only)</emphasis> $ds";
                 }
 
-                $body .= "<tr><td><nobr><a name='member.${cname}.$_'><tt>$type $_</tt></a></nobr></td><td>$ds</td></tr>";
+                print AC "<varlistentry id='&s2.idroot;core$cv.member.${cname}.$_'>";
+                print AC "<term><varname>$type $_</varname></term>";
+                print AC "<listitem><para>$ds</para></listitem></varlistentry>";
             }
-            $body .= "</table>" if %var;
+            print AC "</variablelist></refsect1>" if %var;
             
-            $body .= "<table class='postheading' style='margin-bottom: 10px' border='1' cellpadding='2'><?h2 Methods h2?>" if %func;
+            print AC "<refsect1><title>Methods</title><variablelist>" if %func;
             foreach (sort keys %func) {
                 my $rt = $func{$_}->{'returntype'};
                 if (defined $class->{$rt}) {
                     $rt = "[class[$rt]]";
                 }
                 $xlink->(\$rt);
-                my $ds = $func{$_}->{'docstring'};
+                my $ds = LJ::ehtml($func{$_}->{'docstring'});
                 $xlink->(\$ds);
 
                 my $args = $_;
                 $xlink_args->(\$args);
 
-                $body .= "<tr><td><nobr><a name='meth.${cname}::$_'><tt>$args : $rt</tt></a></nobr></td><td>$ds</td></tr>";
+                print AC "<varlistentry id='&s2.idroot;core$cv.meth.${cname}::$_'>";
+                print AC "<term><methodname>$args : $rt</methodname></term>";
+                print AC "<listitem><para>$ds</para></listitem></varlistentry>";
             }
-            $body .= "</table>" if %func;
+            print AC "</variablelist></refsect1>" if %func;
+            print AC "</refentry>";
         }
-
+        print AC "</section>";
     }
 
+    close AC;
 
+    return;
 }
+__END__
