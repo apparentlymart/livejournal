@@ -1386,7 +1386,7 @@ sub mark_comment_as_spam {
 # </LJFUNC>
 sub get_talk2_row {
     my ($dbcr, $journalid, $jtalkid) = @_;
-    return $dbcr->selectrow_hashref('SELECT posterid, state FROM talk2 WHERE journalid = ? AND jtalkid = ?',
+    return $dbcr->selectrow_hashref('SELECT * FROM talk2 WHERE journalid = ? AND jtalkid = ?',
                                     undef, $journalid+0, $jtalkid+0);
 }
 
