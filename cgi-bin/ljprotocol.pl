@@ -1608,7 +1608,8 @@ sub editfriends
     };
 
     # non-'P'erson accounts can't add friends
-    return $fail->(104, "Journal type cannot add friends");
+    return $fail->(104, "Journal type cannot add friends")
+        unless $u->{'journaltype'} eq 'P';
 
     # perform the adds
   ADDFRIEND:
