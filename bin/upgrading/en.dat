@@ -33,6 +33,30 @@
 
 /allpics.bml.title=User Pictures
 
+/approve.bml.comm.success=Success
+
+/approve.bml.comm.text<<
+You have been added to [[comm]].
+Click <a [[aopts]]>here</a> to add the community to your friends list.
+.
+
+/approve.bml.error.actionperformed=This action has already been performed
+
+/approve.bml.error.internerr.invalidaction=Internal error: invalid action
+
+/approve.bml.error.invalidargument=Invalid argument given
+
+/approve.bml.error.unknownactiontype=Unknown action type
+
+/approve.bml.shared.success=Success
+
+/approve.bml.shared.text<<
+You have been given posting access to [[shared]].
+Click <a [[aopts]]>here</a> to add the shared journal to your friends list.
+.
+
+/approve.bml.title=Action Approval
+
 /changepassword.bml.btn.proceed=Proceed
 
 /changepassword.bml.changepassword.header=Change Password
@@ -916,9 +940,9 @@ If yours is not listed, please contact us with information about how your servic
 
 /editinfo.bml.finished.save_button=Save Changes
 
-/editinfo.bml.foafurl.title=External FOAF URL:
-
 /editinfo.bml.foafurl.about=If you do not want to use the default FOAF page we provide, any URL you enter above will be used as your FOAF resource instead.  We will redirect FOAF requests to the specified URL.
+
+/editinfo.bml.foafurl.title=External FOAF URL:
 
 /editinfo.bml.gender.title=Gender
 
@@ -926,9 +950,9 @@ If yours is not listed, please contact us with information about how your servic
 
 /editinfo.bml.getreplies.header=Get message board replies
 
-/editinfo.bml.getselfemails.header=Get comments you post emailed to you
-
 /editinfo.bml.getselfemails.about=Check this if you wish to get an email every time you post a comment in a journal or community.  You will not get email for anonymous comments.
+
+/editinfo.bml.getselfemails.header=Get comments you post emailed to you
 
 /editinfo.bml.hidefriendof.about=If you check this, the list of people that list you as a friend is hidden on your profile page.
 
@@ -950,17 +974,17 @@ If you uncheck it, LiveJournal will only send text emails.
 
 /editinfo.bml.htmlemail.header=Send HTML Emails
 
-/editinfo.bml.imagelinks.header=Use image placeholders on your friends page
-
 /editinfo.bml.imagelinks.about=Placeholders are useful if you are browsing at work or over a slow connection, replacing inline images with links.  What size images do you want placeholders to be used for?
 
-/editinfo.bml.imagelinks.size.custom=Custom: use placeholders for images larger than [[width]]x[[height]]
+/editinfo.bml.imagelinks.header=Use image placeholders on your friends page
 
 /editinfo.bml.imagelinks.size.all=Use placeholders for all images
 
-/editinfo.bml.imagelinks.size.small=Use placeholders for medium images (over [[width]]x[[height]])
+/editinfo.bml.imagelinks.size.custom=Custom: use placeholders for images larger than [[width]]x[[height]]
 
 /editinfo.bml.imagelinks.size.medium=Use placeholders for large images (over [[width]]x[[height]])
+
+/editinfo.bml.imagelinks.size.small=Use placeholders for medium images (over [[width]]x[[height]])
 
 /editinfo.bml.int.about<<
 If you want other people to be able to search the directory and find you by interest, 
@@ -2119,8 +2143,7 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /register.bml.asterisk.name=* [[journal]]
 
-/register.bml.asterisk.name|notes=This string is used to create an option in the "Word as user" drop down list to allow a user to view all of their journals. The * signifies that the acount, specified by [[jounral]], is not validated yet.
-
+/register.bml.email.body|notes=This string is used to create an option in the "Word as user" drop down list to allow a user to view all of their journals. The * signifies that the acount, specified by [[jounral]], is not validated yet.
 /register.bml.email.body<<
 This is the validation email as you have requested.
 To complete validating your account, please visit this URL:
@@ -2136,9 +2159,9 @@ Sincerely,
 
 /register.bml.email.subject=Validate Email
 
-/register.bml.error.useralreadyvalidated=The email address for [[user]] has already been validated.
-
 /register.bml.error.invalidcode=Invalid validation code.
+
+/register.bml.error.useralreadyvalidated=The email address for [[user]] has already been validated.
 
 /register.bml.error.usernotfound=User not found.
 
@@ -2344,7 +2367,6 @@ that area. p?>
 /support/see_overrides.bml.title=User Overrides
 
 /support/see_request.bml.validationnag|notes=Do not translate this string! It is meant to be in English by default as it is used in support replies which are English based.  It will be translated on a needed basis.
-
 /support/see_request.bml.validationnag<<
 
 Your e-mail address has not been validated.  You will not have full functionality of your account until you have validated your email address.  You will also not be able to reclaim your account if your account security is ever compromised, or obtain your password if you forget it.
@@ -3170,6 +3192,144 @@ BML.parse_multipart.unknowntype=Unknown content type
 
 btn.search=Search
 
+crumb.acctstatus=Account Status
+
+crumb.addfriend=Add Friend
+
+crumb.addtodo=Add To-Do Item
+
+crumb.advcustomize=Customize Advanced S2 Settings
+
+crumb.birthdays=Birthdays
+
+crumb.changepass=Change Password
+
+crumb.commmembers=Community Membership
+
+crumb.commsearch=Community Search
+
+crumb.community=Community Center
+
+crumb.createcommunity=Create Community
+
+crumb.createjournal=Create Journal
+
+crumb.createstyle=Create Style
+
+crumb.customize=Customize S2 Settings
+
+crumb.delcomment=Delete Comment
+
+crumb.editentries=Edit Entries
+
+crumb.editentries_do=Edit Entry
+
+crumb.editfriendgrps=Edit Friends Groups
+
+crumb.editfriends=Edit Friends
+
+crumb.editinfo=Personal Info
+
+crumb.editpics=User Pictures
+
+crumb.editstyle=Edit Style
+
+crumb.emailgateway=Email Gateway
+
+crumb.emailmanage=Email Management
+
+crumb.encodings=About Encodings
+
+crumb.export=Export Journal
+
+crumb.faq=Frequently Asked Questions
+
+crumb.feedstersearch=Search a Journal
+
+crumb.friends=Friends Tools
+
+crumb.friendsfilter=Friends Filter
+
+crumb.home=Home
+
+crumb.joincomm=Join Community
+
+crumb.latestposts=Latest Posts
+
+crumb.layerbrowse=Public Layer Browser
+
+crumb.leavecomm=Leave Community
+
+crumb.linkslist=Your Links
+
+crumb.login=Login
+
+crumb.logout=Logout
+
+crumb.lostinfo=Lost Info
+
+crumb.manage=Manage Accounts
+
+crumb.managecommunity=Community Management
+
+crumb.meme=Meme Tracker
+
+crumb.memories=Memorable Posts
+
+crumb.moderate=Community Moderation
+
+crumb.modify=Journal Settings
+
+crumb.moodlist=Mood Viewer
+
+crumb.news=News
+
+crumb.phonepostsettings=Phone Post
+
+crumb.popfaq=Popular FAQs
+
+crumb.preview=Layout Previews
+
+crumb.register=Validate Email
+
+crumb.seeoverrides=View User Overrides
+
+crumb.setpgpkey=Public Key
+
+crumb.siteopts=Browse Preferences
+
+crumb.styles=Styles
+
+crumb.support=Support
+
+crumb.supportact=Request Action
+
+crumb.supportappend=Append to Request
+
+crumb.supporthelp=Request Board
+
+crumb.supportnotify=Notification Settings
+
+crumb.supportscores=High Scores
+
+crumb.supportsubmit=Submit Request
+
+crumb.textmessage=Send Text Message
+
+crumb.themes=Theme Previews
+
+crumb.todo=Todo List
+
+crumb.unsubscribe=Unsubscribe
+
+crumb.update=Update Journal
+
+crumb.utf8convert=UTF-8 Converter
+
+crumb.yourlayers=Your Layers
+
+crumb.yourstyles=Your Styles
+
 date.day.friday.long=Friday
 
 date.day.friday.short=Fri
@@ -3370,6 +3530,24 @@ lostinfo.head=Forget something?
 
 lostinfo.text=If you forgot your username or password, <a href="lostinfo.bml">recover it here</a>.
 
+lynx.nav.friends=Friends
+
+lynx.nav.help=Technical Support
+
+lynx.nav.home=Home
+
+lynx.nav.login=Login
+
+lynx.nav.logout=Logout
+
+lynx.nav.recent=Recent Entries
+
+lynx.nav.sitemap=Site Map
+
+lynx.nav.siteopts=Browse Options
+
+lynx.nav.update=Update Journal
+
 Password=Password
 
 password.max30=Passwords may not be longer than 30 characters.
@@ -3545,20 +3723,3 @@ Username=Username
 
 userpic.inactive=Inactive
 
-lynx.nav.home=Home
-
-lynx.nav.update=Update Journal
-
-lynx.nav.recent=Recent Entries
-
-lynx.nav.friends=Friends
-
-lynx.nav.login=Login
-
-lynx.nav.logout=Logout
-
-lynx.nav.siteopts=Browse Options
-
-lynx.nav.sitemap=Site Map
-
-lynx.nav.help=Technical Support
