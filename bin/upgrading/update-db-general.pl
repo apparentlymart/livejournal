@@ -770,7 +770,7 @@ CREATE TABLE userproplite2 (
 EOC
 
 # clustered
-register_tablecreate( "userpropblob", <<'EOC');
+register_tablecreate("userpropblob", <<'EOC');
 CREATE TABLE userpropblob (
     userid INT(10) unsigned NOT NULL default '0',
     upropid SMALLINT(5) unsigned NOT NULL default '0',
@@ -1974,9 +1974,13 @@ register_alter(sub {
     }
 
     # Add BLOB flag to proplist
-    if (column_type("userproplist", "is_blob") eq "") {
+    unless (column_type("userproplist", "datatype") =~ /blobchar/) {
+        if (column_type("userproplist", "is_blob")) {
+            do_alter("userproplist",
+                     "ALTER TABLE userproplist DROP is_blob");
+        }
         do_alter("userproplist",
-                 "ALTER TABLE userproplist ADD is_blob enum('0','1') NOT NULL default '0' AFTER cldversion");
+                 "ALTER TABLE userproplist MODIFY datatype ENUM('char','num','bool','blobchar') NOT NULL DEFAULT 'char'");
     }
 
 });
