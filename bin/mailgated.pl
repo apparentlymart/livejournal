@@ -209,7 +209,7 @@ sub stop_parent
 { 
     debug("Shutting down...\n");
 
-    if ($pid) { # only used in foreground
+    if ($pid) { # not used in foreground
         kill 15, $pid;
         waitpid($pid, 0);
     }
