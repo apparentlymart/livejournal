@@ -178,17 +178,17 @@ function altlogin (e) {
     var usejournal_list = document.getElementById('usejournal_list');
     if (! usejournal_list) return false;
     usejournal_list.style.display = 'none';
-    
-    var userpic_list = document.getElementById('userpic_list_row');
-    if (! userpic_list) return false;
-    userpic_list.style.display = 'none';
 
-    var userpic_preview = document.getElementById('userpic_preview');
-    userpic_preview.style.display = 'none';
+    var userpic_list = document.getElementById('userpic_list_row');
+    if (userpic_list) {
+        userpic_list.style.display = 'none';
+        var userpic_preview = document.getElementById('userpic_preview');
+        userpic_preview.style.display = 'none';
+    }
 
     var mood_preview = document.getElementById('mood_preview');
     mood_preview.style.display = 'none';
-    
+
     f = document.updateForm;
     if (! f) return false;
     f.action = 'update.bml?altlogin=1';
