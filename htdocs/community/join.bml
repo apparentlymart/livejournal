@@ -71,6 +71,14 @@
  foreach (sort @$admins) { $list .= "<li><?ljuser $_ ljuser?></li>"};
  $list .= "</ul>";
 
+ # can't join closed communities
+ if ($ci->{membership} eq 'closed') {
+     $body .= "<?h1 $ML{'Sorry'} h1?><?p " .
+              BML::ml('.error.closed', { admins => $list }) .
+              " p?>";
+     return;
+ }
+
  # now do the join
  if ($POST{confirm}) {
      # can members join this community openly?

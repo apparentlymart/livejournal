@@ -166,6 +166,8 @@ p?>
 
 /community/join.bml.error.already.member=You are already a member of this community.
 
+/community/join.bml.error.closed=This community is closed to new members.  If you wish to join, please contact one of the following maintainers: [[admins]]
+
 /community/join.bml.error.statusvis.body=The account you are logged in as is not an active account.
 
 /community/join.bml.error.statusvis.title=Unable to Join Communities
@@ -497,7 +499,7 @@ p?>
 
 /community/settings.bml.label.changetext=Here you can change the settings for the community you own or maintain.
 
-/community/settings.bml.label.closedmemb=<b>Closed Membership</b><br />You have to approve people's requests to join.
+/community/settings.bml.label.closedmemb2=<b>Closed Membership</b><br />Nobody can join the community.
 
 /community/settings.bml.label.commchanged=Your community settings have been changed.
 
@@ -528,6 +530,8 @@ p?>
 /community/settings.bml.label.managepage=<a [[aopts]]>Community Management</a> - to add members, grant posting access, appoint moderators, etc.
 
 /community/settings.bml.label.membership=Membership
+
+/community/settings.bml.label.moderatedmemb=<b>Moderated Membership</b><br />Requests to join are emailed to you for approval.
 
 /community/settings.bml.label.modheader=Moderation
 

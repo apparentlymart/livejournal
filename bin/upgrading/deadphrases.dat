@@ -176,3 +176,5 @@ general /community/members.bml.key.name
 general /community/members.bml.success.addusers
 
 general /userinfo.bml.label.totalfriends
+
+general /community/settings.bml.label.closedmemb

@@ -78,7 +78,9 @@ body<=
      unless (%errors) {
         my $dbh = LJ::get_db_writer();
         my $cid = $cu->{'userid'};
-        my $qmembership = $dbh->quote($POST{'membership'} eq "open" ? "open" : "closed");
+        my $qmembership = $POST{membership};
+        $qmembership = 'closed' unless $qmembership =~ m/(?:open|moderated|closed)/;
+        $qmembership = $dbh->quote($qmembership);
         my $qpostlevel = $dbh->quote($POST{'postlevel'} eq "members" ? "members" : "select");
 
         LJ::update_user($cu, { journaltype => 'C' });
@@ -180,18 +182,20 @@ body<=
  $ret .= "<?h1 $ML{'.label.commopts'} h1?><?p $ML{'.label.howoperates'} p?>";
  $ret .= "<?h2 $ML{'.label.membership'} h2?><?p $ML{'.label.whocanjoin'} p?><div class='opts'>";
 
- my ($optopen,$optclosed);
-
- if ($info{'membership'} eq 'open') {
-    ($optopen,$optclosed)=(" checked='checked'","");
- } else {
-    ($optopen,$optclosed)=("", " checked='checked'");
- }
-
- $ret .= "<input type='radio' id='memopen' name='membership' value='open'$optopen /><label for='memopen'> $ML{'.label.openmemb'}</label>";
- $ret .= "<p><input type='radio' id='memclosed' name='membership' value='closed'$optclosed /><label for='memclosed'> $ML{'.label.closedmemb'}</label>";
+ # membership levels
+ $ret .= "<p>";
+ $ret .= LJ::html_check({ type => 'radio', name => 'membership', id => 'memopen', 
+                          value => 'open', selected => ($info{membership} eq 'open' ? 1 : 0)});
+ $ret .= "<label for='memopen' $ML{'.label.openmemb'}</label></p><p>";
+ $ret .= LJ::html_check({ type => 'radio', name => 'membership', id => 'memmoderated', 
+                          value => 'moderated', selected => ($info{membership} eq 'moderated' ? 1 : 0)});
+ $ret .= "<label for='memmoderated' $ML{'.label.moderatedmemb'}</label></p><p>";
+ $ret .= LJ::html_check({ type => 'radio', name => 'membership', id => 'memclosed', 
+                          value => 'closed', selected => ($info{membership} eq 'closed' ? 1 : 0)});
+ $ret .= "<label for='memclosed' $ML{'.label.closedmemb2'}</label></p>";
  $ret .= "</div>";
 
+ my ($optopen,$optclosed);
  if ($info{'postlevel'} eq 'members') {
     ($optopen,$optclosed)=(" checked='checked'","");
  } else {

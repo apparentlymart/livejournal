@@ -2141,6 +2141,11 @@ register_alter(sub {
         do_alter("support", "ALTER IGNORE TABLE support ADD INDEX (requserid), ADD INDEX (reqemail)");
     }
 
+    unless (column_type("community", "membership") =~ /moderated/i) {
+        do_alter("community", "ALTER TABLE community MODIFY COLUMN " .
+                 "membership ENUM('open','closed','moderated') DEFAULT 'open' NOT NULL");
+    }
+
 });
 
 1; # return true
