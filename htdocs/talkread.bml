@@ -181,7 +181,8 @@ body<=
      my %current;
      if ($logprops{$itemid}->{'current_mood'} || $logprops{$itemid}->{'current_moodid'}) {
          LJ::load_moods($dbs);
-         $current{'Mood'} = LJ::CleanHTML::clean_subject(\$logprops{$itemid}->{'current_mood'});
+         $current{'Mood'} = $logprops{$itemid}->{'current_mood'};
+         LJ::CleanHTML::clean_subject(\$current{'Mood'});
          my $mid = $logprops{$itemid}->{'current_moodid'};
          if ($mid) {
              my $theme = $up->{'moodthemeid'};
@@ -196,7 +197,8 @@ body<=
          }
      }
      if ($logprops{$itemid}->{'current_music'}) {
-         $current{'Music'} = LJ::CleanHTML::clean_subject(\$logprops{$itemid}->{'current_music'});
+         $current{'Music'} = $logprops{$itemid}->{'current_music'};
+         LJ::CleanHTML::clean_subject(\$current{'Music'});
      }
 
      $ret .= "<ul>"; # using <ul> for intenting isn't proper, but this will all go away in s2 anyway.
