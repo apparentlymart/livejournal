@@ -208,7 +208,7 @@ sub content_userpic
         $lastmod = $pic->{'lastmod'};
         if ($pic->{'dversion'} >= 2) {
             my $dbb = LJ::get_cluster_reader($pic->{'clusterid'});
-            return SERVER_ERROR;
+            return SERVER_ERROR unless $dbb;
             $data = $dbb->selectrow_array("SELECT imagedata FROM userpicblob2 WHERE ".
                                           "userid=$pic->{'userid'} AND picid=$picid");
         } else {
