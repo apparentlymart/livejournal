@@ -15,10 +15,10 @@ BEGIN {
 
 require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 require "$ENV{LJHOME}/cgi-bin/ljprotocol.pl";
+require "$ENV{LJHOME}/cgi-bin/fbupload.pl";
 use MIME::Words ();
 use IO::Handle;
-use LWP::UserAgent;
-use Digest::MD5 qw(md5_hex);
+use Image::Size;
 
 # $rv - scalar ref from mailgated.
 # set to 1 to dequeue, 0 to leave for further processing.
@@ -192,11 +192,54 @@ sub process {
         }
     }
 
-    # FIXME: Pict posting integration should fit in here.
-    # FIXME: Need to check fb_account userprop.
-#     upload_images($entity) || 
-#       return $err->("Error posting picture to Fotobilder installation.", { retry => 1 });
+    # imgsecurity and gallery name defaults are set in LJ::FBUpload::do_upload()
+    if ($lj_headers{'imgsecurity'} =~ /^(private|regusers|friends)$/) {
+        my %groupmap = ( private => 0, regusers => 253, friends => 254 );
+        $lj_headers{'imgsecurity'} = $groupmap{$1};
+    }
 
+    # upload picture attachments to fotobilder.
+    my $fb_upload_errstr;
+    # undef return value? retry posting for later.
+    my $fb_upload = upload_images($entity, $u, \$fb_upload_errstr, 
+                               { imgsec  => $lj_headers{'imgsecurity'},
+                                 galname => $lj_headers{'gallery'},
+                               }) || return $err->($fb_upload_errstr, { retry => 1 });
+
+    # if we found and successfully uploaded some images...
+    if (ref $fb_upload eq 'HASH') {
+        my $icount = scalar keys %$fb_upload;
+        $body .= "\n\n";
+
+        # set journal image display size
+        my @valid_sizes = qw(100x100 320x240 640x480);
+        my $size = lc($lj_headers{'imgsize'});
+        $size = '320x240' unless grep { $size eq $_; } @valid_sizes;
+
+        # insert image links into post body
+        # FIXME:  lj-imglayout options? (horizonal, vertical,
+        # tabled, separate lj-cut for each image (with cut-text as image name)?)
+        $body .= "<lj-cut text='$icount " .
+                  (($icount == 1) ? 'image' : 'images') . "'>";
+        foreach my $img (keys %$fb_upload) {
+            my $i = $fb_upload->{$img};
+            $body .= "<a href='$i->{'url'}'>";
+            $body .= "<img src='$i->{'url'}/s$size' alt='$img' border='0'></a><br />";
+        }
+        $body .= "</lj-cut>\n";
+    }
+
+    # at this point, there are either no images in the message ($fb_upload == 1)
+    # or we had some error during upload that we may or may not want to retry
+    # from.  $fb_upload contains the http error code.
+    if ($fb_upload == 400) { 
+        # bad request - don't retry, but go ahead and post the body to
+        # the journal, postfixed with the remote error.
+        $body .= "\n\n";
+        $body .= "($fb_upload_errstr)";
+    }
+
+    # build lj entry
     my $req = {
         'usejournal' => $journal,
         'ver' => 1,
@@ -209,6 +252,7 @@ sub process {
         'tz'    => 'guess',
     };
 
+    # post!
     my $post_error;
     LJ::Protocol::do_request("postevent", $req, \$post_error, { noauth=>1 });
     return $err->(LJ::Protocol::error_message($post_error)) if $post_error;
@@ -349,22 +393,46 @@ sub check_sig {
 
 # Upload images to a Fotobilder installation.
 # Return codes:
-# 1 - no images found
-# hashref - { title => url } for each image uploaded
+# 1 - no images found in mime entity
 # undef - failure during upload
+# http_code - failure during upload w/ code
+# hashref - { title => url } for each image uploaded
 sub upload_images
 {
-    my $entity = shift;
+    my ($entity, $u, $rv, $opts) = @_;
+    return 1 unless LJ::get_cap($u, 'fb_account') && $LJ::FB_SITEROOT;
+
     my @imgs = get_entity($entity, { type => 'image' });
     return 1 unless scalar @imgs;
 
+    my %images;
     foreach my $img_entity (@imgs) {
-        my $img = $img_entity->bodyhandle;
-        print $img->path . "\n";
-        $img->as_string; # slurp decoded img data
-        # FIXME:  todo, rip off fotoup.pl
+        my $img     = $img_entity->bodyhandle;
+        my $path    = $img->path;
+        
+        my ($width, $height) = Image::Size::imgsize($path);
+
+        my ($title, $url) =
+        LJ::FBUpload::do_upload($u, $rv,
+                                { path    => $path,
+                                  rawdata => \$img->as_string,
+                                  imgsec  => $opts->{'imgsec'},
+                                  galname => $opts->{'galname'},
+                                });
+
+        # error posting, we have a http_code (stored in $title)
+        return $title if $title && ! $url;
+        # error posting, no http_code
+        return if $$rv;
+
+        $images{$title} = {
+                    'url'    => $url,
+                    'width'  => $width,
+                    'height' => $height
+        };
     }
 
+    return \%images if scalar keys %images;
     return;
 }
 

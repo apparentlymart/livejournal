@@ -5,8 +5,8 @@
 # </LJDEP>
 
 use strict;
-use vars qw($opt $mailspool $pidfile $workdir
-            $pid $hostname $busy $stop $lock);
+use vars qw($opt $mailspool $pidfile $workdir $maxloop
+            $pid $hostname $busy $stop $locktype);
 
 use Getopt::Long;
 use Sys::Hostname;
@@ -29,26 +29,28 @@ $SIG{$_} = \&stop_daemon foreach qw/INT TERM/;
 $| = 1;
 
 $opt = {};
-GetOptions $opt, qw/stop foreground workdir pidfile lock=s/;
+GetOptions $opt, qw/stop foreground workdir pidfile lock=s maxloop/;
 
 # setup defaults
-$lock    = $opt->{'lock'}    || "hostname";
+$locktype = $opt->{'lock'}   || "hostname";
 die "Invalid lock mechanism specified."
-    unless $lock =~ /hostname|none|ddlockd/i;
+    unless $locktype =~ /hostname|none|ddlockd/i;
 $workdir = $opt->{'workdir'} || "$mailspool/tmp";
 $pidfile = $opt->{'pidfile'} || "/var/run/mailgated.pid";
+$maxloop = $opt->{'maxloop'} || 100;
 
 # Maildir expected.
 die "Invalid mailspool: $mailspool\n" unless -d "$mailspool/new";
 $mailspool .= '/new';
 
+if (-e $pidfile) {
+    open (PID, $pidfile);
+    chomp ($pid = <PID>);
+    close PID;
+}
+
 # shutdown existing daemon?
 if ($opt->{'stop'}) {
-    if (-e $pidfile) {
-        open (PID, $pidfile);
-        chomp ($pid = <PID>);
-        close PID;
-    }
     if (kill 15, $pid) {
         print "Shutting down mailgated.";
     } else {
@@ -62,6 +64,10 @@ if ($opt->{'stop'}) {
     print "\n";
     exit 0;
 }
+
+die "Mailgated already running?\n" . 
+    "(delete $pidfile or run with --stop if this isn't the case.)\n"
+    if ($pid && kill 0, $pid);
 
 # daemonize.
 if (!$opt->{'foreground'}) {
@@ -97,31 +103,55 @@ while (1) {
     cleanup();
 
     # Get list of files to process.
-    # If a file simply exists in the mailspool, it needs processing.
-    # Only process files with a matching hostname, to
-    # allow for multiple mailgates working in the
-    # same mailspool across NFS.
-    # Non NFS spools will process all messages as normal.
-    # (hostname as part of the message filename is
-    #  part of the Maildir specification) 
+    # If a file simply exists in the mailspool, it needs attention.
     debug("\tprocess");
     opendir(MDIR, $mailspool) || die "Unable to open mailspool $mailspool: $!\n";
-    my $count = 0;
-    my $MAX_LOOP = 50;
-    foreach (readdir(MDIR)) {
-        next if /^\./;
-        next if $lock eq 'hostname' && ! /\.$hostname\b/;
-        process($_);
-	exit 0 if $stop;
-	last if ++$count == $MAX_LOOP;
-    }
+    my @all_files = readdir(MDIR);
     closedir MDIR;
+
+    # Separate new messages from retries.
+    # Hostname as part of the filename is Maildir specification -
+    # use 'hostname' locking to be safe across NFS.
+    my (@new_messages, @retry_messages);
+    foreach (@all_files) {
+        next if /^\./;
+        next if $locktype eq 'hostname' && ! /\.$hostname\b/;
+        if (get_pcount($_) == 0) { # new message
+            push @new_messages, $_;
+        } else {                   # message retry
+            push @retry_messages, $_;
+        }
+    }
+
+    # Make sure at least half of our processesing
+    # queue is made up of new messages.
+    # Randomize, so if we're running multiple mailgated
+    # processess, they'll be more likely to be working on
+    # different messages.
+    rand_array(\@retry_messages, int($maxloop / 2)); # half queue max
+    # fill the rest of the queue with new messages.
+    rand_array(\@new_messages, $maxloop - (scalar @retry_messages));
+
+    # do the work
+    foreach (@new_messages, @retry_messages) {
+        my $lock;
+        if (get_pcount($_) % 20 == 0) {  # only retry every 20th iteration
+            if ($locktype eq lc('ddlockd')) {
+                $lock = LJ::locker()->trylock("mailgated-$_");
+                next unless $lock;
+            }
+            process($_);
+        } else {
+            set_pcount($_);
+        }
+	exit 0 if $stop;
+    }
 
     $busy = 0;
     debug("\tdone\n");
 
     # sleep for a bit if we finished reading the directory
-    sleep ($opt->{'foreground'} ? 3 : 10) unless $count == $MAX_LOOP;
+    sleep ($opt->{'foreground'} ? 3 : 10);
 }
 
 sub stop_daemon
@@ -139,27 +169,23 @@ sub debug
     print STDERR (shift) . "\n";
 }
 
-# the filename of a mail message - Maildir++ style.
-# (time.pid.hostname:flags)
-sub set_status
+sub set_pcount
 {
-    my ($file, $reason, $resetattempt) = @_;
-    my ($name, $flags) = ($1, $2) if $file =~ /^(.+?)(?::(.+))?$/;
-    my ($oldreason, $attempt) = ($1, $2) if $flags =~ /^(\w)(\d+)$/;
-    $reason ||= $oldreason;
+    my ($file, $resetattempt) = @_;
+    my $attempt = get_pcount($file);
+    $attempt++;
     $attempt = 0 if $resetattempt;
 
-    my $newname = $name . ":" . $reason . $attempt++;
-    return 0; # todo.  rename() didn't work in a quick test.
+    my $name = $file;
+    $name =~ s/:\d+$//;
+    $name = $name . ":" . $attempt;
+    rename "$mailspool/$file", "$mailspool/$name";
+    return 0;
 }
 
-# return the status code and attempt number
-# of a mail message.
-sub get_status
-{
-    my $file = shift;
-    return ($1, $2) if $file =~ /:(\w)(\d+)$/;
-}
+# return the number of times we've seen this
+# message in the queue
+sub get_pcount { return $1 if shift() =~ /:(\d+)$/ || 0; }
 
 # Either an unrecoverable error, or a total success.  ;)
 # Regardless, we're done with this message.
@@ -173,6 +199,31 @@ sub dequeue
     unlink("$mailspool/$last_file") || debug("\t\t Can't unlink $last_file!");
     File::Path::rmtree($last_tempdir);
     return 0;
+}
+
+# cleanup mime tempdirs, update attempt number,
+# but don't delete the message.
+sub retry
+{
+    my $msg = shift;
+    debug("\t\t retrying: $msg") if $msg;
+    set_pcount($last_file);
+    File::Path::rmtree($last_tempdir);
+    return 0;
+}
+
+# takes an array ref - truncates to max size and shuffles it.
+sub rand_array
+{
+    my ($array, $max) = @_;
+
+    my (@tmp, $c);
+    while (@$array) {
+        push(@tmp, splice(@$array, rand(@$array), 1));
+        last if ++$c == $max;
+    }
+    @$array = @tmp;
+    return;
 }
 
 sub process
@@ -247,9 +298,7 @@ sub process
         my $post_msg = LJ::Emailpost::process($entity, $user, \$post_rv);
 
         if (! $post_rv) {  # don't dequeue
-            debug("\t\t keeping for retry: $post_msg");
-            # FIXME:  set_status() of mail message?
-            return;
+            return retry($post_msg);
         } else {           # dequeue
             return dequeue($post_msg);
         }
@@ -407,10 +456,17 @@ sub virus_check
             R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy
           );
 
+    # get the length of the longest virus signature
+    my $maxlength = length((sort { length $b <=> length $a } @virus_sigs)[0]);
+    $maxlength = 1024 if $maxlength >= 1024; # capped at 1k
+
     foreach my $part (@exe) {
         my $contents = $part->stringify_body;
-        $contents =~ s/\n.*//s;
-        return 1 if grep { $contents =~ /^$_/; } @virus_sigs;
+        $contents = substr $contents, 0, $maxlength;
+
+        foreach (@virus_sigs) {
+            return 1 if index($contents, $_) == 0;
+        }
     }
 
     return;
