@@ -1168,6 +1168,7 @@ my %dt_vars = (
                'h' => "(\$time->{hour} % 12 || 12)",
                'hh' => "sprintf('%02d', (\$time->{hour} % 12 || 12))",
                'min' => "sprintf('%02d', \$time->{min})",
+               'sec' => "sprintf('%02d', \$time->{sec})",
                'a' => "(\$time->{hour} < 12 ? 'a' : 'p')",
                'A' => "(\$time->{hour} < 12 ? 'A' : 'P')",
             );
@@ -1184,7 +1185,7 @@ sub Date__date_format
         $realfmt = $ctx->[S2::PROPS]->{"lang_fmt_date_$fmt"};
     }
     my @parts = split(/\%\%/, $realfmt);
-    my $code = "\$\$c = sub { my \$time = shift; return join(";
+    my $code = "\$\$c = sub { my \$time = shift; return join('',";
     my $i = 0;
     foreach (@parts) {
         if ($i % 2) { $code .= $dt_vars{$_} . ","; }
@@ -1209,7 +1210,7 @@ sub DateTime__time_format
         $realfmt = $ctx->[S2::PROPS]->{"lang_fmt_time_$fmt"};
     }
     my @parts = split(/\%\%/, $realfmt);
-    my $code = "\$\$c = sub { my \$time = shift; return join(";
+    my $code = "\$\$c = sub { my \$time = shift; return join('',";
     my $i = 0;
     foreach (@parts) {
         if ($i % 2) { $code .= $dt_vars{$_} . ","; }
@@ -1269,7 +1270,7 @@ sub YearMonth__month_format
         $realfmt = $ctx->[S2::PROPS]->{"lang_fmt_month_$fmt"};
     }
     my @parts = split(/\%\%/, $realfmt);
-    my $code = "\$\$c = sub { my \$time = shift; return join(";
+    my $code = "\$\$c = sub { my \$time = shift; return join('',";
     my $i = 0;
     foreach (@parts) {
         if ($i % 2) { $code .= $dt_vars{$_} . ","; }
