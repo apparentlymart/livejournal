@@ -37,7 +37,8 @@ _code?>
  $ret .= LJ::html_select({ 'name' => 'searchwhat' },
                          @opt);
  $ret .= "<br />Area: ";
- $ret .= LJ::html_select({ 'name' => 'seachdomain' },
+ $ret .= LJ::html_select({ 'name' => 'searchdomain' },
+                         0, "(all)",
                          map { $_->{'dmid'}, $_->{'uniq'} }  
                          sort { $a->{'dmid'} <=> $b->{'dmid'} } LJ::Lang::get_domains());
  return $ret;
