@@ -71,7 +71,7 @@ function Page::print ()
     var string links;
     $links = $links + ($.view == "recent" ? "<b>entries</b>" : "<a class='index' href='$.base_url/'>entries</a>") + "|";
     $links = $links + ($.view == "friends" ? "<b>friends</b>" : "<a class='index' href='$.base_url/friends'>friends</a>") + "|";
-    $links = $links + ($.view == "calendar" ? "<b>calendar</b>" : "<a class='index' href='$.base_url/calendar'>calendar</a>");
+    $links = $links + ($.view == "archive" ? "<b>archive</b>" : "<a class='index' href='$.base_url/calendar'>archive</a>");
     
 """<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head>
@@ -150,9 +150,9 @@ $website
 </tr>
 <tr>
 <td class="meta">[</td>
-<td class="meta" align="right"><b>calendar</b></td>
+<td class="meta" align="right"><b>archive</b></td>
 <td class="meta" align="center">|</td>
-<td class="meta"><a href="$.view_url{"calendar"}">livejournal calendar</a></td>
+<td class="meta"><a href="$.view_url{"archive"}">journal archive</a></td>
 <td class="meta">]</td>
 </tr>
 </table>
