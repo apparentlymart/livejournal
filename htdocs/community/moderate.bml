@@ -21,8 +21,8 @@ body<=
     my ($saved_comm, $saved_modid) = ("", 0);
 
     if (LJ::did_post() && ($mode eq 'approve_do' || $mode eq 'reject_do')) {
-        my $cid = $POST{'cid'};
-        my $modid = $POST{'modid'};
+        my $cid = $POST{'cid'}+0;
+        my $modid = $POST{'modid'}+0;
         
         my $c = LJ::load_userid($cid);
         unless ($c) {
@@ -37,8 +37,10 @@ body<=
             return $ret;
         }
         # use dbcm to read to minimize collisions between moderators due to replication lag
-        my $entry = $dbcm->selectrow_hashref("SELECT * FROM modlog WHERE journalid=$c->{'userid'} AND modid=$modid");
-        my $frozen = $dbcm->selectrow_array("SELECT request_stor FROM modblob WHERE journalid=$c->{'userid'} AND modid=$modid");
+        my $entry = $dbcm->selectrow_hashref("SELECT * FROM modlog WHERE journalid=? AND modid=?",
+                                             undef, $c->{'userid'}, $modid);
+        my $frozen = $dbcm->selectrow_array("SELECT request_stor FROM modblob WHERE journalid=? AND modid=?",
+                                            undef, $c->{'userid'}, $modid);
         
         my $req = Storable::thaw($frozen) if $frozen;
         unless ($frozen && $entry && $req->{'_moderate'}->{'authcode'} && $req->{'_moderate'}->{'authcode'} eq $POST{'auth'}) {
@@ -132,10 +134,12 @@ body<=
             $saved_modid = 0;
 
             # Delete this moderated entry from the list
-            $c->do("DELETE FROM modlog WHERE journalid=$c->{'userid'} AND modid=$modid");
-            $c->do("DELETE FROM modblob WHERE journalid=$c->{'userid'} AND modid=$modid");
+            $c->do("DELETE FROM modlog WHERE journalid=? AND modid=?",
+                   undef, $c->{'userid'}, $modid);
+            $c->do("DELETE FROM modblob WHERE journalid=? AND modid=?",
+                   undef, $c->{'userid'}, $modid);
 
-            # FALL THROUGH to showing the list of entries in this community
+        # FALL THROUGH to showing the list of entries in this community
         } else {
             $ret .= "<p>";
             $ret .= BML::ml('Backlink', {
@@ -174,7 +178,10 @@ body<=
     if ($mode eq 'action' && $POST{'action:approve'}) {
         my ($posterid, $frreq);
         if ($modid) {
-            ($posterid, $frreq) = $dbcr->selectrow_array("SELECT l.posterid, b.request_stor FROM modlog l, modblob b WHERE l.journalid=$c->{'userid'} AND l.modid=$modid AND l.journalid=b.journalid AND l.modid=b.modid");
+            ($posterid, $frreq) = $dbcr->selectrow_array
+                ("SELECT l.posterid, b.request_stor FROM modlog l, modblob b " .
+                 "WHERE l.journalid=? AND l.modid=? AND l.journalid=b.journalid AND l.modid=b.modid",
+                 undef, $c->{'userid'}, $modid);
         }
         unless ($posterid) {
             $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noentry'} p?>";
@@ -199,7 +206,10 @@ body<=
     if ($mode eq 'action' && $POST{'action:reject'}) {
         my ($posterid, $frreq);
         if ($modid) {
-            ($posterid, $frreq) = $dbcr->selectrow_array("SELECT l.posterid, b.request_stor FROM modlog l, modblob b WHERE l.journalid=$c->{'userid'} AND l.modid=$modid AND l.journalid=b.journalid AND l.modid=b.modid");
+            ($posterid, $frreq) = $dbcr->selectrow_array
+                ("SELECT l.posterid, b.request_stor FROM modlog l, modblob b " .
+                 "WHERE l.journalid=? AND l.modid=? AND l.journalid=b.journalid AND l.modid=b.modid",
+                 undef, $c->{'userid'}, $modid);
         }
         unless ($posterid) {
             $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noentry'} p?>";
@@ -265,7 +275,8 @@ body<=
         
     } else {
         # view an entry
-        my $frozen = $dbcr->selectrow_array("SELECT request_stor FROM modblob WHERE journalid=$c->{'userid'} AND modid=$modid");
+        my $frozen = $dbcr->selectrow_array("SELECT request_stor FROM modblob WHERE journalid=? AND modid=?",
+                                            undef, $c->{'userid'}, $modid);
         unless ($frozen) {
             $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noentry'} p?>";
             return $ret;
