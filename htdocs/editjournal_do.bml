@@ -19,6 +19,18 @@ BODY<=
  my $jump_to_item = 0;
 
  my $clustered = 0;
+ if (defined $FORM{'clustered'}) {
+     $clustered = $FORM{'clustered'};
+ } else {
+     $clustered = 1 if $FORM{'journal'};
+ }
+
+ # in clustered mode, we always come in with ditemid, translate it here
+ # into real itemid, and back into ditemid using anum returned by the
+ # protocol whenever we make a form to refer to ourselves.  --avva
+ if ($clustered && $FORM{'itemid'}) {
+     $FORM{'itemid'} = int($FORM{'itemid'} / 256);
+ }
 
  #### determine their mode
 
@@ -40,9 +52,7 @@ BODY<=
      my $itemid = $FORM{'itemid'}+0;
      my $owner = $FORM{'journal'};
 
-     if ($owner) {
-	 $clustered = 1;
-     } else {
+     unless ($clustered) {
 	 # cluster 0
 	 $sth = $dbr->prepare("SELECT ownerid, posterid FROM log WHERE itemid=$itemid");
 	 $sth->execute;
@@ -82,6 +92,9 @@ BODY<=
 	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"$user\">\n";
 	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"hpassword\" VALUE=\"$hpassword\">\n";
 
+	 $clustered = 1 if defined $res{"events_1_anum"};
+	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"clustered\" VALUE=\"$clustered\">\n";	 
+
 	 my %props = ();
 	 for (my $i=1; $i<=$res{'prop_count'}; $i++) {
 	     $props{$res{"prop_${i}_itemid"}}->{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
@@ -90,7 +103,13 @@ BODY<=
 	 my $count = $res{'events_count'};
 	 for (my $i=1; $i<=$count; $i++)
 	 {
-	     $ret .= "<HR><INPUT TYPE=RADIO NAME=\"itemid\" VALUE=\"" . $res{"events_${i}_itemid"}. "\"> <B>" . $res{"events_${i}_eventtime"} . "</B>";
+	     my $ditemid = defined $res{"events_${i}_anum"} ? 
+		 $res{"events_${i}_itemid"} * 256 + $res{"events_${i}_anum"} : 
+		 $res{"events_${i}_itemid"};
+
+	     $ret .= "<HR><INPUT TYPE=RADIO NAME=\"itemid\" VALUE=\"$ditemid\"> <B>" .
+		 $res{"events_${i}_eventtime"} . "</B>";
+
 	     if ($res{"events_${i}_subject"}) {
 		 $ret .= "; <I>" . $res{"events_${i}_subject"} . "</I>";
 	     }
@@ -189,12 +208,16 @@ BODY<=
 	     $props{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
 	 }
 
+	 my $ditemid = defined $res{'events_1_anum'} ? 
+	     $res{'events_1_itemid'} * 256 + $res{'events_1_anum'} : 
+	     $res{'events_1_itemid'};
+
 	 $ret .= "(=H1 Edit Journal Entry H1=)(=P Edit the fields of your journal entry you'd like to modify and press the save button at the bottom of the page.  To delete the entry, just delete all the text and press save... the entry will be deleted. P=)\n";
 	 $ret .= "<FORM METHOD=POST ACTION=\"editjournal_do.bml\">\n";
 	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"mode\" VALUE=\"editevent\">\n";
 	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"$user\">\n";
 	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"hpassword\" VALUE=\"$hpassword\">\n";
-	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"itemid\" VALUE=\"$res{'events_1_itemid'}\">\n";
+	 $ret .= "<INPUT TYPE=HIDDEN NAME=\"itemid\" VALUE=\"$ditemid\">\n";
 	 $ret .= "<input type='hidden' name='clustered' value='$clustered'>\n";  # for link later
 	 if ($FORM{'usejournal'}) {
 	     $ret .= "<INPUT TYPE=HIDDEN NAME=\"usejournal\" VALUE=\"$FORM{'usejournal'}\">\n";
@@ -214,7 +237,7 @@ BODY<=
 
 	 $ret .= "<P><B>Subject:</B> <I>(optional, for use on longer entries)</I><BR>";
 	 $ret .= "<INPUT NAME=\"subject\" VALUE=\"";
-	 $ret .= LJ::ehtml(LJ::durl($res{"events_1_subject"}));
+	 $ret .= LJ::ehtml($res{"events_1_subject"});
 	 $ret .= "\" SIZE=60 MAXLENGTH=255>\n";
 	
 	 $ret .= "<p><b>Event:</b><br /><textarea rows='12' cols='60' wrap='soft' name='event' style='width: 99%'>";
