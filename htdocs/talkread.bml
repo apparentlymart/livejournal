@@ -39,6 +39,9 @@ BODY<=
      $dbcm = $dbcs->{'dbh'};
      $dbcr = $dbcs->{'reader'};
  }
+
+ my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
+ my $jargent = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
  
  my $SELF = "/talkread.bml";
  my $ret = "";
@@ -265,7 +268,7 @@ BODY<=
  ### load meta-data
  my $talkid_in = join(",", @posts_to_load);
  if ($clustered) {
-     LJ::load_props("talk");
+     LJ::load_props($dbs, "talk");
      LJ::load_talk_props2($dbcr, $u->{'userid'}, \@posts_to_load, \%posts);
  } else {
      LJ::load_talk_props($dbs, \@posts_to_load, \%posts);
@@ -338,15 +341,14 @@ BODY<=
  }
 
  unless ($logprops{$itemid}->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N") {
-     my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
-     $ret .= "<center><b><a href='talkpost.bml?${jarg}itemid=$itemid'>(Post a new comment)</a></b></center>";
+     $ret .= "<center><b><a href='talkpost.bml?${jargent}itemid=$itemid'>(Post a new comment)</a></b></center>";
 
      if ($post_count > 0) 
      {
 	 recurse_post(\%posts, \$ret, $thread, {}, { "newfirst" => 0, 
 						     "children" => \%children,  
 						 });
-	 $ret .= "<p><hr /><center><b><a href='talkpost.bml?itemid=$itemid'>(Post a new comment)</a></b></center></p>";
+	 $ret .= "<p><hr /><center><b><a href='talkpost.bml?${jargent}itemid=$itemid'>(Post a new comment)</a></b></center></p>";
      }
 	 
      if ($navcrap) {
@@ -447,7 +449,7 @@ sub recurse_post
 		if ($post->{'poster_ip'} && $remote && $remote->{'user'} eq $up->{'user'}) {
 		    $$ret .= "(from $post->{'poster_ip'})";
 		}
-		$$ret .= " <font size='-1'>(<a href='$SELF?itemid=$itemid&amp;thread=$tid#t$tid'>link</a>)</font> ";
+		$$ret .= " <font size='-1'>(<a href='$SELF?${jargent}itemid=$itemid&amp;thread=$tid#t$tid'>link</a>)</font> ";
 		
 		if ($remote && ($remote->{'user'} eq $userpost ||
 				$remote->{'user'} eq $u->{'user'} ||
@@ -467,18 +469,18 @@ sub recurse_post
 		
 		$$ret .= "<p><font size='-2'>";
 		if ($post->{'parenttalkid'} != 0 && $post_count >= $PAGE_SIZE) {
-		    $$ret .= "<a href='$SELF?itemid=$itemid&amp;thread=$post->{'parenttalkid'}'>(Parent)</a> ";
+		    $$ret .= "<a href='$SELF?${jargent}itemid=$itemid&amp;thread=$post->{'parenttalkid'}'>(Parent)</a> ";
 		}
 		if (defined $opts->{'children'}->{$tid} && $post_count >= $PAGE_SIZE) {
-		    $$ret .= "<a href='$SELF?itemid=$itemid&amp;thread=$tid'>(Thread)</a> ";
+		    $$ret .= "<a href='$SELF?${jargent}itemid=$itemid&amp;thread=$tid'>(Thread)</a> ";
 		}
-		$$ret .= "<a href='/talkpost.bml?replyto=$tid'>(Reply to this)</a></font>";
+		$$ret .= "<a href='/talkpost.bml?${jargent}replyto=$tid'>(Reply to this)</a></font>";
 		$$ret .= "</td></tr></table>\n";  # close colored table
 	    } else {
 		# link to message
 		$$ret .= "<a name='t$tid'></a><table><tr>";
 		$$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-		$$ret .= "<td><a href='$SELF?itemid=$itemid&amp;thread=$tid'>" . BML::eall($post->{'subject'} || "(no subject)") . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
+		$$ret .= "<td><a href='$SELF?${jargent}itemid=$itemid&amp;thread=$tid'>" . BML::eall($post->{'subject'} || "(no subject)") . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
 	    }
 	}
     }

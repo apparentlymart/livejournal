@@ -353,12 +353,13 @@ BODY<=
 	 if ($values) {
 	     chop $values;
 	     if ($clustered) {
-		 $dbcm->do("INSERT INTO talkprop2 (journalid, jtalkid, tpropid, values) ".
+		 $dbcm->do("INSERT INTO talkprop2 (journalid, jtalkid, tpropid, value) ".
 			   "VALUES $values");
 	     } else {
-		 $dbcm->do("INSERT INTO talkprop (talkid, tpropid, values) ".
+		 $dbcm->do("INSERT INTO talkprop (talkid, tpropid, value) ".
 			   "VALUES $values");
 	     }
+	     die $dbcm->errstr if $dbcm->err;
 	 }
      }
      

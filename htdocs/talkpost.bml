@@ -42,25 +42,40 @@ BODY<=
  {
      my $qparentid = $init->{'replyto'};
 
+     $sql = "SELECT posterid, nodetype, nodeid AS 'itemid', ".
+	 "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(datepost) AS 'secondsold' FROM ";
      if ($clustered) {
-	 $sql = "SELECT posterid, nodetype, nodeid AS 'itemid' FROM talk WHERE talkid=$qparentid";
+	 $sql .= "talk2 WHERE jtalkid=$qparentid";
      } else {
-	 $sql = "SELECT posterid, nodetype, nodeid AS 'itemid' FROM talk ".
-	     "WHERE journalid=$u->{'userid'} AND jtalkid=$qparentid";
+	 $sql .= "talk WHERE journalid=$u->{'userid'} AND jtalkid=$qparentid";
      }
-     my $parpost = LJ::dbs_selectrow_hashref($dbcs, $sql);
+     $parpost = LJ::dbs_selectrow_hashref($dbcs, $sql);
      return "Replyto post not found (deleted?)" unless $parpost;
      
      unless ($parpost->{'nodetype'} eq "L" && $parpost->{'itemid'}) {
 	 return "(=H1 Error H1=)(=P You cannot reply to a non-existent post P=)";
      }
      
-     ### load meta-data
+     ## load its text
+     {
+	 my $tt;
+	 if ($clustered) {
+	     $tt = LJ::get_talktext2($u, $init->{'replyto'});
+	 } else {
+	     $tt = LJ::get_talktext($dbs, $init->{'replyto'});
+	 }
+	 $parpost->{'subject'} = $tt->{$init->{'replyto'}}->[0];
+	 $parpost->{'body'} = $tt->{$init->{'replyto'}}->[1];
+     }
+     
+
+     ## load meta-data
      LJ::load_props($dbs, "talk");
      if ($clustered) {
-	 $sql = "SELECT tpropid, value FROM talkproplist2 WHERE journalid=$u->{'userid'} AND jtalkid=$qparentid";
+	 $sql = "SELECT tpropid, value FROM talkprop2 ".
+	     "WHERE journalid=$u->{'userid'} AND jtalkid=$qparentid";
      } else {
-	 $sql = "SELECT tpropid, value FROM talkproplist WHERE talkid=$qparentid";
+	 $sql = "SELECT tpropid, value FROM talkprop WHERE talkid=$qparentid";
      }
      ($sth = $dbcr->prepare($sql))->execute;
      while (my ($tid, $value) = $sth->fetchrow_array) {
