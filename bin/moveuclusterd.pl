@@ -448,6 +448,23 @@ sub clients {
 }
 
 
+### METHOD: raterules( undef )
+### Get the hash of rate rules the server uses to calculate a cluster's
+### maximum number of clients.
+sub raterules {
+    my JobServer $self = shift;
+    return %{$self->{raterules}};
+}
+
+
+### METHOD: defaultRate( undef )
+### Get the default cluster rate as set on the command line.
+sub defaultRate {
+    my JobServer $self = shift;
+    return $self->{config}->{defaultRate};
+}
+
+
 ### METHOD: addJobs( @jobs=JobServer::Job )
 ### Add a job to move the user with the given I<userid> to the cluster with the
 ### specified I<dstclustid>.
@@ -624,6 +641,33 @@ sub setGlobalRateLimit {
     %{$self->{ratelimits}} = ();
 
     return "Global rate limit set to $rate";
+}
+
+
+### METHOD: resetClusterRateLimit( $clusterid )
+### Remove the explicit rate limit for the cluster with the given
+### I<clusterid>. Returns the new limit for the cluster after resetting.
+sub resetClusterRateLimit {
+    my JobServer $self = shift;
+    my $clusterid = shift or croak "No clusterid given.";
+
+    $self->debugMsg( 1, "Resetting rate limit for cluster $clusterid." );
+    delete $self->{raterules}{$clusterid};
+    %{$self->{ratelimits}} = ();
+
+    return $self->{raterules}{global} || $self->{config}{defaultRate};
+}
+
+
+### METHOD: resetGlobalRateLimit( undef )
+### Reset the rate limit for clusters that don't have an explicit ratelimit back
+### to the default and returns it.
+sub resetGlobalRateLimit {
+    my JobServer $self = shift;
+    delete $self->{raterules}{global};
+    %{$self->{ratelimits}} = ();
+
+    return $self->{config}{defaultRate};
 }
 
 
@@ -1622,6 +1666,14 @@ INIT {
     # message. E.g., if the pattern for 'foo_bar' is /^(\w+)\s+(\d+)$/, then
     # entering the command "foo_bar frobnitz 4" would call:
     #   ->cmd_foo_bar( "frobnitz", "4" )
+    #
+    # The 'help' element of each command is used to provide the information
+    # necessary for the 'help' command.
+    #
+    # If an entry contains a 'form' element, it will be used to describe the
+    # arguments which are expected/required by the command, and is used in the
+    # 'form' part of the individual help for that command. If it is omitted, the
+    # command is assumed by the help system to be standalone and take no arguments.
     %CommandTable = (
 
         # :TODO: Implement a 'desc' or 'longhelp' or something to augment the
@@ -1660,10 +1712,31 @@ INIT {
             args  => qr{^$},
         },
 
+        move_stats => {
+            help    => "List recent move statistics",
+            args    => qr{^$},
+        },
+
+        recent_moves => {
+            help    => "Show a log of recent moves",
+            args    => qr{^$},
+        },
+
         set_rate => {
             help     => "Set the rate for a given source cluster or for all clusters",
             form     => "<globalrate> or <srcclusterid>:<rate>",
             args     => qr{^(\d+)(?:[:\s]+(\d+))?\s*$},
+        },
+
+        show_rates => {
+            help    => "Show the rate settings for all clusters",
+            args    => qr{^$},
+        },
+
+        reset_rate => {
+            help    => "Clear rate settings for all or the given source cluster/s.",
+            form    => "[<srcclusterid>]",
+            args    => qr{^(\d+)?$},
         },
 
         finish => {
@@ -2113,6 +2186,26 @@ sub cmd_list_jobs {
 }
 
 
+### METHOD: cmd_move_stats( undef )
+### Command handler for the C<move_stats> command.
+sub cmd_move_stats {
+    my JobServer::Client $self = shift;
+
+    $self->{state} = 'move_stats';
+    return $self->errorResponse( "Not yet implemented." );
+}
+
+
+### METHOD: cmd_recent_moves( undef )
+### Command handler for the C<recent_moves> command.
+sub cmd_recent_moves {
+    my JobServer::Client $self = shift;
+
+    $self->{state} = 'recent_moves';
+    return $self->errorResponse( "Not yet implemented." );
+}
+
+
 ### METHOD: cmd_set_rate( undef )
 ### Command handler for the C<set_rate> command.
 sub cmd_set_rate {
@@ -2131,6 +2224,45 @@ sub cmd_set_rate {
     else {
         $self->{state} = "set rate for cluster $clusterid";
         $msg = $self->{server}->setClusterRateLimit( $clusterid, $rate );
+    }
+
+    return $self->okayResponse( $msg );
+}
+
+
+### METHOD: cmd_show_rates( undef )
+### Command handler for the C<show_rates> command.
+sub cmd_show_rates {
+    my JobServer::Client $self = shift;
+
+    $self->{state} = 'show_rates';
+    my %rules = $self->{server}->raterules;
+    my @lines = map { sprintf '%6s: %2d', $_, $rules{$_} } sort keys %rules;
+
+    # If there's no global rate set, show the configured default
+    unless ( exists $rules{global} ) {
+        push @lines, "default: " . $self->{server}->defaultRate;
+    }
+
+    $self->multilineResponse( 'Cluster rate limit rules', @lines );
+}
+
+
+### METHOD: cmd_reset_rate( undef )
+### Command handler for the C<reset_rate> command.
+sub cmd_reset_rate {
+    my JobServer::Client $self = shift;
+    my $srcclusterid = shift || '';
+
+    $self->{state} = 'reset_rate';
+    my ( $rval, $msg );
+
+    if ( $srcclusterid ) {
+        $rval = $self->{server}->resetClusterRateLimit( $srcclusterid );
+        $msg = "Reset rate limit for cluster $srcclusterid to $rval";
+    } else {
+        $rval = $self->{server}->resetGlobalRateLimit;
+        $msg = "Reset global rate limit to $rval";
     }
 
     return $self->okayResponse( $msg );
