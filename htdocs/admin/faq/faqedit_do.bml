@@ -1,7 +1,7 @@
-(=_INFO
+<?_info
 NOCACHE=>1
-_INFO=)(=PAGE
-TITLE=>(=_CODE return $FORM{'id'} ? "Edit FAQ Item #$FORM{'id'}" : "Add to FAQ"; _CODE=)
+_info?><?page
+TITLE=><?_code return $FORM{'id'} ? "Edit FAQ Item #$FORM{'id'}" : "Add to FAQ"; _code?>
 BODY<=
 
 <CENTER>
@@ -9,7 +9,7 @@ BODY<=
 </CENTER>
 <P>
 
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -106,10 +106,10 @@ BODY<=
  
  return $ret;
  
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 lib: cgi-bin/ljlib.pl
 link: htdocs/admin/faq/index.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

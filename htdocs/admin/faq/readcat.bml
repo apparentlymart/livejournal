@@ -1,6 +1,6 @@
-(=_INFO
+<?_info
 NOCACHE=>1
-_INFO=)(=PAGE
+_info?><?page
 TITLE=>Read FAQ
 BODY<=
 
@@ -8,7 +8,7 @@ BODY<=
 <A HREF="./"><B>(Back to FAQ Index)</B></A>
 </CENTER>
 
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -58,10 +58,10 @@ BODY<=
 
  return $ret;
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 lib: cgi-bin/ljlib.pl
 link: htdocs/admin/faq/index.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
