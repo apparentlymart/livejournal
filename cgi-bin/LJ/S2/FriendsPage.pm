@@ -65,7 +65,7 @@ sub FriendsPage
         return 1;
     }
 
-    LJ::load_user_props($remote, { "cache" => 1 }, "opt_nctalklinks", "opt_stylemine");
+    LJ::load_user_props($remote, "opt_nctalklinks", "opt_stylemine");
 
     ## never have spiders index friends pages (change too much, and some 
     ## people might not want to be indexed)

@@ -29,7 +29,7 @@ body<=
     my $sth;
 
     # load user props
-    LJ::load_user_props($u, "opt_whatemailshow",
+    LJ::load_user_props($u, { use_master => 1 }, "opt_whatemailshow",
                         "country", "state", "city",
                         "zip", "icq", "aolim", "yahoo", "msn", "url",
                         "urlname", "gender", "jabber", "opt_blockrobots",

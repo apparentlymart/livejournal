@@ -1503,7 +1503,7 @@ sub create_view_friends
 
     # load 'opt_stylemine' prop for $remote.  don't need to load opt_nctalklinks
     # because that was already faked in LJ::make_journal previously
-    LJ::load_user_props($remote, { 'cache' => 1 }, "opt_stylemine");
+    LJ::load_user_props($remote, "opt_stylemine");
   
     my %friends_events = ();
     my $events = \$friends_events{'events'};

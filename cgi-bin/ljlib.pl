@@ -2136,7 +2136,9 @@ sub load_user_props
     $uid = LJ::get_userid($u->{'user'}) unless $uid;
     
     my $mem = {};
-    if ($opts->{'cache'}) {
+    my $use_master = 0;
+
+    if (@LJ::MEMCACHE_SERVERS) {
         my @keys;
         foreach (@props) {
             next if exists $u->{$_};
@@ -2145,7 +2147,11 @@ sub load_user_props
             push @keys, [$uid,"uprop:$uid:$p->{'id'}"];
         }
         $mem = LJ::MemCache::get_multi(@keys) || {};
+        $use_master = 1;
     }
+    
+    $use_master = 1 if $opts->{'use_master'};
+
     my @needwrite;  # [propid, propname] entries we need to save to memcache later
 
     my %loadfrom;
@@ -2175,7 +2181,7 @@ sub load_user_props
 
     foreach my $table (keys %loadfrom) {
         my $db;
-        if ($opts->{'cache'} && @LJ::MEMCACHE_SERVERS) {
+        if ($use_master) {
             $db = $table eq "userproplite2" ? 
                 LJ::get_cluster_master($u) : 
                 LJ::get_db_writer();
@@ -3843,7 +3849,7 @@ sub make_journal
         push @needed_props, "opt_logcommentips";
     }
 
-    LJ::load_user_props($u, { 'cache' => 1 }, @needed_props);
+    LJ::load_user_props($u, @needed_props);
 
     # if the remote is the user to be viewed, make sure the $remote
     # hashref has the value of $u's opt_nctalklinks (though with
@@ -3886,7 +3892,7 @@ sub make_journal
             if ($geta->{'style'} eq 'mine') {
 
                 # get remote props and decide what style remote uses
-                LJ::load_user_props($remote, { 'cache' => 1 }, "stylesys", "s2_style");
+                LJ::load_user_props($remote, "stylesys", "s2_style");
 
                 # remote using s2
                 if ($remote->{'stylesys'} == 2 && $remote->{'s2_style'}) {
