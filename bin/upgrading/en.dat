@@ -862,6 +862,52 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 
 /editjournal_do.bml.title=Edit Journal Entries
 
+/export.bml.btn.proceed=Proceed...
+
+/export.bml.description=This feature lets you download your entire journal to a custom format for backup purposes.
+
+/export.bml.fields=Fields:
+
+/export.bml.format.csv=CSV (Comma Separated Values)
+
+/export.bml.format.xml=XML
+
+/export.bml.label.encoding=Encoding:
+
+/export.bml.label.field.allowmask=Allow Mask
+
+/export.bml.label.field.currents=Current Mood &amp; Music
+
+/export.bml.label.field.event=<b>Event</b>
+
+/export.bml.label.field.eventtime=Event Time (from user's clock)
+
+/export.bml.label.field.itemid=ID Number
+
+/export.bml.label.field.logtime=Log Time (from system's clock)
+
+/export.bml.label.field.security=Security Level
+
+/export.bml.label.field.subject=Subject
+
+/export.bml.label.format=Format:
+
+/export.bml.label.header=Header
+
+/export.bml.label.month=Select month:
+
+/export.bml.label.month.month=mm:
+
+/export.bml.label.month.year=yyyy:
+
+/export.bml.label.notranslation=Do not translate between encodings
+
+/export.bml.label.what=Export what:
+
+/export.bml.title=Export Journal
+
+/export.bml.what.entries=Journal entries
+
 /friends/add.bml.add.header=Success
 
 /friends/add.bml.add.text=User <?ljuser [[user]] ljuser?> was added to your friend list.  You can view your friends page <a href="[[url]]">here</a>.

@@ -1,12 +1,10 @@
 <?page
-title=>Export Journal
+title=><?_ml .title _ml?>
 
 body<=
 
-<?h1 Export Journal h1?>
-<?p
-This feature lets you download your entire journal to a custom format for backup purposes.
-p?>
+<?h1 <?_ml .title _ml?> h1?>
+<?p <?_ml .description _ml?> p?>
 
 <form action="export_do.bml" method="post">
 
@@ -15,27 +13,27 @@ p?>
 <?_code
  return LJ::auth_fields(\%FORM);
  _code?>
-<tr valign='top'><td>Export what:</td>
+<tr valign='top'><td><?_ml .label.what _ml?></td>
 <td>
-    <select name="what">
-    <option value="journal">Journal entries</option>
+    <select name="what" id="what">
+    <option value="journal"><?_ml .what.entries _ml?></option>
     </select>
 </td></tr>
 
-<tr valign='middle'><td>Select month:</td>
+<tr valign='middle'><td><?_ml .label.month _ml?></td>
 <td>
-    yyyy: <input name="year" size='4' maxlength='4' /> - 
-    mm: <input name="month" size='2' maxlength='2' />
+    <?_ml .label.month.year _ml?> <input name="year" size='4' maxlength='4' /> - 
+    <?_ml .label.month.month _ml?> <input name="month" size='2' maxlength='2' />
 </td></tr>
 
-<tr valign='top'><td>Format:</td>
+<tr valign='top'><td><?_ml .label.format _ml?></td>
 <td>
     <select name="format">
-    <option value="csv">CSV (Comma Separated Values)</option>
-    <option value="xml">XML</option>
+    <option value="csv"><?_ml .format.csv _ml?></option>
+    <option value="xml"><?_ml .format.xml _ml?></option>
     </select><br />
-    <input type='checkbox' name="header" checked='checked' /> Header<br />
-    Encoding: <?_code
+    <input type='checkbox' name="header" checked='checked' /> <?_ml .label.header _ml?><br />
+    <?_ml .label.encoding _ml?> <?_code
  my $ret = "";
  if ($LJ::UNICODE) {
      my (%encodings, %encnames);
@@ -54,34 +52,31 @@ p?>
  return $ret . "<br />";
 _code?>
 
- <input type='checkbox' name="notranslation" />Do not translate between encodings<br />
+ <input type='checkbox' name="notranslation" /><?_ml .label.notranslation _ml?><br />
 
 </td></tr>
 <tr><td colspan='2'><hr /></td></tr>
-<tr valign='top'><td>Fields:</td>
+<tr valign='top'><td><?_ml .fields _ml?></td>
 <td>
-  <input type='checkbox' name="field_itemid" checked='checked' /> ID Number<br />
-  <input type='checkbox' name="field_eventtime" checked='checked' /> Event Time (from user's clock)<br />
-  <input type='checkbox' name="field_logtime" checked='checked' /> Log Time (from system's clock)<br />
-  <input type='checkbox' name="field_subject" checked='checked' /> Subject<br />
-  <input type='checkbox' name="field_event" checked='checked' /> <b>Event</b><br />
-  <input type='checkbox' name="field_security" checked='checked' /> Security Level<br />
-  <input type='checkbox' name="field_allowmask" checked='checked' /> Allow Mask<br />
-  <input type='checkbox' name='field_currents' checked='checked' /> Current Mood & Music<br />
+  <input type='checkbox' name="field_itemid" checked='checked' /> <?_ml .label.field.itemid _ml?><br />
+  <input type='checkbox' name="field_eventtime" checked='checked' /> <?_ml .label.field.eventtime _ml?><br />
+  <input type='checkbox' name="field_logtime" checked='checked' /> <?_ml .label.field.logtime _ml?><br />
+  <input type='checkbox' name="field_subject" checked='checked' /> <?_ml .label.field.subject _ml?><br />
+  <input type='checkbox' name="field_event" checked='checked' /> <?_ml .label.field.event _ml?><br />
+  <input type='checkbox' name="field_security" checked='checked' /> <?_ml .label.field.security _ml?><br />
+  <input type='checkbox' name="field_allowmask" checked='checked' /> <?_ml .label.field.allowmask _ml?><br />
+  <input type='checkbox' name='field_currents' checked='checked' /> <?_ml .label.field.currents _ml?><br />
 </td></tr>
 
-<tr><td></td><td><input type="submit" value="Proceed..." /></td></tr>
+<tr><td></td><td><input type="submit" value="<?_ml .btn.proceed _ml?>" /></td></tr>
 </table>
 standout?>
 </form>
 
-<?h1 Forget something? h1?>
-<?p
-If you forgot your username or password, <a href="lostinfo.bml">recover it here!</a>.
-p?>
+<?h1 <?_ml lostinfo.head _ml?> h1?>
+<?p <?_ml lostinfo.text _ml?> p?>
 
 <=body
 page?><?_c <LJDEP>
-link: htdocs/lostinfo.bml
 post: htdocs/export_do.bml
 </LJDEP> _c?>
