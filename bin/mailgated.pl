@@ -32,9 +32,11 @@ die "Invalid lock mechanism specified.  Set \$LJ::MAILLOCK or use --lock.\n"
 $workdir = $opt->{'workdir'} || "$mailspool/tmp";
 $maxloop = $opt->{'maxloop'} || 100;
 
-# Maildir expected.
+# sanity checks
 die "Invalid mailspool: $mailspool\n" unless -d "$mailspool/new";
 $mailspool .= '/new';
+die "Don't run me as root!\n" unless $<;
+die "Unable to read mailspool: $mailspool\n" unless -r $mailspool;
 
 # daemonize - 'nolisten' is essentially the same as foreground, 
 # without the debugging to STDERR.
