@@ -272,8 +272,8 @@ sub html_hidden
     while (@_) {
         my $name = shift;
         my $val;
-
-        my ($ehtml, $extra);
+        my $ehtml = 1;
+        my $extra;
         if (ref $name eq 'HASH') {
             my $opts = $name;
 
