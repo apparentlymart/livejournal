@@ -72,7 +72,7 @@
  {
      if ($piccount++ == 0) {
          $body .= "<?h1 $ML{'.current'} h1?><?p ";
-         $body .= BML::ml('.pics2', {'user'=> LJ::ljuser($user)});
+         $body .= BML::ml('.pics', {'user'=> LJ::ljuser($user)});
          if ($can_manage) {
              $body .= ' ' . BML::ml('.edit2', { 'editlink' => "$LJ::SITEROOT/editpics.bml?authas=$user",
                                               'uploadlink' => "$LJ::SITEROOT/uploadpic.bml?authas=$user" });
