@@ -7476,7 +7476,7 @@ sub alloc_user_counter
         $newmax = $dbcm->selectrow_array("SELECT MAX(modid) FROM modlog WHERE journalid=?",
                 undef, $uid);
     } elsif ($dom eq "S") {
-         $newmax = $dbcm->selectrow_array("SELECT MAX(sessid) FROM session WHERE userid=?",
+         $newmax = $dbcm->selectrow_array("SELECT MAX(sessid) FROM sessions WHERE userid=?",
                 undef, $uid);
     }
     $newmax += 0;
