@@ -52,6 +52,8 @@ $LJ::DBIRole = new DBI::Role {
     'time_report' => \&dbtime_callback,
 };
 
+LJ::MemCache::init();
+
 # $LJ::PROTOCOL_VER is the version of the client-server protocol
 # used uniformly by server code which uses the protocol.
 $LJ::PROTOCOL_VER = ($LJ::UNICODE ? "1" : "0");
