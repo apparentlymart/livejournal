@@ -71,6 +71,10 @@
     $EVERYONE_PAID = 0;    # if true, all new accounts get paid feature access
     $EVERYONE_VALID = 0;   # if true, new accounts don't need to be validated
 
+    # initial friends for new accounts.
+    # leave undefined if you don't want to use it.
+    # @INITIAL_FRIENDS = qw(news);
+
     # performance/load related settings.  turn this on if you want to batch all updates
     # to the database every 10 seconds.  only necessary with high-load sites.
     $BUFFER_QUERIES = 0;
