@@ -640,7 +640,7 @@ sub ExpandLJURL
 
 my $subject_eat = [qw[head title style layer iframe applet object]];
 my $subject_allow = [qw[a b i u em strong cite]];
-my $subject_remove = [qw[bgsound embed object caption link font]];
+my $subject_remove = [qw[bgsound embed object caption link font noscript]];
 sub clean_subject
 {
     my $ref = shift;
@@ -673,7 +673,7 @@ sub clean_subject_all
 }
 
 my $event_eat = [qw[head title style layer iframe applet object xml]];
-my $event_remove = [qw[bgsound embed object link body meta]];
+my $event_remove = [qw[bgsound embed object link body meta noscript]];
 
 my @comment_close = qw(
     a sub sup xmp bdo q span

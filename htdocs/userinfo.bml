@@ -590,7 +590,7 @@ if ($u->{'journaltitle'}) {
          'eat' => [qw[head title style layer iframe applet]],
          'mode' => 'allow',
          'deny' => [qw[]],
-         'remove' => [qw[marquee bgsound embed object caption link]],
+         'remove' => [qw[marquee bgsound embed object caption link noscript]],
 	 'noearlyclose' => 1,
 	 'tablecheck' => 1,
 	 'autoclose' => [qw[table tr th td]],
