@@ -26,6 +26,7 @@ sub get_some {
 }
 
 print "Converting $todo users from data version 2 to 3...\n";
+my $start = time();
 while (my @list = get_some()) {
     LJ::start_request();
     foreach my $u (@list) {
@@ -56,6 +57,10 @@ while (my @list = get_some()) {
         $dbh->do("UPDATE user SET dversion=3 WHERE userid=?", undef, $u->{'userid'});
         $done++;
     }
-    
-    printf "%d/%d complete (%.02f%%)\n", $done, $todo, ($done/$todo*100);
+      
+    my $perc = $done/$todo;
+    my $elapsed = time() - $start;
+    my $total_time = $elapsed / $perc;
+    my $min_remain = int(($total_time - $elapsed) / 60);
+    printf "%d/%d complete (%.02f%%) minutes_remain=%d\n", $done, $todo, ($perc*100), $min_remain;
 }
