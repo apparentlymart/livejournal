@@ -85,6 +85,8 @@ sub clean
 
     my %opencount = ();
 
+    my $cutcount = 0;
+
   TOKEN:
     while (my $token = $p->get_token)
     {
@@ -110,6 +112,7 @@ sub clean
             elsif ($tag eq "lj-cut") 
             {
                 my $attr = $token->[2];
+                $cutcount++;
                 if ($cut) {
                     my $text = "Read more...";
                     if ($attr->{'text'}) {
@@ -118,10 +121,11 @@ sub clean
                         $text =~ s/>/&gt;/g;
                     }
                     my $url = LJ::ehtml($cut);
-                    $newdata .= "<b>(&nbsp;<a href=\"$url\">$text</a>&nbsp;)</b>";
+                    $newdata .= "<b>(&nbsp;<a href=\"$url#cutid$cutcount\">$text</a>&nbsp;)</b>";
                     $p->get_tag("/lj-cut");
                 } else {
-                    next; # ignore the tag.
+                    $newdata .= "<a name=\"cutid$cutcount\"></a>";
+                    next;
                 }
             }
             elsif ($tag eq "lj") 
@@ -388,8 +392,16 @@ sub clean_subject_all
 my $event_eat = [qw[head title style layer iframe applet object]];
 my $event_remove = [qw[bgsound embed object caption link body meta]];
 
-my @comment_close = qw(a b i u ul ol s font tt blockquote pre div span sub sup code strong em big small center h1 h2 h3 table tr td strike dl cite xmp th marquee noframes);
-my @comment_all = (@comment_close, "img", "li", "br", "dd", "dt", "hr", "p");
+my @comment_close = qw(
+    a sub sup xmp bdo q span
+    b i u tt s strike big small font
+    abbr acronym cite code dfn em kbd samp strong var del ins
+    h1 h2 h3 h4 h5 h6 div blockquote address pre center
+    ul ol li dl dt dd
+    table tr td th tbody tfoot thead colgroup caption
+    marquee area map 
+);
+my @comment_all = (@comment_close, "img", "li", "br", "dd", "dt", "hr", "p", "col");
 
 sub clean_event
 {
