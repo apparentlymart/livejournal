@@ -21,9 +21,13 @@ If getting the day counts of a shared journal, include this key and the username
 <!--===================[ RETURN ]==============================-->
 <returns><struct count="1">
 
-<key name="daycounts" count="1"><list count="1"><scalar count="0more"><des>
-For each day that the user has posted a journal entry, a key in the form yyyy-mm-dd  is returned, with the value being the number of entries posted that day. The absence of a key implies zero entries for that day, as well as the presence of a key with the value "0". Note that mm and dd are always two digits, zero padded, so the total key length will always be 10 characters.
-</des></scalar></list></key>
+<key name="daycounts" count="1"><list count="1"><struct count="0more"><des>
+For each day that the user has posted a journal entry, a struct is returned in the list.
+</des>
+<key name="date"><scalar><des>The date, in yyyy-dd-mm format.</des></scalar></key>
+<key name="count"><scalar><des>The number of journal entries on that date.</des></scalar></key>
+</struct>
+</list></key>
 
 </struct></returns>    
 </method>

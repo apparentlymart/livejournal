@@ -12,5 +12,7 @@
 <!ENTITY chSchema 		SYSTEM "../int/db/schema.xml">
 <!ENTITY chSchemaRef	 	SYSTEM "../int/db/schemaref.gen">
 
+<!ENTITY refXMLRPC	 	SYSTEM "../int/protocol/reference.gen">
+
 <!ENTITY % entities 		SYSTEM "entities.xml">
 %entities;
