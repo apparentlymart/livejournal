@@ -28,6 +28,11 @@ notepad/en              i18n            notepad/layout
 punquin/layout          layout          core1
 punquin/en              i18n            punquin/layout
 punquin/bw              theme           punquin/layout
+punquin/autumn          theme           punquin/layout
+punquin/greyslate       theme           punquin/layout
+punquin/minimal         theme           punquin/layout
+punquin/jewel           theme           punquin/layout
+punquin/bold            theme           punquin/layout
 
 tabularindent/layout    layout          core1
 tabularindent/en        i18n            tabularindent/layout

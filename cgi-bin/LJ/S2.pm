@@ -11,7 +11,7 @@ use Apache::Constants ();
 use HTMLCleaner;
 
 use LJ::S2::RecentPage;
-use LJ::S2::ArchiveYearPage;
+use LJ::S2::YearPage;
 use LJ::S2::DayPage;
 use LJ::S2::FriendsPage;
 
@@ -64,8 +64,8 @@ sub make_journal
         $entry = "RecentPage::print()";
         $page = RecentPage($u, $remote, $opts);
     } elsif ($view eq "calendar") {
-        $entry = "ArchiveYearPage::print()";
-        $page = ArchiveYearPage($u, $remote, $opts);
+        $entry = "YearPage::print()";
+        $page = YearPage($u, $remote, $opts);
     } elsif ($view eq "day") {
         $entry = "DayPage::print()";
         $page = DayPage($u, $remote, $opts);
@@ -1119,7 +1119,7 @@ sub DateTime__time_format
     return $$c->($this);
 }
 
-sub ArchiveYearMonth__month_format
+sub YearMonth__month_format
 {
     my ($ctx, $this, $fmt) = @_;
     $fmt ||= "long";

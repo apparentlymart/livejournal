@@ -298,20 +298,20 @@ function CommentInfo::print()
     "</nobr></font></td></tr>";
 }
 
-function ArchiveYearPage::print_body {
-    foreach var ArchiveYearMonth m ($.months) {
+function YearPage::print_body {
+    foreach var YearMonth m ($.months) {
         $this->print_month($m);
     }
 }
 
-function ArchiveYearPage::lay_captionbar_navigation()
+function YearPage::lay_captionbar_navigation()
 {
     $this->print_year_links();
 }
 
-function ArchiveYearPage::print_year_links ()
+function YearPage::print_year_links ()
 {
-    foreach var ArchiveYearYear y ($.years) {
+    foreach var YearYear y ($.years) {
         if ($y.displayed) {
             "$y.year&nbsp;";
         } else {
@@ -320,7 +320,7 @@ function ArchiveYearPage::print_year_links ()
     }
 }
 
-function ArchiveYearPage::print_month(ArchiveYearMonth m)
+function YearPage::print_month(YearMonth m)
 {
     if (not $m.has_entries) { return; }
     "<center><table border='1' cellpadding='4' width='80%'>";
@@ -333,17 +333,17 @@ function ArchiveYearPage::print_month(ArchiveYearMonth m)
         "<td><font color='$*accent_fgcolor'>"+$*lang_dayname_short[$d]+"</font></td>\n";
     }
     "</tr>";
-    foreach var ArchiveYearWeek w ($m.weeks) {
+    foreach var YearWeek w ($m.weeks) {
         $w->print();
     }
     "<tr align='center'><td colspan='7'><a href='$m.url'>View Subjects</a>";
     "</td></tr></table></center>";
 }
 
-function ArchiveYearWeek::print () {
+function YearWeek::print () {
     "<tr>";
     if ($.pre_empty) { "<td colspan='$.pre_empty' bgcolor='$*accent_bgcolor'>&nbsp;</td>"; }
-    foreach var ArchiveYearDay d ($.days) {
+    foreach var YearDay d ($.days) {
         "<td valign='top'><b>$d.day</b>";
         "<div align='center'>";
         if ($d.num_entries) {

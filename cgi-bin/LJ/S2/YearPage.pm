@@ -4,12 +4,12 @@
 use strict;
 package LJ::S2;
 
-sub ArchiveYearPage
+sub YearPage
 {
     my ($u, $remote, $opts) = @_;
 
     my $p = Page($u, $opts->{'vhost'});
-    $p->{'_type'} = "ArchiveYearPage";
+    $p->{'_type'} = "YearPage";
     $p->{'view'} = "archive";
     $p->{'weekdays'} = [ 1..7 ];
 
@@ -76,7 +76,7 @@ sub ArchiveYearPage
     $p->{'year'} = $year;
     $p->{'years'} = [];
     foreach (@years) {
-        push @{$p->{'years'}}, ArchiveYearYear($_, "$p->{'base_url'}/calendar/$_", $_ == $p->{'year'});
+        push @{$p->{'years'}}, YearYear($_, "$p->{'base_url'}/calendar/$_", $_ == $p->{'year'});
     }
 
     $p->{'months'} = [];
@@ -103,7 +103,7 @@ sub ArchiveYearPage
                 $leading = 6 if --$leading < 0;
             }
             $week = {
-                '_type' => 'ArchiveYearWeek',
+                '_type' => 'YearWeek',
                 'days' => [],
                 'pre_empty' => $leading,
                 'post_empty' => 0,
@@ -122,7 +122,7 @@ sub ArchiveYearPage
         my $has_entries = $count{$year}->{$month} ? 1 : 0;
         my $daysinmonth = LJ::days_in_month($month, $year);
 
-        $calmon = ArchiveYearMonth({
+        $calmon = YearMonth({
             'month' => $month,
             'year' => $year, 
             'url' => "$LJ::SITEROOT/view/?type=month&user=$p->{'journal'}->{'username'}&y=$year&m=$month",
@@ -131,9 +131,9 @@ sub ArchiveYearPage
         });
 
         for my $day (1..$daysinmonth) {
-            my $d = ArchiveYearDay($u, $year, $month, $day, 
-                                   $count{$year}->{$month}->{$day},
-                                   $day_of_week+1);
+            my $d = YearDay($u, $year, $month, $day, 
+                            $count{$year}->{$month}->{$day},
+                            $day_of_week+1);
             $push_day->($d);
             $day_of_week = ($day_of_week + 1) % 7;
         }
@@ -145,24 +145,24 @@ sub ArchiveYearPage
     return $p;
 }
 
-sub ArchiveYearMonth {
+sub YearMonth {
     my $opts = shift;
-    $opts->{'_type'} = 'ArchiveYearMonth';
+    $opts->{'_type'} = 'YearMonth';
     return $opts;
 }
 
-sub ArchiveYearYear {
+sub YearYear {
     my ($year, $url, $displayed) = @_;
-    return { '_type' => "ArchiveYearYear",
+    return { '_type' => "YearYear",
              'year' => $year, 'url' => $url, 'displayed' => $displayed };
 }
 
 1;
 
-sub ArchiveYearDay {
+sub YearDay {
     my ($u, $year, $month, $day, $count, $dow) = @_;
     my $d = {
-        '_type' => 'ArchiveYearDay',
+        '_type' => 'YearDay',
         'day' => $day,
         'date' => Date($year, $month, $day, $dow),
         'num_entries' => $count

@@ -372,14 +372,14 @@ function CommentInfo::print ()
     $this->print_postlink();
 }
 
-function ArchiveYearPage::print_year_links ()
+function YearPage::print_year_links ()
 {
     """<table cellpadding="2" cellspacing="0" border="0" summary="">
 <tr><td bgcolor="$*stronger_back" align="center">
 <table cellpadding="5" cellspacing="0" border="0" summary="">
 <tr><td class="caption">Years</td></tr><tr>
 <td colspan="2" bgcolor="$*entry_back">""";
-    foreach var ArchiveYearYear y ($.years) {
+    foreach var YearYear y ($.years) {
         if ($y.displayed) {
             "<b>$y.year</b>&nbsp;";
         } else {
@@ -390,7 +390,7 @@ function ArchiveYearPage::print_year_links ()
 
 }
 
-function ArchiveYearPage::print_month (ArchiveYearMonth m)
+function YearPage::print_month (YearMonth m)
 {       
     if (not $m.has_entries) { return; }
     """<table cellpadding="2" cellspacing="0" border="0" summary="">
@@ -414,17 +414,17 @@ function ArchiveYearPage::print_month (ArchiveYearMonth m)
     
     "</tr>";
 
-    foreach var ArchiveYearWeek w ($m.weeks) {
+    foreach var YearWeek w ($m.weeks) {
         $w->print();
     }
 
     """</table></td></tr></table></td></tr></table><p>""";
 }
 
-function ArchiveYearWeek::print () {
+function YearWeek::print () {
     "<tr valign='top'>";
     if ($.pre_empty) { "<td colspan='$.pre_empty'></td>"; }
-    foreach var ArchiveYearDay d ($.days) {
+    foreach var YearDay d ($.days) {
         """<td><div class="meta">$d.day</div>""";
         if ($d.num_entries) {
             """<div align="center"><a href="$d.url">$d.num_entries</a></div>""";

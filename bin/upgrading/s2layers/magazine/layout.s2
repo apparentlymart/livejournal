@@ -382,24 +382,24 @@ function FriendsPage::print_body
     }
 }
 
-function ArchiveYearPage::lay_skip_navigation ()
+function YearPage::lay_skip_navigation ()
 {
     $this->print_year_links();
 }
 
-function ArchiveYearPage::lay_bottom_navigation() { }
+function YearPage::lay_bottom_navigation() { }
 
-function ArchiveYearPage::print_body() {
+function YearPage::print_body() {
     "<h2>$.year</h2>";
-    foreach var ArchiveYearMonth m ($.months) {
+    foreach var YearMonth m ($.months) {
         $this->print_month($m);
     }
 }
 
-function ArchiveYearPage::print_year_links ()
+function YearPage::print_year_links ()
 {
     "Navigate: ";
-    foreach var ArchiveYearYear y ($.years) {
+    foreach var YearYear y ($.years) {
         if ($y.displayed) {
             " (<span class='Active'>$y.year</span>) ";
         } else {
@@ -408,7 +408,7 @@ function ArchiveYearPage::print_year_links ()
     }
 }
 
-function ArchiveYearPage::print_month(ArchiveYearMonth m)
+function YearPage::print_month(YearMonth m)
 {
     if (not $m.has_entries) { return; }
     "<table class='Month'>";
@@ -420,17 +420,17 @@ function ArchiveYearPage::print_month(ArchiveYearMonth m)
         "<th>"+$*lang_dayname_short[$d]+ "</th>\n";
     }
     "</tr>";
-    foreach var ArchiveYearWeek w ($m.weeks)
+    foreach var YearWeek w ($m.weeks)
     {
         $w->print();
     }
     "</table>\n";
 }
 
-function ArchiveYearWeek::print() {
+function YearWeek::print() {
     "<tr valign='top'>";
     if ($.pre_empty) { "<td class='empty' colspan='$.pre_empty'></td></td>"; }
-    foreach var ArchiveYearDay d ($.days)
+    foreach var YearDay d ($.days)
     {
         "<td>$d.day";
         if ($d.num_entries)

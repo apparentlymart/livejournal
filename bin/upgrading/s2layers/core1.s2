@@ -287,7 +287,7 @@ class Page
     function print_entry_poster(Entry e) 
     "Output a line of text which says who posted an entry (just \"user\", or \"user posting in somejournal\")";
 
-    function builtin get_this_month() : ArchiveYearMonth
+    function builtin get_this_month() : YearMonth
     "Returns information about the current month, so that the page may include a mini-calendar or similar features.";
 
 }
@@ -335,7 +335,7 @@ class DayPage extends Page
 
 ### Archive classes
 
-class ArchiveYearYear
+class YearYear
 "Information on how to link to a year in the year archive"
 {
     var int year "Number of the year, eg 2001.";
@@ -343,7 +343,7 @@ class ArchiveYearYear
     var bool displayed "If this is the year currently being displayed, this will be true.";
 }
 
-class ArchiveYearDay 
+class YearDay 
 "Information on how to link to a day in the year archive"
 {
     var int day "Day of month number";
@@ -353,24 +353,24 @@ class ArchiveYearDay
     var string url "A URL to view the day, if there are entries, else blank.";
 }
 
-class ArchiveYearWeek
+class YearWeek
 "Represents a 'week' on the year archive"
 {
     var int pre_empty "How many days at the start of the week are blank? (From previous month)";
     var int post_empty "How many days at the end of the week are blank? (From next month)";
-    var ArchiveYearDay[] days "An array of the days of the week (0=sunday)";
+    var YearDay[] days "An array of the days of the week (0=sunday)";
 
     function print()
     "Print formatted week";
 }
 
-class ArchiveYearMonth 
+class YearMonth 
 "A month on the calendar page"
 {
     var bool has_entries "If this is false, you probably don't want to display this month.";
     var int month "The number of the month";
     var int year "The number of the year";
-    var ArchiveYearWeek[] weeks "An array of the weeks of the month (for ease of building a row-per-week calendar)";
+    var YearWeek[] weeks "An array of the weeks of the month (for ease of building a row-per-week calendar)";
     var string url "A url to link to in order to view this month.";
 
     function builtin month_format () : string
@@ -379,24 +379,24 @@ class ArchiveYearMonth
     "Returns time formatted as indicated by \$fmt, or long if blank .";
 }
 
-class ArchiveYearPage extends Page 
+class YearPage extends Page 
 "Entire calendar page for a single year"
 {
     var int year "The year being viewed";
-    var ArchiveYearYear[] years "Information for linking to other years";
-    var ArchiveYearMonth[] months "12 months objects, even if no entries are in that month.";
+    var YearYear[] years "Information for linking to other years";
+    var YearMonth[] months "12 months objects, even if no entries are in that month.";
     var int[] weekdays 
     "Integers representing the days of the week. This will start on Monday (2) or Sunday (1) depending on 
      the property setting for start-of-week and go to Sunday (1) or Saturday (7)";
 
-    function print_month(ArchiveYearMonth m)
+    function print_month(YearMonth m)
     "Print the calendar cell for the given month";
 
     function print_year_links()
     "Print the navigation links to move between years";
 }
 
-class ArchiveMonthDay extends ArchiveYearDay
+class MonthDay extends YearDay
 "Summaries of posts by given day"
 {
     var Entry[] entries "Only populated on the month view. Entry text not present.";
@@ -405,10 +405,10 @@ class ArchiveMonthDay extends ArchiveYearDay
     "Print a list of entry summaries including subjects";
 }
 
-class ArchiveMonthPage extends Page 
+class MonthPage extends Page 
 "A page which contains a list of posts made in that month"
 {
-    var ArchiveMonthDay[] days "The days of the month containing entries.";
+    var MonthDay[] days "The days of the month containing entries.";
     var Link prev "A link to the previous month";
     var Link next "A link to the next month";
 
@@ -946,7 +946,7 @@ function FriendsPage::view_title() : string {
 function DayPage::view_title : string {
     return $.date->date_format("long");
 }
-function ArchiveYearPage::view_title() : string {
+function YearPage::view_title() : string {
     return string($.year);
 }
 function Page::title() : string {
@@ -1083,17 +1083,17 @@ function RecentPage::print_body {
 }
 
 
-### ArchiveYear view
+### Year view
 
-function ArchiveYearPage::print_body {
+function YearPage::print_body {
     $this->print_year_links();
-    foreach var ArchiveYearMonth m ($.months) {
+    foreach var YearMonth m ($.months) {
         $this->print_month($m);
     }
 }
-function ArchiveYearPage::print_year_links() {
+function YearPage::print_year_links() {
     """<ul>\n""";
-    foreach var ArchiveYearYear y ($.years) {
+    foreach var YearYear y ($.years) {
         if ($y.displayed) {
             """<li class="active">$y.year</li>\n""";
         } else {
@@ -1102,7 +1102,7 @@ function ArchiveYearPage::print_year_links() {
     }
     """</ul>\n""";
 }
-function ArchiveYearPage::print_month(ArchiveYearMonth m) {
+function YearPage::print_month(YearMonth m) {
     if (not $m.has_entries) { return; }
     """<table style="margin-left: 25%; margin-right: 25%; margin-top: 1em; margin-bottom: 1em;
        border-collapse: collapse; border: 1px solid;" border="1">\n
@@ -1113,7 +1113,7 @@ function ArchiveYearPage::print_month(ArchiveYearMonth m) {
         "<th>"+$*lang_dayname_short[$d]+"</th>\n";
     }
     "</tr>\n";
-    foreach var ArchiveYearWeek w ($m.weeks) {
+    foreach var YearWeek w ($m.weeks) {
         $w->print();
     }
     """<tr><td colspan="7" style="text-align: center; border: 1px solid;">
@@ -1121,12 +1121,12 @@ function ArchiveYearPage::print_month(ArchiveYearMonth m) {
     "</table>";
 }
 
-function ArchiveYearWeek::print() {
+function YearWeek::print() {
    """<tr valign="top" style="height: 2em;">\n""";
    if ($.pre_empty > 0) {
       """<td class="emptyday" colspan="$.pre_empty">&nbsp;</td>\n""";
    }
-   foreach var ArchiveYearDay d ($.days) {
+   foreach var YearDay d ($.days) {
        """<td style="border: 1px solid;">\n""";
        """<div style="text-align: right;">$d.day</div>\n""";
        if ($d.num_entries > 0) {
@@ -1140,13 +1140,13 @@ function ArchiveYearWeek::print() {
    "</tr>";
 }
 
-function ArchiveMonthPage::print_body {
+function MonthPage::print_body {
     "<div class=\"monthnav\">";
     $.prev->print_button();
     $this->print_navform();
     $.next->print_button();
     "</div>\n<dl>";
-    foreach var ArchiveMonthDay d ($.days) {
+    foreach var MonthDay d ($.days) {
         "<dt><a href=\"$d.url\">";
         print lang_ordinal($d.day);
         "</a></dt>\n<dd>";
@@ -1156,7 +1156,7 @@ function ArchiveMonthPage::print_body {
     "</dl>\n";
 }
 
-function ArchiveMonthDay::print_subjectlist() {
+function MonthDay::print_subjectlist() {
     "<table>\n";
     foreach var Entry e ($.entries) {
         "<tr><td>";
