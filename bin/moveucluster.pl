@@ -558,8 +558,9 @@ elsif ($sclust > 0)
                                  "FROM logtext2 WHERE journalid=$userid AND jitemid BETWEEN $lo AND $hi");
             $sth->execute;
             while (my @vals = $sth->fetchrow_array) {
-                $write->("logtext2:(journalid,jitemid,subject,event)", @vals);
                 my $size = length($vals[2]) + length($vals[3]);
+                LJ::text_compress(\$vals[3]);
+                $write->("logtext2:(journalid,jitemid,subject,event)", @vals);
                 $write->("dudata:(userid,area,areaid,bytes)", $userid, 'L', $vals[1], $size);
             }
 
@@ -584,6 +585,7 @@ elsif ($sclust > 0)
                                      "WHERE journalid=$userid AND jtalkid BETWEEN $lo AND $hi");
                 $sth->execute;
                 while (my @vals = $sth->fetchrow_array) {
+                    LJ::text_compress(\$vals[3]) if $table eq "talktext2";
                     $write->("$table:($cols{$table})", @vals);
                 }
             }
