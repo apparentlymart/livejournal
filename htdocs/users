@@ -23,7 +23,6 @@ $SIG{'TERM'} = sub {
 
 unless ($ENV{'SERVER_SOFTWARE'}) {
     $ENV{'REQUEST_URI'} = "/users/test/friends";
-    $LJ::DEBUG = 1;
 }
 
  REQUEST:
