@@ -634,6 +634,16 @@ sub change_journal_type
     if ($type eq "person") {
         $dbh->do("UPDATE user SET journaltype='P' WHERE userid=$quserid");
         $dbh->do("DELETE FROM logaccess WHERE ownerid=$quserid");
+
+        # if we're changing a non-person account to a person account,
+        # we need to ditch all its friend-ofs so that old users befriending
+        # that account (in order to watch it), don't give the account maintainer
+        # access to read the old reader's friends-only posts.  (which they'd now
+        # be able to do, since journaltype=='P'.
+        if ($u->{'journaltype'} ne "P") {
+            $dbh->do("DELETE FROM friends WHERE friendid=$quserid");
+        }
+
     } elsif ($type eq "shared") {
         $dbh->do("UPDATE user SET journaltype='S' WHERE userid=$quserid");
     }
