@@ -76,9 +76,9 @@ $img{'tellfriend'} = {
 };
 
 $img{'placeholder'} = {
-    'src' => '/imageplaceholder.png',
-    'width' => 48,
-    'height' => 48,
+    'src' => '/imageplaceholder2.png',
+    'width' => 35,
+    'height' => 35,
     'alt' => 'Image',
 };
 
