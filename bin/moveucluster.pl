@@ -666,8 +666,8 @@ elsif ($sclust > 0)
             }
         }
     } else {
-        # at minimum, we delete the clustertrack2 row, in which case we also need
-        # to mark the user as moved away
+        # at minimum, we delete the clustertrack2 row so it doesn't get
+        # included in a future ljumover.pl query from that cluster.
         $dbo->do("DELETE FROM clustertrack2 WHERE userid=$userid");
     }
 
