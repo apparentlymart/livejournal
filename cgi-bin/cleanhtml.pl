@@ -131,7 +131,7 @@ sub clean
 
             # check for exploit using TIME namespace to set data and introduce javascript that
             # would affect IE users.
-            if ($tag =~ m/:set$/ && $token->[2]->{attributename} =~ /^innerHTML$/i) {
+            if ($tag =~ m/:set$/ && $token->[2]->{attributename} =~ /innerHTML/i) {
                 next;
             }
 
