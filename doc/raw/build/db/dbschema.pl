@@ -11,9 +11,9 @@ my $sth;
 sub magic_links
 {
     my $des = shift;
-    $$des =~ s!\[dbtable\[(\w+?)\]\]!<dbtblref tblid="$1">$1</dbtblref>!g;
     $$des =~ s!<!&lt;!g;
     $$des =~ s!>!&gt;!g;
+    $$des =~ s!\[dbtable\[(\w+?)\]\]!<dbtblref tblid="$1">$1</dbtblref>!g;
 }
 
 sub dump_xml
