@@ -540,15 +540,16 @@ BODY<=
                 $$ret .= $post->{'body'};
 
                 $$ret .= "<p><font size='-2'>";
+                $$ret .= "(<a href='/talkpost.bml?${jargent}replyto=$dtid'>$T{'replythis'}</a>) ";
+
                 if ($post->{'parenttalkid'} != 0) {
                     my $dpid =  $clustered ? ($post->{'parenttalkid'} * 256 + $init->{'anum'}) : $post->{'parenttalkid'};
                     $$ret .= "(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dpid'>$T{'parent'}</a>) ";
                 }
                 if (defined $opts->{'children'}->{$tid}) {
-                    $$ret .= "(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid'>$T{'thread'}</a>) ";
+                    $$ret .= "(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid'>$T{'thread'}</a>)";
                 }
-
-                $$ret .= "(<a href='/talkpost.bml?${jargent}replyto=$dtid'>$T{'replythis'}</a>)</font>";
+                $$ret .= "</font>";
                 $$ret .= "</td></tr></table>\n";  # close colored table
             } else {
                 # link to message
