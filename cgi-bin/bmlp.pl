@@ -1079,6 +1079,23 @@ sub get_query_string
     return $q;
 }
 
+sub finish_suppress_all
+{
+    finish();
+    suppress_headers();
+    suppress_content();
+}
+
+sub suppress_headers
+{
+    $main::BMLEnv{'NoHeaders'} = 1;
+}
+
+sub suppress_content
+{
+    $main::BMLEnv{'NoContent'} = 1;
+}
+
 sub finish
 {
     $main::BML_STOP_FLAG = 1;
