@@ -443,6 +443,10 @@ sub process
             return dequeue($msg);
         }
 
+        # make sure it's not locked
+        return dequeue("Request is locked, can't append comment.")
+            if LJ::Support::is_locked($sp);
+
         # valid.  need to strip out stuff now with authcodes:
         $body =~ s!http://.+/support/act\.bml\S+![snipped]!g;
         $body =~ s!\+(\d)+z\w{1,10}\@!\@!g;
