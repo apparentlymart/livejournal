@@ -19,7 +19,9 @@ my $BLOCK_UPDATE = 1000;  # users to update at a time if they had no data to mov
 # get options
 my %opts;
 exit 1 unless
-    GetOptions("lock=s" => \$opts{locktype},);
+    GetOptions("lock=s" => \$opts{locktype},
+               "user=s" => \$opts{user},);
+              
 
 # if no locking, notify them about it
 die "ERROR: Lock must be of types 'ddlockd' or 'none'\n"
@@ -272,10 +274,17 @@ print "Processing $stats{'total_users'} total users with the old dversion\n";
 # loop until we have no more users to convert
 my $ct;
 while (1) {
+    # get users to move
+    my $sth;
+    if ($opts{user}) {
+        $sth = $dbh->prepare("SELECT * FROM user WHERE user = ? AND dversion = 6");
+        $sth->execute($opts{user});
+    } else {
+        $sth = $dbh->prepare("SELECT * FROM user WHERE dversion = 6 LIMIT $BLOCK_MOVE");
+        $sth->execute();
+    }
 
     # get blocks of $BLOCK_MOVE users at a time
-    my $sth = $dbh->prepare("SELECT * FROM user WHERE dversion = 6 LIMIT $BLOCK_MOVE");
-    $sth->execute();
     $ct = 0;
     my (%us, %fast);
     while (my $u = $sth->fetchrow_hashref()) {
