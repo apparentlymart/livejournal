@@ -217,7 +217,7 @@ sub EntryPage_entry
     # do they have the viewall priv?
     if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
-                              "viewall", "entry: $u->{'user'}");
+                              "viewall", "entry: $u->{'user'}, itemid: $itemid, statusvis: $u->{'statusvis'}");
 
         # do nothing, let them pass
 

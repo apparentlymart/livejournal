@@ -260,22 +260,17 @@ sub check_viewable
 {
     shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db"; 
     my ($remote, $item, $form, $errref) = @_;
+    # note $form no longer used
     
     my $err = sub {
         $$errref = "<?h1 <?_ml Error _ml?> h1?><?p $_[0] p?>";
         return 0;
     };
 
-    unless (LJ::can_view($remote, $item)) 
-    {
-        if ($form->{'viewall'} && LJ::check_priv($remote, "viewall")) {
-            LJ::statushistory_add($item->{'posterid'}, $remote->{'userid'}, 
-                                  "viewall", "itemid = $item->{'itemid'}");
-        } else {
-            return $err->(BML::ml('talk.error.mustlogin'))
-                unless defined $remote;
-            return $err->(BML::ml('talk.error.notauthorised'));
-        }
+    unless (LJ::can_view($remote, $item)) {
+        return $err->(BML::ml('talk.error.mustlogin'))
+            unless defined $remote;
+        return $err->(BML::ml('talk.error.notauthorised'));
     }
 
     return 1;

@@ -57,7 +57,7 @@ sub MonthPage
         # do they have the viewall priv?
         if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
             LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
-                                  "viewall", "month: $user");
+                                  "viewall", "month: $user, statusvis: $u->{'statusvis'}");
             $viewall = 1;
         }
 

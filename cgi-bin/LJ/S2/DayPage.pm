@@ -56,7 +56,7 @@ sub DayPage
         # do they have the viewall priv?
         if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
             LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
-                                  "viewall", "day: $user");
+                                  "viewall", "day: $user, statusvis: $u->{'statusvis'}");
             $viewall = 1;
         }
 

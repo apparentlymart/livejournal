@@ -37,26 +37,47 @@ $r->notes("codepath" => "bml.view.index");
      return;
  }
 
- my $base = LJ::journal_base($u);
+ my $remote = LJ::get_remote();
+
+ # do they have the viewall priv?
+ if ($GET{'viewall'} && LJ::check_priv($remote, "viewall")) {
+     LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+                           "viewall", "month: $u->{'user'}, statusvis: $u->{'statusvis'}");
+
+ # check for deleted/suspended
+ } else {
+
+     # check suspended
+     if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S") {
+         $body = "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>";
+         return;
+     }
+
+     # check deleted
+     if ($u->{'statusvis'} eq "D") {
+         $body = "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>";
+         return;
+     }
+ }
 
  if ($u->{'journaltype'} eq "R") {
-     LJ::load_user_props($dbr, $u, "renamedto");
+     LJ::load_user_props($u, "renamedto");
      if ($u->{'renamedto'}) {
          return BML::redirect(sprintf(LJ::journal_base($u->{'renamedto'}) . "/%04d/%02d/", $FORM{'y'}, $FORM{'m'}));
      }
  }
 
- LJ::load_user_props($dbr, $u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
+ LJ::load_user_props($u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
  if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
      $head .= LJ::robot_meta_tags();
  }
  
-if (LJ::did_post()) {
-    my $newuri = sprintf("$base/%04d/%02d/", $POST{'y'}, $POST{'m'});
-    return BML::redirect($newuri);
-}
+ my $base = LJ::journal_base($u);
 
- my $remote = LJ::get_remote();
+ if (LJ::did_post()) {
+     my $newuri = sprintf("$base/%04d/%02d/", $POST{'y'}, $POST{'m'});
+     return BML::redirect($newuri);
+ }
 
  my $secwhere = "AND l.security='public'";
  if ($remote) {
