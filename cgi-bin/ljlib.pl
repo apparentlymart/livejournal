@@ -2295,8 +2295,7 @@ sub auth_okay
         $actual = $user->{'password'};
         $user = $user->{'user'};
     } else {
-        my $dbs = LJ::get_dbs();
-        $u = LJ::load_user($dbs, $u);
+        $u = LJ::load_user($u);
     }
     
     # this magic hpassword value is set by auth_fields() to make 
@@ -4005,11 +4004,7 @@ sub load_user
     return $LJ::REQ_CACHE_USER_NAME{$user} if
         $LJ::REQ_CACHE_USER_NAME{$user} && ! $force;
 
-    my $sth =  ($LJ::CACHE_HANDLE{$db}->{'load_user'} ||=
-                $db->prepare("SELECT * FROM user WHERE user=?"));
-    $sth->bind_param(1, $user);
-    $sth->execute;
-    my $u = $sth->fetchrow_hashref();
+    my $u = $db->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
 
     # if user doesn't exist in the LJ database, it's possible we're using
     # an external authentication source and we should create the account

@@ -757,9 +757,6 @@ sub interface_content
 
     $r->content_type("text/plain");
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-
     my %out = ();
     my %FORM = ();
     my $content;

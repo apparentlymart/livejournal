@@ -2123,15 +2123,7 @@ sub authenticate
     unless ($u) {
         my $dbr = LJ::get_db_reader();
         return fail($err,502) unless $dbr;
-        my $quser = $dbr->quote($username);
-        my $other = $LJ::UNICODE ? ", oldenc" : "";
-        my $sth = $dbr->prepare("SELECT user, userid, journaltype, name, ".
-                                "password, status, statusvis, caps, ".
-                                "clusterid, dversion, defaultpicid ".
-                                "$other FROM user WHERE user=$quser");
-        $sth->execute;
-        return fail($err,501,$dbr->errstr) if $dbr->err;
-        $u = $sth->fetchrow_hashref;
+        $u = LJ::load_user($username);
     }
 
     return fail($err,100) unless $u;
@@ -2141,7 +2133,7 @@ sub authenticate
     my $ip_banned = 0;
     unless ($flags->{'nopassword'} ||
             $flags->{'noauth'} ||
-            LJ::auth_okay($username,
+            LJ::auth_okay($u,
                           $req->{'password'},
                           $req->{'hpassword'},
                           $u->{'password'},
