@@ -99,6 +99,7 @@ if ($FORM{'changesum'}) {
      if ($cats->{$newcat}) {
          $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
          $FORM{'body'} = "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n$FORM{'body'}";
+         $sp->{'spcatid'} = $newcat; # update category so IC e-mail goes to right place
      } else {
          return LJ::bad_input("That category doesn't seem to exist.");
      }
