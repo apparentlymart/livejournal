@@ -239,7 +239,7 @@ body<=
              }
          }
      } else {
-         push @errors, BML::ml('.error.friendsonly', {'user'->$u->{'user'}});
+         push @errors, BML::ml('.error.friendsonly', {'user'=>$u->{'user'}});
      }
  }
 
