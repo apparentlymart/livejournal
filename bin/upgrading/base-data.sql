@@ -530,8 +530,10 @@ INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES 
 UPDATE priv_list SET des='Allows a user to edit site text in a given language. arg=Unique language code, optionally appended by |domainid.domaincode',is_public='1',privname='Translate/Update Text',scope='general' WHERE privcode='translate';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when wrong username/password is used.', 'failed_login');
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged whenever user posts (to any journal)', 'post');
+INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when a forgotten password or username e-mail is requested', 'lostinfo');
 UPDATE ratelist SET des='Logged when wrong username/password is used.',name='failed_login' WHERE rlid=NULL;
 UPDATE ratelist SET des='Logged whenever user posts (to any journal)',name='post' WHERE rlid=NULL;
+UPDATE ratelist SET des='Logged when a forgotten password or username e-mail is requested',name='lostinfo' WHERE rlid=NULL;
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('FIPS', '??', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('Name', 'Name of city', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('State', 'State', 'zips');

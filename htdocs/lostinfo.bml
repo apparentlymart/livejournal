@@ -58,6 +58,8 @@ body<=
             return "<?h1 $title h1?>\n<?p $msg p?>";
         };
 
+        return LJ::bad_input($ML{'.error.toofrequent'}) unless LJ::rate_log($u, "lostinfo", 1);
+
         if ($u->{'journaltype'} eq 'Y') {
             return $err->( $ML{'.error.syndicated'} );
         }
@@ -159,6 +161,11 @@ body<=
         $sth->execute($email);
         my @users;
         while (my ($ru, $rs) = $sth->fetchrow_array) {
+            my $u = LJ::load_user($ru);
+            next unless $u;
+            # As the idea is to limit spam to one e-mail address, if any of their username's are
+            # over the limit, then don't send them any more e-mail.
+            return LJ::bad_input($ML{'.error.toofrequent'}) unless LJ::rate_log($u, "lostinfo", 1);
             push @users, $ru;
         }
         
