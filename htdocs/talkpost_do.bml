@@ -460,7 +460,9 @@ body<=
      # dudata
      if ($clustered) {
          my $bytes = length($FORM{'subject'}) + length($FORM{'body'});
-         LJ::dudata_set($dbcm, $u->{'userid'}, 'T', $insertid, $bytes);
+         # we used to do a LJ::dudata_set(..) on 'T' here, but decided
+         # we could defer that.  to find size of a journal, summing
+         # bytes in dudata is too slow (too many seeks)
      }
 
      my %talkprop;   # propname -> value

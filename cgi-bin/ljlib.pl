@@ -4986,7 +4986,6 @@ sub delete_talkitem
         return 0 if $dbcm->err;
     }
     
-    LJ::dudata_set($dbcm, $jid, 'T', $_, 0) foreach (@$jtalkid);
     return 0 if $dbcm->err;
     return $ret;
 }
