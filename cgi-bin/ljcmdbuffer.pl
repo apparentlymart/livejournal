@@ -67,27 +67,8 @@ sub LJ::Cmdbuffer::flush
         $mode = $1;
     }
 
-    my $code;
-    my $too_old = 0;        # 0 = never too old
-    my $arg_format = 'url'; # 'raw' = don't urlencode
-
-    my $cmds = \%LJ::Cmdbuffer::cmds;
-
-    # is it a built-in command?
-    if ($cmds->{$cmd}) {
-        $code = $cmds->{$cmd}->{$mode};
-        $too_old = $cmds->{$cmd}->{"too_old"};
-        $arg_format = $cmds->{$cmd}->{"arg_format"} if
-            defined $cmds->{$cmd}->{"arg_format"};
-
-    # otherwise it might be a site-local command
-    } else {
-        $code = $LJ::HOOKS{"cmdbuf:$cmd:$mode"}->[0]
-            if $LJ::HOOKS{"cmdbuf:$cmd:$mode"};
-        $too_old = $LJ::HOOKS{"cmdbuf:$cmd:too_old"}->[0]->()
-            if $LJ::HOOKS{"cmdbuf:$cmd:too_old"};
-    }
-
+    my $code = $LJ::Cmdbuffer::cmds{$cmd} ?
+        $LJ::Cmdbuffer::cmds{$cmd}->{$mode} : $LJ::HOOKS{"cmdbuf:$cmd:$mode"}->[0];
     return 0 unless $code;
 
     # start/finish modes
@@ -95,6 +76,15 @@ sub LJ::Cmdbuffer::flush
         $code->($dbh);
         return 1;
     }
+
+    # 0 = never too old
+    my $too_old = LJ::Cmdbuffer::get_property($cmd, 'too_old') || 0;
+
+    # 0 == okay to run more than once per user
+    my $once_per_user = LJ::Cmdbuffer::get_property($cmd, 'once_per_user') || 0;
+
+    # 'url' = urlencode, 'raw' = don't urlencode
+    my $arg_format = LJ::Cmdbuffer::get_property($cmd, 'arg_format') || 'url';
 
     my $clist;
     my $loop = 1;
@@ -152,7 +142,7 @@ sub LJ::Cmdbuffer::flush
             # if this task is to be run once per user, go ahead and delete any jobs 
             # for this user of this type and remove them from the queue
             my $wh = "cbid=$cbid";
-            if ($cmds->{$cmd}->{once_per_user}) {
+            if ($once_per_user) {
                 $wh = "cmd=" . $db->quote($cmd) . " AND journalid=" . $db->quote($c->{journalid});
                 @$clist = grep { $_->[2] != $c->{journalid} } @$clist;
             }
@@ -164,6 +154,29 @@ sub LJ::Cmdbuffer::flush
     }
 
     return 1;
+}
+
+# <LJFUNC>
+# name: LJ::Cmdbuffer::get_property
+# des: get a property of an async job type, either built-in or site-specific
+# args: cmd, prop
+# des-cmd: a registered async job type
+# des-prop: the property name to look up
+# returns: value of property (whatever it may be) on success, undef on failure
+# </LJFUNC>
+sub get_property {
+    my ($cmd, $prop) = @_;
+    return undef unless $cmd && $prop;
+
+    if (my $c = $LJ::Cmdbuffer::cmds{$cmd}) {
+        return $c->{$prop};
+    }
+
+    if (LJ::are_hooks("cmdbuf:$cmd:$prop")) {
+        return LJ::run_hook("cmdbuf:$cmd:$prop");
+    }
+
+    return undef;
 }
 
 sub _delitem {
