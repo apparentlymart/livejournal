@@ -5177,6 +5177,8 @@ sub get_cluster_def_reader
     my @dbh_opts = scalar(@_) == 2 ? (shift @_) : ();
     my $arg = shift;
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
+    return LJ::get_cluster_reader(@dbh_opts, $id) if
+        $LJ::DEF_READER_ACTUALLY_SLAVE{$id};
     return LJ::get_dbh(@dbh_opts, LJ::master_role($id));
 }
 
