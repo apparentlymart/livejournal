@@ -616,7 +616,7 @@ body<=
                      $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
                  }
 
-                 my $fromname = $up->{'user'} ? "$up->{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITESHORT  Comment";
+                 my $fromname = $up->{'user'} ? "$up->{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT  Comment";
                  my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
                                             'To' => $paru->{'email'},
                                             'Subject' => ($headersubject || "Reply to your comment..."),
