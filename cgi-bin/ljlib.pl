@@ -29,6 +29,8 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 
+$LJ::USERPIC_ROOT ||= "/userpic";
+
 $LJ::DBIRole = new DBI::Role {
     'sources' => \%LJ::DBINFO,
     'weights_from_db' => $LJ::DBWEIGHTS_FROM_DB,
