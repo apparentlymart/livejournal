@@ -21,7 +21,7 @@ sub ban_list
     my $j = $remote;
 
     unless ($remote->{'journaltype'} eq "P") {
-        push @$out, [ "error", "Only people can ban other users, not communities (you're not logged in as a person account)." ],
+        push @$out, [ "error", "Only people can list banned users, not communities (you're not logged in as a person account)." ],
         return 0;
     }
 
@@ -38,7 +38,7 @@ sub ban_list
         } elsif ($j->{journaltype} ne 'C') {
             $error = 1;
             push @$out, [ "error", "Account is not a community." ],
-        } elsif (!LJ::check_rel($j, $remote, 'A')) {
+        } elsif (!LJ::can_manage($remote, $j)) {
             $error = 1;
             push @$out, [ "error", "Not maintainer of this community." ],
         }
