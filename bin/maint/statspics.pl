@@ -1,10 +1,12 @@
 #!/usr/bin/perl
 #
 
+use GD::Graph::bars;
+
 $maint{'genstatspics'} = sub 
 {
-    &connect_db();
-    use GD::Graph::bars;
+    my $dbs = LJ::get_dbs();
+    my $dbh = $dbs->{'dbh'};
 
     print "-I- paid accounts by day.\n";
 
@@ -99,7 +101,7 @@ $maint{'genstatspics'} = sub
     $g->set(
 	    x_label           => 'Day',
 	    y_label           => 'Posts',
-	    title             => 'LiveJournal posts per day',
+	    title             => 'Posts per day',
 	    tranparent        => 0,
 	    y_max_value       => $max,
 	    );
@@ -135,7 +137,7 @@ $maint{'genstatspics'} = sub
     $g->set(
 	    x_label           => 'Week',
 	    y_label           => 'Posts',
-	    title             => 'LiveJournal posts per week',
+	    title             => 'Posts per week',
 	    tranparent        => 0,
 	    y_max_value       => $max,
 	    );
@@ -149,6 +151,5 @@ $maint{'genstatspics'} = sub
     print "-I- done.\n";
 
 };
-
 
 1;
