@@ -54,22 +54,16 @@ sub newPost {
     my ($appkey, $journal, $user, $password, $content, $publish) = @_;
 
     my $err;
-    my @ltime = gmtime();
     my $event = LJ::Util::blogger_deserialize($content);
 
     my $req = {
-	'usejournal' => $journal ne $user ? $journal : undef,
-	'ver' => 1,
-	'username' => $user,
-	'password' => $password,
-	'event' => $event->{'event'},
-	'subject' => $event->{'subject'},
+        'usejournal' => $journal ne $user ? $journal : undef,
+        'ver' => 1,
+        'username' => $user,
+        'password' => $password,
+        'event' => $event->{'event'},
+        'subject' => $event->{'subject'},
         'props' => $event->{'props'},
-	'year' => $ltime[5]+1900,
-	'mon' => $ltime[4]+1,
-	'day' => $ltime[3],
-	'hour' => $ltime[2],
-	'min' => $ltime[1],
     };
 
     my $res = LJ::Protocol::do_request("postevent", $req, \$err);

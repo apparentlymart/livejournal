@@ -573,6 +573,16 @@ sub postevent
         $event =~ s/\r//g;
     }
 
+    unless (grep { defined $req->{$_} } qw(year mon day hour min)) {
+        # FIXME this is so lame.  should use timezones.
+        my @ltime = gmtime();
+        $req->{'year'} = $ltime[5]+1900;
+        $req->{'mon'}  = $ltime[4]+1;
+        $req->{'day'}  = $ltime[3];
+        $req->{'hour'} = $ltime[2];
+        $req->{'min'}  = $ltime[1];
+    }
+
     return undef
         unless common_event_validation($req, $err, $flags);
 
