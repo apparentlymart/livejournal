@@ -83,7 +83,7 @@ my @alters;
 my $dbh;
 
 CLUSTER: foreach my $cluster (@clusters) {
-    print "Updating cluster: $cluster\n";
+    print "Updating cluster: $cluster\n" unless $opt_listtables;
     ## make sure we can connect
     $dbh = $cluster ? LJ::get_cluster_master($cluster) : LJ::get_db_writer();
     unless ($dbh) {
