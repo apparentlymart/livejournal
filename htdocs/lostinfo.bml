@@ -91,6 +91,12 @@ body<=
         }
 
         # email address is okay, build email body
+        my $encoding = 'utf-8';
+        my $subject = $ML{'/lostinfo_do.bml.lostpasswordmail.subject'};
+        if (!LJ::is_ascii($subject)) {
+            $subject = MIME::Words::encode_mimeword($subject, 'B', $encoding);
+        }
+
         my $body = BML::ml('/lostinfo_do.bml.lostpasswordmail.part1',
                            { 'sitename' => $LJ::SITENAME,
                              'username' => $u->{'user'},
@@ -120,8 +126,8 @@ body<=
             'to' => $email,
             'from' => $LJ::ADMIN_EMAIL,
             'fromname' => $LJ::SITENAME,
-            'charset' => 'utf-8',
-            'subject' => $ML{'/lostinfo_do.bml.lostpasswordmail.subject'},
+            'charset' => $encoding,
+            'subject' => $subject,
             'body' => $body,
         }) or die "Error: couldn't send email";
 
