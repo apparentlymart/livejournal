@@ -691,7 +691,7 @@
          &comma($count) . "</td></tr>";
  }
  
- my $points = $sth->selectrow_array("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
+ my $points = $dbr->selectrow_array("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
  if ($points) {
      $body .= "<tr><td align='right' nowrap><b><a href='/support/'>$ML{'.label.supportpoints'}</a>:</b></td><td colspan='2'>" . &comma($points) . "</td></tr>";
  }
