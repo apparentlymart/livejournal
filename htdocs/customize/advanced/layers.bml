@@ -16,7 +16,6 @@
         return;        
     };
 
-    my %layerinfo;
     my $pub = LJ::S2::get_public_layers();
 
     my $id;
@@ -103,7 +102,7 @@
 
     # show list of layers
     my $ulay = LJ::S2::get_layers_of_user($remote);
-
+    
     $body .= "<?h1 Your Layers h1?>";
     if (%$ulay) {
         $body .= "<table style='margin-bottom: 10px' cellpadding='3' border='1' class='postheading'>";
@@ -115,13 +114,13 @@
             my $bid = $ulay->{$lid}->{'b2lid'};
             if ($bid != $lastbase) {
                 $lastbase = $bid;
-                my $parlay = $layerinfo{$bid} || $pub->{$bid};
+                my $parlay = $ulay->{$bid} || $pub->{$bid};
                 my $pname = LJ::ehtml($parlay->{'name'});
                 $body .= "<tr><td colspan='4'><small>Child of <a href='layerbrowse.bml?id=$bid'>layer $bid</a>: $pname</small></td></tr>\n";
             }
-            my $i = $layerinfo{$lid};
-            my $name = LJ::ehtml($i->{'name'}) || "<i>(none)</i>";
-            $body .= "<tr><td><a href='layerbrowse.bml?id=$lid'>$lid</a></td><td>$ulay->{$lid}->{'type'}</td><td>$name</td><td>";
+            my $lay = $ulay->{$lid};
+            my $name = LJ::ehtml($lay->{'name'}) || "<i>(none)</i>";
+            $body .= "<tr><td><a href='layerbrowse.bml?id=$lid'>$lid</a></td><td>$lay->{'type'}</td><td>$name</td><td>";
             $body .= "<form method='post' style='display:inline' action='layeredit.bml?id=$lid'>";
             $body .= "<input type='submit' name='action:edit' value='Edit...' /></form>\n";
             $body .= "<form method='post' style='display:inline' action='layers.bml'>";
@@ -177,8 +176,8 @@
                    keys %$pub;
     if (%$ulay) {
         push @layouts, ('', '---');
-        push @layouts, map { $_, "$layerinfo{$_}->{'name'} (#$_)" } 
-                       sort { $layerinfo{$a}->{'name'} cmp $layerinfo{$b}->{'name'} || $a <=> $b}
+        push @layouts, map { $_, "$ulay->{$_}->{'name'} (#$_)" } 
+                       sort { $ulay->{$a}->{'name'} cmp $ulay->{$b}->{'name'} || $a <=> $b}
                        keys %$ulay;
     }
 

@@ -145,7 +145,7 @@ sub get_public_layers
 
     my $dbr = LJ::get_db_reader();
     $sysid ||= LJ::get_userid($dbr, "system");
-    my $layers = get_layers_of_user($sysid, "pop_children");
+    my $layers = get_layers_of_user($sysid, "is_system");
 
     return $layers if $LJ::LESS_CACHING;
     $LJ::CACHED_PUBLIC_LAYERS = $layers if $layers;
@@ -154,7 +154,7 @@ sub get_public_layers
 
 sub get_layers_of_user
 {
-    my ($u, $pop_children) = @_;
+    my ($u, $is_system) = @_;
     my $userid;
     if (ref $u eq "HASH") {
         $userid = $u->{'userid'}+0;
@@ -168,11 +168,12 @@ sub get_layers_of_user
 
     my %layers;    # id -> {hashref}, uniq -> {same hashref}
     my $dbr = LJ::get_db_reader();
-    
+
+    my $extrainfo = $is_system ? "'redist_uniq', " : "";
     my $sth = $dbr->prepare("SELECT i.infokey, i.value, l.s2lid, l.b2lid, l.type ".
                             "FROM s2layers l, s2info i ".
                             "WHERE l.userid=? AND l.s2lid=i.s2lid AND ".
-                            "i.infokey IN ('redist_uniq', 'name', 'langcode', ".
+                            "i.infokey IN ($extrainfo 'name', 'langcode', ".
                             "'majorversion', '_previews')");
     $sth->execute($userid);
     die $dbr->errstr if $dbr->err;
@@ -192,7 +193,7 @@ sub get_layers_of_user
 
         # setup children keys
         next unless $layers{$_}->{'b2lid'};
-        if ($pop_children) {
+        if ($is_system) {
             my $bid = $layers{$_}->{'b2lid'};
             unless ($layers{$bid}) {
                 delete $layers{$layers{$_}->{'uniq'}};
@@ -1112,6 +1113,21 @@ sub rand
         ($low, $high) = ($aa, $bb);
     }
     return int(rand($high - $low + 1)) + $low;
+}
+
+sub viewer_logged_in
+{
+    my ($ctx) = @_;
+    my $remote = LJ::get_remote();
+    return defined $remote;
+}
+
+sub viewer_is_owner
+{
+    my ($ctx) = @_;
+    my $remote = LJ::get_remote();
+    return 0 unless $remote;
+    return $remote->{'userid'} == $LJ::S2::CURR_PAGE->{'_u'}->{'userid'};
 }
 
 sub Date__day_of_week

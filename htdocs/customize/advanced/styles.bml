@@ -19,14 +19,15 @@
 
     # authenticate
     my $remote = LJ::get_remote();
-    return $err->('You must be logged in to view your layers.') 
+    return $err->('You must be logged in to view your styles.') 
         unless $remote;
     return $err->('Your account type does not permit you to modify S2 styles')
         unless LJ::get_cap($remote, 's2styles');
 
     # style id to edit, if we have one
     # if we have this we're assumed to be in 'edit' mode
-    my $id = $GET{'id'}+0 if $GET{'id'} =~ /^\d+$/;
+    my $id = $GET{'id'}+0;
+
     my ($core, $layout);      # scalars
     my ($pub, $ulay, $style); # hashrefs
 
@@ -66,7 +67,7 @@
             undef $layout;
         }
 
-        # if we're changing layout, clear everything but core
+        # if we're changing layout, clear everything below
         if ($POST{'layout'} && $POST{'layout'} != $style->{'layer'}->{'layout'}) {
             foreach (qw(theme i18n user)) {
                 delete $POST{$_};
@@ -93,14 +94,21 @@
         # change changes
         if ($POST{'action:change'} || $POST{'action:savechanges'}) {
 
+            my $baseid = sub {
+                my $id = shift;
+                my $layer = $ulay->{$id} || $pub->{$id};
+                return undef unless $layer;
+                return $layer->{'b2lid'};
+            };
+
             # check layer hierarchy
             foreach (qw(i18nc layout)) {
-                next if ! $POST{$_} || $pub->{$POST{$_}}->{'b2lid'} == $core;
-                return $err->('Layer hierarchy mismatch');
+                next if ! $POST{$_} || $baseid->($POST{$_}) == $core;
+                return $err->("Layer hierarchy mismatch: $_");
             }
             foreach (qw(theme i18n user)) {
-                next if ! $POST{$_} || $pub->{$POST{$_}}->{'b2lid'} == $layout;
-                return $err->('Layer hierarchy mismatch');
+                next if ! $POST{$_} || $baseid->($POST{$_}) == $layout;
+                return $err->("Layer hierarchy mismatch: $_");
             }
 
             # save in database
