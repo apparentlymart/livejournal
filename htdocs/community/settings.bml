@@ -137,13 +137,13 @@ body<=
  if ($mode eq 'create') {
     $ret .= "<?h2 $ML{'.label.commheader'} h2?>" .
        ($mode eq 'modify' ? "<?p $ML{'.label.commchange'} p?>" : "<?p $ML{'.label.commcreate'} p?>");
-    $ret .= "<?standout ";
-    $ret .= "$ML{'.label.username'}<br />";
-    $ret .= "<input name='cuser' size='15' maxlength='15' value='$cname'> ";
-    $ret .= "<br /><?inerr $errors{'username'} inerr?><br />";
-    $ret .= "$ML{'.label.password'}<br /><input name='cpassword' type='password'>";
-    $ret .= "<br /><?inerr $errors{'password'} inerr?>";
-    $ret .= " standout?>";
+    $ret .= "<?standout <table width='350' cellpadding='7'><tr valign='top'><td><b>$ML{'.label.maintainer'}</b></td>";
+    $ret .= "<td><?ljuser $remote->{'user'} ljuser?><br />$ML{'.label.maintainer.login'}</td></tr>";
+    $ret .= "<tr valign='top'><td><b>$ML{'.label.community'}</b></td>";
+    $ret .= "<td>$ML{'.label.username'}<br /><input name='cuser' maxlength='15' value='$cname' /><br />";
+    $ret .= "<?inerr $errors{'username'} inerr?><br />";
+    $ret .= "$ML{'.label.password'}<br /><input name='cpassword' type='password' /><br />";
+    $ret .= "<?inerr $errors{'password'} inerr?></td></tr></table> standout?>";
  } else {
     $ret .= LJ::html_hidden('cuser', $cname);
     $ret .= "<?p " . BML::ml('.name',{'name'=>"<?ljcomm $cname ljcomm?>"});

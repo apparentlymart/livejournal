@@ -287,11 +287,17 @@
 
 /community/settings.bml.label.commsite=Community website
 
+/community/settings.bml.label.community=Community:
+
 /community/settings.bml.label.createheader=Create Community
 
 /community/settings.bml.label.createtext=From here you can create a community account.  A community is a special type of account that other users can join, and post in.  For example of a community, check out the <a href="/userinfo.bml?user=seattle">Seattle Party Community</a>.
 
 /community/settings.bml.label.howoperates=Choose how your community operates.  You can change these later.
+
+/community/settings.bml.label.maintainer=Maintainer:
+
+/community/settings.bml.label.maintainer.login=If this is not the maintainter account, <a href='/login.bml?ret=1'>login</a> as somebody else.
 
 /community/settings.bml.label.membership=Membership
 
@@ -1677,9 +1683,9 @@ if you would like to screen, unscreen, or delete the comments.
 
 /talkread.bml.replysuspended=<b>(Reply from suspended user)</b>
 
-/talkread.bml.select=Select
-
 /talkread.bml.screenedpost=<b>(Screened Post)</b>
+
+/talkread.bml.select=Select
 
 /talkread.bml.subjectdeleted=[deleted]
 
