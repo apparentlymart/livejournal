@@ -2099,7 +2099,10 @@ sub ljuser
 
     if (isu($user)) {
         $opts->{'type'} = $user->{'journaltype'};
-        $opts->{'del'} = $user->{'statusvis'} ne 'V';
+        # Mark accounts as deleted that aren't visible, memorial, or locked
+        $opts->{'del'} = $user->{'statusvis'} ne 'V' &&
+            $user->{'statusvis'} ne 'M' &&
+            $user->{'statusvis'} ne 'L';
         $user = $user->{'user'};
     }
     my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
