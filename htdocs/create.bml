@@ -268,7 +268,7 @@ body<=
          'body' => $body,
      });
 
-     my $nu = LJ::load_userid($dbh, $userid);
+     my $nu = LJ::load_userid($userid, "force");
 
      if ($LJ::TOS_CHECK && -f "$LJ::HOME/htdocs/inc/legal-tos") {
          my $rev;

@@ -4450,52 +4450,6 @@ sub get_cluster_master
 }
 
 # <LJFUNC>
-# name: LJ::make_dbs
-# class: db
-# des: Makes a $dbs structure from a master db
-#      handle and optionally a slave.  This function
-#      is called from [func[LJ::get_dbs]].  You shouldn't need
-#      to call it yourself.
-# returns: $dbs: hashref with 'dbh' (master), 'dbr' (slave or undef),
-#          'has_slave' (boolean) and 'reader' (dbr if defined, else dbh)
-# </LJFUNC>
-sub make_dbs
-{
-    my ($dbh, $dbr) = @_;
-    my $dbs = {};
-    $dbs->{'dbh'} = $dbh;
-    $dbs->{'dbr'} = $dbr;
-    $dbs->{'has_slave'} = defined $dbr ? 1 : 0;
-    $dbs->{'reader'} = defined $dbr ? $dbr : $dbh;
-    bless $dbs, "LJ::DBSet";
-    return $dbs;
-}
-
-# <LJFUNC>
-# name: LJ::make_dbs_from_arg
-# class: db
-# des: Convert unknown arg to a dbset.
-# info: Functions use this to let their callers use either db handles
-#       or dbsets.  If argument is a single handle, turns it into a
-#       dbset.  If already a dbset, just returns it unchanged.
-# args: something
-# des-something: Either a db handle or a dbset.
-# returns: A dbset.
-# </LJFUNC>
-sub make_dbs_from_arg
-{
-    my $dbarg = shift;
-    my $dbs;
-    if (ref($dbarg) eq "HASH" || ref($dbarg) eq "LJ::DBSet") {
-        $dbs = $dbarg;
-    } else {
-        $dbs = LJ::make_dbs($dbarg, undef);
-    }
-    return $dbs;
-}
-
-
-# <LJFUNC>
 # name: LJ::date_to_view_links
 # class: component
 # des: Returns HTML of date with links to user's journal.
@@ -4743,65 +4697,66 @@ sub load_userids_multiple
 # info: From the [dbarg[user]] table.
 # args: dbarg?, user, force?
 # des-user: Username of user to load.
-# des-force: if set to true, won't return cached user object
+# des-force: if set to true, won't return cached user object and will
+#            query a dbh
 # returns: Hashref with keys being columns of [dbtable[user]] table.
 # </LJFUNC>
 sub load_user
 {
-    my $db;
-    if (ref $_[0]) {
-        my $dbarg = shift;
-        my $dbs = LJ::make_dbs_from_arg($dbarg);
-        $db = $dbs->{'dbh'};
-    }
+    &nodb;
     my ($user, $force) = @_;
 
     $user = LJ::canonical_username($user);
     return undef unless length $user;
     
-    return $LJ::REQ_CACHE_USER_NAME{$user} if
-        $LJ::REQ_CACHE_USER_NAME{$user} && ! $force;
+    my $get_user = sub {
+        my $use_dbh = shift;
+        my $db = $use_dbh ? LJ::get_db_writer() : LJ::get_db_reader();
+        my $u = $db->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
+        return $u unless $u && $use_dbh;
 
-    my $u = LJ::memcache_get_u("user:$user");
+        # set caches since we got a u from the master
+        LJ::memcache_set_u($u);
+        $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
+        $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u;
+        return $u;
+    };
 
-    # try a reader, unless we're using memcache, otherwise we'll wait and
-    # load from master below.
-    unless ($u || @LJ::MEMCACHE_SERVERS) {
-        $db ||= LJ::get_db_reader();
-        $u = $db->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
-    }
+    # caller is forcing a master, return now
+    return $get_user->("master") if $force;
+
+    my $u;
+
+    # return process cache if we have one
+    $u = $LJ::REQ_CACHE_USER_NAME{$user};
+    return $u if $u;
+
+    # check memcache
+    $u = LJ::memcache_get_u("user:$user");
+    return $u if $u;
+
+    # try to load from master if using memcache, otherwise from slave
+    $u = $get_user->(@LJ::MEMCACHE_SERVERS);
+    return $u if $u;
 
     # if user doesn't exist in the LJ database, it's possible we're using
     # an external authentication source and we should create the account
     # implicitly.
-    unless ($u) {
-        my $dbh = LJ::get_db_writer();
-        if (ref $LJ::AUTH_EXISTS eq "CODE") {
-            if ($LJ::AUTH_EXISTS->($user)) {
-                if (LJ::create_account($dbh, {
-                    'user' => $user,
-                    'name' => $user,
-                    'password' => "",
-                }))
-                {
-                    # NOTE: this should pull from the master, since it was _just_
-                    # created and the elsif below won't catch.
-                    return $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
-                } else {
-                    return undef;
-                }
-            }
-        } else {
-            # If the user still doesn't exist, and there isn't an alternate auth code
-            # try grabbing it from the master.
-            $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
-            LJ::memcache_set_u($u) if $u;
+    if (ref $LJ::AUTH_EXISTS eq "CODE" && 
+        $LJ::AUTH_EXISTS->($user))
+    {
+        if (LJ::create_account({
+            'user' => $user,
+            'name' => $user,
+            'password' => "",
+        }))
+        {
+            # this should pull from the master, since it was _just_ created
+            return $get_user->("master");
         }
     }
 
-    $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u if $u;
-    $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u if $u;
-    return $u;
+    return undef;
 }
 
 sub memcache_get_u
@@ -4832,43 +4787,51 @@ sub memcache_set_u
 # info: From the [dbarg[user]] table.
 # args: dbarg?, userid, force?
 # des-userid: Userid of user to load.
-# des-force: If set to true, won't return cached user object.
+# des-force: if set to true, won't return cached user object and will
+#            query a dbh
 # returns: Hashref with keys being columns of [dbtable[user]] table.
 # </LJFUNC>
 sub load_userid
 {
-    my $dbarg = ref $_[0] ? shift : undef;
+    &nodb;
     my ($userid, $force) = @_;
     return undef unless $userid;
-    
-    return $LJ::REQ_CACHE_USER_ID{$userid} if
-        $LJ::REQ_CACHE_USER_ID{$userid} && ! $force;
+     
+    my $get_user = sub {
+        my $use_dbh = shift;
+        my $db = $use_dbh ? LJ::get_db_writer() : LJ::get_db_reader();
+        my $u = $db->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, $userid);
+        return $u unless $u && $use_dbh;
 
-    my $u = LJ::memcache_get_u([$userid,"userid:$userid"]);
+        # set caches since we got a u from the master
+        LJ::memcache_set_u($u);
+        $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
+        $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u;
+        return $u;
+    };
 
-    unless ($u) {
-        my $master = 0;
-        unless ($dbarg) {
-            $dbarg = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
-            $master = @LJ::MEMCACHE_SERVERS ? 1 : 0;
-        }
+    # user is forcing master, return now
+    return $get_user->("master") if $force;
 
-        my $dbs = LJ::make_dbs_from_arg($dbarg);
-        my $db = $dbs->{'reader'};
+    my $u;
 
-        $u = $db->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, 
-                                    $userid);
-        LJ::memcache_set_u($u) if $u && $master;
-            
-        if (!$u && ($dbs->{'has_slave'} || !$dbarg)) {
-            my $dbh = $dbarg ? $dbs->{'dbh'} : LJ::get_db_writer();
-            $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, $userid);
-        }
-    }
+    # check process cache
+    $u = $LJ::REQ_CACHE_USER_ID{$userid};
+    return $u if $u;
 
-    $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u if $u;
-    $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u if $u;
-    return $u;
+    # check memcache
+    $u = LJ::memcache_get_u([$userid,"userid:$userid"]);
+    return $u if $u;
+
+    # get from master if using memcache
+    return $get_user->("master") if @LJ::MEMCACHE_SERVERS;
+
+    # check slave
+    $u = $get_user->();
+    return $u if $u;
+
+    # if we didn't get a u from the reader, fall back to master
+    return $get_user->("master");
 }
 
 # <LJFUNC>
@@ -5278,36 +5241,24 @@ sub remote_has_priv
 # </LJFUNC>
 sub get_userid
 {
-    my $dbarg = ref $_[0] ? shift : undef;
+    &nodb;
     my $user = shift;
 
     $user = LJ::canonical_username($user);
 
-    my $userid;
     if ($LJ::CACHE_USERID{$user}) { return $LJ::CACHE_USERID{$user}; }
 
-    my $dbr;
-    if ($dbarg) {
-        my $dbs = LJ::make_dbs_from_arg($dbarg);
-        $dbr = $dbs->{'reader'};
-    } else {
-        $dbr = LJ::get_db_reader();
-    }
-
-    my $quser = $dbr->quote($user);
-    my $sth = $dbr->prepare("SELECT userid FROM useridmap WHERE user=$quser");
-    $sth->execute;
-    ($userid) = $sth->fetchrow_array;
+    my $dbr = LJ::get_db_reader();
+    my $userid = $dbr->selectrow_array("SELECT userid FROM useridmap WHERE user=?", undef, $user);
     if ($userid) { $LJ::CACHE_USERID{$user} = $userid; }
 
     # implictly create an account if we're using an external
     # auth mechanism
     if (! $userid && ref $LJ::AUTH_EXISTS eq "CODE")
     {
-        my $dbh = LJ::get_db_writer();
-        $userid = LJ::create_account($dbh, { 'user' => $user,
-                                             'name' => $user,
-                                             'password' => '', });
+        $userid = LJ::create_account({ 'user' => $user,
+                                       'name' => $user,
+                                       'password' => '', });
     }
 
     return ($userid+0);
@@ -5342,31 +5293,37 @@ sub want_userid
 # </LJFUNC>
 sub get_username
 {
-    my $dbarg = ref $_[0] ? shift : undef;
+    &nodb;
     my $userid = shift;
     $userid += 0;
 
     # Checked the cache first.
     if ($LJ::CACHE_USERNAME{$userid}) { return $LJ::CACHE_USERNAME{$userid}; }
 
-    my $dbr;
-    my $dbs;
-    if ($dbarg) {
-        $dbs = LJ::make_dbs_from_arg($dbarg);
-        $dbr = $dbs->{'reader'};
-    } else {
-        $dbr = LJ::get_db_reader();
+    # if we're using memcache, it's faster to just query memcache for
+    # an entire $u object and just return the username.  otherwise, we'll
+    # go ahead and query useridmap
+    if (@LJ::MEMCACHE_SERVERS) {
+        my $u = LJ::load_userid($userid);
+        return undef unless $u;
+
+        $LJ::CACHE_USERNAME{$userid} = $u->{'user'};
+        return $u->{'user'};
     }
 
-    my $user = $dbr->selectrow_array("SELECT user FROM useridmap WHERE userid=$userid");
+    my $dbr = LJ::get_db_reader();
+    my $user = $dbr->selectrow_array("SELECT user FROM useridmap WHERE userid=?", undef, $userid);
 
     # Fall back to master if it doesn't exist.
-    if (! defined($user) && ($dbs->{'has_slave'} || ! $dbarg)) {
-        my $dbh = $dbs ? $dbs->{'dbh'} : LJ::get_db_writer();
-        $user = $dbr->selectrow_array("SELECT user FROM useridmap WHERE userid=$userid");
+    unless (defined $user) {
+        my $dbh = LJ::get_db_writer();
+        $user = $dbh->selectrow_array("SELECT user FROM useridmap WHERE userid=?", undef, $userid);
     }
-    if (defined($user)) { $LJ::CACHE_USERNAME{$userid} = $user; }
-    return ($user);
+
+    return undef unless defined $user;
+
+    $LJ::CACHE_USERNAME{$userid} = $user;
+    return $user;
 }
 
 sub get_itemid_near2

@@ -66,7 +66,7 @@ sub moodtheme_create
         return 0;
     }
 
-    my $u = LJ::load_userid($dbh, $remote->{'userid'});
+    my $u = LJ::load_userid($remote->{'userid'});
     unless (LJ::get_cap($u, "moodthemecreate")) {
         push @$out, [ "error", "Sorry, your account type doesn't let you create new mood themes." ];
         return 0;
@@ -139,7 +139,7 @@ sub moodtheme_setpic
         return 0;
     }
 
-    my $u = LJ::load_userid($dbh, $remote->{'userid'});
+    my $u = LJ::load_userid($remote->{'userid'});
     unless (LJ::get_cap($u, "moodthemecreate")) {
         push @$out, [ "error", "Sorry, your account type doesn't let you modify mood themes." ];
         return 0;
