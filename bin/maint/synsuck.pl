@@ -100,6 +100,9 @@ $maint{'synsuck'} = sub
             next if $dbh->selectrow_array("SELECT COUNT(*) FROM synitem WHERE ".
                                           "userid=$userid AND item=?", undef,
                                           $dig);
+            $dbh->do("INSERT INTO synitem (userid, item, dateadd) VALUES (?,?,NOW())",
+                     undef, $userid, $dig);
+
             $newcount++;
             print "$dig - $it->{'title'}\n";
             $it->{'description'} =~ s/^\s+//;
@@ -125,8 +128,6 @@ $maint{'synsuck'} = sub
             my $res = LJ::Protocol::do_request($dbs, "postevent", $req, \$err, $flags);
             if ($res && ! $err) {
                 sleep 1; # so 20 items in a row don't get the same logtime second value, so they sort correctly
-                $dbh->do("INSERT INTO synitem (userid, item, dateadd) VALUES (?,?,NOW())",
-                         undef, $userid, $dig);
             } else {
                 print "  Error: $err\n";
                 $errorflag = 1;
