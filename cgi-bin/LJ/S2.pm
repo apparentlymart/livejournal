@@ -49,6 +49,8 @@ sub make_journal
         return;
     }
     
+    escape_context_props($ctx);
+    
     $opts->{'ctx'} = $ctx;
 
     $ctx->[S2::PROPS]->{'SITEROOT'} = $LJ::SITEROOT;
@@ -462,6 +464,15 @@ sub load_layer
                                   $lid);
 }
 
+sub escape_context_props
+{
+    my $ctx = shift;
+    while (my ($k, $v) = each %{$ctx->[S2::PROPS]}) {
+        $v =~ s/</&lt;/g;
+        $v =~ s/>/&gt;/g;
+    }
+}
+
 sub layer_compile_user
 {
     my ($layer, $overrides) = @_;
@@ -739,9 +750,14 @@ sub can_use_prop
     my $pol = get_policy();
     my $can = 0;
     foreach my $lay ('*', $uniq) {
-        next unless defined $pol->{$_};
-        next unless defined $pol->{$_}->{'use'};
-        $can = $pol->{$_}->{'use'};
+        foreach my $it ('props', 'prop') {
+            if ($it eq "props" && defined $pol->{$lay}->{'props'}) {
+                $can = $pol->{$lay}->{'props'};
+            }
+            if ($it eq "prop" && defined $pol->{$lay}->{'prop'}->{$prop}) {
+                $can = $pol->{$lay}->{'prop'}->{$prop};
+            }
+        }
     }
     return $can;
 }

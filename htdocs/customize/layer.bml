@@ -6,8 +6,19 @@
     my $dbs = LJ::get_dbs();
     my $dbh = $dbs->{'dbh'};
 
-    my $u = LJ::get_remote($dbs);
-    return BML::redirect("/customize/") unless $u;
+    my $remote = LJ::get_remote($dbs);
+    return "<?h1 Login Required h1?><?p Before you customize your journal, you must first <a href='/login.bml'>login</a>. p?>"
+        unless $remote;
+
+    my @journals = ($remote->{'user'});
+    push @journals, LJ::get_shared_journals($dbs, $remote);
+    my $journal = $GET{'journal'} || $remote->{'user'};
+    unless (grep { $_ eq $journal } @journals) {  return BML::redirect("/customize/");  }
+
+    my $u = $remote;
+    $u = LJ::load_user($dbs, $journal) unless $journal eq $remote->{'user'};
+    my $userid = $u->{'userid'};
+
     LJ::load_user_props($dbs, $u, "stylesys", "s2_style");
 
     $body = "";
@@ -31,7 +42,7 @@
         return $err->("Style not found.") unless $style && $style->{'userid'} == $u->{'userid'};
         $layer = LJ::S2::load_layer($dbh, $style->{'layer'}->{'user'});
         $save_arg = "w=user";
-        $save_redir = "/customize/?journal=$u->{'user'}";
+        $save_redir = "/customize/?journal=$journal";
     }
 
     return BML::redirect("/customize/") unless $layer;
@@ -45,6 +56,9 @@
     my $lyr_core = LJ::S2::load_layer($dbh, $lyr_layout->{'b2lid'});
     return $err->("Core layer for layout not found.") 
         unless $lyr_core;
+
+    $lyr_layout->{'uniq'} = $dbh->selectrow_array("SELECT value FROM s2info WHERE s2lid=? AND infokey=?",
+                                                  undef, $lyr_layout->{'s2lid'}, "redist_uniq");
 
     my ($lid_i18nc, $lid_theme, $lid_i18n);
     $lid_i18nc = $style->{'layer'}->{'i18nc'};
@@ -86,6 +100,7 @@
             next if $prop->{'noui'};
             my $name = $prop->{'name'};
             next unless $POST{"${name}_action"} eq "override";
+            next unless LJ::S2::can_use_prop($u, $lyr_layout->{'uniq'}, $name);
             $override{$name} = [ $prop, $POST{"${name}_value"} ];
         }
         
@@ -113,6 +128,8 @@
         my $name = $prop->{'name'};
         my $type = $prop->{'type'};
         
+        my $can_use = LJ::S2::can_use_prop($u, $lyr_layout->{'uniq'}, $name);
+
         # figure out existing value (if there was no user/theme layer)
         my $existing;
         foreach my $lid (reverse @layerids) {
@@ -137,7 +154,7 @@
 
         if (ref $override eq "HASH") { $override = $override->{'as_string'}; }
 
-        my $checked;
+        my ($checked, $disabled);
 
         $body .= "<?h1 $prop->{'des'} h1?>";
         $body .= "<?p ";
@@ -159,9 +176,11 @@
         }
         $body .= "</dd>";
         $checked = $had_override ? "checked='checked'" : "";
-        $body .= "<dt><input type='radio' name='${name}_action' value='override' id='${name}_override' $checked><label for='${name}_override'> <b>Override: </b></label></dt><dd>";
+        $disabled = $can_use ? "" : "disabled='disabled'";
+        $body .= "<dt><input type='radio' name='${name}_action' value='override' id='${name}_override' $checked $disabled><label for='${name}_override'> <b>Override: </b></label></dt><dd>";
         if ($prop->{'values'}) {
             $body .= LJ::html_select({ 'name' => "${name}_value",
+                                       'disabled' => ! $can_use,
                                        'selected' => $override },
                                      split(/\|/, $prop->{'values'}));
         } elsif ($type eq "int" || $type eq "string") {
@@ -172,11 +191,13 @@
                                          $prop->{'maxlength'} || 60);
             }
             $body .= LJ::html_text({ 'name' => "${name}_value",
+                                     'disabled' => ! $can_use,
                                      'value' => $override,
                                      'maxlength' => $maxlength,
                                      'size' => $length });
         } elsif ($type eq "Color") {
             $body .= LJ::html_color({ 'name' => "${name}_value",
+                                      'disabled' => ! $can_use,
                                       'default' => $override,
                                       'des' => $prop->{'des'} });
         }

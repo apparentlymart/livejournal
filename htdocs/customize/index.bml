@@ -107,7 +107,7 @@ body<=
             return "Error: couldn't generate user layer" unless $id;
             LJ::S2::set_style_layers($u, $u->{'s2_style'}, "user", $id);
         }
-        return BML::redirect("/customize/layer.bml?w=user");
+        return BML::redirect("/customize/layer.bml?w=user&journal=$journal");
     }
 
     if ($POST{'save:theme'}) {

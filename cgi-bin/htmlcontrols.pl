@@ -75,7 +75,7 @@ sub html_select
 {
     my $opts = shift;
     my @items = @_;
-    my $disabled = $opts->{'disabled'} ? " disabled='1'" : "";
+    my $disabled = $opts->{'disabled'} ? " disabled='disabled'" : "";
     my $ret;
     $ret .= "<select";
     if ($opts->{'name'}) { $ret .= " name='$opts->{'name'}'"; }
@@ -132,7 +132,7 @@ sub html_text
 {
     my $opts = shift;
 
-    my $disabled = $opts->{'disabled'} ? " disabled" : "";
+    my $disabled = $opts->{'disabled'} ? " disabled='disabled'" : "";
     my $ret;
     $ret .= "<input type=\"text\"";
     if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
