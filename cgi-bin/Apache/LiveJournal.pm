@@ -193,7 +193,7 @@ sub trans
 
         if ($opts->{'mode'} eq "item") {
             $r->handler("perl-script");
-            $r->set_handlers(PerlHandler => [ \&Apache::BML::handler ]);
+            $r->push_handlers(PerlHandler => \&Apache::BML::handler);
             my $filename = "$LJ::HOME/htdocs/talkread.bml";
             if ($args =~ /^(?:(?:mode=reply)|(?:replyto=\d+))\b/) {
                 $filename = "$LJ::HOME/htdocs/talkpost.bml";
@@ -205,7 +205,7 @@ sub trans
 
         if ($opts->{'mode'} eq "month") {
             $r->handler("perl-script");
-            $r->set_handlers(PerlHandler => [ \&Apache::BML::handler ]);
+            $r->push_handlers(PerlHandler => \&Apache::BML::handler);
             my $filename = "$LJ::HOME/htdocs/view/index.bml";
             $r->notes("_journal" => $opts->{'user'});
             $r->filename($filename);
@@ -213,7 +213,7 @@ sub trans
         }
 
         $r->handler("perl-script");
-        $r->set_handlers(PerlHandler => [ \&journal_content ]);
+        $r->push_handlers(PerlHandler => \&journal_content);
         return OK;
     };
 
@@ -339,24 +339,24 @@ sub trans
         $r->handler("perl-script");
         if ($int eq "/fotobilder") {
             return 403 unless $LJ::FOTOBILDER_IP{$r->connection->remote_ip};
-            $r->set_handlers(PerlHandler => [ \&Apache::LiveJournal::Interface::FotoBilder::handler ]);
+            $r->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
             return OK;
         }
         $RQ{'interface'} = $int eq "/flat" ? "flat" : "xmlrpc";
-        $r->set_handlers(PerlHandler => [ \&interface_content ]);
+        $r->push_handlers(PerlHandler => \&interface_content);
         return OK;
     }
 
     # customview
     if ($uri =~ m!^/customview\.cgi!) {
         $r->handler("perl-script");
-        $r->set_handlers(PerlHandler => [ \&customview_content ]);
+        $r->push_handlers(PerlHandler => \&customview_content);
         return OK;
     }
 
     if ($uri =~ m!^/palimg/!) {
         $r->handler("perl-script");
-        $r->set_handlers(PerlHandler => [ \&Apache::LiveJournal::PalImg::handler ]);
+        $r->push_handlers(PerlHandler => \&Apache::LiveJournal::PalImg::handler);
         return OK;
     }
 
@@ -426,7 +426,7 @@ sub userpic_trans
     $r->filename($file);
 
     $r->handler("perl-script");
-    $r->set_handlers(PerlHandler => [ \&userpic_content ]);
+    $r->push_handlers(PerlHandler => \&userpic_content);
     return OK;
 }
 
