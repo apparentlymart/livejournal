@@ -2174,8 +2174,8 @@ sub load_mood_theme
     return if $LJ::CACHE_MOOD_THEME{$themeid} = LJ::MemCache::get($memkey);
 
     # fall back to db
-    my $dbr = LJ::get_db_reader();
-    my $sth = $dbr->prepare("SELECT moodid, picurl, width, height FROM moodthemedata WHERE moodthemeid=?");
+    my $dbh = LJ::get_db_writer();
+    my $sth = $dbh->prepare("SELECT moodid, picurl, width, height FROM moodthemedata WHERE moodthemeid=?");
     $sth->execute($themeid);
     while (my ($id, $pic, $w, $h) = $sth->fetchrow_array) {
         $LJ::CACHE_MOOD_THEME{$themeid}->{$id} = { 'pic' => $pic, 'w' => $w, 'h' => $h };
