@@ -1,7 +1,6 @@
-####
-#
-# Layerinfo
-#
+# -*-s2-*-
+
+##[ layerinfo ]
 
 layerinfo "type" = "core";
 layerinfo "name" = "LiveJournal S2 Core, v1";
@@ -10,12 +9,13 @@ layerinfo "majorversion" = "1";
 layerinfo "author_name" = "LiveJournal Webmaster";
 layerinfo "author_email" = "webmaster@livejournal.com";
 
-####
-#
-# Classes
-#
+##[ S2 core classes ]
 
-### General classes
+class int
+{
+    function builtin zeropad(int digits) : string
+    "Return the int as a string with at least \$digits characters long, left-padded with zeroes.";
+}
 
 class string
 {
@@ -47,11 +47,30 @@ class string
     "Returns the string repeated n times";
 }
 
-class int
+class Color
+"Represent a color"
 {
-    function builtin zeropad(int digits) : string
-    "Return the int as a string with at least \$digits characters long, left-padded with zeroes.";
+  var readonly int r "Red value, 0-255.";
+  var readonly int g "Green value, 0-255.";
+  var readonly int b "Blue value, 0-255.";
+  var  string as_string "HTML hex encoded: #rrggbb";
+  function builtin Color(string s) : Color "Constructor for color class.  Lets you make a Color object from a string of form #rrggbb";
+
+  function builtin red(int r) "Set the red value. (0-255)";
+  function builtin green(int g) "Set the green value. (0-255)";
+  function builtin blue(int b) "Set the blue value. (0-255)";
+  function builtin red() : int "Get the red value.";
+  function builtin green() : int "Get the green value.";
+  function builtin blue() : int "Get the blue value.";
+  function builtin brighter() : Color "Make color brighter, by 5%.";
+  function builtin brighter(int p) : Color "Make color brighter, by percent given.";
+  function builtin darker() : Color "Make color darker, by 5%.";
+  function builtin darker(int p) : Color "Make color darker, by percent given.";
+  function builtin inverse() : Color "Invert color.";
+  function builtin average(Color other) : Color "Returns color averaged with \$other color.";
 }
+
+##[ site-core classes ]
 
 class Date
 {
@@ -59,17 +78,17 @@ class Date
     var int month "Month; 1-12.";
     var int day "Day; 1-31.";
 
-    function builtin dayofweek() : int
-    "Returns the day of the week this date falls on, from Sunday=0 to Saturday=6";
+    function builtin day_of_week() : int
+    "Returns the day of the week this date falls on, from Sunday=1 to Saturday=7";
 
     function date_short() : string 
-    "Outputs a short date in a format defined in either i18n or user";
+    "Returns date in short format";
 
     function date_long() : string 
-    "Outputs a long date in a format defined in either i18n or user";
+    "Returns date in long format";
 
-    function print_date ()
-    "Prints the date, in the format preferred by the user and user's language.";
+    function builtin time_basic () : string 
+    "Basic date format: yyyymmdd";
 }
 
 class DateTime extends Date
@@ -79,50 +98,24 @@ class DateTime extends Date
     var int sec "Second; 0-59.";
 
     function time_short() : string
-    "Outputs a short time";
+    "Returns short format of time";
 
     function time_long() : string
-    "Outputs a long time (might just be the same as short time in some i18ns)";
+    "Returns long format of time";
 
     function datetime_short() : string
-    "Outputs a representation of the current date and time";
+    "Outputs short format of the date and time";
 
     function datetime_long() : string
-    "Outputs a representation of the current date and time";
+    "Returns long format of the date and time";
 
-    function builtin time_uniq() : string 
-    "'Machine-readable' time - hhmmss.";
+    function builtin time_basic () : string 
+    "Basic time format: hhmmss";
  
-    function builtin datetime_uniq() : string 
-    "'Machine-readable' date/time - yyyymmddhhmmss.";
- 
-    function builtin datetime_unix() : string 
-    "Unix timestamp representing this date/time.";
-
-    function print_datetime ()
-    "Prints the date & time, in the format preferred by the user and user's language.";
+    function builtin datetime_basic () : string 
+    "Basic date/time format: yyyymmddhhmmss";
 }
 
-class Color {
-    var int r "Red value, 0-255";
-    var int g "Green value, 0-255";
-    var int b "Blue value, 0-255";
-    var string as_string "HTML hex encoded: #rrggbb";
-
-    function builtin Color(string s) : Color "Constructor for color class. Lets you make a Color object from a string of form #rrggbb";
-    function builtin red(int r) "Set the red value. (0-255)";
-    function builtin green(int g) "Set the green value. (0-255)";
-    function builtin blue(int b) "Set the blue value. (0-255)";
-    function builtin red() : int "Get the red value.";
-    function builtin green() : int "Get the green value.";
-    function builtin blue() : int "Get the blue value.";
-    function builtin brighter() : Color "Make color brighter, by 5%.";
-    function builtin brighter(int p) : Color "Make color brighter, by percent given.";
-    function builtin darker() : Color "Make color darker, by 5%.";
-    function builtin darker(int p) : Color "Make color darker, by percent given.";
-    function builtin inverse() : Color "Invert color.";
-    function builtin average(Color other) : Color "Returns color averaged with \$other color.";
-}
 
 class Image
 "Generic HTML image handler"
@@ -130,8 +123,6 @@ class Image
     var string url "URL of the image";
     var int width "Width in pixels";
     var int height "Height in pixels";
-#    var string alt "Alternative text";
-    var string{} attributes "<img> attributes";
 
     function print ()
     "Print an HTML tag for this Image";
@@ -155,12 +146,9 @@ class UserPic extends Image
 "Information about userpics"
 {
     var int picid "Unique id number of this picture";
-    var string[] keywords "A list of picture keywords which currently match this picture";
-    var string selkeyword 
+    var string keyword 
     "The keyword which (when associated with an entry or comment) caused this picture to be displayed";
-    var bool default "Is this picture the users' default?";
 }
-
 
 class Link
 "A link or a button"
@@ -209,19 +197,6 @@ class RangeInfo
 
 ### LJ Specific Classes
 
-class MetaData
-"Metadata attatched to something"
-{
-    var string key "The internal name for the given metadata item. For example, 'currentmusic', 'currentmood'.";
-    var string val "The value of the metadata";
-
-    function print()
-    "Print the metadata information.";
-
-    function indicator() : string 
-    "Return the indicator for this metadata... eg, \"Current Music\" or the equivalent in other languages";
-}
-
 class CommentInfo
 "Information about comments attached to something"
 {
@@ -258,14 +233,13 @@ class Entry
     var string text "Entry text. (Will be blank on some viewtypes, like 'month' view)";
     var DateTime entrytime "The user specificed entrytime of this entry";
 
-    var string security "The security level of the entry, ex: 'public', 'private', 'friends' or 'custom'.";
+    var string security "The security level of the entry ('private', 'friends', 'custom), or blank if public.";
     var Image securityicon "A little icon which should be displayed somewhere on an entry to represent the security setting";
-    var bool has_security "True if the entry is private or protected";
 
     var UserLite poster "Author of the journal entry";
     var UserLite journal "Journal the entry has been posted to";
 
-    var MetaData{} metadata "Accompanying metadata";
+    var string{} metadata "Meta-data to post.";
     var CommentInfo commentinfo "Comment information on this entry";
 
     var bool new_day "Is this entry on a different day to the previous one?";
@@ -367,7 +341,7 @@ class Page
     "Links to top-level views where id equals the name of the view being linked to. 
     (if one of views == \$.view, already looking at that view)";
 
-    var string[] viewsorder "An array of view identifiers which can be used to order the views hash.";
+    var string[] views_order "An array of view identifiers which can be used to order the views hash.";
     var string head_content 
     "Extra tags supplied by the server to go in the <head> section of the output HTML document. Layouts 
     should include this in the head section if they are writing HTML.";
@@ -551,10 +525,7 @@ class CalendarMonthPage extends Page
 }
 
 
-####
-#
-# Built-in Functions
-#
+##[ Built-in Functions ]
 
 function builtin eurl (string s) : string
 "URL escape";
@@ -618,6 +589,38 @@ function builtin set_content_type(string text)
 # Properties
 #
 
+property string[] lang_monthname_long {
+    noui = 1;
+    des = "Months of the year.  Indexed from 1 (January) to 12 (December).";
+}
+set lang_monthname_long = [ "", "January",  "February", "March",
+                            "April", "May", "June",
+                            "July", "August", "September",
+                            "October", "November", "December" ];
+
+property string[] lang_monthname_short {
+    noui = 1;
+    des = "Months of the year, in their short forms.  Indexed from 1 (Jan) to 12 (Dec).";
+}
+set lang_monthname_short = [ "", "Jan",  "Feb", "Mar",
+                             "Apr", "May", "Jun",
+                             "Jul", "Aug", "Sep",
+                             "Oct", "Nov", "Dec" ];
+
+property string[] lang_dayname_long {
+    noui = 1;
+    des = "Days of the week.  Indexed from 1 (Sunday) to 7 (Saturday).";
+}
+set lang_dayname_long = [ "", "Sunday", "Monday",  "Tuesday", "Wednesday", 
+                          "Thursday", "Friday", "Saturday" ];
+
+property string[] lang_dayname_short {
+    noui = 1;
+    des = "Days of the week, in their short forms.  Indexed from 1 (Sun) to 7 (Sat).";
+}
+set lang_dayname_short = [ "", "Sun", "Mon",  "Tue", "Wed", 
+                           "Thu", "Fri", "Sat" ];
+
 property string IMGDIR {
     noui = 1;
     des = "A URL which can be safely prepended onto a path starting with / where sitewide image resources can be found.";
@@ -662,24 +665,24 @@ set page_calendar_sortorder = "forward";
 property string text_post_comment {
     des = "Link text to show to leave a comment";
     example = "Leave a comment";
-    maxlength = 20;
 }
 property string text_read_comment {
     des = "Link text to show to read a single comment";
     example = "1 comment";
-    maxlength = 20;
 }
 property string text_read_comments {
     des = "Text to show in a link to read comments";
-    maxlength = 20;
-    "size" = 15;
     example = "# comments";
     note = "Include a # character to insert the number of comments.";
 }
+property string text_read_comments {
+    des = "Text to show in a link to read comments";
+    example = "# comments";
+    note = "Include a # character to insert the number of comments.";
+}
+
 property string text_read_comments_nonumber {
     des = "Text to show in a link to read comments when the number of comments isn't available";
-    maxlength = 20;
-    "size" = 15;
     example = "Read Comments";
 }
 set text_post_comment = "Add a comment";
@@ -846,73 +849,24 @@ function external_stylesheet() {
 
 ### Language
 
-function lang_monthname_long(int num) : string {
-    if ($num == 1) { return "January"; }
-    if ($num == 2) { return "February"; }
-    if ($num == 3) { return "March"; }
-    if ($num == 4) { return "April"; }
-    if ($num == 5) { return "May"; }
-    if ($num == 6) { return "June"; }
-    if ($num == 7) { return "July"; }
-    if ($num == 8) { return "August"; }
-    if ($num == 9) { return "September"; }
-    if ($num == 10) { return "October"; }
-    if ($num == 11) { return "November"; }
-    if ($num == 12) { return "December"; }
-    return "???????";
-}
-function lang_monthname_short(int num) : string {
-    if ($num == 1) { return "Jan"; }
-    if ($num == 2) { return "Feb"; }
-    if ($num == 3) { return "Mar"; }
-    if ($num == 4) { return "Apr"; }
-    if ($num == 5) { return "May"; }
-    if ($num == 6) { return "Jun"; }
-    if ($num == 7) { return "Jul"; }
-    if ($num == 8) { return "Aug"; }
-    if ($num == 9) { return "Sep"; }
-    if ($num == 10) { return "Oct"; }
-    if ($num == 11) { return "Nov"; }
-    if ($num == 12) { return "Dec"; }
-    return "???";
-}
-function lang_dayname_long(int num) : string {
-    if ($num == 1) { return "Monday"; }
-    if ($num == 2) { return "Tuesday"; }
-    if ($num == 3) { return "Wednesday"; }
-    if ($num == 4) { return "Thursday"; }
-    if ($num == 5) { return "Friday"; }
-    if ($num == 6) { return "Saturday"; }
-    if ($num == 7) { return "Sunday"; }
-    return "?????";
-}
-function lang_dayname_short(int num) : string {
-    if ($num == 1) { return "Mon"; }
-    if ($num == 2) { return "Tue"; }
-    if ($num == 3) { return "Wed"; }
-    if ($num == 4) { return "Thu"; }
-    if ($num == 5) { return "Fri"; }
-    if ($num == 6) { return "Sat"; }
-    if ($num == 7) { return "Sun"; }
-    return "???";
-}
-function lang_ordinal(string num) : string 
-"Make an ordinal number from a cardinal number"
-{
-    if ($num->ends_with("11")) { return "11th"; }
-    if ($num->ends_with("12")) { return "12th"; }
-    if ($num->ends_with("13")) { return "13th"; }
-    if ($num->ends_with("1")) { return $num+"st"; }
-    if ($num->ends_with("2")) { return $num+"nd"; }
-    if ($num->ends_with("3")) { return $num+"rd"; }
-    return $num+"th";
-}
-
 function lang_ordinal(int num) : string
 "Make an ordinal number from a cardinal number"
 {
-    return lang_ordinal(string($num)); 
+    if ($num % 100 >= 11 and
+        $num % 100 <= 13) { return $num+"th"; }
+    if ($num % 10 == 1) { return $num+"st"; }
+    if ($num % 10 == 2) { return $num+"nd"; }
+    if ($num % 10 == 3) { return $num+"rd"; }
+    return $num+"th";
 }
+
+function lang_ordinal(string num) : string 
+"Make an ordinal number from a cardinal number"
+{
+    return lang_ordinal(int($num)); 
+}
+
+
 function lang_viewname(string viewid) : string 
 "Get some words representing a view"
 {
@@ -945,11 +899,11 @@ function Image::as_string() : string {
     var string img = """<img src="$.url" """;
 #    var string ealt = ehtml($.alt);
     $img = $img + htmlattr("height", $.height); 
-    $img = $img + htmlattr("height", $.width);
+    $img = $img + htmlattr("width", $.width);
 #    $img = $img + " alt=\"" + ehtml($.alt) + "\""; 
-    foreach var string attr ($.attributes) {
-        $img = $img + htmlattr($attr, $.attributes{$attr});
-    }
+#    foreach var string attr ($.attributes) {
+#        $img = $img + htmlattr($attr, $.attributes{$attr});
+#    }
     $img = $img + "/>";
 
     return $img;
@@ -976,8 +930,8 @@ function userinfoicon(UserLite user) : Image {
     $uimage.width = 17;
     $uimage.height = 17;
 #    $uimage.alt = "User Information";
-    $uimage.attributes{"align"} = "absmiddle";
-    $uimage.attributes{"border"} = "0";
+#    $uimage.attributes{"align"} = "absmiddle";
+#    $uimage.attributes{"border"} = "0";
 
     if ($user.journaltype == "C") {
         $uimage.url = "$*IMGDIR/community.gif";
@@ -1046,8 +1000,8 @@ function DateTime::datetime_short() : string {
     return $this->date_short()+" "+$this->time_short();
 }
 function Date::date_long() : string {
-    return lang_dayname_long($this->dayofweek())+" "+
-           lang_monthname_long($.month)+" "+
+    return $*lang_dayname_long[$this->day_of_week()]+" "+
+           $*lang_monthname_long[$.month]+" "+
            lang_ordinal($.day)+" "+$.year;
 }
 
@@ -1126,21 +1080,6 @@ function Page::print_head() {
     return;
 }
 
-function MetaData::print() {
-    "<div class=\""+$.key+"\"><strong>"+$this->indicator()+":</strong> "+$.val+"</div>\n";
-}
-
-function MetaData::indicator : string {
-    if ($.key == "currentmusic") {
-        return "Current Music";
-    }
-    if ($.key == "currentmood") {
-        return "Current Mood";
-    }
-    # Metadata we don't know about yet...
-    return $.key;
-}
-
 function Page::print_entry_poster(Entry e) {
     $e.poster->print();
     if ($e.poster.userid != $e.journal.userid) {
@@ -1157,7 +1096,7 @@ function Page::print_entry(Entry e) {
     if ($e.subject != "") {
         ": $e.subject";
     }
-    if ($e.has_security) {
+    if ($e.security != "") {
         " "+$e.securityicon->as_string();
     }
     "</h3>\n";
@@ -1180,7 +1119,7 @@ function FriendsPage::print_entry(Entry e) {
     if ($e.subject != "") {
         ": $e.subject";
     }
-    if ($e.has_security) {
+    if ($e.security != "") {
         $e.securityicon->print($e.security);
     }
     "</h3>\n";
@@ -1195,7 +1134,7 @@ function Entry::print_metadata() {
     if (size $.metadata) {
         "<div class=\"metadata\">\n";
         foreach var string m ($.metadata) {
-            $.metadata{$m}->print();
+            #$.metadata{$m}->print();
         }
         "</div>\n";
     }
@@ -1250,7 +1189,7 @@ function CalendarPage::print_month(CalendarPageMonth m) {
     print $m->name();
     """</th></tr>\n""";
     foreach var int d ($.weekdays) {
-        "<th>"+lang_dayname_short($d)+"</th>\n";
+        "<th>"+$*lang_dayname_short[$d]+"</th>\n";
     }
     "</tr>\n";
     foreach var CalendarPageWeek w ($m.weeks) {
@@ -1261,7 +1200,7 @@ function CalendarPage::print_month(CalendarPageMonth m) {
     "</table>";
 }
 function CalendarPageMonth::name() : string {
-    var string monthtitle = lang_monthname_long($.number)+" $.year";
+    var string monthtitle = $*lang_monthname_long[$.number]+" $.year";
     return $monthtitle->upperfirst();
 }
 function CalendarPageWeek::print() {
@@ -1380,7 +1319,7 @@ function Link::print_button {
     if ($.url == "") { return; }
     """<a href="$.url">""";
     #$.icon.alt="[" + $.caption + "]";
-    $.icon.attributes{"border"}="0";
+#    $.icon.attributes{"border"}="0";
     $.icon->print();
     "</a>";
 }
