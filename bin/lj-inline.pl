@@ -32,6 +32,11 @@ print "Apache::SendStats...\n";
 # when not running inside apache
 eval "use Apache::SendStats;";
 
+print "Apache::DebateSuicide...\n";
+# wrapped in eval because ap_scoreboard_image isn't around
+# when not running inside apache
+eval "use Apache::DebateSuicide;";
+
 print "Done.\n";
 
 __DATA__

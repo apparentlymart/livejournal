@@ -22,6 +22,7 @@ use LWP::UserAgent ();
 use Storable;
 use Image::Size ();
 use Apache::SendStats;
+use Apache::DebateSuicide;
 use Time::HiRes ();
 
 # Try to load GTop library
@@ -97,6 +98,7 @@ PerlInitHandler Apache::LiveJournal
 PerlInitHandler Apache::SendStats
 PerlFixupHandler Apache::CompressClientFixup
 PerlCleanupHandler Apache::SendStats
+PerlCleanupHandler Apache::DebateSuicide
 PerlChildInitHandler Apache::SendStats
 DirectoryIndex index.html index.bml
 });

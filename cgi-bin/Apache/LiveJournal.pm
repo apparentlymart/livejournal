@@ -1057,6 +1057,8 @@ sub db_logger
     my $r = shift;
     my $rl = $r->last;
 
+    $r->pnotes('did_lj_logging' => 1);
+
     my $uri = $r->uri;
     my $ctype = $rl->content_type;
 
