@@ -27,15 +27,16 @@
      my $anchor = "cmd.$cmdname";
      $ret .= "<a name='$anchor'><dt><p><table width=100% cellpadding=2><tr><td bgcolor=#d0d0d0>";
      $ret .= "<tt><a href='\#$anchor'><b>$cmdname</b></a> $args</tt></td></tr></table>";
-     $ret .= "<dd><p>$cmd->{'des'}";
+     $ret .= "</dt><dd><p>$cmd->{'des'}";
      if ($cmd->{'args'}) {
          my @des = @{$cmd->{'args'}};
          $ret .= "<p><dl>";
          while (my ($arg, $des) = splice(@des, 0, 2)) {
-             $ret .= "<dt><b><i>$arg</i></b><dd>$des";
+             $ret .= "<dt><b><i>$arg</i></b></dt><dd>$des</dd>";
          }
-         $ret .= "</dl></a>";
+         $ret .= "</dl>";
      }
+     $ret .= "</dd></a>";
  }
  $ret .= "</dl>";
  return $ret;
