@@ -2,21 +2,18 @@
 NOHEADERS=>1
 _INFO=)(=_CODE
 
-	require 'ljlib.pl';
-	
 	my @errors = ();
-	my $user = lc($FORM{'user'});
+	my $user = LJ::canonical_username($FORM{'user'});
 	my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
 	
-	&connect_db;
-	
-	my $quser = $dbh->quote($user);
-	
-	$sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
-	$sth->execute;
-	unless ($sth->rows) { push @errors, "Invalid username"; }
+	my $dbs = LJ::get_dbs();
+	my $dbh = $dbs->{'dbh'};
+	my $dbr = $dbs->{'reader'};
 
-	my $u = $sth->fetchrow_hashref;
+	my $quser = $dbr->quote($user);
+	
+	my $u = LJ::load_user($dbs, $user);
+	unless ($u) { push @errors, "Invalid username"; }
 
 	my $year = $FORM{'year'}+0;
 	my $month = $FORM{'month'}+0;
@@ -64,18 +61,47 @@ _INFO=)(=_CODE
 	    print "<livejournal>\n";
 	}
 
-	$sth = $dbh->prepare("SELECT l.itemid, l.eventtime, l.logtime, lt.subject, lt.event, l.security, l.allowmask FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.ownerid=$u->{'userid'} AND l.year=$year AND l.month=$month");
+	$sth = $dbr->prepare("SELECT itemid, eventtime, logtime, security, allowmask FROM log l WHERE ownerid=$u->{'userid'} AND year=$year AND month=$month");
 	$sth->execute;
 	if ($dbh->err) { print $dbh->errstr;  }
+	my @buffer;
 	while ($_ = $sth->fetchrow_hashref) {
-	    my @vals = ();
+	    push @buffer, $_;
+	    if (@buffer == 20) {
+		load_and_dump_buffer(\@buffer, $format);
+		@buffer = ();
+	    }
+	    
+	}
+	load_and_dump_buffer(\@buffer, $format);
+
+	sub load_and_dump_buffer
+	{
+	    my $buf = shift;
+	    my $format = shift;
+	    my $lt = LJ::get_logtext($dbs, map {
+		$_->{'itemid'}
+	    } @{$buf});
+	    foreach my $e (@{$buf}) {
+		$e->{'subject'} = $lt->{$e->{'itemid'}}->[0];
+		$e->{'event'} = $lt->{$e->{'itemid'}}->[1];
+		dump_entry($e, $format);
+	    }
+	}
+
+	sub dump_entry
+	{
+	    my $e = shift;
+	    my $format = shift;
+	    
+    	    my @vals = ();
 	    if ($format eq "xml") {
 		print "<entry>\n";
 	    }
 
 	    foreach my $f (@fields)
 	    {
-		my $v = $_->{$f};
+		my $v = $e->{$f};
 		if ($format eq "csv") {
 		    if ($v =~ /[\"\n\,]/) {
 			$v =~ s/\"/\"\"/g;
