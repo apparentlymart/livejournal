@@ -253,7 +253,7 @@ MAIN: {
         $ifh = IO::File->new( $ARGV[0], O_RDONLY )
             or abort( "open: $ARGV[0]: $!" );
 
-        while (my $command = ($ifh->getline)) {
+        while ($command = ($ifh->getline)) {
             next if $command =~ m{^\s*(#.*)?$};
             push @commands, $command;
         }
@@ -418,8 +418,9 @@ sub startDaemon () {
     $lsock = new IO::Socket::INET(
         Listen      => 4,
         LocalAddr   => $host,
-        LocalPort   => 0,           # Kernel chooses ephemeral port
-        Reuse       => 1 );         # SO_REUSEADDR
+        #LocalPort   => 0,           # Kernel chooses ephemeral port
+        Reuse       => 1 )          # SO_REUSEADDR
+        or abort( "Could not open listener socket: $!" );
 
     $ip = sprintf '%vd', $lsock->sockaddr;
     $port = $lsock->sockport;
