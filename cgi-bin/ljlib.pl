@@ -31,6 +31,7 @@ $LJ::DBIRole = new DBI::Role {
     'sources' => \%LJ::DBINFO,
     'weights_from_db' => $LJ::DBWEIGHTS_FROM_DB,
     'default_db' => "livejournal",
+    'messages_to' => \&procnotify_callback,
 };
 
 # $LJ::PROTOCOL_VER is the version of the client-server protocol
@@ -5152,6 +5153,46 @@ sub event_register
     $dbc->do("INSERT INTO events (evtime, etype, ejournalid, eiarg, duserid, diarg) ".
              "VALUES (NOW(), $qetype, $qejid, $qeiarg, $qduserid, $qdiarg)");
     return $dbc->err ? 0 : 1;
+}
+
+# <LJFUNC>
+# name: LJ::procnotify_add
+# des: Sends a message to all other processes on all clusters.
+# info: You'll probably never use this yourself.
+# args: dbarg, cmd, args?
+# des-cmd: Command name.  Currently recognized: "DBI::Role::reload" and "rename_user"
+# des-args: Hashref with key/value arguments for the given command.  See
+#           relevant parts of [func[LJ::procnotify_callback]] for required args for different commands.
+# returns: boolean; 1 on success; 0 on fail.
+# </LJFUNC>
+sub procnotify_add
+{
+    my ($dbarg, $cmd, $argref) = @_;
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    return 0 unless $dbh;
+
+    my $args = join('&', map { LJ::eurl($_) . "=" . LJ::eurl($argref->{$_}) }
+                    sort keys %$argref);
+    $dbh->do("INSERT INTO procnotify (cmd, args) VALUES (?,?)",
+             undef, $cmd, $args);
+    return 0 if $dbh->err;
+    return 1;
+}
+
+# called by DBI::Role.
+sub procnotify_callback
+{
+    my ($cmd, $argstring) = @_;
+    my $arg = {};
+    LJ::decode_url_string($argstring, $arg);
+    
+    if ($cmd eq "rename_user") {
+        # this looks backwards, but the cache hash names are just odd:
+        delete $LJ::CACHE_USERNAME{$arg->{'userid'}};
+        delete $LJ::CACHE_USERID{$arg->{'user'}};
+        return;
+    }
 }
 
 # <LJFUNC>

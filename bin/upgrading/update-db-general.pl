@@ -1436,6 +1436,16 @@ CREATE TABLE domains
 )
 EOC
 
+register_tablecreate("procnotify", <<'EOC');
+CREATE TABLE procnotify
+(
+   nid   INT UNSIGNED NOT NULL AUTO_INCREMENT,
+   PRIMARY KEY (nid),
+   cmd   VARCHAR(50),
+   args  VARCHAR(255) 
+)
+EOC
+
 ### changes
 
 register_alter(sub {
