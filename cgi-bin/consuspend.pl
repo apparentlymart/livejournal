@@ -195,14 +195,14 @@ sub suspend
     foreach my $username (@users) {
         my $u = LJ::load_user($username);
         unless ($u) {
-            push @$out, [ "error", "Invalid user." ];
-            return 0;
+            push @$out, [ "error", "$username invalid/unable to load." ];
+            next;
         }
 
         my $status = ($cmd eq "unsuspend") ? "V" : "S";
         if ($u->{'statusvis'} eq $status) {
             push @$out, [ "error", "$username was already in that state ($status)" ];
-            return 0;
+            next;
         }
 
         LJ::update_user($u->{'userid'}, { statusvis => $status, raw => 'statusvisdate=NOW()' });
