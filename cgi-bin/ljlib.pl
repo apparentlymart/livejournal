@@ -3221,13 +3221,14 @@ sub canonical_username
 # class: web
 # des: Parse URL-style arg/value pairs into a hash.
 # args: buffer, hashref
-# des-buffer: Scalar buffer to parse.
+# des-buffer: Scalar or scalarref of buffer to parse.
 # des-hashref: Hashref to populate.
 # returns: boolean; true.
 # </LJFUNC>
 sub decode_url_string
 {
-    my $buffer = shift;   # input scalarref
+    my $a = shift; 
+    my $buffer = ref $a ? $a : \$a;
     my $hashref = shift;  # output hash
 
     my $pair;
