@@ -97,9 +97,9 @@ sub get_newids
 
     my $area = $dbh->quote(shift);
     my $oldid = $dbh->quote(shift);
-
-    return $dbr->selectrow_arrayref("SELECT userid, newid FROM oldids ".
-                                    "WHERE area=$area AND oldid=$oldid");
+    my $db = LJ::get_dbh("oldids") || $dbr;
+    return $db->selectrow_arrayref("SELECT userid, newid FROM oldids ".
+                                   "WHERE area=$area AND oldid=$oldid");
 }
 
 # <LJFUNC>
