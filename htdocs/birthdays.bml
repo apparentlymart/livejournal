@@ -43,6 +43,8 @@
      
  }
 
+ $body .= "</ul>\n";
+
  return;
 
 _code?><?page
