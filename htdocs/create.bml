@@ -41,7 +41,7 @@ head<=
 body<=
 <?_code 
 
- LJ::set_active_crumb('create');
+ LJ::set_active_crumb('createjournal');
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
