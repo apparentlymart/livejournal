@@ -286,7 +286,8 @@
             my $max = LJ::get_cap($u, "userpics");
             if ($count >= $max) {
                 return $err->( BML::ml(".error.toomanypics2",
-                                       { 'maxpics'  => $max }) );
+                                       { 'maxpics'  => $max }) .
+                             LJ::help_icon('userpics', " ", ""));
             }
             
             # see if it's a duplicate
