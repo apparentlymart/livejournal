@@ -156,7 +156,7 @@ BODY<=
 
      my $list;
      my $count = 0;
-     $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='C' ORDER BY u.user");
+     $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='C' AND u.statusvis='V' ORDER BY u.user");
      $sth->execute;
      while ($_ = $sth->fetchrow_hashref) {
 	 $count++;
@@ -184,7 +184,7 @@ BODY<=
      my $count = 0;
      $list .= "<UL>\n";
      # FIXME: LIMIT 1000 is a temporary hack.  better solution:  paging.
-     $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='P' ORDER BY u.user LIMIT 1000");
+     $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='P' AND u.statusvis='V' ORDER BY u.user LIMIT 1000");
      $sth->execute;
      while (my ($iuser, $iname) = $sth->fetchrow_array) {
 	 $count++;
