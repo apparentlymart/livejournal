@@ -1248,10 +1248,11 @@ sub create_view_friends
                   || LJ::check_rel($dbs, $friendid, $remote, 'A')));
 
             my ($readurl, $posturl);
+            my $journalbase = LJ::journal_base($friends{$friendid});
 
             if ($clusterid) {
-                $posturl = "$LJ::SITEROOT/users/$friend/$ditemid.html?mode=reply";
-                $readurl = "$LJ::SITEROOT/users/$friend/$ditemid.html";
+                $posturl = "$journalbase/$ditemid.html?mode=reply";
+                $readurl = "$journalbase/$ditemid.html";
                 $readurl .= "?nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
             } else {
                 $itemargs .= "&amp;nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
@@ -1948,11 +1949,8 @@ sub create_view_rss
         $logtext = LJ::get_logtext($dbs, @itemids);
     }
 
-    my $clink = "$LJ::SITEROOT/users/$user/";
+    my $clink = LJ::journal_base($u) . "/";
     my $ctitle = LJ::exml($u->{'name'});
-    if ($u->{'journaltype'} eq "C") {
-        $clink = "$LJ::SITEROOT/community/$user/";
-    }
 
     $$ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
     $$ret .= "<!DOCTYPE rss PUBLIC \"-//Netscape Communications//DTD RSS 0.91//EN\"\n";
