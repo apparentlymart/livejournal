@@ -141,7 +141,7 @@ body<=
     $info{'nonmember_posting'} = $c->{'nonmember_posting'} ? 1 : 0;
  }
 
- $ret .= "<form method='post' action='settings.bml'><input type='hidden' name='mode' value='update' />";
+ $ret .= "<form method='post' action='settings.bml?mode=$mode'>";
 
  if ($mode eq 'modify') {
     $ret .= "<?h1 $ML{'.label.changeheader'} h1?><?p $ML{'.label.changetext'} p?>";
