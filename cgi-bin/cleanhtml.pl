@@ -149,6 +149,11 @@ sub clean
                     $newdata .= "<b>[Unknown LJ tag]</b>";
                 }
             }
+            elsif ($tag eq "lj-raw") 
+            {
+                # Strip it out, but still register it as being open
+                $opencount{$tag}++;
+            }
             else 
             {
                 my $alt_output = 0;
@@ -231,20 +236,24 @@ sub clean
             my $tag = $token->[1];
 
             my $allow;
-            if ($mode eq "allow") {
-                $allow = 1;
-                if ($action{$tag} eq "deny") { $allow = 0; }
+            if ($tag eq "lj-raw") {
+                $opencount{$tag}--;
             } else {
-                $allow = 0;
-                if ($action{$tag} eq "allow") { $allow = 1; }
-            }
-            
-            if ($allow && ! $remove{$tag})
-            {
-                if ($allow && ! ($opts->{'noearlyclose'} && ! $opencount{$tag})) {
-                    $newdata .= "</$tag>";
-                    $opencount{$tag}--;
-                } else { $newdata .= "&lt;/$tag&gt;"; }
+                if ($mode eq "allow") {
+                    $allow = 1;
+                    if ($action{$tag} eq "deny") { $allow = 0; }
+                } else {
+                    $allow = 0;
+                    if ($action{$tag} eq "allow") { $allow = 1; }
+                }
+
+                if ($allow && ! $remove{$tag})
+                {
+                    if ($allow && ! ($opts->{'noearlyclose'} && ! $opencount{$tag})) {
+                        $newdata .= "</$tag>";
+                        $opencount{$tag}--;
+                    } else { $newdata .= "&lt;/$tag&gt;"; }
+                }
             }
         }
         elsif ($type eq "T" || $type eq "D") {
@@ -257,7 +266,11 @@ sub clean
                 $token->[1] =~ s/about://g;
                 $token->[1] =~ s/expression//g;
             }
-            my $auto_format = $addbreaks && ($opencount{'table'} <= $opencount{'td'}) && ! $opencount{'pre'};
+            my $auto_format = $addbreaks && 
+                ($opencount{'table'} <= ($opencount{'td'} + $opencount{'th'})) &&
+                 ! $opencount{'pre'} &&
+                 ! $opencount{'lj-raw'};
+            
             if ($auto_format && ! $opencount{'a'}) {
                 $token->[1] =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=\~\:\;\#\&\,]+!$url{++$urlcount}=$&;"\{url$urlcount\}";!egi;
             }
