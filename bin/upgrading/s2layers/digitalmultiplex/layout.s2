@@ -187,6 +187,10 @@ propgroup fonts {
     set font_fallback = "sans-serif";
 }
 propgroup presentation {
+    property bool show_entry_userpic { 
+        des = "Show the userpic on the full journal entries? [Excludes friends page]"; 
+    }
+    set show_entry_userpic = true;
     property use page_recent_items;
     property use page_friends_items;
     property use view_entry_disabled;
@@ -200,7 +204,7 @@ propgroup presentation {
     set leading_full_entries = 5;
     property string page_content_width {
         des = "Total page width for sidebar and content";
-        values = "60%|60%|70%|70%|80%|80%|90%|90%";
+        values = "60%|60%|70%|70%|80%|80%|90%|90%|100%|100%";
     }
     set page_content_width = "60%";
 }
@@ -234,8 +238,11 @@ propgroup sidebar {
         values = "155px|Skinny|185px|Default|215px|Wide";
     }
     set sidebar_width = "185px";
+    property string sidebar_profile_text {
+        des = "Text to be added to the 'Profile' sidebar, underneath the name and user picture icon";
+    }
     property string sidebar_blurb {
-        des = "Text to be added to the sidebar";
+        des = "Free text to be added to the sidebar";
         note = "Appears in the sidebar 'Blurb'";
     }
     property bool sidebar_disable_recent_summary {
@@ -286,6 +293,31 @@ propgroup text {
     property use text_post_comment_friends;
     property use text_read_comments_friends;
     property use text_website_default_name;
+    property string text_sidebar_title {
+        des = "Title of the sidebar";
+        noui = 1;
+    }
+    property string text_sidebar_userpic {
+        des = "Title of the userpic sidebar box";
+        noui = 1;
+    }
+    property string text_sidebar_blurb {
+        des = "Title of the blurb sidebar box";
+        noui = 1;
+    }
+    property string text_sidebar_navigation {
+        des = "Title of the navigation sidebar box";
+        noui = 1;
+    }
+    property string text_sidebar_summary {
+        des = "Title of the summary sidebar box";
+        noui = 1;
+    }
+    set text_sidebar_title = "About";
+    set text_sidebar_userpic = "Profile";
+    set text_sidebar_blurb = "Blurb";
+    set text_sidebar_navigation = "Navigation";
+    set text_sidebar_summary = "Page Summary";
 }
 ################################################################################
 #
@@ -293,6 +325,19 @@ propgroup text {
 # 
 
 ### Sidebar related functions ###
+function sidebar_html_width : string "Return an appropriate HTML tag width for the sidebar" {
+    var int length = $*sidebar_width->length();
+    # Percentages are fine
+    if ($*sidebar_width->substr($length-1, $length) == "%") {
+        return $*sidebar_width;
+    # px measurements are fine, minus the 'px' specification
+    } elseif ($*sidebar_width->substr($length-2, $length) == "px") {
+        return $*sidebar_width->substr(0, $length-2);
+    # Otherwise, just forget it and return nothing.
+    } else {
+        return "";
+    }
+}
 function print_sidebar_box(string id, string body, string title) {
     println """<br /><table cellspacing="0" cellpadding="0" border="0" id="sidebar_$id" class="sidebar_box">""";
     println """<tr><th class="sidebar_box_header">$title</th></tr><tr><td class="sidebar_box_contents">$body</td></tr></table><br />""";
@@ -313,11 +358,12 @@ function print_sidebar_userpic () {
         }
         $return = $return + $page.journal.name;
     }
-    print_sidebar_box("userpic",$return, "Profile");
+    if ($*sidebar_profile_text) { $return = $return + "<p>" + $*sidebar_profile_text + "</p>"; }
+    print_sidebar_box("userpic",$return, $*text_sidebar_userpic);
 }
 function print_sidebar_blurb () {
     if ($*sidebar_blurb != "") {
-        print_sidebar_box("blurb",$*sidebar_blurb,"Blurb");
+        print_sidebar_box("blurb",$*sidebar_blurb,$*text_sidebar_blurb);
     }
 }
 function Page::lay_sidebar_view_navigation() : string {
@@ -346,7 +392,7 @@ function print_sidebar_navigation() {
         $navigation = $navigation + $page->lay_sidebar_view_navigation();
     }
     $navigation = $navigation + "</table>";
-    print_sidebar_box("navigation",$navigation,"Navigation");
+    print_sidebar_box("navigation",$navigation,$*text_sidebar_navigation);
 }
 function print_sidebar_calendar() {
     var string calendar;
@@ -387,10 +433,10 @@ function Page::lay_sidebar_view_summary() : string {
 function print_sidebar_summary() {
     var Page page = get_page();
     if ($page->lay_sidebar_view_summary() != "") {
-        var string summary = """<table style="white-space: nowrap" align="left">""";
+        var string summary = """<table align="left">""";
         $summary = $summary + $page->lay_sidebar_view_summary();
         $summary = $summary + "</table>";
-        print_sidebar_box("summary",$summary,"Page Summary");
+        print_sidebar_box("summary",$summary,$*text_sidebar_summary);
     }
 }
 function print_sidebar(Page p)
@@ -507,7 +553,7 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
 
     if (($p.view == "friends" or
         $e.poster.username != $e.journal.username or
-        defined $e.userpic) and $p.view != "entry") {
+        ($*show_entry_userpic and defined $e.userpic)) and $p.view != "entry") {
         println """<td valign="top"><table cellspacing="0" cellpadding="0" class="full_entry_userpic"><tr><td align="center">""";
         if ($p.view == "friends") {
             if ($e.poster.username != $e.journal.username) {
@@ -546,7 +592,7 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
                 }
                 if ($k == "mood" and defined $e.mood_icon) {
                     var Image i = $e.mood_icon;
-                    $val = "<img src='$i.url' width='$i.width' height='$i.height' align='absmiddle'> $val";
+                    $val = "<img src='$i.url' width='$i.width' height='$i.height' align='middle' alt='' /> $val";
                 }
                 """<div class="current$k"><strong>$text:</strong> $val</div>""";
             }
@@ -627,6 +673,7 @@ body {
     }
     """
     font-family: $*font_base, $*font_fallback;
+    font-size: 100%;
 }
 h1 {
     font-size: 2.0em;
@@ -715,13 +762,11 @@ a:visited {
     border-right: 1px solid $*border_color;
     border-top: 1px solid $*border_color;
     max-width: $*sidebar_width;
-    min-width: $*sidebar_width;
     text-align: center;
     width: $*sidebar_width;
 }
 .sidebar_box {
     font-size: 0.8em;
-    white-space: normal;
     width: 100%;
 }
 .sidebar_box_contents {
@@ -779,6 +824,7 @@ a:visited {
     border-top: 1px solid $*border_color;
     color: $*main_fgcolor;
     text-align: left;
+    width: 90%;
 }
 #top_of_page, #server_sig{
     background-color: $*server_sig_bgcolor;
@@ -830,11 +876,13 @@ function Page::print() {
 
     println """<a name="top"></a><div align="center">""";
 
+    var string sidebar_html_width = sidebar_html_width();
     println """<table cellspacing="0" cellpadding="0" id="top_title"><tr><td id="speck">&nbsp;</td><td id="journal_title"><h1>$title</h1></td></tr></table>""";
     println """<table cellspacing="0" cellpadding="0" id="main">""";
-    println """<tr id="subtitles"><th height="15" id="sidebar_title">About</th><th id="main_title">$view_title</th></tr>""";
+    println """<tr id="subtitles"><th height="15" width="$sidebar_html_width" id="sidebar_title">$*text_sidebar_title</th>""";
+    println """<th id="main_title">$view_title</th></tr>""";
 
-        println """<tr><td id="sidebar" valign="top" width="$*sidebar_width" style="overflow: hidden">""";
+        println """<tr><td id="sidebar" valign="top" width="$sidebar_html_width" style="overflow: hidden">""";
         print_sidebar($this);
         println "</td>";
 
