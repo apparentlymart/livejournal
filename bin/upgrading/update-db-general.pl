@@ -1092,6 +1092,18 @@ CREATE TABLE userusage
 )
 EOC
 
+# wknum - number of weeks past unix epoch time
+# ubefore - units before (unit = 10 seconds)
+register_tablecreate("weekuserusage", <<'EOC');
+CREATE TABLE weekuserusage
+(
+   wknum  SMALLINT UNSIGNED NOT NULL,
+   userid INT UNSIGNED NOT NULL,
+   PRIMARY KEY (wknum, userid),
+   ubefore  SMALLINT UNSIGNED NOT NULL
+)
+EOC
+
 register_tablecreate("userupdate", <<'EOC');
 CREATE TABLE userupdate
 (

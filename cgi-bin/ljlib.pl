@@ -5843,6 +5843,19 @@ sub clear_rel
     return;
 }
 
+# given a unix time, returns;
+#   ($week, $ubefore)
+# week: weeks from first sunday to the next sunday after given time
+# ubefore:  seconds before the next sunday, divided by 10
+sub weekuu_parts {
+    my $time = shift;
+    $time -= 86400*3;  # time from the sunday after unixtime 0
+    my $WEEK = 86400*7;
+    my $week = int(($time+$WEEK) / $WEEK);
+    my $ubefore = 60480 - int(($time % $WEEK) / 10);
+    return ($week, $ubefore);
+}
+
 sub paging_bar
 {
     my ($page, $pages) = @_;

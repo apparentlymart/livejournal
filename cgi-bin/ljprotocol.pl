@@ -844,6 +844,9 @@ sub postevent
              "WHERE userid=$qownerid");
 
     # update user update table (on which friends views rely)
+    # NOTE: as of Mar-25-2003, we don't actually use this yet.  we might
+    # use it in the future though, for faster ?skip=0 friends views.
+    # but see below.
     {
         my @bits;
         if ($security eq "public") {
@@ -861,6 +864,12 @@ sub postevent
                      join(",", map { "($ownerid, $_, NOW())" } @bits));
         }
     }
+
+    # update weekuserusage table, which keeps track of user activity
+    # for a given week.
+    my ($weeknum, $ubefore) = LJ::weekuu_parts(time());
+    $dbh->do("REPLACE INTO weekuserusage (wknum, userid, ubefore) VALUES (?,?,?)",
+             undef, $weeknum, $ownerid, $ubefore);
 
     $res->{'itemid'} = $itemid;  # by request of mart
     $res->{'anum'} = $anum if $clustered;
