@@ -12,7 +12,9 @@
 package LJ;
 
 use strict;
+use lib "$ENV{'LJHOME'}/cgi-bin";
 use DBI;
+use DBI::Role qw(get_dbh use_diff_db);
 use Digest::MD5 ();
 use Text::Wrap ();
 use MIME::Lite ();
@@ -24,6 +26,8 @@ require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
+
+DBI::Role::set_sources(\%LJ::DBINFO, $LJ::DBWEIGHTS_FROM_DB);
 
 # $LJ::PROTOCOL_VER is the version of the client-server protocol
 # used uniformly by server code which uses the protocol.
@@ -123,6 +127,35 @@ if ($SIG{'HUP'}) {
 } else {
     $SIG{'HUP'} = \&LJ::clear_caches;
 }
+
+####### documentation for core LJ functions imported from elsewhere:
+
+# given two db roles, returns true only if the two roles are for sure
+# served by different database servers.  this is useful for, say,
+# the moveusercluster script:  you wouldn't want to select something
+# from one db, copy it into another, and then delete it from the
+# source if they were both the same machine.
+# <LJFUNC>
+# name: LJ::use_diff_db
+# class:
+# des:
+# info:
+# args:
+# des-:
+# returns:
+# </LJFUNC>
+
+# <LJFUNC>
+# name: LJ::get_dbh
+# class: db
+# des: Given one or more roles, returns a database handle.
+# info:
+# args:
+# des-:
+# returns:
+# </LJFUNC>
+
+
 
 # <LJFUNC>
 # name: LJ::get_newids
@@ -2758,9 +2791,9 @@ sub start_request
     # TODO: check process growth size
     # TODO: auto-restat and reload ljconfig.pl if changed.
 
-    # clear %LJ::DBREQCACHE (like DBCACHE, but verified already for
+    # clear the handle request cache (like normal cache, but verified already for
     # this request to be ->ping'able).
-    %LJ::DBREQCACHE = ();
+    DBI::Role::clear_req_cache();
 
     # need to suck db weights down on every request (we check
     # the serial number of last db weight change on every request
@@ -3342,266 +3375,6 @@ sub decode_url_string
         $hashref->{$name} .= $hashref->{$name} ? "\0$value" : $value;
     }
     return 1;
-}
-
-# given two db roles, returns true only if the two roles are for sure
-# served by different database servers.  this is useful for, say,
-# the moveusercluster script:  you wouldn't want to select something
-# from one db, copy it into another, and then delete it from the
-# source if they were both the same machine.
-# <LJFUNC>
-# name: LJ::use_diff_db
-# class:
-# des:
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub use_diff_db
-{
-    my ($role1, $role2) = @_;
-
-    return 0 if $role1 eq $role2;
-
-    # this is implied:  (makes logic below more readable by forcing it)
-    $LJ::DBINFO{'master'}->{'role'}->{'master'} = 1;
-
-    foreach (keys %LJ::DBINFO) {
-        next if /^_/;
-        next unless ref $LJ::DBINFO{$_} eq "HASH";
-        if ($LJ::DBINFO{$_}->{'role'}->{$role1} &&
-            $LJ::DBINFO{$_}->{'role'}->{$role2}) {
-            return 0;
-        }
-    }
-
-    return 1;
-}
-
-# <LJFUNC>
-# name: LJ::get_dbh
-# class: db
-# des: Given one or more roles, returns a database handle.
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub get_dbh
-{
-    my @roles = @_;
-    my $role = shift @roles;
-    return undef unless $role;
-
-    my $now = time();
-
-    # if non-master request and we haven't yet hit the master to get
-    # the dbinfo, do that first.  (normal code path is something
-    # calls LJ::start_request(), then gets master, then gets other)
-    # but this path happens also.
-    if ($role ne "master" && $LJ::DBWEIGHTS_FROM_DB &&
-        ! $LJ::DBINFO{'_fromdb'})
-    {
-        # this might be enough to do it, if master isn't loaded:
-        $LJ::NEED_DBWEIGHTS = 1;
-        my $dbh = LJ::get_dbh("master");
-
-        # or, if we already had a master cached, we have to
-        # load it by hand:
-        unless ($LJ::DBINFO{'_fromdb'}) {
-            _reload_weights($dbh);
-        }
-    }
-
-    # otherwise, see if we have a role -> full DSN mapping already
-    my ($fdsn, $dbh);
-    if ($role eq "master") {
-        $fdsn = _make_dbh_fdsn($LJ::DBINFO{'master'});
-    } else {
-        if ($LJ::DBCACHE{$role}) {
-            $fdsn = $LJ::DBCACHE{$role};
-            if ($now > $LJ::DBCACHE_UNTIL{$role}) {
-                # this role -> DSN mapping is too old.  invalidate,
-                # and while we're at it, clean up any connections we have
-                # that are too idle.
-                undef $fdsn;
-
-                foreach (keys %LJ::DB_USED_AT) {
-                    next if $LJ::DB_USED_AT{$_} > $now - 60;
-                    delete $LJ::DB_USED_AT{$_};
-                    delete $LJ::DBCACHE{$_};
-                }
-            }
-        }
-    }
-
-    if ($fdsn) {
-        $dbh = _get_dbh_conn($fdsn, $role);
-        return $dbh if $dbh;
-        delete $LJ::DBCACHE{$role};  # guess it was bogus
-    }
-    return undef if $role eq "master";  # no hope now
-
-    # time to randomly weightedly select one.
-    my @applicable;
-    my $total_weight;
-    foreach (keys %LJ::DBINFO) {
-        next if /^_/;
-        next unless ref $LJ::DBINFO{$_} eq "HASH";
-        my $weight = $LJ::DBINFO{$_}->{'role'}->{$role};
-        next unless $weight;
-        push @applicable, [ $LJ::DBINFO{$_}, $weight ];
-        $total_weight += $weight;
-    }
-
-    while (@applicable)
-    {
-        my $rand = rand($total_weight);
-        my ($i, $t) = (0, 0);
-        for (; $i<@applicable; $i++) {
-            $t += $applicable[$i]->[1];
-            last if $t > $rand;
-        }
-        my $fdsn = _make_dbh_fdsn($applicable[$i]->[0]);
-        $dbh = _get_dbh_conn($fdsn);
-        if ($dbh) {
-            $LJ::DBCACHE{$role} = $fdsn;
-            $LJ::DBCACHE_UNTIL{$role} = $now + 20 + int(rand(10));
-            return $dbh;
-        }
-
-        # otherwise, discard that one.
-        $total_weight -= $applicable[$i]->[1];
-        splice(@applicable, $i, 1);
-    }
-
-    # try others
-    return get_dbh(@roles);
-}
-
-sub _make_dbh_fdsn
-{
-    my $db = shift;   # hashref with DSN info, from ljconfig.pl's %LJ::DBINFO
-    return $db->{'_fdsn'} if $db->{'_fdsn'};  # already made?
-
-    my $fdsn = "DBI:mysql";  # join("|",$dsn,$user,$pass) (because no refs as hash keys)
-    $db->{'dbname'} ||= "livejournal";
-    $fdsn .= ":$db->{'dbname'}:";
-    if ($db->{'host'}) {
-        $fdsn .= "host=$db->{'host'};";
-    }
-    if ($db->{'sock'}) {
-        $fdsn .= "mysql_socket=$db->{'sock'};";
-    }
-    $fdsn .= "|$db->{'user'}|$db->{'pass'}";
-
-    $db->{'_fdsn'} = $fdsn;
-    return $fdsn;
-}
-
-sub _get_dbh_conn
-{
-    my $fdsn = shift;
-    my $role = shift;  # optional.
-    my $now = time();
-
-    my $retdb = sub {
-        my $db = shift;
-        $LJ::DBREQCACHE{$fdsn} = $db;
-        $LJ::DB_USED_AT{$fdsn} = $now;
-        return $db;
-    };
-
-    # have we already created or verified a handle this request for this DSN?
-    return $retdb->($LJ::DBREQCACHE{$fdsn})
-        if $LJ::DBREQCACHE{$fdsn};
-
-    # check to see if we recently tried to connect to that dead server
-    return undef if $now < $LJ::DBDEADUNTIL{$fdsn};
-
-    # if not, we'll try to find one we used sometime in this process lifetime
-    my $dbh = $LJ::DBCACHE{$fdsn};
-
-    # if it exists, verify it's still alive and return it:
-    if ($dbh)
-    {
-        if ($role eq "master" && $LJ::NEED_DBWEIGHTS) {
-            return $retdb->($dbh) if _reload_weights($dbh);
-        } else {
-            return $retdb->($dbh) if $dbh->selectrow_array("SELECT CONNECTION_ID()");
-        }
-
-        # bogus:
-        undef $dbh;
-        undef $LJ::DBCACHE{$fdsn};
-    }
-
-    # time to make one!
-    my ($dsn, $user, $pass) = split(/\|/, $fdsn);
-    $dbh = DBI->connect($dsn, $user, $pass, {
-        PrintError => 0,
-    });
-
-    # mark server as dead if dead.  won't try to reconnect again for 5 seconds.
-    if ($dbh) {
-        $LJ::DB_USED_AT{$fdsn} = $now;
-        if ($role eq "master" && $LJ::NEED_DBWEIGHTS) {
-            _reload_weights($dbh);
-        }
-    } else {
-        $LJ::DB_DEAD_UNTIL{$fdsn} = $now + 5;
-    }
-
-    return $LJ::DBREQCACHE{$fdsn} = $LJ::DBCACHE{$fdsn} = $dbh;
-}
-
-sub _reload_weights
-{
-    my $dbh = shift;
-
-    my $serial =
-        $dbh->selectrow_array("SELECT fdsn AS 'serial' FROM dbinfo WHERE dbid=0");
-
-    return 0 if $dbh->err;
-    $LJ::NEED_DBWEIGHTS = 0;
-    return 1 if $serial == $LJ::CACHE_DBWEIGHT_SERIAL;
-
-    my $sth = $dbh->prepare("SELECT i.masterid, i.name, i.fdsn, ".
-                            "w.role, w.curr FROM dbinfo i, dbweights w ".
-                            "WHERE i.dbid=w.dbid");
-    $sth->execute;
-
-    my %dbinfo;
-    while (my $r = $sth->fetchrow_hashref) {
-        my $name = $r->{'masterid'} ? $r->{'name'} : "master";
-        $dbinfo{$name}->{'_fdsn'} = $r->{'fdsn'};
-        $dbinfo{$name}->{'role'}->{$r->{'role'}} = $r->{'curr'};
-        $dbinfo{$name}->{'_totalweight'} += $r->{'curr'};
-    }
-
-    # any host that has no total weight (temporarily disabled?), we want
-    # to kill all its live connections.
-    foreach my $h (keys %dbinfo) {
-        my $i = $dbinfo{$h};
-        next if $i->{'_totalweight'};
-
-        # kill open OAconnections to it
-        delete $LJ::DBCACHE{$i->{'_fdsn'}};
-
-        # mark nothing as wanting to use it.
-        foreach my $k (keys %LJ::DBCACHE) {
-            next if ref $LJ::DBCACHE{$k};
-            if ($LJ::DBCACHE{$k} eq $i->{'_fdsn'}) {
-                delete $LJ::DBCACHE{$k};
-            }
-        }
-    }
-
-    # copy new config.  good to go!
-    %LJ::DBINFO = %dbinfo;
-    $LJ::DBINFO{'_fromdb'} = 1;
-    1;
 }
 
 # <LJFUNC>
