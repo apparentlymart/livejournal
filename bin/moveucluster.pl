@@ -74,7 +74,7 @@ if ($sclust == $dclust) {
 my $dbo;
 if ($sclust) {
     $dbo = $opt_movemaster ? LJ::get_dbh({raw=>1}, "cluster$u->{clusterid}movemaster") :
-	LJ::get_cluster_master($u);
+	LJ::get_dbh({raw=>1}, "cluster$u->{clusterid}");
     die "Can't get source cluster handle.\n" unless $dbo;
     $dbo->{'RaiseError'} = 1;
     $dbo->do("SET wait_timeout=28800");
