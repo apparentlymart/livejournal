@@ -3215,6 +3215,12 @@ sub make_journal
         }
     }
 
+    LJ::run_hooks("s1_style_select", {
+        'styleid' => \$styleid,
+        'u' => $u,
+        'view' => $view,
+    });
+    
     my $notice = sub {
         my $msg = shift;
         my $url = "$LJ::SITEROOT/users/$user/";
