@@ -245,7 +245,12 @@
  
  if ($com) {
      $body .= "<?h1 $ML{'.comminfo.name'} h1?><?p " . BML::ml('.comminfo.body',{'commname'=>$u->{'name'}}) . " ";
-     $body .= BML::ml('.membership.body',{'commname'=>$u->{'user'}});
+     my $userinfo_join_community;
+     LJ::run_hooks("userinfo_join_community", {
+         'u' => $u,
+         'ret' => \$userinfo_join_community,
+     });
+     $body .= $userinfo_join_community ? $userinfo_join_community : BML::ml('.membership.body',{'commname'=>$u->{'user'}});
      $body .= BML::ml('.body.leave',{'commname'=>$u->{'user'}});
      $body .= " p?>";
  } elsif ($synd) {
