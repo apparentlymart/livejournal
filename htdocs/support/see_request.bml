@@ -1,6 +1,7 @@
 <?page
 title=>Request #<?_code return ($FORM{'id'}+0); _code?>
 head<=
+<?_code return LJ::robot_meta_tags(); _code?>
 <script language="JavaScript"><!--
     function check_replytype (e) {
         if (! e) var e = window.event;
