@@ -102,6 +102,8 @@
 | Future |
 +--------+
 
+* HTML email we send out with images should be the images in the MIME body
+  and then HTML part reference those, not the ones on the site
 * attach files to posts (good for groupware)
   -- new cap limits:  canattachfile, filemaxsize (0 for no limit)
 * support system tweaks:
