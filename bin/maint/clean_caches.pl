@@ -3,7 +3,7 @@
 
 $maint{'clean_caches'} = sub 
 {
-    my $dbh = LJ::get_dbh("master");
+    my $dbh = LJ::get_db_writer();
     my $sth;
 
     my $verbose = $LJ::LJMAINT_VERBOSE;
@@ -33,57 +33,69 @@ $maint{'clean_caches'} = sub
     # move rows from talkleft_xfp to talkleft
     print "-I- Moving talkleft_xfp.\n";
 
-    my $user_ct = 0;
-    my %cluster_down;
-    $sth = $dbh->prepare("SELECT DISTINCT u.clusterid, u.userid, u.user " .
-                         "FROM user u, talkleft_xfp t " .
-                         "WHERE u.userid=t.userid LIMIT 100");
-    $sth->execute;
-    while (my ($clusterid, $userid, $user) = $sth->fetchrow_array) {
-        next if $cluster_down{$clusterid};
+    my $xfp_count = $dbh->selectrow_array("SELECT COUNT(*) FROM talkleft_xfp");
+    print "    rows found: $xfp_count\n";
+
+    if ($xfp_count) {
+
+        my @xfp_cols = qw(userid posttime journalid nodetype nodeid jtalkid publicitem);
+        my $xfp_cols = join(",", @xfp_cols);
+        my $xfp_cols_join = join(",", map { "t.$_" } @xfp_cols);
+
+        my %insert_vals;
+        my %delete_vals;
         
-        my $dbcm = LJ::get_cluster_master($clusterid);
-        unless ($dbcm) {
-            print "    cluster down: $clusterid\n";
-            $cluster_down{$clusterid} = 1;
-            next;
+        # select out 1000 rows from random clusters
+        $sth = $dbh->prepare("SELECT u.clusterid,u.user,$xfp_cols_join " .
+                             "FROM talkleft_xfp t, user u " .
+                             "WHERE t.userid=u.userid LIMIT 1000");
+        $sth->execute();
+        my $row_ct = 0;
+        while (my $row = $sth->fetchrow_hashref) {
+
+            my %qrow = map { $_, $dbh->quote($row->{$_}) } @xfp_cols;
+
+            push @{$insert_vals{$row->{'clusterid'}}},
+                   ("(" . join(",", map { $qrow{$_} } @xfp_cols) . ")");
+            push @{$delete_vals{$row->{'clusterid'}}},
+                   ("(userid=$qrow{'userid'} AND " .
+                    "journalid=$qrow{'journalid'} AND " .
+                    "nodetype=$qrow{'nodetype'} AND " .
+                    "nodeid=$qrow{'nodeid'} AND " .
+                    "posttime=$qrow{'posttime'} AND " .
+                    "jtalkid=$qrow{'jtalkid'})");
+
+            $row_ct++;
         }
 
-        # cluster is up, do move
-        my @cols = qw(userid posttime journalid nodetype nodeid jtalkid publicitem);
-        my $cols = join(",", @cols);
+        foreach my $clusterid (sort keys %insert_vals) {
+            my $dbcm = LJ::get_cluster_master($clusterid);
+            unless ($dbcm) {
+                print "    cluster down: $clusterid\n";
+                next;
+            }
 
-        my $s = $dbh->prepare("SELECT $cols FROM talkleft_xfp WHERE userid=?");
-        $s->execute($userid);
-        my @insert_vals;
-        my @delete_vals;
-        while (my $row = $s->fetchrow_hashref) {
-            %$row = map { $_, $dbcm->quote($row->{$_}) } @cols;
-            push @insert_vals, ("(" . join(",", map { $row->{$_} } @cols) . ")");
-            push @delete_vals, ("(journalid=$row->{'journalid'} AND " .
-                                "nodetype=$row->{'nodetype'} AND " .
-                                "nodeid=$row->{'nodeid'} AND " .
-                                "jtalkid=$row->{'jtalkid'})");
+            print "    cluster $clusterid: " . scalar(@{$insert_vals{$clusterid}}) .
+                  " rows\n" if $verbose;
+            $dbcm->do("INSERT INTO talkleft ($xfp_cols) VALUES " .
+                      join(",", @{$insert_vals{$clusterid}})) . "\n";
+            if ($dbcm->err) {
+                print "    db error (insert): " . $dbcm->errstr . "\n";
+                next;
+            }
+
+            # no error, delete from _xfp
+            $dbh->do("DELETE FROM talkleft_xfp WHERE " .
+                     join(" OR ", @{$delete_vals{$clusterid}})) . "\n";
+            if ($dbh->err) {
+                print "    db error (delete): " . $dbh->errstr . "\n";
+                next;
+            }
         }
 
-        print "    moving: $user\n" if $verbose;
-        $dbcm->do("INSERT INTO talkleft ($cols) VALUES " . join(",", @insert_vals));
-        if ($dbcm->err) {
-            print "    db error: " . $dbcm->errstr . "\n";
-            next;
-        }
-
-        # no error, delete from _xfp
-        $dbh->do("DELETE FROM talkleft_xfp WHERE userid=? AND (" .
-                 join(" OR ", @delete_vals) . ")", undef, $userid);
-        if ($dbh->err) {
-            print "    db error: " . $dbh->errstr . "\n";
-            next;
-        }
-
-        $user_ct++;
+        print "    rows remaining: " . ($xfp_count - $row_ct) . "\n";
     }
-    print "    transferred $user_ct\n";
+
 };
 
 1;
