@@ -50,7 +50,7 @@ sub parent_start {
     print "= L = Listener birth\n" if $debug;
 
     $heap->{listener} = POE::Wheel::SocketFactory->new(
-        BindAddress  => '10.0.0.80',
+        BindAddress  => '0.0.0.0',
         BindPort     => $serverport,
         Reuse        => 'yes',
         SuccessEvent => 'socket_birth',
