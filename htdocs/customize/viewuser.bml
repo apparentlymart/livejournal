@@ -13,7 +13,7 @@
     my @journals = ($remote->{'user'});
     push @journals, LJ::get_shared_journals($dbs, $remote);
     my $journal = $GET{'journal'} || $remote->{'user'};
-    unless (grep { $_ eq $journal } @journals) {  return "$journal (@journals)"; return BML::redirect("/customize/");  }
+    unless (grep { $_ eq $journal } @journals) {  return BML::redirect("/customize/");  }
 
     my $u = $remote;
     $u = LJ::load_user($dbs, $journal) unless $journal eq $remote->{'user'};
