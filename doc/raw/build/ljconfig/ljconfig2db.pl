@@ -301,6 +301,11 @@ my %ljconfig =
      232252 => 1,
 );",
             },
+            'anti_squatter' => {
+                'desc' => "Set true if your installation is a publically available development server and if you would like ".
+                          "beta testers to ensure that they understand as such. If left alone your installation might become susceptible to ".
+                          "<ulink url='http://www.livejournal.com/users/brad/1898163.html'>hordes of squatter accounts</ulink>.",
+            },
         },
 
         'portal' => {
