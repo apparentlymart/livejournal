@@ -241,20 +241,27 @@
 	  my ($state, $city, $country);
 
 	  if ($u->{'country'}) {
-	      $country = "<A HREF=\"$LJ::DIRURI?opt_sort=ut&s_loc=1&loc_cn=$u->{'country'}\">$countries{$u->{'country'}}</A>";
+	      $country = $LJ::DISABLED{'directory'} ? $countries{$u->{'country'}} :
+		  "<a href=\"$LJ::DIRURI?opt_sort=ut&s_loc=1&loc_cn=$u->{'country'}\">".
+		      $countries{$u->{'country'}} . "</a>";
 
 	      my $estate;
 	      if ($u->{'state'}) {
 		  $state = $u->{'state'};
 		  if ($u->{'country'} eq "US") { $state = $states{$state}; }
 		  $estate = &BMLUtil::eurl($state);
-		  $state = "<A HREF=\"$LJ::DIRURI?opt_sort=ut&s_loc=1&loc_cn=$u->{'country'}&loc_st=$estate\">$state</A>";
+		  $state = $LJ::DISABLED{'directory'} ? $state :
+		      "<a href=\"$LJ::DIRURI?opt_sort=ut&s_loc=1&loc_cn=".
+			  "$u->{'country'}&loc_st=$estate\">$state</A>";
 	      }
 
 	      if ($u->{'city'}) {
 		  my $ecity = &BMLUtil::eurl($u->{'city'});
 		  $city = &BMLUtil::ehtml($u->{'city'});
-		  $city = "<A HREF=\"$LJ::DIRURI?opt_sort=ut&s_loc=1&loc_cn=$u->{'country'}&loc_st=$estate&loc_ci=$ecity\">$city</A>";
+		  unless ($LJ::DISABLED{'directory'}) {
+		      $city = "<A HREF=\"$LJ::DIRURI?opt_sort=ut&s_loc=1&loc_cn=".
+			  "$u->{'country'}&loc_st=$estate&loc_ci=$ecity\">$city</A>";
+		  }
 	      }
 	  }
 
