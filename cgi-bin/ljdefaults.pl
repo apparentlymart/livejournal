@@ -221,6 +221,11 @@
             unless defined $LJ::REQUIRED_TOS{$_->[0]};
     }
 
+    # setup default minimal style information
+    $MINIMAL_USERAGENT{$_} ||= 1 foreach qw(Links Lynx w); # w is for w3m
+    $MINIMAL_BML_SCHEME ||= 'lynx';
+    $MINIMAL_STYLE{'core'} ||= 'core1';
+
 }
 
 # no dependencies.

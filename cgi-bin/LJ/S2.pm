@@ -345,7 +345,25 @@ sub s2_context
 
     my $u = $opts->{u};
 
-    my %style = $u ? get_style($styleid, { 'u' => $u }) : get_style($styleid);
+    # but it doesn't matter if we're using the minimal style ...
+    my %style;
+    eval {
+        my $r = Apache->request;
+        if ($r->notes('use_minimal_scheme')) {
+            my $public = get_public_layers();
+            while (my ($layer, $name) = each %LJ::MINIMAL_STYLE) {
+                next unless $name ne "";
+                next unless $public->{$name};
+                my $id = $public->{$name}->{'s2lid'};
+                $style{$layer} = $id if $id;
+            } 
+        }
+    };
+
+    # fall back to the standard call to get a user's styles
+    unless (%style) {
+        %style = $u ? get_style($styleid, { 'u' => $u }) : get_style($styleid);
+    }
 
     my @layers;
     foreach (qw(core i18nc layout i18n theme user)) {

@@ -273,6 +273,16 @@ sub trans
         return OK;
     }
 
+    # see if we should setup a minimal scheme based on the initial part of the
+    # user-agent string; FIXME: maybe this should do more than just look at the
+    # initial letters?
+    if (my $ua = $r->header_in('User-Agent')) {
+        if (($ua =~ /^([a-z]+)/i) && $LJ::MINIMAL_USERAGENT{$1}) {
+            $r->notes('use_minimal_scheme' => 1);
+            $r->notes('bml_use_scheme' => $LJ::MINIMAL_BML_SCHEME);
+        }
+    }
+
     # now we know that the request is going to succeed, so do some checking if they have a defined
     # referer.  clients and such don't, so ignore them.
     my $referer = $r->header_in("Referer");
