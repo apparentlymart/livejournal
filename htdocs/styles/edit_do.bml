@@ -151,13 +151,13 @@ body<=
      {
          my $checked = $sty->{$opt->{'code'}} eq "Y" ? "CHECKED" : "";
          $ret .= "<TR VALIGN=TOP><TD><INPUT TYPE=CHECKBOX NAME=$opt->{'code'} VALUE=1 $checked></TD>";
-         $ret .= "<TD><B>$opt->{'title'}</B><BR>$opt->{'des'}</TD></TR>\n";	     
+         $ret .= "<TD><B>$opt->{'title'}</B><BR>$opt->{'des'}</TD></TR>\n";
      }
      $ret .= "</TABLE></TD></TR>";
 
      $ret .= "</TABLE>\n";
 
-     $ret .= "<?h1 Color Codes h1?><?p When designing a style, it's always best to avoid hard-coding colors in if possible.  That way, if you get bored of your colors you can change them at one place (the modify journal page) and it'll affect all your styles where you use that color code.  Obviously, if you need to use special images in your style, you may have to hard-code certain colors, but try to use them when you can.  It's your call.  If you're contributing styles to LiveJournal for us to make public, we prefer color-neutral styles.  <B>The following color codes can be used in any variable below that contains HTML:</B> p?>";
+     $ret .= "<?h1 Color Codes h1?><?p When designing a style, it's always best to avoid hard-coding colors in if possible.  That way, if you get bored of your colors you can change them at one place (the modify journal page) and it'll affect all your styles where you use that color code.  Obviously, if you need to use special images in your style, you may have to hard-code certain colors, but try to use them when you can.  It's your call.  <B>The following color codes can be used in any variable below that contains HTML:</B> p?>";
 
      $ret .= "<CENTER><P><TABLE CELLPADDING=2 BORDER=1 CELLSPACING=1><TR BGCOLOR=#D0D0D0><TD>Code</TD><TD>Description</TD></TR>\n";
      $sth = $dbh->prepare("SELECT coltype, des FROM themecoltypes ORDER BY sortorder");
