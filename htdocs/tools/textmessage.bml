@@ -3,7 +3,6 @@ TITLE=>Send a Text Message
 BODY<=
 (=_CODE
 
- use LJ::TextMessage;
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
