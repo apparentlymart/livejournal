@@ -387,8 +387,8 @@ sub session
                                      'WHERE sess=?', undef, $sess);
     $try ||= 0;
     # Add/update session
-    $u->do('REPLACE INTO captcha_session SET sess=?, sesstime=?, '.
-           'lastcapid=?, trynum=?', undef, $sess, time(), $capid, $try);
+    $cid->do('REPLACE INTO captcha_session SET sess=?, sesstime=?, '.
+             'lastcapid=?, trynum=?', undef, $sess, time(), $capid, $try);
     return ($capid, $anum);
 }
 
