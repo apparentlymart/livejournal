@@ -682,10 +682,10 @@
          {
              if ($lastclient) { chop $body; chop $body; $body .= "<br />"; }
              else { 1; }
-             $body .= "<b>$client</b>: ";
+             $body .= "<b>" . LJ::ehtml($client) ."</b>: ";
              $lastclient = $client;
          }
-         $body .= "$ver, ";
+         $body .= LJ::ehtml($ver) . ", ";
      }
      if ($lastclient) { chop $body; chop $body; }
      $body .= "</td></tr>";
