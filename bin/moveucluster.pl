@@ -391,6 +391,7 @@ if ($sclust == 0)
 elsif ($sclust > 0) 
 {
     print "Moving away from cluster $sclust\n" if $optv;
+
     while (my $cmd = $dbo->selectrow_array("SELECT cmd FROM cmdbuffer WHERE journalid=$userid")) {
 	my $dbcm = LJ::get_cluster_master($sclust);
         print "Flushing cmdbuffer for cmd: $cmd\n" if $optv > 1;
@@ -770,11 +771,6 @@ sub movefrom0_talkitem
 
     $replace_into->("talktext2", "(journalid, jtalkid, subject, body)",
                     20, $userid, $jtalkid, map { $itemtext->{$_} } qw(subject body));
-
-    # add disk usage info!  (this wasn't in cluster0 anywhere)
-    my $bytes = length($itemtext->{'body'}) + length($itemtext->{'subject'});
-    $replace_into->("dudata", "(userid, area, areaid, bytes)", 50,
-                    $userid, 'T', $jtalkid, $bytes);
 
     # copy its logprop over:
     while (my $lp = $treader->(50, "SELECT talkid, tpropid, value FROM talkprop", $talkid)) {
