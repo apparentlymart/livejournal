@@ -161,7 +161,7 @@ $maint{'synsuck'} = sub
                 next unless $it->{'link'};
                 $link_seen{$it->{'link'}} = 1;
             }
-            $good_links = 1 if scalar(keys %link_seen) > 1;
+            $good_links = 1 if scalar(keys %link_seen) == scalar(@items);
         }
 
         # if the links are good, load all the URLs for syndicated
