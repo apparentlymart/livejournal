@@ -1163,7 +1163,7 @@ body, td, th, table, p, div {
 }
 
 function Page::print_body() {
-    """<p>Error: There is no body renderer for viewtype <tt>$.view</tt> defined.</p>""";
+    """<h2>No Default Renderer</h2><p>There is no body renderer for viewtype <tt>$.view</tt> defined.</p>""";
 }
 
 function Page::print_entry_poster(Entry e) {
@@ -1177,18 +1177,20 @@ function Page::print_entry(Entry e) {
     ## For most styles, this will be overridden by FriendsPage::print_entry and such.
     """<div class="entry" id="entry$e.itemid">\n""";
     "<h3>";
-    $this->print_entry_poster($e);
-    if ($e.subject != "") {
-        ": $e.subject";
-    }
     if ($e.security != "") {
-        " "+$e.security_icon->as_string();
+        print $e.security_icon->as_string();
+    }
+    if ($e.subject != "") {
+        " $e.subject";
     }
     "</h3>\n";
+    if ($.view == "friends" or $e.poster.username != $e.journal.username) {
+        "<div>"; $this->print_entry_poster($e); "</div>";
+    }
     """<div class="entrytext">\n$e.text\n</div>\n""";
     $e->print_metadata();
     if ($e.comments.enabled) {
-            $e.comments->print();
+        $e.comments->print();
     }
     "</div>\n\n";
 }
@@ -1197,17 +1199,18 @@ function FriendsPage::print_entry(Entry e) {
     """<div class="entry" id="entry$e.itemid">\n""";
     var Color bg;
     var Color fg;
-    $bg=$.friends{$e.journal.username}.bgcolor;
-    $fg=$.friends{$e.journal.username}.fgcolor;
-    "<h3 style=\"color: " + $fg + "; background: " + $bg + " none;\">";
+    $bg = $.friends{$e.journal.username}.bgcolor;
+    $fg = $.friends{$e.journal.username}.fgcolor;
+    "<h3>";
     $this->print_entry_poster($e);
-    if ($e.subject != "") {
-        ": $e.subject";
-    }
     if ($e.security != "") {
         $e.security_icon->print($e.security);
     }
+    if ($e.subject != "") {
+        " $e.subject";
+    }
     "</h3>\n";
+    """<div style="color: """ + $fg + "; background: " + $bg + """ none;">"""; $this->print_entry_poster($e); "</div>";
     """<div class="entrytext">\n$e.text\n</div>\n""";
     $e->print_metadata();
     if ($e.comments.enabled) {
@@ -1217,9 +1220,9 @@ function FriendsPage::print_entry(Entry e) {
 }
 function Entry::print_metadata() {
     if (size $.metadata) {
-        "<div class=\"metadata\">\n";
+        """<div class="metadata">\n""";
         foreach var string m ($.metadata) {
-            #$.metadata{$m}->print();
+            "<strong>$m</strong>: "; print $.metadata{$m}; "<br />";
         }
         "</div>\n";
     }
@@ -1490,10 +1493,10 @@ function EntryPage::print_comment (Comment c) {
         }
         print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' /></td>";
     }
-    print "<td style='width: 15%'><strong>From:</strong> $poster</td>";
-    print "<td style='width: 25%'><strong>Date:</strong> ";
+    print "<td style='width: auto'><strong>From:</strong> $poster</td>";
+    print "<td style='width: auto'><strong>Date:</strong> ";
         print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td>";
-    print "<td><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td></tr>";
+    print "<td style='width: 10%'><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td></tr>";
     print "<tr valign='top'><td colspan='$td' style='width: 95%'>";
     if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>"; }
     if ($c.metadata{"poster_ip"}) { print " (IP Address: " + $c.metadata{"poster_ip"} + ")"; }
@@ -1526,7 +1529,9 @@ function ItemRange::print() {
     print "</td></tr></table>";
 }
 
-function print_singleitem(Entry e, bool hide_text) {
+function EntryPage::print_body 
+{
+    var Entry e = $.entry;
     """<div class="entry" id="entry$e.itemid">\n""";
 
     "<table>";
@@ -1552,28 +1557,34 @@ function print_singleitem(Entry e, bool hide_text) {
     }
     "</h2>\n";
 
-    if ($hide_text == false) {
+    if (not $.viewing_thread) {
         "<div class='entrytext'>\n$e.text\n</div>\n";
         $e->print_metadata();
         "</div>\n\n";
     }
-}
 
-function EntryPage::print_body 
-{
-    print_singleitem($.entry, $.viewing_thread);
-
-    if ($.comment_pages.total_subitems > 0) {
-        print "<hr />";
-        $.comment_pages->print();
-        $this->print_comments($.comments);
+    if ($.entry.comments.enabled)
+    {
+        print """<hr />(<a href="$e.comments.post_url">Post a new comment</a>)""";
+        if ($.comment_pages.total_subitems > 0) {
+            $.comment_pages->print();
+            $this->print_comments($.comments);
+            print "<hr />";
+            print """(<a href="$e.comments.post_url">Post a new comment</a>)""";
+        }
     }
-
 }
 
 function ReplyPage::print_body
 {
-    print_singleitem($.entry, true);
+    if (not $.entry.comments.enabled) { 
+        print "<h2>Comments Disabled</h2><p>Commenting to this entry has been disabled</p>";
+        return; 
+    }
+    print "<h2>$.replyto.subject</h2>";
+    print "<div>$.replyto.text</div>";
+
     print "\n<hr />\n";
+    print """(<a href="$.entry.permalink_url">Read Comments</a>)""";
     $.form->print();
 }
