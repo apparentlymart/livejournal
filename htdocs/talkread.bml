@@ -222,9 +222,9 @@ body<=
  ### security indicator
  my $sec = "";
  if ($item->{'security'} eq "private") {
-     $sec = "<?securityprivate?>";
+     $sec = BML::fill_template("securityprivate");
  } elsif ($item->{'security'} eq "usemask") {
-     $sec = "<?securityprotected?>";
+     $sec = BML::fill_template("securityprotected");
  }
 
  $sec .= "<br />\n" unless $sec eq "" or $item->{'subject'};
@@ -465,6 +465,7 @@ body<=
      }
  }
 
+ BML::noparse();
  return $ret;
 
 _code?>

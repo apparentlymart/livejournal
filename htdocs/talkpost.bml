@@ -238,9 +238,9 @@ body<=
     ### security indicator
     my $sec = "";
     if ($parpost->{'security'} eq "private") {
-        $sec = "<?securityprivate?>";
+        $sec = BML::fill_template("securityprivate");
     } elsif ($parpost->{'security'} eq "usemask") {
-        $sec = "<?securityprotected?>";
+        $sec = BML::fill_template("securityprotected");
     }
 
     $sec .= "<br />\n" unless $sec eq "" or $parpost->{'subject'};
@@ -287,10 +287,11 @@ body<=
         return $ret;
     }
 
-    $ret .= "<?h1 $ML{'.postresponse'} h1?>";
+    $ret .= BML::fill_template("H1", { DATA => $ML{'.postresponse'} });
 
     $ret .= LJ::Talk::talkform($remote, $u, $parpost, $init->{replyto}, $ditemid, $FORM{'prop_picture_keyword'});
 
+    BML::noparse();
     return $ret;
 }
 _code?>
