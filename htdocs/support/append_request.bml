@@ -21,7 +21,7 @@ BODY<=
      $u = LJ::load_userid($dbh, $sp->{'requserid'});
  }
 
- my $remote = LJ::get_remote($dbh) || {};
+ my $remote = LJ::get_remote($dbh);
  LJ::Support::init_remote($dbh, $remote, \%FORM);
 
  unless (LJ::Support::can_append($dbh, $sp, $remote) || $remote) {
@@ -93,7 +93,7 @@ BODY<=
 
  my $splid = LJ::Support::append_request($dbh, $sp, {
      'body' => $FORM{'body'},
-     'posterid' => $remote->{'userid'},
+     'posterid' => $remote ? $remote->{'userid'} : 0,
      'type' => $type,
      'faqid' => $faqid,
  });

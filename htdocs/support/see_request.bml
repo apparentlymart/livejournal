@@ -32,7 +32,7 @@ BODY<=
  }
 
  my $owner_mode = 0;
- my $remote = LJ::get_remote($dbh) || {};
+ my $remote = LJ::get_remote($dbh);
  
  LJ::Support::init_remote($dbh, $remote, \%FORM);
  
