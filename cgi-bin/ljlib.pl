@@ -740,9 +740,13 @@ sub get_friend_group {
     my ($db, $fgtable) = $u->{dversion} > 5 ?
                          (LJ::get_cluster_def_reader($u), 'friendgroup2') : # if dversion is 6+, use definitive reader
                          (LJ::get_db_writer(), 'friendgroup');              # else, use regular db writer
+    return undef unless $db;
+
     my $sth = $db->prepare("SELECT userid, groupnum, groupname, sortorder, is_public " .
                            "FROM $fgtable WHERE userid=?");
     $sth->execute($uid);
+    return LJ::error($db) if $db->err;
+    
     my @row;
     push @$fg, [ @row ] while @row = $sth->fetchrow_array;
 
