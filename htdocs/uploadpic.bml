@@ -8,11 +8,8 @@ body<=
     use vars qw(%GET %POST);
 
     # get database handles
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    my $remote = LJ::get_remote($dbs);
+    my $dbh = LJ::get_db_writer();
+    my $remote = LJ::get_remote();
     return LJ::bad_input("You must be logged in to upload pictures.")
         unless $remote;
 
@@ -76,7 +73,7 @@ body<=
             my $code = $1;
             if ($code eq "toolarge") {
                 return LJ::bad_input(BML::ml('.error.filetoolarge',
-                                             { 'maxsize' => int($MAX_UPLOAD / 1024) . $ML{'kilobytes'} }));
+                                             { 'maxsize' => int($MAX_UPLOAD / 1024) . $ML{'.kilobytes'} }));
             }
             $err = BML::ml("BML.parse_multipart.$1");
         }
