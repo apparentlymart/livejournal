@@ -6,6 +6,8 @@ package LJ::Support;
 use strict;
 use Digest::MD5 qw(md5_hex);
 
+require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
+
 ## pass $id of zero or blank to get all categories
 sub load_cats
 {

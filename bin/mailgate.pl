@@ -61,6 +61,7 @@ if ($body =~ /I send you this file in order to have your advice/ ||
 
 # at this point we need ljlib (we delayed this so spam/junk is quicker to process)
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
 
 # see if it's a post-by-email
 my @to = Mail::Address->parse($head->get('To'));

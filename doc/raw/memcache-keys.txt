@@ -44,6 +44,9 @@
 <uid> tu:<uid> == packed number: unixtime when user last updated
       popsyn == 100 most read syndicated accounts [user, userid, synurl, numreaders], 1 hour
 
+sysban:ip == hashref of ip => unix expiration time
+sysban:uniq == hashref of uniq => unix expiration time
+
 <uid> upicinf:<uid> == packed data, userpic keywords
 
       rate_eperr:<email_address> == rate limiting errors sent via email for email gateway

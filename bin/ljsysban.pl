@@ -88,10 +88,12 @@ if ($add) {
     if ($what eq 'ip') {
         LJ::procnotify_add("ban_ip", { 'ip' => $value,
                                        'exptime' => LJ::mysqldate_to_time($banuntil) });
+        LJ::MemCache::delete("sysban:ip");
     }
     if ($what eq 'uniq') {
         LJ::procnotify_add("ban_uniq", { 'uniq' => $value,
                                          'exptime' => LJ::mysqldate_to_time($banuntil) });
+        LJ::MemCache::delete("sysban:uniq");
     }
 
     # log in statushistory
@@ -145,11 +147,13 @@ if ($modify) {
         if ($ban->{'what'} eq 'ip') {
             LJ::procnotify_add("ban_ip", { 'ip' => $value || $ban->{'value'},
                                            'exptime' => LJ::mysqldate_to_time($new_banuntil) });
+            LJ::MemCache::delete("sysban:ip");
         }
 
         if ($ban->{'what'} eq 'uniq') {
             LJ::procnotify_add("ban_uniq", { 'uniq' => $value || $ban->{'value'},
                                              'exptime' => LJ::mysqldate_to_time($new_banuntil) });
+            LJ::MemCache::delete("sysban:uniq");
         }
     }
 
