@@ -17,12 +17,12 @@ $maint{'synsuck'} = sub
     
     my $ua =  LWP::UserAgent->new("timeout" => 10);
 
-    $sth = $dbh->prepare("SELECT u.user, s.userid, s.synurl, s.lastmod, s.etag ".
+    $sth = $dbh->prepare("SELECT u.user, s.userid, s.synurl, s.lastmod, s.etag, s.numreaders ".
                          "FROM useridmap u, syndicated s ".
                          "WHERE u.userid=s.userid AND ".
                          "s.checknext < NOW() ORDER BY s.checknext");
     $sth->execute;
-    while (my ($user, $userid, $synurl, $lastmod, $etag) = $sth->fetchrow_array)
+    while (my ($user, $userid, $synurl, $lastmod, $etag, $readers) = $sth->fetchrow_array)
     {
         my $delay = sub {
             my $minutes = shift;
@@ -280,10 +280,19 @@ $maint{'synsuck'} = sub
         my $int = $newcount ? 30 : 60;
         my $status = $newcount ? "ok" : "nonew";
         my $updatenew = $newcount ? ", lastnew=NOW()" : "";
+        
+        # update reader count while we're changing things, but not
+        # if feed is stale (minimize DB work for inactive things)
+        if ($newcount) {
+            $readers = $dbh->selectrow_array("SELECT COUNT(*) FROM friends WHERE ".
+                                             "friendid=?", undef, $userid);
+            # if readers are gone, don't check for a whole day
+            $int = 60*24 unless $readers;
+        }
  
         $dbh->do("UPDATE syndicated SET checknext=DATE_ADD(NOW(), INTERVAL $int MINUTE), ".
-                 "lastcheck=NOW(), lastmod=?, etag=?, laststatus=? $updatenew ".
-                 "WHERE userid=$userid", undef, $r_lastmod, $r_etag, $status);
+                 "lastcheck=NOW(), lastmod=?, etag=?, laststatus=?, numreaders=? $updatenew ".
+                 "WHERE userid=$userid", undef, $r_lastmod, $r_etag, $status, $readers);
     }
 };
 
