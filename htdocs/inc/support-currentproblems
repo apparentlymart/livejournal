@@ -1,8 +1,1 @@
-(=_C <!-- remove this line and the trailing _C line to make a known issues box) -->
-(=STANDOUT
-<b>Known Issues:</b><ul>
-
-<li>The directory search has been limited to paid members until we can install 3 new servers. At that time, search queries should be opened up to all members again.</ul>
-STANDOUT=)
-_C=)
-
+<!-- a known issues box for the support page -->
