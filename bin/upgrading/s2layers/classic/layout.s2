@@ -111,7 +111,7 @@ set comment_bar_two_fgcolor = "#000000";
 function print_stylesheet ()
 {
     var string font;
-    if ($*font_base != "") {
+    if ($*font_base) {
         $font = "\"$*font_base\"";
         if ($*font_fallback != "none") {
             $font = "$font, ";
@@ -148,11 +148,12 @@ table.main {
     font-family:         monospace;
     white-space:         nowrap;
 }
-td.headerbar {
+th.headerbar {
     background-color:    $*headerbar_bgcolor;
     color:               $*headerbar_fgcolor;
     font-weight:         bold;
     font-size:           16pt;
+    text-align:          left;
 }
 td.metabar {
     text-align:          right;
@@ -212,30 +213,29 @@ function Page::print ()
     var Image default_userpic = $this->lay_primary_userpic();
     if (defined $default_userpic)
     {
-        $userpic = "<img align='right' hspace='2' vspace='2' src='$default_userpic.url' "+
+        $userpic = "<img align='right' style='padding: 2px' src='$default_userpic.url' "+
                    "width='$default_userpic.width' height='$default_userpic.height' alt='' />";
     }
-    var string website;
-    if ($.journal.website_url != "")
-    {
-        $website = """<td><a href="$.journal.website_url">$.journal.website_name</a></td><td class="body">&nbsp;</td>""";
-    }
+    var string website = $.journal.website_url ?
+        """<td><a href="$.journal.website_url">$.journal.website_name</a></td><td class="body">&nbsp;</td>""" :
+        "";
     var string links;
     $links = $links + ($.view == "recent" ? "[$*text_view_recent]" : "[<a href='$.base_url/'>$*text_view_recent</a>]");
     $links = $links + ($.view == "archive" ? "[$*text_view_archive]" : "[<a href='$.base_url/calendar'>$*text_view_archive</a>]");
     $links = $links + ($.view == "friends" ? "[$*text_view_friends]" : "[<a href='$.base_url/friends'>$*text_view_friends</a>]");
+
 """
 <html>
-<head>
-<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />
-$.head_content
-<title>$title</title>
+  <head>
+  <link rel="stylesheet" href="$.stylesheet_url" type="text/css" />
+  $.head_content
+  <title>$title</title>
 </head>
 <body>
-<table class="main" width='100%'><tr><td>
-$userpic
-<span class="page_title">$title</span>
-<p class="view_links">$links</p>
+  <table class="main" width='100%'><tr><td>
+    $userpic
+    <span class="page_title">$title</span>
+    <p class="view_links">$links</p>
 """;
     $this->lay_nav_blurb();
     $this->print_body();
@@ -245,12 +245,9 @@ $userpic
 
     "<table class='main' align='right'><tr>";
 
-    # Website?
-    print $website;
-    # Server Signature
-    "<td>"; server_sig(); "</td></tr>";
+    print $website; "<td>"; server_sig(); "</td></tr>";
 
-    "</table></body></html>";
+    "</table>\n</body>\n</html>";
 }
 
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
@@ -259,17 +256,15 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     var string userpic = "";
     if (defined $e.userpic)
     {
-        $userpic = "<img src='$e.userpic.url' />";
+        $userpic = "<img src='$e.userpic.url' alt='[User Picture] height='$e.userpic.height' width='$e.userpic.width' />";
     }
-    if ($p.view == "recent") {
-        if ($e.new_day)
-        {
-            "<tr><td colspan='2' align='left' class='headerbar'>";
-            print $e.time->date_format("%%month%% %%dayord%%, %%yyyy%%");
-            "</td></tr>\n";
-        }
-    } elseif ($p.view == "day" or $p.view == "entry") {
-        "<tr><td class='headerbar'>Time</td><td class='headerbar' style='width: 100%'>Event</td></tr>";
+    if (($p.view == "recent" and $e.new_day) or $p.view == "entry")
+    {
+        "<tr><th colspan='2' align='left' class='headerbar'>";
+        print $e.time->date_format("%%month%% %%dayord%%, %%yyyy%%");
+        "</th></tr>\n";
+    } elseif ($p.view == "day") {
+        "<tr><th class='headerbar'>Time</td><td class='headerbar' style='width: 100%'>Event</th></tr>";
     }
     "<tr valign='top'>";
 
@@ -372,9 +367,9 @@ function RecentPage::print_body ()
         $nav = "<p align='center'>[$nav]</p>";
     }
     if ($nav != "") { print $nav; }
-    "<ul><table>\n";
+    "<table style='margin-left: 30px'>\n";
     foreach var Entry e ($.entries) { $this->print_entry($e); }
-    "</table></ul>\n";
+    "</table>\n";
     if ($nav != "") { print $nav; }
 }
 
@@ -481,9 +476,9 @@ function DayPage::print_body ()
     {
         "<blockquote><em>"; print ehtml($*text_noentries_day); "</em></blockquote>";
     } else {
-        "<ul><table>";
+        "<table style='margin-left: 30px'>";
         foreach var Entry e ($.entries) { $this->print_entry($e); }
-        "</table></ul>";
+        "</table>";
     }
 
     var string tprev = ehtml($*text_day_prev);
@@ -502,14 +497,17 @@ function DayPage::print_body ()
 }
 
 function EntryPage::print_body () {
-    "<ul><table>\n";
+    "<table style='margin-left: 30px'>\n";
     print_entry($this, $.entry, $*metabar_bgcolor, $*metabar_fgcolor, $.viewing_thread);
-    "</ul></table>\n";
-    print "<h2>Comments:</h2>\n";
+
+    "<tr valign='top'><th class='headerbar' colspan='2'>Comments</th></tr>";
+    "<tr valign='top'><td style='background-color: $*metabar_bgcolor'>&nbsp;</td><td style='width: 100%'>";
     if ($.comment_pages.total_subitems > 0) {
         $.comment_pages->print();
         $this->print_comments($.comments);
     }
+    "</td></tr>";
+    "</table>\n";
 }
 
 function EntryPage::print_comment (Comment c) {
@@ -540,7 +538,7 @@ function EntryPage::print_comment (Comment c) {
             $w = $w / 2;
             $h = $h / 2;
         }
-        print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' /></td>";
+        print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' alt='[User Picture]' /></td>";
     }
     print "<td align='left'><strong>From:</strong> $poster</td>";
     print "<td align='left'><strong>Date:</strong> ";
@@ -559,14 +557,14 @@ function EntryPage::print_comment (Comment c) {
 
 function ReplyPage::print_body()
 {
-    "<ul><table>\n";
+    "<table style='margin-left: 30px'>\n";
     var string time = $.replyto.time->time_format();
     var string userpic = "";
     if (defined $.replyto.userpic)
     {
         $userpic = "<img src='$.replyto.userpic.url' />";
     }
-    "<tr><td class='headerbar'>Time</td><td class='headerbar' style='width: 100%'>Text</td></tr>";
+    "<tr><th class='headerbar'>Time</td><th class='headerbar' style='width: 100%'>Text</th></tr>";
     "<tr valign='top'>";
 
     # Metabar
@@ -587,11 +585,12 @@ function ReplyPage::print_body()
     if ($.replyto.subject != "") { "\n\n<span class='subject'>$.replyto.subject</span><br />"; }
     print $.replyto.text; "\n\n";
 
-    "</td></tr></table>\n";
+    "</td></tr>\n";
     "<div align='center'><a href='$.entry.comments.read_url'>( Read Comments )</a></div>";
-    "<h2>Reply:</h2>\n";
+    "<tr valign='top'><th class='headerbar' colspan='2'>Reply:</th></tr>";
+    "<tr valing='top'><td style='background-color: $*metabar_bgcolor'>&nbsp;</td><td>";
     $.form->print();
-    "</ul>";
+    "</td></tr></table>";
 }
 
 function print_theme_preview ()
