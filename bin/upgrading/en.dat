@@ -2718,6 +2718,8 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkpost_do.bml.title=Post Comment
 
+/talkpost_do.bml.title.error=Comment Not Posted
+
 /talkpost_do.bml.title.preview=Comment Preview
 
 /talkread.bml.anonuser=<i>(Anonymous)</i>
