@@ -5,7 +5,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 my $cmd = shift @ARGV;
 my $ip = shift @ARGV;
-unless (($cmd eq "add" || $cmd eq "remove") && $ip) {
+unless ($cmd eq "list" || (($cmd eq "add" || $cmd eq "remove") && $ip)) {
     die "Usage: ipban {add|remove} <ip>\n";
 }
 
@@ -22,3 +22,11 @@ if ($cmd eq "remove") {
     exit;
 }
 
+if ($cmd eq "list") {
+    print "---Banned IP------Date Added---\n";
+    my $sth = $dbh->prepare("SELECT ip,bandate FROM ipban ORDER BY bandate asc");
+    $sth->execute;
+    while (my ($ip, $date) = $sth->fetchrow_array) {
+        printf "%-15s  $date\n", $ip;
+    }
+}
