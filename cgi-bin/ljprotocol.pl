@@ -16,18 +16,25 @@ sub error_message
 	     # User Errors
 	     "100" => "Invalid username",
 	     "101" => "Invalid password",
+	     "102" => "Can't use custom security on shared/community journals.",
+	     "103" => "Poll error",
+	     "150" => "Can't post as non-user",
 
 	     # Client Errors
 	     "200" => "Missing required argument(s)",
 	     "201" => "Unknown method",
 	     "202" => "Too many arguments",
 	     "203" => "Invalid argument(s)",
+	     "204" => "Invalid metadata datatype",
+	     "205" => "Unknown metadata",
 
 	     # Access Errors
 	     "300" => "Don't have access to shared/community journal",
+	     "301" => "Access of restricted feature",
 
 	     # Server Errors
 	     "500" => "Internal server error",
+	     "501" => "Database error",
 	     );
 
     my $prefix = "";
@@ -53,6 +60,7 @@ sub do_request
     if ($method eq "friendof")        { return friendof(@args);        }
     if ($method eq "checkfriends")    { return checkfriends(@args);    }
     if ($method eq "getdaycounts")    { return getdaycounts(@args);    }
+    if ($method eq "postevent")       { return postevent(@args);       }
 
     return fail($err,201);    
 }
@@ -227,6 +235,231 @@ sub getdaycounts
 	my $date = sprintf("%04d-%02d-%02d", $y, $m, $d);
 	push @{$res->{'daycounts'}}, { 'date' => $date, 'count' => $c };
     }
+    return $res;
+}
+
+sub postevent
+{
+    my ($dbs, $req, $err, $flags) = @_;
+    return undef unless authenticate($dbs, $req, $err, $flags);
+    return undef unless check_altusage($dbs, $req, $err, $flags);
+
+    my $u = $flags->{'u'};    
+    my $ownerid = $flags->{'ownerid'};
+    my $dbr = $dbs->{'reader'};
+    my $dbh = $dbs->{'dbh'};
+
+    return fail($err,200) unless ($req->{'event'} =~ /\S/);
+    
+    ### make sure community, shared, or news journals don't post
+    ### note: shared and news journals are deprecated.  every shared journal 
+    ##        should one day be a community journal, of some form.
+    return fail($err,150) if ($u->{'journaltype'} eq "C" || 
+			      $u->{'journaltype'} eq "S" ||
+			      $u->{'journaltype'} eq "N");
+
+    #### clean up the event text        
+    my $event = $req->{'event'};
+	
+    # remove surrounding whitespace
+    $event =~ s/^\s+//;
+    $event =~ s/\s+$//;
+    
+    # convert line endings to unix format
+    if ($req->{'lineendings'} eq "mac") {
+	$event =~ s/\r/\n/g;
+    } else {
+	$event =~ s/\r//g;
+    }
+    
+    # date validation
+    if ($req->{'year'} !~ /^\d\d\d\d$/ || $req->{'year'} < 1980 || $req->{'year'} > 2037) {
+	return fail($err,203,"Invalid year value.");
+    }
+    if ($req->{'mon'} !~ /^\d{1,2}$/ || $req->{'mon'} < 1 || $req->{'mon'} > 12) {
+	return fail($err,203,"Invalid month value.");
+    }
+    if ($req->{'day'} !~ /^\d{1,2}$/ || $req->{'day'} < 1 || 
+	$req->{'day'} > LJ::days_in_month($req->{'month'}, $req->{'year'})) {
+	return fail($err,203,"Invalid day of month value.");
+    }
+    if ($req->{'hour'} !~ /^\d{1,2}$/ || $req->{'hour'} < 0 || $req->{'hour'} > 23) {
+	return fail($err,203,"Invalid hour value.");
+    }
+    if ($req->{'min'} !~ /^\d{1,2}$/ || $req->{'min'} < 0 || $req->{'min'} > 59) {
+	return fail($err,203,"Invalid minute value.");
+    }
+	
+    ## handle meta-data (properties)
+    my %props_byname = ();
+    my %props = ();
+    foreach my $key (keys %{$req->{'props'}}) {
+	next unless ($req->{'props'}->{$key});  # make sure it was non-empty/true interesting value
+	$props_byname{$key} = $req->{'props'}->{$key};
+    }
+    if (%props_byname) {
+	my $qnamein = join(",", map { $dbh->quote($_); } keys %props_byname);
+	my $sth = $dbr->prepare("SELECT propid, name, datatype FROM logproplist WHERE name IN ($qnamein)");
+	$sth->execute;
+	while (my ($pid, $pname, $ptype) = $sth->fetchrow_array) {
+	    if ($ptype eq "bool" && $props_byname{$pname} !~ /^[01]$/) {
+		return fail($err,204,"Property \"$pname\" should be 0 or 1");
+	    }
+	    if ($ptype eq "num" && $props_byname{$pname} =~ /[^\d]/) {
+		return fail($err,204,"Property \"$pname\" should be numeric");
+	    }
+	    $props{$pid} = $props_byname{$pname};
+	    delete $props_byname{$pname};
+	}
+	return fail($err,205,join(",",keys %props_byname)) 
+	    if (%props_byname);
+    }
+    
+    ### allow for posting to journals that aren't yours (if you have permission)
+    my $posterid = $u->{'userid'};
+    my $ownerid = $flags->{'ownerid'};
+	
+    # make the proper date format
+    my $qeventtime = $dbh->quote(sprintf("%04d-%02d-%02d %02d:%02d", 
+					 $req->{'year'}, $req->{'mon'}, 
+					 $req->{'day'}, $req->{'hour'}, 
+					 $req->{'min'}));
+    my $qsubject = $dbh->quote($req->{'subject'});
+    my $qallowmask = $req->{'allowmask'}+0;
+    my $qsecurity = "public";
+    my $uselogsec = 0;
+    if ($req->{'security'} eq "usemask" || $req->{'security'} eq "private") {
+	$qsecurity = $req->{'security'};
+    }
+    if ($req->{'security'} eq "usemask") {  
+	$uselogsec = 1; 
+    }
+    $qsecurity = $dbh->quote($qsecurity);
+    
+    ### make sure user can't post with "custom security" on shared journals
+    return fail($err,102) 
+	if ($req->{'security'} eq "usemask" && 
+	    $qallowmask != 1 && ($ownerid != $posterid));
+    
+    ### do processing of embedded polls
+    my @polls = ();
+    if (LJ::Poll::contains_new_poll(\$event))
+    {
+	return fail($err,301,"Only users with paid accounts can create polls in their journals.")
+	    if ($u->{'paidfeatures'} ne "paid" && $u->{'paidfeatures'} ne "on");
+	
+	my $error = "";
+	@polls = LJ::Poll::parse($dbh, \$event, \$error, {
+	    'journalid' => $ownerid,
+	    'posterid' => $posterid,
+	});
+	return fail($err,103,$error) if $error;
+    }
+    
+    my $qownerid = $ownerid+0;
+    my $qposterid = $posterid+0;
+    
+    $dbh->do("INSERT INTO log (ownerid, posterid, eventtime, logtime, security, allowmask, replycount, year, month, day) VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, 0, $req->{'year'}, $req->{'mon'}, $req->{'day'})");
+    return fail($err,501,$dbh->errstr) if $dbh->err;
+
+    my $itemid = $dbh->{'mysql_insertid'};
+    return fail($err,501,"No itemid could be generated.") unless $itemid;
+    
+    ### finish embedding stuff now that we have the itemid
+    {
+	### this should NOT return an error, and we're mildly fucked by now
+	### if it does (would have to delete the log row up there), so we're
+	### not going to check it for now.
+	
+	my $error = "";
+	LJ::Poll::register($dbh, \$event, \$error, $itemid, @polls);
+    }
+    #### /embedding
+    
+    my $qevent = $dbh->quote($event);
+    $event = "";
+    
+    my @prefix = ("");
+    if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
+    foreach my $pfx (@prefix) 
+    {
+	$dbh->do("INSERT INTO ${pfx}logtext (itemid, subject, event) ".
+		 "VALUES ($itemid, $qsubject, $qevent)");
+	if ($dbh->err) {
+	    my $msg = $dbh->errstr;
+	    LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+	    return fail($err,501,$msg);
+	}
+    }
+    
+    # this is to speed month view and other places that don't need full text.
+    $dbh->do("INSERT INTO logsubject (itemid, subject) VALUES ($itemid, $qsubject)");
+    if ($dbh->err) {
+	my $msg = $dbh->errstr;
+        LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+	return fail($err,501,$msg);
+    }
+    
+    ## update sync table
+    $dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) ".
+	     "SELECT ownerid, logtime, 'L', itemid, 'create' FROM log WHERE itemid=$itemid");
+    if ($dbh->err) {
+	my $msg = $dbh->errstr;
+        LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+	return fail($err,501,$msg);
+    }
+    
+    # keep track of custom security stuff in other table.
+    if ($uselogsec) {
+	$dbh->do("INSERT INTO logsec (ownerid, itemid, allowmask) VALUES ($qownerid, $itemid, $qallowmask)");
+	if ($dbh->err) {
+	    my $msg = $dbh->errstr;
+  	    LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+	    return fail($err,501,$msg);
+	}
+    }
+    
+    # meta-data
+    if (%props) {
+	my $propinsert = "";
+	foreach my $propid (keys %props) {
+	    if ($propinsert) {
+		$propinsert .= ", ";
+	    } else {
+		$propinsert = "INSERT INTO logprop (itemid, propid, value) VALUES ";
+	    }
+	    my $qvalue = $dbh->quote($props{$propid});
+	    $propinsert .= "($itemid, $propid, $qvalue)";
+	}
+	if ($propinsert) { 
+	    $dbh->do($propinsert); 
+	    if ($dbh->err) {
+		my $msg = $dbh->errstr;
+	        LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+		return fail($err,501,$msg);
+	    }
+	}
+    }
+    
+    $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$itemid ".
+	     "WHERE userid=$qownerid");
+    
+    if ($u->{'track'} eq "yes") {
+	my $quserid = $u->{'userid'}+0;
+	my $qip = $dbh->quote($ENV{'REMOTE_ADDR'});
+	$dbh->do("INSERT INTO tracking (userid, acttime, ip, actdes, associd) ".
+		 "VALUES ($quserid, NOW(), $qip, 'post', $itemid)");
+    }
+    
+    unless ($req->{'props'}->{"opt_backdated"}) {
+	## update lastn hints table
+	LJ::query_buffer_add($dbh, "hintlastnview", 
+			     "INSERT INTO hintlastnview (userid, itemid) ".
+			     "VALUES ($qownerid, $itemid)");
+    }
+    
+    my $res = {};
+    $res->{'itemid'} = $itemid;  # by request of mart
     return $res;
 }
 
@@ -451,6 +684,7 @@ sub authenticate
 
     return fail($err,100) unless $u;
     return fail($err,101) unless ($flags->{'nopassword'} || 
+				  $flags->{'noauth'} || 
   				  LJ::auth_okay($username,
 						$req->{'password'},
 						$req->{'hpassword'},
@@ -532,6 +766,9 @@ sub do_request
     }
     if ($req->{'mode'} eq "getdaycounts") {
 	return getdaycounts($dbs, $req, $res, $flags);
+    }
+    if ($req->{'mode'} eq "postevent") {
+	return postevent($dbs, $req, $res, $flags);
     }
 
     ### OLD CODE FOLLOWS:
@@ -1129,15 +1366,15 @@ sub do_request
 		my $qnamein = join(",", map { $dbh->quote($_); } keys %props_byname);
 		my $sth = $dbh->prepare("SELECT propid, name, datatype FROM logproplist WHERE name IN ($qnamein)");
 		$sth->execute;
-		while ($_ = $sth->fetchrow_hashref) {
-		    if ($_->{'datatype'} eq "bool" && $props_byname{$_->{'name'}} !~ /^[01]$/) {
-			$res->{'errmsg'} = "Client error: Property \"$_->{'name'}\" should be 0 or 1";
+		while (my ($pid, $pname, $ptype) = $sth->fetchrow_array) {
+		    if ($ptype eq "bool" && $props_byname{$pname} !~ /^[01]$/) {
+			$res->{'errmsg'} = "Client error: Property \"$pname\" should be 0 or 1";
 		    }
-		    if ($_->{'datatype'} eq "num" && $props_byname{$_->{'name'}} =~ /[^\d]/) {
-			$res->{'errmsg'} = "Client error: Property \"$_->{'name'}\" should be numeric";
+		    if ($ptype eq "num" && $props_byname{$pname} =~ /[^\d]/) {
+			$res->{'errmsg'} = "Client error: Property \"$pname\" should be numeric";
 		    }
-		    $props{$_->{'propid'}} = $props_byname{$_->{'name'}};
-		    delete $props_byname{$_->{'name'}};
+		    $props{$pid} = $props_byname{$pname};
+		    delete $props_byname{$pname};
 		}
 		if (%props_byname) {
 		    $res->{'errmsg'} = "Client error: Unknown property: " . join(",", keys %props_byname);
@@ -1272,295 +1509,6 @@ sub do_request
         return 1;
     }
 
-    ###
-    ### MODE: postevent
-    ### 
-    if ($req->{'mode'} eq "postevent")
-    {
-        if ($req->{'event'} =~ /^\s*$/)
-        {
-	    $res->{'success'} = "FAIL";
-	    $res->{'errmsg'} = "Client error: No event specified.";
-	    return;
-        }
-	
-	### make sure community, shared, or news journals don't post
-	### note: shared and news journals are deprecated.  every shared journal should one day
-	###       be a community journal, of some form.
-	if ($journaltype eq "C" || $journaltype eq "S" || $journaltype eq "N") {
-	    $res->{'success'} = "FAIL";
-	    $res->{'errmsg'} = "User error: Community and shared journals cannot post, only be posted into.";
-	    return;
-	}
-
-
-	#### clean up the event text        
-	my $event = $req->{'event'};
-	
-	# remove surrounding whitespace
-	$event =~ s/^\s+//;
-	$event =~ s/\s+$//;
-	
-	# convert line endings to unix format
-	if ($req->{'lineendings'} eq "mac") {
-	    $event =~ s/\r/\n/g;
-	} else {
-	    $event =~ s/\r//g;
-	}
-        
-        # date validation
-        if ($req->{'year'} !~ /^\d\d\d\d$/ || $req->{'year'} < 1980 || $req->{'year'} > 2037) {
-	    $res->{'errmsg'} = "Client error: Invalid year value.";
-	}
-        if ($req->{'mon'} !~ /^\d{1,2}$/ || $req->{'mon'} < 1 || $req->{'mon'} > 12) {
-	    $res->{'errmsg'} = "Client error: Invalid month value.";
-	}
-        if ($res->{'errmsg'}) { $res->{'success'} = "FAIL"; return; }
-        if ($req->{'day'} !~ /^\d{1,2}$/ || $req->{'day'} < 1 || $req->{'day'} > &days_in_month($req->{'month'}, $req->{'year'})) {
-	    $res->{'errmsg'} = "Client error: Invalid day of month value.";
-	}
-        if ($req->{'hour'} !~ /^\d{1,2}$/ || $req->{'hour'} < 0 || $req->{'hour'} > 23) {
-	    $res->{'errmsg'} = "Client error: Invalid hour value.";
-        }
-        if ($req->{'min'} !~ /^\d{1,2}$/ || $req->{'min'} < 0 || $req->{'min'} > 59) {
-	    $res->{'errmsg'} = "Client error: Invalid minute value.";
-        }
-	
-	## handle meta-data (properties)
-	my %props_byname = ();
-	my %props = ();
-	foreach my $key (keys %{$req}) {
-	    next unless ($key =~ /^prop_(\w+)$/);
-	    next unless ($req->{$key});  # make sure it was non-empty/true interesting value
-	    $props_byname{$1} = $req->{$key};
-	}
-	if (%props_byname) {
-	    my $qnamein = join(",", map { $dbh->quote($_); } keys %props_byname);
-	    my $sth = $dbh->prepare("SELECT propid, name, datatype FROM logproplist WHERE name IN ($qnamein)");
-	    $sth->execute;
-	    while ($_ = $sth->fetchrow_hashref) {
-		if ($_->{'datatype'} eq "bool" && $props_byname{$_->{'name'}} !~ /^[01]$/) {
-		    $res->{'errmsg'} = "Client error: Property \"$_->{'name'}\" should be 0 or 1";
-		}
-		if ($_->{'datatype'} eq "num" && $props_byname{$_->{'name'}} =~ /[^\d]/) {
-		    $res->{'errmsg'} = "Client error: Property \"$_->{'name'}\" should be numeric";
-		}
-		$props{$_->{'propid'}} = $props_byname{$_->{'name'}};
-		delete $props_byname{$_->{'name'}};
-	    }
-	    if (%props_byname) {
-		$res->{'errmsg'} = "Client error: Unknown property: " . join(",", keys %props_byname);
-	    }
-	}
-
-	### allow for posting to journals that aren't yours (if you have permission)
-	my $posterid = $userid;
-	my $ownerid = $userid;
-	my $qowner = $quser;
-
-	if ($req->{'usejournal'}) {
-	    my $info = {};
-	    if (&can_use_journal($dbs, $posterid, $req->{'usejournal'}, $info)) {
-		$ownerid = $info->{'ownerid'};
-		$qowner = $dbh->quote($req->{'usejournal'});
-	    } else {
-		$res->{'errmsg'} = $info->{'errmsg'};
-	    }
-	}
-	
-	### communities can't post. 
-	if ($journaltype ne "P") {
-	    $res->{'errmsg'} = "Sorry, community and other shared accounts can only be posted into, they cannot post themselves.";
-	}
-
-	if ($res->{'errmsg'}) { $res->{'success'} = "FAIL"; return; }
-	    
-        # make the proper date format
-        my $qeventtime = $dbh->quote(sprintf("%04d-%02d-%02d %02d:%02d", $req->{'year'}, $req->{'mon'}, $req->{'day'}, $req->{'hour'}, $req->{'min'}));
-
-	my $qsubject = $dbh->quote($req->{'subject'});
-	my $qallowmask = $req->{'allowmask'}+0;
-	my $qsecurity = "public";
-	my $uselogsec = 0;
-	if ($req->{'security'} eq "usemask" || $req->{'security'} eq "private") {
-	    $qsecurity = $req->{'security'};
-	}
-	if ($req->{'security'} eq "usemask") {  
-	    $uselogsec = 1; 
-	}
-	$qsecurity = $dbh->quote($qsecurity);
-
-	### make sure user can't post with "custom security" on shared journals
-	if ($req->{'security'} eq "usemask" && 
-	    $qallowmask != 1 && ($ownerid != $posterid)) 
-	{
-	    $res->{'success'} = "FAIL";
-	    $res->{'errmsg'} = "Sorry, you can't use custom security on shared journals.  Change security to public, private, or friends and post again.";
-	    return;
-	}
-
-	### do processing of embedded polls
-	my @polls = ();
-	if (LJ::Poll::contains_new_poll(\$event))
-	{
-	    if ($paidfeatures ne "paid" && $paidfeatures ne "on") {
-		$res->{'success'} = "FAIL";
-		$res->{'errmsg'} = "Sorry, only users with paid accounts can create polls in their journals.";
-		return;
-	    }
-	    my $error = "";
-	    @polls = LJ::Poll::parse($dbh, \$event, \$error, {
-		'journalid' => $ownerid,
-		'posterid' => $posterid,
-	    });
-	    if ($error) {
-		$res->{'success'} = "FAIL";
-		$res->{'errmsg'} = $error;
-		return;
-	    }
-	}
-
-	my $qownerid = $ownerid+0;
-	my $qposterid = $posterid+0;
-
-	$dbh->do("INSERT INTO log (ownerid, posterid, eventtime, logtime, security, allowmask, replycount, year, month, day) VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, 0, $req->{'year'}, $req->{'mon'}, $req->{'day'})");
-
-        if ($dbh->err) {
-	  $res->{'success'} = "FAIL";
-	  $res->{'errmsg'} = "Database error [log]: " . $dbh->errstr;
-	  return;
-        }
-
-	my $itemid = $dbh->{'mysql_insertid'};
-
-	unless ($itemid) {
-	  $res->{'success'} = "FAIL";
-	  $res->{'errmsg'} = "Database error: no itemid could be generated.";
-	  return;
-	}
-
-	### finish embedding stuff now that we have the itemid
-	{
-	    ### this should NOT return an error, and we're mildly fucked by now
-	    ### if it does (would have to delete the log row up there), so we're
-	    ### not going to check it for now.
-
-	    my $error = "";
-	    &LJ::Poll::register($dbh, \$event, \$error, $itemid, @polls);
-	}
-	#### /embedding
-
-        my $qevent = $dbh->quote($event);
-	$event = "";
-
-	my @prefix = ("");
-	if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
-	foreach my $pfx (@prefix) 
-	{
-	    $dbh->do("INSERT INTO ${pfx}logtext (itemid, subject, event) ".
-		     "VALUES ($itemid, $qsubject, $qevent)");
-	    if ($dbh->err) {
-		$res->{'success'} = "FAIL";
-		$res->{'errmsg'} = "Database error [${pfx}lti]: " . $dbh->errstr;
-		&LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-		return;
-	    }
-	}
-
-	# this is to speed month view and other places that don't need full text.
-	$dbh->do("INSERT INTO logsubject (itemid, subject) VALUES ($itemid, $qsubject)");
-	if ($dbh->err) {
-	    $res->{'success'} = "FAIL";
-	    $res->{'errmsg'} = "Database error [lsi]: " . $dbh->errstr;
-	    &LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-	    return;
-	}
-	
-	## update sync table
-	$dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) ".
-		 "SELECT ownerid, logtime, 'L', itemid, 'create' FROM log WHERE itemid=$itemid");
-	if ($dbh->err) {
-	    $res->{'success'} = "FAIL";
-	    $res->{'errmsg'} = "Database error [sur]: " . $dbh->errstr;
-	    &LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-	    return;
-	}
-
-	# keep track of custom security stuff in other table.
-	if ($uselogsec) {
-	    $dbh->do("INSERT INTO logsec (ownerid, itemid, allowmask) VALUES ($qownerid, $itemid, $qallowmask)");
-	    if ($dbh->err) {
-		$res->{'success'} = "FAIL";
-		$res->{'errmsg'} = "Database error [lsec]: " . $dbh->errstr;
-		&LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-		return;
-	    }
-	}
-
-	# meta-data
-	if (%props) {
-	    my $propinsert = "";
-	    foreach my $propid (keys %props) {
-		if ($propinsert) {
-		    $propinsert .= ", ";
-		} else {
-		    $propinsert = "INSERT INTO logprop (itemid, propid, value) VALUES ";
-		}
-		my $qvalue = $dbh->quote($props{$propid});
-		$propinsert .= "($itemid, $propid, $qvalue)";
-	    }
-	    if ($propinsert) { 
-		$dbh->do($propinsert); 
-		if ($dbh->err) {
-		    $res->{'success'} = "FAIL";
-		    $res->{'errmsg'} = "Database error [propins]: " . $dbh->errstr;
-		    &LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-		    return;
-		}
-	    }
-	}
-        
-        $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$itemid WHERE userid=$qownerid");
-
-	if ($track eq "yes") {
-	    my $quserid = $userid+0;
-	    my $qip = $dbh->quote($ENV{'REMOTE_ADDR'});
-	    $dbh->do("INSERT INTO tracking (userid, acttime, ip, actdes, associd) ".
-		     "VALUES ($quserid, NOW(), $qip, 'post', $itemid)");
-	}
-
-	unless ($req->{'prop_opt_backdated'}) {
-	    ## update lastn hints table
-	    &LJ::query_buffer_add($dbh, "hintlastnview", 
-				  "INSERT INTO hintlastnview (userid, itemid) ".
-				  "VALUES ($qownerid, $itemid)");
-	}
-	    
-        if ($dbh->err) {
-	    $res->{'success'} = "FAIL";
-	    $res->{'errmsg'} = "(report this) Database error (hlnv): " . $dbh->errstr;
-	    return;
-        }
-
-	#### do the ICQ notifications
-	if (0 || $user eq "test") {
-	    # $sth = $dbh->prepare("SELECT u.user, u.icq FROM friends f, user u WHERE
-	    # f.user=u.user AND f.friend=$quser AND u.icq <> ''");
-	    # $sth->execute;
-	    while (my $f = $sth->fetchrow_hashref) 
-	    {
-		my $msg = "";
-		$msg .= "Your friend \"$user\" updated their journal...\r\n";
-		$msg .= "$LJ::SITEROOT/users/$f->{'user'}/friends\r\n\r\n";
-		$msg .= "\"$req->{'event'}\"";
-		# &icq_send($f->{'icq'}, $msg);
-	    }
-	}
-        
-        $res->{'success'} = "OK";
-	$res->{'itemid'} = $itemid;  # by request of martmart
-        return 1;
-    }
 
     ###
     ### MODE: syncitems
@@ -1622,7 +1570,7 @@ sub login
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("login", $rq, \$err);
+    my $rs = LJ::Protocol::do_request("login", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1691,7 +1639,7 @@ sub getfriendgroups
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("getfriendgroups", $rq, \$err);
+    my $rs = LJ::Protocol::do_request("getfriendgroups", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1711,7 +1659,7 @@ sub getfriends
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("getfriends", $rq, \$err);
+    my $rs = LJ::Protocol::do_request("getfriends", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1738,7 +1686,7 @@ sub friendof
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("friendof", $rq, \$err);
+    my $rs = LJ::Protocol::do_request("friendof", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1758,7 +1706,7 @@ sub checkfriends
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("checkfriends", $rq, \$err);
+    my $rs = LJ::Protocol::do_request("checkfriends", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1780,7 +1728,7 @@ sub getdaycounts
     my $err = 0;
     my $rq = upgrade_request($req);
     
-    my $rs = LJ::Protocol::do_request("getdaycounts", $rq, \$err);
+    my $rs = LJ::Protocol::do_request("getdaycounts", $rq, \$err, $flags);
     unless ($rs) {
 	$res->{'success'} = "FAIL";
 	$res->{'errmsg'} = LJ::Protocol::error_message($err);
@@ -1793,6 +1741,33 @@ sub getdaycounts
     }
     return 1;
 }
+
+## flat wrapper
+sub postevent
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+    
+    ## changes prop_* to props hashref
+    foreach my $k (keys %$req) {
+	next unless ($k =~ /^prop_(.+)/);
+	$rq->{'props'}->{$1} = $req->{$k};	
+    }
+
+    my $rs = LJ::Protocol::do_request("postevent", $rq, \$err, $flags);
+    unless ($rs) {
+	$res->{'success'} = "FAIL";
+	$res->{'errmsg'} = LJ::Protocol::error_message($err);
+	return 0;
+    }
+
+    $res->{'success'} = "OK";
+    $res->{'itemid'} = $rs->{'itemid'};
+    return 1;
+}
+
 
 sub populate_friends
 {
