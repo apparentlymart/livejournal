@@ -557,22 +557,19 @@ sub postevent
     my $qevent = $dbh->quote($event);
     $event = "";
 
-    my @prefix = ("");
-    if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
-    foreach my $pfx (@prefix)
-    {
-        if ($clustered) {
-            # clustered recents have times now (for purger process.. can't use itemid key prefix)
-            my ($ec, $ev);
-            if ($pfx) { ($ec, $ev) = (", logtime", ", NOW()"); }
-            $dbcm->do("REPLACE INTO ${pfx}logtext2 (journalid, jitemid, subject, event $ec) ".
-                      "VALUES ($ownerid, $itemid, $qsubject, $qevent $ev)");
-            if ($dbcm->err) {
-                my $msg = $dbcm->errstr;
-                LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
-                return fail($err,501,"logtext:$msg");
-            }
-        } else {
+    if ($clustered) {
+        $dbcm->do("REPLACE INTO logtext2 (journalid, jitemid, subject, event) ".
+                  "VALUES ($ownerid, $itemid, $qsubject, $qevent)");
+        if ($dbcm->err) {
+            my $msg = $dbcm->errstr;
+            LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
+            return fail($err,501,"logtext:$msg");
+        }
+    } else {
+        my @prefix = ("");
+        if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
+        foreach my $pfx (@prefix)
+        {
             $dbh->do("INSERT INTO ${pfx}logtext (itemid, subject, event) ".
                      "VALUES ($itemid, $qsubject, $qevent)");
             if ($dbh->err) {
@@ -904,13 +901,13 @@ sub editevent
     {
         my $qsubject = $dbh->quote($req->{'subject'});
 
-        my @prefix = ("");
-        if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
-        foreach my $pfx (@prefix) {
-            if ($clustered) {
-                $dbcm->do("UPDATE ${pfx}logtext2 SET event=$qevent, subject=$qsubject ".
-                          "WHERE journalid=$ownerid AND jitemid=$qitemid");
-            } else {
+        if ($clustered) {
+            $dbcm->do("UPDATE logtext2 SET event=$qevent, subject=$qsubject ".
+                      "WHERE journalid=$ownerid AND jitemid=$qitemid");
+        } else {
+            my @prefix = ("");
+            if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
+            foreach my $pfx (@prefix) {
                 $dbh->do("UPDATE ${pfx}logtext SET event=$qevent, subject=$qsubject ".
                          "WHERE itemid=$qitemid");
             }
