@@ -56,7 +56,7 @@
      $user = $u->{'user'} if $u;
      $userid = $u->{'userid'}+0 if $u;
 
-     LJ::text_out(\$u->{'name'});
+     LJ::text_out(\$u->{'name'}) if $u;
      if ($u && $FORM{'mode'} eq "full") {
          $sth = $dbr->prepare("SELECT timeupdate, timecreate, ".
                               "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
