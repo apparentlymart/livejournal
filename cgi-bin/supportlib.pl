@@ -201,8 +201,10 @@ sub get_answer_types
     } elsif (can_help($dbh, $sp, $remote)) {
 	push @ans_type, ("answer" => "Answer", 
 			 "screened" => "Screened Answer (if unsure)", 
-			 "comment" => "Comment or Question",
-			 "internal" => "Internal Comment / Action");
+			 "comment" => "Comment or Question");
+	unless ($sp->{_cat}->{'public_help'}) {
+	    push @ans_type, ("internal" => "Internal Comment / Action");
+	}
     }
     elsif ($sp->{_cat}->{'allow_screened'}) {
 	push @ans_type, ("screened" => "Screened Answer");
@@ -440,7 +442,7 @@ sub mail_response_to_user
     $body .= "so we can help other people by going here:\n";
     $body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'};$splid", $email);
     
-    unless ($type eq "answer")
+    if ($type eq "answer")
     {
 	$body .= "\n\nIf this wasn't helpful, you need to go to the following address to prevent\n";
 	$body .= "this request from being closed in 7 days.  Click here:\n";
