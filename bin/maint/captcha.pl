@@ -47,7 +47,6 @@ $maint{gen_audio_captchas} = sub {
     my (
         $u,                     # Fake user record for Blob::put
         $sql,                   # SQL queries
-        $dbr,                   # Database handle (reader)
         $dbh,                   # Database handle (writer)
         $sth,                   # Statement handle
         $count,                 # Count of currently-extant audio challenges
@@ -61,9 +60,10 @@ $maint{gen_audio_captchas} = sub {
         $anum,                  # Deseries-ifier value
        );
 
-    # :FIXME: Is this correct? I don't know what '-I-' means, but lots of other
-    # scripts use it...
     print "-I- Generating new audio captchas...\n";
+
+    $dbh = LJ::get_dbh({raw=>1}, "master") or die "Failed to get_db_writer()";
+    $dbh->do("SET wait_timeout=28800");
 
     # Count how many challenges there are currently
     $sql = q{
@@ -74,8 +74,7 @@ $maint{gen_audio_captchas} = sub {
             AND issuetime = 0
     };
 
-    $dbr = LJ::get_db_reader() or die "Failed to get_db_reader()";
-    ( $count ) = $dbr->selectrow_array( $sql );
+    $count = $dbh->selectrow_array( $sql );
 
     my $MaxItems = $LJ::CAPTCHA_AUDIO_PREGEN || 500;
 
@@ -100,7 +99,6 @@ $maint{gen_audio_captchas} = sub {
         INSERT INTO captchas( type, answer, anum )
         VALUES ( 'audio', ?, ? )
     };
-    $dbh = LJ::get_db_writer() or die "Failed to get_db_writer()";
     $sth = $dbh->prepare( $sql ) or die "prepare: $sql: ", $dbh->errstr;
 
     # Generate the challenges
@@ -133,7 +131,6 @@ $maint{gen_image_captchas} = sub {
     my (
         $u,                     # Fake user record for Blob::put
         $sql,                   # SQL queries
-        $dbr,                   # Database handle (reader)
         $dbh,                   # Database handle (writer)
         $sth,                   # Statement handle
         $count,                 # Count of currently-extant audio challenges
@@ -145,9 +142,10 @@ $maint{gen_image_captchas} = sub {
         $anum,                  # Deseries-ifier value
        );
 
-    # :FIXME: Is this correct? I don't know what '-I-' means, but lots of other
-    # scripts use it...
     print "-I- Generating new image captchas...\n";
+
+    $dbh = LJ::get_dbh({raw=>1}, "master") or die "Failed to get_db_writer()";
+    $dbh->do("SET wait_timeout=28800");
 
     # Count how many challenges there are currently
     $sql = q{
@@ -158,8 +156,7 @@ $maint{gen_image_captchas} = sub {
             AND issuetime = 0
     };
 
-    $dbr = LJ::get_db_reader() or die "Failed to get_db_reader()";
-    ( $count ) = $dbr->selectrow_array( $sql );
+    $count = $dbh->selectrow_array( $sql );
 
     my $MaxItems = $LJ::CAPTCHA_IMAGE_PREGEN || 1000;
 
