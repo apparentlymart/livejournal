@@ -54,6 +54,10 @@
     # path to sendmail and any necessary options
     $SENDMAIL ||= "/usr/sbin/sendmail -t -oi";
 
+    # protocol, mailserver hostname, and preferential weight.
+    # qmtp, smtp, dmtp, and sendmail are the currently supported protocols.
+    @MAIL_TRANSPORTS = ( [ 'sendmail', $SENDMAIL, 1 ] ) unless @MAIL_TRANSPORTS;
+
     # where we set the cookies (note the period before the domain)
     $COOKIE_DOMAIN ||= ".$DOMAIN";
     $COOKIE_PATH   ||= "/";
