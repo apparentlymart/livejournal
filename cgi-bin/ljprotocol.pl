@@ -1013,11 +1013,9 @@ sub editfriends
 	}
 	
 	my $row = LJ::load_user($dbs, $aname);
-	unless ($row) {
+	unless ($row && $row->{'statusvis'} eq "V") {
 	    $error_flag = 1;
-	}
-	else
-	{
+	} else {
 	    $friends_added++;
 	    my $added = { 'username' => $aname,
 			  'fullname' => $row->{'name'},
