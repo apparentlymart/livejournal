@@ -94,6 +94,14 @@ sub faqcat
         my $catname = $dbh->quote($args->[3]);
         my $catorder = ($args->[4])+0;
 
+        my $faqd = LJ::Lang::get_dom("faq");
+        my $rlang = LJ::Lang::get_root_lang($faqd);
+        unless ($rlang) { undef $faqd; }
+        if ($faqd) {
+            LJ::Lang::set_text($dbh, $faqd->{'dmid'}, $rlang->{'lncode'},
+                               "cat.$args->[2]", $args->[3], { 'changeseverity' => 1 });
+        }
+
         my $sth = $dbh->prepare("REPLACE INTO faqcat (faqcat, faqcatname, catorder) ".
                                 "VALUES ($catkey, $catname, $catorder)");
         $sth->execute;

@@ -56,6 +56,21 @@ BODY<=
          return "<B>Error: </B> You do not have access to add FAQ questions in this category";
      }     
  }
+
+ my $faqd = LJ::Lang::get_dom("faq");
+ my $rlang = LJ::Lang::get_root_lang($faqd);
+ unless ($rlang) { undef $faqd; }
+ my $opts = {
+     'changeseverity' => $FORM{'sev'}+0,
+ };
+ my $do_trans = sub {
+     my $id = shift;
+     return unless $faqd;
+     LJ::Lang::set_text($dbh, $faqd->{'dmid'}, $rlang->{'lncode'},
+                        "$id.1question", $FORM{'q'}, $opts);
+     LJ::Lang::set_text($dbh, $faqd->{'dmid'}, $rlang->{'lncode'},
+                        "$id.2answer", $FORM{'a'}, $opts);
+ };
  
  unless ($id)
  {
@@ -64,19 +79,28 @@ BODY<=
          return "<B>Error: </B> You did not select a FAQ category.";
      }
      $dbh->do("INSERT INTO faq (faqid, question, answer, faqcat, sortorder, lastmoduserid, lastmodtime) VALUES (NULL, $qq, $qa, $qfaqcat, $sortorder, $remote->{'userid'}, NOW())");
+     $id = $dbh->{'mysql_insertid'};
      $ret .= $dbh->errstr || "Added FAQ item.  All good.";
+
+     $opts->{'childrenlatest'} = 1; 
+     $do_trans->($id) if $id;
  }
  else
  {
+
      if ($FORM{'q'} =~ /\S/)
      {
          $dbh->do("UPDATE faq SET question=$qq, answer=$qa, faqcat=$qfaqcat, lastmoduserid=$remote->{'userid'}, lastmodtime=NOW(), sortorder=$sortorder WHERE faqid=$id");
          $ret .= "Updated FAQ item.  All good.  faqid is <B>$id</B>";
+
+         $do_trans->($id);
      }
      else
      {
          $dbh->do("DELETE FROM faq WHERE faqid=$id");
          $ret .= "FAQ item deleted.";
+
+         # TODO: delete translation from ml_* ?
      }
  }
  

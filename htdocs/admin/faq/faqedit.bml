@@ -76,6 +76,17 @@ BODY<=
  $ret .= "<P><B>Question:</B> (as brief as possible, do not span multiple lines)<BR><TEXTAREA NAME=\"q\" ROWS=3 COLS=70 WRAP=SOFT>$q</TEXTAREA><BR><FONT SIZE=-1>(erase question to delete FAQ entry)</FONT>\n";
  $ret .= "<P><B>Answer:</B> (long as you want, give URLs to links, not HTML)<BR><TEXTAREA NAME=\"a\" ROWS=15 COLS=70 WRAP=SOFT>$a</TEXTAREA>\n";
 
+ my $faqd = LJ::Lang::get_dom("faq");
+ if ($faqd) {
+     $ret .= "<p><b>Select modification level:</b> ";
+     $ret .= LJ::html_select({ 'name' => "sev", "selected" => 1 },
+                             0 => "Typo/etc (no notify)",
+                             1 => "Minor (notify translators)",
+                             2 => "Major (require translation updates)");
+     $ret .= "</p>";
+ }
+
+
  $ret .= "<P><INPUT TYPE=SUBMIT VALUE=\"Add/Edit FAQ Item\">";
  return $ret;
  

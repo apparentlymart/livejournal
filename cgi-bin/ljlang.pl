@@ -138,6 +138,18 @@ sub get_domains
     return values %DM_ID;
 }
 
+sub get_root_lang
+{
+    my $dom = shift;  # from, say, get_dom
+    return undef unless ref $dom eq "HASH";
+    foreach (keys %{$dom->{'langs'}}) {
+        if ($dom->{'langs'}->{$_}) {
+            return get_lang_id($_);
+        }
+    }
+    return undef;
+}
+
 sub load_lang_struct
 {
     return 1 if $LS_CACHED;
