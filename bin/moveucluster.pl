@@ -10,11 +10,14 @@ my $opt_del = 0;
 my $opt_destdel = 0;
 my $opt_useslow = 0;
 my $opt_slowalloc = 0;
+my $opt_verbose = 1;
 exit 1 unless GetOptions('delete' => \$opt_del,
                          'destdelete' => \$opt_destdel,
                          'useslow' => \$opt_useslow, # use slow db role for read
                          'slowalloc' => \$opt_slowalloc, # see note below
+			 'verbose=i' => \$opt_verbose,
                          );
+my $optv = $opt_verbose;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
@@ -40,13 +43,14 @@ usage() unless defined $dclust;
 die "Failed to get move lock.\n"
     unless ($dbh->selectrow_array("SELECT GET_LOCK('moveucluster-$user', 10)"));
 
-my $u = LJ::load_user($dbh, $user);
+my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
 die "Non-existent user $user.\n" unless $u;
 
 die "Can't move back to legacy cluster 0\n" unless $dclust;
 
 my $dbch = LJ::get_dbh("cluster$dclust");
 die "Undefined or down cluster \#$dclust\n" unless $dbch;
+$dbch->do("SET wait_timeout=28800");
 
 my $separate_cluster = LJ::use_diff_db("master", "cluster$dclust");
 
@@ -65,6 +69,7 @@ if ($sclust) {
     $dbo = LJ::get_cluster_master($u);
     die "Can't get source cluster handle.\n" unless $dbo;
     $dbo->{'RaiseError'} = 1;
+    $dbo->do("SET wait_timeout=28800");
 }
 
 my $userid = $u->{'userid'};
@@ -87,7 +92,7 @@ if (($u->{'caps'}+0) & (1 << $readonly_bit)) {
     die "User '$user' is already in the process of being moved? (cap bit $readonly_bit set)\n";
 }
 
-print "Moving '$u->{'user'}' from cluster $sclust to $dclust:\n";
+print "Moving '$u->{'user'}' from cluster $sclust to $dclust\n" if $optv >= 1;
 
 # mark that we're starting the move
 $dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart) ".
@@ -353,9 +358,9 @@ if ($sclust == 0)
 } 
 elsif ($sclust > 0) 
 {
-    print "Moving away from cluster $sclust ...\n";
+    print "Moving away from cluster $sclust\n" if $optv;
     while (my $cmd = $dbo->selectrow_array("SELECT cmd FROM cmdbuffer WHERE journalid=$userid")) {
-        print "Flushing cmdbuffer for cmd: $cmd\n";
+        print "Flushing cmdbuffer for cmd: $cmd\n" if $optv > 1;
         LJ::cmd_buffer_flush($dbh, $dbo, $cmd, $userid)
     }
 
@@ -367,7 +372,6 @@ elsif ($sclust > 0)
         'dudata' => 'userid',
 
         # manual
-        'fvcache' => 'userid',
         'loginstall' => 'userid',
         'ratelog' => 'userid',
         'sessions' => 'userid',
@@ -398,14 +402,14 @@ elsif ($sclust > 0)
     };
 
     my @existing_data;
-    print "Checking for existing data on target cluster...\n";
+    print "Checking for existing data on target cluster...\n" if $optv > 1;
     foreach my $table (sort keys %$pri_key) {
         my $pri = $pri_key->{$table};
         my $is_there = $dbch->selectrow_array("SELECT $pri FROM $table WHERE $pri=$userid LIMIT 1");
         next unless $is_there;
         if ($opt_destdel) {
             while ($dbch->do("DELETE FROM $table WHERE $pri=$userid LIMIT 500") > 0) {
-                print "  deleted from $table\n";
+                print "  deleted from $table\n" if $optv;
             }
         } else {
             push @existing_data, $table;
@@ -426,7 +430,7 @@ elsif ($sclust > 0)
             $vals .= "," if $vals;
             $vals .= "(" . join(',', map { $dbch->quote($_) } @$v) . ")";
         }
-        print "  flushing write to $table\n";
+        print "  flushing write to $table\n" if $optv > 1;
         $dbch->do("REPLACE INTO $table $cols VALUES $vals");
         delete $pendreplace{$dest};
         return 1;
@@ -444,10 +448,11 @@ elsif ($sclust > 0)
     };
 
     # manual moving
-    foreach my $table (qw(fvcache loginstall ratelog sessions userproplite2
+    foreach my $table (qw(loginstall ratelog sessions userproplite2
                           sessions_data userbio userpicblob2
                           s1usercache modlog modblob counter)) {
-        print "  moving $table ...\n";
+	next if $table =~ /^mod/ && $u->{journaltype} eq "P";
+        print "  moving $table ...\n" if $optv > 1;
         my @cols;
         my $sth = $dbo->prepare("DESCRIBE $table");
         $sth->execute;
@@ -474,7 +479,7 @@ elsif ($sclust > 0)
         my $sth;
         my $cols = "security,allowmask,journalid,jitemid,posterid,eventtime,logtime,compressed,anum,replycount,year,month,day,rlogtime,revttime"; # order matters.  see indexes below
         while ($lo <= $maxjitem) {
-            print "  log ($lo - $hi, of $maxjitem)\n";
+            print "  log ($lo - $hi, of $maxjitem)\n" if $optv > 1;
 
             # log2/logsec2
             $sth = $dbo->prepare("SELECT $cols FROM log2 ".
@@ -522,18 +527,13 @@ elsif ($sclust > 0)
                     'talkprop2' => 'journalid,jtalkid,tpropid,value',
                     'talktext2' => 'journalid,jtalkid,subject,body');
         while ($lo <= $maxtalkid) {
-            print "  talk ($lo - $hi, of $maxtalkid)\n";
+            print "  talk ($lo - $hi, of $maxtalkid)\n" if $optv > 1;
             foreach my $table (keys %cols) {
-                my $do_dudata = $table eq "talktext2";
                 $sth = $dbo->prepare("SELECT $cols{$table} FROM $table ".
                                      "WHERE journalid=$userid AND jtalkid BETWEEN $lo AND $hi");
                 $sth->execute;
                 while (my @vals = $sth->fetchrow_array) {
                     $write->("$table:($cols{$table})", @vals);
-                    if ($do_dudata) {
-                        my $size = length($vals[2]) + length($vals[3]);
-                        $write->("dudata:(userid,area,areaid,bytes)", $userid, 'T', $vals[1], $size);
-                    }
                 }
             }
             
@@ -545,13 +545,13 @@ elsif ($sclust > 0)
     {
         # no primary key... delete all of target first.
         while ($dbch->do("DELETE FROM talkleft WHERE userid=$userid LIMIT 500") > 0) {
-            print "  deleted from talkleft\n";
+            print "  deleted from talkleft\n" if $optv > 1;
         }
 
         my $last_max = 0;
         my $cols = "userid,posttime,journalid,nodetype,nodeid,jtalkid,publicitem";
         while (defined $last_max) {
-            print "  talkleft: $last_max\n";
+            print "  talkleft: $last_max\n" if $optv > 1;
             my $sth = $dbo->prepare("SELECT $cols FROM talkleft WHERE userid=$userid ".
                                     "AND posttime > $last_max ORDER BY posttime LIMIT 1000");
             $sth->execute;
@@ -568,15 +568,15 @@ elsif ($sclust > 0)
 
     # unset readonly and move to new cluster in one update
     LJ::update_user($userid, { clusterid => $dclust, raw => "caps=caps&~(1<<$readonly_bit)" });
-    print "Moved.\n";
+    print "Moved.\n" if $optv;
 
     # delete from source cluster
     if ($opt_del) {
-        print "Deleting from source cluster...\n";
+        print "Deleting from source cluster...\n" if $optv;
         foreach my $table (sort keys %$pri_key) {
             my $pri = $pri_key->{$table};
             while ($dbo->do("DELETE FROM $table WHERE $pri=$userid LIMIT 500") > 0) {
-                print "  deleted from $table\n";
+                print "  deleted from $table\n" if $optv;
             }
         }
     }
