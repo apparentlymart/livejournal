@@ -142,7 +142,9 @@
      while (my ($prmid, $prlid, $arg) = $sth->fetchrow_array) 
      {
 	 my $prec = $priv{$prlid};
-	 next unless ($prec->{'is_public'} || $view_access);
+	 next unless ($prec->{'is_public'} || 
+		      $view_access ||
+		      ($remote && $remote->{'userid'} == $userid));
 
 	 $ret .= "<tr><td align='center'>";
 	 if ($access{'all'} || $access{$prec->{'privcode'}}) {
