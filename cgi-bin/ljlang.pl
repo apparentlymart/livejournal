@@ -243,7 +243,7 @@ sub set_text
         my $qtext = $dbh->quote($text);
         $dbh->do("INSERT INTO ml_text (dmid, txtid, lnid, itid, text, userid) ".
                  "VALUES ($dmid, NULL, $lnid, $itid, $qtext, $userid)");
-        return set_error("Error inserting ml_text: ".$dbh->err) if $dbh->err;
+        return set_error("Error inserting ml_text: ".$dbh->errstr) if $dbh->err;
         $txtid = $dbh->{'mysql_insertid'};
     }
     if ($opts->{'txtid'}) {
@@ -253,7 +253,7 @@ sub set_text
     my $staleness = $opts->{'staleness'}+0;
     $dbh->do("REPLACE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) ".
              "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), $staleness)");
-    return set_error("Error inserting ml_latest: ".$dbh->err) if $dbh->err;
+    return set_error("Error inserting ml_latest: ".$dbh->errstr) if $dbh->err;
 
     # set descendants to use this mapping
     if ($opts->{'childrenlatest'}) {
