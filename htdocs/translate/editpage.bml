@@ -273,6 +273,9 @@
          # severity of change:
          $opts->{'changeseverity'} = $sev;
 
+         # set userid of writer
+         $opts->{'userid'} = $remote->{'userid'};
+
          my $res = LJ::Lang::set_text($dbs, $dom, $l->{'lncode'}, $itcode, $text, $opts);
          unless ($res) { 
              push @errors, LJ::Lang::last_error();
