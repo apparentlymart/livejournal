@@ -495,7 +495,10 @@ sub get_keywords {
             $use_reader = 1;
             $dbh = LJ::get_db_reader();
         }
-        my $sth = $dbh->prepare("SELECT DISTINCT mk.kwid FROM memorable m, memkeyword mk " .
+        my $sth = $dbh->prepare("SELECT DISTINCT mk.kwid ".
+                                "FROM ".
+                                "  memorable m FORCE INDEX (uniq),".
+                                "  memkeyword mk ".
                                 "WHERE mk.memid=m.memid AND m.userid=?");
         $sth->execute($u->{userid});
         my @ids;
