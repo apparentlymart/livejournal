@@ -134,6 +134,17 @@ sub moodtheme_setpic
         return 0;
     }
 
+    unless ($remote) {
+        push @$out, [ "error", "You have to be logged in to use this command." ];
+        return 0;
+    }
+
+    my $u = LJ::load_userid($dbh, $remote->{'userid'});
+    unless (LJ::get_cap($u, "moodthemecreate")) {
+        push @$out, [ "error", "Sorry, your account type doesn't let you modify mood themes." ];
+        return 0;
+    }
+
     my ($themeid, $moodid, $picurl, $width, $height) =
         ($args->[1], $args->[2], $args->[3], $args->[4], $args->[5]);
 

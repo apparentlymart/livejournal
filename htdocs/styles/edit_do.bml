@@ -34,6 +34,10 @@ body<=
  
  return LJ::bad_input(@errors) if @errors;
 
+ unless (LJ::get_cap($u, "styles")) {
+     return "(=H1 Sorry H1=)(=P Your account type doesn't permit you to modify styles. P=)";
+ }
+
  my @style_opts = (
                    { 'code' => "is_public",
                      'title' => 'Public?',
