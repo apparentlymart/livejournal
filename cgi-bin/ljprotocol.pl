@@ -2383,6 +2383,7 @@ sub login
             $mood_count++;
             $res->{"mood_${mood_count}_id"} = $m->{'id'};
             $res->{"mood_${mood_count}_name"} = $m->{'name'};
+            $res->{"mood_${mood_count}_parent"} = $m->{'parent'};
         }
         if ($mood_count) {
             $res->{"mood_count"} = $mood_count;
