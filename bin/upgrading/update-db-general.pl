@@ -207,7 +207,6 @@ register_tablecreate("logaccess", <<'EOC');
 CREATE TABLE logaccess (
   ownerid int(10) unsigned NOT NULL default '0',
   posterid int(10) unsigned NOT NULL default '0',
-  KEY (ownerid),
   KEY (posterid),
   PRIMARY KEY  (ownerid,posterid)
 ) 
