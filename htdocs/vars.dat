@@ -586,7 +586,7 @@ A unique integer that represents this journal entry.  You probably won't ever ha
 }
 { itemargs
 .des
-A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%.
+A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%%.
 }
 { currents
 .des
@@ -1301,7 +1301,7 @@ A unique integer that represents this journal entry.  You probably won't ever ha
 }
 { itemargs
 .des
-A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%.
+A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%%.
 }
 { currents
 .des
@@ -1870,7 +1870,7 @@ A unique integer that represents this journal entry.  You probably won't ever ha
 }
 { itemargs
 .des
-A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%.
+A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%%.
 }
 { altposter
 .des
@@ -2155,7 +2155,7 @@ A unique integer that represents this journal entry.  You probably won't ever ha
 }
 { itemargs
 .des
-A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%.
+A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%%.
 }
 }
 
@@ -2225,7 +2225,7 @@ A unique integer that represents this journal entry.  You probably won't ever ha
 }
 { itemargs
 .des
-A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%.
+A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%%.
 }
 }
 
@@ -2295,7 +2295,7 @@ A unique integer that represents this journal entry.  You probably won't ever ha
 }
 { itemargs
 .des
-A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%.
+A portion of a URL which identifies this event. This should be used when referring to memadd.bml, editjournal.bml or other similar actions which require an event to be identified in the URL. Do NOT use itemid=%%itemid%% for this purpose, or a similarly hardcoded scheme, use %%itemargs%%.
 }
 }
 
