@@ -9,7 +9,7 @@
  my $remote = LJ::get_remote($dbs);
  my %cataccess;
 
- unless (LJ::remote_has_priv($dbs, $remote, "topicscreencat", \%cataccess)) {
+ unless (LJ::remote_has_priv($remote, "topicscreencat", \%cataccess)) {
      return "You don't have access to do this, or you're not logged in.";
  }
 

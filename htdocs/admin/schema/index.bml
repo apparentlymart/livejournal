@@ -10,7 +10,7 @@
  my $remote = LJ::get_remote($dbs);
 
  my $can_doc = 0;
- if (LJ::remote_has_priv($dbs, $remote, "schemadoc")) { $can_doc = 1; }
+ if (LJ::remote_has_priv($remote, "schemadoc")) { $can_doc = 1; }
  unless ($can_doc) {
      my $url = "/doc/server/ljp.dbschema.ref.html";
      $body = "This page is for editing <a href=\"$url\">schema documentation</a>, ";

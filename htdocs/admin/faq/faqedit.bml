@@ -22,11 +22,11 @@ body<=
  my $remote = LJ::get_remote($dbs);
  my %ac_edit;
  my %ac_add;
- LJ::remote_has_priv($dbs, $remote, "faqadd", \%ac_add);
+ LJ::remote_has_priv($remote, "faqadd", \%ac_add);
 
  if ($id)
  {
-     LJ::remote_has_priv($dbs, $remote, "faqedit", \%ac_edit);
+     LJ::remote_has_priv($remote, "faqedit", \%ac_edit);
      my $sth = $dbh->prepare("SELECT question, answer, faqcat, sortorder FROM faq WHERE faqid=$id");
      $sth->execute;
      ($question, $answer, $faqcat, $sortorder) = $sth->fetchrow_array;

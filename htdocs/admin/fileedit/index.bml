@@ -1,20 +1,16 @@
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
  my ($ret, $sth);
 
  my $DEF_ROW = 30;
  my $DEF_COL = 80;
 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  my %files = ();  # keys: files remote user has access to, value: 1
  my $INC_DIR = "$LJ::HTDOCS/inc";
 
- unless (LJ::remote_has_priv($dbs, $remote, "fileedit", \%files)) {
+ unless (LJ::remote_has_priv($remote, "fileedit", \%files)) {
      return "You don't have access to edit any files, or you're not logged in.";
  }
 
@@ -30,10 +26,9 @@
      return 0 unless $valid_filename->($filename);
 
      if ($LJ::FILEEDIT_VIA_DB) {
-         my $qname = $dbh->quote($filename);
-         my $qcontent = $dbh->quote($content);
+         my $dbh = LJ::get_db_writer();
          $dbh->do("REPLACE INTO includetext (incname, inctext, updatetime) ".
-                  "VALUES ($qname, $qcontent, UNIX_TIMESTAMP())");
+                   "VALUES (?, ?, UNIX_TIMESTAMP())", undef, $filename, $content);
          return 0 if $dbh->err;
          return 1;
      }
@@ -51,8 +46,8 @@
 
      my $contents;
      if ($LJ::FILEEDIT_VIA_DB) {
-         my $qname = $dbh->quote($filename);
-         $contents = $dbh->selectrow_array("SELECT inctext FROM includetext WHERE incname=$qname");
+         my $dbh = LJ::get_db_writer();
+         $contents = $dbh->selectrow_array("SELECT inctext FROM includetext WHERE incname=?", undef, $filename);
          return $contents if defined $contents;
      }
 

@@ -4549,22 +4549,17 @@ sub check_priv
 # </LJFUNC>
 sub remote_has_priv
 {
-    my $dbarg = shift;
+    shift if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $remote = shift;
     my $privcode = shift;     # required.  priv code to check for.
     my $ref = shift;  # optional, arrayref or hashref to populate
-
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
     return 0 unless ($remote);
 
     ### authentication done.  time to authorize...
 
-    my $qprivcode = $dbh->quote($privcode);
-    my $sth = $dbr->prepare("SELECT pm.arg FROM priv_map pm, priv_list pl WHERE pm.prlid=pl.prlid AND pl.privcode=$qprivcode AND pm.userid=$remote->{'userid'}");
-    $sth->execute;
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare("SELECT pm.arg FROM priv_map pm, priv_list pl WHERE pm.prlid=pl.prlid AND pl.privcode=? AND pm.userid=?");
+    $sth->execute($privcode, $remote->{'userid'});
 
     my $match = 0;
     if (ref $ref eq "ARRAY") { @$ref = (); }

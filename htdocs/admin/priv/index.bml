@@ -24,7 +24,7 @@
  # use the 'bar' arg?"
  my (%access, %maybe_access);
  if ($remote) {
-     LJ::remote_has_priv($dbs, $remote, "admin", \%access);
+     LJ::remote_has_priv($remote, "admin", \%access);
      foreach (keys %access) {
          next unless m!^(\w+)/!;
          $maybe_access{$1} = 1;

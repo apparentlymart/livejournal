@@ -32,7 +32,7 @@ body<=
  
  if ($id)
  {
-     LJ::remote_has_priv($dbs, $remote, "faqedit", \%ac_edit);
+     LJ::remote_has_priv($remote, "faqedit", \%ac_edit);
      my $sth = $dbh->prepare("SELECT faqcat FROM faq WHERE faqid=$id");
      $sth->execute;
      my ($faqcat) = $sth->fetchrow_array;
@@ -47,7 +47,7 @@ body<=
  }
  else 
  {
-     LJ::remote_has_priv($dbs, $remote, "faqadd", \%ac_add);
+     LJ::remote_has_priv($remote, "faqadd", \%ac_add);
      unless ($ac_add{'all'} || $ac_add{$FORM{'faqcat'}}) {
          return "<B>Error: </B> You do not have access to add FAQ questions in this category";
      }     

@@ -8,7 +8,7 @@
 
  my $remote = LJ::get_remote($dbs);
 
- unless (LJ::remote_has_priv($dbs, $remote, "topicaddtopic")) {
+ unless (LJ::remote_has_priv($remote, "topicaddtopic")) {
      return "You don't have access to do this, or you're not logged in.";
  }
 

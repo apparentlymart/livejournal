@@ -118,7 +118,7 @@ sub execute
                 $remote->{'privarg'}->{$privname} = {};
             }
 
-            if (LJ::remote_has_priv($dbh, $remote, $privname, $remote->{'privarg'}->{$privname})) {
+            if (LJ::remote_has_priv($remote, $privname, $remote->{'privarg'}->{$privname})) {
                 $remote->{'priv'}->{$privname} = 1;
             }
         }
