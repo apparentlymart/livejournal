@@ -47,9 +47,6 @@ body<=
         }
 
         my $poster = LJ::load_userid($entry->{'posterid'});
-        $c->do("DELETE FROM modlog WHERE journalid=$c->{'userid'} AND modid=$modid");
-        $c->do("DELETE FROM modblob WHERE journalid=$c->{'userid'} AND modid=$modid");
-        
         my ($success, $do_mail) = (0, 0);
         my $why_mail;
         my $prot_err;
@@ -133,6 +130,11 @@ body<=
         if ($success) {
             $saved_comm = $c->{'user'};
             $saved_modid = 0;
+
+            # Delete this moderated entry from the list
+            $c->do("DELETE FROM modlog WHERE journalid=$c->{'userid'} AND modid=$modid");
+            $c->do("DELETE FROM modblob WHERE journalid=$c->{'userid'} AND modid=$modid");
+
             # FALL THROUGH to showing the list of entries in this community
         } else {
             $ret .= "<p>";
