@@ -11,34 +11,56 @@ my $err = sub {
 print "[Checking for Perl Modules....]\n";
 ############################################################################
 
-my @modules = qw(
-                 DBI
-                 DBD::mysql
-                 Digest::MD5
-                 Image::Size
-                 MIME::Lite
-                 Compress::Zlib
-                 MIME::Base64
-                 URI::URL
-                 HTML::Tagset
-                 HTML::Parser
-                 LWP::Simple
-                 LWP::UserAgent
-                 GD
-                 GD::Graph
-                 GD::Text
-                 Mail::Address
-                 Proc::ProcessTable
-                 SOAP::Lite
-                 Unicode::MapUTF8
-                 );
+my %modules = (
+               "DBI" => { 'deb' => 'libdbi-perl',  },
+               "DBD::mysql" => { 'deb' => 'libdbd-mysql-perl', },
+               "Digest::MD5" => { 'deb' => 'libdigest-md5-perl', },
+               "Image::Size" => { 'deb' => 'libimage-size-perl', },
+               "MIME::Lite" => { 'deb' => 'libmime-lite-perl', },
+               "Compress::Zlib" => {
+                   'deb' => 'libcompress-zlib-perl',
+                   'opt' => 'When available, turn on $LJ::DO_GZIP to cut bandwidth usage in half.',
+               },
+               "MIME::Base64" => { 'deb' => 'libmime-base64-perl' },
+               "URI::URL" => { 'deb' => 'liburi-perl' },
+               "HTML::Tagset" => { 'deb' => 'libhtml-tagset-perl' },
+               "HTML::Parser" => { 'deb' => 'libhtml-parser-perl', },
+               "LWP::Simple" => { 'deb' => 'libwww-perl', },
+               "LWP::UserAgent" => { 'deb' => 'libwww-perl', },
+               "GD::Graph" => { 
+                   'deb' => 'libgd-graph-perl', 
+                   'opt' => 'Required to make graphs for the statistics page.',
+               },
+               "Mail::Address" => { 'deb' => 'libmailtools-perl', },
+               "Proc::ProcessTable" => { 
+                   'deb' => 'libproc-process-perl', 
+                   'opt' => "Better reliability for starting daemons necessary for high-traffic installations.",
+               },
+               "SOAP::Lite" => { 
+                   'deb' => 'libsoap-lite-perl', 
+                   'opt' => 'Required for XML-RPC support.',
+               },
+               "Unicode::MapUTF8" => { 'deb' => 'libunicode-maputf8-perl', },
+               );
 
-foreach my $mod (@modules) {
+my @debs;
+
+foreach my $mod (sort keys %modules) {
     my $rv = eval "use $mod;";
     if ($@) {
-        push @errors, "Missing perl module: $mod";
+        my $dt = $modules{$mod};
+        if ($dt->{'opt'}) {
+            print STDERR "Missing optional module $mod: $dt->{'opt'}\n";
+        } else {
+            push @errors, "Missing perl module: $mod";
+        }
+        push @debs, $dt->{'deb'} if $dt->{'deb'};
     }
 }
+if (@debs && -e '/etc/debian_version') {
+    print STDERR "\n# apt-get install ", join(' ', @debs), "\n\n";
+}
+
 $err->(@errors);
 
 ############################################################################
@@ -49,6 +71,17 @@ $err->("\$LJHOME environment variable not set.")
     unless $ENV{'LJHOME'};
 $err->("\$LJHOME directory doesn't exist ($ENV{'LJHOME'})")
     unless -d $ENV{'LJHOME'};
+
+# before ljconfig.pl is called, we want to call the site-local checkconfig,
+# otherwise ljconfig.pl might load ljconfig-local.pl, which maybe load
+# new modules to implement site-specific hooks.
+my $local_config = "$ENV{'LJHOME'}/bin/checkconfig-local.pl";
+if (-e $local_config) {
+    my $good = eval { require $local_config; };
+    exit 1 unless $good;
+}
+
+
 $err->("No ljconfig.pl file found at $ENV{'LJHOME'}/cgi-bin/ljconfig.pl")
     unless -e "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 

@@ -7,7 +7,9 @@
 use strict;
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
-use Proc::ProcessTable;
+BEGIN {
+    $LJ::OPTMOD_PROCTABLE = eval "use Proc::ProcessTable; 1;";
+}
 
 my $DELAY = $LJ::QBUFFERD_DELAY || 15;
 
@@ -17,8 +19,13 @@ if (-e $pidfile) {
     open (PID, $pidfile);
     chomp ($pid = <PID>);
     close PID;
-    my $processes = Proc::ProcessTable->new()->table;
-    if (grep { $_->cmndline =~ /qbufferd/ && $_->pid != $$ } @$processes) {
+    if ($LJ::OPTMOD_PROCTABLE) {
+        my $processes = Proc::ProcessTable->new()->table;
+        if (grep { $_->cmndline =~ /perl.+qbufferd/ && $_->pid != $$ } @$processes) {
+            exit;
+        }
+    } else {
+        # since we can't really check
         exit;
     }
 }

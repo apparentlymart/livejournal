@@ -6,11 +6,12 @@ package Apache::LiveJournal;
 use strict;
 use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED HTTP_MOVED_PERMANENTLY);
 use Apache::File ();
-use XMLRPC::Transport::HTTP ();
-use Compress::Zlib ();
 use lib "$ENV{'LJHOME'}/cgi-bin";
 
 BEGIN {
+    $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
+    $LJ::OPTMOD_XMLRPC = eval "use XMLRPC::Transport::HTTP (); 1;";
+
     require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
     require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl";
     require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
@@ -488,7 +489,7 @@ sub journal_content
     $r->content_type($opts->{'contenttype'});
     $r->header_out("Cache-Control", "private, proxy-revalidate");
 
-    my $do_gzip = $LJ::DO_GZIP;
+    my $do_gzip = $LJ::DO_GZIP && $LJ::OPTMOD_ZLIB;
     $do_gzip = 0 if $do_gzip && $opts->{'contenttype'} !~ m!^text/html!;
     $do_gzip = 0 if $do_gzip && $r->header_in("Accept-Encoding") !~ /gzip/;
     my $length = length($html);
@@ -584,6 +585,7 @@ sub interface_content
     my $args = $r->args;
 
     if ($RQ{'interface'} eq "xmlrpc") {
+        return 404 unless $LJ::OPTMOD_XMLRPC;
         my $server = XMLRPC::Transport::HTTP::Apache
             -> on_action(sub { die "Access denied\n" if $_[2] =~ /:|\'/ })
             -> dispatch_to('LJ::XMLRPC')
