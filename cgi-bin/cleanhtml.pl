@@ -594,7 +594,7 @@ sub resolve_relative_urls
     return undef;
 }
 
-sub ExpandLJURL 
+sub ExpandLJURL
 {
     my @args = grep { $_ } split(/\//, $_[0]);
     my $mode = shift @args;
@@ -610,7 +610,7 @@ sub ExpandLJURL
              }
          },
          'memories' => sub {
-             my $user = shift;
+             my $user = LJ::canonical_username(shift);
              if ($user) {
                  return "memories.bml?user=$user";
              } else {
@@ -618,7 +618,7 @@ sub ExpandLJURL
              }
          },
          'pubkey' => sub {
-             my $user = shift;
+             my $user = LJ::canonical_username(shift);
              if ($user) {
                  return "pubkey.bml?user=$user";
              } else {
@@ -634,21 +634,22 @@ sub ExpandLJURL
              }
          },
          'todo' => sub {
-             my $user = shift;
+             my $user = LJ::canonical_username(shift);
              if ($user) {
-                 return "todo/index.bml?user=$user";
+                 return "todo/?user=$user";
              } else {
-                 return "todo/index.bml";
+                 return "todo/";
              }
          },
          'user' => sub {
-             my $user = shift;
+             my $user = LJ::canonical_username(shift);
+             return "" if grep { /[\"\'\<\>\n\&]/ } @_;
              return $_[0] eq 'profile' ?
                  "userinfo.bml?user=$user" :
                  "users/$user/" . join("", map { "$_/" } @_ );
          },
          'userinfo' => sub {
-             my $user = shift;
+             my $user = LJ::canonical_username(shift);
              if ($user) {
                  return "userinfo.bml?user=$user";
              } else {
@@ -656,7 +657,7 @@ sub ExpandLJURL
              }
          },
          'userpics' => sub {
-             my $user = shift;
+             my $user = LJ::canonical_username(shift);
              if ($user) {
                  return "allpics.bml?user=$user";
              } else {
@@ -665,7 +666,7 @@ sub ExpandLJURL
          },
         );
 
-    my $uri = $modes{$mode}->(@args);
+    my $uri = $modes{$mode} ? $modes{$mode}->(@args) : "error:bogus-lj-url";
 
     return "$LJ::SITEROOT/$uri";
 }
