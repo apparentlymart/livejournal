@@ -28,7 +28,12 @@ sub get_permissions
             $perm->{'edit'} = 1;
         } else {
             # TAG:FR:ljtodo:get_friends_in_group
-            $sth = $dbh->prepare("SELECT fg.groupname FROM friends f, friendgroup fg WHERE f.userid=$u->{'userid'} and f.friendid=$remote->{'userid'} and fg.userid=$u->{'userid'} and fg.groupname like 'priv-todo-%'");
+            $sth = $dbh->prepare("SELECT fg.groupname FROM friends f, friendgroup fg " .
+                                 "WHERE f.userid=$u->{'userid'} AND " .
+                                       "f.friendid=$remote->{'userid'} AND " .
+                                       "fg.userid=$u->{'userid'} AND " .
+                                       "f.groupmask & (1 << fg.groupnum) AND " .
+                                       "fg.groupname like 'priv-todo-%'");
             $sth->execute;
             while (my ($priv) = $sth->fetchrow_array) {
                 if ($priv =~ /^priv-todo-(.+)/) {
