@@ -108,9 +108,18 @@ my $move_user = sub {
             @vals = ();
         };
 
+        # s1stylecache is the only table keyed on styleid, not user
+        my $where = "user=" . $dbh->quote($u->{'user'});
+        if ($src_table eq "s1stylecache") {
+            my $ids = $dbh->selectcol_arrayref("SELECT styleid FROM style WHERE user=?",
+                                               undef, $u->{'user'});
+            my $ids_in = join(",", map { $dbh->quote($_) } @$ids);
+            $where = "styleid IN ($ids_in)";
+        }
+
         # select from source table and build data for insert
-        my $sth = $dbh->prepare("SELECT * FROM $src_table WHERE user=?");
-        $sth->execute($u->{'user'});
+        my $sth = $dbh->prepare("SELECT * FROM $src_table WHERE $where");
+        $sth->execute();
         while (my $row = $sth->fetchrow_hashref) {
 
             # so that when we look for userid later, it'll be there
@@ -143,6 +152,7 @@ my $move_user = sub {
     # update dversion
     LJ::update_user($u, { 'dversion' => 5 })
         or die "error updating dversion";
+    $u->{'dversion'} = 5; # update local copy in memory
 
     return 1;
 };
