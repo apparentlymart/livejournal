@@ -4005,6 +4005,7 @@ sub get_remote
     my $sess_length = {
         'short' => 60*60*24*1.5,
         'long' => 60*60*24*60,
+        'once' => 0, # do not renew these
     }->{$sess->{'exptype'}};
 
     if ($sess_length &&

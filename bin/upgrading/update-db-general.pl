@@ -2334,6 +2334,12 @@ register_alter(sub {
                 "AFTER journalid");
     }
 
+    if (column_type("sessions", "exptype") !~ /once/) {
+        do_alter("sessions",
+                "ALTER TABLE sessions CHANGE COLUMN exptype ".
+                "exptype ENUM('short', 'long', 'once') NOT NULL");
+    }
+
 
 });
 

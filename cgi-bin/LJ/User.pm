@@ -175,9 +175,14 @@ sub generate_session
     my $udbh = LJ::get_cluster_master($u);
     return undef unless $udbh;
     my $sess = {};
-    $opts->{'exptype'} = "short" unless $opts->{'exptype'} eq "long";
+    $opts->{'exptype'} = "short" unless $opts->{'exptype'} eq "long" ||
+                                        $opts->{'exptype'} eq "once";
     $sess->{'auth'} = LJ::rand_chars(10);
-    my $expsec = $opts->{'exptype'} eq "short" ? 60*60*24*1.5 : 60*60*24*60;
+    my $expsec = $opts->{'expsec'}+0 || {
+        'short' => 60*60*24*1.5, # 36 hours
+        'long' => 60*60*24*60,   # 60 days
+        'once' => 60*60*24*1.5,  # same as short; just doesn't renew
+    }->{$opts->{'exptype'}};
     my $id = LJ::alloc_user_counter($u, 'S');
     return undef unless $id;
     $u->do("REPLACE INTO sessions (userid, sessid, auth, exptype, ".
