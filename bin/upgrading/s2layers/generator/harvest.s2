@@ -1,0 +1,20 @@
+#-*-s2-*-
+
+layerinfo "type" = "theme";
+layerinfo "name" = "Harvest";
+layerinfo "redist_uniq" = "generator/harvest";
+layerinfo "author_name" = "Andrea Hartmann";
+layerinfo "author_email" = "mullenkamp@livejournal.com";
+
+set entry_back  = "#ff9900";
+set entry_text  = "#663333";
+set page_link   = "#ffeeaa";
+set page_vlink  = "#993300";
+set page_alink  = "#ffcc88";
+set page_back   = "#ffaa11";
+set strong_text = "#000000";
+set stronger_back = "#ffcc33";
+set stronger_text = "#663333";
+set weak_back   = "#cc6600";
+set weak_text   = "#ffcc88";
+
