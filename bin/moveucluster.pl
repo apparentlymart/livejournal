@@ -17,12 +17,12 @@ my $opt_ignorebit = 0;
 my $opt_verify = 0;
 exit 1 unless GetOptions('delete' => \$opt_del,
                          'destdelete' => \$opt_destdel,
-			 'verbose=i' => \$opt_verbose,
-			 'movemaster|mm' => \$opt_movemaster,
+                         'verbose=i' => \$opt_verbose,
+                         'movemaster|mm' => \$opt_movemaster,
                          'prelocked' => \$opt_prelocked,
-			 'expungedel' => \$opt_expungedel,
-			 'ignorebit' => \$opt_ignorebit,
-			 'verify' => \$opt_verify,  # slow verification pass (just for debug)
+                         'expungedel' => \$opt_expungedel,
+                         'ignorebit' => \$opt_ignorebit,
+                         'verify' => \$opt_verify,  # slow verification pass (just for debug)
                          );
 my $optv = $opt_verbose;
 
@@ -141,11 +141,11 @@ if ($opt_expungedel && $u->{'statusvis'} eq "D" &&
 
     print "Expunging user '$u->{'user'}'\n";
     $dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart, timedone) ".
-	     "VALUES (?,?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())", undef, 
-	     $userid, $sclust, 0);
+             "VALUES (?,?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())", undef, 
+             $userid, $sclust, 0);
     LJ::update_user($userid, { clusterid => 0,
                                statusvis => 'X',
-			       raw => "caps=caps&~(1<<$readonly_bit), statusvisdate=NOW()" });
+                               raw => "caps=caps&~(1<<$readonly_bit), statusvisdate=NOW()" });
     exit 0;
 }
 
@@ -158,7 +158,7 @@ my $cmid = $dbh->{'mysql_insertid'};
 
 # set readonly cap bit on user
 unless ($opt_prelocked || 
-	LJ::update_user($userid, { raw => "caps=caps|(1<<$readonly_bit)" })) 
+        LJ::update_user($userid, { raw => "caps=caps|(1<<$readonly_bit)" })) 
 {
     die "Failed to set readonly bit on user: $user\n";
 }
@@ -252,9 +252,9 @@ foreach my $table (qw(userbio talkleft log2 talk2 sessions userproplite2)) {
 
     eval { $dbch->do("HANDLER $table OPEN"); };
     if ($@) {
-	die "This mover currently only works on MyISAM tables on MySQL 4.x and above.\n" .
-	    "Support for InnoDB tables coming later.\n\nActual error: " .
-	    $@;
+        die "This mover currently only works on MyISAM tables on MySQL 4.x and above.\n" .
+            "Support for InnoDB tables coming later.\n\nActual error: " .
+            $@;
     }
 
     my $idx = $ti->{idx};
@@ -274,7 +274,7 @@ foreach my $table (qw(userbio talkleft log2 talk2 sessions userproplite2)) {
         }
         last;
     } else {
-	die "  Existing data on destination cluster\n";
+        die "  Existing data on destination cluster\n";
     }
 }
 
@@ -288,7 +288,7 @@ foreach my $table (@tables) {
 
     # people accounts don't have moderated posts
     next if $u->{'journaltype'} eq "P" && ($table eq "modlog" ||
-					   $table eq "modblob");
+                                           $table eq "modblob");
 
     # don't waste time looking at dependent tables with empty parents
     next if $dep{$table} && $was_empty{$dep{$table}};
@@ -301,9 +301,9 @@ foreach my $table (@tables) {
 
     eval { $dbo->do("HANDLER $table OPEN"); };
     if ($@) {
-	die "This mover currently only works on MyISAM tables on MySQL 4.x and above.\n".
-	    "Support for InnoDB tables coming later.\n\nERROR: " .
-	    $@;
+        die "This mover currently only works on MyISAM tables on MySQL 4.x and above.\n".
+            "Support for InnoDB tables coming later.\n\nERROR: " .
+            $@;
     }
 
     my $tct = 0;            # total rows read for this table so far.
@@ -316,30 +316,30 @@ foreach my $table (@tables) {
     my $sqlins = "";
     my $sqlvals = 0;
     my $flush = sub {
-	return unless $sqlins;
+        return unless $sqlins;
         print "# Flushing $table ($sqlvals recs, ", length($sqlins), " bytes)\n" if $optv;
-	$dbch->do($sqlins);
-	$sqlins = "";
-	$sqlvals = 0;
+        $dbch->do($sqlins);
+        $sqlins = "";
+        $sqlvals = 0;
     };
 
     my $insert = sub {
-	my $r = shift;
+        my $r = shift;
 
-	# now that we know it has something to delete (many tables are empty for users)
-	unless ($pushed_delete++) {
-	    push @to_delete, [ $table, $idxcol ];
-	}
+        # now that we know it has something to delete (many tables are empty for users)
+        unless ($pushed_delete++) {
+            push @to_delete, [ $table, $idxcol ];
+        }
 
-	if ($sqlins) {
-	    $sqlins .= ", ";
-	} else {
-	    $sqlins = "INSERT INTO $table (" . join(', ', @{$cols}) . ") VALUES ";
-	}
-	$sqlins .= "(" . join(", ", map { $dbo->quote($_) } @$r) . ")";
+        if ($sqlins) {
+            $sqlins .= ", ";
+        } else {
+            $sqlins = "INSERT INTO $table (" . join(', ', @{$cols}) . ") VALUES ";
+        }
+        $sqlins .= "(" . join(", ", map { $dbo->quote($_) } @$r) . ")";
 
-	$sqlvals++;
-	$flush->() if $sqlvals > 5000 || length($sqlins) > 800_000;
+        $sqlvals++;
+        $flush->() if $sqlvals > 5000 || length($sqlins) > 800_000;
     };
 
     # let tables perform extra processing on the $r before it's 
@@ -348,41 +348,41 @@ foreach my $table (@tables) {
 
     # we know how to compress these two tables (currently the only two)
     if ($table eq "logtext2" || $table eq "talktext2") {
-	$magic = sub {
-	    my $r = shift;
-	    return unless length($r->[3]) > 200;
-	    LJ::text_compress(\$r->[3]);
-	};
+        $magic = sub {
+            my $r = shift;
+            return unless length($r->[3]) > 200;
+            LJ::text_compress(\$r->[3]);
+        };
     }
     if ($table eq "s1style") {
-	$magic = sub {
-	    my $r = shift;
-	    push @styleids, $r->[0];
-	};
+        $magic = sub {
+            my $r = shift;
+            push @styleids, $r->[0];
+        };
     }
 
     while (! $hit_otheruser && ($ct == $batch_size || ! $did_start)) {
-	my $qry = "HANDLER $table READ `$idx` NEXT LIMIT $batch_size";
-	unless ($did_start) {
-	    $qry = "HANDLER $table READ `$idx` = ($userid) LIMIT $batch_size";
-	    $did_start = 1;
-	}
+        my $qry = "HANDLER $table READ `$idx` NEXT LIMIT $batch_size";
+        unless ($did_start) {
+            $qry = "HANDLER $table READ `$idx` = ($userid) LIMIT $batch_size";
+            $did_start = 1;
+        }
 
-	my $sth = $dbo->prepare($qry);
-	$sth->{'mysql_use_result'} = 1;
-	$sth->execute;
+        my $sth = $dbo->prepare($qry);
+        $sth->{'mysql_use_result'} = 1;
+        $sth->execute;
 
-	$ct = 0;
-	while (my $r = $sth->fetchrow_arrayref) {
-	    if ($r->[$pripos] != $userid) {
-		$hit_otheruser = 1;
-		last;
-	    }
-	    $magic->($r) if $magic;
-	    $insert->($r);
-	    $tct++;
-	    $ct++;
-	}
+        $ct = 0;
+        while (my $r = $sth->fetchrow_arrayref) {
+            if ($r->[$pripos] != $userid) {
+                $hit_otheruser = 1;
+                last;
+            }
+            $magic->($r) if $magic;
+            $insert->($r);
+            $tct++;
+            $ct++;
+        }
     }
     $flush->();
 
@@ -390,8 +390,8 @@ foreach my $table (@tables) {
 
     # verify the important tables
     if ($table =~ /^(talk|log)(2|text2)$/) {
-	my $dblcheck = $dbo->selectrow_array("SELECT COUNT(*) FROM $table WHERE $idxcol=$userid");
-	die "# Expecting: $dblcheck, but got $tct\n" unless $dblcheck == $tct;
+        my $dblcheck = $dbo->selectrow_array("SELECT COUNT(*) FROM $table WHERE $idxcol=$userid");
+        die "# Expecting: $dblcheck, but got $tct\n" unless $dblcheck == $tct;
     }
 
     my $verifykey = $ti->{verifykey};
@@ -442,18 +442,18 @@ print "Moved.\n" if $optv;
 if ($opt_del) {
     print "Deleting from source cluster...\n" if $optv;
     foreach my $td (@to_delete) {
-	my ($table, $pri) = @$td;
-	while ($dboa->do("DELETE FROM $table WHERE $pri=$userid LIMIT 1000") > 0) {
-	    print "  deleted from $table\n" if $optv;
-	}
+        my ($table, $pri) = @$td;
+        while ($dboa->do("DELETE FROM $table WHERE $pri=$userid LIMIT 1000") > 0) {
+            print "  deleted from $table\n" if $optv;
+        }
     }
 
     # s1stylecache table
     if (@styleids) {
-	my $styleids_in = join(",", map { $dboa->quote($_) } @styleids);
-	if ($dboa->do("DELETE FROM s1stylecache WHERE styleid IN ($styleids_in)") > 0) {
-	    print "  deleted from s1stylecache\n" if $optv;
-	}
+        my $styleids_in = join(",", map { $dboa->quote($_) } @styleids);
+        if ($dboa->do("DELETE FROM s1stylecache WHERE styleid IN ($styleids_in)") > 0) {
+            print "  deleted from s1stylecache\n" if $optv;
+        }
     }
 } else {
     # at minimum, we delete the clustertrack2 row so it doesn't get
@@ -462,7 +462,7 @@ if ($opt_del) {
 }
 
 $dbh->do("UPDATE clustermove SET sdeleted=?, timedone=UNIX_TIMESTAMP() ".
-	 "WHERE cmid=?", undef, $opt_del ? 1 : 0, $cmid);
+         "WHERE cmid=?", undef, $opt_del ? 1 : 0, $cmid);
 
 exit 0;
 
@@ -472,53 +472,50 @@ sub fetch_tableinfo
     my $memkey = "moveucluster:" . Digest::MD5::md5_hex(join(",",@tables));
     my $tinfo = LJ::MemCache::get($memkey) || {};
     foreach my $table (@tables) {
-	next if $table eq "events" || $table eq "s1stylecache" ||
+        next if $table eq "events" || $table eq "s1stylecache" ||
             $table eq "cmdbuffer" || $table eq "captcha_session";
-	next if $tinfo->{$table};  # no need to load this one
+        next if $tinfo->{$table};  # no need to load this one
 
-	# find the index we'll use
-	my $idx;     # the index name we'll be using
-	my $idxcol;  # "userid" or "journalid"
+# find the index we'll use
+            my $idx;     # the index name we'll be using
+            my $idxcol;  # "userid" or "journalid"
 
-	my $sth = $dbo->prepare("SHOW INDEX FROM $table");
-	$sth->execute;
+            my $sth = $dbo->prepare("SHOW INDEX FROM $table");
+        $sth->execute;
         my @pris;
 
-	while (my $r = $sth->fetchrow_hashref) {
+        while (my $r = $sth->fetchrow_hashref) {
             push @pris, $r->{'Column_name'} if $r->{'Key_name'} eq "PRIMARY";
-	    next unless $r->{'Seq_in_index'} == 1;
+            next unless $r->{'Seq_in_index'} == 1;
             next if $idx;
-	    if ($r->{'Column_name'} eq "journalid" ||
-		$r->{'Column_name'} eq "userid") {
-		$idx = $r->{'Key_name'};
-		$idxcol = $r->{'Column_name'};
-	    }
-	}
+            if ($r->{'Column_name'} eq "journalid" ||
+                $r->{'Column_name'} eq "userid") {
+                $idx = $r->{'Key_name'};
+                $idxcol = $r->{'Column_name'};
+            }
+        }
 
         shift @pris if @pris && ($pris[0] eq "journalid" || $pris[0] eq "userid");
         my $verifykey = join(",", @pris);
 
-	die "can't find index for table $table\n" unless $idx;
+        die "can't find index for table $table\n" unless $idx;
 
-	$tinfo->{$table}{idx} = $idx;
-	$tinfo->{$table}{idxcol} = $idxcol;
+        $tinfo->{$table}{idx} = $idx;
+        $tinfo->{$table}{idxcol} = $idxcol;
         $tinfo->{$table}{verifykey} = $verifykey;
 
-	my $cols = $tinfo->{$table}{cols} = [];
-	my $colnum = 0;
-	$sth = $dbch->prepare("DESCRIBE $table");
-	$sth->execute;
-	while (my $r = $sth->fetchrow_hashref) {
-	    push @$cols, $r->{'Field'};
-	    if ($r->{'Field'} eq $idxcol) {
-		$tinfo->{$table}{pripos} = $colnum;
-	    }
-	    $colnum++;
-	}
+        my $cols = $tinfo->{$table}{cols} = [];
+        my $colnum = 0;
+        $sth = $dbch->prepare("DESCRIBE $table");
+        $sth->execute;
+        while (my $r = $sth->fetchrow_hashref) {
+            push @$cols, $r->{'Field'};
+            if ($r->{'Field'} eq $idxcol) {
+                $tinfo->{$table}{pripos} = $colnum;
+            }
+            $colnum++;
+        }
     }
     LJ::MemCache::set($memkey, $tinfo, 90);  # not for long, but quick enough to speed a series of moves
     return $tinfo;
 }
-
-
-
