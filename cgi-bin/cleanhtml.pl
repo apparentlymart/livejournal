@@ -434,6 +434,7 @@ my $subject_remove = [qw[bgsound embed object caption link font]];
 sub clean_subject
 {
     my $ref = shift;
+    return unless $$ref =~ /[\<\>]/;
     clean($ref, {
         'wordlength' => 40,
         'addbreaks' => 0,
@@ -449,6 +450,7 @@ my $subjectall_eat = [qw[head title style layer iframe applet object]];
 sub clean_subject_all
 {
     my $ref = shift;
+    return unless $$ref =~ /[\<\>]/;
     clean($ref, {
         'wordlength' => 40,
         'addbreaks' => 0,

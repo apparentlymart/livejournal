@@ -467,10 +467,12 @@ sub prepare_currents
     my %currents = ();
     my $val;
     if ($val = $args->{'props'}->{$datakey}->{'current_music'}) {
-        $currents{'Music'} = LJ::CleanHTML::clean_subject(\$val);
+        LJ::CleanHTML::clean_subject(\$val);
+        $currents{'Music'} = $val;
     }
     if ($val = $args->{'props'}->{$datakey}->{'current_mood'}) {
-        $currents{'Mood'} = LJ::CleanHTML::clean_subject(\$val);
+        LJ::CleanHTML::clean_subject(\$val);
+        $currents{'Mood'} = $val;
     }
     if ($val = $args->{'props'}->{$datakey}->{'current_moodid'}) {
         my $theme = $args->{'user'}->{'moodthemeid'};
