@@ -26,6 +26,7 @@ use Storable ();
 use Compress::Zlib ();
 use IO::Socket::INET qw{};
 use DDLockClient ();
+use MogileFS;
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";

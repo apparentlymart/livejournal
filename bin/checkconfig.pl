@@ -57,6 +57,7 @@ my %modules = (
                    'opt' => 'Required for palette-altering of PNG files.  Only necessary if you plan to make your own S2 styles that use PNGs, not GIFs.',
                },
                "Time::HiRes" => { 'deb' => 'libtime-hires-perl' },
+               "IO::WrapTie" => { 'dev' => 'libio-stringy-perl' },
                );
 
 my @debs;
