@@ -547,7 +547,7 @@ sub userpic_content
         return NOT_FOUND unless $pic;
         return NOT_FOUND if $pic->{'userid'} != $userid;
         my $u = LJ::load_userid($userid);
-        return NOT_FOUND unless $u;
+        return NOT_FOUND unless $u && $u->{'statusvis'} ne "X";
 
         $lastmod = $pic->{'lastmod'};
 
