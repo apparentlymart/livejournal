@@ -1356,6 +1356,87 @@ CREATE TABLE s2compiled
 )
 EOC
 
+register_tablecreate("ml_domains", <<'EOC');
+CREATE TABLE ml_domains
+(
+  dmid TINYINT UNSIGNED NOT NULL,
+  PRIMARY KEY (dmid),
+  type VARCHAR(30) NOT NULL,
+  args VARCHAR(255) NOT NULL DEFAULT '',
+  UNIQUE (type,args)  
+)
+EOC
+
+register_tablecreate("ml_items", <<'EOC');
+CREATE TABLE ml_items
+(
+   dmid    TINYINT UNSIGNED NOT NULL,
+   itid    MEDIUMINT UNSIGNED AUTO_INCREMENT NOT NULL,
+   PRIMARY KEY (dmid, itid),
+   itcode  VARCHAR(80) NOT NULL,
+   UNIQUE  (dmid, itcode),
+   notes   MEDIUMTEXT
+)
+EOC
+
+register_tablecreate("ml_langs", <<'EOC');
+CREATE TABLE ml_langs
+(
+   lnid      SMALLINT UNSIGNED NOT NULL,
+   UNIQUE (lnid),
+   lncode   VARCHAR(16) NOT NULL,  # en_US en_LJ en ch_HK ch_B5 etc... de_DE
+   UNIQUE (lncode),
+   lnname   VARCHAR(60) NOT NULL,   # "Deutsch"
+   parenttype   ENUM('diff','sim') NOT NULL,   
+   parentlnid   SMALLINT UNSIGNED NOT NULL,
+   lastupdate  DATETIME NOT NULL
+)
+EOC
+
+register_tablecreate("ml_langdomains", <<'EOC');
+CREATE TABLE ml_langdomains
+(
+   lnid   SMALLINT UNSIGNED NOT NULL,
+   dmid   TINYINT UNSIGNED NOT NULL,
+   PRIMARY KEY (lnid, dmid),
+   dmmaster ENUM('0','1') NOT NULL,   
+   lastgetnew DATETIME,
+   lastpublish DATETIME,
+   countokay    SMALLINT UNSIGNED NOT NULL,
+   counttotal   SMALLINT UNSIGNED NOT NULL
+)
+EOC
+
+register_tablecreate("ml_latest", <<'EOC');
+CREATE TABLE ml_latest
+(
+   lnid     SMALLINT UNSIGNED NOT NULL,
+   dmid     TINYINT UNSIGNED NOT NULL,
+   itid     SMALLINT UNSIGNED NOT NULL,
+   PRIMARY KEY (lnid, dmid, itid),
+   chgtime  DATETIME NOT NULL,
+   txtid     INT UNSIGNED NOT NULL,
+   version   SMALLINT UNSIGNED NOT NULL,
+   INDEX (dmid, itid),
+   INDEX (lnid, dmid, chgtime),
+   INDEX (chgtime)
+)
+EOC
+
+register_tablecreate("ml_text", <<'EOC');
+CREATE TABLE ml_text
+(
+   dmid  TINYINT UNSIGNED NOT NULL,
+   txtid  INT UNSIGNED AUTO_INCREMENT NOT NULL,
+   PRIMARY KEY (dmid, txtid),
+   lnid   SMALLINT UNSIGNED NOT NULL,
+   itid   SMALLINT UNSIGNED NOT NULL,
+   INDEX (lnid, dmid, itid),
+   text    TEXT NOT NULL,
+   userid  INT UNSIGNED NOT NULL
+)
+EOC
+
 ### changes
 
 register_alter(sub {
