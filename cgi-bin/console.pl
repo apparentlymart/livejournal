@@ -452,8 +452,8 @@ $cmd{'community'} = {
     'argsummary' => '<community> <action> <user>',
     'args' => [
                'community' => "The username of the community.",
-               'action' => 'Either <b>add</b> or <b>remove</b>.',
-               'user' => "The user you want to add or remove from the community.",
+               'action' => 'Only <b>remove</b> is supported right now.',
+               'user' => "The user you want to remove from the community.",
                ],
     };
 

@@ -16,8 +16,7 @@ body<=
  my $remote = LJ::get_remote();
 
  unless ($remote) {
-    $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.noremote'} p?>";
-    return $ret;
+    return "<?needlogin?>";
  }
 
  $ret .= "<?h1 $ML{'.commlist.header'} h1?><?p $ML{'.commlist.text'} p?>";
@@ -37,19 +36,24 @@ body<=
  if ($mods) { foreach (@$mods) { $mods{$_} = $show{$_} = 1; } }
 
  my %names = ();
+ my %pending = ();
  if (%show) {
     my $in = join(',', keys %show);
-    my $sth = $dbr->prepare("SELECT u.userid, u.clusterid, u.user, u.name FROM user u, community c ".
+    my $sth = $dbr->prepare("SELECT u.userid, u.clusterid, u.user, u.name, c.membership FROM user u, community c ".
                             "WHERE u.userid IN ($in) AND u.userid=c.userid ".
                             "AND u.statusvis<>'D' AND u.statusvis<>'X'");
     $sth->execute;
     my $udbr;
-    while (my ($uid, $clusterid, $user, $name) = $sth->fetchrow_array) {
-        $names{$uid} = [ $user, $name, -1 ]; 
+    while (my ($uid, $clusterid, $user, $name, $membership) = $sth->fetchrow_array) {
+        $names{$uid} = [ $user, $name, -1 ];
         if ($mods{$uid}) {
             $udbr = LJ::get_cluster_reader($clusterid);
             my $sql = "SELECT COUNT(*) FROM modlog WHERE journalid=$uid";
             $modcount{$uid} = $names{$uid}[2] = $udbr->selectrow_array($sql) || 0;
+        }
+        if ($membership eq 'closed') {
+            my $ids = LJ::get_pending_members($uid) || [];
+            $pending{$uid} = scalar @$ids;
         }
     }
  }
@@ -59,7 +63,7 @@ body<=
 
     # Make up the first table row, linking to the other sort methods
     my @snames;
-    $ret .= "<table cellpadding='5'><tr>";
+    $ret .= "<table cellpadding='5'><tr style='text-align: left;'>";
 
     if (!defined $GET{'sortby'} || $GET{'sortby'} eq 'username') {
         $ret .= "<th>$ML{'.commlist.username'}</th>";
@@ -90,11 +94,13 @@ body<=
         $ret .= "<tr><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td>";
         if ($admin{$id}) {
             $ret .= BML::ml('Actionlink', {
-                'link'=>"<a href='/community/settings.bml?comm=$user'>$ML{'.commlist.actsettings2'}</a>"}) . "&nbsp;&nbsp;";
-            $ret .= BML::ml('Actionlink', {
-                'link'=>"<a href='/community/members.bml?comm=$user'>$ML{'.commlist.actmembers2'}</a>"}) . "&nbsp;&nbsp;";
-            $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='/editinfo.bml?authas=$user'>$ML{'.commlist.actinfo'}</a>"}) . "&nbsp;&nbsp;";
+            $ret .= BML::ml('Actionlink', {
+                'link'=>"<a href='/community/settings.bml?comm=$user'>$ML{'.commlist.actsettings2'}</a>"}) . "&nbsp;&nbsp;";
+            my $pend = $pending{$id} ? BML::ml('.commlist.actpending', { num => $pending{$id},
+                                               aopts => "href=\"/community/pending.bml?comm=$user\"" }) : '';
+            $ret .= BML::ml('Actionlink', {
+                'link'=>"<a href='/community/members.bml?comm=$user'>$ML{'.commlist.actmembers2'}</a>$pend"}) . "&nbsp;&nbsp;";
         }
         $ret .= "</td><td align='center'>";
         if ($mods{$id}) {
@@ -109,6 +115,35 @@ body<=
  }
 
  $ret .= "</div>";
+
+ # save any changes
+ if (LJ::did_post()) {
+     my $op = $POST{email};
+     $op = '' if $op && $op !~ /[DN]/;
+     LJ::set_userprop($remote, 'opt_communityjoinemail', $op);
+ }
+
+ # load up our userprop
+ LJ::load_user_props($remote, 'opt_communityjoinemail');
+ my $op = $remote->{opt_communityjoinemail};
+ $op ||= 'Y';
+
+ # form for setting email option
+ $ret .= "<?h1 $ML{'.joinmail.title'} h1?>";
+ $ret .= "<?p $ML{'.joinmail.body'} p?>";
+ $ret .="<form method='post' action='manage.bml'>";
+ $ret .= "<div style='margin-left: 30px;'>";
+ $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_all', 
+                          value => '', selected => ($op eq 'Y') });
+ $ret .= "<label for='email_all'>$ML{'.joinmail.email.all'}</label><br />";
+ $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_digest', 
+                          value => 'D', selected => ($op eq 'D') });
+ $ret .= "<label for='email_digest'>$ML{'.joinmail.email.digest'}</label><br />";
+ $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_none', 
+                          value => 'N', selected => ($op eq 'N') });
+ $ret .= "<label for='email_none'>$ML{'.joinmail.email.none'}</label><br />";
+ $ret .= LJ::html_submit($ML{'.joinmail.save'});
+ $ret .= "</form></div>";
 
  $ret .= "<?h1 $ML{'.create.header'} h1?>";
  $ret .= "<?p " . BML::ml('.create.text', {'link'=>'/community/settings.bml?mode=create'}) . " p?>";

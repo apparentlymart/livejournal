@@ -171,3 +171,6 @@ general bml.needlogin.body
 general /userinfo.bml.label.frsyndication
 
 general /syn/index.bml.invalid.address
+
+general /community/members.bml.key.name
+general /community/members.bml.success.addusers

@@ -22,3 +22,5 @@ captcha.pl:
   gen_image_captchas - Generate any needed new graphical challenges.
   clean_captchas - Purge old challenges from the database.
 
+generic.pl:
+  joinmail - Generates daily email digests for community join requests

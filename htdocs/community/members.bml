@@ -51,59 +51,6 @@ body<=
         my @userids = split(',', $POST{'ids'});
         my @saveattribs = split(',', $POST{'attribs'});
 
-        # add new users
-        my $adding = 0;
-        my @add_errors;
-        foreach my $num (1..5) {
-            next unless $POST{"add_$num"} =~ /^\w+$/;
-
-            my $target = LJ::load_user($POST{"add_$num"});
-            unless ($target) {
-                push @add_errors, BML::ml('.error.nouser',
-                                          { 'user' => $POST{"add_$num"} });
-                next;
-            }
-
-            my @attr = grep { defined $POST{"add_${num}_$_"} } @saveattribs;
-            unless (@attr) {
-                push @add_errors, BML::ml('.error.noattr',
-                                          { 'user' => LJ::ljuser($POST{"add_$num"},
-                                            { 'type' => $target->{'journaltype'} }) });
-                next;
-            }
-
-            unless ($target->{'journaltype'} eq 'P') {
-                push @add_errors, BML::ml('.error.invaliduser',
-                                          { 'user' => LJ::ljuser($POST{"add_$num"},
-                                            { 'type' => $target->{'journaltype'} }) });
-                next;
-            }
-
-            if (grep { $target->{'userid'} == $_ } @userids) {
-                push @add_errors, BML::ml('.error.alreadyadded',
-                                          { 'user' => LJ::ljuser($POST{"add_$num"},
-                                            { 'type' => $target->{'journaltype'} }) });
-                next;
-            }
-            
-            # insert authactions row
-            my $aa = LJ::comm_member_request($c, $target, \@attr);
-            unless ($aa) {
-                $ret .= "<?h1 $ML{'Error'} h1?><?p Error registering authaction. p?>";
-                return $ret;
-            }
-            if ($aa->{'datecreate'}) {
-                push @add_errors, BML::ml('.error.alreadysent',
-                                          { 'user' => LJ::ljuser($POST{"add_$num"},
-                                            { 'type' => $target->{'journaltype'} }),
-                                            'datetime' => $aa->{'datecreate'} 
-                                          });
-            }
-
-            $adding = 1;
-        }
-        return LJ::bad_input(@add_errors) if @add_errors;
-
         # initialize lists of users to update and delete
         # keyed on attribute type
         my %add = ();
@@ -174,11 +121,6 @@ body<=
         }
 
         # perform additions
-        if (%{$add{'member'}}) {
-            my $in = join(',', map { "($cid, $_)" } keys %{$add{'member'}});
-            # TAG:FR:bml_comm_members:add_members
-            LJ::friends_do($cid, "REPLACE INTO friends (userid,friendid) VALUES $in");
-        }
         if (%{$add{'admin'}}) {
             my $in = join(',', map { "($cid, $_, 'A')" } keys %{$add{'admin'}});
             $dbh->do("REPLACE INTO reluser (userid,targetid,type) VALUES $in");
@@ -197,7 +139,6 @@ body<=
         }
 
         $ret .= "<?h1 $ML{'.success.header'} h1?><?p $ML{'.success.message'} p?>";
-        $ret .= "<?p $ML{'.success.addusers'} p?>" if $adding;
         $ret .= "<?p " . BML::ml(".success.return", { 'link' => BML::get_uri() . "?comm=$cname" }) . " p?>";
 
         return $ret;
@@ -300,7 +241,7 @@ body<=
 
     my $sortlink = BML::get_uri() . "?comm=$cname&sort=";
     $ret .= "<br /><div align='center'><table border='2' cellpadding='5'>\n<tr>" .
-            "<td><a href='${sortlink}name'>$ML{'.key.name'}</a></td>";
+            "<td><a href='${sortlink}name'>$ML{'.key.user'}</a></td>";
     $ret .= "<td><a href='${sortlink}$_'><b>".$ML{".key.$_"}."</b></a></td>" for (@attribs);
     $ret .= "</tr>\n";
 
@@ -316,22 +257,8 @@ body<=
         $ret .= "</tr>\n";
     }
 
-    # if on the last page, let users add to the list
-    if ($items{'page'} == $items{'pages'}) {
-        foreach(1..5) {
-            $ret .= "<tr><td>" . LJ::html_text({ 'name' => "add_$_", 'size' => '10',
-                                                 'maxlength' => '15' }) . "</td>";
-            foreach my $key (@attribs) {
-                $ret .= "<td align='center'>";
-                $ret .= LJ::html_check({ 'name' => "add_${_}_$key" });
-                $ret .= "</td>";
-            }
-            $ret .= "</tr>\n";
-        }
-    }
-    $ret .= "</table>\n";
-
     # some hidden values
+    $ret .= "</table>";
     $ret .= LJ::html_hidden('ids', join(',', map { $_->{'userid'}} @users),
                             'attribs', join(',', @attribs)) . "\n";
 

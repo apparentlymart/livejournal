@@ -5,59 +5,40 @@
  $title = $ML{'.title'};
  $body = "";
 
- my $dbr = LJ::get_db_reader();
- my $sth;
-
  my $remote = LJ::get_remote();
  unless ($remote) {
      $body = "<?h1 $ML{'Sorry'}.. h1?><?p $ML{'.label.logoutfirst'} p?>";
      return;
  }
 
- ### get info about the community
- ###
+ # get info about the community
  my $cuserid = $FORM{'cuserid'}+0;
- my $qcomm = $dbr->quote($FORM{'comm'});
- my $extrawhere = $FORM{'comm'} ? "AND u.user=$qcomm" : "AND c.userid=$cuserid";
- my $ci = $dbr->selectrow_hashref("SELECT u.user, u.userid, u.name, c.membership, c.postlevel ".
-                                  "FROM user u, community c WHERE u.userid=c.userid $extrawhere");
- my $ecname = LJ::ehtml($ci->{'name'});
+ my $cu = $FORM{comm} ? 
+          LJ::load_user($FORM{comm}) : # they gave us the comm name
+          LJ::load_userid($cuserid);   # they gave us the comm id
 
- ### does this community even exist?
- ###
- unless ($ci) {
+ # does this community even exist?
+ unless ($cu) {
      $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.label.infoerror'} p?>";
      return;
  }
  
- if ($FORM{'confirm'}) 
- {
-     ### remove user from community's friends list
-     ###
-     LJ::friends_do($ci, "DELETE FROM friends WHERE userid=? AND friendid=?",
-                    $ci->{'userid'}, $remote->{'userid'});
+ if ($FORM{confirm}) {
+     # remove user from community's friends list
+     LJ::leave_community($remote, $cu, $FORM{removefriend});
 
-     if ($FORM{'removefriend'}) {
-         LJ::friends_do($remote, "DELETE FROM friends WHERE userid=? AND friendid=?",
-                        $remote->{'userid'}, $ci->{'userid'});
-     }
-     
-     $body .= "<?h1 $ML{'.success'} h1?><?p ".BML::ml('.label.removed',{'commuser'=>$ci->{'user'},'commname'=>$ecname})." p?>";
-
-     LJ::clear_rel($ci, $remote, 'P');
-     LJ::clear_rel($ci, $remote, 'N');
-     
- }   
- else 
- {
-     $body .= "<?h1 $ML{'.sure'} h1?><?p " . BML::ml('.label.buttontoleave', {'commname' => $ecname}) . " p?>";
+     # success message
+     $body .= "<?h1 $ML{'.success'} h1?><?p " . BML::ml('.label.removed', 
+                    { commuser => $cu->{user}, commname => $cu->{name} }) . " p?>";
+ } else {
+     # show a confirmation form
+     $body .= "<?h1 $ML{'.sure'} h1?><?p " . BML::ml('.label.buttontoleave', { commname => $cu->{name} }) . " p?>";
      $body .= '<form method="post" action="leave.bml">';
-     $body .= LJ::html_hidden("cuserid", $ci->{'userid'}, "confirm", 1) . "<p align='center'>";
-     $body .= LJ::html_check({ name => 'removefriend', 'selected' => 1, value => 1 }) . " ";
-     $body .= BML::ml('.label.removefromfriends',{'user'=>$ci->{'user'}});
+     $body .= LJ::html_hidden("cuserid", $cu->{userid}, "confirm", 1) . "<p align='center'>";
+     $body .= LJ::html_check({ name => 'removefriend', selected => 1, value => 1 }) . " ";
+     $body .= BML::ml('.label.removefromfriends', { user => $cu->{user} });
      $body .= '<br /><br />' . LJ::html_submit(undef, $ML{'.button.leave'}) . '</p></form>';
-     return;
- }
+ } 
 
  return;
 

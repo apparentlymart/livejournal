@@ -4,98 +4,105 @@
 
  $title = $ML{'.title'};
  $body = "";
- 
- my $dbr = LJ::get_db_reader();
- my $sth;
 
- ### is there a user out there?
- ###
-my $remote = LJ::get_remote();
+ # is there a user out there?
+ my $remote = LJ::get_remote();
  unless ($remote) {
      $body = "<?h1 $ML{'Sorry'}.. h1?><?p $ML{'.label.loginfirst'} p?>";
      return;
  }
 
- ### get info about the community
- ###
+ # bad statusvis?
+ unless ($remote->{statusvis} eq 'V') {
+     $body = "<?h1 fuck h1?><?p go away bad statusvis, will strip this later p?>";
+     return;
+ }
+
+ # get info about the community
  my $cuserid = $FORM{'cuserid'}+0;
- my $qcomm = $dbr->quote($FORM{'comm'});
- my $extrawhere = $FORM{'comm'} ? "AND u.user=$qcomm" : "AND c.userid=$cuserid";
- my $ci = $dbr->selectrow_hashref("SELECT u.user, u.userid, u.name, c.membership, c.postlevel ".
-                                  "FROM user u, community c WHERE u.userid=c.userid $extrawhere");
+ my $cu = $FORM{comm} ? 
+          LJ::load_user($FORM{comm}) : # they gave us the comm name
+          LJ::load_userid($cuserid);   # they gave us the comm id
+ my $ci = LJ::get_community_row($cu);
+ $cuserid = $ci->{'userid'};
 
  LJ::text_out(\$ci->{'name'});
  my $ecname = LJ::ehtml($ci->{'name'});
 
- ### does this community even exit?
- ###
- unless ($ci) {
+ # does this community even exit?
+ unless ($cu) {
      $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.label.errorcomminfo'} p?>";
      return;
  }
 
- $cuserid = $ci->{'userid'};
-
- # get the list of maintainers and their usernames
- my $admins = $dbr->selectcol_arrayref("SELECT u.user FROM user u, reluser r ".
-                                       "WHERE r.userid=$cuserid AND r.targetid=u.userid AND r.type='A'") || [];
- my $list = "<ul>";
- foreach (sort @$admins) { $list .= "<li><?ljuser $_ ljuser?></li>"};
- $list .= "</ul>";
-
- ### can members join this community even?
- unless ($ci->{'membership'} eq "open") {
-     $body .= "<?h1 $ML{'Sorry'} h1?><?p " . 
-         BML::ml('.label.closed',{'admins'=>$list}) . 
-         " p?>";
-     return;
- }
-
- ### make sure a community doesn't join a community (that's confusing
- ### or something)
+ # make sure a community doesn't join a community (that's confusing
+ # or something)
  unless ($remote->{'journaltype'} eq "P") {
      $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.label.commlogged'} p?>";
      return;
  }
  
- ## ensure this user isn't banned
- if (LJ::is_banned($remote, $ci->{'userid'})) {
+ # ensure this user isn't banned
+ if (LJ::is_banned($remote, $cuserid)) {
      $body .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.label.banned'} p?>";
      return;
  }
 
- if ($POST{'confirm'}) 
- {
-     ### make remote user a friend of the community
-     ###
-     LJ::add_friend($ci->{'userid'}, $remote->{'userid'});
-     
-     ### make community a friend of the remote user
-     ###
-     if ($FORM{'addfriend'}) { 
-         LJ::add_friend($remote->{'userid'}, $ci->{'userid'}, {'defaultview' => 1});
+ # and make sure they're not already a member
+ if (LJ::is_friend($cuserid, $remote->{userid})) {
+     $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.already.member'} p?>";
+     return;
+ }
+
+ # get the list of maintainers and their usernames
+ my $dbr = LJ::get_db_reader();
+ my $admins = $dbr->selectcol_arrayref("SELECT u.user FROM useridmap u, reluser r ".
+                                       "WHERE r.userid=$cuserid AND r.targetid=u.userid AND r.type='A'") || [];
+ my $list = "<ul>";
+ foreach (sort @$admins) { $list .= "<li><?ljuser $_ ljuser?></li>"};
+ $list .= "</ul>";
+
+ # now do the join
+ if ($POST{confirm}) {
+     # can members join this community openly?
+     if ($ci->{membership} ne 'open') {
+         # hit up the maintainers to let them know a join was requested
+         LJ::comm_member_request($cu, $remote);
+         $body .= "<?h1 $ML{'.reqsubmitted.title'} h1?><?p $ML{'.reqsubmitted.body'} $list p?>";
+         return;
      }
+
+     # make remote user a friend of the community
+     LJ::join_community($remote, $cu, $FORM{addfriend});
      
-     $body .= "<?h1 $ML{'.success'} h1?><?p ".BML::ml('.label.membernow',{ 'username' => $ci->{'user'}, 'commname'=> $ecname})." p?>";
+     # success message
+     $body .= "<?h1 $ML{'.success'} h1?><?p " . BML::ml('.label.membernow', 
+                    { username => $ci->{user}, commname => $ecname}) . " p?>";
      
-     ### if community permits it, give remote user access to post in this community
-     if ($ci->{'postlevel'} eq "members") {
-         LJ::set_rel($ci, $remote, 'P');
+     # if community permits it, tell the user they have access
+     if ($ci->{postlevel} eq "members") {
          $body .= "<?p $ML{'.label.allowposting'} p?>";
      } else {
-         $body .= "<?p ".BML::ml('.label.auth',{'admins'=>$list})." p?>";
+         $body .= "<?p " . BML::ml('.label.auth', { admins => $list }) . " p?>";
      }
-     return;
-     
  } else {
-                                                                                                 
-     $body .= "<?h1 $ML{'.label.sure'} h1?><?p ".BML::ml('.label.expls',{'maintainer'=>$ecname});
+     if ($ci->{membership} ne 'open') {
+         $body .= "<?h1 $ML{'.request.title'} h1?><?p ";
+         $body .= BML::ml('.request.body', { comm => LJ::ljuser($cu) }) . "<br /> p?>";
+         $body .= "<div style='margin-left: 30px;'><form method='post' action='join.bml'>";
+         $body .= "<input type='hidden' name='cuserid' value='$ci->{userid}' />";
+         $body .= "<input type='hidden' name='confirm' value='1' />";
+         $body .= "<input type='submit' value=\"$ML{'.button.join'}\" /></form></div>";
+         return;
+     }
+
+     $body .= "<?h1 $ML{'.label.sure'} h1?><?p " . BML::ml('.label.expls', { maintainer => $ecname });
      $body .= "<form method='post' action='join.bml'>";
      $body .= "<input type='hidden' name='cuserid' value='$ci->{'userid'}' />";
      $body .= "<input type='hidden' name='confirm' value='1' /><center>";
-     $body .= "<input type='checkbox' name='addfriend' checked>".BML::ml('.label.addtofriends',{'maintainer'=>$ecname});
+     $body .= "<input type='checkbox' name='addfriend' checked>";
+     $body .= BML::ml('.label.addtofriends', { maintainer => $ecname });
      $body .= "<br><input type='submit' value=\"$ML{'.button.join'}\" /></center></form> p?>";
-     return;
  }
 
  return;

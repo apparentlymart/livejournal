@@ -202,23 +202,9 @@ sub community
     
     if ($action eq "add") 
     {
-        my $attr = ['member'];
-        push @$attr, 'post' if $ci->{'postlevel'} eq "members";
-        my $res = LJ::comm_member_request($comm, $target, $attr);
-        unless ($res) {
-            push @$out, [ 'error', "Could not add user." ];
-            return 0;
-        }
-        if ($res->{'datecreate'}) {
-            push @$out, [ 'error', "User \"$target_user\" already mailed on: $res->{'datecreate'}" ];
-            return 0;
-        }
-
-        push @$out, [ "info", "User \"$target_user\" has been mailed and will be added to \"$com_user\" pending their approval." ];
-        
-        if ($ci->{'postlevel'} eq "members") {
-            push @$out, [ "info", "User \"$target_user\" will be allowed to post to \"$com_user\" once they are added." ];
-        } 
+        push @$out, [ 'error', 'The ability to add users to a community through the console has been removed.' ];
+        push @$out, [ 'error', 'Users must now request to be added to a community by visiting the community\'s' ];
+        push @$out, [ 'error', 'profile page and clicking the link to join.' ];
     }
         
     if ($action eq "remove") {
