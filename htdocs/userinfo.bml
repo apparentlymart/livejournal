@@ -768,7 +768,7 @@ if ($u->{'journaltitle'}) {
              my $expire = time() + 3600*24*2; # 2 days
              $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft " .
                                              "WHERE userid=?", undef, $userid);
-             LJ::MemCache::set($memkey, $count, $expire);
+             LJ::MemCache::set($memkey, $count, $expire) if defined $count;
          }
          $com_post = comma($count);
          $com_post = BML::ml('.label.composted', {'num'=>$com_post});
@@ -780,7 +780,7 @@ if ($u->{'journaltitle'}) {
          my $expire = time() + 3600*24*2; # 2 days;
          $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 ".
                                          "WHERE journalid=?", undef, $userid);
-         LJ::MemCache::set($memkey, $count, $expire);
+         LJ::MemCache::set($memkey, $count, $expire) if defined $count;
      }
 
      $com_got = comma($count);
