@@ -42,6 +42,7 @@
                 SELECT i.dmid, i.itid, i.itcode FROM ml_items i, ml_latest l, ml_text t
                 WHERE l.lnid=$lnid AND l.dmid=i.dmid AND i.itid=l.itid 
                 $dmidwhere AND t.dmid=l.dmid AND t.txtid=l.txtid AND LOCATE($qtext, t.text)
+                ORDER BY i.itcode
             };
         }        
     }
