@@ -89,7 +89,7 @@
         $a = LJ::auto_linkify($a);
 
         # display output
-        $$body .= "<?h1 $q h1?><div style='margin-left: 20px;'>$a</div>";
+        $$body .= "<?h1 $q h1?><div class='postheading' style='margin-left: 20px;'>$a</div>";
 
         my $lastmodwho = LJ::get_username($lastmoduserid);
         if ($lastmodwho) {
