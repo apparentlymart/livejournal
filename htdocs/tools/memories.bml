@@ -23,7 +23,7 @@
 
  # Find out if an 'authas' argument is specified in the URL.
  # If not, try to authenticate as 'user'. If still no success, use $remote.
- my $authasu = LJ::get_authas_user($GET{'authas'} || $user);
+ my $authasu = LJ::get_authas_user(LJ::canonical_username($GET{'authas'}) || $user);
  my $authasarg;
  my $authasarge;
  if ($authasu) {
@@ -56,7 +56,7 @@
      # If there's a 'user', that user doesn't exist.
      # Otherwise, complain about the absence of 'user' / suggest logging in.
      $title = $ML{'Error'};
-     $body = $user eq "" ? BML::ml('.login', { 'url' => "/login.bml?ret=1" })
+     $body = $user eq "" ? BML::ml('.login', { 'aopts' => 'href="/login.bml?ret=1"' })
                          : $ML{'error.username_notfound'};
      return;
  }

@@ -57,3 +57,5 @@
 # include the local crumbs info
 require "$ENV{'LJHOME'}/cgi-bin/crumbs-local.pl"
     if -e "$ENV{'LJHOME'}/cgi-bin/crumbs-local.pl";
+
+1;
