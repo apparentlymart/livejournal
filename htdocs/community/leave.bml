@@ -39,7 +39,7 @@
      
      $body .= "<?h1 $ML{'.success'} h1?><?p ".BML::ml('.label.removed',{'commuser'=>$ci->{'user'},'commname'=>$ci->{'name'}})." p?>";
 
-     $dbh->do("DELETE FROM logaccess WHERE ownerid=$ci->{'userid'} AND posterid=$remote->{'userid'}");
+     LJ::clear_rel($dbs, $ci, $remote, 'P');
      
  }   
  else 

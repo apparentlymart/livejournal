@@ -421,7 +421,7 @@ body<=
      ####### let them un-ban users if they've banned users
      my @banned = ();
      my $quserid = $u->{'userid'}+0;
-     $sth = $dbr->prepare("SELECT b.banneduserid, u.user FROM ban b, user u WHERE b.banneduserid=u.userid AND b.userid=$quserid");
+     $sth = $dbr->prepare("SELECT r.targetid, u.user FROM reluser r, user u WHERE r.targetid=u.userid AND r.userid=$quserid AND r.type='B'");
      $sth->execute;
      push @banned, $_ while ($_ = $sth->fetchrow_hashref);
      
@@ -429,7 +429,7 @@ body<=
          $ret .= "<?h1 $ML{'.unbanusers.header'} h1?><?p $ML{'.unbanusers.about'} p?>";
          $ret .= "<UL>";
          foreach (@banned) {
-             $ret .= "<INPUT TYPE=CHECKBOX NAME=\"unban\" VALUE=\"$_->{'banneduserid'}\"> $_->{'user'}<BR>\n";
+             $ret .= "<INPUT TYPE=CHECKBOX NAME=\"unban\" VALUE=\"$_->{'targetid'}\"> $_->{'user'}<BR>\n";
          }
          $ret .= "</UL>";
 
@@ -686,7 +686,7 @@ body<=
      {
          my $bannedin = join(",", map { $dbh->quote($_); } split(/,/, $FORM{'unban'}));
          my $quserid = $u->{'userid'}+0;
-         $dbh->do("DELETE FROM ban WHERE userid=$quserid AND banneduserid IN ($bannedin)");
+         $dbh->do("DELETE FROM reluser WHERE userid=$quserid AND type='B' AND targetid IN ($bannedin)");
      }
 
      ##### /unban

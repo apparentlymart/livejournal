@@ -484,7 +484,7 @@ $cmd{'shared'} = {
 
 $cmd{'change_community_admin'} = {
     'def' => 'conshared.pl',
-    'privs' => [qw(sharedjournal communityxfer)],
+    'privs' => [qw(communityxfer)],
     'des' => 'Change the ownership of a community.',
     'argsummary' => '<community> <new_owner>',
     'args' => [
@@ -818,7 +818,8 @@ sub change_journal_type
     
     if ($type eq "person") {
         $dbh->do("UPDATE user SET journaltype='P' WHERE userid=$quserid");
-        $dbh->do("DELETE FROM logaccess WHERE ownerid=$quserid");
+        my $dbs = LJ::make_dbs_from_arg($dbh);
+        LJ::clear_rel($dbs, $quserid, '*', 'P');
 
         # if we're changing a non-person account to a person account,
         # we need to ditch all its friend-ofs so that old users befriending
@@ -1015,7 +1016,8 @@ sub set
 {
     my ($dbh, $remote, $args, $out) = @_;
     my $err = sub { push @$out, [ "error", $_[0] ]; return 0; };
-
+    my $dbs = LJ::make_dbs_from_arg($dbh);
+    
     return $err->("You need to be logged in to use this command.")
         unless $remote;
 
@@ -1031,7 +1033,7 @@ sub set
         $u = LJ::load_user($dbh, $comm);
         return $err->("Community doesn't exist.") unless $u;
         return $err->("You're not an admin of this community.")
-            unless LJ::check_priv($dbh, $remote, "sharedjournal", $u->{'user'});
+            unless LJ::check_rel($dbs, $u, $remote, 'A');
     }
     return $err->("Wrong number of arguments") unless @args == 2;
     my ($k, $v) = @args;

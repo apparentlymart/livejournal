@@ -32,10 +32,11 @@ sub ban_set_unset
         }
 
         $j = LJ::load_user($dbh, $args->[3]);
+        my $dbs = LJ::make_dbs_from_arg($dbh);
         if (! $j) {
             $error = 1;
             push @$out, [ "error", "Unknown community." ],
-        } elsif (! LJ::check_priv($dbh, $remote, "sharedjournal", $j->{'user'})) {
+        } elsif (! LJ::check_rel($dbs, $j, $remote, 'A')) {
             $error = 1;
             push @$out, [ "error", "Not maintainer of this community." ],
         }
@@ -65,19 +66,15 @@ sub ban_set_unset
     my $qbanid = $banid+0;
     my $quserid = $j->{'userid'}+0;
 
+    my $dbs = LJ::make_dbs_from_arg($dbh);
     if ($args->[0] eq "ban_set") {
-        my $sth = $dbh->prepare("REPLACE INTO ban (userid, banneduserid) ".
-                                "VALUES ($quserid, $qbanid)");
-        $sth->execute;
+        LJ::set_rel($dbs, $quserid, $qbanid, 'B');
         push @$out, [ "info", "User $user ($banid) banned from $j->{'user'}." ];
         return 1;
     }
 
     if ($args->[0] eq "ban_unset") {
-        my $sth = $dbh->prepare("DELETE FROM ban WHERE ".
-                                "userid=$quserid AND banneduserid=$qbanid");
-        $sth->execute;
-        
+        LJ::clear_rel($dbs, $quserid, $qbanid, 'B');
         push @$out, [ "info", "User $user ($banid) un-banned from $j->{'user'}." ];
         return 1;
     }

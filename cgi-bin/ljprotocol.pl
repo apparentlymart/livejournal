@@ -598,7 +598,7 @@ sub postevent
             unless (LJ::get_cap($u, "makepoll")
                     || ($uowner->{'journaltype'} eq "C"
                         && LJ::get_cap($uowner, "makepoll")
-                        && LJ::check_priv($dbs, $u, "sharedjournal", $uowner->{'user'})));
+                        && LJ::check_rel($dbs, $uowner, $u, 'A')));
 
         my $error = "";
         @polls = LJ::Poll::parse($dbs, \$event, \$error, {
@@ -971,8 +971,7 @@ sub editevent
                 ($ownerid == $u->{'userid'} ||
                  # community account can delete it (ick)
 
-                 LJ::check_priv($dbr, $u,
-                                "sharedjournal", $req->{'usejournal'})
+                 LJ::check_rel($dbs, $ownerid, $posterid, 'A')
                  # if user is a community maintainer they can delete
                  # it too (good)
                  ));
@@ -2017,10 +2016,10 @@ sub list_usejournals
     my $res = [];
 
     my $dbr = $dbs->{'reader'};
-    my $sth = $dbr->prepare("SELECT u.user FROM user u, logaccess la ".
-                            "WHERE la.ownerid=u.userid AND ".
+    my $sth = $dbr->prepare("SELECT u.user FROM user u, reluser ru ".
+                            "WHERE ru.userid=u.userid AND ru.type='P' AND ".
                             "u.statusvis='V' AND ".
-                            "la.posterid=$u->{'userid'} ORDER BY u.user");
+                            "ru.targetid=$u->{'userid'} ORDER BY u.user");
     $sth->execute;
     while (my $u = $sth->fetchrow_array) {
         push @$res, $u;
@@ -2133,7 +2132,7 @@ sub check_altusage
         return fail($err,206);
     }
 
-    # otherwise, check logaccess table:
+    # otherwise, check for access:
     my $info = {};
     my $canuse = LJ::can_use_journal($dbs, $u->{'userid'}, $req->{'usejournal'}, $info);
     $flags->{'ownerid'} = $info->{'ownerid'};

@@ -416,6 +416,10 @@ sub create_table
             print "# post-create SQL (necessary if upgrading only)\n";
             try_sql($args[0]); 
         }
+        elsif ($ac eq "code") {
+            print "# post-create code\n";
+            $args[0]->($dbh, $opt_sql);
+        }
         else { print "# don't know how to do \$ac = $ac"; }
     }
 }

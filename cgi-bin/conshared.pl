@@ -15,6 +15,7 @@ sub change_community_admin
     my ($dbh, $remote, $args, $out) = @_;
     my $sth;
     my $err = sub { push @$out, [ "error", $_[0] ]; return 0; };
+    my $dbs = LJ::make_dbs_from_arg($dbh);
 
     return $err->("This command takes exactly 2 arguments.  Consult the reference.")
         unless scalar(@$args) == 3;
@@ -30,7 +31,7 @@ sub change_community_admin
         unless ($unew && $unew->{'journaltype'} eq "P");
 
     return $err->("You do not have access to transfer ownership of this community.")
-        unless ($remote->{'privarg'}->{'sharedjournal'}->{$ucomm->{'user'}} ||
+        unless (LJ::check_rel($dbs, $ucomm, $remote, 'A') ||
                 $remote->{'priv'}->{'communityxfer'} );
 
     return $err->("New owner's email address isn't validated.")
@@ -39,17 +40,13 @@ sub change_community_admin
     my $commid = $ucomm->{'userid'};
     my $newid = $unew->{'userid'};
 
-    my $prlid = $dbh->selectrow_array("SELECT prlid FROM priv_list WHERE privcode='sharedjournal'");
-    return $err->("No sharedjournal priv.  (broken LJ installation?)")
-        unless $prlid;
-
     my $oldid = $dbh->selectrow_array("SELECT ownerid FROM community WHERE userid=$commid");
     my $uold = LJ::load_userid($dbh, $oldid);
 
     # remove old maintainer's power over it
-    $dbh->do("DELETE FROM priv_map WHERE prlid=$prlid AND arg='$ucomm->{'user'}'");
+    LJ::clear_rel($dbs, $ucomm, '*', 'A');
     $dbh->do("UPDATE community SET ownerid=$newid WHERE userid=$commid");
-    $dbh->do("INSERT INTO priv_map (userid, prlid, arg) VALUES ($newid, $prlid, '$ucomm->{'user'}')");
+    LJ::set_rel($dbs, $ucomm, $newid, 'A');
 
     # so old maintainer can't regain access:
     $dbh->do("DELETE FROM infohistory WHERE userid=$commid");
@@ -74,6 +71,7 @@ sub shared
 {
     my ($dbh, $remote, $args, $out) = @_;
     my $error = 0;
+    my $dbs = LJ::make_dbs_from_arg($dbh);
 
     unless (scalar(@$args) == 4) {
         $error = 1;
@@ -103,7 +101,7 @@ sub shared
         push @$out, [ "error", "Target user can't be shared journal user." ];
     }
     
-    unless ($remote->{'privarg'}->{'sharedjournal'}->{$shared_user} ||
+    unless (LJ::check_rel($dbs, $shared_id, $remote, 'A') ||
             $remote->{'privarg'}->{'sharedjournal'}->{'all'}) 
     {
         $error = 1;
@@ -112,12 +110,13 @@ sub shared
     
     return 0 if ($error);    
     
+    my $dbs = LJ::make_dbs_from_arg($dbh);
     if ($action eq "add") {
-        $dbh->do("REPLACE INTO logaccess (ownerid, posterid) VALUES ($shared_id, $target_id)");
+        LJ::set_rel($dbs, $shared_id, $target_id, 'P');
         push @$out, [ "info", "User \"$target_user\" can now post in \"$shared_user\"." ];
     } 
     if ($action eq "remove") {
-        $dbh->do("DELETE FROM logaccess WHERE ownerid=$shared_id AND posterid=$target_id");
+        LJ::clear_rel($dbs, $shared_id, $target_id, 'P');
         push @$out, [ "info", "User \"$target_user\" can no longer post in \"$shared_user\"." ];
     }
 
@@ -129,6 +128,7 @@ sub community
     my ($dbh, $remote, $args, $out) = @_;
     my $error = 0;
     my $sth;
+    my $dbs = LJ::make_dbs_from_arg($dbh);
 
     unless (scalar(@$args) == 4) {
         $error = 1;
@@ -172,9 +172,9 @@ sub community
         push @$out, [ "error", "Target user can't be shared journal user." ];
     }
     
-    # user doesn't need sharedjournal priv to remove themselves from community
+    # user doesn't need admin priv to remove themselves from community
 
-    unless ($remote->{'privarg'}->{'sharedjournal'}->{$com_user} ||
+    unless (LJ::check_rel($dbs, $com_id, $remote, 'A') ||
             $remote->{'privarg'}->{'sharedjournal'}->{'all'} ||
             ($remote->{'user'} eq $target_user && $action eq "remove")) 
     {
@@ -185,13 +185,14 @@ sub community
     
     return 0 if ($error);    
     
+    my $dbs = LJ::make_dbs_from_arg($dbh);
     if ($action eq "add") 
     {
         LJ::add_friend($dbh, $com_id, $target_id);
         push @$out, [ "info", "User \"$target_user\" is now a member of \"$com_user\"." ];
         
         if ($ci->{'postlevel'} eq "members") {
-            $dbh->do("REPLACE INTO logaccess (ownerid, posterid) VALUES ($com_id, $target_id)");
+            LJ::set_rel($dbs, $com_id, $target_id, 'P');
             push @$out, [ "info", "User \"$target_user\" can now post in \"$com_user\"." ];
         } 
     }
@@ -200,7 +201,7 @@ sub community
         $dbh->do("DELETE FROM friends WHERE userid=$com_id AND friendid=$target_id");
         push @$out, [ "info", "User \"$target_user\" is no longer a member of \"$com_user\"." ];
 
-        $dbh->do("DELETE FROM logaccess WHERE ownerid=$com_id AND posterid=$target_id");
+        LJ::clear_rel($dbs, $com_id, $target_id, 'P');
         push @$out, [ "info", "User \"$target_user\" can no longer post in \"$com_user\"." ];
     }
 

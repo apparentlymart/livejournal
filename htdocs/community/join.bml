@@ -75,7 +75,7 @@
      
      ### if community permits it, give remote user access to post in this community
      if ($ci->{'postlevel'} eq "members") {
-         $dbh->do("INSERT INTO logaccess (ownerid, posterid) VALUES ($ci->{'userid'}, $remote->{'userid'})");
+         LJ::set_rel($dbs, $ci, $remote, 'P');
          $body .= "<?p $ML{'.label.allowposting'} p?>";
      } else {
          $body .= "<?p ".BML::ml('.label.authpost',{'maintainer'=>$cowner})." p?>";

@@ -494,7 +494,7 @@ sub create_view_lastn
             my $dispreadlink = $replycount || 
                 ($logprops{$itemid}->{'hasscreened'} &&
                  ($remote->{'user'} eq $user
-                  || LJ::check_priv($dbs, $remote, "sharedjournal", $user)));
+                  || LJ::check_rel($dbs, $u, $remote, 'A')));
 
             $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
                 'itemid' => $ditemid,
@@ -1003,7 +1003,7 @@ sub create_view_friends
             my $dispreadlink = $replycount || 
                 ($logprops{$datakey}->{'hasscreened'} &&
                  ($remote->{'user'} eq $friend
-                  || LJ::check_priv($dbs, $remote, "sharedjournal", $friend)));
+                  || LJ::check_rel($dbs, $friendid, $remote, 'A')));
 
             my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
             $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
@@ -1553,7 +1553,7 @@ sub create_view_day
             my $dispreadlink = $replycount || 
                 ($logprops{$itemid}->{'hasscreened'} &&
                  ($remote->{'user'} eq $user
-                  || LJ::check_priv($dbs, $remote, "sharedjournal", $user)));
+                  || LJ::check_rel($dbs, $u, $remote, 'A')));
             $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
                 'itemid' => $ditemid,
                 'itemargs' => $itemargs,

@@ -92,7 +92,7 @@ sub link_bar
     
     if (defined $remote && ($remote->{'user'} eq $u->{'user'} ||
                             $remote->{'user'} eq $up->{'user'} || 
-                            LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
+                            LJ::check_rel($dbs, $u, $remote, 'A')))
     {
         push @linkele, $mlink->("/editjournal_do.bml?${jargent}itemid=$itemid", "editentry");
     }
@@ -289,7 +289,7 @@ sub can_delete {
     return 1 if $remote->{'user'} eq $userpost ||
                 $remote->{'user'} eq $u->{'user'} ||
                 $remote->{'user'} eq $up->{'user'} ||
-                LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'});
+                LJ::check_rel($dbs, $u, $remote, 'A');
     return 0;
 }
 
@@ -298,7 +298,7 @@ sub can_screen {
     return 0 unless $remote;
     return 1 if $remote->{'user'} eq $u->{'user'} ||
                 $remote->{'user'} eq $up->{'user'} ||
-                LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'});
+                LJ::check_rel($dbs, $u, $remote, 'A');
     return 0;
 }
 

@@ -766,12 +766,12 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
 ### shared journal access
 ###
 {
-    my $posthere = $dbr->selectcol_arrayref("SELECT u.user FROM logaccess l, user u ".
-                                            "WHERE u.userid=l.posterid AND l.ownerid=$u->{'userid'} ".
-                                            "AND u.statusvis='V'");
-    my $canpost = $dbr->selectcol_arrayref("SELECT u.user FROM logaccess l, user u ".
-                                           "WHERE u.userid=l.ownerid AND l.posterid=$u->{'userid'} ".
-                                           "AND u.statusvis='V'");
+    my $posthere = $dbr->selectcol_arrayref("SELECT u.user FROM reluser r, user u ".
+                                            "WHERE u.userid=r.targetid AND r.userid=$u->{'userid'} ".
+                                            "AND r.type='P' AND u.statusvis='V'");
+    my $canpost = $dbr->selectcol_arrayref("SELECT u.user FROM reluser r, user u ".
+                                           "WHERE u.userid=r.userid AND r.targetid=$u->{'userid'} ".
+                                           "AND r.type='P' AND u.statusvis='V'");
 
     if (@$posthere || @$canpost) {
         $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.shared'}</b></td><td colspan='2'>";

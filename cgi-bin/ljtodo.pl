@@ -20,10 +20,9 @@ sub get_permissions
     } else {
         my $quser = $dbh->quote($u->{'user'});
         
-        ## check if you're a sharedjournal manager
-        $sth = $dbh->prepare("SELECT COUNT(*) FROM priv_map pm, priv_list pl WHERE pm.prlid=pl.prlid AND pl.privcode='sharedjournal' AND pm.userid=$remote->{'userid'} AND pm.arg=$quser");
-        $sth->execute;
-        my ($is_manager) = $sth->fetchrow_array;
+        ## check if you're an admin of that journal 
+        my $dbs = LJ::make_dbs_from_arg($dbh);
+        my $is_manager = LJ::check_rel($dbs, $u, $remote, 'A');
         if ($is_manager) {
             $perm->{'add'} = 1;
             $perm->{'delete'} = 1;

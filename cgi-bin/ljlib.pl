@@ -1196,8 +1196,14 @@ sub get_shared_journals
 {
     my $dbs = shift;
     my $u = shift;
-    LJ::load_user_privs($dbs, $u, "sharedjournal");
-    return sort keys %{$u->{'_priv'}->{'sharedjournal'}};
+    my $ids = LJ::load_rel_target($dbs, $u, 'A') || [];
+
+    # have to get usernames;
+    my $dbr = $dbs->{'reader'};
+    my $in = join(",", map { $dbr->quote($_); } @$ids);
+    my $names = $dbr->selectcol_arrayref("SELECT user FROM user WHERE userid IN ($in)") || [];
+    return sort @$names;
+    
 }
 
 # <LJFUNC>
@@ -1272,9 +1278,10 @@ sub get_effective_user
     return $remote->{'user'}
     unless ($f->{'authas'} && $f->{'authas'} ne "(remote)");
 
-    # if they have the privs, let them be that community
+    # check that they have admin access to this community
+    my $authid = LJ::get_userid($dbs, $f->{'authas'});
     return $f->{'authas'}
-    if (LJ::check_priv($dbs, $remote, "sharedjournal", $f->{'authas'}));
+    if ($authid && LJ::check_rel($dbs, $authid, $remote, 'A'));
 
     # else, complain.
     $$referr = "Invalid privileges to act as requested community.";
@@ -2322,8 +2329,6 @@ sub is_banned
     my $jid = (ref $j ? $j->{'userid'} : $j)+0;
 
     my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
 
     return 1 unless $uid;
     return 1 unless $jid;
@@ -2332,11 +2337,7 @@ sub is_banned
     # in own journal.  avoid db hit.
     return 0 if ($uid == $jid);
 
-    my $sth = $dbr->prepare("SELECT COUNT(*) FROM ban WHERE ".
-                            "userid=$jid AND banneduserid=$uid");
-    $sth->execute;
-    my $is_banned = $sth->fetchrow_array;
-    return $is_banned;
+    return LJ::check_rel($dbs, $jid, $uid, 'B');
 }
 
 # <LJFUNC>
@@ -4169,11 +4170,19 @@ sub get_userid
     return ($userid+0);
 }
 
+# <LJFUNC>
+# name: LJ::want_userid
+# des: Returns userid when passed either userid or the user hash. Useful to functions that
+#      want to accept either. Forces its return value to be a number (for safety).
+# args: userid
+# des-userid: Either a userid, or a user hash with the userid in its 'userid' key.
+# returns: The userid, guaranteed to be a numeric value.
+# </LJFUNC>
 sub want_userid
 {
     my $uuserid = shift;
-    return $uuserid->{'userid'} if ref $uuserid;
-    return $uuserid;
+    return ($uuserid->{'userid'} + 0) if ref $uuserid;
+    return ($uuserid + 0);
 }
 
 
@@ -4485,8 +4494,7 @@ sub can_use_journal
     $res->{'u_owner'} = $uowner;
 
     ## check if user has access
-    my $sql = "SELECT COUNT(*) FROM logaccess WHERE ownerid=$ownerid AND posterid=$qposterid";
-    return 1 if dbs_selectrow_array($dbs, $sql);
+    return 1 if LJ::check_rel($dbs, $ownerid, $qposterid, 'P');
 
     # let's check if this is community allowing post access to non-members 
     LJ::load_user_props($dbs, $uowner, "nonmember_posting");
@@ -5659,6 +5667,126 @@ sub kill_session
     delete $BML::COOKIE{'ljsession'};
     return 1;
 }
+
+# <LJFUNC>
+# name: LJ::load_rel_user
+# des: Load user relationship information. Loads all relationships of type 'type' in
+#      which user 'userid' participates on the left side (is the source of the
+#      relationship).
+# args: dbs, userid, type
+# arg-userid: userid or a user hash to load relationship information for.
+# arg-type: type of the relationship
+# returns: reference to an array of userids
+# </LJFUNC>
+sub load_rel_user
+{
+    my ($dbs, $userid, $type) = @_;
+    my $sql;
+    return undef unless $type and $userid;
+    $userid = LJ::want_userid($userid);
+    my $dbr = $dbs->{'reader'};
+    my $qtype = $dbr->quote($type);
+
+    my $res = $dbr->selectcol_arrayref("SELECT targetid FROM reluser WHERE userid=$userid AND type=$qtype");
+    return $res;
+}
+
+# <LJFUNC>
+# name: LJ::load_rel_target
+# des: Load user relationship information. Loads all relationships of type 'type' in
+#      which user 'targetid' participates on the right side (is the target of the
+#      relationship).
+# args: dbs, targetid, type
+# arg-targetid: userid or a user hash to load relationship information for.
+# arg-type: type of the relationship
+# returns: reference to an array of userids
+# </LJFUNC>
+sub load_rel_target
+{
+    my ($dbs, $targetid, $type) = @_;
+    return undef unless $type and $targetid;
+    $targetid = LJ::want_userid($targetid);
+    my $dbr = $dbs->{'reader'};
+    my $qtype = $dbr->quote($type);
+
+    my $res = $dbr->selectcol_arrayref("SELECT userid FROM reluser WHERE targetid=$targetid AND type=$qtype");
+    return $res;
+}
+
+# <LJFUNC>
+# name: LJ::check_rel
+# des: Checks whether two users are in a specified relationship to each other.
+# args: dbs, userid, targetid, type
+# arg-userid: source userid, nonzero; may also be a user hash.
+# arg-targetid: target userid, nonzero; may also be a user hash.
+# arg-type: type of the relationship
+# returns: 1 if the relationship exists, 0 otherwise
+# </LJFUNC>
+sub check_rel
+{
+    my ($dbs, $userid, $targetid, $type) = @_;
+    return undef unless $type and $userid and $targetid;
+    $userid = LJ::want_userid($userid); 
+    $targetid = LJ::want_userid($targetid);
+    my $dbh = $dbs->{'dbh'};
+    my $qtype = $dbh->quote($type);
+
+    my $sql = "SELECT COUNT(*) FROM reluser WHERE userid=$userid AND type=$qtype AND targetid=$targetid";
+    my $res = LJ::dbs_selectrow_array($dbs, $sql);
+    return $res ? 1 : 0;
+}
+
+# <LJFUNC>
+# name: LJ::set_rel
+# des: Sets relationship information for two users.
+# args: dbs, userid, targetid, type
+# arg-userid: source userid, or a user hash
+# arg-targetid: target userid, or a user hash
+# arg-type: type of the relationship
+# </LJFUNC>
+sub set_rel 
+{
+    my ($dbs, $userid, $targetid, $type) = @_;
+    return undef unless $type and $userid and $targetid;
+    $userid = LJ::want_userid($userid);
+    $targetid = LJ::want_userid($targetid);
+
+    my $dbh = $dbs->{'dbh'};
+    my $qtype = $dbh->quote($type);
+    my $sql = "REPLACE INTO reluser (userid,targetid,type) VALUES ($userid,$targetid,$qtype)";
+    $dbh->do($sql);
+    return;
+}
+
+# <LJFUNC>
+# name: LJ::clear_rel
+# des: Deletes a relationship between two users or all relationships of a particular type
+#      for one user, on either side of the relationship. One of userid,targetid -- bit not
+#      both -- may be '*'. In that case, if, say, userid is '*', then all relationship 
+#      edges with target equal to targetid and of the specified type are deleted. 
+#      If both userid and targetid are numbers, just one edge is deleted.
+# args: dbs, userid, targetid, type
+# arg-userid: source userid, or a user hash, or '*'
+# arg-targetid: target userid, or a user hash, or '*'
+# arg-type: type of the relationship
+# </LJFUNC>
+sub clear_rel 
+{
+    my ($dbs, $userid, $targetid, $type) = @_;
+    return undef unless $type and $userid or $targetid;
+    return undef if $userid eq '*' and $targetid eq '*';
+
+    $userid = LJ::want_userid($userid) unless $userid eq '*';
+    $targetid = LJ::want_userid($targetid) unless $targetid eq '*';
+
+    my $dbh = $dbs->{'dbh'};
+    my $qtype = $dbh->quote($type);
+    my $sql = "DELETE FROM reluser WHERE " . ($userid ne '*' ? "userid=$userid AND " : "") .
+              ($targetid ne '*' ? "targetid=$targetid AND " : "") . "type=$qtype";
+    $dbh->do($sql);
+    return;
+}
+
 
 sub last_error_code
 {

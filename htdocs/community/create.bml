@@ -57,8 +57,7 @@
 
      $dbh->do("UPDATE user SET journaltype='C' WHERE userid=$cu->{'userid'}");
      $dbh->do("REPLACE INTO community (userid, ownerid, membership, postlevel) VALUES ($cu->{'userid'}, $mu->{'userid'}, $qmembership, $qpostlevel)");
-     my $qcuser = $dbh->quote($cu->{'user'});
-     $dbh->do("REPLACE INTO priv_map (prmid, userid, prlid, arg) SELECT NULL, $mu->{'userid'}, prlid, $qcuser FROM priv_list WHERE privcode='sharedjournal'");
+     LJ::set_rel($dbs, $cu->{'userid'}, $mu->{'userid'}, 'A');
 
      $body .= "<?h1 $ML{'.success'} h1?><?p $ML{'.label.commcreated'} p?>";
      $body .= "<?p $ML{'.label.rellinks'} <UL><LI><A HREF=\"$LJ::SITEROOT/community/$cu->{'user'}/\">$ML{'.commsite'}<LI><A HREF=\"/userinfo.bml?user=$cu->{'user'}\">$ML{'.label.comminfo'}</A><LI>$ML{'.label.admconsole'} p?>";

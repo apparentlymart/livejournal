@@ -282,7 +282,7 @@ sub FriendsPage
             'post_url' => "$LJ::SITEROOT/talkpost.bml?$itemargs",
             'count' => $replycount,
             'enabled' => ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0,
-            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_priv($dbs, $remote, "sharedjournal", $user))) ? 1 : 0,
+            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbs, $u, $remote, 'A'))) ? 1 : 0,
         });
 
         my $entry = Entry($u, {

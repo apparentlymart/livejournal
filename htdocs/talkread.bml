@@ -567,7 +567,7 @@ body<=
                 $$ret .= "<br />$datepost\n";
                 if ($post->{'poster_ip'} && $remote &&
                     ($remote->{'user'} eq $up->{'user'} ||
-                     LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
+                     LJ::check_rel($dbs, $u, $remote, 'A')))
                 {
                     $$ret .= BML::ml('.fromip', {'ip'=>$post->{'poster_ip'}});
                 }

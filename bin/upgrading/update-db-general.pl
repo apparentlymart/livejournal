@@ -1583,7 +1583,51 @@ CREATE TABLE ipban (
    bandate   DATETIME
 )
 EOC
-                   
+
+# relationship types:
+# 'A' means targetid can administrate userid as a community maintainer
+# 'B' means targetid is banned in userid
+# 'P' means targetid can post to userid
+# 'M' means targetid can moderate the community userid
+# new types to be added here
+
+register_tablecreate("reluser", <<'EOC');
+CREATE TABLE reluser (
+  userid     INT UNSIGNED NOT NULL,
+  targetid   INT UNSIGNED NOT NULL,
+  type       char(1) NOT NULL,
+  PRIMARY KEY (userid,type,targetid),
+  KEY (targetid,type)
+)
+EOC
+
+post_create("reluser",
+            "sqltry" => "INSERT IGNORE INTO reluser (userid, targetid, type) SELECT userid, banneduserid, 'B' FROM ban",
+            "sqltry" => "INSERT IGNORE INTO reluser (userid, targetid, type) SELECT u.userid, p.userid, 'A' FROM priv_map p, priv_list l, user u WHERE l.privcode='sharedjournal' AND l.prlid=p.prlid AND p.arg=u.user AND p.arg<>'all'",
+            "code" => sub {
+                my $dbh = shift;
+                print "# Converting logaccess rows to reluser...\n";
+                my $sth = $dbh->prepare("SELECT MAX(userid) FROM user");
+                $sth->execute;
+                my ($maxid) = $sth->fetchrow_array;
+                return unless $maxid;
+                
+                my $from = 1; my $to = $from + 10000 - 1;
+                while ($from <= $maxid) {
+                    printf "#  logaccess status: (%0.1f%%)\n", ($from * 100 / $maxid);
+                    do_sql("INSERT IGNORE INTO reluser (userid, targetid, type) ".
+                           "SELECT ownerid, posterid, 'P' ".
+                           "FROM logaccess ".
+                           "WHERE ownerid BETWEEN $from AND $to");
+                    $from += 10000;
+                    $to += 10000;
+                }
+                print "# Finished converting logaccess.\n";
+            },
+            );
+
+register_tabledrop("ban");
+register_tabledrop("logaccess");
 
 ### changes
 
