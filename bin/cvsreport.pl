@@ -8,11 +8,14 @@ my $help = '';
 my $sync = '';
 my $full = '';
 my $diff = '';
+my $cvsonly = '';
 
 exit 1 unless GetOptions('help' => \$help,
 			 'full' => \$full,
 			 'sync' => \$sync,
-			 'diff' => \$diff);
+			 'diff' => \$diff,
+			 'cvsonly' => \$cvsonly
+			 );
 
 if ($help) {
     die "Usage: cvsreport.pl [opts] [files]\n" .
@@ -20,7 +23,8 @@ if ($help) {
 	"    --sync          Put files where they need to go.\n" .
 	"                    All files, unless you specify which ones.\n".
 	"    --full          Show main files not in a CVS repository\n".
-	"    --diff          Show diffs of changed files.\n";
+	"    --diff          Show diffs of changed files.\n".
+	"    --cvsonly       Don't consider files changed in live tree.\n";
 }
 
 unless (-d $ENV{'LJHOME'}) { 
@@ -62,6 +66,10 @@ foreach my $file (@files)
     } elsif ($status eq "main -> cvs") {
 	($sdir, $ddir) = ($maind, $cvs);
     } 
+
+    if ($cvsonly && $sdir eq $maind) {
+	next;
+    }
     
     my $the_diff = "";
     if ($diff && $status ne "main -> ??" && $sdir && $ddir) {
