@@ -5,6 +5,57 @@ package LJ::Con;
 
 $cmd{'ban_set'}->{'handler'} = \&ban_set_unset;
 $cmd{'ban_unset'}->{'handler'} = \&ban_set_unset;
+$cmd{'ban_list'}->{'handler'} = \&ban_list;
+
+sub ban_list
+{
+    my ($dbh, $remote, $args, $out) = @_;
+    my $error = 0;
+
+    unless ($remote) {
+        push @$out, [ "error", "You must be logged in to use this command." ];
+        return 0;
+    }
+
+    # journal to list from
+    my $j = $remote;
+
+    unless ($remote->{'journaltype'} eq "P") {
+        push @$out, [ "error", "Only people can ban other users, not communities (you're not logged in as a person account)." ],
+        return 0;
+    }
+
+    if (scalar(@$args) == 3) {
+        unless ($args->[1] eq "from") {
+            $error = 1;
+            push @$out, [ "error", "First argument not 'from'." ];
+        }
+
+        $j = LJ::load_user($args->[2]);
+        if (!$j) {
+            $error = 1;
+            push @$out, [ "error", "Unknown account." ],
+        } elsif ($j->{journaltype} ne 'C') {
+            $error = 1;
+            push @$out, [ "error", "Account is not a community." ],
+        } elsif (!LJ::check_rel($j, $remote, 'A')) {
+            $error = 1;
+            push @$out, [ "error", "Not maintainer of this community." ],
+        }
+    }
+    
+    return 0 if $error;
+
+    my $banids = LJ::load_rel_user($j->{userid}, 'B') || [];
+    my $us = LJ::load_userids(@$banids);
+    my @userlist = map { $us->{$_}{user} } keys %$us;
+
+    foreach my $username (@userlist) {
+        push @$out, [ 'info', $username ];
+    }
+    push @$out, [ "info", "$j->{user} has not banned any other users." ] unless @userlist;
+    return 1;
+}
 
 sub ban_set_unset
 {

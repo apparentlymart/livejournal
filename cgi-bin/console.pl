@@ -399,6 +399,15 @@ $cmd{'ban_unset'} = {
                ],
     };
 
+$cmd{'ban_list'} = {
+    'def' => 'conban.pl',
+    'des' => 'List banned users.',
+    'argsummary' => '[ "from" <community> ]',
+    'args' => [
+               'community' => "Optional, to list bans in a community you run.",
+               ],
+    };
+
 $cmd{'friend'} = {
     'handler' => \&friend,
     'des' => 'List your friends, add a friend, or remove a friend.  Optionally, add friends to friend groups.',
