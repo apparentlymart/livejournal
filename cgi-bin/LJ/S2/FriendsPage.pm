@@ -14,6 +14,8 @@ sub FriendsPage
     $p->{'entries'} = [];
     $p->{'friends'} = {};
     $p->{'friends_title'} = LJ::ehtml($u->{'friendspagetitle'});
+    $p->{'filter_active'} = 0;
+    $p->{'filter_name'} = "";
 
     my $sth;
     my $user = $u->{'user'};
@@ -92,12 +94,18 @@ sub FriendsPage
     if (defined $get->{'filter'} && $remote && $remote->{'user'} eq $user) {
         $filter = $get->{'filter'}; 
         $common_filter = 0;
+        $p->{'filter_active'} = 1;
+        $p->{'filter_name'} = "";
     } else {
         if ($opts->{'pathextra'}) {
             $group = $opts->{'pathextra'};
             $group =~ s!^/!!;
             $group =~ s!/$!!;
             if ($group) { $group = LJ::durl($group); $common_filter = 0; }
+        }
+        if ($group) {
+            $p->{'filter_active'} = 1;
+            $p->{'filter_name'} = LJ::ehtml($group);
         }
         my $grp = LJ::get_friend_group($u, { 'name' => $group || "Default View" });
         my $bit = $grp->{'groupnum'};
@@ -108,6 +116,10 @@ sub FriendsPage
             $opts->{'badfriendgroup'} = 1;
             return 1;
         }
+    }
+    
+    if ($opts->{'view'} eq "friendsfriends") {
+        $p->{'friends_mode'} = "friendsfriends";
     }
 
     if ($get->{'mode'} eq "livecond") 

@@ -431,6 +431,15 @@ class FriendsPage extends RecentPage
 
     var readonly string friends_title
     "A user-selected title for their friends page.";
+
+    var string friends_mode
+    "The 'mode' of this view. An empty string indicates a normal friends view, while 'friendsfriends' indicates the Friends-of-friends view.";
+    
+    var bool filter_active
+    "If true, some kind of filter is in effect. If this filter has a name, it will be included in [member[FriendsPage.filter_name]]";
+    
+    var string filter_name
+    "The name of the filter in effect, if it has a name. This is only used when 'custom' [member[FriendsPage.filter_active]] is true.";
 }
 
 class DayPage extends Page 
@@ -908,6 +917,24 @@ property string text_view_friends_comm {
     "size" = 15;
     example = "Members' Journals";
 }
+property string text_view_friendsfriends {
+    des = "Title of the 'Friends of Friends' view";
+    maxlength = 20;
+    "size" = 15;
+    example = "Friends of Friends";
+}
+property string text_view_friends_filter {
+    des = "Title of a Friends page with an unnamed filter in effect";
+    maxlength = 20;
+    "size" = 15;
+    example = "Friends (Custom filter)";
+}
+property string text_view_friendsfriends_filter {
+    des = "Title of a Friends of Friends page with an unnamed filter in effect";
+    maxlength = 20;
+    "size" = 15;
+    example = "Friends of Friends (Custom filter)";
+}
 property string text_view_archive {
     des = "Text used to link to the archive view.";
     maxlength = 20;
@@ -928,6 +955,10 @@ property string text_view_month {
 }
 set text_view_recent = "Recent Entries";
 set text_view_friends = "Friends";
+set text_view_friends_comm = "Members";
+set text_view_friends_filter = "Friends (Custom filter)";
+set text_view_friendsfriends = "Friends of Friends";
+set text_view_friendsfriends_filter = "Friends of Friends (Custom filter)";
 set text_view_archive = "Archive";
 set text_view_userinfo = "User Info";
 set text_view_month = "View Subjects";
@@ -1318,13 +1349,39 @@ function Page::view_title() [notags] : string {
     return lang_viewname($.view);
 }
 function FriendsPage::view_title() : string {
-    var string title = $.friends_title;
-    if ($title != "") {
-        return $title;
-    } elseif ($.journal.journal_type == "C") {
-        return $*text_view_friends_comm;
-    } else {
-        return $*text_view_friends;
+    if ($.friends_mode == "") {
+        if ($.filter_active) {
+            if ($.filter_name != "") {
+                return $*text_view_friends+" ("+$.filter_name+")";
+            }
+            else {
+                return $*text_view_friends_filter;
+            }
+        } else {
+            if ($.friends_title != "") {
+                return $.friends_title;
+            } elseif ($.journal.journal_type == "C") {
+                return $*text_view_friends_comm;
+            } else {
+                return $*text_view_friends;
+            }
+        }
+    }
+    elseif ($.friends_mode == "friendsfriends") {
+        if ($.filter_active) {
+            if ($.filter_name != "") {
+                return $*text_view_friendsfriends+" ("+$.filter_name+")";
+            }
+            else {
+                return $*text_view_friendsfriends_filter;
+            }
+        }
+        else {
+            return $*text_view_friendsfriends;
+        }
+    }
+    else {
+        return "Unknown Friends View";
     }
 }
 function DayPage::view_title : string {
