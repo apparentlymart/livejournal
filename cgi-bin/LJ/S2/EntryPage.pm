@@ -261,8 +261,8 @@ sub EntryPage_entry
         'count' => $replycount,
         'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! 
                       $entry->{'props'}->{'opt_nocomments'}) ? 1 : 0,
-        'screened' => ($entry->{'props'}->{'hasscreened'} && 
-                       ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($u, $remote, 'A'))) ? 1 : 0,
+        'screened' => ($entry->{'props'}->{'hasscreened'} && $remote &&
+                       ($remote->{'user'} eq $u->{'user'} || LJ::check_rel($u, $remote, 'A'))) ? 1 : 0,
     });
 
     # format it

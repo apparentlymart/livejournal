@@ -148,9 +148,10 @@ sub DayPage
             'post_url' => $posturl,
             'count' => $replycount,
             'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0,
-            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($u, $remote, 'A'))) ? 1 : 0,
+            'screened' => ($logprops{$itemid}->{'hasscreened'} && $remote &&
+                           ($remote->{'user'} eq $u->{'user'} || LJ::check_rel($u, $remote, 'A'))) ? 1 : 0,
         });
-        
+
         my $userlite_poster = $userlite_journal;
         my $pu = $u;
         if ($u->{'userid'} != $posterid) {

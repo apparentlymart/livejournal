@@ -136,9 +136,10 @@ sub MonthPage
             'post_url' => $posturl,
             'count' => $replycount,
             'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0,
-            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($u, $remote, 'A'))) ? 1 : 0,
+            'screened' => ($logprops{$itemid}->{'hasscreened'} && $remote &&
+                           ($remote->{'user'} eq $u->{'user'} || LJ::check_rel($u, $remote, 'A'))) ? 1 : 0,
         });
-        
+
         my $userlite_poster = $userlite_journal;
         my $userpic = $p->{'journal'}->{'default_pic'};
         if ($u->{'userid'} != $posterid) {
@@ -162,7 +163,7 @@ sub MonthPage
 
         push @{$day_entries{$day}}, $entry;
     }
-   
+
     my $days_month = LJ::days_in_month($month, $year);
     for my $day (1..$days_month) {
         my $entries = $day_entries{$day} || [];
