@@ -127,28 +127,27 @@ BODY<=
 	 $alt .= ": $pickw";
      }
      $alt = LJ::ehtml($alt);
-     $ret .= "<TD><IMG SRC=\"/userpic/$picid\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'} ALIGN=ABSMIDDLE HSPACE=3 title=\"$alt\" alt=\"\"></TD>";
+     $ret .= "<td><img src='/userpic/$picid' width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'}' align='absmiddle' hspace='3' title='$alt' alt=''></td>";
  }
- my $extra = "";
- if ($FORM{'replyto'} eq "" && $up != $u) {
-     $extra = " </B>(posting in (=LJUSER $u->{'user'} LJUSER=))<B>";
- }
- $ret .= "<TD>";
+
+ $ret .= "<td>";
  if ($ur && $ur->{'user'} ne "") {
-     $ret .= "<A HREF=\"/userinfo.bml?user=$ur->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>";
-     $ret .= "<B><A HREF=\"$LJ::SITEROOT/users/$ur->{'user'}/\">" . LJ::ehtml($ur->{'name'}) . "</A> ";
+     $ret .= BML::eall($ur->{'name'}) . " ((=LJUSER $ur->{'user'} LJUSER=)) wrote,";
  } else {
-     $ret .= "<B>Someone";
+     $ret .= "Someone wrote,";
  }
- $ret .= "$extra said...</B>";
+ if ($FORM{'replyto'} eq "" && $up != $u) {
+     $ret .= " in (=LJCOMM $u->{'user'} LJCOMM=),";
+ }
+
  if ($FORM{'replyto'} eq "") {
      my $etime = $item->{'eventtime'};
      $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!LJ::date_to_view_links($u, $&)!e;
-     $ret .= "<BR><FONT SIZE=-1>@ $etime</FONT>";
+     $ret .= "<br /><font size='-1'>@ $etime</font>";
  }
  
- $ret .= "</TD></TR></TABLE>";
- 
+ $ret .= "</td></tr></table>";
+
  ## standout bar
  if ($FORM{'replyto'} eq "") 
  {
