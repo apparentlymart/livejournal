@@ -38,7 +38,7 @@ if ($opt_code) {
     exit 0;
 }
 
-sub webdie { print "Content-type: text/html\n\n$_[0];\n"; exit; }
+sub webdie { print "Content-type: text/html\n\n$_[0]\n"; exit; }
 
 #############################################################################
 #####                    [ APACHE HOOK SECTION ]                        #####
@@ -165,7 +165,6 @@ sub handle_request
     %blockdata = ();
     %blockflags = ();
     $CONTENT_TYPE = $DEFAULT_CONTENT_TYPE || "text/html";
-    %BMLml::ml_used = ();
     $FORM_READ = 0;
     $REQ_LANG = "";
     %GETVARS = ();
@@ -320,18 +319,26 @@ sub handle_request
         &note_file_mod_time($FILE);
 
         ## begin the multi-lang stuff
-        if ($GETVARS{'setlang'})
-        {
-            &BMLClient::set_var("langpref", $GETVARS{'setlang'});
-            &BMLClient::set_var("langsettime", time());
-        }
-        $REQ_LANG = lc($GETVARS{'setlang'} || $GETVARS{'uselang'} || &BMLClient::get_var("langpref"));
-        
-        # make sure the document says it was changed at least as new as when
-        # the user last set their current language, else their browser might
-        # show a cached (wrong language) version.
-        &note_mod_time(&BMLClient::get_var("langsettime"));
 
+        # clean
+        foreach (qw(setlang uselang)) {
+            delete $GETVARS{$_} unless $GETVARS{$_} =~ /^\w{2,10}$/;
+        }
+
+        # have they explictly specified their language?
+        $REQ_LANG = $GETVARS{'setlang'} || $GETVARS{'uselang'};
+        if ($GETVARS{'setlang'}) {
+            BMLClient::set_cookie("bmllangpref", $GETVARS{'setlang'} . "/" . time(), 0);
+        }
+        if (! $REQ_LANG && $BMLClient::COOKIE{'bmllangpref'} =~ m!^(\w{2,10})/(\d+)$!) {
+            $REQ_LANG = $1;
+            # make sure the document says it was changed at least as new as when
+            # the user last set their current language, else their browser might
+            # show a cached (wrong language) version.
+            &note_mod_time($2);
+        }
+
+        # time to guess!
         unless ($REQ_LANG)
         {
             my %lang_weight = ();
@@ -342,23 +349,19 @@ sub handle_request
                 # do something smarter in future.  for now, ditch country code:
                 s/-\w+//;
                 
-                if (/(.+);q=(.+)/)
-                {
+                if (/(.+);q=(.+)/) {
                     $lang_weight{$1} = $2;
-                }
-                else
-                {
+                } else {
                     $lang_weight{$_} = 1.0;
                 }
                 if ($lang_weight{$_} > $winner_weight && 
-                    -e "$BMLEnv{'MultiLangRoot'}/$BMLEnv{'LanguageProject'}/lang.$_")
-                {
+                    -e "$BMLEnv{'MultiLangRoot'}/$_.db") {
                     $winner_weight = $lang_weight{$_};
                     $REQ_LANG = $_;
                 }
             }
         }
-        $REQ_LANG ||= lc($BMLEnv{'DefaultLanguage'}) || "en";
+        $REQ_LANG ||= $BMLEnv{'DefaultLanguage'} || "en";
 
         ### read the data to mangle
         my $bmlsource = "";
@@ -369,68 +372,16 @@ sub handle_request
         # print on the HTTP header
         my $html;
         &bml_decode(\$bmlsource, \$html, { DO_CODE => $BMLEnv{'AllowCode'} });
-        
+
         # insert all client (per-user, cookie-set) variables
-        $html =~ s/%%c\!(\w+)%%/&BMLUtil::ehtml(&BMLClient::get_var($1))/eg;
-
-        # insert all multilang phrases (_ML tags) from the $REQ_LANG
-        if (scalar(keys(%BMLml::ml_used)))
-        {
-            my $lang_file = "$BMLEnv{'MultiLangRoot'}/$BMLEnv{'LanguageProject'}/lang.$REQ_LANG";
-            if (-e $lang_file)
-            {
-                %langprop = ();
-                &note_file_mod_time($lang_file);
-                open (LANG, $lang_file);
-                while (($_ = <LANG>) ne "\n")
-                {
-                    chomp;
-                    my ($key, $value) = ($_ =~ /(.+?)\s*:\s*(.+)/);
-                    $langprop{$key} = $value if ($key ne "" && $value ne "");
-                }
-                
-                # read the translate data!
-                while (<LANG>)
-                {
-                    chomp;
-                    next unless (/^(?:\*|$BMLEnv{'LanguageSection'})\t(.+?)\t/);
-                    next unless defined $BMLml::ml_used{$1};
-
-                    my ($section, $code, $data) = split(/\t/, $_);
-                    next unless $BMLml::ml_used{$code};
-
-                    $html =~ s/%%ml\!$code(\?(.+?))?%%/$2 ? &BMLml::interpolate_phrase($data, $2) : $data/eg;
-                    undef $BMLml::ml_used{$1};
-                }
-                close (LANG);
-            }
-            else
-            {
-                $html = "<B>Error: </B> Language code <I>$REQ_LANG</I> not defined for this project.";
-            }
-
-            if (defined $langprop{'Content-type'}) {
-                &BML::set_content_type($langprop{'Content-type'});
-            }
-            
-            # replace anything untranslated with an error of sorts
-            $html =~ s!%%ml\!(.+?)%%!<B>[untranslated phrase: </B><I>$1</I><B>]</B>!g;
-            $html .= "\n<!-- $REQ_LANG -->\n";
-
-            my $rootlang = substr($REQ_LANG, 0, 2);
-            unless ($BMLEnv{'NoHeaders'}) {
-                print "Content-Language: $rootlang\n";
-            }
+        if ($BMLEnv{'UseBmlSession'}) {
+            $html =~ s/%%c\!(\w+)%%/&BMLUtil::ehtml(&BMLClient::get_var($1))/eg;
         }
 
-        # TODO: temporary
-        #my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time());
-        #$date = sprintf("%04d-%02d-%02d", $year+1900, $mon+1, $mday);
-        #open (TLOG, ">>log-$date.txt");
-        #print TLOG ($ENV{'REMOTE_HOST'} || $ENV{'REMOTE_ADDR'});
-        #print TLOG "\t$REQ_LANG\t$ENV{'REQUEST_URI'}\t$date ";
-        #print TLOG sprintf("%02d:%02d:%02d\n", $hour, $min, $sec);
-        #close TLOG;
+        my $rootlang = substr($REQ_LANG, 0, 2);
+        unless ($BMLEnv{'NoHeaders'}) {
+            print "Content-Language: $rootlang\n";
+        }
 
         my $modtime = &modified_time;
         my $notmod = 0;
@@ -576,16 +527,17 @@ sub bml_block
     # multi-linguality stuff
     if ($type eq "_ML")
     {
-        my $pc = $data;
-        if ($pc =~ /^(.+?)\?/)
-        {
-            $pc = $1;
+        my ($code, $args);
+        my $args_present = 0;
+        if ($data =~ /^(.+?)(\?(.*))?$/) {
+            ($code, $args) = ($1, $3);
+            $args_present = !!$2;
         }
-        # make a note of the phrase requested to translate, to load later
-        $BMLml::ml_used{$pc} = 1;
-        
-        # and put in a marker in page to replace later
-        return "%%ml!$data%%";
+        $code = "$ENV{'PATH_INFO'}$code"
+            if $code =~ /^\./;
+
+        return "[ml_getter not defined]" unless $ML_GETTER;
+        return $ML_GETTER->($REQ_LANG, $code);
     }
         
     # an _INFO block contains special internal information, like which
@@ -620,7 +572,6 @@ sub bml_block
                 $blockdata{$k} =~ s/\(=([A-Z0-9\_]+?)=\)/$blockdata{$1}/g;
             }
         }
-        $BMLEnv{'LanguageSection'} = $element{'MLSECTION'};
         return "";
     }
     
@@ -1165,6 +1116,12 @@ sub register_hook
     $main::HOOK{$name} = $code;
 }
 
+sub register_ml_getter
+{
+    my $getter = shift;
+    $main::ML_GETTER = $getter;
+}
+
 sub get_query_string
 {
     my $q = $ENV{'QUERY_STRING'} || $ENV{'REDIRECT_QUERY_STRING'};
@@ -1240,6 +1197,27 @@ sub ebml
     $a =~ s/\(=/\(&#0061;/g;
     $a =~ s/=\)/&#0061;\)/g;
     return $a;
+}
+
+sub get_language
+{
+    return $main::REQ_LANG;
+}
+
+sub set_language
+{
+    $main::REQ_LANG = $_[0];
+}
+
+# multi-lang string
+sub ml
+{
+    my ($code, $vars) = @_;
+    return "[ml_getter not defined]" unless $main::ML_GETTER;
+    my $data = $main::ML_GETTER->($main::REQ_LANG, $code);
+    return $data unless $vars;
+    $data =~ s/\[\[(.+?)\]\]/$vars->{$1}/g;
+    return $data;
 }
 
 package BMLUtil;
@@ -1335,50 +1313,6 @@ sub paging
     unless ($page==$self{'pages'}) { $self{'nextlink'} = "<A HREF=\"" . &page_newurl($page+1) . "\">&gt;&gt;&gt;</A>"; }
     
     return %self;
-}
-
-package BMLml;
-
-sub get_language
-{
-    return $main::REQ_LANG;
-}
-
-sub set_language
-{
-    $main::REQ_LANG = $_[0];
-}
-
-sub make_ml_block
-{
-    my ($pc, $arghashref) = @_;
-    my $ret = "(=_ML $pc?";
-    foreach (keys %{$arghashref})
-    {
-        $ret .= "$_=" . &BMLUtil::eurl($arghashref->{$_}) . "&";
-    }
-    chop $ret;  # return last ampersand, or the question mark if no args
-    $ret .= " _ML=)";
-    return $ret;
-}
-
-sub interpolate_phrase
-{
-    my ($data, $args) = @_;
-    my %vars = ();
-
-    my $pair;
-    my @pairs = split(/&/, $args);
-    my ($name, $value);
-    foreach $pair (@pairs)
-    {
-        ($name, $value) = split(/=/, $pair);
-        $value =~ tr/+/ /;
-        $value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
-        $vars{$name} = $value;
-    }
-    $data =~ s/\[\[(.+?)\]\]/$vars{$1}/g;
-    return $data;
 }
 
 package main;
