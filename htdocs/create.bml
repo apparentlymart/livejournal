@@ -1,102 +1,242 @@
 (=PAGE
-TITLE=>Create Journal
-
+TITLE=>Create New Journal
 BODY<=
+(=_CODE 
 
-(=H1 Creating a New Journal H1=)
-(=P
-Creating a new LiveJournal is easy, just follow the instructions below!
-P=)
+ return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+ 
+ my $mode = $FORM{'mode'};
 
-(=HR=)
-
-<FORM ACTION="create_do.bml" METHOD="POST">
-
-(=H2 Username H2=)
-(=P
-Each LiveJournal user must have their own unique username.  Your username is what appears in the address to your journal and what you use to log into the LiveJournal server.  It also shows up when you post comments in other people's journal.
-P=)
-
-(=STANDOUT
-<TABLE>
-<TR><TD ALIGN=CENTER>
-<TABLE><TR><TD>
-Username:<BR>
-<INPUT TYPE="TEXT" NAME="user" SIZE="15" MAXLENGTH="15">
-</TD></TR></TABLE>
-</TD></TR>
-<TR><TD>
-<FONT FACE="Arial,Helvetica" SIZE=-1>&nbsp;<BR>
-<B>Your LiveJournal will be at these addresses:</B><BR>
-&nbsp;&nbsp;&nbsp;&nbsp;(=SITEROOT=)/users/<I>username</I>/<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;(=SITEROOT=)/<I>~username</I>/<BR>
-(=_CODE
- return "" unless $LJ::USER_VHOSTS;
- my $ret;
- unless ($LJ::EVERYONE_PAID) {
-     $ret .= "<B>Or, for paid accounts:</B><BR>";
+ # with no mode, decide which screen the user sees first, based
+ # on whether or not this LJ installation lets in free users
+ if ($mode eq "") {
+     $mode = $LJ::USE_ACCT_CODES ? "entercode" : "getinfo"; 
+ } else {
+     unless (LJ::did_post()) {
+	 return "<b>Error:</b> POST required.";
+     }
  }
- $ret .= "&nbsp;&nbsp;&nbsp;&nbsp;http://<I>username</I>.$LJ::USER_DOMAIN/<br>";
- return $ret;
+
+ # MODE: entercode - enter an account code to proceed making an account
+ if ($mode eq "entercode" && $LJ::USE_ACCT_CODES)
+ {
+     
+ }
+ 
+ # MODE: submit - try to create an account.  might change mode
+ #       if there are errors, we'll populate %errors and 
+ #       return to "getinfo" mode below
+ my %errors;
+ if ($mode eq "submit") 
+ {
+     my $user = LJ::canonical_username($FORM{'user'});
+     my $name = $FORM{'name'};
+     my $email = &trim(lc($FORM{'email'}));
+     
+     my $dbs = LJ::get_dbs();
+     my $dbh = $dbs->{'dbh'};
+     my $dbr = $dbs->{'reader'};
+     
+     my $quser = $dbh->quote($user);
+     my $qemail = $dbh->quote($email);
+     my $qname = $dbh->quote($name);
+     
+     if (length($user) > 15) { 
+	 $errors{'username'} = "Username is too long, 15 character max";
+     }
+     unless ($FORM{'user'}) { 
+	 $errors{'username'} = "You must enter a username"; 
+     }
+     if ($FORM{'user'} && ! $user) { 
+	 $errors{'username'} = "Invalid characters in username.";
+     }
+     foreach my $re ("^system\$", @LJ::PROTECTED_USERNAMES) {
+	 next unless ($FORM{'user'} =~ /$re/);
+	 $errors{'username'} = "Sorry, that's a reserved username.";
+     }
+     
+     my $u = LJ::load_user($dbs, $user);
+     my $second_submit = 0;
+     if ($u) {
+	 if ($user ne "test" && $u->{'password'} eq $FORM{'password1'}) {
+	     # oh, they double-clicked the submit button 
+	     $second_submit = 1;
+	 } else {
+	     $errors{'username'} = "Username already in use; please select a different one"; 
+	 }
+     }
+ 
+     unless ($name) { 
+	 $errors{'name'} = "Please supply a name or handle/alias."; 
+     }
+     unless ($email) { 
+	 $errors{'email'} = "You must provide your email address";
+     }
+     if ($email =~ /\s/) { 
+	 $errors{'email'} = "No spaces allowed in email address.  If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>\@aol.com</b>"; 
+     }
+ 
+     if ($FORM{'password1'} ne $FORM{'password2'}) { 
+	 $errors{'password'} = "Passwords do not match."; 
+     }
+     if (! $FORM{'password1'}) { 
+	 $errors{'password'} = "You must enter a password.";
+     }
+
+     if ($FORM{'under13'}) {
+	 return "Sorry, due to COPPA restrictions, you cannot use the LiveJournal service until you're 13 years old.  Please come back on your 13th birthday.";
+     }
+
+     unless ($errors{'email'})
+     {
+	 my @email_errors;
+	 check_email($email, \@email_errors);
+	 $errors{'email'} = join(", ", @email_errors) if @email_errors;
+     }
+
+
+     # Note: goto is evil.  this is the first time I've used it in perl.
+     #       I wish 'last' or 'next' would break out of an if block.
+     goto SUBMITERRORS if %errors;
+
+     $qpassword = $dbh->quote($FORM{'password1'});
+     my $userid = $u->{'userid'}+0;
+     unless ($second_submit)
+     {
+	 my $paid   = ($LJ::EVERYONE_PAID  ? "on" : "off");
+	 my $status = ($LJ::EVERYONE_VALID ? 'A'  : 'N');
+	 $dbh->do("INSERT INTO user (user, email, password, status, paidfeatures, name, lastn_style, friends_style, calendar_style, day_style) VALUES ($quser, $qemail, $qpassword, '$status', '$paid', $qname, 1, 6, 2, 5)");
+	 if ($dbh->err)
+	 {
+	     return "(=H1 Error H1=)(=P There was an error processing your request: <B>" . $dbh->errstr . "</B> P=)";
+	 }
+	 $userid = $dbh->{'mysql_insertid'};
+	 $dbh->do("INSERT INTO useridmap (userid, user) VALUES ($userid, $quser)");
+	 $dbh->do("INSERT INTO userusage (userid, timecreate) VALUES ($userid, NOW())");
+     }
+     
+     my $aa = {};
+     if ($userid) {
+	 $aa = &register_authaction($userid, "validateemail", $email);
+     }
+     
+     open (REM, "$LJ::HOME/htdocs/inc/email-welcome") || return "Error: couldn't open email-welcome template";
+     my $etemp;
+     while (<REM>) {
+	 $etemp .= $_;
+     }	
+     close REM;
+     unless ($etemp) { return "Error: email-welcome template is empty?"; }
+     
+     my %replace = (
+		    "email" => $email,
+		    "regurl" => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
+		    "username" => $user,
+		    "password" => $FORM{'password1'},
+		    "sitename" => $LJ::SITENAME,
+		    "siteroot" => $LJ::SITEROOT,
+		    "admin_email" => $LJ::ADMIN_EMAIL,
+		    "bogus_email" => $LJ::BOGUS_EMAIL,
+		    );
+     
+     $etemp =~ s/%%(\w+?)%%/$replace{$1}/ge;
+     
+     open (MAIL, "|$LJ::SENDMAIL");
+     print MAIL $etemp;
+     close MAIL;
+     
+     $ret = "(=H1 Success! H1=)(=P Your journal has been created.  Important registration information has been emailed to <FONT FACE=Arial SIZE=+1><B>$email</B></FONT> containing further instructions.  <B>Note: </B>  You have exactly <I>seven days</I> to confirm your journal creation.  If you still haven't gone and set it up after seven days the username of <B>$user</B> will be automaticaly deleted and somebody else may use it. P=)";
+     $ret .= "(=P Your LiveJournal will be available at: P=)(=STANDOUT <FONT SIZE=+1 FACe=Arial><B><A HREF=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</A></B></FONT> STANDOUT=)";
+     $ret .= "(=P Now, please take the time to fill in some information about yourself.  It's mostly optional, but it lets us get an idea of who's using LiveJournal. P=)";
+     
+     $ret .= "<CENTER><FORM METHOD=POST ACTION=\"/editinfo_do.bml\">";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . &hash_password($FORM{'password1'}) . "\">\n";
+     $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Enter Personal Information ---&gt;\">\n";
+     $ret .= "</FORM></CENTER>\n";
+     
+     return $ret;
+    
+ }
+
+ SUBMITERRORS:
+ if ($mode eq "getinfo" || %errors)
+ {
+     my $ret;
+     my $v;
+
+     my $error_msg = sub {
+	 my $key = shift;
+	 my $pre = shift;
+	 my $post = shift;
+	 my $msg = $errors{$key};
+	 return "" unless $msg;
+	 return "$pre<font color=\"#ff0000\"><b>$msg</b></font>$post";
+     };
+
+     $ret .= "(=H1 Creating a New Journal H1=)(=P Creating a new LiveJournal is easy, just follow the instructions below! P=)(=HR=)";
+     $ret .= "<form action=\"create.bml\" method=\"post\">";
+     $ret .= "<input type=\"hidden\" name=\"mode\" value=\"submit\">";
+     
+
+     $ret .= "(=H2 Username H2=)";
+     $ret .= "(=P Each $LJ::SITENAME user must have their own unique username.  Your username is what appears in the address to your journal and what you use to log into the $LJ::SITENAME server.  It also shows up when you post comments in other people's journal. P=)";
+     
+     $v = LJ::ehtml($FORM{'user'});
+     $ret .= "(=STANDOUT <table><tr><td align=\"center\"><table><tr><td>Username:<br /><input value=\"$v\" type=\"text\" name=\"user\" size=\"15\" maxlength=\"15\"></td></tr></table></td></tr>";
+     $ret .= "<tr><td>";
+     $ret .= $error_msg->('username', '', '<br>');
+     $ret .= "<font face=\"Arial,Helvetica\" size=\"-1\">&nbsp;<br />";
+     $ret .= "<b>Your journal will be at these addresses:</b><br />&nbsp;&nbsp;&nbsp;&nbsp;(=SITEROOT=)/users/<I>username</I>/<br />&nbsp;&nbsp;&nbsp;&nbsp;(=SITEROOT=)/<i>~username</i>/<br />";
+     if ($LJ::USER_VHOSTS) {
+	 unless ($LJ::EVERYONE_PAID) {
+	     $ret .= "<B>Or, for paid accounts:</B><BR>";
+	 }
+	 $ret .= "&nbsp;&nbsp;&nbsp;&nbsp;http://<I>username</I>.$LJ::USER_DOMAIN/<br>";
+     }
+     $ret .= "</font></td></tr>";
+     $ret .= "</table> STANDOUT=)";
+
+     #### name
+     $v = LJ::ehtml($FORM{'name'});
+     $ret .= "(=H2 Your Name H2=)(=P What's your name or handle?  This will appear at the top of your journal, and in the user directory should you choose to be listed in it.  You do not have to provide your full name or even your real name. P=)(=STANDOUT Name:<br /><input value=\"$v\" type=\"text\" name=\"name\" size=\"40\" maxlength=\"100\">";
+     $ret .= $error_msg->('name', '<br>', '');
+     $ret .= " STANDOUT=)";
+     
+     $ret .= "(=H2 Your email address H2=)(=P For verification and security purposes, we need your email address.  It will be never ever, under any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a href=\"/legal/privacy.bml\" TARGET=\"privacy\">privacy policy</a> for more information. P=)";
+
+     ### email address
+     $v = LJ::ehtml($FORM{'email'});     
+     $ret .= "(=STANDOUT <table width=\"250\"><tr><td valign=\"top\" align=\"left\">Email Address:<br /><input value=\"$v\" type=\"text\" name=\"email\" size=\"40\" maxlength=\"50\">";
+     $ret .= $error_msg->('email', '<br>', '');
+     $ret .= "</td></tr></table> STANDOUT=)";
+
+     $ret .= "(=H2 Password H2=)(=P elect a password. P=)";
+
+     ### password
+     $ret .= "(=STANDOUT Password:<br /><input type=\"password\" name=\"password1\" size=\"30\" maxlength=\"30\"><br />Re-type password:<br /><input type=\"password\" name=\"password2\" size=\"30\" maxlength=\"30\">";
+     $ret .= $error_msg->('password', '<br>', '');
+     $ret .= " STANDOUT=)";
+     
+     unless ($LJ::INTRANET)
+     {
+	 $ret .= "(=H2 Notice to AOL Users H2=)(=P If you are an <b>AOL User</b>, make sure you go to <b>Keyword: <i>Mail Controls</i></b> and <b>turn off</b> any of AOL's \"useful\" mail controls.  You must be able to receive mail from the Internet or you will not recieve your confirmation code.  If your parents have this restricted, perhaps you really shouldn't be using (=SITENAME=). P=)";
+
+	 $ret .= "(=H2 Age H2=)(=P Are you under 13 years of age? <blockquote><input type=\"checkbox\" value=\"1\" name=\"under13\"> Yes, I am under 13 years old.</blockquote>  P=)";
+     }
+
+     $ret .= "(=H2 Proceed H2=)(=P Press the button below and you're on your way to having your very own LiveJournal! P=)";
+
+     $ret .= "(=STANDOUT <center><input type=\"submit\" value=\"Proceed...\"><br />";
+     $ret .= "<font size=\"-1\">Only press <b>Proceed</b> <i>once</i>!!</font>";
+     $ret .= "</center> STANDOUT=)";
+
+     return $ret;
+ }
+
+ return "Unknown mode: <b>$mode</b>";
+
 _CODE=)
-</FONT>
-</TD></TR></TABLE>
-STANDOUT=)
-
-(=H2 Your Name H2=)
-(=P
-What's your name or handle?  This will appear at the top of your journal, and in the user directory should you choose to be listed in it.  You do not have to provide your full name or even your real
-name.
-P=)
-
-(=STANDOUT
-Name:<BR>
-<INPUT TYPE="TEXT" NAME="name" SIZE="40" MAXLENGTH="100">
-STANDOUT=)
-
-(=H2 Your email address H2=)
-(=P
-For verification and security purposes, we need your email address.  It will be never ever, under any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <A HREF="/legal/privacy.bml" TARGET=privacy>privacy policy</A> for more information.
-P=)
-
-(=STANDOUT
-Email Address:<BR>
-<INPUT TYPE="TEXT" NAME="email" SIZE="40" MAXLENGTH="50">
-STANDOUT=)
-
-(=H2 Password H2=)
-(=P
-Select a password.
-P=)
-
-(=STANDOUT
-Password:<BR><INPUT TYPE="password" NAME="password1" SIZE="30" MAXLENGTH="30">
-<BR>Re-type password:<BR><INPUT TYPE="password" NAME="password2" SIZE="30" MAXLENGTH="30">
-STANDOUT=)
-
-(=_CODE
- require 'ljconfig.pl';
- return "" if ($LJ::INTRANET);
- return "
-(=H2 Notice to AOL Users H2=)
-(=P If you are an <B>AOL User</B>, make sure you go to <B>Keyword: <I>Mail Controls</I></B> and <B>turn off</B> any of AOL's \"useful\" mail controls.  You must be able to receive mail from the Internet or you will not recieve your confirmation code.  If your parents have this restricted, perhaps you really shouldn't be using (=SITENAME=). P=)
-(=H2 Age H2=)
-(=P Are you under 13 years of age? <blockquote><input type=checkbox value=1 name=under13> Yes, I am under 13 years old. </blockquote>  P=)
-    ";
- _CODE=)
-
-(=H2 Proceed H2=)
-(=P
-Press the button below and you're on your way to having your very own LiveJournal!
-P=)
-
-(=STANDOUT
-<CENTER>
-<INPUT TYPE="SUBMIT" VALUE="Proceed..."><BR>
-<FONT SIZE=-1>Only press <B>Proceed</B> <I>once</I>!!</FONT>
-</CENTER>
-STANDOUT=)
-
 
 <=BODY
 PAGE=)
