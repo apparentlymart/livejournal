@@ -19,7 +19,7 @@
 
 <xsl:param name="local.l10n.xml" select="document('')"/>
 
-<xsl:param name="toc.section.depth">0</xsl:param>
+<xsl:param name="toc.section.depth">2</xsl:param>
 
 <xsl:param name="navig.showtitles">1</xsl:param>
 
