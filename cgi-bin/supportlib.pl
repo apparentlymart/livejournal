@@ -570,7 +570,7 @@ sub append_request
     # attempt to buffer job to send email (but don't care if it fails)
     LJ::do_to_cluster(sub {
         # first parameter is cluster id
-        return LJ::cmd_buffer_add(shift(@_), 0, 'support_notify', { spid => $spid, type => 'new' });
+        return LJ::cmd_buffer_add(shift(@_), 0, 'support_notify', { spid => $spid, splid => $splid, type => 'update' });
     });
 
     return $splid;    
