@@ -1,6 +1,6 @@
 (=_CODE
 
- $title = "Join Community";
+ $title = $ML{'.title'};
  $body = "";
  
  my $dbs = LJ::get_dbs();
@@ -11,7 +11,7 @@
  ###
  my $remote = LJ::get_remote($dbs);
  unless ($remote) {
-     $body = "(=H1 Sorry.. H1=)(=P To join a community you must first <a href=\"/login.bml?ret=1\">log in</a>. P=)";
+     $body = "(=H1 $ML{'Sorry'}.. H1=)(=P $ML{'.label.loginfirst'} P=)";
      return;
  }
 
@@ -30,7 +30,7 @@
  ### does this community even exit?
  ###
  unless ($ci) {
-     $body .= "(=H1 Error H1=)(=P The specified community information is not valid. P=)";
+     $body .= "(=H1 $ML{'Error'} H1=)(=P $ML{'.label.errorcomminfo'} P=)";
      return;
  }
 
@@ -39,7 +39,7 @@
 
  ### can members join this community even?
  unless ($ci->{'membership'} eq "open") {
-     $body .= "(=H1 Sorry... H1=)(=P This community is closed.  If you're interested in joining it, please contact <a href=\"/userinfo.bml?user=$cowner\">its maintainer</a>. P=)";
+     $body .= "(=H1 $ML{'Sorry'}... H1=)(=P $ML{'.label.closedcomm'} P=)";
      return;
  }
 
@@ -47,13 +47,13 @@
  ### or something)
  LJ::load_remote($dbs, $remote);
  unless ($remote->{'journaltype'} eq "P") {
-     $body .= "(=H1 Error H1=)(=P You're logged in as a shared/community account, not your personal account. P=)";
+     $body .= "(=H1 $ML{'Error'} H1=)(=P $ML{'.label.commlogged'} P=)";
      return;
  }
  
  ## ensure this user isn't banned
  if (LJ::is_banned($dbs, $remote, $ci->{'userid'})) {
-     $body .= "(=H1 Sorry H1=)(=P The maintainer(s) of this community has banned you from joining. P=)";
+     $body .= "(=H1 $ML{'Sorry'} H1=)(=P $ML{'.label.banned'} P=)";
      return;
  }
 
@@ -69,25 +69,25 @@
          LJ::add_friend($dbh, $remote->{'userid'}, $ci->{'userid'});
      }
      
-     $body .= "(=H1 Success H1=)(=P You are now a member of the <a href=\"/userinfo.bml?user=$ci->{'user'}\">$ecname Community</a> P=)";
+     $body .= "(=H1 $ML{'.success'} H1=)(=P ".BML::ml('.label.membernow',{ 'username' => $ci->{'user'}, 'commname'=> $ecname})." P=)";
      
      ### if community permits it, give remote user access to post in this community
      if ($ci->{'postlevel'} eq "members") {
          $dbh->do("INSERT INTO logaccess (ownerid, posterid) VALUES ($ci->{'userid'}, $remote->{'userid'})");
-         $body .= "(=P This community allows posting by all members, so you now have access to post in it.  If you already have a LiveJournal client open on your computer you'll have to log out and log back in for this journal to show up in your list of journals you can post to. P=)";
+         $body .= "(=P $ML{'.label.allowposting'} P=)";
      } else {
-         $body .= "(=P Although you are now listed as a member, this community only allows posting by authorized users.  Contact <a href=\"/userinfo.bml?user=$cowner\">the community maintainer</a> if you desire posting access. P=)";
+         $body .= "(=P ".BML::ml('.label.authpost',{'maintainer'=>$cowner})." P=)";
      }
      return;
      
  } else {
-
-     $body .= "(=H1 You sure? H1=)(=P Press the button below to join the \"$ecname\" community. Uncheck the box below if you want to join the community without seeing community entries on your friends page.";
+                                                                                                 
+     $body .= "(=H1 $ML{'.label.sure'} H1=)(=P ".BML::ml('.label.expls',{'maintainer'=>$ecname});
      $body .= "<form method='post' action='join.bml'>";
      $body .= "<input type='hidden' name='cuserid' value='$ci->{'userid'}' />";
      $body .= "<input type='hidden' name='confirm' value='1' /><center>";
-     $body .= "<input type='checkbox' name='addfriend' checked> Add \"$ecname\" to friends list.<br>";
-     $body .= "<br><input type='submit' value='Join Community' /></center></form> P=)";
+     $body .= "<input type='checkbox' name='addfriend' checked>".BML::ml('.label.addtofriends',{'maintainer'=>$ecname});
+     $body .= "<br><input type='submit' value=$ML{'.button.join'} /></center></form> P=)";
      return;
  }
 

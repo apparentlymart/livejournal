@@ -1,6 +1,6 @@
 (=_CODE
 
- $title = "Create Community";
+ $title = $ML{'.title'};
  $body = "";
 
  if ($FORM{'mode'} eq "create") 
@@ -23,26 +23,26 @@
      }
      
      unless ($mu) {
-         push @errors, "Maintainer account not found.";
+         push @errors, $ML{'.error.accountnotfound'};
      } else {
          if ($mu->{'password'} ne $FORM{'mpassword'}) {
-             push @errors, "Invalid password for maintainer account.";
+             push @errors, $ML{'.error.invalidpassword'};
          }
          unless ($mu->{'journaltype'} eq "P") {
-             push @errors, "Maintainer account must be a person, not another shared account.";
+             push @errors, $ML{'.error.maintainertype'};
          }
      }
 
      unless ($cu) {
-         push @errors, "Community account not found.";
+         push @errors, $ML{'.error.accountnotfound'};
      } else {
          if ($cu->{'password'} ne $FORM{'cpassword'}) {
-             push @errors, "Invalid password for maintainer account.";
+             push @errors, $ML{'.error.invalidmpasw'};
          }
      }
 
      if ($cu && $mu && $cu->{'userid'} == $mu->{'userid'}) {
-         push @errors, "Maintainer account and community account cannot be the same.";
+         push @errors, $ML{'.error.samenames'};
      }
 
      if (@errors) {
@@ -58,33 +58,33 @@
      my $qcuser = $dbh->quote($cu->{'user'});
      $dbh->do("REPLACE INTO priv_map (prmid, userid, prlid, arg) SELECT NULL, $mu->{'userid'}, prlid, $qcuser FROM priv_list WHERE privcode='sharedjournal'");
 
-     $body .= "(=H1 Success H1=)(=P Your community is now set up. P=)";
-     $body .= "(=P Relevant links: <UL><LI><A HREF=\"$LJ::SITEROOT/community/$cu->{'user'}/\">Community website<LI><A HREF=\"/userinfo.bml?user=$cu->{'user'}\">Community info</A><LI><A HREF=\"/admin/console/\">Admin console</A> - to add/remove people that are able to post</UL> P=)";
+     $body .= "(=H1 $ML{'.success'} H1=)(=P $ML{'.label.commcreated'} P=)";
+     $body .= "(=P $ML{'.label.rellinks'} <UL><LI><A HREF=\"$LJ::SITEROOT/community/$cu->{'user'}/\">$ML{'.commsite'}<LI><A HREF=\"/userinfo.bml?user=$cu->{'user'}\">$ML{'.label.comminfo'}</A><LI>$ML{'.label.admconsole'} P=)";
 
      return;
  }
 
- $body .= "(=H1 Create Community H1=)(=P From here you can create a community account.  A community is a special type of account that other users can join, and post in.  For example of a community, check out the <A HREF=\"/userinfo.bml?user=seattle_party\">Seattle Party Community</A>. P=)";
+ $body .= "(=H1 $ML{'.label.create'} H1=)(=P $ML{'.label.createcomm'} P=)";
 
  $body .= "<FORM METHOD=POST><input type=hidden name=mode value=create>";
- $body .= "(=H2 Maintainer Account H2=)(=P This account is the one that runs the community.  This account must be a real person account... not another community account. P=)";
- $body .= "<UL>Username: <INPUT NAME=\"muser\" SIZE=15 MAXLENGTH=15> Password: <INPUT NAME=\"mpassword\" TYPE=PASSWORD></UL>";
+ $body .= "(=H2 $ML{'.label.mainaccount'} H2=)(=P $ML{'.label.mustbereal'} P=)";
+ $body .= "<UL>$ML{'.label.username'} <INPUT NAME=\"muser\" SIZE=15 MAXLENGTH=15> $ML{'.label.password'} <INPUT NAME=\"mpassword\" TYPE=PASSWORD></UL>";
 
- $body .= "(=H2 Community Account H2=)(=P This is the account that you want to turn into a community.  It must <a href=\"/create.bml\">already be created</a>, but should not already be in use by an individual because after this tons of different people will be able to potentially post in it.  P=)";
- $body .= "<UL>Username: <INPUT NAME=\"cuser\" SIZE=15 MAXLENGTH=15> Password: <INPUT NAME=\"cpassword\" TYPE=PASSWORD></UL>";
+ $body .= "(=H2 $ML{'.label.commacc'} H2=)(=P $ML{'.label.accforcomm'}  P=)";
+ $body .= "<UL>$ML{'.label.username'} <INPUT NAME=\"cuser\" SIZE=15 MAXLENGTH=15> $ML{'.label.password'} <INPUT NAME=\"cpassword\" TYPE=PASSWORD></UL>";
 
- $body .= "(=H1 Community Options H1=)(=P Choose how your community operates.  You can change these later. P=)";
- $body .= "(=H2 Membership H2=)(=P Who can join your community? <UL>";
- $body .= "<INPUT TYPE=radio name=\"membership\" VALUE=\"open\" CHECKED> <B>Open Membership</B><BR>Anybody can join without getting approved.";
- $body .= "<P><INPUT TYPE=radio name=\"membership\" VALUE=\"closed\"> <B>Closed Membership</B><BR>You have to approve people's requests to join.";
+ $body .= "(=H1 $ML{'.label.commopts'} H1=)(=P $ML{'.label.howoperates'} P=)";
+ $body .= "(=H2 $ML{'.label.membership'} H2=)(=P $ML{'.label.whocanjoin'} <UL>";
+ $body .= "<INPUT TYPE=radio name=\"membership\" VALUE=\"open\" CHECKED> $ML{'.label.openmemb'}";
+ $body .= "<P><INPUT TYPE=radio name=\"membership\" VALUE=\"closed\"> $ML{'.label.closedmemb'}";
  $body .= "</UL> P=)";
 
- $body .= "(=H2 Posting Access H2=)(=P Who can post to this community? <UL>";
- $body .= "<INPUT TYPE=radio name=\"postlevel\" VALUE=\"members\" CHECKED> <B>All Members</B><BR>Anybody can post immediately, once they're a member.";
- $body .= "<P><INPUT TYPE=radio name=\"postlevel\" VALUE=\"select\"> <B>Select Members</B><BR>Only some members are able to post, once they've been given access by the maintainer account..";
+ $body .= "(=H2 $ML{'.label.postaccess'} H2=)(=P $ML{'.label.whocanpost'} <UL>";
+ $body .= "<INPUT TYPE=radio name=\"postlevel\" VALUE=\"members\" CHECKED> $ML{'.label.anybodycan'}";
+ $body .= "<P><INPUT TYPE=radio name=\"postlevel\" VALUE=\"select\"> $ML{'.label.selcan'}";
  $body .= "</UL> P=)";
 
- $body .= "<center><input type=submit value=\"Create Community\"></center></form>";
+ $body .= "<center><input type=submit value=\"$ML{'.button.createcommunity'}\"></center></form>";
 
  return;
 

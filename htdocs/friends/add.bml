@@ -11,23 +11,23 @@
 
  unless ($remote) 
  {
-     $title = "Add Friend";
-     $body = "(=H1 Login First H1=)(=P To add a user to your friends list you must first go and <A HREF=\"/login.bml?ret=1\">log in</A>.  If you don't already have an account you can <a href=\"/create.bml\">create one</a> to track your friend's journals. P=)";
+     $title = $ML{'.error1.title'};
+     $body = "(=H1 $ML{'.error1.header'} H1=)(=P $ML{'.error1.text'} P=)";
      return;
  }
 
  unless ($user && $userid) 
  {
-     $title = "Error";
-     $body = "Invalid or missing username given.  To add a friend, go to the <A HREF=\"/friends/edit.bml\">edit friends</A> page.";
+     $title = $ML{'Error'};
+     $body = $ML{'.error2.text'};
      return;
  }
  
  if ($FORM{'mode'} eq "add") 
  {
      unless (LJ::did_post()) { 
-         $title = "Error";
-         $body = "(=H1 Error H1=)(=P (=REQUIREPOST=) P=)";
+         $title = $ML{'Error'};
+         $body = "(=H1 $ML{'Error'} H1=)(=P (=REQUIREPOST=) P=)";
          return;
      }
 
@@ -60,15 +60,19 @@
      if ($res{'success'} eq "OK") 
      {
          if ($FORM{'action:delete'}) {
-             $title = "Friend Removed";
-             $body = "(=H1 Success H1=)(=P User (=LJUSER $user LJUSER=) was removed from your friends list.  You can view your friends page <A HREF=\"$LJ::SITEROOT/users/$remote->{'user'}/friends\">here</A>. P=)";
+             $title = $ML{'.remove.title'};
+             $body = "(=H1 $ML{'.remove.header'} H1=)(=P " .
+                     BML::ml('.remove.text', {'user'=>$user, 'url'=>"$LJ::SITEROOT/users/$remote->{'user'}/friends"}) .
+                     " P=)";
          } else {
-             $title = "Friend Added!";
-             $body = "(=H1 Success H1=)(=P User (=LJUSER $user LJUSER=) was added to your friend list.  You can view your friends page <A HREF=\"$LJ::SITEROOT/users/$remote->{'user'}/friends\">here</A>. P=)";
+             $title = $ML{'.add.title'};
+             $body = "(=H1 $ML{'.add.header'} H1=)(=P " .
+                     BML::ml('.add.text', {'user'=>$user, 'url'=>"$LJ::SITEROOT/users/$remote->{'user'}/friends"}) .
+                     " P=)";
          }
      } else {
-         $title = "Error";
-         $body = "(=H1 Error H1=)(=P $res{'errmsg'} P=)";
+         $title = $ML{'Error'};
+         $body = "(=H1 $ML{'Error'} H1=)(=P $res{'errmsg'} P=)";
      }
      return;
  }
@@ -79,11 +83,12 @@
  my $fr = $sth->fetchrow_hashref;
  
  if ($fr) {
-     $title .= "Modify Friend";
-     $body .= "(=H1 Modify Friend H1=)(=P You already have (=LJUSER $user LJUSER=) listed as a friend.  Here you can either modify the settings (colors & groups) or remove $user from your friends list. P=)";
+     $title .= $ML{'.error3.title'};
+     $body .= "(=H1 $ML{'.error3.title'} H1=)(=P " .
+              BML::ml('.error3.text', {'user'=>$user}) . " P=)";
  } else {
-     $title .= "Add Friend";
-     $body .= "(=H1 Add $user as a friend? H1=)(=P To add <B>$user</B> to your friends list, click the button below.  P=)";
+     $title .= $ML{'.confirm.title'};
+     $body .= "(=H1 " . BML::ml(".confirm.header", { 'user' => $user }) . " H1=)(=P " . BML::ml(".confirm.text", { 'user' => $user }) . " P=)";
  }
 
  $body .= "<form method='post'>";
@@ -91,14 +96,15 @@
  $body .= "<input type='hidden' name='user' value=\"$user\">";
 
  if ($fr) {
-     $body .= "<center><input type='submit' value=\"Modify\">";
-     $body .= " - <input type='submit' name='action:delete' value=\"Remove\"></center>";
+     $body .= "<center><input type='submit' value=\"$ML{'.btn.modify'}\">";
+     $body .= " - <input type='submit' name='action:delete' value=\"$ML{'.btn.remove'}\"></center>";
  } else {
-     $body .= "<center><input type='submit' value=\"Add $user!\"></center>";
+     $body .= "<center><input type='submit' value=\"" .
+              BML::ml('.btn.add', {'user'=>$user}) . "\"></center>";
  }
 
  ## let them pick friend groups
- $body .= "(=H1 Friend Groups H1=)(=P What friend groups do you want to put this user in?  Friend groups are used for filtering your friends list view and also for group-based viewing security of items. P=)<blockquote>";
+ $body .= "(=H1 $ML{'.groups.header'} H1=)(=P $ML{'.groups.text'} P=)<blockquote>";
  my $err;
  my $greq = LJ::Protocol::do_request($dbs, "getfriendgroups", {
      'username' => $remote->{'user'},
@@ -117,14 +123,15 @@
          $body .= LJ::ehtml($g->{'name'}) . "<br />\n";
      }
  } else {
-     $body .= "<i>No friend groups setup.</i>";
+     $body .= "<i>$ML{'.groups.nogroup'}</i>";
  }
  $body .= "</blockquote>";
 
  ## let them pick the colors
- $body .= "(=H1 Colors H1=)(=P You may also optionally select the colors that will represent $user in your friends list.  P=)";
+ $body .= "(=H1 $ML{'.colors.header'} H1=)(=P " .
+          BML::ml('.colors.text', {'user'=>$user}) . " P=)";
 
- $ret .= "<P><CENTER><TABLE CELLPADDING=4><TR><TD><B>Foreground</B></TD><TD><B>Background</B></TD></TR>\n";
+ $ret .= "<P><CENTER><TABLE CELLPADDING=4><TR><TD><B>$ML{'.colors.foreground'}</B></TD><TD><B>$ML{'.colors.background'}</B></TD></TR>\n";
 
  my @color = ();
  LJ::load_codes($dbs, { "color" => \@color });
@@ -162,7 +169,7 @@
  }
  if ($col) { $ret .= "</TR>\n"; $col==0; }
  $ret .= "</TABLE>\n";
- $ret .= "<FONT SIZE=-2 FACE=\"Arial,Helvetica\">(Hover your mouse over a color to see its name)</FONT>";
+ $ret .= "<FONT SIZE=-2 FACE=\"Arial,Helvetica\">$ML{'.colors.hover'}</FONT>";
 
  $ret .= "</CENTER>\n";
  $body .= $ret;

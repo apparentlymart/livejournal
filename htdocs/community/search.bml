@@ -18,12 +18,12 @@ BAR<=
 <=BAR
 <=LOCALBLOCKS
 _INFO=)(=PAGE
-TITLE=>Community Search
+TITLE=>(=_ML .title _ML=)
 BODY<=
 
-(=H1 Search Communities H1=)
+(=H1 (=_ML .label.searchcomm _ML=) H1=)
 (=P
-Select the criteria below that you'd like to find communities by.  The results returned are the intersection of all search criteria.  In other words, each checkbox you click means "AND", not "OR".
+(=_ML .label.selecriteria _ML=)
 P=)
 
 (=HR=)
@@ -36,12 +36,12 @@ P=)
 
 <!--- location --->
 (=CRIT
-NAME=>By Location
+NAME=>(=_ML .label.bylocation _ML=)
 CODE=>s_loc
 FORM<=
 
 <TABLE>
-<TR><TD ALIGN=RIGHT>Country:</TD><TD>
+<TR><TD ALIGN=RIGHT>(=_ML .label.country _ML=)</TD><TD>
 <SELECT NAME="loc_cn">
 (=_CODE
 
@@ -57,8 +57,8 @@ FORM<=
  
 _CODE=)
 </SELECT></TD></TR>
-<TR><TD ALIGN=RIGHT>State/Province:</TD><TD><INPUT NAME="loc_st"></TD></TR>
-<TR><TD ALIGN=RIGHT>City:</TD><TD><INPUT NAME="loc_ci"></TD></TR>
+<TR><TD ALIGN=RIGHT>(=_ML .label.stateprovince _ML=)</TD><TD><INPUT NAME="loc_st"></TD></TR>
+<TR><TD ALIGN=RIGHT>(=_ML .label.city _ML=)</TD><TD><INPUT NAME="loc_ci"></TD></TR>
 </TABLE>
 
 <=FORM
@@ -66,76 +66,76 @@ CRIT=)
 
 <!---- update time ----->
 (=CRIT
-NAME=>By Journal Update Time
+NAME=>(=_ML .label.bytime _ML=)
 CODE=>s_ut
 FORM<=
-Updated in last 
+(=_ML .label.updated _ML=)
 <SELECT NAME="ut_days">
 <OPTION VALUE="">-------
-<OPTION VALUE="1">day
-<OPTION VALUE="7">week
-<OPTION VALUE="30">month
+<OPTION VALUE="1">(=_ML .sel.day _ML=)
+<OPTION VALUE="7">(=_ML .sel.week _ML=)
+<OPTION VALUE="30">(=_ML .sel.month _ML=)
 </SELECT>
 <=FORM
 CRIT=)
 
 <!---- interest ----->
 (=CRIT
-NAME=>By Interest
+NAME=>(=_ML .label.byinterest _ML=)
 CODE=>s_int
 FORM<=
-User likes: <INPUT NAME="int_like" SIZE=30>
+(=_ML .userlikes _ML=) <INPUT NAME="int_like" SIZE=30>
 <=FORM
 CRIT=)
 
 <!---- has member ----->
 (=CRIT
-NAME=>Has Member
+NAME=>(=_ML .label.hasmember _ML=)
 CODE=>s_fr
 FORM<=
-Contains user <INPUT NAME="fr_user" SIZE=15 MAXLENGTH=15> as a member.
+(=_ML .contasmember _ML=)
 <=FORM
 CRIT=)
 
 <!----- other ------>
 (=BAR
-NAME=>Other Criteria
+NAME=>(=_ML .label.othercriteria _ML=)
 FORM<=
-<INPUT TYPE=CHECKBOX NAME="s_withpic" VALUE=1> Only communities with pictures
+<INPUT TYPE=CHECKBOX NAME="s_withpic" VALUE=1> (=_ML .checkbox.onlywithpics _ML=)
 <=FORM
 BAR=)
 
 <!---- output formatting ----->
 (=BAR
-NAME=>Display Options
+NAME=>(=_ML .label.displayoptions _ML=)
 FORM<=
 
 <TABLE>
 <TR>
 <TD ALIGN=RIGHT>
-Output Format:
+(=_ML .label.outputformat _ML=)
 </TD><TD>
 <SELECT NAME="opt_format">
-<OPTION VALUE="com" SELECTED>Community View
-<OPTION VALUE="pics">By Picture
-<OPTION VALUE="simple">Simple
+<OPTION VALUE="com" SELECTED>(=_ML .sel.commview _ML=)
+<OPTION VALUE="pics">(=_ML .sel.bypicture _ML=)
+<OPTION VALUE="simple">(=_ML .sel.simple _ML=)
 </SELECT>
 </TD></TR>
 
 <TR>
 <TD ALIGN=RIGHT>
-Sorting Method:
+(=_ML .label.sortmethod _ML=)
 </TD><TD>
 <SELECT NAME="opt_sort">
-<OPTION VALUE="name" SELECTED>Community Name
-<OPTION VALUE="ut">Update Time
-<OPTION VALUE="user">User Name
+<OPTION VALUE="name" SELECTED>(=_ML .sel.communityname _ML=)
+<OPTION VALUE="ut">(=_ML .sel.updatetime _ML=)
+<OPTION VALUE="user">(=_ML .sel.username _ML=)
 </SELECT>
 </TD></TR>
 
 <TR>
 <TD ALIGN=RIGHT>
-Records per page:
+(=_ML .label.records _ML=)
 </TD><TD>
 <SELECT NAME="opt_pagesize">
 <OPTION VALUE="25">25
@@ -151,8 +151,8 @@ BAR=)
 
 <!--- submit --->
 <TR BGCOLOR=#E0E0E0><TD COLSPAN=2 ALIGN=CENTER>
-  <INPUT TYPE=SUBMIT VALUE="Search!">
-  <INPUT TYPE=RESET VALUE="Clear Form">
+  <INPUT TYPE=SUBMIT VALUE="(=_ML .button.search _ML=)">
+  <INPUT TYPE=RESET VALUE="(=_ML .button.clear _ML=)">
 </TD></TR>
 
 </TABLE>

@@ -1,4 +1,172 @@
 ;; -*- coding: utf-8 -*-
+/community/create.bml.button.createcommunity=Create Community
+
+/community/create.bml.commsite=Community website
+
+/community/create.bml.error.accountnotfound=Maintainer account not found.
+
+/community/create.bml.error.invalidmpasw=Invalid password for maintainer account.
+
+/community/create.bml.error.invalidpassword=Invalid password for maintainer account.
+
+/community/create.bml.error.maintainertype=Maintainer account must be a person, not another shared account.
+
+/community/create.bml.error.samenames=Maintainer account and community account cannot be the same.
+
+/community/create.bml.label.accforcomm=This is the account that you want to turn into a community.  It must <a href="/create.bml">already be created</a>, but should not already be in use by an individual because after this tons of different people will be able to potentially post in it.
+
+/community/create.bml.label.admconsole=<A HREF="/admin/console/">Admin console</A> - to add/remove people that are able to post</UL>
+
+/community/create.bml.label.anybodycan=<B>All Members</B><BR>Anybody can post immediately, once they're a member.
+
+/community/create.bml.label.closedmemb=<B>Closed Membership</B><BR>You have to approve people's requests to join.
+
+/community/create.bml.label.commacc=Community Account
+
+/community/create.bml.label.commcreated=Your community is now set up.
+
+/community/create.bml.label.comminfo=Community info
+
+/community/create.bml.label.commopts=Community Options
+
+/community/create.bml.label.create=Create Community
+
+/community/create.bml.label.createcomm=From here you can create a community account.  A community is a special type of account that other users can join, and post in.  For example of a community, check out the <A HREF="/userinfo.bml?user=seattle_party">Seattle Party Community</A>.
+
+/community/create.bml.label.howoperates=Choose how your community operates.  You can change these later.
+
+/community/create.bml.label.mainaccount=Maintainer Account
+
+/community/create.bml.label.membership=Membership
+
+/community/create.bml.label.mustbereal=This account is the one that runs the community.  This account must be a real person account... not another community account.
+
+/community/create.bml.label.openmemb=<B>Open Membership</B><BR>Anybody can join without getting approved.
+
+/community/create.bml.label.password=Password:
+
+/community/create.bml.label.postaccess=Posting Access
+
+/community/create.bml.label.rellinks=Relevant links:
+
+/community/create.bml.label.selcan=<B>Select Members</B><BR>Only some members are able to post, once they've been given access by the maintainer account..
+
+/community/create.bml.label.username=Username:
+
+/community/create.bml.label.whocanjoin=Who can join your community?
+
+/community/create.bml.label.whocanpost=Who can post to this community?
+
+/community/create.bml.success=Success
+
+/community/create.bml.title=Create Community
+
+/community/index.bml.title=Community Center
+
+/community/join.bml.button.join=Join Community
+
+/community/join.bml.label.addtofriends=Add "[[maintainer]]" to friends list.<br>
+
+/community/join.bml.label.allowposting=This community allows posting by all members, so you now have access to post in it.  If you already have a LiveJournal client open on your computer you'll have to log out and log back in for this journal to show up in your list of journals you can post to.
+
+/community/join.bml.label.authpost=Although you are now listed as a member, this community only allows posting by authorized users.  Contact <a href="/userinfo.bml?user=[[maintainer]]">the community maintainer</a> if you desire posting access.
+
+/community/join.bml.label.banned=The maintainer(s) of this community has banned you from joining.
+
+/community/join.bml.label.closedcomm=This community is closed.  If you're interested in joining it, please contact <a href="/userinfo.bml?user=[[maintainer]]">its maintainer</a>.
+
+/community/join.bml.label.commlogged=You're logged in as a shared/community account, not your personal account.
+
+/community/join.bml.label.errorcomminfo=The specified community information is not valid.
+
+/community/join.bml.label.expls=Press the button below to join the "[[maintainer]]" community. Uncheck the box below if you want to join the community without seeing community entries on your friends page.
+
+/community/join.bml.label.loginfirst=To join a community you must first <a href="/login.bml?ret=1">log in</a>.
+
+/community/join.bml.label.membernow=You are now a member of the <a href="/userinfo.bml?user=[[username]]">[[commname]] Community</a>
+
+/community/join.bml.label.sure=You sure?
+
+/community/join.bml.success=Success
+
+/community/join.bml.title=Join Community
+
+/community/leave.bml.button.leave=Leave Community
+
+/community/leave.bml.label.buttontoleave=Press the button below to leave the "[[commname]]" community.
+
+/community/leave.bml.label.infoerror=The specified community information is not valid.
+
+/community/leave.bml.label.logoutfirst=To leave a community you must first <a href="/login.bml?ret=1">log in</a>.
+
+/community/leave.bml.label.removed=You are now removed from the <a href="/userinfo.bml?user=[[commuser]]">[[commname]] Community</a>
+
+/community/leave.bml.success=Success
+
+/community/leave.bml.sure=You sure?
+
+/community/leave.bml.title=Leave Community
+
+/community/search.bml.button.clear=Clear Form
+
+/community/search.bml.button.search=Search!
+
+/community/search.bml.checkbox.onlywithpics=Only communities with pictures
+
+/community/search.bml.contasmember=Contains user <INPUT NAME="fr_user" SIZE=15 MAXLENGTH=15> as a member.
+
+/community/search.bml.label.byinterest=By Interest
+
+/community/search.bml.label.bylocation=By Location
+
+/community/search.bml.label.bytime=By Journal Update Time
+
+/community/search.bml.label.city=City:
+
+/community/search.bml.label.country=Country:
+
+/community/search.bml.label.displayoptions=Display Options
+
+/community/search.bml.label.hasmember=Has Member
+
+/community/search.bml.label.othercriteria=Other Criteria
+
+/community/search.bml.label.outputformat=Output Format:
+
+/community/search.bml.label.records=Records per page:
+
+/community/search.bml.label.searchcomm=Search Communities
+
+/community/search.bml.label.selecriteria=Select the criteria below that you'd like to find communities by.  The results returned are the intersection of all search criteria.  In other words, each checkbox you click means "AND", not "OR".
+
+/community/search.bml.label.sortmethod=Sorting Method:
+
+/community/search.bml.label.stateprovince=State/Province:
+
+/community/search.bml.label.updated=Updated in last 
+
+/community/search.bml.sel.bypicture=By Picture
+
+/community/search.bml.sel.communityname=Community Name
+
+/community/search.bml.sel.commview=Community View
+
+/community/search.bml.sel.day=day
+
+/community/search.bml.sel.month=month
+
+/community/search.bml.sel.simple=Simple
+
+/community/search.bml.sel.updatetime=Update Time
+
+/community/search.bml.sel.username=User Name
+
+/community/search.bml.sel.week=week
+
+/community/search.bml.title=Community Search
+
+/community/search.bml.userlikes=User likes:
+
 /editinfo.bml.allowshocontact.email.if_domainaddy<<
 only show your livejournal email address 
 (<a href="[[siteroot]]/paidaccounts/">paid accounts</a> only), or to show them both.
@@ -318,6 +486,61 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 /editinfo.bml.zip.title=ZIP Code
 
 /editinfo.bml.zip.usonly=5 digit ZIP code; US residents only
+
+/friends/add.bml.add.header=Success
+
+/friends/add.bml.add.text=User (=LJUSER [[user]] LJUSER=) was added to your friend list.  You can view your friends page <a href="[[url]]">here</a>.
+
+/friends/add.bml.add.title=Friend Added!
+
+/friends/add.bml.btn.add=Add [[user]]
+
+/friends/add.bml.btn.modify=Modify
+
+/friends/add.bml.btn.remove=Remove
+
+/friends/add.bml.colors.bg=Background
+
+/friends/add.bml.colors.fg=Foreground
+
+/friends/add.bml.colors.header=Colors
+
+/friends/add.bml.colors.hover=(Hover your mouse over a color to see its name)
+
+/friends/add.bml.colors.text=You may also optionally select the colors that will represent [[user]] in your friends list.
+
+/friends/add.bml.confirm.header=Add <b>[[user]]</b> as a friend?
+
+/friends/add.bml.confirm.text=To add <b>[[user]]</b> to your friends list, click the button below.
+
+/friends/add.bml.confirm.title=Add Friend
+
+/friends/add.bml.error1.header=Login First
+
+/friends/add.bml.error1.text<<
+To add a user to your friends list you must first go and <A HREF=\"/login.bml?ret=1\">log in</A>.  If you don't
+already have an account you can <a href=\"/create.bml\">create one</a> to track your friend's journals. 
+.
+
+/friends/add.bml.error1.title=Add Friend
+
+/friends/add.bml.error2.text=Invalid or missing username given.  To add a friend, go to the <A HREF=\"/friends/edit.bml\">edit friends</A> page.
+
+/friends/add.bml.error3.text=You already have <b>[[user]]</b> listed as a friend.  However, you can modify the colors you've chosen to represent him/her.
+
+/friends/add.bml.error3.title=Modify Friend
+
+/friends/add.bml.groups.header=Friends Groups
+
+/friends/add.bml.groups.nogroup=No friend groups setup.
+
+/friends/add.bml.groups.text=What friend groups do you want to put this user in?  Friend groups are used for filtering your friends list view and also for group-based viewing security of items.
+
+/friends/add.bml.remove.header=Success
+
+/friends/add.bml.remove.text=User (=LJUSER [[user]] LJUSER=) was removed from your friend list.  You can view your friends page <a href="[[url]]">here</a>.
+
+/friends/add.bml.remove.title=Friend Removed!
 
 /friends/index.bml.title=Friends Tools
 

@@ -1,6 +1,6 @@
 (=_CODE
 
- $title = "Leave Community";
+ $title = $ML{'.title'};
  $body = "";
 
  my $dbs = LJ::get_dbs();
@@ -11,7 +11,7 @@
  ###
  my $remote = LJ::get_remote($dbh);
  unless ($remote) {
-     $body = "(=H1 Sorry.. H1=)(=P To leave a community you must first <a href=\"/login.bml?ret=1\">log in</a>. P=)";
+     $body = "(=H1 $ML{'Sorry'}.. H1=)(=P $ML{'.label.logoutfirst'} P=)";
      return;
  }
 
@@ -27,7 +27,7 @@
  ### does this community even exit?
  ###
  unless ($ci) {
-     $body .= "(=H1 Error H1=)(=P The specified community information is not valid. P=)";
+     $body .= "(=H1 $ML{'Error'} H1=)(=P $ML{'.label.infoerror'} P=)";
      return;
  }
  
@@ -37,18 +37,18 @@
      ###
      $dbh->do("DELETE FROM friends WHERE userid=$ci->{'userid'} AND friendid=$remote->{'userid'}");
      
-     $body .= "(=H1 Success H1=)(=P You are now removed from the <a href=\"/userinfo.bml?user=$ci->{'user'}\">$ci->{'name'} Community</a> P=)";
-     
+     $body .= "(=H1 $ML{'.success'} H1=)(=P ".BML::ml('.label.removed',{'commuser'=>$ci->{'user'},'commname'=>$ci->{'name'}})." P=)";
+
      $dbh->do("DELETE FROM logaccess WHERE ownerid=$ci->{'userid'} AND posterid=$remote->{'userid'}");
      
  }   
  else 
  {
-     $body .= "(=H1 You sure? H1=)(=P Press the button below to leave the \"$ci->{'name'}\" community.";
+     $body .= "(=H1 $ML{'.sure'} H1=)(=P ".BML::ml('.label.buttontoleave',{'commname'=>$ci->{'name'}});
      $body .= '<form method="post" action="leave.bml">';
      $body .= "<input type=\"hidden\" name=\"cuserid\" value=\"$ci->{'userid'}\" />";
      $body .= '<input type="hidden" name="confirm" value="1" /><center>';
-     $body .= '<input type="submit" value="Leave Community" /></center></form> P=)';
+     $body .= '<input type="submit" value='.$ML{'.button.leave'}.' /></center></form> P=)';
      return;
  }
 
