@@ -6124,6 +6124,9 @@ sub durl
 # </LJFUNC>
 sub exml
 {
+    # fast path for the commmon case:
+    return $_[0] unless $_[0] =~ /[&\"\'<>]/;
+
     my $a = shift;
     $a =~ s/\&/&amp;/g;
     $a =~ s/\"/&quot;/g;
@@ -6143,6 +6146,10 @@ sub exml
 # </LJFUNC>
 sub ehtml
 {
+    # fast path for the commmon case:
+    return $_[0] unless $_[0] =~ /[&\"\'<>]/;
+
+    # this is faster than doing one substitution with a map:
     my $a = $_[0];
     $a =~ s/\&/&amp;/g;
     $a =~ s/\"/&quot;/g;
@@ -6163,6 +6170,9 @@ sub ehtml
 # </LJFUNC>
 sub etags
 {
+    # fast path for the commmon case:
+    return $_[0] unless $_[0] =~ /[<>]/;
+
     my $a = $_[0];
     $a =~ s/</&lt;/g;
     $a =~ s/>/&gt;/g;
