@@ -2,7 +2,7 @@
 # database schema & data info
 #
 
-mark_clustered("useridmap", "userbio", "syncupdates2", "cmdbuffer", "dudata",
+mark_clustered("useridmap", "userbio", "cmdbuffer", "dudata",
                "log2", "logtext2", "logsubject2", "logprop2", "logsec2",
                "talk2", "talkprop2", "talktext2", "talkleft",
                "userpicblob2", "events",
@@ -588,30 +588,6 @@ CREATE TABLE supportpoints (
   points tinyint(3) unsigned default NULL,
   KEY (spid),
   KEY (userid)
-) 
-EOC
-
-register_tablecreate("syncupdates", <<'EOC');
-CREATE TABLE syncupdates (
-  userid int(10) unsigned NOT NULL default '0',
-  atime datetime NOT NULL default '0000-00-00 00:00:00',
-  nodetype char(1) NOT NULL default '',
-  nodeid int(10) unsigned NOT NULL default '0',
-  atype enum('create','update') NOT NULL default 'create',
-  PRIMARY KEY  (userid,nodetype,nodeid),
-  KEY (userid,atime)
-) 
-EOC
-
-register_tablecreate("syncupdates2", <<'EOC');
-CREATE TABLE syncupdates2 (
-  userid INT UNSIGNED NOT NULL,
-  atime DATETIME NOT NULL,
-  nodetype CHAR(1) NOT NULL,
-  nodeid MEDIUMINT UNSIGNED NOT NULL,
-  atype ENUM('create','update','del') NOT NULL DEFAULT 'create',
-  PRIMARY KEY  (userid,nodetype,nodeid),
-  KEY (userid,atime)
 ) 
 EOC
 

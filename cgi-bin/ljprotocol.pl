@@ -70,6 +70,7 @@ sub error_message
              "501" => "Database error",
              "502" => "Database temporarily unavailable",
              "503" => "Error obtaining necessary database lock",
+             "504" => "Protocol mode no longer supported.",
              );
 
     my $prefix = "";
@@ -782,25 +783,6 @@ sub postevent
         }
     }
 
-    ## update sync table (selected from log table, so logtime is identical!)
-    if ($clustered) {
-        $dbcm->do("REPLACE INTO syncupdates2 (userid, atime, nodetype, nodeid, atype) ".
-                  "VALUES ($ownerid, '$udbh_now', 'L', $itemid, 'create')");
-        if ($dbcm->err) {
-            my $msg = $dbcm->errstr;
-            LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
-            return fail($err,501,$msg);
-        }
-    } else {
-        $dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) ".
-                 "SELECT ownerid, logtime, 'L', itemid, 'create' FROM log WHERE itemid=$itemid");
-        if ($dbh->err) {
-            my $msg = $dbh->errstr;
-            LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-            return fail($err,501,$msg);
-        }
-    }
-
     # keep track of custom security stuff in other table.
     if ($uselogsec) {
         if ($clustered) {
@@ -979,18 +961,6 @@ sub editevent
         ## editing:
         return fail($err,303)
             if ($req->{'event'} =~ /\S/);
-    }
-
-    ## update sync table (before we actually do it!  in case updates
-    ## partially fail below)
-    if ($clustered) {
-        my $synctype = "update";
-        if ($req->{'event'} !~ /\S/) { $synctype = "del"; }
-        $dbcm->do("REPLACE INTO syncupdates2 (userid, atime, nodetype, nodeid, atype) ".
-                  "VALUES ($ownerid, NOW(), 'L', $qitemid, '$synctype')");
-    } else {
-        $dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) ".
-                 "VALUES ($ownerid, NOW(), 'L', $qitemid, 'update')");
     }
 
     # simple logic for deleting an entry
@@ -1339,27 +1309,7 @@ sub getevents
     }
     elsif ($req->{'selecttype'} eq "syncitems")
     {
-        my ($date);
-        ## have a valid date?
-        $date = $req->{'lastsync'} || "0000-00-00 00:00:00";
-        if ($date !~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/) {
-            return fail($err,203,"Invalid syncitems date format.");
-        }
-
-        my $LIMIT = 300;
-        if ($clustered) {
-            $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid ".
-                "FROM log2 l, syncupdates2 s ".
-                "WHERE s.userid=$ownerid AND l.journalid=$ownerid ".
-                "AND s.atime>='$date' AND s.nodetype='L' AND s.nodeid=l.jitemid ".
-                "AND s.nodeid=l.jitemid ORDER BY s.atime LIMIT $LIMIT";
-        } else {
-            $use_master = 1;
-            $sql = "SELECT itemid, eventtime, security, allowmask, posterid ".
-                "FROM log l, syncupdates s WHERE s.userid=$ownerid ".
-                "AND s.atime>='$date' AND s.nodetype='L' AND s.nodeid=l.itemid ".
-                "AND s.nodeid=l.itemid ORDER BY s.atime LIMIT $LIMIT";
-        }
+        return fail($err,504,"syncitems is no longer supported.");
     }
     else
     {
@@ -1879,54 +1829,7 @@ sub list_friends
 sub syncitems
 {
     my ($dbs, $req, $err, $flags) = @_;
-    return undef unless authenticate($dbs, $req, $err, $flags);
-    return undef unless check_altusage($dbs, $req, $err, $flags);
-
-    my $ownerid = $flags->{'ownerid'};
-    my $uowner = $flags->{'u_owner'} || $flags->{'u'};
-    my $dbr = $dbs->{'reader'};
-    my ($date, $sth);
-
-    # cluster differences
-    my ($db, $table) = ($dbs->{'dbh'}, "syncupdates");
-    ($db, $table) = (LJ::get_cluster_reader($uowner), "syncupdates2")
-        if $uowner->{'clusterid'};
-
-    return fail($err,502) unless $db;
-
-    ## have a valid date?
-    $date = $req->{'lastsync'};
-    if ($date) {
-        return fail($err,203,"Invalid date format")
-            unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
-    } else {
-        $date = "0000-00-00 00:00:00";
-    }
-
-    my $LIMIT = 500;
-
-    my $total = $db->selectrow_array("SELECT COUNT(*) FROM $table WHERE ".
-                                     "userid=$ownerid AND atime >= '$date'");
-
-    $sth = $db->prepare("SELECT atime, nodetype, nodeid, atype FROM ".
-                        "$table WHERE userid=$ownerid AND ".
-                        "atime >= '$date' ORDER BY atime LIMIT $LIMIT");
-    $sth->execute;
-    return fail($err,501,$db->errstr) if $db->err;
-
-    my $res = {};
-    my $list = $res->{'syncitems'} = [];
-    my $ct = 0;
-    while (my ($atime, $nodetype, $nodeid, $atype) = $sth->fetchrow_array) {
-        $ct++;
-        push @$list, { 'item' => "$nodetype-$nodeid",
-                       'action' => $atype,
-                       'time' => $atime,
-                   };
-    }
-    $res->{'count'} = $ct;
-    $res->{'total'} = $total;
-    return $res;
+    return fail($err,504,"syncitems is no longer supported.");
 }
 
 sub consolecommand
@@ -2477,29 +2380,10 @@ sub getdaycounts
 sub syncitems
 {
     my ($dbs, $req, $res, $flags) = @_;
-
-    my $err = 0;
-    my $rq = upgrade_request($req);
-
-    my $rs = LJ::Protocol::do_request($dbs, "syncitems", $rq, \$err, $flags);
-    unless ($rs) {
-        $res->{'success'} = "FAIL";
-        $res->{'errmsg'} = LJ::Protocol::error_message($err);
-        return 0;
-    }
-
-    $res->{'success'} = "OK";
-    $res->{'sync_total'} = $rs->{'total'};
-    $res->{'sync_count'} = $rs->{'count'};
-
-    my $ct = 0;
-    foreach my $s (@{ $rs->{'syncitems'} }) {
-        $ct++;
-        foreach my $a (qw(item action time)) {
-            $res->{"sync_${ct}_$a"} = $s->{$a};
-        }
-    }
-    return 1;
+    $res->{'success'} = "FAIL";
+    $res->{'errcode'} = 504;
+    $res->{'errmsg'} = LJ::Protocol::error_message(504);
+    return 0;
 }
 
 ## flat wrapper: limited functionality.  (1 command only, server-parsed only)
