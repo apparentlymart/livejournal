@@ -489,7 +489,11 @@ RTE
     $$body .= "<p>" . $prop_check->('backdated', 'backdate') . " ";
 
     # don't auto-format
-    $$body .= $prop_check->('preformatted', 'noformat') . LJ::help_icon("noautoformat", " ") . "</p>\n";
+    if ($richtext) {
+        $$body .= LJ::html_hidden('prop_opt_preformatted', '1') . "\n";
+    } else {
+        $$body .= $prop_check->('preformatted', 'noformat') . LJ::help_icon("noautoformat", " ") . "</p>\n";
+    }
 
     # don't allow comments
     $$body .= "<p>" . $prop_check->('nocomments') . " ";

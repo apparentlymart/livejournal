@@ -125,17 +125,6 @@ function ChangeTSize(dir) {
     return textsize;
 }
 
-//Fixup midas generated strings.
-function escapeChars(bad,good,content) {
-    var pos;
-    while (content.indexOf(bad)>-1)
-    {
-        pos = content.indexOf(bad);
-        content = "" + (content.substring(0, pos) + good + content.substring((pos + bad.length), content.length));
-    }
-    return content;
-}
-
 //Add LJ specific tags.
 function AddLJTag(rte, type) {
     var cw = document.getElementById(rte).contentWindow;
@@ -290,11 +279,7 @@ function updateRTE(rte) {
 
     if (isRichText) {
         if (oHdnMessage.value == null) oHdnMessage.value = "";
-
-        //Fixup.
-        var content = oMessageFrame.contentWindow.document.body.innerHTML;
-        content = escapeChars('<br>',' ',content); // we already add breaks on newlines.
-        oHdnMessage.value = content;
+        oHdnMessage.value = oMessageFrame.contentWindow.document.body.innerHTML;
 
         //exception for Mozilla
         if (oHdnMessage.value.indexOf('<br>') > -1 && oHdnMessage.value.length == 8) oHdnMessage.value = "";
