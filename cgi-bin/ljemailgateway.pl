@@ -17,46 +17,25 @@ require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 require "$ENV{LJHOME}/cgi-bin/ljprotocol.pl";
 use MIME::Words ();
 use IO::Handle;
+use LWP::UserAgent;
+use Digest::MD5 qw(md5_hex);
 
+# $rv - scalar ref from mailgated.
+# set to 1 to dequeue, 0 to leave for further processing.
 sub process {
-    my ($entity, $to) = @_;
+    my ($entity, $to, $rv) = @_;
     my $head = $entity->head;
     my ($subject, $body);
     $head->unfold;
 
-    my $err = sub {
-        my ($msg, $who) = @_;
-
-        # FIXME: Need to log last 10 errors to DB / memcache
-        # and create a page to watch this stuff.
-
-        my $errbody;
-        $errbody .= "There was an error during your email posting:\n\n";
-        $errbody .= $msg;
-        if ($body) {
-            $errbody .= "\n\n\nOriginal posting follows:\n\n";
-            $errbody .= $body;
-        }
-
-        # Rate limit email to 1/5min/address
-        if ($who && LJ::MemCache::add("rate_eperr:$who", 5, 300)) {
-            LJ::send_mail({
-                    'to' => $who,
-                    'from' => $LJ::BOGUS_EMAIL,
-                    'fromname' => "$LJ::SITENAME Error",
-                    'subject' => "$LJ::SITENAME posting error: $subject",
-                    'body' => $errbody
-                    });
-        }
-        return $msg;
-    };
+    $$rv = 1;  # default dequeue
 
     # Parse email for lj specific info
     my ($user, $journal, $pin);
     ($user, $pin) = split(/\+/, $to);
     ($user, $journal) = split(/\./, $user) if $user =~ /\./;
     my $u = LJ::load_user($user);
-    return 0 unless $u;
+    return unless $u;
     LJ::load_user_props($u, 'emailpost_pin') unless (lc($pin) eq 'pgp' && $LJ::USE_PGP);
 
     # Pick what address to send potential errors to.
@@ -73,10 +52,39 @@ sub process {
     }
     $err_addr ||= $u->{email};
 
+    my $err = sub {
+        my ($msg, $opt) = @_;
+
+        # FIXME: Need to log last 10 errors to DB / memcache
+        # and create a page to watch this stuff.
+
+        my $errbody;
+        $errbody .= "There was an error during your email posting:\n\n";
+        $errbody .= $msg;
+        if ($body) {
+            $errbody .= "\n\n\nOriginal posting follows:\n\n";
+            $errbody .= $body;
+        }
+
+        # Rate limit email to 1/5min/address
+        if ($opt->{'sendmail'} && $err_addr &&
+            LJ::MemCache::add("rate_eperr:$err_addr", 5, 300)) {
+            LJ::send_mail({
+                    'to' => $err_addr,
+                    'from' => $LJ::BOGUS_EMAIL,
+                    'fromname' => "$LJ::SITENAME Error",
+                    'subject' => "$LJ::SITENAME posting error: $subject",
+                    'body' => $errbody
+                    });
+        }
+        $$rv = 0 if $opt->{'retry'};
+        return $msg;
+    };
+
     # Get various email parts.
     my $content_type = $head->get('Content-type:');
-    my $tent = get_entity($entity, 'text');
-    return $err->("Unable to find any text content in your mail", $err_addr) unless $tent;
+    my $tent = get_entity($entity);
+    return $err->("Unable to find any text content in your mail", { sendmail => 1 }) unless $tent;
     $subject = $head->get('Subject:');
     $body = $tent->bodyhandle->as_string;
     $body =~ s/^\s+//;
@@ -101,10 +109,10 @@ sub process {
             }
         }
         return $err->("Unauthorized sender address: $from") unless $ok; # don't mail user due to bounce spam
-        return $err->("Unable to locate your PIN.", $err_addr) unless $pin;
-        return $err->("Invalid PIN.", $err_addr) unless lc($pin) eq lc($u->{emailpost_pin});
+        return $err->("Unable to locate your PIN.", { sendmail => 1 }) unless $pin;
+        return $err->("Invalid PIN.", { sendmail => 1 }) unless lc($pin) eq lc($u->{emailpost_pin});
     }
-    return $err->("Email gateway access denied for your account type.", $err_addr)
+    return $err->("Email gateway access denied for your account type.", { sendmail => 1 })
         unless LJ::get_cap($u, "emailpost");
 
     # Snag charset and do utf-8 conversion
@@ -112,7 +120,7 @@ sub process {
     $charset = $1 if $content_type =~ /\bcharset=['"]?(\S+?)['"]?[\s\;]/i;
     $format = $1 if $content_type =~ /\bformat=['"]?(\S+?)['"]?[\s\;]/i;
     if (defined($charset) && $charset !~ /^UTF-?8$/i) { # no charset? assume us-ascii
-        return $err->("Unknown charset encoding type.", $err_addr)
+        return $err->("Unknown charset encoding type.", { sendmail => 1 })
             unless Unicode::MapUTF8::utf8_supported_charset($charset);
         $body = Unicode::MapUTF8::to_utf8({-string=>$body, -charset=>$charset});
 
@@ -141,7 +149,7 @@ sub process {
                 'invalid_key' => "Your PGP key is invalid.  Please upload a proper key.",
                 'not_signed' => "You specified PGP verification, but your message isn't PGP signed!");
         my $gpgcode = LJ::Emailpost::check_sig($u, $entity);
-        return $err->($gpg_errcodes{$gpgcode}, $err_addr) unless $gpgcode eq 'good';
+        return $err->($gpg_errcodes{$gpgcode}, { sendmail => 1 }) unless $gpgcode eq 'good';
     }
 
     $body =~ s/^(?:\- )?[\-_]{2,}\s*\r?\n.*//ms; # trim sigs
@@ -179,15 +187,15 @@ sub process {
             $amask = (1 << $group->{groupnum});
             $lj_headers{security} = 'usemask';
         } else {
-            $err->("Friendgroup \"$lj_headers{security}\" not found.  Your journal entry was posted privately.", $err_addr);
+            $err->("Friendgroup \"$lj_headers{security}\" not found.  Your journal entry was posted privately.", { sendmail => 1 });
             $lj_headers{security} = 'private';
         }
     }
 
     # FIXME: Pict posting integration should fit in here.
-    # my $ient = get_entity($entity, 'image');
-    # if ($ient) {
-      # my $img = $ient->bodyhandle;
+    # FIXME: Need to check fb_account userprop.
+#     upload_images($entity) || 
+#       return $err->("Error posting picture to Fotobilder installation.", { retry => 1 });
 
     my $req = {
         'usejournal' => $journal,
@@ -255,40 +263,48 @@ sub set_allowed_senders {
     LJ::set_userprop($u, "emailpost_allowfrom", join(", ", @addresses));
 }
 
+# By default, returns first plain text entity from email message.
+# Specifying a type will return an array of MIME::Entity handles
+# of that type. (image, application, etc)
+# Specifying a type of 'all' will return all MIME::Entities,
+# regardless of type.
 sub get_entity
 {
-    my ($entity,$etype) = @_;
-    $etype ||= 'text';
+    my ($entity, $opts) = @_;
+    return if $opts && ref $opts ne 'HASH';
+    my $type = $opts->{'type'} || 'text';
 
     my $head = $entity->head;
     my $mime_type = $head->mime_type;
-    if ($mime_type eq "text/plain" && $etype eq 'text') {
-        return $entity;
-    }
 
-    my $partcount = $entity->parts;
-    if ($mime_type eq "multipart/alternative" ||
-        $mime_type eq "multipart/signed" ||
-        $mime_type eq "multipart/mixed") {
+    return $entity if $type eq 'text' && $mime_type eq "text/plain";
+    my @entities;
+
+    # Only bother looking in messages that advertise attachments
+    if ($mime_type =~ m#^multipart/(?:alternative|signed|mixed)$#) {
+        my $partcount = $entity->parts;
         for (my $i=0; $i<$partcount; $i++) {
             my $alte = $entity->parts($i);
-            return $alte if $alte->mime_type eq "text/plain" &&
-                            $etype eq 'text';
-            return $alte if $alte->mime_type =~ /image\// &&
-                            $etype eq 'image';
+
+            return $alte if $alte->mime_type eq "text/plain" && $type eq 'text';
+            push @entities, $alte if $type eq 'all';
+            push @entities, $alte if $alte->mime_type =~ /^$type\// &&
+                                     $type ne 'all';
+
+            # Recursively search through nested MIME for various pieces
+            if ($alte->mime_type =~ m#^multipart/(?:mixed|related)$#) {
+                if ($type eq 'text') {
+                    my $text_entity = get_entity($entity->parts($i));
+                    return $text_entity if $text_entity;
+                } else {
+                    push @entities, get_entity($entity->parts($i), $opts);
+                }
+            }
         }
-        return undef;
     }
 
-    if ($mime_type eq "multipart/related" && $etype eq 'text') {
-        if ($partcount) {
-            return get_entity($entity->parts(0), 'text');
-        }
-        return undef;
-    }
-
-    $entity->dump_skeleton(\*STDERR);
-    return undef;
+    return @entities if $type ne 'text' && scalar @entities;
+    return;
 }
 
 
@@ -303,7 +319,7 @@ sub check_sig {
     return 'no_key' unless $key;
 
     # Create work directory.
-    my $tmpdir = File::Temp::tempdir("ljmailgate_" . 'X' x 20, DIR=>'/tmp', CLEANUP=>1 );
+    my $tmpdir = File::Temp::tempdir("ljmailgate_" . 'X' x 20, DIR=>'/tmp');
     return 'bad_tmpdir' unless chdir($tmpdir);
 
     # Pull in user's key, add to keyring.
@@ -331,3 +347,23 @@ sub check_sig {
     }
 }
 
+# Upload images to a Fotobilder installation.
+# Return codes:
+# 1 - no images found
+# hashref - { title => url } for each image uploaded
+# undef - failure during upload
+sub upload_images
+{
+    my $entity = shift;
+    my @imgs = get_entity($entity, { type => 'image' });
+    return 1 unless scalar @imgs;
+
+    foreach my $img_entity (@imgs) {
+        my $img = $img_entity->bodyhandle;
+        print $img->path . "\n";
+        $img->as_string; # slurp decoded img data
+        # FIXME:  todo, rip off fotoup.pl
+    }
+
+    return;
+}

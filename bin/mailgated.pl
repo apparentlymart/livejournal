@@ -6,7 +6,7 @@
 
 use strict;
 use vars qw($opt $mailspool $pidfile $workdir
-            $pid $hostname $busy $stop);
+            $pid $hostname $busy $stop $lock);
 
 use Getopt::Long;
 use Sys::Hostname;
@@ -29,9 +29,13 @@ $SIG{$_} = \&stop_daemon foreach qw/INT TERM/;
 $| = 1;
 
 $opt = {};
-GetOptions $opt, qw/stop foreground workdir pidfile/;
+GetOptions $opt, qw/stop foreground workdir pidfile lock=s/;
 
-$workdir = $opt->{'workdir'} || '/tmp';
+# setup defaults
+$lock    = $opt->{'lock'}    || "hostname";
+die "Invalid lock mechanism specified."
+    unless $lock =~ /hostname|none|ddlockd/i;
+$workdir = $opt->{'workdir'} || "$mailspool/tmp";
 $pidfile = $opt->{'pidfile'} || "/var/run/mailgated.pid";
 
 # Maildir expected.
@@ -103,7 +107,8 @@ while (1) {
     debug("\tprocess");
     opendir(MDIR, $mailspool) || die "Unable to open mailspool $mailspool: $!\n";
     foreach (readdir(MDIR)) {
-        next unless /\.$hostname\b/;
+        next if /^\./;
+        next if $lock eq 'hostname' && ! /\.$hostname\b/;
         process($_);
     }
     closedir MDIR;
@@ -128,22 +133,26 @@ sub debug
     print STDERR (shift) . "\n";
 }
 
-# FIXME: use rename() to append/change
 # the filename of a mail message - Maildir++ style.
 # (time.pid.hostname:flags)
 sub set_status
 {
-    my $file = shift;
-    my ($name, $flags) = ($1, $2) if $file =~ /^(.+?):(.+)$/;
-    # ......  todo
-    return 0;
+    my ($file, $reason, $resetattempt) = @_;
+    my ($name, $flags) = ($1, $2) if $file =~ /^(.+?)(?::(.+))?$/;
+    my ($oldreason, $attempt) = ($1, $2) if $flags =~ /^(\w)(\d+)$/;
+    $reason ||= $oldreason;
+    $attempt = 0 if $resetattempt;
+
+    my $newname = $name . ":" . $reason . $attempt++;
+    return 0; # todo.  rename() didn't work in a quick test.
 }
 
-# return the status code of a mail message.
+# return the status code and attempt number
+# of a mail message.
 sub get_status
 {
     my $file = shift;
-    return $1 if $file =~ /:(.+)$/;
+    return ($1, $2) if $file =~ /:(\w)(\d+)$/;
 }
 
 # Either an unrecoverable error, or a total success.  ;)
@@ -195,8 +204,11 @@ sub process
         return dequeue($file, "Spam");
     }
 
+    # quick and dirty (and effective) scan for viruses
+    return dequeue($file, "Virus found") if virus_check($entity);
+
     # stop more spam, based on body text checks
-    my $tent = LJ::Emailpost::get_entity($entity, 'text');
+    my $tent = LJ::Emailpost::get_entity($entity);
     return dequeue($file, "Can't find text entity") unless $tent;
     my $body = $tent->bodyhandle->as_string;
     $body = LJ::trim($body);
@@ -217,11 +229,17 @@ sub process
         # unresolved:  where to temporarily store messages before they're approved?
         # perhaps the modblob table?  perhaps a column it can be used to determine
         # whether it's a moderated community post vs. an un-acked phone post.
-        my $post_rv = LJ::Emailpost::process($entity, $user);
+        my $post_rv;
+        my $post_msg = LJ::Emailpost::process($entity, $user, \$post_rv);
 
-        # FIXME: Don't dequeue (retry instead) on a few specific post_errors
-        # FIXME: change status of message for subsequent process runs?
-        return dequeue($file, $post_rv);
+        if (! $post_rv) {  # don't dequeue
+            debug("\t\t keeping for retry: $post_msg");
+            # FIXME:  set_status() of mail message?
+            return;
+        } else {           # dequeue
+            return dequeue($file, $post_msg);
+        }
+
     }
 
     # From this point on we know it's a support request of some type,
@@ -351,6 +369,36 @@ EMAIL_END
     }
 }
 
+# returns true on found virus
+sub virus_check
+{
+    my $entity = shift;
+    return unless $entity;
+
+    my @exe = LJ::Emailpost::get_entity($entity, { type => 'all' });
+    return unless scalar @exe;
+
+    # If an attachment's encoding begins with one of these strings,
+    # we want to completely drop the message.
+    # (Other 'clean' attachments are silently ignored, and the
+    # message is allowed.)
+    my @virus_sigs =
+        qw(
+            TVqQAAMAA TVpQAAIAA TVpAALQAc TVpyAXkAX TVrmAU4AA
+            TVrhARwAk TVoFAQUAA TVoAAAQAA TVoIARMAA TVouARsAA
+            TVrQAT8AA UEsDBBQAA UEsDBAoAAA
+            R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy
+          );
+
+    foreach my $part (@exe) {
+        my $contents = $part->stringify_body;
+        $contents =~ s/\n.*//s;
+        return 1 if grep { $contents =~ /^$_/; } @virus_sigs;
+    }
+
+    return;
+}
+
 # Remove prior run workdirs.
 # File::Temp's CLEANUP only works upon program exit.
 sub cleanup
@@ -367,7 +415,7 @@ sub cleanup
         last if $limit >= 50;
         $limit++;
         my $modtime = (stat("$workdir/$_"))[9];
-        if ($now - $modtime > 3600) {
+        if ($now - $modtime > 300) {
             File::Path::rmtree("$workdir/$_");
             debug("\t\t$workdir/$_");
         }
