@@ -29,6 +29,10 @@ body<=
      $dbcm = LJ::get_cluster_master($u);
  }
 
+ unless ($dbcm) {
+     return "<?h1 Maintenance h1?><?p Database currently unavailable.  Most likely, maintenance is being performed. p?>";
+ }
+
  ### get some info about the comment being deleted ... which journal entry is it about?
  ### and if it's being deleted, is it authorized to be deleted by this user?
  my $tp;
