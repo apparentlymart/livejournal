@@ -19,7 +19,7 @@ BODY<=
  my $sth = $dbr->prepare("SELECT question, answer, lastmoduserid, ".
 			 "DATE_FORMAT(lastmodtime, '%Y-%m-%d'), ".
 			 "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
-			 "WHERE $where");
+			 "WHERE $where ORDER BY sortorder");
  $sth->execute;
  my ($question, $answer, $unixmodtime, $lastmoduserid, $lastmodtime);
  while (($question, $answer, $lastmoduserid, $lastmodtime, $unixmodtime) =
