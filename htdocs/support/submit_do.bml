@@ -51,6 +51,7 @@ BODY<=
  $req{'subject'} = $FORM{'subject'};
  $req{'spcatid'} = $FORM{'spcatid'};
 
+ return LJ::bad_input(@errors) if @errors;
  my $spid = LJ::Support::file_request($dbh, \@errors, \%req);
  return LJ::bad_input(@errors) if @errors;
  
