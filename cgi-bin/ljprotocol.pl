@@ -806,7 +806,7 @@ sub postevent
             my $mods = LJ::load_rel_user($dbh, $ownerid, 'M') || [];
             if (@$mods) {
                 my $in = join(", ", map { $_+0 } @$mods );
-                my $emails = $dbh->selectcol_arrayref("SELECT email FROM user ".
+                my $emails = $dbh->selectcol_arrayref("SELECT email FROM user USE INDEX (PRIMARY) ".
                                                       "WHERE userid IN ($in) AND status='A'") || [];
                 my $ct;
                 foreach my $to (@$emails) {
@@ -2091,15 +2091,15 @@ sub list_friendgroups
     my $dbr = LJ::get_db_reader();
 
     my $sth = $dbr->prepare("SELECT groupnum, groupname, sortorder, is_public ".
-                            "FROM friendgroup WHERE userid=$u->{'userid'} ".
-                            "ORDER BY sortorder");
-    $sth->execute;
+                            "FROM friendgroup WHERE userid=?");
+    $sth->execute($u->{'userid'});
     while (my ($gid, $name, $sort, $public) = $sth->fetchrow_array) {
         push @$res, { 'id' => $gid,
                       'name' => $name,
                       'sortorder' => $sort,
                       'public' => $public };
     }
+    @$res = sort { $a->{sortorder} <=> $b->{sortorder} } @$res;
     return $res;
 }
 
