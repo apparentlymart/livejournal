@@ -924,6 +924,7 @@ sub Entry
     }
 
     $e->{'time'} = DateTime_parts($arg->{'dateparts'});
+    $e->{'depth'} = 0;  # Entries are always depth 0.  Comments are 1+.
     
     if ($arg->{'security'} eq "public") {
         # do nothing.

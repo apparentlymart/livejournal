@@ -106,7 +106,7 @@ sub EntryPage
 
     my $pics = LJ::Talk::get_subjecticons()->{'pic'};  # hashref of imgname => { w, h, img }
     my $convert_comments = sub {
-        my ($self, $destlist, $srclist) = @_;
+        my ($self, $destlist, $srclist, $parent, $depth) = @_;
 
         foreach my $com (@$srclist) {
             my $dtalkid = $com->{'talkid'} * 256 + $entry->{'anum'};
@@ -136,6 +136,7 @@ sub EntryPage
                     'picture_keyword' => $com->{'props'}->{'picture_keyword'},
                 },
                 'permalink_url' => "$permalink?thread=$dtalkid#t$dtalkid",
+                'reply_url' => "$permalink?replyto=$dtalkid",
                 'poster' => UserLite($user{$com->{'posterid'}}),
                 'replies' => [],
                 'subject' => LJ::ehtml($com->{'subject'}),
@@ -145,15 +146,17 @@ sub EntryPage
                 'userpic' => $comment_userpic,
                 'time' => $datetime,
                 'full' => $com->{'_loaded'} ? 1 : 0,
+                'parent' => $parent,
+                'depth' => $depth,
             };
             
             push @$destlist, $s2com;
 
-            $self->($self, $s2com->{'replies'}, $com->{'children'});
+            $self->($self, $s2com->{'replies'}, $com->{'children'}, $s2com, $depth+1);
         }
     };
     $p->{'comments'} = [];
-    $convert_comments->($convert_comments, $p->{'comments'}, \@comments);
+    $convert_comments->($convert_comments, $p->{'comments'}, \@comments, undef, 1);
 
     $p->{'comment_pages'} = ItemRange({
         'all_sub_items_displayed' => ($copts->{'out_pages'} == 1),

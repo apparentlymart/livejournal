@@ -226,6 +226,7 @@ class EntryLite
     var readonly string{} metadata "Post metadata. Keys: 'music', 'mood'";
 
     var readonly string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
+    var int depth "Depth of entry.  Top-level journal entries are depth zero.  Top-level comments are depth 1.  Each layer of sub-comments increases by 1.";
 }
 
 class Entry extends EntryLite
@@ -256,6 +257,8 @@ class Comment extends EntryLite
     var int talkid "Server stored ID number for this comment.";
     var Comment[] replies "Comments replying to this comment.";
     var bool full "True if all information is available for this comment.  False if only the subject, poster, and date are available.  (collapsed threads)";
+    var Comment parent "Reference to parent comment, or undef if a top-level comment.";
+    var readonly string reply_url "URL to reply to this comment.";
 }
 
 ### Userinfo
@@ -805,7 +808,7 @@ property string text_nosubject {
     example = "No Subject";
     note = "This only appears in places where a subject line is required, such as on a month view.";
 }
-set text_nosubject = "No Subject";
+set text_nosubject = "(no subject)";
 
 property string text_noentries_recent {
     des = "Text do display when there are no entries on the recent or friends views";
