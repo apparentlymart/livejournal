@@ -95,7 +95,7 @@ $dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart) ".
 my $cmid = $dbh->{'mysql_insertid'};
 
 # set readonly cap bit on user
-$dbh->do("UPDATE user SET caps=caps|(1<<$readonly_bit) WHERE userid=$userid");
+LJ::update_user($userid, { raw => "caps=caps|(1<<$readonly_bit)" });
 $dbh->do("SELECT RELEASE_LOCK('moveucluster-$user')");
 
 # wait a bit for writes to stop if journal is somewhat active (last week update)
@@ -309,7 +309,7 @@ if ($sclust == 0)
     if ($opt_del)
     {
         # before we start deleting, record they've moved servers.
-        $dbh->do("UPDATE user SET dversion=$dversion, clusterid=$dclust WHERE userid=$userid");
+        LJ::update_user($userid, { dversion => $dversion, clusterid => $dclust });
 
         $done = 0;
         $stime = time();
@@ -336,7 +336,7 @@ if ($sclust == 0)
         }
 
         # unset read-only bit (marks the move is complete, also, and not aborted mid-delete)
-        $dbh->do("UPDATE user SET caps=caps&~(1<<$readonly_bit) WHERE userid=$userid");
+        LJ::update_user($userid, { raw => "caps=caps&~(1<<$readonly_bit)" });
         $dbh->do("UPDATE clustermove SET sdeleted='1', timedone=UNIX_TIMESTAMP() ".
                  "WHERE cmid=?", undef, $cmid);
                  
@@ -344,8 +344,8 @@ if ($sclust == 0)
     else
     {
         # unset readonly and move to new cluster in one update
-        $dbh->do("UPDATE user SET dversion=$dversion, clusterid=$dclust, caps=caps&~(1<<$readonly_bit) ".
-                 "WHERE userid=$userid");
+        LJ::update_user($userid, { dversion => $dversion, clusterid => $dclust,
+                                   raw => "caps=caps&~(1<<$readonly_bit)" });
         $dbh->do("UPDATE clustermove SET sdeleted='0', timedone=UNIX_TIMESTAMP() ".
                  "WHERE cmid=?", undef, $cmid);
     }
@@ -567,8 +567,7 @@ elsif ($sclust > 0)
     foreach (keys %pendreplace) { $flush->($_); }
 
     # unset readonly and move to new cluster in one update
-    $dbh->do("UPDATE user SET clusterid=$dclust, caps=caps&~(1<<$readonly_bit) ".
-             "WHERE userid=$userid");
+    LJ::update_user($userid, { clusterid => $dclust, raw => "caps=caps&~(1<<$readonly_bit)" });
     print "Moved.\n";
 
     # delete from source cluster
