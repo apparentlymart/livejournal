@@ -2076,6 +2076,11 @@ register_alter(sub {
                  "count int(5) UNSIGNED NOT NULL DEFAULT 0 AFTER challenge");
     }
 
+    if (column_type("userblob", "length") =~ /mediumint/)
+    {
+        do_alter("userblob", "ALTER TABLE userblob MODIFY length INT UNSIGNED");
+    }
+
 
 });
 
