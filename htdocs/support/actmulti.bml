@@ -48,6 +48,33 @@ body<=
         # return redirection back? or success message otherwise
         return BML::redirect($POST{ret}) if $POST{ret};
         return "<?h1 Success h1?><?p The requests you have specified have been closed. p?>";
+    } elsif ($POST{'action:move'}) {
+        return "<?h1 Error h1?><?p You don't have access to move requests out of this category. p?>"
+            unless LJ::Support::can_perform_actions({ _cat => $cat }, $remote);
+
+        my $newcat = $POST{'changecat'} + 0;
+        my $cats = LJ::Support::load_cats();
+        return "<?h1 Error h1?><?p Category invalid. p?>" unless $cats->{$newcat};
+
+        # now move all of these requests
+        my $dbh = LJ::get_db_writer();
+        my $in = join ',', @ids;
+        $dbh->do("UPDATE support SET spcatid = ? WHERE spid IN ($in) AND spcatid = ?",
+                 undef, $newcat, $spcatid);
+
+        # now add movement notices
+        my @stmts;
+        foreach (@ids) {
+            push @stmts, "($_, UNIX_TIMESTAMP(), 'internal', $remote->{userid}, " .
+                         "'(Mass move from $cats->{$spcatid}->{catname} to $cats->{$newcat}->{catname}.)')";
+        }
+        my $sql = "INSERT INTO supportlog (spid, timelogged, type, userid, message) VALUES ";
+        $sql .= join ',', @stmts;
+        $dbh->do($sql);
+
+        # done now
+        return BML::redirect($POST{ret}) if $POST{ret};
+        return "<?h1 Success h1?><?p The requests have been moved. p?>";
     }
 }
 _code?>
