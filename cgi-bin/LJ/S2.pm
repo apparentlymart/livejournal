@@ -1730,6 +1730,69 @@ sub Page__get_latest_month
 *EntryPage__get_latest_month = \&Page__get_latest_month;
 *ReplyPage__get_latest_month = \&Page__get_latest_month;
 
+sub palimg_modify
+{
+    my ($ctx, $filename, $items) = @_;
+    return undef unless $filename =~ /^\w[\w\/]*\.(gif|png)$/;
+    my $url = "$LJ::SITEROOT/palimg/$filename";
+    return $url unless $items && @$items;
+    return undef if @$items > 7;
+    $url .= "/p";
+    foreach my $pi (@$items) {
+        die "Can't modify a palette index greater than 15 with palimg_modify\n" if
+            $pi->{'index'} > 15;
+        $url .= sprintf("%1x%02x%02x%02x", 
+                        $pi->{'index'},
+                        $pi->{'color'}->{'r'},
+                        $pi->{'color'}->{'g'},
+                        $pi->{'color'}->{'b'});
+    }
+    return $url;
+}
+
+sub palimg_tint
+{
+    my ($ctx, $filename, $bcol, $dcol) = @_;  # bright color, dark color [opt]
+    return undef unless $filename =~ /^\w[\w\/]*\.(gif|png)$/;
+    my $url = "$LJ::SITEROOT/palimg/$filename";
+    $url .= "/pt";
+    foreach my $col ($bcol, $dcol) {
+        next unless $col;
+        $url .= sprintf("%02x%02x%02x", 
+                        $col->{'r'}, $col->{'g'}, $col->{'b'});
+    }
+    return $url;
+}
+
+sub palimg_gradient
+{
+    my ($ctx, $filename, $start, $end) = @_;
+    return undef unless $filename =~ /^\w[\w\/]*\.(gif|png)$/;
+    my $url = "$LJ::SITEROOT/palimg/$filename";
+    $url .= "/pg";
+    foreach my $pi ($start, $end) {
+        next unless $pi;
+        $url .= sprintf("%02x%02x%02x%02x", 
+                        $pi->{'index'},
+                        $pi->{'color'}->{'r'},
+                        $pi->{'color'}->{'g'},
+                        $pi->{'color'}->{'b'});
+    }
+    return $url;
+}
+
+sub PalItem
+{
+    my ($ctx, $idx, $color) = @_;
+    return undef unless $color && $color->{'_type'} eq "Color";
+    return undef unless $idx >= 0 && $idx <= 255;
+    return {
+        '_type' => 'PalItem',
+        'color' => $color,
+        'index' => $idx+0,
+    };
+}
+
 sub YearMonth__month_format
 {
     my ($ctx, $this, $fmt) = @_;

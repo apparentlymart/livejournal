@@ -82,6 +82,7 @@ class Color
   function builtin average(Color other) : Color "Returns color averaged with \$other color.";
 }
 
+
 ##[ site-core classes ]
 
 class Date
@@ -534,6 +535,13 @@ class ReplyPage extends Page
     var ReplyForm form "The reply form.";
 }
 
+class PalItem
+"A specification for a numbered palette index in a GIF or PNG to be changed to a certain color"
+{
+    var int index "Integer palette index.";
+    var Color color "Color to put at specified index.";
+}
+
 ##[ Built-in Functions ]
 
 function builtin eurl (string s) : string
@@ -595,6 +603,22 @@ function builtin get_plural_phrase(int n, string prop) : string
 
 function builtin weekdays() : int[] 
 "Integers representing the days of the week. This will start on Monday (2) or Sunday (1) depending on the property setting for start-of-week and go to Sunday (1) or Saturday (7)";
+
+function builtin PalItem(int index, Color c) : PalItem
+"Convenience constructor to make populating an array of PalItems (like in [function[palimg_modify]]) easy.";
+
+function builtin palimg_modify(string filename, PalItem[] items) : string
+"Return a URL to the specified filename (relative to the palimg root) with its palette table altered, once for each provided [class[PalItem]].  Restrictions:  only 7 palette entries may be modified, and the PalItem indexes must be 0-15.";
+
+function builtin palimg_tint(string filename, Color bright) : string
+    "Return a URL to the specified filename (relative to the palimg root) with its palette table tinted.  The given 'bright' color will be the new white, and darkest color remains black.";
+
+function builtin palimg_tint(string filename, Color bright, Color dark) : string
+    "Return a URL to the specified filename (relative to the palimg root) with its palette table tinted.  The given 'bright' color will be the new white, and the given 'dark' color is the new black.";
+
+function builtin palimg_gradient(string filename, PalItem start, PalItem end) : string
+    "Return a URL to the specified filename (relative to the palimg root) with its palette table made into a gradient.  All palette entries between the inclusive indexes of \$start and \$end will fade from the colors in \$start and \$end.  The palette indexes for the start and end can be between 0 and 255.";
+
 
 ##[ properties ]
 
