@@ -835,7 +835,7 @@ sub canonical_url {
     unless ($allow_all) {
         # see what protocol they want, default to http
         my $pref = "http";
-        $pref = $1 if $url =~ /^(https?|ftp):/;
+        $pref = $1 if $url =~ /^(https?|ftp|webcal):/;
 
         # strip out the protocol section
         $url =~ s!^.*?:/*!!;
