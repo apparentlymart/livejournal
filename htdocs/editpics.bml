@@ -758,14 +758,14 @@
         $body .= "<tr><td align='right'>";
         $body .= "<?help $LJ::HELPURL{'upic_keywords'} help?>";
         $body .= "</td><td align='right'><label for='keywords'>";
-        $body .= "Keywords:</label></td><td align='left'>";
+        $body .= "$ML{'.label.keywords'}</label></td><td align='left'>";
         $body .= LJ::html_text({ 'name' => 'keywords', 'size' => '40' });
         $body .= "</td></tr>";
 
         if ($u->{'dversion'} > 6) {
             $body .= "<tr><td align='right'>";
             $body .= "<?help $LJ::HELPURL{'upic_comments'} help?>";
-            $body .= "</td><td align='right'><label for='comments'> Comments:</label></td><td align='left'>";
+            $body .= "</td><td align='right'><label for='comments'>$ML{'.label.comment'}</label></td><td align='left'>";
             $body .= LJ::html_text({ 'name' => 'comments', 'size' => '40', 'maxlength' => LJ::CMAX_UPIC_COMMENT });
             $body .= "</td></tr>";
         }
