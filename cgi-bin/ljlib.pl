@@ -4850,13 +4850,13 @@ sub can_use_journal
     ## check if user has access
     return 1 if LJ::check_rel($ownerid, $qposterid, 'P');
 
-    # let's check if this is community allowing post access to non-members 
+    # let's check if this community is allowing post access to non-members 
     my $dbr = LJ::get_db_reader();
     LJ::load_user_props($dbr, $uowner, "nonmember_posting");
     if ($uowner->{'nonmember_posting'}) {
-        my ($membership, $postlevel) = $dbr->selectrow_array("SELECT membership, postlevel FROM ".
-                                                             "community WHERE userid=$ownerid");
-        return 1 if $membership eq 'open' && $postlevel eq 'members';
+        my $postlevel = $dbr->selectrow_array("SELECT postlevel FROM ".
+                                              "community WHERE userid=$ownerid");
+        return 1 if $postlevel eq 'members';
     }
 
     $res->{'errmsg'} = "You do not have access to post to this journal.";
