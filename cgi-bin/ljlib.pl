@@ -1178,6 +1178,9 @@ sub get_recent_items
 
     my $clusterid = $opts->{'clusterid'}+0;
     my @sources = ("cluster$clusterid");
+    if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$clusterid}) {
+        @sources = ("cluster${clusterid}${ab}");
+    }
     unshift @sources, ("cluster${clusterid}lite", "cluster${clusterid}slave")
         if $opts->{'clustersource'} eq "slave";
     my $logdb = LJ::get_dbh(@sources);
