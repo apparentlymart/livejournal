@@ -55,6 +55,7 @@ class Color
   var readonly int b "Blue value, 0-255.";
   var  string as_string "HTML hex encoded: #rrggbb";
   function builtin Color(string s) : Color "Constructor for color class.  Lets you make a Color object from a string of form #rrggbb";
+  function builtin set_hsv (int h, int s, int v) "Set the HSV value for a color class.";
 
   function builtin red(int r) "Set the red value. (0-255)";
   function builtin green(int g) "Set the green value. (0-255)";
@@ -62,6 +63,14 @@ class Color
   function builtin red() : int "Get the red value.";
   function builtin green() : int "Get the green value.";
   function builtin blue() : int "Get the blue value.";
+
+  function builtin hue(int h) "Set the hue value. (0-255)";
+  function builtin saturation(int s) "Set the saturation value. (0-255)";
+  function builtin value(int v) "Set the HSV value parameter. (0-255)";
+  function builtin hue() : int "Get the hue value. (0-255)";
+  function builtin saturation() : int "Get the saturation value. (0-255)";
+  function builtin value() : int "Get the HSV value parameter. (0-255)";
+
   function builtin brighter() : Color "Make color brighter, by 5%.";
   function builtin brighter(int p) : Color "Make color brighter, by percent given.";
   function builtin darker() : Color "Make color darker, by 5%.";
@@ -217,6 +226,7 @@ class EntryLite
     var readonly string{} metadata "Post metadata. Keys: 'music', 'mood'";
 
     var readonly string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
+   
 }
 
 class Entry extends EntryLite
