@@ -161,7 +161,7 @@ body<=
  my $preformatted = $FORM{'replyto'} eq "" ? $logprops{$itemid}->{'opt_preformatted'} : $parpost->{'opt_preformatted'};
 
  LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
- $event = BML::ebml(LJ::CleanHTML::clean_event(\$event, $preformatted));
+ LJ::CleanHTML::clean_event(\$event, $preformatted);
  $ret .= "<p>";
  $ret .= "<table><tr valign='middle'>";
  my $picid;
