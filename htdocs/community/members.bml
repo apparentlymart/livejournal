@@ -45,7 +45,7 @@ body<=
 
     my %add = ();
     my %delete = ();
-    foreach (@attribs) {
+    foreach (@attribs, 'moderate') {
        $add{$_} = {};
        $delete{$_} = {};
     }
