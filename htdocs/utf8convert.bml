@@ -637,7 +637,7 @@
          next if LJ::is_utf8($res);
          convert(\$res, $encid);
          my $qres = $dbh->quote($res);
-         $dbh->do("UPDATE pollresult SET value=$qvalue WHERE pollid=$pid AND pollqid=$pqid");
+         $dbh->do("UPDATE pollresult SET value=$qres WHERE pollid=$pid AND pollqid=$pqid");
          $changed = 1;
      }
      if ($changed) {
