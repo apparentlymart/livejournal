@@ -10,6 +10,7 @@ foreach (@LJ::LANGS) {
 
 BML::register_block("DOMAIN", "S", $LJ::DOMAIN);
 BML::register_block("IMGPREFIX", "S", $LJ::IMGPREFIX);
+BML::register_block("STATPREFIX", "S", $LJ::STATPREFIX);
 BML::register_block("SITEROOT", "S", $LJ::SITEROOT);
 BML::register_block("SITENAME", "S", $LJ::SITENAME);
 BML::register_block("ADMIN_EMAIL", "S", $LJ::ADMIN_EMAIL);

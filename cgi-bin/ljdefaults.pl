@@ -29,6 +29,7 @@
 
     $SITEROOT ||= "http://www.$DOMAIN:8011";
     $IMGPREFIX ||= "$SITEROOT/img";
+    $STATPREFIX ||= "$SITEROOT/stc";
     $USERPIC_ROOT ||= "$LJ::SITEROOT/userpic";
 
     # path to sendmail and any necessary options
