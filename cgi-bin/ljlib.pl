@@ -2184,7 +2184,7 @@ sub get_talktext2
 	my ($db, $table) = ($s->[0], $s->[1]);
 	my $in = join(", ", keys %need);
 
-	my $sth = $db->prepare("SELECT jitemid, subject, body FROM $table ".
+	my $sth = $db->prepare("SELECT jtalkid, subject, body FROM $table ".
 			       "WHERE journalid=$journalid AND jtalkid IN ($in)");
 	$sth->execute;
 	while (my ($id, $subject, $event) = $sth->fetchrow_array) {
@@ -4081,14 +4081,16 @@ sub load_talk_props2
 
     my $in = join(", ", map { $_+0; } @$listref);
     return unless $in;
-    return unless ref $hashref eq "HASH";
-    return unless defined $LJ::CACHE_PROPID{'talk'};
+    die "Last param not hash" unless ref $hashref eq "HASH";
+    die "talkprops not loaded" unless defined $LJ::CACHE_PROPID{'talk'};
 
-    my $sth = $db->prepare("SELECT jtalkid, tpropid, value FROM logprop2 ".
+    my $sth = $db->prepare("SELECT jtalkid, tpropid, value FROM talkprop2 ".
 			   "WHERE journalid=$journalid AND jtalkid IN ($in)");
     $sth->execute;
     while (my ($jtalkid, $propid, $value) = $sth->fetchrow_array) {
-	$hashref->{$jtalkid}->{$LJ::CACHE_PROPID{'talk'}->{$propid}->{'name'}} = $value;
+	my $p = $LJ::CACHE_PROPID{'talk'}->{$propid};
+	next unless $p;
+	$hashref->{$jtalkid}->{$p->{'name'}} = $value;
     }
 }
 
