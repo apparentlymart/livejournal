@@ -597,6 +597,217 @@ sub load_comments
     return map { $posts{$_} } @top_replies;
 }
 
+sub talkform {
+    # replyto : init->replyto
+    # curpickw : FORM{prop_picture_keyword} or something like that
+    my ($remote, $journalu, $parpost, $replyto, $ditemid, $curpickw) = @_;
+
+    my $ret;
+    my $pics = LJ::Talk::get_subjecticons();
+
+    # once we clean out talkpost.bml, this will need to be changed.
+    BML::set_language_scope('/talkpost.bml');
+
+    if ($parpost->{'state'} eq "S") {
+        $ret .= "<br /><?p $BML::ML{'.warnscreened'} p?>";
+    }
+    $ret .= "<form method='post' action='/talkpost_do.bml' id='postform'>";
+
+    # hidden values
+    my $parent = $replyto+0;
+    $ret .= "<input type='hidden' name='parenttalkid' value='$parent' />\n";
+    $ret .= "<input type='hidden' name='itemid' value='$ditemid' />\n";
+    $ret .= "<input type='hidden' name='journal' value='$journalu->{'user'}' />\n";
+
+    # from registered user or anonymous?
+    $ret .= "<table class='postheading'>\n";
+    if ($journalu->{'opt_whocanreply'} eq "all") {
+        $ret .= "<tr valign='middle'>";
+        $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td>";
+        $ret .= "<td align='middle'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon'></td>";
+        $ret .= "<td align='left'><b><label for='talkpostfromanon'>$BML::ML{'.opt.anonymous'}</label></b>";
+        if ($journalu->{'opt_whoscreened'} eq 'A' ||
+            $journalu->{'opt_whoscreened'} eq 'R' ||
+            $journalu->{'opt_whoscreened'} eq 'F') {
+            $ret .= " " . $BML::ML{'.opt.willscreen'};
+        }
+        $ret .= "</td></tr>\n";
+    } elsif ($journalu->{'opt_whocanreply'} eq "reg") {
+        $ret .= "<tr valign='middle'>";
+        $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td><td align='middle'>(  )</td>";
+        $ret .= "<td align='left' colspan='3'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>$BML::ML{'.opt.noanonpost'}</td>";
+        $ret .= "</tr>\n";
+    } else {
+        $ret .= "<tr valign='middle'>";
+        $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td>";
+        $ret .= "<td align='middle'>(  )</td>";
+        $ret .= "<td align='left' colspan='3'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>" .
+            BML::ml(".opt.friendsonly", {'username'=>"<b>$journalu->{'user'}</b>"}) 
+            . "</td>";
+        $ret .= "</tr>\n";
+    }
+
+    my $checked = "checked='checked'";
+    if ($remote) {
+        $ret .= "<tr valign='middle'>";
+        $ret .= "<td align='right'>&nbsp;</td>";
+        if (LJ::is_banned($remote, $journalu)) {
+            $ret .= "<td align='middle'>( )</td>";
+            $ret .= "<td align='left'><span class='ljdeem'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</font>" . BML::ml(".opt.bannedfrom", {'journal'=>$journalu->{'user'}}) . "</td>";
+        } else {
+            $ret .= "<td align='middle'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' $checked /></td>";
+            $ret .= "<td align='left'><label for='talkpostfromremote'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</label>\n";
+            $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}' id='cookieuser' />\n";
+            if ($journalu->{'opt_whoscreened'} eq 'A' ||
+                ($journalu->{'opt_whoscreened'} eq 'F' &&
+                 !LJ::is_friend($journalu, $remote))) {
+                $ret .= " " . $BML::ML{'.opt.willscreen'};
+            }
+            $ret .= "</td>";
+            $checked = "";
+        }
+        $ret .= "</tr>\n";
+    }
+
+    # ( ) LiveJournal user:
+    $ret .= "<tr valign='middle'>";
+    $ret .= "<td>&nbsp;</td>";
+    $ret .= "<td align=middle><input type='radio' name='usertype' value='user' id='talkpostfromlj' $checked />";
+    $ret .= "</td><td align='left'><b><label for='talkpostfromlj'>$BML::ML{'.opt.ljuser'}</label></b> ";
+    $ret .= $BML::ML{'.opt.willscreenfriend'} if $journalu->{'opt_whoscreened'} eq 'F';
+    $ret .= $BML::ML{'.opt.willscreen'} if $journalu->{'opt_whoscreened'} eq 'A';
+    $ret .= "</tr>\n";
+
+    # Username: [    ] Password: [    ]  Login? [ ]
+    $ret .= "<tr valign='middle' align='left'><td colspan='2'></td><td>";
+    $ret .= "$BML::ML{'Username'}:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='15' id='username' /> ";
+    $ret .= "$BML::ML{'Password'}:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13' id='password' /> <label for='logincheck'>$BML::ML{'.loginq'}&nbsp;</label><input type='checkbox' name='do_login' id='logincheck' /></td></tr>\n";
+    
+    my $basesubject = "";
+    if ($replyto) {
+        $basesubject = $parpost->{'subject'};
+        $basesubject =~ s/^Re:\s*//i;
+        if ($basesubject) {
+            $basesubject = "Re: $basesubject";
+            $basesubject = BML::eall($basesubject);
+        }
+    }
+
+    # subject
+    $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.subject'}</td><td colspan='4'><input class='textbox' type='text' size='50' maxlength='100' name='subject' value=\"$basesubject\" />\n";
+
+    # Subject Icon toggle button
+    {
+        $ret .= "<input type='hidden' id='subjectIconField' name='subjecticon' value='none'>\n";
+        $ret .= "<script type='text/javascript' language='Javascript'>\n";
+        $ret .= "<!--\n";
+        $ret .= "if (document.getElementById) {\n";
+        $ret .= "document.write(\"";
+        $ret .= LJ::ejs(LJ::Talk::show_none_image("id='subjectIconImage' style='cursor:hand' align='absmiddle' ".
+                                                  "onclick='subjectIconListToggle();' ".
+                                                  "title='Click to change the subject icon'"));
+        $ret .="\");\n";
+
+
+        # spit out a pretty table of all the possible subjecticons
+        $ret .= "document.write(\"";
+        $ret .= "<blockquote style='display:none;' id='subjectIconList'>";
+        $ret .= "<table border='0' cellspacing='5' cellpadding='0' style='border: 1px solid #AAAAAA'>\");\n";
+
+        foreach my $type (@{$pics->{'types'}}) {
+            
+            $ret .= "document.write(\"<tr>\");\n";
+
+            # make an option if they don't want an image
+            if ($type eq $pics->{'types'}->[0]) { 
+                $ret .= "document.write(\"";
+                $ret .= "<td valign='middle' align='middle'>";
+                $ret .= LJ::Talk::show_none_image(
+                        "id='none' onclick='subjectIconChange(this);' style='cursor:hand' title='No subject icon'");
+                $ret .= "</td>\");\n";
+            }
+
+            # go through and make clickable image rows.
+            foreach (@{$pics->{'lists'}->{$type}}) {
+                $ret .= "document.write(\"";
+                $ret .= "<td valign='middle' align='middle'>";
+                $ret .= LJ::Talk::show_image($pics, $_->{'id'}, 
+                        "id='$_->{'id'}' onclick='subjectIconChange(this);' style='cursor:hand'");
+                $ret .= "</td>\");\n";
+            }
+            
+            $ret .= "document.write(\"</tr>\");\n";
+            
+        }
+        # end that table, bar!
+        $ret .= "document.write(\"</table></blockquote>\");\n";
+
+        $ret .= "}\n";
+        $ret .="//-->\n";
+        $ret .= "</script>\n";
+    }
+
+    # finish off subject line
+    $ret .= "<div id='ljnohtmlsubj' class='ljdeem'>$BML::ML{'.nosubjecthtml'}</div></td></tr>\n";
+
+    $ret .= "<tr><td align='right'>&nbsp;</td><td colspan='4'>";
+    $ret .= "$BML::ML{'.opt.noautoformat'}<input type='checkbox' value='1' name='prop_opt_preformatted' />";
+    $ret .= LJ::help_icon("noautoformat", " ");
+    
+    my %res;
+    if ($remote) {
+        LJ::do_request({ "mode" => "login",
+                         "ver" => ($LJ::UNICODE ? "1" : "0"),
+                         "user" => $remote->{'user'},
+                         "getpickws" => 1,
+                       }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
+    }
+    if ($res{'pickw_count'}) {
+        $ret .= BML::ml('.label.picturetouse',{'username'=>$remote->{'user'}});
+        my @pics;
+        for (my $i=1; $i<=$res{'pickw_count'}; $i++) {
+            push @pics, $res{"pickw_$i"};
+        }
+        @pics = sort { lc($a) cmp lc($b) } @pics;
+        $ret .= LJ::html_select({'name' => 'prop_picture_keyword', 
+                                 'selected' => $curpickw, },
+                                ("", $BML::ML{'.opt.defpic'}, map { ($_, $_) } @pics));
+        $ret .= LJ::help_icon("userpics", " ");
+    }
+    $ret .= "</td></tr>\n";
+
+    # textarea for their message body
+    $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}</td><td colspan='4'>";
+    $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext' style='width: 99%'></textarea>";
+    $ret .= "<br /><input type='submit' name='submitpost' value='$BML::ML{'.opt.submit'}' />\n";
+
+    ## preview stuff
+    $ret .= "<input type='submit' name='submitpreview' value='$BML::ML{'talk.btn.preview'}' />\n";
+    if ($LJ::SPELLER) {
+        $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>$BML::ML{'talk.spellcheck'}</label>";
+    }
+
+    if ($journalu->{'opt_logcommentips'} eq "A") {
+        $ret .= "<br />$BML::ML{'.logyourip'}";
+        $ret .= LJ::help_icon("iplogging", " ");
+    }
+    if ($journalu->{'opt_logcommentips'} eq "S") {
+        $ret .= "<br />$BML::ML{'.loganonip'}";
+        $ret .= LJ::help_icon("iplogging", " ");
+    }
+
+    $ret .= "</td></tr></table>\n";
+
+    # Some JavaScript to help the UI out
+
+    $ret .= "<script type='text/javascript' language='JavaScript'>\n";
+    $ret .= "var usermismatchtext = \"" . LJ::ejs($BML::ML{'.usermismatch'}) . "\";\n";
+    $ret .= "</script><script type='text/javascript' language='JavaScript' src='/js/talkpost.js'></script>";
+    $ret .= "</form>\n";
+
+    return $ret;
+}
+
 package LJ::Talk::Post;
 
 # entryid-commentid-password hash
