@@ -2869,7 +2869,7 @@ sub send_mail
         $toname = " ($opt->{'toname'})";
     }
     print MAIL "To: $opt->{'to'}$toname\n";
-    print MAIL "Cc: $opt->{'bcc'}\n" if ($opt->{'cc'});
+    print MAIL "Cc: $opt->{'cc'}\n" if ($opt->{'cc'});
     print MAIL "Bcc: $opt->{'bcc'}\n" if ($opt->{'bcc'});
     print MAIL "From: $opt->{'from'}";
     if ($opt->{'fromname'}) {
