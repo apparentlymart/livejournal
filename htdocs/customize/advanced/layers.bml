@@ -104,6 +104,7 @@
             my $layerinfo = {};
             LJ::S2::load_layer_info($layerinfo, [ $id ]);
             my $name = $layerinfo->{$id}->{'name'} ? "'$layerinfo->{$id}->{'name'}'" : "#$id";
+            $name = LJ::ehtml($name);
 
             $title = "Deleting layer $name";
             $body .= "<br /> ";
