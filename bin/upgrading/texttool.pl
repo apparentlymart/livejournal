@@ -10,11 +10,13 @@ use Getopt::Long;
 my $opt_help = 0;
 my $opt_local_lang;
 my $opt_extra;
+my $opt_only;
 exit 1 unless
 GetOptions(
            "help" => \$opt_help,
            "local-lang=s" => \$opt_local_lang,
            "extra=s" => \$opt_extra,
+           "only=s" => \$opt_only,
            );
 
 my $mode = shift @ARGV;
@@ -285,6 +287,7 @@ sub poptext
     } else {
         foreach my $lang (keys %lang_code) {
             my $file = "$ENV{'LJHOME'}/bin/upgrading/${lang}.dat";
+            next if $opt_only && $lang ne $opt_only;
             next unless -e $file;
             $source{$lang} = $file;            
         }
