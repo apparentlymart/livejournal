@@ -29,7 +29,6 @@
  }
 
  my $remote = LJ::get_remote($dbs);
- LJ::load_remote($dbs, $remote);
  my $is_owner = 0;
 
  my $secwhere = "AND l.security='public'";

@@ -10,7 +10,6 @@ body<=
     
     my $ret;
     my $remote = LJ::get_remote($dbs);
-    LJ::load_remote($dbs, $remote);
     
     unless ($remote) {
         return "<?h1 Login Required h1?><?p You must first <a href='/login.bml?ret=1'>login</a> before using this tool. p?>";
@@ -48,7 +47,6 @@ p?>
 <?hr?>
 ENDINTRO
 
-    LJ::load_remote($dbs, $remote);
     unless ($remote->{'status'} eq "A") {
         $ret .= "<?h1 Email not validated h1?><?p To use this tool, your current email address ($remote->{'email'}) must be validated.  To do this, visit the <a href='/lostinfo.bml'>lost info</a> page, which will send you an authorization URL.  After visiting it, come back here. p?>";
         return $ret;

@@ -973,7 +973,6 @@ sub set
     return $err->("You need to be logged in to use this command.")
         unless $remote;
 
-    LJ::load_remote($dbh, $remote);
     my $u = $remote;
 
     my @args = @$args;

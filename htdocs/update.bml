@@ -28,7 +28,6 @@
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
  my $remote = LJ::get_remote($dbs);
- LJ::load_remote($dbs, $remote);
 
  my $dbcm = LJ::get_cluster_master($remote);
 

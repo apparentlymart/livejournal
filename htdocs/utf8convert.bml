@@ -56,7 +56,6 @@
      return;
  }
 
- LJ::load_remote($dbs, $remote);
  # avva, kinda improper usage of load_codes, but works i guess -brad
  LJ::load_codes($dbs, { "encname" => \%LJ::CACHE_ENCNAMES } )
      unless %LJ::CACHE_ENCNAMES;

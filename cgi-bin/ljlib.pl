@@ -375,7 +375,6 @@ sub get_friend_items
 
     # 'remote' opt takes precendence, then 'remoteid'
     my $remote = $opts->{'remote'};
-    LJ::load_remote($dbs, $remote);
     my $remoteid = $remote ? $remote->{'userid'} : 0;
     if ($remoteid == 0 && $opts->{'remoteid'}) {
         $remoteid = $opts->{'remoteid'} + 0;
@@ -642,7 +641,6 @@ sub get_recent_items
 
     # 'remote' opt takes precendence, then 'remoteid'
     my $remote = $opts->{'remote'};
-    LJ::load_remote($dbs, $remote);
     my $remoteid = $remote ? $remote->{'userid'} : 0;
     if ($remoteid == 0 && $opts->{'remoteid'}) {
         $remoteid = $opts->{'remoteid'} + 0;
@@ -2363,7 +2361,6 @@ sub can_view
 
     # if it's usemask, we have to refuse non-personal journals,
     # so we have to load the user
-    LJ::load_remote($dbs, $remote);
     return 0 unless $remote->{'journaltype'} eq 'P';
 
     my $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE ".
@@ -2813,40 +2810,10 @@ sub set_remote
     1;
 }
 
-# <LJFUNC>
-# name: LJ::load_remote
-# des: Given a partial remote user hashref (from [func[LJ::get_remote]]),
-#      loads in the rest, unless it's already loaded.
-# args: dbarg, remote
-# des-remote: Hashref containing 'user' and 'userid' keys at least.  This
-#             hashref will be populated with the rest of the 'user' table
-#             data.  If undef, does nothing.
-# </LJFUNC>
 sub load_remote
 {
-    my $dbarg = shift;
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    my $remote = shift;
-    return unless $remote;
-
-    # if all three of these are loaded, this hashref is probably full.
-    # (don't want to just test for 2 keys, since keys like '_priv' and
-    # _privloaded might be present)
-    return if (defined $remote->{'email'} &&
-               defined $remote->{'caps'} &&
-               defined $remote->{'status'});
-
-    # try to load this remote user's record
-    my $ru = LJ::load_userid($dbs, $remote->{'userid'});
-    return unless $ru;
-
-    # merge user record (so we preserve underscore key data structures)
-    foreach my $k (keys %$ru) {
-        $remote->{$k} = $ru->{$k};
-    }
+    # function is no longer used, since get_remote returns full objects.
+    # keeping this here so we don't break people's local site code
 }
 
 # <LJFUNC>

@@ -796,7 +796,6 @@ sub find_security
     }
 
     ## need to be both a person and with a visible journal to vote
-    LJ::load_remote($dbs, $remote);
     unless ($remote->{'journaltype'} eq "P" && $remote->{'statusvis'} eq "V") {
         return (0, 0);
     }

@@ -94,7 +94,6 @@ body<=
      $ret .= "<?h1 $ML{'.findsim.head'} h1?><?p $ML{'.findsim.text'} p?>";
      
      my $remote = LJ::get_remote($dbs);
-     LJ::load_remote($dbs, $remote);
      if (LJ::get_cap($remote, "findsim")) {
          $ret .= "<center><form method='get'><input type='hidden' name='mode' value='findsim_do' />";
          $ret .= "$ML{'.findsim.simtouser'} <input name='user' value='$remote->{'user'}' /> <input type='submit' value=\"$ML{'.findsim.btn.find'}\" /></form>$ML{'.findsim.searchwait'}</center>";
@@ -114,7 +113,6 @@ body<=
      }
 
      my $remote = LJ::get_remote($dbs);
-     LJ::load_remote($dbs, $remote);
      unless (LJ::get_cap($remote, "findsim")) {
          return $ML{'.findsim_do.account.notallowed'};
      }

@@ -19,7 +19,6 @@ sub ban_set_unset
     # journal to ban from:
     my $j;
 
-    LJ::load_remote($dbh, $remote);
     unless ($remote->{'journaltype'} eq "P") {
         push @$out, [ "error", "Only people can ban other users, not communities (you're not logged in as a person account." ],
         return 0;
