@@ -115,7 +115,9 @@ sub do_request
     my ($method, $req, $err, $flags) = @_;
 
     # if version isn't specified explicitly, it's version 0
-    $req->{'ver'} = 0 unless defined $req->{'ver'};
+    if (ref $req eq "HASH") {
+        $req->{'ver'} = 0 unless defined $req->{'ver'};
+    }
 
     $flags ||= {};
     my @args = ($req, $err, $flags);
@@ -137,6 +139,7 @@ sub do_request
     if ($method eq "editfriends")      { return editfriends(@args);      }
     if ($method eq "editfriendgroups") { return editfriendgroups(@args); }
     if ($method eq "consolecommand")   { return consolecommand(@args);   }
+    if ($method eq "getchallenge")     { return getchallenge(@args);     }
 
     $r->notes("codepath" => "") if $r;
     return fail($err,201);
@@ -2021,6 +2024,19 @@ sub consolecommand
     return $res;
 }
 
+sub getchallenge
+{
+    my ($req, $err, $flags) = @_;
+    my $res = {};
+    my $now = time();
+    my $etime = 60;
+    $res->{'challenge'} = LJ::challenge_generate($etime);
+    $res->{'server_time'} = $now;
+    $res->{'expire_time'} = $now + $etime;
+    $res->{'auth_scheme'} = "c0";  # fixed for now, might support others later
+    return $res;
+}
+
 sub login_message
 {
     my ($req, $res, $flags) = @_;
@@ -2221,13 +2237,26 @@ sub authenticate
     return fail($err,505) unless $u->{'clusterid'};
 
     my $ip_banned = 0;
+    my $auth_check = sub {
+        my $auth_meth = $req->{'auth_method'} || "clear";
+        if ($auth_meth eq "clear") {
+            return LJ::auth_okay($u,
+                                 $req->{'password'},
+                                 $req->{'hpassword'},
+                                 $u->{'password'},
+                                 \$ip_banned);
+        }
+        if ($auth_meth eq "challenge") {
+            return LJ::challenge_check_login($u, 
+                                             $req->{'auth_challenge'},
+                                             $req->{'auth_response'},
+                                             \$ip_banned);
+        }
+    };
+
     unless ($flags->{'nopassword'} ||
             $flags->{'noauth'} ||
-            LJ::auth_okay($u,
-                          $req->{'password'},
-                          $req->{'hpassword'},
-                          $u->{'password'},
-                          \$ip_banned))
+            $auth_check->() )
     {
         return fail($err,402) if $ip_banned;
         return fail($err,101);
@@ -2266,8 +2295,6 @@ sub do_request
     %{$res} = ();                      # clear the given response hash
     $flags = {} unless (ref $flags eq "HASH");
 
-    my $user = LJ::canonical_username($req->{'user'});
-
     # did they send a mode?
     unless ($req->{'mode'}) {
         $res->{'success'} = "FAIL";
@@ -2275,6 +2302,13 @@ sub do_request
         return;
     }
 
+    # this method doesn't require auth
+    if ($req->{'mode'} eq "getchallenge") {
+        return getchallenge($req, $res, $flags);
+    }
+
+    # mode from here on out require a username
+    my $user = LJ::canonical_username($req->{'user'});
     unless ($user) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = "Client error: No username sent.";
@@ -2579,6 +2613,23 @@ sub consolecommand
 
     $res->{'success'} = "OK";
 
+}
+
+## flat wrapper
+sub getchallenge
+{
+    my ($req, $res, $flags) = @_;
+    my $err = 0;
+    my $rs = LJ::Protocol::do_request("getchallenge", $req, \$err, $flags);
+
+    # stupid copy (could just return $rs), but it might change in the future
+    # so this protects us from future accidental harm.
+    foreach my $k (qw(challenge server_time expire_time auth_scheme)) {
+        $res->{$k} = $rs->{$k};
+    }
+
+    $res->{'success'} = "OK";
+    return $res;
 }
 
 ## flat wrapper
