@@ -608,7 +608,6 @@ sub journal_content
         $LJ::UNICODE && $opts->{'contenttype'} !~ /charset=/) {
         $opts->{'contenttype'} .= "; charset=utf-8";
     }
-    Apache->log_error("ctype: $opts->{'contenttype'} ($LJ::UNICODE)");
 
     if ($opts->{'badargs'}) 
     {
