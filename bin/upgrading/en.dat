@@ -2231,6 +2231,8 @@ you wish to delete.
 
 /tools/emailmanage.bml.address.old.title=Previous Addresses
 
+/tools/emailmanage.bml.address.old.none=None
+
 /tools/emailmanage.bml.delete_selected=Delete Selected
 
 /tools/emailmanage.bml.desc.notfirst<<

@@ -5,27 +5,31 @@ body<=
 <?_code
 {
     use strict;
-    use vars qw(%POST);
+    use vars qw(%GET %POST);
 
     my $dbh = LJ::get_db_writer();
     
-    my $ret;
     my $remote = LJ::get_remote();
-    return "<?h1 $ML{'Error'} h1?><?p $ML{'error.noremote'} p?>"
+    return LJ::bad_input($ML{'error.noremote'})
         unless $remote;
+
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input($ML{'error.invalidauth'})
+        unless $u;
 
     my $firstdate = $dbh->selectrow_array(qq{
         SELECT MIN(timechange) FROM infohistory
         WHERE userid=? AND what='email'
         AND oldvalue=?
-    }, undef, $remote->{'userid'}, $remote->{'email'});
+    }, undef, $u->{'userid'}, $u->{'email'});
 
     my @deleted;
     if (LJ::did_post()) {
         my $sth = $dbh->prepare("SELECT timechange, oldvalue " .
                                 "FROM infohistory WHERE userid=? " . 
                                 "AND what='email' ORDER BY timechange");
-        $sth->execute($remote->{'userid'});
+        $sth->execute($u->{'userid'});
         while (my ($time, $email) = $sth->fetchrow_array)
         {
             my $can_del = defined $firstdate && $time gt $firstdate;
@@ -36,11 +40,18 @@ body<=
 
                 $dbh->do("DELETE FROM infohistory WHERE what='email' " .
                          "AND userid=? AND timechange=? AND oldvalue=?",
-                         undef, $remote->{'userid'}, $time, $email);
+                         undef, $u->{'userid'}, $time, $email);
             }            
         }
     }
+
+    my $ret;
     
+    # authas switcher form
+    $ret .= "<form class='postheading' method='get' action='emailmanage.bml'>\n";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+    $ret .= "</form>\n\n";
+
     # some explanatory text
     $ret .= "<?h1 $ML{'.desc.title'} h1?>\n";
     $ret .= "<?p $ML{'.desc.text'} p?>\n";
@@ -48,40 +59,46 @@ body<=
 
     $ret .= "<?hr?>\n";
 
-    unless ($remote->{'status'} eq "A") {
+    unless ($u->{'status'} eq "A") {
         $ret .= "<?h1 $ML{'.notvalidated.title'} h1?>\n";
         $ret .= "<?p " . BML::ml('.notvalidated.text',
-                                 { 'email' => $remote->{'email'} }) . " p?>";
+                                 { 'email' => $u->{'email'} }) . " p?>";
         return $ret;
     }
 
     # current address
     $ret .= "<?h1 $ML{'.address.current.title'} h1?>\n";
     $ret .= "<div style='margin: 20px 0 20px 30px;'><b>";
-    $ret .= "$remote->{'email'}</b></div>\n";
+    $ret .= "$u->{'email'}</b></div>\n";
 
     # old addresses
     $ret .= "<?h1 $ML{'.address.old.title'} h1?>\n";
     $ret .= "<?p $ML{'.address.old.text'} p?>";
 
-    $ret .= "<form method='post'>";
-    $ret .= "<table border='1' cellpadding='2' style='margin-bottom: 3px;'>\n";
- 
     my $sth = $dbh->prepare("SELECT timechange, oldvalue FROM infohistory " .
-                            "WHERE userid=$remote->{'userid'} AND what='email' " .
+                            "WHERE userid=? AND what='email' " .
                             "ORDER BY timechange");
-    $sth->execute;
+    $sth->execute($u->{'userid'});
+    my $rows;
     while (my ($time, $email) = $sth->fetchrow_array)
     {
         my $can_del = defined $firstdate && $time gt $firstdate;
-        $ret .= "<tr><td>" . LJ::html_check({ 'type' => 'check', 'name' => "$email-$time",
+        $rows .= "<tr><td>" . LJ::html_check({ 'type' => 'check', 'name' => "$email-$time",
                                               'disabled' => ! $can_del } ) . "</td>";
-        $ret .= "<td>$email</td><td>$time</td></tr>\n";
+        $rows .= "<td>$email</td><td>$time</td></tr>\n";
     }
-    $ret .= "</table>\n";
 
-    $ret .= LJ::html_submit(undef, $ML{'.delete_selected'});
-    $ret .= "</form>";
+    if ($rows) {
+        my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
+        $ret .= "<form method='post' action='emailmanage.bml$getextra'>";
+        $ret .= "<table border='1' cellpadding='2' style='margin-bottom: 3px;'>\n";
+        $ret .= $rows;
+        $ret .= "</table>\n";
+        $ret .= LJ::html_submit(undef, $ML{'.delete_selected'});
+        $ret .= "</form>";
+    } else {
+        $ret .= "<div style='margin-left: 30px; margin-top: 10px'><i>$ML{'.address.old.none'}</i></div>\n";
+    }
 
     if (@deleted) {
         $ret .= "<?h1 $ML{'.log.deleted.title'} h1?>\n";
