@@ -228,13 +228,10 @@ body<=
 
 
         # update 'user' table
-        my $sets = "";
         foreach (keys %update) {
-            $sets .= "$_=" . $dbh->quote($update{$_}) . ",";
+            delete $update{$_} if $u->{$_} eq $update{$_};
         }
-        chop $sets;
-
-        LJ::update_user($u, { raw => $sets });
+        LJ::update_user($u, \%update) if %update;
 
         # change any of the userprops ?
         foreach my $uprop (keys %uprop) {
