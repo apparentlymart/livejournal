@@ -309,7 +309,7 @@
             
             # Redirect to offsite uri if allowed, and not an internal LJ redirect. ('ret' == 1)
             if ($POST{'ret'} && $POST{'ret'} != 1) {
-                my $redir_host = $1 if $POST{'ret'} =~ m#http://((?:\.|-|:|\w)+).*#i;
+                my $redir_host = $1 if $POST{'ret'} =~ m#^http://([\.:\w-]+)#i;
                 return BML::redirect($POST{'ret'}) if $LJ::REDIRECT_ALLOWED{$redir_host};
             }
 
