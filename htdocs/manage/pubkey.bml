@@ -31,7 +31,8 @@ body<=
 
         my $ret;
         $ret .= "<?h1 Success h1?>";
-        $ret .= "<?p Your public key been saved. p?>";
+        $ret .= "<?p Your public key been saved. You may view it <a href='/pubkey.bml'>here</a>. p?>";
+
         if ($LJ::HELPURL{publickey}) {
             $ret .= "<?h1 Instructions h1?>";
             $ret .= "<?p FIXME: link to helpurl p?>";
