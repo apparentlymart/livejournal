@@ -1,0 +1,297 @@
+# -*-s2-*-
+
+layerinfo type = "layout";
+layerinfo name = "Notepad";
+layerinfo redist_uniq = "notepad/layout";
+
+property string imguri { des = "URI to notepad images (no trailing slash)"; }
+set imguri = "";
+
+property bool show_entry_userpic { des = "Show the userpic on the journal entries?"; }
+set show_entry_userpic = false;
+
+property Color body_bgcolor { des = "Body background color"; }
+set body_bgcolor = "#8cd5fe";
+
+property Color text_color { des = "Text color"; }
+set text_color = "#000000";
+
+property Color subject_color { des = "Text color of subjects"; }
+set subject_color = "#ff0000"; 
+
+property Color link_color { des = "Link color"; }
+set link_color = "#000050";
+
+property Color vlink_color { des = "Visited link color"; }
+set vlink_color = "#500050";
+
+property Color alink_color { des = "Active link color"; }
+set alink_color = "#ff00c0";
+
+function prop_init()
+{
+    if ($*imguri == "") { $*imguri = "$*SITEROOT/img/style/notepad"; }
+}
+
+function Page::lay_bottom_navigation() { }
+
+function Page::print()
+{
+    var string title = $this->title();
+    """
+<html>
+ <head>
+  <title>$title</title>
+  $.head_content
+  <style type="text/css">
+   <!--
+body {
+    background-color: $*body_bgcolor;
+}
+td,body,p,div {
+    color: $*text_color;
+    text-decoration: none;
+    font-family: verdana,arial,helvetica;
+    font-size: 12px;
+}
+a:link {
+    color: $*link_color;
+    text-decoration: underline;
+    font-family: verdana,arial,helvetica;
+    font-size: 12px;
+}
+a:visited {
+    color: $*vlink_color;
+    text-decoration: underline;
+    font-family: verdana,arial,helvetica;
+    font-size:12px;
+}
+a:active {
+    color: $*alink_color;
+    text-decoration: underline;
+    font-family: verdana,arial,helvetica;
+    font-size: 12px;
+}
+a:hover {
+    color: $*alink_color;
+    text-decoration: underline;
+    font-family: verdana,arial,helvetica;
+    font-size:12px;
+}
+   -->
+  </style>
+ </head>
+ <body>
+  <table width="70%" border="0" cellpadding="0" cellspacing="0">
+   <tr height="18">
+    <td colspan="2">
+     <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+       <td width="30"><img src="$*imguri/spacer.gif" width="30" height="10"></td>
+       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="$.base_url/">Journal</a></td>
+       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="$.base_url/friends">Friends</a></td>
+       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="$.base_url/calendar">Archive</a></td>
+       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="$.base_url/info">User Info</a></td>
+       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="$*SITEROOT/tools/memories.bml?user=$.journal.username">memories</a></td>
+      </tr>
+     </table>
+    </td>
+   </tr>
+   <tr height="38">
+    <td width="80" height="38" background="$*imguri/top-left.jpg"><img src="$*imguri/spacer.gif" width="80" height="10"></td>
+    <td height="38" background="$*imguri/middle.jpg"><img src="$*imguri/spacer.gif" width="10" height="10"></td>
+    <td width="10" height="38" background="$*imguri/top-right.jpg"><img src="$*imguri/spacer.gif" width="10" height="10"></td>
+   </tr>
+   <tr>
+    <td width="80" height="38" background="$*imguri/side-left.jpg">
+     &nbsp;
+    </td>
+    <td width="100%" height="38" background="$*imguri/middle.jpg">
+     <h1>$title</h1>
+     <p><center><img src="$*imguri/hr.gif" width="345" height="23"></center></p>
+    """;
+    $this->print_body();
+    "<p><center><font size='+1'>"; $this->lay_bottom_navigation(); "</font></center></p>";
+    """
+    </td>
+    <td width="8" height="38" background="$*imguri/side-right.jpg">
+     &nbsp;
+    </td>
+   </tr>
+   <tr height="12">
+    <td width="80" height="12" background="$*imguri/bottom-left.jpg"><img src="$*imguri/spacer.gif" width="70" height="12"></td>
+    <td height="12" background="$*imguri/bottom-line.jpg"><img src="$*imguri/spacer.gif" width="10" height="12"></td>
+    <td width="8" height="12" background="$*imguri/bottom-right.jpg"><img src="$*imguri/spacer.gif" width="8" height="12"></td>
+   </tr>
+  </table>
+ </body>
+</html>
+    """;
+}
+
+function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
+{
+    "<table border='0'><tr>";
+    if ($p.view == "friends" or
+        $*show_entry_userpic == true or
+        $e.journal.username != $e.poster.username)
+    {
+        var string userpic = defined $e.userpic ? "<img src='$e.userpic.url' /><br />" : "";
+        "<td valign='top' width='100'><center>";
+        if ($p.view == "friends" or $*show_entry_userpic == true) { print $userpic; }
+        if ($p.view == "friends") { "<strong><a href='"; print $e.journal->base_url(); "'>$e.journal.username</a></strong>"; }
+        if ($e.journal.username != $e.poster.username) 
+        {
+            print ($p.view == "friends" ? 
+            "<br />[ <a href='" + $e.poster->base_url() + "'>$e.poster.username</a> ]" :
+            "<strong><a href='" + $e.poster->base_url() + "'>$e.poster.username</a></strong>");
+        }
+        "</center></td>";
+    }
+    """<td valign="top"><font size="+1">"""; print $e.time->date_format("med"); " "; print $e.time->time_format();
+    if ($e.subject != "") { " <span style='color: $*subject_color'>$e.subject</span>"; }
+    "</font><p>$e.text</p>";
+    if (size $e.metadata) {
+        "<p>";
+        foreach var string k ($e.metadata) {
+            var string key = $k;
+            var string val = $e.metadata{$k};
+            if ($k == "mood") {
+                $key = $*text_meta_mood;
+            } elseif ($k == "music") {
+                $key = $*text_meta_music;
+            }
+            if ($k == "mood" and defined $e.mood_icon) {
+                var Image i = $e.mood_icon;
+                $val = "<img src='$i.url' width='$i.width' height='$i.height' align='absmiddle' alt='[mood icon]' /> $val";
+            }
+            "<strong>$key:</strong> $val<br />";
+        }
+        "</p>";
+    }
+    $e.comments->print();
+    """<p><center><img src="$*imguri/hr.gif" width="345" height="23"></center></p>""";
+    "</td></tr></table>\n";
+}
+
+function Page::print_entry (Entry e) 
+{
+    print_entry($this, $e, null Color, null Color);
+}
+
+function FriendsPage::print_entry (Entry e) {
+    var Friend f = $.friends{$e.journal.username};
+    print_entry($this, $e, $f.bgcolor, $f.fgcolor);
+}
+
+function RecentPage::lay_bottom_navigation ()
+{
+    var string nav = "";
+    if ($.nav.backward_url != "") {
+        $nav = """<a href="$.nav.backward_url">Back a Page</a>""";
+    }
+    if ($.nav.forward_url != "" and $.nav.backward_url != "") {
+        $nav = " - ";
+    }
+    if ($.nav.forward_url != "") {
+        $nav = """$nav<a href="$.nav.forward_url">Forward a Page</a>""";
+    }
+    if ($nav != "") { print $nav; }
+}
+
+function CommentInfo::print()
+{
+    "<p>";
+     if ($.count > 0 or $.screened)
+     {
+         $this->print_readlink(); " - ";
+     }
+     $this->print_postlink();
+     "</p>";
+}
+
+function ArchiveYearPage::lay_bottom_navigation ()
+{
+    $this->print_year_links();
+}
+
+function ArchiveYearPage::print_year_links ()
+{
+    if (size $.years <= 0) { return; }
+    foreach var ArchiveYearYear y ($.years)
+    {
+        if ($y.displayed) {
+            "$y.year&nbsp;"; 
+        } else {
+            "<a href='$y.url'>$y.year</a>&nbsp;</a>";
+        }
+    }
+}
+
+function ArchiveYearPage::print_body ()
+{
+    "<h2>$.year</h2>";
+    foreach var ArchiveYearMonth m ($.months)
+    {
+        $this->print_month($m);
+    }
+}
+
+function ArchiveYearPage::print_month(ArchiveYearMonth m)
+{
+    if (not $m.has_entries) { return; }
+    "<center><p><table border='1' cellpadding='4' width='80%'>";
+
+    # Month Header
+    "<tr align=center><th colspan='7'>"; print $m->month_format(); "</th></tr>";
+
+    # Weekdays
+    "<tr align='center'>";
+    foreach var int d ($.weekdays)
+    {
+        "<td>" + $*lang_dayname_short[$d] + "</td>\n";
+    }
+    "</tr>";
+
+    # Weeks
+    foreach var ArchiveYearWeek w ($m.weeks)
+    {
+        $w->print();
+    }
+    "<tr align='center'><td colspan='7'>";
+    "<a href='$m.url'>$*text_view_month</a>";
+    "</td></tr></table></p></center>";
+}
+
+function ArchiveYearWeek::print()
+{
+    "<tr>";
+    if ($.pre_empty) { "<td colspan='$.pre_empty'>&nbsp;</td>"; }
+    foreach var ArchiveYearDay d ($.days)
+    {
+        "<td valign='top'><b><font size='-1'>$d.day</font></b><center>";
+        if ($d.num_entries)
+        {
+            "<a href='$d.url'>$d.num_entries</a>";
+        } else {
+            "&nbsp;";
+        }
+        "</center></td>";
+    }
+    if ($.post_empty) { "<td colspan='$.post_empty'>&nbsp;</td>"; }
+}
+
+function DayPage::lay_bottom_navigation()
+{
+    if (not $.has_entries) { "<img src='$*imguri/hr.gif' /><br />"; }
+    print "<a href='$.prev_url'>Back a Day</a> - <a href='$.next_url'>Forward a Day</a>";
+}
+
+function DayPage::print_body()
+{
+    if (not $.has_entries) {
+        "<p>No journal entries for this day.</p>";
+    } else {
+        foreach var Entry e ($.entries) { $this->print_entry($e); }
+    }
+}
