@@ -129,6 +129,7 @@ if (-e "$LJ::HOME/cgi-bin/console-local.pl") {
 
 $cmd{'foreach_entry'} = {
     'handler' => \&foreach_entry,
+    'hidden' => 1,   # not yet done.
     'des' => 'Do one or more actions on some subset of your journal entries.',
     'argsummary' => '<condition>* "action" <action>',
     'args' => [
