@@ -405,7 +405,7 @@ sub get_friend_items
     my $fvcache;
     if ($LJ::FV_CACHING && $remote && $remote->{'userid'} == $userid && 
         LJ::get_cap($remote, "betatest") &&  # <---- temporary!
-        ! $filter && ! $opts->{'friendsoffriends'}) 
+        ! defined $opts->{'filter'} && ! $opts->{'friendsoffriends'}) 
     {
         $could_cache = 1;  # so we save later, if enough new stuff
         my $udbr = LJ::get_cluster_reader($opts->{'u'});
