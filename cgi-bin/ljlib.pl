@@ -1527,7 +1527,7 @@ sub is_friend
 # returns: boolean; 1 iff user B is banned from journal A
 # args: dbarg, user, journal
 # des-user: User hashref or userid.
-# des-user: Journal hashref or userid.
+# des-journal: Journal hashref or userid.
 # </LJFUNC>
 sub is_banned
 {
