@@ -108,8 +108,7 @@ sub finduser
         return 0;
     }
 
-    my $sth = $dbh->prepare("SELECT userid, user, email, status ".
-                            "FROM user WHERE $where");
+    my $sth = $dbh->prepare("SELECT * FROM user WHERE $where");
     $sth->execute;
     if (! $sth->rows) {
         push @$out, [ "error", "No matches." ];
@@ -117,7 +116,14 @@ sub finduser
     while (my $u = $sth->fetchrow_hashref) {        
         push @$out, [ "info", "User: $u->{'user'} ".
                       "($u->{'userid'}), email: ($u->{'status'}) $u->{'email'}" ];
+        foreach (LJ::run_hooks("finduser_extrainfo", { 'dbh' => $dbh, 'u' => $u })) {
+            next unless $_->[0];
+            foreach (split(/\n/, $_->[0])) {
+                push @$out, [ "info", $_ ];
+            }
+        }
     }
+    
     return 1;
 }
 
