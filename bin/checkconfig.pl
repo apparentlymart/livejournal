@@ -17,6 +17,7 @@ my %modules = (
                "Digest::MD5" => { 'deb' => 'libdigest-md5-perl', },
                "Image::Size" => { 'deb' => 'libimage-size-perl', },
                "MIME::Lite" => { 'deb' => 'libmime-lite-perl', },
+               "MIME::Words" => { 'deb' => 'libmime-perl', },
                "Compress::Zlib" => {
                    'deb' => 'libcompress-zlib-perl',
                    'opt' => 'When available, turn on $LJ::DO_GZIP to cut bandwidth usage in half.',
