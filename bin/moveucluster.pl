@@ -598,10 +598,7 @@ sub deletefrom0_logitem
     foreach my $table (qw(logprop logtext log)) {
         $dbh->do("DELETE FROM $table WHERE itemid=$itemid");
     }
-
-    $dbh->do("DELETE FROM syncupdates WHERE userid=$userid AND nodetype='L' AND nodeid=$itemid");
 }
-
 
 sub movefrom0_logitem
 {
@@ -647,11 +644,6 @@ sub movefrom0_logitem
         $replace_into->("logprop2", "(journalid, jitemid, propid, value)", 50,
                         $userid, $jitemid, $lp->{'propid'}, $lp->{'value'});
     }
-
-    # copy its syncitems over (always type 'create', since a new id)
-    $replace_into->("syncupdates2", "(userid, atime, nodetype, nodeid, atype)", 50,
-                    $userid, $item->{'logtime'}, 'L', $jitemid, 'create');
-
 
     # now we're done for non-commented posts
     return unless $item->{'replycount'};
