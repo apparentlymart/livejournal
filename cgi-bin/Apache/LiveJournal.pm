@@ -1146,7 +1146,8 @@ sub db_logger
                  "cpu_total FLOAT UNSIGNED,".
                  "mem_vsize INT,".
                  "mem_share INT,".
-                 "mem_rss INT) DELAY_KEY_WRITE = 1");
+                 "mem_rss INT,".
+                 "mem_unshared INT) DELAY_KEY_WRITE = 1");
         $r->log_error("error creating log table ($table), perhaps due to old MySQL not supporting delayed key writes?  Error is: " .
                       $dbl->errstr) if $dbl->err;
     }
@@ -1187,7 +1188,8 @@ sub db_logger
         my $endmem = $GTop->proc_mem( $$ )      or last STATS;
         my $cpufreq = $endcpu->frequency        or last STATS;
 
-        @$var{qw{pid cpu_user cpu_sys cpu_total mem_vsize mem_share mem_rss}} = (
+        # Map the GTop values into the corresponding fields in a slice
+        @$var{qw{pid cpu_user cpu_sys cpu_total mem_vsize mem_share mem_rss mem_unshared}} = (
             $$,
             ($endcpu->user - $startcpu->user) / $cpufreq,
             ($endcpu->sys - $startcpu->sys) / $cpufreq,
@@ -1195,6 +1197,7 @@ sub db_logger
             $endmem->vsize - $startmem->vsize,
             $endmem->share - $startmem->share,
             $endmem->rss - $startmem->rss,
+            $endmem->size - $endmem->share,
            );
     }
 
