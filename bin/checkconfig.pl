@@ -85,6 +85,10 @@ my %modules = (
                },
                "Time::HiRes" => { 'deb' => 'libtime-hires-perl' },
                "IO::WrapTie" => { 'deb' => 'libio-stringy-perl' },
+               "XML::Atom" => {
+                   'deb' => 'libxml-atom-perl',
+                   'opt' => 'Required for AtomAPI support.',
+                },
                );
 
 sub check_modules {
