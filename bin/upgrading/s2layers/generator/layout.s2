@@ -639,7 +639,24 @@ function ReplyPage::print_body () {
 <td class="caption">$.replyto.subject</td>
 <td class="index" align="right">$datetime</td></tr>
 <tr align='left'>
-<td colspan="2" bgcolor="$*entry_back">$.replyto.text</td></tr>
+<td colspan="2" bgcolor="$*entry_back">
+<table cellpadding="1" align="right" cellspacing="0" border="0" summary="">
+<tr align='left'><td bgcolor="$*stronger_back">
+<table cellpadding="2" align="center" cellspacing="0" border="0" summary="">
+<tr align='left'><td align="center" style="color: $*stronger_text">""";
+
+if (defined $.replyto.poster) {
+    "<a href='" + $.replyto.poster->base_url() + "'>";
+    if (defined $.replyto.userpic) {
+        """<img border="0" src="$.replyto.userpic.url" width="$.replyto.userpic.width" """;
+        """height="$.replyto.userpic.height" alt=""><br />""";
+    }
+    "$.replyto.poster.username</a>";
+} else {
+    print "<i>Anonymous</i>";
+}
+
+"""</td></tr></table></td></tr></table>$.replyto.text</td></tr>
 <tr bgcolor="$*weak_back"><td align='left' class='comments'>
 <a href="$.replyto.permalink_url">$*text_permalink</a></td>
 <td align='right' class='comments'><a href='$.entry.comments.read_url'>Read Comments</a></td>
