@@ -303,7 +303,7 @@ function Page::print ()
     "<td colspan='2' align='$main_position'>\n";
     "<a href='$*SITEROOT/'>$*SITENAME</a></td>\n";
 
-    "</tr></table></center></body></html>";
+    "</tr></table></div></body></html>";
 }
 
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
