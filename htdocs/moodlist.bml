@@ -29,7 +29,7 @@ body<=
     my $add_header = sub {
         $ret .= "<?h1 Moods h1?><?p The following are server-supported moods on <?sitename?>.  You can always enter your own, but these are the ones that can have pictures associated with them and can be searched on, etc.  You're encouraged to use these if possible.  p?><?p To change the icons in your journal, go to the <a href=\"/modify.bml\">modify journal page</a> and select your preferred icon set. p?>";
     };
-    
+
     # Get a list of all possible moods
     my $moods = LJ::get_moods();
     my @mlist = ();
@@ -37,21 +37,46 @@ body<=
         my $m = $moods->{$_};
         push @mlist, $m;
     }
-                                                                                    
+
     # FIXME: cache this.  it's small.
-    my $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y' ORDER BY name");
+    $sth = $dbr->prepare("SELECT moodthemeid, name, is_public FROM moodthemes WHERE is_public='Y'");
     $sth->execute;
     my @themes = ();
     push @themes, $_ while $_ = $sth->fetchrow_hashref;
+    @themes = sort { lc($a->{name}) cmp lc($b->{name}) } @themes;
 
-    if($GET{'theme'}) {
+    my @user_themes;
+    # Determine the action depending on the GET arguments, or lack thereof
+    if (defined $GET{'moodtheme'}) {
         $ret .= BML::ml('Backlink', {
                 'link'=>'/moodlist.bml',
                 'text'=>'Mood Themes',
-            }). "<br />"; 
+            }). "<br />";
 
-       $add_header->();
-        do_theme_detail($GET{'theme'});
+        $add_header->();
+
+        my $remote = LJ::get_remote();
+
+        # Check if the user is logged in and if so append their private mood themes
+        my $sth;
+        if($remote) {
+            # FIXME: cache this.  it's small.
+            $sth = $dbr->prepare("SELECT moodthemeid, name, is_public FROM moodthemes WHERE ownerid=?");
+            $sth->execute($remote->{userid});
+            @user_themes = ();
+            push @user_themes, $_ while $_ = $sth->fetchrow_hashref;
+            @user_themes = sort { lc($a->{name}) cmp lc($b->{name}) } @user_themes;
+        }
+
+        # See if the user can even view this theme
+        my $theme = (grep { $_->{moodthemeid} == $GET{moodtheme} } (@themes, @user_themes))[0];
+        if (! $theme) {
+            # It isn't theirs, or they aren't logged in, and it isn't public and it actually exists
+            return LJ::bad_input("Not your theme or a system theme.");
+        } else {
+            do_theme_detail($GET{'moodtheme'});
+        }
+
     } else {
         $add_header->();
         do_mood_list();
@@ -85,14 +110,14 @@ body<=
         $ret .= "<form action='moodlist.bml' method='get'>\n";
         $ret .= LJ::html_hidden("page", $items{page});
         $ret .= "<table width='100%' border='0'><tr><td></td>";
-    
+
         # Create the table columns for each mood
         my $mname;
         my $n = 1;
         foreach $mname (@show_moods) {
-            $ret .= "<td align='center'>" . 
-                LJ::html_select({'name' => "theme$n", 'selected' => "$mname", 
-                                 'style' => "text-align: center"}, 
+            $ret .= "<td align='center'>" .
+                LJ::html_select({'name' => "theme$n", 'selected' => "$mname",
+                                 'style' => "text-align: center"},
                                 map {$_->{name}, $_->{name}} @mlist) . "</td>\n";
             $n++;
         }
@@ -104,7 +129,7 @@ body<=
             $ret .= "<tr><td>$theme->{'name'}</td>\n";
 
             LJ::load_mood_theme($theme->{'moodthemeid'});
-           
+
             # Output each of the displayed moods
             foreach my $mood (@show_moods) {
                 if (LJ::get_mood_picture($theme->{'moodthemeid'}, LJ::mood_id($mood), \ my %pic)) {
@@ -114,10 +139,10 @@ body<=
                     $ret .= "<td></td>\n";
                 }
             }
-            
+
             $ret .= "<td align='center'>";
             $ret .= BML::ml('Actionlink', {
-                'link' => "<a href='/moodlist.bml?theme=$theme->{moodthemeid}'>View&nbsp;All</a>"
+                'link' => "<a href='/moodlist.bml?moodtheme=$theme->{moodthemeid}'>View&nbsp;All</a>"
             });
             $ret .= "</td>";
         }
@@ -128,13 +153,17 @@ body<=
    {
        my ($themeid) = @_;
 
-       my $name = $dbr->selectrow_array("SELECT name FROM moodthemes WHERE moodthemeid=?", undef, $themeid);
-
        $ret .= "<br /><table width='100%'><tr><td colspan='5' align='center'>" .
-           "<form action='moodlist.bml' method='GET'>" .
-           LJ::html_select({'name' => "theme", 'selected' => "$themeid"}, 
-                           map {$_->{moodthemeid}, $_->{name}} @themes) .
-           "&nbsp;<input type='submit' value='View' /></form></td>";
+           "<form action='moodlist.bml' method='GET'>";
+
+       my @opts = ((map {$_->{moodthemeid}, $_->{name}} @themes),
+                   (@user_themes ? (0, "---") : ()),
+                   (map {$_->{moodthemeid}, $_->{name}} @user_themes));
+
+       $ret .= LJ::html_select({'name' => "moodtheme", 'selected' => "$themeid"},
+                               @opts);
+
+       $ret .= "&nbsp;<input type='submit' value='View' /></form></td>";
 
        # Output all the moods
        while (@mlist) {
@@ -168,4 +197,3 @@ page?><?_c <LJDEP>
 form: htdocs/moodlist.bml
 link: htdocs/modify.bml
 </LJDEP> _c?>
-
