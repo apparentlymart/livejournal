@@ -23,7 +23,7 @@
 
 /community/create.bml.error.accountnotfound=Maintainer account not found.
 
-/community/create.bml.error.invalidmpasw=Invalid password for maintainer account.
+/community/create.bml.error.invalidmpasw=Invalid password for community account.
 
 /community/create.bml.error.invalidpassword=Invalid password for maintainer account.
 
@@ -49,7 +49,7 @@
 
 /community/create.bml.label.create=Create Community
 
-/community/create.bml.label.createcomm=From here you can create a community account.  A community is a special type of account that other users can join, and post in.  For example of a community, check out the <A HREF="/userinfo.bml?user=seattle_party">Seattle Party Community</A>.
+/community/create.bml.label.createcomm=From here you can create a community account.  A community is a special type of account that other users can join, and post in.  For example of a community, check out the <a href="/userinfo.bml?user=seattle">Seattle Party Community</a>.
 
 /community/create.bml.label.howoperates=Choose how your community operates.  You can change these later.
 
@@ -209,7 +209,7 @@
 
 /create.bml.create.head=Creating a New Journal
 
-/create.bml.create.text=Creating a new journal is easy, just follow the instructions below!
+/create.bml.create.text=Creating a new LiveJournal is easy, just follow the instructions below!
 
 /create.bml.email.head=Your email address
 
@@ -217,7 +217,7 @@
 
 /create.bml.email.text=For verification and security purposes, we need your email address.  It will never ever, under any any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a href="/legal/privacy.bml" TARGET="privacy">privacy policy</a> for more information.
 
-/create.bml.error.coppa.under13=Sorry, due to COPPA restrictions, you cannot use this service until you're 13 years old.  Please come back on your 13th birthday.
+/create.bml.error.coppa.under13=Sorry, due to COPPA restrictions, you cannot use the LiveJournal service until you're 13 years old.  Please come back on your 13th birthday.
 
 /create.bml.error.email.blank=You must provide your email address.
 
@@ -259,7 +259,7 @@
 
 /create.bml.proceed.head=Proceed
 
-/create.bml.proceed.text=Press the button below and you're on your way to having your very own journal!
+/create.bml.proceed.text=Press the button below and you're on your way to having your very own LiveJournal!
 
 /create.bml.proceed.warning=Only press <b>Proceed</b> <i>once</i>!!
 
@@ -269,9 +269,9 @@
 
 /create.bml.success.text1=Your journal has been created.  Important registration information has been emailed to <FONT FACE=Arial SIZE=+1><B>[[email]]</B></FONT> containing further instructions.  <B>Note: </B>  You have exactly <I>seven days</I> to confirm your journal creation.  If you still haven't gone and set it up after seven days the username of <B>[[username]]</B> will be automatically deleted and somebody else may use it.
 
-/create.bml.success.text2=Your journal will be available at:
+/create.bml.success.text2=Your LiveJournal will be available at:
 
-/create.bml.success.text3=Now, please take the time to fill in some information about yourself.  It's mostly optional, but it lets us get an idea of who's using the service.
+/create.bml.success.text3=Now, please take the time to fill in some information about yourself.  It's mostly optional, but it lets us get an idea of who's using LiveJournal.
 
 /create.bml.title=Create New Journal
 
@@ -294,7 +294,7 @@
 /editinfo.bml.allowshowcontact.about<<
 You should keep this option enabled.  This lets other people be able to contact 
 you by showing your email address, ICQ number, and AOL Instant Messenger screenname 
-all on your profile page.
+all on your LiveJournal.
 .
 
 /editinfo.bml.allowshowcontact.email=If visible, email address to be displayed:
@@ -322,14 +322,14 @@ With the option above, you may also choose to hide your email address
 (while still showing other contact information).
 .
 
-/editinfo.bml.allowshowcontact.title=Show your contact information on your profile page?
+/editinfo.bml.allowshowcontact.title=Show your contact information on your LiveJournal?
 
 /editinfo.bml.allowshowinfo.about=Turn this on if you want your city/state/country and birthday to be visible to other users.
 
 /editinfo.bml.allowshowinfo.title=Show location &amp; birthday?
 
 /editinfo.bml.autotranslate.about<<
-Use this option to tell us which encoding to assume for your entries and comments entered before the site was converted to Unicode. 
+Use this option to tell LiveJournal which encoding to assume for your entries and comments entered before the site was converted to Unicode. 
 If you write in English, choose "Western European" here.
 .
 
@@ -339,7 +339,7 @@ If you write in English, choose "Western European" here.
 
 /editinfo.bml.bday.year.opt=year is optional
 
-/editinfo.bml.bdayreminders.about=If you want to get email reminding you of birthdays for your friends, click this box.
+/editinfo.bml.bdayreminders.about=If you want to get email reminding you of birthdays for your friends on LiveJournal, click this box.
 
 /editinfo.bml.bdayreminders.header=Send me birthday reminders
 
@@ -459,7 +459,7 @@ was from another source/article/link/website, enter the appropriate information.
 /editinfo.bml.htmlemail.about<<
 Check this if your email program fully supports HTML in your email.  
 Many clients try to support it but fail horribly.  
-If you uncheck it, you'll only be sent text emails.
+If you uncheck it, LiveJournal will only send text emails.
 .
 
 /editinfo.bml.htmlemail.header=Send HTML Emails
@@ -492,7 +492,7 @@ plural form for consistency.  "I like DVDs" instead of "I like DVD".
 
 /editinfo.bml.mangleaddress.about<<
 If you have the above option selected and are afraid spam-robots will find your email 
-address, select this option and your email address will be modified 
+address on LiveJournal, select this option and your email address will be modified 
 so your email address won't be found by email-collecting robots.
 .
 
@@ -507,12 +507,12 @@ so your email address won't be found by email-collecting robots.
 /editinfo.bml.optional=Optional
 
 /editinfo.bml.opt_in.about<<
-If you want to know when we add some cool new feature to the site, check this box.  
+If you want to know when we add some cool new feature to LiveJournal, check this box.  
 The emails you get will be pretty rare, no more than once or twice a month usually.  
 Your email address will not be visible to other users, and you can turn this off at anytime.
 .
 
-/editinfo.bml.opt_in.header=Send me site news.
+/editinfo.bml.opt_in.header=Send me LiveJournal news.
 
 /editinfo.bml.persinfo.disclaimer<<
 Fill in some quick information about yourself, for our own curiosity and statistical purposes. 
@@ -547,7 +547,7 @@ read our <a href="/legal/privacy.bml">privacy policy</a>.
 
 /editinfo.bml.settings.about=Select below your personal privacy options and preferences.
 
-/editinfo.bml.settings.header=Journal Options
+/editinfo.bml.settings.header=LiveJournal Options
 
 /editinfo.bml.showsubjicons.about<<
 By default, a bunch of icons are shown that people can use when replying to your messages.  
@@ -594,7 +594,7 @@ A lot of users feel these are ugly and a waste of space, so uncheck this box if 
 
 /editinfo.bml.translatemailto.about<<
 In case you chose to receive message board replies by email, and your email client doesn't handle Unicode (UTF-8) 
-messages very well, use this option to specify a different encoding into which the text sent to you will be automatically translated.
+messages very well, use this option to specify a different encoding into which LiveJournal will automatically translate the text of comments sent to you.
 .
 
 /editinfo.bml.translatemailto.header=Translate email notifications into: 
@@ -605,7 +605,7 @@ messages very well, use this option to specify a different encoding into which t
 
 /editinfo.bml.userpic.about<<
 Below is the miniature picture you have uploaded to represent you 
-throughout the site and in your journal and in your friends' journals:
+throughout the LiveJournal site and in your journal and in your friends' journals:
 .
 
 /editinfo.bml.userpic.edit=To delete this picture, or upload a new one, <a href="/uploadpic.bml" target="_blank">go here</a>.
@@ -767,13 +767,13 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/edit.bml.edit.head=Edit Your Friends
 
-/friends/edit.bml.edit.text=Enter your username and password to modify your friends.  To use this, you must already have your own account.  You can make your own journal from the <a href="/create.bml">create journal page</a>.  Once you have defined your fellow friends, you'll be able to easily keep track of what they're all doing, as they're doing it.
+/friends/edit.bml.edit.text=Enter your username and password to modify your friends.  To use this, you must already have your own LiveJournal account.  You can make your own LiveJournal from the <a href="/create.bml">create journal page</a>.  Once you have defined your fellow LiveJournal-using friends, you'll be able to easily keep track of what they're all doing, as they're doing it.
 
 /friends/edit.bml.title=Edit Friends
 
 /friends/edit_do.bml.addfriends.head=Add Friends
 
-/friends/edit_do.bml.addfriends.text=Enter your friends' user names in the boxes below, and pick what background and foreground colors you want to associate with them....
+/friends/edit_do.bml.addfriends.text=Enter your friends' LiveJournal user names in the boxes below, and pick what background and foreground colors you want to associate with them....
 
 /friends/edit_do.bml.background=Background
 
@@ -793,7 +793,7 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/edit_do.bml.fellowfriends.head=Fellow Friends
 
-/friends/edit_do.bml.fellowfriends.text=The following people have listed you as their friend... You may want to list them as your friend too.  More than anything this is provided as a reference so you know their usernames too.  You are under no obligation to add them to your list.
+/friends/edit_do.bml.fellowfriends.text=The following people have listed you as their friend... You may want to list them as your friend too.  More than anything this is provided as a reference so you know their LiveJournal usernames too.  You are under no obligation to add them to your list.
 
 /friends/edit_do.bml.foreground=Foreground
 
@@ -809,7 +809,7 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/edit_do.bml.nofriends.head=No Friends?
 
-/friends/edit_do.bml.nofriends.text=You do not currently have any friends defined.  However, we're sure you have to have a few friends!  <tt>:)</tt>  Just enter their usernames below....
+/friends/edit_do.bml.nofriends.text=You do not currently have any friends defined.  However, we're sure you have to have a few friends!  <tt>:)</tt>  Just enter their LiveJournal names below....
 
 /friends/edit_do.bml.opt.delete=Delete?
 
@@ -941,7 +941,7 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /login.bml.expire.neverexpire.text=Your login will <b>never expire</b>, so if you're at a public internet terminal, a school, library, or other place where people may be using this computer shortly, make sure you log out when you're done!  Or, change your login mode to expire when you close your browser:
 
-/login.bml.expire.sessiononly.text=Your login will expire after you close your browser.  If this is your own computer and you're the only user, you may want to set change your login expiration such that it never expires:
+/login.bml.expire.sessiononly.text=Your login will expire after you close your browser.  If this is your own computer and you're the only user, you may want to set your login expiration such that it never expires:
 
 /login.bml.links.head=Links
 
@@ -1009,7 +1009,7 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /lostinfo.bml.enter_username=Enter your username:
 
-/lostinfo.bml.lostpassword.text=If you've lost your password, enter your username and optionally, the email address you'd like the password sent to.  Note that the email address must be one you've used at the site before and had confirmed at one point.  If you leave the email field blank, it'll be mailed to your current address.
+/lostinfo.bml.lostpassword.text=If you've lost your password, enter your username and optionally, the email address you'd like the password sent to.  Note that the email address must be one you've used at LiveJournal before and had confirmed at one point.  If you leave the email field blank, it'll be mailed to your current address.
 
 /lostinfo.bml.lostpassword.title=Lose your password?
 
@@ -1063,7 +1063,7 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /modify_do.bml.colortheme.head=Color Theme
 
-/modify_do.bml.domainalias.about=If you have a domain name already registered (or which you're planning on registering) and would like it to automatically load your journal, enter it here:
+/modify_do.bml.domainalias.about=If you have a domain name already registered (or which you're planning on registering) and would like it to automatically load your LiveJournal, enter it here:
 
 /modify_do.bml.domainalias.domainname=Domain name:
 
@@ -1091,7 +1091,7 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /modify_do.bml.friends.opt.usesharedpic.head=Use shared journal pictures instead of poster's user picture
 
-/modify_do.bml.journaloptions.about=From here you can customize the look of your journal pages.
+/modify_do.bml.journaloptions.about=From here you can customize the look of your LiveJournal pages.  If you're really curious how everything works, read the <A HREF="/developer/" TARGET=_blank>developer information</A>.  Otherwise, we'll assume you're satisifed with the basic options below:
 
 /modify_do.bml.journaloptions.head=Journal Options
 
@@ -1107,7 +1107,7 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /modify_do.bml.journalstatus.select.suspended=Suspended
 
-/modify_do.bml.moodicons.about=When posting journal entries you can also specify your current mood.  Different users have submitted different sets of mood icons that you can use.  Or, select "None" if you don't want any pictures besids your moods.  (or, you don't even have to use the Current Mood feature at all.)
+/modify_do.bml.moodicons.about=When posting journal entries you can also specify your current mood.  Different users have submitted different sets of mood icons that you can use.  Or, select "None" if you don't want any pictures beside your moods.  (or, you don't even have to use the Current Mood feature at all.)
 
 /modify_do.bml.moodicons.head=Mood Icons
 
@@ -1156,14 +1156,14 @@ neat the bottom of the page that is called <b>Auto-convert older entries from:</
 "Western European (Windows)" from the pull-down menu and save your settings. Your entries should
 now be editable. p?>
 
-<?p <b>Long answer</b>: In order to allow you to edit a non-Unicode entry, we need to 
+<?p <b>Long answer</b>: In order to allow you to edit a non-Unicode entry, LiveJournal code needs to 
 know which encoding that entry has been posted in. For users of English and other West European 
 languages, this will normally be "Western European (Windows)", although if that doesn't work well
 for quote characters and other similar meta-characters, try "Western European (ISO)". Users
 writing in other languages should select their encoding; if it isn't in the supplied list, 
 contact <a href="/support/">Support</a> and explain the problem.  p?>
 
-<?p Note that "non-Unicode entry" may mean either a journal entry posted before the site underwent
+<?p Note that "non-Unicode entry" may mean either a journal entry posted before LiveJournal underwent
 the conversion to Unicode, or a new journal entry posted recently with a client program that 
 is not Unicode-compatible.  p?>
 .
@@ -1190,14 +1190,14 @@ can rename your groups to ASCII-only names on the
 /support/encodings.bml.overview.header=What is this all about?
 
 /support/encodings.bml.overview.text<<
-<?p The site uses Unicode to store and display everything: 
+<?p LiveJournal uses Unicode to store and display everything: 
 text of journal entries, comments, names and personal information... everything. 
 Unicode is a very powerful standard for working with text. 
 For example, it allows users to store and input information in many languages at once. 
 It supports the intrastructure of translating and maintaining the user interface in 
 languages other than English. p?>
 
-<?p Journal entries and comments which had been stored before the site switched
+<?p Journal entries and comments which had been stored before LiveJournal switched
 to Unicode need to be converted to Unicode on-the-fly in order for the user to be able 
 to view or edit them. This page explains how to deal with some of the common problems in
 that area. p?>
@@ -1243,11 +1243,11 @@ that area. p?>
 
 /talkpost.bml.opt.defpic=(default)
 
-/talkpost.bml.opt.friendsonly=- this user has disabled anonymous and non-friend posting.  You may post here if [[username]] lists you as a friend.";
+/talkpost.bml.opt.friendsonly=- this user has disabled anonymous and non-friend posting.  You may post here if [[username]] lists you as a friend.
 
 /talkpost.bml.opt.from=From:
 
-/talkpost.bml.opt.ljuser=Username:
+/talkpost.bml.opt.ljuser=LiveJournal user:
 
 /talkpost.bml.opt.loggedin=<b>Logged in user:</b> [[username]]
 
@@ -1277,7 +1277,7 @@ that area. p?>
 
 /talkpost_do.bml.error.badpassword=Incorrect password given for the username specified.  You can recover your password <a href='/lostinfo.bml'>here</a> if you've forgotten it.
 
-/talkpost_do.bml.error.badusername=The username you specified does not exist.  You can recover your username <a href='/lostinfo.bml'>here</a> if you've forgotten it, or you may post as "Anonymous" instead.
+/talkpost_do.bml.error.badusername=The LiveJournal username you specified does not exist.  You can recover your username <a href='/lostinfo.bml'>here</a> if you've forgotten it, or you may post as "Anonymous" instead.
 
 /talkpost_do.bml.error.banned=You are not allowed to post in this user's journal.
 
@@ -1307,7 +1307,7 @@ that area. p?>
 
 /talkpost_do.bml.error.notafriend=Sorry, user <b>[[user]]</b> does not list you as a friend, and they've set the "friends only" option for who can reply to their journal.
 
-/talkpost_do.bml.error.nousername=You did not enter your username.  You can choose to post as "Anonymous" if you don't have an account.
+/talkpost_do.bml.error.nousername=You did not enter your LiveJournal username.  You can choose to post as "Anonymous" if you don't have a LiveJournal user account.
 
 /talkpost_do.bml.error.noverify=Sorry, you aren't allowed to post comments in other people's journals until your email address has been verified.  If you've lost the confirmation email to do this, you can have it resent from the <a href='/lostinfo.bml'>lost information page</a>.
 
@@ -1323,7 +1323,7 @@ that area. p?>
 
 /talkpost_do.bml.opt.spellcheck=Spell check entry before posting
 
-/talkpost_do.bml.preview=Below is how your post will look.  Press your browser's back button to make changes. Or, submit it.
+/talkpost_do.bml.preview=This is how your comment will look when posted. Using the form below, you can edit your comment further, or you can submit it as-is.
 
 /talkpost_do.bml.preview.subject=<b>Subject: </b>
 
@@ -1595,7 +1595,7 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /update.bml.title.readonly=Read-only mode
 
-/update.bml.update.about=If you don't want to <a href="/download/">download a client</a> for your computer, or if one doesn't exist for your computer, you may use this page to update your journal.  This is also useful if you're on vacation or away from your primary computer.
+/update.bml.update.about=If you don't want to <a href="/download/">download a client</a> for your computer, or if one doesn't exist for your computer, you may use this page to update your LiveJournal.  This is also useful if you're on vacation or away from your primary computer.
 
 /update.bml.update.head=Update your Journal...
 
@@ -1613,7 +1613,7 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.closedmembership.body=This is a closed community.  To become a member you must contact <a href="userinfo.bml?user=[[cowner]]">its maintainer</a>.
 
-/userinfo.bml.comminfo.body=Below is information about the "[[commname]]" community.
+/userinfo.bml.comminfo.body=Below is information about the "[[commname]]" community on LiveJournal.
 
 /userinfo.bml.comminfo.name=Community Information
 
@@ -1688,6 +1688,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 /userinfo.bml.label.user=User:
 
 /userinfo.bml.label.viewfriends=View Friends
+
+/userinfo.bml.label.viewlabel=View [[label]]
 
 /userinfo.bml.label.viewmembers=View Members
 
@@ -1777,7 +1779,7 @@ error.procrequest=There was an error processing your request:
 
 error.purged.name=Deleted
 
-error.purged.text=This journal has been deleted and purged.  This username will be available again shortly.
+error.purged.text=This journal has been deleted and purged.
 
 error.purged.title=Purged Account
 
@@ -1890,7 +1892,7 @@ talk.somebodywrote=[[realname]] ([[userlink]]) wrote,
 
 talk.somebodywrote_comm=[[realname]] ([[userlink]]) wrote in [[commlink]],
 
-talk.spellcheck=Checking spelling during preview
+talk.spellcheck=Check spelling during preview
 
 talk.threadlink=Thread
 

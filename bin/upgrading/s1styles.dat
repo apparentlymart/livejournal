@@ -345,7 +345,7 @@ CALENDAR_WEEK<=
 Style: calendar/Disjointed
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2002-04-19 09:03:31
+lastupdate: 2002-10-11 08:48:58
 
 CALENDAR_YEAR_DISPLAYED=><div>&gt;&gt;&nbsp;%%yyyy%%</a>
 
@@ -480,7 +480,7 @@ color:%%color:stronger_text%%;
   <td colspan=2 rowspan=2 class="metabox" id="navlink">
    <a class="links" href="%%urllastn%%">Recent Entries</a><br>
    <a class="links" href="%%urlfriends%%">Friends</a><br>
-   <a class="links" href="%%cons:siteroot%%/userinfo.bml?user=%%username%%&amp;mode=full">Info<br>
+   <a class="links" href="%%cons:siteroot%%/userinfo.bml?user=%%username%%&amp;mode=full">Info</a><br>
 %%website%%</td>
   <td id="secorn">&nbsp;</td>
  </tr>
@@ -572,7 +572,7 @@ CALENDAR_WEEK<=
 Style: calendar/Generator
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2001-12-29 08:29:52
+lastupdate: 2002-09-09 16:53:47
 
 CALENDAR_YEAR_DISPLAYED=><b>%%yyyy%%</b>&nbsp;
 
@@ -1826,7 +1826,7 @@ DAY_PAGE<=
 Style: day/Disjointed
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2002-04-19 09:03:48
+lastupdate: 2002-10-11 08:49:46
 
 DAY_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">Post</a>
 
@@ -2085,7 +2085,7 @@ color:%%color:stronger_text%%;
   <td colspan=2 rowspan=2 class="metabox" id="navlink">
    <a class="links" href="%%urllastn%%">Recent Entries</a><br>
    <a class="links" href="%%urlfriends%%">Friends</a><br>
-   <a class="links" href="%%cons:siteroot%%/userinfo.bml?user=%%username%%&amp;mode=full">Info<br>
+   <a class="links" href="%%cons:siteroot%%/userinfo.bml?user=%%username%%&amp;mode=full">Info</a><br>
    <a class="links" href="%%urlcalendar%%">Calendar</a><br>%%website%%
   <td id="secorn">&nbsp;</td>
  </tr>
@@ -2119,7 +2119,7 @@ color:%%color:stronger_text%%;
 Style: day/Generator
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2002-05-09 18:48:49
+lastupdate: 2002-09-09 16:52:24
 
 DAY_TALK_LINKS<=
 <tr>
@@ -3643,7 +3643,7 @@ FRIENDS_SUBJECT=><FONT COLOR="%%color:page_text_em%%" FACE="Arial"><I><B>%%subje
 Style: friends/Disjointed
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2002-04-19 09:04:37
+lastupdate: 2002-10-11 08:51:09
 
 FRIENDS_RANGE_HISTORY=>
 
@@ -3854,7 +3854,7 @@ color:%%color:stronger_text%%;
  <tr>
   <td colspan=2 rowspan=2 class="metabox" id="navlink">
    <a class="links" href="%%urllastn%%">Recent Entries</a><br>
-   <a class="links" href="%%cons:siteroot%%/userinfo.bml?user=%%username%%&amp;mode=full">Info<br>
+   <a class="links" href="%%cons:siteroot%%/userinfo.bml?user=%%username%%&amp;mode=full">Info</a><br>
    <a class="links" href="%%urlcalendar%%">Calendar</a>
 %%website%%</td>
   <td id="secorn">&nbsp;</td>
@@ -3966,7 +3966,7 @@ FRIENDS_SUBJECT=>%%subject%%
 Style: friends/Generator
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2002-06-24 05:34:59
+lastupdate: 2002-09-09 16:50:59
 
 FRIENDS_RANGE_HISTORY=>%%skip%% entries back
 
@@ -5754,7 +5754,7 @@ LASTN_USERPIC=><IMG ALIGN=RIGHT HSPACE=2 VSPACE=2 SRC="%%src%%" WIDTH=%%width%% 
 Style: lastn/Disjointed
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2002-04-19 09:04:11
+lastupdate: 2002-10-11 08:51:54
 
 LASTN_EVENT_PROTECTED<=
 <table cellspacing=0 class="entries">
@@ -5924,7 +5924,7 @@ color:%%color:stronger_text%%;
  <tr>
   <td colspan=2 rowspan=2 class="metabox" id="navlink">
    <a class="links" href="%%urlfriends%%">Friends</a><br>
-   <a class="links" href="%%cons:siteroot%%/userinfo.bml?user=%%username%%&amp;mode=full">Info<br>
+   <a class="links" href="%%cons:siteroot%%/userinfo.bml?user=%%username%%&amp;mode=full">Info</a><br>
    <a class="links" href="%%urlcalendar%%">Calendar</a>
 %%website%%</td>
   <td id="secorn">&nbsp;</td>
@@ -6059,9 +6059,9 @@ LASTN_WEBSITE=><br><a class="links" href="%%url%%">%%name%%</a>
 Style: lastn/Generator
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2002-04-14 00:35:32
+lastupdate: 2002-09-09 16:48:39
 
-LASTN_EVENT_PRIVATE<=
+LASTN_EVENT_PROTECTED<=
 <table width="600" cellpadding="2" cellspacing="0"
 border="0"
 summary="" class="entrybox">
@@ -6071,7 +6071,7 @@ summary="" class="entrybox">
 border="0"
 summary="">
 <tr align='left'>
-<td class="caption"><img src="%%cons:img%%/icon_private.gif" width="14" 
+<td class="caption"><img src="%%cons:img%%/icon_protected.gif" width="14" 
 height="15"> %%subject%%</td>
 <td align="right" class="index">[%%datetime%%]</td>
 </tr>
@@ -6087,8 +6087,21 @@ height="15"> %%subject%%</td>
 </td>
 </tr>
 </table><p>
+<=LASTN_EVENT_PROTECTED
 
-<=LASTN_EVENT_PRIVATE
+LASTN_SUBJECT=>%%subject%%
+
+LASTN_TALK_READLINK=><a href="%%urlread%%"><b>%%messagecount%% comment%%mc-plural-s%%</b></a>|
+
+LASTN_TALK_LINKS<=
+<tr>
+<td align="right" colspan="2" width="100%" bgcolor="%%color:weak_back%%" class="comments">
+%%readlink%%<a href="%%urlpost%%">post comment</a>
+</td>
+</tr>
+<=LASTN_TALK_LINKS
+
+LASTN_SKIP_BACKWARD=><a href="%%url%%">earlier</a>
 
 LASTN_PAGE<=
 <!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
@@ -6218,24 +6231,6 @@ summary="">
 
 <=LASTN_PAGE
 
-LASTN_RANGE_HISTORY=>%%skip%% entries back
-
-LASTN_ALTPOSTER<=
-<table cellpadding="1" align="right" cellspacing="0"
-border="0"
-summary="">
-<tr><td bgcolor="%%color:stronger_back%%">
-<table cellpadding="2" align="center" cellspacing="0"
-border="0"
-summary="">
-<tr><td bgcolor="%%color:page_back%%" align="center">
-<a class="index" href="%%cons:siteroot%%/users/%%poster%%/">
-%%pic%%
-<span style="color:%%color:page_link%%">%%poster%%</span></a>
-</td></tr></table>
-</td></tr></table>
-<=LASTN_ALTPOSTER
-
 LASTN_EVENT<=
 <table width="600" cellpadding="2" cellspacing="0"
 border="0"
@@ -6263,24 +6258,41 @@ summary="">
 </table><p>
 <=LASTN_EVENT
 
-LASTN_CURRENT<=
-<tr>
-<td class="meta">[</td>
-<td class="meta" align="right"><b>%%lc:what%%</b></td>
-<td class="meta" align="center">|</td>
-<td class="meta">%%value%%</td>
-<td class="meta">]</td>
-</tr>
-
-<=LASTN_CURRENT
-
-LASTN_DATE_FORMAT=>%%dd%%&nbsp;%%monshort%%&nbsp;%%yyyy%%|<b>%%12hh%%:%%min%%%%ampm%%</b>
-
-LASTN_NEW_DAY=>
+LASTN_ALTPOSTER_PIC<=
+<img border="0" src="%%src%%" width="%%width%%" height="%%height%%" 
+alt=""><br>
+<=LASTN_ALTPOSTER_PIC
 
 LASTN_SKIP_FORWARD=><a href="%%url%%">later</a>
 
-LASTN_EVENT_PROTECTED<=
+LASTN_RANGE_HISTORY=>%%skip%% entries back
+
+LASTN_USERPIC<=
+<td>
+<table cellpadding="2" bgcolor="%%color:page_back%%" cellspacing="0"
+border="0"
+summary="">
+<tr>
+<td bgcolor="%%color:stronger_back%%" align="center"><img border="0" src="%%src%%" height="%%height%%" width="%%width%%" alt=""></td>
+</tr>
+</table>
+</td>
+<=LASTN_USERPIC
+
+LASTN_SKIP_SPACER=>/
+
+LASTN_END_DAY=>
+
+LASTN_CURRENTS<=
+<table cellspacing="0"
+cellpadding="0"
+border="0"
+summary="">
+%%currents%%
+</table><p>
+<=LASTN_CURRENTS
+
+LASTN_EVENT_PRIVATE<=
 <table width="600" cellpadding="2" cellspacing="0"
 border="0"
 summary="" class="entrybox">
@@ -6290,7 +6302,7 @@ summary="" class="entrybox">
 border="0"
 summary="">
 <tr align='left'>
-<td class="caption"><img src="%%cons:img%%/icon_protected.gif" width="14" 
+<td class="caption"><img src="%%cons:img%%/icon_private.gif" width="14" 
 height="15"> %%subject%%</td>
 <td align="right" class="index">[%%datetime%%]</td>
 </tr>
@@ -6306,49 +6318,43 @@ height="15"> %%subject%%</td>
 </td>
 </tr>
 </table><p>
-<=LASTN_EVENT_PROTECTED
 
-LASTN_TALK_LINKS<=
-<tr>
-<td align="right" colspan="2" width="100%" bgcolor="%%color:weak_back%%" class="comments">
-%%readlink%%<a href="%%urlpost%%">post comment</a>
-</td>
-</tr>
-<=LASTN_TALK_LINKS
+<=LASTN_EVENT_PRIVATE
 
-LASTN_RANGE_MOSTRECENT=>most recent entries
-
-LASTN_SUBJECT=>%%subject%%
-
-LASTN_WEBSITE<=
-<tr>
-<td class="meta">[</td>
-<td class="meta" align="right"><b>website</b></td>
-<td class="meta" align="center">|</td>
-<td class="meta"><a href="%%url%%">%%name%%</a></td>
-<td class="meta">]</td>
-</tr>
-
-<=LASTN_WEBSITE
-
-LASTN_SKIP_SPACER=>/
-
-LASTN_END_DAY=>
+LASTN_ALTPOSTER<=
+<table cellpadding="1" align="right" cellspacing="0"
+border="0"
+summary="">
+<tr><td bgcolor="%%color:stronger_back%%">
+<table cellpadding="2" align="center" cellspacing="0"
+border="0"
+summary="">
+<tr><td bgcolor="%%color:page_back%%" align="center">
+<a class="index" href="%%cons:siteroot%%/users/%%poster%%/">
+%%pic%%
+<span style="color:%%color:page_link%%">%%poster%%</span></a>
+</td></tr></table>
+</td></tr></table>
+<=LASTN_ALTPOSTER
 
 LASTN_OPT_ITEMS=>
 
-LASTN_SKIP_BACKWARD=><a href="%%url%%">earlier</a>
+LASTN_CURRENT<=
+<tr>
+<td class="meta">[</td>
+<td class="meta" align="right"><b>%%lc:what%%</b></td>
+<td class="meta" align="center">|</td>
+<td class="meta">%%value%%</td>
+<td class="meta">]</td>
+</tr>
 
-LASTN_TALK_READLINK=><a href="%%urlread%%"><b>%%messagecount%% comment%%mc-plural-s%%</b></a>|
+<=LASTN_CURRENT
 
-LASTN_CURRENTS<=
-<table cellspacing="0"
-cellpadding="0"
-border="0"
-summary="">
-%%currents%%
-</table><p>
-<=LASTN_CURRENTS
+LASTN_RANGE_MOSTRECENT=>most recent entries
+
+LASTN_NEW_DAY=>
+
+LASTN_DATE_FORMAT=>%%dd%%&nbsp;%%monshort%%&nbsp;%%yyyy%%|<b>%%12hh%%:%%min%%%%ampm%%</b>
 
 LASTN_SKIP_LINKS<=
 <tr>
@@ -6361,22 +6367,16 @@ LASTN_SKIP_LINKS<=
 
 <=LASTN_SKIP_LINKS
 
-LASTN_ALTPOSTER_PIC<=
-<img border="0" src="%%src%%" width="%%width%%" height="%%height%%" 
-alt=""><br>
-<=LASTN_ALTPOSTER_PIC
-
-LASTN_USERPIC<=
-<td>
-<table cellpadding="2" bgcolor="%%color:page_back%%" cellspacing="0"
-border="0"
-summary="">
+LASTN_WEBSITE<=
 <tr>
-<td bgcolor="%%color:stronger_back%%" align="center"><img border="0" src="%%src%%" height="%%height%%" width="%%width%%" alt=""></td>
+<td class="meta">[</td>
+<td class="meta" align="right"><b>website</b></td>
+<td class="meta" align="center">|</td>
+<td class="meta"><a href="%%url%%">%%name%%</a></td>
+<td class="meta">]</td>
 </tr>
-</table>
-</td>
-<=LASTN_USERPIC
+
+<=LASTN_WEBSITE
 
 
 .
