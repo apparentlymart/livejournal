@@ -75,8 +75,10 @@ $flush_host->('master', $mdb);
 
 $sth = $mdb->prepare("SHOW MASTER LOGS");
 $sth->execute;
-my $log_count;
+my @master_logs;
+my $log_count = 0;
 while (my ($log) = $sth->fetchrow_array) {
+    push @master_logs, $log;
     $log_count++;
     print "Log: $log ($log_count)\n";
 }
@@ -170,7 +172,9 @@ foreach my $skey (keys %$slaves)
 	push @errors, "No log file for: $skey";
     }
 
-    printf "is in %s at %10d [%10d]\n", $s->{'logfile'}, $s->{'pos'}, $s->{'pos'} - $masterpos;
+    printf ("is in %s at %10d [%10d] c=%d\n", $s->{'logfile'}, 
+	    $s->{'pos'}, $s->{'pos'} - $masterpos,
+	    $ccount);
     $dbh->disconnect();
 
     if ($minlog eq "" || $s->{'logfile'} lt $minlog) { 
@@ -183,7 +187,7 @@ check_errors();
 print "All slaves running.\n";
 print "Minlog: $minlog\n";
 
-if ($log_count >= 2)
+if ($log_count >= 2 && $master_logs[0] lt $minlog)
 {
     my $sql = "PURGE MASTER LOGS TO " . $mdb->quote($minlog);
     print $sql, "\n";
