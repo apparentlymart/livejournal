@@ -1342,9 +1342,10 @@ sub ljuser
     my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
     my $img = $opts->{'imgroot'} || $LJ::IMGPREFIX;
     if ($opts->{'type'} eq "C") {
-        return "<nobr><a href=\"$LJ::SITEROOT/userinfo.bml?user=$user$andfull\"><img src=\"$img/community.gif\" width=\"16\" height=\"16\" align=\"absmiddle\" border=\"0\"></a><b><a href=\"$LJ::SITEROOT/community/$user/\">$user</a></b></nobr>";
+        return "<span class='ljuser' style='white-space:nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/community.gif' alt='userinfo' width='16' height='16' align='middle' border='0' /></a><a href='$LJ::SITEROOT/users/$user/'><b>$user</b></a></span>";
+
     } else {
-        return "<nobr><a href=\"$LJ::SITEROOT/userinfo.bml?user=$user$andfull\"><img src=\"$img/userinfo.gif\" width=\"17\" height=\"17\" align=\"absmiddle\" border=\"0\"></a><b><a href=\"$LJ::SITEROOT/users/$user/\">$user</a></b></nobr>";
+        return "<span class='ljuser' style='white-space:nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/userinfo.gif' alt='userinfo' width='17' height='17' align='middle' border='0' /></a><a href='$LJ::SITEROOT/users/$user/'><b>$user</b></a></span>";
     }
 }
 
