@@ -283,7 +283,7 @@
     $ret .= "<p>Who can view this poll?<br><select name=\"whoview\">\n";
     foreach ( qw(all friends none) ) {
         $ret .= "<option value=\"$_\"";
-        $ret .= "selected" if ($poll->{'whoview'} eq $_);
+        $ret .= " selected='1'" if ($poll->{'whoview'} eq $_);
         $ret .= ">" . ucfirst($_) . "\n";
     }
     $ret .= "</select>\n\n";
@@ -291,12 +291,12 @@
     $ret .= "<p>Who can vote in this poll?<br><select name=\"whovote\">\n";
     foreach ( qw(all friends) ) {
 	$ret .= "<option value=\"$_\"";
-	$ret .= "selected" if ($poll->{'whovote'} eq $_);
+	$ret .= " selected='1'" if ($poll->{'whovote'} eq $_);
 	$ret .= ">" . ucfirst($_) . "\n";
     }
     $ret .= "</select>\n\n";
 
-    $ret .= "<p>Poll Name: <i>(opt.)</i><br><input type=\"text\" name=\"name\" value=\"" . $poll->{"name"} . "\">\n<p>"; 
+    $ret .= "<p>Poll Name: <i>(opt.)</i><br><input type=\"text\" name=\"name\" value=\"" . LJ::ehtml($poll->{"name"}) . "\">\n<p>"; 
 
     # if they have no elements, we need to manually give them an insert option
     $ret .= &insert_element(0, $poll);
@@ -331,7 +331,7 @@
 	# question text and hidden fields
 	$ret .= "<input type=\"hidden\" name=\"pq_$x\_type\" value=\"$elem->{'type'}\">\n";
 	$ret .= "<input type=\"hidden\" name=\"pq_$x\_opts\" value=\"$elem->{'opts'}\">\n";
-	$ret .= "<p><p>Question:<br><input type=\"text\" size=\"30\" name=\"pq_$x\_question\" value=\"" . $elem->{"question"} . "\">\n";
+	$ret .= "<p><p>Question:<br><input type=\"text\" size=\"30\" name=\"pq_$x\_question\" value=\"" . LJ::ehtml($elem->{"question"}) . "\">\n";
 	$ret .= "<br><font size=\"1\"><b>[" . $errors->[$x]->{'question'} ."]</b></font>\n" if ($errors->[$x]->{'question'});
 
 	$ret .= "<blockquote>\n";
@@ -339,14 +339,14 @@
 	    # spit out "items" -- choices for drop-down, radio, etc questions
 	    $ret .= "<br>Options:\n";
 	    for ($y = 0; $y < $elem->{'opts'}; $y++) {
-	        $ret .= "<br><input type=\"text\" name=\"pq_$x\_opt_$y\" value=\"" . @{$elem->{'opt'}}[$y] . "\" maxlength=\"$RULES{'items'}{'maxlength'}\" size=\"20\">\n";
+	        $ret .= "<br><input type=\"text\" name=\"pq_$x\_opt_$y\" value=\"" . LJ::ehtml(@{$elem->{'opt'}}[$y]) . "\" maxlength=\"$RULES{'items'}{'maxlength'}\" size=\"20\">\n";
 		$ret .= "<br><font size=\"1\"><b>[" . $errors->[$x]->{$y}->{'items'} . "]</b></font>\n" if ($errors->[$x]->{$y}->{"items"});
 	    }
 	    $ret .= ($elem->{'opts'} < $RULES{'items'}{'max'}) ? "<br><input type=\"submit\" name=\"request:$x:do\" value=\"More >>\">\n" : "<br>(=DE [Option limit reached] DE=)\n";
 	} elsif ($elem->{'type'} eq 'text') {
 	    foreach ( qw(size maxlength) ) {
 	        $ret .= "" . ucfirst($_) . ": <input type=\"text\" name=\"pq_$x\_$_\" value=\"";
-		$ret .= $elem->{$_} || $RULES{'text'}{$_};
+		$ret .= LJ::ehtml($elem->{$_} || $RULES{'text'}{$_});
 		$ret .= "\" size=\"3\" maxlength=\"3\">\n";
 	    }
 	    foreach ( qw(size maxlength) ) {
@@ -355,7 +355,7 @@
 	} elsif ($elem->{'type'} eq 'scale') {
 	    foreach ( qw(from to by) ) {
 	        $ret .= " " . ucfirst($_) . ": <input type=\"text\" name=\"pq_$x\_$_\" value=\"";
-		$ret .= $elem->{$_} || $RULES{'scale'}{$_};
+		$ret .= LJ::ehtml($elem->{$_} || $RULES{'scale'}{$_});
 		$ret .= "\" size=\"3\" maxlength=\"9\">\n";
 	    }
 	    foreach ( qw(from by scale) ) {
@@ -410,7 +410,7 @@ sub make_code {
     my $ret = "";
 
     # start out the tag
-    $ret .= "<lj-poll name=\"" . $poll->{"name"} . "\" whovote=\"" . $poll->{"whovote"} . "\" whoview=\"" . $poll->{"whoview"} . "\">\n";
+    $ret .= "<lj-poll name=\"" . LJ::ehtml($poll->{"name"}) . "\" whovote=\"" . LJ::ehtml($poll->{"whovote"}) . "\" whoview=\"" . LJ::ehtml($poll->{"whoview"}) . "\">\n";
 
     # go through and make <lj-pq> tags
     for ($x = 0; $x < $poll->{'count'}; $x++) { 
@@ -420,11 +420,11 @@ sub make_code {
                 # fill in attributes
 		if ($elem->{'type'} eq 'text') {
 		    foreach ( qw(size maxlength) ) {
-		        $ret .= " $_=\"" . $elem->{$_} . "\"";
+		        $ret .= " $_=\"" . LJ::ehtml($elem->{$_}) . "\"";
 		    }
 		} elsif ($elem->{'type'} eq 'scale') {
 		    foreach ( qw(from to by) ) {
-		        $ret .= " $_=\"" . $elem->{$_} . "\"";
+		        $ret .= " $_=\"" . LJ::ehtml($elem->{$_}) . "\"";
 		    }
 		}
 		$ret .= ">\n";

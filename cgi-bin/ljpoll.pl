@@ -6,6 +6,27 @@ package LJ::Poll;
 use strict;
 use HTML::TokeParser;
 
+require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
+
+sub clean_poll
+{
+    my $ref = shift;
+
+    my $poll_eat = [qw[head title style layer iframe applet object]];
+    my $poll_allow = [qw[a b i u]];
+    my $poll_remove = [qw[bgsound embed object caption link font]];
+    
+    LJ::CleanHTML::clean($ref, {
+	'wordlength' => 40,
+	'addbreaks' => 0,
+	'eat' => $poll_eat,
+	'mode' => 'deny',
+	'allow' => $poll_allow,
+	'remove' => $poll_remove,
+    });
+}
+
+
 sub contains_new_poll
 {
     my $postref = shift;
@@ -453,6 +474,7 @@ sub show_poll
 	    $it{$itid} = $item;
 	}
 
+	clean_poll(\$q->{'qtext'});
 	$ret .= $q->{'qtext'};
 	$ret .= "<p>";
 
@@ -461,6 +483,8 @@ sub show_poll
 
 	while (my ($user, $value) = $sth->fetchrow_array) 
 	{
+	    clean_poll(\$value);
+
 	    ## some question types need translation; type 'text' doesn't.
 	    if ($q->{'type'} eq "radio" || $q->{'type'} eq "drop") {
 		$value = $it{$value};
@@ -511,11 +535,12 @@ sub show_poll
     {
 	# this id= is only for people bookmarking it.  
 	# it does nothing, since POST is being used
-	$ret .= "<form action=\"$LJ::SITEROOT/poll/?id=$pollid\" method=POST>";
-	$ret .= "<input type=hidden name=pollid value=$pollid>";
+	$ret .= "<form action=\"$LJ::SITEROOT/poll/?id=$pollid\" method='post'>";
+	$ret .= "<input type='hidden' name='pollid' value='$pollid'>";
     }
     $ret .= "<b><a href=\"$LJ::SITEROOT/poll/?id=$pollid\">Poll \#$pollid:</a></b> ";
     if ($po->{'name'}) {
+	clean_poll(\$po->{'name'});
 	$ret .= "<i>$po->{'name'}</i>";
     }
     $ret .= "<br>Open to: <b>$po->{'whovote'}</b>, results viewable to: <b>$po->{'whoview'}</b>";
@@ -540,6 +565,7 @@ sub show_poll
     foreach my $q (@qs)
     {
 	my $qid = $q->{'pollqid'};
+	clean_poll(\$q->{'qtext'});
 	$ret .= "<p>$q->{'qtext'}<blockquote>";
 	
 	### get statistics, for scale questions
@@ -616,7 +642,7 @@ sub show_poll
 	    my ($size, $max) = split(m!/!, $q->{'opts'});
 	    if ($mode eq "enter") {
 		if ($do_form) {
-		    my $pval = &LJ::escapeall($preval{$qid});
+		    my $pval = LJ::escapeall($preval{$qid});
 		    $ret .= "<input type=text size=$size maxlength=$max name=\"pollq-$qid\" value=\"$pval\">";
 		} else {
 		    $ret .= "[" . ("&nbsp;"x$size) . "]";
@@ -689,6 +715,7 @@ sub show_poll
 	    foreach my $it (@{$its{$qid}})
 	    {
 		my ($itid, $item) = @$it;
+		clean_poll(\$item);
 
 		if ($mode eq "enter") {
 		    if ($q->{'type'} eq "drop") {
