@@ -31,6 +31,9 @@ require "$ENV{'LJHOME'}/cgi-bin/talklib.pl" if $LJ::NEW_ENTRY_CLEANUP_HACK;
 #### New interface (meta handler) ... other handlers should call into this.
 package LJ::Protocol;
 
+# global declaration of this text since we use it in two places
+our $CannotBeShown = '(cannot be shown)';
+
 sub translate
 {
     my ($u, $msg, $vars) = @_;
@@ -72,6 +75,7 @@ sub error_message
              "207" => "Protocol version mismatch",
              "208" => "Invalid text encoding",
              "209" => "Parameter out of range",
+             "210" => "Client tried to edit with corrupt data.  Preventing.",
 
              # Access Errors
              "300" => "Don't have access to requested journal",
@@ -1128,6 +1132,10 @@ sub editevent
         return $res;
     }
 
+    # now make sure the new entry text isn't $CannotBeShown
+    return fail($err, 210)
+        if $req->{event} eq $CannotBeShown;
+
     # don't allow backdated posts in communities
     return fail($err,152) if
         ($req->{'props'}->{"opt_backdated"} &&
@@ -1561,7 +1569,7 @@ sub getevents
                 # viewing the daily summary
 
                 if ($req->{'selecttype'} eq 'day') {
-                    $t->[0] = $t->[1] = '(cannot be shown)';
+                    $t->[0] = $t->[1] = $CannotBeShown;
                 } else {
                     return fail($err,207,"Cannot display/edit a Unicode post with a non-Unicode client. Please see $LJ::SITEROOT/support/encodings.bml for more information.");
                 }
