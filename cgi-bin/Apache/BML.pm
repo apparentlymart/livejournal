@@ -6,6 +6,7 @@ package Apache::BML;
 use strict;
 use Apache::Constants qw(:common REDIRECT);
 use Apache::File ();
+use Apache::URI;
 use CGI;
 use Data::Dumper;
 
@@ -143,8 +144,20 @@ sub handler
     }
     $req->{'lang'} ||= $req->{'env'}->{'DefaultLanguage'} || "en";
 
-    # TODO: tie this
-    %BMLCodeBlock::FORM = ();
+    # let BML code blocks see input
+    %BMLCodeBlock::GET = ();
+    %BMLCodeBlock::POST = ();
+    %BMLCodeBlock::FORM = ();  # old, combines both.
+    foreach my $id ([ [ $r->args    ] => [ \%BMLCodeBlock::GET,  \%BMLCodeBlock::FORM ] ],
+                    [ [ $r->content ] => [ \%BMLCodeBlock::POST, \%BMLCodeBlock::FORM ] ])
+    {
+        while (my ($k, $v) = splice @{$id->[0]}, 0, 2) {
+            foreach my $dest (@{$id->[1]}) {
+                $dest->{$k} .= "\0" if exists $dest->{$k};
+                $dest->{$k} .= $v;
+            }
+        }
+    }
     
     # print on the HTTP header
     my $html;
@@ -354,16 +367,10 @@ sub bml_block
     # multi-linguality stuff
     if ($type eq "_ML")
     {
-        my ($code, $args);
-        my $args_present = 0;
-        if ($data =~ /^(.+?)(\?(.*))?$/) {
-            ($code, $args) = ($1, $3);
-            $args_present = !!$2;
-        }
-        $code = "$ENV{'PATH_INFO'}$code"
-            if $code =~ /^\./;
-
         return "[ml_getter not defined]" unless $ML_GETTER;
+        my $code = $data;
+        $code = $req->{'r'}->parsed_uri()->path() . $code
+            if $code =~ /^\./;
         return $ML_GETTER->($req->{'lang'}, $code);
     }
         
@@ -804,6 +811,12 @@ sub modified_time
 
 package BML;
 
+sub note_mod_time
+{
+    my $mod_time = shift;
+    main::note_mod_time($Apache::BML::cur_req, $mod_time);
+}
+
 sub redirect
 {
     my $url = shift;
@@ -939,6 +952,8 @@ sub ml
 {
     my ($code, $vars) = @_;
     return "[ml_getter not defined]" unless $Apache::BML::ML_GETTER;
+    $code = $Apache::BML::cur_req->{'r'}->parsed_uri()->path() . $code
+        if $code =~ /^\./;
     my $data = $Apache::BML::ML_GETTER->($Apache::BML::cur_req->{'lang'}, $code);
     return $data unless $vars;
     $data =~ s/\[\[(.+?)\]\]/$vars->{$1}/g;

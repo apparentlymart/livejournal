@@ -70,7 +70,7 @@ P=)
      foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
      {
          next unless ($faqq{$faqid}->{'question'});
-         &main::note_mod_time($faqq{$faqid}->{'lastmodtime'});	 
+         BML::note_mod_time($faqq{$faqid}->{'lastmodtime'});	 
          my $q = LJ::ehtml($faqq{$faqid}->{'question'});
          $q =~ s/^\s+//; $q =~ s/\s+$//;
          $q =~ s/\n/<BR>/g;

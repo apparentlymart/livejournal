@@ -51,7 +51,7 @@ BODY<=
      $dbh->do("REPLACE INTO faquses (faqid, userid, dateview) ".
               "VALUES ($id, $remote->{'userid'}, NOW())") if $remote;
 
-     &main::note_mod_time($unixmodtime);
+     BML::note_mod_time($unixmodtime);
      
      $q = LJ::ehtml($question);
      $q =~ s/^\s+//; $q =~ s/\s+$//;

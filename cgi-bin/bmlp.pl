@@ -1078,6 +1078,12 @@ sub trim
 
 package BML;
 
+sub note_mod_time
+{
+    my $mod_time = shift;
+    main::note_mod_time($mod_time);
+}
+
 sub redirect
 {
     my $url = shift;
@@ -1223,6 +1229,8 @@ sub ml
 {
     my ($code, $vars) = @_;
     return "[ml_getter not defined]" unless $main::ML_GETTER;
+    $code = "$ENV{'PATH_INFO'}$code"
+        if $code =~ /^\./;
     my $data = $main::ML_GETTER->($main::REQ_LANG, $code);
     return $data unless $vars;
     $data =~ s/\[\[(.+?)\]\]/$vars->{$1}/g;
