@@ -16,10 +16,18 @@ body<=
         $u = LJ::load_user($GET{user});
         return BML::ml('.error.invaliduser', { user => LJ::ehtml($GET{user}) })
             unless $u;
+        return BML::ml('.error.badstatus', { user => LJ::ljuser($u->{user}) })
+            if $u->{statusvis} ne 'V';
     }
 
     my $body;
     my $lastmon = 0;
+
+    $body .= "<?p $ML{'.findothers'} p?>";
+    $body .= "<form method='get' action='$LJ::SITEROOT/birthdays.bml'>";
+    $body .= LJ::html_text({ name => 'user', maxlength => 15, size => 15 });
+    $body .= LJ::html_submit(undef, $ML{'.view'});
+    $body .= "</form>";
 
     $body .= '<?p ';
     if ($u) {
@@ -73,12 +81,6 @@ body<=
     } else {
         $body .= "<?p $ML{'.nobirthdays'} p?>";
     }
-
-    $body .= "<?p $ML{'.findothers'} p?>";
-    $body .= "<form method='get' action='$LJ::SITEROOT/birthdays.bml'>";
-    $body .= LJ::html_text({ name => 'user', maxlength => 15, size => 15 });
-    $body .= LJ::html_submit(undef, $ML{'.view'});
-    $body .= "</form>";
 
     return $body;
 }
