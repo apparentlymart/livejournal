@@ -1,56 +1,13 @@
     (Don't try to make much sense of this list.  It's mainly for the
      core developers to keep track of things.)
 
-AWAITING MERGE:
-
-* postevent duplicate locking (avva: somewhat good patch, is
-  going to improve it)
-
-SHERM:
-
-* billing systems
-
-ALANJ:
-
-* statserv (rate limiting detection daemon)
-
-* netsaint improvements
-
-AVVA:
-
--- username renames
-
--- moderated communities
-
 DOCUMENTATION: (JPROULX)
 
--- all LJFUNC, return values, semantics, uses.
+-- how to modify site-local text (like: en_LJ from en) (done?)
 
--- all dbtables: cross-ref everything, describe format of data
-   in columns, etc
-
--- how to modify site-local text (like: en_LJ from en)
-
--- document all the db roles, and how to set 'em up in %LJ::DBINFO.
+-- document all the db roles, and how to set 'em up in %LJ::DBINFO. (done?)
 
 ANYBODY:
-
--- redo system of sending mail out.  ideally, LJ::send_mail tries
-   to use Net::SMTP first to $LJ::SMTP_SERVER and if that fails
-   or isn't defined, then puts it in a new database table to be
-   re-sent later.
-
--- better RSS support
-
--- community option management page
-
-     - create new community (with invite code)
-     - flip between communities (like editinfo.bml)
-     - change options
-     - add/remove members/posters/"sharedjournal" admins
-
-   shouldn't need to use console!  /community/create.bml should
-   die.
 
 -- Windows syncitem client.  Use Perl+Win::Forms+ActiveState compiler
    ... make local GDBM/etc file.  Export to HTML/XML/etc from that
@@ -60,20 +17,12 @@ ANYBODY:
 
 -- ESN system (Event/Subscription/Notification) (have plan/API)
 
--- new logprop:  comments_until = "yyyymmmdd" on which date talkpost
-   won't accept new comments or replies.
-
 * need a 'replyanywhere' priv that lets site admins reply in journals
   that are friends only, when the site admins aren't part of the
   community.
 
-* suspended users shouldn't show up in community journals
-
 * fix LJ::get_itemid_{before|after} to respect security of $remote
    NOTE: not easy to do fast.  maybe best not to do it. not a big deal.
-
-* talklib.pl (clean up / rewrite talk*.bml).  won't be important
-  until bradfitz finishes S2.
 
 +----------+
 | bradfitz |
@@ -96,11 +45,6 @@ talkleft_xfp investigation
    -- after user's moved, update their memories:
                  (0,global)->(userid,ditemid)
       that way, filtering on "my own" will work.
-
-* journal titles vs. names:
-    http://www.livejournal.com/talkread.bml?itemid=14018511
-
-* S2.
 
 * rate limiting
 
