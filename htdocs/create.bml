@@ -404,7 +404,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      my $nu = LJ::load_userid($userid, "force");
 
      # now flag as underage (and set O to mean was old or Y to mean was young)
-     $nu->underage(1, $ofage ? 'O' : 'Y') if $is_underage;
+     $nu->underage(1, $ofage ? 'O' : 'Y', 'account creation') if $is_underage;
 
      if ($LJ::TOS_CHECK) {
          my $err = "";

@@ -59,6 +59,13 @@ sub underage {
         $u->underage_status($status || 'Y');
     }
 
+    # add to statushistory
+    if (my $shwhen = shift()) {
+        my $text = $on ? "marked" : "unmarked";
+        my $status = $u->underage_status;
+        LJ::statushistory_add($u, undef, "coppa", "$text; status=$status; when=$shwhen");
+    }
+
     # now fire off any hooks that are available
     LJ::run_hooks('set_underage', {
         u => $u,

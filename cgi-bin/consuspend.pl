@@ -57,9 +57,9 @@ sub set_underage {
         $sh = "unmarked; $note";
     }
 
-    # now record this change
+    # now record this change (yes we log it twice)
     LJ::statushistory_add($u->{userid}, $remote->{userid}, "set_underage", $sh);
-    $u->underage($on, $status);
+    $u->underage($on, $status, "manual");
     return $info->($res);
 }
 
