@@ -1,5 +1,7 @@
 <?_code
 {
+    use strict;
+    use vars qw(%FORM $title $body);
 
     $title = "Poll";
     $body = "";
@@ -55,7 +57,8 @@
                                        undef, $u->{'userid'}, $itemid, $anum);
     $log->{'ownerid'} = $log->{'journalid'};
     unless ($log) {
-        return "Owning post deleted, so poll no longer accessible.";
+        $body = "Owning post deleted, so poll no longer accessible.";
+        return;
     }
 
     unless (LJ::can_view($remote, $log)) {

@@ -854,7 +854,8 @@ sub find_security
     }
 
     ## need to be both a person and with a visible journal to vote
-    unless ($remote && $remote->{'journaltype'} eq "P" && $remote->{'statusvis'} eq "V") {
+    if ($remote &&
+        ($remote->{'journaltype'} ne "P" || $remote->{'statusvis'} ne "V")) {
         return (0, 0);
     }
 
