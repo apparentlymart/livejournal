@@ -12,6 +12,7 @@ use LJ::S2;
 use LJ::Blob;
 use Apache::LiveJournal::Interface::Blogger;
 use Apache::LiveJournal::Interface::AtomAPI;
+use Apache::LiveJournal::Interface::S2;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
@@ -437,6 +438,10 @@ sub trans
             $RQ{'interface'} = $int;
             $RQ{'is_ssl'} = $is_ssl;
             $r->push_handlers(PerlHandler => \&interface_content);
+            return OK;
+        }
+        if ($int eq "s2") {
+            $r->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::S2::handler);
             return OK;
         }
         return 404;
