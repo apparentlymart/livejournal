@@ -540,6 +540,8 @@ sub journal_content
     my $r = shift;
     my $uri = $r->uri;
 
+    my %GET = $r->args;
+
     my $dbs = LJ::get_dbs();
 
     if ($RQ{'mode'} eq "robots_txt")
@@ -573,6 +575,7 @@ sub journal_content
 	'args' => $RQ{'args'},
 	'vhost' => $RQ{'vhost'},
         'pathextra' => $RQ{'pathextra'},
+        's2id' => $GET{'s2id'},
         'header' => {
             'If-Modified-Since' => $r->header_in("If-Modified-Since"),
         },

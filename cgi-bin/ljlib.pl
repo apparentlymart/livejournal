@@ -3106,7 +3106,7 @@ sub make_journal
     }
 
     my ($styleid);
-    if ($opts->{'styleid'}) {
+    if ($opts->{'styleid'}) {  # s1 styleid
         $styleid = $opts->{'styleid'}+0;
     } else {
         $view ||= "lastn";    # default view when none specified explicitly in URLs
@@ -3154,7 +3154,11 @@ sub make_journal
 
     my $stylesys = 1;
     if ($styleid == -1) {
-        if ($u->{'stylesys'} == 2) {
+        # force s2 style id
+        if ($opts->{'s2id'}) {
+            $stylesys = 2;
+            $styleid = $opts->{'s2id'};
+        } elsif ($u->{'stylesys'} == 2) {
             $stylesys = 2;
             $styleid = $u->{'s2_style'};
         } else {

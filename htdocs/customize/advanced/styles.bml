@@ -1,0 +1,274 @@
+<?_code # -*-bml-*-
+{
+    use strict;
+    use vars qw(%GET %POST $title $body);
+
+    # start of output
+    $title = "Styles";
+    $body = BML::ml("Backlink", {
+        'link' => './',
+        'text' => 'Advanced Customization',
+    }) . "\n";
+
+    # used for error messages
+    my $err = sub {
+        $title = "Error";
+        $body = shift;
+        return;        
+    };
+
+    # authenticate
+    my $remote = LJ::get_remote();
+    return $err->('You must be logged in to view your layers.') 
+        unless $remote;
+    return $err->('Your account type does not permit you to modify S2 styles')
+        unless LJ::get_cap($remote, 's2styles');
+
+    # style id to edit, if we have one
+    # if we have this we're assumed to be in 'edit' mode
+    my $id = $GET{'id'}+0 if $GET{'id'} =~ /^\d+$/;
+    my ($core, $layout);      # scalars
+    my ($pub, $ulay, $style); # hashrefs
+
+    # edit mode
+    if ($id) {
+
+        # get public layers
+        $pub = LJ::S2::get_public_layers();
+
+        # get user layers
+        $ulay = LJ::S2::get_layers_of_user($remote);
+
+        # load style
+        $style = LJ::S2::load_style($id);
+        return $err->('Style not found') unless $style;
+
+        # core lid
+        $POST{'core'} ||= $POST{'core_hidden'};
+        $core = $POST{'core'} || $style->{'layer'}->{'core'};
+        unless ($core) { # default to highest numbered core
+            map { $core = $_ if $pub->{$_}->{'type'} eq 'core' && /^\d+$/ && 
+                                $pub->{$_}->{'majorversion'} > $pub->{$core}->{'majorversion'} } keys %$pub;
+
+            # update in POST to keep things in sync
+            $POST{'core'} = $core;
+        }
+
+
+        # layout lid
+        $layout = $POST{'layout'} || $style->{'layer'}->{'layout'};
+
+        # if we're changing core, clear everything
+        if ($POST{'core'} && $POST{'core'} != $style->{'layer'}->{'core'}) {
+            foreach (qw(i18nc layout theme i18n user)) {
+                delete $POST{$_};
+            }
+            undef $layout;
+        }
+
+        # if we're changing layout, clear everything but core
+        if ($POST{'layout'} && $POST{'layout'} != $style->{'layer'}->{'layout'}) {
+            foreach (qw(theme i18n user)) {
+                delete $POST{$_};
+            }
+        }
+
+        # set up start of output
+        $title = "Edit Style";
+        $body .= "<br />" . BML::ml('backlink', { 'text' => 'Your Styles', 'link' => 'styles.bml' }) . "\n";
+
+        ### process edit actions
+
+        # check that they own style and that it exists
+        return $err->("You cannot edit other people's styles.")
+            unless $style->{'userid'} == $remote->{'userid'};
+
+        # delete
+        if ($POST{'action:delete'}) {
+            LJ::S2::delete_user_style($remote, $id);
+            undef $id; # don't show form below
+            return BML::redirect('styles.bml');
+        }
+
+        # change changes
+        if ($POST{'action:change'} || $POST{'action:savechanges'}) {
+
+            # check layer hierarchy
+            foreach (qw(i18nc layout)) {
+                next if ! $POST{$_} || $pub->{$POST{$_}}->{'b2lid'} == $core;
+                return $err->('Layer hierarchy mismatch');
+            }
+            foreach (qw(theme i18n user)) {
+                next if ! $POST{$_} || $pub->{$POST{$_}}->{'b2lid'} == $layout;
+                return $err->('Layer hierarchy mismatch');
+            }
+
+            # save in database
+            LJ::S2::set_style_layers($remote, $style->{'styleid'}, 
+                                     map { $_, $POST{$_} } qw(core i18nc layout i18n theme user));
+
+            # redirect if they clicked the bottom button
+            return BML::redirect('styles.bml') if $POST{'action:savechanges'};
+        }
+
+    # no style id, process actions for non-edit mode
+    # and load in data necessary for style list
+    } else {
+
+        # load user styles
+        my $ustyle = LJ::S2::load_user_styles($remote);
+
+        # process create action
+        if ($POST{'action:create'} && $POST{'stylename'}) {
+
+            return $err->('You have reached your maximum number of styles.')
+                if scalar(keys %$ustyle) >= LJ::get_cap($remote, 's2stylesmax');
+
+            my $styleid = LJ::S2::create_style($remote, $POST{'stylename'});
+            return $err->('Style not created: Database error') unless $styleid;
+
+            return BML::redirect("styles.bml?id=$styleid");
+        }
+
+
+        # set up page header
+        $title = "Your Styles";
+        $body .= "<div class='postheading'><?h1 Your Styles h1?></div>\n";
+
+        # show style listing
+        $body .= "<table class='postheading' style='margin-left: 40px'>\n";
+        if (%$ustyle) {
+            foreach (sort { $ustyle->{$a} cmp $ustyle->{$b} || $a <=> $b} keys %$ustyle) {
+                $body .= "<tr><td>" . LJ::ehtml($ustyle->{$_});
+                $body .= " (<a href='" . LJ::journal_base($remote) . "/?s2id=$_'>\#$_</a>) </td>";
+                $body .= "<td><form style='display:inline' method='post' action='styles.bml?id=$_'>";
+                $body .= LJ::html_submit('action:edit', 'Edit') . " ";
+                $body .= LJ::html_submit('action:delete', 'Delete', 
+                                         { 'onclick' => "confirm('Are you sure you want to delete style \#$_?')" });
+                $body .= "</form></td></tr>\n";
+            }
+        } else {
+            $body .= "<tr><td><i>none</i></td></tr>\n";
+        }
+        $body .= "</table>\n";
+    }
+
+
+    ### show create / edit form
+
+    my $act = $id ? "?id=$id" : '';
+    $body .= "<form class='postheading' method='post' action='styles.bml$act'>";
+
+    # create a new style
+    $body .= "<?h1 Style Options h1?>\n";
+    $body .= "<table class='postheading' style='margin-bottom: 10px'>\n";
+    $body .= "<tr><td>Name: </td><td>";
+    $body .= LJ::html_text({ 'name' => 'stylename', 'size' => '30', 'maxlength' => '255', 
+                             'value' => $POST{'stylename'} || $style->{'name'} });
+    $body .= " " . LJ::html_submit('action:create', 'Create') unless $id;
+    $body .= "</td></tr>\n";
+    $body .= "</table>\n";
+
+    # if no id to edit, we're finished
+    $body .= "</form>\n", return unless $id;
+
+    # sub to take a layer type, core, and parent layout
+    # and return a list of options to feed to LJ::html_select()
+    my $layerselect = sub {
+        my ($type, $b2lid) = @_;
+
+        my @opts = ();
+
+        # returns html_select to caller
+        my $html_select = sub {
+            my $dis = scalar(@opts) > 2 ? 0 : 1;
+            
+            return [ LJ::html_select({ 'name' => $type, 
+                                       'selected' => $POST{$type} || $style->{'layer'}->{$type},
+                                       'disabled' => $dis }, @opts), { 'disabled' => $dis, } ];
+        };
+
+        # greps, and sorts a list
+        my $greplist = sub {
+            my $ref = shift;
+            return  sort { $ref->{$a}->{'name'} cmp $ref->{$b}->{'name'} || $a <=> $b}
+                    grep { $ref->{$_}->{'type'} eq $type && $ref->{$_}->{'b2lid'} == $b2lid && /^\d+$/}
+                    keys %$ref;
+        };
+        
+        # public layers
+        my $name = $type eq 'core' ? 'majorversion' : 'name';
+        push @opts, map { $_, $pub->{$_}->{$name} } $greplist->($pub);
+
+        # no user core layers
+        return $html_select->() if $type eq 'core';
+
+        # user layers
+        push @opts, ('', '---');
+        my $startsize = scalar(@opts);
+        push @opts, map { $_, "$ulay->{$_}->{'name'} (\#$_)" } $greplist->($ulay);
+
+        # if we didn't push anything above, remove dividing line
+        pop @opts, pop @opts unless scalar(@opts) > $startsize;
+
+        # add blank option to beginning of list
+        unshift @opts, ('', @opts ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+
+        return $html_select->();
+    };
+
+    ### core version
+
+    $body .= "<?h1 Style Layers h1?>\n";
+    $body .= "<table class='postheading'>\n";
+    $body .= "<tr><td>Core Version: </td><td>";
+    my $coresel = $layerselect->('core', 0);
+    $body .= $coresel->[0];
+    $body .= LJ::html_hidden('core_hidden', $core);
+    my $dis = $coresel->[1]->{'disabled'} ? { 'disabled' => 'disabled' } : undef;
+    $body .= " " . LJ::html_submit('action:change', 'Change', $dis) . "</td></tr>\n";
+    $body .= "</table>\n";
+
+    ### i18nc / layout
+
+    $body .= "<table style='margin: 10px 0 0 40px'>\n";
+
+    # i18nc
+    $body .= "<tr><td>Language (i18nc): </td><td>";
+    $body .= $layerselect->('i18nc', $core)->[0];
+
+    # layout
+    $body .= "<tr><td>Layout: </td><td>";
+    my $layoutsel = $layerselect->('layout', $core);
+    $body .= $layoutsel->[0];
+    my $dis = $layoutsel->[1]->{'disabled'} ? { 'disabled' => 'disabled' } : undef;
+    $body .= " " . LJ::html_submit("action:change", "Change", $dis) . " </td></tr>\n";
+    $body .= "</table>\n";
+
+    # do we need to show the rest of the form?
+    $body .= "</form>\n", return unless $layout;
+
+    ### theme / i18n / user
+
+    # theme
+    $body .= "<table style='margin: 10px 0 0 80px'>\n";
+    $body .= "<tr><td>Language (i18n): </td><td>";
+    $body .= $layerselect->('i18n', $layout)->[0] . "</td></tr>\n";
+    $body .= "<tr><td>Theme: </td><td>";
+    $body .= $layerselect->('theme', $layout)->[0] . "</td></tr>\n";
+    $body .= "<tr><td>User: </td><td>";
+    $body .= $layerselect->('user', $layout)->[0] . "</td></tr>\n";
+    $body .= "<tr><td>&nbsp;</td><td>";
+    $body .= LJ::html_submit('action:savechanges', 'Save Changes') . "</td></tr>\n";
+    $body .= "</table>\n";
+
+    # end edit form
+    $body .= "</form>\n";
+
+    return;
+}
+_code?><?page
+title=><?_code return $title; _code?>
+body=><?_code return $body; _code?>
+page?>
+    

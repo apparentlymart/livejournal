@@ -4,10 +4,11 @@
     use vars qw(%GET %POST $title $body);
 
     $title = "Your Layers";
-    $body = BML::ml("Backlink", {
+    $body = "<div style='margin-bottom: 10px'>";
+    $body .= BML::ml("Backlink", {
         'link' => './',
         'text' => 'Advanced Customization',
-    });
+    }) . "</div>\n";
 
     my $err = sub {
         $title = "Error";
@@ -101,24 +102,17 @@
     }
 
     # show list of layers
-    my @to_load;
-    my %ulay;
-    my $sth = $dbr->prepare("SELECT s2lid, type, b2lid FROM s2layers WHERE userid=? ".
-                            "AND type IN ('layout', 'i18n', 'i18nc', 'theme')");
-    $sth->execute($remote->{'userid'});
-    $ulay{$_->{'s2lid'}} = $_ while $_ = $sth->fetchrow_hashref;
-    push @to_load, keys %ulay;
-    LJ::S2::load_layer_info(\%layerinfo, \@to_load);
+    my $ulay = LJ::S2::get_layers_of_user($remote);
 
     $body .= "<?h1 Your Layers h1?>";
-    if (%ulay) {
+    if (%$ulay) {
         $body .= "<table style='margin-bottom: 10px' cellpadding='3' border='1' class='postheading'>";
         $body .= "<tr><td><b>LayerID</b></td><td><b>Type</b></td><td><b>Name</b></td><td><b>Actions</b></td></tr>\n";
         my $lastbase = 0;
-        foreach my $lid (sort { $ulay{$a}->{'b2lid'} <=> $ulay{$b}->{'b2lid'} || $a <=> $b } 
-                         keys %ulay) 
+        foreach my $lid (sort { $ulay->{$a}->{'b2lid'} <=> $ulay->{$b}->{'b2lid'} || $a <=> $b } 
+                         keys %$ulay) 
         {
-            my $bid = $ulay{$lid}->{'b2lid'};
+            my $bid = $ulay->{$lid}->{'b2lid'};
             if ($bid != $lastbase) {
                 $lastbase = $bid;
                 my $parlay = $layerinfo{$bid} || $pub->{$bid};
@@ -127,7 +121,7 @@
             }
             my $i = $layerinfo{$lid};
             my $name = LJ::ehtml($i->{'name'}) || "<i>(none)</i>";
-            $body .= "<tr><td><a href='layerbrowse.bml?id=$lid'>$lid</a></td><td>$ulay{$lid}->{'type'}</td><td>$name</td><td>";
+            $body .= "<tr><td><a href='layerbrowse.bml?id=$lid'>$lid</a></td><td>$ulay->{$lid}->{'type'}</td><td>$name</td><td>";
             $body .= "<form method='post' style='display:inline' action='layeredit.bml?id=$lid'>";
             $body .= "<input type='submit' name='action:edit' value='Edit...' /></form>\n";
             $body .= "<form method='post' style='display:inline' action='layers.bml'>";
@@ -161,7 +155,8 @@
                                                  map { $_, $pub->{$_}->{'majorversion'} }
                                                  sort { $pub->{$a}->{'name'} cmp $pub->{$b}->{'name'} ||
                                                         $a <=> $b }
-                                                 grep { $pub->{$_}->{'b2lid'} == 0 && /^\d+$/}
+                                                 grep { $pub->{$_}->{'b2lid'} == 0 &&
+                                                        $pub->{$_}->{'type'} eq 'core' && /^\d+$/}
                                                  keys %$pub) . "\n";
     $body .= LJ::html_submit("action:create", "Create");
     $body .= "</form>\n\n";
@@ -180,11 +175,11 @@
                    sort { $pub->{$a}->{'name'} cmp $pub->{$b}->{'name'} || $a <=> $b}
                    grep { $pub->{$_}->{'type'} eq 'layout' && /^\d+$/} 
                    keys %$pub;
-    if (%ulay) {
+    if (%$ulay) {
         push @layouts, ('', '---');
         push @layouts, map { $_, "$layerinfo{$_}->{'name'} (#$_)" } 
                        sort { $layerinfo{$a}->{'name'} cmp $layerinfo{$b}->{'name'} || $a <=> $b}
-                       keys %ulay;
+                       keys %$ulay;
     }
 
     $body .= "Layout: " . LJ::html_select({ 'name' => 'parid' }, @layouts);

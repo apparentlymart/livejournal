@@ -20,6 +20,7 @@ p?>
 <ul>
 <li><a href="layers.bml">Your Layers</a> -- create/manage your layers</li>
 <li><a href="layerbrowse.bml">Public Layers</a> -- system layers (good reference &amp; place to learn)</li>
+<li><a href="styles.bml">Your Styles</a> -- create/manage your styles</li>
 </ul>
 
 <=body
