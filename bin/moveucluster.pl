@@ -820,15 +820,25 @@ sub moveUser {
         die "Move aborted due to state change during move: Before: [$pre_state], After: [$post_state]\n";
     }
 
+    my $unlocked;
     if (! $verify_code || $verify_code->()) {
         # unset readonly and move to new cluster in one update
-        LJ::update_user($userid, { clusterid => $dclust, raw => "caps=caps&~(1<<$readonly_bit)" });
+        $unlocked = LJ::update_user($userid, { clusterid => $dclust, raw => "caps=caps&~(1<<$readonly_bit)" });
         print "Moved.\n" if $optv;
     } else {
         # job server went away or we don't have permission to flip the clusterid attribute
         # so just unlock them
-        LJ::update_user($userid, { raw => "caps=caps&~(1<<$readonly_bit)" });
+        $unlocked = LJ::update_user($userid, { raw => "caps=caps&~(1<<$readonly_bit)" });
         die "Job server said no.\n";
+    }
+
+    # delete from the index of who's read-only.  if this fails we don't really care
+    # (not all sites might have this table anyway) because it's not used by anything
+    # except the readonly-cleaner which can deal with all cases.
+    if ($unlocked) {
+        eval {
+            $dbh->do("DELETE FROM readonly_user WHERE userid=?", undef, $userid);
+        };
     }
 
     # delete from source cluster
