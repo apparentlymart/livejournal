@@ -256,7 +256,13 @@ sub set_text
         print "VALS: $vals\n";
     }
     
-    # Todo: stale-ify child languages one layer down if severity
+    if ($opts->{'changeseverity'} && $l->{'children'} && @{$l->{'children'}}) {
+        my $in = join(",", @{$l->{'children'}});
+        my $newstale = $opts->{'changeseverity'} == 2 ? 2 : 1;
+        $dbh->do("UPDATE ml_latest SET staleness=$newstale WHERE lnid IN ($in) AND ".
+                 "dmid=$dmid AND itid=$itid AND staleness < $newstale");
+    }
+
     return 1;
 }
 

@@ -135,9 +135,22 @@
          my $disabled = "disabled='disabled'";
          if ($lat->{'staleness'} >= 3) {
              $disabled = "";
-             $ret .= LJ::html_hidden("ed_$ict", "1");
+             # when something's this stale, assume both it's being
+             # edited and that the severity is major (going from wrong
+             # language to right language is a major change, afterall)
+             $ret .= LJ::html_hidden("ed_$ict", "1",
+                                     "sev_$ict", "2",
+                                     );
          } else {
-             $ret .= "<input name='ed_$ict' type='checkbox' value='1' id='ed_$ict' onClick='a=document.getElementById(\"newtext_$ict\"); a.disabled=!this.checked; if (this.checked) a.focus();' /><label for='ed_$ict'>Edit Text</label><br />";
+             $ret .= "<input name='ed_$ict' type='checkbox' value='1' id='ed_$ict' onClick='a=document.getElementById(\"newtext_$ict\"); a.disabled=!this.checked; if (this.checked) a.focus();' /><label for='ed_$ict'>Edit Text</label>";
+             if ($l->{'children'} && @{$l->{'children'}}) {
+                 $ret .= " Severity: ";
+                 $ret .= LJ::html_select({ 'name' => "sev_$ict", "selected" => 1 },
+                                         0 => "Typo/etc (no notify)",
+                                         1 => "Minor (notify translators)",
+                                         2 => "Major (require translation updates)");
+             }
+             $ret .= "<br />";
          }
          if ($use_textarea) {
              $ret .= "<textarea name='newtext_$ict' id='newtext_$ict' $disabled wrap='soft' rows='10' cols='40'>$curtext</textarea>";
@@ -174,8 +187,8 @@
      for (my $i=1; $i<=$num; $i++)
      {
          next unless $FORM{"ed_$i"};
-         my ($dom, $itid, $oldtxtid, $oldptxtid) = 
-             map { int($FORM{"${_}_$i"}+0) } qw(dom itid oldtxtid oldptxtid);
+         my ($dom, $itid, $oldtxtid, $oldptxtid, $sev) = 
+             map { int($FORM{"${_}_$i"}+0) } qw(dom itid oldtxtid oldptxtid sev);
 
          my $itcode = $dbr->selectrow_array("SELECT itcode FROM ml_items WHERE dmid=$dom AND itid=$itid");
          unless (defined $itcode) {
@@ -237,6 +250,9 @@
          if ($lat->{'staleness'} == 4) {
              $opts->{'childrenlatest'} = 1;
          }
+
+         # severity of change:
+         $opts->{'changeseverity'} = $sev;
 
          my $res = LJ::Lang::set_text($dbs, $dom, $l->{'lncode'}, $itcode, $text, $opts);
          unless ($res) { 
