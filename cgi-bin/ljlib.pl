@@ -2138,26 +2138,23 @@ sub img
 # name: LJ::load_user_props
 # des: Given a user hashref, loads the values of the given named properties
 #      into that user hashref.
-# args: dbarg, u, propname*
+# args: dbarg?, u, propname*
 # des-propname: the name of a property from the userproplist table.
 # </LJFUNC>
 sub load_user_props
 {
-    my $dbarg = shift;
-    $dbarg ||= LJ::get_db_reader();
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
 
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my ($u, @props) = @_;
+    return unless ref $u eq "HASH";
+
     my ($sql, $sth);
-
-    LJ::load_props($dbs, "user");
+    LJ::load_props("user");
 
     ## user reference
-    my ($uref, @props) = @_;
-    return unless ref $uref eq "HASH";  # example: undefined $remote
-    my $uid = $uref->{'userid'}+0;
-    $uid = LJ::get_userid($dbarg, $uref->{'user'}) unless $uid;
+    my $uid = $u->{'userid'}+0;
+    $uid = LJ::get_userid($u->{'user'}) unless $uid;
+    my $dbr = LJ::get_db_reader();
 
     my %loadfrom;
     unless (@props) {
@@ -2170,7 +2167,7 @@ sub load_user_props
             my $p = LJ::get_prop("user", $_);
             next unless $p;
             my $source = $p->{'indexed'} ? "userprop" : "userproplite";
-            next if exists $uref->{$_};
+            next if exists $u->{$_};
             push @{$loadfrom{$source}}, $p->{'id'};
         }
     }
@@ -2183,7 +2180,7 @@ sub load_user_props
         $sth = $dbr->prepare($sql);
         $sth->execute;
         while (my ($id, $v) = $sth->fetchrow_array) {
-            $uref->{$LJ::CACHE_PROPID{'user'}->{$id}->{'name'}} = $v;
+            $u->{$LJ::CACHE_PROPID{'user'}->{$id}->{'name'}} = $v;
         }
     }
 
@@ -2210,8 +2207,8 @@ sub load_user_props
     unless (@props) { @props = keys %LJ::USERPROP_DEF; }
 
     foreach my $prop (@props) {
-        next if (defined $uref->{$prop});
-        $uref->{$prop} = $LJ::USERPROP_DEF{$prop};
+        next if (defined $u->{$prop});
+        $u->{$prop} = $LJ::USERPROP_DEF{$prop};
     }
 }
 
@@ -3371,7 +3368,7 @@ sub make_journal
         push @needed_props, @{$LJ::viewinfo{$eff_view}->{'owner_props'}};
     }
 
-    LJ::load_user_props(undef,, $u, @needed_props);
+    LJ::load_user_props($u, @needed_props);
 
     # if the remote is the user to be viewed, make sure the $remote
     # hashref has the value of $u's opt_nctalklinks (though with
