@@ -95,7 +95,7 @@ body<=
      
      my $remote = LJ::get_remote($dbs);
      if (LJ::get_cap($remote, "findsim")) {
-         $ret .= "<center><form method='get'><input type='hidden' name='mode' value='findsim_do' />";
+         $ret .= "<center><form action='interests.bml' method='get'><input type='hidden' name='mode' value='findsim_do' />";
          $ret .= "$ML{'.findsim.simtouser'} <input name='user' value='$remote->{'user'}' /> <input type='submit' value=\"$ML{'.findsim.btn.find'}\" /></form>$ML{'.findsim.searchwait'}</center>";
      } else {
          $ret .= "<?p $ML{'.findsim.account.notallowed'} p?>";
@@ -264,11 +264,11 @@ body<=
 
  my $ret = "";
  $ret .= "<?h1 $ML{'.interests.head'} h1?><?p $ML{'.interests.text'} p?>";
- $ret .= "<FORM METHOD=GET><UL>";
- $ret .= "<LI><A HREF=\"/interests.bml?view=popular\">$ML{'.interests.viewpop'}</A>\n";
- $ret .= "<LI><A HREF=\"/interests.bml?mode=findsim\">$ML{'.interests.findsim1'}</A> -- $ML{'.interests.findsim2'}\n" unless ($LJ::DISABLED{'interests-findsim'});
- $ret .= "<LI>$ML{'.interested.in'} <INPUT NAME=int SIZE=20><INPUT TYPE=SUBMIT VALUE=\"$ML{'.interested.btn.find'}\">\n";
- $ret .= "</UL></FORM>\n";
+ $ret .= "<form method='get' action='interests.bml'><ul>";
+ $ret .= "<li><a href=\"/interests.bml?view=popular\">$ML{'.interests.viewpop'}</a></li>\n";
+ $ret .= "<li><a href=\"/interests.bml?mode=findsim\">$ML{'.interests.findsim1'}</a> -- $ML{'.interests.findsim2'}</li>\n" unless ($LJ::DISABLED{'interests-findsim'});
+ $ret .= "<li>$ML{'.interested.in'} <input name='int' size='20' /><input type='submit' value=\"$ML{'.interested.btn.find'}\" /></li>\n";
+ $ret .= "</ul></form>\n";
  $ret .= $ML{'.nointerests.text'};
  
  return $ret;

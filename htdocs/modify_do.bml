@@ -63,9 +63,9 @@ if ($FORM{'remoteuser'} eq $user) {
  {
      return "Post required." unless LJ::did_post();
      my $ret = "";
-     $ret .= "<FORM METHOD=POST>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=domodify>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=<?_eh $user _eh?>>\n";
+     $ret .= "<form method='post' action='modify_do.bml'>\n";
+     $ret .= LJ::html_hidden("mode", "domodify",
+                             "user", $user);
      if ($as_remote){
          $ret .= LJ::html_hidden("remoteuser", $u->{'user'});
      } else {

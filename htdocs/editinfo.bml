@@ -89,13 +89,13 @@ body<=
      my $ret = "";
 
      if ($remote) {
-         $ret .= "<form method='post'>";
+         $ret .= "<form method='post' action='editinfo.bml'>";
          $ret .= "<?h1 $ML{'.switch.header'} h1?><?p $ML{'.switch.workwith'} ";
          $ret .= LJ::make_shared_select($dbs, $remote, \%FORM);
-         $ret .= " <input type='submit' value='$ML{'.switch.button'}'> p?></form>";
+         $ret .= " <input type='submit' value='$ML{'.switch.button'}' /> p?></form>";
      }
 
-     $ret .= "<form method=\"POST\">\n";
+     $ret .= "<form method='post' action='editinfo.bml'>\n";
      $ret .= "<input type=\"hidden\" name=\"mode\" value=\"domodify\" />\n";
      $ret .= "<input type=\"hidden\" name=\"user\" value=\"<?_eh $user _eh?>\" />\n";
      $ret .= "<input type=\"hidden\" name=\"hpassword\" value=\"$hpassword\" />\n";

@@ -118,8 +118,8 @@
  }
  $sth->execute;
  
- $body .= "<FORM METHOD=GET>";
- $body .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">";
+ $body .= "<form method='get' action='memories.bml'>";
+ $body .= "<input type='hidden' name='user' value=\"$user\" />";
  $body .= "Filter entries: <SELECT NAME=\"filter\">";
  foreach my $filt ("all", "own", "other") {
      my $sel = $filter eq $filt ? "SELECTED" : "";

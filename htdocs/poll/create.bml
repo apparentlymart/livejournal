@@ -270,7 +270,7 @@
  sub make_form {
     my ($poll, $errors, $error_count) = @_;
 
-    $ret .= "<form method=\"post\">\n";
+    $ret .= "<form method=\"post\" action='create.bml'>\n";
     $ret .= "<input type=\"hidden\" name=\"count\" value=\"" . $poll->{'count'} . "\">\n";
 
     if ($$error_count > 0) {

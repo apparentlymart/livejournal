@@ -38,7 +38,7 @@ body<=
     my $curr = BML::get_language();
     my $ret;
 
-    $ret .= "<?_ml .select _ml?><form method='post'>";
+    $ret .= "<?_ml .select _ml?><form method='post' action='setlang.bml'>";
 
     my @langs = ("en");
     @langs = @LJ::LANGS if @LJ::LANGS;
@@ -64,7 +64,7 @@ body<=
     
     $ret .= "</td></tr></table>";
     
-    $ret .= "<p><input type='submit' value='<?_ml .switch _ml?>'></p></form>";
+    $ret .= "<p><input type='submit' value='<?_ml .switch _ml?>' /></p></form>";
 
     return $ret;
 

@@ -29,7 +29,7 @@
 
  unless ($u) {
      $title = "To-Do List";
-     $body .= "<FORM METHOD=GET>";
+     $body .= "<form method='get' action='./'>";
      $body .= "Enter the username of the user whose to-do list you would like to view:<UL><INPUT NAME=\"user\" SIZE=15 MAXLENGTH=15> <INPUT TYPE=SUBMIT VALUE=\"View\"></UL></FORM>\n";
      return;
  }
@@ -103,7 +103,7 @@
      return;
  }
 
- $body .= "<FORM METHOD=GET>";
+ $body .= "<form method='get' action='./'>";
  $body .= "<INPUT TYPE=HIDDEN NAME=user VALUE=$FORM{'user'}>\n" if ($FORM{'user'});
  $body .= "<?h1 Filter Items h1?><?p ";
  foreach my $kwid (sort { lc($keyword{$a}->{'keyword'}) cmp lc($keyword{$b}->{'keyword'}) } 
@@ -194,7 +194,7 @@
  }
 
  
- $body .= "<FORM METHOD=POST><P><TABLE BORDER=1 CELLPADDING=4 CELLSPACING=1>\n";
+ $body .= "<form method='post' action='./'><P><TABLE BORDER=1 CELLPADDING=4 CELLSPACING=1>\n";
  $body .= "<TR BGCOLOR=<?emcolorlite?> ALIGN=LEFT VALIGN=BOTTOM>\n";
  $body .= "<TD><B>&nbsp;</B></TD>\n" if ($permission{'delete'});
  {

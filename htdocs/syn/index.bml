@@ -171,7 +171,7 @@ EOB
     $ret .= sprintf("<?h1 Your quota h1?><?p You're using <b>%0.03f</b> of your allowed <b>%.03f</b> units. p?>",
                     $used, $quota);
 
-    $ret .= "<form method='post'>"; 
+    $ret .= "<form method='post' action='./'>"; 
     $ret .= LJ::html_hidden("userid", $u->{'userid'});
 
     if ($used) {

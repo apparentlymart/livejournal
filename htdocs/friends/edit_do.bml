@@ -131,10 +131,10 @@ if (scalar(@errors)==0 &&
 
      ### who do you have defiend as a friend?
 
-     $ret .= "<form method='post' name='editFriends'>\n";
-     $ret .= "<input type='hidden' name='mode' value='domodify'>\n";
-     $ret .= "<input type='hidden' name='user' value='<?_eh $user _eh?>'>\n";
-     $ret .= "<input type='hidden' name='hpassword' value='$hpassword'>\n";
+     $ret .= "<form method='post' name='editFriends' action='edit_do.bml'>\n";
+     $ret .= LJ::html_hidden("mode", "domodify",
+                             "user", $user,
+                             "hpassword", $hpassword);
 
      %res = ();
      LJ::do_request($dbs, {

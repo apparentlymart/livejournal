@@ -35,9 +35,9 @@
         return;
     }
 
-    $body .= "<form>";
-    $body .= LJ::html_hidden("user", $u->{'user'});
-    $body .= LJ::html_hidden("sessid", $u->{'_session'}->{'sessid'});
+    $body .= "<form action='logout.bml'>";
+    $body .= LJ::html_hidden("user", $u->{'user'},
+                             "sessid", $u->{'_session'}->{'sessid'});
     $body .= "<?h1 $ML{'.logout.head'} h1?><?p $ML{'.logout.text'} ";
     $body .= "<blockquote><input type='submit' value='$ML{'.logout.btn'}'></blockquote> p?></form>";
 
@@ -52,7 +52,7 @@
 					     "userid=$u->{'userid'} AND timeexpire > UNIX_TIMESTAMP() ".
                                              "AND sessid <> $curid");
     if (@$sessions) {
-        $body .= "<form method='post'>";
+        $body .= "<form method='post' action='logout.bml'>";
         $body .= LJ::html_hidden("action:killall", '1');
         $body .= "<?h1 $ML{'.killall.head'} h1?><?p $ML{'.killall.text'} ";
         $body .= "<blockquote><input type='submit' value='$ML{'.killall.btn'}'></blockquote> p?></form>";

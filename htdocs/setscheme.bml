@@ -54,7 +54,7 @@ body<=
     my $ret;
     
     $ret .= "<p>$ML{'.select'}</p>";
-    $ret .= "<form method='post'>";
+    $ret .= "<form method='post' action='setscheme.bml'>";
     $ret .= "<p>";
         
     my $scheme = $BML::COOKIE{'BMLschemepref'};

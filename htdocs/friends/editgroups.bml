@@ -53,7 +53,7 @@
  my @num_free;
 
  $body .= "<?h1 $ML{'.title'} h1?><?p $ML{'.text'} p?><?p $ML{'.text.sec'} p?><p>";
- $body .= "<form method='post' name='fg'>";
+ $body .= "<form method='post' name='fg' action='editgroups.bml'>";
  $body .= "<input type='hidden' name='mode' value='save' />";
  for (my $i=1; $i<=30; $i++) {
      my $sort = 255;

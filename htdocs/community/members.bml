@@ -173,7 +173,7 @@ body<=
  $ret .= "<?p " . BML::ml('.name',{'name'=>"<?ljcomm $cname ljcomm?>"});
  $ret .= " " . BML::ml('.settings',{'link'=>"/community/settings.bml?comm=$cname"}) . " p?>";
 
- $ret .= "<form method='post'>";
+ $ret .= "<form method='post' action='members.bml'>";
  $ret .= $navcrap;
 
  my $sortlink = BML::get_uri() . "?comm=$cname&sort=";

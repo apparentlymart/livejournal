@@ -60,10 +60,10 @@
      $body .= "<?h1 Add New Box h1?><?p You can create a new box to show on the main page:<ul>";
      foreach my $loc (@LJ::PORTAL_COLS)
      {
-         $body .= "<form method=post>";
-         $body .= "<input type=hidden name=op value=addnew>";
-         $body .= "<input type=hidden name=loc value=$loc>";
-              $body .= "<p><b>$LJ::Portal::colname{$loc}</b><br>";
+         $body .= "<form method='post' action='alter.bml'>";
+         $body .= LJ::html_hidden("op", "addnew",
+                                  "loc", $loc);
+         $body .= "<p><b>$LJ::Portal::colname{$loc}</b><br>";
          $body .= LJ::html_select({ 'name' => "bname",
                                                 'selected' => '', },
                                               "", "(Pick Box Type)",

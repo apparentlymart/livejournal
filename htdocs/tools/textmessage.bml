@@ -25,7 +25,7 @@ body<=
 } 
 
  unless ($user) {
-     $ret .= "<?h1 Enter user h1?><?p Enter the LiveJournal username of the person you'd like to send a text message to: <UL><FORM METHOD=GET>Username: <INPUT TYPE=TEXT SIZE=15 MAXLENGTH=15 NAME=user> <INPUT TYPE=SUBMIT VALUE=\"Proceed...\"></FORM></UL> p?>";
+     $ret .= "<?h1 Enter user h1?><?p Enter the LiveJournal username of the person you'd like to send a text message to: <div style='margin-left: 40px'><form method='get' action='textmessage.bml'>Username: <input type='text' size='15' maxlength='15' name='user' /> <input type='submit' value=\"Proceed...\" /></form></div> p?>";
      &add_footer();
      return $ret;
  }
@@ -100,9 +100,9 @@ body<=
  my $pinfo = LJ::TextMessage::provider_info($tminfo->{'provider'});
 
 $ret .= "<?h1 Send a message h1?><?p Fill out this form to send a text message to <B>$u->{'user'}</B>. p?>";
-$ret .= "<UL>";
-$ret .= "<FORM NAME=frmMsg METHOD=POST><INPUT TYPE=HIDDEN NAME=user VALUE=\"$u->{'user'}\">";
-$ret .= "<B>From: </B> ";
+$ret .= "<ul>";
+$ret .= "<form name='frmMsg' method='post' action='textmessage.bml'><input type='hidden' name='user' value=\"$u->{'user'}\" />";
+$ret .= "<b>From: </b> ";
 my $maxlen = $pinfo->{'totlimit'};
 if ($tminfo->{'security'} eq "all") {
      $ret .= "<INPUT NAME=from MAXLENGTH=15 SIZE=15 VALUE=\"$remote->{'user'}\">\n";
@@ -115,9 +115,9 @@ if ($tminfo->{'security'} eq "all") {
 if ($pinfo->{'msglimit'} < $maxlen) { $maxlen = $pinfo->{'msglimit'}; }
  $ret .= "<P><B>Message:</B> (max <TT>$maxlen</TT> characters ... type until it stops you)<BR>";
 
- $ret .= "<INPUT NAME=message SIZE=50 MAXLENGTH=$maxlen>\n";
- $ret .= "<P><INPUT TYPE=SUBMIT VALUE=\"Send Message!\">";
-$ret .= "</FORM></UL>";
+ $ret .= "<input name='message' size='50' maxlength='$maxlen' />\n";
+ $ret .= "<p><input type='submit' value=\"Send Message!\" /></p>";
+$ret .= "</form></ul>";
 
 &add_footer();
  return $ret;

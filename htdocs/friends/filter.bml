@@ -48,9 +48,9 @@
  }
  
  $body .= "<?h1 Select groups... h1?><?p Check the group(s) of friends you want to view right now on your friends list. p?>";
- $body .= "<form method='post' style='display: inline'>\n";
- $body .= LJ::html_hidden("user", $remote->{'user'});
- $body .= LJ::html_hidden("mode", "view");
+ $body .= "<form method='post' style='display: inline' action='filter.bml'>\n";
+ $body .= LJ::html_hidden("user", $remote->{'user'},
+                          "mode", "view");
  $body .= "<div style='margin-left: 30px'>";
  
  foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group)

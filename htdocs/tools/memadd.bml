@@ -121,7 +121,7 @@
      LJ::text_out(\$keywords);
 
      $body .= $ML{'add_previous'};
-     $body .= "<FORM METHOD=POST>";
+     $body .= "<form method='post' action='memadd.bml'>";
      $body .= "<input type='hidden' name='itemid' value='$ditemid'>";
      $body .= "<input type='hidden' name='journal' value='$ju->{'user'}'>";
      $body .= "<input type=hidden name=mode value=\"save\">";

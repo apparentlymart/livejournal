@@ -40,7 +40,7 @@ body<=
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
     
     if (@journals > 1) {
-        $ret .= "<form method='get'>";
+        $ret .= "<form method='get' action='./'>";
         $ret .= "<?h1 Customize Journal h1?><?p Work with journal: ";
         $ret .= LJ::html_select({
             'name' => 'journal',
@@ -126,7 +126,7 @@ body<=
     }
 
     # choose style system
-    $ret .= "<form method='post'>";
+    $ret .= "<form method='post' action='./'>";
     $ret .= "<?h1 Choose style system h1?><?p Do you want to use the old style system, or the new one? p?>";
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'stylesys', 'selected' => $u->{'stylesys'} },

@@ -30,8 +30,8 @@ body<=
  if ($mode eq "modify")
  {
      my $ret = "";
-     $ret .= "<form method='post'>\n";
-     $ret .= "<input type='hidden' name='mode' value='save'>\n";
+     $ret .= "<form method='post' action='changenotify.bml'>\n";
+     $ret .= "<input type='hidden' name='mode' value='save' />\n";
 
      $ret .= "<?h1 Change Notification Settings h1?><?p Here you may select what categories of support requests you'd like to be notified about.  Choices are <B>off</B> (the default), <B>new</B> (you'll get notifications when a new support request in that category is posted) or <B>all</B> (you'll get notifications and then a copy of each comment/solution posted). p?>";
 

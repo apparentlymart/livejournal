@@ -45,9 +45,9 @@
 
      return "Nothing to show." unless @load;
      
-     $ret .= "<form method='post'>";
-     $ret .= LJ::html_hidden('lang', $lang);
-     $ret .= LJ::html_hidden('mode', "save");
+     $ret .= "<form method='post' action='editpage.bml'>";
+     $ret .= LJ::html_hidden('lang', $lang,
+                             'mode', 'save');
 
      # load item info
      my %ml_items;

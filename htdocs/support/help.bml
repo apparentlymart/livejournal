@@ -85,8 +85,8 @@ my $total_open;
 
 
  # filter line:
- $ret .= "<form method=get>Show only ";
- $ret .= "<select name=state>";
+ $ret .= "<form method='get' action='help.bml'>Show only ";
+ $ret .= "<select name='state'>";
  {
      my @states = ("" => "Open",
                    "closed" => "Closed",
@@ -96,13 +96,13 @@ my $total_open;
      }
      while (@states) {
          my ($skey, $sname) = splice(@states, 0, 2);
-         my $sel = $FORM{'state'} eq $skey ? " selected" : "";
+         my $sel = $FORM{'state'} eq $skey ? " selected='selected'" : "";
          $ret .= "<option value=\"$skey\"$sel>$sname</option>";
      }
  }
  $ret .= "</select>";
 
- $ret .= " requests of type: <select name=cat>";
+ $ret .= " requests of type: <select name='cat'>";
  $ret .= "<option value=\"\">(All)</option>";
  my @filter_cats = LJ::Support::filter_cats($remote, $cats);
  if (LJ::check_priv($dbr, $remote, "supportread")) {
@@ -113,11 +113,11 @@ my $total_open;
  }
  foreach my $cat (@filter_cats)
  {
-     my $sel = $filtercat eq $cat->{'catkey'} ? " SELECTED" : "";
+     my $sel = $filtercat eq $cat->{'catkey'} ? " selected='selected'" : "";
      $ret .= "<option value=\"$cat->{'catkey'}\"$sel>$cat->{'catname'}</option>";
  }
  $ret .= "</select>\n";
- $ret .= "<input type=submit value=\"Filter\"></form>";
+ $ret .= "<input type=submit value=\"Filter\" /></form>";
  # /filter line
  
 
