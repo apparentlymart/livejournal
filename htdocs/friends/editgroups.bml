@@ -3,9 +3,10 @@
  $title = "Edit Friend Groups";
  $body = "";
 
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
  
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
  unless ($remote) {
      $body = "(=H1 Login First H1=)(=P To edit your friend groups you must first <A HREF=\"/login.bml?ret=1\">log in</A>. P=)";
      return "";
@@ -15,7 +16,7 @@
      my %res;
      $FORM{'mode'} = "editfriendgroups";
      $FORM{'user'} = $remote->{'user'};
-     &LJ::do_request($dbh, \%FORM, \%res, {
+     LJ::do_request($dbs, \%FORM, \%res, {
 	 'userid' => $remote->{'userid'},
 	 'noauth' => 1, 
      });
@@ -28,16 +29,13 @@
      return "";
  }
 
- my %resfg;
- my %resfr;
- &LJ::do_request($dbh, { 'mode' => 'getfriendgroups',
-			 'user' => $remote->{'user'}, },
-		 \%resfg, { 'userid' => $remote->{'userid'},
-			    'noauth' => 1, });
- &LJ::do_request($dbh, { 'mode' => 'getfriends',
-			 'user' => $remote->{'user'}, },
-		 \%resfr, { 'userid' => $remote->{'userid'},
-			    'noauth' => 1, });
+ my %res;
+ LJ::do_request($dbs, { 'mode' => 'getfriends',
+			'user' => $remote->{'user'}, 
+			'includegroups' => 1,
+		    },
+		\%res, { 'userid' => $remote->{'userid'},
+			   'noauth' => 1, });
  my @num_used;
  my @num_free;
 
@@ -49,9 +47,9 @@
  for (my $i=1; $i<=30; $i++) {
      my $sort = 255;
      my $name = "";
-     if ($resfg{"frgrp_${i}_name"}) {
-	 $sort = $resfg{"frgrp_${i}_sortorder"}+0;
-	 $name = &ehtml($resfg{"frgrp_${i}_name"});
+     if ($res{"frgrp_${i}_name"}) {
+	 $sort = $res{"frgrp_${i}_sortorder"}+0;
+	 $name = &ehtml($res{"frgrp_${i}_name"});
 	 push @num_used, $i;
      } else {
 	 push @num_free, $i;
@@ -60,9 +58,9 @@
      $body .= "<input type=hidden name=efg_set_${i}_sort value=\"$sort\">\n";
      $body .= "<input type=hidden name=efg_delete_${i} value=\"0\">\n";
  }
- for (my $i=1; $i<=$resfr{'friend_count'}; $i++) {
-     my $user = $resfr{"friend_${i}_user"};
-     my $mask = $resfr{"friend_${i}_groupmask"} || 1;
+ for (my $i=1; $i<=$res{'friend_count'}; $i++) {
+     my $user = $res{"friend_${i}_user"};
+     my $mask = $res{"friend_${i}_groupmask"} || 1;
      $body .= "<input type=hidden name=editfriend_groupmask_$user value=\"$mask\">\n";
  }
 
@@ -286,10 +284,10 @@ END_JS
  $body .= "<TABLE CELLSPACING=5><TR VALIGN=TOP>";
 
  $body .= "\n<TD><B>Your groups:</B><BR><SELECT NAME=list_groups STYLE=\"width: 150px;\" SIZE=15 onClick=\"groupClicked();\">";
- foreach my $num (sort { $resfg{"frgrp_${a}_sortorder"} <=> 
-			 $resfg{"frgrp_${b}_sortorder"} } @num_used) 
+ foreach my $num (sort { $res{"frgrp_${a}_sortorder"} <=> 
+			 $res{"frgrp_${b}_sortorder"} } @num_used) 
  {
-     $body .= "\n<OPTION VALUE=\"$num\">" . &ehtml($resfg{"frgrp_${num}_name"});
+     $body .= "\n<OPTION VALUE=\"$num\">" . &ehtml($res{"frgrp_${num}_name"});
  }
 # foreach my $num (sort { $a <=> $b } @num_free) {
 #     $body .= "\n<OPTION VALUE=\"$num\">";
