@@ -78,8 +78,8 @@ sub link_bar
                 "</a>");
     };
 
-    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
-    my $jargent = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
+    my $jarg = "journal=$u->{'user'}&";
+    my $jargent = "journal=$u->{'user'}&amp;";
 
     # << Previous
     push @linkele, $mlink->("/go.bml?${jargent}itemid=$itemid&amp;dir=prev", "prev_entry");
@@ -189,34 +189,22 @@ sub init
 sub get_journal_item
 {
     my ($dbs, $dbcs, $u, $itemid) = @_;
-    my $clustered = $u->{'clusterid'};
-    my $sql;
-    if ($clustered) {
-        $sql = "SELECT journalid AS 'ownerid', posterid, eventtime, security, allowmask, ".
-            "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(logtime) AS 'secondsold', anum ".
-            "FROM log2 WHERE journalid=$u->{'userid'} AND jitemid=$itemid";
-    } else {
-        $sql = "SELECT ownerid, posterid, eventtime, security, allowmask, ".
-            "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(logtime) AS 'secondsold' ".
-            "FROM log WHERE itemid=$itemid";
-    }
+    my $sql = "SELECT journalid AS 'ownerid', posterid, eventtime, security, allowmask, ".
+        "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(logtime) AS 'secondsold', anum ".
+        "FROM log2 WHERE journalid=$u->{'userid'} AND jitemid=$itemid";
     my $item = LJ::dbs_selectrow_hashref($dbcs, $sql);
     return undef unless $item;
     $item->{'itemid'} = $itemid;
 
-    my $lt = $clustered ? LJ::get_logtext2($u, $itemid) : LJ::get_logtext($dbcs, $itemid);
+    my $lt = LJ::get_logtext2($u, $itemid);
     my $v = $lt->{$itemid};
     $item->{'subject'} = $v->[0];
     $item->{'event'} = $v->[1];
 
     ### load the log properties
     my %logprops = ();
-    if ($clustered) {
-        LJ::load_props($dbs, "log");
-        LJ::load_log_props2($dbcs->{'reader'}, $u->{'userid'}, [ $itemid ], \%logprops);
-    } else {
-        LJ::load_log_props($dbcs, [ $itemid ], \%logprops);
-    }
+    LJ::load_props($dbs, "log");
+    LJ::load_log_props2($dbcs->{'reader'}, $u->{'userid'}, [ $itemid ], \%logprops);
     $item->{'logprops'} = \%logprops;
 
     if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
@@ -280,17 +268,13 @@ sub can_view_screened {
 sub update_commentalter {
     my ($dbs, $dbcs, $u, $itemid) = @_;
     my $dbcm = $dbcs->{'dbh'};
-    my $clustered = $u->{'clusterid'};
     my $userid = $u->{'userid'};
     my $prop = LJ::get_prop("log", "commentalter");
 
     $itemid = $itemid + 0;
 
-    if ($clustered) {
-        $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, $userid, $itemid, $prop->{'id'});
-    } else {
-        $dbcm->do("REPLACE INTO logprop (itemid, propid, value) VALUES (?, ?, UNIX_TIMESTAMP())", undef, $itemid, $prop->{'id'});
-    }
+    $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) ".
+              "VALUES (?, ?, ?, UNIX_TIMESTAMP())", undef, $userid, $itemid, $prop->{'id'});
 }
 
 sub screen_comment {
@@ -303,25 +287,16 @@ sub screen_comment {
     return unless $in;
 
     my $dbcm = $dbcs->{'dbh'};
-    my $clustered = $u->{'clusterid'};
     my $userid = $u->{'userid'} + 0;
     my $prop = LJ::get_prop("log", "hasscreened");
 
-    if ($clustered) {
-        my $updated = $dbcm->do("UPDATE talk2 SET state='S' ".
-                                "WHERE journalid=$userid AND jtalkid IN ($in) ".
-                                "AND nodetype='L' AND nodeid=$itemid ".
-                                "AND state NOT IN ('S','D')");
-        if ($updated > 0) {
-            $dbcm->do("UPDATE log2 SET replycount=replycount-$updated WHERE journalid=$userid AND jitemid=$itemid");
-            $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ($userid, $itemid, $prop->{'id'}, '1')");
-        }
-    } else {
-        my $updated = $dbcm->do("UPDATE talk SET state='S' WHERE talkid IN ($in) AND state NOT IN ('S','D')");
-        if ($updated > 0) {
-            $dbcm->do("UPDATE log SET replycount=replycount-$updated WHERE itemid=$itemid");
-            $dbcm->do("REPLACE INTO logprop (itemid, propid, value) VALUES ($itemid, $prop->{'id'}, '1')");
-        }
+    my $updated = $dbcm->do("UPDATE talk2 SET state='S' ".
+                            "WHERE journalid=$userid AND jtalkid IN ($in) ".
+                            "AND nodetype='L' AND nodeid=$itemid ".
+                            "AND state NOT IN ('S','D')");
+    if ($updated > 0) {
+        $dbcm->do("UPDATE log2 SET replycount=replycount-$updated WHERE journalid=$userid AND jitemid=$itemid");
+        $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ($userid, $itemid, $prop->{'id'}, '1')");
     }
 
     LJ::Talk::update_commentalter($dbs, $dbcs, $u, $itemid);
@@ -339,32 +314,20 @@ sub unscreen_comment {
 
     my $dbcm = $dbcs->{'dbh'};
     my $dbcr = $dbcs->{'reader'};
-    my $clustered = $u->{'clusterid'};
     my $userid = $u->{'userid'} + 0;
     my $prop = LJ::get_prop("log", "hasscreened");
 
-    if ($clustered) {
-        my $updated = $dbcm->do("UPDATE talk2 SET state='A' ".
-                                "WHERE journalid=$userid AND jtalkid IN ($in) ".
-                                "AND nodetype='L' AND nodeid=$itemid ".
-                                "AND state='S'");
-        if ($updated > 0) {
-            $dbcm->do("UPDATE log2 SET replycount=replycount+$updated WHERE journalid=$userid AND jitemid=$itemid");
-
-            my $hasscreened = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 " .
-                                                     "WHERE journalid=$userid AND nodeid=$itemid AND nodetype='L' AND state='S'");
-            $dbcm->do("DELETE FROM logprop2 WHERE journalid=$userid AND jitemid=$itemid AND propid=$prop->{'id'}")
-                unless $hasscreened;
-        }
-    } else {
-        my $updated = $dbcm->do("UPDATE talk SET state='A' WHERE talkid IN ($in) AND state='S'");
-        if ($updated > 0) {
-            $dbcm->do("UPDATE log SET replycount=replycount+$updated WHERE itemid=$itemid");
-            my $hasscreened = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk WHERE ".
-                                                     "nodeid=$itemid AND nodetype='L' AND state='S'");
-            $dbcm->do("DELETE FROM logprop WHERE itemid=$itemid AND propid=$prop->{'id'}")
-                unless $hasscreened;
-        }
+    my $updated = $dbcm->do("UPDATE talk2 SET state='A' ".
+                            "WHERE journalid=$userid AND jtalkid IN ($in) ".
+                            "AND nodetype='L' AND nodeid=$itemid ".
+                            "AND state='S'");
+    if ($updated > 0) {
+        $dbcm->do("UPDATE log2 SET replycount=replycount+$updated WHERE journalid=$userid AND jitemid=$itemid");
+        
+        my $hasscreened = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 " .
+                                                 "WHERE journalid=$userid AND nodeid=$itemid AND nodetype='L' AND state='S'");
+        $dbcm->do("DELETE FROM logprop2 WHERE journalid=$userid AND jitemid=$itemid AND propid=$prop->{'id'}")
+            unless $hasscreened;
     }
 
     LJ::Talk::update_commentalter($dbs, $dbcs, $u, $itemid);
