@@ -45,6 +45,8 @@ general /modify.bml.modify.text
 
 general /modify_do.bml.title
 
+general /support/faqbrowse.bml.title
+
 general /talkread.bml.pageofpages
 
 general /update.bml.login.success
@@ -58,5 +60,3 @@ general /userinfo.bml.label.viewlabel
 general /userinfo.bml.openmembership.body
 general /userinfo.bml.rpmembership.body
 general /userinfo.bml.syn.lastnew
-
-

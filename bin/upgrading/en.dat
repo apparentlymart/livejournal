@@ -1620,7 +1620,9 @@ that area. p?>
 
 /support/faqbrowse.bml.lastupdated=Last Updated:
 
-/support/faqbrowse.bml.title=FAQ Question
+/support/faqbrowse.bml.title_cat=FAQ - [[catname]]
+
+/support/faqbrowse.bml.title_num=FAQ Question #[[num]]
 
 /support/see_overrides.bml.error.noprivs=Only users with the supportviewinternal or supporthelp privilege can view another user's overrides.
 

@@ -1,90 +1,118 @@
-<?page
-title=><?_ml .title _ml?>
-body<=
-
 <?_code
+{
+    use strict;
+    use vars qw(%GET);
 
- my $curlang = BML::get_language();
- my $deflang = BML::get_language_default();
- my $altlang = $curlang ne $deflang;
- my ($mll, $mld);
- if ($altlang) {
-     $mll = LJ::Lang::get_lang($curlang);
-     $mld = LJ::Lang::get_dom("faq");
-     $altlang = 0 unless $mll && $mld;
- }
+    # make title and body references to BML scratch area
+    my $title = \$_[1]->{'title'};
+    my $body = \$_[1]->{'body'};
+    $$body = '';
+    $$title = '';
 
- my $id = $FORM{'faqid'} + 0;
- my $ret = "";
- 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+    # get faqid and redirect to faq.bml if none
+    my $faqid = $GET{'faqid'} + 0;
+    my $faqcat = $GET{'faqcat'};
 
- my $remote = LJ::get_remote($dbs);
- 
- my $where = "faqid=$id";
- if ($FORM{'faqcat'}) {
-     $where = "faqcat=" . $dbh->quote($FORM{'faqcat'});
- }
- my $sth = $dbr->prepare("SELECT faqid, question, answer, lastmoduserid, ".
-                         "DATE_FORMAT(lastmodtime, '%Y-%m-%d'), ".
-                         "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
-                         "WHERE $where ORDER BY sortorder");
- $sth->execute;
- if ($dbh->err) { return "<p>$sql</p><p>" . $dbh->errstr . "</p>"; }
+    my $dbh = LJ::get_db_writer();
+    my $where;
 
- my $count = 0;
- while (my ($faqid, $question, $answer, $lastmoduserid, 
-            $lastmodtime, $unixmodtime) = $sth->fetchrow_array)
- {
-     # it'd be better to load them in a batch, but this works for now:
-     if ($altlang) {
-         $question = LJ::Lang::get_text($curlang, "$faqid.1question", $mld->{'dmid'});
-         $answer   = LJ::Lang::get_text($curlang, "$faqid.2answer",   $mld->{'dmid'});
+    # loading single faqid
+    if ($faqid) {
+        $$title = BML::ml('.title_num', { 'num' => $faqid });
+        $where = "faqid=$faqid";
+
+    # loading entire faqcat
+    } elsif ($faqcat) {
+        my $catname = $dbh->selectrow_array("SELECT faqcatname FROM faqcat WHERE faqcat=?",
+                                            undef, $faqcat);
+        $$title = BML::ml('.title_cat', { 'catname' => LJ::ehtml($catname) });
+
+        $where = "faqcat=" . $dbh->quote($faqcat);
+
+    # no faqid or faqcat specified, redirect
+    } else {
+        return BML::redirect("faq.bml");
+    }
+
+    my $remote = LJ::get_remote();
+
+    # get language settings
+    my $curlang = BML::get_language();
+    my $deflang = BML::get_language_default();
+    my $altlang = $curlang ne $deflang;
+    my $mld;
+    if ($altlang) {
+        my $mll = LJ::Lang::get_lang($curlang);
+        $mld = LJ::Lang::get_dom("faq");
+        $altlang = 0 unless $mll && $mld;
+    }
+
+    # query db and get data
+    my $sth = $dbh->prepare("SELECT faqid, question, answer, lastmoduserid, ".
+                            "DATE_FORMAT(lastmodtime, '%Y-%m-%d'), ".
+                            "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
+                            "WHERE $where ORDER BY sortorder");
+    $sth->execute;
+    if ($dbh->err) {
+        $$title = $ML{'Error'};
+        $$body = "$ML{'error.dberror'} <ul><li>" . $dbh->errstr . "</li></ul>\n";
+        return;
+    }
+
+    my $count = 0;
+    while (my ($faqid, $question, $answer, $lastmoduserid, 
+               $lastmodtime, $unixmodtime) = $sth->fetchrow_array)
+    {
+        # log this faq view
+        $dbh->do("REPLACE INTO faquses (faqid, userid, dateview) ".
+                 "VALUES ($faqid, ?, NOW())", undef, $remote->{'userid'}) if $remote;
+
+        BML::note_mod_time($unixmodtime);
+
+        # it'd be better to load them in a batch, but this works for now:
+        if ($altlang) {
+            $question = LJ::Lang::get_text($curlang, "$faqid.1question", $mld->{'dmid'});
+            $answer   = LJ::Lang::get_text($curlang, "$faqid.2answer",   $mld->{'dmid'});
+        }
+          
+        # escape question and answers
+        my $q = LJ::ehtml($question);
+        $q =~ s/^\s+//; $q =~ s/\s+$//;
+        $q =~ s/\n/<br \/>/g;
+     
+        my $a = LJ::ehtml($answer);
+        $a =~ s/^\s+//; $a =~ s/\s+$//;
+        $a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
+        $a =~ s/\n/<br \/>/g;
+     
+        $a =~ s!(&quot;|&#39;)?(https?://\S+[a-zA-Z0-9_/&=\-])!$1 ? $& : "<a href=\"$2\">$2</a>"!eg;
+
+        # display output
+        $$body .= "<?h1 $q h1?><div style='margin-left: 20px;'>$a</div>";
+
+        my $lastmodwho = LJ::get_username($lastmoduserid);
+        if ($lastmodwho) {
+            $$body .= "<p align=\"right\"><b>$ML{'.lastupdated'}</b><br />$lastmodwho, $lastmodtime</p>";
+        }
+
+        $count++;
      }
 
-     my $q = "";
-     my $a = "";
-     my $lastmodwho;
-     $lastmodwho = LJ::get_username($dbs, $lastmoduserid);
-     
-     $dbh->do("REPLACE INTO faquses (faqid, userid, dateview) ".
-              "VALUES ($id, $remote->{'userid'}, NOW())") if $remote;
-
-     BML::note_mod_time($unixmodtime);
-     
-     $q = LJ::ehtml($question);
-     $q =~ s/^\s+//; $q =~ s/\s+$//;
-     $q =~ s/\n/<BR>/g;
-     
-     $a = LJ::ehtml($answer);
-     $a =~ s/^\s+//; $a =~ s/\s+$//;
-     $a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
-     $a =~ s/\n/<BR>/g;
-     
-     $a =~ s!(&quot;|&#39;)?(https?://\S+[a-zA-Z0-9_/&=\-])!$1 ? $& : "<a href=\"$2\">$2</a>"!eg;
-
-     $ret .= "<?h1 $q h1?><blockquote>$a</blockquote>";
-
-     if ($lastmodwho) {
-         $ret .= "<p align=\"right\"><b><?_ml .lastupdated _ml?></b><br />$lastmodwho, $lastmodtime</p>";
+     # nothing found?
+     unless ($count) {
+         $$title = $ML{'Error'};
+         $$body .= "<p><b>$ML{'.error.nofaq'}</b></p>\n";
      }
-     $count++;
- }
- if (!$count)
- {
-     $ret .= "<p><b>$ML{'.error.nofaq'}</b></p>";
- }
- 
- return $ret;
 
+     return;
+}
 _code?>
 
-<?hr?>
-<?_ml .backfaq _ml?>
-<br /><?_ml .backsupport _ml?>
-
+<?page
+title=><?_code return $_[1]->{'title'}; _code?>
+body<=
+<?_code return $_[1]->{'body'}; _code?>
+<?hr?><?_ml .backfaq _ml?><br /><?_ml .backsupport _ml?>
 <=body
 page?><?_c <LJDEP>
 link: htdocs/support/index.bml, htdocs/support/faq.bml
