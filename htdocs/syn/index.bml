@@ -19,19 +19,6 @@ body<=
         return "<?h1 $ML{'.invalid.submission'} h1?><?p $ML{'.user.nomatch'} p?>";
     }
 
-    # TAG:FR:bml_syn:1
-    my $sth = $dbh->prepare("SELECT s.userid, us.user, s.synurl, COUNT(*) ".
-                            "FROM useridmap us, syndicated s, friends fa, friends fb ".
-                            "WHERE fa.userid=? AND fa.friendid=s.userid AND us.userid=s.userid ".
-                            "AND fb.friendid=s.userid GROUP BY 1, 2, 3");
-    $sth->execute($u->{'userid'});
-    my %count;
-    my %syn;
-    while (my ($suserid, $user, $url, $count) = $sth->fetchrow_array) {
-        $count{$user} = $count;
-        $syn{$user} = $url;
-    }
-
     my $error = sub {
         return "<?h1 $ML{'Error'} h1?><?p $_[0] p?><?p " .
                 BML::ml('Backlink', {'link' => '/syn/', 'text' => $ML{'.back'}}) . " p?>";
@@ -154,8 +141,6 @@ body<=
         my $count = $dbh->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=?", undef,
                                           $su->{'userid'});
         LJ::add_friend($u->{'userid'}, $su->{'userid'}, { 'defaultview' => 1 });
-        $count{$su->{'user'}} = $count+1; # +1 to include us
-        $syn{$su->{'user'}} = $su->{'synurl'};
     }
 
     # get most popular feeds from memcache
@@ -182,8 +167,6 @@ body<=
 
         if ($POST{'action:add'} && $POST{"add_$user"}) {
             LJ::add_friend($u->{'userid'}, $suserid, { 'defaultview' => 1 });
-            $count{$user} = $count+1;
-            $syn{$user} = $url;
         } else {
             push @pop, [ $user, $url, $count ];
             last if @pop >= 20;
