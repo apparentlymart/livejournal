@@ -159,10 +159,6 @@ body<=
             }
             $maints++ if $add{'admin'}->{$id};
         }
-        use Data::Dumper;
-        print STDERR Dumper(\%add);
-         print STDERR Dumper(\%delete);
-       die('1');
 
         # can't remove ALL maintainers, give them an error so they can
         # go back and decide who to keep
