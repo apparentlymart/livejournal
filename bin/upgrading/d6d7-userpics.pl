@@ -269,9 +269,10 @@ while (1) {
     my $sth = $dbh->prepare("SELECT * FROM user WHERE dversion = 6 LIMIT $BLOCK_MOVE");
     $sth->execute();
     $ct = 0;
-    my %us;
+    my (%us, %fast);
     while (my $u = $sth->fetchrow_hashref()) {
         $us{$u->{userid}} = $u;
+        $fast{$u->{userid}} = 1;
         $ct++;
     }
 
@@ -282,7 +283,23 @@ while (1) {
     my $ids = join ',', map { $_+0 } keys %us;
     my $has_upics = $dbh->selectcol_arrayref("SELECT DISTINCT userid FROM userpic WHERE userid IN ($ids)");
     my %uids = ( map { $_ => 1 } (@$has_upics) );
-    my %moved_slow;
+
+    # remove folks that have userpics from the fast list
+    delete $fast{$_} foreach keys %uids;
+
+    # now see who we can do in a fast way
+    my @fast_ids = map { $_+0 } keys %fast;
+    if (@fast_ids) {
+        # update stats for counting and print
+        $stats{'fast_moved'} += @fast_ids;
+        print $status->($stats{'slow_moved'}+$stats{'fast_moved'}, $stats{'total_users'}, "users");
+
+        # block update
+        LJ::update_user(\@fast_ids, { dversion => 7 });
+    }
+    
+    my $slow_todo = scalar keys %uids;
+    print "Of $BLOCK_MOVE, $slow_todo have to be slow-converted...\n";
     foreach my $id (keys %uids) {
         # this person has userpics, move them the slow way
         die "Userid $id in \$has_upics, but not in \%us...fatal error\n" unless $us{$id};
@@ -292,19 +309,8 @@ while (1) {
         # now move the user
         bless $us{$id}, 'LJ::User';
         $move_user->($us{$id});
-        $moved_slow{$id} = 1;
     }
 
-    # now see who we can do in a fast way
-    my @fast_ids = map { $_+0 } grep { !$moved_slow{$_} } keys %us;
-    if (@fast_ids) {
-        # update stats for counting and print
-        $stats{'fast_moved'} += @fast_ids;
-        print $status->($stats{'slow_moved'}+$stats{'fast_moved'}, $stats{'total_users'}, "users");
-
-        # block update
-        LJ::update_user(\@fast_ids, { dversion => 7 });
-    }
 }
 
 # ...done?
