@@ -1847,21 +1847,21 @@ sub create_view_calendar
     my $quserid = int($u->{'userid'});
     my $maxyear = 0;
 
-    my $db = LJ::get_cluster_reader($u);
-    my $sql = "SELECT year, month, day, DAYOFWEEK(CONCAT(year, \"-\", month, \"-\", day)) AS 'dayweek', COUNT(*) AS 'count' FROM log2 WHERE journalid=$quserid GROUP BY year, month, day, dayweek";
-
-    unless ($db) {
+    my $daycts = LJ::get_daycounts($u, $remote);
+    unless ($daycts) {
         $opts->{'errcode'} = "nodb";
         $$ret = "";
         return 0;
     }
 
-    my $sth = $db->prepare($sql);
-    $sth->execute;
+    my (%count, %dayweek);
+    foreach my $dy (@$daycts) {
+        my ($year, $month, $day, $count) = @$dy;
 
-    my (%count, %dayweek, $year, $month, $day, $dayweek, $count);
-    while (($year, $month, $day, $dayweek, $count) = $sth->fetchrow_array)
-    {
+        # calculate day of week
+        my $time = Time::Local::timegm(0, 0, 0, $day, $month-1, $year);
+        my $dayweek = (gmtime($time))[6] + 1;
+
         $count{$year}->{$month}->{$day} = $count;
         $dayweek{$year}->{$month}->{$day} = $dayweek;
         if ($year > $maxyear) { $maxyear = $year; }
@@ -1904,7 +1904,7 @@ sub create_view_calendar
             LJ::fill_var_props($vars, 'CALENDAR_YEAR_LINKS', { "years" => $yearlinks });
     }
 
-    foreach $year (@years)
+    foreach my $year (@years)
     {
         $$months .= LJ::fill_var_props($vars, 'CALENDAR_NEW_YEAR', {
           'yyyy' => $year,
@@ -1913,7 +1913,7 @@ sub create_view_calendar
 
         my @months = sort { $b <=> $a } keys %{$count{$year}};
         if ($vars->{'CALENDAR_SORT_MODE'} eq "forward") { @months = reverse @months; }
-        foreach $month (@months)
+        foreach my $month (@months)
         {
           my $daysinmonth = LJ::days_in_month($month, $year);
           

@@ -69,6 +69,7 @@ sub MonthPage
         }
     }
     
+    # FIXME: remove the join with logtext.  get that with the API (thus memcache)
     $sth = $dbcr->prepare("SELECT l.jitemid, l.posterid, l.anum, l.day, lt.subject, ".
                           "       DATE_FORMAT(l.eventtime, '$dateformat') AS 'alldatepart', ".
                           "       l.replycount, l.security ".
@@ -86,7 +87,7 @@ sub MonthPage
 
     # load the log properties
     my %logprops = ();
-    LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
+    LJ::load_log_props2($u->{'userid'}, \@itemids, \%logprops);
 
     my (%pu, %pu_lite);  # poster users; UserLite objects
     foreach (@items) {
@@ -193,10 +194,15 @@ sub MonthPage
     my $nowval = $year*12 + $month;
 
     $p->{'months'} = [];
-    $sth = $dbcr->prepare("SELECT DISTINCT year, month FROM log2 ".
-                          "WHERE journalid=? ORDER BY year, month");
-    $sth->execute($u->{'userid'});
-    while (my ($oy, $om) = $sth->fetchrow_array) {
+
+    my $days = LJ::get_daycounts($u, $remote) || [];
+    my $lastmo;
+    foreach my $day (@$days) {
+        my ($oy, $om) = ($day->[0], $day->[1]);
+        my $mo = "$oy-$om";
+        next if $mo eq $lastmo;
+        $lastmo = $mo;
+
         my $date = Date($oy, $om, 0);
         my $url = $journalbase . sprintf("/%04d/%02d/", $oy, $om);
         push @{$p->{'months'}}, {

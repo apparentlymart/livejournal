@@ -678,6 +678,41 @@ sub get_timeupdate_multi {
     return \%timeupdate;
 }
 
+# returns undef on error, or otherwise arrayref of arrayrefs,
+# each of format [ year, month, day, count ] for all days with
+# non-zero count.  examples:
+#  [ [ 2003, 6, 5, 3 ], [ 2003, 6, 8, 4 ], ... ]
+# 
+sub get_daycounts
+{
+    my ($u, $remote, $not_memcache) = @_;  
+    # NOTE: $remote not yet used.  one of the oldest LJ shortcomings is that
+    # it's public how many entries users have per-day, even if the entries
+    # are protected.  we'll be fixing that with a new table, but first
+    # we're moving everything to this API.
+
+    my $uid = LJ::want_userid($u) or return undef;
+
+    my @days;
+    my $memkey = [$uid,"dayct:$uid"];
+    unless ($not_memcache) {
+        my $list = LJ::MemCache::get($memkey);
+        return $list if $list;
+    }
+    
+    my $dbcm = LJ::get_cluster_master($u) or return undef;
+    my $sth = $dbcm->prepare("SELECT year, month, day, COUNT(*) ".
+                             "FROM log2 WHERE journalid=? GROUP BY 1, 2, 3");
+    $sth->execute($uid);
+    while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
+        # we force each number from string scalars (from DBI) to int scalars,
+        # so they store smaller in memcache
+        push @days, [ int($y), int($m), int($d), int($c) ];
+    }
+    LJ::MemCache::add($memkey, \@days);
+    return \@days;
+}
+
 # <LJFUNC>
 # name: LJ::get_friend_items
 # des: Return friend items for a given user, filter, and period.

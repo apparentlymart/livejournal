@@ -889,17 +889,11 @@ sub get_journal_day_counts
     
     my $u = $s2page->{'_u'};
     my $counts = {};
-
-    my $db = LJ::get_cluster_reader($u);
-    my $sql = "SELECT year, month, day, COUNT(*) AS 'count' ".
-            "FROM log2 WHERE journalid=? ".
-            "GROUP BY year, month, day";
     
-    my $sth = $db->prepare($sql);
-    $sth->execute($u->{'userid'});
-
-    while (my ($year, $month, $day, $count) = $sth->fetchrow_array) {
-        $counts->{$year}->{$month}->{$day} = $count;
+    my $remote = LJ::get_remote();
+    my $days = LJ::get_daycounts($u, $remote) or return {};
+    foreach my $day (@$days) {
+        $counts->{$day->[0]}->{$day->[1]}->{$day->[2]} = $day->[3];
     }
     
     return $s2page->{'_day_counts'} = $counts;

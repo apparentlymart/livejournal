@@ -403,16 +403,12 @@ sub getdaycounts
     my $ownerid = $flags->{'ownerid'};
 
     my $res = {};
-    my $db = LJ::get_cluster_reader($uowner);
-    return fail($err,502) unless $db;
+    my $daycts = LJ::get_daycounts($uowner, $u);
+    return fail($err,502) unless $daycts;
 
-    # FIXME: memcache this
-    my $sth = $db->prepare("SELECT year, month, day, COUNT(*) AS 'count' ".
-                           "FROM log2 WHERE journalid=? GROUP BY 1, 2, 3");
-    $sth->execute($ownerid);
-    while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
-        my $date = sprintf("%04d-%02d-%02d", $y, $m, $d);
-        push @{$res->{'daycounts'}}, { 'date' => $date, 'count' => $c };
+    foreach my $day (@$daycts) {
+        my $date = sprintf("%04d-%02d-%02d", $day->[0], $day->[1], $day->[2]);
+        push @{$res->{'daycounts'}}, { 'date' => $date, 'count' => $day->[3] };
     }
     return $res;
 }
@@ -828,6 +824,7 @@ sub postevent
     return $fail->($err,501,$dberr) if $dberr;
 
     LJ::MemCache::incr([$ownerid, "log2ct:$ownerid"]);
+    LJ::memcache_kill($ownerid, "dayct");
 
     # set userprops.
     {
@@ -1254,8 +1251,9 @@ sub editevent
         LJ::log2_do($dbcm, $ownerid, undef, "UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
                   "WHERE journalid=$ownerid AND jitemid=$itemid");
     }
-
     return fail($err,501,$dbcm->errstr) if $dbcm->err;
+
+    LJ::memcache_kill($ownerid, "dayct");
 
     my $res = { 'itemid' => $itemid };
     $res->{'anum'} = $oldevent->{'anum'} if defined $oldevent->{'anum'};
