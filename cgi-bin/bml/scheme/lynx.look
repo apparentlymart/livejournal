@@ -20,7 +20,7 @@ _code?><html>
 %%HEAD%%
 </head>
 
-<body>
+<body %%bodyopts%%>
 
 %%BODY%%
 
