@@ -8527,11 +8527,11 @@ sub alloc_user_counter
     return LJ::alloc_user_counter($u, $dom, 1);
 }
 
-# $dom: 'S' == style, 'P' == userpic
+# $dom: 'S' == style, 'P' == userpic, 'C' == captcha
 sub alloc_global_counter
 {
     my ($dom, $recurse) = @_;
-    return undef unless $dom =~ /^[S|P]$/;
+    return undef unless $dom =~ /^[SPC]$/;
     my $dbh = LJ::get_db_writer();
     return undef unless $dbh;
 
@@ -8551,6 +8551,10 @@ sub alloc_global_counter
         $newmax = $dbh->selectrow_array("SELECT MAX(styleid) FROM style");
     } elsif ($dom eq "P") {
         $newmax = $dbh->selectrow_array("SELECT MAX(picid) FROM userpic");
+    } elsif ($dom eq "C") {
+        $newmax = $dbh->selectrow_array("SELECT MAX(capid) FROM captchas");
+    } else {
+        die "No alloc_global_counter initalizer for domain '$dom'";
     }
     $newmax += 0;
     $dbh->do("INSERT IGNORE INTO counter (journalid, area, max) VALUES (?,?,?)",
