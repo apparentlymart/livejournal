@@ -192,6 +192,7 @@ sub FriendsPage
     };
     
     my $eventnum = 0;
+    my $hiddenentries = 0;
   ENTRY:
     foreach my $item (@items) 
     {
@@ -220,7 +221,6 @@ sub FriendsPage
         my ($friend, $poster);
         $friend = $poster = $friends{$friendid}->{'user'};
 
-        $eventnum++;
         LJ::CleanHTML::clean_subject(\$subject) if $subject;
 
         my $ditemid = $itemid * 256 + $item->{'anum'};
@@ -240,7 +240,10 @@ sub FriendsPage
         my $po = $posters{$posterid} || $friends{$posterid};  
 
         # don't allow posts from suspended users
-        next ENTRY if $po->{'statusvis'} eq 'S';
+        if ($po->{'statusvis'} eq 'S') {
+            $hiddenentries++; # Remember how many we've skipped for later
+            next ENTRY;
+        }
 
         # do the picture
         my $picid = 0;
@@ -300,6 +303,7 @@ sub FriendsPage
         }
 
         push @{$p->{'entries'}}, $entry;
+        $eventnum++;
         
     } # end while
 
@@ -367,7 +371,8 @@ sub FriendsPage
     ## unless we didn't even load as many as we were expecting on this
     ## page, then there are more (unless there are exactly the number shown 
     ## on the page, but who cares about that)
-    unless ($eventnum != $itemshow || $skip == $maxskip) {
+    # Must remember to count $hiddenentries or we'll have no skiplinks when > 1
+    unless (($eventnum + $hiddenentries) != $itemshow || $skip == $maxskip) {
         my %linkvars;
         $linkvars{'filter'} = $linkfilter if $incfilter;
         $linkvars{'show'} = $get->{'show'} if $get->{'show'} =~ /^\w+$/;
