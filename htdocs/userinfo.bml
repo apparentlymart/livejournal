@@ -704,7 +704,6 @@ if ($u->{'journaltitle'}) {
                           "<td>$yfriends</td>";
              }
              $body .= "</tr></table>";
-             $body .= "<b>" . BML::ml('.label.totalfriends', { numfriends => $friends{'count'} }) . "</b>";
          } else {
              $body .= "<b>" . $friends{'count'} . ":</b> ";
              foreach my $f (@friends) {

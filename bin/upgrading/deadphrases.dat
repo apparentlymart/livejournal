@@ -174,3 +174,5 @@ general /syn/index.bml.invalid.address
 
 general /community/members.bml.key.name
 general /community/members.bml.success.addusers
+
+general /userinfo.bml.label.totalfriends

@@ -3448,8 +3448,6 @@ This could be because: <ol>
 
 /userinfo.bml.label.todo=To-Do List
 
-/userinfo.bml.label.totalfriends=[[numfriends]] total friends
-
 /userinfo.bml.label.user=User:
 
 /userinfo.bml.label.viewfriends=View Friends
