@@ -731,11 +731,16 @@ sub postevent
             my $mods = LJ::load_rel_user($dbs, $ownerid, 'M') || [];
             if (@$mods) {
                 my $in = join(", ", map { $_+0 } @$mods );
-                my $emails = $dbr->selectcol_arrayref("SELECT email FROM user WHERE userid IN ($in) AND status='A'");
-                my $to = join(",", @$emails) if $emails;
-                if ($to) {
-                    my $body = "There has been a new submission into the community '$uowner->{'user'}' which you moderate.  To accept or reject the submission, please go to this address:\n\n" .
-                        "   $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}\n\nRegards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
+                my $emails = $dbr->selectcol_arrayref("SELECT email FROM user ".
+                                                      "WHERE userid IN ($in) AND status='A'") || [];
+                my $ct;
+                foreach my $to (@$emails) {
+                    last if ++$ct > 20;  # don't send more than 20 emails.
+                    my $body = ("There has been a new submission into the community '$uowner->{'user'}' \n".
+                                "which you moderate.  To accept or reject the submission, please go \n".
+                                "to this address:\n\n" .
+                                "   $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}\n\n".
+                                "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n");
                     LJ::send_mail({
                         'to' => $to, 
                         'from' => $LJ::ADMIN_EMAIL,
