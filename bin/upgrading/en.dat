@@ -2089,6 +2089,8 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /lostinfo.bml.enter_username=Enter your username:
 
+/lostinfo.bml.error.commnopassword=The account you are trying to retrieve the password for is a community. This kind of account does not have a password to retrieve. All community management can be accomplished by logging in as a maintainer of the community.
+
 /lostinfo.bml.error.no_email=You must enter an email address in order to recover your username.
 
 /lostinfo.bml.error.purged=Cannot retrieve password for a deleted account once it has been purged.

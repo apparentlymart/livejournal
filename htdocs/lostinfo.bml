@@ -62,6 +62,11 @@ body<=
             return $err->( $ML{'.error.syndicated'} );
         }
 
+        if ($u->{'journaltype'} eq 'C' && !length $u->{'password'}) {
+            # community with no password
+            return $err->( $ML{'.error.commnopassword'} );
+        }
+
         if ($u->{'statusvis'} eq 'X') {
             return $err->( $ML{'.error.purged'} );
         }
