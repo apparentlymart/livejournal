@@ -137,8 +137,8 @@ body<=
                      'exptype' => 'short',
                      'ipfixed' => undef,
                  };
-                 my $sess = LJ::generate_session($u, $sess_opts);
-                 $COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime ];
+                 my $sess = LJ::generate_session($up, $sess_opts);
+                 $COOKIE{'ljsession'} = [  "ws:$up->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime ];
                  LJ::set_remote($up);
 
                  LJ::load_user_props($dbs, $up, "browselang");
