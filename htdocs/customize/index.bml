@@ -62,7 +62,8 @@ body<=
         my $layid = $POST{'layoutid'};
         return BML::redirect("/customize/?journal=$u->{'user'}") if $layid == $style{'layout'};
         my $lay = $pub->{$layid} || $userlay->{$layid};
-        return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_layout'} p?>" unless $lay;
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_layout'} p?>"
+            unless $lay && LJ::S2::can_use_layer($u, $lay->{'uniq'});
         my $coreid = $lay->{'b2lid'} or return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.no_core_parent'} p?>";
         $implicit_style_create->();
         LJ::S2::delete_layer($style{'user'});
@@ -166,10 +167,10 @@ body<=
     }
 
     # choose layout
-    my @layouts = map { $_, LJ::ehtml($pub->{$_}->{'name'}) }
+    my @layouts = map { $_, $pub->{$_}->{'name'} }
                  sort { $pub->{$a}->{'name'} cmp $pub->{$b}->{'name'} }
                  grep { /^\d+$/ && $pub->{$_}->{'type'} eq "layout" &&
-                        LJ::S2::can_use_layer($u, $pub->{$_}->{'uniq'})  } keys %$pub;
+                        LJ::S2::can_use_layer($u, $pub->{$_}->{'uniq'}) } keys %$pub;
     # add user ones
     {
         my @user = map { $_, $userlay->{$_}->{'name'} ? $userlay->{$_}->{'name'} : "\#$_" } 
