@@ -7,6 +7,11 @@ use strict;
 use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED);
 use Apache::File ();
 use CGI;
+use XMLRPC::Transport::HTTP;
+
+require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
 
 my %RQ;       # per-request data
 my %USERPIC;  # conf related to userpics
@@ -34,6 +39,13 @@ sub trans
     LJ::start_request();
 
     return trans_userpic($r, $1) if $uri =~ m!^/userpic/(\d+)$!;
+
+    if ($uri =~ m!^/(interface(/flat|/xmlrpc)?)|cgi-bin/log\.cgi!) {
+        $RQ{'interface'} = $1 ? ($2 eq "/flat" ? "flat" : ($2 eq "/xmlrpc" ? "xmlrpc" : "")) : "flat";
+        $r->handler("perl-script");
+        $r->push_handlers(PerlHandler => \&interface_content);
+        return OK;
+    }
 
     my $redir = sub {
         my $url = shift;
@@ -339,6 +351,94 @@ sub journal_content
 
     return OK;
 
+}
+
+sub interface_content
+{
+    my $r = shift;
+    my $args = $r->args;
+
+    if ($RQ{'interface'} eq "xmlrpc") {
+        my $server = XMLRPC::Transport::HTTP::CGI
+            -> on_action(sub { die "Access denied\n" if $_[2] =~ /:|\'/ })
+            -> dispatch_to('LJ::XMLRPC')
+            -> handle;
+        return OK;
+    }
+
+    if ($RQ{'interface'} ne "flat") {
+        $r->content_type("text/plain");
+        $r->send_http_header;
+        $r->print("Unknown interface.");
+        return OK;
+    }
+
+    $r->content_type("text/plain");
+
+    my $dbs = LJ::get_dbs();
+    my $dbh = $dbs->{'dbh'};
+
+    my %out = ();
+    my %FORM = ();
+    LJ::get_form_data(\%FORM);
+
+    print "Content-type: text/plain\n";
+    LJ::do_request($dbs, \%FORM, \%out);
+
+    if ($FORM{'responseenc'} eq "urlenc") {
+        $r->send_http_header;
+        foreach (sort keys %out) {
+            $r->print(LJ::eurl($_) . "=" . LJ::eurl($out{$_}) . "&");
+        }
+        return OK;
+    }
+
+    my $length = 0;
+    foreach (sort keys %out) {
+        $length += length($_)+1;
+        $length += length($out{$_})+1;
+    }
+
+    $r->header_out("Content-length", $length);
+    $r->send_http_header;
+    foreach (sort keys %out) {
+        $r->print($_, "\n", $out{$_}, "\n");
+    }
+
+    return OK;
+}
+
+package LJ::Protocol;
+
+sub xmlrpc_method {
+    my $method = shift;
+    shift;   # get rid of package name that dispatcher includes.
+    my $req = shift;
+
+    if (@_) {
+        # don't allow extra arguments
+        die SOAP::Fault
+            ->faultstring(LJ::Protocol::error_message(202))
+            ->faultcode(202);
+    }
+    my $error = 0;
+    my $res = LJ::Protocol::do_request_without_db($method, $req, \$error);
+    if ($error) {
+        die SOAP::Fault
+            ->faultstring(LJ::Protocol::error_message($error))
+            ->faultcode(substr($error, 0, 3));
+    }
+    return $res;
+}
+
+package LJ::XMLRPC;
+
+use vars qw($AUTOLOAD);
+
+sub AUTOLOAD {
+    my $method = $AUTOLOAD;
+    $method =~ s/^.*:://;
+    LJ::Protocol::xmlrpc_method($method, @_);
 }
 
 1;
