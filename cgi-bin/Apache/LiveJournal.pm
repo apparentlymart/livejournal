@@ -193,7 +193,10 @@ sub trans
             # handled later
         } elsif ($LJ::SSLDOCS && $uri !~ m!(\.\.|\%|\.\/)!) {
             my $file = "$LJ::SSLDOCS/$uri";
-            return 404 unless -e $file;
+            unless (-e $file) {
+                # no such file.  send them to the main server if it's a GET.
+                return $r->method eq 'GET' ? redir($r, "$LJ::SITEROOT$uri$args_wq") : 404;
+            }
             if (-d _) { $file .= "/index.bml"; }
             $file =~ s!/{2,}!/!g;
             $r->filename($file);
