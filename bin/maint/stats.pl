@@ -149,7 +149,9 @@ $maint{'genstats'} = sub
     #### client usage stats
 
     print "-I- Clients.\n";
-    $sth = $dbh->prepare("SELECT client, COUNT(*) AS 'count' FROM logins WHERE lastlogin > DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY 1 ORDER BY 2");
+    $sth = $dbh->prepare("SELECT c.client, COUNT(*) FROM clients c, clientusage cu WHERE ".
+			 "c.clientid=cu.clientid AND cu.lastlogin > ".
+			 "DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY 1 ORDER BY 2");
     $sth->execute;
 
     $dbh->do("DELETE FROM stats WHERE statcat='client'");
