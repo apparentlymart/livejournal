@@ -138,11 +138,16 @@ sub clean
                     delete $hash->{$_};
                 }
 
-                foreach my $attr (qw(href content src dynsrc lowsrc))
+                foreach my $attr (keys %$hash)
                 {
-                    next unless (defined $hash->{$attr});
                     $hash->{$attr} =~ s/^lj:(?:\/\/)?(.*)$/ExpandLJURL($1)/ei;
-                    if ($hash->{$attr} =~ /^\s*javascript:/i) { delete $hash->{$attr}; }
+                    $hash->{$attr} =~ s/\t//g;
+                    $hash->{$attr} =~ s/\n//g;
+                    if ($hash->{$attr} =~ /javascript:/i) { delete $hash->{$attr}; }
+                    if ($hash->{$attr} =~ /about:/i) { delete $hash->{$attr}; }
+                    if ($attr eq "style" && $hash->{$attr} =~ /expression/i) {
+                        delete $hash->{$attr};
+                    }
                 }
 
                 if ($tag eq "img") 
@@ -217,6 +222,12 @@ sub clean
             my %url = ();
             my $urlcount = 0;
 
+            if ($opencount{'style'}) {
+                # remove anything that might run javascript code
+                $token->[1] =~ s/javascript://g;
+                $token->[1] =~ s/about://g;
+                $token->[1] =~ s/expression//g;
+            }
             if ($addbreaks && ! $opencount{'a'}) {
                 $token->[1] =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=\~\:\;\#\&\,]+!$url{++$urlcount}=$&;"\{url$urlcount\}";!egi;
             }
