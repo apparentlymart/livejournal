@@ -23,6 +23,9 @@ sub error_message
 	     "202" => "Too many arguments",
 	     "203" => "Invalid argument(s)",
 
+	     # Access Errors
+	     "300" => "Don't have access to shared/community journal",
+
 	     # Server Errors
 	     "500" => "Internal server error",
 	     );
@@ -47,8 +50,9 @@ sub do_request
     if ($method eq "login")           { return login(@args);           }
     if ($method eq "getfriendgroups") { return getfriendgroups(@args); }
     if ($method eq "getfriends")      { return getfriends(@args);      }
-    if ($method eq "friendof")        { return friendof(@args);      }
-    if ($method eq "checkfriends")    { return checkfriends(@args);      }
+    if ($method eq "friendof")        { return friendof(@args);        }
+    if ($method eq "checkfriends")    { return checkfriends(@args);    }
+    if ($method eq "getdaycounts")    { return getdaycounts(@args);    }
 
     return fail($err,201);    
 }
@@ -202,6 +206,27 @@ sub checkfriends
 	$res->{'interval'} = 60;
     }
 
+    return $res;
+}
+
+sub getdaycounts
+{
+    my ($dbs, $req, $err, $flags) = @_;
+    return undef unless authenticate($dbs, $req, $err, $flags);
+    return undef unless check_altusage($dbs, $req, $err, $flags);
+
+    my $u = $flags->{'u'};    
+    my $ownerid = $flags->{'ownerid'};
+    my $dbr = $dbs->{'reader'};
+    
+    my $res = {};
+
+    my $sth = $dbr->prepare("SELECT year, month, day, COUNT(*) AS 'count' FROM log WHERE ownerid=$ownerid GROUP BY 1, 2, 3");
+    $sth->execute;
+    while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
+	my $date = sprintf("%04d-%02d-%02d", $y, $m, $d);
+	push @{$res->{'daycounts'}}, { 'date' => $date, 'count' => $c };
+    }
     return $res;
 }
 
@@ -384,6 +409,29 @@ sub list_moods
     return $res;
 }
 
+sub check_altusage
+{
+    my ($dbs, $req, $err, $flags) = @_;
+
+    my $alt = $req->{'usejournal'};
+    my $u = $flags->{'u'};
+    $flags->{'ownerid'} = $u->{'userid'};
+
+    # all good if not using an alt journal
+    return 1 unless $alt;
+
+    # complain if the username is invalid
+    return fail($err,203) unless LJ::canonical_username($alt);
+   
+    my $info = {};
+    if (LJ::can_use_journal($dbs, $u->{'userid'}, $req->{'usejournal'}, $info)) {
+	$flags->{'ownerid'} = $info->{'ownerid'};
+	return 1;
+    }
+
+    # not allowed to access it
+    return fail($err,300);
+}
 
 sub authenticate
 {
@@ -481,6 +529,9 @@ sub do_request
     }
     if ($req->{'mode'} eq "checkfriends") {
 	return checkfriends($dbs, $req, $res, $flags);
+    }
+    if ($req->{'mode'} eq "getdaycounts") {
+	return getdaycounts($dbs, $req, $res, $flags);
     }
 
     ### OLD CODE FOLLOWS:
@@ -643,37 +694,6 @@ sub do_request
 	return;
     }
     
-
-    ###
-    ### MODE: getdaycounts
-    ### (find out how many journal entries appear on each day)
-    ###
-    if ($req->{'mode'} eq "getdaycounts")
-    {
-	### shared-journal support
-	my $ownerid = $userid;
-	if ($req->{'usejournal'}) {
-            my $info = {};
-	    if (&can_use_journal($dbs, $userid, $req->{'usejournal'}, $info)) {
-		$ownerid = $info->{'ownerid'};
-	    } else {
-                $res->{'errmsg'} = $info->{'errmsg'};
-		$res->{'success'} = "FAIL"; 
-		return; 
-	    }
-	}
-	
-        $sth = $dbr->prepare("SELECT year, month, day, COUNT(*) AS 'count' FROM log WHERE ownerid=$ownerid GROUP BY 1, 2, 3");
-        $sth->execute;
-        while ($_ = $sth->fetchrow_hashref)
-        {
-	    my $date = sprintf("%04d-%02d-%02d", $_->{'year'}, $_->{'month'}, $_->{'day'});
-	    $res->{$date} = $_->{'count'};
-        }
-        $res->{'success'} = "OK";
-	return; 
-    }
-
     ####
     #### MODE: editfriends
     ####
@@ -1749,6 +1769,28 @@ sub checkfriends
     $res->{'new'} = $rs->{'new'};
     $res->{'lastupdate'} = $rs->{'lastupdate'};
     $res->{'interval'} = $rs->{'interval'};
+    return 1;
+}
+
+## flat wrapper
+sub getdaycounts
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+    
+    my $rs = LJ::Protocol::do_request("getdaycounts", $rq, \$err);
+    unless ($rs) {
+	$res->{'success'} = "FAIL";
+	$res->{'errmsg'} = LJ::Protocol::error_message($err);
+	return 0;
+    }
+
+    $res->{'success'} = "OK";
+    foreach my $d (@{ $rs->{'daycounts'} }) {
+	$res->{$d->{'date'}} = $d->{'count'};
+    }
     return 1;
 }
 
