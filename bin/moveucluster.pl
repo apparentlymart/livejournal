@@ -96,7 +96,7 @@ if ($secidle) {
 }
 
 # make sure slow is caught up:
-if ($opt_useslow) 
+if ($opt_useslow)
 {
     my $ms = $dbh->selectrow_hashref("SHOW MASTER STATUS");
     my $loop = 1;
@@ -175,12 +175,13 @@ if ($dbh->selectrow_array("SELECT oldid FROM oldids WHERE userid=$userid LIMIT 1
 }
 print "first move: $first_move\n";
 my %alloc_data;
+my %alloc_arealast;
 my $alloc_id = sub {
     my ($area, $orig) = @_;
 
     # fast version
     if ($first_move) {
-        my $id = ++$alloc_data{$area};
+        my $id = $alloc_data{$area}->{$orig} = ++$alloc_arealast{$area};
         $replace_into->($dbh, "oldids", "(area, oldid, userid, newid)", 250,
                         $area, $orig, $userid, $id);
         return $id;
@@ -190,12 +191,15 @@ my $alloc_id = sub {
     $dbh->{'RaiseError'} = 0;
     $dbh->do("INSERT INTO oldids (area, oldid, userid, newid) ".
              "VALUES ('$area', $orig, $userid, NULL)");
+    my $id;
     if ($dbh->err) {
-        $dbh->{'RaiseError'} = 1;
-        return $dbh->selectrow_array("SELECT newid FROM oldids WHERE area='$area' AND oldid=$orig");
+        $id = $dbh->selectrow_array("SELECT newid FROM oldids WHERE area='$area' AND oldid=$orig");
+    } else {
+        $id = $dbh->{'mysql_insertid'};
     }
     $dbh->{'RaiseError'} = 1;
-    return $dbh->{'mysql_insertid'};
+    $alloc_data{$area}->{$orig} = $id;
+    return $id;
 };
 
 my $bufread;
@@ -243,11 +247,11 @@ if ($sclust == 0)
     # work.  (it checks the first 4 bytes only, not joining the
     # globalid on the clustered log table)
     print "Fixing memories.\n";
-    my @fix = @{$dbh->selectall_arrayref("SELECT m.memid, o.newid FROM memorable m, oldids o WHERE ".
-                                         "m.userid=$u->{'userid'} AND m.journalid=0 AND o.area='L' ".
-                                         "AND o.userid=$u->{'userid'} AND m.jitemid=o.oldid")};
+    my @fix = @{$dbh->selectall_arrayref("SELECT memid, jitemid FROM memorable WHERE ".
+                                         "userid=$u->{'userid'} AND journalid=0")};
     foreach my $f (@fix) {
-        my ($memid, $newid) = ($f->[0], $f->[1]);
+        my ($memid, $newid) = ($f->[0], $alloc_data{'L'}->{$f->[1]});
+        next unless $newid;
         my ($newid2, $anum) = $dbch->selectrow_array("SELECT jitemid, anum FROM log2 ".
                                                      "WHERE journalid=$u->{'userid'} AND ".
                                                      "jitemid=$newid");
@@ -261,12 +265,11 @@ if ($sclust == 0)
 
     # fix polls
     print "Fixing polls.\n";
-    @fix = @{$dbh->selectall_arrayref("SELECT p.pollid, o.newid FROM poll p, oldids o ".
-                                      "WHERE o.userid=$u->{'userid'} AND ".
-                                      "o.area='L' AND o.oldid=p.itemid AND ".
-                                      "p.journalid=$u->{'userid'}")};
+    @fix = @{$dbh->selectall_arrayref("SELECT pollid, itemid FROM poll ".
+                                      "WHERE journalid=$u->{'userid'}")};
     foreach my $f (@fix) {
-        my ($pollid, $newid) = ($f->[0], $f->[1]);
+        my ($pollid, $newid) = ($f->[0], $alloc_data{'L'}->{$f->[1]});
+        next unless $newid;
         my ($newid2, $anum) = $dbch->selectrow_array("SELECT jitemid, anum FROM log2 ".
                                                      "WHERE journalid=$u->{'userid'} AND ".
                                                      "jitemid=$newid");
