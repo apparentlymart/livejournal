@@ -382,6 +382,7 @@ sub clean
     1 while $newdata =~ s/<script\b//ig;
 
     $$data = $newdata;
+    return undef;
 }
 
 sub ExpandLJURL 
