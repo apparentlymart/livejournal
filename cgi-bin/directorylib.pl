@@ -426,7 +426,9 @@ sub validate_loc
     my ($req, $errors) = @_;
     return 0 unless $req->{'loc_cn'};
 
-    unless ($req->{'loc_cn'} =~ /^[A-Z]{2}$/) {
+    unless ($req->{'loc_cn'} =~ /^[A-Z]{2}$/ ||  # ISO code
+            $req->{'loc_cn'} =~ /^LJ/)           # site-local country/region code
+    {
         push @$errors, "Invalid country for location search.";
         return 0;
     }
