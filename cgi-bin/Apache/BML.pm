@@ -13,7 +13,8 @@ use vars qw($config @confdirs);   # loaded once
 use vars qw($cur_req);    # current request hash
 use vars qw($ML_GETTER);  # normally undef
 use vars qw(%HOOK);
-use vars qw(%Lang);       # iso639-2 2-letter lang code -> BML lang code
+use vars qw(%Lang);       # registered BML lang codes
+use vars qw(%ISOCode);    # iso639-2 2-letter lang code -> BML lang code
 use vars qw(%CodeBlockOpts);
 use vars qw(%FileModTime %FileBlockData %FileBlockFlags);
 
@@ -37,6 +38,7 @@ my (%SchemeRefs);               # scheme -> key -> refs to %SchemeData scalars, 
 
 tie %BML::ML, 'BML::ML';
 tie %BML::COOKIE, 'BML::Cookie';
+$Lang{'debug'} = 1;
 
 sub handler
 {
@@ -437,8 +439,10 @@ sub bml_block
     # multi-linguality stuff
     if ($type eq "_ML")
     {
-        return "[ml_getter not defined]" unless $ML_GETTER;
         my $code = $data;
+        return $code 
+            if $req->{'lang'} eq 'debug';   
+        return "[ml_getter not defined]" unless $ML_GETTER;
         $code = $req->{'r'}->parsed_uri()->path() . $code
             if $code =~ /^\./;
         return $ML_GETTER->($req->{'lang'}, $code);
@@ -970,9 +974,9 @@ sub decide_language
         } else {
             $lang_weight{$_} = 1.0;
         }
-        if ($lang_weight{$_} > $winner_weight && defined $Apache::BML::Lang{$_}) {
+        if ($lang_weight{$_} > $winner_weight && defined $Apache::BML::ISOCode{$_}) {
             $winner_weight = $lang_weight{$_};
-            $winner = $Apache::BML::Lang{$_};
+            $winner = $Apache::BML::ISOCode{$_};
         }
     }
     return $winner if $winner;
@@ -986,9 +990,15 @@ sub decide_language
 
 sub register_language
 {
+    my ($langcode) = @_;
+    $Apache::BML::Lang{$langcode} ||= 1;
+}
+
+sub register_isocode
+{
     my ($isocode, $langcode) = @_;
     next unless $isocode =~ /^\w{2,2}$/;
-    $Apache::BML::Lang{$isocode} ||= $langcode;
+    $Apache::BML::ISOCode{$isocode} ||= $langcode;
 }
 
 sub note_mod_time
@@ -1132,6 +1142,7 @@ sub set_language
 sub ml
 {
     my ($code, $vars) = @_;
+    return $code if $Apache::BML::cur_req->{'lang'} eq 'debug';
     return "[ml_getter not defined]" unless $Apache::BML::ML_GETTER;
     $code = $Apache::BML::cur_req->{'r'}->parsed_uri()->path() . $code
         if $code =~ /^\./;
@@ -1323,7 +1334,7 @@ sub TIEHASH {
 # note: duplicated code for performance in BML::ml() above!
 sub FETCH {
     my ($t, $code) = @_;
-
+    return $code if $Apache::BML::cur_req->{'lang'} eq 'debug';
     return "[ml_getter not defined]" unless $Apache::BML::ML_GETTER;
     $code = $Apache::BML::cur_req->{'r'}->parsed_uri()->path() . $code
         if $code =~ /^\./;

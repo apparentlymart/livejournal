@@ -4,7 +4,8 @@
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
 foreach (@LJ::LANGS) {
-    BML::register_language(substr($_, 0, 2), $_);
+    BML::register_isocode(substr($_, 0, 2), $_);
+    BML::register_language($_);
 }
 
 BML::register_block("DOMAIN", "S", $LJ::DOMAIN);
