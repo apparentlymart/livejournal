@@ -129,7 +129,11 @@ $maint{'synsuck'} = sub
             $it->{'description'} =~ s/\s+$//;
             
             my @now = localtime();
-            my $htmllink = "<p class='ljsyndicationlink'><a href='$it->{'link'}'>$it->{'link'}</a></p>";
+            my $htmllink;
+            if (defined $it->{'link'}) {
+                $htmllink = "<p class='ljsyndicationlink'>" .
+                    "<a href='$it->{'link'}'>$it->{'link'}</a></p>";
+            }
             my $req = {
                 'username' => $user,
                 'ver' => 1,
