@@ -4903,9 +4903,16 @@ sub make_remote
 
 sub update_user
 {
-    my ($uuserid, $ref) = @_;
-    my $uid = want_userid($uuserid);
-    return 0 unless $uid;
+    my ($arg, $ref) = @_;
+    my @uid;
+
+    if (ref $arg eq "ARRAY") {
+        @uid = @$arg;
+    } else {
+        @uid = want_userid($arg);
+    }
+    @uid = grep { $_ } map { $_ + 0 } @uid;
+    return 0 unless @uid;
 
     my @sets;
     my @bindparams;
@@ -4922,13 +4929,15 @@ sub update_user
     return 0 unless $dbh;
     {
         local $" = ",";
-        $dbh->do("UPDATE user SET @sets WHERE userid=?", undef,
-                 @bindparams, $uid);
+        my $where = @uid == 1 ? "userid=$uid[0]" : "userid IN (@uid)";
+        $dbh->do("UPDATE user SET @sets WHERE $where", undef,
+                 @bindparams);
         return 0 if $dbh->err;
     }
     if (@LJ::MEMCACHE_SERVERS) {
-        my $u = _load_user_raw($dbh, "userid", $uid);
-        LJ::memcache_set_u($u);
+        _load_user_raw($dbh, "userid", \@uid, sub {
+            LJ::memcache_set_u($_[0]);
+        });
     }
     return 1;
 }
