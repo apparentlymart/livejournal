@@ -43,15 +43,6 @@ CREATE TABLE authactions (
 ) 
 EOC
 
-register_tablecreate("ban", <<'EOC');
-CREATE TABLE ban (
-  userid int(10) unsigned NOT NULL default '0',
-  banneduserid int(10) unsigned NOT NULL default '0',
-  KEY (userid),
-  PRIMARY KEY  (userid,banneduserid)
-) 
-EOC
-
 register_tablecreate("clients", <<'EOC');
 CREATE TABLE clients (
   clientid smallint(5) unsigned NOT NULL auto_increment,
@@ -194,15 +185,6 @@ CREATE TABLE keywords (
   keyword varchar(80) binary NOT NULL default '',
   PRIMARY KEY  (kwid),
   UNIQUE KEY kwidx (keyword)
-) 
-EOC
-
-register_tablecreate("logaccess", <<'EOC');
-CREATE TABLE logaccess (
-  ownerid int(10) unsigned NOT NULL default '0',
-  posterid int(10) unsigned NOT NULL default '0',
-  KEY (posterid),
-  PRIMARY KEY  (ownerid,posterid)
 ) 
 EOC
 
