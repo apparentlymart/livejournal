@@ -65,5 +65,6 @@ general /userinfo.bml.canpost
 general /userinfo.bml.closedmembership.body
 general /userinfo.bml.label.viewlabel
 general /userinfo.bml.openmembership.body
+general /userinfo.bml.posthere
 general /userinfo.bml.rpmembership.body
 general /userinfo.bml.syn.lastnew

@@ -2279,8 +2279,6 @@ This could be because: <ol>
 
 /userinfo.bml.nonexist.name=Unknown user
 
-/userinfo.bml.posthere=[[user]] can post to [[comm]]
-
 /userinfo.bml.sendmessage.body=<a href="[[link]]">Send <b>[[user]]</b> a text message</a><br />on his/her cellphone/pager.
 
 /userinfo.bml.syn.last.never=Never
