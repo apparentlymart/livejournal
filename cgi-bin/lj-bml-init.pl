@@ -29,7 +29,7 @@ package BMLCodeBlock;
 use LJ::TextMessage;
 use LJ::TagGenerator ':html4';
 use Digest::MD5 qw(md5_hex);
-use MIME::Words qw(encode_mimewords);
+use MIME::Words;
 
 require 'imageconf.pl';
 require 'propparse.pl';
