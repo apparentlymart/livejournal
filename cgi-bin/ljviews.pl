@@ -1141,7 +1141,7 @@ sub create_view_lastn
         $lastn_event{'eventnum'} = $eventnum;
         $lastn_event{'itemid'} = $itemid;
         $lastn_event{'datetime'} = LJ::fill_var_props($vars, 'LASTN_DATE_FORMAT', \%lastn_date_format);
-        if ($subject) {
+        if ($subject ne "") {
             LJ::CleanHTML::clean_subject(\$subject);
             $lastn_event{'subject'} = LJ::fill_var_props($vars, 'LASTN_SUBJECT', { 
                 "subject" => $subject,
@@ -1577,7 +1577,7 @@ sub create_view_friends
         my %friends_event = ();
         $friends_event{'itemid'} = $itemid;
         $friends_event{'datetime'} = LJ::fill_var_props($vars, 'FRIENDS_DATE_FORMAT', \%friends_date_format);
-        if ($subject) {
+        if ($subject ne "") {
             LJ::CleanHTML::clean_subject(\$subject);
             $friends_event{'subject'} = LJ::fill_var_props($vars, 'FRIENDS_SUBJECT', { 
                 "subject" => $subject,
@@ -2170,7 +2170,7 @@ sub create_view_day
         my %day_event = ();
         $day_event{'itemid'} = $itemid;
         $day_event{'datetime'} = LJ::fill_var_props($vars, 'DAY_DATE_FORMAT', \%day_date_format);
-        if ($subject) {
+        if ($subject ne "") {
             LJ::CleanHTML::clean_subject(\$subject);
             $day_event{'subject'} = LJ::fill_var_props($vars, 'DAY_SUBJECT', { 
                 "subject" => $subject,
