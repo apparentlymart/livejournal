@@ -16,6 +16,8 @@ BODY<=
  my $dbr = $dbs->{'reader'};
  my $remote = LJ::get_remote($dbs);
 
+ &load_subjecticon();
+
  my $ret = "";
  my @errors = ();
 
@@ -206,6 +208,7 @@ BODY<=
  my $qbody = $dbh->quote($FORM{'body'});
  my $datepost = LJ::mysql_time();
  my $qdatepost = $dbh->quote($datepost);
+ my $icon = &show_image($subjecticon); 
 
  my $insertid;
  my $md5_body = md5_hex($FORM{'body'});
@@ -341,7 +344,7 @@ BODY<=
                  $html .= "\n\nTheir reply was:\n\n";
                  my $cleanbody = $FORM{'body'};
                  LJ::CleanHTML::clean_comment(\$cleanbody, $FORM{'prop_opt_preformatted'});
-                 $html .= &blockquote("<TT><B>Subject:</B> $cleansubject</TT><P>$cleanbody");
+                 $html .= &blockquote("<TT><B>Subject:</B> $cleansubject</TT> $icon<P>$cleanbody");
 
                  $html .= "You can reply at the webpage, or here...";
                  $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
@@ -426,7 +429,7 @@ BODY<=
          $html .= "\n\nTheir reply was:\n\n";
          my $clean = $FORM{'body'};
          LJ::CleanHTML::clean_comment(\$clean, $FORM{'prop_opt_preformatted'});
-         $html .= &blockquote("<TT><B>Subject: </B> $textsubject</TT><HR>$clean");
+         $html .= &blockquote("<TT><B>Subject: </B> $textsubject</TT> $icon<HR>$clean");
 
          # begin form
          $html .= "You can reply at the webpage, or here...";
