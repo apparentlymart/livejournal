@@ -92,7 +92,7 @@ sub execute
 	return 0;
     }
 
-    if ($cmd->{'def'}) { require $cmd->{'def'}; }
+    if ($cmd->{'def'}) { require "$ENV{'LJHOME'}/cgi-bin/$cmd->{'def'}"; }
 
     unless (ref $cmd->{'handler'} eq "CODE") {
 	push @$outlist, [ "error", "No handler found for command '$args->[0]'" ];
