@@ -165,6 +165,7 @@ sub get_friend_items
     my $lastmax = 0;
     my $itemsleft = $getitems;
     my $fr;
+    my $must_fill_bares;  # if we ever got a bare response from get_recent_items
 
     while ($loop && ($fr = $get_next_friend->()))
     {
@@ -172,6 +173,7 @@ sub get_friend_items
 
 	# load the next recent updating friend's recent items
 	my $friendid = $fr->[0];
+	my $bare = 0;
 
 	my @newitems = LJ::get_recent_items($dbs, {
 	    'userid' => $friendid,
@@ -181,11 +183,14 @@ sub get_friend_items
 	    'gmask_from' => $gmask_from,
 	    'friendsview' => 1,
 	    'notafter' => $lastmax,
+	    'bareflag' => \$bare,
 	});
 	
 	if (@newitems)
 	{
 	    push @items, @newitems;
+
+	    $must_fill_bares = 1 if $bare;
 
 	    $opts->{'owners'}->{$friendid} = 1;
 
@@ -215,12 +220,46 @@ sub get_friend_items
 
     # return the itemids for them if they wanted them
     if (ref $opts->{'itemids'} eq "ARRAY") {
-	foreach (@items) {
-	    push @{$opts->{'itemids'}}, $_->{'itemid'};
-	}
+	@{$opts->{'itemids'}} = map { $_->{'itemid'} } @items;
     }
     
+    fill_bares($dbs, @items) if $must_fill_bares;
+
     return @items;
+}
+
+# given a dbs and list of half-loaded items (from dbcache), load the rest of their info:
+sub fill_bares
+{
+    my $dbs = shift;
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
+    my @items = @_;
+
+    my @bare = map { $_->{'itemid'} } @items;
+    my $pass = 1;  # 1=slave, 2=master
+    while (@bare && $pass <= 2) {
+	my $dbu = $pass==1 ? $dbr : $dbh;
+	my $itemids = join(", ", @bare);
+	my $sth = $dbh->prepare("SELECT itemid, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart' FROM log WHERE itemid IN ($itemids)");
+	$sth->execute;
+	my %res;
+	while (my ($itemid, $rcount, $alldate) = $sth->fetchrow_array) {
+	    $res{$itemid} = [ $rcount, $alldate ];
+	}
+	@bare = ();
+	foreach my $h (@items) {
+	    my $itemid = $h->{'itemid'};
+	    if ($res{$itemid}) {
+		$h->{'replycount'} = $res{$itemid}->[0];
+		$h->{'alldatepart'} = $res{$itemid}->[1];
+	    } else {
+		push @bare, $itemid;  # load from master
+	    }
+	}
+	$pass++;  # use master next, or quit.
+    }
 }
 
 sub get_recent_items
@@ -288,9 +327,70 @@ sub get_recent_items
 	}
     }
 
+    # what mask can the remote user see?
+    my $mask = $gmask_from->{$userid} + 0;
+
+    # fetch crap from squid (an experiment)
+    if ($LJ::DATACACHE) {
+	my $url = "http://$LJ::DATACACHE/datacache?userid=$userid&sort=$sort_key";
+	unless ($mask || $remoteid == $userid) { $url .= "&notfriend=1"; }
+      LJ::debug("url = $url");
+
+	my $ua = new LWP::UserAgent;
+	$ua->proxy('http', $LJ::DATACACHE_PROXY)
+	    if $LJ::DATACACHE_PROXY;
+	my $req = HTTP::Request->new('GET', $url);
+	my $res = $ua->request($req);
+	
+	if ($res->is_success) {
+	  LJ::debug("snagged it");
+
+            my @lines = split(/\n/, $res->content);
+	    shift @lines;  # kill the comment/status line
+	    my $skipcount = 0;
+	    while (@lines) {
+		my $line = shift @lines;
+		my $h;
+		($h->{'itemid'},
+		 $h->{'security'},
+		 $h->{'allowmask'},
+		 $h->{'ownerid'},
+		 $h->{'posterid'},
+		 $h->{'rlogtime'}) = split(/\t/, $line);
+		last unless $h->{'itemid'};
+		
+		next if ($h->{'security'} eq "private" &&
+			 $h->{'posterid'} != $remoteid);
+		
+		next if ($h->{'security'} eq "usemask" && 
+			 ! (($h->{'allowmask'}+0) & $mask));
+		
+		if ($skipcount < $skip) {
+		    $skipcount++;
+		    next;
+		}
+		    
+		push @items, $h;
+		push @{$opts->{'itemids'}}, $h->{'itemid'};
+		last if (@items >= $itemshow);
+	    }
+
+	    if ($opts->{'friendview'}) {
+		# flag for caller to load time/replycounts
+		my $r = $opts->{'bareflag'};
+		if (ref $r eq "SCALAR") { $$r = 1; }
+	    } else {
+		fill_bares($dbs, @items);
+	    }
+	
+	    return @items;
+	} else {
+	    LJ::debug("failed: " . $res->error_as_HTML);
+	}
+    }
+
     # decide what level of security the remote user can see
     my $secwhere = "";
-    my $mask = $gmask_from->{$userid} + 0;
     if ($userid == $remoteid || $opts->{'viewall'}) {
 	# no extra where restrictions... user can see all their own stuff
 	# alternatively, if 'viewall' opt flag is set, security is off.
