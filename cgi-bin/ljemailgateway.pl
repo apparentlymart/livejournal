@@ -14,16 +14,18 @@ BEGIN {
 require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 require "$ENV{LJHOME}/cgi-bin/ljprotocol.pl";
 require "$ENV{LJHOME}/cgi-bin/fbupload.pl";
-use MIME::Words ();
+use HTML::Entities;
 use IO::Handle;
 use Image::Size;
+use LWP::UserAgent;
+use MIME::Words ();
+use XML::Simple;
 
 # $rv - scalar ref from mailgated.
 # set to 1 to dequeue, 0 to leave for further processing.
 sub process {
     my ($entity, $to, $rv) = @_;
     my $head = $entity->head;
-    my ($subject, $body);
     $head->unfold;
 
     $$rv = 1;  # default dequeue
@@ -50,6 +52,8 @@ sub process {
         }
     }
     $err_addr ||= $u->{email};
+
+    my ($body, $subject);
 
     my $err = sub {
         my ($msg, $opt) = @_;
@@ -82,13 +86,101 @@ sub process {
 
     # Get various email parts.
     my $content_type = $head->get('Content-type:');
-    my $tent = get_entity($entity);
-    $tent = LJ::Emailpost::get_entity($entity, { type => 'html' }) unless $tent;
-    return $err->("Unable to find any text content in your mail", { sendmail => 1 }) unless $tent;
     $subject = $head->get('Subject:');
-    $body = $tent->bodyhandle->as_string;
-    $body =~ s/^\s+//;
-    $body =~ s/\s+$//;
+    my $return_path = ${(Mail::Address->parse( $head->get('Return-Path') ))[0] || []}[1];
+    my $tent;
+
+    # Is this message from a sprint PCS phone?  Sprint doesn't support
+    # MMS (yet) - when it does, we should just be able to rip this block
+    # of code completely out.
+    #
+    # Sprint has two methods of non-mms mail sending.
+    #   -  Normal text messaging just sends a text/plain piece.
+    #   -  Sprint "PictureMail".
+    # PictureMail sends a text/html piece, that contains XML with
+    # the location of the image on their servers - and a blank text/plain.  (?)
+    # We assume the existence of a text/html means this is a PictureMail message,
+    # as there is no other method (headers or otherwise) to tell the difference,
+    # and Sprint tells me that their text messaging never contains text/html.
+    # Currently, PictureMail can only contain one image per message
+    # and the image is always a jpeg. (2/2/05)
+    if ($return_path && $return_path =~ /messaging\.sprintpcs/) {
+        $tent = LJ::Emailpost::get_entity( $entity, { type => 'html' } );
+        $subject = 'Sprint PictureMail Post'; 
+
+        return $err->(
+            "Unable to find Sprint HTML content in PictureMail message.",
+            { sendmail => 1 }
+          ) unless $tent;
+
+        # ok, parse the XML.
+        my $html = $tent->bodyhandle->as_string();
+        my $xml_string = $1 if $html =~ /<!-- lsPictureMail-Share-\w+-comment\n(.+)\n-->/is;
+        return $err->(
+            "Unable to find XML content in PictureMail message.",
+            { sendmail => 1 }
+          ) unless $tent;
+
+        HTML::Entities::decode_entities( $xml_string );
+        my $xml = eval { XML::Simple::XMLin( $xml_string ); };
+        return $err->(
+            "Unable to parse XML content in PictureMail message.",
+            { sendmail => 1 }
+          ) if ( ! $xml || $@ );
+
+        return $err->(
+            "Sorry, we currently only support image media.",
+            { sendmail => 1 }
+          ) unless $xml->{messageContents}->{type} eq 'PICTURE';
+
+        $body = $xml->{messageContents}->{messageText} . "\n";
+        my $url =
+          HTML::Entities::decode_entities(
+            $xml->{messageContents}->{mediaItems}->{mediaItem}->{url} );
+
+        # we've got the url to the full sized image.
+        # fetch!
+        my ($tmpdir, $tempfile);
+        my $tmpdir = File::Temp::tempdir( "ljmailgate_" . 'X' x 20, DIR=> $main::workdir );
+        ( undef, $tempfile ) = File::Temp::tempfile(
+            'sprintpcs_XXXXX',
+            SUFFIX => '.jpg',
+            OPEN   => 0,
+            DIR    => $tmpdir
+        );
+        my $ua = LWP::UserAgent->new(
+            timeout => 20,
+            agent   => 'LiveJournal_EmailGateway/0.1'
+        );
+        my $ua_rv = $ua->get( $url, ':content_file' => $tempfile );
+
+        if ($ua_rv->is_success) {
+            # attach the image to the main entity, so upload_images()
+            # can work without modifications.
+            $entity->attach(
+                Path => $tempfile,
+                Type => 'image/jpeg'
+            );
+        }
+        else {
+            return $err->(
+                "Unable to fetch SprintPCS image. (" . $ua_rv->status_line . ")",
+                { sendmail => 1 });
+        }
+
+    } 
+
+    # All other email (including MMS)
+    # Use text/plain piece first - if it doesn't exist, then fallback to text/html
+    else {
+        $tent = get_entity( $entity );
+        $tent = LJ::Emailpost::get_entity( $entity, { type => 'html' } ) unless $tent;
+        return $err->("Unable to find any text content in your mail", { sendmail => 1 }) unless $tent;
+
+        $body = $tent->bodyhandle->as_string;
+        $body =~ s/^\s+//;
+        $body =~ s/\s+$//;
+    }
 
     # Snag charset and do utf-8 conversion
     my ($charset, $format);
@@ -240,12 +332,16 @@ sub process {
     $lj_headers{'imglayout'} ||= ($u->{'emailpost_imglayout'} || 'vertical');
 
     # upload picture attachments to fotobilder.
-    my $fb_upload_errstr;
+    my ($fb_upload, $fb_upload_errstr);
     # undef return value? retry posting for later.
-    my $fb_upload = upload_images($entity, $u, \$fb_upload_errstr, 
-                       { imgsec  => $lj_headers{'imgsecurity'},
-                         galname => $lj_headers{'gallery'} || $u->{'emailpost_gallery'}
-                       }) || return $err->($fb_upload_errstr, { retry => 1 });
+    $fb_upload = upload_images(
+        $entity, $u,
+        \$fb_upload_errstr,
+        {
+            imgsec  => $lj_headers{'imgsecurity'},
+            galname => $lj_headers{'gallery'} || $u->{'emailpost_gallery'}
+        }
+      ) || return $err->( $fb_upload_errstr, { retry => 1 } );
 
     # if we found and successfully uploaded some images...
     if (ref $fb_upload eq 'HASH') {
