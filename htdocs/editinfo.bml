@@ -505,7 +505,7 @@ _code?>
         $ret .= "</table>\n";
 
         ### unicode options
-        if ($LJ::UNICODE && $u->{journaltype} eq 'P') {
+        if ($LJ::UNICODE) {
             my (%old_encnames, %mail_encnames, %encodings);
             LJ::load_codes({ "encoding" => \%encodings } );
             LJ::load_codes({ "encname" => \%old_encnames } );
@@ -523,10 +523,14 @@ _code?>
             $ret .= "<td>" . LJ::html_select({ 'name' => 'oldenc', 'selected' => $u->{'oldenc'}},
                                              map { $_, $old_encnames{$_} } sort keys %old_encnames ) . "</td></tr>\n";
             $ret .= "<tr><td colspan='2'>" . $ML{'.autotranslate.about'} . "</td></tr>";
-            $ret .= "<tr><td><b>$ML{'.translatemailto.header'}</b></td>";
-            $ret .= "<td>" . LJ::html_select({ 'name' => 'mailencoding', 'selected' => $u->{'mailencoding'}},
-                                             map { $_, $mail_encnames{$_} } sort keys %mail_encnames ) . "</td></tr>\n";
-            $ret .= "<tr><td colspan='2'>$ML{'.translatemailto.about'}</td></tr>";
+
+            if ($u->{journaltype} eq 'P') {
+                $ret .= "<tr><td><b>$ML{'.translatemailto.header'}</b></td>";
+                $ret .= "<td>" . LJ::html_select({ 'name' => 'mailencoding', 'selected' => $u->{'mailencoding'}},
+                                                 map { $_, $mail_encnames{$_} } sort keys %mail_encnames ) . "</td></tr>\n";
+                $ret .= "<tr><td colspan='2'>$ML{'.translatemailto.about'}</td></tr>";
+            }
+
             $ret .= "</table>\n";
         }
         
