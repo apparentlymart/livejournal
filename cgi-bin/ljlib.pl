@@ -24,14 +24,13 @@ use Unicode::MapUTF8 ();
 use LJ::S2;
 use Time::Local ();
 
-require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
+do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
+
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
-
-$LJ::USERPIC_ROOT ||= "$LJ::SITEROOT/userpic";
 
 $LJ::DBIRole = new DBI::Role {
     'sources' => \%LJ::DBINFO,
@@ -2761,10 +2760,11 @@ sub clear_caches
 # </LJFUNC>
 sub handle_caches
 {
-    return 1 unless ($LJ::CLEAR_CACHES);
+    return 1 unless $LJ::CLEAR_CACHES;
     $LJ::CLEAR_CACHES = 0;
 
     do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+    do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
 
     $LJ::DBIRole->flush_cache();
 

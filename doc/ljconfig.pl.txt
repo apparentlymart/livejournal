@@ -247,16 +247,6 @@
         },
         );
     }
-
-    # keep this next line.  it lets you upgrade LiveJournal without
-    # having to change your config file.  if there is a new required
-    # configuration option, the following line will set it:
-    require "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
-    
-    # if there is a local configuration file, read it.
-    if (-e "$HOME/cgi-bin/ljconfig-local.pl") {
-        do "$HOME/cgi-bin/ljconfig-local.pl";
-    }
     
 }
 

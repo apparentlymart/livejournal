@@ -24,7 +24,8 @@
     $NODB_MSG ||= "Database temporarily unavailable.  Try again shortly.";
 
     $SITEROOT ||= "http://www.$DOMAIN:8011";
-    $IMGPREFIX ||= "$SITEROOT/img";    
+    $IMGPREFIX ||= "$SITEROOT/img";
+    $USERPIC_ROOT ||= "$LJ::SITEROOT/userpic";
 
     # path to sendmail and any necessary options
     $SENDMAIL ||= "/usr/sbin/sendmail -t";
