@@ -82,6 +82,13 @@ $img{'placeholder'} = {
     'alt' => 'Image',
 };
 
+$img{'xml'} = {
+    'src' => '/xml.gif',
+    'width' => 36,
+    'height' => 14,
+    'alt' => 'XML Source',
+};
+
 # load the site-local version, if it's around.
 if (-e "$LJ::HOME/cgi-bin/imageconf-local.pl") {
     require "$LJ::HOME/cgi-bin/imageconf-local.pl";

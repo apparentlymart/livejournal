@@ -25,16 +25,9 @@ body<=
                             "WHERE fa.userid=? AND fa.friendid=s.userid AND us.userid=s.userid ".
                             "AND fb.friendid=s.userid GROUP BY 1, 2, 3");
     $sth->execute($u->{'userid'});
-    my $used = 0;
     my %count;
     my %syn;
     while (my ($suserid, $user, $url, $count) = $sth->fetchrow_array) {
-        if ($POST{'action:remove'} && $POST{"defriend_$user"}) {
-            # TAG:FR:bml_syn:remove_feed
-            LJ::friends_do($u, "DELETE FROM friends WHERE userid=? AND friendid=?",
-                           $u->{'userid'}, $suserid);
-            next;
-        }
         $count{$user} = $count;
         $syn{$user} = $url;
     }
@@ -163,11 +156,17 @@ body<=
 
     # populate @pop and add users they've chosen to add
     my @pop;
+    my %urls;
+    my %names;
     for (0 .. 99) {
         next if not defined $popsyn->[$_];
         my ($user, $name, $suserid, $url, $count) = @{ $popsyn->[$_] };
+        $names{$user} = $name;
 
         my $suser = LJ::load_userid($suserid);
+        LJ::load_user_props($suser, 'url');
+        $urls{$user} = $suser->{url};
+        
         # skip suspended/deleted accounts, already watched feeds
         next if $friends->{$suserid} || $suser->{'statusvis'} ne "V";
 
@@ -188,35 +187,22 @@ body<=
     $ret .= "<form method='post' action='./'>"; 
     $ret .= LJ::html_hidden("userid", $u->{'userid'});
 
-    if ($used) {
-        $ret .= "<p><table cellpadding='3' style='margin-bottom: 10px;'>";
-        $ret .= "<tr><td></td><td><b>$ML{'.table.account'}</b></td><td><b>$ML{'.table.feed'}</b></td>";
-        $ret .= "<td align='right'><b>$ML{'.table.watchers'}</b></td></tr>\n";
-        foreach my $user (sort { $count{$a} <=> $count{$b} } keys %count) {
-            $ret .= "<tr>";
-            $ret .= "<td><input type='checkbox' value='1' name='defriend_$user' /></td>";
-            $ret .= "<td>" . LJ::ljuser($user, { 'type' => 'Y' }) . "</td>";
-            $ret .= "<td><a href=\"$syn{$user}\">$syn{$user}</a></td>";
-            $ret .= "<td align='right'>$count{$user}</td>";
-            $ret .= "</tr>";
-        }
-        $ret .= "<tr><td align='left' colspan='4'>";
-        $ret .= "<input type='submit' name='action:remove' value='" . LJ::ehtml($ML{'.remove'}) . "' />";
-        $ret .= "</td></tr>";
-        $ret .= "</table>";
-    }
-
     if (@pop) {
         $ret .= "<?h1 $ML{'.add.pop.title'} h1?><?p $ML{'.add.pop.text'} p?>";
-        $ret .= "<p><table cellpadding='3' style='margin-bottom: 10px;'>";
-        $ret .= "<tr><td></td><td><b>$ML{'.table.account'}</b></td><td><b>$ML{'.table.feed'}</b></td>";
-        $ret .= "<td><b>$ML{'.table.watchers'}</b></td></tr>";
+        $ret .= "<p><table cellpadding='3' style='margin-bottom: 10px; width: 80%;'>";
+        $ret .= "<tr><td><b>$ML{'.table.account'}</b></td><td></td><td><b>$ML{'.table.feed'}</b></td>";
+        $ret .= "<td align='right'><b>$ML{'.table.watchers'}</b></td></tr>";
         foreach (@pop) {
             my ($user, $url, $count) = @$_;
             $ret .= "<tr>";
-            $ret .= "<td><input type='checkbox' value='1' name='add_$user' /></td>";
-            $ret .= "<td>" . LJ::ljuser($user, { 'type' => 'Y' }) . "</td>";
-            $ret .= "<td><a href=\"$url\">$url</a></td>";
+            $ret .= "<td><input type='checkbox' value='1' name='add_$user' /> ";
+            $ret .= LJ::ljuser($user, { 'type' => 'Y' }) . "</td>";
+            $ret .= "<td><a href='$url'>" . LJ::img('xml', '', { border => 0 }) . "</a></td><td>";
+            if ($urls{$user}) {
+                $ret .= "$names{$user}<br /><a href='$urls{$user}'>$urls{$user}</a></td>";
+            } else {
+                $ret .= "$names{$user}</td>";
+            }
             $ret .= "<td align='right'>$count</td>";
             $ret .= "</tr>";
         }
