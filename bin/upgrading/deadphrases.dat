@@ -167,3 +167,5 @@ general /syn/index.bml.notused
 general /userinfo.bml.syn.cost
 
 general bml.needlogin.body
+
+general /userinfo.bml.label.frsyndication

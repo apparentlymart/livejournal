@@ -682,21 +682,24 @@ if ($u->{'journaltitle'}) {
              $body .= "<table>";
              if ($pfriends) {
                  my $text = $ML{'.label.frpeople'};
-                 $body .= "<tr><th style='text-align: right' nowrap valign='top'>" .
-                          "<img src='$LJ::IMGPREFIX/userinfo.gif' title='$text' alt='$text' />" .
-                          "<a href='$LJ::SITEROOT/$dir/$user/friends?show=PS'><b>$pcount</b></a>:</th><td>$pfriends</td>";
+                 $body .= "<tr><td style='text-align: center;font-weight:bold' nowrap valign='top'>" .
+                          "<img src='$LJ::IMGPREFIX/userinfo.gif' title='$text' alt='$text' border='0' align='top' /></td>" .
+                          "<td style='text-align: left;font-weight:bold' nowrap valign='top'>$pcount:</td>".
+                          "<td>[<a style='font-weight:bold' href='$LJ::SITEROOT/$dir/$user/friends?show=PS'>$text</a>]<br />$pfriends</td>";
              }
              if ($cfriends) {
                  my $text = $ML{'.label.frcommunity'};
-                 $body .= "<tr><th style='text-align: right' nowrap valign='top'>" .
-                          "<img src='$LJ::IMGPREFIX/community.gif' title='$text' alt='$text' />" .
-                          "<a href='$LJ::SITEROOT/$dir/$user/friends?show=CN'><b>$ccount</b></a>:</th><td>$cfriends</td>";
+                 $body .= "<tr><td style='text-align: center;font-weight:bold' nowrap valign='top'>" .
+                          "<img src='$LJ::IMGPREFIX/community.gif' title='$text' alt='$text' border='0' align='top' /></td>" .
+                          "<td style='text-align: left;font-weight:bold' nowrap valign='top'>$ccount:</td>" .
+                          "<td>[<a style='font-weight:bold' href='$LJ::SITEROOT/$dir/$user/friends?show=CN'>$text</a>]<br />$cfriends</td>";
              }
              if ($yfriends) {
-                 my $text = $ML{'.label.frsyndication'};
-                 $body .= "<tr><th style='text-align: right' nowrap valign='top'>" .
-                          "<img src='$LJ::IMGPREFIX/syndicated.gif' title='$text' alt='$text' />" .
-                          "<a href='$LJ::SITEROOT/$dir/$user/friends?show=Y'><b>$ycount</b></a>:</th><td>$yfriends<br></td>";
+                 my $text = $ML{'.label.frsyndication2'};
+                 $body .= "<tr><td style='text-align: center;font-weight:bold' nowrap valign='top'>" .
+                          "<img src='$LJ::IMGPREFIX/syndicated.gif' title='$text' alt='$text' border='0' align='top' /></td>" .
+                          "<td style='text-align: left;font-weight:bold' nowrap valign='top'>$ycount:</td>" .
+                          "<td>[<a style='font-weight:bold' href='$LJ::SITEROOT/$dir/$user/friends?show=Y'>$text</a>]<br />$yfriends<br></td>";
              }
              $body .= "</tr></table>";
              $body .= "<b>" . BML::ml('.label.totalfriends', { numfriends => $friends{'count'} }) . "</b>";
