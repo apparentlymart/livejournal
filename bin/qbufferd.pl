@@ -187,7 +187,7 @@ while (LJ::start_request())
         next unless $db;
 
         my @check_jobs = ($my_job);
-        if ($my_job eq "_others_") { @check_jobs = map { ! $isolated{$_} } @all_jobs; }
+        if ($my_job eq "_others_") { @check_jobs = grep { ! $isolated{$_} } @all_jobs; }
 
         foreach my $cmd (@check_jobs) {
             my $have_jobs = $db->selectrow_array("SELECT cbid FROM cmdbuffer WHERE cmd=?",

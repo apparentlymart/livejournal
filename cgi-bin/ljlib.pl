@@ -5245,7 +5245,10 @@ sub delete_item2
     my ($dbcm, $jid, $jitemid, $quick, $anum) = @_;
     $jid += 0; $jitemid += 0;
 
-    $dbcm->do("DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid");
+    my $and;
+    if (defined $anum) { $and = "AND anum=" . ($anum+0); }
+    my $dc = $dbcm->do("DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
+    return 1 if $dc < 1;  # already deleted?
 
     return LJ::cmd_buffer_add($dbcm, $jid, "delitem", {
         'itemid' => $jitemid,
