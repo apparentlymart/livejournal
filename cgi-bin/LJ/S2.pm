@@ -12,6 +12,7 @@ use HTMLCleaner;
 
 use LJ::S2::RecentPage;
 use LJ::S2::CalendarPage;
+use LJ::S2::DayPage;
 
 package LJ::S2;
 
@@ -45,6 +46,9 @@ sub make_journal
     } elsif ($view eq "calendar") {
         $entry = "CalendarPage::print()";
         $page = CalendarPage($u, $remote, $opts);
+    } elsif ($view eq "day") {
+        $entry = "DayPage::print()";
+        $page = DayPage($u, $remote, $opts);
     }
 
     my $run_opts = {

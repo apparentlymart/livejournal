@@ -327,13 +327,13 @@ class FriendsPage extends RecentPage
 class DayPage extends Page 
 "View entries by specifc day"
 {
-    var Date prevdate "Previous day";
-    var Date nextdate "Next day";
-    var Link prevlink "Link to previous day";
-    var Link nextlink "Link to next day";
+    var Date prev_date "Previous day";
+    var Date next_date "Next day";
+    var string prev_url "URL to previous day";
+    var string next_url "URL to next day";
     var bool has_entries "True if there are entries on the specified day";
     var Entry[] entries "Array of entries available to be seen by the viewer of the page";
-    var Date viewdate "Date of the current day";
+    var Date date "Date of the current day";
 }
 
 ### Calendar page classes
@@ -945,7 +945,7 @@ function FriendsPage::view_title() : string {
     }
 }
 function DayPage::view_title : string {
-    return $.viewdate->date_format("long");
+    return $.date->date_format("long");
 }
 function CalendarPage::view_title() : string {
     return string($.year);
@@ -1183,7 +1183,7 @@ function CalendarMonthPageDay::print_subjectlist() {
 function DayPage::print_body() {
     if ($.has_entries) {
         "<div class=\"day\" id=\"dayyymmmmmdddd\">\n<h2>";
-        print $.viewdate->date_format("long");
+        print $.date->date_format("long");
         "</h2>\n";
 
         foreach var Entry e ($.entries) {
@@ -1196,8 +1196,8 @@ function DayPage::print_body() {
     }
 
     "<div class=\"skiplinks\">\n";
-    "<a href=\""+ehtml($.prevlink.url)+"\">"+ehtml($*text_day_prev)+"</a> | ";
-    "<a href=\""+ehtml($.prevlink.url)+"\">"+ehtml($*text_day_next)+"</a>\n</div>";
+    "<a href=\""+ehtml($.prev_url)+"\">"+ehtml($*text_day_prev)+"</a> | ";
+    "<a href=\""+ehtml($.prev_url)+"\">"+ehtml($*text_day_next)+"</a>\n</div>";
 
 }
 

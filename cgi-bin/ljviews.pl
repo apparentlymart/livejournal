@@ -1422,11 +1422,6 @@ sub create_view_day
     my $initpagedates = 0;
     my $quser = $dbr->quote($user);
 
-    LJ::load_remote($dbs, $remote);
-    my $qremoteid = 0;
-    $qremoteid = ($remote->{'userid'}+0) 
-        if ($remote && $remote->{'journaltype'} eq "P");
-
     my %FORM = ();
     LJ::decode_url_string($opts->{'args'}, \%FORM);
 
