@@ -4774,8 +4774,10 @@ sub eall
     $a =~ s/>/&gt;/g;
 
     ### and escape BML
-    $a =~ s/\(=/\(&\#0061;/g;
-    $a =~ s/=\)/&\#0061;\)/g;
+    $a =~ s/<\?/&lt;?/g;
+    $a =~ s/\?>/?&gt;/g;
+    $a =~ s/\(=/\(&\#0061;/g;  # old syntax
+    $a =~ s/=\)/&\#0061;\)/g;  # old syntax
     return $a;
 }
 

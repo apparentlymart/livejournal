@@ -108,7 +108,8 @@ body<=
  my $event = $item->{'event'};
 
  LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
- $event = BML::ebml(LJ::CleanHTML::clean_event(\$event, $logprops{$itemid}->{'opt_preformatted'}));
+ $event = LJ::CleanHTML::clean_event(\$event, $logprops{$itemid}->{'opt_preformatted'});
+ BML::ebml(\$event);
 
  $ret .= "<p>";
  $ret .= "<table><tr valign='middle'>";
@@ -472,7 +473,7 @@ body<=
             $$ret .= "<td>$ML{'.replysuspended'}</td></tr></table>\n";
         } else {
             if ($userpost) {
-                $user = "<?ljuser $userpost ljuser?>";
+                $user = LJ::ljuser($userpost);
             }
             my $icon = LJ::Talk::show_image($pics, $post->{'subjecticon'});
 
@@ -514,7 +515,7 @@ body<=
                     }
                 }
 
-                my $cleansubject = LJ::ehtml($post->{'subject'});
+                my $cleansubject = LJ::eall($post->{'subject'});
 
                 $$ret .= "<font size='+1' face='Arial,Helvetica'><b>$cleansubject</b></font> $icon";
                 $$ret .= "<br />$user\n";
@@ -542,6 +543,7 @@ body<=
                 ## escape BML block codes.  so <?tag ... tag?> turns into (&#0061; ... tag?>
                 $post->{'body'} =~ s/\(=/\(&\#0061\;/g;
                 LJ::CleanHTML::clean_comment(\$post->{'body'}, $post->{'opt_preformatted'});
+                BML::ebml(\$post->{'body'});
                 $$ret .= $post->{'body'};
 
                 $$ret .= "<p><font size='-2'>";

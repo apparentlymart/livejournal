@@ -262,6 +262,7 @@ body<=
  if ($parpost->{'subject'}) {
      my $cleansubject = $parpost->{'subject'};
      LJ::CleanHTML::clean_subject(\$cleansubject);
+     BML::ebml(\$cleansubject);
      $ret .= "<FONT FACE=\"Arial,Helvetica\" size=+1><I><B>$cleansubject</B></I></FONT><BR />\n";
  }
  
