@@ -151,14 +151,14 @@ $r->notes("codepath" => "bml.view.index");
                          "FROM log2 l, logtext2 ls ".
                          "WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} ".
                          "AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid ".
-                         "$secwhere");
+                         "$secwhere LIMIT 2000");
  } else {
      $sth = $db->prepare("SELECT l.jitemid, l.anum, l.day, ls.subject, l.eventtime, u.user, ".
                          "l.replycount, l.security ".
                          "FROM log2 l, logtext2 ls, ${LJ::DB_USERIDMAP}useridmap u ".
                          "WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} ".
                          "AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid ".
-                         "AND l.posterid=u.userid $secwhere");
+                         "AND l.posterid=u.userid $secwhere LIMIT 2000");
  }
 
  # sort on eventtime
