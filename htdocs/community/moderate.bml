@@ -310,15 +310,7 @@ body<=
         $ret .= "<p>";
         $ret .= "<table><tr valign='middle'>";
         
-        my $picid;
-        if ($props->{'picture_keyword'}) {
-            my $dbr = LJ::get_db_reader();
-            my $qkw = $dbr->quote($props->{'picture_keyword'});
-            $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
-                                           "WHERE m.userid=$up->{'userid'} ".
-                                           "AND m.kwid=k.kwid AND k.keyword=$qkw");
-        }
-        $picid ||= $up->{'defaultpicid'};
+        my $picid = LJ::get_picid_from_keyword($up, $props->{'picture_keyword'});
         
         my %userpics;
         if ($picid) {

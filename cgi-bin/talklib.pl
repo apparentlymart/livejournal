@@ -395,7 +395,6 @@ sub load_comments
 {
     my ($u, $remote, $nodetype, $nodeid, $opts) = @_;
 
-    my $dbr = LJ::get_db_reader();
     my $n = $u->{'clusterid'};
     my $db = LJ::get_dbh("cluster${n}lite", "cluster${n}slave", "cluster$n");
     my $dbcr = LJ::get_cluster_reader($u);
@@ -578,7 +577,6 @@ sub load_comments
 
         # optionally load userpics
         if (ref($opts->{'userpicref'}) eq "HASH") {
-            my %user_kw2id; # userid -> kw -> picid
             my %load_pic;
             foreach my $talkid (@posts_to_load) {
                 my $post = $posts{$talkid};
@@ -586,20 +584,13 @@ sub load_comments
                 if ($post->{'props'} && $post->{'props'}->{'picture_keyword'}) {
                     $kw = $post->{'props'}->{'picture_keyword'};
                 }
-                my $id;
-                if ($kw) {
-                    $id = $user_kw2id{$post->{'posterid'}}->{$kw} ||
-                        $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
-                                              "WHERE k.kwid=m.kwid AND m.userid=? AND k.keyword=?",
-                                              undef, $post->{'posterid'}, $kw);
-                }
                 my $pu = $opts->{'userref'}->{$post->{'posterid'}};
-                $id ||= $pu->{'defaultpicid'} if $pu;
+                my $id = LJ::get_picid_from_keyword($pu, $kw);
                 $post->{'picid'} = $id;
                 $load_pic{$id} = 1 if $id;
             }
             
-            LJ::load_userpics($dbr, $opts->{'userpicref'}, [ keys %load_pic ]);
+            LJ::load_userpics($opts->{'userpicref'}, [ keys %load_pic ]);
         }
     }
     

@@ -2798,7 +2798,6 @@ sub handle_caches
     %LJ::CACHE_MOOD_THEME = ();
     %LJ::CACHE_USERID = ();
     %LJ::CACHE_USERNAME = ();
-    %LJ::CACHE_USERPIC_SIZE = ();
     %LJ::CACHE_CODES = ();
     %LJ::CACHE_USERPROP = ();  # {$prop}->{ 'upropid' => ... , 'indexed' => 0|1 };
     %LJ::CACHE_ENCODINGS = ();
@@ -2825,6 +2824,7 @@ sub start_request
     %LJ::REQ_CACHE_REL = ();  # relations from LJ::check_rel()
     %LJ::REQ_CACHE_DBS = ();  # clusterid -> LJ::DBSet
     %LJ::CACHE_USERPIC_SIZE = ();
+    %LJ::CACHE_USERPIC_INFO = ();  # uid -> { ... }
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
@@ -3139,6 +3139,41 @@ sub activate_userpics
     return;
 }
 
+sub get_userpic_info
+{
+    my $uuid = shift;
+    return undef unless $uuid;
+    my $userid = want_userid($uuid);
+    return $LJ::CACHE_USERPIC_INFO{$userid} if $LJ::CACHE_USERPIC_INFO{$userid};
+    
+    # TODO: insert memcache stuff
+
+    my $info = {
+        'pic' => {},
+        'kw' => {},
+    };
+
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare("SELECT picid, width, height, state, userid ".
+                            "FROM userpic WHERE userid=?");
+    $sth->execute($userid);
+    while ($_ = $sth->fetchrow_hashref) {
+        $info->{'pic'}->{$_->{'picid'}} = $_;
+        $LJ::CACHE_USERPIC_SIZE{$_->{'picid'}} = [ $_->{'width'}, $_->{'height'}, $_->{'userid'} ];
+    }
+
+    $sth = $dbr->prepare("SELECT k.keyword, m.picid FROM userpicmap m, keywords k ".
+                         "WHERE m.userid=? AND m.kwid=k.kwid");
+    $sth->execute($userid);
+    while (my ($kw, $id) = $sth->fetchrow_array) {
+        next unless $info->{'pic'}->{$id};
+        next if $kw =~ /[\n\r\0]/;  # used to be a bug that allowed these to get in.
+        $info->{'kw'}->{$kw} = $info->{'pic'}->{$id};
+    }
+    
+    return $LJ::CACHE_USERPIC_INFO{$userid} = $info;
+}
+
 # <LJFUNC>
 # name: LJ::get_pic_from_keyword
 # des: Given a userid and keyword, returns the pic row hashref
@@ -3148,20 +3183,22 @@ sub activate_userpics
 # </LJFUNC>
 sub get_pic_from_keyword
 {
-    my $u = shift;
-    my $userid = want_userid($u);
-    my $keyword = shift;
-    return undef unless $userid && $keyword;
-
-    my $dbr = LJ::get_db_reader();
-    return undef unless $dbr;
-
-    return $dbr->selectrow_hashref("SELECT p.* FROM userpic p, userpicmap m, keywords k " .
-                                   "WHERE k.kwid=m.kwid AND p.picid=m.picid AND m.userid=? AND k.keyword=?",
-                                   undef, $userid, $keyword);
-
+    my ($u, $kw) = @_;
+    my $info = LJ::get_userpic_info($u);
+    return undef unless $info;
+    return $info->{'kw'}{$kw};
 }
 
+sub get_picid_from_keyword
+{
+    my ($u, $kw, $default) = @_;
+    $default ||= (ref $u ? $u->{'defaultpicid'} : 0);
+    return $default unless $kw;
+    my $info = LJ::get_userpic_info($u);
+    return $default unless $info;
+    my $pr = $info->{'kw'}{$kw};
+    return $pr ? $pr->{'picid'} : $default;
+}
 
 # <LJFUNC>
 # name: LJ::send_mail

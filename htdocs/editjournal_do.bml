@@ -275,18 +275,15 @@ body<=
 
         # picture to use
         {
-            # this is the only place we need a dbr
-            my $dbr = LJ::get_db_reader();
-            my $pics = $dbr->selectcol_arrayref("SELECT k.keyword FROM userpicmap m, keywords k " .
-                                                "WHERE m.userid=? AND m.kwid=k.kwid",
-                                                undef, $u->{'userid'});
-
-            if (@$pics) {
+            my $pi = LJ::get_userpic_info($u);
+            my @pics = sort keys %{$pi->{'kw'}};
+               
+            if (@pics) {
                 $ret .= "<p><b>".BML::ml(".picture", { 'url' => "$LJ::SITEROOT/allpics.bml?user=$u->{'user'}" }) ."</b> ";
                 $ret .= LJ::html_select({ 'name' => 'prop_picture_keyword',
                                           'selected' => $props{'picture_keyword'} },
                                           '', $ML{'.default'},
-                                          map { $_, $_ } sort { lc($a) cmp lc($b) } @$pics
+                                          map { $_, $_ } @pics
                                        );
                 $ret .= LJ::help_icon("userpics", " ") . "</p>\n";
             }

@@ -516,7 +516,7 @@ sub common_event_validation
         my $pic = LJ::get_pic_from_keyword($flags->{'u'}, $pickwd);
 
         # need to make sure they aren't trying to post with an inactive keyword, but also
-        # we don't want to allow them to post with a pic that has no keyword at all to prevent
+        # we don't want to allow them to post with a keyword that has no pic at all to prevent
         # them from deleting the keyword, posting, then adding it back with editpics.bml
         delete $req->{'props'}->{'picture_keyword'} if ! $pic || $pic->{'state'} eq 'I';
     }
@@ -2042,21 +2042,15 @@ sub list_pickws
 {
     my $u = shift;
 
-    my $dbr = LJ::get_db_reader();
+    my $pi = LJ::get_userpic_info($u);
     my @res;
 
-    my $sth = $dbr->prepare("SELECT k.keyword, m.picid, p.state " .
-                            "FROM userpicmap m, keywords k, userpic p ".
-                            "WHERE m.userid=? AND m.kwid=k.kwid AND m.picid=p.picid");
-    $sth->execute($u->{'userid'});
-    while (my ($kw, $id, $state) = $sth->fetchrow_array) {
-        next if $state eq 'I';
-        $kw =~ s/[\n\r\0]//g;  # used to be a bug that allowed these characters to get in.
-        push @res, [ $kw, $id ];
+    # FIXME: should be a utf-8 sort
+    foreach my $kw (sort keys %{$pi->{'kw'}}) {
+        my $pic = $pi->{'kw'}{$kw};
+        next if $pic->{'state'} eq "I";
+        push @res, [ $kw, $pic->{'picid'} ];
     }
-
-    # FIXME: should be a utf-8 sort:
-    @res = sort { $a->[0] cmp $b->[0] } @res;
 
     return \@res;
 }

@@ -1073,34 +1073,18 @@ sub Image_std
 sub Image_userpic
 {
     my ($u, $picid, $kw) = @_;
-    unless ($u->{'_userpics'}) {
-        my $dbr = LJ::get_db_reader();
-        my $sth = $dbr->prepare("SELECT picid, width, height FROM userpic ".
-                                "WHERE userid=?");
-        $sth->execute($u->{'userid'});
-        while (my ($id, $w, $h) = $sth->fetchrow_array) {
-            $u->{'_userpics'}->{$id} = [ $w, $h ];
-        }
-        $sth = $dbr->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k ".
-                             "WHERE m.userid=? AND m.kwid=k.kwid");
-        $sth->execute($u->{'userid'});
-        while (my ($id, $kw) = $sth->fetchrow_array) {
-            $u->{'_userpics'}->{'kw'}->{$kw} = $id;
-        }
-    }
 
-    unless ($picid) {
-        $picid = $kw ? $u->{'_userpics'}->{'kw'}->{$kw} : $u->{'defaultpicid'};
-        $picid ||= $u->{'defaultpicid'};
-    }
+    $picid ||= LJ::get_picid_from_keyword($u, $kw);
 
-    return Null("Image") unless defined $u->{'_userpics'}->{$picid};
-    my $p = $u->{'_userpics'}->{$picid};
+    my $pi = LJ::get_userpic_info($u);
+    my $p = $pi->{'pic'}->{$picid};
+
+    return Null("Image") unless $p;
     return {
         '_type' => "Image",
         'url' => "$LJ::USERPIC_ROOT/$picid/$u->{'userid'}",
-        'width' => $p->[0],
-        'height' => $p->[1],
+        'width' => $p->{'width'},
+        'height' => $p->{'height'},
     };
 }
 

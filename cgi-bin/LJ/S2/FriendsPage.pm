@@ -255,10 +255,7 @@ sub FriendsPage
             if ($logprops{$datakey}->{'picture_keyword'} && 
                 (! $u->{'opt_usesharedpic'} || $posterid == $friendid))
             {
-                my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k ".
-                                        "WHERE m.userid=$posterid AND m.kwid=k.kwid AND k.keyword=?");
-                $sth->execute($logprops{$datakey}->{'picture_keyword'});
-                $picid = $sth->fetchrow_array;
+                $picid = LJ::get_picid_from_keyword($po, $logprops{$datakey}->{'picture_keyword'});
             }
         }
 

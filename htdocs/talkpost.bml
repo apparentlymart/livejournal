@@ -159,17 +159,8 @@ body<=
     BML::ebml(\$event);
 
     $ret .= "<table><tr valign='middle'>";
-    my $picid;
     my $pickw = $init->{'replyto'} ? $parpost->{'picture_keyword'} : $props->{'picture_keyword'};
-
-    if ($pickw) {
-        my $qkw = $dbr->quote($pickw);
-        $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
-                                       "WHERE m.userid=$ur->{'userid'} AND ".
-                                       "m.kwid=k.kwid AND k.keyword=$qkw");
-    }
-
-    $picid ||= $ur->{'defaultpicid'};
+    my $picid = LJ::get_picid_from_keyword($ur, $pickw);
 
     my %userpics;
     if ($picid) {

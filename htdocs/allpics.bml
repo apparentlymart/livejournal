@@ -7,9 +7,6 @@
  $body = "";
  $head = "";
  
- my $dbr = LJ::get_db_reader();
- my $sth;
-
  my $user = LJ::canonical_username($GET{'user'});
  my $remote = LJ::get_remote();
  my $u = ! $user || $remote && $remote->{'user'} eq $user ? $remote : LJ::load_user($user);
@@ -53,21 +50,17 @@
 
  #### show pictures
 
+ my $info = LJ::get_userpic_info($u);
+
  my %keywords = ();
- $sth = $dbr->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k ".
-                      "WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
- $sth->execute;
- while (my ($pic, $keyword) = $sth->fetchrow_array) {
-     LJ::text_out(\$keyword);
-     push @{$keywords{$pic}}, $keyword;
+ while (my ($kw, $pic) = each %{$info->{'kw'}}) {
+     LJ::text_out(\$kw);
+     push @{$keywords{$pic->{'picid'}}}, $kw;
  }
  
- $sth = $dbr->prepare("SELECT picid, width, height, state " .
-                      "FROM userpic WHERE userid=?");
- $sth->execute($u->{'userid'});
  my $piccount = 0;
 
- while (my $pic = $sth->fetchrow_hashref)
+ foreach my $pic (map { $info->{'pic'}->{$_} } sort { $a <=> $b } keys %{$info->{'pic'}})
  {
      if ($piccount++ == 0) {
          $body .= "<?h1 $ML{'.current'} h1?><?p ";

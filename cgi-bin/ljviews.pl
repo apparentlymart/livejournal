@@ -662,13 +662,7 @@ sub create_view_lastn
         my $itemid = $item->{'itemid'};
         my $pu = $posteru{$item->{'posterid'}};
 
-        my $picid;
-        if ($logprops{$itemid}->{'picture_keyword'}) {
-            $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
-                                           "WHERE m.userid=? AND m.kwid=k.kwid AND k.keyword=?",
-                                           undef, $item->{'posterid'}, $logprops{$itemid}->{'picture_keyword'});
-        }
-        $picid ||= $pu->{'defaultpicid'};
+        my $picid = LJ::get_picid_from_keyword($pu, $logprops{$itemid}->{'picture_keyword'});
         $item->{'_picid'} = $picid;
         push @userpic_load, $picid if ($picid && ! grep { $_ eq $picid } @userpic_load);
     }
@@ -1204,11 +1198,7 @@ sub create_view_friends
             if ($logprops{$datakey}->{'picture_keyword'} && 
                 (! $u->{'opt_usesharedpic'} || ($posterid == $friendid))) 
             {
-                my $qkw = $dbr->quote($logprops{$datakey}->{'picture_keyword'});
-                my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k ".
-                                        "WHERE m.userid=$posterid AND m.kwid=k.kwid AND k.keyword=$qkw");
-                $sth->execute;
-                my $alt_picid = $sth->fetchrow_array;
+                my $alt_picid = LJ::get_picid_from_keyword($posterid, $logprops{$datakey}->{'picture_keyword'});
                 if ($alt_picid) {
                     LJ::load_userpics(\%userpics, [ $alt_picid ]);
                     $picid = $alt_picid;
