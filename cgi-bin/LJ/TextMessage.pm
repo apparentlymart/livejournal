@@ -1346,12 +1346,16 @@ sub send_mail
                                'Subject' => $opt->{'subject'},
                                'Data' => $opt->{'body'});
     if ($self->{'smtp'}) {
-        $status = $msg->send_by_smtp($self->{'smtp'}, Timeout => 10);
+        $status = eval { $msg->send_by_smtp($self->{'smtp'}, Timeout => 10) && 1; };
     } else {
-	$status = $msg->send_by_sendmail($self->{'sendmail'});
+	$status = eval { $msg->send_by_sendmail($self->{'sendmail'}) && 1; };
     }
     unless ($status) {
-	push @$errors, "There may have been a problem sending your message through the email gateway.";
+        if ($@ =~ /(bad address syntax|syntax illegal)/i) {
+            push @$errors, "Recipient has an invalid email address on file.";
+        } else {
+            push @$errors, "There may have been a problem sending your message through the email gateway.";
+        }
     }
     return $status;
 }
