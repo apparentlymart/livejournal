@@ -63,11 +63,13 @@
             $COOKIE{'BMLschemepref'} = [ $COOKIE{'BMLschemepref'}, $etime ];
 
             my $udbh = LJ::get_cluster_master($remote, 1);
+            my $sessid = $remote->{'_session'}->{'sessid'};
             $udbh->do("UPDATE sessions SET timeexpire=UNIX_TIMESTAMP()+$session_secs, ".
                       "exptype=?, ipfixed=? WHERE " .
                       "userid=? AND sessid=?", undef,
-                      $len, $bindip, $remote->{'userid'},
-                      $remote->{'_session'}->{'sessid'});
+                      $len, $bindip, $remote->{'userid'}, $sessid);
+            my $memkey = [$remote->{'userid'},"sess:$remote->{'userid'}:$sessid"];
+            LJ::MemCache::delete($memkey);
         }
 
         if ($do_login) {

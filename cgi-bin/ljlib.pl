@@ -2795,23 +2795,26 @@ sub get_remote
     my $u = LJ::load_user($user);
     return $no_remote->("User doesn't exist") unless $u;
 
-    my $sess_db = LJ::get_cluster_reader($u, 1);
+    my $sess_db;
     my $sess;
     my $get_sess = sub {
-        $sess = $sess_db->selectrow_hashref(qq{
-            SELECT *, UNIX_TIMESTAMP() AS 'now' FROM sessions 
-                WHERE userid=? AND sessid=? AND auth=? 
-            }, undef, $u->{'userid'}, $sessid, $auth);
+        $sess = $sess_db->selectrow_hashref("SELECT * FROM sessions ".
+                                            "WHERE userid=? AND sessid=? AND auth=?",
+                                            undef, $u->{'userid'}, $sessid, $auth);
     };
-    $get_sess->();
+    my $memkey = [$u->{'userid'},"sess:$u->{'userid'}:$sessid"];
+    # try memory
+    $sess = LJ::MemCache::get($memkey);
+    # try master
     unless ($sess) {
-        # maybe the slave is just lagged.  we'll try again from the
-        # master.
         $sess_db = LJ::get_cluster_master($u, 1);
         $get_sess->();
+        LJ::MemCache::set($memkey, $sess) if $sess;
     }
     return $no_remote->("Session bogus") unless $sess;
-    return $no_remote->("Session old") if $sess->{'timeexpire'} < $sess->{'now'};
+    return $no_remote->("Invalid auth") unless $sess->{'auth'} eq $auth;
+    my $now = time();
+    return $no_remote->("Session old") if $sess->{'timeexpire'} < $now;
     if ($sess->{'ipfixed'}) {
         my $remote_ip = $LJ::_XFER_REMOTE_IP || LJ::get_remote_ip();
         return $no_remote->("Session wrong IP") 
@@ -2825,15 +2828,16 @@ sub get_remote
     }->{$sess->{'exptype'}};
     
     if ($sess_length && 
-        $sess->{'timeexpire'} - $sess->{'now'} < $sess_length/2) {
+        $sess->{'timeexpire'} - $now < $sess_length/2) {
         my $udbh = LJ::get_cluster_master($u, 1);
         if ($udbh) {
-            my $future = $sess->{'now'} + $sess_length;
+            my $future = $now + $sess_length;
             $udbh->do("UPDATE sessions SET timeexpire=$future WHERE ".
                       "userid=$u->{'userid'} AND sessid=$sess->{'sessid'}");
             my $dbh = LJ::get_db_writer();
             $dbh->do("UPDATE userusage SET timecheck=NOW() WHERE userid=?",
                      undef, $u->{'userid'});
+            LJ::MemCache::delete($memkey);
         }
     }
 
@@ -5960,6 +5964,11 @@ sub kill_sessions
     foreach (qw(sessions sessions_data)) {
         $udbh->do("DELETE FROM $_ WHERE userid=? AND ".
                   "sessid IN ($in)", undef, $userid);
+    }
+    foreach my $id (@sessids) {
+        $id += 0;
+        my $memkey = [$userid,"sess:$userid:$id"];
+        LJ::MemCache::delete($memkey);
     }
     return 1;
 }
