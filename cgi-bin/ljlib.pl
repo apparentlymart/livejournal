@@ -5505,4 +5505,27 @@ sub set_interests
     return 1;
 }
 
+sub md5_struct
+{
+    my ($st, $md5) = @_;
+    $md5 ||= Digest::MD5->new;
+    unless (ref $st) {
+        $md5->add($st);
+        return $md5;
+    }
+    if (ref $st eq "HASH") {
+        foreach (sort keys %$st) {
+            md5_struct($_, $md5);
+            md5_struct($st->{$_}, $md5);           
+        }
+        return $md5;
+    }
+    if (ref $st eq "ARRAY") {
+        foreach (@$st) {
+            md5_struct($_, $md5);
+        }
+        return $md5;
+    }
+}
+
 1;

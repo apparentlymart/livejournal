@@ -119,7 +119,8 @@ sub create_view_lastn
         'itemshow' => $itemshow,
         'skip' => $skip,
         'itemids' => \@itemids,
-        'order' => $u->{'journaltype'} eq "C" ? "logtime" : "",
+        'order' => ($u->{'journaltype'} eq "C" || $u->{'journaltype'} eq "Y")  # community or syndicated
+            ? "logtime" : "",
         'err' => \$err,
     });
 

@@ -818,7 +818,7 @@ CREATE TABLE user (
   has_bio enum('Y','N') NOT NULL default 'N',
   txtmsg_status enum('none','on','off') NOT NULL default 'none',
   is_system enum('Y','N') NOT NULL default 'N',
-  journaltype enum('P','N','C','S') NOT NULL default 'P',
+  journaltype char(1) NOT NULL default 'P',
   lang char(2) NOT NULL default 'EN',
   PRIMARY KEY  (userid),
   UNIQUE KEY user (user),
@@ -1446,6 +1446,34 @@ CREATE TABLE procnotify
 )
 EOC
 
+register_tablecreate("syndicated", <<'EOC');
+CREATE TABLE syndicated
+(
+   userid  INT UNSIGNED NOT NULL,
+   synurl  VARCHAR(255),
+   checknext  DATETIME NOT NULL,
+   lastcheck  DATETIME,
+   lastmod    INT UNSIGNED, # unix time
+   etag       VARCHAR(80),
+   PRIMARY KEY (userid),
+   UNIQUE (synurl),
+   INDEX (checknext)
+)
+EOC
+
+register_tablecreate("synitem", <<'EOC');
+CREATE TABLE synitem
+(
+   userid  INT UNSIGNED NOT NULL,
+   item   CHAR(22),    # base64digest of rss $item
+   dateadd DATETIME NOT NULL,
+   INDEX (userid, item(3)),
+   INDEX (userid, dateadd)
+)
+EOC
+
+
+
 ### changes
 
 register_alter(sub {
@@ -1724,6 +1752,11 @@ register_alter(sub {
     # this never ended up being useful, and just freaked people out unnecessarily.
     if (column_type("user", "track")) {
         do_alter("user", "ALTER TABLE user DROP track");
+    }
+
+    # need more choices (like "Y" for sYndicated journals)
+    if (column_type("user", "journaltype") =~ /enum/i) {
+        do_alter("user", "ALTER TABLE user MODIFY journaltype CHAR(1) NOT NULL DEFAULT 'P'");
     }
 
     # change themedata. key to being unique, if it's not already
