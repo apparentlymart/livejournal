@@ -1855,18 +1855,15 @@ sub load_mood_theme
 #      logproplist, talkproplist, and userproplist, which describe
 #      the various meta-data that can be stored on log (journal) items,
 #      comments, and users, respectively.
-# args: dbarg, table*
+# args: dbarg?, table*
 # des-table: a list of tables' proplists to load.  can be one of
 #            "log", "talk", "user", or "rate"
 # </LJFUNC>
 sub load_props
 {
-    my $dbarg = shift;
+    my $dbarg = ref $_[0] ? shift : undef;
     my @tables = @_;
-
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbr = $dbs->{'reader'};
-
+    my $dbr;
     my %keyname = qw(log  propid
                      talk tpropid
                      user upropid
@@ -1875,8 +1872,9 @@ sub load_props
 
     foreach my $t (@tables) {
         next unless defined $keyname{$t};
-        next if (defined $LJ::CACHE_PROP{$t});
+        next if defined $LJ::CACHE_PROP{$t};
         my $tablename = $t eq "rate" ? "ratelist" : "${t}proplist";
+        $dbr ||= LJ::get_db_reader();
         my $sth = $dbr->prepare("SELECT * FROM $tablename");
         $sth->execute;
         while (my $p = $sth->fetchrow_hashref) {
@@ -4605,7 +4603,6 @@ sub load_log_props2multi
     }
 }
 
-# Note: requires caller to first call LJ::load_props($dbs, "talk")
 # <LJFUNC>
 # name: LJ::load_talk_props2
 # class:
@@ -4621,8 +4618,9 @@ sub load_talk_props2
 
     my $in = join(", ", map { $_+0; } @$listref);
     return unless $in;
+
+    LJ::load_props("talk");
     die "Last param not hash" unless ref $hashref eq "HASH";
-    die "talkprops not loaded" unless defined $LJ::CACHE_PROPID{'talk'};
 
     my $sth = $db->prepare("SELECT jtalkid, tpropid, value FROM talkprop2 ".
                            "WHERE journalid=$journalid AND jtalkid IN ($in)");
@@ -5248,7 +5246,7 @@ sub text_trim
 # des: convert one item's subject, text and props to UTF8.
 #      item can be an entry or a comment (in which cases props can be
 #      left empty, since there are no 8bit talkprops).
-# args: dbs, u, subject, text, props
+# args: dbs?, u, subject, text, props
 # des-u: user hashref of the journal's owner
 # des-subject: ref to the item's subject
 # des-text: ref to the item's text
@@ -5257,7 +5255,8 @@ sub text_trim
 # </LJFUNC>
 sub item_toutf8
 {
-    my ($dbs, $u, $subject, $text, $props) = @_;
+    my $dbs = ref $_[0] eq "LJ::DBSet" ? shift : LJ::get_dbs();
+    my ($u, $subject, $text, $props) = @_;
     return unless $LJ::UNICODE;
 
     my $convert = sub {
