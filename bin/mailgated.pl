@@ -326,25 +326,21 @@ sub process
 
     # see if it's a post-by-email
     my @to = Mail::Address->parse( $head->get('To') );
-    if (   @to == 1
-        && $to[0]->address =~ /^(\S+?)\@\Q$LJ::EMAIL_POST_DOMAIN\E$/i )
-    {
-        my $user = $1;
+    if ( scalar @to > 0 ) {
+        foreach my $dest ( @to ) {
+            next unless $dest->address =~ /^(\S+?)\@\Q$LJ::EMAIL_POST_DOMAIN\E$/i;
+        
+            my $user = $1;
 
-       # FIXME: verify auth (extra from $user/$subject/$body), require ljprotocol.pl, do post.
-       # unresolved:  where to temporarily store messages before they're approved?
-       # perhaps the modblob table?  perhaps a column it can be used to determine
-       # whether it's a moderated community post vs. an un-acked phone post.
-        my $post_rv;
-        my $post_msg = LJ::Emailpost::process( $entity, $user, \$post_rv );
+            # FIXME: verify auth (extra from $user/$subject/$body), require ljprotocol.pl, do post.
+            # unresolved:  where to temporarily store messages before they're approved?
+            # perhaps the modblob table?  perhaps a column it can be used to determine
+            # whether it's a moderated community post vs. an un-acked phone post.
+            my $post_rv;
+            my $post_msg = LJ::Emailpost::process( $entity, $user, \$post_rv );
 
-        if ( !$post_rv ) {    # don't dequeue
-            return retry($post_msg);
+            return $post_rv ? dequeue($post_msg) : retry($post_msg);
         }
-        else {                # dequeue
-            return dequeue($post_msg);
-        }
-
     }
 
     # From this point on we know it's a support request of some type,
