@@ -4,6 +4,8 @@ body<=
 <?_code
 {
     use strict;
+    use vars qw(%FORM);
+
     my $ret;
 
     my $user = $FORM{'user'};
