@@ -26,7 +26,7 @@
      my $args = LJ::ehtml($cmd->{'argsummary'});
      my $anchor = "cmd.$cmdname";
      $ret .= "<a name='$anchor'><dt><p><table width=100% cellpadding=2><tr><td bgcolor=#d0d0d0>";
-     $ret .= "<tt><a href='\#$anchor'><b>$cmdname</b></a> $args</tt></td></tr></table>";
+     $ret .= "<tt><a style='text-decoration: none' href='\#$anchor'><b>$cmdname</b></a> $args</tt></td></tr></table>";
      $ret .= "</dt><dd><p>$cmd->{'des'}";
      if ($cmd->{'args'}) {
          my @des = @{$cmd->{'args'}};
