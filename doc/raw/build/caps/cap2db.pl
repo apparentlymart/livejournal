@@ -33,6 +33,10 @@ $caps_general{'synd_create'} = {
     type => 'boolean',
     desc => 'User can create syndicated accounts.',
 };
+$caps_general{'synd_quota'} = {
+    type => 'integer',
+    desc => "Limit used to determine how many syndicated accounts can be added to friends lists",
+},
 $caps_general{'findsim'} = {
     type => 'boolean',
     desc => 'User is able to use the similar interests matching feature',
@@ -90,6 +94,47 @@ $caps_general{'useremail'} = {
 $caps_general{'userpics'} = {
     type => 'integer',
     desc => 'Maximum number of user pictures allowed.',
+};
+$caps_general{'hide_email_after'} = {
+    type => 'integer',
+    desc => "Hide an account's email address who has not used the site in a time period longer than the given setting.  ".
+            "If 0, the email is never hidden.  The time period is in days.",
+};
+$caps_general{'weblogscom'} = {
+    type => 'boolean',
+    desc => "Allow the account to ping weblogs.com with new updates",
+};
+$caps_general{'full_rss'} = {
+    type => 'boolean',
+    desc => "Show the full text in the RSS view",
+};
+$caps_general{'get_comments'} = {
+    type => 'boolean',
+    desc => "Can receive comments",
+};
+$caps_general{'leave_comments'} = {
+    type => 'boolean',
+    desc => "Can leave comments on other accounts",
+};
+$caps_general{'can_post'} = {
+    type => 'boolean',
+    desc => "Can post new entries",
+};
+$caps_general{'rateperiod-failed_login'} = {
+    type => 'integer',
+    desc => "The period of time an account can try to repeat logging in for",
+};
+$caps_general{'rateallowed-failed_login'} = {
+    type => 'integer',
+    desc => "How many times a period an account can try to log in for", 
+};
+$caps_general{'s2everything'} = {
+    type => 'boolean',
+    desc => "Can use all properties of S2 layouts",
+};
+$caps_general{'friendspopwithfriends'} = {
+    type => 'boolean',
+    desc => "Can use <quote>Popular with Friends</quote> tool",
 };
 
 sub dump_caps
