@@ -5281,8 +5281,8 @@ sub _load_user_raw
 
     my $use_isam;
     unless ($LJ::CACHE_NO_ISAM{user} || scalar(@$vals) > 10) {
-        $db->do("HANDLER user OPEN");
-        if ($db->err) {
+        eval { $db->do("HANDLER user OPEN"); };
+        if ($@ || $db->err) {
             $LJ::CACHE_NO_ISAM{user} = 1;
         } else {
             $use_isam = 1;
