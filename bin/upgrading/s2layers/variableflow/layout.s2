@@ -304,7 +304,8 @@ function Page::lay_print_heading()
 }
 
 function Page::print() {
-   """<html>
+   """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd">
+<html>
 <head>
 <title>"""+$this->title()+"""</title>
 """;
@@ -812,6 +813,9 @@ body {
   background: $background_body;
   color: $*clr_text;
   $fontspec  font-size: $*font_size;
+}
+table, tr, td, th {
+  font-size: 1em;
 }
 #page {
 """;
