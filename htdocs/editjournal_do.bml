@@ -216,8 +216,8 @@ body<=
 
         # security
         $ret .= "<p><b>$ML{'label.security.head'}</b> ";
-        my @secs = ("public" => $ML{'label.security.public'}, "private" => $ML{'label.security.private'}, 
-                    "friends" => $ML{'label.security.friends'});
+        my @secs = ("public" => $ML{'label.security.public'}, "friends" => $ML{'label.security.friends'});
+        push @secs,  ("private" => $ML{'label.security.private'}) unless $usejournal;
         
         # custom friend groups - wont' happen if $usejournal
         my @opts;
