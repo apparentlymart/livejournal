@@ -28,6 +28,7 @@ Where 'command' is one of:
   poptext      Populate text from en.dat, etc into database
   dumptext     Dump lang text based on text[-local].dat information
   check        Check validity of text[-local].dat files
+  wipedb       Remove all language/text data from database.
   newitems     Search files in htdocs, cgi-bin, & bin and insert
                necessary text item codes in database.
 
@@ -140,7 +141,15 @@ poptext() if $mode eq "poptext";
 dumptext() if $mode eq "dumptext";
 popstruct() if $mode eq "dump";
 newitems() if $mode eq "newitems";
+wipedb() if $mode eq "wipedb";
 help();
+
+sub wipedb
+{
+    $dbh->do("DELETE FROM ml_$_")
+        foreach (qw(domains items langdomains langs latest text));
+    exit 0;                 
+}
 
 sub popstruct
 {
@@ -165,6 +174,46 @@ sub popstruct
     }
 
     print "All done.\n";
+    exit 0;
+}
+
+sub poptext
+{
+    foreach my $lang (keys %lang_code)
+    {
+        print "$lang\n";
+        my $l = $lang_code{$lang};
+        open (D, "$ENV{'LJHOME'}/bin/upgrading/${lang}.dat")
+            or die "Can't find $lang.dat\n";
+        my $lnum = 0;
+        my ($code, $text);
+        while (my $line = <D>) {
+            $lnum++;
+            if ($line =~ /^(\S+?)=(.*)/) {
+                ($code, $text) = ($1, $2);
+            } elsif ($line =~ /^(\S+?)\<\<\s*$/) {
+                ($code, $text) = ($1, "");
+                while (<D>) {
+                    last if $_ eq ".\n";
+                    s/^\.//;
+                    $text .= $_;
+                }
+            } elsif ($line =~ /\S/) {
+                die "$lang.dat:$lnum: Bogus format.\n";
+            }
+
+            my $qcode = $dbh->quote($code);
+            my $exists = $dbh->selectrow_array("SELECT COUNT(*) FROM ml_latest l, ml_items i ".
+                                               "WHERE l.dmid=1 AND i.dmid AND i.itcode=$qcode AND ".
+                                               "i.itid=l.itid AND l.lnid=$l->{'lnid'}");
+            if (! $exists) {
+                print " adding: $code = ";
+                my $res = LJ::Lang::set_text($dbh, 1, $lang, $code, $text);
+                print "$res\n";
+            }
+        }
+        close D;
+    }
     exit 0;
 }
 

@@ -1415,8 +1415,8 @@ CREATE TABLE ml_latest
    itid     SMALLINT UNSIGNED NOT NULL,
    PRIMARY KEY (lnid, dmid, itid),
    chgtime  DATETIME NOT NULL,
-   txtid     INT UNSIGNED NOT NULL,
-   version   SMALLINT UNSIGNED NOT NULL,
+   staleness  TINYINT UNSIGNED DEFAULT 0 NOT NULL, # better than ENUM('0','1','2');
+   INDEX (lnid, staleness),
    INDEX (dmid, itid),
    INDEX (lnid, dmid, chgtime),
    INDEX (chgtime)
