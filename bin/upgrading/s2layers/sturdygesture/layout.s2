@@ -369,6 +369,7 @@ $userpic
         println "<div style='margin: 0.5em;'>";
         $this->print_linklist();
         println "</div>";
+        println "</div>";
     }
 
     "</td>";
