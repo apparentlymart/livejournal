@@ -1,7 +1,6 @@
 (=_CODE
 
- # Brad Whitaker
- # 7/19/2001
+ # Brad Whitaker <lj user=whitaker>
 
  # init title and body variables
  $title = "Poll Creator";
@@ -261,7 +260,7 @@
 	       );
 
 	# need to be sure to increment the %errors hash when we insert.  we do when we move.
-	splice ( @{$errors}, '', 0, '' );
+	splice ( @{$errors}, $action->{'item'}, 0, '' );
     }
 
     return ($poll, $errors);
