@@ -1,4 +1,5 @@
 
+
 layerinfo "type" = "layout";
 layerinfo "name" = "Variable Flow";
 layerinfo "author_name" = "Martin Atkins";
@@ -21,9 +22,11 @@ propgroup colors {
     }
     property Color clr_line {
         des = "Color of line separating the entry area from the background";
+        requires = "opt_page_border";
     }
     property Color clr_back {
-        des = "Background Color of Main Entry Area";
+        des = "Background Color of Main Content Area";
+        requires = "opt_page_background";
     }
     property Color clr_text {
         des = "Main Text Color";
@@ -133,10 +136,17 @@ propgroup layout {
         note = "With this enabled, browsers which support projection stylesheets will see a different stylesheet.";
         noui = 1;
     }
+    property bool adv_horrible_userpic_markup {
+        des = "Enable horrible userpic markup";
+        note = "With this enabled, the layout will use a table hack to present userpics. With it disabled, the userpics will just be shown raw with class userpic. You'll have to add your own stylesheet rules for them.";
+        # See the comment within Page::print_entry for more details
+        noui = 1;
+    }
     set adv_page_max_width = "";
     set adv_entry_max_width = "";
     set adv_enable_print_styles = true;
     set adv_enable_projection_styles = true;
+    set adv_horrible_userpic_markup = true;
 }
 
 propgroup presentation {
@@ -150,12 +160,12 @@ propgroup presentation {
     set font_size = "0.75em";
 
     property bool opt_page_border {
-        des = "Draw Line Around Page";
+        des = "Draw Line Around Content Box";
         note = "With this disabled, the line color option has no effect";
     }
     property bool opt_page_background {
-        des = "Draw Background Behind Entries";
-        note = "With this disabled, the Content Box Background Color and Image options have no effect";
+        des = "Content Box has Background";
+        note = "With this disabled, the Content Box Background Color and Image options have no effect and the page background will show through instead.";
     }
     set opt_page_border = true;
     set opt_page_background = true;
@@ -170,27 +180,51 @@ propgroup presentation {
     property string background_properties_page {
         des = "Page Background Image Display Options";
         values = "scroll|Scrolling, Tiled|scroll no-repeat|Scrolling, No repeat|scroll repeat-x|Scrolling, tile horizontally|scroll repeat-y|Scrolling, tile vertically|fixed|Fixed, Tiled|fixed no-repeat|Fixed, No repeat|fixed repeat-x|Fixed, tile horizontally|fixed repeat-y|Fixed, tile vertically";
+        requires = "url_background_img_page";
     }
     set background_properties_page = "scroll";
+
+    property string background_position_page {
+        des = "Page Background Position";
+        values = "center|Centered|center left|Centered Vertically, Left|center right|Centered Vertically, Right|top center|Top, Centered Horizontally|top left|Top, Left|top right|Top, Right|bottom center|Bottom, Centered Horizontally|bottom left|Bottom, Left|bottom right|Bottom, Right";
+        requires = "url_background_img_page";
+    }
+    set background_position_page = "top left";
 
     property string url_background_img_box {
         des = "Content Box Background Image URL";
         note = "Leave this blank if you do not wish to use a background image.";
         palimg_transform = "tint;*clr_back"; # Doesn't do anything right now
+        requires = "opt_page_background";
     }
     set url_background_img_box = "";
 
     property string background_properties_box {
         des = "Content Box Background Image Display Options";
         values = "scroll|Scrolling, Tiled|scroll no-repeat|Scrolling, No repeat|scroll repeat-x|Scrolling, tile horizontally|scroll repeat-y|Scrolling, tile vertically|fixed|Fixed, Tiled|fixed no-repeat|Fixed, No repeat|fixed repeat-x|Fixed, tile horizontally|fixed repeat-y|Fixed, tile vertically";
+        requires = "opt_page_background,url_background_img_box";
     }
     set background_properties_box = "scroll";
 
+    property string background_position_box {
+        des = "Content Box Background Position";
+        values = "center|Centered|center left|Centered Vertically, Left|center right|Centered Vertically, Right|top center|Top, Centered Horizontally|top left|Top, Left|top right|Top, Right|bottom center|Bottom, Centered Horizontally|bottom left|Bottom, Left|bottom right|Bottom, Right";
+        requires = "opt_page_background,url_background_img_box";
+    }
+    set background_position_box = "top left";
+
     property bool opt_entry_userpics {
-        des = "Enable Entry Userpics";
+        des = "Enable Userpics On Entries";
         note = "With this disabled, no entries will show userpics, even on the friends page.";
     }
     set opt_entry_userpics = true;
+
+    property bool opt_own_userpics {
+        des = "Show Own Userpics";
+        note = "Enable this to show userpics on your own entries. You must also have the previous option enabled. This option has no effect on community journals.";
+        requires = "opt_entry_userpics";
+    }
+    set opt_own_userpics = false;
 
     # This layout has quite a big stylesheet so let's avoid
     # transferring it over and over.
@@ -198,6 +232,27 @@ propgroup presentation {
 
     # No good support for EntryPage/ReplyPage yet
     set view_entry_disabled = true;
+}
+
+propgroup options {
+
+    # Some standard constructional properties
+    property use page_recent_items;
+    property use page_friends_items;
+    property use page_year_sortorder;
+    property use page_day_sortorder;
+
+    # Tell the system this layout has no linklist support
+    # If you add linklist support in a user layer, you should also
+    # set this property to true in your layer.
+    set linklist_support = false;
+}
+
+propgroup text {
+    property use text_post_comment;
+    property use text_read_comments;
+    property use text_post_comment_friends;
+    property use text_read_comments_friends;
 }
 
 function makefontspec() : string
@@ -447,13 +502,17 @@ function Page::lay_print_entry_metadata(Entry e)
         # This is horrible and unextensible. We have core to thank.
         # C'est la vie.
         "<div class=\"metadata\">\n";
-        """<div class="currentmusic">"""+metadata_title("music") + ": " +
-                                         $e.metadata{"music"}+"</div>\n";
-        """<div class="currentmood">"""+metadata_title("mood") + ": ";
-        if (defined $e.mood_icon) {
-            print $e.mood_icon->as_string()+" ";
+        if ($e.metadata{"music"} != "") {
+            """<div class="currentmusic"><span class="metacaption">"""+metadata_title("music") + ":</span> " +
+                                             $e.metadata{"music"}+"</div>\n";
         }
-        print $e.metadata{"mood"}+"</div>\n";
+        if ($e.metadata{"mood"} != "") {
+            """<div class="currentmood"><span class="metacaption">"""+metadata_title("mood") + ":</span> ";
+            if (defined $e.mood_icon) {
+                print $e.mood_icon->as_string()+" ";
+            }
+            print $e.metadata{"mood"}+"</div>\n";
+        }
         "</div>\n";
     }
 }
@@ -462,17 +521,32 @@ function Page::print_entry(Entry e) {
     """<div class="entry" id="entry$e.itemid">\n""";
 
     var bool altposter = $e.poster.username != $e.journal.username;
-    var bool showpic = $*opt_entry_userpics and ($.view == "friends" or $altposter);
+    var bool showpic = $*opt_entry_userpics and (($.view == "friends" or $altposter) or $*opt_own_userpics);
+
+    # By default, this layout uses an ugly table hack to present the userpic
+    # alongside the entry. This is because I've been bitten on many previous
+    # occasions by a bug with floats in IE causing text to vanish in certain
+    # cases. You can set the property adv_horrible_userpic_markup to false
+    # in a user layer to disable this behavior, but there are no CSS rules
+    # in the stock stylesheet to handle it, so you'll have to supply your
+    # own.
+
     if ($showpic) {
-        """<table cellpadding="0" border="0" cellspacing="0" style="margin: 0;">
-        <tr valign="top">
-        <td style="text-align: center;" width="105">""";
-        if (defined $e.userpic) {
-            print $e.userpic->as_string();
-        } else {
-            print "&nbsp;";
+        if ($*adv_horrible_userpic_markup) {
+            """<table cellpadding="0" border="0" cellspacing="0" style="margin: 0;" class="uglykludgeuserpic">
+            <tr valign="top">
+            <td style="text-align: center;" width="105">""";
         }
-        "</td><td>";
+        if (defined $e.userpic) {
+            println """<img src="$e.userpic.url" width="$e.userpic.width" width="$e.userpic.height" alt="" class="userpic" />""";
+        } else {
+            if ($*adv_horrible_userpic_markup) {
+                print "&nbsp;";
+            }
+        }
+        if ($*adv_horrible_userpic_markup) {
+            "</td><td>";
+        }
     }
     """<h2 class="entryheading">""";
     if ($.view != "day") {
@@ -495,7 +569,7 @@ function Page::print_entry(Entry e) {
 
     $this->lay_print_entry_metadata($e);
 
-    if ($showpic) {
+    if ($showpic and $*adv_horrible_userpic_markup) {
         "</td></tr></table>";
     }
     $e.comments->print();
@@ -515,7 +589,6 @@ function CommentInfo::print {
     print "</li>";
     "</ul>";
 }
-
 
 function EntryPage::print_comment (Comment c) {
     var Color barlight = $*color_comment_bar->clone();
@@ -701,12 +774,15 @@ function print_stylesheet() {
    """.entryextra { text-align: $*align_talklinks; font-size: 0.9em; }""";
 
    # This tries to do a bit of "sanity" checking to ensure users
-   # don't inadvertantly break the CSS, but it's not brilliant.
+   # don't inadvertently break the CSS, but it's not brilliant.
    var string background_body = $*clr_margin;
    if ($*url_background_img_page != "" and not $*url_background_img_page->contains(")")) {
        $background_body = $background_body + " url($*url_background_img_page)";
        if (not $*background_properties_page->contains(";")) {
            $background_body = $background_body + " $*background_properties_page";
+       }
+       if (not $*background_position_page->contains(";")) {
+           $background_body = $background_body + " $*background_position_page";
        }
    }
    else {
@@ -718,6 +794,9 @@ function print_stylesheet() {
        $background_page = $background_page + " url($*url_background_img_box)";
        if (not $*background_properties_box->contains(";")) {
            $background_page = $background_page + " $*background_properties_box";
+       }
+       if (not $*background_position_box->contains(";")) {
+           $background_page = $background_page + " $*background_position_box";
        }
    }
    else {
@@ -733,9 +812,6 @@ body {
   background: $background_body;
   color: $*clr_text;
   $fontspec  font-size: $*font_size;
-}
-td, tr, table {
-  font-size: 1em;
 }
 #page {
 """;
