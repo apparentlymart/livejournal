@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  use strict;
  use vars qw(%FORM $title $body);
@@ -21,7 +21,7 @@
  $FORM{'oldkeywords'} = [ split('\0', $FORM{'oldkeywords'}) ];
 
  unless (LJ::text_in(\%FORM)) {
-     $body = "(=BADINPUT=)";
+     $body = "<?badinput?>";
      return;
  }
 
@@ -184,15 +184,15 @@
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
              $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
              $title = $ML{'.title.deleted'};
-             $body = "(=H1 .error.deleted.title H1=)(=P " . 
+             $body = "<?h1 .error.deleted.title h1?><?p " . 
                      BML::ml(".error.deleted.body", { 'desc' => $memory->{'des'} }) .
-                     "P=)";
+                     "p?>";
              return;	     
          } else {
              $title = $ML{'Error'};
-             $body = "(=H1 $ML{'.error.nodescription.title'} H1=)(=P ";
+             $body = "<?h1 $ML{'.error.nodescription.title'} h1?><?p ";
              $body .= BML::ml('.error.nodescription.body');
-             $body .= " P=)";
+             $body .= " p?>";
              return;
          }
      }
@@ -208,7 +208,7 @@
      }
      if (scalar(@keywords) > 5) { 
          $title = $ML{'Error'};
-         $body = "(=H1 $ML{'Error'} H1=)(=P $ML{'.error.fivekeywords'} P=)";
+         $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.fivekeywords'} p?>";
          return;
      }
      @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
@@ -218,8 +218,8 @@
      foreach my $kw (@keywords) {
          if (length($kw) > 40) {
              $title = $ML{'Error'};
-             $body = "(=H1 $ML{'Error'} H1=)(=P " . 
-                     BML::ml(".error.maxsize", { 'keyword' => $kw }) . "P=)";
+             $body = "<?h1 $ML{'Error'} h1?><?p " . 
+                     BML::ml(".error.maxsize", { 'keyword' => $kw }) . "p?>";
              return;
          }
 
@@ -265,7 +265,7 @@
      }
 
      $title = $ML{'.title.added'};
-     $body = "(=H1 $ML{'.body.added.header'} H1=)(=P $ML{'.body.added.body'} P=)";
+     $body = "<?h1 $ML{'.body.added.header'} h1?><?p $ML{'.body.added.body'} p?>";
      return;
  }
 
@@ -273,14 +273,14 @@
  $body = $ML{'error.unknownmode'};
 
  return;
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
+_code?><?page
+TITLE=><?_code return $title; _code?>
 BODY<=
-(=_CODE
+<?_code
  return $body;
-_CODE=)
+_code?>
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/login.bml
 post: htdocs/tools/memadd.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = "Tell a Friend!";
  $body = "";
@@ -16,7 +16,7 @@
  }
 
  unless ($remote) {
-     $body .= "(=H1 Sorry... H1=)(=P To use the \"Tell a Friend\" feature, you must first <a href=\"/login.bml?ret=1\">login</a>.  P=)(=P If we didn't require you to login for this, we'd be essentially providing an anonymous email gateway and there'd be tons of people abusing it and harassing each other.  (We tried this on another website once...)  P=)";
+     $body .= "<?h1 Sorry... h1?><?p To use the \"Tell a Friend\" feature, you must first <a href=\"/login.bml?ret=1\">login</a>.  p?><?p If we didn't require you to login for this, we'd be essentially providing an anonymous email gateway and there'd be tons of people abusing it and harassing each other.  (We tried this on another website once...)  p?>";
      return;
  }
 
@@ -27,13 +27,13 @@
  }
  
  unless ($u->{'status'} eq "A") {
-     $body .= "(=H1 Sorry... H1=)(=P Your current email address ($u->{'email'}) isn't validated, so we can't let you use the \"Tell a Friend\" feature.  To validate your email address, have the confirmation email resent at the <a href=\"/lostinfo.bml\">lost information</a> page, and then follow the instructions in it when you get it. P=)";
+     $body .= "<?h1 Sorry... h1?><?p Your current email address ($u->{'email'}) isn't validated, so we can't let you use the \"Tell a Friend\" feature.  To validate your email address, have the confirmation email resent at the <a href=\"/lostinfo.bml\">lost information</a> page, and then follow the instructions in it when you get it. p?>";
      return;
  }
 
  my $err = sub {
      $title = "Error";
-     $body = "(=H1 Error H1=)(=P $_[0] P=)";
+     $body = "<?h1 Error h1?><?p $_[0] p?>";
      return;
  };
  
@@ -42,7 +42,7 @@
      my $email = $FORM{'toemail'};
      my @errors;
      &check_email($email, \@errors);
-     push @errors, "(=REQUIREPOST=)" unless LJ::did_post();
+     push @errors, "<?requirepost?>" unless LJ::did_post();
      return LJ::bad_input(@errors) if @errors;
 
      LJ::send_mail({
@@ -54,7 +54,7 @@
          'body' => $FORM{'body'},
      });
 
-     $body .= "(=H1 Sent! H1=)(=P $FORM{'toemail'} has been mailed. P=)";    
+     $body .= "<?h1 Sent! h1?><?p $FORM{'toemail'} has been mailed. p?>";    
      return;
  }
 
@@ -147,11 +147,11 @@
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 lib: cgi-bin/emailcheck.pl
 link: htdocs/login.bml, htdocs/lostinfo.bml, htdocs/users, htdocs/talkread.bml
 form: htdocs/tools/tellafriend.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

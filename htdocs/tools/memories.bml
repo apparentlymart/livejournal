@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -41,12 +41,12 @@
      my $qkw = $dbh->quote($FORM{'keyword'});
      if ($FORM{'keyword'} eq "*") {
          $title = $ML{'.title.memorable'};
-         $body .= "(=H1 $ML{'.title.memorable'} H1=)(=P " . BML::ml(".body.memorable", { 'user' => $user }) . " P=)";
+         $body .= "<?h1 $ML{'.title.memorable'} h1?><?p " . BML::ml(".body.memorable", { 'user' => $user }) . " p?>";
      } else {
          $title = BML::ml(".title.keyword", { 'keyword' => $FORM{'keyword'}, 'user' => $user });
          $body .= BML::ml(".body.keyword", { 'keyword' => $FORM{'keyword'}, 'user' => $user });
      }
-     $body .= "(=P <A HREF=\"/tools/memories.bml?user=$user\">&lt;&lt; $ML{'.back'}</A> P=)";
+     $body .= "<?p <A HREF=\"/tools/memories.bml?user=$user\">&lt;&lt; $ML{'.back'}</A> p?>";
 
      my $extrawhere = "";
      if ($filter eq "own" || $filter eq "other") {
@@ -109,18 +109,18 @@
      $body .= "<LI><B><A HREF=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</A></B>: $row->{'count'} $noun\n";
  }
  unless ($rows) {
-     $body .= "(=H1 $ML{'.error.noentries.title'} H1=)(=P $ML{'.error.noentries.body'} P=)";
+     $body .= "<?h1 $ML{'.error.noentries.title'} h1?><?p $ML{'.error.noentries.body'} p?>";
  } else {
      $body .= "</UL>";
 }
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
+_code?><?page
+TITLE=><?_code return $title; _code?>
 BODY<=
-(=_CODE return $body; _CODE=)
+<?_code return $body; _code?>
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/tools/memories.bml, htdocs/tools/memadd.bml, htdocs/talkread.bml
 form: htdocs/tools/memories.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

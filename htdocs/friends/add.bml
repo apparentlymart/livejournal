@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -12,7 +12,7 @@
  unless ($remote) 
  {
      $title = $ML{'.error1.title'};
-     $body = "(=H1 $ML{'.error1.header'} H1=)(=P $ML{'.error1.text'} P=)";
+     $body = "<?h1 $ML{'.error1.header'} h1?><?p $ML{'.error1.text'} p?>";
      return;
  }
 
@@ -27,7 +27,7 @@
  {
      unless (LJ::did_post()) { 
          $title = $ML{'Error'};
-         $body = "(=H1 $ML{'Error'} H1=)(=P (=REQUIREPOST=) P=)";
+         $body = "<?h1 $ML{'Error'} h1?><?p <?requirepost?> p?>";
          return;
      }
 
@@ -61,18 +61,18 @@
      {
          if ($FORM{'action:delete'}) {
              $title = $ML{'.remove.title'};
-             $body = "(=H1 $ML{'.remove.header'} H1=)(=P " .
+             $body = "<?h1 $ML{'.remove.header'} h1?><?p " .
                      BML::ml('.remove.text', {'user'=>$user, 'url'=>"$LJ::SITEROOT/users/$remote->{'user'}/friends"}) .
-                     " P=)";
+                     " p?>";
          } else {
              $title = $ML{'.add.title'};
-             $body = "(=H1 $ML{'.add.header'} H1=)(=P " .
+             $body = "<?h1 $ML{'.add.header'} h1?><?p " .
                      BML::ml('.add.text', {'user'=>$user, 'url'=>"$LJ::SITEROOT/users/$remote->{'user'}/friends"}) .
-                     " P=)";
+                     " p?>";
          }
      } else {
          $title = $ML{'Error'};
-         $body = "(=H1 $ML{'Error'} H1=)(=P $res{'errmsg'} P=)";
+         $body = "<?h1 $ML{'Error'} h1?><?p $res{'errmsg'} p?>";
      }
      return;
  }
@@ -84,11 +84,11 @@
  
  if ($fr) {
      $title .= $ML{'.error3.title'};
-     $body .= "(=H1 $ML{'.error3.title'} H1=)(=P " .
-              BML::ml('.error3.text', {'user'=>$user}) . " P=)";
+     $body .= "<?h1 $ML{'.error3.title'} h1?><?p " .
+              BML::ml('.error3.text', {'user'=>$user}) . " p?>";
  } else {
      $title .= $ML{'.confirm.title'};
-     $body .= "(=H1 " . BML::ml(".confirm.header", { 'user' => $user }) . " H1=)(=P " . BML::ml(".confirm.text", { 'user' => $user }) . " P=)";
+     $body .= "<?h1 " . BML::ml(".confirm.header", { 'user' => $user }) . " h1?><?p " . BML::ml(".confirm.text", { 'user' => $user }) . " p?>";
  }
 
  $body .= "<form method='post'>";
@@ -104,7 +104,7 @@
  }
 
  ## let them pick friend groups
- $body .= "(=H1 $ML{'.groups.header'} H1=)(=P $ML{'.groups.text'} P=)<blockquote>";
+ $body .= "<?h1 $ML{'.groups.header'} h1?><?p $ML{'.groups.text'} p?><blockquote>";
  my $err;
  my $greq = LJ::Protocol::do_request($dbs, "getfriendgroups", {
      'username' => $remote->{'user'},
@@ -128,8 +128,8 @@
  $body .= "</blockquote>";
 
  ## let them pick the colors
- $body .= "(=H1 $ML{'.colors.header'} H1=)(=P " .
-          BML::ml('.colors.text', {'user'=>$user}) . " P=)";
+ $body .= "<?h1 $ML{'.colors.header'} h1?><?p " .
+          BML::ml('.colors.text', {'user'=>$user}) . " p?>";
 
  $ret .= "<P><CENTER><TABLE CELLPADDING=4><TR><TD><B>$ML{'.colors.fg'}</B></TD><TD><B>$ML{'.colors.bg'}</B></TD></TR>\n";
 
@@ -178,12 +178,12 @@
 
  return;
      
-_CODE=)
-(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?>
+<?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/create.bml, htdocs/friends/edit.bml, htdocs/users
 img: htdocs/img/dot.gif
 post: htdocs/friends/add.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

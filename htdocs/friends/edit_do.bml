@@ -1,4 +1,4 @@
-(=PAGE
+<?page
 TITLE=>Edit Friends
 BODY<=
 
@@ -75,10 +75,10 @@ d.close();
 </SCRIPT>
 
 
-(=_CODE
+<?_code
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
- return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
+ return "<?badinput?>" unless LJ::text_in(\%FORM);
 
  my @errors = ();
  my $user = lc($FORM{'user'});
@@ -111,11 +111,11 @@ d.close();
          }, \%res, { "noauth" => 1 });
      if ($res{'friendof_count'})
      {
-         $ret .= "(=H1 Fellow Friends H1=)(=P The following people have listed you as their friend... You may want to list them as your friend too.  More than anything this is provided as a reference so you know their LiveJournal usernames too.  You are under no obligation to add them to your list. P=)\n";
-         $ret .= "<center><p align='center'><table><tr bgcolor='(=EMCOLOR=)'><td width='150'><b>User</b></td><td width='150'><b>Name</b></td></tr>\n";
+         $ret .= "<?h1 Fellow Friends h1?><?p The following people have listed you as their friend... You may want to list them as your friend too.  More than anything this is provided as a reference so you know their LiveJournal usernames too.  You are under no obligation to add them to your list. p?>\n";
+         $ret .= "<center><p align='center'><table><tr bgcolor='<?emcolor?>'><td width='150'><b>User</b></td><td width='150'><b>Name</b></td></tr>\n";
          for (my $i=1; $i <= $res{'friendof_count'}; $i++)
          {
-           $ret .= "<tr align='left'><td>(=LJUSER " . $res{"friendof_${i}_user"}. " LJUSER=)</td><td>" . $res{"friendof_${i}_name"} . "</td></tr>\n";
+           $ret .= "<tr align='left'><td><?ljuser " . $res{"friendof_${i}_user"}. " ljuser?></td><td>" . $res{"friendof_${i}_name"} . "</td></tr>\n";
          }
          $ret .= "</table></p></center>";
      }
@@ -124,7 +124,7 @@ d.close();
 
      $ret .= "<FORM METHOD=POST NAME=editFriends>\n";
      $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=domodify>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=(=_EH $user _EH=)>\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=<?_eh $user _eh?>>\n";
      $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
 
      %res = ();
@@ -138,14 +138,14 @@ d.close();
 
      if ($res{'friend_count'})
      {
-         $ret .= "(=H1 Your Friends H1=)(=P You have the following friends currently defined: P=)\n";
-         $ret .= "<p><center><table><tr bgcolor='(=EMCOLOR=)' align='left'><td width='150'><b>Friend</b></td><td width='250'><b>Name</b></td><td align='center'><b>Delete?</b></td></tr>\n";
+         $ret .= "<?h1 Your Friends h1?><?p You have the following friends currently defined: p?>\n";
+         $ret .= "<p><center><table><tr bgcolor='<?emcolor?>' align='left'><td width='150'><b>Friend</b></td><td width='250'><b>Name</b></td><td align='center'><b>Delete?</b></td></tr>\n";
          for (my $i=1; $i<=$res{'friend_count'}; $i++)
          {
              my $fruser = $res{"friend_${i}_user"};
              my $bgcolor = $res{"friend_${i}_bg"} || "#FFFFFF";
              my $fgcolor = $res{"friend_${i}_fg"} || "#000000";
-             $ret .= "<tr align='left'><td>(=LJUSER $fruser LJUSER=)</td>";
+             $ret .= "<tr align='left'><td><?ljuser $fruser ljuser?></td>";
              $ret .= "<td bgcolor='$bgcolor'><font color='$fgcolor'>" . BML::eall($res{"friend_${i}_name"}) . "</font></td>";
              $ret .= "<td><input type='checkbox' value='1' name=\"editfriend_delete_${fruser}\"></td></tr>\n";
          }
@@ -154,10 +154,10 @@ d.close();
      }
      else
      {
-         $ret .= "(=H1 No Friends? H1=)(=P You do not currently have any friends defined.  However, we're sure you have to have a few friends!  <tt>:)</tt>  Just enter their LiveJournal names below.... P=)\n";
+         $ret .= "<?h1 No Friends? h1?><?p You do not currently have any friends defined.  However, we're sure you have to have a few friends!  <tt>:)</tt>  Just enter their LiveJournal names below.... p?>\n";
      }
     
-     $ret .= "(=H1 Add Friends H1=)(=P Enter your friends' LiveJournal user names in the boxes below, and pick what background and foreground colors you want to associate with them.... P=)\n";
+     $ret .= "<?h1 Add Friends h1?><?p Enter your friends' LiveJournal user names in the boxes below, and pick what background and foreground colors you want to associate with them.... p?>\n";
      $ret .= "<SCRIPT LANGUAGE=\"JavaScript\"><!--\ndocument.write(\"<P><CENTER><INPUT TYPE=BUTTON VALUE=\\\"Toggle Preview Window\\\" onClick='togglePreview(); return true;'></CENTER></P>\");\n// -->\n</SCRIPT>\n";
      $ret .= "<P><CENTER><TABLE CELLPADDING=4><TR><TD><B>Friend</B></TD><TD><B>Foreground</B></TD><TD><B>Background</B></TD></TR>\n";
 
@@ -205,8 +205,8 @@ d.close();
      $ret .= "<P>If you need to add more friends than you have room for on this form, save the changes below, then come back to add more.\n";
 
      ### ending submit block
-     $ret .= "(=H1 Done? H1=)(=P When done, press the \"Save Changes\" button below... P=)\n";
-     $ret .= "(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> STANDOUT=)\n";
+     $ret .= "<?h1 Done? h1?><?p When done, press the \"Save Changes\" button below... p?>\n";
+     $ret .= "<?standout <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> standout?>\n";
      $ret .= "</FORM>\n";
 
      return $ret;
@@ -232,22 +232,22 @@ d.close();
      if ($response{'success'} eq "OK")
      {
          # tell the user all is well
-         return "(=H1 Success H1=)(=P Your friends have been updated.  You may view your newly updated friends page <A HREF=\"/users/$user/friends\">here</A>. P=)";
+         return "<?h1 Success h1?><?p Your friends have been updated.  You may view your newly updated friends page <A HREF=\"/users/$user/friends\">here</A>. p?>";
      }
      else
      {
-         return "(=H1 Error H1=)(=P There was an error updating your friends list:<UL><LI><B>$response{'errmsg'}</B></UL> P=)\n";
+         return "<?h1 Error h1?><?p There was an error updating your friends list:<UL><LI><B>$response{'errmsg'}</B></UL> p?>\n";
      }
  }
 
  return "Unknown mode."
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/users
 img: htdocs/img/dot.gif
 form: htdocs/friends/edit_do.bml
 post: htdocs/friends/edit_do.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

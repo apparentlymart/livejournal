@@ -1,6 +1,6 @@
-(=_INFO
+<?_info
 NOCACHE=>1
-_INFO=)(=_CODE
+_info?><?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -13,7 +13,7 @@ _INFO=)(=_CODE
 
  my $u = LJ::load_user($dbs, $FORM{'user'});
  unless ($u) {
-     return "(=H1 Unknown user H1=)(=P No user with that username.  Sorry. P=)";
+     return "<?h1 Unknown user h1?><?p No user with that username.  Sorry. p?>";
  }
  my $user = $u->{'user'};
 
@@ -28,4 +28,4 @@ _INFO=)(=_CODE
 
  return $ret;
 
-_CODE=)
+_code?>

@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = "Edit Friend Groups";
  $body = "";
@@ -10,7 +10,7 @@
  delete $FORM{'list_out'};
 
  unless (LJ::text_in(\%FORM)) {
-     $body = "(=BADINPUT=)";
+     $body = "<?badinput?>";
      return;
  }
 
@@ -19,7 +19,7 @@
 
  my $remote = LJ::get_remote($dbs);
  unless ($remote) {
-     $body = "(=H1 Login First H1=)(=P To edit your friend groups you must first <A HREF=\"/login.bml?ret=1\">log in</A>. P=)";
+     $body = "<?h1 Login First h1?><?p To edit your friend groups you must first <A HREF=\"/login.bml?ret=1\">log in</A>. p?>";
      return;
  }
 
@@ -34,9 +34,9 @@
      });
 
      if ($res{'success'} eq "OK") {
-         $body .= "(=H1 Saved H1=)(=P Your friend groups are now saved. P=)\n";     
+         $body .= "<?h1 Saved h1?><?p Your friend groups are now saved. p?>\n";     
      } else {
-         $body .= "(=H1 Error H1=)(=P Server says: <B>$res{'errmsg'}</B> P=)";
+         $body .= "<?h1 Error h1?><?p Server says: <B>$res{'errmsg'}</B> p?>";
      }
      return;
  }
@@ -52,8 +52,8 @@
  my @num_used;
  my @num_free;
 
- $body .= "(=H1 Friend Groups H1=)(=P From here you can edit your groups of friends.  Friend groups are used for setting security on items and for filtering your friends page.  This page requires JavaScript to work. P=)";
- $body .= "(=P <b>Security note:</b> If you want to delete a group and make a new group, do <B>NOT</B> simply rename one group to something else and change the people that are in the group.  If you do, all the people in the new group can see all your old entries you made for people in the old group. P=)";
+ $body .= "<?h1 Friend Groups h1?><?p From here you can edit your groups of friends.  Friend groups are used for setting security on items and for filtering your friends page.  This page requires JavaScript to work. p?>";
+ $body .= "<?p <b>Security note:</b> If you want to delete a group and make a new group, do <B>NOT</B> simply rename one group to something else and change the people that are in the group.  If you do, all the people in the new group can see all your old entries you made for people in the old group. p?>";
  $body .= "<P>";
  $body .= "\n<FORM METHOD=POST NAME=\"fg\">\n";
  $body .= "<input type=hidden name=mode value=save>\n";
@@ -326,15 +326,15 @@ END_JS
 
  $body .= "</TR></TABLE>\n";
 
- $body .= "(=H1 Done? H1=)(=P When you're all done, press <INPUT TYPE=submit VALUE=\"Save\"> P=)\n";
+ $body .= "<?h1 Done? h1?><?p When you're all done, press <INPUT TYPE=submit VALUE=\"Save\"> p?>\n";
  $body .= "</FORM>\n";
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 link: htdocs/login.bml
 post: htdocs/friends/editgroups.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

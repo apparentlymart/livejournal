@@ -1,7 +1,7 @@
-(=PAGE
+<?page
 TITLE=>Send a Text Message
 BODY<=
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -13,7 +13,7 @@ BODY<=
 
  if ($FORM{'mode'} eq "details") 
  {
-     $ret .= "(=H1 Service Providers H1=)(=P The following text messaging service providers are supported. P=)";
+     $ret .= "<?h1 Service Providers h1?><?p The following text messaging service providers are supported. p?>";
      $ret .= "<UL>";
      foreach my $p (LJ::TextMessage::providers()) {
          my $info = LJ::TextMessage::provider_info($p);
@@ -25,7 +25,7 @@ BODY<=
 } 
 
  unless ($user) {
-     $ret .= "(=H1 Enter user H1=)(=P Enter the LiveJournal username of the person you'd like to send a text message to: <UL><FORM METHOD=GET>Username: <INPUT TYPE=TEXT SIZE=15 MAXLENGTH=15 NAME=user> <INPUT TYPE=SUBMIT VALUE=\"Proceed...\"></FORM></UL> P=)";
+     $ret .= "<?h1 Enter user h1?><?p Enter the LiveJournal username of the person you'd like to send a text message to: <UL><FORM METHOD=GET>Username: <INPUT TYPE=TEXT SIZE=15 MAXLENGTH=15 NAME=user> <INPUT TYPE=SUBMIT VALUE=\"Proceed...\"></FORM></UL> p?>";
      &add_footer();
      return $ret;
  }
@@ -39,14 +39,14 @@ BODY<=
  }
 
  unless ($tminfo) {
-     $ret .= "(=H1 Unavailable H1=)(=P This user has not setup their text messaging ".
-         "information at LiveJournal or they've turned it off. P=)";
+     $ret .= "<?h1 Unavailable h1?><?p This user has not setup their text messaging ".
+         "information at LiveJournal or they've turned it off. p?>";
      &add_footer();
      return $ret;
  }
 
  unless (LJ::get_cap($u, "textmessaging")) {
-     $ret .= "(=H1 Unavailable H1=)(=P This user's account type does not permit text messaging. P=)";
+     $ret .= "<?h1 Unavailable h1?><?p This user's account type does not permit text messaging. p?>";
      &add_footer();
      return $ret;
  }
@@ -59,14 +59,14 @@ BODY<=
          $andbefriend = " and be listed as their friend";
      }
      unless ($remote) {
-         $ret .= "(=H1 Not logged in H1=)(=P To send a text message to this user, you must be <A HREF=\"/login.bml?ret=1\">logged in</A>$andbefriend. P=)";
+         $ret .= "<?h1 Not logged in h1?><?p To send a text message to this user, you must be <A HREF=\"/login.bml?ret=1\">logged in</A>$andbefriend. p?>";
          &add_footer();
          return $ret;
      }
 
      if ($tminfo->{'security'} eq "friends" && $u->{'userid'} != $remote->{'userid'}) {
          unless (LJ::is_friend($dbs, $u->{'userid'}, $remote->{'userid'})) {
-             $ret .= "(=H1 Unauthorized H1=)(=P User <B>$u->{'user'}</B> has selected \"friends only\" as the security level required to send text messages to them.  P=)";
+             $ret .= "<?h1 Unauthorized h1?><?p User <B>$u->{'user'}</B> has selected \"friends only\" as the security level required to send text messages to them.  p?>";
              &add_footer();
              return $ret;
          }
@@ -90,14 +90,14 @@ BODY<=
 
      return LJ::bad_input(@errors) if @errors;
 
-     $ret .= "(=H1 Success H1=)(=P Your text message was sent. P=)";
+     $ret .= "<?h1 Success h1?><?p Your text message was sent. p?>";
      &add_footer();
      return $ret;
  }
  
  my $pinfo = LJ::TextMessage::provider_info($tminfo->{'provider'});
 
-$ret .= "(=H1 Send a message H1=)(=P Fill out this form to send a text message to <B>$u->{'user'}</B>. P=)";
+$ret .= "<?h1 Send a message h1?><?p Fill out this form to send a text message to <B>$u->{'user'}</B>. p?>";
 $ret .= "<UL>";
 $ret .= "<FORM NAME=frmMsg METHOD=POST><INPUT TYPE=HIDDEN NAME=user VALUE=\"$u->{'user'}\">";
 $ret .= "<B>From: </B> ";
@@ -125,11 +125,11 @@ $ret .= "</FORM></UL>";
      $ret .= "<P><HR><FONT SIZE=-1>How does this feature work?  <A HREF=\"/support/faqbrowse.bml?faqid=30\">Read this</A>.<BR><B>Disclaimer:</B> The reliability of text messaging should not be trusted in dealing with emergencies.</FONT>";
  }
 
-_CODE=)
+_code?>
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 lib: LJ::TextMessage
 link: htdocs/login.bml, htdocs/support/faqbrowse.bml
 form: htdocs/tools/textmessage.bml
 post: htdocs/tools/textmessage.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
