@@ -281,6 +281,7 @@ sub EntryPage_entry
         'read_url' => $readurl,
         'post_url' => $posturl,
         'count' => $replycount,
+        'maxcomments' => ($replycount >= LJ::get_cap($u, 'maxcomments')) ? 1 : 0,
         'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! 
                       $entry->{'props'}->{'opt_nocomments'}) ? 1 : 0,
         'screened' => ($entry->{'props'}->{'hasscreened'} && $remote &&

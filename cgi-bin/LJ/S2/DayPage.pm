@@ -149,6 +149,7 @@ sub DayPage
             'read_url' => $readurl,
             'post_url' => $posturl,
             'count' => $replycount,
+            'maxcomments' => ($replycount >= LJ::get_cap($u, 'maxcomments')) ? 1 : 0,
             'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0,
             'screened' => ($logprops{$itemid}->{'hasscreened'} && $remote &&
                            ($remote->{'user'} eq $u->{'user'} || LJ::check_rel($u, $remote, 'A'))) ? 1 : 0,

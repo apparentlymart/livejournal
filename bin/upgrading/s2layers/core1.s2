@@ -193,6 +193,7 @@ class CommentInfo
     var int count "Current number of comments available to be read by the viewer.";
     var bool screened "Set to true if there are screened comments and remote user can unscreen them.";
     var bool enabled "Set to false if comments disabled journal-wide or just on this item.";
+    var bool maxcomments "Set to true if entry has reached a comment maximum.";
 
     function print
     "Print all comment related links";
@@ -856,12 +857,17 @@ property string text_post_comment {
     des = "Link text to leave a comment.";
     example = "Leave a comment";
 }
+property string text_max_comments {
+    des = "Text when entry has reached a comment maximum";
+    example = "Maximum comments reached";
+}
 property string text_read_comments {
     des = "Link text to read comments.";
     format = "plurals";
     example = "1 comment // # comments";
 }
 set text_post_comment = "Leave a comment";
+set text_max_comments = "Maximum comments reached";
 set text_read_comments = "1 comment // # comments";
 
 property string text_post_comment_friends {
@@ -1737,7 +1743,11 @@ function CommentInfo::print_readlink {
 }
 function CommentInfo::print_postlink() {
     var Page p = get_page();
-    "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+    if ($.maxcomments) {
+        "$*text_max_comments";
+    } else {
+        "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+    }
 }
 function CommentInfo::print() {
     if (not $.enabled) { return; }
