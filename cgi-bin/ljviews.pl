@@ -432,10 +432,15 @@ sub create_view_lastn
 
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
+        if ($FORM{'nohtml'}) {
+            # quote all non-LJ tags
+            $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
+            $event   =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
+        }
 
-	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-	    LJ::item_toutf8($dbs, $u, \$subject, \$event, $logprops{$itemid});
-	}
+        if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
+            LJ::item_toutf8($dbs, $u, \$subject, \$event, $logprops{$itemid});
+        }
 
         my %lastn_date_format = LJ::alldateparts_to_hash($alldatepart);
 
@@ -889,6 +894,11 @@ sub create_view_friends
             
         my $subject = $logtext->{$datakey}->[0];
         my $event = $logtext->{$datakey}->[1];
+        if ($FORM{'nohtml'}) {
+            # quote all non-LJ tags
+            $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
+            $event   =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
+        }
 
         if ($LJ::UNICODE && $logprops{$datakey}->{'unknown8bit'}) {
             LJ::item_toutf8($dbs, $friends{$friendid}, \$subject, \$event, $logprops{$datakey});
