@@ -5,11 +5,20 @@
 # </LJDEP>
 
 use strict;
+use Getopt::Long
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+
+my $opt_foreground;
+my $opt_debug;
+exit 1 unless GetOptions('foreground' => \$opt_foreground,
+                         'debug' => \$opt_debug,
+                         );
 
 BEGIN {
     $LJ::OPTMOD_PROCTABLE = eval "use Proc::ProcessTable; 1;";
 }
+
+
 
 my $DELAY = $LJ::QBUFFERD_DELAY || 15;
 
@@ -47,7 +56,7 @@ $SIG{'HUP'} = sub {
 };
 
 # Perhaps I should give it a command to not do this in the future.
-if ($pid = fork) 
+if (!$opt_foreground && ($pid = fork)) 
 {
     $is_parent = 1;
     unless (open (PID, ">$pidfile")) {
@@ -72,6 +81,7 @@ $running = 1;
 while (LJ::start_request())
 {
     my $cycle_start = time();
+    print "Starting cycle.\n" if $opt_debug;
 
     # do main cluster updates
     my $dbh = LJ::get_dbh("master");
@@ -89,6 +99,7 @@ while (LJ::start_request())
         
     # handle clusters
     foreach my $c (@LJ::CLUSTERS) {
+        print "Cluster: $c\n" if $opt_debug;
         my $db = LJ::get_cluster_master($c);
         next unless $db;
 
@@ -96,10 +107,12 @@ while (LJ::start_request())
         $sth->execute;
         my @cmds;
         while (my ($cmd, $count) = $sth->fetchrow_array) {
+            print "  $cmd ($count)\n" if $opt_debug;
             LJ::cmd_buffer_flush($dbh, $db, $cmd);
         }
     }
 
+    print "Sleeping.\n" if $opt_debug;
     my $elapsed = time() - $cycle_start;
     sleep ($DELAY-$elapsed) if $elapsed < $DELAY;
 };
