@@ -237,7 +237,9 @@ sub get_dbh {
   ROLE:
     foreach my $role (@_) {
         if (($mapping = $LJ::WRAPPED_DB_ROLE{$role}) && ! $opts->{raw}) {
-            return $LJ::REQ_DBIX_KEEPER{$role} if $LJ::REQ_DBIX_KEEPER{$role};
+	    if (my $keeper = $LJ::REQ_DBIX_KEEPER{$role}) {
+		return $keeper->set_database() ? $keeper : undef;
+	    }
             my ($canl_role, $dbname) = @$mapping;
             my $tracker;
             # DBIx::StateTracker::new will die if it can't connect to the database,
@@ -251,7 +253,7 @@ sub get_dbh {
             if ($tracker) {
                 my $keeper = DBIx::StateKeeper->new($tracker, $dbname);
                 $LJ::REQ_DBIX_KEEPER{$role} = $keeper;
-                return $keeper;
+		return $keeper->set_database() ? $keeper : undef;
             }
             next ROLE;
         }
@@ -320,13 +322,13 @@ sub get_lock
 # des: see if we COULD get a mysql lock on a given key/dbrole combination,
 #      but don't actually get it.
 # returns: undef if called improperly, true on success, die() on failure
-# args: dbrole
+# args: db, dbrole
 # des-dbrole: the role this lock should be gotten on, either 'global' or 'user'
 # </LJFUNC>
 sub may_lock
 {
-    my $dbrole = shift;
-    return undef unless$dbrole eq 'global' || $dbrole eq 'user';
+    my ($db, $dbrole) = @_;
+    return undef unless $db && ($dbrole eq 'global' || $dbrole eq 'user');
 
     # die if somebody already has a lock
     if ($LJ::LOCK_OUT{$dbrole}) {
