@@ -185,7 +185,7 @@
      $friends{'count'} = scalar @friends;
      $friends{'loaded'} = 1;
      if ($friends{'count'} > $MAX_FRIENDS_SHOW) {
-         $friends{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=$u->{'userid'}");
+         $friends{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE userid=$u->{'userid'}");
      }
  }
 
@@ -202,7 +202,7 @@
      $friendsof{'loaded'} = 1;
      if ($friendsof{'count'} > $MAX_FRIENDS_SHOW) {
          # note: not entirely accurate (includes suspended/deleted users) but close enough:
-         $friendsof{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE userid=$u->{'userid'}");
+         $friendsof{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=$u->{'userid'}");
      }
  }
 
