@@ -20,7 +20,7 @@ sub new {
 }
 
 sub get {
-	my ($self, $cid, $uid, $domain, $fmt, $bid) = @_;
+    my ($self, $cid, $uid, $domain, $fmt, $bid) = @_;
     my $fh = new IO::File;
     local $/ = undef;
     my $path = make_path(@_);
@@ -44,7 +44,7 @@ sub get_stream {
         return undef;
     }
     my $data;
-    while (read($fh, $data, 4096)) {
+    while (read($fh, $data, 1024*50)) {
         $callback->($data);
     }
     close($fh);
