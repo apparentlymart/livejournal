@@ -799,9 +799,9 @@ sub postevent
     # update user update table (on which friends views rely)
     {
         my @bits;
-        if ($req->{'security'} eq "public") {
+        if ($security eq "public") {
             push @bits, 31;  # 31 means public
-        } elsif ($req->{'security'} eq "private") {
+        } elsif ($security eq "private") {
             push @bits, 32;  # 1<<32 doesn't exist (too big), but we'll use it in this table
         } else {
             for (my $i=0; $i<=30; $i++) {

@@ -289,7 +289,6 @@ sub get_friend_items
         while (my ($friendid, $mask) = $sth->fetchrow_array) {
             $gmask_from->{$friendid} = $mask;
         }
-        $sth->finish;
     }
 
     my $filtersql;
