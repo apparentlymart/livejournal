@@ -4435,7 +4435,7 @@ sub cmd_buffer_flush
                         ->new( proxy => "http://rpc.weblogs.com/RPC2",
                                timeout => 5 )
                         ->call('weblogUpdates.ping', # xml-rpc method call
-                               LJ::ehtml($a->{'title'}),
+                               LJ::ehtml($a->{'title'}) . " \@ $LJ::SITENAMESHORT",
                                $a->{'url'},
                                "$LJ::SITEROOT/misc/weblogs-change.bml?user=$a->{'user'}");
                 };
