@@ -81,7 +81,6 @@ sub FriendsPage
     if ($skip < 0) { $skip = 0; }
     my $itemload = $itemshow+$skip;
 
-    my %owners;
     my $filter;
     my $group;
     my $common_filter = 1;
@@ -96,11 +95,17 @@ sub FriendsPage
             $group =~ s!/$!!;
             if ($group) { $group = LJ::durl($group); $common_filter = 0; }
         }
-        my $qgroup = $dbr->quote($group || "Default View");
-        my ($bit, $public) = $dbr->selectrow_array("SELECT groupnum, is_public " .
-            "FROM friendgroup WHERE userid=$u->{'userid'} AND groupname=$qgroup");
-        if ($bit && ($public || ($remote && $remote->{'user'} eq $user))) { 
-            $filter = (1 << $bit); 
+        $group ||= "Default View";
+        my $grp = LJ::get_friend_group($u, { 'name' => $group });
+        my $bit = $grp->{'groupnum'};
+        my $public = $grp->{'is_public'};
+        if ($bit) {
+            if ($public || ($remote && $remote->{'user'} eq $user)) { 
+                $filter = (1 << $bit);
+            } else {
+                $opts->{'badfriendgroup'} = 1;
+                return 1;
+            }
         }
     }
 
@@ -137,6 +142,8 @@ sub FriendsPage
     }
     
     ## load the itemids 
+    my %friends;
+    my %friends_row;
     my %idsbycluster;
     my @items = LJ::get_friend_items({
         'u' => $u,
@@ -146,28 +153,18 @@ sub FriendsPage
         'skip' => $skip,
         'filter' => $filter,
         'common_filter' => $common_filter,
-        'owners' => \%owners,
+        'friends_u' => \%friends,
+        'friends' => \%friends_row,
         'idsbycluster' => \%idsbycluster,
         'showtypes' => $get->{'show'},
         'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
         'dateformat' => 'S2',
     });
 
-    my $ownersin = join(",", keys %owners);
-
-    my %friends = ();
-    unless ($opts->{'view'} eq "friendsfriends") {
-        $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, f.fgcolor, f.bgcolor, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc, u.journaltype FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=$u->{'userid'} AND f.friendid IN ($ownersin)");
-    } else {
-        $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc, u.journaltype FROM user u WHERE u.userid IN ($ownersin)");
-    }
-
-    $sth->execute;
-    while ($_ = $sth->fetchrow_hashref) {
-        next unless ($_->{'statusvis'} eq "V");  # ignore suspended/deleted users.
-        $_->{'fgcolor'} = LJ::color_fromdb($_->{'fgcolor'}) || "#000000";
-        $_->{'bgcolor'} = LJ::color_fromdb($_->{'bgcolor'}) || "#ffffff";
-        $friends{$_->{'userid'}} = $_;
+    while ($_ = each %friends) {
+        # we expect fgcolor/bgcolor to be in here later
+        $friends{$_}->{'fgcolor'} = $friends_row{$_}->{'fgcolor'} || '#ffffff';
+        $friends{$_}->{'bgcolor'} = $friends_row{$_}->{'bgcolor'} || '#000000';
     }
 
     return $p unless %friends;

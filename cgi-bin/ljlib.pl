@@ -457,6 +457,219 @@ sub get_log2_recent_user
 }
 
 # <LJFUNC>
+# name: LJ::get_friend_group
+# des: Returns friendgroup row(s) for a given user.
+# args: uuserid, opt?
+# des-uuserid: a userid or u object
+# des-opt: a hashref with keys: 'bit' => bit number of group to return
+#                               'name' => name of group to return
+# returns: hashref; if bit/name are specified, returns hashref with keys being
+#                   friendgroup rows, or undef if the group wasn't found.
+#
+#                   otherwise, returns hashref of all group rows with keys being
+#                   group bit numbers and values being row col => val hashrefs
+# </LJFUNC>
+sub get_friend_group {
+    my ($uuid, $opt) = @_;
+    my $uid = want_userid($uuid);
+    return undef unless $uid;
+
+    # data version number
+    my $ver = 1;
+
+    # sanity check bitnum
+    delete $opt->{'bit'} if
+        $opt->{'bit'} > 31 || $opt->{'bitnum'} < 0;
+
+    my $fg;
+    my $find_grp = sub {
+
+        # $fg format:
+        # [ version, [userid, bitnum, name, sortorder, public], [...], ... ]
+
+        my $memver = shift @$fg;
+        return undef unless $memver == $ver;
+
+        # bit number was specified
+        if ($opt->{'bit'}) {
+            foreach (@$fg) {
+                return LJ::MemCache::array_to_hash("fgrp", [$memver, @$_])
+                    if $_->[1] == $opt->{'bit'};
+            }
+            return undef;
+        }
+
+        # group name was specified
+        if ($opt->{'name'}) {
+            foreach (@$fg) {
+                return LJ::MemCache::array_to_hash("fgrp", [$memver, @$_])
+                    if $_->[2] eq $opt->{'name'};
+            }
+            return undef;
+        }
+
+        # no arg, return entire object
+        return { map { $_->[1] => LJ::MemCache::array_to_hash("fgrp", [$memver, @$_]) } @$fg };
+    };
+
+    # check memcache
+    my $memkey = [$uid, "fgrp:$uid"];
+    $fg = LJ::MemCache::get($memkey);
+    return $find_grp->() if $fg;
+
+    # check database
+    $fg = [$ver];
+    my $dbh = LJ::get_db_writer();
+    my $sth = $dbh->prepare("SELECT userid, groupnum, groupname, sortorder, is_public " .
+                            "FROM friendgroup WHERE userid=?");
+    $sth->execute($uid);
+    my @row;
+    push @$fg, [ @row ] while @row = $sth->fetchrow_array;
+
+    # set in memcache
+    LJ::MemCache::set($memkey, $fg);
+
+    return $find_grp->();
+}
+
+# <LJFUNC>
+# name: LJ::get_friends
+# des: Returns friends rows for a given user.
+# args: uuserid, mask?, memcache_only?
+# des-uuserid: a userid or u object
+# des-mask: a security mask to filter on
+# des-memcache_only: flag, set to only return data from memcache
+# returns: hashref; keys = friend userids
+#                   values = hashrefs of 'friends' columns and their values
+# </LJFUNC>
+sub get_friends {
+    my ($uuid, $mask, $memcache_only) = @_;
+    my $userid = LJ::want_userid($uuid);
+    return unless $userid;
+
+    my $packfmt = "NH6H6NC";
+    my $packlen = 15;  # bytes
+
+    my @cols = qw(friendid fgcolor bgcolor groupmask showbydefault);
+
+    # first, check memcache
+    my $memkey = [$userid, "friends:$userid"];
+    my $memfriends = LJ::MemCache::get($memkey);
+    if ($memfriends) {
+        my %friends; # rows to be returned
+
+        # get each $packlen-byte row
+        while (length($memfriends) >= $packlen) {
+            my @row = unpack($packfmt, substr($memfriends, 0, $packlen, ''));
+
+            # don't add into %friends hash if groupmask doesn't match
+            next if $mask && ! ($row[3]+0 & $mask+0);
+
+            # add "#" to beginning of colors
+            $row[$_] = "\#$row[$_]" foreach 1..2;
+
+            # turn unpacked row into hashref
+            my $fid = $row[0];
+            my $idx = 1;
+            foreach my $col (@cols[1..$#cols]) {
+                $friends{$fid}->{$col} = $row[$idx];
+                $idx++;
+            }
+        }
+
+        # got from memcache, return
+        return \%friends;
+    }
+    return if $memcache_only;
+
+    # nothing from memcache, select all rows from the
+    # database and insert those into memcache
+    # then return rows that matched the given groupmask
+
+    my $mempack; # full packed string to insert into memcache
+    my %friends; # friends object to be returned, all groupmasks match
+    my $dbh = LJ::get_db_writer();
+    my $sth = $dbh->prepare("SELECT friendid, fgcolor, bgcolor, groupmask, showbydefault " .
+                            "FROM friends WHERE userid=?");
+    $sth->execute($userid);
+    while (my @row = $sth->fetchrow_array) {
+
+        # convert color columns to hex
+        $row[$_] = sprintf("%06x", $row[$_]) foreach 1..2;
+
+        $mempack .= pack($packfmt, @row);
+
+        # unless groupmask matches, skip adding to %friends
+        next if $mask && ! ($row[3]+0 & $mask+0);
+
+        # add "#" to beginning of colors
+        $row[$_] = "\#$row[$_]" foreach 1..2;
+
+        my $fid = $row[0];
+        my $idx = 1;
+        foreach my $col (@cols[1..$#cols]) {
+            $friends{$fid}->{$col} = $row[$idx];
+            $idx++;
+        }
+    }
+
+    LJ::MemCache::add($memkey, $mempack);
+
+    return \%friends;
+}
+
+# <LJFUNC>
+# name: LJ::get_timeupdate_multi
+# des: Get the last time a list of users updated
+# args: opt?, uids
+# des-opt: optional hashref, currently can contain 'memcache_only'
+#          to only retrieve data from memcache
+# des-uids: list of userids to load timeupdates for
+# returns: hashref; uid => unix timeupdate
+# </LJFUNC>
+sub get_timeupdate_multi {
+    my ($opt, @uids) = @_;
+
+    # allow optional opt hashref as first argument
+    unless (ref $opt eq 'HASH') {
+        push @uids, $opt;
+        $opt = {};
+    }
+    return {} unless @uids;
+
+    my @memkeys = map { [$_, "tu:$_"] } @uids;
+    my $mem = LJ::MemCache::get_multi(@memkeys) || {};
+
+    my @need;
+    my %timeupdate; # uid => timeupdate
+    foreach (@uids) {
+        if ($mem->{"tu:$_"}) {
+            $timeupdate{$_} = unpack("N", $mem->{"tu:$_"});
+        } else {
+            push @need, $_;
+        }
+    }
+
+    # if everything was in memcache, return now
+    return \%timeupdate if $opt->{'memcache_only'} || ! @need;
+
+    # fill in holes from the database
+    my $dbh = LJ::get_db_writer();
+    my $need_bind = join(",", map { "?" } @need);
+    my $sth = $dbh->prepare("SELECT userid, UNIX_TIMESTAMP(timeupdate) " .
+                            "FROM userusage WHERE userid IN ($need_bind)");
+    $sth->execute(@need);
+    while (my ($uid, $tu) = $sth->fetchrow_array) {
+        $timeupdate{$uid} = $tu;
+
+        # set memcache for this row
+        LJ::MemCache::set([$uid, "tu:$uid"], pack("N", $tu));
+    }
+
+    return \%timeupdate;
+}
+
+# <LJFUNC>
 # name: LJ::get_friend_items
 # des: Return friend items for a given user, filter, and period.
 # args: dbarg?, opts
@@ -466,7 +679,8 @@ sub get_log2_recent_user
 #           - itemshow
 #           - skip
 #           - filter  (opt) defaults to all
-#           - owners  (opt) hashref to set found userid keys to value 1
+#           - friends (opt) friends rows loaded via LJ::get_friends()
+#           - friends_u (opt) u objects of all friends loaded
 #           - idsbycluster (opt) hashref to set clusterid key to [ [ journalid, itemid ]+ ]
 #           - dateformat:  either "S2" for S2 code, or anything else for S1
 #           - common_filter:  set true if this is the default view
@@ -519,22 +733,159 @@ sub get_friend_items
         }
     }
 
-    my $filtersql;
-    if ($filter) {
-        $filtersql = "AND f.groupmask & $filter";
-    }
+    # given a hash of friends rows, strip out rows with invalid journaltype
+    my $filter_journaltypes = sub {
+        my ($friends, $friends_u, $memcache_only) = @_;
+        return unless $friends && $friends_u;
+
+        # load u objects for all the given
+        LJ::load_userids_multiple([ map { $_, \$friends_u->{$_} } keys %$friends ], [$remote]);
+
+        # delete u objects based on 'showtypes'
+        if ($opts->{'showtypes'}) {
+            foreach my $fid (keys %$friends_u) {
+                next if $opts->{'showtypes'} =~ /$friends_u->{$fid}->{'journaltype'}/i;
+
+                delete $friends_u->{$fid};
+                delete $friends->{$fid};
+            }
+        }
+
+        # all args passed by reference
+        return;
+    };
 
     my @friends_buffer = ();
     my $fr_loaded = 0;  # flag:  have we loaded friends?
 
+    # normal friends mode
     my $get_next_friend = sub
     {
         # return one if we already have some loaded.
         return $friends_buffer[0] if @friends_buffer;
+        return undef if $fr_loaded;
 
-        # load another batch if we just started or
-        # if we just finished a batch.
-        unless ($fr_loaded++) {
+        # get all friends for this user and groupmask
+        my $friends = LJ::get_friends($userid, $filter);
+        my %friends_u;
+
+        # strip out rows with invalid journal types
+        $filter_journaltypes->($friends, \%friends_u);
+
+        # get update times for all the friendids
+        my $timeupdate = LJ::get_timeupdate_multi(keys %$friends);
+
+        # now push a properly formatted @friends_buffer row
+        foreach my $fid (keys %$timeupdate) {
+            next unless $friends_u{$fid};
+            my $rupdate = $LJ::EndOfTime - $timeupdate->{$fid};
+            my $clusterid = $friends_u{$fid}->{'clusterid'};
+
+            push @friends_buffer, [ $fid, $rupdate, $clusterid, $friends->{$fid}, $friends_u{$fid} ];
+        }
+
+        @friends_buffer = sort { $a->[1] <=> $b->[1] } @friends_buffer;
+
+        # note that we've already loaded the friends
+        $fr_loaded = 1;
+
+        # return one if we just found some, else we're all
+        # out and there's nobody else to load.
+        return @friends_buffer ? $friends_buffer[0] : undef;
+    };
+
+    # memcached friends of friends mode
+    $get_next_friend = sub
+    {
+        # return one if we already have some loaded.
+        return $friends_buffer[0] if @friends_buffer;
+        return undef if $fr_loaded;
+
+        # get journal's friends
+        my $friends = LJ::get_friends($userid, $filter);
+        my %friends_u;
+
+        # strip out invalid friend journaltypes
+        $filter_journaltypes->($friends, \%friends_u, "memcache_only");
+
+        # get update times for all the friendids
+        my $f_tu = LJ::get_timeupdate_multi({'memcache_only' => 1}, keys %$friends);
+
+        # get friends of friends
+        my $ffct = 0;
+        my %ffriends = ();
+        foreach my $fid (sort { $f_tu->{$b} <=> $f_tu->{$a} } keys %$friends) {
+            last if $ffct > 50;
+            my $ff = LJ::get_friends($fid, undef, "memcache_only");
+            my $ct = 0;
+            foreach my $ffid (keys %$ff) {
+                last if $ct > 100;
+                next if $friends->{$ffid} || $ffid == $userid;
+                $ffriends{$ffid} = $ff->{$ffid};
+                $ct++;
+            }
+            $ffct++;
+        }
+
+        # strip out invalid friendsfriends journaltypes
+        my %ffriends_u;
+        $filter_journaltypes->(\%ffriends, \%ffriends_u, "memcache_only");
+
+        # get update times for all the friendids
+        my $ff_tu = LJ::get_timeupdate_multi({'memcache_only' => 1}, keys %ffriends);
+
+        # build friends buffer
+        foreach my $ffid (sort { $ff_tu->{$b} <=> $ff_tu->{$a} } keys %$ff_tu) {
+            my $rupdate = $LJ::EndOfTime - $ff_tu->{$ffid};
+            my $clusterid = $ffriends_u{$ffid}->{'clusterid'};
+
+            # since this is ff mode, we'll force colors to ffffff on 000000
+            $ffriends{$ffid}->{'fgcolor'} = "#000000";
+            $ffriends{$ffid}->{'bgcolor'} = "#ffffff";
+
+            push @friends_buffer, [ $ffid, $rupdate, $clusterid, $ffriends{$ffid}, $ffriends_u{$ffid} ];
+        }
+
+        @friends_buffer = sort { $a->[1] <=> $b->[1] } @friends_buffer;
+
+        # note that we've already loaded the friends
+        $fr_loaded = 1;
+
+        # return one if we just found some fine, else we're all
+        # out and there's nobody else to load.
+        return @friends_buffer ? $friends_buffer[0] : undef;
+
+    } if $opts->{'friendsoffriends'} && @LJ::MEMCACHE_SERVERS;
+
+    # old friends of friends mode
+    # - use this when there are no memcache servers
+    $get_next_friend = sub
+    {
+        # return one if we already have some loaded.
+        return $friends_buffer[0] if @friends_buffer;
+        return undef if $fr_loaded;
+
+        # load all user's friends
+        my %f;
+        my $sth = $dbr->prepare(qq{
+            SELECT f.friendid, f.groupmask, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate),
+            u.journaltype FROM friends f, userusage uu, user u
+            WHERE f.userid=? AND f.friendid=uu.userid AND u.userid=f.friendid
+        });
+        $sth->execute($userid);
+        while (my ($id, $mask, $time, $jt) = $sth->fetchrow_array) {
+            next if $id == $userid; # don't follow user's own friends
+            $f{$id} = { 'userid' => $id, 'timeupdate' => $time, 'jt' => $jt,
+                        'relevant' => ($filter && !($mask & $filter)) ? 0 : 1 , };
+        }
+            
+        # load some friends of friends (most 20 queries)
+        my %ff;
+        my $fct = 0;
+        foreach my $fid (sort { $f{$a}->{'timeupdate'} <=> $f{$b}->{'timeupdate'} } keys %f)
+        {
+            next unless $f{$fid}->{'jt'} eq "P" && $f{$fid}->{'relevant'};
+            last if ++$fct > 20;
             my $extra;
             if ($opts->{'showtypes'}) {
                 my @in;
@@ -543,84 +894,32 @@ sub get_friend_items
                 if ($opts->{'showtypes'} =~ /C/) { push @in, "'C','S','N'"; }
                 $extra = "AND u.journaltype IN (".join (',', @in).")" if @in;
             }
-            my $sth = $dbr->prepare("SELECT u.userid, u.clusterid, uu.timeupdate ".
-                                    "FROM friends f, userusage uu, user u ".
-                                    "WHERE f.userid=? AND f.friendid=uu.userid ".
-                                    "AND f.friendid=u.userid $filtersql AND u.statusvis='V' $extra ".
-                                    "AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 14 DAY) " .
-                                    "LIMIT 500");
-            $sth->execute($userid);
 
-            while (my ($userid, $clusterid, $timeupdate) = $sth->fetchrow_array) {
-                my $update = $LJ::EndOfTime - LJ::mysqldate_to_time($timeupdate);
-                push @friends_buffer, [ $userid, $update, $clusterid, $timeupdate ];
-            }
-
-            @friends_buffer = sort { $a->[1] <=> $b->[1] } @friends_buffer;
-
-            # return one if we just found some fine, else we're all
-            # out and there's nobody else to load.
-            return $friends_buffer[0] if @friends_buffer;
-            return undef;
-        }
-
-        # otherwise we must've run out.
-        return undef;
-    };
-
-    # friends of friends mode
-    $get_next_friend = sub
-    {
-        unless (@friends_buffer || $fr_loaded) 
-        {
-            # load all user's friends
-            my %f;
             my $sth = $dbr->prepare(qq{
-                SELECT f.friendid, f.groupmask, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate),
-                u.journaltype FROM friends f, userusage uu, user u
-                WHERE f.userid=$userid AND f.friendid=uu.userid AND u.userid=f.friendid
+                SELECT u.*, UNIX_TIMESTAMP(uu.timeupdate) AS timeupdate
+                FROM friends f, userusage uu, user u WHERE f.userid=? AND
+                    f.friendid=uu.userid AND f.friendid=u.userid AND u.statusvis='V' $extra
+                    AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 14 DAY) LIMIT 100
             });
-            $sth->execute;
-            while (my ($id, $mask, $time, $jt) = $sth->fetchrow_array) {
-                $f{$id} = { 'userid' => $id, 'timeupdate' => $time, 'jt' => $jt,
-                            'relevant' => ($filter && !($mask & $filter)) ? 0 : 1 , };
-            }
-            
-            # load some friends of friends (most 20 queries)
-            my %ff;
-            my $fct = 0;
-            foreach my $fid (sort { $f{$a}->{'timeupdate'} <=> $f{$b}->{'timeupdate'} } keys %f)
-            {
-                next unless $f{$fid}->{'jt'} eq "P" and $f{$fid}->{'relevant'};
-                last if ++$fct > 20;
-                my $extra;
-                if ($opts->{'showtypes'}) {
-                    my @in;
-                    if ($opts->{'showtypes'} =~ /P/) { push @in, "'P'"; }
-                    if ($opts->{'showtypes'} =~ /Y/) { push @in, "'Y'"; }
-                    if ($opts->{'showtypes'} =~ /C/) { push @in, "'C','S','N'"; }
-                    $extra = "AND u.journaltype IN (".join (',', @in).")" if @in;
-                }
-                my $sth = $dbr->prepare(qq{
-                    SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid 
-                    FROM friends f, userusage uu, user u WHERE f.userid=$fid AND
-                         f.friendid=uu.userid AND f.friendid=u.userid AND u.statusvis='V' $extra
-                         AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 14 DAY) LIMIT 100
-                });
-                $sth->execute;
-                while (my ($id, $time, $c) = $sth->fetchrow_array) {
-                    next if $f{$id};  # we don't wanna see our friends
-                    $ff{$id} = [ $id, $time, $c ];
-                }
-            }
+            $sth->execute($fid);
+            while (my $u = $sth->fetchrow_hashref) {
+                my $uid = $u->{'userid'};
+                next if $f{$uid} || $uid == $userid;  # we don't wanna see our friends
 
-            @friends_buffer = sort { $a->[1] <=> $b->[1] } values %ff;
-            $fr_loaded = 1;
+                # timeupdate
+                my $time = $LJ::EndOfTime-$u->{'timeupdate'};
+                delete $u->{'timeupdate'}; # not a proper $u column
+
+                $ff{$uid} = [ $uid, $time, $u->{'clusterid'}, {}, $u ];
+            }
         }
 
-        return $friends_buffer[0] if @friends_buffer;
-        return undef;       
-    } if $opts->{'friendsoffriends'};
+        @friends_buffer = sort { $a->[1] <=> $b->[1] } values %ff;
+        $fr_loaded = 1;
+
+        return @friends_buffer ? $friends_buffer[0] : undef;
+        
+    } if $opts->{'friendsoffriends'} && ! @LJ::MEMCACHE_SERVERS;
 
     my $loop = 1;
     my $itemsleft = $getitems;  # even though we got a bunch, potentially, they could be old
@@ -632,6 +931,9 @@ sub get_friend_items
 
         # load the next recent updating friend's recent items
         my $friendid = $fr->[0];
+
+        $opts->{'friends'}->{$friendid} = $fr->[3];  # friends row
+        $opts->{'friends_u'}->{$friendid} = $fr->[4]; # friend u object
 
         my @newitems = LJ::get_log2_recent_user({
             'clusterid' => $fr->[2],
@@ -4497,15 +4799,16 @@ sub update_user
 #       listref (not hashref: can't have dups).  values of $map listref are
 #       scalar refs to put result in.  $have is an optional listref of user
 #       object caller already has, but is too lazy to sort by themselves.
-# args: dbarg?, map, have
+# args: dbarg?, map, have, memcache_only?
 # des-map: Arrayref of pairs (userid, destination scalarref)
 # des-have: Arrayref of user objects caller already has
+# des-memcache_only: Flag to only retrieve data from memcache
 # returns: Nothing.
 # </LJFUNC>
 sub load_userids_multiple
 {
     &nodb;
-    my ($map, $have) = @_;
+    my ($map, $have, $memcache_only) = @_;
 
     my $sth;
 
@@ -4544,7 +4847,7 @@ sub load_userids_multiple
         }
     }
 
-    if (%need) {
+    if (%need && ! $memcache_only) {
         my $in = join(", ", map { $_+0 } keys %need);
         my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
         ($sth = $db->prepare("SELECT * FROM user WHERE userid IN ($in)"))->execute;
@@ -5914,6 +6217,22 @@ sub delete_all_comments {
     
 }
 
+# <LJFUNC>
+# name: LJ::memcache_kill
+# des: Kills a memcache entry, given a userid and type
+# args: uuserid, type
+# des-uuserid: a userid or u object
+# des-args: memcache key type, will be used as "$type:$userid"
+# returns: results of LJ::MemCache::delete
+# </LJFUNC>
+sub memcache_kill {
+    my ($uuid, $type) = @_;
+    my $userid = want_userid($uuid);
+    return undef unless $userid && $type;
+
+    return LJ::MemCache::delete([$userid, "$type:$userid"]);
+}
+
 # all reads/writes to talk2 must be done inside a lock, so there's
 # no race conditions between reading from db and putting in memcache.
 # can't do a db write in between those 2 steps.  the talk2 -> memcache
@@ -5971,6 +6290,28 @@ sub log2_do {
     $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
 
     LJ::MemCache::delete($memkey, 0) if int($ret);
+    return $ret;
+}
+
+# <LJFUNC>
+# name: LJ::friends_do
+# des: Runs given sql, then deletes the given userid's friends from memcache
+# args: uuserid, sql, args
+# des-uuserid: a userid or u object
+# des-sql: sql to run via $dbh->do()
+# des-args: a list of arguments to pass use via: $dbh->do($sql, undef, @args)
+# returns: results of $dbh->do()
+# </LJFUNC>
+sub friends_do {
+    my ($uuid, $sql, @args) = @_;
+    my $uid = want_userid($uuid);
+    return undef unless $uid && $sql;
+
+    my $dbh = LJ::get_db_writer();
+    my $ret = $dbh->do($sql, undef, @args);
+
+    LJ::memcache_kill($uid, "friends");
+
     return $ret;
 }
 
@@ -6136,8 +6477,9 @@ sub add_friend
         $groupmask |= (1 << $grp) if $grp;
     }
 
-    $dbh->do("INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) ".
-             "VALUES ($ida, $idb, $black, $white, $groupmask)");
+    LJ::friends_do($ida,
+                   "INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) " .
+                   "VALUES (?,?,?,?,?)", $ida, $idb, $black, $white, $groupmask);
 
     return 1;
 }

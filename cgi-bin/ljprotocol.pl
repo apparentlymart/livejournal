@@ -908,6 +908,7 @@ sub postevent
 
     $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$itemid ".
              "WHERE userid=$ownerid");
+    LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()));
 
     # update user update table (on which friends views rely)
     # NOTE: as of Mar-25-2003, we don't actually use this yet.  we might
@@ -1612,6 +1613,7 @@ sub editfriends
     my $error_flag = 0;
     my $friends_added = 0;
     my $fail = sub {
+        LJ::memcache_kill($userid, "friends");
         return fail($err, $_[0], $_[1]);
     };
 
@@ -1697,6 +1699,9 @@ sub editfriends
     }
 
     return $fail->(104) if $error_flag;
+
+    # invalidate memcache of friends
+    LJ::memcache_kill($userid, "friends");
 
     return $res;
 }
@@ -1853,6 +1858,10 @@ sub editfriendgroups
                  "WHERE userid=$userid AND friendid=?",
                  undef, LJ::get_userid($dbh, $friend));
     }
+
+    # invalidate memcache of friends/groups
+    LJ::memcache_kill($userid, "friends");
+    LJ::memcache_kill($userid, "fgrp");
 
     # return value for this is nothing.
     return {};

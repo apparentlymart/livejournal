@@ -32,8 +32,8 @@ body<=
     my %syn;
     while (my ($suserid, $user, $url, $count) = $sth->fetchrow_array) {
         if ($POST{'action:remove'} && $POST{"defriend_$user"}) {
-            $dbh->do("DELETE FROM friends WHERE userid=? AND friendid=?",
-                     undef, $u->{'userid'}, $suserid);
+            LJ::friends_do($u, "DELETE FROM friends WHERE userid=? AND friendid=?",
+                           $u->{'userid'}, $suserid);
             next;
         }
         $count{$user} = $count;

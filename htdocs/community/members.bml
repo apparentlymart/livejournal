@@ -151,7 +151,7 @@ body<=
         # perform deletions
         if (%{$delete{'member'}}) {
             my $in = join(',', keys %{$delete{'member'}});
-            $dbh->do("DELETE FROM friends WHERE userid=$cid AND friendid IN ($in)");
+            LJ::friends_do($cid, "DELETE FROM friends WHERE userid=? AND friendid IN ($in)", $cid);
         }
         if (%{$delete{'admin'}}) {
             my $in = join(',', keys %{$delete{'admin'}});
@@ -173,7 +173,7 @@ body<=
         # perform additions
         if (%{$add{'member'}}) {
             my $in = join(',', map { "($cid, $_)" } keys %{$add{'member'}});
-            $dbh->do("REPLACE INTO friends (userid,friendid) VALUES $in");
+            LJ::friends_do($cid, "REPLACE INTO friends (userid,friendid) VALUES $in");
         }
         if (%{$add{'admin'}}) {
             my $in = join(',', map { "($cid, $_, 'A')" } keys %{$add{'admin'}});

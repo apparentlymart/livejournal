@@ -31,6 +31,9 @@
 
 <uid> checkfriends:<uid>:<mask> == scalar maxupdate, expires after refresh interval
 <uid> frgmask:<uid>:<uid_friend>  -- scalar numeric mask, 15 minutes
+<uid> fgrp:<uid> == friendgroup rows for a given user
+<uid> friends:<uid> == packed friends rows for a user
+<uid> tu:<uid> == unixtime when user last updated
 
 <uid> upicinfo:<uid> == packed data
 

@@ -13,6 +13,7 @@ package LJ::MemCache;
                               allow_getljnews opt_showtalklinks opt_whocanreply opt_gettalkemail opt_htmlemail
                               opt_mangleemail useoverrides defaultpicid has_bio txtmsg_status is_system
                               journaltype lang oldenc]],
+                          'fgrp' => [qw[1 userid groupnum groupname sortorder is_public]],
                           );
 
 

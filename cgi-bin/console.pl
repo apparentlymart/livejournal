@@ -751,7 +751,11 @@ sub change_journal_type
     # that account (in order to watch it), don't give the account maintainer
     # access to read the old reader's friends-only posts.  (which they'd now
     # be able to do, since journaltype=='P'.
-    $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $u->{'userid'});
+    my $ids = $dbh->selectcol_arrayref("SELECT userid FROM friends WHERE friendid=?",
+                                       undef, $u->{'userid'});
+    my $bind = join(",", map { "?" } @$ids);
+    $dbh->do("DELETE FROM friends WHERE friendid IN ($bind)", undef, @$ids);
+    LJ::memcache_kill($_, "friends") foreach @$ids;
     
     if ($type eq "person") {
         LJ::update_user($u, { journaltype => 'P' });

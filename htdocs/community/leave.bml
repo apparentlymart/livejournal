@@ -31,11 +31,12 @@
  {
      ### remove user from community's friends list
      ###
-     my $dbh = LJ::get_db_writer();
-     $dbh->do("DELETE FROM friends WHERE userid=? AND friendid=?", undef, $ci->{'userid'}, $remote->{'userid'});
+     LJ::friends_do($ci, "DELETE FROM friends WHERE userid=? AND friendid=?",
+                    $ci->{'userid'}, $remote->{'userid'});
 
      if ($FORM{'removefriend'}) {
-         $dbh->do("DELETE FROM friends WHERE userid=? AND friendid=?", undef, $remote->{'userid'}, $ci->{'userid'});
+         LJ::friends_do($remote, "DELETE FROM friends WHERE userid=? AND friendid=?",
+                        $remote->{'userid'}, $ci->{'userid'});
      }
      
      $body .= "<?h1 $ML{'.success'} h1?><?p ".BML::ml('.label.removed',{'commuser'=>$ci->{'user'},'commname'=>$ci->{'name'}})." p?>";
