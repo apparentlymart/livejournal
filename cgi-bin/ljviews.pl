@@ -131,7 +131,9 @@ sub create_view_lastn
 			   '24hh' => $dateparts[16],
 				 );
 
-        if ($lastday != $lastn_date_format{'d'})
+        if ($lastday != $lastn_date_format{'d'} ||
+	    $lastmonth != $lastn_date_format{'m'} ||
+	    $lastyear != $lastn_date_format{'yyyy'})
         {
 	  my %lastn_new_day = ();
 	  foreach (qw(dayshort daylong monshort monlong m mm yy yyyy d dd dth))
