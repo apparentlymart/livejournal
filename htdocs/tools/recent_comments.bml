@@ -186,15 +186,16 @@ body<=
     }
     $ret .= "</table>";
 
-    $ret .= "<?p " . BML::ml('/tools/recent_comments.bml.maxnotshown', 
-                             { 'current' => $count, 'max' => $LJ::TOOLS_RECENT_COMMENTS_MAX }). 
+    $ret .= "<?p " . BML::ml('/tools/recent_comments.bml.maxnotshown',
+                             { 'current' => $count, 'max' => $LJ::TOOLS_RECENT_COMMENTS_MAX }).
                                  " p?>" unless $count == $LJ::TOOLS_RECENT_COMMENTS_MAX;
 
 
     if ($u->{journaltype} eq "P") {
-        $ret .= "<div style='text-align: center'><a name='posted'></a>" . 
+        $ret .= "<div style='text-align: center; margin-top: 1em'><a name='posted'></a>" .
+            BML::ml('Actionlink', { 'link'=>"<a href='#received'>Latest Received</a>"}) .
             BML::ml('ActionLink', { 'link' => "Latest Posted"}) . " " .
-            BML::ml('Actionlink', { 'link'=>"<a href='#received'>Latest Received</a>"}) . "</div>";
+            "</div>";
         $ret .= "<?h1 Latest Posted h1?><?p Last $count comments " . LJ::ljuser($u) . " has posted. p?>";
         my %jcount;  # jid -> ct
         $ret .= "<table style='text-align: left'>";
