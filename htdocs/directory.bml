@@ -29,7 +29,7 @@ body<=
  {
      LJ::load_codes({ state => \%state, country => \%country  });
      $ret = "";
-     $ret .= "<?h1 Browse Journals by US State h1?><?p Click a US state below to read journals from that state, or click a country name below the map to read journals from that country. p?>\n";
+     $ret .= "<?h1 $ML{'.browse.usa.title'} h1?><?p $ML{'.browse.usa.desc'} p?>\n";
      $ret .= "<form action='get' name=\"stateForm\"><p align='center'>";
      $ret .= "<script language=\"JavaScript\" type='text/javascript'><!--\n document.write('<input name=\"s\" type=\"text\" size=\"30\"><br />'); \n// --></script>\n";
 
@@ -122,7 +122,7 @@ body<=
      $ret .= "</map>\n";
 
      # by country
-       $ret .= "<?h1 Browse Journals by Country h1?><?p Select a country to read journals from that country... p?>";
+       $ret .= "<?h1 $ML{'.browse.country.title'} h1?><?p $ML{'.browse.country.desc'} p?>";
      $ret .= "<table style='margin-left: 20px' cellpadding='5'><tr valign='top'><td align='left'><ul>";
      my $total = scalar(keys %{$count{'country'}});
      my $count = 0;
@@ -147,7 +147,7 @@ body<=
  }
 
  unless (LJ::Dir::do_search($dbr, $dbdir, \%FORM, \@matches, \%info)) {
-     return "<?h1 Error h1?><?p Error: $info{'errmsg'} p?>";
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'Error'}: $info{'errmsg'} p?>";
  }
 
  # opt_format and opt_sort might've been modified by do_search,
@@ -161,20 +161,19 @@ body<=
      my ($uri, $args) = (BML::get_uri(), BML::get_query_string());
      $uri .= '?' . $args if $args;
      $head .= "<meta http-equiv='Refresh' content='3;URL=$LJ::SITEROOT$uri' />\n";
-     return "<center><b>Searching<img src='$LJ::IMGPREFIX/searchingdots.gif' alt='...' width='18' height='12' /></b><p>".
-         "Hundreds of trained monkeys are currently running about finding your search results.  Please stand by.</center>";
+     return "<center><b>$ML{'.search.title'}<img src='$LJ::IMGPREFIX/searchingdots.gif' alt='...' width='18' height='12' /></b><p>$ML{'.search.monkey'}</center>";
  }
 
  if ($POST{'s_com'} || $GET{'s_com'}) {
-     $ret .= "<a href=\"/community/search.bml\">&lt;&lt; New Query</a><p>\n";
+     $ret .= "<a href=\"/community/search.bml\">&lt;&lt; $ML{'.search.new'}</a><p>\n";
  } else {
-     $ret .= "<a href=\"/directorysearch.bml\">&lt;&lt; New Query</a><p>\n";
+     $ret .= "<a href=\"/directorysearch.bml\">&lt;&lt; $ML{'.search.new'}</a><p>\n";
  }
  unless (@{$info{'english'}}) {
      push @{$info{'english'}}, "wish to be listed in the public directory";
  }
 
- $ret .= "Below are all $info{'allwhat'} that ";
+  $ret .= "Below are all $info{'allwhat'} that ";
 
   my $count_preds = @{$info{'english'}};
 
@@ -197,7 +196,7 @@ body<=
  $ret .= LJ::ehtml($last) . ".\n";
 
  if ($info{'overflow'}) {
-     $ret .= "<B>Search results limited to $info{'count'} results.  Please refine your query.</B>";
+     $ret .= BML::ml(".search.overflow", {'count' => $info{'count'}});
  }
 
  if ($count_preds == 1 && $GET{'int_like'}) {
@@ -212,10 +211,12 @@ body<=
 
  ########## make the navcrap
  my $navcrap;
- $navcrap .= "<?standout <CENTER><FONT FACE=\"Arial,Helvetica\" SIZE=-1><B>$info{'count'} matches</B>";
+ $navcrap .= "<?standout <CENTER><FONT FACE=\"Arial,Helvetica\" SIZE=-1><B>".BML::ml(".navcrap.matches", {'count' => $info{'count'}})."</B>";
  if ($info{'count'}) {
      if ($info{'pages'} > 1) {
-         $navcrap .= "<BR>Page $info{'page'} of $info{'pages'} shown (records $info{'first'}-$info{'last'})<BR>";
+         $navcrap .= "<BR>";
+         $navcrap .= BML::ml(".navcrap.xofy", {'curpage' => $info{'page'}, 'totpages' => $info{'pages'}, 'reca' => "$info{'first'}, 'recb' => $info{'last'}"});
+         $navcrap .= "<BR>";
          my $left = "<B>&lt;&lt;</B>";
          if ($info{'page'} > 1) { $left = "<A HREF=\"" . BML::self_link({ 'page' => $info{'page'}-1 }) . "\">$left</A>"; }
          my $right = "<B>&gt;&gt;</B>";
@@ -284,7 +285,7 @@ body<=
  if ($opt_format eq "com") 
  {
      $ret .= "<TABLE CELLSPACING=3>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD><B>User</B></TD><TD><B>Community Name</B></TD><TD><B>Open</B></TD><TD><B>Post</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD><B>$ML{'.user'}</B></TD><TD><B>$ML{'.community'}</B></TD><TD><B>$ML{'.open'}</B></TD><TD><B>$ML{'.post'}</B></TD></TR>\n";
      foreach my $rec (@matches) 
      {
          $ret .= "<TR VALIGN=TOP>";
@@ -365,7 +366,7 @@ body<=
          }
          $ret .= "</A> ";
 
-         $ret .= "<BR><FONT SIZE=-1><B>Update: </B> $updateago</FONT></TD>\n";
+         $ret .= "<BR><FONT SIZE=-1><B>$Ml{'.update'} </B> $updateago</FONT></TD>\n";
      }
      $ret .= "</TR></TABLE>\n";
  }

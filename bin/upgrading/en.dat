@@ -703,11 +703,39 @@ whether to allow <em>all</em>, <em>registered users</em>, or
 
 /delcomment.bml.title=Delete Comment
 
+/directory.bml.browse.usa.title=Browse Journals by US State
+
+/directory.bml.browse.usa.desc=Click a US state below to read journals from that state, or click a country name below the map to read journals from that country.
+
+/directory.bml.browse.country.title=Browse Journals by Country
+
+/directory.bml.browse.country.desc=Select a country to read journals from that country...
+
 /directory.bml.error.accounttype<<
 Sorry, your account type doesn't permit usage of the
 directory, or you aren't currently <a href='/login.bml'>logged in</a>.  If your account type permits
 directory usage, be sure that you are logged in and then try again.
 .
+
+/directory.bml.navcrap.matches=[[count]] matches
+
+/directory.bml.navcrap.xofy=Page [[curpage]] of [[totpages]] shown (records [[reca]]-[[recb]])
+
+/directory.bml.open=Open
+
+/directory.bml.post=Post
+
+/directory.bml.search.monkey=Hundreds of trained monkeys are currently running about finding your search results.  Please stand by.
+
+/directory.bml.search.new=New Query
+
+/directory.bml.search.overflow=<b>Search results limited to [[count]] results.  Please refine your query.</b>
+
+/directory.bml.search.title=Searching
+
+/directory.bml.update=Update:
+
+/directory.bml.user=User
 
 /editinfo.bml.allowshowcontact.about<<
 You should keep this option enabled.  This lets other people be able to contact 
