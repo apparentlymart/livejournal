@@ -69,6 +69,28 @@ $maint{'synsuck'} = sub
 
         # take most recent 20
         splice(@items, 0, @items-20) if @items > 20;
+
+        # delete existing items older than the age which can show on a
+        # friends view.
+        my $su = LJ::load_userid($dbs, $userid);
+        my $udbh = LJ::get_cluster_master($su);
+        if ($udbh) {
+            my $secs = ($LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14)+0;  # 2 week default.
+            my $sth = $udbh->prepare("SELECT jitemid, anum FROM log2 WHERE journalid=? AND ".
+                                     "logtime < DATE_SUB(NOW(), INTERVAL $secs SECOND)");
+            $sth->execute($userid);
+            die $udbh->errstr if $udbh->err;
+            while (my ($jitemid, $anum) = $sth->fetchrow_array) {
+                print "DELETE itemid: $jitemid, anum: $anum... \n";
+                if (LJ::delete_item2($dbh, $udbh, $userid, $jitemid, 0, $anum)) {
+                    print "success.\n"; 
+                } else {
+                    print "fail.\n";
+                }
+            }
+        } else {
+            print "WARNING: syndicated user not on a cluster.  can't delete old stuff.\n";
+        }
         
         # post these items
         my $newcount = 0;

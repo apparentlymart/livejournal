@@ -62,6 +62,7 @@ sub error_message
              # Limit errors
              "401" => "Your account type doesn't permit adding syndicated accounts as friends.",
              "402" => "Your IP address is temporarily banned for exceeding the login failure rate.",
+             "403" => "This would push you over your syndication quota.",
 
              # Server Errors
              "500" => "Internal server error",
@@ -1539,8 +1540,12 @@ sub editfriends
         # point the user to the redirected username.
         if (! $row) {
             $error_flag = 1;
-        } elsif ($row->{'journaltype'} eq "Y" && ! LJ::get_cap($u, "synd_befriend")) {
+        } elsif ($row->{'journaltype'} eq "Y" && 
+                 ! LJ::get_cap($u, "synd_befriend")) {
             return fail($err,401);
+        } elsif ($row->{'journaltype'} eq "Y" && 
+                 ! LJ::can_add_syndicated($u, $row)) {
+            return fail($err,403);
         } elsif ($row->{'journaltype'} eq "R") {
             return fail($err,154);
         } elsif ($row->{'statusvis'} ne "V") {

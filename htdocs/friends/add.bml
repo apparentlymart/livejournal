@@ -138,6 +138,7 @@
  $body .= "<?h1 $ML{'.colors.header'} h1?><?p " .
           BML::ml('.colors.text', {'user'=>$user}) . " p?>";
 
+ $ret = "";
  $ret .= "<P><CENTER><TABLE CELLPADDING=4><TR><TD><B>$ML{'.colors.fg'}</B></TD><TD><B>$ML{'.colors.bg'}</B></TD></TR>\n";
 
  my @color = ();
