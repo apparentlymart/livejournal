@@ -1,0 +1,34 @@
+* userinfo_html_by_user
+
+  on userinfo.bml page, extra HTML to show next to username & id
+
+  ret
+  u
+
+* login_formopts
+
+  extra html for login options on login.bml
+
+  ret
+
+
+* post_login
+
+  action to take after logging in, before HTML is sent to 
+  to client (possible to print HTTP headers directly)
+
+  u
+  form
+  
+
+* post_create
+
+  action to take after creating a journal
+
+  dbs
+  user
+  userid
+  code    -- auth code, if in use
+
+
+
