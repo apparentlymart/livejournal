@@ -55,7 +55,8 @@ die "Non-existent user $user.\n" unless $u;
 
 die "Can't move back to legacy cluster 0\n" unless $dclust;
 
-my $dbch = LJ::get_dbh({raw=>1}, "cluster$dclust");
+my $dbch = LJ::get_cluster_master({raw=>1}, $dclust);
+
 die "Undefined or down cluster \#$dclust\n" unless $dbch;
 $dbch->do("SET wait_timeout=28800");
 
@@ -73,8 +74,9 @@ if ($sclust == $dclust) {
 # original cluster db handle.
 my $dbo;
 if ($sclust) {
-    $dbo = $opt_movemaster ? LJ::get_dbh({raw=>1}, "cluster$u->{clusterid}movemaster") :
-	LJ::get_dbh({raw=>1}, "cluster$u->{clusterid}");
+    $dbo = $opt_movemaster ?
+        LJ::get_dbh({raw=>1}, "cluster$u->{clusterid}movemaster") :
+	LJ::get_cluster_master({raw=>1}, $u);
     die "Can't get source cluster handle.\n" unless $dbo;
     $dbo->{'RaiseError'} = 1;
     $dbo->do("SET wait_timeout=28800");

@@ -4895,6 +4895,7 @@ sub get_cluster_reader
 # </LJFUNC>
 sub get_cluster_master
 {
+    my @dbh_opts = scalar(@_) == 2 ? (shift @_) : ();
     my $arg = shift;
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
     my $role = "cluster${id}";
@@ -4903,7 +4904,7 @@ sub get_cluster_master
         # master-master cluster
         $role = "cluster${id}${ab}" if $ab eq "a" || $ab eq "b";
     }
-    return LJ::get_dbh($role);
+    return LJ::get_dbh(@dbh_opts, $role);
 }
 
 # <LJFUNC>
