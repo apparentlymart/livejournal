@@ -329,7 +329,8 @@ body<=
         $ret .= LJ::html_submit('action:save', $ML{'.btn.save'},
                                 { 'disabled' => $disabled_save }) . " ";
         $ret .= LJ::html_submit('action:delete', "Delete Entry",
-                                { 'disabled' => $disabled_delete });
+                                { 'disabled' => $disabled_delete,
+                                  'onclick' => "return confirm('Are you sure you want to delete this entry?')" });
         $ret .= " standout?></form>\n";
         
         return $ret;
