@@ -109,7 +109,7 @@ my $check = sub {
 
     my $db = $LJ::DBIRole->get_dbh_conn($d->{'rootfdsn'});
     unless ($db) {
-	printf("%4d %-15s %4s %12s  %14s  ($roles)\n",
+	printf("%4d %-15s %4s %16s  %14s  ($roles)\n",
 	       $dbid,
 	       $d->{name},
 	       $d->{masterid} ? $d->{masterid} : "",
@@ -151,7 +151,7 @@ my $check = sub {
 		$diff = $ss->{'Read_Master_Log_Pos'} - $ss->{'Exec_master_log_pos'};
 	    } else {
 		$diff = "XXXXXXX";
-		push @errors, "Wrong log file";
+		push @errors, "Wrong log file: $d->{name}";
 	    }
 	} else {
 	    $diff = "XXXXXXX";
@@ -163,11 +163,12 @@ my $check = sub {
     
 
     #print "$dbid of $d->{masterid}: $d->{name} ($roles)\n";
-    printf("%4d %-15s %4s repl:%7s  conn:%4d/%4d  ($roles)\n",
+    printf("%4d %-15s %4s repl:%7s %4s conn:%4d/%4d  ($roles)\n",
 	   $dbid, 
 	   $d->{name},
 	   $d->{masterid} ? $d->{masterid} : "",
 	   $diff,
+	   $log_count ? sprintf("<%2s>", $log_count) : "",
 	   $pcount_busy, $pcount_total) unless $opt_err;
     
 
