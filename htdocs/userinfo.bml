@@ -76,6 +76,7 @@
      $dbcr = LJ::get_cluster_reader($u);
  }
 
+ my $remote_isowner = $remote && $remote->{'user'} eq $u->{'user'};
  my $remote_isfriend = LJ::is_friend($dbr, $u, $remote);
  my $com = $u->{'journaltype'} eq "C" ? 1 : 0;
  my $dir = "users";
@@ -144,7 +145,7 @@
 
  my %res_fr;
  my $incfriendof = 1;
- if ($u->{'opt_hidefriendofs'}) {
+ if ($u->{'opt_hidefriendofs'} && ! $remote_isowner) {
      $incfriendof = 0; 
  }
  LJ::do_request($dbr, 
@@ -479,10 +480,14 @@
 	     push @friend_of, $fr;
 	 }
      }
-     if (@friend_of && ! $u->{'opt_hidefriendofs'}) {
+     if (@friend_of && ($remote_isowner || ! $u->{'opt_hidefriendofs'})) {
 	 $label = $com ? "Watched by" : "Friend of";
-	 $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B><nobr>$label:</nobr></B></TD><TD COLSPAN=2>";
-	 $body .= "<B>" . scalar(@friend_of) . ":</B> ";
+	 $body .= "<tr><td align='right' valign='top'><b><nobr>$label:</nobr></b>";
+	 if ($u->{'opt_hidefriendofs'}) {
+	     $body  .= "<br /><i>(hidden)</i>";
+	 }
+	 $body .= "</td>";
+	 $body .= "<td colspan='2' valign='top'><b>" . scalar(@friend_of) . ":</b> ";
 	 my $count = 0;
 	 foreach (@friend_of) {
 	     $body .= "<A HREF=\"/userinfo.bml?user=$_\">$_</A>, ";
