@@ -10,13 +10,13 @@ use strict;
 use IO::Socket::INET;
 use Apache::Constants qw(:common);
 
-Inline->init() if $LJ::HAVE_INLINE;
+Inline->init() if $LJ::HAVE_INLINE && $LJ::FREECHILDREN_BCAST;
 
 sub handler
 {
     my $r = shift;
     return OK if $r->main;
-    return OK unless $LJ::HAVE_INLINE;
+    return OK unless $LJ::HAVE_INLINE && $LJ::FREECHILDREN_BCAST;
 
     my $callback = $r->current_callback() if $r;
     my $cleanup = $callback eq "PerlCleanupHandler";
@@ -27,8 +27,7 @@ sub handler
     $free += $cleanup;
     $free += $childinit;
     $active -= $cleanup if $active;
-    if ($LJ::FREECHILDREN_BCAST && 
-        $LJ::FREECHILDREN_BCAST =~ /^(\S+):(\d+)$/) {
+    if ($LJ::FREECHILDREN_BCAST =~ /^(\S+):(\d+)$/) {
         my $bcast = $1;
         my $port = $2;
         my $sock = IO::Socket::INET->new(Proto => 'udp');
