@@ -792,6 +792,7 @@ sub editevent
     my %curprops;
 
     if ($clustered) {
+        LJ::load_props($dbs, "log");
         LJ::load_log_props2($dbcm, $ownerid, [ $qitemid ], \%curprops);
     } else {
         LJ::load_log_props($dbh, [ $qitemid ], \%curprops);
@@ -1198,6 +1199,7 @@ sub getevents
         $count = 0;
         my %props = ();
         if ($clustered) {
+            LJ::load_props($dbs, "log");
             LJ::load_log_props2($dbcr, $ownerid, \@itemids, \%props);
         } else {
             LJ::load_log_props($dbcr, \@itemids, \%props);
