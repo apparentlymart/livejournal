@@ -1733,7 +1733,7 @@ sub is_valid_authaction
 sub get_mood_picture
 {
     my ($themeid, $moodid, $ref) = @_;
-    LJ::load_mood_theme($themeid) unless $LJ::CACHED_MOOD_THEME{$themeid};
+    LJ::load_mood_theme($themeid) unless $LJ::CACHE_MOOD_THEME{$themeid};
     LJ::load_moods() unless $LJ::CACHED_MOODS;
     do
     {
