@@ -74,6 +74,9 @@ if ($picker) {
             # don't know what they said, so die
             die "Unknown line from picker: $resp";
         }
+
+        # we're done if we only want one user
+        last if $one;
     }
 
     # close the picker, we're done
