@@ -245,7 +245,8 @@ sub getfriends
         }
     }
     $res->{'friends'} = list_friends($dbs, $u, {
-        'limit' => $req->{'friendlimit'}
+        'limit' => $req->{'friendlimit'},
+        'includebdays' => $req->{'includebdays'},
     });
     if ($req->{'ver'} >= 1) {
         foreach(@{$res->{'friends'}}) { LJ::text_out(\$_->{'fullname'}) };
@@ -1722,8 +1723,10 @@ sub list_friends
         $where = "u.userid=f.userid AND f.friendid=$u->{'userid'} AND u.statusvis='V'";
     }
 
+    my $bday = $opts->{'includebdays'} ? "u.bdate, u.allow_infoshow," : ""; 
     my $limit = $limitnum ? "LIMIT $limitnum" : "";
-    my $sth = $dbr->prepare("SELECT u.user AS 'friend', u.name, u.journaltype, u.statusvis, f.fgcolor, f.bgcolor, f.groupmask ".
+    my $sth = $dbr->prepare("SELECT u.user AS 'friend', $bday u.name,".
+                            "u.journaltype, u.statusvis, f.fgcolor, f.bgcolor, f.groupmask ".
                             "FROM user u, friends f WHERE $where ORDER BY u.user $limit");
     $sth->execute;
     my @friends;
@@ -1736,6 +1739,10 @@ sub list_friends
         my $r =  { 'username' => $f->{'friend'},
                    'fullname' => $f->{'name'},
                };
+        $r->{'birthday'} = $f->{'bdate'} 
+            unless $f->{'allow_infoshow'} ne 'Y' || !$f->{'bdate'} 
+                || $f->{'bdate'} eq '0000-00-00';
+
         $r->{'fgcolor'} = LJ::color_fromdb($f->{'fgcolor'});
         $r->{'bgcolor'} = LJ::color_fromdb($f->{'bgcolor'});
         if (! $opts->{'friendof'} && $f->{'groupmask'} != 1) {
@@ -2610,6 +2617,7 @@ sub populate_friends
         $count++;
         $res->{"${pfx}_${count}_name"} = $f->{'fullname'};
         $res->{"${pfx}_${count}_user"} = $f->{'username'};
+        $res->{"${pfx}_${count}_birthday"} = $f->{'birthday'} if $f->{'birthday'}; 
         $res->{"${pfx}_${count}_bg"} = $f->{'bgcolor'};
         $res->{"${pfx}_${count}_fg"} = $f->{'fgcolor'};
         if (defined $f->{'groupmask'}) {

@@ -292,6 +292,12 @@ If set to <TT>1</TT>, you will also get back the info from the "getfriendgroups"
 .optional
 1
 }
+{ includebdays
+.des
+If set to <TT>1</TT>, birthdays will be included with the friends results below.
+.optional
+1
+}
 { friendlimit
 .des
 If set to a numeric value greater than zero, this mode will only return the number of results indicated. Useful only for building pretty lists for display which might have a button to view the full list nearby.
@@ -311,6 +317,13 @@ The <I>n</I>th friend's user name.
 { friend_<I>n</I>_name
 .des
 The <I>n</I>th friend's full name.
+}
+{ friend_<I>n</I>_birthday
+.des
+The <I>n</I>th friend's birthday.  Note that this is only returned if the user has set
+their info to visible and if they have set a birthday, otherwise this key is skipped.
+You will also need to set <TT>includebdays</TT> to 1 when you make the request in order to
+receive this field.
 }
 { friend_<I>n</I>_bg
 .des
