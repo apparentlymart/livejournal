@@ -122,7 +122,7 @@ $maint{'synsuck'} = sub
         die $udbh->errstr if $udbh->err;
         while (my ($jitemid, $anum) = $sth->fetchrow_array) {
             print "DELETE itemid: $jitemid, anum: $anum... \n" if $verbose;
-            if (LJ::delete_item2($udbh, $userid, $jitemid, 0, $anum)) {
+            if (LJ::delete_entry($su, $jitemid, 0, $anum)) {
                 print "success.\n" if $verbose;
             } else {
                 print "fail.\n" if $verbose;

@@ -864,7 +864,7 @@ sub postevent
               "VALUES ($ownerid, $itemid, ?, ?)", undef, $req->{'subject'}, $event);
     if ($dbcm->err) {
         my $msg = $dbcm->errstr;
-        LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
+        LJ::delete_entry($uowner, $itemid);   # roll-back
         return fail($err,501,"logtext:$msg");
     }
     LJ::MemCache::set([$ownerid,"logtext:$clusterid:$ownerid:$itemid"],
@@ -876,7 +876,7 @@ sub postevent
                   "VALUES ($ownerid, $itemid, $qallowmask)");
         if ($dbcm->err) {
             my $msg = $dbcm->errstr;
-            LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
+            LJ::delete_entry($uowner, $itemid);   # roll-back
             return fail($err,501,"logsec2:$msg");
         }
     }
@@ -1051,14 +1051,13 @@ sub editevent
         # if their newesteventtime prop equals the time of the one they're deleting
         # then delete their newesteventtime.
         if ($u->{'userid'} == $uowner->{'userid'}) {
-            LJ::load_user_props($dbh, $u, "newesteventtime");
+            LJ::load_user_props($u, { use_master => 1 }, "newesteventtime");
             if ($u->{'newesteventtime'} eq $oldevent->{'eventtime'}) {
                 LJ::set_userprop($u, "newesteventtime", undef);
             }
         }
 
-        LJ::delete_item2($dbcm, $ownerid, $req->{'itemid'},
-                         'quick', $oldevent->{'anum'});
+        LJ::delete_entry($uowner, $req->{'itemid'}, 'quick', $oldevent->{'anum'});
 
         # clear their duplicate protection, so they can later repost
         # what they just deleted.  (or something... probably rare.)

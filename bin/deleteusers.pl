@@ -100,7 +100,7 @@ foreach my $du (@delusers)
 	foreach my $idanum (@$ids) {
 	    my ($id, $anum) = ($idanum->[0], $idanum->[1]);
 	    print "  deleting $id (a=$anum) ($uid; $du->{'user'})\n";
-	    LJ::delete_item2($dbcm, $uid, $id, 0, $anum);
+	    LJ::delete_entry($du, $id, 0, $anum);
 	    $pause->();
 	}
     }

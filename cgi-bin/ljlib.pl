@@ -4767,7 +4767,7 @@ sub cmd_buffer_flush
             'run' => sub {
                 my ($dbh, $db, $c) = @_;
                 my $a = $c->{'args'};
-                LJ::delete_item2($db, $c->{'journalid'}, $a->{'itemid'},
+                LJ::delete_entry($c->{'journalid'}, $a->{'itemid'},
                                  0, $a->{'anum'});
             },
         },
@@ -5023,7 +5023,7 @@ sub check_priv
 # </LJFUNC>
 sub remote_has_priv
 {
-    shift if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $remote = shift;
     my $privcode = shift;     # required.  priv code to check for.
     my $ref = shift;  # optional, arrayref or hashref to populate
@@ -5684,10 +5684,10 @@ sub day_of_week
 }
 
 # <LJFUNC>
-# name: LJ::delete_item2
-# des: Deletes a user's journal item from a cluster.
-# args: dbcm, journalid, jitemid, quick?, anum?
-# des-journalid: Journal ID item is in.
+# name: LJ::delete_entry
+# des: Deletes a user's journal entry
+# args: uuserid, jitemid, quick?, anum?
+# des-uuserid: Journal itemid or $u object of journal to delete entry from
 # des-jitemid: Journal itemid of item to delete.
 # des-quick: Optional boolean.  If set, only [dbtable[log2]] table
 #            is deleted from and the rest of the content is deleted
@@ -5697,10 +5697,15 @@ sub day_of_week
 #           log row will already be gone so we'll need to store it for later.
 # returns: boolean; 1 on success, 0 on failure.
 # </LJFUNC>
-sub delete_item2
+sub delete_entry
 {
-    my ($dbcm, $jid, $jitemid, $quick, $anum) = @_;
-    $jid += 0; $jitemid += 0;
+    my ($uuserid, $jitemid, $quick, $anum) = @_;
+    my $jid = LJ::want_userid($uuserid);
+    my $u = ref $uuserid ? $uuserid : LJ::load_userid($jid);
+    $jitemid += 0;
+
+    my $dbcm = LJ::get_cluster_master($u);
+    return 0 unless $dbcm;
 
     my $and;
     if (defined $anum) { $and = "AND anum=" . ($anum+0); }
@@ -5747,7 +5752,7 @@ sub delete_item2
 # des: Deletes a comment (or multiple) and associated metadata.
 # info: The tables [dbtable[talk2]], [dbtable[talkprop2]], [dbtable[talktext2]],
 #       and [dbtable[dudata]] are all
-#       deleted from, immediately. Unlike [func[LJ::delete_item2]], there is
+#       deleted from, immediately. Unlike [func[LJ::delete_entry]], there is
 #       no $quick flag to queue the delete for later, nor is one really
 #       necessary, since deleting from 4 tables won't be too slow.
 # args: dbcm, journalid, jtalkid, light?
