@@ -82,8 +82,9 @@ PAGE<=
 <HTML>
 <HEAD>
 <TITLE>%%TITLE%% [LiveJournal.com]</TITLE>
+%%head%%
 </HEAD>
-<BODY BGCOLOR="#FFFFFF">
+<BODY BGCOLOR="#FFFFFF" %%bodyopts%%>
 
 <CENTER>
 

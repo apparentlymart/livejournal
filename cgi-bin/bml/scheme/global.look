@@ -251,8 +251,8 @@ CHOICES<=
 
 PAGE<=
 {Fp}<HTML>
-<HEAD><TITLE>%%title%%</TITLE></HEAD>
-<BODY>
+<HEAD><TITLE>%%title%%</TITLE>%%head%%</HEAD>
+<BODY %%bodyopts%%>
 %%body%%
 </BODY>
 </HTML>
