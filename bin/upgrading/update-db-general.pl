@@ -541,6 +541,7 @@ EOC
 register_tablecreate("supportpointsum", <<'EOC');
 CREATE TABLE supportpointsum (
   userid INT UNSIGNED NOT NULL DEFAULT '0',
+  PRIMARY KEY (userid),
   totpoints MEDIUMINT UNSIGNED DEFAULT 0,
   lastupdate  INT UNSIGNED NOT NULL,
   INDEX (totpoints, lastupdate),
