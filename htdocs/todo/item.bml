@@ -43,13 +43,7 @@
 	 }
      }
      if ($it->{'security'} eq "friends") {
-	 my $access = 0;
-	 if ($remote) {
-	     $sth = $dbh->prepare("SELECT COUNT(*) FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
-	     $sth->execute;
-	     ($access) = $sth->fetchrow_array;
-	 }
-	 unless ($access) {
+	 unless (LJ::is_friend($dbs, $u, $remote))
 	     $title = "Sorry...";
 	     $body = "(=H1 Security H1=)(=P The requested to-do item marked 'friends only' by the owner. P=)";
 	     return "";
