@@ -220,7 +220,7 @@ class Entry
     var DateTime time "The user specificed time of this entry";
 
     var string security "The security level of the entry ('private', 'protected'), or blank if public.";
-    var Image securityicon "A little icon which should be displayed somewhere on an entry to represent the security setting";
+    var Image security_icon "A little icon which should be displayed somewhere on an entry to represent the security setting";
 
     var UserLite poster "Author of the journal entry";
     var UserLite journal "Journal the entry has been posted to";
@@ -288,7 +288,7 @@ class Page
     function view_title : string
     "Return a title for this particular page, such as \"Friends' Recent Entries\" for the friends view,
     or a date for the day view. Should be overridden in i18n layers. Ideally, layout layers should never touch
-    this — see [member[Page.title]].";
+    this.  See [member[Page.title]].";
 
     function title : string 
     "Return a relevant combination of [member[global_title]] and [method[Page::view_title()]]. Should be
@@ -312,13 +312,6 @@ class Page
     function builtin get_this_month() : CalendarPageMonth 
     "Returns information about the current month, so that the page may include a mini-calendar or similar features.";
 
-    function print_viewspecific_links() 
-    "Print view-specific navigation links, if any (such as page skipping links on recent views).
-    Used only when such links are integrated into a journal-wide template.";
-
-    function print_viewspecific_info()
-    "Print view-specific information, if any (such as range information on recent views).  
-    Used only when such content is integrated into a journal-wide template.";
 }
 
 class RecentNav {
@@ -988,13 +981,6 @@ body, td, th, table, p, div {
     server_sig();
     """</address>\n</body></html>""";
 }
-function Page::print_viewspecific_links() {
-    # Blank in core!
-}
-function Page::print_viewspecific_info() {
-    # Blank in core!
-}
-
 
 function Page::print_body() {
     """<p>Error: There is no body renderer for viewtype <tt>$.view</tt> defined.</p>""";
@@ -1017,7 +1003,7 @@ function Page::print_entry(Entry e) {
         ": $e.subject";
     }
     if ($e.security != "") {
-        " "+$e.securityicon->as_string();
+        " "+$e.security_icon->as_string();
     }
     "</h3>\n";
     """<div class="entrytext">\n$e.text\n</div>\n""";
@@ -1040,7 +1026,7 @@ function FriendsPage::print_entry(Entry e) {
         ": $e.subject";
     }
     if ($e.security != "") {
-        $e.securityicon->print($e.security);
+        $e.security_icon->print($e.security);
     }
     "</h3>\n";
     """<div class="entrytext">\n$e.text\n</div>\n""";

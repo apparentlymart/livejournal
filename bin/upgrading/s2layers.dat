@@ -2,3 +2,10 @@
 # base filename         layer type      parent
 
 core1                   core            -
+i18nc/en1               i18nc           core1
+i18nc/fr1               i18nc           core1
+i18nc/ru1               i18nc           core1
+i18nc/ja1               i18nc           core1
+
+generator/layout        layout          core1
+

@@ -611,10 +611,10 @@ sub Entry
         # do nothing.
     } elsif ($arg->{'security'} eq "usemask") {
         $e->{'security'} = "protected";
-        $e->{'securityicon'} = Image_std("security-protected");
+        $e->{'security_icon'} = Image_std("security-protected");
     } elsif ($arg->{'security'} eq "private") {
         $e->{'security'} = "private";
-        $e->{'securityicon'} = Image_std("security-private");
+        $e->{'security_icon'} = Image_std("security-private");
     }
 
     return $e;
@@ -632,7 +632,7 @@ sub Null
 sub Page
 {
     my ($u, $vhost) = @_;
-    my $base_url = LJ::journal_base($u, $vhost);
+    my $base_url = LJ::journal_base($u->{'user'}, $vhost);
     my $p = {
         '_type' => 'Page',
         'view' => '',

@@ -7,8 +7,9 @@ layerinfo "name" = "Russian";
 # Three forms, special cases for numbers ending in 1 and 2, 3, 4, except those ending in 1[1-4]
 function lang_map_plural (int n) : int {
     if ($n%10 == 1 and $n%100 != 11) { return 0; }
-    if ($n%10 >= 2 and $n%10 <= 4 and ($n%100 < 10 || $n%100>=20)) { return 1; }
+    if ($n%10 >= 2 and $n%10 <= 4 and ($n%100 < 10 or $n%100>=20)) { return 1; }
     return 2;
-)
+}
+
 
 

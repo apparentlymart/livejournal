@@ -1,0 +1,270 @@
+# -*-s2-*-
+#
+
+layerinfo type = "layout";
+layerinfo name = "Generator";
+layerinfo redist_uniq = "generator/layout";
+
+property Color page_back { des = "Entry background"; }
+set page_back = "#ffffff";
+
+property Color page_link { des = "Link color"; }
+set page_link = "#0000ff";
+
+property Color page_vlink { des = "Visited link color"; }
+set page_vlink = "#0000ff";
+
+property Color page_alink { des = "Active link color"; }
+set page_alink = "#00ffff";
+
+property Color page_text { des = "Entry text color"; }
+set page_text = "#000000";
+
+property Color page_text_em { des = "Emphasized text color"; }
+set page_text_em = "#ffffff";
+
+property Color page_text_title { des = "Title text color"; }
+set page_text_title = "#ffffff";
+
+property Color strong_back { des = "Surrounding background color (and around userpics)"; }
+set strong_back = "#2d4f89";
+
+property Color strong_text { des = "Text on strong surrounding color (where needed)"; }
+set strong_text = "#000000";
+
+property Color stronger_back { des = "Background color for the bar above entries"; }
+set stronger_back = "#000000";
+
+property Color stronger_text { des = "Text color for the bar above entries"; }
+set stronger_text = "#ffffff";
+
+property Color weak_back { des = "Text color for the bar below entries"; }
+set weak_back = "#aaaaaa";
+
+property Color weak_text { des = "Text color for the bar below entries"; }
+set weak_text = "#000000";
+
+
+set text_post_comment = "post comment";
+set text_post_comment_friends = "post comment";
+
+function Page::print () 
+{
+    var string title = $this->title();
+
+"""
+<!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<style type="text/css">
+body, td {
+font-family: verdana, sans-serif;
+font-size: 10pt;
+}
+tt, pre {
+font-family: monospace;
+}
+a {
+text-decoration: none;
+}
+a:hover {
+text-decoration: underline;
+}
+.shadowed {
+font-size: 8pt;
+background: $*weak_back;
+}
+.meta {
+font-size: 8pt;
+}
+.index {
+font-size: 8pt;
+}
+.caption, .index {
+color: $*stronger_text;
+}
+.comments {
+font-size: 8pt;
+}
+</style>
+$.head_content
+<title>$title</title>
+</head>
+<body bgcolor="$*strong_back" text="$*page_text" link="$*page_link" vlink="$*page_vlink" alink="$*page_alink">
+<div align="center">
+<table width="600" cellpadding="2" cellspacing="0"
+border="0"
+summary="">
+<tr><td bgcolor="$*stronger_back" align="center">
+<table width="100%" cellpadding="3" cellspacing="0"
+border="0"
+summary="">
+<tr class="caption">
+<td class="caption"><b>$title</b></td>
+<td class="index" align="right">[<b>entries</b>|<a class="index" href="$.base_url/friends">friends</a>|<a class="index" href="$.base_url/calendar">calendar</a>]</td>
+</tr></table>
+<table width="100%" cellpadding="3" cellspacing="0"
+border="0"
+summary="">
+<tr>
+<td class="shadowed" align="center">
+<table cellspacing="5"
+cellpadding="0"
+border="0"
+summary="" style="margin-left: auto; margin-right: auto;">
+<tr>
+%%userpic%%
+<td>
+<div align="center"><b>%%name%%</b></div><p>
+<table cellspacing="0"
+cellpadding="0"
+border="0"
+summary="">
+%%website%%
+<tr>
+<td class="meta">[</td>
+<td class="meta" align="right"><b>userinfo</b></td>
+<td class="meta" align="center">|</td>
+<td class="meta"><a href="$*SITEROOT/userinfo.bml?user=%%username%%">livejournal userinfo</a></td>
+<td class="meta">]</td>
+</tr>
+<tr>
+<td class="meta">[</td>
+<td class="meta" align="right"><b>calendar</b></td>
+<td class="meta" align="center">|</td>
+<td class="meta"><a href="%%urlcalendar%%">livejournal calendar</a></td>
+<td class="meta">]</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</td>
+</tr></table>
+</td></tr>
+</table>
+<p>
+""";
+    $this->print_body();
+
+"""
+</div>
+<p>
+</body>
+</html>
+""";
+}
+
+function Page::print_entry (Entry e)
+{
+    """
+<table width="600" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
+<tr align='left'>
+<td bgcolor="$*stronger_back" align="center">
+<table width="100%" cellpadding="5" cellspacing="0"
+border="0"
+summary="">
+<tr align='left'>
+<td class="caption">""";
+    
+    if ($e.security != "") {
+        $e.security_icon->print();
+    }
+    
+    """ $e.subject</td>
+<td align="right" class="index">[%%datetime%%]</td>
+</tr>
+<tr align='left'>
+<td colspan="2" bgcolor="$*page_back">
+""";
+
+    if ($.view == "friends" or
+        $.journal_type == "C" or
+        $e.poster.username != $e.journal.username) {
+        "[altposter]";
+    }
+"""%%currents%%
+$e.text
+</td>
+</tr>""";
+    $e.comments->print();
+
+"""</table>
+</td>
+</tr>
+</table><p>
+""";
+
+}
+
+function RecentPage::print_body ()
+{
+    foreach var Entry e ($.entries) {
+        $this->print_entry($e);
+    }
+
+# skip links navigation
+    var string range = "most recent entries";
+    if ($.nav.skip > 0) {
+        $range = "$.nav.skip entries back";
+    }
+
+"""
+<table cellpadding="2" cellspacing="0"
+border="0"
+summary="">
+<tr><td bgcolor="$*stronger_back">
+<table cellpadding="3" cellspacing="0"
+border="0"
+summary="">
+<tr>
+<td align="center" class="index">navigation</td>
+</tr>
+<tr>
+<td bgcolor="$*page_back" align="center">
+<table cellspacing="0"
+cellpadding="0"
+border="0"
+summary="">
+<tr>
+<td class="meta">[</td>
+<td class="meta" align="right"><b>viewing</b></td>
+<td class="meta" align="center">|</td>
+<td class="meta">$range</td>
+<td class="meta">]</td>
+</tr>
+""";
+
+    # go forward/backward if possible
+    if ($.nav.forward_url != "" or $.nav.backward_url != "") {
+        var string sep;
+        var string back;
+        var string forward;
+        if ($.nav.backward_url != "") {
+            $back = """<a href="$.nav.backward_url">earlier</a>""";
+        }
+        if ($.nav.forward_url != "") {
+            $forward = """<a href="$.nav.forward_url">later</a>""";
+        }
+        if ($back != "" and $forward != "") { $sep = "/"; }
+        """<tr>
+<td class="meta">[</td>
+<td class="meta" align="right"><b>go</b></td>
+<td class="meta" align="center">|</td>
+<td class="meta">$back$sep$forward</td>
+<td class="meta">]</td>
+</tr>""";
+    }
+
+    "</table></td></tr></table></table>";
+}
+
+function CommentInfo::print ()
+{
+    """<tr><td align="right" colspan="2" width="100%" bgcolor="$*weak_back" class="comments">""";
+    if ($.count > 0 or $.screened) {
+        "<b>"; $this->print_readlink(); "</b>";
+        "|";
+    }
+    $this->print_postlink();
+    "</td></tr>";
+}

@@ -7,6 +7,4 @@ layerinfo "name" = "Japanese";
 # One form (the number is inflected)
 function lang_map_plural (int n) : int {
     return 0;
-)
-
-
+}
