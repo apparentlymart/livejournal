@@ -472,15 +472,11 @@ sub userpic_content
         return NOT_FOUND if $userid && $pic->{'userid'} != $userid;
 
         $lastmod = $pic->{'lastmod'};
-        if ($pic->{'dversion'} >= 2) {
-            my $dbb = LJ::get_cluster_reader($pic->{'clusterid'});
-            return SERVER_ERROR unless $dbb;
-            $data = $dbb->selectrow_array("SELECT imagedata FROM userpicblob2 WHERE ".
-                                          "userid=$pic->{'userid'} AND picid=$picid");
-        } else {
-            $data = $dbr->selectrow_array("SELECT imagedata FROM userpicblob WHERE ".
-                                          "picid=$picid");
-        }
+
+        my $dbb = LJ::get_cluster_reader($pic->{'clusterid'});
+        return SERVER_ERROR unless $dbb;
+        $data = $dbb->selectrow_array("SELECT imagedata FROM userpicblob2 WHERE ".
+                                      "userid=$pic->{'userid'} AND picid=$picid");
     }
 
     return NOT_FOUND unless $data;
