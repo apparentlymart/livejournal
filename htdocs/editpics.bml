@@ -478,7 +478,7 @@
 
                 ### insert the blob
                 if ($LJ::USERPIC_MOGILEFS && $LJ::MogileFS && !$dberr) {
-                    my $fh = $LJ::MogileFS->new_file($u->mogfs_userpic_key($picid), 'userpic');
+                    my $fh = $LJ::MogileFS->new_file($u->mogfs_userpic_key($picid), 'userpics');
                     if (defined $fh) {
                         $fh->print($POST{'userpic'});
                         my $rv = $fh->close;
