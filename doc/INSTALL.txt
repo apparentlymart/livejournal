@@ -90,6 +90,7 @@ Now, install the following modules:
         Digest::MD5
         Image::Size
         FCGI
+        MIME::Tools
         MIME::Lite
         Compress::Zlib
         MIME::Base64
@@ -110,7 +111,7 @@ Now, install the following modules:
 
 If you're using Debian this should get everything:
 
-# apt-get install libwww-perl libfcgi-perl libmime-lite-perl \
+# apt-get install libwww-perl libfcgi-perl libmime-perl libmime-lite-perl \
                   libsoap-lite-perl libgd-perl liburi-perl \
                   libimage-size-perl libdbd-mysql-perl libdbi-perl \
                   libnet-perl libdigest-md5-perl libgd-graph-perl \
