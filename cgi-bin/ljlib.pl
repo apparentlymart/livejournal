@@ -840,6 +840,43 @@ sub is_friend
     return $is_friend;
 }
 
+# returns true if $remote user can see the given $item ('log' row).
+# not for use with many entries at once...  just one.
+sub can_view
+{
+    my $dbarg = shift;
+    my $remote = shift;
+    my $item = shift;
+    
+    # public is okay
+    return 1 if ($item->{'security'} eq "public");
+
+    # must be logged in otherwise
+    return 0 unless $remote;
+
+    my $userid = int($item->{'ownerid'});
+    my $remoteid = int($remote->{'userid'});
+
+    # private
+    return ($userid == $remoteid) if ($item->{'security'} eq "private");
+
+    # should be 'usemask' security from here out, otherwise
+    # assume it's something new and return 0
+    return 0 unless ($item->{'security'} eq "usemask");
+
+    # usemask
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbr = $dbs->{'reader'};
+
+    my $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE ".
+			    "userid=$userid AND friendid=$remoteid");
+    $sth->execute;
+    my ($gmask) = $sth->fetchrow_array;
+    my $allowed = (int($gmask) & int($item->{'allowmask'}));
+    return $allowed ? 1 : 0;  # no need to return matching mask
+}
+
+
 # args: ($dbs, @talkids)
 # return: hashref with keys being talkids, values being [ $subject, $body ]
 sub get_talktext
