@@ -12,8 +12,11 @@ sub ReplyPage
     $p->{'_type'} = "ReplyPage";
     $p->{'view'} = "reply";
 
+    my $get = $opts->{'getargs'};
+
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
     return if $opts->{'handler_return'};
+    my $ditemid = $entry->{'itemid'}*256 + $entry->{'anum'};
 
     if ($u->{'opt_blockrobots'}) {
         $p->{'head_content'} .= "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
@@ -21,13 +24,73 @@ sub ReplyPage
 
     $p->{'entry'} = $s2entry;
 
+    # setup the replying item
+    my $replyto = $s2entry;
+    my $parpost;
+    if ($get->{'replyto'}) {
+        my $re_talkid = int($get->{'replyto'} >> 8);
+        my $re_anum = $get->{'replyto'} % 256;
+        unless ($re_anum == $entry->{'anum'}) {
+            $opts->{'handler_return'} = 404;
+            return;
+        }
+        my $dbcs = LJ::get_cluster_set($u);
+        my $sql = "SELECT t.posterid, t.state, t.datepost FROM talk2 ".
+            "WHERE t.journalid=$u->{'userid'} AND t.jtalkid=$re_talkid ".
+            "AND nodetype='L' AND nodeid=$re_talkid";
+        $parpost = LJ::dbs_selectrow_hashref($dbcs, $sql);
+        unless ($parpost) {
+            $opts->{'handler_return'} = 404;
+            return;
+        }
+
+        my $tt = LJ::get_talktext2($u, $replyto);
+        $parpost->{'subject'} = $tt->{$replyto}->[0];
+        $parpost->{'body'} = $tt->{$replyto}->[1];
+        $parpost->{'props'} = {};
+
+        LJ::load_talk_props2($dbcs, $u->{'userid'}, [ $re_talkid ], { $re_talkid => $parpost->{'props'} }); 
+        if($LJ::UNICODE && $parpost->{'props'}->{'unknown8bit'}) {
+            LJ::item_toutf8($u, \$parpost->{'subject'}, \$parpost->{'body'}, {});
+        }
+
+        $parpost->{'subject'} = LJ::ehtml($parpost->{'subject'});
+        LJ::CleanHTML::clean_comment(\$parpost->{'body'}, 
+                                     $parpost->{'props'}->{'opt_preformatted'});        
+        
+        my $datetime = DateTime_unix(LJ::mysqldate_to_time($parpost->{'datepost'}));
+
+        my ($s2poster, $pu);
+        my $comment_userpic;
+        if ($parpost->{'posterid'}) {
+            $pu = LJ::load_userid($parpost->{'posterid'});
+            $s2poster = UserLite($pu);
+
+            # FIXME: this is a little heavy:
+            $comment_userpic = Image_userpic($pu, 0, $parpost->{'props'}->{'picture_keyword'});
+        }
+        
+        my $dtalkid = $re_talkid * 256 + $entry->{'anum'};
+        $replyto = {
+            '_type' => 'EntryLite',
+            'subject' => $parpost->{'subject'},
+            'text' => $parpost->{'body'},
+            'userpic' => $comment_userpic,
+            'poster' => $s2poster,
+            'journal' => $s2entry->{'journal'},
+            'metadata' => {},
+            'permalink_url' => $u->{'_journalbase'} . "/$ditemid?view=dtalkid#t#dtalkid",
+            'depth' => 1,
+        };
+    }
+
+    $p->{'replyto'} = $replyto;
+
     $p->{'form'} = {
         '_type' => "ReplyForm",
         '_remote' => $remote,
         '_u' => $u,
-        '_ditemid' => $entry->{'itemid'}*256 + $entry->{'anum'},
-        
-
+        '_ditemid' => $ditemid,
     };
 
     return $p;
