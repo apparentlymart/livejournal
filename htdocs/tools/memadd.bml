@@ -267,7 +267,7 @@
          $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.fivekeywords'} p?>";
          return;
      }
-     @keywords = grep { $_ } map { s/^\s+//; s/\s+$//; s/\s\s+/ /g; $_; } @keywords;
+     @keywords = grep { $_ } map { s/\s\s+/ /g; LJ::trim($_); } @keywords;
      push @keywords, "*" unless (@keywords);
      my @kwid;
 
