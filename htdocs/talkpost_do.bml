@@ -349,7 +349,7 @@ body<=
     my $icon = LJ::Talk::show_image($pics, $subjecticon); 
 
     my $dtalkid;
-    my $md5_body = md5_hex($FORM{'body'});
+    my $md5_body = Digest::MD5::md5_hex($FORM{'body'});
     
     # figure out whether to post this comment screened
     my $state = 'A';
@@ -824,7 +824,7 @@ body<=
     # entryid-commentid-password hash
     sub ecphash {
         my ($itemid, $talkid, $password) = @_;
-        return "ecph-" . md5_hex($itemid . $talkid . $password);
+        return "ecph-" . Digest::MD5::md5_hex($itemid . $talkid . $password);
     }
 
     sub indent {
