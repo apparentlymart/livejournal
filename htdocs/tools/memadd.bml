@@ -83,8 +83,8 @@
 
  my $dbcr = LJ::get_cluster_reader($ju);
 
-# FIXME: Should use get_log2_row and get_logtext2 API
- my $log = $dbcr->selectrow_hashref("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, ls.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold', l.anum FROM log2 l, logtext2 ls WHERE ls.journalid=$jid AND l.journalid=$jid AND ls.jitemid=l.jitemid AND l.jitemid=$itemid");
+ my $log = LJ::get_log2_row($ju, $itemid);
+ my $subject = LJ::get_logtext2($ju, $itemid)->{$log->{jitemid}}[0];
 
  if ($oldstyle) {
      # ditemid was an old-style itemid, so we update it to the new style.
@@ -96,14 +96,14 @@
  # subject may need conversion into UTF-8
  if ($LJ::UNICODE) {
      my %props = ();
-     LJ::load_log_props2($dbcr, $log->{'ownerid'}, [ $itemid ], \%props);
+     LJ::load_log_props2($dbcr, $log->{'journalid'}, [ $itemid ], \%props);
      if ($props{$itemid}->{'unknown8bit'}) {
-         my $u = LJ::load_userid($log->{'ownerid'});
+         my $u = LJ::load_userid($log->{'journalid'});
          my ($error, $subj);
-         $subj = LJ::text_convert($log->{'subject'}, $u, \$error);
-         $log->{'subject'} = $subj unless $error;
+         $subj = LJ::text_convert($subject, $u, \$error);
+         $subject = $subj unless $error;
      }
-     LJ::text_out(\$log->{'subject'});
+     LJ::text_out(\$subject);
  }
 
  # check to see if it already is memorable (thus we're editing, not adding);
@@ -161,9 +161,9 @@
          $title = $ML{'.title.add_memory'};
 
          # this is a new memory.
-         my $user = LJ::get_username($log->{'ownerid'});
+         my $user = LJ::get_username($log->{'journalid'});
          my $dt = substr($log->{'eventtime'}, 0, 10);
-         $des = "$dt: $user: $log->{'subject'}";
+         $des = "$dt: $user: $subject";
      }
 
      # it'd be nice to only show the authas form when adding an entry and not
