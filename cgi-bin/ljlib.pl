@@ -1081,7 +1081,6 @@ sub ago_text
 # </LJFUNC>
 sub get_shared_journals
 {
-    shift if ref $_[0] eq "LJ::DBSet";
     my $u = shift;
     my $ids = LJ::load_rel_target($u, 'A') || [];
 
@@ -5390,7 +5389,7 @@ sub set_logprop
 # </LJFUNC>
 sub load_log_props2
 {
-    my $db = (ref $_[0] eq "DBI::db") ? shift @_ : undef;
+    my $db = isdb($_[0]) ? shift @_ : undef;
 
     my ($uuserid, $listref, $hashref) = @_;
     my $userid = want_userid($uuserid);
@@ -5459,7 +5458,7 @@ sub load_log_props2multi
 # </LJFUNC>
 sub load_talk_props2
 {
-    my $db = (ref $_[0] eq "DBI::db") ? shift @_ : undef;
+    my $db = isdb($_[0]) ? shift @_ : undef;
     my ($uuserid, $listref, $hashref) = @_;
 
     my $userid = want_userid($uuserid);
@@ -6232,7 +6231,6 @@ sub text_trim
 # </LJFUNC>
 sub item_toutf8
 {
-    shift if ref $_[0] eq "LJ::DBSet";
     my ($u, $subject, $text, $props) = @_;
     return unless $LJ::UNICODE;
 
@@ -6610,22 +6608,20 @@ sub auto_linkify
 # des: Load user relationship information. Loads all relationships of type 'type' in
 #      which user 'userid' participates on the left side (is the source of the
 #      relationship).
-# args: dbarg?, userid, type
+# args: db?, userid, type
 # arg-userid: userid or a user hash to load relationship information for.
 # arg-type: type of the relationship
 # returns: reference to an array of userids
 # </LJFUNC>
 sub load_rel_user
 {
-    my $dbarg = (ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db") ? shift : undef;
+    my $db = isdb($_[0]) ? shift : undef;
     my ($userid, $type) = @_;
     return undef unless $type and $userid;
     $userid = LJ::want_userid($userid);
-    my $dbr;
-    $dbr = $dbarg->{'reader'} if ref $dbarg eq "LJ::DBSet";
-    $dbr ||= $dbarg || LJ::get_db_reader();
-    return $dbr->selectcol_arrayref("SELECT targetid FROM reluser WHERE userid=? AND type=?",
-                                    undef, $userid, $type);
+    $db ||= LJ::get_db_reader();
+    return $db->selectcol_arrayref("SELECT targetid FROM reluser WHERE userid=? AND type=?",
+                                   undef, $userid, $type);
 }
 
 # <LJFUNC>
@@ -6633,28 +6629,27 @@ sub load_rel_user
 # des: Load user relationship information. Loads all relationships of type 'type' in
 #      which user 'targetid' participates on the right side (is the target of the
 #      relationship).
-# args: dbarg?, targetid, type
+# args: db?, targetid, type
 # arg-targetid: userid or a user hash to load relationship information for.
 # arg-type: type of the relationship
 # returns: reference to an array of userids
 # </LJFUNC>
 sub load_rel_target
 {
-    my $dbarg = (ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db") ? shift : undef;
+    my $db = isdb($_[0]) ? shift : undef;
     my ($targetid, $type) = @_;
     return undef unless $type and $targetid;
     $targetid = LJ::want_userid($targetid);
     my $dbr;
-    $dbr = $dbarg->{'reader'} if ref $dbarg eq "LJ::DBSet";
-    $dbr ||= $dbarg || LJ::get_db_reader();
-    return $dbr->selectcol_arrayref("SELECT userid FROM reluser WHERE targetid=? AND type=?",
-                                    undef, $targetid, $type);
+    $db ||= LJ::get_db_reader();
+    return $db->selectcol_arrayref("SELECT userid FROM reluser WHERE targetid=? AND type=?",
+                                   undef, $targetid, $type);
 }
 
 # <LJFUNC>
 # name: LJ::check_rel
 # des: Checks whether two users are in a specified relationship to each other.
-# args: dbarg?, userid, targetid, type
+# args: db?, userid, targetid, type
 # arg-userid: source userid, nonzero; may also be a user hash.
 # arg-targetid: target userid, nonzero; may also be a user hash.
 # arg-type: type of the relationship
@@ -6662,8 +6657,7 @@ sub load_rel_target
 # </LJFUNC>
 sub check_rel
 {
-    my $dbarg;
-    $dbarg = shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my $db = isdb($_[0]) ? shift : undef;
     my ($userid, $targetid, $type) = @_;
     return undef unless $type and $userid and $targetid;
     $userid = LJ::want_userid($userid); 
@@ -6672,12 +6666,10 @@ sub check_rel
     my $key = "$userid-$targetid-$type";
     return $LJ::REQ_CACHE_REL{$key} if defined $LJ::REQ_CACHE_REL{$key};
 
-    my $dbs = LJ::make_dbs_from_arg($dbarg || LJ::get_db_reader());
-    my $dbh = $dbs->{'dbh'};
-    my $qtype = $dbh->quote($type);
-
-    my $sql = "SELECT COUNT(*) FROM reluser WHERE userid=$userid AND type=$qtype AND targetid=$targetid";
-    my $res = LJ::dbs_selectrow_array($dbs, $sql);
+    $db ||= LJ::get_db_reader();
+    my $res = $db->selectrow_array("SELECT COUNT(*) FROM reluser ".
+                                   "WHERE userid=$userid AND type=? ".
+                                   "AND targetid=$targetid", undef, $type);
     return $LJ::REQ_CACHE_REL{$key} = ($res ? 1 : 0);
 }
 
@@ -6698,9 +6690,8 @@ sub set_rel
     $targetid = LJ::want_userid($targetid);
 
     my $dbh = LJ::get_db_writer();
-    my $qtype = $dbh->quote($type);
-    my $sql = "REPLACE INTO reluser (userid,targetid,type) VALUES ($userid,$targetid,$qtype)";
-    $dbh->do($sql);
+    $dbh->do("REPLACE INTO reluser (userid,targetid,type) ".
+             "VALUES ($userid,$targetid,?)", undef, $type);
     return;
 }
 
@@ -6939,7 +6930,7 @@ sub last_error
 sub error
 {
     my $err = shift;
-    if (ref $err eq "DBI::db") {
+    if (isdb($err)) {
         $LJ::db_error = $err->errstr;
         $err = "db";
     } elsif ($err eq "db") {
@@ -6950,8 +6941,14 @@ sub error
 }
 
 # to be called as &nodb; (so this function sees caller's @_)
-sub nodb { shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db"; }
+sub nodb { 
+    shift @_ if 
+        ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db" ||
+        ref $_[0] eq "DBIx::StateKeeper";
+}
 
+sub isdb { return ref $_[0] && (ref $_[0] eq "DBI::db" || 
+                                ref $_[0] eq "DBIx::StateKeeper"); }
 
 # LJ::S1::get_public_styles lives here in ljlib.pl so that 
 # cron jobs can call LJ::load_user_props without including
