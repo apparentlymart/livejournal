@@ -10,6 +10,8 @@ use strict;
 use vars qw($dbh %FORM);  # FIXME: in process of removing global $dbh usage.
 use DBI;
 use Digest::MD5 qw(md5_hex);
+use Text::Wrap;
+use MIME::Lite;
 
 ########################
 # CONSTANTS

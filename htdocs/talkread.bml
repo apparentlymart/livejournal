@@ -4,7 +4,6 @@ BODY<=
 
 (=_CODE
 #line 6
- use Fcntl ':flock'; # import LOCK_* constants
 
  my $PAGE_SIZE = 25;
  my $THREADING_POINT = 50;
@@ -73,27 +72,10 @@ BODY<=
  ## ref stuff
 
  ####  Check security before viewing this post
- if ($item->{'security'} ne "public") 
- {
-     unless (defined $remote) {
-	 return "(=H1 Error H1=)(=P You must be logged in to view this protected entry. P=)";
-     }
-
-     if ($item->{'security'} eq "private" && $u->{'user'} ne $remote->{'user'}) {
-	 return "(=H1 Error H1=)(=P You are not authorized to view this private entry. P=)";
-     }
-
-     if ($item->{'security'} eq "usemask" && $u->{'user'} ne $remote->{'user'}) {
-	 $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
-	 $sth->execute;
-	 my ($gmask) = $sth->fetchrow_array;
-	 my $allowed = (int($gmask) & int($item->{'allowmask'}));
-	 
-	 unless ($allowed) {
-	     return "(=H1 Error H1=)(=P You are not authorized to view this protected entry. P=)";
-	 }
-     }
-
+ unless (LJ::can_view($dbs, $remote, $item)) {
+     return "(=H1 Error H1=)(=P You must be logged in to view this protected entry. P=)"
+	 unless (defined $remote);
+     return "(=H1 Error H1=)(=P You are not authorized to view this protected entry. P=)";
  }
 
  $event = $item->{'event'};

@@ -4,22 +4,19 @@ BODY<=
 
 (=_CODE
 
- use Fcntl ':flock'; # import LOCK_* constants
- use Text::Wrap qw(wrap fill $columns);
- use Digest::MD5 qw(md5_hex);
- use MIME::Lite;
- $columns = 76;
+ $Text::Wrap::columns = 76;
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
+ my $remote = LJ::get_remote($dbs);
 
  my $ret = "";
  my @errors = ();
 
- my $DEBUG = $FORM{'debug'} ? 1 : 0;
+ my $DEBUG = 0;
 
  # start quoting shit to insert
  my $qitemid = $FORM{'itemid'}+0;
@@ -54,10 +51,8 @@ BODY<=
      push @errors, "You entered a username, but selected to post anonymously or as the currently logged in user.  Go back and decide which you really want to do.";
  }
 
- my $remote;
  my $cookie_auth;
  if ($FORM{'usertype'} eq "cookieuser") {
-     $remote = LJ::get_remote($dbs);
      return LJ::badinput("Your login cookie seems to have disappeared?") 
 	 unless ($remote && $remote->{'user'} eq $FORM{'cookieuser'});
      
@@ -105,6 +100,15 @@ BODY<=
      } else {
 	 push @errors, "You did not enter your LiveJournal username.  You can choose to post as \"Anonymous\" if you don't have a LiveJournal user account.";
      }
+ }
+
+ # check that user can even view this post, which is required
+ # to reply to it
+ ####  Check security before viewing this post
+ unless (LJ::can_view($dbs, $up, $item)) {
+     return "(=H1 Error H1=)(=P You must be logged in or using a username/password to reply to this protected entry. P=)"
+	 unless (defined $up);
+     return "(=H1 Error H1=)(=P You are not authorized to reply to this protected entry. P=)";
  }
 
  if ($FORM{'usertype'} ne "user" && $u->{'opt_whocanreply'} ne "all") {
@@ -477,7 +481,7 @@ BODY<=
  sub indent {
      my $a = shift;
      my $leadchar = shift || " ";
-     return fill("$leadchar  ", "$leadchar  ", $a);
+     return Text::Wrap::fill("$leadchar  ", "$leadchar  ", $a);
  }
 
 sub blockquote {

@@ -1,11 +1,8 @@
 #!/usr/bin/perl
 #
-# Historical note:  this code is damn old.
-#
+# Historical note:  the top of this code is damn old.
 # I think Brad Whitaker wrote it for freevote.com in like '97 or something.
-#
 # It needs to die.
-#
 
 # Loads hash of icon info...
 sub load_subjecticon
@@ -67,5 +64,9 @@ sub show_image
     }
     return "";
 }
+
+package LJ::Talk;
+
+
 
 1;
