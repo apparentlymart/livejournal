@@ -27,7 +27,6 @@ exit 1 unless GetOptions('delete' => \$opt_del, # from source
 my $optv = $opt_verbose;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljcmdbuffer.pl";
 
 my $dbh = LJ::get_dbh({raw=>1}, "master");
 die "No master db available.\n" unless $dbh;
@@ -259,6 +258,7 @@ print "Moving away from cluster $sclust\n" if $optv;
 
 while (my $cmd = $dboa->selectrow_array("SELECT cmd FROM cmdbuffer WHERE journalid=$userid")) {
     print "Flushing cmdbuffer for cmd: $cmd\n" if $optv > 1;
+    require "$ENV{'LJHOME'}/cgi-bin/ljcmdbuffer.pl";
     LJ::Cmdbuffer::flush($dbh, $dboa, $cmd, $userid);
 }
 
