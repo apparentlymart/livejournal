@@ -1885,7 +1885,14 @@ sub login_message
         if ($u->{'status'} eq "N") { $res->{'message'} = "You are currently not validated.  You may continue to use LiveJournal, but please validate your email address for continued use.  See the instructions that were mailed to you when you created your journal, or see $LJ::SITEROOT/support/ for more information."; }
         if ($u->{'status'} eq "T") { $res->{'message'} = "You need to validate your new email address.  Your old one was good, but since you've changed it, you need to re-validate the new one.  Visit the support area for more information."; }
     }
+    
+    my @checkpass = LJ::run_hooks("bad_password", $u->{'password'});
+    if (@checkpass && $checkpass[0]->[0]) {
+        $res->{'message'} = "Your password is too easy to guess.  It's recommended that you change it, otherwise you risk having your journal hijacked.  Visit $LJ::SITEROOT/changepassword.bml";
+    }
+
     if ($u->{'status'} eq "B") { $res->{'message'} = "You are currently using a bad email address.  All mail we try to send you is bouncing.  We require a valid email address for continued use.  Visit the support area for more information."; }
+    
 
     if (LJ::get_cap($u, "readonly")) {
         $res->{'message'} = "Your account is temporarily in read-only mode.  Some operations will fail for a few minutes.";
