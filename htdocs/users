@@ -126,7 +126,7 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
 
     if ($user ne lc($user))
     {
-	my $url = &LJ::journal_base(lc($user), $vhost) . "/";
+	my $url = LJ::journal_base(lc($user), $vhost) . "/";
 	print "Status: 301 Moved Permanently\n";
 	print "Location: $url\n";
 	print "Content-type: text/html\n\n";
@@ -134,7 +134,7 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
 	next REQUEST;
     }
     
-    my $remote = &get_remote(undef, $cgi);
+    my $remote = LJ::get_remote($dbs, undef, $cgi);
 
     my %headers = ();
     my $opts = {
@@ -147,10 +147,14 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
         local $SIG{ALRM} = sub { die "alarm\n" }; # NB: \n required
         alarm 7;
 	$html = LJ::make_journal($dbs, $user, $mode, $remote, $opts);
-        alarm 0;
     };
+    alarm 0;
     if ($@) {
-        $html = "Timeout rendering page.";
+        if ($@ eq "alarm\n") {
+	    $html = "Timeout rendering page.\n";
+	} else {
+	    $html = "Fatal error: $@\n";
+	}
 	dump_error();
     }
 
