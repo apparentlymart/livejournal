@@ -105,8 +105,8 @@ sub get_id
     # Fetch database handle and lock the captcha table
     $dbh = LJ::get_db_writer()
 		or return LJ::error( "Couldn't fetch a db writer." );
-    $dbh->do( "LOCK TABLES captchas WRITE" )
-		or return LJ::error( "Failed lock on captchas table." );
+    $dbh->selectrow_array("SELECT GET_LOCK('get_captcha', 10)")
+                or return LJ::error( "Failed lock on getting a captcha." );
 
     # Fetch the first unassigned row
     $sql = q{
@@ -118,7 +118,7 @@ sub get_id
         LIMIT 1
     };
     $row = $dbh->selectrow_arrayref( $sql, undef, $type )
-        or $dbh->do(" UNLOCK TABLES ") && die "No $type captchas available";
+        or $dbh->do("DO RELEASE_LOCK('get_captcha')") && die "No $type captchas available";
     die "selectrow_arrayref: $sql: ", $dbh->errstr if $dbh->err;
     ( $capid, $anum ) = @$row;
 
@@ -130,7 +130,7 @@ sub get_id
         WHERE capid = $capid
     };
     $dbh->do( $sql ) or die "do: $sql: ", $dbh->errstr;
-    $dbh->do( "UNLOCK TABLES" );
+    $dbh->do("DO RELEASE_LOCK('get_captcha')");
 
     return ( $capid, $anum );
 }
