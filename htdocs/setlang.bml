@@ -10,16 +10,16 @@
     if (LJ::did_post()) {
         my $remote = LJ::get_remote();
 
-        my $cval = $l->{'lncode'};
+        my $cval = $l->{'lncode'} . "/" . time();
         if ($remote) {
             LJ::set_userprop($remote, "browselang", $l->{'lncode'});
 
             if ($remote->{'_session'}->{'exptype'} eq 'long') {
-                $cval = [ $l->{'lncode'}, $remote->{'_session'}->{'timeexpire'} ];
+                $cval = [ $cval, $remote->{'_session'}->{'timeexpire'} ];
             }
         }
 
-        $COOKIE{'langpref'} = $cval . "/" . time();
+        $COOKIE{'langpref'} = $cval;
         BML::set_language($l->{'lncode'});
     }
 
