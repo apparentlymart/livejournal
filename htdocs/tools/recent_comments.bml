@@ -28,15 +28,14 @@ body<=
     $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
     $ret .= "</form>\n\n";
 
-    eval {
-    my (@recv, @posted, %talkids, %logids);
+    my (@recv, @posted, %talkids);
     my %need_userid;
-    my %logrow;  # jid-nodeid -> $logrow
+    my %logrow;  # "jid nodeid" -> $logrow
+    my %need_logids;  # hash of "journalid jitemid" => [journalid, jitemid]
 
     my $now = time();
     my $sth;
 
-    my $jarg = "journal=$u->{'user'}&";
     my $jargent ="journal=$u->{'user'}&amp;";
 
     # Retrieve received
@@ -49,12 +48,12 @@ body<=
                               "WHERE journalid=? AND jtalkid > ?");
         $sth->execute($u->{userid}, $max - $count);
         die $dbcr->errstr if $dbcr->err;
-        
         while (my $r = $sth->fetchrow_hashref) {
             $need_userid{$r->{posterid}} = 1 if $r->{posterid};
             push @recv, $r;
             $talkids{$r->{jtalkid}} = 1;
-            $logids{$r->{nodeid}} = 1 if $r->{nodetype} eq "L";
+            $need_logids{"$u->{userid} $r->{nodeid}"} = [$u->{userid}, $r->{nodeid}]
+                if $r->{nodetype} eq "L";
         }
     }
 
@@ -68,12 +67,13 @@ body<=
         $ret .= "<table style='width: 50%'>";
         while (my $r = $sth->fetchrow_hashref) {
             push @posted, $r;
-            $talkids{$r->{jtalkid}} = 1;
-            $logids{$r->{nodeid}}   = 1 if $r->{nodetype} eq "L";
+            $need_logids{"$r->{journalid} $r->{nodeid}"} = [$r->{journalid}, $r->{nodeid}]
+                if $r->{nodetype} eq "L";
+            $need_userid{$r->{journalid}} = 1;
         }
     }
 
-    $ret .= "<div style='text-align: center'><a name='received'></a>" . 
+    $ret .= "<div style='text-align: center'><a name='received'></a>" .
         BML::ml('ActionLink', { 'link' => "Latest Received"}) . " " .
         BML::ml('Actionlink', { 'link'=>"<a href='#posted'>Latest Posted</a>"}) . "</div>" if $u->{journaltype} eq "P";
 
@@ -83,9 +83,16 @@ body<=
     @recv = sort { $b->{datepost} cmp $a->{datepost} } @recv;
     my $us = LJ::load_userids(keys %need_userid);
 
-    my $comment_text = LJ::get_talktext2($u, %talkids);
-    my $log_text     = LJ::get_logtext2($u, %logids);
-    
+    # setup the parameter to get_logtext2multi
+    my $need_logtext = {};
+    foreach my $need (values %need_logids) {
+        my $ju = $us->{$need->[0]};
+        next unless $ju;
+        push @{$need_logtext->{$ju->{clusterid}} ||= []}, $need;
+    }
+
+    my $comment_text = LJ::get_talktext2($u, keys %talkids);
+    my $log_text     = LJ::get_logtext2multi($need_logtext);
     my $root = LJ::journal_base($u);
 
     $ret .= "<table style='width: 100%' cellpadding='5' cellspacing='0'>";
@@ -110,7 +117,6 @@ body<=
 
 	my $pu = $us->{$r->{posterid}};
 
-
         $ret .= "<tr valign='top'><td style='width: 150px; line-height: 1.5em; border-top: 1px solid #999; background-color: $bgcolor'>";
 	$ret .= ($pu ? LJ::ljuser($pu) : "Anonymous") . "<br />";
 
@@ -126,7 +132,7 @@ body<=
         }
         
             if ($r->{'state'} eq 'F') {
-                $ret .= "<a href='/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";        
+                $ret .= "<a href='/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$talkid'>" . LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
             }
             
             if ($r->{'state'} ne 'S') {
@@ -144,7 +150,7 @@ body<=
 
         $ret .= "</td><td style='text-align: left; border-top: 1px solid #999; border-left: 1px solid #999'>";
 
-        my $subject = $log_text->{$r->{nodeid}}[0];
+        my $subject = $log_text->{"$u->{userid} $r->{nodeid}"}[0];
         LJ::CleanHTML::clean_subject(\$subject) if $subject ne "";
 
         $ret .= "<strong style='float: left; text-decoration: underline'>$subject</strong> " if $subject ne "";
@@ -195,11 +201,11 @@ body<=
         $ret .= "<tr><th>Time</th><th>Location</th><th></th></tr>";
         @posted = sort { $b->{datepost} cmp $a->{datepost} } @posted;
 
-        foreach my $r ( @posted ) {
+        foreach my $r (@posted) {
             $jcount{$r->{'journalid'}}++;
             next unless $r->{'nodetype'} eq "L";  # log2 comment
 
-            my $ju = LJ::load_userid($r->{'journalid'});
+            my $ju = $us->{$r->{journalid}};
             my $lrow = $logrow{"$ju->{userid} $r->{nodeid}"} ||= LJ::get_log2_row($ju, $r->{'nodeid'});
             my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
 
@@ -210,20 +216,19 @@ body<=
             my $subject;
             if (defined $lrow->{ditemid}) {
                 $hr_ago = "<a href='$talkurl'>$hr_ago</a>";
-                $subject = $log_text->{$r->{nodeid}}[0] || "$lrow->{ditemid}.html";
+                $subject = $log_text->{"$r->{journalid} $r->{nodeid}"}[0] || "$lrow->{ditemid}.html";
                 LJ::CleanHTML::clean_subject(\$subject);
                 $subject = "<a href='$logurl'>$subject</a>";
             } else {
                 $subject = "Post Deleted";
             }
-            
+
             my $links = "[<a href='$talkurl'>Comment</a>] [<a href='$logurl'>Entry</a>]\n";
             $ret .= "<tr><td>$hr_ago</td><td>" . LJ::ljuser($ju->{user}) . ":</td><td>$subject</td></tr>";
         }
         $ret .= "</table>";
     }
-    };
-    
+
     return $@ || $ret;
 
 }
