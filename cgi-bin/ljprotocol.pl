@@ -1487,6 +1487,7 @@ sub authenticate
     }
 
     return fail($err,100) unless $u;
+    return fail($err,100) if ($u->{'statusvis'} eq "X");
     return fail($err,101) unless ($flags->{'nopassword'} || 
 				  $flags->{'noauth'} || 
   				  LJ::auth_okay($username,
