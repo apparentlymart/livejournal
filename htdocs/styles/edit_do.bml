@@ -322,7 +322,7 @@ if ($FORM{'mode'} eq "savechanges")
 
      # all good
      return "(=H1 Success H1=)(=P Style has been updated.  You can view it ".
-	 "<a href=\"/customview.cgi?user=$user&styleid=$qstyleid\">here</a>. P=)";
+	 "<a target=preview href=\"/customview.cgi?user=$user&styleid=$qstyleid\">here</a>. P=)";
  }
 
  return "<B>Error:</B> Unknown mode ($FORM{'mode'}).";
