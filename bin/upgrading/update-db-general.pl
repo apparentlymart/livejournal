@@ -2,16 +2,7 @@
 # database schema & data info
 #
 
-mark_clustered("userbio", "cmdbuffer", "dudata",
-               "log2", "logtext2", "logprop2", "logsec2",
-               "talk2", "talkprop2", "talktext2", "talkleft",
-               "userpicblob2", "events",
-               "ratelog", "loginstall", "sessions", "sessions_data",
-               "s1usercache", "modlog", "modblob", "counter",
-               "userproplite2", "links", "s1overrides", "s1style",
-               "s1stylecache", "userblob", "userpropblob",
-               "clustertrack2",
-               );
+mark_clustered(@LJ::USER_TABLES);
 
 register_tablecreate("adopt", <<'EOC');
 CREATE TABLE adopt (

@@ -27,6 +27,21 @@ use Compress::Zlib ();
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
 
+# tables on user databases (ljlib-local should define @LJ::USE_TABLES_LOCAL)
+# this is here and no longer in bin/upgrading/update-db-{general|local}.pl
+# so other tools (in particular, the inter-cluster user mover) can verify
+# that it knows how to move all types of data before it will proceed.
+@LJ::USER_TABLES = ("userbio", "cmdbuffer", "dudata",
+                    "log2", "logtext2", "logprop2", "logsec2",
+                    "talk2", "talkprop2", "talktext2", "talkleft",
+                    "userpicblob2", "events",
+                    "ratelog", "loginstall", "sessions", "sessions_data",
+                    "s1usercache", "modlog", "modblob", "counter",
+                    "userproplite2", "links", "s1overrides", "s1style",
+                    "s1stylecache", "userblob", "userpropblob",
+                    "clustertrack2",
+                    );
+
 require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"
     if -e "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl";
 
