@@ -261,21 +261,43 @@ sub create_view_rss
     return $ret;
 }
 
+
 # the creator for the Atom view
+# keys of $opts:
+# saycharset - required: the charset of the feed
+# noheader - only output an <entry>..</entry> block. off by default
+# apilinks - output AtomAPI links for posting a new entry or 
+#            getting/editing/deleting an existing one. off by default
+# TODO: define and use an 'lj:' namespace
+
 sub create_view_atom
 {
     my ($journalinfo, $u, $opts, $cleanitems) = @_;
 
     my $ret;
 
-    # header
+    # prolog line
     $ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
-    $ret .= "<feed version='0.3' xmlns='http://purl.org/atom/ns#'>\n";
 
-    # attributes
-    $ret .= "<title mode='escaped'>$journalinfo->{title}</title>\n";
-    $ret .= "<tagline mode='escaped'>$journalinfo->{subtitle}</tagline>\n";
-    $ret .= "<link rel='alternate' type='text/html' href='$journalinfo->{link}' />\n";
+    # AtomAPI interface
+    my $api = "$LJ::SITEROOT/interface/atomapi/$journalinfo->{'u'}->{'user'}";
+
+    # header
+    unless ($opts->{'noheader'}) {
+        $ret .= "<feed version='0.3' xmlns='http://purl.org/atom/ns#'>\n";
+
+        # attributes
+        $ret .= "<title mode='escaped'>$journalinfo->{title}</title>\n";
+        $ret .= "<tagline mode='escaped'>$journalinfo->{subtitle}</tagline>\n";
+        $ret .= "<link rel='alternate' type='text/html' href='$journalinfo->{link}' />\n";
+        
+        # link to the AtomAPI version of this feed
+        $ret .= "<link rel='service.feed' type='application/x.atom+xml' title='AtomAPI-enabled feed' href='$api/feed' />";
+
+        if ($opts->{'apilinks'}) {
+            $ret .= "<link rel='service.post' type='application/x.atom+xml' title='Create a new post' href='$api/post' />";
+        }
+    }
 
     # output individual item blocks
 
@@ -288,6 +310,9 @@ sub create_view_atom
         $ret .= "    <title mode='escaped'>$it->{subject}</title>\n"; # include empty tag if we don't have a subject.
         $ret .= "    <id>urn:lj:$LJ::DOMAIN:atom1:$journalinfo->{u}{user}:$ditemid</id>\n";
         $ret .= "    <link rel='alternate' type='text/html' href='$journalinfo->{link}$ditemid.html' />\n";
+        if ($opts->{'apilinks'}) {
+            $ret .= "<link rel='service.edit' type='application/x.atom+xml' title='Edit this post' href='$api/edit/$itemid' />";
+        }
         $ret .= "    <created>" . LJ::time_to_w3c($it->{createtime}, 'Z') . "</created>\n"
              if $it->{createtime} != $it->{modtime};
 
@@ -305,7 +330,9 @@ sub create_view_atom
         $ret .= "  </entry>\n";
     }
 
-    $ret .= "</feed>\n";
+    unless ($opts->{'noheader'}) {
+        $ret .= "</feed>\n";
+    }
 
     return $ret;
 }
