@@ -404,35 +404,44 @@ sub get_by_keyword {
     my $kw = defined $kwoid && !$kwid ? $kwoid : undef;
     return undef unless $u && ($kwid || defined $kw);
 
-    # get database handles, depending on version, etc
-    my $dv = $u->{dversion}+0;
-    my $db = $dv > 5 ? LJ::get_cluster_reader($u) : LJ::get_db_reader();
-    return undef unless $db;
-
-    # get kwid if we need it
-    if (defined $kw) {
-        if ($dv > 5) {
-            $kwid = $db->selectrow_array('SELECT kwid FROM userkeywords WHERE userid = ? AND keyword = ?',
-                                         undef, $u->{userid}, $kw)+0;
-        } else {
-            $kwid = $db->selectrow_array('SELECT kwid FROM keywords WHERE keyword = ?', undef, $kw)+0;
-        }
-    }
-    return undef if $db->err || !$kwid;
-
-    # get ids of memories
+    # two entirely separate codepaths, depending on the user's dversion.
     my $memids;
-    if ($dv > 5) {
-        # new clustered memories
-        $memids = $db->selectcol_arrayref('SELECT memid FROM memkeyword2 WHERE userid = ? AND kwid = ?',
-                                          undef, $u->{userid}, $kwid);
-    } else {
-        # old global memories
-        $memids = $db->selectcol_arrayref('SELECT memid FROM memkeyword WHERE kwid = ?', undef, $kwid);
-    }
-    return {} unless @{$memids || []};
+    if ($u->{dversion} > 5) {
+        # the smart way
+        my $dbcr = LJ::get_cluster_reader($u);
+        return undef unless $dbcr;
 
-    # now hit up other function to return the memories
+        # get keyword id if we don't have it
+        if (defined $kw) {
+            $kwid = $dbcr->selectrow_array('SELECT kwid FROM userkeywords WHERE userid = ? AND keyword = ?',
+                                           undef, $u->{userid}, $kw)+0;
+        }
+        return undef unless $kwid;
+
+        # now get the actual memory ids
+        $memids = $dbcr->selectcol_arrayref('SELECT memid FROM memkeyword2 WHERE userid = ? AND kwid = ?',
+                                           undef, $u->{userid}, $kwid);
+        return undef if $dbcr->err;
+    } else {
+        # the dumb way
+        my $dbr = LJ::get_db_reader();
+        return undef unless $dbr;
+
+        # get keyword id if we don't have it
+        if (defined $kw) {
+            $kwid = $dbr->selectrow_array('SELECT kwid FROM keywords WHERE keyword = ?', undef, $kw)+0;
+        }
+        return undef unless $kwid;
+
+        # now get memory ids.  this has to join.  :(
+        $memids = $dbr->selectcol_arrayref('SELECT m.memid FROM memorable m, memkeyword mk ' .
+                                           'WHERE m.userid = ? AND mk.memid = m.memid AND mk.kwid = ?',
+                                           undef, $u->{userid}, $kwid);
+        return undef if $dbr->err;
+    }
+
+    # standard in both cases
+    return {} unless @{$memids || []};
     return LJ::Memories::_memory_getter($u, { %{$opts || {}}, byid => $memids });
 }
 
