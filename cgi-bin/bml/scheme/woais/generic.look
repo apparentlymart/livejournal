@@ -135,7 +135,7 @@ _CODE=)
  }
 
  my $remote = LJ::get_remote();
- if (remote) {
+ if ($remote) {
      return "<B>Logged in:</B> $remote->{'user'}, <A HREF=\"/logout.bml\">Logout</A>";
  } else {
      return "<B>Not Logged in.</B> <A HREF=\"/login.bml\">Login</A>";
