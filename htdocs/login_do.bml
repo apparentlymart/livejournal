@@ -21,7 +21,7 @@
  unless ($u) { push @errors, "Unknown user."; }
 
  unless (LJ::auth_okay($u, $password, $hpassword)) {
-     push @errors, "Invalid password. (p=$password, hp=$hpassword)"; 
+     push @errors, "Invalid password."; 
  }
  
  if (@errors)
