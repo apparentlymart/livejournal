@@ -1258,7 +1258,7 @@ sub talkform {
     if ($res{'pickw_count'}) {
         $ret .= BML::ml('.label.picturetouse2',
                         {
-                            'aopts'=>"$LJ::SITEROOT/allpics.bml?user=$remote->{'user'}"});
+                            'aopts'=>"href='$LJ::SITEROOT/allpics.bml?user=$remote->{'user'}'"});
         my @pics;
         for (my $i=1; $i<=$res{'pickw_count'}; $i++) {
             push @pics, $res{"pickw_$i"};

@@ -735,7 +735,7 @@ sub create_qr_div {
         if ($res{'pickw_count'}) {
             $qrhtml .= BML::ml('/talkpost.bml.label.picturetouse2',
                                {
-                                   'aopts'=>"$LJ::SITEROOT/allpics.bml?user=$remote->{'user'}"});
+                                   'aopts'=>"href='$LJ::SITEROOT/allpics.bml?user=$remote->{'user'}'"});
             my @pics;
             for (my $i=1; $i<=$res{'pickw_count'}; $i++) {
                 push @pics, $res{"pickw_$i"};

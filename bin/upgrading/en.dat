@@ -3073,7 +3073,7 @@ if you would like to screen, unscreen, or delete the comments.
 
 /talkpost.bml.error.noreply_screened=This comment is screened and you have no permissions to see it or reply to it.
 
-/talkpost.bml.label.picturetouse2=<a href='[[aopts]]'>Picture</a> to use: 
+/talkpost.bml.label.picturetouse2=<a [[aopts]]>Picture</a> to use:
 
 /talkpost.bml.loganonip=<b>Notice!</b> This user has turned on the option that logs IP addresses of anonymous posters.
 
