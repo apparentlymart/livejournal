@@ -355,7 +355,7 @@ sub clean
     }
     
     # extra-paranoid check
-    1 while $newdata =~ s/<script//ig;
+    1 while $newdata =~ s/<script\b//ig;
 
     $$data = $newdata;
 }
