@@ -10,8 +10,7 @@ sub MonthPage
 
     my $p = Page($u, $opts->{'vhost'});
     $p->{'_type'} = "MonthPage";
-    $p->{'prev'} = undef;
-    $p->{'next'} = undef;
+    $p->{'view'} = "month";
     $p->{'days'} = [];
 
     my $ctx = $opts->{'ctx'};
