@@ -160,13 +160,13 @@
      my @linkele;
     
      my $label = $com ? "Monitor Community" : "Add this user to your friends list";
-     push @linkele, "<A HREF=\"/friends/add.bml?user=$user\"><IMG SRC=\"(=IMGPREFIX=)/btn_addfriend.gif\" WIDTH=22 HEIGHT=20 alt=\"$label\" title=\"$label\" ALIGN=ABSMIDDLE BORDER=0></A>";
+     push @linkele, "<A HREF=\"/friends/add.bml?user=$user\"><IMG SRC=\"$LJ::IMGPREFIX/btn_addfriend.gif\" WIDTH=22 HEIGHT=20 alt=\"$label\" title=\"$label\" ALIGN=ABSMIDDLE BORDER=0></A>";
 
      $label = "To-Do List";
-     push @linkele, "<A HREF=\"/todo/?user=$user\"><IMG SRC=\"(=IMGPREFIX=)/btn_todo.gif\" WIDTH=22 HEIGHT=20 alt=\"$label\" title=\"$label\" ALIGN=ABSMIDDLE BORDER=0></A>";
+     push @linkele, "<A HREF=\"/todo/?user=$user\"><IMG SRC=\"$LJ::IMGPREFIX/btn_todo.gif\" WIDTH=22 HEIGHT=20 alt=\"$label\" title=\"$label\" ALIGN=ABSMIDDLE BORDER=0></A>";
 
      $label = "Memories";
-     push @linkele, "<A HREF=\"/tools/memories.bml?user=$user\"><IMG SRC=\"(=IMGPREFIX=)/btn_memories.gif\" WIDTH=22 HEIGHT=20 alt=\"$label\" title=\"$label\" ALIGN=ABSMIDDLE BORDER=0></A>";
+     push @linkele, "<A HREF=\"/tools/memories.bml?user=$user\"><IMG SRC=\"$LJ::IMGPREFIX/btn_memories.gif\" WIDTH=22 HEIGHT=20 alt=\"$label\" title=\"$label\" ALIGN=ABSMIDDLE BORDER=0></A>";
 
      push @linkele, "<A HREF=\"/tools/tellafriend.bml?user=$u->{'user'}\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_tellfriend.gif\" WIDTH=22 HEIGHT=20 ALT=\"Tell a Friend!\" title=\"Tell a Friend!\" BORDER=0></A>";
 
@@ -184,7 +184,7 @@
  {
      my $paid_extra;
      if ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid") {
-	 $paid_extra = " <A HREF=\"/site/supporters.bml\"><IMG SRC=\"(=IMGPREFIX=)/talk/md10_thumbup.gif\" WIDTH=25 HEIGHT=19 ALIGN=ABSMIDDLE ALT=\"Paid User\" BORDER=0></A>";
+	 $paid_extra = " <A HREF=\"/site/supporters.bml\"><IMG SRC=\"$LJ::IMGPREFIX/talk/md10_thumbup.gif\" WIDTH=25 HEIGHT=19 ALIGN=ABSMIDDLE ALT=\"Paid User\" BORDER=0></A>";
      }
 
      $body .= "<TR VALIGN=TOP><TD ALIGN=RIGHT><B>User:</B></TD><TD WIDTH=100%><A HREF=\"/$dir/$user/\"><B>$user</B></A> ($u->{'userid'})$paid_extra</TD>";
