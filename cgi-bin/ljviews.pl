@@ -342,7 +342,7 @@ sub create_view_friends
     $remote = LJ::load_userid($dbs, $remote->{'userid'}) if $remote;
 
     # see how often the remote user can reload this page.
-    my $newinterval = LJ::get_cap($remote, "friendsviewupdate") || 1;
+    my $newinterval = LJ::get_cap_min($remote, "friendsviewupdate") || 1;
 
     # when are we going to say page was last modified?  back up to the 
     # most recent time in the past where $time % $interval == 0
