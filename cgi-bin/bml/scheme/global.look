@@ -153,7 +153,8 @@ LOAD_PAGE_INFO<=
 	   },
 	     );
  
- my $remuser = $BML::COOKIE{'ljuser'};
+ my $remote = LJ::get_remote();
+ my $remuser = $remote ? $remote->{'user'} : "";
  my $uri = BML::get_uri();        
  if ($remuser ne "" && $uri ne "/logout.bml") 
  {

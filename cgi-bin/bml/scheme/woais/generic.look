@@ -133,9 +133,10 @@ _CODE=)
  if (BML::get_uri() =~ /^\/log(in|out)/) {
      return "";
  }
- my $cooku = $BML::COOKIE{"ljuser"};
- if ($cooku && $BML::COOKIE{"ljhpass"} =~ /^$cooku:(.+)/) {
-     return "<B>Logged in:</B> $cooku, <A HREF=\"/logout.bml\">Logout</A>";
+
+ my $remote = LJ::get_remote();
+ if (remote) {
+     return "<B>Logged in:</B> $remote->{'user'}, <A HREF=\"/logout.bml\">Logout</A>";
  } else {
      return "<B>Not Logged in.</B> <A HREF=\"/login.bml\">Login</A>";
  }
