@@ -1,0 +1,21 @@
+#!/usr/bin/perl
+package ipl;
+
+use Term::ShellKit qw{};
+use Term::ShellKit::Commands qw{};
+
+use lib "$ENV{LJHOME}/cgi-bin";
+require 'ljlib.pl';
+
+my @startup = (
+    @Term::ShellKit::DefaultStartup,
+    'Term::ShellKit::Commands::echo Loading additional shell command kits',
+    'Term::ShellKit::load_kit Dev',
+    'Term::ShellKit::load_kit TextFile',
+    'Term::ShellKit::load_kit DBI',
+    'Term::ShellKit::load_kit AutoPager',
+    @ARGV,
+);
+
+Term::ShellKit::shell( @startup );
+
