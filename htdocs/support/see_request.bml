@@ -53,13 +53,16 @@ BODY<=
  }
 
  my $ret = "";
- $ret .= "<TABLE>\n";
- $ret .= "<TR><TD VALIGN=BOTTOM ALIGN=RIGHT><B>From:</B></TD><TD>";
+ $ret .= "<table>\n";
+ $ret .= "<tr><td valign=\"bottom\" align=\"right\"><b>From:</b></td><td>";
  if ($u->{'defaultpicid'}) {
      my %pic;
      my $picid = $u->{'defaultpicid'};
      LJ::load_userpics($dbs, \%pic, [ $picid ]);
-     $ret .= "<IMG ALIGN=BASELINE SRC=\"/userpic/$picid\" WIDTH=$pic{$picid}->{'width'} HEIGHT=$pic{$picid}->{'height'} ALIGN=ABSMIDDLE HSPACE=3>";
+     $ret .= "<a href=\"/allpics.bml?user=$u->{'user'}\">";
+     $ret .= "<img align='baseline' src=\"/userpic/$picid\" width='$pic{$picid}->{'width'}' ".
+         "height='$pic{$picid}->{'height'}' align=\"absmiddle\" hspace='3' border='0' />";
+     $ret .= "</a>";
  }
 
  # show requester name + email
@@ -360,6 +363,7 @@ PAGE=)(=_C <LJDEP>
 link: htdocs/support/faqbrowse.bml, htdocs/styles/browse/styleinfo.bml
 link: htdocs/support/help.bml, htdocs/support/act.bml, htdocs/login.bml
 link: htdocs/guide/support.bml, htdocs/support/faq.bml, htdocs/support/index.bml
+link: htdocs/allpics.bml
 img: htdocs/userpic
 post: htdocs/support/append_request.bml
 </LJDEP> _C=)
