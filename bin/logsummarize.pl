@@ -71,7 +71,7 @@ foreach my $table (@need_summary)
 	$st{'browser'}->{$r->[F_BROWSER]}++;
 	$st{'host'}->{$r->[F_VHOST]}++;
 
-	if ($r->[F_URI] =~ s!^/users/\w+/?!/users/*/!) {
+	if ($r->[F_URI] =~ s!^/(users/|~)\w+/?!/users/*/!) {
 	    $r->[F_URI] =~ s!day/\d\d\d\d/\d\d/\d\d!day!;
 	    $r->[F_URI] =~ s!calendar/\d\d\d\d!calendar!;
 	}
