@@ -669,7 +669,7 @@ sub userpic_content
             
             my $paths = LJ::MemCache::get($memkey);
             unless ($paths) {
-                my @paths = LJ::mogclient()->get_paths( $key, 1, $zone );
+                my @paths = LJ::mogclient()->get_paths( $key, { noverify => 1, zone => $zone });
                 $paths = \@paths;
                 LJ::MemCache::add($memkey, $paths, 3600) if @paths;
             }
