@@ -245,7 +245,7 @@ BODY<=
      $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_infoshow $checked></TD><TD><B>Show location & birthday</B></TD></TR>\n";
      $ret .= "<TR><TD>&nbsp;</TD><TD>Turn this on if you want your city/state/country and birthday to be visible to other users.</TD></TR>\n";
 
-     $checked = $u->{'allow_infoshow'} ne "N" ? "CHECKED" : "";
+     $checked = $u->{'allow_contactshow'} ne "N" ? "CHECKED" : "";
      $ret .= "<tr valign=middle><td width=50 align=right><input type=checkbox name=allow_contactshow $checked></td><td><b>Show your contact information on your LiveJournal?</b></td></tr>\n";
      $ret .= "<tr><td>&nbsp;</td><td>You should keep this option enabled.  This lets other people be able to contact you by showing your email address, ICQ number, and AOL Instant Messenger screenname all on your LiveJournal.";
 
