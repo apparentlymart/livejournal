@@ -6,3 +6,5 @@ general /userinfo.bml.syn.lastnew
 general /editinfo.bml.allowshowcontact.email.reason
 general /editinfo.bml.allowshocontact.email.if_domainaddy
 
+general /paidaccounts/index.bml.otherpay.phone_num
+
