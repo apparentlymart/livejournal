@@ -21,8 +21,6 @@ sub handler
     my $disk_file = "$LJ::HOME/htdocs/palimg/$base.$ext";
     return 404 unless -e $disk_file;
 
-    $r->log_error("File exists: $disk_file, Extra: $extra");
-
     my @st = stat(_);
     my $size = $st[7];
     my $modtime = $st[9];
@@ -42,8 +40,6 @@ sub handler
         }
     }
  
-    $r->log_error("sending file");
-
     return send_file($r, $disk_file, {
         'mime' => $mime,
         'etag' => $etag,
@@ -141,7 +137,6 @@ sub send_file
             $palette = PaletteModify::new_png_palette($fh, \%pal_colors);
         }
         unless ($palette) {
-            $r->log_error("no palette?");
             return 404;  # image isn't palette changeable?
         }
     }
