@@ -34,8 +34,8 @@ BODY<=
      my $item = "langname.$code";
      my $namethislang = BML::ml($item);
      my $namenative = LJ::Lang::get_text_bml($l->{'lncode'}, $item);
-     $ret .= "<p><input type='radio' $checked name='lang' value='$code' id='sel$code'> <label for='sel$code'>$namethislang";
-     $ret .= " ($namenative)" if $namethislang ne $namenative;
+     $ret .= "<p><input type='radio' $checked name='lang' value='$code' id='sel$code'> <label for='sel$code'>$namenative";
+     $ret .= " ($namethislang)" if $namethislang ne $namenative;
      $ret .= "</label></p>\n";
  }
  
