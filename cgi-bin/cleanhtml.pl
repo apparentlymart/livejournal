@@ -357,7 +357,7 @@ sub clean_subject_all
 my $event_eat = [qw[head title style layer iframe applet object]];
 my $event_remove = [qw[bgsound embed object caption link body meta]];
 
-my @comment_close = qw(a b i u ul ol s font tt blockquote pre sub sup code strong em big small center h1 h2 h3 table tr td strike dl cite xmp th marquee);
+my @comment_close = qw(a b i u ul ol s font tt blockquote pre sub sup code strong em big small center h1 h2 h3 table tr td strike dl cite xmp th marquee noframes);
 my @comment_all = (@comment_close, "img", "li", "br", "dd", "dt", "hr", "p");
 
 sub clean_event
