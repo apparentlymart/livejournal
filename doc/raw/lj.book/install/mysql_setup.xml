@@ -43,7 +43,7 @@
   <para>
     <screen><prompt>$</prompt> <userinput>cd <link linkend='ljhome_var'>$LJHOME</link></userinput>
 <prompt>$</prompt> <userinput>bin/upgrading/update-db.pl --runsql --populate</userinput>
-<prompt>$</prompt> <userinput>bin/upgrading/texttool.pl --load</userinput></screen>
+<prompt>$</prompt> <userinput>bin/upgrading/texttool.pl load</userinput></screen>
   </para>
   <para>
     That'll bring your database schema up-to-date and populate it with any look-up data it needs.
