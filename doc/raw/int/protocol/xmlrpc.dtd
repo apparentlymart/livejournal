@@ -25,10 +25,12 @@
 <!ELEMENT struct (key*)>
 <!ATTLIST struct %countatt;>
 
-<!ELEMENT key (scalar | struct | list)>
+<!ELEMENT key (des?, (scalar | struct | list))>
 <!ATTLIST key name NMTOKEN #REQUIRED %keycountatt;>
 
 <!ELEMENT list (struct | list | scalar)*>
 <!ATTLIST list %countatt;>
+
+<!ELEMENT des (#PCDATA)>
 
 

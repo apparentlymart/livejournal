@@ -3,20 +3,38 @@
 
 &authInfo;
 
+<key name="clientversion" count="opt"><scalar>
+Although optional, this <emphasis>should</emphasis> be a string of the form <literal>Platform-ProductName/ClientVersionMajor.Minor.Rev</literal>, like <emphasis>Win32-MFC/1.2.7</emphasis> or <emphasis>Gtk-LoserJabber/1.0.4</emphasis>.  Note in this case that "Gtk" is not a platform, but rather a toolkit, since the toolkit is multi-platform (Linux, FreeBSD, Solaris, Windows...).  You make the judge what is best to send, but if it's of this form, we'll give you cool statistics about your users.
+</scalar></key>
+
+<key name="getmoods" count="opt"><scalar>
+If your client supports moods, send this key with a value of the highest mood ID you have cached/stored on the user's computer.  For example, if you logged in last time with and got mood IDs 1, 2, 4, and 5, then send "5" as the value of "getmoods".  The server will return every new mood that has an internal MoodID greater than 5.  If you've never downloaded moods before, send "0".  If you don't care about getting any moods at all (if your client doesn't support them), then don't send this key at all.
+</scalar></key>
+
+<key name="getmenus" count="opt"><scalar>
+Send something for this key if you want to get a list/tree of web jump menus to show in your client.
+</scalar></key>
+
+<key name="getpickws" count="opt"><scalar>
+If your client supports picture keywords and you want to receive that list, send something for this key, like "1", and you'll receieve the list of picture keywords the user has defined.
+</scalar></key>
 
 </struct></arguments>
 
 <!--===================[ RETURN ]==============================-->
 <returns><struct count="1">
 	  
-<key name="usejournals" count="opt"><list count="1"><scalar count="0more">
-Journal usernames of communities that this user is
-allowed to post in.
-</scalar></list></key>
+<key name="usejournals" count="opt">
+&useJournals;
+</key>
 	  
 <key name="message" count="opt"><scalar>
 A message that <emphasis>should</emphasis> be displayed in a dialog box (or to the screen in a console application).  The message is rarely present but when used notifies the user of software updates they've requested to hear about, problems with their account (if mail is bouncing to them, we'd like them to give us a current email address), etc.  To test this if you're developing a client, use the user account <literal role="username">test</literal> with the password <literal>test</literal> and a message will always be returned.
 </scalar></key>
+
+<key name="friendgrounds" count="1">
+&friendGroups;
+</key>
 
 </struct></returns>    
 </method>

@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <!DOCTYPE ljxmlrpc SYSTEM "xmlrpc.dtd" [
+
 <!ENTITY authInfo SYSTEM "authinfo.ent.xml">
+<!ENTITY useJournals SYSTEM "usejournals.ent.xml">
+<!ENTITY friendGroups SYSTEM "friendgroups.ent.xml">
+
 <!ENTITY mode.login SYSTEM "login.mode.xml">
 ]>
 <ljxmlrpc>
