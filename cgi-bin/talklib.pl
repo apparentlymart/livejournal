@@ -743,7 +743,7 @@ sub talkform {
     if ($journalu->{'opt_whocanreply'} eq "all") {
         $ret .= "<tr valign='middle'>";
         $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td>";
-        $ret .= "<td align='middle'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon'></td>";
+        $ret .= "<td align='center'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon' /></td>";
         $ret .= "<td align='left'><b><label for='talkpostfromanon'>$BML::ML{'.opt.anonymous'}</label></b>";
         if ($journalu->{'opt_whoscreened'} eq 'A' ||
             $journalu->{'opt_whoscreened'} eq 'R' ||
@@ -753,13 +753,13 @@ sub talkform {
         $ret .= "</td></tr>\n";
     } elsif ($journalu->{'opt_whocanreply'} eq "reg") {
         $ret .= "<tr valign='middle'>";
-        $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td><td align='middle'>(  )</td>";
+        $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td><td align='center'>(  )</td>";
         $ret .= "<td align='left' colspan='3'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>$BML::ML{'.opt.noanonpost'}</td>";
         $ret .= "</tr>\n";
     } else {
         $ret .= "<tr valign='middle'>";
         $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td>";
-        $ret .= "<td align='middle'>(  )</td>";
+        $ret .= "<td align='center'>(  )</td>";
         $ret .= "<td align='left' colspan='3'><font color='#c0c0c0'><b>$BML::ML{'.opt.anonymous'}</b></font>" .
             BML::ml(".opt.friendsonly", {'username'=>"<b>$journalu->{'user'}</b>"}) 
             . "</td>";
@@ -771,10 +771,10 @@ sub talkform {
         $ret .= "<tr valign='middle'>";
         $ret .= "<td align='right'>&nbsp;</td>";
         if (LJ::is_banned($remote, $journalu)) {
-            $ret .= "<td align='middle'>( )</td>";
+            $ret .= "<td align='center'>( )</td>";
             $ret .= "<td align='left'><span class='ljdeem'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</font>" . BML::ml(".opt.bannedfrom", {'journal'=>$journalu->{'user'}}) . "</td>";
         } else {
-            $ret .= "<td align='middle'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' $checked /></td>";
+            $ret .= "<td align='center'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' $checked /></td>";
             $ret .= "<td align='left'><label for='talkpostfromremote'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</label>\n";
             $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}' id='cookieuser' />\n";
             if ($journalu->{'opt_whoscreened'} eq 'A' ||
@@ -791,7 +791,7 @@ sub talkform {
     # ( ) LiveJournal user:
     $ret .= "<tr valign='middle'>";
     $ret .= "<td>&nbsp;</td>";
-    $ret .= "<td align=middle><input type='radio' name='usertype' value='user' id='talkpostfromlj' $checked />";
+    $ret .= "<td align='center'><input type='radio' name='usertype' value='user' id='talkpostfromlj' $checked />";
     $ret .= "</td><td align='left'><b><label for='talkpostfromlj'>$BML::ML{'.opt.ljuser'}</label></b> ";
     $ret .= $BML::ML{'.opt.willscreenfriend'} if $journalu->{'opt_whoscreened'} eq 'F';
     $ret .= $BML::ML{'.opt.willscreen'} if $journalu->{'opt_whoscreened'} eq 'A';
@@ -817,7 +817,7 @@ sub talkform {
 
     # Subject Icon toggle button
     {
-        $ret .= "<input type='hidden' id='subjectIconField' name='subjecticon' value='none'>\n";
+        $ret .= "<input type='hidden' id='subjectIconField' name='subjecticon' value='none' />\n";
         $ret .= "<script type='text/javascript' language='Javascript'>\n";
         $ret .= "<!--\n";
         $ret .= "if (document.getElementById) {\n";
@@ -840,7 +840,7 @@ sub talkform {
             # make an option if they don't want an image
             if ($type eq $pics->{'types'}->[0]) { 
                 $ret .= "document.write(\"";
-                $ret .= "<td valign='middle' align='middle'>";
+                $ret .= "<td valign='middle' align='center'>";
                 $ret .= LJ::Talk::show_none_image(
                         "id='none' onclick='subjectIconChange(this);' style='cursor:hand' title='No subject icon'");
                 $ret .= "</td>\");\n";
@@ -849,7 +849,7 @@ sub talkform {
             # go through and make clickable image rows.
             foreach (@{$pics->{'lists'}->{$type}}) {
                 $ret .= "document.write(\"";
-                $ret .= "<td valign='middle' align='middle'>";
+                $ret .= "<td valign='middle' align='center'>";
                 $ret .= LJ::Talk::show_image($pics, $_->{'id'}, 
                         "id='$_->{'id'}' onclick='subjectIconChange(this);' style='cursor:hand'");
                 $ret .= "</td>\");\n";
@@ -1095,7 +1095,7 @@ sub format_html_mail {
         unless (!$newsub || $newsub =~ /^Re:/) { $newsub = "Re: $newsub"; }
         $html .= "<b>Subject: </b> <input name='subject' size='40' value=\"" . LJ::ehtml($newsub) . "\" />";
         $html .= "<p><b>Message</b><br /><textarea rows='10' cols='50' wrap='soft' name='body'></textarea>";
-        $html .= "<br /><input type='submit' value=\"Post Reply\">";
+        $html .= "<br /><input type='submit' value=\"Post Reply\" />";
         $html .= "</form></blockquote>\n";
     }
     $html .= "<p><font size='-1'>(If you'd prefer to not get these updates, go to <a href=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</a> and turn off the relevant options.)</font></p>\n";
