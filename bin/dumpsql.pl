@@ -94,7 +94,7 @@ foreach my $table (sort keys %tables)
             my $where = "$uniqc=" . $dbh->quote($vals{$uniqc});
             delete $vals{$uniqc};
             $sql = "UPDATE $table SET ";
-            $sql .= join(",", map { "$_=" . $dbh->quote($vals{$_}) } keys %vals);
+            $sql .= join(",", map { "$_=" . $dbh->quote($vals{$_}) } sort keys %vals);
             $sql .= " WHERE $where;\n";
             push @{$output{$scope}}, [ "$table.$skey.2", $sql ];
         }
