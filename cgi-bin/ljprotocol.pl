@@ -977,7 +977,7 @@ sub postevent
     if ($u->{'opt_weblogscom'} && LJ::get_cap($u, "weblogscom") &&
         $security eq "public" && ! $req->{'props'}->{'opt_backdated'})
     {
-        LJ::cmd_buffer_add($dbcm, $u->{'userid'}, 'weblogscom', {
+        LJ::cmd_buffer_add($uowner->{clusterid}, $u->{'userid'}, 'weblogscom', {
             'user' => $u->{'user'}, 
             'title' => $u->{'journaltitle'} || $u->{'name'},
             'url' => LJ::journal_base($u) . "/",

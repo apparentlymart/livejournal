@@ -60,7 +60,6 @@ sub send_mail
     # if send operation fails, buffer and send later
     my $buffer = sub {
 
-        my $dbcm;
         my $tries = 0;
 
         # aim to try 10 times, but that's redundant if there are fewer clusters
@@ -68,15 +67,16 @@ sub send_mail
         $maxtries = 10 if $maxtries > 10;
 
         # select a random cluster master to insert to
-        while (! $dbcm && $tries < $maxtries) {
+        my $cid;
+        while (! $cid && $tries < $maxtries) {
             my $idx = int(rand() * @LJ::CLUSTERS);
-            $dbcm = LJ::get_cluster_master($LJ::CLUSTERS[$idx]);
+            $cid = $LJ::CLUSTERS[$idx];
             $tries++;
         }
-        return undef unless $dbcm;
+        return undef unless $cid;
 
         # try sending later
-        LJ::cmd_buffer_add($dbcm, 0, 'send_mail', Storable::freeze($msg));
+        LJ::cmd_buffer_add($cid, 0, 'send_mail', Storable::freeze($msg));
     };
 
     my $rv = eval { $msg->send && 1; };

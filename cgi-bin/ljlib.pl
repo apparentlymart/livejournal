@@ -5265,8 +5265,13 @@ sub cmd_buffer_add
 {
     my ($db, $journalid, $cmd, $args) = @_;
 
-    return 0 unless $db;
     return 0 unless $cmd;
+
+    my $cid = ref $db ? 0 : $db+0;
+    $db = $cid ? LJ::get_cluster_master($cid) : $db;
+    my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$cid};
+
+    return 0 unless $db;
 
     my $arg_str;
     if (ref $args eq 'HASH') {
@@ -5278,9 +5283,28 @@ sub cmd_buffer_add
         $arg_str = $args;
     }
 
-    $db->do("INSERT INTO cmdbuffer (journalid, cmd, instime, args) ".
-            "VALUES (?, ?, NOW(), ?)", undef,
-            $journalid, $cmd, $arg_str);
+    if ($ab eq 'a' || $ab eq 'b') {
+        # get a lock
+        my $locked = $db->selectrow_array("SELECT GET_LOCK('cmd-buffer-$cid',10)");
+        return 0 unless $locked; # 10 second timeout elapsed
+
+        # a or b -- a goes odd, b goes even!
+        my $max = $db->selectrow_array('SELECT MAX(cbid) FROM cmdbuffer');
+        $max += $ab eq 'a' ? ($max & 1 ? 2 : 1) : ($max & 1 ? 1 : 2);
+
+        # insert command
+        $db->do('INSERT INTO cmdbuffer (cbid, journalid, cmd, instime, args) ' .
+                'VALUES (?, ?, NOW(), ?, ?)', undef, 
+                $max, $journalid, $cmd, $arg_str);
+
+        # release lock
+        $db->selectrow_array("SELECT RELEASE_LOCK('cmd-buffer-$cid')");
+    } else {
+        # old method
+        $db->do("INSERT INTO cmdbuffer (journalid, cmd, instime, args) ".
+                "VALUES (?, ?, NOW(), ?)", undef,
+                $journalid, $cmd, $arg_str);
+    }
 }
 
 # <LJFUNC>
@@ -6364,7 +6388,7 @@ sub delete_entry
     # the log2 row will already be gone and we shouldn't check for it.
     if ($quick) {
         return 1 if $dc < 1;  # already deleted?
-        return LJ::cmd_buffer_add($dbcm, $jid, "delitem", {
+        return LJ::cmd_buffer_add($u->{clusterid}, $jid, "delitem", {
             'itemid' => $jitemid,
             'anum' => $anum,
         });
