@@ -27,7 +27,7 @@ sub html_datetime
                                             $6 > 0 ? $6 : "");
     }
     $ret .= html_select({ 'name' => "${name}_mm", 'selected' => $mm, 'disabled' => $opts->{'disabled'} },
-                         map { $_, Lang::month_long($lang, $_) } (0..12));
+                         map { $_, LJ::Lang::month_long($lang, $_) } (0..12));
     $ret .= "<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_dd VALUE=\"$dd\" $disabled>, <INPUT SIZE=4 MAXLENGTH=4 NAME=${name}_yyyy VALUE=\"$yyyy\" $disabled>";
     unless ($opts->{'notime'}) {
         $ret.= " <INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_hh VALUE=\"$hh\" $disabled>:<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_nn VALUE=\"$nn\" $disabled>";
