@@ -73,29 +73,30 @@ sub link_bar
     };
 
     my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
+    my $jargent = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
 
     # << Previous
-    push @linkele, $mlink->("/go.bml?${jarg}itemid=$itemid&amp;dir=prev", "prev_entry");
-    $$headref .= "<link href='/go.bml?itemid=$itemid&amp;dir=prev' rel='Previous'>\n";
+    push @linkele, $mlink->("/go.bml?${jargent}itemid=$itemid&amp;dir=prev", "prev_entry");
+    $$headref .= "<link href='/go.bml?${jargent}itemid=$itemid&amp;dir=prev' rel='Previous'>\n";
     
     # memories
-    push @linkele, $mlink->("/tools/memadd.bml?${jarg}itemid=$itemid", "memadd");
+    push @linkele, $mlink->("/tools/memadd.bml?${jargent}itemid=$itemid", "memadd");
     
     if (defined $remote && ($remote->{'user'} eq $u->{'user'} ||
 			    $remote->{'user'} eq $up->{'user'} || 
 			    LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
     {
-	push @linkele, $mlink->("/editjournal_do.bml?${jarg}itemid=$itemid", "editentry");
+	push @linkele, $mlink->("/editjournal_do.bml?${jargent}itemid=$itemid", "editentry");
     }
     
     if ($u->{'opt_showtopicstuff'} ne "N") {
-	push @linkele, $mlink->("/topics/additem.bml?${jarg}itemid=$itemid", "topicadd");
+	push @linkele, $mlink->("/topics/additem.bml?${jargent}itemid=$itemid", "topicadd");
     }
     
-    push @linkele, $mlink->("/tools/tellafriend.bml?${jarg}itemid=$itemid", "tellfriend");
+    push @linkele, $mlink->("/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend");
     
     ## >>> Next
-    push @linkele, $mlink->("/go.bml?${jarg}itemid=$itemid&amp;dir=next", "next_entry");
+    push @linkele, $mlink->("/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
     
     if (@linkele) {
 	$ret .= "(=STANDOUT <table><tr><td valign='middle'>";

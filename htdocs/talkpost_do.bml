@@ -285,10 +285,11 @@ BODY<=
  {
      # insert the comment
      my $table = $clustered ? "talk2" : "talk";
+     my $now = $dbcm->selectrow_array("SELECT NOW()");
      $sth = $dbcm->prepare("INSERT INTO $table (nodetype, nodeid, parenttalkid, ".
 			   "journalid, posterid, datepost) ".
 			   "VALUES ('L', $itemid, $qpartid, ".
-			   "$u->{'userid'}, $posterid, NOW())");
+			   "$u->{'userid'}, $posterid, '$now')");
      $sth->execute;
      
      # uh oh?  is there an error?  show them if there is.
@@ -298,6 +299,19 @@ BODY<=
      
      # what's the tid of the newly inserted message?
      $insertid = $sth->{'mysql_insertid'};
+
+     # add to poster's talkleft table, or the xfer place
+     if ($posterid && $clustered) {
+	 my ($db, $table) = ($dbh, "talkleft_xfp");
+	 if ($up->{'clusterid'}) {
+	     $db = LJ::get_cluster_master($up);
+	     $table = "talkleft";
+	 }
+	 my $pub  = $item->{'security'} eq "public" ? 1 : 0;
+	 $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
+		 "nodeid, jtalkid, publicitem) VALUES ($posterid, UNIX_TIMESTAMP('$now'), ".
+		 "$u->{'userid'}, 'L', $init->{'itemid'}, $insertid, $pub)");
+     }
 
      my @prefix = ("");
      if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
@@ -318,6 +332,7 @@ BODY<=
      }
 
      my %talkprop;   # propname -> value
+
 
      # meta-data
      $talkprop{'unknownbit'} = 1 if $unknown8bit;

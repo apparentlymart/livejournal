@@ -45,9 +45,9 @@ BODY<=
      $sql = "SELECT posterid, nodetype, nodeid AS 'itemid', ".
 	 "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(datepost) AS 'secondsold' FROM ";
      if ($clustered) {
-	 $sql .= "talk2 WHERE jtalkid=$qparentid";
+	 $sql .= "talk2 WHERE journalid=$u->{'userid'} AND jtalkid=$qparentid";
      } else {
-	 $sql .= "talk WHERE journalid=$u->{'userid'} AND jtalkid=$qparentid";
+	 $sql .= "talk WHERE talkid=$qparentid";
      }
      $parpost = LJ::dbs_selectrow_hashref($dbcs, $sql);
      return "Replyto post not found (deleted?)" unless $parpost;
@@ -143,7 +143,7 @@ BODY<=
  $ret .= "<p>";
  $ret .= "<table><tr valign='middle'>";
  my $picid = $ur->{'defaultpicid'};
- my $pickw = $FORM{'replyto'} ? $talkprops{$FORM{'replyto'}}->{'picture_keyword'} : $logprops{$itemid}->{'picture_keyword'};
+ my $pickw = $init->{'replyto'} ? $talkprops{$init->{'replyto'}}->{'picture_keyword'} : $logprops{$itemid}->{'picture_keyword'};
 
  if ($pickw) {
      my $qkw = $dbr->quote($pickw);
@@ -171,11 +171,11 @@ BODY<=
  } else {
      $ret .= "Someone wrote,";
  }
- if ($FORM{'replyto'} eq "" && $up != $u) {
+ if ($init->{'replyto'} eq "" && $up != $u) {
      $ret .= " in (=LJCOMM $u->{'user'} LJCOMM=),";
  }
 
- if ($FORM{'replyto'} eq "") {
+ if ($init->{'replyto'} eq "") {
      my $etime = $item->{'eventtime'};
      $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!LJ::date_to_view_links($u, $&)!e;
      $ret .= "<br /><font size='-1'>@ $etime</font>";
@@ -183,7 +183,7 @@ BODY<=
  
  $ret .= "</td></tr></table>";
 
- unless ($FORM{'replyto'}) {
+ unless ($init->{'replyto'}) {
      $ret .= LJ::Talk::link_bar($dbs, { 'u' => $u, 'up' => $up, 'headref' => \$head,
 					'remote' => $remote, 'itemid' => $itemid, });
  }
@@ -214,7 +214,7 @@ BODY<=
  $ret .= "<UL>";
  
  ### currents
- if ($FORM{'replyto'} eq "" && %current) 
+ if ($init->{'replyto'} eq "" && %current) 
  {
      $ret .= "<table border=0>\n";
      foreach (sort keys %current) {
@@ -236,7 +236,7 @@ BODY<=
  $ret .= "<br clear='all'><hr size='2' align='center' />";	
 
  ### is this in a topic?
- $ret .= LJ::Talk::topic_links($dbs, $u, $itemid) unless $FORM{'replyto'};
+ $ret .= LJ::Talk::topic_links($dbs, $u, $itemid) unless $init->{'replyto'};
  
  my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
  $ret .= "<center><b><a href=\"talkread.bml?${jarg}itemid=$itemid\">(Read comments)</a></b></center>";
@@ -257,7 +257,7 @@ BODY<=
 
  $ret .= "<form method='post' action='talkpost_do.bml'>";
  # hidden values
- my $parent = int($FORM{'replyto'}+0);
+ my $parent = int($init->{'replyto'}+0);
  $ret .= "<input type='hidden' name='parenttalkid' value='$parent'>\n";
  $ret .= "<input type='hidden' name='itemid' value='$itemid'>\n";
  if ($clustered) {
@@ -310,7 +310,7 @@ BODY<=
  $ret .= "Password:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13'> <label for='logincheck'>Login?&nbsp;</label><input type='checkbox' name='do_login' id='logincheck'></td></tr>\n";
  
  my $basesubject = "";
- if ($FORM{'replyto'}) {
+ if ($init->{'replyto'}) {
      $basesubject = $parpost->{'subject'};
      $basesubject =~ s/^Re:\s*//i;
      if ($basesubject) {

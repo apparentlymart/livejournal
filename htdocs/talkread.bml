@@ -85,9 +85,9 @@ BODY<=
  my $picid = $up->{'defaultpicid'};
  if ($logprops{$itemid}->{'picture_keyword'}) {
      my $qkw = $dbr->quote($logprops{$itemid}->{'picture_keyword'});
-     my $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
-				       "WHERE m.userid=$up->{'userid'} ".
-				       "AND m.kwid=k.kwid AND k.keyword=$qkw");
+     $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
+				    "WHERE m.userid=$up->{'userid'} ".
+				    "AND m.kwid=k.kwid AND k.keyword=$qkw");
  }
 
  my %userpics;
@@ -300,21 +300,22 @@ BODY<=
 	 }
      }
  }
- 
+
  my %userpics = ();
  if (%users_to_load) {
      my @pics_to_load;
      my $userid_in = join(", ", keys %users_to_load);
-     $sth = $dbr->prepare("SELECT user, statusvis, email, name, defaultpicid FROM user WHERE userid IN ($userid_in)");
+     $sth = $dbr->prepare("SELECT user, statusvis, email, name, defaultpicid FROM user ".
+			  "WHERE userid IN ($userid_in)");
      $sth->execute;
-     push @pics_to_load;
+
      while ($_ = $sth->fetchrow_hashref) {
 	 $user{$_->{'user'}} = $_;
-	 push @pics_to_load, $_->{'defaultpicid'};
+	 push @pics_to_load, $_->{'defaultpicid'} if $_->{'defaultpicid'};
      }
      LJ::load_userpics($dbs, \%userpics, [ @pics_to_load ]);     
  }
-
+ 
  ########## make the navcrap
  my $navcrap;
  if ($pages > 1) {
@@ -456,7 +457,7 @@ sub recurse_post
 				$remote->{'user'} eq $up->{'user'} ||
 			        LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
 		{
-		    $$ret .= "<a href='delcomment.bml?id=$tid'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/delcomment.gif' width='22' height='20' title='Click to delete' alt='Delete' border='0'></a>";
+		    $$ret .= "<a href='delcomment.bml?${jargent}id=$tid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
 		}
 	    
 		$$ret .= "</td></tr>";
