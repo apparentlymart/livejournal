@@ -162,7 +162,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
     my $subject = $item->{'subject'} || $item->{'event'};
     LJ::CleanHTML::clean_subject_all(\$subject);
     $subject =~ s/\n.*//s;
-    $subject = substr($subject, 0, 40) if length($subject) > 40;
+    $subject = LJ::text_trim($subject, 0, 40);
     $$title = "$u->{'user'}: $subject";
 }
 
