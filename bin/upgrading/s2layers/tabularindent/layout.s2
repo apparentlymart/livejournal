@@ -273,7 +273,7 @@ function print_box (string{} colors, string metapic, string{} meta, string conte
         "<td width='100' valign='top' align='center'>$metapic</td>";
     }
 
-    "<td valign='top'><table border='0'>";
+    "<td valign='top'><table border='0' style='$style'>";
 
     foreach var string k ($meta) {
         var string key = $k;
