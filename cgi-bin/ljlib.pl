@@ -5577,12 +5577,25 @@ sub rate_log
     return 1;
 }
 
+# We're not always running under mod_perl... sometimes scripts (syndication sucker)
+# call paths which end up thinking they need the remote IP, but don't.
+sub get_remote_ip
+{
+    my $ip;
+    eval {
+        $ip = Apache->request->connection->remote_ip;
+    };
+    return $ip;
+}
+
 sub login_ip_banned
 {
     my $u = shift;
     return 0 unless $u && $u->{'clusterid'};
 
-    my $ip = Apache->request->connection->remote_ip;
+    my $ip;
+    return 0 unless ($ip = LJ::get_remote_ip());
+
     my $udbr;
     my $rateperiod = LJ::get_cap($u, "rateperiod-failed_login");
     if ($rateperiod && ($udbr = LJ::get_cluster_reader($u))) {
@@ -5601,7 +5614,8 @@ sub handle_bad_login
     my $u = shift;
     return 1 unless $u && $u->{'clusterid'};
 
-    my $ip = Apache->request->connection->remote_ip;
+    my $ip;
+    return 1 unless ($ip = LJ::get_remote_ip());
     # an IP address is permitted such a rate of failures
     # until it's banned for a period of time.
     my $udbh;
