@@ -1,17 +1,26 @@
 <?xml version="1.0"?>
 <!DOCTYPE ljxmlrpc SYSTEM "xmlrpc.dtd" [
 
-<!ENTITY authInfo SYSTEM "authinfo.ent.xml">
-<!ENTITY useJournals SYSTEM "usejournals.ent.xml">
-<!ENTITY friendGroups SYSTEM "friendgroups.ent.xml">
-<!ENTITY moods SYSTEM "moods.ent.xml">
+<!ENTITY authInfo                SYSTEM "authinfo.ent.xml">
+<!ENTITY useJournals             SYSTEM "usejournals.ent.xml">
+<!ENTITY friendGroups            SYSTEM "friendgroups.ent.xml">
+<!ENTITY moods                   SYSTEM "moods.ent.xml">
+<!ENTITY friendsList             SYSTEM "friendslist.ent.xml">
 
-<!ENTITY mode.login SYSTEM "login.mode.xml">
-<!ENTITY mode.syncitems SYSTEM "syncitems.mode.xml">
+<!ENTITY mode.getfriendgroups    SYSTEM "getfriendgroups.mode.xml">
+<!ENTITY mode.getfriends         SYSTEM "getfriends.mode.xml">
+<!ENTITY mode.login              SYSTEM "login.mode.xml">
+<!ENTITY mode.postevent          SYSTEM "postevent.mode.xml">
+<!ENTITY mode.syncitems          SYSTEM "syncitems.mode.xml">
 ]>
 <ljxmlrpc>
 
 &mode.login;
+&mode.syncitems;
+&mode.getfriends;
+&mode.getfriendgroups;
+&mode.login;
+&mode.postevent;
 &mode.syncitems;
     
 </ljxmlrpc>

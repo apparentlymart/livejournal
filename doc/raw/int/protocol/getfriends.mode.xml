@@ -1,0 +1,34 @@
+<method name="getfriends">
+<arguments><struct count="1">
+
+&authInfo;
+
+<key name="includefriendof" count="opt"><scalar>
+If set to 1, you will also get back the info from the "friendof" mode. Some clients show friends and friendof data in separate tabs/panes. If you're always going to load both, then use this flag (as opposed to a tabbed dialog approach, where the user may not go to the second tab and thus would not need to load the friendof data.) friendof request variables can be used.
+</scalar></key>
+
+<key name="includegroups" count="opt"><scalar>
+If set to 1, you will also get back the info from the "getfriendgroups" mode. See above for the reason why this would be useful.
+</scalar></key>
+
+<key name="friendlimit" count="opt"><scalar>
+If set to a numeric value greater than zero, this mode will only return the number of results indicated. Useful only for building pretty lists for display which might have a button to view the full list nearby.
+</scalar></key>
+
+</struct></arguments>
+
+<!--===================[ RETURN ]==============================-->
+<returns><struct count="1">
+
+&friendGroups;
+
+<key name="friendofs">
+&friendsList;
+</key>
+
+<key name="friends">
+&friendsList;
+</key>
+  
+</struct></returns>    
+</method>

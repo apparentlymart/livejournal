@@ -1,0 +1,16 @@
+<method name="getfriendgroups">
+<arguments><struct count="1">
+
+&authInfo;
+
+</struct></arguments>
+
+<!--===================[ RETURN ]==============================-->
+<returns><struct count="1">
+
+<key name="friendgroups" count="1">
+&friendGroups;
+</key>
+  
+</struct></returns>    
+</method>
