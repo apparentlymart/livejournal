@@ -498,18 +498,18 @@ sub register
 
 sub show_polls
 {
-    my $dbs = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $itemid = shift;
     my $remote = shift;
     my $postref = shift;
 
-    $$postref =~ s/<lj-poll-(\d+)>/&show_poll($dbs, $itemid, $remote, $1)/eg;
+    $$postref =~ s/<lj-poll-(\d+)>/&show_poll($itemid, $remote, $1)/eg;
 }
 
 sub show_poll
 {
-    my $dbs = shift;
-    my $dbr = $dbs->{'reader'};
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my $dbr = LJ::get_db_reader();
     my $itemid = shift;
     my $remote = shift;
     my $pollid = shift;
@@ -529,7 +529,7 @@ sub show_poll
     if ($itemid && $po->{'itemid'} != $itemid) {
         return "<b>[Error: this poll is not attached to this journal entry]</b>"	
     }
-    my ($can_vote, $can_view) = find_security($dbs, $po, $remote);
+    my ($can_vote, $can_view) = find_security($po, $remote);
 
     ### prepare our output buffer
     my $ret;
@@ -842,8 +842,8 @@ sub show_poll
 
 sub find_security
 {
-    my $dbs = shift;
-    my $dbr = $dbs->{'reader'};
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+
     my $po = shift;
     my $remote = shift;
     my $sth;
@@ -862,7 +862,7 @@ sub find_security
     if (($po->{'whoview'} eq "friends" || 
          $po->{'whovote'} eq "friends") && $remote)
     {
-        $is_friend = LJ::is_friend($dbs, $po->{'journalid'}, $remote->{'userid'});
+        $is_friend = LJ::is_friend($po->{'journalid'}, $remote->{'userid'});
     }
 
     my %sec;
@@ -879,11 +879,8 @@ sub find_security
         $sec{'vote'} = 1;
     }
 
-    if (LJ::is_banned($dbs, $remote, $po->{'journalid'})) {
-        $sec{'vote'} = 0;
-    }
-    
-    if (LJ::is_banned($dbs, $remote, $po->{'posterid'})) {
+    if ($sec{'vote'} && (LJ::is_banned($remote, $po->{'journalid'}) ||
+                         LJ::is_banned($remote, $po->{'posterid'}))) {
         $sec{'vote'} = 0;
     }
     
@@ -892,13 +889,14 @@ sub find_security
 
 sub submit
 {
-    my $dbs = shift;
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    
     my $remote = shift;
     my $form = shift;
     my $error = shift;
     my $sth;
+
+    my $dbh = LJ::get_db_writer();
 
     unless ($remote) {
         $$error = "You must be <a href='$LJ::SITEROOT/login.bml?ret=1'>logged in</a> to vote in a poll.";
@@ -906,15 +904,14 @@ sub submit
     }
 
     my $pollid = $form->{'pollid'}+0;
-    $sth = $dbr->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=?");
-    $sth->execute($pollid);
-    my $po = $sth->fetchrow_hashref;
+    my $po = $dbh->selectrow_hashref("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name ".
+                                     "FROM poll WHERE pollid=?", undef, $pollid);
     unless ($po) {
         $$error = "pollid parameter is missing.";
         return 0;	
     }
     
-    my ($can_vote, undef) = find_security($dbs, $po, $remote);
+    my ($can_vote, undef) = find_security($po, $remote);
 
     unless ($can_vote) {
         $$error = "Sorry, you don't have permission to vote in this particular poll.";
@@ -923,10 +920,9 @@ sub submit
 
     ### load all the questions
     my @qs;
-    $sth = $dbr->prepare("SELECT pollqid, type, opts, qtext FROM pollquestion WHERE pollid=?");
+    $sth = $dbh->prepare("SELECT pollqid, type, opts, qtext FROM pollquestion WHERE pollid=?");
     $sth->execute($pollid);
-    push @qs, $_ while ($_ = $sth->fetchrow_hashref);
-    $sth->finish;
+    push @qs, $_ while $_ = $sth->fetchrow_hashref;
     
     foreach my $q (@qs) {
         my $qid = $q->{'pollqid'}+0;

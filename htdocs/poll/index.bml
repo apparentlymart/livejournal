@@ -3,6 +3,8 @@
  $title = "Poll";
  $body = "";
 
+
+
  # answers to checkbox questions are null-separated sequences
  # since our inout correctness check rules out nulls, we change them
  # to commas here rather than inside LJ::Poll::submit() .
@@ -14,10 +16,7 @@
      return;
  }
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  my $pollid = ($FORM{'id'} || $FORM{'pollid'})+0;
 
@@ -27,17 +26,16 @@
      return;
  }
 
- $sth = $dbr->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=$pollid");
- $sth->execute;
- my $po = $sth->fetchrow_hashref;
-
+ my $dbr = LJ::get_db_reader();
+ my $po = $dbr->selectrow_hashref("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name ".
+                                  "FROM poll WHERE pollid=?", undef, $pollid);
  unless ($po) {
    $title = "Error";
    $body = "Poll not found.";
    return;
  }
 
- my $u = LJ::load_userid($dbs, $po->{'journalid'});
+ my $u = LJ::load_userid($po->{'journalid'});
  my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
 
  my $mode = "";
@@ -61,7 +59,7 @@
      return "Owning post deleted, so poll no longer accessible.";
  }
 
- unless (LJ::can_view($dbs, $remote, $log)) {
+ unless (LJ::can_view($remote, $log)) {
      $body = "Sorry, you're not permitted to see this poll.";
      return;
  }
@@ -75,7 +73,7 @@
  if (defined $FORM{'poll-submit'})
  {
      my $error;
-     &LJ::Poll::submit($dbs, $remote, \%FORM, \$error);
+     LJ::Poll::submit($remote, \%FORM, \$error);
      if ($error) {
          $title = "Error";
          $body .= $error;
@@ -91,8 +89,9 @@
               'qid' => $FORM{'qid'},
               'prefill' => 1,
           };
+
  ## itemid 0 means no security is done to check that it's not hijacked:
- $body .= LJ::Poll::show_poll($dbs, 0, $remote, $pollid, $opts);
+ $body .= LJ::Poll::show_poll(0, $remote, $pollid, $opts);
 
  return;
 

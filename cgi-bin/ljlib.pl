@@ -3997,14 +3997,12 @@ sub make_graphviz_dot_file
 # </LJFUNC>
 sub expand_embedded
 {
-    # FIXME: this shouldn't pass show_polls a $dbs at all.
-    my $dbarg = ref $_[0] ? shift @_ : LJ::get_db_reader();
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $ditemid = shift;
     my $remote = shift;
     my $eventref = shift;
 
-    LJ::Poll::show_polls($dbs, $ditemid, $remote, $eventref);
+    LJ::Poll::show_polls($ditemid, $remote, $eventref);
 }
 
 # <LJFUNC>
