@@ -8,6 +8,9 @@ use Apache::LiveJournal;
 use Apache::CompressClientFixup;
 use Apache::BML;
 
+# auto-load some stuff before fork:
+Storable::thaw(Storable::freeze({}));
+
 # setup httpd.conf things for the user:
 Apache->httpd_conf("DocumentRoot $LJ::HTDOCS")
     if $LJ::HTDOCS;
