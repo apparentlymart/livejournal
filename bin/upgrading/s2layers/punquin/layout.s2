@@ -91,6 +91,12 @@ propgroup presentation {
   property use page_recent_items;
   property use page_friends_items;
   property use view_entry_disabled;
+  property bool show_entrynav_icons {
+    des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
+  }
+  property string page_background_image {
+      des = "URL to an image to be used for the page background";
+  }
 }
 set font_base = "Verdana, Arial, Helvetica";
 set font_fallback = "sans-serif";
@@ -99,6 +105,8 @@ set sidebar_position = "left";
 set page_recent_items = 20;
 set page_friends_items = 20;
 set view_entry_disabled = false;
+set show_entrynav_icons = true;
+set page_background_image = "";
 
 propgroup text {
   property string text_gotop {
@@ -115,6 +123,7 @@ set text_gotop = "Go to Top";
 function print_stylesheet ()
 {
     var string font = "$*font_base, $*font_fallback";
+    print $*page_background_image ? "body { background-image: url($*page_background_image); }" : "";
     print """
 body {
     background-color:  $*body_bgcolor;
@@ -288,14 +297,16 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         "<hr class='seperator' />";
     }
 
-    print "<div style='text-align: center'>";
-    var Link link;
-    $link = $e->get_link("nav_prev"); " $link";
-    $link = $e->get_link("edit_entry"); " $link";
-    $link = $e->get_link("mem_add"); " $link";
-    $link = $e->get_link("tell_friend"); " $link";
-    $link = $e->get_link("nav_next"); " $link";
-    print "</div>";
+    if ($p.view == "entry" and $*show_entrynav_icons)
+    {
+        print "<div style='text-align: center'>";
+        foreach var string key (["nav_prev","edit_entry","mem_add","tell_friend","nav_next"])
+        {
+            var Link link = $e->get_link($key);
+            if ($link) { print "$link "; }
+        }
+        print "</div>";
+    }
 
     "<table border='0' cellpadding='2' cellspacing='0'><tr>";
 

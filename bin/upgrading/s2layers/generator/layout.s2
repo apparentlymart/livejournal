@@ -76,6 +76,12 @@ propgroup other {
 
     property use view_entry_disabled;
     property use comment_userpic_style;
+    property bool show_entrynav_icons {
+        des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
+    }
+    property string page_background_image {
+        des = "URL to an image to be used for the page background";
+    }
 }
 
 propgroup text {
@@ -106,8 +112,11 @@ set comment_bar_screened_bgcolor = "#5f6f99";
 set comment_bar_screened_fgcolor = "#000000";
 
 set box_width = 600;
+set show_entrynav_icons = true;
+set page_background_image = "";
 
 function print_stylesheet () {
+    print $*page_background_image ? "body { background-image: url($*page_background_image); }" : "";
 """body, td {
 font-family: verdana, sans-serif;
 font-size: 10pt;
@@ -267,14 +276,16 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
 <td colspan="2" bgcolor="$*entry_back">
 """;
 
-    print "<div style='text-align: center'>";
-    var Link link;
-    $link = $e->get_link("nav_prev"); " $link";
-    $link = $e->get_link("edit_entry"); " $link";
-    $link = $e->get_link("mem_add"); " $link";
-    $link = $e->get_link("tell_friend"); " $link";
-    $link = $e->get_link("nav_next"); " $link";
-    print "</div>";
+    if ($p.view == "entry" and $*show_entrynav_icons)
+    {
+        print "<div style='text-align: center'>";
+        foreach var string key (["nav_prev","edit_entry","mem_add","tell_friend","nav_next"])
+        {
+            var Link link = $e->get_link($key);
+            if ($link) { print "$link "; }
+        }
+        print "</div>";
+    }
 
     if ($p.view == "friends" or
         $p.journal_type == "C" or
