@@ -5755,6 +5755,39 @@ sub paging_bar
     return $navcrap;
 }
 
+sub make_login_session
+{
+    my $u = shift;
+    return 0 unless $u;
+
+    my $dbs = LJ::get_dbs();
+    my $etime = 0;
+    eval { Apache->request->notes('ljuser' => $u->{'user'}); };
+
+    my $sess_opts = {
+        'exptype' => 'short',
+        'ipfixed' => undef,
+    };
+    my $sess = LJ::generate_session($u, $sess_opts);
+    $BML::COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime, 1 ];
+    LJ::set_remote($u);
+
+    LJ::load_user_props($dbs, $u, "browselang");
+    my $bl = LJ::Lang::get_lang($u->{'browselang'});
+    if ($bl) {
+        BML::set_cookie("langpref", $bl->{'lncode'} . "/" . time(), 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+        BML::set_language($bl->{'lncode'});
+    }
+    
+    LJ::run_hooks("post_login", {
+        "u" => $u,
+        "form" => {},
+        "expiretime" => $etime,
+    });
+
+    return 1;
+}
+
 sub last_error_code
 {
     return $LJ::last_error;

@@ -139,32 +139,7 @@ body<=
 
                 # if the user chooses to log in, do so
                 if ($FORM{'do_login'} && ! @errors) {
-
-                    my $etime = 0;
-                    eval { Apache->request->notes('ljuser' => $up->{'user'}); };
-
-                    my $sess_opts = {
-                        'exptype' => 'short',
-                        'ipfixed' => undef,
-                    };
-                    my $sess = LJ::generate_session($up, $sess_opts);
-                    $COOKIE{'ljsession'} = [  "ws:$up->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime, 1 ];
-                    LJ::set_remote($up);
-
-                    LJ::load_user_props($dbs, $up, "browselang");
-                    my $bl = LJ::Lang::get_lang($up->{'browselang'});
-                    if ($bl) {
-                        BML::set_cookie("langpref", $bl->{'lncode'} . "/" . time(), 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
-                          BML::set_language($bl->{'lncode'});
-                      }
-
-                    LJ::run_hooks("post_login", {
-                        "u" => $up,
-                        "form" => \%FORM,
-                        "expiretime" => $etime,
-                    });
-
-                    $didlogin = 1;
+                    $didlogin = LJ::make_login_session($up);
                 }
 
             } else {

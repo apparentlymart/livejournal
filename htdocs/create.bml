@@ -17,23 +17,12 @@ body<=
              : "getinfo"; 
  }
  
- my ($dbs, $dbh, $dbr);
- my $remote;
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
- my $connect_db = sub {
-     $dbs = LJ::get_dbs();
-     $dbh = $dbs->{'dbh'};
-     $dbr = $dbs->{'reader'};
- };
+ my $remote = LJ::get_remote();
  
- my $got_remote = 0;
- my $get_remote = sub {
-     return if $got_remote;
-     $connect_db->() unless $dbs;
-     $remote = LJ::get_remote($dbs);
-     $got_remote = 1;
- };
-
  my %errors;
  my $error_msg = sub {
      my $key = shift;
@@ -49,7 +38,6 @@ body<=
  if ($LJ::USE_ACCT_CODES && ($mode eq "codesubmit" || $mode eq "submit"))
  {
      my $code = $FORM{'code'};
-     $connect_db->();
      my $error;
      my $userid = 0;  # acceptable userid for double-click protection
      if ($mode eq "submit") {
@@ -103,8 +91,6 @@ body<=
      $name =~ s/[\n\r]//g;
      my $email = LJ::trim(lc($FORM{'email'}));
 
-     $connect_db->();
-     
      my $quser = $dbh->quote($user);
      my $qemail = $dbh->quote($email);
      my $qname = $dbh->quote($name);
@@ -123,7 +109,6 @@ body<=
 
          # you can give people sharedjournal priv ahead of time to create
          # reserved communities:
-         $get_remote->();
          next if LJ::check_priv($dbs, $remote, "sharedjournal", $user);
 
          $errors{'username'} = "$ML{'.error.username.reserved'}";
@@ -224,9 +209,8 @@ body<=
          my $status = ($LJ::EVERYONE_VALID ? 'A'  : 'N');
          $dbh->do("INSERT INTO user (user, email, password, status, caps, name, clusterid, dversion) ".
                   "VALUES ($quser, $qemail, $qpassword, '$status', $caps, $qname, $qclusterid, $qdversion)");
-         if ($dbh->err)
-         {
-             return "<?h1 $ML{'Error'} h1?><?p $ML{'error.procrequest'} <B>" . $dbh->errstr . "</B> p?>";
+         if ($dbh->err) {
+             return "<?h1 $ML{'Error'} h1?><?p $ML{'error.procrequest'} <b>" . $dbh->errstr . "</b> p?>";
          }
          $userid = $dbh->{'mysql_insertid'};
          $dbh->do("REPLACE INTO useridmap (userid, user) VALUES ($userid, $quser)");
@@ -278,6 +262,9 @@ body<=
          'subject' => BML::ml('email.newacct.subject', {'sitename' => $LJ::SITENAME}),
          'body' => $body,
      });
+
+     my $nu = LJ::load_userid($dbh, $userid);
+     LJ::make_login_session($nu) unless $remote;
 
      $ret = "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text1", {'email' => $email, 'username' => $user}) ." p?>";
      $ret .= "<?p $ML{'.success.text2'} p?><?standout <font size='+1' face='arial'><b><a href=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</a></b></font> standout?>";
