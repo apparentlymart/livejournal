@@ -164,23 +164,17 @@ sub trans
         my $ref = $r->header_in("Referer");
         if ($ref && index($ref, $LJ::SITEROOT) != 0) {
             # FIXME: this doesn't anti-squat user domains yet
-            $r->handler("perl-script");
-            $r->push_handlers(PerlHandler => sub {
-                my $r = shift;
-                $r->content_type("text/html");
-                $r->send_http_header();
-                $r->print("<html><head><title>Dev Server Warning</title>",
-                          "<style> body { border: 20px solid red; padding: 30px; margin: 0; font-family: sans-serif; } ",
-                          "h1 { color: #500000; }",
-                          "</style></head>",
-                          "<body><h1>Warning</h1><p>This server is for development and testing only.  ",
-                          "Accounts are subject to frequent deletion.  Don't use this machine for anything important.</p>",
-                          "<form method='post' action='/misc/ack-devserver.bml' style='margin-top: 1em'>",
-                          LJ::html_hidden("dest", "http://$host$uri$args_wq"),
-                          LJ::html_submit(undef, "Acknowledged"),
-                          "</form></body></html>");
-                return OK;
-            });
+            if ($uri !~ m!^/404!) {  
+                # So hacky!  (see note below)
+                $LJ::SQUAT_URL = "http://$host$uri$args_wq";
+            } else {
+                # then Apache's 404 handler takes over and we get here
+                # FIXME: why??  why doesn't it just work to return OK
+                # the first time with the handlers pushed?  nothing
+                # else requires this chicanery!
+                $r->handler("perl-script");
+                $r->push_handlers(PerlHandler => \&anti_squatter);
+            }
             return OK;
         }
     }
@@ -886,6 +880,28 @@ sub db_logger
              "VALUES (" . join(',', map { $dbl->quote($var->{$_}) } keys %$var) . ")");
 
     $dbl->disconnect if $LJ::DISCONNECT_DB_LOG;
+}
+
+sub anti_squatter
+{
+    my $r = shift;
+    $r->push_handlers(PerlHandler => sub {
+        my $r = shift;
+        $r->content_type("text/html");
+        $r->send_http_header();
+        $r->print("<html><head><title>Dev Server Warning</title>",
+                  "<style> body { border: 20px solid red; padding: 30px; margin: 0; font-family: sans-serif; } ",
+                  "h1 { color: #500000; }",
+                  "</style></head>",
+                  "<body><h1>Warning</h1><p>This server is for development and testing only.  ",
+                  "Accounts are subject to frequent deletion.  Don't use this machine for anything important.</p>",
+                  "<form method='post' action='/misc/ack-devserver.bml' style='margin-top: 1em'>",
+                  LJ::html_hidden("dest", "$LJ::SQUAT_URL"),
+                  LJ::html_submit(undef, "Acknowledged"),
+                  "</form></body></html>");
+        return OK;
+    });
+    
 }
 
 package LJ::Protocol;
