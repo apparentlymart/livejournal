@@ -1633,25 +1633,41 @@ sub load_codes
 #      into the source.  The real image data is stored in LJ::Img, which
 #      has default values provided in cgi-bin/imageconf.pl but can be 
 #      overridden in cgi-bin/ljconfig.pl.
-# args: imagecode, type?, name?
+# args: imagecode, type?, attrs?
 # des-imagecode: The unique string key to reference the image.  Not a filename,
 #                but the purpose or location of the image.
 # des-type: By default, the tag returned is an &lt;img&gt; tag, but if 'type'
 #           is "input", then an input tag is returned.
-# des-name: The name of the input element, if type == "input".
+# des-attrs: Optional hashref of other attributes.  If this isn't a hashref,
+#            then it's assumed to be a scalar for the 'name' attribute for 
+#            input controls.
 # </LJFUNC>
 sub img
 {
     my $ic = shift;
     my $type = shift;  # either "" or "input"
-    my $name = shift;  # if input
+    my $attr = shift;  
+
+    my $attrs;
+    if ($attr) {
+	if (ref $attr eq "HASH") {
+	    foreach (keys %$attr) {
+		$attrs .= " $_=\"" . LJ::ehtml($attr->{$_}) . "\"";
+	    }
+	} else {
+	    $attrs = " name=\"$attr\"";
+	}
+    }
 
     my $i = $LJ::Img::img{$ic};
     if ($type eq "") {
-	return "<img src=\"$LJ::IMGPREFIX$i->{'src'}\" width=\"$i->{'width'}\" height=\"$i->{'height'}\" alt=\"$i->{'alt'}\" border=0>";
+	return "<img src=\"$LJ::IMGPREFIX$i->{'src'}\" width=\"$i->{'width'}\" ".
+	    "height=\"$i->{'height'}\" alt=\"$i->{'alt'}\" border='0'$attrs>";
     }
     if ($type eq "input") {
-	return "<input type=\"image\" src=\"$LJ::IMGPREFIX$i->{'src'}\" width=\"$i->{'width'}\" height=\"$i->{'height'}\" alt=\"$i->{'alt'}\" border=0 name=\"$name\">";
+	return "<input type=\"image\" src=\"$LJ::IMGPREFIX$i->{'src'}\" ".
+	    "width=\"$i->{'width'}\" height=\"$i->{'height'}\" ".
+	    "alt=\"$i->{'alt'}\" border='0'$attrs>";
     }
     return "<b>XXX</b>";
 }
@@ -2127,6 +2143,49 @@ sub get_logtext2
 
 	my $sth = $db->prepare("SELECT jitemid, $snag_what FROM $table ".
 			       "WHERE journalid=$journalid AND jitemid IN ($jitemid_in)");
+	$sth->execute;
+	while (my ($id, $subject, $event) = $sth->fetchrow_array) {
+	    $lt->{$id} = [ $subject, $event ];
+	    delete $need{$id};
+	}
+    }
+    return $lt;
+}
+
+sub get_talktext2
+{
+    my $u = shift;
+    my $clusterid = $u->{'clusterid'};
+    my $journalid = $u->{'userid'}+0;
+
+    my $opts = ref $_[0] ? shift : {};
+
+    # return structure.
+    my $lt = {};
+    return $lt unless $clusterid;
+
+    my $dbh = LJ::get_dbh("cluster$clusterid");
+    my $dbr = $opts->{'usemaster'} ? undef : LJ::get_dbh("cluster${clusterid}slave");
+
+    # keep track of itemids we still need to load.
+    my %need;
+    foreach (@_) { $need{$_+0} = 1; }
+
+    # always consider hitting the master database, but if a slave is 
+    # available, hit that first.
+    my @sources = ([$dbh, "talktext2"]);
+    if ($dbr) { 
+	unshift @sources, [ $dbr, $LJ::USE_RECENT_TABLES ? "recent_talktext2" : "talktext2" ];
+    }
+
+    while (@sources && %need)
+    {
+	my $s = shift @sources;
+	my ($db, $table) = ($s->[0], $s->[1]);
+	my $in = join(", ", keys %need);
+
+	my $sth = $db->prepare("SELECT jitemid, subject, body FROM $table ".
+			       "WHERE journalid=$journalid AND jtalkid IN ($in)");
 	$sth->execute;
 	while (my ($id, $subject, $event) = $sth->fetchrow_array) {
 	    $lt->{$id} = [ $subject, $event ];
@@ -3300,9 +3359,51 @@ sub escapeall
     $a =~ s/>/&gt;/g;
 
     ### and escape BML
-    $a =~ s/\(=/\(&#0061;/g;
-    $a =~ s/=\)/&#0061;\)/g;
+    $a =~ s/\(=/\(&\#0061;/g;
+    $a =~ s/=\)/&\#0061;\)/g;
     return $a;
+}
+
+# load a few users at once, their userids given in the keys of $map
+# listref (not hashref: can't have dups).  values of $map listref are
+# scalar refs to put result in.  $have is an optional listref of user
+# object caller already has, but is too lazy to sort by themselves.
+
+sub load_userids_multiple
+{
+    my ($dbarg, $map, $have) = @_;
+    
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    my $sth;
+
+    my %need;
+    while (@$map) {
+	my $id = shift @$map;
+	my $ref = shift @$map;
+	push @{$need{$id}}, $ref;
+    }
+
+    my $satisfy = sub {
+	my $u = shift;
+	foreach (@{$need{$u->{'userid'}}}) {
+	    $$_ = $u;
+	}
+	delete $need{$u->{'userid'}};
+    };
+    
+    if ($have) {
+	foreach my $u (@$have) {
+	    $satisfy->($u);
+	}
+    }
+    
+    if (keys %need) {
+	my $in = join(", ", map { $_+0 } keys %need);
+	($sth = $dbr->prepare("SELECT * FROM user WHERE userid IN ($in)"))->execute;
+	$satisfy->($_) while $_ = $sth->fetchrow_hashref;
+    }
 }
 
 # $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
@@ -3859,7 +3960,9 @@ sub load_log_props
     unless ($itemin) { return ; }
     unless (ref $hashref eq "HASH") { return; }
     
-    my $sth = $dbr->prepare("SELECT p.itemid, l.name, p.value FROM logprop p, logproplist l WHERE p.propid=l.propid AND p.itemid IN ($itemin)");
+    my $sth = $dbr->prepare("SELECT p.itemid, l.name, p.value ".
+			    "FROM logprop p, logproplist l ".
+			    "WHERE p.propid=l.propid AND p.itemid IN ($itemin)");
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
 	$hashref->{$_->{'itemid'}}->{$_->{'name'}} = $_->{'value'};
@@ -3876,7 +3979,8 @@ sub load_log_props2
     return unless ref $hashref eq "HASH";
     return unless defined $LJ::CACHE_PROPID{'log'};
 
-    my $sth = $db->prepare("SELECT jitemid, propid, value FROM logprop2 WHERE journalid=$journalid AND jitemid IN ($jitemin)");
+    my $sth = $db->prepare("SELECT jitemid, propid, value FROM logprop2 ".
+			   "WHERE journalid=$journalid AND jitemid IN ($jitemin)");
     $sth->execute;
     while (my ($jitemid, $propid, $value) = $sth->fetchrow_array) {
 	$hashref->{$jitemid}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
@@ -3949,7 +4053,6 @@ sub load_log_props2multi
     }
 }
 
-
 sub load_talk_props
 {
     my ($dbarg, $listref, $hashref) = @_;
@@ -3961,13 +4064,34 @@ sub load_talk_props
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
     
-    my $sth = $dbr->prepare("SELECT tp.talkid, tpl.name, tp.value FROM talkproplist tpl, talkprop tp WHERE tp.tpropid=tpl.tpropid AND tp.talkid IN ($itemin)");
+    my $sth = $dbr->prepare("SELECT tp.talkid, tpl.name, tp.value ".
+			    "FROM talkproplist tpl, talkprop tp ".
+			    "WHERE tp.tpropid=tpl.tpropid ".
+			    "AND tp.talkid IN ($itemin)");
     $sth->execute;
     while (my ($id, $name, $val) = $sth->fetchrow_array) {
 	$hashref->{$id}->{$name} = $val;
     }
-    $sth->finish;
 }
+
+# Note: requires caller to first call LJ::load_props($dbs, "talk")
+sub load_talk_props2
+{
+    my ($db, $journalid, $listref, $hashref) = @_;
+
+    my $in = join(", ", map { $_+0; } @$listref);
+    return unless $in;
+    return unless ref $hashref eq "HASH";
+    return unless defined $LJ::CACHE_PROPID{'talk'};
+
+    my $sth = $db->prepare("SELECT jtalkid, tpropid, value FROM logprop2 ".
+			   "WHERE journalid=$journalid AND jtalkid IN ($in)");
+    $sth->execute;
+    while (my ($jtalkid, $propid, $value) = $sth->fetchrow_array) {
+	$hashref->{$jtalkid}->{$LJ::CACHE_PROPID{'talk'}->{$propid}->{'name'}} = $value;
+    }
+}
+
 
 # <LJFUNC>
 # name: LJ::eurl

@@ -16,7 +16,16 @@ BODY<=
  my $dbr = $dbs->{'reader'};
  my $remote = LJ::get_remote($dbs);
 
- &load_subjecticon();
+ my $init = LJ::Talk::init($dbs, \%FORM);
+ my $u = $init->{'journalu'};
+ return "Error: couldn't determine journal from arguments." unless $u;
+ return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+
+ my $pics = LJ::Talk::get_subjecticons;
+ my $clustered = $init->{'clustered'};
+
+ my $jarg = $clustered ? "journal=$u->{'user'}&" : "";
+ my $jargent = $clustered ? "journal=$u->{'user'}&amp;" : "";
 
  my $ret = "";
  my @errors = ();
@@ -24,30 +33,24 @@ BODY<=
  my $DEBUG = 0;
 
  # start quoting shit to insert
- my $itemid = $FORM{'itemid'}+0;
- $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, lt.event, l.eventtime, lt.subject, l.security, l.allowmask FROM log l, logtext lt WHERE lt.itemid=l.itemid AND l.itemid=$itemid");
- $sth->execute;
- my $item = $sth->fetchrow_hashref;
- unless ($item) { push @errors, "No such entry."; }
+ my $itemid = $init->{'itemid'}+0;
+ my $item = LJ::Talk::get_journal_item($dbcs, $u, $itemid);
+ return "(=H1 Error H1=)(=P No such entry. (itemid = $itemid) P=)" unless $item;
 
  my %logprops;
- LJ::load_log_props($dbs, [ $itemid ], \%logprops);
+ if ($clustered) {
+     LJ::load_props($dbs, "log");
+     LJ::load_log_props2($dbcr, $u->{'userid'}, [ $itemid ], \%logprops);
+ } else {
+     LJ::load_log_props($dbs, [ $init->{'itemid'} ], \%logprops);
+ }
 
  ### load users
- $sth = $dbr->prepare("SELECT * FROM user WHERE userid IN ($item->{'ownerid'}, $item->{'posterid'})");
- $sth->execute;
- my ($u, $ujp);  ## user owner and user journal poster
- my ($quser, $qjpuser);
- while ($_ = $sth->fetchrow_hashref) {
-     if ($_->{'userid'} == $item->{'ownerid'})  { 
-         $u  = $_; 
-         $quser = $dbr->quote($u->{'user'});
-     }
-     if ($_->{'userid'} == $item->{'posterid'}) {
-         $ujp = $_;
-         $qjpuser = $dbr->quote($ujp->{'user'});
-     }
- }
+ my $ujp;                 # poster of item 
+ LJ::load_userids_multiple($dbs, [
+				  $item->{'posterid'} => \$ujp,
+				  ], [ $u ]);
+ my ($quser, $qjpuser) = map { $dbr->quote($_) } ($u->{'user'}, $ujp->{'user'});
  LJ::load_user_props($dbs, $u, "opt_logcommentips");
 
  if ($FORM{'userpost'} && $FORM{'usertype'} ne "user") {
@@ -86,7 +89,8 @@ BODY<=
              }
 
              if ($up->{'journaltype'} ne "P") {
-                 push @errors, "You can't post as a shared or community account.  Shared accounts represent groups of people, not individual people.";
+                 push @errors, "You can't post as a shared or community account.  ".
+		     "Shared accounts represent groups of people, not individual people.";
              }
 
              unless ($cookie_auth || 
@@ -94,7 +98,9 @@ BODY<=
                      ecphash($itemid, $FORM{'parenttalkid'}, 
                              $up->{'password'}) eq $FORM{'ecphash'} )
              {
-                 push @errors, "Incorrect password given for the LiveJournal username you specified.  You can recover your password <A HREF=\"/lostinfo.bml\">here</A> if you've forgotten it.";
+                 push @errors, "Incorrect password given for the username ".
+		     " specified.  You can recover your password <a href=\"/lostinfo.bml\">here</a> ".
+		     "if you've forgotten it.";
              }
 
              # if the user chooses to log in, do so (patch by: lucretio)
@@ -117,7 +123,7 @@ BODY<=
              }
 
          } else {
-             push @errors, "The LiveJournal username you specified does not exist.  You can recover your username <A HREF=\"/lostinfo.bml\">here</A> if you've forgotten it, or you may post as \"Anonymous\" instead.";
+             push @errors, "The LiveJournal username you specified does not exist.  You can recover your username <a href=\"/lostinfo.bml\">here</a> if you've forgotten it, or you may post as \"Anonymous\" instead.";
          }
      } else {
          push @errors, "You did not enter your LiveJournal username.  You can choose to post as \"Anonymous\" if you don't have a LiveJournal user account.";
@@ -157,11 +163,7 @@ BODY<=
      if ($up) {
          if ($up->{'userid'} != $u->{'userid'}) 
          {
-             # TODO: use is_friend/similar API call?
-             $sth = $dbr->prepare("SELECT COUNT(*) FROM friends WHERE userid=$u->{'userid'} AND friendid=$up->{'userid'}");
-             $sth->execute;
-             my ($is_friend) = $sth->fetchrow_array;
-             unless ($is_friend) {
+             unless (LJ::is_friend($dbs, $u, $up)) {
                  push @errors, "Sorry, user <B>$u->{'user'}</B> does not list you as a friend, and they've set the \"friends only\" option for who can reply to their journal.";
              }
          }
@@ -210,11 +212,11 @@ BODY<=
      my $event = $FORM{'body'};
      LJ::CleanHTML::clean_comment(\$event, $FORM{'prop_opt_preformatted'});
 
-     $ret .= "<B>Subject: </B> $cleansubject<hr>\n";
+     $ret .= "<b>Subject: </b> $cleansubject<hr>\n";
      $ret .= $event;
 
-     $ret .= "<hr>";
-     $ret .= "<form method=post>\n";
+     $ret .= "<hr />";
+     $ret .= "<form method='post'>\n";
      # change mode:
      delete $FORM{'submitpreview'}; $FORM{'submitpost'} = 1;
      if ($cookie_auth) {
@@ -222,15 +224,13 @@ BODY<=
          delete $FORM{'userpost'};
      }
      foreach (keys %FORM) {
-         $ret .= "<input type=hidden name=\"$_\" value=\"" . LJ::ehtml($FORM{$_}) . "\">\n";
+         $ret .= "<input type='hidden' name=\"$_\" value=\"" . LJ::ehtml($FORM{$_}) . "\">\n";
      }
-     
 
-     $ret .= "<input type=submit value=\"Submit\">\n";
+     $ret .= "<input type='submit' value='Submit'>\n";
      $ret .= "</form>";
      return $ret;
  }
-
 
  ## insertion
 
@@ -241,7 +241,7 @@ BODY<=
  my $qbody = $dbh->quote($FORM{'body'});
  my $datepost = LJ::mysql_time();
  my $qdatepost = $dbh->quote($datepost);
- my $icon = &show_image($subjecticon); 
+ my $icon = LJ::Talk::show_image($pics, $subjecticon); 
 
  my $insertid;
  my $md5_body = md5_hex($FORM{'body'});
@@ -366,7 +366,7 @@ BODY<=
                  $text .= "\n\nTheir reply was:\n\n";
                  $text .= &indent("Subject: $cleansubject\n\n$FORM{'body'}");
                  $text .= "\n\nYou can view the discussion and reply here:\n\n";
-                 $text .= "     $LJ::SITEROOT/talkread.bml?itemid=$itemid\n\n";
+                 $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$itemid\n\n";
                  $text .= "-- $LJ::SITENAME\n\n";
                  $msg->attach('Type' => 'TEXT',
                               'Data' => $text,
@@ -375,7 +375,7 @@ BODY<=
 
                  my $html = "";
                  $html .= "<BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
-                 $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?itemid=$itemid\">your LiveJournal comment</A> in which you said:</TD></TR></TABLE>\n\n";
+                 $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$itemid\">your LiveJournal comment</A> in which you said:</TD></TR></TABLE>\n\n";
                  LJ::CleanHTML::clean_comment(\$parbody);
                  $html .= &blockquote($parbody);
                  
@@ -443,7 +443,7 @@ BODY<=
          $text .= "\n\nTheir reply was:\n\n";
          $text .= &indent("Subject: $textsubject\n\n$FORM{'body'}");
          $text .= "\n\nYou can view the discussion and reply here:\n\n";
-         $text .= "     $LJ::SITEROOT/talkread.bml?itemid=$itemid\n\n";
+         $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$itemid\n\n";
          $text .= "-- $LJ::SITENAME\n\n";
          $text .= "(if you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options)\n";
          $msg->attach('Type' => 'TEXT',
@@ -454,12 +454,12 @@ BODY<=
          my $html = "";
          $html .= "<BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
          if ($parentcomment)  {
-             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$LJ::SITEROOT/talkread.bml?itemid=$itemid\">your LiveJournal post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
+             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$itemid\">your LiveJournal post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
              my $cleancom = $parentcomment;
              LJ::CleanHTML::clean_comment(\$cleancom);
              $html .= &blockquote($cleancom);
          } else {
-             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?itemid=$itemid\">your LiveJournal post</A> in which you said:</TD></TR></TABLE>\n";
+             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$itemid\">your LiveJournal post</A> in which you said:</TD></TR></TABLE>\n";
              my $clean = $item->{'event'};
              LJ::CleanHTML::clean_event(\$clean);
              $html .= &blockquote($clean);
@@ -512,7 +512,7 @@ BODY<=
  }
  
  # Yeah, we're done.
- my $commentlink = "<a href='talkread.bml?itemid=$itemid&amp;view=$insertid#t$insertid'>here</a>";
+ my $commentlink = "<a href='talkread.bml?${jargent}itemid=$itemid&amp;view=$insertid#t$insertid'>here</a>";
  $ret .= "(=H1 Success H1=)(=P Your comment has been added.  You can view it $commentlink. P=)";
 
  if ($didlogin) {

@@ -15,75 +15,58 @@ BODY<=
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
+ my ($sth, $sql);
 
- &load_subjecticon;  # TODO: blech
+ my $pics = LJ::Talk::get_subjecticons;
+
+ ## workaround mail client bug when don't understand quoted-printable:
+ $FORM{'itemid'} =~ s/^3D//;
+ my $init = LJ::Talk::init($dbs, \%FORM);
+ my $u = $init->{'journalu'};
+
+ return "Error: couldn't determine journal from arguments." unless $u;
+ return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+ 
+ my $clustered = $init->{'clustered'};
+
+ my ($dbcs, $dbcm, $dbcr) = ($dbs, $dbh, $dbr);
+ if ($clustered) {
+     $dbcs = LJ::get_cluster_set($u);
+     $dbcm = $dbcs->{'dbh'};
+     $dbcr = $dbcs->{'reader'};
+ }
 
  my $SELF = "/talkread.bml";
  my $ret = "";
 
- ## fix bug where mail clients don't understand quoted-printable encoding
- $FORM{'itemid'} =~ s/^3D//;
-
- ### load the log properties
- my %logprops = ();
- LJ::load_log_props($dbs, [ $FORM{'itemid'} ], \%logprops);
-
- my $itemid = $FORM{'itemid'}+0;
- my $qitemid = $FORM{'itemid'}+0;
+ my $itemid = $init->{'itemid'}+0;
  my $page = int($FORM{'page'}) || 1;
  my $thread = int($FORM{'thread'}) || 0;
 
- my $item;
- my @dbl = ($dbh);
- if ($dbs->{'has_slave'}) { unshift @dbl, $dbr; }
- foreach my $db (@dbl) {
-     $sth = $db->prepare("SELECT replycount, ownerid, posterid, eventtime, security, allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(logtime) AS 'secondsold' FROM log WHERE itemid=$qitemid");
-     $sth->execute;
-     $item = $sth->fetchrow_hashref;
-     last if $item;
- }
- unless ($item) {
-     return "(=H1 Error H1=)(=P No such entry. (itemid = $itemid) P=)";
- }
+ my $item = LJ::Talk::get_journal_item($dbcs, $u, $itemid);
+ return "(=H1 Error H1=)(=P No such entry. (itemid = $itemid) P=)" unless $item;
  
- # load the text of the item we just loaded (didn't join above so
- # we could use slaves (no logtext on slaves))
- {
-     my $lt = LJ::get_logtext($dbs, $itemid);
-     my $v = $lt->{$itemid};
-     $item->{'subject'} = $v->[0];
-     $item->{'event'} = $v->[1];
+ ### load the log properties
+ my %logprops = ();
+ if ($clustered) {
+     LJ::load_props($dbs, "log");
+     LJ::load_log_props2($dbcr, $u->{'userid'}, [ $itemid ], \%logprops);
+ } else {
+     LJ::load_log_props($dbs, [ $init->{'itemid'} ], \%logprops);
  }
  
  ### load users
- $sth = $dbr->prepare("SELECT * FROM user WHERE userid IN ($item->{'ownerid'}, $item->{'posterid'})");
- $sth->execute;
- my ($u, $up);
- my $quser;
- while ($_ = $sth->fetchrow_hashref) {
-     if ($_->{'userid'} == $item->{'ownerid'})  { 
-	 $u  = $_; 
-	 $quser = $dbr->quote($u->{'user'});
-     }
-     if ($_->{'userid'} == $item->{'posterid'}) { $up = $_; }
- }
+ my ($up, $ur);  # $up = user posted journal item; $ur = user remote is replying to
+ LJ::load_userids_multiple($dbs, [
+				  $item->{'posterid'} => \$up,
+				  $parpost->{'posterid'} => \$ur,
+				  ], [ $u ]);
  LJ::load_user_props($dbs, $up, "opt_showtopicstuff");
 
  my $remote = LJ::get_remote($dbs);
 
- ## ref stuff
-
  ####  Check security before viewing this post
- unless (LJ::can_view($dbs, $remote, $item)) {
-     if ($FORM{'viewall'} && LJ::check_priv($dbs, $remote, "viewall")) {
-         LJ::statushistory_add($dbs, $item->{'posterid'}, $remote->{'userid'}, 
-			       "viewall", "itemid = $itemid");
-     } else {
-	 return "(=H1 Error H1=)(=P You must be logged in to view this protected entry. P=)"
-	     unless (defined $remote);
-	 return "(=H1 Error H1=)(=P You are not authorized to view this protected entry. P=)";
-     }
- }
+ return $errtxt unless LJ::Talk::check_viewable($dbs, $remote, $item, \%FORM, \$errtxt);
 
  $event = $item->{'event'};
 
@@ -96,7 +79,9 @@ BODY<=
  my $picid = $up->{'defaultpicid'};
  if ($logprops{$itemid}->{'picture_keyword'}) {
      my $qkw = $dbr->quote($logprops{$itemid}->{'picture_keyword'});
-     my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid AND k.keyword=$qkw");
+     my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k ".
+			     "WHERE m.userid=$up->{'userid'} ".
+			     "AND m.kwid=k.kwid AND k.keyword=$qkw");
      $sth->execute;
      ($picid) = $sth->fetchrow_array;
  }
@@ -107,7 +92,9 @@ BODY<=
 	 $alt .= ": $logprops{$itemid}->{'picture_keyword'}";
      }
      $alt = LJ::ehtml($alt);
-     $ret .= "<td><img src='/userpic/$picid' width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'}' align='absmiddle' hspace='3' title='$alt' alt=''></td>";
+     $ret .= "<td><img src='/userpic/$picid' width='$userpics{$picid}->{'width'}' ".
+	 "height='$userpics{$picid}->{'height'}' align='absmiddle' ".
+	 "hspace='3' title='$alt' alt=''></td>";
  }
  
  $ret .= "<td>";
@@ -122,35 +109,8 @@ BODY<=
  $ret .= "</td></tr></table>";
 
  ## standout bar
- {
-     my @linkele;
-     push @linkele, "<a href='/go.bml?itemid=$itemid&dir=prev'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_prev.gif' width='22' height='20' alt='Previous Entry' title='Previous Entry' border='0'></a>";
-     $head .= "<link href='/go.bml?itemid=$itemid&amp;dir=prev' rel='Previous'>\n";     
-     
-     push @linkele, "<a href='/tools/memadd.bml?itemid=$itemid'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/memadd.gif' width='22' height='20' alt='Add to memories!' title='Add to memories!' border='0'></a>";
-
-     if (defined $remote && ($remote->{'user'} eq $u->{'user'} ||
-			     $remote->{'user'} eq $up->{'user'} ||
-			     LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
-     {
-	 push @linkele, "<a href='/editjournal_do.bml?itemid=$itemid'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_edit.gif' width='22' height='20' alt='Edit Entry' title='Edit Entry' border='0'></a>";
-     }
-
-     if ($up->{'opt_showtopicstuff'} ne "N") {
-	 push @linkele, "<a href='/topics/additem.bml?itemid=$itemid'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/topic_add.gif' width='22' height='20' title='Add to Topic Directory' alt='Add to Topic Directory' border='0'></a>";
-     }
-
-     push @linkele, "<a href='/tools/tellafriend.bml?itemid=$itemid'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_tellfriend.gif' width='22' height='20' alt='Tell a Friend!' title='Tell a Friend!' border='0'></a>";
-
-     push @linkele, "<a href='/go.bml?itemid=$itemid&dir=next'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_next.gif' width='22' height='20' alt='Next Entry' title='Next Entry' border='0'></a>";	
-     $head .= "<link href='/go.bml?itemid=$itemid&amp;dir=next' rel='Next'>\n";
-
-     if (@linkele) {
-	 $ret .="(=STANDOUT ";
-	 $ret .= join("&nbsp;&nbsp;", @linkele);
-	 $ret .= " STANDOUT=)";
-     }
- }
+ $ret .= LJ::Talk::link_bar($dbs, { 'u' => $u, 'up' => $up, 'headref' => \$head,
+				    'remote' => $remote, 'itemid' => $itemid, });
 
  ## dump the log entry, unless we're browsing a thread.
  unless ($thread)
@@ -200,37 +160,40 @@ BODY<=
 
  $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' />";
  ### is this in a topic?
- {
-     my $cache = {};
-     my $in_topic = 0;
-
-     $sth = $dbr->prepare("SELECT tptopid, status FROM topic_map WHERE itemid=$qitemid");
-     $sth->execute;
-     while (my $mape = $sth->fetchrow_hashref)
-     {
-	 next unless ($mape->{'status'} eq "on");
-	 unless ($in_topic) {
-	     $in_topic = 1;
-	     $ret .= "<b>Read similar journal entries:</b><br />";
-	 }
-	 
-	 # TODO: LJ::Topic isn't yet $dbs/$dbarg aware
-	 my @hier = LJ::Topic::get_hierarchy($dbh, { 'topid' => $mape->{'tptopid'} });
-	 $ret .= "<b>";
-	 $ret .= join(" : ", map { "<a href='$_->{'url'}'>$_->{'name'}</a>"; } @hier);
-	 $ret .= "</b><br /><hr />";
-	 
-     }
- }
- ### /topic
+ $ret .= LJ::Talk::topic_links($dbs, $u, $itemid) unless $FORM{'replyto'};
 
  my %users_to_load;
  my @posts_to_load;
  my %posts;
  my %children;
  
- # TODO: FIXME: shouldn't use master here... but tricky not to.
- $sth = $dbh->prepare("SELECT t.talkid, t.posterid, u.user AS 'userpost', t.datepost, t.parenttalkid, tt.subject, t.state FROM talk t, talktext tt LEFT JOIN useridmap u ON u.userid=t.posterid WHERE t.nodetype='L' AND t.nodeid=$qitemid AND t.talkid=tt.talkid ORDER BY t.talkid");
+ # get all talk rows & their subjects.  will load needed body text later.
+ if ($clustered) {
+     # need to decide if it's safe to get all data from a slave.  if
+     # the owning post is newer than $LJ::RECENT_DAYS, then obviously
+     # all replies are newer to, and they all exist on a slave.  or,
+     # if slaves are full copies, then it's also okay.
+     my $db = $dbch;
+     my $recent = "";
+     if (! $LJ::USE_RECENT_TABLES) {
+	 $db = $dbcr;
+     } elsif ($item->{'secondsold'} > $LJ::RECENT_DAYS*86400) {
+	 $db = $dbcr;
+	 $recent = "recent_";
+     }
+     $sth = $db->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, u.user AS 'userpost', ".
+			 "t.datepost, t.parenttalkid, tt.subject, t.state ".
+			 "FROM talk2 t, ${recent}talktext2 tt ".
+			 "LEFT JOIN useridmap u ON u.userid=t.posterid ".
+			 "WHERE t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
+			 "AND t.nodetype='L' AND t.nodeid=$itemid AND ".
+			 "t.jtalkid=tt.jtalkid ORDER BY t.jtalkid");
+ } else {
+     # TODO: FIXME: shouldn't use master here... but tricky not to way
+     # things are setup.  but since non-clustered code will die away in
+     # a couple months, we won't optimize this like we do above.
+     $sth = $dbh->prepare("SELECT t.talkid, t.posterid, u.user AS 'userpost', t.datepost, t.parenttalkid, tt.subject, t.state FROM talk t, talktext tt LEFT JOIN useridmap u ON u.userid=t.posterid WHERE t.nodetype='L' AND t.nodeid=$itemid AND t.talkid=tt.talkid ORDER BY t.talkid");
+ }
  $sth->execute;
  my $post_count = 0;
  while (my $post = $sth->fetchrow_hashref) {
@@ -238,19 +201,9 @@ BODY<=
      $posts{$post->{'talkid'}} = $post;
      push @{$children{$post->{'parenttalkid'}}}, $post->{'talkid'};
  }	
- 
- ## temporary:
- if ($item->{'replycount'} > $post_count) {
-     # something messed?
-     LJ::query_buffer_flush($dbh, "log");
-     
-     my $qpc = $post_count + 0;
-     $dbh->do("UPDATE log SET replycount=$qpc WHERE itemid=$qitemid");
- }
 
- if ($post_count < $THREADING_POINT) {
-     $PAGE_SIZE = $THREADING_POINT;
- }
+ # some magic:
+ $PAGE_SIZE = $THREADING_POINT if $post_count < $THREADING_POINT;
  
  my $top_replies = $thread ? 1 : @{$children{$thread}};
  my $pages = int($top_replies / $PAGE_SIZE);
@@ -284,10 +237,14 @@ BODY<=
  unless (@posts_to_load) {
      $ret .= "No replies";
  }
- my $talkid_in = join(",", @posts_to_load);
 
  ### loads more of some of the posts, uses slaves if possible.
- my $posts_loaded = LJ::get_talktext($dbs, @posts_to_load);
+ my $posts_loaded;
+ if ($clustered) {
+     $posts_loaded = LJ::get_talktext2($u, @posts_to_load);
+ } else {
+     $posts_loaded = LJ::get_talktext($dbs, @posts_to_load);
+ }
  foreach my $talkid (keys %{$posts_loaded}) {
      $posts{$talkid}->{'body'} = $posts_loaded->{$talkid}->[1];
      $posts{$talkid}->{'_loaded'} = 1;
@@ -295,10 +252,12 @@ BODY<=
  }
 
  ### load meta-data
- $sth = $dbr->prepare("SELECT tp.talkid, tpl.name, tp.value FROM talkproplist tpl, talkprop tp WHERE tp.talkid IN ($talkid_in) AND tp.tpropid=tpl.tpropid");
- $sth->execute;
- while (my ($id, $name, $value) = $sth->fetchrow_array) {
-     $posts{$id}->{$name} = $value;
+ my $talkid_in = join(",", @posts_to_load);
+ if ($clustered) {
+     LJ::load_props("talk");
+     LJ::load_talk_props2($dbcr, $u->{'userid'}, \@posts_to_load, \%posts);
+ } else {
+     LJ::load_talk_props($dbs, \@posts_to_laod, \%posts);
  }
 
  foreach my $talkid (sort { $a <=> $b } keys %posts)
@@ -367,7 +326,8 @@ BODY<=
  }
 
  unless ($logprops{$itemid}->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N") {
-     $ret .= "<center><b><a href='talkpost.bml?itemid=$itemid'>(Post a new comment)</a></b></center>";
+     my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
+     $ret .= "<center><b><a href='talkpost.bml?${jarg}itemid=$itemid'>(Post a new comment)</a></b></center>";
 
      if ($post_count > 0) 
      {
@@ -439,7 +399,9 @@ sub recurse_post
 			$picid = $user{$userpost}->{'_pictures'}->{$pickw};
 			unless ($picid) {
 			    my $qkw = $dbr->quote($pickw);
-			    my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$post->{'posterid'} AND m.kwid=k.kwid AND k.keyword=$qkw");
+			    my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k ".
+						    "WHERE m.userid=$post->{'posterid'} ".
+						    "AND m.kwid=k.kwid AND k.keyword=$qkw");
 			    $sth->execute;
 			    my ($alt_picid) = $sth->fetchrow_array;
 			    if ($alt_picid) {
@@ -459,7 +421,7 @@ sub recurse_post
 			$$ret .= "<img align='left' hspace='3' src='/userpic/$picid'";
 			$$ret .= " width='$userpics{$picid}->{'width'}'";
 			$$ret .= " title='$alt' alt=''";
-			$$ret .= " height='$userpics{$picid}->{'height'}'>";
+			$$ret .= " height='$userpics{$picid}->{'height'}' />";
 		    }
 		}
 		
