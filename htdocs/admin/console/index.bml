@@ -28,11 +28,12 @@
          my $first = 1;
          $ret .= "<P><TABLE BORDER=1 CELLPADDING=5><TR>";
          foreach (@args) {
+             my $arg = BML::eall($_);
              if ($first) {
-                 $ret .= "<TD><B>$_</B></TD>";
+                 $ret .= "<TD><B>$arg</B></TD>";
                  $first = 0;
              } else {
-                 $ret .= "<TD>$_</TD>";
+                 $ret .= "<TD>$arg</TD>";
              }
          }
          $ret .= "</TR></TABLE>";
