@@ -4115,8 +4115,8 @@ sub start_request
     # TODO: check process growth size
 
     # clear per-request caches
-    $LJ::CACHE_REMOTE = undef;
-    $LJ::CACHED_REMOTE = 0;
+    LJ::unset_remote();               # clear cached remote
+    LJ::set_active_crumb('');         # clear active crumb
     %LJ::CACHE_USERPIC_SIZE = ();     # picid -> [width, height, userid]
     %LJ::CACHE_USERPIC_INFO = ();     # uid -> { ... }
     %LJ::REQ_CACHE_USER_NAME = ();    # users by name
@@ -4127,7 +4127,6 @@ sub start_request
     %LJ::REQ_DBIX_TRACKER = ();       # canonical dbrole -> DBIx::StateTracker
     %LJ::REQ_DBIX_KEEPER = ();        # dbrole -> DBIx::StateKeeper
     %LJ::REQ_HEAD_HAS = ();           # avoid code duplication for js
-    $LJ::ACTIVE_CRUMB = '';           # clear out bread crumbs
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
