@@ -835,6 +835,11 @@ sub submit
     
     my ($can_vote, undef) = find_security($dbh, $po, $remote);
 
+    if (LJ::is_banned($dbh, $remote, $po)) {
+	$$error = "You can't vote because you're banned from this journal.";
+	return 0;
+    }
+
     unless ($can_vote) {
 	$$error = "Sorry, you don't have permission to vote in this particular poll.";
 	return 0;
