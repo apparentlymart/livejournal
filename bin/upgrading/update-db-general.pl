@@ -693,7 +693,7 @@ CREATE TABLE userpicblob2 (
   picid int unsigned not null,
   imagedata blob,
   PRIMARY KEY (userid, picid)
-) 
+) max_rows=100000000
 EOC
 
 register_tablecreate("userpicmap", <<'EOC');
@@ -938,7 +938,7 @@ CREATE TABLE useridmap (
   user char(15) NOT NULL,
   PRIMARY KEY  (userid),
   UNIQUE KEY user (user)
-) PACK_KEYS=1
+)
 EOC
 
 post_create("useridmap",

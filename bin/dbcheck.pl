@@ -12,6 +12,7 @@ my $opt_start = 0;
 my $opt_stop = 0;
 my $opt_err = 0;
 my $opt_all = 0;
+my $opt_tablestatus;
 my @opt_run;
 exit 1 unless GetOptions('help' => \$help,
                          'flushhosts' => \$opt_fh,
@@ -21,6 +22,7 @@ exit 1 unless GetOptions('help' => \$help,
                          'run=s' => \@opt_run,
                          'onlyerrors' => \$opt_err,
                          'all' => \$opt_all,
+                         'tablestatus' => \$opt_tablestatus,
                          );
 
 unless (-d $ENV{'LJHOME'}) { 
@@ -37,6 +39,7 @@ if ($help) {
          "    --start         Start replication.\n".
          "    --run <sql>     Run arbitrary SQL.\n".
          "    --onlyerrors    Will be silent unless there are errors.\n".
+         "    --tablestatus   Show warnings about full/sparse tables.\n".
          "\n".
          "Commands\n".
          "   (none)           Shows replication status.\n".
@@ -207,6 +210,8 @@ my $check = sub
 	my $ver = $dbsl->selectrow_array("SELECT VERSION()");
 	
 	my $sth;
+
+	
 	my $stalled = 0;
 	my $ccount = 0;
 	$sth = $dbsl->prepare("SHOW PROCESSLIST");
@@ -339,6 +344,36 @@ $flush_host->($masterid, $dbh);
 my $good = 1;
 while (@to_check) {
     $good = 0 unless $check->(shift @to_check, \@to_check);
+}
+
+if ($opt_tablestatus) {
+    my @errors = ();
+    foreach my $dbid (sort { $a <=> $b } keys %dbinfo) {
+	my $d = $dbinfo{$dbid};
+	my $name = $d->{name};
+	my $db = $LJ::DBIRole->get_dbh_conn($d->{rootfdsn});
+	$sth = $db->prepare("SHOW TABLE STATUS");
+	$sth->execute;
+	while (my $c = $sth->fetchrow_hashref) {
+	    next if $c->{Type} eq "InnoDB";
+	    if ($c->{Max_data_length} <= 4294967295) {
+		if ($c->{Data_length} > $c->{Max_data_length}*0.8) {
+		    my $perc = sprintf("%0.02f", $c->{Data_length} / $c->{Max_data_length} * 100);
+		    push @errors, "Table $name.$c->{Name} $perc% full (4gb limit)";
+		}
+		if ($c->{Name} eq "userpicblob2") {
+		    push @errors, "Table $name.userpicblob2 should be altered to use >4 byte pointers";
+		}
+	    }
+	}
+    }
+    if (@errors) {
+        print STDERR "\nERRORS:\n";
+        foreach (@errors) {
+            print STDERR "  * $_\n";
+        }
+	$good = 0;
+    }
 }
 
 exit 1 unless $good;
