@@ -355,7 +355,7 @@ sub get_log2_recent_log
     my $jid = LJ::want_userid($u);
     $cid ||= $u->{'clusterid'} if ref $u;
 
-    my $DATAVER = "2"; # 1 char
+    my $DATAVER = "3"; # 1 char
 
     my $memkey = [$jid, "log2lt:$jid"];
     my $lockkey = $memkey->[1];
@@ -396,6 +396,7 @@ sub get_log2_recent_log
 
     return $ret
         if $rows_decode->();
+    $rows = "";
 
     my $db = LJ::get_cluster_master($cid);
     # if we use slave or didn't get some data, don't store in memcache
@@ -414,6 +415,7 @@ sub get_log2_recent_log
         $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
         return $ret;
     }
+    $rows = "";
 
     # get reliable update time from the db
     # TODO: check userprop first
