@@ -725,14 +725,14 @@ sub get_recent_items
     if ($clusterid) {
         $sql = ("SELECT jitemid AS 'itemid', posterid, security, replycount, $extra_sql ".
                 "DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
-                "FROM log2 WHERE journalid=$userid AND $sort_key <= $notafter $secwhere ".
+                "FROM log2 WHERE journalid=$userid AND $sort_key BETWEEN 0 AND $notafter $secwhere ".
                 "ORDER BY journalid, $sort_key ".
                 "LIMIT $skip,$itemshow");
     } else {
         # old tables ("cluster 0")
         $sql = ("SELECT itemid, posterid, security, replycount, $extra_sql ".
                 "DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart' ".
-                "FROM log WHERE ownerid=$userid AND $sort_key <= $notafter $secwhere ".
+                "FROM log WHERE ownerid=$userid AND $sort_key BETWEEN 0 AND $notafter $secwhere ".
                 "ORDER BY ownerid, $sort_key ".
                 "LIMIT $skip,$itemshow");
     }
