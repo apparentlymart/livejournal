@@ -203,7 +203,7 @@
 
 /create.bml.error.email.blank=You must provide your email address.
 
-/create.bml.error.email.nospaces=No spaces allowed in email address.  If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>\@aol.com</b>
+/create.bml.error.email.nospaces=No spaces allowed in email address.  If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>@aol.com</b>
 
 /create.bml.error.password.asciionly=You can only use ASCII symbols in the password.
 
