@@ -9,7 +9,7 @@ P=)
 (=HR=)
 
 (=_CODE
-#line 14
+#line 12
  my $ret = "";
  &connect_db();
 
@@ -20,6 +20,10 @@ P=)
  $sth->execute;
  while ($_ = $sth->fetchrow_hashref) {
      $stat{$_->{'statcat'}}->{$_->{'statkey'}} = $_->{'statval'};
+ }
+
+ unless (%stat) {
+     return "(=H1 Sorry... H1=)(=P No statistics are available.  If you're the administrator for this site, run <b>ljmaint.pl genstats</b>, or ideally, put it in cron to run nightly. P=)";
  }
 
  $sth = $dbh->prepare("SELECT c.item, s.statval FROM stats s, codes c WHERE c.type='country' AND s.statcat='country' AND s.statkey=c.code ORDER BY s.statval DESC LIMIT 15");
@@ -58,8 +62,8 @@ P=)
      my $female = $stat{'gender'}->{'F'}+0;
      my $tot = $male+$female;
      $tot ||= 1;
-     $ret .= "<LI><B>Male: </B> $male (" . sprintf("%0.1f", $male*100/$tot) . "%)";
-     $ret .= "<LI><B>Female: </B> $female (" . sprintf("%0.1f", $female*100/$tot) . "%)";
+     $ret .= "<LI><B>Male: </B> $male (" . sprintf("%0.1f", $male*100/($tot||1)) . "%)";
+     $ret .= "<LI><B>Female: </B> $female (" . sprintf("%0.1f", $female*100/($tot||1)) . "%)";
  }
  $ret .= "<LI><B>Unspecified: </B> " . ($stat{'gender'}->{'U'}+0);
  $ret .= "</UL> P=)\n";
@@ -69,7 +73,7 @@ P=)
  {
      foreach my $act (qw(off early paid on)) {
 	 my $num = $stat{'account'}->{$act}+0;
-	 $ret .= "<LI><B>$LJ::acct_name{$act}: </B> $num (" . sprintf("%0.1f", $num*100/$stat{'userinfo'}->{'total'}) . "%)";	 
+	 $ret .= "<LI><B>$LJ::acct_name{$act}: </B> $num (" . sprintf("%0.1f", $num*100/($stat{'userinfo'}->{'total'}||1)) . "%)";	 
      }
  }
  $ret .= "</UL> P=)\n";
