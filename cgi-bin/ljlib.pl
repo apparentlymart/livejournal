@@ -461,8 +461,7 @@ sub get_friend_items
     }
 
     my @friends_buffer = ();
-    my $total_loaded = 0;
-    my $buffer_unit = int($getitems * 1.5);  # load a bit more first to avoid 2nd load
+    my $fr_loaded = 0;  # flag:  have we loaded friends?
 
     my $get_next_friend = sub
     {
@@ -471,8 +470,7 @@ sub get_friend_items
 
         # load another batch if we just started or
         # if we just finished a batch.
-        if ($total_loaded % $buffer_unit == 0)
-        {
+        unless ($fr_loaded++) {
             my $extra;
             if ($opts->{'showtypes'}) {
                 my @in;
@@ -482,19 +480,21 @@ sub get_friend_items
                 $extra = "AND u.journaltype IN (".join (',', @in).")" if @in;
             }
             my $timeafter = $cache_max_update ? "AND uu.timeupdate > '$cache_max_update' " : "";
-            my $sth = $dbr->prepare("SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid, uu.timeupdate ".
+            my $sth = $dbr->prepare("SELECT u.userid, u.clusterid, uu.timeupdate ".
                                     "FROM friends f, userusage uu, user u ".
-                                    "WHERE f.userid=$userid AND f.friendid=uu.userid ".
+                                    "WHERE f.userid=? AND f.friendid=uu.userid ".
                                     "AND f.friendid=u.userid $filtersql AND u.statusvis='V' $extra ".
-                                    "AND uu.timeupdate IS NOT NULL ".
+                                    "AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 14 DAY) " .
                                     $timeafter .
-                                    "ORDER BY 2 LIMIT $total_loaded, $buffer_unit");
-            $sth->execute;
+                                    "LIMIT 500");
+            $sth->execute($userid);
 
-            while (my ($userid, $update, $clusterid, $timeupdate) = $sth->fetchrow_array) {
+            while (my ($userid, $clusterid, $timeupdate) = $sth->fetchrow_array) {
+                my $update = $LJ::EndOfTime - LJ::mysqldate_to_time($timeupdate);
                 push @friends_buffer, [ $userid, $update, $clusterid, $timeupdate ];
-                $total_loaded++;
             }
+
+            @friends_buffer = sort { $a->[1] <=> $b->[1] } @friends_buffer;
 
             # return one if we just found some fine, else we're all
             # out and there's nobody else to load.
@@ -509,7 +509,7 @@ sub get_friend_items
     # friends of friends mode
     $get_next_friend = sub
     {
-        unless (@friends_buffer || $total_loaded) 
+        unless (@friends_buffer || $fr_loaded) 
         {
             # load all user's friends
             my %f;
@@ -543,7 +543,7 @@ sub get_friend_items
                     SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid 
                     FROM friends f, userusage uu, user u WHERE f.userid=$fid AND
                          f.friendid=uu.userid AND f.friendid=u.userid AND u.statusvis='V' $extra
-                         AND uu.timeupdate IS NOT NULL ORDER BY 2 LIMIT 100
+                         AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 14 DAY) LIMIT 100
                 });
                 $sth->execute;
                 while (my ($id, $time, $c) = $sth->fetchrow_array) {
@@ -553,7 +553,7 @@ sub get_friend_items
             }
 
             @friends_buffer = sort { $a->[1] <=> $b->[1] } values %ff;
-            $total_loaded = 1;  # as flag in this case; so we don't reload later
+            $fr_loaded = 1;
         }
 
         return $friends_buffer[0] if @friends_buffer;
