@@ -46,13 +46,16 @@ sub LJ::Stats::run_stats {
                 next;
             }
 
-            my $dbr = LJ::Stats::get_db("dbr");
-            die "Can't get db reader handle."
-                unless $dbr;
+            # rather than passing an actual db handle to the stat handler,
+            # just pass a getter subef so it can be revalidated as necessary
+            my $dbr_getter = sub {
+                return LJ::Stats::get_db("dbr")
+                    or die "Can't get db reader handle.";
+            };
 
             print "-I- Running: $jobname\n";
 
-            my $res = $stat->{'handler'}->($dbr);
+            my $res = $stat->{'handler'}->($dbr_getter);
             die "Error running '$jobname' handler on global reader."
                 unless $res;
 
@@ -88,13 +91,16 @@ sub LJ::Stats::run_stats {
                     next;
                 }
 
-                my $dbcr = LJ::Stats::get_db("dbcr", $cid);
-                die "Can't get cluster $cid db handle."
-                    unless $dbcr;
+                # pass a dbcr getter subref so the stat handler knows how
+                # to revalidate its database handles, by invoking this closure
+                my $dbcr_getter = sub {
+                    return LJ::Stats::get_db("dbcr", $cid)
+                        or die "Can't get cluster $cid db handle.";
+                };
 
                 print "-I- Running: $jobname, cluster $cid\n";
 
-                my $res = $stat->{'handler'}->($dbcr, $cid);
+                my $res = $stat->{'handler'}->($dbcr_getter, $cid);
                 die "Error running '$jobname' handler on cluster $cid."
                     unless $res;
 
@@ -140,10 +146,13 @@ sub LJ::Stats::get_db {
     return undef unless $type;
     my $cid = shift;
 
+    my $opts = {raw=>1,nocache=>1}; # get_dbh opts
+
     # global handles
     if ($type eq "dbr") {
         my @roles = $LJ::STATS_FORCE_SLOW ? ("slow") : ("slave", "master");
-        my $db = LJ::get_dbh({raw=>1}, @roles);
+
+        my $db = LJ::get_dbh($opts, @roles);
         return $db if $db;
             
         # don't fall back to slave/master if STATS_FORCE_SLOW is on
@@ -153,15 +162,13 @@ sub LJ::Stats::get_db {
         return undef;
     }
 
-    return LJ::get_dbh({raw=>1}, 'master')
+    return LJ::get_dbh($opts, 'master')
         if $type eq "dbh";
 
     # cluster handles
     return undef unless $cid > 0;
-    return LJ::get_cluster_master($cid)
-        if $type eq "dbcm";
-    return LJ::get_cluster_reader($cid)
-        if $type eq "dbcr";
+    return LJ::get_cluster_def_reader($opts, $cid)
+        if $type eq "dbcm" || $type eq "dbcr";
 
     return undef;
 }

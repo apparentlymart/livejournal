@@ -19,7 +19,9 @@ $maint{'genstats'} = sub
            'statname' => "pop_faq",
            'handler' =>
                sub {
-                   my $db = shift;
+                   my $db_getter = shift;
+                   return undef unless ref $db_getter eq 'CODE';
+                   my $db = $db_getter->();
                    return undef unless $db;
 
                    my $sth = $db->prepare("SELECT faqid, COUNT(*) FROM faquses WHERE " .
@@ -44,8 +46,11 @@ $maint{'genstats'} = sub
            'statname' => "pop_interests",
            'handler' =>
                sub {
-                   my $db = shift;
+                   my $db_getter = shift;
+                   return undef unless ref $db_getter eq 'CODE';
+                   my $db = $db_getter->();
                    return undef unless $db;
+
                    return {} if $LJ::DISABLED{'interests-popular'};
 
                    # see what the previous min was, then subtract 20% of max from it
@@ -53,7 +58,6 @@ $maint{'genstats'} = sub
                                                                     "FROM stats WHERE statcat='pop_interests'");
                    my $stat_min = int($prev_min - (0.2*$prev_max));
                    $stat_min = 1 if $stat_min < 1;
-                   
 
                    my $sth = $db->prepare("SELECT interest, intcount FROM interests WHERE intcount>? " .
                                           "ORDER BY intcount DESC, interest ASC LIMIT 400");
@@ -77,8 +81,11 @@ $maint{'genstats'} = sub
            'statname' => "popmeme",
            'handler' =>
                sub {
-                   my $db = shift;
+                   my $db_getter = shift;
+                   return undef unless ref $db_getter eq 'CODE';
+                   my $db = $db_getter->();
                    return undef unless $db;
+
                    return {} if $LJ::DISABLED{'meme'};
 
                    my $sth = $db->prepare("SELECT url, count(*) FROM meme " .
@@ -102,8 +109,11 @@ $maint{'genstats'} = sub
            'statname' => "client",
            'handler' =>
                sub {
-                   my $db = shift;
+                   my $db_getter = shift;
+                   return undef unless ref $db_getter eq 'CODE';
+                   my $db = $db_getter->();
                    return undef unless $db;
+
                    return {} if $LJ::DISABLED{'clientversionlog'};
 
                    my $usertotal = $db->selectrow_array("SELECT MAX(userid) FROM user");
@@ -113,6 +123,7 @@ $maint{'genstats'} = sub
                    foreach my $block (1..$blocks) {
                        my ($low, $high) = LJ::Stats::get_block_bounds($block);
 
+                       $db = $db_getter->(); # revalidate connection
                        my $sth = $db->prepare("SELECT c.client, COUNT(*) AS 'count' FROM clients c, clientusage cu " .
                                               "WHERE c.clientid=cu.clientid AND cu.userid BETWEEN $low AND $high " .
                                               "AND cu.lastlogin > DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY 1 ORDER BY 2");
@@ -138,7 +149,9 @@ $maint{'genstats'} = sub
            'statname' => ["account", "newbyday", "age", "userinfo"],
            'handler' =>
                sub {
-                   my $db = shift;
+                   my $db_getter = shift;
+                   return undef unless ref $db_getter eq 'CODE';
+                   my $db = $db_getter->();
                    return undef unless $db;
 
                    my $usertotal = $db->selectrow_array("SELECT MAX(userid) FROM user");
@@ -151,6 +164,7 @@ $maint{'genstats'} = sub
 
                        my ($low, $high) = LJ::Stats::get_block_bounds($block);
 
+                       $db = $db_getter->(); # revalidate connection
                        my $sth = $db->prepare
                            ("SELECT DATE_FORMAT(uu.timecreate, '%Y-%m-%d') AS 'datereg', " .
                             "DATE_FORMAT(NOW(), '%Y-%m-%d') AS 'nowdate', " .
@@ -205,7 +219,9 @@ $maint{'genstats'} = sub
            'statname' => "country",
            'handler' =>
                sub {
-                   my $db = shift; # dbcr
+                   my $db_getter = shift;
+                   return undef unless ref $db_getter eq 'CODE';
+                   my $db = $db_getter->();
                    my $cid = shift;
                    return undef unless $db && $cid;
 
@@ -219,6 +235,7 @@ $maint{'genstats'} = sub
                    foreach my $block (1..$blocks) {
                        my ($low, $high) = LJ::Stats::get_block_bounds($block);
 
+                       $db = $db_getter->(); # revalidate connection
                        my $sth = $db->prepare("SELECT u.value, COUNT(*) AS 'count' FROM userproplite2 u " .
                                               "LEFT JOIN clustertrack2 c ON u.userid=c.userid " .
                                               "WHERE u.upropid=? AND u.value<>'' AND u.userid=c.userid " .
@@ -246,7 +263,9 @@ $maint{'genstats'} = sub
            'statname' => "stateus",
            'handler' =>
                sub {
-                   my $db = shift;
+                   my $db_getter = shift;
+                   return undef unless ref $db_getter eq 'CODE';
+                   my $db = $db_getter->();
                    my $cid = shift;
                    return undef unless $db && $cid;
 
@@ -263,6 +282,7 @@ $maint{'genstats'} = sub
                    foreach my $block (1..$blocks) {
                        my ($low, $high) = LJ::Stats::get_block_bounds($block);
 
+                       $db = $db_getter->(); # revalidate connection
                        my $sth = $db->prepare("SELECT ua.value, COUNT(*) AS 'count' " .
                                               "FROM userproplite2 ua, userproplite2 ub " .
                                               "WHERE ua.userid=ub.userid AND ua.upropid=? AND " .
@@ -291,7 +311,10 @@ $maint{'genstats'} = sub
            'statname' => "gender",
            'handler' =>
                sub {
-                   my ($db, $cid) = @_;
+                   my $db_getter = shift;
+                   return undef unless ref $db_getter eq 'CODE';
+                   my $db = $db_getter->();
+                   my $cid = shift;
                    return undef unless $db && $cid;
 
                    my $upg = LJ::get_prop("user", "gender");
@@ -304,6 +327,7 @@ $maint{'genstats'} = sub
                    foreach my $block (1..$blocks) {
                        my ($low, $high) = LJ::Stats::get_block_bounds($block);
 
+                       $db = $db_getter->(); # revalidate connection
                        my $sth = $db->prepare("SELECT value, COUNT(*) AS 'count' FROM userproplite2 up " .
                                               "LEFT JOIN clustertrack2 c ON up.userid=c.userid " .
                                               "WHERE up.upropid=? AND up.userid BETWEEN $low AND $high " .
@@ -354,7 +378,9 @@ $maint{'genstats_size'} = sub {
            'statname' => "size",
            'handler' =>
                sub {
-                   my $db = shift;
+                   my $db_getter = shift;
+                   return undef unless ref $db_getter eq 'CODE';
+                   my $db = $db_getter->();
                    return undef unless $db;
 
                    # not that this isn't a total of current accounts (some rows may have 
@@ -370,7 +396,9 @@ $maint{'genstats_size'} = sub {
            'statname' => "size",
            'handler' =>
                sub {
-                   my $db = shift;
+                   my $db_getter = shift;
+                   return undef unless ref $db_getter eq 'CODE';
+                   my $db = $db_getter->();
                    return undef unless $db;
 
                    my $period = 30;  # one month is considered active
@@ -396,7 +424,9 @@ $maint{'genstats_weekly'} = sub
            'statname' => "supportrank",
            'handler' =>
                sub {
-                   my $db = shift;
+                   my $db_getter = shift;
+                   return undef unless ref $db_getter eq 'CODE';
+                   my $db = $db_getter->();
                    return undef unless $db;
 
                    my %supportrank;
