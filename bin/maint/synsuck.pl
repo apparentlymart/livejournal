@@ -22,7 +22,7 @@ $maint{'synsuck'} = sub
     return 0 unless
         $hlock = LJ::locker()->trylock("maint-synsuck-$LJ::SERVER_NAME");
 
-    my %child_jobs; # child pid => userid
+    my %child_jobs; # child pid => [ userid, lock ]
 
     my $process_user = sub {
         my $urow = shift;
@@ -444,27 +444,21 @@ $maint{'synsuck'} = sub
                 next;
             }
 
+            my $lockname = "synsuck-user-" . $urow->{user};
+            my $lock = LJ::locker()->trylock($lockname);
+            next unless $lock;
+            print "Got lock on '$lockname'. Running\n" if $verbose;
+
             # spawn a new process
             if (my $pid = fork) {
                 # we are a parent, nothing to do?
-                $child_jobs{$pid} = $urow->{'userid'};
+                $child_jobs{$pid} = [$urow->{'userid'}, $lock];
                 $threads++;
                 $userct++;
-
             } else {
                 # handles won't survive the fork
                 LJ::disconnect_dbs();
-
-                my $lockname = sprintf "synsuck-user-%s", $urow->{user};
-                if ( my $lock = LJ::locker()->trylock($lockname) ) {
-                    print "Got lock on '$lockname'. Running\n" if $verbose;
-                    $process_user->($urow);
-                } else {
-                    print "Task '$lockname' already running. Skipping.\n"
-                        if $verbose;
-                }
-
-                # exit child process
+                $process_user->($urow);
                 exit 0;
             }
 
