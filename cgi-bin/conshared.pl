@@ -54,9 +54,10 @@ sub change_community_admin
     # so old maintainer can't regain access:
     $dbh->do("DELETE FROM infohistory WHERE userid=$commid");
 
-    # change password of community to new maintainer's password
+    # change password & email of community to new maintainer's password
     my $qpass = $dbh->quote($unew->{'password'});
-    $dbh->do("UPDATE user SET password=$qpass WHERE userid=$commid");
+    my $qemail = $dbh->quote($unew->{'email'});
+    $dbh->do("UPDATE user SET password=$qpass, email=$qemail WHERE userid=$commid");
 
     ## log to status history
     if ($uold) {
