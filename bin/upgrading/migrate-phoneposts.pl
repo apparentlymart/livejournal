@@ -201,10 +201,10 @@ sub handle_userid {
 
     # get all their photos that aren't in mogile already
     my $rows = $dbcm->selectall_arrayref
-        ("SELECT filetype, blobid FROM phonepostentry WHERE userid = ? AND (location <> 'mogile' OR location IS NULL)",
+        ("SELECT filetype, blobid FROM phonepostentry WHERE userid = ? ".
+         "AND (location = 'blob' OR location IS NULL)",
          undef, $u->{userid});
     return unless @$rows;
-
 
     # if a user has been moved to another cluster, but the source data from
     # phonepost2 wasn't deleted, we need to ignore the user
@@ -220,6 +220,22 @@ sub handle_userid {
 
         # get length
         my $len = length($data);
+
+        if (! $len) {
+            my $has_blob = $dbcm->selectrow_array("SELECT COUNT(*) FROM userblob WHERE ".
+                                                  "journalid=? AND domain=? AND blobid=?",
+                                                  undef, $u->{userid},
+                                                  LJ::get_blob_domainid("phonepost"),
+                                                  $blobid);
+            if (! $has_blob) {
+                $dbcm->do("UPDATE phonepostentry SET location='none' ".
+                          "WHERE userid=? AND blobid=?", undef, $u->{userid}, $blobid);
+                print "\tnote: changed phonepost entry location to 'none'\n\n"
+                    if $verbose;
+                next;
+            }
+        }
+
         if ($besteffort && !$len) {
             print STDERR "empty_phonepost userid=$u->{userid} blobid=$blobid\n";
             print "\twarning: empty phonepost.\n\n"
