@@ -144,7 +144,7 @@
     # By default, auto-detect account types for
     # <lj user> tags only if using memcache
     unless (defined $LJ::DYNAMIC_LJUSER) {
-        $LJ::DYNAMIC_LJUSER = scalar(@LJ::MEMCACHED_SERVERS) ? 1 : 0;
+        $LJ::DYNAMIC_LJUSER = scalar(@LJ::MEMCACHE_SERVERS) ? 1 : 0;
     }
 }
 
