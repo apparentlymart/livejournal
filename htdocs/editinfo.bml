@@ -54,6 +54,10 @@ BODY<=
                      "sidx_bdate", "sidx_loc", "mailencoding",
                      );
 
+ my %saved = (); # to store values before they undergo normalisation
+
+ $saved{'name'} = $u->{'name'};
+
  foreach (values %$u) { LJ::text_out(\$_); }
 
  my $quser = $dbr->quote($user);
@@ -65,6 +69,7 @@ BODY<=
  if ($u->{'has_bio'}) {
      $u->{'bio'} = LJ::dbs_selectrow_array($dbcs, "SELECT bio FROM userbio ".
                                            "WHERE userid=$u->{'userid'}");
+     $saved{'bio'} = $u->{'bio'};
      LJ::text_out(\$u->{'bio'});
  }
 
@@ -109,7 +114,13 @@ BODY<=
      $ret .= "<P><TABLE WIDTH=100%>\n";
 
      # name
-     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Name</TD><TD><INPUT NAME=name VALUE=\"$htmlu{'name'}\" MAXLENGTH=50></TD></TR>\n";
+     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Name</TD>";
+     if(LJ::text_in($saved{'name'})) {
+         $ret .= "<TD><INPUT NAME=name VALUE=\"$htmlu{'name'}\" MAXLENGTH=50></TD></TR>\n";
+     } else {
+         $ret .= "<input type='hidden' name='name_absent' value='yes' />";
+         $ret .= "<td>(=INERR Your name contains invalid characters. You must visit the <a href='/utf8convert.bml'><b>conversion page</b></a> to convert it to Unicode. INERR=)</td></tr>\n";
+     }
 
      # birthday
      $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Birthday</TD><TD>";
@@ -229,7 +240,12 @@ BODY<=
 
      ### User bio
      $ret .= "(=H1 About You H1=)(=P Here you can enter a little mini-biography about yourself that will show up on your user-info page.... P=)";
-     $ret .= "<UL><TEXTAREA NAME=bio ROWS=10 COLS=50 WRAP=SOFT>$htmlu{'bio'}</TEXTAREA></UL>";
+     if (LJ::text_in($saved{'bio'})) {
+         $ret .= "<UL><TEXTAREA NAME=bio ROWS=10 COLS=50 WRAP=SOFT>$htmlu{'bio'}</TEXTAREA></UL>";
+     } else {
+         $ret .= "<input type='hidden' name='bio_absent' value='yes' />";
+         $ret .= "(=P (=INERR Your stored biography contains invalid symbols. You must visit the <a href='/utf8convert.bml'><b>conversion page</b></a> to convert it to Unicode. INERR=) P=)";
+     }
 
      ### How heard Settings
      unless ($htmlu{'howhear'}) {
@@ -241,13 +257,19 @@ BODY<=
      {
          ### Interests
          my $eints = BMLUtil::escapeall(join(", ", sort keys %interests));
-         LJ::text_out(\$eints);
-         $ret .= "(=H1 Interests H1=)(=P If you want other people to be able to search the directory and find you by interest, list below everything you're interested in, separated by commas.  Short single-word phrases are best.  <B>Rule of thumb:</B> You should be able to put the interest in the sentence \"I like ________\".  When referring to nouns, use the plural form for consistency.  \"I like DVDs\" instead of \"I like DVD\". P=)";
-         $ret .= "(=P <FONT COLOR=#009000><B>GOOD</B></FONT> Example: <B>biking, snow skiing, computers, dvds, mp3s, cheese, women</B> P=)";
-         $ret .= "(=P <FONT COLOR=#FF0000><B>BAD</B></FONT> Example: <B>I like lots of bands and watching movies and talking to friends and going to clubs.</B>  That sort of stuff goes in your bio above. P=)";
-         $ret .= "<UL><TEXTAREA NAME=interests ROWS=10 COLS=50 WRAP=SOFT>$eints</TEXTAREA></UL>";
+         if (LJ::text_in($eints)) {
+             LJ::text_out(\$eints);
+             $ret .= "(=H1 Interests H1=)(=P If you want other people to be able to search the directory and find you by interest, list below everything you're interested in, separated by commas.  Short single-word phrases are best.  <B>Rule of thumb:</B> You should be able to put the interest in the sentence \"I like ________\".  When referring to nouns, use the plural form for consistency.  \"I like DVDs\" instead of \"I like DVD\". P=)";
+             $ret .= "(=P <FONT COLOR=#009000><B>GOOD</B></FONT> Example: <B>biking, snow skiing, computers, dvds, mp3s, cheese, women</B> P=)";
+             $ret .= "(=P <FONT COLOR=#FF0000><B>BAD</B></FONT> Example: <B>I like lots of bands and watching movies and talking to friends and going to clubs.</B>  That sort of stuff goes in your bio above. P=)";
+             $ret .= "<UL><TEXTAREA NAME=interests ROWS=10 COLS=50 WRAP=SOFT>$eints</TEXTAREA></UL>";
+         } else {
+             $ret .= "<input type='hidden' name='interests_absent' value='yes' />";
+             $ret .= "(=H1 Interests H1=)(=P (=INERR Your currently stored list of interests contains invalid symbols. You must visit the <a href='/utf8convert.bml'><b>conversion page</b></a> to convert it to Unicode. INERR=) P=)";
+         }
      }
-#line 172
+     
+        
 
      ### Picture Settings
      $ret .= "(=H1 Your Picture H1=)(=P Below is the miniature picture you have uploaded to represent you throughout the LiveJournal site and in your journal and in your friends' journals... \n<P><CENTER>";
@@ -417,7 +439,7 @@ BODY<=
 
      my $this_year = (localtime())[5]+1900;
 
-     unless ($FORM{'name'}) { push @errors, "Your name is a required field.  At least provide your first name, or a nickname or handle."; }
+     unless ($FORM{'name'} || defined($FORM{'name_absent'})) { push @errors, "Your name is a required field.  At least provide your first name, or a nickname or handle."; }
      if ($FORM{'year'} && $FORM{'year'} < 100) { push @errors, "Invalid birthday year.  Enter a 4-digit year."; }
      if ($FORM{'year'} && $FORM{'year'} >= 100 && 
         ($FORM{'year'} < 1890 || $FORM{'year'} > $this_year)) { push @errors, "Invalid birthday year."; }
@@ -494,14 +516,16 @@ BODY<=
          }
      }
 
-     $FORM{'name'} =~ s/[\n\r]//g;
-     $FORM{'name'} = LJ::text_trim($FORM{'name'}, $LJ::BMAX_NAME, $LJ::CMAX_NAME);
+     my $newname = defined($FORM{'name_absent'}) ? $saved{'name'} : $FORM{'name'};
+     $newname =~ s/[\n\r]//g;
+     $newname = LJ::text_trim($newname, $LJ::BMAX_NAME, $LJ::CMAX_NAME);
 
-     my $has_bio = ($FORM{'bio'} =~ /\S/) ? "Y" : "N";
+     my $newbio = defined($FORM{'bio_absent'}) ? $saved{'bio'} : $FORM{'bio'};
+     my $has_bio = ($newbio =~ /\S/) ? "Y" : "N";
      my $txtmsg_status = $FORM{'use_txtmsg'} ? "on" : "off";
      # setup what we're gonna update in the user table:
      my %update = (
-                   'name' => $FORM{'name'},
+                   'name' => $newname,
                    'bdate' => sprintf("%04d-%02d-%02d", $FORM{'year'}, $FORM{'month'}, $FORM{'day'}),
                    'email' => $FORM{'email'},
                    'status' => ($email_changed && $u->{'status'} eq "A") ? "T" : $u->{'status'},
@@ -598,7 +622,7 @@ BODY<=
 
 
      #### update their bio text
-     if ($u->{'bio'} ne $FORM{'bio'}) {
+     if (($u->{'bio'} ne $FORM{'bio'}) && !defined($FORM{'bio_absent'})) {
          my $db_bio = $dbcs->{'dbh'};
          if ($has_bio eq "N") {
              $db_bio->do("DELETE FROM userbio WHERE userid=$u->{'userid'}");
@@ -623,7 +647,7 @@ BODY<=
      }
 
      ### update interests
-     {
+     unless ($FORM{'interests_absent'}) {
          $FORM{'interests'} =~ s/^\s+//;
          $FORM{'interests'} =~ s/\s+$//;
          $FORM{'interests'} =~ s/\n/,/g;
