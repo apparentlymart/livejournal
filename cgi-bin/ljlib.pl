@@ -859,8 +859,11 @@ sub can_view
     my $userid = int($item->{'ownerid'});
     my $remoteid = int($remote->{'userid'});
 
-    # private
-    return ($userid == $remoteid) if ($item->{'security'} eq "private");
+    # owners can always see their own.
+    return 1 if ($userid == $remoteid);
+
+    # other people can't read private
+    return 0 if ($item->{'security'} eq "private");
 
     # should be 'usemask' security from here out, otherwise
     # assume it's something new and return 0
