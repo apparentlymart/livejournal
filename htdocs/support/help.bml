@@ -48,7 +48,7 @@ BODY<=
 	 return "(=H1 Error H1=)(=P You must be logged in to filter on requests that you've replied to. P=)";
      }
      
-     $sth = $dbh->prepare("SELECT DISTINCT s.* FROM support s, supportlog sl WHERE s.spid=sl.spid AND s.state='open' AND sl.userid=$remote->{'userid'} $filterwhere ORDER BY timecreate DESC");
+     $sth = $dbh->prepare("SELECT s.*, MAX(sl.timelogged) AS 'timelogged' FROM support s, supportlog sl WHERE s.spid=sl.spid AND s.state='open' AND sl.userid=$remote->{'userid'} $filterwhere GROUP BY s.spid ORDER BY timecreate DESC");
      
  }
  else 
