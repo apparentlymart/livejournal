@@ -387,7 +387,7 @@ package ipl;
 use strict;
 
 BEGIN {
-    use GetOpt::Long qw{GetOptions};
+    use Getopt::Long qw{GetOptions};
     $GetOpt::Long::Bundling = 1;
 }
 
