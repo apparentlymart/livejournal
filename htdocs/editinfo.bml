@@ -814,6 +814,7 @@ _code?>
             $POST{'interests'} =~ s/^\s+//;
             $POST{'interests'} =~ s/\s+$//;
             $POST{'interests'} =~ s/\n/,/g;
+            $POST{'interests'} =~ s/\s+/ /g; #Strip duplicate spaces from the interest
             my @ints = split (/\s*,\s*/, $POST{'interests'});
             my $intcount = scalar(@ints);
             if ($intcount > 150) {
