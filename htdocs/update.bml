@@ -159,7 +159,7 @@
             my $event = $POST{event};
             if ($richtext) {
                 $event =~ s/&lt;lj-cut(.*?)&gt;/<lj-cut$1 \/>/ig;
-                $event =~ s/<span class="ljuser".*?userinfo\.bml\?user=(.+?)".*?<\/b><\/a>(?:<\/span>)?/<lj user="$1" \/>/ig;
+                $event =~ s/<span class="ljuser".*?userinfo\.bml\?user=(.+?)\".*?<\/b><\/a>(?:<\/span>)?/<lj user="$1" \/>/ig;
             }
             $req{'event'} = $event;
 
@@ -365,8 +365,11 @@ RTE
         'rows' => '20', 'cols' => '50', 'style' => 'width: 100%', 'wrap' => 'soft' });
     $$body .= '</noscript>' if $richtext;
 
-    my $jrich = "<?de " . LJ::ejs(BML::ml(".htmlokay.rich", { 'opts' => 'href="#" onClick="enable_rte()"' })) . " de?>";
-    my $jnorich = "<?de " . LJ::ejs($ML{'.htmlokay.norich'}) . " de?>";
+    my $jrich = LJ::ejs(BML::fill_template("de", {
+        DATA => BML::ml(".htmlokay.rich", { 'opts' => 'href="#" onClick="enable_rte()"' })
+        }));
+    my $jnorich = LJ::ejs(BML::fill_template("de", { DATA => $ML{'.htmlokay.norich'} }));
+
     unless ($richtext || ($POST{do_spellcheck} && $richtext)) {
         $$body .= <<RTE;
 <script language='JavaScript' type='text/javascript'>
