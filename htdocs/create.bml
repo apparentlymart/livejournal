@@ -527,7 +527,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          }
          
          $ret .= "<br /><br />$ML{'.captcha.answer'}";
-         $ret .= LJ::html_text({ name => 'answer', size => 15, value => $answer });
+         $ret .= LJ::html_text({ name => 'answer', size => 15 });
          $ret .= LJ::html_hidden(captcha_chal => $captcha_chal);
          $ret .= $error_msg->('captcha', '<p class="formitemFlag">', '</p>');
          $ret .= "</div></li>";
