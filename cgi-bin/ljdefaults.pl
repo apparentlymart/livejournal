@@ -228,6 +228,7 @@
 
     # maximum size to cache s2compiled data
     $MAX_S2COMPILED_CACHE_SIZE ||= 7500; # bytes
+    $S2COMPILED_MIGRATION_DONE ||= 0;    # turn on after s2compiled2 migration
 
 }
 
