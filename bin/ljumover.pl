@@ -550,7 +550,8 @@ sub parseCommand ($) {
 ### Parse the given I<clusterSpec> into an list of cluster numbers and return
 ### them.
 sub parseCluster ($) {
-    my $cluster = shift or die "No cluster specified";
+    my $cluster = shift;
+    die "No cluster specified" unless defined $cluster;
     my @rval = ();
 
     $cluster =~ s{\s+}{}g;
@@ -801,11 +802,12 @@ sub start {
                 last USER if $self->{_haltFlag} || $self->{_shutdownFlag};
                 $dest = $self->pickDestination;
                 $self->debugMsg( "Creating a thread for user '%s' (%d -> %d)",
-                                 $userRecord->[0], $userRecord->[4], $dest );
+                                 $userRecord->{user}, $userRecord->{clusterid},
+                                 $dest );
 
                 # Create a mover thread (sets the user's read-only bit).
-                $self->{userThreads}{$userRecord->[1]} =
-                    Mover::Thread->new( @{$userRecord}[0,1,4], $dest );
+                $self->{userThreads}{$userRecord->{userid}} =
+                    Mover::Thread->new( @{$userRecord}{'user','userid','clusterid'}, $dest );
             } @queue;
 
             # Wait for the read-only bit to sink in
@@ -962,47 +964,14 @@ sub getPendingUsers {
     my (
         $sql,       # SQL query string
         $dbh,       # Database handle (writer)
-        $selsth,    # SELECT cursor
         $ipsth,     # INSERT cursor for the in-progress table
+        $seldbh,    # Database handle (cluster master for active users, copy of
+                    # $dbh if not)
+        $selsth,    # User-selection cursor
         $iip,       # Integer IP for insertion into the in-progress table
         $row,       # Row iterator
         @users,     # User rows
        );
-
-    # Pick a query based on whether the user wants only active users.
-    if ( $self->activeUsersOnly ) {
-        $sql = sprintf q{
-            SELECT
-                u.user,
-                u.userid,
-                ( (uu.timeupdate IS NULL OR
-                   uu.timeupdate < DATE_SUB( NOW(), INTERVAL 5 MONTH ))
-                   AND
-                  (uu.timecheck IS NULL OR
-                   uu.timecheck < DATE_SUB( NOW(), INTERVAL 5 MONTH )) )
-                  as 'inactive',
-                u.statusvis,
-                u.clusterid
-            FROM
-                user u LEFT JOIN userusage uu
-                ON u.userid = uu.userid
-            WHERE
-                u.clusterid = ?
-            LIMIT %d
-        }, $limit;
-    } else {
-        $sql = sprintf q{
-            SELECT
-                u.user,
-                u.userid,
-                'unused',
-                u.statusvis,
-                u.clusterid
-            FROM user u
-            WHERE u.clusterid = ?
-            LIMIT %d
-        }, $limit;
-    }
 
     # :FIXME: This is the only way I can make this query work. If I don't do
     # this, I get "MySQL has gone away" on the second query, despite calling
@@ -1011,7 +980,6 @@ sub getPendingUsers {
     # bit.
     LJ::disconnect_dbs();
     $dbh = LJ::get_db_writer() or die "failed to get_db_writer()";
-    $selsth = $dbh->prepare( $sql ) or die "prepare: ", $dbh->errstr;
 
     $sql = q{
         INSERT INTO clustermove_inprogress
@@ -1021,30 +989,73 @@ sub getPendingUsers {
     };
     $ipsth = $dbh->prepare( $sql ) or die "prepare: ", $dbh->errstr;
 
+    # Pick a query based on whether the user wants only active users.
+    if ( $self->activeUsersOnly ) {
+        $sql = sprintf q{
+            SELECT
+                userid
+            FROM
+                clustertrack2
+            WHERE
+                timeactive > UNIX_TIMESTAMP() - 86400*30
+                AND clusterid = ?
+            LIMIT %d
+        }, $limit;
+    } else {
+        $sql = sprintf q{
+            SELECT
+                user,
+                userid,
+                statusvis,
+                clusterid
+            FROM user
+            WHERE clusterid = ?
+            LIMIT %d
+        }, $limit;
+    }
+
     $iip = unpack( 'N', pack('C4', split( /\./, $self->lockIp )) );
     @users = ();
+
+    # Fetch users for each cluster
     foreach my $cid ( @{$self->{sources}} ) {
-        $self->debugMsg( "Running user-select query on cluster %d", $cid );
+
+        # Either get the cluster master handle for active users, or reuse the
+        # current one for all users
+        $seldbh = $self->activeUsersOnly ? LJ::get_cluster_master($cid) : $dbh;
+        die "Couldn't obtain db handle for cluster $cid\n" unless $seldbh;
+
+        # Prepare the selection cursor and execute it
+        $selsth = $seldbh->prepare( $sql ) or die "prepare: ", $dbh->errstr;
+        $self->debugMsg( "Running user-select query '%s' on cluster %d", $sql, $cid );
         $selsth->execute( $cid ) or die "execute: ", $selsth->errstr;
 
-        while (( $row = $selsth->fetchrow_arrayref )) {
-            next if exists $self->{userThreads}{$row->[1]}
-                or exists $self->{fakeMovedUsers}{$row->[1]};
+        while (( $row = $selsth->fetchrow_hashref )) {
+            next if exists $self->{userThreads}{$row->{userid}}
+                or exists $self->{fakeMovedUsers}{$row->{userid}};
+
+            # populate the rest of the row
+            if ($self->activeUsersOnly) {
+                my $u = LJ::load_userid($row->{userid});
+                die "Couldn't load userid: $row->{userid}" unless $u;
+                $row = $u;
+            }
 
             # Insert the user in the in-progress table, skipping users who're
             # already being moved by another mover
             next unless
-                $ipsth->execute( $row->[1], time, $iip,
+                $ipsth->execute( $row->{userid}, time, $iip,
                                  $self->lockPort, $self->instanceId );
 
             $self->debugMsg( "Selected row: %s", $row );
-            push @users, [@$row];
+            push @users, {%$row};
+        } continue {
+            $self->debugMsg( "DBI error: %s", $DBI::errstr ) if $DBI::errstr;
         }
     }
 
     $ipsth->finish;
-    $selsth->finish;
-    return sort { $a->[1] <=> $b->[1] } @users;
+    return sort { $a->{userid} <=> $b->{userid} } @users;
 }
 
 
@@ -1170,14 +1181,14 @@ BEGIN {
 ### given I<dest> cluster.
 sub new {
     my $class = shift;
-    my ( $userRecord, $userid, $src, $dest ) = @_;
+    my ( $user, $userid, $src, $dest ) = @_;
 
     # Lock the user
     LJ::update_user( $userid, {raw => "caps=caps|(1<<$ReadOnlyBit)"} );
 
     return bless {
         userid      => $userid,
-        user        => $userRecord,
+        user        => $user,
         src         => $src,
         dest        => $dest,
         pid         => undef,
