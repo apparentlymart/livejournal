@@ -30,12 +30,7 @@ body<=
         }
     }
 
-#    use Data::Dumper;
-#    $ret .= "<pre>" . Dumper($pub) . "</pre>";
-
-
     return $ret;
-
 }
 _code?>
 <=body

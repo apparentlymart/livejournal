@@ -255,6 +255,7 @@ if ($opt_pop)
             
             if ($info->{'previews'}) {
                 my @pvs = split(/\s*\,\s*/, $info->{'previews'});
+                my @vals;
                 foreach my $pv (@pvs) {
                     my $from = "$LD/$pv";
                     next unless -e $from;
@@ -263,10 +264,10 @@ if ($opt_pop)
                     my $target = "$LJ::HOME/htdocs/img/s2preview/$pv";
                     File::Copy::copy($from, $target);
                     my ($w, $h) = Image::Size::imgsize($target);
-                    $pv = "$pv|$w|$h";
+                    push @vals, "$pv|$w|$h";
                 }
                 $dbh->do("REPLACE INTO s2info (s2lid, infokey, value) VALUES (?,?,?)",
-                         undef, $id, '_previews', join(",", @pvs));
+                         undef, $id, '_previews', join(",", @vals));
             }
             
             if ($opt_compiletodisk) {
