@@ -13,6 +13,7 @@ package BMLClient;
 sub reset
 {
     $SAVE_DIR = $main::BMLEnv{'ClientDir'};
+    $USE_SESSION = $main::BMLEnv{'UseBmlSession'};
     $LOADED = 0;
     $DIRTY = 0;                 # does it need to be saved?
     %data = ();
@@ -48,7 +49,7 @@ sub set_var
 
 sub load
 {
-    return if $LOADED;
+    return if $LOADED || not $USE_SESSION;
     my $user = &user_id;
     my ($var, $val);
     
@@ -64,7 +65,7 @@ sub load
 
 sub save
 {
-    return unless $DIRTY;
+    return unless $DIRTY && $USE_SESSION;
     my $user = &user_id;
     
     open (CL, ">$SAVE_DIR/$user.dat") || print "Can't save open<BR>\n";

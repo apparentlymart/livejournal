@@ -121,8 +121,6 @@ MISC:
 * support: dakus wants to be able to mark requests as "still needs help"
 * LJ::delete_user()
 * require POST for all do actions (use LJ::did_post to check)
-* add bmlp.pl config option to disable BMLSESSION stuff, since we don't
-  use it anyway
 * ehtml current mood/music ?
 * bug: multiple talkread delete: /support/see_request.bml?id=10159
 * perf: don't preload friends in ljprotocol.pl:editfriends, check $sth->rows
