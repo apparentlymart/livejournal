@@ -206,7 +206,8 @@
          foreach my $kw (@all_keywords) {
              my $sel = $selected_keyword{$kw} ? " selected" : "";
              LJ::text_out(\$kw);
-             $body .= "<option$sel>$kw</option>\n";
+             my $ekw = LJ::ehtml($kw);
+             $body .= "<option$sel>$ekw</option>\n";
          }
          $body .= "</select></ul>$ML{'.multiple_selections'}";
      } else {
@@ -277,8 +278,8 @@
      foreach my $kw (@keywords) {
          if (length($kw) > 40) {
              $title = $ML{'Error'};
-             $body = "<?h1 $ML{'Error'} h1?><?p " . 
-                     BML::ml(".error.maxsize", { 'keyword' => $kw }) . "p?>";
+             $body = "<?h1 $ML{'Error'} h1?><?p " .
+                     BML::ml(".error.maxsize", { 'keyword' => LJ::ehtml($kw) }) . "p?>";
              return;
          }
 

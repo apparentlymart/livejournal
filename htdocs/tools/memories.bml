@@ -126,14 +126,15 @@
 
  my $kwmap = LJ::Memories::get_keywords($u);
 
- if ($GET{'keyword'}) 
+ if ($GET{'keyword'})
  {
      if ($GET{'keyword'} eq "*") {
          $title = $ML{'.title.memorable'};
          $body .= "<?h1 $ML{'.title.memorable'} h1?><?p " . BML::ml(".body.memorable", { 'user' => $user }) . " p?>";
      } else {
-         $title = BML::ml(".title.keyword", { 'keyword' => $GET{'keyword'}, 'user' => $user });
-         $body .= BML::ml(".body.keyword", { 'keyword' => $GET{'keyword'}, 'user' => $user });
+         my $ekw = LJ::ehtml($GET{'keyword'});
+         $title = BML::ml(".title.keyword", { 'keyword' => $ekw, 'user' => $user });
+         $body .= BML::ml(".body.keyword", { 'keyword' => $ekw, 'user' => $user });
      }
 
      $body .= "<form method='get' action='memories.bml'>";
@@ -246,6 +247,7 @@
          my $keyword = $row->{'keyword'};
          LJ::text_out(\$keyword);
          if ($keyword eq "*") { $keyword = $ML{'.uncategorized'}; }
+         else { $keyword = LJ::ehtml($keyword); }
          $body .= "<li><b><a href=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</a></b>: $noun\n</li>";
      }
      $body .= "</ul>";
