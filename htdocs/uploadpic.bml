@@ -179,13 +179,11 @@ body<=
         return LJ::bad_input($dbh->errstr) if $dbh->err;
     }
 
-    return "<?h1 $ML{'.success.header'} h1?>\n<?p " .
-           BML::ml('.success.text', { 'userpic'       => "$LJ::USERPIC_ROOT/$picid/$u->{'userid'}",
-                                      'xsize'         => $sx,
-                                      'ysize'         => $sy,
+    return "<?h1 $ML{'.success.header'} h1?>\n" .
+           BML::ml('.success.text', { 'userpic'       => "<img src='$LJ::USERPIC_ROOT/$picid/$u->{'userid'}' width='$sx' height='$sy'>",
                                       'editpiclink'   => "$LJ::SITEROOT/editpics.bml?authas=$authas",
                                       'uploadpiclink' => "$LJ::SITEROOT/uploadpic.bml?authas=$authas",
-                                      'journallink'   => LJ::journal_base($u) } ) . " p?>";
+                                      'journallink'   => LJ::journal_base($u) } ) . "\n\n";
 } 
 _code?>
 
