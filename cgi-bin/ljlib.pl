@@ -519,7 +519,6 @@ sub get_friend_items
                     if ($opts->{'showtypes'} =~ /C/) { push @in, "'C','S','N'"; }
                     $extra = "AND u.journaltype IN (".join (',', @in).")" if @in;
                 }
-                Apache->request->log_error("extra: $extra  showtypes: $opts->{'showtypes'}");
                 my $sth = $dbh->prepare(qq{
                     SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid 
                     FROM friends f, userusage uu, user u WHERE f.userid=$fid AND
