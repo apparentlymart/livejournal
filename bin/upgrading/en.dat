@@ -482,6 +482,8 @@ p?>
 
 /create.bml.btn.create=Create Journal
 
+/create.bml.btn.proceed=Proceed...
+
 /create.bml.captcha.answer=Answer: 
 
 /create.bml.captcha.audiodesc=Type the numbers you hear to prove that you're not a spam robot:
@@ -512,7 +514,7 @@ p?>
 
 /create.bml.email.input.head=Email Address:
 
-/create.bml.email.text=For verification and security purposes, we need your email address.  It will never ever, under any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a href="/legal/privacy.bml" target="privacy">privacy policy</a> for more information.
+/create.bml.email.text2=For verification and security purposes, we need your email address.  It will never ever, under any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a [[aopts]]>privacy policy</a> for more information.
 
 /create.bml.error.coppa.under13=Sorry, due to COPPA restrictions, you cannot use the service until you're 13 years old.  Please come back on your 13th birthday.
 
@@ -578,7 +580,7 @@ p?>
 
 /create.bml.tos.heading=Terms of Service
 
-/create.bml.tos.p1=Before continuing you must read and agree to the <a href='/legal/tos.bml'>Terms of Service.</a>
+/create.bml.tos.p1.2=Before continuing you must read and agree to the <a [[aopts]]>Terms of Service.</a>
 
 /create.bml.useacctcodes.entercode=To create a new account, enter an account creation code:
 
@@ -2033,7 +2035,7 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /modify_do.bml.friends.opt.usesharedpic.head=Use shared journal pictures instead of poster's user picture
 
-/modify_do.bml.journaloptions.about=From here you can customize the look of your LiveJournal pages.  If you're really curious how everything works, read the <A HREF="/developer/" TARGET=_blank>developer information</A>.  Otherwise, we'll assume you're satisfied with the basic options below:
+/modify_do.bml.journaloptions.about=From here you can customize the look of your LiveJournal pages.  If you're really curious how everything works, read the <A HREF="/developer/" target='_blank'>developer information</A>.  Otherwise, we'll assume you're satisfied with the basic options below:
 
 /modify_do.bml.journaloptions.head=Journal Options
 
@@ -2061,7 +2063,7 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /modify_do.bml.moodicons.select=Select mood icon set:
 
-/modify_do.bml.overrides.about=You can ignore this section.  This is for tweaking very specific things about your page layout.  See the <A HREF="/developer/" TARGET=_blank>developer section</A> for details.  Also note that overrides are for overriding only one or two things about a style.  If you'd like to override everything, you need to <A HREF="/styles/create.bml" TARGET=_blank>create your own style</A>.
+/modify_do.bml.overrides.about=You can ignore this section.  This is for tweaking very specific things about your page layout.  See the <a href="/developer/" target='_blank'>developer section</A> for details.  Also note that overrides are for overriding only one or two things about a style.  If you'd like to override everything, you need to <a href="/styles/create.bml" target='_blank'>create your own style</A>.
 
 /modify_do.bml.overrides.box.head=Overrides:
 
@@ -2079,7 +2081,7 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /modify_do.bml.success.head=Success
 
-/modify_do.bml.success.text=Your journal settings have been updated.  You can view your journal <A HREF="[[url]]">here</A>.
+/modify_do.bml.success.text=Your journal settings have been updated.  You can view your journal <a href="[[url]]">here</A>.
 
 /register.bml.ask.body=Click the button below to have <?sitename?> send a validation email to <b>[[email]]</b>.
 

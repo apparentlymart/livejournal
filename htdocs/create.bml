@@ -407,9 +407,10 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      $v = LJ::ehtml($FORM{'email'});
      $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.email.input.head'}</div>";
      $ret .= $error_msg->('email', '<p class="formitemFlag">', '</p>');
-     $ret .= "<div class='formitemDesc'>$ML{'.email.text'}</div>";
+     $ret .= "<div class='formitemDesc'>" . BML::ml('.email.text2', {
+         aopts => "target='_new' href='$LJ::SITEROOT/legal/privacy.bml'",
+     }) . "</div>";
      $ret .= LJ::html_text({'name' => 'email', 'size' => 40, 'maxlength' => 50, 'value' => $v,});
-     $ret .= "<div class='formitemNote'>$ML{'.email.note'}</div>";
      $ret .= "</div></li>";
 
      $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.password.input.head1'}</div>";
@@ -465,7 +466,8 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      if ($LJ::TOS_CHECK)
      {
          $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.tos.heading'}</div>";
-         $ret .= "<div class='formitemDesc'>$ML{'.tos.p1'}</div>";
+         $ret .= "<div class='formitemDesc'>" .
+             BML::ml('.tos.p1.2', { aopts => "target='_new' href='$LJ::SITEROOT/legal/tos.bml'" }) . "</div>";
          $ret .= $error_msg->('agree_tos', '<p class="formitemFlag">', '</p>');
          my $checked = $POST{'agree_tos'} ? "checked='checked'" : "";
          $ret .= "<iframe width='600' height='300' src='/legal/tos-mini.bml' style='border: 1px solid gray;'></iframe>";

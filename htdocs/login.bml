@@ -91,34 +91,29 @@
         } else {
 
             # FIXME: needs translation 'standard'/'secure' and make the below ML strings.
-            my $insecure;
-            if ( ! $LJ::IS_SSL) {
-                $insecure = "[ <b>Standard</b> | <a href='$LJ::SSLROOT/login.bml'>Secure</a> ]";
-            } else {
-                $insecure = "[ <b>Standard</b> | Secure ]";
-            }
             my $secure = "[ Standard | <b>Secure</b> ]";
 
-            my $login_btn_text = LJ::ejs($ML{'.login.btn.login'});
-            if (! $LJ::IS_SSL) {
+            if ($LJ::IS_SSL) {
+                $body .= "<input name='action:login' type='submit' value='$ML{'.login.btn.login'}' /> ".
+                    "<img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' /><br />";
+                $body .= $secure;
+            } else {
+                my $login_btn_text = LJ::ejs($ML{'.login.btn.login'});
                 $body .= "<script>
                     document.write(\"<input name='action:login' onclick='sendForm()' type='submit' value='$login_btn_text' />\");";
-            } else {
-                $body .= "<script>
-                    document.write(\"<input name='action:login' type='submit' value='$login_btn_text' />\");";
-            }
-            $body .= "
-                if (document.getElementById('login')) {
-                    document.write(\"&nbsp; <img src='$LJ::SITEROOT/img/icon_protected.gif' width='14' height='15' alt='secure login' align='middle'/>\");
+                $body .= "
+                if (document.getElementById && document.getElementById('login')) {
+                    document.write(\"&nbsp; <img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' />\");
                     document.write(\"<br />\");
                     document.write(\"$secure\")
                 } ";
-            $body .= '</script>';
-            $body .= "<noscript><input name='action:login' type='submit' value='$ML{'.login.btn.login'}' /><br />";
-            $body .= $LJ::IS_SSL ? $secure : $insecure;
-            $body .= "</noscript>";
-            $body .= '&nbsp;';
-            $body .= LJ::help_icon('securelogin');
+                $body .= '</script>';
+                $body .= "<noscript><input name='action:login' type='submit' value='$ML{'.login.btn.login'}' />";
+                $body .= "<br />" . "[ <b>Standard</b> | <a href='$LJ::SSLROOT/login.bml'>Secure</a> ]"
+                    if $LJ::USE_SSL;
+                $body .= "</noscript>";
+            }
+            $body .= LJ::help_icon('securelogin', '&nbsp;');
 
         }
         $body .= "</td></tr>\n";

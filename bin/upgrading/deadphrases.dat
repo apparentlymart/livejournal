@@ -137,3 +137,10 @@ general /userinfo.bml.syn.lastnew
 
 general /tools/memories.bml.entry
 general /tools/memories.bml.entries
+
+general /create.bml.tos.p1
+general /create.bml.email.text
+general /create.bml.email.note
+
+
+
