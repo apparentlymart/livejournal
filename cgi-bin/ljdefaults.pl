@@ -65,11 +65,9 @@
 	my %defcap = (
 		      'checkfriends' => 1,
 		      'checkfriends_interval' => 60,
-		      'friendsviewupdate' => 1,
 		      'friendsviewupdate' => 30,
 		      'makepoll' => 1,
 		      'maxfriends' => 500,
-		      'moodthemecreate' => 1,
 		      'moodthemecreate' => 1,
 		      'styles' => 1,
 		      'textmessage' => 1,
