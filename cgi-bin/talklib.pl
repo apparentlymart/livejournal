@@ -80,7 +80,9 @@ sub link_bar
     $$headref .= "<link href='/go.bml?${jargent}itemid=$itemid&amp;dir=prev' rel='Previous'>\n";
     
     # memories
-    push @linkele, $mlink->("/tools/memadd.bml?${jargent}itemid=$itemid", "memadd");
+    unless ($LJ::DISABLED{'memories'}) {
+	push @linkele, $mlink->("/tools/memadd.bml?${jargent}itemid=$itemid", "memadd");
+    }
     
     if (defined $remote && ($remote->{'user'} eq $u->{'user'} ||
 			    $remote->{'user'} eq $up->{'user'} || 
@@ -89,11 +91,13 @@ sub link_bar
 	push @linkele, $mlink->("/editjournal_do.bml?${jargent}itemid=$itemid", "editentry");
     }
     
-    if ($u->{'opt_showtopicstuff'} ne "N") {
+    if ($u->{'opt_showtopicstuff'} ne "N" && ! $LJ::DISABLED{'topicdir'}) {
 	push @linkele, $mlink->("/topics/additem.bml?${jargent}itemid=$itemid", "topicadd");
     }
     
-    push @linkele, $mlink->("/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend");
+    unless ($LJ::DISABLED{'tellafriend'}) {
+	push @linkele, $mlink->("/tools/tellafriend.bml?${jargent}itemid=$itemid", "tellfriend");
+    }
     
     ## >>> Next
     push @linkele, $mlink->("/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
