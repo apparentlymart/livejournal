@@ -957,7 +957,6 @@ require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 sub create_view_lastn
 {
     my ($ret, $u, $vars, $remote, $opts) = @_;
-    my $dbr = LJ::get_db_reader();
     my $dbcr = LJ::get_cluster_reader($u);
 
     my $user = $u->{'user'};
@@ -1313,7 +1312,6 @@ sub create_view_lastn
 sub create_view_friends
 {
     my ($ret, $u, $vars, $remote, $opts) = @_;
-    my $dbr = LJ::get_db_reader();
     my $sth;
     my $user = $u->{'user'};
 
@@ -2028,7 +2026,6 @@ sub create_view_calendar
 sub create_view_day
 {
     my ($ret, $u, $vars, $remote, $opts) = @_;
-    my $dbr = LJ::get_db_reader();
     my $sth;
 
     my $user = $u->{'user'};
@@ -2122,9 +2119,7 @@ sub create_view_day
         if ($remote->{'userid'} == $u->{'userid'} || $viewall) {
             $secwhere = "";   # see everything
         } elsif ($remote->{'journaltype'} eq 'P') {
-            my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends ".
-                                              "WHERE userid=? AND friendid=?", undef, 
-                                              $u->{'userid'}, $remote->{'userid'});
+            my $gmask = LJ::get_groupmask($u, $remote);
             $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $gmask))"
                 if $gmask;
         }
@@ -2251,6 +2246,8 @@ sub create_view_day
     if (! $initpagedates)
     {
         # if no entries were on that day, we haven't populated the time shit!
+        # FIXME: don't use the database for this.  it can be done in Perl.
+        my $dbr = LJ::get_db_reader();
         $sth = $dbr->prepare("SELECT DATE_FORMAT('$year-$month-$day', '%a %W %b %M %y %Y %c %m %e %d %D') AS 'alldatepart'");
         $sth->execute;
         my @dateparts = split(/ /, $sth->fetchrow_arrayref->[0]);
