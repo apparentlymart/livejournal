@@ -1,0 +1,128 @@
+<?_info
+nocache=>1
+_info?><?page
+title=><?_ml .title _ml?>
+body<=
+
+<?_code
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
+ my $ret = "";
+ my $mode = $FORM{'mode'};
+
+ my $remote = LJ::get_remote($dbs);
+
+ unless ($remote) {
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.login'} p?>";
+ }
+
+ my $qtalkid = $FORM{'talkid'}+0;
+
+ # we need to find out: $u, $up (poster of the entry this is a comment to),
+ # userpost (username of this comment's author). Then we can check permissions.
+
+ my ($clustered, $dbcm) = (0, $dbh);
+ my $u;
+ if ($FORM{'journal'}) {
+     $u = LJ::load_user($dbs, $FORM{'journal'});
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'.talk.error.bogusargs'} p?>" unless $u;
+     $clustered = 1;
+     $dbcm = LJ::get_cluster_master($u);
+ }
+
+ my $post;
+ if ($clustered) {
+     $qtalkid = int($qtalkid / 256);  # get rid of anum
+     $post = $dbcm->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, nodeid AS 'itemid', ".
+                                    "parenttalkid, journalid, posterid FROM talk2 ".
+                                    "WHERE journalid=$u->{'userid'} AND jtalkid=$qtalkid");
+ } else {
+     $post = $dbh->selectrow_hashref("SELECT talkid, nodetype, state, nodeid AS 'itemid', ".
+                                   "parenttalkid, journalid, posterid FROM talk ".
+                                   "WHERE talkid=$qtalkid");
+ }
+ unless ($post) {
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.nocomment'} p?>";
+ }
+ if ($post->{'state'} eq "D") {
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.comm_deleted'} p?>";
+ }
+
+ $u ||= LJ::load_userid($dbs, $post->{'journalid'});
+ return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+
+ if ($post->{'posterid'}) {
+     $post->{'userpost'} = LJ::get_username($dbs, $post->{'posterid'});
+ }
+
+ my $qitemid = $post->{'itemid'}+0;
+
+ # $posterid is the userid of the author of the entry, not the comment
+ my $posterid;
+ if ($clustered) {
+     $posterid = $dbcm->selectrow_array("SELECT posterid FROM log2 WHERE ".
+                                        "journalid=$u->{'userid'} AND jitemid=$qitemid");
+ } else {
+     $posterid = $dbh->selectrow_array("SELECT posterid FROM log WHERE itemid=$qitemid");
+ }
+ my $up = LJ::load_userid($dbs, $posterid);
+
+ my $can_screen = LJ::Talk::can_screen($dbs, $remote, $u, $up, $post->{'userpost'});
+ my $can_unscreen = LJ::Talk::can_unscreen($dbs, $remote, $u, $up, $post->{'userpost'});
+
+ if ($mode eq 'screen') {
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.privs.screen'} p?>"
+         unless $can_screen;
+     unless ($FORM{'confirm'} eq 'Y' && LJ::did_post()) {
+         $ret .= "<?h1 $ML{'.screen.sure.title'} h1?><?p $ML{'.screen.sure.body'} p?>";
+         $ret .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
+         $ret .= "<input type='hidden' name='mode' value='screen'>\n";
+         $ret .= "<input type='hidden' name='talkid' value='$FORM{'talkid'}'>\n";
+         $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n" if $clustered;
+         $ret .= "<input type='hidden' name='confirm' value='Y'>\n";
+         $ret .= "<input type='submit' value='$ML{'.screen.doit'}'>";
+         $ret .= "</center>";
+         $ret .= "</form>\n";
+         return $ret;
+     }
+     if ($clustered) {
+         $dbcm->do("UPDATE talk2 SET state='S' WHERE journalid=$u->{'userid'} AND jtalkid=$FORM{'talkid'}");
+     } else {
+         $dbh->do("UPDATE talk SET state='S' WHERE talkid=$FORM{'talkid'}");
+     }
+     return "<?h1 $ML{'.screened.title'} h1?><?p $ML{'.screened.body'} p?>";
+ }
+
+ if ($mode eq 'unscreen') {
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.privs.unscreen'} p?>"
+         unless $can_unscreen;
+     unless ($FORM{'confirm'} eq 'Y' && LJ::did_post()) {
+         $ret .= "<?h1 $ML{'.unscreen.sure.title'} h1?><?p $ML{'.unscreen.sure.body'} p?>";
+         $ret .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
+         $ret .= "<input type='hidden' name='mode' value='unscreen'>\n";
+         $ret .= "<input type='hidden' name='talkid' value='$FORM{'talkid'}'>\n";
+         $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n" if $clustered;
+         $ret .= "<input type='hidden' name='confirm' value='Y'>\n";
+         $ret .= "<input type='submit' value='$ML{'.unscreen.doit'}'>";
+         $ret .= "</center>";
+         $ret .= "</form>\n";
+         return $ret;
+     }
+     if ($clustered) {
+         $dbcm->do("UPDATE talk2 SET state='A' WHERE journalid=$u->{'userid'} AND jtalkid=$FORM{'talkid'}");
+     } else {
+         $dbh->do("UPDATE talk SET state='A' WHERE talkid=$FORM{'talkid'}");
+     }
+     return "<?h1 $ML{'.unscreened.title'} h1?><?p $ML{'.unscreened.body'} p?>";
+ }
+
+ return "<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>";
+
+_code?>
+
+<=body
+page?><?_c <LJDEP>
+</LJDEP> _c?>

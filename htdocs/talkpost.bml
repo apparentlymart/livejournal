@@ -49,11 +49,11 @@ body<=
      if ($clustered) {
          $sql = "SELECT t.posterid, t.nodetype, t.nodeid AS 'itemid', ".
              "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(t.datepost) AS 'secondsold', ".
-             "l.anum FROM talk2 t, log2 l WHERE l.journalid=$u->{'userid'} AND ".
+             "t.state, l.anum FROM talk2 t, log2 l WHERE l.journalid=$u->{'userid'} AND ".
              "l.jitemid=t.nodeid AND t.journalid=$u->{'userid'} AND t.jtalkid=$qparentid";
      } else {
          $sql = "SELECT posterid, nodetype, nodeid AS 'itemid', ".
-             "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(datepost) AS 'secondsold' FROM ".
+             "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(datepost) AS 'secondsold', state FROM ".
              "talk WHERE talkid=$qparentid";
      }
      $parpost = LJ::dbs_selectrow_hashref($dbcs, $sql);
@@ -123,6 +123,8 @@ body<=
                                   $parpost->{'posterid'} => \$ur,
                                   ], [ $u ]);
 
+ my $remote = LJ::get_remote($dbs);
+
  # check suspended
  return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
     if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S");
@@ -131,11 +133,15 @@ body<=
  return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
     if ($u->{'statusvis'} eq "D");
 
+ # checked screened post
+ return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_screened'} p?>"
+     if $parpost->{'state'} eq "S" 
+         and not LJ::Talk::can_unscreen($dbs, $remote, $u, $up->{'user'});
+
  LJ::load_user_props($dbs, $u,  
                      "opt_showtopicstuff", "opt_notalkicons", 
                      "opt_logcommentips");
 
- my $remote = LJ::get_remote($dbs);
 
  ####  Check security before viewing this post
  return $errtxt unless LJ::Talk::check_viewable($dbs, $remote, $item, \%FORM, \$errtxt);
@@ -291,6 +297,9 @@ body<=
 
  $ret .= "<?h1 $ML{'.postresponse'} h1?>";
 
+ if ($parpost->{'state'} eq "S") {
+     $ret .= "<br /><?p $ML{'.warnscreened'} p?>";
+ }
  $ret .= "<form method='post' action='talkpost_do.bml'>";
  # hidden values
  my $parent = int($init->{'replyto'}+0);

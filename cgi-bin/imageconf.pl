@@ -26,6 +26,20 @@ $img{'btn_del'} = {
     'alt' => 'Delete',
 };
 
+$img{'btn_scr'} = { 
+    'src' => '/btn_scr.gif',
+    'width' => 20,
+    'height' => 20,
+    'alt' => 'Screen',
+};
+
+$img{'btn_unscr'} = { 
+    'src' => '/btn_unscr.gif',
+    'width' => 22,
+    'height' => 20,
+    'alt' => 'Screen',
+};
+
 $img{'prev_entry'} = { 
     'src' => '/btn_prev.gif',
     'width' => 22,

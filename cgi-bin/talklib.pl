@@ -281,4 +281,31 @@ sub check_viewable
     return 1;
 }
 
+sub can_delete {
+    my ($dbs, $remote, $u, $up, $userpost) = @_;
+    return 0 unless $remote;
+    return 1 if $remote->{'user'} eq $userpost ||
+                $remote->{'user'} eq $u->{'user'} ||
+                $remote->{'user'} eq $up->{'user'} ||
+                LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'});
+    return 0;
+}
+
+sub can_screen {
+    my ($dbs, $remote, $u, $up, $userpost) = @_;
+    return 0 unless $remote;
+    return 1 if $remote->{'user'} eq $u->{'user'} ||
+                $remote->{'user'} eq $up->{'user'} ||
+                LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'});
+    return 0;
+}
+
+sub can_unscreen {
+    return LJ::Talk::can_screen(@_);
+}
+
+sub can_view_screened {
+    return LJ::Talk::can_delete(@_);
+}
+
 1;

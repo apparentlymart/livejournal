@@ -77,7 +77,7 @@ body<=
                                   $item->{'posterid'} => \$ujp,
                                   ], [ $u ]);
  my ($quser, $qjpuser) = map { $dbr->quote($_) } ($u->{'user'}, $ujp->{'user'});
- LJ::load_user_props($dbs, $u, "opt_logcommentips");
+ LJ::load_user_props($dbs, $u, "opt_logcommentips", "opt_whoscreened");
 
  if ($FORM{'userpost'} && $FORM{'usertype'} ne "user") {
      push @errors, $ML{'.error.confused_identity'};
@@ -169,6 +169,39 @@ body<=
          unless (defined $up);
      push @errors, $ML{'.error.noauth'};
      return LJ::bad_input(@errors);     
+ }
+
+ # If the reply is to a comment, check that it exists.
+ # if it's screened, check that the user has permission to
+ # reply and unscreen it
+
+ my $parpost;
+ my $partid = $FORM{'parenttalkid'};
+ my $qpartid = $dbh->quote($partid);
+
+ if ($partid) {
+     if ($clustered) {
+         $sth = $dbcm->prepare("SELECT posterid, state FROM talk2 ".
+                               "WHERE journalid=$u->{'userid'} AND jtalkid=$qpartid");
+     } else {
+         $sth = $dbh->prepare("SELECT posterid, state FROM talk ".
+                              "WHERE talkid=$qpartid");
+     }
+     $sth->execute;
+     $parpost = $sth->fetchrow_hashref;
+
+     unless ($parpost) {
+         push @errors, $ML{'.error.noparent'};
+     }
+
+     # can't use $remote because we may get here
+     # with a reply from email. so use $up instead of $remote
+     # in the call below.
+
+     if ($parpost && $parpost->{'state'} eq "S" && 
+         !LJ::Talk::can_unscreen($dbs, $up, $u, $ujp->{'user'})) {
+         push @errors, $ML{'.error.screened'};
+     }
  }
 
  if ($FORM{'usertype'} ne "user" && $u->{'opt_whocanreply'} ne "all") {
@@ -282,8 +315,6 @@ body<=
 
  ## insertion
 
- my $partid = $FORM{'parenttalkid'};
- my $qpartid = $dbh->quote($partid);
  my $qsubject = $dbh->quote($FORM{'subject'});
  my $subjecticon = ($FORM{'subjecticon'} eq "none" || $FORM{'subjecticon'} eq "") ? "" : LJ::trim(lc($FORM{'subjecticon'}));
  my $qbody = $dbh->quote($FORM{'body'});
@@ -294,6 +325,26 @@ body<=
  my $insertid;
  my $dtalkid;
  my $md5_body = md5_hex($FORM{'body'});
+ 
+ # figure out whether to post this comment screened
+ my $state = 'A';
+ if ($u->{'opt_whoscreened'} eq 'A' ||
+     ($u->{'opt_whoscreened'} eq 'R' && ! $up) ||
+     ($u->{'opt_whoscreened'} eq 'F' && !($up && LJ::is_friend($dbs, $u, $up)))) {
+     $state = 'S';
+ }
+
+ # unscreen the parent comment if needed
+ my $unscreened = 0;
+ if ($parpost->{'state'} eq 'S') {
+     if ($clustered) {
+         $dbcm->do("UPDATE talk2 SET state='A' " .
+                   "WHERE journalid=$u->{'userid'} AND jtalkid=$qpartid");
+     } else {
+         $dbh->do("UPDATE talk SET state='A' WHERE talkid=$qpartid");
+     }
+     $unscreened = 1;
+ }
  
  ### check for duplicate entry (double submission)
  my $posterid = $up ? $up->{'userid'} : 0;
@@ -327,9 +378,9 @@ body<=
      my $table = $clustered ? "talk2" : "talk";
      my $now = $dbcm->selectrow_array("SELECT NOW()");
      $sth = $dbcm->prepare("INSERT INTO $table (nodetype, nodeid, parenttalkid, ".
-                           "journalid, posterid, datepost) ".
+                           "journalid, posterid, datepost, state) ".
                            "VALUES ('L', $itemid, $qpartid, ".
-                           "$u->{'userid'}, $posterid, '$now')");
+                           "$u->{'userid'}, $posterid, '$now', '$state')");
      $sth->execute;
      
      # uh oh?  is there an error?  show them if there is.
@@ -755,7 +806,17 @@ body<=
  my $commentlink = "talkread.bml?${jargent}itemid=$ditemid&amp;view=$dtalkid#t$dtalkid";
 
  $ret .= "<?h1 $ML{'.success.title'} h1?>";
- $ret .= "<?p " . BML::ml('.success.message', {'link'=>$commentlink}) . " p?>";
+ if ($state eq 'A') {
+     $ret .= "<?p " . BML::ml('.success.message', {'link'=>$commentlink}) . " p?>";
+ } elsif ($state eq 'S' && $u->{'journaltype'} eq 'C') {
+     $ret .= "<?p " . BML::ml('.success.screened.comm', {'link'=>$commentlink}) . " p?>";
+ } else {
+     $ret .= "<?p " . BML::ml('.success.screened.user', {'link'=>$commentlink}) . " p?>";
+ }
+
+ if ($unscreened) {
+     $ret .= "<?p $ML{'.success.unscreened'} p?>";
+ }
 
  if ($didlogin) {
      $ret .= "<?p $ML{'.success.loggedin'} p?>";

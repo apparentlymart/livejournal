@@ -371,7 +371,7 @@ body<=
      if ($_->{'state'} eq "D") {
          $_->{'subject'} = $T{'deleted'};
      }
-     elsif ($_->{'state'} eq "A") {
+     elsif ($_->{'state'} eq "A" || $_->{'state'} eq "S") {
          # if the message isn't deleted, flag its parent(s) as
          # having children to recurse into later.
          my $par = $_->{'parenttalkid'};
@@ -438,7 +438,10 @@ body<=
      
      # find child messages (replys to $tid)
     my @childs = sort { $postref->{$a}->{'datepost'} cmp $postref->{$b}->{'datepost'} }
-    grep { ($postref->{$_}->{'state'} ne "D" || $postref->{$_}->{'_haschildren'}) }
+    grep { ($postref->{$_}->{'state'} eq "A" || $postref->{$_}->{'_haschildren'} ||
+            ($postref->{$_}->{'state'} eq "S" && 
+             LJ::Talk::can_view_screened($dbs, $remote, $u, $postref->{$_}->{'userpost'}))
+           )}
     @{$opts->{'children'}->{$tid}};
 
     #$$ret .= "<p>recurse_post($tid): children=(@childs)\n";
@@ -464,10 +467,20 @@ body<=
             $user = $ML{'.anonuser'};
         }
 
+        my $canviewscr = LJ::Talk::can_view_screened($dbs, $remote, $u, $userpost);
+        my $shouldviewscr = exists $FORM{'showscreened'} && $FORM{'showscreened'};
+
         if ($post->{'state'} eq "D") {
             $$ret .= "<p><a name='t$dtid'></a><table><tr>";
             $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
             $$ret .= "<td>$ML{'.deletedpost'}</td></tr></table>\n";
+        } elsif ($post->{'state'} eq "S" && !($canviewscr && $shouldviewscr)) {
+            $$ret .= "<p><a name='t$dtid'></a><table><tr>";
+            $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
+            my $screenedtext = $ML{'.screenedpost'};
+            $screenedtext = "<a href='" . BML::self_link({'showscreened'=>'1'}) . "'>$screenedtext</a>"
+                if $canviewscr;
+            $$ret .= "<td>$screenedtext</td></tr></table>\n";
         } elsif ($userpost && $user{$userpost}->{'statusvis'} eq "S") {
             $$ret .= "<p><a name='t$dtid'></a><table><tr>";
             $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
@@ -530,12 +543,21 @@ body<=
 
                 $$ret .= " <font size='-1'>(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid#t$dtid'>$T{'link'}</a>)</font> ";
 
-                if ($remote && ($remote->{'user'} eq $userpost ||
-                                $remote->{'user'} eq $u->{'user'} ||
-                                $remote->{'user'} eq $up->{'user'} ||
-                                LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
+                if (LJ::Talk::can_delete($dbs, $remote, $u, $up, $userpost))
                 {
                     $$ret .= "<a href='delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+                }
+
+                if ($post->{'state'} eq 'A' && 
+                    LJ::Talk::can_screen($dbs, $remote, $u, $up, $userpost))
+                {
+                    $$ret .= "<a href='talkscreen.bml?mode=screen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+                }
+
+                if ($post->{'state'} eq 'S' && 
+                    LJ::Talk::can_unscreen($dbs, $remote, $u, $up, $userpost))
+                {
+                    $$ret .= "<a href='talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
                 }
 
                 $$ret .= "</td></tr>";

@@ -52,6 +52,7 @@ body<=
                      "opt_notalkicons", "opt_logcommentips",
                      "howhear", "opt_bdaymail", "opt_hidefriendofs",
                      "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
+                     "opt_whoscreened"
                      );
 
  my %saved = (); # to store values before they undergo normalisation
@@ -369,6 +370,9 @@ body<=
      $ret .= "<P><B>$ML{'.logip.header'}</B> ";
      $ret .= LJ::html_select({ 'name' => 'opt_logcommentips', 'selected' => $u->{'opt_logcommentips'}, },
                           "N" => BML::ml(".donotlog"), "S" => BML::ml(".logip.anon_only"), "A" => BML::ml(".logip.always"));
+ 
+     $ret .= "<p><b>$ML{'.screen.header'}</b> ";
+     $ret .= LJ::html_select({ 'name' => 'opt_whoscreened', 'selected' => $u->{'opt_whoscreened'}, }, "N" => $ML{'.screen.none'}, "R" => $ML{'.screen.anon'}, "F" => ($u->{'journaltype'} eq 'C' ? $ML{'.screen.nonmembers'} : $ML{'.screen.nonfriends'}), "A" => $ML{'.screen.all'});
      
      $ret .= "<P><TABLE>\n";
 
@@ -590,6 +594,7 @@ body<=
          if ($FORM{'opt_logcommentips'} ne "N" && 
              $FORM{'opt_logcommentips'} ne "S" && 
              $FORM{'opt_logcommentips'} ne "A") { $FORM{'opt_logcommentips'} = "N"; }
+         $FORM{'opt_whoscreened'} = "N" unless $FORM{'opt_whoscreened'} =~ m/^(N|R|F|A)$/;
          $FORM{'state'} = $state;
 
          # for the directory.
@@ -623,6 +628,7 @@ body<=
                        "opt_notalkicons", "opt_logcommentips",
                        "opt_bdaymail", "opt_hidefriendofs",
                        "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
+                       "opt_whoscreened",
                        );	
 
          # this is only done once, then never appears again.
