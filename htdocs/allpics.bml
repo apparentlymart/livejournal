@@ -21,28 +21,35 @@
         $head .= LJ::robot_meta_tags();
     }
 
-    if ($u->{'statusvis'} eq "S") {
-        $title = $ML{'error.suspended.title'};
-        $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " .
-                BML::ml('error.suspended.text', { 'user' => LJ::ljuser($u),
-                                                  'sitename' => $LJ::SITENAME }) . " p?>";
-        return;
-    }
+    # no need for viewsome, due to the fact that none of this is private anyway.  just
+    # allow anybody with any version of viewall to see userpics for non-V statusvis users
+    if ($GET{viewall} && LJ::check_priv($remote, 'viewall')) {
+        LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
+                              "viewall", "userinfo: $u->{'user'}, statusvis: $u->{'statusvis'}");
+    } else {
+        if ($u->{'statusvis'} eq "S") {
+            $title = $ML{'error.suspended.title'};
+            $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " .
+                    BML::ml('error.suspended.text', { 'user' => LJ::ljuser($u),
+                                                      'sitename' => $LJ::SITENAME }) . " p?>";
+            return;
+        }
 
-    if ($u->{'statusvis'} eq "D") {
-        $title = $ML{'error.deleted.title'};
-        $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " .
-                BML::ml('error.deleted.text', { 'user' => LJ::ljuser($u) }) . 
-                " p?>";
-        return;
-    }
+        if ($u->{'statusvis'} eq "D") {
+            $title = $ML{'error.deleted.title'};
+            $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " .
+                    BML::ml('error.deleted.text', { 'user' => LJ::ljuser($u) }) . 
+                    " p?>";
+            return;
+        }
 
-    if ($u->{'statusvis'} eq "X") {
-        $title = $ML{'error.purged.title'};
-        $body = "<?h1 $ML{'error.purged.name'} h1?><?p " .
-                BML::ml('error.purged.text', { 'user' => LJ::ljuser($u) }) . 
-                " p?>";
-        return;
+        if ($u->{'statusvis'} eq "X") {
+            $title = $ML{'error.purged.title'};
+            $body = "<?h1 $ML{'error.purged.name'} h1?><?p " .
+                    BML::ml('error.purged.text', { 'user' => LJ::ljuser($u) }) . 
+                    " p?>";
+            return;
+        }
     }
 
     # redirect renamed users
