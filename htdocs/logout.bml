@@ -17,7 +17,6 @@
      foreach (qw(ljuser ljhpass langpref permlogin)) {
          delete $COOKIE{$_};
      }
-     BML::set_language(BML::decide_language());
      $body .= "<?h1 $ML{'.loggedout.head'} h1?>\n";
      $body .= "<?p $ML{'.loggedout.text'} p?>";
 
