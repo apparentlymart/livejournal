@@ -590,10 +590,10 @@ if ($u->{'journaltitle'}) {
          'eat' => [qw[head title style layer iframe applet]],
          'mode' => 'allow',
          'deny' => [qw[]],
-         'remove' => [qw[marquee bgsound embed object caption link noscript]],
+         'remove' => [qw[thead marquee bgsound embed object caption link noscript]],
 	 'noearlyclose' => 1,
 	 'tablecheck' => 1,
-	 'autoclose' => [qw[table tr th td]],
+	 'autoclose' => [qw[table tr th td textarea pre xmp]],
      });
 
      $body .= "<tr><td align='right' valign='top'><b>$label</b></td><td colspan='$span'>$u->{'bio'}</td></tr>\n";
