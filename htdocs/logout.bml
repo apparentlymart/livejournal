@@ -1,38 +1,3 @@
 <?_code
-
- # since we take an action on a GET request, we need to set the etag
- # to nothing, so browsers and BML won't work together to cache it
- BML::set_etag(undef); 
-
- my @errors = ();
- my $user = lc($FORM{'user'});
- my $password = $FORM{'password'};
- my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
- $body = "";
-
- LJ::run_hooks("post_logout");
-
- if ($BML::COOKIE{'ljuser'}) 
- {
-     foreach (qw(ljuser ljhpass langpref permlogin)) {
-         delete $COOKIE{$_};
-     }
-     $body .= "<?h1 $ML{'.loggedout.head'} h1?>\n";
-     $body .= "<?p $ML{'.loggedout.text'} p?>";
-
- } else {
-
-     $body .= "<?h1 $ML{'.already.head'} h1?>\n";
-     $body .= "<?p $ML{'.already.text'} p?>";
- }
- 
- return;
-
+    return BML::redirect("$LJ::SITEROOT/login.bml");
 _code?>
-<?_info
-nocache=>1
-_info?><?page
-title=><?_ml .title _ml?>
-body=><?_code return $body; _code?>
-page?><?_c <LJDEP>
-</LJDEP> _c?>

@@ -950,6 +950,14 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /login.bml.login.btn.login=Login...
 
+/login.bml.bindip.label=Bind to IP address:
+
+/login.bml.bindip.yes=Yes (safer)
+
+/login.bml.bindip.no=No (works with all ISPs)
+
+/login.bml.login.btn.changeopts=Change Options
+
 /login.bml.login.expiration=Expiration:
 
 /login.bml.login.forget=Forget?
@@ -1733,6 +1741,8 @@ error.deleted.name=Deleted
 error.deleted.text=This journal has been deleted.  If you are [[user]], you have a period of 30 days from the deletion time to undelete the journal.  After 30 days we will delete all content permanently from our servers.
 
 error.deleted.title=Deleted Account
+
+error.ipbanned=Your IP address is temporarily banned for exceeding the login failure rate.
 
 error.nobutton=No button pressed?
 

@@ -7,7 +7,7 @@ mark_clustered("useridmap", "userbio", "syncupdates2", "cmdbuffer", "dudata",
                "talk2", "talkprop2", "talktext2", "talkleft",
                "userpicblob2", "events",
                "s2style", "s2info", "s2source", "s2compiled",
-               "ratelog", "loginstall"
+               "ratelog", "loginstall", "sessions", "sessions_data",
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -1518,6 +1518,34 @@ CREATE TABLE loginstall
  time     INT UNSIGNED NOT NULL,
  UNIQUE (userid, ip)
  )
+EOC
+
+# web sessions.  optionally tied to ips and with expiration times.
+# whenever a session is okayed, expired ones are deleted, or ones
+# created over 30 days ago.  a live session can't change email address
+# or password.  digest authentication will be required for that,
+# or javascript md5 challenge/response.
+register_tablecreate("sessions", <<'EOC'); # user cluster
+CREATE TABLE sessions (
+   userid     MEDIUMINT UNSIGNED NOT NULL,
+   sessid     MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+   PRIMARY KEY (userid, sessid),
+   auth       CHAR(10) NOT NULL,
+   exptype    ENUM('short','long') NOT NULL,  # browser closed or "infinite"
+   timecreate INT UNSIGNED NOT NULL,
+   timeexpire INT UNSIGNED NOT NULL,
+   ipfixed    CHAR(15)  # if null, not fixed at IP.
+) TYPE=MYISAM
+EOC
+    
+register_tablecreate("sessions_data", <<'EOC');  # user cluster
+CREATE TABLE sessions_data (
+   userid     MEDIUMINT UNSIGNED NOT NULL,
+   sessid     MEDIUMINT UNSIGNED NOT NULL,
+   skey       VARCHAR(30) NOT NULL,
+   PRIMARY KEY (userid, sessid, skey),
+   sval       VARCHAR(255)
+)
 EOC
 
 ### changes

@@ -894,7 +894,7 @@ sub auth_fields
     my $form = shift;
     my $opts = shift;
 
-    my $remote = LJ::get_remote_noauth();
+    my $remote = LJ::get_remote();
     my $ret = "";
     if ((!$form->{'altlogin'} && $remote) || $opts->{'user'})
     {
@@ -902,13 +902,11 @@ sub auth_fields
         my $luser = $opts->{'user'} || $remote->{'user'};
         if ($opts->{'user'}) {
             $hpass = $form->{'hpassword'} || LJ::hash_password($form->{'password'});
-        } elsif ($remote && $BML::COOKIE{"ljhpass"} =~ /^$luser:(.+)/) {
-            $hpass = $1;
+        } elsif ($remote) {
+            $ret .= "<input type='hidden' name='remoteuser' value='$remote->{'user'}'>\n";
         }
 
-        my $alturl = BML::get_uri() . '?' . BML::get_query_string();
-        $alturl .= "&amp;" unless $alturl =~ /\?$/;
-        $alturl .= "altlogin=1";
+        my $alturl = BML::self_link({ 'altlogin' => 1 });
 
         $ret .= "<tr align='left'><td colspan='2' align='left'>You are currently logged in as <b>$luser</b>.";
         $ret .= "<br />If this is not you, <a href='$alturl'>click here</a>.\n"
@@ -1092,11 +1090,16 @@ sub get_effective_user
 
         # if password present, check it.
         if ($f->{'password'} || $f->{'hpassword'}) {
-            if (LJ::auth_okay($u, $f->{'password'}, $f->{'hpassword'}, $u->{'password'})) {
+            my $ipbanned = 0;
+            if (LJ::auth_okay($u, $f->{'password'}, $f->{'hpassword'}, $u->{'password'}, \$ipbanned)) {
                 $$refu = $u;
                 return $f->{'user'};
             } else {
-                $$referr = "Invalid password.";
+                if ($ipbanned) {
+                    $$referr = "Your IP address is temporarily banned for exceeding the login failure rate.";
+                } else {
+                    $$referr = "Invalid password.";
+                }
                 return;
             }
         }
@@ -2083,7 +2086,7 @@ sub debug
 #      if one is defined, so LiveJournal installations can be based
 #      off an LDAP server, for example.
 # returns: boolean; 1 if authentication succeeded, 0 on failure
-# args: user_u, clear, md5, actual?
+# args: user_u, clear, md5, actual?, ip_banned?
 # des-user_u: Either the user name or a user object.
 # des-clear: Clear text password the client is sending. (need this or md5)
 # des-md5: MD5 of the password the client is sending. (need this or clear).
@@ -2092,6 +2095,8 @@ sub debug
 # des-actual: The actual password for the user.  Ignored if a pluggable
 #             authenticator is being used.  Required unless the first
 #             argument is a user object instead of a username scalar.
+# des-ip_banned: Optional scalar ref which this function will set to true
+#                if IP address of remote user is banned.
 # </LJFUNC>
 sub auth_okay
 {
@@ -2099,27 +2104,50 @@ sub auth_okay
     my $clear = shift;
     my $md5 = shift;
     my $actual = shift;
+    my $ip_banned = shift;
+
+    my $u;
 
     # first argument can be a user object instead of a string, in
     # which case the actual password (last argument) is got from the
     # user object.
     if (ref $user eq "HASH") {
+        $u = $user;
         $actual = $user->{'password'};
         $user = $user->{'user'};
+    } else {
+        my $dbs = LJ::get_dbs();
+        $u = LJ::load_user($dbs, $u);
     }
+
+    # set the IP banned flag, if it was provided.
+    my $fake_scalar;
+    my $ref = ref $ip_banned ? $ip_banned : \$fake_scalar;
+    if (LJ::login_ip_banned($u)) {
+        $$ref = 1;
+        return 0;
+    } else {
+        $$ref = 0;
+    }
+
+    my $bad_login = sub {
+        LJ::handle_bad_login($u);
+        return 0;
+    };
 
     ## custom authorization:
     if (ref $LJ::AUTH_CHECK eq "CODE") {
         my $type = $md5 ? "md5" : "clear";
         my $try = $md5 || $clear;
-        return $LJ::AUTH_CHECK->($user, $try, $type);
+        my $good = $LJ::AUTH_CHECK->($user, $try, $type);
+        return $good || $bad_login->();
     }
 
     ## LJ default authorization:   
-    return 0 unless $actual;
+    return $bad_login->() unless $actual;
     return 1 if ($md5 && lc($md5) eq LJ::hash_password($actual));
     return 1 if ($clear eq $actual);
-    return 0;
+    return $bad_login->();
 }
 
 # <LJFUNC>
@@ -2633,6 +2661,12 @@ sub get_remote
     my $criterr = shift;
     my $cgi = shift;
 
+    return $LJ::CACHE_REMOTE if $LJ::CACHED_REMOTE;
+
+    unless ($dbarg) {
+        $dbarg = LJ::get_dbs();
+    }
+
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
@@ -2642,8 +2676,6 @@ sub get_remote
     my $cookie = sub {
         return $cgi ? $cgi->cookie($_[0]) : $BML::COOKIE{$_[0]};
     };
-
-    my ($user, $userid, $caps);
 
     my $validate = sub {
         my $a = shift;
@@ -2661,45 +2693,66 @@ sub get_remote
         return 1;
     };
 
-    ### are they logged in?
-    unless ($user = $cookie->('ljuser')) {
+    my $no_remote = sub {
+        $LJ::CACHED_REMOTE = 1;
+        $LJ::CACHE_REMOTE = undef;
         $validate->();
         return undef;
+    };
+
+    my $sessdata;
+
+    # do they have any sort of session cookie?
+    return $no_remote->() 
+        unless ($sessdata = $cookie->('ljsession'));
+
+    my ($authtype, $user, $sessid, $auth) = split(/:/, $sessdata);
+
+    # fail unless authtype is 'ws' (more might be added in future)
+    return $no_remote->() unless $authtype eq "ws";
+
+    my $u = LJ::load_user($dbs, $user);
+    return $no_remote->() unless $u;
+
+    my $udbr = LJ::get_cluster_reader($u, 1);
+    return undef unless $udbr;  # shouldn't happen.
+
+    my $sess = $udbr->selectrow_hashref(qq{
+        SELECT *, UNIX_TIMESTAMP() AS 'now' FROM sessions 
+            WHERE userid=? AND sessid=? AND auth=? 
+        }, undef, $u->{'userid'}, $sessid, $auth);
+    return $no_remote->() unless $sess;
+    return $no_remote->() if $sess->{'timeexpire'} < $sess->{'now'};
+    return $no_remote->() if ($sess->{'ipfixed'} && 
+                              $sess->{'ipfixed'} ne BML::get_remote_ip());
+
+    # renew short session
+    my $short_session = 60*60*24;
+    if ($sess->{'exptype'} eq "short" && 
+        ($sess->{'timeexpire'} - $sess->{'now'}) < $short_session/2) {
+        my $udbh = FB::get_cluster_master($u, 1);
+        if ($udbh) {
+            my $future = $sess->{'now'} + $short_session;
+            $udbh->do("UPDATE sessions SET timeexpire=$future WHERE ".
+                      "userid=$u->{'userid'} AND sessid=$sess->{'sessid'}");
+        }
     }
 
-    ### does their login password match their login?
-    my $hpass = $cookie->('ljhpass');
-    unless ($hpass =~ /^$user:(.+)/) {
-        $validate->();
-        return undef;
-    }
-    my $remhpass = $1;
-    my $correctpass;     # find this out later.
+    # augment hash with session data;
+    $u->{'_session'} = $sess;
 
-    unless (ref $LJ::AUTH_CHECK eq "CODE") {
-        my $quser = $dbr->quote($user);
-        ($userid, $correctpass, $caps) =
-            $dbr->selectrow_array("SELECT userid, password, caps ".
-                                  "FROM user WHERE user=$quser");
+    $LJ::CACHED_REMOTE = 1;
+    $LJ::CACHE_REMOTE = $u;
 
-        # each handler must return true, else credentials are ignored:
-        return undef unless $validate->({
-            'userid' => $userid,
-            'user' => $user,
-            'caps' => $caps,
-        });
+    return $u;
+}
 
-    } else {
-        $userid = LJ::get_userid($dbh, $user);
-    }
-
-    unless ($userid && LJ::auth_okay($user, undef, $remhpass, $correctpass)) {
-        $validate->();
-        return undef;
-    }
-
-    return { 'user' => $user,
-             'userid' => $userid, };
+sub set_remote
+{
+    my $remote = shift;
+    $LJ::CACHED_REMOTE = 1;
+    $LJ::CACHE_REMOTE = $remote;
+    1;
 }
 
 # <LJFUNC>
@@ -2748,13 +2801,9 @@ sub load_remote
 # </LJFUNC>
 sub get_remote_noauth
 {
-    ### are they logged in?
-    my $remuser = $BML::COOKIE{"ljuser"};
-    return undef unless ($remuser =~ /^\w{1,15}$/);
-
-    ### does their login pasAsword match their login?
-    return undef unless ($BML::COOKIE{"ljhpass"} =~ /^$remuser:(.+)/);
-    return { 'user' => $remuser, };
+    my $sess = $BML::COOKIE{'ljsession'};
+    return { 'user' => $1 } if $sess =~ /^ws:(\w+):/;
+    return undef;
 }
 
 # <LJFUNC>
@@ -2833,6 +2882,9 @@ sub start_request
     handle_caches();
     # TODO: check process growth size
     # TODO: auto-restat and reload ljconfig.pl if changed.
+
+    $LJ::CACHE_REMOTE = undef;
+    $LJ::CACHED_REMOTE = 0;
 
     # clear the handle request cache (like normal cache, but verified already for
     # this request to be ->ping'able).
@@ -3466,31 +3518,42 @@ sub get_dbs
 # name: LJ::get_cluster_reader
 # class: db
 # des: Returns a cluster slave for a user, or cluster master if no slaves exist.
-# args: uarg
+# args: uarg, or_global?
 # des-uarg: Either a userid scalar or a user object.
+# des-or_global: If user is unclustered, return normal reader.
 # returns: DB handle.  Or undef if all dbs are unavailable.
 # </LJFUNC>
 sub get_cluster_reader
 {
     my $arg = shift;
+    my $or_global = shift;
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
-    return LJ::get_dbh("cluster${id}slave",
-                       "cluster${id}");
+    my @roles = ("cluster${id}slave", "cluster${id}");
+    if ($or_global && $id == 0) {
+        @roles = ("slave", "master");
+    }
+    return LJ::get_dbh(@roles);
 }
 
 # <LJFUNC>
 # name: LJ::get_cluster_master
 # class: db
 # des: Returns a cluster master for a given user.
-# args: uarg
+# args: uarg, or_global?
 # des-uarg: Either a userid scalar or a user object.
+# des-or_global: If user is unclustered, return normal reader.
 # returns: DB handle.  Or undef if master is unavailable.
 # </LJFUNC>
 sub get_cluster_master
 {
     my $arg = shift;
+    my $or_global = shift;
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
-    return LJ::get_dbh("cluster${id}");
+    my $role = "cluster${id}";
+    if ($or_global && $id == 0) {
+        $role = "master";
+    }
+    return LJ::get_dbh($role);
 }
 
 # <LJFUNC>
@@ -5652,6 +5715,67 @@ sub md5_struct
         }
         return $md5;
     }
+}
+
+sub rand_chars
+{
+    my $length = shift;
+    my $chal = "";
+    my $digits = "abcdefghijklmnopqrstuvwzyzABCDEFGHIJKLMNOPQRSTUVWZYZ0123456789";
+    for (1..$length) {
+        $chal .= substr($digits, int(rand(62)), 1);
+    }
+    return $chal;
+}
+
+sub generate_session
+{
+    my ($u, $opts) = @_;
+    my $udbh = LJ::get_cluster_master($u, 1);
+    my $sess = {};
+    $opts->{'exptype'} = "short" unless $opts->{'exptype'} eq "long";
+    $sess->{'auth'} = LJ::rand_chars(10);
+    my $expsec = $opts->{'exptype'} eq "short" ? 60*60*24 : 60*60*24*7;
+    $udbh->do("INSERT INTO sessions (userid, sessid, auth, exptype, ".
+              "timecreate, timeexpire, ipfixed) VALUES (?,NULL,?,?,UNIX_TIMESTAMP(),".
+              "UNIX_TIMESTAMP()+$expsec,?)", undef,
+              $u->{'userid'}, $sess->{'auth'}, $opts->{'exptype'}, $opts->{'ipfixed'});
+    return undef if $udbh->err;
+    $sess->{'sessid'} = $udbh->{'mysql_insertid'};
+    $sess->{'userid'} = $u->{'userid'};
+    $sess->{'ipfixed'} = $opts->{'ipfixed'};
+    $sess->{'exptype'} = $opts->{'exptype'};
+
+    # clean up old sessions
+    my $old = $udbh->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
+                                        "userid=$u->{'userid'} AND ".
+                                        "timeexpire < UNIX_TIMESTAMP()");
+    LJ::kill_sessions($udbh, $u->{'userid'}, @$old) if $old;
+
+    return $sess;
+}
+
+sub kill_sessions
+{
+    my ($udbh, $userid, @sessids) = @_;
+    my $in = join(',', map { $_+0 } @sessids);
+    return 1 unless $in;
+    foreach (qw(sessions sessions_data)) {
+        $udbh->do("DELETE FROM $_ WHERE userid=? AND ".
+                  "sessid IN ($in)", undef, $userid);
+    }
+    return 1;
+}
+
+sub kill_session
+{
+    my $u = shift;
+    return 0 unless $u;
+    return 0 unless exists $u->{'_session'};
+    my $udbh = LJ::get_cluster_master($u, 1);
+    LJ::kill_sessions($udbh, $u->{'userid'}, $u->{'_session'}->{'sessid'});
+    delete $BML::COOKIE{'ljsession'};
+    return 1;
 }
 
 1;

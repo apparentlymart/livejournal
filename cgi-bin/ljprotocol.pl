@@ -2087,16 +2087,17 @@ sub authenticate
 
     return fail($err,100) unless $u;
     return fail($err,100) if ($u->{'statusvis'} eq "X");
-    return fail($err,402) if LJ::login_ip_banned($u);
 
+    my $ip_banned = 0;
     unless ($flags->{'nopassword'} ||
             $flags->{'noauth'} ||
             LJ::auth_okay($username,
                           $req->{'password'},
                           $req->{'hpassword'},
-                          $u->{'password'}))
+                          $u->{'password'},
+                          \$ip_banned))
     {
-        LJ::handle_bad_login($u);
+        return fail($err,402) if $ip_banned;
         return fail($err,101);
     }
     # remember the user record for later.

@@ -87,7 +87,15 @@ d.close();
  my $u = LJ::load_user($dbs, $user);
  unless ($u) { push @errors, "Invalid username"; }
 
- if (scalar(@errors)==0 && ! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) { push @errors, $ML{'error.badpassword'}; }
+my $ipbanned = 0;
+if (scalar(@errors)==0 && 
+    ! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'}, undef, \$ipbanned)) {
+    if ($ipbanned) {
+        push @errors, $ML{'error.ipbanned'};
+    } else {
+        push @errors, $ML{'error.badpassword'};
+    }
+}
 
  return LJ::bad_input(@errors) if @errors;
 

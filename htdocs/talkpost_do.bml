@@ -127,16 +127,22 @@ body<=
                  push @errors, $ML{'.error.badpassword'};
              }
 
-             # if the user chooses to log in, do so (patch by: lucretio)
+             # if the user chooses to log in, do so
              if ($FORM{'do_login'} && ! @errors) {
-                 my $hp = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
-                 my $etime = 0;
-                 BML::set_cookie("ljuser", $up->{'user'}, $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
-                 eval { Apache->request->notes('ljuser' => $up->{'user'}); };
-                 BML::set_cookie("ljhpass", "$up->{'user'}:$hp", $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
 
-                 LJ::load_user_props($dbs, $u, "browselang");
-                 my $bl = LJ::Lang::get_lang($u->{'browselang'});
+                 my $etime = 0;
+                 eval { Apache->request->notes('ljuser' => $up->{'user'}); };
+
+                 my $sess_opts = {
+                     'exptype' => 'short',
+                     'ipfixed' => undef,
+                 };
+                 my $sess = LJ::generate_session($u, $sess_opts);
+                 $COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime ];
+                 LJ::set_remote($up);
+
+                 LJ::load_user_props($dbs, $up, "browselang");
+                 my $bl = LJ::Lang::get_lang($up->{'browselang'});
                  if ($bl) {
                      BML::set_cookie("langpref", $bl->{'lncode'} . "/" . time(), 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
                      BML::set_language($bl->{'lncode'});
