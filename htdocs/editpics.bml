@@ -1,234 +1,234 @@
 <?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $body @errors);
 
- use strict;
- use vars qw(%GET %POST $title $body @errors);
+    $title = "Edit User Pictures";
+    $body = "";
+    @errors = ();
 
- $title = "Edit User Pictures";
- $body = "";
- @errors = ();
-
- my $err = sub {
-    $title = "Error";
-    $body = LJ::bad_input(@_);
-    return;
- };
+    my $err = sub {
+        $title = "Error";
+        $body = LJ::bad_input(@_);
+        return;
+    };
  
- unless (LJ::text_in(\%POST)) {
-     return $err->("Invalid UTF-8 Input");
- }
+    unless (LJ::text_in(\%POST)) {
+        return $err->("Invalid UTF-8 Input");
+    }
 
- my $dbr = LJ::get_db_reader();
- my $sth;
+    my $dbr = LJ::get_db_reader();
+    my $sth;
 
- my $remote = LJ::get_remote();
- return $err->("You must be logged in to edit your pictures.")
-    unless $remote;
+    my $remote = LJ::get_remote();
+    return $err->("You must be logged in to edit your pictures.")
+        unless $remote;
  
- my $authas = $GET{'authas'} || $remote->{'user'};
- my $u = LJ::get_authas_user($authas);
- return $err->("You could not be authenticated as the specified user.")
-    unless $u;
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return $err->("You could not be authenticated as the specified user.")
+        unless $u;
 
- # update this user's activated pics
- LJ::activate_userpics($u);
+    # update this user's activated pics
+    LJ::activate_userpics($u);
 
- if (LJ::get_cap($u, "readonly")) {
-     $title = "Read-only mode";
-     $body = $LJ::MSG_READONLY_USER;
-     return;
- }
+    if (LJ::get_cap($u, "readonly")) {
+        $title = "Read-only mode";
+        $body = $LJ::MSG_READONLY_USER;
+        return;
+    }
 
- ### save mode
+    ### save mode
 
- if ($POST{'mode'} eq "save") 
- {
-     my $dbh = LJ::get_db_writer();
-     my $dbcm = LJ::get_cluster_master($u);
-     return $err->("Database temporarily unavailable.") unless $dbh && $dbcm;
+    if ($POST{'mode'} eq "save") 
+    {
+        my $dbh = LJ::get_db_writer();
+        my $dbcm = LJ::get_cluster_master($u);
+        return $err->("Database temporarily unavailable.") unless $dbh && $dbcm;
 
-     my %exist_kwids;
-     $sth = $dbh->prepare("SELECT kwid, picid FROM userpicmap WHERE userid=?");
-     $sth->execute($u->{'userid'});
-     while (my ($kwid, $picid) = $sth->fetchrow_array) {
-         push @{$exist_kwids{$picid}}, $kwid;
-     }
+        my %exist_kwids;
+        $sth = $dbh->prepare("SELECT kwid, picid FROM userpicmap WHERE userid=?");
+        $sth->execute($u->{'userid'});
+        while (my ($kwid, $picid) = $sth->fetchrow_array) {
+            push @{$exist_kwids{$picid}}, $kwid;
+        }
 
-     # unconditionally delete form userpicmap, we'll rebuild it later
-     $dbh->do("DELETE FROM userpicmap WHERE userid=?", undef, $u->{'userid'});
+        # unconditionally delete form userpicmap, we'll rebuild it later
+        $dbh->do("DELETE FROM userpicmap WHERE userid=?", undef, $u->{'userid'});
 
-     # select all of their userpics and iterate through them
-     $sth = $dbh->prepare("SELECT picid, width, height, state FROM userpic WHERE userid=?");
-     $sth->execute($u->{'userid'});
+        # select all of their userpics and iterate through them
+        $sth = $dbh->prepare("SELECT picid, width, height, state FROM userpic WHERE userid=?");
+        $sth->execute($u->{'userid'});
 
-     my @inactive_picids;
-     my @delete;
-     my %picid_of_kwid;
+        my @inactive_picids;
+        my @delete;
+        my %picid_of_kwid;
 
-     while (my $pic = $sth->fetchrow_hashref)
-     {
-         # delete this pic
-         if ($POST{"delete_$pic->{'picid'}"}) {
-             push @delete, $pic->{'picid'};
-             next;
-         }
+        while (my $pic = $sth->fetchrow_hashref)
+        {
+            # delete this pic
+            if ($POST{"delete_$pic->{'picid'}"}) {
+                push @delete, $pic->{'picid'};
+                next;
+            }
 
-         # make a list of inactive picids
-         if ($pic->{'state'} eq 'I') {
-             push @inactive_picids, $pic->{'picid'};
-             next;
-         }
+            # make a list of inactive picids
+            if ($pic->{'state'} eq 'I') {
+                push @inactive_picids, $pic->{'picid'};
+                next;
+            }
 
-         # we're going to modify keywords on active pictures
-         my @keywords = split(/\s*,\s*/, $POST{"kw_$pic->{'picid'}"});
-         @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
-         foreach my $kw (@keywords) {
-             my $kwid = LJ::get_keyword_id($kw);
-             next unless $kwid;
+            # we're going to modify keywords on active pictures
+            my @keywords = split(/\s*,\s*/, $POST{"kw_$pic->{'picid'}"});
+            @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
+            foreach my $kw (@keywords) {
+                my $kwid = LJ::get_keyword_id($kw);
+                next unless $kwid;
 
-             if ($picid_of_kwid{$kwid}) {
-                 my $ekw = LJ::eall($kw);
-                 push @errors, "You used the keyword \"$ekw\" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.";
-             }
-             $picid_of_kwid{$kwid} = $pic->{'picid'};
-         }
-     }
+                if ($picid_of_kwid{$kwid}) {
+                    my $ekw = LJ::eall($kw);
+                    push @errors, "You used the keyword \"$ekw\" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.";
+                }
+                $picid_of_kwid{$kwid} = $pic->{'picid'};
+            }
+        }
 
-     # now, reapply the existing picids to the inactive pics, unless
-     # that picid has already been assigned to a new active one
-     foreach my $picid (@inactive_picids) {
-         next unless $exist_kwids{$picid};
+        # now, reapply the existing picids to the inactive pics, unless
+        # that picid has already been assigned to a new active one
+        foreach my $picid (@inactive_picids) {
+            next unless $exist_kwids{$picid};
 
-         foreach (@{$exist_kwids{$picid}}) {
-             $picid_of_kwid{$_} ||= $picid;
-         }
-     }
+            foreach (@{$exist_kwids{$picid}}) {
+                $picid_of_kwid{$_} ||= $picid;
+            }
+        }
 
-     if (@delete) {
-         my $id_in = join(", ", @delete);
-         # delete metadata from global
-         $dbh->do("DELETE FROM userpic WHERE picid IN ($id_in)");
-         # delete data from user cluster
-         $dbcm->do("DELETE FROM userpicblob2 WHERE userid=$u->{'userid'} ".
-                   "AND picid IN ($id_in)");
+        if (@delete) {
+            my $id_in = join(", ", @delete);
+            # delete metadata from global
+            $dbh->do("DELETE FROM userpic WHERE picid IN ($id_in)");
+            # delete data from user cluster
+            $dbcm->do("DELETE FROM userpicblob2 WHERE userid=$u->{'userid'} ".
+                      "AND picid IN ($id_in)");
 
-         # if any of the userpics they want to delete are active, then we want to 
-         # re-run LJ::activate_userpics() - turns out it's faster to not check to 
-         # see if we need to do this
-         LJ::activate_userpics($u);
+            # if any of the userpics they want to delete are active, then we want to 
+            # re-run LJ::activate_userpics() - turns out it's faster to not check to 
+            # see if we need to do this
+            LJ::activate_userpics($u);
+        }
 
-     }
+        if (%picid_of_kwid) {
+            my $sql = "REPLACE INTO userpicmap (userid, kwid, picid) VALUES ";
+            $sql .= join(",", map { "($u->{'userid'}, $_, $picid_of_kwid{$_})" } keys %picid_of_kwid);
+            $dbh->do($sql);
+        }
 
-     if (%picid_of_kwid) {
-         my $sql = "REPLACE INTO userpicmap (userid, kwid, picid) VALUES ";
-         $sql .= join(",", map { "($u->{'userid'}, $_, $picid_of_kwid{$_})" } keys %picid_of_kwid);
-         $dbh->do($sql);
-     }
+        my $new_default = $POST{'defaultpic'}+0;
+        if ($POST{"delete_$POST{'defaultpic'}"}) { $new_default = 0; } # deleting your default
+        if ($new_default != $u->{'defaultpicid'}) {
 
-     my $new_default = $POST{'defaultpic'}+0;
-     if ($POST{"delete_$POST{'defaultpic'}"}) { $new_default = 0; } # deleting your default
-     if ($new_default != $u->{'defaultpicid'}) {
+            # see if they are trying to make an inactive userpic their default
+            my $state = $dbh->selectrow_array("SELECT state FROM userpic WHERE picid=?",
+                                              undef, $new_default);
+            LJ::update_user($u, { defaultpicid => $new_default }) unless $state eq 'I';
+        }
 
-         # see if they are trying to make an inactive userpic their default
-         my $state = $dbh->selectrow_array("SELECT state FROM userpic WHERE picid=?",
-                                           undef, $new_default);
-         LJ::update_user($u, { defaultpicid => $new_default }) unless $state eq 'I';
-     }
+        my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
+        LJ::MemCache::delete($memkey);
 
-     my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
-     LJ::MemCache::delete($memkey);
+        # errors occurred during processing?
+        return $err->(@errors) if @errors;
 
-     # errors occurred during processing?
-     return $err->(@errors) if @errors;
+        # no errors
+        $body .= "<?h1 Saved h1?><?p Your new picture keywords and defaults have been saved.  You can view them <a href=\"/allpics.bml?user=$authas\">here</a>. p?>";
+        
+        return;
+    }
 
-     # no errors
-     $body .= "<?h1 Saved h1?><?p Your new picture keywords and defaults have been saved.  You can view them <a href=\"/allpics.bml?user=$authas\">here</a>. p?>";
+    # show the form to let people edit
+    $title = "Edit User Pictures";
 
-     return;
- }
+    # authas switcher form
+    $body .= "<form class='postheading' method='get' action='editpics.bml'>\n";
+    $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+    $body .= "</form>\n\n";
 
- # show the form to let people edit
- $title = "Edit User Pictures";
-
- # authas switcher form
- $body .= "<form class='postheading' method='get' action='editpics.bml'>\n";
- $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
- $body .= "</form>\n\n";
-
- my %keywords = ();
- $sth = $dbr->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k ".
-                      "WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
- $sth->execute;
- while (my ($pic, $keyword) = $sth->fetchrow_array) {
-     LJ::text_out(\$keyword);
-     push @{$keywords{$pic}}, $keyword;
- }
+    my %keywords = ();
+    $sth = $dbr->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k ".
+                         "WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
+    $sth->execute;
+    while (my ($pic, $keyword) = $sth->fetchrow_array) {
+        LJ::text_out(\$keyword);
+          push @{$keywords{$pic}}, $keyword;
+      }
  
- $sth = $dbr->prepare("SELECT picid, width, height, state FROM userpic WHERE userid=?");
- $sth->execute($u->{'userid'});
- my $piccount = 0;
+    $sth = $dbr->prepare("SELECT picid, width, height, state FROM userpic WHERE userid=?");
+    $sth->execute($u->{'userid'});
+    my $piccount = 0;
 
- while (my $pic = $sth->fetchrow_hashref)
- {
-     my $pid = $pic->{'picid'};
+    while (my $pic = $sth->fetchrow_hashref)
+    {
+        my $pid = $pic->{'picid'};
 
-     if ($piccount++ == 0) {
+        if ($piccount++ == 0) {
 
-         $body .= "<?h1 Current Pictures h1?><?p Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, <a href='/uploadpic.bml?authas=$authas'>go here</a>. p?>";
+            $body .= "<?h1 Current Pictures h1?><?p Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, <a href='/uploadpic.bml?authas=$authas'>go here</a>. p?>";
 
-         $body .= "<form method='post' action='editpics.bml?authas=$authas'>";
-         $body .= "<input type='hidden' name='mode' value='save'>";
-         $body .= "<ul><table cellpadding='5' border='0' cellspacing='1'>";
+            $body .= "<form method='post' action='editpics.bml?authas=$authas'>";
+            $body .= "<input type='hidden' name='mode' value='save'>";
+            $body .= "<ul><table cellpadding='5' border='0' cellspacing='1'>";
              
-     }
-     $body .= "<tr valign='middle'>";
-     $body .= "<td align='center'><img src='$LJ::USERPIC_ROOT/$pid/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
-     $body .= "<td>";
-     $body .= "<table>";
+        }
+        $body .= "<tr valign='middle'>";
+        $body .= "<td align='center'><img src='$LJ::USERPIC_ROOT/$pid/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
+        $body .= "<td>";
+        $body .= "<table>";
 
-     my ($dis, $distxt);
-     if ($pic->{'state'} eq 'I') {
-         $dis = " disabled='disabled'";
-         $distxt = " &nbsp;<i>[$ML{'userpic.inactive'}]</i> " . LJ::help_icon('userpic_inactive');
-     }
+        my ($dis, $distxt);
+        if ($pic->{'state'} eq 'I') {
+            $dis = " disabled='disabled'";
+            $distxt = " &nbsp;<i>[$ML{'userpic.inactive'}]</i> " . LJ::help_icon('userpic_inactive');
+        }
+        
+        {
+            my $chk = $u->{'defaultpicid'} == $pic->{'picid'} ? " checked='checked'" : "";
+            
+            $body .= "<tr><td align='right'><b><label for='$pid-def'>Default:</label></b></td><td> <input id='$pid-def' type='radio' name='defaultpic' value='$pid'$chk$dis />&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>Delete:</label></b> <input type='checkbox' name='delete_$pid' value='1' id='$pid-del' />$distxt</td></tr>\n";
+        }
 
-     {
-         my $chk = $u->{'defaultpicid'} == $pic->{'picid'} ? " checked='checked'" : "";
+        {
+            my $eh_keywords;
+            $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}}) if $keywords{$pic->{'picid'}};
+            $eh_keywords = LJ::eall($eh_keywords);
+            $body .= "<tr><td align='right'><b><label for='$pid-key'>Keywords:</label></b></td><td> <input id='$pid-key' size='30' name='kw_$pic->{'picid'}' value=\"$eh_keywords\"$dis /></td></tr>\n";
+        }
+        
+        $body .= "</table>\n";
 
-         $body .= "<tr><td align='right'><b><label for='$pid-def'>Default:</label></b></td><td> <input id='$pid-def' type='radio' name='defaultpic' value='$pid'$chk$dis />&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>Delete:</label></b> <input type='checkbox' name='delete_$pid' value='1' id='$pid-del' />$distxt</td></tr>\n";
-     }
+        $body .= "</td>";
+        $body .= "</tr>\n";
 
-     {
-         my $eh_keywords;
-         $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}}) if $keywords{$pic->{'picid'}};
-         $eh_keywords = LJ::eall($eh_keywords);
-         $body .= "<tr><td align='right'><b><label for='$pid-key'>Keywords:</label></b></td><td> <input id='$pid-key' size='30' name='kw_$pic->{'picid'}' value=\"$eh_keywords\"$dis /></td></tr>\n";
-     }
+    }
 
-     $body .= "</table>\n";
+    if ($piccount) {
+        $body .= "<tr><td></td><td align=left>&nbsp;<b><label for='nodefpic'>No Default Picture</label></b>&nbsp;";
+        $body .= LJ::html_check({ 'name' => 'defaultpic', 
+                                  'value' => 0,
+                                  'type' => 'radio',
+                                  'selected' => ! $u->{'defaultpicid'}, 
+                                  'raw' => "id='nodefpic'" });
 
-     $body .= "</td>";
-     $body .= "</tr>\n";
-
- }
-
- if ($piccount) {
-     $body .= "<tr><td></td><td align=left>&nbsp;<b><label for='nodefpic'>No Default Picture</label></b>&nbsp;";
-     $body .= LJ::html_check({ 'name' => 'defaultpic', 
-                               'value' => 0,
-                               'type' => 'radio',
-                               'selected' => ! $u->{'defaultpicid'}, 
-                               'raw' => "id='nodefpic'",
-                           });
-     $body .= "</td><td>&nbsp;</td></tr>\n";
-     $body .= "<tr><td></td><td>&nbsp;<p>" . LJ::html_submit(undef, "Save Settings") . "</td></tr>\n";
-     $body .= "</table>";
-     $body .= "</form>";
- } else {
-     $body .= "<?h1 No Pictures h1?><?p You have no pictures uploaded.  To upload one, go <a href='/uploadpic.bml?authas=$authas'>here</A>. p?>";
- }
+        $body .= "</td><td>&nbsp;</td></tr>\n";
+        $body .= "<tr><td></td><td>&nbsp;<p>" . LJ::html_submit(undef, "Save Settings") . "</td></tr>\n";
+        $body .= "</table>";
+        $body .= "</form>";
+    } else {
+        $body .= "<?h1 No Pictures h1?><?p You have no pictures uploaded.  To upload one, go <a href='/uploadpic.bml?authas=$authas'>here</A>. p?>";
+    }
  
- return;
+    return;
 
+}
 _code?><?page
 title=><?_code return $title; _code?>
 body=><?_code return $body; _code?>
