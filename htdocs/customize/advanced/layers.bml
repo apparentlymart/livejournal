@@ -4,7 +4,10 @@
     use vars qw(%GET %POST $title $body);
 
     $title = "Your Layers";
-    $body = "";
+    $body = BML::ml("Backlink", {
+        'link' => './',
+        'text' => 'Advanced Customization',
+    });
 
     my $err = sub {
         $title = "Error";
@@ -22,12 +25,16 @@
 
     my $dbr = LJ::get_db_reader();
     my $remote = LJ::get_remote();
-    return $err->('You must be logged in to view your layers.') unless $remote;
+    return $err->('You must be logged in to view your layers.') 
+        unless $remote;
+
+    my $has_priv = LJ::get_cap($remote, 's2styles');
 
     ### perform actions ###
 
     # create
     if ($POST{'action:create'}) {
+        return $err->("Account type doesn't permit creating styles") unless $has_priv;
         my $err_badparid = "No/bogus parent layer ID given (for layouts and core languages, use core parent ID; for themes and layout languages, use layout ID)";
         my $type = $POST{'type'} or return $err->("No layer type selected.");
         my $parid = $POST{'parid'}+0 or return $err->($err_badparid);
@@ -69,6 +76,7 @@
 
     # delete
     if ($POST{'action:del'}) {
+        return $err->("Account type doesn't permit modifying layers") unless $has_priv;
         my $id = $POST{'id'}+0;
         my $lay = LJ::S2::load_layer($dbr, $id) or return $err->("Non-existant layer");
         return $err->("Not your layer") unless $lay->{'userid'} == $remote->{'userid'};
@@ -101,7 +109,8 @@
     $ulay{$_->{'s2lid'}} = $_ while $_ = $sth->fetchrow_hashref;
     push @to_load, keys %ulay;
     LJ::S2::load_layer_info(\%layerinfo, \@to_load);
-    
+
+    $body .= "<?h1 Your Layers h1?>";
     if (%ulay) {
         $body .= "<table style='margin-bottom: 10px' cellpadding='3' border='1' class='postheading'>";
         $body .= "<tr><td><b>LayerID</b></td><td><b>Type</b></td><td><b>Name</b></td><td><b>Actions</b></td></tr>\n";
@@ -112,17 +121,18 @@
             my $bid = $ulay{$lid}->{'b2lid'};
             if ($bid != $lastbase) {
                 $lastbase = $bid;
-                my $pname = LJ::ehtml($layerinfo{$bid}->{'name'});
+                my $parlay = $layerinfo{$bid} || $pub->{$bid};
+                my $pname = LJ::ehtml($parlay->{'name'});
                 $body .= "<tr><td colspan='4'><small>Child of <a href='layerbrowse.bml?id=$bid'>layer $bid</a>: $pname</small></td></tr>\n";
             }
             my $i = $layerinfo{$lid};
             my $name = LJ::ehtml($i->{'name'}) || "<i>(none)</i>";
             $body .= "<tr><td><a href='layerbrowse.bml?id=$lid'>$lid</a></td><td>$ulay{$lid}->{'type'}</td><td>$name</td><td>";
             $body .= "<form method='post' style='display:inline' action='layeredit.bml?id=$lid'>";
-            $body .= "<input type='submit' name='action:edit' value='Edit...'></form>\n";
+            $body .= "<input type='submit' name='action:edit' value='Edit...' /></form>\n";
             $body .= "<form method='post' style='display:inline' action='layers.bml'>";
             $body .= LJ::html_hidden('id', $lid);
-            $body .= "<input type='submit' name='action:del' value='Delete...'>";
+            $body .= "<input type='submit' name='action:del' value='Delete...' />";
             $body .= "</form>\n";
             $body .= "</td></tr>"
         }
@@ -134,7 +144,11 @@
 
     # create layer
     $body .= "<?h1 Create Layer h1?>";
-    
+    unless ($has_priv) {
+        $body .= "<?p Your account type doesn't allow layer creation. p?>";
+        return;
+    }
+
     $body .= "<?h2 Create top-level layer h2?>\n";
     $body .= "<form class='postheading' method='post' action='layers.bml'>";
     
@@ -144,7 +158,7 @@
                                         "i18nc" => "Language",
                                         );
     $body .= " Core Version: " . LJ::html_select({ 'name' => 'parid' }, 
-                                                 map { $_, $pub->{$_}->{'name'} }
+                                                 map { $_, $pub->{$_}->{'majorversion'} }
                                                  sort { $pub->{$a}->{'name'} cmp $pub->{$b}->{'name'} ||
                                                         $a <=> $b }
                                                  grep { $pub->{$_}->{'b2lid'} == 0 && /^\d+$/}

@@ -7,7 +7,6 @@
     use strict;
     use vars qw(%GET %POST);
 
-    my %layerinfo;
     my $pub = LJ::S2::get_public_layers();
 
     my $dbh = LJ::get_db_writer();
@@ -16,10 +15,9 @@
     my $id = $GET{'id'}+0 or return BML::redirect('layers.bml');
     my $lay = LJ::S2::load_layer($dbh, $id) or return "Bogus layer";
 
-    unless ($remote && 
-            ($remote->{'userid'} == $lay->{'userid'} ||
-             (defined $pub->{$id} && 
-              LJ::get_cap($remote, "s2everything")))) {
+    my $has_priv = LJ::get_cap($remote, "s2styles");
+
+    unless ($remote && ($remote->{'userid'} == $lay->{'userid'})) {
         return "Unauthorized.";
     }
 
@@ -32,7 +30,7 @@
                                 undef, $lay->{'s2lid'}) unless $s2;
 
     # we tried to compile something
-    if ($POST{'action'} eq "compile") {
+    if ($POST{'action'} eq "compile" && $has_priv) {
         $ret .= "<div style='margin: 20px 0 20px 40px'>\n";
         $ret .= "<b>Compiler Output</b><br />\n";
 
@@ -56,9 +54,9 @@
                 $snippet .= "\n";
 
                 # and now, fun with regular expressions
-                my $ct;
+                my $ct = 0;
                 $snippet =~ s!(.*?)\n!sprintf("%3d", ++$ct) . ": " . 
-                    LJ::ehtml($1) . "\n"!ges;                     # add line breaks and numbering
+                    LJ::ehtml($1) . "\n"!ge;                      # add line breaks and numbering
 
                 $snippet =~ s!^((?:.*?\n){$kill,$kill})           # kill before relevant lines
                                ((?:.*?\n){$prehilite,$prehilite}) # captuure context before error
@@ -76,13 +74,15 @@
         $ret .= "</div>\n\n";
     }
 
+    my @dis = $has_priv ? () : ( 'disabled' => 'disabled' );
     $ret .= LJ::html_hidden("action", "compile");
-    $ret .= LJ::html_submit('submit', 'Compile', { 'style' => 'float: right; margin-bottom: 2px' } );
+    $ret .= LJ::html_submit('submit', 'Compile', { @dis,
+                                                   'style' => 'float: right; margin-bottom: 2px' } );
     $ret .= "<b>Edit layer source</b>\n";
     $ret .= "<textarea class='s2' cols='50' name='s2' wrap='off' rows='40'>";
     $ret .= LJ::eall($s2);
     $ret .= "</textarea>\n";
-    $ret .= LJ::html_submit('submit', 'Compile') . "</form>\n";
+    $ret .= LJ::html_submit('submit', 'Compile', { @dis }) . "</form>\n";
 
 }
 _code?>

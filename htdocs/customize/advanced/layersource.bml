@@ -10,6 +10,7 @@
     my $remote = LJ::get_remote();
 
     my $id = $GET{'id'};
+    return BML::redirect('layers.bml') unless $id =~ /^\d+$/;
     my $lay;
     unless (defined $pub->{$id}) {
         $lay = LJ::S2::load_layer($id);
@@ -26,15 +27,33 @@
 
     if ($GET{'fmt'} eq "html") {
         my $html;
+        my ($md5, $save_cache);
+        if ($pub->{$id}) {
+            # let's see if we have it cached
+            $md5 = Digest::MD5::md5_hex($s2);
+            my $cache = $dbr->selectrow_array("SELECT value FROM blobcache WHERE bckey='s2html-$id'");
+            if ($cache =~ s/^\[$md5\]//) {
+                $html = $cache;
+            } else {
+                $save_cache = 1;
+            }
+        }
 
-        my $cr = new S2::Compiler;
-        $cr->compile_source({
-            'source' => \$s2,
-            'output' => \$html,
-            'format' => "html",
-            'type' => $pub->{$id}->{'type'},
-        });
+        unless ($html) {
+            my $cr = new S2::Compiler;
+            $cr->compile_source({
+                'source' => \$s2,
+                'output' => \$html,
+                'format' => "html",
+                'type' => $pub->{$id}->{'type'},
+            });
+        }
 
+        if ($save_cache) {
+            my $dbh = LJ::get_db_writer();
+            $dbh->do("REPLACE INTO blobcache (bckey, dateupdate, value) VALUES (?,NOW(),?)",
+                     undef, "s2html-$id", "[$md5]$html");
+        }
         return $html;
     }
 

@@ -3,7 +3,10 @@
     use strict;
     use vars qw(%GET %POST $title $body);
 
-    $body = "";
+    $body = BML::ml("Backlink", {
+        'link' => './',
+        'text' => 'Advanced Customization',
+    });
 
     my $err = sub {
         $title = "Error";
@@ -30,7 +33,6 @@
         my @to_load = grep { /^\d+$/ } keys %$pub;
         LJ::S2::load_layer_info(\%layerinfo, \@to_load);
 
-        $body .= "<?p These layers are available for use by everybody. p?>";
         my $recurse = sub {
             my $self = shift;
             my $pid = shift;  # parent id
@@ -38,9 +40,6 @@
             my $uniq = $lay->{'uniq'};
             my $id = $lay->{'s2lid'};
             my $controls;
-            if (LJ::get_cap($remote, "s2everything")) {
-                $controls .= " [<a href='layeredit?id=$id'>edit</a>]";
-            }
             $controls = "<small>$controls</small>" if $controls;
             my $typedes;
             if ($lay->{'type'} eq "core" || $lay->{'type'} eq "layout") {
@@ -107,12 +106,13 @@
         $xlink->($r);
     };
 
-    $body .= "[&lt;&lt; <a href=\"layerbrowse.bml\">Layer List</a>]\n";
+    $body .= "<p>[&lt;&lt; <a href=\"layerbrowse.bml\">Layer List</a>]\n";
     $body .= "[<a href=\"layersource.bml?id=$id\">Download</a>]\n";
     $body .= "[<a href=\"layersource.bml?id=$id&fmt=html\">View as HTML</a>]\n";
     if ($layer->{'b2lid'}) {
         $body .= "[<a href=\"layerbrowse.bml?id=$layer->{'b2lid'}\">Parent Layer</a>]\n";
     }
+    $body .= "</p>";
 
     # layerinfo
     if (my $info = $s2info->{'info'}) {
@@ -268,21 +268,7 @@
     
     return;
 }
-_code?><?page
-head<=
-<style>
-    caption {
-        font-size: 15px;
-        font-style: italic;
-        font-weight: bold;
-        text-align: left;
-        padding-bottom: 0px;
-        margin-bottom: 0px;
-        padding-top: 10px;
-    }
-</style>
-<=head
-title=><?_code return $title; _code?>
+_code?><?page title=><?_code return $title; _code?>
 body=><?_code return $body; _code?>
 page?>
     

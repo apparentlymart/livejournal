@@ -52,7 +52,7 @@ body<=
     LJ::load_user_props($dbs, $u, "stylesys", "s2_style");
     $u->{'stylesys'} ||= 1;
     my $pub = LJ::S2::get_public_layers();
-    my $userlay = {};   # TODO: add API call to fetch these
+    my $userlay = LJ::S2::get_layers_of_user($u);
     my %style = LJ::S2::get_style($u->{'s2_style'});
 
     my $get_lang = sub {
@@ -146,6 +146,14 @@ body<=
     my @layouts = map { $_, LJ::ehtml($pub->{$_}->{'name'}) }
                  grep { /^\d+$/ && $pub->{$_}->{'type'} eq "layout" &&
                         LJ::S2::can_use_layer($u, $pub->{$_}->{'uniq'})  } keys %$pub;
+    # add user ones
+    {
+        my @user = map { $_, LJ::ehtml($userlay->{$_}->{'name'}) } 
+                  grep { /^\d+$/ && $userlay->{$_}->{'type'} eq "layout" } keys %$userlay;
+        if (@user) {
+            push @layouts, "", "------", @user;
+        }
+    }
     $ret .= "<?h1 Step 1: Layout h1?><?p Pick your layout.  Because theme selection and custom modifications depend on your layout, changing this setting discards all other edits you may have made. p?>";
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'layoutid',

@@ -145,40 +145,68 @@ sub get_public_layers
 
     my $dbr = LJ::get_db_reader();
     $sysid ||= LJ::get_userid($dbr, "system");
+    my $layers = get_layers_of_user($sysid, "pop_children");
+
+    return $layers if $LJ::LESS_CACHING;
+    $LJ::CACHED_PUBLIC_LAYERS = $layers if $layers;
+    return $LJ::CACHED_PUBLIC_LAYERS;
+}
+
+sub get_layers_of_user
+{
+    my ($u, $pop_children) = @_;
+    my $userid;
+    if (ref $u eq "HASH") {
+        $userid = $u->{'userid'}+0;
+    } else {
+        $userid = $u + 0;
+        undef $u;
+    }
+    return undef unless $userid;
+
+    return $u->{'_s2layers'} if $u && $u->{'_s2layers'};
+
+    my %layers;    # id -> {hashref}, uniq -> {same hashref}
+    my $dbr = LJ::get_db_reader();
     
-    my %existing;  # uniq -> id
     my $sth = $dbr->prepare("SELECT i.infokey, i.value, l.s2lid, l.b2lid, l.type ".
                             "FROM s2layers l, s2info i ".
-                            "WHERE l.userid=$sysid AND l.s2lid=i.s2lid AND ".
-                            "i.infokey IN ('redist_uniq', 'name', 'langcode', '_previews')");
-    $sth->execute;
+                            "WHERE l.userid=? AND l.s2lid=i.s2lid AND ".
+                            "i.infokey IN ('redist_uniq', 'name', 'langcode', ".
+                            "'majorversion', '_previews')");
+    $sth->execute($userid);
     die $dbr->errstr if $dbr->err;
     while (my ($key, $val, $id, $bid, $type) = $sth->fetchrow_array) {
-        $existing{$id}->{'b2lid'} = $bid;
-        $existing{$id}->{'s2lid'} = $id;
-        $existing{$id}->{'type'} = $type;
+        $layers{$id}->{'b2lid'} = $bid;
+        $layers{$id}->{'s2lid'} = $id;
+        $layers{$id}->{'type'} = $type;
         $key = "uniq" if $key eq "redist_uniq";
-        $existing{$id}->{$key} = $val;
+        $layers{$id}->{$key} = $val;
     }
 
-    foreach (keys %existing) {
+    foreach (keys %layers) {
         # setup uniq alias.
-        $existing{$existing{$_}->{'uniq'}} = $existing{$_};
+        if ($layers{$_}->{'uniq'} ne "") {
+            $layers{$layers{$_}->{'uniq'}} = $layers{$_};
+        }
 
         # setup children keys
-        next unless $existing{$_}->{'b2lid'};
-        my $bid = $existing{$_}->{'b2lid'};
-        unless ($existing{$bid}) {
-            delete $existing{$existing{$_}->{'uniq'}};
-            delete $existing{$_};
-            next;
+        next unless $layers{$_}->{'b2lid'};
+        if ($pop_children) {
+            my $bid = $layers{$_}->{'b2lid'};
+            unless ($layers{$bid}) {
+                delete $layers{$layers{$_}->{'uniq'}};
+                delete $layers{$_};
+                next;
+            }
+            push @{$layers{$bid}->{'children'}}, $_;
         }
-        push @{$existing{$bid}->{'children'}}, $_;
     }
 
-    return \%existing if $LJ::LESS_CACHING;
-    $LJ::CACHED_PUBLIC_LAYERS = \%existing if %existing;
-    return $LJ::CACHED_PUBLIC_LAYERS;
+    if ($u) {
+        $u->{'_s2layers'} = \%layers;
+    }
+    return \%layers;
 }
 
 sub get_style
@@ -737,7 +765,7 @@ sub get_policy
 sub can_use_layer
 {
     my ($u, $uniq) = @_;  # $uniq = redist_uniq value
-    return 1 if LJ::get_cap($u, "s2everything");
+    return 1 if LJ::get_cap($u, "s2styles");
     my $pol = get_policy();
     my $can = 0;
     foreach ('*', $uniq) {
@@ -751,7 +779,7 @@ sub can_use_layer
 sub can_use_prop
 {
     my ($u, $uniq, $prop) = @_;  # $uniq = redist_uniq value
-    return 1 if LJ::get_cap($u, "s2everything");
+    return 1 if LJ::get_cap($u, "s2styles");
     my $pol = get_policy();
     my $can = 0;
     my @layers = ('*');

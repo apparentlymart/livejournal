@@ -4,7 +4,7 @@
 # That file will override anything not set here.
 #
 # 'allow' means all users get access.  'deny' means only users with
-# the 's2everything' capability get access.
+# the 's2styles' capability get access.
 #
 
 # Default policy for layouts without their own policy section.
