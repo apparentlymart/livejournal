@@ -117,6 +117,7 @@ sub clean
     }
 
     my %opencount = ();
+    my @tablescope = ();
 
     my $cutcount = 0;
 
@@ -286,7 +287,12 @@ sub clean
                             }
                         }
                     }
-                        
+                    
+                    # reserve ljs_* ids for divs, etc so users can't override them to replace content
+                    if ($attr eq 'id' && $hash->{$attr} =~ /^ljs_/i) {
+                        delete $hash->{$attr};
+                    }
+
                     if ($s1var) {
                         if ($attr =~ /%%/) {
                             delete $hash->{$attr};
@@ -361,8 +367,17 @@ sub clean
                     if ($allow && ! $remove{$tag})
                     {
                         if ($opts->{'tablecheck'}) {
-                            if (($tag eq 'td' || $tag eq 'th') && ! $opencount{'tr'}) { $allow = 0; }
-                            elsif ($tag =~ /^(?:tr|tbody|thead|tfoot)$/ && ! $opencount{'table'}) { $allow = 0; }
+
+                            $allow = 0 if
+
+                                # can't open table elements from outside a table
+                                ($tag =~ /^(?:tbody|thead|tfoot|tr|td|th)$/ && ! @tablescope) ||
+
+                                # can't open td or th if not inside tr
+                                ($tag =~ /^(?:td|th)$/ && ! $tablescope[-1]->{'tr'}) ||
+
+                                # can't open a table unless inside a td or th
+                                ($tag eq 'table' && @tablescope && ! grep { $tablescope[-1]->{$_} } qw(td th));
                         }
 
                         if ($allow) { $newdata .= "<$tag"; }
@@ -387,10 +402,25 @@ sub clean
                         if ($slashclose) {
                             $newdata .= " /";
                             $opencount{$tag}--;
+                            $tablescope[-1]->{$tag}-- if $opts->{'tablecheck'} && @tablescope;
                         }
                         if ($allow) { 
                             $newdata .= ">"; 
                             $opencount{$tag}++;
+
+                            # maintain current table scope
+                            if ($opts->{'tablecheck'}) {
+
+                                # open table
+                                if ($tag eq 'table') {
+                                    push @tablescope, {};
+
+                                # new tag within current table
+                                } elsif (@tablescope) {
+                                    $tablescope[-1]->{$tag}++;
+                                }
+                            }
+
                         }
                         else { $newdata .= "&gt;"; }
                     }
@@ -405,6 +435,7 @@ sub clean
             my $allow;
             if ($tag eq "lj-raw") {
                 $opencount{$tag}--;
+                $tablescope[-1]->{$tag}-- if $opts->{'tablecheck'} && @tablescope;
             }
             elsif ($tag eq "lj-cut") {
                 if ($opts->{'cutpreview'}) {
@@ -423,13 +454,34 @@ sub clean
                 {
 
                     if ($opts->{'tablecheck'}) {
-                        if ($tag eq 'table' && $opencount{'tr'}) { $allow = 0; }
-                        elsif ($tag eq 'tr' && $opencount{'td'}) { $allow = 0; }
+
+                        $allow = 0 if
+
+                            # can't close table elements from outside a table
+                            ($tag =~ /^(?:table|tbody|thead|tfoot|tr|td|th)$/ && ! @tablescope) ||
+
+                            # can't close td or th unless open tr
+                            ($tag =~ /^(?:td|th)$/ && ! $tablescope[-1]->{'tr'});
                     }
 
                     if ($allow && ! ($opts->{'noearlyclose'} && ! $opencount{$tag})) {
+
+                        # maintain current table scope
+                        if ($opts->{'tablecheck'}) {
+
+                            # open table
+                            if ($tag eq 'table') {
+                                pop @tablescope;
+
+                            # closing tag within current table
+                            } elsif (@tablescope) {
+                                $tablescope[-1]->{$tag}--;
+                            }
+                        }
+
                         $newdata .= "</$tag>";
                         $opencount{$tag}--;
+
                     } else { $newdata .= "&lt;/$tag&gt;"; }
                 }
             }
