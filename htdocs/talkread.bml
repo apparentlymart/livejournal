@@ -34,6 +34,9 @@ body<=
         var subject = document.getElementById('subject');
         subject.value = newsubject;
 
+        var dtid_field = document.getElementById('dtid');
+        dtid_field.value = dtid;
+
         var qr_div = document.getElementById('qrdiv');
         var cur_div = document.getElementById(dtid);
 
@@ -61,9 +64,11 @@ body<=
 
     function moreopts()
     {
-        var itemid = document.getElementById('itemid');
         var multi_form = document.getElementById('multiform');
-        multi_form.action = '/talkpost.bml?replyto='+itemid.value;
+        var basepath = document.getElementById('basepath');
+        var dtid = document.getElementById('dtid');
+
+        multi_form.action = basepath.value + dtid.value;
         return true;
     }
 
@@ -584,14 +589,17 @@ body<=
          # Do Quick Reply stuff
          LJ::load_user_props($remote, "opt_no_quickreply") if $remote;
          if ($remote && !$remote->{'opt_no_quickreply'}) {
+             my $basepath = LJ::journal_base($u) . "/$ditemid.html?replyto=";;
              $ret .= LJ::html_hidden({'name' => 'replyto', 'id' => 'replyto', 'value' => ''},
                                      {'name' => 'parenttalkid', 'id' => 'parenttalkid', 'value' => ''},
                                      {'name' => 'itemid', 'id' => 'itemid', 'value' => $ditemid},
                                      {'name' => 'usertype', 'id' => 'usertype', 'value' => 'cookieuser'},
                                      {'name' => 'userpost', 'id' => 'userpost', 'value' => $remote->{'user'}},
                                      {'name' => 'qr', 'id' => 'qr', 'value' => '1'},
-                                     {'name' => 'cookieuser', 'id' => 'cookieuser', 'value' => $remote->{'user'}
-                                  });
+                                     {'name' => 'cookieuser', 'id' => 'cookieuser', 'value' => $remote->{'user'}},
+                                     {'name' => 'dtid', 'id' => 'dtid', 'value' => ''},
+                                     {'name' => 'basepath', 'id' => 'basepath', 'value' => $basepath},
+                                  );
 
              # rate limiting challenge
              {
