@@ -186,7 +186,7 @@ BODY<=
      my $overrides = "";
      if ($u->{'useoverrides'} eq "Y")
      {
-         $sth = $dbh->prepare("SELECT override FROM overrides WHERE user=$quser");
+         $sth = $dbr->prepare("SELECT override FROM overrides WHERE user=$quser");
          $sth->execute;
          ($overrides) = $sth->fetchrow_array;
      }
@@ -253,7 +253,7 @@ BODY<=
      {
 	 my $oldoverrides = "";
 	 if ($u->{'useoverrides'} eq "Y") {
-	     $sth = $dbh->prepare("SELECT override FROM overrides WHERE user=$quser");
+	     $sth = $dbr->prepare("SELECT override FROM overrides WHERE user=$quser");
 	     $sth->execute;
 	     ($oldoverrides) = $sth->fetchrow_array;
 	 }
