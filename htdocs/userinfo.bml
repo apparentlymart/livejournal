@@ -519,7 +519,7 @@
      if ($friends{'count'}) {
          if (!$friends{'loaded'} || !$friends{'display'}) {
              $body .= "<b>" . $friends{'count'} . ":</b> ";
-             $body .= "<a href='/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'>" . BML::ml('.label.viewlabel',{'label'=>$label}) . "</a>.";
+             $body .= "<a href='/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'> " . ($com ? $ML{'.label.viewmembers'} : $ML{'.label.viewfriends'}) .  " </a>.";
          } else {
              $body .= "<b>" . $res_fr{'friend_count'} . ":</b> ";
              for (my $i=1; $i<=$res_fr{'friend_count'}; $i++) {

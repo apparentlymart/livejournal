@@ -1679,7 +1679,9 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.label.user=User:
 
-/userinfo.bml.label.viewlabel=View [[label]]
+/userinfo.bml.label.viewfriends=View Friends
+
+/userinfo.bml.label.viewmembers=View Members
 
 /userinfo.bml.label.website=Website:
 
