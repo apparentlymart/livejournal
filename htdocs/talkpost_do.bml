@@ -225,8 +225,12 @@ BODY<=
      # what's the tid of the newly inserted message?
      $insertid = $sth->{'mysql_insertid'};
 
-     $sth = $dbh->prepare("INSERT INTO talktext (talkid, subject, body) VALUES ($insertid, $qsubject, $qbody)");
-     $sth->execute;
+     my @prefix = ("");
+     if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
+     foreach my $pfx (@prefix) {
+         $sth = $dbh->prepare("INSERT INTO ${pfx}talktext (talkid, subject, body) VALUES ($insertid, $qsubject, $qbody)");
+         $sth->execute;
+     }
 
      # meta-data
      if ($subjecticon) {

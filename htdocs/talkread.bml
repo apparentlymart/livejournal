@@ -11,7 +11,9 @@ BODY<=
 
  return &server_down_html() if ($LJ::SERVER_DOWN);
 
- &connect_db;
+ my $dbs = LJ::get_dbs();
+ $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
  require 'talklib.pl';
  &load_subjecticon;
@@ -41,7 +43,7 @@ BODY<=
  }
 
  ### load users
- $sth = $dbh->prepare("SELECT * FROM user WHERE userid IN ($item->{'ownerid'}, $item->{'posterid'})");
+ $sth = $dbr->prepare("SELECT * FROM user WHERE userid IN ($item->{'ownerid'}, $item->{'posterid'})");
  $sth->execute;
  my ($u, $up);
  my $quser;
@@ -285,11 +287,10 @@ BODY<=
 
 # $ret .= "<P>talkid_in = " . scalar(@posts_to_load) . " = ($talkid_in)\n";
 
- ### load rests of some of the posts
- $sth = $dbh->prepare("SELECT talkid, body FROM talktext WHERE talkid IN ($talkid_in)");
- $sth->execute;
- while (my ($talkid, $body) = $sth->fetchrow_array) {
-     $posts{$talkid}->{'body'} = $body;
+ ### loads more of some of the posts, uses slaves if possible.
+ my $posts_loaded = LJ::get_talktext($dbs, @posts_to_load);
+ foreach my $talkid (keys %{$posts_loaded}) {
+     $posts{$talkid}->{'body'} = $posts_loaded->{$talkid}->[1];
      $posts{$talkid}->{'_loaded'} = 1;
      $users_to_load{$posts{$talkid}->{'posterid'}} = 1;
  }
@@ -331,7 +332,7 @@ BODY<=
  if (%users_to_load) {
      my @pics_to_load;
      my $userid_in = join(", ", keys %users_to_load);
-     $sth = $dbh->prepare("SELECT user, statusvis, email, name, defaultpicid FROM user WHERE userid IN ($userid_in)");
+     $sth = $dbr->prepare("SELECT user, statusvis, email, name, defaultpicid FROM user WHERE userid IN ($userid_in)");
      $sth->execute;
      push @pics_to_load;
      while ($_ = $sth->fetchrow_hashref) {
