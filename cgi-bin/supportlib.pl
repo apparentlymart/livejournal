@@ -50,8 +50,6 @@ sub init_remote
     return unless ($remote);
 
     if ($remote->{'userid'}) {
-        my $u = LJ::load_userid($dbh, $remote->{'userid'});
-        %$remote = %$u;
         LJ::load_user_privs($dbh, $remote, 
                             qw(supportclose supporthelp 
                                supportdelete supportread));
