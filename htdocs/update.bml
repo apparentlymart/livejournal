@@ -26,7 +26,6 @@
 
  my $remote = LJ::get_remote();
  my $dbcm = LJ::get_cluster_master($remote);
- my $dbr = LJ::get_db_reader();
 
  # portal uses this, to avoid putting username/auth in hidden fields:
  if ($FORM{'remoteuser'} ne "" && $remote && 
@@ -105,13 +104,13 @@ if ($remote && ! LJ::get_cap($remote, "can_post")) {
      if ($FORM{'prop_current_mood'} ne "") 
      {
          delete $FORM{'prop_current_moodid'};
-         my $qmood = $dbr->quote(lc($FORM{'prop_current_mood'}));
-         my $sth = $dbr->prepare("SELECT moodid FROM moods WHERE mood=$qmood");
-         $sth->execute;
-         my ($moodid) = $sth->fetchrow_array;
-         if ($moodid) {
+         LJ::load_moods();
+         my $moodname = lc($FORM{'prop_current_mood'});
+         while (my ($id, $mood) = each %LJ::CACHE_MOODS) {
+             next unless $mood->{'name'} eq $moodname;
              delete $FORM{'prop_current_mood'};
-             $FORM{'prop_current_moodid'} = $moodid;
+             $FORM{'prop_current_moodid'} = $id;
+             last;
          }
      }
 
@@ -144,11 +143,8 @@ if ($remote && ! LJ::get_cap($remote, "can_post")) {
      if ($res{'success'} eq "OK") {
          my $uri = "/users/$FORM{'user'}/";
          if ($FORM{'usejournal'}) {
-             my $quj = $dbr->quote($FORM{'usejournal'});
-             my $sth = $dbr->prepare("SELECT journaltype FROM user WHERE user=$quj");
-             $sth->execute;
-             my ($type) = $sth->fetchrow_array;
-             if ($type eq "C") {
+             my $ju = LJ::load_user($FORM{'usejournal'});
+             if ($ju && $ju->{'journaltype'} eq "C") {
                  $uri = "/community/$FORM{'usejournal'}/";
              } else {
                  $uri = "/users/$FORM{'usejournal'}/";
