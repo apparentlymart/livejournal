@@ -299,9 +299,10 @@ body<=
 
  # mass close button
  if ($can_close) {
+     my $time = time();
      $ret .= LJ::html_hidden('ids', join(':', map { $_->{spid} } @support_log),
                              'spcatid', $fcat->{spcatid},
-                             'ret', "/support/help.bml?state=$state&cat=$filtercat");
+                             'ret', "/support/help.bml?state=$state&cat=$filtercat&time=$time");
      $ret .= "<br />" . LJ::html_submit('action:close', 'Close Marked Requests', {
                             onclick => 'return confirm("Are you sure you want to close the marked requests?");' }) if $rct;
      $ret .= "</form>";
