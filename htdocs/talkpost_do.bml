@@ -63,10 +63,10 @@ BODY<=
      $FORM{'usertype'} = "user";
  }
 
- if (($FORM{'userpost'} eq "test" || $FORM{'userpost'} eq "test2")
-     && !($u->{'user'} eq "test" || $u->{'user'} eq "test2")) 
+ if ((grep { $FORM{'userpost'} eq $_ } @LJ::TESTACCTS) && !
+     (grep { $u->{'user'}      eq $_ } @LJ::TESTACCTS))
  {
-     push @errors, "The test account can only be used in the 'test' or 'test2' journals.";
+     push @errors, "Test accounts can only be used in test account journals.";
  }
 
  my $userpost = lc($FORM{'userpost'});
