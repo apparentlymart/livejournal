@@ -23,6 +23,8 @@ _code?>
   <dd><?_ml .information.emailpost.about _ml?></dd>
   <dt><a href="./pubkey.bml">PGP/GPG public key</a></dt>
   <dd>Upload your public key</dd>
+  <dt><a href="/manage/invites.bml"><?_ml /manage/invites.bml.title _ml?></a></dt>
+  <dd><?_ml .communities.invites.about _ml?></dd>
 </dl>
 
 <?h1 <?_ml .customization.header _ml?> h1?>
