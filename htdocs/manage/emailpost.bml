@@ -202,8 +202,8 @@ body<=
 
                     <a name="pgp"></a>
                     <fieldset><legend>PGP/GPG message signing <img src="/img/key.gif" width="16" height="16"></legend>
-                    <?p If you specify "<b>PGP</b>" as your PIN,
-                    allowed sender addresses and saved PIN are completely ignored.
+                    <?p If you specify "<b>PGP</b>" instead of your PIN,
+                    allowed sender addresses and the saved PIN are completely ignored.
                     Your email will only be posted if it is signed with a valid PGP/GPG private key. p?>
                     <?p You must first upload your public key <a href="/manage/pubkey.bml">here</a>. p?>
                     <?emailex
