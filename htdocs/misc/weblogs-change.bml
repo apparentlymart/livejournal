@@ -1,0 +1,14 @@
+<?_code
+{
+    use strict;
+    use vars qw(%FORM);
+
+    return "no user" unless $FORM{'user'};
+
+    my $dbr = LJ::get_db_reader();
+    my $u =  LJ::load_user($dbr, $FORM{'user'});
+    return "no user" unless $u;
+
+    return $dbr->selectrow_array("SELECT timeupdate FROM userusage WHERE userid=?", undef, $u->{'userid'});
+}
+_code?>
