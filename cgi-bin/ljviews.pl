@@ -81,7 +81,7 @@ sub create_view_lastn
     }
 
     # "Automatic Discovery of RSS feeds"
-    $lastn_page{'head'} .= qq{<link rel="alternate" type="text/xml" title="XML" href="$journalbase/rss" />\n};
+    $lastn_page{'head'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$journalbase/rss" />\n};
 
     $lastn_page{'head'} .= 
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'LASTN_HEAD'};
