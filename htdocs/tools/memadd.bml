@@ -49,11 +49,6 @@
  }
  $sth->execute;
  my $log = $sth->fetchrow_hashref;
- unless ($log && $log->{'anum'} == $anum) {
-     $title = "Error";
-     $body = "No such journal entry";
-     return;
- }
 
  # check to see if it already is memorable (thus we're editing, not adding);
  $sth = $dbr->prepare("SELECT memid, des, security FROM memorable WHERE ".
@@ -85,7 +80,22 @@
 	     $keywords .= $kw;
 	     $selected_keyword{$kw} = 1;
 	 }
+         if (!$log || !($log->{'anum'} == $anum))
+         {
+             $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
+             $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
+             $title = "Error";
+             $body = "Journal entry no longer exists.  Memory deleted.";
+             return;
+         }
+
      } 
+     elsif (!$log || !($log->{'anum'} == $anum)) 
+     {
+         $title = "Error";
+         $body = "No such journal entry.";
+         return;
+     }
      else 
      {
 	 my $user = LJ::get_username($dbs, $log->{'ownerid'});
