@@ -882,63 +882,64 @@ $LJ::COMMON_CODE{'autoradio_check'} = q{
 
 # Common Javascript functions for Quick Reply
 $LJ::COMMON_CODE{'quickreply'} = q{
-    <script language="JavaScript" type="text/javascript" src="/js/xbDOM.js"></script>
-    <script language="JavaScript" type="text/javascript" src="/js/browserdetect.js"></script>
+    <script language="JavaScript" type="text/javascript" src="/js/x_core.js"></script>
     <script language='Javascript' type='text/javascript'>
     <!--
     var lastDiv;
     lastDiv = 'qrdiv';
 
     function quickreply(dtid, pid, newsubject) {
-        // Mac IE 5.x does not like the replaceChild function!
-        // Cannot understand a crash report since it has no useful debug info in it.
-        if (browser.isIE && browser.isMac) { return true;}
+        // Mac IE 5.x does not like dealing with
+        // nextSibling since it does not support it
+        if (xIE4Up && xMac) { return true;}
 
-        // Netscape 6 and below does not do Quick Reply anyway so make sure it doesn't try to
-        if (browser.isNS && ! browser.isNS6up) return true;
-
-        var ptalkid = xbGetElementById('parenttalkid');
+        var ptalkid = xGetElementById('parenttalkid');
         ptalkid.value = pid;
 
-        var rto = xbGetElementById('replyto');
+        var rto = xGetElementById('replyto');
         rto.value = pid;
 
-        var subject = xbGetElementById('subject');
-        subject.value = newsubject;
-
-        var dtid_field = xbGetElementById('dtid');
+        var dtid_field = xGetElementById('dtid');
         dtid_field.value = dtid;
 
-        var qr_div = xbGetElementById('qrdiv');
-        var cur_div = xbGetElementById(dtid);
+        var qr_div = xGetElementById('qrdiv');
+        var cur_div = xGetElementById(dtid);
 
         if (lastDiv == 'qrdiv') {
-            qr_div.style.display = 'inline';
+            if (! showQRdiv(qr_div)) {
+               return true;
+            }
 
-            // only one swap
-            swapnodes(qr_div, cur_div);
+            // Only one swap
+            if (! swapnodes(qr_div, cur_div)) {
+                return true;
+            }
         } else if (lastDiv != dtid) {
-              var last_div = xbGetElementById(lastDiv);
+            var last_div = xGetElementById(lastDiv);
 
-              // Two swaps
-              swapnodes(last_div, cur_div);
-              swapnodes(qr_div, last_div);
+            // Two swaps
+            if (! (swapnodes(last_div, cur_div) && swapnodes(qr_div, last_div))) {
+                return true;
+            }
         }
 
         lastDiv = dtid;
 
-        var multi_form = xbGetElementById('multiform');
+        var subject = xGetElementById('subject');
+        subject.value = newsubject;
+
+        var multi_form = xGetElementById('multiform');
         multi_form.action = '/talkpost_do.bml';
 
-        // So it doesn't follow the link
+        // So it does not follow the link
         return false;
     }
 
     function moreopts()
     {
-        var multi_form = xbGetElementById('multiform');
-        var basepath = xbGetElementById('basepath');
-        var dtid = xbGetElementById('dtid');
+        var multi_form = xGetElementById('multiform');
+        var basepath = xGetElementById('basepath');
+        var dtid = xGetElementById('dtid');
 
         multi_form.action = basepath.value + dtid.value;
         return true;
@@ -946,32 +947,37 @@ $LJ::COMMON_CODE{'quickreply'} = q{
 
    function submitform()
    {
-        var submit = xbGetElementById('submitpost');
+        var submit = xGetElementById('submitpost');
         submit.disabled = true;
 
-        var submitmore = xbGetElementById('submitmoreopts');
+        var submitmore = xGetElementById('submitmoreopts');
         submitmore.disabled = true;
 
         // New top-level comments
-        var dtid = xbGetElementById('dtid');
+        var dtid = xGetElementById('dtid');
         if (dtid.value == 'top' || dtid.value == 'bottom') {
             dtid.value = 0;
         }
 
-        var multi_form = xbGetElementById('multiform');
+        var multi_form = xGetElementById('multiform');
         multi_form.submit();
    }
 
    function swapnodes (orig, to_swap) {
-        var parent_node = orig.parentNode;
+        var orig_pn = xParent(orig, true);
         var next_sibling = orig.nextSibling;
-        to_swap.parentNode.replaceChild(orig, to_swap);
-        parent_node.insertBefore(to_swap, next_sibling);
+        var to_swap_pn = xParent(to_swap, true);
+        if (! to_swap_pn) {
+            return false;
+        }
+
+        to_swap_pn.replaceChild(orig, to_swap);
+        orig_pn.insertBefore(to_swap, next_sibling);
         return true;
    }
 
    function checkLength() {
-        var textbox = xbGetElementById('body');
+        var textbox = xGetElementById('body');
         if (!textbox) return true;
         if (textbox.value.length > 4300) {
              alert('Sorry, but your comment of ' + textbox.value.length + ' characters exceeds the maximum character length of 4300.  Please try shortening it and then post again.');
@@ -982,12 +988,12 @@ $LJ::COMMON_CODE{'quickreply'} = q{
 
     // Maintain entry through browser navigations.
     function save_entry() {
-        var qr_body = xbGetElementById('body');
-        var qr_subject = xbGetElementById('subject');
-        var do_spellcheck = xbGetElementById('do_spellcheck');
-        var qr_upic = xbGetElementById('prop_picture_keyword');
-        var qr_dtid = xbGetElementById('dtid');
-        var qr_ptid = xbGetElementById('parenttalkid');
+        var qr_body = xGetElementById('body');
+        var qr_subject = xGetElementById('subject');
+        var do_spellcheck = xGetElementById('do_spellcheck');
+        var qr_upic = xGetElementById('prop_picture_keyword');
+        var qr_dtid = xGetElementById('dtid');
+        var qr_ptid = xGetElementById('parenttalkid');
 
         document.multiform.saved_body.value = qr_body.value;
         document.multiform.saved_subject.value = qr_subject.value;
@@ -1001,34 +1007,34 @@ $LJ::COMMON_CODE{'quickreply'} = q{
 
     // Restore saved_entry text across platforms.
     function restore_entry() {
-        var saved_body = xbGetElementById('saved_body');
+        var saved_body = xGetElementById('saved_body');
         if (saved_body.value == "") return false;
 
         setTimeout(
             function () {
 
-                var dtid = xbGetElementById('saved_dtid');
+                var dtid = xGetElementById('saved_dtid');
                 if (! dtid) return false;
-                var ptid = xbGetElementById('saved_ptid');
+                var ptid = xGetElementById('saved_ptid');
                 if (! ptid) return false;
 
                 quickreply(dtid.value, ptid.value, document.multiform.saved_subject.value);
 
-                var body = xbGetElementById('body');
+                var body = xGetElementById('body');
                 if (! body) return false;
                 body.value = saved_body.value;
 
                 // Some browsers require we explicitly set this after the div has moved
                 // and is now no longer hidden
-                var subject = xbGetElementById('subject');
+                var subject = xGetElementById('subject');
                 if (! subject) return false;
                 subject.value = document.multiform.saved_subject.value
 
-                var prop_picture_keyword = xbGetElementById('prop_picture_keyword');
+                var prop_picture_keyword = xGetElementById('prop_picture_keyword');
                 if (! prop_picture_keyword) return false;
                 prop_picture_keyword.selectedIndex = document.multiform.saved_upic.value;
 
-                var spell_check = xbGetElementById('do_spellcheck');
+                var spell_check = xGetElementById('do_spellcheck');
                 if (! spell_check) return false;
                 if (document.multiform.saved_spell.value == 'true') {
                     spell_check.checked = true;
@@ -1038,6 +1044,20 @@ $LJ::COMMON_CODE{'quickreply'} = q{
 
             }, 100);
         return false;
+    }
+
+    function showQRdiv(qr_div) {
+        if (! qr_div) {
+            qr_div = xGetElementById('qr_div');
+            if (! qr_div) {
+                return false;
+            }
+        } else if (qr_div.style && xDef(qr_div.style.display)) {
+            qr_div.style.display='inline';
+            return true;
+        } else {
+            return false;
+        }
     }
 
     //  -->

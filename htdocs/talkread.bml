@@ -17,7 +17,7 @@ body<=
 
  $$head .= $LJ::COMMON_CODE{'quickreply'};
 
- $$bodyopts .= 'onload="restore_entry();" onunload="save_entry()"';
+ $$bodyopts .= 'onload="restore_entry();" onunload="save_entry();"';
 
  my $pics = LJ::Talk::get_subjecticons();
 
@@ -489,9 +489,14 @@ body<=
      $ret .= "<form style='display: inline' method='post' action='/talkmulti.bml' name='multiform' id='multiform' >";
 
      # Quick Reply when posting a new top level comment
-     # requires setup.
+     # requires setup when logged in.
      $ret .= "<p class='lesstop' align='center'><b>$readlink";
-     $ret .= "(" . LJ::make_qr_link('top', '', $T{'postcomments'}, $posturl) . "</a>)" if $remote;
+     if ($remote) {
+         $ret .= "(" . LJ::make_qr_link('top', '', $T{'postcomments'}, $posturl) . "</a>)";
+     } else {
+         $ret .= "(<a href='$posturl'>$T{'postcomments'}</a>)";
+     }
+
      $ret .= "</b></p>";
 
      $ret .= "<div align='center'>" . LJ::make_qr_target('top') . "</div>" if $remote;
