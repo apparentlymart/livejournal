@@ -2345,8 +2345,8 @@ sub get_logtext2
     # keep track of itemids we still need to load.
     my %need;
     my @mem_keys;
-    foreach my $id (@_) { 
-        $id += 0;
+    foreach (@_) { 
+        my $id = $_+0;
         $need{$id} = 1;
         push @mem_keys, [$journalid,"logtext:$clusterid:$journalid:$id"];
     }
@@ -2411,8 +2411,8 @@ sub get_talktext2
     # keep track of itemids we still need to load.
     my %need;
     my @mem_keys;
-    foreach my $id (@_) {
-        $id += 0;
+    foreach (@_) {
+        my $id = $_+0;
         $need{$id} = 1;
         push @mem_keys, [$journalid,"talksubject:$clusterid:$journalid:$id"];
         unless ($opts->{'onlysubjects'}) {
@@ -4727,8 +4727,8 @@ sub load_log_props2
     
     my %need;
     my @memkeys;
-    foreach my $id (@$listref) {
-        $id += 0;
+    foreach (@$listref) {
+        my $id = $_+0;
         $need{$id} = 1;
         push @memkeys, [$userid,"logprop:$userid:$id"];
     }
@@ -4833,8 +4833,8 @@ sub load_talk_props2
 
     my %need;
     my @memkeys;
-    foreach my $id (@$listref) {
-        $id += 0;
+    foreach (@$listref) {
+        my $id = $_+0;
         $need{$id} = 1;
         push @memkeys, [$userid,"talkprop:$userid:$id"];
     }
