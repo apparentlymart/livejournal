@@ -158,13 +158,18 @@ BODY<=
      #       I wish 'last' or 'next' would break out of an if block.
      goto SUBMITERRORS if %errors;
 
+     # clusterid
+     my $qclusterid = ($LJ::ALLOW_CLUSTER_SELECT ? $FORM{'cluster_id'} : 
+                       $LJ::DEFAULT_CLUSTER)+0;
+     my $qdversion = $qclusterid ? 1 : 0;
+
      $qpassword = $dbh->quote($FORM{'password1'});
      my $userid = $u->{'userid'}+0;
      unless ($second_submit)
      {
 	 my $caps   = int($LJ::NEWUSER_CAPS);
 	 my $status = ($LJ::EVERYONE_VALID ? 'A'  : 'N');
-	 $dbh->do("INSERT INTO user (user, email, password, status, caps, name) VALUES ($quser, $qemail, $qpassword, '$status', $caps, $qname)");
+	 $dbh->do("INSERT INTO user (user, email, password, status, caps, name, clusterid, dversion) VALUES ($quser, $qemail, $qpassword, '$status', $caps, $qname, $qclusterid, $qdversion)");
 	 if ($dbh->err)
 	 {
 	     return "(=H1 Error H1=)(=P There was an error processing your request: <B>" . $dbh->errstr . "</B> P=)";
@@ -294,6 +299,16 @@ BODY<=
 	 $ret .= "(=H2 Notice to AOL Users H2=)(=P If you are an <b>AOL User</b>, make sure you go to <b>Keyword: <i>Mail Controls</i></b> and <b>turn off</b> any of AOL's \"useful\" mail controls.  You must be able to receive mail from the Internet or you will not recieve your confirmation code.  If your parents have this restricted, perhaps you really shouldn't be using (=SITENAME=). P=)";
 
 	 $ret .= "(=H2 Age H2=)(=P Are you under 13 years of age? <blockquote><input type=\"checkbox\" value=\"1\" name=\"under13\"> Yes, I am under 13 years old.</blockquote>  P=)";
+     }
+
+     if ($LJ::ALLOW_CLUSTER_SELECT) {
+	 $ret .= "(=H2 Cluster Selection H2=)(=P Please select the cluster you want to create this ".
+	     "account on. P=)";
+	 $ret .= "(=STANDOUT Cluster:<br />";
+	 $ret .= LJ::html_select({ 'name' => 'cluster_id' },
+				 "0", "No Cluster", 
+				 map { $_, "Cluster $_" } @LJ::CLUSTERS);
+	 $ret .= " STANDOUT=)"; 
      }
 
      $ret .= "(=H2 Proceed H2=)(=P Press the button below and you're on your way to having your very own LiveJournal! P=)";

@@ -1850,7 +1850,10 @@ sub create_account
     my $qpassword = $dbr->quote($o->{'password'});
     my $qname = $dbr->quote($o->{'name'});
 
-    my $sth = $dbh->prepare("INSERT INTO user (user, name, password) VALUES ($quser, $qname, $qpassword)");
+    my $cluster = $LJ::DEFAULT_CLUSTER + 0;
+
+    my $sth = $dbh->prepare("INSERT INTO user (user, name, password, clusterid, dversion) ".
+			    "VALUES ($quser, $qname, $qpassword, $cluster, 1)");
     $sth->execute;
     if ($dbh->err) { return 0; }
 
