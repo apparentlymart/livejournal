@@ -83,6 +83,7 @@
     my $enabled_rte = $POST{'switched_rte_on'};
     my $richtext = 1 if $GET{rich} || $POST{rich} ||
                         ($enabled_rte && ! $spellcheck_html);
+    $$bodyopts = "onunload=\"save_entry();\" " if $richtext;
 
     if ($did_post && ! $spellcheck_html && ! $showform && ! $enabled_rte) {
 
@@ -168,8 +169,9 @@
             # Convert the rich text editor output back to parsable lj tags.
             my $event = $POST{event};
             if ($richtext) {
-                $event =~ s/&lt;lj-cut(.*?)&gt;/<lj-cut$1 \/>/ig;
-                $event =~ s/<span class="ljuser".*?userinfo\.bml\?user=(.+?)\".*?<\/b><\/a>(?:<\/span>)?/<lj user="$1" \/>/ig;
+                $event =~ s/&lt;(\/)?lj-cut(.*?)(?: \/)?&gt;/<$1lj-cut$2>/ig;
+                $event =~ s/&lt;lj user=['"]?(.+?)['"](?: \/)?&gt;/<lj user="$1" \/>/ig; # manually typed tags
+                $event =~ s/<span class="?ljuser"?.*?userinfo\.bml\?user=(.+?)".*?<\/b><\/a>(?:<\/span>)?/<lj user="$1" \/>/ig;
             }
             $req{'event'} = $event;
 
@@ -296,7 +298,7 @@
 
     # preserve times from form if spellchecking
     if ($did_spellcheck) {
-        $$bodyopts = "onLoad=\"pageload(0);\""; # js fill-in off
+        $$bodyopts .= "onload=\"pageload(0);\" "; # js fill-in off
 
         $year = $POST{'year'};
         $mon = $POST{'mon'};
@@ -306,7 +308,7 @@
         
     # insert current time
     } else {
-        $$bodyopts = "onLoad=\"pageload(1);\""; # js fill-in on
+        $$bodyopts .= "onload=\"pageload(1);\" "; # js fill-in on
 
         my @time = localtime(time);
         $year = $time[5] + 1900;
@@ -351,9 +353,17 @@
     $$body .= "<br />";
     if ($richtext) {
         my $jevent = $POST{event} || $GET{event};
+
+        # manually typed tags
+        $jevent =~ s/<lj user=['"](.+?)['"](?: \/)?>/&lt;lj user="$1" \/&gt;/ig;
+        $jevent =~ s/<(\/)?lj-cut(.*?)(?: \/)?>/&lt;$1lj-cut$2&gt;/ig;
+
         $jevent = LJ::ejs($jevent);
+        my $rte_nosupport = LJ::ejs(BML::fill_template("de", { DATA => $ML{'.htmlokay.rte_nosupport'} }));
 
         $$body .= LJ::html_hidden('rich', '1') . "\n";
+        $$body .= LJ::html_hidden('saved_entry', '') . "\n";
+
         $$body .= <<RTE;
 <iframe id="testFrame" style="position: absolute; visibility: hidden; width: 0px; height: 0px;"></iframe>
 <script language="JavaScript" type="text/javascript" src="/js/browserdetect.js"></script>
@@ -365,7 +375,10 @@
 <script language="JavaScript" type="text/javascript" src="/js/richtext.js"></script>
 <script language='JavaScript' type='text/javascript'>
     <!--
-        writeRichText('rte', 'event', '$jevent', '100%', 300, true);
+        writeRichText('rte', 'event', '$jevent', '95%', 300, true);
+        if (isRichText == false) {
+            document.write("$rte_nosupport");
+        }
     //-->
 </script>
 <noscript>
@@ -703,6 +716,7 @@ head<=
     }
 
     function pageload (dotime) {
+        restore_entry();
         if (dotime) settime();
         if (!document.getElementById) return false;
         var remotelogin = document.getElementById('remotelogin');
@@ -739,6 +753,37 @@ head<=
         if (! f) return false;
         f.switched_rte_on.value = 1;
         f.submit();
+        return false;
+    }
+
+    // Maintain entry through browser navigations.
+    // IE does this onBlur, Gecko onUnload.
+    function save_entry () {
+        if (! document.getElementById) return false;
+
+        f = document.updateForm;
+        if (! f) return false;
+        rte = document.getElementById('rte');
+        if (! rte) return false;
+        content = document.getElementById('rte').contentWindow.document.body.innerHTML;
+        f.saved_entry.value = content;
+        return false;
+    }
+
+    // Restore saved_entry text across platforms.
+    // This is only used for IE, Gecko browser support is in the RTE library.
+    function restore_entry () {
+        if (! document.getElementById) return false;
+        f = document.updateForm;
+        if (! f) return false;
+        rte = document.getElementById('rte');
+        if (! rte) return false;
+        if (document.updateForm.saved_entry.value == "") return false;
+        setTimeout(
+            function () {
+                document.getElementById('rte').contentWindow.document.body.innerHTML = 
+                    document.updateForm.saved_entry.value;
+            }, 100);
         return false;
     }
 

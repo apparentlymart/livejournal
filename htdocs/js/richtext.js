@@ -38,8 +38,6 @@ function initRTE() {
         //other browser
         isRichText = false;
     }
-    //set the following line to whatever you want for testing
-    //isRichText = false;
 }
 
 function writeRTE(rte, postvar, html, width, height, buttons) {
@@ -53,9 +51,6 @@ function writeRTE(rte, postvar, html, width, height, buttons) {
         document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_italic.gif" width="25" height="24" alt="Italic" title="Italic" onClick="FormatText(\'' + rte + '\', \'italic\')"></td>');
         document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_underline.gif" width="25" height="24" alt="Underline" title="Underline" onClick="FormatText(\'' + rte + '\', \'underline\', \'\')"></td>');
         document.writeln('              <td>&nbsp;</td>');
-        //              document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_left_just.gif" width="25" height="24" alt="Align Left" title="Align Left" onClick="FormatText(\'' + rte + '\', \'justifyleft\', \'\')"></td>');
-        //              document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_centre.gif" width="25" height="24" alt="Center" title="Center" onClick="FormatText(\'' + rte + '\', \'justifycenter\', \'\')"></td>');
-        //              document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_right_just.gif" width="25" height="24" alt="Align Right" title="Align Right" onClick="FormatText(\'' + rte + '\', \'justifyright\', \'\')"></td>');
         document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_text_smaller.gif" width="25" height="24" alt="Smaller Text" title="Smaller Text" onClick="FormatText(\'' + rte + '\', \'fontsize\', ChangeTSize(\'-\'));"></td>');
         document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_text_normal.gif" width="25" height="24" alt="Normal Text" title="Normal Text" onClick="textsize = 3; FormatText(\'' + rte + '\', \'fontsize\', textsize);"></td>');
         document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_text_larger.gif" width="25" height="24" alt="Larger Text" title="Larger Text" onClick="FormatText(\'' + rte + '\', \'fontsize\', ChangeTSize(\'+\'));"></td>');
@@ -65,17 +60,8 @@ function writeRTE(rte, postvar, html, width, height, buttons) {
         document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_numbered_list.gif" width="25" height="24" alt="Ordered List" title="Ordered List" onClick="FormatText(\'' + rte + '\', \'insertorderedlist\', \'\')"></td>');
         document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_list.gif" width="25" height="24" alt="Unordered List" title="Unordered List" onClick="FormatText(\'' + rte + '\', \'insertunorderedlist\', \'\')"></td>');
         document.writeln('              <td>&nbsp;</td>');
-        //              document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_outdent.gif" width="25" height="24" alt="Outdent" title="Outdent" onClick="FormatText(\'' + rte + '\', \'outdent\', \'\')"></td>');
-        //              document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_indent.gif" width="25" height="24" alt="Indent" title="Indent" onClick="FormatText(\'' + rte + '\', \'indent\', \'\')"></td>');
-        //              document.writeln('              <td><div id="hilitecolor"><img class="btnImage" src="/img/rte/post_button_bgcolor.gif" width="25" height="24" alt="Background Color" title="Background Color" onClick="FormatText(\'' + rte + '\', \'hilitecolor\', \'\')"></div></td>');
         document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_hyperlink.gif" width="25" height="24" alt="Insert Link" title="Insert Link" onClick="FormatText(\'' + rte + '\', \'createlink\')"></td>');
         document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_image.gif" width="25" height="24" alt="Add Image" title="Add Image" onClick="AddImage(\'' + rte + '\')"></td>');
-        //              if (browser.isIE55up) document.writeln('                <td><img class="btnImage" src="/img/rte/post_button_spellcheck.gif" width="25" height="24" alt="Add Image" title="Add Image" onClick="checkspell()"></td>');
-        //              document.writeln('              <td>&nbsp;</td>');
-        //              document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_cut.gif" width="25" height="24" alt="Cut" title="Cut" onClick="FormatText(\'' + rte + '\', \'cut\')"></td>');
-        //              document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_copy.gif" width="25" height="24" alt="Copy" title="Copy" onClick="FormatText(\'' + rte + '\', \'copy\')"></td>');
-        //              document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_paste.gif" width="25" height="24" alt="Paste" title="Paste" onClick="FormatText(\'' + rte + '\', \'paste\')"></td>');
-        //              document.writeln('              <td>&nbsp;</td>');
         document.writeln('              <td>&nbsp;</td>');
         document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_ljuser.gif" width="25" height="24" alt="Add LJ User" title="Add LJ User" onClick="AddLJTag(\'' + rte + '\', \'user\')"></td>');
         document.writeln('              <td><img class="btnImage" src="/img/rte/post_button_ljcut.gif" width="25" height="24" alt="Add LJ Cut" title="Add LJ Cut" onClick="AddLJTag(\'' + rte + '\', \'cut\')"></td>');
@@ -85,7 +71,7 @@ function writeRTE(rte, postvar, html, width, height, buttons) {
         document.writeln('      </tr>');
         document.writeln('</table>');
     }
-    document.writeln('<iframe name="event" id="' + rte + '" width="' + width + 'px" height="' + height + 'px" src="/rte/blank.html"></iframe>');
+    document.writeln('<iframe onBlur="save_entry();" name="event" id="' + rte + '" width="' + width + 'px" height="' + height + 'px" src="/rte/blank.html"></iframe>');
     document.writeln('<iframe width="254" height="174" id="cp' + rte + '" src="/rte/palette.html" marginwidth="0" marginheight="0" scrolling="no" style="visibility:hidden; position: absolute;"></iframe>');
     document.writeln('<input type="hidden" id="hdn' + rte + '" name="' + postvar + '" value="">');
     if (browser.isIE55up) {
@@ -96,11 +82,14 @@ function writeRTE(rte, postvar, html, width, height, buttons) {
 }
 
 function writeDefault(rte, html, width, height, buttons) {
-    document.writeln('<textarea name="' + rte + '" id="' + rte + '" style="width: ' + width + 'px; height: ' + height + 'px;">' + html + '</textarea>');
+    document.writeln('<textarea name="' + rte + '" id="' + rte + '" style="width: ' + width + '; height: ' + height + 'px;">' + html + '</textarea>');
 }
 
 function enableDesignMode(rte, html) {
     var content = document.getElementById('rte');
+    var saved_entry = document.updateForm.saved_entry.value;
+    if (saved_entry != "") html = saved_entry; // only for gecko browsers
+
     if (browser.isIE55up) {
         frames[rte].document.designMode = "On";
         setTimeout(function(){ content.contentWindow.document.body.innerHTML = html; }, 100);
@@ -125,35 +114,134 @@ function ChangeTSize(dir) {
     return textsize;
 }
 
-//Add LJ specific tags.
+// Check for bad chars
+function badChars(str) {
+    var txt = new String(str);
+    var bad = "!@#$%^&*()-~,'<.>/?;:[]{}\| ";
+        for(i = 0; i < bad.length; i++) {
+            if(txt.indexOf(bad.charAt(i)) >= 0) return true;
+        }
+    return false;
+}
+
+// lj-user text
+function make_ljuser (res, type) {
+    if (type != null) { // gecko
+        // manually build lj user node
+        var span = document.createElement("span");
+        span.setAttribute("class", "ljuser");
+
+        var img = document.createElement("img");
+        img.setAttribute("src", siteroot + "/img/userinfo.gif");
+        img.setAttribute("alt", "userinfo");
+        img.setAttribute("width", "17");
+        img.setAttribute("height", "17");
+        img.setAttribute("style", "vertical-align: bottom; border: 0;");
+
+        var uinfo_link = document.createElement("a");
+        uinfo_link.setAttribute("href", siteroot + '/userinfo.bml?user=' + res);
+        uinfo_link.appendChild(img);
+
+        var userlink = document.createTextNode(res);
+        var bold = document.createElement("b");
+        var ujournal_link = document.createElement("a");
+        ujournal_link.setAttribute("href", siteroot + '/users/' + res + '/');
+        bold.appendChild(userlink);
+        ujournal_link.appendChild(bold);
+
+        span.appendChild(uinfo_link);
+        span.appendChild(ujournal_link);
+
+        rng.insertNode(span);
+    } else { // ie
+        return "<span class=\"ljuser\" style='white-space: nowrap;'><a href='" + siteroot + "/userinfo.bml?user=" + res + "'><img src='" + siteroot + "/img/userinfo.gif' alt='userinfo' width='17' height='17' style='vertical-align: bottom; border: 0;' /></a><a href='" + siteroot + "/users/" + res + "/'><b>" + res + "</b></a></span> ";
+    }
+}
+
+
+//Add LJ specific tags - lj user and lj-cut.
 function AddLJTag(rte, type) {
     var cw = document.getElementById(rte).contentWindow;
     var res;
 
+    // Get current user selection
+    if (cw.window.getSelection) { // gecko
+        res = cw.window.getSelection();
+        rng = cw.window.getSelection().getRangeAt(0);
+    } else if (cw.document.selection) { // ie
+        rng = cw.document.selection.createRange();
+        res = rng.text;
+    } 
+
+    // lj-user
     if (type == 'user') {
-        res = prompt('Enter a username', '');
-        if ((res != null) && (res != "")) {
-            cw.focus();
-            cw.document.body.innerHTML = cw.document.body.innerHTML +
-                "<span class='ljuser' style='white-space: nowrap;'><a href='" + siteroot + "/userinfo.bml?user=" + res + "'><img src='" + siteroot + "/img/userinfo.gif' alt='userinfo' width='17' height='17' style='vertical-align: bottom; border: 0;' /></a><a href='" + siteroot + "/users/" + res + "/'><b>" + res + "</b></a></span> ";
-//                '&lt;lj user="' + res + '" /&gt;';
+        if (res == "" || res.length == 0) {
+            // Nothing selected or totally unsupported
+            res = prompt('Enter a username', '');
+            if ((res != null) && (res != "")) {
+                if (badChars(res)) {
+                    alert("Invalid characters in username.");
+                    return;
+                }
+                cw.focus();
+                // tack onto the existing text
+                cw.document.body.innerHTML += make_ljuser(res);
+                return;
+            }
+        }
+
+        if (badChars(res)) {
+            alert("Invalid characters in username.");
+            return;
+        }
+
+        if (rng.pasteHTML) {    // ie
+            rng.pasteHTML(make_ljuser(res));
+        } else {                // gecko
+            var username = rng.toString();
+            rng.deleteContents();
+            make_ljuser(username, "node");
         }
     }
 
+    // lj-cut
     if (type == 'cut') {
-        res = prompt('Optional cut caption', '');
-        if (res != null) {
-            cw.focus();
+        var cut = prompt('Optional cut caption', '');
+        if (cut != null) {
             var cuttag;
-            if (res == "") {
-                cuttag = '&lt;lj-cut /&gt;';
+            var cutend = "\n</lj-cut>\n";
+            cw.focus();
+
+            if (cut == "") {
+                cuttag = '<lj-cut>' + "\n";
             } else {
-                cuttag = '&lt;lj-cut text="' + res + '" /&gt;';
+                cuttag = '<lj-cut text="' + cut + '">' + "\n";
             }
-            cw.document.body.innerHTML = cw.document.body.innerHTML + cuttag;
+
+            if (rng.text && rng.text != "") { // ie
+                rng.text = cuttag + rng.text;
+                if (res.length > 0) rng.text += cutend;
+            } else if (rng.insertNode && rng.toString() != "") { // gecko
+                var content = document.createTextNode(rng.toString());
+                var cut_s = document.createTextNode(cuttag);
+                var cut_e = document.createTextNode(cutend);
+                rng.deleteContents();
+                rng.insertNode(cut_e);
+                rng.insertNode(content);
+                rng.insertNode(cut_s);
+            } else { // nothing selected or totally unsupported
+                if (cut == "") {
+                    cuttag = '&lt;lj-cut&gt;' + "\n";
+                } else {
+                    cuttag = '&lt;lj-cut text="' + cut + '"&gt;' + "\n";
+                }
+                cw.document.body.innerHTML += cuttag;
+            }
         }
     }
+
     cw.focus();
+    return;
 }
 
 
