@@ -454,7 +454,7 @@ sub bml_block
         return $code 
             if $req->{'lang'} eq 'debug';   
         return "[ml_getter not defined]" unless $ML_GETTER;
-        $code = $req->{'r'}->parsed_uri()->path() . $code
+        $code = $req->{'r'}->uri . $code
             if $code =~ /^\./;
         return $ML_GETTER->($req->{'lang'}, $code);
     }
@@ -1058,7 +1058,46 @@ sub register_ml_getter
 
 sub get_query_string
 {
-    return $Apache::BML::cur_req->{'r'}->parsed_uri()->query;
+    return $Apache::BML::cur_req->{'r'}->args;
+}
+
+sub get_uri
+{
+    return $Apache::BML::cur_req->{'r'}->uri;
+}
+
+sub get_method 
+{
+    return $Apache::BML::cur_req->{'r'}->method;
+}
+
+# <LJFUNC>
+# class: web
+# name: BML::self_link
+# des: Takes the URI of the current page, and adds the current form data
+#      to the url, then adds any additional data to the url.
+# returns: scalar; the full url
+# args: newvars
+# des-newvars: A hashref of information to add/override to the link.
+# </LJFUNC>
+sub self_link
+{
+    my $newvars = shift;
+    my $link = $Apache::BML::cur_req->{'r'}->uri;
+    my $form = \%BMLCodeBlock::FORM;
+
+    $link .= "?";
+    foreach (keys %$newvars) {
+        if (! exists $form->{$_}) { $form->{$_} = ""; }
+    }
+    foreach (sort keys %$form) {
+        if (defined $newvars->{$_} && ! $newvars->{$_}) { next; }
+        my $val = $newvars->{$_} || $form->{$_};
+        next unless $val;
+        $link .= BML::eurl($_) . "=" . BML::eurl($val) . "&";
+    }
+    chop $link;
+    return $link;
 }
 
 sub http_response
@@ -1162,7 +1201,7 @@ sub set_language
     } elsif ($getter) {
         *{"BML::ml"} = sub {
             my ($code, $vars) = @_;
-            $code = $r->parsed_uri()->path() . $code
+            $code = $r->uri . $code
                 if $code =~ /^\./;
             my $data = $getter->($lang, $code);
             return $data unless $vars;
@@ -1171,7 +1210,7 @@ sub set_language
         };
         *{"BML::ML::FETCH"} = sub {
             my $code = $_[1];
-            $code = $r->parsed_uri()->path() . $code
+            $code = $r->uri . $code
                 if $code =~ /^\./;
             return $getter->($lang, $code);
         };
@@ -1224,7 +1263,7 @@ sub page_newurl
         push @pair, (eurl($_) . "=" . eurl($BMLCodeBlock::FORM{$_}));
     }
     push @pair, "page=$page";
-    return $Apache::BML::cur_req->{'r'}->parsed_uri()->path() . "?" . join("&", @pair);
+    return $Apache::BML::cur_req->{'r'}->uri . "?" . join("&", @pair);
 }
 
 sub paging
