@@ -69,23 +69,31 @@ if ($sclust == $dclust) {
 die "This mover tool doesn't support moving from cluster 0.\n" unless $sclust;
 die "Can't move back to legacy cluster 0\n" unless $dclust;
 
-# original cluster db handle.
+# original cluster db handle.  (may be a movemaster (a slave))
 my $dbo;
 my $is_movemaster;
 
+# the actual master handle, which we delete from if deleting from source
+my $dboa;
+
 if ($sclust) {
+    $dboa = LJ::get_cluster_master({raw=>1}, $u);
+    die "Can't get source cluster handle.\n" unless $dboa;
+
     if ($opt_movemaster) {
         $dbo = LJ::get_dbh({raw=>1}, "cluster$u->{clusterid}movemaster");
         if ($dbo) {
+            $dbo->{'RaiseError'} = 1;
+            $dbo->do("SET wait_timeout=28800");
             my $ss = $dbo->selectrow_hashref("show slave status");
             die "Move master not a slave?" unless $ss;
         }
         $is_movemaster = 1;
+    } else {
+        $dbo = $dboa;
     }
-    $dbo ||= LJ::get_cluster_master({raw=>1}, $u);
-    die "Can't get source cluster handle.\n" unless $dbo;
-    $dbo->{'RaiseError'} = 1;
-    $dbo->do("SET wait_timeout=28800");
+    $dboa->{'RaiseError'} = 1;
+    $dboa->do("SET wait_timeout=28800");
 }
 
 my $userid = $u->{'userid'};
@@ -435,22 +443,22 @@ if ($opt_del) {
     print "Deleting from source cluster...\n" if $optv;
     foreach my $td (@to_delete) {
 	my ($table, $pri) = @$td;
-	while ($dbo->do("DELETE FROM $table WHERE $pri=$userid LIMIT 1000") > 0) {
+	while ($dboa->do("DELETE FROM $table WHERE $pri=$userid LIMIT 1000") > 0) {
 	    print "  deleted from $table\n" if $optv;
 	}
     }
 
     # s1stylecache table
     if (@styleids) {
-	my $styleids_in = join(",", map { $dbo->quote($_) } @styleids);
-	if ($dbo->do("DELETE FROM s1stylecache WHERE styleid IN ($styleids_in)") > 0) {
+	my $styleids_in = join(",", map { $dboa->quote($_) } @styleids);
+	if ($dboa->do("DELETE FROM s1stylecache WHERE styleid IN ($styleids_in)") > 0) {
 	    print "  deleted from s1stylecache\n" if $optv;
 	}
     }
 } else {
     # at minimum, we delete the clustertrack2 row so it doesn't get
     # included in a future ljumover.pl query from that cluster.
-    $dbo->do("DELETE FROM clustertrack2 WHERE userid=$userid");
+    $dboa->do("DELETE FROM clustertrack2 WHERE userid=$userid");
 }
 
 $dbh->do("UPDATE clustermove SET sdeleted=?, timedone=UNIX_TIMESTAMP() ".
