@@ -21,6 +21,7 @@ use Text::Wrap ();
 use LWP::UserAgent ();
 use Storable;
 use Image::Size ();
+use Apache::SendStats;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
