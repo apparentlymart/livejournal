@@ -3139,7 +3139,8 @@ sub make_journal
         $style = LJ::S1::load_style($dbs, $styleid, \$view);
     } else {
         $view ||= "lastn";    # default view when none specified explicitly in URLs
-        if ($LJ::viewinfo{$view} || $view eq "month" || $view eq "item")  {
+        if ($LJ::viewinfo{$view} || $view eq "month" || 
+            $view eq "entry" || $view eq "reply")  {
             $styleid = -1;    # to get past the return, then checked later for -1 and fixed, once user is loaded.
         } else {
             $opts->{'badargs'} = 1;
@@ -3211,7 +3212,8 @@ sub make_journal
     }
     # S2 can't yet handle ReplyPage
     if ($stylesys == 2 && $view eq "item" && ($geta->{'mode'} eq "reply" ||
-                                              $geta->{'replyto'})) {
+                                              $geta->{'replyto'})
+        && ! $opts->{'s2id'}) {
         ${$opts->{'handle_with_bml_ref'}} = 1;
         return;
     }

@@ -513,11 +513,21 @@ class EntryPage extends Page
 
 }
 
+class ReplyForm 
+"This class will be used more in the future to set options on the reply form before
+it's printed out by the system.  The system has to print it since it contains
+sensitive information which can't be made available to S2."
+{
+    var readonly bool subj_icons "Whether user has enabled subject icons or not.  Currently read-only until policy is decided on whether layers should be able to change it (rather than changing it in the user preferences)";
+    function builtin print() "Prints the reply form";
+}
+
 class ReplyPage extends Page
 "A page to reply to a journal entry or comment"
 {
     var Entry entry "The journal entry for this talk page";
-    var EntryLite source "The object which is being replied to, either the entry or a comment";
+    var EntryLite replyto "The object which is being replied to, either the entry or a comment";
+    var ReplyForm form "The reply form.";
 }
 
 ##[ Built-in Functions ]

@@ -154,6 +154,8 @@ sub trans
     }
     return FORBIDDEN if LJ::run_hook("forbid_request", $r);
 
+    my %GET = $r->args;
+
     my $journal_view = sub { 
         my $opts = shift;
         $opts ||= {};
@@ -196,7 +198,11 @@ sub trans
         my $pe;
 
         if ($uuri =~ m!^/(\d+)\.html$!) {
-            $mode = "item";
+            if ($GET{'mode'} eq "reply" || $GET{'replyto'}) {
+                $mode = "reply";
+            } else {
+                $mode = "entry";
+            }
         } elsif ($uuri =~ m!^/(\d\d\d\d)(?:/(\d\d)(?:/(\d\d))?)?(/?)$!) {
             my ($year, $mon, $day, $slash) = ($1, $2, $3, $4);
             unless ($slash) {
@@ -573,18 +579,20 @@ sub journal_content
         my $args_wq = $args ? "?$args" : "";
 
         # can't show BML on user domains... redirect them
-        if ($RQ{'vhost'} eq "users" && ($RQ{'mode'} eq "item" || $RQ{'mode'} eq "month")) {
+        if ($RQ{'vhost'} eq "users" && ($RQ{'mode'} eq "entry" || 
+                                        $RQ{'mode'} eq "reply" || 
+                                        $RQ{'mode'} eq "month")) 
+        {
             my $u = LJ::load_user($dbs, $RQ{'user'});
             my $base = "$LJ::SITEROOT/users/$RQ{'user'}";
             $base = "$LJ::SITEROOT/community/$RQ{'user'}" if $u && $u->{'journaltype'} eq "C";
             return redir($r, "$base$uri$args_wq");
         }
 
-        if ($RQ{'mode'} eq "item") {
-            my $filename = "$LJ::HOME/htdocs/talkread.bml";
-            if ($args =~ /^(?:(?:mode=reply)|(?:replyto=\d+))\b/) {
-                $filename = "$LJ::HOME/htdocs/talkpost.bml";
-            }
+        if ($RQ{'mode'} eq "entry" || $RQ{'mode'} eq "reply") {
+            my $filename = $RQ{'mode'} eq "entry" ? 
+                "$LJ::HOME/htdocs/talkread.bml" :
+                "$LJ::HOME/htdocs/talkpost.bml";
             $r->notes("_journal" => $RQ{'user'});
             $r->notes("bml_filename" => $filename);
             return Apache::BML::handler($r);

@@ -17,6 +17,7 @@ use LJ::S2::DayPage;
 use LJ::S2::FriendsPage;
 use LJ::S2::MonthPage;
 use LJ::S2::EntryPage;
+use LJ::S2::ReplyPage;
 use LJ::Color;
 
 package LJ::S2;
@@ -55,7 +56,7 @@ sub make_journal
 
     # let layouts disable EntryPage / ReplyPage, using the BML version
     # instead.
-    if ($ctx->[S2::PROPS]->{'view_entry_disabled'} && $view eq "item") {
+    if ($ctx->[S2::PROPS]->{'view_entry_disabled'} && ($view eq "entry" || $view eq "reply")) {
         ${$opts->{'handle_with_bml_ref'}} = 1;
         return;
     }
@@ -89,9 +90,12 @@ sub make_journal
     } elsif ($view eq "month") {
         $entry = "MonthPage::print()";
         $page = MonthPage($u, $remote, $opts);
-    } elsif ($view eq "item") {
+    } elsif ($view eq "entry") {
         $entry = "EntryPage::print()";
         $page = EntryPage($u, $remote, $opts);
+    } elsif ($view eq "reply") {
+        $entry = "ReplyPage::print()";
+        $page = ReplyPage($u, $remote, $opts);
     }
 
     return if $opts->{'handler_return'};
