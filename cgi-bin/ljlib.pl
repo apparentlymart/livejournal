@@ -6059,6 +6059,7 @@ sub cmd_buffer_flush
         # ping weblogs.com with updates?  takes a $u argument
         'weblogscom' => {
             'too_old' => 60*60*2,  # 2 hours old = qbufferd not running?
+            'once_per_user' => 1,
             'run' => sub {
                 # user, title, url
                 my ($dbh, $db, $c) = @_;
@@ -6087,6 +6088,7 @@ sub cmd_buffer_flush
         },
         # notify fotobilder of dirty friends
         'dirty' => {
+            'once_per_user' => 1,
             'run' => sub {
                 my ($dbh, $db, $c) = @_;
 
@@ -6226,13 +6228,15 @@ sub cmd_buffer_flush
     my $LIMIT = 500;
 
     while ($loop &&
-           ($clist = $db->selectall_arrayref("SELECT cbid, UNIX_TIMESTAMP() - UNIX_TIMESTAMP(instime) ".
+           ($clist = $db->selectall_arrayref("SELECT cbid, UNIX_TIMESTAMP() - UNIX_TIMESTAMP(instime), journalid ".
                                              "FROM cmdbuffer ".
                                              "WHERE $where ORDER BY cbid LIMIT $LIMIT")) &&
            $clist && @$clist)
     {
         my @too_old;
         my @cbids;
+
+        # citem: [ cbid, age, journalid ]
         foreach my $citem (@$clist) {
             if ($too_old && $citem->[1] > $too_old) {
                 push @too_old, $citem->[0];
@@ -6266,7 +6270,15 @@ sub cmd_buffer_flush
             # run handler
             $code->($dbh, $db, $c);
 
-            $db->do("DELETE FROM cmdbuffer WHERE cbid=$cbid");
+            # if this task is to be run once per user, go ahead and delete any jobs 
+            # for this user of this type and remove them from the queue
+            my $wh = "cbid=$cbid";
+            if ($cmds->{$cmd}->{once_per_user}) {
+                $wh = "cmd=" . $db->quote($cmd) . " AND journalid=" . $db->quote($c->{journalid});
+                @$clist = grep { $_->[2] != $c->{journalid} } @$clist;
+            }
+
+            $db->do("DELETE FROM cmdbuffer WHERE $wh");
             $db->do("SELECT RELEASE_LOCK('cbid-$cbid')");
         }
         $loop = 0 unless scalar(@$clist) == $LIMIT;
