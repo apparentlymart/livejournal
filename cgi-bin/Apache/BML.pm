@@ -22,6 +22,8 @@ my (%CodeBlockMade);
 my (%SchemeData, %SchemeFlags); # scheme -> key -> scalars (data has {s} blocks expanded)
 my (%SchemeRefs);               # scheme -> key -> refs to %SchemeData scalars, OR scalars (from LOCALBLOCKS)
 
+my ($TokenOpen, $TokenClose) = ('<\?', '\?>');
+
 # load BML Config
 {
     my $conf_file = $ENV{'BMLConfig'};
@@ -33,6 +35,10 @@ my (%SchemeRefs);               # scheme -> key -> refs to %SchemeData scalars, 
         unless (load_look_from_initscript($is, \$err)) {
             $config->{'/'}->{'_error'} .= "<p><b>Error running VarInitScript ($is):</b> $err</p>";
         }
+    }
+
+    if ($config->{'/'}->{'AllowOldSyntax'}) {
+        ($TokenOpen, $TokenClose) = ('(?:<\?|\(=)', '(?:\?>|=\))');
     }
 }
 
@@ -164,7 +170,7 @@ sub handler
         }
         foreach my $k (keys %$sd) {
             next unless $sf->{$k} =~ /s/;
-            $sd->{$k} =~ s/\(=([A-Z0-9\_]+?)=\)/$sd->{$1}/g;
+            $sd->{$k} =~ s/$TokenOpen([a-zA-Z0-9\_]+?)$TokenClose/$sd->{uc($1)}/og;
         }
     }
 
@@ -344,8 +350,8 @@ sub deleteglob
     }
 }
 
-# $type - "THINGER" in the case of (=THINGER Whatever THINGER=)
-# $data - "Whatever" in the case of (=THINGER Whatever THINGER=)
+# $type - "THINGER" in the case of <?thinger Whatever thinger?>
+# $data - "Whatever" in the case of <?thinger Whatever thinger?>
 # $option_ref - hash ref to %BMLEnv
 sub bml_block
 {
@@ -476,7 +482,7 @@ sub bml_block
                 if ($localflags{$k} =~ /s/) { push @expandconstants, $k; }
             }
             foreach my $k (@expandconstants) {
-                $localblock{$k} =~ s/\(=([A-Z0-9\_]+?)=\)/${$req->{'blockref'}->{$1}}/g;
+                $localblock{$k} =~ s/$TokenOpen([a-zA-Z0-9\_]+?)$TokenClose/${$req->{'blockref'}->{uc($1)}}/og;
             }
         }
         return "";
@@ -599,8 +605,8 @@ sub bml_decode
 {
     my ($req, $inref, $outref, $opts) = @_;
 
-    my $block = "";    # what (=BLOCK ... BLOCK=) are we in?
-    my $data = "";          # what is (=BLOCK inside BLOCK=) the current block.
+    my $block = "";    # what <?block ... block?> are we in?
+    my $data = "";     # what is inside the current block?
     my $depth = 0;     # how many blocks we are deep of the *SAME* type.
 
   EAT:
@@ -608,9 +614,9 @@ sub bml_decode
     {
         # currently not in a BML tag... looking for one!
         if ($block eq "") {
-            if ($$inref =~ s/^(.*?)\(=([A-Z0-9\_]+)\b//s) {
+            if ($$inref =~ s/^(.*?)$TokenOpen([a-zA-Z0-9\_]+)\b//os) {
                 $$outref .= $1;
-                $block = $2;
+                $block = uc($2);
                 $depth = 1;
                 next EAT;
             }
@@ -621,25 +627,25 @@ sub bml_decode
             last EAT;
         }
         
-        # now we're in a FOO tag: (=FOO
+        # now we're in a FOO tag: <?foo
         # things to look out for:
         #   * Increasing depth:
-        #      - some text, then another opening (=FOO, increading our depth
-        #          (=FOO bla blah (=FOO
+        #      - some text, then another opening <?foo, increading our depth
+        #          <?foo bla blah <?foo
         #   * Decreasing depth: (if depth==0, then we're done)
         #      - immediately closing the tag, empty tag
-        #          (=FOO=)
+        #          <?foo?>
         #      - closing the tag (if depth == 0, then we're done)
-        #          (=FOO blah blah FOO=)
+        #          <?foo blah blah foo?>
         
-        if ($$inref =~ s/^=\)//) {
+        if ($$inref =~ s/^$TokenClose//o) {
             $depth--;
-        } elsif ($$inref =~ s/^(.+?)((?:\(=$block\b )|(?:\b$block=\)))//s) {
+        } elsif ($$inref =~ s/^(.+?)((?:$TokenOpen$block\b )|(?:\b$block$TokenClose))//is) {
             $data .= $1;
-            if ($2 eq "(=$block") {
+            if ($2 =~ /^$TokenOpen$block$/i) {
                 $data .= $2;
                 $depth++;
-            } elsif ($2 eq "$block=)") {
+            } elsif ($2 =~ /^$block$TokenClose$/i) {
                 $depth--;
                 if ($depth) { $data .= $2; }
             }
@@ -791,30 +797,30 @@ sub load_elements
     while (defined ($_ = $getter->()))
     {
         chomp;
-        if ($curitem eq "" && /^([A-Z0-9\_\/]+)=>(.*)/)
+        if ($curitem eq "" && /^([a-zA-Z0-9\_\/]+)=>(.*)/)
         {
-            $hashref->{$1} = $2;
+            $hashref->{uc($1)} = $2;
             push @$ol, $1;
         }
-        elsif (/^([A-Z0-9\_\/]+)<=\s*$/)
+        elsif (/^([a-zA-Z0-9\_\/]+)<=\s*$/)
         {
             if ($curitem eq "")
             {
-                $curitem = $1;
+                $curitem = uc($1);
                 $depth = 1;
                 $hashref->{$curitem} = "";
                 push @$ol, $curitem;
             }
             else
             {
-                if ($curitem eq $1)
+                if ($curitem eq uc($1))
                 {
                     $depth++;
                 }
                 $hashref->{$curitem} .= $_ . "\n";
             }
         }
-        elsif ($curitem && /^<=$curitem\s*$/)
+        elsif ($curitem && /^<=$curitem\s*$/i)
         {
             $depth--;
             if ($depth == 0)
