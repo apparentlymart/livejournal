@@ -41,25 +41,26 @@ END_TOP
 	next if $mode eq "host" && $host ne $GET{'host'};
 
 	LJ::MemCache::forget_dead_hosts();
-	my $sock = MemCachedClient::sock_to_host($host);
-	next unless $sock;
+	my $sock = Cache::Memcached::sock_to_host($host);
 
 	my $log;
 	my %stat;
 	my @cmds = ("", "malloc", "items", "slabs");
 	my $cmd;
-	while (defined($cmd = shift @cmds)) {
-	    my $realcmd = "stats" . ($cmd ? " $cmd" : "");
-	    $log .= "<b>$realcmd</b>\n";
-	    foreach (MemCachedClient::run_command($sock, "$realcmd\r\n")) {
-		last if $_ eq "END\r\n";
-		$log .= $_;
-		next if $cmd eq "maps";
-		if (/^STAT (\S+) (\S+)/) {
-		    $stat{$cmd}{$1} = $2;
-		}
-	    }
-	}
+        if ($sock) {
+            while (defined($cmd = shift @cmds)) {
+                my $realcmd = "stats" . ($cmd ? " $cmd" : "");
+                $log .= "<b>$realcmd</b>\n";
+                foreach (Cache::Memcached::run_command($sock, "$realcmd\r\n")) {
+                    last if $_ eq "END\r\n";
+                    $log .= $_;
+                    next if $cmd eq "maps";
+                    if (/^STAT (\S+) (\S+)/) {
+                        $stat{$cmd}{$1} = $2;
+                    }
+                }
+            }
+        }
 
 	my $cpu = 0;
 	foreach my $key (qw(rusage_user rusage_system)) {
