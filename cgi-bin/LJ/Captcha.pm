@@ -332,8 +332,8 @@ sub session_check_code {
                               'WHERE capid=?', undef, $lcapid);
     if (! LJ::Captcha::check_code($capid, $anum, $code, $u)) {
         # update try and lastcapid
-        $dbcm->do('UPDATE captcha_session SET lastcapid=NULL, ' .
-                  'trynum=trynum+1 WHERE sess=?', undef, $sess);
+        $u->do('UPDATE captcha_session SET lastcapid=NULL, ' .
+               'trynum=trynum+1 WHERE sess=?', undef, $sess);
         return 0;
     }
     return ($capid, $anum);
@@ -387,8 +387,8 @@ sub session
                                      'WHERE sess=?', undef, $sess);
     $try ||= 0;
     # Add/update session
-    $dbcm->do('REPLACE INTO captcha_session SET sess=?, sesstime=?, '.
-              'lastcapid=?, trynum=?', undef, $sess, time(), $capid, $try);
+    $u->do('REPLACE INTO captcha_session SET sess=?, sesstime=?, '.
+           'lastcapid=?, trynum=?', undef, $sess, time(), $capid, $try);
     return ($capid, $anum);
 }
 

@@ -67,12 +67,10 @@ sub load_linkobj
 sub save_linkobj
 {
     my ($u, $linkobj) = @_;
-    return unless ref $u eq 'HASH' && ref $linkobj eq 'ARRAY';
-
-    my $dbcm = LJ::get_cluster_master($u);
+    return unless LJ::isu($u) &&  $linkobj eq 'ARRAY' && $u->writer;
 
     # delete old links, we'll rebuild them shortly
-    $dbcm->do("DELETE FROM links WHERE journalid=?", undef, $u->{'userid'});
+    $u->do("DELETE FROM links WHERE journalid=?", undef, $u->{'userid'});
 
     # only save allowed number of links
     my $numlinks = @$linkobj;
@@ -96,8 +94,8 @@ sub save_linkobj
     # insert into database
     {
         local $" = ",";
-        return $dbcm->do("INSERT INTO links (journalid, ordernum, parentnum, url, title) " .
-                         "VALUES @bind", undef, @vals);
+        return $u->do("INSERT INTO links (journalid, ordernum, parentnum, url, title) " .
+                      "VALUES @bind", undef, @vals);
     }
 }
 

@@ -68,21 +68,20 @@ sub create {
 
     # we have valid data, now let's insert it
     if ($u->{dversion} > 5) {
-        my $dbcm = LJ::get_cluster_master($u);
-        return undef unless $dbcm;
+        return undef unless $u->writer;
 
         # allocate memory id to use
         my $memid = LJ::alloc_user_counter($u, 'R');
         return undef unless $memid;
 
         # insert main memory
-        $dbcm->do("INSERT INTO memorable2 (userid, memid, journalid, ditemid, des, security) " .
-                  "VALUES (?, ?, ?, ?, ?, ?)", undef, $userid, $memid, $journalid, $ditemid, $des, $security);
-        return undef if $dbcm->err;
+        $u->do("INSERT INTO memorable2 (userid, memid, journalid, ditemid, des, security) " .
+               "VALUES (?, ?, ?, ?, ?, ?)", undef, $userid, $memid, $journalid, $ditemid, $des, $security);
+        return undef if $u->err;
 
         # insert keywords
         my $val = join ',', map { "($u->{userid}, $memid, $_)" } @$kwids;
-        $dbcm->do("REPLACE INTO memkeyword2 (userid, memid, kwid) VALUES $val");
+        $u->do("REPLACE INTO memkeyword2 (userid, memid, kwid) VALUES $val");
 
     } else {
         my $dbh = LJ::get_db_writer();

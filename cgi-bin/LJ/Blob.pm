@@ -93,8 +93,7 @@ sub put {
     _load_bcid($u);
     my $bc = get_blobclient($u);
 
-    my $dbcm = LJ::get_cluster_master($u);
-    unless ($dbcm) {
+    unless ($u->writer) {
         $$errref = "nodb";
         return 0;
     }
@@ -104,11 +103,11 @@ sub put {
         return 0;
     }
 
-    $dbcm->do("INSERT IGNORE INTO userblob (journalid, domain, blobid, length) ".
-              "VALUES (?, ?, ?, ?)", undef,
-              $u->{userid}, LJ::get_blob_domainid($domain), 
-              $bid, length($data));
-    die "Error doing userblob accounting: " . $dbcm->errstr if $dbcm->err;
+    $u->do("INSERT IGNORE INTO userblob (journalid, domain, blobid, length) ".
+           "VALUES (?, ?, ?, ?)", undef,
+           $u->{userid}, LJ::get_blob_domainid($domain), 
+           $bid, length($data));
+    die "Error doing userblob accounting: " . $u->errstr if $u->err;
     return 1;
 }
 
@@ -117,15 +116,15 @@ sub delete {
     _load_bcid($u);
     my $bc = get_blobclient($u);
 
-    my $dbcm = LJ::get_cluster_master($u) or return 0;
+    return 0 unless $u->writer;
 
     my $bdid = LJ::get_blob_domainid($domain);
     return 0 unless $bc->delete($u->{blob_clusterid}, $u->{userid}, $domain, 
                                 $fmt, $bid);
 
-    $dbcm->do("DELETE FROM userblob WHERE journalid=? AND domain=? AND blobid=?",
-              undef, $u->{userid}, $bdid, $bid);
-    die "Error doing userblob accounting: " . $dbcm->errstr if $dbcm->err;
+    $u->do("DELETE FROM userblob WHERE journalid=? AND domain=? AND blobid=?",
+           undef, $u->{userid}, $bdid, $bid);
+    die "Error doing userblob accounting: " . $u->errstr if $u->err;
     return 1;
 }
 

@@ -85,32 +85,35 @@ sub send_comm_invite {
     my $newargstr = join('=1&', map { LJ::eurl($_) } @$attrs) . '=1';
     
     # step 5: delete old stuff (lazy cleaning of invite tables)
-    my $dbcm = LJ::get_cluster_master($u);
-    return LJ::error('db') unless $dbcm;
-    $dbcm->do('DELETE FROM inviterecv WHERE userid = ? AND ' .
-              'recvtime < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))', undef, $u->{userid});
-    my $cdbcm = LJ::get_cluster_master($cu);
-    return LJ::error('db') unless $cdbcm;
-    $cdbcm->do('DELETE FROM invitesent WHERE commid = ? AND ' .
-               'recvtime < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))', undef, $cu->{userid});
+    return LJ::error('db') unless $u->writer;
+    $u->do('DELETE FROM inviterecv WHERE userid = ? AND ' .
+           'recvtime < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
+           undef, $u->{userid});
+
+    return LJ::error('db') unless $cu->writer;
+    $cu->do('DELETE FROM invitesent WHERE commid = ? AND ' .
+            'recvtime < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
+            undef, $cu->{userid});
 
     # step 6: branch here to update or insert
     if ($argstr) {
         # merely an update, so just do it quietly
-        $dbcm->do("UPDATE inviterecv SET args = ? WHERE userid = ? AND commid = ?",
-                  undef, $newargstr, $u->{userid}, $cu->{userid});
-        $cdbcm->do("UPDATE invitesent SET args = ?, status = 'outstanding' WHERE userid = ? AND commid = ?",
-                   undef, $newargstr, $cu->{userid}, $u->{userid});
+        $u->do("UPDATE inviterecv SET args = ? WHERE userid = ? AND commid = ?",
+               undef, $newargstr, $u->{userid}, $cu->{userid});
+
+        $cu->do("UPDATE invitesent SET args = ?, status = 'outstanding' WHERE userid = ? AND commid = ?",
+                undef, $newargstr, $cu->{userid}, $u->{userid});
     } else {
          # insert new data, as this is a new invite
-         $dbcm->do("INSERT INTO inviterecv VALUES (?, ?, ?, UNIX_TIMESTAMP(), ?)",
-                   undef, $u->{userid}, $cu->{userid}, $mu->{userid}, $newargstr);
-         $cdbcm->do("REPLACE INTO invitesent VALUES (?, ?, ?, UNIX_TIMESTAMP(), 'outstanding', ?)",
-                    undef, $cu->{userid}, $u->{userid}, $mu->{userid}, $newargstr);
+         $u->do("INSERT INTO inviterecv VALUES (?, ?, ?, UNIX_TIMESTAMP(), ?)",
+                undef, $u->{userid}, $cu->{userid}, $mu->{userid}, $newargstr);
+
+         $cu->do("REPLACE INTO invitesent VALUES (?, ?, ?, UNIX_TIMESTAMP(), 'outstanding', ?)",
+                 undef, $cu->{userid}, $u->{userid}, $mu->{userid}, $newargstr);
     }
 
     # step 7: error check database work
-    return LJ::error('db') if $dbcm->err || $cdbcm->err;
+    return LJ::error('db') if $u->err || $cu->err;
 
     # success
     return 1;
@@ -159,14 +162,13 @@ sub accept_comm_invite {
     }
 
     # now we can delete the invite and update the status on the other side
-    my $dbcm = LJ::get_cluster_master($u);
-    return LJ::error('db') unless $dbcm;
-    $dbcm->do("DELETE FROM inviterecv WHERE userid = ? AND commid = ?",
-              undef, $u->{userid}, $cu->{userid});
-    my $cdbcm = LJ::get_cluster_master($cu); # get community's cluster master
-    return LJ::error('db') unless $cdbcm;
-    $cdbcm->do("UPDATE invitesent SET status = 'accepted' WHERE commid = ? AND userid = ?",
-               undef, $cu->{userid}, $u->{userid});
+    return LJ::error('db') unless $u->writer;
+    $u->do("DELETE FROM inviterecv WHERE userid = ? AND commid = ?",
+           undef, $u->{userid}, $cu->{userid});
+
+    return LJ::error('db') unless $cu->writer;
+    $cu->do("UPDATE invitesent SET status = 'accepted' WHERE commid = ? AND userid = ?",
+            undef, $cu->{userid}, $u->{userid});
 
     # done
     return 1;
@@ -195,14 +197,13 @@ sub reject_comm_invite {
     return undef unless $test;
 
     # now just reject it
-    my $dbcm = LJ::get_cluster_master($u);
-    return LJ::error('db') unless $dbcm;
-    $dbcm->do("DELETE FROM inviterecv WHERE userid = ? AND commid = ?",
+    return LJ::error('db') unless $u->writer;
+    $u->do("DELETE FROM inviterecv WHERE userid = ? AND commid = ?",
               undef, $u->{userid}, $cu->{userid});
-    my $cdbcm = LJ::get_cluster_master($cu); # get community's cluster master
-    return LJ::error('db') unless $cdbcm;
-    $cdbcm->do("UPDATE invitesent SET status = 'rejected' WHERE commid = ? AND userid = ?",
-               undef, $cu->{userid}, $u->{userid});
+
+    return LJ::error('db') unless $cu->writer;
+    $cu->do("UPDATE invitesent SET status = 'rejected' WHERE commid = ? AND userid = ?",
+            undef, $cu->{userid}, $u->{userid});
 
     # done
     return 1;
