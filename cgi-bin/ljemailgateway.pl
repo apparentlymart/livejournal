@@ -354,7 +354,8 @@ sub get_entity
     my @entities;
 
     # Only bother looking in messages that advertise attachments
-    if ($mime_type =~ m#^multipart/(?:alternative|signed|mixed)$#) {
+    my $mimeattach_re = qr{ m|^multipart/(?:alternative|signed|mixed|related)$| };
+    if ($mime_type =~ $mimeattach_re) {
         my $partcount = $entity->parts;
         for (my $i=0; $i<$partcount; $i++) {
             my $alte = $entity->parts($i);
@@ -373,8 +374,8 @@ sub get_entity
                                      $type ne 'all';
 
             # Recursively search through nested MIME for various pieces
-            if ($alte->mime_type =~ m#^multipart/(?:mixed|related)$#) {
-                if ($type eq 'text') {
+            if ($alte->mime_type =~ $mimeattach_re) {
+                if ($type =~ /^(?:text|html)$/) {
                     my $text_entity = get_entity($entity->parts($i));
                     return $text_entity if $text_entity;
                 } else {
