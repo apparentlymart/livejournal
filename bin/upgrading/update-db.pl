@@ -9,6 +9,8 @@ use File::Path ();
 use File::Basename ();
 use File::Copy ();
 use Image::Size ();
+BEGIN { require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl"; }
+use LJ::S2;
 
 my $opt_sql = 0;
 my $opt_drop = 0;
@@ -50,7 +52,6 @@ unless (-d $ENV{'LJHOME'}) {
     die "LJHOME environment variable is not set, or is not a directory.\n".
         "You must fix this before you can run this database update script.";
 }
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 ## make sure we can connect
 my $dbh = $cluster ? LJ::get_cluster_master($cluster) : LJ::get_dbh("master");
