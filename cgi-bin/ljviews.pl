@@ -207,7 +207,8 @@ sub create_view_lastn
             ! $logprops{$itemid}->{'opt_nocomments'}
             ) 
         {
-            $itemargs .= "&nc=$replycount" if $replycount && $remote->{'opt_nctalklinks'};
+            $itemargs .= "&nc=$replycount" if $replycount && $remote &&
+                         $remote->{'opt_nctalklinks'};
             my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
             $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
                 'itemid' => $ditemid,
@@ -473,20 +474,23 @@ sub create_view_friends
 
     my %owners;
     my $filter;
-    if (defined $FORM{'filter'}) {
+    my $group;
+
+    if (defined $FORM{'filter'} && $remote && $remote->{'user'} eq $user) {
         $filter = $FORM{'filter'}; 
     } else {
-        my $group;
         if ($opts->{'pathextra'}) {
             $group = $opts->{'pathextra'};
             $group =~ s!^/!!;
+            $group =~ s!/$!!;
             if ($group) { $group = LJ::durl($group); }
         }
-        $group ||= "Default View";
-        my $qgroup = $dbr->quote($group);
-        my $bit = $dbr->selectrow_array("SELECT groupnum FROM friendgroup WHERE ".
-                                        "userid=$u->{'userid'} AND groupname=$qgroup");
-        if ($bit) { $filter = (1 << $bit); }
+        my $qgroup = $dbr->quote($group || "Default View");
+        my ($bit, $public) = $dbr->selectrow_array("SELECT groupnum, is_public " .
+            "FROM friendgroup WHERE userid=$u->{'userid'} AND groupname=$qgroup");
+        if ($bit && ($public || ($remote && $remote->{'user'} eq $user))) { 
+            $filter = (1 << $bit); 
+        }
     }
 
 
@@ -706,7 +710,8 @@ sub create_view_friends
             ! $logprops{$datakey}->{'opt_nocomments'}
             ) 
         {
-            $itemargs .= "&nc=$replycount" if $replycount && $remote->{'opt_nctalklinks'};
+            $itemargs .= "&nc=$replycount" if $replycount && $remote &&
+                          $remote->{'opt_nctalklinks'};
             my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
             $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
                 'itemid' => $ditemid,
@@ -766,11 +771,21 @@ sub create_view_friends
 
     my ($skip_f, $skip_b) = (0, 0);
     my %skiplinks;
+    my $base = "$journalbase/$opts->{'view'}";
+    if ($group) {
+        $base .= "/" . LJ::eurl($group);
+    }
+
+    # $linkfilter is distinct from $filter: if user has a default view,
+    # $filter is now set according to it but we don't want it to show in the links.
+
+    my $linkfilter = $FORM{'filter'} + 0;
 
     if ($skip) {
         $skip_f = 1;
         my %linkvars;
-        if (defined $filter) { $linkvars{'filter'} = $filter; }
+
+        $linkvars{'filter'} = $linkfilter if $linkfilter;
 
         my $newskip = $skip - $itemshow;
         if ($newskip > 0) { $linkvars{'skip'} = $newskip; }
@@ -778,7 +793,7 @@ sub create_view_friends
         $skiplinks{'skipforward'} = 
             LJ::fill_var_props($vars, 'FRIENDS_SKIP_FORWARD', {
                 "numitems" => $itemshow,
-                "url" => LJ::make_link("$journalbase/$opts->{'view'}", \%linkvars),
+                "url" => LJ::make_link($base, \%linkvars),
             });
     }
 
@@ -789,7 +804,8 @@ sub create_view_friends
     unless ($eventnum != $itemshow || $skip == $maxskip) {
         $skip_b = 1;
         my %linkvars;
-        if (defined $filter) { $linkvars{'filter'} = $filter; }
+
+        $linkvars{'filter'} = $linkfilter if $linkfilter;
 
         my $newskip = $skip + $itemshow;
         $linkvars{'skip'} = $newskip;
@@ -797,7 +813,7 @@ sub create_view_friends
         $skiplinks{'skipbackward'} = 
             LJ::fill_var_props($vars, 'FRIENDS_SKIP_BACKWARD', {
                 "numitems" => $itemshow,
-                "url" => LJ::make_link("$journalbase/$opts->{'view'}", \%linkvars),
+                "url" => LJ::make_link($base, \%linkvars),
             });
     }
 
@@ -1229,7 +1245,8 @@ sub create_view_day
             ! $logprops{$itemid}->{'opt_nocomments'}
             ) 
         {
-            $itemargs .= "&nc=$replycount" if $replycount && $remote->{'opt_nctalklinks'};
+            $itemargs .= "&nc=$replycount" if $replycount && $remote &&
+                         $remote->{'opt_nctalklinks'};
             my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
             $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
                 'itemid' => $ditemid,

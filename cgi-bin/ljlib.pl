@@ -293,9 +293,7 @@ sub get_friend_items
 
     my $filtersql;
     if ($filter) {
-        if ($remoteid == $userid) {
-            $filtersql = "AND f.groupmask & $filter";
-        }
+        $filtersql = "AND f.groupmask & $filter";
     }
 
     my @friends_buffer = ();

@@ -1611,7 +1611,10 @@ sub editfriendgroups
         next unless ($bit >= 1 && $bit <= 30);
         my $sa = $req->{'set'}->{$bit};
         my $name = LJ::text_trim($sa->{'name'}, LJ::BMAX_GRPNAME, LJ::CMAX_GRPNAME);
-        
+
+        # can't end with a slash
+        $name =~ s!/$!!;        
+
         # setting it to name is like deleting it.
         unless ($name =~ /\S/) {
             push @{$req->{'delete'}}, $bit;
