@@ -350,7 +350,10 @@ sub search_int
     my $qint = $dbr->quote($req->{'int_like'});
     my $intid = $dbr->selectrow_array("SELECT intid FROM interests ".
                                       "WHERE interest=$qint");
-    $intid += 0;
+    unless ($intid) {
+        $info->{'errmsg'} = "The interest you have entered is not valid.";
+        return;
+    }
 
     return {
         'tables' => {
