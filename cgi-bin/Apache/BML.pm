@@ -132,45 +132,9 @@ sub handler
     
     load_look($req, "", "global");
     load_look($req, $req->{'scheme'}, "generic");
-    
-    ## begin the multi-lang stuff
-    if ($BMLCodeBlock::GET{'uselang'}) {
-        $req->{'lang'} = $BMLCodeBlock::GET{'uselang'} if
-            exists $Lang{$BMLCodeBlock::GET{'uselang'}};
-    }
-    if (! $req->{'lang'} && $BML::COOKIE{'langpref'} =~ m!^(\w{2,10})/(\d+)$!) {
-        if (exists $Lang{$1}) {
-            $req->{'lang'} = $1;
-            # make sure the document says it was changed at least as new as when
-            # the user last set their current language, else their browser might
-            # show a cached (wrong language) version.
-            note_mod_time($req, $2);
-        }
-    }
-    unless ($req->{'lang'})
-    {
-        # time to guess!
-        my %lang_weight = ();
-        my @langs = split(/\s*,\s*/, lc($r->header_in("Accept-Language")));
-        my $winner_weight = 0.0;
-        foreach (@langs)
-        {
-            # do something smarter in future.  for now, ditch country code:
-            s/-\w+//;
-            
-            if (/(.+);q=(.+)/) {
-                $lang_weight{$1} = $2;
-            } else {
-                $lang_weight{$_} = 1.0;
-            }
-            if ($lang_weight{$_} > $winner_weight && defined $Lang{$_}) {
-                $winner_weight = $lang_weight{$_};
-                $req->{'lang'} = $Lang{$_};
-            }
-        }
-    }
-    $req->{'lang'} ||= $req->{'env'}->{'DefaultLanguage'} || "en";
 
+    $req->{'lang'} = BML::decide_language();
+    
     # print on the HTTP header
     my $html;
     bml_decode($req, \$bmlsource, \$html, { DO_CODE => $req->{'env'}->{'AllowCode'} });
@@ -826,6 +790,55 @@ sub modified_time
 
 package BML;
 
+sub decide_language
+{
+    my $req = $Apache::BML::cur_req;
+
+    # GET param 'uselang' takes priority
+    if (exists $Apache::BML::Lang{$BMLCodeBlock::GET{'uselang'}}) {
+        return $BMLCodeBlock::GET{'uselang'};
+    }
+
+    # next is their cookie preference
+    if ($BML::COOKIE{'langpref'} =~ m!^(\w{2,10})/(\d+)$!) {
+        if (exists $Apache::BML::Lang{$1}) {
+            # make sure the document says it was changed at least as new as when
+            # the user last set their current language, else their browser might
+            # show a cached (wrong language) version.
+            note_mod_time($req, $2);
+            return $1;
+        }
+    }
+    
+    # next is their browser's preference
+    my %lang_weight = ();
+    my @langs = split(/\s*,\s*/, lc($req->{'r'}->header_in("Accept-Language")));
+    my $winner_weight = 0.0;
+    my $winner;
+    foreach (@langs)
+    {
+        # do something smarter in future.  for now, ditch country code:
+        s/-\w+//;
+        
+        if (/(.+);q=(.+)/) {
+            $lang_weight{$1} = $2;
+        } else {
+            $lang_weight{$_} = 1.0;
+        }
+        if ($lang_weight{$_} > $winner_weight && defined $Apache::BML::Lang{$_}) {
+            $winner_weight = $lang_weight{$_};
+            $winner = $Apache::BML::Lang{$_};
+        }
+    }
+    return $winner if $winner;
+
+    # next is the default language
+    return $req->{'env'}->{'DefaultLanguage'} if $req->{'env'}->{'DefaultLanguage'};
+    
+    # lastly, english.
+    return "en";
+}
+
 sub register_language
 {
     my ($isocode, $langcode) = @_;
@@ -922,6 +935,10 @@ sub set_content_type
 sub set_default_content_type
 {
     $Apache::BML::config->{'/'}->{'DefaultContentType'} = $_[0];
+
+    # also, since config merge to $req->{'env'} has already happened,
+    # need to set the current request's env also:
+    $Apache::BML::cur_req->{'env'}->{'DefaultContentType'} = $_[0];
 }
 
 sub eall

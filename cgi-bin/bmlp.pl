@@ -321,43 +321,8 @@ sub handle_request
 
         ## begin the multi-lang stuff
 
-        # clean
-        delete $GETVARS{'uselang'} unless $GETVARS{'uselang'} =~ /^\w{2,10}$/;
-
         # have they explictly specified their language?
-        $REQ_LANG = $GETVARS{'uselang'};
-
-        if (! $REQ_LANG && $BMLClient::COOKIE{'langpref'} =~ m!^(\w{2,10})/(\d+)$!) {
-            $REQ_LANG = $1;
-            # make sure the document says it was changed at least as new as when
-            # the user last set their current language, else their browser might
-            # show a cached (wrong language) version.
-            &note_mod_time($2);
-        }
-
-        # time to guess!
-        unless ($REQ_LANG)
-        {
-            my %lang_weight = ();
-            my @langs = split(/\s*,\s*/, lc($ENV{'HTTP_ACCEPT_LANGUAGE'}));
-            my $winner_weight = 0.0;
-            foreach (@langs)
-            {
-                # do something smarter in future.  for now, ditch country code:
-                s/-\w+//;
-                
-                if (/(.+);q=(.+)/) {
-                    $lang_weight{$1} = $2;
-                } else {
-                    $lang_weight{$_} = 1.0;
-                }
-                if ($lang_weight{$_} > $winner_weight && defined $Lang{$_}) {
-                    $winner_weight = $lang_weight{$_};
-                    $REQ_LANG = $Lang{$_};
-                }
-            }
-        }
-        $REQ_LANG ||= $BMLEnv{'DefaultLanguage'} || "en";
+        $REQ_LANG = BML::decide_language();
 
         ### read the data to mangle
         my $bmlsource = "";
@@ -1077,6 +1042,44 @@ sub trim
 }
 
 package BML;
+
+sub decide_language
+{
+    return $GETVARS{'uselang'} if
+        $main::GETVARS{'uselang'} =~ /^\w{2,10}$/;
+
+    if ($BMLClient::COOKIE{'langpref'} =~ m!^(\w{2,10})/(\d+)$!) {
+        # make sure the document says it was changed at least as new as when
+        # the user last set their current language, else their browser might
+        # show a cached (wrong language) version.
+        note_mod_time($2);
+        return $1;
+    }
+
+    my %lang_weight = ();
+    my @langs = split(/\s*,\s*/, lc($ENV{'HTTP_ACCEPT_LANGUAGE'}));
+    my $winner_weight = 0.0;
+    my $winner;
+    foreach (@langs)
+    {
+        # do something smarter in future.  for now, ditch country code:
+        s/-\w+//;
+        
+        if (/(.+);q=(.+)/) {
+            $lang_weight{$1} = $2;
+        } else {
+            $lang_weight{$_} = 1.0;
+        }
+        if ($lang_weight{$_} > $winner_weight && defined $main::Lang{$_}) {
+            $winner_weight = $lang_weight{$_};
+            $winner = $main::Lang{$_};
+        }
+    }
+
+    return $winner if $winner;
+    return $main::BMLEnv{'DefaultLanguage'} if $main::BMLEnv{'DefaultLanguage'};
+    return "en";
+}
 
 sub set_cookie
 {
