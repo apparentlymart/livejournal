@@ -415,18 +415,19 @@ body<=
                                  'name' => 'itemid', 'id' => "itemid-$ditemid" });
         $ret .= "</td><td>";
 
-        $ret .= " <label for='itemid-$ditemid'>" . $res{"events_${i}_eventtime"} . "</label></b>";
+        $ret .= " <b><label for='itemid-$ditemid'>" . $res{"events_${i}_eventtime"} . "</label></b>";
         $ret .= " (Posted by: " . LJ::ljuser($res{"events_${i}_poster"}) . ")" if $usejournal;
 
-        if ($res{"events_${i}_subject"}) {
-            $ret .= "; <i>" . BML::ebml($res{"events_${i}_subject"}) . "</i>";
+        if (my $subj = $res{"events_${i}_subject"}) {
+            LJ::CleanHTML::clean_subject_all(\$subj);
+            $ret .= "; <i>" . LJ::ehtml($subj) . "</i>";
         }
         $ret .= "<br />\n";
             
-        my $event = BML::ebml(LJ::durl($res{"events_${i}_event"}));
-        LJ::CleanHTML::clean_event(\$event,
-                                   $props{$itemid}->{'opt_preformatted'});
+        my $event = LJ::ehtml(LJ::durl($res{"events_${i}_event"}));
+        $event =~ s!\n!<br />!g;
         $ret .= $event;
+
         $ret .= "</td></tr></table>\n";
     }
         
