@@ -1394,6 +1394,10 @@ sub check_altusage
     # complain if the username is invalid
     return fail($err,203) unless LJ::canonical_username($alt);
    
+    # allow usage if we're told explicitly that it's okay
+    return 1 if ($flags->{'usejournal_okay'});
+    
+    # otherwise, check logaccess table:
     my $info = {};
     if (LJ::can_use_journal($dbs, $u->{'userid'}, $req->{'usejournal'}, $info)) {
 	$flags->{'ownerid'} = $info->{'ownerid'};
