@@ -115,7 +115,7 @@ body<=
 
     my $mlcode;
     if ($comment->{state} eq 'A') {
-        if ($POST{'qr'}) {
+        if ($POST{'qr'} && !($wasscreened and $parent->{state} ne 'S')) {
             # Set memcache key for highlighting post
             my $memkey = [$remote->{'userid'}, "lastcomm:$remote->{'userid'}"];
             LJ::MemCache::set($memkey, "$journalu->{'userid'}:$dtalkid", time()+10);
