@@ -65,7 +65,6 @@ while (my @list = get_some()) {
         }
         if (@vals) {
             my $sql = "REPLACE INTO userproplite2 VALUES " . join(',', @vals);
-            print "SQL: $sql\n";
             $dbcm->do($sql);
             if ($dbcm->err) {
                 die "Error: " . $dbcm->errstr . "\n\n(Do you need to --runsql on your clusters first?)\n";
