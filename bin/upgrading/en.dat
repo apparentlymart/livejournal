@@ -1621,6 +1621,8 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /lostinfo.bml.enter_username=Enter your username:
 
+/lostinfo.bml.error.no_email=You must enter an email address in order to recover your username.
+
 /lostinfo.bml.lostpassword.text=If you've lost your password, enter your username and optionally, the email address you'd like the password sent to.  Note that the email address must be one you've used at LiveJournal before and had confirmed at one point.  If you leave the email field blank, it'll be mailed to your current address.
 
 /lostinfo.bml.lostpassword.title=Lost your password?

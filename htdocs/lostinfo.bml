@@ -1,34 +1,158 @@
 <?page
 title=><?_ml .title _ml?>
 body<=
+<?_code
+{
+    use strict;
+    use vars qw(%POST);
 
-<form action="lostinfo_do.bml" method="post">
+    return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
-<?h1 <?_ml .lostpassword.title _ml?> h1?>
-<?p
-<?_ml .lostpassword.text _ml?>
-p?>
+    # no post action, just show query form
+    unless (LJ::did_post()) {
+        my $ret;
 
-<?standout
-<?_ml .enter_username _ml?><br />
-<input type="text" name="user" size="30" maxlength="70" /><br /><br />
-<?_ml .enter_email_optional _ml?><br />
-<input type="text" name="email_p" size="30" maxlength="70" /> <input type="submit" name="lostpass" value="<?_ml .btn.proceed _ml?>" />
-standout?>
+        $ret .= "<?h1 $ML{'.lostpassword.title'} h1?>\n";
+        $ret .= "<?p $ML{'.lostpassword.text'} p?>\n";
 
-<?h1 <?_ml .lostusername.title _ml?> h1?>
-<?p
-<?_ml .lostusername.text _ml?>
-p?>
+        $ret .= "<form action='lostinfo.bml' method='post'>\n";
+        $ret .= "<?standout $ML{'.enter_username'}<br />\n";
+        $ret .= LJ::html_text({ 'name' => 'user', 'size' => 30, 'maxlength' => 15 }) . "<br /><br />\n";
+        $ret .= "$ML{'.enter_email_optional'}<br />\n";
+        $ret .= LJ::html_text({ 'name' => 'email_p', 'size' => 30, 'maxlength' => 50 }) . "\n";
+        $ret .= LJ::html_submit('lostpass', $ML{'.btn.proceed'}) . "\n";
+        $ret .= "standout?>\n</form>\n";
 
-<?standout
-<?_ml .enter_email _ml?><br />
-<input type="text" name="email_u" size="30" maxlength="70" /> <input type="submit" name="lostuser" value="<?_ml .btn.proceed _ml?>" />
-standout?>
+        $ret .= "<form action='lostinfo.bml' method='post'>\n";
+        $ret .= "<?h1 $ML{'.lostusername.title'} h1?>\n";
+        $ret .= "<?p $ML{'.lostusername.text'} p?>\n";
+        $ret .= "<?standout $ML{'.enter_email'}<br />\n";
+        $ret .= LJ::html_text({ 'name' => 'email_u', 'size' => 30, 'maxlength' => 50 }) . "\n";
+        $ret .= LJ::html_submit('lostuser', $ML{'.btn.proceed'}) . "\n";
+        $ret .= "standout?>\n</form>\n";
 
-</form>
+        return $ret;
+    }
 
+    # we have a post action
+
+    # note: some lostinfo_do.bml translation strings are used below
+    # because the code was once in lostinfo_do.bml, but later
+    # was merged into this file
+
+    if ($POST{'lostpass'}) {
+        my $email = LJ::trim($POST{'email_p'});
+        
+        my $u = LJ::load_user($POST{'user'});
+        return LJ::bad_input($ML{'error.username_notfound'})
+            unless $u;
+        
+        # can we send them the password where they want it?
+        # if blank email, then yes.
+        if (! $email) {
+            $email = $u->{'email'};
+        
+        # if their current email address, then yes.
+        # otherwise, check:
+        # if an old validated email address, then yes.
+        } elsif (lc($email) ne lc($u->{'email'})) {
+
+            my $dbr = LJ::get_db_reader();
+
+            return LJ::bad_input($ML{'/lostinfo_do.bml.error1.text'})
+                unless $dbr->selectrow_array("SELECT COUNT(*) FROM infohistory ".
+                                             "WHERE userid=? AND what='email' ".
+                                             "AND oldvalue=? AND other='A'",
+                                             undef, $u->{'userid'}, $email);
+        }
+
+        # email address is okay, build email body
+        my $body = BML::ml('/lostinfo_do.bml.lostpasswordmail.part1',
+                           { 'sitename' => $LJ::SITENAME,
+                             'username' => $u->{'user'},
+                             'password' => $u->{'password'},
+                             'emailadr' => $u->{'email'} }) . "\n\n";
+
+        if ($u->{'status'} ne "A") {
+            my $aa = LJ::register_authaction($u->{'userid'}, "validateemail", $u->{'email'});
+            $body .= $ML{'/lostinfo_do.bml.lostpasswordmail.part2'} . "\n\n";
+            $body .= "    $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";
+        }
+
+        $body .= BML::ml('/lostinfo_do.bml.lostpasswordmail.part3',
+                         { 'remoteip' => BML::get_remote_host() . " (" . BML::get_remote_ip() . ")" });
+        $body .= "\n\n";
+
+        # section 4 is optional, and blank in 'en'
+        my $mline = $ML{'/lostinfo_do.bml.lostpasswordmail.part4'};
+        $body .= $mline . "\n\n" if $mline;
+
+        $body .= BML::ml('/lostinfo_do.bml.lostpasswordmail.part5',
+                         { 'journalurl' => "$LJ::SITEROOT/users/$u->{'user'}/",
+                           'updateurl'  => "$LJ::SITEROOT/update.bml?$u->{'user'}",
+                           'rooturl'    => "$LJ::SITEROOT/" }) . "\n";
+
+        LJ::send_mail({
+            'to' => $email,
+            'from' => $LJ::ADMIN_EMAIL,
+            'fromname' => $LJ::SITENAME,
+            'charset' => 'utf-8',
+            'subject' => $ML{'/lostinfo_do.bml.lostpasswordmail.subject'},
+            'body' => $body,
+        }) or die "Error: couldn't send email";
+
+        return "<?h1 $ML{'/lostinfo_do.bml.password_mailed.title'} h1?>\n" .
+               "<?p $ML{'/lostinfo_do.bml.password_mailed.text'} p?>";
+    }
+
+    if ($POST{'lostuser'}) {
+
+        my $sendto = "";
+        my $email = LJ::trim($POST{'email_u'});
+        return LJ::bad_input($ML{'.error.no_email'})
+            unless $email;
+        
+        my $dbr = LJ::get_db_reader();
+        my $sth = $dbr->prepare("SELECT user, status FROM user WHERE email=?");
+        $sth->execute($email);
+        my @users;
+        while (my ($ru, $rs) = $sth->fetchrow_array) {
+            push @users, $ru;
+        }
+        
+        return LJ::bad_input(BML::ml('/lostinfo_do.bml.error.no_usernames_for_email',
+                                     { 'address' => LJ::ehtml($email) || 'none' }))
+            unless @users;
+        
+        # we have valid usernames, build email body
+        my $body;
+        $body .= "This is your requested username reminder from $LJ::SITENAME.  ";
+        $body .= "Below are the usernames you have registered for the email address $email:\n\n";
+
+        $body .= "          $_\n" foreach @users;
+        
+        $body .= "\nThis information was requested on the website from " . BML::get_remote_host() . 
+                 " (" . BML::get_remote_ip() . ").\n\n";
+        $body .= "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
+        
+        LJ::send_mail({
+            'to' => $email,
+            'from' => $LJ::ADMIN_EMAIL,
+            'fromname' => $LJ::SITENAME,
+            'charset' => 'utf-8',
+            'subject' => "Lost Username",
+            'body' => $body,
+        }) or die "Error: couldn't send email";
+        
+        return "<?h1 $ML{'/lostinfo_do.bml.username_mailed.title'} h1?>\n" .
+               "<?p $ML{'/lostinfo_do.bml.username_mailed.text'} p?>";
+    }
+        
+    # post, but they didn't press a button?
+    return $ML{'error.nobutton'};
+}
+_code?>
 <=body
 page?><?_c <LJDEP>
-post: htdocs/lostinfo_do.bml
+post: htdocs/lostinfo.bml
 </LJDEP> _c?>
