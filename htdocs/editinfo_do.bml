@@ -18,9 +18,11 @@ BODY<=
  my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
 
  my $ret;
- my $dbh = LJ::get_dbh("master");
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
- my $u = LJ::load_user($dbh, $FORM{'user'});
+ my $u = LJ::load_user($dbr, $FORM{'user'});
 
  unless ($u) {
      return LJ::bad_input("Invalid username");
@@ -31,7 +33,7 @@ BODY<=
  }
  
 
- LJ::load_user_props($dbh, $u, "opt_whatemailshow",
+ LJ::load_user_props($dbr, $u, "opt_whatemailshow",
 		     "opt_showtopicstuff", "country", "state", "city",
 		     "zip", "icq", "aolim", "yahoo", "msn", "url",
 		     "urlname", "gender", "jabber", "opt_blockrobots",
@@ -344,7 +346,7 @@ BODY<=
      ####### let them un-ban users if they've banned users
      my @banned = ();
      my $quserid = $u->{'userid'}+0;
-     $sth = $dbh->prepare("SELECT b.banneduserid, u.user FROM ban b, user u WHERE b.banneduserid=u.userid AND b.userid=$quserid");
+     $sth = $dbr->prepare("SELECT b.banneduserid, u.user FROM ban b, user u WHERE b.banneduserid=u.userid AND b.userid=$quserid");
      $sth->execute;
      push @banned, $_ while ($_ = $sth->fetchrow_hashref);
      
@@ -378,7 +380,7 @@ BODY<=
      my ($zipcity, $zipstate);
      my $qzip = $dbh->quote($FORM{'zip'});
      if ($FORM{'country'} eq "US") {
-	 $sth = $dbh->prepare("SELECT city, state FROM zip WHERE zip=$qzip");
+	 $sth = $dbr->prepare("SELECT city, state FROM zip WHERE zip=$qzip");
 	 $sth->execute;
 	 ($zipcity, $zipstate) = $sth->fetchrow_array;
      }
@@ -603,7 +605,7 @@ BODY<=
 	     my @new_intids = ();  ## existing IDs we'll add for this user
 
 	     ## find existing IDs
-	     $sth = $dbh->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
+	     $sth = $dbr->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
 	     $sth->execute;
 	     while ($_ = $sth->fetchrow_hashref) {
 		 push @new_intids, $_->{'intid'};     # - we'll add this later.
