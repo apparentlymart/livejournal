@@ -538,7 +538,6 @@ sub clean_s1_style
 sub s1_attribute_clean {
     my $a = $_[0];
     $a =~ s/[\t\n]//g;
-    $a =~ s/\&/&amp;/g;
     $a =~ s/\"/&quot;/g;
     $a =~ s/\'/&\#39;/g;
     $a =~ s/</&lt;/g;
