@@ -8,7 +8,11 @@ use XML::RSS;
 use XML::Parser;
 
 
-# parse_feed parses an RSS/Atom feed and returns $feed, which is a hash
+# parse_feed parses an RSS/Atom feed 
+# arguments: content and, optionally, type, specifying "atom" or
+# "rss". If type isn't supplied, the function will try to guess it
+# based on contents.
+# It returns $feed, which is a hash
 # with the following keys:
 #  type - 'atom' or 'rss'
 #  version - version of the feed in its standard
@@ -29,7 +33,7 @@ use XML::Parser;
 
 sub parse_feed
 {
-    my $content = shift;
+    my ($content, $type) = @_;
     my ($feed, $items, $error);
     my $parser;
 
@@ -39,7 +43,7 @@ sub parse_feed
     # TODO: maybe store the feed's type on creation in a userprop and not guess here
     
     my $cut = substr($content, 0, 255);
-    if ($cut =~ m!\<feed!) {
+    if ($type eq 'atom' || $cut =~ m!\<feed!) {
         # try treating it as an atom feed
         $parser = new XML::Parser(Style=>'Stream', Pkg=>'LJ::ParseFeed::Atom');
         return ("", "failed to create XML parser") unless $parser;
@@ -52,9 +56,10 @@ sub parse_feed
             ($feed, $items, $error) = LJ::ParseFeed::Atom::results();
         };
     
-        if ($feed) {
-            # there was a top-level <feed> there, so even if $error is set,
-            # this is an atom feed, don't try RSS
+        if ($feed || $type eq 'atom') {
+            # there was a top-level <feed> there, or we're forced to treat
+            # as an Atom feed, so even if $error is set,
+            # don't try RSS
             return ($feed, $error);
         }
     }
