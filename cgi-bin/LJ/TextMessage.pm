@@ -22,7 +22,7 @@ use LWP::UserAgent;
 use strict;
 use vars qw($VERSION $SENDMAIL %providers);
 
-$VERSION = '1.4.8';
+$VERSION = '1.4.9';
 
 # default path to sendmail, if none other specified.  we should probably
 # use something more perl-ish and less unix-specific, but whateva'
@@ -324,20 +324,13 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
     },
 
     'suncom' => {
-        'name'		=> 'SunCom',
-        'notes'		=> 'Please use a 10-Digit SunCom phone number.',
-        'fromlimit'	=> 30,
-        'msglimit'	=> 120,
-        'totlimit'	=> 120,	      
+        'name'          => 'SunCom',
+        'notes'         => 'Enter your number. Email will be sent to number@tms.suncom.com.',
+        'fromlimit'     => 18,
+        'msglimit'      => 110,
+        'totlimit'      => 110,
     },
 
-    'tmobile' => {
-        'name'          => 'T-Mobile (formerly One-2-One)',
-        'notes'         => 'Enter your 11 digit phone number',
-        'fromlimit'     => 50,
-        'msglimit'      => 160,
-        'totlimit'      => 160,
-    },
 
     'telus' => {
         'name'		=> 'Telus Mobility',
@@ -347,20 +340,37 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 120,
     },
     
-    'tmomail' => {
+
+    'tmobileaustria' => {
+        'name'       => 'T-Mobile Austria',
+        'notes'      => 'Enter your number starting with 43676. Email will be sent to number@sms.t-mobile.at.',
+        'fromlimit'  => 15,
+        'msglimit'   => 160,
+        'totlimit'   => 160,
+    },
+
+    'tmobilegermany' => {
+        'name'       => 'T-Mobile Germany',
+        'notes'      => 'Enter your number. Email will be sent to number@T-D1-SMS.de',
+        'fromlimit'  => 15,
+        'msglimit'   => 160,
+        'totlimit'   => 160,
+    },
+
+    'tmobileholland' => {
+        'name'       => 'T-Mobile Netherlands',
+        'notes'      => 'Send "EMAIL ON" to 555 from your phone, then enter your number starting with 316. Email will be sent to number@gin.nl',
+        'fromlimit'  => 15,
+        'msglimit'   => 160,
+        'totlimit'   => 160,
+    },
+
+    'tmobileusa' => {
         'name'		=> 'T-Mobile',
         'notes'		=> 'Messages are sent to number@tmomail.net',
         'fromlimit'	=> 30,
         'msglimit'	=> 160,
         'totlimit'	=> 160,	      
-    },
-
-    'tms-suncom' => {
-        'name'		=> 'TMS SunCom',
-        'notes'		=> 'Messages are sent to number@tms.suncom.com',
-        'fromlimit'	=> 18,
-        'msglimit'	=> 110,
-        'totlimit'	=> 110,	      
     },
 
     'uboot' => {
@@ -425,7 +435,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'msglimit'	=> 480,
         'totlimit'	=> 500,
     },
-    
+
 );
 
 sub providers
@@ -442,8 +452,9 @@ sub provider_info
 sub remap {
     my $provider = shift;
     return "o2mmail" if $provider eq "btcellnet";
-    return "tmobile" if $provider eq "one2one";
     return "voicestream" if $provider eq "voicestream2";
+    return "tmobileusa" if $provider eq "tmomail";
+    return "suncom" if $provider eq "tms-suncom";
     return $provider;
 }
 
@@ -820,9 +831,9 @@ sub send
 
     elsif ($provider eq "suncom") {
         send_mail($self, {
-            'to' => "$self->{'number'}\@suncom1.com",
-            'from' => $msg->{'from'},
-            'body' => $msg->{'message'},
+            'to'   => "$self->{'number'}\@tms.suncom.com",
+            'from' => "$msg->{'from'}",
+            'body' => "$msg->{'message'}",
         });
     }
 
@@ -836,32 +847,43 @@ sub send
         });
     }
 
-    elsif ($provider eq "tmomail")  # T-Mobile
+    elsif ($provider eq "tmobileaustria")    
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@sms.t-mobile.at",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+        });
+    }
+
+    elsif ($provider eq "tmobilegermany")
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@T-D1-SMS.de",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+        });
+    }
+
+    elsif ($provider eq "tmobileholland")
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@gin.nl",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+        });
+    }
+
+    elsif ($provider eq "tmobileusa") 
     {
         send_mail($self, {
             'to'        => "$self->{'number'}\@tmomail.net",
-            'subject'   => "$msg->{'from'}", # Message Subject Contains Sender Name
+            'subject'   => "$msg->{'from'}",
             'body'      => "$msg->{'message'}",
-            'from'      => "LJ", # This Does Not Show on The Phone
+            'from'      => "LJ",
         });
     }
     
-    elsif ($provider eq "tmobile") {
-        send_mail($self, {
-            'to' => "$self->{'number'}\@one2one.net",
-            'from' => "$msg->{'from'}",
-            'body' => "$msg->{'message'}",
-        });
-    }
-
-    elsif ($provider eq "tms-suncom") {
-        send_mail($self, {
-            'to' => "$self->{'number'}\@tms.suncom.com",
-            'from' => $msg->{'from'},
-            'body' => $msg->{'message'},
-        });
-    }
-
     elsif ($provider eq "uboot")
     {
        	post_webform("http://www.uboot.com/cgi-bin/nickpage.fcgi", $errors, {
