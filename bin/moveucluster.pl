@@ -197,10 +197,9 @@ if ($is_movemaster) {
 
 print "Moving away from cluster $sclust\n" if $optv;
 
-while (my $cmd = $dbo->selectrow_array("SELECT cmd FROM cmdbuffer WHERE journalid=$userid")) {
-    my $dbcm = LJ::get_cluster_master($sclust);
+while (my $cmd = $dboa->selectrow_array("SELECT cmd FROM cmdbuffer WHERE journalid=$userid")) {
     print "Flushing cmdbuffer for cmd: $cmd\n" if $optv > 1;
-    LJ::cmd_buffer_flush($dbh, $dbcm, $cmd, $userid);
+    LJ::cmd_buffer_flush($dbh, $dboa, $cmd, $userid);
 }
 
 
