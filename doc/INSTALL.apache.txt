@@ -29,22 +29,19 @@
   RewriteLog /home/lj/logs/rewrite.log
   RewriteLogLevel 0
 
-  RewriteCond %{HTTP_HOST} ^(www\.)?ljsite\.com$ [NC]
+  RewriteCond %{HTTP_HOST} ^(www\.)?ljsite\.com(:[0-9]+)?$ [NC]
   RewriteRule ^/~([a-z0-9_]+)(/?.*)$ /users/$1$2 [L,PT,NS]
 
   RewriteCond %{REQUEST_URI} !\.bml
   RewriteRule ^/community/([a-z0-9_]+)(/?.*)$ /users/$1$2 [L,PT,NS]
 
-  RewriteCond %{HTTP_HOST} ^([a-z0-9_\-]+)\.ljsite\.com$ [NC]
+  RewriteCond %{HTTP_HOST} ^([a-z0-9_\-]+)\.ljsite\.com(:[0-9]+)?$ [NC]
   RewriteCond %1 !^www$ [NC]
   RewriteRule ^(.+) %{HTTP_HOST}$1  [C]
   RewriteRule ^([a-z0-9_\-]+)\.ljsite\.com(.+)  /users/$1$2  [L,PT,NS]
 
-  RewriteCond %{HTTP_HOST} ^(www\.)?ljsite\.com$ [NC]
+  RewriteCond %{HTTP_HOST} ^(www\.)?ljsite\.com(:[0-9]+)?$ [NC]
   RewriteRule ^/confirm/([a-z0-9]+\.[a-z0-9]+) http://www.ljsite.com/register.bml?$1 [L,R]
-
-  RewriteCond %{HTTP_HOST} ^mrtg\.ljsite\.com$ [NC]
-  RewriteRule ^(.+)$ http://mrtg.ljsite.com:88$1 [L,R]
 
   # if they send any Host header with letters (an IP address or blank
   # is okay) then it has to be www.ljsite.com or ljsite.com
