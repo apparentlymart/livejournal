@@ -3083,7 +3083,7 @@ if you would like to screen, unscreen, or delete the comments.
 
 /talkpost.bml.logyourip=<b>Notice!</b> This user has turned on the option that logs your IP address when posting.
 
-/talkpost.bml.noaccount=<a [[aopts]]>Don't have an account? Create one now</a>
+/talkpost.bml.noaccount=Don't have an account? <a [[aopts]]>Create one now</a>.
 
 /talkpost.bml.nosubjecthtml=No HTML allowed in subject
 

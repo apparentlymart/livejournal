@@ -1154,7 +1154,7 @@ sub talkform {
 
     # Link to create an account
     if (!$remote) {
-        $ret .= "<tr valign='middle' align='left'><td colspan='2'></td><td><font size='1'>";
+        $ret .= "<tr valign='middle' align='left'><td colspan='2'></td><td><span style='font-size: 8pt; font-style: italic;'>";
         $ret .= BML::ml('.noaccount', {'aopts' => "href='$LJ::SITEROOT/create.bml'"});
         $ret .= "</font></td></tr>\n";
     }
