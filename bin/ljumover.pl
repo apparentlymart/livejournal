@@ -47,7 +47,7 @@ will do an unlock cycle before starting to move anything itself.
 
 Move commands are in the form:
 
-  <src clusters>[+active] to <dest clusters> [<max users>]
+  <src clusters>[+active[(<number>)]] to <dest clusters> [<max users>]
 
 =over 4
 
@@ -62,7 +62,13 @@ Example:
 
 =item B<+active>
 
-If this flag is given, only active users will be moved.
+If this option is given, only active users will be moved. You can specify the
+number of days to consider "active" by appending a number in parentheses, e.g.,
+
+  active(20)
+
+means that "active" means activity within the last 20 days. If not specified,
+the default of 30 is used.
 
 =item B<dest clusters>
 
@@ -156,12 +162,11 @@ BEGIN {
 
 sub runCommand ($$$$$$);
 sub parseCommand ($);
+sub parseCluster ($);
 sub cleanup ();
 sub unlockStaleUsers ();
 sub startDaemon ();
 sub daemonRoutine ($$);
-sub parseCommand ($);
-sub parseCluster ($);
 sub abort (@);
 
 
@@ -170,7 +175,7 @@ sub abort (@);
 ###############################################################################
 our (
     $Debug, $VerboseFlag, $ClusterSpecRe, $CommandRe,
-    $ReadOnlyBit, $DaemonPid, $MoverWorkersFile,
+    $ReadOnlyBit, $DaemonPid, $MoverWorkersFile, $ActiveDaysDefault,
    );
 
 # -d and -v option flags
@@ -179,19 +184,21 @@ $VerboseFlag    = FALSE;
 
 # Patterns for matching movement commands
 $ClusterSpecRe  = qr{
-                     \d+                # Lead num
-                     (?:\s*-\s*\d+)?    # Range end num (optional)
-                     (?:\s*,\s*)?       # Comma + whitespace
+                     \d+                        # Lead num
+                     (?:\s*-\s*\d+)?            # Range end num (optional)
+                     (?:\s*,\s*)?               # Comma + whitespace
                      }x;
 $CommandRe      = qr{^
-                     ($ClusterSpecRe+)  # Source clusters
+                     ($ClusterSpecRe+)          # Source clusters
                      \s*
-                     (\+\s*active)?     # Active flag
+                     (\+\s*active
+                       (?:\s*\(\s*\d+\s*\))?    # Optional day-range
+                     )?                         # Active flag
                      \s+
-                     to                 # Literal 'to'
+                     to                         # Literal 'to'
                      \s+
-                     ($ClusterSpecRe+)  # Dest clusters
-                     (?:\s+(\d+))?      # Maximum
+                     ($ClusterSpecRe+)          # Dest clusters
+                     (?:\s+(\d+))?              # Maximum
                      $}ix;
 
 
@@ -213,6 +220,9 @@ $DaemonPid      = undef;
 # The path to the file that controls the number of running threads.
 $MoverWorkersFile = "$ENV{LJHOME}/var/mover-workers";
 
+# The number of days to use as the threshold for activity if the "+active" flag
+# is given.
+$ActiveDaysDefault = 30;
 
 
 ### Main body
@@ -482,6 +492,7 @@ sub runCommand ($$$$$$) {
         dests           => $cmd->{dests},
         max             => $cmd->{max},
         activeUsersOnly => $cmd->{active},
+        activeDays      => $cmd->{activeDays} || $ActiveDaysDefault,
         chunksize       => 500,
         debugFunction   => \&debugMsg,
         messageFunction => \&verboseMsg,
@@ -511,6 +522,7 @@ sub parseCommand ($) {
         $srcClusters,
         @sources,
         $activeFlag,
+        $activeDays,
         $dstClusters,
         @dests,
         $max,
@@ -534,11 +546,17 @@ sub parseCommand ($) {
         push @dests, parseCluster( $cluster );
     }
 
+    # Grab the "days" param from the "active" flag if both were present
+    if ( $activeFlag && $activeFlag =~ m{(\d+)} ) {
+        $activeDays = int( $1 );
+    }
+
     my $rval = {
-        sources => \@sources,
-        active  => $activeFlag ? TRUE : FALSE,
-        dests   => \@dests,
-        max     => $max || 0,
+        sources     => \@sources,
+        active      => $activeFlag ? TRUE : FALSE,
+        activeDays  => $activeDays,
+        dests       => \@dests,
+        max         => $max || 0,
     };
 
     debugMsg( "Parsed command '%s' into: %s", $command, $rval );
@@ -683,6 +701,7 @@ sub new {
         dests             => [],
         max               => 0,
         activeUsersOnly   => 0,
+        activeDays        => 30,
         chunksize         => 500,
         maxThreads        => 0,
         moverWorkersMtime => 0,
@@ -718,7 +737,9 @@ sub desc {
 
     return sprintf( '[%s]%s -> [%s] (Max: %s, Chunksize: %d)',
                     join(',', @{$self->{sources}}),
-                    $self->{activeUsersOnly} ? " (Active)" : "",
+                    $self->{activeUsersOnly}
+                        ? " (Active $self->{activeDays} days)"
+                        : "",
                     join(',', @{$self->{dests}}),
                     $self->max,
                     $self->chunksize,
@@ -784,7 +805,7 @@ sub start {
             $self->debugMsg( "User loop: max threads: $maxThreads" );
 
             # Advise the use if the thread count changes.
-            if ( $maxThreads != $oldMax ) {
+            if ( defined $oldMax && $maxThreads != $oldMax ) {
                 $self->message( "Set thread count to %d (was %d)", $maxThreads, $oldMax );
                 $oldMax = $maxThreads;
             }
@@ -1013,10 +1034,10 @@ sub getPendingUsers {
             FROM
                 clustertrack2
             WHERE
-                timeactive > UNIX_TIMESTAMP() - 86400*2
+                timeactive > UNIX_TIMESTAMP() - 86400*%d
                 AND clusterid = ?
             LIMIT %d
-        }, $limit;
+        }, $self->activeDays, $limit;
     } else {
         $sql = sprintf q{
             SELECT
