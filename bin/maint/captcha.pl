@@ -178,7 +178,7 @@ $maint{gen_image_captchas} = sub {
     $u = LJ::load_user( "system" )
         or die "Couldn't load the system user.";
 
-    # Prepare insert cursor
+    # Prepare insert statement
     $sql = q{
         INSERT INTO captchas( type, answer, anum )
         VALUES ( 'image', ?, ? )
@@ -216,7 +216,6 @@ $maint{clean_captchas} = sub {
         $expiredate,            # unixtime of oldest-issued captcha to keep
         $expired,               # arrayref of arrayrefs of expired captchas
         $dbh,                   # Database handle (writer)
-        $dbr,                   # Database handle (reader)
         $sql,                   # SQL statement
         $sth,                   # Statement handle
         $count,                 # Deletion count
@@ -237,10 +236,11 @@ $maint{clean_captchas} = sub {
         WHERE
             userid > 0
             OR ( issuetime <> 0 AND issuetime < ? )
+        LIMIT 500
     };
-    $dbr = LJ::get_db_reader();
-    $expired = $dbr->selectall_arrayref( $sql, undef, $expiredate );
-    die "selectall_arrayref: $sql: ", $dbr->errstr if $dbr->err;
+    $dbh = LJ::get_db_writer();
+    $expired = $dbh->selectall_arrayref( $sql, undef, $expiredate );
+    die "selectall_arrayref: $sql: ", $dbh->errstr if $dbh->err;
 
     if ( @$expired ) {
         print "found ", scalar @$expired, " captchas to delete...\n";
@@ -249,9 +249,8 @@ $maint{clean_captchas} = sub {
         return;
     }
 
-    # Prepare deletion cursor
+    # Prepare deletion statement
     $sql = q{ DELETE FROM captchas WHERE capid = ? };
-    $dbh = LJ::get_db_writer();
     $sth = $dbh->prepare( $sql );
 
     # Fetch system user
