@@ -1,5 +1,8 @@
 <?_code
 {
+    use strict;
+    use vars qw(%FORM %GET $title $body);
+
     $title = "UTF-8 Conversion Page";
     $body = "";
 
@@ -8,38 +11,38 @@
     my %areas = (
                  'personal'=>{
                      'des'=>'Personal Information: name, biography, friend groups\' names',
-                     'browse'=>'browse_personals',
-                     'save'=>'save_personals',
+                     'browse'=>\&browse_personals,
+                     'save'=>\&save_personals,
                  },
 
                  'interests'=>{
                      'des'=>'Personal information: interests',
-                     'browse'=>'browse_interests',
-                     'save'=>'save_interests',
+                     'browse'=>\&browse_interests,
+                     'save'=>\&save_interests,
                  },
 
                  'keywords'=>{
                      'des'=>'Picture keywords',
-                     'browse'=>'browse_pickwd',
-                     'save'=>'save_pickwd',
+                     'browse'=>\&browse_pickwd,
+                     'save'=>\&save_pickwd,
                  },
 
                  'memories'=>{
                      'des'=>'Text of memory descriptions',
-                     'browse'=>'browse_memories',
-                     'save'=>'save_memories',
+                     'browse'=>\&browse_memories,
+                     'save'=>\&save_memories,
                  },
 
                  'polls'=>{
                      'des'=>'Text of questions/answers for polls you created',
-                     'browse'=>'browse_polls',
-                     'save'=>'save_polls',
+                     'browse'=>\&browse_polls,
+                     'save'=>\&save_polls,
                  },
 
                  'styles'=>{
                      'des'=>'Text of styles and overrides belonging to you',
-                     'browse'=>'browse_styles',
-                     'save'=>'save_styles',
+                     'browse'=>\&browse_styles,
+                     'save'=>\&save_styles,
                  },
                  );
 
@@ -55,8 +58,20 @@
         return;
     }
 
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    unless ($u) {
+        $body .= LJ::bad_input($ML{'error.invalidauth'});
+        return;
+    }
+
+    # extra arguments for get requests
+    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
+    my $getextra_amp = $getextra ? "&amp;authas=$authas" : '';
+
     my $dbcm = LJ::get_cluster_master($u);
     my $dbh = LJ::get_db_writer();
+    my $sth;
 
     # avva, kinda improper usage of load_codes, but works i guess -brad
     LJ::load_codes({ "encname" => \%LJ::CACHE_ENCNAMES } )
@@ -68,6 +83,11 @@
     my $mode = $FORM{'mode'};
     my $area = $FORM{'area'};
     my $encid = $FORM{'encid'} + 0;
+
+    # authas switcher form
+    $body .= "<form class='postheading' method='get' action='utf8convert.bml'>\n";
+    $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+    $body .= "</form>\n\n";
 
     $mode = 'overview' unless defined $mode;
     if ( ($mode =~ m/^save.*/) && !$encid) {
@@ -82,12 +102,12 @@
         $body .= "<?p <b>If your journal is written in English, you always use English for communication in LiveJournal and never use even accent symbols of other West European languages, you do not need to use this page.</b> p?>";
 
         $body .= "<?hr?>";
-        if ($remote->{'oldenc'}) {
-            $body .= "<?h1 Mass Conversion h1?><?p We detect that you have defined the \"old encoding\" value of <b>$LJ::CACHE_ENCNAMES{$remote->{'oldenc'}}</b> on your personal info page. You can choose to mass-convert all your miscellaneous information to UTF-8 under the assumption that it is all stored in this encoding. <b>Do not</b> choose this option if you might have used some other encoding in the past (anywhere besides your entries and comments) while using LiveJournal. If you are not sure, use the <b>Conversion by Area</b> option below. p?>";
+        if ($u->{'oldenc'}) {
+            $body .= "<?h1 Mass Conversion h1?><?p We detect that you have defined the \"old encoding\" value of <b>$LJ::CACHE_ENCNAMES{$u->{'oldenc'}}</b> on your personal info page. You can choose to mass-convert all your miscellaneous information to UTF-8 under the assumption that it is all stored in this encoding. <b>Do not</b> choose this option if you might have used some other encoding in the past (anywhere besides your entries and comments) while using LiveJournal. If you are not sure, use the <b>Conversion by Area</b> option below. p?>";
 
-            $body .= "<?p <form method='post' action='utf8convert.bml'>\n";
+            $body .= "<?p <form method='post' action='utf8convert.bml$getextra'>\n";
             $body .= "<input type=hidden name=mode value='saveall'>\n";
-            $body .= "<input type=hidden name=encid value='" . $remote->{'oldenc'} . "'>\n";
+            $body .= "<input type=hidden name=encid value='" . $u->{'oldenc'} . "'>\n";
             $body .= "<input type=submit value='Yes, mass-convert all my information!'>";
             $body .= "</form> p?><?hr?>";
         }
@@ -96,11 +116,11 @@
         $body .= "<?p Available areas are: p?>";
     
         unless ($encid) { 
-            $encid = ($remote->{'oldenc'} ? $remote->{'oldenc'} : '1'); 
+            $encid = ($u->{'oldenc'} ? $u->{'oldenc'} : '1'); 
         };
 
         foreach (@areanames) {
-            $body .= "<?p <b><a href=\"utf8convert.bml?mode=browse&amp;encid=$encid&amp;area=$_\">$areas{$_}->{'des'}</a></b> p?>";
+            $body .= "<?p <b><a href=\"utf8convert.bml?mode=browse&amp;encid=$encid&amp;area=$_$getextra_amp\">$areas{$_}->{'des'}</a></b> p?>";
         }
 
     }
@@ -109,10 +129,10 @@
         # need to display the data in given encoding, if it is not UTF-8
         $body .= "<?h1 Browse h1?><?p You are browsing the area <br /><b>$areas{$area}->{'des'}</b>: p?>";
         my $browse = $areas{$area}->{'browse'};
-        my ($valid, $disp) = $browse->($remote, $encid);
+        my ($valid, $disp) = $browse->($u, $encid);
         if ($valid && !defined($FORM{'forceview'})) {
             $body .= "<?h1 No unconverted information h1?><?p There is no information in this area that is not valid UTF-8. Nothing needs to be done here. p?>";
-            $body .= "<?p You can <b><a href=\"utf8convert.bml\">return to the area list</a></b> or <b><a href=\"utf8convert.bml?mode=browse&area=$area&encid=$encid&forceview=1\">force the information to be shown anyway</a></b>. p?>";
+            $body .= "<?p You can <b><a href=\"utf8convert.bml$getextra\">return to the area list</a></b> or <b><a href=\"utf8convert.bml?mode=browse&area=$area&encid=$encid&forceview=1$getextra_amp\">force the information to be shown anyway</a></b>. p?>";
         } else {
             $body .= "<?h1 Information needs to be converted h1?>";
             $body .= "<?p Below your information is shown in the encoding <b>$LJ::CACHE_ENCNAMES{$encid}</b>. If it appears correct, press Save to convert and store it in the database. If some or all characters are displayed corrupted, you probably should choose another encoding from the list below and press Browse to see it displayed in that encoding. p?>";
@@ -120,21 +140,21 @@
             $body .= $disp;
             $body .= "<?hr?>";
 
-            $body .= "<?h1 Save h1?><?p <form method='post' action='utf8convert.bml'>\n";
+            $body .= "<?h1 Save h1?><?p <form method='post' action='utf8convert.bml$getextra'>\n";
             $body .= "<input type=hidden name=mode value='save'>\n";
             $body .= "<input type=hidden name=area value=$area>\n";
             $body .= "<input type=hidden name=encid value='$encid'>\n";
             $body .= "<input type=submit value='Yes, save this text as in this encoding.'>";
             $body .= "</form> p?>";
 
-            $body .= "<?h1 Choose Another h1?><?p <form method='post' action='utf8convert.bml'>\n";
+            $body .= "<?h1 Choose Another h1?><?p <form method='post' action='utf8convert.bml$getextra'>\n";
             $body .= "<input type=hidden name=mode value='browse'>\n";
             $body .= "<input type=hidden name=area value=$area>\n";
             $body .= LJ::html_select({'name'=>'encid', 'selected'=>$encid}, %LJ::CACHE_ENCNAMES);
             $body .= "<input type=submit value='Browse in different encoding.'>";
             $body .= "</form> p?>";
 
-            $body .= "<?p You can also <b><a href=\"utf8convert.bml\">go back to the area list</a></b>. p?>";
+            $body .= "<?p You can also <b><a href=\"utf8convert.bml$getextra\">go back to the area list</a></b>. p?>";
         };
     }
 
@@ -143,13 +163,13 @@
         $body .= "<?p What this means, precisely, is that all text in that area which is not already in the UTF-8 format will be converted to UTF-8 under the assumption that currently it is stored in the encoding <b>$LJ::CACHE_ENCNAMES{$encid}</b> (the technical name of which is <b>$LJ::CACHE_ENCODINGS{$encid}</b>). If you chose a wrong encoding, the text will display incorrectly after the conversion. p?>";
         $body .= "<?p Are you sure you want to proceed with this operation? p?>";
         
-        $body .= "<?p <form method='post' action='utf8convert.bml'>\n";
+        $body .= "<?p <form method='post' action='utf8convert.bml$getextra'>\n";
         $body .= "<input type=hidden name=mode value='save_do'>\n";
         $body .= "<input type=hidden name=area value=$area>\n";
         $body .= "<input type=hidden name=encid value='$encid'>\n";
         $body .= "<input type=submit value='Yes, proceed to save.'>";
         $body .= "</form>";
-        $body .= "<form method='post' action='utf8convert.bml'>\n";
+        $body .= "<form method='post' action='utf8convert.bml$getextra'>\n";
         $body .= "<input type=submit value='No, go back to the area list.'>";
         $body .= "</form> p?>";
     }
@@ -158,13 +178,13 @@
         $body .= "<?h1 Save All h1?><?p You chose to save all the miscellaneous information available with the encoding value <b>$LJ::CACHE_ENCNAMES{$encid}</b>. p?>";
         $body .= "<?p What this means, precisely, is that all text you have ever submitted to LiveJournal, except actual entries and comments, that is not already in the UTF-8 format will be converted to UTF-8 under the assumption that currently it is stored in the encoding <b>$LJ::CACHE_ENCNAMES{$encid}</b> (the technical name of which is <b>$LJ::CACHE_ENCODINGS{$encid}</b>). If you chose a wrong encoding, the text will display incorrectly after the conversion. p?>";
         $body .= "<?p Are you sure you want to proceed with this operation? p?>";
-        $body .= "<?p <form method='post' action='utf8convert.bml'>\n";
+        $body .= "<?p <form method='post' action='utf8convert.bml$getextra'>\n";
         $body .= "<input type=hidden name=mode value='saveall_do'>\n";
         $body .= "<input type=hidden name=area value=$area>\n";
         $body .= "<input type=hidden name=encid value='$encid'>\n";
         $body .= "<input type=submit value='Yes, proceed to save.'>";
         $body .= "</form>";
-        $body .= "<form method='post' action='utf8convert.bml'>\n";
+        $body .= "<form method='post' action='utf8convert.bml$getextra'>\n";
         $body .= "<input type=submit value='No, go back to the area list.'>";
         $body .= "</form> p?>";
     }
@@ -172,7 +192,7 @@
     if ($mode eq 'save_do') {
         $body .= "<?h1 Saving h1?><?p Attempting to convert the area <br /><b>$areas{$area}->{'des'}</b>... p?>";
         my $save = $areas{$area}->{'save'};
-        my ($success, $message) = $save->($remote, $encid);
+        my ($success, $message) = $save->($u, $encid);
         if ($success) {
             $body .= "<?h1 Success h1?><?p Converted successfully. p?>";
             $body .= $message;
@@ -186,7 +206,7 @@
         foreach (@areanames) {
             $body .= "<?p Trying to convert <b>$areas{$_}->{'des'}</b>... p?>";
             my $save = $areas{$_}->{'save'};
-            my ($success, $message) = $save->($remote, $encid);
+            my ($success, $message) = $save->($u, $encid);
             if ($success) {
                 $body .= "<?h1 Success h1?><?p Converted successfully. p?>";
                 $body .= $message;
