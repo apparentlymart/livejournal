@@ -31,8 +31,8 @@ BODY<=
              }],
              ['percent','% Done', sub {
                  my $r = shift;
-                 "<td align='right'>" .
-                 sprintf("%.02f%%", $r->{'percent'}) . "<br />" .
+                 "<td align='right'><b>" .
+                 sprintf("%.02f%%", $r->{'percent'}) . "</b><br />" .
                  "<font size='-1'>$r->{'_good'}/$r->{'_total'}</font>" .
                  "</td>";
              }, sub { $b->{'percent'} <=> $a->{'percent'} ||
