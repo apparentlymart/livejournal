@@ -1,5 +1,40 @@
 # Blogger API wrapper for LJ
 
+package LJ::Util;
+
+sub blogger_deserialize {
+    my $content = shift;
+    my $event = { 'props' => {} };
+    if ($content =~ s!<title>(.*?)</title>!!) {
+        $event->{'subject'} = $1;
+    }
+    if ($content =~ s/(^|\n)lj-mood:\s*(.*)\n//) {
+        $event->{'props'}->{'current_mood'} = $2;
+    }
+    if ($content =~ s/(^|\n)lj-music:\s*(.*)\n//) {
+        $event->{'props'}->{'current_music'} = $2;
+    }
+    $content =~ s/^\s+//; $content =~ s/\s+$//;
+    $event->{'event'} = $content;
+    return $event;
+}
+
+sub blogger_serialize {
+    my $event = shift;
+    my $content;
+    if ($event->{'subject'}) {
+        $content .= "<title>$event->{'subject'}</title>";
+    }
+    if ($event->{'props'}->{'current_mood'}) {
+        $content .= "lj-mood: $event->{'props'}->{'current_mood'}\n";
+    }
+    if ($event->{'props'}->{'current_music'}) {
+        $content .= "lj-music: $event->{'props'}->{'current_music'}\n";
+    }
+    $content .= $event->{'event'};
+    return $content;
+}
+
 package Apache::LiveJournal::Interface::Blogger;
 
 sub newPost {
@@ -7,22 +42,23 @@ sub newPost {
     my ($appkey, $journal, $user, $password, $content, $publish) = @_;
 
     my $err;
-    my @ltime = localtime();
+    my @ltime = gmtime();
+    my $event = LJ::Util::blogger_deserialize($content);
+
     my $req = {
 	'usejournal' => $journal ne $user ? $journal : undef,
 	'ver' => 1,
 	'username' => $user,
 	'password' => $password,
-	'event' => $content,
+	'event' => $event->{'event'},
+	'subject' => $event->{'subject'},
+        'props' => $event->{'props'},
 	'year' => $ltime[5]+1900,
 	'mon' => $ltime[4]+1,
 	'day' => $ltime[3],
 	'hour' => $ltime[2],
 	'min' => $ltime[1],
     };
-
-    use Data::Dumper;
-    print STDERR Dumper($req);
 
     my $res = LJ::Protocol::do_request("postevent", $req, \$err);
     
@@ -32,7 +68,155 @@ sub newPost {
             ->faultcode(substr($err, 0, 3));
     }
 
-    return $res->{'itemid'};
+    return "$journal:$res->{'itemid'}";
+}
+
+sub deletePost {
+    shift;
+    my ($appkey, $postid, $user, $password, $content, $publish) = @_;
+    return editPost(undef, $appkey, $postid, $user, $password, "", $publish);
+}
+
+sub editPost {
+    shift;
+    my ($appkey, $postid, $user, $password, $content, $publish) = @_;
+
+    die "Invalid postid\n" unless $postid =~ /^(\w+):(\d+)$/;
+    my ($journal, $itemid) = ($1, $2);
+    
+    my $event = LJ::Util::blogger_deserialize($content);
+
+    my $req = {
+	'usejournal' => $journal ne $user ? $journal : undef,
+	'ver' => 1,
+	'username' => $user,
+	'password' => $password,
+	'event' => $event->{'event'},
+	'subject' => $event->{'subject'},
+        'props' => $event->{'props'},
+        'itemid' => $itemid,
+    };
+
+    my $res = LJ::Protocol::do_request("editevent", $req, \$err);
+    
+    if ($err) {
+        die SOAP::Fault
+            ->faultstring(LJ::Protocol::error_message($err))
+            ->faultcode(substr($err, 0, 3));
+    }
+
+    return 1;
+}
+
+sub getUsersBlogs {
+    shift;
+    my ($appkey, $user, $password) = @_;
+    
+    my $u = LJ::load_user($user) or die "Invalid login\n";
+    die "Invalid login\n" unless LJ::auth_okay($u, $password);
+
+    my $dbr = LJ::get_db_reader() or die "Database temporarily unavailable\n";
+    my $sth = $dbr->prepare("SELECT u.* FROM user u, reluser ru ".
+                            "WHERE ru.userid=u.userid AND ru.type='P' AND ".
+                            "u.statusvis='V' AND ".
+                            "ru.targetid=?");
+    my @list = ($u);
+    $sth->execute($u->{'userid'});
+    push @list, $_ while $_ = $sth->fetchrow_hashref;
+    return [ map { {
+        'url' => LJ::journal_base($_) . "/",
+        'blogid' => $_->{'user'},
+        'blogName' => $_->{'name'}, 
+    } } @list ];
+}
+
+sub getRecentPosts {
+    shift;
+    my ($appkey, $journal, $user, $password, $numposts) = @_;
+
+    $numposts = int($numposts);
+    $numposts = 1 if $numposts < 1;
+    $numposts = 50 if $numposts > 50;
+
+    my $req = {
+	'usejournal' => $journal ne $user ? $journal : undef,
+	'ver' => 1,
+	'username' => $user,
+	'password' => $password,
+        'selecttype' => 'lastn',
+        'howmany' => $numposts,
+    };
+
+    my $res = LJ::Protocol::do_request("getevents", $req, \$err);
+    
+    if ($err) {
+        die SOAP::Fault
+            ->faultstring(LJ::Protocol::error_message($err))
+            ->faultcode(substr($err, 0, 3));
+    }
+
+    return [ map { { 
+        'content' => LJ::Util::blogger_serialize($_),
+        'userID' => $_->{'poster'} || $journal,
+        'postId' => "$journal:$_->{'itemid'}",
+        'dateCreated' => $_->{'eventtime'}, 
+    } } @{$res->{'events'}} ];
+}
+
+sub getPost {
+    shift;
+    my ($appkey, $postid, $user, $password) = @_;
+
+    die "Invalid postid\n" unless $postid =~ /^(\w+):(\d+)$/;
+    my ($journal, $itemid) = ($1, $2);
+
+    my $req = {
+	'usejournal' => $journal ne $user ? $journal : undef,
+	'ver' => 1,
+	'username' => $user,
+	'password' => $password,
+        'selecttype' => 'one',
+        'itemid' => $itemid,
+    };
+
+    my $res = LJ::Protocol::do_request("getevents", $req, \$err);
+    
+    if ($err) {
+        die SOAP::Fault
+            ->faultstring(LJ::Protocol::error_message($err))
+            ->faultcode(substr($err, 0, 3));
+    }
+
+    die "Post not found\n" unless $res->{'events'}->[0];
+
+    return map { { 
+        'content' => LJ::Util::blogger_serialize($_),
+        'userID' => $_->{'poster'} || $journal,
+        'postId' => "$journal:$_->{'itemid'}",
+        'dateCreated' => $_->{'eventtime'}, 
+    } } $res->{'events'}->[0];
+}
+
+sub getTemplate { die "$LJ::SITENAME doesn't support Blogger Templates.  To customize your journal, visit $LJ::SITENAME/customize/"; }
+*setTemplate = \&getTemplate;
+
+sub getUserInfo {
+    shift;
+    my ($appkey, $user, $password) = @_;
+
+    my $u = LJ::load_user($user) or die "Invalid login\n";
+    die "Invalid login\n" unless LJ::auth_okay($u, $password);
+    
+    LJ::load_user_props($u, "url");
+
+    return {
+        'userid' => $u->{'userid'},
+        'nickname' => $u->{'user'},
+        'firstname' => $u->{'name'},
+        'lastname' => $u->{'name'},
+        'email' => $u->{'email'},
+        'url' => $u->{'url'},
+    };
 }
 
 1;

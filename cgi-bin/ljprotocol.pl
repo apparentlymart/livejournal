@@ -1050,6 +1050,17 @@ sub editevent
         ($req->{'props'}->{"opt_backdated"} &&
          $uowner->{'journaltype'} ne "P");
 
+    # make year/mon/day/hour/min optional in an edit event,
+    # and just inherit their old values
+    {
+        $oldevent->{'logtime'} =~ /^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/;
+        $req->{'year'} = $1 unless defined $req->{'year'};
+        $req->{'mon'} = $2+0 unless defined $req->{'mon'};
+        $req->{'day'} = $3+0 unless defined $req->{'day'};
+        $req->{'hour'} = $4+0 unless defined $req->{'hour'};
+        $req->{'min'} = $5+0 unless defined $req->{'min'};
+    }
+
     # updating an entry:
     return undef
         unless common_event_validation($req, $err, $flags);
