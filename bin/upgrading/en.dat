@@ -674,6 +674,8 @@ p?>
 
 /customize/index.bml.s2.customize.settings.delete=Remove Customizations
 
+/customize/index.bml.s2.customize.settings.delete.confirm=Are you sure you want to remove these customizations?
+
 /customize/index.bml.s2.customize.settings.edit=Edit Customizations
 
 /customize/index.bml.s2.customize.settings.header=Change Individual Settings

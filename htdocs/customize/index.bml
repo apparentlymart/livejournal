@@ -286,8 +286,9 @@ body<=
     $ret .= "<?h2 $ML{'.s2.customize.settings.header'} h2?><?p $ML{'.s2.customize.settings'} p?>";
     $ret .= "<blockquote>";
     if ($style{'user'}) {
-        $ret .= "<input type='submit' name='action:edituser' value='$ML{'.s2.customize.settings.edit'}'>\n";
-        $ret .= "<input type='submit' name='action:deluser' value='$ML{'.s2.customize.settings.delete'}'>\n";
+        $ret .= LJ::html_submit('action:edituser', $ML{'.s2.customize.settings.edit'});
+        $ret .= LJ::html_submit('action:deluser', $ML{'.s2.customize.settings.delete'},
+                                { 'onclick' => "return confirm('" . LJ::ejs($ML{'.s2.customize.settings.delete.confirm'}) . "')" });
     } else {
         $ret .= "<input type='submit' name='action:edituser' value='$ML{'.s2.customize.settings.new'}'>\n";
     }
