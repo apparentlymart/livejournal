@@ -416,8 +416,6 @@ p?>
 
 /community/settings.bml.error.samenames=Maintainer account and community account cannot be the same.
 
-/community/settings.bml.label.admconsole=<a href='/admin/console/'>Admin console</a> - to add/remove people that are able to post
-
 /community/settings.bml.label.anybodycan=<b>All Members</b><br />Anybody can post immediately once a member.
 
 /community/settings.bml.label.changeheader=Change Community Settings
@@ -451,6 +449,8 @@ p?>
 /community/settings.bml.label.maintainer=Maintainer:
 
 /community/settings.bml.label.maintainer.login=If this is not the maintainer account, <a href='/login.bml?ret=1'>login</a> as somebody else.
+
+/community/settings.bml.label.managepage=<a [[aopts]]>Community Management</a> - to add members, grant posting access, appoint moderators, etc.
 
 /community/settings.bml.label.membership=Membership
 
