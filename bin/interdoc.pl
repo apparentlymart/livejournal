@@ -54,6 +54,7 @@ sub find
     {
 	my $dir = shift @dirs;
 	next if ($dir eq "htdocs/img");
+	next if ($dir eq "htdocs/doc");
 
 	opendir (D, $dir);
 	my @files = sort { $a cmp $b } readdir(D);
@@ -73,7 +74,7 @@ sub check_file
 {
     $_ = shift;
     next unless (-f);
-    next if (/\.(gif|jpg|png|class|jar|zip|exe)$/);
+    next if (/\.(gif|jpg|png|class|jar|zip|exe|gz|deb|rpm|ico)$/);
     next if (/~$/);
 
     my $file = $_;
