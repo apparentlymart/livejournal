@@ -35,10 +35,18 @@
         delete $COOKIE{'BMLschemepref'};
         BML::set_scheme(undef);
         $body = "$ML{'.loggedout.success'}";
+
+        # Redirect to offsite uri if allowed.
+        if ($POST{'ret'}) {
+            my $redir_host = $1 if $POST{'ret'} =~ m#http://((?:\.|-|:|\w)+).*#i;
+            return BML::redirect($POST{'ret'}) if $LJ::REDIRECT_ALLOWED{$redir_host};
+        }
+
         return;
     }
 
-    $body .= "<form action='logout.bml'>";
+    $body .= "<form action='logout.bml' method='post'>";
+    $body .= LJ::html_hidden('ret', LJ::ehtml($GET{'ret'})) if $GET{'ret'};
     $body .= LJ::html_hidden("user", $u->{'user'},
                              "sessid", $u->{'_session'}->{'sessid'});
     $body .= "<?h1 $ML{'.logout.head'} h1?><?p $ML{'.logout.text'} ";

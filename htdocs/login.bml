@@ -43,7 +43,7 @@
         $body .= "<input type='hidden' name='response' id='login_response' value='' />";
 
         my $referer = BML::get_client_header('Referer');
-        if ($GET{'ret'} && $referer) {
+        if ($GET{'ret'} == 1 && $referer) {
             my $eh_ref = LJ::ehtml($referer);
             $body .= "<input type='hidden' NAME='ref' value='$eh_ref' />\n";
         }
@@ -152,6 +152,11 @@
         }
         $body .= "</table>\n";
         $body .= " standout?>\n";
+
+        # Save offsite redirect uri between POSTs
+        my $redir = $GET{'ret'} || $POST{'ret'};
+        $body .= "<input type='hidden' name='ret' value='$redir' />" if $redir && $redir != 1;
+        
         $body .= "</form>\n";
 
         $body .= "<?h1 $ML{'.whylogin.head'} h1?>\n";
@@ -302,6 +307,12 @@
                 "expiretime" => $etime,
             });
             
+            # Redirect to offsite uri if allowed, and not an internal LJ redirect. ('ret' == 1)
+            if ($POST{'ret'} && $POST{'ret'} != 1) {
+                my $redir_host = $1 if $POST{'ret'} =~ m#http://((?:\.|-|:|\w)+).*#i;
+                return BML::redirect($POST{'ret'}) if $LJ::REDIRECT_ALLOWED{$redir_host};
+            }
+
             if ($POST{'ref'} =~ /\Q$LJ::DOMAIN\E/ && $POST{'ref'} !~ m!/logout\.bml$! &&
                 $POST{'ref'} !~ /[\n\r]/) 
             {
