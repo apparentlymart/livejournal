@@ -144,7 +144,7 @@ if (! $opt->{'foreground'}) {
                 }
 
                 print $c "mailgate ";
-                print $c ($state eq 'defunct') ? "down" : "running";
+                print $c ($state ne 'defunct' && kill 0, $pid) ? "running" : "down";
                 print $c "\n";
             }
 
