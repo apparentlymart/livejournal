@@ -2614,7 +2614,6 @@ sub get_talktext2
     # try the memory cache
     my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
     while (my ($k, $v) = each %$mem) {
-        next unless $v;
         $k =~ /^talk(.*):(\d+):(\d+):(\d+)/;
         if ($opts->{'onlysubjects'} && $1 eq "subject") {
             delete $need{$4};
@@ -5782,6 +5781,47 @@ sub delete_all_comments {
     
 }
 
+# all reads/writes to talk2 must be done inside a lock, so there's
+# no race conditions between reading from db and putting in memcache.
+# can't do a db write in between those 2 steps.  the talk2 -> memcache
+# is elsewhere (talklib.pl), but this $dbh->do wrapper is provided
+# here because non-talklib things modify the talk2 table, and it's
+# nice to centralize the locking rules.
+#
+# return value is return of $dbh->do.  $errref scalar ref is optional, and 
+# if set, gets value of $dbh->errstr
+#
+# write:  (LJ::talk2_do)
+#   GET_LOCK
+#    update/insert into talk2
+#   RELEASE_LOCK
+#    delete memcache
+#
+# read:   (LJ::Talk::get_talk_data)
+#   try memcache
+#   GET_LOCk
+#     read db
+#     update memcache
+#   RELEASE_LOCK
+
+sub talk2_do {
+    my ($dbcm, $uid, $nodetype, $nodeid, $errref, $sql, @args) = @_;
+    return undef unless $nodetype =~ /^\w$/;
+    return undef unless $nodeid =~ /^\d+$/;
+    return undef unless $uid =~ /^\d+$/;
+
+    my $memkey = [$uid, "talk2:$uid:$nodetype:$nodeid"];
+    my $lockkey = $memkey->[1];
+
+    $dbcm->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
+    my $ret = $dbcm->do($sql, undef, @args);
+    if (ref $errref) { $$errref = $dbcm->errstr; }
+    $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+
+    LJ::MemCache::delete($memkey, 0) if int($ret);
+    return $ret;
+}
+
 # <LJFUNC>
 # name: LJ::delete_comments
 # des: deletes comments, but not the relational information, so threading doesn't break
@@ -5804,7 +5844,8 @@ sub delete_comments {
     return 1 unless $in;
     my $where = "WHERE journalid=$jid AND jtalkid IN ($in)";
 
-    my $num = $dbcm->do("UPDATE talk2 SET state='D' $where");
+    my $num = LJ::talk2_do($dbcm, $jid, $nodetype, $nodeid, undef,
+                           "UPDATE talk2 SET state='D' $where");
     $num = 0 if $num == -1;
 
     if ($num > 0) {

@@ -266,10 +266,9 @@ sub check_viewable
         return 0;
     };
 
-    my $dbr = LJ::get_db_reader();
-    unless (LJ::can_view($dbr, $remote, $item)) 
+    unless (LJ::can_view($remote, $item)) 
     {
-        if ($form->{'viewall'} && LJ::check_priv($dbr, $remote, "viewall")) {
+        if ($form->{'viewall'} && LJ::check_priv($remote, "viewall")) {
             LJ::statushistory_add($item->{'posterid'}, $remote->{'userid'}, 
                                   "viewall", "itemid = $item->{'itemid'}");
         } else {
@@ -326,10 +325,11 @@ sub screen_comment {
 
     my $userid = $u->{'userid'} + 0;
 
-    my $updated = $dbcm->do("UPDATE talk2 SET state='S' ".
-                            "WHERE journalid=$userid AND jtalkid IN ($in) ".
-                            "AND nodetype='L' AND nodeid=$itemid ".
-                            "AND state NOT IN ('S','D')");
+    my $updated = LJ::talk2_do($dbcm, $userid, "L", $itemid, undef,
+                               "UPDATE talk2 SET state='S' ".
+                               "WHERE journalid=$userid AND jtalkid IN ($in) ".
+                               "AND nodetype='L' AND nodeid=$itemid ".
+                               "AND state NOT IN ('S','D')");
     if ($updated > 0) {
         $dbcm->do("UPDATE log2 SET replycount=replycount-$updated WHERE journalid=$userid AND jitemid=$itemid");
         LJ::set_logprop($u, $itemid, { 'hasscreened' => 1 });
@@ -350,10 +350,11 @@ sub unscreen_comment {
     my $userid = $u->{'userid'} + 0;
     my $prop = LJ::get_prop("log", "hasscreened");
 
-    my $updated = $dbcm->do("UPDATE talk2 SET state='A' ".
-                            "WHERE journalid=$userid AND jtalkid IN ($in) ".
-                            "AND nodetype='L' AND nodeid=$itemid ".
-                            "AND state='S'");
+    my $updated = LJ::talk2_do($dbcm, $userid, "L", $itemid, undef,
+                               "UPDATE talk2 SET state='A' ".
+                               "WHERE journalid=$userid AND jtalkid IN ($in) ".
+                               "AND nodetype='L' AND nodeid=$itemid ".
+                               "AND state='S'");
     if ($updated > 0) {
         $dbcm->do("UPDATE log2 SET replycount=replycount+$updated WHERE journalid=$userid AND jitemid=$itemid");
         
@@ -364,6 +365,84 @@ sub unscreen_comment {
 
     LJ::Talk::update_commentalter($u, $itemid);
     return;
+}
+
+# retrieves data from the talk2 table (but preferrably memcache)
+# returns a hashref (key -> { 'talkid', 'posterid', 'datepost', 
+#                             'parenttalkid', 'state' } , or undef on failure
+sub get_talk_data
+{
+    my ($u, $nodetype, $nodeid) = @_;
+    return undef unless $u && $u->{'userid'};
+    return undef unless $nodetype =~ /^\w$/;
+    return undef unless $nodeid =~ /^\d+$/;
+
+    my $ret = {};
+
+    # check for data in memcache
+    my $DATAVER = "1";  # single character
+    my $memkey = [$u->{'userid'}, "talk2:$u->{'userid'}:$nodetype:$nodeid"];
+    my $lockkey = $memkey->[1];
+    my $packed = LJ::MemCache::get($memkey);
+
+    my $memcache_good = sub {
+        return $packed && substr($packed,0,1) eq $DATAVER &&
+            length($packed) % 16 == 1;
+    };
+
+    my $memcache_decode = sub {
+        my $n = (length($packed) - 1) / 16;
+        for (my $i=0; $i<$n; $i++) {
+            my ($f1, $par, $poster, $time) = unpack("NNNN",substr($packed,$i*16+1,16));
+            my $state = chr($f1 & 255);
+            my $talkid = $f1 >> 8;
+            $ret->{$talkid} = {
+                talkid => $talkid,
+                state => $state,
+                posterid => $poster,
+                datepost => LJ::mysql_time($time),
+                parenttalkid => $par,
+            };
+        }
+        return $ret;
+    };
+    
+    return $memcache_decode->() if $memcache_good->();
+
+    my $dbcm = LJ::get_cluster_master($u);
+    return undef unless $dbcm;
+
+    my $lock = $dbcm->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
+    return undef unless $lock;
+
+    # it's quite likely (for a popular post) that the memcache was 
+    # already populated while we were waiting for the lock
+    if ($memcache_good->()) {
+        $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+        $memcache_decode->();
+        return $ret;
+    }
+
+    my $memval = $DATAVER;
+    my $sth = $dbcm->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, ".
+                             "t.datepost, t.parenttalkid, t.state ".
+                             "FROM talk2 t ".
+                             "WHERE t.journalid=? AND t.nodetype=? AND t.nodeid=?");
+    $sth->execute($u->{'userid'}, $nodetype, $nodeid);
+    die $dbcm->errstr if $dbcm->err;
+    while (my $r = $sth->fetchrow_hashref) {
+        $ret->{$r->{'talkid'}} = $r;
+        $memval .= pack("NNNN", 
+                        ($r->{'talkid'} << 8) + ord($r->{'state'}),
+                        $r->{'parenttalkid'},
+                        $r->{'posterid'},
+                        LJ::mysqldate_to_time($r->{'datepost'}));
+    }
+    LJ::MemCache::set($memkey, $memval);
+
+    $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+    return $ret;
+    
 }
 
 # LJ::Talk::load_comments($u, $remote, $nodetype, $nodeid, $opts)
@@ -414,35 +493,23 @@ sub load_comments
     my ($u, $remote, $nodetype, $nodeid, $opts) = @_;
 
     my $n = $u->{'clusterid'};
-    my $db = LJ::get_dbh("cluster${n}lite", "cluster${n}slave", "cluster$n");
-    my $dbcr = LJ::get_cluster_reader($u);
-    unless ($db) {
+
+    my $posts = get_talk_data($u, $nodetype, $nodeid);  # hashref, talkid -> talk2 row, or undef
+    unless ($posts) {
         $opts->{'out_error'} = "nodb";
         return;
     }
-
-    my $sth;
-    $sth = $db->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, u.user AS 'userpost', ".
-                        "t.datepost, t.parenttalkid, t.state ".
-                        "FROM talk2 t ".
-                        "LEFT JOIN ${LJ::DB_USERIDMAP}useridmap u ON u.userid=t.posterid ".
-                        "WHERE t.journalid=? AND t.nodetype=? ".
-                        "AND t.nodeid=?");
-    $sth->execute($u->{'userid'}, $nodetype, $nodeid);
-
-    my %users_to_load;
-    my @posts_to_load;
-    my %posts;          # talkid -> talk2 row hashref (mutated as above)
+    my %users_to_load;  # userid -> 1
+    my @posts_to_load;  # talkid scalars
     my %children;       # talkid -> [ childenids+ ]
 
     my $uposterid = $opts->{'up'} ? $opts->{'up'}->{'userid'} : 0;
 
     my $post_count = 0;
     {
-        $posts{$_->{'talkid'}} = $_ while $_ = $sth->fetchrow_hashref;
         my %showable_children;  # $id -> $count
 
-        foreach my $post (sort { $b->{'talkid'} <=> $a->{'talkid'} } values %posts) {
+        foreach my $post (sort { $b->{'talkid'} <=> $a->{'talkid'} } values %$posts) {
             # see if we should ideally show it or not.  even if it's 
             # zero, we'll still show it if a child of it 
             my $should_show = 1; 
@@ -460,9 +527,9 @@ sub load_comments
             # somebody maliciously/accidentally made their parent be a future
             # post, which could result in an infinite loop, which we don't want.
             $post->{'parenttalkid'} = 0 
-                if $post->{'parenttalkid'} && ! $posts{$post->{'parenttalkid'}};
+                if $post->{'parenttalkid'} && ! $posts->{$post->{'parenttalkid'}};
 
-            $post->{'children'} = [ map { $posts{$_} } @{$children{$post->{'talkid'}} || []} ];
+            $post->{'children'} = [ map { $posts->{$_} } @{$children{$post->{'talkid'}} || []} ];
 
             # increment the parent post's number of showable children,
             # which is our showability plus all those of our children
@@ -479,7 +546,7 @@ sub load_comments
 
     # with a wrong thread number, silently default to the whole page
     my $thread = $opts->{'thread'}+0;
-    $thread = 0 unless $posts{$thread};
+    $thread = 0 unless $posts->{$thread};
 
     unless ($thread || $children{$thread}) {
         $opts->{'out_error'} = "noposts";
@@ -503,11 +570,11 @@ sub load_comments
     if ($opts->{'view'} && !$opts->{'page'}) {
         # find top-level comment that this comment is under
         my $viewid = $opts->{'view'} >> 8;
-        while ($posts{$viewid} && $posts{$viewid}->{'parenttalkid'}) {
-            $viewid = $posts{$viewid}->{'parenttalkid'};
+        while ($posts->{$viewid} && $posts->{$viewid}->{'parenttalkid'}) {
+            $viewid = $posts->{$viewid}->{'parenttalkid'};
         }
         for (my $ti = 0; $ti < @top_replies; ++$ti) {
-            if ($posts{$top_replies[$ti]}->{'talkid'} == $viewid) {
+            if ($posts->{$top_replies[$ti]}->{'talkid'} == $viewid) {
                 $page_from_view = int($ti/$page_size)+1;
                 last;
             }
@@ -553,51 +620,65 @@ sub load_comments
     $posts_loaded = LJ::get_talktext2($u, @posts_to_load);
     $subjects_loaded = LJ::get_talktext2($u, {'onlysubjects'=>1}, @subjects_to_load) if @subjects_to_load;
     foreach my $talkid (@posts_to_load) {
-        next unless $posts{$talkid}->{'_show'};
-        $posts{$talkid}->{'_loaded'} = 1;
-        $posts{$talkid}->{'subject'} = $posts_loaded->{$talkid}->[0];
-        $posts{$talkid}->{'body'} = $posts_loaded->{$talkid}->[1];
-        $users_to_load{$posts{$talkid}->{'posterid'}} = 1;
+        next unless $posts->{$talkid}->{'_show'};
+        $posts->{$talkid}->{'_loaded'} = 1;
+        $posts->{$talkid}->{'subject'} = $posts_loaded->{$talkid}->[0];
+        $posts->{$talkid}->{'body'} = $posts_loaded->{$talkid}->[1];
+        $users_to_load{$posts->{$talkid}->{'posterid'}} = 1;
     }
     foreach my $talkid (@subjects_to_load) {
-        next unless $posts{$talkid}->{'_show'};
-        $posts{$talkid}->{'subject'} = $subjects_loaded->{$talkid}->[0];
+        next unless $posts->{$talkid}->{'_show'};
+        $posts->{$talkid}->{'subject'} = $subjects_loaded->{$talkid}->[0];
+        $users_to_load{$posts->{$talkid}->{'posterid'}} ||= 0.5;  # only care about username
     }
 
     # load meta-data
     {
         my %props;
-        LJ::load_talk_props2($dbcr, $u->{'userid'}, \@posts_to_load, \%props);
+        LJ::load_talk_props2($u->{'userid'}, \@posts_to_load, \%props);
         foreach (keys %props) {
-            next unless $posts{$_}->{'_show'};
-            $posts{$_}->{'props'} = $props{$_};
+            next unless $posts->{$_}->{'_show'};
+            $posts->{$_}->{'props'} = $props{$_};
         }
     }
 
     if ($LJ::UNICODE) {
         foreach (@posts_to_load) {
-            if ($posts{$_}->{'props'}->{'unknown8bit'}) {
-                LJ::item_toutf8($u, \$posts{$_}->{'subject'},
-                                \$posts{$_}->{'body'},
+            if ($posts->{$_}->{'props'}->{'unknown8bit'}) {
+                LJ::item_toutf8($u, \$posts->{$_}->{'subject'},
+                                \$posts->{$_}->{'body'},
                                 {});
               }
         }
     }
 
-    # optionally load users
+    # load users who posted
+    delete $users_to_load{0};
+    my %up = ();
+    if (%users_to_load) {
+        LJ::load_userids_multiple([ map { $_, \$up{$_} } keys %users_to_load ]);
+          
+        # fill in the 'userpost' member on each post being shown
+        while (my ($id, $post) = each %$posts) {
+            $post->{'userpost'} = $up{$post->{'posterid'}}->{'user'} if
+                $up{$post->{'posterid'}};
+        }
+    }
+
+    # optionally give them back user refs
     if (ref($opts->{'userref'}) eq "HASH") {
         my %userpics = ();
-        delete $users_to_load{0};
-        if (%users_to_load) {
-            LJ::load_userids_multiple([ map { $_, \$opts->{'userref'}->{$_} } 
-                                        keys %users_to_load ]);;
+        
+        # copy into their ref the users we've already loaded above.
+        while (my ($k, $v) = each %up) {
+            $opts->{'userref'}->{$k} = $v;
         }
 
         # optionally load userpics
         if (ref($opts->{'userpicref'}) eq "HASH") {
             my %load_pic;
             foreach my $talkid (@posts_to_load) {
-                my $post = $posts{$talkid};
+                my $post = $posts->{$talkid};
                 my $kw;
                 if ($post->{'props'} && $post->{'props'}->{'picture_keyword'}) {
                     $kw = $post->{'props'}->{'picture_keyword'};
@@ -612,7 +693,7 @@ sub load_comments
         }
     }
     
-    return map { $posts{$_} } @top_replies;
+    return map { $posts->{$_} } @top_replies;
 }
 
 sub talkform {
@@ -1206,20 +1287,23 @@ sub enter_comment {
     return $err->("Database Error", "Could not generate a talkid necessary to post this comment.")
         unless $jtalkid; 
 
-    my $dbr = LJ::get_db_reader();
     my $dbcm = LJ::get_cluster_master($journalu);
 
     # insert the comment
     my $posterid = $comment->{u} ? $comment->{u}{userid} : 0;
-    $dbcm->do("INSERT INTO talk2 ".
-              "(journalid, jtalkid, nodetype, nodeid, parenttalkid, posterid, datepost, state) ".
-              "VALUES (?,?,'L',?,?,?,NOW(),?)", undef,
-              $journalu->{userid}, $jtalkid, $itemid, $partid, $posterid, $comment->{state});
-    if ($dbcm->err) {
+    
+    my $errstr;
+    LJ::talk2_do($dbcm, $journalu->{userid}, "L", $itemid, \$errstr,
+                 "INSERT INTO talk2 ".
+                 "(journalid, jtalkid, nodetype, nodeid, parenttalkid, posterid, datepost, state) ".
+                 "VALUES (?,?,'L',?,?,?,NOW(),?)",
+                 $journalu->{userid}, $jtalkid, $itemid, $partid, $posterid, $comment->{state});
+    if ($errstr) {
         return $err->("Database Error",
             "There was an error posting your comment to the database.  " .
-            "Please report this.  The error is: <b>" . $dbcm->errstr . "</b>");
+            "Please report this.  The error is: <b>$errstr</b>");
     }
+
     $comment->{talkid} = $jtalkid;
     
     # add to poster's talkleft table, or the xfer place
@@ -1286,7 +1370,7 @@ sub enter_comment {
             next unless $p;
             $hash->{$_} = $talkprop{$_};
             my $tpropid = $p->{'tpropid'};
-            my $qv = $dbr->quote($talkprop{$_});
+            my $qv = $dbcm->quote($talkprop{$_});
             $values .= "($journalu->{'userid'}, $jtalkid, $tpropid, $qv),";
         }
         if ($values) {

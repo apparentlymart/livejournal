@@ -6,6 +6,7 @@
 <uid> talkprop:<uid>:<jtalkid> == { propname => $value, ... }
 <uid> talksubject:<cid>:<uid>:<jtalkid> == scalar
 <uid> talkbody:<cid>:<uid>:<jtalkid> == scalar
+<uid> talk2:<uid>:<nodetype>:<nodeid> == packed data
 
 <uid> logtext:<cid>:<uid>:<jitemid> == [ subject, text ]
 <uid> logprop:<uid>:<jtalkid> == { propname => $value, ... }
@@ -23,6 +24,6 @@
 <uid> checkfriends:<uid>:<mask> == scalar maxupdate, expires after refresh interval
 <uid> frgmask:<uid>:<uid_friend>  -- scalar numeric mask, 15 minutes
 
-<uid> upicinfo:<uid> == { 'pic' => { upicrow }, 'kw' => { keyword => upicrow, ... } }
+<uid> upicinfo:<uid> == packed data
 
 ml.<lang>.<dmid>.<code>
