@@ -711,7 +711,7 @@ sub create_view_lastn
         }
 
         my $ditemid = $u->{'clusterid'} ? ($itemid * 256 + $item->{'anum'}) : $itemid;
-        my $itemargs = $u->{'clusterid'} ? "journal=$user&itemid=$ditemid" : "itemid=$ditemid";
+        my $itemargs = $u->{'clusterid'} ? "journal=$user&amp;itemid=$ditemid" : "itemid=$ditemid";
         $lastn_event{'itemargs'} = $itemargs;
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
@@ -723,7 +723,7 @@ sub create_view_lastn
             ! $logprops{$itemid}->{'opt_nocomments'}
             ) 
         {
-            $itemargs .= "&nc=$replycount" if $replycount && $remote &&
+            $itemargs .= "&amp;nc=$replycount" if $replycount && $remote &&
                          $remote->{'opt_nctalklinks'};
             my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
             my $dispreadlink = $replycount || 
@@ -1019,7 +1019,7 @@ sub create_view_friends
         my $first = @items ? $items[0]->{'itemid'} : 0;
 
         $$ret .= "time = " . scalar(time()) . "<br>";
-        $opts->{'headers'}->{'Refresh'} = "30;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&lastitemid=$first";
+        $opts->{'headers'}->{'Refresh'} = "30;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&amp;lastitemid=$first";
         if ($FORM{'lastitemid'} == $first) {
             $$ret .= "nothing new!";
         } else {
@@ -1161,7 +1161,7 @@ sub create_view_friends
         }
         
         my $ditemid = $clusterid ? ($itemid * 256 + $item->{'anum'}) : $itemid;
-        my $itemargs = $clusterid ? "journal=$friend&itemid=$ditemid" : "itemid=$ditemid";
+        my $itemargs = $clusterid ? "journal=$friend&amp;itemid=$ditemid" : "itemid=$ditemid";
         $friends_event{'itemargs'} = $itemargs;
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
@@ -1230,7 +1230,7 @@ sub create_view_friends
             ! $logprops{$datakey}->{'opt_nocomments'}
             ) 
         {
-            $itemargs .= "&nc=$replycount" if $replycount && $remote &&
+            $itemargs .= "&amp;nc=$replycount" if $replycount && $remote &&
                           $remote->{'opt_nctalklinks'};
             my $dispreadlink = $replycount || 
                 ($logprops{$datakey}->{'hasscreened'} &&
@@ -1514,7 +1514,7 @@ sub create_view_calendar
           $calendar_month{'yyyy'} = $year;
           $calendar_month{'yy'} = substr($year, 2, 2);
           $calendar_month{'weeks'} = "";
-          $calendar_month{'urlmonthview'} = "$LJ::SITEROOT/view/?type=month&user=$user&y=$year&m=$month";
+          $calendar_month{'urlmonthview'} = "$LJ::SITEROOT/view/?type=month&amp;user=$user&amp;y=$year&amp;m=$month";
           my $weeks = \$calendar_month{'weeks'};
 
           my %calendar_week = ();
@@ -1763,7 +1763,7 @@ sub create_view_day
         }
 
         my $ditemid = $u->{'clusterid'} ? ($itemid*256 + $anum) : $itemid;
-        my $itemargs = $u->{'clusterid'} ? "journal=$user&itemid=$ditemid" : "itemid=$ditemid";
+        my $itemargs = $u->{'clusterid'} ? "journal=$user&amp;itemid=$ditemid" : "itemid=$ditemid";
         $day_event{'itemargs'} = $itemargs;
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
@@ -1775,7 +1775,7 @@ sub create_view_day
             ! $logprops{$itemid}->{'opt_nocomments'}
             ) 
         {
-            $itemargs .= "&nc=$replycount" if $replycount && $remote &&
+            $itemargs .= "&amp;nc=$replycount" if $replycount && $remote &&
                          $remote->{'opt_nctalklinks'};
             my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
             my $dispreadlink = $replycount || 
