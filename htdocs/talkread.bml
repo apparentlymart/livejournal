@@ -27,18 +27,6 @@ body<=
 
  my $pics = LJ::Talk::get_subjecticons();
 
- # pre-load common strings for little speed and less typing later
- my %T = qw(postcomments   talk.commentpost
-            readcomments   talk.commentsread
-            parent         talk.parentlink
-            thread         talk.threadlink
-            replythis      talk.replytothis
-            link           talk.commentpermlink
-            deleted        .subjectdeleted
-            nosubject      .nosubject
-            );
- foreach (keys %T) { $T{$_} = $ML{$T{$_}}; }
-
  ## workaround mail client bug when don't understand quoted-printable.
  ## Only correct 'journal' if 'itemid' was also broken, to avoid the 
  ## unlikely clash with a journal name.
@@ -60,6 +48,20 @@ if ($uri =~ m!/(\d+)\.html$!) {
     $FORM{'journal'} = $r->notes("_journal");
     BML::set_language_scope("/talkread.bml");
 }
+
+ # pre-load common strings for little speed and less typing later
+ # (we're doing this *after* set_language_scope is called, because
+ # two below are relative strings)
+ my %T = qw(postcomments   talk.commentpost
+            readcomments   talk.commentsread
+            parent         talk.parentlink
+            thread         talk.threadlink
+            replythis      talk.replytothis
+            link           talk.commentpermlink
+            deleted        .subjectdeleted
+            nosubject      .nosubject
+            );
+ foreach (keys %T) { $T{$_} = $ML{$T{$_}}; }
 
  my $init = LJ::Talk::init($dbs, \%FORM);
  my $u = $init->{'journalu'};
