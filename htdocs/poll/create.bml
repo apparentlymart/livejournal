@@ -464,8 +464,8 @@
                 foreach my $o (0..$elem->{'opts'}-1) {
                     $ret .= "<br />";
 
-                    $ret .= LJ::html_check({ 'type' => 'radio', 'name' => "dummy_$q" }) if $elem->{'type'} eq 'radio';
-                    $ret .= LJ::html_check({ 'type' => 'checkbox' }) if $elem->{'type'} eq 'check';
+                    $ret .= LJ::html_check({ 'type' => 'radio', 'name' => "dummy_$q", 'disabled' => 'disabled' }) if $elem->{'type'} eq 'radio';
+                    $ret .= LJ::html_check({ 'type' => 'checkbox', 'disabled' => 'disabled' }) if $elem->{'type'} eq 'check';
 
                     $ret .= LJ::html_text({ 'type' => 'text', 'name' => "pq_${q}_opt_$o", 'size' => '35',
                                             'maxlength' => $RULES{'items'}->{'maxlength'}, 'value' => $elem->{'opt'}->[$o] }) . "\n";
