@@ -64,15 +64,17 @@ sub do_upload
         return;
     }
 
-    my $rawdata = ${$opts->{'rawdata'}} ? $opts->{'rawdata'} : \"";
-    unless ($$rawdata) {
+    my $rawdata = $opts->{'rawdata'};
+    unless ($rawdata) {
         # no rawdata was passed, so slurp it in ourselves
         unless (open (F, $opts->{'path'})) {
             $$rv = "Couldn't read image file: $!\n";
             return;
         }
         binmode(F);
-        { local $/ = undef; $$rawdata = <F>; }
+        my $data;
+        { local $/ = undef; $data = <F>; }
+        $rawdata = \$data;
         close F;
     }
 
