@@ -35,6 +35,7 @@ if ($FORM{'remoteuser'} eq $user) {
  LJ::load_user_props($dbs, $u, "opt_usesharedpic",
                      "s1_lastn_style", "s1_calendar_style",
                      "s1_day_style", "s1_friends_style",
+                     "stylesys",
                      "journaldomain",
                      );
 
@@ -78,78 +79,81 @@ if ($FORM{'remoteuser'} eq $user) {
      ### LAYOUT OPTIONS
      ###
 
-     $and = $capstyles ? "" : "<?_ml .pagelayoutstyle.warning _ml?>";
-     $ret .= "<?h2 $ML{'.pagelayoutstyle.head'} h2?><?p $ML{'.pagelayoutstyle.about'}  $and p?><UL><TABLE><TR BGCOLOR=#D0D0D0><TD></TD><TD>$ML{'.availablestyles.head'}</TD></TR>\n";
-     my %styles = ();
-
-     $sth = $dbr->prepare("SELECT styleid, styledes, user, type ".
-                          "FROM style WHERE (user='system' AND is_public='Y') ".
-                          "OR user=$quser ORDER BY styledes");
-     $sth->execute;
-     push @{$styles{$_->{'type'}}}, $_ while ($_ = $sth->fetchrow_hashref);
-
-     foreach my $view (@LJ::views)
+     unless ($u->{'stylesys'} == 2) 
      {
-         $ret .= "<TR><TD BGCOLOR=#D0D0D0>$LJ::viewinfo{$view}->{'des'}</TD><TD><SELECT NAME=\"s1_${view}_style\">\n";
-         foreach (grep { $_->{'user'} eq "system" } @{$styles{$view}})
+         $and = $capstyles ? "" : "<?_ml .pagelayoutstyle.warning _ml?>";
+         $ret .= "<?h2 $ML{'.pagelayoutstyle.head'} h2?><?p $ML{'.pagelayoutstyle.about'}  $and p?><UL><TABLE><TR BGCOLOR=#D0D0D0><TD></TD><TD>$ML{'.availablestyles.head'}</TD></TR>\n";
+         my %styles = ();
+         
+         $sth = $dbr->prepare("SELECT styleid, styledes, user, type ".
+                              "FROM style WHERE (user='system' AND is_public='Y') ".
+                              "OR user=$quser ORDER BY styledes");
+         $sth->execute;
+         push @{$styles{$_->{'type'}}}, $_ while ($_ = $sth->fetchrow_hashref);
+         
+         foreach my $view (@LJ::views)
          {
-             my $selected = $_->{'styleid'}==$u->{"s1_${view}_style"} ? " SELECTED" : "";
-             $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . BML::eall($_->{'styledes'}) . "\n";
-         }
-         my $exist_user_style = 0;
-         foreach (grep { $_->{'user'} ne "system" } @{$styles{$view}})
-         {
-             if (!$exist_user_style)
+             $ret .= "<TR><TD BGCOLOR=#D0D0D0>$LJ::viewinfo{$view}->{'des'}</TD><TD><SELECT NAME=\"s1_${view}_style\">\n";
+             foreach (grep { $_->{'user'} eq "system" } @{$styles{$view}})
              {
-                 $exist_user_style = 1;
-                 $ret .= "<OPTION VALUE=\"\">--- $ML{'.availablestyles.userstyles'} ---\n";
+                 my $selected = $_->{'styleid'}==$u->{"s1_${view}_style"} ? " SELECTED" : "";
+                 $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . BML::eall($_->{'styledes'}) . "\n";
              }
-             my $selected = $_->{'styleid'}==$u->{"s1_${view}_style"} ? " SELECTED" : "";
-             $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . BML::eall($_->{'styledes'}) . "\n";
+             my $exist_user_style = 0;
+             foreach (grep { $_->{'user'} ne "system" } @{$styles{$view}})
+             {
+                 if (!$exist_user_style)
+                 {
+                     $exist_user_style = 1;
+                     $ret .= "<OPTION VALUE=\"\">--- $ML{'.availablestyles.userstyles'} ---\n";
+                 }
+                 my $selected = $_->{'styleid'}==$u->{"s1_${view}_style"} ? " SELECTED" : "";
+                 $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . BML::eall($_->{'styledes'}) . "\n";
+             }
+             $ret .= "</SELECT></TD></TR>\n";
          }
-         $ret .= "</SELECT></TD></TR>\n";
+         $ret .= "</TABLE></UL>\n";
+         
+         ###
+         ### COLOR THEME OPTIONS
+         ###
+         $ret .= "<?h2 $ML{'.colortheme.head'} h2?><?p $ML{'.colortheme.about'} p?>\n";
+         $ret .= "<UL>\n";
+         $checked = $u->{'themeid'} != 0 ? "CHECKED" : "";
+         $ret .= "<INPUT TYPE=RADIO VALUE=\"default\" NAME=themetype $checked> <B>$ML{'.colortheme.defaulttheme'}</B>: ";
+         $ret .= "<SELECT NAME=themeid>\n";
+         $sth = $dbr->prepare("SELECT themeid, name FROM themelist ORDER BY name");
+         $sth->execute;
+         while ($_ = $sth->fetchrow_hashref) {
+             $checked = $u->{'themeid'} == $_->{'themeid'} ? "SELECTED" : "";
+             $ret .= "  <OPTION VALUE=$_->{'themeid'} $checked>$_->{'name'}\n";
+         }
+         $ret .= "</SELECT><BR>\n";
+         $checked = $u->{'themeid'} == 0 ? "CHECKED" : "";
+         $ret .= "<INPUT TYPE=RADIO VALUE=\"custom\" NAME=themetype $checked> <B>$ML{'.colortheme.customcolors'}</B>:<P>";
+         $ret .= "<CENTER><TABLE BORDER=1 CELLPADDING=2>\n";
+         $ret .= "<TR VALIGN=TOP BGCOLOR=#D0D0D0><TD ALIGN=RIGHT><B>$ML{'.colortheme.area.head'}</B></TD><TD><B>$ML{'.colortheme.color.head1'}</B><BR><FONT SIZE=-1>$ML{'.colortheme.color.head2'}</FONT></TD></TR>\n";
+         
+         # get the user's custom colors
+         my %custcolors = ();
+         if ($u->{'themeid'} == 0) {
+             $sth = $dbr->prepare("SELECT coltype, color FROM themecustom WHERE user=$quser");
+         } else {
+             my $qthemeid = $dbr->quote($u->{'themeid'});
+             $sth = $dbr->prepare("SELECT coltype, color FROM themedata WHERE themeid=$qthemeid");
+         }
+         $sth->execute;
+         $custcolors{$_->{'coltype'}} = $_->{'color'} while ($_ = $sth->fetchrow_hashref);
+         
+         $sth = $dbr->prepare("SELECT coltype, des FROM themecoltypes ORDER BY sortorder");
+         $sth->execute;
+         while ($_ = $sth->fetchrow_hashref) {
+             $ret .= "<TR><TD ALIGN=RIGHT>$_->{'des'}</TD><TD><INPUT TYPE=TEXT NAME=\"theme_cust:$_->{'coltype'}\" SIZE=20 MAXLENGTH=30 VALUE=\"" . LJ::ehtml($custcolors{$_->{'coltype'}}) . "\"></TD></TR>\n";
+             
+         }
+         $ret .= "</TABLE></CENTER>\n";
+         $ret .= "</UL>\n";
      }
-     $ret .= "</TABLE></UL>\n";
-
-     ###
-     ### COLOR THEME OPTIONS
-     ###
-     $ret .= "<?h2 $ML{'.colortheme.head'} h2?><?p $ML{'.colortheme.about'} p?>\n";
-     $ret .= "<UL>\n";
-     $checked = $u->{'themeid'} != 0 ? "CHECKED" : "";
-     $ret .= "<INPUT TYPE=RADIO VALUE=\"default\" NAME=themetype $checked> <B>$ML{'.colortheme.defaulttheme'}</B>: ";
-     $ret .= "<SELECT NAME=themeid>\n";
-     $sth = $dbr->prepare("SELECT themeid, name FROM themelist ORDER BY name");
-     $sth->execute;
-     while ($_ = $sth->fetchrow_hashref) {
-     $checked = $u->{'themeid'} == $_->{'themeid'} ? "SELECTED" : "";
-         $ret .= "  <OPTION VALUE=$_->{'themeid'} $checked>$_->{'name'}\n";
-     }
-     $ret .= "</SELECT><BR>\n";
-     $checked = $u->{'themeid'} == 0 ? "CHECKED" : "";
-     $ret .= "<INPUT TYPE=RADIO VALUE=\"custom\" NAME=themetype $checked> <B>$ML{'.colortheme.customcolors'}</B>:<P>";
-     $ret .= "<CENTER><TABLE BORDER=1 CELLPADDING=2>\n";
-     $ret .= "<TR VALIGN=TOP BGCOLOR=#D0D0D0><TD ALIGN=RIGHT><B>$ML{'.colortheme.area.head'}</B></TD><TD><B>$ML{'.colortheme.color.head1'}</B><BR><FONT SIZE=-1>$ML{'.colortheme.color.head2'}</FONT></TD></TR>\n";
-
-     # get the user's custom colors
-     my %custcolors = ();
-     if ($u->{'themeid'} == 0) {
-         $sth = $dbr->prepare("SELECT coltype, color FROM themecustom WHERE user=$quser");
-     } else {
-         my $qthemeid = $dbr->quote($u->{'themeid'});
-         $sth = $dbr->prepare("SELECT coltype, color FROM themedata WHERE themeid=$qthemeid");
-     }
-     $sth->execute;
-     $custcolors{$_->{'coltype'}} = $_->{'color'} while ($_ = $sth->fetchrow_hashref);
-
-     $sth = $dbr->prepare("SELECT coltype, des FROM themecoltypes ORDER BY sortorder");
-     $sth->execute;
-     while ($_ = $sth->fetchrow_hashref) {
-         $ret .= "<TR><TD ALIGN=RIGHT>$_->{'des'}</TD><TD><INPUT TYPE=TEXT NAME=\"theme_cust:$_->{'coltype'}\" SIZE=20 MAXLENGTH=30 VALUE=\"" . LJ::ehtml($custcolors{$_->{'coltype'}}) . "\"></TD></TR>\n";
-
-     }
-     $ret .= "</TABLE></CENTER>\n";
-     $ret .= "</UL>\n";
 
      ###
      ### MOOD THEME OPTIONS
@@ -205,28 +209,31 @@ if ($FORM{'remoteuser'} eq $user) {
          $ret .= BML::ml(".domainalias.helptext", {'sitename' => $LJ::SITENAME})." p?>";
      }
 
-     ### ending submit block
-     $ret .= "<?h1 $ML{'.done.head'} h1?><?p $ML{'.done.text'} p?>\n";
-     $ret .= "<?standout <INPUT TYPE=SUBMIT VALUE=\"$ML{'.done.btn.savechanges'}\"> standout?>\n";
-
-     $ret .= "<?hr?>\n";
-
-     ### overrides
-     # first, load the overrides if they use 'em:
-     my $overrides = "";
-     if ($u->{'useoverrides'} eq "Y")
+     unless ($u->{'stylesys'} == 2) 
      {
-         $sth = $dbr->prepare("SELECT override FROM overrides WHERE user=$quser");
-         $sth->execute;
-         ($overrides) = $sth->fetchrow_array;
-         LJ::text_out(\$overrides);
-     }
+         ### ending submit block
+         $ret .= "<?h1 $ML{'.done.head'} h1?><?p $ML{'.done.text'} p?>\n";
+         $ret .= "<?standout <INPUT TYPE=SUBMIT VALUE=\"$ML{'.done.btn.savechanges'}\"> standout?>\n";
+         
+         $ret .= "<?hr?>\n";
 
-     $ret .= "<?h1 $ML{'.overrides.head'} h1?><?p $ML{'.overrides.about'} p?><?p <FONT SIZE=+1><B>$ML{'.overrides.warning'}</B></FONT> p?>\n";
-     $ret .= "<?p $ML{'.overrides.note'} p?>\n";
-     $ret .= "<?standout <B>$ML{'.overrides.box.head'}</B><BR><TEXTAREA NAME=\"overrides\" COLS=60 ROWS=8 WRAP=OFF>";
-     $ret .= BML::eall($overrides);
-     $ret .= "</TEXTAREA> standout?>";
+         ### overrides
+         # first, load the overrides if they use 'em:
+         my $overrides = "";
+         if ($u->{'useoverrides'} eq "Y")
+         {
+             $sth = $dbr->prepare("SELECT override FROM overrides WHERE user=$quser");
+             $sth->execute;
+             ($overrides) = $sth->fetchrow_array;
+             LJ::text_out(\$overrides);
+         }
+         
+         $ret .= "<?h1 $ML{'.overrides.head'} h1?><?p $ML{'.overrides.about'} p?><?p <FONT SIZE=+1><B>$ML{'.overrides.warning'}</B></FONT> p?>\n";
+         $ret .= "<?p $ML{'.overrides.note'} p?>\n";
+         $ret .= "<?standout <B>$ML{'.overrides.box.head'}</B><BR><TEXTAREA NAME=\"overrides\" COLS=60 ROWS=8 WRAP=OFF>";
+         $ret .= BML::eall($overrides);
+         $ret .= "</TEXTAREA> standout?>";
+     }
 
      $ret .= "<?h1 $ML{'.journalstatus.head'} h1?><?p $ML{'.journalstatus.about'} p?>";
      my %statvis = ("V" => "$ML{'.journalstatus.select.activated'}", "D" => "$ML{'.journalstatus.select.deleted'}");
