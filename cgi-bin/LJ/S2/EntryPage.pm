@@ -84,7 +84,8 @@ sub EntryPage
                 # quote all non-LJ tags
                 $text =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
             }
-            LJ::CleanHTML::clean_comment(\$text, $com->{'props'}->{'opt_preformatted'});
+            LJ::CleanHTML::clean_comment(\$text, { 'preformatted' => $com->{'props'}->{'opt_preformatted'}, 
+                                                   'anon_comment' => !$com->{posterid}});
 
             # local time in mysql format to gmtime
             my $datetime = DateTime_unix(LJ::mysqldate_to_time($com->{'datepost'}));

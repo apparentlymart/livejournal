@@ -1623,22 +1623,26 @@ sub format_html_mail {
             $intro = "You replied to a comment somebody left in ";
             $intro .= "<a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a>.  ";
             $intro .= "The comment you replied to was:";
-            LJ::CleanHTML::clean_comment(\$cleanbody, $parent->{preformat});
+            LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat}, 
+                                                        'anon_comment' => !$comment->{u} });
         }
     } elsif (LJ::u_equals($targetu, $item->{entryu})) {
         if ($parent->{ispost}) {
             $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which you said:";
-            LJ::CleanHTML::clean_event(\$cleanbody, {preformatted => $parent->{preformat}});
+            LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat}, 
+                                                        'anon_comment' => !$comment->{u} });
         } else {
             $intro = "$who replied to another comment somebody left in ";
             $intro .= "<a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a>.  ";
             $intro .= "The comment they replied to was:";
-            LJ::CleanHTML::clean_comment(\$cleanbody, $parent->{preformat});
+            LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat}, 
+                                                        'anon_comment' => !$comment->{u} });
         }
     } else {
         $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT comment</a> ";
         $intro .= "in which you said:";
-        LJ::CleanHTML::clean_comment(\$cleanbody, $parent->{preformat});
+        LJ::CleanHTML::clean_comment(\$cleanbody, { 'preformatted' => $parent->{preformat}, 
+                                                    'anon_comment' => !$comment->{u} });
     }
 
     my $pichtml;

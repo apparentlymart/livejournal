@@ -24,7 +24,9 @@ use URI ();
 #        'keepcomments' => 1,
 #        'cuturl' => 'http://www.domain.com/full_item_view.ext',
 #        'ljcut_disable' => 1, # stops the cleaner from using the lj-cut tag
-#        'cleancss' => 1
+#        'cleancss' => 1,
+#        'extractlinks' => 1, # remove a hrefs; implies noautolinks
+#        'noautolinks' => 1, # do not auto linkify
 #     });
 
 package LJ::CleanHTML;
@@ -89,6 +91,10 @@ sub clean
     my $cut = $opts->{'cuturl'} || $opts->{'cutpreview'};
     my $ljcut_disable = $opts->{'ljcut_disable'};
     my $s1var = $opts->{'s1var'};
+    my $extractlinks = 0 || $opts->{'extractlinks'};
+    my $noautolinks = $extractlinks || $opts->{'noautolinks'};
+
+    my @canonical_urls; # extracted links
 
     my %action = ();
     my %remove = ();
@@ -354,6 +360,13 @@ sub clean
                     }
                 }
 
+                if ($tag eq "a" && $extractlinks)
+                {
+                    push @canonical_urls, canonical_url($token->[2]->{href}, 1);
+                    $newdata .= "<b>";
+                    next;
+                }
+
                 unless ($alt_output)
                 {
                     my $allow;
@@ -451,6 +464,13 @@ sub clean
                     if ($action{$tag} eq "allow") { $allow = 1; }
                 }
 
+                if ($extractlinks && $tag eq "a") {
+                    if (@canonical_urls) {
+                        my $url = LJ::ehtml(pop @canonical_urls);
+                        $newdata .= "</b> ($url)";
+                    }
+                }
+
                 if ($allow && ! $remove{$tag})
                 {
 
@@ -517,7 +537,7 @@ sub clean
                  ! $opencount{'pre'} &&
                  ! $opencount{'lj-raw'};
 
-            if ($auto_format && ! $opencount{'a'} && ! $opencount{'textarea'}) {
+            if ($auto_format && ! $noautolinks && ! $opencount{'a'} && ! $opencount{'textarea'}) {
                 my $match = sub {
                     my $str = shift;
                     if ($str =~ /^(.*?)(&(#39|quot|lt|gt)(;.*)?)$/) {
@@ -575,6 +595,14 @@ sub clean
             $newdata .= "<!-- OTHER: " . $type . "-->\n";
         }
     } # end while
+
+    # finish up open links if we're extracting them
+    if ($extractlinks && @canonical_urls) {
+        while (my $url = pop @canonical_urls) {
+            $newdata .= "($url)";
+            $opencount{'a'}--;
+        }
+    }
 
     if (ref $opts->{'autoclose'} eq "ARRAY") {
         foreach my $tag (@{$opts->{'autoclose'}}) {
@@ -845,12 +873,22 @@ sub get_okay_comment_tags
     return @comment_all;
 }
 
+
+# ref: scalarref of text to clean, gets cleaned in-place
+# opts:  either a hashref of opts:
+#         - preformatted:  if true, don't insert breaks and auto-linkify
+#         - anon_comment:  don't linkify things, and prevent <a> tags
+#       or, opts can just be a boolean scalar, which implies the performatted tag
 sub clean_comment
 {
-    my ($ref, $preformatted) = @_;
+    my ($ref, $opts) = @_;
+
+    unless (ref $opts) {
+        $opts = { 'preformatted' => $opts };
+    }
 
     # fast path:  no markup or URLs to linkify
-    if ($$ref !~ /\<|\>|http/ && ! $preformatted) {
+    if ($$ref !~ /\<|\>|http/ && ! $opts->{preformatted}) {
         $$ref =~ s/\S{40,}/break_word($&,40)/eg;
         $$ref =~ s/\r?\n/<br \/>/g;
         return;
@@ -860,12 +898,13 @@ sub clean_comment
     clean($ref, {
         'linkify' => 1,
         'wordlength' => 40,
-        'addbreaks' => $preformatted ? 0 : 1,
+        'addbreaks' => $opts->{preformatted} ? 0 : 1,
         'eat' => [qw[head title style layer iframe applet object]],
         'mode' => 'deny',
         'allow' => \@comment_all,
         'autoclose' => \@comment_close,
         'cleancss' => 1,
+        'extractlinks' => $opts->{'anon_comment'},
     });
 }
 

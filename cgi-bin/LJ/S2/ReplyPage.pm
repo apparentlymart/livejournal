@@ -70,7 +70,8 @@ sub ReplyPage
         }
 
         LJ::CleanHTML::clean_comment(\$parpost->{'body'}, 
-                                     $parpost->{'props'}->{'opt_preformatted'});        
+                                     { 'preformatted' => $parpost->{'props'}->{'opt_preformatted'}, 
+                                       'anon_comment' => !$parpost->{posterid} });
         
         my $datetime = DateTime_unix(LJ::mysqldate_to_time($parpost->{'datepost'}));
 

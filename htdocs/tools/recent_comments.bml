@@ -171,7 +171,8 @@ body<=
         }
 
         my $comment = $comment_text->{$r->{jtalkid}}[1];
-        LJ::CleanHTML::clean_comment(\$comment, $r->{'props'}->{'opt_preformatted'});
+        LJ::CleanHTML::clean_comment(\$comment, { 'preformatted' => $r->{'props'}->{'opt_preformatted'},
+                                                  'anon_comment' => !$pu });
         $ret .= "$comment<br /><br />";
 
         $ret .= "(<a href='$talkurl'>Comment Link</a>) " unless $r->{state} eq "D" || $lrow->{ditemid} == undef;

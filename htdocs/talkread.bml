@@ -433,7 +433,8 @@ body<=
 
              $ret .= "</td></tr><tr><td>";
 
-             LJ::CleanHTML::clean_comment(\$post->{'body'}, $post->{'props'}->{'opt_preformatted'});
+             LJ::CleanHTML::clean_comment(\$post->{'body'}, { 'preformatted' => $post->{'props'}->{'opt_preformatted'},
+                                                              'anon_comment' => !$pu });
              BML::ebml(\$post->{'body'});
              $ret .= $post->{'body'};
 
