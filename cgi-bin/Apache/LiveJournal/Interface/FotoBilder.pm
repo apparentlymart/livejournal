@@ -60,12 +60,19 @@ sub get_user_info
     $r->print("can_upload: " . (can_upload($u)) . "\n");
     $r->print("gallery_enabled: 1\n"); # future toggle
     my $quota      = LJ::get_cap($u, 'disk_quota') << 10;
-    my $fbusage    = LJ::Blob::get_disk_usage($u, 'picpix_quota') >> 10;
     my $totalusage = LJ::Blob::get_disk_usage($u) >> 10;
 
     $r->print("diskquota: $quota\n");
-    $r->print("fbusage: $fbusage\n");
     $r->print("totalusage: $totalusage\n");
+
+    # now optional site-specific info
+    if (LJ::are_hooks("fb_rpc_user_info")) {
+        my $inf = LJ::run_hook("fb_rpc_user_info", $u);
+        while (my ($key, $val) = each %$inf) {
+            $r->print("$key: $val\n");
+        }
+    }
+
     return OK;
 }
 
