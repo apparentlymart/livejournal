@@ -265,27 +265,11 @@ sub check_viewable
     return 1;
 }
 
-# <LJFUNC>
-# name: LJ::Talk::can_delete
-# des: Determines if a user can delete a comment or entry.  Basically, you can
-#       delete anything you've posted.  You can delete anything posted in something
-#       you own (i.e. a comment in your journal, a comment to an entry you made in
-#       a community).  You can also delete any item in an account you have the
-#       "A"dministration edge for.
-# args: remote, u, up, userpost
-# des-remote: User object we're checking access of.  From LJ::get_remote.
-# des-u: Username or object of the account the thing is located in.
-# des-up: Username or object of person who owns the parent of the thing.  (I.e. the poster
-#           of the entry a comment is in.)
-# des-userpost: Username (NOT object) of person who posted the item.
-# returns: Boolean indicating whether remote is allowed to delete the thing
-#           specified by the other options.
-# </LJFUNC>
 sub can_delete {
     my ($remote, $u, $up, $userpost) = @_; # remote, journal, posting user, commenting user
     return 0 unless $remote;
     return 1 if $remote->{'user'} eq $userpost ||
-                $remote->{'user'} eq (ref $u ? $u->{'user'} : $u) ||
+                $remote->{'user'} eq $u->{'user'} ||
                 $remote->{'user'} eq (ref $up ? $up->{'user'} : $up) ||
                 LJ::check_rel($u, $remote, 'A');
     return 0;
@@ -870,8 +854,9 @@ sub talkform {
 
     # Username: [    ] Password: [    ]  Login? [ ]
     $ret .= "<tr valign='middle' align='left'><td colspan='2'></td><td>";
-    $ret .= "$BML::ML{'Username'}:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='15' id='username' value='" .
-            BML::eall($form->{userpost}). "' /> ";
+    my $ljuser_def = ($form->{'userpost'} ne $form->{'cookieuser'} && $form->{'usertype'} ne 'anonymous') ?
+                     BML::eall($form->{userpost}) : "";
+    $ret .= "$BML::ML{'Username'}:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='15' id='username' value='$ljuser_def' />";
     $ret .= "$BML::ML{'Password'}:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13' id='password' /> <label for='logincheck'>$BML::ML{'.loginq'}&nbsp;</label><input type='checkbox' name='do_login' id='logincheck' /></td></tr>\n";
     
     my $basesubject = $form->{subject} || "";
@@ -1005,10 +990,10 @@ sub talkform {
             $try = $dbcr->selectrow_array('SELECT trynum FROM captcha_session ' .
                                           'WHERE sess=?', undef, $captcha_sess);
         }
+        $ret .= '<br /><br />';
 
         # Visual challenge
         if (! $wants_audio && ! $form->{audio_chal}) {
-            $ret .= '<br /><br />';
             $ret .= "<div class='formitemDesc'>$BML::ML{'/create.bml.captcha.desc'}</div>";
             $ret .= "<img src='/captcha/image.bml?chal=$captcha_chal&amp;cid=$cid&amp;try=$try' width='175' height='35' />";
             $ret .= "<br /><br />$BML::ML{'/create.bml.captcha.answer'}";
@@ -1030,9 +1015,9 @@ sub talkform {
     <script language="JavaScript" type='text/javascript'> 
         <!--
         if (document.getElementById && document.getElementById('postform')) {
-            document.write("<input name='submitpost' onclick='return sendForm(\\"postform\\")' type='submit' value='$BML::ML{'.opt.submit'}' />");
+            document.write("<input name='submitpost' onclick='return sendForm(\\"postform\\", \\"username\\")' type='submit' value='$BML::ML{'.opt.submit'}' />");
             document.write("&nbsp;");
-            document.write("<input name='submitpreview' onclick='return sendForm(\\"postform\\")' type='submit' value='$BML::ML{'talk.btn.preview'}' />");
+            document.write("<input name='submitpreview' onclick='return sendForm(\\"postform\\", \\"username\\")' type='submit' value='$BML::ML{'talk.btn.preview'}' />");
         } else {
             document.write("<input type='submit' name='submitpost' value='$BML::ML{'.opt.submit'}' />");
             document.write("&nbsp;");
@@ -1081,20 +1066,12 @@ sub format_text_mail {
     $Text::Wrap::columns = 76;
 
     my $who = "Somebody";
-    if ($comment->{u}) {
+    if ($comment->{u}{user}) {
         $who = "$comment->{u}{name} ($comment->{u}{user})";
     }
 
     my $text = "";
-    if (LJ::u_equals($targetu, $comment->{u})) {
-        $who = "$targetu->{'name'} ($targetu->{'user'})";
-        $text .= "You left a comment in a post by $who.  ";
-        if ($parent->{'ispost'}) {
-            $text .= "The entry you replied to was:";
-        } else {
-            $text .= "The comment you replied to was:";
-        }
-    } elsif (LJ::u_equals($targetu, $item->{entryu})) {
+    if ($targetu == $item->{entryu}) {
         if ($parent->{ispost}) {
             $text .= "$who replied to your $LJ::SITENAMESHORT post in which you said:";
         } else {
@@ -1106,7 +1083,7 @@ sub format_text_mail {
     }
     $text .= "\n\n";
     $text .= indent($parent->{body}, ">") . "\n\n";
-    $text .= (LJ::u_equals($targetu, $comment->{u}) ? 'Your' : 'Their') . " reply was:\n\n";
+    $text .= "Their reply was:\n\n";
     if ($comment->{subject}) {
         $text .= Text::Wrap::wrap("  Subject: ",
                                   "           ",
@@ -1132,8 +1109,7 @@ sub format_text_mail {
         $opts .= "  - Unscreen the comment:\n";
         $opts .= "    $LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\n";
     }
-    if (LJ::Talk::can_delete($targetu, $item->{journalu}, $item->{entryu}, 
-                                $comment->{u} ? $comment->{u}{user} : undef)) {
+    if (LJ::Talk::can_delete($targetu, $item->{journalu}, $item->{entryu}, $comment->{u})) {
         $opts .= "  - Delete the comment:\n";
         $opts .= "    $LJ::SITEROOT/delcomment.bml?journal=$item->{journalu}{user}&id=$dtalkid\n";
     }
@@ -1151,7 +1127,7 @@ sub format_html_mail {
     my $threadurl = LJ::Talk::talkargs($talkurl, "thread=$dtalkid");
 
     my $who = "Somebody";
-    if ($comment->{u}) {
+    if ($comment->{u}{name}) {
         $who = "$comment->{u}{name} ".
             "(<a href=\"$LJ::SITEROOT/userinfo.bml?user=$comment->{u}{user}\">$comment->{u}{user}</a>)";
     }
@@ -1161,18 +1137,7 @@ sub format_html_mail {
 
     my $intro;
     my $cleanbody = $parent->{body};
-    if (LJ::u_equals($targetu, $comment->{u})) {
-        $who = "$targetu->{'name'} ($targetu->{'user'})";
-        if ($parent->{ispost}) {
-            $intro = "You replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> in which $who said:";
-            LJ::CleanHTML::clean_event(\$cleanbody, {preformatted => $parent->{preformat}});
-        } else {
-            $intro = "You replied to a comment somebody left in ";
-            $intro .= "<a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> by $who.  ";
-            $intro .= "The comment you replied to was:";
-            LJ::CleanHTML::clean_comment(\$cleanbody, $parent->{preformat});
-        }
-    } elsif (LJ::u_equals($targetu, $item->{u})) {
+    if ($targetu == $item->{entryu}) {
         if ($parent->{ispost}) {
             $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which you said:";
             LJ::CleanHTML::clean_event(\$cleanbody, {preformatted => $parent->{preformat}});
@@ -1189,7 +1154,7 @@ sub format_html_mail {
     }
 
     my $pichtml;
-    if ($comment->{u} && $comment->{u}{defaultpicid} || $comment->{pic}) {
+    if ($comment->{u}{defaultpicid} || $comment->{pic}) {
         my $picid = $comment->{pic} ? $comment->{pic}{'picid'} : $comment->{u}{'defaultpicid'};
         unless ($comment->{pic}) {
             my %pics;
@@ -1210,7 +1175,7 @@ sub format_html_mail {
     }
     $html .= blockquote($cleanbody);
 
-    $html .= "\n\n" . (LJ::u_equals($targetu, $comment->{u}) ? 'Your' : 'Their') . " reply was:\n\n";
+    $html .= "\n\nTheir reply was:\n\n";
     $cleanbody = $comment->{body};
     LJ::CleanHTML::clean_comment(\$cleanbody, $comment->{preformat});
     my $pics = LJ::Talk::get_subjecticons();
@@ -1236,8 +1201,7 @@ sub format_html_mail {
     if ($comment->{state} eq 'S') {
         $html .= "<li><a href=\"$LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\">Unscreen the comment</a></li>";
     }
-    if (LJ::Talk::can_delete($targetu, $item->{journalu}, $item->{entryu}, 
-                                $comment->{u} ? $comment->{u}{user} : undef)) {
+    if (LJ::Talk::can_delete($targetu, $item->{journalu}, $item->{entryu}, $comment->{u})) {
         $html .= "<li><a href=\"$LJ::SITEROOT/delcomment.bml?journal=$item->{journalu}{user}&id=$dtalkid\">Delete the comment</a></li>";
     }
     $html .= "</ul></p>";
@@ -1327,15 +1291,9 @@ sub mail_comments {
             LJ::load_user_props($paru, 'mailencoding');
             LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
                 unless %LJ::CACHE_ENCODINGS;
-
-            # we don't want to send email to a parent if the email address on the
-            # parent's user is the same as the email address on this comment's user
-            # is_diff_email: also so we don't auto-vivify $comment->{u}
-            my $is_diff_email = !$comment->{u} || 
-                $paru->{'email'} ne $comment->{u}{'email'};
-                
+            
             if ($paru->{'opt_gettalkemail'} eq "Y" &&
-                $is_diff_email &&
+                $paru->{'email'} ne $comment->{u}{'email'} &&
                 $paru->{'status'} eq "A")
             {
                 $parentmailed = $paru->{'email'};
@@ -1351,7 +1309,7 @@ sub mail_comments {
                     $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
                 }
 
-                my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
+                my $fromname = $comment->{u}{'user'} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
                 my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
                                            'To' => $paru->{'email'},
                                            'Subject' => ($headersubject || "Reply to your comment..."),
@@ -1395,7 +1353,7 @@ sub mail_comments {
     # send mail to the poster of the entry
     if ($entryu->{'opt_gettalkemail'} eq "Y" &&
         !$item->{props}->{'opt_noemail'} &&
-        !LJ::u_equals($comment->{u}, $entryu) &&
+        $comment->{u}{user} ne $entryu->{'user'} &&
         $entryu->{'email'} ne $parentmailed &&
         $entryu->{'status'} eq "A") 
     {
@@ -1414,7 +1372,7 @@ sub mail_comments {
             $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
         }
 
-        my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
+        my $fromname = $comment->{u}{'user'} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
         my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
                                    'To' => $entryu->{'email'},
                                    'Subject' => ($headersubject || "Reply to your post..."),
@@ -1464,79 +1422,6 @@ sub mail_comments {
         }
         
         LJ::send_mail($msg);
-    }
-
-    # now send email to the person who posted the comment we're using?  only if userprop
-    # opt_getselfemail is turned on.  no need to check for active/suspended accounts, as
-    # they couldn't have posted if they were.  (and if they did somehow, we're just emailing
-    # them, so it shouldn't matter.)
-    my $u = $comment->{u};
-    LJ::load_user_props($u, 'opt_getselfemail', 'mailencoding') if $u;
-    if ($u && $u->{'opt_getselfemail'} && LJ::get_cap($u, 'getselfemail')) {
-        LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
-            unless %LJ::CACHE_ENCODINGS;
-        my $encoding = $u->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$u->{'mailencoding'}} : "UTF-8";
-        my $part;
-
-        my $headersubject = $comment->{subject};
-        if ($LJ::UNICODE && $encoding ne "UTF-8") {
-            $headersubject = Unicode::MapUTF8::from_utf8({-string=>$headersubject, -charset=>$encoding}); 
-        }
-
-        if (!LJ::is_ascii($headersubject)) {
-            $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
-        }
-
-        my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($u->{'user'} - $LJ::SITENAMEABBREV Comment)",
-                                   'To' => $u->{'email'},
-                                   'Subject' => ($headersubject || "Comment you posted..."),
-                                   'Type' => 'multipart/alternative');
-
-        my $quote = $parentcomment ? $parentcomment : $item->{'event'};
-
-        # if this is a response to a comment inside our journal,
-        # we don't know who made the parent comment
-        # (and it's potentially anonymous).
-        if ($parentcomment) {
-            $parent->{u} = undef;
-            $parent->{body} = $parentcomment;
-            $parent->{ispost} = 0;
-        } else {
-            $parent->{u} = $entryu;
-            $parent->{body} = $item->{'event'},
-            $parent->{ispost} = 1; 
-            $parent->{preformat} = $item->{'props'}->{'opt_preformatted'};
-        }
-        $item->{entryu} = $entryu;
-        $item->{journalu} = $journalu;
-
-        my $text = format_text_mail($u, $parent, $comment, $talkurl, $item);
-
-        if ($LJ::UNICODE && $encoding ne "UTF-8") {
-            $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding}); 
-        }
-        $part = $msg->attach('Type' => 'TEXT',
-                             'Data' => $text,
-                             'Encoding' => 'quoted-printable',
-                             );
-        $part->attr("content-type.charset" => $encoding)
-            if $LJ::UNICODE;
-        
-        if ($u->{'opt_htmlemail'} eq "Y") {
-            my $html = format_html_mail($u, $parent, $comment, $encoding, $talkurl, $item);
-            if ($LJ::UNICODE && $encoding ne "UTF-8") {
-                $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
-            }
-            $part = $msg->attach('Type' => 'text/html',
-                                 'Data' => $html,
-                                 'Encoding' => 'quoted-printable',
-                                 );
-            $part->attr("content-type.charset" => $encoding)
-                if $LJ::UNICODE;
-        }
-        
-        LJ::send_mail($msg);
-
     }
 }
 
