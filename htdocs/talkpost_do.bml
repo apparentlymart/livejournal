@@ -48,12 +48,12 @@ body<=
         my $talkurl = LJ::journal_base($journalu) . "/$POST{itemid}.html";
         return LJ::Talk::Post::make_preview($talkurl, $cookie_auth, \%POST);
     }
-    
+
     # check anonymous rate limits
-    my $do_captcha = 0;
-    $do_captcha = 1 if $LJ::HUMAN_CHECK{anonpost} &&
-                       $POST{'usertype'} eq 'anonymous' &&
-                       ! LJ::Talk::Post::check_rate(undef, 'anonymous');
+    my $do_captcha =
+        $LJ::HUMAN_CHECK{anonpost} &&
+        ! LJ::Talk::Post::check_rate($remote,
+                                     $POST{'usertype'} eq 'anonymous');
 
     ## init.  this handles all the error-checking, as well.
     my @errors;

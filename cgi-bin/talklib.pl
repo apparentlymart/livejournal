@@ -2180,7 +2180,7 @@ sub make_preview {
     return $ret;
 }
 
-# more anti-spammer rate limiting.
+# more anti-spammer rate limiting.  returns 1 if rate is okay, 0 if too fast.
 sub check_rate {
     my ($remote, $anon) = @_;
 
