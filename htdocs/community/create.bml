@@ -167,9 +167,9 @@ SUBMIT:
         my $ret;
 
         if ($error) {
-            $ret .= "<?standout <strong>$ML{'.errors.label'}</strong><ul>";
+            $ret .= "<?errorbar <strong>$ML{'.errors.label'}</strong><ul>";
             $ret .= "<li>$error</li>";
-            $ret .= "</ul> standout?>";
+            $ret .= "</ul> errorbar?>";
         }
 
         $ret .= "<?p $ML{'.create.text'} p?>" unless $error;
