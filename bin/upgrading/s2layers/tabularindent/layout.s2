@@ -64,6 +64,18 @@ property Color alink_color {
     des = "Active link color";
     s1color = "page_alink";
 }
+property Color comment_bar_one_bgcolor {
+    des = "Alternating background color for comment bars (one)";
+}
+property Color comment_bar_two_fgcolor {
+    des = "Text color on alternating comment bars (one)";
+}
+property Color comment_bar_two_bgcolor {
+    des = "Alternating background color for comment bars (two)";
+}
+property Color comment_bar_one_fgcolor {
+    des = "Text color on alternating comment bars (two)";
+}
 
 # Inherited properties
 
@@ -90,13 +102,15 @@ set accent_fgcolor = "#000000";
 set link_color = "#000050";
 set vlink_color = "#500050";
 set alink_color = "#ff00c0";
+set comment_bar_one_bgcolor = "#c0c0ff";
+set comment_bar_one_fgcolor = "#000000";
+set comment_bar_two_bgcolor = "#eeeeff";
+set comment_bar_two_fgcolor = "#000000";
 
 # Other options
 set show_entry_userpic = false;
 set page_recent_items = 20;
 set page_friends_items = 20;
-
-set view_entry_disabled = true;
 
 function Page::lay_captionbar_navigation () { }
 
@@ -136,16 +150,9 @@ function captionbar (Page p) {
     "<tr><td colspan='2'>"; $p->lay_captionbar_navigation(); "</td></tr></table></td></tr></table>";
 }
 
-function Page::print () 
+function print_stylesheet ()
 {
-    var string title = $this->title();
-"""
-<html>
-<head>
-<link rel="stylesheet" href="$.stylesheet_url" type="text/css"/>
-  <style>
-   <!--
-body {
+    """body {
     background-color:  $*body_bgcolor;
 }
 body,td,p {
@@ -176,8 +183,25 @@ a:hover {
     font-size:         8pt;
     text-decoration:   underline;
 }
-   -->
-  </style>
+h3.page-header {
+    font-size:         8pt;
+    font-family:       verdana, arial, helvetica, sans-serif;
+    font-weight:       normal;
+    background-color:  $*headerbar_bgcolor;
+    color:             $*headerbar_fgcolor;
+    padding: 6px;
+    border:            1px solid $*border_color;
+}
+""";
+}
+
+function Page::print () 
+{
+    var string title = $this->title();
+"""
+<html>
+<head>
+  <link rel="stylesheet" href="$.stylesheet_url" type="text/css"/>
   $.head_content
   <title>$title</title>
  </head>
@@ -192,13 +216,18 @@ a:hover {
     "</body></html>";
 }
 
-function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
+function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
-    if ($e.new_day) {
-        "<table border='0' width='100%' cellpadding='5' cellspacing='1' bgcolor='$*border_color'>";
-        "<tr><td bgcolor='$*headerbar_bgcolor'><font color='$*headerbar_fgcolor'>";
+    if ($p.view == "recent") {
+        if ($e.new_day) {
+            "<h3 class='page-header'>";
+            print $e.time->date_format("%%month%% %%dayord%%, %%yyyy%%");
+            "</h3>\n";
+        }
+    } else {
+        "<h3 class='page-header'>";
         print $e.time->date_format("%%month%% %%dayord%%, %%yyyy%%");
-        "</font></td></tr></table><br />";
+        "</h3>\n";
     }
     "<div align='right'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
     "<tr><td bgcolor='$*accent_bgcolor'>";
@@ -253,19 +282,21 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
         }
     }
     "</table></td></tr></table></td></tr>";
-    "<tr><td bgcolor='$*main_bgcolor'><font color='$*main_fgcolor'>$e.text</font></td></tr>";
+    "<tr><td bgcolor='$*main_bgcolor'><font color='$*main_fgcolor'>";
+    if (not $hide_text) { print $e.text; }
+    "</font></td></tr>";
     $e.comments->print();
     "</table></div><br />";
 }
 
 function Page::print_entry (Entry e) 
 {
-    print_entry($this, $e, null Color, null Color);
+    print_entry($this, $e, null Color, null Color, false);
 }
 
 function FriendsPage::print_entry (Entry e) {
     var Friend f = $.friends{$e.journal.username};
-    print_entry($this, $e, $f.bgcolor, $f.fgcolor);
+    print_entry($this, $e, $f.bgcolor, $f.fgcolor, false);
 }
 
 function RecentPage::lay_captionbar_navigation() 
@@ -388,6 +419,104 @@ function DayPage::print_body ()
             $this->print_entry($e);
         }
     }
+}
+
+function EntryPage::print_body () {
+    print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
+    print "<h3 class='page-header'>Comments:</h3>";
+    if ($.comment_pages.total_subitems > 0) {
+        $.comment_pages->print();
+        $this->print_comments($.comments);
+    }
+}
+
+function EntryPage::print_comment (Comment c) {
+    var Color background; var Color color;
+    if ($c.depth % 2) {
+        $background = $*comment_bar_one_bgcolor;
+        $color = $*comment_bar_one_fgcolor;
+    } else {
+        $background = $*comment_bar_two_bgcolor;
+        $color = $*comment_bar_two_fgcolor;
+    }
+    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
+    var string sub_icon;
+    if (defined $c.subject_icon) {
+        $sub_icon = $c.subject_icon->as_string();
+    }
+    "<div align='right'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
+    "<tr><td bgcolor='$background'>";
+    "<table border='0' width='100%'><tr>";
+    # Userpic
+    if (defined $c.userpic and $*comment_userpic_style != "off")
+    {
+        var string userpic = defined $c.userpic ? "<img src='$c.userpic.url' />" : "";
+        "<td width='100' valign='top' align='center'>";
+        print $userpic;
+        "</td>";
+    }
+    "<td valign='top'><table border='0'>";
+    # Poster
+    "<tr><td align='right'><font color='$color'>From:</font>";
+    "</td><td><font color='$color'>$poster</font></td></tr>";
+    # Subject
+    if ($c.subject != "") {
+        "<tr><td align='right'><font color='$color'>Subject:</font>";
+        "</td><td><font color='$color'>$c.subject</font></td></tr>";
+    }
+    # Time posted
+    var string time = $c.time->time_format();
+    "<tr><td align='right'><font color='$color'>Time:</font></td>";
+    "<td><font color='$color'>$time</font></td></tr>";
+    # Link
+    "<tr><td align='right'><font color='$color'>Link:</font>";
+    "</td><td><font color='$color'>(<a href='$c.permalink_url'>Link</a>)</font></td></tr>";
+    # IP Address:
+    if ($c.metadata{"poster_ip"}) {
+        "<tr><td align='right'><font color='$color'>IP Address:</font>";
+        "</td><td><font color='$color'>" + $c.metadata{"poster_ip"} + "</font></td></tr>";
+    }
+    "</table></td></tr></table></td></tr>";
+    "<tr><td bgcolor='$*main_bgcolor'><font color='$*main_fgcolor'>$c.text";
+    "</font></td></tr>";
+    "<tr><td bgcolor='$background'><font color='$color'><nobr>";
+    print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>Reply to this</a>) ";
+    if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
+    if ($c.thread_url != "") { "(<a href='$c.thread_url'>Thread</a>) "; }
+    "</div></nobr></font></td></tr>";
+    "</table></div><br />";
+}
+
+function ReplyPage::print_body () {
+    "<div align='right'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
+    "<tr><td bgcolor='$*accent_bgcolor'>";
+    "<table border='0' width='100%'><tr>";
+    # Userpic
+    if (defined $.replyto.userpic and $*comment_userpic_style != "off")
+    {
+        var string userpic = "<img src='$.replyto.userpic.url' />";
+        "<td width='100' valign='top' align='center'>";
+        print $userpic;
+        "</td>";
+    }
+    "<td valign='top'><table border='0'>";
+    # Subject
+    if ($.replyto.subject != "") {
+        "<tr><td align='right'><font color='$*accent_fgcolor'>Subject:</font>";
+        "</td><td><font color='$*accent_fgcolor'>$.replyto.subject</font></td></tr>";
+    }
+    # Time posted
+    var string time = $.replyto.time->time_format();
+    "<tr><td align='right'><font color='$*accent_fgcolor'>Time:</font></td>";
+    "<td><font color='$*accent_fgcolor'>$time</font></td></tr>";
+    "</table></td></tr></table></td></tr>";
+    "<tr><td bgcolor='$*main_bgcolor'><font color='$*main_fgcolor'>";
+    print $.replyto.text;
+    "</font></td></tr>";
+    "</table></div><br />";
+
+    print "<h3 class='page-header'>Reply:</h3>";
+    $.form->print();
 }
 
 function print_theme_preview()
