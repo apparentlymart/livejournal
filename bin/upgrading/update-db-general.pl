@@ -1811,6 +1811,15 @@ register_alter(sub {
                  "ALTER IGNORE TABLE supportcat ADD scope ENUM('general', 'local') ".
                  "NOT NULL DEFAULT 'general', ADD UNIQUE (catkey)");
     }
+    
+    # convert 'all' arguments to '*'
+    unless (check_dbnote("privcode_all_to_*")) {
+
+        # arg isn't keyed, but this table is only a couple thousand rows
+        do_sql("UPDATE priv_map SET arg='*' WHERE arg='all'");
+
+        set_dbnote("privcode_all_to_*", 1);
+    }
 
     # this never ended up being useful, and just freaked people out unnecessarily.
     if (column_type("user", "track")) {

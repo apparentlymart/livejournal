@@ -19,27 +19,27 @@ chomp $pass;
 print "\n";
 
 print "Creating system account...\n";
-unless (LJ::create_account($dbh, { 'user' => 'system',
-                                   'name' => 'System Account',
-                                   'password' => $pass }))
+unless (LJ::create_account({ 'user' => 'system',
+                             'name' => 'System Account',
+                             'password' => $pass }))
 {
     print "Already exists.\nModifying 'system' account...\n";
-    my $qp = $dbh->quote($pass);
-    $dbh->do("UPDATE user SET password=$qp WHERE user='system'");
+    $dbh->do("UPDATE user SET password=? WHERE user='system'",
+             undef, $pass);
 }
 
-my $u = LJ::load_user($dbh, "system");
+my $u = LJ::load_user("system");
 unless ($u) {
     print "ERROR: can't find newly-created system account.\n";
     exit 1;
 }
 
 print "Giving 'system' account 'admin' priv on all areas...\n";
-if (LJ::check_priv($dbh, $u, "admin", "all")) {
+if (LJ::check_priv($u, "admin", "*")) {
     print "Already has it.\n";
 } else {
     my $sth = $dbh->prepare("INSERT INTO priv_map (userid, prlid, arg) ".
-                            "SELECT $u->{'userid'}, prlid, 'all' ".
+                            "SELECT $u->{'userid'}, prlid, '*' ".
                             "FROM priv_list WHERE privcode='admin'");
     $sth->execute;
     if ($dbh->err || $sth->rows == 0) {

@@ -227,7 +227,7 @@ $cmd{'priv'} =
               or return $fail->($out, "Couldn't load admin privs?!");
             foreach my $pair (@privs) {
                 my ($priv, $arg) = @$pair;
-                unless ($admin->{all} or $admin->{$priv}
+                unless ($admin->{'*'} or $admin->{$priv}
                         or ($arg and $admin->{"$priv/$arg"})) {
                     return $fail->($out,
                                    "You don't have permission to grant priv ".

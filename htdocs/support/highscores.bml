@@ -14,7 +14,7 @@ The following people have helped other users in the support area:
 
  my $remote = LJ::get_remote();
  my $admin = (LJ::check_priv($remote, "admin", "supporthelp") ||
-              LJ::check_priv($remote, "admin", "all"));
+              LJ::check_priv($remote, "admin", "*"));
  
  my %helper;
  if ($admin) {

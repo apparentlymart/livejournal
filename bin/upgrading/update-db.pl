@@ -661,5 +661,20 @@ sub ensure_confirm
     return 0;
 }
 
+sub set_dbnote
+{
+    my ($key, $value) = @_;
+    return unless $opt_sql && $key && $value;
 
+    return $dbh->do("REPLACE INTO blobcache (bckey, dateupdate, value) VALUES (?,NOW(),?)",
+                    undef, $key, $value);
+}
+
+sub check_dbnote
+{
+    my $key = shift;
+
+    return $dbh->selectrow_array("SELECT value FROM blobcache WHERE bckey=?",
+                                 undef, $key);
+}
 

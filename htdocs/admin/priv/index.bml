@@ -1,20 +1,19 @@
 <html><head>
 <meta name="robots" content="noindex, nofollow, noarchive" />
 <meta name="googlebot" content="nosnippet" />
+<title>Privilege Management</title>
 </head><body>
 <?_code
 
  use strict;
  use vars qw(%FORM);
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbh = LJ::get_db_writer;
 
  my ($sth, $ret);
  my $mode = $FORM{'mode'};
 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  # if user has priv 'admin' with arg 'foo/bar', user can grant or revoke the
  # 'foo' priv with only argument 'bar'.  Normally, the admin arg is just the
@@ -31,12 +30,12 @@
      }
  }
 
- my $view_access = $access{'all'}; # TODO: add || LJ::check_priv($dbs, $remote, "privview")
+ my $view_access = $access{'*'}; # TODO: add || LJ::check_priv($remote, "privview")
 
  my @privs;
  my %priv;
  my %pcode2id;
- $sth = $dbh->prepare("SELECT prlid, privcode, privname, des, is_public FROM priv_list ORDER BY privcode");
+ $sth = $dbh->prepare("SELECT prlid, privcode, privname, des, is_public, scope FROM priv_list ORDER BY privcode");
  $sth->execute;
  while ($_ = $sth->fetchrow_hashref) {
      push @privs, $_;
@@ -52,27 +51,32 @@
 
  unless ($mode)
  {
-     $ret .= "<h1>privilege management</h1>\n";
-     $ret .= "<form method='get'>";
-     $ret .= "View all privileges of user <input name='user' size='15'> <input type='submit' value=\"Load\">";
-     $ret .= "</form>";
+     $ret .= "<h1>Privilege Management</h1>\n";
+     $ret .= "<form method='get' action='index.bml'>";
+	 $ret .= "<p>View all privileges of user <input name='user' size='15' /> <input type='submit' value=\"Load\" /></p></form>";
 
-     $ret .= "Or, show all users with privilege:<ul>";
+     $ret .= "<p>Or, show all users with privilege:</p><dl>";
      foreach my $priv (@privs) {
-         $ret .= "<li><b><a href='./?priv=$priv->{'privcode'}'>$priv->{'privcode'}</a>: $priv->{'privname'}</b><br />$priv->{'des'}\n";
+         my ($des, $args) = split(/arg=/, $priv->{'des'});
+         $ret .= "<dt><strong><a href='./?priv=$priv->{'privcode'}'>$priv->{'privcode'}</a>: $priv->{'privname'}</strong>";
+         $ret .= " <i>(Site Specific)</i>" if $priv->{'scope'} eq 'local';
+         $ret .= "</dt>";
+         $ret .= "<dd>$des\n";
+         $ret .= "<br /><strong>Argument:</strong> $args" if $args;
+         $ret .= "</dd>";
      }
-     $ret .= "</ul>";
+     $ret .= "</dl>";
      return $ret;
  }
 
  if ($mode eq "userchange" || $mode eq "privchange") 
  {
      unless (LJ::did_post()) {
-         return "<b>Error:</b> requires post";
+         return "<p><b>Error:</b> requires post</p>";
      }
 
      unless ($FORM{'submit:refresh'}) {
-         my $userid = LJ::get_userid($dbs, $FORM{'user'});
+         my $userid = LJ::get_userid($FORM{'user'});
          foreach my $key (keys %FORM) {
              if ($key =~ /^revoke:(\d+):(\d+)$/) {
                  my $prmid = $1;
@@ -95,7 +99,7 @@
              my $privcode = $priv{$qpriv}->{'privcode'};
              my $arg = $FORM{'arg'};
              if ($privcode) {
-                 if ($access{'all'} || $access{$privcode} || $access{"$privcode/$arg"}) {
+                 if ($access{'*'} || $access{$privcode} || $access{"$privcode/$arg"}) {
                      my $qarg = $dbh->quote($arg);
                      $dbh->do("INSERT INTO priv_map (prmid, userid, prlid, arg) VALUES (NULL, $userid, $qpriv, $qarg)");
                      LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, "privadd", "Granting: \"$privcode\" with arg \"$FORM{'arg'}\"");
@@ -108,13 +112,13 @@
              }
          }
          if ($FORM{'grantuser'}) {
-             my $userid = LJ::get_userid($dbs, $FORM{'grantuser'});
+             my $userid = LJ::get_userid($FORM{'grantuser'});
              my $privid = $pcode2id{$FORM{'priv'}};
              my $arg = $FORM{'arg'};
              my $qarg = $dbh->quote($arg);
              my $privcode = $priv{$privid}->{'privcode'};
              if ($privcode) {
-                 if ($access{'all'} || $access{$privcode} || $access{"$privcode/$arg"}) {
+                 if ($access{'*'} || $access{$privcode} || $access{"$privcode/$arg"}) {
                      if ($userid && $privid) {
                          my $qarg = $dbh->quote($FORM{'arg'});
                          $dbh->do("INSERT INTO priv_map (prmid, userid, prlid, arg) VALUES (NULL, $userid, $privid, $qarg)");
@@ -144,7 +148,7 @@
  if ($mode eq "viewuser") 
  {
      my $user = LJ::canonical_username($FORM{'user'});
-     my $userid = LJ::get_userid($dbs, $user);	 
+     my $userid = LJ::get_userid($user);	 
 
      $ret .= "<h1><a href='./'>&lt;&lt;</a> view user \"$user\"</h1>\n";
      unless ($userid) {
@@ -152,8 +156,9 @@
          return $ret;
      }
 
-     $ret .= "<form method='post' action='./'><input type='hidden' name='mode' value='userchange'>\n";
-     $ret .= "<input type='hidden' name='user' value='$user'>\n";
+     $ret .= "<form method='post' action='./'>\n";
+     $ret .= "<input type='hidden' name='mode' value='userchange' />\n";
+     $ret .= "<input type='hidden' name='user' value='$user' />\n";
      $sth = $dbh->prepare("SELECT pm.prmid, pm.prlid, pm.arg FROM priv_map pm, priv_list pl WHERE pm.prlid=pl.prlid AND pm.userid=$userid ORDER BY pl.privcode");
      $sth->execute;
      $ret .= "<table cellpadding='5' cellspacing='1' border='1'><tr><td><b>Revoke</b></td><td><b>Privilege</b></td><td><b>Arg</b></td></tr>\n";
@@ -165,37 +170,42 @@
                       ($remote && $remote->{'userid'} == $userid));
 
          $ret .= "<tr><td align='center'>";
-         if ($access{'all'} || $access{$prec->{'privcode'}} || $access{"$prec->{privcode}/$arg"}) {
-             $ret .= "<input type='checkbox' name='revoke:$prmid:$userid'>";
+         if ($access{'*'} || $access{$prec->{'privcode'}} || $access{"$prec->{privcode}/$arg"}) {
+             $ret .= "<input type='checkbox' name='revoke:$prmid:$userid' />";
          } else {
              $ret .= "--";
          }
          my $pcode = $priv{$prlid}->{'privcode'};
          $ret .= "</td><td><a href='./?priv=$pcode'>$pcode</a></td>";
-         $ret .= "<td>$arg</td></tr>\n";
+         if ($arg)
+         {
+             $ret .= "<td><a href='./?priv=$pcode&amp;viewarg=$arg'>$arg</a></td></tr>\n";
+         } else {
+             $ret .= "<td>&nbsp;</td></tr>\n";
+         }
      }
      $ret .= "</table>";
 
      if (%access || %maybe_access) {
-         $ret .= "<p>Grant <b>$user</b> privilege:<ul>";
+         $ret .= "<p>Grant <b>$user</b> privilege:<div style='margin-left: 20px;'>\n";
          $ret .= "<select name='grantpriv'><option value='' selected='1'></option>";
          foreach my $priv (@privs) {
-             next unless ($access{'all'} || $access{$priv->{'privcode'}} ||
+             next unless ($access{'*'} || $access{$priv->{'privcode'}} ||
                           $maybe_access{$priv->{'privcode'}});
              $ret .= "<option value='$priv->{'prlid'}'>$priv->{'privcode'}</option>";
          }
-         $ret .= "</select>";
-         $ret .= "Arg: <input name='arg' size='10' maxlength='40'></ul>";
+         $ret .= "</select>\n";
+         $ret .= "Arg: <input name='arg' size='10' maxlength='40' /></div>\n";
      } else {
-         $ret .= "<P><I>(you do not have access to grant any privileges)</I>";
+         $ret .= "<p><i>(you do not have access to grant any privileges)</i></p>\n";
      }	
 
-     $ret .= "<P>";
+     $ret .= "<p>\n";
      if (%access) {
-         $ret .=  "<INPUT TYPE=SUBMIT VALUE=\"Make Changes\">";
+         $ret .=  "<input type=\"submit\" value=\"Make Changes\" />";
      }
-     $ret .= " <INPUT TYPE=SUBMIT NAME=\"submit:refresh\" VALUE=\"Just Refresh\">";
-     $ret .= "</FORM>";
+     $ret .= " <input type=\"submit\" name=\"submit:refresh\" value=\"Just Refresh\" />";
+     $ret .= "</form>";
      return $ret;
  }
 
@@ -206,22 +216,35 @@
      my $skip = $FORM{'skip'} + 0;
      my $limit = 100;
 
-     $ret .= "<h1><a href=\"./\">&lt;&lt;</a> view priv \"$priv{$priv}->{'privcode'}\"</h1>";
+     my $viewarg;
+     if ($FORM{'viewarg'}) {
+         $viewarg = " AND pm.arg=" . $dbh->quote($FORM{'viewarg'});
+     }
+	 
+     $ret .= "<h1><a href=\"./\">&lt;&lt;</a> view priv \"$priv{$priv}->{'privcode'}\"</h1>\n";
      $ret .= "<p><b>Privilege Name:</b> $priv{$priv}->{'privname'}";
-     $ret .= "<br /><b>Description:</b> $priv{$priv}->{'des'}" if ($priv{$priv}->{'des'});
-
+     my ($des, $args) = split(/arg=/, $priv{$priv}->{'des'});
+     $ret .= "<br /><b>Description:</b> $des" if $des;
+     $ret .= "<br /><b>Argument:</b> $args" if $args;
+     $ret .= "</p>";
+     
      unless ($prec->{'is_public'} || $view_access) {
-         $ret .= "<p><b>ERROR:</b> This privilege's access list is not public.</p>";
+         $ret .= "<p><b>ERROR:</b> This privilege's access list is not public.</p>\n";
          return $ret;
      }
      
-     $ret .= "<form method='post' action='./'><input type='hidden' name='mode' value='privchange'>";
-     $ret .= "<input type='hidden' name='priv' value='$pcode'>";
-     $sth = $dbh->prepare("SELECT pm.prmid, u.user, u.userid, pm.arg FROM priv_map pm, user u WHERE pm.prlid=$priv AND pm.userid=u.userid ORDER BY u.user LIMIT $skip,$limit");
+     $ret .= "<form style='display: inline;' action='./' method='post'>\n";
+     $ret .= "<p><b>View only privs with arg:</b> ";
+     $ret .= "<input name='viewarg' size='10' /> ";
+     $ret .= "<input type='submit' name='submit:load' value='Load' /></p>\n";
+
+     $ret .= "<input type='hidden' name='mode' value='privchange' />\n";
+     $ret .= "<input type='hidden' name='priv' value='$pcode' />";
+     $sth = $dbh->prepare("SELECT pm.prmid, u.user, u.userid, pm.arg FROM priv_map pm, user u WHERE pm.prlid=$priv AND pm.userid=u.userid$viewarg ORDER BY u.user LIMIT $skip,$limit");
      $sth->execute;
      $ret .= "<table cellpadding='5' cellspacing='1' border='1'><tr><td><b>Revoke</b></td><td><b>User</b></td><td><b>Arg</b></td></tr>\n";
 
-     my $showgrant = ($access{'all'} || $access{$priv{$priv}->{'privcode'}} ||
+     my $showgrant = ($access{'*'} || $access{$priv{$priv}->{'privcode'}} ||
                       $maybe_access{$priv{$priv}->{'privcode'}});
      my $foundcount = 0;
 
@@ -229,7 +252,7 @@
      {
          $foundcount++;
          $ret .= "<tr><td align='center'>";
-         if ($access{'all'} || $access{$priv{$priv}->{'privcode'}} ||
+         if ($access{'*'} || $access{$priv{$priv}->{'privcode'}} ||
              $access{"$priv{$priv}->{'privcode'}/$_->{'arg'}"})
          {
              $ret .= "<input type='checkbox' name=\"revoke:$_->{'prmid'}:$_->{'userid'}\" />";
@@ -237,9 +260,16 @@
              $ret .= "--";
          }
          $ret .= "</td><td><a href=\"./?user=$_->{'user'}\">$_->{'user'}</a></td>";
-         $ret .= "<td>$_->{'arg'}</td></tr>\n";
+         if ($_->{'arg'} ne "")
+         {
+             $ret .= "<td><a href=\"./?priv=$priv{$priv}->{'privcode'}&amp;viewarg=$_->{'arg'}\">$_->{'arg'}</a></td></tr>\n";
+         } else {
+             $ret .= "<td>&nbsp;</td></tr>\n";
+         }
      }
+     $ret .= "<tr><td colspan='3'><b>$foundcount users</b></td></tr>\n";
      $ret .= "</table>";
+     
      if ($foundcount >= $limit) {
          $ret .= "<a href='" . BML::self_link({'skip'=>($skip +$limit)}) . "'>See more...</a>\n";
      }
@@ -247,15 +277,22 @@
      if ($showgrant) {
          $ret .= "<p>Grant <b>$priv{$priv}->{'privcode'}</b> privilege to:<ul>";
          $ret .= "User: <input name='grantuser' size='15' maxlength='15' /> ";
-         $ret .= "Arg: <input name='arg' size='10' maxlength='40' /></ul>";
+         $ret .= "Arg: <input name='arg' size='10' maxlength='40' /></ul>\n";
      } else {
-         $ret .= "<p><i>(you don't have access to grant this privilege to other users)</i>";
+         $ret .= "<p><i>(you don't have access to grant this privilege to other users)</i></p>\n";
      }
  
-     $ret .= "<p>";
-     if ($showgrant) { $ret .= "<input type='submit' value=\"Make Changes\" />"; }
-     $ret .= " <input type='submit' name=\"submit:refresh\" value=\"Just Refresh\" />";
-     $ret .= "</form>";
+     if ($showgrant) {
+         $ret .= "<input name=\"submit:change\" type='submit' value=\"Make Changes\" />\n";
+     }
+     $ret .= "</form>\n";
+
+     $ret .= "<form style='display: inline;' method='post' action='./'>\n";
+     $ret .= LJ::html_hidden('mode', 'privchange',
+                             'priv', $pcode,
+                             'viewarg', $FORM{'viewarg'}) . "\n";
+     $ret .= "<input type='submit' name=\"submit:refresh\" value=\"Just Refresh\" />\n";
+     $ret .= "</form>\n";
      return $ret;
  }
 

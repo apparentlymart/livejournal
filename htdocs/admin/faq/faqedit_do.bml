@@ -35,7 +35,7 @@ body<=
      $sth->execute;
      my ($faqcat) = $sth->fetchrow_array;
 
-     unless ($ac_edit{'all'} || $ac_edit{$faqcat}) {
+     unless ($ac_edit{'*'} || $ac_edit{$faqcat}) {
          if (%ac_edit) {
              return "<B>Error: </B> You do not have access to edit a FAQ question in the \"$faqcat\" category.";
          } else {
