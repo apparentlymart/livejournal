@@ -11,8 +11,6 @@
 
 /accountstatus.bml.journalstatus.select.suspended=Suspended
 
-/accountstatus.bml.title=Account Status
-
 /allpics.bml.current=Current Pictures
 
 /allpics.bml.default=<u>Default</u>
@@ -705,39 +703,11 @@ whether to allow <em>all</em>, <em>registered users</em>, or
 
 /delcomment.bml.title=Delete Comment
 
-/directory.bml.browse.country.desc=Select a country to read journals from that country...
-
-/directory.bml.browse.country.title=Browse Journals by Country
-
-/directory.bml.browse.usa.desc=Click a US state below to read journals from that state, or click a country name below the map to read journals from that country.
-
-/directory.bml.browse.usa.title=Browse Journals by US State
-
 /directory.bml.error.accounttype<<
 Sorry, your account type doesn't permit usage of the
 directory, or you aren't currently <a href='/login.bml'>logged in</a>.  If your account type permits
 directory usage, be sure that you are logged in and then try again.
 .
-
-/directory.bml.navcrap.matches=[[count]] matches
-
-/directory.bml.navcrap.xofy=Page [[curpage]] of [[totpages]] shown (records [[reca]]-[[recb]])
-
-/directory.bml.open=Open
-
-/directory.bml.post=Post
-
-/directory.bml.search.monkey=Hundreds of trained monkeys are currently running about finding your search results.  Please stand by.
-
-/directory.bml.search.new=New Query
-
-/directory.bml.search.overflow=<b>Search results limited to [[count]] results.  Please refine your query.</b>
-
-/directory.bml.search.title=Searching
-
-/directory.bml.update=Update:
-
-/directory.bml.user=User
 
 /editinfo.bml.allowshowcontact.about<<
 You should keep this option enabled.  This lets other people be able to contact 
@@ -1206,8 +1176,6 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.btn.proceed=Proceed
 
-/editpics.bml.btn.save=Save Settings
-
 /editpics.bml.curpics=Current Pictures
 
 /editpics.bml.curpics.desc=Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, use the form at the bottom of the page.
@@ -1216,11 +1184,11 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.error.filetoolarge=Image uploaded is too large.  File size cannot exceed [[maxsize]].
 
+/editpics.bml.error.keywords=You used the keyword "[[ekw]]" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.
+
 /editpics.bml.error.imagetoolarge=The dimensions of your image ([[imagesize]]) exceed maximum size.  Your picture can only be 100x100 pixels large.  Use a image/photo editing program to reduce the image to thumbnail-size.
 
 /editpics.bml.error.invalidimage=Invalid image file.
-
-/editpics.bml.error.keywords=You used the keyword "[[ekw]]" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.
 
 /editpics.bml.error.toomanypics2=You are already at your limit of [[maxpics]] pictures.  You cannot upload this picture until you delete one of your existing ones.
 
@@ -1239,26 +1207,28 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 /editpics.bml.fromurl.key=r
 
 /editpics.bml.imagesize.by|notes=This character is inserted between two numbers to indicate "by" when specifying image dimensions, for example "100x100".
+
 /editpics.bml.imagesize.by=x
 
 /editpics.bml.kilobytes=KB
 
-/editpics.bml.label.default=Default:
-
 /editpics.bml.label.delete=Delete:
+
+/editpics.bml.label.default=Default:
 
 /editpics.bml.label.keywords=Keywords:
 
 /editpics.bml.makedefault=Make this your <u>d</u>efault picture
 
 /editpics.bml.makedefault.key|notes=Enter here a <b>lower-case</b> version of the letter you underlined in ".makedefault". This is the shortcut key for the makedefault option.
+
 /editpics.bml.makedefault.key=d
 
 /editpics.bml.nodefault=No Default Picture
 
-/editpics.bml.noneupload=You have no pictures uploaded.  Please upload one using the form below.
-
 /editpics.bml.nopics=No Pictures
+
+/editpics.bml.noneupload=You have no pictures uploaded.  Please upload one using the form below.
 
 /editpics.bml.restriction.fileformat=File format must be either PNG, GIF or JPG
 
@@ -1320,7 +1290,7 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /friends/add.bml.add.header=Success
 
-/friends/add.bml.add.text=User <?ljuser [[user]] ljuser?> was added to your friend list.  You can view your friends page <a href="[[url]]">here</a>.
+/friends/add.bml.add.text=User [[ljuser]] was added to your friend list.  You can view your friends page <a href="[[url]]">here</a>.
 
 /friends/add.bml.add.title=Friend Added!
 
@@ -2401,20 +2371,6 @@ that area. p?>
 
 /syn/index.bml.using.title=Using [[sitename]] for syndication
 
-/syn/list.bml.error.nofeeds=<b>Error:</b> No syndicated feeds have been updated in the past 24 hours.
-
-/syn/list.bml.feeddesc=Feed Description
-
-/syn/list.bml.feedurl=Feed URL
-
-/syn/list.bml.numreaders=Number of readers
-
-/syn/list.bml.title=Syndicated Feeds
-
-/syn/list.bml.username=Username
-
-/syn/list.bml.xml_icon.alt=[View Raw Feed]
-
 /talkmulti.bml.deleted.body=The comments have been deleted. You can view the rest of the thread <a href="[[link]]">here</a>.
 
 /talkmulti.bml.deleted.title=Comments deleted
@@ -2803,6 +2759,10 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /tools/memories.bml.edit=edit
 
+/tools/memories.bml.entries=entries
+
+/tools/memories.bml.entry=entry
+
 /tools/memories.bml.error.noentries.body<<
 This could be because: <ol>
 <li>the user hasn't defined any memorable events,</li>
@@ -2823,8 +2783,6 @@ This could be because: <ol>
 /tools/memories.bml.form.sort=Sort entries by:
 
 /tools/memories.bml.form.switch=Switch
-
-/tools/memories.bml.plur_entry=[[num]] [[?num|entry|entries]]
 
 /tools/memories.bml.sort.description=Description
 
@@ -2854,9 +2812,9 @@ This could be because: <ol>
 
 /update.bml.error.cantpost=Sorry, you cannot post at this time.
 
-/update.bml.error.disabled=Your account type does not permit posting.
-
 /update.bml.error.disabled.title=Posting access disabled
+
+/update.bml.error.disabled=Your account type does not permit posting.
 
 /update.bml.error.login=Error logging on:
 

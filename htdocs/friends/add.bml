@@ -69,7 +69,9 @@
          } else {
              $title = $ML{'.add.title'};
              $body = "<?h1 $ML{'.add.header'} h1?><?p " .
-                     BML::ml('.add.text', {'user'=>$user, 'url'=>"$LJ::SITEROOT/users/$remote->{'user'}/friends"}) .
+                     BML::ml('.add.text', { 'user' => $user,
+                                            'ljuser' => LJ::ljuser($user),
+                                            'url' => "$LJ::SITEROOT/users/$remote->{'user'}/friends", }) .
                      " p?>";
          }
      } else {
@@ -95,9 +97,9 @@
  }
 
  $body .= "<form method='post' action='add.bml'>";
- $body .= "<input type='hidden' name='mode' value='add' />";
- $body .= "<input type='hidden' name='user' value=\"$user\" />";
- $body .= "<input type='hidden' name='remid' value=\"$remote->{'userid'}\" />";
+ $body .= LJ::html_hidden(mode => 'add',
+                          user => $user,
+                          remid => $remote->{userid});
 
  if ($fr) {
      $body .= "<center><input type='submit' value=\"$ML{'.btn.modify'}\">";
