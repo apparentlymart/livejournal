@@ -24,6 +24,7 @@ sub create_view_lastn
 
     LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
+    LJ::load_user_props($dbs, $remote, "opt_nctalklinks");
 
     my %FORM = ();
     LJ::get_form_data(\%FORM);
@@ -191,6 +192,7 @@ sub create_view_lastn
             ! $logprops{$itemid}->{'opt_nocomments'}
             ) 
         {
+            $itemargs .= "&nc=$replycount" if $replycount && $remote->{'opt_nctalklinks'};
             my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
             $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
                 'itemid' => $ditemid,
@@ -410,6 +412,7 @@ sub create_view_friends
 
     LJ::load_user_props($dbs, $u, "opt_usesharedpic", "url", "urlname");
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
+    LJ::load_user_props($dbs, $remote, "opt_nctalklinks");
 
     my %friends_page = ();
     $friends_page{'name'} = LJ::ehtml($u->{'name'});
@@ -686,6 +689,7 @@ sub create_view_friends
             ! $logprops{$datakey}->{'opt_nocomments'}
             ) 
         {
+            $itemargs .= "&nc=$replycount" if $replycount && $remote->{'opt_nctalklinks'};
             my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
             $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
                 'itemid' => $ditemid,
@@ -1028,6 +1032,7 @@ sub create_view_day
 
     LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
+    LJ::load_user_props($dbs, $remote, "opt_nctalklinks");
 
     my %day_page = ();
     $day_page{'username'} = $user;
@@ -1195,6 +1200,7 @@ sub create_view_day
             ! $logprops{$itemid}->{'opt_nocomments'}
             ) 
         {
+            $itemargs .= "&nc=$replycount" if $replycount && $remote->{'opt_nctalklinks'};
             my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
             $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
                 'itemid' => $ditemid,

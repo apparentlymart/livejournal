@@ -51,7 +51,7 @@ BODY<=
                      "urlname", "gender", "jabber", "opt_blockrobots",
                      "opt_notalkicons", "opt_logcommentips",
                      "howhear", "opt_bdaymail", "opt_hidefriendofs",
-                     "sidx_bdate", "sidx_loc", "mailencoding",
+                     "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                      );
 
  my %saved = (); # to store values before they undergo normalisation
@@ -352,6 +352,10 @@ BODY<=
      $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_hidefriendofs $checked></TD><TD><B>Hide \"Friend of\" list</B></TD></TR>\n";
      $ret .= "<TR><TD>&nbsp;</TD><TD>If you check this, the list of people that list you as a friend is hidden on your profile page.</TD></TR>\n";
 
+     $checked = $u->{'opt_nctalklinks'} ? "CHECKED" : "";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_nctalklinks $checked></TD><TD><B>Append &amp;nc=xx to comment URLs</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>Check this if you want to append the comment count to URLs to make your browser possibly display the links in a different color.</TD></TR>\n";
+
      $checked = $u->{'opt_showtalklinks'} eq "Y" ? "CHECKED" : "";
      $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_showtalklinks $checked></TD><TD><B>Enable message boards</B></TD></TR>\n";
      $ret .= "<TR><TD>&nbsp;</TD><TD>Check this if you want people to be able to reply to journal entries you post.  (the journal style you select must also support this)\n";
@@ -570,6 +574,7 @@ BODY<=
          $FORM{'opt_bdaymail'} = $FORM{'opt_bdaymail'} ? 1 : 0;
          $FORM{'opt_hidefriendofs'} = $FORM{'opt_hidefriendofs'} ? 1 : 0;
          $FORM{'opt_notalkicons'} = $FORM{'opt_talkicons'} ? 0 : 1;   # (negated)
+         $FORM{'opt_nctalklinks'} = $FORM{'opt_nctalklinks'} ? 1 : 0;
          if ($FORM{'opt_logcommentips'} ne "N" && 
              $FORM{'opt_logcommentips'} ne "S" && 
              $FORM{'opt_logcommentips'} ne "A") { $FORM{'opt_logcommentips'} = "N"; }
@@ -605,7 +610,7 @@ BODY<=
                        "gender", "jabber", "opt_blockrobots",
                        "opt_notalkicons", "opt_logcommentips",
                        "opt_bdaymail", "opt_hidefriendofs",
-                       "sidx_bdate", "sidx_loc", "mailencoding",
+                       "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                        );	
 
          # this is only done once, then never appears again.
