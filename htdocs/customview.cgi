@@ -5,15 +5,15 @@ require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl";
 
 use Compress::Zlib;
 use FCGI;
+use CGI;
 
 my $REQ_COUNT = 0;
 my $REQ_MAX = 500;
-my $dbh;
 
 while(LJ::start_request() && 
       ++$REQ_COUNT <= $REQ_MAX && FCGI::accept() >= 0) 
 {
-    $dbh = LJ::get_dbh("master");
+    my $dbs = LJ::get_dbs();
 
     my %FORM = ();
     LJ::get_form_data(\%FORM);
@@ -28,7 +28,14 @@ while(LJ::start_request() &&
     my $styleid = $FORM{'styleid'} + 0;
     my $nooverride = $FORM{'nooverride'} ? 1 : 0;
 
-    my $data = (LJ::make_journal($dbh, $user, "", undef,
+    my $remote;
+    if ($FORM{'checkcookies'}) {
+	my $cgi = new CGI;
+	my $criterr = 0;
+	$remote = LJ::get_remote($dbs, \$criterr, $cgi);
+    }
+
+    my $data = (LJ::make_journal($dbs, $user, "", $remote,
 				 { "nocache" => $FORM{'nocache'}, 
 				   "contesttheme" => $FORM{'contesttheme'},
 				   "vhost" => "customview",
