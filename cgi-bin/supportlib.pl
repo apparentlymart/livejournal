@@ -236,18 +236,27 @@ sub get_answer_types
 
     if (is_poster($sp, $remote)) {
 	push @ans_type, ("comment", "More information");
-    } elsif (can_help($dbh, $sp, $remote)) {
+	return @ans_type;
+    } 
+
+    if (can_help($dbh, $sp, $remote)) {
 	push @ans_type, ("answer" => "Answer", 
 			 "screened" => "Screened Answer (if unsure)", 
 			 "comment" => "Comment or Question");
-	unless ($sp->{_cat}->{'public_help'}) {
-	    push @ans_type, ("internal" => "Internal Comment / Action");
-	}
     }
-    elsif ($sp->{_cat}->{'allow_screened'}) {
+
+    if (can_read_internal($dbh, $sp, $remote) &&
+	! $sp->{_cat}->{'public_help'})
+    {
+	push @ans_type, ("internal" => "Internal Comment / Action");
+	return @ans_type;
+    }
+    
+    if ($sp->{_cat}->{'allow_screened'}) {
 	push @ans_type, ("screened" => "Screened Answer");
     }
-    return @ans_type;    
+
+    return @ans_type;
 }
 
 sub file_request
