@@ -850,7 +850,17 @@ sub create_view_calendar
     my $quserid = $dbr->quote($u->{'userid'});
     my $maxyear = 0;
 
-    my $sth = $dbr->prepare("SELECT year, month, day, DAYOFWEEK(CONCAT(year, \"-\", month, \"-\", day)) AS 'dayweek', COUNT(*) AS 'count' FROM log WHERE ownerid=$quserid GROUP BY year, month, day, dayweek");
+    my ($db, $sql);
+    
+    if ($u->{'clusterid'}) {
+	$db = LJ::get_cluster_reader($u);
+	$sql = "SELECT year, month, day, DAYOFWEEK(CONCAT(year, \"-\", month, \"-\", day)) AS 'dayweek', COUNT(*) AS 'count' FROM log2 WHERE journalid=$quserid GROUP BY year, month, day, dayweek";
+    } else {
+	$db = $dbr;
+	$sql = "SELECT year, month, day, DAYOFWEEK(CONCAT(year, \"-\", month, \"-\", day)) AS 'dayweek', COUNT(*) AS 'count' FROM log WHERE ownerid=$quserid GROUP BY year, month, day, dayweek";
+    }
+
+    my $sth = $db->prepare($sql);
     $sth->execute;
 
     my (%count, %dayweek, $year, $month, $day, $dayweek, $count);
