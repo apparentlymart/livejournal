@@ -168,6 +168,10 @@ table.main {
     font-family:         monospace;
     white-space:         nowrap;
 }
+.view_links2 {
+    font-family:         monospace;
+    font-size:           9pt;
+}
 th.headerbar {
     background-color:    $*headerbar_bgcolor;
     color:               $*headerbar_fgcolor;
@@ -228,6 +232,33 @@ function EntryPage::lay_primary_userpic() : Image {
    return $.entry.userpic;
 }
 
+function Page::print_linklist() {
+    if (size $.linklist <= 0) {
+        return;
+    }
+    
+    var bool section_open = false;
+    
+    println "<span class='view_links2'>";
+    foreach var UserLink l ($.linklist) {
+        if ($l.title) {
+            if ($l.is_heading) {
+                if ($section_open) {
+                    println "<br />";
+                }
+                println """<span style="font-weight: bold;">$l.title</span> """;
+                $section_open = true;
+            } else {
+                println """[<a href="$l.url">$l.title</a>]""";
+            }
+        }
+    }    
+    if ($section_open) {
+        println "</span><br /><br />";
+    }
+    println "";
+}
+
 function Page::print ()
 {
     var string title = $this->title();
@@ -268,6 +299,10 @@ function Page::print ()
     <span class="page_title">$title</span>
     <p class="view_links">$links</p>
 """;
+if (size $.linklist > 0 and $*linklist_support) {
+$this->print_linklist();
+}
+
     $this->lay_nav_blurb();
     $this->print_body();
     "</td></tr></table>\n";
