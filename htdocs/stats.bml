@@ -74,20 +74,10 @@ p?>
  $ret .= "<li><b>Unspecified: </b> " . ($stat{'gender'}->{'U'}+0) . "</li>";
  $ret .= "</ul>\n";
 
- $ret .= "<?h1 Account Types h1?>\n";
- $ret .= "<?p What type of <a href=\"/support/faqbrowse.bml?faqid=38\">account</a> do people have? p?><ul>";
- {
-     # FIXME: ljcom specific, make into a hook.
-     my %acct_name = ("paid" => "Paid Account",
-                      "off" => "Free Account",
-                      "early" => "Early Adopter",
-                      "on" => "Permanent Account");
-     foreach my $act (qw(off early paid on)) {
-         my $num = $stat{'account'}->{$act}+0;
-         $ret .= "<li><b>$acct_name{$act}: </b> $num (" . sprintf("%0.1f", $num*100/($stat{'userinfo'}->{'total'}||1)) . "%)</li>";
-     }
- }
- $ret .= "</ul>\n";
+ LJ::run_hook('statspage', {
+     stat => \%stat,
+     ret => \$ret,
+ });
 
  unless ($LJ::DISABLED{'stats-recentupdates'}) 
  { 
