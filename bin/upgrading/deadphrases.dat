@@ -75,6 +75,8 @@ general /modify.bml.modify.text
 
 general /modify_do.bml.title
 
+general /multisearch.bml.region.text
+
 general /setlang.bml.select
 general /setlang.bml.switch
 general /setlang.bml.title

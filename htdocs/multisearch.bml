@@ -116,7 +116,7 @@
      my @parts = split(/\s*,\s*/, $q);
      if (@parts==0 || @parts>3) {
          $title = $ML{'.formaterror'};
-         $body .= "<?h1 $ML{'.region.head'} h1?><?p $ML{'.region.text'} p?>";
+         $body .= "<?h1 $ML{'.region.head'} h1?><?p $ML{'.region.bodytext'} p?>";
          return;
      }
      

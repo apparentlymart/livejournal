@@ -2173,9 +2173,7 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /multisearch.bml.nomatch.text=There were no results for the criteria you specified.
 
-/multisearch.bml.region.head=Search by Region
-
-/multisearch.bml.region.text<<
+/multisearch.bml.region.bodytext<<
 You can search by region in one of the following formats:
 <ul>
  <li>Country</li>
@@ -2190,6 +2188,9 @@ Notes:
  <li>Country can either be the country's full name, or its two letter country code</li>
 </ul>
 If you want to do a different type of search, check out the <a href='/directorysearch.bml'>directory search</a>.
+.
+
+/multisearch.bml.region.head=Search by Region
 
 /register.bml.ask.body=Click the button below to have <?sitename?> send a validation email to <b>[[email]]</b>.
 
