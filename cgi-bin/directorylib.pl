@@ -172,8 +172,12 @@ sub do_search
         $useridcol{"uu.userid"} = 1;
         $orderby = "ORDER BY uu.timeupdate DESC";
     } elsif ($req->{'opt_sort'} eq "user") {
+        $alias_used{'u'} = 'user';
+        $useridcol{"u.userid"} = 1;
         $orderby = "ORDER BY u.user";
     } elsif ($req->{'opt_sort'} eq "name") {
+        $alias_used{'u'} = 'user';
+        $useridcol{"u.userid"} = 1;
         $orderby = "ORDER BY u.name";
     }
 

@@ -2,19 +2,18 @@
 localblocks<=
 crit<=
 {F}
-<TR BGCOLOR=#D0D0D0>
-<TD><INPUT TYPE=CHECKBOX NAME="%%code%%" VALUE=1></TD>
-<TD><B>%%name%%</B>
-</TR>
-<TR><TD>&nbsp;</TD><TD>%%form%%</TD></TR>
+<tr bgcolor='<?emcolor?>'>
+<td align='left' colspan='2'><b>%%name%%</b>
+</tr>
+<tr><td>&nbsp;</td><td>%%form%%</td></tr>
 <=crit
 bar<=
 {F}
-<TR BGCOLOR=#D0D0D0>
-<TD>&nbsp;</TD>
-<TD><B>%%name%%</B>
-</TR>
-<TR><TD>&nbsp;</TD><TD>%%form%%</TD></TR>
+<tr bgcolor='<?emcolor?>'>
+<td>&nbsp;</td>
+<td><b>%%name%%</b>
+</tr>
+<tr><td>&nbsp;</td><td>%%form%%</td></tr>
 <=bar
 <=localblocks
 _info?><?page
@@ -30,9 +29,10 @@ p?>
 
 <CENTER>
 
-<FORM ACTION="/directory.bml">
-<INPUT TYPE=HIDDEN NAME="s_com" VALUE=1>
-<TABLE CELLPADDING=4 CELLSPACING=0 BORDER=0>
+<form action="/directory.bml">
+<input type='hidden' name="com_do" value='1' />
+
+<table cellpadding='4' cellspacing='0' border='0'>
 
 <!--- location --->
 <?crit
@@ -40,26 +40,25 @@ name=><?_ml .label.bylocation _ml?>
 code=>s_loc
 form<=
 
-<TABLE>
-<TR><TD ALIGN=RIGHT><?_ml .label.country _ml?></TD><TD>
-<SELECT NAME="loc_cn">
+<table>
+<tr><td align='right'><?_ml .label.country _ml?></td><td>
+<select name="loc_cn">
 <?_code
 
  my $dbs = LJ::get_dbs();
  LJ::load_codes($dbs, { "country" => \%countries });
- my $ret = "";
- foreach (sort { $countries{$a} cmp $countries{$b} } keys %countries)
- {
-     my $sel = $_ eq "US" ? " SELECTED" : "";
-     $ret .= "<OPTION VALUE=\"$_\"$sel>$countries{$_}\n";
- }
+ my $ret;
+ $ret = LJ::html_select({ 'name' => 'loc_cn',  },
+                        '', '',
+                        map { $_, $countries{$_} } 
+                        ("US", sort { $countries{$a} cmp $countries{$b} } keys %countries));
  return $ret; 
  
 _code?>
-</SELECT></TD></TR>
-<TR><TD ALIGN=RIGHT><?_ml .label.stateprovince _ml?></TD><TD><INPUT NAME="loc_st"></TD></TR>
-<TR><TD ALIGN=RIGHT><?_ml .label.city _ml?></TD><TD><INPUT NAME="loc_ci"></TD></TR>
-</TABLE>
+</select></td></tr>
+<tr><td align='right'><?_ml .label.stateprovince _ml?></td><td><input name="loc_st" /></td></tr>
+<tr><td align='right'><?_ml .label.city _ml?></td><td><input name="loc_ci" /></td></tr>
+</table>
 
 <=form
 crit?>
@@ -70,12 +69,12 @@ name=><?_ml .label.bytime _ml?>
 code=>s_ut
 form<=
 <?_ml .label.updated _ml?>
-<SELECT NAME="ut_days">
-<OPTION VALUE="">-------
-<OPTION VALUE="1"><?_ml .sel.day _ml?>
-<OPTION VALUE="7"><?_ml .sel.week _ml?>
-<OPTION VALUE="30"><?_ml .sel.month _ml?>
-</SELECT>
+<select name="ut_days">
+<option value="">-------</option>
+<option value="1"><?_ml .sel.day _ml?></option>
+<option value="7"><?_ml .sel.week _ml?></option>
+<option value="30"><?_ml .sel.month _ml?></option>
+</select>
 <=form
 crit?>
 
@@ -93,7 +92,7 @@ crit?>
 name=><?_ml .label.hasmember _ml?>
 code=>s_fr
 form<=
-<?_ml .contasmember _ml?>
+Contains user <input name="fr_user" size='15' maxlength='15' /> as a member.
 <=form
 crit?>
 
@@ -101,7 +100,7 @@ crit?>
 <?bar
 name=><?_ml .label.othercriteria _ml?>
 form<=
-<INPUT TYPE=CHECKBOX NAME="s_withpic" VALUE=1> <?_ml .checkbox.onlywithpics _ml?>
+<input type='checkbox' name="s_withpic" value='1' /> <?_ml .checkbox.onlywithpics _ml?>
 <=form
 bar?>
 
@@ -110,55 +109,55 @@ bar?>
 name=><?_ml .label.displayoptions _ml?>
 form<=
 
-<TABLE>
-<TR>
-<TD ALIGN=RIGHT>
+<table>
+<tr>
+<td align='right'>
 <?_ml .label.outputformat _ml?>
-</TD><TD>
-<SELECT NAME="opt_format">
-<OPTION VALUE="com" SELECTED><?_ml .sel.commview _ml?>
-<OPTION VALUE="pics"><?_ml .sel.bypicture _ml?>
-<OPTION VALUE="simple"><?_ml .sel.simple _ml?>
-</SELECT>
-</TD></TR>
+</td><td>
+<select name="opt_format">
+<option value="com" selected='selected'><?_ml .sel.commview _ml?></option>
+<option value="pics"><?_ml .sel.bypicture _ml?></option>
+<option value="simple"><?_ml .sel.simple _ml?></option>
+</select>
+</td></tr>
 
-<TR>
-<TD ALIGN=RIGHT>
+<tr>
+<td align='right'>
 <?_ml .label.sortmethod _ml?>
-</TD><TD>
-<SELECT NAME="opt_sort">
-<OPTION VALUE="name" SELECTED><?_ml .sel.communityname _ml?>
-<OPTION VALUE="ut"><?_ml .sel.updatetime _ml?>
-<OPTION VALUE="user"><?_ml .sel.username _ml?>
-</SELECT>
-</TD></TR>
+</td><td>
+<select name="opt_sort">
+<option value="user" selected='selected'><?_ml .sel.username _ml?></option>
+<option value="name"><?_ml .sel.communityname _ml?></option>
+<option value="ut"><?_ml .sel.updatetime _ml?></option>
+</select>
+</td></tr>
 
-<TR>
-<TD ALIGN=RIGHT>
+<tr>
+<td align='right'>
 <?_ml .label.records _ml?>
-</TD><TD>
-<SELECT NAME="opt_pagesize">
-<OPTION VALUE="25">25
-<OPTION VALUE="50">50
-<OPTION VALUE="100" SELECTED>100
-<OPTION VALUE="200">200
-</SELECT>
-</TD></TR>
+</td><td>
+<select name="opt_pagesize">
+<option value="25">25</option>
+<option value="50">50</option>
+<option value="100" selected='selected'>100</option>
+<option value="200">200</option>
+</select>
+</td></tr>
 
-</TABLE>
+</table>
 <=form
 bar?>
 
 <!--- submit --->
-<TR BGCOLOR=#E0E0E0><TD COLSPAN=2 ALIGN=CENTER>
-  <INPUT TYPE=SUBMIT VALUE="<?_ml .button.search _ml?>">
-  <INPUT TYPE=RESET VALUE="<?_ml .button.clear _ml?>">
-</TD></TR>
+<tr bgcolor='<?emcolor?>'><td colspan='2' align='center'>
+  <input type='submit' value="<?_ml .button.search _ml?>" />
+  <input type='reset' value="<?_ml .button.clear _ml?>" />
+</td></tr>
 
-</TABLE>
-</FORM>
+</table>
+</form>
 
-</CENTER>
+</center>
 
 <=body
 page?>

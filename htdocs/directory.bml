@@ -271,7 +271,7 @@ body<=
              $ret .= "<img border='0' src=\"$LJ::IMGPREFIX/userinfo.gif\" width='17' height='17' align='absmiddle'>";
          }
          $ret .= "</a> ";
-         $ret .= "<a href=\"/users/$rec->{'user'}/\">$rec->{'user'}</A> - <b>$rec->{'name'}</b>, <font size='-1' face=\"Arial\"><i>Updated ";
+         $ret .= "<a href=\"/users/$rec->{'user'}/\">$rec->{'user'}</A> - <b>" . LJ::ehtml($rec->{'name'}) . "</b>, <font size='-1' face=\"Arial\"><i>Updated ";
          $ret .= LJ::ago_text($rec->{'secondsold'});
          $ret .= "</i></font><br />\n";
      }
@@ -293,7 +293,7 @@ body<=
          }
          $ret .= "</A></TD>";
          $ret .= "<TD><B><A HREF=\"/community/$rec->{'user'}/\">$rec->{'user'}</A></B></TD>";
-         $ret .= "<TD>$rec->{'name'}</TD>";
+         $ret .= "<td>" . LJ::ehtml($rec->{'name'}) . "</td>";
 
          my $color;
          if ($rec->{'membership'} eq "open") { $color = "green"; } else { $color = "red"; }
