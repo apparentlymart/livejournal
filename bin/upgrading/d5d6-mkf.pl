@@ -5,6 +5,7 @@ use strict;
 $| = 1;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+use LJ::User;
 
 use constant DEBUG => 0;  # turn on for debugging (mostly db handle crap)
 
@@ -276,6 +277,7 @@ while (1) {
         print $status->($stats{'slow_moved'}+$stats{'fast_moved'}, $stats{'total_users'}, "users", $us{$id}{user});
 
         # now move the user
+        bless $us{$id}, 'LJ::User';
         $move_user->($us{$id});
         $moved_slow{$id} = 1;
     }
