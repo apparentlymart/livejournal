@@ -76,6 +76,7 @@
 		      'userdomain' => 0,
 		      'useremail' => 0,
 		      'userpics' => 5,
+		      'findsim' => 1,
 		      );
 	foreach my $k (keys %defcap) {
 	    next if (defined $LJ::CAP_DEF{$k});
