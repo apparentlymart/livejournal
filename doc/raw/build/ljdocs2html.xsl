@@ -81,6 +81,34 @@
   </tr>
 </xsl:template>
 
+<xsl:template match="ulink" name="ulink">
+  <xsl:variable name="link">
+    <a>
+      <xsl:if test="@id">
+        <xsl:attribute name="name">
+          <xsl:value-of select="@id"/>
+        </xsl:attribute>
+      </xsl:if>
+      <xsl:attribute name="href"><xsl:value-of select="@url"/></xsl:attribute>
+      <xsl:if test="$ulink.target != ''">
+        <xsl:attribute name="target">
+          <xsl:value-of select="$ulink.target"/>
+        </xsl:attribute>
+      </xsl:if>
+      <xsl:choose>
+        <xsl:when test="count(child::node())=0">
+          <xsl:value-of select="@url"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:apply-templates/>
+        </xsl:otherwise>
+      </xsl:choose>
+      <span class="ulink"> <img src="/img/globe.gif" alt="[o]" />&#x00bb;</span>
+    </a>
+  </xsl:variable>
+  <xsl:copy-of select="$link"/>
+</xsl:template>
+
 <l:i18n xmlns:l="http://docbook.sourceforge.net/xmlns/l10n/1.0">
   <l:l10n language="en">
     <l:context name="xref">
