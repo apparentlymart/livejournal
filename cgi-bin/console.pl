@@ -222,7 +222,7 @@ $cmd{'community'} = {
 	       ],
     };
 
-$cmd{'unsuspend'} = {
+$cmd{'suspend'} = {
     'def' => 'consuspend.pl',
     'privs' => [qw(suspend)],
     'des' => 'Suspend a user\'s account.',
@@ -233,7 +233,7 @@ $cmd{'unsuspend'} = {
 	       ],
     };
 
-$cmd{'suspend'} = {
+$cmd{'unsuspend'} = {
     'def' => 'consuspend.pl',
     'privs' => [qw(suspend)],
     'des' => 'Unsuspend a user\'s account.',
