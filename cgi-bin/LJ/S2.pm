@@ -964,7 +964,7 @@ sub Entry
     my ($u, $arg) = @_;
     my $e = {
         '_type' => 'Entry',
-        'links' => {}, # TODO: finish
+        'link_keyseq' => [ 'edit_entry' ],
         'metadata' => {},
     };
     foreach (qw(subject _rawsubject text journal poster new_day end_day
@@ -975,6 +975,13 @@ sub Entry
     $e->{'time'} = DateTime_parts($arg->{'dateparts'});
     $e->{'depth'} = 0;  # Entries are always depth 0.  Comments are 1+.
     
+    my $link_keyseq = $e->{'link_keyseq'};
+    push @$link_keyseq, 'mem_add' unless $LJ::DISABLED{'memories'};
+    push @$link_keyseq, 'tell_friend' unless $LJ::DISABLED{'tellafriend'};
+    # Note: nav_prev and nav_next are not included in the keyseq anticipating
+    #      that their placement relative to the others will vary depending on
+    #      layout.
+
     if ($arg->{'security'} eq "public") {
         # do nothing.
     } elsif ($arg->{'security'} eq "usemask") {

@@ -129,6 +129,7 @@ sub EntryPage
                 'depth' => $depth,
                 'parent_url' => $par_url,
                 'screened' => $com->{'state'} eq "S" ? 1 : 0,
+                'link_keyseq' => [ 'delete_comment' ],
             };
 
             # don't show info from suspended users
@@ -141,6 +142,14 @@ sub EntryPage
                 $s2com->{'full'} = 0;
                 $s2com->{'subject_icon'} = undef;
                 $s2com->{'userpic'} = undef;
+            }
+
+            # Conditionally add more links to the keyseq
+            my $link_keyseq = $s2com->{'link_keyseq'};
+            if ($s2com->{'screened'}) {
+                push @$link_keyseq, 'unscreen_comment';
+            } else {
+                push @$link_keyseq, 'screen_comment';
             }
 
             $s2com->{'thread_url'} = "$permalink?thread=$dtalkid" if @{$com->{'children'}};
