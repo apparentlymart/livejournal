@@ -4040,9 +4040,12 @@ sub update_user
     return 1 unless @sets;
     my $dbh = LJ::get_db_writer();
     return 0 unless $dbh;
-    { local $" = ",";
-      $dbh->do("UPDATE user SET @sets WHERE userid=?", undef,
-               @bindparams, $uid) or return 0; }
+    { 
+        local $" = ",";
+        $dbh->do("UPDATE user SET @sets WHERE userid=?", undef,
+                 @bindparams, $uid);
+        return 0 if $dbh->err;
+    }
     if (@LJ::MEMCACHE_SERVERS) {
         my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, $uid);
         LJ::memcache_set_u($u);
