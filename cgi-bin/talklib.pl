@@ -2241,7 +2241,7 @@ sub init {
     my $partid = $form->{'parenttalkid'}+0;
 
     if ($partid) {
-        my $parpost = LJ::Talk::get_talk2_row($dbcr, $journalu->{userid}, $partid);
+        $parpost = LJ::Talk::get_talk2_row($dbcr, $journalu->{userid}, $partid);
         unless ($parpost) {
             $bmlerr->("$SC.error.noparent");
         }
