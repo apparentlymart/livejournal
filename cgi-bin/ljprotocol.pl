@@ -1671,7 +1671,7 @@ sub list_friends
     my $limitnum = $opts->{'limit'}+0;
     my $where = "u.userid=f.friendid AND f.userid=$u->{'userid'}";
     if ($opts->{'friendof'}) {
-        $where = "u.userid=f.userid AND f.friendid=$u->{'userid'}";
+        $where = "u.userid=f.userid AND f.friendid=$u->{'userid'} AND u.statusvis='V'";
     }
 
     my $limit = $limitnum ? "LIMIT $limitnum" : "";
