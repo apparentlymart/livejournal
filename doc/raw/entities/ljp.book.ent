@@ -5,6 +5,7 @@
 <!ENTITY ljp.int.index                          SYSTEM "../ljp.book/int/index.xml">
 <!ENTITY ljp.int.bml.faq                        SYSTEM "../ljp.book/int/bml_faq.xml">
 <!ENTITY ljp.int.cap_classes                    SYSTEM "../ljp.book/int/cap_classes.xml">
+<!ENTITY ljp.int.cap_list                       SYSTEM "../ljp.book/int/cap.ref.gen.xml">
 
 <!-- Client/Server Protocol Reference -->
 

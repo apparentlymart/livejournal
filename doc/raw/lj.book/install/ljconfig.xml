@@ -28,4 +28,5 @@
   </para>
   &lj.install.ljconfig.vars;
   &lj.install.ljconfig.dbinfo;
+  &lj.install.ljconfig.caps;
 </chapter>

@@ -27,6 +27,14 @@
         <xsl:apply-templates/>
       </xsl:for-each>
       </orderedlist>
+
+      <example>
+        <title>Sample call to <literal>LJ.XMLRPC.<xsl:value-of select="@name"/></literal></title>
+        <para><programlisting>
+          <xsl:value-of select="expost"/>
+        </programlisting></para>
+      </example>
+
     </refsect1>
 
     <refsect1>
@@ -36,6 +44,14 @@
         <xsl:apply-templates/>
       </xsl:for-each>
       </orderedlist>
+
+      <example>
+        <title>Sample return value for <literal>LJ.XMLRPC.<xsl:value-of select="@name"/></literal></title>
+        <para><programlisting>
+          <xsl:value-of select="exreturn"/>
+        </programlisting></para>
+      </example>
+
     </refsect1>
 
   </refentry>
@@ -89,7 +105,7 @@
 
 <xsl:template match="list">
   <listitem><para>
-  <emphasis>[list]</emphasis> 
+  <emphasis>[array]</emphasis> 
   <xsl:call-template name="count"/>
     <xsl:value-of select="des"/>
     Containing items:

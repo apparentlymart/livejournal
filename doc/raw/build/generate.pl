@@ -120,6 +120,13 @@ chdir "$docraw_dir/build/console" or die;
 system("./console2db.pl > $docraw_dir/lj.book/admin/console.ref.gen.xml")
     and die "Error generating console reference\n";
 
+print "Generating Capability Class Reference\n";
+chdir "$docraw_dir/build/caps" or die;
+system("./cap2db.pl > $docraw_dir/lj.book/admin/cap.ref.gen.xml")
+    and die "Error generating caps reference\n";
+system("./cap2db.pl > $docraw_dir/ljp.book/int/cap.ref.gen.xml")
+    and die "Error generating caps reference\n";
+
 print "Converting to HTML\n";
 mkdir $output_dir, 0755 unless -d $output_dir;
 chdir $output_dir or die "Couldn't chdir to $output_dir\n";
