@@ -21,7 +21,6 @@ sub handler
     my $cleanup = ($r && $r->current_callback() eq "PerlCleanupHandler");
 
     my $free = free_servers();
-    $r->log_error("cleanup=$cleanup, free servers: $free");
 
     $free += $cleanup;
     if ($LJ::FREECHILDREN_BCAST && 
