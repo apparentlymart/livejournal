@@ -43,7 +43,7 @@ sub END { LJ::end_request(); }
                     "talk2", "talkprop2", "talktext2", "talkleft",
                     "userpicblob2", "events",
                     "ratelog", "loginstall", "sessions", "sessions_data",
-                    "s1usercache", "modlog", "modblob", "counter",
+                    "s1usercache", "modlog", "modblob",
                     "userproplite2", "links", "s1overrides", "s1style",
                     "s1stylecache", "userblob", "userpropblob",
                     "clustertrack2", "captcha_session", "reluser2",
@@ -8445,8 +8445,8 @@ sub alloc_user_counter
 {
     my ($u, $dom, $recurse) = @_;
     return undef unless $dom =~ /^[LTMBSRK]$/;
-    my $dbcm = LJ::get_cluster_master($u);
-    return undef unless $dbcm;
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
 
     my $newmax;
     my $uid = $u->{'userid'}+0;
@@ -8459,10 +8459,10 @@ sub alloc_user_counter
     # as a sanity check to record/check latest number handed out.
     my $memmax = int(LJ::MemCache::get($memkey) || 0);
 
-    my $rs = $u->do("UPDATE counter SET max=LAST_INSERT_ID(GREATEST(max,$memmax)+1) ".
-                    "WHERE journalid=? AND area=?", undef, $uid, $dom);
+    my $rs = $dbh->do("UPDATE usercounter SET max=LAST_INSERT_ID(GREATEST(max,$memmax)+1) ".
+                      "WHERE journalid=? AND area=?", undef, $uid, $dom);
     if ($rs > 0) {
-        $newmax = $u->selectrow_array("SELECT LAST_INSERT_ID()");
+        $newmax = $dbh->selectrow_array("SELECT LAST_INSERT_ID()");
         LJ::MemCache::set($memkey, $newmax);
         return $newmax;
     }
@@ -8493,8 +8493,8 @@ sub alloc_user_counter
                                       undef, $uid);
     }
     $newmax += 0;
-    $u->do("INSERT IGNORE INTO counter (journalid, area, max) VALUES (?,?,?)",
-           undef, $uid, $dom, $newmax) or return undef;
+    $dbh->do("INSERT IGNORE INTO usercounter (journalid, area, max) VALUES (?,?,?)",
+             undef, $uid, $dom, $newmax) or return undef;
 
     # The 2nd invocation of the alloc_user_counter sub should do the
     # intended incrementing.

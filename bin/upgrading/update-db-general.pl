@@ -1581,6 +1581,16 @@ CREATE TABLE counter (
 )
 EOC
 
+# user counters on the global (contrary to the name)
+register_tablecreate("usercounter", <<'EOC');
+CREATE TABLE usercounter (
+  journalid  INT UNSIGNED NOT NULL,
+  area       CHAR(1) NOT NULL,
+  PRIMARY KEY (journalid, area),
+  max        INT UNSIGNED NOT NULL
+)
+EOC
+
 # community interests
 register_tablecreate("comminterests", <<'EOC');
 CREATE TABLE comminterests (
