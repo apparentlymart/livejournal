@@ -7,17 +7,19 @@
 use strict;
 use Getopt::Long;
 
-my $help = '';
-my $sync = '';
-my $full = '';
-my $diff = '';
-my $cvsonly = '';
+my $help = 0;
+my $sync = 0;
+my $full = 0;
+my $diff = 0;
+my $cvsonly = 0;
+my $init = 0;
 
 exit 1 unless GetOptions('help' => \$help,
 			 'full' => \$full,
 			 'sync' => \$sync,
 			 'diff' => \$diff,
-			 'cvsonly' => \$cvsonly
+			 'cvsonly' => \$cvsonly,
+			 'init' => \$init,
 			 );
 
 if ($help) {
@@ -27,7 +29,8 @@ if ($help) {
 	"                    All files, unless you specify which ones.\n".
 	"    --full          Show main files not in a CVS repository\n".
 	"    --diff          Show diffs of changed files.\n".
-	"    --cvsonly       Don't consider files changed in live tree.\n";
+	"    --cvsonly       Don't consider files changed in live tree.\n".
+	"    --init          Copy all files from cvs to main, unconditionally.\n";
 }
 
 unless (-d $ENV{'LJHOME'}) { 
@@ -42,11 +45,20 @@ my @toplevel = qw(htdocs cgi-bin bin doc src);
 
 my %status = ();   # $relfile -> $status
 
+if ($init)
+{
+# mark all cvs files for copying to main.
+init_from_cvs();
+$sync = 1;
+}
+else
+{
 # checks if files aren't in CVS, are newer than CVS, or if CVS is newer
 scan_main();
 
 # checks to see if new CVS files aren't in the main tree yet
 scan_cvs();
+}
 
 my @files = scalar(@ARGV) ? @ARGV : sort keys %status;
 foreach my $file (@files) 
@@ -207,6 +219,39 @@ sub scan_main
         close MD;
     }
 
+}
+
+sub init_from_cvs
+{
+    foreach my $repo ("cvs", "local")
+    {
+       my $cdir = $repo eq "cvs" ? $cvs : $cvslocal;
+       my @dirs = @toplevel;
+       while (@dirs)
+       {
+           my $dir = shift @dirs;
+           my $fulldir = "$cdir/$dir";
+           next unless (-e $fulldir);
+           opendir (MD, $fulldir) or die "Can't open $fulldir.";
+           while (my $file = readdir(MD)) {
+               next if ($file =~ /CVS/);
+               if (-d "$fulldir/$file") {
+                   unless ($file eq "." || $file eq "..") {
+                       unshift @dirs, "$dir/$file";
+                   }
+               } elsif (-f "$fulldir/$file") {
+                   my $relfile = "$dir/$file";
+                   my $status = "main <- $repo";
+
+                   $status{$relfile} = $status if ($status);
+                   
+               } else {
+                   print "WHAT IS THIS? $dir/$file\n";
+               }
+           }
+           close MD;
+       }
+    }
 }
 
 sub mtime
