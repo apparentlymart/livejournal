@@ -82,6 +82,7 @@ body<=
      my $phone = new LJ::TextMessage { 'provider' => $tminfo->{'provider'},
                                        'number' => $tminfo->{'number'}, 
                                        'mailcommand' => $LJ::SENDMAIL,
+                                       'smtp' => $LJ::SMTP_SERVER,
                                    };
      my @errors;
      $phone->send({ 'from' => $from, 

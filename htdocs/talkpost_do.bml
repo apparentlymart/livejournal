@@ -702,9 +702,7 @@ body<=
 
                  }
 
-                 open(MAIL, "|$LJ::SENDMAIL");
-                 $msg->print(\*MAIL);
-                 close MAIL;
+                 $msg->send;
              } else {
                  if ($DEBUG) {
                      $debug .= "Parent not mailed<br>\n";
@@ -831,9 +829,7 @@ body<=
                  if $LJ::UNICODE;
          }
          
-         open(MAIL, "|$LJ::SENDMAIL");
-         $msg->print(\*MAIL);
-         close MAIL;
+         $msg->send;
      } else {
          $debug .= "don't send mail to journal owner.<ul>\n";
          $debug .= "<li>ujp--opt_gettalkemail = $ujp->{'opt_gettalkemail'}\n";

@@ -51,14 +51,8 @@ body<=
 
      return LJ::bad_input(@errors) if @errors;
 
-     open (MAIL, "|$LJ::SENDMAIL") || die "Couldn't send mail";
-
-     print MAIL "To: $email\n";
-     print MAIL "From: $LJ::ADMIN_EMAIL ($LJ::SITENAME)\n";
-     print MAIL "Content-type: text/plain; charset=utf-8\n";
-     print MAIL "Subject: $ML{'.lostpasswordmail.subject'}\n\n";
-
-     print MAIL BML::ml('.lostpasswordmail.part1', {
+     my $body;
+     $body .= BML::ml('.lostpasswordmail.part1', {
                  'sitename' => $LJ::SITENAME,
                  'username' => $u->{'user'},
                  'password' => $u->{'password'},
@@ -66,19 +60,26 @@ body<=
      if ($u->{'status'} ne "A") {
          my $aa = {};
          $aa = LJ::register_authaction($dbs, $u->{'userid'}, "validateemail", $u->{'email'});
-         print MAIL $ML{'.lostpasswordmail.part2'} . "\n\n";
-         print MAIL "    $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";
+         $body .= $ML{'.lostpasswordmail.part2'} . "\n\n";
+         $body .= "    $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";
      }
-     print MAIL BML::ml('.lostpasswordmail.part3', {
+     $body .= BML::ml('.lostpasswordmail.part3', {
                  'remoteip' => BML::get_remote_host() . " (" . BML::get_remote_ip() . ")" }) . "\n\n";
      my $mline = $ML{'.lostpasswordmail.part4'};
-     print MAIL $mline . "\n\n" if ($mline ne "");
-     print MAIL BML::ml('.lostpasswordmail.part5', {
+     $body .= $mline . "\n\n" if ($mline ne "");
+     $body .= BML::ml('.lostpasswordmail.part5', {
                  'journalurl' => "$LJ::SITEROOT/users/$u->{'user'}/",
                  'updateurl'  => "$LJ::SITEROOT/update.bml?$u->{'user'}",
                  'rooturl'    => "$LJ::SITEROOT/" }) . "\n";
 
-     close MAIL;
+     LJ::send_mail({
+         'to' => $email,
+         'from' => $LJ::ADMIN_EMAIL,
+         'fromname' => $LJ::SITENAME,
+         'charset' => 'utf-8',
+         'subject' => $ML{'.lostpasswordmail.subject'},
+         'body' => $body,
+     }) or die "Error: couldn't send email";
 
      return "<?h1 $ML{'.password_mailed.title'} h1?>\n<?p $ML{'.password_mailed.text'} p?>";
  }
@@ -103,19 +104,24 @@ body<=
      
      return LJ::bad_input(@errors) if @errors;
      
-     open (MAIL, "|$LJ::SENDMAIL") || die "Couldn't send mail";
-     print MAIL "To: $email\n";
-     print MAIL "From: $LJ::ADMIN_EMAIL ($LJ::SITENAME)\n";
-     print MAIL "Subject: Lost Username\n\n";
-     print MAIL "This is your requested username reminder from $LJ::SITENAME.  Below are the usernames you have registered for the email address $email:\n\n";
+     my $body;
+     $body .= "This is your requested username reminder from $LJ::SITENAME.  Below are the usernames you have registered for the email address $email:\n\n";
      foreach my $ru (@users) {
-         print MAIL "          $ru\n";
+         $body .= "          $ru\n";
      }
 
-     print MAIL "\nThis information was requested on the website from " . BML::get_remote_host() . 
+     $body .= "\nThis information was requested on the website from " . BML::get_remote_host() . 
          " (" . BML::get_remote_ip() . ").\n\n";
-     print MAIL "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
-     close MAIL;
+     $body .= "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
+
+     LJ::send_mail({
+         'to' => $email,
+         'from' => $LJ::ADMIN_EMAIL,
+         'fromname' => $LJ::SITENAME,
+         'charset' => 'utf-8',
+         'subject' => "Lost Username",
+         'body' => $body,
+     }) or die "Error: couldn't send email";
 
      return "<?h1 $ML{'.username_mailed.title'} h1?>\n<?p $ML{'.username_mailed.text'} p?>";
  }

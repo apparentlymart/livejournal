@@ -1999,6 +1999,34 @@ BML.parse_multipart.unknowntype=Unknown content type
 
 btn.search=Search
 
+email.newacct.subject=Welcome to [[sitename]]
+email.newacct.body<<
+Congratulations, you have a new [[sitename]] account!
+
+To complete your journal creation and verify your email address, go
+here:
+
+   [[regurl]]
+
+The URL that your new journal is located at is:
+
+   [[siteroot]]/users/[[username]]/
+
+and also:
+
+   [[siteroot]]/~[[username]]/
+
+Below is your LiveJournal username and password:
+
+   Username: [[username]]
+   Password: [[password]]
+
+Enjoy!
+
+[[sitename]] Team
+[[siteroot]]/
+.
+
 Email=Email
 
 Error|notes=typically used inside an H1 tag to announce an error.

@@ -18,11 +18,12 @@ package LJ::TextMessage;
 
 use URI::Escape;
 use LWP::UserAgent;
+use MIME::Lite;
 
 use strict;
 use vars qw($VERSION $SENDMAIL %providers);
 
-$VERSION = '1.4.9';
+$VERSION = '1.4.10';
 
 # default path to sendmail, if none other specified.  we should probably
 # use something more perl-ish and less unix-specific, but whateva'
@@ -915,10 +916,12 @@ sub send
     {
         send_mail($self, {
             'to'        => "$self->{'number'}\@vtext.com",
-            'return-path'    => "$msg->{'from'}\@livejournal.com",
             'from'      => "$msg->{'from'}\@livejournal.com",
             'body'      => "$msg->{'message'}",
 	    'subject'	=> "LJ",
+
+            # is this necessary?  (--brad 1.4.10)
+            #'return-path'    => "$msg->{'from'}\@livejournal.com",
         });
     }
 
@@ -1001,20 +1004,16 @@ sub send_mail
 {
     my $self = shift;
     my $opt = shift;
-    if ($opt->{'return-path'}) {
-        open (MAIL, "|$self->{'sendmail'} -t -f$opt->{'return-path'}");
+
+    my $msg =  new MIME::Lite ('From' => $opt->{'from'},
+                               'To' => $opt->{'to'},
+                               'Subject' => $opt->{'subject'},
+                               'Data' => $opt->{'body'});
+    if ($self->{'smtp'}) {
+        return $msg->send_by_smtp($self->{'smtp'}, Timeout => 10);
     }
-    else {
-        open (MAIL, "|" . $self->{'sendmail'});
-    }
-    print MAIL "To: $opt->{'to'}\n";
-    print MAIL "Bcc: $opt->{'bcc'}\n" if ($opt->{'bcc'});
-    print MAIL "Return-Path: $opt->{'return-path'}\n" if ($opt->{'return-path'});
-    print MAIL "From: $opt->{'from'}";
-    print MAIL " ($opt->{'fromname'})" if ($opt->{'fromname'});
-    print MAIL "\nSubject: $opt->{'subject'}\n\n";
-    print MAIL $opt->{'body'};
-    close MAIL;
+
+    return $msg->send_by_sendmail($self->{'sendmail'});
 }
 
 sub request_string

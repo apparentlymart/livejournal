@@ -23,8 +23,19 @@ use Unicode::MapUTF8 ();
 use LJ::S2;
 use Time::Local ();
 
-do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
-do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
+# determine how we're going to send mail
+BEGIN {
+    do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+    do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
+
+    $LJ::OPTMOD_NETSMTP = eval "use Net::SMTP (); 1;";
+    if ($LJ::SMTP_SERVER) {
+        die "Net::SMTP not installed\n" unless $LJ::OPTMOD_NETSMTP;
+        MIME::Lite->send('smtp', $LJ::SMTP_SERVER, Timeout => 10);
+    } else {
+        MIME::Lite->send('sendmail', $LJ::SENDMAIL);
+    }
+}
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
@@ -2996,23 +3007,24 @@ sub load_userpics
 sub send_mail
 {
     my $opt = shift;
-    open (MAIL, "|$LJ::SENDMAIL") or return 0;
-    my $toname;
-    if ($opt->{'toname'}) {
-        $opt->{'toname'} =~ s/[\n\t\(\)]//g;
-        $toname = " ($opt->{'toname'})";
-    }
-    print MAIL "To: $opt->{'to'}$toname\n";
-    print MAIL "Cc: $opt->{'cc'}\n" if ($opt->{'cc'});
-    print MAIL "Bcc: $opt->{'bcc'}\n" if ($opt->{'bcc'});
-    print MAIL "From: $opt->{'from'}";
-    print MAIL " ($opt->{'fromname'})" if ($opt->{'fromname'});
-    print MAIL "\nContent-type: text/plain; charset=$opt->{'charset'}"
-        if ($opt->{'charset'});
-    print MAIL "\nSubject: $opt->{'subject'}\n\n";
-    print MAIL $opt->{'body'};
-    close MAIL;
-    return 1;
+
+    my $clean_name = sub {
+        my $name = shift;
+        $name =~ s/[\n\t\(\)]//g;
+        return $name ? " ($name)" : "";
+    };
+
+    my $msg = new MIME::Lite ('From' => "$opt->{'from'}" . $clean_name->($opt->{'fromname'}),
+                              'To' => "$opt->{'to'}" . $clean_name->($opt->{'toname'}),
+                              'Cc' => $opt->{'cc'},
+                              'Bcc' => $opt->{'bcc'},
+                              'Subject' => $opt->{'subject'},
+                              'Data' => $opt->{'body'});
+
+    $msg->attr("content-type.charset" => $opt->{'charset'})
+        if $opt->{'charset'};
+
+    return $msg->send;
 }
 
 # <LJFUNC>

@@ -693,14 +693,17 @@ body<=
          $aa = LJ::register_authaction($dbs, $u->{'userid'}, 
                                        "validateemail", $FORM{'email'});
 
-         open (MAIL, "|$LJ::SENDMAIL");
-         print MAIL "To: $FORM{'email'}\n";
-         print MAIL "From: $LJ::ADMIN_EMAIL\n";
-         print MAIL "Subject: Email Address Changed\n\n";
-         print MAIL "You have just changed your LiveJournal email address.  To validate the change, please go to this address:\n\n";
-         print MAIL "     $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";
-         print MAIL "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
-         close MAIL;
+         my $body = ("You have just changed your LiveJournal email address.  To validate the change, please go to this address:\n\n" .
+                     "     $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n" .
+                     "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n");
+         
+         LJ::send_mail({
+             'to' => $FORM{'email'},
+             'from' => $LJ::ADMIN_EMAIL,
+             'charset' => 'utf-8',
+             'subject' => "Email Address Changed",
+             'body' => $body,
+         });
      }
 
      # tell the user all is well

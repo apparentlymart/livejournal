@@ -28,7 +28,7 @@
     $USERPIC_ROOT ||= "$LJ::SITEROOT/userpic";
 
     # path to sendmail and any necessary options
-    $SENDMAIL ||= "/usr/sbin/sendmail -t";
+    $SENDMAIL ||= "/usr/sbin/sendmail -t -oi";
 
     # where we set the cookies (note the period before the domain)
     $COOKIE_DOMAIN ||= ".$DOMAIN";

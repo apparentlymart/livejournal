@@ -22,6 +22,10 @@ my %modules = (
                    'deb' => 'libcompress-zlib-perl',
                    'opt' => 'When available, turn on $LJ::DO_GZIP to cut bandwidth usage in half.',
                },
+               "Net::SMTP" => { 
+                   'deb' => 'libnet-perl',
+                   'opt' => "Alternative to piping into sendmail to send mail.",
+               },
                "MIME::Base64" => { 'deb' => 'libmime-base64-perl' },
                "URI::URL" => { 'deb' => 'liburi-perl' },
                "HTML::Tagset" => { 'deb' => 'libhtml-tagset-perl' },
@@ -93,12 +97,16 @@ if (-e $local_config) {
     exit 1 unless $good;
 }
 
-
 $err->("No ljconfig.pl file found at $ENV{'LJHOME'}/cgi-bin/ljconfig.pl")
     unless -e "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
 eval { require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl"; };
 $err->("Failed to load ljlib.pl: $@") if $@;
+
+# if SMTP_SERVER is set, then Net::SMTP is required, not optional.
+if ($LJ::SMTP_SERVER && ! defined $Net::SMTP::VERSION) {
+    $err->("Net::SMTP isn't available, and you have \$LJ::SMTP_SERVER set.");
+}
 
 ############################################################################
 print "[Checking Database...]\n";

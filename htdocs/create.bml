@@ -259,30 +259,25 @@ body<=
          $aa = LJ::register_authaction($dbs, $userid, "validateemail", $email);
      }
 
-     open (REM, "$LJ::HOME/htdocs/inc/email-welcome") || return "Error: couldn't open email-welcome template";
-     my $etemp;
-     while (<REM>) {
-         $etemp .= $_;
-     }	
-     close REM;
-     unless ($etemp) { return "Error: email-welcome template is empty?"; }
+     my $body = BML::ml('email.newacct.body', {
+         "email" => $email,
+         "regurl" => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
+         "username" => $user,
+         "password" => $FORM{'password1'},
+         "sitename" => $LJ::SITENAME,
+         "siteroot" => $LJ::SITEROOT,
+         "admin_email" => $LJ::ADMIN_EMAIL,
+         "bogus_email" => $LJ::BOGUS_EMAIL,
+     });
      
-     my %replace = (
-                    "email" => $email,
-                    "regurl" => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
-                    "username" => $user,
-                    "password" => $FORM{'password1'},
-                    "sitename" => $LJ::SITENAME,
-                    "siteroot" => $LJ::SITEROOT,
-                    "admin_email" => $LJ::ADMIN_EMAIL,
-                    "bogus_email" => $LJ::BOGUS_EMAIL,
-                    );
-     
-     $etemp =~ s/%%(\w+?)%%/$replace{$1}/ge;
-     
-     open (MAIL, "|$LJ::SENDMAIL");
-     print MAIL $etemp;
-     close MAIL;
+     LJ::send_mail({
+         'to' => $email,
+         'from' => $LJ::ADMIN_EMAIL,
+         'fromname' => $LJ::SITENAME,
+         'charset' => 'utf-8',
+         'subject' => BML::ml('email.newacct.subject', {'sitename' => $LJ::SITENAME}),
+         'body' => $body,
+     });
 
      $ret = "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text1", {'email' => $email, 'username' => $user}) ." p?>";
      $ret .= "<?p $ML{'.success.text2'} p?><?standout <FONT SIZE=+1 FACe=Arial><B><A HREF=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</A></B></FONT> standout?>";
@@ -382,6 +377,6 @@ _code?>
 page?><?_c <LJDEP>
 link: htdocs/legal/privacy.bml
 post: htdocs/create.bml, htdocs/editinfo.bml
-file: htdocs/inc/account-codes, htdocs/inc/email-welcome
+file: htdocs/inc/account-codes
 hook: post_create
 </LJDEP> _c?>
