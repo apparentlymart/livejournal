@@ -202,7 +202,7 @@ BEGIN {
             if $LJ::CAP{$bit}{_name} eq '_moveinprogress' &&
                 $LJ::CAP{$bit}{readonly} == 1;
     }
-    abort( "Won't move user without \%LJ::CAP capability class named ",
+    die( "Won't move user without \%LJ::CAP capability class named ",
            "'_moveinprogress' with readonly => 1\n" )
         unless defined $ReadOnlyBit;
 }
@@ -253,7 +253,7 @@ MAIN: {
         $ifh = IO::File->new( $ARGV[0], O_RDONLY )
             or abort( "open: $ARGV[0]: $!" );
 
-        foreach $command ( $ifh->readlines ) {
+        while (my $command = ($ifh->getline)) {
             next if $command =~ m{^\s*(#.*)?$};
             push @commands, $command;
         }
