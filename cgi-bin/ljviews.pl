@@ -810,10 +810,8 @@ sub fvp_transform
             $ret = LJ::exml($ret);
         }
         elsif ($trans eq 'ljuser' or $trans eq 'ljcomm') {
-            my $u;
             my $user = LJ::canonical_username($ret);
-            $u = LJ::load_user($user) if $LJ::DYNAMIC_LJUSER;
-            $ret = LJ::ljuser($u || $user);
+            $ret = LJ::ljuser($user);
         }
     }
     return $ret;
