@@ -265,9 +265,18 @@ if ($FORM{'remoteuser'} eq $user) {
      # setup what we're gonna update in the user table:
      my %update = ();
 
+     # validate moodthemeid
+     # mood theme, make sure they're allowed to use it
+     my $moodthemeid = $FORM{'moodthemeid'}+0;
+     if ($moodthemeid) {
+         my ($mownerid, $mpublic) = $dbr->selectrow_array("SELECT ownerid, is_public FROM moodthemes ".
+                                                          "WHERE moodthemeid=?", undef, $moodthemeid);
+         $moodthemeid = 0 unless $mpublic eq 'Y' || $mownerid == $u->{'userid'};
+     }
+     $update{'moodthemeid'} = $moodthemeid;
+
      # color themes
      $update{'themeid'} = $FORM{'themetype'} eq "custom" ? 0 : $FORM{'themeid'};
-     $update{'moodthemeid'} = $FORM{'moodthemeid'};
      $update{'opt_forcemoodtheme'} = $FORM{'opt_forcemoodtheme'} ? "Y" : "N";
      
      if ($FORM{'themetype'} eq "custom") {
