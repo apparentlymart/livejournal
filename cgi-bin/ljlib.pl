@@ -3001,6 +3001,140 @@ sub load_userpics
 }
 
 # <LJFUNC>
+# name: LJ::activate_userpics
+# des: Sets/unsets userpics as inactive based on account caps
+# args: u
+# returns: nothing
+# </LJFUNC>
+sub activate_userpics
+{
+    # this behavior is optional, but enabled by default
+    return if $LJ::ALLOW_PICS_OVER_QUOTA;
+
+    my $u = shift;
+    return unless $u;
+
+    # get a database handle for reading/writing
+    # need to get this now so we can pass it to load_userid if necessary
+    my $dbh = LJ::get_db_writer();    
+
+    # if a userid was given, get a real $u object
+    $u = LJ::load_userid($dbh, $u, 1) unless ref $u eq "HASH";
+
+    # should have a $u object now
+    return unless ref $u eq 'HASH';
+    my $userid = $u->{'userid'};
+
+    # active / inactive lists
+    my @active = ();
+    my @inactive = ();
+    my $allow = LJ::get_cap($u, "userpics");
+
+    # get database cluster reader handle
+    my $dbcr = LJ::get_cluster_reader($u);
+    return unless $dbcr;
+
+    # select all userpics and build active / inactive lists
+    my $sth = $dbh->prepare("SELECT picid, state FROM userpic WHERE userid=?");
+    $sth->execute($userid);
+    while (my ($picid, $state) = $sth->fetchrow_array) {
+        if ($state eq 'I') {
+            push @inactive, $picid;
+        } else {
+            push @active, $picid;
+        }
+    }  
+
+    # inactivate previously activated userpics
+    if (@active > $allow) {
+        my $to_ban = @active - $allow;
+
+        # find first jitemid greater than time 2 months ago using rlogtime index
+        # ($LJ::EndOfTime - UnixTime)
+        my $jitemid = $dbcr->selectrow_array("SELECT jitemid FROM log2 USE INDEX (rlogtime) " .
+                                             "WHERE journalid=? AND rlogtime > ? LIMIT 1",
+                                             undef, $userid, $LJ::EndOfTime - time() + 86400*60);
+
+        # query all pickws in logprop2 with jitemid > that value
+        my %count_kw = ();
+        my $propid = LJ::get_prop("log", "picture_keyword")->{'id'};
+        my $sth = $dbcr->prepare("SELECT value, COUNT(*) FROM logprop2 " . 
+                                 "WHERE journalid=? AND jitemid > ? AND propid=?" .
+                                 "GROUP BY value");
+        $sth->execute($userid, $jitemid, $propid);
+        while (my ($value, $ct) = $sth->fetchrow_array) {
+            # keyword => count
+            $count_kw{$value} = $ct;
+        }
+
+        my $keywords_in = join(",", map { $dbcr->quote($_) } keys %count_kw);
+
+        # map pickws to picids for freq hash below
+        my %count_picid = ();
+        if ($keywords_in) {
+            my $sth = $dbcr->prepare("SELECT k.keyword, m.picid FROM keywords k, userpicmap m " .
+                                     "WHERE k.keyword IN ($keywords_in) AND k.kwid=m.kwid " . 
+                                     "AND m.userid=?");
+            $sth->execute($userid);
+            while (my ($keyword, $picid) = $sth->fetchrow_array) {
+                # keyword => picid
+                $count_picid{$picid} += $count_kw{$keyword};
+            }
+        }
+
+        # we're only going to ban the least used, excluding the user's default
+        my @ban = (grep { $_ != $u->{'defaultpicid'} } 
+                   sort { $count_picid{$a} <=> $count_picid{$b} } @active);
+
+        @ban = splice(@ban, 0, $to_ban) if @ban > $to_ban;
+        my $ban_in = join(",", map { $dbh->quote($_) } @ban);
+        $dbh->do("UPDATE userpic SET state='I' WHERE userid=? AND picid IN ($ban_in)", 
+                 undef, $userid) if $ban_in;
+    }
+
+    # activate previously inactivated userpics
+    if (@inactive && @active < $allow) {
+        my $to_activate = $allow - @active;
+        $to_activate = @inactive if $to_activate > @inactive;
+
+        # take the $to_activate newest (highest numbered) pictures
+        # to reactivated
+        @inactive = sort @inactive;
+        my @activate_picids = splice(@inactive, -$to_activate);
+
+        my $activate_in = join(",", map { $dbh->quote($_) } @activate_picids);
+        $dbh->do("UPDATE userpic SET state='N' WHERE userid=? AND picid IN ($activate_in)",
+                 undef, $userid) if $activate_in;
+    }
+
+    return;
+}
+
+# <LJFUNC>
+# name: LJ::get_pic_from_keyword
+# des: Given a userid and keyword, returns the pic row hashref
+# args: u, keyword
+# des-keyword: The keyword of the userpic to fetch
+# returns: hashref of pic row found
+# </LJFUNC>
+sub get_pic_from_keyword
+{
+    my $u = shift;
+    my $userid = want_userid($u);
+    my $keyword = shift;
+    return undef unless $userid && $keyword;
+
+    my $dbr = LJ::get_db_reader();
+    return undef unless $dbr;
+
+    return $dbr->selectrow_hashref("SELECT p.* FROM userpic p, userpicmap m, keywords k " .
+                                   "WHERE k.kwid=m.kwid AND p.picid=m.picid AND m.userid=? AND k.keyword=?",
+                                   undef, $userid, $keyword);
+
+}
+
+
+# <LJFUNC>
 # name: LJ::send_mail
 # des: Sends email.
 # args: opt

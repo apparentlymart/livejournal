@@ -490,6 +490,16 @@ sub common_event_validation
         }
     }
 
+    # check props for inactive userpic
+    if (my $pickwd = $req->{'props'}->{'picture_keyword'}) {
+        my $pic = LJ::get_pic_from_keyword($flags->{'u'}, $pickwd);
+
+        # need to make sure they aren't trying to post with an inactive keyword, but also
+        # we don't want to allow them to post with a pic that has no keyword at all to prevent
+        # them from deleting the keyword, posting, then adding it back with editpics.bml
+        delete $req->{'props'}->{'picture_keyword'} if ! $pic || $pic->{'state'} eq 'I';
+    }
+
     return 1;
 }
 
@@ -2113,11 +2123,13 @@ sub list_pickws
     my $dbr = $dbs->{'reader'};
     my $res = [];
 
-    my $sth = $dbr->prepare("SELECT k.keyword, m.picid FROM userpicmap m, keywords k ".
-                            "WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid ".
+    my $sth = $dbr->prepare("SELECT k.keyword, m.picid, p.state " .
+                            "FROM userpicmap m, keywords k, userpic p ".
+                            "WHERE m.userid=? AND m.kwid=k.kwid AND m.picid=p.picid ".
                             "ORDER BY k.keyword");
-    $sth->execute;
-    while (my ($kw, $id) = $sth->fetchrow_array) {
+    $sth->execute($u->{'userid'});
+    while (my ($kw, $id, $state) = $sth->fetchrow_array) {
+        next if $state eq 'I';
         $kw =~ s/[\n\r\0]//g;  # used to be a bug that allowed these characters to get in.
         push @$res, [ $kw, $id ];
     }

@@ -43,7 +43,7 @@ $user = $u->{'user'};
      return;
  }
 
- #### edit mode
+ #### show pictures
 
  my %keywords = ();
  $sth = $dbr->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
@@ -53,8 +53,9 @@ $user = $u->{'user'};
      push @{$keywords{$pic}}, $keyword;
  }
  
- $sth = $dbr->prepare("SELECT picid, width, height FROM userpic WHERE userid=$u->{'userid'}");
- $sth->execute;
+ $sth = $dbr->prepare("SELECT picid, width, height, state " .
+                      "FROM userpic WHERE userid=?");
+ $sth->execute($u->{'userid'});
  my $piccount = 0;
 
  while (my $pic = $sth->fetchrow_hashref)
@@ -65,7 +66,7 @@ $user = $u->{'user'};
              $edit = $ML{'.edit'};
          }
          $body .= "<?h1 $ML{'.current'} h1?><?p ";
-         $body .= BML::ml('.pics', {'user'=>"<?ljuser $user ljuser?>"});
+         $body .= BML::ml('.pics', {'user'=> LJ::ljuser($user)});
          $body .= "$edit p?>";
          $body .= "<div style='margin-left: 50px;'><table cellpadding='5' border='0' cellspacing='1'>";
              
@@ -80,6 +81,11 @@ $user = $u->{'user'};
      $body .= "<td>";
      if ($u->{'defaultpicid'} == $pic->{'picid'}) {
          $body .= "$ML{'.default'}<br />";
+     }
+
+     if ($remote && $remote->{'userid'} == $u->{'userid'} && 
+         $pic->{'state'} eq 'I') {
+         $body .= "<i>[Inactive]</i><br />";
      }
 
      if ($eh_keywords) {

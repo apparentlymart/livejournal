@@ -47,7 +47,10 @@
          $newcaps |= (1 << $n);
      }
      $dbh->do("UPDATE user SET caps=$newcaps WHERE userid=$u->{'userid'}");
-     $u->{'caps'} = $newcaps;  # so viewuser mode below is correct.
+     $u->{'caps'} = $newcaps;  # so user object is correct in memory
+
+     # re-evaluate userpics for activation
+     LJ::activate_userpics($u);
 
      $ret .= "Saved.";
      $mode = "viewuser";

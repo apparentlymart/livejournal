@@ -1,5 +1,8 @@
 <?_code
 
+ use strict;
+ use vars qw(%FORM $title $body $su @errors);
+
  $title = "Edit User Pictures";
  $body = "";
  $su = "";           # switch user bar
@@ -13,6 +16,7 @@
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
+ my $sth;
 
  my $u;
  my $remote = LJ::get_remote($dbs);
@@ -49,6 +53,9 @@
 
  $u = LJ::load_user($dbs, $user) unless $u;
 
+ # update this user's activated pics
+ LJ::activate_userpics($u);
+
  if (LJ::get_cap($u, "readonly")) {
      $title = "Read-only mode";
      $body = $LJ::MSG_READONLY_USER;
@@ -69,32 +76,60 @@
 
  if ($FORM{'mode'} eq "save") 
  {
-     $dbh->do("DELETE FROM userpicmap WHERE userid=$u->{'userid'}");
+     my %exist_kwids;
+     $sth = $dbr->prepare("SELECT kwid, picid FROM userpicmap WHERE userid=?");
+     $sth->execute($u->{'userid'});
+     while (my ($kwid, $picid) = $sth->fetchrow_array) {
+         push @{$exist_kwids{$picid}}, $kwid;
+     }
 
-     $sth = $dbr->prepare("SELECT picid, width, height FROM userpic WHERE userid=$u->{'userid'}");
-     $sth->execute;
-     
+     # unconditionally delete form userpicmap, we'll rebuild it later
+     $dbh->do("DELETE FROM userpicmap WHERE userid=?", undef, $u->{'userid'});
+
+     # select all of their userpics and iterate through them
+     $sth = $dbr->prepare("SELECT picid, width, height, state FROM userpic WHERE userid=?");
+     $sth->execute($u->{'userid'});
+
+     my @inactive_picids;
      my @delete;
      my %picid_of_kwid;
 
      while (my $pic = $sth->fetchrow_hashref)
      {
+         # delete this pic
          if ($FORM{"delete_$pic->{'picid'}"}) {
-             # delete this one
              push @delete, $pic->{'picid'};
+             next;
          }
-         else 
-         {
-             my @keywords = split(/\s*,\s*/, $FORM{"kw_$pic->{'picid'}"});
-             @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
-             foreach my $kw (@keywords) {
-                 my $kwid = LJ::get_keyword_id($dbs, $kw);
-                 next unless $kwid;
-                 if ($picid_of_kwid{$kwid}) {
-                     push @errors, "You used the keyword \"$kw\" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.";
-                 }
-                 $picid_of_kwid{$kwid} = $pic->{'picid'};
+
+         # make a list of inactive picids
+         if ($pic->{'state'} eq 'I') {
+             push @inactive_picids, $pic->{'picid'};
+             next;
+         }
+
+         # we're going to modify keywords on active pictures
+         my @keywords = split(/\s*,\s*/, $FORM{"kw_$pic->{'picid'}"});
+         @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
+         foreach my $kw (@keywords) {
+             my $kwid = LJ::get_keyword_id($dbs, $kw);
+             next unless $kwid;
+
+             if ($picid_of_kwid{$kwid}) {
+                 my $ekw = LJ::eall($kw);
+                 push @errors, "You used the keyword \"$ekw\" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.";
              }
+             $picid_of_kwid{$kwid} = $pic->{'picid'};
+         }
+     }
+
+     # now, reapply the existing picids to the inactive pics, unless
+     # that picid has already been assigned to a new active one
+     foreach my $picid (@inactive_picids) {
+         next unless $exist_kwids{$picid};
+
+         foreach (@{$exist_kwids{$picid}}) {
+             $picid_of_kwid{$_} ||= $picid;
          }
      }
 
@@ -109,6 +144,12 @@
              # non-clustered blobs
              $dbh->do("DELETE FROM userpicblob WHERE picid IN ($id_in)");
          }
+
+         # if any of the userpics they want to delete are active, then we want to 
+         # re-run LJ::activate_userpics() - turns out it's faster to not check to 
+         # see if we need to do this
+         LJ::activate_userpics($u);
+
      }
 
      if (%picid_of_kwid) {
@@ -120,7 +161,14 @@
      my $new_default = $FORM{'defaultpic'}+0;
      if ($FORM{"delete_$FORM{'defaultpic'}"}) { $new_default = 0; } # deleting your default
      if ($new_default != $u->{'defaultpicid'}) {
-         $dbh->do("UPDATE user SET defaultpicid=$new_default WHERE userid=$u->{'userid'}");
+
+         # see if they are trying to make an inactive userpic their default
+         my $state = $dbh->selectrow_array("SELECT state FROM userpic WHERE picid=?",
+                                           undef, $new_default);
+
+         $dbh->do("UPDATE user SET defaultpicid=? WHERE userid=?",
+                  undef, $new_default, $u->{'userid'})
+             unless $state eq 'I';
      }
 
      $body .= "<?h1 Saved h1?><?p Your new picture keywords and defaults have been saved.  You can view them <a href=\"/allpics.bml?user=$u->{'user'}\">here</a>. p?>";
@@ -134,7 +182,7 @@
      return;
  }
 
- #### edit mode
+ # show the form to let people edit
 
  $title = "Edit User Pictures";
 
@@ -146,8 +194,8 @@
      push @{$keywords{$pic}}, $keyword;
  }
  
- $sth = $dbr->prepare("SELECT picid, width, height FROM userpic WHERE userid=$u->{'userid'}");
- $sth->execute;
+ $sth = $dbr->prepare("SELECT picid, width, height, state FROM userpic WHERE userid=?");
+ $sth->execute($u->{'userid'});
  my $piccount = 0;
 
  while (my $pic = $sth->fetchrow_hashref)
@@ -182,25 +230,26 @@
      $body .= "<tr valign='middle'>";
      $body .= "<td align='center'><img src='$LJ::USERPIC_ROOT/$pid/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
      $body .= "<td>";
-
      $body .= "<table>";
-     
+
+     my $dis = $pic->{'state'} eq 'I' ? "disabled='disabled' " : "";
      {
-         my $sel = $u->{'defaultpicid'} == $pic->{'picid'} ? "checked='1'" : "";
-         $body .= "<tr><td align='right'><b><label for='$pid-def'>Default:</label></b></td><td> <input id='$pid-def' type='radio' name='defaultpic' value='$pid' $sel>&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>Delete:</label></b> <input type='checkbox' name='delete_$pid' value='1' id='$pid-del'></TD></TR>\n";
+         my $chk = $u->{'defaultpicid'} == $pic->{'picid'} ? "checked='checked' " : "";
+
+         $body .= "<tr><td align='right'><b><label for='$pid-def'>Default:</label></b></td><td> <input id='$pid-def' type='radio' name='defaultpic' value='$pid'$chk$dis>&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>Delete:</label></b> <input type='checkbox' name='delete_$pid' value='1' id='$pid-del'></td></tr>\n";
      }
 
      {
-         my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}});
+         my $eh_keywords;
+         $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}}) if $keywords{$pic->{'picid'}};
          $eh_keywords = LJ::eall($eh_keywords);
-         $body .= "<tr><td align='right'><b><label for='$pid-key'>Keywords:</label></b></td><td> <input id='$pid-key' size='30' name='kw_$pic->{'picid'}' value=\"$eh_keywords\"></td></tr>\n";
+         $body .= "<tr><td align='right'><b><label for='$pid-key'>Keywords:</label></b></td><td> <input id='$pid-key' size='30' name='kw_$pic->{'picid'}' value=\"$eh_keywords\"$dis></td></tr>\n";
      }
 
-     $body .= "</TABLE>\n";
+     $body .= "</table>\n";
 
-
-     $body .= "</TD>";
-     $body .= "</TR>\n";     
+     $body .= "</td>";
+     $body .= "</tr>\n";
 
  }
 
