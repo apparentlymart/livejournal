@@ -6,25 +6,26 @@ BODY<=
 (=H1 Upload your Picture H1=)
 (=P
 Here you can upload a miniature picture that will be used to represent you through the LiveJournal site, in your journal, and in your friends' journals.  The following restrictions are placed on the file:
-<UL>
-<LI>File size must be less than 40k
-<LI>Image dimensions must be no larger than 100x100 pixels
-<LI>File format must be either PNG, GIF or JPG
-</UL>
+<ul>
+<li>File size must be less than 40k</li>
+<li>Image dimensions must be no larger than 100x100 pixels</li>
+<li>File format must be either PNG, GIF or JPG</li>
+</ul>
 P=)
 
-<FORM ACTION="uploadpic_do.bml" METHOD="POST" ENCTYPE="multipart/form-data">
+<form action="uploadpic_do.bml" method="post" enctype="multipart/form-data">
 
 (=STANDOUT
-<TABLE>
+<table>
 (=_CODE
- return LJ::auth_fields(\%FORM);
+ my $dbs = LJ::get_dbs();
+ return LJ::auth_fields_2($dbs, \%FORM, { 'shared' => 1, 'getother' => 1 });
  _CODE=)
-<TR><TD><INPUT TYPE=RADIO NAME="src" VALUE="file" CHECKED> From File:</TD><td align="left"><input type="file" name="userpic"></TD></TR>
-<TR><TD><INPUT TYPE=RADIO NAME="src" VALUE="url"> From URL:</TD><td align="left"><input name="urlpic" size="40"></TD></TR>
-<TR><TD></TD><td align="left"><INPUT TYPE="CHECKBOX" NAME="make_default" CHECKED VALUE=1> Make this your default picture</FONT></TD></TR>
-<TR><TD></TD><TD><INPUT TYPE="SUBMIT" VALUE="Proceed..."></FONT></TD></TR>
-</TABLE>
+<tr><td><input type='radio' name='src' value='file' checked='1' id='radio_file' accesskey='f'> <label for='radio_file'>From <u>F</u>ile:</label></td><td align="left"><input type="file" name="userpic"></td></tr>
+<tr><td><input type='radio' name="src" value="url" id='radio_url' accesskey='r'> <label for='radio_url'>From U<u>R</u>L:</label></td><td align="left"><input name="urlpic" size="40"></td></tr>
+<tr><td></td><td align="left"><input type="checkbox" name="make_default" checked='1' value='1' id='make_default' accesskey='d'> <label for='make_default'>Make this your <u>d</u>efault picture</label></td></tr>
+<tr><td></td><td><input type="submit" value="Proceed..."></td></tr>
+</table>
 STANDOUT=)
 
 <=BODY

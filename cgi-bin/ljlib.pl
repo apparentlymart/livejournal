@@ -486,15 +486,14 @@ sub ago_text
 # des-form: The hash of form information, which is used to determine whether to
 #           get the current login info and display a concise form, or to display
 #           a login form.
-# des-opts: An optional hash table with further information (current password.)
 # </LJFUNC>
 sub auth_fields
 {
     my $form = shift;
-    my $opts = shift;
+
     my $remote = LJ::get_remote_noauth();
     my $ret = "";
-    if (!$form->{'altlogin'} && !$opts->{'user'} && $remote->{'user'}) {
+    if (!$form->{'altlogin'} && !$form->{'user'} && $remote->{'user'}) {
 	my $hpass;
 	if ($BMLClient::COOKIE{"ljhpass"} =~ /^$remote->{'user'}:(.+)/) {
 	    $hpass = $1;
@@ -503,21 +502,171 @@ sub auth_fields
 	$alturl .= ($alturl =~ /\?/) ? "&amp;" : "?";
 	$alturl .= "altlogin=1";
 
-	$ret .= "<tr align='left'><td colspan=\"2\" align=\"left\">You are currently logged in as <B>$remote->{'user'}</B>.<BR>If this is not you, <a href=\"$alturl\">click here</a>.\n";
-	$ret .= "<input type=\"hidden\" name=\"user\" value=\"$remote->{'user'}\">\n";
-	$ret .= "<input type=\"hidden\" name=\"hpassword\" value=\"$hpass\"><br />&nbsp;\n";
+	$ret .= "<tr align='left'><td colspan='2' align='left'>You are currently logged in as <b>$remote->{'user'}</b>.<br />If this is not you, <a href='$alturl'>click here</a>.\n";
+	$ret .= "<input type='hidden' name='user' value='$remote->{'user'}'>\n";
+	$ret .= "<input type='hidden' name='hpassword' value='$hpass'><br />&nbsp;\n";
 	$ret .= "</td></tr>\n";
     } else {
-	$ret .= "<tr align='left'><td>Username:</td><td align=\"left\"><input type=\"text\" name=\"user\" size=\"15\" maxlength=\"15\" value=\"";
-	my $user = $opts->{'user'};
+	$ret .= "<tr align='left'><td>Username:</td><td align='left'><input type='text' name='user' size='15' maxlength='15' value='";
+	my $user = $form->{'user'};
 	unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
 	$ret .= BMLUtil::escapeall($user) unless ($form->{'altlogin'});
-	$ret .= "\"></td></tr>\n";
-	$ret .= "<tr><td>Password:</td><td align=\"left\">\n";
-	$ret .= "<input type=\"password\" name=\"password\" size=\"15\" maxlength=\"30\" value=\"" . LJ::ehtml($opts->{'password'}) . "\">";
+	$ret .= "'></td></tr>\n";
+	$ret .= "<tr><td>Password:</td><td align='left'>\n";
+	$ret .= "<input type='password' name='password' size='15' maxlength='30'>";
 	$ret .= "</td></tr>\n";
     }
     return $ret;
+}
+
+
+sub auth_fields_2
+{
+    my $dbs = shift;
+    my $form = shift;
+    my $opts = shift;
+    my $remote = LJ::get_remote($dbs);
+    my $ret = "";
+
+    # text box mode
+    if ($form->{'authas'} eq "(other)" || $form->{'altlogin'} || 
+	$form->{'user'} || ! $remote)
+    {
+	$ret .= "<tr><td align='right'><u>U</u>sername:</td><td align='left'><input type=\"text\" name='user' size='15' maxlength='15' accesskey='u' value=\"";
+	my $user = $form->{'user'};
+	unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
+	$ret .= BMLUtil::escapeall($user) unless ($form->{'altlogin'});
+	$ret .= "\"></td></tr>\n";
+	$ret .= "<tr><td align='right'><u>P</u>assword:</td><td align='left'>\n";
+	$ret .= "<input type='password' name='password' size='15' maxlength='30' accesskey='p' value=\"" . LJ::ehtml($opts->{'password'}) . "\">";
+	$ret .= "</td></tr>\n";
+	return $ret;
+    }
+
+    # logged in mode
+    $ret .= "<tr><td align='right'><u>U</u>sername:</td><td align='left'>";
+
+    my $alturl = LJ::self_link($form, { 'altlogin' => 1 });
+    my @shared = ($remote->{'user'});
+
+    my $sopts = {};
+    $sopts->{'notshared'} = 1 unless $opts->{'shared'};
+    $sopts->{'getother'} = $opts->{'getother'};
+
+    $ret .= LJ::make_shared_select($dbs, $remote, $form, $sopts);
+
+    if ($sopts->{'getother'}) {
+	my $alturl = LJ::self_link($form, { 'altlogin' => 1 });
+	$ret .= "&nbsp;(<a href='$alturl'>Other</a>)";
+    }
+
+    $ret .= "</td></tr>\n";
+    return $ret;
+}
+
+sub make_shared_select
+{
+    my ($dbs, $u, $form, $opts) = @_;
+
+    my %u2k;
+    $u2k{$u->{'user'}} = "(remote)";
+
+    my @choices = ("(remote)", $u->{'user'});
+    unless ($opts->{'notshared'}) {
+	foreach (LJ::get_shared_journals($dbs, $u)) {
+	    push @choices, $_, $_;
+	    $u2k{$_} = $_;
+	}
+    }
+    unless ($opts->{'getother'}) {
+	push @choices, "(other)", "Other...";
+    }
+    
+    if (@choices > 2) {
+	my $sel;
+	if ($form->{'user'}) {
+	    $sel = $u2k{$form->{'user'}} || "(other)";
+	} else {
+	    $form->{'authas'};	    
+	}
+	return LJ::html_select({ 
+	    'name' => 'authas', 
+	    'raw' => "accesskey='u'",
+	    'selected' => $sel,
+	}, @choices);
+    } else {
+	return "<b>$u->{'user'}</b>";
+    }
+}
+
+sub get_shared_journals
+{
+    my $dbs = shift;
+    my $u = shift;
+    LJ::load_user_privs($dbs, $u, "sharedjournal");
+    return sort keys %{$u->{'_priv'}->{'sharedjournal'}};
+}
+
+sub get_effective_user
+{
+    my $dbs = shift;
+    my $opts = shift;
+    my $f = $opts->{'form'};
+    my $refu = $opts->{'out_u'};
+    my $referr = $opts->{'out_err'};
+    my $remote = $opts->{'remote'};
+
+    # presence of 'altlogin' means user is probably logged in but
+    # wants to act as somebody else, so ignore their cookie and just
+    # fail right away, which'll cause the form to be loaded where they
+    # can enter manually a username.
+    if ($f->{'altlogin'}) { return ""; }
+
+    # this means the same, and is used by LJ::make_shared_select:
+    if ($f->{'authas'} eq "(other)") { return ""; }
+
+    # an explicit 'user' argument overrides the remote setting.  if
+    # the password is correct, the user they requested is the
+    # effective one, else we have no effective yet.
+    if ($f->{'user'}) {
+	my $u = LJ::load_user($dbs, $f->{'user'});
+	unless ($u) {
+	    $$referr = "Invalid user.";
+	    return;
+	}
+
+	# if password present, check it.
+	if ($f->{'password'} || $f->{'hpassword'}) {
+	    if (LJ::auth_okay($u, $f->{'password'}, $f->{'hpassword'}, $u->{'password'})) {
+		$$refu = $u;
+		return $f->{'user'};
+	    } else {
+		$$referr = "Invalid password.";
+		return;
+	    }
+	}
+
+	# otherwise don't check it and return nothing (to prevent the
+	# remote setting from taking place... this forces the
+	# user/password boxes to appear)
+	return;
+    }
+    
+    # not logged in?
+    return unless $remote;
+
+    # logged in. use self identity unless they're requesting to act as
+    # a community.
+    return $remote->{'user'} 
+    unless ($f->{'authas'} && $f->{'authas'} ne "(remote)");
+
+    # if they have the privs, let them be that community
+    return $f->{'authas'}
+    if (LJ::check_priv($dbs, $remote, "sharedjournal", $f->{'authas'}));
+
+    # else, complain.
+    $$referr = "Invalid privileges to act as requested community.";
+    return;
 }
 
 # <LJFUNC>
@@ -2371,7 +2520,8 @@ sub html_check
     } else {
 	$ret .= "<input type=\"checkbox\" ";
     }
-    if ($opts->{'selected'}) { $ret .= " checked"; }
+    if ($opts->{'selected'}) { $ret .= " checked='1'"; }
+    if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
     if ($opts->{'name'}) { $ret .= " name=\"$opts->{'name'}\""; }
     if (defined $opts->{'value'}) { $ret .= " value=\"$opts->{'value'}\""; }
     $ret .= "$disabled>";

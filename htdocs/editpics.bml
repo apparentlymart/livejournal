@@ -2,21 +2,47 @@
 
  $title = "Edit User Pictures";
  $body = "";
+ $su = "";           # switch user bar
  @errors = ();
  
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
- 
- my $remote = LJ::get_remote($dbs);
 
- unless (defined $remote) {
+ my $u;
+ my $remote = LJ::get_remote($dbs);
+ my $err;
+ my $user = LJ::get_effective_user($dbs, {
+     'remote' => $remote,
+     'form' => \%FORM,
+     'out_err' => \$err,
+     'out_u' => \$u,
+ });
+
+ if ($err) {
      $title = "Error";
-     $body = "(=H1 Error H1=)(=P You must be <a href=\"/login.bml?ret=1\">logged in</a> to edit your pictures. P=)";
-     return "";
+     $body = LJ::bad_input($err);
+     return;
+ }
+ 
+ unless ($user) {
+     
+     $body .= "(=H1 Authenticate H1=)(=P Enter the username and password of the journal you want to modify the user pictures for. P=)";
+     
+     $body .= "<form method='post' action='editpics.bml'>";
+     $body .= "(=STANDOUT <table>\n";
+     $body .= LJ::auth_fields_2($dbs, \%FORM);
+     $body .= "<tr><td></td><td><input type='submit' value='Proceed...'></td></tr>";
+     $body .= "</table> STANDOUT=)\n";
+     $body .= "</form>";
+     return;
  }
 
- my $u = LJ::load_userid($dbs, $remote->{'userid'});
+ my $authlink;
+ $authlink = "?authas=$FORM{'authas'}" if ($FORM{'authas'} && $FORM{'authas'} ne "(remote)");
+ $authlink ||= "?user=$user" if ($FORM{'user'});
+
+ $u = LJ::load_user($dbs, $user) unless $u;
  
  ### save mode
 
@@ -97,29 +123,48 @@
 
  while (my $pic = $sth->fetchrow_hashref)
  {
-     if ($piccount++ == 0) {
-	 $body .= "<FORM METHOD=POST>";
-	 $body .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=save>";
+     my $pid = $pic->{'picid'};
 
-	 $body .= "(=H1 Current Pictures H1=)(=P Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, <A HREF=\"/uploadpic.bml\">go here</A>. P=)";
-	 $body .= "<UL><TABLE CELLPADDING=5 BORDER=0 CELLSPACING=1>";
+     if ($piccount++ == 0) {
+
+	 $body .= "(=H1 Current Pictures H1=)(=P Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, <a href='/uploadpic.bml$authlink'>go here</a>. P=)";
+
+	 if ($remote) {
+	     $body .= "<form method='post'>";
+	     $body .= "(=H1 Switch Journal H1=)(=P Work with journal: ";
+	     $body .= LJ::make_shared_select($dbs, $remote, \%FORM);
+	     $body .= " <input type='submit' value='Switch'> P=)</form>";
+	 }
+
+	 $body .= "<form method='post'>";
+	 $body .= "<input type='hidden' name='mode' value='save'>";
+	 if ($FORM{'user'}) {
+	     $body .= "<input type='hidden' name='user' value='$user'>\n";
+	     my $hpass = LJ::hash_password($u->{'password'});
+	     $body .= "<input type='hidden' name='hpassword' value='$hpass'>\n";
+	 } else {
+	     $body .= "<input type='hidden' name='authas' value='$FORM{'authas'}'>\n";
+	 }
+
+
+	 $body .= "<ul><table cellpadding='5' border='0' cellspacing='1'>";
 	     
      }
-     $body .= "<TR VALIGN=MIDDLE>";
-     $body .= "<TD ALIGN=CENTER><IMG SRC=\"/userpic/$pic->{'picid'}\" WIDTH=$pic->{'width'} HEIGHT=$pic->{'height'}></TD>";
-     $body .= "<TD>";
+     $body .= "<tr valign='middle'>";
+     $body .= "<td align='center'><img src='/userpic/$pid' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
+     $body .= "<td>";
 
-     $body .= "<TABLE>";
+     $body .= "<table>";
      
      {
-	 my $sel = $u->{'defaultpicid'} == $pic->{'picid'} ? "CHECKED" : "";
-	 $body .= "<TR><TD ALIGN=RIGHT><B>Default:</B></TD><TD> <INPUT TYPE=RADIO NAME=defaultpic VALUE=$pic->{'picid'} $sel>  <B>Delete:</B> <INPUT TYPE=CHECKBOX NAME=delete_$pic->{'picid'} VALUE=1></TD></TR>\n";
+	 my $sel = $u->{'defaultpicid'} == $pic->{'picid'} ? "checked='1'" : "";
+	 $body .= "<tr><td align='right'><b><label for='$pid-def'>Default:</label></b></td><td> <input id='$pid-def' type='radio' name='defaultpic' value='$pid' $sel>&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>Delete:</label></b> <input type='checkbox' name='delete_$pid' value='1' id='$pid-del'></TD></TR>\n";
      }
 
      {
 	 my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}});
 	 $eh_keywords = LJ::ehtml($eh_keywords);
-	 $body .= "<TR><TD ALIGN=RIGHT><B>Keywords:</B></TD><TD>  <INPUT SIZE=30 NAME=\"kw_$pic->{'picid'}\" VALUE=\"$eh_keywords\"></TD></TR>\n";
+	 $body .= "<tr><td align='right'><b><label for='$pid-key'>Keywords:</label></b></td><td> <input id='$pid-key' size='30' name='kw_$pic->{'picid'}' value='$eh_keywords'></td></tr>\n";
      }
 
      $body .= "</TABLE>\n";
@@ -131,11 +176,13 @@
  }
 
  if ($piccount) {
-     $body .= "<tr><td></td><td align=left>&nbsp;<b>No Default Picture</b>&nbsp;";
+     $body .= "<tr><td></td><td align=left>&nbsp;<b><label for='nodefpic'>No Default Picture</label></b>&nbsp;";
      $body .= LJ::html_check({ 'name' => 'defaultpic', 
 			       'value' => 0,
 			       'type' => 'radio',
-			       'selected' => ! $u->{'defaultpicid'}, });
+			       'selected' => ! $u->{'defaultpicid'}, 
+			       'raw' => "id='nodefpic'",
+			   });
      $body .= "</td><td>&nbsp;</td></tr>\n";
      $body .= "<TR><TD></TD><TD>&nbsp;<P><INPUT TYPE=SUBMIT VALUE=\"Save Settings\"></TD></TR>\n";
      $body .= "</TABLE>";
@@ -149,6 +196,7 @@
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
 BODY=>(=_CODE return $body; _CODE=)
+SWITCHUSER=>(=_CODE return $su; _CODE=)
 PAGE=)(=_C <LJDEP>
 link: htdocs/login.bml, htdocs/allpics.bml, htdocs/uploadpic.bml
 post: htdocs/editpics.bml

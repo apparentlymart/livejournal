@@ -21,18 +21,38 @@ BODY<=
  $FORM{'password'} = $query->param('password');
  $FORM{'hpassword'} = $query->param('hpassword');
  $FORM{'make_default'} = $query->param('make_default');
- my $user = LJ::canonical_username($FORM{'user'});
+
+ my $user;
  my @errors = ();
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
+ my $remote;
+
+ my $authas = $query->param('authas');
+ if ($authas) {
+     $remote = LJ::get_remote($dbs);
+     return LJ::bad_input("No longer logged in?") unless $remote;
+
+     if ($authas eq "(remote)") {
+	 $user = $remote->{'user'};
+     } else {
+	 return LJ::bad_input("Not admin of selected community")
+	     unless LJ::check_priv($dbs, $remote, "sharedjournal", $authas);
+	 $user = $authas;
+     }
+ } else {
+     $user = $FORM{'user'};
+ }
+
  my $u = LJ::load_user($dbs, $user);
- unless ($u) { push @errors, "Invalid username"; }
+ return LJ::bad_input("Invalid username") unless $u;
+
  my $userid = $u->{'userid'}+0;
 
- if (scalar(@errors)==0 && ! LJ::valid_password($u->{'password'}, \%FORM)) { 
+ if (! $authas && ! LJ::valid_password($u->{'password'}, \%FORM)) { 
      push @errors, "Incorrect password."; 
  }
 
@@ -43,6 +63,10 @@ BODY<=
  return LJ::bad_input(@errors) if @errors;
 
  # now we're authenticated
+ my $authaslink;
+ $authaslink = "?authas=$authas" if ($authas =~ /^\w/);
+ $authaslink ||= "?user=$user" if $FORM{'user'};
+
  my $ret = "";
  my $imagedata = "";
 
@@ -127,7 +151,7 @@ BODY<=
  my ($count) = $sth->fetchrow_array;
  my $max = LJ::get_cap($u, "userpics");
  if ($count >= $max) {
-     push @errors, "You are already at your limit of $max pictures.  You cannot upload this picture until you <A HREF=\"/editpics.bml\">delete one of your existing ones</A>.";
+     push @errors, "You are already at your limit of $max pictures.  You cannot upload this picture until you <A HREF=\"/editpics.bml$authaslink\">delete one of your existing ones</A>.";
      return LJ::bad_input(@errors) if @errors;     
  }
 
@@ -168,7 +192,9 @@ BODY<=
  }
  
  $nowtime = time();
- return "(=H1 Success H1=)(=P <!-- $action : $picid --> Your image has been uploaded.  It looks like this: <P><CENTER><IMG SRC=\"/userpic/$picid\" WIDTH=$sx HEIGHT=$sy></CENTER> You can <a href=\"editpics.bml\">edit your picture keywords</a> to be able to use this picture selectively in the future. P=)(=P You can view your journal <A HREF=\"/users/${user}\">here</A>. P=)";
+
+
+ return "(=H1 Success H1=)(=P Your image has been uploaded.  It looks like this: <p align='center'><img src='/userpic/$picid' width='$sx' height='$sy'></p>You can <a href=\"editpics.bml$authaslink\">edit your picture keywords</a> to be able to use this picture selectively in the future. P=)(=P You can view your journal <a href='/users/${user}'>here</a>. P=)";
  
 _CODE=)
 
