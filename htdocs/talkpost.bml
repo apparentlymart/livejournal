@@ -153,7 +153,7 @@ BODY<=
 
  $ret .= "<p>";
  $ret .= "<table><tr valign='middle'>";
- my $picid = $ur->{'defaultpicid'};
+ my $picid;
  my $pickw = $init->{'replyto'} ? $parpost->{'picture_keyword'} : $logprops{$itemid}->{'picture_keyword'};
 
  if ($pickw) {
@@ -162,6 +162,8 @@ BODY<=
                                     "WHERE m.userid=$ur->{'userid'} AND ".
                                     "m.kwid=k.kwid AND k.keyword=$qkw");
  }
+
+ $picid ||= $ur->{'defaultpicid'};
 
  my %userpics;
  if ($picid) {

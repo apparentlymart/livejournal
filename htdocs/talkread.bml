@@ -96,13 +96,15 @@ BODY<=
  $ret .= "<p>";
  $ret .= "<table><tr valign='middle'>";
 
- my $picid = $up->{'defaultpicid'};
+ my $picid;
  if ($logprops{$itemid}->{'picture_keyword'}) {
      my $qkw = $dbr->quote($logprops{$itemid}->{'picture_keyword'});
      $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
                                     "WHERE m.userid=$up->{'userid'} ".
                                     "AND m.kwid=k.kwid AND k.keyword=$qkw");
  }
+
+ $picid ||= $up->{'defaultpicid'};
 
  my %userpics;
  if ($picid) {
@@ -484,6 +486,7 @@ sub recurse_post
                             if ($alt_picid) {
                                 LJ::load_userpics($dbs, \%userpics, [ $alt_picid ]);
                                 $picid = $alt_picid;
+                                $user{$userpost}->{'_pictures'}->{$pickw} = $picid;
                             }
                         }
                     }
