@@ -701,6 +701,14 @@ sub journal_content
     }
     elsif ($opts->{'badfriendgroup'})
     {
+        # give a real 404 to the journal owner
+        if ($remote->{'user'} eq $user) {
+            $status = "404 Friend group does not exist";
+            $html = "<h1>Not Found</h1>" .
+                    "<p>The friend group you are trying to access does not exist.</p>";
+
+        # otherwise be vague with a 403
+        } else {
             # send back a 403 and don't reveal if the group existed or not
             $status = "403 Friend group does not exist, or is not public";
             $html = "<h1>Denied</h1>" .
@@ -710,8 +718,9 @@ sub journal_content
             $html .= "<p>You're not logged in.  If you're the owner of this journal, " .
                      "<a href='$LJ::SITEROOT/login.bml'>log in</a> and try again.</p>\n"
                          unless $remote;
+        }
 
-            $generate_iejunk = 1;
+        $generate_iejunk = 1;
     }
 
     unless ($html) {
