@@ -36,15 +36,22 @@ The following people have helped other users in the support area:
  } else {
      @rows = sort { $b->{points} <=> $a->{points} } @rows;
  }
- my $ret;
+
+ my $total = scalar(@rows);
+
+ my %items = BML::paging(\@rows, $GET{'page'}, 100);
+ my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'});
+ @rows = @{$items{'items'}};
+
+ my $ret = $navbar;
  $ret .= "<p><table>";
  my $rank = 0;
  my $lastpoints = 0;
  my $buildup = 0;
- my $total = 0;
+ my $count = 0;
  foreach (@rows)
  {
-     $total++;
+     $count++;
      my $userid = $_->{'userid'};
      if ($_->{'points'} != $lastpoints) {
          $lastpoints = $_->{'points'};
@@ -71,7 +78,8 @@ The following people have helped other users in the support area:
      $ret .= "<tr><td align=\"right\">$rank.</td><td>$change</td><td><?ljuser $_->{'user'} ljuser?> - $name</td><td><b>$_->{'points'} point$s</b></td></tr>\n";
  }
  $ret .= "</table></p>";
- $ret .= "<p><b>$total</b> total supporting users.</p>";
+ $ret .= "<p><b>$total</b> total supporting users, <b>$count</b> displayed.</p>";
+ $ret .= $navbar;
  return $ret;
 
 _code?>
