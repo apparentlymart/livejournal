@@ -18,11 +18,20 @@ BODY<=
  }
  
  my ($dbs, $dbh, $dbr);
+ my $remote;
 
  my $connect_db = sub {
      $dbs = LJ::get_dbs();
      $dbh = $dbs->{'dbh'};
      $dbr = $dbs->{'reader'};
+ };
+ 
+ my $got_remote = 0;
+ my $get_remote = sub {
+     return if $got_remote;
+     $connect_db->() unless $dbs;
+     $remote = LJ::get_remote($dbs);
+     $got_remote = 1;
  };
 
  my %errors;
@@ -111,6 +120,12 @@ BODY<=
      }
      foreach my $re ("^system\$", @LJ::PROTECTED_USERNAMES) {
          next unless ($user =~ /$re/);
+
+         # you can give people sharedjournal priv ahead of time to create
+         # reserved communities:
+         $get_remote->();
+         next if LJ::check_priv($dbs, $remote, "sharedjournal", $user);
+
          $errors{'username'} = "Sorry, that's a reserved username.";
      }
      
