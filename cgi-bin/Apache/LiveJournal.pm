@@ -1327,26 +1327,28 @@ sub db_logger
     #   Benchmark: timing 10000 iterations of Cached GTop, New Every Time...
     #   Cached GTop: 2.06161 wallclock secs ( 1.06 usr +  0.97 sys =  2.03 CPU) @ 4926.11/s (n=10000)
     #   New Every Time: 2.17439 wallclock secs ( 1.18 usr +  0.94 sys =  2.12 CPU) @ 4716.98/s (n=10000)
-  STATS: if ( $LJ::LOG_GTOP && $LJ::HAVE_GTOP ) {
-        $GTop ||= new GTop or last STATS;
+  STATS: {
+        if ( $LJ::LOG_GTOP && $LJ::HAVE_GTOP ) {
+            $GTop ||= new GTop or last STATS;
 
-        my $startcpu = $r->pnotes( 'gtop_cpu' ) or last STATS;
-        my $endcpu = $GTop->cpu                 or last STATS;
-        my $startmem = $r->pnotes( 'gtop_mem' ) or last STATS;
-        my $endmem = $GTop->proc_mem( $$ )      or last STATS;
-        my $cpufreq = $endcpu->frequency        or last STATS;
+            my $startcpu = $r->pnotes( 'gtop_cpu' ) or last STATS;
+            my $endcpu = $GTop->cpu                 or last STATS;
+            my $startmem = $r->pnotes( 'gtop_mem' ) or last STATS;
+            my $endmem = $GTop->proc_mem( $$ )      or last STATS;
+            my $cpufreq = $endcpu->frequency        or last STATS;
 
-        # Map the GTop values into the corresponding fields in a slice
-        @$var{qw{pid cpu_user cpu_sys cpu_total mem_vsize mem_share mem_rss mem_unshared}} = (
-            $$,
-            ($endcpu->user - $startcpu->user) / $cpufreq,
-            ($endcpu->sys - $startcpu->sys) / $cpufreq,
-            ($endcpu->total - $startcpu->total) / $cpufreq,
-            $endmem->vsize - $startmem->vsize,
-            $endmem->share - $startmem->share,
-            $endmem->rss - $startmem->rss,
-            $endmem->size - $endmem->share,
-           );
+            # Map the GTop values into the corresponding fields in a slice
+            @$var{qw{pid cpu_user cpu_sys cpu_total mem_vsize mem_share mem_rss mem_unshared}} = (
+                $$,
+                ($endcpu->user - $startcpu->user) / $cpufreq,
+                ($endcpu->sys - $startcpu->sys) / $cpufreq,
+                ($endcpu->total - $startcpu->total) / $cpufreq,
+                $endmem->vsize - $startmem->vsize,
+                $endmem->share - $startmem->share,
+                $endmem->rss - $startmem->rss,
+                $endmem->size - $endmem->share,
+               );
+        }
     }
 
     my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
