@@ -67,6 +67,7 @@ my %table;
 my %coldes;
 
 foreach (`$ENV{'LJHOME'}/bin/upgrading/update-db.pl --listtables`) {
+    chomp;
     $table{$_} = {};
 }
 
