@@ -55,13 +55,18 @@ _code?>
 Select what in particular you're having a problem with:
 <div style='margin-left: 30px'><select name="spcatid">
 <?_code
+ use strict;
+ use vars qw($GET);
+
  my $ret = "";
  my $dbr = LJ::get_db_reader();
- my $sth = $dbr->prepare("SELECT spcatid, catname FROM supportcat ".
+ my $sth = $dbr->prepare("SELECT spcatid, catkey, catname FROM supportcat ".
                          "WHERE is_selectable='1' ORDER BY sortorder");
  $sth->execute;
+
  while ($_ = $sth->fetchrow_hashref) {
-     $ret .= "<option value='$_->{'spcatid'}'>$_->{'catname'}</option>\n";
+     my $selected = $GET{'category'} eq $_->{'catkey'} ? "selected='selected'" : " ";
+     $ret .= "<option value='$_->{'spcatid'}' $selected>$_->{'catname'}</option>\n";
  }
  return $ret;
 _code?>
