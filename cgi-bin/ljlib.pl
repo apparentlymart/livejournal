@@ -1991,6 +1991,7 @@ sub load_mood_theme
     shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $themeid = shift;
     return if $LJ::CACHE_MOOD_THEME{$themeid};
+    return unless $themeid;
     my $dbr = LJ::get_db_reader();
     my $sth = $dbr->prepare("SELECT moodid, picurl, width, height FROM moodthemedata WHERE moodthemeid=?");
     $sth->execute($themeid);

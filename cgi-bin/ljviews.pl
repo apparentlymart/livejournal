@@ -675,7 +675,7 @@ sub create_view_lastn
         $item->{'_picid'} = $picid;
         push @userpic_load, $picid if ($picid && ! grep { $_ eq $picid } @userpic_load);
     }
-    LJ::load_userpics($dbr, \%userpics, \@userpic_load);
+    LJ::load_userpics(\%userpics, \@userpic_load);
 
     if (my $picid = $u->{'defaultpicid'}) {
         $lastn_page{'userpic'} = 
@@ -764,7 +764,7 @@ sub create_view_lastn
             my $dispreadlink = $replycount || 
                 ($logprops{$itemid}->{'hasscreened'} &&
                  ($remote->{'user'} eq $user
-                  || LJ::check_rel($dbr, $u, $remote, 'A')));
+                  || LJ::check_rel($u, $remote, 'A')));
 
             $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
                 'itemid' => $ditemid,
@@ -1113,7 +1113,7 @@ sub create_view_friends
     # load the pictures for the user
     my %userpics;
     my @picids = map { $friends{$_}->{'defaultpicid'} } keys %friends;
-    LJ::load_userpics($dbr, \%userpics, [ @picids, map { $_->{'defaultpicid'} } values %aposter ]);
+    LJ::load_userpics(\%userpics, [ @picids, map { $_->{'defaultpicid'} } values %aposter ]);
 
     # load the text of the entries
     my $logtext = LJ::get_logtext2multi(\%idsbycluster);
@@ -1215,7 +1215,7 @@ sub create_view_friends
                 $sth->execute;
                 my $alt_picid = $sth->fetchrow_array;
                 if ($alt_picid) {
-                    LJ::load_userpics($dbr, \%userpics, [ $alt_picid ]);
+                    LJ::load_userpics(\%userpics, [ $alt_picid ]);
                     $picid = $alt_picid;
                     $picuserid = $posterid;
                 }
@@ -1252,7 +1252,7 @@ sub create_view_friends
             my $dispreadlink = $replycount || 
                 ($logprops{$datakey}->{'hasscreened'} &&
                  ($remote->{'user'} eq $friend
-                  || LJ::check_rel($dbr, $friendid, $remote, 'A')));
+                  || LJ::check_rel($friendid, $remote, 'A')));
 
             my ($readurl, $posturl);
             my $journalbase = LJ::journal_base($friends{$friendid});
@@ -1393,7 +1393,6 @@ sub create_view_friends
 sub create_view_calendar
 {
     my ($ret, $u, $vars, $remote, $opts) = @_;
-    my $dbr = LJ::get_db_reader();
     
     my $user = $u->{'user'};
 
@@ -1795,7 +1794,7 @@ sub create_view_day
             my $dispreadlink = $replycount || 
                 ($logprops{$itemid}->{'hasscreened'} &&
                  ($remote->{'user'} eq $user
-                  || LJ::check_rel($dbr, $u, $remote, 'A')));
+                  || LJ::check_rel($u, $remote, 'A')));
             $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
                 'itemid' => $ditemid,
                 'itemargs' => $itemargs,
@@ -1964,7 +1963,7 @@ sub create_view_rss
     ### image block, returns info for their current userpic
     if ($u->{'defaultpicid'}) {
         my $pic = {};
-        LJ::load_userpics($dbr, $pic, [$u->{'defaultpicid'}]);
+        LJ::load_userpics($pic, [$u->{'defaultpicid'}]);
         $pic = $pic->{$u->{'defaultpicid'}}; # flatten
         
         $$ret .= "  <image>\n";
@@ -1977,7 +1976,7 @@ sub create_view_rss
     }
 
     my %posteru = ();  # map posterids to u objects
-    LJ::load_userids_multiple($dbr, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
+    LJ::load_userids_multiple([map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
 
     # output individual item blocks
 
