@@ -120,11 +120,11 @@ body<=
                  $ret .= "; <i>" . BML::ebml($res{"events_${i}_subject"}) . "</i>";
              }
              $ret .= "<br />\n";
-             my $event = LJ::durl($res{"events_${i}_event"});
-             unless ($props{$res{"events_${i}_itemid"}}->{'opt_preformatted'}) {
-                 $event =~ s!\n!<br />\n!g;
-             }
-             $ret .= BML::ebml($event);
+
+             my $event = BML::ebml(LJ::durl($res{"events_${i}_event"}));
+             LJ::CleanHTML::clean_event(\$event,
+                                        $props{$res{"events_${i}_itemid"}}->{'opt_preformatted'});
+             $ret .= $event;
          }
          
          $ret .= "<?h1 $ML{'.continue.head'} h1?><?p $ML{'.continue.text'} p?><?standout <input type='submit' value='$ML{'.btn.edit'}'> standout?></form>\n";
@@ -401,4 +401,5 @@ _code?>
 page?><?_c <LJDEP>
 post: htdocs/editjournal_do.bml
 link: htdocs/moodlist.bml, htdocs/users
+lib: cgi-bin/cleanhtml.pl
 </LJDEP> _c?>
