@@ -1089,6 +1089,13 @@ register_alter(sub {
 		 "'comment','payments') NOT NULL default 'support'");
     }
 
+    if (column_type("schematables", "redist_where") eq "")
+    {
+	do_alter("schematables",
+		 "ALTER TABLE schematables ADD ".
+		 "redist_where varchar(255) AFTER redist_mode");
+    }
+
 });
 
 
