@@ -782,7 +782,7 @@
         $body .= "<tr><td colspan='3' align='center'><hr></td></tr>";
 
         $body .= "<tr><td align='right'>";
-        $body .= "<?help $LJ::HELPURL{'upic_keywords'} help?>";
+        $body .= LJ::help_icon('upic_keywords');
         $body .= "</td><td align='right'><label for='keywords'>";
         $body .= "$ML{'.label.keywords'}</label></td><td align='left'>";
         $body .= LJ::html_text({ 'name' => 'keywords', 'size' => '40' });
@@ -790,7 +790,7 @@
 
         if ($u->{'dversion'} > 6) {
             $body .= "<tr><td align='right'>";
-            $body .= "<?help $LJ::HELPURL{'upic_comments'} help?>";
+            $body .= LJ::help_icon('upic_comments');
             $body .= "</td><td align='right'><label for='comments'>$ML{'.label.comment'}</label></td><td align='left'>";
             my $comments = $POST{'comments'} if $fotobilder;
             $body .= LJ::html_text({ 'name' => 'comments', 'size' => '40', 'maxlength' => LJ::CMAX_UPIC_COMMENT, 'value', $comments });
