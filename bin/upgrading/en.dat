@@ -1469,8 +1469,6 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editjournal_do.bml.success.delete=Journal entry was deleted.
 
-/editjournal_do.bml.success.edit=Journal entry was modified.  You may view it <a href="[[url]]">here</a>.
-
 /editjournal_do.bml.success.head=Success
 
 /editjournal_do.bml.timeformat=24 hour time

@@ -170,9 +170,7 @@ body<=
             }
 
             # modified
-            return "<?h1 $ML{'.success.head'} h1?><?p " .
-                BML::ml(".success.edit", {'url' => LJ::item_link($usejournal ? $usejournal_u : $u,
-                                                                 $itemid, $res{'anum'}) }) ." p?>";
+            return BML::redirect(LJ::item_link($usejournal ? $usejournal_u : $u, $itemid, $res{'anum'}));
         }
 
 
