@@ -2174,13 +2174,16 @@ sub can_view
 #      slave database servers for recent items, then the master in
 #      cases of old items the slaves have already disposed of.  See also:
 #      [func[LJ::get_logtext]].
-# args: dbs, talkid*
+# args: dbs, opts?, talkid*
 # returns: hashref with keys being talkids, values being [ $subject, $body ]
+# des-opts: Optional hashref of flags.  Currently supported key: 'onlysubjects',
+#           which won't return body text:  $body will be undef.
 # des-talkid: List of talkids to retrieve the subject & text for.
 # </LJFUNC>
 sub get_talktext
 {
     my $dbs = shift;
+    my $opts = ref $_[0] eq "HASH" ? shift : {};
 
     # return structure.
     my $lt = {};
@@ -2201,13 +2204,15 @@ sub get_talktext
         }
     }
 
+    my $bodycol = $opts->{'onlysubjects'} ? "" : ", body";
+
     while (@sources && %need)
     {
         my $s = shift @sources;
         my ($db, $table) = ($s->[0], $s->[1]);
         my $talkid_in = join(", ", keys %need);
 
-        my $sth = $db->prepare("SELECT talkid, subject, body FROM $table ".
+        my $sth = $db->prepare("SELECT talkid, subject $bodycol FROM $table ".
                                "WHERE talkid IN ($talkid_in)");
         $sth->execute;
         while (my ($id, $subject, $body) = $sth->fetchrow_array) {
@@ -2216,7 +2221,6 @@ sub get_talktext
         }
     }
     return $lt;
-
 }
 
 # <LJFUNC>
