@@ -16,11 +16,13 @@
 <uid> log2:<uid>:<jitemid> == packed data
 <uid> log2ct:<uid> == # of rows for user
 <uid> log2lt:<uid> == packed data: array of recent log2 entries in rlogtime order, last 2 weeks by default
-<uid> rp:<uid>:<jitemid> == scalar, the replycount value 
+<uid> rp:<uid>:<jitemid> == scalar, the replycount value
 
 <uid> memkwid:<uid> == hashref of 'memories' keyword ids to keywords.
 
 <uid> dayct:<uid> == arrayref of arrayrefs (see LJ::get_daycounts)
+
+<uid> auc:<uid>:<dom> == last ID from LJ::alloc_user_counter() for $uid/$domain
 
 <picid> userpic.<picid> = [ $w, $h, $uid ]
 <themeid> moodthemedata:<themeid> = { $moodid => { 'pic' => $pic, 'w' => $w, 'h' => $h } }
