@@ -542,8 +542,16 @@ if ($u->{'journaltitle'}) {
      }
 
      $body .= "<b>$intcount:</b> " . $intlist;
-
-     $body .= "</td></tr>\n";
+     if ($remote) {
+         my $link = "/interests.bml?mode=enmasse";
+         $link .= "&fromuser=$user" unless ($remote->{'userid'} == $userid);
+         $body .= ". <small>";
+         my $mlcode = ($remote->{'userid'} == $userid) ? '.label.interests.removesome'
+                                                       : '.label.interests.modifyyours';
+         $body .= BML::ml('Actionlink', { 'link' => "<a href='$link'>$ML{$mlcode}</a>" });
+         $body .= "</a></small>";
+     }
+     $body .= "</td></tr>";
  }
  
  ##

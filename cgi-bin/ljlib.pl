@@ -1405,25 +1405,29 @@ sub time_to_http {
 # class: component
 # name: LJ::ljuser
 # des: Make link to userinfo/journal of user.
-# info: Returns the HTML for an userinfo/journal link pair for a given user
-#       name, just like LJUSER does in BML.  But files like cleanhtml.pl
-#       and ljpoll.pl need to do that too, but they aren't run as BML.
+# info: Returns the HTML for a userinfo/journal link pair for a given user
+#       name, just like LJUSER does in BML.  This is for files like cleanhtml.pl
+#       and ljpoll.pl which need this functionality too, but they aren't run as BML.
 # args: user, opts?
-# des-user: Username to link to.
+# des-user: Username to link to, or user hashref.
 # des-opts: Optional hashref to control output.  Key 'full' when true causes
 #           a link to the mode=full userinfo.   Key 'type' when 'C' makes
-#           a community link, not a user link.
+#           a community link, not a user link.  If user parameter is a hashref,
+#           its 'journaltype' overrides this 'type'.
 # returns: HTML with a little head image & bold text link.
 # </LJFUNC>
 sub ljuser
 {
     my $user = shift;
     my $opts = shift;
+    if (ref $user eq 'HASH') {
+        $opts->{'type'} = $user->{'journaltype'};
+        $user = $user->{'user'};
+    }
     my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
     my $img = $opts->{'imgroot'} || $LJ::IMGPREFIX;
     if ($opts->{'type'} eq "C") {
         return "<span class='ljuser' style='white-space:nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/community.gif' alt='userinfo' width='16' height='16' style='vertical-align:bottom;border:0;' /></a><a href='$LJ::SITEROOT/community/$user/'><b>$user</b></a></span>";
-
     } else {
         return "<span class='ljuser' style='white-space:nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/userinfo.gif' alt='userinfo' width='17' height='17' style='vertical-align:bottom;border:0;' /></a><a href='$LJ::SITEROOT/users/$user/'><b>$user</b></a></span>";
     }

@@ -18,7 +18,7 @@ general /community/search.bml.contasmember
 
 general /community/settings.bml.manage
 
-general /editinfo.bml.allowshowcontact.email.if_domainaddy
+general /editinfo.bml.allowshocontact.email.if_domainaddy
 general /editinfo.bml.allowshowcontact.email.reason
 general /editinfo.bml.settings.about
 general /editinfo.bml.showsubjicons.about
@@ -97,3 +97,12 @@ general /userinfo.bml.openmembership.body
 general /userinfo.bml.posthere
 general /userinfo.bml.rpmembership.body
 general /userinfo.bml.syn.lastnew
+
+general /interests.bml.findsim.account.notallowed
+general /interests.bml.findsim.account.notloggedin
+general /interests.bml.findsim.btn.find
+general /interests.bml.findsim.head
+general /interests.bml.findsim.simtouser
+general /interests.bml.findsim.text
+general /interests.bml.interests.findsim1
+general /interests.bml.interests.findsim2
