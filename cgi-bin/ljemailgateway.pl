@@ -346,6 +346,13 @@ sub get_entity
 
             return $alte if $alte->mime_type eq "text/plain" && $type eq 'text';
             push @entities, $alte if $type eq 'all';
+
+            if ($type eq 'image' &&
+                $alte->mime_type =~ m#^application/octet-stream#) {
+                my $alte_head = $alte->head;
+                my $filename = $alte_head->recommended_filename;
+                push @entities, $alte if $filename =~ /\.(?:gif|png|tiff?|jpe?g)$/;
+            }
             push @entities, $alte if $alte->mime_type =~ /^$type\// &&
                                      $type ne 'all';
 
