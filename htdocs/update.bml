@@ -78,6 +78,7 @@
                        ! $POST{'response'};                                       # user w/o password
     my $showform = $POST{'showform'} || $auth_missing;                            # show entry form
     my $mode = $GET{'mode'};
+    my $preview = $POST{'action:preview'};
     $mode = 'full' if $GET{'usejournal'} || $POST{'usejournal_set'};
 
     # richtext
@@ -87,7 +88,7 @@
     # The $GET{'rich'} is simply for user bookmarking / faq linking convenience.
     my $enabled_rte = $POST{'switched_rte_on'};
     my $richtext = 1 if $GET{rich} || $POST{rich} ||
-                        ($enabled_rte && ! $spellcheck_html);
+                        ($enabled_rte && ! $spellcheck_html && ! $preview);
     $$bodyopts = "onunload=\"save_entry();\" " if $richtext;
 
     ###
@@ -203,6 +204,17 @@
 
         # if no script, above is server time
         $out .= "<noscript><p align='center' style=\"font-size: 0.85em;\">$ML{'.note'}</p></noscript>\n";
+
+        if ($preview) {
+            $out .= "<hr><h2>$ML{'.preview.header'}</h2>";
+            $out .= "<?p $ML{'.preview.text'} p?>";
+            $out .= "<b>Subject</b>: " . LJ::ehtml($POST{'subject'}) . '<br /><br />';
+            my $event = $POST{'event'};
+            LJ::CleanHTML::clean_comment(\$event, $POST{'prop_opt_preformatted'});
+            $out .= "<b>Event</b>: <br/>";
+            $out .= $event;
+            $out .= '<br /><hr>';
+        }
 
         # subject
         $out .= "<table width='90%' align='center'; style='margin-top: 20px;'><tr><td>$ML{'.subject'}<br />";
@@ -456,14 +468,19 @@ RTE
             $out .= '" ';
         }
 
-        $out .= "></p>\n";
+        $out .= '>&nbsp;';
+        $out .= "<input type='submit' value='$ML{'.btn.preview'}' ";
+        $out .= 'onClick="updateRTE(\'rte\');" ' if $richtext;
+        $out .= "name='action:preview'>";
+        $out .= "</p>\n";
         $out .= "</form></div>";
 
         return $out;
     };  ### end show_updateform()
 
 
-    if ($did_post && ! $spellcheck_html && ! $showform && ! $enabled_rte) {
+    if ( $did_post && ! $spellcheck_html && !
+            $showform && ! $enabled_rte && ! $preview ) {
 
         # what's our authentication scheme for subsequent protocol actions?
         my $flags = {};

@@ -187,8 +187,23 @@ body<=
 
         # start edit form
         my $ret;
-        $ret .= "<?h1 $ML{'.title'} h1?>\n";
 
+        # user clicked the preview button
+        if ($POST{'action:preview'}) {
+            $ret .= "<h2>$ML{'.preview.header'}</h2>";
+            $ret .= "<?p $ML{'.preview.text'} p?>";
+            $ret .= "<b>Subject</b>: " . LJ::ehtml($POST{'subject'}) . '<br /><br />';
+            my $event = $POST{'event'};
+            LJ::CleanHTML::clean_comment(\$event, $POST{'prop_opt_preformatted'});
+            $ret .= "<b>Event</b>: <br/>";
+            $ret .= $event;
+            $ret .= '<br /><br />';
+            $ret .= LJ::html_submit('action:save', $ML{'.btn.save'},
+                                    { 'disabled' => $disabled_save });
+            $ret .= '<br /><br />';
+        }
+
+        $ret .= "<?h1 $ML{'.title'} h1?>\n";
         $ret .= "<?p $ML{'.body'} p?>\n";
 
         $ret .= "<div style='width: 90%'><form method='post' action='editjournal_do.bml$getextra'>\n";
@@ -339,6 +354,7 @@ body<=
         $ret .= "<?standout ";
         $ret .= LJ::html_submit('action:save', $ML{'.btn.save'},
                                 { 'disabled' => $disabled_save }) . " ";
+        $ret .= LJ::html_submit('action:preview', $ML{'.btn.preview'}) . " ";
         $ret .= LJ::html_submit('action:delete', $ML{'.btn.delete'},
                                 { 'disabled' => $disabled_delete,
                                   'onclick' => "return confirm('" . LJ::ejs($ML{'.delete.confirm'}) . "')" });

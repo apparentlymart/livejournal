@@ -1200,6 +1200,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editjournal_do.bml.btn.edit=Edit Selected Entry
 
+/editjournal_do.bml.btn.preview=Preview Entry
+
 /editjournal_do.bml.btn.save=Save Journal Entry
 
 /editjournal_do.bml.continue.head=Press to continue...
@@ -1247,6 +1249,10 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 /editjournal_do.bml.pickentry.text=Select which item you want to edit and press the edit button at the bottom of the page.
 
 /editjournal_do.bml.picture=<a href="[[url]]">Picture</a> to use:
+
+/editjournal_do.bml.preview.header=Preview Entry
+
+/editjournal_do.bml.preview.text=This is how the entry will look when posted. Using the form below, you can edit the entry further, or you can submit it as is.
 
 /editjournal_do.bml.save.head=Press to save...
 
@@ -2991,6 +2997,8 @@ This could be because: <ol>
 
 /update.bml.altpost=Journal to post in:
 
+/update.bml.btn.preview=Preview
+
 /update.bml.btn.update=Update Journal
 
 /update.bml.currmood=Current <a href="/moodlist.bml">Mood</a>:
@@ -3056,6 +3064,10 @@ This could be because: <ol>
 /update.bml.password=Password:
 
 /update.bml.picture=<a href="[[url]]">Picture</a> to use:
+
+/update.bml.preview.header=Preview
+
+/update.bml.preview.text=This is how the entry will look when posted. Using the form below, you can edit the entry further, or you can submit it as is.
 
 /update.bml.security.custom=Custom...
 

@@ -835,10 +835,13 @@ $box{'update'} =
               } else {
                 document.write("<input type='submit' value='Update Journal' />");
               }
+            document.write("&nbsp; <input type='submit' name='action:preview' value='Preview' />");
         // -->
         </script>
         <noscript>
             <input type='submit' value='Update Journal' />
+            &nbsp;
+            <input type='submit' name='action:preview' value='Preview' />
         </noscript>
 UPDATE
         $$bd .= "</TD></TR>";
