@@ -48,6 +48,7 @@ sub error_message
              "206" => "Invalid destination journal username.",
              "207" => "Protocol version mismatch",
              "208" => "Invalid text encoding",
+             "209" => "Parameter out of range",
 
              # Access Errors
              "300" => "Don't have access to shared/community journal",
@@ -1311,7 +1312,50 @@ sub getevents
     }
     elsif ($req->{'selecttype'} eq "syncitems")
     {
-        return fail($err,504,"syncitems selecttype is no longer supported.");
+        return fail($err,504,"syncitems selecttype is no longer supported for cluster0.")
+            unless $clustered;
+
+        my $date = $req->{'lastsync'} || "0000-00-00 00:00:00";
+        return fail($err,203,"Invalid syncitems date format")
+            unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
+        
+        my %item;
+        $sth = $dbcr->prepare("SELECT jitemid, logtime FROM log2 WHERE ".
+                              "journalid=? and logtime > ?");
+        $sth->execute($ownerid, $date);
+        while (my ($id, $dt) = $sth->fetchrow_array) {
+            $item{$id} = $dt;
+        }
+
+        LJ::load_props($dbs, "log");
+        my $p_revtime = LJ::get_prop("log", "revtime");
+        $sth = $dbcr->prepare("SELECT jitemid, FROM_UNIXTIME(value) ".
+                              "FROM logprop2 WHERE journalid=? ".
+                              "AND propid=$p_revtime->{'id'} ".
+                              "AND value+0 > UNIX_TIMESTAMP(?)");
+        $sth->execute($ownerid, $date);
+        while (my ($id, $dt) = $sth->fetchrow_array) {
+            $item{$id} = $dt;
+        }
+
+        my $limit = 100;
+        my @ids = sort { $item{$a} cmp $item{$b} } keys %item;
+        if (@ids > $limit) { @ids = @ids[0..$limit-1]; }
+        
+        my $in = join(',', @ids);
+        $where = "AND jitemid IN ($in)";
+    }
+    elsif ($req->{'selecttype'} eq "multiple")
+    {
+        my @ids;
+        foreach my $num (split(/\s*,\s*/, $req->{'itemids'})) {
+            return fail($err,203,"Non-numeric itemid") unless $num =~ /^\d+$/;
+            push @ids, $num;
+        }
+        my $limit = 100;
+        return fail($err,209,"Can't retrieve more than $limit entries at once") if @ids > $limit;
+        my $in = join(',', @ids);
+        $where = $clustered ? "AND jitemid IN ($in)" : "AND itemid IN ($in)";
     }
     else
     {
