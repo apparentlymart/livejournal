@@ -24,7 +24,7 @@ P=)
 
  my %faqcat;
  my %faqq;
- my $ret = "[alt=$altlang]";
+ my $ret = "";
  if ($altlang) {
      my $sql = "SELECT fc.faqcat, t.text AS 'faqcatname', fc.catorder FROM faqcat fc, ".
          "ml_text t, ml_latest l, ml_items i WHERE ".
