@@ -1464,6 +1464,116 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /update.bml.updating=Updating journal...
 
+/userinfo.bml.about.comm=About
+
+/userinfo.bml.about.user=Bio
+
+/userinfo.bml.body.leave= You may <a href="/community/leave.bml?comm=[[commname]]">leave the community</a> at any time.
+
+/userinfo.bml.canpost=[[user]] can post to [[comm]]
+
+/userinfo.bml.closedmembership.body=This is a closed community.  To become a member you must contact <a href="userinfo.bml?user=[[cowner]]">its maintainer</a>.
+
+/userinfo.bml.comminfo.body=Below is information about the "[[commname]]" community on LiveJournal.
+
+/userinfo.bml.comminfo.name=Community Information
+
+/userinfo.bml.date.never=<i>Never.</i>
+
+/userinfo.bml.error.malfname=Malformed username.
+
+/userinfo.bml.friendof.comm=Watched by
+
+/userinfo.bml.friendof.user=Friend of
+
+/userinfo.bml.friends.comm=Members
+
+/userinfo.bml.friends.user=Friends
+
+/userinfo.bml.label.addbuddy=Add Buddy
+
+/userinfo.bml.label.adduser=Add User
+
+/userinfo.bml.label.birthdate=Birthdate:
+
+/userinfo.bml.label.clientsused=<a href="[[siteroot]]/download/">Clients</a> used:
+
+/userinfo.bml.label.comments=Comments:
+
+/userinfo.bml.label.composted=<b>Posted:</b> [[num]] - 
+
+/userinfo.bml.label.comreceived=<b>Received:</b> [[num]]
+
+/userinfo.bml.label.datecreated=Date created:
+
+/userinfo.bml.label.dateupdated=Date updated:
+
+/userinfo.bml.label.interests=Interests
+
+/userinfo.bml.label.intsnotshown=<b>... [[intnotshown]] interests not shown</b>
+
+/userinfo.bml.label.journalentrs=Journal entries:
+
+/userinfo.bml.label.location=Location:
+
+/userinfo.bml.label.memberof=Member of
+
+/userinfo.bml.label.memories=Memories:
+
+/userinfo.bml.label.moredetails=(more details...)
+
+/userinfo.bml.label.name=Name:
+
+/userinfo.bml.label.nofriends=<i>None listed.</i>
+
+/userinfo.bml.label.reqfinduser=Only users with 'finduser' priv can lookup users by userid.
+
+/userinfo.bml.label.sendmessage=Send Message
+
+/userinfo.bml.label.shared=Shared Journal Access:
+
+/userinfo.bml.label.supportpoints=Support points
+
+/userinfo.bml.label.textmessage=<nobr>Text<br>Message</nobr>:
+
+/userinfo.bml.label.todo=To-Do List
+
+/userinfo.bml.label.user=User:
+
+/userinfo.bml.label.viewlabel=View [[label]]
+
+/userinfo.bml.label.website=Website:
+
+/userinfo.bml.memories.entries=[[count]] entries
+
+/userinfo.bml.memories.entry=[[count]] entry
+
+/userinfo.bml.monitor.comm=Monitor Community
+
+/userinfo.bml.monitor.user=Add this user to your friends list
+
+/userinfo.bml.nonexist.body=There does not exist a user with the username <b>[[user]]</b>.  Sorry.
+
+/userinfo.bml.nonexist.name=Unknown user
+
+/userinfo.bml.openmembership.body=This an open-membership community.  To join, <a href="/community/join.bml?comm=[[username]]">click here</a>.
+
+/userinfo.bml.posthere=[[user]] can post to [[comm]]
+
+/userinfo.bml.rpmembership.body= Although it's open, the setting for this community is that only select users are able to post to it.  To request access, contact <a href="userinfo.bml?user=[[cowner]]">its maintainer</a>.
+
+/userinfo.bml.sendmessage.body=<a href="[[link]]">Send <b>[[user]]</b> a text message</a><br />on his/her cellphone/pager.
+
+/userinfo.bml.tellafriend=Tell a Friend!
+
+/userinfo.bml.title=User Info
+
+/userinfo.bml.title.communityinfo=Community Info
+
+/userinfo.bml.userinfo.body=Below is user information for [[username]].  If you are this user, you can edit your information (or choose what information is considered public) at <a href="[[siteroot]]/editinfo.bml">the Edit Info page</a>.
+
+/userinfo.bml.userinfo.name=User Information
+
 BML.parse_multipart.parse=Error parsing upload
 
 BML.parse_multipart.toolarge=Upload too large
