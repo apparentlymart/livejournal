@@ -62,8 +62,6 @@ sub trans
         return redir($r, $url);
     }
 
-    return DECLINED if $uri =~ /\.bml$/; # not dirs, but most.
-
     LJ::start_request();
 
     my $journal_view = sub { 
