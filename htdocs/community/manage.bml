@@ -60,17 +60,17 @@ body<=
         my $name = $names{$id}->[1];
         $ret .= "<tr><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td>";
         if ($admin{$id}) {
-            $ret .= "<b>" . BML::ml('Actionlink', {
-                'link'=>"<a href='/community/settings.bml?comm=$user'>$ML{'.commlist.actsettings'}</a>"}) . "</b>&nbsp;&nbsp;";
-            $ret .= "<b>" . BML::ml('Actionlink', {
-                'link'=>"<a href='/community/members.bml?comm=$user'>$ML{'.commlist.actmembers'}</a>"}) . "</b>&nbsp;&nbsp;";
+            $ret .= BML::ml('Actionlink', {
+                'link'=>"<a href='/community/settings.bml?comm=$user'>$ML{'.commlist.actsettings2'}</a>"}) . "&nbsp;&nbsp;";
+            $ret .= BML::ml('Actionlink', {
+                'link'=>"<a href='/community/members.bml?comm=$user'>$ML{'.commlist.actmembers2'}</a>"}) . "&nbsp;&nbsp;";
         }
         if ($mods{$id}) {
-            my $num = $modcount{$id} || "</b>0<b>"; # relying on this to be <b>-wrapped
-            $ret .= "<b>" . BML::ml('Actionlink', {
+            my $num = $modcount{$id} || "0"; # relying on this to be <b>-wrapped
+            $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='/community/moderate.bml?comm=$user'>" .
                     BML::ml('.commlist.actmoderate', {'num'=>$num}) . "</a>"}) .
-                    "</b>&nbsp;&nbsp;";
+                    "&nbsp;&nbsp;";
         }
         $ret .= "</td></tr>";
     }

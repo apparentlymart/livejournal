@@ -15,7 +15,10 @@ body<=
  my $ret;
  my $remote = LJ::get_remote($dbs);
 
- $ret .= BML::ml('.manage', {'link'=>'/community/manage.bml'});
+ $ret .= BML::ml('Backlink', {
+     'link'=>'/community/manage.bml',
+     'text'=>$ML{'.manage2'},
+ });
 
  unless ($remote) {
     $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.noremote'} p?>";

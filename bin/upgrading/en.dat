@@ -135,7 +135,13 @@
 
 /community/manage.bml.commlist.actmembers=<b>[<a href='[[link]]'>Members</a>]</b>
 
+/community/manage.bml.commlist.actmembers2=Members
+
+/community/manage.bml.commlist.actmoderate=Moderate: [[num]]
+
 /community/manage.bml.commlist.actsettings=<b>[<a href='[[link]]'>Settings</a>]</b>
+
+/community/manage.bml.commlist.actsettings2=Settings
 
 /community/manage.bml.commlist.header=Your communities
 
@@ -167,7 +173,11 @@
 
 /community/members.bml.key.post=<b>Posting Access</b>
 
+/community/members.bml.key.preapprove=Unmoderated
+
 /community/members.bml.manage=[<a href='[[link]]'><b>&lt;&lt;</b></a> Manage communities]
+
+/community/members.bml.manage2=Manage communities
 
 /community/members.bml.name=<b>Community name:</b> [[name]]
 
@@ -186,6 +196,86 @@
 /community/members.bml.title=Community Members
 
 /community/members.bml.update=Update settings
+
+/community/moderate.bml.approve.button=Yes, approve it
+
+/community/moderate.bml.approve.header=Approve this entry?
+
+/community/moderate.bml.approve.preapprove=Also, add user [[user]] to the list of pre-approved users for this community.
+
+/community/moderate.bml.approve.text=Are you sure you want to approve this entry?
+
+/community/moderate.bml.brlist.actions=Actions
+
+/community/moderate.bml.brlist.poster=Poster
+
+/community/moderate.bml.brlist.subject=Subject begins
+
+/community/moderate.bml.brlist.time=Time
+
+/community/moderate.bml.brlist.view=View
+
+/community/moderate.bml.browse.empty=The moderation queue is empty.
+
+/community/moderate.bml.browse.header=Moderate Community
+
+/community/moderate.bml.browse.text=Here is the moderation queue for the community [[link]]
+
+/community/moderate.bml.choice.approve=Approve
+
+/community/moderate.bml.choice.bkapprove=#82dd88
+
+/community/moderate.bml.choice.bkreject=#e08291
+
+/community/moderate.bml.choice.reject=Reject
+
+/community/moderate.bml.error.noaccess=You do not moderate the community [[comm]].
+
+/community/moderate.bml.error.noentry=Entry not found (perhaps already handled by another moderator).
+
+/community/moderate.bml.error.nolist=You do not moderate any communities.
+
+/community/moderate.bml.error.notfound=Community account not found.
+
+/community/moderate.bml.manage=Manage communities
+
+/community/moderate.bml.moderate=Moderate this community
+
+/community/moderate.bml.modlist.actions=Actions
+
+/community/moderate.bml.modlist.actmodempty=[Moderate]
+
+/community/moderate.bml.modlist.actmoderate=Moderate
+
+/community/moderate.bml.modlist.count=Queue size
+
+/community/moderate.bml.modlist.header=Moderate Communities
+
+/community/moderate.bml.modlist.title=Title
+
+/community/moderate.bml.modlist.username=Username
+
+/community/moderate.bml.posted.appheader=Preapproved
+
+/community/moderate.bml.posted.apptext=Additionally, the user [[user]] has been added to the list of pre-approved users for this community.
+
+/community/moderate.bml.posted.header=Success
+
+/community/moderate.bml.posted.proterror=The entry has not been posted due to this protocol error: [[err]]
+
+/community/moderate.bml.posted.text=The entry has been successfully posted.
+
+/community/moderate.bml.reject.button=Yes, reject it
+
+/community/moderate.bml.reject.header=Reject this entry?
+
+/community/moderate.bml.reject.reason=You can also explain to the poster your reasons for rejecting their entry. They will be sent to the poster by email.
+
+/community/moderate.bml.reject.text=Are you sure you want to reject this entry?
+
+/community/moderate.bml.rejected.header=Rejected
+
+/community/moderate.bml.rejected.text=The entry has been rejected.
 
 /community/search.bml.button.clear=Clear Form
 
@@ -303,6 +393,14 @@
 
 /community/settings.bml.label.membership=Membership
 
+/community/settings.bml.label.modheader=Moderation
+
+/community/settings.bml.label.modis=<b>Moderated</b><br />New entries must be approved by a moderator.
+
+/community/settings.bml.label.modisnt=<b>Unmoderated</b><br />New entries appear immediately.
+
+/community/settings.bml.label.modtext=Are submissions to this community moderated?
+
 /community/settings.bml.label.nmcan=<b>Non-Members Can Post</b><br />Users can post to this community without having to join it.
 
 /community/settings.bml.label.nmcant=<b>Non-Members Cannot Post</b><br />Users have to join this community in order to post in it.
@@ -328,6 +426,8 @@
 /community/settings.bml.label.whocanpost=Who can post to this community?
 
 /community/settings.bml.manage=[<a href='[[link]]'><b>&lt;&lt;</b></a> Manage communities]
+
+/community/settings.bml.manage2=Manage communities
 
 /community/settings.bml.members=[<a href='[[link]]'>Members</a>]
 
@@ -2185,6 +2285,10 @@ you can <a href="[[addtofriends]]">add this journal to your friends list</a>.
 
 /userinfo.bml.userinfo.name=User Information
 
+Actionlink=[[[link]]]
+
+Backlink=[<a href="[[link]]">&lt;&lt;</a> [[text]]]
+
 BML.parse_multipart.parse=Error parsing upload
 
 BML.parse_multipart.toolarge=Upload too large
@@ -2406,6 +2510,8 @@ protocol.bad_password=Your password is too easy to guess.  It's recommended that
 protocol.hello_test=Hello Test Account!
 
 protocol.mail_bouncing=You are currently using a bad email address.  All mail we try to send you is bouncing.  We require a valid email address for continued use.  Visit the support area for more information.
+
+protocol.modpost=Your entry has been put into the moderation queue.  It will be accepted or rejected by one of the community moderators.
 
 protocol.must_revalidate=You need to validate your new email address.  Your old one was good, but since you've changed it, you need to re-validate the new one.  Visit [[siteroot]]/support for more information.
 

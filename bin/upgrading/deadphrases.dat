@@ -23,3 +23,10 @@ general /community/create.bml.*
 
 general /update.bml.login.success
 
+general /community/manage.bml.actsettings
+
+general /community/manage.bml.actmembers
+
+general /community/members.bml.manage
+
+general /community/settings.bml.manage

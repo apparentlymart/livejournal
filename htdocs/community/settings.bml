@@ -9,6 +9,11 @@ title<=
  }
 _code?>
 <=title
+head<=
+<style type='text/css'>
+    div.opts { margin: 10px 0 10px 30px; }
+</style>
+<=head
 body<=
 <?_code
 
@@ -23,7 +28,10 @@ body<=
 
  my $remote = LJ::get_remote();
 
- $ret .= BML::ml('.manage', {'link'=>'/community/manage.bml'});
+ $ret .= BML::ml('Backlink', {
+     'link'=>'/community/manage.bml',
+     'text'=>$ML{'.manage2'},
+ });
 
  unless ($remote) {
     $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.noremote'} p?>";
@@ -94,8 +102,10 @@ body<=
         }
 
         my $nonmembers = $POST{'nonmember_posting'} + 0;
+        my $moderated = $POST{'moderated'} + 0;
 
         LJ::set_userprop($dbs, $cu->{'userid'}, 'nonmember_posting', $nonmembers);
+        LJ::set_userprop($dbs, $cu->{'userid'}, 'moderated', $moderated);
  
         $ret .= "<?h1 $ML{'.success'} h1?>";
         if ($mode eq 'create') {
@@ -122,6 +132,7 @@ body<=
     'membership'=>$POST{'membership'} || 'open',
     'postlevel'=>$POST{'postlevel'} || 'members',
     'nonmember_posting'=>$POST{'nonmember_posting'} || 0,
+    'moderated'=>$POST{'moderated'} || 0,
  );
 
  if ($mode eq 'modify') {
@@ -137,8 +148,9 @@ body<=
     } 
     ($info{'membership'},$info{'postlevel'}) = 
        LJ::dbs_selectrow_array($dbs, "SELECT membership,postlevel FROM community WHERE userid=$c->{'userid'}");
-    LJ::load_user_props($dbs, $c, "nonmember_posting");
+    LJ::load_user_props($dbs, $c, "nonmember_posting", "moderated");
     $info{'nonmember_posting'} = $c->{'nonmember_posting'} ? 1 : 0;
+    $info{'moderated'} = $c->{'moderated'} ? 1 : 0;
  }
 
  $ret .= "<form method='post' action='settings.bml?mode=$mode'>";
@@ -167,45 +179,56 @@ body<=
  }
 
  $ret .= "<?h1 $ML{'.label.commopts'} h1?><?p $ML{'.label.howoperates'} p?>";
- $ret .= "<?h2 $ML{'.label.membership'} h2?><?p $ML{'.label.whocanjoin'} <UL>";
+ $ret .= "<?h2 $ML{'.label.membership'} h2?><?p $ML{'.label.whocanjoin'} p?><div class='opts'>";
 
  my ($optopen,$optclosed);
 
  if ($info{'membership'} eq 'open') {
-    ($optopen,$optclosed)=(" checked","");
+    ($optopen,$optclosed)=(" checked='checked'","");
  } else {
-    ($optopen,$optclosed)=("", " checked");
+    ($optopen,$optclosed)=("", " checked='checked'");
  }
 
- $ret .= "<input type='radio' id='memopen' name='membership' value='open'$optopen><label for='memopen'> $ML{'.label.openmemb'}</label>";
- $ret .= "<p><input type='radio' id='memclosed' name='membership' value='closed'$optclosed><label for='memclosed'> $ML{'.label.closedmemb'}</label>";
- $ret .= "</ul> p?>";
+ $ret .= "<input type='radio' id='memopen' name='membership' value='open'$optopen /><label for='memopen'> $ML{'.label.openmemb'}</label>";
+ $ret .= "<p><input type='radio' id='memclosed' name='membership' value='closed'$optclosed /><label for='memclosed'> $ML{'.label.closedmemb'}</label>";
+ $ret .= "</div>";
 
  if ($info{'postlevel'} eq 'members') {
-    ($optopen,$optclosed)=(" checked","");
+    ($optopen,$optclosed)=(" checked='checked'","");
  } else {
-    ($optopen,$optclosed)=("", " checked");
+    ($optopen,$optclosed)=("", " checked='checked'");
  }
 
- $ret .= "<?h2 $ML{'.label.postaccess'} h2?><?p $ML{'.label.whocanpost'} <ul>";
- $ret .= "<input type='radio' id='postopen' name='postlevel' value='members'$optopen><label for='postopen'> $ML{'.label.anybodycan'}</label>";
- $ret .= "<p><input type='radio' id='postclosed' name='postlevel' value='select'$optclosed><label for='postclosed'> $ML{'.label.selcan'}</label>";
- $ret .= "</ul> p?>";
+ $ret .= "<?h2 $ML{'.label.postaccess'} h2?><?p $ML{'.label.whocanpost'} p?><div class='opts'>";
+ $ret .= "<input type='radio' id='postopen' name='postlevel' value='members'$optopen /><label for='postopen'> $ML{'.label.anybodycan'}</label>";
+ $ret .= "<p><input type='radio' id='postclosed' name='postlevel' value='select'$optclosed /><label for='postclosed'> $ML{'.label.selcan'}</label>";
+ $ret .= "</div>";
 
  if ($info{'nonmember_posting'}) {
-    ($optopen,$optclosed)=(" checked","");
+    ($optopen,$optclosed)=(" checked='checked'","");
  } else {
-    ($optopen,$optclosed)=("", " checked");
+    ($optopen,$optclosed)=("", " checked='checked'");
  }
 
- $ret .= "<?h2 $ML{'.label.nmheader'} h2?><?p $ML{'.label.nmtext'} <ul>";
- $ret .= "<input type='radio' id='nonopen' name='nonmember_posting' value='0'$optclosed><label for='nonopen'> $ML{'.label.nmcant'}</label>";
- $ret .= "<p><input type='radio' id='nonclosed' name='nonmember_posting' value='1'$optopen><label for='nonclosed'> $ML{'.label.nmcan'}</label>";
- $ret .= "</ul> p?>";
+ $ret .= "<?h2 $ML{'.label.nmheader'} h2?><?p $ML{'.label.nmtext'} p?><div class='opts'>";
+ $ret .= "<input type='radio' id='nonopen' name='nonmember_posting' value='0'$optclosed /><label for='nonopen'> $ML{'.label.nmcant'}</label>";
+ $ret .= "<p><input type='radio' id='nonclosed' name='nonmember_posting' value='1'$optopen /><label for='nonclosed'> $ML{'.label.nmcan'}</label>";
+ $ret .= "</div>";
 
- $ret .= "<center><input type=submit value='" .
+ if ($info{'moderated'}) {
+    ($optopen,$optclosed)=(" checked='checked'","");
+ } else {
+    ($optopen,$optclosed)=("", " checked='checked'");
+ }
+
+ $ret .= "<?h2 $ML{'.label.modheader'} h2?><?p $ML{'.label.modtext'} p?><div class='opts'>";
+ $ret .= "<input type='radio' id='nonopen' name='moderated' value='0'$optclosed /><label for='nonopen'> $ML{'.label.modisnt'}</label>";
+ $ret .= "<p><input type='radio' id='nonclosed' name='moderated' value='1'$optopen /><label for='nonclosed'> $ML{'.label.modis'}</label>";
+ $ret .= "</div>\n";
+
+ $ret .= "<center><input type='submit' value='" .
     ($mode eq 'create' ? "$ML{'.button.createcommunity'}" : "$ML{'.button.changecommunity'}") .
-    "'></center></form>";
+    "' /></center></form>";
 
  return $ret;
 
