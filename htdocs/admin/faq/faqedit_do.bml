@@ -46,7 +46,7 @@ body<=
  else 
  {
      LJ::remote_has_priv($remote, "faqadd", \%ac_add);
-     unless ($ac_add{'all'} || $ac_add{$FORM{'faqcat'}}) {
+     unless ($ac_add{'*'} || $ac_add{$FORM{'faqcat'}}) {
          return "<B>Error: </B> You do not have access to add FAQ questions in this category";
      }     
  }
