@@ -120,7 +120,9 @@
      while ((selindex=from.selectedIndex) != -1)
      {
 	 var i;
-	 var item = from.options[selindex];
+	 var item = new Option(from.options[selindex].text,
+			       from.options[selindex].value,
+			       false, true);
 
 	 from.options[selindex] = null;
 	 //to.options[to.options.length] = item;
@@ -279,12 +281,12 @@
      groupClicked();
  }
 
---></SCRIPT>
+// --></SCRIPT>
 END_JS
 
  $body .= "<TABLE CELLSPACING=5><TR VALIGN=TOP>";
 
- $body .= "\n<TD><B>Your groups:</B><BR><SELECT NAME=list_groups STYLE=\"width: 150px;\" SIZE=15 onClick=\"groupClicked();\">";
+ $body .= "\n<TD><B>Your groups:</B><BR><SELECT NAME=list_groups STYLE=\"width: 150px;\" SIZE=15 onChange=\"groupClicked();\">";
  foreach my $num (sort { $res{"frgrp_${a}_sortorder"} <=> 
 			 $res{"frgrp_${b}_sortorder"} } @num_used) 
  {
