@@ -830,7 +830,7 @@ sub getevents
 	if ($row->{'security'} ne "public") {
 	    $evt->{'security'} = $row->{'security'};
 	    if ($row->{'security'} eq "usemask") {
-		$res->{'allowmask'} = $row->{'allowmask'};
+		$evt->{'allowmask'} = $row->{'allowmask'};
 	    }
 	}
 	if ($row->{'subject'} ne "") {
