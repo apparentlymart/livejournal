@@ -872,8 +872,8 @@ sub submit
         my $val;
         $val = $form->{"pollq-$qid"};
         if ($q->{'type'} eq "check") {
-            ## multi-selected itmes will be null value separated.  change that.
-            $val = join(",",sort { $a <=>$ b} split(/\0/, $val));
+            ## multi-selected items are comma separated from htdocs/poll/index.bml
+            $val = join(",", sort { $a <=> $b } split(/,/, $val));
         }
         if ($q->{'type'} eq "scale") {
             my ($from, $to, $by) = split(m!/!, $q->{'opts'});

@@ -3,6 +3,12 @@
  $title = "Poll";
  $body = "";
 
+ # answers to checkbox questions are null-separated sequences
+ # since our inout correctness check rules out nulls, we change them
+ # to commas here rather than inside LJ::Poll::submit() .
+ foreach (values %FORM) {
+     s/\0/,/g;
+ }
  unless (LJ::text_in(\%FORM)) {
      $body = "(=BADINPUT=)";
      return;
