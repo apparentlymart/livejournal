@@ -11,16 +11,11 @@ POST /interface/xmlrpc HTTP/1.0
 User-Agent: XMLRPC Client 1.0
 Host: www.livejournal.com
 Content-Type: text/xml
-Content-Length: 193 
+Content-Length: 97
 
 &lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;methodCall&gt;
 &lt;methodName&gt;LJ.XMLRPC.getchallenge&lt;/methodName&gt;
-&lt;params&gt;
-&lt;param&gt;
-
-&lt;/param&gt;
-&lt;/params&gt;
 &lt;/methodCall&gt;
 </expost>
 
