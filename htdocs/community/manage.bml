@@ -97,6 +97,8 @@ body<=
                 'link'=>"<a href='/editinfo.bml?authas=$user'>$ML{'.commlist.actinfo'}</a>"}) . "&nbsp;&nbsp;";
             $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='/community/settings.bml?comm=$user'>$ML{'.commlist.actsettings2'}</a>"}) . "&nbsp;&nbsp;";
+            $ret .= BML::ml('Actionlink', {
+                'link'=>"<a href='/community/sentinvites.bml?comm=$user'>$ML{'.commlist.actinvites'}</a>"}) . "&nbsp;&nbsp;";
             my $pend = $pending{$id} ? BML::ml('.commlist.actpending', { num => $pending{$id},
                                                aopts => "href=\"/community/pending.bml?comm=$user\"" }) : '';
             $ret .= BML::ml('Actionlink', {

@@ -1,0 +1,146 @@
+<?page
+title=><?_ml .title _ml?>
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%POST);
+
+    LJ::set_active_crumb('comminvites');
+
+    return LJ::server_down_html()
+        if $LJ::SERVER_DOWN;
+
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>"
+        unless $remote;
+
+    # for now, assume we're operating on $remote.  maybe in the future we'll be able to
+    # manage other P type accounts, but we can't yet
+    my $u = $remote;
+    
+    return $LJ::MSG_READONLY_USER
+        if LJ::get_cap($u, "readonly");
+
+    # always have links at top
+    my $ret = BML::ml('Backlink', {
+        'link' => '/manage/index.bml',
+        'text' => $ML{'/manage/invites.bml.manage'},
+    });
+
+    # get pending invites
+    my $pending = LJ::get_pending_invites($u) || [];
+
+    # short out?
+    return "<?h1 $ML{'.none.title'} h1?><?p $ML{'.none.body'} p?>"
+        unless @$pending;
+
+    # load communities and maintainers
+    my @ids;
+    push @ids, ($_->[0], $_->[1]) foreach @$pending;
+    my $us = LJ::load_userids(@ids);
+
+    # all possible attributes
+    my @allattribs = ('post', 'preapprove', 'moderate', 'admin');
+
+    # see if they posted and if we should take actions
+    if (LJ::did_post()) {
+        # change the back link
+        $ret = BML::ml('Backlink', {
+            'link' => '/manage/invites.bml',
+            'text' => $ML{'/manage/invites.bml.back'},
+        });
+        
+        my (@accepted, @rejected, @undecided);
+        foreach my $invite (@$pending) {
+            my ($commid, $maintid, $date, $argline) = @$invite;
+            my $args = {};
+            LJ::decode_url_string($invite->[3], $args);
+
+            # now take actions?
+            if ($POST{"pending_$commid"} eq 'yes') {
+                LJ::accept_comm_invite($u, $us->{$commid});
+                push @accepted, [ $commid, $args ];
+            } elsif ($POST{"pending_$commid"} eq 'no') {
+                LJ::reject_comm_invite($u, $us->{$commid});
+                push @rejected, $commid;
+            } else {
+                push @undecided, $commid;
+            }
+        }
+
+        # communities they've joined
+        if (@accepted) {
+            $ret .= "<?h1 $ML{'.accepted.title'} h1?><?p $ML{'.accepted.body'} p?><ul>";
+            foreach my $row (@accepted) {
+                $ret .= "<li>" . LJ::ljuser($us->{$row->[0]}, { type => 'C' }) . ": ";
+                foreach my $attrib (@allattribs) {
+                    $ret .= "$ML{'.label.$attrib'}, " if $row->[1]{$attrib};
+                }
+                chop $ret; chop $ret;
+                $ret .= "</li>\n";
+            }
+            $ret .= "</ul>";
+        }
+
+        # communities they rejected
+        if (@rejected) {
+            $ret .= "<?h1 $ML{'.rejected.title'} h1?><?p $ML{'.rejected.body'} p?><ul>";
+            $ret .= "<li>" . LJ::ljuser($us->{$_}, { type => 'C' }) . "</li>\n" foreach @rejected;
+            $ret .= "</ul>";
+        }
+
+        # now print out undecided results
+        if (@undecided) {
+            $ret .= "<?h1 $ML{'.undecided.title'} h1?><?p $ML{'.undecided.body'} p?><ul>";
+            $ret .= "<li>" . LJ::ljuser($us->{$_}, { type => 'C' }) . "</li>\n" foreach @undecided;
+            $ret .= "</ul>";
+        }
+        
+        return $ret;
+    }
+    
+    # prepare table
+    $ret .= "<br /><form method='post'><div align='center'><table class='borderedtable' cellspacing='0' cellpadding='2'>";
+    $ret .= "<tr><th>$ML{'.community.title'}</th><th>$ML{'.abilities.title'}</th>";
+    $ret .= "<th colspan='2'>$ML{'.actions.title'}</th>";
+    $ret .= "</tr>";
+
+    # now list memberships
+    my $rc = 0;
+    foreach my $invite (@$pending) {
+        # get variables we'll need for HTML generatrion
+        my $rstyle = ($rc++ & 1) ? "<?altcolor1?>" : "<?altcolor2?>";
+        my $cu = $us->{$invite->[0]};
+        my $key = "pending_$invite->[0]";
+        my @tags = ($ML{'.label.member'});
+        my $args = {};
+        LJ::decode_url_string($invite->[3], $args);
+        foreach (@allattribs) {
+            push @tags, $ML{".label.$_"} if $args->{$_};
+        }
+        my $ename = LJ::ehtml($cu->{name});
+        
+        # now generate HTML
+        $ret .= "<tr style='background-color: $rstyle;'><td>" . LJ::ljuser($cu, { type => 'C' }) . " - $ename</td>";
+        $ret .= "<td>" . join(', ', @tags) . "</td>";
+        $ret .= "<td nowrap='nowrap'>" . LJ::html_check({ type => 'radio', name => $key, id => "yes$key", value => 'yes' });
+        $ret .= " <label for='yes$key'>$ML{'.accept'}</label></td>";
+        $ret .= "<td nowrap='nowrap'>" . LJ::html_check({ type => 'radio', name => $key, id => "no$key", value => 'no' });
+        $ret .= " <label for='no$key'>$ML{'.decline'}</label></td>";
+        $ret .= "</tr><tr>";
+        $ret .= "<td colspan='4' style='background-color: $rstyle;'>";
+        $ret .= BML::ml('.fromline', { user => LJ::ljuser($us->{$invite->[1]}, { type => 'P' }), date => $invite->[2] });
+        $ret .= "</td></tr>\n";
+    }
+
+    # all done
+    $ret .= "</table><br />";
+    $ret .= LJ::html_submit('submit', $ML{'.submit'});
+    $ret .= "</div></form>";
+        
+    return $ret;
+
+} _code?>
+<=body
+page?>

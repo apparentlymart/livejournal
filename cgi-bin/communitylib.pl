@@ -5,6 +5,219 @@ package LJ;
 use strict;
 
 # <LJFUNC>
+# name: LJ::get_sent_invites
+# des: Get a list of sent invitations from the past 30 days.
+# args: cuserid
+# des-cuserid: a userid or u object of the community to get sent invitations for
+# returns: hashref of arrayrefs with keys userid, maintid, recvtime, status, args (itself
+#   a hashref if what abilities the user would be given)
+# </LJFUNC>
+sub get_sent_invites {
+    my $cu = shift;
+    $cu = LJ::want_user($cu);
+    return undef unless $cu;
+
+    # now hit the database for their recent invites
+    my $dbcr = LJ::get_cluster_reader($cu);
+    my $data = $dbcr->selectall_arrayref('SELECT userid, maintid, DATE_FORMAT(recvtime, "%Y-%m-%d"), status, args
+                                          FROM invitesent WHERE recvtime > DATE_SUB(NOW(), INTERVAL 30 DAY) AND commid = ?',
+                                          undef, $cu->{userid});
+    return undef if $dbcr->err;
+
+    # now break data down into usable format for caller
+    my @res;
+    foreach my $row (@{$data || []}) {
+        my $temp = {};
+        LJ::decode_url_string($row->[4], $temp);
+        push @res, {
+            userid => $row->[0]+0,
+            maintid => $row->[1]+0,
+            recvtime => $row->[2],
+            status => $row->[3],
+            args => $temp,
+        };
+    }
+
+    # all done
+    return \@res;    
+}
+
+# <LJFUNC>
+# name: LJ::send_comm_invite
+# des: Sends an invitation to a user to join a community with the passed abilities.
+# args: uuserid, cuserid, muserid, attrs
+# des-uuserid: a userid or u object of the user to invite
+# des-cuserid: a userid or u object of the community to invite the user to
+# des-muserid: a userid or u object of the maintainer doing the inviting
+# des-attrs: a hashref of abilities this user should have (e.g. member, post, unmoderated, ...)
+# returns: 1 for success, undef if failure
+# </LJFUNC>
+sub send_comm_invite {
+    my ($u, $cu, $mu, $attrs) = @_;
+    $u = LJ::want_user($u);
+    $cu = LJ::want_user($cu);
+    $mu = LJ::want_user($mu);
+    return unless $u && $cu && $mu;
+
+    # step 1: if the user has banned the community, don't accept the invite
+    return LJ::error('comm_user_has_banned') if LJ::is_banned($cu, $u);
+
+    # step 2: outstanding invite?
+    my $dbcr = LJ::get_cluster_reader($u);
+    my $argstr = $dbcr->selectrow_array('SELECT args FROM inviterecv WHERE userid = ? AND commid = ? ' .
+                                        'AND recvtime > DATE_SUB(NOW(), INTERVAL 30 DAY)',
+                                        undef, $u->{userid}, $cu->{userid});
+
+    # step 3: exceeded outstanding invitation limit?  only if no outstanding invite
+    unless ($argstr) {
+        my $cdbcr = LJ::get_cluster_reader($cu);
+        my $count = $cdbcr->selectrow_array("SELECT COUNT(*) FROM invitesent WHERE commid = ? AND userid <> ? AND status = 'outstanding'",
+                                            undef, $cu->{userid}, $u->{userid});
+        my $fr = LJ::get_friends($cu) || {};
+        my $max = int(scalar(keys %$fr) / 10); # can invite up to 1/10th of the community
+        $max = 50 if $max < 50;                # or 50, whichever is greater
+        return LJ::error('comm_invite_limit') if $count > $max;
+    }
+ 
+    # step 4: setup arg string as url-encoded string
+    my $newargstr = join('=1&', map { LJ::eurl($_) } @$attrs) . '=1';
+    
+    # step 5: delete old stuff (lazy cleaning of invite tables)
+    my $dbcm = LJ::get_cluster_master($u);
+    $dbcm->do('DELETE FROM inviterecv WHERE userid = ? AND recvtime < DATE_SUB(NOW(), INTERVAL 30 DAY)', undef, $u->{userid});
+    my $cdbcm = LJ::get_cluster_master($cu);
+    $cdbcm->do('DELETE FROM invitesent WHERE commid = ? AND recvtime < DATE_SUB(NOW(), INTERVAL 30 DAY)', undef, $cu->{userid});
+
+    # step 6: branch here to update or insert
+    if ($argstr) {
+        # merely an update, so just do it quietly
+        $dbcm->do("UPDATE inviterecv SET args = ? WHERE userid = ? AND commid = ?",
+                  undef, $newargstr, $u->{userid}, $cu->{userid});
+        $cdbcm->do("UPDATE invitesent SET args = ?, status = 'outstanding' WHERE userid = ? AND commid = ?",
+                   undef, $newargstr, $cu->{userid}, $u->{userid});
+    } else {
+         # insert new data, as this is a new invite
+         $dbcm->do("INSERT INTO inviterecv VALUES (?, ?, ?, NOW(), ?)",
+                   undef, $u->{userid}, $cu->{userid}, $mu->{userid}, $newargstr);
+         $cdbcm->do("REPLACE INTO invitesent VALUES (?, ?, ?, NOW(), 'outstanding', ?)",
+                    undef, $cu->{userid}, $u->{userid}, $mu->{userid}, $newargstr);
+    }
+
+    # step 7: error check database work
+    return undef if $dbcm->err || $cdbcm->err;
+
+    # success
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::accept_comm_invite
+# des: Accepts an invitation a user has received.  This does all the work to make the
+#   user join the community as well as sets up privileges.
+# args: uuserid, cuserid
+# des-uuserid: a userid or u object of the user to get pending invites for
+# des-cuserid: a userid or u object of the community to reject the invitation from
+# returns: 1 for success, undef if failure
+# </LJFUNC>
+sub accept_comm_invite {
+    my ($u, $cu) = @_;
+    $u = LJ::want_user($u);
+    $cu = LJ::want_user($cu);
+    return undef unless $u && $cu;
+
+    # get their invite to make sure they have one
+    my $dbcr = LJ::get_cluster_reader($u);
+    my $argstr = $dbcr->selectrow_array('SELECT args FROM inviterecv WHERE userid = ? AND commid = ? ' .
+                                        'AND recvtime > DATE_SUB(NOW(), INTERVAL 30 DAY)',
+                                        undef, $u->{userid}, $cu->{userid});
+    return undef unless $argstr;
+
+    # decode to find out what they get
+    my $args = {};
+    LJ::decode_url_string($argstr, $args);
+
+    # valid invite.  let's accept it as far as the community listing us goes.
+    LJ::join_community($u, $cu) if $args->{member};
+    
+    # now grant necessary abilities
+    my %edgelist = (
+        post => 'P',
+        preapprove => 'N',
+        moderate => 'M',
+        admin => 'A',
+    );
+    foreach (keys %edgelist) {
+        LJ::set_rel($cu->{userid}, $u->{userid}, $edgelist{$_}) if $args->{$_};
+    }
+
+    # now we can delete the invite and update the status on the other side
+    my $dbcm = LJ::get_cluster_master($u);
+    $dbcm->do("DELETE FROM inviterecv WHERE userid = ? AND commid = ?",
+              undef, $u->{userid}, $cu->{userid});
+    my $cdbcm = LJ::get_cluster_master($cu); # get community's cluster master
+    $cdbcm->do("UPDATE invitesent SET status = 'accepted' WHERE commid = ? AND userid = ?",
+               undef, $cu->{userid}, $u->{userid});
+
+    # done
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::reject_comm_invite
+# des: Rejects an invitation a user has received.
+# args: uuserid, cuserid
+# des-uuserid: a userid or u object of the user to get pending invites for
+# des-cuserid: a userid or u object of the community to reject the invitation from
+# returns: 1 for success, undef if failure
+# </LJFUNC>
+sub reject_comm_invite {
+    my ($u, $cu) = @_;
+    $u = LJ::want_user($u);
+    $cu = LJ::want_user($cu);
+    return undef unless $u && $cu;
+
+    # get their invite to make sure they have one
+    my $dbcr = LJ::get_cluster_reader($u);
+    my $test = $dbcr->selectrow_array('SELECT userid FROM inviterecv WHERE userid = ? AND commid = ? ' .
+                                      'AND recvtime > DATE_SUB(NOW(), INTERVAL 30 DAY)',
+                                      undef, $u->{userid}, $cu->{userid});
+    return undef unless $test;
+
+    # now just reject it
+    my $dbcm = LJ::get_cluster_master($u);
+    $dbcm->do("DELETE FROM inviterecv WHERE userid = ? AND commid = ?",
+              undef, $u->{userid}, $cu->{userid});
+    my $cdbcm = LJ::get_cluster_master($cu); # get community's cluster master
+    $cdbcm->do("UPDATE invitesent SET status = 'rejected' WHERE commid = ? AND userid = ?",
+               undef, $cu->{userid}, $u->{userid});
+
+    # done
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::get_pending_invites
+# des: Gets a list of pending invitations for a user to join a community.
+# args: uuserid
+# des-uuserid: a userid or u object of the user to get pending invites for
+# returns: [ [ commid, maintainerid, time, args(url encoded) ], [ ... ], ... ] or
+#   undef if failure
+# </LJFUNC>
+sub get_pending_invites {
+    my $u = shift;
+    $u = LJ::want_user($u);
+    return undef unless $u;
+
+    # hit up database for invites and return them
+    my $dbcr = LJ::get_cluster_reader($u);
+    my $pending = $dbcr->selectall_arrayref('SELECT commid, maintid, DATE_FORMAT(recvtime, "%Y-%m-%d"), args FROM inviterecv ' .
+                                            'WHERE userid = ? AND recvtime > DATE_SUB(NOW(), INTERVAL 30 DAY)', 
+                                            undef, $u->{userid});
+    return undef if $dbcr->err;
+    return $pending;
+}
+
+# <LJFUNC>
 # name: LJ::leave_community
 # des: Makes a user leave a community.  Takes care of all reluser and friend stuff.
 # args: uuserid, ucommid, defriend

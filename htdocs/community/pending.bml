@@ -102,12 +102,14 @@ body<=
     $ret .= "<form method='post' action='pending.bml?comm=$cname'>";
 
     # table headers
-    $ret .= "<br /><div align='center'><table border='2' cellpadding='5'>\n<tr>" .
-            "<td>$ML{'/community/members.bml.key.user'}</td><td colspan='2'>$ML{'.approve.title'}</td></tr>\n";
+    $ret .= "<br /><div align='center'><table class='borderedtable' cellspacing='0' cellpadding='2'>\n<tr>" .
+            "<th>$ML{'/community/members.bml.key.user'}</th><th colspan='2'>$ML{'.approve.title'}</th></tr>\n";
 
     # rows for existing users
+    my $rc = 0;
     foreach (@users) {
-        $ret .= "<tr><td>" . LJ::ljuser($_->{user}) . "</td>";
+        my $rstyle = ($rc++ & 1) ? '<?altcolor1?>' : '<?altcolor2?>';
+        $ret .= "<tr style='background-color: $rstyle;'><td>" . LJ::ljuser($_->{user}) . "</td>";
         $ret .= "<td>" . LJ::html_check({ type => 'radio', name => "pending_$_->{userid}",
                                           id => "pending_$_->{userid}_yes", value => 'yes' });
         $ret .= " <label for='pending_$_->{userid}_yes'>$ML{'.yes'}</label></td>\n";

@@ -51,6 +51,78 @@ body<=
         my @userids = split(',', $POST{'ids'});
         my @saveattribs = split(',', $POST{'attribs'});
 
+        # invite new users
+        my $adding = 0;
+        my @to_add;
+        my @add_errors;
+        foreach my $num (1..5) {
+            next unless $POST{"add_$num"} =~ /^\w+$/;
+
+            my $target = LJ::load_user($POST{"add_$num"});
+            unless ($target) {
+                push @add_errors, BML::ml('.error.nouser',
+                                          { 'user' => $POST{"add_$num"} });
+                next;
+            }
+
+            unless ($target->{statusvis} eq 'V') {
+                push @add_errors, BML::ml('.error.notactive',
+                                          { 'user' => LJ::ljuser($POST{"add_$num"}) });
+                next;
+            }
+
+            my @attr = grep { defined $POST{"add_${num}_$_"} } @saveattribs;
+            unless (@attr) {
+                push @add_errors, BML::ml('.error.noattr',
+                                          { 'user' => LJ::ljuser($POST{"add_$num"},
+                                            { 'type' => $target->{'journaltype'} }) });
+                next;
+            }
+
+            unless ($target->{'journaltype'} eq 'P') {
+                push @add_errors, BML::ml('.error.invaliduser',
+                                          { 'user' => LJ::ljuser($POST{"add_$num"},
+                                            { 'type' => $target->{'journaltype'} }) });
+                next;
+            }
+
+            if (grep { $target->{'userid'} == $_ } @userids) {
+                push @add_errors, BML::ml('.error.alreadyadded',
+                                          { 'user' => LJ::ljuser($POST{"add_$num"},
+                                            { 'type' => $target->{'journaltype'} }) });
+                next;
+            }
+            
+            # insert authactions row
+            push @to_add, [ $target, \@attr ];
+        }
+        return LJ::bad_input(@add_errors) if @add_errors;
+
+        # now do the additions if any were needed
+        my @fail;
+        if (@to_add) {
+            foreach my $row (@to_add) {
+                # good, let's extend an invite to this person
+                my ($target, $attrs) = @$row;
+                LJ::send_comm_invite($target, $c, $remote, $attrs)
+                    or push @fail, [ $target, LJ::last_error_code() ];
+            }
+            $adding = 1;
+        }
+        if (@fail) {
+            my @bad;
+            foreach (@fail) {
+                if ($_->[1] eq 'comm_user_has_banned') {
+                    push @bad, BML::ml('.error.adding', { user => LJ::ljuser($_->[0], { type => 'P' }) });
+                } elsif ($_->[1] eq 'comm_invite_limit') {
+                    push @bad, BML::ml('.error.limit', { user => LJ::ljuser($_->[0], { type => 'P' }) });
+                } else {
+                    push @bad, BML::ml('.error.unknown', { user => LJ::ljuser($_->[0], { type => 'P' }) });
+                }
+            }
+            return LJ::bad_input(@bad);
+        }
+
         # initialize lists of users to update and delete
         # keyed on attribute type
         my %add = ();
@@ -240,14 +312,16 @@ body<=
     }
 
     my $sortlink = BML::get_uri() . "?comm=$cname&sort=";
-    $ret .= "<br /><div align='center'><table border='2' cellpadding='5'>\n<tr>" .
-            "<td><a href='${sortlink}name'>$ML{'.key.user'}</a></td>";
-    $ret .= "<td><a href='${sortlink}$_'><b>".$ML{".key.$_"}."</b></a></td>" for (@attribs);
+    $ret .= "<br /><div align='center'><table class='borderedtable' cellpadding='2' cellspacing='0'>\n<tr>" .
+            "<th><a href='${sortlink}name'>$ML{'.key.user'}</a></th>";
+    $ret .= "<th><a href='${sortlink}$_'>".$ML{".key.$_"}."</a></th>" for (@attribs);
     $ret .= "</tr>\n";
 
     # rows for existing users
+    my $rc = 0;
     foreach(@users) {
-        $ret .= "<tr><td>" . LJ::ljuser($_->{'name'}) . "</td>";
+        my $rstyle = ($rc++ & 1) ? "<?altcolor1?>" : "<?altcolor2?>";
+        $ret .= "<tr style='background-color: $rstyle;'><td>" . LJ::ljuser($_->{'name'}) . "</td>";
         foreach my $key (@attribs) {
             $ret .= "<td align='center'>";
             $ret .= LJ::html_check({ 'name' => "edit_$_->{'userid'}_$key",
@@ -255,6 +329,25 @@ body<=
             $ret .= "</td>";
         }
         $ret .= "</tr>\n";
+    }
+
+    # if on the last page, let users add to the list
+    if ($items{'page'} == $items{'pages'}) {
+        foreach(1..5) {
+            my $rstyle = ($rc++ & 1) ? "<?altcolor1?>" : "<?altcolor2?>";
+            $ret .= "<tr style='background-color: $rstyle;'><td>";
+            $ret .= LJ::html_text({ 'name' => "add_$_", 'size' => '10', 'maxlength' => '15' }) . "</td>";
+            foreach my $key (@attribs) {
+                $ret .= "<td align='center'>";
+                if ($key eq 'member') {
+                    $ret .= LJ::html_check({ name => "add_${_}_$key", selected => 1, });
+                } else {
+                    $ret .= LJ::html_check({ name => "add_${_}_$key" });
+                }
+                $ret .= "</td>";
+            }
+            $ret .= "</tr>\n";
+        }
     }
 
     # some hidden values

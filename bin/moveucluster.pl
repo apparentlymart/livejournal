@@ -234,6 +234,8 @@ my %skip_table = (
                   "captcha_session" => 1, # temporary
                   "tempanonips" => 1,     # temporary ip storage for spam reports
                   );
+$skip_table{'inviterecv'} = 1 if $u->{journaltype} ne 'P'; # non-person, skip invites received
+$skip_table{'invitesent'} = 1 if $u->{journaltype} ne 'C'; # not community, skip invites sent
 
 # we had a concern at the time of writing this dependency optization
 # that we might use "log3" and "talk3" tables in the future with the
@@ -476,11 +478,11 @@ sub fetch_tableinfo
             $table eq "cmdbuffer" || $table eq "captcha_session";
         next if $tinfo->{$table};  # no need to load this one
 
-# find the index we'll use
-            my $idx;     # the index name we'll be using
-            my $idxcol;  # "userid" or "journalid"
+        # find the index we'll use
+        my $idx;     # the index name we'll be using
+        my $idxcol;  # "userid" or "journalid"
 
-            my $sth = $dbo->prepare("SHOW INDEX FROM $table");
+        my $sth = $dbo->prepare("SHOW INDEX FROM $table");
         $sth->execute;
         my @pris;
 
@@ -489,7 +491,8 @@ sub fetch_tableinfo
             next unless $r->{'Seq_in_index'} == 1;
             next if $idx;
             if ($r->{'Column_name'} eq "journalid" ||
-                $r->{'Column_name'} eq "userid") {
+                $r->{'Column_name'} eq "userid" ||
+                $r->{'Column_name'} eq "commid") {
                 $idx = $r->{'Key_name'};
                 $idxcol = $r->{'Column_name'};
             }

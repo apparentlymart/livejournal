@@ -20,7 +20,11 @@ body<=
  use strict;
  use vars qw(%GET %POST);
 
- my $ret = "";
+ # always have links at top
+ my $ret = BML::ml('Backlink', {
+     'link' => '/community/manage.bml',
+     'text' => $ML{'/community/members.bml.manage2'},
+ });
  my %errors;
 
  my $remote = LJ::get_remote();

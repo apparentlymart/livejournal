@@ -1773,6 +1773,31 @@ CREATE TABLE partialstatsdata (
 )
 EOC
    
+# inviterecv -- stores community invitations received
+register_tablecreate("inviterecv", <<'EOC');
+CREATE TABLE inviterecv (
+    userid      INT(10) UNSIGNED NOT NULL,
+    commid      INT(10) UNSIGNED NOT NULL,
+    maintid     INT(10) UNSIGNED NOT NULL,
+    recvtime    TIMESTAMP NOT NULL,
+    args        VARCHAR(255),
+    PRIMARY KEY (userid, commid)
+)
+EOC
+
+# invitesent -- stores community invitations sent
+register_tablecreate("invitesent", <<'EOC');
+CREATE TABLE invitesent (
+    commid      INT(10) UNSIGNED NOT NULL,
+    userid      INT(10) UNSIGNED NOT NULL,
+    maintid     INT(10) UNSIGNED NOT NULL,
+    recvtime    TIMESTAMP NOT NULL,
+    status      ENUM('accepted', 'rejected', 'outstanding') NOT NULL,
+    args        VARCHAR(255),
+    PRIMARY KEY (commid, userid)
+)
+EOC
+
 
 # NOTE: new table declarations go here
 

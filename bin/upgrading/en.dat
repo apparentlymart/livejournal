@@ -230,6 +230,8 @@ p?>
 
 /community/manage.bml.commlist.actions=<b>Actions</b>
 
+/community/manage.bml.commlist.actinvites=Invitations
+
 /community/manage.bml.commlist.actmembers=<b>[<a href='[[link]]'>Members</a>]</b>
 
 /community/manage.bml.commlist.actmembers2=Members
@@ -273,11 +275,15 @@ p?>
 
 /community/manage.bml.title=Community Management
 
+/community/members.bml.error.adding=[[user]] has banned this community from sending them invitations.
+
 /community/members.bml.error.alreadyadded=[[user]] was not added because they already have access to this community.
 
 /community/members.bml.error.alreadysent=[[user]] could not be added because they were already sent a confirmation email on: <i>[[datetime]]</i>.  Please wait for them to respond.
 
 /community/members.bml.error.invaliduser=Cannot add community or syndicated account: [[user]]
+
+/community/members.bml.error.limit=Unable to invite [[user]], the outstanding invitation limit for this community has been exceeded.
 
 /community/members.bml.error.noaccess=Only community maintainers are able to edit membership lists. You are not a maintainer of community [[comm]].
 
@@ -285,7 +291,11 @@ p?>
 
 /community/members.bml.error.nocomm=Community not found.
 
+/community/members.bml.error.notactive=Account is not active: <b>[[user]]</b>
+
 /community/members.bml.error.nouser=User does not exist: <b>[[user]]</b>
+
+/community/members.bml.error.unknown=Error inviting [[user]].  Please make sure they're not already a member and try again.
 
 /community/members.bml.key.admin=<b>Maintainer</b>
 
@@ -476,6 +486,22 @@ p?>
 /community/search.bml.sel.week=week
 
 /community/search.bml.title=Community Search
+
+/community/sentinvites.bml.date=Date Sent
+
+/community/sentinvites.bml.key.date=Date
+
+/community/sentinvites.bml.key.sentby=Sent By
+
+/community/sentinvites.bml.key.status=Status
+
+/community/sentinvites.bml.none.body=No invites have been sent in the past 30 days.  If you wish to invite people to this community, please visit the <a [[aopts]]>Members page</a>.
+
+/community/sentinvites.bml.none.title=No Invites Found
+
+/community/sentinvites.bml.send=Send Invitations
+
+/community/sentinvites.bml.title=Sent Invitations
 
 /community/settings.bml.button.changecommunity=Update Settings
 
@@ -2063,6 +2089,8 @@ The site team
 
 /manage/index.bml.communities.header=Communities
 
+/manage/index.bml.communities.invites.about=View any pending invitations you have received to join communities.
+
 /manage/index.bml.communities.manage.about=Manage your communities' settings and members
 
 /manage/index.bml.customization=Customize the look of your journal pages:
@@ -2139,6 +2167,52 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 /manage/index.bml.userpictures.edit.about=Upload and Manage Your User Picture Icons
 
 /manage/index.bml.userpictures.header=User Picture Icons
+
+/manage/invites.bml.abilities.title=Abilities
+
+/manage/invites.bml.accept=Accept
+
+/manage/invites.bml.accepted.body=You have joined the following communities, with the mentioned abilities:
+
+/manage/invites.bml.accepted.title=Invitations Accepted
+
+/manage/invites.bml.actions.title=Actions
+
+/manage/invites.bml.back=Manage invites
+
+/manage/invites.bml.community.title=Community
+
+/manage/invites.bml.decline=Decline
+
+/manage/invites.bml.fromline=From [[user]] ([[date]])
+
+/manage/invites.bml.label.admin=Maintainer
+
+/manage/invites.bml.label.member=Member
+
+/manage/invites.bml.label.moderate=Moderator
+
+/manage/invites.bml.label.post=Can Post
+
+/manage/invites.bml.label.preapprove=Unmoderated
+
+/manage/invites.bml.manage=Manage account
+
+/manage/invites.bml.none.body=You have no pending community invitations at this time.
+
+/manage/invites.bml.none.title=Nothing Pending
+
+/manage/invites.bml.rejected.body=You have rejected the following community invitations:
+
+/manage/invites.bml.rejected.title=Invitations Rejected
+
+/manage/invites.bml.submit=Submit Selections
+
+/manage/invites.bml.title=Manage Community Invitations
+
+/manage/invites.bml.undecided.body=You have not decided on actions for the following invitations:
+
+/manage/invites.bml.undecided.title=Invitations Still Pending
 
 /manage/links.bml.about=Use the form below to create a list of links to appear on your journal. Links will only appear if this feature is supported by your S2 style.
 

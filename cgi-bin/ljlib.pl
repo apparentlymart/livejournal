@@ -42,7 +42,7 @@ do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
                     "userproplite2", "links", "s1overrides", "s1style",
                     "s1stylecache", "userblob", "userpropblob",
                     "clustertrack2", "captcha_session", "reluser2",
-                    "tempanonips");
+                    "tempanonips", "inviterecv", "invitesent",);
 
 # keep track of what db locks we have out
 %LJ::LOCK_OUT = (); # {global|user} => caller_with_lock
@@ -8087,6 +8087,8 @@ sub last_error
         'comm_not_found' => "Community not found",
         'comm_not_comm' => "Account not a community",
         'comm_not_member' => "User not a member of community",
+        'comm_invite_limit' => "Outstanding invitation limit reached",
+        'comm_user_has_banned' => "Unable to invite; user has banned community",
     };
     my $des = $err->{$LJ::last_error};
     if ($LJ::last_error eq "db" && $LJ::db_error) {
