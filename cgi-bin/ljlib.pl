@@ -783,7 +783,7 @@ sub make_auth_code
 sub make_text_link
 {
     my ($url, $email) = @_;
-    if ($email =~ /\@aol.com$/i) {
+    if ($email =~ /\@aol\.com$/i) {
 	return "<A HREF=\"$url\">$url</A>";
     }
     return $url;
