@@ -251,7 +251,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      # Check the turing test answer if it's turned on
      if ($LJ::HUMAN_CHECK{create} && 
          ! LJ::Captcha::check_code($POST{capid}, $POST{anum}, $POST{answer}, $u)) {
-         $errors{'captcha'} = $ML{'.captcha.invalid.'};
+         $errors{'captcha'} = $ML{'.captcha.invalid'};
      }
 
      last SUBMIT if %errors;
