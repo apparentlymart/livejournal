@@ -141,6 +141,10 @@ body<=
 
     LJ::load_user_props($dbs, $u, "opt_notalkicons", "opt_logcommentips", "opt_whoscreened");
 
+    # don't allow anonymous comments on syndicated items
+    if ($u->{'journaltype'} eq "Y" && $u->{'opt_whocanreply'} eq "all") {
+        $u->{'opt_whocanreply'} = "reg";
+    }
 
     ####  Check security before viewing this post
     return $errtxt unless LJ::Talk::check_viewable($dbs, $remote, $item, \%FORM, \$errtxt);

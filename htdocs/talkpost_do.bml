@@ -189,6 +189,11 @@ body<=
         }
     }
 
+    # don't allow anonymous comments on syndicated items
+    if ($u->{'journaltype'} eq "Y" && $u->{'opt_whocanreply'} eq "all") {
+        $u->{'opt_whocanreply'} = "reg";
+    }
+
     if ($FORM{'usertype'} ne "user" && $u->{'opt_whocanreply'} ne "all") {
         push @errors, $ML{'.error.noanon'};
     }
