@@ -449,11 +449,11 @@ sub send
 
     elsif ($provider eq "voicestream" )
     {
-        post_webform("http://www.voicestream.com/messagecenter/rtsValidate.asp", $errors, {
-            "txtNum0"	=> $self->{'number'},
-            "From"	=> $msg->{'from'},
-            "Message"	=> $msg->{'message'},
-            "totSubscriber" => 1,   ## who knows what this is.
+        post_webform("http://www.voicestream.com/messagecenter/".
+		     "default.asp?num=$self->{'number'}", $errors, {
+            "txtNum"     => $self->{'number'},
+            "txtFrom"    => $msg->{'from'},
+            "txtMessage" => $msg->{'message'},
         });
     }
 
