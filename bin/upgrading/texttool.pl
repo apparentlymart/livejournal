@@ -60,6 +60,7 @@ unless (-d $ENV{'LJHOME'}) {
         "You must fix this before you can run this database update script.";
 }
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 
 my %dom_id;     # number -> {}
 my %dom_code;   # name   -> {}
