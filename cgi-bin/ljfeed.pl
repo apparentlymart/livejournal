@@ -3,6 +3,7 @@
 use strict;
 
 package LJ::Feed;
+use Apache::Constants qw(OK);
 
 my %feedtypes = (
     rss  => \&create_view_rss,
@@ -67,6 +68,34 @@ sub make_feed
     my $logdb = LJ::get_cluster_reader($u);
     LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
     $logtext = LJ::get_logtext2($u, @itemids);
+
+    # set last-modified header, then let apache figure out
+    # whether we actually need to send the feed.
+    my $lastmod = 0;
+    foreach my $item (@items) {
+        # revtime of the item.
+        my $revtime = $logprops{$item->{itemid}}->{revtime};
+        $lastmod = $revtime if $revtime > $lastmod;
+
+        # if we don't have a revtime, use the logtime of the item.
+        unless ($revtime) {
+            my $itime = $LJ::EndOfTime - $item->{rlogtime};
+            $lastmod = $itime if $itime > $lastmod;
+        }
+    }
+    $r->set_last_modified($lastmod) if $lastmod;
+
+    # regarding $r->set_etag:
+    # http://perl.apache.org/docs/general/correct_headers/correct_headers.html#Entity_Tags
+    # It is strongly recommended that you do not use this method unless you
+    # know what you are doing. set_etag() is expecting to be used in
+    # conjunction with a static request for a file on disk that has been
+    # stat()ed in the course of the current request. It is inappropriate and
+    # "dangerous" to use it for dynamic content.
+    if ((my $status = $r->meets_conditions) != OK) {
+        $opts->{handler_return} = $status;
+        return undef;
+    }
 
     # some data used throughout the channel
     my $journalinfo = {
