@@ -918,6 +918,51 @@ property string text_day_next {
 set text_day_prev = "Previous Day";
 set text_day_next = "Next Day";
 
+property string text_comment_from {
+    des = "Text of the 'from' header in comments";
+    example = "From:";
+    maxlength = "20";
+}
+property string text_comment_date {
+    des = "Text of the 'date' header in comments";
+    example = "Date:";
+    maxlength = "20";
+}
+property string text_comment_ipaddr {
+    des = "Text of the 'IP Address' header in comments";
+    example = "IP Address:";
+    maxlength = "20";
+}
+set text_comment_from = "From:";
+set text_comment_date = "Date:";
+set text_comment_ipaddr = "IP Address:";
+
+property string text_comment_reply {
+    des = "Text to link to reply for for comment";
+    example = "Reply to this";
+    maxlength = "50";
+}
+property string text_comment_parent {
+    des = "Text to link to parent comment of current comment";
+    example = "Parent";
+    maxlength = "50";
+}
+property string text_comment_thread {
+    des = "Text to link to the thread stemming from the comment";
+    example = "Thread";
+    maxlength = "50";
+}
+set text_comment_reply = "Reply";
+set text_comment_parent = "Parent";
+set text_comment_thread = "Thread";
+
+property string text_reply_back {
+    des = "Text to link back to the single entry view from the read comments page";
+    example = "Read Comments";
+    maxlength = "50";
+}
+set text_reply_back = "Read Comments";
+
 property bool view_entry_disabled {
     des = "Set to true in a layout to fall-back to the system-provided single entry view and comment system.";
 }
@@ -936,7 +981,7 @@ property string comment_userpic_style {
 }
 set comment_userpic_style = "";
 
-##[ global function implementations ]
+###[ global function implementations ]
 
 function lang_map_plural (int n) : int {
     if ($n == 1) { return 0; } # singular
@@ -991,8 +1036,8 @@ function lang_viewname(string viewid) [notags] : string
     if ($viewid == "day") { return "Day"; }
     if ($viewid == "month") { return "Month"; }
     if ($viewid == "userinfo") { return $*text_view_userinfo; }
-    if ($viewid == "commentread") { return "Read Comments"; }
-    if ($viewid == "commentpost") { return "Post Comment"; }
+    if ($viewid == "entry") { return "Read Comments"; }
+    if ($viewid == "reply") { return "Post Comment"; }
     return "Unknown View";
 }
 
@@ -1014,14 +1059,14 @@ function Image::as_string(string alttext) [fixed] : string {
     var string img = """<img src="$.url" """;
     $img = $img + htmlattr("height", $.height); 
     $img = $img + htmlattr("width", $.width);
-    if ($alttext != "") { $img = $img + htmlattr("alt", $alttext); }
+    $img = $img + htmlattr("alt", $alttext);
     $img = $img + " />";
 
     return $img;
 }
 
 function Image::as_string() [fixed] : string {
-    return "<img src=\"$.url\" " +
+    return """<img src="$.url" alt="" """ +
         htmlattr("height", $.height) +
         htmlattr("width", $.width) + " />";
 }
@@ -1111,6 +1156,14 @@ function DayPage::view_title : string {
 function YearPage::view_title() : string {
     return string($.year);
 }
+function EntryPage::view_title() : string {
+    return $.entry.subject ? $.entry.subject->substr(0,40) : "";
+}
+function ReplyPage::view_title() : string {
+    return $.entry.subject ? 
+        "Reply to " + $.entry.subject->substr(0,40) :
+        "Post a new comment";
+}
 function Page::title() [notags] : string {
     var string title = $.global_title;
     if ($title == "") {
@@ -1177,10 +1230,8 @@ function Page::print_entry(Entry e) {
     ## For most styles, this will be overridden by FriendsPage::print_entry and such.
     """<div class="entry" id="entry$e.itemid">\n""";
     "<h3>";
-    if ($e.security != "") {
-        print $e.security_icon->as_string();
-    }
-    if ($e.subject != "") {
+    print $e.security_icon->as_string();
+    if ($e.subject) {
         " $e.subject";
     }
     "</h3>\n";
@@ -1203,10 +1254,8 @@ function FriendsPage::print_entry(Entry e) {
     $fg = $.friends{$e.journal.username}.fgcolor;
     "<h3>";
     $this->print_entry_poster($e);
-    if ($e.security != "") {
-        $e.security_icon->print($e.security);
-    }
-    if ($e.subject != "") {
+    $e.security_icon->print($e.security);
+    if ($e.subject) {
         " $e.subject";
     }
     "</h3>\n";
@@ -1452,6 +1501,7 @@ function Redirector::end_form ()
     "</form>";
 }
 
+### EntryPage functions
 
 function EntryPage::print_comments (Comment[] cs) {
     if (size $cs == 0) { return; }
@@ -1473,10 +1523,6 @@ function EntryPage::print_comment (Comment c) {
     $barlight->lightness(($barlight->lightness() + 255) / 2);
     var Color barc = $c.depth % 2 ? $*color_comment_bar : $barlight;
     var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
-    var string sub_icon;
-    if (defined $c.subject_icon) {
-        $sub_icon = $c.subject_icon->as_string();
-    }
     "<div style='background: $barc; margin-top: 10px;'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%;'><tr valign='top'>";
     var int td = 3;
@@ -1491,21 +1537,21 @@ function EntryPage::print_comment (Comment c) {
             $w = $w / 2;
             $h = $h / 2;
         }
-        print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' /></td>";
+        print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' alt='' /></td>";
     }
-    print "<td align='left'><strong>From:</strong> $poster</td>";
-    print "<td align='left'><strong>Date:</strong> ";
-        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td>";
-    print "<td align='right'><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td></tr>";
+    print "<td align='left'><strong>$*text_comment_from</strong> $poster</td>\n";
+    print "<td align='left'><strong>$*text_comment_date</strong> ";
+        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td>\n";
+    print "<td align='right'><strong>(<a href='$c.permalink_url'>$*text_permalink</a>)</strong></td>\n</tr>\n";
     print "<tr valign='top'><td colspan='$td' style='width: 95%'>";
-    if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>"; }
-    if ($c.metadata{"poster_ip"}) { print " (IP Address: " + $c.metadata{"poster_ip"} + ")"; }
+    if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>\n"; }
+    if ($c.metadata{"poster_ip"}) { print " ($*text_comment_ipaddr " + $c.metadata{"poster_ip"} + ")"; }
     print "</td></tr></table></div>";
-    print "<div style='margin-left: 5px'>$c.text</div>";
-    print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>Reply to this</a>) ";
-    if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
-    if ($c.thread_url != "") { "(<a href='$c.thread_url'>Thread</a>) "; }
-    "</div>";
+    print "<div style='margin-left: 5px'>$c.text</div>\n";
+    print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>$*text_comment_reply</a>) ";
+    if ($c.parent_url != "") { "(<a href='$c.parent_url'>$*text_comment_parent</a>) "; }
+    if ($c.thread_url != "") { "(<a href='$c.thread_url'>$*text_comment_thread</a>) "; }
+    "</div>\n";
 }
 
 function EntryPage::print_comment_partial (Comment c) {
@@ -1548,12 +1594,8 @@ function EntryPage::print_body
     "</td></tr></table>\n";
 
     "<h2>"; 
-    if ($e.security != "") {
-        print $e.security_icon->as_string();
-    }
-    if ($e.subject != "") {
-        " $e.subject";
-    }
+    print $e.security_icon->as_string();
+    if ($e.subject) { " $e.subject"; }
     "</h2>\n";
 
     if (not $.viewing_thread) {
@@ -1564,19 +1606,19 @@ function EntryPage::print_body
 
     if ($.entry.comments.enabled)
     {
-        print """<hr />(<a href="$e.comments.post_url">Post a new comment</a>)""";
+        print """<hr />(<a href="$e.comments.post_url">$*text_post_comment</a>)""";
         if ($.comment_pages.total_subitems > 0) {
             $.comment_pages->print();
             $this->print_comments($.comments);
             print "<hr />";
-            print """(<a href="$e.comments.post_url">Post a new comment</a>)""";
+            print """(<a href="$e.comments.post_url">$*text_post_comment</a>)""";
         }
     }
 }
 
 function ReplyPage::print_body
 {
-    if (not $.entry.comments.enabled) { 
+    if (not $.entry.comments.enabled) {
         print "<h2>Comments Disabled</h2><p>Commenting to this entry has been disabled</p>";
         return; 
     }
@@ -1584,6 +1626,6 @@ function ReplyPage::print_body
     print "<div>$.replyto.text</div>";
 
     print "\n<hr />\n";
-    print """(<a href="$.entry.permalink_url">Read Comments</a>)""";
+    print """(<a href="$.entry.permalink_url">$*text_reply_back</a>)""";
     $.form->print();
 }
