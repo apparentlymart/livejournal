@@ -146,9 +146,12 @@
     </note>
     <important><para>
       To ensure that you have installed the necessary modules, be sure to
-      run the included tool: <filename>/bin/checkconfig.pl</filename>. 
+      run the included tool: <filename><envar>$LJHOME</envar>/bin/checkconfig.pl</filename>. 
       If <filename>checkconfig.pl</filename> doesn't detect all of the
-      required modules, it will tell you which ones you are missing.
+      required modules, it will tell you which ones you are missing. Note that this tool will
+      fail after checking for modules, because it will also check for a database connection, which
+      hasn't been set up yet. This will be fixed later when we add options to 
+      <filename>checkconfig.pl</filename> to detect for specific sections of installation.
     </para></important>
   </section>
 </chapter>

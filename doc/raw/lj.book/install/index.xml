@@ -11,8 +11,8 @@
       If you have any questions, or encounter any problems not easily remedied, feel free to join the <quote><ulink url="http://www.livejournal.com/userinfo.bml?user=lj_everywhere">LiveJournal Everywhere!</ulink></quote> Community.
     </para>
   </partintro>
-  &lj.install.general_setup;
   &lj.install.perl_setup;
+  &lj.install.general_setup;
   &lj.install.apache_setup;
   &lj.install.ljconfig;
   &lj.install.mysql_setup;
