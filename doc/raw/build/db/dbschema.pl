@@ -66,11 +66,8 @@ sub dump_xml
 my %table;
 my %coldes;
 
-$sth = $dbr->prepare("SHOW TABLES");
-$sth->execute;
-while (my ($table) = $sth->fetchrow_array) {
-    next if $table =~ /^access\d\d\d\d/;
-    $table{$table} = {};
+foreach (`$ENV{'LJHOME'}/bin/upgrading/update-db.pl --listtables`) {
+    $table{$_} = {};
 }
 
 $sth = $dbr->prepare("SELECT tablename, public_browsable, des FROM schematables");

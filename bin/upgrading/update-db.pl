@@ -13,6 +13,7 @@ my $opt_confirm = "";
 my $opt_skip = "";
 my $opt_help = 0;
 my $cluster = 0;   # by default, upgrade master.
+my $opt_listtables;
 exit 1 unless
 GetOptions("runsql" => \$opt_sql,
            "drop" => \$opt_drop,
@@ -21,6 +22,7 @@ GetOptions("runsql" => \$opt_sql,
            "cluster=i" => \$cluster,
            "skip=s" => \$opt_skip,
            "help" => \$opt_help,
+           "listtables" => \$opt_listtables,
            );
 
 if ($opt_help) {
@@ -29,6 +31,7 @@ if ($opt_help) {
   -p  --populate     Populate the database with the latest required base data.
   -d  --drop         Drop old unused tables (default is to never)
       --cluster <n>  Upgrade cluster number <n> (default is global cluster)
+  -l  --listtables   Print used tables, one per line.
 ";
 }
 
@@ -69,9 +72,11 @@ while (my ($table) = $sth->fetchrow_array) {
 load_datfile("$LJ::HOME/bin/upgrading/update-db-local.pl", 1);
 load_datfile("$LJ::HOME/bin/upgrading/update-db-general.pl");
 
-foreach my $t (keys %table_create) {
+foreach my $t (sort keys %table_create) {
     delete $table_drop{$t} if ($table_drop{$t});
+    print "$t\n" if $opt_listtables;
 }
+exit if $opt_listtables;
 
 foreach my $t (keys %table_drop) {
     delete $table_unknown{$t};
