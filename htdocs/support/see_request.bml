@@ -538,6 +538,9 @@ body<=
         if (LJ::Support::can_help($sp, $remote)) {
             $ret .= "<tr><td>Change summary:</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'changesum' });
+            $ret .= LJ::html_text({ 'type' => 'text', 'name' => 'summary', 'size' => '50', 'maxlength' => '80', 'value' => $sp->{'subject'} });
+            $ret .= "</td></tr>\n";
+            $ret .= "<tr><td>&nbsp;</td><td>";
             $ret .= "<?de (Use this to change the request summary.) de?>\n";
             $ret .= "</td></tr>\n";
 	}

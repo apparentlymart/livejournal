@@ -72,7 +72,7 @@ body<=
 
     return LJ::bad_input($ML{'.invalid.blank'})
         if $FORM{'body'} !~ /\S/ && !$FORM{'approveans'} && !$FORM{'changecat'} &&
-            !$FORM{'touch'} && !$FORM{'untouch'};
+            !$FORM{'touch'} && !$FORM{'untouch'} && !$FORM{'changesum'};
 
     # get dbh now, it's always needed
     my $dbh = LJ::get_db_writer();
@@ -186,10 +186,10 @@ body<=
 
     ## change summary
     if ($FORM{'changesum'}) {
-        $FORM{'body'} =~ s/[\n\r]//g;
-        my $qnewsub = $dbh->quote($FORM{'body'});
+        $FORM{'summary'} =~ s/[\n\r]//g;
+        my $qnewsub = $dbh->quote($FORM{'summary'});
         $dbh->do("UPDATE support SET subject=$qnewsub WHERE spid=$spid");
-        $status .= "Changing subject from \"$sp->{'subject'}\" to: ";
+        $status .= "Changing subject from \"$sp->{'subject'}\" to \"$FORM{'summary'}\".\n\n";
     }
 
     my $splid = LJ::Support::append_request($sp, {
