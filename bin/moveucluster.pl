@@ -58,9 +58,9 @@ if ($LJ::USE_RECENT_TABLES) {
 my $readonly_bit = undef;
 foreach (keys %LJ::CAP) {
     if ($LJ::CAP{$_}->{'_name'} eq "_moveinprogress" &&
-	$LJ::CAP{$_}->{'readonly'} == 1) {
-	$readonly_bit = $_;
-	last;
+        $LJ::CAP{$_}->{'readonly'} == 1) {
+        $readonly_bit = $_;
+        last;
     }
 }
 unless (defined $readonly_bit) {
@@ -97,18 +97,18 @@ if ($sclust == 0)
 {
     # do bio stuff
     {
-	my $bio = $dbh->selectrow_array("SELECT bio FROM userbio WHERE userid=$userid");
-	my $bytes = length($bio);
-	$dbch->do("REPLACE INTO dudata (userid, area, areaid, bytes) VALUES ($userid, 'B', 0, $bytes)");
-	if ($separate_cluster) {
-	    $bio = $dbh->quote($bio);
-	    $dbch->do("REPLACE INTO userbio (userid, bio) VALUES ($userid, $bio)");
-	}
+        my $bio = $dbh->selectrow_array("SELECT bio FROM userbio WHERE userid=$userid");
+        my $bytes = length($bio);
+        $dbch->do("REPLACE INTO dudata (userid, area, areaid, bytes) VALUES ($userid, 'B', 0, $bytes)");
+        if ($separate_cluster) {
+            $bio = $dbh->quote($bio);
+            $dbch->do("REPLACE INTO userbio (userid, bio) VALUES ($userid, $bio)");
+        }
     }
 
     my @itemids = reverse @{$dbh->selectcol_arrayref("SELECT itemid FROM log ".
-						     "WHERE ownerid=$u->{'userid'} ".
-						     "ORDER BY ownerid, rlogtime")};
+                                                     "WHERE ownerid=$u->{'userid'} ".
+                                                     "ORDER BY ownerid, rlogtime")};
 
     my $todo = @itemids;
     my $done = 0;
@@ -117,13 +117,13 @@ if ($sclust == 0)
 
     # moving time, journal item at a time, and everything recursively under it
     foreach my $itemid (@itemids) {
-	movefrom0_logitem($itemid);
-	$done++;
-	my $percent = $done/$todo;
-	my $elapsed = time() - $stime;
-	my $totaltime = $elapsed * (1 / $percent);
-	my $timeremain = int($totaltime - $elapsed);
-	$stmsg->(sprintf "$user: copy $done/$todo (%.2f%%) +${elapsed}s -${timeremain}s\n", 100*$percent);
+        movefrom0_logitem($itemid);
+        $done++;
+        my $percent = $done/$todo;
+        my $elapsed = time() - $stime;
+        my $totaltime = $elapsed * (1 / $percent);
+        my $timeremain = int($totaltime - $elapsed);
+        $stmsg->(sprintf "$user: copy $done/$todo (%.2f%%) +${elapsed}s -${timeremain}s\n", 100*$percent);
     }
 
     # update their memories.  in particular, any memories of their own
@@ -133,37 +133,37 @@ if ($sclust == 0)
     # globalid on the clustered log table)
     print "Fixing memories.\n";
     my @fix = @{$dbh->selectall_arrayref("SELECT m.memid, o.newid FROM memorable m, oldids o WHERE ".
-					 "m.userid=$u->{'userid'} AND m.journalid=0 AND o.area='L' ".
-					 "AND o.userid=$u->{'userid'} AND m.jitemid=o.oldid")};
+                                         "m.userid=$u->{'userid'} AND m.journalid=0 AND o.area='L' ".
+                                         "AND o.userid=$u->{'userid'} AND m.jitemid=o.oldid")};
     foreach my $f (@fix) {
-	my ($memid, $newid) = ($f->[0], $f->[1]);
-	my ($newid2, $anum) = $dbch->selectrow_array("SELECT jitemid, anum FROM log2 ".
-						     "WHERE journalid=$u->{'userid'} AND ".
-						     "jitemid=$newid");
-	if ($newid2 == $newid) {
-	    my $ditemid = $newid * 256 + $anum;
-	    print "UPDATE $memid TO $ditemid\n";
-	    $dbh->do("UPDATE memorable SET journalid=$u->{'userid'}, jitemid=$ditemid ".
-		     "WHERE memid=$memid");
-	}
+        my ($memid, $newid) = ($f->[0], $f->[1]);
+        my ($newid2, $anum) = $dbch->selectrow_array("SELECT jitemid, anum FROM log2 ".
+                                                     "WHERE journalid=$u->{'userid'} AND ".
+                                                     "jitemid=$newid");
+        if ($newid2 == $newid) {
+            my $ditemid = $newid * 256 + $anum;
+            print "UPDATE $memid TO $ditemid\n";
+            $dbh->do("UPDATE memorable SET journalid=$u->{'userid'}, jitemid=$ditemid ".
+                     "WHERE memid=$memid");
+        }
     }
 
     # fix polls
     print "Fixing polls.\n";
     @fix = @{$dbh->selectall_arrayref("SELECT p.pollid, o.newid FROM poll p, oldids o ".
-				      "WHERE o.userid=$u->{'userid'} AND ".
-				      "o.area='L' AND o.oldid=p.itemid AND ".
-				      "p.journalid=$u->{'userid'}")};
+                                      "WHERE o.userid=$u->{'userid'} AND ".
+                                      "o.area='L' AND o.oldid=p.itemid AND ".
+                                      "p.journalid=$u->{'userid'}")};
     foreach my $f (@fix) {
-	my ($pollid, $newid) = ($f->[0], $f->[1]);
-	my ($newid2, $anum) = $dbch->selectrow_array("SELECT jitemid, anum FROM log2 ".
+        my ($pollid, $newid) = ($f->[0], $f->[1]);
+        my ($newid2, $anum) = $dbch->selectrow_array("SELECT jitemid, anum FROM log2 ".
                                                      "WHERE journalid=$u->{'userid'} AND ".
-						     "jitemid=$newid");
+                                                     "jitemid=$newid");
         if ($newid2 == $newid) {
-	    my $ditemid = $newid * 256 + $anum;
+            my $ditemid = $newid * 256 + $anum;
             print "UPDATE $pollid TO $ditemid\n";
-	    $dbh->do("UPDATE poll SET itemid=$ditemid WHERE pollid=$pollid");
-	}
+            $dbh->do("UPDATE poll SET itemid=$ditemid WHERE pollid=$pollid");
+        }
     }
 
     # before we start deleting, record they've moved servers.
@@ -173,22 +173,22 @@ if ($sclust == 0)
     # if everything's good (nothing's died yet), then delete all from source
     if ($opt_del)
     {
-	$done = 0;
-	$stime = time();
-	foreach my $itemid (@itemids) {
-	    deletefrom0_logitem($itemid);
-	    $done++;
-	    my $percent = $done/$todo;
-	    my $elapsed = time() - $stime;
-	    my $totaltime = $elapsed * (1 / $percent);
-	    my $timeremain = int($totaltime - $elapsed);
-	    $stmsg->(sprintf "$user: delete $done/$todo (%.2f%%) +${elapsed}s -${timeremain}s\n", 100*$percent);
-	}
-	
-	# delete bio from source, if necessary
-	if ($separate_cluster) {
-	    $dbh->do("DELETE FROM userbio WHERE userid=$userid");
-	}
+        $done = 0;
+        $stime = time();
+        foreach my $itemid (@itemids) {
+            deletefrom0_logitem($itemid);
+            $done++;
+            my $percent = $done/$todo;
+            my $elapsed = time() - $stime;
+            my $totaltime = $elapsed * (1 / $percent);
+            my $timeremain = int($totaltime - $elapsed);
+            $stmsg->(sprintf "$user: delete $done/$todo (%.2f%%) +${elapsed}s -${timeremain}s\n", 100*$percent);
+        }
+        
+        # delete bio from source, if necessary
+        if ($separate_cluster) {
+            $dbh->do("DELETE FROM userbio WHERE userid=$userid");
+        }
     }
 
     # unset read-only bit (marks the move is complete, also, and not aborted mid-delete)
@@ -202,18 +202,18 @@ sub deletefrom0_logitem
 
     # delete all the comments
     my $talkids = $dbh->selectcol_arrayref("SELECT talkid FROM talk ".
-					   "WHERE nodetype='L' AND nodeid=$itemid");
+                                           "WHERE nodetype='L' AND nodeid=$itemid");
 
     my $talkidin = join(",", @$talkids);
     if ($talkidin) {
-	foreach my $table (qw(talktext talkprop talk)) {
-	    $dbh->do("DELETE FROM $table WHERE talkid IN ($talkidin)");
-	}
+        foreach my $table (qw(talktext talkprop talk)) {
+            $dbh->do("DELETE FROM $table WHERE talkid IN ($talkidin)");
+        }
     }
 
     $dbh->do("DELETE FROM logsec WHERE ownerid=$userid AND itemid=$itemid");
     foreach my $table (qw(logprop logtext logsubject log)) {
-	$dbh->do("DELETE FROM $table WHERE itemid=$itemid");
+        $dbh->do("DELETE FROM $table WHERE itemid=$itemid");
     }
 
     $dbh->do("DELETE FROM syncupdates WHERE userid=$userid AND nodetype='L' AND nodeid=$itemid");
@@ -231,15 +231,15 @@ sub movefrom0_logitem
     # we need to allocate a new jitemid (journal-specific itemid) for this item now.
     $dbh->{'RaiseError'} = 0;
     $dbh->do("INSERT INTO oldids (area, oldid, userid, newid) ".
-	     "VALUES ('L', $itemid, $userid, NULL)");
+             "VALUES ('L', $itemid, $userid, NULL)");
     my $jitemid = 0;
     if ($dbh->err) {
-	$jitemid = $dbh->selectrow_array("SELECT newid FROM oldids WHERE area='L' AND oldid=$itemid");
+        $jitemid = $dbh->selectrow_array("SELECT newid FROM oldids WHERE area='L' AND oldid=$itemid");
     } else {
-	$jitemid = $dbh->{'mysql_insertid'};
+        $jitemid = $dbh->{'mysql_insertid'};
     }
     unless ($jitemid) {
-	die "ERROR: could not allocate a new jitemid\n";
+        die "ERROR: could not allocate a new jitemid\n";
     }
     $dbh->{'RaiseError'} = 1;
     $item->{'jitemid'} = $jitemid;
@@ -251,9 +251,9 @@ sub movefrom0_logitem
     $dbch->do("REPLACE INTO logtext2 (journalid, jitemid, subject, event) VALUES (" . join(",", $userid, $jitemid, map { $dbh->quote($itemtext->{$_}) } qw(subject event)) . ")");
 
     $dbch->do("REPLACE INTO logsubject2 (journalid, jitemid, subject) VALUES (" . 
-	      join(",", $userid, 
-		   $jitemid, 
-		   $dbh->quote($itemtext->{'subject'}) . ")"));
+              join(",", $userid, 
+                   $jitemid, 
+                   $dbh->quote($itemtext->{'subject'}) . ")"));
 
     # add disk usage info!  (this wasn't in cluster0 anywhere)
     my $bytes = length($itemtext->{'event'}) + length($itemtext->{'subject'});
@@ -261,41 +261,41 @@ sub movefrom0_logitem
 
     # is it in recent_?
     if ($recentpoint && $item->{'logtime'} gt $recentpoint) {
-	$dbch->do("REPLACE INTO recent_logtext2 (journalid, jitemid, logtime, subject, event) ".
-		  "VALUES (" . join(",", $userid, $jitemid, $dbh->quote($item->{'logtime'}), 
-				    map { $dbh->quote($itemtext->{$_}) } qw(subject event)) . ")");
+        $dbch->do("REPLACE INTO recent_logtext2 (journalid, jitemid, logtime, subject, event) ".
+                  "VALUES (" . join(",", $userid, $jitemid, $dbh->quote($item->{'logtime'}), 
+                                    map { $dbh->quote($itemtext->{$_}) } qw(subject event)) . ")");
     }
 
     # add the logsec item, if necessary:
     if ($item->{'security'} ne "public") {
-	$dbch->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) VALUES (" . join(",", map { $dbh->quote($item->{$_}) } qw(ownerid jitemid allowmask)) . ")");
+        $dbch->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) VALUES (" . join(",", map { $dbh->quote($item->{$_}) } qw(ownerid jitemid allowmask)) . ")");
     }
 
     # copy its logprop over:
     my $logprops = $dbh->selectall_arrayref("SELECT propid, value FROM logprop WHERE itemid=$itemid");
     if ($logprops && @$logprops) {
-	my $values = join(",", 
-			  map { "(" . join(",", $userid, $jitemid, 
-					   map { $dbh->quote($_) } @$_ ) . ")" } 
-			  grep { $_->[1] } @$logprops); 
-	$dbch->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES $values")
-	    if $values;
+        my $values = join(",", 
+                          map { "(" . join(",", $userid, $jitemid, 
+                                           map { $dbh->quote($_) } @$_ ) . ")" } 
+                          grep { $_->[1] } @$logprops); 
+        $dbch->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES $values")
+            if $values;
     }
     
     # copy its syncitems over
     my $syncs = $dbh->selectrow_arrayref("SELECT atime, atype FROM syncupdates WHERE userid=$userid ".
-					 "AND nodetype='L' AND nodeid=$itemid");
+                                         "AND nodetype='L' AND nodeid=$itemid");
     if ($syncs) {
-	$dbch->do("REPLACE INTO syncupdates2 (userid, atime, nodetype, nodeid) VALUES ".
-		  "($userid, '$syncs->[0]', 'L', $jitemid)");
+        $dbch->do("REPLACE INTO syncupdates2 (userid, atime, nodetype, nodeid) VALUES ".
+                  "($userid, '$syncs->[0]', 'L', $jitemid)");
     }
 
     # copy its talk shit over:
     my %newtalkids = (0 => 0);  # 0 maps back to 0 still
     my $talkids = $dbh->selectcol_arrayref("SELECT talkid FROM talk ".
-					   "WHERE nodetype='L' AND nodeid=$itemid");
+                                           "WHERE nodetype='L' AND nodeid=$itemid");
     foreach my $t (sort { $a <=> $b } @$talkids) {
-	movefrom0_talkitem($t, $jitemid, \%newtalkids, $item);
+        movefrom0_talkitem($t, $jitemid, \%newtalkids, $item);
     }
 }
 
@@ -317,28 +317,28 @@ sub movefrom0_talkitem
     # we need to allocate a new jitemid (journal-specific itemid) for this item now.
     $dbh->{'RaiseError'} = 0;
     $dbh->do("INSERT INTO oldids (area, oldid, userid, newid) ".
-	     "VALUES ('T', $talkid, $userid, NULL)");
+             "VALUES ('T', $talkid, $userid, NULL)");
     my $jtalkid = 0;
     if ($dbh->err) {
-	$jtalkid = $dbh->selectrow_array("SELECT newid FROM oldids WHERE area='T' AND oldid=$talkid");
+        $jtalkid = $dbh->selectrow_array("SELECT newid FROM oldids WHERE area='T' AND oldid=$talkid");
     } else {
-	$jtalkid = $dbh->{'mysql_insertid'};
+        $jtalkid = $dbh->{'mysql_insertid'};
     }
     unless ($jtalkid) {
-	die "ERROR: could not allocate a new jtalkid\n";
+        die "ERROR: could not allocate a new jtalkid\n";
     }
     $newtalkids->{$talkid} = $jtalkid;
     $dbh->{'RaiseError'} = 1;
     
     # copy item over:
     $dbch->do("REPLACE INTO talk2 (journalid, jtalkid, parenttalkid, nodeid, nodetype, posterid, datepost, state) ".
-	     "VALUES (" . join(",", $userid, $jtalkid,
-			       $newtalkids->{$item->{'parenttalkid'}},
-			       $jitemid, "'L'",
-			       map { $dbh->quote($item->{$_}) } qw(posterid datepost state)) . ")");
+             "VALUES (" . join(",", $userid, $jtalkid,
+                               $newtalkids->{$item->{'parenttalkid'}},
+                               $jitemid, "'L'",
+                               map { $dbh->quote($item->{$_}) } qw(posterid datepost state)) . ")");
 
     $dbch->do("REPLACE INTO talktext2 (journalid, jtalkid, subject, body) VALUES (" . 
-	      join(",", $userid, $jtalkid, map { $dbh->quote($itemtext->{$_}) } qw(subject body)) . ")");
+              join(",", $userid, $jtalkid, map { $dbh->quote($itemtext->{$_}) } qw(subject body)) . ")");
 
     # add disk usage info!  (this wasn't in cluster0 anywhere)
     my $bytes = length($itemtext->{'body'}) + length($itemtext->{'subject'});
@@ -346,32 +346,32 @@ sub movefrom0_talkitem
 
     # is it in recent_?
     if ($recentpoint && $item->{'datepost'} gt $recentpoint) {
-	$dbch->do("REPLACE INTO recent_talktext2 (journalid, jtalkid, datepost, subject, body) ".
-		  "VALUES (" . join(",", $userid, $jtalkid, $dbh->quote($item->{'datepost'}), 
-				    map { $dbh->quote($itemtext->{$_}) } qw(subject body)) . ")");
+        $dbch->do("REPLACE INTO recent_talktext2 (journalid, jtalkid, datepost, subject, body) ".
+                  "VALUES (" . join(",", $userid, $jtalkid, $dbh->quote($item->{'datepost'}), 
+                                    map { $dbh->quote($itemtext->{$_}) } qw(subject body)) . ")");
     }
 
     # copy its logprop over:
     my $props = $dbh->selectall_arrayref("SELECT tpropid, value FROM talkprop WHERE talkid=$talkid");
     if ($props && @$props) {
-	my $values = join(",", 
-			  map { "(" . join(",", $userid, $jtalkid, 
-					   map { $dbh->quote($_) } @$_ ) . ")" } 
-			  grep { $_->[1] } @$props); 
-	$dbch->do("REPLACE INTO talkprop2 (journalid, jtalkid, tpropid, value) VALUES $values")
-	    if $values;
+        my $values = join(",", 
+                          map { "(" . join(",", $userid, $jtalkid, 
+                                           map { $dbh->quote($_) } @$_ ) . ")" } 
+                          grep { $_->[1] } @$props); 
+        $dbch->do("REPLACE INTO talkprop2 (journalid, jtalkid, tpropid, value) VALUES $values")
+            if $values;
     }
 
     # note that poster commented here
     if ($item->{'posterid'}) {
-	my $pub = $logitem->{'security'} eq "public" ? 1 : 0;
-	my ($db, $table) = ($dbh, "talkleft_xfp");
-	if ($userid == $item->{'posterid'}) {
-	    ($db, $table) = ($dbch, "talkleft");
-	}
-	$db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
-		"nodeid, jtalkid, publicitem) VALUES ($item->{'posterid'}, ".
-		"UNIX_TIMESTAMP('$item->{'datepost'}'), $userid, 'L', $jitemid, $jtalkid, '$pub')");
+        my $pub = $logitem->{'security'} eq "public" ? 1 : 0;
+        my ($db, $table) = ($dbh, "talkleft_xfp");
+        if ($userid == $item->{'posterid'}) {
+            ($db, $table) = ($dbch, "talkleft");
+        }
+        $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
+                "nodeid, jtalkid, publicitem) VALUES ($item->{'posterid'}, ".
+                "UNIX_TIMESTAMP('$item->{'datepost'}'), $userid, 'L', $jitemid, $jtalkid, '$pub')");
     }
 }
     
