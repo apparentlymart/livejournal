@@ -142,6 +142,10 @@ body<=
 
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_deleted'} p?>"
         if $parpost->{'state'} eq "D";
+
+    # check if frozen
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_frozen'} p?>"
+        if $parpost->{'state'} eq "F";
     
     # don't allow anonymous comments on syndicated items
     if ($u->{'journaltype'} eq "Y" && $u->{'opt_whocanreply'} eq "all") {

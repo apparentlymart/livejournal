@@ -643,7 +643,11 @@ function EntryPage::print_comment (Comment c) {
         $meta{"IP Address:"} = $c.metadata{"poster_ip"};
     }
 
-    $footer = "(<a href='$c.reply_url'>Reply to this</a>) ";
+    if ($c.frozen) {
+        $footer = "(Replies frozen) ";
+    } else {
+        $footer = "(<a href='$c.reply_url'>Reply to this</a>) ";
+    }
     if ($c.parent_url != "") { $footer = "$footer (<a href='$c.parent_url'>Parent</a>) "; }
     if ($c.thread_url != "") { $footer = "$footer (<a href='$c.thread_url'>Thread</a>) "; }
 

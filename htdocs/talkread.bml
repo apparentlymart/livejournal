@@ -45,6 +45,7 @@ body<=
             parent         talk.parentlink
             thread         talk.threadlink
             replythis      talk.replytothis
+            frozen         talk.frozen
             link           talk.commentpermlink
             deleted        .subjectdeleted
             nosubject      .nosubject
@@ -338,6 +339,12 @@ body<=
          if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
              $ret .= " <a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
          }
+         if ($post->{state} ne 'F' && LJ::Talk::can_freeze($remote, $u, $up, $userpost)) {
+             $ret .= "<a href='/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+         }
+         if ($post->{state} eq 'F' && LJ::Talk::can_unfreeze($remote, $u, $up, $userpost)) {
+             $ret .= "<a href='/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+         }
          $ret .= "</td></tr></table>\n";
      } else {
          if ($userpost) {
@@ -376,8 +383,18 @@ body<=
              if (LJ::Talk::can_delete($remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
-             
-             if ($post->{'state'} eq 'A' && 
+
+             if ($post->{'state'} ne 'F' &&
+                 LJ::Talk::can_freeze($remote, $u, $up, $userpost)) {
+                 $ret .= "<a href='/talkscreen.bml?mode=freeze&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_freeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+             }
+
+             if ($post->{'state'} eq 'F' &&
+                 LJ::Talk::can_unfreeze($remote, $u, $up, $userpost)) {
+                 $ret .= "<a href='/talkscreen.bml?mode=unfreeze&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unfreeze", "", { align => 'absmiddle', hspace => 2, vspace => }) . "</a>";
+             }
+
+             if ($post->{'state'} ne 'S' && 
                  LJ::Talk::can_screen($remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/talkscreen.bml?mode=screen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
@@ -399,8 +416,12 @@ body<=
              $ret .= $post->{'body'};
 
              $ret .= "<p style='margin: 0.7em 0 0.2em 0'><font size='-2'>";
-             my $replyurl = LJ::Talk::talkargs($talkurl, "replyto=$dtid", $stylemine);
-             $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
+             if ($post->{'state'} eq 'F') {
+                 $ret .= "($T{'frozen'}) ";
+             } else {
+                 my $replyurl = LJ::Talk::talkargs($talkurl, "replyto=$dtid", $stylemine);
+                 $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
+             }
              
              if ($post->{'parenttalkid'} != 0) {
                  my $dpid = $post->{'parenttalkid'} * 256 + $init->{'anum'};

@@ -53,6 +53,11 @@ sub ReplyPage
             $opts->{'handler_return'} = 403;
             return;
         }
+        if ($parpost->{'state'} eq 'F') {
+            # frozen comment, no replies allowed
+            $opts->{'handler_return'} = 403;
+            return;
+        }
 
         my $tt = LJ::get_talktext2($u, $re_talkid);
         $parpost->{'subject'} = $tt->{$re_talkid}->[0];

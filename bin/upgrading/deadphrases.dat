@@ -180,3 +180,5 @@ general /community/members.bml.success.addusers
 general /userinfo.bml.label.totalfriends
 
 general /community/settings.bml.label.closedmemb
+
+general /talkscreen.bml.title

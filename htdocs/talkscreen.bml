@@ -1,7 +1,7 @@
 <?_info
 nocache=>1
 _info?><?page
-title=><?_ml .title _ml?>
+title=><?_ml .title2 _ml?>
 body<=
 
 <?_code
@@ -60,21 +60,19 @@ body<=
 
  my $ditemid = $qitemid*256 + $anum;
 
- my $commentlink = LJ::journal_base($u) . "/$ditemid.html?view=$dtalkid#t$dtalkid";
- my $can_screen = LJ::Talk::can_screen($remote, $u, $up, $post->{'userpost'});
- my $can_unscreen = LJ::Talk::can_unscreen($remote, $u, $up, $post->{'userpost'});
+ my $itemlink = LJ::journal_base($u) . "/$ditemid.html";
+ my $commentlink = "$itemlink?view=$dtalkid#t$dtalkid";
 
  if ($mode eq 'screen') {
+     my $can_screen = LJ::Talk::can_screen($remote, $u, $up, $post->{'userpost'});
      return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.privs.screen'} p?>"
          unless $can_screen;
      unless ($POST{'confirm'} eq 'Y') {
          $ret .= "<?h1 $ML{'.screen.sure.title'} h1?><?p $ML{'.screen.sure.body'} p?>";
          $ret .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
-         $ret .= "<input type='hidden' name='mode' value='screen' />\n";
-         $ret .= "<input type='hidden' name='talkid' value='$talkid' />\n";
-         $ret .= "<input type='hidden' name='journal' value='$u->{'user'}' />\n";
-         $ret .= "<input type='hidden' name='confirm' value='Y' />\n";
-         $ret .= "<input type='submit' value='$ML{'.screen.doit'}' />";
+         $ret .= LJ::html_hidden(mode => 'screen', 'talkid' => $talkid,
+                                 journal => $u->{user}, confirm => 'Y');
+         $ret .= LJ::html_submit(undef, $ML{'.screen.doit'});
          $ret .= "</center>";
          $ret .= "</form>\n";
          return $ret;
@@ -86,16 +84,15 @@ body<=
  }
 
  if ($mode eq 'unscreen') {
+     my $can_unscreen = LJ::Talk::can_unscreen($remote, $u, $up, $post->{'userpost'});
      return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.privs.unscreen'} p?>"
          unless $can_unscreen;
      unless ($POST{'confirm'} eq 'Y') {
          $ret .= "<?h1 $ML{'.unscreen.sure.title'} h1?><?p $ML{'.unscreen.sure.body'} p?>";
          $ret .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
-         $ret .= "<input type='hidden' name='mode' value='unscreen' />\n";
-         $ret .= "<input type='hidden' name='talkid' value='$talkid' />\n";
-         $ret .= "<input type='hidden' name='journal' value='$u->{'user'}' />\n";
-         $ret .= "<input type='hidden' name='confirm' value='Y' />\n";
-         $ret .= "<input type='submit' value='$ML{'.unscreen.doit'}' />";
+         $ret .= LJ::html_hidden(mode => 'unscreen', 'talkid' => $talkid,
+                                 journal => $u->{user}, confirm => 'Y');
+         $ret .= LJ::html_submit(undef, $ML{'.unscreen.doit'});
          $ret .= "</center>";
          $ret .= "</form>\n";
          return $ret;
@@ -104,6 +101,48 @@ body<=
          LJ::Talk::unscreen_comment($u, $qitemid, $qtalkid);
      }
      return "<?h1 $ML{'.unscreened.title'} h1?><?p " . BML::ml('.unscreened.body', {'link'=>$commentlink}) . " p?>";
+ }
+
+ if ($mode eq 'freeze') {
+     my $can_freeze = LJ::Talk::can_freeze($remote, $u, $up, $post->{userpost});
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.privs.freeze'} p?>"
+         unless $can_freeze;
+     unless ($POST{confirm} eq 'Y') {
+         $ret .= "<?h1 $ML{'.freeze.sure.title'} h1?><?p $ML{'.freeze.sure.body'} p?>";
+         $ret .= "<p><form method='post' action='talkscreen.bml'><center>\n";
+         $ret .= LJ::html_hidden(mode => 'freeze', 'talkid' => $talkid,
+                                 journal => $u->{user}, confirm => 'Y');
+         $ret .= LJ::html_submit(undef, $ML{'.freeze.doit'});
+         $ret .= "</center>";
+         $ret .= "</form>\n";
+         return $ret;
+     }
+     if ($state ne 'F') {
+         LJ::Talk::freeze_thread($u, $qitemid, $qtalkid);
+     }
+     my $linktext = BML::ml('.link', { aopts => "href='$itemlink'" });
+     return "<?h1 $ML{'.frozen.title'} h1?><?p $ML{'.frozen.body'} $linktext p?>";
+ }
+
+ if ($mode eq 'unfreeze') {
+     my $can_unfreeze = LJ::Talk::can_unfreeze($remote, $u, $up, $post->{userpost});
+     return "<?h1 $ML{'Error'} h1?><?p You are not allowed to unfreeze this thread p?>"
+         unless $can_unfreeze;
+     unless ($POST{confirm} eq 'Y') {
+         $ret .= "<?h1 $ML{'.unfreeze.sure.title'} h1?><?p $ML{'.unfreeze.sure.body'} p?>";
+         $ret .= "<p><form method='post' action='talkscreen.bml'><center>\n";
+         $ret .= LJ::html_hidden(mode => 'unfreeze', 'talkid' => $talkid,
+                                 journal => $u->{user}, confirm => 'Y');
+         $ret .= LJ::html_submit(undef, $ML{'.unfreeze.doit'});
+         $ret .= "</center>";
+         $ret .= "</form>\n";
+         return $ret;
+     }
+     if ($state eq 'F') {
+         LJ::Talk::unfreeze_thread($u, $qitemid, $qtalkid);
+     }
+     my $linktext = BML::ml('.link', { aopts => "href='$itemlink'" });
+     return "<?h1 $ML{'.unfrozen.title'} h1?><?p $ML{'.unfrozen.body'} $linktext p?>";
  }
 
  return "<?h1 $ML{'Error'} h1?><?p $ML{'error.unknownmode'} p?>";

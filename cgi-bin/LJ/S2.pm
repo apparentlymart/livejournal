@@ -1598,8 +1598,8 @@ sub Color__darker {
 sub Comment__get_link
 {
     my ($ctx, $this, $key) = @_;
-    
-    if ($key eq "delete_comment" || $key eq "unscreen_comment" || $key eq "screen_comment") {
+    if ($key eq "delete_comment" || $key eq "unscreen_comment" || $key eq "screen_comment" ||
+           $key eq "freeze_thread" || $key eq "unfreeze_thread") {
         my $page = get_page();
         my $u = $page->{'_u'};
         my $post_user = $page->{'entry'} ? $page->{'entry'}->{'poster'}->{'username'} : undef;
@@ -1612,6 +1612,26 @@ sub Comment__get_link
                 'url' => "$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}",
                 'caption' => $ctx->[S2::PROPS]->{"text_multiform_opt_delete"},
                 'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 22, 20),
+            };
+        }
+        if ($key eq "freeze_thread") {
+            return undef if $this->{'frozen'};
+            return undef unless LJ::Talk::can_freeze($remote, $u, $post_user, $com_user);
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/talkscreen.bml?mode=freeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+                'caption' => $ctx->[S2::PROPS]->{"text_multiform_opt_freeze"},
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_freeze.gif", 22, 20),
+            };
+        }
+        if ($key eq "unfreeze_thread") {
+            return undef unless $this->{'frozen'};
+            return undef unless LJ::Talk::can_unfreeze($remote, $u, $post_user, $com_user);
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/talkscreen.bml?mode=unfreeze&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+                'caption' => $ctx->[S2::PROPS]->{"text_multiform_opt_unfreeze"},
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_unfreeze.gif", 22, 20),
             };
         }
         if ($key eq "screen_comment") {

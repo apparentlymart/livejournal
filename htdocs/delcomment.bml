@@ -67,19 +67,27 @@ body<=
 
     ### perform actions
     if (LJ::did_post() && $POST{'confirm'}) {
-
-        # if it's screened, unscreen it first to properly adjust
-        # replycount and the hasscreened logprop
-        LJ::Talk::unscreen_comment($u, $tp->{'itemid'}, $tpid)
-            if $tp->{'state'} eq 'S';
-
         # mark this as spam?
         LJ::Talk::mark_comment_as_spam($u, $tp->{talkid})
             if $POST{spam};
 
-        my $num = LJ::delete_comments($u, "L", $tp->{'itemid'}, $tpid);
-        LJ::replycount_do($u, $tp->{'itemid'}, "decr", $num);
-        LJ::Talk::update_commentalter($u, $tp->{'itemid'});
+        # delete entire thread? or just the one comment?
+        if ($POST{delthread}) {
+            # delete entire thread ...
+            LJ::Talk::delete_thread($u, $tp->{'itemid'}, $tpid);
+        } else {
+            # delete single comment...
+
+            # if it's screened, unscreen it first to properly adjust
+            # replycount and the hasscreened logprop
+            LJ::Talk::unscreen_comment($u, $tp->{'itemid'}, $tpid)
+                if $tp->{'state'} eq 'S';
+
+            # now do the deletion
+            my $num = LJ::delete_comments($u, "L", $tp->{'itemid'}, $tpid);
+            LJ::replycount_do($u, $tp->{'itemid'}, "decr", $num);
+            LJ::Talk::update_commentalter($u, $tp->{'itemid'});
+        }
 
         # ban the user, if selected
         my $msg;
@@ -115,6 +123,9 @@ body<=
         $ret .= "<div>" . LJ::html_check({name => 'spam', id => 'spam'});
         $ret .= "<label for='spam'>$ML{'.confirm.spam'}</label></div>";
     }
+
+    $ret .= "<div>" . LJ::html_check({name => 'delthread', id => 'delthread'});
+    $ret .= "<label for='delthread'>$ML{'.confirm.delthread'}</label></div>";
 
     $ret .= " standout?>";
 

@@ -144,6 +144,7 @@ sub EntryPage
                 'depth' => $depth,
                 'parent_url' => $par_url,
                 'screened' => $com->{'state'} eq "S" ? 1 : 0,
+                'frozen' => $com->{'state'} eq "F" ? 1 : 0,
                 'link_keyseq' => [ 'delete_comment' ],
                 'anchor' => "t$dtalkid",
             };
@@ -162,11 +163,8 @@ sub EntryPage
 
             # Conditionally add more links to the keyseq
             my $link_keyseq = $s2com->{'link_keyseq'};
-            if ($s2com->{'screened'}) {
-                push @$link_keyseq, 'unscreen_comment';
-            } else {
-                push @$link_keyseq, 'screen_comment';
-            }
+            push @$link_keyseq, $s2com->{'screened'} ? 'unscreen_comment' : 'screen_comment';
+            push @$link_keyseq, $s2com->{'frozen'} ? 'unfreeze_thread' : 'freeze_thread';
 
             if (@{$com->{'children'}}) {
                 $s2com->{'thread_url'} = LJ::Talk::talkargs($permalink, "thread=$dtalkid", $stylemine) . "#t$dtalkid";

@@ -308,6 +308,14 @@ sub can_view_screened {
     return LJ::Talk::can_delete(@_);
 }
 
+sub can_freeze {
+    return LJ::Talk::can_screen(@_);
+}
+
+sub can_unfreeze {
+    return LJ::Talk::can_unscreen(@_);
+}
+
 # <LJFUNC>
 # name: LJ::Talk::screening_level
 # des: Determines the screening level of a particular post given the relevent information.
@@ -342,6 +350,172 @@ sub screening_level {
 sub update_commentalter {
     my ($u, $itemid) = @_;
     LJ::set_logprop($u, $itemid, { 'commentalter' => time() });
+}
+
+# <LJFUNC>
+# name: LJ::Talk::get_comments_in_thread
+# class: web
+# des: Gets a list of comment ids that are contained within a thread, including the
+#   comment at the top of the thread.  You can also limit this to only return comments
+#   of a certain state.
+# args: u, jitemid, jtalkid, onlystate, screenedref
+# des-u: user object of user to get comments from
+# des-jitemid: journal itemid to get comments from
+# des-jtalkid: journal talkid of comment to use as top of tree
+# des-onlystate: if specified, return only comments of this state (e.g. A, F, S...)
+# des-screenedref: if provided and an array reference, will push on a list of comment
+#   ids that are being returned and are screened (mostly for use in deletion so you can
+#   unscreen the comments)
+# returns: undef on error, array reference of jtalkids on success
+# </LJFUNC>
+sub get_comments_in_thread {
+    my ($u, $jitemid, $jtalkid, $onlystate, $screened_ref) = @_;
+    $u = LJ::want_user($u);
+    $jitemid += 0;
+    $jtalkid += 0;
+    $onlystate = uc $onlystate;
+    return undef unless $u && $jitemid && $jtalkid && 
+                        (!$onlystate || $onlystate =~ /^\w$/);
+
+    # get all comments to post
+    my $comments = LJ::Talk::get_talk_data($u, 'L', $jitemid) || {};
+
+    # see if our comment exists
+    return undef unless $comments->{$jtalkid};
+
+    # create relationship hashref and count screened comments in post
+    my %parentids;
+    $parentids{$_} = $comments->{$_}{parenttalkid} foreach keys %$comments;
+
+    # now walk and find what to update
+    my %to_act;
+    foreach my $id (keys %$comments) {
+        my $act = ($id == $jtalkid);
+        my $walk = $id;
+        while ($parentids{$walk}) {
+            if ($parentids{$walk} == $jtalkid) {
+                # we hit the one we want to act on
+                $act = 1;
+                last;
+            }
+            last if $parentids{$walk} == $walk;
+
+            # no match, so move up a level
+            $walk = $parentids{$walk};
+        }
+
+        # set it as being acted on
+        $to_act{$id} = 1 if $act && (!$onlystate || $comments->{$id}{state} eq $onlystate);
+
+        # push it onto the list of screened comments? (if the caller is doing a delete, they need
+        # a list of screened comments in order to unscreen them)
+        push @$screened_ref, $id if ref $screened_ref &&             # if they gave us a ref
+                                    $to_act{$id} &&                  # and we're acting on this comment
+                                    $comments->{$id}{state} eq 'S';  # and this is a screened comment
+    }
+
+    # return list from %to_act
+    return [ keys %to_act ];
+}
+
+# <LJFUNC>
+# name: LJ::Talk::delete_thread
+# class: web
+# des: Deletes an entire thread of comments.
+# args: u, jitemid, jtalkid
+# des-u: Userid or user object to delete thread from.
+# des-jitemid: Journal itemid of item to delete comments from.
+# des-jtalkid: Journal talkid of comment at top of thread to delete.
+# returns: 1 on success; undef on error
+# </LJFUNC>
+sub delete_thread {
+    my ($u, $jitemid, $jtalkid) = @_;
+
+    # get comments and delete 'em
+    my @screened;
+    my $ids = LJ::Talk::get_comments_in_thread($u, $jitemid, $jtalkid, undef, \@screened);
+    LJ::Talk::unscreen_comment($u, $jitemid, @screened) if @screened; # if needed only!
+    my $num = LJ::delete_comments($u, "L", $jitemid, @$ids);
+    LJ::replycount_do($u, $jitemid, "decr", $num);
+    LJ::Talk::update_commentalter($u, $jitemid);
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::Talk::freeze_thread
+# class: web
+# des: Freezes an entire thread of comments.
+# args: u, jitemid, jtalkid
+# des-u: Userid or user object to freeze thread from.
+# des-jitemid: Journal itemid of item to freeze comments from.
+# des-jtalkid: Journal talkid of comment at top of thread to freeze.
+# returns: 1 on success; undef on error
+# </LJFUNC>
+sub freeze_thread {
+    my ($u, $jitemid, $jtalkid) = @_;
+
+    # now we need to update the states
+    my $ids = LJ::Talk::get_comments_in_thread($u, $jitemid, $jtalkid, 'A');
+    LJ::Talk::freeze_comments($u, "L", $jitemid, 0, $ids);
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::Talk::unfreeze_thread
+# class: web
+# des: unfreezes an entire thread of comments.
+# args: u, jitemid, jtalkid
+# des-u: Userid or user object to unfreeze thread from.
+# des-jitemid: Journal itemid of item to unfreeze comments from.
+# des-jtalkid: Journal talkid of comment at top of thread to unfreeze.
+# returns: 1 on success; undef on error
+# </LJFUNC>
+sub unfreeze_thread {
+    my ($u, $jitemid, $jtalkid) = @_;
+
+    # now we need to update the states
+    my $ids = LJ::Talk::get_comments_in_thread($u, $jitemid, $jtalkid, 'F');
+    LJ::Talk::freeze_comments($u, "L", $jitemid, 1, $ids);
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::Talk::freeze_comments
+# class: web
+# des: Freezes comments.  This is the internal helper function called by
+#   freeze_thread/unfreeze_thread.  Use those if you wish to freeze or
+#   unfreeze a thread.  This function just freezes specific comments.
+# args: u, nodetype, nodeid, unfreeze, ids
+# des-u: Userid or object of user to manipulate comments in.
+# des-nodetype: Nodetype of the thing containing the specified ids.  Typically "L".
+# des-nodeid: Id of the node to manipulate comments from.
+# des-unfreeze: If 1, unfreeze instead of freeze.
+# des-ids: Array reference containing jtalkids to manipulate.
+# returns: 1 on success; undef on error
+# </LJFUNC>
+sub freeze_comments {
+    my ($u, $nodetype, $nodeid, $unfreeze, $ids) = @_;
+    $u = LJ::want_user($u);
+    $nodeid += 0;
+    $unfreeze = $unfreeze ? 1 : 0;
+    return undef unless $u && $nodetype =~ /^\w$/ && $nodeid && @$ids;
+
+    # get database and quote things
+    my $dbcm = LJ::get_cluster_master($u);
+    my $quserid = $u->{userid}+0;
+    my $qnodetype = $dbcm->quote($nodetype);
+    my $qnodeid = $nodeid+0;
+    return undef unless $dbcm;
+
+    # now perform action    
+    my $in = join(',', map { $_+0 } @$ids);
+    my $newstate = $unfreeze ? 'A' : 'F';
+    LJ::talk2_do($dbcm, $u->{userid}, $nodetype, $nodeid, undef, 
+                 "UPDATE talk2 SET state = '$newstate' " .
+                 "WHERE journalid = $quserid AND nodetype = $qnodetype " .
+                 "AND nodeid = $qnodeid AND jtalkid IN ($in)");
+    return undef if $dbcm->err;
+    return 1;
 }
 
 sub screen_comment {

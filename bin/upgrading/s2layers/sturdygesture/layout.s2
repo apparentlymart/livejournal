@@ -90,7 +90,9 @@ propgroup presentation {
     }
     set text_comment_links = {"delete_comment" => "Delete",
                               "screen_comment" => "Screen",
-                              "unscreen_comment" => "Unscreen"};
+                              "unscreen_comment" => "Unscreen",
+                              "freeze_thread" => "Freeze",
+                              "unfreeze_thread" => "Unfreeze", };
 
     property use use_shared_pic;
     property use linklist_support;
@@ -673,7 +675,11 @@ function EntryPage::print_comment(Comment c) {
             println """<a href="$l.url">$*text_comment_links{$ls}</a> - """;
         }
     }
-    """<a href="$c.reply_url">$*text_comment_reply</a>""";
+    if (not $c.frozen) {
+        """<a href="$c.reply_url">$*text_comment_reply</a>""";
+    } else {
+        """$*text_comment_frozen""";
+    }
     # FIXME: better location?
     if ($.multiform_on) {
         """<br /><label for="ljcomsel_$c.talkid">$*text_multiform_check</label> """; $c->print_multiform_check();

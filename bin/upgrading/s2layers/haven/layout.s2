@@ -1403,7 +1403,12 @@ function EntryPage::print_comment(Comment c)
 
     println "</table></td></tr></table></div>";
     println """<div style="margin-left: 5px">$c.text</div>""";
-    println """<div style="margin-top: 3px; font-size: smaller">(<a href="$c.reply_url">Reply to this</a>) """;
+    println """<div style="margin-top: 3px; font-size: smaller"> """;
+    if ($c.frozen) {
+        println """(Replies frozen) """;
+    } else {
+        println """(<a href="$c.reply_url">Reply to this</a>) """;
+    }
     if ($c.parent_url != "") { println """(<a href="$c.parent_url">Parent</a>) """; }
     if ($c.thread_url != "") { println """(<a href="$c.thread_url">Thread</a>) """; }
     println "</div>";
