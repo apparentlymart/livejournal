@@ -75,7 +75,6 @@ sub RecentPage
     my $logtext;
     LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
     $logtext = LJ::get_logtext2($u, @itemids);
-    LJ::load_moods();
 
     my $lastdate = "";
     my $itemnum = 0;

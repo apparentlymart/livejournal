@@ -4043,7 +4043,7 @@ sub load_moods
     my $sth = $dbr->prepare("SELECT moodid, mood, parentmood FROM moods");
     $sth->execute;
     while (my ($id, $mood, $parent) = $sth->fetchrow_array) {
-        $LJ::CACHE_MOODS{$id} = { 'name' => $mood, 'parent' => $parent };
+        $LJ::CACHE_MOODS{$id} = { 'name' => $mood, 'parent' => $parent, 'id' => $id };
         if ($id > $LJ::CACHED_MOOD_MAX) { $LJ::CACHED_MOOD_MAX = $id; }
     }
     $LJ::CACHED_MOODS = 1;

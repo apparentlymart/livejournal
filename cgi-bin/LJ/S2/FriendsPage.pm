@@ -175,7 +175,6 @@ sub FriendsPage
     ### load the log properties
     my %logprops = ();  # key is "$owneridOrZero $[j]itemid"
     LJ::load_log_props2multi(\%idsbycluster, \%logprops);
-    LJ::load_moods();
 
     # load the text of the entries
     my $logtext = LJ::get_logtext2multi(\%idsbycluster);

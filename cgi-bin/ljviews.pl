@@ -643,7 +643,6 @@ sub create_view_lastn
     my $logtext;
     LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
     $logtext = LJ::get_logtext2($u, @itemids);
-    LJ::load_moods();
 
     my $lastday = -1;
     my $lastmonth = -1;
@@ -1105,7 +1104,6 @@ sub create_view_friends
     ### load the log properties
     my %logprops = ();  # key is "$owneridOrZero $[j]itemid"
     LJ::load_log_props2multi(\%idsbycluster, \%logprops);
-    LJ::load_moods();
 
     # load the pictures for the user
     my %userpics;
@@ -1725,7 +1723,6 @@ sub create_view_day
     my %logprops = ();
     LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
     my $logtext = LJ::get_logtext2($u, @itemids);
-    LJ::load_moods();
 
     my %posteru = ();  # map posterids to u objects
     LJ::load_userids_multiple([map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
