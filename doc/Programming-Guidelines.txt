@@ -1,21 +1,47 @@
 LiveJournal programming/style guidelines.
 
-[ NOW ]
+[ SECURITY ]
 
-  -- security: all GET/POST form values go into %FORM into BML, but
-     check LJ::did_post() on critical actions.  GET requests can be
-     easily spoofed, or hidden in images, etc.
+  -- all GET/POST form values go into %FORM into BML, but check
+     LJ::did_post() on critical actions.  GET requests can be easily
+     spoofed, or hidden in images, etc.
+
+[ LIVEJOURNAL-SPECIFIC ]
 
   -- always use the LJ:: functions that take an explicit database
      handle.  don't use the old main:: functions that use the global
      $dbh.
 
+  -- all files should have <LJDEP> edge dependency somewhere, usually
+     at the bottom.
+
+  -- using userids (integers) for things is better than using
+     users (strings), except in URL arguments, where pretty
+     is more important than speed.
+
+  -- in BML page, use BML blocks defined in global.look: 
+        LJUSER, P, H1, H2, STANDOUT, HR, etc...
+
+  -- all HTML should be XHTML compliant... 
+
+       * lower case tags, <BR> -> <br />
+       * quotes around attributes <font face="helvetica">
+       * no bare & chars ... always escape them: &amp;
+         <a href="foo.bml?a=1&amp;b=2">...</a>
+
+  -- use of multiple files to do one function is deprecated.  there
+     should no longer be "foo.bml" and "foo_do.bml" like there used
+     to.  that's ugly.
+
+  -- tab is a formatting command, not a character.  (TODO: add note
+     about save hooks for emacs & vi) there should be spaces in the
+     files, not tab characters
+
+[ DATABASE ]
+
   -- check your db index usage... mysql's "EXPLAIN" is your friend.
 
-  -- don't write temporary files to disk... all LJ code should be able
-     to run on a cluster of web servers with no session persistence
-
-  -- lines longer than 80 characters are okay, but not great.
+  -- between LOCK TABLES & UNLOCK TABLES, never call a subroutine.
 
   -- preferred way to break up a long SQL query:
 
@@ -36,36 +62,32 @@ LiveJournal programming/style guidelines.
           $u        a user 'object' (a hashref)
 
 
-  -- all files should have <LJDEP> edge dependency somewhere, usually
-     at the bottom.
+[ PERF / SCALABILITY ]
+
+  -- don't write temporary files to disk... all LJ code should be able
+     to run on a cluster of web servers with no session persistence
+
+  -- if you're calling a function with a $dbarg parameter and you
+     have both a $dbs and $dbh available, call the function with
+     your $dbs ... otherwise the function and all its callees
+     can't ever use the slave databases.
+
+[ PATCHES ]
 
   -- all patches sent in should be in diff -u format
-
-  -- using userids (integers) for things is better than using
-     users (strings), except in URL arguments, where pretty
-     is more important than speed.
-
-  -- in BML page, use BML blocks defined in global.look: 
-        LJUSER, P, H1, H2, STANDOUT, HR, etc...
 
   -- don't send in patches that comment out old code.  if
      we want the old code, we'll go get it from CVS.. that's
      what it's for.
 
+[ PERL STYLE ]
 
-[ FUTURE - low priority now, higher later ]
+  -- foo() looks prettier than &foo().  let perl 4 die.
 
-  -- all HTML should be XHTML compliant... lower case tags, <BR> -> <br />
+  -- lines longer than 80 characters are okay, but not great.
 
-  -- use of multiple files to do one function is deprecated.  there
-     should no longer be "foo.bml" and "foo_do.bml" like there used
-     to.  that's ugly.
-
-  -- tab is a formatting command, not a character.  (TODO: add note
-     about save hooks for emacs & vi) there should be spaces (0x20) in
-     the files, not 0x09
-
-
-
-
+  -- if you're in package LJ and calling an LJ::* API function,
+     go ahead and type the extra four characters (LJ::) even 
+     if they're not necessary... being explicit is nice for
+     the reader.
 
