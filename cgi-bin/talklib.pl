@@ -867,7 +867,7 @@ sub format_text_mail {
     $text .= " - View all comments on the entry:\n";
     $text .= "   $talkurl\n";
     $text .= " - Reply to the comment:\n";
-    $text .= "   " . talkargs($talkurl, "reply=$dtalkid") . "\n";
+    $text .= "   " . talkargs($talkurl, "replyto=$dtalkid") . "\n";
     if ($comment->{state} eq 'S') {
         $text .= " - Unscreen the comment:\n";
         $text .= "   $LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\n";
@@ -1064,7 +1064,7 @@ sub mail_comments {
                     $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
                 }
 
-                my $fromname = $comment->{u}{'user'} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT  Comment";
+                my $fromname = $comment->{u}{'user'} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
                 my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
                                            'To' => $paru->{'email'},
                                            'Subject' => ($headersubject || "Reply to your comment..."),
