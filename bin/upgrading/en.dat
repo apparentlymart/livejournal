@@ -1049,7 +1049,6 @@ believes that he or she controls this username. It's also possible that
 someone made a typo in a username or email address.
 .
 
-/lostinfo_do.bml.lostpasswordmail.part4|notes=Site-local text.  For 'en', it's blank.
 /lostinfo_do.bml.lostpasswordmail.part4=
 
 /lostinfo_do.bml.lostpasswordmail.part5<<
@@ -1683,6 +1682,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.label.adduser=Add User
 
+/userinfo.bml.label.aolim=AOL IM:
+
 /userinfo.bml.label.birthdate=Birthdate:
 
 /userinfo.bml.label.clientsused=<a href="[[siteroot]]/download/">Clients</a> used:
@@ -1697,9 +1698,15 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.label.dateupdated=Date updated:
 
+/userinfo.bml.label.email=Email:
+
+/userinfo.bml.label.icquin=ICQ UIN:
+
 /userinfo.bml.label.interests=Interests
 
 /userinfo.bml.label.intsnotshown=<b>... [[intnotshown]] interests not shown</b>
+
+/userinfo.bml.label.jabber=Jabber:
 
 /userinfo.bml.label.journalentrs=Journal entries:
 
@@ -1710,6 +1717,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 /userinfo.bml.label.memories=Memories:
 
 /userinfo.bml.label.moredetails=(more details...)
+
+/userinfo.bml.label.msnusername=MSN Username:
 
 /userinfo.bml.label.name=Name:
 
@@ -1740,6 +1749,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 /userinfo.bml.label.viewmembers=View Members
 
 /userinfo.bml.label.website=Website:
+
+/userinfo.bml.label.yahooid=Yahoo! ID:
 
 /userinfo.bml.memories.entries=[[count]] entries
 
@@ -1775,6 +1786,26 @@ you can <a href="[[addtofriends]]">add this journal to your friends list</a>.
 /userinfo.bml.syndinfo.name=Syndication Journal
 
 /userinfo.bml.tellafriend=Tell a Friend!
+
+/userinfo.bml.timeupdate.dayago=1 day ago
+
+/userinfo.bml.timeupdate.daysago=[[num]] days ago
+
+/userinfo.bml.timeupdate.hourago=1 hour ago
+
+/userinfo.bml.timeupdate.hoursago=[[num]] hours ago
+
+/userinfo.bml.timeupdate.minuteago=1 minute ago
+
+/userinfo.bml.timeupdate.minutesago=[[num]] minutes ago
+
+/userinfo.bml.timeupdate.secondago=1 second ago
+
+/userinfo.bml.timeupdate.secondsago=[[num]] seconds ago
+
+/userinfo.bml.timeupdate.weekago=1 week ago
+
+/userinfo.bml.timeupdate.weeksago=[[num]] weeks ago
 
 /userinfo.bml.title=User Info
 

@@ -410,7 +410,7 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
   {
       unless ($u->{'opt_whatemailshow'} eq "N") {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr valign='top'><td align='right'><b>Email:</b></td><td colspan='$span'>";
+          $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.email'}</b></td><td colspan='$span'>";
           my @emails = ($u->{'email'});
           if ($u->{'opt_whatemailshow'} eq "L") {
               @emails = ();
@@ -444,23 +444,23 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
           my $qim = $u->{'aolim'};
           $qim =~ s/ /+/g;
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b><nobr>AOL IM</nobr>:</b></td><td colspan='$span'>$u->{'aolim'} (<b><a href='aim:addbuddy?screenname=$qim'>$ML{'.label.addbuddy'}</a>, <a href='aim:goim?screenname=$qim&amp;message=Hello+there!.+How+are+you?'>$ML{'.label.sendmessage'}</a></b>)</td></tr>\n";
+          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.aolim'}</nobr></b></td><td colspan='$span'>$u->{'aolim'} (<b><a href='aim:addbuddy?screenname=$qim'>$ML{'.label.addbuddy'}</a>, <a href='aim:goim?screenname=$qim&amp;message=Hello+there!.+How+are+you?'>$ML{'.label.sendmessage'}</a></b>)</td></tr>\n";
       }
       if ($u->{'icq'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b><nobr>ICQ UIN</nobr>:</b></td><td colspan='$span'><img src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18'> $u->{'icq'} (<b><a href='http://wwp.icq.com/scripts/search.dll?to=$u->{'icq'}'>$ML{'.label.adduser'}</a>, <a href='http://wwp.icq.com/scripts/contact.dll?msgto=$u->{'icq'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
+          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.icquin'}</nobr></b></td><td colspan='$span'><img src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18'> $u->{'icq'} (<b><a href='http://wwp.icq.com/scripts/search.dll?to=$u->{'icq'}'>$ML{'.label.adduser'}</a>, <a href='http://wwp.icq.com/scripts/contact.dll?msgto=$u->{'icq'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
       }
       if ($u->{'yahoo'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b><nobr>Yahoo! ID</nobr>:</b></td><td colspan='$span'><a href='http://profiles.yahoo.com/$u->{'yahoo'}'>$u->{'yahoo'}</a> (<b><a href='http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=$u->{'yahoo'}'>$ML{'.label.adduser'}</a>, <a href='http://edit.yahoo.com/config/send_webmesg?.target=$u->{'yahoo'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
+          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.yahooid'}</nobr></b></td><td colspan='$span'><a href='http://profiles.yahoo.com/$u->{'yahoo'}'>$u->{'yahoo'}</a> (<b><a href='http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=$u->{'yahoo'}'>$ML{'.label.adduser'}</a>, <a href='http://edit.yahoo.com/config/send_webmesg?.target=$u->{'yahoo'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
       }
       if ($u->{'msn'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b><nobr>MSN Username</nobr>:</b></td><td colspan='$span'>$u->{'msn'}</td></tr>\n";
+          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.msnusername'}</nobr></b></td><td colspan='$span'>$u->{'msn'}</td></tr>\n";
       }
       if ($u->{'jabber'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b><nobr>Jabber</nobr>:</b></td><td colspan='$span'>$u->{'jabber'}</td></tr>\n";
+          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.jabber'}</nobr></b></td><td colspan='$span'>$u->{'jabber'}</td></tr>\n";
       }
   }
 
@@ -482,7 +482,7 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
 	 'autoclose' => [qw[table tr th td]],
      });
 
-     $body .= "<tr><td align='right' valign='top'><b>$label:</b></td><td colspan='$span'>$u->{'bio'}</td></tr>\n";
+     $body .= "<tr><td align='right' valign='top'><b>$label</b></td><td colspan='$span'>$u->{'bio'}</td></tr>\n";
  }
 
  ### memories
@@ -581,7 +581,7 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
          }
          if (@friend_of) {
              $label = $com ? $ML{'.friendof.comm'} : $ML{'.friendof.user'};
-             $body .= "<tr><td align='right' valign='top'><b><nobr>$label:</nobr></b>";
+             $body .= "<tr><td align='right' valign='top'><b><nobr>$label</nobr></b>";
              if ($u->{'opt_hidefriendofs'}) {
                  $body  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
              }
@@ -646,26 +646,31 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
  $body .= "<tr><td align='right' nowrap><b>$ML{'.label.datecreated'}</b></td><td colspan='2'>$u->{'timecreate'}</td></tr>";
  $body .= "<tr><td align='right' nowrap><b>$ML{'.label.dateupdated'}</b></td><td colspan='2'>";
  if ($u->{'timeupdate'}) {
+     $body .= "$u->{'timeupdate'}, <i>";
      my $secondsold = $u->{'secondsold'};
      my $num;
-     my $unit;
      if ($secondsold > 60*60*24*7) {
          $num = int($secondsold / (60*60*24*7));
-         $unit = "week";
+         $body .= $num == 1 ? $ML{'.timeupdate.weekago'}
+                            : BML::ml('.timeupdate.weeksago',{'num'=>$num});
      } elsif ($secondsold > 60*60*24) {
          $num = int($secondsold / (60*60*24));
-         $unit = "day";
+         $body .= $num == 1 ? $ML{'.timeupdate.dayago'}
+                            : BML::ml('.timeupdate.daysago',{'num'=>$num});
      } elsif ($secondsold > 60*60) {
          $num = int($secondsold / (60*60));
-         $unit = "hour";
+         $body .= $num == 1 ? $ML{'.timeupdate.hourago'}
+                            : BML::ml('.timeupdate.hoursago',{'num'=>$num});
      } elsif ($secondsold > 60) {
          $num = int($secondsold / (60));
-         $unit = "minute";
+         $body .= $num == 1 ? $ML{'.timeupdate.minuteago'}
+                            : BML::ml('.timeupdate.minutesago',{'num'=>$num});
      } else {
          $num = $secondsold;
-         $unit = "second";
+         $body .= $num == 1 ? $ML{'.timeupdate.secondago'}
+                            : BML::ml('.timeupdate.secondsago',{'num'=>$num});
      }
-     $body .= "$u->{'timeupdate'}, <i>$num $unit" . ($num==1?"":"s") . " ago</i>";
+     $body .= "</i>";
  } else {
      $body .= $ML{'.date.never'};
  }
@@ -687,7 +692,7 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
          my ($client, $ver) = ($1, $2);
          if ($lastclient ne $client) 
          {
-             if ($lastclient) { chop $body; chop $body; $body .= "<BR>"; }
+             if ($lastclient) { chop $body; chop $body; $body .= "<br />"; }
              else { 1; }
              $body .= "<b>$client</b>: ";
              $lastclient = $client;
