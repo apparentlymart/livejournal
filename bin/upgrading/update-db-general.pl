@@ -1042,9 +1042,24 @@ CREATE TABLE includetext (
 )
 EOC
 
+register_tablecreate("oldids", <<'EOC');
+CREATE TABLE oldids (
+  area     CHAR(1) NOT NULL,
+  oldid    INT UNSIGNED NOT NULL,
+  PRIMARY KEY (area, oldid),
+  userid   INT UNSIGNED NOT NULL,
+  newid    INT UNSIGNED NOT NULL,
+  INDEX (userid)
+)
+EOC
+
 ### changes
 
 register_alter(sub {
+
+    my $dbh = shift;
+    my $runsql = shift;
+
     if (column_type("supportcat", "is_selectable") eq "")
     {
 	do_alter("supportcat",
@@ -1208,7 +1223,7 @@ register_alter(sub {
 		 "ALTER TABLE priv_list ".
 		 "ADD is_public ENUM('1', '0') DEFAULT '1' NOT NULL");
     }
-   
+
 });
 
 

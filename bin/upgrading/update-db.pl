@@ -9,11 +9,13 @@ use Getopt::Long;
 my $opt_sql = 0;
 my $opt_drop = 0;
 my $opt_pop = 0;
+my $opt_confirm = "";
 
 exit 1 unless
 GetOptions("runsql" => \$opt_sql,
 	   "drop" => \$opt_drop,
 	   "populate" => \$opt_pop,
+	   "confirm=s" => \$opt_confirm,
 	   );
 
 
@@ -83,7 +85,7 @@ foreach my $t (keys %table_drop)
 ## do all the alters
 foreach my $s (@alters)
 {
-    $s->();
+    $s->($dbh, $opt_sql);
 }
 
 if ($opt_pop)
@@ -264,7 +266,16 @@ sub column_type
     return $type;
 }
 
+sub ensure_confirm
+{
+    my $area = shift;
 
+    return 1 if ($opt_confirm eq "all" or
+		 $opt_confirm eq $area);
+
+    print STDERR "To proceeed with the necessary changes, rerun with --confirm=$area\n";
+    return 0;
+}
 
 
 
