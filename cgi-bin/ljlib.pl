@@ -2309,10 +2309,10 @@ sub html_select
 {
     my $opts = shift;
     my @items = @_;
-    my $disabled = $opts->{'disabled'} ? " DISABLED" : "";
+    my $disabled = $opts->{'disabled'} ? " disabled='1'" : "";
     my $ret;
     $ret .= "<select";
-    if ($opts->{'name'}) { $ret .= " name=\"$opts->{'name'}\""; }
+    if ($opts->{'name'}) { $ret .= " name='$opts->{'name'}'"; }
     if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
     $ret .= "$disabled>";
     while (my ($value, $text) = splice(@items, 0, 2)) {
