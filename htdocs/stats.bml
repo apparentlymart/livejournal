@@ -72,14 +72,19 @@ P=)
  $ret .= "</UL> P=)\n";
 
  $ret .= "(=H1 Account Types H1=)\n";
- $ret .= "(=P What type of <A HREF=\"/support/faqbrowse.bml?faqid=38\">account</A> do people have? <UL>";
+ $ret .= "(=P What type of <a href=\"/support/faqbrowse.bml?faqid=38\">account</a> do people have? <ul>";
  {
+     # FIXME: ljcom specific, make into a hook.
+     my %acct_name = ("paid" => "Paid Account",
+		      "off" => "Free Account",
+		      "early" => "Early Adopter",
+		      "on" => "Permanent Account");
      foreach my $act (qw(off early paid on)) {
 	 my $num = $stat{'account'}->{$act}+0;
-	 $ret .= "<LI><B>$LJ::acct_name{$act}: </B> $num (" . sprintf("%0.1f", $num*100/($stat{'userinfo'}->{'total'}||1)) . "%)";	 
+	 $ret .= "<LI><B>$acct_name{$act}: </B> $num (" . sprintf("%0.1f", $num*100/($stat{'userinfo'}->{'total'}||1)) . "%)";	 
      }
  }
- $ret .= "</UL> P=)\n";
+ $ret .= "</ul> P=)\n";
  
  $ret .= "(=H1 Receiving News/Advertising H1=)\n";
  $ret .= "(=P This information says how many users of the ones with validated email addresses subscribe to the LiveJournal news that we send out, and how many people say they wouldn't mind getting advertisement/promotions sent to them by email. <UL>";

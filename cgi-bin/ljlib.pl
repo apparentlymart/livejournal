@@ -1542,7 +1542,13 @@ sub handle_caches
     return 1;
 }
 
-### hashref, arrayref
+# <LJFUNC>
+# name: LJ::load_userpics
+# des: Loads a bunch of userpic at once.
+# args: dbarg, upics, idlist
+# des-upics: hashref to load pictures into, keys being the picids
+# des-idlist: arrayref of picids to load
+# </LJFUNC>
 sub load_userpics
 {
     my ($dbarg, $upics, $idlist) = @_;
@@ -1574,6 +1580,13 @@ sub load_userpics
     }
 }
 
+# <LJFUNC>
+# name: LJ::send_mail
+# des: Sends email.
+# args: opt
+# des-opt: Hashref of arguments.  <b>Required:</b> to, from, subject, body.
+#          <b>Optional:</b> toname, fromname, cc, bcc
+# </LJFUNC>
 sub send_mail
 {
     my $opt = shift;
@@ -1595,6 +1608,7 @@ sub send_mail
     close MAIL;
 }
 
+# TODO: make this just call the HTML cleaner.
 sub strip_bad_code
 {
     my $data = shift;
@@ -1660,22 +1674,6 @@ sub strip_bad_code
     $$data = $newdata;
 }
 
-#sub strip_bad_code
-#{
-#    my $data = shift;
-#    require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
-#    LJ::CleanHTML::clean($data, {
-#	'mode' => 'allow',
-#	'keepcomments' => 1,
-#    });
-#}
-
-# FIXME: this belongs in a site-specific config file
-%LJ::acct_name = ("paid" => "Paid Account",
-		  "off" => "Free Account",
-		  "early" => "Early Adopter",
-		  "on" => "Permanent Account");
-
 sub load_user_theme
 {
     # hashref, hashref
@@ -1731,7 +1729,7 @@ sub parse_vars
 
 sub server_down_html
 {
-    return "<B>$LJ::SERVER_DOWN_SUBJECT</B><BR>$LJ::SERVER_DOWN_MESSAGE";
+    return "<b>$LJ::SERVER_DOWN_SUBJECT</b><br />$LJ::SERVER_DOWN_MESSAGE";
 }
 
 ##
@@ -1803,7 +1801,7 @@ sub make_journal
 	if ($opts->{'vhost'} eq "customview") {
 	    return "<!-- LJ down for maintenance -->";
 	}
-	return &server_down_html();
+	return LJ::server_down_html();
     }
     
     my ($styleid);
@@ -1842,14 +1840,14 @@ sub make_journal
 	return "<b>Notice</b><br />Addresses like <tt>http://<i>username</i>.$LJ::USER_DOMAIN</tt> aren't enabled for this user's account type.  Instead, visit:<ul><font face=\"Verdana,Arial\"><b><a href=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</a></b></font></ul>";
     }
     if ($opts->{'vhost'} eq "customview" && ! LJ::get_cap($u, "userdomain")) {
-	return "<B>Notice</B><BR>Only users with <A HREF=\"$LJ::SITEROOT/paidaccounts/\">paid accounts</A> can create and embed styles.";
+	return "<b>Notice</b><br />Only users with <A HREF=\"$LJ::SITEROOT/paidaccounts/\">paid accounts</A> can create and embed styles.";
     }
     if ($opts->{'vhost'} eq "community" && $u->{'journaltype'} ne "C") {
-	return "<B>Notice</B><BR>This account isn't a community journal.";
+	return "<b>Notice</b><br />This account isn't a community journal.";
     }
 
-    return "<H1>Error</H1>Journal has been deleted.  If you are <B>$user</B>, you have a period of 30 days to decide to undelete your journal." if ($u->{'statusvis'} eq "D");
-    return "<H1>Error</H1>This journal has been suspended." if ($u->{'statusvis'} eq "S");
+    return "<h1>Error</h1>Journal has been deleted.  If you are <B>$user</B>, you have a period of 30 days to decide to undelete your journal." if ($u->{'statusvis'} eq "D");
+    return "<h1>Error</h1>This journal has been suspended." if ($u->{'statusvis'} eq "S");
 
     my %vars = ();
     # load the base style
@@ -2055,8 +2053,15 @@ sub get_dbh
     return $dbh;
 }
 
-# takes nothing, returns db set (dbset = master and perhaps a slave)
-# gets master and slave by connecting.
+# <LJFUNC>
+# name: LJ::get_dbs
+# des: Returns a set of database handles to master and a slave,
+#      if this site is using slave databases.  Only use this
+#      once per connection and pass around the same $dbs, since
+#      this function calls [func[LJ::get_dbh]] which uses cached
+#      connections, but validates the connection is still live.
+# returns: $dbs (see [func[LJ::make_dbs]])
+# </LJFUNC>
 sub get_dbs
 {
     my $dbh = LJ::get_dbh("master");
@@ -2064,8 +2069,15 @@ sub get_dbs
     return make_dbs($dbh, $dbr);
 }
 
-# take a master handle and optionally a slave handle and turns it
-# into a dbs
+# <LJFUNC>
+# name: LJ::make_dbs
+# des: Makes a $dbs structure from a master db
+#      handle and optionally a slave.  This function
+#      is called from [func[LJ::get_dbs]].  You shouldn't need
+#      to call it yourself.
+# returns: $dbs: hashref with 'dbh' (master), 'dbr' (slave or undef),
+#          'has_slave' (boolean) and 'reader' (dbr if defined, else dbh)
+# </LJFUNC>
 sub make_dbs
 {
     my ($dbh, $dbr) = @_;
