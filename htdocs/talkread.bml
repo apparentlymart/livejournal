@@ -318,9 +318,6 @@ BODY<=
      }
      LJ::load_userpics($dbs, \%userpics, [ @pics_to_load ]);     
 
-     use Data::Dumper;
-#     return "<pre>" . Dumper([ \%users_to_load, \%userpics, \@pics_to_load ]) . "</pre>";
-
  }
  
  ########## make the navcrap
