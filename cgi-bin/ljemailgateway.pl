@@ -144,13 +144,18 @@ sub process {
     # PGP signed mail?  We'll see about that.
     if (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
         my %gpg_errcodes = ( # temp mapping until translation
-                'bad' => "PGP signature found to be invalid.",
-                'no_key' => "You don't have a PGP key uploaded.",
-                'bad_tmpdir' => "Problem generating tempdir: Please try again.",
+                'bad'         => "PGP signature found to be invalid.",
+                'no_key'      => "You don't have a PGP key uploaded.",
+                'bad_tmpdir'  => "Problem generating tempdir: Please try again.",
                 'invalid_key' => "Your PGP key is invalid.  Please upload a proper key.",
-                'not_signed' => "You specified PGP verification, but your message isn't PGP signed!");
-        my $gpgcode = LJ::Emailpost::check_sig($u, $entity);
-        return $err->($gpg_errcodes{$gpgcode}, { sendmail => 1 }) unless $gpgcode eq 'good';
+                'not_signed'  => "You specified PGP verification, but your message isn't PGP signed!");
+        my $gpgerr;
+        my $gpgcode = LJ::Emailpost::check_sig($u, $entity, \$gpgerr);
+        unless ($gpgcode eq 'good') {
+            my $errstr = $gpg_errcodes{$gpgcode};
+            $errstr .= "\nGnuPG error: $gpgerr\n" if $gpgerr;
+            return $err->($errstr, { sendmail => 1 });
+        }
     }
 
     $body =~ s/^(?:\- )?[\-_]{2,}\s*\r?\n.*//ms; # trim sigs
@@ -378,7 +383,7 @@ sub get_entity
 # Returns codes so we can use the pre-existing err subref,
 # without passing everything all over the place.
 sub check_sig {
-    my ($u, $entity) = @_;
+    my ($u, $entity, $gpg_err) = @_;
 
     LJ::load_user_props($u, 'public_key');
     my $key = $u->{public_key};
@@ -406,6 +411,10 @@ sub check_sig {
     my ($gpg_email, $ret);
     $gpg_email = new Mail::GnuPG( keydir=>$tmpdir );
     eval { $ret = $gpg_email->verify($entity); };
+    if ($@) {
+        $$gpg_err = $@;
+        $$gpg_err =~ s/ at.*?GnuPG.*$//;
+    }
     if (defined($ret)) {
         $ret == 0 ? return 'good' : return 'bad';
     } else {

@@ -10,6 +10,7 @@ use Getopt::Long;
 use Sys::Hostname;
 use POSIX 'setsid';
 use Proc::ProcessTable;
+require "$ENV{LJHOME}/cgi-bin/ljconfig.pl";
 
 # listener globals
 use vars qw($s $c $pid $opt $no_listen);
@@ -25,8 +26,8 @@ $mailspool = $LJ::MAILSPOOL || "$ENV{'LJHOME'}/mail";
 $hostname = $1 if hostname() =~ /^(\w+)/;
 
 # setup defaults
-$locktype = $opt->{'lock'}   || "hostname";
-die "Invalid lock mechanism specified.\n"
+$locktype = $opt->{'lock'}   || $LJ::MAILLOCK;
+die "Invalid lock mechanism specified.  Set \$LJ::MAILLOCK or use --lock.\n"
     unless $locktype =~ /hostname|none|ddlockd/i;
 $workdir = $opt->{'workdir'} || "$mailspool/tmp";
 $maxloop = $opt->{'maxloop'} || 100;
