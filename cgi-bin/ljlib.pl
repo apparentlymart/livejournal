@@ -4762,7 +4762,7 @@ sub get_userpic_info
                         my $comment = substr($comminfo, $pos, $nulpos-$pos);
                         my $id = unpack("N", substr($comminfo, $nulpos+1, 4));
                         $pos = $nulpos + 5; # skip NUL + 4 bytes.
-                        $info->{'comment'}->{$comment} = $id;
+                        $info->{'pic'}->{$id}->{'comment'} = $comment;
                     }
                     $info->{'_has_comments'} = 1;
                 } else { # Requested to load comments, but they aren't in memcache
@@ -4820,9 +4820,9 @@ sub get_userpic_info
             next if $pic->{state} eq 'X'; # no expunged pics in list
             push @pics, $pic;
             $info->{'pic'}->{$pic->{'picid'}} = $pic;
-            $minfocom{$pic->{'comment'}} = int($pic->{'picid'}) if $u->{'dversion'} > 6
+            $minfocom{int($pic->{picid})} = $pic->{comment} if $u->{'dversion'} > 6
                 && $opts->{'load_comments'} && $pic->{'comment'};
-            $minfourl{$pic->{'url'}} = int($pic->{'picid'}) if $u->{'dversion'} > 6
+            $minfourl{int($pic->{'picid'})} = $pic->{'url'} if $u->{'dversion'} > 6
                 && $opts->{'load_urls'} && $pic->{'url'};
         }
 
@@ -4855,7 +4855,7 @@ sub get_userpic_info
 
             if ($opts->{'load_comments'}) {
                 $info->{'comment'} = \%minfocom;
-                my $commentstr = join('', map { pack("Z*N", $_, $minfocom{$_}) } keys %minfocom);
+                my $commentstr = join('', map { pack("Z*N", $minfocom{$_}, $_) } keys %minfocom);
 
                 my $memkey = [$u->{'userid'}, "upiccom:$u->{'userid'}"];
                 LJ::MemCache::set($memkey, $commentstr);
@@ -4864,7 +4864,7 @@ sub get_userpic_info
             }
 
             if ($opts->{'load_urls'}) {
-                my $urlstr = join('', map { pack("Z*N", $_, $minfourl{$_}) } keys %minfourl);
+                my $urlstr = join('', map { pack("Z*N", $minfourl{$_}, $_) } keys %minfourl);
 
                 my $memkey = [$u->{'userid'}, "upicurl:$u->{'userid'}"];
                 LJ::MemCache::set($memkey, $urlstr);

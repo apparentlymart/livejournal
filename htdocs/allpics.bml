@@ -76,7 +76,7 @@
     }
 
     my %comments = ();
-    while (my ($comment, $pic) = each %{$info->{'comment'}}) {
+    while (my ($pic, $comment) = each %{$info->{'comment'}}) {
         LJ::text_out(\$comment);
         $comments{$pic} = $comment;
     }
