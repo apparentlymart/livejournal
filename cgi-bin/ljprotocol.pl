@@ -69,7 +69,7 @@ sub error_message
              "209" => "Parameter out of range",
 
              # Access Errors
-             "300" => "Don't have access to shared/community journal",
+             "300" => "Don't have access to requested journal",
              "301" => "Access of restricted feature",
              "302" => "Can't edit post from requested journal",
              "303" => "Can't edit post in community journal",
