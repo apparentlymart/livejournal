@@ -43,6 +43,7 @@ _code?>
                         "opt_whoscreened", "journaltitle", "journalsubtitle", 
                         "friendspagetitle", "opt_weblogscom", "opt_stylemine",
                         "opt_imagelinks", "opt_getselfemail", "external_foaf_url",
+                        "opt_showmutualfriends",
                         );
 
     # to store values before they undergo normalisation
@@ -372,13 +373,21 @@ _code?>
             $ret .= "</td><td><b><label for='opt_weblogscom'>$ML{'.weblogscom.header'}</label></b></td></tr>\n";
             $ret .= "<tr><td>&nbsp;</td><td>$ML{'.weblogscom.about'}</td></tr>\n";
         }
-        
+
+        # opt_showmutualfriends
+        $ret .= "<tr valign='middle'><td>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showmutualfriends', 'id' => 'opt_showmutualfriends',
+                                 'selected' => $u->{'opt_showmutualfriends'} });
+        $ret .= "</td><td><b><label for='opt_showmutualfriends'>$ML{'.mutualfriends.header'}</label></b></td></tr>\n";
+        $ret .= "<tr><td>&nbsp;</td><td>$ML{'.mutualfriends.about'}</td></tr>\n";
+
         # opt_hidefriendofs
         $ret .= "<tr valign='middle'><td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_hidefriendofs', 'id' => 'opt_hidefriendofs',
                                  'selected' => $u->{'opt_hidefriendofs'} });
         $ret .= "</td><td><b><label for='opt_hidefriendofs'>$ML{'.hidefriendof.header'}</label></b></td></tr>\n";
         $ret .= "<tr><td>&nbsp;</td><td>$ML{'.hidefriendof.about'}</td></tr>\n";
+
 
         # allow_getljnews
         $ret .= "<tr valign='middle'><td>";
@@ -725,6 +734,7 @@ _code?>
             $POST{'friendspagetitle'} = LJ::text_trim($POST{'friendspagetitle'}, 0, 80) if $POST{'friendspagetitle'};
 
             # opts
+            $POST{'opt_showmutualfriends'} = $POST{'opt_showmutualfriends'} ? 1 : 0;
             $POST{'opt_getselfemail'} = $POST{'opt_getselfemail'} ? 1 : 0;
             $POST{'opt_stylemine'} = $POST{'opt_stylemine'} ? 1 : 0;
             $POST{'opt_blockrobots'} = $POST{'opt_blockrobots'} ? 1 : 0;
@@ -773,7 +783,7 @@ _code?>
                           "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                           "opt_whoscreened", "journaltitle", "journalsubtitle", "friendspagetitle",
                           "opt_stylemine", "opt_imagelinks", "opt_getselfemail",
-                          "external_foaf_url",
+                          "external_foaf_url", "opt_showmutualfriends",
                           );
 
             # weblogs.com requires a special cap

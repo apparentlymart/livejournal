@@ -1030,6 +1030,10 @@ so your email address won't be found by email-collecting robots.
 
 /editinfo.bml.mangleaddress.header=Mangle your displayed email address
 
+/editinfo.bml.mutualfriends.about=This option adds a new list to your profile page: the mutual friends list.  People who you list as a friend and who also list you as a friend will be put on this list.
+
+/editinfo.bml.mutualfriends.header=Display mutual friends on profile page
+
 /editinfo.bml.name.title=Name
 
 /editinfo.bml.newemail.body2<<
@@ -3267,6 +3271,8 @@ This could be because: <ol>
 
 /userinfo.bml.label.adduser=Add User
 
+/userinfo.bml.label.alsofriendof=Also Friend of:
+
 /userinfo.bml.label.aolim=AOL IM:
 
 /userinfo.bml.label.birthdate=Birthdate:
@@ -3308,6 +3314,8 @@ This could be because: <ol>
 /userinfo.bml.label.moredetails=(more details...)
 
 /userinfo.bml.label.msnusername=MSN Username:
+
+/userinfo.bml.label.mutual=Mutual Friends:
 
 /userinfo.bml.label.name=Name:
 
