@@ -588,7 +588,7 @@ p?>
 
 /create.bml.username.box.head=Username:
 
-/create.bml.username.charsallowed=Your username may contain only lower-case letters (a-z), digits (0-9) and the underscore character (_). Aditionally, it must not be longer than 15 characters.
+/create.bml.username.charsallowed=Your username may contain only lower-case letters (a-z), digits (0-9) and the underscore character (_). Additionally, it must not be longer than 15 characters.
 
 /create.bml.username.forpaidaccts=Or, for paid accounts:
 
