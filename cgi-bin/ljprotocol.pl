@@ -1337,12 +1337,14 @@ sub getevents
 
         # truncate
         if ($req->{'truncate'} >= 4) {
+            my $original = $t->[1];
             if ($req->{'ver'} > 1) {
                 $t->[1] = LJ::text_trim($t->[1], $req->{'truncate'} - 3, 0);
             } else {
                 $t->[1] = LJ::text_trim($t->[1], 0, $req->{'truncate'} - 3);
-            };
-            $t->[1] .= "...";
+            }
+            # only append the elipsis if the text was actually truncated
+            $t->[1] .= "..." if $t->[1] ne $original;
         }
         
         # line endings
