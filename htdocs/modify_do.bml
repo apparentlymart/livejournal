@@ -172,7 +172,7 @@ if ($FORM{'remoteuser'} eq $user) {
          $sth->execute;
          push @theme_user, $_ while ($_ = $sth->fetchrow_hashref);
          if (@theme_user) {
-             push @themes, { 'moodthemeid' => 0, 'name' => '--- <?_ml .moodicons.personal _ml?> ---' };
+             push @themes, { 'moodthemeid' => 0, 'name' => "--- $ML{'.moodicons.personal'} ---" };
              push @themes, @theme_user;
          }
      }
