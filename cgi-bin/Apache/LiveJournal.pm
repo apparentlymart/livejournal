@@ -9,6 +9,7 @@ use Apache::File ();
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use Apache::LiveJournal::PalImg;
 use LJ::S2;
+use LJ::Blob;
 use Apache::LiveJournal::Interface::Blogger;
 
 BEGIN {
@@ -240,6 +241,14 @@ sub trans
             return redir($r, $url);
         }
 
+        if ($opts->{mode} eq "data" && $opts->{pathextra} =~ m!^/(\w+)(/.*)?!) {
+            if (my $handler = LJ::run_hook("data_handler:$1", $RQ{'user'}, $2)) {
+                $r->handler("perl-script");
+                $r->push_handlers(PerlHandler => $handler);
+                return OK;
+            }
+        }
+
         $r->handler("perl-script");
         $r->push_handlers(PerlHandler => \&journal_content);
         return OK;
@@ -287,12 +296,10 @@ sub trans
                 my $newuri = $uri;
                 $newuri =~ s!$mode/(\d\d\d\d)!$1!;
                 return redir($r, "http://$host$hostport$newuri");
-            }
-            if ($mode eq 'rss') {
+            } elsif ($mode eq 'rss') {
                 # code 301: moved permanently, update your links.
                 return redir($r, LJ::journal_base($user) . "/data/rss", 301);
             }
-
         } elsif (($vhost eq "users" || $vhost =~ /^other:/) &&
                  $uuri eq "/robots.txt") {
             $mode = "robots_txt";

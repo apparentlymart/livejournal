@@ -9,7 +9,7 @@ mark_clustered("useridmap", "userbio", "cmdbuffer", "dudata",
                "ratelog", "loginstall", "sessions", "sessions_data",
                "fvcache", "s1usercache", "modlog", "modblob", "counter",
                "userproplite2", "links", "s1overrides", "s1style",
-               "s1stylecache",
+               "s1stylecache", "userblob",
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -704,6 +704,23 @@ CREATE TABLE userpicmap (
   picid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (userid,kwid)
 ) 
+EOC
+
+# - blobids aren't necessarily unique between domains;
+# global userpicids may collide with the counter used for the rest.
+# so type must be in the key.
+# - domain ids are set up in ljconfig.pl.
+# - NULL length indicates the data is external-- we need another
+# table for more data for that.
+register_tablecreate("userblob", <<'EOC'); # clustered
+CREATE TABLE userblob (
+  journalid   INT       UNSIGNED NOT NULL,
+  domain      TINYINT   UNSIGNED NOT NULL,
+  blobid      MEDIUMINT UNSIGNED NOT NULL,
+  length      MEDIUMINT UNSIGNED,
+  PRIMARY KEY (journalid, domain, blobid),
+  KEY (domain)
+)
 EOC
 
 register_tablecreate("userproplist", <<'EOC');

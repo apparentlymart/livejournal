@@ -578,26 +578,7 @@ sub postevent
 
     if (defined $req->{'tz'}) {
         if ($req->{tz} eq 'guess') {
-            # we guess their current timezone's offset
-            # by comparing the gmtime of their last post
-            # with the time they specified on that post.
-            my $dbcm = LJ::get_cluster_master($uowner);
-            return fail($err, 306) unless $dbcm;
-
-            # grab the times on the last post.
-            if (my $last_row = $dbcm->selectrow_hashref(
-                                "SELECT rlogtime, eventtime ".
-                                "FROM log2 WHERE journalid=? ".
-                                "ORDER BY rlogtime LIMIT 1",
-                                undef, $uowner->{userid})) {
-                my $logtime = $LJ::EndOfTime - $last_row->{'rlogtime'};
-                my $eventtime = LJ::mysqldate_to_time($last_row->{'eventtime'}, 1);
-                my $hourdiff = ($eventtime - $logtime) / 3600;
-
-                # if they're up to a quarter hour behind, round up.
-                $offset = $hourdiff > 0 ? int($hourdiff + 0.25) : int($hourdiff - 0.25);
-            }
-            $time_was_faked = 1;
+            LJ::get_timezone($uowner, \$offset, \$time_was_faked);
         } elsif ($req->{'tz'} =~ /^[+\-]\d\d\d\d$/) {
             # FIXME we ought to store this timezone and make use of it somehow.
             $offset = $req->{'tz'} / 100.0;

@@ -2207,7 +2207,7 @@ sub load_user_props
         my $pubsty = LJ::S1::get_public_styles();
         foreach (values %$pubsty) {
             my $k = "s1_$_->{'type'}_style";
-            next unless $LJ::USERPROP_DEF{$k} =~ m!^$_->{'type'}/(.+)$!;
+            next unless $LJ::USERPROP_DEF{$k} =~ m#^$_->{'type'}/(.+)$#;
 
             if ($_->{'styledes'} eq $1) {
                 $LJ::USERPROP_DEF{$k} = $_->{'styleid'};
@@ -3615,6 +3615,51 @@ sub get_picid_from_keyword
 }
 
 # <LJFUNC>
+# name: LJ::get_timezone
+# des: Gets the timezone offset for the user.
+# args: u, offsetref, fakedref
+# des-u: user object.
+# des-offsetref: reference to scalar to hold timezone offset;
+# des-fakedref: reference to scalar to hold whether this timezone was
+#               faked.  0 if it is the timezone specified by the user (not supported yet).
+# returns: nonzero if successful.
+# </LJFUNC>
+sub get_timezone {
+    my ($u, $offsetref, $fakedref) = @_;
+
+    # we currently don't support timezones,
+    # but when we do this will be the function to modify.
+    
+    my $offset;
+
+    my $dbcm = LJ::get_cluster_master($u);
+    return 0 unless $dbcm;
+
+    # we guess their current timezone's offset
+    # by comparing the gmtime of their last post
+    # with the time they specified on that post.
+
+    # grab the times on the last post.
+    if (my $last_row = $dbcm->selectrow_hashref(
+                        "SELECT rlogtime, eventtime ".
+                        "FROM log2 WHERE journalid=? ".
+                        "ORDER BY rlogtime LIMIT 1",
+                        undef, $u->{userid})) {
+        my $logtime = $LJ::EndOfTime - $last_row->{'rlogtime'};
+        my $eventtime = LJ::mysqldate_to_time($last_row->{'eventtime'}, 1);
+        my $hourdiff = ($eventtime - $logtime) / 3600;
+
+        # if they're up to a quarter hour behind, round up.
+        $$offsetref = $hourdiff > 0 ? int($hourdiff + 0.25) : int($hourdiff - 0.25);
+    }
+
+    # until we store real timezones, the timezone is always faked.
+    $$fakedref = 1 if $fakedref;
+    
+    return 1;
+}
+
+# <LJFUNC>
 # name: LJ::send_mail
 # des: Sends email.  Character set will only be used if message is not ascii.
 # args: opt
@@ -4377,6 +4422,7 @@ sub expand_embedded
     my $eventref = shift;
 
     LJ::Poll::show_polls($ditemid, $remote, $eventref);
+    LJ::run_hooks("expand_embedded", $ditemid, $remote, $eventref);
 }
 
 # <LJFUNC>
@@ -6662,7 +6708,7 @@ sub clear_rel
 sub alloc_user_counter
 {
     my ($u, $dom, $pre_locked) = @_;
-    return undef unless $dom =~ /^[LTM]$/;
+    return undef unless $dom =~ /^[LTMB]$/;
     my $dbcm = LJ::get_cluster_master($u);
     return undef unless $dbcm;
 
