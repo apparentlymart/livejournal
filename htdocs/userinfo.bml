@@ -596,10 +596,10 @@ $body .= "<TR><TD ALIGN=RIGHT><B>Comments:</B></TD><TD COLSPAN=2><B>Posted:</B> 
 
     if (@$posthere || @$canpost) {
 	$body .= "<tr valign='top'><td align='right'><b>Shared Journal Access:</b></td><td colspan='2'>";
-	foreach (@$canpost) {
+	foreach (sort @$canpost) {
 	    $body .= "$u->{'user'} can post to <a href='userinfo.bml?user=$_'><b>$_</b></a><br>\n";
 	}
-	foreach (@$posthere) {
+	foreach (sort @$posthere) {
 	    $body .= "<a href='userinfo.bml?user=$_'><b>$_</b></a> can post to $u->{'user'}<br>\n";
 	}
 	$body .= "</td></tr>";
