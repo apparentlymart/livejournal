@@ -623,6 +623,9 @@ sub postevent
 
     # can't post to deleted/suspended community
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";
+
+    # post content too large
+    return fail($err,409) if bytes::length($req->{'event'}) >= LJ::BMAX_EVENT; 
     
     my $time_was_faked = 0;
     my $offset = 0;  # assume gmt at first.
