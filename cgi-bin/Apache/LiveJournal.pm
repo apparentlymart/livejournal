@@ -619,7 +619,7 @@ sub userpic_content
     my $disk_cache = $USERPIC{'use_disk_cache'} &&
         $file eq $RQ{'userpicfile'};
 
-    my ($pic, $data, $lastmod);
+    my ($data, $lastmod);
     my $need_cache;
 
     my $mime = "image/jpeg";
@@ -639,24 +639,23 @@ sub userpic_content
     };
 
     # Load the user object and pic and make sure the picture is viewable
-    my $u = LJ::load_userid( $userid );
-    $pic = get_pic_from_picid( $u, $picid ) or return NOT_FOUND;
-    return NOT_FOUND if $pic->{'userid'} != $userid;
-    return NOT_FOUND unless $u && $u->{'statusvis'} !~ /[XS]/ && $pic->{state} ne 'X';
+    my $u = LJ::load_userid($userid);
+    return NOT_FOUND unless $u && $u->{'statusvis'} !~ /[XS]/;
+
+    my %upics;
+    LJ::load_userpics(\%upics, [ $u, $picid ]);
+    my $pic = $upics{$picid} or return NOT_FOUND;
+    return NOT_FOUND if $pic->{'userid'} != $userid || $pic->{state} eq 'X';
 
     # Read the mimetype from the pichash if dversion 7
-    if ($u->{'dversion'} > 6) {
-        $mime = { 'G' => 'image/gif',
-                  'J' => 'image/jpeg',
-                  'P' => 'image/png', }->{$pic->{fmt}};
-    } else {
-        $mime = $pic->{contenttype};
-    }
+    $mime = { 'G' => 'image/gif',
+              'J' => 'image/jpeg',
+              'P' => 'image/png', }->{$pic->{fmt}};
 
     ### Handle reproxyable requests
 
     # For dversion 7+ and mogilefs userpics, follow this path
-    if ($u->{dversion} > 6 && $pic->{location} eq 'mogile' ) {
+    if ($pic->{location} eq 'M' ) {  # 'M' for mogilefs
         my $key = $u->mogfs_userpic_key( $picid );
 
         if ( !$LJ::REPROXY_DISABLE{userpics} &&
@@ -680,6 +679,7 @@ sub userpic_content
 
         else {
             my $data = $LJ::MogileFS->get_file_data( $key );
+            return NOT_FOUND unless $data;
             $size = length $$data;
             $send_headers->();
             $r->print( $$data ) unless $r->header_only;
@@ -708,7 +708,7 @@ sub userpic_content
             # Now ask the blob lib for the path to send to the reproxy
             $fmt = ($u->{'dversion'} > 6) ? $MimeTypeMapd6{ $pic->{fmt} } : $MimeTypeMap{ $pic->{contenttype} };
             $path = LJ::Blob::get_rel_path( $root, $u, "userpic", $fmt, $picid );
-    
+
             $r->header_out( 'X-REPROXY-FILE', $path );
             $send_headers->();
 
@@ -737,7 +737,7 @@ sub userpic_content
 
     # else, get it from db.
     unless ($data) {
-        $lastmod = $pic->{'lastmod'};
+        $lastmod = $pic->{'picdate'};
 
         if ($LJ::USERPIC_BLOBSERVER) {
             my $fmt = ($u->{'dversion'} > 6) ? $MimeTypeMapd6{ $pic->{fmt} } : $MimeTypeMap{ $pic->{contenttype} };
@@ -780,52 +780,6 @@ sub userpic_content
     $r->print($data) unless $r->header_only;
     return OK;
 }
-
-
-sub get_pic_from_picid {
-    my ($u, $picid) = @_;
-    $picid += 0;
-    return undef unless ref $u;
-
-    my $rec;
-    if ($u->{'dversion'} > 6) {
-        my $query = "SELECT state, userid, fmt, location, UNIX_TIMESTAMP(picdate) ".
-            "AS 'lastmod' FROM userpic2 WHERE userid=$u->{'userid'} AND picid=$picid";
-
-        if (my $dbcr = LJ::get_cluster_def_reader($u)) {
-            $rec = $dbcr->selectrow_hashref($query);
-            return $rec if $rec;
-        }
-
-        # some users report blank userpics after upload.  probably
-        # a race where it's not in the slaves yet?
-        if (my $dbcm = LJ::get_cluster_master($u)) {
-            $rec = $dbcm->selectrow_hashref($query);
-            return $rec if $rec;
-        }
-
-    } else {
-        my $query = "SELECT state, userid, contenttype, UNIX_TIMESTAMP(picdate) ".
-            "AS 'lastmod' FROM userpic WHERE picid=$picid";
-
-        if (my $dbr = LJ::get_db_reader()) {
-            $rec = $dbr->selectrow_hashref($query);
-            return $rec if $rec;
-        }
-
-        # some users report blank userpics after upload.  probably
-        # a race where it's not in the slaves yet?
-        if (my $dbh = LJ::get_db_writer()) {
-            $rec = $dbh->selectrow_hashref($query);
-            return $rec if $rec;
-        }
-    }
-
-    return undef;
-
-}
-
-
 
 sub files_trans
 {

@@ -15,6 +15,9 @@ package LJ::MemCache;
                               opt_mangleemail useoverrides defaultpicid has_bio txtmsg_status is_system
                               journaltype lang oldenc]],
                           'fgrp' => [qw[1 userid groupnum groupname sortorder is_public]],
+                          # version #101 because old userpic format in memcached was an arrayref of
+                          # [width, height, ...] and widths could have been 1 before, although unlikely
+                          'userpic' => [qw[101 width height userid fmt state picdate location flags]],
                           );
 
 

@@ -24,7 +24,6 @@
 
 <uid> auc:<uid>:<dom> == last ID from LJ::alloc_user_counter() for $uid/$domain
 
-<picid> userpic.<picid> = [ $w, $h, $uid ]
 <themeid> moodthemedata:<themeid> = { $moodid => { 'pic' => $pic, 'w' => $w, 'h' => $h } }
 
 <uid> s1overr:<uid> == overrides for a given user
@@ -49,6 +48,7 @@
 sysban:ip == hashref of ip => unix expiration time
 sysban:uniq == hashref of uniq => unix expiration time
 
+<picid> userpic.<picid> == hashref-as-arrayref (ARRAYFMT: 'userpic' in LJ::MemCache)
 <uid> upicinf:<uid> == packed data, userpic keywords
 <uid> upiccom:<uid> == packed data, userpic comments
 <uid> upicurl:<uid> == packed data, userpic urls

@@ -4121,7 +4121,7 @@ sub start_request
     # clear per-request caches
     LJ::unset_remote();               # clear cached remote
     $LJ::ACTIVE_CRUMB = '';           # clear active crumb
-    %LJ::CACHE_USERPIC_SIZE = ();     # picid -> [width, height, userid]
+    %LJ::CACHE_USERPIC = ();          # picid -> hashref
     %LJ::CACHE_USERPIC_INFO = ();     # uid -> { ... }
     %LJ::REQ_CACHE_USER_NAME = ();    # users by name
     %LJ::REQ_CACHE_USER_ID = ();      # users by id
@@ -4283,10 +4283,8 @@ sub load_userpics
         my ($u, $id) = @$row;
         next unless ref $u;
 
-        if ($LJ::CACHE_USERPIC_SIZE{$id}) {
-            $upics->{$id}->{'width'} = $LJ::CACHE_USERPIC_SIZE{$id}->[0];
-            $upics->{$id}->{'height'} = $LJ::CACHE_USERPIC_SIZE{$id}->[1];
-            $upics->{$id}->{'userid'} = $LJ::CACHE_USERPIC_SIZE{$id}->[2];
+        if ($LJ::CACHE_USERPIC{$id}) {
+            $upics->{$id} = $LJ::CACHE_USERPIC{$id};
         } elsif ($id+0) {
             push @load_list, [$u, $id+0];
         }
@@ -4299,9 +4297,7 @@ sub load_userpics
         while (my ($k, $v) = each %$mem) {
             next unless $v && $k =~ /(\d+)/;
             my $id = $1;
-            $upics->{$id}->{'width'} = $v->[0];
-            $upics->{$id}->{'height'} = $v->[1];
-            $upics->{$id}->{'userid'} = $v->[2];
+            $upics->{$id} = LJ::MemCache::array_to_hash("userpic", $v);
         }
         @load_list = grep { ! $upics->{$_->[1]} } @load_list;
         return unless @load_list;
@@ -4312,7 +4308,7 @@ sub load_userpics
     foreach my $row (@load_list) {
         # ignore users on clusterid 0
         next unless $row->[0]->{clusterid};
-        
+
         if ($row->[0]->{'dversion'} > 6) {
             push @{$db_load{$row->[0]->{'clusterid'}}}, $row;
         } else {
@@ -4333,32 +4329,51 @@ sub load_userpics
             push @data, ($row->[0]->{userid}, $row->[1]);
         }
         next unless @data && @bindings;
-        
-        my $sth = $dbcr->prepare("SELECT userid, picid, width, height FROM userpic2 WHERE " . join(' OR ', @bindings));
+
+        my $sth = $dbcr->prepare("SELECT userid, picid, width, height, fmt, state, ".
+                                 "       FROM_UNIXTIME(picdate) AS 'picdate', location, flags ".
+                                 "FROM userpic2 WHERE " . join(' OR ', @bindings));
         $sth->execute(@data);
 
-        while ($_ = $sth->fetchrow_hashref) {
-            my $id = $_->{'picid'};
-            undef $_->{'picid'};
-            $upics->{$id} = $_;
-            my $val = [ $_->{'width'}, $_->{'height'}, $_->{'userid'} ];
-            $LJ::CACHE_USERPIC_SIZE{$id} = $val;
-            LJ::MemCache::set([$id,"userpic.$id"], $val);
+        while (my $ur = $sth->fetchrow_hashref) {
+            my $id = delete $ur->{'picid'};
+            $upics->{$id} = $ur;
+
+            # force into numeric context so they'll be smaller in memcache:
+            foreach my $k (qw(userid width height flags picdate)) {
+                $ur->{$k} += 0;
+            }
+            $ur->{location} = uc(substr($ur->{location}, 0, 1));
+
+            $LJ::CACHE_USERPIC{$id} = $ur;
+            LJ::MemCache::set([$id,"userpic.$id"], LJ::MemCache::hash_to_array("userpic", $ur));
         }
     }
 
-    my $dbr = LJ::get_db_reader();
+    my $dbr = LJ::get_db_writer();
     my $picid_in = join(',', map { $_->[1] } @load_list_d6);
-    my $sth = $dbr->prepare("SELECT userid, picid, width, height ".
+    my $sth = $dbr->prepare("SELECT userid, picid, width, height, contenttype, state, ".
+                            "       FROM_UNIXTIME(picdate) AS 'picdate' ".
                             "FROM userpic WHERE picid IN ($picid_in)");
     $sth->execute;
-    while ($_ = $sth->fetchrow_hashref) {
-        my $id = $_->{'picid'};
-        undef $_->{'picid'};
-        $upics->{$id} = $_;
-        my $val = [ $_->{'width'}, $_->{'height'}, $_->{'userid'} ];
-        $LJ::CACHE_USERPIC_SIZE{$id} = $val;
-        LJ::MemCache::set([$id,"userpic.$id"], $val);
+    while (my $ur = $sth->fetchrow_hashref) {
+        my $id = delete $ur->{'picid'};
+        $upics->{$id} = $ur;
+
+        # force into numeric context so they'll be smaller in memcache:
+        foreach my $k (qw(userid width height picdate)) {
+            $ur->{$k} += 0;
+        }
+        $ur->{location} = "?";
+        $ur->{flags} = undef;
+        $ur->{fmt} = {
+            'image/gif' => 'G',
+            'image/jpeg' => 'J',
+            'image/png' => 'P',
+        }->{delete $ur->{contenttype}};
+
+        $LJ::CACHE_USERPIC{$id} = $ur;
+        LJ::MemCache::set([$id,"userpic.$id"], LJ::MemCache::hash_to_array("userpic", $ur));
     }
 }
 
@@ -4832,10 +4847,6 @@ sub get_userpic_info
                 $info->{'_has_urls'} = 1;
             }
         }
-    }
-
-    foreach (values %{$info->{'pic'}}) {
-        $LJ::CACHE_USERPIC_SIZE{$_->{'picid'}} = [ $_->{'width'}, $_->{'height'}, $_->{'userid'} ];
     }
 
     $LJ::CACHE_USERPIC_INFO{$u->{'userid'}} = $info;
