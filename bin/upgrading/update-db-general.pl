@@ -1121,7 +1121,7 @@ CREATE TABLE s2layers
 )
 EOC
 
-register_tablecreate("s2info", <<'EOC'); # clustered
+register_tablecreate("s2info", <<'EOC'); # global
 CREATE TABLE s2info
 (
    s2lid INT UNSIGNED NOT NULL,
@@ -1131,7 +1131,7 @@ CREATE TABLE s2info
 )
 EOC
 
-register_tablecreate("s2source", <<'EOC'); # clustered
+register_tablecreate("s2source", <<'EOC'); # global
 CREATE TABLE s2source
 (
    s2lid INT UNSIGNED NOT NULL,
@@ -1140,7 +1140,7 @@ CREATE TABLE s2source
 )
 EOC
 
-register_tablecreate("s2checker", <<'EOC'); # clustered
+register_tablecreate("s2checker", <<'EOC'); # global
 CREATE TABLE s2checker
 (
    s2lid INT UNSIGNED NOT NULL,
@@ -1149,7 +1149,7 @@ CREATE TABLE s2checker
 )
 EOC
 
-register_tablecreate("s2compiled", <<'EOC'); # clustered
+register_tablecreate("s2compiled", <<'EOC'); # global
 CREATE TABLE s2compiled
 (
    s2lid INT UNSIGNED NOT NULL,
@@ -1159,7 +1159,7 @@ CREATE TABLE s2compiled
 )
 EOC
 
-register_tablecreate("s2styles", <<'EOC'); # clustered
+register_tablecreate("s2styles", <<'EOC'); # global
 CREATE TABLE s2styles
 (
    styleid INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1171,7 +1171,7 @@ CREATE TABLE s2styles
 )
 EOC
 
-register_tablecreate("s2stylelayers", <<'EOC'); # clustered
+register_tablecreate("s2stylelayers", <<'EOC'); # global
 CREATE TABLE s2stylelayers
 (
     styleid INT UNSIGNED NOT NULL,
