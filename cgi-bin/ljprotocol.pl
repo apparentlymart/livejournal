@@ -1044,7 +1044,6 @@ sub editevent
                             map { $req->{$_} } qw(year mon day hour min));
     my $qeventtime = $dbh->quote($eventtime);
 
-    my $qallowmask = $req->{'allowmask'}+0;
     my $security = "public";
     if ($req->{'security'} eq "private" || $req->{'security'} eq "usemask") {
         $security = $req->{'security'};
