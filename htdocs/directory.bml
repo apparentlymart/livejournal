@@ -13,15 +13,19 @@ BODY<=
  LJ::Dir::validate(\%FORM, \@errors);
  return LJ::bad_input(@errors) if @errors;
 
- my $dbh = LJ::get_dbh("master");  # setup $dbh connection to master
- my $dbdir = LJ::get_dbh($LJ::DIR_DB_HOST);
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
+ my $dbdir = LJ::get_dbh("directory");
+ return "Directory database not available." unless $dbdir;
  my @matches;
  my %info;
  my $ret = "";
 
  if ($ENV{'QUERY_STRING'} eq "")
  {
-     LJ::load_codes($dbh, { state => \%state, country => \%country  });
+     LJ::load_codes($dbs, { state => \%state, country => \%country  });
      $ret = "";
      $ret .= "(=H1 Browse Journals by US State H1=)(=P Click a US state below to read journals from that state, or click a country name below the map to read journals from that country. P=)\n";
      $ret .= "<FORM NAME=\"stateForm\"><P><CENTER>";
@@ -31,12 +35,12 @@ BODY<=
 
      $ret .= "<IMG SRC=\"$LJ::IMGPREFIX/us_map.gif\" WIDTH=489 HEIGHT=315 BORDER=0 USEMAP=\"#state_test\" ISMAP></CENTER></FORM><MAP NAME=state_test>\n";
 
-     $sth = $dbh->prepare("SELECT statcat, statkey, statval FROM stats WHERE statcat IN ('country', 'stateus')");
+     $sth = $dbr->prepare("SELECT statcat, statkey, statval FROM stats WHERE statcat IN ('country', 'stateus')");
      $sth->execute;
-     while ($_ = $sth->fetchrow_hashref) {	
+     while ($_ = $sth->fetchrow_hashref) {
          $count{$_->{'statcat'}}->{$_->{'statkey'}} = $_->{'statval'};
      }
-     
+
      my @shapes = (
                  "1,235,1,309,108,309,108,235,18,235,1,235", "AK", 
                  "328,196,328,236,355,235,345,195,328,196,328,196", "AL", 
@@ -135,13 +139,13 @@ BODY<=
      
  }
 
- my $remote = LJ::get_remote($dbh);
+ my $remote = LJ::get_remote($dbs);
 
- unless (LJ::check_priv($dbh, $remote, "betatest", "journal")) {
+ unless (LJ::check_priv($dbs, $remote, "betatest", "journal")) {
      return "The directory is currently unavailable.";
  }
 
- if (LJ::Dir::do_search($dbdir, $dbh, \%FORM, \@matches, \%info)==0) {
+ if (LJ::Dir::do_search($dbs, \%FORM, \@matches, \%info)==0) {
      return "(=H1 Error H1=)(=P Error: $info{'errmsg'} P=)";
  }
  $info{'allwhat'} ||= "users";
@@ -209,7 +213,7 @@ BODY<=
  unless ($info{'count'}) { return $ret; }
 
  if ($FORM{'opt_sort'} eq "loc") {
-     LJ::load_codes($dbh, { state => \%state, country => \%country  });
+     LJ::load_codes($dbs, { state => \%state, country => \%country  });
  }
 
  if ($FORM{'opt_format'} eq "simple") 
@@ -266,7 +270,7 @@ BODY<=
          $ret .= "</A></TD>";
          $ret .= "<TD><B><A HREF=\"/community/$rec->{'user'}/\">$rec->{'user'}</A></B></TD>";
          $ret .= "<TD>$rec->{'name'}</TD>";
-         
+
          my $color;
          if ($rec->{'membership'} eq "open") { $color = "green"; } else { $color = "red"; }
          $ret .= "<TD ALIGN=CENTER><IMG SRC=\"$LJ::IMGPREFIX/dot_$color.gif\" WIDTH=14 HEIGHT=14></TD>";
@@ -278,14 +282,14 @@ BODY<=
      $ret .= "</TABLE>\n";
  }
 
- if ($FORM{'opt_format'} eq "pics") 
+ if ($FORM{'opt_format'} eq "pics")
  {
      my $showloc = $FORM{'opt_sort'} eq "loc" ? 1 : 0;
      my %last = ();
 
      my %pic;
      my @picids = map { $_->{'defaultpicid'} } @matches;
-     LJ::load_userpics($dbh, \%pic, \@picids);
+     LJ::load_userpics($dbs, \%pic, \@picids);
 
      my $count = 0;
      my $pos = 0;
@@ -337,7 +341,6 @@ BODY<=
          $ret .= "<BR><FONT SIZE=-1><B>Update: </B> $updateago</FONT></TD>\n";
      }
      $ret .= "</TR></TABLE>\n";
-     
  }
 
  if ($info{'pages'} > 1) { $ret .= $navcrap; }

@@ -3,8 +3,7 @@ LOCALBLOCKS<=
 CRIT<=
 {F}
 <tr bgcolor='(=EMCOLOR=)'>
-<td><input type='checkbox' name="%%CODE%%" value='1'></td>
-<td align='left'><b>%%NAME%%</b>
+<td align='left' colspan='2'><b>%%NAME%%</b>
 </tr>
 <tr align='left'><td>&nbsp;</td><td>%%FORM%%</td></tr>
 <=CRIT
@@ -23,7 +22,7 @@ BODY<=
 
 (=H1 Search Directory H1=)
 (=P
-Select the criteria below that you'd like to find user journals by.  The results returned are the intersection of all search criteria.  In other words, each checkbox you click means "AND", not "OR".
+Fill in criteria below that you'd like to find user journals by.  The results returned are the intersection of all search criteria.  In other words, each restriction means "AND", not "OR".
 P=)
 
 (=HR=)
@@ -31,7 +30,7 @@ P=)
 <CENTER>
 
 (=_CODE
- return "<FORM ACTION='$LJ::DIRURI' METHOD='GET'>";
+ return "<form action='/directory.bml' method='get'>";
 _CODE=)
 
 <table cellpadding='4' cellspacing='0' border='0'>
@@ -44,21 +43,16 @@ FORM<=
 
 <table>
 <tr><td align='right'>Country:</td><td align='left'>
-<select name="loc_cn">
 (=_CODE
 
  my $dbs = LJ::get_dbs();
  LJ::load_codes($dbs, { "country" => \%countries });
- my $ret = "";
- foreach (sort { $countries{$a} cmp $countries{$b} } keys %countries)
- {
-     my $sel = $_ eq "US" ? " SELECTED" : "";
-     $ret .= "<OPTION VALUE=\"$_\"$sel>$countries{$_}\n";
- }
- return $ret; 
- 
+ return LJ::html_select({
+     'name' => 'loc_cn',
+ }, "", "", map { $_, $countries{$_} } "US", sort { $countries{$a} cmp $countries{$b} } keys %countries);
+
 _CODE=)
-</select></td></tr>
+</td></tr>
 <tr><td align='right'>State/Province:</td><td align='left'><input name="loc_st"></td></tr>
 <tr><td align='right'>City:</td><td align='left'><input name="loc_ci"></td></tr>
 </table>
@@ -92,7 +86,8 @@ Between
 <=FORM
 CRIT=)
 
-<!---- age ----->
+(=_C  DISABLED because of privacy policy.  add later when 'public gender' option
+<!---- gender ----->
 (=CRIT
 NAME=>By Gender
 CODE=>s_gen
@@ -104,6 +99,7 @@ User is: <SELECT NAME="gen_sel">
 </SELECT>
 <=FORM
 CRIT=)
+_C=)
 
 <!---- interest ----->
 (=CRIT
@@ -131,6 +127,7 @@ FORM<=
 <INPUT NAME="fro_user" SIZE=15 MAXLENGTH=15> lists user as a friend.
 CRIT=)
 
+(=_C  dead for now
 <!---- client used ----->
 (=CRIT
 NAME=>Client Usage
@@ -138,7 +135,9 @@ CODE=>s_client
 FORM<=
 Has used update client named: <INPUT NAME="client_match" SIZE=20>
 CRIT=)
+_C=)
 
+(=_C no index on this yet.  need a userprop boolean.
 <!----- other ------>
 (=BAR
 NAME=>Other Criteria
@@ -146,6 +145,7 @@ FORM<=
 <INPUT TYPE=CHECKBOX NAME="s_withpic" VALUE=1> Only users with pictures
 <=FORM
 BAR=)
+_C=)
 
 <!---- output formatting ----->
 (=BAR

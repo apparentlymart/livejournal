@@ -1,37 +1,35 @@
 #!/usr/bin/perl
 #
-# Tables hit:
-#   user
+# Directory search code.
+#
+############################################################
+#
+# Misc Notes...
+#
+# directory handle can only touch:
 #   community
-#   userinterests
-#   interests
-#   payments
 #   friends
-#   logins
+#   payments
+#   userinterests
 #   userprop
-#   userproplist
+#   userusage
 #
 
 use strict;
-
 package LJ::Dir;
 use Digest::MD5 qw(md5_hex);
 
 my $MAX_RETURN_RESULT = 1000;
 
 my %filters = (
-            'int' => { 'searcher' => \&search_int, 
+            'int' => { 'searcher' => \&search_int,
                        'validate' => \&validate_int, },
             'fr' => { 'searcher' => \&search_fr, },
             'fro' => { 'searcher' => \&search_fro, },
-#	    'client' => { 'searcher' => \&search_client, 
-#			  'validate' => \&validate_client, 
-#		      },
-#	    'withpic' => { 'searcher' => \&search_withpic, },
-            'loc' => { 'validate' => \&validate_loc, 
+            'loc' => { 'validate' => \&validate_loc,
                        'searcher' => \&search_loc, },
-            'gen' => { 'validate' => \&validate_gen,
-                       'searcher' => \&search_gen, },
+            #'gen' => { 'validate' => \&validate_gen,
+            #           'searcher' => \&search_gen, },
             'age' => { 'validate' => \&validate_age,
                        'searcher' => \&search_age, },
             'ut' => { 'validate' => \&validate_ut,
@@ -39,7 +37,6 @@ my %filters = (
             'sup' => { 'searcher' => \&search_sup, },
             'com' => { 'searcher' => \&search_com, },
             );
-
 
 # validate all filter options
 #
@@ -109,8 +106,6 @@ sub do_search
     my ($extrawhere, $extrawhere2);
     my ($extrafrom, $extrafrom2);
 
-    my $distinct = "";
-
     my %only_one_copy = qw(community c user u userusage uu);
 
     ## keep track of what table aliases we've used
@@ -162,11 +157,6 @@ sub do_search
             $cond =~ s/\{(\w+?)\}/$map_alias{$1}/g;
             $conds{"$cond=u.userid"} = 1;
         }
-
-        ## does this crit require a distinct select?
-        if ($crit->{'distinct'}) {
-            $distinct = "DISTINCT";
-        }
     }
 
     my $pagesize = $req->{'opt_pagesize'}+0 || 100;
@@ -210,7 +200,7 @@ sub do_search
     my $fromwhat = join(", ", map { "$alias_used{$_} $_" } keys %alias_used);
     my $conds = join(" AND ", keys %conds);
 
-    my $sql = "SELECT $distinct u.userid FROM $fromwhat WHERE $conds $orderby LIMIT $MAX_RETURN_RESULT";
+    my $sql = "SELECT u.userid FROM $fromwhat WHERE $conds $orderby LIMIT $MAX_RETURN_RESULT";
 
     if ($req->{'sql'}) {
         $info->{'errmsg'} = "SQL: $sql";
@@ -221,10 +211,10 @@ sub do_search
     my $hit_cache = 0;
     my $count = 0;
     my @ids;
-    
+
     ## let's see if it's cached.
     {
-        my $csql = "SELECT userids FROM ${pfx}dirsearchres2 WHERE qdigest=$qdig AND dateins > DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
+        my $csql = "SELECT userids FROM dirsearchres2 WHERE qdigest=$qdig AND dateins > DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
         my $sth = $dbmaster->prepare($csql);
         $sth->execute;
         if ($dbh->err) {  $info->{'errmsg'} = $dbh->errstr; return 0; }
@@ -247,13 +237,15 @@ sub do_search
         $sth->execute;
         if ($dbh->err) { $info->{'errmsg'} = $dbh->errstr . "<p>SQL: $sql"; return 0; }
 
+        my %ids;
         while (my ($id) = $sth->fetchrow_array) {
-            push @ids, $id;
+            $ids{$id} = 1;
         }
+        @ids = keys %ids;
 
         # insert it into the cache
         my $ids = $dbh->quote(join(",", @ids));
-        $dbmaster->do("REPLACE INTO ${pfx}dirsearchres2 (qdigest, dateins, userids) VALUES ($qdig, NOW(), $ids)");
+        $dbmaster->do("REPLACE INTO dirsearchres2 (qdigest, dateins, userids) VALUES ($qdig, NOW(), $ids)");
         $count = scalar(@ids);
     }
 
@@ -332,7 +324,7 @@ sub validate_int
     if (length($int) > 35) {
         push @$errors, "Interest is too long.";
     }
-    
+
     $req->{'int_like'} = $int;
 }
 
@@ -344,18 +336,17 @@ sub search_int
 
     ## find interest id, if one doth exist.
     my $qint = $dbh->quote($req->{'int_like'});
+    my $intid = $dbh->selectrow_array("SELECT intid FROM interests ".
+                                      "WHERE interest=$qint");
+    $int += 0;
 
     return {
         'tables' => {
-            'ui' => 'userinterests', 
-            'i' => 'interests',
-        }, 
-        'conds' => [ "{ui}.intid={i}.intid",
-                     "{i}.interest=$qint",
-                     ],
+            'ui' => 'userinterests',
+        },
+        'conds' => [ "{ui}.intid=$intid" ],
         'userid' => "{ui}.userid",
     };
-   
 }
 
 ######## HAVE A PICTURE? ##############3
@@ -382,12 +373,11 @@ sub search_sup
 
     return {
         'tables' => {
-            'p' => 'payments', 
-        }, 
+            'p' => 'payments',
+        },
         'conds' => [  ],
         'userid' => "{p}.userid",
     };
-
 }
 
 ######## HAS FRIEND ##############
@@ -402,8 +392,8 @@ sub search_fr
 
     push @{$info->{'english'}}, "consider \"$arg\" a friend";
 
-    my $friendid = &LJ::get_userid($dbh, $user);
-    
+    my $friendid = LJ::get_userid($dbh, $user);
+
     return {
         'tables' => {
             'f' => 'friends',
@@ -426,7 +416,7 @@ sub search_fro
 
     push @{$info->{'english'}}, "are considered a friend by \"$arg\"";
 
-    my $userid = &LJ::get_userid($dbh, $user);
+    my $userid = LJ::get_userid($dbh, $user);
 
     return {
         'tables' => {
