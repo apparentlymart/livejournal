@@ -1551,6 +1551,10 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.uploadheader=Upload a New Picture
 
+/editpics.bml.uploaddesc.fb=Upload a thumbnail of an image hosted on your <a [[aopts]]>[[sitename]]</a> account as a new user picture.
+
+/editpics.bml.uploadheader.fb=Upload a New Picture From Fotobilder
+
 /export.bml.btn.proceed=Proceed...
 
 /export.bml.description=This feature lets you download your entire journal to a custom format for backup purposes.

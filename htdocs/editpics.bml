@@ -27,8 +27,23 @@
     return $err->($ML{'error.invalidauth'})
         unless $u;
 
+    my $fotobilder = defined $GET{'ret'} && index $GET{'ret'}, $LJ::FB_DOMAIN >= 0 ? 1 : 0;
+
+    if ($fotobilder &&
+        (LJ::check_referer($GET{'ret'}) || LJ::check_referer('/editpics.bml'))) {
+
+        return $err->('Invalid referring site or redirection not allowed')
+            unless $GET{'ret'} =~ /$LJ::FB_DOMAIN/ && LJ::get_cap($u, 'fb_account');
+    }
+
     # extra arguments for get requests
-    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
+    my $getextra;
+    if ($authas ne $remote->{'user'}) {
+        $getextra = "?authas=$authas";
+        $getextra .= "&ret=" . LJ::eurl($GET{'ret'}) if $fotobilder;
+    } else {
+        $getextra = "?ret=" . LJ::eurl($GET{'ret'}) if $fotobilder;
+    }
 
     if (LJ::get_cap($u, "readonly")) {
         $title = "Read-only mode";
@@ -562,6 +577,11 @@
             LJ::MemCache::delete($memkey);
         }
 
+        if ($fotobilder) {
+            my $redir_host = $1 if LJ::durl($GET{'ret'}) =~ m#^http://([\.:\w-]+)#i;
+            BML::redirect(LJ::durl($GET{'ret'})) if $LJ::REDIRECT_ALLOWED{$redir_host};
+        }
+
         # now fall through to edit page and show the updated userpic info
     }
 
@@ -571,6 +591,7 @@
     # authas switcher form
     $body .= "<form method='get' action='editpics.bml'>\n";
     $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+    $body .= LJ::html_hidden('ret', $GET{'ret'}, 'urlpic', $GET{'urlpic'}) if $fotobilder;
     $body .= "</form>\n\n";
 
 
@@ -580,144 +601,156 @@
          $body .= "</li></ul> standout?>";
     }
 
-    my %keywords = ();
-    my $dbcr = LJ::get_cluster_def_reader($u);
-    if ($u->{'dversion'} > 6) {
-        $sth = $dbcr->prepare("SELECT m.picid, k.keyword FROM userpicmap2 m, userkeywords k ".
-                              "WHERE m.userid=? AND m.kwid=k.kwid AND m.userid=k.userid");
-    } else {
-        $sth = $dbh->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k ".
-                             "WHERE m.userid=? AND m.kwid=k.kwid");
-    }
-    $sth->execute($u->{'userid'});
-    while (my ($pic, $keyword) = $sth->fetchrow_array) {
-        LJ::text_out(\$keyword);
-        push @{$keywords{$pic}}, $keyword;
-    }
-
-    if ($u->{'dversion'} > 6) {
-        $sth = $dbcr->prepare("SELECT picid, width, height, state, comment " .
-                              "FROM userpic2 WHERE userid=?");
-    } else {
-        $sth = $dbh->prepare("SELECT picid, width, height, state " .
-                             "FROM userpic WHERE userid=?");
-    }
-    $sth->execute($u->{'userid'});
-    my @sortedpics;
-    push @sortedpics, $_ while $_ = $sth->fetchrow_hashref;
-
-    my $piccount = 0;
-    foreach my $pic (sort { $a->{picid} <=> $b->{picid} } @sortedpics)
-    {
-        my $pid = $pic->{'picid'};
-
-        if ($piccount++ == 0) {
-
-            $body .= "<?h1 $ML{'.curpics'} h1?><?p $ML{'.curpics.desc'} p?>";
-            $body .= "<?p <strong>". BML::ml('.piclimitstatus', {current => $count, max => $max}) . "</strong> p?>";
-
-            $body .= "<form method='post' action='editpics.bml$getextra'>";
-            $body .= "<table cellpadding='5' border='0' cellspacing='1' " .
-                     "style='margin-left: 30px'>";
-             
+    if (!$fotobilder) {
+        my %keywords = ();
+        my $dbcr = LJ::get_cluster_def_reader($u);
+        if ($u->{'dversion'} > 6) {
+            $sth = $dbcr->prepare("SELECT m.picid, k.keyword FROM userpicmap2 m, userkeywords k ".
+                                  "WHERE m.userid=? AND m.kwid=k.kwid AND m.userid=k.userid");
+        } else {
+            $sth = $dbh->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k ".
+                                 "WHERE m.userid=? AND m.kwid=k.kwid");
         }
-        $body .= "<tr valign='middle'>";
-        $body .= "<td align='center'><img src='$LJ::USERPIC_ROOT/$pid/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
-        $body .= "<td>\n<table>";
+        $sth->execute($u->{'userid'});
+        while (my ($pic, $keyword) = $sth->fetchrow_array) {
+            LJ::text_out(\$keyword);
+              push @{$keywords{$pic}}, $keyword;
+          }
 
-        my ($dis, $distxt);
-        
-        {            
-            $body .= "<tr><td align='right'><b><label for='$pid-def'>$ML{'.label.default'}</label></b></td><td> ";
-            $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'defaultpic', 'value' => $pid, 
-                                      'selected' => $u->{'defaultpicid'} == $pid,
-                                      'disabled' => $pic->{'state'} eq 'I' });
-
-            $body .= "&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>$ML{'.label.delete'}</label></b> ";
-            $body .= LJ::html_check({ 'type' => 'checkbox', 'name' => "delete_$pid",
-                                      'id' => "$pid-del", 'value' => 1 });
-
-            if ($pic->{'state'} eq 'I') {
-                $body .= " &nbsp;<i>[$ML{'userpic.inactive'}]</i> " . LJ::help_icon('userpic_inactive');
-            }
-
-            $body .= "</td></tr>\n";
+        if ($u->{'dversion'} > 6) {
+            $sth = $dbcr->prepare("SELECT picid, width, height, state, comment " .
+                                  "FROM userpic2 WHERE userid=?");
+        } else {
+            $sth = $dbh->prepare("SELECT picid, width, height, state " .
+                                 "FROM userpic WHERE userid=?");
         }
+        $sth->execute($u->{'userid'});
+        my @sortedpics;
+        push @sortedpics, $_ while $_ = $sth->fetchrow_hashref;
 
+        my $piccount = 0;
+        foreach my $pic (sort { $a->{picid} <=> $b->{picid} } @sortedpics)
         {
-            my $keywords;
-            $keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}})
-                if $keywords{$pid};
+            my $pid = $pic->{'picid'};
 
-            $body .= "<tr><td align='right'><b><label for='$pid-key'>$ML{'.label.keywords'}</label></b></td><td> ";
-            $body .= LJ::html_text({'name' => "kw_$pid", 'id' => "$pid-key",
-                                     'size' => '30', 'value' => $keywords,
-                                     'disabled' => $pic->{'state'} eq 'I' });
+            if ($piccount++ == 0) {
+                $body .= "<?h1 $ML{'.curpics'} h1?><?p $ML{'.curpics.desc'} p?>";
+                $body .= "<?p <strong>". BML::ml('.piclimitstatus', {current => $count, max => $max}) . "</strong> p?>";
 
-            $body .= "</td></tr>\n";
+                $body .= "<form method='post' action='editpics.bml$getextra'>";
+                $body .= "<table cellpadding='5' border='0' cellspacing='1' " .
+                    "style='margin-left: 30px'>";
+            }
+            $body .= "<tr valign='middle'>";
+            $body .= "<td align='center'><img src='$LJ::USERPIC_ROOT/$pid/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
+            $body .= "<td>\n<table>";
 
-            if ($u->{'dversion'} > 6) {
-                $body .= "<tr><td align='right'><b><label for='$pid-com'>$ML{'.label.comment'}</label></b></td><td> ";
-                $body .= LJ::html_text({ 'name' => "com_$pid", 'id' => "$pid-com",
-                                         'size' => '30', 'value' => $pic->{'comment'},
-                                         'maxlength' => LJ::CMAX_UPIC_COMMENT,
-                                         'disabled' => $pic->{'state'} eq 'I' });
+            my ($dis, $distxt);
+            {
+                $body .= "<tr><td align='right'><b><label for='$pid-def'>$ML{'.label.default'}</label></b></td><td> ";
+                $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'defaultpic', 'value' => $pid, 
+                                          'selected' => $u->{'defaultpicid'} == $pid,
+                                          'disabled' => $pic->{'state'} eq 'I' });
+
+                $body .= "&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>$ML{'.label.delete'}</label></b> ";
+                $body .= LJ::html_check({ 'type' => 'checkbox', 'name' => "delete_$pid",
+                                          'id' => "$pid-del", 'value' => 1 });
+
+                if ($pic->{'state'} eq 'I') {
+                    $body .= " &nbsp;<i>[$ML{'userpic.inactive'}]</i> " . LJ::help_icon('userpic_inactive');
+                }
 
                 $body .= "</td></tr>\n";
             }
+
+            {
+                my $keywords;
+                $keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}})
+                    if $keywords{$pid};
+
+                $body .= "<tr><td align='right'><b><label for='$pid-key'>$ML{'.label.keywords'}</label></b></td><td> ";
+                $body .= LJ::html_text({'name' => "kw_$pid", 'id' => "$pid-key",
+                                        'size' => '30', 'value' => $keywords,
+                                        'disabled' => $pic->{'state'} eq 'I' });
+
+                $body .= "</td></tr>\n";
+
+                if ($u->{'dversion'} > 6) {
+                    $body .= "<tr><td align='right'><b><label for='$pid-com'>$ML{'.label.comment'}</label></b></td><td> ";
+                    $body .= LJ::html_text({ 'name' => "com_$pid", 'id' => "$pid-com",
+                                             'size' => '30', 'value' => $pic->{'comment'},
+                                             'maxlength' => LJ::CMAX_UPIC_COMMENT,
+                                             'disabled' => $pic->{'state'} eq 'I' });
+
+                    $body .= "</td></tr>\n";
+                }
+            }
+
+            $body .= "</table>\n</td></tr>\n";
         }
-        
-        $body .= "</table>\n</td></tr>\n";
-    }
 
-    if ($piccount) {
-        $body .= "<tr><td></td><td align=left>&nbsp;<b><label for='nodefpic'>$ML{'.nodefault'}</label></b>&nbsp;";
-        $body .= LJ::html_check({ 'name' => 'defaultpic', 
-                                  'value' => 0,
-                                  'type' => 'radio',
-                                  'selected' => ! $u->{'defaultpicid'}, 
-                                  'raw' => "id='nodefpic'" });
+        if ($piccount) {
+            $body .= "<tr><td></td><td align=left>&nbsp;<b><label for='nodefpic'>$ML{'.nodefault'}</label></b>&nbsp;";
+            $body .= LJ::html_check({ 'name' => 'defaultpic', 
+                                      'value' => 0,
+                                      'type' => 'radio',
+                                      'selected' => ! $u->{'defaultpicid'}, 
+                                      'raw' => "id='nodefpic'" });
 
-        $body .= "</td><td>&nbsp;</td></tr>\n";
-        $body .= "<tr><td></td><td>&nbsp;" . LJ::html_submit('action:save', $ML{'.btn.save'}) . "</td></tr>\n";
-        $body .= "</table>";
-        $body .= "</form>";
-
-    } else {
-        $body .= "<?h1 $ML{'.nopics'} h1?><?p $ML{'.noneupload'} p?>";
+            $body .= "</td><td>&nbsp;</td></tr>\n";
+            $body .= "<tr><td></td><td>&nbsp;" . LJ::html_submit('action:save', $ML{'.btn.save'}) . "</td></tr>\n";
+            $body .= "</table>";
+            $body .= "</form>";
+        } else {
+            $body .= "<?h1 $ML{'.nopics'} h1?><?p $ML{'.noneupload'} p?>";
+        }
     }
 
     # let users upload more pics
     $body .= "<a name='upload'></a>";
 
     if ($count < $max) {
-        $body .= "<?h1 $ML{'.uploadheader'} h1?>\n";
-        $body .= "<?p $ML{'.uploaddesc'} p?>\n\n";
-        $body .= "<ul>\n";
-        foreach (qw(filesize imagesize fileformat)) {
-            $body .= "<li>" . $ML{".restriction.$_"} . "</li>\n";
+        if ($fotobilder) {
+            $body .= "<?h1 $ML{'.uploadheader.fb'} h1?>\n";
+            $body .= "<?p " . BML::ml('.uploaddesc.fb', {'aopts' => "href='$LJ::FB_SITEROOT'", 'sitename' => $LJ::FB_SITENAME}) . " p?>\n\n";
+        } else {
+            $body .= "<?h1 $ML{'.uploadheader'} h1?>\n";
+            $body .= "<?p $ML{'.uploaddesc'} p?>\n\n";
+
+            $body .= "<ul>\n";
+            foreach (qw(filesize imagesize fileformat)) {
+                $body .= "<li>" . $ML{".restriction.$_"} . "</li>\n";
+            }
+            $body .= "</ul>\n";
         }
-        $body .= "</ul>\n";
-        
+
         # upload form
         $body .= "<?standout \n";
         $body .= "<form action='editpics.bml$getextra' method='post' " .
                  "enctype='multipart/form-data' style='display: inline;'>\n";
 
-        $body .= "<table>\n<tr><td align='right'>\n";
-        $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
-                                  'value' => 'file', 'selected' => '1',
-                                  'accesskey' => $ML{'.fromfile.key'} });
-        $body .= "</td><td align='right'>";
-        $body .= "<label for='radio_file'>$ML{'.fromfile'}</label></td>";
-        $body .= "<td align='left'><input type='file' name='userpic' size='28' /></td></tr>\n";
+        $body .= "<table>\n";
 
-        $body .= "<tr><td align='right'>";
-        $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'value' => 'url',
-                                  'id' => 'radio_url', 'accesskey' => $ML{'.fromurl.key'} });
-        $body .= "</td><td align='right'>";
-        $body .= "<label for='radio_url'>$ML{'.fromurl'}</label></td><td align='left'>";
-        $body .= LJ::html_text({ 'name' => 'urlpic', 'size' => '40' }) . "</td></tr>\n";
+        if ($fotobilder) {
+            $body .= "<tr><td colspan='3' align='center'>\n";
+            $body .= "<img src='$GET{'urlpic'}' />";
+            $body .= LJ::html_hidden('src', 'url', 'urlpic', $GET{'urlpic'});
+        } else {
+            $body .= "<tr><td align='right'>\n";
+            $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
+                                      'value' => 'file', 'selected' => '1',
+                                      'accesskey' => $ML{'.fromfile.key'} });
+            $body .= "</td><td align='right'>";
+            $body .= "<label for='radio_file'>$ML{'.fromfile'}</label></td>";
+            $body .= "<td align='left'><input type='file' name='userpic' size='28' /></td></tr>\n";
+
+            $body .= "<tr><td align='right'>";
+            $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'value' => 'url',
+                                      'id' => 'radio_url', 'accesskey' => $ML{'.fromurl.key'} });
+            $body .= "</td><td align='right'>";
+            $body .= "<label for='radio_url'>$ML{'.fromurl'}</label></td><td align='left'>";
+            $body .= LJ::html_text({ 'name' => 'urlpic', 'size' => '40' }) . "</td></tr>\n";
+        }
 
         $body .= "<tr><td colspan='3' align='center'><hr></td></tr>";
 

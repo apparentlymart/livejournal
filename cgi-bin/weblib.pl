@@ -550,6 +550,7 @@ sub check_referer {
     return 1 if $LJ::SITEROOT   && $referer =~ m!^$LJ::SITEROOT$uri!;
     return 1 if $LJ::DOMAIN     && $referer =~ m!^http://$LJ::DOMAIN$uri!;
     return 1 if $LJ::DOMAIN_WEB && $referer =~ m!^http://$LJ::DOMAIN_WEB$uri!;
+    return 1 if $uri =~ m!^http://! && $referer eq $uri;
     return undef;
 }
 
