@@ -119,6 +119,10 @@ if ($opt_pop)
 
         # update
         if ($existing) {
+            if ($LJ::DONT_TOUCH_STYLES) {
+                print "skipping\n";
+                next;
+            }
             $dbh->do(qq{ UPDATE style SET formatdata=?, is_embedded=?,
                          is_colorfree=?, lastupdate=? WHERE styleid=$existing },
                      undef, map { $s->{$_} } qw(formatdata is_embedded is_colorfree lastupdate));
