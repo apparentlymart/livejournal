@@ -159,6 +159,32 @@ sub trans
 
     my %GET = $r->args;
 
+    # anti-squatter checking
+    if ($LJ::ANTI_SQUATTER && $r->method eq "GET") {
+        my $ref = $r->header_in("Referer");
+        if ($ref && index($ref, $LJ::SITEROOT) != 0) {
+            # FIXME: this doesn't anti-squat user domains yet
+            $r->handler("perl-script");
+            $r->push_handlers(PerlHandler => sub {
+                my $r = shift;
+                $r->content_type("text/html");
+                $r->send_http_header();
+                $r->print("<html><head><title>Dev Server Warning</title>",
+                          "<style> body { border: 20px solid red; padding: 30px; margin: 0; font-family: sans-serif; } ",
+                          "h1 { color: #500000; }",
+                          "</style></head>",
+                          "<body><h1>Warning</h1><p>This server is for development and testing only.  ",
+                          "Accounts are subject to frequent deletion.  Don't use this machine for anything important.</p>",
+                          "<form method='post' action='/misc/ack-devserver.bml' style='margin-top: 1em'>",
+                          LJ::html_hidden("dest", "http://$host$uri$args_wq"),
+                          LJ::html_submit(undef, "Acknowledged"),
+                          "</form></body></html>");
+                return OK;
+            });
+            return OK;
+        }
+    }
+
     my $journal_view = sub { 
         my $opts = shift;
         $opts ||= {};

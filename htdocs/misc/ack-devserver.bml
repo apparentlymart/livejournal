@@ -1,0 +1,4 @@
+<?_code
+ return BML::redirect($LJ::SITEROOT) unless $LJ::ANTI_SQUATTER; 
+ return BML::redirect($POST{'dest'} || $LJ::SITEROOT);
+_code?>
