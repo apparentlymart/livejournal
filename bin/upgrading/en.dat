@@ -570,6 +570,73 @@ Regards,
 
 /create.bml.username.username=username
 
+/customize/index.bml.change=Change
+
+/customize/index.bml.choose=Do you want to use the old style system, or the new one?
+
+/customize/index.bml.choose.header=Choose style system
+
+/customize/index.bml.choose.s1=Old system (S1)
+
+/customize/index.bml.choose.s2=New system (S2)
+
+/customize/index.bml.error.cant_generate_user_layer=Could not generate user layer
+
+/customize/index.bml.error.fail_create_style=Failed to create new style.
+
+/customize/index.bml.error.not_your_layout=Not your layout.
+
+/customize/index.bml.error.not_your_theme=Not your theme
+
+/customize/index.bml.error.no_core_parent=No core parent?
+
+/customize/index.bml.previews=(Previews)
+
+/customize/index.bml.s1=The old style system is configured through the <a href="/modify.bml">Modify Journal</a> page.
+
+/customize/index.bml.s1.header=Using S1
+
+/customize/index.bml.s2.advanced.denied=Your account is not permitted to use the advanced customization features.
+
+/customize/index.bml.s2.advanced.header=Advanced Customizations
+
+/customize/index.bml.s2.advanced.permitted=To create new layers and styles from scratch, visit <a href='./advanced/'>the advanced customization</a> center.
+
+/customize/index.bml.s2.customize=The following settings are layout-dependent.
+
+/customize/index.bml.s2.customize.header=Step 2: Customize Layout
+
+/customize/index.bml.s2.customize.language=The following languages are fully or partially support by this layout.
+
+/customize/index.bml.s2.customize.language.custom=(Custom)
+
+/customize/index.bml.s2.customize.language.header=Language
+
+/customize/index.bml.s2.customize.settings=If you want to customize your journal further, here you can tweak individual settings to get it looking exactly how you want.
+
+/customize/index.bml.s2.customize.settings.delete=Remove Customizations
+
+/customize/index.bml.s2.customize.settings.edit=Edit Customizations
+
+/customize/index.bml.s2.customize.settings.header=Change Individual Settings
+
+/customize/index.bml.s2.customize.settings.new=Customize
+
+/customize/index.bml.s2.customize.themes=Choose from the following optional themes for this layout.
+
+/customize/index.bml.s2.customize.themes.default=(Layout Default)
+
+/customize/index.bml.s2.customize.themes.header=Themes
+
+/customize/index.bml.s2.layout<<
+Pick your layout.  Because theme selection and custom modifications depend 
+on your layout, changing this setting discards all other edits you may have made.
+.
+
+/customize/index.bml.s2.layout.header=Step 1: Layout
+
+/customize/index.bml.title=Customize Journal
+
 /directory.bml.error.accounttype<<
 Sorry, your account type doesn't permit usage of the
 directory, or you aren't currently <a href='/login.bml'>logged in</a>.  If your account type permits

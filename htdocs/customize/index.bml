@@ -1,5 +1,5 @@
 <?page
-title=>Customize
+title=><?_ml .title _ml?>
 body<=
 <?_code
 {
@@ -21,8 +21,6 @@ body<=
 
     my $ret;
 
-    $ret .= "<?h1 Customize Journal h1?>";
-    
     # authas switcher form
     $ret .= "<form class='postheading' method='get' action='index.bml'>\n";
     $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} || $GET{'journal'} }) . "\n";
@@ -54,7 +52,7 @@ body<=
     my $implicit_style_create = sub {
         return if $u->{'s2_style'};
         unless ($u->{'s2_style'} = LJ::S2::create_style($u, "wizard")) {
-            die "ERROR: Failed to create new style.";
+            die "<?h1 $ML{'Error'} h1?><?p $ML{'.error.fail_create_style'} p?>";
         }
         LJ::S2::set_style_layers($u, $u->{'s2_style'}, %style);
         LJ::set_userprop($u, "s2_style", $u->{'s2_style'});
@@ -64,8 +62,8 @@ body<=
         my $layid = $POST{'layoutid'};
         return BML::redirect("/customize/?journal=$u->{'user'}") if $layid == $style{'layout'};
         my $lay = $pub->{$layid} || $userlay->{$layid};
-        return "Error: not your layout" unless $lay;
-        my $coreid = $lay->{'b2lid'} or return "No core parent?";
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_layout'} p?>" unless $lay;
+        my $coreid = $lay->{'b2lid'} or return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.no_core_parent'} p?>";
         $implicit_style_create->();
         LJ::S2::delete_layer($style{'user'});
         $style{'user'} = $style{'theme'} = $style{'i18nc'} = $style{'i18n'} = 0;
@@ -86,7 +84,7 @@ body<=
         my $id = $style{'user'};
         unless ($id) {
             $id = LJ::S2::create_layer($u, $style{'layout'}, "user");
-            return "Error: couldn't generate user layer" unless $id;
+            return "<?h1 $ML{'Error'} h1?> <?p $ML{'.error.cant_generate_user_layer'} p?>" unless $id;
             LJ::S2::set_style_layers($u, $u->{'s2_style'}, "user", $id);
         }
         return BML::redirect("/customize/layer.bml?w=user&journal=$authas");
@@ -95,7 +93,7 @@ body<=
     if ($POST{'save:theme'}) {
         my $themeid = $POST{'themeid'}+0;
         my $lay = $pub->{$themeid} || $userlay->{$themeid};
-        return "Error: not your theme" if $themeid && ! $lay;
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_theme'} p?>" if $themeid && ! $lay;
         $implicit_style_create->();
         LJ::S2::set_style_layers($u, $u->{'s2_style'}, "theme", $themeid);
 
@@ -152,17 +150,17 @@ body<=
 
     # choose style system
     $ret .= "<form method='post' action='./?journal=$u->{'user'}'>";
-    $ret .= "<?h1 Choose style system h1?><?p Do you want to use the old style system, or the new one? p?>";
+    $ret .= "<?h1 $ML{'.choose.header'} h1?><?p $ML{'.choose'} p?>";
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'stylesys', 'selected' => $u->{'stylesys'} },
-                            1, "Old system (S1)",
-                            2, "New system (S2)");
-    $ret .= " <input type='submit' name='save:stylesys' value='Change'>";
+                            1, "$ML{'.choose.s1'}",
+                            2, "$ML{'.choose.s2'}");
+    $ret .= " <input type='submit' name='save:stylesys' value='$ML{'.change'}'>";
     $ret .= "</blockquote>";
 
     # no more options if they're using S1.
     if ($u->{'stylesys'} == 1) {
-        $ret .= "<?h1 Using S1 h1?><?p The old style system is configured through the <a href='/modify.bml'>Modify Journal</a> page. p?>";
+        $ret .= "<?h1 $ML{'.s1.header'} h1?><?p $ML{'.s1'} p?>";
         $ret .= "</form>";
         return $ret;
     }
@@ -183,17 +181,17 @@ body<=
             push @layouts, "", "---", @user;
         }
     }
-    $ret .= "<?h1 Step 1: Layout h1?><?p Pick your layout.  Because theme selection and custom modifications depend on your layout, changing this setting discards all other edits you may have made. p?>";
+    $ret .= "<?h1 $ML{'.s2.layout.header'} h1?><?p $ML{'.s2.layout'} p?>";
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'layoutid',
                               'selected' => $style{'layout'},  },
                             @layouts);
-    $ret .= " <input type='submit' name='save:layout' value='Change'> (<a href=\"preview.bml?journal=$u->{'user'}\">previews</a>)";
+    $ret .= " <input type='submit' name='save:layout' value='$ML{'.change'}'> <a href=\"preview.bml?journal=$u->{'user'}\">$ML{'.previews'}</a>";
     $ret .= "</blockquote>";
 
     # pick other stuff
-    $ret .= "<?h1 Step 2: Customize Layout h1?>";
-    $ret .= "<?p The following settings are layout-dependent. p?>";
+    $ret .= "<?h1 $ML{'.s2.customize.header'} h1?>";
+    $ret .= "<?p $ML{'.s2.customize'} p?>";
 
     # langauge
     my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
@@ -201,16 +199,16 @@ body<=
     # they have set a custom i18n layer
     if ($style{'i18n'} && 
         ($style{'i18nc'} != $style{'i18n'} || ! defined $pub->{$style{'i18n'}})) {
-        push @langs, 'custom', '(Custom)';
+        push @langs, 'custom', $ML{'.s2.customize.language.custom'};
         $langcode = 'custom';
     }
     
-    $ret .= "<?h2 Language h2?><?p The following languages are fully or partially supported by this layout. p?>";
+    $ret .= "<?h2 $ML{'.s2.customize.language.header'} h2?><?p $ML{'.s2.customize.language'} p?>";
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'langcode',
                               'selected' => $langcode, },
                             @langs);
-    $ret .= " <input type='submit' name='save:langcode' value='Change'>";
+    $ret .= " <input type='submit' name='save:langcode' value='$ML{'.change'}'>";
     $ret .= "</blockquote>";
     
     # theme
@@ -229,27 +227,31 @@ body<=
         }
     }
 
-    $ret .= "<?h2 Theme h2?><?p Choose from the following optional themes for this layout. p?>";
+    $ret .= "<?h2 $ML{'.s2.customize.themes.header'} h2?><?p p?>";
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'themeid',
                               'selected' => $style{'theme'}, },
-                            '0' => '(Layout Default)',
+                            '0' => $ML{'.s2.customize.themes.default'},
                             @themes);
-    $ret .= " <input type='submit' name='save:theme' value='Change'> (<a href=\"themes.bml?journal=$u->{'user'}\">previews</a>)";
+    $ret .= " <input type='submit' name='save:theme' value='$ML{'.change'}'> <a href=\"themes.bml?journal=$u->{'user'}\">$ML{'.previews'}</a>";
     $ret .= "</blockquote>";
     
     # customize
-    $ret .= "<?h2 Change Individual Settings h2?><?p If you want to customize your journal further, here you can tweak individual settings to get it looking exactly how you want... p?>";
+    $ret .= "<?h2 $ML{'.s2.customize.settings.header'} h2?><?p $ML{'.s2.customize.settings'} p?>";
     $ret .= "<blockquote>";
     if ($style{'user'}) {
-        $ret .= "<input type='submit' name='action:edituser' value='Edit Customizations...'>\n";
-        $ret .= "<input type='submit' name='action:deluser' value='Remove Customizations'>\n";
+        $ret .= "<input type='submit' name='action:edituser' value='$ML{'.s2.customize.settings.edit'}'>\n";
+        $ret .= "<input type='submit' name='action:deluser' value='$ML{'.s2.customize.settings.delete'}'>\n";
     } else {
-        $ret .= "<input type='submit' name='action:edituser' value='Customize...'>\n";
+        $ret .= "<input type='submit' name='action:edituser' value='$ML{'.s2.customize.settings.new'}'>\n";
     }
     $ret .= "</blockquote>";
 
     $ret .= "</form>";
+
+    $ret .= "<?h1 $ML{'.s2.advanced.header'} h1?><?p ";
+    $ret .= LJ::get_cap($u, 's2styles') ? $ML{'.s2.advanced.permitted'} : $ML{'.s2.advanced.denied'};
+    $ret .= " p?>";
 
     return $ret;
 }
