@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = "";
  $body = "";
@@ -57,9 +57,9 @@
 
  my $is_person = $u->{'journaltype'} eq "P";
  if ($is_person) {
-     $body .= "(=H1 Month View H1=)(=P Here are the subjects of all posts by user (=LJUSER $u->{'user'} LJUSER=) in $monlang, $year. P=)";
+     $body .= "<?h1 Month View h1?><?p Here are the subjects of all posts by user <?ljuser $u->{'user'} ljuser?> in $monlang, $year. p?>";
  } else {
-     $body .= "(=H1 Month View H1=)(=P Here are the subjects of all posts in the (=LJUSER $u->{'user'} LJUSER=) journal in $monlang, $year. P=)";
+     $body .= "<?h1 Month View h1?><?p Here are the subjects of all posts in the <?ljuser $u->{'user'} ljuser?> journal in $monlang, $year. p?>";
  }
 
  ### make standout box
@@ -72,7 +72,7 @@
      my $next = "<a href=\"" . LJ::self_link(\%FORM, { 'y' => $next[0], 'm' => $next[1] }) . "\"><img src=\"$LJ::IMGPREFIX/btn_next.gif\" width=22 height=20 border=0></a>";
      my $prev = "<a href=\"" . LJ::self_link(\%FORM, { 'y' => $prev[0], 'm' => $prev[1] }) . "\"><img src=\"$LJ::IMGPREFIX/btn_prev.gif\" width=22 height=20 border=0></a>";
 
-     $body .= "(=STANDOUT ";
+     $body .= "<?standout ";
      $body .= "<form method=get><input type=hidden name=type value=month><input type=hidden name=user value=$u->{'user'}>";
      $body .= "<table><tr valign=middle>";
      $body .= "<td><b>$prev</b></td>";
@@ -84,7 +84,7 @@
      $body .= "</select> <input type=text name=y maxlength=4 size=4 value=$year> <input type=submit value=\"View\"></td>";
      $body .= "<td><b>$next</b></td>";
      $body .= "</tr></table>";
-     $body .= " STANDOUT=)</form>\n";
+     $body .= " standout?></form>\n";
  }
 
  $body .= "<dl>\n";
@@ -156,9 +156,9 @@
      my $m = substr($eventtime, 14, 2);
      my ($rep, $sec);
      if ($security eq "private") {
-         $sec = " (=SECURITYPRIVATE=)";
+         $sec = " <?securityprivate?>";
      } elsif ($security eq "usemask") {
-         $sec = " (=SECURITYPROTECTED=)";
+         $sec = " <?securityprotected?>";
      }
      if ($replycount) {
          if ($replycount == 1) { $rep .= " - $replycount reply"; }
@@ -166,7 +166,7 @@
      }
      $body .= "<tr><td align=right><i>" . LJ::Lang::time_format(12, $h, $m, "short") . "</i></td>";
      if (! $is_person) {
-         $body .= "<td>(=LJUSER $poster LJUSER=)</td>";
+         $body .= "<td><?ljuser $poster ljuser?></td>";
      }
 
      LJ::CleanHTML::clean_subject_all(\$subject);
@@ -179,11 +179,11 @@
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 img: htdocs/img/btn_next.gif, htdocs/img/btn_prev.gif
 form: htdocs/view/index.bml
 link: htdocs/users, htdocs/talkread.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
