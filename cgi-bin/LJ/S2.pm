@@ -246,13 +246,42 @@ sub load_layers {
     my @lids = map { $_ + 0 } @_;
     return 0 unless @lids;
 
-    my @need;
     my $maxtime = 0;  # to be returned
 
-    my %bycluster; # cluster => [ lid, lid, ... ]
-    my $us = LJ::S2::get_layer_owners(@lids);
-    my $sysid = LJ::get_userid('system');
+    # figure out what is process cached...that goes to DB always
+    # if it's not in process cache, hit memcache first
+    my %need_db;
+    my %need_memc;
+
+    # initial sweep, anything loaded goes to db
     foreach my $lid (@lids) {
+        if (my $loaded = S2::layer_loaded($lid)) {
+            $need_db{$lid} = $loaded;
+        } else {
+            $need_memc{$lid} = 1;
+        }
+    }
+
+    # attempt to get things in %need_memc from memcache
+    my $memc = LJ::MemCache::get_multi(map { [ $_, "s2c:$_"] } keys %need_memc);
+    foreach my $lid (keys %need_memc) {
+        if (my $row = $memc->{"s2c:$lid"}) {
+            my ($updtime, $data) = @$row;
+
+            # mark the db as needing to check, then load this layer
+            $need_db{$lid} = $updtime;
+            S2::load_layer($lid, $data, $updtime);
+        } else {
+            # make it exist, but mark it 0
+            $need_db{$lid} = 0;
+        }
+    }
+
+    my %bycluster; # cluster => [ lid, lid, ... ]
+    my @from_db = keys %need_db;
+    my $us = LJ::S2::get_layer_owners(@from_db);
+    my $sysid = LJ::get_userid('system');
+    foreach my $lid (@from_db) {
         next unless $us->{$lid};
         if ($us->{$lid}->{userid} == $sysid) {
             push @{$bycluster{0} ||= []}, $lid;
@@ -278,8 +307,7 @@ sub load_layers {
         # create SQL to load the layers we want
         my @to_load;
         foreach my $lid (@{$bycluster{$cid}}) {
-            my $loaded = S2::layer_loaded($lid);
-            if ($loaded) {
+            if (my $loaded = $need_db{$lid}) {
                 $maxtime = $loaded if $loaded > $maxtime;
                 push @to_load, "(userid=$us->{$lid}->{userid} AND s2lid=$lid AND comptime>$loaded)";
             } else {
@@ -293,6 +321,8 @@ sub load_layers {
         $sth->execute;
         while (my ($id, $comp, $comptime) = $sth->fetchrow_array) {
             LJ::text_uncompress(\$comp);
+            LJ::MemCache::set([ $id, "s2c:$id" ], [ $comptime, $comp ])
+                if length $comp <= $LJ::MAX_S2COMPILED_CACHE_SIZE;
             S2::load_layer($id, $comp, $comptime);
             $maxtime = $comptime if $comptime > $maxtime;
         }
@@ -301,7 +331,7 @@ sub load_layers {
     # now we have to go through everything again and verify they're all loaded and
     # otherwise do a fallback to the global
     my @to_load;
-    foreach my $lid (@lids) {
+    foreach my $lid (@from_db) {
         next if S2::layer_loaded($lid);
         push @to_load, $lid;
     }
