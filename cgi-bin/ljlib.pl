@@ -1056,40 +1056,13 @@ sub get_form_data
     }
     
     # Split the name-value pairs
-    LJ::urlargs_to_hash($buffer, $hashref);
-}
-
-# <LJFUNC>
-# class: web
-# name: LJ::urlargs_to_hash
-# des: Parse URL-style arg/value pairs into a hash.
-# args: buffer, hashref
-# des-buffer: Scalar buffer to parse.
-# des-hashref: Hashref to populate.
-# returns: boolean; true.
-# </LJFUNC>
-sub urlargs_to_hash
-{
-    my ($buffer, $hashref) = @_;
-
-    my $pair;
-    my @pairs = split(/&/, $buffer);
-    my ($name, $value);
-    foreach $pair (@pairs)
-    {
-        ($name, $value) = split(/=/, $pair);
-        $value =~ tr/+/ /;
-        $value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
-        $name =~ tr/+/ /;
-        $name =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
-        $hashref->{$name} .= $hashref->{$name} ? "\0$value" : $value;
-    }
-    return 1;
+    LJ::decode_url_string($buffer, $hashref);
 }
 
 # <LJFUNC>
 # name: LJ::is_valid_authaction
 # des: Validates a shared secret (authid/authcode pair)
+# info: See [func[LJ::register_authaction]].
 # returns: Hashref of authaction row from database.
 # args: dbarg, aaid, auth
 # des-aaid: Integer; the authaction ID.
@@ -1202,6 +1175,7 @@ sub get_mood_picture
 
 
 # <LJFUNC>
+# class: s1
 # name: LJ::prepare_currents
 # des: do all the current music/mood/weather/whatever stuff.  only used by ljviews.pl.
 # args: dbarg, args
@@ -1229,7 +1203,8 @@ sub prepare_currents
 	LJ::load_mood_theme($dbs, $theme);
 	my %pic;
 	if (LJ::get_mood_picture($theme, $val, \%pic)) {
-	    $currents{'Mood'} = "<IMG SRC=\"$pic{'pic'}\" ALIGN=ABSMIDDLE WIDTH=$pic{'w'} HEIGHT=$pic{'h'} VSPACE=1> $LJ::CACHE_MOODS{$val}->{'name'}";
+	    $currents{'Mood'} = "<img src=\"$pic{'pic'}\" align='absmiddle' width='$pic{'w'}' ".
+		"height='$pic{'h'}' vspace='1'> $LJ::CACHE_MOODS{$val}->{'name'}";
 	} else {
 	    $currents{'Mood'} = $LJ::CACHE_MOODS{$val}->{'name'};
 	}
@@ -1251,9 +1226,9 @@ sub prepare_currents
 	} else 
 	{
 	    ### PREFIX_CURRENTS is not defined, so just add to %%events%%
-	    $args->{'event'}->{'event'} .= "<BR>&nbsp;";
+	    $args->{'event'}->{'event'} .= "<br />&nbsp;";
 	    foreach (sort keys %currents) {
-		$args->{'event'}->{'event'} .= "<BR><B>Current $_</B>: " . $currents{$_} . "\n";
+		$args->{'event'}->{'event'} .= "<br /><b>Current $_</b>: " . $currents{$_} . "\n";
 	    }
 	}
     }
@@ -2853,6 +2828,7 @@ sub load_user_theme
 }
 
 # <LJFUNC>
+# class: s1
 # name: LJ::parse_vars
 # des: Parses S1 style data into hashref.
 # returns: Nothing.  Modifies a hashref.
@@ -2903,6 +2879,7 @@ sub server_down_html
 }
 
 # <LJFUNC>
+# class: s1
 # name: LJ::load_style_fast
 # des: Loads a style, and does minimal caching (data sticks for 60 seconds).
 # returns: Nothing. Modifies a data reference.
@@ -2959,13 +2936,12 @@ sub load_style_fast
     }
 }
 
-# $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
 # <LJFUNC>
 # name: LJ::make_journal
 # class: 
 # des: 
 # info: 
-# args: 
+# args: dbarg, user, view, remote, opts
 # des-: 
 # returns: 
 # </LJFUNC>
@@ -3082,9 +3058,9 @@ sub make_journal
 
 # <LJFUNC>
 # name: LJ::html_datetime
-# class: 
+# class: component
 # des: 
-# info: 
+# info: Parse output later with [func[LJ::html_datetime_decode]].
 # args: 
 # des-: 
 # returns: 
@@ -3120,9 +3096,9 @@ sub html_datetime
 
 # <LJFUNC>
 # name: LJ::html_datetime_decode
-# class: 
+# class: component
 # des: 
-# info: 
+# info: Generate the form controls with [func[LJ::html_datetime]].
 # args: 
 # des-: 
 # returns: 
@@ -3143,7 +3119,7 @@ sub html_datetime_decode
 
 # <LJFUNC>
 # name: LJ::html_select
-# class: 
+# class: component
 # des: 
 # info: 
 # args: 
@@ -3171,7 +3147,7 @@ sub html_select
 
 # <LJFUNC>
 # name: LJ::html_check
-# class: 
+# class: component
 # des: 
 # info: 
 # args: 
@@ -3199,7 +3175,7 @@ sub html_check
 
 # <LJFUNC>
 # name: LJ::html_text
-# class: 
+# class: component
 # des: 
 # info: 
 # args: 
@@ -3221,17 +3197,12 @@ sub html_text
     return $ret;
 }
 
-#
-# returns the canonical username given, or blank if the username is not well-formed
-#
 # <LJFUNC>
 # name: LJ::canonical_username
-# class: 
 # des: 
 # info: 
-# args: 
-# des-: 
-# returns: 
+# args: user
+# returns: the canonical username given, or blank if the username is not well-formed
 # </LJFUNC>
 sub canonical_username
 {
@@ -3246,12 +3217,12 @@ sub canonical_username
 
 # <LJFUNC>
 # name: LJ::decode_url_string
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class: web
+# des: Parse URL-style arg/value pairs into a hash.
+# args: buffer, hashref
+# des-buffer: Scalar buffer to parse.
+# des-hashref: Hashref to populate.
+# returns: boolean; true.
 # </LJFUNC>
 sub decode_url_string
 {
@@ -3270,6 +3241,7 @@ sub decode_url_string
         $name =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
         $hashref->{$name} .= $hashref->{$name} ? "\0$value" : $value;
     }
+    return 1;
 }
 
 # given two db roles, returns true only if the two roles are for sure
@@ -4030,7 +4002,7 @@ sub cmd_buffer_flush
 	    next unless $c;
 
 	    my $a = {};
-	    LJ::urlargs_to_hash($c->{'args'}, $a);
+	    LJ::decode_url_string($c->{'args'}, $a);
 	    $c->{'args'} = $a;
 	    $cmds->{$cmd}->{'run'}->($dbh, $db, $c);
 
