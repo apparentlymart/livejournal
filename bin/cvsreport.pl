@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 #
+# <LJDEP>
+# lib: Getopt::Long
+# </LJDEP>
 
 use strict;
 use Getopt::Long;

@@ -5,6 +5,10 @@
 # accepts two optional arguments, host and port.
 # doesn't daemonize.
 #
+#
+# <LJDEP>
+# lib: Socket::, Text::Wrap, cgi-bin/ljlib.pl
+# </LJDEP>
 
 my $bindhost = shift @ARGV;
 my $port = shift @ARGV;
@@ -13,7 +17,7 @@ unless ($bindhost) {
     $bindhost = "0.0.0.0";
 }
 
-require '/home/lj/cgi-bin/ljlib.pl';
+require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 &connect_db();
 
 use Socket;
