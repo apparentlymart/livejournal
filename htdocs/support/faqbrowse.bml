@@ -71,8 +71,10 @@ body<=
         $dbh ||= LJ::get_db_writer();
 
         # log this faq view
-        $dbh->do("REPLACE INTO faquses (faqid, userid, dateview) ".
-                 "VALUES ($faqid, ?, NOW())", undef, $remote->{'userid'}) if $remote;
+        if ($remote && ! $LJ::DISABLED{faquses}) {
+            $dbh->do("REPLACE INTO faquses (faqid, userid, dateview) ".
+                     "VALUES ($faqid, ?, NOW())", undef, $remote->{'userid'});
+        }
 
         BML::note_mod_time($unixmodtime);
 
