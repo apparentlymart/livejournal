@@ -99,70 +99,72 @@
     $body .= "<table><tr><td>";
 
     # scheme selector
-    $body .= "<?h1 $ML{'.head.scheme'} h1?>";
-    $body .= "<form method='post' action='siteopts.bml'>";
+    if (@LJ::SCHEMES) {
+        $body .= "<?h1 $ML{'.head.scheme'} h1?>";
+        $body .= "<form method='post' action='siteopts.bml'>";
         
-    my $scheme = $BML::COOKIE{'BMLschemepref'};
-    $scheme = $LJ::SCHEMES[0]->{'scheme'} unless $scheme;
+        my $scheme = $BML::COOKIE{'BMLschemepref'};
+        $scheme = $LJ::SCHEMES[0]->{'scheme'} unless $scheme;
 
-    if (@thumb_schemes) {
-        $body .= "<div class='postheading' width='100%'>";
-        foreach my $sh (@thumb_schemes) {
-            my $th = $sh->{'thumb'};
-            $body .= "&nbsp;<input type='image' ";
-            $body .= "name='action:setscheme:$sh->{'scheme'}' ";
-            $body .= "src='$LJ::IMGPREFIX/$th->[0]'";
-            $body .= " width='$th->[1]'" if $th->[1];
-            $body .= " height='$th->[2]'" if $th->[2];
+        if (@thumb_schemes) {
+            $body .= "<div class='postheading' width='100%'>";
+            foreach my $sh (@thumb_schemes) {
+                my $th = $sh->{'thumb'};
+                $body .= "&nbsp;<input type='image' ";
+                $body .= "name='action:setscheme:$sh->{'scheme'}' ";
+                $body .= "src='$LJ::IMGPREFIX/$th->[0]'";
+                $body .= " width='$th->[1]'" if $th->[1];
+                $body .= " height='$th->[2]'" if $th->[2];
             
-            if ($sh->{'scheme'} eq $scheme) {
-                $body .= "style='border: solid 2px blue;' ";
-            } else {
-                $body .= "style='border: solid 1px black;' ";
-            }
+                if ($sh->{'scheme'} eq $scheme) {
+                    $body .= "style='border: solid 2px blue;' ";
+                } else {
+                    $body .= "style='border: solid 1px black;' ";
+                }
             
-            $body .= " alt='$sh->{'title'}' title='$sh->{'title'}'/>";
-        }
-        $body .= "</div>";
-    }
-
-    if (@text_schemes) {
-
-        my $ct = 0;
-        my $cols = 3;
-        my $width = int(100 / $cols +.5) . "%";
-        my $switch = @text_schemes / $cols;
-
-        $body .= "<table border='0' width='100%' cellpadding='2'>";
-        $body .= "<tr valign='top' align='left'>";
-
-        foreach my $sh (@text_schemes) {
-
-            if ($ct == 0) {
-                $body .= "<td width='$width' align='left'>";
+                $body .= " alt='$sh->{'title'}' title='$sh->{'title'}'/>";
             }
-
-            $body .= "<p>" . 
-                LJ::html_check({ 'type' => 'radio', 'name' => 'scheme',
-                                 'value' => $sh->{'scheme'},
-                                 'id' => "scheme-$sh->{'scheme'}",
-                                 'selected' => $scheme eq $sh->{'scheme'} });
-
-            $body .= "<label for='scheme-$sh->{'scheme'}'>$sh->{'title'}</label></p>";
-            
-            if (++$ct >= $switch) {
-                $body .= "</td>";
-                $ct = 0;
-            }
+            $body .= "</div>";
         }
 
-        $body .= "</tr><tr><td colspan='$cols' align='left'>";
-        $body .= LJ::html_submit('action:setscheme', $ML{'.btn.scheme'});
+        if (@text_schemes) {
 
-        $body .= "</td></tr></table>";
+            my $ct = 0;
+            my $cols = 3;
+            my $width = int(100 / $cols +.5) . "%";
+            my $switch = @text_schemes / $cols;
+
+            $body .= "<table border='0' width='100%' cellpadding='2'>";
+            $body .= "<tr valign='top' align='left'>";
+
+            foreach my $sh (@text_schemes) {
+
+                if ($ct == 0) {
+                    $body .= "<td width='$width' align='left'>";
+                }
+
+                $body .= "<p>" . 
+                    LJ::html_check({ 'type' => 'radio', 'name' => 'scheme',
+                                     'value' => $sh->{'scheme'},
+                                     'id' => "scheme-$sh->{'scheme'}",
+                                     'selected' => $scheme eq $sh->{'scheme'} });
+
+                $body .= "<label for='scheme-$sh->{'scheme'}'>$sh->{'title'}</label></p>";
+            
+                if (++$ct >= $switch) {
+                    $body .= "</td>";
+                    $ct = 0;
+                }
+            }
+
+            $body .= "</tr><tr><td colspan='$cols' align='left'>";
+            $body .= LJ::html_submit('action:setscheme', $ML{'.btn.scheme'});
+
+            $body .= "</td></tr></table>";
+        }
+
+        $body .= "</form>";
     }
-
-    $body .= "</form>";
 
     # language selector
     $body .= "<?h1 $ML{'.head.lang'} h1?>";
