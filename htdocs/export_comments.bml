@@ -73,6 +73,7 @@
         my $us = LJ::load_userids(keys %posterids);
 
         # now spit out the metadata
+        $r->print("<comments>\n");
         while (my ($id, $data) = each %comments) {
             my $ret = "<comment id='$id'";
             $ret .= " posterid='$data->{posterid}'" if $data->{posterid};
@@ -80,6 +81,7 @@
             $ret .= " />\n";
             $r->print($ret);
         }
+        $r->print("</comments>\n<usermaps>\n");
 
         # now spit out usermap
         my $ret = '';
@@ -87,6 +89,7 @@
             $ret .= "<usermap id='$id' user='$user->{user}' />\n";
         }
         $r->print($ret);
+        $r->print("</usermaps>\n");
 
     # comment data also presented in glorious XML:
     } elsif ($mode eq 'comment_body') {
@@ -97,6 +100,7 @@
         my $texts = LJ::get_talktext2($u, @ids);
 
         # now start spitting out data
+        $r->print("<comments>\n");
         foreach my $id (@ids) {
             # get text for this comment
             my $data = $comments{$id};
@@ -110,10 +114,6 @@
             $subject = LJ::exml($subject);
             $body = LJ::exml($body);
 
-            # if we don't have data on this comment, or it's deleted, or has no body,
-            # just skip out of this iteration and move on
-            next unless $data && $data->{state} ne 'D' && $body;
-
             # setup the date to be GMT and formatted per W3C specs
             my $date = LJ::mysqldate_to_time($data->{datepost});
             $date = LJ::time_to_w3c($date, 'Z');
@@ -123,11 +123,12 @@
             $ret .= " posterid='$data->{posterid}'" if $data->{posterid};
             $ret .= " state='$data->{state}'" if $data->{state} ne 'A';
             $ret .= " parentid='$data->{parenttalkid}'" if $data->{parenttalkid};
-            $ret .= ">\n";
+            $ret .= $data->{state} eq 'D' ? " />\n" : ">\n";
             $ret .= "<subject>$subject</subject>\n" if $subject;
-            $ret .= "<body>$body</body>\n<date>$date</date>\n</comment>\n";
+            $ret .= "<body>$body</body>\n<date>$date</date>\n</comment>\n" if $body;
             $r->print($ret);
         }
+        $r->print("</comments>\n");
     }
 
     # all done
