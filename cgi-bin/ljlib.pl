@@ -1841,19 +1841,18 @@ sub acid_decode
 # returns: Code generated (if quantity 1),
 #          number of codes generated (if quantity>1),
 #          or undef on failure.
-# args: dbarg, userid?, quantity?
+# args: dbarg?, userid?, quantity?
 # des-userid: Userid to make the invitation code from,
 #             else the code will be from userid 0 (system)
 # des-quantity: Number of codes to generate (default 1)
 # </LJFUNC>
 sub acct_code_generate
 {
-    my $dbarg = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $userid = int(shift);
     my $quantity = shift || 1;
 
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
+    my $dbh = LJ::get_db_writer();
 
     my @authcodes = map {LJ::make_auth_code(5)} 1..$quantity;
     my @values = map {"(NULL, $userid, 0, '$_')"} @authcodes;
