@@ -31,12 +31,14 @@ sub make_journal
     $LJ::S2::ret_ref = \$ret;
 
     my ($entry, $page);
+    my $con_opts = {};
 
     if ($view eq "res") {
         if ($opts->{'pathextra'} =~ m!/(\d+)/stylesheet$!) {
             $styleid = $1;
             $entry = "print_stylesheet()";
             $opts->{'contenttype'} = 'text/css';
+            $con_opts->{'use_modtime'} = 1;
         } else {
             $opts->{'handler_return'} = 404;
             return;
@@ -44,7 +46,7 @@ sub make_journal
     }
 
     $u->{'_s2styleid'} = $styleid + 0;
-    my $ctx = s2_context($r, $styleid);
+    my $ctx = s2_context($r, $styleid, $con_opts);
     unless ($ctx) {
         $opts->{'handler_return'} = Apache::Constants::OK();
         return;
@@ -322,7 +324,7 @@ sub s2_context
     if ($opts->{'use_modtime'})
     {
         my $ims = $r->header_in("If-Modified-Since");
-        my $ourtime = LJ::date_unix_to_http($opts->{'modtime'});
+        my $ourtime = LJ::time_to_http($modtime);
         if ($ims eq $ourtime) {
             $r->status_line("304 Not Modified");
             $r->send_http_header();
