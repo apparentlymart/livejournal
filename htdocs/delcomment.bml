@@ -35,13 +35,29 @@ BODY<=
  if ($tp->{'posterid'}) {
      $tp->{'userpost'} = LJ::get_username($dbs, $tp->{'posterid'});
  }
- unless ($tp->{'journalid'} == $remote->{'userid'} ||
-	 $tp->{'posterid'} == $remote->{'userid'})
- {
+
+ my $qitemid = $tp->{'itemid'}+0;
+
+ # the poster of a comment or the journal owner can delete a comment
+ my $can_delete = ($tp->{'journalid'} == $remote->{'userid'} ||
+		   $tp->{'posterid'} == $remote->{'userid'});
+
+ # or, a community admin can:
+ unless ($can_delete) {
      my $journal = LJ::get_username($dbs, $tp->{'journalid'});
-     unless (LJ::check_priv($dbs, $remote, "sharedjournal", $journal)) {
-	 return "(=H1 Error H1=)(=P A comment may only be deleted by the journal owner or the one who posted it. (pid=$tp->{'posterid'}; jid=$tp->{'journalid'}; ruid=$remote->{'uid'}) P=)";
-     }
+     $can_delete = 1 if LJ::check_priv($dbs, $remote, "sharedjournal", $journal);
+ }
+
+ # or, for a journal item (nodetype == "L"), the poster can delete it,
+ # if this happens to be in a community journal (so the
+ # $tp->{'journlaid'} would have been the community id)
+ if (! $can_delete && $tp->{'nodetype'} eq "L") {
+     my ($posterid) = $dbh->selectrow_array("SELECT posterid FROM log WHERE itemid=$qitemid");
+     $can_delete = 1 if ($posterid == $remote->{'userid'});
+ }
+
+ unless ($can_delete) {
+     return "(=H1 Error H1=)(=P A comment may only be deleted by the journal owner or the one who posted it. (pid=$tp->{'posterid'}; jid=$tp->{'journalid'}; ruid=$remote->{'userid'}) P=)";
  }
  
  if ($FORM{'confirm'} ne "Y") {
@@ -73,11 +89,14 @@ BODY<=
  $sth->execute;
  if ($dbh->err) { return "<B>Error:</B>" . $dbh->errstr; }
 
- my $qitemid = $tp->{'itemid'}+0;
+
  my $mod = $qitemid % 100;
 
  # update the "replycount" field of the log table
- LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount-1 WHERE itemid=$qitemid");
+
+ if ($tp->{'nodetype'} eq "L") {
+     LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount-1 WHERE itemid=$qitemid");
+ }
 
  my $and;
 
