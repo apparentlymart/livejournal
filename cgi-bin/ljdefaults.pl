@@ -146,6 +146,14 @@
     unless (defined $LJ::DYNAMIC_LJUSER) {
         $LJ::DYNAMIC_LJUSER = scalar(@LJ::MEMCACHE_SERVERS) ? 1 : 0;
     }
+
+    # The list of content types that we consider valid for gzip compression.
+    %GZIP_OKAY = (
+        'text/html' => 1,               # regular web pages; XHTML 1.0 "may" be this
+        'text/xml' => 1,                # regular XML files
+        'application/xml' => 1,         # XHTML 1.1 "may" be this
+        'application/xhtml+xml' => 1,   # XHTML 1.1 "should" be this
+    ) unless %GZIP_OKAY;
 }
 
 # no dependencies.

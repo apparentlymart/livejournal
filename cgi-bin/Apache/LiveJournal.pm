@@ -816,8 +816,12 @@ sub journal_content
     $html .= ("<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxx -->\n" x 100) if $generate_iejunk;
 
     my $do_gzip = $LJ::DO_GZIP && $LJ::OPTMOD_ZLIB;
-    $do_gzip = 0 if $do_gzip && $opts->{'contenttype'} !~ m!^text/html!;
-    $do_gzip = 0 if $do_gzip && $r->header_in("Accept-Encoding") !~ /gzip/;
+    if ($do_gzip) {
+        my $ctbase = $opts->{'contenttype'};
+        $ctbase =~ s/;.*//;
+        $do_gzip = 0 unless $LJ::GZIP_OKAY{$ctbase};
+        $do_gzip = 0 if $r->header_in("Accept-Encoding") !~ /gzip/;
+    }
     my $length = length($html);
     $do_gzip = 0 if $length < 500;
 
