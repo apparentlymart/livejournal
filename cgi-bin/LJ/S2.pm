@@ -108,6 +108,7 @@ sub make_journal
         $page = ReplyPage($u, $remote, $opts);
     }
 
+    return if $opts->{'suspendeduser'};
     return if $opts->{'handler_return'};
 
     s2_run($r, $ctx, $opts, $entry, $page);

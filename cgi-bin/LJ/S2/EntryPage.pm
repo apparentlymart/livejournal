@@ -18,6 +18,7 @@ sub EntryPage
     $p->{'comment_pages'} = undef;
     
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
+    return if $opts->{'suspendeduser'};
     return if $opts->{'handler_return'};
 
     $p->{'multiform_on'} = $remote &&
@@ -217,6 +218,14 @@ sub EntryPage_entry
         return;
     }
 
+    my $userlite_journal = UserLite($u);
+    my $userlite_poster = $userlite_journal;
+    my $pu = $u;
+    if ($entry->{'posterid'} != $entry->{'ownerid'}) {
+        $pu = LJ::load_userid($entry->{'posterid'});
+        $userlite_poster = UserLite($pu);
+    }
+
     # do they have the viewall priv?
     if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
@@ -228,21 +237,16 @@ sub EntryPage_entry
     } elsif (! LJ::can_view($remote, $entry)) {
         $opts->{'handler_return'} = 403;
         return;
+    } elsif ($pu && $pu->{'statusvis'} eq 'S') {
+        $opts->{'suspendeduser'} = 1;
+        return;
     }
-    
+
     my $replycount = $entry->{'props'}->{'replycount'};
     my $nc = "";
     $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
     my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
-
-    my $userlite_journal = UserLite($u);
-    my $userlite_poster = $userlite_journal;
-    my $pu = $u;
-    if ($entry->{'posterid'} != $entry->{'ownerid'}) {
-        $pu = LJ::load_userid($entry->{'posterid'});
-        $userlite_poster = UserLite($pu);
-    }
 
     my $userpic = Image_userpic($pu, 0, $entry->{'props'}->{'picture_keyword'});
 

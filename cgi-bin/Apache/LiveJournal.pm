@@ -735,6 +735,13 @@ sub journal_content
         }
 
         $generate_iejunk = 1;
+
+    } elsif ($opts->{'suspendeduser'}) {
+        $status = "403 User suspended";
+        $html = "<h1>Denied</h1>" .
+                "<p>The journal your are trying to view is suspended.</p>";
+
+        $generate_iejunk = 1;
     }
 
     unless ($html) {

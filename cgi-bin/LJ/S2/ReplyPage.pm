@@ -15,6 +15,7 @@ sub ReplyPage
     my $get = $opts->{'getargs'};
 
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
+    return if $opts->{'suspendeduser'};
     return if $opts->{'handler_return'};
     my $ditemid = $entry->{'itemid'}*256 + $entry->{'anum'};
 
