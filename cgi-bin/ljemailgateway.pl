@@ -145,13 +145,46 @@ sub process {
     $body =~ s/^\s*-----BEGIN PGP SIGNED MESSAGE-----.+?\n\n//s;
     $body =~ s/-----BEGIN PGP SIGNATURE-----.+//s;
 
+    # Find and set entry props.
+    my $props = {};
+    my (%lj_headers,$amask);
+    if ($body =~ s/^(lj-.+?)\n\n//is) {
+        my @headers = split(/\n/, $1);
+        foreach (@headers) {
+            $lj_headers{lc($1)} = $2 if /^lj-(\w+):\s*(.+)/i;
+        }
+    }
+    $props->{picture_keyword} = $lj_headers{userpic};
+    $props->{current_mood} = $lj_headers{mood};
+    $props->{current_music} = $lj_headers{music};
+    $props->{opt_nocomments} = 1 if $lj_headers{comments} =~ /off/i;
+    $props->{opt_noemail} = 1 if $lj_headers{comments} =~ /noemail/i;
+
+    if ($lj_headers{security} =~ /^(public|private|friends)$/) {
+        if ($1 eq 'friends') {
+            $lj_headers{security} = 'usemask';
+            $amask = 1;
+        }
+    } elsif ($lj_headers{security}) { # Assume a friendgroup if unknown security mode.
+        # Get the mask for the requested friends group, or default to private.
+        my $group = LJ::get_friend_group($u, { 'name'=>$lj_headers{security} });
+        if ($group) {
+            $amask = (1 << $group->{groupnum});
+            $lj_headers{security} = 'usemask';
+        } else {
+            $lj_headers{security} = 'private';
+        }
+    }
+
     my $req = {
         'usejournal' => $journal,
         'ver' => 1,
         'username' => $user,
         'event' => $body,
         'subject' => $subject,
-        'props' => {},
+        'security' => $lj_headers{security},
+        'allowmask' => $amask,
+        'props' => $props,
         'tz'    => 'guess',
     };
 

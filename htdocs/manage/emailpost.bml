@@ -78,7 +78,7 @@ body<=
         $ret .= '<?h2 Removing unwanted text h2?>';
         $ret .= '<?p All text below two or more dashes or underscores ("--" or "__") on a line by itself will be automatically removed. The red text below won\'t show up in your posting. p?>';
         $ret .= '<div style="margin-left:40px">';
-        $ret .= "To: $user" . '<b>+' . $pin . '</b>@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
+        $ret .= "To: $user+$pin" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
         $ret .= $from . $subject . $body;
         $ret .= "<br />--<br /><font color='red'>";
         $ret .= "This text and anything underneath it will be ignored, including automatic signatures added by free email services.<br />";
@@ -90,6 +90,37 @@ body<=
         $ret .= '<div style="margin-left:40px">';
         $ret .= 'To: <b>some-user.some-community</b>+' . $pin . '</b>@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
         $ret .= $from . $subject . $body;
+        $ret .= '</div><br />';
+
+        $ret .= '<?h2 Journal entry options h2?>';
+        $ret .= '<?p Most journal specific features can be set via "lj-headers" in the body of your message. The lj-headers should be at the top of your message, separated by a newline. p?>';
+        $ret .= '<div style="margin-left:40px">';
+        $ret .= "To: $user+$pin" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
+        $ret .= $from . $subject;
+        $ret .= '<b>lj-userpic:</b> pict keywords<br />';
+        $ret .= '<b>lj-mood:</b> happy<br />';
+        $ret .= '<b>lj-music:</b> The Pixies: Where is my mind?<br />';
+        $ret .= '<b>lj-comments:</b> ("off" or "noemail")<br />';
+        $ret .= '<br />' . $body;
+        $ret .= '</div><br />';
+
+        $ret .= '<?h2 Journal entry security h2?>';
+        $ret .= '<?p Security options are set via the lj-header "lj-security".  If the security type specified is unknown, the journal entry defaults to private.  If no security is specified, the entry is posted according to your default journal security. p?>';
+        $ret .= '<div style="margin-left:40px">';
+        $ret .= '<b>lj-security:</b> public<br />';
+        $ret .= '<div style="margin-left:40px">The post is posted publicly.</div><br />';
+        $ret .= '</div>';
+        $ret .= '<div style="margin-left:40px">';
+        $ret .= '<b>lj-security:</b> private<br />';
+        $ret .= '<div style="margin-left:40px">The post is posted privately.</div><br />';
+        $ret .= '</div>';
+        $ret .= '<div style="margin-left:40px">';
+        $ret .= '<b>lj-security:</b> friends<br />';
+        $ret .= '<div style="margin-left:40px">The post can only be viewed by those on your friends list.</div><br />';
+        $ret .= '</div>';
+        $ret .= '<div style="margin-left:40px">';
+        $ret .= '<b>lj-security:</b> friendgroup<br />';
+        $ret .= '<div style="margin-left:40px">This is literally the name of a friend group.  Only friends belonging to that group can view the post.<br />Example: lj-security: <b>my friends</b></div><br />';
         $ret .= '</div><br /><br />';
 
         $ret .= '<?h1 Advanced usage h1?><br />';
