@@ -7,9 +7,12 @@
 
     my @errors = ();
 
+    # ! after username overrides expire to never
+    $POST{'expire'} = 'never' if $POST{'user'} =~ s/!$//;
+
     my $user = LJ::canonical_username($POST{'user'});
     my $password = $POST{'password'};
-    
+
     my $remote = LJ::get_remote();
     my $cursess = $remote ? $remote->{'_session'} : undef;
 
@@ -74,7 +77,7 @@
 
         if ($do_login) {
 
-            my $u = LJ::load_user($POST{'user'});
+            my $u = LJ::load_user($user);
             unless ($u) { push @errors, "$ML{'error.username_notfound'}"; }
             
             my $banned = 0;
