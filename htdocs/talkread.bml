@@ -533,14 +533,25 @@ body<=
      {
          $recurse_post->($recurse_post, $_, { "depth" => 0 }) foreach (@comments);
 
-         $$head .= "<script src=\"$LJ::SITEROOT/js/commentmanage.js\"></script>\n";
-         my $js_screen_color = "\"" . LJ::ejs(BML::get_template_def("screenedbarcolor") || BML::get_template_def("emcolor")) . "\"";
-         my $js_normal_color = "\"" . LJ::ejs(BML::get_template_def("emcolor")) . "\"";
-         $$head .= "<script>var LJ_cmtinfo = " . LJ::js_dumper(\%LJ_cmtinfo) . ";\n" .
-             "function userhook_screen_comment_ARG (dIid) { setStyle('cmtbar'+dIid, 'background', $js_screen_color); }\n".
-             "function userhook_unscreen_comment_ARG (dIid) { setStyle('cmtbar'+dIid, 'background', $js_normal_color); }\n".
-             "var LJVAR; if (!LJVAR) LJVAR = new Object(); LJVAR.imgprefix = \"$LJ::IMGPREFIX\";\n".
-             "</script>\n";
+         my $do_commentmanage_js = 1;
+         if ($LJ::DISABLED{'commentmanage'}) {
+             if (ref $LJ::DISABLED{'commentmanage'} eq "CODE") {
+                 $do_commentmanage_js = $LJ::DISABLED{'commentmanage'}->($remote);
+             } else {
+                 $do_commentmanage_js = 0;
+             }
+         }
+
+         if ($do_commentmanage_js) {
+             $$head .= "<script src=\"$LJ::SITEROOT/js/commentmanage.js\"></script>\n";
+             my $js_screen_color = "\"" . LJ::ejs(BML::get_template_def("screenedbarcolor") || BML::get_template_def("emcolor")) . "\"";
+             my $js_normal_color = "\"" . LJ::ejs(BML::get_template_def("emcolor")) . "\"";
+             $$head .= "<script>var LJ_cmtinfo = " . LJ::js_dumper(\%LJ_cmtinfo) . ";\n" .
+                 "function userhook_screen_comment_ARG (dIid) { setStyle('cmtbar'+dIid, 'background', $js_screen_color); }\n".
+                 "function userhook_unscreen_comment_ARG (dIid) { setStyle('cmtbar'+dIid, 'background', $js_normal_color); }\n".
+                 "var LJVAR; if (!LJVAR) LJVAR = new Object(); LJVAR.imgprefix = \"$LJ::IMGPREFIX\";\n".
+                 "</script>\n";
+         }
 
          $ret .= "<hr /><p class='lesstop' align='center'><b>$readlink";
          $ret .= "(" . LJ::make_qr_link('bottom', '', $T{'postcomments'}, $posturl) . "</a>)" if $remote;
