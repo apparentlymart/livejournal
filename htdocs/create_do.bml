@@ -102,6 +102,7 @@ BODY<=
 		"sitename" => $LJ::SITENAME,
                 "siteroot" => $LJ::SITEROOT,
                 "admin_email" => $LJ::ADMIN_EMAIL,
+                "bogus_email" => $LJ::BOGUS_EMAIL,
 		);
  
  $etemp =~ s/%%(\w+?)%%/$replace{$1}/ge;
