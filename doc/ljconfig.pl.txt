@@ -115,10 +115,15 @@
            #},
            );
 
-    # clusters? (for each @CLUSTERS, need a 'cluster$i' role above)
-    $DEFAULT_CLUSTER = 1; 
+    # List of all clusters - each one needs a 'cluster$i' role in %DBINFO
     @CLUSTERS = qw(1);
-    $ALLOW_CLUSTER_SELECT = 0;  # for testing; you don't want this on.
+
+    # Which cluster(s) get new users?
+    # If it's an arrayref, choose one of the listed clusters at random.
+    $DEFAULT_CLUSTER = 1;
+
+    # Can users choose which cluster they're assigned to?  Leave this off.
+    $ALLOW_CLUSTER_SELECT = 0; 
 
     # list of regular expressions matching usernames that people can't have.
     @PROTECTED_USERNAMES = ("^ex_", "^lj_");

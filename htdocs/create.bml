@@ -202,9 +202,10 @@ body<=
      #       I wish 'last' or 'next' would break out of an if block.
      goto SUBMITERRORS if %errors;
 
-     # clusterid
-     my $qclusterid = ($LJ::ALLOW_CLUSTER_SELECT ? $FORM{'cluster_id'} : 
-                       $LJ::DEFAULT_CLUSTER)+0;
+     my $qclusterid = ($LJ::ALLOW_CLUSTER_SELECT
+                       ? $FORM{'cluster_id'}
+                       : LJ::new_account_cluster()) + 0;
+
      my $qdversion = $qclusterid ? 2 : 0;
 
      $qpassword = $dbh->quote($FORM{'password1'});

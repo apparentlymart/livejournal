@@ -2197,8 +2197,7 @@ sub create_account
     my $quser = $dbr->quote($user);
     my $qpassword = $dbr->quote($o->{'password'});
     my $qname = $dbr->quote($o->{'name'});
-
-    my $cluster = $LJ::DEFAULT_CLUSTER + 0;
+    my $cluster = LJ::new_account_cluster();
 
     my $sth = $dbh->prepare("INSERT INTO user (user, name, password, clusterid, dversion) ".
                             "VALUES ($quser, $qname, $qpassword, $cluster, 2)");
@@ -2216,6 +2215,19 @@ sub create_account
         'code' => undef,
     });
     return $userid;
+}
+
+# <LJFUNC>
+# name: LJ::new_account_cluster
+# des: Which cluster to put a new account on.  $DEFAULT_CLUSTER if it's
+#      a scalar, random element from @$DEFAULT_CLUSTER if it's arrayref.
+# returns: clusterid where the new account should be created
+# </LJFUNC>
+sub new_account_cluster
+{
+    return (ref $LJ::DEFAULT_CLUSTER
+            ? $LJ::DEFAULT_CLUSTER->[int rand scalar @$LJ::DEFAULT_CLUSTER]
+            : $LJ::DEFAULT_CLUSTER+0);
 }
 
 # <LJFUNC>
