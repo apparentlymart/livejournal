@@ -267,13 +267,12 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' />";
 
- my %userpic;
  my %user;
  my $opts = {
      'thread' => $init->{'thread'},
      'page' => $GET{'page'},
      'view' => $GET{'view'},
-     'userpicref' => \%userpic,
+     'userpicref' => \%userpics,
      'userref' => \%user,
  };
 
@@ -364,11 +363,9 @@ if ($uri =~ m!/(\d+)\.html$!) {
                      $alt .= ": $post->{'props'}->{'picture_keyword'}";
                  }
                  $alt = LJ::ehtml($alt);
-                     
+                 my ($w, $h) = ($userpics{$picid}->{'width'}, $userpics{$picid}->{'height'});
                  $ret .= "<img align='left' hspace='3' src='$LJ::USERPIC_ROOT/$picid/$post->{'posterid'}'";
-                 $ret .= " width='$userpics{$picid}->{'width'}'";
-                 $ret .= " title='$alt' alt=''";
-                 $ret .= " height='$userpics{$picid}->{'height'}' />";
+                 $ret .= " width='$w' title='$alt' alt='' height='$h' />";
              }
 
              my $cleansubject = LJ::eall($post->{'subject'});
