@@ -82,6 +82,19 @@ property string font_sidebar_fallback {
     des = "Alternative font style for side navigation bar";
     values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
 }
+
+property Color comment_bar_one_bgcolor {
+    des = "Alternating background color for comment bars (one)";
+}
+property Color comment_bar_two_fgcolor {
+    des = "Text color on alternating comment bars (one)";
+}
+property Color comment_bar_two_bgcolor {
+    des = "Alternating background color for comment bars (two)";
+}
+property Color comment_bar_one_fgcolor {
+    des = "Text color on alternating comment bars (two)";
+}
 property use page_recent_items;
 property use page_friends_items;
 property use text_post_comment;
@@ -106,8 +119,10 @@ set opt_daylines_style = "dashed";
 set opt_margin_size = "50px";
 set font_topbar_fallback = "none";
 set font_sidebar_fallback = "none";
-
-set view_entry_disabled = true;
+set comment_bar_one_bgcolor = "#c0c0ff";
+set comment_bar_one_fgcolor = "#000000";
+set comment_bar_two_bgcolor = "#eeeeff";
+set comment_bar_two_fgcolor = "#000000";
 
 function css_fontspec(string base, string fallback)
  "Prints a CSS font-family specification based on the base and fallback given" 
@@ -440,7 +455,7 @@ if ($*opt_navbar_pos == "right") {
 """;
 }
 
-function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
+function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
     var string time = $e.time->time_format();
     if ($e.new_day) {
@@ -477,10 +492,10 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
     }
     "<span class=\"timestamp\">"+$e.time->time_format()+"</span>: ";
 
-    if ($e.security != "") {
+    if ($e.security) {
         $e.security_icon->print();
     }
-    if ($e.subject != "") {
+    if ($e.subject) {
         " <span class=\"subject\">$e.subject</span>";
     }
     println "</span>"+($e.subject != "" ? "<br />" : "");
@@ -491,25 +506,26 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
             height="$e.userpic.height" alt="" align="right" class="frienduserpic" />""";
     }
 
-    print $e.text;
-
-    if (size $e.metadata) {
-        """<div class="currents">""";
-        foreach var string k ($e.metadata) {
-            var string text = $k;
-            var string val = $e.metadata{$k};
-            if ($k == "mood") {
-                $text = $*text_meta_mood;
-            } elseif ($k == "music") {
-                $text = $*text_meta_music;
+    if (not $hide_text) {
+        print $e.text;
+        if (size $e.metadata) {
+            """<div class="currents">""";
+            foreach var string k ($e.metadata) {
+                var string text = $k;
+                var string val = $e.metadata{$k};
+                if ($k == "mood") {
+                    $text = $*text_meta_mood;
+                } elseif ($k == "music") {
+                    $text = $*text_meta_music;
+                }
+                if ($k == "mood" and defined $e.mood_icon) {
+                    var Image i = $e.mood_icon;
+                    $val = "<img src='$i.url' width='$i.width' height='$i.height' align='absmiddle'> $val";
+                }
+                """<div class="current$k"><strong>$text:</strong> $val</div>""";
             }
-            if ($k == "mood" and defined $e.mood_icon) {
-                var Image i = $e.mood_icon;
-                $val = "<img src='$i.url' width='$i.width' height='$i.height' align='absmiddle'> $val";
-            }
-            """<div class="current$k"><strong>$text:</strong> $val</div>""";
+            "</div>\n";
         }
-        "</div>\n";
     }
 
     $e.comments->print(); "\n";
@@ -523,12 +539,12 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
 
 function Page::print_entry (Entry e)
 {
-   print_entry($this, $e, null Color, null Color);
+   print_entry($this, $e, null Color, null Color, false);
 }
 
 function FriendsPage::print_entry (Entry e) {
    var Friend f = $.friends{$e.journal.username};
-   print_entry($this, $e, $f.bgcolor, $f.fgcolor);
+   print_entry($this, $e, $f.bgcolor, $f.fgcolor, false);
 }
 
 function CommentInfo::print ()
@@ -645,6 +661,92 @@ function DayPage::print_body() {
         $this->print_entry($e);
     }
     println "</div>";
+}
+
+function EntryPage::print_body () {
+
+    print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
+
+    """<div class="day"><h3>Comments</h3></div>""";
+    if ($.comment_pages.total_subitems > 0) {
+        $.comment_pages->print();
+        $this->print_comments($.comments);
+    }
+}
+
+# Clean style. Hate to clutter it up with this:
+function EntryPage::print_comment (Comment c) {
+    var Color barc = $c.depth % 2 ? $*comment_bar_one_bgcolor : $*comment_bar_two_bgcolor;
+    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
+    var string sub_icon;
+    var int width = 100 - 4 - (($c.depth - 1) * 2);
+    if (defined $c.subject_icon) {
+        $sub_icon = $c.subject_icon->as_string();
+    }
+    "<div style='background: $barc; margin-top: 10px;'>";
+    "<table cellpadding='2' cellspacing='0' summary='0' style='width: auto'><tr valign='top'>";
+    var int td = 3;
+    if (defined $c.userpic and $*comment_userpic_style != "off") { 
+        $td = 4;
+        var int w = $c.userpic.width;
+        var int h = $c.userpic.height;
+        # WARNING: this will later be done by the system (it'll be a
+        # constructional property), so don't copy this hack into your
+        # layout layers or you'll be messed up later.
+        if ($*comment_userpic_style == "small") {
+            $w = $w / 2;
+            $h = $h / 2;
+        }
+        print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' alt='[User Picture]' /></td>";
+    }
+    print "<td align='left'><strong>From:</strong> $poster</td>";
+    print "<td align='left'><strong>Date:</strong> ";
+        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td>";
+    print "<td align='right'><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td></tr>";
+    print "<tr valign='top'><td colspan='$td' style='width: 95%'>";
+    if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>"; }
+    if ($c.metadata{"poster_ip"}) { print " (IP Address: " + $c.metadata{"poster_ip"} + ")"; }
+    print "</td></tr></table></div>";
+    print "<div style='margin-left: 5px'>$c.text</div>";
+    print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>Reply to this</a>) ";
+    if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
+    if ($c.thread_url != "") { "(<a href='$c.thread_url'>Thread</a>) "; }
+    "</div>";   
+}
+
+function ReplyPage::print_body () {
+    var string time = $.replyto.time->time_format();
+    """
+<div class="entry">
+<div class="entrytext">
+<span class="entryheading">
+    """;
+
+    "<span style='padding-left: 0.5em; padding-right: 0.5em;'>";
+    print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
+    "</span> @ ";
+    "<span class='timestamp'>$time</span>: ";
+
+    if ($.replyto.subject) {
+        " <span class=\"subject\">$.replyto.subject</span>";
+    }
+    println "</span>"+($.replyto.subject ? "<br />" : "");
+
+    if (defined $.replyto.userpic) {
+        """<img src="$.replyto.userpic.url" width="$.replyto.userpic.width"
+            style="border: 2px solid $*entry_fgcolor;"
+            height="$.replyto.userpic.height" alt="" align="right" class="frienduserpic" />""";
+    }
+
+    print $.replyto.text;
+
+    """<div class="talklinks" clear="all"><a href='$.entry.permalink_url'>Read Comments</a></div>""";
+
+    "</div>";
+
+    """<div class="day"><h3>Reply</h3></div>""";
+    $.form->print();
+
 }
 
 function print_theme_preview ()
