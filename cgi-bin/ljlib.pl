@@ -118,42 +118,57 @@ sub get_friend_items
     }
     @friends = sort { $b->[1] cmp $a->[1] } @friends;
 
+    my $no_new_count = 0;
     my $loop = 1;
-    my $lastmax = 0;
+    my $lastmax = $LJ::EndOfTime;
     my $itemsleft = $getitems;
+    my $no_new_stop_count = 4;   # see notes below
+ 
     while ($loop && @friends)
     {
 	# load the next recent updating friend's recent items
 	my $fr = shift @friends;
 	my $friendid = $fr->[0];
 
-	push @items, LJ::get_recent_items($dbs, {
+	my @newitems = LJ::get_recent_items($dbs, {
 	    'userid' => $friendid,
 	    'remoteid' => $remoteid,
 	    'itemshow' => $itemsleft,
 	    'skip' => 0,
 	    'gmask_from' => $gmask_from,
 	    'friendsview' => 1,
+	    'lessthan' => $lastmax,
 	});
-
-	$opts->{'owners'}->{$friendid} = 1;
-	$itemsleft--; # we'll need at least one less for the next friend
 	
-	# sort all the total items by rlogtime (recent at beginning)
-	@items = sort { $a->{'rlogtime'} <=> $b->{'rlogtime'} } @items;
+	if (@newitems)
+	{
+	    push @items, @newitems;
 
-	# cut the list down to what we need.
-	@items = splice(@items, 0, $getitems) if (@items > $getitems);
+	    $opts->{'owners'}->{$friendid} = 1;
+	    $itemsleft--; # we'll need at least one less for the next friend
+	    
+	    # sort all the total items by rlogtime (recent at beginning)
+	    @items = sort { $a->{'rlogtime'} <=> $b->{'rlogtime'} } @items;
 
-	# if we have enough, consider stopping.
-	if (@items == $getitems) {
-	    my $finalrlog = $items[$getitems-1]->{'rlogtime'};
-	    if ($finalrlog == $lastmax) {
-		$loop = 0;
-		delete $opts->{'owners'}->{$friendid}; # didn't load
-	    } 
-	    $lastmax = $finalrlog;
+	    # cut the list down to what we need.
+	    @items = splice(@items, 0, $getitems) if (@items > $getitems);
+
+	    # reset the no_new_count.  if we stop loading stuff for so
+	    # many friends in a row, then we consider nothing new for
+	    # rest.  (see, uu.timeupdate is always updated, even on
+	    # private entries and stuff.. we only use it to help us
+	    # make this page quickly.. it's not perfect)
+	    $no_new_count = 0;
 	} 
+	elsif (@items == $getitems) 
+	{
+	    # if we're already full, try 5 more friends (to allow for the
+	    # case that 5 friends in a row have posted nothing but
+	    # private/protected entries... an odd case)
+	    $loop = 0 if (++$no_new_count >= $no_new_stop_count)
+	}
+
+	$lastmax = $items[-1]->{'rlogtime'};
     }
 
     # remove skipped ones
@@ -190,6 +205,9 @@ sub get_recent_items
     # community/friend views need to post by log time, not event time
     $sort_key = "rlogtime" if ($opts->{'order'} eq "logtime" ||
 			       $opts->{'friendsview'});
+
+    # less than time
+    my $lessthan = ($opts->{'lessthan'}+0) || $LJ::EndOfTime;
 
     my $skip = $opts->{'skip'}+0;
     my $itemshow = $opts->{'itemshow'}+0;
@@ -236,7 +254,7 @@ sub get_recent_items
     my $sql = ("SELECT itemid, posterid, security, replycount, $extra_sql ".
 	       "DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i ".
 	       "%l %h %k %H\") AS 'alldatepart' ".
-	       "FROM log WHERE ownerid=$userid AND $sort_key >= 0 $secwhere ".
+	       "FROM log WHERE ownerid=$userid AND $sort_key < $lessthan $secwhere ".
 	       "ORDER BY ownerid, $sort_key ".
 	       "LIMIT $skip,$itemshow");
 
@@ -1251,7 +1269,8 @@ sub bad_input
 # <LJFUNC>
 # name: LJ::debug
 # des: When $LJ::DEBUG is set, logs the given message to 
-#      $LJ::VAR/debug.log.
+#      $LJ::VAR/debug.log.  Or, if $LJ::DEBUG is 2, then 
+#      prints to STDOUT.
 # returns: 1 if logging disabled, 0 on failure to open log, 1 otherwise
 # args: message
 # des-message: Message to log.
@@ -1259,6 +1278,10 @@ sub bad_input
 sub debug 
 {
     return 1 unless ($LJ::DEBUG);
+    if ($LJ::DEBUG == 2) {
+	print $_[0], "\n";
+	return 1;
+    }
     open (L, ">>$LJ::VAR/debug.log") or return 0;
     print L scalar(time), ": $_[0]\n";
     close L;
@@ -1300,8 +1323,6 @@ sub auth_okay
 	$actual = $user->{'password'};
 	$user = $user->{'user'};
     }
-
-    LJ::debug("auth_okay(user=$user, clear=$clear, md5=$md5, act=$actual)");
 
     ## custom authorization:
     if (ref $LJ::AUTH_CHECK eq "CODE") {
@@ -3077,7 +3098,6 @@ sub delete_item
     $ownerid += 0;
     $itemid += 0;
 
-    $dbh->do("DELETE FROM hintlastnview WHERE itemid=$itemid") unless ($quick);
     $dbh->do("DELETE FROM memorable WHERE itemid=$itemid");
     $dbh->do("UPDATE userusage SET lastitemid=0 WHERE userid=$ownerid AND lastitemid=$itemid") unless ($quick);
     $dbh->do("DELETE FROM log WHERE itemid=$itemid");

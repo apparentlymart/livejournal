@@ -405,7 +405,18 @@ sub postevent
     my $qownerid = $ownerid+0;
     my $qposterid = $posterid+0;
     
-    $dbh->do("INSERT INTO log (ownerid, posterid, eventtime, logtime, security, allowmask, replycount, year, month, day, revttime, rlogtime) VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, 0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-UNIX_TIMESTAMP($qeventtime), $LJ::EndOfTime-UNIX_TIMESTAMP())");
+    # by default we record the true reverse time that the item was entered.
+    # however, if backdate is on, we put the reverse time at the end of time
+    # (which makes it equivalent to 1969, but get_recent_items will never load 
+    # it... where clause there is: < $LJ::EndOfTime).  but this way we can
+    # have entries that don't show up on friends view, now that we don't have
+    # the hints table to not insert into.
+    my $rlogtime = "$LJ::EndOfTime";
+    unless ($req->{'props'}->{"opt_backdated"}) {
+	$rlogtime .= "-UNIX_TIMESTAMP()";
+    }
+
+    $dbh->do("INSERT INTO log (ownerid, posterid, eventtime, logtime, security, allowmask, replycount, year, month, day, revttime, rlogtime) VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, 0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-UNIX_TIMESTAMP($qeventtime), $rlogtime)");
     return fail($err,501,$dbh->errstr) if $dbh->err;
 
     my $itemid = $dbh->{'mysql_insertid'};
@@ -510,13 +521,6 @@ sub postevent
 		 "VALUES ($quserid, NOW(), $qip, 'post', $itemid)");
     }
     
-    unless ($req->{'props'}->{"opt_backdated"}) {
-	## update lastn hints table
-	LJ::query_buffer_add($dbh, "hintlastnview", 
-			     "INSERT INTO hintlastnview (userid, itemid) ".
-			     "VALUES ($qownerid, $itemid)");
-    }
-    
     my $res = {};
     $res->{'itemid'} = $itemid;  # by request of mart
     return $res;
@@ -537,11 +541,13 @@ sub editevent
 
     my $qitemid = $req->{'itemid'}+0;
 
-    # fetch the old entry, so we know what we really have to
-    # update. (less locking)
+    # fetch the old entry from master database so we know what we
+    # really have to update later.  usually people just edit one part,
+    # not every field in every table.  reads are quicker than writes,
+    # so this is worth it.
     my $oldevent;
     {
-	my $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, l.eventtime, l.logtime, l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, MD5(lt.event) AS 'md5event' FROM log l, logtext lt WHERE l.itemid=$qitemid AND lt.itemid=$qitemid");
+	my $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, l.eventtime, l.logtime, l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, MD5(lt.event) AS 'md5event', l.rlogtime FROM log l, logtext lt WHERE l.itemid=$qitemid AND lt.itemid=$qitemid");
 	$sth->execute;
 	$oldevent = $sth->fetchrow_hashref;
     }
@@ -695,19 +701,20 @@ sub editevent
 	}
     }
     
-    ## update lastn hints table, unless it was a backdated entry
-    ## before and they didn't say in their request what its new
-    ## backdated status is:
-    
-    if ($req->{'prop_opt_backdated'} eq "1") {
-	LJ::query_buffer_add($dbh, "hintlastnview", "DELETE FROM hintlastnview WHERE userid=$ownerid AND itemid=$qitemid");
-      } else {
-	  unless ($curprops{$qitemid}->{'opt_backdated'} && ! defined $req->{'prop_opt_backdated'})
-	  {
-	      LJ::query_buffer_add($dbh, "hintlastnview", 
-				   "REPLACE INTO hintlastnview (userid, itemid) VALUES ($ownerid, $qitemid)");
-	    }
-      }
+    # deal with backdated changes.  if the entry's rlogtime is
+    # $EndOfTime, then it's backdated.  if they want that off, need to
+    # reset rlogtime to real reverse log time.  also need to set
+    # rlogtime to $EndOfTime if they're turning backdate on.
+    if ($req->{'prop_opt_backdated'} eq "1" && 
+	$oldevent->{'rlogtime'} != $LJ::EndOfTime) {
+	$dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime WHERE ".
+		 "itemid=$qitemid");
+    }
+    if ($req->{'prop_opt_backdated'} eq "0" &&
+	$oldevent->{'rlogtime'} == $LJ::EndOfTime) {
+	$dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
+		 "WHERE itemid=$qitemid");
+    }
   
     return fail($err,501,$dbh->errstr) if $dbh->err;
 

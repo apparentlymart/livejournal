@@ -12,5 +12,3 @@ statspics.pl:
 clean_caches.pl:
   clean_caches - removes old cache files
 
-batchdelete.pl:
-  db_batchdelete - Delete stuff from the database en masse.

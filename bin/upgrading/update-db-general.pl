@@ -44,14 +44,6 @@ CREATE TABLE ban (
 ) TYPE=ISAM PACK_KEYS=1
 EOC
 
-register_tablecreate("batchdelete", <<'EOC');
-CREATE TABLE batchdelete (
-  what char(12) NOT NULL default '',
-  itsid int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (what,itsid)
-) 
-EOC
-
 register_tablecreate("clients", <<'EOC');
 CREATE TABLE clients (
   clientid smallint(5) unsigned NOT NULL auto_increment,
@@ -167,18 +159,6 @@ CREATE TABLE friends (
   PRIMARY KEY  (userid,friendid),
   KEY (userid),
   KEY (friendid)
-) 
-EOC
-
-register_tablecreate("hintlastnview", <<'EOC');
-CREATE TABLE hintlastnview (
-  hintid int(10) unsigned NOT NULL auto_increment,
-  userid int(10) unsigned NOT NULL default '0',
-  itemid int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (hintid),
-  UNIQUE KEY uniq (userid,itemid),
-  KEY (userid),
-  KEY (itemid)
 ) 
 EOC
 
@@ -966,6 +946,8 @@ register_tabledrop("contest1");
 register_tabledrop("contest1data");
 register_tabledrop("logins");
 register_tabledrop("hintfriendsview");
+register_tabledrop("hintlastnview");
+register_tabledrop("batchdelete");
 register_tabledrop("ftpusers");
 
 register_tablecreate("portal", <<'EOC');
