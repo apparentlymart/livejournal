@@ -59,7 +59,8 @@ BODY<=
  }
 
 
- unless ($FORM{'body'} =~ /\S/ || $FORM{'faqid'}) {
+ unless ($FORM{'body'} =~ /\S/ || $FORM{'faqid'} || 
+	 ($type eq "internal" && $FORM{'approveans'})) {
      return done_error("Your message was blank.  Please type at least something in the message field.");
  }
 
