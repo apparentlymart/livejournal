@@ -81,7 +81,7 @@ foreach my $table (sort keys %tables)
                               ! $skip_auto);
         $sql = "$verb INTO $table ";
         $sql .= "($cols) ";
-        $sql .= "VALUES (" . join(", ", map { $dbh->quote($_) } @r) . ");\n";
+        $sql .= "VALUES (" . join(", ", map { db_quote($_) } @r) . ");\n";
 
         my $uniqc = $skip_auto{$table};
         my $skey = $uniqc ? $vals{$uniqc} : $sql;
@@ -91,14 +91,29 @@ foreach my $table (sort keys %tables)
             # for all the *proplist tables, there might be new descriptions
             # or columns, but we can't do a REPLACE, because that'd mess
             # with their auto_increment ids, so we do insert ignore + update
-            my $where = "$uniqc=" . $dbh->quote($vals{$uniqc});
+            my $where = "$uniqc=" . db_quote($vals{$uniqc});
             delete $vals{$uniqc};
             $sql = "UPDATE $table SET ";
-            $sql .= join(",", map { "$_=" . $dbh->quote($vals{$_}) } sort keys %vals);
+            $sql .= join(",", map { "$_=" . db_quote($vals{$_}) } sort keys %vals);
             $sql .= " WHERE $where;\n";
             push @{$output{$scope}}, [ "$table.$skey.2", $sql ];
         }
     }
+}
+
+# don't use $dbh->quote because it's changed between versions
+# and developers sending patches can't generate concise patches
+# it used to not quote " in a single quoted string, but later it does.
+# so we'll implement the new way here.
+sub db_quote {
+    my $s = shift;
+    return "NULL" unless defined $s;
+    $s =~ s/\\/\\\\/g;
+    $s =~ s/\"/\\\"/g;
+    $s =~ s/\'/\\\'/g;
+    $s =~ s/\n/\\n/g;
+    $s =~ s/\r/\\r/g;
+    return "'$s'";
 }
 
 foreach my $k (keys %output) {
