@@ -4,6 +4,7 @@ layerinfo type = "layout";
 layerinfo name = "Clean and Simple";
 layerinfo redist_uniq = "cleansimple/layout";
 layerinfo author_name = "Martin Atkins";
+layerinfo previews = "cleansimple/cleansimple.jpg";
 
 property string opt_margin_size {
     des = "Size of page border";
