@@ -21,6 +21,8 @@
   - how to store/index
   - code to do it all & view
   - security userprop: who can view my journal's stats?
+  - brad: UDP packet to logging daemon w/ sep db, summaries nightly
+          to main db
 * Netsaint on mayor.
 * Write new netsaint modules (warning if slaves are too far behind, 
   using an updated db_check script, etc.)
@@ -78,7 +80,8 @@ MEDIUM PRIORITY:
 * journal titles vs. names:
     http://www.livejournal.com/talkread.bml?itemid=14018511
 
-* postevent duplicate locking
+* postevent duplicate locking (avva: somewhat good patch, is
+  going to improve it)
 
 * need a community admin page where the primary community
   admin can give/remove 'sharedjournal' privs to secondary admins
@@ -111,8 +114,6 @@ MISC:
 
 * Syndicating channels:
      http://www.livejournal.com/talkread.bml?itemid=14311193
-* htdocs/userpic: why use LJ::Cache at all if we're using disk now?
-* htdocs/userpic: doesn't clean disk cache yet
 * /fz/ joins on logtext (requires master) 
 * talk* joins on logtext (requires master)
 * cvsreport:
@@ -122,11 +123,7 @@ MISC:
 * LJ::delete_user()
 * require POST for all do actions (use LJ::did_post to check)
 * ehtml current mood/music ?
-* bug: multiple talkread delete: /support/see_request.bml?id=10159
 * perf: don't preload friends in ljprotocol.pl:editfriends, check $sth->rows
-* bmlp.pl command-line option to read BML file and emit just the _CODE
-  blocks we can at least do things like: 
-    $ ~/cgi-bin/bmlp.pl --perl ~/htdocs/foo.bml | perl -c
 
 +-------------+
 | Cleanliness |
