@@ -140,14 +140,14 @@ sub clean
 
                 foreach my $attr (keys %$hash)
                 {
+                    $hash->{$attr} =~ s/[\t\n]//g;
+                    if ($hash->{$attr} =~ /(javascript|about):/i) { delete $hash->{$attr}; }
+                }
+                foreach my $attr (qw(href)) {
                     $hash->{$attr} =~ s/^lj:(?:\/\/)?(.*)$/ExpandLJURL($1)/ei;
-                    $hash->{$attr} =~ s/\t//g;
-                    $hash->{$attr} =~ s/\n//g;
-                    if ($hash->{$attr} =~ /javascript:/i) { delete $hash->{$attr}; }
-                    if ($hash->{$attr} =~ /about:/i) { delete $hash->{$attr}; }
-                    if ($attr eq "style" && $hash->{$attr} =~ /expression/i) {
-                        delete $hash->{$attr};
-                    }
+                }
+                if ($hash->{'style'} =~ /expression/i) {
+                    delete $hash->{'style'};
                 }
 
                 if ($tag eq "img") 
