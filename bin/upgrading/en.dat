@@ -3185,7 +3185,7 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkread.bml.nosubject=(no subject)
 
-/talkread.bml.posted=Comment Posted Sucessfully
+/talkread.bml.posted=Comment Posted Successfully
 
 /talkread.bml.replysuspended=<b>(Reply from suspended user)</b>
 
