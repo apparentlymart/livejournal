@@ -127,6 +127,9 @@ MISC:
 * require POST for all do actions (use LJ::did_post to check)
 * ehtml current mood/music ?
 * perf: don't preload friends in ljprotocol.pl:editfriends, check $sth->rows
+* comprehensive fix for adding communities as friends: befriending vs.
+  watching: provide a way for users to turn bit 0 off in allowmask,
+  essentially.
 
 +-------------+
 | Cleanliness |
