@@ -194,7 +194,7 @@ function settime() {
     if (! f) return false;
     
     f.date_ymd_yyyy.value = now.getYear() < 1900 ? now.getYear() + 1900 : now.getYear();
-    f.date_ymd_mm.value = twodigit(now.getMonth()+1);
+    f.date_ymd_mm.selectedIndex = twodigit(now.getMonth());
     f.date_ymd_dd.value = twodigit(now.getDate());
     f.hour.value = twodigit(now.getHours());
     f.min.value = twodigit(now.getMinutes());
