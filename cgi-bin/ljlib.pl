@@ -5547,12 +5547,15 @@ sub delete_item2
     my $and;
     if (defined $anum) { $and = "AND anum=" . ($anum+0); }
     my $dc = $dbcm->do("DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
-    return 1 if $dc < 1;  # already deleted?
-
-    return LJ::cmd_buffer_add($dbcm, $jid, "delitem", {
-        'itemid' => $jitemid,
-        'anum' => $anum,
-    }) if $quick;
+    # if this is running the second time (started by the cmd buffer),
+    # the log2 row will already be gone and we shouldn't check for it.
+    if ($quick) {
+        return 1 if $dc < 1;  # already deleted?
+        return LJ::cmd_buffer_add($dbcm, $jid, "delitem", {
+            'itemid' => $jitemid,
+            'anum' => $anum,
+        });
+    }
 
     # delete from clusters
     foreach my $t (qw(logtext2 logprop2 logsec2)) {
