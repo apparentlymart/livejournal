@@ -718,7 +718,7 @@ sub show_poll
             if ($q->{'type'} ne "text") {
                 $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=?");
                 $sth->execute($pollid, $qid);
-                while (my $val = $sth->fetchrow_array) {
+                while (my ($val) = $sth->fetchrow_array) {
                     $usersvoted++;
                     if ($q->{'type'} eq "check") {
                         foreach (split(/,/,$val)) {
