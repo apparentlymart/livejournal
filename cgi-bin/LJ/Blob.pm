@@ -6,38 +6,74 @@ use BlobClient;
 
 package LJ::Blob;
 
-my %clusters = ();
+my %bc_cache = ();
+my %bc_reader_cache = ();
 
-sub get_blobcluster {
+# read-write (i.e. HTTP connection to BlobServer, with NetApp NFS mounted)
+sub get_blobclient {
     my $u = shift;
-    my $bcid = $LJ::BLOBINFO{cluster_map}->{$u->{clusterid}};
-    $clusters{$bcid} ||= new LJ::BlobCluster($bcid, $LJ::BLOBINFO{clusters}->{$bcid});
-    return $clusters{$bcid};
+    my $bcid = $LJ::BLOBINFO{cluster_map}->{$u->{clusterid}} ||
+        $LJ::BLOBINFO{cluster_map}->{_default};
+    return $bc_cache{$bcid} ||=
+        _bc_from_path($LJ::BLOBINFO{clusters}->{$bcid});
 }
 
-sub get {
+# read-only access.  (i.e. direct HTTP connection to NetApp)
+sub get_blobclient_reader {
     my $u = shift;
-    my $bc = get_blobcluster($u);
-    return $bc->get($u, @_);
+    my $bcid = $LJ::BLOBINFO{cluster_map}->{$u->{clusterid}} ||
+        $LJ::BLOBINFO{cluster_map}->{_default};
+ 
+    return $bc_reader_cache{$bcid} if $bc_reader_cache{$bcid};
+
+    my $path = $LJ::BLOBINFO{clusters}->{"$bcid-GET"} ||
+        $LJ::BLOBINFO{clusters}->{$bcid};
+    
+    return $bc_reader_cache{$bcid} = _bc_from_path($path);
+}
+
+sub _bc_from_path {
+    my $path = shift;
+    if ($path =~ /^http/) {
+        return BlobClient::Remote->new({ path => $path });
+    } elsif ($path) {
+        return BlobClient::Local->new({ path => $path });
+    }
+    return undef;
+}
+
+# args: u, domain, fmt, bid
+# des-fmt: string file extension ("jpg", "gif", etc)
+# des-bid: numeric blob id for this domain
+# des-domain: string name of domain ("userpic", "phonephost", etc)
+sub get {
+    my ($u, $domain, $fmt, $bid) = @_;
+    my $bc = get_blobclient_reader($u);
+    return $bc->get($u->{clusterid}, $u->{userid}, $domain, $fmt, $bid);
 }
 
 sub get_stream {
-    my $u = shift;
-    my $bc = get_blobcluster($u);
-    return $bc->get_stream($u, @_);
+    my ($u, $domain, $fmt, $bid, $callback) = @_;
+    my $bc = get_blobclient_reader($u);
+    return $bc->get($u->{clusterid}, $u->{userid}, $domain, $fmt, $bid, $callback);
 }
 
 sub put {
     my ($u, $domain, $fmt, $bid, $data, $errref) = @_;
-    my $bc = get_blobcluster($u);
+    my $bc = get_blobclient($u);
 
-    unless ($bc->put($u, $domain, $fmt, $bid, $data, $errref)) {
+    my $dbcm = LJ::get_cluster_master($u);
+    unless ($dbcm) {
+        $$errref = "nodb";
         return 0;
     }
 
-    my $dbcm = LJ::get_cluster_master($u);
-    $dbcm->do("INSERT INTO userblob ".
-              "(journalid, domain, blobid, length) ".
+    unless ($bc->put($u->{clusterid}, $u->{userid}, $domain, 
+                     $fmt, $bid, $data, $errref)) {
+        return 0;
+    }
+
+    $dbcm->do("INSERT INTO userblob (journalid, domain, blobid, length) ".
               "VALUES (?, ?, ?, ?)", undef,
               $u->{userid}, $LJ::BLOBINFO{blobdomain_ids}->{$domain},
               $bid, length($data));
@@ -51,91 +87,6 @@ sub get_disk_usage {
                     "SELECT SUM(length) FROM userblob ".
                     "WHERE journalid=? AND domain=?", undef,
                     $u->{userid}, $LJ::BLOBINFO{blobdomain_ids}->{$domain});
-}
-
-package LJ::BlobCluster;
-
-use constant MAX_TRIES => 10; # number of tries to randomly find a live host
-
-sub new {
-    my ($class, $bcid, $paths) = @_;
-    my $self = {};
-
-    $self->{bcid} = $bcid;
-    foreach my $path (@$paths) {
-        if ($path =~ /^http/) {
-            push @{$self->{clients}}, new BlobClient::Remote({ path => $path });
-        } else {
-            push @{$self->{clients}}, new BlobClient::Local({ path => $path });
-        }
-    }
-
-    bless $self, ref $class || $class;
-    return $self;
-}
-
-sub get_random_source {
-    my $self = shift;
-    my $clients = $self->{clients};
-
-    my $tries = 0;
-    my $client = $clients->[int(rand(scalar @$clients))];
-    while ($client->is_dead) {
-        return undef if $tries++ > MAX_TRIES;
-        $client = $clients->[int(rand(scalar @$clients))];
-    }
-    return $client;
-}
-
-sub get_first_source {
-    my $self = shift;
-    foreach my $source (@{$self->{clients}}) {
-        return $source unless ($source->is_dead);
-    }
-    return undef;
-}
-
-sub get {
-    my $self = shift;
-    my $u = shift;
-
-    my $source = $self->get_random_source();
-
-    my $data = $source->get($u->{clusterid}, $u->{userid}, @_);
-    unless ($data) {
-        $source = $self->get_first_source();
-        $data = $source->get($u->{clusterid}, $u->{userid}, @_) if $source;
-    }
-    return $data;
-}
-
-sub get_stream {
-    my $self = shift;
-    my $u = shift;
-
-    my $source = $self->get_random_source();
-
-    my $ret = $source->get_stream($u->{clusterid}, $u->{userid}, @_);
-    unless ($ret) {
-        $source = $self->get_first_source();
-        $ret = $source->get_stream($u->{clusterid}, $u->{userid}, @_) if $source;
-    }
-    return $ret;
-}
-
-sub put {
-    my $self = shift;
-    my ($u, $domain, $fmt, $bid, $data, $errref) = @_;
-
-    # we succeed if we manage to put to one server.
-    my $success = 0;
-    foreach my $source (@{$self->{clients}}) {
-        next if $source->is_dead;
-        if ($source->put($u->{clusterid}, $u->{userid}, $domain, $fmt, $bid, $data, $errref)) {
-            $success = 1;
-        }
-    }
-    return $success;
 }
 
 1;

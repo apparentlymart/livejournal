@@ -541,19 +541,32 @@ sub userpic_content
     # else, get it from db.
     unless ($data) {
         my $dbr = LJ::get_db_reader();
-        my $query = "SELECT p.state, p.userid, p.contenttype, UNIX_TIMESTAMP(p.picdate) ".
-            "AS 'lastmod', u.clusterid, u.dversion FROM userpic p, user u WHERE ".
-            "p.picid=$picid AND u.userid=p.userid";
+        my $query = "SELECT state, userid, contenttype, UNIX_TIMESTAMP(picdate) ".
+            "AS 'lastmod' FROM userpic WHERE picid=$picid";
         $pic = $dbr->selectrow_hashref($query);
         return NOT_FOUND unless $pic;
-        return NOT_FOUND if $userid && $pic->{'userid'} != $userid;
+        return NOT_FOUND if $pic->{'userid'} != $userid;
+        my $u = LJ::load_userid($userid);
+        return NOT_FOUND unless $u;
 
         $lastmod = $pic->{'lastmod'};
 
-        my $dbb = LJ::get_cluster_reader($pic->{'clusterid'});
-        return SERVER_ERROR unless $dbb;
-        $data = $dbb->selectrow_array("SELECT imagedata FROM userpicblob2 WHERE ".
-                                      "userid=$pic->{'userid'} AND picid=$picid");
+        if ($LJ::USERPIC_BLOBSERVER) {
+            my $fmt = {
+                'image/gif' => 'gif',
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+            }->{$pic->{contenttype}};
+
+            $data = LJ::Blob::get($u, "userpic", $fmt, $picid);
+        }
+
+        unless ($data) {
+            my $dbb = LJ::get_cluster_reader($u);
+            return SERVER_ERROR unless $dbb;
+            $data = $dbb->selectrow_array("SELECT imagedata FROM userpicblob2 WHERE ".
+                                          "userid=$pic->{'userid'} AND picid=$picid");
+        }
     }
 
     return NOT_FOUND unless $data;

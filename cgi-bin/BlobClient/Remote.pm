@@ -26,12 +26,12 @@ sub new {
 }
 
 sub get {
-	my ($self, $cid, $uid, $domain, $fmt, $bid) = @_;
+    my ($self, $cid, $uid, $domain, $fmt, $bid) = @_;
     my $path = make_path(@_);
     print STDERR "Blob::Remote requesting $path\n" if DEBUG;
     my $req = HTTP::Request->new(GET => $path);
     my $res = $self->{ua}->request($req);
-    return $res->content if ($res->is_success);
+    return $res->content if $res->is_success;
 
     # two types of failure: server dead, or just a 404.
     # a 404 doesn't mean the server is necessarily bad.
@@ -44,17 +44,18 @@ sub get {
 }
 
 sub get_stream {
-	my ($self, $cid, $uid, $domain, $fmt, $bid, $callback) = @_;
+    my ($self, $cid, $uid, $domain, $fmt, $bid, $callback) = @_;
     my $req = HTTP::Request->new(GET => make_path(@_));
     my $res = $self->{ua}->request($req, $callback, 4096);
     return $res->is_success;
 }
 
 sub put {
-	my ($self, $cid, $uid, $domain, $fmt, $bid, $content, $errref) = @_;
+    my ($self, $cid, $uid, $domain, $fmt, $bid, $content, $errref) = @_;
     my $path = make_path(@_);
-    print STDERR "Blob::Remote putting $path\n" if DEBUG;
+    print STDERR "Blob::Remote putting $path with content of length " . length($content) . "\n" if DEBUG;
     my $req = HTTP::Request->new(PUT => $path);
+    
     $req->content($content);
     my $res = $self->{ua}->request($req);
     unless ($res->is_success) {
