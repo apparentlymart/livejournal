@@ -4509,12 +4509,12 @@ sub get_username
         $dbr = LJ::get_db_reader();
     }
 
-    my $user = $dbr->seletrow_array("SELECT user FROM useridmap WHERE userid=$userid");
+    my $user = $dbr->selectrow_array("SELECT user FROM useridmap WHERE userid=$userid");
 
     # Fall back to master if it doesn't exist.
     if (! defined($user) && ($dbs->{'has_slave'} || ! $dbarg)) {
         my $dbh = $dbs ? $dbs->{'dbh'} : LJ::get_db_writer();
-        $user = $dbr->seletrow_array("SELECT user FROM useridmap WHERE userid=$userid");
+        $user = $dbr->selectrow_array("SELECT user FROM useridmap WHERE userid=$userid");
     }
     if (defined($user)) { $LJ::CACHE_USERNAME{$userid} = $user; }
     return ($user);
