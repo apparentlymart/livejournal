@@ -188,6 +188,8 @@ sub suspend
         }
 
         push @users, $_ foreach @$names;
+    } else {
+        push @users, $user;
     }
 
     foreach my $username (@users) {
