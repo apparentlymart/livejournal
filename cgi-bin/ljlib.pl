@@ -2762,12 +2762,7 @@ sub handle_caches
 
     do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
-    foreach (keys %LJ::DBCACHE) {
-        my $v = $LJ::DBCACHE{$_};
-        next unless ref $v;
-        $v->disconnect;
-    }
-    %LJ::DBCACHE = ();
+    $LJ::DBIRole->flush_cache();
 
     %LJ::CACHE_PROP = ();
     %LJ::CACHE_STYLE = ();
@@ -3402,7 +3397,7 @@ sub get_dbs
     # slave (avoids some queries being run twice on master).  this is
     # common when somebody sets up a master and 2 slaves, but has the
     # master doing 1 of the 3 configured slave roles
-    $dbr = undef if $LJ::DBCACHE{"slave"} eq $LJ::DBCACHE{"master"};
+    $dbr = undef if $LJ::DBIRole->same_cached_handle("slave", "master");
 
     return make_dbs($dbh, $dbr);
 }
@@ -3456,7 +3451,7 @@ sub get_cluster_set
 
     # see note in LJ::get_dbs about why we do this:
     $dbs->{'dbr'} = undef
-        if $LJ::DBCACHE{"cluster${id}"} eq $LJ::DBCACHE{"cluster${id}slave"};
+        if $LJ::DBIRole->same_cached_handle("cluster${id}", "cluster${id}slave");
 
     $dbs->{'has_slave'} = defined $dbs->{'dbr'};
     $dbs->{'reader'} = $dbs->{'has_slave'} ? $dbs->{'dbr'} : $dbs->{'dbh'};
