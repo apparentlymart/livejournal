@@ -410,15 +410,17 @@ sub get_query_string
 # <LJFUNC>
 # name: LJ::get_form_data
 # des: Loads a hashref with form data from a GET or POST request.
-# args: hashref
+# args: hashref, type?
 # des-hashref: Hashref to populate with form data.
+# des-type: If "GET", will ignore POST data.
 # </LJFUNC>
 sub get_form_data 
 {
-    my ($hashref) = shift;
-    my $buffer = shift;
+    my $hashref = shift;
+    my $type = shift;
+    my $buffer;
 
-    if ($ENV{'REQUEST_METHOD'} eq 'POST') {
+    if ($ENV{'REQUEST_METHOD'} eq 'POST' && $type ne "GET") {
         read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
     } else {
         $buffer = $ENV{'QUERY_STRING'} || $ENV{'REDIRECT_QUERY_STRING'};

@@ -51,8 +51,9 @@ my $lastconn;
 	next REQUEST;
     }
 
+    my $now = time();
     %FORM = ();
-    &get_form_data(\%FORM);
+    LJ::get_form_data(\%FORM, "GET");
     if ($ENV{'PATH_INFO'} =~ /^\/(\w+)$/) {
 	$FORM{'id'} = $1;
     }
@@ -137,7 +138,7 @@ my $lastconn;
     {
 	$misses++;
 
-	my $now = time();
+
 	## every 10 seconds, revalidate/reconnect our db connections
 	if (($now - $lastconn) > 10) {
 	    $dbh = LJ::get_dbh("master");
@@ -231,24 +232,3 @@ my $lastconn;
 	print "\n";
     }
 }
-
-sub get_form_data 
-{
-    my $hashref = shift;
-    my $buffer = $ENV{'QUERY_STRING'};
-    
-    # Split the name-value pairs
-    my $pair;
-    my @pairs = split(/&/, $buffer);
-    my ($name, $value);
-    foreach $pair (@pairs)
-    {
-	($name, $value) = split(/=/, $pair);
-	$value =~ tr/+/ /;
-        $value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
-        $name =~ tr/+/ /;
-        $name =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
-	$hashref->{$name} .= $hashref->{$name} ? "\0$value" : $value;
-    }
-}
-
