@@ -12,7 +12,7 @@
         <listitem>
           <para>Full, mix of multi &amp; single line property definitions:
             <programlisting><![CDATA[<?template
-<=foo
+foo<=
 Multi
 line
 string
