@@ -49,13 +49,10 @@ sub RecentPage
     # "Automatic Discovery of RSS feeds"
     $p->{'head_content'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$p->{'base_url'}/rss" />\n};
     
-    my $quser = $dbh->quote($user);
-    
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_recent_items")+0;
     if ($itemshow < 1) { $itemshow = 20; }
     elsif ($itemshow > 50) { $itemshow = 50; }
     
-
     my $skip = $FORM{'skip'}+0;
     my $maxskip = $LJ::MAX_HINTS_LASTN-$itemshow;
     if ($skip < 0) { $skip = 0; }

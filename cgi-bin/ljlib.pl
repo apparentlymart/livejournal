@@ -399,6 +399,7 @@ sub get_friend_items
             'gmask_from' => $gmask_from,
             'friendsview' => 1,
             'notafter' => $lastmax,
+            'dateformat' => $opts->{'dateformat'},
         });
 
         # stamp each with clusterid if from cluster, so ljviews and other
@@ -3000,7 +3001,7 @@ sub make_journal
                         "stylesys", "s2_style", "url", "urlname",
                         $s1prop,
                         # indexed:
-                        "opt_blockrobots", "renamedto",
+                        "opt_blockrobots", "renamedto", "opt_usesharedpic",
                         );
 
 

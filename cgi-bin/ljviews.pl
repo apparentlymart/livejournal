@@ -886,8 +886,8 @@ sub create_view_friends
         }
 
         my ($friend, $poster);
-        $friend = $friends{$friendid}->{'user'};
-        $poster = LJ::get_username($dbs, $posterid);
+        $friend = $poster = $friends{$friendid}->{'user'};
+        $poster = LJ::get_username($dbs, $posterid) if $friendid != $posterid;
         
         $eventnum++;
         my %friends_date_format = LJ::alldateparts_to_hash($alldatepart);
@@ -1050,8 +1050,6 @@ sub create_view_friends
             });
     }
 
-    ### if we've skipped down, then we can skip back up
-
     my ($skip_f, $skip_b) = (0, 0);
     my %skiplinks;
     my $base = "$journalbase/$opts->{'view'}";
@@ -1063,10 +1061,10 @@ sub create_view_friends
     # $filter is now set according to it but we don't want it to show in the links.
     # $incfilter may be true even if $filter is 0: user may use filter=0 to turn
     # off the default group
-
     my $linkfilter = $FORM{'filter'} + 0;
     my $incfilter = defined $FORM{'filter'};
 
+    # if we've skipped down, then we can skip back up
     if ($skip) {
         $skip_f = 1;
         my %linkvars;

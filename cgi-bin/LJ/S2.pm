@@ -672,6 +672,16 @@ sub Entry
     return $e;
 }
 
+sub Friend
+{
+    my ($u) = @_;
+    my $o = UserLite($u);
+    $o->{'_type'} = "Friend";
+    $o->{'bgcolor'} = S2::Builtin::Color__Color($u->{'bgcolor'});
+    $o->{'fgcolor'} = S2::Builtin::Color__Color($u->{'fgcolor'});
+    return $o;
+}
+
 sub Null
 {   
     my $type = shift;

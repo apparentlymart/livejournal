@@ -321,7 +321,8 @@ class RecentPage extends Page
 class FriendsPage extends RecentPage
 "Friends most recent entries"
 {
-    var Friend{} friends;
+    var Friend{} friends
+    "A mapping from friend username to color association information.  There will only be keys for friends whose entries are in the entries array.";
 }
 
 class DayPage extends Page 

@@ -175,7 +175,7 @@ $website
 """;
 }
 
-function Page::print_entry (Entry e)
+function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
 {
     var string datetime;
     $datetime = $e.time->date_format("med")+"|<b>" 
@@ -202,10 +202,23 @@ summary="">
 <td colspan="2" bgcolor="$*page_back">
 """;
 
-    if ($.view == "friends" or
-        $.journal_type == "C" or
-        $e.poster.username != $e.journal.username) {
-        "[altposter]";
+    if ($p.view == "friends" or
+        $p.journal_type == "C" or
+        $e.poster.username != $e.journal.username) 
+    {
+        """<table cellpadding="1" align="right" cellspacing="0" border="0" summary=""><tr align='left'><td bgcolor="$*stronger_back">""";
+        """<table cellpadding="2" align="center" cellspacing="0" border="0" summary="">""";
+        """<tr align='left'><td bgcolor="$bgcolor" align="center"><a class="index" href=\"""" + $e.journal->base_url() + "\">";
+        if (defined $e.userpic) {
+            """<img border="0" src="$e.userpic.url" width="$e.userpic.width" height="$e.userpic.height" alt=""><br>""";
+        }
+
+        "<font color=\"$fgcolor\">$e.journal.username</font></a>";
+        if ($e.poster.username != $e.journal.username) {
+            "<br>[<a class=\"index\" href=\"" +
+                $e.poster->base_url() + "<font color=\"$fgcolor\">$e.poster.username</font></a>]";
+        }
+        "</td></tr></table></td></tr></table>";
     }
 
     if (size $e.metadata) {
@@ -235,6 +248,15 @@ $e.text
 </table><p>
 """;
 
+} # print_entry(Page,Entry,Color,Color)
+
+function Page::print_entry (Entry e) {
+   print_entry($this, $e, null Color, null Color);
+}
+
+function FriendsPage::print_entry (Entry e) {
+   var Friend f = $.friends{$e.journal.username};
+   print_entry($this, $e, $f.bgcolor, $f.fgcolor);
 }
 
 function RecentPage::print_body ()
@@ -243,7 +265,6 @@ function RecentPage::print_body ()
         $this->print_entry($e);
     }
 
-# skip links navigation
     var string range = "most recent entries";
     if ($.nav.skip > 0) {
         $range = "$.nav.skip entries back";
