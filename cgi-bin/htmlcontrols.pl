@@ -231,9 +231,12 @@ sub html_color
             "id=\"${htmlname}_disp\">&nbsp;</span>'); ".
             "\n--></script>\n";
 
+    # 'onchange' argument happens when color picker button is clicked,
+    # or when focus is changed to text box
+
     $ret .= html_text({ 'size' => 8, 'maxlength' => 7, 'name' => $htmlname, 'id' => $htmlname,
-                        'onchange' => "setBGColor(findel('${htmlname}_disp'),${htmlname}.value); " .
-                                      $opts->{'onchange'},
+                        'onchange' => "setBGColor(findel('${htmlname}_disp'),${htmlname}.value);",
+                        'onfocus' => $opts->{'onchange'},
                         'disabled' => $opts->{'disabled'}, 'value' => $opts->{'default'},
                         'noescape' => 1, 'raw' => $opts->{'raw'},
                       });

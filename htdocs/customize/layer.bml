@@ -241,7 +241,7 @@
             $body .= LJ::html_text({ 'name' => "${name}_value",
                                      'disabled' => ! $can_use,
                                      'value' => $override,
-                                     'onchange' => "checkOverride('$name');",
+                                     'onfocus' => "checkOverride('$name');",
                                      'maxlength' => 5,
                                      'size' => 7 });
         } elsif ($type eq "string") {
@@ -251,7 +251,7 @@
                 $body .= LJ::html_textarea({ 'name' => "${name}_value",
                                      'disabled' => ! $can_use,
                                      'value' => $override,
-                                     'onchange' => "checkOverride('$name');",
+                                     'onfocus' => "checkOverride('$name');",
                                      'rows' => $rows,
                                      'cols' => $cols });
             } else {
@@ -260,7 +260,7 @@
                 $body .= LJ::html_text({ 'name' => "${name}_value",
                                      'disabled' => ! $can_use,
                                      'value' => $override,
-                                     'onchange' => "checkOverride('$name');",
+                                     'onfocus' => "checkOverride('$name');",
                                      'maxlength' => $maxlength,
                                      'size' => $length });
             }
