@@ -203,42 +203,46 @@ sub do_search
     my $count = 0;
     my @ids;
 
-    ## let's see if it's cached.
+    # mark query as in progress.
+    $dbdir->do("INSERT INTO dirsearchres2 (qdigest, dateins, userids) ".
+               "VALUES ($qdig, NOW(), '[searching]')");
+    if ($dbdir->err)
     {
-        my $csql = "SELECT userids FROM dirsearchres2 WHERE qdigest=$qdig ".
-            "AND dateins > DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
-        my $sth = $dbdir->prepare($csql);
-        $sth->execute;
-        if ($dbdir->err) {  $info->{'errmsg'} = $dbdir->errstr; return 0; }
-
-        my ($ids) = $sth->fetchrow_array;
+        # if there's an error inserting that, we know something's there.
+        # let's see what!
+        my $ids = $dbdir->selectrow_array("SELECT userids FROM dirsearchres2 ".
+                                          "WHERE qdigest=$qdig");
         if (defined $ids) {
+            if ($ids eq "[searching]") {
+                # somebody else (or same user before) is still searching
+                $info->{'searching'} = 1;
+                return 1;
+            }
             @ids = split(/,/, $ids);
             $count = scalar(@ids);
             $hit_cache = 1;
         }
     }
 
-    my $page = $req->{'page'} || 1;
-    my $skip = ($page-1)*$pagesize;
-
     ## guess we'll have to query it.
     if (! $hit_cache)
     {
-        $sth = $dbdir->prepare($sql);
-        $sth->execute;
-        if ($dbdir->err) { $info->{'errmsg'} = $dbdir->errstr . "<p>SQL: $sql"; return 0; }
-
-        while (my ($id) = $sth->fetchrow_array) {
-            push @ids, $id;
-        }
-
-        # insert it into the cache
-        my $ids = $dbdir->quote(join(",", @ids));
-        $dbdir->do("REPLACE INTO dirsearchres2 (qdigest, dateins, userids) VALUES ($qdig, NOW(), $ids)");
-        $count = scalar(@ids);
+        BML::do_later(sub {
+            $sth = $dbdir->prepare($sql);
+            $sth->execute;
+            while (my ($id) = $sth->fetchrow_array) {
+                push @ids, $id;
+            }
+            my $ids = $dbdir->quote(join(",", @ids));
+            $dbdir->do("REPLACE INTO dirsearchres2 (qdigest, dateins, userids) ".
+                       "VALUES ($qdig, NOW(), $ids)");
+        });
+        $info->{'searching'} = 1;
+        return 1;
     }
 
+    my $page = $req->{'page'} || 1;
+    my $skip = ($page-1)*$pagesize;
     my $pages = int($count / $pagesize) + (($count % $pagesize) ? 1 : 0);
     if ($page > $pages) { $page = $pages; }
     $info->{'pages'} = $pages;
@@ -256,6 +260,8 @@ sub do_search
 
     my $in = join(",", grep { $_+0; } @ids);
 
+    unless ($in) { return 1; }
+
     $alias_used{'u'} = "user";
     $alias_used{'uu'} = "userusage";
     my ($fromwhat, $joinwhere);
@@ -271,7 +277,7 @@ sub do_search
     $sth->execute;
 
     if ($dbr->err) {
-	$info->{'errmsg'} = "[getdata] ".$dbr->errstr;
+	$info->{'errmsg'} = "[getdata] $fsql == ".$dbr->errstr;
 	return 0;
     }
 
@@ -585,8 +591,8 @@ sub search_age
 sub validate_ut
 {
     my ($req, $errors) = @_;
-    return 0 unless $req->{'utdays'};
-    unless ($req->{'utdays'} =~ /^\d+$/) {
+    return 0 unless $req->{'ut_days'};
+    unless ($req->{'ut_days'} =~ /^\d+$/) {
         push @$errors, "Days since last updated must be a postive, whole number.";
         return;
     }

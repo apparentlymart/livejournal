@@ -1,8 +1,5 @@
-(=PAGE
+(=_CODE $head = ""; _CODE=)(=PAGE
 TITLE=>Search Results
-HEAD<=
-<meta name="robots" content="noindex,nofollow">
-<=HEAD
 BODY<=
 
 (=_CODE
@@ -142,10 +139,17 @@ BODY<=
      return "The directory is currently unavailable.";
  }
 
- if (LJ::Dir::do_search($dbr, $dbdir, \%FORM, \@matches, \%info)==0) {
+ unless (LJ::Dir::do_search($dbr, $dbdir, \%FORM, \@matches, \%info)) {
      return "(=H1 Error H1=)(=P Error: $info{'errmsg'} P=)";
  }
+
  $info{'allwhat'} ||= "users";
+
+ if ($info{'searching'}) {
+     $head .= "<meta http-equiv='Refresh' content='3;URL=$LJ::SITEROOT$ENV{'REQUEST_URI'}'>\n";
+     return "<center><b>Searching<img src='$LJ::IMGPREFIX/searchingdots.gif' width='18' height='12'></b><p>".
+         "Hundreds of trained monkeys are currently running about finding your search results.  Please stand by.</center>";
+ }
 
  if ($FORM{'s_com'}) {
      $ret .= "<a href=\"/community/search.bml\">&lt;&lt; New Query</a><p>\n";
@@ -347,4 +351,8 @@ BODY<=
 _CODE=)
 
 <=BODY
+HEAD<=
+<meta name="robots" content="noindex,nofollow">
+(=_CODE return $head; _CODE=)
+<=HEAD
 PAGE=)
