@@ -285,7 +285,8 @@ body<=
                 return LJ::bad_input("You must specify a name for this theme.")
                     unless LJ::trim($POST{'name'});
                 my $dbh = LJ::get_db_writer();
-                $dbh->do("INSERT INTO moodthemes (ownerid, name, is_public) VALUES (?, ?, 'N')", undef, $u->{'userid'}, $POST{'name'});
+                my $i = $dbh->do("INSERT INTO moodthemes (ownerid, name, is_public) VALUES (?, ?, 'N')", undef, $u->{'userid'}, $POST{'name'});
+                return "<?h1 $ML{'Error'} h1?><?p There was an error creating this moodtheme. p?>" unless $i;
                 $themeid = $dbh->{'mysql_insertid'};
                 $info->{'name'} = $POST{'name'};
             }
@@ -310,7 +311,8 @@ body<=
 
             # Update the name or description if needed
             if ($info->{'name'} ne $POST{'name'}) {
-                $dbh->do("UPDATE moodthemes SET name=? WHERE moodthemeid=?", undef, $POST{'name'}, $POST{'themeid'});
+                my $u = $dbh->do("UPDATE moodthemes SET name=? WHERE moodthemeid=?", undef, $POST{'name'}, $POST{'themeid'});
+                return "<?h1 $ML{'Error'} h1?><?p There was an error updating this moodtheme. p?>" unless $u;
             }
 
             # The fun part of figuring out what needs to be changed in the db
@@ -326,16 +328,19 @@ body<=
                     my $mname = LJ::mood_name($mid);
 
                     if (($POST{$mid.'check'} ne 'checked') && (!$picurl || $width == 0 || $height == 0)) { # Delete this picture
-                        $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid=$themeid AND moodid=$mid");
+                        my $p = $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid=$themeid AND moodid=$mid");
+                        return "<?h1 $ML{'Error'} h1?><?p There was an error updating this moodtheme. p?>" unless $p;
                         next;
                     }
 
                     if ($POST{$mid.'check'} eq 'checked') { # Inherited, thus don't represent it in the db
-                        $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid=$themeid AND moodid=$mid");
+                        my $d = $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid=$themeid AND moodid=$mid");
+                        return "<?h1 $ML{'Error'} h1?><?p There was an error creating this moodtheme. p?>" unless $d;
                         $ret .= "$mname($mid) was deleted and will now be represented by its parent.<br />\n";
                     } else { # Not inherited, it is different than its parent or it is actually a parent
                         my $qpicurl = $dbh->quote($picurl);
-                        $dbh->do("REPLACE INTO moodthemedata (moodthemeid, moodid, picurl, width, height) VALUES ($themeid, $mid, $qpicurl, $width, $height)");
+                        my $i = $dbh->do("REPLACE INTO moodthemedata (moodthemeid, moodid, picurl, width, height) VALUES ($themeid, $mid, $qpicurl, $width, $height)");
+                        return "<?h1 $ML{'Error'} h1?><?p There was an error updating this moodtheme. p?>" unless $i;
                         $ret .= "$mname($mid) is set to $picurl.<br />\n";
                     }
                 }
