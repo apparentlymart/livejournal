@@ -46,6 +46,14 @@ body<=
         my $u = LJ::load_user($POST{'user'});
         return LJ::bad_input($ML{'error.username_notfound'})
             unless $u;
+
+        # Check to see if they are banned from sending a password
+        if (LJ::sysban_check('lostpassword', $u->{'user'})) {
+            LJ::sysban_note($u->{'userid'}, "Password retrieval blocked based on user",
+                            { 'user' => $u->{'user'} });
+            return "<?h1 Sorry... h1?>\n" .
+                "<?p Your account is not allowed to email passwords. p?>";
+        }
         
         # can we send them the password where they want it?
         # if blank email, then yes.
