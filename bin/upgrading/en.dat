@@ -2782,7 +2782,15 @@ This could be because: <ol>
 
 /update.bml.defaultjournal=([[user]]) -- default
 
+/update.bml.error.cantpost=Sorry, you cannot post at this time.
+
+/update.bml.error.disabled.title=Posting access disabled
+
+/update.bml.error.disabled=Your account type does not permit posting.
+
 /update.bml.error.login=Error logging on:
+
+/update.bml.error.nopass=Enter Password
 
 /update.bml.error.update=Error updating journal:
 
@@ -2797,6 +2805,8 @@ This could be because: <ol>
 /update.bml.htmlokay.rte_nosupport=(Sorry, your browser does not currently support the rich text environment.)
 
 /update.bml.localtime=Local time:
+
+/update.bml.loggedinas=You are currently logged in as <b>[[user]]</b>.<br />To post as another user, <a href="update.bml[[altget]]">click here</a>.
 
 /update.bml.loggingin=Logging in to server...
 
@@ -2821,6 +2831,8 @@ This could be because: <ol>
 /update.bml.options=Optional Settings
 
 /update.bml.other=Other:
+
+/update.bml.password=Password:
 
 /update.bml.picture=<a href="[[url]]">Picture</a> to use:
 
@@ -2855,6 +2867,8 @@ This could be because: <ol>
 /update.bml.update.success=Update successful.  You may view your updated journal <a href="[[uri]]">here</a>.
 
 /update.bml.updating=Updating journal...
+
+/update.bml.username=Username:
 
 /uploadpic.bml.error.unsupportedtype=Files of type [[filetype]] are not supported.  You can only upload GIF, PNG or JPG files.  Nearly all image/photo programs can do this conversion for you.
 
