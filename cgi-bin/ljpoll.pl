@@ -11,11 +11,15 @@ require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 sub clean_poll
 {
     my $ref = shift;
+    if ($$ref !~ /[<>]/) {
+        LJ::text_out($ref);
+        return;
+    }
 
     my $poll_eat = [qw[head title style layer iframe applet object]];
     my $poll_allow = [qw[a b i u img]];
     my $poll_remove = [qw[bgsound embed object caption link font]];
-    
+
     LJ::CleanHTML::clean($ref, {
         'wordlength' => 40,
         'addbreaks' => 0,
