@@ -250,7 +250,7 @@ sub dbs_selectrow_hashref
 
 sub invalidate_friends_view_cache {
     my $u = shift;
-    next unless $LJ::FV_CACHING;
+    return unless $LJ::FV_CACHING;
     my $udbh = LJ::get_cluster_master($u);
     $udbh->do("DELETE FROM fvcache WHERE userid=?", undef, $u->{'userid'})
         if $udbh;
