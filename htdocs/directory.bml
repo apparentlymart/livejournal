@@ -145,7 +145,7 @@ body<=
          LJ::get_cap($remote, "directory") ||
          (@filters == 1 && $filters[0] eq "int" && $FORM{'opt_format'} eq "simple"))
  {
-     return "Sorry, your account type doesn't permit usage of the directory.";
+     return $ML{'.error.accounttype'};
  }
 
  unless (LJ::Dir::do_search($dbr, $dbdir, \%FORM, \@matches, \%info)) {
