@@ -180,7 +180,11 @@ sub clean
                     }
 
                     if ($attr eq 'style' && $opts->{'cleancss'}) {
-                        foreach my $css (qw(position top left bottom right)) {
+                        my $attr = $hash->{$attr};
+                        # css2 spec, section 4.1.3
+                        # position === p\osition  :(
+                        $attr =~ s/\\//g;
+                        foreach my $css (qw(absolute relative fixed)) {
                             if ($hash->{$attr} =~ /$css/i) {
                                 delete $hash->{$attr};
                                 last;
