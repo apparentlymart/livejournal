@@ -230,7 +230,7 @@ sub process {
         my %groupmap = ( private => 0, regusers => 253,
                          friends => 254, public => 255 );
 
-        $lj_headers{'imgsecurity'} = $groupmap{ lc $1 };
+        $lj_headers{'imgsecurity'} = $groupmap{$1};
     }
 
     $lj_headers{'imgcut'}    ||= ($u->{'emailpost_imgcut'}    || 'totals');
