@@ -86,10 +86,13 @@ body<=
         # are we authorized to edit other peoples' posts in this community?
         my $disabled_save = 0;
         my $disabled_delete = 0;
+        my $disabled_spamdelete = 0;
         if ($usejournal && $res{'events_1_poster'} ne $u->{'user'}) {
             $disabled_delete = ! LJ::can_delete_journal_item($u, $usejournal_u);
             $disabled_save++;
         }
+
+        $disabled_spamdelete = $disabled_delete || !$usejournal || ($res{'events_1_poster'} eq $u->{'user'});
 
         ###
         ### SAVE EDITS
@@ -107,7 +110,7 @@ body<=
         }
 
         # they clicked the save or delete button
-        if (!$spellcheck_html && ($POST{'action:save'} || $POST{'action:delete'})) {
+        if (!$spellcheck_html && ($POST{'action:save'} || $POST{'action:delete'} || $POST{'action:deletespam'})) {
 
             my %req = (
                        'mode' => 'editevent',
@@ -126,7 +129,7 @@ body<=
             }
 
             # deleting the event? protocol wants blank event body
-            $req{'event'} = '' if $POST{'action:delete'};
+            $req{'event'} = '' if $POST{'action:delete'} || $POST{'action:deletespam'};
 
             # copy some opts, but make sure they are 1 : 0 explicitly
             foreach (qw(preformatted nocomments backdated noemail)) {
@@ -156,6 +159,9 @@ body<=
             $req{'security'} = $sec;
             $req{'allowmask'} = $amask;
 
+            # mark as spam, if need be
+            LJ::mark_entry_as_spam($usejournal_u, $itemid) if $POST{'action:deletespam'};
+
             # do editevent request
             LJ::do_request(\%req, \%res, { 'noauth' => 1, 'u' => $u });
 
@@ -166,7 +172,9 @@ body<=
 
             # deleted
             unless ($req{'event'}) {
-                return "<?h1 $ML{'.success.head'} h1?><?p $ML{'.success.delete'} p?>";
+                my $result = "<?h1 $ML{'.success.head'} h1?><?p $ML{'.success.delete'} p?>";
+                $result .= "<?p $ML{'.success.deletespam'} p?>" if $POST{'action:deletespam'};
+                return $result;
             }
 
             # modified
@@ -387,7 +395,10 @@ body<=
         $ret .= LJ::html_submit('action:preview', $ML{'.btn.preview'}) . " ";
         $ret .= LJ::html_submit('action:delete', $ML{'.btn.delete'},
                                 { 'disabled' => $disabled_delete,
-                                  'onclick' => "return confirm('" . LJ::ejs($ML{'.delete.confirm'}) . "')" });
+                                  'onclick' => "return confirm('" . LJ::ejs($ML{'.delete.confirm'}) . "')" }) . " ";
+        $ret .= "<br/><br/><center>" . LJ::html_submit('action:deletespam', $ML{'.btn.deletespam'},
+                                { 'onclick' => "return confirm('" . LJ::ejs($ML{'.deletespam.confirm'}) . "')" }) . "</center>"
+                                if !$disabled_spamdelete;
         $ret .= " standout?></form></div>\n";
         
         return $ret;

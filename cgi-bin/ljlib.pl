@@ -7044,6 +7044,40 @@ sub delete_entry
 }
 
 # <LJFUNC>
+# name: LJ::mark_entry_as_spam
+# class: web
+# des: Copies an entry in a community into the global spamreports table
+# args: journalu, jitemid
+# des-journalu: User object of journal (community) entry was posted in.
+# des-jitemid: ID of this entry.
+# returns: 1 for success, 0 for failure
+# </LJFUNC> 
+sub mark_entry_as_spam {
+    my ($journalu, $jitemid) = @_;
+    $journalu = LJ::want_user($journalu);
+    $jitemid += 0;
+    return 0 unless $journalu && $jitemid;
+
+    my $dbcr = LJ::get_cluster_def_reader($journalu);
+    my $dbh = LJ::get_db_writer();
+
+    my $item = LJ::get_log2_row($journalu, $jitemid);
+	
+    # step 1: get info we need
+    my $logtext = LJ::get_logtext2($journalu, $jitemid);
+    my ($subject, $body, $posterid) = ($logtext->{$jitemid}[0], $logtext->{$jitemid}[1], $item->{posterid});
+    return 0 unless $body;
+
+    # step 2: insert into spamreports
+    $dbh->do('INSERT INTO spamreports (reporttime, posttime, journalid, posterid, subject, body, report_type) ' .
+             'VALUES (UNIX_TIMESTAMP(), UNIX_TIMESTAMP(?), ?, ?, ?, ?, \'entry\')', 
+              undef, $item->{logtime}, $journalu->{userid}, $posterid, $subject, $body);
+	
+    return 0 if $dbh->err;
+    return 1;
+}
+
+# <LJFUNC>
 # name: LJ::delete_all_comments
 # des: deletes all comments from a post, permanently, for when a post is deleted
 # info: The tables [dbtable[talk2]], [dbtable[talkprop2]], [dbtable[talktext2]],

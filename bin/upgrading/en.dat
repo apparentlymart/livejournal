@@ -1401,6 +1401,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editjournal_do.bml.btn.delete=Delete Entry 
 
+/editjournal_do.bml.btn.deletespam=Delete and Mark As Spam
+
 /editjournal_do.bml.btn.edit=Edit Selected Entry
 
 /editjournal_do.bml.btn.preview=Preview Entry
@@ -1420,6 +1422,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 /editjournal_do.bml.default=default
 
 /editjournal_do.bml.delete.confirm=Are you sure you want to delete this entry?
+
+/editjournal_do.bml.deletespam.confirm=Are you sure you want to delete this entry and mark it as spam?
 
 /editjournal_do.bml.edit.text=Edit the fields of your journal entry you'd like to modify and press the save button at the bottom of the page.  To delete the entry, just delete all the text and press save... the entry will be deleted.
 
@@ -1468,6 +1472,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 /editjournal_do.bml.subject=<B>Subject:</B> <I>(optional, for use on longer entries)</I>
 
 /editjournal_do.bml.success.delete=Journal entry was deleted.
+
+/editjournal_do.bml.success.deletespam=Additionally, the entry was marked as spam.  Thank you for your report.
 
 /editjournal_do.bml.success.head=Success
 

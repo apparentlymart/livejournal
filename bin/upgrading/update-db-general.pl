@@ -2292,6 +2292,12 @@ register_alter(sub {
                  "ADD location ENUM('blob','mogile') DEFAULT NULL AFTER type");
     }
 
+    if (column_type("spamreports", "report_type") eq '') {
+        do_alter("spamreports", "ALTER TABLE spamreports " .
+                 "ADD report_type ENUM('entry','comment') NOT NULL DEFAULT 'comment' " .
+                 "AFTER posterid");
+    }
+
 });
 
 1; # return true

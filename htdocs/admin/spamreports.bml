@@ -161,11 +161,11 @@
             $what += 0;
             my $u = LJ::load_userid($what);
             return $error->('No such posterid.') unless $u;
-            $title = "Spam Reports - Comments By $u->{user} ($state)";
+            $title = "Spam Reports - By $u->{user} ($state)";
         } elsif ($by eq 'ip') {
             # check for right format x.x.x.x, not necessarily a valid IP
             return $error->('No such IP.') if $what !~ /^\d+\.\d+\.\d+\.\d+$/ or length $what > 15;
-            $title = "Spam Reports - Comments By IP $what ($state)";
+            $title = "Spam Reports - By IP $what ($state)";
         }
 
         # see if we should call a hook for extra actions?
@@ -173,7 +173,7 @@
             if $state eq 'open' && $by eq 'posterid';
 
         # now the general info gathering
-        my $res = $dbr->selectall_arrayref('SELECT reporttime, journalid, subject, body, ip, posttime ' .
+        my $res = $dbr->selectall_arrayref('SELECT reporttime, journalid, subject, body, ip, posttime, report_type ' .
                                            "FROM spamreports WHERE state=? AND $by=? ORDER BY reporttime DESC LIMIT 1000",
                                             undef, $state, $what);
         return $error->('No reports found.', $body) unless $res && @$res;
@@ -183,10 +183,11 @@
             my $x = $by eq 'ip' ? 4 : 1;
             my $comment_body = $_->[3];
             LJ::text_uncompress(\$comment_body);
+            my $spamlocation = ($_->[6] eq 'entry') ? 'Entry' : 'Comment';
             $body .= '<tr><td>' .  ($state eq 'open' ? $dellink->("del$by", "$_->[0]:$_->[$x]", 'Close') : '') . '</td><td>' .
-                     '<strong>Location:</strong> ' . LJ::ljuser($u2) . '<br />' .
+                     "<strong>$spamlocation in:</strong> " . LJ::ljuser($u2) . '<br />' .
                      '<strong>Report Time:</strong> ' . LJ::mysql_time($_->[0]) . '<br />' .
-                     '<strong>Comment Time:</strong> ' . LJ::mysql_time($_->[5]) . '<br />' .
+                     "<strong>$spamlocation Time:</strong> " . LJ::mysql_time($_->[5]) . '<br />' .
                      '<strong>Subject:</strong> ' . LJ::ehtml($_->[2] || 'no subject') . '<br />' .
                      '<strong>Body:</strong> ' . LJ::ehtml($comment_body || 'no body') . '<br />' .
                      '</td></tr><tr><td>&nbsp;</td></tr>';
