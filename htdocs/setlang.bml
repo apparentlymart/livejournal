@@ -20,20 +20,26 @@ BODY<=
      }
  }
 
+ my $def = BML::get_language_default();
  my $curr = BML::get_language();
  my $ret;
  $ret .= "(=_ML .select _ML=)<form method='post'>";
 
- my @q = ("en_LJ", "English",
-          "de", "German");
+ my @q = ("en");
+ @q = @LJ::LANGS if @LJ::LANGS;
  
- while (@q) {
-     my ($code, $name) = splice(@q, 0, 2);
+ foreach my $code (@q) {
+     my $l = LJ::Lang::get_lang($code);
      my $checked = $code eq $curr ? "checked='checked'" : "";
-     $ret .= "<p><input type=radio $checked name=lang value=$code> $name</p>\n";
+     my $item = "langname.$code";
+     my $namethislang = BML::ml($item);
+     my $namenative = LJ::Lang::get_text_bml($l->{'lncode'}, $item);
+     $ret .= "<p><input type='radio' $checked name='lang' value='$code' id='sel$code'> <label for='sel$code'>$namethislang";
+     $ret .= " ($namenative)" if $namethislang ne $namenative;
+     $ret .= "</label></p>\n";
  }
  
- $ret .= "<p><input type=submit value='(=_ML .switch _ML=)'></p></form>";
+ $ret .= "<p><input type='submit' value='(=_ML .switch _ML=)'></p></form>";
  return $ret;
 
 
