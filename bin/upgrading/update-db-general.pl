@@ -737,6 +737,8 @@ CREATE TABLE userpic2 (
   picdate datetime default NULL,
   md5base64 char(22) NOT NULL default '',
   comment varchar(255) BINARY NOT NULL default '',
+  flags tinyint(1) NOT NULL default 0,
+  location enum('blob','disk','mogile') default NULL,
   PRIMARY KEY  (userid, picid)
 )
 EOC
@@ -2250,6 +2252,16 @@ register_alter(sub {
     
     if (index_name("moodthemedata", "INDEX:moodthemeid")) {
         do_alter("moodthemedata", "ALTER IGNORE TABLE moodthemedata DROP KEY moodthemeid");
+    }
+
+    if (column_type("userpic2", "flags") eq '') {
+        do_alter("userpic2", "ALTER TABLE userpic2 " .
+                 "ADD flags tinyint(1) NOT NULL default 0 AFTER comment");
+    }
+
+    if (column_type("userpic2", "location") eq '') {
+        do_alter("userpic2", "ALTER TABLE userpic2 " .
+                 "ADD location enum('blob','disk','mogile') default NULL AFTER flags");
     }
 
 });
