@@ -51,7 +51,7 @@ body<=
             my ($title, $msg) = @_;
             if ($title && ! $msg) {
                 $msg = $title;
-                $title = "Error";
+                $title = $ML{'Error'};
             }
             return "<?h1 $title h1?>\n<?p $msg p?>";
         };
