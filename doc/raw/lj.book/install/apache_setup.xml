@@ -12,20 +12,17 @@
   <formalpara>
     <title>Setting up a VirtualHost</title>
       <para>
-        You need to add a <literal>&lt;VirtualHost&gt;</literal> section in Apache's httpd.conf file. Below is the most common  <literal>&lt;VirtualHost&gt;</literal> setup, as an example.
+        You need to add a <literal>&lt;VirtualHost&gt;</literal> section in Apache's httpd.conf file. Below is the most common <literal>&lt;VirtualHost&gt;</literal> setup, as an example.
         <note>
           <para><filename>/home/lj</filename> is only an example directory. You'll want to use the same directory used in <xref linkend="ljhome_var" />.</para>
         </note>
-        <programlisting>
-        <![CDATA[
-<VirtualHost www.ljsite.com>
+        <programlisting><![CDATA[<VirtualHost www.ljsite.com>
   ServerName www.ljsite.com
   ServerAlias ljsite.com *.ljsite.com
 
   PerlSetEnv    LJHOME /home/lj
   PerlRequire   /home/lj/cgi-bin/modperl.pl
-</VirtualHost>
-        ]]>
+</VirtualHost>]]>
         </programlisting>
       </para>
     </formalpara>

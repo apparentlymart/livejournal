@@ -3,7 +3,7 @@
   <section id="install">
     <title>Installing Perl</title>
     <para>
-      Perl offers distrobutions for many operating aystems, including Win32 and almost all of the different <quote>flavors</quote> of unix. Installations on any of these systems should be fairly easy, as most offer a simple installation program that guides you through setup.
+      Perl offers distrobutions for many operating aystems, including Win32 and almost all of the different <quote>flavors</quote> of Unix. Installations on any of these systems should be fairly easy, as most offer a simple installation program that guides you through setup.
     </para>
     <para>
       The complete Perl documentation is included with every Perl install, so if you have any Perl specific questions, you might want to refer to the specific documentation first. As quoted from the Perl FAQs: <quote>The complete Perl documentation is available with the Perl distribution. If you have Perl installed locally, you probably have the documentation installed as well: type man perl if you're on a system resembling Unix. This will lead you to other important man pages, including how to set your $MANPATH. If you're not on a Unix system, access to the documentation will be different; for example, it might be only in HTML format. But all proper Perl installations have fully-accessible documentation.</quote>
