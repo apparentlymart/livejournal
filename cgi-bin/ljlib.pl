@@ -3448,7 +3448,7 @@ sub end_request
 
         # and cached trackers/keepers to partitioned dbs
         while (my ($role, $tk) = each %LJ::REQ_DBIX_TRACKER) {
-            $tk->disconnect;
+            $tk->disconnect if $tk;
         }
         %LJ::REQ_DBIX_TRACKER = ();
         %LJ::REQ_DBIX_KEEPER = ();
