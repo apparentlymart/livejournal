@@ -718,8 +718,10 @@ sub load_table_info
 
     my $sth = $dbh->prepare("DESCRIBE $table");
     $sth->execute;
-    while (my ($Field, $Type) = $sth->fetchrow_array) {
-        $coltype{$table}->{$Field} = lc($Type);
+    while (my $row = $sth->fetchrow_hashref) {
+        my $type = $row->{'Type'};
+        $type .= " $1" if $row->{'Extra'} =~ /(auto_increment)/i;
+        $coltype{$table}->{ $row->{'Field'} } = lc($type);
     }
 
     $sth = $dbh->prepare("SHOW INDEX FROM $table");

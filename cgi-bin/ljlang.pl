@@ -191,13 +191,20 @@ sub get_itemid
     return $itid if defined $itid;
 
     my $dbh = LJ::get_db_writer();
+    return 0 unless $dbh;
+    
+    # allocate a new id
+    LJ::get_lock($dbh, 'global', 'mlitem_dmid') || return 0;
+    my $itid = $dbh->selectrow_array("SELECT MAX(itid)+1 FROM ml_items WHERE dmid=?", undef, $dmid);
     $dbh->do("INSERT INTO ml_items (dmid, itid, itcode, notes) ".
-             "VALUES ($dmid, NULL, ?, ?)", undef, $itcode, $opts->{'notes'});
+             "VALUES (?, ?, ?, ?)", undef, $dmid, $itid, $itcode, $opts->{'notes'});
+    LJ::release_lock($dbh, 'global', 'mlitem_dmid');
+
     if ($dbh->err) {
         return $dbh->selectrow_array("SELECT itid FROM ml_items WHERE dmid=$dmid AND itcode=?",
                                      undef, $itcode);
     }
-    return $dbh->{'mysql_insertid'};
+    return $itid;
 }
 
 sub set_text

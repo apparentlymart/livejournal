@@ -2340,6 +2340,11 @@ register_alter(sub {
                 "exptype ENUM('short', 'long', 'once') NOT NULL");
     }
 
+    if (column_type("ml_items", "itid") =~ /auto_increment/) {
+        do_alter("ml_items",
+                "ALTER TABLE ml_items MODIFY COLUMN " .
+                "itid MEDIUMINT UNSIGNED NOT NULL DEFAULT 0");
+    }
 
 });
 
