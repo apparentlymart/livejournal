@@ -154,11 +154,13 @@
         foreach (@$res) {
             my $u2 = LJ::load_userid($_->[1]);
             my $x = $by eq 'ip' ? 4 : 1;
+            my $body = $_->[3];
+            LJ::text_uncompress(\$body);
             $body .= '<tr><td>' .  $dellink->("del$by", "$_->[0]:$_->[$x]", 'Delete') . '</td><td>' .
                      '<strong>Location:</strong> ' . LJ::ljuser($u2) . '<br />' .
                      '<strong>Report Time:</strong> ' . LJ::mysql_time($_->[0]) . '<br />' .
                      '<strong>Subject:</strong> ' . LJ::ehtml($_->[2] || 'no subject') . '<br />' .
-                     '<strong>Body:</strong> ' . LJ::ehtml($_->[3] || 'no body') . '<br />' .
+                     '<strong>Body:</strong> ' . LJ::ehtml($body || 'no body') . '<br />' .
                      '</td></tr><tr><td>&nbsp;</td></tr>';
         }
         $body .= "</table><br />" . $dellink->("delby$by", $what, 'Delete All');
