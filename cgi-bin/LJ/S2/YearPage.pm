@@ -45,7 +45,7 @@ sub YearPage
     $p->{'year'} = $year;
     $p->{'years'} = [];
     foreach (@years) {
-        push @{$p->{'years'}}, YearYear($_, "$p->{'base_url'}/calendar/$_", $_ == $p->{'year'});
+        push @{$p->{'years'}}, YearYear($_, "$p->{'base_url'}/$_", $_ == $p->{'year'});
     }
 
     $p->{'months'} = [];
