@@ -199,7 +199,7 @@ sub trans
                 $filename = "$LJ::HOME/htdocs/talkpost.bml";
             }
             $r->notes("_journal" => $opts->{'user'});
-            $r->filename($filename);
+            $r->notes("bml_filename" => $filename);
             return OK;
         }
 
@@ -208,7 +208,7 @@ sub trans
             $r->push_handlers(PerlHandler => \&Apache::BML::handler);
             my $filename = "$LJ::HOME/htdocs/view/index.bml";
             $r->notes("_journal" => $opts->{'user'});
-            $r->filename($filename);
+            $r->notes("bml_filename" => $filename);
             return OK;
         }
 
