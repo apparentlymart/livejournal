@@ -371,7 +371,7 @@
   }
  
   if ( ! $synd && ($u->{'allow_contactshow'} eq "Y" ||
-      $u->{'allow_contactshow'} eq "F") && $remote_isfriend)
+      ($u->{'allow_contactshow'} eq "F" && $remote_isfriend)))
   {
       unless ($u->{'opt_whatemailshow'} eq "N") {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
