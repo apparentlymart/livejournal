@@ -255,16 +255,18 @@ body<=
         my $prop_check = sub {
             my $prop = shift;
             my $prop_ml = shift || $prop;
+            my $dis = shift() ? 1 : 0;
 
             return "<b><label for='prop_opt_$prop'>" . $ML{".opt.$prop_ml"} . "</label></b> " .
                    LJ::html_check({ 'type' => 'check',
                                     'name' => "prop_opt_$prop",
                                     'id' => "prop_opt_$prop",
-                                    'selected' => $props{"opt_$prop"} });
+                                    'selected' => $props{"opt_$prop"},
+                                    'disabled' => $dis });
         };
 
         # backdating
-        $ret .= "<p>" . $prop_check->('backdated', 'backdate') . " ";
+        $ret .= "<p>" . $prop_check->('backdated', 'backdate', $usejournal) . " ";
 
         # don't auto-format
         $ret .= $prop_check->('preformatted', 'noformat') . LJ::help_icon("noautoformat", " ") . "</p>\n";
