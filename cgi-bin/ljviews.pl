@@ -1097,37 +1097,58 @@ sub create_view_day
 
     my $optDESC = $vars->{'DAY_SORT_MODE'} eq "reverse" ? "DESC" : "";
 
-    $sth = $dbr->prepare(<<"END_SQL"
-SELECT itemid 
-FROM log l LEFT JOIN friends f ON l.ownerid=f.userid AND f.friendid=$qremoteid
-WHERE l.ownerid=$u->{'userid'}
-AND year=$year AND month=$month AND day=$day
-AND ((l.security='public')
-  OR (l.security='usemask' AND l.allowmask & f.groupmask)
-  OR (l.ownerid=$qremoteid))
-ORDER BY l.eventtime LIMIT 200
-END_SQL
-);
-   
+    my $secwhere = "AND security='public'";
+    if ($remote) {
+	if ($remote->{'userid'} == $u->{'userid'}) {
+	    $secwhere = "";   # see everything
+	} else {
+	    my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
+	    $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $gmask))"
+		if $gmask;
+	}
+    }
+
+    my $logdb;
+    if ($u->{'clusterid'}) { 
+	$logdb = LJ::get_cluster_reader($u);
+	$sth = $logdb->prepare("SELECT jitemid FROM log2 WHERE journalid=$u->{'userid'} ".
+			       "AND year=$year AND month=$month AND day=$day $secwhere ".
+			       "ORDER BY eventtime LIMIT 200");
+    } else {
+	$logdb = $dbr;
+	$sth = $logdb->prepare("SELECT itemid FROM log WHERE ownerid=$u->{'userid'} ".
+			       "AND year=$year AND month=$month AND day=$day $secwhere ".
+			       "ORDER BY eventtime LIMIT 200");
+    }
     $sth->execute;
-    if ($dbr->err) {
-	$$ret .= $dbr->errstr;
+    if ($logdb->err) {
+	$$ret .= $logdb->errstr;
 	return 1;
     }
 
-    push @itemids, $_->{'itemid'} while ($_ = $sth->fetchrow_hashref);
+    push @itemids, $_ while ($_ = $sth->fetchrow_array);
 
     my $itemid_in = join(", ", map { $_+0; } @itemids);
 
     ### load the log properties
     my %logprops = ();
-    LJ::load_log_props($dbs, \@itemids, \%logprops);
+    my $logtext;
+    if ($u->{'clusterid'}) {
+	LJ::load_props($dbs, "log");
+	LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
+	$logtext = LJ::get_logtext2($u, @itemids);
+    } else {
+	LJ::load_log_props($dbs, \@itemids, \%logprops);
+	$logtext = LJ::get_logtext($dbs, @itemids);
+    }
     LJ::load_moods($dbs);
 
-    my $logtext = LJ::get_logtext($dbs, @itemids);
-
     # load the log items
-    $sth = $dbr->prepare("SELECT itemid, security, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart' FROM log l WHERE itemid IN ($itemid_in) ORDER BY eventtime $optDESC, logtime $optDESC");
+    if ($u->{'clusterid'}) {
+	$sth = $logdb->prepare("SELECT jitemid, security, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart' FROM log2 WHERE journalid=$u->{'userid'} AND jitemid IN ($itemid_in) ORDER BY eventtime $optDESC, logtime $optDESC");
+    } else {
+	$sth = $dbr->prepare("SELECT itemid, security, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart' FROM log WHERE itemid IN ($itemid_in) ORDER BY eventtime $optDESC, logtime $optDESC");
+    }
     $sth->execute;
 
     my $events = "";
@@ -1187,11 +1208,13 @@ END_SQL
 	if ($u->{'opt_showtalklinks'} eq "Y" &&
 	    ! $logprops{$itemid}->{'opt_nocomments'}
 	    ) {
+	    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
+
 	    $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
 		'itemid' => $itemid,
-		'urlpost' => "$LJ::SITEROOT/talkpost.bml?itemid=$itemid",
+		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$itemid",
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'DAY_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&amp;nc=$replycount",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$itemid&amp;nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount==1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
