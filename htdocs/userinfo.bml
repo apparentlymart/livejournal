@@ -21,8 +21,6 @@
      return;
  }
 
- LJ::set_active_crumb('userinfo');
-
  my $dbr = LJ::get_db_reader();
  my $dbcr;
 
