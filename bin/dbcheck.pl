@@ -171,7 +171,7 @@ my $check = sub
 	    push @$chkref, $sid;
 	}
 
-	$pr->(sprintf("    %-30s", $skey));
+	$pr->(sprintf("    %-20s", $skey));
 
 	unless ($s->{'totalweight'}) {
 	    $pr->("dead, skipping.\n");
