@@ -2991,10 +2991,11 @@ sub start_request
                 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"; 
                 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl"; 
             };
+            $LJ::DBIRole->set_sources(\%LJ::DBINFO);
+            LJ::MemCache::trigger_bucket_reconstruct();
+            print STDERR "ljconfig.pl reloaded\n";
         }
         $LJ::CACHE_CONFIG_MODTIME_LASTCHECK = $now;
-        $LJ::DBIRole->set_sources(\%LJ::DBINFO);
-        LJ::MemCache::trigger_bucket_reconstruct();
     }
 
     return 1;
@@ -4186,7 +4187,6 @@ sub load_userid
 
         my $dbs = LJ::make_dbs_from_arg($dbarg);
         my $db = $dbs->{'reader'};
-        my $u;
 
         $u = $db->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, 
                                     $userid);
