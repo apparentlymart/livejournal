@@ -1309,7 +1309,7 @@ sub getevents
             # format is:  time/date/time/date/time/date/... so split
             # it into a hash, then delete pairs that are older than an hour
             my %reqs = split(m!/!, $u->{$pname});
-            foreach (map { $_ > $now - 60*60 } keys %reqs) { delete $reqs{$_}; }
+            foreach (grep { $_ < $now - 60*60 } keys %reqs) { delete $reqs{$_}; }
             my $count = grep { $_ eq $date } values %reqs;
             $reqs{$now} = $date;
             LJ::set_userprop($dbs, $u, $pname, 
