@@ -267,27 +267,31 @@ body<=
         $ret .= "<?h2 $ML{'.pagelayoutstyle.head'} h2?><?p $ML{'.pagelayoutstyle.about'}  $and p?>\n";
         $ret .= "<table style='margin-left: 30px; margin-bottom: 20px;'>\n";
         $ret .= "<tr bgcolor='#d0d0d0'><td></td><td>$ML{'.availablestyles.head'}</td></tr>\n";
-        my %styles = ();
 
         my $pubstyles = LJ::S1::get_public_styles();
+        my %pubstyles = ();
         foreach (sort { $a->{'styledes'} cmp $b->{'styledes'} } values %$pubstyles) {
-            push @{$styles{$_->{'type'}}}, $_;
+            push @{$pubstyles{$_->{'type'}}}, $_;
         }
-            
-        foreach my $view (@LJ::views)
-        {
+
+        my $userstyles = LJ::S1::get_user_styles($u);
+        my %userstyles = ();
+        foreach (sort { $a->{'styledes'} cmp $b->{'styledes'} } values %$userstyles) {
+            push @{$userstyles{$_->{'type'}}}, $_;
+        }
+
+        foreach my $view (@LJ::views) {
+
             $ret .= "<tr><td bgcolor='#d0d0d0'>$LJ::viewinfo{$view}->{'des'}</td><td>";
             
-            my @list = map { $_->{'styleid'}, $_->{'styledes'} }
-                       grep { exists $pubstyles->{$_->{'styleid'}} } @{$styles{$view} || []};
+            my @list = map { $_->{'styleid'}, $_->{'styledes'} } 
+                       @{$pubstyles{$view} || []};
 
-            my $exist_user_style = 0;
-            foreach (grep { $_->{'user'} ne "system" } @{$styles{$view} || []}) {
-                if (!$exist_user_style) {
-                    $exist_user_style = 1;
-                    push @list, ('', "--- $ML{'.availablestyles.userstyles'} ---");
-                }
-                push @list, ($_->{'styleid'}, $_->{'styledes'});
+            if (@{$userstyles{$view} || []}) {
+                push @list, ('', "--- $ML{'.availablestyles.userstyles'} ---");
+
+                push @list, map { $_->{'styleid'}, $_->{'styledes'} }
+                            @{$userstyles{$view} || []}
             }
 
             $ret .= LJ::html_select({ 'name' => "s1_${view}_style",
