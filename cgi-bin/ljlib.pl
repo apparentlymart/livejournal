@@ -2169,8 +2169,6 @@ sub load_user_props
     my $uid = $u->{'userid'}+0;
     $uid = LJ::get_userid($u->{'user'}) unless $uid;
     
-    $opts->{'cache'} = 0 unless $LJ::DEV_CACHE_PROPS;
-
     my $mem = {};
     if ($opts->{'cache'}) {
         my @keys;
@@ -2196,7 +2194,7 @@ sub load_user_props
             next if exists $u->{$_};
             my $p = LJ::get_prop("user", $_);
             next unless $p;
-            if (exists $mem->{"uprop:$uid:$p->{'id'}"}) {
+            if (defined $mem->{"uprop:$uid:$p->{'id'}"}) {
                 $u->{$_} = $mem->{"uprop:$uid:$p->{'id'}"};
                 next;
             }

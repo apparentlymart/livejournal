@@ -205,6 +205,7 @@ sub _load_items
         }
         if ($line eq "END\r\n") {
             foreach (@_) {
+                next unless exists $val{$_};
                 next unless length($val{$_}) == $len{$_};
                 $val{$_} = Storable::thaw($val{$_}) if $flags{$_} & 1;
                 $outref->{$_} = $val{$_};
