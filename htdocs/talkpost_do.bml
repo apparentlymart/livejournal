@@ -5,7 +5,7 @@ BODY<=
 (=_CODE
 
  foreach my $re (@LJ::TALKSPAM) {
-     return "" if ($FORM{'body'} =~ /$re/);
+     return if ($FORM{'body'} =~ /$re/);
  }
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
@@ -22,16 +22,16 @@ BODY<=
  my $DEBUG = 0;
 
  # start quoting shit to insert
- my $qitemid = $FORM{'itemid'}+0;
- $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, lt.event, l.eventtime, lt.subject, l.security, l.allowmask FROM log l, logtext lt WHERE lt.itemid=l.itemid AND l.itemid=$qitemid");
+ my $itemid = $FORM{'itemid'}+0;
+ $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, lt.event, l.eventtime, lt.subject, l.security, l.allowmask FROM log l, logtext lt WHERE lt.itemid=l.itemid AND l.itemid=$itemid");
  $sth->execute;
  my $item = $sth->fetchrow_hashref;
  unless ($item) { push @errors, "No such entry."; }
 
  my %logprops;
- LJ::load_log_props($dbs, [ $qitemid ], \%logprops);
+ LJ::load_log_props($dbs, [ $itemid ], \%logprops);
 
- my $mod = $qitemid % 100;
+ my $mod = $itemid % 100;
 
  ### load users
  $sth = $dbr->prepare("SELECT * FROM user WHERE userid IN ($item->{'ownerid'}, $item->{'posterid'})");
@@ -118,7 +118,7 @@ BODY<=
      push @errors, "You can't post anonymously in this person's journal.";
  }
 
- if ($logprops{$qitemid}->{'opt_nocomments'}) {
+ if ($logprops{$itemid}->{'opt_nocomments'}) {
      push @errors, "User has disabled commenting on this journal entry.";
  }
 
@@ -166,9 +166,9 @@ BODY<=
  ###################################################3
 
  my $textsubject = $FORM{'subject'};
- &LJ::CleanHTML::clean_subject_all(\$textsubject);
+ LJ::CleanHTML::clean_subject_all(\$textsubject);
  my $cleansubject = $FORM{'subject'};
- &LJ::CleanHTML::clean_subject(\$cleansubject);
+ LJ::CleanHTML::clean_subject(\$cleansubject);
 
  ## preview
 
@@ -176,7 +176,7 @@ BODY<=
      $ret .= "(=H1 Preview H1=)(=P Below is how your post will look.  Press your browser's back button to make changes. Or, submit it. P=)(=HR=)";
 
      my $event = $FORM{'body'};
-     &LJ::CleanHTML::clean_comment(\$event, $FORM{'prop_opt_preformatted'});
+     LJ::CleanHTML::clean_comment(\$event, $FORM{'prop_opt_preformatted'});
 
      $ret .= "<B>Subject: </B> $cleansubject<hr>\n";
      $ret .= $event;
@@ -190,7 +190,7 @@ BODY<=
 	 delete $FORM{'userpost'};
      }
      foreach (keys %FORM) {
-	 $ret .= "<input type=hidden name=\"$_\" value=\"" . &ehtml($FORM{$_}) . "\">\n";
+	 $ret .= "<input type=hidden name=\"$_\" value=\"" . LJ::ehtml($FORM{$_}) . "\">\n";
      }
      
 
@@ -207,7 +207,7 @@ BODY<=
  my $subjecticon = ($FORM{'subjecticon'} eq "none" || $FORM{'subjecticon'} eq "") ? "" : &trim(lc($FORM{'subjecticon'}));
  my $qsubjecticon = $dbh->quote($subjecticon);
  my $qbody = $dbh->quote($FORM{'body'});
- my $datepost = &LJ::mysql_time();
+ my $datepost = LJ::mysql_time();
  my $qdatepost = $dbh->quote($datepost);
 
  my $insertid;
@@ -215,7 +215,7 @@ BODY<=
  
  ### check for duplicate entry (double submission)
  my $posterid = $up ? $up->{'userid'} : 0;
- $sth = $dbh->prepare("SELECT t.talkid FROM talk t, talktext tt WHERE t.talkid=tt.talkid AND t.journalid=$u->{'userid'} AND t.nodetype='L' AND t.nodeid=$qitemid AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' AND t.parenttalkid=$qpartid");
+ $sth = $dbh->prepare("SELECT t.talkid FROM talk t, talktext tt WHERE t.talkid=tt.talkid AND t.journalid=$u->{'userid'} AND t.nodetype='L' AND t.nodeid=$itemid AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' AND t.parenttalkid=$qpartid");
  $sth->execute;
  ($insertid) = $sth->fetchrow_array;
  
@@ -223,7 +223,7 @@ BODY<=
  unless ($insertid)
  {
      # insert the comment
-     $sth = $dbh->prepare("INSERT INTO talk (nodetype, nodeid, parenttalkid, journalid, posterid, datepost) VALUES ('L', $qitemid, $qpartid, $u->{'userid'}, $posterid, NOW())");
+     $sth = $dbh->prepare("INSERT INTO talk (nodetype, nodeid, parenttalkid, journalid, posterid, datepost) VALUES ('L', $itemid, $qpartid, $u->{'userid'}, $posterid, NOW())");
      $sth->execute;
      
      # uh oh?  is there an error?  show them if there is.
@@ -267,7 +267,7 @@ BODY<=
      }
 
      # update the "replycount" field of the log table (redudant? yes. -> optimization)
-     &LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$qitemid");
+     LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");
      
      # send some emails
      my $who = $up->{'name'} || "Somebody";
@@ -328,7 +328,7 @@ BODY<=
 		 $text .= "\n\nTheir reply was:\n\n";
 		 $text .= &indent("Subject: $cleansubject\n\n$FORM{'body'}");
 		 $text .= "\n\nYou can view the discussion and reply here:\n\n";
-		 $text .= "     $LJ::SITEROOT/talkread.bml?itemid=$FORM{'itemid'}\n\n";
+		 $text .= "     $LJ::SITEROOT/talkread.bml?itemid=$itemid\n\n";
 		 $text .= "-- $LJ::SITENAME\n\n";
 		 $msg->attach('Type' => 'TEXT',
 			      'Data' => $text,
@@ -337,25 +337,25 @@ BODY<=
 
 		 my $html = "";
 		 $html .= "<BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
-		 $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?itemid=$FORM{'itemid'}\">your LiveJournal comment</A> in which you said:</TD></TR></TABLE>\n\n";
-		 &LJ::CleanHTML::clean_comment(\$parbody);
+		 $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?itemid=$itemid\">your LiveJournal comment</A> in which you said:</TD></TR></TABLE>\n\n";
+		 LJ::CleanHTML::clean_comment(\$parbody);
 		 $html .= &blockquote($parbody);
 		 
 		 $html .= "\n\nTheir reply was:\n\n";
 		 my $cleanbody = $FORM{'body'};
-		 &LJ::CleanHTML::clean_comment(\$cleanbody, $FORM{'prop_opt_preformatted'});
+		 LJ::CleanHTML::clean_comment(\$cleanbody, $FORM{'prop_opt_preformatted'});
 		 $html .= &blockquote("<TT><B>Subject:</B> $cleansubject</TT><P>$cleanbody");
 
 		 $html .= "You can reply at the webpage, or here...";
 		 $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
 		 $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
 		 $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
-		 $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$FORM{'itemid'}>";
+		 $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$itemid>";
 		 $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$paru->{'user'}\">";
-		 $html .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . &ehtml(&hash_password($paru->{'password'})) . "\">";
+		 $html .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . LJ::ehtml(LJ::hash_password($paru->{'password'})) . "\">";
 		 my $newsub = $FORM{'subject'};
 		 unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
-		 $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . &ehtml($newsub) . "\">";
+		 $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . LJ::ehtml($newsub) . "\">";
 		 $html .= "<P><B>Message</B><BR><TEXTAREA ROWS=10 COLS=50 WRAP=SOFT NAME=body></TEXTAREA>";
 		 $html .= "<BR><INPUT TYPE=SUBMIT VALUE=\"Post Reply\">";
 		 $html .= "</FORM></BLOCKQUOTE>\n";
@@ -405,7 +405,7 @@ BODY<=
 	 $text .= "\n\nTheir reply was:\n\n";
 	 $text .= &indent("Subject: $textsubject\n\n$FORM{'body'}");
 	 $text .= "\n\nYou can view the discussion and reply here:\n\n";
-	 $text .= "     $LJ::SITEROOT/talkread.bml?itemid=$FORM{'itemid'}\n\n";
+	 $text .= "     $LJ::SITEROOT/talkread.bml?itemid=$itemid\n\n";
 	 $text .= "-- $LJ::SITENAME\n\n";
 	 $text .= "(if you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options)\n";
 	 $msg->attach('Type' => 'TEXT',
@@ -416,19 +416,19 @@ BODY<=
 	 my $html = "";
 	 $html .= "<BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
 	 if ($parentcomment)  {
-	     $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$LJ::SITEROOT/talkread.bml?itemid=$FORM{'itemid'}\">your LiveJournal post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
+	     $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$LJ::SITEROOT/talkread.bml?itemid=$itemid\">your LiveJournal post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
 	     my $cleancom = $parentcomment;
-	     &LJ::CleanHTML::clean_comment(\$cleancom);
+	     LJ::CleanHTML::clean_comment(\$cleancom);
 	     $html .= &blockquote($cleancom);
 	 } else {
-	     $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?itemid=$FORM{'itemid'}\">your LiveJournal post</A> in which you said:</TD></TR></TABLE>\n";
+	     $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?itemid=$itemid\">your LiveJournal post</A> in which you said:</TD></TR></TABLE>\n";
 	     my $clean = $item->{'event'};
-	     &LJ::CleanHTML::clean_event(\$clean);
+	     LJ::CleanHTML::clean_event(\$clean);
 	     $html .= &blockquote($clean);
 	 }
 	 $html .= "\n\nTheir reply was:\n\n";
 	 my $clean = $FORM{'body'};
-	 &LJ::CleanHTML::clean_comment(\$clean, $FORM{'prop_opt_preformatted'});
+	 LJ::CleanHTML::clean_comment(\$clean, $FORM{'prop_opt_preformatted'});
 	 $html .= &blockquote("<TT><B>Subject: </B> $textsubject</TT><HR>$clean");
 
 	 # begin form
@@ -436,12 +436,12 @@ BODY<=
 	 $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
 	 $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
 	 $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
-	 $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$FORM{'itemid'}>";
+	 $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$itemid>";
 	 $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$ujp->{'user'}\">";
-	 $html .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . &ehtml(&hash_password($ujp->{'password'})) . "\">";
+	 $html .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . LJ::ehtml(LJ::hash_password($ujp->{'password'})) . "\">";
 	 my $newsub = $FORM{'subject'};
 	 unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
-	 $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . &ehtml($newsub) . "\">";
+	 $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . LJ::ehtml($newsub) . "\">";
 	 $html .= "<P><B>Message</B><BR><TEXTAREA ROWS=10 COLS=50 WRAP=SOFT NAME=body></TEXTAREA>";
 	 $html .= "<BR><INPUT TYPE=SUBMIT VALUE=\"Post Reply\">";
 	 $html .= "</FORM></BLOCKQUOTE>\n";
@@ -474,10 +474,11 @@ BODY<=
  }
  
  # Yeah, we're done.
- $ret .= "(=H1 Success H1=)(=P Your comment has been added.  You can view it <A HREF=\"talkread.bml?itemid=$FORM{'itemid'}&amp;view=$insertid#t$insertid\">here</A>. P=)";
+ my $commentlink = "<a href='talkread.bml?itemid=$itemid&amp;view=$insertid#t$insertid'>here</a>";
+ $ret .= "(=H1 Success H1=)(=P Your comment has been added.  You can view it $commentlink. P=)";
 
  if ($DEBUG) {
-     $ret .= "<P>" . $debug;
+     $ret .= "<p>$debug</p>";
  }
  return $ret;
 
@@ -489,7 +490,7 @@ BODY<=
 
 sub blockquote {
      my $a = shift;
-     return "<BLOCKQUOTE style=\"BORDER-LEFT: #000040 2px solid; MARGIN-LEFT: 0px; MARGIN-RIGHT: 0px; PADDING-LEFT: 15px; PADDING-RIGHT: 0px\">$a</BLOCKQUOTE>";
+     return "<blockquote style='BORDER-LEFT: #000040 2px solid; MARGIN-LEFT: 0px; MARGIN-RIGHT: 0px; PADDING-LEFT: 15px; PADDING-RIGHT: 0px'>$a</blockquote>";
 }
 
 _CODE=)
