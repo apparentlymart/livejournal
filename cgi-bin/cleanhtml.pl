@@ -36,7 +36,7 @@ my $onechar;
     if (not $LJ::UNICODE) {
         $match = '[^&\s]|(&\#?\w{1,7};)';
     } else {
-        $match = $utf_longchar . '|[^&\s\x80-\xff]|(&\#?\w{1,7};)';
+        $match = $utf_longchar . '|[^&\s\x80-\xff]|(?:&\#?\w{1,7};)';
     }
     $onechar = qr/$match/o;
 }
