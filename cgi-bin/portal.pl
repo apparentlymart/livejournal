@@ -770,9 +770,7 @@ $box{'update'} =
 
         my $mode = $opts->{'form'}->{'mode'} || $box->{'args'}->{'mode'};
 
-        $$bd .= "<FORM METHOD=POST ACTION=\"/update.bml\" NAME=updateForm$box->{'uniq'}>";
-        $$bd .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=update>";
-        $$bd .= "<INPUT TYPE=HIDDEN NAME=oldmode VALUE=$mode>";
+        $$bd .= "<form method='post' action='$LJ::SITEROOT/update.bml' name='updateForm$box->{'uniq'}'>";
 
         my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
         $year+=1900;
@@ -782,10 +780,8 @@ $box{'update'} =
 
         $$bd .= "<table>";
         if ($remote) {
-            $$bd .= "<input type='hidden' name='remoteuser' value='$remote->{'user'}'>\n";
-            $$bd .= "<tr><td><b>Logged in user:</b> $remote->{'user'} (<a href=\"/update.bml?altlogin=1\">other user?</a>)</td></tr>\n";
+            $$bd .= "<tr><td><b>Logged in user:</b> $remote->{'user'} (<a href=\"$LJ::SITEROOT/update.bml?altlogin=1\">other user?</a>)</td></tr>\n";
         } else {
-            $$bd .= "<input type=hidden name=usertype value=explicit>";
             $$bd .= "<tr><td><b>User:</b> <input name=user size=10 maxlength=15> ";
             $$bd .= "Password: <input type=password name=password size=10> ";
             $$bd .= "</td></tr>";
@@ -892,7 +888,7 @@ $box{'update'} =
         }
         else 
         {
-            $$bd .= "<TR><TD><?de For more options, modify this portal box or <A HREF=\"/update.bml\">go here</A>. de?></TD></TR>\n";
+            $$bd .= "<tr><td><?de For more options, modify this portal box or <a href=\"$LJ::SITEROOT/update.bml?mode=full\">go here</a>. de?></td></tr>\n";
         }
         
         $$bd .= "</TABLE></FORM>";
