@@ -125,13 +125,13 @@ body<=
                                       'selected' => '#000000',
                                       'onchange' => "updatePreview(); return true;",
                                       'onfocus' => "setFriend($i);" },
-                                      map { $_->{'code'}, $_->{'item'} } @color );
+                                      map { lc($_->{'code'}), $_->{'item'} } @color );
             $ret .= "</td><td>";
             $ret .= LJ::html_select({ 'name' => "editfriend_add_${i}_bg",
                                       'selected' => '#ffffff',
                                       'onchange' => "updatePreview(); return true;",
                                       'onfocus' => "setFriend($i);" },
-                                      map { $_->{'code'}, $_->{'item'} } @color );
+                                      map { lc($_->{'code'}), $_->{'item'} } @color );
 
             $ret .= "</td></tr>\n";
         }
