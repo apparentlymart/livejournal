@@ -1,6 +1,5 @@
 <?_code
 {
-    return "<?badinput?>" unless LJ::text_in(\%GET);
     my $wav;
 
     eval { $wav = LJ::Captcha::get_audio_data($GET{capid}, $GET{anum}); };

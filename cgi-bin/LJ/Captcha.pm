@@ -140,6 +140,7 @@ sub get_id
 sub get_visual_data
 {
     my ( $capid, $anum ) = @_;
+    $capid = int($capid);
 
     my (
         $dbr,                   # Database handle (reader)
@@ -174,6 +175,7 @@ sub get_visual_data
 sub get_audio_data
 {
     my ( $capid, $anum ) = @_;
+    $capid = int($capid);
 
     my (
         $dbr,                   # Database handle (reader)
