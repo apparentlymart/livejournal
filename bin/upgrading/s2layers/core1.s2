@@ -933,7 +933,7 @@ function lang_map_plural (int n) : int {
     return 1;             # plural
 }
 
-function lang_page_of_pages (int pg, int pgs) : string {
+function lang_page_of_pages (int pg, int pgs) [notags] : string {
     return "Page $pg of $pgs";
 }
 
@@ -947,23 +947,15 @@ function print_stylesheet ()
   "Prints a stylesheet, the URL of which can be referenced by [member[Page.stylesheet_url]].  This is another S2 entry point, in addition to [method[Page.print()]]." {
 }
 
-function htmlattr(string name, string value) : string 
-"If the value isn't blank, return in HTML attribute format with a leading space.  HTML of name is not escaped."
-{
-    if ($value != "") {
-        $name = $name->lower();
-        return " $name=\"" + ehtml($value )+ "\"";
-    } else {
-        return "";
-    }
-}
-function htmlattr(string name, int value) : string {
-    return htmlattr($name, string($value));
-}
+function builtin htmlattr(string name, string value) : string
+"If the value isn't blank, return in HTML attribute format with a leading space.  HTML of name is not escaped.";
+
+function builtin htmlattr(string name, int value) : string
+"If the value isn't blank, return in HTML attribute format with a leading space.  HTML of name is not escaped.";
 
 ### Language
 
-function lang_ordinal(int num) : string
+function lang_ordinal(int num) [notags] : string
 "Make an ordinal number from a cardinal number"
 {
     if ($num % 100 >= 4 and $num % 100 <= 20) { return $num+"th"; }
@@ -973,14 +965,14 @@ function lang_ordinal(int num) : string
     return $num+"th";
 }
 
-function lang_ordinal(string num) : string 
+function lang_ordinal(string num) [notags] : string 
 "Make an ordinal number from a cardinal number"
 {
     return lang_ordinal(int($num)); 
 }
 
 
-function lang_viewname(string viewid) : string 
+function lang_viewname(string viewid) [notags] : string 
 "Get some words representing a view"
 {
     if ($viewid == "recent") { return $*text_view_recent; }
@@ -999,7 +991,7 @@ function lang_viewname(string viewid) : string
 
 ### Image Manipulation
 
-function Image::as_string(string{} opts) : string {
+function Image::as_string(string{} opts) [fixed] : string {
     var string img = "";
     if ($opts{"href"} != "") { $img = $img + "<a href=\"" + eurl($opts{"href"}) + "\" $opts{"a_attr"}>"; }
     $img = $img + $this->as_string();
@@ -1008,7 +1000,7 @@ function Image::as_string(string{} opts) : string {
     return $img;
 }
 
-function Image::as_string(string alttext) : string {
+function Image::as_string(string alttext) [fixed] : string {
     var string img = """<img src="$.url" """;
     $img = $img + htmlattr("height", $.height); 
     $img = $img + htmlattr("width", $.width);
@@ -1018,28 +1010,30 @@ function Image::as_string(string alttext) : string {
     return $img;
 }
 
-function Image::as_string() : string {
-    var string img = """<img src="$.url" """;
-    $img = $img + htmlattr("height", $.height); 
-    $img = $img + htmlattr("width", $.width);
-    $img = $img + " />";
-
-    return $img;
+function Image::as_string() [fixed] : string {
+    return "<img src=\"$.url\" " +
+        htmlattr("height", $.height) +
+        htmlattr("width", $.width) + " />";
 }
 
 function Image::print (string{} opts)
 {
-    print $this->as_string($opts);
+    print safe $this->as_string($opts);
 }
 
 function Image::print (string alttext)
 {
-    print $this->as_string($alttext);
+    print "<img src=\"$.url\" " +
+        htmlattr("alt", $alttext) +
+        htmlattr("height", $.height) +
+        htmlattr("width", $.width) + " />";
 }
 
 function Image::print
 {
-    print $this->as_string();
+    print "<img src=\"$.url\" " +
+        htmlattr("height", $.height) +
+        htmlattr("width", $.width) + " />";
 }
 
 function userinfoicon(UserLite user) : Image {
@@ -1059,14 +1053,14 @@ function userinfoicon(UserLite user) : Image {
 
 ### UserLite functions
 
-function UserLite::base_url() : string {
+function UserLite::base_url() [fixed] : string {
     if ($.journal_type == "C") {
         return "$*SITEROOT/community/$.username";
     }
     return "$*SITEROOT/users/$.username";
 }
 
-function UserLite::as_string() : string {
+function UserLite::as_string() [fixed] : string {
     var Image uiimg = userinfoicon($this);
     var string dir = $.journal_type == "C" ? "community" : "users";
     return "<span class='ljuser' style='white-space:nowrap;'><a href='$*SITEROOT/userinfo.bml?user=$.username'><img src='$uiimg.url' alt='userinfo' width='$uiimg.width' height='$uiimg.height' style='vertical-align:bottom;border:0;' /></a><a href='$*SITEROOT/$dir/$.username/'><b>$.username</b></a></span>";
@@ -1091,7 +1085,7 @@ function Friend::print() {
 
 ### Generic Page Functions
 
-function Page::view_title() : string {
+function Page::view_title() [notags] : string {
     return lang_viewname($.view);
 }
 function FriendsPage::view_title() : string {
@@ -1107,7 +1101,7 @@ function DayPage::view_title : string {
 function YearPage::view_title() : string {
     return string($.year);
 }
-function Page::title() : string {
+function Page::title() [notags] : string {
     var string title = $.global_title;
     if ($title == "") {
         $title = $.journal.name;
@@ -1117,9 +1111,11 @@ function Page::title() : string {
     }
     return $title;
 }
+
 function server_sig() {
     """Powered by <a href="$*SITEROOT/">$*SITENAME</a>""";
 }
+
 function Page::print() {
     """<html>\n<head>\n<title>""";
     print $this->title();
@@ -1374,12 +1370,12 @@ function DayPage::print_body() {
 
         "</div>";
     } else {
-        "<p>"+ehtml($*text_noentries_day)+"</p>";
+        "<p>$*text_noentries_day</p>";
     }
 
     "<div class=\"skiplinks\">\n";
-    "<a href=\""+ehtml($.prev_url)+"\">"+ehtml($*text_day_prev)+"</a> | ";
-    "<a href=\""+ehtml($.next_url)+"\">"+ehtml($*text_day_next)+"</a>\n</div>";
+    "<a href=\"$.prev_url\">$*text_day_prev</a> | ";
+    "<a href=\"$.next_url\">$*text_day_next</a>\n</div>";
 
 }
 
@@ -1394,7 +1390,7 @@ function CommentInfo::print_readlink {
 }
 function CommentInfo::print_postlink() {
     var Page p = get_page();
-    "<a href=\"$.post_url\">"+ehtml($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
+    "<a href=\"$.post_url\">"+($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment)+"</a>";
 }
 function CommentInfo::print() {
     if (not $.enabled) { return; }
@@ -1499,7 +1495,7 @@ function EntryPage::print_comment_partial (Comment c) {
 function ItemRange::print() {
     if ($.all_subitems_displayed) { return; }
     print "<table align='center' border='1' cellpadding='3'><tr><td align='center'><b>" +
-        ehtml(lang_page_of_pages($.current, $.total)) + "</b><br />";
+        lang_page_of_pages($.current, $.total) + "</b><br />";
     foreach var int i (1..$.total) {
         if ($i == $.current) { "<b>[$i]</b> "; }
         else { 

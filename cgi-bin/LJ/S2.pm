@@ -60,7 +60,7 @@ sub make_journal
         return;
     }
     
-    escape_context_props($ctx);
+    escape_context_props($ctx->[S2::PROPS]);
     
     $opts->{'ctx'} = $ctx;
 
@@ -533,10 +533,25 @@ sub load_layer
 
 sub escape_context_props
 {
-    my $ctx = shift;
-    while (my ($k, $v) = each %{$ctx->[S2::PROPS]}) {
-        $v =~ s/</&lt;/g;
-        $v =~ s/>/&gt;/g;
+    my $obj = shift;
+    if (ref $obj eq "HASH") {
+        while (my ($k, $v) = each %{$obj}) {
+            if (ref $v) {
+                escape_context_props($v); 
+            } else {
+                $obj->{$k} =~ s/</&lt;/g;
+                $obj->{$k} =~ s/>/&gt;/g;
+            }
+        }
+    } elsif (ref $obj eq "ARRAY") {
+        foreach (@$obj) {
+            if (ref) {
+                escape_context_props($_);
+            } else {
+                s/</&lt;/g;
+                s/>/&gt;/g;
+            }
+        }
     }
 }
 
@@ -1206,6 +1221,15 @@ sub get_url
     $view = "calendar" if $view eq "archive";
     $view = "" if $view eq "recent";
     return "$LJ::SITEROOT/$dir/$user/$view";
+}
+
+sub htmlattr
+{
+    my ($ctx, $name, $value) = @_;
+    return "" if $value eq "";
+    $name = lc($name);
+    return "" if $name =~ /[^a-z]/;
+    return " $name=\"" . LJ::ehtml($value ). "\"";
 }
 
 sub rand
