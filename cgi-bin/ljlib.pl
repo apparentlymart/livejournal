@@ -4161,7 +4161,7 @@ sub load_userpics
     &nodb;
     my ($upics, $idlist) = @_;
 
-    return undef unless ref $idlist eq 'ARRAY';
+    return undef unless ref $idlist eq 'ARRAY' && $idlist->[0];
 
     # deal with the old calling convention, just an array ref of picids eg. [7, 4, 6, 2]
     if (! ref $idlist->[0] && $idlist->[0]) { # assume we have an old style caller
