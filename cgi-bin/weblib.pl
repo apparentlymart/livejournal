@@ -999,7 +999,11 @@ RTE
     }));
     my $jnorich = LJ::ejs(BML::fill_template("de", { DATA => BML::ml('entryform.htmlokay.norich') }));
 
-    unless ($opts->{'richtext_on'} || $opts->{'disabled_save'} || ($opts->{'did_spellcheck'} && $opts->{'richtext_on'})) {
+    unless ( $opts->{'richtext_on'}   ||
+             $opts->{'disabled_save'} ||
+             ! $opts->{'richtext'}    ||
+             ( $opts->{'did_spellcheck'} && $opts->{'richtext_on'} )
+           ) {
         $out .= <<RTE;
         <script language='JavaScript' type='text/javascript'>
             <!--
