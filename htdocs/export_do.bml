@@ -80,9 +80,10 @@
         }
         if ($FORM{'format'} eq "xml") {
             $opts->{'format'} = "xml";
-            $r->content_type("text/xml; charset='$encoding'");
+            my $lenc = lc($encoding);
+            $r->content_type("text/xml; charset=$lenc");
             $r->send_http_header();
-            $r->print("<?xml version=\"1.0\" encoding='$encoding'?>\n");
+            $r->print("<?xml version=\"1.0\" encoding='$lenc'?>\n");
             $r->print("<livejournal>\n");
         }
 
