@@ -55,11 +55,28 @@ body<=
     my $userlay = {};   # TODO: add API call to fetch these
     my %style = LJ::S2::get_style($u->{'s2_style'});
 
+    my $get_lang = sub {
+        my $styleid = shift;
+        foreach ($userlay, $pub) {
+            return $_->{$styleid}->{'langcode'} if
+                $_->{$styleid} && $_->{$styleid}->{'langcode'};
+        }
+        return undef;
+    };
+    my $langcode = $get_lang->($style{'i18n'}) || $get_lang->($style{'i18nc'});
+
     if ($POST{'save:stylesys'}) {
         my $num = $POST{'stylesys'} == 2 ? 2 : 1;
         LJ::set_userprop($dbh, $u, "stylesys", $num);
         return BML::redirect("/customize/?journal=$u->{'user'}");
     }
+
+    my $implicit_style_create = sub {
+        unless ($u->{'s2_style'}) {
+            $u->{'s2_style'} = LJ::S2::create_style($u, "wizard");
+            LJ::set_userprop($dbh, $u, "s2_style", $u->{'s2_style'});
+        }
+    };
 
     if ($POST{'save:layout'}) {
         my $layid = $POST{'layoutid'};
@@ -67,17 +84,26 @@ body<=
         my $lay = $pub->{$layid} || $userlay->{$layid};
         return "Error: not your layout" unless $lay;
         my $coreid = $lay->{'b2lid'} or return "No core parent?";
+        $implicit_style_create->();
         LJ::S2::delete_layer($style{'user'});
         $style{'user'} = $style{'theme'} = $style{'i18nc'} = $style{'i18n'} = 0;
         $style{'layout'} = $layid;
         $style{'core'} = $coreid;
-
-        unless ($u->{'s2_style'}) {
-            $u->{'s2_style'} = LJ::S2::create_style($u, "wizard");
-            LJ::set_userprop($dbh, $u, "s2_style", $u->{'s2_style'});
-        }
-
         LJ::S2::set_style_layers($u, $u->{'s2_style'}, %style);
+        return BML::redirect("/customize/?journal=$u->{'user'}");
+    }
+
+    if ($POST{'save:theme'}) {
+        my $themeid = $POST{'themeid'}+0;
+        my $lay = $pub->{$themeid} || $userlay->{$themeid};
+        return "Error: not your theme" if $themeid && ! $lay;
+        $implicit_style_create->();
+        $style{'theme'} = $themeid;
+        LJ::S2::set_style_layers($u, $u->{'s2_style'}, %style);
+
+        # TODO: conflict resolution.  check if there
+        # exists a user layer, and ask user if they want to 
+        # override it using the theme exclusively.
         return BML::redirect("/customize/?journal=$u->{'user'}");
     }
 
@@ -113,9 +139,29 @@ body<=
     $ret .= "<?h1 Step 2: Customize Layout h1?>";
     $ret .= "<?p The following settings are layout-dependent. p?>";
 
+    # langauge
+    my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
     $ret .= "<?h2 Language h2?><?p The following languages are fully or partially supported by this layout. p?>";
-    $ret .= "<?h2 Theme h2?><?p Choose from the following optional themes for this layout. p?>";
+    $ret .= "<blockquote>";
+    $ret .= LJ::html_select({ 'name' => 'langcode',
+                              'selected' => $langcode, },
+                            @langs);
+    $ret .= " <input type='submit' name='save:langcode' value='Change'>";
+    $ret .= "</blockquote>";
     
+    # theme
+    my @themes = LJ::S2::get_layout_themes([$pub, $userlay], $style{'layout'});
+    $ret .= "<?h2 Theme h2?><?p Choose from the following optional themes for this layout. p?>";
+    $ret .= "<blockquote>";
+    $ret .= LJ::html_select({ 'name' => 'themeid',
+                              'selected' => $style{'theme'}, },
+                            '0' => '(Layout Default)',
+                            @themes);
+    $ret .= " <input type='submit' name='save:theme' value='Change'> (<a href=\"preview.bml?show=themes&amp;layid=$style{'layout'}\">previews</a>)";
+    $ret .= "</blockquote>";
+    
+    # 
+
     #use Data::Dumper;
     #$ret .= "<pre>" . Dumper($pub) . "</pre>";
     

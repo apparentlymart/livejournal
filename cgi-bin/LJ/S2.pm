@@ -142,7 +142,7 @@ sub get_public_layers
     my %existing;  # uniq -> id
     my $sth = $dbr->prepare("SELECT i.infokey, i.value, l.s2lid, l.b2lid, l.type ".
                             "FROM s2layers l, s2info i ".
-                            "WHERE l.userid=$sysid AND l.s2lid=i.s2lid AND i.infokey IN ('redist_uniq', 'name')");
+                            "WHERE l.userid=$sysid AND l.s2lid=i.s2lid AND i.infokey IN ('redist_uniq', 'name', 'langcode')");
     $sth->execute;
     die $dbr->errstr if $dbr->err;
     while (my ($key, $val, $id, $bid, $type) = $sth->fetchrow_array) {
@@ -152,8 +152,8 @@ sub get_public_layers
         if ($key eq "redist_uniq") {
             $existing{$id}->{'uniq'} = $val;
             $existing{$val} = $existing{$id};
-        } elsif ($key eq "name") {
-            $existing{$id}->{'name'} = $val;
+        } elsif ($key eq "name" || $key eq "langcode") {
+            $existing{$id}->{$key} = $val;
         }
     }
 
@@ -631,6 +631,38 @@ sub load_layer_info
         $outhash->{$id}->{$k} = $v;
     }
     return 1;
+}
+
+sub get_layout_langs
+{
+    my $src = shift;
+    my $layid = shift;
+    my %lang;
+    foreach (keys %$src) {
+        next unless /^\d+$/;
+        my $v = $src->{$_};
+        next unless $v->{'langcode'};
+        $lang{$v->{'langcode'}} = $src->{$_} 
+            if ($v->{'type'} eq "i18nc" ||
+                ($v->{'type'} eq "i18n" && $layid && $v->{'b2lid'} == $layid));
+    }
+    return map { $_, $lang{$_}->{'name'} } sort keys %lang;
+}
+
+sub get_layout_themes
+{
+    my $src = shift; $src = [ $src ] unless ref $src eq "ARRAY";
+    my $layid = shift;
+    my %theme;
+    foreach my $src (@$src) {
+        foreach (keys %$src) {
+            next unless /^\d+$/;
+            my $v = $src->{$_};
+            $theme{$_} = $v->{'name'} if 
+                ($v->{'type'} eq "theme" && $layid && $v->{'b2lid'} == $layid);
+        }
+    }
+    return map { $_, $theme{$_} } sort keys %theme;
 }
 
 ## S2 object constructors
