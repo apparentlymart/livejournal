@@ -5337,7 +5337,7 @@ sub cmd_buffer_add
         $max += $ab eq 'a' ? ($max & 1 ? 2 : 1) : ($max & 1 ? 1 : 2);
 
         # insert command
-        $db->do('INSERT INTO cmdbuffer (cbid, journalid, cmd, instime, args) ' .
+        $db->do('INSERT INTO cmdbuffer (cbid, journalid, instime, cmd, args) ' .
                 'VALUES (?, ?, NOW(), ?, ?)', undef,
                 $max, $journalid, $cmd, $arg_str);
 
