@@ -1112,7 +1112,7 @@ MOODS
                                               'value' => $opts->{'prop_current_mood'}, 'onchange' => "mood_preview()",
                                               'size' => '15', 'maxlength' => '30',
                                               'tabindex' => $tabindex->() });
-                my $mood_preview = LJ::ejs("<p id='mood_preview'><img src='' alt='' id='mood_image_preview' /> <span id='mood_text_preview'></span></p>");
+                my $mood_preview = LJ::ejs("<p id='mood_preview'><img src='javascript://' alt='' id='mood_image_preview' /> <span id='mood_text_preview'></span></p>");
                 $out .= "<script type='text/javascript' language='JavaScript'>\n<!--\ndocument.write(\"$mood_preview\");\n//-->\n</script>" if $remote;
                 $out .= "</td></tr>";
             }
