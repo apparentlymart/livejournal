@@ -631,13 +631,13 @@
 
      # convert poll results
      $changed = 0;
-     $sth = $dbr->prepare("SELECT pollid, pollqid, value FROM pollresult WHERE pollid IN ($pids)");
+     $sth = $dbr->prepare("SELECT pollid, pollqid, userid, value FROM pollresult WHERE pollid IN ($pids)");
      $sth->execute;
-     while (my ($pid, $pqid, $res) = $sth->fetchrow_array) {
+     while (my ($pid, $pqid, $userid, $res) = $sth->fetchrow_array) {
          next if LJ::is_utf8($res);
          convert(\$res, $encid);
          my $qres = $dbh->quote($res);
-         $dbh->do("UPDATE pollresult SET value=$qres WHERE pollid=$pid AND pollqid=$pqid");
+         $dbh->do("UPDATE pollresult SET value=$qres WHERE pollid=$pid AND pollqid=$pqid AND userid=$userid");
          $changed = 1;
      }
      if ($changed) {
