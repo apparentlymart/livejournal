@@ -28,6 +28,7 @@ exit 1 unless GetOptions('delete' => \$opt_del,
 my $optv = $opt_verbose;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljcmdbuffer.pl";
 
 my $dbh = LJ::get_dbh({raw=>1}, "master");
 die "No master db available.\n" unless $dbh;
@@ -409,7 +410,7 @@ elsif ($sclust > 0)
     while (my $cmd = $dbo->selectrow_array("SELECT cmd FROM cmdbuffer WHERE journalid=$userid")) {
 	my $dbcm = LJ::get_cluster_master($sclust);
         print "Flushing cmdbuffer for cmd: $cmd\n" if $optv > 1;
-        LJ::cmd_buffer_flush($dbh, $dbcm, $cmd, $userid);
+        LJ::Cmdbuffer::flush($dbh, $dbcm, $cmd, $userid);
     }
 
     my $pri_key = {

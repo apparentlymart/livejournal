@@ -8,6 +8,7 @@ use strict;
 use Getopt::Long
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljcmdbuffer.pl";
 
 my $opt_foreground;
 my $opt_debug;
@@ -22,11 +23,6 @@ BEGIN {
 }
 
 my $DELAY = $LJ::QBUFFERD_DELAY || 15;
-
-# HACK: there's a memory leak somewhere in the code path that flushes 'dirty' jobs (SOAP?  LWP?)
-#       that causes those processes to grow out of control.  So we respawn them after a certain
-#       number of jobs have been processed.
-my $DIRTY_MAX = 250;
 
 my $pidfile = $LJ::QBUFFERD_PIDFILE || "$ENV{'LJHOME'}/var/qbufferd.pid";
 my $pid;
@@ -209,35 +205,38 @@ while (LJ::start_request())
 
             print "  Starting $cmd...\n" if $opt_debug;
             unless ($started{$cmd}++) {
-                LJ::cmd_buffer_flush($dbh, $db, "$cmd:start");
+                LJ::Cmdbuffer::flush($dbh, $db, "$cmd:start");
             }
-            LJ::cmd_buffer_flush($dbh, $db, $cmd);
+            LJ::Cmdbuffer::flush($dbh, $db, $cmd);
             print "  Finished $cmd.\n" if $opt_debug;
 
-            # kill off children handling "dirty" after $dirty_max "dirty" jobs are handled
-            if ($cmd eq "dirty") {
-                my $size = 0;
-                if (open(S, "/proc/$$/status")) {
-                    my $file;
-                    { local $/ = undef; $file = <S>; }
-                    $size = $1 if $file =~ /VmSize:.+?(\d+)/;
-                    close S;
-                }
-
-                if ($size > 50_000 || $started{dirty} >= $DIRTY_MAX) {
-                    # trigger reload of current child process
-                    print "'dirty' job suicide.  (size=$size, rpcs=$started{dirty})\n"
-                        if $opt_debug;
-                    exit 0;
-                }
+            # monitor process size and job counts to suicide if necessary
+            my $size = 0;
+            if (open(S, "/proc/$$/status")) {
+                my $file;
+                { local $/ = undef; $file = <S>; }
+                $size = $1 if $file =~ /VmSize:.+?(\d+)/;
+                close S;
             }
 
+            # is it our time to go?
+            my $cinfo = $LJ::Cmdbuffer::cmds{$cmd};
+            if ($cinfo->{kill_job_ct} && $started{$cmd} >= $cinfo->{kill_job_ct} ||
+                $cinfo->{kill_mem_size} && $size >= $cinfo->{kill_mem_size})
+            {
+
+                # trigger reload of current child process
+                print "Job suicide: $cmd. (size=$size, rpcs=" . ($started{dirty}+0) . ")\n"
+                    if $opt_debug;
+
+                exit 0;
+            }
         }
     }
 
     # run the end hook for all commands we've run
     foreach my $cmd (keys %started) {
-        LJ::cmd_buffer_flush($dbh, undef, "$cmd:finish");
+        LJ::Cmdbuffer::flush($dbh, undef, "$cmd:finish");
     }
     
 

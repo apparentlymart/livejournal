@@ -199,7 +199,7 @@ print "Moving away from cluster $sclust\n" if $optv;
 
 while (my $cmd = $dboa->selectrow_array("SELECT cmd FROM cmdbuffer WHERE journalid=$userid")) {
     print "Flushing cmdbuffer for cmd: $cmd\n" if $optv > 1;
-    LJ::cmd_buffer_flush($dbh, $dboa, $cmd, $userid);
+    LJ::Cmdbuffer::flush($dbh, $dboa, $cmd, $userid);
 }
 
 
