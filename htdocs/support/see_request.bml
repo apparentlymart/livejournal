@@ -218,7 +218,9 @@ body<=
                 "(unable to connect to cluster, some data temporarily unavailable)</span><br />";
     }
 
-    if ($u->readonly) {
+    # check isu because requests don't always come from users and sometimes we
+    # fake the user hash
+    if (LJ::isu($u) && $u->readonly) {
         $ret .= "<span style='color: red; font-weight: bold;'>" .
             "(this user is currently in read-only mode)</span><br />";
     }
