@@ -290,6 +290,13 @@ sub html_hidden
 sub html_submit
 {
     my ($name, $val, $opts) = @_;
+
+    # if one argument, assume (undef, $val)
+    if (@_ == 1) {
+        $val = $name;
+        $name = undef;
+    }
+
     my ($eopts, $disabled, $raw);
     my $type = 'submit';
 
