@@ -1,4 +1,4 @@
-<sect1>
+<chapter>
 <?dbhtml filename="programming-guidelines.html"?>
 <title>Programming Guidelines</title>
 
@@ -32,7 +32,7 @@ General
 </title>
 <listitem><para>
 BML pages shouldn't interface with the database much.  Use the
-LJ::* API & the protocol handler.
+LJ::* API &amp; the protocol handler.
 </para></listitem>
 <listitem><para>
 always use the <function>LJ::</function> functions that take an explicit database
@@ -74,7 +74,7 @@ to.  that's ugly.
 </para></listitem>
 <listitem><para>
 tab is a formatting command, not a character.  (TODO: add note
-about save hooks for emacs & vi) there should be spaces in the
+about save hooks for emacs &amp; vi) there should be spaces in the
 files, not tab characters
 </para></listitem>
 </itemizedlist>
@@ -87,7 +87,7 @@ files, not tab characters
 check your db index usage... mysql's "EXPLAIN" is your friend.
 </para></listitem>
 <listitem><para>
-between LOCK TABLES & UNLOCK TABLES, never call a subroutine.
+between LOCK TABLES &amp; UNLOCK TABLES, never call a subroutine.
 </para></listitem>
 <listitem><para>
 check the DB error code after an SQL statement.  just because
@@ -100,7 +100,7 @@ deal with them.
 preferred way to break up a long SQL query:
 <programlisting>
   $sth = $dbh->prepare("SELECT cola, colb, colc, cold FROM foo ".
-                       "WHERE colb<>cola AND colc=22");
+                       "WHERE colb&lt;&gt;cola AND colc=22");
 </programlisting>
 </para></listitem>
 <listitem><para>
@@ -201,4 +201,4 @@ the reader.
 </para></listitem>
 </itemizedlist>
 
-</sect1>
+</chapter>

@@ -1,9 +1,41 @@
+&chIntro;
+
+<part>
+<title>About LiveJournal</title>
 &chAbout;
+</part>
+
+<part>
+<title>Using LiveJournal</title>
 &chUsingLJ;
 &chAdvanced;
+</part>
+
+<part>
+<title>Client/Server Protocol</title>
+<chapter>
+<title>foo</title>
+<para>hi</para>
+</chapter>
+</part>
+
+<part>
+<title>Running a LiveJournal Site</title>
 &chInstall;
+
+</part>
+
+<part>
+<title>LiveJournal Server Internals</title>
+&chProgGuide;
 &chInternals;
 &chSchema;
 &chSchemaRef;
+</part>
+
+<part>
+<title>Installation-Specific Notes</title>
 &chSite;
+</part>
+
 

@@ -17,3 +17,8 @@ nsgmls -s -wxml /usr/lib/sgml/declaration/xml.dcl book.xml
 # make HTML:
 jade -t sgml -d /usr/lib/sgml/stylesheet/dsssl/docbook/nwalsh/html/docbook.dsl /usr/lib/sgml/declaration/xml.dcl book.xml
 
+# make HTML using docbook-xsl-stylesheets:
+
+~/doc/raw$ ln -s /usr/share/sgml/docbook/ docbook
+~/doc/raw$ java -cp /usr/share/java/saxon.jar com.icl.saxon.StyleSheet book.xml /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl > foo.html
+
