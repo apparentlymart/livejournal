@@ -31,16 +31,16 @@ sub handler
     $r->print("fotobilder-interface-version: 1\n");
 
     my %POST = $r->content;
-    return $interface->{$cmd}->($r, %POST) || OK;
+    return $interface->{$cmd}->($r, \%POST) || OK;
 }
 
 # Is there a current LJ session?
 # If so, return info.
 sub checksession
 {
-    my ($r, %POST) = @_;
+    my ($r, $POST) = @_;
     BML::reset_cookies();
-    $LJ::_XFER_REMOTE_IP = $POST{'remote_ip'};
+    $LJ::_XFER_REMOTE_IP = $POST->{'remote_ip'};
     my $remote = LJ::get_remote();
     return OK unless $remote;
 
@@ -63,10 +63,10 @@ sub checksession
 # Pregenerate a list of challenge/responses.
 sub makechals
 {
-    my ($r, %POST) = @_;
-    my $count = int($POST{'count'}) || 1;
+    my ($r, $POST) = @_;
+    my $count = int($POST->{'count'}) || 1;
     if ($count > 50) { $count = 50; }
-    my $u = LJ::load_user($POST{'user'});
+    my $u = LJ::load_user($POST->{'user'});
     return OK unless $u;
 
     $r->print("count: $count\n");
@@ -81,8 +81,8 @@ sub makechals
 # Does the user exist?
 sub user_exists
 {
-    my ($r, %POST) = @_;
-    my $u = LJ::load_user($POST{'user'});
+    my ($r, $POST) = @_;
+    my $u = LJ::load_user($POST->{'user'});
     if ($u) {
         $r->print("exists: 1\n");
         $r->print("can_upload: " . (can_upload($u)) . "\n");
@@ -102,11 +102,11 @@ sub can_upload
 # 'used' - FB disk usage in bytes
 sub set_quota
 {
-    my ($r, %POST) = @_;
-    my $u = LJ::load_user($POST{'user'});
-    return OK unless $u && defined $POST{'used'};
+    my ($r, $POST) = @_;
+    my $u = LJ::load_user($POST->{'user'});
+    return OK unless $u && defined $POST->{'used'};
 
-    my $used = $POST{'used'} << 10;  # Kb -> bytes
+    my $used = $POST->{'used'} << 10;  # Kb -> bytes
 
     my $dbcm = LJ::get_cluster_master($u);
     return OK unless $dbcm;
@@ -122,8 +122,9 @@ sub set_quota
 
 sub get_auth_challenge
 {
-    my ($r, %POST) = @_;
-    $r->print("chal: " . LJ::challenge_generate($POST{'goodfor'}) . "\n");
+    my ($r, $POST) = @_;
+    my $goodfor = $POST->{'goodfor'} + 0;
+    $r->print("chal: " . LJ::challenge_generate($goodfor) . "\n");
     return OK;
 }
 
