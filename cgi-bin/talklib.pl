@@ -613,6 +613,7 @@ sub load_comments
     }
 
     my $page_size = $LJ::TALK_PAGE_SIZE || 25;
+    my $max_subjects = $LJ::TALK_MAX_SUBJECTS || 200;
     my $threading_point = $LJ::TALK_THREAD_POINT || 50;
 
     # we let the page size initially get bigger than normal for awhile,
@@ -653,7 +654,7 @@ sub load_comments
     # and deeper until we've hit the page size.  if too many loaded,
     # just mark that we'll load the subjects;
     my @check_for_children = @posts_to_load;
-    my @subjects_to_load;
+    my (@subjects_to_load, @subjects_ignored);
     while (@check_for_children) {
         my $cfc = shift @check_for_children;
         next unless defined $children{$cfc};
@@ -661,7 +662,11 @@ sub load_comments
             if (@posts_to_load < $page_size) {
                 push @posts_to_load, $child;
             } else {
-                push @subjects_to_load, $child;
+                if (@subjects_to_load < $max_subjects) {
+                    push @subjects_to_load, $child;
+                } else {
+                    push @subjects_ignored, $child;
+                }
             }
             push @check_for_children, $child;
         }
@@ -688,6 +693,11 @@ sub load_comments
     foreach my $talkid (@subjects_to_load) {
         next unless $posts->{$talkid}->{'_show'};
         $posts->{$talkid}->{'subject'} = $subjects_loaded->{$talkid}->[0];
+        $users_to_load{$posts->{$talkid}->{'posterid'}} ||= 0.5;  # only care about username
+    }
+    foreach my $talkid (@subjects_ignored) {
+        next unless $posts->{$talkid}->{'_show'};
+        $posts->{$talkid}->{'subject'} = "...";
         $users_to_load{$posts->{$talkid}->{'posterid'}} ||= 0.5;  # only care about username
     }
 
