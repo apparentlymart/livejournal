@@ -211,6 +211,8 @@
 
 /community/moderate.bml.rejected.text=The entry has been rejected.
 
+/community/moderate.bml.title=Community Moderation
+
 /community/search.bml.button.clear=Clear Form
 
 /community/search.bml.button.search=Search!
