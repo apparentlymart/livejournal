@@ -1294,7 +1294,7 @@ sub create_view_rss
         'itemids' => \@itemids,
     });
 
-    $opts->{'contenttype'} = 'text/xml';
+    $opts->{'contenttype'} = 'text/xml; charset=utf-8';
 
     my $logtext = LJ::get_logtext($dbs, @itemids);
 
