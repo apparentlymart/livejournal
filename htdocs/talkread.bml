@@ -510,7 +510,11 @@ body<=
         } elsif ($userpost && $user{$userpost}->{'statusvis'} eq "S") {
             $$ret .= "<p><a name='t$dtid'></a><table><tr>";
             $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-            $$ret .= "<td>$ML{'.replysuspended'}</td></tr></table>\n";
+            $$ret .= "<td>$ML{'.replysuspended'}";
+            if (LJ::Talk::can_delete($dbs, $remote, $u, $up, $userpost)) {
+                $$ret .= " <a href='delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+            }
+            $$ret .= "</td></tr></table>\n";
         } else {
             if ($userpost) {
                 $user = LJ::ljuser($userpost);
