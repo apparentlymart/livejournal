@@ -153,8 +153,36 @@ sub trans
 
     LJ::start_request();
     LJ::procnotify_check();
-    foreach (@req_hosts) {
-        return FORBIDDEN if LJ::sysban_check('ip', $_);
+
+    # handle uniq cookies
+    if ($LJ::UNIQ_COOKIES) {
+
+        # if cookie exists, check for sysban
+        my $uniq;
+        if (Apache->header_in("Cookie") =~ /ljuniq\s*=\s*([a-zA-Z0-9]+)/) {
+            my $uniq = $1;
+            $r->notes("uniq" => $uniq);
+            return FORBIDDEN if LJ::sysban_check('uniq', $uniq);
+
+        # if no cookie, create one
+        } else {
+            my $uniq = LJ::rand_chars(15);
+            $r->notes("uniq" => $uniq);
+
+            # set uniq cookies for all cookie_domains
+            my @domains = ref $LJ::COOKIE_DOMAIN ? @$LJ::COOKIE_DOMAIN : ($LJ::COOKIE_DOMAIN);
+            foreach my $dom (@domains) {
+                $r->header_out("Set-Cookie" =>
+                               "ljuniq=$uniq; " .
+                               "expires=" . LJ::time_to_cookie(time() + 60*60*24*365) . "; " .
+                               "domain=$dom; path=/");
+            }
+        }
+    }
+
+    # check for sysbans on ip address
+    foreach my $ip (@req_hosts) {
+        return FORBIDDEN if LJ::sysban_check('ip', $ip);
     }
     return FORBIDDEN if LJ::run_hook("forbid_request", $r);
 
@@ -862,6 +890,7 @@ sub db_logger
                  "codepath VARCHAR(80),".  # protocol.getevents / s[12].friends / bml.update / bml.friends.index
                  "anonsess INT UNSIGNED,". 
                  "langpref VARCHAR(5),".
+                 "uniq VARCHAR(15),".
                  "method VARCHAR(10) NOT NULL,".
                  "uri VARCHAR(255) NOT NULL,".
                  "args VARCHAR(255),".
@@ -883,6 +912,7 @@ sub db_logger
         'anonsess' => $rl->notes('anonsess'),
         'langpref' => $rl->notes('langpref'),
         'clientver' => $rl->notes('clientver'),
+        'uniq' => $rl->notes('uniq'),
         'method' => $r->method,
         'uri' => $uri,
         'args' => scalar $r->args,

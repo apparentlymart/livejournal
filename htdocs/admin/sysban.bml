@@ -31,19 +31,37 @@
             "<p>You do not have the required priv to modify this type of ban.</p>"
             unless $priv_all || LJ::check_priv($remote, "sysban", $ban->{'what'});
 
-        return BML::redirect("sysban.bml") if ! $ban->{'banid'} || $ban->{'status'} eq 'expired';
+        return BML::redirect("sysban.bml")
+            if ! $ban->{'banid'} || $ban->{'status'} eq 'expired' ||
+               $ban->{'banuntil'} && LJ::mysqldate_to_time($ban->{'banuntil'}) < time();
 
         # save changes
         if ($POST{'modify_submit'}) {
             my @set = ();
 
-            # ip ban and we're going to change the value
-            if ($ban->{'what'} eq 'ip' &&
-                (($POST{'modify_value'} && $POST{'modify_value'} ne $ban->{'value'}) ||
-                 ($POST{'modify_status'} && $POST{'modify_status'} ne $ban->{'status'} &&
-                  $POST{'modify_status'} eq 'expired')) ) {
+            # if bandays changed, modify banuntil
+            if ($POST{'modify_bandays'} != $ban->{'bandays'}) {
+                if ($POST{'modify_bandays'} == 0) {
+                    $ban->{'banuntil'} = 0;
+                } else {
+                    $ban->{'banuntil'} = LJ::mysql_time( LJ::mysqldate_to_time($ban->{'bandate'})
+                                                         + 60*60*24*$POST{'modify_bandays'});
+                }
+            }
 
-                LJ::procnotify_add("unban_ip", { 'ip' => $ban->{'value'} });
+            # ip ban and we're going to change the value
+            if (($POST{'modify_value'} && $POST{'modify_value'} ne $ban->{'value'}) ||
+                $POST{'modify_bandays'} != $ban->{'bandays'} ||
+                ($POST{'modify_status'} && $POST{'modify_status'} ne $ban->{'status'} &&
+                 $POST{'modify_status'} eq 'expired')) {
+
+                if ($ban->{'what'} eq 'ip') {
+                    LJ::procnotify_add("unban_ip", { 'ip' => $ban->{'value'} });
+                }
+
+                if ($ban->{'what'} eq 'uniq') {
+                    LJ::procnotify_add("unban_uniq", { 'uniq' => $ban->{'value'} });
+                }
             }
 
             # what
@@ -53,12 +71,20 @@
             }
 
             # still ip ban and we are going to change the value
-            if ($ban->{'what'} eq 'ip' &&
-                (($POST{'modify_value'} && $POST{'modify_value'} ne $ban->{'value'}) ||
-                 ($POST{'modify_status'} && $POST{'modify_status'} ne $ban->{'status'} &&
-                  $POST{'modify_status'} eq 'active')) ) {
+            if (($POST{'modify_value'} && $POST{'modify_value'} ne $ban->{'value'}) ||
+                $POST{'modify_bandays'} != $ban->{'bandays'} ||
+                ($POST{'modify_status'} && $POST{'modify_status'} ne $ban->{'status'} &&
+                 $POST{'modify_status'} eq 'active')) {
 
-                LJ::procnotify_add("ban_ip", { 'ip' => $POST{'modify_value'} });
+                if ($ban->{'what'} eq 'ip') {
+                    LJ::procnotify_add("ban_ip", { 'ip' => $POST{'modify_value'},
+                                                   'exptime' => LJ::mysqldate_to_time($ban->{'banuntil'}) });
+                }
+
+                if ($ban->{'what'} eq 'uniq') {
+                    LJ::procnotify_add("ban_uniq", { 'uniq' => $POST{'modify_value'},
+                                                     'exptime' => LJ::mysqldate_to_time($ban->{'banuntil'}) });
+                }
             }
 
             # value
@@ -84,11 +110,8 @@
                 $ban->{'bandays'} = $POST{'modify_bandays'};
 
                 if ($POST{'modify_bandays'} == 0) {
-                    $ban->{'banuntil'} = 0;
                     push @set, "banuntil=NULL";
                 } else {
-                    $ban->{'banuntil'} = LJ::mysql_time( LJ::mysqldate_to_time($ban->{'bandate'})
-                                                         + 60*60*24*$POST{'modify_bandays'});
                     push @set, "banuntil=" . $dbh->quote($ban->{'banuntil'});
                 }
             }
@@ -164,9 +187,17 @@
                  undef, $POST{'create_what'}, $POST{'create_value'}, $POST{'create_note'});
         return $dbh->errstr if $dbh->err;
 
-        # special case: modifying ip ban
+        # special case: creating ip/uniq ban
         if ($POST{'create_what'} eq 'ip') {
-            LJ::procnotify_add("ban_ip", { 'ip' => $POST{'create_value'} });
+            LJ::procnotify_add("ban_ip", { 'ip' => $POST{'create_value'},
+                                           'exptime' => LJ::mysqldate_to_time(time() +
+                                                        60*60*24*$POST{'create_bandays'}) });
+        }
+
+        if ($POST{'create_what'} eq 'uniq') {
+            LJ::procnotify_add("ban_uniq", { 'uniq' => $POST{'create_value'},
+                                             'exptime' => LJ::mysqldate_to_time(time() +
+                                                          60*60*24*$POST{'create_bandays'}) });
         }
 
         # log in statushistory
@@ -218,7 +249,7 @@
 
     # column headings w/ sort links
     $ret .= "<h2>Existing Bans</h2>\n";
-    $ret .= "Below is a list of bans that you have access to view/modify.";
+    $ret .= "Below is a list of active bans that you have access to view/modify.";
 
     $ret .= "<table style='margin-top: 20px;' border='1' cellpadding='5' width='100%'>\n<tr>";
     foreach (@cols) {
@@ -228,7 +259,9 @@
     }
     $ret .= "</tr>\n";
     
-    my $sth = $dbh->prepare("SELECT * FROM sysban WHERE status='active' ORDER BY $orderby $flow LIMIT 1000");
+    my $sth = $dbh->prepare("SELECT * FROM sysban WHERE status='active' AND " .
+                            "(banuntil > NOW() OR banuntil IS NULL) " .
+                            "ORDER BY $orderby $flow LIMIT 1000");
     $sth->execute();
     my $ct = 0;
     while (my $ban = $sth->fetchrow_hashref) {

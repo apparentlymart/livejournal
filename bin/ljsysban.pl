@@ -67,7 +67,7 @@ if ($list) {
         print "\n";
         $ct++;
     }
-    print "\tNO MATCHES\n\n" unless $ct;
+    print "\n\tNO MATCHES\n\n" unless $ct;
 
     exit;
 }
@@ -86,11 +86,16 @@ if ($add) {
     my $insertid = $dbh->{'mysql_insertid'};
 
     if ($what eq 'ip') {
-        LJ::procnotify_add($dbh, "ban_ip", { 'ip' => $value });
+        LJ::procnotify_add("ban_ip", { 'ip' => $value,
+                                       'exptime' => LJ::mysqldate_to_time($banuntil) });
+    }
+    if ($what eq 'uniq') {
+        LJ::procnotify_add("ban_uniq", { 'uniq' => $value,
+                                         'exptime' => LJ::mysqldate_to_time($banuntil) });
     }
 
     # log in statushistory
-    LJ::statushistory_add($dbh, 0, 0, 'sysban_add',
+    LJ::statushistory_add(0, 0, 'sysban_add',
                           "banid=$insertid; status=$status; " .
                           "bandate=" . ($bandate || LJ::mysql_time()) . "; " .
                           "banuntil=" . ($banuntil || 'NULL') . "; " .
@@ -110,12 +115,18 @@ if ($modify) {
 
     my @set = ();
 
-    # ip ban and we're going to change the value
-    if ($ban->{'what'} eq 'ip' &&
-        (($value && $value ne $ban->{'value'}) ||
-        ($status && $status ne $ban->{'status'} && $status eq 'expired')) ) {
+    # ip/uniq ban and we're going to change the value
+    if (($value && $value ne $ban->{'value'}) ||
+        $banuntil && $banuntil ne $ban->{'banuntil'} || 
+        ($status && $status ne $ban->{'status'} && $status eq 'expired')) {
 
-        LJ::procnotify_add($dbh, "unban_ip", { 'ip' => $ban->{'value'} || $ban->{'value'}});
+        if ($ban->{'what'} eq 'ip') {
+            LJ::procnotify_add("unban_ip", { 'ip' => $value || $ban->{'value'}});
+        }
+        
+        if ($ban->{'what'} eq 'uniq') {
+            LJ::procnotify_add("unban_uniq", { 'uniq' => $value || $ban->{'value'} });
+        }
     }
         
     # what - must have a value
@@ -124,12 +135,22 @@ if ($modify) {
         push @set, "what=" . $dbh->quote($ban->{'what'});
     }
 
-    # ip ban and we are going to change the value
-    if ($ban->{'what'} eq 'ip' &&
-        (($value && $value ne $ban->{'value'}) ||
-        ($status && $status ne $ban->{'status'} && $status eq 'active')) ) {
+    # ip/uniq ban and we are going to change the value
+    if (($value && $value ne $ban->{'value'}) ||
+        $banuntil && $banuntil ne $ban->{'banuntil'} || 
+        ($status && $status ne $ban->{'status'} && $status eq 'active')) {
 
-        LJ::procnotify_add($dbh, "ban_ip", { 'ip' => $value || $ban->{'value'}});
+        my $new_banuntil = $banuntil || $ban->{'banuntil'};
+
+        if ($ban->{'what'} eq 'ip') {
+            LJ::procnotify_add("ban_ip", { 'ip' => $value || $ban->{'value'},
+                                           'exptime' => LJ::mysqldate_to_time($new_banuntil) });
+        }
+
+        if ($ban->{'what'} eq 'uniq') {
+            LJ::procnotify_add("ban_uniq", { 'uniq' => $value || $ban->{'value'},
+                                             'exptime' => LJ::mysqldate_to_time($new_banuntil) });
+        }
     }
 
     # value - must have a value
@@ -145,15 +166,13 @@ if ($modify) {
     }
 
     # banuntil
-    if ($banuntil != $ban->{'banuntil'}) {
-        print "banuntil: $banuntil\n";
+    if ($banuntil && $banuntil ne $ban->{'banuntil'}) {
         $ban->{'banuntil'} = ($banuntil && $banuntil ne 'NULL') ? $banuntil : 0;
         push @set, "banuntil=" . ($ban->{'banuntil'} ? $dbh->quote($ban->{'banuntil'}) : 'NULL');
-        print "set: $set[$#set]\n";
     }
 
     # bandate - must have a value
-    if ($bandate && $bandate != $ban->{'bandate'}) {
+    if ($bandate && $bandate ne $ban->{'bandate'}) {
         $ban->{'bandate'} = $bandate;
         push @set, "bandate=" . $dbh->quote($ban->{'bandate'});
     }
@@ -170,7 +189,7 @@ if ($modify) {
     # log in statushistory
     my $msg; map { $msg .= " " if $msg;
                    $msg .= "$_=$ban->{$_};" }  qw(banid status bandate banuntil what value note);
-    LJ::statushistory_add($dbh, 0, 0, 'sysban_mod', $msg);
+    LJ::statushistory_add(0, 0, 'sysban_mod', $msg);
 
     print "MODIFIED: banid=$banid\n";
     exit;

@@ -1419,6 +1419,27 @@ sub time_to_http {
 }
 
 # <LJFUNC>
+# name: LJ::time_to_cookie
+# des: Converts unix time to format expected in a Set-Cookie header
+# args: time
+# des-time: unix time
+# returns: string; Date/Time in format expected by cookie.
+# </LJFUNC>
+sub time_to_cookie {
+    my $time = shift;
+    $time = time() unless defined $time;
+
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($time);
+    $year+=1900;
+
+    my @day = qw{Sunday Monday Tuesday Wednesday Thursday Friday Saturday};
+    my @month = qw{Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec};
+
+    return sprintf("$day[$wday], %02d-$month[$mon]-%04d %02d:%02d:%02d GMT", 
+                   $mday, $year, $hour, $min, $sec);
+}
+
+# <LJFUNC>
 # class: component
 # name: LJ::ljuser
 # des: Make link to userinfo/journal of user.
@@ -2974,7 +2995,12 @@ sub sysban_check {
 
     # cache if ip ban
     if ($what eq 'ip') {
-        return $LJ::IP_BANNED{$value} if $LJ::IP_BANNED_LOADED;
+
+        if ($LJ::IP_BANNED_LOADED) {
+            return (defined $LJ::IP_BANNED{$value} &&
+                    ($LJ::IP_BANNED{$value} == 0 ||     # forever
+                     $LJ::IP_BANNED{$value} > time())); # not-expired
+        }
 
         my $dbh = LJ::get_db_writer();
         return undef unless $dbh;
@@ -2983,16 +3009,48 @@ sub sysban_check {
         $LJ::IP_BANNED_LOADED++;
 
         # build cache
-        my $sth = $dbh->prepare("SELECT value FROM sysban " .
+        my $sth = $dbh->prepare("SELECT value, UNIX_TIMESTAMP(banuntil) FROM sysban " .
                                 "WHERE status='active' AND what='ip' " .
                                 "AND NOW() > bandate " .
                                 "AND (NOW() < banuntil OR banuntil IS NULL)");
         $sth->execute();
         return undef $LJ::IP_BANNED_LOADED if $sth->err;
-        $LJ::IP_BANNED{$_}++ while $_ = $sth->fetchrow_array;
+        while (my ($val, $exp) = $sth->fetchrow_array) {
+            $LJ::IP_BANNED{$val} = $exp;
+        }
 
         # return value to user
         return $LJ::IP_BANNED{$value};
+    }
+
+    # cache if uniq ban
+    if ($what eq 'uniq') {
+
+        if ($LJ::UNIQ_BANNED_LOADED) {
+            return (defined $LJ::UNIQ_BANNED{$value} &&
+                    ($LJ::UNIQ_BANNED{$value} == 0 ||     # forever
+                     $LJ::UNIQ_BANNED{$value} > time())); # not-expired
+        }
+
+        my $dbh = LJ::get_db_writer();
+        return undef unless $dbh;
+
+        # set this now before the query
+        $LJ::UNIQ_BANNED_LOADED++;
+
+        # build cache
+        my $sth = $dbh->prepare("SELECT value, UNIX_TIMESTAMP(banuntil) FROM sysban " .
+                                "WHERE status='active' AND what='uniq' " .
+                                "AND NOW() > bandate " .
+                                "AND (NOW() < banuntil OR banuntil IS NULL)");
+        $sth->execute();
+        return undef $LJ::UNIQ_BANNED_LOADED if $sth->err;
+        while (my ($val, $exp) = $sth->fetchrow_array) {
+            $LJ::UNIQ_BANNED{$val} = $exp;
+        }
+
+        # return value to user
+        return $LJ::UNIQ_BANNED{$value};
     }
 
     # non-ip bans come straight from the db
@@ -3022,6 +3080,7 @@ sub sysban_note
     $notes .= ":";
     map { $notes .= " $_=$vars->{$_};" if $vars->{$_} } sort keys %$vars;
     LJ::statushistory_add($userid, 0, 'sysban_trig', $notes);
+
     return;
 }
 
@@ -5502,9 +5561,11 @@ sub procnotify_add
                     sort keys %$argref);
     $dbh->do("INSERT INTO procnotify (cmd, args) VALUES (?,?)",
              undef, $cmd, $args);
+
     return 0 if $dbh->err;
     return $dbh->{'mysql_insertid'};
 }
+
 # <LJFUNC>
 # name: LJ::procnotify_callback
 # des: Call back function process notifications.
@@ -5527,13 +5588,25 @@ sub procnotify_callback
         return;
     }
 
+    # ip bans
     if ($cmd eq "ban_ip") {
-        $LJ::IP_BANNED{$arg->{'ip'}} = 1;
+        $LJ::IP_BANNED{$arg->{'ip'}} = $arg->{'exptime'};
         return;
     }
 
     if ($cmd eq "unban_ip") {
         delete $LJ::IP_BANNED{$arg->{'ip'}};
+        return;
+    }
+
+    # uniq key bans
+    if ($cmd eq "ban_uniq") {
+        $LJ::UNIQ_BANNED{$arg->{'uniq'}} = $arg->{'exptime'};
+        return;
+    }
+
+    if ($cmd eq "unban_uniq") {
+        delete $LJ::UNIQ_BANNED{$arg->{'uniq'}};
         return;
     }
 }
