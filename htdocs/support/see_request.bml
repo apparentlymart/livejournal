@@ -115,7 +115,7 @@ BODY<=
      $ret .= ", <A HREF=\"act.bml?close;$sp->{'spid'};$sp->{'authcode'}\"><B>close without credit</B></A>";
  }
  $ret .= "</td></tr>\n";
- $ret .= "<TR><TD ALIGN=RIGHT><B>Summary:</B></TD><TD><FONT FACE=\"Arial\" SIZE=+1><B>$sp->{'subject'}</B></FONT></TD></TR>\n";
+ $ret .= "<tr><td align='right'><b>Summary:</b></td><td><font face='Arial' size='+1'><b>" . LJ::ehtml($sp->{'subject'}) . "</b></font></td></tr>\n";
  $ret .= "</TABLE>\n";
 
  my %userinfo;
