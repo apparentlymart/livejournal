@@ -964,6 +964,22 @@ property string text_reply_back {
 }
 set text_reply_back = "Read Comments";
 
+property string text_reply_nocomments_header {
+    des = "Heading text that explains that comments are disabled";
+    example = "Comments Disabled:";
+    maxlength = "50";
+}
+set text_reply_nocomments_header = "Comments Disabled:";
+
+property string text_reply_nocomments {
+    des = "Text that explains that comments are not allowed for this post.";
+    example = "Comments have been disabled for this post.";
+    maxlength = "100";
+}
+set text_reply_nocomments = "Comments have been disabled for this post.";
+
+
+
 property bool view_entry_disabled {
     des = "Enable to use the old comment page instead of the newer style specific view";
 }
@@ -1599,6 +1615,8 @@ function EntryPage::print_body
             $this->print_comments($.comments);
             print "<hr />";
             print """(<a href="$e.comments.post_url">$*text_post_comment</a>)""";
+            if ($.comment_pages.all_subitems_displayed) { print "<hr />"; }
+            $.comment_pages->print();
         }
     }
 }
@@ -1606,7 +1624,7 @@ function EntryPage::print_body
 function ReplyPage::print_body
 {
     if (not $.entry.comments.enabled) {
-        print "<h2>Comments Disabled</h2><p>Commenting to this entry has been disabled</p>";
+        print "<h2>$*text_reply_nocomments_header/h2><p>$*text_reply_nocomments</p>";
         return; 
     }
     print "<h2>$.replyto.subject</h2>";
