@@ -28,7 +28,7 @@ $img{'btn_del'} = {
 
 $img{'btn_scr'} = { 
     'src' => '/btn_scr.gif',
-    'width' => 20,
+    'width' => 22,
     'height' => 20,
     'alt' => 'Screen',
 };
@@ -37,7 +37,7 @@ $img{'btn_unscr'} = {
     'src' => '/btn_unscr.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Screen',
+    'alt' => 'Unscreen',
 };
 
 $img{'prev_entry'} = { 
