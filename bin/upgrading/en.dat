@@ -71,6 +71,8 @@
 
 /community/leave.bml.label.removed=You are now removed from the <a href="/userinfo.bml?user=[[commuser]]">[[commname]] Community</a>
 
+/community/leave.bml.label.removefromfriends=Also remove "[[user]]" from friends list.
+
 /community/leave.bml.success=Success
 
 /community/leave.bml.sure=You sure?

@@ -32,7 +32,11 @@
      ### remove user from community's friends list
      ###
      my $dbh = LJ::get_db_writer();
-     $dbh->do("DELETE FROM friends WHERE userid=$ci->{'userid'} AND friendid=$remote->{'userid'}");
+     $dbh->do("DELETE FROM friends WHERE userid=? AND friendid=?", undef, $ci->{'userid'}, $remote->{'userid'});
+
+     if ($FORM{'removefriend'}) {
+         $dbh->do("DELETE FROM friends WHERE userid=? AND friendid=?", undef, $remote->{'userid'}, $ci->{'userid'});
+     }
      
      $body .= "<?h1 $ML{'.success'} h1?><?p ".BML::ml('.label.removed',{'commuser'=>$ci->{'user'},'commname'=>$ci->{'name'}})." p?>";
 
@@ -41,11 +45,12 @@
  }   
  else 
  {
-     $body .= "<?h1 $ML{'.sure'} h1?><?p ".BML::ml('.label.buttontoleave',{'commname'=>$ci->{'name'}});
+     $body .= "<?h1 $ML{'.sure'} h1?><?p " . BML::ml('.label.buttontoleave', {'commname' => $ci->{'name'}}) . " p?>";
      $body .= '<form method="post" action="leave.bml">';
-     $body .= "<input type=\"hidden\" name=\"cuserid\" value=\"$ci->{'userid'}\" />";
-     $body .= '<input type="hidden" name="confirm" value="1" /><center>';
-     $body .= '<input type="submit" value="'.$ML{'.button.leave'}.'" /></center></form> p?>';
+     $body .= LJ::html_hidden("cuserid", $ci->{'userid'}, "confirm", 1) . "<p align='center'>";
+     $body .= LJ::html_check({ name => 'removefriend', 'selected' => 1, value => 1 }) . " ";
+     $body .= BML::ml('.label.removefromfriends',{'user'=>$ci->{'user'}});
+     $body .= '<br /><br />' . LJ::html_submit(undef, $ML{'.button.leave'}) . '</p></form>';
      return;
  }
 
