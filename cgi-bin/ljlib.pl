@@ -82,6 +82,7 @@ sub valid_password { return LJ::valid_password(@_); }
 sub ehtml { return LJ::ehtml(@_); }
 sub eurl { return LJ::eurl(@_); }
 sub exml { return LJ::exml(@_); }
+sub durl { return LJ::durl(@_); }
 
 sub register_authaction
 {
@@ -312,13 +313,6 @@ sub trim
     return $a;	
 }
 
-sub durl
-{
-    my ($a) = @_;
-    $a =~ tr/+/ /;
-    $a =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
-    return $a;
-}
 
 sub html_datetime_decode
 {
@@ -3205,7 +3199,7 @@ sub load_talk_props
 
 # <LJFUNC>
 # name: LJ::eurl
-# des: Escapes a value before it can be put in a URL.
+# des: Escapes a value before it can be put in a URL.  See also [func[LJ::durl]].
 # args: string
 # des-string: string to be escaped
 # returns: string escaped
@@ -3215,6 +3209,21 @@ sub eurl
     my $a = $_[0];
     $a =~ s/([^a-zA-Z0-9_\,\-.\/\\\: ])/uc sprintf("%%%02x",ord($1))/eg;
     $a =~ tr/ /+/;
+    return $a;
+}
+
+# <LJFUNC>
+# name: LJ::durl
+# des: Decodes a value that's URL-escaped.  See also [func[LJ::eurl]].
+# args: string
+# des-string: string to be decoded
+# returns: string decoded
+# </LJFUNC>
+sub durl
+{
+    my ($a) = @_;
+    $a =~ tr/+/ /;
+    $a =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
     return $a;
 }
 

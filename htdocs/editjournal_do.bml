@@ -13,7 +13,7 @@ BODY<=
 
  my $user = lc($FORM{'user'});
  my $userid = 0;
- my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+ my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
  my %res;
  my $just_last = 0;
  my $jump_to_item = 0;
@@ -33,7 +33,7 @@ BODY<=
      my $sth = $dbr->prepare("SELECT password FROM user WHERE userid=$remote->{'userid'}");
      $sth->execute;
      my $password = $sth->fetchrow_array;
-     $hpassword = &hash_password($password);
+     $hpassword = LJ::hash_password($password);
      
      my $itemid = $FORM{'itemid'}+0;
      $sth = $dbr->prepare("SELECT ownerid, posterid FROM log WHERE itemid=$itemid");
@@ -83,12 +83,10 @@ BODY<=
 		 $ret .= "; <I>" . $res{"events_${i}_subject"} . "</I>";
 	     }
 	     $ret .= "<BR>\n";
-	     my $event = &durl($res{"events_${i}_event"});
+	     my $event = LJ::durl($res{"events_${i}_event"});
 	     unless ($props{$res{"events_${i}_itemid"}}->{'opt_preformatted'}) {
 		 $event =~ s/\n/<BR>\n/g;
 	     }
-	     
-	     &remap_event_links(\$event, $u->{'baseurl'});
 	     $ret .= $event;
 	 }
 	 
@@ -190,11 +188,11 @@ BODY<=
 
 	 $ret .= "<P><B>Subject:</B> <I>(optional, for use on longer entries)</I><BR>";
 	 $ret .= "<INPUT NAME=\"subject\" VALUE=\"";
-	 $ret .= &ehtml(&durl($res{"events_1_subject"}));
+	 $ret .= LJ::ehtml(LJ::durl($res{"events_1_subject"}));
 	 $ret .= "\" SIZE=60 MAXLENGTH=255>\n";
 	
 	 $ret .= "<P><B>Event:</B><BR><TEXTAREA ROWS=12 COLS=60 WRAP=SOFT NAME=\"event\">";
-	 $ret .= &ehtml(&durl($res{"events_1_event"}));
+	 $ret .= LJ::ehtml(LJ::durl($res{"events_1_event"}));
  	 $ret .= "</TEXTAREA>\n";
 
 	 $ret .= "<P><B>Security Level:</B><SELECT NAME=\"security\">\n";
@@ -272,13 +270,13 @@ BODY<=
 	     }
 	     $ret .= "</SELECT>";
 	     my $other_mood = $match==0 ? $props{'current_mood'} : "";
-	     $other_mood = &ehtml($other_mood);
+	     $other_mood = LJ::ehtml($other_mood);
 	     $ret .= "Other: <INPUT NAME=\"prop_current_mood\" VALUE=\"$other_mood\" SIZE=15 MAXLENGTH=30>";
 	 }	     
 
 	 ## current music
 	 {
-	     my $music = &ehtml($props{'current_music'});
+	     my $music = LJ::ehtml($props{'current_music'});
 	     $ret .= "<P><B>Current Music:</B> <INPUT NAME=\"prop_current_music\" VALUE=\"$music\" SIZE=40 MAXLENGTH=60>";
 	 }
 
