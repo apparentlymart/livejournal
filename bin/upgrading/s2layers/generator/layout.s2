@@ -193,6 +193,8 @@ summary="" style="margin-left: auto; margin-right: auto;">
 <tr>""";
     $this->lay_top_userpic();
 
+    var string sitename_lc = $*SITENAMESHORT->lower();
+
 """<td>
 <div align="center"><b>$.journal.name</b></div><p>
 <table cellspacing="0"
@@ -204,7 +206,7 @@ $website
 <td class="meta">[</td>
 <td class="meta" align="right"><b>userinfo</b></td>
 <td class="meta" align="center">|</td>
-<td class="meta"><a href="$.view_url{"userinfo"}">livejournal userinfo</a></td>
+<td class="meta"><a href="$.view_url{"userinfo"}">$sitename_lc userinfo</a></td>
 <td class="meta">]</td>
 </tr>
 <tr>
