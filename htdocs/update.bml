@@ -26,6 +26,7 @@
 
  my $remote = LJ::get_remote();
  my $dbcm = LJ::get_cluster_master($remote);
+ my $dbr = LJ::get_db_reader();
 
  # portal uses this, to avoid putting username/auth in hidden fields:
  if ($FORM{'remoteuser'} ne "" && $remote && 
