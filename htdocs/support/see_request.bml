@@ -309,6 +309,14 @@ body<=
         'remote' => $remote,
     });
 
+    # put in a "this is private!" box if this is a private request and the user viewing
+    # this page is the person who opened the request
+    if (!$sp->{_cat}->{public_read} && LJ::Support::is_poster($sp, $remote, $auth)) {
+        $ret .= "<div style='margin-top: 15px; margin-bottom: 15px; padding: 5px; " .
+                "text-align: center; background-color: #ffff00; border: solid 2px red;'>" .
+                "<b>This is a private request.</b> It is not publicly visible.</div>";
+    }
+
     my %userpics;  # id -> {..}
 
     my @screened;
