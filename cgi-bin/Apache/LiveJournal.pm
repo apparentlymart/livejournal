@@ -38,23 +38,34 @@ sub handler
     return OK;
 }
 
+sub redir
+{
+    my ($r, $url, $code) = @_;
+    $r->content_type("text/html");
+    $r->header_out(Location => $url);
+    return $code || REDIRECT;
+}
+
 sub trans
 {
     my $r = shift;
     my $uri = $r->uri;
+    my $host = $r->header_in("Host");
+    my $hostport = ($host =~ s/:\d+$//) ? $& : "";
+
+    # let foo.com still work, but redirect to www.foo.com
+    if ($LJ::DOMAIN_WEB && $r->method eq "GET" &&
+        $host eq $LJ::DOMAIN && $LJ::DOMAIN_WEB ne $LJ::DOMAIN) 
+    {
+        my $url = "$LJ::SITEROOT$uri";
+        $url .= "?" . $r->args if $r->args;
+        return redir($r, $url);
+    }
+
     return DECLINED if $uri =~ /\.bml$/; # not dirs, but most.
 
-    my $host = $r->header_in("Host");
     LJ::start_request();
 
-    my $redir = sub {
-        my $url = shift;
-        my $code = shift;
-        $r->content_type("text/html");
-        $r->header_out(Location => $url);
-        return $code || REDIRECT;
-    };
-    
     my $journal_view = sub { 
         my $opts = shift;
         $opts ||= {};
@@ -62,13 +73,13 @@ sub trans
         if ($opts->{'user'} ne lc($opts->{'user'})) {
             my $url = LJ::journal_base(lc($opts->{'user'}), $opts->{'vhost'}) .
                 "/$opts->{'mode'}$opts->{'args'}";
-            return $redir->($url);
+            return redir($r, $url);
         }
 
         $opts->{'user'} = LJ::canonical_username($opts->{'user'});
 
         if ($opts->{'mode'} eq "info") {
-            return $redir->("$LJ::SITEROOT/userinfo.bml?user=$opts->{'user'}");
+            return redir($r, "$LJ::SITEROOT/userinfo.bml?user=$opts->{'user'}");
         }
 
         %RQ = %$opts;
@@ -79,7 +90,7 @@ sub trans
 
     # user domains
     if ($LJ::USER_VHOSTS && 
-        $host =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E(:\d+)?$/ &&
+        $host =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/ &&
         $1 ne "www") 
     {
         my $user = $1;
@@ -88,16 +99,26 @@ sub trans
                                 'args' => $2,
                                 'user' => $user, })
             if $uri =~ m!/(\w+)?([^\?]*)!;
-        return $journal_view->(undef); # undef
+        return $journal_view->(undef);
     }
 
-    # let foo.com still work, but redirect to www.foo.com
-    if ($LJ::DOMAIN_PREPEND_WWW && $r->method eq "GET" &&
-        $host =~ /^\Q$LJ::DOMAIN\E(:\d+)?$/) 
+    if ($LJ::OTHER_VHOSTS && $host ne $LJ::DOMAIN
+        && $host ne $LJ::DOMAIN_WEB)
     {
-        my $url = "$LJ::SITEROOT$uri";
-        $url .= "?" . $r->args if $r->args;
-        return $redir->($url);
+        my $dbr = LJ::get_dbh("slave", "master");
+        my $checkhost = lc($host);
+        $checkhost =~ s/^www\.//i;
+        $checkhost = $dbr->quote($checkhost);
+        my $user = $dbr->selectrow_array(qq{
+            SELECT u.user FROM useridmap u, domains d WHERE
+            u.userid=d.userid AND d.domain=$checkhost
+        });
+        return $journal_view->({'vhost' => "other:$host$hostport",
+                                'mode' => $1,
+                                'args' => $2,
+                                'user' => $user, })
+            if $user && $uri =~ m!/(\w+)?([^\?]*)!;
+        return $journal_view->(undef);
     }
 
     # userpic
@@ -139,12 +160,12 @@ sub trans
     if ($REDIR{$uri}) {
         my $new = $REDIR{$uri};
         if ($r->args) { $new .= "?" . $r->args; }
-        return $redir->($new, HTTP_MOVED_PERMANENTLY);
+        return redir($r, $new, HTTP_MOVED_PERMANENTLY);
     }
 
     # confirm
     if ($uri =~ m!^/confirm/(\w+\.\w+)!) {
-        return $redir->("$LJ::SITEROOT/register.bml?$1");
+        return redir($r, "$LJ::SITEROOT/register.bml?$1");
     }
 
     return FORBIDDEN if $uri =~ m!^/userpics!;

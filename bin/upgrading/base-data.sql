@@ -945,6 +945,8 @@ INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope
 UPDATE userproplist SET des='ICQ Number',prettyname='ICQ',indexed='1',scope='general',datatype='char' WHERE name='icq';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('jabber', '1', 'Jabber Address', 'char', 'Jabber address (username@server)', 'general');
 UPDATE userproplist SET des='Jabber address (username@server)',prettyname='Jabber Address',indexed='1',scope='general',datatype='char' WHERE name='jabber';
+INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('journaldomain', '0', 'Domain Alias', 'char', 'Domain which will load user\'s journal', 'general');
+UPDATE userproplist SET des='Domain which will load user\'s journal',prettyname='Domain Alias',indexed='0',scope='general',datatype='char' WHERE name='journaldomain';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('mailencoding', '0', 'Mail Encoding', 'num', 'Encoding in which to mail comments to the user. Defaults to UTF-8.', 'general');
 UPDATE userproplist SET des='Encoding in which to mail comments to the user. Defaults to UTF-8.',prettyname='Mail Encoding',indexed='0',scope='general',datatype='num' WHERE name='mailencoding';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('msn', '1', 'MSN Username', 'char', 'MSN Username', 'general');

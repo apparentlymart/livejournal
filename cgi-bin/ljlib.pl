@@ -3090,6 +3090,9 @@ sub make_journal
     if ($LJ::USER_VHOSTS && $opts->{'vhost'} eq "users" && ! LJ::get_cap($u, "userdomain")) {
         return "<b>Notice</b><br />Addresses like <tt>http://<i>username</i>.$LJ::USER_DOMAIN</tt> aren't enabled for this user's account type.  Instead, visit:<ul><font face=\"Verdana,Arial\"><b><a href=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</a></b></font></ul>";
     }
+    if ($opts->{'vhost'} =~ /^other:/ && ! LJ::get_cap($u, "userdomain")) {
+        return "<b>Notice</b><br />This user's account type doesn't permit domain aliasing.  Instead, visit:<ul><font face=\"Verdana,Arial\"><b><a href=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</a></b></font></ul>";
+    }
     if ($opts->{'vhost'} eq "customview" && ! LJ::get_cap($u, "userdomain")) {
         return "<b>Notice</b><br />Only users with <A HREF=\"$LJ::SITEROOT/paidaccounts/\">paid accounts</A> can create and embed styles.";
     }
@@ -4241,6 +4244,8 @@ sub journal_base
         return "$LJ::SITEROOT/~$user";
     } elsif ($vhost eq "community") {
         return "$LJ::SITEROOT/community/$user";
+    } elsif ($vhost =~ /^other:(.+)/) {
+        return "http://$1";
     } else {
         return "$LJ::SITEROOT/users/$user";
     }

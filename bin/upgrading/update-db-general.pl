@@ -1438,6 +1438,16 @@ CREATE TABLE ml_text
 )
 EOC
 
+register_tablecreate("domains", <<'EOC');
+CREATE TABLE domains
+(
+   domain  VARCHAR(80) NOT NULL,
+   PRIMARY KEY (domain),
+   userid  INT UNSIGNED NOT NULL,
+   INDEX (userid)
+)
+EOC
+
 ### changes
 
 register_alter(sub {

@@ -49,8 +49,7 @@ BODY<=
      # force them to either come from the interest.bml page, or have posted the request.
      # if both fail, ask them to confirm with a post form.
      
-     my $ref_match = "^http://$LJ::DOMAIN_RE/interests\\.bml\\?";
-     unless ($ENV{'HTTP_REFERER'} =~ /$ref_match/ || LJ::did_post())
+     unless ($ENV{'HTTP_REFERER'} =~ /^\Q$LJ::SITEROOT\E\/interests\.bml\?/ || LJ::did_post())
      {
          $sth = $dbh->prepare("SELECT interest FROM interests WHERE intid=$qintid");
          $sth->execute;

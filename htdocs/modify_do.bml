@@ -24,6 +24,7 @@ BODY<=
  LJ::load_user_props($dbs, $u, "opt_usesharedpic",
                      "s1_lastn_style", "s1_calendar_style",
                      "s1_day_style", "s1_friends_style",
+                     "journaldomain",
                      );
 
  if (scalar(@errors)==0 && ! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) { push @errors, "Incorrect password."; }
@@ -169,6 +170,15 @@ BODY<=
      $ret .= "<TR><TD>&nbsp;</TD><TD>This option controls what picture you see on your friends page when a user posts in a shared or community journal.  If you check it, then you'll see the community's icon.  If you leave it unchecked, then you'll see the person that's actually posting's personal user icon.</TD></TR>\n";
      
      $ret .= "</TABLE>\n";
+
+     # Journal domain stuff
+     if ($LJ::OTHER_VHOSTS && LJ::get_cap($u, "userdomain")) {
+         $ret .= "(=H2 Domain Aliasing H2=)(=P If you have a domain name already registered (or which you're planning on registering) and would like it to automatically load your LiveJournal, enter it here: ";
+         $ret .= "<blockquote>Domain name: <input name='journaldomain' size='30' maxlength='80' value='";
+         $ret .= LJ::ehtml($u->{'journaldomain'});
+         $ret .= "'><br />Example: <i>my-journal.com</i></blockquote>";
+         $ret .= "For this to work, you'll need to arrange to have your domain name's DNS point to the same IP address of $LJ::SITENAME. P=)";
+     }
 
      ### ending submit block
      $ret .= "(=H1 Done? H1=)(=P When done, press the \"Save Changes\" button below... P=)\n";
@@ -351,6 +361,22 @@ BODY<=
                  return $ret;
              }
          }
+     }
+
+     if ($u->{'journaldomain'} ne $FORM{'journaldomain'}) {
+         $FORM{'journaldomain'} =~ s!^(http://)?(www\.)?!!;
+         my $dom = lc($FORM{'journaldomain'});
+         my $qdom = $dbh->quote($dom);
+         $dbh->do("INSERT INTO domains VALUES ($qdom, $u->{'userid'})");
+         if ($dbh->err) {
+             my $otherid = $dbh->selectrow_array("SELECT userid FROM domains WHERE domain=$qdom");
+             return "(=H1 Error H1=)(=P Another user has already registered themselves as using your selected domain alias. P=)"
+                 if $otherid != $u->{'userid'};
+         }
+         if ($u->{'journaldomain'}) {
+             $dbh->do("DELETE FROM domains WHERE userid=$u->{'userid'} AND domain <> $qdom");
+         }
+         $uprop{'journaldomain'} = $dom;
      }
 
      ### change any of the userprops ?
