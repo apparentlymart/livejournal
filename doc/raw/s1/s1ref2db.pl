@@ -16,7 +16,7 @@
  LJ::load_objects_from_file("vars.dat", \@vars);
 
  my $ret;
-
+ my %done;
  foreach my $vi (@views)
  {
      $ret .= "<appendix id='ljp.styles.s1.$vi->{'name'}'><title>S1 Variable Reference: $vi->{'props'}->{'name'}</title>\n";
@@ -26,6 +26,8 @@
          foreach my $v (sort { $a->{'name'} cmp $b->{'name'} } @vars)
          {
              next unless ($v->{'props'}->{'scope'} =~ /\b$vi->{'name'}\b/);
+             next if $done{$v};
+
              cleanse->(\$v->{'props'}->{'des'});
 
              my $id = lc($v->{'name'});
@@ -77,7 +79,8 @@
                  $ret .= "</tbody></tgroup></informaltable></refsection>\n";
              }
              $ret .= "</refentry>\n";
-        }
+             $done{$v} = 1;
+         }
      $ret .= "</appendix>\n";
  }
 
