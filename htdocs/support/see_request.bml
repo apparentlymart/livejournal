@@ -401,8 +401,9 @@ body<=
                                     @screened);
             $ret .= LJ::html_select({ 'name' => 'approveas' },
                                     ("answer" => "as answer", "comment" => "as comment",));
+            $ret .= "</td>";
         }
-        $ret .= "</td></tr></table>\n";
+        $ret .= "</tr></table>\n";
 
         $ret .= "</td></tr>\n";
         $ret .= "<tr><td>Touch request:</td><td>";
