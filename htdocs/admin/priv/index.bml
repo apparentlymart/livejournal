@@ -185,6 +185,8 @@
      my $priv = $pcode2id{$FORM{'priv'}};
      my $prec = $priv{$priv};
      my $pcode = $prec->{'privcode'};
+     my $skip = $FORM{'skip'} + 0;
+     my $limit = 100;
 
      $ret .= "<h1><a href=\"./\">&lt;&lt;</a> view priv \"$priv{$priv}->{'privcode'}\"</h1>";
      $ret .= "<p><b>Privilege Name:</b> $priv{$priv}->{'privname'}";
@@ -197,14 +199,16 @@
      
      $ret .= "<form method='post'><input type='hidden' name='mode' value='privchange'>";
      $ret .= "<input type='hidden' name='priv' value='$pcode'>";
-     $sth = $dbh->prepare("SELECT pm.prmid, u.user, u.userid, pm.arg FROM priv_map pm, user u WHERE pm.prlid=$priv AND pm.userid=u.userid ORDER BY u.user LIMIT 100");
+     $sth = $dbh->prepare("SELECT pm.prmid, u.user, u.userid, pm.arg FROM priv_map pm, user u WHERE pm.prlid=$priv AND pm.userid=u.userid ORDER BY u.user LIMIT $skip,$limit");
      $sth->execute;
      $ret .= "<table cellpadding='5' cellspacing='1' border='1'><tr><td><b>Revoke</b></td><td><b>User</b></td><td><b>Arg</b></td></tr>\n";
 
      my $cangrant = ($access{'all'} || $access{$priv{$priv}->{'privcode'}});	
+     my $foundany = 0;
 
      while ($_ = $sth->fetchrow_hashref) 
      {
+         $foundany = 1;
          $ret .= "<tr><td align='center'>";
          if ($cangrant) {	
              $ret .= "<input type='checkbox' name=\"revoke:$_->{'prmid'}:$_->{'userid'}\" />";
@@ -215,7 +219,10 @@
          $ret .= "<td>$_->{'arg'}</td></tr>\n";
      }
      $ret .= "</table>";
-     
+     if ($foundany) {
+         $ret .= "<a href='" . LJ::self_link(\%FORM, {'skip'=>($skip +$limit)}) . "'>See more...</a>\n";
+     }
+
      if ($cangrant) {
          $ret .= "<p>Grant <b>$priv{$priv}->{'privcode'}</b> privilege to:<ul>";
          $ret .= "User: <input name='grantuser' size='15' maxlength='15'> ";
