@@ -4804,7 +4804,8 @@ sub cmd_buffer_flush
     if ($cmds->{$cmd}) {
         $code = $cmds->{$cmd}->{$mode};
         $too_old = $cmds->{$cmd}->{"too_old"};
-        $arg_format = $cmds->{$cmd}->{"arg_format"};
+        $arg_format = $cmds->{$cmd}->{"arg_format"} if
+            defined $cmds->{$cmd}->{"arg_format"};
         
     # otherwise it might be a site-local command
     } else {
