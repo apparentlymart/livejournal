@@ -28,13 +28,20 @@ while (<REDIR>) {
 }
 close REDIR;
 
-# init handler.
+# init handler (PostReadRequest)
 sub handler
 {
     my $r = shift;
     $r->set_handlers(PerlTransHandler => [ \&trans ]);
     $r->set_handlers(PerlCleanupHandler => [ sub { %RQ = () },
                                              "Apache::LiveJournal::db_logger" ]);
+
+    # if we're behind a lite mod_proxy front-end, we need to trick future handlers
+    # into thinking they know the real remote IP address and requested host name
+    $r->connection->remote_ip($1) if $r->header_in('X-Forwarded-For') =~ /([^,\s]+)$/;
+    # added only by mod_proxy_add_forward:
+    $r->header_in('Host', $_) if $_ = $r->header_in('X-Host');
+
     return OK;
 }
 
