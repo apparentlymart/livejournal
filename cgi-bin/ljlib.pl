@@ -1065,7 +1065,7 @@ sub set_userprop
         }
     }
 
-    my $expire = time() + 3600*6;
+    my $expire = time() + 3600*24;
     foreach my $table (keys %action) {
         my $db = $action{$table}->{'db'};
         if (my $list = $action{$table}->{"replace"}) {
@@ -2443,7 +2443,7 @@ sub load_user_props
     }
 
     unless ($used_slave) {
-        my $expire = time() + 3600*6;
+        my $expire = time() + 3600*24;
         foreach my $wr (@needwrite) {
             my ($id, $name) = ($wr->[0], $wr->[1]);
             LJ::MemCache::set([$uid,"uprop:$uid:$id"], $u->{$name} || "", $expire);
