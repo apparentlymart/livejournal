@@ -190,9 +190,9 @@ body<=
  }
  my $last = pop @{$info{'english'}};
  if (@{$info{'english'}}) {
-     $ret .= join(", ", @{$info{'english'}}) . ", and ";
+     $ret .= join(", ", map { LJ::ehtml($_) } @{$info{'english'}}) . ", and ";
  }
- $ret .= $last . ".\n";
+ $ret .= LJ::ehtml($last) . ".\n";
 
  if ($info{'overflow'}) {
      $ret .= "<B>Search results limited to $info{'count'} results.  Please refine your query.</B>";
