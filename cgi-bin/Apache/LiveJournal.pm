@@ -426,7 +426,7 @@ sub userpic_trans
     $r->filename($file);
 
     $r->handler("perl-script");
-    $r->push_handlers(PerlHandler => \&userpic_content);
+    $r->set_handlers(PerlHandler => [ \&userpic_content ]);
     return OK;
 }
 
