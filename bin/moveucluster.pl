@@ -874,6 +874,7 @@ sub verify_movable_tables {
 
     # things we don't move because it doesn't really matter
     delete $table{"s1stylecache"};
+    delete $table{"captcha_session"};
 
     if (%table) {
         die "ERROR.  Won't try to move user, because this mover script can't move all live tables for this user.  List of tables without mover code available: \n -- " . join("\n -- ", sort keys %table), "\n";

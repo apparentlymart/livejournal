@@ -126,7 +126,7 @@ body<=
 
 # MODE: submit - if they've given 'audio' as the answer to the spambot-blocker,
 # reset the mode to 'getinfo' and set the audio flag
-if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i )
+if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audio' )
 {
     $mode = 'getinfo';
     $wants_audio = 1;
@@ -251,11 +251,11 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      }
 
      # Check the turing test answer if it's turned on
-     if ($LJ::HUMAN_CHECK{create} && 
-         ! LJ::Captcha::check_code($POST{capid}, $POST{anum}, $POST{answer}, $u)) {
-         $errors{'captcha'} = $ML{'.captcha.invalid'};
+     my ($capid, $anum);
+     if ($LJ::HUMAN_CHECK{create}) {
+         ($capid, $anum) = LJ::Captcha::session_check_code($POST{captcha_chal}, $POST{answer});
+         $errors{'captcha'} = $ML{'.captcha.invalid'} unless $capid && $anum;
      }
-
      last SUBMIT if %errors;
 
      my $qclusterid = ($LJ::ALLOW_CLUSTER_SELECT
@@ -297,7 +297,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
 
          # Mark the turing test for deletion
          if ($LJ::HUMAN_CHECK{create}) {
-             LJ::Captcha::expire( $POST{capid}, $POST{anum}, $userid );
+             LJ::Captcha::expire($capid, $anum, $userid);
          }
 
          LJ::run_hooks("post_create", {
@@ -490,35 +490,39 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      }
 
      if ($LJ::HUMAN_CHECK{create}) {
-         my ( $capid, $anum ) = ( $POST{capid}, $POST{anum} );
-         my $answer = $POST{answer};
-         if ( $errors{captcha} || $wants_audio ) {
-             undef $capid;
-             undef $answer;
-         }
+         my ($captcha_chal, $captcha_sess);
+         $captcha_chal = $POST{captcha_chal} || LJ::challenge_generate(900);
+         $captcha_sess = LJ::get_challenge_attributes($captcha_chal);
 
+         my $answer = $POST{answer};
+         undef $answer if $errors{captcha} || $wants_audio;
+
+
+         my $try = 0;
+         if ($form->{captcha_chal}) {
+             my $dbcm = LJ::get_cluster_reader();
+             $try = $dbcm->selectrow_array('SELECT trynum FROM captcha_session ' .
+                                           'WHERE sess=?', undef, $captcha_sess);
+         }
+         
          $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.captcha.prove'}</div>";
 
          # Visual challenge
          unless ( $wants_audio || $POST{audio_chal} ) {
-             ( $capid, $anum ) = LJ::Captcha::get_visual_id() unless $capid;
-
              $ret .= "<div class='formitemDesc'>$ML{'.captcha.desc'}</div>";
-             $ret .= "<img src='/captcha/image.bml?capid=$capid&amp;anum=$anum' width='175' height='35' />";
+             $ret .= "<img src='/captcha/image.bml?chal=$captcha_chal&amp;try=$try'' width='175' height='35' />";
          }
 
          # Audio challenge
          else {
-             ( $capid, $anum ) = LJ::Captcha::get_audio_id() unless $capid;
-             
              $ret .= "<div class='formitemDesc'>$ML{'.captcha.audiodesc'}</div>";
-             $ret .= "<a href='/captcha/audio.bml?capid=$capid&amp;anum=$anum'>$ML{'.captcha.play'}</a>";
+             $ret .= "<a href='/captcha/audio.bml?chal=$captcha_chal&amp;try=$try''>$ML{'.captcha.play'}</a>";
              $ret .= LJ::html_hidden(audio_chal => 1);
          }
          
          $ret .= "<br /><br />$ML{'.captcha.answer'}";
          $ret .= LJ::html_text({ name => 'answer', size => 15, value => $answer });
-         $ret .= LJ::html_hidden( capid => $capid, anum => $anum );
+         $ret .= LJ::html_hidden(captcha_chal => $captcha_chal);
          $ret .= $error_msg->('captcha', '<p class="formitemFlag">', '</p>');
          $ret .= "</div></li>";
      }

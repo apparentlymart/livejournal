@@ -48,10 +48,17 @@ body<=
         my $talkurl = LJ::journal_base($journalu) . "/$POST{itemid}.html";
         return LJ::Talk::Post::make_preview($talkurl, $cookie_auth, \%POST);
     }
+    
+    # check anonymous rate limits
+    my $do_captcha = 0;
+    $do_captcha = 1 if $LJ::HUMAN_CHECK{anonpost} &&
+                       $POST{'usertype'} eq 'anonymous' &&
+                       ! $remote &&
+                       ! LJ::Talk::Post::check_rate();
 
     ## init.  this handles all the error-checking, as well.
     my @errors;
-    my $init = LJ::Talk::Post::init(\%POST, $remote, \@errors);
+    my $init = LJ::Talk::Post::init(\%POST, $remote, $do_captcha, \@errors);
 
     # Report errors in a friendly manner by regenerating the field.
     # Required for challenge/response login, since we also need to regenerate an auth token.
@@ -66,8 +73,14 @@ body<=
         $sth->execute($journalu->{userid}, $POST{itemid}+0);
         $parpost = $sth->fetchrow_hashref;
         
-        return LJ::Talk::talkform($remote, $journalu, $parpost, $POST{replyto}, $POST{itemid},
-                                  $POST{'prop_picture_keyword'}, \%POST, @errors)
+        return LJ::Talk::talkform({ 'remote'     => $remote,
+                                    'journalu'   => $journalu,
+                                    'parpost'    => $parpost,
+                                    'replyto'    => $POST{replyto},
+                                    'ditemid'    => $POST{itemid},
+                                    'do_captcha' => $do_captcha,
+                                    'errors'     => \@errors,
+                                    'form'       => \%POST });
     }
 
     my $talkurl = $init->{talkurl};

@@ -21,8 +21,8 @@ sub get_subjecticons
             { img => "md06_radioactive.gif",	w => 20,	h => 20 },
             { img => "md07_cool.gif",		w => 20,	h => 20 },
             { img => "md08_bulb.gif",		w => 17,	h => 23 },
-            { img => "md09_thumbdown.gif",		w => 25,	h => 19 },
-            { img => "md10_thumbup.gif",		w => 25,	h => 19 }
+            { img => "md09_thumbdown.gif",	w => 25,	h => 19 },
+            { img => "md10_thumbup.gif",	w => 25,	h => 19 }
     ];
     $subjecticon{'lists'}->{'sm'} = [
             { img => "sm01_smiley.gif",		w => 15,	h => 15 },
@@ -708,11 +708,21 @@ sub load_comments
 }
 
 sub talkform {
-    # replyto : init->replyto
-    # curpickw : FORM{prop_picture_keyword} or something like that
-    my ($remote, $journalu, $parpost, $replyto, $ditemid, $curpickw, $FORM, @errors) = @_;
+    # Takes a hashref with the following keys / values:
+    # remote:     optional remote u object
+    # journalu:   required journal u object
+    # parpost:    parent post object
+    # replyto:    init->replyto
+    # ditemid:    init->ditemid
+    # form:       optional full form hashref
+    # do_captcha: optional toggle for creating a captcha challenge
+    # errors:     optional error arrayref
+    my $opts = shift;
+    return "Invalid talkform values." unless ref $opts eq 'HASH';
 
     my $ret;
+    my ($remote, $journalu, $parpost, $form) = ($opts->{remote}, $opts->{journalu},
+                                                $opts->{parpost}, $opts->{form});
     my $pics = LJ::Talk::get_subjecticons();
 
     # once we clean out talkpost.bml, this will need to be changed.
@@ -728,35 +738,70 @@ sub talkform {
     $ret .= "<input type='hidden' name='chal' id='login_chal' value='$authchal' />";
     $ret .= "<input type='hidden' name='response' id='login_response' value='' />";
 
-    if (@errors) {
+    if ($opts->{errors} && @{$opts->{errors}}) {
         $ret .= '<ul>';
-        $ret .= "<li><b>$_</b></li>" foreach @errors;
+        $ret .= "<li><b>$_</b></li>" foreach @{$opts->{errors}};
         $ret .= '</ul>';
         $ret .= "<hr />";
     }
 
     # hidden values
-    my $parent = $replyto+0;
-    $ret .= LJ::html_hidden("replyto", $replyto,
+    my $parent = $opts->{replyto}+0;
+    $ret .= LJ::html_hidden("replyto", $opts->{replyto},
                             "parenttalkid", $parent,
-                            "itemid", $ditemid,
+                            "itemid", $opts->{ditemid},
                             "journal", $journalu->{'user'});
 
     # rate limiting challenge
     {
         my ($time, $secret) = LJ::get_secret();
         my $rchars = LJ::rand_chars(20);
-        my $chal = "$ditemid-$journalu->{userid}-$time-$rchars";
+        my $chal = $opts->{ditemid} . "-$journalu->{userid}-$time-$rchars";
         my $res = Digest::MD5::md5_hex($secret . $chal);
         $ret .= LJ::html_hidden("chrp1", "$chal-$res");
     }
+
+    # Default radio button
+    # 4 possible scenarios:
+    # remote - initial form load, error and redisplay
+    # no remote - initial load, error and redisplay
+    my $whocheck = sub {
+        my $type = shift;
+        my $default = " checked='checked'";
+
+        # Anonymous
+        return $default if $type eq 'anonymous';
+
+        # Remote user, remote equals userpost
+        return $default if $type eq 'remote' &&
+                           $form->{'userpost'} eq $form->{'cookieuser'};
+
+        # Possible remote, using ljuser field
+        if ($type eq 'ljuser') {
+        return $default if
+            # Remote user posting as someone else.
+            ($form->{'userpost'} ne $form->{'cookieuser'} && $form->{'usertype'} ne 'anonymous') ||
+            ($form->{'usertype'} eq 'user' && ! $form->{'userpost'}) ||
+            # Initial page load (no remote)
+            (! $form->{'usertype'} && ! $remote);
+        }
+
+        return;
+    };
+    
+#id'tal;ksdrsdf'  " . $checkif-($whocheck eq "anonymous") .
+#my $checkif = sub { return (shift) ? "checked='checked'" : ""; };
+#my $whocheck = sub { return $ARGV[0]; };
+#print $checkif->($whocheck->());
 
     # from registered user or anonymous?
     $ret .= "<table>\n";
     if ($journalu->{'opt_whocanreply'} eq "all") {
         $ret .= "<tr valign='center'>";
         $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td>";
-        $ret .= "<td align='center'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon' /></td>";
+        $ret .= "<td align='center'><input type='radio' name='usertype' value='anonymous' id='talkpostfromanon'" .
+                $whocheck->('anonymous') .
+                " /></td>";
         $ret .= "<td align='left'><b><label for='talkpostfromanon'>$BML::ML{'.opt.anonymous'}</label></b>";
         if ($journalu->{'opt_whoscreened'} eq 'A' ||
             $journalu->{'opt_whoscreened'} eq 'R' ||
@@ -779,7 +824,6 @@ sub talkform {
         $ret .= "</tr>\n";
     }
 
-    my $checked = "checked='checked'";
     if ($remote) {
         $ret .= "<tr valign='middle'>";
         $ret .= "<td align='right'>&nbsp;</td>";
@@ -787,7 +831,9 @@ sub talkform {
             $ret .= "<td align='center'>( )</td>";
             $ret .= "<td align='left'><span class='ljdeem'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</font>" . BML::ml(".opt.bannedfrom", {'journal'=>$journalu->{'user'}}) . "</td>";
         } else {
-            $ret .= "<td align='center'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' $checked /></td>";
+            $ret .= "<td align='center'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote'" .
+                     $whocheck->('remote') .
+                     " /></td>";
             $ret .= "<td align='left'><label for='talkpostfromremote'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</label>\n";
             $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}' id='cookieuser' />\n";
             if ($journalu->{'opt_whoscreened'} eq 'A' ||
@@ -796,7 +842,6 @@ sub talkform {
                 $ret .= " " . $BML::ML{'.opt.willscreen'};
             }
             $ret .= "</td>";
-            $checked = "";
         }
         $ret .= "</tr>\n";
     }
@@ -804,7 +849,8 @@ sub talkform {
     # ( ) LiveJournal user:
     $ret .= "<tr valign='middle'>";
     $ret .= "<td>&nbsp;</td>";
-    $ret .= "<td align='center'><input type='radio' name='usertype' value='user' id='talkpostfromlj' $checked />";
+    $ret .= "<td align='center'><input type='radio' name='usertype' value='user' id='talkpostfromlj'" .
+            $whocheck->('ljuser') . "/>";
     $ret .= "</td><td align='left'><b><label for='talkpostfromlj'>$BML::ML{'.opt.ljuser'}</label></b> ";
     $ret .= $BML::ML{'.opt.willscreenfriend'} if $journalu->{'opt_whoscreened'} eq 'F';
     $ret .= $BML::ML{'.opt.willscreen'} if $journalu->{'opt_whoscreened'} eq 'A';
@@ -813,11 +859,11 @@ sub talkform {
     # Username: [    ] Password: [    ]  Login? [ ]
     $ret .= "<tr valign='middle' align='left'><td colspan='2'></td><td>";
     $ret .= "$BML::ML{'Username'}:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='15' id='username' value='" .
-            BML::eall($FORM->{userpost}). "' /> ";
+            BML::eall($form->{userpost}). "' /> ";
     $ret .= "$BML::ML{'Password'}:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13' id='password' /> <label for='logincheck'>$BML::ML{'.loginq'}&nbsp;</label><input type='checkbox' name='do_login' id='logincheck' /></td></tr>\n";
     
-    my $basesubject = $FORM->{subject} || "";
-    if ($replyto && !$basesubject) {
+    my $basesubject = $form->{subject} || "";
+    if ($opts->{replyto} && !$basesubject && $parpost->{'subject'}) {
         $basesubject = $parpost->{'subject'};
         $basesubject =~ s/^Re:\s*//i;
         $basesubject = "Re: $basesubject";
@@ -829,7 +875,7 @@ sub talkform {
 
     # Subject Icon toggle button
     {
-        my $subjicon = $FORM->{subjecticon} || 'none';
+        my $subjicon = $form->{subjecticon} || 'none';
         my $foundicon = 0;
         $ret .= "<input type='hidden' id='subjectIconField' name='subjecticon' value='$subjicon'>\n";
         $ret .= "<script type='text/javascript' language='Javascript'>\n";
@@ -921,7 +967,7 @@ sub talkform {
         }
         @pics = sort { lc($a) cmp lc($b) } @pics;
         $ret .= LJ::html_select({'name' => 'prop_picture_keyword', 
-                                 'selected' => $curpickw, },
+                                 'selected' => $form->{'prop_picture_keyword'}, },
                                 ("", $BML::ML{'.opt.defpic'}, map { ($_, $_) } @pics));
         $ret .= LJ::help_icon("userpics", " ");
     }
@@ -929,12 +975,48 @@ sub talkform {
 
     # textarea for their message body
     $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}</td><td colspan='4' style='width: 90%'>";
-    $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext' style='width: 100%'>$FORM->{body}</textarea>";
+    $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext' style='width: 100%'>$form->{body}</textarea>";
+
+    # Display captcha challenge if anon and over rate limits.
+    if ($form->{'usertype'} eq "anonymous" && ! $remote && $opts->{do_captcha} && $LJ::HUMAN_CHECK{anonpost}) {
+        my ($wants_audio, $captcha_sess, $captcha_chal);
+        $wants_audio = 1 if $LJ::HUMAN_CHECK{anonpost} && lc($form->{answer}) eq 'audio';
+
+        # Captcha sessions 
+        my $cid = $journalu->{clusterid};
+        $captcha_chal = $form->{captcha_chal} || LJ::challenge_generate(900);
+        $captcha_sess = LJ::get_challenge_attributes($captcha_chal);
+        my $dbcr = LJ::get_cluster_reader($journalu);
+
+        my $try = 0;
+        if ($form->{captcha_chal}) {
+            $try = $dbcr->selectrow_array('SELECT trynum FROM captcha_session ' .
+                                          'WHERE sess=?', undef, $captcha_sess);
+        }
+
+        # Visual challenge
+        if (! $wants_audio && ! $form->{audio_chal}) {
+            $ret .= '<br /><br />';
+            $ret .= "<div class='formitemDesc'>$BML::ML{'/create.bml.captcha.desc'}</div>";
+            $ret .= "<img src='/captcha/image.bml?chal=$captcha_chal&amp;cid=$cid&amp;try=$try' width='175' height='35' />";
+            $ret .= "<br /><br />$BML::ML{'/create.bml.captcha.answer'}";
+        }
+        # Audio challenge
+        else {
+            $ret .= "<div class='formitemDesc'>$BML::ML{'/create.bml.captcha.audiodesc'}</div>";
+            $ret .= "<a href='/captcha/audio.bml?chal=$captcha_chal&amp;cid=$cid&amp;try=$try'>$BML::ML{'/create.bml.captcha.play'}</a> &nbsp; ";
+            $ret .= LJ::html_hidden(audio_chal => 1);
+        }
+        $ret .= LJ::html_text({ name =>'answer', size =>15 });
+        $ret .= LJ::html_hidden(captcha_chal => $captcha_chal);
+        $ret .= '<br />';
+    }
 
     # post and preview buttons
     $ret .= <<LOGIN;
     <br />
-    <script> 
+    <script language="JavaScript" type='text/javascript'> 
+        <!--
         if (document.getElementById && document.getElementById('postform')) {
             document.write("<input name='submitpost' onclick='return sendForm(\\"postform\\")' type='submit' value='$BML::ML{'.opt.submit'}' />");
             document.write("&nbsp;");
@@ -944,6 +1026,7 @@ sub talkform {
             document.write("&nbsp;");
             document.write("<input type='submit' name='submitpreview' value='$BML::ML{'talk.btn.preview'}' />");
         }
+        // -->
     </script>
     <noscript>
         <input type='submit' name='submitpost' value='$BML::ML{'.opt.submit'}' />
@@ -1485,7 +1568,7 @@ sub enter_comment {
 my $SC = '/talkpost_do.bml';
 
 sub init {
-    my ($form, $remote, $errret) = @_;
+    my ($form, $remote, $do_captcha, $errret) = @_;
     my $sth;
 
     my $err = sub {
@@ -1665,9 +1748,17 @@ sub init {
         }
     }
 
-    # anti-spam rate limiting 
-    return $err->("You've hit the \"probably a spambot\" rate limit.") 
-        unless check_rate($remote);
+    # anti-spam captcha check
+    if ($form->{'usertype'} eq "anonymous" && $do_captcha) {
+        return $err->("Please confirm you are a human below.") unless $form->{answer};
+        return if lc($form->{answer}) eq 'audio';
+        my ($capid, $anum) = LJ::Captcha::session_check_code($form->{captcha_chal},
+                                                             $form->{answer},
+                                                             $journalu->{clusterid});
+        return $err->("Incorrect response to spam robot challenge.") unless $capid && $anum;
+        my $sysu = LJ::load_user('system');
+        LJ::Captcha::expire($capid, $anum, $sysu->{userid});
+    }
     
     # check that user can even view this post, which is required
     # to reply to it

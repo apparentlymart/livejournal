@@ -1,8 +1,11 @@
 <?_code
 {
-    my $png;
+    my ($capid, $anum) = ($GET{capid}, $GET{anum});
+    ($capid, $anum) = LJ::Captcha::session($GET{chal}, 'image', $GET{cid}) if $GET{chal};
+    return "Error" unless $capid && $anum;
 
-    eval { $png = LJ::Captcha::get_visual_data($GET{capid}, $GET{anum}); };
+    my $png;
+    eval { $png = LJ::Captcha::get_visual_data($capid, $anum); };
     if ($png) {
         BML::set_content_type("image/png");
         return BML::noparse($png);

@@ -1695,6 +1695,17 @@ CREATE TABLE openproxy (
 )
 EOC
 
+register_tablecreate("captcha_session", <<'EOC');  # clustered
+CREATE TABLE captcha_session (
+    sess char(20) NOT NULL default '',
+    sesstime int(10) unsigned NOT NULL default '0',
+    lastcapid int(11) default NULL,
+    trynum smallint(6) default '0',
+    PRIMARY KEY  (`sess`),
+    KEY sesstime (`sesstime`)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 

@@ -39,7 +39,7 @@ do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
                     "s1usercache", "modlog", "modblob", "counter",
                     "userproplite2", "links", "s1overrides", "s1style",
                     "s1stylecache", "userblob", "userpropblob",
-                    "clustertrack2",
+                    "clustertrack2", "captcha_session",
                     );
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"
@@ -2830,6 +2830,12 @@ sub challenge_generate
     return $chal;
 }
 
+# Return challenge info.
+# This could grow later - for now just return the rand chars used.
+sub get_challenge_attributes 
+{
+    return (split /:/, shift)[4];
+}
 
 # Validate a challenge string previously supplied by challenge_generate
 # return 1 "good" 0 "bad", plus sets keys in $opts:
@@ -4707,7 +4713,7 @@ sub get_cluster_reader
 # class: db
 # des: Returns a cluster master for a given user.
 # args: uarg
-# des-uarg: Either a userid scalar or a user object.
+# des-uarg: Either a clusterid scalar or a user object.
 # returns: DB handle.  Or undef if master is unavailable.
 # </LJFUNC>
 sub get_cluster_master

@@ -1,8 +1,11 @@
 <?_code
 {
-    my $wav;
+    my ($capid, $anum) = ($GET{capid}, $GET{anum});
+    ($capid, $anum) = LJ::Captcha::session($GET{chal}, 'audio', $GET{cid}) if $GET{chal};
+    return "Error" unless $capid && $anum;
 
-    eval { $wav = LJ::Captcha::get_audio_data($GET{capid}, $GET{anum}); };
+    my $wav;
+    eval { $wav = LJ::Captcha::get_audio_data($capid, $anum); };
     if ($wav) {
         BML::set_content_type("audio/x-wav");
         return BML::noparse($wav);

@@ -289,8 +289,12 @@ body<=
 
     $ret .= BML::fill_template("H1", { DATA => $ML{'.postresponse'} });
 
-    $ret .= LJ::Talk::talkform($remote, $u, $parpost, $init->{replyto}, $ditemid, $FORM{'prop_picture_keyword'});
-
+    $ret .= LJ::Talk::talkform({ 'remote'   => $remote,
+                                 'journalu' => $u,
+                                 'parpost'  => $parpost,
+                                 'replyto'  => $init->{replyto},
+                                 'ditemid'  => $ditemid,
+                                 'form'     => $form });
     BML::noparse();
     return $ret;
 }

@@ -118,7 +118,7 @@ sub get_id
         LIMIT 1
     };
     $row = $dbh->selectrow_arrayref( $sql, undef, $type )
-        or die "No $type captchas available";
+        or $dbh->do(" UNLOCK TABLES ") && die "No $type captchas available";
     die "selectrow_arrayref: $sql: ", $dbh->errstr if $dbh->err;
     ( $capid, $anum ) = @$row;
 
@@ -309,6 +309,35 @@ sub check_code {
     return lc $answer eq lc $code;
 }
 
+# Verify captcha answer if using a captcha session.
+# (captcha challenge, code, $u)
+# Returns capid and anum if answer correct. (for expire)
+sub session_check_code {
+    my ($sess, $code, $u) = @_;
+    return 0 unless $sess && $code;
+    $sess = LJ::get_challenge_attributes($sess);
+
+    $u = LJ::load_user('system') unless $u;
+
+    my $dbcm = LJ::get_cluster_master($u);
+    my $dbr = LJ::get_db_reader();
+    
+    my ($lcapid, $try) =  # clustered
+        $dbcm->selectrow_array('SELECT lastcapid, trynum ' .
+                               'FROM captcha_session ' .
+                               'WHERE sess=?', undef, $sess);
+    my ($capid, $anum) =  # global
+        $dbr->selectrow_array('SELECT capid,anum ' .
+                              'FROM captchas '.
+                              'WHERE capid=?', undef, $lcapid);
+    if (! LJ::Captcha::check_code($capid, $anum, $code, $u)) {
+        # update try and lastcapid
+        $dbcm->do('UPDATE captcha_session SET lastcapid=NULL, ' .
+                  'trynum=trynum+1 WHERE sess=?', undef, $sess);
+        return 0;
+    }
+    return ($capid, $anum);
+}
 
 ### expire( $capid ) -> <true value if code was expired successfully>
 sub expire {
@@ -331,5 +360,37 @@ sub expire {
 
     return 1;
 }
+
+# Update/create captcha sessions, return new capid/anum pairs on success.
+# challenge, type, optional journalu->{clusterid} for clustering.
+# Type is either 'image' or 'audio'
+sub session
+{
+    my ($chal, $type, $cid) = @_;
+    return unless $chal && $type;
+
+    my $chalinfo = {};
+    LJ::challenge_check($chal, $chalinfo);
+    return unless $chalinfo->{valid};
+
+    my $sess = LJ::get_challenge_attributes($chal);
+    my ($capid, $anum) = ($type eq 'image') ?
+                         LJ::Captcha::get_visual_id() :
+                         LJ::Captcha::get_audio_id();
+
+
+    $cid = LJ::load_user('system')->{clusterid} unless $cid;
+    my $dbcm = LJ::get_cluster_master($cid);
+
+    # Retain try count
+    my $try = $dbcm->selectrow_array('SELECT trynum FROM captcha_session ' .
+                                     'WHERE sess=?', undef, $sess);
+    $try ||= 0;
+    # Add/update session
+    $dbcm->do('REPLACE INTO captcha_session SET sess=?, sesstime=?, '.
+              'lastcapid=?, trynum=?', undef, $sess, time(), $capid, $try);
+    return ($capid, $anum);
+}
+
 
 1;
