@@ -104,6 +104,11 @@ sub DayPage
 
         my $subject = $logtext->{$itemid}->[0];
         my $text = $logtext->{$itemid}->[1];
+        if ($get->{'nohtml'}) {
+            # quote all non-LJ tags
+            $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
+            $text    =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
+        }
 
         # don't show posts from suspended users
         next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S';

@@ -67,6 +67,10 @@ sub EntryPage
         foreach my $com (@$srclist) {
             my $dtalkid = $com->{'talkid'} * 256 + $entry->{'anum'};
             my $text = $com->{'body'};
+            if ($get->{'nohtml'}) {
+                # quote all non-LJ tags
+                $text =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
+            }
             LJ::CleanHTML::clean_comment(\$text, $com->{'props'}->{'opt_preformatted'});
 
             # local time in mysql format to gmtime
@@ -230,6 +234,11 @@ sub EntryPage_entry
     });
 
     # format it
+    if ($opts->{'getargs'}->{'nohtml'}) {
+        # quote all non-LJ tags
+        $entry->{'subject'} =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
+        $entry->{'event'}   =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
+    }
     LJ::CleanHTML::clean_subject(\$entry->{'subject'});
     LJ::CleanHTML::clean_event(\$entry->{'event'}, $entry->{'props'}->{'opt_preformatted'});
     LJ::expand_embedded($ditemid, $remote, \$entry->{'event'});
