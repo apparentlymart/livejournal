@@ -436,7 +436,7 @@ sub handle_request
 
 sub eval_code
 {
-    my $ret = (eval("{\n package BMLCodeBlock; \n $_[0] \n }\n"))[0];
+    my $ret = (eval("{\n package BMLCodeBlock; \n $_[0]\n }\n"))[0];
     if ($@) { return "<B>[Error: $@]</B>"; }
     
     my $newhtml;
