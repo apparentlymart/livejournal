@@ -5937,6 +5937,10 @@ sub set_interests
     my %int_new = ();
     my %int_del = %$old;  # assume deleting everything, unless in @$new
 
+    # user interests go in a different table than user interests,
+    # though the schemas are the same so we can run the same queries on them
+    my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
+
     foreach my $int (@$new)
     {
         $int = lc($int);       # FIXME: use utf8?
@@ -5955,7 +5959,7 @@ sub set_interests
     {
         ## easy, we know their IDs, so delete them en masse
         my $intid_in = join(", ", values %int_del);
-        $dbh->do("DELETE FROM userinterests WHERE userid=$userid AND intid IN ($intid_in)");
+        $dbh->do("DELETE FROM $uitable WHERE userid=$userid AND intid IN ($intid_in)");
         $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)");
     }
 
@@ -5979,7 +5983,6 @@ sub set_interests
 
         if (@new_intids) {
             my $sql = "";
-            my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
             foreach my $newid (@new_intids) {
                 if ($sql) { $sql .= ", "; }
                 else { $sql = "REPLACE INTO $uitable (userid, intid) VALUES "; }
@@ -6012,7 +6015,7 @@ sub set_interests
             }
             if ($intid) {
                 ## now we can actually insert it into the userinterests table:
-                $dbh->do("INSERT INTO userinterests (userid, intid) ".
+                $dbh->do("INSERT INTO $uitable (userid, intid) ".
                          "VALUES ($userid, $intid)");
             }
         }
