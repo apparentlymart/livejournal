@@ -67,6 +67,7 @@ while (1)
     $sth->execute;
     my @tables;
     while (my ($table, $count) = $sth->fetchrow_array) {
+	next if ($table =~ /^do:/);
 	push @tables, $table;
     }
     $sth->finish;
