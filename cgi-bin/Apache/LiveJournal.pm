@@ -1115,7 +1115,7 @@ sub db_logger
         my $endcpu = $GTop->cpu                 or last STATS;
         my $startmem = $r->pnotes( 'gtop_mem' ) or last STATS;
         my $endmem = $GTop->proc_mem( $$ )      or last STATS;
-        my $cpufreq = $endcpu->freq             or last STATS;
+        my $cpufreq = $endcpu->frequency        or last STATS;
 
         @$var{qw{pid cpu_user cpu_sys cpu_total mem_vsize mem_share mem_rss}} = (
             $$,
