@@ -402,9 +402,9 @@ $cmd{'ban_unset'} = {
 $cmd{'ban_list'} = {
     'def' => 'conban.pl',
     'des' => 'List banned users.',
-    'argsummary' => '[ "from" <community> ]',
+    'argsummary' => '[ "from" <user> ]',
     'args' => [
-               'community' => "Optional, to list bans in a community you run.",
+               'user' => "Optional; list bans in a community you maintain, or any user if you have the 'finduser' priv.",
                ],
     };
 

@@ -10,7 +10,6 @@ $cmd{'ban_list'}->{'handler'} = \&ban_list;
 sub ban_list
 {
     my ($dbh, $remote, $args, $out) = @_;
-    my $error = 0;
 
     unless ($remote) {
         push @$out, [ "error", "You must be logged in to use this command." ];
@@ -21,31 +20,33 @@ sub ban_list
     my $j = $remote;
 
     unless ($remote->{'journaltype'} eq "P") {
-        push @$out, [ "error", "Only people can list banned users, not communities (you're not logged in as a person account)." ],
+        push @$out, [ "error", "Only people can list banned users, not communities (you're not logged in as a person account)." ];
         return 0;
     }
 
     if (scalar(@$args) == 3) {
         unless ($args->[1] eq "from") {
-            $error = 1;
             push @$out, [ "error", "First argument not 'from'." ];
+            return 0;
         }
 
         $j = LJ::load_user($args->[2]);
         if (!$j) {
-            $error = 1;
-            push @$out, [ "error", "Unknown account." ],
-        } elsif ($j->{journaltype} ne 'C') {
-            $error = 1;
-            push @$out, [ "error", "Account is not a community." ],
-        } elsif (!LJ::can_manage($remote, $j)) {
-            $error = 1;
-            push @$out, [ "error", "Not maintainer of this community." ],
+            push @$out, [ "error", "Unknown account." ];
+            return 0;
+        }
+
+        unless (LJ::check_priv($remote, "finduser")) {
+            if ($j->{journaltype} ne 'C') {
+                push @$out, [ "error", "Account is not a community." ];
+                return 0;
+            } elsif (!LJ::can_manage($remote, $j)) {
+                push @$out, [ "error", "Not maintainer of this community." ];
+                return 0;
+            }
         }
     }
     
-    return 0 if $error;
-
     my $banids = LJ::load_rel_user($j->{userid}, 'B') || [];
     my $us = LJ::load_userids(@$banids);
     my @userlist = map { $us->{$_}{user} } keys %$us;
