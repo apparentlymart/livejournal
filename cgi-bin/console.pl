@@ -274,18 +274,27 @@ $cmd{'priv'} =
             $arg ||= "";   # since it might be undef
 
             foreach my $username (@usernames) {
-                my $userid = $userids{$username};
-                my $desc = sprintf(qq{%s: "%s" with arg "%s"},
-                                   $is_grant ? "Granting" : "Denying",
-                                   $privcode, $arg);
+                my $u = LJ::load_user($username);
+                return $fail->($out, "Couldn't load user for $username") unless $u;
+                my $has_priv = LJ::check_priv($u, $privcode, $arg);
 
-                if ($sth->execute($userid, $prlid, $arg)) {
-                    $success->($out, "$desc to $username");
-                    LJ::statushistory_add($userid, $remote->{userid},
-                                          $is_grant ? "privadd" : "privdel",
-                                          $desc);
-                } else {
-                    $result = $fail->($out, "DB failure: $desc to $username: " . $sth->errstr);
+                if ($is_grant && $has_priv) { # Dupe priv
+                    $result = $fail->($out, "User $username already has $privcode with the argument $arg.");
+                } elsif (!$is_grant && !$has_priv) { # Dupe priv
+                    $result = $fail->($out, "User $username does not have $privcode with the argument $arg.");
+                } else { # We can do it! ... All night long
+                    my $desc = sprintf(qq{%s: "%s" with arg "%s"},
+                                       $is_grant ? "Granting" : "Denying",
+                                       $privcode, $arg);
+
+                    if ($sth->execute($u->{'userid'}, $prlid, $arg)) {
+                        $success->($out, "$desc to $username");
+                        LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
+                                              $is_grant ? "privadd" : "privdel",
+                                              $desc);
+                    } else {
+                        $result = $fail->($out, "DB failure: $desc to $username: " . $sth->errstr);
+                    }
                 }
             }
         }
