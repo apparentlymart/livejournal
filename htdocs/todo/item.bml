@@ -43,7 +43,7 @@
 	 }
      }
      if ($it->{'security'} eq "friends") {
-	 unless (LJ::is_friend($dbs, $u, $remote))
+	 unless (LJ::is_friend($dbs, $u, $remote)) {
 	     $title = "Sorry...";
 	     $body = "(=H1 Security H1=)(=P The requested to-do item marked 'friends only' by the owner. P=)";
 	     return;
