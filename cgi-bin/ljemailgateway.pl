@@ -90,7 +90,24 @@ sub process {
     if ($body =~ s/^\s*\+([a-z0-9]+)\s+//i) {
         $pin = $1 unless defined $pin;
     }
-    return $err->("Unable to locate your PIN.", $err_addr) unless $pin;
+
+    # Validity checks.  We only care about these if they aren't using PGP.
+    unless (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
+        return $err->("No allowed senders have been saved for your account.", $err_addr)
+            unless ref $addrlist;
+        my $ok = 0;
+        foreach (keys %$addrlist) {
+            if (lc($from) eq lc) {
+                $ok = 1;
+                last;
+            }
+        }
+        return $err->("Unauthorized sender address: $from") unless $ok; # don't mail user due to bounce spam
+        return $err->("Unable to locate your PIN.", $err_addr) unless $pin;
+        return $err->("Invalid PIN.", $err_addr) unless lc($pin) eq lc($u->{emailpost_pin});
+    }
+    return $err->("Email gateway access denied for your account type.", $err_addr)
+        unless LJ::get_cap($u, "emailpost");
 
     # Snag charset and do utf-8 conversion
     my ($charset, $format);
@@ -109,23 +126,6 @@ sub process {
             }
         }
     }
-
-    # Validity checks.  We only care about these if they aren't using PGP.
-    unless (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
-        return $err->("No allowed senders have been saved for your account.", $err_addr)
-            unless ref $addrlist;
-        my $ok = 0;
-        foreach (keys %$addrlist) {
-            if (lc($from) eq lc) {
-                $ok = 1;
-                last;
-            }
-        }
-        return $err->("Unauthorized sender address: $from") unless $ok; # don't mail user due to bounce spam
-        return $err->("Invalid PIN.", $err_addr) unless lc($pin) eq lc($u->{emailpost_pin});
-    }
-    return $err->("Email gateway access denied for your account type.", $err_addr)
-        unless LJ::get_cap($u, "emailpost");
 
     # PGP signed mail?  We'll see about that.
     if (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
