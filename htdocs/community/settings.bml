@@ -90,12 +90,13 @@ body<=
         if ($mode eq 'create') {
            $dbh->do("REPLACE INTO community (userid, membership, postlevel) VALUES ($cid, $qmembership, $qpostlevel)");
            LJ::set_rel($cu, $remote, 'A');
+
+           # delete existing friends
+           $dbh->do("DELETE FROM friends WHERE userid=?", undef, $cid);
+
         } else {
            $dbh->do("UPDATE community SET membership=$qmembership, postlevel=$qpostlevel WHERE userid=$cid");
         }
-
-        # delete existing friends
-        $dbh->do("DELETE FROM friends WHERE userid=?", undef, $cid);
 
         my $nonmembers = $POST{'nonmember_posting'} + 0;
         my $moderated = $POST{'moderated'} + 0;
