@@ -904,7 +904,7 @@ sub postevent
         LJ::cmd_buffer_add($dbcm, $u->{'userid'}, 'weblogscom', {
             'user' => $u->{'user'}, 
             'title' => $u->{'journaltitle'} || $u->{'name'},
-            'url' => LJ::journal_base($u)
+            'url' => LJ::journal_base($u) . "/",
         });
       }
 
