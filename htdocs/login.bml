@@ -186,7 +186,7 @@
             $do_change = 0;
         }
 
-        if ($do_logout || $do_login) {
+        if ($do_logout) {
             LJ::kill_session($remote);
             foreach (qw(ljsession langpref)) {
                 delete $COOKIE{$_};
