@@ -204,11 +204,11 @@
      $ret .= "<table cellpadding='5' cellspacing='1' border='1'><tr><td><b>Revoke</b></td><td><b>User</b></td><td><b>Arg</b></td></tr>\n";
 
      my $cangrant = ($access{'all'} || $access{$priv{$priv}->{'privcode'}});	
-     my $foundany = 0;
+     my $foundcount = 0;
 
      while ($_ = $sth->fetchrow_hashref) 
      {
-         $foundany = 1;
+         $foundcount++;
          $ret .= "<tr><td align='center'>";
          if ($cangrant) {	
              $ret .= "<input type='checkbox' name=\"revoke:$_->{'prmid'}:$_->{'userid'}\" />";
@@ -219,7 +219,7 @@
          $ret .= "<td>$_->{'arg'}</td></tr>\n";
      }
      $ret .= "</table>";
-     if ($foundany) {
+     if ($foundcount >= $limit) {
          $ret .= "<a href='" . LJ::self_link(\%FORM, {'skip'=>($skip +$limit)}) . "'>See more...</a>\n";
      }
 
