@@ -2149,6 +2149,16 @@ The site team
 
 /manage/index.bml.customization.modify.about=Modify your journal's display properties
 
+/manage/index.bml.customization.moodtheme.header=Mood Themes
+
+/manage/index.bml.customization.moodtheme.editor=Create and edit your custom mood themes
+
+/manage/index.bml.customization.moodtheme.editor.header=Mood Theme Editor
+
+/manage/index.bml.customization.moodtheme.set=Select which mood theme set your journal will use
+
+/manage/index.bml.customization.moodtheme.set.header=Set Your Mood Theme
+
 /manage/index.bml.customization.s1.header=S1 Style System
 
 /manage/index.bml.customization.s2.header=S2 Style System
