@@ -89,9 +89,9 @@ body<=
          return $ret;
      }
      if ($clustered) {
-         $dbcm->do("UPDATE talk2 SET state='S' WHERE journalid=$u->{'userid'} AND jtalkid=$FORM{'talkid'}");
+         $dbcm->do("UPDATE talk2 SET state='S' WHERE journalid=$u->{'userid'} AND jtalkid=$qtalkid");
      } else {
-         $dbh->do("UPDATE talk SET state='S' WHERE talkid=$FORM{'talkid'}");
+         $dbh->do("UPDATE talk SET state='S' WHERE talkid=$qtalkid");
      }
      return "<?h1 $ML{'.screened.title'} h1?><?p $ML{'.screened.body'} p?>";
  }
@@ -112,9 +112,9 @@ body<=
          return $ret;
      }
      if ($clustered) {
-         $dbcm->do("UPDATE talk2 SET state='A' WHERE journalid=$u->{'userid'} AND jtalkid=$FORM{'talkid'}");
+         $dbcm->do("UPDATE talk2 SET state='A' WHERE journalid=$u->{'userid'} AND jtalkid=$qtalkid");
      } else {
-         $dbh->do("UPDATE talk SET state='A' WHERE talkid=$FORM{'talkid'}");
+         $dbh->do("UPDATE talk SET state='A' WHERE talkid=$qtalkid");
      }
      return "<?h1 $ML{'.unscreened.title'} h1?><?p $ML{'.unscreened.body'} p?>";
  }

@@ -440,7 +440,7 @@ body<=
     my @childs = sort { $postref->{$a}->{'datepost'} cmp $postref->{$b}->{'datepost'} }
     grep { ($postref->{$_}->{'state'} eq "A" || $postref->{$_}->{'_haschildren'} ||
             ($postref->{$_}->{'state'} eq "S" && 
-             LJ::Talk::can_view_screened($dbs, $remote, $u, $postref->{$_}->{'userpost'}))
+             LJ::Talk::can_view_screened($dbs, $remote, $u, $up, $postref->{$_}->{'userpost'}))
            )}
     @{$opts->{'children'}->{$tid}};
 
@@ -467,7 +467,7 @@ body<=
             $user = $ML{'.anonuser'};
         }
 
-        my $canviewscr = LJ::Talk::can_view_screened($dbs, $remote, $u, $userpost);
+        my $canviewscr = LJ::Talk::can_view_screened($dbs, $remote, $u, $up, $userpost);
         my $shouldviewscr = exists $FORM{'showscreened'} && $FORM{'showscreened'};
 
         if ($post->{'state'} eq "D") {
