@@ -402,7 +402,8 @@
           $mret .= "</td></tr></table>";
           return $mret;
       };
-      unless ($u->{'opt_whatemailshow'} eq "N") {
+      unless ($u->{'opt_whatemailshow'} eq "N" ||
+              $u->{'opt_whatemailshow'} eq "L" && $u->{'no_mail_alias'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.email'}</b></td><td colspan='$span'>";
           my @emails = ($u->{'email'});
