@@ -44,5 +44,16 @@ require 'topiclib.pl';
 require 'ljtodo.pl';
 require 'directorylib.pl';
 
+# register BML multi-language hook
+BML::register_ml_getter(sub {
+    my ($lang, $code) = @_;
+    # FIXME: bare-minimum implementation.  add memoization later.
+    my $dbr = LJ::get_dbh("slave", "master");
+    my $langid = $dbr->selectrow_array("SELECT lnid FROM ml_langs WHERE lncode=" . $dbr->quote($lang));
+    my $text = $dbr->selectrow_array("SELECT t.text FROM ml_text t, ml_latest l, ml_items i WHERE t.dmid=1 ".
+                                     "AND t.txtid=l.txtid AND l.dmid=1 AND l.lnid=$langid AND l.itid=i.itid ".
+                                     "AND i.dmid=1 AND i.itcode=" . $dbr->quote($code));
+    return $text;
+});
 
 1;
