@@ -3102,6 +3102,7 @@ sub make_journal
         my $errcode = $opts->{'errcode'};
         my $errmsg = {
             'nodb' => 'Database temporarily unavailable during maintenance.',
+            'nosyn' => 'No syndication URL available.',
         }->{$errcode};
         return "<!-- $errmsg -->" if ($opts->{'vhost'} eq "customview");
         return $errmsg;

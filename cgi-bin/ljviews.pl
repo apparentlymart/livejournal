@@ -1639,7 +1639,18 @@ sub create_view_rss
     my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    
+
+    # for syndicated accounts, redirect to the syndication URL
+    if ($u->{'journaltype'} eq 'Y') {
+        my $synurl = $dbr->selectrow_array("SELECT synurl FROM syndicated WHERE userid=$u->{'userid'}");
+        unless ($synurl) {
+            $opts->{'errcode'} = "nosyn";
+            return 0;
+        }
+        $opts->{'redir'} = $synurl;
+        return 1;
+    }
+
     my $user = $u->{'user'};
     LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
