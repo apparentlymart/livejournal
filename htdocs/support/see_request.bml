@@ -628,7 +628,9 @@ body<=
     }
     # Prefill an e-mail validation nag, if needed.
     my $validationnag;
-    if (($u->{'status'} eq "N" || $u->{'status'} eq "T") && ! LJ::Support::is_poster($sp, $remote, $auth)) {
+    if (!($u->underage && $u->{'status'} eq 'T') &&
+        ($u->{'status'} eq "N" || $u->{'status'} eq "T") &&
+        ! LJ::Support::is_poster($sp, $remote, $auth)) {
         my $reminder = LJ::load_include('validationreminder');
         $validationnag .= "\n\n$reminder" if $reminder;
     }
