@@ -19,7 +19,11 @@
  my $remote = LJ::get_remote($dbs);
  LJ::load_remote($dbs, $remote);
 
- if (LJ::get_cap($remote, "readonly")) {
+ my $dbcm = LJ::get_cluster_master($remote);
+
+ if (LJ::get_cap($remote, "readonly") ||
+     ($remote && $remote->{'clusterid'} && ! $dbcm))
+ {
      $title = "Read-only mode";
      $body = $LJ::MSG_READONLY_USER;
      return;
