@@ -1361,7 +1361,7 @@ sub getevents
                 $evt->{'props'}->{$_} = LJ::text_convert($dbs, 
                     $evt->{'props'}->{$_}, $uowner, \$error);
             }
-            return fail($err,208,"Cannot display non-Unicode posts unless default encoding has been selected")
+            return fail($err,208,"Cannot display this post. Please see $LJ::SITEROOT/support/encodings.bml for more information.")
                 if $error;
         }
 
@@ -1376,7 +1376,7 @@ sub getevents
                 if ($req->{'selecttype'} eq 'day') {
                     $t->[0] = $t->[1] = '(cannot be shown)';
                 } else {
-                    return fail($err,207,"Cannot display/edit a Unicode post with a non-Unicode client");
+                    return fail($err,207,"Cannot display/edit a Unicode post with a non-Unicode client. Please see $LJ::SITEROOT/support/encodings.bml for more information.");
                 }
             }
         }
@@ -1577,7 +1577,7 @@ sub editfriendgroups
             my $name = $req->{'set'}->{$bit}->{'name'};
             return fail($err,207,"non-ASCII names require a Unicode-capable client")
                 if $req->{'ver'} < 1 and not LJ::is_ascii($name);
-            return fail($err,208,"Some of the group names aren't valid UTF-8 strings")
+            return fail($err,208,"Invalid group names. Please see $LJ::SITEROOT/support/encodings.bml for more information.")
                 unless LJ::text_in($name);
         }
     }

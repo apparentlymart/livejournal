@@ -1,0 +1,17 @@
+<?_code
+
+ $title = $ML{'.title'};
+ $body = "";
+
+ $body .= "<?h1 $ML{'.overview.header'} h1?>$ML{'.overview.text'}";
+ $body .= "<?h1 $ML{'.edit.header'} h1?>$ML{'.edit.text'}";
+ $body .= "<?h1 $ML{'.editcl.header'} h1?>$ML{'.editcl.text'}";
+ $body .= "<?h1 $ML{'.groups.header'} h1?>$ML{'.groups.text'}";
+ $body .= "<?h1 $ML{'.still.header'} h1?>$ML{'.still.text'}";
+
+ return;
+
+_code?><?page
+title=><?_code return $title; _code?>
+body=><?_code return $body; _code?>
+page?>
