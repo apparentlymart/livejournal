@@ -797,7 +797,10 @@ sub getevents
 	$dbh->do("SET SQL_LOG_BIN=0");  # don't replicate temp table creation
 	$dbh->do("DROP TABLE IF EXISTS tmp_selecttype_day");
 	$dbh->do("CREATE TEMPORARY TABLE tmp_selecttype_day SELECT $allfields, l.logtime FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.ownerid=$ownerid AND l.year=$qyear AND l.month=$qmonth AND l.day=$qday");
-	return fail($err,501,$dbh->errstr) if $dbh->err;
+	if ($dbh->err) {
+	    $dbh->do("SET SQL_LOG_BIN=1"); 
+	    return fail($err,501,$dbh->errstr);
+	}
 	
 	$fields =~ s/lt\./l\./g;
 	$sth = $dbh->prepare("SELECT $fields FROM tmp_selecttype_day l ORDER BY l.eventtime, l.logtime");
@@ -848,11 +851,17 @@ sub getevents
 	$sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt, syncupdates s WHERE s.userid=$ownerid AND s.atime>='$date' AND s.nodetype='L' AND s.nodeid=l.itemid AND s.nodeid=lt.itemid ORDER BY s.atime LIMIT $LIMIT");
     }
 
-    return fail($err,200,"Invalid selecttype.")
-	unless $sth;
+    unless ($sth) {
+	$dbh->do("SET SQL_LOG_BIN=1"); 
+	return fail($err,200,"Invalid selecttype.");
+    }
 
     $sth->execute;
-    return fail($err,501,$dbh->errstr) if $dbh->err;
+    if ($dbh->err) {
+	my $errstr = $dbh->errstr;
+	$dbh->do("SET SQL_LOG_BIN=1"); 
+	return fail($err,501,$errstr);
+    }
 
     my $count = 0;
     my @itemids = ();
