@@ -137,6 +137,12 @@ my $check = sub
 	return 0;
     }
 
+    my $mcount = 0;
+    $sth = $db->prepare("SHOW PROCESSLIST");
+    $sth->execute;
+    while ($sth->fetchrow_hashref) { $mcount++; }
+    print "  Conn: $mcount\n";
+
     $sth = $db->prepare("SHOW MASTER LOGS");
     $sth->execute;
     my @master_logs;
@@ -164,7 +170,7 @@ my $check = sub
 	if (defined $slaves{$sid}) {
 	    push @$chkref, $sid;
 	}
-	
+
 	$pr->(sprintf("    %-30s", $skey));
 
 	unless ($s->{'totalweight'}) {
@@ -175,8 +181,9 @@ my $check = sub
 
 	my $dbsl = LJ::_get_dbh_conn($s->{'rootfdsn'});
 	unless ($dbsl) {
-	    push @errors, "Can't connect to slave: $s->{'name'}";
-	    next;
+            $pr->("\n");
+            push @errors, "Can't connect to slave: $s->{'name'}";
+            next;
 	}
 
 	$flush_host->($sid, $dbh);
