@@ -2557,23 +2557,26 @@ sub get_prop
 # </LJFUNC>
 sub load_codes
 {
-    &nodb;    
+    &nodb;
     my $req = shift;
 
     my $dbr = LJ::get_db_reader();
 
     foreach my $type (keys %{$req})
     {
-        unless ($LJ::CACHE_CODES{$type})
+        my $memkey = "load_codes:$type";
+        unless ($LJ::CACHE_CODES{$type} ||= LJ::MemCache::get($memkey))
         {
             $LJ::CACHE_CODES{$type} = [];
-            my $qtype = $dbr->quote($type);
-            my $sth = $dbr->prepare("SELECT code, item FROM codes WHERE type=$qtype ORDER BY sortorder");
-            $sth->execute;
-            while (my ($code, $item) = $sth->fetchrow_array)
+            my $sth = $dbr->prepare("SELECT code, item, sortorder FROM codes WHERE type=?");
+            $sth->execute($type);
+            while (my ($code, $item, $sortorder) = $sth->fetchrow_array)
             {
-                push @{$LJ::CACHE_CODES{$type}}, [ $code, $item ];
+                push @{$LJ::CACHE_CODES{$type}}, [ $code, $item, $sortorder ];
             }
+            @{$LJ::CACHE_CODES{$type}} =
+                sort { $a->[2] <=> $b->[2] } @{$LJ::CACHE_CODES{$type}};
+            LJ::MemCache::set($memkey, $LJ::CACHE_CODES{$type}, 60*15);
         }
 
         foreach my $it (@{$LJ::CACHE_CODES{$type}})
