@@ -40,10 +40,6 @@ free to figure that out yourself.  We'll assume your webserver is
 running as user 'lj', though it doesn't have to run as any certain
 user to work.
 
-If you do use suEXEC, you'll need a User directive in your livejournal
-Vhost, as well as some different options to start the FastCGI process.
-You can read more about that at www.fastcgi.com.
-
 Installing the files
 --------------------
 In the past, the mandatory path for Livejournal was /home/lj/ but that
@@ -89,7 +85,6 @@ Now, install the following modules:
         Bundle::libnet
         Digest::MD5
         Image::Size
-        FCGI
         MIME::Tools
         MIME::Lite
         Compress::Zlib
@@ -111,13 +106,12 @@ Now, install the following modules:
 
 If you're using Debian this should get everything:
 
-# apt-get install libwww-perl libfcgi-perl libmime-perl libmime-lite-perl \
+# apt-get install libwww-perl libmime-perl libmime-lite-perl \
                   libsoap-lite-perl libgd-perl liburi-perl \
                   libimage-size-perl libdbd-mysql-perl libdbi-perl \
                   libnet-perl libdigest-md5-perl libgd-graph-perl \
                   libgd-text-perl libcompress-zlib-perl \
-                  libunicode-maputf8-perl libproc-process-perl \
-                  libapache-mod-fastcgi
+                  libunicode-maputf8-perl libproc-process-perl libapache-mod-perl
 
 NOTE: there used to be three custom LJ:: modules that needed
 installing.  We no longer install those in the system.  Instead LJ
@@ -131,22 +125,11 @@ You'll need the following Apache modules running (either statically or
 as DSOs):
 
 Standard:
-        mod_env
-        mod_setenvif
-        mod_alias
-        mod_expires
-        mod_actions
-        mod_rewrite
-        mod_mime_magic
-        mod_mime
+        mod_mime 
+        mod_dir  
 
 Special:
-        mod_fastcgi     -- from http://www.fastcgi.com/
-
-NOTE: It is critical that mod_mime_magic appear in the Apache config
-      file before mod_mime, otherwise none of the LiveJournal pages
-      will work. See http://httpd.apache.org/docs/mod/mod_mime_magic.html
-      if you'd like more information.
+        mod_perl
 
 
 Configuring Apache

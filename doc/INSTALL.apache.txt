@@ -7,120 +7,20 @@
 
   DirectoryIndex index.html index.bml
 
-  Options +ExecCGI
-  ScriptAlias /cgi-bin/ /home/lj/cgi-bin/
- 
-  SetEnv LJHOME /home/lj
-  FastCgiServer /home/lj/cgi-bin/404notfound.cgi -processes 1 -initial-env LJHOME=/home/lj
-  FastCgiServer /home/lj/cgi-bin/bmlp.pl -processes 2 -initial-env LJHOME=/home/lj
-  FastCgiServer /home/lj/htdocs/interface -processes 2 -initial-env LJHOME=/home/lj
-  FastCgiServer /home/lj/htdocs/customview.cgi -processes 2 -initial-env LJHOME=/home/lj
-  FastCgiServer /home/lj/htdocs/userpic -processes 1 -initial-env LJHOME=/home/lj
-  FastCgiServer /home/lj/htdocs/users -processes 5 -initial-env LJHOME=/home/lj
+  PerlSetEnv       LJHOME /home/lj
+  PerlRequire      /home/lj/cgi-bin/modperl.pl
+  PerlInitHandler  +Apache::LiveJournal
 
-  AddType text/bml BML 
-  AddType text/rdf rdf
-  AddType text/plain TCL
-  AddType application/x-httpd-cgi CGI
+  # BML support
+  PerlSetEnv       BMLConfig $LJHOME/cgi-bin/bmlp.cfg
+  PerlModule       Apache::BML
+  <Files ~ "\.bml$">
+    SetHandler     perl-script
+    PerlHandler    Apache::BML
+  </Files>
 
-  Action text/bml /cgi-bin/bmlp.pl
-
-  RewriteEngine on
-  RewriteLog /home/lj/logs/rewrite.log
-  RewriteLogLevel 0
-
-  # Optional: Fast use of a local userpic cache.   
-  # If you want this to be enabled, you must first create LJHOME/htdocs/userpics/
-  # contents of userpics never change, let's not even stat file.
-  RewriteCond %{REQUEST_URI} ^/userpic/[0-9]+$
-  RewriteCond %{HTTP:If-Modified-Since} . [OR]
-  RewriteCond %{HTTP:If-None-Match} .
-  RewriteRule . . [L,R=304]
- 
-  # don't allow direct access to cache
-  RewriteRule ^/userpics/ . [L,F,NS]
- 
-  # serve from cache first, if it exists.
-  RewriteCond %{REQUEST_URI} ^/userpic/([0-9]*)([0-9][0-9])([0-9][0-9][0-9])$
-  RewriteCond /home/lj/htdocs/userpics/%3/%2/%1%2%3 -s
-  RewriteRule ^/userpic/([0-9]*)([0-9][0-9])([0-9][0-9][0-9])$ /userpics/$3/$2/$1$2$3 [PT,L]
-
-  MIMEMagicFile /home/lj/cgi-bin/userpicmagic.txt
-
-  # End userpic stuff.
-  RewriteCond %{HTTP_HOST} ^(www\.)?ljsite\.com(:[0-9]+)?$ [NC]
-  RewriteRule ^/~([a-z0-9_]+)(/?.*)$ /users/$1$2 [L,PT,NS]
-
-  RewriteCond %{REQUEST_URI} !\.bml
-  RewriteRule ^/community/([a-z0-9_]+)(/?.*)$ /users/$1$2 [L,PT,NS]
-
-  RewriteCond %{HTTP_HOST} ^([a-z0-9_\-]+)\.ljsite\.com(:[0-9]+)?$ [NC]
-  RewriteCond %1 !^www$ [NC]
-  RewriteRule ^(.+) %{HTTP_HOST}$1  [C]
-  RewriteRule ^([a-z0-9_\-]+)\.ljsite\.com(.+)  /users/$1$2  [L,PT,NS]
-
-  RewriteRule ^/confirm/([a-z0-9]+\.[a-z0-9]+) http://%{HTTP_HOST}/register.bml?$1 [L,R]
-
-  # OPTIONAL:
-  # if they send any Host header with letters (an IP address or blank
-  # is okay) then it has to be www.ljsite.com or ljsite.com
-  # (optional port, too)
-  # RewriteCond %{HTTP_HOST} [a-z] [NC]
-  # RewriteCond %{HTTP_HOST} !^(www\.)?ljsite\.com(:[0-9]+)?$ [NC]
-  # RewriteRule . . [F]
-
-  # compatibility for old clients.
-  RewriteRule ^/cgi-bin/log\.cgi(.*) /interface/flat$1 [L,PT,NS]
-
-  ErrorDocument 403 /403.html
-  ErrorDocument 500 /500.html
-  ErrorDocument 404 /cgi-bin/404notfound.cgi
-
-  DirectoryIndex index.html index.bml
-
-  <Location /cgi-bin/404notfound.cgi>
-    SetHandler fastcgi-script
-  </Location>
-  # This Directory directive goes with the userpic stuff done above.
-  # contents never change, let's tell browser to not bug us as much.
-  <Directory /home/lj/htdocs/userpics>
-    ExpiresActive on                  
-    ExpiresDefault "access plus 30 days"
-  </Directory>
-  <Location /userpic>
-    SetHandler fastcgi-script
-  </Location>
-  <Location /users>
-    SetHandler fastcgi-script
-  </Location>
-  <Location /interface>
-    ErrorDocument 500 /500-log.html
-    SetHandler fastcgi-script
-  </Location>
-  <Location /cgi-bin/bmlp.pl>
-    SetHandler fastcgi-script
-  </Location>
-  <Location /customview.cgi>
-    SetHandler fastcgi-script
-  </Location>
-  <Directory /home/lj/htdocs/img>
-    AllowOverride None
-    Options None
-    ExpiresActive on
-    ExpiresByType image/gif "access plus 1 month"
-    ExpiresByType image/jpeg "access plus 1 month"
-  </Directory>
-
-  <FilesMatch "~$">
-    Deny from all
-  </FilesMatch>
-
-  <Directory /home/lj/htdocs/inc/>
-    Deny from all
-  </Directory>
-
-  <Directory /home/lj/htdocs/files/>
-    Options -ExecCGI
-  </Directory>
+  <IfModule mod_userdir.c>
+    UserDir        disabled
+  </IfModule>
 
 </VirtualHost>
