@@ -1,0 +1,77 @@
+<?page
+title=><?_ml .title _ml?>
+body<=
+<?p <?_ml .about _ml?> p?>
+<?_code return LJ::get_remote() ? "" : "<?p <?de $ML{'.login'} de?> p?>"; _code?>
+
+<?h1 <?_ml .information.header _ml?> h1?>
+<?p  <?_ml .information        _ml?>  p?>
+<dl>
+  <dt><a href="/editinfo.bml"><?_ml /editinfo.bml.title _ml?></a></dt>
+  <dd><?_ml .information.editinfo.about _ml?></dd>
+  <dt><a href="/accountstatus.bml"><?_ml .information.status _ml?></a></dt>
+  <dd><?_ml .information.status.about _ml?></dd>
+  <dt><a href="/changepassword.bml"><?_ml .information.changepass _ml?></a></dt>
+  <dd><?_ml .information.changepass.about _ml?></dd>
+  <dt><a href="/setlang.bml"><?_ml /setlang.bml.title _ml?></a></dt>
+  <dd><?_ml .information.setlang.about _ml?></dd>
+  <dt><a href="/setscheme.bml"><?_ml /setscheme.bml.title _ml?></a></dt>
+  <dd><?_ml .information.setscheme.about _ml?></dd>
+</dl>
+
+<?h1 <?_ml .customization.header _ml?> h1?>
+<?p  <?_ml .customization        _ml?>  p?>
+<dl>
+  <dt><a href="/customize/"><?_ml .customization.customize _ml?></a></dt>
+  <dd><?_ml .customization.customize.about _ml?></dd>
+  <dt><a href="/modify.bml"><?_ml /modify.bml.title _ml?></a></dt>
+  <dd><?_ml .customization.modify.about _ml?></dd>
+</dl>
+
+<?h1 <?_ml .entries.header _ml?> h1?>
+<?p  <?_ml .entries        _ml?>  p?>
+<dl>
+  <dt><a href="/editjournal.bml"><?_ml /editjournal.bml.title _ml?></a></dt>
+  <dd><?_ml .entries.edit.about _ml?></dd>
+  <dt><a href="/tools/memories.bml"><?_ml /tools/memories.bml.title.memorable _ml?></a></dt>
+  <dd><?_ml .entries.memories.about _ml?></dd>
+</dl>
+
+<?h1 <?_ml .userpictures.header _ml?> h1?>
+<?p  <?_ml .userpictures        _ml?>  p?>
+<dl>
+  <dt><a href="/editpics.bml"><?_ml .userpictures.edit.about _ml?></a></dt>
+</dl>
+
+<?h1 <?_ml .friends.header _ml?> h1?>
+<?p  <?_ml .friends        _ml?>  p?>
+<dl>
+  <dt><a href="/friends/edit.bml"><?_ml /friends/edit.bml.title _ml?></a></dt>
+  <dd><?_ml .friends.edit.about _ml?></dd>
+  <dt><a href="/friends/editgroups.bml"><?_ml /friends/editgroups.bml.title _ml?></a></dt>
+  <dd><?_ml .friends.groups.about _ml?></dd>
+  <dt><a href="/friends/filter.bml"><?_ml .friends.filter _ml?></a></dt>
+  <dd><?_ml .friends.filter.about _ml?></dd>
+</dl>
+
+<?h1 <?_ml .communities.header _ml?> h1?>
+<?p  <?_ml .communities        _ml?>  p?>
+<dl>
+  <dt><a href="/community/settings.bml?mode=create"><?_ml /community/settings.bml.title.create _ml?></a></dt>
+  <dd><?_ml .communities.create.about _ml?></dd>
+  <dt><a href="/community/manage.bml"><?_ml /community/manage.bml.title _ml?></a></dt>
+  <dd><?_ml .communities.manage.about _ml?></dd>
+</dl>
+
+<=body
+head<=
+<style type='text/css'>
+dl, dd {
+    margin-left: 30px;
+}
+dt {
+    font-weight: bold;
+}
+</style>
+<=head
+page?>

@@ -1613,6 +1613,77 @@ The site team
 
 /lostinfo_do.bml.username_mailed.title=Username mailed!
 
+/manage/index.bml.about=Managing your account is easy. Just choose from the following areas below:
+
+/manage/index.bml.communities=Create and manage your own communities:
+
+/manage/index.bml.communities.create.about=Create a new community
+
+/manage/index.bml.communities.header=Communities
+
+/manage/index.bml.communities.manage.about=Manage your communities' settings and members
+
+/manage/index.bml.customization=Customize the look of your journal pages:
+
+/manage/index.bml.customization.customize=Customize Journal
+
+/manage/index.bml.customization.customize.about=Change the apearance of your journal
+
+/manage/index.bml.customization.header=Customization
+
+/manage/index.bml.customization.modify.about=Modify your journal's display properties
+
+/manage/index.bml.entries=Work with entries you have made in your account's journal:
+
+/manage/index.bml.entries.edit.about=Edit and delete entries in your journal
+
+/manage/index.bml.entries.header=Journal Entries
+
+/manage/index.bml.entries.memories.about=View and work with your memorable posts
+
+/manage/index.bml.friends=Manage your friends and friend groups, or filter your friends page according to your saved friend groups:
+
+/manage/index.bml.friends.edit.about=Add, edit, or remove users from your friends list
+
+/manage/index.bml.friends.filter=Filter Friends Page
+
+/manage/index.bml.friends.filter.about=Filter your friends list to display a specific friend group
+
+/manage/index.bml.friends.groups.about=Create, edit, or delete subgroups of your friends list
+
+/manage/index.bml.friends.header=Friends
+
+/manage/index.bml.information=Choose what information is displayed on your account:
+
+/manage/index.bml.information.changepass=Change Account Password
+
+/manage/index.bml.information.changepass.about=Change your account's password
+
+/manage/index.bml.information.editinfo.about=Edit your account information and various options
+
+/manage/index.bml.information.header=Account Information
+
+/manage/index.bml.information.setlang.about=Select your preferred language
+
+/manage/index.bml.information.setscheme.about=Select your preferred site layout
+
+/manage/index.bml.information.status=Account Status
+
+/manage/index.bml.information.status.about=Set your account's activation status
+
+/manage/index.bml.login<<
+The following links will nagivate you to pages where your login information
+is required. To save yourself some time, you can <a href="/login.bml?ret=1">log in</a> beforehand.
+.
+
+/manage/index.bml.title=Manage Accounts
+
+/manage/index.bml.userpictures=Upload and manage user picture icons for your account:
+
+/manage/index.bml.userpictures.edit.about=Upload and Manage Your User Picture Icons
+
+/manage/index.bml.userpictures.header=User Picture Icons
+
 /modify.bml.title=Modify Journal
 
 /modify_do.bml.availablestyles.head=Available Styles
