@@ -683,7 +683,7 @@ sub postevent
         $getlock->(); return $res if $res_done;
 
         # do rate-checking
-        if (! LJ::rate_log($u, "post", 1)) {
+        if ($u->{'journaltype'} ne "Y" && ! LJ::rate_log($u, "post", 1)) {
             return fail($err,405);
         }
 
