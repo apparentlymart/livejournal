@@ -331,7 +331,7 @@
         $ret .= LJ::html_hidden('count', $poll->{'count'});
         
         if ($$error_count > 0) {
-            $ret .= "<div style='margin: 10px 0 20px 40px'><b>You have one or more errors with your poll.  Please scroll down for more details.</b></div\n";
+            $ret .= "<div style='margin: 10px 0 20px 40px'><b>You have one or more errors with your poll.  Please scroll down for more details.</b></div>\n";
         }
         
         ### Poll Properties -- name, whovote, whoview
@@ -500,7 +500,7 @@
         my $ret;
 
         # generate code for preview
-        my $code .= make_code($poll);
+        my $code = make_code($poll);
 
         # parse code into standard poll hashref
         # so we can feed it into LJ::Poll::preview()

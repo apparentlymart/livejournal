@@ -268,7 +268,7 @@ sub parse
                 my $len = length($qopts{'qtext'});
                 if (! $len)
                 {
-                    $$error .= "Need text inside an lj-pq tag to say what the question is about.";
+                    $$error = "Need text inside an lj-pq tag to say what the question is about.";
                     return 0;
                 }
 
@@ -290,7 +290,7 @@ sub parse
                 my $len = length($iopts{'item'});
                 if ($len > 255 || $len < 1)
                 {
-                    $$error .= "Text inside an lj-pi tag must be between 1 and 255 characters.  Your's is $len";
+                    $$error = "Text inside an lj-pi tag must be between 1 and 255 characters.  Your's is $len";
                     return 0;
                 }
 
