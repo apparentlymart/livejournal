@@ -297,13 +297,13 @@ BODY<=
 
      if ($FORM{'parenttalkid'}) 
      {	
-	 $sth = $dbh->prepare("SELECT u.user, tt.body FROM talk t, talktext tt, user u WHERE t.talkid=$qpartid AND tt.talkid=$qpartid AND u.userid=t.posterid");
+	 $sth = $dbh->prepare("SELECT t.posterid, tt.body FROM talk t, talktext tt WHERE t.talkid=$qpartid AND tt.talkid=$qpartid");
 	 $sth->execute;
-	 my ($paruser, $parbody) = $sth->fetchrow_array;
+	 my ($paruserid, $parbody) = $sth->fetchrow_array;
 	 $parentcomment = $parbody;
-	 if ($paruser) {
-	     my $qparuser = $dbr->quote($paruser);
-	     $sth = $dbr->prepare("SELECT email, opt_htmlemail, password, status, opt_gettalkemail FROM user WHERE user=$qparuser");
+	 if ($paruserid) {
+	     my $qparuserid = $dbr->quote($paruserid);
+	     $sth = $dbr->prepare("SELECT user, email, opt_htmlemail, password, status, opt_gettalkemail FROM user WHERE userid=$qparuserid");
 	     $sth->execute;
 	     my $paru = $sth->fetchrow_hashref;
 	     
@@ -312,7 +312,7 @@ BODY<=
 		 $paru->{'status'} eq "A")
 	     {
 		 if ($DEBUG) {
-		     $debug .= "Parent mailed ($paruser, $paru->{'email'})<br>\n";
+		     $debug .= "Parent mailed ($paru->{'user'}, $paru->{'email'})<br>\n";
 		 }
 		 $parentmailed = $paru->{'email'};
 
@@ -351,7 +351,7 @@ BODY<=
 		 $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
 		 $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
 		 $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$FORM{'itemid'}>";
-		 $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$paruser\">";
+		 $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$paru->{'user'}\">";
 		 $html .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . &ehtml(&hash_password($paru->{'password'})) . "\">";
 		 my $newsub = $FORM{'subject'};
 		 unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
