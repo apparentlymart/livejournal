@@ -32,14 +32,8 @@
  if ($remote) {
      if ($remote->{'userid'} == $userid) {
 	 push @sec_in, "private", "friends";
-     } else {
-	 ## see if they're a friend
-	 $sth = $dbr->prepare("SELECT COUNT(*) FROM friends WHERE userid=$userid AND friendid=$remote->{'userid'}");
-	 $sth->execute;
-	 my ($is_friend) = $sth->fetchrow_array;
-	 if ($is_friend) {
-	     push @sec_in, "friends";
-	 }
+     } elsif (LJ::is_friend($dbs, $userid, $remote->{'userid'})) {
+	 push @sec_in, "friends";
      }
  }
  my $sec_in = join(", ", map { $dbh->quote($_) } @sec_in);

@@ -4,6 +4,10 @@ BODY<=
 (=_CODE
 
  use LJ::TextMessage;
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my ($sth, $ret);
 
  my $user = $FORM{'user'};
@@ -27,24 +31,21 @@ BODY<=
      return $ret;
  }
 
- &connect_db();
  my $quser = $dbh->quote($user);
- $sth = $dbh->prepare("SELECT user, userid, txtmsg_status FROM user WHERE user=$quser");
- $sth->execute;
- my $u = $sth->fetchrow_hashref;
+ my $u = LJ::load_user($dbs, $quser);
  unless ($u->{'txtmsg_status'} eq "on") {
      $ret .= "(=H1 Unavailable H1=)(=P This user has not setup their text messaging information at LiveJournal or they've turned it off. P=)";
      &add_footer();
      return $ret;
  }
 
- $sth = $dbh->prepare("SELECT provider, number, security FROM txtmsg WHERE userid=$u->{'userid'}");
+ $sth = $dbr->prepare("SELECT provider, number, security FROM txtmsg WHERE userid=$u->{'userid'}");
  $sth->execute;
  my $tminfo = $sth->fetchrow_hashref;
 
  my $remote;
  if ($tminfo->{'security'} ne "all") {
-     $remote = &get_remote();
+     $remote = LJ::get_remote($dbs);
      my $andbefriend;
      if ($tminfo->{'security'} eq "friends") {
 	 $andbefriend = " and be listed as their friend";
@@ -56,10 +57,7 @@ BODY<=
      }
 
      if ($tminfo->{'security'} eq "friends" && $u->{'userid'} != $remote->{'userid'}) {
-	 $sth = $dbh->prepare("SELECT COUNT(*) AS 'count' FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
-	 $sth->execute;
-	 my ($is_friend) = $sth->fetchrow_array;
-	 unless ($is_friend) {
+	 unless (LJ::is_friend($dbs, $u->{'userid'}, $remote->{'userid'})) {
 	     $ret .= "(=H1 Unauthorized H1=)(=P User <B>$u->{'user'}</B> has selected \"friends only\" as the security level required to send text messages to them.  P=)";
 	     &add_footer();
 	     return $ret;

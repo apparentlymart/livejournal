@@ -3,18 +3,19 @@
  $title = "Tell a Friend!";
  $body = "";
 
- &connect_db();
- my $remote = &get_remote();
- my ($sth);
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
+ my $remote = LJ::get_remote($dbs);
+ my $sth;
 
  unless ($remote) {
      $body .= "(=H1 Sorry... H1=)(=P To use the \"Tell a Friend\" feature, you must first <a href=\"/login.bml?ret=1\">login</a>.  P=)(=P If we didn't require you to login for this, we'd be essentially providing an anonymous email gateway and there'd be tons of people abusing it and harassing each other.  (We tried this on another website once...)  P=)";
      return "";
  }
 
- $sth = $dbh->prepare("SELECT user, name, email, status, paidfeatures FROM user WHERE userid=$remote->{'userid'}");
- $sth->execute;
- my $u = $sth->fetchrow_hashref;
+ my $u = LJ::load_user($dbs, $remote->{'userid'});
  $u->{'emailpref'} = $u->{'email'};
  if ($LJ::USER_EMAIL && ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid")) {
      $u->{'emailpref'} = $u->{'user'} . '@' . $LJ::USER_DOMAIN;
@@ -65,7 +66,7 @@
  $subject = "Check this out...";
  if ($FORM{'itemid'} =~ /^\d+$/) {
      my $itemid = $FORM{'itemid'}+0;
-     $sth = $dbh->prepare("SELECT u.user, lt.subject FROM user u, log l, logtext lt WHERE l.itemid=$itemid AND lt.itemid=$itemid AND l.ownerid=u.userid");
+     $sth = $dbr->prepare("SELECT u.user, ls.subject FROM user u, log l, logsubject ls WHERE l.itemid=$itemid AND ls.itemid=$itemid AND l.ownerid=u.userid");
      $sth->execute;
      my ($user, $subject) = $sth->fetchrow_array;
      my $url = "$LJ::SITEROOT/talkread.bml?itemid=$itemid";
@@ -83,9 +84,7 @@
  if ($FORM{'user'} =~ /^\w{1,15}$/) {
      my $user = $FORM{'user'};
      my $quser = $dbh->quote($user);
-     $sth = $dbh->prepare("SELECT user, name, email, status, paidfeatures FROM user WHERE user=$quser");
-     $sth->execute;
-     my $uj = $sth->fetchrow_hashref;
+     my $uj = LJ::load_user($dbs, $quser);
      my $url;
      if ($uj->{'paidfeatures'} eq "on" || $uj->{'paidfeatures'} eq "paid") {
 	 my $sub = $user;
