@@ -554,8 +554,8 @@ $cmd{'change_journal_type'} = {
     };
 
 $cmd{'finduser'} = {
+    'def' => 'consuspend.pl',
     'privs' => [qw(finduser)],
-    'handler' => \&finduser,
     'des' => "Find a user by a criteria.",
     'argsummary' => '<criteria> <data>',
     'args' => [
@@ -628,9 +628,9 @@ $cmd{'help'} = {
   };
 
 $cmd{'infohistory'} = {
+    'def' => 'consuspend.pl',
     'privs' => [qw(finduser)],
     'des' => 'Retrieve the infohistory of a given user',
-    'handler' => \&infohistory,
     'argsummary' => '<user>',
     'args' => [
         'user' => "The user whose infohistory is being retrieved.",
@@ -647,41 +647,6 @@ $cmd{'set'} = {
                'value' => "Value to set property to.",
                ],
     };
-
-sub infohistory
-{
-    my ($dbh, $remote, $args, $out) = @_;
-
-    unless ($remote->{'privarg'}->{'finduser'}->{'infohistory'}) {
-        push @$out, [ "error", "$remote->{'user'}, you are not authorized to use this command." ];
-        return 0;
-    }
-
-    my $user = $args->[1];
-    my $userid = LJ::get_userid($dbh, $user);
-
-    unless ($userid) {
-        push @$out, [ "error", "Invalid user $user" ];
-        return 0;
-    }
-
-    my $sth = $dbh->prepare("SELECT * FROM infohistory WHERE userid='$userid'");
-    $sth->execute;
-    if (! $sth->rows) {
-        push @$out, [ "error", "No matches." ];
-    } else {
-        push @$out, ["info", "Infohistory of user: $user"];
-        while (my $info = $sth->fetchrow_hashref) {        
-            $info->{'oldvalue'} ||= '(none)';
-            push @$out, [ "info", 
-                          "Changed $info->{'what'} at $info->{'timechange'}.\n".
-                          "Old value of $info->{'what'} was $info->{'oldvalue'}.".
-                          ($info->{'other'} ? 
-                           "\nOther information recorded: $info->{'other'}" : "") ];
-        }
-    }
-    return 1;
-}
 
 sub conhelp 
 {
@@ -839,47 +804,6 @@ sub change_journal_type
     }
 
     push @$out, [ "info", "User: $u->{'user'} converted." ];
-    return 1;
-}
-
-
-sub finduser
-{
-    my ($dbh, $remote, $args, $out) = @_;
-
-    unless ($remote->{'priv'}->{'finduser'}) {
-        push @$out, [ "error", "$remote->{'user'}, you are not authorized to use this command." ];
-        return 0;
-    }
-
-    my $crit = $args->[1];
-    my $data = $args->[2];
-    my $qd = $dbh->quote($data);
-
-    my $where;
-    if ($crit eq "email") {
-        $where = "email=$qd";
-    } elsif ($crit eq "userid") {
-        $where = "userid=$qd";
-    } elsif ($crit eq "user") {
-        $where = "user=$qd";
-    }
-
-    unless ($where) {
-        push @$out, [ "error", "Invalid search criteria.  See reference." ];
-        return 0;
-    }
-
-    my $sth = $dbh->prepare("SELECT userid, user, email, status ".
-                            "FROM user WHERE $where");
-    $sth->execute;
-    if (! $sth->rows) {
-        push @$out, [ "error", "No matches." ];
-    }
-    while (my $u = $sth->fetchrow_hashref) {        
-        push @$out, [ "info", "User: $u->{'user'} ".
-                      "($u->{'userid'}), email: ($u->{'status'}) $u->{'email'}" ];
-    }
     return 1;
 }
 
