@@ -2035,6 +2035,14 @@ register_alter(sub {
                  "ALTER TABLE userproplist MODIFY datatype ENUM('char','num','bool','blobchar') NOT NULL DEFAULT 'char'");
     }
 
+    if (column_type("challenges", "count") eq "")
+    {
+        do_alter("challenges",
+                 "ALTER TABLE challenges ADD ".
+                 "count int(5) UNSIGNED NOT NULL DEFAULT 0 AFTER challenge");
+    }
+
+
 });
 
 1; # return true

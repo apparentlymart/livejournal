@@ -2696,6 +2696,106 @@ sub auth_okay
     return $bad_login->();
 }
 
+# Implement Digest authentication per RFC2617
+# called with Apache's request oject
+# modifies outgoing header fields appropriately and returns
+# 1/0 according to whether auth succeeded. If succeeded, also
+# calls LJ::set_remote() to set up internal LJ auth.
+# this routine should be called whenever it's clear the client
+# wants/the server demands digest auth, and if it returns 1, 
+# things proceed as usual; if it returns 0, the caller should
+# $r->send_http_header(), output an auth error message in HTTP
+# data and return to apache.
+# Note: Authentication-Info: not sent (optional and nobody supports
+# it anyway). Instead, server nonces are reused within their timeout
+# limits and nonce counts are used to prevent replay attacks.
+
+sub auth_digest {
+    my ($r) = @_;
+
+    my $decline = sub {
+        my $stale = shift;
+
+        my $nonce = LJ::challenge_generate(180); # 3 mins timeout 
+        my $authline = "Digest realm=\"lj\", nonce=\"$nonce\", algorithm=MD5, qop=\"auth\"";
+        $authline .= ", stale=\"true\"" if $stale;
+        $r->header_out("WWW-Authenticate", $authline);
+        $r->status_line("401 Authentication required");
+        return 0;
+    };
+    
+    unless ($r->header_in("Authorization")) {
+        return $decline->(0);
+    }
+
+    my $header = $r->header_in("Authorization");
+
+    # parse it
+    # TODO: could there be "," or " " inside attribute values, requiring
+    # trickier parsing?
+
+    my @vals = split(/[, \s]/, $header);
+    my $authname = shift @vals;
+    my %attrs;
+    foreach (@vals) {
+        if (/^(\S*)=(\S*)$/) {
+            my ($attr, $value) = ($1,$2);
+            if ($value =~ m/^\"([^\"]*)\"$/) {
+                $value = $1;
+            }
+            $attrs{$attr} = $value;
+        }
+    }
+    
+    # sanity checks
+    unless ($authname eq 'Digest' && $attrs{'qop'} eq 'auth' &&
+            $attrs{'realm'} eq 'lj' && $attrs{'algorithm'} eq 'MD5') {
+        return $decline->(0);
+    }
+
+    my %opts;
+    LJ::challenge_check($attrs{'nonce'}, \%opts);
+
+    return $decline->(0) unless $opts{'valid'};
+
+    # if the nonce expired, force a new one
+    return $decline->(1) if $opts{'expired'};
+
+    # check the nonce count
+    # be lenient, allowing for error of magnitude 1 (Mozilla has a bug,
+    # it repeats nc=00000001 twice...)
+    # in case the count is off, force a new nonce; if a client's
+    # nonce count implementation is broken and it doesn't send nc= or
+    # always sends 1, this'll at least work due to leniency above
+
+    unless (abs($opts{'count'} - $attrs{'nc'}) <= 1) {
+        return $decline->(1);
+    }
+
+    # the username
+    my $user = LJ::canonical_username($attrs{'username'});
+    my $u = LJ::load_user($user);
+
+    return $decline->(0) unless $u;
+
+    # recalculate the hash and compare to response
+    
+    my $a1src="$u->{'user'}:lj:$u->{'password'}";
+    my $a1 = Digest::MD5::md5_hex($a1src);
+    my $a2src = $r->method . ":$attrs{'uri'}";
+    my $a2 = Digest::MD5::md5_hex($a2src);
+    my $hashsrc = "$a1:$attrs{'nonce'}:$attrs{'nc'}:$attrs{'cnonce'}:$attrs{'qop'}:$a2";
+    my $hash = Digest::MD5::md5_hex($hashsrc);
+
+    return $decline->(0) 
+        unless $hash eq $attrs{'response'};
+
+    # set the remote
+    LJ::set_remote($u);
+
+    return 1;
+}
+
 
 # Create a challenge token for secure logins
 sub challenge_generate
@@ -2712,9 +2812,75 @@ sub challenge_generate
     return $chal;
 }
 
+
+# Validate a challenge string previously supplied by challenge_generate
+# return 1 "good" 0 "bad", plus sets keys in $opts:
+# 'valid'=1/0 whether the string itself was valid
+# 'expired'=1/0 whether the challenge expired, provided it's valid
+# 'count'=N number of times we've seen this challenge, including this one,
+#           provided it's valid and not expired
+# the return value is 1 if 'valid' and not 'expired' and 'count'==1
+sub challenge_check {
+    my ($chal, $opts) = @_;
+    my ($valid, $expired, $count) = (1, 0, 0);
+
+    my ($c_ver, $stime, $s_age, $goodfor, $rand, $chalsig) = split /:/, $chal;
+    my $secret = LJ::get_secret($stime);
+    my $chalbare = "$c_ver:$stime:$s_age:$goodfor:$rand";
+
+    # Validate token
+    $valid = 0
+        unless $secret && $c_ver eq 'c0'; # wrong version
+    $valid = 0
+        unless Digest::MD5::md5_hex($chalbare . $secret) eq $chalsig;
+
+    $expired = 1
+        unless (not $valid) or time() - ($stime + $s_age) < $goodfor; 
+
+    # Check for token dups
+    if ($valid && !$expired) {
+        if (@LJ::MEMCACHE_SERVERS) {
+            $count = LJ::MemCache::incr("chaltoken:$chal", 1);
+            unless ($count) {
+                LJ::MemCache::add("chaltoken:$chal", 1, $goodfor);
+                $count = 1;
+            }
+        } else {
+            my $dbh = LJ::get_db_writer();
+            my $rv = $dbh->do("SELECT GET_LOCK(?,5)", undef, $chal);
+            if ($rv) {
+                $count = $dbh->selectrow_array("SELECT count FROM challenges WHERE challenge=?", 
+                                               undef, $chal);
+                if ($count) {
+                    $dbh->do("UPDATE challenges SET count=count+1 WHERE challenge=?",
+                             undef, $chal);
+                    $count++;
+                } else {
+                    $dbh->do("INSERT INTO challenges SET ctime=?, challenge=?, count=1",
+                         undef, $stime + $s_age, $chal);
+                    $count = 1;
+                }
+            }
+            $dbh->do("SELECT RELEASE_LOCK(?)", undef, $chal);
+        }
+        # if we couldn't get the count (means we couldn't store either)
+        # , consider it invalid
+        $valid = 0 unless $count;
+    }
+
+    if ($opts) {
+        $opts->{'expired'} = $expired;
+        $opts->{'valid'} = $valid;
+        $opts->{'count'} = $count;
+    }
+    
+    return ($valid && !$expired && ($count==1));
+}
+
+
 # Validate login/talk md5 responses.
 # Return 1 on valid, 0 on invalid.
-sub challenge_check
+sub challenge_check_login
 {
     my ($u, $chal, $res, $banned) = @_;
     return 0 unless $u;
@@ -2730,32 +2896,8 @@ sub challenge_check
         $$ref = 0;
     }
 
-    my ($c_ver, $stime, $s_age, $goodfor, $rand, $chalsig) = split /:/, $chal;
-    my $secret = LJ::get_secret($stime);
-    my $chalbare = "$c_ver:$stime:$s_age:$goodfor:$rand";
-
-    # Validate token
-    return 0 unless $c_ver eq 'c0'; # wrong version
-    return 0 unless time() - ($stime + $s_age) < $goodfor; # expired
-    return 0 unless Digest::MD5::md5_hex($chalbare . $secret) eq $chalsig;
-
-    # Check for token dups
-    my $good;
-    if (@LJ::MEMCACHE_SERVERS) {
-        $good = LJ::MemCache::add("chaltoken:$chal", 1, $goodfor);
-    } else {
-        my $dbh = LJ::get_db_writer();
-        my $rv = $dbh->do("SELECT GET_LOCK(?,5)", undef, $chal);
-        return 0 unless $rv;
-        if (! $dbh->selectrow_array("SELECT challenge FROM challenges WHERE challenge=?",
-                                     undef, $chal)) {
-            $dbh->do("INSERT INTO challenges SET ctime=?, challenge=?",
-                      undef, $stime + $s_age, $chal);
-            $good = 1;
-        }
-        $dbh->do("SELECT RELEASE_LOCK(?)", undef, $chal);
-    }
-    return 0 unless $good;
+    # check the challenge string validity
+    return 0 unless LJ::challenge_check($chal);
 
     # Validate password
     my $hashed = Digest::MD5::md5_hex($chal . Digest::MD5::md5_hex($pass));
