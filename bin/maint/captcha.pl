@@ -106,20 +106,24 @@ $maint{gen_audio_captchas} = sub {
     $sth = $dbh->prepare( $sql ) or die "prepare: $sql: ", $dbh->errstr;
 
     # Generate the challenges
-    for ( my $i = 0; $i <= $need; $i++ ) {
+    for ( my $i = 0; $i < $need; $i++ ) {
+        print "Generating audio $i...";        
         ( $wav, $code ) = LJ::Captcha::generate_audio( $tmpdir );
         $data = readfile( $wav );
         unlink $wav or die "unlink: $wav: $!";
 
         # Insert the captcha into the DB
+        print "inserting (code = $code)...";
         $anum = int( rand 65_535 );
         $sth->execute( $code, $anum )
             or die "insert: $sql ($code, $anum): ", $sth->errstr;
         $capid = $dbh->{mysql_insertid};
 
         # Insert the blob
+        print "uploading (capid = $capid, anum = $anum)...";
         LJ::Blob::put( $u, 'captcha_audio', 'wav', $capid, $data, \$err )
               or die "Error uploading to media server: $err";
+        print "done.\n";
     }
 
     print "done. Created $need new audio captchas.\n";
@@ -182,7 +186,7 @@ $maint{gen_image_captchas} = sub {
     $sth = $dbh->prepare( $sql ) or die "prepare: $sql: ", $dbh->errstr;
 
     # Generate the challenges
-    for ( my $i = 0; $i <= $need; $i++ ) {
+    for ( my $i = 0; $i < $need; $i++ ) {
         print "Generating image $i...";
         $code = gencode( 7 );
         ( $png ) = LJ::Captcha::generate_visual( $code );
