@@ -443,6 +443,7 @@ sub clean_subject
         'mode' => 'deny',
         'allow' => $subject_allow,
         'remove' => $subject_remove,
+        'autoclose' => $subject_allow,
     });
 }
 
@@ -458,6 +459,7 @@ sub clean_subject_all
         'eat' => $subjectall_eat,
         'mode' => 'deny',
         'textonly' => 1,
+        'autoclose' => $subject_allow,
     });
 }
 
