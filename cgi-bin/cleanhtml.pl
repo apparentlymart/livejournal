@@ -197,7 +197,7 @@ sub clean
             my $urlcount = 0;
 
             if ($addbreaks && ! $opencount{'a'}) {
-                $token->[1] =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=\~\:\;\#\&\,]+!$url{++$urlcount}=$&;"\{url$urlcount\}";!eg;
+                $token->[1] =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=\~\:\;\#\&\,]+!$url{++$urlcount}=$&;"\{url$urlcount\}";!egi;
             }
             if ($wordlength) {
                 # this treats normal characters and &entities; as single characters
