@@ -144,6 +144,8 @@ sub do_request
     if ($method eq "editfriendgroups") { return editfriendgroups(@args); }
     if ($method eq "consolecommand")   { return consolecommand(@args);   }
     if ($method eq "getchallenge")     { return getchallenge(@args);     }
+    if ($method eq "sessiongenerate")  { return sessiongenerate(@args);  }
+    if ($method eq "sessionexpire")    { return sessionexpire(@args);    }
 
     $r->notes("codepath" => "") if $r;
     return fail($err,201);
@@ -1896,6 +1898,48 @@ sub editfriendgroups
     return {};
 }
 
+sub sessionexpire {
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+    my $u = $flags->{u};
+
+    # expunge one? or all?
+    if ($req->{expireall}) {
+        LJ::kill_all_sessions($u);
+        return {};
+    }
+
+    # just expire a list
+    my $list = $req->{expire} || [];
+    my $dbcm = LJ::get_cluster_master($u);
+    LJ::kill_sessions($dbcm, $u->{userid}, @$list) if @$list;
+    return {};
+}
+
+sub sessiongenerate {
+    # generate a session
+    my ($req, $err, $flags) = @_;
+    return undef unless authenticate($req, $err, $flags);
+
+    # sanitize input
+    $req->{expiration} = 'short' unless $req->{expiration} eq 'long';
+    my $boundip;
+    $boundip = LJ::get_remote_ip() if $req->{bindtoip};
+    
+    my $u = $flags->{u};
+    my $sess_opts = {
+        exptype => $req->{expiration},
+        ipfixed => $boundip,
+    };
+
+    my $sess = LJ::generate_session($u, $sess_opts);
+
+    # return our hash
+    return {
+        ljsession => "ws:$u->{user}:$sess->{sessid}:$sess->{auth}",
+    };
+}
+
 sub list_friends
 {
     my ($u, $opts) = @_;
@@ -2445,6 +2489,12 @@ sub do_request
     if ($req->{'mode'} eq "consolecommand") {
         return consolecommand($req, $res, $flags);
     }
+    if ($req->{'mode'} eq "sessiongenerate") {
+        return sessiongenerate($req, $res, $flags);
+    }
+    if ($req->{'mode'} eq "sessionexpire") {
+        return sessionexpire($req, $res, $flags);
+    }
 
     ### unknown mode!
     $res->{'success'} = "FAIL";
@@ -2862,6 +2912,47 @@ sub editevent
     $res->{'success'} = "OK";
     $res->{'itemid'} = $rs->{'itemid'};
     $res->{'anum'} = $rs->{'anum'} if defined $rs->{'anum'};
+    return 1;
+}
+
+## flat wrapper
+sub sessiongenerate {
+    my ($req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+
+    my $rs = LJ::Protocol::do_request('sessiongenerate', $rq, \$err, $flags);
+    unless ($rs) {
+        $res->{success} = 'FAIL';
+        $res->{errmsg} = LJ::Protocol::error_message($err);
+    }
+
+    $res->{success} = 'OK';
+    $res->{ljsession} = $rs->{ljsession};
+    return 1;
+}
+
+## flat wrappre
+sub sessionexpire {
+    my ($req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+
+    $rq->{expire} = [];
+    foreach my $k (keys %$rq) {
+        push @{$rq->{expire}}, $1 
+            if $k =~ /^expire_id_(\d+)$/;
+    }
+
+    my $rs = LJ::Protocol::do_request('sessionexpire', $rq, \$err, $flags);
+    unless ($rs) {
+        $res->{success} = 'FAIL';
+        $res->{errmsg} = LJ::Protocol::error_message($err);
+    }
+
+    $res->{success} = 'OK';
     return 1;
 }
 

@@ -21,6 +21,8 @@
 <!ENTITY mode.getfriends         SYSTEM "getfriends.mode.xml">
 <!ENTITY mode.login              SYSTEM "login.mode.xml">
 <!ENTITY mode.postevent          SYSTEM "postevent.mode.xml">
+<!ENTITY mode.sessionexpire      SYSTEM "sessionexpire.mode.xml">
+<!ENTITY mode.sessiongenerate    SYSTEM "sessiongenerate.mode.xml">
 <!ENTITY mode.syncitems          SYSTEM "syncitems.mode.xml">
 ]>
 <ljxmlrpc>
@@ -38,6 +40,8 @@
 &mode.getfriendgroups;
 &mode.login;
 &mode.postevent;
+&mode.sessionexpire;
+&mode.sessiongenerate;
 &mode.syncitems;
     
 </ljxmlrpc>
