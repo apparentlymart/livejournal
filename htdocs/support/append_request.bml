@@ -8,6 +8,8 @@ body<=
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
+ my $status = "";
+
  my $spid = $FORM{'spid'}+0;
  my $sp = LJ::Support::load_request($dbh, $spid);
  unless ($sp) { return "<?h1 Error h1?><?p Unknown support request. p?>"; }
@@ -82,15 +84,21 @@ body<=
  ## touch request
  if ($FORM{'touch'}) {
      $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
-     $FORM{'body'} = "Touching support request\n\n$FORM{'body'}";
+     $status .= "Touching support request\n\n";
  }
+
+ if (LJ::Support::is_poster($sp, $remote, $FORM{'auth'})) 
+ {
+     $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
+ }
+
  ## change category
  if ($FORM{'changecat'}) {
      my $newcat = $FORM{'changecat'}+0;
      my $cats = LJ::Support::load_cats($dbh, $newcat);
      if ($cats->{$newcat}) {
          $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
-         $FORM{'body'} = "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n$FORM{'body'}";
+         $status .= "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n";
          $sp->{'spcatid'} = $newcat; # update category so IC e-mail goes to right place
      } else {
          return LJ::bad_input("That category doesn't seem to exist.");
@@ -103,7 +111,7 @@ body<=
      my $res = LJ::Support::load_response($dbh, $splid);
      if ($res->{'spid'} == $spid && $res->{'type'} eq "screened") {
          $dbh->do("UPDATE supportlog SET type='answer' WHERE splid=$splid");
-         $FORM{'body'} = "(Approving answer \#$splid)\n\n$FORM{'body'}";
+         $status .= "(Approving answer \#$splid)\n\n";
          LJ::Support::mail_response_to_user($dbh, $sp, $splid);
      } else {
          return LJ::bad_input("Invalid screened entry to approve.");
@@ -115,11 +123,11 @@ body<=
      $FORM{'body'} =~ s/[\n\r]//g;
      my $qnewsub = $dbh->quote($FORM{'body'});
      $dbh->do("UPDATE support SET subject=$qnewsub WHERE spid=$spid");
-     $FORM{'body'} = "Changing subject from \"$sp->{'subject'}\" to \"$FORM{'body'}\"";
+     $status .= "Changing subject from \"$sp->{'subject'}\" to: ";
  }
 
  my $splid = LJ::Support::append_request($dbh, $sp, {
-     'body' => $FORM{'body'},
+     'body' => $status . $FORM{'body'},
      'posterid' => $remote ? $remote->{'userid'} : 0,
      'type' => $type,
      'faqid' => $faqid,
