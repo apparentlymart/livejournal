@@ -41,17 +41,17 @@ sub process {
 
         # Rate limit email to 1/5min/address
         if (LJ::MemCache::add("rate_eperr:$who", 5, 300)) {
-            LJ::send_mail({ 
+            LJ::send_mail({
                     'to' => $who,
                     'from' => $LJ::BOGUS_EMAIL,
                     'fromname' => "$LJ::SITENAME Error",
                     'subject' => "$LJ::SITENAME posting error: $subject",
-                    'body' => $errbody  
+                    'body' => $errbody
                     });
         }
     };
 
-    # Parse email for lj specific info                                                                                
+    # Parse email for lj specific info
     my ($user, $journal, $pin);
     ($user, $pin) = split(/\+/, $to);
     ($user, $journal) = split(/\./, $user) if $user =~ /\./;
@@ -115,18 +115,21 @@ sub process {
         return $err->("Unknown charset encoding type.", $err_addr)
             unless Unicode::MapUTF8::utf8_supported_charset($charset);
         $body = Unicode::MapUTF8::to_utf8({-string=>$body, -charset=>$charset});
-        # check subject for rfc-1521 junk 
-        if ($subject =~ /^=\?(utf-8)?/i) {
-            my @subj_data;
-            @subj_data = MIME::Words::decode_mimewords($subject);
-            if (scalar(@subj_data)) {
-                if (! $1) {
-                    $subject = Unicode::MapUTF8::to_utf8({-string=>$subj_data[0][0], -charset=>$subj_data[0][1]});
-                } else {
-                    $subject = $subj_data[0][0];
-                }
+
+        # check subject for rfc-1521 junk
+        if ($subject =~ /^=\?/) {
+            my @subj_data = Unicode::MapUTF8::decode_mimewords($subject);
+            if (@subj_data) {
+                $subject = Unicode::MapUTF8::to_utf8({-string=>$subj_data[0][0],
+                                                      -charset=>$subj_data[0][1]});
             }
         }
+    }
+
+    # Also check subjects of UTF-8 emails for encoded subject lines [support: 220926]
+    elsif ($subject =~ /^=\?utf-8/i) {
+        my @subj_data = Unicode::MapUTF8::decode_mimewords( $subject );
+        $subject = $subj_data[0][0] if @subj_data;
     }
 
     # PGP signed mail?  We'll see about that.
@@ -202,7 +205,7 @@ sub process {
     LJ::Protocol::do_request("postevent", $req, \$post_error, { noauth=>1 });
     return $err->(LJ::Protocol::error_message($post_error)) if $post_error;
 
-    return 1; 
+    return 1;
 }
 
 # Retreives an allowed email addr list for a given user object.
@@ -214,7 +217,7 @@ sub get_allowed_senders {
     LJ::load_user_props($u, 'emailpost_allowfrom');
     @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
     return undef unless scalar(@address) > 0;
-    
+
     my %flag_english = ( 'E' => 'get_errors' );
 
     foreach my $add (@address) {
@@ -290,7 +293,7 @@ sub get_entity
 
 
 # Verifies an email pgp signature as being valid.
-# Returns codes so we can use the pre-existing err subref, 
+# Returns codes so we can use the pre-existing err subref,
 # without passing everything all over the place.
 sub check_sig {
     my ($u, $entity) = @_;
