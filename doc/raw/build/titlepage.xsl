@@ -2,9 +2,16 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 version="1.0">
 
+<xsl:template match="abstract" mode="titlepage.mode">
+  <div class="{name(.)}">
+    <h3>Abstract</h3>
+    <p><xsl:apply-templates mode="titlepage.mode"/></p>
+  </div>
+</xsl:template>
+
 <xsl:template match="authorgroup" mode="titlepage.mode">
   <div class="{name(.)}">
-    <p><b>Authors</b></p>
+    <h3>Authors</h3>
     <p>
     <xsl:apply-templates mode="titlepage.mode"/>
     </p>
@@ -13,6 +20,13 @@
 
 <xsl:template match="author" mode="titlepage.mode">
   <b class="{name(.)}"><xsl:call-template name="person.name"/></b>
+  <xsl:apply-templates mode="titlepage.mode" select="./contrib"/>
+  <xsl:apply-templates mode="titlepage.mode" select="./affiliation"/>
+  <br />
+</xsl:template>
+
+<xsl:template match="editor" mode="titlepage.mode">
+  <b class="{name(.)}">Editor: <xsl:call-template name="person.name"/></b>
   <xsl:apply-templates mode="titlepage.mode" select="./contrib"/>
   <xsl:apply-templates mode="titlepage.mode" select="./affiliation"/>
   <br />

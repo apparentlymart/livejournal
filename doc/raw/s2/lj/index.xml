@@ -5,11 +5,14 @@
 ]>
 <book id="index" status="prelim" lang="en">
   &s2.bookinfo;
-  <chapter id='&s2.idroot;preface'>
+  <chapter id='&s2.idroot;intro'>
     &s2.preface;
   </chapter>
   <chapter id='&s2.idroot;overview'>
     &s2.overview;
+  </chapter>
+  <chapter id='&s2.idroot;langref'>
+    &s2.langref;
   </chapter>
   <chapter id='&s2.idroot;notes'>
     &s2.notes;

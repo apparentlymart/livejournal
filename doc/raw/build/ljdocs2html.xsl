@@ -15,12 +15,26 @@
 <!-- Label sections -->
 <xsl:param name="section.autolabel" select="1"/>
 
-<!-- DocBook XSL adds extra navigation links which
-     basically add 500 lines of unnecessary kludge.
-     Turning this off saves on bandwidth and speed. -->
-<xsl:param name="html.extra.head.links" select="0"/>
+<xsl:param name="chunk.section.depth" select="0"/>
 
 <xsl:param name="local.l10n.xml" select="document('')"/>
+
+<xsl:param name="toc.section.depth">0</xsl:param>
+
+<xsl:param name="navig.showtitles">1</xsl:param>
+
+<xsl:template name="anchor">
+  <xsl:param name="node" select="."/>
+  <xsl:param name="conditional" select="1"/>
+  <xsl:variable name="id">
+    <xsl:call-template name="object.id">
+      <xsl:with-param name="object" select="$node"/>
+    </xsl:call-template>
+  </xsl:variable>
+  <xsl:if test="$conditional = 0 or $node/@id">
+    <a class="linkhere" href="#{$id}">&#x00bb;</a> <a name="{$id}"/>
+  </xsl:if>
+</xsl:template>
 
 <l:i18n xmlns:l="http://docbook.sourceforge.net/xmlns/l10n/1.0">
   <l:l10n language="en">
