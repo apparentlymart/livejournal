@@ -16,7 +16,7 @@ $img{'btn_down'} = {
     'src' => '/btn_dn.gif',
     'width' => 22,
     'height' => 20,
-    'alt' => 'Up',
+    'alt' => 'Down',
 };
 
 $img{'btn_del'} = { 
