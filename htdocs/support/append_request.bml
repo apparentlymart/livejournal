@@ -74,6 +74,31 @@ body<=
         if $FORM{'body'} !~ /\S/ && !$FORM{'approveans'} && !$FORM{'changecat'} &&
             !$FORM{'touch'} && !$FORM{'untouch'} && !$FORM{'changesum'};
 
+    # Load up vars for approvals
+    my $res;
+    my $splid;
+    if ($FORM{'approveans'}) {
+        $splid = $FORM{'approveans'}+0;
+        $res = LJ::Support::load_response($splid);
+
+        return LJ::bad_input($ML{'.invalid.noanswer'})
+            if ($res->{'spid'} == $spid && $res->{'type'} ne "screened");
+
+        return LJ::bad_input('Invalid type to approve screened response as.')
+            if (($FORM{'approveas'} ne 'answer') && ($FORM{'approveas'} ne 'comment'));
+    }
+
+    # Load up vars for category moves
+    my $newcat;
+    my $cats;
+    if ($FORM{'changecat'}) {
+        $newcat = $FORM{'changecat'}+0;
+        $cats = LJ::Support::load_cats($newcat);
+
+        return LJ::bad_input($ML{'.invalid.notcat'})
+            unless ($cats->{$newcat});
+    }
+
     # get dbh now, it's always needed
     my $dbh = LJ::get_db_writer();
 
@@ -156,32 +181,20 @@ body<=
 
     ## change category
     if ($FORM{'changecat'}) {
-        my $newcat = $FORM{'changecat'}+0;
-        my $cats = LJ::Support::load_cats($newcat);
-        if ($cats->{$newcat}) {
-            $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
-            $status .= "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n";
-            $sp->{'spcatid'} = $newcat; # update category so IC e-mail goes to right place
-        } else {
-            return LJ::bad_input($ML{'.invalid.notcat'});
-        }
+        # $newcat, $cats defined above
+        $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
+        $status .= "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n";
+        $sp->{'spcatid'} = $newcat; # update category so IC e-mail goes to right place
     }
 
     ## approving a screened response
     if ($FORM{'approveans'}) {
-        my $splid = $FORM{'approveans'}+0;
-        my $res = LJ::Support::load_response($splid);
-        if ($res->{'spid'} == $spid && $res->{'type'} eq "screened") {
-            return LJ::bad_input('Invalid type to approve screened response as.')
-                if (($FORM{'approveas'} ne 'answer') && ($FORM{'approveas'} ne 'comment'));
-            # approve
-            my $qtype = $dbh->quote($FORM{'approveas'});
-            $dbh->do("UPDATE supportlog SET type=$qtype WHERE splid=$splid");
-            $status .= "(Approving $FORM{'approveas'} \#$splid)\n\n";
-            LJ::Support::mail_response_to_user($sp, $splid);
-        } else {
-            return LJ::bad_input($ML{'.invalid.noanswer'});
-        }
+        # $res, $splid defined above
+        # approve
+        my $qtype = $dbh->quote($FORM{'approveas'});
+        $dbh->do("UPDATE supportlog SET type=$qtype WHERE splid=$splid");
+        $status .= "(Approving $FORM{'approveas'} \#$splid)\n\n";
+        LJ::Support::mail_response_to_user($sp, $splid);
     }
 
     ## change summary
