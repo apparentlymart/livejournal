@@ -42,26 +42,24 @@
         </listitem>
       </varlistentry>
 
-
-      <varlistentry>
-        <term><literal role="variable">$LJ::DBINFO</literal></term>
+      <varlistentry id='ljconfig.var.dbinfo'>
+        <term><literal role="variable">%LJ::DBINFO</literal></term>
         <listitem><para><literal role="variable">%DBINFO</literal> is a hash that contains the necessary information to connect to your database, as well as the configuration for multiple database clusters, if your installation supports them. For example:
-          <programlisting>
-          <![CDATA[
-   %DBINFO = (
-     # master must be named 'master'L
-     'master' => { 
-        'host' => "localhost",
-        'port' => 3306,
-        # or, leave out host/port and use a socket to connect:
-        #'sock' => "/var/run/mysqld.sock"; 
-        'user' => 'lj',
-        'pass' => 'ljpass',
-        'role' => {
-            'cluster1' => 1,
-        }, },
-   );
- ]]></programlisting>
+          <programlisting><![CDATA[%DBINFO = (
+  # master must be named 'master'
+  'master' => { 
+     'host' => "localhost",
+     'port' => 3306,
+     # or, leave out host/port and use a socket to connect:
+     #'sock' => "/var/run/mysqld.sock"; 
+     # optional dbname, if not "livejournal":
+     #'dbname' => 'livejournal', 
+     'user' => 'lj',
+     'pass' => 'ljpass',
+     'role' => {
+         'cluster1' => 1,
+     }, },
+);]]></programlisting>
  That's the basic configuration for an installation with only one database server.  (FIXME: add link to new section on configuring a site with many database servers)
         </para></listitem>
       </varlistentry>

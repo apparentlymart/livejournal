@@ -26,15 +26,6 @@
     http://your-lj-server/admin/priv/
   </para>
   </formalpara>
-  <formalpara>
-  <title>Populating the text</title>
-    <para>
-      To fill your site with the necessary text to get started, you'll need to run our provided text tool:
-    </para>
-    <para>
-      <screen><prompt>$</prompt> <userinput>bin/upgrading/texttool.pl --load</userinput></screen>  
-    </para>
-  </formalpara>
   <para>
     If you have any questions, join the <ulink url="http://www.livejournal.com/users/lj_everywhere/info">"lj_everywhere"</ulink> community on LiveJournal.com and post your questions.  We'd love to help you out.
   </para>

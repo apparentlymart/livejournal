@@ -54,17 +54,27 @@
   <section id="lj.install.install_files">
   <title>Installing the files</title>
     <para>
-      The recommended directory to install LiveJournal is <filename>/home/lj</filename>, but it is not a requirement to install your document tree there. For uniformity purposes, we'll assume that you'll want to install in the aforementioned directory:
+      The typical directory to install LiveJournal is
+      <filename>/home/lj</filename>, but it is not a requirement at
+      all.  To ease documentation, we'll assume that you'll want to
+      install in that directory.  We'll also assume you'll be using
+      user <literal>lj</literal>, but that also doesn't matter at all.
+      Feel free to install wherever and as whoever ... there shouldn't
+      be any problems.  (and if there are, we'll fix it right away!)
     </para>
-    <note>
+
+    <formalpara>
+      <title>Creating your <link linkend='ljhome_var'><literal>$LJHOME</literal></link>.</title>
       <para>
-      Before you install LiveJournal, you should create the directory where your LiveJournal installation will reside:
+        Before you install LiveJournal, you should create the directory
+        where your LiveJournal installation will reside:
       </para>
       <para>
         <screen><prompt>#</prompt> <userinput>mkdir <replaceable>/home/lj</replaceable></userinput>
-<prompt>#</prompt> <userinput>chown <replaceable>lj.lj /home/lj</replaceable></userinput></screen>
-      </para>
-    </note>
+<prompt>#</prompt> <userinput>chown <replaceable>lj.lj /home/lj</replaceable></userinput></screen></para>
+    </formalpara>
+
+<!-- Uhh, lame:
     <formalpara>
       <title>Using the distributed tarball archives</title>
       <para>
@@ -82,21 +92,28 @@
         </para>
       </note>
     </formalpara>
+-->
     <formalpara>
       <title>Installing from CVS</title>
       <para>
-        If you have CVS installed, you can anonymously checkout the LiveJournal repository by issuing the following commands:
-        <screen><prompt>$</prompt> <userinput>cd <replaceable>/home/lj</replaceable></userinput>
-<prompt>$</prompt> <userinput>touch CVSPASS</userinput>
-<prompt>$</prompt> <userinput>cvs -d:pserver:anonymous@danga.com:/home/cvslj co livejournal</userinput></screen>
+        The recommended way to get the code is from anonymous CVS,
+        which always represent the latest stable code.  We used to do
+        tarball releases (and plan to start doing them again), but for
+        now, just use CVS... it's painless.
+      </para>
+        <screen><prompt>$</prompt> <userinput>mkdir $LJHOME/cvs</userinput>
+<prompt>$</prompt> <userinput>cd $LJHOME/cvs</userinput>
+<prompt>$</prompt> <userinput>cvs -z3 -d:pserver:anonymous@danga.com:/home/cvslj co livejournal</userinput>
+<prompt>$</prompt> <userinput>livejournal/bin/cvsreport.pl -c -s</userinput></screen>
+      <para>
+        That last command will copy everything from the CVS directory
+        over to <literal>$LJHOME</literal>, the live area.
       </para>
       <para>
-        Installing straight from CVS gives you the latest version possible that LiveJournal offers.
-        <note>
-          <para>
-            CVS installs might not be as stable as tarball releases.
-         </para>
-        </note>
+        Having two copies of the code laying around may not make sense
+        now, but it will later when we write the docs to explain how
+        to run a heavily-customized version of the site and still stay
+        up-to-date with the mainstream CVS.  (FIXME: write/link that section)
       </para>
     </formalpara>
   </section>

@@ -3,10 +3,17 @@
   <section id="install">
   <title>Install MySQL</title>
   <para>
-    LiveJournal requires a MySQL install of at least version 3.23.x, but highly recommends installing the latest stable release that is available, expecially if you're going to need clustering and replication abilities.
+    LiveJournal requires a MySQL install of at least version 3.23.x,
+    but highly recommends installing the latest stable release that is
+    available, expecially if you're going to need clustering and
+    replication abilities.
   </para>
   <para>
-    MySQL offers binaries for many operating aystems, including Win32 and several different <quote>flavors</quote> of unix. Installations on any of these systems should be fairly easy, as most offer a simple installation program that guides you through setup.
+    MySQL offers binaries for many operating aystems, including Win32
+    and several different <quote>flavors</quote> of Unix.
+    Installations on any of these systems should be fairly easy, as
+    most offer a simple installation program that guides you through
+    setup.
   </para>
   </section>
   <section id="lj.install.mysql_setup.create_db">
@@ -18,10 +25,13 @@
     <screen><prompt>$</prompt> <userinput>mysql -uroot -p</userinput>
 <prompt>mysql></prompt> <userinput>CREATE DATABASE livejournal;</userinput>
 <prompt>mysql></prompt> <userinput>GRANT ALL PRIVILEGES ON livejournal.* TO </userinput>
-<prompt>     ></prompt> <userinput>lj@'127.0.0.1' IDENTIFIED BY 'ljpass';</userinput></screen>
+<prompt>     ></prompt> <userinput>lj@'localhost' IDENTIFIED BY 'ljpass';</userinput></screen>
   </para>
   <para>
-    You can set your MySQL environment in your <filename>ljconfig.pl</filename>, as detailed in: <xref linkend="lj.install.ljconfig" />.
+      If you know what you're doing, you can set this up however you
+      like.  You tell LiveJournal how to connect to its database server(s) 
+      in your <filename>ljconfig.pl</filename>, as
+      detailed in: <xref linkend="ljconfig.var.dbinfo" />.
   </para>
   </section>
 
@@ -31,11 +41,9 @@
     In order to use your site, you're going to need to populate your MySQL database with the required information to get the service started.
   </para>
   <para>
-    Assuming your LJHOME directory is /home/lj, all you have to do is run:
-  </para>
-  <para>
-    <screen><prompt>$</prompt> <userinput>cd <replaceable>/home/lj</replaceable></userinput>
-<prompt>$</prompt> <userinput>bin/upgrading/update-db.pl --runsql --populate</userinput></screen>
+    <screen><prompt>$</prompt> <userinput>cd <link linkend='ljhome_var'>$LJHOME</link></userinput>
+<prompt>$</prompt> <userinput>bin/upgrading/update-db.pl --runsql --populate</userinput>
+<prompt>$</prompt> <userinput>bin/upgrading/texttool.pl --load</userinput></screen>
   </para>
   <para>
     That'll bring your database schema up-to-date and populate it with any look-up data it needs.
