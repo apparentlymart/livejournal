@@ -5,6 +5,8 @@ use strict;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use Apache;
 
+require 'ljconfig.pl';
+
 # setup httpd.conf things for the user:
 Apache->httpd_conf("DocumentRoot $LJ::HTDOCS")
     if $LJ::HTDOCS;
