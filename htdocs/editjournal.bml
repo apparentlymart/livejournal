@@ -1,6 +1,6 @@
 <?page
 title=><?_ML .title _ML?>
-
+head=><?_code return $LJ::COMMON_CODE{'autoradio_check'}; _code?>
 body<=
 <?_code
 {
@@ -39,7 +39,8 @@ body<=
 
     $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'selecttype',
                              'id' => 'selecttype-lastn', 'value' => 'lastn' }) . " ";
-    $ret .= LJ::html_text({ 'name' => 'howmany', 'size' => '3', 'maxlength' => '2', 'value' => '20' }) . " ";
+    $ret .= LJ::html_text({ 'name' => 'howmany', 'size' => '3', 'maxlength' => '2', 'value' => '20',
+                            'onchange' => "checkRadioButton('selecttype-lastn');" }) . " ";
     $ret .= "<label for='selecttype-lastn'>$ML{'.recententries'}</label><br />\n";
 
     $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'selecttype',
@@ -51,9 +52,12 @@ body<=
     my $mon = sprintf("%02d", $time[4] + 1);
     my $year = $time[5] + 1900;
 
-    $ret .= LJ::html_text({ 'name' => 'year', 'size' => '5', 'maxlength' => '4', 'value' => $year }) . "-";
-    $ret .= LJ::html_text({ 'name' => 'month', 'size' => '3', 'maxlength' => '2', 'value' => $mon }) . "-";
-    $ret .= LJ::html_text({ 'name' => 'day', 'size' => '3', 'maxlength' => '2', 'value' => $mday }) . "\n";
+    $ret .= LJ::html_text({ 'name' => 'year', 'size' => '5', 'maxlength' => '4', 'value' => $year,
+                            'onchange' => "checkRadioButton('selecttype-day');" }) . "-";
+    $ret .= LJ::html_text({ 'name' => 'month', 'size' => '3', 'maxlength' => '2', 'value' => $mon,
+                            'onchange' => "checkRadioButton('selecttype-day');" }) . "-";
+    $ret .= LJ::html_text({ 'name' => 'day', 'size' => '3', 'maxlength' => '2', 'value' => $mday,
+                            'onchange' => "checkRadioButton('selecttype-day');" }) . "\n";
 
     $ret .= "</td></tr>\n";
 

@@ -1,5 +1,6 @@
 <?page
 title=><?_ml .title _ml?>
+head=><?_code return $LJ::COMMON_CODE{'autoradio_check'}; _code?>
 body<=
 
 <?_code
@@ -321,7 +322,7 @@ body<=
             push @list, ($_->{'themeid'}, $_->{'name'});
         }
         $ret .= LJ::html_select({ 'name' => 'themeid', 'selected' => $u->{'themeid'} }, @list) . "<br />\n";
-        $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'themetype',
+        $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'themetype', 'id' => 'themetype:custom',
                                  'value' => 'custom', 'selected' => $u->{'themeid'} == 0 }) . "\n";
         $ret .= "<b>$ML{'.colortheme.customcolors'}</b>:";
         
@@ -353,7 +354,8 @@ body<=
         foreach my $col (@LJ::S1::themecoltypes) {
             $ret .= "<tr><td align='right'>$col->[1]</td><td>";
             $ret .= LJ::html_text({ 'name' => "theme_cust:$col->[0]", 'size' => '20',
-                                    'maxlength' => '30', 'value' => $custcolors{$col->[0]} });
+                                    'maxlength' => '30', 'value' => $custcolors{$col->[0]},
+                                    'onchange' => "checkRadioButton('themetype:custom');" });
             $ret .= "</td></tr>\n";
             $dig .= $col->[0];
         }

@@ -566,4 +566,20 @@ function sendForm (formid, checkuser)
 </script>
 };
 
+# Common Javascript function for auto-checking radio buttons on form
+# input field data changes
+$LJ::COMMON_CODE{'autoradio_check'} = q{
+<script language="JavaScript" type="text/javascript">
+    <!--
+    /* If radioid exists, check the radio button. */
+    function checkRadioButton(radioid) {
+        if (!document.getElementById) return;
+        var radio = document.getElementById(radioid);
+        if (!radio) return;
+        radio.checked = true;
+    }
+// -->
+</script>
+};
+
 1;
