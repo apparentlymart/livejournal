@@ -121,7 +121,7 @@
         }
 
         $body .= "$apre<img src='$LJ::USERPIC_ROOT/$pic->{'picid'}/$u->{'userid'}' ";
-        $body .= "width='$pic->{'width'}' height='$pic->{'height'}' alt='$eh_keywords' border='0'/>$apost</td><td>";
+        $body .= "width='$pic->{'width'}' height='$pic->{'height'}' alt='' border='0'/>$apost</td><td>";
 
         if ($u->{'defaultpicid'} == $pic->{'picid'}) {
             $body .= "$ML{'.default'}<br />";
