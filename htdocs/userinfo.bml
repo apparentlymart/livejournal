@@ -112,17 +112,17 @@
 
  if ($u->{'statusvis'} eq "S") {
      $title = $ML{'error.suspended.title'};
-     $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " . BML::ml('error.suspended.body',{'sitename'=>$LJ::SITENAME,'username'=>$user}) . " p?>";
+     $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " . BML::ml('error.suspended.text',{'sitename'=>$LJ::SITENAME,'username'=>$user}) . " p?>";
      return;
  }
  if ($u->{'statusvis'} eq "D") {
      $title = $ML{'error.deleted.title'};
-     $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " . BML::ml('error.deleted.body',{'user'=>$user}) . " p?>";
+     $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " . BML::ml('error.deleted.text',{'user'=>$user}) . " p?>";
      return;
  }
  if ($u->{'statusvis'} eq "X") {
      $title = $ML{'error.purged.title'};
-     $body = "<?h1 $ML{'error.purged.name'} h1?><?p $ML{'error.purged.body'} p?>";
+     $body = "<?h1 $ML{'error.purged.name'} h1?><?p $ML{'error.purged.text'} p?>";
      return;
  }
 
