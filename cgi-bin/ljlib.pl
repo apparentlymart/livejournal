@@ -4326,46 +4326,47 @@ sub get_username
 sub get_itemid_near
 {
     my $dbarg = shift;
-    my $ownerid = shift;
-    my $date = shift;
+    my $itemid = shift;
     my $after_before = shift;
-		
+
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
     
-    return 0 unless ($date =~ /^(\d{4})-(\d{2})-\d{2} \d{2}:\d{2}:\d{2}$/);
-    my ($year, $month) = ($1, $2);
-
-    my ($op, $inc, $func);
+    my ($inc, $order);
     if ($after_before eq "after") {
-	($op, $inc, $func) = (">",  1, "MIN");
+	($inc, $order) = (-1, "DESC");
     } elsif ($after_before eq "before") {
-	($op, $inc, $func) = ("<", -1, "MAX");
+	($inc, $order) = (1, "ASC");
     } else {
 	return 0;
     }
 
-    my $qeventtime = $dbh->quote($date);
+    $itemid += 0;	
+    my $lr = $dbr->selectrow_hashref("SELECT u.userid, u.journaltype, l.rlogtime, l.revttime ".
+				     "FROM user u, log l WHERE l.itemid=$itemid ".
+				     "AND l.ownerid=u.userid");
+    return 0 unless $lr;
+    my $jid = $lr->{'userid'};
+    my $field = $lr->{'journaltype'} eq "P" ? "revttime" : "rlogtime";
+    my $stime = $lr->{$field};
 
-    my $item = 0;
-    my $tries = 0;
-    while ($item==0 && $tries<2) 
-    {
-	my $sql = "SELECT $func(itemid) FROM log WHERE ownerid=$ownerid AND year=$year AND month=$month AND eventtime $op $qeventtime";
-	my $sth = $dbr->prepare($sql);
-	$sth->execute;
-	($item) = $sth->fetchrow_array;
-
-	unless ($item) {
-	    $tries++;
-	    $month += $inc;
-	    if ($month == 13) { $month = 1;  $year++; }
-	    if ($month == 0)  { $month = 12; $year--; }
+    my $day = 86400;
+    foreach my $distance ($day, $day*7, $day*30, $day*90) {
+	my ($one_away, $further) = ($stime + $inc, $stime + $inc*$distance);
+	if ($further < $one_away) {
+	    # swap them, BETWEEN needs lower number first
+	    ($one_away, $further) = ($further, $one_away);
 	}
+	my ($id, $anum) = 
+	    $dbr->selectrow_array("SELECT itemid FROM log WHERE ownerid=$jid ".
+				  "AND $field BETWEEN $one_away AND $further ".
+				  "ORDER BY $field $order LIMIT 1");
+	return $id if $id;
     }
-    return ($item+0);
+    return 0;
 }
+
 
 # <LJFUNC>
 # name: LJ::get_itemid_after
@@ -4387,6 +4388,55 @@ sub get_itemid_after  { return get_itemid_near(@_, "after");  }
 # returns: 
 # </LJFUNC>
 sub get_itemid_before { return get_itemid_near(@_, "before"); }
+
+
+sub get_itemid_near2
+{
+    my $u = shift;
+    my $jitemid = shift;
+    my $after_before = shift;
+    
+    $jitemid += 0;
+
+    my ($inc, $order);
+    if ($after_before eq "after") {
+	($inc, $order) = (-1, "DESC");
+    } elsif ($after_before eq "before") {
+	($inc, $order) = (1, "ASC");
+    } else {
+	return 0;
+    }
+	
+    my $dbr = LJ::get_cluster_reader($u);
+    my $jid = $u->{'userid'}+0;
+    my $field = $u->{'journaltype'} eq "P" ? "revttime" : "rlogtime";
+
+    my $stime = $dbr->selectrow_array("SELECT $field FROM log2 WHERE ".
+				      "journalid=$jid AND jitemid=$jitemid");
+    return 0 unless $stime;
+
+    
+    my $day = 86400;
+    foreach my $distance ($day, $day*7, $day*30, $day*90) {
+	my ($one_away, $further) = ($stime + $inc, $stime + $inc*$distance);
+	if ($further < $one_away) {
+	    # swap them, BETWEEN needs lower number first
+	    ($one_away, $further) = ($further, $one_away);
+	}
+	my ($id, $anum) = 
+	    $dbr->selectrow_array("SELECT jitemid, anum FROM log2 WHERE journalid=$jid ".
+				  "AND $field BETWEEN $one_away AND $further ".
+				  "ORDER BY $field $order LIMIT 1");
+	if ($id) {
+	    return wantarray() ? ($id, $anum) : ($id*256 + $anum);
+	}
+    }
+    return 0;
+}
+
+sub get_itemid_after2  { return get_itemid_near2(@_, "after");  }
+sub get_itemid_before2 { return get_itemid_near2(@_, "before"); }
+
 
 # <LJFUNC>
 # name: LJ::mysql_time
