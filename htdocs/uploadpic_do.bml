@@ -45,6 +45,8 @@ BODY<=
  $u ||= LJ::load_user($dbs, $user);
  return LJ::bad_input("Invalid username") unless $u;
 
+ return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+
  my $userid = $u->{'userid'}+0;
 
  if ($FORM{'src'} eq "url" && $FORM{'urlpic'} !~ /^http:\/\//) {

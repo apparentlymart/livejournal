@@ -44,6 +44,12 @@
 
  $u = LJ::load_user($dbs, $user) unless $u;
 
+ if (LJ::get_cap($u, "readonly")) {
+     $title = "Read-only mode";
+     $body = $LJ::MSG_READONLY_USER;
+     return;
+ }
+
  my $dbb;
  if ($u->{'dversion'} >= 2) {
      $dbb = LJ::get_cluster_master($u);
