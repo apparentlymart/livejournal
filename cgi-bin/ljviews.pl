@@ -661,6 +661,7 @@ sub clear_overrides {
     # update s1usercache
     $db->do("UPDATE s1usercache SET override_stor=NULL WHERE userid=?",
             undef, $u->{'userid'});
+
     LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
     LJ::MemCache::delete([$u->{'userid'}, "s1overr:$u->{'userid'}"]);
 
@@ -689,9 +690,10 @@ sub save_overrides {
     }
 
     # update s1usercache
-    my $overr_clean = LJ::CleanHTML::clean_s1_style($overr);
+    my $override_stor = LJ::CleanHTML::clean_s1_style($overr);
     $dbcm->do("UPDATE s1usercache SET override_stor=?, override_cleanver=? WHERE userid=?",
-              undef, Storable::freeze(\$overr_clean), $LJ::S1::CLEANER_VERSION, $u->{'userid'});
+              undef, $override_stor, $LJ::S1::CLEANER_VERSION, $u->{'userid'});
+
     LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
     LJ::MemCache::delete([$u->{'userid'}, "s1overr:$u->{'userid'}"]);
 
