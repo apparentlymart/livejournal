@@ -809,6 +809,7 @@ sub postevent
         my $propinsert = "";
         foreach my $pname (keys %{$req->{'props'}}) {
             next unless $req->{'props'}->{$pname};
+            next if $pname eq "revnum" || $pname eq "revtime";
             if ($propinsert) {
                 $propinsert .= ", ";
             } else {
@@ -819,7 +820,7 @@ sub postevent
                 }
             }
             my $p = LJ::get_prop("log", $pname);
-            if ($p && $pname ne "revnum") {
+            if ($p) {
                 my $qvalue = $dbh->quote($req->{'props'}->{$pname});
                 if ($clustered) {
                     $propinsert .= "($ownerid, $itemid, $p->{'id'}, $qvalue)";
@@ -1134,6 +1135,7 @@ sub editevent
 
     # up the revision number
     $req->{'props'}->{'revnum'} = ($curprops{$qitemid}->{'revnum'} || 0) + 1;
+    $req->{'props'}->{'revtime'} = time();
 
     # handle the props
     {
@@ -1309,7 +1311,7 @@ sub getevents
     }
     elsif ($req->{'selecttype'} eq "syncitems")
     {
-        return fail($err,504,"syncitems is no longer supported.");
+        return fail($err,504,"syncitems selecttype is no longer supported.");
     }
     else
     {
@@ -1829,7 +1831,72 @@ sub list_friends
 sub syncitems
 {
     my ($dbs, $req, $err, $flags) = @_;
-    return fail($err,504,"syncitems is no longer supported.");
+    return undef unless authenticate($dbs, $req, $err, $flags);
+    return undef unless check_altusage($dbs, $req, $err, $flags);
+
+    my $ownerid = $flags->{'ownerid'};
+    my $uowner = $flags->{'u_owner'} || $flags->{'u'};
+    my $dbr = $dbs->{'reader'};
+    my $sth;
+
+    return fail($err,504,"syncitems is no longer supported for cluster0.")
+        unless $uowner->{'clusterid'};
+
+    # cluster differences
+    my $db = LJ::get_cluster_reader($uowner);
+    return fail($err,502) unless $db;
+
+    ## have a valid date?
+    my $date = $req->{'lastsync'};
+    if ($date) {
+        return fail($err,203,"Invalid date format")
+            unless ($date =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
+    } else {
+        $date = "0000-00-00 00:00:00";
+    }
+
+    my $LIMIT = 500;
+
+    my %item;
+    $sth = $db->prepare("SELECT jitemid, logtime FROM log2 WHERE ".
+                        "journalid=? and logtime > ?");
+    $sth->execute($ownerid, $date);
+    while (my ($id, $dt) = $sth->fetchrow_array) {
+        $item{$id} = [ 'L', $id, $dt, "create" ];
+    }
+
+    my %cmt;
+    LJ::load_props($dbs, "log");
+    my $p_calter = LJ::get_prop("log", "commentalter");
+    my $p_revtime = LJ::get_prop("log", "revtime");
+    $sth = $db->prepare("SELECT jitemid, propid, FROM_UNIXTIME(value) ".
+                        "FROM logprop2 WHERE journalid=? ".
+                        "AND propid IN ($p_calter->{'id'}, $p_revtime->{'id'}) ".
+                        "AND value+0 > UNIX_TIMESTAMP(?)");
+    $sth->execute($ownerid, $date);
+    while (my ($id, $prop, $dt) = $sth->fetchrow_array) {
+        if ($prop == $p_calter->{'id'}) {
+            $cmt{$id} = [ 'C', $id, $dt, "update" ];
+        } elsif ($prop == $p_revtime->{'id'}) {
+            $item{$id} = [ 'L', $id, $dt, "update" ];
+        }
+    }
+    
+    my @ev = sort { $a->[2] cmp $b->[2] } (values %item, values %cmt);
+    
+    my $res = {};
+    my $list = $res->{'syncitems'} = [];
+    $res->{'total'} = scalar @ev;
+    my $ct = 0;
+    while (my $ev = shift @ev) {
+        $ct++;
+        push @$list, { 'item' => "$ev->[0]-$ev->[1]",
+                       'time' => $ev->[2],
+                       'action' => $ev->[3],  };
+        last if $ct >= $LIMIT;
+    }
+    $res->{'count'} = $ct;
+    return $res;
 }
 
 sub consolecommand
@@ -2380,10 +2447,29 @@ sub getdaycounts
 sub syncitems
 {
     my ($dbs, $req, $res, $flags) = @_;
-    $res->{'success'} = "FAIL";
-    $res->{'errcode'} = 504;
-    $res->{'errmsg'} = LJ::Protocol::error_message(504);
-    return 0;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+
+    my $rs = LJ::Protocol::do_request($dbs, "syncitems", $rq, \$err, $flags);
+    unless ($rs) {
+        $res->{'success'} = "FAIL";
+        $res->{'errmsg'} = LJ::Protocol::error_message($err);
+        return 0;
+    }
+
+    $res->{'success'} = "OK";
+    $res->{'sync_total'} = $rs->{'total'};
+    $res->{'sync_count'} = $rs->{'count'};
+    
+    my $ct = 0;
+    foreach my $s (@{ $rs->{'syncitems'} }) {
+        $ct++;
+        foreach my $a (qw(item action time)) {
+            $res->{"sync_${ct}_$a"} = $s->{$a};
+        }
+    }
+    return 1;
 }
 
 ## flat wrapper: limited functionality.  (1 command only, server-parsed only)
