@@ -6,6 +6,8 @@
 # link: htdocs/paidaccounts/index.bml, htdocs/users, htdocs/view/index.bml
 # </LJDEP>
 
+use strict;
+use vars qw($dbh %FORM);  # FIXME: in process of removing global $dbh usage.
 use DBI;
 use Digest::MD5 qw(md5_hex);
 
@@ -194,8 +196,7 @@ sub set_userprop
     my $table = $p->{'indexed'} ? "userprop" : "userproplite";
     $value = $dbh->quote($value);
 
-    $sth = $dbh->prepare("REPLACE INTO $table (userid, upropid, value) VALUES ($userid, $p->{'upropid'}, $value)");
-    $sth->execute;
+    $dbh->do("REPLACE INTO $table (userid, upropid, value) VALUES ($userid, $p->{'upropid'}, $value)");
 }
 
 
@@ -490,10 +491,10 @@ sub icq_send
     my $time = time();
     my $rand = "0000";
     my $file;
-    $file = "$ICQSPOOL/$time.$rand";
+    $file = "$LJ::ICQSPOOL/$time.$rand";
     while (-e $file) {
 	$rand = sprintf("%04d", int(rand()*10000));
-	$file = "$ICQSPOOL/$time.$rand";
+	$file = "$LJ::ICQSPOOL/$time.$rand";
     }
     open (FIL, ">$file");
     print FIL "send $uin $msg";
@@ -1053,7 +1054,7 @@ sub strip_bad_code
     my $data = shift;
     my $newdata;
     use HTML::TokeParser;
-    $p = HTML::TokeParser->new($data);
+    my $p = HTML::TokeParser->new($data);
 
     while (my $token = $p->get_token)
     {
@@ -1123,10 +1124,11 @@ sub strip_bad_code
 #    });
 #}
 
-%acct_name = ("paid" => "Paid Account",
-	      "off" => "Free Account",
-	      "early" => "Early Adopter",
-	      "on" => "Permanent Account");
+# FIXME: this belongs in a site-specific config file
+%LJ::acct_name = ("paid" => "Paid Account",
+		  "off" => "Free Account",
+		  "early" => "Early Adopter",
+		  "on" => "Permanent Account");
 
 sub load_user_theme
 {
@@ -1206,15 +1208,17 @@ sub load_style_fast
     }
     else
     {
-	$sth = $dbh->prepare("SELECT formatdata, type, opt_cache FROM style WHERE styleid=$styleid");
+	my $sth = $dbh->prepare("SELECT formatdata, type, opt_cache FROM style WHERE styleid=$styleid");
 	$sth->execute;
 	my ($data, $type, $cache) = $sth->fetchrow_array;
+	$sth->finish;
 	if ($cache eq "Y") {
 	    $LJ::CACHE_STYLE{$styleid} = { 'lastpull' => $now,
 				       'data' => $data,
 				       'type' => $type,
 				   };
 	}
+
 	$$dataref = $data;
 	if (ref $typeref eq "SCALAR") { $$typeref = $type; }
     }
@@ -1254,9 +1258,7 @@ sub make_journal
     if ($opts->{'u'}) {
 	$u = $opts->{'u'};
     } else {
-	$sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
-	$sth->execute;
-	$u = $sth->fetchrow_hashref;
+	$u = LJ::load_user($dbh, $user);
     }
 
     unless ($u)
@@ -1293,9 +1295,10 @@ sub make_journal
     my $overrides = "";
     if ($opts->{'nooverride'}==0 && $u->{'useoverrides'} eq "Y")
     {
-        $sth = $dbh->prepare("SELECT override FROM overrides WHERE user=$quser");
+        my $sth = $dbh->prepare("SELECT override FROM overrides WHERE user=$quser");
         $sth->execute;
         ($overrides) = $sth->fetchrow_array;
+	$sth->finish;
     }
 
     # populate the variable hash
@@ -1576,8 +1579,6 @@ sub make_graphviz_dot_file
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
 	$ret .= "  \"$_->{'user'}\"->\"$_->{'friend'}\"\n";
-	$mark{$_->{'user'}}++;
-	$mark{$_->{'friend'}}++;
     }
     
     $ret .= "}\n";
@@ -1715,7 +1716,7 @@ sub query_buffer_flush
     my $count = 0;
     my $max = 0;
     my $qtable = $dbh->quote($table);
-    $sth = $dbh->prepare("SELECT qbid, query FROM querybuffer WHERE tablename=$qtable ORDER BY qbid");
+    my $sth = $dbh->prepare("SELECT qbid, query FROM querybuffer WHERE tablename=$qtable ORDER BY qbid");
     if ($dbh->err) { $dbh->do("UNLOCK TABLES"); die $dbh->errstr; }
     $sth->execute;
     if ($dbh->err) { $dbh->do("UNLOCK TABLES"); die $dbh->errstr; }	
@@ -1839,13 +1840,13 @@ sub get_userid
     $user = canonical_username($user);
 
     my $userid;
-    if ($CACHE_USERID{$user}) { return $CACHE_USERID{$user}; }
+    if ($LJ::CACHE_USERID{$user}) { return $LJ::CACHE_USERID{$user}; }
 
     my $quser = $dbh->quote($user);
     my $sth = $dbh->prepare("SELECT userid FROM user WHERE user=$quser");
     $sth->execute;
     ($userid) = $sth->fetchrow_array;
-    if ($userid) { $CACHE_USERID{$user} = $userid; }
+    if ($userid) { $LJ::CACHE_USERID{$user} = $userid; }
 
     # implictly create an account if we're using an external
     # auth mechanism
@@ -1866,12 +1867,12 @@ sub get_username
     my $userid = shift;
     my $user;
     $userid += 0;
-    if ($CACHE_USERNAME{$userid}) { return $CACHE_USERNAME{$userid}; }
+    if ($LJ::CACHE_USERNAME{$userid}) { return $LJ::CACHE_USERNAME{$userid}; }
     
     my $sth = $dbh->prepare("SELECT user FROM user WHERE userid=$userid");
     $sth->execute;
     ($user) = $sth->fetchrow_array;
-    if ($user) { $CACHE_USERNAME{$userid} = $user; }
+    if ($user) { $LJ::CACHE_USERNAME{$userid} = $user; }
     return ($user);
 }
 
@@ -2039,6 +2040,8 @@ sub get_friend_itemids
     my $owners_ref = (ref $opts->{'owners'} eq "HASH") ? $opts->{'owners'} : {};
     my $filter = $opts->{'filter'}+0;
 
+    my $sth;
+
     # sanity check:
     $skip = 0 if ($skip < 0);
 
@@ -2051,6 +2054,7 @@ sub get_friend_itemids
 	while (my ($friendid, $mask) = $sth->fetchrow_array) { 
 	    $usermask{$friendid} = $mask; 
 	}
+	$sth->finish;
     }
 
     my $filtersql;
@@ -2155,6 +2159,8 @@ sub get_recent_itemids
     my $userid = $opts->{'userid'}+0;
     my $view = $opts->{'view'};
     my $remid = $opts->{'remoteid'}+0;
+
+    my $sth;
 
     my $max_hints = 0;
     my $sort_key = "eventtime";
