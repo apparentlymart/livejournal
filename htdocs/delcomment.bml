@@ -6,10 +6,6 @@ body<=
 
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
  my $ret = "";
 
  my $remote = LJ::get_remote();
@@ -21,8 +17,7 @@ body<=
  my $qid = $FORM{'id'}+0;
  my $u = LJ::load_user($FORM{'journal'});
  return "<?h1 Error h1?><?p Bogus journal arg p?>" unless $u;
- my $dbcs = LJ::get_cluster_set($u);
- my $dbcm = $dbcs->{'dbh'};
+ my $dbcm = LJ::get_cluster_master($u);
  unless ($dbcm) {
      return "<?h1 Maintenance h1?><?p Database currently unavailable.  Most likely, maintenance is being performed. p?>";
  }
@@ -109,12 +104,11 @@ body<=
  my $and;
  if ($FORM{'ban'})
  {
-     LJ::set_rel($dbs, $remote, $tp->{'posterid'}, 'B');
+     LJ::set_rel($remote, $tp->{'posterid'}, 'B');
      $and .= "Additionally, user <B>$tp->{'userpost'}</B> has been banned from commenting in your journal.";
  }
 
  $ret .= "<?h1 Deleted h1?><?p The comment has been deleted. $and p?>";
- $ret .= $dbh->errstr;
  return $ret;
 
 _code?>

@@ -21,10 +21,9 @@
         return $err->($ML{'.error.invalid_mode'});
     }
 
-    my $dbs = LJ::get_dbs();
     my $sth;
    
-    my $remote = LJ::get_remote($dbs);
+    my $remote = LJ::get_remote();
     return $err->($ML{'.error.login'}) unless $remote;
     return $err->("<?requirepost?>") unless LJ::did_post();
 
@@ -34,12 +33,11 @@
     }
     return $err->($ML{'.error.none_selected'}) unless @talkids;
 
-    my $u = LJ::load_user($dbs, $POST{'journal'});
+    my $u = LJ::load_user($POST{'journal'});
     return $err->($ML{'talk.error.bogusargs'}) unless $u && $u->{'clusterid'};
     return $err->($LJ::MSG_READONLY_USER) if LJ::get_cap($u, "readonly");
 
-    my $dbcs = LJ::get_cluster_set($u);
-    my $dbcm = $dbcs->{'dbh'};
+    my $dbcm = LJ::get_cluster_master($u);
 
     my $jid = $u->{'userid'};
     my $ditemid = $POST{'ditemid'}+0;
@@ -48,7 +46,7 @@
     my $log = $dbcm->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=?",
                                        undef, $jid, $itemid);
     return $err->($ML{'.error.inconsistent_data'}) unless $log && $log->{'anum'} == ($ditemid & 255);
-    my $up = LJ::load_userid($dbs, $log->{'posterid'});
+    my $up = LJ::load_userid($log->{'posterid'});
 
     # check permissions
     return $err->($ML{'.error.privs.screen'})

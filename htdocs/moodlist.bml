@@ -17,9 +17,7 @@ p?>
     my $ret;
     my $sth;
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     
     # FIXME: cache this.  it's small.
     $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y' ORDER BY name");
@@ -37,8 +35,8 @@ p?>
 
     my $moodtheme = $FORM{'moodtheme'}+0;
     $moodtheme ||= 1;
-    LJ::load_moods($dbs);
-    LJ::load_mood_theme($dbs, $moodtheme);
+    LJ::load_moods();
+    LJ::load_mood_theme($moodtheme);
 
     $ret .= "<form method='get' action='moodlist.bml'><b>Preview mood icon set: </b> ";
     $ret .= LJ::html_select({ name => 'moodtheme',

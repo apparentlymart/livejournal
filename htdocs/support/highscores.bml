@@ -7,31 +7,31 @@ The following people have helped other users in the support area:
 
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbr = LJ::get_db_reader();
 
  my $sth;
  my %rank;
 
- my $remote = LJ::get_remote($dbs);
- my $admin = (LJ::check_priv($dbs, $remote, "admin", "supporthelp") ||
-              LJ::check_priv($dbs, $remote, "admin", "all"));
+ my $remote = LJ::get_remote();
+ my $admin = (LJ::check_priv($remote, "admin", "supporthelp") ||
+              LJ::check_priv($remote, "admin", "all"));
  
  my %helper;
  if ($admin) {
      # if remote user has power to assign 'supporthelp' priv, then find out
      # already has it so we can make links later on people without it
-     $sth = $dbr->prepare("SELECT DISTINCT pm.userid FROM priv_map pm, priv_list pl WHERE pm.prlid=pl.prlid AND pl.privcode='supporthelp'");
+     $sth = $dbr->prepare("SELECT DISTINCT pm.userid FROM priv_map pm, priv_list pl ".
+                          "WHERE pm.prlid=pl.prlid AND pl.privcode='supporthelp'");
      $sth->execute;
      while (my ($userid) = $sth->fetchrow_array) {
          $helper{$userid} = 1;
      }
  }
 
- $sth = $dbr->prepare("SELECT statcat, statkey, statval FROM stats WHERE statcat IN ('supportrank', 'supportrank_prev')");
+ $sth = $dbr->prepare("SELECT statcat, statkey, statval FROM stats ".
+                      "WHERE statcat IN ('supportrank', 'supportrank_prev')");
  $sth->execute;
- if ($dbh->err) { return $dbh->errstr; }
+
  while (my ($cat, $userid, $rank) = $sth->fetchrow_array) {
      if ($cat eq "supportrank") {
          $rank{$userid}->{'now'} = $rank;
@@ -40,7 +40,9 @@ The following people have helped other users in the support area:
      }
  }
 
- $sth = $dbr->prepare("SELECT u.userid, u.user, u.name, SUM(sp.points) AS 'points' FROM user u, supportpoints sp WHERE u.userid=sp.userid GROUP BY 1, 2, 3 ORDER BY 4 DESC");
+ $sth = $dbr->prepare("SELECT u.userid, u.user, u.name, SUM(sp.points) AS 'points' ".
+                      "FROM user u, supportpoints sp WHERE u.userid=sp.userid ".
+                      "GROUP BY 1, 2, 3 ORDER BY 4 DESC");
  $sth->execute;
 
  my $ret;
