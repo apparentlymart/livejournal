@@ -313,7 +313,7 @@ sub ReplyForm__print
 
     $ret .= "<script type='text/javascript' language='JavaScript'>\n";
     $ret .= "var usermismatchtext = \"" . LJ::ejs($ML{'.usermismatch'}) . "\";\n";
-    $ret .= "</script><script type='text/javascript' language='JavaScript' src='/js/talkpost.js'></script>";
+    $ret .= "</script><script type='text/javascript' language='JavaScript' src='$LJ::SITEROOT/js/talkpost.js'></script>";
     $ret .= "</form>\n";    
     
     
