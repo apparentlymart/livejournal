@@ -170,6 +170,8 @@ sub create_view_lastn
 	}
 
 	my $ditemid = $u->{'clusterid'} ? ($itemid * 256 + $item->{'anum'}) : $itemid;
+	my $itemargs = $u->{'clusterid'} ? "journal=$user&itemid=$ditemid" : "itemid=$ditemid";
+	$lastn_event{'itemargs'} = $itemargs;
 
 	LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
 					       'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}), });
@@ -180,11 +182,11 @@ sub create_view_lastn
 	    ! $logprops{$itemid}->{'opt_nocomments'}
 	    ) 
 	{
-	    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
-	    my $readurl = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
+	    my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
 	    $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
 		'itemid' => $ditemid,
-		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$ditemid",
+		'itemargs' => $itemargs,
+		'urlpost' => "$LJ::SITEROOT/talkpost.bml?$itemargs",
 		'urlread' => $readurl,
 		'messagecount' => $replycount,
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'LASTN_TALK_READLINK', {
@@ -599,6 +601,8 @@ sub create_view_friends
 	}
 	
 	my $ditemid = $clusterid ? ($itemid * 256 + $item->{'anum'}) : $itemid;
+	my $itemargs = $clusterid ? "journal=$friend&itemid=$ditemid" : "itemid=$ditemid";
+	$friends_event{'itemargs'} = $itemargs;
 
 	LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
 					       'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}), });
@@ -661,12 +665,13 @@ sub create_view_friends
 	
 	if ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" &&
 	    ! $logprops{$datakey}->{'opt_nocomments'}
-	    ) {
-	    my $jarg = $clusterid ? "journal=$friend&" : "";
-	    my $readurl = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
+	    ) 
+	{
+	    my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs",
 	    $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
 		'itemid' => $ditemid,
-		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$ditemid",
+		'itemargs' => $itemargs,
+		'urlpost' => "$LJ::SITEROOT/talkpost.bml?$itemargs",
 		'urlread' => $readurl,
 		'messagecount' => $replycount,
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'FRIENDS_TALK_READLINK', {
@@ -1145,6 +1150,8 @@ sub create_view_day
 	}
 
 	my $ditemid = $u->{'clusterid'} ? ($itemid*256 + $anum) : $itemid;
+	my $itemargs = $u->{'clusterid'} ? "journal=$user&itemid=$ditemid" : "itemid=$ditemid";
+	$day_event{'itemargs'} = $itemargs;
 
 	LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
 					       'cuturl' => LJ::item_link($u, $itemid, $anum), });
@@ -1153,12 +1160,13 @@ sub create_view_day
 
 	if ($u->{'opt_showtalklinks'} eq "Y" &&
 	    ! $logprops{$itemid}->{'opt_nocomments'}
-	    ) {
-	    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
-	    my $readurl = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
+	    ) 
+	{
+	    my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs";
 	    $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
 		'itemid' => $ditemid,
-		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$ditemid",
+		'itemargs' => $itemargs,
+		'urlpost' => "$LJ::SITEROOT/talkpost.bml?$itemargs",
 		'urlread' => $readurl,
 		'messagecount' => $replycount,
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'DAY_TALK_READLINK', {
