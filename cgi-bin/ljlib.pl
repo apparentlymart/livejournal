@@ -30,6 +30,8 @@ use DDLockClient ();
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
 
+sub END { LJ::end_request(); }
+
 # tables on user databases (ljlib-local should define @LJ::USE_TABLES_LOCAL)
 # this is here and no longer in bin/upgrading/update-db-{general|local}.pl
 # so other tools (in particular, the inter-cluster user mover) can verify
@@ -746,6 +748,41 @@ sub get_friend_group {
     LJ::MemCache::set($memkey, $fg);
 
     return $find_grp->();
+}
+
+sub fill_groups_xmlrpc {
+    my ($u, $ret) = @_;
+    return undef unless ref $u && ref $ret;
+
+    # layer on friend group information in the following format:
+    #
+    # grp:1 => 'mygroup',
+    # ...
+    # grp:30 => 'anothergroup',
+    #
+    # grpu:whitaker => '0,1,2,3,4',
+    # grpu:test => '0', 
+    
+    my $grp = LJ::get_friend_group($u) || {};
+
+    $ret->{"grp:0"} = "_all_";
+    foreach my $bit (1..30) {
+        next unless my $g = $grp->{$bit};
+        $ret->{"grp:$bit"} = $g->{groupname};
+    }
+
+    my $fr = LJ::get_friends($u) || {};
+    my $users = LJ::load_userids(keys %$fr);
+    while (my ($fid, $f) = each %$fr) {
+        my $u = $users->{$fid};
+        next unless $u->{journaltype} =~ /^[PCS]$/;
+
+        my $fname = $u->{user};
+        $ret->{"grpu:$fid:$fname"} = 
+            join(",", 0, grep { $grp->{$_} && $f->{groupmask} & 1 << $_ } 1..30);
+    }
+
+    return 1;
 }
 
 # <LJFUNC>
@@ -4003,11 +4040,12 @@ sub start_request
     %LJ::REQ_CACHE_USER_NAME = ();    # users by name
     %LJ::REQ_CACHE_USER_ID = ();      # users by id
     %LJ::REQ_CACHE_REL = ();          # relations from LJ::check_rel()
+    %LJ::REQ_CACHE_DIRTY = ();        # caches calls to LJ::mark_dirty()
     %LJ::S1::REQ_CACHE_STYLEMAP = (); # styleid -> uid mappings
     %LJ::REQ_DBIX_TRACKER = ();       # canonical dbrole -> DBIx::StateTracker
     %LJ::REQ_DBIX_KEEPER = ();        # dbrole -> DBIx::StateKeeper
     %LJ::REQ_HEAD_HAS = ();           # avoid code duplication for js
-    $LJ::ACTIVE_CRUMB = '';            # clear out bread crumbs
+    $LJ::ACTIVE_CRUMB = '';           # clear out bread crumbs
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
@@ -4069,10 +4107,21 @@ sub start_request
 # </LJFUNC>
 sub end_request
 {
+    LJ::flush_cleanup_handlers();
     LJ::disconnect_dbs() if $LJ::DISCONNECT_DBS;
     LJ::MemCache::disconnect_all() if $LJ::DISCONNECT_MEMCACHE;
 }
 
+# <LJFUNC>
+# name: LJ::flush_cleanup_handlers
+# des: Runs all cleanup handlers registered in @LJ::CLEANUP_HANDLERS
+# </LJFUNC>
+sub flush_cleanup_handlers {
+    while (my $ref = shift @LJ::CLEANUP_HANDLERS) {
+        next unless ref $ref eq 'CODE';
+        $ref->();
+    }
+}
 
 # <LJFUNC>
 # name: LJ::disconnect_dbs
@@ -5765,6 +5814,37 @@ sub do_to_cluster {
 }
 
 # <LJFUNC>
+# name: LJ::mark_dirty
+# des: Marks a given user as being $what type of dirty
+# args: u, what
+# des-what: type of dirty being marked (EG 'friends')
+# returns: 1
+# </LJFUNC>
+sub mark_dirty {
+    my ($uuserid, $what) = @_;
+
+    my $userid = LJ::want_userid($uuserid);
+    return 1 if $LJ::REQ_CACHE_DIRTY{$what}->{$userid};
+
+    my $u = LJ::want_user($userid);
+
+    # friends dirtiness is only necessary to track
+    # if we're exchange XMLRPC with fotobilder
+    if ($what eq 'friends' && $LJ::FB_SITEROOT) {
+        my $udbh = LJ::get_cluster_master($u);
+        push @LJ::CLEANUP_HANDLERS, sub {
+            my $res = LJ::cmd_buffer_add($udbh, $u->{userid}, 'dirty', { what => 'friends' });
+            };
+    } else {
+        return 1;
+    }
+
+    $LJ::REQ_CACHE_DIRTY{$what}->{$userid}++;
+
+    return 1;
+}
+
+# <LJFUNC>
 # name: LJ::cmd_buffer_add
 # des: Schedules some command to be run sometime in the future which would
 #      be too slow to do syncronously with the web request.  An example
@@ -5798,7 +5878,7 @@ sub cmd_buffer_add
         }
         chop $arg_str;
     } else {
-        $arg_str = $args;
+        $arg_str = $args || "";
     }
 
     my $rv;
@@ -5887,6 +5967,33 @@ sub cmd_buffer_flush
                 my $msg = Storable::thaw($c->{'args'});
                 LJ::send_mail($msg, "async");
             }
+        },
+        # notify fotobilder of dirty friends
+        'dirty' => {
+            'run' => sub {
+                my ($dbh, $db, $c) = @_;
+
+                my $a = $c->{args};
+                my $what = $a->{what};
+
+                if ($what eq 'friends') {
+                    eval {
+                        eval "use XMLRPC::Lite();";
+
+                        my $u = LJ::load_userid($c->{journalid});
+                        my %req = ( user => $u->{user} );
+
+                        # fill in groups info
+                        LJ::fill_groups_xmlrpc($u, \%req);
+
+                        XMLRPC::Lite
+                            ->new( proxy => "$LJ::FB_SITEROOT/interface/xmlrpc",
+                                   timeout => 5 )
+                            ->call('FB.XMLRPC.groups_push', \%req);
+                    };
+                }
+
+            },
         },
         # send notifications for support requests
         'support_notify' => {
@@ -7178,6 +7285,9 @@ sub friends_do {
     my $ret = $dbh->do($sql, undef, @args);
 
     LJ::memcache_kill($uid, "friends");
+
+    # pass $uuid in case it's a $u object which mark_dirty wants
+    LJ::mark_dirty($uuid, "friends");
 
     return $ret;
 }

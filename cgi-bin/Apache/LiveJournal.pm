@@ -71,11 +71,14 @@ sub handler
 
     $r->set_handlers(PerlTransHandler => [ \&trans ]);
 
+    # call LJ::end_request to flush @LJ::CLEANUP_HANDLERS and release
+    # database connections
+    $r->push_handlers(PerlCleanupHandler => "LJ::end_request");
+
     # only perform this once in case of internal redirects
     if ($r->is_initial_req) {
         $r->push_handlers(PerlCleanupHandler => sub { %RQ = () });
         $r->push_handlers(PerlCleanupHandler => "Apache::LiveJournal::db_logger");
-        $r->push_handlers(PerlCleanupHandler => "LJ::end_request");
     }
 
     # if we're behind a lite mod_proxy front-end, we need to trick future handlers

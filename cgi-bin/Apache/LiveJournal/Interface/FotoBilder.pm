@@ -84,12 +84,25 @@ sub get_user_info
     # to fotobilder how much disk the user is using on livejournal's end
     $ret{diskused} = LJ::Blob::get_disk_usage($u) - $ret{fb_usage};
 
+    return \%ret unless $POST->{fullsync};
+
+    LJ::fill_groups_xmlrpc($u, \%ret);
     return \%ret;
 }
 
 # get_user_info above used to be called 'checksession', maintain
 # an alias for compatibility
 sub checksession { get_user_info(@_); }
+
+sub get_groups {
+    my $POST = shift;
+    my $u = LJ::load_user($POST->{user});
+    return {} unless $u;
+
+    my %ret = ();
+    LJ::fill_groups_xmlrpc($u, \%ret);
+    return \%ret;
+}
 
 # Pregenerate a list of challenge/responses.
 sub makechals

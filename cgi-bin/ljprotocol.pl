@@ -1613,7 +1613,6 @@ sub editfriends
     $sth->finish;
 
     # perform the deletions
-    my $did_deletes = 0;
   DELETEFRIEND:
     foreach (@{$req->{'delete'}})
     {
@@ -1623,7 +1622,6 @@ sub editfriends
         my $friendid = LJ::get_userid($deluser);
         # TAG:FR:protocol:editfriends2_del
         LJ::delete_friend_edge($userid, $friendid);
-        $did_deletes = 1;
         $friend_count--;
     }
 
@@ -1889,6 +1887,7 @@ sub editfriendgroups
     # invalidate memcache of friends/groups
     LJ::memcache_kill($userid, "friends");
     LJ::memcache_kill($userid, "fgrp");
+    LJ::mark_dirty($u, "friends");
 
     # return value for this is nothing.
     return {};
