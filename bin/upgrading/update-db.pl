@@ -29,7 +29,7 @@ GetOptions("runsql" => \$opt_sql,
            "drop" => \$opt_drop,
            "populate" => \$opt_pop,
            "confirm=s" => \$opt_confirm,
-           "cluster=i" => \$cluster,
+           "cluster=s" => \$cluster,
            "skip=s" => \$opt_skip,
            "help" => \$opt_help,
            "listtables" => \$opt_listtables,
@@ -43,7 +43,10 @@ if ($opt_help) {
   -r  --runsql       Actually do the SQL, instead of just showing it.
   -p  --populate     Populate the database with the latest required base data.
   -d  --drop         Drop old unused tables (default is to never)
-      --cluster <n>  Upgrade cluster number <n> (default is global cluster)
+      --cluster=<n>  Upgrade cluster number <n> (defaut,0 is global cluster)
+      --cluster=<n>,<n>,<n>
+      --cluster=user Update user clusters
+      --cluster=all  Update user clusters, and global
   -l  --listtables   Print used tables, one per line.
 ";
 }
@@ -56,12 +59,18 @@ unless (-d $ENV{'LJHOME'}) {
 
 die "Can't --populate a cluster" if $opt_pop && $cluster;
 
-## make sure we can connect
-my $dbh = $cluster ? LJ::get_cluster_master($cluster) : LJ::get_dbh("master");
-unless ($dbh) {
-    die "Can't connect to the database (clust\#$cluster), so I can't update it.\n";
+my @clusters;
+foreach my $cl (split(/,/, $cluster)) {
+    die "Invalid cluster spec: $cl\n" unless
+        $cl =~ /^\s*((\d+)|all|user)\s*$/;
+    if ($cl eq "all") { push @clusters, 0, @LJ::CLUSTERS; }
+    elsif ($cl eq "user") { push @clusters, @LJ::CLUSTERS; }
+    else { push @clusters, $1; }
 }
+@clusters = (0) unless @clusters;
 
+my %status;          # clusterid -> string
+my %clustered_table; # $table -> 1
 my $sth;
 my %table_exists;   # $table -> 1
 my %table_unknown;  # $table -> 1
@@ -71,57 +80,97 @@ my %post_create;    # $table -> [ [ $action, $what ]* ]
 my %coltype;        # $table -> { $col -> $type }
 my %indexname;      # $table -> "INDEX"|"UNIQUE" . ":" . "col1-col2-col3" -> "PRIMARY" | index_name
 my @alters;
-my %clustered_table; # $table -> 1
+my $dbh;
 
-## figure out what tables already exist (but not details of their structure)
-$sth = $dbh->prepare("SHOW TABLES");
-$sth->execute;
-while (my ($table) = $sth->fetchrow_array) {
-    next if $table =~ /^access\d+$/;
-    $table_exists{$table} = 1;
+CLUSTER: foreach my $cluster (@clusters) {
+    print "Updating cluster: $cluster\n";
+    ## make sure we can connect
+    $dbh = $cluster ? LJ::get_cluster_master($cluster) : LJ::get_db_writer();
+    unless ($dbh) {
+        $status{$cluster} = "ERROR: Can't connect to the database (clust\#$cluster), so I can't update it.";
+        next CLUSTER;
+    }
+
+    # reset everythign
+    %clustered_table = %table_exists = %table_unknown =
+        %table_create = %table_drop = %post_create =
+        %coltype = %indexname = ();
+    @alters = ();
+
+    ## figure out what tables already exist (but not details of their structure)
+    $sth = $dbh->prepare("SHOW TABLES");
+    $sth->execute;
+    while (my ($table) = $sth->fetchrow_array) {
+        next if $table =~ /^access\d+$/;
+        $table_exists{$table} = 1;
+    }
+    %table_unknown = %table_exists;  # for now, later we'll delete from table_unknown
+
+    ## very important that local is run first!  (it can define tables that
+    ## the site-wide would drop if it didn't know about them already)
+
+    my $load_datfile = sub {
+        my $file = shift;
+        my $local = shift;
+        return if $local && ! -e $file;
+        open(F, $file) or die "Can't find database update file at $file\n";
+        my $data;
+        {
+            local $/ = undef;
+            $data = <F>;
+        }
+        close F;
+        eval $data;
+        die "Can't run $file: $@\n" if $@;
+        return 1;
+    };
+
+    $load_datfile->("$LJ::HOME/bin/upgrading/update-db-local.pl", 1);
+    $load_datfile->("$LJ::HOME/bin/upgrading/update-db-general.pl");
+
+    foreach my $t (sort keys %table_create) {
+        delete $table_drop{$t} if ($table_drop{$t});
+        print "$t\n" if $opt_listtables;
+    }
+    exit if $opt_listtables;
+
+    foreach my $t (keys %table_drop) {
+        delete $table_unknown{$t};
+    }
+
+    foreach my $t (keys %table_unknown)
+    {
+        print "# Warning: unknown live table: $t\n";
+    }
+
+    ## create tables
+    foreach my $t (keys %table_create)
+    {
+        next if $table_exists{$t};
+        create_table($t);
+    }
+
+    ## drop tables
+    foreach my $t (keys %table_drop)
+    {
+        next unless $table_exists{$t};
+        drop_table($t);
+    }
+
+    ## do all the alters
+    foreach my $s (@alters)
+    {
+        $s->($dbh, $opt_sql);
+    }
+
+    $status{$cluster} = "OKAY";
 }
-%table_unknown = %table_exists;  # for now, later we'll delete from table_unknown
 
-## very important that local is run first!  (it can define tables that
-## the site-wide would drop if it didn't know about them already)
-
-load_datfile("$LJ::HOME/bin/upgrading/update-db-local.pl", 1);
-load_datfile("$LJ::HOME/bin/upgrading/update-db-general.pl");
-
-foreach my $t (sort keys %table_create) {
-    delete $table_drop{$t} if ($table_drop{$t});
-    print "$t\n" if $opt_listtables;
+print "\ncluster: status\n";
+foreach my $clid (sort { $a <=> $b } keys %status) {
+    printf "%7d: %s\n", $clid, $status{$clid};
 }
-exit if $opt_listtables;
-
-foreach my $t (keys %table_drop) {
-    delete $table_unknown{$t};
-}
-
-foreach my $t (keys %table_unknown)
-{
-    print "# Warning: unknown live table: $t\n";
-}
-
-## create tables
-foreach my $t (keys %table_create)
-{
-    next if $table_exists{$t};
-    create_table($t); 
-}
-
-## drop tables
-foreach my $t (keys %table_drop)
-{
-    next unless $table_exists{$t};
-    drop_table($t); 
-}
-
-## do all the alters
-foreach my $s (@alters)
-{
-    $s->($dbh, $opt_sql);
-}
+print "\n";
 
 if ($opt_pop)
 {
@@ -161,7 +210,7 @@ if ($opt_pop)
             }
             next;
         }
-                
+
         # insert new
         my %opts = ( "is_public" => 'Y', "opt_cache" => 'Y',
                      map { $_, $s->{$_} } qw(styledes type formatdata is_embedded is_colorfree lastupdate));
@@ -179,7 +228,7 @@ if ($opt_pop)
         my $LD = "s2layers"; # layers dir
 
         my $sysid = $su->{'userid'};
-    
+
         # find existing re-distributed layers that are in the database
         # and their styleids.
         my $existing = LJ::S2::get_public_layers($sysid);
@@ -552,17 +601,6 @@ sub drop_table
     }
 }
 
-sub load_datfile
-{
-    my $file = shift;
-    my $local = shift;
-    return if ($local && ! -e $file);
-    unless (-e $file) {
-        die "Can't find database update file at $file\n";
-    }
-    require $file or die "Can't run $file\n";
-}
-
 sub mark_clustered
 {
     foreach (@_) {
@@ -613,6 +651,7 @@ sub load_table_info
     my $table = shift;
 
     clear_table_info($table);
+
     my $sth = $dbh->prepare("DESCRIBE $table");
     $sth->execute;
     while (my ($Field, $Type) = $sth->fetchrow_array) {
@@ -627,7 +666,7 @@ sub load_table_info
         $idx_type{$ir->{'Key_name'}} = $ir->{'Non_unique'} ? "INDEX" : "UNIQUE";
         push @{$idx_parts{$ir->{'Key_name'}}}, $ir->{'Column_name'};
     }
-    
+
     foreach my $idx (keys %idx_type) {
         my $val = "$idx_type{$idx}:" . join("-", @{$idx_parts{$idx}});
         $indexname{$table}->{$val} = $idx;
