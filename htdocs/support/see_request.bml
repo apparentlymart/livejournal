@@ -120,7 +120,7 @@ body<=
     my $ret = "";
     $ret .= "<table>\n";
     $ret .= "<tr><td valign='bottom' align='right'><b>From:</b></td><td>";
-    if ($u->{'defaultpicid'}) {
+    if ($u->{'defaultpicid'} && $u->{'statusvis'} ne 'S') {
         my %pic;
         my $picid = $u->{'defaultpicid'};
         LJ::load_userpics(\%pic, [ $picid ]);
@@ -249,7 +249,7 @@ body<=
 
     my %userinfo;
     my $dbr = LJ::get_db_reader();
-    $sth = $dbr->prepare("SELECT DISTINCT u.userid, u.user, u.name, u.defaultpicid " .
+    $sth = $dbr->prepare("SELECT DISTINCT u.userid, u.user, u.name, u.defaultpicid, u.statusvis " .
                          "FROM supportlog s, user u WHERE s.spid=? AND u.userid=s.userid");
     $sth->execute($spid);
     $userinfo{$_->{'userid'}} = $_ while ($_ = $sth->fetchrow_hashref);
@@ -300,10 +300,14 @@ body<=
             my $up = $userinfo{$le->{'userid'}};
             my $picid = $up->{'defaultpicid'};
             $header = "<table style='margin-top: 15px;'><tr valign='bottom'>";
-            if ($picid) { 
+            if ($picid && $up->{'statusvis'} ne 'S') {
                 $header .= "<td><img src='$LJ::USERPIC_ROOT/$picid/$up->{'userid'}' width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'}' hspace='3' alt='$up->{'user'}'/></td>";
             }
-            $header .= "<td>" . LJ::ljuser($up->{'user'}, { 'full' => 1 }) . " - " . LJ::ehtml($up->{'name'}) . "</td></tr></table>\n";
+            $header .= "<td>" . LJ::ljuser($up->{'user'}, { 'full' => 1 });
+            if ($up->{'statusvis'} ne 'S') {
+                $header .= " - " . LJ::ehtml($up->{'name'});
+            }
+            $header .= "</td></tr></table>\n"
         }
 
         my $what = "Answer";
