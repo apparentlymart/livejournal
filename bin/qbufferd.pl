@@ -215,10 +215,21 @@ while (LJ::start_request())
             print "  Finished $cmd.\n" if $opt_debug;
 
             # kill off children handling "dirty" after $dirty_max "dirty" jobs are handled
-            if ($cmd eq "dirty" && $started{dirty} >= $DIRTY_MAX) {
-                # trigger reload of current child process
-                print "Child suicide.  Too many dirty jobs (ct $started{dirty} >= max $DIRTY_MAX)\n" if $opt_debug;
-                exit 0;
+            if ($cmd eq "dirty") {
+                my $size = 0;
+                if (open(S, "/proc/$$/status")) {
+                    my $file;
+                    { local $/ = undef; $file = <S>; }
+                    $size = $1 if $file =~ /VmSize:.+?(\d+)/;
+                    close S;
+                }
+
+                if ($size > 50_000 || $started{dirty} >= $DIRTY_MAX) {
+                    # trigger reload of current child process
+                    print "'dirty' job suicide.  (size=$size, rpcs=$started{dirty})\n"
+                        if $opt_debug;
+                    exit 0;
+                }
             }
 
         }
