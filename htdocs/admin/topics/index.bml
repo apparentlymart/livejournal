@@ -14,11 +14,11 @@ BODY<=
 
  my $remote = LJ::get_remote($dbs);
 
- if (LJ::remote_has_priv($remote, "topicaddtopic")) {
+ if (LJ::remote_has_priv($dbs, $remote, "topicaddtopic")) {
      $ret .= "<P><A HREF=\"screentop.bml\"><B>Screen Topic Submissions</B></A> that are awaiting approval into a category.";
  }
 
- if (LJ::remote_has_priv($remote, "topicscreencat")) {
+ if (LJ::remote_has_priv($dbs, $remote, "topicscreencat")) {
      $ret .= "<P><A HREF=\"screen.html\"><B>Screen Entry Submissions</B></A> that are awaiting approval into a topic.";
  }
 

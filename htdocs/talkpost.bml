@@ -382,7 +382,7 @@ BODY<=
 
 
  $ret .= "<BR>(=DE Paragraphs will be automatically formatted by default.  <B>Allowed HTML</B>: ";
- foreach (sort LJ::CleanHTML::get_okay_comment_tags()) {
+ foreach (sort &LJ::CleanHTML::get_okay_comment_tags()) {
      $ret .= "&lt;$_&gt; ";
  }
  $ret .= "DE=)";
