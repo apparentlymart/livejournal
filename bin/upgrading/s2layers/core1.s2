@@ -1148,12 +1148,12 @@ body, td, th, table, p, div {
         ";\n}\n--></style>\n";
     }
     "</head>\n<body>\n";
-    if (defined $.journal.default_pic) {
-        $.journal.default_pic->print();
+    if (defined $.journal.default_pic and
+        $.view != "entry" and
+        $.view != "reply") {
+            $.journal.default_pic->print();
     }
-    "<h1>";
-    print $this->title();
-    "</h1>\n";
+    print "<h1>" + $this->title() + "</h1>\n";
 
     #print_linklist($.views,$.view,$.viewsorder);
     $this->print_body();
@@ -1188,7 +1188,7 @@ function Page::print_entry(Entry e) {
     """<div class="entrytext">\n$e.text\n</div>\n""";
     $e->print_metadata();
     if ($e.comments.enabled) {
-        $e.comments->print();
+            $e.comments->print();
     }
     "</div>\n\n";
 }
@@ -1491,7 +1491,8 @@ function EntryPage::print_comment (Comment c) {
         print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' /></td>";
     }
     print "<td style='width: 15%'><strong>From:</strong> $poster</td>";
-    print "<td style='width: 25%'><strong>Date:</strong> " + $c.time->date_format("med") + "</td>";
+    print "<td style='width: 25%'><strong>Date:</strong> ";
+        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td>";
     print "<td><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td></tr>";
     print "<tr valign='top'><td colspan='$td' style='width: 95%'>";
     if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>"; }
@@ -1525,10 +1526,42 @@ function ItemRange::print() {
     print "</td></tr></table>";
 }
 
+function print_singleitem(Entry e, bool hide_text) {
+    """<div class="entry" id="entry$e.itemid">\n""";
+
+    "<table>";
+    if (defined $e.userpic) { 
+        print "<tr valign='middle'><td><img src='$e.userpic.url' /></td>"; 
+    }
+    print "<td>"; 
+    $e.poster->print();
+    if ($e.poster.username != $e.journal.username) {
+        " posting in ";
+        $e.journal->print();
+    }
+    " wrote:";
+    print "<br />@ " + $e.time->date_format("long") + " - " + $e.time->time_format();
+    "</td></tr></table>\n";
+
+    "<h2>"; 
+    if ($e.security != "") {
+        print $e.security_icon->as_string();
+    }
+    if ($e.subject != "") {
+        " $e.subject";
+    }
+    "</h2>\n";
+
+    if ($hide_text == false) {
+        "<div class='entrytext'>\n$e.text\n</div>\n";
+        $e->print_metadata();
+        "</div>\n\n";
+    }
+}
+
 function EntryPage::print_body 
 {
-    if ($.entry.subject != "") { "<div style='font-weight: bold'>$.entry.subject</div>"; }
-    "<div>$.entry.text</div>";
+    print_singleitem($.entry, $.viewing_thread);
 
     if ($.comment_pages.total_subitems > 0) {
         print "<hr />";
@@ -1536,4 +1569,11 @@ function EntryPage::print_body
         $this->print_comments($.comments);
     }
 
+}
+
+function ReplyPage::print_body
+{
+    print_singleitem($.entry, true);
+    print "\n<hr />\n";
+    $.form->print();
 }
