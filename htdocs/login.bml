@@ -74,7 +74,7 @@
             $COOKIE{'langpref'} = [ $COOKIE{'langpref'}, $etime ];
             $COOKIE{'BMLschemepref'} = [ $COOKIE{'BMLschemepref'}, $etime ];
 
-            my $udbh = LJ::get_cluster_master($remote, 1);
+            my $udbh = LJ::get_cluster_master($remote);
             my $sessid = $remote->{'_session'}->{'sessid'};
             $udbh->do("UPDATE sessions SET timeexpire=UNIX_TIMESTAMP()+$session_secs, ".
                       "exptype=?, ipfixed=? WHERE " .
