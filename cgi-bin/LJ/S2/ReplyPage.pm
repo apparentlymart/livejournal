@@ -44,9 +44,9 @@ sub ReplyPage
             return;
         }
 
-        my $tt = LJ::get_talktext2($u, $replyto);
-        $parpost->{'subject'} = $tt->{$replyto}->[0];
-        $parpost->{'body'} = $tt->{$replyto}->[1];
+        my $tt = LJ::get_talktext2($u, $re_talkid);
+        $parpost->{'subject'} = $tt->{$re_talkid}->[0];
+        $parpost->{'body'} = $tt->{$re_talkid}->[1];
         $parpost->{'props'} = {};
 
         LJ::load_talk_props2($dbcs->{'reader'}, $u->{'userid'}, 
@@ -82,6 +82,7 @@ sub ReplyPage
             'metadata' => {},
             'permalink_url' => $u->{'_journalbase'} . "/$ditemid?view=dtalkid#t#dtalkid",
             'depth' => 1,
+            'time' => $datetime,
         };
     }
 
