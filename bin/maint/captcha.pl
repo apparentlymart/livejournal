@@ -3,6 +3,8 @@
 use LJ::Captcha qw{};
 use LJ::Blob    qw{};
 use File::Temp  qw{tempdir};
+use File::Path  qw{rmtree};
+use File::Spec  qw{};
 
 our ( $FakeUserId, $ClusterId, $Digits, $DigitCount, $ExpireThreshold );
 
@@ -91,12 +93,24 @@ $maint{gen_audio_captchas} = sub {
         print "generating $make new audio challenges.\n";
     }
 
+    # Clean up any old audio directories lying about from failed generations
+    # before. In theory, File::Temp::tempdir() is supposed to clean them up
+    # itself, but it doesn't appear to be doing so.
+    foreach my $olddir ( glob "audio_captchas_*" ) {
+
+        # If it's been more than an hour since it's been changed from the
+        # starting time of the script, kill it
+        if ( (-M $olddir) * 24 > 1 ) {
+            print "cleaning up old working temp directory ($olddir).\n";
+            rmtree( $olddir ) or die "rmtree: $olddir: $!";
+        }
+    }
 
     # Load the system user for Blob::put() and create an auto-cleaning temp
     # directory for audio generation
     $u = LJ::load_user( "system" )
         or die "Couldn't load the system user.";
-    $tmpdir = tempdir( "audio_captchas_XXXXXX", CLEANUP => 1 );
+    $tmpdir = tempdir( "audio_captchas_XXXXXX", CLEANUP => 0 );
 
     # Prepare insert statement
     $sql = q{
@@ -125,6 +139,9 @@ $maint{gen_audio_captchas} = sub {
               or die "Error uploading to media server: $err";
         print "done.\n";
     }
+
+    print "cleaning up working temporary directory ($tmpdir).\n";
+    rmtree( $tmpdir ) or die "Failed directory cleanup: $!";
 
     print "done. Created $make new audio captchas.\n";
     return 1;
