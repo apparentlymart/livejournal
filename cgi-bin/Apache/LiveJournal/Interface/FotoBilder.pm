@@ -70,19 +70,19 @@ sub get_user_info
     my %ret = (
                user            => $u->{user},
                userid          => $u->{userid},
+               statusvis       => $u->{statusvis},
                can_upload      => can_upload($u),
-               gallery_enabled => 1, # future toggle
-               diskquota       => LJ::get_cap($u, 'disk_quota') << 10,
-               totalusage      => LJ::Blob::get_disk_usage($u) >> 10,
+               gallery_enabled => can_upload($u),
+               diskquota       => LJ::get_cap($u, 'disk_quota') << 20, # mb -> bytes
+               fb_account      => LJ::get_cap($u, 'fb_account'),
+               fb_usage        => LJ::Blob::get_disk_usage($u, 'fotobilder'),
                );
 
-    # now optional site-specific info
-    if (LJ::are_hooks("fb_rpc_user_info")) {
-        my $inf = LJ::run_hook("fb_rpc_user_info", $u);
-        while (my ($key, $val) = each %$inf) {
-            $ret{$key} = $val;
-        }
-    }
+    # when the set_quota rpc call is executed (below), a placholder row is inserted
+    # into userblob.  it's just used for livejournal display of what we last heard
+    # fotobilder disk usage was, but we need to subtract that out before we report
+    # to fotobilder how much disk the user is using on livejournal's end
+    $ret{diskused} = LJ::Blob::get_disk_usage($u) - $ret{fb_usage};
 
     return \%ret;
 }
@@ -140,7 +140,7 @@ sub set_quota
     my $used = $POST->{'used'} << 10;  # Kb -> bytes
     my $result = $dbcm->do('REPLACE INTO userblob SET ' .
                            'domain=?, length=?, journalid=?, blobid=0',
-                           undef, LJ::get_blob_domainid('picpix_quota'),
+                           undef, LJ::get_blob_domainid('fotobilder'),
                            $used, $u->{'userid'});
 
     return {
@@ -161,11 +161,13 @@ sub get_auth_challenge
 # non-interface helper functions
 #
 
-# Does the user have upload access?  (ignoring quota restrictions)
+# Does the user have upload access?
 sub can_upload
 {
     my $u = shift;
-    return LJ::get_cap($u, 'fb_account') ? 1 : 0;
+
+    return LJ::get_cap($u, 'fb_account')
+        && LJ::get_cap($u, 'fb_can_upload') ? 1 : 0;
 }
 
 1;

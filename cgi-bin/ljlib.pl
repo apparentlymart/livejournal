@@ -201,7 +201,7 @@ sub get_blob_domainid
         "phonepost" => 2,
         "captcha_audio" => 3,
         "captcha_image" => 4,
-        "picpix_quota" => 5,
+        "fotobilder" => 5,
     }->{$name};
     # FIXME: add hook support, so sites can't define their own
     # general code gets priority on numbers, say, 1-200, so verify
