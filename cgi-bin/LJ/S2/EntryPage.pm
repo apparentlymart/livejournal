@@ -36,6 +36,10 @@ sub EntryPage
         $opts->{'handler_return'} = 404;
         return;
     }
+    unless (LJ::can_view($dbs, $remote, $entry)) {
+        $opts->{'handler_return'} = 403;
+        return;
+    }
     
     my $replycount = $entry->{'replycount'};
     my $nc = "";
