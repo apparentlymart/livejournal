@@ -420,8 +420,12 @@ sub postevent
     #### /embedding
     
     ### extract links for meme tracking
-    foreach my $url (LJ::get_urls($event)) {
-        LJ::record_meme($dbs, $url, $posterid, $itemid);
+    unless ($req->{'security'} eq "usemask" ||
+	    $req->{'security'} eq "private")
+    {
+	foreach my $url (LJ::get_urls($event)) {
+	  LJ::record_meme($dbs, $url, $posterid, $itemid);
+	}
     }
 
     my $qevent = $dbh->quote($event);
@@ -1305,11 +1309,13 @@ sub hash_menus
 		  'url' => "$LJ::SITEROOT/support/", }
 		];
 
-    # FIXME: ljcom specific! make this whole function a hook!
-    unless ($u->{'caps'} & (8|4)) { # unless perm or paid
-	push @$menu, { 'text' => 'Upgrade your account',
-		       'url' => "$LJ::SITEROOT/paidaccounts/", };
-    }
+    LJ::run_hooks("modify_login_menu", {
+	'dbs' => $dbs,
+	'menu' => $menu,
+	'u' => $u,
+	'user' => $user,
+    });
+
     return $menu;
 }
 

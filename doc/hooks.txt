@@ -1,38 +1,50 @@
-* userinfo_html_by_user
+* userinfo_html_by_user(\%args)
 
   on userinfo.bml page, extra HTML to show next to username & id
 
-  ret
-  u
+  arg keys:
+    ret
+    u
 
-* login_formopts
+* login_formopts(\%args)
 
   extra html for login options on login.bml
 
-  ret
+  arg keys:
+    ret
 
 
-* post_login
+* post_login(\%args)
 
   action to take after logging in, before HTML is sent to 
   to client (possible to print HTTP headers directly)
 
-  u
-  form
+  arg keys:
+    u
+    form
   
-
-* post_create
+* post_create(\%args)
 
   action to take after creating a journal
 
-  dbs
-  user
-  userid
-  code    -- auth code, if in use
+  arg keys:
+    dbs
+    user
+    userid
+    cde    -- auth code, if in use
 
 * canonicalize_url(\$url)
 
   cleans up a URL into its canonical form.
 
 
+* modify_login_menu(\%args)
 
+  modifies or resets entirely the web menu data structure that is sent
+  to the client.  see cgi-bin/ljprotocol.pl for the format.
+
+  arg keys:
+    menu
+    u
+    dbs
+    user

@@ -664,9 +664,10 @@ sub get_cap
 	next unless ($caps & (1 << $bit));
 	my $v = $LJ::CAP{$bit}->{$cname};
 	next unless (defined $v);
-	$max = $v if ($v > $max);
+	next if (defined $max && $max > $v);
+	$max = $v;
     }
-    return $max;
+    return defined $max ? $max : $LJ::CAP_DEF{$cname};
 }
 
 # <LJFUNC>
@@ -691,9 +692,10 @@ sub get_cap_min
 	next unless ($caps & (1 << $bit));
 	my $v = $LJ::CAP{$bit}->{$cname};
 	next unless (defined $v);
-	$min = $v if (! defined $min || $v < $min);
+	next if (defined $min && $min < $v);
+	$min = $v;
     }
-    return $min;
+    return defined $min ? $min : $LJ::CAP_DEF{$cname};
 }
 
 # <LJFUNC>
