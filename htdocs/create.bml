@@ -67,6 +67,10 @@ body<=
      return unless $msg;
      return "$pre $msg $post";
  };
+
+ # Flag to indicate they've submitted with 'audio' as the answer to the spambot
+ # challenge.
+ my $wants_audio = 0;
  
  # validate a code they've entered and throw them back to entercode
  # mode if it's invalid
@@ -107,12 +111,20 @@ body<=
      open (REM, "$LJ::HOME/htdocs/inc/account-codes");
      while (<REM>) {
          $ret .= $_;
-     }	
+     }  
      close REM;
 
      return $ret;
  }
- 
+
+# MODE: submit - if they've given 'audio' as the answer to the spambot-blocker,
+# reset the mode to 'getinfo' and set the audio flag
+if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i )
+{
+    $mode = 'getinfo';
+    $wants_audio = 1;
+}
+
  # MODE: submit - try to create an account.  might change mode
  #       if there are errors, we'll populate %errors and 
  #       return to "getinfo" mode below
@@ -231,6 +243,10 @@ body<=
          $errors{'email'} = join(", ", @email_errors) if @email_errors;
      }
 
+     # Check the turing test answer if it's turned on
+     if ($LJ::HUMAN_CHECK{create} && LJ::Captcha::check_code($POST{capid}, $POST{anum}, $POST{answer})) {
+         $errors{'captcha'} = "Invalid answer.";
+     }
 
      last SUBMIT if %errors;
 
@@ -269,6 +285,11 @@ body<=
          foreach my $friend (@LJ::INITIAL_OPTIONAL_FRIENDS) {
              my $friendid = LJ::get_userid($friend);
              LJ::add_friend($userid, $friendid) if $friendid and $POST{"initial_optional_friend_$friend"};
+         }
+
+         # Mark the turing test for deletion
+         if ($LJ::HUMAN_CHECK{create}) {
+             LJ::Captcha::expire( $POST{capid} );
          }
 
          LJ::run_hooks("post_create", {
@@ -448,9 +469,32 @@ body<=
      }
 
      if ($LJ::HUMAN_CHECK{create}) {
+		 my ( $capid, $anum );
+
          $ret .= "<li><div class='formitem'><div class='formitemName'>Prove that you're a human</div>";
-         $ret .= "<div class='formitemDesc'>Type the letters and numbers you see below, to prove that you're not a spam robot.  If you can't read the text, type \"AUDIO\" and take a sound test instead.</div>";
-         $ret .= "<img src='/captcha/image.bml' width='175' height='35' />";
+
+         # Visual challenge
+         unless ( $wants_audio ) {
+             ( $capid, $anum ) = LJ::Captcha::get_visual_id();
+
+             $ret .= "<div class='formitemDesc'>Type the letters and numbers you see below, to prove ".
+                 "that you're not a spam robot.  If you can't read the text, type \"AUDIO\" and take ".
+                 "a sound test instead.</div>";
+             $ret .= "<img src='/captcha/image.bml?capid=$capid&anum=$anum' width='175' height='35' />";
+         }
+
+         # Audio challenge
+         else {
+             ( $capid, $anum ) = LJ::Captcha::get_audio_id();
+
+             $ret .= "<div class='formitemDesc'>Type the numbers you hear to prove ".
+                 "that you're not a spam robot:</div>";
+             $ret .= "<a href='/captcha/audio.bml?capid=$capid&anum=$anum'>Play the sound</a>";
+         }
+
+         $ret .= "<br/><br/>";
+         $ret .= "Answer: <input type='text' name='answer' value='' size='15' />";
+		 $ret .= LJ::html_hidden( capid => $capid, anum => $anum );
          $ret .= "</div></li>";
      }
 

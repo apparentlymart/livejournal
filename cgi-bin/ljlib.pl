@@ -191,6 +191,8 @@ sub get_blob_domainid
     my $id = {
         "userpic" => 1,
         "phonepost" => 2,
+        "captcha_audio" => 3,
+        "captcha_image" => 4,
     }->{$name};
     # FIXME: add hook support, so sites can't define their own
     # general code gets priority on numbers, say, 1-200, so verify

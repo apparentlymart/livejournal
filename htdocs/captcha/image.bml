@@ -1,15 +1,9 @@
 <?_code
 {
+    return "<?badinput?>" unless LJ::text_in(\%GET);
     my $png;
 
-    my $code = "";
-    my $digits = "abcdefghkmnpqrstuvwzyz23456789";
-    my $len = length($digits);
-    for (1..7) {
-        $code .= substr($digits, int(rand($len)), 1);
-    }
-
-    eval { $png = LJ::Captcha::generate_visual($code); };
+    eval { $png = LJ::Captcha::get_visual_data($GET{capid}, $GET{anum}); };
     if ($png) {
         BML::set_content_type("image/png");
         return BML::noparse($png);

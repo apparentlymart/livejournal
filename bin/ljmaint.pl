@@ -121,9 +121,13 @@ sub run_task
         eval {
             $maint{$task}->(@args);
         };
+		if ( $@ ) {
+			print STDERR "ERROR> task $task died: $@\n\n";
+		}
         unlink $lock_file;
         flock(LOCK, LOCK_UN);
         close LOCK;
+
     } else {
         print "Task '$task' already running.  Quitting.\n" if ($VERBOSE >= 1);
     }

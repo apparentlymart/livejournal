@@ -6,6 +6,9 @@ use GD;
 use File::Temp;
 use Cwd ();
 use Digest::MD5 ();
+use LJ::Blob qw{};
+require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
+
 
 # stolen from Authen::Captcha.  code was small enough that duplicating
 # was easier than requiring that module, and removing all its automatic
@@ -25,7 +28,7 @@ sub generate_visual
     # create a new image and color
     my $im = new GD::Image(($im_width * $length),$im_height);
     my $black = $im->colorAllocate(0,0,0);
-	
+    
     # copy the character images into the code graphic
     for(my $i=0; $i < $length; $i++)
     {
@@ -39,7 +42,7 @@ sub generate_visual
         my $d = int(rand (int(($im_height)/3)))-(int(($im_height)/5));
         $im->copyResized($source,($i*($im_width))+$a,$b,0,0,($im_width)+$c,($im_height)+$d,$im_width,$im_height);
     }
-	
+    
     # distort the code graphic
     for(my $i=0; $i<($length*$im_width*$im_height/14+150); $i++)
     {
@@ -79,6 +82,129 @@ sub generate_visual
     return $im->png;
     
 }
+
+
+### get_visual_id() -> ( $capid, $anum )
+sub get_visual_id { get_id('image') }
+sub get_audio_id { get_id('audio') }
+
+
+### get_id( $type ) -> ( $capid, $anum )
+sub get_id
+{
+    my ( $type ) = @_;
+    my (
+        $dbh,                   # Database handle (writer)
+        $sql,                   # SQL statement
+        $row,                   # Row arrayref
+        $capid,                 # Captcha id
+        $anum,                  # Unseries-ifier number
+        $issuedate,             # unixtime of issue
+       );
+
+    # Fetch database handle and lock the captcha table
+    $dbh = LJ::get_db_writer()
+		or return LJ::error( "Couldn't fetch a db writer." );
+    $dbh->do( "LOCK TABLES captchas WRITE" )
+		or return LJ::error( "Failed lock on captchas table." );
+
+    # Fetch the first unassigned row
+    $sql = q{
+        SELECT capid, anum
+        FROM captchas
+        WHERE
+            issuetime = 0
+            AND type = ?
+        LIMIT 1
+    };
+    $row = $dbh->selectrow_arrayref( $sql, undef, $type )
+        or die "No $type captchas available";
+    die "selectrow_arrayref: $sql: ", $dbh->errstr if $dbh->err;
+    ( $capid, $anum ) = @$row;
+
+    # Mark the captcha as issued
+    $issuedate = time();
+    $sql = qq{
+        UPDATE captchas
+        SET issuetime = $issuedate
+        WHERE capid = $capid
+    };
+    $dbh->do( $sql ) or die "do: $sql: ", $dbh->errstr;
+    $dbh->do( "UNLOCK TABLES" );
+
+    return ( $capid, $anum );
+}
+
+
+### get_visual_data( $capid, $anum )
+sub get_visual_data
+{
+    my ( $capid, $anum ) = @_;
+
+    my (
+        $dbr,                   # Database handle (reader)
+        $sql,                   # SQL statement
+        $valid,                 # Are the capid/anum valid?
+        $data,                  # The PNG data
+        $u,                     # System user
+       );
+
+    $dbr = LJ::get_db_reader();
+    $sql = q{
+        SELECT COUNT(*)
+        FROM captchas
+        WHERE
+            capid = ?
+            AND anum = ?
+    };
+
+    ( $valid ) = $dbr->selectrow_array( $sql, undef, $capid, $anum );
+    return undef unless $valid;
+
+    $u = LJ::load_user( "system" )
+        or die "Couldn't load the system user.";
+
+    $data = LJ::Blob::get( $u, 'captcha_image', 'png', $capid )
+          or die "Failed to fetch captcha_image $capid from media server";
+    return $data;
+}
+
+
+### get_audio_data( $capid, $anum )
+sub get_audio_data
+{
+    my ( $capid, $anum ) = @_;
+
+    my (
+        $dbr,                   # Database handle (reader)
+        $sql,                   # SQL statement
+        $valid,                 # Are the capid/anum valid?
+        $err,                   # Error message for Blob::get()
+        $data,                  # The PNG data
+        $u,                     # System user
+       );
+
+    $dbr = LJ::get_db_reader();
+    $sql = q{
+        SELECT COUNT(*)
+        FROM captchas
+        WHERE
+            capid = ?
+            AND anum = ?
+    };
+
+    ( $valid ) = $dbr->selectrow_array( $sql, undef, $capid, $anum );
+    return undef unless $valid;
+
+    $u = LJ::load_user( "system" )
+        or die "Couldn't load the system user.";
+
+    $data = LJ::Blob::get( $u, 'captcha_audio', 'wav', $capid )
+          or die "Failed to fetch captcha_audio $capid from media server";
+    return $data;
+}
+
+
 
 # ($dir) -> ("$dir/speech.wav", $code)
 #  Callers must:
@@ -149,5 +275,53 @@ sub command {
     system(@_) >> 8 == 0 or die "audio command failed, died";
 }
 
+
+### check_code( $capid, $anum, $code ) -> <true value if code is correct>
+sub check_code {
+    my ( $capid, $anum, $code ) = @_;
+
+    my (
+        $dbr,                   # Database handle (reader)
+        $sql,                   # SQL query
+        $answer,                # Challenge answer
+       );
+
+    $sql = q{
+        SELECT answer
+        FROM captchas
+        WHERE
+            capid = ?
+            AND anum = ?
+    };
+
+    # Fetch the challenge's answer based on id and anum.
+    $dbr = LJ::get_db_reader();
+    ( $answer ) = $dbr->selectrow_array( $sql, undef, $capid, $anum );
+
+    return lc $answer eq lc $code;
+}
+
+
+### expire( $capid ) -> <true value if code was expired successfully>
+sub expire {
+    my ( $capid ) = @_;
+
+    my (
+        $dbh,                   # Database handle (writer)
+        $sql,                   # SQL update query
+       );
+
+    $sql = q{
+        UPDATE captchas
+        SET used = 1
+        WHERE capid = ?
+    };
+
+    # Fetch the challenge's answer based on id and anum.
+    $dbh = LJ::get_db_writer();
+    $dbh->do( $sql, undef, $capid ) or return undef;
+
+    return 1;
+}
 
 1;
