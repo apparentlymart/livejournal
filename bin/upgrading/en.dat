@@ -3061,6 +3061,8 @@ if you would like to screen, unscreen, or delete the comments.
 
 /talkpost.bml.opt.anonymous=Anonymous
 
+/talkpost.bml.opt.bannedfrom= - you have been banned from commenting in this journal.
+
 /talkpost.bml.opt.defpic=(default)
 
 /talkpost.bml.opt.friendsonly=- this user has disabled anonymous and non-friend posting.  You may post here if [[username]] lists you as a friend.
