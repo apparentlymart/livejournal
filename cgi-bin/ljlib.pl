@@ -4173,10 +4173,6 @@ sub activate_userpics
     my $u = shift;
     return undef unless $u;
 
-    # get a database handle for reading/writing
-    # need to get this now so we can pass it to load_userid if necessary
-    my $dbh = LJ::get_db_writer();
-
     # if a userid was given, get a real $u object
     $u = LJ::load_userid($u, "force") unless ref $u eq "HASH";
 
@@ -4194,9 +4190,9 @@ sub activate_userpics
     my @inactive = ();
     my $allow = LJ::get_cap($u, "userpics");
 
-    # get database cluster reader handle
-    my $dbcr = LJ::get_cluster_reader($u);
-    return undef unless $dbcr;
+    # get a database handle for reading/writing
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
 
     # select all userpics and build active / inactive lists
     my $sth = $dbh->prepare("SELECT picid, state FROM userpic WHERE userid=?");
@@ -4209,6 +4205,10 @@ sub activate_userpics
             push @active, $picid;
         }
     }
+
+    # get database cluster reader handle
+    my $dbcr = LJ::get_cluster_reader($u);
+    return undef unless $dbcr;
 
     # inactivate previously activated userpics
     if (@active > $allow) {
