@@ -26,11 +26,11 @@ _code?><html>
 
 <hr />
 
-<p>[ <a href='/'>Home</a> | <?_code
+<p>[ <a href='/'>Home</a> | <a href='/update.bml'>Update Journal</a> | <?_code
    return unless $BML::Lynx::remote;
    my $user = $BML::Lynx::remote->{'user'};
    return "<a href='/users/$user'>Recent Entries</a> | <a href='/users/$user/friends'>Friends</a> | ";
-_code?><a href='/login.bml'>Login</a>/<a href='/logout.bml'>Logout</a> | <a href='/manage/siteopts.bml'>Browse Options</a> | <a href='/sitemap.bml'>Site Map</a>]</p>
+_code?><a href='/login.bml'>Login</a>/<a href='/logout.bml'>Logout</a> | <a href='/manage/siteopts.bml'>Browse Options</a> | <a href='/site/'>Site Map</a>]</p>
 
 </body>
 </html>
