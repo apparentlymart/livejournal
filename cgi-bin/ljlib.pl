@@ -1321,19 +1321,32 @@ sub acct_code_check
     my $userid = shift;  # optional; acceptable userid (double-click proof)
     
     my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    
+
     unless (length($code) == 12) {
 	$$err = "Malformed code; not 12 characters.";
 	return 0;	 
     }
 
-    # FIXME: fall back to master (if slave's behind?)
     my ($acid, $auth) = acct_code_decode($code);
-    my $sth = $dbr->prepare("SELECT userid, rcptid, auth FROM acctcode WHERE acid=$acid");
-    $sth->execute;
-    my $ac = $sth->fetchrow_hashref;
-    
+
+    # are we sure this is what the master has?  if we have a slave, could be behind.
+    my $definitive = ! $dbs->{'has_slave'};
+
+    # try to load from slave
+    my $ac = $dbr->selectrow_hashref("SELECT userid, rcptid, auth FROM acctcode WHERE acid=$acid");
+
+    # if we loaded something, and that code's used, it must be what master has
+    if ($ac && $ac->{'rcptid'}) {
+	$definitive = 1;
+    }
+
+    # unless we're sure we have a clean record, load from master:
+    unless ($definitive) {
+	$ac = $dbh->selectrow_hashref("SELECT userid, rcptid, auth FROM acctcode WHERE acid=$acid");
+    }
+
     unless ($ac && $ac->{'auth'} eq $auth) {
 	$$err = "Invalid account code.";
 	return 0;
