@@ -50,16 +50,17 @@ sub handler
         return SERVER_ERROR;
     }
 
+    ### read the data to mangle
+    my $bmlsource = "";
+    while (<$fh>) { $bmlsource .= $_; }
+    $fh->close();
+
     # create new request
     my $req = $cur_req = {
         'r' => $r,
         'BlockStack' => [""],
     };
-
-    ### read the data to mangle
-    my $bmlsource = "";
-    while (<$fh>) { $bmlsource .= $_; }
-    $fh->close();
+    note_mod_time($req, $modtime);
 
     # setup env
     my $uri = $r->uri;
@@ -72,18 +73,40 @@ sub handler
         }
     }
 
-    my %GETVARS;
-    my $query_string = BML::get_query_string();
-    split_vars(\$query_string, \%GETVARS);
+    # clear the package which code will run in
+    reset_codeblock();
+
+    # setup cookies
+    *BMLCodeBlock::COOKIE = *BML::COOKIE;
+    %BMLCodeBlock::COOKIE = ();
+    foreach (split(/;\s+/, $r->header_in("Cookie"))) {
+        next unless ($_ =~ /(.*)=(.*)/);
+        $BML::COOKIE{BML::durl($1)} = BML::durl($2);
+    }
+
+    # let BML code blocks see input
+    %BMLCodeBlock::GET = ();
+    %BMLCodeBlock::POST = ();
+    %BMLCodeBlock::FORM = ();  # old, combines both.
+    foreach my $id ([ [ $r->args    ] => [ \%BMLCodeBlock::GET,  \%BMLCodeBlock::FORM ] ],
+                    [ [ $r->content ] => [ \%BMLCodeBlock::POST, \%BMLCodeBlock::FORM ] ])
+    {
+        while (my ($k, $v) = splice @{$id->[0]}, 0, 2) {
+            foreach my $dest (@{$id->[1]}) {
+                $dest->{$k} .= "\0" if exists $dest->{$k};
+                $dest->{$k} .= $v;
+            }
+        }
+    }
 
     my $ideal_scheme = "";
-    if ($ENV{'HTTP_USER_AGENT'} =~ /^Lynx\//) {
+    if ($r->header_in("User-Agent") =~ /^Lynx\//) {
         $ideal_scheme = "lynx";
     }
 
     $req->{'scheme'} = $req->{'env'}->{'ForceScheme'} || 
-        $BMLClient::COOKIE{'BMLschemepref'} || 
-        $GETVARS{'usescheme'} || 
+        $BML::COOKIE{'BMLschemepref'} || 
+        $BMLCodeBlock::GET{'usescheme'} || 
         $ideal_scheme ||
         $req->{'env'}->{'DefaultScheme'};
 
@@ -107,24 +130,25 @@ sub handler
     load_look($req, "", "global");
     load_look($req, $req->{'scheme'}, "generic");
     
-    note_mod_time($req, $modtime);
-
     ## begin the multi-lang stuff
-    delete $GETVARS{'uselang'} unless $GETVARS{'uselang'} =~ /^\w{2,10}$/;
-    $req->{'lang'} = $GETVARS{'uselang'};
-    if (! $req->{'lang'} && $BMLClient::COOKIE{'langpref'} =~ m!^(\w{2,10})/(\d+)$!) {
-        $req->{'lang'} = $1;
-        # make sure the document says it was changed at least as new as when
-        # the user last set their current language, else their browser might
-        # show a cached (wrong language) version.
-        note_mod_time($req, $2);
+    if ($BMLCodeBlock::GET{'uselang'}) {
+        $req->{'lang'} = $BMLCodeBlock::GET{'uselang'} if
+            exists $Lang{$BMLCodeBlock::GET{'uselang'}};
     }
-
-    # time to guess!
+    if (! $req->{'lang'} && $BML::COOKIE{'langpref'} =~ m!^(\w{2,10})/(\d+)$!) {
+        if (exists $Lang{$1}) {
+            $req->{'lang'} = $1;
+            # make sure the document says it was changed at least as new as when
+            # the user last set their current language, else their browser might
+            # show a cached (wrong language) version.
+            note_mod_time($req, $2);
+        }
+    }
     unless ($req->{'lang'})
     {
+        # time to guess!
         my %lang_weight = ();
-        my @langs = split(/\s*,\s*/, lc($ENV{'HTTP_ACCEPT_LANGUAGE'}));
+        my @langs = split(/\s*,\s*/, lc($r->header_in("Accept-Language")));
         my $winner_weight = 0.0;
         foreach (@langs)
         {
@@ -144,21 +168,6 @@ sub handler
     }
     $req->{'lang'} ||= $req->{'env'}->{'DefaultLanguage'} || "en";
 
-    # let BML code blocks see input
-    %BMLCodeBlock::GET = ();
-    %BMLCodeBlock::POST = ();
-    %BMLCodeBlock::FORM = ();  # old, combines both.
-    foreach my $id ([ [ $r->args    ] => [ \%BMLCodeBlock::GET,  \%BMLCodeBlock::FORM ] ],
-                    [ [ $r->content ] => [ \%BMLCodeBlock::POST, \%BMLCodeBlock::FORM ] ])
-    {
-        while (my ($k, $v) = splice @{$id->[0]}, 0, 2) {
-            foreach my $dest (@{$id->[1]}) {
-                $dest->{$k} .= "\0" if exists $dest->{$k};
-                $dest->{$k} .= $v;
-            }
-        }
-    }
-    
     # print on the HTTP header
     my $html;
     bml_decode($req, \$bmlsource, \$html, { DO_CODE => $req->{'env'}->{'AllowCode'} });
@@ -171,12 +180,12 @@ sub handler
 
     # insert all client (per-user, cookie-set) variables
     if ($req->{'env'}->{'UseBmlSession'}) {
-        $html =~ s/%%c\!(\w+)%%/BML::ehtml(BMLClient::get_var($1))/eg;
+        $html =~ s/%%c\!(\w+)%%/BML::ehtml(BML::get_var($1))/eg;
     }
 
     my $rootlang = substr($req->{'lang'}, 0, 2);
     unless ($req->{'env'}->{'NoHeaders'}) {
-        $r->header_out("Content-Language", $rootlang);
+        $r->content_languages([ $rootlang ]);
     }
 
     my $modtime = modified_time($req);
@@ -197,17 +206,20 @@ sub handler
         }
 
         $r->content_type($content_type);
-        
-        $r->header_out("Cache-Control", "no-cache")
-            if $req->{'env'}->{'NoCache'};
+
+        if ($req->{'env'}->{'NoCache'}) {        
+            $r->header_out("Cache-Control", "no-cache");
+            $r->no_cache(1);
+        }
+
         $r->header_out("Last-Modified", modified_time($req))
             if $req->{'env'}->{'Static'};
         $r->header_out("Cache-Control", "private, proxy-revalidate");
         $r->header_out("ETag", Digest::MD5::md5_hex($html));
-        $r->send_http_header();
     }
     
-    $r->print($html) unless $req->{'env'}->{'NoContent'};
+    $r->send_http_header();
+    $r->print($html) unless $req->{'env'}->{'NoContent'} || $r->header_only;
     return OK;
 }
 
@@ -811,10 +823,17 @@ sub modified_time
 
 package BML;
 
+sub register_language
+{
+    my ($isocode, $langcode) = @_;
+    next unless $isocode =~ /^\w{2,2}$/;
+    $Apache::BML::Lang{$isocode} = $langcode;
+}
+
 sub note_mod_time
 {
     my $mod_time = shift;
-    main::note_mod_time($Apache::BML::cur_req, $mod_time);
+    Apache::BML::note_mod_time($Apache::BML::cur_req, $mod_time);
 }
 
 sub redirect
@@ -858,11 +877,7 @@ sub register_ml_getter
 
 sub get_query_string
 {
-    my $q = $ENV{'QUERY_STRING'} || $ENV{'REDIRECT_QUERY_STRING'};
-    if ($q eq "" && $ENV{'REQUEST_URI'} =~ /\?(.+)/) {
-        $q = $1;
-    }
-    return $q;
+    return $Apache::BML::cur_req->{'r'}->query;
 }
 
 sub http_response
@@ -903,7 +918,7 @@ sub set_content_type
 
 sub set_default_content_type
 {
-    $Apache::BML::cur_req->{'env'}->{'DefaultContentType'} = $_[0];
+    $Apache::BML::config->{'/'}->{'DefaultContentType'} = $_[0];
 }
 
 sub eall
@@ -998,7 +1013,7 @@ sub page_newurl
         push @pair, (eurl($_) . "=" . eurl($BMLCodeBlock::FORM{$_}));
     }
     push @pair, "page=$page";
-    return ($ENV{'PATH_INFO'} . "?" . join("&", @pair));
+    return $Apache::BML::cur_req->{'r'}->parsed_uri()->path() . "?" . join("&", @pair);
 }
 
 sub paging
@@ -1025,5 +1040,44 @@ sub paging
     return %self;
 }
 
+# $expires = 0  to expire when browser closes
+# $expires = undef to delete cookie
+sub set_cookie
+{
+    my ($name, $value, $expires, $path, $domain) = @_;
+
+    # let the domain argument be an array ref, so callers can set
+    # cookies in both .foo.com and foo.com, for some broken old browsers.
+    if ($domain && ref $domain eq "ARRAY") {
+        foreach (@$domain) {
+            set_cookie($name, $value, $expires, $path, $_);
+        }
+        return;
+    }
+
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($expires);
+    $year+=1900;
+
+    my @day = qw{Sunday Monday Tuesday Wednesday Thursday Friday Saturday};
+    my @month = qw{Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec};
+    
+    my $cookie = eurl($name) . "=" . eurl($value);
+
+    # this logic is confusing potentially
+    unless (defined $expires && $expires==0) {
+        $cookie .= sprintf("; expires=$day[$wday], %02d-$month[$mon]-%04d %02d:%02d:%02d GMT", 
+                           $mday, $year, $hour, $min, $sec);
+    }
+    $cookie .= "; path=$path" if $path;
+    $cookie .= "; domain=$domain" if $domain;
+
+    my $ho = $Apache::BML::cur_req->{'r'}->headers_out;
+    $ho->add("Set-Cookie" => $cookie);
+}
+
+# deprecated:
+package BMLClient;
+*BMLClient::COOKIE = *BML::COOKIE;
+sub set_cookie { BML::set_cookie(@_); }
 
 1;
