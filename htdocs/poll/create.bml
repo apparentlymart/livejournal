@@ -686,7 +686,7 @@
         # generate poll preview for them
         if (($POST{'see_preview'} || $POST{'see_code'}) && ! %$err) {
             $body .= $make_preview->($poll);
-            return 1;
+            return;
         }
     }
 
