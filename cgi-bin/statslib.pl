@@ -273,6 +273,7 @@ sub LJ::Stats::get_block_bounds {
 
 sub LJ::Stats::block_status_line {
     my ($block, $total) = @_;
+    return "" unless $LJ::Stats::VERBOSE;
     return "" if $total == 1; # who cares about percentage for one block?
 
     # status line gets called AFTER work is done, so we show percentage

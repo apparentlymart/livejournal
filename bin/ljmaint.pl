@@ -91,6 +91,8 @@ sub run_task
         return;
     }
 
+    $LJ::LJMAINT_VERBOSE = $VERBOSE;
+
     require "$MAINT/$maintinfo{$task}->{'source'}";
     my $opts = $maintinfo{$task}{opts} || {};
     my $lock = undef;
@@ -105,7 +107,6 @@ sub run_task
 	exit 0;
     }
 
-    $LJ::LJMAINT_VERBOSE = $VERBOSE;
     eval {
 	$maint{$task}->(@args);
     };

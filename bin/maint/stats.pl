@@ -6,6 +6,9 @@ use vars qw(%maint);
 
 require "$ENV{'LJHOME'}/cgi-bin/statslib.pl";
 
+# filled in by ljmaint.pl, 0=quiet, 1=normal, 2=verbose
+$LJ::Stats::VERBOSE = $LJ::LJMAINT_VERBOSE >= 2 ? 1 : 0;
+
 $maint{'genstats'} = sub
 {
     my @which = @_ || qw(users countries 
