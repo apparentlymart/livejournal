@@ -1083,8 +1083,8 @@ sub set_cookie
     $cookie .= "; path=$path" if $path;
     $cookie .= "; domain=$domain" if $domain;
 
-    my $ho = $Apache::BML::cur_req->{'r'}->headers_out;
-    $ho->add("Set-Cookie" => $cookie);
+    # use err_headers_out so we can set cookies along with a redirect
+    $Apache::BML::cur_req->{'r'}->err_headers_out->add("Set-Cookie" => $cookie);
 
     if (defined $expires) {
         $BML::COOKIE{$name} = $value;
