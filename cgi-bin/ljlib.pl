@@ -698,6 +698,22 @@ sub get_friend_itemids { return LJ::get_friend_itemids($dbh, @_); }
 
 package LJ;
 
+sub img
+{
+    my $ic = shift;
+    my $type = shift;  # either "" or "input"
+    my $name = shift;  # if input
+
+    my $i = $LJ::Img::img{$ic};
+    if ($type eq "") {
+	return "<img src=\"$LJ::IMGPREFIX$i->{'src'}\" width=\"$i->{'width'}\" height=\"$i->{'height'}\" alt=\"$i->{'alt'}\" border=0>";
+    }
+    if ($type eq "input") {
+	return "<input type=\"image\" src=\"$LJ::IMGPREFIX$i->{'src'}\" width=\"$i->{'width'}\" height=\"$i->{'height'}\" alt=\"$i->{'alt'}\" border=0 name=\"$name\">";
+    }
+    return "<b>XXX</b>";
+}
+
 sub get_limit
 {
     my $lname = shift;
