@@ -57,6 +57,7 @@ body<=
         
         # the 'itemid' form element is really an 'itemid'
         my $ditemid = $GET{'itemid'} || $POST{'itemid'};
+        my $anum = $ditemid % 256;
         my $itemid = $ditemid >> 8;
 
         # do getevents request
@@ -78,7 +79,7 @@ body<=
 
         # does the requested entry exist?
         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.nofind'} p?>"
-            unless $res{'events_count'};
+            unless $res{'events_count'} && $res{'events_1_anum'} == $anum;
 
         # are we authorized to edit other peoples' posts in this community?
         my $disabled_save = 0;
