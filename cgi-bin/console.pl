@@ -438,7 +438,7 @@ sub delete_talk
     my $err = sub { push @$out, [ "error", $_[0] ]; 0; };
     my $inf = sub { push @$out, [ "info",  $_[0] ]; 1; };
 
-    return $err->("You do not have the required privlidge to use this command.")
+    return $err->("You do not have the required privilege to use this command.")
 	unless $remote->{'priv'}->{'deletetalk'};
     return $err->("This command has 3 arguments") unless @$args == 4;
 
