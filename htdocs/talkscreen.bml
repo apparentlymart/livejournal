@@ -20,6 +20,7 @@ body<=
  }
 
  my $qtalkid = $FORM{'talkid'}+0;
+ my $dtalkid = $qtalkid;   # display talkid, for use in URL later
 
  # we need to find out: $u, $up (poster of the entry this is a comment to),
  # userpost (username of this comment's author). Then we can check permissions.
@@ -62,8 +63,7 @@ body<=
 
  my $ditemid = $qitemid*256 + $anum;
 
- my $jargent = "journal=$u->{'user'}&amp;";
- my $commentlink = "talkread.bml?${jargent}itemid=$ditemid&amp;showscreened=1&amp;view=$FORM{'talkid'}#t$FORM{'talkid'}";
+ my $commentlink = LJ::journal_base($u) . "/$ditemid.html?view=$dtalkid#t$dtalkid";
  my $can_screen = LJ::Talk::can_screen($dbs, $remote, $u, $up, $post->{'userpost'});
  my $can_unscreen = LJ::Talk::can_unscreen($dbs, $remote, $u, $up, $post->{'userpost'});
 
