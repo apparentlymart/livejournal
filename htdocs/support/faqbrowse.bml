@@ -4,41 +4,52 @@ BODY<=
 
 (=_CODE
 
-$id = $FORM{'faqid'} + 0;
-$ret = "";
+my $id = $FORM{'faqid'} + 0;
+my $ret = "";
 
-&connect_db;
+my $dbs = LJ::get_dbs();
+my $dbh = $dbs->{'dbh'};
+my $dbr = $dbs->{'reader'};
 
-$q = "";
-$a = "";
+my $q = "";
+my $a = "";
+my $lastmodwho;
+my $lastmodtime;
 
 if ($id)
 {
-	my $sth = $dbh->prepare("SELECT f.question, f.answer, u.user, DATE_FORMAT(f.lastmodtime, '%Y-%m-%d'), UNIX_TIMESTAMP(f.lastmodtime) FROM faq f, user u WHERE u.userid=f.lastmoduserid AND f.faqid=$id");
-	$sth->execute;
-	($question, $answer, $lastmodwho, $lastmodtime, $unixmodtime) = $sth->fetchrow_array;
+    my $sth = $dbr->prepare("SELECT question, answer, lastmoduserid, ".
+			    "DATE_FORMAT(lastmodtime, '%Y-%m-%d'), ".
+			    "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
+			    "WHERE faqid=$id");
+    $sth->execute;
+    my ($question, $answer, $unixmodtime, $lastmoduserid);
+    ($question, $answer, $lastmoduserid, $lastmodtime, $unixmodtime) =
+	$sth->fetchrow_array;
+    
+    $lastmodwho = LJ::get_username($dbs, $lastmoduserid);
 
-	$dbh->do("UPDATE faq SET uses=uses+1 WHERE faqid=$id");
-
-	&main::note_mod_time($unixmodtime);
-
-	$q = &BMLUtil::ehtml($question);
-	$q =~ s/^\s+//; $q =~ s/\s+$//;
-	$q =~ s/\n/<BR>/g;
-
-	$a = &BMLUtil::ehtml($answer);
-	$a =~ s/^\s+//; $a =~ s/\s+$//;
-	$a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
-	$a =~ s/\n/<BR>/g;
-
-	$a =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=]+!<A HREF="$&">$&</A>!g;
+    $dbh->do("UPDATE faq SET uses=uses+1 WHERE faqid=$id");
+    
+    &main::note_mod_time($unixmodtime);
+    
+    $q = &BMLUtil::ehtml($question);
+    $q =~ s/^\s+//; $q =~ s/\s+$//;
+    $q =~ s/\n/<BR>/g;
+    
+    $a = &BMLUtil::ehtml($answer);
+    $a =~ s/^\s+//; $a =~ s/\s+$//;
+    $a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
+    $a =~ s/\n/<BR>/g;
+    
+    $a =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=]+!<a href="$&">$&</a>!g;
 }
 
-$ret .= "(=H1 $q H1=)<P>$a";
+$ret .= "(=H1 $q H1=)<p>$a";
 
 if ($lastmodwho)
 {
-	$ret .= "<P ALIGN=RIGHT><B>Last Updated:</B><BR><a href=\"/userinfo.bml?user=$lastmodwho\">$lastmodwho</a>, $lastmodtime</P>";
+    $ret .= "<p align=\"right\"><b>Last Updated:</b><br />$lastmodwho, $lastmodtime</p>";
 }
 
 return $ret;
@@ -46,8 +57,10 @@ return $ret;
 _CODE=)
 
 (=HR=)
-Back to <A HREF="faq.bml">the FAQ</A>.
-<BR>Back to <A HREF="./">the support area</A>.
+Back to <a href="faq.bml">the FAQ</a>.
+<br />Back to <a href="./">the support area</a>.
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/support/index.bml, htdocs/support/faq.bml
+</LJDEP> _C=)
