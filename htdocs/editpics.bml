@@ -199,8 +199,10 @@
                 # see if they are trying to make an inactive userpic their default
                 my $state = $dbh->selectrow_array("SELECT state FROM userpic WHERE picid=?",
                                                   undef, $new_default);
-                LJ::update_user($u, { defaultpicid => $new_default }) unless $state eq 'I';
-                $u->{'defaultpicid'} = $new_default;
+                if ($state eq 'N' || !$new_default) {
+                    LJ::update_user($u, { defaultpicid => $new_default });
+                    $u->{'defaultpicid'} = $new_default;
+                }
             }
 
             my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
