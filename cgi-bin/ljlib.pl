@@ -21,6 +21,7 @@ use HTTP::Date ();
 use LJ::MemCache;
 use Time::Local ();
 use Storable ();
+use Text::Wrap;
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
@@ -3403,7 +3404,7 @@ sub get_picid_from_keyword
 # des: Sends email.  Character set will only be used if message is not ascii.
 # args: opt
 # des-opt: Hashref of arguments.  <b>Required:</b> to, from, subject, body.
-#          <b>Optional:</b> toname, fromname, cc, bcc, charset
+#          <b>Optional:</b> toname, fromname, cc, bcc, charset, wrap
 # </LJFUNC>
 sub send_mail
 {
@@ -3415,12 +3416,13 @@ sub send_mail
         return $name ? " ($name)" : "";
     };
 
+    my $body = $opt->{'wrap'} ? Text::Wrap::wrap('','',$opt->{'body'}) : $opt->{'body'};
     my $msg = new MIME::Lite ('From' => "$opt->{'from'}" . $clean_name->($opt->{'fromname'}),
                               'To' => "$opt->{'to'}" . $clean_name->($opt->{'toname'}),
                               'Cc' => $opt->{'cc'},
                               'Bcc' => $opt->{'bcc'},
                               'Subject' => $opt->{'subject'},
-                              'Data' => $opt->{'body'});
+                              'Data' => $body);
 
     if ($opt->{'charset'} && ! (LJ::is_ascii($opt->{'body'}) && LJ::is_ascii($opt->{'subject'}))) {
         $msg->attr("content-type.charset" => $opt->{'charset'});        
