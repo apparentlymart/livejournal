@@ -645,9 +645,6 @@ sub movefrom0_logitem
                         $userid, $jitemid, $lp->{'propid'}, $lp->{'value'});
     }
 
-    # now we're done for non-commented posts
-    return unless $item->{'replycount'};
-
     # copy its talk shit over:
     my %newtalkids = (0 => 0);  # 0 maps back to 0 still
     my $talkids = $dbr->selectcol_arrayref("SELECT talkid FROM talk ".
