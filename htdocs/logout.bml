@@ -9,7 +9,7 @@
     my $u = LJ::get_remote($dbs);
 
     unless ($u) {
-        $body = "Already logged out.";
+        $body = "$ML{'.loggedout.already'}";
         return;
     }
 
@@ -19,21 +19,21 @@
     {
         LJ::kill_session($u);
         LJ::set_remote(undef);
-        $body = "Logged out.";
+        $body = "$ML{'.loggedout.success'}";
         return;
     }
 
     $body .= "<form>";
     $body .= LJ::html_hidden("user", $u->{'user'});
     $body .= LJ::html_hidden("sessid", $u->{'_session'}->{'sessid'});
-    $body .= "<?h1 Logout? h1?><?p Click the logout button below to confirm your desire to logout. ";
-    $body .= "<blockquote><input type='submit' value='Yes, logout.'></blockquote> p?></form>";
+    $body .= "<?h1 $ML{'.logout.head'} h1?><?p $ML{'.logout.text'} ";
+    $body .= "<blockquote><input type='submit' value='$ML{'.logout.btn'}'></blockquote> p?></form>";
 
     return;
 
 }
 
 _code?><?page
-title=>Logout
+title=><?_ml .title _ml?>
 body=><?_code return $body; _code?>
 page?>
