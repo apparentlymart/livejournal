@@ -286,8 +286,9 @@ BODY<=
 	 if ($u->{'paidfeatures'} eq "off") {
 	     # verify they haven't forged the style numbers
 	     my $in = join(",", 0, @picked);
+	     
 	     $sth = $dbh->prepare("SELECT COUNT(*) FROM style WHERE ".
-				  "((user='system' AND is_public='Y) OR user=$quser) ".
+				  "((user='system' AND is_public='Y') OR user=$quser) ".
 				  "AND styleid IN ($in)");
 	     $sth->execute;
 	     if ($dbh->err) { return $dbh->errstr; }
