@@ -392,8 +392,8 @@ sub poptext
 
             # do deletes
             if (defined $del) {
-                remove("general", $del);
-                delete $existing_item{$l->{'lnid'}}->{$del};
+                remove("general", $del) 
+                    if delete $existing_item{$l->{'lnid'}}->{$del};
                 next;
             }
 
