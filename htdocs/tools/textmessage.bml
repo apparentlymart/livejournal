@@ -32,15 +32,25 @@ BODY<=
  }
 
  my $u = LJ::load_user($dbs, $user);
- unless ($u->{'txtmsg_status'} eq "on") {
-     $ret .= "(=H1 Unavailable H1=)(=P This user has not setup their text messaging information at LiveJournal or they've turned it off. P=)";
+ my $tminfo;
+
+ if ($u->{'txtmsg_status'} eq "on") {
+     $tminfo = $dbr->selectrow_hashref("SELECT provider, number, security ".
+				       "FROM txtmsg WHERE userid=$u->{'userid'}")
+ }
+
+ unless ($tminfo) {
+     $ret .= "(=H1 Unavailable H1=)(=P This user has not setup their text messaging ".
+	 "information at LiveJournal or they've turned it off. P=)";
      &add_footer();
      return $ret;
  }
 
- $sth = $dbr->prepare("SELECT provider, number, security FROM txtmsg WHERE userid=$u->{'userid'}");
- $sth->execute;
- my $tminfo = $sth->fetchrow_hashref;
+ unless (LJ::get_cap($u, "textmessaging")) {
+     $ret .= "(=H1 Unavailable H1=)(=P This user's account type does not permit text messaging. P=)";
+     &add_footer();
+     return $ret;
+ }
 
  my $remote;
  if ($tminfo->{'security'} ne "all") {

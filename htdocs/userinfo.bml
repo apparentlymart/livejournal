@@ -262,7 +262,7 @@
  $body .= "<TR><TD ALIGN=RIGHT><B>Name:</B></TD><TD>$u->{'name'}</TD></TR>\n";
 
  ## text mesage
- if ($u->{'txtmsg_status'} eq "on") {
+ if ($u->{'txtmsg_status'} eq "on" && LJ::get_cap($u, "textmessaging")) {
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
      $body .= "<TR VALIGN=TOP><TD ALIGN=RIGHT><B><NOBR>Text<BR>Message</NOBR>:</B></TD><TD COLSPAN=$span><A HREF=\"/tools/textmessage.bml?user=$u->{'user'}\">Send <B>$u->{'user'}</B> a text message</A><BR>on his/her cellphone/pager.</TD></TR>";
  }
