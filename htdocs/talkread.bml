@@ -519,11 +519,15 @@ body<=
                  $ret .= "($T{'frozen'}) ";
              } elsif ($remote) {
                  my $pid = int($dtid / 256);
-                 my $basesubject = $cleansubject;
-                 $basesubject =~ s/^Re:\s*//i;
+                 my $basesubject = $post->{'subject'};
+                 $basesubject =~ s/^(Re:\s*)*//i;
                  $basesubject = "Re: $basesubject";
+                 $basesubject = LJ::ejs($basesubject);
 
-                 $ret .= "(<a onclick=\"return quickreply($dtid, $pid, '$basesubject')\" href='$replyurl' >$T{'replythis'}</a>) ";
+                 my $onclick = "return quickreply($dtid, $pid, '$basesubject')";
+                 $onclick = LJ::ehtml($onclick);
+
+                 $ret .= "(<a onclick='$onclick' href='$replyurl' >$T{'replythis'}</a>) ";
              } else {
                  $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
              }
