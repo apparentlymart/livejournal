@@ -1303,8 +1303,7 @@ sub get_authas_user {
     return $remote if $remote->{'user'} eq $user;
 
     # load user and authenticate
-    my $dbs = LJ::get_dbs();
-    my $u = LJ::load_user($dbs, $user);
+    my $u = LJ::load_user($user);
     return undef unless $u;
 
     # does $u have admin access?
@@ -1331,8 +1330,7 @@ sub can_manage {
     return 1 if want_userid($remote) == want_userid($u);
 
     # check for admin access
-    my $dbs = LJ::get_dbs();
-    return undef unless LJ::check_rel($dbs, $u, $remote, 'A');
+    return undef unless LJ::check_rel($u, $remote, 'A');
 
     # passed checks, return true
     return 1;
@@ -1351,13 +1349,12 @@ sub get_authas_list {
     # only one valid type right now
     $type = 'P' if $type;
 
-    my $dbs = LJ::get_dbs();
-    my $ids = LJ::load_rel_target($dbs, $u, 'A');
+    my $ids = LJ::load_rel_target($u, 'A');
     return undef unless $ids;
 
     # load_userids_multiple
     my %users;
-    LJ::load_userids_multiple($dbs, [ map { $_, \$users{$_} } @$ids ], [$u]);
+    LJ::load_userids_multiple([ map { $_, \$users{$_} } @$ids ], [$u]);
 
     return $u->{'user'}, sort map { $_->{'user'} }
                          grep { ! $type || $type eq $_->{'journaltype'} }
@@ -3049,10 +3046,9 @@ sub sysban_note
 {
     my ($userid, $notes, $vars) = @_;
 
-    my $dbs = LJ::get_dbs();
     $notes .= ":";
     map { $notes .= " $_=$vars->{$_};" if $vars->{$_} } sort keys %$vars;
-    LJ::statushistory_add($dbs, $userid, 0, 'sysban_trig', $notes);
+    LJ::statushistory_add($userid, 0, 'sysban_trig', $notes);
     return;
 }
 
@@ -5515,14 +5511,14 @@ sub text_trim
 # </LJFUNC>
 sub item_toutf8
 {
-    my $dbs = ref $_[0] eq "LJ::DBSet" ? shift : LJ::get_dbs();
+    shift if ref $_[0] eq "LJ::DBSet";
     my ($u, $subject, $text, $props) = @_;
     return unless $LJ::UNICODE;
 
     my $convert = sub {
         my $rtext = shift;
         my $error = 0;
-        my $res = LJ::text_convert($dbs, $$rtext, $u, \$error);
+        my $res = LJ::text_convert($$rtext, $u, \$error);
         if ($error) {
 	    LJ::text_out($rtext);
         } else {
@@ -5655,10 +5651,6 @@ sub rate_log
     return 0 unless $dbu;
     
     my $rp = LJ::get_prop("rate", $ratename);
-    unless ($rp) {
-        LJ::load_props(LJ::get_dbs(), "rate");
-        $rp = LJ::get_prop("rate", $ratename);
-    }
     return 0 unless $rp;
     
     my $now = time();
@@ -5881,21 +5873,22 @@ sub load_rel_user
 # des: Load user relationship information. Loads all relationships of type 'type' in
 #      which user 'targetid' participates on the right side (is the target of the
 #      relationship).
-# args: dbs, targetid, type
+# args: dbarg?, targetid, type
 # arg-targetid: userid or a user hash to load relationship information for.
 # arg-type: type of the relationship
 # returns: reference to an array of userids
 # </LJFUNC>
 sub load_rel_target
 {
-    my ($dbs, $targetid, $type) = @_;
+    my $dbarg = (ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db") ? shift : undef;
+    my ($targetid, $type) = @_;
     return undef unless $type and $targetid;
     $targetid = LJ::want_userid($targetid);
-    my $dbr = $dbs->{'reader'};
-    my $qtype = $dbr->quote($type);
-
-    my $res = $dbr->selectcol_arrayref("SELECT userid FROM reluser WHERE targetid=$targetid AND type=$qtype");
-    return $res;
+    my $dbr;
+    $dbr = $dbarg->{'reader'} if ref $dbarg eq "LJ::DBSet";
+    $dbr ||= $dbarg || LJ::get_db_reader();
+    return $dbr->selectcol_arrayref("SELECT userid FROM reluser WHERE targetid=? AND type=?",
+                                    undef, $targetid, $type);
 }
 
 # <LJFUNC>
@@ -6088,7 +6081,6 @@ sub make_login_session
     my $u = shift;
     return 0 unless $u;
 
-    my $dbs = LJ::get_dbs();
     my $etime = 0;
     eval { Apache->request->notes('ljuser' => $u->{'user'}); };
 
@@ -6100,7 +6092,7 @@ sub make_login_session
     $BML::COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime, 1 ];
     LJ::set_remote($u);
 
-    LJ::load_user_props($dbs, $u, "browselang", "schemepref" );
+    LJ::load_user_props($u, "browselang", "schemepref" );
     my $bl = LJ::Lang::get_lang($u->{'browselang'});
     if ($bl) {
         BML::set_cookie("langpref", $bl->{'lncode'} . "/" . time(), 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
