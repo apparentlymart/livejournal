@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+#
+# <LJDEP>
+# lib: cgi-bin/ljlib.pl, cgi-bin/ljconfig.pl, cgi-bin/ljlang.pl, cgi-bin/cleanhtml.pl
+# </LJDEP>
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
@@ -127,7 +131,7 @@ sub create_view_lastn
 			   'dd' => $dateparts[9],
 			   'dth' => $dateparts[10],
 			   'ap' => substr(lc($dateparts[11]),0,1),
-			   'AP' => substr(lc($dateparts[11]),0,1),
+			   'AP' => substr(uc($dateparts[11]),0,1),
 			   'ampm' => lc($dateparts[11]),
 			   'AMPM' => $dateparts[11],
 			   'min' => $dateparts[12],
@@ -532,7 +536,7 @@ sub create_view_friends
 				   'dd' => $dateparts[9],
 				   'dth' => $dateparts[10],
 				   'ap' => substr(lc($dateparts[11]),0,1),
-				   'AP' => substr(lc($dateparts[11]),0,1),
+				   'AP' => substr(uc($dateparts[11]),0,1),
 				   'ampm' => lc($dateparts[11]),
 				   'AMPM' => $dateparts[11],
 				   'min' => $dateparts[12],
@@ -1061,7 +1065,7 @@ END_SQL
 			 'dd' => $dateparts[9],
 			 'dth' => $dateparts[10],
 			 'ap' => substr(lc($dateparts[11]),0,1),
-			 'AP' => substr(lc($dateparts[11]),0,1),
+			 'AP' => substr(uc($dateparts[11]),0,1),
 			 'ampm' => lc($dateparts[11]),
 			 'AMPM' => $dateparts[11],
 			 'min' => $dateparts[12],
