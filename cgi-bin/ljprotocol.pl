@@ -1628,8 +1628,7 @@ sub editfriends
 
         my $friendid = LJ::get_userid($deluser);
         # TAG:FR:protocol:editfriends2_del
-        $dbh->do("DELETE FROM friends WHERE userid=? AND friendid=?", undef,
-                 $userid, $friendid);
+        LJ::delete_friend_edge($userid, $friendid);
         $did_deletes = 1;
         $friend_count--;
     }
@@ -1714,6 +1713,11 @@ sub editfriends
             $sth = $dbh->prepare("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) ".
                                  "VALUES ($userid, $friendid, $qfg, $qbg, $gmask)");
             $sth->execute;
+
+            unless ($dbh->err) {
+                my $memkey = [$userid,"frgmask:$userid:$friendid"];
+                LJ::MemCache::set($memkey, $gmask+0, time()+60*15);
+            }
             return $fail->(501,$dbh->errstr) if $dbh->err;
 
         }

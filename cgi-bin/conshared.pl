@@ -208,8 +208,7 @@ sub community
     }
         
     if ($action eq "remove") {
-        LJ::friends_do($com_id, "DELETE FROM friends WHERE userid=? AND friendid=?",
-                       $com_id, $target_id);
+        LJ::delete_friend_edge($com_id, $target_id);
         push @$out, [ "info", "User \"$target_user\" is no longer a member of \"$com_user\"." ];
 
         LJ::clear_rel($com_id, $target_id, 'P');

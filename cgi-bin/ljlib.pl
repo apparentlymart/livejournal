@@ -6687,8 +6687,7 @@ sub leave_community {
 
     # defriend comm -> user
     return LJ::error('comm_not_comm') unless $cu->{journaltype} eq 'C';
-    my $ret = LJ::friends_do($cu->{userid}, 'DELETE FROM friends WHERE userid=? AND friendid=?', 
-                             $cu->{userid}, $u->{userid});
+    my $ret = LJ::delete_friend_edge($cu->{userid}, $u->{userid});
     return LJ::error('comm_not_member') unless $ret; # $ret = number of rows deleted, should be 1 if the user was in the comm
 
     # clear edges that effect this relationship
@@ -7044,6 +7043,22 @@ sub add_friend
                    "VALUES (?,?,?,?,?)", $ida, $idb, $black, $white, $groupmask);
 
     return 1;
+}
+
+# <LJFUNC>
+# name: LJ::delete_friend_edge
+# args: userid, friendid
+# </LJFUNC>
+sub delete_friend_edge
+{
+    my ($userid, $friendid) = @_;
+    return undef unless $userid && $friendid;
+
+    my $res = LJ::friends_do($userid, "DELETE FROM friends WHERE userid=? AND friendid=?",
+                   $userid, $friendid);
+    LJ::MemCache::delete([$userid, "frgmask:$userid:$friendid"]);
+
+    return $res;
 }
 
 # <LJFUNC>
