@@ -15,7 +15,7 @@
  my $lastmon = 0;
 
  my $sth;
- $sth = $dbh->prepare("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0 ORDER BY 3, 4");
+ $sth = $dbh->prepare("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0 ORDER BY 3, 4");
  $sth->execute;
  while (my $bday = $sth->fetchrow_hashref) {
      if ($bday->{'month'} != $lastmon) {
