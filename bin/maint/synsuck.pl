@@ -110,22 +110,23 @@ $maint{'synsuck'} = sub
         # friends view.
         my $su = LJ::load_userid($userid);
         my $udbh = LJ::get_cluster_master($su);
-        if ($udbh) {
-            my $secs = ($LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14)+0;  # 2 week default.
-            my $sth = $udbh->prepare("SELECT jitemid, anum FROM log2 WHERE journalid=? AND ".
-                                     "logtime < DATE_SUB(NOW(), INTERVAL $secs SECOND)");
-            $sth->execute($userid);
-            die $udbh->errstr if $udbh->err;
-            while (my ($jitemid, $anum) = $sth->fetchrow_array) {
-                print "DELETE itemid: $jitemid, anum: $anum... \n" if $verbose;
-                if (LJ::delete_item2($udbh, $userid, $jitemid, 0, $anum)) {
-                    print "success.\n" if $verbose;
-                } else {
-                    print "fail.\n" if $verbose;
-                }
+        unless ($udbh) {
+            $delay->(15, "nodb");
+            next;
+        }
+
+        my $secs = ($LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14)+0;  # 2 week default.
+        my $sth = $udbh->prepare("SELECT jitemid, anum FROM log2 WHERE journalid=? AND ".
+                                 "logtime < DATE_SUB(NOW(), INTERVAL $secs SECOND)");
+        $sth->execute($userid);
+        die $udbh->errstr if $udbh->err;
+        while (my ($jitemid, $anum) = $sth->fetchrow_array) {
+            print "DELETE itemid: $jitemid, anum: $anum... \n" if $verbose;
+            if (LJ::delete_item2($udbh, $userid, $jitemid, 0, $anum)) {
+                print "success.\n" if $verbose;
+            } else {
+                print "fail.\n" if $verbose;
             }
-        } else {
-            print "WARNING: syndicated user not on a cluster.  can't delete old stuff.\n" if $verbose;
         }
         
         # determine if link tags are good or not, where good means
@@ -146,7 +147,7 @@ $maint{'synsuck'} = sub
         # already later and see it's changed, we'll do an editevent
         # instead of a new post.
         my %existing_item = ();
-        if ($good_links && $udbh) {
+        if ($good_links) {
             my $p = LJ::get_prop("log", "syn_link");
             my $sth = $udbh->prepare("SELECT jitemid, value FROM logprop2 WHERE ".
                                      "journalid=? AND propid=? LIMIT 1000");
@@ -268,7 +269,7 @@ $maint{'synsuck'} = sub
             }
 
             my $des = $rss->channel('description');
-            if ($des && $udbh) {
+            if ($des) {
                 my $bio;
                 if ($su->{'has_bio'} eq "Y") {
                     $bio = $udbh->selectrow_array("SELECT bio FROM userbio WHERE userid=?", undef,
