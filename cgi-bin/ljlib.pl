@@ -2710,19 +2710,28 @@ sub load_mood_theme
 
     # check memcache
     my $memkey = [$themeid, "moodthemedata:$themeid"];
-    return if $LJ::CACHE_MOOD_THEME{$themeid} = LJ::MemCache::get($memkey);
+    return if $LJ::CACHE_MOOD_THEME{$themeid} = LJ::MemCache::get($memkey) &&
+        %{$LJ::CACHE_MOOD_THEME{$themeid}};
 
     # fall back to db
-    my $dbh = LJ::get_db_writer();
+    my $dbh = LJ::get_db_writer()
+        or return 0;
+
     $LJ::CACHE_MOOD_THEME{$themeid} = {};
+
     my $sth = $dbh->prepare("SELECT moodid, picurl, width, height FROM moodthemedata WHERE moodthemeid=?");
     $sth->execute($themeid);
+    return 0 if $dbh->err;
+
     while (my ($id, $pic, $w, $h) = $sth->fetchrow_array) {
         $LJ::CACHE_MOOD_THEME{$themeid}->{$id} = { 'pic' => $pic, 'w' => $w, 'h' => $h };
     }
 
     # set in memcache
-    LJ::MemCache::set($memkey, $LJ::CACHE_MOOD_THEME{$themeid});
+    LJ::MemCache::set($memkey, $LJ::CACHE_MOOD_THEME{$themeid}, 3600)
+        if %{$LJ::CACHE_MOOD_THEME{$themeid}};
+
+    return 1;
 }
 
 # <LJFUNC>
