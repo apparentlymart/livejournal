@@ -136,11 +136,23 @@ body<=
      my $u = LJ::load_user($dbs, $user);
      my $second_submit = 0;
      if ($u) {
-         if ($u->{'password'} eq $FORM{'password1'} &&
-             $u->{'email'} eq $FORM{'email'}) {
-             # oh, they double-clicked the submit button 
-             $second_submit = 1;
-         } else {
+         my $in_use = 1;
+
+         if ($u->{'email'} eq $FORM{'email'}) {
+             if (LJ::login_ip_banned($u)) {
+                 # brute-force possible going on
+             } else {
+                 if ($u->{'password'} eq $FORM{'password1'}) {
+                     # oh, they double-clicked the submit button 
+                     $second_submit = 1;
+                     $in_use = 0;
+                 } else {
+                     LJ::handle_bad_login($u);                     
+                 }
+             }
+         }
+
+         if ($in_use) {
              $errors{'username'} = "$ML{'.error.username.inuse'}"; 
          }
      }

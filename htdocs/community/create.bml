@@ -25,7 +25,7 @@
      unless ($mu) {
          push @errors, $ML{'.error.accountnotfound'};
      } else {
-         if ($mu->{'password'} ne $FORM{'mpassword'}) {
+         unless (LJ::auth_okay($mu, $FORM{'mpassword'})) {
              push @errors, $ML{'.error.invalidpassword'};
          }
          unless ($mu->{'journaltype'} eq "P") {
@@ -36,7 +36,7 @@
      unless ($cu) {
          push @errors, $ML{'.error.accountnotfound'};
      } else {
-         if ($cu->{'password'} ne $FORM{'cpassword'}) {
+         unless (LJ::auth_okay($cu, $FORM{'cpassword'})) {
              push @errors, $ML{'.error.invalidmpasw'};
          }
      }
