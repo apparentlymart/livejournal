@@ -12,11 +12,13 @@ use Unicode::MapUTF8 ();
 my $parser = new MIME::Parser;
 $parser->output_dir("/tmp");
 
+# Don't leave /tmp files around for any reason.
+END { $parser->filer->purge; }
+
 my $entity;
 eval { $entity = $parser->parse(\*STDIN) };
 if ($@) {
     my $results  = $parser->results;
-    $parser->filer->purge;
     die "Can't parse MIME.\n";
 }
 
@@ -34,16 +36,12 @@ if ($subject =~ /auto.?(response|reply)/i ||
     $subject =~ /Attachment block message/ ||
     $subject =~ /Use this patch immediately/) 
 {
-    $parser->filer->purge;
     exit 0;
 }
 
 # stop more spam, based on body text checks
 my $tent = get_text_entity($entity);
-unless ($tent) {
-    $parser->filer->purge;
-    die "Can't find text entity";
-}
+die "Can't find text entity" unless $tent;
 my $body = $tent->bodyhandle->as_string;
 $body =~ s/^\s+//;
 $body =~ s/\s+$//;
@@ -55,7 +53,6 @@ if ($body =~ /I send you this file in order to have your advice/ ||
     ($subject eq "failure notice" && $body =~ /\.(scr|pif)\"/) ||
     ($subject =~ /^Mail delivery failed/ && $body =~ /\.(scr|pif)\"/))
 {
-    $parser->filer->purge;
     exit 0;
 }
 
@@ -73,7 +70,6 @@ if (@to == 1 && $to[0]->address =~ /^(\S+?)\@\Q$LJ::EMAIL_POST_DOMAIN\E$/i) {
     require "$ENV{LJHOME}/cgi-bin/ljemailgateway.pl";
     LJ::Emailpost::process($entity, $user);
 
-    $parser->filer->purge;
     exit 0;
 }
 
@@ -103,7 +99,6 @@ foreach my $a (@to,
 }
 
 unless ($to) {
-    $parser->filer->purge;
     exit 0 if $ignore;
     die "Not deliverable to support system (no match To:)\n";
 }
@@ -113,8 +108,6 @@ my $adf = (Mail::Address->parse($head->get('From')))[0];
 my $name = $adf->name;
 my $from = $adf->address;
 $subject ||= "(No Subject)";
-
-$parser->filer->purge;
 
 # is this a reply to another post?
 if ($toarg =~ /^(\d+)z(.+)$/)
