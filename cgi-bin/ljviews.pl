@@ -1931,7 +1931,7 @@ sub create_view_rss
         'remote' => $remote,
         'userid' => $u->{'userid'},
         'itemshow' => 50,
-        'order' => $u->{'journaltype'} eq "C" ? "logtime" : "",
+        'order' => "logtime",
         'itemids' => \@itemids,
     });
 
