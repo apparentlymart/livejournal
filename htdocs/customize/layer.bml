@@ -253,7 +253,7 @@
                 $body .= LJ::html_textarea({ 'name' => "${name}_value",
                                      'disabled' => ! $can_use,
                                      'value' => $override,
-                                     'onfocus' => "checkOverride('$name');",
+                                     'onfocus' => "toggleOverride('$name');",
                                      'rows' => $rows,
                                      'cols' => $cols });
             } else {
