@@ -574,39 +574,45 @@ sub postevent
     }
 
     my $time_was_faked = 0;
+    my $offset = 0;  # assume gmt at first.
 
-    unless (grep { defined $req->{$_} } qw(year mon day hour min)) {
-        # no time specified?  guess at their timezone.
-        # FIXME this is lame.  we should let the users specify their timezone.
+    if (defined $req->{'tz'}) {
+        if ($req->{tz} eq 'guess') {
+            # we guess their current timezone's offset
+            # by comparing the gmtime of their last post
+            # with the time they specified on that post.
+            my $dbcm = LJ::get_cluster_master($uowner);
+            return fail($err, 306) unless $dbcm;
 
-        # we guess their current timezone's offset
-        # by comparing the gmtime of their last post
-        # with the time they specified on that post.
-        my $dbcm = LJ::get_cluster_master($uowner);
-        return fail($err, 306) unless $dbcm;
+            # grab the times on the last post.
+            if (my $last_row = $dbcm->selectrow_hashref(
+                                "SELECT rlogtime, eventtime ".
+                                "FROM log2 WHERE journalid=? ".
+                                "ORDER BY rlogtime LIMIT 1",
+                                undef, $uowner->{userid})) {
+                my $logtime = $LJ::EndOfTime - $last_row->{'rlogtime'};
+                my $eventtime = LJ::mysqldate_to_time($last_row->{'eventtime'}, 1);
+                my $hourdiff = ($eventtime - $logtime) / 3600;
 
-        my $offset = 0;  # assume gmt at first.
-
-        # grab the times on the last post.
-        if (my $last_row = $dbcm->selectrow_hashref(
-                            "SELECT rlogtime, eventtime ".
-                            "FROM log2 WHERE journalid=? ".
-                            "ORDER BY rlogtime LIMIT 1",
-                            undef, $uowner->{userid})) {
-            my $logtime = $LJ::EndOfTime - $last_row->{'rlogtime'};
-            my $eventtime = LJ::mysqldate_to_time($last_row->{'eventtime'}, 1);
-            my $hourdiff = ($eventtime - $logtime) / 3600;
-
-            # if they're up to a quarter hour behind, round up.
-            $offset = $hourdiff > 0 ? int($hourdiff + 0.25) : int($hourdiff - 0.25);
+                # if they're up to a quarter hour behind, round up.
+                $offset = $hourdiff > 0 ? int($hourdiff + 0.25) : int($hourdiff - 0.25);
+            }
+            $time_was_faked = 1;
+        } elsif ($req->{'tz'} =~ /^[+\-]\d\d\d\d$/) {
+            # FIXME we ought to store this timezone and make use of it somehow.
+            $offset = $req->{'tz'} / 100.0;
+        } else {
+            return fail($err, 203, "Invalid tz");
         }
+    }
+
+    if (defined $req->{'tz'} and not grep { defined $req->{$_} } qw(year mon day hour min)) {
         my @ltime = gmtime(time() + ($offset*3600));
         $req->{'year'} = $ltime[5]+1900;
         $req->{'mon'}  = $ltime[4]+1;
         $req->{'day'}  = $ltime[3];
         $req->{'hour'} = $ltime[2];
         $req->{'min'}  = $ltime[1];
-        $time_was_faked = 1;
     }
 
     return undef
