@@ -100,14 +100,14 @@ BODY<=
      if (length($user) > 15) { 
 	 $errors{'username'} = "Username is too long, 15 character max";
      }
-     unless ($FORM{'user'}) { 
-	 $errors{'username'} = "You must enter a username"; 
-     }
      if ($FORM{'user'} && ! $user) { 
 	 $errors{'username'} = "Invalid characters in username.";
      }
+     unless ($FORM{'user'}) { 
+	 $errors{'username'} = "You must enter a username"; 
+     }
      foreach my $re ("^system\$", @LJ::PROTECTED_USERNAMES) {
-	 next unless ($FORM{'user'} =~ /$re/);
+	 next unless ($user =~ /$re/);
 	 $errors{'username'} = "Sorry, that's a reserved username.";
      }
      
