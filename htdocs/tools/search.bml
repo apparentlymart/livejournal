@@ -28,7 +28,7 @@ p?>
     <form action='http://www.feedster.com/search.php' method='get' style='display:inline'>
 };
 
-    my $rss_feed = LJ::journal_base($u) . '/data/rss/';
+    my $rss_feed = LJ::journal_base($u) . '/data/rss';
     $ret .= LJ::html_hidden('hl' => 'en', 'ie' => 'UTF-8', 'inrss' => $rss_feed);
 
     $ret .= qq{
