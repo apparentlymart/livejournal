@@ -9,7 +9,8 @@ $maint{'genstats'} = sub
     my @which = @_;
 
     unless (@which) { @which = qw(usage users countries 
-				  states gender clients ); }
+				  states gender clients
+                                  pop_interests ); }
     my %do = map { $_, 1, } @which;
     
     my $dbs = LJ::get_dbs();
@@ -24,6 +25,7 @@ $maint{'genstats'} = sub
     my %gender;
     my %stateus;
     my %country;
+    my %pop_interests;
     my ($nowtime, $time, $nowdate);
 
     my %to_pop;
@@ -162,7 +164,18 @@ $maint{'genstats'} = sub
 	    $gender{$_->{'value'}} = $_->{'count'};
 	}
     }
-	
+
+    if ($do{'pop_interests'})
+    {
+        $to_pop{'pop_interests'} = \%pop_interests;
+
+        print "-I- Interests.\n";
+        $sth = $dbr->prepare("SELECT interest, intcount FROM interests WHERE intcount>2 ORDER BY intcount DESC, interest ASC LIMIT 400");
+        $sth->execute;
+        while (my ($int, $count) = $sth->fetchrow_array) {
+            $pop_interests{$int} = $count;
+        }
+    }
     
     foreach my $cat (keys %to_pop)
     {

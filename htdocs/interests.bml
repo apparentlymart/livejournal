@@ -18,7 +18,8 @@ BODY<=
      my $ret = "";
      $ret .= "(=H1 Popular Interests H1=)(=P The following are the most popular interests. P=)";
  
-     $sth = $dbr->prepare("SELECT interest, intcount AS 'count' FROM interests WHERE intcount>2 ORDER BY intcount DESC, interest ASC LIMIT 400");
+     $sth = $dbr->prepare("SELECT statkey, statval FROM stats WHERE ".
+			  "statcat='pop_interests' ORDER BY statval DESC, statkey ASC");
      $sth->execute;
      
      $ret .= "<P><TABLE><TR><TD><B>Interest</B></TD><TD><B>Count</B></TD></TR>\n";
