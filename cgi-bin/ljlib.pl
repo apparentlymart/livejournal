@@ -959,7 +959,7 @@ sub auth_fields_2
     # logged in mode
     $ret .= "<tr><td align='right'><u>U</u>sername:</td><td align='left'>";
 
-    my $alturl = BMl::self_link({ 'altlogin' => 1 });
+    my $alturl = BML::self_link({ 'altlogin' => 1 });
     my @shared = ($remote->{'user'});
 
     my $sopts = {};
