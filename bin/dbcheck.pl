@@ -9,9 +9,15 @@ my $help = 0;
 my $opt_fh = 0;
 my $opt_fix = 0;
 my $opt_ex = 0;
+my $opt_start = 0;
+my $opt_stop = 0;
+my @opt_run;
 exit 1 unless GetOptions('help' => \$help,
 			 'flushhosts' => \$opt_fh,
+			 'start' => \$opt_start,
+			 'stop' => \$opt_stop,
 			 'fix' => \$opt_fix,
+			 'run=s' => \@opt_run,
 			 'exampleconf' => \$opt_ex,
 			 );
 
@@ -20,13 +26,21 @@ unless (-d $ENV{'LJHOME'}) {
 }
 
 if ($help) {
-    die ("Usage: dbcheck.pl [opts]\n" .
+    die ("Usage: dbcheck.pl [opts] [[cmd] args...]\n" .
 	 "    --help          Get this help\n" .
 	 "    --flushhosts    Send 'FLUSH HOSTS' to each db as root.\n".
 	 "    --fix           Fix (once) common problems.\n".
-	 "    --exampleconf   Dump out prototype ~/var/dbcheck.conf file.\n"
+	 "    --exampleconf   Dump out prototype ~/var/dbcheck.conf file.\n".
+	 "    --stop          Stop replication.\n".
+	 "    --start         Start replication.\n".
+	 "    --run <sql>     Run arbitrary SQL.\n".
+	 "\n".
+	 "Commands\n".
+	 "   (none)           Shows replication status.\n".
+	 "   queries <host>   Shows active queries on host, sorted by running time.\n"
 	 );
 }
+
 
 if ($opt_ex) {
     print <DATA>;
@@ -54,8 +68,33 @@ require $conf_file;
 
 my $master = $LJ::DBCheck::master;
 my $slaves = $LJ::DBCheck::slaves;
-
 my $sth;
+
+my $cmd = shift @ARGV;
+
+if ($cmd eq "queries") {
+    my $host = shift @ARGV;
+    my $s = $slaves->{$host};
+    unless ($s) { die "Unknown slave: $host\n"; }
+
+    my $dbh = DBI->connect("DBI:mysql:mysql:$s->{'ip'}",
+			   $s->{'user'}, $s->{'pass'});
+    die "Can't connect to slave: $host\n" unless ($dbh);
+
+    my $ts = $dbh->selectall_hashref("SHOW FULL PROCESSLIST");
+    foreach my $t (sort { $a->{'Time'} <=> $b->{'Time'} } @$ts) {
+	next if ($t->{'Command'} eq "Sleep" ||
+		 $t->{'Command'} eq "Connect");
+	my $cmd = $t->{'Info'};
+	$cmd =~ s/\n/ /g;
+	print "$t->{'Time'}\t($t->{'Id'})\t$cmd\n";
+    }
+    exit;
+} elsif ($cmd) {
+    die "Unknown command: $cmd\n";
+}
+
+
 my @errors = ();
 
 $| = 1;
@@ -111,6 +150,15 @@ foreach my $skey (keys %$slaves)
     }
 
     $flush_host->($skey, $dbh);
+
+    if ($opt_start) { $dbh->do("SLAVE START"); }
+    if ($opt_stop) { $dbh->do("SLAVE STOP"); }
+    foreach (@opt_run) { 
+	print "Running: $_\n";
+	$dbh->do($_); 
+	print $dbh->err ? $dbh->errstr : "OK";
+	print "\n";
+    }
 
     my $sth;
     my $stalled = 0;
