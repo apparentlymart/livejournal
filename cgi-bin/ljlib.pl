@@ -6998,6 +6998,7 @@ sub alloc_user_counter
         $newmax = $dbcm->selectrow_array("SELECT MAX(modid) FROM modlog WHERE journalid=?",
                 undef, $uid);
     }
+    $newmax += 0;
     $dbcm->do("INSERT IGNORE INTO counter (journalid, area, max) VALUES (?,?,?)",
                 undef, $uid, $dom, $newmax) or return undef;
             
