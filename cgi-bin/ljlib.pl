@@ -4149,7 +4149,7 @@ sub expunge_userpic {
     return undef unless $dbh;
     $dbh->do("UPDATE userpic SET state='X' WHERE picid = ?", undef, $picid);
     return LJ::error($dbh) if $dbh->err;
-    $dbh->do("DELETE FROM userpicmap WHERE picid = ?", undef, $picid);
+    $dbh->do("DELETE FROM userpicmap WHERE userid = ? AND picid = ?", undef, $userid, $picid);
 
     # now clear the user's memcache picture info
     LJ::MemCache::delete([$userid, "upicinf:$userid"]);
