@@ -381,7 +381,7 @@ body<=
 
     # only one item returned?  go directly to edit it
     if ($res{'events_count'} == 1) {
-        my $ditemid = $res{'events_1_itemid'} << 8;
+        my $ditemid = ($res{'events_1_itemid'} << 8) + $res{'events_1_anum'};
         my $ditemid_get = $getextra ? "$getextra&itemid=$ditemid" : "?itemid=$ditemid";
         return BML::redirect("$LJ::SITEROOT/editjournal_do.bml$ditemid_get");
     }
