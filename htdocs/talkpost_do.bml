@@ -56,7 +56,7 @@ body<=
     # start quoting shit to insert
     my $itemid = $init->{'itemid'}+0;
 
-    my $item = LJ::Talk::get_journal_item($dbs, $dbcs, $u, $itemid);
+    my $item = LJ::Talk::get_journal_item($u, $itemid);
 
     if ($init->{'oldurl'} && $item) {
         $init->{'anum'} = $item->{'anum'};
@@ -80,11 +80,11 @@ body<=
 
     ### load users
     my $ujp;                 # poster of item 
-    LJ::load_userids_multiple($dbs, [
-                                     $item->{'posterid'} => \$ujp,
-                                     ], [ $u ]);
+    LJ::load_userids_multiple([
+                               $item->{'posterid'} => \$ujp,
+                               ], [ $u ]);
     my ($quser, $qjpuser) = map { $dbr->quote($_) } ($u->{'user'}, $ujp->{'user'});
-    LJ::load_user_props($dbs, $u, "opt_logcommentips", "opt_whoscreened");
+    LJ::load_user_props($u, "opt_logcommentips", "opt_whoscreened");
 
     if ($FORM{'userpost'} && $FORM{'usertype'} ne "user") {
         unless ($FORM{'usertype'} eq "cookieuser" &&
@@ -116,11 +116,11 @@ body<=
 
     if ($FORM{'usertype'} eq "user") {
         if ($FORM{'userpost'}) {
-            $up = LJ::load_user($dbs, $FORM{'userpost'});
+            $up = LJ::load_user($FORM{'userpost'});
             if ($up) 
             {
                 ### see if the user is banned from posting here
-                if (LJ::is_banned($dbr, $up, $u)) {
+                if (LJ::is_banned($up, $u)) {
                     push @errors, $ML{'.error.banned'};
 
                 }
@@ -155,7 +155,7 @@ body<=
     # check that user can even view this post, which is required
     # to reply to it
     ####  Check security before viewing this post
-    unless (LJ::can_view($dbs, $up, $item)) {
+    unless (LJ::can_view($up, $item)) {
         push @errors, $ML{'.error.mustlogin'}
         unless (defined $up);
         push @errors, $ML{'.error.noauth'};
@@ -184,7 +184,7 @@ body<=
         # in the call below.
 
         if ($parpost && $parpost->{'state'} eq "S" && 
-            !LJ::Talk::can_unscreen($dbs, $up, $u, $ujp, $ujp->{'user'})) {
+            !LJ::Talk::can_unscreen($up, $u, $ujp, $ujp->{'user'})) {
             push @errors, $ML{'.error.screened'};
         }
     }
@@ -218,7 +218,7 @@ body<=
         if ($up) {
             if ($up->{'userid'} != $u->{'userid'}) 
             {
-                unless (LJ::is_friend($dbs, $u, $up)) {
+                unless (LJ::is_friend($u, $up)) {
                     push @errors, BML::ml('.error.notafriend', {'user'=>$u->{'user'}});
                 }
             }
@@ -355,7 +355,7 @@ body<=
     my $state = 'A';
     if ($u->{'opt_whoscreened'} eq 'A' ||
         ($u->{'opt_whoscreened'} eq 'R' && ! $up) ||
-        ($u->{'opt_whoscreened'} eq 'F' && !($up && LJ::is_friend($dbs, $u, $up)))) {
+        ($u->{'opt_whoscreened'} eq 'F' && !($up && LJ::is_friend($u, $up)))) {
         $state = 'S';
     }
 
@@ -463,7 +463,7 @@ body<=
         # remove blank/0 values (defaults)
         foreach (keys %talkprop) { delete $talkprop{$_} unless $talkprop{$_}; }
 
-        LJ::load_props($dbs, "talk");
+        LJ::load_props("talk");
         if (%talkprop) {
             my $values;
             my $hash = {};
@@ -499,7 +499,7 @@ body<=
         LJ::Talk::update_commentalter($u, $itemid);   
 
         # log the event
-        LJ::event_register($dbs, $dbcm, "R", $u->{'userid'}, $ditemid);
+        LJ::event_register($dbcm, "R", $u->{'userid'}, $ditemid);
         # FUTURE: log events type 'T' (thread) up to root
         
         # send some emails
@@ -511,7 +511,7 @@ body<=
             my $picid = $pic ? $pic->{'picid'} : $up->{'defaultpicid'};
             unless ($pic) {
                 my %pics;
-                LJ::load_userpics($dbs, \%pics, [ $up->{'defaultpicid'} ]);
+                LJ::load_userpics(\%pics, [ $up->{'defaultpicid'} ]);
                 $pic = $pics{$picid};
             }
             if ($pic) {
@@ -537,20 +537,20 @@ body<=
             $parentcomment = $parbody;
 
             my %props = ($partid => {});
-            LJ::load_props($dbs, "talk");
+            LJ::load_props("talk");
             LJ::load_talk_props2($dbcr, $u->{'userid'}, [$partid], \%props);
             $parentpreformatted = $props{$partid}->{'opt_preformatted'};
 
             # convert to UTF-8 if necessary
             if ($LJ::UNICODE && $props{$partid}->{'unknown8bit'}) {
-                LJ::item_toutf8($dbs, $u, \$textsubject, \$parentcomment, {});
-                  LJ::item_toutf8($dbs, $u, \$cleansubject, undef, {});
+                LJ::item_toutf8($u, \$textsubject, \$parentcomment, {});
+                  LJ::item_toutf8($u, \$cleansubject, undef, {});
               }
             
             if ($paruserid) {
                 my $paru = LJ::load_userid($paruserid);
-                LJ::load_user_props($dbs, $paru, 'mailencoding');
-                LJ::load_codes($dbs, { "encoding" => \%LJ::CACHE_ENCODINGS } )
+                LJ::load_user_props($paru, 'mailencoding');
+                LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
                     unless %LJ::CACHE_ENCODINGS;
                 
                 if ($paru->{'opt_gettalkemail'} eq "Y" &&
@@ -669,8 +669,8 @@ body<=
                 $debug .= "send mail to journal owner. (to $ujp->{'email'})<br />\n";
             }
 
-            LJ::load_user_props($dbs, $ujp, 'mailencoding');
-            LJ::load_codes($dbs, { "encoding" => \%LJ::CACHE_ENCODINGS } )
+            LJ::load_user_props($ujp, 'mailencoding');
+            LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
                 unless %LJ::CACHE_ENCODINGS;
             my $encoding = $ujp->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$ujp->{'mailencoding'}} : "UTF-8";
             my $part;

@@ -2707,7 +2707,7 @@ sub get_talktext2
 # </LJFUNC>
 sub get_logtext2multi
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $idsbyc = shift;
     my $sth;
 
@@ -3153,16 +3153,14 @@ EOM
 # <LJFUNC>
 # name: LJ::load_userpics
 # des: Loads a bunch of userpic at once.
-# args: dbarg, upics, idlist
+# args: dbarg?, upics, idlist
 # des-upics: hashref to load pictures into, keys being the picids
 # des-idlist: arrayref of picids to load
 # </LJFUNC>
 sub load_userpics
 {
-    my ($dbarg, $upics, $idlist) = @_;
-
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbr = $dbs->{'reader'};
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my ($upics, $idlist) = @_;
 
     my @load_list;
     foreach my $id (@{$idlist})
@@ -3191,8 +3189,10 @@ sub load_userpics
         return unless @load_list;
     }
 
+    my $dbr = LJ::get_db_reader();
     my $picid_in = join(",", @load_list);
-    my $sth = $dbr->prepare("SELECT userid, picid, width, height FROM userpic WHERE picid IN ($picid_in)");
+    my $sth = $dbr->prepare("SELECT userid, picid, width, height ".
+                            "FROM userpic WHERE picid IN ($picid_in)");
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
         my $id = $_->{'picid'};
@@ -5441,7 +5441,7 @@ sub add_friend
 # <LJFUNC>
 # name: LJ::event_register
 # des: Logs a subscribable event, if anybody's subscribed to it.
-# args: dbarg, dbc, etype, ejid, eiarg, duserid, diarg
+# args: dbarg?, dbc, etype, ejid, eiarg, duserid, diarg
 # des-dbc: Cluster master of event
 # des-type: One character event type.
 # des-ejid: Journalid event occured in.
@@ -5452,10 +5452,9 @@ sub add_friend
 # </LJFUNC>
 sub event_register
 {
-    my ($dbarg, $dbc, $etype, $ejid, $eiarg, $duserid, $diarg) = @_;
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
+    my ($dbc, $etype, $ejid, $eiarg, $duserid, $diarg) = @_;
+    my $dbr = LJ::get_db_reader();
 
     # see if any subscribers first of all (reads cheap; writes slow)
     return 0 unless $dbr;
