@@ -53,7 +53,6 @@
       <listitem><para>HTML::Parser</para></listitem>
       <listitem><para>LWP::Simple</para></listitem>
       <listitem><para>LWP::UserAgent</para></listitem>
-      <listitem><para>Time::DaysInMonth</para></listitem>
       <listitem><para>GD</para></listitem>
       <listitem><para>GD::Graph</para></listitem>
       <listitem><para>GD::Text</para></listitem>
