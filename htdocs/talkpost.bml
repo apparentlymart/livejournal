@@ -136,7 +136,7 @@ body<=
  # checked screened post
  return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_screened'} p?>"
      if $parpost->{'state'} eq "S" 
-         and not LJ::Talk::can_unscreen($dbs, $remote, $u, $up->{'user'});
+         and not LJ::Talk::can_unscreen($dbs, $remote, $u, $up, $ur->{'user'});
 
  LJ::load_user_props($dbs, $u,  
                      "opt_showtopicstuff", "opt_notalkicons", 
