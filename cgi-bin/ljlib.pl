@@ -37,20 +37,23 @@ require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 		     'img' => $LJ::IMGPREFIX,
 		     );
 
-$SIG{'HUP'} = sub {
-    print STDERR "HUP caught.  Clearing caches.\n";
-    %LJ::CACHE_STYLE = ();
-    %LJ::CACHE_PROPS = ();
-    $LJ::CACHED_MOODS = 0;
-    $LJ::CACHED_MOOD_MAX = 0;
-    %LJ::CACHE_MOODS = ();
-    %LJ::CACHE_MOOD_THEME = ();
-    %LJ::CACHE_USERID = ();
-    %LJ::CACHE_USERNAME = ();
-    %LJ::CACHE_USERPIC_SIZE = ();
-    %LJ::CACHE_CODES = ();
-    %LJ::CACHE_USERPROP = ();  # {$prop}->{ 'upropid' => ... , 'indexed' => 0|1 };
-};
+## we want to set this right away, so when we get a HUP signal later
+## and our signal handler sets it to true, perl doesn't need to malloc,
+## since malloc may not be thread-safe and we could core dump.
+## see LJ::clear_caches and LJ::handle_caches
+$LJ::CLEAR_CACHES = 0;
+
+## if this library is used in a BML page, we don't want to destroy BML's
+## HUP signal handler.
+if ($SIG{'HUP'}) {
+    my $oldsig = $SIG{'HUP'};
+    $SIG{'HUP'} = sub {
+	&{$oldsig};
+	&LJ::clear_caches;
+    };
+} else {
+    $SIG{'HUP'} = \&LJ::clear_caches;    
+}
 
 sub send_mail
 {
@@ -123,7 +126,7 @@ sub get_remote_noauth
 {
     ### are they logged in?
     my $remuser = $BMLClient::COOKIE{"ljuser"};
-    return undef unless ($remuser);
+    return undef unless ($remuser =~ /^\w{1,15}$/);
 
     ### does their login password match their login?
     return undef unless ($BMLClient::COOKIE{"ljhpass"} =~ /^$remuser:(.+)/);
@@ -895,6 +898,37 @@ sub load_user_theme
 
 package LJ;
 
+# called from a HUP signal handler, so intentionally very very simple
+# so we don't core dump on a system without reentrant libraries.
+sub clear_caches
+{
+    $LJ::CLEAR_CACHES = 1;
+}
+
+# handle_caches
+# clears caches, if the CLEAR_CACHES flag is set from an earlier HUP signal.
+# always returns trues, so you can use it in a conjunction of statements
+# in a while loop around the application like:
+#        while (LJ::handle_caches() && FCGI::accept())
+sub handle_caches
+{
+    return 1 unless ($LJ::CLEAR_CACHES);
+    $LJ::CLEAR_CACHES = 0;
+
+    %LJ::CACHE_STYLE = ();
+    %LJ::CACHE_PROPS = ();
+    $LJ::CACHED_MOODS = 0;
+    $LJ::CACHED_MOOD_MAX = 0;
+    %LJ::CACHE_MOODS = ();
+    %LJ::CACHE_MOOD_THEME = ();
+    %LJ::CACHE_USERID = ();
+    %LJ::CACHE_USERNAME = ();
+    %LJ::CACHE_USERPIC_SIZE = ();
+    %LJ::CACHE_CODES = ();
+    %LJ::CACHE_USERPROP = ();  # {$prop}->{ 'upropid' => ... , 'indexed' => 0|1 };
+    return 1;
+}
+
 ### hashref, arrayref
 sub load_userpics
 {
@@ -1273,8 +1307,8 @@ sub html_text
 sub canonical_username
 {
     my $user = shift;
-    if ($user =~ /^[\w\-]{1,15}$/) {
-	$user = lc($user);
+    if ($user =~ /^\s*([\w\-]{1,15})\s*$/) {
+	$user = lc($1);
 	$user =~ s/-/_/g;
 	return $user;
     }
