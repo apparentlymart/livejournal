@@ -106,8 +106,7 @@
      if ($synd) { push @props, qw(rssparseerror); }
      if ($u->{'statusvis'} eq 'V') { push @props, qw(opt_blockrobots); }
      LJ::run_hooks('userinfo_local_props', {
-         'u' => $u,
-         'props' => \@props,
+         'props' => \@props
      });
      LJ::load_user_props($u, @props);
  }
