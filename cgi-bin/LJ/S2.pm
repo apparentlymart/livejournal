@@ -879,6 +879,21 @@ sub Date
     return $dt;
 }
 
+sub DateTime_unix
+{
+    my $time = shift;
+    my @gmtime = gmtime($time);
+    my $dt = { '_type' => 'DateTime' };
+    $dt->{'year'} = $gmtime[5]+1900;
+    $dt->{'month'} = $gmtime[4]+1;
+    $dt->{'day'} = $gmtime[3];
+    $dt->{'hour'} = $gmtime[2];
+    $dt->{'min'} = $gmtime[1];
+    $dt->{'sec'} = $gmtime[0];
+    $dt->{'_dayofweek'} = $gmtime[6] + 1;
+    return $dt;
+}
+
 sub DateTime_parts
 {
     my @parts = split(/\s+/, shift);
@@ -1042,6 +1057,52 @@ sub Image_userpic
         'width' => $p->[0],
         'height' => $p->[1],
     };
+}
+
+sub ItemRange_fromopts
+{
+    my $opts = shift;
+    my $ir = {};
+
+    my $items = $opts->{'items'};
+    my $page_size = ($opts->{'pagesize'}+0) || 25;
+    my $page = $opts->{'page'}+0 || 1;
+    my $num_items = scalar @$items;
+
+    my $pages = POSIX::ceil($num_items / $page_size);
+    if ($page > $pages) { $page = $pages; }
+
+    splice(@$items, 0, ($page-1)*$page_size) if $page > 1;
+    splice(@$items, $page_size) if @$items > $page_size;
+    
+    $ir->{'current'} = $page;
+    $ir->{'total'} = $pages;
+    $ir->{'total_subitems'} = $num_items;
+    $ir->{'from_subitem'} = ($page-1) * $page_size + 1;
+    $ir->{'num_subitems_displayed'} = @$items;
+    $ir->{'to_subitem'} = $ir->{'from_subitem'} + $ir->{'num_subitems_displayed'} - 1;
+    $ir->{'all_subitems_displayed'} = ($pages == 1);
+    $ir->{'_url_of'} = $opts->{'url_of'};
+    return ItemRange($ir);
+}
+
+sub ItemRange
+{
+    my $h = shift;  # _url_of = sub($n)
+    $h->{'_type'} = "ItemRange";
+
+    my $url_of = ref $h->{'_url_of'} eq "CODE" ? $h->{'_url_of'} : sub {"";};
+
+    $h->{'url_next'} = $url_of->($h->{'current'} + 1)
+        unless $h->{'current'} >= $h->{'total'};
+    $h->{'url_prev'} = $url_of->($h->{'current'} - 1)
+        unless $h->{'current'} <= 1;
+    $h->{'url_first'} = $url_of->(1)
+        unless $h->{'current'} == 1;
+    $h->{'url_last'} = $url_of->($h->{'total'})
+        unless $h->{'current'} == $h->{'total'};
+
+    return $h;
 }
 
 sub User
@@ -1261,12 +1322,15 @@ sub get_plural_phrase
 sub get_url
 {
     my ($ctx, $obj, $view) = @_;
-    # FIXME: make this generate community URLs when $obj is a UserLite and we know the journal_type
+    my $dir = "users";
+    if (ref $obj eq "HASH" && $obj->{'journal_type'} eq "C") {
+        $dir = "community";
+    }
     my $user = ref $obj ? $obj->{'username'} : $obj;
     $view = "info" if $view eq "userinfo";
     $view = "calendar" if $view eq "archive";
     $view = "" if $view eq "recent";
-    return "$LJ::SITEROOT/users/$user/$view";
+    return "$LJ::SITEROOT/$dir/$user/$view";
 }
 
 sub rand
@@ -1458,6 +1522,11 @@ sub Image__set_url {
     $img->{'url'} = LJ::eurl($newurl);
 }
 
-
+sub ItemRange__url_of
+{
+    my ($ctx, $this, $n) = @_;
+    return "" unless ref $this->{'_url_of'} eq "CODE";
+    return $this->{'_url_of'}->($n+0);
+}
 
 1;
