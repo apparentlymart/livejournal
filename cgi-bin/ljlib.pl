@@ -74,6 +74,37 @@ if ($SIG{'HUP'}) {
 
 package LJ;
 
+# interface to oldids table (URL compatability)
+sub get_newids
+{
+    my $dbarg = shift;
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    my $sth;
+
+    my $area = $dbh->quote(shift);
+    my $oldid = $dbh->quote(shift);
+
+    return $dbr->selectrow_arrayref("SELECT userid, newid FROM oldids ".
+				    "WHERE area=$area AND oldid=$oldid");
+}
+
+# takes a dbset and query.  will try query on slave first, then master if not in slave yet.
+sub dbs_selectrow_array
+{
+    my $dbs = shift;
+    my $query = shift;
+
+    my @dbl = ($dbs->{'dbh'});
+    if ($dbs->{'has_slave'}) { unshift @dbl, $dbs->{'dbr'}; }
+    foreach my $db (@dbl) {
+	my $ans = $db->selectrow_arrayref($query);
+	return wantarray() ? @$ans : $ans->[0] if defined $ans;
+    }
+    return undef;
+}
+
 sub get_friend_items
 {
     my $dbarg = shift;
@@ -2851,7 +2882,7 @@ sub get_dbh
     # explictly.
     unless ($LJ::DBINFO{'_ubs_set'}) 
     {
-	foreach my $type (qw(slave recenttext log))
+	foreach my $type (qw(slave recenttext log)) 
 	{
 	    my $total_weight;
 	    for (my $i=1; $i<=$LJ::DBINFO{'slavecount'}; $i++) {
@@ -3797,7 +3828,7 @@ sub days_in_month
 #
 sub delete_item
 {
-    my ($dbarg, $ownerid, $itemid, $quick) = @_;
+    my ($dbarg, $ownerid, $itemid, $quick, $deleter) = @_;
     my $sth;
 		
     my $dbs = make_dbs_from_arg($dbarg);
@@ -3807,25 +3838,28 @@ sub delete_item
     $ownerid += 0;
     $itemid += 0;
 
-    $dbh->do("DELETE FROM memorable WHERE itemid=$itemid");
+    $deleter ||= sub {
+	my $table = shift;
+	my $col = shift;
+	my @ids = @_;
+	return unless @ids;
+	my $in = join(",", @ids);
+	$dbh->do("DELETE FROM $table WHERE $col IN ($in)");
+    };
+
+    $deleter->("memorable", "itemid", $itemid);
     $dbh->do("UPDATE userusage SET lastitemid=0 WHERE userid=$ownerid AND lastitemid=$itemid") unless ($quick);
-    $dbh->do("DELETE FROM log WHERE itemid=$itemid");
-    $dbh->do("DELETE FROM logtext WHERE itemid=$itemid");
-    $dbh->do("DELETE FROM logsubject WHERE itemid=$itemid");
-    $dbh->do("DELETE FROM logprop WHERE itemid=$itemid");
+    foreach my $t (qw(log logtext logsubject logprop)) {
+	$deleter->($t, "itemid", $itemid);
+    }
     $dbh->do("DELETE FROM logsec WHERE ownerid=$ownerid AND itemid=$itemid");
 
     my @talkids = ();
     $sth = $dbh->prepare("SELECT talkid FROM talk WHERE nodetype='L' AND nodeid=$itemid");
     $sth->execute;
-    while (my ($tid) = $sth->fetchrow_array) {
-	push @talkids, $tid;
-    }
-    if (@talkids) {
-	my $in = join(",", @talkids);
-	$dbh->do("DELETE FROM talk WHERE talkid IN ($in)");
-	$dbh->do("DELETE FROM talktext WHERE talkid IN ($in)");
-	$dbh->do("DELETE FROM talkprop WHERE talkid IN ($in)");
+    push @talkids, $_ while ($_ = $sth->fetchrow_array);
+    foreach my $t (qw(talk talktext talkprop)) {
+	$deleter->($t, "talkid", @talkids);
     }
 }
 
