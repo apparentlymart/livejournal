@@ -604,15 +604,55 @@ sub get_talk_data
         # probably need to fix.  checking is at least warranted.
         my $dbcm = LJ::get_cluster_master($u);
         return unless $dbcm;
-        $dbcm->do("LOCK TABLES log2 WRITE, talk2 READ");
+
+        # attempt to get a database lock to make sure that nobody else is in this section
+        # at the same time we are
+        my $db_key = "rp:fix:$u->{userid}:$nodetype:$nodeid";
+        my $got_lock = $dbcm->selectrow_array("SELECT GET_LOCK(?, 1)", undef, $db_key);
+        return unless $got_lock;
+
+        # setup an unlock handler
+        my $unlock = sub {
+            $dbcm->do("SELECT RELEASE_LOCK(?)", undef, $db_key);
+            return undef;
+        };
+
+        # check memcache to see if someone has previously fixed this entry in this journal
+        # with this reply count
+        my $fix_key = "rp_fixed:$u->{userid}:$nodetype:$nodeid:$rp_count";
+        my $was_fixed = LJ::MemCache::get($fix_key);
+        return $unlock->() if $was_fixed;
+
+        # if we're doing innodb, begin a transaction, else lock tables
+        my $sharedmode = "";
+        if ($LJ::INNODB_DB{$u->{clusterid}}) {
+            $sharedmode = "LOCK IN SHARED MODE";
+            $dbcm->begin_work;
+        } else {
+            $dbcm->do("LOCK TABLES log2 WRITE, talk2 READ");
+        }
+
+        # get count and then update.  this should be totally safe because we've either
+        # locked the tables or we're in a transaction.
         my $ct = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 WHERE ".
                                         "journalid=? AND nodetype='L' AND nodeid=? ".
-                                        "AND state IN ('A','F')", undef, $u->{'userid'}, $nodeid);
+                                        "AND state IN ('A','F') $sharedmode",
+                                        undef, $u->{'userid'}, $nodeid);
         $u->do("UPDATE log2 SET replycount=? WHERE journalid=? AND jitemid=?",
                undef, int($ct), $u->{'userid'}, $nodeid);
         print STDERR "Fixing replycount for $u->{'userid'}/$nodeid from $rp_count to $ct\n"
             if $LJ::DEBUG{'replycount_fix'};
-        $dbcm->do("UNLOCK TABLES");
+
+        # now, commit or unlock as appropriate
+        if ($LJ::INNODB_DB{$u->{clusterid}}) {
+            $dbcm->commit;
+        } else {
+            $dbcm->do("UNLOCK TABLES");
+        }
+
+        # mark it as fixed in memcache, so we don't do this again
+        LJ::MemCache::add($fix_key, 1, 60);
+        $unlock->();
         LJ::MemCache::delete($rp_memkey);
     };
 
