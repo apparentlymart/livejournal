@@ -1134,6 +1134,10 @@ register_alter(sub {
     # axe this column (and its two related ones) if it exists.
     if (column_type("user", "paidfeatures"))
     {
+	try_sql("REPLACE INTO paiduser (userid, paiduntil, paidreminder) ".
+		"SELECT userid, paiduntil, paidreminder FROM user WHERE paidfeatures='paid'");
+	try_sql("REPLACE INTO paiduser (userid, paiduntil, paidreminder) ".
+		"SELECT userid, '2035-12-01', NULL FROM user WHERE paidfeatures='on'");
 	do_alter("user",
 		 "ALTER TABLE user DROP paidfeatures, DROP paiduntil, DROP paidreminder");
     }
