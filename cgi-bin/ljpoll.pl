@@ -525,6 +525,11 @@ sub show_poll
         }
     }
 
+    # Users cannot vote unless they are logged in
+    if ($mode eq 'enter' && ! $remote) {
+        return "<?p In order to participate in a poll you must first <a href=\"$LJ::SITEROOT/login.bml?ret=1\">login</a>. p?>";
+    }
+
     my $do_form = ($mode eq "enter" && $can_vote);
     my %preval;
     if ($do_form) {
