@@ -245,7 +245,7 @@ BODY<=
 
      $checked = $u->{'allow_infoshow'} ne "N" ? "CHECKED" : "";
      $ret .= "<tr valign=middle><td width=50 align=right><input type=checkbox name=allow_contactshow $checked></td><td><b>Show your contact information on your LiveJournal?</b></td></tr>\n";
-     $ret .= "<tr><td>&nbsp;</td><td>You should keep this option enabled.  This lets other people be able to contact you by showing your email address, ICQ number, and AOL Instant Messanger screenname all on your LiveJournal.";
+     $ret .= "<tr><td>&nbsp;</td><td>You should keep this option enabled.  This lets other people be able to contact you by showing your email address, ICQ number, and AOL Instant Messenger screenname all on your LiveJournal.";
 
      {
 	 $ret .= "<p><b>Security:</b> ";
