@@ -33,6 +33,18 @@ body<=
  unless ($FORM{'spid'}) { return LJ::bad_input("need spid"); }
  unless (LJ::did_post) { return LJ::bad_input("<?requirepost?>"); }
 
+ ### links to show on success
+ my $successlinks = qq{
+<ul>
+   <li>Go back to <a href='see_request.bml?id=$sp->{'spid'}'>Request #$sp->{'spid'}</a></li>
+   <li>Go to <a href='see_request.bml?id=$sp->{'spid'}&amp;find=prev'>previous</a> /
+             <a href='see_request.bml?id=$sp->{'spid'}&amp;find=next'>next</a> open request</li>
+   <li>Go to <a href='see_request.bml?id=$sp->{'spid'}&amp;find=cprev'>previous</a> /
+             <a href='see_request.bml?id=$sp->{'spid'}&amp;find=cnext'>next</a> open request in the same category</li>
+</ul>
+};
+
+
  ### insert record
  my $faqid = $FORM{'faqid'}+0;
  
@@ -100,13 +112,21 @@ body<=
          unless LJ::Support::can_bounce($sp, $remote);
 
      # check email using BMLCodeBlock::check_email
+     my @emails = split(/\s*,\s*/, $FORM{'bounce_email'});
+
+     return LJ::bad_input("You can only send to 5 email addresses.  Go back and remove some.")
+         if @emails > 5;
+     
      my @email_errors;
-     check_email($FORM{'bounce_email'}, \@email_errors);
-     return LJ::bad_input(@email_errors) if @email_errors;
+     foreach my $email (@emails) {
+         check_email($email, \@email_errors);
+         @email_errors = map { "<b>$email:</b> $_" } @email_errors;
+         return LJ::bad_input(@email_errors) if @email_errors;
+     }
 
      # append notice that this message was bounced
      my $splid = LJ::Support::append_request($sp, {
-         'body' => "(Bouncing mail to '$FORM{'bounce_email'}' and closing)\n\n" . $FORM{'body'},
+         'body' => "(Bouncing mail to '" . join(', ', @emails) . "' and closing)\n\n" . $FORM{'body'},
          'posterid' => $remote ? $remote->{'userid'} : 0,
          'type' => 'internal',
      });
@@ -117,18 +137,19 @@ body<=
                                          undef, $sp->{'spid'});
 
      LJ::send_mail({ 
-         'to' => $FORM{'bounce_email'},
+         'to' => join(", ", @emails),
          'from' => $sp->{'reqemail'},
          'fromname' => $sp->{'reqname'},
          'subject' => "$sp->{'subject'} (support request #$sp->{'spid'})",
-         'body' => "$message\n\n$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}",
-     });
+             'body' => "$message\n\n$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}",
+         });
 
      # close request, nobody gets credited
      $dbh->do("UPDATE support SET state='closed', timeclosed=UNIX_TIMESTAMP() WHERE spid=?",
               undef, $sp->{'spid'});
 
-     return "<?h1 Bounced h1?><?p The selected support request has been bounced to <b>$FORM{'bounce_email'}</b> and closed. p?>";
+     return "<?h1 Bounced h1?><?p The selected support request has been bounced to <b>" .
+         join(', ', @emails) . "</b> and closed. p?>" . $successlinks;
  
  }
 
@@ -185,14 +206,7 @@ body<=
  LJ::Support::mail_response_to_user($sp, $splid);
 
  my $auth_arg = $FORM{'auth'} ? "&auth=$FORM{'auth'}" : "";
- return "<?h1 Logged h1?><?p Your comment/solution <a href=\"see_request.bml?id=$spid$auth_arg\">has been recorded</a>. p?>
-    <ul>
-    <li>Go back to <a href='see_request.bml?id=$sp->{'spid'}'>Request #$sp->{'spid'}</a></li>
-    <li>Go to <a href='see_request.bml?id=$sp->{'spid'}&amp;find=prev'>previous</a> /
-              <a href='see_request.bml?id=$sp->{'spid'}&amp;find=next'>next</a> open request</li>
-    <li>Go to <a href='see_request.bml?id=$sp->{'spid'}&amp;find=cprev'>previous</a> /
-              <a href='see_request.bml?id=$sp->{'spid'}&amp;find=cnext'>next</a> open request in the same category</li>
-    </ul>";
+ return "<?h1 Logged h1?><?p Your comment/solution <a href=\"see_request.bml?id=$spid$auth_arg\">has been recorded</a>. p?>" . $successlinks;
 _code?>
 <?hr?>
 Back to the <A HREF="help.bml">list of open requests</A>.<BR>
