@@ -1520,7 +1520,7 @@ sub editfriendgroups
         {
             my $name = $req->{'set'}->{$bit}->{'name'};
             return fail($err,207,"non-ASCII names require a Unicode-capable client")
-                if $req->{'ver'} < 1 and not LJ::ascii($name);
+                if $req->{'ver'} < 1 and not LJ::is_ascii($name);
             return fail($err,208,"Some of the group names aren't valid UTF-8 strings")
                 unless LJ::text_in($name);
         }
