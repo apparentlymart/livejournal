@@ -30,7 +30,7 @@
          unless (LJ::did_post());
 
      return"<b>Error:</b> You don't have access to change a user's capability class."
-         unless (LJ::check_priv($remote, "admin", "all"));
+         unless (LJ::check_priv($remote, "admin", "*"));
 
      unless ($u) {
          $ret .= "Unknown user.\n";
