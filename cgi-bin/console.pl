@@ -4,12 +4,13 @@
 # lib: cgi-bin/conmoodtheme.pl, cgi-bin/contopic.pl
 # lib: cgi-bin/conban.pl. cgi-bin/conshared.pl
 # lib: cgi-bin/consuspend.pl, cgi-bin/confaq.pl
-# lib: cgi-bin/console-local.pl
+# lib: cgi-bin/console-local.pl, Text::Wrap
 # </LJDEP>
 
 package LJ::Con;
 use strict;
 use vars qw(%cmd);
+use Text::Wrap;
 
 sub parse_line
 {
@@ -272,7 +273,7 @@ $cmd{'friend'} = {
     'args' => [
 	       'command' => "Either 'list' to list friend, 'add' to add a friend, or 'remove' to remove a friend.",
 	       'username' => "The username of the person to add or remove when using the add or remove command.",
-	       'group' => "When using command 'add', tihs 3rd parameter can list the name of a friend group to add the friend to.  The group must already exist.",
+	       'group' => "When using command 'add', this 3rd parameter can list the name of a friend group to add the friend to.  The group must already exist.",
 	       ],
     };
 
@@ -430,6 +431,59 @@ DES
 	       ],
     };
 
+$cmd{'help'} = {
+    'des' => 'Get help on admin console commands',
+    'handler' => \&conhelp,
+    'argsummary' => '[<command>]',
+    'args' => [
+      'command' => "The command to get help on.  If ommitted, prints a list of commands."
+    ],
+  };
+
+sub conhelp 
+{
+    my ($dbh, $remote, $args, $out) = @_;
+
+    $Text::Wrap::columns = 72;
+
+    my $pr  = sub { foreach (split(/\n/,$_[0])) {
+                      push @$out, [ "",      $_ ];
+                    } 1; };
+    my $err = sub { push @$out, [ "error", $_[0] ]; 0; };
+
+    my $which = $args->[1];
+    return $err->("Invalid Arguments") if ($#{$args} > 1);
+
+    unless ($which) 
+    {
+	# Make a command list.
+        foreach my $cmdname (sort keys %LJ::Con::cmd) {
+            next if ($LJ::Con::cmd{$cmdname}->{'hidden'});
+            my $des = $LJ::Con::cmd{$cmdname}->{'des'};
+            my $indent = length($cmdname)+2;
+            my $helptext = Text::Wrap::wrap('',' 'x$indent,"$cmdname: $des");
+            $pr->($helptext);
+        }
+        return 1;
+    } 
+
+    # Help for a specific command
+    return $err->("Command '$which' does not exist here.")
+	unless defined $LJ::Con::cmd{$which};
+    my $cmd = $LJ::Con::cmd{$which};
+    
+    $pr->("$which ".$cmd->{'argsummary'});
+    $pr->(wrap('  ','  ',$cmd->{'des'}));
+    if ($cmd->{'args'}) {
+	$pr->("  --------");
+	my @des = @{$cmd->{'args'}};
+	while (my ($arg, $des) = splice(@des, 0, 2)) {
+	    $pr->("  $arg");
+	    $pr->(wrap('    ','    ',$des));
+	}
+    }
+    return 1;
+}
 
 sub delete_talk
 {

@@ -54,7 +54,7 @@
 		     $color = "#008800";
 		 } 
 		 
-		 $ret .= "<FONT COLOR=$color>$line->[1]</FONT>\n";
+		 $ret .= "<FONT COLOR=$color>".LJ::eall($line->[1])."</FONT>\n";
 		 
 	     }
 	     $ret .= "</B></PRE>";
