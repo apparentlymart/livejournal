@@ -35,7 +35,7 @@
 
             # check the password last
             $errors{password} = $ML{'.error.nopassword'} if !%errors && !$POST{password};
-            $errors{password} = $ML{'.error.mismatch'} if !%errors && $cu->{password} ne $POST{password};
+            $errors{password} = $ML{'.error.mismatch'} if !%errors && !LJ::auth_okay($cu, $POST{password});
         }
 
         # everything checks out, transfer it
