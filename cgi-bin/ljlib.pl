@@ -3027,7 +3027,14 @@ sub start_request
             };
             $LJ::DBIRole->set_sources(\%LJ::DBINFO);
             LJ::MemCache::trigger_bucket_reconstruct();
-            print STDERR "ljconfig.pl reloaded\n";
+            if ($modtime > $now - 60) {
+                # show to stderr current reloads.  won't show
+                # reloads happening from new apache children
+                # forking off the parent who got the inital config loaded
+                # hours/days ago and then the "updated" config which is
+                # a different hours/days ago.
+                print STDERR "ljconfig.pl reloaded\n";
+            }
         }
         $LJ::CACHE_CONFIG_MODTIME_LASTCHECK = $now;
     }
