@@ -112,15 +112,6 @@
 
         # do update postevent
         {
-            ## see if an "other" mood they typed in has an equivalent moodid
-            my $moodid = $POST{'prop_current_moodid'};
-            my $moodname = lc($POST{'prop_current_mood'});
-
-            if (my $id = LJ::mood_id($moodname)) {
-                $moodid = $id;
-                undef $moodname;
-            }
-
             # find security
             my $sec = "public";
             my $amask = 0;
@@ -155,6 +146,16 @@
             # copy some opts, but make sure they are 1 : 0 explicitly
             foreach (qw(preformatted nocomments backdated noemail)) {
                 $req{"prop_opt_$_"} = $POST{"prop_opt_$_"} ? 1 : 0;
+            }
+
+            ## see if an "other" mood they typed in has an equivalent moodid
+            if ($POST{'prop_current_mood'}) {
+                if (my $id = LJ::mood_id($POST{'prop_current_mood'})) {
+                    $req{'prop_current_moodid'} = $id;
+                    delete $req{'prop_current_mood'};
+                } else {
+                    delete $req{'prop_current_moodid'};
+                }
             }
 
             my %res;

@@ -881,11 +881,13 @@ sub prepare_currents
         LJ::CleanHTML::clean_subject(\$val);
         $currents{'Music'} = $val;
     }
+
+    # favor custom mood over system mood
     if ($val = $args->{'props'}->{$datakey}->{'current_mood'}) {
         LJ::CleanHTML::clean_subject(\$val);
         $currents{'Mood'} = $val;
-    }
-    if ($val = $args->{'props'}->{$datakey}->{'current_moodid'}) {
+
+    } elsif ($val = $args->{'props'}->{$datakey}->{'current_moodid'}) {
         my $theme = $args->{'user'}->{'moodthemeid'};
         my %pic;
         my $name = LJ::mood_name($val);

@@ -122,9 +122,12 @@ body<=
             if ($POST{'prop_current_mood'}) {
                 if (my $id = LJ::mood_id($POST{'prop_current_mood'})) {
                     $req{'prop_current_moodid'} = $id;
+                    delete $req{'prop_current_mood'};
+                } else {
+                    delete $req{'prop_current_moodid'};
                 }
             }
-            
+
             # security
             my $sec = "public";
             my $amask = 0;

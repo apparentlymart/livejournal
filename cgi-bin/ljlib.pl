@@ -1399,8 +1399,8 @@ sub mood_id
     my ($mood) = @_;
     return undef unless $mood;
     LJ::load_moods() unless $LJ::CACHED_MOODS;
-    while (my ($id, $imood) = each %LJ::CACHE_MOODS) {
-        return $id if $mood eq $imood;
+    foreach my $m (values %LJ::CACHE_MOODS) {
+        return $m->{'id'} if $mood eq $m->{'name'};
     }
     return undef;
 }
