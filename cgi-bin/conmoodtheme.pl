@@ -164,12 +164,14 @@ sub moodtheme_setpic
     $moodid += 0;
     if (!$picurl || $width==0 || $height==0) {
         $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid=$themeid AND moodid=$moodid");
+        LJ::MemCache::delete([$themeid, "moodthemedata:$themeid"]);
         push @$out, [ "info", "Data deleted for theme=$themeid, moodid=$moodid." ];
         return 1;
     }
 
     my $qpicurl = $dbh->quote($picurl);
     $dbh->do("REPLACE INTO moodthemedata (moodthemeid, moodid, picurl, width, height) VALUES ($themeid, $moodid, $qpicurl, $width, $height)");
+    LJ::MemCache::delete([$themeid, "moodthemedata:$themeid"]);
     if ($dbh->err) { push @$out, [ "error", $dbh->errstr ]; }
     
     push @$out, [ "", "Data inserted for theme=$themeid, moodid=$moodid." ];

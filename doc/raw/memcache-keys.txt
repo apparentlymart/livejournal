@@ -19,6 +19,7 @@
 <uid> rp:<uid>:<jitemid> == scalar, the replycount value 
 
 <picid> userpic.<picid> = [ $w, $h, $uid ]
+<themeid> moodthemedata:<themeid> = { $moodid => { 'pic' => $pic, 'w' => $w, 'h' => $h } }
 
 <uid> s1overr:<uid> == overrides for a given user
 <uid> s1uc:<uid> == s1usercache row hashref

@@ -1565,7 +1565,8 @@ sub get_mood_picture
     LJ::load_moods() unless $LJ::CACHED_MOODS;
     do
     {
-        if ($LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}) {
+        if ($LJ::CACHE_MOOD_THEME{$themeid} && 
+            $LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}) {
             %{$ref} = %{$LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}};
             if ($ref->{'pic'} =~ m!^/!) {
                 $ref->{'pic'} =~ s!^/img!!;
@@ -2167,12 +2168,21 @@ sub load_mood_theme
     my $themeid = shift;
     return if $LJ::CACHE_MOOD_THEME{$themeid};
     return unless $themeid;
+
+    # check memcache
+    my $memkey = [$themeid, "moodthemedata:$themeid"];
+    return if $LJ::CACHE_MOOD_THEME{$themeid} = LJ::MemCache::get($memkey);
+
+    # fall back to db
     my $dbr = LJ::get_db_reader();
     my $sth = $dbr->prepare("SELECT moodid, picurl, width, height FROM moodthemedata WHERE moodthemeid=?");
     $sth->execute($themeid);
     while (my ($id, $pic, $w, $h) = $sth->fetchrow_array) {
         $LJ::CACHE_MOOD_THEME{$themeid}->{$id} = { 'pic' => $pic, 'w' => $w, 'h' => $h };
     }
+
+    # set in memcache
+    LJ::MemCache::set($memkey, $LJ::CACHE_MOOD_THEME{$themeid});
 }
 
 # <LJFUNC>

@@ -410,6 +410,7 @@ if ($opt_pop)
                 next if $data{$moodid} eq "$url$w$h";
                 $dbh->do("REPLACE INTO moodthemedata (moodthemeid, moodid, picurl, width, height) ".
                          "VALUES (?,?,?,?,?)", undef, $themeid, $moodid, $url, $w, $h);
+                LJ::MemCache::delete([$themeid, "moodthemedata:$themeid"]);
             }
         }
         close M;
