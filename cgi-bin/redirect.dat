@@ -14,7 +14,7 @@
 /stylebrowser		/styles/browse/
 /free.bml		/site/about.bml
 /contributors.bml	/site/contributors.bml
-/supporters.bml		/site/supporters.bml
+/supporters.bml		/paidaccounts/
 /goat.bml		/site/goat.bml
 /sitemap.bml		/site/map.bml
 /friendgraph.bml	/friends/graph.bml
