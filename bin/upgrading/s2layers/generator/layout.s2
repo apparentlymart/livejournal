@@ -460,3 +460,28 @@ function DayPage::print_body() {
 </table>""";
 
 }
+
+
+function print_theme_preview () {
+  """<table width='100%' bgcolor='$*page_back' cellpadding=10><tr><td align='center'>
+
+<table width='400' cellpadding='2' cellspacing='2'>
+<tr align='left'><td bgcolor="$*stronger_back" align="center">
+
+<table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
+<tr align='left'><td style="color: $*stronger_text">Preview Subject</td><td align="right" style="font-size: 8pt; color: $*stronger_text">[Feb. 5th, 2002|<b>8:46 pm</b>]</td></tr>
+<tr align='left'>
+<td colspan="2" bgcolor="$*entry_back" style='color: $*entry_text'>
+Preview text, preview text, etc, etc..... words, words and more words.
+</td></tr>
+
+<tr bgcolor="$*weak_back"><td align='left' class='style: font-size: 8pt'>
+<a style='text-decoration:none;color: $*page_link' href="#">$*text_permalink</a>
+</td><td align='right' style='font-size: 8pt'>
+<a href='#' style='text-decoration:none;color:$*page_vlink'><b>1 comment</b></a>|<a href='#' style='text-decoration:none;color:$*page_link'>post comment</a>
+
+</td></tr></table>
+</td></tr></table>
+</td></tr></table>
+""";
+}

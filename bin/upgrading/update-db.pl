@@ -169,6 +169,8 @@ if ($opt_pop)
         # and their styleids.
         my $existing = LJ::S2::get_public_layers($sysid);
 
+        my %known_id;
+
         chdir "$ENV{'LJHOME'}/bin/upgrading" or die;
         my %layer;    # maps redist_uniq -> { 'type', 'parent' (uniq), 'id' (s2lid) }
         foreach my $file ("s2layers.dat", "s2layers-local.dat")
@@ -205,6 +207,9 @@ if ($opt_pop)
                     }
                 }
                 die "Can't generate ID for '$base'" unless $id;
+
+                # remember it so we don't delete it later.
+                $known_id{$id} = 1;
 
                 $layer{$base} = {
                     'type' => $type,
@@ -273,6 +278,14 @@ if ($opt_pop)
                 
             }
             close SL;
+        }
+
+        # now, delete any system layers that don't below (from previous imports?)
+        my $sth = $dbh->prepare("SELECT s2lid FROM s2layers WHERE userid=?");
+        $sth->execute($sysid);
+        while (my $id = $sth->fetchrow_array) {
+            next if $known_id{$id};
+            LJ::S2::delete_layer($id);
         }
     }
     

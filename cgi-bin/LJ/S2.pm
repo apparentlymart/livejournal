@@ -651,20 +651,35 @@ sub get_layout_langs
     return map { $_, $lang{$_}->{'name'} } sort keys %lang;
 }
 
+# returns array of hashrefs
 sub get_layout_themes
 {
     my $src = shift; $src = [ $src ] unless ref $src eq "ARRAY";
     my $layid = shift;
-    my %theme;
+    my @themes;
     foreach my $src (@$src) {
-        foreach (keys %$src) {
+        foreach (sort { $src->{$a}->{'name'} cmp $src->{$b}->{'name'} } keys %$src) {
             next unless /^\d+$/;
             my $v = $src->{$_};
-            $theme{$_} = $v->{'name'} if 
+            push @themes, $v if
                 ($v->{'type'} eq "theme" && $layid && $v->{'b2lid'} == $layid);
         }
     }
-    return map { $_, $theme{$_} } sort keys %theme;
+    return @themes;
+}
+
+sub get_layout_themes_select
+{
+    my @sel;
+    my $last_uid;
+    foreach my $t (get_layout_themes(@_)) {
+        if ($last_uid && $t->{'userid'} != $last_uid) {
+            push @sel, 0, '';  # divider between system & user
+        }
+        $last_uid = $t->{'userid'};
+        push @sel, $t->{'s2lid'}, $t->{'name'};
+    }
+    return @sel;
 }
 
 sub get_policy

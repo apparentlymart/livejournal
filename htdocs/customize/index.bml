@@ -149,7 +149,7 @@ body<=
     $ret .= LJ::html_select({ 'name' => 'layoutid',
                               'selected' => $style{'layout'},  },
                             @layouts);
-    $ret .= " <input type='submit' name='save:layout' value='Change'> (<a href=\"preview.bml?show=layouts&amp;journal=$u->{'user'}\">previews</a>)";
+    $ret .= " <input type='submit' name='save:layout' value='Change'> (<a href=\"preview.bml?journal=$u->{'user'}\">previews</a>)";
     $ret .= "</blockquote>";
 
     # pick other stuff
@@ -167,14 +167,14 @@ body<=
     $ret .= "</blockquote>";
     
     # theme
-    my @themes = LJ::S2::get_layout_themes([$pub, $userlay], $style{'layout'});
+    my @themes = LJ::S2::get_layout_themes_select([$pub, $userlay], $style{'layout'});
     $ret .= "<?h2 Theme h2?><?p Choose from the following optional themes for this layout. p?>";
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'themeid',
                               'selected' => $style{'theme'}, },
                             '0' => '(Layout Default)',
                             @themes);
-    $ret .= " <input type='submit' name='save:theme' value='Change'> (<a href=\"preview.bml?show=themes&amp;layid=$style{'layout'}\">previews</a>)";
+    $ret .= " <input type='submit' name='save:theme' value='Change'> (<a href=\"themes.bml?journal=$u->{'user'}\">previews</a>)";
     $ret .= "</blockquote>";
     
     # customize

@@ -1,0 +1,42 @@
+<?page
+title=>Layout Previews
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST);
+
+    my $ret;
+    my $remote = LJ::get_remote();
+    my $journal = LJ::canonical_username($FORM{'journal'});
+
+    $ret .= "<p>[&lt;&lt; <a href='/customize/?journal=$journal'>Back</a>]</p>";
+
+    my $pub = LJ::S2::get_public_layers();
+
+    my @layouts = 
+        sort { $a->{'name'} cmp $b->{'name'} }
+        map { $pub->{$_} } grep { /^\d+$/ && $pub->{$_}->{'type'} eq "layout" } keys %$pub;
+
+    foreach my $l (@layouts) {
+        $ret .= "<?h1 " . LJ::eall($l->{'name'}) . " h1?>";
+        unless ($l->{'_previews'}) {
+            $ret .= "<?p <i>No preview available.</i> p?>";
+            next;
+        }
+        foreach (split(/\,/, $l->{'_previews'})) {
+            my ($img, $w, $h) = split(/\|/, $_);
+            $ret .= "<p style='margin-left: 20px'><img src=\"/img/s2preview/$img\" width=\"$w\" height=\"$h\"></p>";
+        }
+    }
+
+#    use Data::Dumper;
+#    $ret .= "<pre>" . Dumper($pub) . "</pre>";
+
+
+    return $ret;
+
+}
+_code?>
+<=body
+page?>
