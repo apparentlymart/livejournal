@@ -30,7 +30,7 @@ function shift_contents() {
         width = document.body.clientWidth;
     }
 
-    if (width < 750) {
+    if (width < 1000) {
         if (layout_mode == "thin") { return; }
         layout_mode = "thin";
         sc_old_border_style = column_one.style.borderRight;
