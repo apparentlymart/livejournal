@@ -501,23 +501,11 @@ sub file_request
           });
     }
 
-    # buffer mail for sending:
-    # aim to try 10 times, but that's redundant if there are fewer clusters
-    my $maxtries = @LJ::CLUSTERS;
-    $maxtries = 10 if $maxtries > 10;
-
-    # select a random cluster master to insert to
-    my $cid;
-    my $tries = 0;
-    while (! $cid && $tries < $maxtries) {
-        my $idx = int(rand() * @LJ::CLUSTERS);
-        $cid = $LJ::CLUSTERS[$idx];
-        $tries++;
-    }
-
-    # now really try sending later.  if we don't have a $cid, it isn't the end of the
-    # world.  support notifications are useful, but not required.
-    LJ::cmd_buffer_add($cid, 0, 'support_notify', { spid => $spid, type => 'new' }) if $cid;
+    # attempt to buffer job to send email (but don't care if it fails)
+    LJ::do_to_cluster(sub {
+        # first parameter is cluster id
+        return LJ::cmd_buffer_add(shift(@_), 0, 'support_notify', { spid => $spid, type => 'new' });
+    });
     
     # and we're done
     return $spid;
@@ -575,23 +563,11 @@ sub append_request
     $dbh->do($sql);
     my $splid = $dbh->{'mysql_insertid'};
 
-    # buffer mail for sending:
-    # aim to try 10 times, but that's redundant if there are fewer clusters
-    my $maxtries = @LJ::CLUSTERS;
-    $maxtries = 10 if $maxtries > 10;
-
-    # select a random cluster master to insert to
-    my $cid;
-    my $tries = 0;
-    while (! $cid && $tries < $maxtries) {
-        my $idx = int(rand() * @LJ::CLUSTERS);
-        $cid = $LJ::CLUSTERS[$idx];
-        $tries++;
-    }
-
-    # now really try sending later.  if we don't have a $cid, it isn't the end of the
-    # world.  support notifications are useful, but not required.
-    LJ::cmd_buffer_add($cid, 0, 'support_notify', { spid => $spid, type => 'update', splid => $splid }) if $cid;
+    # attempt to buffer job to send email (but don't care if it fails)
+    LJ::do_to_cluster(sub {
+        # first parameter is cluster id
+        return LJ::cmd_buffer_add(shift(@_), 0, 'support_notify', { spid => $spid, type => 'new' });
+    });
 
     return $splid;    
 }

@@ -64,23 +64,14 @@ sub send_mail
     # if send operation fails, buffer and send later
     my $buffer = sub {
         my $starttime = [gettimeofday()];
-        my $tries = 0;
 
-        # aim to try 10 times, but that's redundant if there are fewer clusters
-        my $maxtries = @LJ::CLUSTERS;
-        $maxtries = 10 if $maxtries > 10;
-
-        # select a random cluster master to insert to
-        my $cid;
-        while (! $cid && $tries < $maxtries) {
-            my $idx = int(rand() * @LJ::CLUSTERS);
-            $cid = $LJ::CLUSTERS[$idx];
-            $tries++;
-        }
-        return undef unless $cid;
-
-        # try sending later
-        my $rval = LJ::cmd_buffer_add($cid, 0, 'send_mail', Storable::freeze($msg));
+        # try this on each cluster
+        my $frozen = Storable::freeze($msg);
+        my $rval = LJ::do_to_cluster(sub {
+            # first parameter is cluster id
+            return LJ::cmd_buffer_add(shift(@_), 0, 'send_mail', $frozen);
+        });
+        return undef unless $rval;
 
         my $notes = sprintf( "Queued mail send to %s %s: %s",
                              $msg->get('to'),

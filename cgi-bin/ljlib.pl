@@ -5380,6 +5380,38 @@ sub load_moods
 }
 
 # <LJFUNC>
+# name: LJ::do_to_cluster
+# des: Given a subref, this function will pick a random cluster and run the subref,
+#   passing it the cluster id.  If the subref returns a 1, this function will exit
+#   with a 1.  Else, the function will call the subref again, with the next cluster.
+# args: subref
+# des-subref: Reference to a sub to call; @_ = (clusterid)
+# returns: 1 if the subref returned a 1 at some point, undef if it didn't ever return
+#   success and we tried every cluster.
+# </LJFUNC>
+sub do_to_cluster {
+    my $subref = shift;
+
+    # start at some random point and iterate through the clusters one by one until
+    # $subref returns a true value
+    my $size = @LJ::CLUSTERS;
+    my $start = int(rand() * $size);
+    my $rval = undef;
+    my $tries = $size > 15 ? 15 : $size;
+    foreach (1..$tries) {
+        # select at random
+        my $idx = $start++ % $size;
+
+        # get subref value
+        $rval = $subref->($LJ::CLUSTERS[$idx]);
+        last if $rval;
+    }
+
+    # return last rval
+    return $rval;
+}
+
+# <LJFUNC>
 # name: LJ::cmd_buffer_add
 # des: Schedules some command to be run sometime in the future which would
 #      be too slow to do syncronously with the web request.  An example
@@ -5416,6 +5448,7 @@ sub cmd_buffer_add
         $arg_str = $args;
     }
 
+    my $rv;
     if ($ab eq 'a' || $ab eq 'b') {
         # get a lock
         my $locked = $db->selectrow_array("SELECT GET_LOCK('cmd-buffer-$cid',10)");
@@ -5429,6 +5462,7 @@ sub cmd_buffer_add
         $db->do('INSERT INTO cmdbuffer (cbid, journalid, instime, cmd, args) ' .
                 'VALUES (?, ?, NOW(), ?, ?)', undef,
                 $max, $journalid, $cmd, $arg_str);
+        $rv = $db->err ? 0 : 1;
 
         # release lock
         $db->selectrow_array("SELECT RELEASE_LOCK('cmd-buffer-$cid')");
@@ -5437,7 +5471,10 @@ sub cmd_buffer_add
         $db->do("INSERT INTO cmdbuffer (journalid, cmd, instime, args) ".
                 "VALUES (?, ?, NOW(), ?)", undef,
                 $journalid, $cmd, $arg_str);
+        $rv = $db->err ? 0 : 1;
     }
+
+    return $rv;
 }
 
 # <LJFUNC>
