@@ -1586,6 +1586,20 @@ post_create("reluser",
 register_tabledrop("ban");
 register_tabledrop("logaccess");
 
+register_tablecreate("clustermove", <<'EOC');
+CREATE TABLE clustermove (
+   cmid      INT UNSIGNED NOT NULL AUTO_INCREMENT,
+   PRIMARY KEY (cmid),
+   userid    INT UNSIGNED NOT NULL,
+   KEY (userid),
+   sclust    TINYINT UNSIGNED NOT NULL,
+   dclust    TINYINT UNSIGNED NOT NULL,
+   timestart INT UNSIGNED,
+   timedone  INT UNSIGNED,
+   sdeleted  ENUM('1','0')
+)
+EOC
+
 ### changes
 
 register_alter(sub {

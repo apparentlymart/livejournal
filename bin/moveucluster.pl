@@ -89,6 +89,11 @@ if (($u->{'caps'}+0) & (1 << $readonly_bit)) {
 
 print "Moving '$u->{'user'}' from cluster $sclust to $dclust:\n";
 
+# mark that we're starting the move
+$dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart) ".
+         "VALUES (?,?,?,UNIX_TIMESTAMP())", undef, $userid, $sclust, $dclust);
+my $cmid = $dbh->{'mysql_insertid'};
+
 # set readonly cap bit on user
 $dbh->do("UPDATE user SET caps=caps|(1<<$readonly_bit) WHERE userid=$userid");
 $dbh->do("SELECT RELEASE_LOCK('moveucluster-$user')");
@@ -332,12 +337,17 @@ if ($sclust == 0)
 
         # unset read-only bit (marks the move is complete, also, and not aborted mid-delete)
         $dbh->do("UPDATE user SET caps=caps&~(1<<$readonly_bit) WHERE userid=$userid");
+        $dbh->do("UPDATE clustermove SET sdeleted='1', timedone=UNIX_TIMESTAMP() ".
+                 "WHERE cmid=?", undef, $cmid);
+                 
     }
     else
     {
         # unset readonly and move to new cluster in one update
         $dbh->do("UPDATE user SET dversion=$dversion, clusterid=$dclust, caps=caps&~(1<<$readonly_bit) ".
                  "WHERE userid=$userid");
+        $dbh->do("UPDATE clustermove SET sdeleted='0', timedone=UNIX_TIMESTAMP() ".
+                 "WHERE cmid=?", undef, $cmid);
     }
 
 } 
@@ -565,6 +575,8 @@ elsif ($sclust > 0)
             }
         }
     }
+    $dbh->do("UPDATE clustermove SET sdeleted=?, timedone=UNIX_TIMESTAMP() ".
+             "WHERE cmid=?", undef, $opt_del ? 1 : 0, $cmid);
 }
 
 sub deletefrom0_logitem
