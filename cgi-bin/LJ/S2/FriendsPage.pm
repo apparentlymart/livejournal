@@ -15,7 +15,6 @@ sub FriendsPage
     $p->{'friends'} = {};
     $p->{'friends_title'} = LJ::ehtml($u->{'friendspagetitle'});
 
-    my $dbr = LJ::get_db_reader();
     my $sth;
     my $user = $u->{'user'};
 

@@ -957,7 +957,6 @@ require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 sub create_view_lastn
 {
     my ($ret, $u, $vars, $remote, $opts) = @_;
-    my $dbcr = LJ::get_cluster_reader($u);
 
     my $user = $u->{'user'};
 
@@ -1057,7 +1056,7 @@ sub create_view_lastn
     ### load the log properties
     my %logprops = ();
     my $logtext;
-    LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
+    LJ::load_log_props2($u->{'userid'}, \@itemids, \%logprops);
     $logtext = LJ::get_logtext2($u, @itemids);
 
     my $lastday = -1;
@@ -2148,8 +2147,7 @@ sub create_view_day
     my $events = "";
 
   ENTRY:
-    foreach my $item (@items)
-    {
+    foreach my $item (@items) {
         my ($itemid, $posterid, $security, $alldatepart, $anum) = 
             map { $item->{$_} } qw(itemid posterid security alldatepart anum);
 
@@ -2165,13 +2163,10 @@ sub create_view_day
 
         my %day_date_format = LJ::alldateparts_to_hash($alldatepart);
 
-        unless ($initpagedates)
-        {
-          foreach (qw(dayshort daylong monshort monlong yy yyyy m mm d dd dth))
-          {
-              $day_page{$_} = $day_date_format{$_};
-          }
-          $initpagedates = 1;
+        unless ($initpagedates++) {
+            foreach (qw(dayshort daylong monshort monlong yy yyyy m mm d dd dth)) {
+                $day_page{$_} = $day_date_format{$_};
+            }
         }
 
         my %day_event = ();
@@ -2242,7 +2237,7 @@ sub create_view_day
             
         $events .= LJ::fill_var_props($vars, $var, \%day_event);
     }
-
+    
     if (! $initpagedates)
     {
         # if no entries were on that day, we haven't populated the time shit!
