@@ -29,5 +29,7 @@ require 'cleanhtml.pl';
 require 'emailcheck.pl';
 require 'portal.pl';
 require 'imageconf.pl';
+require 'talklib.pl';
+require 'topiclib.pl';
 
 1;

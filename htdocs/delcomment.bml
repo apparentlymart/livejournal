@@ -9,10 +9,14 @@ BODY<=
  use Fcntl ':flock'; # import LOCK_* constants
  
  require 'ljlib.pl';
- &connect_db;
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my $ret = "";
 
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
 
  unless ($remote) {
      return "(=H1 Error H1=)(=P You must be logged in to delete a comment. P=)";

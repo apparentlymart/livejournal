@@ -3,9 +3,11 @@
  $title = "Birthdays";
  $body = "";
 
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
  unless ($remote) {
      $body .= "(=H1 Login first... H1=)(=P To use this feature, you must first <a href=\"/login.bml?ret=1\">login</a>. P=)";
      return "";
@@ -15,7 +17,7 @@
  my $lastmon = 0;
 
  my $sth;
- $sth = $dbh->prepare("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0 ORDER BY 3, 4");
+ $sth = $dbr->prepare("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0 ORDER BY 3, 4");
  $sth->execute;
  while (my $bday = $sth->fetchrow_hashref) {
      if ($bday->{'month'} != $lastmon) {

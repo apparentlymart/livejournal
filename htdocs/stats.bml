@@ -9,14 +9,17 @@ P=)
 (=HR=)
 
 (=_CODE
-#line 12
+
  my $ret = "";
- &connect_db();
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
  $now = time();
  %stat = ();
 
- $sth = $dbh->prepare("SELECT statcat, statkey, statval FROM stats WHERE statcat IN ('userinfo', 'client', 'age', 'gender', 'account')");
+ $sth = $dbr->prepare("SELECT statcat, statkey, statval FROM stats WHERE statcat IN ('userinfo', 'client', 'age', 'gender', 'account')");
  $sth->execute;
  while ($_ = $sth->fetchrow_hashref) {
      $stat{$_->{'statcat'}}->{$_->{'statkey'}} = $_->{'statval'};
@@ -26,13 +29,13 @@ P=)
      return "(=H1 Sorry... H1=)(=P No statistics are available.  If you're the administrator for this site, run <b>ljmaint.pl genstats</b>, or ideally, put it in cron to run nightly. P=)";
  }
 
- $sth = $dbh->prepare("SELECT c.item, s.statval FROM stats s, codes c WHERE c.type='country' AND s.statcat='country' AND s.statkey=c.code ORDER BY s.statval DESC LIMIT 15");
+ $sth = $dbr->prepare("SELECT c.item, s.statval FROM stats s, codes c WHERE c.type='country' AND s.statcat='country' AND s.statkey=c.code ORDER BY s.statval DESC LIMIT 15");
  $sth->execute;
  while ($_ = $sth->fetchrow_hashref) {
      $stat{'country'}->{$_->{'item'}} = $_->{'statval'};
  }
 
- $sth = $dbh->prepare("SELECT c.item, s.statval FROM stats s, codes c WHERE c.type='state' AND s.statcat='stateus' AND s.statkey=c.code ORDER BY s.statval DESC LIMIT 15");
+ $sth = $dbr->prepare("SELECT c.item, s.statval FROM stats s, codes c WHERE c.type='state' AND s.statcat='stateus' AND s.statkey=c.code ORDER BY s.statval DESC LIMIT 15");
  $sth->execute;
  while ($_ = $sth->fetchrow_hashref) {
      $stat{'state'}->{$_->{'item'}} = $_->{'statval'};
@@ -86,7 +89,7 @@ P=)
 
  $ret .= "(=H1 Recent Updates H1=)\n";
  $ret .= "(=P The following are the 10 most recently updated journals: <UL>";
- $sth = $dbh->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 30 DAY) ORDER BY uu.timeupdate DESC LIMIT 10");
+ $sth = $dbr->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 30 DAY) ORDER BY uu.timeupdate DESC LIMIT 10");
  $sth->execute;
  while (my ($iuser, $iname, $itime) = $sth->fetchrow_array)
  {
@@ -96,7 +99,7 @@ P=)
 
  $ret .= "(=H1 New Journals H1=)\n";
  $ret .= "(=P The following are the 10 most recently created journals.  It's very likely these users haven't modified their journals much, and probably haven't wrote much in them yet either... <UL>";
- $sth = $dbh->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate IS NOT NULL ORDER BY uu.timecreate DESC LIMIT 10");
+ $sth = $dbr->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate IS NOT NULL ORDER BY uu.timecreate DESC LIMIT 10");
  $sth->execute;
  while (my ($iuser, $iname, $itime) = $sth->fetchrow_array)
  {

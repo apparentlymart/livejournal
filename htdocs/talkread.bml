@@ -9,16 +9,13 @@ BODY<=
  my $PAGE_SIZE = 25;
  my $THREADING_POINT = 50;
 
- return &server_down_html() if ($LJ::SERVER_DOWN);
+ return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
  my $dbs = LJ::get_dbs();
- $dbh = $dbs->{'dbh'};
+ my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
- require 'talklib.pl';
  &load_subjecticon;
-
- require 'topiclib.pl';
 
  my $SELF = "/talkread.bml";
  my $ret = "";
@@ -50,13 +47,13 @@ BODY<=
  while ($_ = $sth->fetchrow_hashref) {
      if ($_->{'userid'} == $item->{'ownerid'})  { 
 	 $u  = $_; 
-	 $quser = $dbh->quote($u->{'user'});
+	 $quser = $dbr->quote($u->{'user'});
      }
      if ($_->{'userid'} == $item->{'posterid'}) { $up = $_; }
  }
- &load_user_props($up, "opt_showtopicstuff");
+ LJ::load_user_props($dbs, $up, "opt_showtopicstuff");
 
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
 
  ## ref stuff
 
@@ -72,7 +69,7 @@ BODY<=
      }
 
      if ($item->{'security'} eq "usemask" && $u->{'user'} ne $remote->{'user'}) {
-	 $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
+	 $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
 	 $sth->execute;
 	 my ($gmask) = $sth->fetchrow_array;
 	 my $allowed = (int($gmask) & int($item->{'allowmask'}));
@@ -86,21 +83,21 @@ BODY<=
 
  $event = $item->{'event'};
 
- &LJ::expand_embedded($dbh, $itemid, $remote, \$event);
- $event = &BML::ebml(&LJ::CleanHTML::clean_event(\$event, $logprops{$itemid}->{'opt_preformatted'}));
+ LJ::expand_embedded($dbs, $itemid, $remote, \$event);
+ $event = &BML::ebml(LJ::CleanHTML::clean_event(\$event, $logprops{$itemid}->{'opt_preformatted'}));
  
  $ret .= "<P>";
  $ret .= "<TABLE><TR VALIGN=MIDDLE>";
 
  my $picid = $up->{'defaultpicid'};
  if ($logprops{$itemid}->{'picture_keyword'}) {
-     my $qkw = $dbh->quote($logprops{$itemid}->{'picture_keyword'});
-     my $sth = $dbh->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid AND k.keyword=$qkw");
+     my $qkw = $dbr->quote($logprops{$itemid}->{'picture_keyword'});
+     my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid AND k.keyword=$qkw");
      $sth->execute;
      ($picid) = $sth->fetchrow_array;
  }
  if ($picid) {
-     &load_userpics(\%userpics, [ $picid ]);
+     LJ::load_userpics($dbs, \%userpics, [ $picid ]);
      my $alt = $up->{'name'};
      if ($logprops{$itemid}->{'picture_keyword'}) {
 	 $alt .= ": $logprops{$itemid}->{'picture_keyword'}";
@@ -133,7 +130,7 @@ BODY<=
 
      if (defined $remote && ($remote->{'user'} eq $u->{'user'} ||
 			     $remote->{'user'} eq $up->{'user'} ||
-			     LJ::check_priv($dbh, $remote, "sharedjournal", $u->{'user'})))
+			     LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
      {
 	 push @linkele, "<A HREF=\"/editjournal_do.bml?itemid=$itemid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_edit.gif\" WIDTH=22 HEIGHT=20 ALT=\"Edit Entry\" title=\"Edit Entry\" BORDER=0></A>";	     
      }
@@ -201,7 +198,7 @@ BODY<=
      my $cache = {};
      my $in_topic = 0;
 
-     $sth = $dbh->prepare("SELECT tptopid, status FROM topic_map WHERE itemid=$qitemid");
+     $sth = $dbr->prepare("SELECT tptopid, status FROM topic_map WHERE itemid=$qitemid");
      $sth->execute;
      while (my $mape = $sth->fetchrow_hashref)
      {
@@ -211,6 +208,7 @@ BODY<=
 	     $ret .= "<B>Read similiar journal entries:</B><BR>";
 	 }
 	 
+	 # TODO: ljtopc isn't yet $dbs/$dbarg aware
 	 my @hier = &ljtopic::get_hierarchy($dbh, { 'topid' => $mape->{'tptopid'} });
 	 $ret .= "<B>";
 	 $ret .= join(" : ", map { "<A HREF=\"$_->{'url'}\">$_->{'name'}</A>"; } @hier);
@@ -297,7 +295,7 @@ BODY<=
  }
 
  ### load meta-data
- $sth = $dbh->prepare("SELECT tp.talkid, tpl.name, tp.value FROM talkproplist tpl, talkprop tp WHERE tp.talkid IN ($talkid_in) AND tp.tpropid=tpl.tpropid");
+ $sth = $dbr->prepare("SELECT tp.talkid, tpl.name, tp.value FROM talkproplist tpl, talkprop tp WHERE tp.talkid IN ($talkid_in) AND tp.tpropid=tpl.tpropid");
  $sth->execute;
  while (my ($id, $name, $value) = $sth->fetchrow_array) {
      $posts{$id}->{$name} = $value;
@@ -442,8 +440,8 @@ sub recurse_post
 		    if ($pickw) {
 			$picid = $user{$userpost}->{'_pictures'}->{$pickw};
 			unless ($picid) {
-			    my $qkw = $dbh->quote($pickw);
-			    my $sth = $dbh->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$post->{'posterid'} AND m.kwid=k.kwid AND k.keyword=$qkw");
+			    my $qkw = $dbr->quote($pickw);
+			    my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$post->{'posterid'} AND m.kwid=k.kwid AND k.keyword=$qkw");
 			    $sth->execute;
 			    my ($alt_picid) = $sth->fetchrow_array;
 			    if ($alt_picid) {

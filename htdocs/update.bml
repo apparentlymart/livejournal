@@ -9,10 +9,13 @@
  $bodyopts = "";
 
  my $remote = undef;
- my $dbh = LJ::get_dbh("master");
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
  if ($LJ::SERVER_DOWN) {
-     $body = &server_down_html();
+     $body = LJ::server_down_html();
      return "";
  }
 
@@ -32,7 +35,7 @@
      my $flags = {};
 
      if ($FORM{'usertype'} eq "remote") {
-	 unless ($remote) { $remote = &get_remote(); }
+	 unless ($remote) { $remote = LJ::get_remote($dbs); }
 	 if ($remote) {
 	     $FORM{'user'} = $remote->{'user'};
 	     $flags->{'nopassword'} = 1;
@@ -49,7 +52,7 @@
      if ($FORM{'did_spellcheck'} || $FORM{'do_spellcheck'}) {
 	 $FORM{'clientversion'} .= "s";
      }
-     &LJ::do_request($dbh, \%FORM, \%res, $flags);
+     LJ::do_request($dbs, \%FORM, \%res, $flags);
      
      $body .= "(=H1 Logging in to server... H1=)\n";
      if ($res{'success'} eq "OK")
@@ -70,8 +73,8 @@
      if ($FORM{'prop_current_mood'} ne "") 
      {
 	 delete $FORM{'prop_current_moodid'};
-	 my $qmood = $dbh->quote(lc($FORM{'prop_current_mood'}));
-	 my $sth = $dbh->prepare("SELECT moodid FROM moods WHERE mood=$qmood");
+	 my $qmood = $dbr->quote(lc($FORM{'prop_current_mood'}));
+	 my $sth = $dbr->prepare("SELECT moodid FROM moods WHERE mood=$qmood");
 	 $sth->execute;
 	 my ($moodid) = $sth->fetchrow_array;
 	 if ($moodid) {
@@ -90,15 +93,15 @@
      # next, postevent
      $FORM{'mode'} = "postevent";
      delete $FORM{'clientversion'};
-     &LJ::do_request($dbh, \%FORM, \%res, $flags);
+     LJ::do_request($dbs, \%FORM, \%res, $flags);
      
      $body .= "(=H1 Updating journal... H1=)\n";
      if ($res{'success'} eq "OK")
      {
 	 my $uri = "/users/$FORM{'user'}/";
 	 if ($FORM{'usejournal'}) {
-	     my $quj = $dbh->quote($FORM{'usejournal'});
-	     my $sth = $dbh->prepare("SELECT journaltype FROM user WHERE user=$quj");
+	     my $quj = $dbr->quote($FORM{'usejournal'});
+	     my $sth = $dbr->prepare("SELECT journaltype FROM user WHERE user=$quj");
 	     $sth->execute;
 	     my ($type) = $sth->fetchrow_array;
 	     if ($type eq "C") {
@@ -191,18 +194,18 @@
 
      if ($mode eq "full") 
      {
-	 $remote = &get_remote();
+	 $remote = LJ::get_remote($dbs);
 	 my %res;
 
 	 if (! $FORM{'altlogin'} && $remote)
 	 {
-	     &LJ::do_request($dbh, { "mode" => "login",
-				     "user" => $remote->{'user'},
-				     "getpickws" => 1,
-				 }, \%res, { 
-				     "noauth" => 1, 
-				     "userid" => $remote->{'userid'} 
-				 });
+	     LJ::do_request($dbs, { "mode" => "login",
+				    "user" => $remote->{'user'},
+				    "getpickws" => 1,
+				}, \%res, { 
+				    "noauth" => 1, 
+				    "userid" => $remote->{'userid'} 
+				});
 	 }
 
 	 $body .= "<TR><TD NOWRAP><INPUT TYPE=hidden NAME=webversion VALUE=full>(=H2 Optional Settings H2=)";

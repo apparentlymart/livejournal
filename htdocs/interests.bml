@@ -4,10 +4,13 @@ BODY<=
 
 (=_CODE
 
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my $sth;
  my $qintid = $FORM{'intid'}+0;
- my $qinterest = $dbh->quote($FORM{'int'});
+ my $qinterest = $dbr->quote($FORM{'int'});
  my $interest;
 
  if ($FORM{'view'} eq "popular") 
@@ -15,7 +18,7 @@ BODY<=
      my $ret = "";
      $ret .= "(=H1 Popular Interests H1=)(=P The following are the most popular interests. P=)";
  
-     $sth = $dbh->prepare("SELECT interest, intcount AS 'count' FROM interests WHERE intcount>2 ORDER BY intcount DESC, interest ASC LIMIT 400");
+     $sth = $dbr->prepare("SELECT interest, intcount AS 'count' FROM interests WHERE intcount>2 ORDER BY intcount DESC, interest ASC LIMIT 400");
      $sth->execute;
      
      $ret .= "<P><TABLE><TR><TD><B>Interest</B></TD><TD><B>Count</B></TD></TR>\n";
@@ -59,7 +62,7 @@ BODY<=
 	 return $ret;	 
      }
 
-     $sth = $dbh->prepare("SELECT COUNT(*) FROM userinterests WHERE userid=$remote->{'userid'}");
+     $sth = $dbr->prepare("SELECT COUNT(*) FROM userinterests WHERE userid=$remote->{'userid'}");
      $sth->execute;
      my ($count) = $sth->fetchrow_array;
      if ($count >= 150) {
@@ -96,13 +99,10 @@ BODY<=
      }
 
      my $ret = "";
-     my $quser = $dbh->quote(lc($FORM{'user'}));
-     $sth = $dbh->prepare("SELECT userid FROM user WHERE user=$quser");
-     $sth->execute;
-     my ($userid) = $sth->fetchrow_array;
+     my $userid = LJ::get_userid($dbs, $FORM{'user'});
      return "(=H1 Error H1=)(=P Unknown user P=)" unless ($userid);
 
-     $sth = $dbh->prepare("SELECT intid FROM userinterests WHERE userid=$userid");
+     $sth = $dbr->prepare("SELECT intid FROM userinterests WHERE userid=$userid");
      $sth->execute;
      my @intids = ();
      push @intids, $_->{'intid'} while ($_ = $sth->fetchrow_hashref);
@@ -142,20 +142,20 @@ BODY<=
  if ($FORM{'intid'} || $FORM{'int'}) 
  {
      my $where = $FORM{'intid'} ? "intid=$qintid" : "interest=$qinterest";
-     $sth = $dbh->prepare("SELECT interest, intid FROM interests WHERE $where");
+     $sth = $dbr->prepare("SELECT interest, intid FROM interests WHERE $where");
      $sth->execute;
      ($interest, $intid) = $sth->fetchrow_array;
      unless ($interest) { return "(=H1 Error H1=)(=P Interest wasn't found. P=)"; }
      $qintid = $intid+0;
      
      my $ret = "";
-     my $remote = &get_remote_noauth();
+     my $remote = LJ::get_remote_noauth();
 
      ### communities
 
      my $list;
      my $count = 0;
-     $sth = $dbh->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='C' ORDER BY u.user");
+     $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='C' ORDER BY u.user");
      $sth->execute;
      while ($_ = $sth->fetchrow_hashref) {
 	 $count++;
@@ -183,7 +183,7 @@ BODY<=
      my $count = 0;
      $list .= "<UL>\n";
      # FIXME: LIMIT 1000 is a temporary hack.  better solution:  paging.
-     $sth = $dbh->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='P' ORDER BY u.user LIMIT 1000");
+     $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='P' ORDER BY u.user LIMIT 1000");
      $sth->execute;
      while (my ($iuser, $iname) = $sth->fetchrow_array) {
 	 $count++;

@@ -3,6 +3,10 @@
  $title = "";
  $body = "";
 
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  if ($FORM{'type'} eq "user") {
 
      ## magic mode
@@ -66,9 +70,8 @@
 	 $body = "(=H1 Error H1=)(=P You did not enter an email address. P=)";
 	 return "";
      } else {
-	 &connect_db();
-	 my $qemail = $dbh->quote($email);
-	 my $sth = $dbh->prepare("SELECT u.user, up.value FROM user u, userproplist upl, userprop up WHERE u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND u.email=$qemail AND u.userid=up.userid AND up.upropid=upl.upropid AND upl.name='opt_whatemailshow' ORDER BY u.userid");
+	 my $qemail = $dbr->quote($email);
+	 my $sth = $dbr->prepare("SELECT u.user, up.value FROM user u, userproplist upl, userprop up WHERE u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND u.email=$qemail AND u.userid=up.userid AND up.upropid=upl.upropid AND upl.name='opt_whatemailshow' ORDER BY u.userid");
 	 $sth->execute;
 	 my ($user, $emailshow) = $sth->fetchrow_array;
 	 unless ($emailshow eq "A" || $emailshow eq "B") {
@@ -89,10 +92,9 @@
 
  if ($FORM{'type'} eq "aolim" || $FORM{'type'} eq "icq") {
      my $val = $FORM{'q'};
-     &connect_db();
-     my $qval = $dbh->quote($val);
-     my $qtype = $dbh->quote($FORM{'type'});
-     my $sth = $dbh->prepare("SELECT u.user FROM user u, userproplist upl, userprop up WHERE u.journaltype='P' AND u.statusvis='V' AND u.userid=up.userid AND up.upropid=upl.upropid AND upl.name=$qtype AND up.value=$qval ORDER BY u.userid");
+     my $qval = $dbr->quote($val);
+     my $qtype = $dbr->quote($FORM{'type'});
+     my $sth = $dbr->prepare("SELECT u.user FROM user u, userproplist upl, userprop up WHERE u.journaltype='P' AND u.statusvis='V' AND u.userid=up.userid AND up.upropid=upl.upropid AND upl.name=$qtype AND up.value=$qval ORDER BY u.userid");
      $sth->execute;
      my ($user, $emailshow) = $sth->fetchrow_array;
      if ($user) {
@@ -117,12 +119,11 @@
 	 return "";
      }
      
-     &connect_db();
      my ($qarg, $sth);
 
-     $qarg = $dbh->quote($parts[-1]);
+     $qarg = $dbr->quote($parts[-1]);
      
-     $sth = $dbh->prepare("SELECT code FROM codes WHERE type='country' AND (code=$qarg OR item=$arg) LIMIT 1");
+     $sth = $dbr->prepare("SELECT code FROM codes WHERE type='country' AND (code=$qarg OR item=$arg) LIMIT 1");
      $sth->execute;
      my ($country) = $sth->fetchrow_array;
      my ($state, $city);

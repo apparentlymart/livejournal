@@ -21,14 +21,14 @@ BODY<=
  $FORM{'password'} = $query->param('password');
  $FORM{'hpassword'} = $query->param('hpassword');
  $FORM{'make_default'} = $query->param('make_default');
- my $user = lc(&trim($FORM{'user'}));
+ my $user = LJ::canonical_username($FORM{'user'});
  my @errors = ();
 
- &connect_db;
- my $quser = $dbh->quote($user);
- $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
- $sth->execute;
- my $u = $sth->fetchrow_hashref;
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
+ my $u = LJ::load_user($dbs, $user);
  unless ($u) { push @errors, "Invalid username"; }
  my $userid = $u->{'userid'}+0;
 

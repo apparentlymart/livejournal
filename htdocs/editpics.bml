@@ -4,8 +4,11 @@
  $body = "";
  @errors = ();
  
- my $dbh = LJ::get_dbh("master");
- my $remote = LJ::get_remote($dbh);
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+ 
+ my $remote = LJ::get_remote($dbs);
 
  unless (defined $remote) {
      $title = "Error";
@@ -13,8 +16,7 @@
      return "";
  }
 
- my $u = LJ::load_userid($dbh, $remote->{'userid'});
-
+ my $u = LJ::load_userid($dbs, $remote->{'userid'});
  
  ### save mode
 
@@ -22,7 +24,7 @@
  {
      $dbh->do("DELETE FROM userpicmap WHERE userid=$u->{'userid'}");
 
-     $sth = $dbh->prepare("SELECT picid, width, height FROM userpic WHERE userid=$u->{'userid'}");
+     $sth = $dbr->prepare("SELECT picid, width, height FROM userpic WHERE userid=$u->{'userid'}");
      $sth->execute;
      
      my @delete;
@@ -39,7 +41,7 @@
 	     my @keywords = split(/\s*,\s*/, $FORM{"kw_$pic->{'picid'}"});
 	     @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
 	     foreach my $kw (@keywords) {
-		 my $kwid = LJ::get_keyword_id($dbh, $kw);
+		 my $kwid = LJ::get_keyword_id($dbs, $kw);
 		 next unless $kwid;
 		 if ($picid_of_kwid{$kwid}) {
 		     push @errors, "You used the keyword \"$kw\" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.";
@@ -83,13 +85,13 @@
  $title = "Edit User Pictures";
 
  my %keywords = ();
- $sth = $dbh->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
+ $sth = $dbr->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
  $sth->execute;
  while (my ($pic, $keyword) = $sth->fetchrow_array) {
      push @{$keywords{$pic}}, $keyword;
  }
  
- $sth = $dbh->prepare("SELECT picid, width, height FROM userpic WHERE userid=$u->{'userid'}");
+ $sth = $dbr->prepare("SELECT picid, width, height FROM userpic WHERE userid=$u->{'userid'}");
  $sth->execute;
  my $piccount = 0;
 

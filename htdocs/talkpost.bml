@@ -4,13 +4,12 @@ BODY<=
 
 (=_CODE
 
- return &server_down_html() if ($LJ::SERVER_DOWN);
- &connect_db;
+ return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
- require 'talklib.pl';
  &load_subjecticon;
-
- require 'topiclib.pl';
 
  my $ret = "";
 
@@ -25,7 +24,7 @@ BODY<=
      $parpost = $sth->fetchrow_hashref;
 
      ### load meta-data
-     $sth = $dbh->prepare("SELECT tpl.name, tp.value FROM talkproplist tpl, talkprop tp WHERE tp.talkid=$qparentid AND tp.tpropid=tpl.tpropid");
+     $sth = $dbr->prepare("SELECT tpl.name, tp.value FROM talkproplist tpl, talkprop tp WHERE tp.talkid=$qparentid AND tp.tpropid=tpl.tpropid");
      $sth->execute;
      while (my ($name, $value) = $sth->fetchrow_array) {
 	 $parpost->{$name} = $value;
@@ -42,13 +41,12 @@ BODY<=
  my %talkprops;
  &load_log_props([ $FORM{'itemid'} ], \%logprops);
  if ($FORM{'replyto'}) { 
-     &LJ::load_talk_props($dbh, [ $FORM{'replyto'} ], \%talkprops); 
+     LJ::load_talk_props($dbs, [ $FORM{'replyto'} ], \%talkprops); 
  }
  
- my $qitemid = $dbh->quote($FORM{'itemid'});
  my $itemid = $FORM{'itemid'}+0;
 
- $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, lt.event, l.eventtime, lt.subject, l.security, l.allowmask FROM log l, logtext lt WHERE lt.itemid=l.itemid AND l.itemid=$qitemid");
+ $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, lt.event, l.eventtime, lt.subject, l.security, l.allowmask FROM log l, logtext lt WHERE lt.itemid=l.itemid AND l.itemid=$itemid");
  $sth->execute;
  my $item = $sth->fetchrow_hashref;
  unless ($item) {
@@ -56,7 +54,7 @@ BODY<=
  }
  unless ($parpost) { $parpost = $item; }
 
- $sth = $dbh->prepare("SELECT * FROM user WHERE userid IN ($item->{'ownerid'}, $item->{'posterid'}, $parpost->{'posterid'})");
+ $sth = $dbr->prepare("SELECT * FROM user WHERE userid IN ($item->{'ownerid'}, $item->{'posterid'}, $parpost->{'posterid'})");
  $sth->execute;
  my ($u, $up, $ur);  # user journal, user posted, user replying to
  while ($_ = $sth->fetchrow_hashref) {
@@ -64,9 +62,9 @@ BODY<=
      if ($_->{'userid'} == $item->{'posterid'}) { $up = $_; }
      if ($_->{'userid'} == $parpost->{'posterid'}) { $ur = $_; }
  }
- &load_user_props($u,  "opt_showtopicstuff", "opt_notalkicons", "opt_logcommentips");
+ LJ::load_user_props($dbs, $u,  "opt_showtopicstuff", "opt_notalkicons", "opt_logcommentips");
 
- my $remote = LJ::get_remote($dbh);
+ my $remote = LJ::get_remote($dbs);
 
  if ($remote || $ENV{'HTTP_REFERER'}) {
      my @refs;
@@ -89,7 +87,7 @@ BODY<=
      }
 
      if ($item->{'security'} eq "usemask" && $u->{'user'} ne $remote->{'user'}) {
-	 $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
+	 $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
 	 $sth->execute;
 	 my ($gmask) = $sth->fetchrow_array;
 	 my $allowed = (int($gmask) & int($item->{'allowmask'}));
@@ -103,7 +101,7 @@ BODY<=
  $event = $FORM{'replyto'} eq "" ? $item->{'event'} : $parpost->{'body'};
  my $preformatted = $FORM{'replyto'} eq "" ? $logprops{$itemid}->{'opt_preformatted'} : $parpost->{'opt_preformatted'};
 
- &LJ::expand_embedded($dbh, $itemid, $remote, \$event);
+ LJ::expand_embedded($dbs, $itemid, $remote, \$event);
  $event = &BML::ebml(&LJ::CleanHTML::clean_event(\$event, $preformatted));
 
  $ret .= "<P>";
@@ -112,13 +110,13 @@ BODY<=
  my $pickw = $FORM{'replyto'} ? $talkprops{$FORM{'replyto'}}->{'picture_keyword'} : $logprops{$itemid}->{'picture_keyword'};
 
  if ($pickw) {
-     my $qkw = $dbh->quote($pickw);
-     my $sth = $dbh->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$ur->{'userid'} AND m.kwid=k.kwid AND k.keyword=$qkw");
+     my $qkw = $dbr->quote($pickw);
+     my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$ur->{'userid'} AND m.kwid=k.kwid AND k.keyword=$qkw");
      $sth->execute;
      ($picid) = $sth->fetchrow_array;
  }
  if ($picid) {
-     &load_userpics(\%userpics, [ $picid ]);
+     LJ::load_userpics($dbs, \%userpics, [ $picid ]);
      my $alt = $ur->{'name'};
      if ($pickw) {
 	 $alt .= ": $pickw";
@@ -157,7 +155,7 @@ BODY<=
      
      if (defined $remote && ($remote->{'user'} eq $u->{'user'} ||
 			     $remote->{'user'} eq $up->{'user'} || 
-			     LJ::check_priv($dbh, $remote, "sharedjournal", $u->{'user'})))
+			     LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
      {
 	 push @linkele, "<A HREF=\"/editjournal_do.bml?itemid=$itemid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_edit.gif\" WIDTH=22 HEIGHT=20 ALT=\"Edit Entry\" title=\"Edit Entry\" BORDER=0></A>";	     
      }
@@ -226,7 +224,7 @@ BODY<=
      my $cache = {};
      my $in_topic = 0;
      
-     $sth = $dbh->prepare("SELECT tptopid, status FROM topic_map WHERE itemid=$qitemid");
+     $sth = $dbr->prepare("SELECT tptopid, status FROM topic_map WHERE itemid=$itemid");
      $sth->execute;
      while (my $mape = $sth->fetchrow_hashref)
      {
@@ -236,7 +234,8 @@ BODY<=
 	     $ret .= "<B>Read similiar journal entries:</B><BR>";
 	 }
 	 
-	 my @hier = &ljtopic::get_hierarchy($dbh, { 'topid' => $mape->{'tptopid'} });
+	 # TODO: ljtopic doesn't yet support $dbs/$dbarg
+	 my @hier = ljtopic::get_hierarchy($dbh, { 'topid' => $mape->{'tptopid'} });
 	 $ret .= "<B>";
 	 $ret .= join(" : ", map { "<A HREF=\"$_->{'url'}\">$_->{'name'}</A>"; } @hier);
 	 $ret .= "</B><BR>";
@@ -348,10 +347,10 @@ BODY<=
  
  my %res;
  if ($remote) {
-     &LJ::do_request($dbh, { "mode" => "login",
-			     "user" => $remote->{'user'},
-			     "getpickws" => 1,
-			 }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
+     LJ::do_request($dbs, { "mode" => "login",
+			    "user" => $remote->{'user'},
+			    "getpickws" => 1,
+			}, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
  }
  if ($res{'pickw_count'}) {
      $ret .= " <a href=\"/allpics.bml?user=$remote->{'user'}\">Picture</a> to use: ";

@@ -289,7 +289,7 @@ $maint{'build_randomuserset'} = sub
 
     &connect_db();
     print "-I- Building randomuserset.\n";
-    $dbh->do("REPLACE INTO randomuserset (userid, timeupdate) SELECT userid, timeupdate FROM user WHERE allow_infoshow='Y' AND timeupdate > DATE_SUB(NOW(), INTERVAL 1 DAY)");
+    $dbh->do("REPLACE INTO randomuserset (userid, timeupdate) SELECT uu.userid, uu.timeupdate FROM userusage uu, user u WHERE u.userid=uu.userid AND u.allow_infoshow='Y' AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 1 DAY)");
     $dbh->do("DELETE FROM randomuserset WHERE timeupdate < DATE_SUB(NOW(), INTERVAL 1 DAY)");
     print "-I- Done.\n";
 };

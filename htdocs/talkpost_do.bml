@@ -10,10 +10,11 @@ BODY<=
  use MIME::Lite;
  $columns = 76;
 
- return &server_down_html() if ($LJ::SERVER_DOWN);
+ return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
- &connect_db;
- require 'talklib.pl';
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
  my $ret = "";
  my @errors = ();
@@ -28,26 +29,26 @@ BODY<=
  unless ($item) { push @errors, "No such entry."; }
 
  my %logprops;
- &load_log_props([ $qitemid ], \%logprops);
+ LJ::load_log_props($dbs, [ $qitemid ], \%logprops);
 
  my $mod = $qitemid % 100;
 
  ### load users
- $sth = $dbh->prepare("SELECT * FROM user WHERE userid IN ($item->{'ownerid'}, $item->{'posterid'})");
+ $sth = $dbr->prepare("SELECT * FROM user WHERE userid IN ($item->{'ownerid'}, $item->{'posterid'})");
  $sth->execute;
  my ($u, $ujp);  ## user owner and user journal poster
  my ($quser, $qjpuser);
  while ($_ = $sth->fetchrow_hashref) {
      if ($_->{'userid'} == $item->{'ownerid'})  { 
 	 $u  = $_; 
-	 $quser = $dbh->quote($u->{'user'});
+	 $quser = $dbr->quote($u->{'user'});
      }
      if ($_->{'userid'} == $item->{'posterid'}) {
 	 $ujp = $_;
-	 $qjpuser = $dbh->quote($ujp->{'user'});
+	 $qjpuser = $dbr->quote($ujp->{'user'});
      }
  }
- &load_user_props($u, "opt_logcommentips");
+ LJ::load_user_props($dbs, $u, "opt_logcommentips");
 
  if ($FORM{'userpost'} && $FORM{'usertype'} ne "user") {
      push @errors, "You entered a username, but selected to post anonymously or as the currently logged in user.  Go back and decide which you really want to do.";
@@ -56,7 +57,7 @@ BODY<=
  my $remote;
  my $cookie_auth;
  if ($FORM{'usertype'} eq "cookieuser") {
-     $remote = LJ::get_remote($dbh);
+     $remote = LJ::get_remote($dbs);
      return LJ::badinput("Your login cookie seems to have disappeared?") 
 	 unless ($remote && $remote->{'user'} eq $FORM{'cookieuser'});
      
@@ -76,13 +77,13 @@ BODY<=
 
  if ($FORM{'usertype'} eq "user") {
      if ($FORM{'userpost'}) {
-	 $up = LJ::load_user($dbh, $FORM{'userpost'});
+	 $up = LJ::load_user($dbs, $FORM{'userpost'});
 	 if ($up) 
 	 {
 	     ### see if the user is banned from posting here
 	     my $quid = $u->{'userid'}+0;
 	     my $qupid = $up->{'userid'}+0;
-	     my $sth = $dbh->prepare("SELECT COUNT(*) AS 'banned' FROM ban WHERE userid=$quid AND banneduserid=$qupid");
+	     my $sth = $dbr->prepare("SELECT COUNT(*) AS 'banned' FROM ban WHERE userid=$quid AND banneduserid=$qupid");
 	     $sth->execute;
 	     my ($banned) = $sth->fetchrow_array;
 	     if ($banned) {
@@ -129,7 +130,8 @@ BODY<=
      if ($up) {
 	 if ($up->{'userid'} != $u->{'userid'}) 
 	 {
-	     $sth = $dbh->prepare("SELECT COUNT(*) FROM friends WHERE userid=$u->{'userid'} AND friendid=$up->{'userid'}");
+	     # TODO: use is_friend/similar API call?
+	     $sth = $dbr->prepare("SELECT COUNT(*) FROM friends WHERE userid=$u->{'userid'} AND friendid=$up->{'userid'}");
 	     $sth->execute;
 	     my ($is_friend) = $sth->fetchrow_array;
 	     unless ($is_friend) {
@@ -268,8 +270,8 @@ BODY<=
      if ($up->{'defaultpicid'} || $FORM{'prop_picture_keyword'}) {
 	 my $picid;
 	 if ($FORM{'prop_picture_keyword'}) {
-	     my $qkw = $dbh->quote($FORM{'prop_picture_keyword'});
-	     my $sth = $dbh->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid AND k.keyword=$qkw");
+	     my $qkw = $dbr->quote($FORM{'prop_picture_keyword'});
+	     my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid AND k.keyword=$qkw");
 	     $sth->execute;
 	     ($picid) = $sth->fetchrow_array;
 	 }
@@ -293,8 +295,8 @@ BODY<=
 	 my ($paruser, $parbody) = $sth->fetchrow_array;
 	 $parentcomment = $parbody;
 	 if ($paruser) {
-	     my $qparuser = $dbh->quote($paruser);
-	     $sth = $dbh->prepare("SELECT email, opt_htmlemail, password, status, opt_gettalkemail FROM user WHERE user=$qparuser");
+	     my $qparuser = $dbr->quote($paruser);
+	     $sth = $dbr->prepare("SELECT email, opt_htmlemail, password, status, opt_gettalkemail FROM user WHERE user=$qparuser");
 	     $sth->execute;
 	     my $paru = $sth->fetchrow_hashref;
 	     

@@ -4,32 +4,32 @@ BODY<=
 
 (=_CODE
 
- return &server_down_html() if ($LJ::SERVER_DOWN);
+ return LJ::server_down_html() if ($LJ::SERVER_DOWN);
  
  my @errors = ();
- my $user = lc($FORM{'user'});
+ my $user = LJ::canonical_username($FORM{'user'});
  my $name = $FORM{'name'};
  my $email = &trim(lc($FORM{'email'}));
  
- &connect_db;
- 
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my $quser = $dbh->quote($user);
  my $qemail = $dbh->quote($email);
  my $qname = $dbh->quote($name);
  
  if (length($user) > 15) { push @errors, "Username is too long, 15 character max"; }
- unless ($user) { push @errors, "You must enter a username"; }
- if ($user =~ /[^\w]/) { push @errors, "Username contains invalid characters"; }
+ unless ($FORM{'user'}) { push @errors, "You must enter a username"; }
+ if ($FORM{'user'} && ! $user) { 
+     push @errors, "Invalid characters in username.";
+ }
  foreach my $re ("^system\$", @LJ::PROTECTED_USERNAMES) {
      if ($user =~ /$re/) { push @errors, "Sorry, that's a reserved username."; }     
  }
- 
- $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
- $sth->execute;
+ my $u = LJ::load_user($dbs, $user);
  my $second_submit = 0;
- my $u = {};
- if ($sth->rows > 0) { 
-     $u = $sth->fetchrow_hashref;
+ if ($u) {
      if ($user ne "test" && $u->{'password'} eq $FORM{'password1'}) {
          # oh, they double-clicked the submit button 
          $second_submit = 1;

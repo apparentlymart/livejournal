@@ -1847,7 +1847,6 @@ sub query_buffer_add
     else 
     {
 	# low load sites can skip this, and just have queries go through immediately.
-
 	$dbh->do($query);
     }
 }

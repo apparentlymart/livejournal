@@ -3,21 +3,23 @@
  $title = "Error";
  $body = "No parameters given";
 
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
  if ($FORM{'itemid'}) 
  {
      my $itemid = $FORM{'itemid'}+0;
-     my $sth = $dbh->prepare("SELECT ownerid, eventtime FROM log WHERE itemid=$itemid");
+     my $sth = $dbr->prepare("SELECT ownerid, eventtime FROM log WHERE itemid=$itemid");
      $sth->execute;
      my $item = $sth->fetchrow_hashref;
      my $jumpid = 0;
      $title = "No Entry";
      if ($FORM{'dir'} eq "next") {
-	 $jumpid =  &LJ::get_itemid_after($dbh, $item->{'ownerid'}, $item->{'eventtime'});
+	 $jumpid =  LJ::get_itemid_after($dbs, $item->{'ownerid'}, $item->{'eventtime'});
 	 $body = "There is no journal entry following this one.";
      } elsif ($FORM{'dir'} eq "prev") {
-	 $jumpid = &LJ::get_itemid_before($dbh, $item->{'ownerid'}, $item->{'eventtime'});
+	 $jumpid = LJ::get_itemid_before($dbs, $item->{'ownerid'}, $item->{'eventtime'});
 	 $body = "There is no journal entry preceeding this one.";
      }
      if ($jumpid) {

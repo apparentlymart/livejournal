@@ -5,9 +5,12 @@ BODY<=
 (=_CODE
 
  my $ret = "";
- return &server_down_html() if ($LJ::SERVER_DOWN);
+ return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my $user = lc($FORM{'user'});
  my $userid = 0;
  my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
@@ -20,31 +23,31 @@ BODY<=
  if ($FORM{'mode'} eq "" && $FORM{'itemid'}) 
  {
      $jump_to_item = 1;
-     my $remote = &get_remote();
+     my $remote = LJ::get_remote($dbs);
      unless ($remote) {
 	 return "(=H1 Error H1=)(=P You have to be logged in to directly edit a journal entry of yours. P=)";
      }
      $user = $FORM{'user'} = $remote->{'user'};
      $userid = $remote->{'userid'};
 
-     my $sth = $dbh->prepare("SELECT password FROM user WHERE userid=$remote->{'userid'}");
+     my $sth = $dbr->prepare("SELECT password FROM user WHERE userid=$remote->{'userid'}");
      $sth->execute;
      my $password = $sth->fetchrow_array;
      $hpassword = &hash_password($password);
      
      my $itemid = $FORM{'itemid'}+0;
-     $sth = $dbh->prepare("SELECT ownerid, posterid FROM log WHERE itemid=$itemid");
+     $sth = $dbr->prepare("SELECT ownerid, posterid FROM log WHERE itemid=$itemid");
      $sth->execute;
      my ($ownerid, $posterid) = $sth->fetchrow_array;
      if ($ownerid != $posterid) {
-	 my $owner = &LJ::get_username($dbh, $ownerid);
+	 my $owner = LJ::get_username($dbs, $ownerid);
 	 $FORM{'usejournal'} = $owner;
      }
 
      $FORM{'mode'} = "getevents";
      $FORM{'selecttype'} = "one";
      
-     &LJ::do_request($dbh, \%FORM, \%res, { "noauth" => 1});     
+     LJ::do_request($dbs, \%FORM, \%res, { "noauth" => 1});     
  }
 
  if ($FORM{'metamode'} eq "choose_editrange") 
@@ -56,7 +59,7 @@ BODY<=
 	 $FORM{'howmany'} = 1;
 	 $just_last = 1;
      }
-     &LJ::do_request($dbh, \%FORM, \%res);
+     LJ::do_request($dbs, \%FORM, \%res);
  
      if ($res{'success'} eq "OK")
      {
@@ -126,8 +129,8 @@ BODY<=
 	 if ($FORM{'prop_current_mood'} ne "") 
 	 {
 	     delete $FORM{'prop_current_moodid'};
-	     my $qmood = $dbh->quote(lc($FORM{'prop_current_mood'}));
-	     my $sth = $dbh->prepare("SELECT moodid FROM moods WHERE mood=$qmood");
+	     my $qmood = $dbr->quote(lc($FORM{'prop_current_mood'}));
+	     my $sth = $dbr->prepare("SELECT moodid FROM moods WHERE mood=$qmood");
 	     $sth->execute;
 	     my ($moodid) = $sth->fetchrow_array;
 	     if ($moodid) {
@@ -145,14 +148,14 @@ BODY<=
 	 $FORM{'allowmask'} = $amask;
      }
 
-     &LJ::do_request($dbh, \%FORM, \%res);
+     LJ::do_request($dbs, \%FORM, \%res);
  }
  
  if ($res{'success'} eq "OK")
  {
      if ($FORM{'mode'} eq "getevents")
      {
-	 $userid = LJ::get_userid($dbh, $user);
+	 $userid = LJ::get_userid($dbs, $user);
 	 my $count = $res{'events_count'};
 	 unless ($count) {
 	     return "(=H1 Error H1=)(=P Could not find selected journal entry. P=)";
@@ -238,7 +241,7 @@ BODY<=
 	 
 	 ### picture to use
 	 {
-	     my $sth = $dbh->prepare("SELECT k.keyword FROM userpicmap m, keywords k WHERE m.userid=$userid AND m.kwid=k.kwid");
+	     my $sth = $dbr->prepare("SELECT k.keyword FROM userpicmap m, keywords k WHERE m.userid=$userid AND m.kwid=k.kwid");
 	     $sth->execute;
 	     my @pics;
 	     push @pics, $_ while ($_ = $sth->fetchrow_array);
@@ -257,7 +260,7 @@ BODY<=
 	     $ret .= "<P><B>Current <A HREF=\"/moodlist.bml\">Mood</A>:</B><SELECT NAME=\"prop_current_moodid\"><OPTION VALUE=\"\">None, or other:";
 
 	     my $match = 0;
-	     my $sth = $dbh->prepare("SELECT moodid, mood FROM moods ORDER BY mood");
+	     my $sth = $dbr->prepare("SELECT moodid, mood FROM moods ORDER BY mood");
 	     $sth->execute;
 	     while ($_ = $sth->fetchrow_hashref) {
 		 my $sel = ($props{'current_mood'} eq $_->{'mood'} || 
@@ -288,8 +291,8 @@ BODY<=
 	 {
 	     my $uri = "/users/$user/";
 	     if ($FORM{'usejournal'}) {
-		 my $quj = $dbh->quote($FORM{'usejournal'});
-		 my $sth = $dbh->prepare("SELECT journaltype FROM user WHERE user=$quj");
+		 my $quj = $dbr->quote($FORM{'usejournal'});
+		 my $sth = $dbr->prepare("SELECT journaltype FROM user WHERE user=$quj");
 		 $sth->execute;
 		 my ($type) = $sth->fetchrow_array;
 		 if ($type eq "C") {

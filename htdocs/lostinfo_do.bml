@@ -6,18 +6,21 @@ BODY<=
 
 (=_CODE
 
- return &server_down_html() if ($LJ::SERVER_DOWN);
+ return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
- &connect_db;
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my @errors = ();
 
  if ($FORM{'lostpass'})
  {
-     my $user = &trim(lc($FORM{'user'}));
-     my $quser = $dbh->quote($user);
+     my $user = LJ::canonical_username($FORM{'user'});
+     my $quser = $dbr->quote($user);
      my $email = &trim($FORM{'email_p'});
 
-     my $u = &LJ::load_user($dbh, $user);
+     my $u = LJ::load_user($dbs, $user);
 
      if (! $u)
      {
@@ -36,8 +39,8 @@ BODY<=
 
      elsif (lc($email) ne lc($u->{'email'})) 
      {
-	 my $qe = $dbh->quote($email);
-	 my $sth = $dbh->prepare("SELECT COUNT(*) FROM infohistory WHERE userid=$u->{'userid'} AND what='email' AND oldvalue=$qe AND other='A'");
+	 my $qe = $dbr->quote($email);
+	 my $sth = $dbr->prepare("SELECT COUNT(*) FROM infohistory WHERE userid=$u->{'userid'} AND what='email' AND oldvalue=$qe AND other='A'");
 	 $sth->execute;
 	 ($okay) = $sth->fetchrow_array;
 
@@ -91,7 +94,7 @@ BODY<=
      my $email = &trim($FORM{'email_u'});
      my $qe = $dbh->quote($email);
 
-     $sth = $dbh->prepare("SELECT user, status FROM user WHERE email=$qe");
+     $sth = $dbr->prepare("SELECT user, status FROM user WHERE email=$qe");
      $sth->execute;
      my @users;
      while (my ($ru, $rs) = $sth->fetchrow_array) {

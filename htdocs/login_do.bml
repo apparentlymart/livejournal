@@ -1,6 +1,5 @@
 (=_CODE
  
- require 'ljlib.pl';
  $body = "";
 
  my @errors = ();
@@ -8,7 +7,9 @@
  my $password = $FORM{'password'};
  my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
 
- my $dbh = LJ::get_dbh("master");
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
  my $quser = $dbh->quote($user);
  if (length($FORM{'user'}) > 15) { push @errors, "Username is too long, 15 character max"; }
@@ -17,7 +18,7 @@
 
  unless (LJ::did_post()) { push @errors, "(=REQUIREPOST=)"; }
 
- my $u = LJ::load_user($dbh, $FORM{'user'});
+ my $u = LJ::load_user($dbs, $FORM{'user'});
  unless ($u) { push @errors, "Unknown user."; }
 
  unless (LJ::auth_okay($u, $password, $hpassword)) {

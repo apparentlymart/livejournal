@@ -41,16 +41,16 @@ BODY<=
 		     "howhear", "opt_bdaymail", "opt_hidefriendofs");
 
  my $user = $u->{'user'};
- my $quser = $dbh->quote($user);
+ my $quser = $dbr->quote($user);
 
  if ($u->{'has_bio'}) {
-     $sth = $dbh->prepare("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
+     $sth = $dbr->prepare("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
      $sth->execute;
      $_ = $sth->fetchrow_hashref;
      $u->{'bio'} = $_->{'bio'};
  }
 
- $sth = $dbh->prepare("SELECT i.interest, i.intid FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$u->{'userid'}");
+ $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$u->{'userid'}");
  $sth->execute;
  my %interests = ();
  while ($_ = $sth->fetchrow_hashref) {
@@ -164,7 +164,7 @@ BODY<=
      ### paid user features
      if ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid") 
      {
-	 $sth = $dbh->prepare("SELECT provider, number, security FROM txtmsg WHERE userid=$u->{'userid'}");
+	 $sth = $dbr->prepare("SELECT provider, number, security FROM txtmsg WHERE userid=$u->{'userid'}");
 	 $sth->execute;
 	 my $tminfo = $sth->fetchrow_hashref;
 
@@ -373,12 +373,8 @@ BODY<=
      my @errors = ();
      my $state = "";
 
-     ## clean up the city
-#    $FORM{'city'} = ucfirst(lc($FORM{'city'}));
-#    $FORM{'city'} =~ s/\b\w{3,}\b/ucfirst($1)/eg;
-
      my ($zipcity, $zipstate);
-     my $qzip = $dbh->quote($FORM{'zip'});
+     my $qzip = $dbr->quote($FORM{'zip'});
      if ($FORM{'country'} eq "US") {
 	 $sth = $dbr->prepare("SELECT city, state FROM zip WHERE zip=$qzip");
 	 $sth->execute;
@@ -524,6 +520,9 @@ BODY<=
 
 	 foreach my $uprop (@uprops) {
 	     if ($FORM{$uprop} ne $u->{$uprop}) {
+		 #TODO: set_userprop has not been converted to LJ::
+		 #and therefore does not use $dbarg/$dbs.  Leave it
+		 #alone for now.
 		 &set_userprop($dbh, $u->{'userid'}, $uprop, $FORM{$uprop});
 	     }
 	 }

@@ -21,8 +21,6 @@ sub do_request
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
     %{$res} = ();                      # clear the given response hash
-    $user = &trim(lc($req->{'user'}));
-    my $quser = $dbh->quote($user);
 
     # check for an alive database connection
     unless ($dbh)
@@ -31,6 +29,9 @@ sub do_request
         $res->{'errmsg'} = "Server error: cannot connect to database.";
         return;
     }
+
+    $user = &trim(lc($req->{'user'}));
+    my $quser = $dbh->quote($user);
 
     # did they send a mode?
     unless ($req->{'mode'})
@@ -60,10 +61,10 @@ sub do_request
     {
         $sth = $dbr->prepare("SELECT user, userid, journaltype, name, paidfeatures, password, status, statusvis, track FROM user WHERE user=$quser");
         $sth->execute;
-        if ($dbh->err)
+        if ($dbr->err)
         {
 	  $res->{'success'} = "FAIL";
-	  $res->{'errmsg'} = "Server database error: " . $dbh->errstr;
+	  $res->{'errmsg'} = "Server database error: " . $dbr->errstr;
 	  return;
         }
         ($user, $userid, $journaltype, $name, $paidfeatures, $correctpassword, $status, $statusvis, $track) = $sth->fetchrow_array;
@@ -115,7 +116,7 @@ sub do_request
 	$req->{'mode'} eq "getfriendgroups" ||
 	($req->{'mode'} eq "getfriends" && $req->{'includegroups'}))
     {
-	$sth = $dbh->prepare("SELECT groupnum, groupname, sortorder, is_public FROM friendgroup WHERE userid=$userid");
+	$sth = $dbr->prepare("SELECT groupnum, groupname, sortorder, is_public FROM friendgroup WHERE userid=$userid");
 	$sth->execute;
 	my $maxnum = 0;
 	while ($_ = $sth->fetchrow_hashref) {
@@ -159,7 +160,7 @@ sub do_request
 
 	### report what shared journals this user may post in
 	my $access_count = 0;
-	my $sth = $dbh->prepare("SELECT u.user FROM useridmap u, logaccess la WHERE la.ownerid=u.userid AND la.posterid=$userid ORDER BY u.user");
+	my $sth = $dbr->prepare("SELECT u.user FROM useridmap u, logaccess la WHERE la.ownerid=u.userid AND la.posterid=$userid ORDER BY u.user");
 	$sth->execute;
 	while ($_ = $sth->fetchrow_hashref) {
 	    $access_count++;
@@ -173,7 +174,7 @@ sub do_request
 	if (defined $req->{"getpickws"}) 
 	{
 	    my $pickw_count = 0;
-	    my $sth = $dbh->prepare("SELECT k.keyword FROM userpicmap m, keywords k WHERE m.userid=$userid AND m.kwid=k.kwid ORDER BY k.keyword");
+	    my $sth = $dbr->prepare("SELECT k.keyword FROM userpicmap m, keywords k WHERE m.userid=$userid AND m.kwid=k.kwid ORDER BY k.keyword");
 	    $sth->execute;
 	    while ($_ = $sth->fetchrow_array) {
 		s/[\n\r\0]//g;  # used to be a bug that allowed these characters to get in.
@@ -288,7 +289,7 @@ sub do_request
 	#  or UPDATE.
 
 	my %bitset;
-	$sth = $dbh->prepare("SELECT groupnum FROM friendgroup WHERE userid=$userid");
+	$sth = $dbr->prepare("SELECT groupnum FROM friendgroup WHERE userid=$userid");
 	$sth->execute;
 	while (my ($bit) = $sth->fetchrow_array) {
 	    $bitset{$bit} = 1;
@@ -320,7 +321,7 @@ sub do_request
 		    
 		    # remove all posts from allowing that group:
 		    my @posts_to_clean = ();
-		    $sth = $dbh->prepare("SELECT itemid FROM logsec WHERE ownerid=$userid AND allowmask & (1 << $bit)");
+		    $sth = $dbr->prepare("SELECT itemid FROM logsec WHERE ownerid=$userid AND allowmask & (1 << $bit)");
 		    $sth->execute;
 		    while (my ($id) = $sth->fetchrow_array) { push @posts_to_clean, $id; }
 		    while (@posts_to_clean) {
@@ -395,7 +396,7 @@ sub do_request
 	    }
 	}
 	
-        $sth = $dbh->prepare("SELECT year, month, day, COUNT(*) AS 'count' FROM log WHERE ownerid=$ownerid GROUP BY 1, 2, 3");
+        $sth = $dbr->prepare("SELECT year, month, day, COUNT(*) AS 'count' FROM log WHERE ownerid=$ownerid GROUP BY 1, 2, 3");
         $sth->execute;
         while ($_ = $sth->fetchrow_hashref)
         {
@@ -415,7 +416,7 @@ sub do_request
     {
 	my $limitnum = $req->{'friendoflimit'}+0;
 	my $limit = $limitnum ? "LIMIT $limitnum" : "";
-        $sth = $dbh->prepare("SELECT u.user, u.name, u.journaltype, f.fgcolor, f.bgcolor FROM friends f, user u WHERE u.userid=f.userid AND f.friendid=$userid AND u.statusvis='V' ORDER BY user $limit");
+        $sth = $dbr->prepare("SELECT u.user, u.name, u.journaltype, f.fgcolor, f.bgcolor FROM friends f, user u WHERE u.userid=f.userid AND f.friendid=$userid AND u.statusvis='V' ORDER BY user $limit");
         $sth->execute;
         my @friendof;
         push @friendof, $_ while $_ = $sth->fetchrow_hashref;
@@ -446,7 +447,7 @@ sub do_request
     {
 	my $limitnum = $req->{'friendlimit'}+0;
 	my $limit = $limitnum ? "LIMIT $limitnum" : "";
-        $sth = $dbh->prepare("SELECT u.user AS 'friend', u.name, u.journaltype, f.fgcolor, f.bgcolor, f.groupmask FROM user u, friends f WHERE u.userid=f.friendid AND f.userid=$userid AND u.statusvis='V' ORDER BY u.user $limit");
+        $sth = $dbr->prepare("SELECT u.user AS 'friend', u.name, u.journaltype, f.fgcolor, f.bgcolor, f.groupmask FROM user u, friends f WHERE u.userid=f.friendid AND f.userid=$userid AND u.statusvis='V' ORDER BY u.user $limit");
         $sth->execute;
         my @friends;
         push @friends, $_ while $_ = $sth->fetchrow_hashref;
@@ -541,10 +542,8 @@ sub do_request
 		    $res->{'errmsg'} = "Client error: Invalid color values";
 		    return;
 		}
-		my $qname = $dbh->quote($name);
-		my $sth = $dbh->prepare("SELECT user, userid, name FROM user WHERE user=$qname");
-		$sth->execute;
-		my $row = $sth->fetchrow_hashref;
+
+		my $row = LJ::load_user($dbs, $name);
 		unless ($row) {
 		    $error_flag = 1;
 		}
@@ -559,7 +558,7 @@ sub do_request
 		    my $friendid = $row->{'userid'};
 
 		    ### get the group mask if friend already exists, or default to 1 (bit 0 (friend bit) set)
-		    $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$userid AND friendid=$friendid");
+		    my $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$userid AND friendid=$friendid");
 		    $sth->execute;
 		    my ($gmask) = $sth->fetchrow_array;
 		    $gmask ||= 1;
@@ -630,6 +629,7 @@ sub do_request
 	    
 	    if ($lastitemid) {
 		### we know the last one the entered!
+		# Must be on master, since logtext is not replicated.
 		$sth = $dbh->prepare("SELECT $fields FROM log l, logtext lt WHERE l.ownerid=$ownerid AND l.itemid=$lastitemid AND lt.itemid=$lastitemid");
 	    } else  {
 		### do it the slower way
@@ -656,7 +656,6 @@ sub do_request
 
 	    ### MySQL sucks at this query for some reason, but it's fast if you go
 	    ### to a temporary table and then select and order by on that
-
 	    $dbh->do("DROP TABLE IF EXISTS tmp_selecttype_day");
 	    $dbh->do("CREATE TEMPORARY TABLE tmp_selecttype_day SELECT $allfields, l.logtime FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.ownerid=$ownerid AND l.year=$qyear AND l.month=$qmonth AND l.day=$qday");
 
@@ -851,7 +850,7 @@ sub do_request
 		if ($ownerid == $u->{'userid'}) {
 		    ## community account can delete it (ick)
 		    $allow = 1;
-		} elsif (LJ::check_priv($dbh, $u, "sharedjournal", $req->{'usejournal'})) {
+		} elsif (LJ::check_priv($dbr, $u, "sharedjournal", $req->{'usejournal'})) {
 		    ## if user is a community maintainer they can delete it too (good)
 		    $allow = 1;
 		}
@@ -1362,14 +1361,14 @@ sub do_request
 
 	my $LIMIT = 500;
 
-	$sth = $dbh->prepare("SELECT COUNT(*) FROM syncupdates WHERE userid=$userid AND atime >= '$date'");
+	$sth = $dbr->prepare("SELECT COUNT(*) FROM syncupdates WHERE userid=$userid AND atime >= '$date'");
 	$sth->execute;
 	my ($sync_count) = $sth->fetchrow_array;
 	
-	$sth = $dbh->prepare("SELECT atime, nodetype, nodeid, atype FROM syncupdates WHERE userid=$userid AND atime >= '$date' ORDER BY atime LIMIT $LIMIT");
+	$sth = $dbr->prepare("SELECT atime, nodetype, nodeid, atype FROM syncupdates WHERE userid=$userid AND atime >= '$date' ORDER BY atime LIMIT $LIMIT");
 	$sth->execute;
-	if ($dbh->err) {
-	    $res->{'errmsg'} = $dbh->errstr;
+	if ($dbr->err) {
+	    $res->{'errmsg'} = $dbr->errstr;
 	    $res->{'success'} = "FAIL";
 	    return 0;
 	}
@@ -1411,7 +1410,7 @@ sub do_request
 	    $sql .= " AND f.groupmask & $req->{mask} > 0";
 	}
 	
-	$sth = $dbh->prepare($sql);
+	$sth = $dbr->prepare($sql);
 	$sth->execute;
 	my ($update) = $sth->fetchrow_array;
 	$update ||= "0000-00-00 00:00:00";

@@ -10,7 +10,9 @@
      return "";
  }
 
- my $dbr = LJ::get_dbh("slave");
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 	
  my $remote = LJ::get_remote($dbr);
 
@@ -33,9 +35,9 @@
      $sth->execute;
      if ($dbr->err) { return $dbr->errstr; }
      $u = $sth->fetchrow_hashref;
-     $userid = $u->{'userid'}+0;
+     $userid = $u->{'userid'}+0 if $u;
 
-     if ($FORM{'mode'} eq "full") {
+     if ($u && $FORM{'mode'} eq "full") {
 	 $sth = $dbr->prepare("SELECT timeupdate, timecreate, ".
 			      "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
 			      "AS 'secondsold' FROM userusage ".

@@ -4,22 +4,19 @@
  $body = "";
  @errors = ();
  
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'dbr'};
 
- my $user = lc($FORM{'user'});
- $user =~ s/[^\w]//g;
-
- my $remote = &get_remote_noauth();	
-
+ my $user = LJ::canonical_username($FORM{'user'});
+ my $remote = LJ::get_remote_noauth();	
  unless ($user) {
      $user = $remote->{'user'};
  }
 
- my $quser = $dbh->quote($user);
+ my $quser = $dbr->quote($user);
 
- $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
- $sth->execute;
- my $u = $sth->fetchrow_hashref;
+ my $u = LJ::load_user($dbs, $user);
  unless ($u) {
      $title = "User Pictures";
      $body = "(=H1 Error H1=)(=P You need to specify a user parameter. P=)";
@@ -31,13 +28,13 @@
  $title = "User Pictures";
 
  my %keywords = ();
- $sth = $dbh->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
+ $sth = $dbr->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
  $sth->execute;
  while (my ($pic, $keyword) = $sth->fetchrow_array) {
      push @{$keywords{$pic}}, $keyword;
  }
  
- $sth = $dbh->prepare("SELECT picid, width, height FROM userpic WHERE userid=$u->{'userid'}");
+ $sth = $dbr->prepare("SELECT picid, width, height FROM userpic WHERE userid=$u->{'userid'}");
  $sth->execute;
  my $piccount = 0;
 

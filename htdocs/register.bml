@@ -7,7 +7,10 @@ BODY<=
 
 (=_CODE
 
- &connect_db;
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my ($sth, $ret);
 
  my $qs = &get_query_string();
@@ -19,7 +22,7 @@ BODY<=
      my ($aaid, $auth) = ($1, $2);
      my $aa = &is_valid_authaction($aaid, $auth);
      if ($aa) {
-	 $sth = $dbh->prepare("SELECT userid, email, user, status, password FROM user WHERE userid=$aa->{'userid'}");
+	 $sth = $dbr->prepare("SELECT userid, email, user, status, password FROM user WHERE userid=$aa->{'userid'}");
 	 $sth->execute;
 	 $u = $sth->fetchrow_hashref;
 

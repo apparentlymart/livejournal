@@ -175,7 +175,7 @@ sub create_view_lastn
 
 	&LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
 					       'cuturl' => LJ::item_link($u, $itemid), });
-	&LJ::expand_embedded($dbh, $itemid, $remote, \$event);
+	&LJ::expand_embedded($dbs, $itemid, $remote, \$event);
         $lastn_event{'event'} = $event;
 
 	if ($u->{'opt_showtalklinks'} eq "Y" && 
@@ -213,8 +213,8 @@ sub create_view_lastn
 	    
 	    my $picid = 0;
 	    if ($logprops{$itemid}->{'picture_keyword'}) {
-		my $qkw = $dbh->quote($logprops{$itemid}->{'picture_keyword'});
-		my $sth = $dbh->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$posterid AND m.kwid=k.kwid AND k.keyword=$qkw");
+		my $qkw = $dbr->quote($logprops{$itemid}->{'picture_keyword'});
+		my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$posterid AND m.kwid=k.kwid AND k.keyword=$qkw");
 		$sth->execute;
 		($picid) = $sth->fetchrow_array;
 	    } 
@@ -222,7 +222,7 @@ sub create_view_lastn
 		if (exists $altposter_picid{$posterid}) {
 		    $picid = $altposter_picid{$posterid};
 		} else {
-		    my $st2 = $dbh->prepare("SELECT defaultpicid FROM user WHERE userid=$posterid");
+		    my $st2 = $dbr->prepare("SELECT defaultpicid FROM user WHERE userid=$posterid");
 		    $st2->execute;
 		    ($picid) = $st2->fetchrow_array;
 		    $altposter_picid{$posterid} = $picid;
@@ -330,6 +330,7 @@ sub create_view_friends
 {
     my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
     my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
 
     my $user = $u->{'user'};
 
@@ -377,9 +378,9 @@ sub create_view_friends
 
     $friends_page{'events'} = "";
 
-    my $quser = $dbh->quote($user);
-    my $qremoteuser = $dbh->quote($remote->{'user'});
-    my $qremoteid = $dbh->quote($remote->{'userid'});
+    my $quser = $dbr->quote($user);
+    my $qremoteuser = $dbr->quote($remote->{'user'});
+    my $qremoteid = $dbr->quote($remote->{'userid'});
 
     my $itemshow = $vars->{'FRIENDS_OPT_ITEMS'} + 0;
     if ($itemshow < 1) { $itemshow = 20; }
@@ -404,8 +405,8 @@ sub create_view_friends
 	    if ($group) { $group = &durl($group); }
 	}
 	$group ||= "Default View";
-	my $qgroup = $dbh->quote($group);
-	$sth = $dbh->prepare("SELECT groupnum FROM friendgroup WHERE userid=$u->{'userid'} AND groupname=$qgroup");
+	my $qgroup = $dbr->quote($group);
+	$sth = $dbr->prepare("SELECT groupnum FROM friendgroup WHERE userid=$u->{'userid'} AND groupname=$qgroup");
 	$sth->execute;
 	my ($bit) = $sth->fetchrow_array;
 	if ($bit) { $filter = (1 << $bit); }
@@ -457,7 +458,7 @@ sub create_view_friends
     my $ownersin = join(",", keys %owners);
 
     my %friends = ();
-    $sth = $dbh->prepare("SELECT u.user, u.userid, f.fgcolor, f.bgcolor, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=$u->{'userid'} AND f.friendid IN ($ownersin)");
+    $sth = $dbr->prepare("SELECT u.user, u.userid, f.fgcolor, f.bgcolor, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=$u->{'userid'} AND f.friendid IN ($ownersin)");
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
 	next unless ($_->{'statusvis'} eq "V");  # ignore suspended/deleted users.
@@ -477,7 +478,7 @@ sub create_view_friends
 	return 1;
     }
 
-    $friendsin = join(", ", map { $dbh->quote($_) } keys %friends);
+    $friendsin = join(", ", map { $dbr->quote($_) } keys %friends);
     
     ### load the log properties
     my %logprops = ();
@@ -494,7 +495,7 @@ sub create_view_friends
   
     # load the log items
     my $itemid_in = join(", ", map { $_+0; } @itemids);
-    $sth = $dbh->prepare("SELECT itemid, security, ownerid, posterid, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', replycount FROM log WHERE itemid IN ($itemid_in) ORDER BY logtime DESC");
+    $sth = $dbr->prepare("SELECT itemid, security, ownerid, posterid, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', replycount FROM log WHERE itemid IN ($itemid_in) ORDER BY logtime DESC");
     $sth->execute;
 
     ## suck it all into memory to free the db.
@@ -577,7 +578,7 @@ sub create_view_friends
 	
 	&LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
 					       'cuturl' => LJ::item_link($u, $itemid), });
-	&LJ::expand_embedded($dbh, $itemid, $remote, \$event);
+	&LJ::expand_embedded($dbs, $itemid, $remote, \$event);
 	$friends_event{'event'} = $event;
 	
         # do the picture
@@ -586,7 +587,7 @@ sub create_view_friends
 	    if ($friendid != $posterid && ! $u->{'opt_usesharedpic'}) {
 		unless (defined $posterdefpic{$posterid}) {
 		    my $pdpic = 0;
-		    my $sth = $dbh->prepare("SELECT defaultpicid FROM user WHERE userid=$posterid");
+		    my $sth = $dbr->prepare("SELECT defaultpicid FROM user WHERE userid=$posterid");
 		    $sth->execute;
 		    ($pdpic) = $sth->fetchrow_array;
 		    $posterdefpic{$posterid} = $pdpic ? $pdpic : 0;
@@ -746,6 +747,7 @@ sub create_view_calendar
 {
     my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
     my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
     
     my $user = $u->{'user'};
     &load_user_props($u, "opt_blockrobots", "url", "urlname");
@@ -779,11 +781,11 @@ sub create_view_calendar
 
     my $months = \$calendar_page{'months'};
 
-    my $quser = $dbh->quote($user);
-    my $quserid = $dbh->quote($u->{'userid'});
+    my $quser = $dbr->quote($user);
+    my $quserid = $dbr->quote($u->{'userid'});
     my $maxyear = 0;
 
-    my $sth = $dbh->prepare("SELECT year, month, day, DAYOFWEEK(CONCAT(year, \"-\", month, \"-\", day)) AS 'dayweek', COUNT(*) AS 'count' FROM log WHERE ownerid=$quserid GROUP BY year, month, day, dayweek");
+    my $sth = $dbr->prepare("SELECT year, month, day, DAYOFWEEK(CONCAT(year, \"-\", month, \"-\", day)) AS 'dayweek', COUNT(*) AS 'count' FROM log WHERE ownerid=$quserid GROUP BY year, month, day, dayweek");
     $sth->execute;
 
     my (%count, %dayweek, $year, $month, $day, $dayweek, $count);
@@ -950,6 +952,7 @@ sub create_view_day
 {
     my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
     my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
 
     my $user = $u->{'user'};
 
@@ -978,8 +981,8 @@ sub create_view_day
     $day_page{'urllastn'} = "$journalbase/";
 
     my $initpagedates = 0;
-    my $quser = $dbh->quote($user);
-    my $qremoteuser = $dbh->quote($remote->{'user'});
+    my $quser = $dbr->quote($user);
+    my $qremoteuser = $dbr->quote($remote->{'user'});
     my $qremoteid = $remote->{'userid'}+0;
 
     my %FORM = ();
@@ -1014,11 +1017,11 @@ sub create_view_day
 
     my %talkcount = ();
     my @itemids = ();
-    my $quser = $dbh->quote($user);
+    my $quser = $dbr->quote($user);
 
     my $optDESC = $vars->{'DAY_SORT_MODE'} eq "reverse" ? "DESC" : "";
 
-    $sth = $dbh->prepare(<<"END_SQL"
+    $sth = $dbr->prepare(<<"END_SQL"
 SELECT itemid 
 FROM log l LEFT JOIN friends f ON l.ownerid=f.userid AND f.friendid=$qremoteid
 WHERE l.ownerid=$u->{'userid'}
@@ -1031,8 +1034,8 @@ END_SQL
 );
    
     $sth->execute;
-    if ($dbh->err) {
-	$$ret .= $dbh->errstr;
+    if ($dbr->err) {
+	$$ret .= $dbr->errstr;
 	return 1;
     }
 
@@ -1045,13 +1048,18 @@ END_SQL
     &load_log_props(\@itemids, \%logprops);
     &load_moods();
 
+    my $logtext = LJ::get_logtext($dbs, @itemids);
+
     # load the log items
-    $sth = $dbh->prepare("SELECT l.itemid, l.security, lt.subject, lt.event, l.replycount, DATE_FORMAT(l.eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart' FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.itemid IN ($itemid_in) ORDER BY l.eventtime $optDESC, l.logtime $optDESC");
+    $sth = $dbh->prepare("SELECT itemid, security, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart' FROM log l WHERE itemid IN ($itemid_in) ORDER BY eventtime $optDESC, logtime $optDESC");
     $sth->execute;
 
     my $events = "";
-    while (my ($itemid, $security, $subject, $event, $replycount, $alldatepart) = $sth->fetchrow_array)
+    while (my ($itemid, $security, $replycount, $alldatepart) = $sth->fetchrow_array)
     {
+	my $subject = $logtext->{$itemid}->[0];
+	my $event = $logtext->{$itemid}->[1];
+
         my @dateparts = split(/ /, $alldatepart);
         my %day_date_format = (
 			 'dayshort' => $dateparts[0],
@@ -1097,7 +1105,7 @@ END_SQL
 
 	&LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
 					       'cuturl' => LJ::item_link($u, $itemid), });
-	&LJ::expand_embedded($dbh, $itemid, $remote, \$event);
+	&LJ::expand_embedded($dbs, $itemid, $remote, \$event);
         $day_event{'event'} = $event;
 
 	if ($u->{'opt_showtalklinks'} eq "Y" &&
@@ -1137,7 +1145,7 @@ END_SQL
     if (! $initpagedates)
     {
         # if no entries were on that day, we haven't populated the time shit!
-        $sth = $dbh->prepare("SELECT DATE_FORMAT('$year-$month-$day', '%a %W %b %M %y %Y %c %m %e %d %D') AS 'alldatepart'");
+        $sth = $dbr->prepare("SELECT DATE_FORMAT('$year-$month-$day', '%a %W %b %M %y %Y %c %m %e %d %D') AS 'alldatepart'");
         $sth->execute;
         my @dateparts = split(/ /, $sth->fetchrow_arrayref->[0]);
         foreach (qw(dayshort daylong monshort monlong yy yyyy m mm d dd dth))

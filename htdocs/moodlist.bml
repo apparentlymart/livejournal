@@ -15,14 +15,17 @@ P=)
 (=_CODE
  my $ret = "";
  my $sth;
- &connect_db();
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
  
- $sth = $dbh->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y'");
+ $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y'");
  $sth->execute;
  my @themes = ();
  push @themes, $_ while ($_ = $sth->fetchrow_hashref);
 
- $sth = $dbh->prepare("SELECT * FROM moods ORDER BY mood");
+ $sth = $dbr->prepare("SELECT * FROM moods ORDER BY mood");
  $sth->execute;
  my %lists = ();
  while ($_ = $sth->fetchrow_hashref) {
