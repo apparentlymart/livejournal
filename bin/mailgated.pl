@@ -103,6 +103,19 @@ if (! $opt->{'foreground'}) {
                 exit 0;
             }
 
+            if (/queuesize/) {
+                if (! opendir(MDIR, $mailspool)) {
+                    print $c "Unable to open mailspool $mailspool: $!\n";
+                } else {
+                    my $count = 0;
+                    foreach (readdir(MDIR)) {
+                        next if /^\./;
+                        $count++;
+                    }
+                    print $c "$count\n";
+                }
+            }
+
             if (/status/) {
                 my $t = new Proc::ProcessTable;
                 my $state;
