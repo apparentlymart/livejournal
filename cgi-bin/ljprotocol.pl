@@ -918,7 +918,7 @@ sub postevent
 
     $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$itemid ".
              "WHERE userid=$ownerid");
-    LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()));
+    LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()), 30*60);
 
     # update user update table (on which friends views rely)
     # NOTE: as of Mar-25-2003, we don't actually use this yet.  we might

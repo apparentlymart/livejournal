@@ -701,7 +701,7 @@ sub get_timeupdate_multi {
         $timeupdate{$uid} = $tu;
 
         # set memcache for this row
-        LJ::MemCache::set([$uid, "tu:$uid"], pack("N", $tu));
+        LJ::MemCache::set([$uid, "tu:$uid"], pack("N", $tu), 30*60);
     }
 
     return \%timeupdate;
