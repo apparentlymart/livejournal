@@ -15,6 +15,7 @@ use LJ::S2::YearPage;
 use LJ::S2::DayPage;
 use LJ::S2::FriendsPage;
 use LJ::S2::MonthPage;
+use LJ::S2::EntryPage;
 
 package LJ::S2;
 
@@ -77,6 +78,9 @@ sub make_journal
     } elsif ($view eq "month") {
         $entry = "MonthPage::print()";
         $page = MonthPage($u, $remote, $opts);
+    } elsif ($view eq "item") {
+        $entry = "EntryPage::print()";
+        $page = EntryPage($u, $remote, $opts);
     }
 
     s2_run($r, $ctx, $run_opts, $entry, $page);
@@ -117,11 +121,22 @@ sub s2_run
         S2::set_output(sub {});
         S2::set_output_safe(sub {});
     } else {
-        my $out_straight = sub { $$LJ::S2::ret_ref .= $_[0]; };
-        my $out_clean = sub { $cleaner->parse($_[0]); };
+        my $need_flush;
+        my $out_straight = sub { 
+            # Hacky: forces text flush.  see:
+            # http://zilla.livejournal.org/906
+            if ($need_flush) {
+                $cleaner->parse("<!-- -->");
+                $need_flush = 0;
+            }
+            $$LJ::S2::ret_ref .= $_[0]; 
+        };
+        my $out_clean = sub { 
+            $cleaner->parse($_[0]); 
+            $need_flush = 1;
+        };
         S2::set_output($out_straight);
-        S2::set_output_safe($out_straight);
-        S2::set_output_safe($out_clean) if $cleaner;
+        S2::set_output_safe($cleaner ? $out_clean : $out_straight);
     }
           
     $LJ::S2::CURR_PAGE = $page;
