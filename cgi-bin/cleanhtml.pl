@@ -110,7 +110,7 @@ sub clean
                     }
                     my $url = LJ::ehtml($cut);
                     $newdata .= "<b>(&nbsp;<a href=\"$url\">$text</a>&nbsp;)</b>";
-                    last TOKEN;
+                    $p->get_tag("/lj-cut");
                 } else {
                     next; # ignore the tag.
                 }
