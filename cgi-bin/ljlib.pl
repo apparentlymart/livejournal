@@ -143,6 +143,15 @@ sub dbs_selectrow_hashref
     return undef;
 }
 
+# <LJFUNC>
+# name: LJ::get_friend_items
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub get_friend_items
 {
     my $dbarg = shift;
@@ -313,6 +322,15 @@ sub get_friend_items
     return @items;
 }
 
+# <LJFUNC>
+# name: LJ::get_recent_items
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub get_recent_items
 {
     my $dbarg = shift;
@@ -481,6 +499,15 @@ sub set_userprop
     }
 }
 
+# <LJFUNC>
+# name: LJ::register_authaction
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub register_authaction
 {
     my $dbarg = shift;
@@ -1002,6 +1029,15 @@ sub get_form_data
     LJ::urlargs_to_hash($buffer, $hashref);
 }
 
+# <LJFUNC>
+# name: LJ::urlargs_to_hash
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub urlargs_to_hash
 {
     my ($buffer, $hashref) = @_;
@@ -2732,6 +2768,15 @@ sub send_mail
 }
 
 # TODO: make this just call the HTML cleaner.
+# <LJFUNC>
+# name: LJ::strip_bad_code
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub strip_bad_code
 {
     my $data = shift;
@@ -2938,6 +2983,15 @@ sub load_style_fast
 }
 
 # $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
+# <LJFUNC>
+# name: LJ::make_journal
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub make_journal
 {
     my ($dbarg, $user, $view, $remote, $opts) = @_;
@@ -3049,6 +3103,15 @@ sub make_journal
     return $ret;   
 }
 
+# <LJFUNC>
+# name: LJ::html_datetime
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub html_datetime
 {
     my $opts = shift;
@@ -3078,6 +3141,15 @@ sub html_datetime
     return $ret;
 }
 
+# <LJFUNC>
+# name: LJ::html_datetime_decode
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub html_datetime_decode
 {
     my $opts = shift;
@@ -3092,6 +3164,15 @@ sub html_datetime_decode
 		   $hash->{"${name}_ss"});
 }
 
+# <LJFUNC>
+# name: LJ::html_select
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub html_select
 {
     my $opts = shift;
@@ -3111,6 +3192,15 @@ sub html_select
     return $ret;
 }
 
+# <LJFUNC>
+# name: LJ::html_check
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub html_check
 {
     my $opts = shift;
@@ -3130,6 +3220,15 @@ sub html_check
     return $ret;
 }
 
+# <LJFUNC>
+# name: LJ::html_text
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub html_text
 {
     my $opts = shift;
@@ -3148,6 +3247,15 @@ sub html_text
 #
 # returns the canonical username given, or blank if the username is not well-formed
 #
+# <LJFUNC>
+# name: LJ::canonical_username
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub canonical_username
 {
     my $user = shift;
@@ -3159,6 +3267,15 @@ sub canonical_username
     return "";  # not a good username.
 }
 
+# <LJFUNC>
+# name: LJ::decode_url_string
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub decode_url_string
 {
     my $buffer = shift;   # input scalarref
@@ -3183,6 +3300,15 @@ sub decode_url_string
 # the moveusercluster script:  you wouldn't want to select something
 # from one db, copy it into another, and then delete it from the 
 # source if they were both the same machine.
+# <LJFUNC>
+# name: LJ::use_diff_db
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub use_diff_db
 {
     my ($role1, $role2) = @_;
@@ -3204,6 +3330,15 @@ sub use_diff_db
     return 1;    
 }
 
+# <LJFUNC>
+# name: LJ::get_dbh
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub get_dbh
 {
     my @roles = @_;
@@ -3280,6 +3415,15 @@ sub get_dbh
     return get_dbh(@roles);
 }
 
+# <LJFUNC>
+# name: LJ::_get_dbh_fdsn
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub _get_dbh_fdsn
 {
     my $db = shift;   # hashref with DSN info, from ljconfig.pl's %LJ::DBINFO
@@ -3301,6 +3445,15 @@ sub _get_dbh_fdsn
     return $fdsn;
 }
 
+# <LJFUNC>
+# name: LJ::_get_dbh_conn
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub _get_dbh_conn
 {
     my $fdsn = shift;
@@ -3361,6 +3514,15 @@ sub get_dbs
     return make_dbs($dbh, $dbr);
 }
 
+# <LJFUNC>
+# name: LJ::get_cluster_reader
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub get_cluster_reader
 {
     my $arg = shift;
@@ -3369,6 +3531,15 @@ sub get_cluster_reader
 		       "cluster${id}");
 }
 
+# <LJFUNC>
+# name: LJ::get_cluster_master
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub get_cluster_master
 {
     my $arg = shift;
@@ -3376,6 +3547,15 @@ sub get_cluster_master
     return LJ::get_dbh("cluster${id}");
 }
 
+# <LJFUNC>
+# name: LJ::get_cluster_set
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub get_cluster_set
 {
     my $arg = shift;
@@ -3411,6 +3591,15 @@ sub make_dbs
 # converts a single argument to a dbs.  the argument is either a 
 # dbset already, or it's a master handle, in which case we need
 # to make it into a dbset with no slave.
+# <LJFUNC>
+# name: LJ::make_dbs_from_arg
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub make_dbs_from_arg
 {
     my $dbarg = shift;
@@ -3426,6 +3615,15 @@ sub make_dbs_from_arg
  
 ## turns a date (yyyy-mm-dd) into links to year calendar, month view, and day view, given
 ## also a user object (hashref)
+# <LJFUNC>
+# name: LJ::date_to_view_links
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub date_to_view_links
 {
     my ($u, $date) = @_;
@@ -3442,12 +3640,30 @@ sub date_to_view_links
     return $ret;
 }
 
+# <LJFUNC>
+# name: LJ::item_link
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub item_link
 {
     my ($u, $itemid) = @_;
     return "$LJ::SITEROOT/talkread.bml?itemid=$itemid";
 }
 
+# <LJFUNC>
+# name: LJ::make_graphviz_dot_file
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub make_graphviz_dot_file
 {
     my $dbarg = shift;
@@ -3494,6 +3710,15 @@ sub make_graphviz_dot_file
     return $ret;
 }
 
+# <LJFUNC>
+# name: LJ::expand_embedded
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub expand_embedded
 {
     my $dbarg = shift;
@@ -3511,6 +3736,15 @@ sub expand_embedded
     LJ::Poll::show_polls($dbh, $itemid, $remote, $eventref);
 }
 
+# <LJFUNC>
+# name: LJ::make_remote
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub make_remote
 {
     my $user = shift;
@@ -3522,6 +3756,15 @@ sub make_remote
     return undef;
 }
 
+# <LJFUNC>
+# name: LJ::escapeall
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub escapeall
 {
     my $a = $_[0];
@@ -3543,6 +3786,15 @@ sub escapeall
 # scalar refs to put result in.  $have is an optional listref of user
 # object caller already has, but is too lazy to sort by themselves.
 
+# <LJFUNC>
+# name: LJ::load_userids_multiple
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub load_userids_multiple
 {
     my ($dbarg, $map, $have) = @_;
@@ -3582,6 +3834,15 @@ sub load_userids_multiple
 }
 
 # $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
+# <LJFUNC>
+# name: LJ::load_user
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub load_user
 {
     my $dbarg = shift;
@@ -3630,6 +3891,15 @@ sub load_user
     return $u;
 }
 
+# <LJFUNC>
+# name: LJ::load_userid
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub load_userid
 {
     my $dbarg = shift;
@@ -3648,6 +3918,15 @@ sub load_userid
     return $u;
 }
 
+# <LJFUNC>
+# name: LJ::load_moods
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub load_moods
 {
     return if ($LJ::CACHED_MOODS);
@@ -3736,6 +4015,15 @@ sub cmd_buffer_add
 	    "VALUES ($journalid, $qcmd, NOW(), $qargs)");
 }
 
+# <LJFUNC>
+# name: LJ::cmd_buffer_flush
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub cmd_buffer_flush
 {
     my ($dbh, $db, $cmd, $userid) = @_;
@@ -3786,6 +4074,15 @@ sub cmd_buffer_flush
     return 1;
 }
 
+# <LJFUNC>
+# name: LJ::query_buffer_flush
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub query_buffer_flush
 {
     my ($dbarg, $table) = @_;
@@ -3826,6 +4123,15 @@ sub query_buffer_flush
     return $count;
 }
 
+# <LJFUNC>
+# name: LJ::journal_base
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub journal_base
 {
     my ($user, $vhost) = @_;
@@ -3844,6 +4150,15 @@ sub journal_base
 
 # loads all of the given privs for a given user into a hashref
 # inside the user record ($u->{_privs}->{$priv}->{$arg} = 1)
+# <LJFUNC>
+# name: LJ::load_user_privs
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub load_user_privs
 {
     my $dbarg = shift;
@@ -3878,6 +4193,15 @@ sub load_user_privs
 # arg is optional.  if arg not present, checks if remote has
 # any privs at all of that type.
 # also, $dbh can be undef, in which case privs must be pre-loaded
+# <LJFUNC>
+# name: LJ::check_priv
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub check_priv
 {
     my ($dbarg, $remote, $priv, $arg) = @_;
@@ -3905,6 +4229,15 @@ sub check_priv
 
 # check to see if the given remote user has a certain privledge
 # DEPRECATED.  should use load_user_privs + check_priv
+# <LJFUNC>
+# name: LJ::remote_has_priv
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub remote_has_priv
 {
     my $dbarg = shift;
@@ -3936,6 +4269,15 @@ sub remote_has_priv
 }
 
 ## get a userid from a username (returns 0 if invalid user)
+# <LJFUNC>
+# name: LJ::get_userid
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub get_userid
 {
     my $dbarg = shift;
@@ -3972,6 +4314,15 @@ sub get_userid
 
 ## get a username from a userid (returns undef if invalid user)
 # $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
+# <LJFUNC>
+# name: LJ::get_username
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub get_username
 {
     my $dbarg = shift;
@@ -4000,6 +4351,15 @@ sub get_username
     return ($user);
 }
 
+# <LJFUNC>
+# name: LJ::get_itemid_near
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub get_itemid_near
 {
     my $dbarg = shift;
@@ -4044,9 +4404,36 @@ sub get_itemid_near
     return ($item+0);
 }
 
+# <LJFUNC>
+# name: LJ::get_itemid_after
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub get_itemid_after  { return get_itemid_near(@_, "after");  }
+# <LJFUNC>
+# name: LJ::get_itemid_before
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub get_itemid_before { return get_itemid_near(@_, "before"); }
 
+# <LJFUNC>
+# name: LJ::mysql_time
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub mysql_time
 {
     my $time = shift;
@@ -4061,6 +4448,15 @@ sub mysql_time
 		   $ltime[0]);
 }
 
+# <LJFUNC>
+# name: LJ::get_keyword_id
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub get_keyword_id
 {
     my $dbarg = shift;
@@ -4104,6 +4500,15 @@ sub trim
 # returns true if $formref->{'password'} matches cleartext password or if
 # $formref->{'hpassword'} is the hash of the cleartext password
 # DEPRECTED: should use LJ::auth_okay
+# <LJFUNC>
+# name: LJ::valid_password
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub valid_password
 {
     my ($clearpass, $formref) = @_;
@@ -4118,6 +4523,15 @@ sub valid_password
     return 0;    
 }
 
+# <LJFUNC>
+# name: LJ::delete_user
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub delete_user
 {
 		# TODO: Is this function even being called?
@@ -4133,12 +4547,30 @@ sub delete_user
     ### so many issues.     
 }
 
+# <LJFUNC>
+# name: LJ::hash_password
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub hash_password
 {
     return Digest::MD5::md5_hex($_[0]);
 }
 
 # $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
+# <LJFUNC>
+# name: LJ::can_use_journal
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub can_use_journal
 {
     my ($dbarg, $posterid, $reqownername, $res) = @_;
@@ -4174,6 +4606,15 @@ sub can_use_journal
     }
 }
 
+# <LJFUNC>
+# name: LJ::load_log_props
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub load_log_props
 {
     my ($dbarg, $listref, $hashref) = @_;
@@ -4195,6 +4636,15 @@ sub load_log_props
 }
 
 # Note: requires caller to first call LJ::load_props($dbs, "log")
+# <LJFUNC>
+# name: LJ::load_log_props2
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub load_log_props2
 {
     my ($db, $journalid, $listref, $hashref) = @_;
@@ -4213,6 +4663,15 @@ sub load_log_props2
 }
 
 # Note: requires caller to first call LJ::load_props($dbs, "log")
+# <LJFUNC>
+# name: LJ::load_log_props2multi
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub load_log_props2multi
 {
     # ids by cluster (hashref),  output hashref (keys = "$ownerid $jitemid",
@@ -4278,6 +4737,15 @@ sub load_log_props2multi
     }
 }
 
+# <LJFUNC>
+# name: LJ::load_talk_props
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub load_talk_props
 {
     my ($dbarg, $listref, $hashref) = @_;
@@ -4300,6 +4768,15 @@ sub load_talk_props
 }
 
 # Note: requires caller to first call LJ::load_props($dbs, "talk")
+# <LJFUNC>
+# name: LJ::load_talk_props2
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub load_talk_props2
 {
     my ($db, $journalid, $listref, $hashref) = @_;
@@ -4418,6 +4895,15 @@ sub days_in_month
 ### delete an itemid.  if $quick is specified, that means items are being deleted en-masse
 ##  and the batch deleter will take care of some of the stuff, so this doesn't have to
 #
+# <LJFUNC>
+# name: LJ::delete_item
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub delete_item
 {
     my ($dbarg, $ownerid, $itemid, $quick, $deleter) = @_;
@@ -4459,6 +4945,7 @@ sub delete_item
 # name: LJ::delete_item2
 # des: Deletes a user's journal item from a cluster.
 # args: dbh, dbcm, journalid, jitemid, quick?, anum?
+# des-dbh: Master database handle.
 # des-dbcm: Cluster master db to delete item from.
 # des-journalid: Journal ID item is in.
 # des-jitemid: Journal itemid of item to delete.
@@ -4509,6 +4996,15 @@ sub delete_item2
     return 1;
 }
 
+# <LJFUNC>
+# name: LJ::delete_talkitem
+# class: 
+# des: 
+# info: 
+# args: 
+# des-: 
+# returns: 
+# </LJFUNC>
 sub delete_talkitem
 {
     my ($dbcm, $jid, $jtalkid) = @_;

@@ -10,9 +10,11 @@ use Data::Dumper;
 
 my $opt_warn = 0;
 my $opt_file;
+my $opt_stubs = 0;  # generate stubs of undoced funcs
 GetOptions(
 	   'warn' => \$opt_warn,
 	   'file=s' => \$opt_file,
+	   'stubs' => \$opt_stubs,
 	   );
 
 die "Unknown arguments.\n" if @ARGV;
@@ -93,9 +95,23 @@ sub check_file
 	    my $s = $1;
 	    my $total = $curpackage . "::" . $s;
 	    unless ($funcs{$total}) {
-		print "Undocumented: $total\n";
+		print STDERR "Undocumented: $total\n";
+		
+		if ($opt_stubs) {
+		    print "# <LJFUNC>\n";
+		    print "# name: $total\n";
+		    print "# class: \n";
+		    print "# des: \n";
+		    print "# info: \n";
+		    print "# args: \n";
+		    print "# des-: \n";
+		    print "# returns: \n";
+		    print "# </LJFUNC>\n";
+		}
 	    }
 	}
+
+	print $l if $opt_stubs;
 	
 	if (! $infunc) {
 	    if ($l =~ /<LJFUNC>/) {
