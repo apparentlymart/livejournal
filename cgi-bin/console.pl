@@ -20,8 +20,6 @@ sub parse_line
     $cmd =~ s/\s+$//;
     $cmd =~ s/\t/ /g;
     
-    my @args;
-    
     my $state = 'a';  # w=whitespace, a=arg, q=quote, e=escape (next quote isn't closing)
     
     my @args;

@@ -508,7 +508,6 @@ sub postevent
 
     ### allow for posting to journals that aren't yours (if you have permission)
     my $posterid = $u->{'userid'};
-    my $ownerid = $flags->{'ownerid'};
 
     # make the proper date format
     my $qeventtime = $dbh->quote(sprintf("%04d-%02d-%02d %02d:%02d",
