@@ -10,28 +10,16 @@ INERR=>{DR}<font color="#ff0000"><b>%%data%%</b></font>
 SOERROR=>{DR}<div><b>%%data%%</b></div>
 
 NEEDLOGIN<=
-<?h1 Login Required h1?>
-<?p
-To view this page you must first <a href="/login.bml?ret=1">go login</a>.
-p?>
+<?h1 <?_ml bml.needlogin.head _ml?> h1?>
+<?p <?_code return BML::ml('bml.needlogin.body', { 'aopts' => 'href="/login.bml?ret=1"' }); _code?> p?>
 <=NEEDLOGIN
 
 BADINPUT<=
-<?h1 Bad Unicode input h1?>
-<?p
-Your browser sent some text which is not recognised as valid text in the
-UTF-8 encoding, as it should be. This might happen if you forced your browser 
-to view the previous page in some other encoding rather than UTF-8. It may
-also indicate a bug in the browser. If you cannot get around this error,
-contact us. 
-p?>
+<?h1 <?_ml bml.badinput.head _ml?> h1?>
+<?p <?_ml bml.badinput.body _ml?> p?>
 <=BADINPUT
 
-REQUIREPOST<=
-{S}As a security precaution, the page you're viewing requires a POST request, 
-not a GET.  If you're trying to submit this form legitimately, please 
-contact us.
-<=REQUIREPOST
+REQUIREPOST=><?_ml bml.requirepost _ml?>
 
 LOAD_PAGE_INFO<=
 <?_code
@@ -213,11 +201,8 @@ STANDOUT<=
 <=STANDOUT
 
 BADCONTENT<=
-<?h1 Error h1?>
-<?p
-One or more errors occurred processing your request.  Please go back, correct the 
-necessary information, and submit your data again.
-p?>
+<?h1 <?_ml Error _ml?> h1?>
+<?p <?_ml bml.badcontent.body _ml?> p?>
 <=BADCONTENT
 
 DE<=

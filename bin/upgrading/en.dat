@@ -3272,6 +3272,18 @@ Actionlink=[[[link]]]
 
 Backlink=[<a href="[[link]]">&lt;&lt;</a> [[text]]]
 
+bml.badcontent.body=One or more errors occurred processing your request.  Please go back, correct the necessary information, and submit your data again.
+
+bml.badinput.body=Your browser sent some text which is not recognised as valid text in the UTF-8 encoding, as it should be. This might happen if you forced your browser to view the previous page in some other encoding rather than UTF-8. It may also indicate a bug in the browser. If you cannot get around this error, contact us.
+
+bml.badinput.head=Bad Unicode Input
+
+bml.needlogin.body=In order to view this page, you must <a [[aopts]]>log in</a>.
+
+bml.needlogin.head=Login Required
+
+bml.requirepost=As a security precaution, the page you're viewing requires a POST request, not a GET. If you're trying to submit this form legitimately, please contact us.
+
 BML.parse_multipart.parse=Error parsing upload
 
 BML.parse_multipart.toolarge=Upload too large
