@@ -5858,22 +5858,22 @@ sub kill_session
 # des: Load user relationship information. Loads all relationships of type 'type' in
 #      which user 'userid' participates on the left side (is the source of the
 #      relationship).
-# args: dbs, userid, type
+# args: dbarg?, userid, type
 # arg-userid: userid or a user hash to load relationship information for.
 # arg-type: type of the relationship
 # returns: reference to an array of userids
 # </LJFUNC>
 sub load_rel_user
 {
-    my ($dbs, $userid, $type) = @_;
-    my $sql;
+    my $dbarg = (ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db") ? shift : undef;
+    my ($userid, $type) = @_;
     return undef unless $type and $userid;
     $userid = LJ::want_userid($userid);
-    my $dbr = $dbs->{'reader'};
-    my $qtype = $dbr->quote($type);
-
-    my $res = $dbr->selectcol_arrayref("SELECT targetid FROM reluser WHERE userid=$userid AND type=$qtype");
-    return $res;
+    my $dbr;
+    $dbr = $dbarg->{'reader'} if ref $dbarg eq "LJ::DBSet";
+    $dbr ||= $dbarg || LJ::get_db_reader();
+    return $dbr->selectcol_arrayref("SELECT targetid FROM reluser WHERE userid=? AND type=?",
+                                    undef, $userid, $type);
 }
 
 # <LJFUNC>
