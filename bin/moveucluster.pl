@@ -417,6 +417,7 @@ elsif ($sclust > 0)
         'modblob' => 'journalid',
         'counter' => 'journalid',
         'userblob' => 'journalid',
+        'clustertrack2' => 'userid',
 
         # log
         'log2' => 'journalid',
@@ -505,7 +506,7 @@ elsif ($sclust > 0)
     foreach my $table (qw(loginstall ratelog sessions userproplite2
                           sessions_data userbio userpicblob2
                           s1usercache modlog modblob counter
-                          s1style s1overrides links userblob), @local_tables) {
+                          s1style s1overrides links userblob clustertrack2), @local_tables) {
 	next if $table =~ /^mod/ && $u->{journaltype} eq "P";
         print "  moving $table ...\n" if $optv > 1;
         my @cols;

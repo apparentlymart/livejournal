@@ -67,15 +67,12 @@
      LJ::text_out(\$u->{'name'}) if $u;
      if ($u && ($GET{'mode'} eq "full" || $u->{'journaltype'} eq "Y")) {
          $sth = $dbr->prepare("SELECT timeupdate, timecreate, ".
-                              "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timecheck) ".
-                              "AS 'secondscheck', ".
                               "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
                               "AS 'secondsold' FROM userusage ".
                               "WHERE userid=$userid");
          $sth->execute;
          ($u->{'timeupdate'}, 
           $u->{'timecreate'},
-          $u->{'secondscheck'},
           $u->{'secondsold'}) = $sth->fetchrow_array;
      }
  }
@@ -446,7 +443,7 @@ if ($u->{'journaltitle'}) {
           $body .= "<tr><td align='right'><b>$ML{'.label.birthdate'}</b></td><td colspan='$span'>$bdate</td></tr>\n";
       }
   }
- 
+
   if ( ! $synd && ($u->{'allow_contactshow'} eq "Y" ||
       ($u->{'allow_contactshow'} eq "F" && $remote_isfriend)))
   {
@@ -462,10 +459,25 @@ if ($u->{'journaltitle'}) {
           return $mret;
       };
 
-      my $hide_after = LJ::get_cap($u, "hide_email_after");
+      # some classes of users we want to have their contact info hidden
+      # after so much time of activity, to prevent people from bugging
+      # them for their account or trying to brute force it.
+      my $hide_contactinfo = sub {
+          my $hide_after = LJ::get_cap($u, "hide_email_after");
+          return 0 unless $hide_after;
+          my $memkey = [$u->{userid}, "timeactive:$u->{userid}"];
+          my $active;
+          unless (defined($active = LJ::MemCache::get($memkey))) {
+              $active = $dbcr->selectrow_array("SELECT timeactive FROM clustertrack2 ".
+                                               "WHERE userid=?", undef, $u->{userid});
+              LJ::MemCache::set($memkey, $active, 86400);
+          }
+          return $active && (time() - $active) > $hide_after * 86400;
+      };
+
       unless ($u->{'opt_whatemailshow'} eq "N" ||
               $u->{'opt_whatemailshow'} eq "L" && $u->{'no_mail_alias'} ||
-              $hide_after && $u->{'secondscheck'} > $hide_after * 86400) {
+              $hide_contactinfo->()) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.email'}</b></td><td colspan='$span'>";
           my @emails = ($u->{'email'});
