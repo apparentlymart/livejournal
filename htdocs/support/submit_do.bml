@@ -4,10 +4,6 @@ body<=
 
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
  my @errors = ();
 
  unless (LJ::did_post()) { push @errors, "<?requirepost?>"; }
@@ -23,14 +19,14 @@ body<=
      $req{'reqtype'} = "user";
      $user = LJ::canonical_username($FORM{'user'});
      if ($FORM{'password'} eq "_REMOTE") {
-         $remote = LJ::get_remote($dbh);
+         $remote = LJ::get_remote();
          if ($remote && $remote->{'user'} eq $user) {
-             $u = LJ::load_user($dbs, $remote->{'user'});
+             $u = LJ::load_user($remote->{'user'});
              $req{'requserid'} = $remote->{'userid'};
          }
      }
      unless ($req{'requserid'}) {
-         $u = LJ::load_user($dbs, $user);
+         $u = LJ::load_user($user);
          push @errors, "Invalid username" unless $u;
          if (LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) {
              $req{'requserid'} = $u->{'userid'};
@@ -54,7 +50,7 @@ body<=
  $req{'spcatid'} = $FORM{'spcatid'};
 
  return LJ::bad_input(@errors) if @errors;
- my $spid = LJ::Support::file_request($dbh, \@errors, \%req);
+ my $spid = LJ::Support::file_request(\@errors, \%req);
  return LJ::bad_input(@errors) if @errors;
  
  $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";

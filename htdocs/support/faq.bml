@@ -19,9 +19,7 @@ p?>
      $altlang = 0 unless $mll && $mld;
  }
 
- my $dbs = LJ::get_dbs();
- my $dbr = $dbs->{'reader'};
-
+ my $dbr = LJ::get_db_reader();
  my %faqcat;
  my %faqq;
  my $ret = "";

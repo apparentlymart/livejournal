@@ -7,13 +7,11 @@ body<=
     use strict;
     use vars qw(%FORM);
 
-    my $dbh = LJ::get_db_writer();
-    my $dbr = LJ::get_db_reader();
     my $spid = $FORM{'id'}+0;
-    my $sp = LJ::Support::load_request($dbr, $spid);
-    my $cats = LJ::Support::load_cats($dbr);
-    my $remote = LJ::get_remote($dbr);
-    LJ::Support::init_remote($dbr, $remote);
+    my $sp = LJ::Support::load_request($spid);
+    my $cats = LJ::Support::load_cats();
+    my $remote = LJ::get_remote();
+    LJ::Support::init_remote($remote);
 
     if ($FORM{'find'}) {
         my $find = $FORM{'find'};
@@ -36,7 +34,9 @@ body<=
         }
         my $clause = "";
         $clause = "AND spid$op$spid" unless ($find eq 'first' || $find eq 'last');
-        my ($foundspid) = $dbh->selectrow_array("SELECT spid FROM support WHERE state='open' $spcatand $clause ORDER BY spid $sort LIMIT 1");
+        my $dbr = LJ::get_db_reader();
+        my ($foundspid) = $dbr->selectrow_array("SELECT spid FROM support WHERE state='open' $spcatand $clause ".
+                                                "ORDER BY spid $sort LIMIT 1");
         if ($foundspid) {
             return BML::redirect("see_request.bml?id=$foundspid");
         } else {
@@ -63,7 +63,8 @@ body<=
 
     my $winner;  # who closed it?
     if ($sp->{'state'} eq "closed") {
-        $sth = $dbh->prepare("SELECT u.user, sp.points FROM user u, supportpoints sp WHERE u.userid=sp.userid AND sp.spid=?");
+        my $dbr = LJ::get_db_reader();
+        $sth = $dbr->prepare("SELECT u.user, sp.points FROM user u, supportpoints sp WHERE u.userid=sp.userid AND sp.spid=?");
         $sth->execute($spid);
         $winner = $sth->fetchrow_hashref;
     }
@@ -78,7 +79,7 @@ body<=
         return "<?h1 Error h1?><?p You don't have the necessary privilege to view this request. p?>";
     }
 
-    if (LJ::Support::can_close($dbh, $sp, $remote, $auth)) {
+    if (LJ::Support::can_close($sp, $remote, $auth)) {
         $owner_mode = 1;
     }
 
@@ -119,7 +120,7 @@ body<=
         if ($u->{'stylesys'} == 2) {
             $ret .= "(S2) ";
             if ($u->{'s2_style'}) {
-                my $s2style = LJ::S2::load_style($dbr, $u->{'s2_style'});
+                my $s2style = LJ::S2::load_style($u->{'s2_style'});
                 my $pub = LJ::S2::get_public_layers(); # cached
                 foreach my $lay (keys %{$s2style->{'layer'}}) {
                     my $lid = $s2style->{'layer'}->{$lay};
@@ -184,7 +185,7 @@ body<=
             $state = "<b><span style='color: #ff0000;'>open</span></b>"; 
         }
     }
-    if ($state eq "closed" && $winner && LJ::Support::can_see_helper($dbh, $sp, $remote)) {
+    if ($state eq "closed" && $winner && LJ::Support::can_see_helper($sp, $remote)) {
         my $s = $winner->{'points'} > 1 ? "s" : "";
         my $wuser = $winner->{'user'};
         $state .= " (<b>$winner->{'points'}</b> point$s to ";
@@ -209,7 +210,8 @@ body<=
     });
 
     my %userinfo;
-    $sth = $dbh->prepare("SELECT DISTINCT u.userid, u.user, u.name, u.defaultpicid " .
+    my $dbr = LJ::get_db_reader();
+    $sth = $dbr->prepare("SELECT DISTINCT u.userid, u.user, u.name, u.defaultpicid " .
                          "FROM supportlog s, user u WHERE s.spid=? AND u.userid=s.userid");
     $sth->execute($spid);
     $userinfo{$_->{'userid'}} = $_ while ($_ = $sth->fetchrow_hashref);
@@ -221,14 +223,14 @@ body<=
     my @screened;
 
     ### reply loop
-    $sth = $dbh->prepare("SELECT splid, timelogged, UNIX_TIMESTAMP()-timelogged AS 'age', type, faqid, userid, message " . 
+    $sth = $dbr->prepare("SELECT splid, timelogged, UNIX_TIMESTAMP()-timelogged AS 'age', type, faqid, userid, message " . 
                          "FROM supportlog WHERE spid=? ORDER BY timelogged");
     $sth->execute($spid);
     while (my $le = $sth->fetchrow_hashref)
     {
-        next if ($le->{'type'} eq "internal" && ! (LJ::Support::can_read_internal($dbh, $sp, $remote) ||
+        next if ($le->{'type'} eq "internal" && ! (LJ::Support::can_read_internal($sp, $remote) ||
                                                    ($remote && $remote->{'userid'} == $le->{'userid'} )));
-        next if ($le->{'type'} eq "screened" && ! (LJ::Support::can_read_screened($dbh, $sp, $remote) ||
+        next if ($le->{'type'} eq "screened" && ! (LJ::Support::can_read_screened($sp, $remote) ||
                                                    ($remote && $remote->{'userid'} == $le->{'userid'} )));
         
         if ($le->{'type'} eq "screened") {
@@ -257,7 +259,7 @@ body<=
      
         # reply header
         my $header = "";
-        if ($le->{'userid'} && LJ::Support::can_see_helper($dbh, $sp, $remote)) {
+        if ($le->{'userid'} && LJ::Support::can_see_helper($sp, $remote)) {
             my $up = $userinfo{$le->{'userid'}};
             my $picid = $up->{'defaultpicid'};
             $header = "<table style='margin-top: 15px;'><tr valign='bottom'>";
@@ -291,7 +293,8 @@ body<=
         $ret .= "<tr><td align='center'>\n";
         if ($le->{'faqid'}) {
             # faq question
-            my $sth = $dbh->prepare("SELECT question FROM faq WHERE faqid=?");
+            my $dbr = LJ::get_db_reader();
+            my $sth = $dbr->prepare("SELECT question FROM faq WHERE faqid=?");
             $sth->execute($le->{'faqid'});
             my $faqname = $sth->fetchrow_array;
             $ret .= "<div style='display: table; padding: 3px; background: #d0d0d0; border: 1px solid #000000; margin-left: auto; margin-right: auto;'>\n";
@@ -317,13 +320,13 @@ body<=
         return $ret;
     }
  
-    unless (LJ::Support::can_append($dbh, $sp, $remote, $auth))
+    unless (LJ::Support::can_append($sp, $remote, $auth))
     {
         $ret .= "Sorry, you do not have access to answer people's support requests in this category.\n";
         return $ret;
     }
 
-    my @ans_type = LJ::Support::get_answer_types($dbh, $sp, $remote, $auth);
+    my @ans_type = LJ::Support::get_answer_types($sp, $remote, $auth);
     my %ans_type = @ans_type;
 
     if ($ans_type{'answer'} || $ans_type{'screened'})
@@ -357,18 +360,19 @@ body<=
 
     if ($ans_type{'answer'} || $ans_type{'screened'}) 
     {
+        my $dbr = LJ::get_db_reader();
         # FAQ reference
         $ret .= "<tr valign='middle'><td align='right'>Reference <a href='faq.bml'>FAQ</a>:</td><td colspan='2'>\n";
 
         my %faqcat;
         my %faqq;
-        $sth = $dbh->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat WHERE faqcat<>'int-abuse'");
+        $sth = $dbr->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat WHERE faqcat<>'int-abuse'");
         $sth->execute;
         while ($_ = $sth->fetchrow_hashref) {
             $faqcat{$_->{'faqcat'}} = $_;
         }
      
-        $sth = $dbh->prepare("SELECT faqid, question, sortorder, faqcat, lastmodtime FROM faq WHERE faqcat<>'int-abuse'");
+        $sth = $dbr->prepare("SELECT faqid, question, sortorder, faqcat, lastmodtime FROM faq WHERE faqcat<>'int-abuse'");
         $sth->execute;
         while ($_ = $sth->fetchrow_hashref) {
             $faqq{$_->{'faqid'}} = $_;
@@ -409,7 +413,7 @@ body<=
     }
     
     # helpers can do actions:
-    if (LJ::Support::can_perform_actions($dbh, $sp, $remote) &&
+    if (LJ::Support::can_perform_actions($sp, $remote) &&
         ! LJ::Support::is_poster($sp, $remote, $auth))
     {
         $ret .= "<tr><td align='right'></td><td>\n";
@@ -423,7 +427,7 @@ body<=
                                 LJ::Support::sorted_cats($cats));
         $ret .= "</td>";
 
-        if (@screened && LJ::Support::can_help($dbh, $sp, $remote)) {
+        if (@screened && LJ::Support::can_help($sp, $remote)) {
             $ret .= "<td>Approve Screened Response:<br />";
             $ret .= LJ::html_select({ 'name' => 'approveans' },
                                     ('', ''),
@@ -447,7 +451,7 @@ body<=
             $ret .= "<?de (Use this to remove the &quot;still needs help&quot; message.) de?>\n";
             $ret .= "</td></tr>\n";
         }
-        if (LJ::Support::can_help($dbh, $sp, $remote)) {
+        if (LJ::Support::can_help($sp, $remote)) {
             $ret .= "<tr><td>Change summary:</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'changesum' });
             $ret .= "<?de (Use this to change the request summary.) de?>\n";

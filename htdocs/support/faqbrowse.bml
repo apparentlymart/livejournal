@@ -13,9 +13,9 @@
     my $faqid = $GET{'faqid'} + 0;
     my $faqcat = $GET{'faqcat'};
 
-    my $dbh = LJ::get_db_writer();
     my $where;
 
+    my $dbr = LJ::get_db_reader();
     # loading single faqid
     if ($faqid) {
         $$title = BML::ml('.title_num', { 'num' => $faqid });
@@ -23,11 +23,11 @@
 
     # loading entire faqcat
     } elsif ($faqcat) {
-        my $catname = $dbh->selectrow_array("SELECT faqcatname FROM faqcat WHERE faqcat=?",
+        my $catname = $dbr->selectrow_array("SELECT faqcatname FROM faqcat WHERE faqcat=?",
                                             undef, $faqcat);
         $$title = BML::ml('.title_cat', { 'catname' => LJ::ehtml($catname) });
 
-        $where = "faqcat=" . $dbh->quote($faqcat);
+        $where = "faqcat=" . $dbr->quote($faqcat);
 
     # no faqid or faqcat specified, redirect
     } else {
@@ -48,14 +48,14 @@
     }
 
     # query db and get data
-    my $sth = $dbh->prepare("SELECT faqid, question, answer, lastmoduserid, ".
+    my $sth = $dbr->prepare("SELECT faqid, question, answer, lastmoduserid, ".
                             "DATE_FORMAT(lastmodtime, '%Y-%m-%d'), ".
                             "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
                             "WHERE $where ORDER BY sortorder");
     $sth->execute;
-    if ($dbh->err) {
+    if ($dbr->err) {
         $$title = $ML{'Error'};
-        $$body = "$ML{'error.dberror'} <ul><li>" . $dbh->errstr . "</li></ul>\n";
+        $$body = "$ML{'error.dberror'} <ul><li>" . $dbr->errstr . "</li></ul>\n";
         return;
     }
 
@@ -63,6 +63,7 @@
     while (my ($faqid, $question, $answer, $lastmoduserid, 
                $lastmodtime, $unixmodtime) = $sth->fetchrow_array)
     {
+        my $dbh = LJ::get_db_writer();
         # log this faq view
         $dbh->do("REPLACE INTO faquses (faqid, userid, dateview) ".
                  "VALUES ($faqid, ?, NOW())", undef, $remote->{'userid'}) if $remote;

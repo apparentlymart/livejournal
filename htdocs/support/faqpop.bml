@@ -9,9 +9,7 @@ p?>
 
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbr = $dbs->{'reader'};
-
+ my $dbr = LJ::get_db_reader();
  $sth = $dbr->prepare("SELECT f.faqid, f.question, s.statval AS 'uses'".
                       "FROM faq f, stats s WHERE f.faqcat<>'int-abuse' AND s.statcat='popfaq' ".
                       "AND s.statkey=f.faqid ORDER BY s.statval DESC LIMIT 50");

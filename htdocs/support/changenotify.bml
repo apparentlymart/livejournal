@@ -8,11 +8,7 @@ body<=
 
  my @errors = ();
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
  my $mode = $FORM{'mode'} || "modify";
 
  unless ($remote) {
@@ -23,8 +19,8 @@ body<=
  }
  return LJ::bad_input(@errors) if @errors;
  
- LJ::Support::init_remote($dbh, $remote);
- my $cats = LJ::Support::load_cats($dbh);
+ LJ::Support::init_remote($remote);
+ my $cats = LJ::Support::load_cats();
  my @filter_cats = LJ::Support::filter_cats($remote, $cats);
 
  if ($mode eq "modify")
@@ -36,7 +32,8 @@ body<=
      $ret .= "<?h1 Change Notification Settings h1?><?p Here you may select what categories of support requests you'd like to be notified about.  Choices are <B>off</B> (the default), <B>new</B> (you'll get notifications when a new support request in that category is posted) or <B>all</B> (you'll get notifications and then a copy of each comment/solution posted). p?>";
 
      my %notify;
-     $sth = $dbh->prepare("SELECT spcatid, level FROM supportnotify WHERE userid=$remote->{'userid'}");
+     my $dbr = LJ::get_db_reader();
+     $sth = $dbr->prepare("SELECT spcatid, level FROM supportnotify WHERE userid=$remote->{'userid'}");
      $sth->execute;
      while (my ($spcatid, $level) = $sth->fetchrow_array) {
          ## if user used to be able to read a category, subscribed, then lost
@@ -75,6 +72,7 @@ body<=
 
  if ($mode eq "save")
  {
+     my $dbh = LJ::get_db_writer();
      $dbh->do("DELETE FROM supportnotify WHERE userid=$remote->{'userid'}");
      my $sql;
 

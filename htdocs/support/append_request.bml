@@ -4,14 +4,10 @@ body<=
 
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
  my $status = "";
 
  my $spid = $FORM{'spid'}+0;
- my $sp = LJ::Support::load_request($dbh, $spid);
+ my $sp = LJ::Support::load_request($spid);
  unless ($sp) { return "<?h1 Error h1?><?p Unknown support request. p?>"; }
 
  if ($sp->{'state'} eq "closed") {
@@ -20,13 +16,13 @@ body<=
 
  my $u;
  if ($sp->{'reqtype'} eq "user") {
-     $u = LJ::load_userid($dbh, $sp->{'requserid'});
+     $u = LJ::load_userid($sp->{'requserid'});
  }
 
- my $remote = LJ::get_remote($dbh);
- LJ::Support::init_remote($dbh, $remote);
+ my $remote = LJ::get_remote();
+ LJ::Support::init_remote($remote);
 
- unless (LJ::Support::can_append($dbh, $sp, $remote, $FORM{'auth'}) || $remote) {
+ unless (LJ::Support::can_append($sp, $remote, $FORM{'auth'}) || $remote) {
      return LJ::bad_input("You must <a href=\"/login.bml\">login</a> to help people out.");
  }
 
@@ -40,7 +36,7 @@ body<=
  ### insert record
  my $faqid = $FORM{'faqid'}+0;
  
- my %answer_types = LJ::Support::get_answer_types($dbh, $sp, $remote, $FORM{'auth'});
+ my %answer_types = LJ::Support::get_answer_types($sp, $remote, $FORM{'auth'});
 
  my $type = $FORM{'replytype'};
  unless (defined $answer_types{$type}) {
@@ -49,28 +45,28 @@ body<=
 
  ## can we do the action we want?
  if ($FORM{'approveans'} && 
-     ($type ne "internal" || ! LJ::Support::can_help($dbh, $sp, $remote)))
+     ($type ne "internal" || ! LJ::Support::can_help($sp, $remote)))
  {
      return LJ::bad_input("To approve an answer, you must select \"Internal Comment ".
                        "/ Action\" and optionally explain why you're approving it.");
  }
 
  if ($FORM{'changecat'} &&
-     ($type ne "internal" || ! LJ::Support::can_perform_actions($dbh, $sp, $remote)))
+     ($type ne "internal" || ! LJ::Support::can_perform_actions($sp, $remote)))
  {
      return LJ::bad_input("To change a request's category, you must select \"Internal Comment ".
                        "/ Action\" and explain why you're changing it.");
  }
 
  if (($FORM{'touch'} || $FORM{'untouch'}) &&
-     ($type ne "internal" || ! LJ::Support::can_perform_actions($dbh, $sp, $remote)))
+     ($type ne "internal" || ! LJ::Support::can_perform_actions($sp, $remote)))
  {
      return LJ::bad_input("To touch this request, you must select \"Internal Comment ".
                        "/ Action\" and explain why you're touching it.");
  }
 
  if ($FORM{'changesum'} && ($type ne "internal" ||
-     ! LJ::Support::can_help($dbh, $sp, $remote)))
+     ! LJ::Support::can_help($sp, $remote)))
  {
      return LJ::bad_input("To change the summary of the request, you must select \"Internal Comment".
                        "/ Action\" and enter in the new summary.");
@@ -83,6 +79,7 @@ body<=
 
  ## touch/untouch request
  if ($FORM{'touch'}) {
+     my $dbh = LJ::get_db_writer();
      $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
      $status .= "(Inserting request into queue)\n\n";
  }
@@ -93,14 +90,16 @@ body<=
 
  if (LJ::Support::is_poster($sp, $remote, $FORM{'auth'})) 
  {
+     my $dbh = LJ::get_db_writer();
      $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
  }
 
  ## change category
  if ($FORM{'changecat'}) {
      my $newcat = $FORM{'changecat'}+0;
-     my $cats = LJ::Support::load_cats($dbh, $newcat);
+     my $cats = LJ::Support::load_cats($newcat);
      if ($cats->{$newcat}) {
+         my $dbh = LJ::get_db_writer();
          $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
          $status .= "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n";
          $sp->{'spcatid'} = $newcat; # update category so IC e-mail goes to right place
@@ -112,15 +111,16 @@ body<=
  ## approving a screened entry
  if ($FORM{'approveans'}) {
      my $splid = $FORM{'approveans'}+0;
-     my $res = LJ::Support::load_response($dbh, $splid);
+     my $res = LJ::Support::load_response($splid);
      if ($res->{'spid'} == $spid && $res->{'type'} eq "screened") {
          return LJ::bad_input('Invalid type to approve screened response as.')
             if (($FORM{'approveas'} ne 'answer') && ($FORM{'approveas'} ne 'comment'));
          # approve
+         my $dbh = LJ::get_db_writer();
          my $qtype = $dbh->quote($FORM{'approveas'});
          $dbh->do("UPDATE supportlog SET type=$qtype WHERE splid=$splid");
          $status .= "(Approving $FORM{'approveas'} \#$splid)\n\n";
-         LJ::Support::mail_response_to_user($dbh, $sp, $splid);
+         LJ::Support::mail_response_to_user($sp, $splid);
      } else {
          return LJ::bad_input("Invalid screened response to approve.");
      }
@@ -129,19 +129,20 @@ body<=
  ## change summary
  if ($FORM{'changesum'}) {
      $FORM{'body'} =~ s/[\n\r]//g;
+     my $dbh = LJ::get_db_writer();
      my $qnewsub = $dbh->quote($FORM{'body'});
      $dbh->do("UPDATE support SET subject=$qnewsub WHERE spid=$spid");
      $status .= "Changing subject from \"$sp->{'subject'}\" to: ";
  }
 
- my $splid = LJ::Support::append_request($dbh, $sp, {
+ my $splid = LJ::Support::append_request($sp, {
      'body' => $status . $FORM{'body'},
      'posterid' => $remote ? $remote->{'userid'} : 0,
      'type' => $type,
      'faqid' => $faqid,
  });
 
- LJ::Support::mail_response_to_user($dbh, $sp, $splid);
+ LJ::Support::mail_response_to_user($sp, $splid);
 
  my $auth_arg = $FORM{'auth'} ? "&auth=$FORM{'auth'}" : "";
  return "<?h1 Logged h1?><?p Your comment/solution <a href=\"see_request.bml?id=$spid$auth_arg\">has been recorded</a>. p?>

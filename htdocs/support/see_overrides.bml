@@ -12,7 +12,7 @@ body<=
     my $user = LJ::canonical_username($FORM{'user'});
 
     my $dbr = LJ::get_db_reader();
-    my $remote = LJ::get_remote($dbr);
+    my $remote = LJ::get_remote();
 
     my $sth;
     my $body = "";
@@ -25,18 +25,18 @@ body<=
     }
 
     # check for privs
-    unless (LJ::check_priv($dbr, $remote, "supportviewscreened") ||
-            LJ::check_priv($dbr, $remote, "supporthelp") ||
+    unless (LJ::check_priv($remote, "supportviewscreened") ||
+            LJ::check_priv($remote, "supporthelp") ||
             $remote->{'user'} eq $user) {
         push @errors, BML::ml(".error.noprivs");
     }
 
     # remote is authenticated, now load $u
-    my $u = LJ::load_user($dbr, $user);
+    my $u = LJ::load_user($user);
     push @errors, $ML{'error.username_notfound'} unless $u;
 
     # see if they're using s2
-    LJ::load_user_props($dbr, $u, "stylesys");
+    LJ::load_user_props($u, "stylesys");
     push @errors, BML::ml(".error.nos1", { 'user' => $user }) if $u->{'stylesys'} == 2;
 
     # return errors if we have them

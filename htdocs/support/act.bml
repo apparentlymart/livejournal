@@ -1,9 +1,5 @@
 <?_code
  
- $dbs = LJ::get_dbs();
- $dbh = $dbs->{'dbh'};
- $dbr = $dbs->{'reader'};
-
  my $cmd = BML::get_query_string();
  if ($cmd =~ /^(\w+);(\d+);(\w{15})(?:;(\d+))?$/) {
      ($action, $spid, $authcode, $splid) = ($1, $2, $3, $4);
@@ -25,17 +21,17 @@ body<=
  if ($title eq "Error") { 
      return "<?h1 Error h1?><?p Improper arguments. p?>";
  }
- my $remote = LJ::get_remote($dbh);
+ my $remote = LJ::get_remote();
  
- LJ::Support::init_remote($dbh, $remote);
- my $sp = LJ::Support::load_request($dbh, $spid);
+ LJ::Support::init_remote($remote);
+ my $sp = LJ::Support::load_request($spid);
 
  if ($sp->{'authcode'} ne $authcode) {
      return "<?h1 Error h1?><?p Invalid authcode. p?>";
  }
 
  if ($action eq "touch") {
-     LJ::Support::touch_request($dbh, $spid)
+     LJ::Support::touch_request($spid)
        or return "<?h1 Error h1?><?p Touch failed. p?>";
 
      $ret .= ("<?h1 Touched h1?><?p Your support request ".
@@ -78,6 +74,7 @@ body<=
 
  if ($action eq "close") {
      if ($sp->{'state'} eq "open") {
+         my $dbh = LJ::get_db_writer();
          $splid += 0;
          if ($splid) {
              $sth = $dbh->prepare("SELECT userid, timelogged, spid, type FROM supportlog WHERE splid=$splid");
@@ -90,7 +87,7 @@ body<=
 
              ## can't credit yourself.
              if ($userid != $sp->{'requserid'} && $type eq "answer") {
-                 my $cats = LJ::Support::load_cats($dbh, $sp->{'spcatid'});
+                 my $cats = LJ::Support::load_cats($sp->{'spcatid'});
                  my $secold = $timelogged - $sp->{'timecreate'};
                  my $points = LJ::Support::calc_points($sp, $secold);
                  $dbh->do("INSERT INTO supportpoints (spid, userid, points) VALUES ($spid, $userid, $points)");
@@ -99,13 +96,14 @@ body<=
          $dbh->do("UPDATE support SET state='closed', timeclosed=UNIX_TIMESTAMP() WHERE spid=$spid");
      }
 
-     my $remote = LJ::get_remote($dbs);
-     my $is_admin = LJ::check_priv($dbs, $remote, "supportclose");
+     my $remote = LJ::get_remote();
+     my $is_admin = LJ::check_priv($remote, "supportclose");
      if ($is_admin)
      {
+         my $dbr = LJ::get_db_reader();
          my $catid = $sp->{'_cat'}->{'spcatid'};
          my $sql = "SELECT MIN(spid) FROM support WHERE spcatid=$catid AND state='open' AND timelasthelp>timetouched AND spid>$spid";
-         my $sth = $dbh->prepare($sql);
+         my $sth = $dbr->prepare($sql);
          $sth->execute;
          my $next = $sth->fetchrow_array;
          if ($next) {

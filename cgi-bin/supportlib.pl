@@ -9,11 +9,12 @@ use Digest::MD5 qw(md5_hex);
 ## pass $id of zero or blank to get all categories
 sub load_cats
 {
-    my ($dbh, $id) = @_;
+    my ($id) = @_;
     my $hashref = {};
     $id += 0;
     my $where = $id ? "WHERE spcatid=$id" : "";
-    my $sth = $dbh->prepare("SELECT * FROM supportcat $where");
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare("SELECT * FROM supportcat $where");
     $sth->execute;
     $hashref->{$_->{'spcatid'}} = $_ while ($_ = $sth->fetchrow_hashref);
     return $hashref;
@@ -21,9 +22,9 @@ sub load_cats
 
 sub load_email_to_cat_map
 {
-    my $dbh = shift;
     my $map = {};
-    my $sth = $dbh->prepare("SELECT * FROM supportcat ORDER BY sortorder DESC");
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare("SELECT * FROM supportcat ORDER BY sortorder DESC");
     $sth->execute;
     while (my $sp = $sth->fetchrow_hashref) {
         next unless ($sp->{'replyaddress'});
@@ -45,10 +46,9 @@ sub calc_points
 
 sub init_remote
 {
-    my $dbh = shift;
     my $remote = shift;
     return unless $remote;
-    LJ::load_user_privs($dbh, $remote, 
+    LJ::load_user_privs($remote, 
                         qw(supportclose supporthelp 
                            supportdelete supportread));
 }
@@ -111,11 +111,11 @@ sub is_poster
 
 sub can_see_helper
 {
-    my ($dbh, $sp, $remote) = @_;
+    my ($sp, $remote) = @_;
     my $see = 1;
     if ($sp->{_cat}->{'hide_helpers'}) { 
         $see = 0; 
-        if (can_help($dbh, $sp, $remote)) {
+        if (can_help($sp, $remote)) {
             $see = 1;
         }
     }
@@ -139,24 +139,24 @@ sub can_read_cat
 
 sub can_close
 {
-    my ($dbh, $sp, $remote, $auth) = @_;
+    my ($sp, $remote, $auth) = @_;
     if (is_poster($sp, $remote, $auth)) { return 1; }
     if ($sp->{_cat}->{'public_read'}) {
-        if (LJ::check_priv($dbh, $remote, "supportclose", "")) { return 1; }
+        if (LJ::check_priv($remote, "supportclose", "")) { return 1; }
     }
     my $catkey = $sp->{_cat}->{'catkey'};
-    if (LJ::check_priv($dbh, $remote, "supportclose", $catkey)) { return 1; }
+    if (LJ::check_priv($remote, "supportclose", $catkey)) { return 1; }
     return 0;
 }
 
 sub can_append
 {
-    my ($dbh, $sp, $remote, $auth) = @_;
+    my ($sp, $remote, $auth) = @_;
     if (is_poster($sp, $remote, $auth)) { return 1; }
     return 0 unless $remote;
     return 0 unless $remote->{'statusvis'} eq "V";
     if ($sp->{_cat}->{'allow_screened'}) { return 1; }
-    if (can_help($dbh, $sp, $remote)) { return 1; }
+    if (can_help($sp, $remote)) { return 1; }
     return 0;
 }
 
@@ -164,21 +164,21 @@ sub can_append
 # extended supportread (with a plus sign at the end of the category key)
 sub can_read_internal
 {
-    my ($dbh, $sp, $remote) = @_;    
-    if (can_help($dbh, $sp, $remote)) { return 1; }
-    if (LJ::check_priv($dbh, $remote, "supportviewinternal", "")) { return 1; }
+    my ($sp, $remote) = @_;    
+    if (can_help($sp, $remote)) { return 1; }
+    if (LJ::check_priv($remote, "supportviewinternal", "")) { return 1; }
     my $catkey = $sp->{_cat}->{'catkey'};
-    if (LJ::check_priv($dbh, $remote, "supportread", $catkey."+")) { return 1; }
-    if (LJ::check_priv($dbh, $remote, "supportviewinternal", $catkey)) { return 1; }
+    if (LJ::check_priv($remote, "supportread", $catkey."+")) { return 1; }
+    if (LJ::check_priv($remote, "supportviewinternal", $catkey)) { return 1; }
     return 0;
 }
 
 sub can_make_internal
 {
-    my ($dbh, $sp, $remote) = @_;
-    if (can_help($dbh, $sp, $remote)) { return 1; }
-    if (LJ::check_priv($dbh, $remote, "supportmakeinternal", "")) { return 1; }
-    if (LJ::check_priv($dbh, $remote, "supportmakeinternal", $sp->{_cat}->{'catkey'})) { 
+    my ($sp, $remote) = @_;
+    if (can_help($sp, $remote)) { return 1; }
+    if (LJ::check_priv($remote, "supportmakeinternal", "")) { return 1; }
+    if (LJ::check_priv($remote, "supportmakeinternal", $sp->{_cat}->{'catkey'})) { 
         return 1; 
     }
     return 0;
@@ -186,10 +186,10 @@ sub can_make_internal
 
 sub can_read_screened
 {
-    my ($dbh, $sp, $remote) = @_;
-    if (can_help($dbh, $sp, $remote)) { return 1; }
-    if (LJ::check_priv($dbh, $remote, "supportviewscreened", "")) { return 1; }
-    if (LJ::check_priv($dbh, $remote, "supportviewscreened", $sp->{_cat}->{'catkey'})) {
+    my ($sp, $remote) = @_;
+    if (can_help($sp, $remote)) { return 1; }
+    if (LJ::check_priv($remote, "supportviewscreened", "")) { return 1; }
+    if (LJ::check_priv($remote, "supportviewscreened", $sp->{_cat}->{'catkey'})) {
         return 1;
     }
     return 0;
@@ -197,10 +197,10 @@ sub can_read_screened
 
 sub can_perform_actions
 {
-    my ($dbh, $sp, $remote) = @_;
-    if (can_help($dbh, $sp, $remote)) { return 1; }
-    if (LJ::check_priv($dbh, $remote, "supportmovetouch", "")) { return 1; }
-    if (LJ::check_priv($dbh, $remote, "supportmovetouch", $sp->{_cat}->{'catkey'})) {
+    my ($sp, $remote) = @_;
+    if (can_help($sp, $remote)) { return 1; }
+    if (LJ::check_priv($remote, "supportmovetouch", "")) { return 1; }
+    if (LJ::check_priv($remote, "supportmovetouch", $sp->{_cat}->{'catkey'})) {
         return 1;
     }
     return 0;
@@ -208,35 +208,35 @@ sub can_perform_actions
 
 sub can_help
 {
-    my ($dbh, $sp, $remote) = @_;
+    my ($sp, $remote) = @_;
     if ($sp->{_cat}->{'public_read'}) {
         if ($sp->{_cat}->{'public_help'}) {
             return 1;
         }
-        if (LJ::check_priv($dbh, $remote, "supporthelp", "")) { return 1; }
+        if (LJ::check_priv($remote, "supporthelp", "")) { return 1; }
     }
     my $catkey = $sp->{_cat}->{'catkey'};
-    if (LJ::check_priv($dbh, $remote, "supporthelp", $catkey)) { return 1; }
+    if (LJ::check_priv($remote, "supporthelp", $catkey)) { return 1; }
     return 0;
 }
 
 sub load_request
 {
-    my $dbh = shift;
     my $spid = shift;
     my $sth;
 
     $spid += 0;
 
     # load the support request
-    $sth = $dbh->prepare("SELECT * FROM support WHERE spid=$spid");
+    my $dbr = LJ::get_db_reader();
+    $sth = $dbr->prepare("SELECT * FROM support WHERE spid=$spid");
     $sth->execute;
     my $sp = $sth->fetchrow_hashref;
 
     return undef unless $sp;
 
     # load the category the support requst is in
-    $sth = $dbh->prepare("SELECT * FROM supportcat WHERE spcatid=$sp->{'spcatid'}");
+    $sth = $dbr->prepare("SELECT * FROM supportcat WHERE spcatid=$sp->{'spcatid'}");
     $sth->execute;
     $sp->{_cat} = $sth->fetchrow_hashref;
 
@@ -245,14 +245,14 @@ sub load_request
 
 sub load_response
 {
-    my $dbh = shift;
     my $splid = shift;
     my $sth;
 
     $splid += 0;
 
     # load the support request
-    $sth = $dbh->prepare("SELECT * FROM supportlog WHERE splid=$splid");
+    my $dbr = LJ::get_db_reader();
+    $sth = $dbr->prepare("SELECT * FROM supportlog WHERE splid=$splid");
     $sth->execute;
     my $res = $sth->fetchrow_hashref;
 
@@ -261,7 +261,7 @@ sub load_response
 
 sub get_answer_types
 {
-    my ($dbh, $sp, $remote, $auth) = @_;
+    my ($sp, $remote, $auth) = @_;
     my @ans_type;
 
     if (is_poster($sp, $remote, $auth)) {
@@ -269,7 +269,7 @@ sub get_answer_types
         return @ans_type;
     } 
 
-    if (can_help($dbh, $sp, $remote)) {
+    if (can_help($sp, $remote)) {
         push @ans_type, ("screened" => "Screened Response", 
                          "answer" => "Answer",                         
                          "comment" => "Comment or Question");
@@ -277,7 +277,7 @@ sub get_answer_types
         push @ans_type, ("screened" => "Screened Response");
     }
 
-    if (can_make_internal($dbh, $sp, $remote) &&
+    if (can_make_internal($sp, $remote) &&
         ! $sp->{_cat}->{'public_help'})
     {
         push @ans_type, ("internal" => "Internal Comment / Action");
@@ -288,7 +288,6 @@ sub get_answer_types
 
 sub file_request
 {
-    my $dbh = shift;
     my $errors = shift;
     my $o = shift;
 
@@ -303,6 +302,8 @@ sub file_request
     }
 
     if (@$errors) { return 0; }
+
+    my $dbh = LJ::get_db_writer();
     
     my $dup_id = 0;
     my $qsubject = $dbh->quote($reqsubject);
@@ -421,7 +422,6 @@ sub file_request
 
 sub append_request
 {
-    my $dbh = shift;
     my $sp = shift;  # support request to be appended to.
     my $re = shift;  # hashref of attributes of response to be appended
     my $sth;
@@ -434,6 +434,8 @@ sub append_request
     my $message = $re->{'body'};
     $message =~ s/^\s+//;
     $message =~ s/\s+$//;
+
+    my $dbh = LJ::get_db_writer();
 
     my $qmessage = $dbh->quote($message);
     my $qtype = $dbh->quote($re->{'type'});
@@ -486,7 +488,9 @@ sub append_request
 
 sub touch_request
 {
-    my ($dbh, $spid) = @_;
+    my ($spid) = @_;
+
+    my $dbh = LJ::get_db_writer();
 
     $dbh->do("UPDATE support".
              "   SET state='open', timeclosed=0, timetouched=UNIX_TIMESTAMP()".
@@ -504,19 +508,18 @@ sub touch_request
 
 sub mail_response_to_user
 {
-    my $dbh = shift;
     my $sp = shift;
     my $splid = shift;
 
     $splid += 0;
 
-    my $res = load_response($dbh, $splid);
+    my $res = load_response($splid);
     
     my $email;
     if ($sp->{'reqtype'} eq "email") {
         $email = $sp->{'reqemail'};
     } else {
-        my $u = LJ::load_userid($dbh, $sp->{'requserid'});
+        my $u = LJ::load_userid($sp->{'requserid'});
         $email = $u->{'email'};
     }
 
@@ -538,6 +541,7 @@ sub mail_response_to_user
     return if ($sp->{'requserid'} == $res->{'userid'});
 
     my $body = "";
+    my $dbh = LJ::get_db_writer();
     my $what = $type eq "answer" ? "an answer to" : "a comment on";
     $body .= "Below is $what your support question regarding \"$sp->{'subject'}\".\n";
     $body .= "="x70 . "\n\n";
