@@ -6,103 +6,69 @@ layerinfo redist_uniq = "cleansimple/layout";
 layerinfo author_name = "Martin Atkins";
 layerinfo previews = "cleansimple/cleansimple.jpg";
 
-property string opt_margin_size {
-    des = "Size of page border";
-    values = "0|None|5px|Tiny|25px|Small|50px|Medium|75px|Large|100px|Extra Large";
+propgroup colors {
+  property Color body_bgcolor {
+      des = "Page border color";
+      note = "If you set the border size to 'None', this won't show up.";
+      s1color = "stronger_back";
+  }
+  property Color entry_bgcolor {
+      des = "Background of entries";
+      s1color = "page_back";
+  }
+  property Color entry_fgcolor {
+      des = "Text color of entries"; 
+      s1color = "page_text";
+  }
+  property Color meta_color {
+      des = "Color of entry headings and meta-information";
+      s1color = "page_text_em";
+  }
+  property Color link_color {
+      des = "Link color";
+      s1color = "page_link";
+  }
+  property Color vlink_color { 
+      des = "Visited link color";
+      s1color = "page_vlink";
+  }
+  property Color alink_color {
+      des = "Active link color";
+      s1color = "page_alink";
+  }
+  property Color topbar_bgcolor {
+      des = "Background color of titlebar and userpic"; 
+      s1color = "strong_back";
+  }
+  property Color topbar_fgcolor {
+      des = "Titlebar text color"; 
+      s1color = "strong_text";
+  }
+  property Color navbar_bgcolor {
+      des = "Background color of sidebar";
+      s1color = "weak_back";
+  }
+  property Color navbar_fgcolor {
+      des = "Sidebar text color"; 
+      s1color = "weak_text";
+  }
+  property string opt_navbar_pos {
+      des = "Side Navbar Position";
+      values = "left|Left|right|Right";
+  }
+  property Color comment_bar_one_bgcolor {
+      des = "Alternating background color for comment bars (one)";
+  }
+  property Color comment_bar_two_fgcolor {
+      des = "Text color on alternating comment bars (one)";
+  }
+  property Color comment_bar_two_bgcolor {
+      des = "Alternating background color for comment bars (two)";
+  }
+  property Color comment_bar_one_fgcolor {
+      des = "Text color on alternating comment bars (two)";
+  }
 }
-property Color body_bgcolor {
-    des = "Page border color";
-    note = "If you set the border size to 'None', this won't show up.";
-    s1color = "stronger_back";
-}
-property Color entry_bgcolor {
-    des = "Background of entries";
-    s1color = "page_back";
-}
-property Color entry_fgcolor {
-    des = "Text color of entries"; 
-    s1color = "page_text";
-}
-property Color meta_color {
-    des = "Color of entry headings and meta-information";
-    s1color = "page_text_em";
-}
-property Color link_color {
-    des = "Link color";
-    s1color = "page_link";
-}
-property Color vlink_color { 
-    des = "Visited link color";
-    s1color = "page_vlink";
-}
-property Color alink_color {
-    des = "Active link color";
-    s1color = "page_alink";
-}
-property Color topbar_bgcolor {
-    des = "Background color of titlebar and userpic"; 
-    s1color = "strong_back";
-}
-property Color topbar_fgcolor {
-    des = "Titlebar text color"; 
-    s1color = "strong_text";
-}
-
-property string opt_navbar_pos {
-    des = "Side Navbar Position";
-    values = "left|Left|right|Right";
-}
-property Color navbar_bgcolor {
-    des = "Background color of sidebar";
-    s1color = "weak_back";
-}
-property Color navbar_fgcolor {
-    des = "Sidebar text color"; 
-    s1color = "weak_text";
-}
-property string opt_daylines_style {
-    des = "Style of Lines Around Day Headings";
-    values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
-}
-property use font_base;
-property use font_fallback;
-property string font_topbar_base {
-    des = "Preferred font for top bar";
-    note = "As with the main font, leave blank if you don't care.";
-}
-property string font_topbar_fallback {
-    des = "Alternative font style for top bar";
-    values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
-}
-property string font_sidebar_base {
-    des = "Preferred font for side navigation bar";
-    note = "As with the main font, leave blank if you don't care.";
-}
-property string font_sidebar_fallback {
-    des = "Alternative font style for side navigation bar";
-    values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
-}
-
-property Color comment_bar_one_bgcolor {
-    des = "Alternating background color for comment bars (one)";
-}
-property Color comment_bar_two_fgcolor {
-    des = "Text color on alternating comment bars (one)";
-}
-property Color comment_bar_two_bgcolor {
-    des = "Alternating background color for comment bars (two)";
-}
-property Color comment_bar_one_fgcolor {
-    des = "Text color on alternating comment bars (two)";
-}
-property use page_recent_items;
-property use page_friends_items;
-property use text_post_comment;
-property use text_read_comments;
-property use text_post_comment_friends;
-property use text_read_comments_friends;
-
-# Set default property values
 set body_bgcolor = "#6666cc";
 set entry_bgcolor = "#ffffff";
 set entry_fgcolor = "#000000";
@@ -114,15 +80,58 @@ set topbar_bgcolor = "#c0c0ff";
 set topbar_fgcolor = "#000000";
 set navbar_bgcolor = "#eeeeff";
 set navbar_fgcolor = "#000000";
-set opt_navbar_pos = "left";
-set opt_daylines_style = "dashed";
-set opt_margin_size = "50px";
-set font_topbar_fallback = "none";
-set font_sidebar_fallback = "none";
 set comment_bar_one_bgcolor = "#c0c0ff";
 set comment_bar_one_fgcolor = "#000000";
 set comment_bar_two_bgcolor = "#eeeeff";
 set comment_bar_two_fgcolor = "#000000";
+
+propgroup fonts {
+  property use font_base;
+  property use font_fallback;
+  property string font_topbar_base {
+      des = "Preferred font for top bar";
+      note = "As with the main font, leave blank if you don't care.";
+  }
+  property string font_topbar_fallback {
+      des = "Alternative font style for top bar";
+      values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
+  }
+  property string font_sidebar_base {
+      des = "Preferred font for side navigation bar";
+      note = "As with the main font, leave blank if you don't care.";
+  }
+  property string font_sidebar_fallback {
+      des = "Alternative font style for side navigation bar";
+      values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
+  }
+}
+set font_topbar_fallback = "none";
+set font_sidebar_fallback = "none";
+
+propgroup presentation {
+  property string opt_daylines_style {
+      des = "Style of Lines Around Day Headings";
+      values = "solid|Solid|dashed|Dashed|dotted|Dotted|double|Double|hidden|Invisible";
+  }
+  property use page_recent_items;
+  property use page_friends_items;
+  property string opt_margin_size {
+      des = "Size of page border";
+      values = "0|None|5px|Tiny|25px|Small|50px|Medium|75px|Large|100px|Extra Large";
+  }
+  property use view_entry_disabled;
+}
+set opt_navbar_pos = "left";
+set opt_daylines_style = "dashed";
+set opt_margin_size = "50px";
+set view_entry_disabled = false;
+
+propgroup text {
+  property use text_post_comment;
+  property use text_read_comments;
+  property use text_post_comment_friends;
+  property use text_read_comments_friends;
+}
 
 function css_fontspec(string base, string fallback)
  "Prints a CSS font-family specification based on the base and fallback given" 

@@ -5,92 +5,68 @@ layerinfo name = "Classic";
 layerinfo redist_uniq = "classic/layout";
 layerinfo previews = "classic/classic.jpg";
 
-property bool show_entry_userpic {
-    des = "Show your userpic with your journal's entries?"; 
+propgroup colors {
+  property Color body_bgcolor {
+      des = "Background color of page";
+      s1color = "stronger_back";
+  }
+  property Color main_bgcolor {
+      des = "Background color of main text area";
+      s1color = "page_back";
+  }
+  property Color main_fgcolor {
+      des = "Color of text on main text areas";
+      s1color = "page_text";
+  }
+  property Color headerbar_bgcolor {
+      des = "Background color of header bars";
+      s1color = "strong_back";
+  }
+  property Color headerbar_fgcolor {
+      des = "Color of text on header bars";
+      s1color = "strong_text";
+  }
+  property Color metabar_bgcolor {
+      des = "Background color of side bar";
+      s1color = "weak_back";
+  }
+  property Color metabar_fgcolor {
+      des = "Color of text on side bar";
+      s1color = "weak_text";
+  }
+  property Color page_title_color {
+      des = "Text color of the page's main title";
+      s1color = "page_text_title";
+  }
+  property Color page_subtitle_color {
+      des = "Text color of the page's subtitles";
+      s1color = "page_text_em";
+  }
+  property Color link_color {
+      des = "Text color of links";
+      s1color = "page_link";
+  }
+  property Color vlink_color {
+      des = "Text color of visited links";
+      s1color = "page_vlink";
+  }
+  property Color alink_color {
+      des = "Text color of active links";
+      s1color = "page_alink";
+  }
+  property Color comment_bar_one_bgcolor {
+      des = "Alternating background color for comment bars (one)";
+  }
+  property Color comment_bar_two_fgcolor {
+      des = "Text color on alternating comment bars (one)";
+  }
+  property Color comment_bar_two_bgcolor {
+      des = "Alternating background color for comment bars (two)";
+  }
+  property Color comment_bar_one_fgcolor {
+      des = "Text color on alternating comment bars (two)";
+  }
 }
-
-# Colors
-property Color body_bgcolor {
-    des = "Background color of page";
-    s1color = "stronger_back";
-}
-property Color main_bgcolor {
-    des = "Background color of main text area";
-    s1color = "page_back";
-}
-property Color main_fgcolor {
-    des = "Color of text on main text areas";
-    s1color = "page_text";
-}
-property Color headerbar_bgcolor {
-    des = "Background color of header bars";
-    s1color = "strong_back";
-}
-property Color headerbar_fgcolor {
-    des = "Color of text on header bars";
-    s1color = "strong_text";
-}
-property Color metabar_bgcolor {
-    des = "Background color of side bar";
-    s1color = "weak_back";
-}
-property Color metabar_fgcolor {
-    des = "Color of text on side bar";
-    s1color = "weak_text";
-}
-property Color page_title_color {
-    des = "Text color of the page's main title";
-    s1color = "page_text_title";
-}
-property Color page_subtitle_color {
-    des = "Text color of the page's subtitles";
-    s1color = "page_text_em";
-}
-property Color link_color {
-    des = "Text color of links";
-    s1color = "page_link";
-}
-property Color vlink_color {
-    des = "Text color of visited links";
-    s1color = "page_vlink";
-}
-property Color alink_color {
-    des = "Text color of active links";
-    s1color = "page_alink";
-}
-property Color comment_bar_one_bgcolor {
-    des = "Alternating background color for comment bars (one)";
-}
-property Color comment_bar_two_fgcolor {
-    des = "Text color on alternating comment bars (one)";
-}
-property Color comment_bar_two_bgcolor {
-    des = "Alternating background color for comment bars (two)";
-}
-property Color comment_bar_one_fgcolor {
-    des = "Text color on alternating comment bars (two)";
-}
-
-# Inherited properties
-
-property use font_base;
-property use font_fallback;
-
-property use page_recent_items;
-property use text_post_comment;
-property use text_read_comments;
-
-property use page_friends_items;
-property use text_post_comment_friends;
-property use text_read_comments_friends;
-
-set page_recent_items = 20;
-set page_friends_items = 25;
-set show_entry_userpic = false;
-set font_base = "Arial, Helvetica";
-set font_fallback = "sans-serif";
-
-#Default Colors
 set body_bgcolor = "#6666cc";
 set main_bgcolor = "#ffffff";
 set main_fgcolor = "#000000";
@@ -107,6 +83,30 @@ set comment_bar_one_bgcolor = "#c0c0ff";
 set comment_bar_one_fgcolor = "#000000";
 set comment_bar_two_bgcolor = "#eeeeff";
 set comment_bar_two_fgcolor = "#000000";
+
+propgroup presentation {
+  property bool show_entry_userpic {
+      des = "Show your userpic with your journal's entries?"; 
+  }
+  property use font_base;
+  property use font_fallback;
+  property use page_recent_items;
+  property use page_friends_items;
+  property use view_entry_disabled;
+}
+set show_entry_userpic = false;
+set font_base = "Arial, Helvetica";
+set font_fallback = "sans-serif";
+set page_recent_items = 20;
+set page_friends_items = 25;
+set view_entry_disabled = false;
+
+propgroup text {
+  property use text_post_comment;
+  property use text_read_comments;
+  property use text_post_comment_friends;
+  property use text_read_comments_friends;
+}
 
 function print_stylesheet ()
 {

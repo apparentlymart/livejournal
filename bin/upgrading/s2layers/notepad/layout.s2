@@ -5,53 +5,71 @@ layerinfo name = "Notepad";
 layerinfo redist_uniq = "notepad/layout";
 layerinfo previews = "notepad/notepad.jpg";
 
-property bool show_entry_userpic { des = "Show the userpic on the journal entries?"; }
-set show_entry_userpic = false;
-
-property Color body_bgcolor { des = "Body background color"; }
+propgroup colors {
+  property Color body_bgcolor {
+    des = "Body background color"; 
+  }
+  property Color text_color { 
+    des = "Text color"; 
+  }
+  property Color subject_color { 
+    des = "Text color of subjects"; 
+  }
+  property Color link_color { 
+    des = "Link color"; 
+  }
+  property Color vlink_color { 
+    des = "Visited link color";
+  }
+  property Color alink_color {
+    des = "Active link color"; 
+  }
+  property Color comment_bar_one_bgcolor {
+      des = "Alternating background color for comment bars (one)";
+  }
+  property Color comment_bar_two_fgcolor {
+      des = "Text color on alternating comment bars (one)";
+  }
+  property Color comment_bar_two_bgcolor {
+      des = "Alternating background color for comment bars (two)";
+  }
+  property Color comment_bar_one_fgcolor {
+      des = "Text color on alternating comment bars (two)";
+  }
+}
 set body_bgcolor = "#8cd5fe";
-
-property Color text_color { des = "Text color"; }
 set text_color = "#000000";
-
-property Color subject_color { des = "Text color of subjects"; }
 set subject_color = "#ff0000"; 
-
-property Color link_color { des = "Link color"; }
 set link_color = "#000050";
-
-property Color vlink_color { des = "Visited link color"; }
 set vlink_color = "#500050";
-
-property Color alink_color { des = "Active link color"; }
 set alink_color = "#ff00c0";
-
-property Color comment_bar_one_bgcolor {
-    des = "Alternating background color for comment bars (one)";
-}
-property Color comment_bar_two_fgcolor {
-    des = "Text color on alternating comment bars (one)";
-}
-property Color comment_bar_two_bgcolor {
-    des = "Alternating background color for comment bars (two)";
-}
-property Color comment_bar_one_fgcolor {
-    des = "Text color on alternating comment bars (two)";
-}
 set comment_bar_one_bgcolor = "#c0c0ff";
 set comment_bar_one_fgcolor = "#000000";
 set comment_bar_two_bgcolor = "#eeeeff";
 set comment_bar_two_fgcolor = "#000000";
 
-property use page_recent_items;
-property use text_post_comment;
-property use text_read_comments;
+propgroup presentation {
+  property bool show_entry_userpic { 
+    des = "Show the userpic on the journal entries?"; 
+  }
+  property use page_recent_items;
+  property use page_friends_items;
+  property use view_entry_disabled;
+}
+set show_entry_userpic = false;
+set view_entry_disabled = false;
 
-property use page_friends_items;
-property use text_post_comment_friends;
-property use text_read_comments_friends;
+propgroup text {
+  property use text_post_comment;
+  property use text_read_comments;
+  property use text_post_comment_friends;
+  property use text_read_comments_friends;
+}
 
-property string imguri { noui=1; } #  URI to notepad images (no trailing slash)
+property string imguri {
+  noui = 1;
+  des = "URI to notepad images (no trailing slash)";
+}
 set imguri = "";
 
 function prop_init()

@@ -5,89 +5,76 @@ layerinfo name = "Tabular Indent";
 layerinfo redist_uniq = "tabularindent/layout";
 layerinfo previews = "tabularindent/tabularindent.jpg";
 
-property bool show_entry_userpic { 
-    des = "Show the userpic on the journal entries?";
+propgroup colors {
+  property Color body_bgcolor { 
+      des = "Body background color";
+      s1color = "page_back";
+  }
+  property Color main_bgcolor { 
+      des = "Background of main text areas";
+      s1color = "page_back";
+  }
+  property Color main_fgcolor { 
+      des = "Main text color"; 
+      s1color = "page_text";
+  }
+  property Color border_color { 
+      des = "Color of borders";
+      # No s1color equivalent
+  }
+  property Color headerbar_bgcolor { 
+      des = "Background color of header bar(s)";
+      s1color = "stronger_back";
+  }
+  property Color headerbar_fgcolor { 
+      des = "Header bar text color";
+      s1color = "stronger_text";
+  }
+  property Color captionbar_mainbox_bgcolor { 
+      des = "Main background color of caption bar";
+      s1color = "page_back";
+  }
+  property Color captionbar_mainbox_fgcolor { 
+      des = "Text color of caption bar";
+      s1color = "page_text";
+  }
+  property Color captionbar_userpicbox_color { 
+      des = "User picture background color of caption bar";
+      s1color = "strong_back";
+  }
+  property Color accent_bgcolor { 
+      des = "Background color of accented areas";
+      s1color = "weak_back";
+  }
+  property Color accent_fgcolor { 
+      des = "Accented area text color";
+      s1color = "weak_text";
+  }
+  property Color link_color { 
+      des = "Link color";
+      s1color = "page_link";
+  }
+  property Color vlink_color {
+      des = "Visited link color";
+      s1color = "page_vlink";
+  }
+  property Color alink_color {
+      des = "Active link color";
+      s1color = "page_alink";
+  }
+  property Color comment_bar_one_bgcolor {
+      des = "Alternating background color for comment bars (one)";
+  }
+  property Color comment_bar_two_fgcolor {
+      des = "Text color on alternating comment bars (one)";
+  }
+  property Color comment_bar_two_bgcolor {
+      des = "Alternating background color for comment bars (two)";
+  }
+  property Color comment_bar_one_fgcolor {
+      des = "Text color on alternating comment bars (two)";
+  }
 }
-property Color body_bgcolor { 
-    des = "Body background color";
-    s1color = "page_back";
-}
-property Color main_bgcolor { 
-    des = "Background of main text areas";
-    s1color = "page_back";
-}
-property Color main_fgcolor { 
-    des = "Main text color"; 
-    s1color = "page_text";
-}
-property Color border_color { 
-    des = "Color of borders";
-    # No s1color equivalent
-}
-property Color headerbar_bgcolor { 
-    des = "Background color of header bar(s)";
-    s1color = "stronger_back";
-}
-property Color headerbar_fgcolor { 
-    des = "Header bar text color";
-    s1color = "stronger_text";
-}
-property Color captionbar_mainbox_bgcolor { 
-    des = "Main background color of caption bar";
-    s1color = "page_back";
-}
-property Color captionbar_mainbox_fgcolor { 
-    des = "Text color of caption bar";
-    s1color = "page_text";
-}
-property Color captionbar_userpicbox_color { 
-    des = "User picture background color of caption bar";
-    s1color = "strong_back";
-}
-property Color accent_bgcolor { 
-    des = "Background color of accented areas";
-    s1color = "weak_back";
-}
-property Color accent_fgcolor { 
-    des = "Accented area text color";
-    s1color = "weak_text";
-}
-property Color link_color { 
-    des = "Link color";
-    s1color = "page_link";
-}
-property Color vlink_color {
-    des = "Visited link color";
-    s1color = "page_vlink";
-}
-property Color alink_color {
-    des = "Active link color";
-    s1color = "page_alink";
-}
-property Color comment_bar_one_bgcolor {
-    des = "Alternating background color for comment bars (one)";
-}
-property Color comment_bar_two_fgcolor {
-    des = "Text color on alternating comment bars (one)";
-}
-property Color comment_bar_two_bgcolor {
-    des = "Alternating background color for comment bars (two)";
-}
-property Color comment_bar_one_fgcolor {
-    des = "Text color on alternating comment bars (two)";
-}
-
-# Inherited properties
-
-property use page_recent_items;
-property use text_post_comment;
-property use text_read_comments;
-
-property use page_friends_items;
-property use text_post_comment_friends;
-property use text_read_comments_friends;
-
-# Default colors
 set body_bgcolor = "#ffffff";
 set main_bgcolor = "#ffffff";
 set main_fgcolor = "#000000";
@@ -107,10 +94,25 @@ set comment_bar_one_fgcolor = "#000000";
 set comment_bar_two_bgcolor = "#eeeeff";
 set comment_bar_two_fgcolor = "#000000";
 
-# Other options
+propgroup presentation {
+  property bool show_entry_userpic { 
+      des = "Show the userpic on the journal entries?";
+  }
+  property use page_recent_items;
+  property use page_friends_items;
+  property use view_entry_disabled;
+}
 set show_entry_userpic = false;
 set page_recent_items = 20;
 set page_friends_items = 20;
+set view_entry_disabled = false;
+
+propgroup text {
+  property use text_post_comment;
+  property use text_read_comments;
+  property use text_post_comment_friends;
+  property use text_read_comments_friends;
+}
 
 function Page::lay_captionbar_navigation () { }
 

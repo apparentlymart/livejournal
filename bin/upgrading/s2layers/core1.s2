@@ -968,7 +968,7 @@ property string text_reply_back {
 set text_reply_back = "Read Comments";
 
 property bool view_entry_disabled {
-    des = "Enable to fall back to the system-provided single entry view and comment system.";
+    des = "Enable to use the old comment page instead of the newer style specific view";
 }
 set view_entry_disabled = false;
 

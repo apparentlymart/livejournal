@@ -6,90 +6,56 @@ layerinfo redist_uniq = "punquin/layout";
 layerinfo previews = "punquin/punquin.jpg";
 
 # Colors
-property Color body_bgcolor { 
-    des = "Page background color";
-    s1color = "stronger_accent";
+propgroup colors {
+  property Color body_bgcolor { 
+      des = "Page background color";
+      s1color = "stronger_accent";
+  }
+  property Color main_bgcolor {
+      des = "Background of text areas";
+      s1color = "page_back";
+  }
+  property Color main_fgcolor {
+      des = "Text color";
+      s1color = "page_text";
+  }
+  property Color subject_color { 
+      des = "Color of entry subjects";
+      s1color = "page_text_em";
+  }
+  property Color title_color { 
+      des = "Color of headers and titles";
+      s1color = "page_text_title";
+  }
+  property Color border_color { 
+      des = "Color of borders";
+      s1color = "weak_back";
+  }
+  property Color link_color {
+      des = "Link color";
+      s1color = "page_link";
+  }
+  property Color vlink_color {
+      des = "Visited link color";
+      s1color = "page_vlink"; 
+  }
+  property Color alink_color { 
+      des = "Active link color";
+      s1color = "page_alink";
+  }
+  property Color comment_bar_one_bgcolor {
+      des = "Alternating background color for comment bars (one)";
+  }
+  property Color comment_bar_two_fgcolor {
+      des = "Text color on alternating comment bars (one)";
+  }
+  property Color comment_bar_two_bgcolor {
+      des = "Alternating background color for comment bars (two)";
+  }
+  property Color comment_bar_one_fgcolor {
+      des = "Text color on alternating comment bars (two)";
+  }
 }
-property Color main_bgcolor {
-    des = "Background of text areas";
-    s1color = "page_back";
-}
-property Color main_fgcolor {
-    des = "Text color";
-    s1color = "page_text";
-}
-property Color subject_color { 
-    des = "Color of entry subjects";
-    s1color = "page_text_em";
-}
-property Color title_color { 
-    des = "Color of headers and titles";
-    s1color = "page_text_title";
-}
-property Color border_color { 
-    des = "Color of borders";
-    s1color = "weak_back";
-}
-property Color link_color {
-    des = "Link color";
-    s1color = "page_link";
-}
-property Color vlink_color {
-    des = "Visited link color";
-    s1color = "page_vlink"; 
-}
-property Color alink_color { 
-    des = "Active link color";
-    s1color = "page_alink";
-}
-property Color comment_bar_one_bgcolor {
-    des = "Alternating background color for comment bars (one)";
-}
-property Color comment_bar_two_fgcolor {
-    des = "Text color on alternating comment bars (one)";
-}
-property Color comment_bar_two_bgcolor {
-    des = "Alternating background color for comment bars (two)";
-}
-property Color comment_bar_one_fgcolor {
-    des = "Text color on alternating comment bars (two)";
-}
-
-# Layout Options
-property bool show_recent_userpic {
-    des = "Show the userpic on the recent entries page?"; 
-}
-property string sidebar_position {
-    des = "Position of the sidebar relative to the main content";
-    values = "left|Left|right|Right";
-}
-
-# Added Text
-property string text_gotop {
-    des = "Link text to 'top of the page'";
-    noui = 1;
-}
-
-property use font_base;
-property use font_fallback;
-
-property use page_recent_items;
-property use text_post_comment;
-property use text_read_comments;
-
-property use page_friends_items;
-property use text_post_comment_friends;
-property use text_read_comments_friends;
-
-set font_base = "Verdana, Arial, Helvetica";
-set font_fallback = "sans-serif";
-set show_recent_userpic = false;
-set sidebar_position = "left";
-set page_recent_items = 20;
-set page_friends_items = 20;
-
-set text_gotop = "Go to Top";
-
 set body_bgcolor = "#6666cc";
 set main_bgcolor = "#ffffff";
 set main_fgcolor = "#000000";
@@ -103,6 +69,40 @@ set comment_bar_one_bgcolor = "#c0c0ff";
 set comment_bar_one_fgcolor = "#000000";
 set comment_bar_two_bgcolor = "#eeeeff";
 set comment_bar_two_fgcolor = "#000000";
+
+propgroup presentation {
+  property bool show_recent_userpic {
+      des = "Show the userpic on the recent entries page?"; 
+  }
+  property string sidebar_position {
+      des = "Position of the sidebar relative to the main content";
+      values = "left|Left|right|Right";
+  }
+  property use font_base;
+  property use font_fallback;
+  property use page_recent_items;
+  property use page_friends_items;
+  property use view_entry_disabled;
+}
+set font_base = "Verdana, Arial, Helvetica";
+set font_fallback = "sans-serif";
+set show_recent_userpic = false;
+set sidebar_position = "left";
+set page_recent_items = 20;
+set page_friends_items = 20;
+set view_entry_disabled = false;
+
+propgroup text {
+  property string text_gotop {
+      des = "Link text to 'top of the page'";
+      noui = 1;
+  }
+  property use text_post_comment;
+  property use text_read_comments;
+  property use text_post_comment_friends;
+  property use text_read_comments_friends;
+}
+set text_gotop = "Go to Top";
 
 function print_stylesheet ()
 {
