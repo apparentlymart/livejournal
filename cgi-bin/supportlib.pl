@@ -374,6 +374,9 @@ sub file_request
         push @$errors, "You did not enter a support request.";
     }
 
+    my $cats = LJ::Support::load_cats();
+    push @$errors, "Invalid support category" unless $cats->{$o->{'spcatid'}+0};
+
     if (@$errors) { return 0; }
 
     my $dbh = LJ::get_db_writer();
