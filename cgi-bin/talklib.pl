@@ -412,6 +412,7 @@ sub get_talk_data
 
     # it's quite likely (for a popular post) that the memcache was 
     # already populated while we were waiting for the lock
+    $packed = LJ::MemCache::get($memkey);
     if ($memcache_good->()) {
         $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
         $memcache_decode->();
