@@ -23,7 +23,7 @@ use MIME::Lite;
 use strict;
 use vars qw($VERSION $SENDMAIL %providers);
 
-$VERSION = '1.4.10';
+$VERSION = '1.4.11';
 
 # default path to sendmail, if none other specified.  we should probably
 # use something more perl-ish and less unix-specific, but whateva'
@@ -474,6 +474,7 @@ sub init {
     $self->{'sendmail'} = $args->{'mailcommand'} || $SENDMAIL;
     $self->{'provider'} = remap($args->{'provider'});
     $self->{'number'} = $args->{'number'};
+    $self->{'smtp'} = $args->{'smtp'};
 }
  
 sub send
@@ -559,7 +560,7 @@ sub send
     elsif ($provider eq "beemail") 
     {
         send_mail($self, {
-            'to'	=> "$self->{'number'}@\sms.beemail.ru",
+            'to'	=> "$self->{'number'}\@sms.beemail.ru",
             'body'	=> "$msg->{'from'} - $msg->{'message'}",
         });
     }
@@ -684,7 +685,7 @@ sub send
     elsif ($provider eq "kyivstar") 
     {
         send_mail($self, {
-            'to'	=> "$self->{'number'}@\sms.kyivstar.net",
+            'to'	=> "$self->{'number'}\@sms.kyivstar.net",
             'from'	=> "$msg->{'from'}",
             'body'	=> "$msg->{'message'}",
         });
@@ -693,7 +694,7 @@ sub send
     elsif ($provider eq "lmt") 
     {
         send_mail($self, {
-            'to'	=> "$self->{'number'}@\smsmail.lmt.lv",
+            'to'	=> "$self->{'number'}\@smsmail.lmt.lv",
             'from'	=> "$msg->{'from'}",
             'body'	=> "$msg->{'message'}",
         });
@@ -898,7 +899,7 @@ sub send
     elsif ($provider eq "uma") 
     {
         send_mail($self, {
-            'to'	=> "$self->{'number'}@\sms.umc.com.ua",
+            'to'	=> "$self->{'number'}\@sms.umc.com.ua",
             'from'	=> "$msg->{'from'}",
             'body'	=> "$msg->{'message'}",
         });
