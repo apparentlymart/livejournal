@@ -20,6 +20,7 @@ require 'ljconfig.pl';
 
 # pre-load common libraries so we don't have to load them in BML files (slow)
 package BMLCodeBlock;
+use LJ::TagGenerator;
 require 'ljlib.pl';
 require 'ljprotocol.pl';
 require 'cleanhtml.pl';

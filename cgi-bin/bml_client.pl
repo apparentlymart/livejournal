@@ -19,6 +19,7 @@ sub reset
     %COOKIE = ();
     $USERID = "";
 
+    $ENV{'HTTP_COOKIE'} .= "";  # quiet warning
     foreach (split(/;\s+/, $ENV{'HTTP_COOKIE'}))
     {
 	if ($_ =~ /(.*)=(.*)/)
@@ -106,13 +107,12 @@ sub set_cookie
     my @day = qw{Sunday Monday Tuesday Wednesday Thursday Friday Saturday};
     my @month = qw{Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec};
     
-    printf ("Set-Cookie: %s=%s", 
-	    &BMLUtil::eurl($name), &BMLUtil::eurl($value));
+    printf "Set-Cookie: %s=%s", BMLUtil::eurl($name), BMLUtil::eurl($value);
 
     # this logic is confusing potentially
     unless (defined $expires && $expires==0) {
-	printf ("; expires=$day[$wday], %02d-$month[$mon]-%04d %02d:%02d:%02d GMT", 
-		$mday, $year, $hour, $min, $sec);
+	printf "; expires=$day[$wday], %02d-$month[$mon]-%04d %02d:%02d:%02d GMT", 
+		$mday, $year, $hour, $min, $sec;
     }
 
     print "; path=$path" if $path;

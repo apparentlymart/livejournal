@@ -21,11 +21,14 @@ srand;
 
 $SERVE_MAX = 50;
 $SERVE_COUNT = 0;
-$HUP_COUNT = -1;
+$HUP_COUNT = 0;
 $SERVING = 0;
 
 &reset_caches;
-$SIG{'HUP'} = \&reset_caches;
+$SIG{'HUP'} = sub {
+    $HUP_COUNT++;
+    reset_caches();
+};
 $SIG{'TERM'} = sub {
     if ($SERVING) {
 	$SERVE_MAX = 0; 
@@ -36,57 +39,10 @@ $SIG{'TERM'} = sub {
 
 sub reset_caches
 {
-    $HUP_COUNT++;
-    %FileContents = ();
     %FileModTime = ();
     %Config = ();
     %FileBlockData = ();  # $FileBlockData{$file}->{$block} = $def;
     %FileBlockFlags = ();  # $FileBlockFlags{$file}->{$block} = $def;
-}
-
-if ($ARGV[0] eq "profile" && ! $ENV{'HTTP_HOST'}) {
-    my $tests = 0;
-    for (my $pass=0; $pass<$tests*2; $pass++) {
-	$ENV{'HTTP_COOKIE'} = "ljuser=test; ljhpass=test:";
-	if ($pass % $tests == 0) {
-	    $ENV{'REQUEST_URI'} = "/";
-	    $ENV{'PATH_TRANSLATED'} = "/home/lj/htdocs/index.bml";
-	} elsif ($pass % $tests == 1) {
-	    $ENV{'REQUEST_URI'} = "/talkread.bml?itemid=1522964";
-	    $ENV{'PATH_TRANSLATED'} = "/home/lj/htdocs/talkread.bml";
-	} elsif ($pass % $tests == 2) {
-	    $ENV{'REQUEST_URI'} = "/multisearch.bml?q=blythe&type=user";
-	    $ENV{'PATH_TRANSLATED'} = "/home/lj/htdocs/multisearch.bml";
-	} elsif ($pass % $tests == 3) {
-	    $ENV{'REQUEST_URI'} = "/interests.bml?int=sex";
-	    $ENV{'PATH_TRANSLATED'} = "/home/lj/htdocs/interests.bml";
-	} elsif ($pass % $tests == 4) {
-	    $ENV{'REQUEST_URI'} = "/support/help.bml";
-	    $ENV{'PATH_TRANSLATED'} = "/home/lj/htdocs/support/help.bml";
-	} elsif ($pass % $tests == 5) {
-	    $ENV{'REQUEST_URI'} = "/talkread.bml?itemid=1398341";
-	    $ENV{'PATH_TRANSLATED'} = "/home/lj/htdocs/talkread.bml";
-	} elsif ($pass % $tests == 6) {
-	    $ENV{'REQUEST_URI'} = "/userinfo.bml?user=bradfitz";
-	    $ENV{'PATH_TRANSLATED'} = "/home/lj/htdocs/userinfo.bml";
-	}
-    }
-
-    $ENV{'REQUEST_URI'} = "/dev/talkread.bml?itemid=1947941";
-    $ENV{'PATH_TRANSLATED'} = "/home/lj/htdocs/dev/talkread.bml";
-    
-    $ENV{'REQUEST_URI'} =~ /^(.+?)(\?(.+))?$/;
-    $ENV{'QUERY_STRING'} = $3;
-    $ENV{'PATH_INFO'} = $1;
-    
-    my %SAVE_INC = %INC;
-    $SERVING = 1;
-    &handle_request;
-    $SERVING = 0;
-    %INC = %SAVE_INC;
-    &reset_codeblock;	
-
-    exit;
 }
 
 use FCGI;
@@ -135,7 +91,7 @@ sub deleteglob
         undef @entry;
     }
     if ($key ne "main::" && $key ne "DB::" && defined %entry
-        && ($dumpPackages or $key !~ /::$/)
+        && $key !~ /::$/
         && $key !~ /^_</ && !($package eq "dumpvar" and $key eq "stab")) 
     {
         undef %entry;
@@ -182,12 +138,22 @@ sub handle_request
 	return;
     }
 
+    if ($ENV{'REQUEST_URI'} eq "/cgi-bin/bmlp.pl") {
+	print "Content-type: text/html\n\n";
+	print "<H1>BML</H1>\n";
+	print "<H3>Version: $VERSION</H3>\n";
+	print "<p>Served: ($SERVE_COUNT/$SERVE_MAX)";
+	print "<br>Hupped: ($HUP_COUNT)";
+	return
+    }
+
     if ($ENV{'REQUEST_URI'} =~ /cgi-bin/) {
 	print "Content-type: text/html\n\n";
 	print "<H1>Error</H1>\n";
 	print "Cannot serve requests directed at the cgi-bin.";
 	return;
     }
+
     unless ($FILE =~ /\.s?bml$/) {
 	print "Content-type: text/html\n\n";
 	print "<H1>Error</H1>\n";
@@ -455,14 +421,6 @@ sub handle_request
 	    print LOG "$$\t($fastcgi_wait, $duration)\t$ENV{'REQUEST_URI'}\n";
 	    close LOG;
 	}
-    } 
-    else
-    {
-	print "Content-type: text/html\n\n";
-	print "<H1>BML</H1>\n";
-	print "<H3>Version: $VERSION</H3>\n";
-	print "<p>Served: ($SERVE_COUNT/$SERVE_MAX)";
-	print "<br>Hupped: ($HUP_COUNT)";
     }
 }
 
@@ -710,7 +668,7 @@ sub bml_decode
 	    
 	    # no BML left? append it all and be done.
 	    $$outref .= $$inref;
-	    $$inef = "";
+	    $$inref = "";
 	    last EAT;
 	}
 	
@@ -839,6 +797,9 @@ sub load_cfg
 		}
 		else
 		{
+		    # expand environment variables
+		    $val =~ s/\$(\w+)/$ENV{$1}/g;
+
 		    $Config{$currentpath}->{$var} = $val;
 		}
 	    }
