@@ -103,6 +103,7 @@ sub delete {
         $res = $self->{ua}->request($req);
     } "delete", $path, $self->{path};
 
+    return 1 if $res && $res->code == 404;
     return 0 unless $res->is_success;
     return 1;
 }
