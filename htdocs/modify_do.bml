@@ -15,8 +15,6 @@ body<=
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
- my $quser = $dbh->quote($user);
- 
 my $u;
 my $as_remote = 0;
 if ($FORM{'remoteuser'} eq $user) {
@@ -26,6 +24,10 @@ if ($FORM{'remoteuser'} eq $user) {
     $u = LJ::load_user($dbs, $user);
 }
  unless ($u) { push @errors, $ML{'error.username_notfound'}; }
+
+ $user = $u->{'user'};
+ my $quser = $dbh->quote($user);
+
  my $capstyles = LJ::get_cap($u, "styles");
 
  LJ::load_user_props($dbs, $u, "opt_usesharedpic",
