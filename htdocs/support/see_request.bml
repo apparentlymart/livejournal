@@ -327,7 +327,7 @@ body<=
             my $sth = $dbr->prepare("SELECT question FROM faq WHERE faqid=?");
             $sth->execute($le->{'faqid'});
             my $faqname = $sth->fetchrow_array;
-            $ret .= "<div style='display: table; padding: 3px; background: #d0d0d0; border: 1px solid #000000; margin-left: auto; margin-right: auto;'>\n";
+            $ret .= "<div style='display: table; padding: 3px; background: <?emcolor?>; border: 1px solid #000000; margin-left: auto; margin-right: auto;'>\n";
             # whitespace between these two DIVs is necessary for proper
             # rendering in IE 5 for Mac OS < X
             $ret .= "<div style='text-align:center;'>";
