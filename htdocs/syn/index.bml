@@ -99,7 +99,7 @@ body<=
                 return "<?h1 $ML{'.invalid.http.title'} h1?><?p $ML{'.invalid.http.text'} p?>"
                     unless $content;
                 return "<?h1 $ML{'.invalid.notrss.title'} h1?><?p $ML{'.invalid.notrss.text'} p?>"
-                    unless $content =~ m/<(\w+:)?d(?:rss|feed|RDF)/; # Must have a <[?:]rss <[?:]feed (for Atom support) <[?:]RDF
+                    unless $content =~ m/<(\w+:)?(?:rss|feed|RDF)/; # Must have a <[?:]rss <[?:]feed (for Atom support) <[?:]RDF
                 
                 # create the feed account
                 my $id = LJ::create_account({
