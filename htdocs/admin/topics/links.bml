@@ -1,5 +1,7 @@
 <?_code
 
+ return "This page is old and uses a horrendous database query.  It won't likely return.";
+
  my $user = $FORM{'user'};
 
  my $dbh = LJ::get_db_writer();
