@@ -31,8 +31,6 @@ BODY<=
  my %logprops;
  LJ::load_log_props($dbs, [ $itemid ], \%logprops);
 
- my $mod = $itemid % 100;
-
  ### load users
  $sth = $dbr->prepare("SELECT * FROM user WHERE userid IN ($item->{'ownerid'}, $item->{'posterid'})");
  $sth->execute;
@@ -88,7 +86,9 @@ BODY<=
 	     }
 
 	     unless ($cookie_auth || 
-		     LJ::auth_okay($up, $FORM{'password'}, $FORM{'hpassword'}))
+		     LJ::auth_okay($up, $FORM{'password'}, $FORM{'hpassword'}) ||
+                     ecphash($itemid, $FORM{'parenttalkid'}, 
+			     $up->{'password'}) eq $FORM{'ecphash'} )
 	     {
 		 push @errors, "Incorrect password given for the LiveJournal username you specified.  You can recover your password <A HREF=\"/lostinfo.bml\">here</A> if you've forgotten it.";
 	     }
@@ -347,7 +347,7 @@ BODY<=
 		 $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
 		 $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$itemid>";
 		 $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$paru->{'user'}\">";
-		 $html .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . LJ::ehtml(LJ::hash_password($paru->{'password'})) . "\">";
+                 $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $paru->{'password'})) . "\">";
 		 my $newsub = $FORM{'subject'};
 		 unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
 		 $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . LJ::ehtml($newsub) . "\">";
@@ -433,7 +433,7 @@ BODY<=
 	 $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
 	 $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$itemid>";
 	 $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$ujp->{'user'}\">";
-	 $html .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . LJ::ehtml(LJ::hash_password($ujp->{'password'})) . "\">";
+         $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $ujp->{'password'})) . "\">";
 	 my $newsub = $FORM{'subject'};
 	 unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
 	 $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . LJ::ehtml($newsub) . "\">";
@@ -476,6 +476,12 @@ BODY<=
      $ret .= "<p>$debug</p>";
  }
  return $ret;
+
+ # entryid-commentid-password hash
+ sub ecphash {
+     my ($itemid, $talkid, $password) = @_;
+     return "ecph-" . md5_hex($itemid . $talkid . $password);
+ }
 
  sub indent {
      my $a = shift;
