@@ -490,17 +490,19 @@ sub get_log2_recent_user
 
     my $left = $opts->{'itemshow'};
     my $notafter = $opts->{'notafter'};
-    
+    my $remote = $opts->{'remote'};
+
     foreach my $item (@$log) {
         last unless $left;
         last if $notafter and $item->{'rlogtime'} > $notafter;
-        next unless $opts->{'remote'} || $item->{'security'} eq 'public';
+        next unless $remote || $item->{'security'} eq 'public';
         next if $item->{'security'} eq 'private' 
-            and $item->{'journalid'} != $opts->{'remote'}->{'userid'};
+            and $item->{'journalid'} != $remote->{'userid'};
         if ($item->{'security'} eq 'usemask') {
-            my $permit = ($item->{'journalid'} == $opts->{'remote'}->{'userid'});
+            next unless $remote->{'journaltype'} eq "P";
+            my $permit = ($item->{'journalid'} == $remote->{'userid'});
             unless ($permit) {
-                my $mask = LJ::get_groupmask($item->{'journalid'}, $opts->{'remote'}->{'userid'});
+                my $mask = LJ::get_groupmask($item->{'journalid'}, $remote->{'userid'});
                 $permit = $item->{'allowmask'}+0 & $mask+0;
             }
             next unless $permit;
@@ -810,7 +812,7 @@ sub get_friend_items
     my $remoteid = $remote ? $remote->{'userid'} : 0;
     if ($remoteid == 0 && $opts->{'remoteid'}) {
         $remoteid = $opts->{'remoteid'} + 0;
-        $remote = LJ::load_userid($dbr, $remoteid);
+        $remote = LJ::load_userid($remoteid);
     }
 
     my @items = ();
@@ -1146,7 +1148,6 @@ sub get_recent_items
     &nodb;
     my $opts = shift;
 
-    my $dbr = LJ::get_db_reader();
     my $sth;
 
     my @items = ();             # what we'll return
@@ -1159,7 +1160,7 @@ sub get_recent_items
     my $remoteid = $remote ? $remote->{'userid'} : 0;
     if ($remoteid == 0 && $opts->{'remoteid'}) {
         $remoteid = $opts->{'remoteid'} + 0;
-        $remote = LJ::load_userid($dbr, $remoteid);
+        $remote = LJ::load_userid($remoteid);
     }
 
     my $max_hints = $LJ::MAX_HINTS_LASTN;  # temporary
