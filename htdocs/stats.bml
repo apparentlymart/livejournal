@@ -102,7 +102,7 @@ p?>
  unless ($LJ::DISABLED{'stats-newjournals'}) 
  {
      $ret .= "<?h1 New Journals h1?>\n";
-     $ret .= "<?p The following are the 10 most recently created journals.  It's very likely these users haven't modified their journals much, and probably haven't wrote much in them yet either... p?><ul>";
+     $ret .= "<?p The following are the 10 most recently created journals.  It's very likely these users haven't modified their journals much, and probably haven't written much in them yet either... p?><ul>";
      $sth = $dbr->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate IS NOT NULL ORDER BY uu.timecreate DESC LIMIT 10");
      $sth->execute;
      while (my ($iuser, $iname, $itime) = $sth->fetchrow_array) {
