@@ -146,6 +146,9 @@ sub LJ::Stats::get_db {
     return undef unless $type;
     my $cid = shift;
 
+    # tell DBI to revalidate connections before returning them
+    $LJ::DBIRole->clear_req_cache();
+
     my $opts = {raw=>1,nocache=>1}; # get_dbh opts
 
     # global handles
