@@ -74,7 +74,7 @@ if (! $opt->{'foreground'}) {
         die "Unable to start listener: $!\n";
     }
 
-    open(PID, ">$mailspool/tmp/mailgated.pid") || die "Unable to write pidfile: $!\n";
+    open(PID, ">$mailspool/tmp/mailgated-$hostname.pid") || die "Unable to write pidfile: $!\n";
     print PID $$, "\n";
     close PID;
 
