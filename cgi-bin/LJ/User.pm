@@ -75,6 +75,13 @@ sub do {
     return $rv;
 }
 
+sub selectrow_array {
+    my $u = shift;
+    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+        or croak "Database handle unavailable";
+    return $dbcm->selectrow_array(@_);
+}
+
 sub err {
     my $u = shift;
     return $u->{_dberr};
