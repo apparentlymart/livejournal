@@ -372,6 +372,7 @@ sub get_friend_items
     my $sth;
 
     my $userid = $opts->{'userid'}+0;
+    return () if $LJ::FORCE_EMPTY_FRIENDS{$userid};
 
     # 'remote' opt takes precendence, then 'remoteid'
     my $remote = $opts->{'remote'};
