@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
+use Getopt::Long;
 
 my $clusterid = shift;
 die "Usage: blobify_userpics.pl <clusterid>\n"
@@ -11,6 +12,11 @@ use lib "$ENV{'LJHOME'}/cgi-bin";
 use LJ::Blob;
 use Image::Size ();
 require "ljlib.pl";
+
+my $opt_fast;
+exit 1 unless
+    GetOptions("fast" => \$opt_fast,
+               );
 
 my $db = LJ::get_cluster_master($clusterid);
 die "Invalid/down cluster: $clusterid\n" unless $db;
@@ -28,6 +34,12 @@ while ($loop) {
         $loop = 1;
         my $u = LJ::load_userid($uid);
         die "Can't find userid: $uid" unless $u;
+
+        # sometimes expunges don't expunge all the way.
+        if ($u->{'statusvis'} eq "X") {
+            $db->do("DELETE FROM userpicblob2 WHERE userid=$uid AND picid=$picid");
+            next;
+        }
         
         my ($sx, $sy, $fmt) = Image::Size::imgsize(\$image);
         die "Unknown format" unless $fmt eq "GIF" || $fmt eq "JPG" || $fmt eq "PNG";
@@ -37,9 +49,11 @@ while ($loop) {
         my $rv = LJ::Blob::put($u, "userpic", $fmt, $picid, $image, \$err);
         die "Error putting file: $u->{'user'}/$picid\n" unless $rv;
 
-        # extra paranoid!
-        my $get = LJ::Blob::get($u, "userpic", $fmt, $picid);
-        die "Re-fetch didn't match" unless $get eq $image;
+        unless ($opt_fast) {
+            # extra paranoid!
+            my $get = LJ::Blob::get($u, "userpic", $fmt, $picid);
+            die "Re-fetch didn't match" unless $get eq $image;
+        }
 
         $db->do("DELETE FROM userpicblob2 WHERE userid=$uid AND picid=$picid");
 
