@@ -117,7 +117,7 @@ BODY<=
  $ret .= "<A HREF=\"/userinfo.bml?user=$up->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>";
  $ret .= "<B><A HREF=\"$LJ::SITEROOT/users/$up->{'user'}/\">" . &BML::eall($up->{'name'}) . "</A> ";
 
- $ret .= "$extra says...</B>";
+ $ret .= "$extra said...</B>";
 
  my $etime = $item->{'eventtime'};
  $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!&LJ::date_to_view_links($u, $&)!e;
