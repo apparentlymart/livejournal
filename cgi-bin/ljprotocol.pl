@@ -960,8 +960,12 @@ sub do_request
 	    {
 		my $qsubject = $dbh->quote($req->{'subject'});	    
 
-		$sth = $dbh->prepare("UPDATE logtext SET event=$qevent, subject=$qsubject WHERE itemid=$qitemid");
-		$sth->execute;
+		my @prefix = ("");
+		if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
+		foreach my $pfx (@prefix) {
+		    $sth = $dbh->prepare("UPDATE ${pfx}logtext SET event=$qevent, subject=$qsubject WHERE itemid=$qitemid");
+		    $sth->execute;
+		}
 		$dbh->do("REPLACE INTO logsubject (itemid, subject) VALUES ($qitemid, $qsubject)");
 	    }
 
@@ -1204,13 +1208,19 @@ sub do_request
 
         my $qevent = $dbh->quote($event);
 	$event = "";
-	$dbh->do("INSERT INTO logtext (itemid, subject, event) ".
-		 "VALUES ($itemid, $qsubject, $qevent)");
-	if ($dbh->err) {
-	    $res->{'success'} = "FAIL";
-	    $res->{'errmsg'} = "Database error [lti]: " . $dbh->errstr;
-	    &LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-	    return;
+
+	my @prefix = ("");
+	if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
+	foreach my $pfx (@prefix) 
+	{
+	    $dbh->do("INSERT INTO ${pfx}logtext (itemid, subject, event) ".
+		     "VALUES ($itemid, $qsubject, $qevent)");
+	    if ($dbh->err) {
+		$res->{'success'} = "FAIL";
+		$res->{'errmsg'} = "Database error [${pfx}lti]: " . $dbh->errstr;
+		&LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+		return;
+	    }
 	}
 
 	# this is to speed month view and other places that don't need full text.
