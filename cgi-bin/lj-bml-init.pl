@@ -18,6 +18,8 @@ BML::register_block("SUPPORT_EMAIL", "S", $LJ::SUPPORT_EMAIL);
     BML::register_block("DL", "DS", $dl);
 }
 
+BML::register_hook("startup", sub { LJ::start_request() });
+
 # pre-load common libraries so we don't have to load them in BML files (slow)
 package BMLCodeBlock;
 use LJ::TextMessage;

@@ -285,6 +285,17 @@ sub handle_request
 	    }
 	}
 
+	if ($HOOK{'startup'}) {
+	    eval {
+		$HOOK{'startup'}->();
+	    };
+	    if ($@) {
+		print "Content-type: text/html\n\n";
+                print "<b>Error running startup hook:</b><br />\n$@";
+                return 0;
+	    }
+	}
+
 	&load_look("", "global");
 	&load_look($BMLSCHEME, "generic");
 
@@ -1115,6 +1126,12 @@ sub register_block
     $datahash->{$type} = $def;
     $flaghash->{$type} = $flags;
     return 1;
+}
+
+sub register_hook
+{
+    my ($name, $code) = @_;
+    $main::HOOK{$name} = $code;
 }
 
 sub get_query_string
