@@ -8,7 +8,7 @@ layerinfo author = "Martin Atkins";
 layerinfo author_email = "mart@livejournal.com";
 
 layerinfo redist_uniq = "sturdygesture/layout";
-layerinfo previews = "sturdygesture/preview.gif";
+layerinfo previews = "sturdygesture/sturdygesture.jpg";
 
 propgroup Colors {
     property Color clr_page_back { des = "Page background"; }
