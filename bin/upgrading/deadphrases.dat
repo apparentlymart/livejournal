@@ -187,5 +187,3 @@ general /talkscreen.bml.title
 general /community/members.bml.success.message
 
 general /community/transfer.bml.error.banned
-
-general /editjournal_do.bml.success.edit
