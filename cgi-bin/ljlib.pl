@@ -63,49 +63,6 @@ if ($SIG{'HUP'}) {
 
 package LJ;
 
-sub html_datetime
-{
-    my $opts = shift;
-    my $lang = $opts->{'lang'} || "EN";
-    my ($yyyy, $mm, $dd, $hh, $nn, $ss);
-    my $ret;
-    my $name = $opts->{'name'};
-    my $disabled = $opts->{'disabled'} ? "DISABLED" : "";
-    if ($opts->{'default'} =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d):(\d\d))/) {
-	($yyyy, $mm, $dd, $hh, $nn, $ss) = ($1 > 0 ? $1 : "",
-					    $2+0, 
-					    $3 > 0 ? $3+0 : "",
-					    $4 > 0 ? $4 : "", 
-					    $5 > 0 ? $5 : "", 
-					    $6 > 0 ? $6 : "");
-    }
-    $ret .= LJ::html_select({ 'name' => "${name}_mm", 'selected' => $mm, 'disabled' => $opts->{'disabled'} },
-			 map { $_, LJ::Lang::month_long($lang, $_) } (0..12));
-    $ret .= "<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_dd VALUE=\"$dd\" $disabled>, <INPUT SIZE=4 MAXLENGTH=4 NAME=${name}_yyyy VALUE=\"$yyyy\" $disabled>";
-    unless ($opts->{'notime'}) {
-	$ret.= " <INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_hh VALUE=\"$hh\" $disabled>:<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_nn VALUE=\"$nn\" $disabled>";
-	if ($opts->{'seconds'}) {
-	    $ret .= "<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_ss VALUE=\"$ss\" $disabled>";
-	}
-    }
-
-    return $ret;
-}
-
-sub html_datetime_decode
-{
-    my $opts = shift;
-    my $hash = shift;
-    my $name = $opts->{'name'};
-    return sprintf("%04d-%02d-%02d %02d:%02d:%02d", 
-		   $hash->{"${name}_yyyy"},
-		   $hash->{"${name}_mm"},
-		   $hash->{"${name}_dd"},
-		   $hash->{"${name}_hh"},
-		   $hash->{"${name}_nn"},
-		   $hash->{"${name}_ss"});
-}
-
 sub set_userprop
 {
     my ($dbarg, $userid, $propname, $value) = @_;
@@ -1902,6 +1859,48 @@ sub make_journal
     return $ret;   
 }
 
+sub html_datetime
+{
+    my $opts = shift;
+    my $lang = $opts->{'lang'} || "EN";
+    my ($yyyy, $mm, $dd, $hh, $nn, $ss);
+    my $ret;
+    my $name = $opts->{'name'};
+    my $disabled = $opts->{'disabled'} ? "DISABLED" : "";
+    if ($opts->{'default'} =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d):(\d\d))/) {
+	($yyyy, $mm, $dd, $hh, $nn, $ss) = ($1 > 0 ? $1 : "",
+					    $2+0, 
+					    $3 > 0 ? $3+0 : "",
+					    $4 > 0 ? $4 : "", 
+					    $5 > 0 ? $5 : "", 
+					    $6 > 0 ? $6 : "");
+    }
+    $ret .= LJ::html_select({ 'name' => "${name}_mm", 'selected' => $mm, 'disabled' => $opts->{'disabled'} },
+			 map { $_, LJ::Lang::month_long($lang, $_) } (0..12));
+    $ret .= "<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_dd VALUE=\"$dd\" $disabled>, <INPUT SIZE=4 MAXLENGTH=4 NAME=${name}_yyyy VALUE=\"$yyyy\" $disabled>";
+    unless ($opts->{'notime'}) {
+	$ret.= " <INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_hh VALUE=\"$hh\" $disabled>:<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_nn VALUE=\"$nn\" $disabled>";
+	if ($opts->{'seconds'}) {
+	    $ret .= "<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_ss VALUE=\"$ss\" $disabled>";
+	}
+    }
+
+    return $ret;
+}
+
+sub html_datetime_decode
+{
+    my $opts = shift;
+    my $hash = shift;
+    my $name = $opts->{'name'};
+    return sprintf("%04d-%02d-%02d %02d:%02d:%02d", 
+		   $hash->{"${name}_yyyy"},
+		   $hash->{"${name}_mm"},
+		   $hash->{"${name}_dd"},
+		   $hash->{"${name}_hh"},
+		   $hash->{"${name}_nn"},
+		   $hash->{"${name}_ss"});
+}
 
 sub html_select
 {
