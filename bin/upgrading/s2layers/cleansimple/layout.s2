@@ -46,8 +46,6 @@ property use text_post_comment_friends;
 property use text_read_comments_friends;
 
 
-set page_recent_items = 3;
-
 function print_stylesheet ()
 {
     print """

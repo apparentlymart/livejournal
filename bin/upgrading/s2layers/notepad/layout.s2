@@ -4,9 +4,6 @@ layerinfo type = "layout";
 layerinfo name = "Notepad";
 layerinfo redist_uniq = "notepad/layout";
 
-property string imguri { des = "URI to notepad images (no trailing slash)"; }
-set imguri = "";
-
 property bool show_entry_userpic { des = "Show the userpic on the journal entries?"; }
 set show_entry_userpic = false;
 
@@ -27,6 +24,18 @@ set vlink_color = "#500050";
 
 property Color alink_color { des = "Active link color"; }
 set alink_color = "#ff00c0";
+
+property use page_recent_items;
+property use text_post_comment;
+property use text_read_comments;
+
+property use page_friends_items;
+property use text_post_comment_friends;
+property use text_read_comments_friends;
+
+
+property string imguri { noui=1; } #  URI to notepad images (no trailing slash)
+set imguri = "";
 
 function prop_init()
 {
@@ -108,10 +117,10 @@ a:hover {
     </td>
     <td width="100%" height="38" background="$*imguri/middle.jpg">
      <h1>$title</h1>
-     <p><center><img src="$*imguri/hr.gif" width="345" height="23"></center></p>
+     <p align="center"><img src="$*imguri/hr.gif" width="345" height="23"></p>
     """;
     $this->print_body();
-    "<p><center><font size='+1'>"; $this->lay_bottom_navigation(); "</font></center></p>";
+    "<p align='center'><font size='+1'>"; $this->lay_bottom_navigation(); "</font></p>";
     """
     </td>
     <td width="8" height="38" background="$*imguri/side-right.jpg">
@@ -137,7 +146,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
         $e.journal.username != $e.poster.username)
     {
         var string userpic = defined $e.userpic ? "<img src='$e.userpic.url' /><br />" : "";
-        "<td valign='top' width='100'><center>";
+        "<td valign='top' width='100' align='center'>";
         if ($p.view == "friends" or $*show_entry_userpic == true) { print $userpic; }
         if ($p.view == "friends") { "<strong><a href='"; print $e.journal->base_url(); "'>$e.journal.username</a></strong>"; }
         if ($e.journal.username != $e.poster.username) 
@@ -146,7 +155,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
             "<br />[ <a href='" + $e.poster->base_url() + "'>$e.poster.username</a> ]" :
             "<strong><a href='" + $e.poster->base_url() + "'>$e.poster.username</a></strong>");
         }
-        "</center></td>";
+        "</td>";
     }
     """<td valign="top"><font size="+1">"""; print $e.time->date_format("med"); " "; print $e.time->time_format();
     if ($e.subject != "") { " <span style='color: $*subject_color'>$e.subject</span>"; }
@@ -170,7 +179,8 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
         "</p>";
     }
     $e.comments->print();
-    """<p><center><img src="$*imguri/hr.gif" width="345" height="23"></center></p>""";
+    """</td></tr>""";
+    """<tr><td colspan="2"><p align="center"><img src="$*imguri/hr.gif" width="345" height="23"></p>""";
     "</td></tr></table>\n";
 }
 
@@ -240,7 +250,7 @@ function ArchiveYearPage::print_body ()
 function ArchiveYearPage::print_month(ArchiveYearMonth m)
 {
     if (not $m.has_entries) { return; }
-    "<center><p><table border='1' cellpadding='4' width='80%'>";
+    "<p align='center'><table border='1' cellpadding='4' width='80%'>";
 
     # Month Header
     "<tr align=center><th colspan='7'>"; print $m->month_format(); "</th></tr>";
@@ -260,7 +270,7 @@ function ArchiveYearPage::print_month(ArchiveYearMonth m)
     }
     "<tr align='center'><td colspan='7'>";
     "<a href='$m.url'>$*text_view_month</a>";
-    "</td></tr></table></p></center>";
+    "</td></tr></table></p>";
 }
 
 function ArchiveYearWeek::print()
@@ -269,14 +279,14 @@ function ArchiveYearWeek::print()
     if ($.pre_empty) { "<td colspan='$.pre_empty'>&nbsp;</td>"; }
     foreach var ArchiveYearDay d ($.days)
     {
-        "<td valign='top'><b><font size='-1'>$d.day</font></b><center>";
+        "<td valign='top'><b><font size='-1'>$d.day</font></b><div align='center'>";
         if ($d.num_entries)
         {
             "<a href='$d.url'>$d.num_entries</a>";
         } else {
             "&nbsp;";
         }
-        "</center></td>";
+        "</div></td>";
     }
     if ($.post_empty) { "<td colspan='$.post_empty'>&nbsp;</td>"; }
 }
