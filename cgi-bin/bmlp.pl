@@ -141,6 +141,23 @@ sub deleteglob
 
 sub handle_request
 {
+    # let Apache+FCGI use BML to authenticate directories
+    if ($ENV{'FCGI_APACHE_ROLE'} eq "ACCESS_CHECKER")
+    {
+        my $dir = $ENV{'SCRIPT_FILENAME'};
+        unless (-d $dir) {
+            $dir =~ s!(.+/).*!$1!;
+        }
+        $FILE = $ENV{'PATH_TRANSLATED'} = "$dir/fcgi-acheck.bml";
+        unless (-e $FILE) {
+            print "Status: 403 Not Found\n";
+            print "Content-type: text/html\n\n";
+            print "<H1>No Access Checker</H1>\n";
+            print "<B>Error:</b>: fcgi-acheck.bml does not exist in directory.";
+            return;
+        }
+    }
+
     $FILE = $ENV{'PATH_TRANSLATED'};
     $most_recent_mod = "";
     %BMLCodeBlock::FORM = ();
@@ -1141,6 +1158,15 @@ sub get_query_string
         $q = $1;
     }
     return $q;
+}
+
+sub http_response
+{
+    my ($code, $msg) = @_;
+    finish_suppress_all();
+    # FIXME: pretty lame.  be smart about code & their names & whether or not to send
+    # msg or not.
+    print "Status: $code\nContent-type: text/html\n\n$msg";
 }
 
 sub finish_suppress_all
