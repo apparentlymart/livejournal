@@ -180,7 +180,7 @@ sub create_view_lastn
 		'itemid' => $itemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?itemid=$itemid",
 		'readlink' => $replycount ? &fill_var_props($vars, 'LASTN_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount == 1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
@@ -635,7 +635,7 @@ sub create_view_friends
 		'itemid' => $itemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?itemid=$itemid",
 		'readlink' => $replycount ? &fill_var_props($vars, 'FRIENDS_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount==1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
@@ -1102,7 +1102,7 @@ END_SQL
 		'itemid' => $itemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?itemid=$itemid",
 		'readlink' => $replycount ? &fill_var_props($vars, 'DAY_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount==1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
