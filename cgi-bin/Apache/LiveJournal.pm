@@ -470,7 +470,6 @@ sub interface_content
     my %FORM = ();
     LJ::get_form_data(\%FORM);
 
-    print "Content-type: text/plain\n";
     LJ::do_request($dbs, \%FORM, \%out);
 
     if ($FORM{'responseenc'} eq "urlenc") {
