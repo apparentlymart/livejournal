@@ -84,7 +84,7 @@
      foreach my $key (qw(statusline security subject des priority datedue progress)) {
 	 $q{$key} = $dbh->quote($FORM{$key});
      }
-     $q{'datedue'} = $dbh->quote(&html_datetime_decode({ 'name' => 'datedue' }, \%FORM));
+     $q{'datedue'} = $dbh->quote(LJ::html_datetime_decode({ 'name' => 'datedue' }, \%FORM));
 
      if ($todoid) {
 	 unless ($permission{'edit'}) {
@@ -236,7 +236,7 @@
 
  ## date due
  $body .= "<tr><td><b>Due Date:</b></td><td>";
- $body .= &html_datetime({ 'name' => 'datedue', 'default' => $it->{'datedue'}, 'disabled' => $disabled,
+ $body .= LJ::html_datetime({ 'name' => 'datedue', 'default' => $it->{'datedue'}, 'disabled' => $disabled,
 			   'lang' => 'EN',     }),
  $body .= "</td></tr>";
 

@@ -443,7 +443,7 @@ sub make_code {
     $ret .= "</lj-poll>";
 
     # escape html on this because it'll currently be sent to user so they can copy/paste
-    return &ehtml($ret);
+    return LJ::ehtml($ret);
  }
 
 

@@ -1439,7 +1439,7 @@ sub do_request
     $flags = {} unless (ref $flags eq "HASH");
 
     my ($user, $userid, $journaltype, $name, $correctpassword, $status, $statusvis, $track, $sth);
-    $user = &trim(lc($req->{'user'}));
+    $user = LJ::canonical_username($req->{'user'});
     my $quser = $dbh->quote($user);
 
     # check for an alive database connection

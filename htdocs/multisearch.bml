@@ -13,7 +13,7 @@
      if ($FORM{'q'} =~ /^\*(\d+)/) {
 	 print "Status: 302 Found\n";
 	 print "Location: $LJ::SITEROOT/talkread.bml?itemid=$1\n\n";
-	 &BML::finish;
+	 BML::finish;
 	 return "";
      }
 
@@ -36,12 +36,12 @@
 
 	 print "Status: 302 Found\n";
 	 print "Location: $url\n\n";
-	 &BML::finish;
+	 BML::finish;
 	 return "";
      } else {
 	 print "Status: 302 Found\n";
 	 print "Location: $LJ::SITEROOT/random.bml\n\n";
-	 &BML::finish;
+	 BML::finish;
 
 	 $title = "No user";
 	 $body = "(=H1 Error H1=)(=P You did not enter a username. P=)";
@@ -53,8 +53,8 @@
      my $int = lc($FORM{'q'});
      if ($int) {
 	 print "Status: 302 Found\n";
-	 print "Location: $LJ::SITEROOT/interests.bml?int=" . &eurl($int) . "\n\n";
-	 &BML::finish;
+	 print "Location: $LJ::SITEROOT/interests.bml?int=" . LJ::eurl($int) . "\n\n";
+	 BML::finish;
 	 return "";
      } else {
 	 $title = "No Interest";
@@ -80,7 +80,7 @@
 	 if ($user) {
 	     print "Status: 302 Found\n";
 	     print "Location: $LJ::SITEROOT/userinfo.bml?user=$user\n\n";
-	     &BML::finish;
+	     BML::finish;
 	     return "";
 	 } else {
 	     $title = "No Match";
@@ -100,7 +100,7 @@
      if ($user) {
 	 print "Status: 302 Found\n";
 	 print "Location: $LJ::SITEROOT/userinfo.bml?user=$user\n\n";
-	 &BML::finish;
+	 BML::finish;
 	 return "";
      } else {
 	 $title = "No Match";
@@ -143,10 +143,10 @@
 	     ($city, $state) = @parts;
 	 }
      }
-     ($city, $state, $country) = map { &eurl($_); } ($city, $state, $country);
+     ($city, $state, $country) = map { LJ::eurl($_); } ($city, $state, $country);
      print "Status: 302 Found\n";
      print "Location: $LJ::SITEROOT/directory.bml?s_loc=1&loc_cn=$country&loc_st=$state&loc_ci=$city&opt_sort=ut&opt_format=pics&opt_pagesize=50\n\n";
-     &BML::finish();
+     BML::finish();
      return "";
  }
 

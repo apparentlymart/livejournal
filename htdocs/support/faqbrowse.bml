@@ -34,11 +34,11 @@ BODY<=
      
      &main::note_mod_time($unixmodtime);
      
-     $q = &BMLUtil::ehtml($question);
+     $q = LJ::ehtml($question);
      $q =~ s/^\s+//; $q =~ s/\s+$//;
      $q =~ s/\n/<BR>/g;
      
-     $a = &BMLUtil::ehtml($answer);
+     $a = LJ::ehtml($answer);
      $a =~ s/^\s+//; $a =~ s/\s+$//;
      $a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
      $a =~ s/\n/<BR>/g;

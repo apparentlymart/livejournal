@@ -33,7 +33,7 @@ P=)
 				$faqcat{$b}->{'catorder'} } keys %faqcat)
  {
      $ret .= "(=H2 ";
-     $ret .= BMLUtil::ehtml($faqcat{$faqcat}->{'faqcatname'});
+     $ret .= LJ::ehtml($faqcat{$faqcat}->{'faqcatname'});
      $ret .= " (<a href=\"faqbrowse.bml?faqcat=$faqcat\">";
      $ret .= "view all";
      $ret .= "</a>) H2=)\n";

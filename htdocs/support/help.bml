@@ -134,9 +134,9 @@ BODY<=
        
      next if ($FORM{'state'} eq "green" && $barbg ne "BGCOLOR=#D0EED0");
        
-     my $summary = &BMLUtil::ehtml($sp->{'subject'});
+     my $summary = LJ::ehtml($sp->{'subject'});
      my $secold = time() - $sp->{'timecreate'};
-     my $age = &ago_text($secold);
+     my $age = LJ::ago_text($secold);
      my $probarea = $sp->{_cat}->{'catname'};
      my $points = LJ::Support::calc_points($sp, $secold);
 

@@ -8,7 +8,6 @@
 
  $title = "";
  $body = "";
- $debug = "";
 
  my $user = $FORM{'user'};
  if ($user eq "" && defined $remote) {
@@ -62,7 +61,7 @@
      $body .= "<UL>\n";
      while (my $mem = $sth->fetchrow_hashref)
      {
-	 my $eh_des = &ehtml($mem->{'des'});
+	 my $eh_des = LJ::ehtml($mem->{'des'});
 	 my $eventtime = substr($mem->{'eventtime'}, 0, 10);
 	 my $edit = "";
 	 if ($remote && $remote->{'user'} eq $user) {
@@ -103,7 +102,7 @@
 	 $body .= "<UL>";
      }
      my $noun = $row->{'count'}==1 ? "entry" : "entries";
-     my $ue_keyword = &eurl($row->{'keyword'});
+     my $ue_keyword = LJ::eurl($row->{'keyword'});
      my $keyword = $row->{'keyword'};
      if ($keyword eq "*") { $keyword = "Uncategorized"; }
      $body .= "<LI><B><A HREF=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</A></B>: $row->{'count'} $noun\n";
@@ -118,9 +117,7 @@
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
 BODY<=
-(=_CODE
- return $body . "<P>" . $debug;
-_CODE=)
+(=_CODE return $body; _CODE=)
 <=BODY
 PAGE=)(=_C <LJDEP>
 link: htdocs/tools/memories.bml, htdocs/tools/memadd.bml, htdocs/talkread.bml

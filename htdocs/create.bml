@@ -89,7 +89,7 @@ BODY<=
      
      my $user = LJ::canonical_username($FORM{'user'});
      my $name = $FORM{'name'};
-     my $email = &trim(lc($FORM{'email'}));
+     my $email = LJ::trim(lc($FORM{'email'}));
 
      $connect_db->();
      
@@ -187,7 +187,7 @@ BODY<=
      
      my $aa = {};
      if ($userid) {
-	 $aa = &register_authaction($userid, "validateemail", $email);
+	 $aa = LJ::register_authaction($dbs, $userid, "validateemail", $email);
      }
      
      open (REM, "$LJ::HOME/htdocs/inc/email-welcome") || return "Error: couldn't open email-welcome template";

@@ -110,7 +110,7 @@
  foreach (@color) {
      if ($col==0) { $ret .= "<TR>\n"; }
      $col++;
-	 my $ecolor = BMLUtil::ehtml($_->{'item'});
+	 my $ecolor = LJ::ehtml($_->{'item'});
      $ret .= "<TD bgcolor=$_->{'code'}><IMG SRC=\"/img/dot.gif\" WIDTH=14 HEIGHT=14 TITLE=\"$ecolor\" ALT=\"$ecolor\"></TD>\n";
      if ($col==23) { $ret .= "</TR>\n"; $col==0; }
  }

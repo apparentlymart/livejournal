@@ -159,7 +159,7 @@ BODY<=
      $sth->execute;
      while ($_ = $sth->fetchrow_hashref) {
 	 $count++;
-	 my $name = ehtml($_->{'name'});
+	 my $name = LJ::ehtml($_->{'name'});
 	 $list .= "<li>(=LJCOMM $_->{'user'} LJCOMM=) - $name\n";
      }
 
@@ -187,7 +187,7 @@ BODY<=
      $sth->execute;
      while (my ($iuser, $iname) = $sth->fetchrow_array) {
 	 $count++;
-	 my $name = ehtml($iname);
+	 my $name = LJ::ehtml($iname);
 	 $list .= "<li>(=LJUSER $iuser LJUSER=) - $name\n";
      }
      $list .= "</ul>\n";

@@ -7,7 +7,6 @@
 # </LJDEP>
 
 use strict;
-use vars qw($dbh %FORM);  # FIXME: in process of removing global $dbh usage.
 use DBI;
 use Digest::MD5 qw(md5_hex);
 use Text::Wrap;
@@ -57,233 +56,7 @@ if ($SIG{'HUP'}) {
 }
 
 
-#  DEPRECATED.  use LJ:: versions.
-sub connect_db { 
-    my $c = join(",",caller);
-    LJ::debug("$0: connect_db called from [$c]");
-    $dbh = ($BMLPersist::dbh = LJ::get_dbh("master")); 
-}
-sub html_select { return LJ::html_select(@_); }
-sub load_codes {  &connect_db(); LJ::load_codes($dbh, @_); }
-sub load_log_props { &connect_db(); return LJ::load_log_props($dbh, @_); }
-sub load_mood_theme { &connect_db(); return LJ::load_mood_theme($dbh, @_); }
-sub load_moods { &connect_db(); return LJ::load_moods($dbh); }
-sub load_user_theme { &connect_db(); return LJ::load_user_theme(@_); }
-sub load_userpics { return LJ::load_userpics($dbh, @_); }
-sub make_journal { connect_db(); return LJ::make_journal($dbh, @_); }
-sub make_text_link { return LJ::make_text_link(@_); }
-sub parse_vars { return LJ::parse_vars(@_); }
-sub remote_has_priv { return LJ::remote_has_priv($dbh, @_); }
-sub send_mail { return LJ::send_mail(@_); }
-sub server_down_html { return LJ::server_down_html(); }
-sub strip_bad_code { return LJ::strip_bad_code(@_); }
-sub valid_password { return LJ::valid_password(@_); }
-sub ehtml { return LJ::ehtml(@_); }
-sub eurl { return LJ::eurl(@_); }
-sub exml { return LJ::exml(@_); }
-sub durl { return LJ::durl(@_); }
-
-sub register_authaction
-{
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-
-    my $userid = shift;  $userid += 0;
-    my $action = $dbh->quote(shift);
-    my $arg1 = $dbh->quote(shift);
-    
-    # make the authcode
-    my $authcode = "";
-    my $vchars = "abcdefghijklmnopqrstuvwxyz0123456789";
-    srand();
-    for (1..15) {
-	$authcode .= substr($vchars, int(rand()*36), 1);
-    }
-    my $qauthcode = $dbh->quote($authcode);
-
-    my $sth = $dbh->prepare("INSERT INTO authactions (aaid, userid, datecreate, authcode, action, arg1) VALUES (NULL, $userid, NOW(), $qauthcode, $action, $arg1)");
-    $sth->execute;
-
-    if ($dbh->err) {
-	return 0;
-    } else {
-	return { 'aaid' => $dbh->{'mysql_insertid'},
-		 'authcode' => $authcode,
-	     };
-    }
-}
-
-
-
-sub remap_event_links
-{
-    my ($eventref, $baseurl) = @_;
-    return unless $baseurl;
-    $$eventref =~ s/(<IMG\s+[^>]*SRC=)(("(.+?)")|([^\s>]+))/"$1\"" . &abs_url($2, $baseurl). '"'/ieg;
-    $$eventref =~ s/(<A\s+[^>]*HREF=)(("(.+?)")|([^\s>]+))/"$1\"" . &abs_url($2, $baseurl). '"'/ieg;
-}
-
-sub abs_url
-{
-    use URI::URL;
-    my ($uri, $base) = @_;
-    $uri =~ s/^"//;
-	$uri =~ s/"$//;
-    return url($uri)->abs($base)->as_string;
-}
-
-sub set_userprop
-{
-    my ($dbh, $userid, $propname, $value) = @_;
-    my $p;
-
-    if ($LJ::CACHE_USERPROP{$propname}) {
-	$p = $LJ::CACHE_USERPROP{$propname};
-    } else {
-	my $qpropname = $dbh->quote($propname);
-	$userid += 0;
-	my $propid;
-	my $sth;
-	
-	$sth = $dbh->prepare("SELECT upropid, indexed FROM userproplist WHERE name=$qpropname");
-	$sth->execute;
-	$p = $sth->fetchrow_hashref;
-	return unless ($p);
-	$LJ::CACHE_USERPROP{$propname} = $p;
-    }
-
-    my $table = $p->{'indexed'} ? "userprop" : "userproplite";
-    $value = $dbh->quote($value);
-
-    $dbh->do("REPLACE INTO $table (userid, upropid, value) VALUES ($userid, $p->{'upropid'}, $value)");
-}
-
-sub ago_text
-{
-    my $secondsold = shift;
-    return "Never." unless ($secondsold);
-    my $num;
-    my $unit;
-    if ($secondsold > 60*60*24*7) {
-	$num = int($secondsold / (60*60*24*7));
-	$unit = "week";
-    } elsif ($secondsold > 60*60*24) {
-	$num = int($secondsold / (60*60*24));
-	$unit = "day";
-    } elsif ($secondsold > 60*60) {
-	$num = int($secondsold / (60*60));
-	$unit = "hour";
-    } elsif ($secondsold > 60) {
-	$num = int($secondsold / (60));
-	$unit = "minute";
-    } else {
-	$num = $secondsold;
-	$unit = "second";
-    }
-    return "$num $unit" . ($num==1?"":"s") . " ago";
-}
-
-
-sub icq_send
-{
-    my ($uin, $msg) = @_;
-    if (length($msg) > 450) { $msg = substr($msg, 0, 447) . "..."; }
-    return unless ($uin eq "489151" || $uin eq "19639663");
-    my $time = time();
-    my $rand = "0000";
-    my $file;
-    $file = "$LJ::ICQSPOOL/$time.$rand";
-    while (-e $file) {
-	$rand = sprintf("%04d", int(rand()*10000));
-	$file = "$LJ::ICQSPOOL/$time.$rand";
-    }
-    open (FIL, ">$file");
-    print FIL "send $uin $msg";
-    close FIL;
-}
-
-sub create_password
-{
-    my @c = split(/ */, "bcdfghjklmnprstvwxyz");
-    my @v = split(/ */, "aeiou");
-    my $l = int(rand(2)) + 4;
-    my $password = "";
-    for(my $i = 1; $i <= $l; $i++)
-    {
-        $password .= "$c[int(rand(20))]$v[int(rand(5))]";
-    }
-    return $password;
-}
-
-sub age
-{
-    my ($age) = $_[0];   # seconds
-    my $sec = $age; 
-    my $unit;
-    if ($age < 60) 
-    { 
-        $unit="sec"; 
-    } 
-    elsif ($age < 3600) 
-    { 
-        $age = int($age/60); 
-        $unit=" min";
-    } 
-    elsif ($age < 3600*24)
-    {
-        $age = (int($age/3600)); 
-        $unit="hr"; 
-    } 
-    else
-    {
-        $age = (int($age/(3600*24))); 
-        $unit = "day";
-    }
-    if ($age != 1) 
-    {
-        $unit .= "s"; 
-    } 
-    return "$age $unit";
-}
-
-
-
-
-sub make_link
-{
-    my $url = shift;
-    my $vars = shift;
-    my $append = "?";
-    foreach (keys %$vars) {
-	next if ($vars->{$_} eq "");
-	$url .= "${append}${_}=$vars->{$_}";
-	$append = "&";
-    }
-    return $url;
-}
-
-sub trim
-{
-    my $a = $_[0];
-    $a =~ s/^\s+//;
-    $a =~ s/\s+$//;
-    return $a;	
-}
-
-
-sub html_datetime_decode
-{
-    my $opts = shift;
-    my $hash = shift;
-    my $name = $opts->{'name'};
-    return sprintf("%04d-%02d-%02d %02d:%02d:%02d", 
-		   $hash->{"${name}_yyyy"},
-		   $hash->{"${name}_mm"},
-		   $hash->{"${name}_dd"},
-		   $hash->{"${name}_hh"},
-		   $hash->{"${name}_nn"},
-		   $hash->{"${name}_ss"});
-}
+package LJ;
 
 sub html_datetime
 {
@@ -314,7 +87,112 @@ sub html_datetime
     return $ret;
 }
 
-package LJ;
+sub html_datetime_decode
+{
+    my $opts = shift;
+    my $hash = shift;
+    my $name = $opts->{'name'};
+    return sprintf("%04d-%02d-%02d %02d:%02d:%02d", 
+		   $hash->{"${name}_yyyy"},
+		   $hash->{"${name}_mm"},
+		   $hash->{"${name}_dd"},
+		   $hash->{"${name}_hh"},
+		   $hash->{"${name}_nn"},
+		   $hash->{"${name}_ss"});
+}
+
+sub set_userprop
+{
+    my ($dbarg, $userid, $propname, $value) = @_;
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    
+    my $p;
+
+    if ($LJ::CACHE_USERPROP{$propname}) {
+	$p = $LJ::CACHE_USERPROP{$propname};
+    } else {
+	my $qpropname = $dbh->quote($propname);
+	$userid += 0;
+	my $propid;
+	my $sth;
+	
+	$sth = $dbh->prepare("SELECT upropid, indexed FROM userproplist WHERE name=$qpropname");
+	$sth->execute;
+	$p = $sth->fetchrow_hashref;
+	return unless ($p);
+	$LJ::CACHE_USERPROP{$propname} = $p;
+    }
+
+    my $table = $p->{'indexed'} ? "userprop" : "userproplite";
+    $value = $dbh->quote($value);
+
+    $dbh->do("REPLACE INTO $table (userid, upropid, value) VALUES ($userid, $p->{'upropid'}, $value)");
+}
+
+sub register_authaction
+{
+    my $dbarg = shift;
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+
+    my $userid = shift;  $userid += 0;
+    my $action = $dbh->quote(shift);
+    my $arg1 = $dbh->quote(shift);
+    
+    # make the authcode
+    my $authcode = LJ::make_auth_code(15);
+    my $qauthcode = $dbh->quote($authcode);
+
+    my $sth = $dbh->prepare("INSERT INTO authactions (aaid, userid, datecreate, authcode, action, arg1) VALUES (NULL, $userid, NOW(), $qauthcode, $action, $arg1)");
+    $sth->execute;
+
+    if ($dbh->err) {
+	return 0;
+    } else {
+	return { 'aaid' => $dbh->{'mysql_insertid'},
+		 'authcode' => $authcode,
+	     };
+    }
+}
+
+sub make_link
+{
+    my $url = shift;
+    my $vars = shift;
+    my $append = "?";
+    foreach (keys %$vars) {
+	next if ($vars->{$_} eq "");
+	$url .= "${append}${_}=$vars->{$_}";
+	$append = "&";
+    }
+    return $url;
+}
+
+sub ago_text
+{
+    my $secondsold = shift;
+    return "Never." unless ($secondsold);
+    my $num;
+    my $unit;
+    if ($secondsold > 60*60*24*7) {
+	$num = int($secondsold / (60*60*24*7));
+	$unit = "week";
+    } elsif ($secondsold > 60*60*24) {
+	$num = int($secondsold / (60*60*24));
+	$unit = "day";
+    } elsif ($secondsold > 60*60) {
+	$num = int($secondsold / (60*60));
+	$unit = "hour";
+    } elsif ($secondsold > 60) {
+	$num = int($secondsold / (60));
+	$unit = "minute";
+    } else {
+	$num = $secondsold;
+	$unit = "second";
+    }
+    return "$num $unit" . ($num==1?"":"s") . " ago";
+}
 
 sub auth_fields
 {
@@ -1995,8 +1873,8 @@ sub make_journal
     }
 
     # populate the variable hash
-    &parse_vars(\$basevars, \%vars);
-    &parse_vars(\$overrides, \%vars);
+    LJ::parse_vars(\$basevars, \%vars);
+    LJ::parse_vars(\$overrides, \%vars);
     LJ::load_user_theme($dbs, $user, $u, \%vars);
     
     # kinda free some memory
@@ -2012,7 +1890,7 @@ sub make_journal
 
     # remove bad stuff
     unless ($opts->{'trusted_html'}) {
-	&strip_bad_code(\$ret);
+        LJ::strip_bad_code(\$ret);
     }
 
     # return it...

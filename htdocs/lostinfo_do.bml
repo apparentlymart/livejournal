@@ -18,7 +18,7 @@ BODY<=
  {
      my $user = LJ::canonical_username($FORM{'user'});
      my $quser = $dbr->quote($user);
-     my $email = &trim($FORM{'email_p'});
+     my $email = LJ::trim($FORM{'email_p'});
 
      my $u = LJ::load_user($dbs, $user);
 
@@ -71,7 +71,7 @@ BODY<=
      print MAIL "     EMail Address: $u->{'email'}\n\n";
      if ($u->{'status'} ne "A"){
 	 my $aa = {};
-	 $aa = &register_authaction($u->{'userid'}, "validateemail", $u->{'email'});
+	 $aa = LJ::register_authaction($dbs, $u->{'userid'}, "validateemail", $u->{'email'});
 	 print MAIL "To confirm your email address, go here:\n\n";
 	 print MAIL "    $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";	
      }
@@ -91,7 +91,7 @@ BODY<=
  if ($FORM{'lostuser'})
  {
      my $sendto = "";
-     my $email = &trim($FORM{'email_u'});
+     my $email = LJ::trim($FORM{'email_u'});
      my $qe = $dbh->quote($email);
 
      $sth = $dbr->prepare("SELECT user, status FROM user WHERE email=$qe");

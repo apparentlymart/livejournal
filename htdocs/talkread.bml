@@ -99,7 +99,7 @@ BODY<=
      if ($logprops{$itemid}->{'picture_keyword'}) {
 	 $alt .= ": $logprops{$itemid}->{'picture_keyword'}";
      }
-     $alt = ehtml($alt);
+     $alt = LJ::ehtml($alt);
      $ret .= "<TD><IMG SRC=\"/userpic/$picid\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'} ALIGN=ABSMIDDLE HSPACE=3 TITLE=\"$alt\" ALT=\"\"></TD>";
  }
  
@@ -450,7 +450,7 @@ sub recurse_post
 			if ($post->{'picture_keyword'}) {
 			    $alt .= ": $post->{'picture_keyword'}";
 			}
-			$alt = ehtml($alt);
+			$alt = LJ::ehtml($alt);
 
 			$$ret .= "<IMG ALIGN=LEFT HSPACE=3 SRC=\"/userpic/$picid\"";
 			$$ret .= " WIDTH=$userpics{$picid}->{'width'}";

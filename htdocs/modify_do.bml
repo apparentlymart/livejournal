@@ -125,7 +125,7 @@ BODY<=
      $sth = $dbr->prepare("SELECT coltype, des FROM themecoltypes ORDER BY sortorder");
      $sth->execute;
      while ($_ = $sth->fetchrow_hashref) {
-	 $ret .= "<TR><TD ALIGN=RIGHT>$_->{'des'}</TD><TD><INPUT TYPE=TEXT NAME=\"theme_cust:$_->{'coltype'}\" SIZE=20 MAXLENGTH=30 VALUE=\"" . &ehtml($custcolors{$_->{'coltype'}}) . "\"></TD></TR>\n";
+	 $ret .= "<TR><TD ALIGN=RIGHT>$_->{'des'}</TD><TD><INPUT TYPE=TEXT NAME=\"theme_cust:$_->{'coltype'}\" SIZE=20 MAXLENGTH=30 VALUE=\"" . LJ::ehtml($custcolors{$_->{'coltype'}}) . "\"></TD></TR>\n";
 
      }
      $ret .= "</TABLE></CENTER>\n";
@@ -156,7 +156,7 @@ BODY<=
      $ret .= "<UL><B>Select mood icon set: </B> <SELECT NAME=\"moodthemeid\">";
      foreach my $t (@themes) {
 	 my $sel = $t->{'moodthemeid'} == $u->{'moodthemeid'} ? "SELECTED" : "";
-	 $ret .= "<OPTION $sel VALUE=$t->{'moodthemeid'}>" . &ehtml($t->{'name'}) . "\n";
+	 $ret .= "<OPTION $sel VALUE=$t->{'moodthemeid'}>" . LJ::ehtml($t->{'name'}) . "\n";
      }
      $ret .= "</SELECT> (<A HREF=\"/moodlist.bml\" TARGET=moods>preview</A>)\n";
      $checked = $u->{'opt_forcemoodtheme'} eq "Y" ? "CHECKED" : "";
@@ -363,10 +363,7 @@ BODY<=
 		       );	
 	 foreach my $uprop (@uprops) {
 	     if ($FORM{$uprop} ne $u->{$uprop}) {
-		 # TODO: set_userprop does not have an LJ:: function
-		 # and therefore has not been converted.  Leaving asis
-		 # for now.
-		 &set_userprop($dbh, $u->{'userid'}, $uprop, $FORM{$uprop});
+		 LJ::set_userprop($dbs, $u->{'userid'}, $uprop, $FORM{$uprop});
 	     }
 	 }
      }

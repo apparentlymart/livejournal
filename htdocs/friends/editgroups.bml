@@ -288,7 +288,7 @@ END_JS
  foreach my $num (sort { $res{"frgrp_${a}_sortorder"} <=> 
 			 $res{"frgrp_${b}_sortorder"} } @num_used) 
  {
-     $body .= "\n<OPTION VALUE=\"$num\">" . &ehtml($res{"frgrp_${num}_name"});
+     $body .= "\n<OPTION VALUE=\"$num\">" . LJ::ehtml($res{"frgrp_${num}_name"});
  }
 # foreach my $num (sort { $a <=> $b } @num_free) {
 #     $body .= "\n<OPTION VALUE=\"$num\">";

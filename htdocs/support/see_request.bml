@@ -98,7 +98,7 @@ BODY<=
  }
  $ret .= "</td></tr>\n";
 
- my $age = &ago_text(time() - $sp->{'timecreate'});
+ my $age = LJ::ago_text(time() - $sp->{'timecreate'});
  $ret .= "<tr><td align=right><b>Time opened:</b></td><td>$age</td></tr>\n";
  my $state = $sp->{'state'};
  if ($state eq "open") { 

@@ -432,7 +432,7 @@ sub create_view_friends
 	    $group = $opts->{'args'};
 	    $group =~ s!^/!!;
 	    $group =~ s!\?.*!!;
-	    if ($group) { $group = &durl($group); }
+	    if ($group) { $group = LJ::durl($group); }
 	}
 	$group ||= "Default View";
 	my $qgroup = $dbr->quote($group);
@@ -734,7 +734,7 @@ sub create_view_friends
 	$skiplinks{'skipforward'} = 
 	    LJ::fill_var_props($vars, 'FRIENDS_SKIP_FORWARD', {
 		"numitems" => $itemshow,
-		"url" => &make_link("$journalbase/friends", \%linkvars),
+		"url" => LJ::make_link("$journalbase/friends", \%linkvars),
 	    });
     }
 
@@ -753,7 +753,7 @@ sub create_view_friends
 	$skiplinks{'skipbackward'} = 
 	    LJ::fill_var_props($vars, 'FRIENDS_SKIP_BACKWARD', {
 		"numitems" => $itemshow,
-		"url" => &make_link("$journalbase/friends", \%linkvars),
+		"url" => LJ::make_link("$journalbase/friends", \%linkvars),
 	    });
     }
 

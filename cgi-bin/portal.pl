@@ -710,10 +710,6 @@ $box{'lastnview'} =
 	    $order_by = "l.logtime DESC, l.eventtime DESC";
 	}
 
-	### load the log properties
-	#my %logprops = ();
-	#&load_log_props(\@itemids, \%logprops);
-
 	my $itemid_in = join(", ", map { $_+0; } @itemids);	
 	if ($box->{'args'}->{'showtext'}) {
 	    $sth = $dbh->prepare("SELECT l.posterid, l.itemid, l.security, lt.subject, lt.event, DATE_FORMAT(l.eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', replycount FROM log l, logtext lt WHERE l.itemid=lt.itemid AND l.itemid IN ($itemid_in) ORDER BY $order_by");

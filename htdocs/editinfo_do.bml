@@ -512,10 +512,7 @@ BODY<=
 
 	 foreach my $uprop (@uprops) {
 	     if ($FORM{$uprop} ne $u->{$uprop}) {
-		 #TODO: set_userprop has not been converted to LJ::
-		 #and therefore does not use $dbarg/$dbs.  Leave it
-		 #alone for now.
-		 &set_userprop($dbh, $u->{'userid'}, $uprop, $FORM{$uprop});
+		 LJ::set_userprop($dbs, $u->{'userid'}, $uprop, $FORM{$uprop});
 	     }
 	 }
      }
@@ -665,7 +662,8 @@ BODY<=
      if ($email_changed) 
      {
 	 my $aa = {};
-	 $aa = &register_authaction($u->{'userid'}, "validateemail", $FORM{'email'});
+	 $aa = LJ::register_authaction($dbs, $u->{'userid'}, 
+				       "validateemail", $FORM{'email'});
 
 	 open (MAIL, "|$LJ::SENDMAIL");
 	 print MAIL "To: $FORM{'email'}\n";

@@ -133,7 +133,7 @@
 	       }); 
 
 
- $u->{'name'} = &ehtml($u->{'name'});
+ $u->{'name'} = LJ::ehtml($u->{'name'});
 
  my $ci;
  if ($com)

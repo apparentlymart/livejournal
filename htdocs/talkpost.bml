@@ -119,7 +119,7 @@ BODY<=
      if ($pickw) {
 	 $alt .= ": $pickw";
      }
-     $alt = ehtml($alt);
+     $alt = LJ::ehtml($alt);
      $ret .= "<TD><IMG SRC=\"/userpic/$picid\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'} ALIGN=ABSMIDDLE HSPACE=3 title=\"$alt\" alt=\"\"></TD>";
  }
  my $extra = "";
@@ -129,7 +129,7 @@ BODY<=
  $ret .= "<TD>";
  if ($ur && $ur->{'user'} ne "") {
      $ret .= "<A HREF=\"/userinfo.bml?user=$ur->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>";
-     $ret .= "<B><A HREF=\"$LJ::SITEROOT/users/$ur->{'user'}/\">" . &ehtml($ur->{'name'}) . "</A> ";
+     $ret .= "<B><A HREF=\"$LJ::SITEROOT/users/$ur->{'user'}/\">" . LJ::ehtml($ur->{'name'}) . "</A> ";
  } else {
      $ret .= "<B>Someone";
  }
@@ -297,8 +297,8 @@ BODY<=
      if ($basesubject) {
 	 $basesubject = "Re: $basesubject";
 	 # double-escape it for including in the input value below.
-	 $basesubject = &ehtml($basesubject);
-	 $basesubject = &ehtml($basesubject);
+	 $basesubject = LJ::ehtml($basesubject);
+	 $basesubject = LJ::ehtml($basesubject);
      }
  }
 

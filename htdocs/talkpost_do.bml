@@ -204,7 +204,7 @@ BODY<=
 
  my $qpartid = $dbh->quote($FORM{'parenttalkid'});
  my $qsubject = $dbh->quote($FORM{'subject'});
- my $subjecticon = ($FORM{'subjecticon'} eq "none" || $FORM{'subjecticon'} eq "") ? "" : &trim(lc($FORM{'subjecticon'}));
+ my $subjecticon = ($FORM{'subjecticon'} eq "none" || $FORM{'subjecticon'} eq "") ? "" : LJ::trim(lc($FORM{'subjecticon'}));
  my $qsubjecticon = $dbh->quote($subjecticon);
  my $qbody = $dbh->quote($FORM{'body'});
  my $datepost = LJ::mysql_time();

@@ -40,7 +40,7 @@ P=)
  $ret .= "<FORM METHOD=GET><B>Preview mood icon set: </B> <SELECT NAME=\"moodtheme\">";
  foreach my $t (@themes) {
      my $sel = $t->{'moodthemeid'} == $moodtheme ? "SELECTED" : "";
-     $ret .= "<OPTION $sel VALUE=$t->{'moodthemeid'}>" . &ehtml($t->{'name'}) . "\n";
+     $ret .= "<OPTION $sel VALUE=$t->{'moodthemeid'}>" . LJ::ehtml($t->{'name'}) . "\n";
  }
  $ret .= "</SELECT><INPUT TYPE=SUBMIT VALUE=\"Change\"></FORM>\n";
  

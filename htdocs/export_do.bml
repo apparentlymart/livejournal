@@ -103,7 +103,7 @@ _INFO=)(=_CODE
 		    }
 		}
 		if ($format eq "xml") {
-		    $v = &exml($v);
+		    $v = LJ::exml($v);
 		}
 		push @vals, $v;
 	    }

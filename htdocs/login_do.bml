@@ -72,7 +72,7 @@
      $switchtext = "Change expiration mode to NEVER";
      $body .= "(=P Your login will expire after you close your browser.  If this is your own computer and you're the only user, you may want to set change your login expiration such that it never expires: P=)";
  }
- $body .= "<form method=post><input type=hidden name=user value=$user><input type=hidden name=hpassword value=\"$hpassword\"><input type=hidden name=expire value=\"$newexpire\"><center><input type=submit value=\"" . &ehtml($switchtext) . "\"></center></form>";
+ $body .= "<form method=post><input type=hidden name=user value=$user><input type=hidden name=hpassword value=\"$hpassword\"><input type=hidden name=expire value=\"$newexpire\"><center><input type=submit value=\"" . LJ::ehtml($switchtext) . "\"></center></form>";
  
  $body .= "(=H1 Links H1=)(=P In the future this page will have all sorts of links and relevant information, but for now here are a few places you may want to go: P=)";
  $body .= "<ul>";

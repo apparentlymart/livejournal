@@ -65,8 +65,8 @@
 	 $des = "$user: " . ($log->{'subject'} || $log->{'eventtime'});
      }
 
-     $des = &ehtml($des);
-     $keywords = &ehtml($keywords);
+     $des = LJ::ehtml($des);
+     $keywords = LJ::ehtml($keywords);
 
      $body .= "(=H1 Add to memories... H1=)(=P To add the journal entry you were just viewing to your \"memories\", fill out the form below. P=)";
      $body .= "<FORM METHOD=POST>";

@@ -118,7 +118,7 @@
 
      {
 	 my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}});
-	 $eh_keywords = &ehtml($eh_keywords);
+	 $eh_keywords = LJ::ehtml($eh_keywords);
 	 $body .= "<TR><TD ALIGN=RIGHT><B>Keywords:</B></TD><TD>  <INPUT SIZE=30 NAME=\"kw_$pic->{'picid'}\" VALUE=\"$eh_keywords\"></TD></TR>\n";
      }
 

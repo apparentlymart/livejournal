@@ -27,7 +27,7 @@ _INCLUDE=)
      $u = LJ::load_userid($dbs, $userid);
 
      foreach (qw(user name)) {
-	 $eh{$_} = &ehtml($u->{$_});
+	 $eh{$_} = LJ::ehtml($u->{$_});
      }
 
      $eh{'password'} = "_REMOTE";

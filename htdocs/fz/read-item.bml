@@ -59,7 +59,6 @@ _INFO=)<HTML>
  }
 
  $event = $item->{'event'};
- &remap_event_links(\$event, $u->{'baseurl'});
  LJ::CleanHTML::clean_event(\$event, $logprops{$FORM{'itemid'}}->{'opt_preformatted'});
 
  $ret .= "<P>";
