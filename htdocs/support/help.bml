@@ -40,6 +40,17 @@ BODY<=
      $sth = $dbh->prepare("SELECT s.* FROM support s WHERE s.state='closed' AND s.timeclosed>UNIX_TIMESTAMP()-(3600*24) $filterwhere ORDER BY timecreate DESC");
 
  }
+ elsif ($FORM{'state'} eq "youreplied") 
+ {
+     $ret .= "(=H1 Requests you replied to H1=)(=P This shows all open requests you've replied to. P=)";
+
+     unless ($remote) {
+	 return "(=H1 Error H1=)(=P You must be logged in to filter on requests that you've replied to. P=)";
+     }
+     
+     $sth = $dbh->prepare("SELECT DISTINCT s.* FROM support s, supportlog sl WHERE s.spid=sl.spid AND s.state='open' AND sl.userid=$remote->{'userid'} $filterwhere ORDER BY timecreate DESC");
+     
+ }
  else 
  {
      $ret .= "(=H1 Open Support Requests H1=)(=P Below are all support requests that are open (they just came in and haven't been touched yet) or answered (either awaiting to be closed by the person needing help, or the person requested they still need help).  The <a href=\"./help.bml?state=closed&cat=$filtercat\">closed reports</a> are also available.  If you help somebody out and they confirm you helped them, you get the number of points indicated in the status column.  These points will show up on your userinfo page. P=)";
@@ -62,6 +73,9 @@ BODY<=
      my @states = ("" => "Open",
 		   "closed" => "Closed",
 		   "green" => "Green");
+     if ($remote) {
+	 push @states, ("youreplied", "You Replied");
+     }
      while (@states) {
 	 my ($skey, $sname) = splice(@states, 0, 2);
 	 my $sel = $FORM{'state'} eq $skey ? " selected" : "";
