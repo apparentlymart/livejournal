@@ -1288,6 +1288,8 @@ sub Page__get_latest_month
 *MonthPage__get_latest_month = \&Page__get_latest_month;
 *YearPage__get_latest_month = \&Page__get_latest_month;
 *FriendsPage__get_latest_month = \&Page__get_latest_month;
+*EntryPage__get_latest_month = \&Page__get_latest_month;
+*ReplyPage__get_latest_month = \&Page__get_latest_month;
 
 sub YearMonth__month_format
 {
