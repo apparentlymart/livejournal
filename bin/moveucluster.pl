@@ -343,14 +343,9 @@ sub movefrom0_logitem
         }
     }
 
-    # copy its syncitems over
-    my $syncs = $dbh->selectrow_arrayref("SELECT atime, atype FROM syncupdates WHERE userid=$userid ".
-                                         "AND nodetype='L' AND nodeid=$itemid");
-    if ($syncs) {
-        $replace_into->("syncupdates2", "(userid, atime, nodetype, nodeid)", 50,
-                         $userid, $syncs->[0], 'L', $jitemid);
-
-    }
+    # copy its syncitems over (always type 'create', since a new id)
+    $replace_into->("syncupdates2", "(userid, atime, nodetype, nodeid, atype)", 50,
+                    $userid, $item->{'logtime'}, 'L', $jitemid, 'create');
 
     # copy its talk shit over:
     my %newtalkids = (0 => 0);  # 0 maps back to 0 still
