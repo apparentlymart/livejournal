@@ -183,7 +183,6 @@ my $alloc_id = sub {
         my $id = ++$alloc_data{$area};
         $replace_into->($dbh, "oldids", "(area, oldid, userid, newid)", 250,
                         $area, $orig, $userid, $id);
-        print "Fast! $id\n";
         return $id;
     }
 
