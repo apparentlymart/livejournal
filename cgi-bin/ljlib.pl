@@ -3028,7 +3028,8 @@ sub load_user_theme
     my $quser = $dbh->quote($user);
 
     if ($u->{'themeid'} == 0) {
-        $sth = $dbr->prepare("SELECT coltype, color FROM themecustom WHERE user=$quser");
+        my $db = LJ::get_dbh("s1styles") || $dbr;
+        $sth = $db->prepare("SELECT coltype, color FROM themecustom WHERE user=$quser");
     } else {
         my $qtid = $dbh->quote($u->{'themeid'});
         $sth = $dbr->prepare("SELECT coltype, color FROM themedata WHERE themeid=$qtid");
