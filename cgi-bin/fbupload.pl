@@ -90,9 +90,9 @@ sub do_upload
             'X-FB-MD5'                => hash($$rawdata),
             'X-FB-Username'           => $u->{'user'},
             'X-FB-Auth'               => make_auth($chal, $u->{'password'}),
+            'X-FB-Security'           => $opts->{'imgsec'},
             'X-FB-Gallery'            =>
-                    'name=' . (uri_escape($opts->{'galname'})) .
-                    '&picsec=' . $opts->{'imgsec'} . '&galsec=255' . '&mixed=1',
+                    'name=' . (uri_escape($opts->{'galname'})) .  '&galsec=255',
             );
 
     foreach my $hdr (keys %headers) {
