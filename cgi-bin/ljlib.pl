@@ -1346,8 +1346,14 @@ sub get_friend_items
 
             $itemsleft--; # we'll need at least one less for the next friend
 
-            # sort all the total items by rlogtime (recent at beginning)
-            @items = sort { $a->{'rlogtime'} <=> $b->{'rlogtime'} } @items;
+            # sort all the total items by rlogtime (recent at beginning).
+            # if there's an in-second tie, the "newer" post is determined by
+            # the higher jitemid, which means nothing if the posts are in the same
+            # journal, but means everything if they are (which happens almost never
+            # for a human, but all the time for RSS feeds, once we remove the
+            # synsucker's 1-second delay between postevents)
+            @items = sort { $a->{'rlogtime'} <=> $b->{'rlogtime'} ||
+                            $b->{'jitemid'}  <=> $a->{'jitemid'}     } @items;
 
             # cut the list down to what we need.
             @items = splice(@items, 0, $getitems) if (@items > $getitems);
