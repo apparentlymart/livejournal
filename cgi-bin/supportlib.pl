@@ -269,7 +269,7 @@ sub get_answer_types
     } 
 
     if (can_help($dbh, $sp, $remote)) {
-        push @ans_type, ("screened" => "Screened Answer (if unsure)", 
+        push @ans_type, ("screened" => "Screened Response", 
                          "answer" => "Answer",                         
                          "comment" => "Comment or Question");
     } elsif ($sp->{_cat}->{'allow_screened'}) {
