@@ -171,12 +171,11 @@ body<=
     if (!$did_post && $GET{'mode'} eq "enmasse")
     {
         my $remote = LJ::get_remote();
-        return LJ::bad_input($ML{'.error.loginfirst'}) unless $remote;
-        return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.enmasse.mustlogin'} p?>" unless $remote;
+        return LJ::bad_input($ML{'.error.enmasse.mustlogin'}) unless $remote;
 
         my $authas = $GET{'authas'} || $remote->{'user'};
         my $u = LJ::get_authas_user($authas);
-        return LJ::bad_input($ML{'.error.noauth'}) unless $u;
+        return LJ::bad_input(BML::ml('.error.enmasse.noaccess', {'user' => LJ::ljuser($authas)})) unless $u;
 
         my $altauthas = $remote->{'user'} ne $u->{'user'};
         my $getextra = $altauthas ? "?authas=$u->{'user'}" : '';
