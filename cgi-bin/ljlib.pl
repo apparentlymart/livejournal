@@ -1917,7 +1917,7 @@ sub get_userid
     if ($LJ::CACHE_USERID{$user}) { return $LJ::CACHE_USERID{$user}; }
 
     my $quser = $dbh->quote($user);
-    my $sth = $dbh->prepare("SELECT userid FROM user WHERE user=$quser");
+    my $sth = $dbh->prepare("SELECT userid FROM useridmap WHERE user=$quser");
     $sth->execute;
     ($userid) = $sth->fetchrow_array;
     if ($userid) { $LJ::CACHE_USERID{$user} = $userid; }
@@ -1949,14 +1949,14 @@ sub get_username
     my $dbs = LJ::make_dbs_from_arg($db_arg);
     my $dbr = $dbs->{'reader'};
 
-    my $sth = $dbr->prepare("SELECT user FROM user WHERE userid=$userid");
+    my $sth = $dbr->prepare("SELECT user FROM useridmap WHERE userid=$userid");
     $sth->execute;
     $user = $sth->fetchrow_array;
 
     # Fall back to master if it doesn't exist.
     if (! defined($user) && $dbs->{'has_slave'}) {
         my $dbh = $dbs->{'dbh'};
-        $sth = $dbh->prepare("SELECT user FROM user WHERE userid=$userid");
+        $sth = $dbh->prepare("SELECT user FROM useridmap WHERE userid=$userid");
         $sth->execute;
         $user = $sth->fetchrow_array;
     }
@@ -2068,7 +2068,7 @@ sub delete_user
     my $user = shift;
     my $quser = $dbh->quote($user);
     my $sth;
-    $sth = $dbh->prepare("SELECT user, userid FROM user WHERE user=$quser");
+    $sth = $dbh->prepare("SELECT user, userid FROM useridmap WHERE user=$quser");
     my $u = $sth->fetchrow_hashref;
     unless ($u) { return; }
     
@@ -2093,13 +2093,13 @@ sub can_use_journal
     my $qposterid = $posterid+0;
 
     ## find the journal owner's userid
-    my $sth = $dbr->prepare("SELECT userid FROM user WHERE user=$qreqownername");
+    my $sth = $dbr->prepare("SELECT userid FROM useridmap WHERE user=$qreqownername");
     $sth->execute;
     my $ownerid = $sth->fetchrow_array;
     # First, fall back to the master.
     unless ($ownerid) {
         if ($dbs->{'has_slave'}) {
-            $sth = $dbh->prepare("SELECT userid FROM user WHERE user=$qreqownername");
+            $sth = $dbh->prepare("SELECT userid FROM useridmap WHERE user=$qreqownername");
             $sth->execute;
             $ownerid = $sth->fetchrow_array;
         }

@@ -100,9 +100,7 @@ sub do_request
 	if ($flags->{'userid'}) {
 	    $userid = $flags->{'userid'};
 	} else {
-	    $sth = $dbr->prepare("SELECT userid FROM user WHERE user=$quser");
-	    $sth->execute;
-	    ($userid) = $sth->fetchrow_array;
+	    $userid = LJ::get_userid($dbr, $user);
 	}
     }
 
@@ -161,7 +159,7 @@ sub do_request
 
 	### report what shared journals this user may post in
 	my $access_count = 0;
-	my $sth = $dbh->prepare("SELECT u.user FROM user u, logaccess la WHERE la.ownerid=u.userid AND la.posterid=$userid ORDER BY u.user");
+	my $sth = $dbh->prepare("SELECT u.user FROM useridmap u, logaccess la WHERE la.ownerid=u.userid AND la.posterid=$userid ORDER BY u.user");
 	$sth->execute;
 	while ($_ = $sth->fetchrow_hashref) {
 	    $access_count++;
@@ -305,11 +303,8 @@ sub do_request
 		    my $friend = $1;
 		    my $mask = $req->{"editfriend_groupmask_${friend}"}+0;
 		    $mask |= 1;  # make sure bit 0 is on
-		    my $qfriend = $dbh->quote($friend);
 
-		    $sth = $dbh->prepare("SELECT userid FROM user WHERE user=$qfriend");
-		    $sth->execute;
-		    my ($friendid) = $sth->fetchrow_array;
+		    my $friendid = LJ::get_userid($dbh, $friend);
 		    if ($friendid) {
 			$sth = $dbh->prepare("UPDATE friends SET groupmask=$mask WHERE userid=$userid AND friendid=$friendid");
 			$sth->execute;
@@ -484,7 +479,7 @@ sub do_request
 	## first, figure out who the current friends are to save us work later
 	my %curfriend;
 	my $friend_count = 0;
-        $sth = $dbh->prepare("SELECT u.user FROM user u, friends f WHERE u.userid=f.friendid AND f.userid=$userid");
+        $sth = $dbh->prepare("SELECT u.user FROM useridmap u, friends f WHERE u.userid=f.friendid AND f.userid=$userid");
         $sth->execute;
 	while (my ($friend) = $sth->fetchrow_array) {
 	    $curfriend{$friend} = 1;
