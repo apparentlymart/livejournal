@@ -3830,7 +3830,9 @@ sub make_journal
                 my $style_userid = $dbr->selectrow_array("SELECT userid FROM s2styles WHERE styleid=?",
                                                          undef, $geta->{'s2id'});
 
-                if ($u->{'userid'} == $style_userid) {
+                # if remote owns the style or the journal owns the style, it's okay
+                if ($u->{'userid'} == $style_userid ||
+                    $remote->{'userid'} == $style_userid ) {
                     return (2, $geta->{'s2id'});
                 }
             }
