@@ -194,6 +194,12 @@
          $num = 0;
      }
 
+     unless (LJ::text_in(\%FORM)) {
+         push @errors, "You seem to have changed your browser's encoding to something other than UTF-8.  It needs to be in UTF-8.";
+         push @errors, "Nothing saved.";
+         $num = 0;
+     }
+ 
      my $saved = 0;  # do any saves?
 
      for (my $i=1; $i<=$num; $i++)
