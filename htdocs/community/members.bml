@@ -35,7 +35,9 @@ body<=
     # is $remote an admin?
     unless (LJ::check_rel($c, $remote, 'A')) {
         $ret .= "<?h1 $ML{'Error'} h1?><?p ";
-        $ret .= BML::ml('.error.noaccess', { 'comm' => LJ::ljuser($cname, { 'type' => 'C' }) }) . " p?>";
+        $ret .= BML::ml('.error.noaccess', 
+                        { 'comm' => LJ::ljuser($cname, { 'type' => 'C' }) });
+        $ret .= " p?>";
         return $ret;
     }
 
@@ -47,44 +49,25 @@ body<=
         my @saveattribs = split(',', $POST{'attribs'});
 
         # add new users
+        my $adding = 0;
         foreach my $num (1..5) {
-            next unless $POST{"add_$num"} =~ /^\w+$/ ||
-                        grep { defined $POST{"add_${num}_$_"} } @saveattribs;
+            next unless $POST{"add_$num"} =~ /^\w+$/;
 
             my $target = LJ::load_user($POST{"add_$num"});
             next unless $target->{'journaltype'} eq 'P';
             
             # make a urlencoded arg string
-            my $arg = join("&", "targetid=$target->{'userid'}",
-                                map { "$_=1" }
-                                grep { defined $POST{"add_${num}_$_"} }
-                                @saveattribs);
+            my @attr = grep { defined $POST{"add_${num}_$_"} } @saveattribs;
+            next unless @attr;
 
             # insert authactions row
-            my $aa = LJ::register_authaction($cid, 'comm_invite', $arg);
+            my $aa = LJ::comm_member_request($c, $target, \@attr);
             unless ($aa) {
                 $ret .= "<?h1 $ML{'Error'} h1?><?p Error registering authaction. p?>";
                 return $ret;
             }
 
-            # email recipient user to tell them about it
-            my $body = "A maintainer of the $cname community has requested " .
-                "that you be added to the community.  If you do not wish to be " .
-                "added to $cname, just ignore this email.  However, if " .
-                "you would like to join the community, please click the link " .
-                "below to authorize this action.\n\n" .
-                "     $LJ::SITEROOT/approve/$aa->{'aaid'}.$aa->{'authcode'}\n\n" .
-                "Regards\n$LJ::SITENAME Team\n";
-
-            LJ::send_mail({
-                'to' => $target->{'email'},
-                'from' => $LJ::ADMIN_EMAIL,
-                'fromname' => $LJ::SITENAME,
-                'charset' => 'utf-8',
-                'subject' => "Community Membership: $cname",
-                'body' => $body
-            });
-
+            $adding = 1;
         }
 
         # initialize lists of users to update and delete
@@ -186,6 +169,7 @@ body<=
         }
 
         $ret .= "<?h1 $ML{'.success.header'} h1?><?p $ML{'.success.message'} p?>";
+        $ret .= "<?p $ML{'.success.addusers'} p?>" if $adding;
         $ret .= "<?p " . BML::ml(".success.return", { 'link' => BML::get_uri() . "?comm=$cname" }) . " p?>";
 
         return $ret;

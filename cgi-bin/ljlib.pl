@@ -1178,6 +1178,60 @@ sub make_authas_select {
 }
 
 # <LJFUNC>
+# name: LJ::comm_member_request
+# des: Registers an authaction to add a user to a
+#      community and sends an approval email
+# returns: Hashref; output of LJ::register_authaction()
+# args: comm, u, attr?
+# des-comm: Community user object
+# des-u: User object to add to community
+# des-attr: array of attributes new user will have
+# </LJFUNC>
+sub comm_member_request {
+    my ($comm, $u, $attr) = @_;
+
+    $comm = ref $comm ? $comm : LJ::load_user($comm);
+    $u = ref $u ? $u : LJ::load_user($u);
+    return undef unless $comm && $u;
+
+    # insert authactions row
+    $attr ||= [];
+    my $aa = LJ::register_authaction($comm->{'userid'}, 'comm_invite',
+                                     join("&", "targetid=$u->{'userid'}",
+                                          map { "$_=1" } @$attr) );
+    return undef unless $aa;
+
+    # email recipient user for confirmation
+    my %attr_map = ('member'     => "Member",
+                    'admin'      => "Maintainer",
+                    'post'       => "Poster",
+                    'moderate'   => "Moderator",
+                    'preapprove' => "Unmoderated",
+                    );
+
+    my $cname = $comm->{'name'};
+    my $body = "A maintainer of the $cname community has requested that " .
+        "you be added to the community with the following capabilities: " .
+        join(", ", map { $attr_map{$_} } @$attr) . ".\n\n" .
+        "If you do not wish to be added to $cname, just ignore this email.  " .
+        "However, if you would like to join the community, please click " .
+        "the link below to authorize this action.\n\n" .
+        "     $LJ::SITEROOT/approve/$aa->{'aaid'}.$aa->{'authcode'}\n\n" .
+        "Regards\n$LJ::SITENAME Team\n";
+
+    LJ::send_mail({
+        'to' => $u->{'email'},
+        'from' => $LJ::ADMIN_EMAIL,
+        'fromname' => $LJ::SITENAME,
+        'charset' => 'utf-8',
+        'subject' => "Community Membership: $cname",
+        'body' => $body
+        });
+
+    return $aa;
+}
+
+# <LJFUNC>
 # name: LJ::is_valid_authaction
 # des: Validates a shared secret (authid/authcode pair)
 # info: See [func[LJ::register_authaction]].

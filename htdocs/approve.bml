@@ -23,14 +23,17 @@ body<=
     # perform actions according to the action type
     if ($aa->{'action'} eq 'comm_invite') {
 
-        my $dbh = LJ::get_db_writer();
+        my $dbh = undef;
 
         my $targetid = $arg->{'targetid'};
         return LJ::bad_input("Internal error: invalid action") unless $targetid;
 
         # add to community
-        $dbh->do("REPLACE INTO friends (userid, friendid) VALUES (?, ?)",
-                 undef, $aa->{'userid'}, $targetid);
+        if ($arg->{'member'}) {
+            $dbh = LJ::get_db_writer();
+            $dbh->do("REPLACE INTO friends (userid, friendid) VALUES (?, ?)",
+                     undef, $aa->{'userid'}, $targetid);
+        }
 
         # set up rels with this community
         my @rels = ();
@@ -40,9 +43,13 @@ body<=
         push @rels, 'N' if $arg->{'preapprove'};
 
         if (@rels) {
+            $dbh ||= LJ::get_db_writer();
             my $sets = join(", ", map { "($aa->{'userid'}, $targetid, '$_')" } @rels);
             $dbh->do("REPLACE INTO reluser (userid, targetid, type) VALUES $sets");
         }
+
+        # something weird is going on if we did nothing above
+        return LJ::bad_input("Internal error: nothing to be done") unless $dbh;
 
         # return success
         my $username = LJ::get_username($aa->{'userid'});

@@ -133,6 +133,8 @@
 
 /community/members.bml.settings=[<a href='[[link]]'>Settings</a>]
 
+/community/members.bml.success.addusers=The users you have added to this community have been sent a confirmation email.  They will appear in the member list as soon as they approve this action.
+
 /community/members.bml.success.header=Success
 
 /community/members.bml.success.message=Your changes have been successfully saved.
