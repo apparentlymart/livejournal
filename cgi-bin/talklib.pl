@@ -366,6 +366,30 @@ sub get_talk_data
     my $lockkey = $memkey->[1];
     my $packed = LJ::MemCache::get($memkey);
 
+    # we check the replycount in memcache, the value we count, and then fix it up
+    # if it seems necessary.
+    my $rp_memkey = $nodetype eq "L" ? [$u->{'userid'}, "rp:$u->{'userid'}:$nodeid"] : undef;
+    my $rp_count = $rp_memkey ? LJ::MemCache::get($rp_memkey) : 0;
+    my $rp_ourcount = 0;
+    my $fixup_rp = sub {
+        return unless $nodetype eq "L";
+        return if $rp_count == $rp_ourcount;
+
+        # probably need to fix.  checking is at least warranted.
+        my $dbcm = LJ::get_cluster_master($u);
+        return unless $dbcm;
+        $dbcm->do("LOCK TABLES log2 WRITE, talk2 READ");
+        my $ct = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 WHERE ".
+                                        "journalid=? AND nodetype='L' AND nodeid=? ".
+                                        "AND state='A'", undef, $u->{'userid'},
+                                        $nodeid);
+        $dbcm->do("UPDATE log2 SET replycount=? WHERE journalid=? AND jitemid=?",
+                  undef, int($ct), $u->{'userid'}, $nodeid);
+        print STDERR "Fixing replycount for $u->{'userid'}/$nodeid from $rp_count to $ct\n";
+        $dbcm->do("UNLOCK TABLES");
+        LJ::MemCache::delete($rp_memkey);
+    };
+
     my $memcache_good = sub {
         return $packed && substr($packed,0,1) eq $DATAVER &&
             length($packed) % 16 == 1;
@@ -384,7 +408,9 @@ sub get_talk_data
                 datepost => LJ::mysql_time($time),
                 parenttalkid => $par,
             };
+            $rp_ourcount++ if $state eq "A";
         }
+        $fixup_rp->();
         return $ret;
     };
     
@@ -419,10 +445,13 @@ sub get_talk_data
                         $r->{'parenttalkid'},
                         $r->{'posterid'},
                         LJ::mysqldate_to_time($r->{'datepost'}));
+        $rp_ourcount++ if $r->{'state'} eq "A";
     }
     LJ::MemCache::set($memkey, $memval);
-
     $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+
+    $fixup_rp->();
+
     return $ret;
     
 }
