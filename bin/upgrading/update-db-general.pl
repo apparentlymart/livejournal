@@ -1255,6 +1255,28 @@ CREATE TABLE dudata (
 )
 EOC
 
+register_tablecreate("dbinfo", <<'EOC');
+CREATE TABLE dbinfo (
+  dbid    TINYINT UNSIGNED NOT NULL,
+  name    VARCHAR(25),
+  fdsn      VARCHAR(50),
+  rootfdsn  VARCHAR(50),
+  masterid  TINYINT UNSIGNED NOT NULL,
+  PRIMARY KEY (dbid),
+  UNIQUE (name)
+)
+EOC
+
+register_tablecreate("dbweights", <<'EOC');
+CREATE TABLE dbweights (
+  dbid    TINYINT UNSIGNED NOT NULL,
+  role    VARCHAR(25) NOT NULL,
+  PRIMARY KEY (dbid, role),
+  norm    TINYINT UNSIGNED NOT NULL,
+  curr    TINYINT UNSIGNED NOT NULL
+)
+EOC
+
 ### changes
 
 register_alter(sub {

@@ -1,0 +1,114 @@
+<html>
+<head><title>DB Admin - (=SITENAME=)</title></head>
+<body bgcolor='#000000' text='#ffffff'>
+(=_CODE
+
+ use strict;
+ use vars qw(%FORM);
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+ my $remote = LJ::get_remote($dbs);
+
+ return"<b>Error:</b> You don't have access to administer databases."
+ unless (LJ::check_priv($dbs, $remote, "dbadmin"));
+
+ my %dbinfo;  # dbid
+ my %slaves;  # dbid
+ my $sth;
+ $sth = $dbh->prepare("SELECT dbid, name, masterid FROM dbinfo");
+ $sth->execute;
+ while ($_ = $sth->fetchrow_hashref) {
+     next unless $_->{'dbid'};
+     $dbinfo{$_->{'dbid'}} = $_;
+     push @{$slaves{$_->{'masterid'}}}, $_->{'dbid'};
+ }
+
+ my %role;
+ $sth = $dbh->prepare("SELECT dbid, role, norm, curr FROM dbweights");
+ $sth->execute;
+ while ($_ = $sth->fetchrow_hashref) {
+     next unless defined $dbinfo{$_->{'dbid'}};
+     $role{$_->{'dbid'}}->{$_->{'role'}} = $_;
+ }
+
+ my $ret;
+ my $p = sub { $ret .= shift; };
+ my $status;
+
+ if (defined $FORM{'action:save'}) {
+     return "<b>Error:</b> Not a POST request." unless LJ::did_post();
+
+     my $curr_changed = 0;
+     foreach my $k (keys %FORM) {
+	 next unless $k =~ /^set-(\d+)-(\w+?)-(\w+)$/;
+	 my ($sid, $role, $what) = ($1, $2, $3);
+	 next unless $what eq "norm" or $what eq "curr";
+	 next unless defined $role{$sid};
+	 next unless defined $role{$sid}->{$role};
+	 my $val = $FORM{$k}+0;
+	 next if $val == $role{$sid}->{$role}->{$what};
+	 
+	 $dbh->do("UPDATE dbweights SET $what=$val WHERE ".
+		  "dbid=$sid AND role='$role'");
+	 $role{$sid}->{$role}->{$what} = $val;
+	 $curr_changed = 1 if $what eq "curr";
+     }
+
+     if ($curr_changed) {
+	 my $newserial;
+	 my $rows = $dbh->do("UPDATE dbinfo SET fdsn=fdsn+1 WHERE dbid=0");
+	 if ($rows == 1) {
+	     $newserial = $dbh->selectrow_array("SELECT fdsn FROM dbinfo WHERE dbid=0");
+	 } else {
+	     $dbh->do("INSERT INTO dbinfo (dbid, name, fdsn) VALUES (0, 'lastupdate', 1)");
+	     $newserial = 1;
+	 }
+	 $status .= "<p>New Serial: $newserial</p>\n";
+     }
+ }
+
+ my $dumpslaves = sub 
+ {
+     my $mid = shift;
+     my $depth = shift;
+     my $rec = shift;
+     return unless $slaves{$mid};
+
+     my $indent = "&nbsp;" x ($depth*5);
+
+     foreach my $sid (sort { $#{$slaves{$a}} <=> $#{$slaves{$b}} } @{$slaves{$mid}}) {
+	 my $db = $dbinfo{$sid};
+	 $p->("<tr bgcolor='#404070'><td colspan='3'><b>$indent$db->{'name'}</b></td></tr>");
+
+	 foreach my $role (sort keys %{$role{$sid}}) {
+	     my $r = $role{$sid}->{$role};
+	     my $col;
+	     if ($r->{'norm'} != $r->{'curr'}) {
+		 $col = "bgcolor='#800000'";
+	     }
+	     $p->("<tr valign='bottom' $col><td>$indent$role</td>");
+	     $p->("<td align='center'><input size='3' name='set-$sid-$role-norm' value='$r->{'norm'}'></td>");
+	     $p->("<td align='center'><input size='3' name='set-$sid-$role-curr' value='$r->{'curr'}'></td>");
+	     $p->("</tr>");
+	 }
+	 $rec->($sid, $depth+1, $rec);
+     }
+ };
+
+ $p->('<form method="post">');
+ $p->('<table cellpadding="3" border="1" bgcolor="#606060">');
+ $p->('<tr bgcolor="#404040"><td><b>Host</b>/Role</td><td><b>Norm</b></td><td><b>Curr</b></td></tr>');
+ $dumpslaves->(0, 0, $dumpslaves);  # root
+ $p->('</table>');
+ $p->('<p><input type="submit" name="action:refresh" value="Refresh"> ');
+ $p->('<input type="submit" name="action:save" value="Save"></p>');
+ $p->('</form>');
+ $p->($status);
+
+ return $ret;
+
+_CODE=)
+</body>
+</html>

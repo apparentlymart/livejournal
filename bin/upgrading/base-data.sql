@@ -554,6 +554,7 @@ REPLACE INTO priv_list (privcode, privname, des, scope, is_public) VALUES ('cont
 REPLACE INTO priv_list (privcode, privname, des, scope, is_public) VALUES ('historyview', 'View statushistory info', 'Can view data in \'statushistory\' table for a user.  If arg is \'all\', can query by adminid also.', 'general', '1');
 REPLACE INTO priv_list (privcode, privname, des, scope, is_public) VALUES ('viewall', 'View All Entries', 'Allows abuse staff to view an entry even if protected.  Must explictily enter this mode, and then it\'s audited, to prevent people from abusing this mode.', 'general', '0');
 REPLACE INTO priv_list (privcode, privname, des, scope, is_public) VALUES ('communityxfer', 'Community Maintainer Transfer', 'Can change the maintainer of a community', 'general', '');
+REPLACE INTO priv_list (privcode, privname, des, scope, is_public) VALUES ('dbadmin', 'Administer Database Servers', 'This priv lets user adjust weights for slave db servers.', 'general', '1');
 REPLACE INTO schemacols VALUES ('talk', 'talkid', 'Each comment\'s unique id.');
 REPLACE INTO schemacols VALUES ('talk', 'nodetype', 'This field defines what type of thing in comment is in reply to.  Values can be "L" = log item (journal entry), "T" = todo item.');
 REPLACE INTO schemacols VALUES ('talk', 'nodeid', 'For type "L", the log itemid.  For type "T", the todo todoid.');

@@ -2674,6 +2674,7 @@ sub handle_caches
       
     foreach (keys %LJ::DBCACHE) { 
 	my $v = $LJ::DBCACHE{$_};
+	next unless ref $v;
 	$v->disconnect;
     }
     %LJ::DBCACHE = ();
@@ -2708,6 +2709,14 @@ sub start_request
     # clear %LJ::DBREQCACHE (like DBCACHE, but verified already for
     # this request to be ->ping'able).  
     %LJ::DBREQCACHE = ();
+
+    # need to suck db weights down on every request (we check
+    # the serial number of last db weight change on every request
+    # to validate master db connection, instead of selecting
+    # the connection ID... just as fast, but with a point!)
+    if ($LJ::DBWEIGHTS_FROM_DB) {  # defined in ljconfig.pl
+	$LJ::NEED_DBWEIGHTS = 1; 
+    }
 
     return 1;
 }
@@ -3321,7 +3330,7 @@ sub get_dbh
     }
 
     if ($fdsn) {
-	$dbh = _get_dbh_conn($fdsn);
+	$dbh = _get_dbh_conn($fdsn, $role);
 	return $dbh if $dbh;
 	delete $LJ::DBCACHE{$role};  # guess it was bogus
     }
@@ -3387,13 +3396,19 @@ sub _make_dbh_fdsn
 sub _get_dbh_conn
 {
     my $fdsn = shift;
+    my $role = shift;  # optional. 
     my $now = time();
 
-    # have we already created or verified a handle this request for this DSN?
-    if ($LJ::DBREQCACHE{$fdsn}) {
+    my $retdb = sub {
+	my $db = shift;
+	$LJ::DBREQCACHE{$fdsn} = $db;
 	$LJ::DB_USED_AT{$fdsn} = $now;
-	return $LJ::DBREQCACHE{$fdsn};
-    }
+	return $db;
+    };
+
+    # have we already created or verified a handle this request for this DSN?
+    return $retdb->($LJ::DBREQCACHE{$fdsn})
+	if $LJ::DBREQCACHE{$fdsn};
     
     # check to see if we recently tried to connect to that dead server
     return undef if $now < $LJ::DBDEADUNTIL{$fdsn};
@@ -3402,12 +3417,23 @@ sub _get_dbh_conn
     my $dbh = $LJ::DBCACHE{$fdsn};
 
     # if it exists, verify it's still alive and return it:
-    if ($dbh) {
-	if ($dbh->selectrow_array("SELECT CONNECTION_ID()")) {
-	    $LJ::DBREQCACHE{$fdsn} = $dbh;  # validated.
-	    $LJ::DB_USED_AT{$fdsn} = $now;
-	    return $dbh;
+    if ($dbh) 
+    {
+	if ($role eq "master" && $LJ::NEED_DBWEIGHTS) {
+	    my $serial = 
+		$dbh->selectrow_array("SELECT fdsn AS 'serial' FROM dbinfo WHERE dbid=0");
+	    if (! $dbh->err) {
+		if ($serial != $LJ::CACHE_DBWEIGHT_SERIAL) {
+		    $LJ::CACHE_DBWEIGHT_SERIAL = $serial;
+		    _reload_weights($dbh);
+		}
+		return $retdb->($dbh);
+	    }
+	} elsif ($dbh->selectrow_array("SELECT CONNECTION_ID()")) {
+	    return $retdb->($dbh);
 	}
+
+	# bogus:
 	undef $dbh;
 	undef $LJ::DBCACHE{$fdsn};
     }
@@ -3421,11 +3447,52 @@ sub _get_dbh_conn
     # mark server as dead if dead.  won't try to reconnect again for 5 seconds.
     if ($dbh) {
 	$LJ::DB_USED_AT{$fdsn} = $now;
+	if ($role eq "master" && $LJ::NEED_DBWEIGHTS) {
+	    _reload_weights($dbh);
+	}
     } else {
 	$LJ::DB_DEAD_UNTIL{$fdsn} = $now + 5;
     }
 
     return $LJ::DBREQCACHE{$fdsn} = $LJ::DBCACHE{$fdsn} = $dbh;
+}
+
+sub _reload_weights
+{
+    my $dbh = shift;
+    my $sth = $dbh->prepare("SELECT i.masterid, i.name, i.fdsn, ".
+			    "w.role, w.curr FROM dbinfo i, dbweights w ".
+			    "WHERE i.dbid=w.dbid");
+    $sth->execute;
+    
+    my %dbinfo;
+    while (my $r = $sth->fetchrow_hashref) {
+	my $name = $r->{'masterid'} ? $r->{'name'} : "master";
+	$dbinfo{$name}->{'_fdsn'} = $r->{'fdsn'};
+	$dbinfo{$name}->{'role'}->{$r->{'role'}} = $r->{'curr'};
+	$dbinfo{$name}->{'_totalweight'} += $r->{'curr'};
+    }
+
+    # any host that has no total weight (temporarily disabled?), we want
+    # to kill all its live connections.
+    foreach my $h (keys %dbinfo) {
+	my $i = $dbinfo{$h};
+	next if $i->{'_totalweight'};
+
+	# kill open OAconnections to it
+	delete $LJ::DBCACHE{$i->{'_fdsn'}};
+
+	# mark nothing as wanting to use it.
+	foreach my $k (keys %LJ::DBCACHE) {
+	    next if ref $LJ::DBCACHE{$k};
+	    if ($LJ::DBCACHE{$k} eq $i->{'_fdsn'}) {
+		delete $LJ::DBCACHE{$k};
+	    }
+	}
+    }
+
+    # copy new config.  good to go!
+    %LJ::DBINFO = %dbinfo;    
 }
 
 # <LJFUNC>
