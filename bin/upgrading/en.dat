@@ -33,11 +33,11 @@
 
 /community/create.bml.error.samenames=Maintainer account and community account cannot be the same.
 
-/community/create.bml.label.accforcomm=This is the account that you want to turn into a community.  It must <a href="/create.bml">already be created</a>, but should not already be in use by an individual because after this tons of different people will be able to potentially post in it.
+/community/create.bml.label.accforcomm=This is the account that you want to turn into a community.  It must <a href="/create.bml">already be created</a>, but should not already be in use by an individual, because after this, many different people will potentially be able to post in it.
 
-/community/create.bml.label.admconsole=<A HREF="/admin/console/">Admin console</A> - to add/remove people that are able to post</UL>
+/community/create.bml.label.admconsole=<A HREF="/admin/console/">Admin console</A> - to add or remove people who are able to post</UL>
 
-/community/create.bml.label.anybodycan=<B>All Members</B><BR>Anybody can post immediately, once they're a member.
+/community/create.bml.label.anybodycan=<B>All Members</B><BR>Anybody can post immediately once a member.
 
 /community/create.bml.label.closedmemb=<B>Closed Membership</B><BR>You have to approve people's requests to join.
 
@@ -51,7 +51,7 @@
 
 /community/create.bml.label.create=Create Community
 
-/community/create.bml.label.createcomm=From here you can create a community account.  A community is a special type of account that other users can join, and post in.  For example of a community, check out the <a href="/userinfo.bml?user=seattle">Seattle Party Community</a>.
+/community/create.bml.label.createcomm=From here you can create a community account.  A community is a special type of account that other users can join and post in.  For an example of a community, check out the <a href="/userinfo.bml?user=seattle">Seattle Party Community</a>.
 
 /community/create.bml.label.howoperates=Choose how your community operates.  You can change these later.
 
@@ -59,7 +59,7 @@
 
 /community/create.bml.label.membership=Membership
 
-/community/create.bml.label.mustbereal=This account is the one that runs the community.  This account must be a real person account... not another community account.
+/community/create.bml.label.mustbereal=This account is the one that runs the community.  This account must be a real person account, not another community account.
 
 /community/create.bml.label.openmemb=<B>Open Membership</B><BR>Anybody can join without getting approved.
 
@@ -69,7 +69,7 @@
 
 /community/create.bml.label.rellinks=Relevant links:
 
-/community/create.bml.label.selcan=<B>Select Members</B><BR>Only some members are able to post, once they've been given access by the maintainer account..
+/community/create.bml.label.selcan=<B>Select Members</B><BR>Only some members are able to post, once they've been given access by the maintainer account.
 
 /community/create.bml.label.username=Username:
 
@@ -87,13 +87,13 @@
 
 /community/join.bml.label.addtofriends=Add "[[maintainer]]" to friends list.<br>
 
-/community/join.bml.label.allowposting=This community allows posting by all members, so you now have access to post in it.  If you already have a LiveJournal client open on your computer you'll have to log out and log back in for this journal to show up in your list of journals you can post to.
+/community/join.bml.label.allowposting=This community allows posting by all members, so you now have access to post in it.  If you already have a LiveJournal client open on your computer, you'll have to log out and log back in for this journal to show up in your list of journals you can post to.
 
 /community/join.bml.label.auth=Although you are now listed as a member, this community only allows posting by authorized users.  Contact one of the maintainers if you desire posting access. Below is the list of maintainers for this community: [[admins]]
 
 /community/join.bml.label.authpost=Although you are now listed as a member, this community only allows posting by authorized users.  Contact <a href="/userinfo.bml?user=[[maintainer]]">the community maintainer</a> if you desire posting access.
 
-/community/join.bml.label.banned=The maintainer(s) of this community has banned you from joining.
+/community/join.bml.label.banned=The maintainer(s) of this community have banned you from joining.
 
 /community/join.bml.label.closed=This community is closed.  If you're interested in joining it, please contact one of its maintainers. Below is the list of maintainers for this community: [[admins]]
 
@@ -157,15 +157,15 @@
 
 /community/members.bml.error.nocomm=Community not found.
 
-/community/members.bml.key.admin=<b>Administrates</b>
+/community/members.bml.key.admin=<b>Maintainer</b>
 
 /community/members.bml.key.member=<b>Member</b>
 
-/community/members.bml.key.moderate=<b>Moderates</b>
+/community/members.bml.key.moderate=<b>Moderator</b>
 
 /community/members.bml.key.name=<b>Name</b>
 
-/community/members.bml.key.post=<b>Able to post</b>
+/community/members.bml.key.post=<b>Posting Access</b>
 
 /community/members.bml.manage=[<a href='[[link]]'><b>&lt;&lt;</b></a> Manage communities]
 
@@ -267,7 +267,7 @@
 
 /community/settings.bml.label.admconsole=<a href='/admin/console/'>Admin console</a> - to add/remove people that are able to post
 
-/community/settings.bml.label.anybodycan=<b>All Members</b><br />Anybody can post immediately, once they're a member.
+/community/settings.bml.label.anybodycan=<b>All Members</b><br />Anybody can post immediately once a member.
 
 /community/settings.bml.label.changeheader=Change Community Settings
 
@@ -277,7 +277,7 @@
 
 /community/settings.bml.label.commchanged=Your community settings have been changed.
 
-/community/settings.bml.label.commcreate=This is the account that you want to turn into a community.  It must <a href="/create.bml">already be created</a>, but should not already be in use by an individual because after this tons of different people will be able to potentially post in it.
+/community/settings.bml.label.commcreate=This is the account that you want to turn into a community.  It must <a href="/create.bml">already be created</a>, but should not already be in use by an individual, because after this, many different people will potentially be able to post in it.
 
 /community/settings.bml.label.commcreated=Your community is now set up.
 
@@ -293,7 +293,7 @@
 
 /community/settings.bml.label.createheader=Create Community
 
-/community/settings.bml.label.createtext=From here you can create a community account.  A community is a special type of account that other users can join, and post in.  For example of a community, check out the <a href="/userinfo.bml?user=seattle">Seattle Party Community</a>.
+/community/settings.bml.label.createtext=From here you can create a community account.  A community is a special type of account that other users can join and post in.  For an example of a community, check out the <a href="/userinfo.bml?user=seattle">Seattle Party Community</a>.
 
 /community/settings.bml.label.howoperates=Choose how your community operates.  You can change these later.
 
@@ -319,7 +319,7 @@
 
 /community/settings.bml.label.rellinks=Relevant links:
 
-/community/settings.bml.label.selcan=<b>Select Members</b><br />Only some members are able to post, once they've been given access by the maintainer account..
+/community/settings.bml.label.selcan=<b>Select Members</b><br />Only some members are able to post, once they've been given access by the maintainer account.
 
 /community/settings.bml.label.username=Username:
 
@@ -347,7 +347,7 @@
 
 /create.bml.aolnotice.head=Notice to AOL Users
 
-/create.bml.aolnotice.text=If you are an <b>AOL User</b>, make sure you go to <b>Keyword: <i>Mail Controls</i></b> and <b>turn off</b> any of AOL's "useful" mail controls.  You must be able to receive mail from the Internet or you will not recieve your confirmation code.  If your parents have this restricted, perhaps you really shouldn't be using [[sitename]].
+/create.bml.aolnotice.text=If you are an <b>AOL User</b>, make sure you go to <b>Keyword: <i>Mail Controls</i></b> and <b>turn off</b> any of AOL's "useful" mail controls.  You must be able to receive mail from the Internet or you will not receive your confirmation code.  If your parents have this restricted, perhaps you really shouldn't be using [[sitename]].
 
 /create.bml.btn.proceed=Proceed...
 
@@ -369,7 +369,7 @@
 
 /create.bml.email.input.head=Email Address:
 
-/create.bml.email.text=For verification and security purposes, we need your email address.  It will never ever, under any any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a href="/legal/privacy.bml" TARGET="privacy">privacy policy</a> for more information.
+/create.bml.email.text=For verification and security purposes, we need your email address.  It will never ever, under any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a href="/legal/privacy.bml" TARGET="privacy">privacy policy</a> for more information.
 
 /create.bml.error.coppa.under13=Sorry, due to COPPA restrictions, you cannot use the LiveJournal service until you're 13 years old.  Please come back on your 13th birthday.
 
@@ -423,7 +423,7 @@
 
 /create.bml.success.head=Success!
 
-/create.bml.success.text1=Your journal has been created.  Important registration information has been emailed to <FONT FACE=Arial SIZE=+1><B>[[email]]</B></FONT> containing further instructions.  <B>Note: </B>  You have exactly <I>seven days</I> to confirm your journal creation.  If you still haven't gone and set it up after seven days the username of <B>[[username]]</B> will be automatically deleted and somebody else may use it.
+/create.bml.success.text1=Your journal has been created.  Important registration information has been emailed to <font size="+1"><b>[[email]]</b></font> containing further instructions.  Be sure to confirm your journal creation by clicking on the link sent to you in email.
 
 /create.bml.success.text2=Your LiveJournal will be available at:
 
@@ -443,7 +443,7 @@
 
 /create.bml.username.ljaddress=Your journal will be at these addresses:
 
-/create.bml.username.text=Each [[sitename]] user must have their own unique username.  Your username is what appears in the address to your journal and what you use to log into the [[sitename]] server.  It also shows up when you post comments in other people's journal.
+/create.bml.username.text=Each [[sitename]] user must have their own unique username.  Your username is what appears in the address to your journal and what you use to log into the [[sitename]] server.  It also shows up when you post comments in other people's journals.
 
 /create.bml.username.username=username
 
@@ -497,15 +497,15 @@ If you write in English, choose "Western European" here.
 
 /editinfo.bml.bdayreminders.about=If you want to get email reminding you of birthdays for your friends on LiveJournal, click this box.
 
-/editinfo.bml.bdayreminders.header=Send me birthday reminders
+/editinfo.bml.bdayreminders.header=Send me birthday reminders (currently disabled)
 
-/editinfo.bml.bio.about=Here you can enter a little mini-biography about yourself that will show up on your user-info page.
+/editinfo.bml.bio.about=Here you can enter a little mini-biography about yourself. This will show up on your User Info page.
 
 /editinfo.bml.bio.header=About You
 
 /editinfo.bml.blockrobots.about<<
 If you check this option, robots will be told to go away.  
-Not all robots respect the rules, but the popular search sites' robots do.
+Not all robots respect the rules.
 .
 
 /editinfo.bml.blockrobots.header=Block Robots/Spiders from indexing your journal
@@ -520,7 +520,7 @@ Not all robots respect the rules, but the popular search sites' robots do.
 
 /editinfo.bml.email.title=Email
 
-/editinfo.bml.enableboards.about=Check this if you want people to be able to reply to journal entries you post.  (the journal style you select must also support this)
+/editinfo.bml.enableboards.about=Check this if you want people to be able to reply to journal entries you post.
 
 /editinfo.bml.enableboards.header=Enable message boards
 
@@ -576,7 +576,7 @@ Either correct the information, or erase one or both of the state and zip code f
 .
 
 /editinfo.bml.error.locale.zip_requires_us<<
-You entered a zip-code but you did not select United States as you country.  
+You entered a zip code but you did not select United States as your country.  
 We only collect zip code information about people in the US.  
 Please go back and remove the zip code or select United States as your country.
 .
@@ -605,8 +605,8 @@ If yours is not listed, please contact us with information about how your servic
 /editinfo.bml.hidefriendof.header=Hide "Friend of" list
 
 /editinfo.bml.howhear.about<<
-Just for curiousity's sake, where did you hear about [[sitename]] from?  
-If it was a specific person, enter their username, if it 
+Just for curiosity's sake, where did you hear about [[sitename]] from?  
+If it was a specific person, enter their username; if it 
 was from another source/article/link/website, enter the appropriate information.
 .
 
@@ -648,7 +648,7 @@ plural form for consistency.  "I like DVDs" instead of "I like DVD".
 
 /editinfo.bml.mangleaddress.about<<
 If you have the above option selected and are afraid spam-robots will find your email 
-address on LiveJournal, select this option and your email address will be modified 
+address on LiveJournal, select this option. Your email address will be modified 
 so your email address won't be found by email-collecting robots.
 .
 
@@ -664,7 +664,7 @@ so your email address won't be found by email-collecting robots.
 
 /editinfo.bml.opt_in.about<<
 If you want to know when we add some cool new feature to LiveJournal, check this box.  
-The emails you get will be pretty rare, no more than once or twice a month usually.  
+We aren't currently using this feature, but we might in the future.  
 Your email address will not be visible to other users, and you can turn this off at anytime.
 .
 
@@ -701,7 +701,7 @@ read our <a href="/legal/privacy.bml">privacy policy</a>.
 
 /editinfo.bml.security.visibility.regusers=Registered Users
 
-/editinfo.bml.settings.about=Select below your personal privacy options and preferences.
+/editinfo.bml.settings.about=Select your personal privacy options and preferences below.
 
 /editinfo.bml.settings.header=LiveJournal Options
 
@@ -746,7 +746,7 @@ A lot of users feel these are ugly and a waste of space, so uncheck this box if 
 
 /editinfo.bml.topicdir.about=If you check this, other users will be able to easily add your journal entries to the hierarchial <a href="/topics/">topic directory</a>.
 
-/editinfo.bml.topicdir.header=Allow Topic Directory Inclusion
+/editinfo.bml.topicdir.header=Allow Topic Directory Inclusion (currently disabled)
 
 /editinfo.bml.translatemailto.about<<
 In case you chose to receive message board replies by email, and your email client doesn't handle Unicode (UTF-8) 
@@ -818,7 +818,7 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 
 /editjournal_do.bml.error.getting=There was an error getting the journal entries to edit:
 
-/editjournal_do.bml.error.modify=An error occured modifying your journal:
+/editjournal_do.bml.error.modify=An error occurred modifying your journal:
 
 /editjournal_do.bml.error.mustlogin=You have to be logged in to directly edit a journal entry of yours.
 
@@ -938,7 +938,7 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 
 /friends/add.bml.confirm.title=Add Friend
 
-/friends/add.bml.error1.header=Login First
+/friends/add.bml.error1.header=Log In First
 
 /friends/add.bml.error1.text<<
 To add a user to your friends list you must first go and <a href="/login.bml?ret=1">log in</a>.  If you don't
@@ -1057,7 +1057,7 @@ then be accessible to the new group.
 
 /friends/edit_do.bml.fellowfriends.head=Fellow Friends
 
-/friends/edit_do.bml.fellowfriends.text=The following people have listed you as their friend... You may want to list them as your friend too.  More than anything this is provided as a reference so you know their LiveJournal usernames too.  You are under no obligation to add them to your list.
+/friends/edit_do.bml.fellowfriends.text=The following people have listed you as a friend. You may want to list them as your friend too.  This is provided as a reference, so that you know their LiveJournal usernames.  You are under no obligation to add them to your list.
 
 /friends/edit_do.bml.foreground=Foreground
 
@@ -1165,7 +1165,7 @@ then be accessible to the new group.
 
 /interests.bml.interests.head=Interests
 
-/interests.bml.interests.text=Here are some fun things you can do with interests...
+/interests.bml.interests.text=Here are some fun things you can do with interests.
 
 /interests.bml.interests.viewpop=View popular interests
 
@@ -1295,11 +1295,11 @@ then be accessible to the new group.
 
 /lostinfo.bml.lostpassword.text=If you've lost your password, enter your username and optionally, the email address you'd like the password sent to.  Note that the email address must be one you've used at LiveJournal before and had confirmed at one point.  If you leave the email field blank, it'll be mailed to your current address.
 
-/lostinfo.bml.lostpassword.title=Lose your password?
+/lostinfo.bml.lostpassword.title=Lost your password?
 
 /lostinfo.bml.lostusername.text=If you've lost your username, enter your email address and we'll send you your username.
 
-/lostinfo.bml.lostusername.title=Lose your username?
+/lostinfo.bml.lostusername.title=Lost your username?
 
 /lostinfo.bml.title=Lost Information
 
@@ -1331,6 +1331,7 @@ believes that he or she controls this username. It's also possible that
 someone made a typo in a username or email address.
 .
 
+/lostinfo_do.bml.lostpasswordmail.part4|notes=Site-local text.  For 'en', it's blank.
 /lostinfo_do.bml.lostpasswordmail.part4=
 
 /lostinfo_do.bml.lostpasswordmail.part5<<
@@ -1418,7 +1419,7 @@ The site team
 
 /modify_do.bml.friends.opt.usesharedpic.head=Use shared journal pictures instead of poster's user picture
 
-/modify_do.bml.journaloptions.about=From here you can customize the look of your LiveJournal pages.  If you're really curious how everything works, read the <A HREF="/developer/" TARGET=_blank>developer information</A>.  Otherwise, we'll assume you're satisifed with the basic options below:
+/modify_do.bml.journaloptions.about=From here you can customize the look of your LiveJournal pages.  If you're really curious how everything works, read the <A HREF="/developer/" TARGET=_blank>developer information</A>.  Otherwise, we'll assume you're satisfied with the basic options below:
 
 /modify_do.bml.journaloptions.head=Journal Options
 
@@ -1533,7 +1534,7 @@ can rename your groups to ASCII-only names on the
 text of journal entries, comments, names and personal information... everything. 
 Unicode is a very powerful standard for working with text. 
 For example, it allows users to store and input information in many languages at once. 
-It supports the intrastructure of translating and maintaining the user interface in 
+It supports the infrastructure of translating and maintaining the user interface in 
 languages other than English. p?>
 
 <?p Journal entries and comments which had been stored before LiveJournal switched
@@ -1562,7 +1563,7 @@ that area. p?>
 
 /talkmulti.bml.deleted.title=Comments deleted
 
-/talkmulti.bml.error.comms_deleted=One of the comments has been deleted since. For security reasons, please go back and try again.
+/talkmulti.bml.error.comms_deleted=One of the comments has been deleted since you selected it. For security reasons, please go back and try again.
 
 /talkmulti.bml.error.inconsistent_data=The supplied data is inconsistent.
 
@@ -1713,7 +1714,7 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkpost_do.bml.opt.spellcheck=Spell check entry before posting
 
-/talkpost_do.bml.preview=This is how your comment will look when posted. Using the form below, you can edit your comment further, or you can submit it as-is.
+/talkpost_do.bml.preview=This is how your comment will look when posted. Using the form below, you can edit your comment further, or you can submit it as is.
 
 /talkpost_do.bml.preview.subject=<b>Subject: </b>
 
@@ -1783,7 +1784,7 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkscreen.bml.screen.sure.title=Screen this comment?
 
-/talkscreen.bml.screened.body=The comment has been screened. You can view it <a href="[[link]]">here</a>.
+/talkscreen.bml.screened.body=The comment has been screened.
 
 /talkscreen.bml.screened.title=Success
 
@@ -1795,7 +1796,7 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkscreen.bml.unscreen.sure.title=Unscreen this comment?
 
-/talkscreen.bml.unscreened.body=The comment has been unscreened. You can view it <a href="[[link]]">here</a>.
+/talkscreen.bml.unscreened.body=The comment has been unscreened.
 
 /talkscreen.bml.unscreened.title=Success
 
@@ -1899,10 +1900,10 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 /tools/memories.bml.entry=entry
 
 /tools/memories.bml.error.noentries.body<<
-  This could be because 
-  1) the user hasn't defined any memorable events, 
-  2) the user's memorable events are protected and you don't have access to view them, or 
-  3) the user doesn't have any memories that match your filter criteria.
+This could be because: <ol>
+<li>the user hasn't defined any memorable events,</li>
+<li>the user's memorable events are protected and you don't have access to view them, or</li>
+<li>the user doesn't have any memories that match your filter criteria.</li></ol>
 .
 
 /tools/memories.bml.error.noentries.title=No memories found.
@@ -2009,9 +2010,9 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /uploadpic_do.bml.error.urlerror=An error ocurred while trying to fetch your image.
 
-/userinfo.bml.about.comm=About
+/userinfo.bml.about.comm=About:
 
-/userinfo.bml.about.user=Bio
+/userinfo.bml.about.user=Bio:
 
 /userinfo.bml.body.leave= You may <a href="/community/leave.bml?comm=[[commname]]">leave the community</a> at any time.
 
@@ -2029,13 +2030,13 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.error.notloggedin=If you wish to view your own user profile, you need to <a href='/login.bml?ret=1'>login</a>.
 
-/userinfo.bml.friendof.comm=Watched by
+/userinfo.bml.friendof.comm=Watched by:
 
 /userinfo.bml.friendof.hidden=(hidden)
 
 /userinfo.bml.friendof.syndreadcount=Number of Readers
 
-/userinfo.bml.friendof.user=Friend of
+/userinfo.bml.friendof.user=Friend of:
 
 /userinfo.bml.friends.comm=Members
 
@@ -2091,7 +2092,7 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.label.sendmessage=Send Message
 
-/userinfo.bml.label.shared=Shared Journal Access:
+/userinfo.bml.label.shared=Posting Access:
 
 /userinfo.bml.label.supportpoints=Support points
 
@@ -2125,11 +2126,11 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.monitor.user=Add this user to your friends list
 
-/userinfo.bml.nonexist.body=There does not exist a user with the username <b>[[user]]</b>.  Sorry.
+/userinfo.bml.nonexist.body=The username <b>[[user]]</b> is not currently registered.
 
 /userinfo.bml.nonexist.name=Unknown user
 
-/userinfo.bml.openmembership.body=This an open-membership community.  To join, <a href="/community/join.bml?comm=[[username]]">click here</a>.
+/userinfo.bml.openmembership.body=This is an open-membership community.  To join, <a href="/community/join.bml?comm=[[username]]">click here</a>.
 
 /userinfo.bml.posthere=[[user]] can post to [[comm]]
 
@@ -2143,7 +2144,7 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.syn.nextcheck=Next check:
 
-/userinfo.bml.syn.parseerror=Error Messsage:
+/userinfo.bml.syn.parseerror=Error Message:
 
 /userinfo.bml.syndinfo.body<<
 If you would like articles from the syndicated site to appear on your friends page,
@@ -2360,7 +2361,7 @@ portal.recent.error.notsetup=You have to configure this box.  Click the plus sym
 
 portal.recent.error.userstatus=User has deleted or suspended their account.
 
-portal.recent.items.description=By default, only the most interest entry is shown.
+portal.recent.items.description=By default, only the most recent entry is shown.
 
 portal.recent.items.name=Items to display
 
