@@ -34,8 +34,8 @@ body<=
      $dbcr = $dbcs->{'reader'};
  }
 
- return $LJ::MSG_READONLY_USER unless $dbcm && $dbh;
  return $ML{'error.nodb'} unless $dbcr && $dbr;
+ return $LJ::MSG_READONLY_USER unless $dbcm && $dbh;
 
  my $ret = "";
 
