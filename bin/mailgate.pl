@@ -7,6 +7,7 @@
 use strict;
 use MIME::Parser;
 use Mail::Address;
+use Unicode::MapUTF8 ();
 
 my $parser = new MIME::Parser;
 $parser->output_dir("/tmp");
@@ -155,6 +156,15 @@ if ($toarg =~ /^(\d+)z(.+)$/)
 
 # make a new post.
 my @errors;
+
+# convert email body to utf-8
+my $content_type = $head->get('Content-type:');
+my $charset = $1 if $content_type =~ /\bcharset=['"]?(\S+?)['"]?[\s\;]/i;
+if (defined($charset) && $charset !~ /^UTF-?8$/i &&
+        Unicode::MapUTF8::utf8_supported_charset($charset)) {
+    $body = Unicode::MapUTF8::to_utf8({ -string=>$body, -charset=>$charset });
+}
+
 my $spid = LJ::Support::file_request(\@errors, {
     'spcatid' => $email2cat->{$to}->{'spcatid'},
     'subject' => $subject,
