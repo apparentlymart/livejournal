@@ -207,9 +207,7 @@ while (LJ::start_request())
 
             print "  Starting $cmd...\n" if $opt_debug;
             unless ($started{$cmd}++) {
-                # note the $db passed into the start is pretty useless since it's
-                # just the first cluster qbufferd happens to come to
-                LJ::Cmdbuffer::flush($dbh, $db, "$cmd:start");
+                LJ::Cmdbuffer::flush($dbh, undef, "$cmd:start");
             }
             LJ::Cmdbuffer::flush($dbh, $db, $cmd);
             print "  Finished $cmd.\n" if $opt_debug;
