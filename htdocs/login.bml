@@ -8,7 +8,11 @@
     my @errors = ();
 
     # ! after username overrides expire to never
-    $POST{'expire'} = 'never' if $POST{'user'} =~ s/!$//;
+    # < after username overrides ipfixed to yes
+    if ($POST{'user'} =~ s/[!<]{1,2}$//) {
+        $POST{'expire'} = 'never' if index($&, "!") >= 0;
+        $POST{'bindip'} = 'yes' if index($&, "<") >= 0;
+    }
 
     my $user = LJ::canonical_username($POST{'user'});
     my $password = $POST{'password'};

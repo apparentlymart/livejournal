@@ -6290,15 +6290,16 @@ sub paging_bar
 
 sub make_login_session
 {
-    my $u = shift;
+    my ($u, $exptype, $ipfixed) = @_;
+    $exptype ||= 'short';
     return 0 unless $u;
 
     my $etime = 0;
     eval { Apache->request->notes('ljuser' => $u->{'user'}); };
 
     my $sess_opts = {
-        'exptype' => 'short',
-        'ipfixed' => undef,
+        'exptype' => $exptype,
+        'ipfixed' => $ipfixed,
     };
     my $sess = LJ::generate_session($u, $sess_opts);
     $BML::COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}", $etime, 1 ];

@@ -113,9 +113,18 @@ body<=
     my $userpost = lc($FORM{'userpost'});
     my $up;             # user posting
     my $didlogin = 0;	# true if user logged in while commenting
+    my $exptype;        # set to long if ! after username
+    my $ipfixed;        # set to remote  ip if < after username
 
     if ($FORM{'usertype'} eq "user") {
         if ($FORM{'userpost'}) {
+
+            # parse inline login opts
+            if ($FORM{'userpost'} =~ s/[!<]{1,2}$//) {
+                $exptype = 'long' if index($&, "!") >= 0;
+                $ipfixed = BML::get_remote_ip() if index($&, "<") >= 0;
+            }
+
             $up = LJ::load_user($FORM{'userpost'});
             if ($up) 
             {
@@ -139,7 +148,7 @@ body<=
 
                 # if the user chooses to log in, do so
                 if ($FORM{'do_login'} && ! @errors) {
-                    $didlogin = LJ::make_login_session($up);
+                    $didlogin = LJ::make_login_session($up, $exptype, $ipfixed);
                 }
 
             } else {
