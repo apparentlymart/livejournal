@@ -122,6 +122,12 @@
 	     
 	 }
      }
+
+     $ret .= "<form method=post><p>";
+     $ret .= "<tt>enter commands:</tt><br>";
+     $ret .= "<textarea name=commands rows=3 cols=60 wrap=off></textarea> ";
+     $ret .= "<input type=submit value=\"execute\"></form>\n";
+
      return $ret;     
      
  }
@@ -134,7 +140,6 @@
      $ret .= "<TD><B><TT>command console.</TT></B>";
      $ret .= "<P>welcome to the livejournal console.  from here administrators can do administrative type things.  you will forget the commands, so there is a <A HREF=\"reference.bml\">reference</A>.</TD>";
      $ret .= "</TR>";
-
      $ret .= "<TR><TD COLSPAN=2>";
      $ret .= "<P><tt>enter commands:</tt><BR>";
      $ret .= "<TEXTAREA NAME=commands ROWS=10 COLS=60 WRAP=OFF></TEXTAREA></TD></TR>\n";
