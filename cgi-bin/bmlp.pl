@@ -1045,7 +1045,7 @@ package BML;
 
 sub decide_language
 {
-    return $GETVARS{'uselang'} if
+    return $main::GETVARS{'uselang'} if
         $main::GETVARS{'uselang'} =~ /^\w{2,10}$/;
 
     if ($BMLClient::COOKIE{'langpref'} =~ m!^(\w{2,10})/(\d+)$!) {
