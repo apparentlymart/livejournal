@@ -80,7 +80,7 @@ The following people have helped other users in the support area:
 	 if ($helper{$userid}) {
 	     $data = "*";
 	 } elsif ($pts >= 25) {
-	     $data = "<a href=\"/admin/priv/?user=$_->{'user'}&mode=view\">+</a>";
+	     $data = "<a href=\"/admin/priv/?user=$_->{'user'}\">+</a>";
 	 }
 	 $privcol = "<td align=\"center\">$data</td>";
      }
