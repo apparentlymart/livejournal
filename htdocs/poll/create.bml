@@ -355,7 +355,8 @@
         } elsif ($elem->{'type'} eq 'scale') {
             foreach ( qw(from to by) ) {
                 $ret .= " " . ucfirst($_) . ": <input type=\"text\" name=\"pq_$x\_$_\" value=\"";
-                $ret .= LJ::ehtml($elem->{$_} || $RULES{'scale'}{$_});
+                my $relem = defined $elem->{$_} ? $elem->{$_} : $RULES{'scale'}{$_};
+                $ret .= LJ::ehtml($relem);
                 $ret .= "\" size=\"3\" maxlength=\"9\">\n";
             }
             foreach ( qw(from by scale) ) {
