@@ -83,7 +83,7 @@ sub put {
         return 0;
     }
 
-    $dbcm->do("INSERT INTO userblob (journalid, domain, blobid, length) ".
+    $dbcm->do("INSERT IGNORE INTO userblob (journalid, domain, blobid, length) ".
               "VALUES (?, ?, ?, ?)", undef,
               $u->{userid}, LJ::get_blob_domainid($domain), 
               $bid, length($data));
