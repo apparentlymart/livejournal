@@ -842,6 +842,7 @@ sub create_account
 
     my $userid = $sth->{'mysql_insertid'};
     $dbh->do("INSERT INTO useridmap (userid, user) VALUES ($userid, $quser)");
+    $dbh->do("INSERT INTO userusage (userid, timecreate) VALUES ($userid, NOW())");
     return $userid;
 }
 
