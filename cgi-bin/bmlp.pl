@@ -54,6 +54,7 @@ my $HUP_COUNT = 0;
 my $SERVING = 0;
 my (%FileModTime, %Config, %FileBlockData, %FileBlockFlags);
 my ($time_a, $time_b);
+use vars qw(%Lang);                    # iso639-2 2-letter lang code -> BML lang code
 
 &reset_caches;
 $SIG{'HUP'} = sub {
@@ -350,10 +351,9 @@ sub handle_request
                 } else {
                     $lang_weight{$_} = 1.0;
                 }
-                if ($lang_weight{$_} > $winner_weight && 
-                    -e "$BMLEnv{'MultiLangRoot'}/$_.db") {
+                if ($lang_weight{$_} > $winner_weight && defined $Lang{$_}) {
                     $winner_weight = $lang_weight{$_};
-                    $REQ_LANG = $_;
+                    $REQ_LANG = $Lang{$_};
                 }
             }
         }
@@ -1077,6 +1077,13 @@ sub trim
 }
 
 package BML;
+
+sub register_language
+{
+    my ($isocode, $langcode) = @_;
+    next unless $isocode =~ /^\w{2,2}$/;
+    $main::Lang{$isocode} = $langcode;
+}
 
 sub note_mod_time
 {

@@ -3,6 +3,10 @@
     
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
+foreach (@LJ::LANGS) {
+    BML::register_language(substr($_, 0, 2), $_);
+}
+
 BML::register_block("DOMAIN", "S", $LJ::DOMAIN);
 BML::register_block("IMGPREFIX", "S", $LJ::IMGPREFIX);
 BML::register_block("SITEROOT", "S", $LJ::SITEROOT);
