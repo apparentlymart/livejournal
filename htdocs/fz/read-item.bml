@@ -1,8 +1,8 @@
-(=_INFO
+<?_info
 NOCACHE=>1
-_INFO=)<HTML>
+_info?><HTML>
 <BODY BGCOLOR=#FFFFFF MARGINHEIGHT=0 MARGINWIDTH=0>
-(=_CODE
+<?_code
 
  my ($sth, $ret);
 
@@ -21,7 +21,7 @@ _INFO=)<HTML>
  $sth->execute;
  my $item = $sth->fetchrow_hashref;
  unless ($item) {
-     return "(=H1 Error H1=)(=P No such entry. $FORM{'itemid'} P=)";
+     return "<?h1 Error h1?><?p No such entry. $FORM{'itemid'} p?>";
  }
 
  ### load users
@@ -43,7 +43,7 @@ _INFO=)<HTML>
      $remote = LJ::get_remote($dbs);
      
      if ($item->{'security'} eq "private" && $u->{'user'} ne $remote->{'user'}) {
-         return "(=H1 Error H1=)(=P You are not authorized to view this private entry. P=)";
+         return "<?h1 Error h1?><?p You are not authorized to view this private entry. p?>";
      }
      
      if ($item->{'security'} eq "usemask" && $u->{'user'} ne $remote->{'user'}) {
@@ -53,7 +53,7 @@ _INFO=)<HTML>
          my $allowed = (int($gmask) & int($item->{'allowmask'}));
          
          unless ($allowed) {
-             return "(=H1 Error H1=)(=P You are not authorized to view this protected entry. P=)";
+             return "<?h1 Error h1?><?p You are not authorized to view this protected entry. p?>";
          }
      }
  }
@@ -92,8 +92,8 @@ _INFO=)<HTML>
 LJ::strip_bad_code(\$ret);
 return $ret;
 
-_CODE=)
-</BODY> (=_C <LJDEP>
+_code?>
+</BODY> <?_c <LJDEP>
 link: htdocs/userinfo.bml, htdocs/users, htdocs/talkpost.bml
 img: htdocs/userpic, htdocs/img/userinfo.gif
-</LJDEP> _C=)
+</LJDEP> _c?>

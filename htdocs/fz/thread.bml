@@ -1,6 +1,6 @@
-(=_INFO
+<?_info
 NOCACHE=>1
-_INFO=)(=_CODE
+_info?><?_code
 
 $TRUNC_SUBJECT = 60;
 
@@ -122,5 +122,5 @@ RDF_END
 
 return $ret;
 
-_CODE=)
+_code?>
 

@@ -1,7 +1,7 @@
-(=_INFO
+<?_info
 NOCACHE=>1
-_INFO=)
-(=_CODE
+_info?>
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -11,7 +11,7 @@ _INFO=)
 
  my $talkid = $FORM{'talkid'}+0;
  unless ($talkid) {
-     return "(=H1 Error H1=)(=P No talkid given. P=)";
+     return "<?h1 Error h1?><?p No talkid given. p?>";
  }
 
  my $sth = $dbh->prepare("SELECT d.nodeid as itemid, u.user as userpost, d.datepost, d.parenttalkid, t.subject, t.body, d.state FROM talk as d, talktext as t LEFT JOIN user u ON u.userid=d.posterid WHERE d.talkid=$talkid AND d.talkid=t.talkid");
@@ -19,7 +19,7 @@ _INFO=)
 if ($dbh->err) { die $dbh->errstr; }
  my $ti = $sth->fetchrow_hashref;
  unless ($ti) {
-     return "(=H1 Error H1=)(=P No such comment. P=)";
+     return "<?h1 Error h1?><?p No such comment. p?>";
  }
 
  my $qitemid = $ti->{'itemid'}+0;
@@ -28,7 +28,7 @@ if ($dbh->err) { die $dbh->errstr; }
 if ($dbh->err) { die $dbh->errstr; }
  my $item = $sth->fetchrow_hashref;
  unless ($item) {
-     return "(=H1 Error H1=)(=P No such entry. P=)";
+     return "<?h1 Error h1?><?p No such entry. p?>";
  }
 
  ### load user who commented
@@ -56,7 +56,7 @@ if ($dbh->err) { die $dbh->errstr; }
      $remote = LJ::get_remote($dbs);
      
      if ($item->{'security'} eq "private" && $u->{'user'} ne $remote->{'user'}) {
-         return "(=H1 Error H1=)(=P You are not authorized to view this private entry. P=)";
+         return "<?h1 Error h1?><?p You are not authorized to view this private entry. p?>";
      }
      
      if ($item->{'security'} eq "usemask" && $u->{'user'} ne $remote->{'user'}) {
@@ -66,7 +66,7 @@ if ($dbh->err) { die $dbh->errstr; }
          my $allowed = (int($gmask) & int($item->{'allowmask'}));
          
          unless ($allowed) {
-             return "(=H1 Error H1=)(=P You are not authorized to view this protected entry. P=)";
+             return "<?h1 Error h1?><?p You are not authorized to view this protected entry. p?>";
          }
      }
  }
@@ -112,7 +112,7 @@ if ($dbh->err) { die $dbh->errstr; }
      $ret .= "</TD></TR>";
      $ret .= "<TR><TD>\n";
      
-     ## escape BML block codes.  so (=TAG ... TAG=) turns into (&#0061; ... TAG=)
+     ## escape BML block codes.  so <?tag ... tag?> turns into (&#0061; ... tag?>
      $ti->{'body'} =~ s/\(=/\(&#0061;/g;
      LJ::CleanHTML::clean_comment(\$ti->{'body'});	
      $ret .= $ti->{'body'};
@@ -125,9 +125,9 @@ if ($dbh->err) { die $dbh->errstr; }
 LJ::strip_bad_code(\$ret);
 return $ret;
 
-_CODE=)(=_C <LJDEP>
+_code?><?_c <LJDEP>
 link: htdocs/userinfo.bml, htdocs/delcomment.bml, htdocs/talkpost.bml
 link: htdocs/users
 img: htdocs/img/dot.gif, htdocs/img/userinfo.gif, htdocs/img/delcomment.gif
 img: htdocs/userpic
-</LJDEP> _C=)
+</LJDEP> _c?>

@@ -1,6 +1,6 @@
-(=_INFO
+<?_info
 NOCACHE=>1
-_INFO=)(=_CODE
+_info?><?_code
 
 my ($sth, $ret);
         
@@ -60,4 +60,4 @@ RDF_END
 
 return $ret;
 
-_CODE=)
+_code?>

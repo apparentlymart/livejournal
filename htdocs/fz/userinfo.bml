@@ -1,7 +1,7 @@
-(=_INFO
+<?_info
 NOCACHE=>1
-_INFO=)
-(=_CODE
+_info?>
+<?_code
 
  my $ret;
  my $user = $FORM{'user'};
@@ -14,6 +14,6 @@ _INFO=)
 
  return $ret;
 
-_CODE=)(=_C <LJDEP>
+_code?><?_c <LJDEP>
 link: htdocs/userinfo.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
