@@ -18,7 +18,7 @@ require "$home/cgi-bin/ljlib.pl";
 $ENV{'SGML_CATALOG_FILES'} = $LJ::CATALOG_FILES || "/usr/share/sgml/docbook/dtd/xml/4.1/docbook.cat";
 
 unless (-e $ENV{'SGML_CATALOG_FILES'}) {
-    die "Catalog files don't exist.  Either set $LJ::CATALOG_FILES, install docbook-xml (on Debian), or symlink $ENV{'SGML_CATALOG_FILES'} to XML DocBook 4.1's docbook.cat.";
+    die "Catalog files don't exist.  Either set \$LJ::CATALOG_FILES, install docbook-xml (on Debian), or symlink $ENV{'SGML_CATALOG_FILES'} to XML DocBook 4.1's docbook.cat.";
 }
 
 if ($opt_getxsl) {
