@@ -1,12 +1,12 @@
 (=PAGE
-TITLE=>Read Comments
+TITLE=>(=_ML .title _ML=)
 BODY<=
 
 (=_CODE
 #BML:cache:talkread
 
  use strict;
- use vars qw($r_head %FORM);
+ use vars qw($r_head %FORM %ML);
 
  $r_head = "";
  my $head = $_[1] ? \$_[1]->{'head'} : \$r_head;
@@ -31,8 +31,10 @@ BODY<=
             thread         talk.threadlink
             replythis      talk.replytothis
             link           talk.commentpermlink
+            deleted        .subjectdeleted
+            nosubject      .nosubject
             );
- foreach (keys %T) { $T{$_} = BML::ml($T{$_}); }
+ foreach (keys %T) { $T{$_} = $ML{$T{$_}}; }
 
  ## workaround mail client bug when don't understand quoted-printable.
  ## Only correct 'journal' if 'itemid' was also broken, to avoid the 
@@ -44,8 +46,8 @@ BODY<=
  my $init = LJ::Talk::init($dbs, \%FORM);
  my $u = $init->{'journalu'};
 
- return "(=H1 Error H1=)(=P $init->{'error'} P=)" if $init->{'error'};
- return "Error: couldn't determine journal from arguments." unless $u;
+ return "(=H1 $ML{'Error'} H1=)(=P $init->{'error'} P=)" if $init->{'error'}; 
+ return $ML{'talk.error.nojournal'} unless $u;
 
  my $clustered = $init->{'clustered'};
 
@@ -72,7 +74,7 @@ BODY<=
  }
 
  unless ($item && $item->{'anum'} == $init->{'anum'}) {
-     return "(=H1 Error H1=)(=P No such entry. P=)";
+     return "(=H1 $ML{'Error'} H1=)(=P $ML{'talk.error.noentry'} P=)";
  }
 
  my %logprops = %{$item->{'logprops'}};
@@ -91,7 +93,7 @@ BODY<=
  LJ::text_out(\$u->{'name'});
 
  # check suspended
- return "(=H1 Suspended H1=)(=P This journal/poster is suspended. P=)"
+ return "(=H1 $ML{'talk.error.suspended.title'} H1=)(=P $ML{'talk.error.suspended'} P=)"
  if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S");
 
  my $remote = LJ::get_remote($dbs);
@@ -175,11 +177,14 @@ BODY<=
 
      $ret .= "<ul>"; # using <ul> for intenting isn't proper, but this will all go away in s2 anyway.
 
-     ### currents
-     if (%current) {
+     if (%current) 
+     {
          $ret .= "<table border=0>\n";
          foreach (sort keys %current) {
-             $ret .= "<tr><td align=right><b>Current $_:</b></td><td>$current{$_}</td></tr>\n";
+             my $curkey = "talk.curname_" . $_;
+             my $curname = BML::ml($curkey);
+             $curname = "<b>Current $_:</b>" unless $curname;
+             $ret .= "<tr><td align=right>$curname</td><td>$current{$_}</td></tr>\n";
          }
          $ret .= "</table><p>\n";
      }
@@ -236,7 +241,7 @@ BODY<=
      }
 
      unless ($db) {
-         return "This part of the database is temporarily down for maintenance.  Try again in a few minutes.";
+         return $ML{'error.nodbmaintenance'};
      }
 
      if ($clustered) {
@@ -315,7 +320,7 @@ BODY<=
  }
 
  unless (@posts_to_load) {
-     $ret .= "No replies";
+     $ret .= $ML{'.noreplies'};
  }
 
  ### loads more of some of the posts, uses slaves if possible.
@@ -358,7 +363,7 @@ BODY<=
      next if ($_->{'_hide'});
 
      if ($_->{'state'} eq "D") {
-         $_->{'subject'} = "[deleted]";
+         $_->{'subject'} = $T{'deleted'};
      }
      elsif ($_->{'state'} eq "A") {
          # if the message isn't deleted, flag its parent(s) as
@@ -398,7 +403,7 @@ BODY<=
  my $navcrap;
  if ($pages > 1) {
      $navcrap .= "(=STANDOUT <center><font face='Arial,Helvetica' size='-1'><b>";
-     $navcrap .= "Page $page of $pages<br />";
+     $navcrap .= BML::ml('.pageofpages',{'page'=>$page, 'total'=>$pages}) . "<br />";
      my $left = "<b>&lt;&lt;</b>";
      if ($page > 1) { $left = "<a href='" . LJ::self_link(\%FORM, { 'page' => $page-1 }) . "'>$left</a>"; }
      my $right = "<b>&gt;&gt;</b>";
@@ -444,19 +449,22 @@ BODY<=
 
         my $datepost = "<font size='-1'>" . substr($post->{'datepost'}, 0, 16) . "</font>";
         my $userpost = $post->{'userpost'};
-        my $user = "<i>(Anonymous)</i>";
+        my $user;
         if ($post->{'deleted_poster'}) {
-            $user = "<i>(Deleted user: $post->{'deleted_poster'})</i>";
+            $user = BML::ml('.deleteduser', {'username'=>$post->{'deleted_poster'}});
+        }
+        else {
+            $user = $ML{'.anonuser'};
         }
 
         if ($post->{'state'} eq "D") {
             $$ret .= "<p><a name='t$dtid'></a><table><tr>";
             $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-            $$ret .= "<td><b>(Deleted post)</b></td></tr></table>\n";
+            $$ret .= "<td>$ML{'.deletedpost'}</td></tr></table>\n";
         } elsif ($userpost && $user{$userpost}->{'statusvis'} eq "S") {
             $$ret .= "<p><a name='t$dtid'></a><table><tr>";
             $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-            $$ret .= "<td><b>(Reply from suspended user)</b></td></tr></table>\n";
+            $$ret .= "<td>$ML{'.replysuspended'}</td></tr></table>\n";
         } else {
             if ($userpost) {
                 $user = "(=LJUSER $userpost LJUSER=)";
@@ -510,7 +518,7 @@ BODY<=
                     ($remote->{'user'} eq $up->{'user'} ||
                      LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
                 {
-                    $$ret .= "(from $post->{'poster_ip'})";
+                    $$ret .= BML::ml('.fromip', {'ip'=>$post->{'poster_ip'}});
                 }
 
                 $$ret .= " <font size='-1'>(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid#t$dtid'>$T{'link'}</a>)</font> ";
@@ -559,7 +567,7 @@ BODY<=
 
                 $$ret .= "<a name='t$dtid'></a><table><tr>";
                 $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-                $$ret .= "<td><a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid'>" . BML::eall($post->{'subject'} || "(no subject)") . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
+                $$ret .= "<td><a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid'>" . BML::eall($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
             }
         }
     }

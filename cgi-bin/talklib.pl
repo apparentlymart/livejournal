@@ -130,8 +130,8 @@ sub init
     if ($journal) {
         # they specified a journal argument, which indicates new style.
         $ju = LJ::load_user($dbs, $journal);
-        return { 'error' => "No such journal" } unless $ju;
-        return { 'error' => "Bogus arguments" } unless $ju->{'clusterid'};
+        return { 'error' => BML::ml('talk.error.nosuchjournal')} unless $ju;
+        return { 'error' => BML::ml('talk.error.bogusargs')} unless $ju->{'clusterid'};
         $init->{'clustered'} = 1;
         foreach (qw(itemid replyto)) {
             next unless $init->{$_};
@@ -158,7 +158,7 @@ sub init
                 }
             } else {
                 my $jid = LJ::dbs_selectrow_array($dbs, "SELECT ownerid FROM log WHERE itemid=$itemid");
-                return { 'error' => "No such entry" } unless $jid;
+                return { 'error' => BML::ml('talk.error.noentry')} unless $jid;
                 $ju = LJ::load_userid($dbs, $jid);
             }
         } elsif ($form->{'replyto'}) {
@@ -171,7 +171,7 @@ sub init
             } else {
                 # guess it's on cluster 0, so find out what journal.
                 my $jid = LJ::dbs_selectrow_array($dbs, "SELECT journalid FROM talk WHERE talkid=$replyto");
-                return { 'error' => "No such entry" } unless $jid;
+                return { 'error' => BML::ml('talk.error.noentry')} unless $jid;
                 $ju = LJ::load_userid($dbs, $jid);
             }
         }
@@ -199,7 +199,7 @@ sub topic_links
         next unless $status eq "on";
         unless ($in_topic) {
             $in_topic = 1;
-            $ret .= "<b>Read similar journal entries:</b><br />";
+            $ret .= "<b>(=_ML talk.readsimilar _ML=)</b><br />";
         }
         
         # TODO: LJ::Topic doesn't yet support $dbs/$dbarg
@@ -256,7 +256,7 @@ sub check_viewable
     my ($dbs, $remote, $item, $form, $errref) = @_;
     
     my $err = sub {
-        $$errref = "(=H1 Error H1=)(=P $_[0] P=)";
+        $$errref = "(=H1 (=_ML Error _ML=) H1=)(=P $_[0] P=)";
         return 0;
     };
 
@@ -266,9 +266,9 @@ sub check_viewable
             LJ::statushistory_add($dbs, $item->{'posterid'}, $remote->{'userid'}, 
                                   "viewall", "itemid = $item->{'itemid'}");
         } else {
-            return $err->("You must be logged in to view this protected entry.")
+            return $err->(BML::ml('talk.error.mustlogin'))
                 unless defined $remote;
-            return $err->("You are not authorized to view this protected entry.");
+            return $err->(BML::ml('talk.error.notauthorised'));
         }
     }
 

@@ -1,11 +1,11 @@
 (=PAGE
-TITLE=>Post Comment
+TITLE=>(=_ML .title _ML=)
 BODY<=
 
 (=_CODE
 
  use strict;
- use vars qw(%FORM);
+ use vars qw(%FORM %ML);
 
  foreach my $re (@LJ::TALKSPAM) {
      return if ($FORM{'body'} =~ /$re/);
@@ -29,8 +29,8 @@ BODY<=
  my $init = LJ::Talk::init($dbs, \%FORM);
  my $u = $init->{'journalu'};
 
- return "(=H1 Error H1=)(=P $init->{'error'} P=)" if $init->{'error'}; 
- return "Error: couldn't determine journal from arguments." unless $u;
+ return "(=H1 $ML{'Error'} H1=)(=P $init->{'error'} P=)" if $init->{'error'}; 
+ return $ML{'talk.error.nojournal'} unless $u;
  return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
  my $pics = LJ::Talk::get_subjecticons();
@@ -44,7 +44,7 @@ BODY<=
  }
 
  return $LJ::MSG_READONLY_USER unless $dbcm && $dbh;
- return "Database temporarily unavailable" unless $dbcr && $dbr;
+ return $ML{'error.nodb'} unless $dbcr && $dbr;
 
  my $jarg = $clustered ? "journal=$u->{'user'}&" : "";
  my $jargent = $clustered ? "journal=$u->{'user'}&amp;" : "";
@@ -65,7 +65,7 @@ BODY<=
  }
 
  unless ($item && $item->{'anum'} == $init->{'anum'}) {
-     return "(=H1 Error H1=)(=P No such entry. P=)";
+     return "(=H1 $ML{'Error'} H1=)(=P $ML{'talk.error.noentry'} P=)";
  }
 
  my %logprops = %{$item->{'logprops'}};
@@ -80,12 +80,12 @@ BODY<=
  LJ::load_user_props($dbs, $u, "opt_logcommentips");
 
  if ($FORM{'userpost'} && $FORM{'usertype'} ne "user") {
-     push @errors, "You entered a username, but selected to post anonymously or as the currently logged in user.  Go back and decide which you really want to do.";
+     push @errors, $ML{'.error.confused_identity'};
  }
 
  my $cookie_auth;
  if ($FORM{'usertype'} eq "cookieuser") {
-     push @errors, "Your login cookie seems to have disappeared?"
+     push @errors, $ML{'.error.lostcookie'}
          unless ($remote && $remote->{'user'} eq $FORM{'cookieuser'});
      return LJ::bad_input(@errors) if @errors;
      
@@ -97,7 +97,7 @@ BODY<=
  if ((grep { $FORM{'userpost'} eq $_ } @LJ::TESTACCTS) && !
      (grep { $u->{'user'}      eq $_ } @LJ::TESTACCTS))
  {
-     push @errors, "Test accounts can only be used in test account journals.";
+     push @errors, $ML{'.error.testacct'};
  }
 
  my $userpost = lc($FORM{'userpost'});
@@ -111,12 +111,12 @@ BODY<=
          {
              ### see if the user is banned from posting here
              if (LJ::is_banned($dbr, $up, $u)) {
-                 push @errors, "You are not allowed to post in this user's journal.";
+                 push @errors, $ML{'.error.banned'};
+
              }
 
              if ($up->{'journaltype'} ne "P") {
-                 push @errors, "You can't post as a shared or community account.  ".
-                     "Shared accounts represent groups of people, not individual people.";
+                 push @errors, $ML{'.error.postshared'};
              }
 
              unless ($cookie_auth || 
@@ -124,9 +124,7 @@ BODY<=
                      ecphash($itemid, $FORM{'parenttalkid'}, 
                              $up->{'password'}) eq $FORM{'ecphash'} )
              {
-                 push @errors, "Incorrect password given for the username ".
-                     " specified.  You can recover your password <a href=\"/lostinfo.bml\">here</a> ".
-                     "if you've forgotten it.";
+                 push @errors, $ML{'.error.badpassword'};
              }
 
              # if the user chooses to log in, do so (patch by: lucretio)
@@ -149,10 +147,12 @@ BODY<=
              }
 
          } else {
-             push @errors, "The LiveJournal username you specified does not exist.  You can recover your username <a href=\"/lostinfo.bml\">here</a> if you've forgotten it, or you may post as \"Anonymous\" instead.";
+             push @errors, $ML{'.error.badusername'};
+
          }
      } else {
-         push @errors, "You did not enter your LiveJournal username.  You can choose to post as \"Anonymous\" if you don't have a LiveJournal user account.";
+         push @errors, $ML{'.error.nousername'};
+
      }
  }
 
@@ -160,29 +160,30 @@ BODY<=
  # to reply to it
  ####  Check security before viewing this post
  unless (LJ::can_view($dbs, $up, $item)) {
-     push @errors, "You must be logged in or using a username/password to reply to this protected entry."
+     push @errors, $ML{'.error.mustlogin'}
          unless (defined $up);
-     push @errors, "You are not authorized to reply to this protected entry.";
+     push @errors, $ML{'.error.noauth'};
      return LJ::bad_input(@errors);     
  }
 
  if ($FORM{'usertype'} ne "user" && $u->{'opt_whocanreply'} ne "all") {
-     push @errors, "You can't post anonymously in this person's journal.";
+     push @errors, $ML{'.error.noanon'};
  }
 
  if ($logprops{$itemid}->{'opt_nocomments'}) {
-     push @errors, "User has disabled commenting on this journal entry.";
+     push @errors, $ML{'.error.nocomments'};
  }
 
  if ($up && $up->{'status'} eq "N") {
-     push @errors, "Sorry, you aren't allowed to post comments in other people's journals until your email address has been verified.  If you've lost the confirmation email to do this, you can have it resent from the <a href=\"/lostinfo.bml\">lost information page</a>.";
+     push @errors, ML{'.error.noverify'};
+
  }
 
  if ($up && $up->{'statusvis'} eq "D") {
-     push @errors, "Your journal has been deleted.  You can't post messages.";
+     push @errors, $ML{'.error.deleted'};
  }
  if ($up && $up->{'statusvis'} eq "S") {
-     push @errors, "Your journal has been suspended.  You can't post messages.";
+     push @errors, $ML{'.error.suspended'};
  }
 
  if ($u->{'opt_whocanreply'} eq "friends") {
@@ -190,16 +191,16 @@ BODY<=
          if ($up->{'userid'} != $u->{'userid'}) 
          {
              unless (LJ::is_friend($dbs, $u, $up)) {
-                 push @errors, "Sorry, user <B>$u->{'user'}</B> does not list you as a friend, and they've set the \"friends only\" option for who can reply to their journal.";
+                 push @errors, BML::ml('.error.notafriend', {'user'=>$u->{'user'}});
              }
          }
      } else {
-         push @errors, "Only friends of <B>$u->{'user'}</B> may post in this journal.";
+         push @errors, BML::ml('.error.friendsonly', {'user'->$u->{'user'}});
      }
  }
 
  unless ($FORM{'body'} =~ /\S/) {
-     push @errors, "Your message was blank.  Please type at least something in the message field.";
+     push @errors, $ML{'.error.blankmessage'};
  }
 
  # in case this post comes directly from the user's mail client, it
@@ -226,9 +227,10 @@ BODY<=
 
  my ($bl, $cl) = LJ::text_length($FORM{'body'});
  if ($cl > $LJ::CMAX_COMMENT) {
-     push @errors, "Sorry, but your comment of $cl characters exceeds the maximum character length of $LJ::CMAX_COMMENT. Please go back, shorten it, and try posting it again.";
+     push @errors, BML::ml('.error.manychars', {'current'=>$cl, 'limit'=>$LJ::CMAX_COMMENT});
+
  } elsif ($bl > $LJ::BMAX_COMMENT) {
-     push @errors, "Sorry, but your comment of $bl bytes exceeds the maximum byte length of $LJ::BMAX_COMMENT. Please go back, shorten it, and try posting it again.";
+     push @errors, BML::ml('.error.manybytes', {'current'=>$bl, 'limit'=>$LJ::BMAX_COMMENT});
  }
  # the Subject can be silently shortened, no need to reject the whole comment
  $FORM{'subject'} = LJ::text_trim($FORM{'subject'}, 100, 100);
@@ -245,12 +247,12 @@ BODY<=
  ## preview
 
  if ($FORM{'submitpreview'}) {
-     $ret .= "(=H1 Preview H1=)(=P Below is how your post will look.  Press your browser's back button to make changes. Or, submit it. P=)(=HR=)";
+     $ret .= "(=H1 $ML{'.preview.title'} H1=)(=P $ML{'.preview'} P=)(=HR=)";
 
      my $event = $FORM{'body'};
      LJ::CleanHTML::clean_comment(\$event, $FORM{'prop_opt_preformatted'});
 
-     $ret .= "<b>Subject: </b> $cleansubject<hr>\n";
+     $ret .= "$ML{'.preview.subject'} $cleansubject<hr>\n";
      $ret .= $event;
 
      $ret .= "<hr />";
@@ -265,7 +267,7 @@ BODY<=
          $ret .= "<input type='hidden' name=\"$_\" value=\"" . LJ::ehtml($FORM{$_}) . "\">\n";
      }
 
-     $ret .= "<input type='submit' value='Submit'>\n";
+     $ret .= "<input type='submit' value='$ML{'.preview.submit'}'>\n";
      $ret .= "</form>";
      return $ret;
  }
@@ -741,11 +743,13 @@ BODY<=
  }
 
  # Yeah, we're done.
- my $commentlink = "<a href='talkread.bml?${jargent}itemid=$ditemid&amp;view=$dtalkid#t$dtalkid'>here</a>";
- $ret .= "(=H1 Success H1=)(=P Your comment has been added.  You can view it $commentlink. P=)";
+ my $commentlink = "talkread.bml?${jargent}itemid=$ditemid&amp;view=$dtalkid#t$dtalkid";
+
+ $ret .= "(=H1 $ML{'.success.title'} H1=)";
+ $ret .= "(=P " . BML::ml('.success.message', {'link'=>$commentlink}) . " P=)";
 
  if ($didlogin) {
-     $ret .= "(=P You are now logged in. P=)";
+     $ret .= "(=P $ML{'.success.loggedin'} P=)";
  }
 
  if ($DEBUG) {

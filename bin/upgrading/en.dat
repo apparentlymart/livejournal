@@ -15,9 +15,140 @@
 
 /support/faqbrowse.bml.title=FAQ Question
 
+/talkpost.bml.allowedhtml=Allowed HTML
+
+/talkpost.bml.error.cannotreplynopost=You cannot reply to a non-existent post 
+
+/talkpost.bml.error.nocommentsjournal=User has disabled comments in their journal.
+
+/talkpost.bml.error.nocommentspost=User has disabled comments for this particular post.
+
+/talkpost.bml.error.noreplypost=Replyto post not found (deleted?)
+
+/talkpost.bml.loganonip=<b>Notice!</b> This user has turned on the option that logs IP addresses of anonymous posters.
+
+/talkpost.bml.logyourip=<b>Notice!</b> This user has turned on the option that logs your IP address when posting.
+
+/talkpost.bml.nosubjecthtml=No HTML allowed in subject
+
+/talkpost.bml.opt.anonymous=Anonymous
+
+/talkpost.bml.opt.defpic=(default)
+
+/talkpost.bml.opt.friendsonly=- this user has disabled anonymous and non-friend posting.  You may post here if [[username]] lists you as a friend.";
+
+/talkpost.bml.opt.from=From:
+
+/talkpost.bml.opt.ljuser=LiveJournal user:
+
+/talkpost.bml.opt.loggedin=<b>Logged in user:</b> [[username]]
+
+/talkpost.bml.opt.message=Message:
+
+/talkpost.bml.opt.noanonpost=- this user has disabled anonymous posting.
+
+/talkpost.bml.opt.noautoformat=Don't auto-format: 
+
+/talkpost.bml.opt.noimage=No Image
+
+/talkpost.bml.opt.preview=Preview
+
+/talkpost.bml.opt.subject=Subject:
+
+/talkpost.bml.opt.submit=Post Comment
+
+/talkpost.bml.paraformat=Paragraphs will be automatically formatted by default.
+
+/talkpost.bml.postresponse=Post a comment in response:
+
+/talkpost.bml.title=Post Comment
+
+/talkpost_do.bml.error.badpassword=Incorrect password given for the username specified.  You can recover your password <a href='/lostinfo.bml'>here</a> if you've forgotten it.
+
+/talkpost_do.bml.error.badusername=The LiveJournal username you specified does not exist.  You can recover your username <a href='/lostinfo.bml'>here</a> if you've forgotten it, or you may post as "Anonymous" instead.
+
+/talkpost_do.bml.error.banned=You are not allowed to post in this user's journal.
+
+/talkpost_do.bml.error.blankmessage=Your message was blank.  Please type at least something in the message field.
+
+/talkpost_do.bml.error.confused_identity=You entered a username, but selected to post anonymously or as the currently logged in user.  Go back and decide which you really want to do.
+
+/talkpost_do.bml.error.deleted=Your journal has been deleted.  You can't post messages.
+
+/talkpost_do.bml.error.friendsonly=Only friends of [[user]] may post in this journal.
+
+/talkpost_do.bml.error.lostcookie=Your login cookie seems to have disappeared?
+
+/talkpost_do.bml.error.manybytes=Sorry, but your comment of [[current]] exceeds the maximum byte length of [[limit]]. Please go back, shorten it, and try posting it again.
+
+/talkpost_do.bml.error.manychars=Sorry, but your comment of [[current]] characters exceeds the maximum character length of [[limit]]. Please go back, shorten it, and try posting it again.
+
+/talkpost_do.bml.error.mustlogin=You must be logged in or using a username/password to reply to this protected entry.
+
+/talkpost_do.bml.error.noanon=You can't post anonymously in this person's journal.
+
+/talkpost_do.bml.error.noauth=You are not authorized to reply to this protected entry.
+
+/talkpost_do.bml.error.nocomments=User has disabled commenting on this journal entry.
+
+/talkpost_do.bml.error.notafriend=Sorry, user <b>[[user]]</b> does not list you as a friend, and they've set the "friends only" option for who can reply to their journal.
+
+/talkpost_do.bml.error.nousername=You did not enter your LiveJournal username.  You can choose to post as "Anonymous" if you don't have a LiveJournal user account.
+
+/talkpost_do.bml.error.noverify=Sorry, you aren't allowed to post comments in other people's journals until your email address has been verified.  If you've lost the confirmation email to do this, you can have it resent from the <a href='/lostinfo.bml'>lost information page</a>.
+
+/talkpost_do.bml.error.postshared=You can't post as a shared or community account.  Shared accounts represent groups of people, not individual people.
+
+/talkpost_do.bml.error.suspended=Your journal has been suspended.  You can't post messages.
+
+/talkpost_do.bml.error.testacct=Test accounts can only be used in test account journals.
+
+/talkpost_do.bml.preview=Below is how your post will look.  Press your browser's back button to make changes. Or, submit it.
+
+/talkpost_do.bml.preview.subject=<b>Subject: </b>
+
+/talkpost_do.bml.preview.submit=Submit
+
+/talkpost_do.bml.preview.title=Preview
+
+/talkpost_do.bml.success.loggedin=You are now logged in.
+
+/talkpost_do.bml.success.message=Your comment has been added.  You can view it <a href="[[link]]">here</a>.
+
+/talkpost_do.bml.success.title=Success
+
+/talkpost_do.bml.title=Post Comment
+
+/talkread.bml.anonuser=<i>(Anonymous)</i>
+
+/talkread.bml.deletedpost=<b>(Deleted post)</b>
+
+/talkread.bml.deleteduser=<i>(Deleted user: [[username]])</i>
+
+/talkread.bml.fromip=(from [[ip]])
+
+/talkread.bml.noreplies=No replies
+
+/talkread.bml.nosubject=(no subject)
+
+/talkread.bml.pageofpages=Page [[page]] of [[total]]
+
+/talkread.bml.replysuspended=<b>(Reply from suspended user)</b>
+
+/talkread.bml.subjectdeleted=[deleted]
+
+/talkread.bml.title=Read Comments
+
 btn.search=Search
 
 Email=Email
+
+Error|notes=typically used inside an H1 tag to announce an error.
+Error=Error
+
+error.nodb=Database temporary unavailable.
+
+error.nodbmaintenance=This part of the database is temporarily down for maintenance.  Try again in a few minutes.
 
 Help=Help
 
@@ -25,13 +156,42 @@ langname.en=English
 
 Password=Password
 
+Sorry|notes=typically used to announce that the requested action can't be done.
+Sorry=Sorry
+
+talk.anonwrote=Someone wrote,
+
+talk.anonwrote_comm=Someone wrote in [[commlink]],
+
 talk.commentpermlink=link
 
 talk.commentpost=Post a new comment
 
 talk.commentsread=Read comments
 
+talk.curname_Mood=<b>Current mood:</b>
+
+talk.curname_Music=<b>Current music:</b>
+
+talk.error.bogusargs=Bogus arguments
+
+talk.error.mustlogin=You must be logged in to view this protected entry.
+
+talk.error.noentry=No such entry.
+
+talk.error.nojournal=Error: couldn't determine journal from arguments.
+
+talk.error.nosuchjournal=No such journal
+
+talk.error.notauthorised=You are not authorized to view this protected entry.
+
+talk.error.suspended=This journal/poster is suspended.
+
+talk.error.suspended.title=Suspended
+
 talk.parentlink=Parent
+
+talk.readsimilar=Read similar journal entries:
 
 talk.replytothis=Reply to this
 
