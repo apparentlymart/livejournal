@@ -1,0 +1,242 @@
+SECURITYPRIVATE=>{Ss}<img src="(=IMGPREFIX=)/icon_private.gif" width=16 height=16 align=absmiddle>
+SECURITYPROTECTED=>{Ss}<img src="(=IMGPREFIX=)/icon_protected.gif" width=14 height=15 align=absmiddle>
+LJUSER=>{DSs}<a href="/userinfo.bml?user=%%DATA%%"><img src="(=IMGPREFIX=)/userinfo.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
+LJCOMM=>{DSs}<a href="/userinfo.bml?user=%%DATA%%"><img src="(=IMGPREFIX=)/community.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
+LJUSERF=>{DSs}<a href="/userinfo.bml?user=%%DATA%%&mode=full"><img src="(=IMGPREFIX=)/userinfo.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
+HELP=>{DS}(<a href="%%DATA%%"><i>help</i></a>)
+
+LOAD_PAGE_INFO<=
+(=_CODE
+#line 3
+ @sidebar = ({ 'name' => 'Home',
+	       'uri' => '/',
+	       'match' => "^/(index\\.bml)?(\\?.*)?\$",
+	       'children' => [
+			      { 'name' => 'Create Journal',
+				'uri' => '/create.bml', },
+			      { 'name' => 'Update',
+				'uri' => '/update.bml', 
+				'extra' => '/update.bml?mode=full',
+#				'children' => [
+#					       { 'name' => 'Full Update',
+#						 'uri' => '/update.bml?mode=full', }
+#					       ],
+			    },
+			      { 'name' => 'Download',
+				'uri' => '/download/', },
+			      ],
+	       },
+	     { 'name' => 'LiveJournal',
+	       'children' => [
+			      { 'name' => 'News',
+				'match' => '^/news\\.bml\$',
+				'uri' => '/news.bml', },
+			      { 'name' => 'Paid Accounts',
+				'uri' => '/paidaccounts/', 
+                                'recursematch' => '^/paidaccounts/',
+				'children' => [ 
+						{ 'name' => 'Is this safe?',
+						  'uri' => '/paidaccounts/whysafe.bml', },
+						{ 'name' => 'Progress',
+						  'uri' => '/paidaccounts/progress.bml', },
+						],
+				},
+#			      { 'name' => 'To-Do list',
+#				'uri' => '/todo.bml', },
+			      { 'name' => 'Contributors',
+				'uri' => '/contributors.bml', },
+			      { 'name' => 'Supporters',
+				'uri' => '/supporters.bml', },
+			      ],
+	       },
+	     { 'name' => 'Customize',
+	       'children' => [
+			      { 'name' => 'Modify Journal',
+				'uri' => '/modify.bml', },
+			      { 'name' => 'Create Style',
+				'uri' => '/createstyle.bml', },
+			      { 'name' => 'Edit Style',
+				'uri' => '/editstyle.bml', },
+			      ],
+	   },
+	     { 'name' => 'Find Users',
+	       'children' => [
+       			      { 'name' => 'Random!',
+				'uri' => '/random.bml', },
+       			      { 'name' => 'By Region',
+				'uri' => '/directory.sbml', },
+       			      { 'name' => 'By Interest',
+				'uri' => '/interests.bml', },
+                              { 'name' => 'Search',	
+				'uri' => '/directorysearch.bml', }  
+	              ], },
+	     { 'name' => 'Find Entries',
+	       'children' => [
+       			      { 'name' => 'By Topic',
+				'uri' => '/topics/', },
+        	      ], },
+	     { 'name' => 'Edit ...',
+	       'children' => [
+			      { 'name' => 'Personal Info &',
+				'uri' => '/editinfo.bml', },
+			      { 'name' => 'Settings', cont => 1,
+				'uri' => '/editinfo.bml', },
+			      { 'name' => 'Your Friends',
+				'uri' => '/editfriends.bml', },
+			      { 'name' => 'Old Entries',
+				'uri' => '/editjournal.bml', },
+			      { 'name' => 'Your Pictures',
+				'uri' => '/editpics.bml', },
+			      { 'name' => 'Your Password',
+				'uri' => '/changepassword.bml', },
+			      ],
+	   },
+	     { 'name' => 'Developer Area',
+	       'uri' => '/developer/',
+	       'match' => "^/developer/\$",
+	       'recursematch' => "^/developer/",
+	       'children' => [
+			      { 'name' => 'Style System',
+				'uri' => '/developer/styles.bml', 
+				'children' => [
+					       { 'name' => 'View Types',
+						 'uri' => '/developer/views.bml', },
+					       { 'name' => 'Variable List',
+						 'uri' => '/developer/varlist.bml', },
+					       ],
+				},
+			      { 'name' => 'Embedding',
+				'uri' => '/developer/embedding.bml', },
+			      { 'name' => 'Protocol',
+				'uri' => '/developer/protocol.bml', 
+				'children' => [
+					       { 'name' => 'Mode List',
+						 'uri' => '/developer/modelist.bml', }
+					       ],
+			    },
+			      ],
+	   },
+	     { 'name' => 'Need Help?',
+	       'children' => [
+			      { 'name' => 'Lost Password?',
+				'uri' => '/lostinfo.bml', },
+			      { 'name' => 'Freq. Asked',
+				'uri' => '/support/faq.bml', },
+			      { 'name' => 'Questions',
+				'uri' => '/support/faq.bml', cont => 1, },
+			      { 'name' => 'Support Area',
+				'uri' => '/support/', },
+			      ],
+	   },
+	     );
+ 
+ my $remuser = $BMLClient::COOKIE{'ljuser'};
+ if ($remuser ne "" && $ENV{'REQUEST_URI'} ne "/logout.bml") 
+ {
+     my $subdomain = $remuser;
+     $subdomain =~ s/_/-/g;
+     unshift @sidebar, { 'name' => "Hello, $remuser!",
+			 'children' => [
+					{ 'name' => 'Your Journal', 
+					  'children' => [
+							 { 'name' => 'Recent',
+							   'uri' => "/users/$remuser/", },
+							 { 'name' => 'Calendar',
+							   'uri' => "/users/$remuser/calendar", },
+							 { 'name' => 'Friends',
+							   'uri' => "/users/$remuser/friends",
+							   'extra' => "/friendsfilter.bml",
+						       },
+							 ],
+					  },
+					{ 'name' => 'User Info',
+					  'uri' => "/userinfo.bml?user=$remuser", },
+					{ 'name' => 'Memories',
+					  'uri' => "/memories.bml?user=$remuser", },
+					{ 'name' => 'Logout',
+					  'uri' => '/logout.bml', },
+					]
+					};
+ } elsif ($ENV{'REQUEST_URI'} ne "/login_do.bml") {
+     unshift @sidebar, { 'name' => "Log In",
+			 'uri' => '/login.bml', }
+ }
+
+return "";
+_CODE=)
+<=LOAD_PAGE_INFO
+
+AL=>{P}<I><A HREF="%%DATA1%%">%%DATA2%%</A></I> <IMG SRC="/img/external_link.gif" WIDTH=16 HEIGHT=11 ALIGN=ABSMIDDLE>
+AWAYLINK=>{P}<I><A HREF="%%DATA1%%">%%DATA2%%</A></I> <IMG SRC="/img/external_link.gif" WIDTH=16 HEIGHT=11 ALIGN=ABSMIDDLE>
+
+H1=>{DS}<H1>%%DATA%%</H1>
+H2=>{DS}<H2>%%DATA%%</H2>
+
+# Banner Header: search results banner, content desriptor, etc...
+BH=>{DS}<P ALIGN=CENTER><FONT FACE="Arial,Helvetica" COLOR="#CC0000" SIZE=-1><B>%%DATA%%</B></FONT>
+
+GRIN=>&lt;grin&gt;
+HR=>{S}<HR>
+
+NEWLINE=>{S}<BR>&nbsp;&nbsp;&nbsp;&nbsp;
+P=>{D}<P>%%DATA%%</P>
+
+STANDOUTO<=
+{D}<CENTER><FONT SIZE=1><BR></FONT><TABLE ALIGN=CENTER CELLPADDING=8 BORDER=1 BGCOLOR=#CCCCFF BORDERCOLORLIGHT=#DDDDFF
+BORDERCOLORDARK=#BBBBFF><TR><TD VALIGN=CENTER>
+%%DATA%%
+
+</TD></TR></TABLE></CENTER>
+<=STANDOUTO
+
+STANDOUT<=
+{D}<BLOCKQUOTE>
+<HR>
+%%DATA%%
+<HR>
+</BLOCKQUOTE>
+<=STANDOUT
+
+BADCONTENT<=
+(=H1 Error H1=)
+(=P
+One or more errors occured processing your request.  Please go back, correct the 
+necessary information, and submit your data again.
+P=)
+<=BADCONTENT
+
+DE<=
+%%DATA%%
+<=DE
+
+EMCOLOR=>#c0c0c0
+HOTCOLOR=>#ff0000
+EMCOLORLITE=>#e2e2e2
+
+CHOICE=>{P}<DT><A HREF="%%DATA2%%"><FONT SIZE="+1"><TT><B>%%DATA1%%</B></TT></FONT></A><DD><FONT SIZE="2">%%DATA3%%</FONT>
+
+CHOICES<=
+{F}<TABLE WIDTH="100%" CELLPADDING="2" CELLSPACING="5">
+<TR>
+<TD VALIGN=TOP WIDTH="50%">
+<DL>
+%%ITEMS%%
+</DL>
+</TD>
+<TD VALIGN=TOP WIDTH="50%">
+<DL>
+%%ITEMSB%%
+</DL>
+</TD>
+</TR>
+</TABLE>
+<=CHOICES
+
+PAGE<=
+{Fp}<HTML>
+<HEAD><TITLE>%%TITLE%%</TITLE></HEAD>
+<BODY>
+%%BODY%%
+</BODY>
+</HTML>
+<=PAGE
