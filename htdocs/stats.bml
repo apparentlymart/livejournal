@@ -86,21 +86,22 @@ P=)
 
  $ret .= "(=H1 Recent Updates H1=)\n";
  $ret .= "(=P The following are the 10 most recently updated journals: <UL>";
- $sth = $dbh->prepare("SELECT user, name, timeupdate FROM user WHERE user <> 'test' AND timeupdate IS NOT NULL ORDER BY timeupdate DESC LIMIT 10");
+ $sth = $dbh->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 30 DAY) ORDER BY uu.timeupdate DESC LIMIT 10");
  $sth->execute;
- while ($_ = $sth->fetchrow_hashref)
+ while (my ($iuser, $iname, $itime) = $sth->fetchrow_array)
  {
-     $ret .= "<LI><A HREF=\"/users/$_->{'user'}/\">(=_EH $_->{'name'} _EH=)</A>, $_->{'timeupdate'}\n";
+     $ret .= "<LI><A HREF=\"/users/$iuser/\">(=_EH $iname _EH=)</A>, $itime\n";
  }
  $ret .= "</UL> P=)\n";
 
  $ret .= "(=H1 New Journals H1=)\n";
  $ret .= "(=P The following are the 10 most recently created journals.  It's very likely these users haven't modified their journals much, and probably haven't wrote much in them yet either... <UL>";
- $sth = $dbh->prepare("SELECT user, name, timeupdate FROM user WHERE user <> 'test' AND timeupdate IS NOT NULL ORDER BY timecreate DESC LIMIT 10");
+ $sth = $dbh->prepare("SELECT u.user, u.name, uu.timeupdate FROM user u, userusage uu WHERE u.userid=uu.userid AND uu.timeupdate IS NOT NULL ORDER BY uu.timecreate DESC LIMIT 10");
  $sth->execute;
- while ($_ = $sth->fetchrow_hashref)
+ while (my ($iuser, $iname, $itime) = $sth->fetchrow_array)
  {
-     $ret .= "<LI><A HREF=\"/users/$_->{'user'}/\">(=_EH $_->{'name'} _EH=)</A>, $_->{'timeupdate'}\n";
+     $ret .= "<LI><A HREF=\"/users/$iuser/\">(=_EH $iname _EH=)</A>, $itime\n";
+
  }
  $ret .= "</UL> P=)\n";
 
