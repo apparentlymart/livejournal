@@ -3949,6 +3949,19 @@ sub get_remote
             $udbh->do("UPDATE sessions SET timeexpire=$future WHERE ".
                       "userid=$u->{'userid'} AND sessid=$sess->{'sessid'}");
             LJ::MemCache::delete($memkey);
+
+            # Update their ljsession cookie as well
+            eval {
+                my @domains = ref $LJ::COOKIE_DOMAIN ? @$LJ::COOKIE_DOMAIN : ($LJ::COOKIE_DOMAIN);
+                foreach my $dom (@domains) {
+                    my $cookiestr = 'ljsession=' . $cookie->('ljsession');
+                    $cookiestr .= '; expires=' . LJ::time_to_cookie($future);
+                    $cookiestr .= $dom ? "; domain=$dom" : '';
+                    $cookiestr .= '; path=/; HttpOnly';
+
+                    Apache->request->err_headers_out->add('Set-Cookie' => $cookiestr);
+                }
+            };
         }
     }
 
