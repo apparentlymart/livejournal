@@ -526,6 +526,8 @@ INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES 
 UPDATE priv_list SET des='Allows a user to edit site text in a given language. arg=Unique language code, optionally appended by |domainid.domaincode',is_public='1',privname='Translate/Update Text',scope='general' WHERE privcode='translate';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows a user to view an entry even if it is protected. Must explicitly enter this mode, and then it is audited to prevent people from abusing this mode.', '0', 'viewall', 'View All Entries', 'general');
 UPDATE priv_list SET des='Allows a user to view an entry even if it is protected. Must explicitly enter this mode, and then it is audited to prevent people from abusing this mode.',is_public='0',privname='View All Entries',scope='general' WHERE privcode='viewall';
+INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows a user to set an IP address as being allowed if it\'s listed as an open proxy.', '0', 'allowopenproxy', 'Allow Open Proxy', 'general');
+UPDATE priv_list SET des='Allows a user to set an IP address as being allowed if it\'s listed as an open proxy.',is_public='0',privname='Allow Open Proxy',scope='general' WHERE privcode='allowopenproxy';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when wrong username/password is used.', 'failed_login');
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged whenever user posts (to any journal)', 'post');
 UPDATE ratelist SET des='Logged when wrong username/password is used.',name='failed_login' WHERE rlid=NULL;

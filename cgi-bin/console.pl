@@ -631,6 +631,16 @@ $cmd{'syn_editurl'} = {
                ],
     };
 
+$cmd{'allow_open_proxy'} = {
+    'handler' => \&allow_open_proxy,
+    'privs' => [qw(allowopenproxy)],
+    'des' => "Marks an IP address as not being an open proxy for the next 24 hours.",
+    'argsummary' => '<ip>',
+    'args' => [
+               'ip' => "The IP address to mark as clear.",
+               ],
+    };
+
 sub conhelp 
 {
     my ($dbh, $remote, $args, $out) = @_;
@@ -1103,6 +1113,30 @@ sub reset_password
     LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, "reset_password", $reason);
 
     push @$out, [ '', "Password reset." ];
+    return 1;
+}
+
+sub allow_open_proxy
+{
+    my ($dbh, $remote, $args, $out) = @_;
+    my $err = sub { push @$out, [ "error", $_[0] ]; 0; };
+
+    return $err->('This command requires 1 argument.') unless @$args == 2;
+
+    return $err->('You are not authorized to use this command.')
+        unless $remote && $remote->{priv}->{allowopenproxy};
+
+    my $ip = $args->[1];
+    return $err->('That is an invalid IP address.')
+        unless $ip =~ /^(?:\d{1,3}\.){3}\d{1,3}$/;
+    return $err->('That IP address is not an open proxy.')
+        unless LJ::is_open_proxy($ip);
+
+    $dbh->do("REPLACE INTO openproxy VALUES (?, 'clear', UNIX_TIMESTAMP(), ?)",
+             undef, $ip, "Manual: $remote->{user}");
+    return $err->($dbh->errstr) if $dbh->err;
+
+    push @$out, [ '', "$ip cleared for the next 24 hours." ];
     return 1;
 }
 
