@@ -7,9 +7,28 @@ my $err = sub {
     die "Problem:\n" . join('', map { "  * $_\n" } @_);
 };
 
-############################################################################
-print "[Checking for Perl Modules....]\n";
-############################################################################
+my %dochecks;   # these are the ones we'll actually do
+my @checks = (  # put these in the order they should be checked in
+    "modules", 
+    "env", 
+    "database" 
+);
+foreach my $check (@checks) { $dochecks{$check} = 1; }
+
+my $only = 0;
+
+arg: foreach my $arg (@ARGV) {
+    ($w, $c) = ($arg =~ /^-(no|only)(.*)/) or die "unknown option $arg";
+    die "only one '-onlyfoo' option may be speified" if $w eq "only" and $only++;
+    foreach my $check (@checks) {
+        if ($check eq $c) {
+            if ($w eq "only") { %dochecks = ( $check => 1 ); }
+            else { $dochecks{$check} = 0 }
+            next arg;
+        }
+    }
+    die "unknown check '$c' (known checks: " . join(", ", @checks) . ")\n";
+}
 
 my %modules = (
                "DBI" => { 'deb' => 'libdbi-perl',  },
@@ -64,75 +83,85 @@ my %modules = (
                "IO::WrapTie" => { 'deb' => 'libio-stringy-perl' },
                );
 
-my @debs;
+sub check_modules {
+    print "[Checking for Perl Modules....]\n";
 
-foreach my $mod (sort keys %modules) {
-    my $rv = eval "use $mod;";
-    if ($@) {
-        my $dt = $modules{$mod};
-        if ($dt->{'opt'}) {
-            print STDERR "Missing optional module $mod: $dt->{'opt'}\n";
-        } else {
-            push @errors, "Missing perl module: $mod";
+    my @debs;
+
+    foreach my $mod (sort keys %modules) {
+        my $rv = eval "use $mod;";
+        if ($@) {
+            my $dt = $modules{$mod};
+            if ($dt->{'opt'}) {
+                print STDERR "Missing optional module $mod: $dt->{'opt'}\n";
+            } else {
+                push @errors, "Missing perl module: $mod";
+            }
+            push @debs, $dt->{'deb'} if $dt->{'deb'};
         }
-        push @debs, $dt->{'deb'} if $dt->{'deb'};
+    }
+    if (@debs && -e '/etc/debian_version') {
+        print STDERR "\n# apt-get install ", join(' ', @debs), "\n\n";
+    }
+
+    $err->(@errors);
+}
+
+sub check_env {
+    print "[Checking LJ Environment...]\n";
+
+    $err->("\$LJHOME environment variable not set.")
+        unless $ENV{'LJHOME'};
+    $err->("\$LJHOME directory doesn't exist ($ENV{'LJHOME'})")
+        unless -d $ENV{'LJHOME'};
+
+    # before ljconfig.pl is called, we want to call the site-local checkconfig,
+    # otherwise ljconfig.pl might load ljconfig-local.pl, which maybe load
+    # new modules to implement site-specific hooks.
+    my $local_config = "$ENV{'LJHOME'}/bin/checkconfig-local.pl";
+    if (-e $local_config) {
+        my $good = eval { require $local_config; };
+        exit 1 unless $good;
+    }
+
+    $err->("No ljconfig.pl file found at $ENV{'LJHOME'}/cgi-bin/ljconfig.pl")
+        unless -e "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+
+    eval { require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl"; };
+    $err->("Failed to load ljlib.pl: $@") if $@;
+
+    # if SMTP_SERVER is set, then Net::SMTP is required, not optional.
+    if ($LJ::SMTP_SERVER && ! defined $Net::SMTP::VERSION) {
+        $err->("Net::SMTP isn't available, and you have \$LJ::SMTP_SERVER set.");
     }
 }
-if (@debs && -e '/etc/debian_version') {
-    print STDERR "\n# apt-get install ", join(' ', @debs), "\n\n";
+
+sub check_database {
+    print "[Checking Database...]\n";
+
+    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+    my $dbh = LJ::get_dbh("master");
+    unless ($dbh) {
+        $err->("Couldn't get master database handle.");
+    }
+    foreach my $c (@LJ::CLUSTERS) {
+        my $dbc = LJ::get_cluster_master($c);
+        next if $dbc;
+        $err->("Couldn't get db handle for cluster \#$c");
+    }
+
+    if (%LJ::MOGILEFS_CONFIG && $LJ::MOGILEFS_CONFIG{hosts}) {
+        print "[Checking MogileFS client.]\n";
+        my $mog = LJ::mogclient();
+        die "Couldn't create mogilefs client." unless $mog;
+    }
 }
 
-$err->(@errors);
-
-############################################################################
-print "[Checking LJ Environment...]\n";
-############################################################################
-
-$err->("\$LJHOME environment variable not set.")
-    unless $ENV{'LJHOME'};
-$err->("\$LJHOME directory doesn't exist ($ENV{'LJHOME'})")
-    unless -d $ENV{'LJHOME'};
-
-# before ljconfig.pl is called, we want to call the site-local checkconfig,
-# otherwise ljconfig.pl might load ljconfig-local.pl, which maybe load
-# new modules to implement site-specific hooks.
-my $local_config = "$ENV{'LJHOME'}/bin/checkconfig-local.pl";
-if (-e $local_config) {
-    my $good = eval { require $local_config; };
-    exit 1 unless $good;
+foreach my $check (@checks) {
+    next unless $dochecks{$check};
+    my $cn = "check_".$check;
+    &$cn;
 }
-
-$err->("No ljconfig.pl file found at $ENV{'LJHOME'}/cgi-bin/ljconfig.pl")
-    unless -e "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
-
-eval { require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl"; };
-$err->("Failed to load ljlib.pl: $@") if $@;
-
-# if SMTP_SERVER is set, then Net::SMTP is required, not optional.
-if ($LJ::SMTP_SERVER && ! defined $Net::SMTP::VERSION) {
-    $err->("Net::SMTP isn't available, and you have \$LJ::SMTP_SERVER set.");
-}
-
-############################################################################
-print "[Checking Database...]\n";
-############################################################################
-
-my $dbh = LJ::get_dbh("master");
-unless ($dbh) {
-    $err->("Couldn't get master database handle.");
-}
-foreach my $c (@LJ::CLUSTERS) {
-    my $dbc = LJ::get_cluster_master($c);
-    next if $dbc;
-    $err->("Couldn't get db handle for cluster \#$c");
-}
-
-if (%LJ::MOGILEFS_CONFIG && $LJ::MOGILEFS_CONFIG{hosts}) {
-    print "[Checking MogileFS client.]\n";
-    my $mog = LJ::mogclient();
-    die "Couldn't create mogilefs client." unless $mog;
-}
-
 print "All good.\n";
 print "NOTE: checkconfig.pl doesn't check everything yet\n";
 
