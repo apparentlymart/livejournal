@@ -41,8 +41,11 @@ DOCUMENTATION: (JPROULX)
 
 -- how to modify site-local text (like: en_LJ from en)
 
+-- document all the db roles, and how to set 'em up in %LJ::DBINFO.
 
 ANYBODY:
+
+-- cluster<n>lite db role
 
 -- redo system of sending mail out.  ideally, LJ::send_mail tries
    to use Net::SMTP first to $LJ::SMTP_SERVER and if that fails
