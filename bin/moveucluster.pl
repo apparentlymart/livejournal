@@ -15,14 +15,19 @@ sub usage {
     die "Usage:\n  movecluster.pl <user> <destination cluster #>\n";
 }
 
-usage() unless $user;
-usage() unless $dclust;
+usage() unless defined $user;
+usage() unless defined $dclust;
 
 my $u = LJ::load_user($dbh, $user);
 die "Non-existent user $user.\n" unless $u;
 
+die "Can't move back to legacy cluster 0\n" unless $dclust;
+
 my $dbch = LJ::get_dbh("cluster$dclust!");
 die "Undefined or down cluster \#$dclust\n" unless $dbch;
+
+$dbh->{'RaiseError'} = 1;
+$dbch->{'RaiseError'} = 1;
 
 my $sclust = $u->{'clusterid'};
 
@@ -36,21 +41,40 @@ if ($sclust) {
 }
 
 my $userid = $u->{'userid'};
-print "Moving '$u->{'user'}' from cluster $sclust to $dclust:\n";
-print "dbh = $dbh; dbch = $dbch\n";
 
 my $recentpoint;
 if ($LJ::USE_RECENT_TABLES) {
     $recentpoint = $dbh->selectrow_array("SELECT DATE_SUB(NOW(), INTERVAL $LJ::RECENT_DAYS DAY)");
 }
 
-# TODO: find readonly cap class, complain if not found
-# TODO: set readonly cap bit on user
-# TODO: record in table clustermoves: (userid, sclust, dclust, stime, status('IP','DONE'), ftime)
-# TODO: wait 5 seconds?  for writes to stop?
+# find readonly cap class, complain if not found
+my $readonly_bit = undef;
+foreach (keys %LJ::CAP) {
+    if ($LJ::CAP{$_}->{'_name'} eq "_moveinprogress" &&
+	$LJ::CAP{$_}->{'readonly'} == 1) {
+	$readonly_bit = $_;
+	last;
+    }
+}
+unless (defined $readonly_bit) {
+    die "Won't move user without %LJ::CAP capability class named '_moveinprogress' with readonly => 1\n";
+}
 
-$dbh->{'RaiseError'} = 1;
-$dbch->{'RaiseError'} = 1;
+# make sure a move isn't already in progress
+if (($u->{'caps'}+0) & (1 << $readonly_bit)) {
+    die "User '$user' is already in the process of being moved?\n";
+}
+
+
+print "Moving '$u->{'user'}' from cluster $sclust to $dclust:\n";
+
+# set readonly cap bit on user
+$dbh->do("UPDATE user SET caps=caps|(1<<$readonly_bit) WHERE userid=$userid");
+
+# TODO: record in table clustermoves: (userid, sclust, dclust, stime, status('IP','DONE'), ftime)
+
+# wait a bit for writes to stop
+sleep(3);
 
 my $last = time();
 my $stmsg = sub {
@@ -113,7 +137,10 @@ if ($sclust == 0)
     }
 
     $dbh->do("UPDATE user SET clusterid=$dclust WHERE userid=$userid");
-    # TODO: unset read-only cap
+
+    # unset read-only bit
+    $dbh->do("UPDATE user SET caps=caps&~(1<<$readonly_bit) WHERE userid=$userid");
+
 }
 
 sub deletefrom0_logitem
