@@ -9,6 +9,7 @@
  $bodyopts = "";
 
  my $remote = undef;
+ my $dbh = LJ::get_dbh("master");
 
  if ($LJ::SERVER_DOWN) {
      $body = &server_down_html();
@@ -27,7 +28,6 @@
 
  if ($mode eq "update")
  {
-     &connect_db();
      my %res;
      my $flags = {};
 
@@ -191,7 +191,6 @@
 
      if ($mode eq "full") 
      {
-	 &connect_db();
 	 $remote = &get_remote();
 	 my %res;
 
@@ -200,7 +199,10 @@
 	     &LJ::do_request($dbh, { "mode" => "login",
 				     "user" => $remote->{'user'},
 				     "getpickws" => 1,
-				 }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
+				 }, \%res, { 
+				     "noauth" => 1, 
+				     "userid" => $remote->{'userid'} 
+				 });
 	 }
 
 	 $body .= "<TR><TD NOWRAP><INPUT TYPE=hidden NAME=webversion VALUE=full>(=H2 Optional Settings H2=)";
@@ -231,7 +233,7 @@
 	 $body .= "<P><b>Backdate Entry:</b><INPUT TYPE=CHECKBOX NAME=\"prop_opt_backdated\" VALUE=1 $checked> (will only show on calendar)";
 	 
 	 if ($res{'pickw_count'}) {
-	     $body .= "<P><B>Picture to use:</B> ";
+	     $body .= "<p><b><a href=\"$LJ::SITEROOT/allpics.bml?user=$remote->{'user'}\">Picture</a> to use:</b> ";
 	     my @pics;
 	     for (my $i=1; $i<=$res{'pickw_count'}; $i++) {
 		 push @pics, $res{"pickw_$i"};
@@ -241,10 +243,7 @@
 				    'selected' => $FORM{'prop_picture_keyword'}, },
 				   ("", "(default)", map { ($_, $_) } @pics));
 	     $body .= " (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=46 HELP=)";
-	 } else {
-	     $body .= "<P><B>$res{'errmsg'}</B>";
 	 }
-	 
 
 	 $body .= "<P><B>Current <A HREF=\"/moodlist.bml\">Mood</A>:</B>";
 
