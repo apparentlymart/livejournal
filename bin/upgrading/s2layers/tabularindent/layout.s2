@@ -555,7 +555,13 @@ function ReplyPage::print_body () {
     "</table></div><br />";
 
     print "<h3 class='page-header'>Reply:</h3>";
+    "<div align='right'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
+    "<tr><td bgcolor='$*main_bgcolor'><font color='$*main_fgcolor'>";
+
     $.form->print();
+
+    "</font></td></tr>";
+    "</table></div><br />";
 }
 
 function print_theme_preview()
