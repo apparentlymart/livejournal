@@ -1192,9 +1192,7 @@ register_alter(sub {
 		 "MODIFY statkey VARCHAR(150) NOT NULL, ".
 		 "MODIFY statval INT UNSIGNED NOT NULL, ". 
 		 "DROP INDEX statcat");
-    } else {
-	print "column type = ", column_type("stats", "statcat"), "\n";
-    }
+    } 
    
 });
 
