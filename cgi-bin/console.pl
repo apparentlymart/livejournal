@@ -471,9 +471,9 @@ $cmd{'suspend'} = {
     'def' => 'consuspend.pl',
     'privs' => [qw(suspend)],
     'des' => 'Suspend a user\'s account.',
-    'argsummary' => '<user> <reason>',
+    'argsummary' => '<username or email address> <reason>',
     'args' => [
-               'user' => "The username of the person to suspend.",
+               'username or email address' => "The username of the person to suspend, or an email address to suspend all accounts at that address.",
                'reason' => "Why you're suspending the account.",
                ],
     };
@@ -482,9 +482,9 @@ $cmd{'unsuspend'} = {
     'def' => 'consuspend.pl',
     'privs' => [qw(suspend)],
     'des' => 'Unsuspend a user\'s account.',
-    'argsummary' => '<user> <reason>',
+    'argsummary' => '<username or email address> <reason>',
     'args' => [
-               'user' => "The username of the person to unsuspend.",
+               'username or email address' => "The username of the person to unsuspend, or an email address to unsuspend all accounts at that address.",
                'reason' => "Why you're unsuspending the account.",
                ],
     };

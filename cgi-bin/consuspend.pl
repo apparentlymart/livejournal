@@ -139,6 +139,12 @@ sub suspend
 {
     my ($dbh, $remote, $args, $out) = @_;
 
+    my $confirmed = 0;
+    if (scalar(@$args) == 4 && $args->[3] eq 'confirm') {
+        pop @$args;
+        $confirmed = 1;
+    }
+
     unless (scalar(@$args) == 3) {
         push @$out, [ "error", "This command takes exactly 2 arguments.  Consult the reference." ];
         return 0;
@@ -157,23 +163,52 @@ sub suspend
         return 0;
     }
 
-    my $u = LJ::load_user($user);
-    my $status = ($cmd eq "unsuspend") ? "V" : "S";
-    unless ($u) {
-        push @$out, [ "error", "Invalid user." ];
-        return 0;
+    # if the user argument is an email address...
+    my @users;
+    if ($user =~ /@/) {
+        push @$out, [ "info", "Acting on users matching email $user..." ];
+
+        my $dbr = LJ::get_db_reader();
+        my $names = $dbr->selectcol_arrayref('SELECT user FROM user WHERE email = ?', undef, $user);
+        if ($dbr->err) {
+            push @$out, [ "error", "Database error: " . $dbr->errstr ];
+            return 0;
+        }
+        unless ($names && @$names) {
+            push @$out, [ "error", "No users found matching the email address $user." ];
+            return 0;
+        }
+
+        # bail unless they've confirmed this mass action
+        unless ($confirmed) {
+            push @$out, [ "info", "    $_" ] foreach @$names;
+            push @$out, [ "info", "To actually confirm this action, please do this again:" ];
+            push @$out, [ "info", "    $cmd $user \"$reason\" confirm" ];
+            return 1;
+        }
+
+        push @users, $_ foreach @$names;
     }
 
-    if ($u->{'statusvis'} eq $status) {
-        push @$out, [ "error", "User was already in that state ($status)" ];
-        return 0;
+    foreach my $username (@users) {
+        my $u = LJ::load_user($username);
+        unless ($u) {
+            push @$out, [ "error", "Invalid user." ];
+            return 0;
+        }
+
+        my $status = ($cmd eq "unsuspend") ? "V" : "S";
+        if ($u->{'statusvis'} eq $status) {
+            push @$out, [ "error", "$username was already in that state ($status)" ];
+            return 0;
+        }
+
+        LJ::update_user($u->{'userid'}, { statusvis => $status, raw => 'statusvisdate=NOW()' });
+
+        LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, $cmd, $reason);
+
+        push @$out, [ "info", "$username ${cmd}ed." ];
     }
-
-    LJ::update_user($u->{'userid'}, { statusvis => $status, raw => 'statusvisdate=NOW()' });
-
-    LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, $cmd, $reason);
-
-    push @$out, [ "info", "User ${cmd}ed." ];
 
     return 1;
 }
