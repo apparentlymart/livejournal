@@ -33,6 +33,7 @@
 <!ENTITY lj.customize.text                SYSTEM "../lj.book/customize/text.xml">
 <!ENTITY lj.customize.tasks               SYSTEM "../lj.book/customize/tasks.xml">
 <!ENTITY lj.customize.hooks               SYSTEM "../lj.book/customize/hooks.xml">
+<!ENTITY lj.customize.hooks.ref           SYSTEM "../lj.book/customize/hooks.ref.gen.xml">
 
 <!-- Administration -->
 

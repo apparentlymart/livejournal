@@ -179,6 +179,18 @@
     </variablelist>
 
     <variablelist>
+      <title>Internationalization</title>
+
+      <varlistentry>
+        <term><literal role="">$LJ::UNICODE</literal></term>
+        <listitem><para>
+          Boolean setting that enables <abbrev>UTF-8</abbrev> support.
+        </para></listitem>
+      </varlistentry>
+
+    </variablelist>
+
+    <variablelist>
       <title>Development/Debugging Options</title>
 
       <varlistentry>

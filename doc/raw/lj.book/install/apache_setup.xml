@@ -10,14 +10,21 @@
       either FastCGI or mod_perl, but we've dropped FastCGI support.
       There's really no need.  So, you'll need mod_perl ... it's
       everywhere and well supported, and you might already have it on
-      your machine.
+      your machine. If not, you can read up on the installation docs at
+      <ulink url="http://perl.apache.org/docs/1.0/guide/install.html" />
     </para>
-    <para>
-      A word of caution, though:  using the dynamically linked mod_perl
-      isn't stable, and I don't think it ever has been.  You'll want
-      mod_perl statically linked in with your Apache binary.  In Debian,
-      the package that provides this is <literal>apache-perl</literal>.
-    </para>
+    <caution><para>
+      We've found that more people have success when mod_perl is statically
+      linked, rather than using a <abbrev>DSO</abbrev>.
+      <footnote><simpara>
+      Consult <citetitle pubwork="article">
+      <ulink url="http://perl.apache.org/docs/1.0/guide/install.html#When_DSO_can_be_Used">
+      mod_perl Installation User Guide: When <abbrev>DSO</abbrev> Can Be Used</ulink></citetitle>
+      for more information. 
+      </simpara></footnote>
+      In Debian, the package that provides mod_perl and Apache together is
+      <literal>apache-perl</literal>.
+    </para></caution>
   </formalpara>
   <formalpara>
     <title>Apache suEXEC Support</title>

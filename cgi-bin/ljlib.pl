@@ -5275,8 +5275,15 @@ sub procnotify_add
     return 0 if $dbh->err;
     return $dbh->{'mysql_insertid'};
 }
-
-# called by DBI::Role.
+# <LJFUNC>
+# name: LJ::procnotify_callback
+# des: Call back function process notifications.
+# info: You'll probably never use this yourself.
+# args: cmd, argstring
+# des-cmd: Command name.
+# des-argstring: String of arguments.
+# returns: new serial number on success; 0 on fail.
+# </LJFUNC>
 sub procnotify_callback
 {
     my ($cmd, $argstring) = @_;

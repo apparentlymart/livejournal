@@ -1,7 +1,0 @@
-<VirtualHost www.ljsite.com>
-  ServerName www.ljsite.com
-  ServerAlias ljsite.com *.ljsite.com
-
-  PerlSetEnv    LJHOME /home/lj
-  PerlRequire   /home/lj/cgi-bin/modperl.pl
-</VirtualHost>

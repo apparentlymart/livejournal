@@ -1,186 +1,35 @@
 <chapter id="lj.customize.hooks">
   <title>Setting Site-Specific Hooks</title>
-  <para>(FIXME - add an introduction to the concept and use of hooks)</para>
-  <section id="lj.customize.hooks.ref">
   <para>
-    <variablelist>
-      <title>Hooks</title>
-      <varlistentry>
-        <term><literal role="hook">canonicalize_url(\$url)</literal></term>
-        <listitem>
-          <para>Cleans up a URL into its canonical form. </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><literal role="hook">emailconfirmed($dbarg, $u)</literal></term>
-        <listitem>
-          <para>
-            After a user has confirmed their email address, this hook is called with a <literal>dbs/dbh</literal> and a user object.
-            This is useful to update a database alias table which you also have your mail system using for address lookups.
-            <itemizedlist>
-              <title>Argument Keys</title>
-              <listitem><para><literal role="key">ret</literal></para></listitem>
-            </itemizedlist>
-          </para>
-        </listitem>
-      </varlistentry>
-      <varlistentry>
-        <term><literal role="hook">login_formopts(\%args)</literal></term>
-        <listitem>
-          <para>
-            Extra <abbrev>HTML</abbrev> for login options on <filename>login.bml</filename>
-            <itemizedlist>
-              <title>Arugment Keys</title>
-              <listitem><para><literal role="key">ret</literal></para></listitem>
-            </itemizedlist>
-          </para>
-        </listitem>
-      </varlistentry>        
-      <varlistentry>
-        <term><literal role="hook">modify_login_menu(\%args)</literal></term>
-        <listitem>
-          <para>
-            Modifies or resets entirely the web menu data structure that is sent 
-            to the client. See <filename>cgi-bin/ljprotocol.pl</filename> for the necessary format.
-            <itemizedlist>
-              <title>Arugment Keys</title>
-              <listitem><para><literal role="key">menu</literal></para></listitem>
-              <listitem><para><literal role="key">u</literal></para></listitem>
-              <listitem><para><literal role="key">dbs</literal></para></listitem>
-              <listitem><para><literal role="key">user</literal></para></listitem>
-            </itemizedlist>
-          </para>
-        </listitem>
-      </varlistentry>        
-      <varlistentry>
-        <term><literal role="hook">name_caps(\%caps)</literal></term>
-        <listitem>
-          <para>
-            Returns the long code for the given capability class.
-            <itemizedlist>
-              <title>Arugment Keys</title>
-              <listitem><para><literal role="key">caps</literal></para></listitem>
-            </itemizedlist>
-          </para>
-        </listitem>
-      </varlistentry>        
-      <varlistentry>
-        <term><literal role="hook">name_caps_short(\%caps)</literal></term>
-        <listitem>
-          <para>
-            Returns the short code for the given capability class.
-            <itemizedlist>
-              <title>Arugment Keys</title>
-              <listitem><para><literal role="key">caps</literal></para></listitem>
-            </itemizedlist>
-          </para>
-        </listitem>
-      </varlistentry>        
-      <varlistentry>
-        <term><literal role="hook">post_login(\%args)</literal></term>
-        <listitem>
-          <para>
-            Action to take after logging, before <abbrev>HTML</abbrev> is
-            sent to the client (makes it possible to print <abbrev>HTTP</abbrev> headers directly).
-            <itemizedlist>
-              <title>Arugment Keys</title>
-              <listitem><para><literal role="key">u</literal></para></listitem>
-              <listitem><para><literal role="key">form</literal></para></listitem>
-              <listitem><para><literal role="key">expiretime</literal></para></listitem>
-            </itemizedlist>
-          </para>
-        </listitem>
-      </varlistentry>        
-      <varlistentry>
-        <term><literal role="hook">post_changepassword(\%args)</literal></term>
-        <listitem>
-          <para>
-            Action to take after changing a password, before <abbrev>HTML</abbrev> is
-            sent to the client (makes it possible to print <abbrev>HTTP</abbrev> headers directly).
-            <itemizedlist>
-              <title>Arugment Keys</title>
-              <listitem><para><literal role="key">u</literal></para></listitem>
-              <listitem><para><literal role="key">user</literal></para></listitem>
-              <listitem><para><literal role="key">newpassword</literal></para></listitem>
-              <listitem><para><literal role="key">oldpassword</literal></para></listitem>
-            </itemizedlist>
-          </para>
-        </listitem>
-      </varlistentry>        
-      <varlistentry>
-        <term><literal role="hook">post_logout()</literal></term>
-        <listitem>
-          <para>
-            Used to clear cookies your local code might&apos;ve set.
-          </para>
-        </listitem>
-      </varlistentry>        
-      <varlistentry>
-        <term><literal role="hook">post_create(\%args)</literal></term>
-        <listitem>
-          <para>
-            Action to take after creating a journal.
-            <itemizedlist>
-              <title>Arugment Keys</title>
-              <listitem><para><literal role="key">dbs</literal></para></listitem>
-              <listitem><para><literal role="key">user</literal></para></listitem>
-              <listitem><para><literal role="key">userid</literal></para></listitem>
-              <listitem><para><literal role="key">code</literal> -- auth code, if in use</para></listitem>
-            </itemizedlist>
-          </para>
-        </listitem>
-      </varlistentry>        
-      <varlistentry>
-        <term><literal role="hook">userinfo_html_by_user(\%args)</literal></term>
-        <listitem>
-          <para>
-            On <filename>userinfo.bml</filename> page. this adds extra <abbrev>HTML</abbrev> to show
-            extra information next to the username &amp; id.
-            <itemizedlist>
-              <title>Arugment Keys</title>
-              <listitem><para><literal role="key">ret</literal></para></listitem>
-              <listitem><para><literal role="key">u</literal></para></listitem>
-            </itemizedlist>
-          </para>
-        </listitem>
-      </varlistentry>        
-      <varlistentry>
-        <term><literal role="hook">userinfo_rows(\%args)</literal></term>
-        <listitem>
-          <para>
-            Returns a two-element arrayref for a row on a userinfo page, containing
-            first the left side label, then the body.
-            <itemizedlist>
-              <title>Arugment Keys</title>
-              <listitem><para><literal role="key">dbs</literal></para></listitem>
-              <listitem><para><literal role="key">u</literal></para></listitem>
-              <listitem><para><literal role="key">remote</literal></para></listitem>
-            </itemizedlist>
-          </para>
-        </listitem>
-      </varlistentry>        
-      <varlistentry>
-        <term><literal role="hook">validate_get_remote(\%args)</literal></term>
-        <listitem>
-          <para>
-            This hook lets you ignore the remote user&apos;s cookies or flag them
-            as intentionally forged to <literal>LJ::get_remote()</literal>. If you return
-            a true value, no action is taken. If you return a false value, <literal>LJ::get_remote()</literal>
-            returns <literal>undef</literal>. You can optionally set <literal>$$criterr</literal> to something
-            true as well.
-            <itemizedlist>
-              <title>Arugment Keys</title>
-              <listitem><para><literal role="key">user</literal> -- may be "" or <literal>undef</literal></para></listitem>
-              <listitem><para><literal role="key">userid</literal> -- may be 0</para></listitem>
-              <listitem><para><literal role="key">dbs</literal></para></listitem>
-              <listitem><para><literal role="key">caps</literal></para></listitem>
-              <listitem><para><literal role="key">criterr</literal> -- scalar ref</para></listitem>
-              <listitem><para><literal role="key">cookiesource</literal> -- sub ref: takes cookie name, returns cookie value</para></listitem>
-            </itemizedlist>
-          </para>
-        </listitem>
-      </varlistentry>        
-    </variablelist>
+    The LiveJournal code provides a number of hooks, which you can use to
+    alter or extend the functionality of the code, tailored for your own site.
+    You're free to implement as few or as many as you want.
+    <note><para>
+      If there's a hook you want but don't see, let us know and we'll be more
+      than happy to add it in.
+    </para></note>
   </para>
+  <section id="lj.customize.hooks.intro">
+    <title>Introduction</title>
+    <para>
+      One of the reasons for implementing hooks on LiveJournal came from a 
+      need to make distinctions between account status types, without leaving
+      a lot of kludge in the code base, and without having to write extensive
+      code libraries in the ljcom <abbrev>CVS</abbrev> repository.
+    </para>
+  </section>
+  <section id="lj.customize.hooks.setup">
+    <title>Writing Hooks</title>
+    <para>
+      Hooks are written in <filename>cgi-bin/ljconfig.pl</filename>, by using the 
+      sub <function>LJ::register_hook()</function>.
+    </para>
+    <example>
+      <title>Writing a hook for <literal></literal></title><para></para>
+    </example>
+  </section>
+  <section id="lj.customize.hooks.ref">
+    <title>Hooks Reference</title>
+    &lj.customize.hooks.ref;
   </section>
 </chapter>

@@ -26,6 +26,17 @@ use HTML::TokeParser ();
 
 package LJ::CleanHTML;
 
+# <LJFUNC>
+# name: LJ::CleanHTML::clean
+# class: text
+# des: Multifaceted HTML parse function
+# info: 
+# args: data, opts
+# des-data: A reference to html to parse to output, or HTML if modified in-place.
+# des-opts: An hash of options to pass to the parser.
+# returns: Nothing.
+# </LJFUNC>
+
 sub clean
 {
     my $data = shift;

@@ -127,6 +127,13 @@ system("./cap2db.pl > $docraw_dir/lj.book/admin/cap.ref.gen.xml")
 system("./cap2db.pl > $docraw_dir/ljp.book/int/cap.ref.gen.xml")
     and die "Error generating caps reference\n";
 
+print "Generating Hook Function Reference\n";
+chdir "$docraw_dir/build/hooks" or die;
+system("./hooks2db.pl > $docraw_dir/lj.book/customize/hooks.ref.gen.xml")
+    and die "Error generating hooks reference\n";
+system("./hooks2db.pl > $docraw_dir/ljp.book/int/hooks.ref.gen.xml")
+    and die "Error generating hooks reference\n";
+
 print "Converting to HTML\n";
 mkdir $output_dir, 0755 unless -d $output_dir;
 chdir $output_dir or die "Couldn't chdir to $output_dir\n";

@@ -24,11 +24,11 @@
       such that you can.      
     </para>
   </partintro>
-
   &lj.customize.local_cvs;
   &lj.customize.images;
   &lj.customize.text;
   &lj.customize.limits;
+  &lj.customize.hooks;
   &lj.customize.layout;
   &lj.customize.tasks;
 </part>

@@ -3,122 +3,152 @@
   <section id="perl_install">
     <title>Installing Perl</title>
     <para>
-      Perl offers distrobutions for many operating aystems, including Win32 and almost all of the different <quote>flavors</quote> of Unix. Installations on any of these systems should be fairly easy, as most offer a simple installation program that guides you through setup.
+      Perl offers distrobutions for many operating aystems, including Win32 and 
+      almost all of the different <quote>flavors</quote> of Unix. Installations
+      on any of these systems should be fairly easy, as most offer a simple
+      installation program that guides you through setup.
     </para>
     <para>
-      The complete Perl documentation is included with every Perl install, so if you have any Perl specific questions, you might want to refer to the specific documentation first. As quoted from the Perl FAQs: <quote>The complete Perl documentation is available with the Perl distribution. If you have Perl installed locally, you probably have the documentation installed as well: type man perl if you're on a system resembling Unix. This will lead you to other important man pages, including how to set your $MANPATH. If you're not on a Unix system, access to the documentation will be different; for example, it might be only in HTML format. But all proper Perl installations have fully-accessible documentation.</quote>
-      <footnote><para>For comprehensive information on obtaining and installing perl, please refer to <ulink url="http://www.perldoc.com/perl5.6/pod/perlfaq2.html">perlfaq2</ulink></para></footnote>
+      The complete Perl documentation is included with every Perl install, so if
+      you have any Perl specific questions, you might want to refer to the
+      specific documentation first. As quoted from the Perl FAQs: <quote>The
+      complete Perl documentation is available with the Perl distribution. If you
+      have Perl installed locally, you probably have the documentation installed
+      as well: type man perl if you're on a system resembling Unix. This will lead
+      you to other important man pages, including how to set your $MANPATH. If you're
+      not on a Unix system, access to the documentation will be different; for
+      example, it might be only in HTML format. But all proper Perl installations
+      have fully-accessible documentation.</quote>
+      <footnote><para>
+        Consult <citetitle pubwork="article"><ulink url="http://www.perldoc.com/perl5.6/pod/perlfaq2.html">
+        Obtaining and Learning about Perl (perlfaq2)</ulink></citetitle>
+      </para></footnote>
     </para>
   </section>
   <section id="lj.install.perl_setup.modules">
-  <title>Installing Perl Modules</title>
-  <para>
-    LiveJournal requires several Perl modules to be installed. Installing these modules requires a fully working perl and C development environment (including gcc and make).
-  </para>
-  <para>
-    If you are unfamilar with installing modules, the simplest method is to enter the following command from a root shell prompt:
-  </para>
-  <para>
-    <screen><prompt>#</prompt> <userinput>perl -MCPAN -e shell</userinput></screen>
-  </para>
-  <para>
-    Once the Perl interpreter has loaded (and been configured), you can install modules by issuing the command <literal>install MODULENAME</literal>.
-  </para>
-  <para>
-    The first thing you should do is upgrade your CPAN:
-  </para>
-  <para>
-    <screen><prompt>cpan></prompt> <userinput>install Bundle::CPAN</userinput></screen>
-  </para>
-  <para>
-    Once it's done, type:
-  </para>
-  <para>
-    <screen><prompt>cpan></prompt> <userinput>reload cpan</userinput></screen>
-  </para>
-  <para>
-    Now, install the following modules:
-  </para>
-  <para>
+    <title>Installing Perl Modules</title>
+    <para>
+      LiveJournal requires several Perl modules to be installed. Installing these
+      modules requires a fully working perl and C development environment
+      (including a C compiler and make tool).
+    </para>
+    <note><para>
+      Some modules such as GD and Compress::Zlib require certain C libraries to be pre-installed
+      on your machine in order to work. Please read the author-provided README files for each
+      module before proceeding further.  
+    </para></note>
+    <para>
+      If you are unfamilar with installing modules, the simplest method is to enter
+      the following command from a root shell prompt:
+    </para>
+    <para>
+      <screen><prompt>#</prompt> <userinput>perl -MCPAN -e shell</userinput></screen>
+    </para>
+    <para>
+      Once the Perl interpreter has loaded (and been configured), you can install
+      modules by issuing the command <literal>install <replaceable>MODULENAME</replaceable></literal>.
+    </para>
+    <para>
+      The first thing you should do is upgrade your CPAN:
+    </para>
+    <para>
+      <screen><prompt>cpan></prompt> <userinput>install Bundle::CPAN</userinput></screen>
+    </para>
+    <para>
+      Once it's done, type:
+    </para>
+    <para>
+      <screen><prompt>cpan></prompt> <userinput>reload cpan</userinput></screen>
+    </para>
+    <para>
+      Now, install the following modules:
+    </para>
     <itemizedlist>
-      <listitem><para>DBD::mysql</para></listitem>
-      <listitem><para>DBI</para></listitem>
-      <listitem><para>Digest::MD5</para></listitem>
-      <listitem><para>Image::Size</para></listitem>
-      <listitem><para>MIME::Lite</para></listitem>
-      <listitem><para>Compress::Zlib</para></listitem>
-      <listitem><para>MIME::Base64</para></listitem>
-      <listitem><para>URI::URL</para></listitem>
-      <listitem><para>HTML::Tagset</para></listitem>
-      <listitem><para>HTML::Parser</para></listitem>
-      <listitem><para>LWP::Simple</para></listitem>
-      <listitem><para>LWP::UserAgent</para></listitem>
-      <listitem><para>GD</para></listitem>
-      <listitem><para>GD::Graph</para></listitem>
-      <listitem><para>GD::Text</para></listitem>
-      <listitem><para>Bundle::Mysql</para></listitem>
-      <listitem><para>Mail::Address</para></listitem>
-      <listitem><para>Proc::ProcessTable</para></listitem>
-      <listitem><para>SOAP::Lite</para></listitem>
-      <listitem><para>Unicode::MapUTF8</para></listitem>
+      <listitem><simpara>DBD::mysql</simpara></listitem>
+      <listitem><simpara>DBI</simpara></listitem>
+      <listitem><simpara>Digest::MD5</simpara></listitem>
+      <listitem><simpara>Image::Size</simpara></listitem>
+      <listitem><simpara>MIME::Lite</simpara></listitem>
+      <listitem><simpara>Compress::Zlib</simpara></listitem>
+      <listitem><simpara>MIME::Base64</simpara></listitem>
+      <listitem><simpara>URI::URL</simpara></listitem>
+      <listitem><simpara>HTML::Tagset</simpara></listitem>
+      <listitem><simpara>HTML::Parser</simpara></listitem>
+      <listitem><simpara>LWP::Simple</simpara></listitem>
+      <listitem><simpara>LWP::UserAgent</simpara></listitem>
+      <listitem><simpara>GD</simpara></listitem>
+      <listitem><simpara>GD::Graph</simpara></listitem>
+      <listitem><simpara>GD::Text</simpara></listitem>
+      <listitem><simpara>Bundle::Mysql</simpara></listitem>
+      <listitem><simpara>Mail::Address</simpara></listitem>
+      <listitem><simpara>Proc::ProcessTable</simpara></listitem>
+      <listitem><simpara>SOAP::Lite</simpara></listitem>
+      <listitem><simpara>Unicode::MapUTF8</simpara></listitem>
     </itemizedlist>
-  </para>
-  <para>
-    If you're using Debian this should get everything:
-  </para>
-  <para>
-    <screen><prompt>#</prompt> <userinput>apt-get install libwww-perl libmime-perl libmime-lite-perl \
+    <formalpara><title>Debian Install</title><para>
+      If you're using Debian this should get everything:
+    </para></formalpara>
+    <para>
+  <screen><prompt>#</prompt> <userinput>apt-get install libwww-perl libmime-perl libmime-lite-perl \
   libsoap-lite-perl libgd-perl liburi-perl \
   libimage-size-perl libdbd-mysql-perl libdbi-perl \
   libnet-perl libdigest-md5-perl libgd-graph-perl \
   libgd-text-perl libcompress-zlib-perl \
   libunicode-maputf8-perl libproc-process-perl libapache-mod-perl</userinput></screen>
-  </para>
-  <note>
-    <title>Windows Install</title>
-    <para>
-      If using ActiveState's Win32 Perl installation, we recommend using Perl Package Manager<footnote id="ppm.faq"><para><ulink url="http://aspn.activestate.com/ASPN/Products/ActivePerl-5.6/faq/ActivePerl-faq2.html">PPM FAQ</ulink></para></footnote> to install the following modules:
-      <itemizedlist>
-        <listitem><para>libwww-perl</para></listitem>
-        <listitem><para>DBD::mysql</para></listitem>
-        <listitem><para>DBI</para></listitem>
-        <listitem><para>Digest::MD5</para></listitem>
-        <listitem><para>Image::Size</para></listitem>
-        <listitem><para>MIME::Lite</para></listitem>
-        <listitem><para>MIME::Base64</para></listitem>
-        <listitem><para>HTML::Tagset</para></listitem>
-        <listitem><para>HTML::Parser</para></listitem>
-        <listitem><para>GD</para></listitem>
-        <listitem><para>GDGraph</para></listitem>
-        <listitem><para>GDTextUtil</para></listitem>
-        <listitem><para>MailTools</para></listitem>
-        <listitem><para>SOAP::Lite</para></listitem>
-        <listitem><para>Unicode::String</para></listitem>
-        <listitem><para>Unicode::Map</para></listitem>
-      </itemizedlist>
     </para>
-    <para>
-      The following packages are currently <emphasis role="bold">Not</emphasis> available through PPM. 
-      You will need to have a make utility and a C++ compiler:
-      <itemizedlist>
-        <listitem><para>Compress::Zlib</para></listitem>
-        <listitem><para>Jcode</para></listitem>
-        <listitem><para>Unicode::Map8</para></listitem>
-        <listitem><para>Unicode::MapUTF8</para></listitem>
-      </itemizedlist>
-    </para>
-  </note>
-  <note>
-    <para>
-      There used to be three custom <filename>LJ::</filename> modules that needed installing.
-      We no longer install those in the system.  
-      Instead LJ uses them right out of <filename>/cgi-bin/LJ/*</filename>.  
-      If you have those old LJ modules installed, it's best to go remove them since Perl will prefer system-level ones over local ones.
-    </para>
-  </note>
-  <para>
-    To ensure that you have installed the necessary modules, be sure to run the included tool: <filename>/bin/checkconfig.pl</filename>. 
-    If <filename>checkconfig.pl</filename> doesn't detect all of the required modules, it will tell you which ones you are missing.
-  </para>
+    <formalpara><title>Windows Install</title>
+      <para>
+        If using ActiveState's Win32 Perl installation, we recommend using 
+        Perl Package Manager
+        <footnote id="ppm.faq"><para>
+          Consult <citetitle pubwork="article"><ulink url="http://aspn.activestate.com/ASPN/Products/ActivePerl-5.6/faq/ActivePerl-faq2.html">
+          The <abbrev>PPM</abbrev> <abbrev>FAQ</abbrev></ulink></citetitle>
+        </para></footnote> to install the following modules:
+        <itemizedlist>
+          <listitem><simpara>libwww-perl</simpara></listitem>
+          <listitem><simpara>DBD::mysql</simpara></listitem>
+          <listitem><simpara>DBI</simpara></listitem>
+          <listitem><simpara>Digest::MD5</simpara></listitem>
+          <listitem><simpara>Image::Size</simpara></listitem>
+          <listitem><simpara>MIME::Lite</simpara></listitem>
+          <listitem><simpara>MIME::Base64</simpara></listitem>
+          <listitem><simpara>HTML::Tagset</simpara></listitem>
+          <listitem><simpara>HTML::Parser</simpara></listitem>
+          <listitem><simpara>GD</simpara></listitem>
+          <listitem><simpara>GDGraph</simpara></listitem>
+          <listitem><simpara>GDTextUtil</simpara></listitem>
+          <listitem><simpara>MailTools</simpara></listitem>
+          <listitem><simpara>SOAP::Lite</simpara></listitem>
+          <listitem><simpara>Unicode::String</simpara></listitem>
+          <listitem><simpara>Unicode::Map</simpara></listitem>
+        </itemizedlist>
+      </para>
+      <para>
+        The following packages are currently <emphasis role="bold">Not</emphasis> available through PPM. 
+        You will need to have a make utility and a C++ compiler:
+        <itemizedlist>
+          <listitem><simpara>Compress::Zlib</simpara></listitem>
+          <listitem><simpara>Jcode</simpara></listitem>
+          <listitem><simpara>Unicode::Map8</simpara></listitem>
+          <listitem><simpara>Unicode::MapUTF8</simpara></listitem>
+        </itemizedlist>
+      </para>
+    </formalpara>
+    <note>
+      <para>
+        There used to be a few custom <filename>LJ::</filename> modules that
+        needed installing. Those no longer need to be installed on the system,
+        as LJ uses them right out of <filename>/cgi-bin/*</filename> instead.
+        If by chance you have those old LJ modules installed, it's best to go
+        remove them since Perl will prefer system-level ones over the (newer)
+        local ones.
+      </para>
+    </note>
+    <important><para>
+      To ensure that you have installed the necessary modules, be sure to
+      run the included tool: <filename>/bin/checkconfig.pl</filename>. 
+      If <filename>checkconfig.pl</filename> doesn't detect all of the
+      required modules, it will tell you which ones you are missing.
+    </para></important>
   </section>
 </chapter>
