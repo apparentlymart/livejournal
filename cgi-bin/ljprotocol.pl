@@ -186,7 +186,7 @@ sub login
         return fail($err, 208, "Bad clientversion string")
             if $ver >= 1 and not LJ::text_in($client);
 
-       	my $qclient = $dbh->quote($client);
+        my $qclient = $dbh->quote($client);
         my $cu_sql = "REPLACE INTO clientusage (userid, clientid, lastlogin) " .
             "SELECT $u->{'userid'}, clientid, NOW() FROM clients WHERE client=$qclient";
         my $sth = $dbh->prepare($cu_sql);
