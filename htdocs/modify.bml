@@ -216,9 +216,12 @@ body<=
 
                     # just load whole structure since it should be cached
                     my $pubstyles = LJ::S1::get_public_styles();
+                    my $userstyles = LJ::S1::get_user_styles($u);
 
-                    return LJ::bad_input($ML{'.error.stylenotavailable'})
-                        unless grep { exists $pubstyles->{$_} } @picked;
+                    foreach (@picked) {
+                        return LJ::bad_input($ML{'.error.stylenotavailable'})
+                            unless exists $pubstyles->{$_} || exists $userstyles->{$_};
+                    }
                 }
             }
         }
@@ -263,7 +266,7 @@ body<=
     # using S1, need to take style input
     if ($u->{'stylesys'} != 2)
     {
-        my $and = $capstyles ? "" : "<?_ml .pagelayoutstyle.warning _ml?>";
+        my $and = $capstyles ? "" : $ML{'.pagelayoutstyle.warning'};
         $ret .= "<?h2 $ML{'.pagelayoutstyle.head'} h2?><?p $ML{'.pagelayoutstyle.about'}  $and p?>\n";
         $ret .= "<table style='margin-left: 30px; margin-bottom: 20px;'>\n";
         $ret .= "<tr bgcolor='#d0d0d0'><td></td><td>$ML{'.availablestyles.head'}</td></tr>\n";
