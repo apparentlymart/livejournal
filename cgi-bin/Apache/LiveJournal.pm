@@ -386,6 +386,10 @@ sub trans
         } elsif (($vhost eq "users" || $vhost =~ /^other:/) &&
                  $uuri eq "/robots.txt") {
             $mode = "robots_txt";
+        } elsif ($uri =~ /pics/ && $LJ::REDIRECT_ALLOWED{$LJ::FB_DOMAIN}) {
+            # redirect to a user's gallery
+            my $url = "$LJ::FB_SITEROOT/$user";
+            return redir($r, $url);
         }
 
         return undef unless defined $mode;
