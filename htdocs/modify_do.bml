@@ -270,16 +270,16 @@ BODY<=
 	 require 'propparse.pl';
 	 my @vars;
 	 load_objects_from_file("$LJ::HTDOCS/vars.dat", \@vars);
+	 my $is_paid = $u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "on";
 	 foreach my $v (@vars) {
 	     my $ov = $v->{'props'}->{'override'}; 
-	     if ($ov eq "yes" || $ov eq "only") {
+	     if ($ov eq "yes" || $ov eq "only" || $is_paid) {
 		 my $name = $v->{'name'};
 		 $ret .= "<B>$name</B><br>";
 		 if (defined $newoverrides{$name}) {
 		     $overrides{$name} = $newoverrides{$name};
 		 }
 	     }
-
 	 }
 	 
 	 # make the new override code we'll put in the database
