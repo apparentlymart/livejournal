@@ -170,7 +170,7 @@
             my $event = $POST{event};
             if ($richtext) {
                 $event =~ s/&lt;(\/)?lj-cut(.*?)(?: \/)?&gt;/<$1lj-cut$2>/ig;
-                $event =~ s/&lt;lj user=['"]?(.+?)['"](?: \/)?&gt;/<lj user="$1" \/>/ig; # manually typed tags
+                $event =~ s/&lt;lj user=['"]?(\w{1,15})['"]?\s?\/?&gt;/<lj user="$1" \/>/ig; # manually typed tags
                 $event =~ s/<span class="?ljuser"?.*?userinfo\.bml\?user=(.+?)".*?<\/b><\/a>(?:<\/span>)?/<lj user="$1" \/>/ig;
             }
             $req{'event'} = $event;
@@ -355,7 +355,7 @@
         my $jevent = $POST{event} || $GET{event};
 
         # manually typed tags
-        $jevent =~ s/<lj user=['"](.+?)['"](?: \/)?>/&lt;lj user="$1" \/&gt;/ig;
+        $jevent =~ s/<lj user=['"]?(\w{1,15})['"]?\s?\/?>/&lt;lj user="$1" \/&gt;/ig;
         $jevent =~ s/<(\/)?lj-cut(.*?)(?: \/)?>/&lt;$1lj-cut$2&gt;/ig;
 
         $jevent = LJ::ejs($jevent);

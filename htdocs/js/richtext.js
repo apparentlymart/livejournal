@@ -71,7 +71,7 @@ function writeRTE(rte, postvar, html, width, height, buttons) {
         document.writeln('      </tr>');
         document.writeln('</table>');
     }
-    document.writeln('<iframe onBlur="save_entry();" name="event" id="' + rte + '" width="' + width + 'px" height="' + height + 'px" src="/rte/blank.html"></iframe>');
+    document.writeln('<iframe onblur="save_entry();" name="event" id="' + rte + '" width="' + width + 'px" height="' + height + 'px" src="/rte/blank.html"></iframe>');
     document.writeln('<iframe width="254" height="174" id="cp' + rte + '" src="/rte/palette.html" marginwidth="0" marginheight="0" scrolling="no" style="visibility:hidden; position: absolute;"></iframe>');
     document.writeln('<input type="hidden" id="hdn' + rte + '" name="' + postvar + '" value="">');
     if (browser.isIE55up) {
@@ -114,14 +114,10 @@ function ChangeTSize(dir) {
     return textsize;
 }
 
-// Check for bad chars
-function badChars(str) {
-    var txt = new String(str);
-    var bad = "!@#$%^&*()-~,'<.>/?;:[]{}\| ";
-        for(i = 0; i < bad.length; i++) {
-            if(txt.indexOf(bad.charAt(i)) >= 0) return true;
-        }
-    return false;
+// Check for allowed lj user characters
+function goodChars(str) {
+    var pattern = /^\w{1,15}$/i;
+    return pattern.test(str);
 }
 
 // lj-user text
@@ -179,7 +175,7 @@ function AddLJTag(rte, type) {
             // Nothing selected or totally unsupported
             res = prompt('Enter a username', '');
             if ((res != null) && (res != "")) {
-                if (badChars(res)) {
+                if (! goodChars(res)) {
                     alert("Invalid characters in username.");
                     return;
                 }
@@ -190,7 +186,7 @@ function AddLJTag(rte, type) {
             }
         }
 
-        if (badChars(res)) {
+        if (! goodChars(res)) {
             alert("Invalid characters in username.");
             return;
         }
