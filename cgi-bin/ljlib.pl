@@ -248,6 +248,10 @@ sub mogclient {
                                       hosts  => $LJ::MOGILEFS_CONFIG{hosts},
                                       )
             or die "Could not initialize MogileFS";
+
+        # set preferred ip list if we have one
+        $LJ::MogileFS->set_pref_ip(\%LJ::MOGILEFS_PREF_IP)
+            if %LJ::MOGILEFS_PREF_IP;
     }
 
     return $LJ::MogileFS;
@@ -4207,6 +4211,8 @@ sub start_request
                         ( domain => $LJ::MOGILEFS_CONFIG{domain},
                           root   => $LJ::MOGILEFS_CONFIG{root},
                           hosts  => $LJ::MOGILEFS_CONFIG{hosts}, );
+                    LJ::mogclient()->set_pref_ip(\%LJ::MOGILEFS_PREF_IP)
+                        if %LJ::MOGILEFS_PREF_IP;
                 }
             };
             $LJ::IMGPREFIX_BAK = $LJ::IMGPREFIX;
