@@ -79,11 +79,13 @@ package LJ;
 
 # <LJFUNC>
 # name: LJ::get_newids
-# des: interface to oldids table (URL compatability)
-# returns: An array reference of "userid, newid" arrays.
+# des: Lookup an old global ID and see what journal it belongs to and its new ID.
+# info: Interface to [dbtable[oldids]] table (URL compatability)
+# returns: Undef if non-existent or unconverted, or arrayref of [$userid, $newid].
 # args: area, oldid
-# des-area: The "area" of the id. L (log) or T (talk)
-# des-oldid: The old id of the item.
+# des-area: The "area" of the id.  Legal values are "L" (log), to lookup an old itemid,
+#           or "T" (talk) to lookup an old talkid.
+# des-oldid: The old globally-unique id of the item.
 # </LJFUNC>
 sub get_newids
 {
@@ -101,13 +103,16 @@ sub get_newids
 }
 
 # <LJFUNC>
+# class: db
 # name: LJ::dbs_selectrow_array
-# des: Given a db and a query, will try query on slave first.
-#      Falls back to master if not in slave yet.
-# returns: An array with the row in list context, or the first
-#          column of the result row in scalar context.
+# des: Like DBI's selectrow_array, but working on a $dbs preferring the slave.
+# info: Given a dbset and a query, will try to query the slave first.
+#       Falls back to master if not in slave yet.  See also 
+#       [func[LJ::dbs_selectrow_hashref]].
+# returns: In scalar context, the first column selected.  In list context,
+#          the entire row.
 # args: dbs, query
-# des-query: The SQL query to run.
+# des-query: The select query to run.
 # </LJFUNC>
 sub dbs_selectrow_array
 {
@@ -124,12 +129,15 @@ sub dbs_selectrow_array
 }
 
 # <LJFUNC>
+# class: db
 # name: LJ::dbs_selectrow_hashref
-# des: takes a dbset and query.  will try query on slave first, 
-#      then master if not in slave yet.
-# returns: A hash reference of the results.
+# des: Like DBI's selectrow_hashref, but working on a $dbs preferring the slave.
+# info: Given a dbset and a query, will try to query the slave first.
+#       Falls back to master if not in slave yet.  See also 
+#       [func[LJ::dbs_selectrow_array]].
+# returns: Hashref, or undef if no row found in either slave or master.
 # args: dbs, query
-# des-query: The SQL query to run.
+# des-query: The select query to run.
 # </LJFUNC>
 sub dbs_selectrow_hashref
 {
@@ -147,7 +155,6 @@ sub dbs_selectrow_hashref
 
 # <LJFUNC>
 # name: LJ::get_friend_items
-# class: 
 # des: 
 # info: 
 # args: 
@@ -463,11 +470,17 @@ sub get_recent_items
 
 # <LJFUNC>
 # name: LJ::set_userprop
-# des: Sets a userprop by name for a user.
-# args: userid, propname, value
+# des: Sets/deletes a userprop by name for a user.
+# info: This adds or deletes from the
+#       [dbtable[userprop]]/[dbtable[userproplite]] tables.  One
+#       crappy thing about this interface is that it doesn't allow
+#       a batch of userprops to be updated at once, which is the
+#       common thing to do.
+# args: dbarg, userid, propname, value
 # des-userid: The userid of the user.
 # des-propname: The name of the property.
-# des-value: The value to set to the property.
+# des-value: The value to set to the property.  If undefined or the 
+#            empty string, then property is deleted.
 # </LJFUNC>
 sub set_userprop
 {
@@ -495,7 +508,8 @@ sub set_userprop
     my $table = $p->{'indexed'} ? "userprop" : "userproplite";
     if (defined $value && $value ne "") {
 	$value = $dbh->quote($value);
-	$dbh->do("REPLACE INTO $table (userid, upropid, value) VALUES ($userid, $p->{'upropid'}, $value)");
+	$dbh->do("REPLACE INTO $table (userid, upropid, value) ".
+		 "VALUES ($userid, $p->{'upropid'}, $value)");
     } else {
 	$dbh->do("DELETE FROM $table WHERE userid=$userid AND upropid=$p->{'upropid'}");
     }
@@ -503,12 +517,20 @@ sub set_userprop
 
 # <LJFUNC>
 # name: LJ::register_authaction
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Registers a secret to have the user validate.
+# info: Some things, like requiring a user to validate their email address, require
+#       making up a secret, mailing it to the user, then requiring them to give it
+#       back (usually in a URL you make for them) to prove they got it.  This
+#       function creates a secret, attaching what it's for and an optional argument.
+#       Background maintenance jobs keep track of cleaning up old unvalidated secrets.
+# args: dbarg, userid, action, arg?
+# des-userid: Userid of user to register authaction for.
+# des-action: Action type to register.   Max chars: 50.
+# des-arg: Optional argument to attach to the action.  Max chars: 255.
+# returns: 0 if there was an error.  Otherwise, a hashref
+#          containing keys 'aaid' (the authaction ID) and the 'authcode',
+#          a 15 character string of random characters from
+#          [func[LJ::make_auth_code]].
 # </LJFUNC>
 sub register_authaction
 {
@@ -524,24 +546,21 @@ sub register_authaction
     my $authcode = LJ::make_auth_code(15);
     my $qauthcode = $dbh->quote($authcode);
 
-    my $sth = $dbh->prepare("INSERT INTO authactions (aaid, userid, datecreate, authcode, action, arg1) VALUES (NULL, $userid, NOW(), $qauthcode, $action, $arg1)");
-    $sth->execute;
+    $dbh->do("INSERT INTO authactions (aaid, userid, datecreate, authcode, action, arg1) ".
+	     "VALUES (NULL, $userid, NOW(), $qauthcode, $action, $arg1)");
 
-    if ($dbh->err) {
-	return 0;
-    } else {
-	return { 'aaid' => $dbh->{'mysql_insertid'},
-		 'authcode' => $authcode,
-	     };
-    }
+    return 0 if $dbh->err;
+    return { 'aaid' => $dbh->{'mysql_insertid'},
+	     'authcode' => $authcode,
+	 };
 }
 
 # <LJFUNC>
 # class: logging
 # name: LJ::send_statserv
-# des: Sends a line to the statistics server.
+# des: Sends UDP packet of info to the statistics server.
 # returns: Nothing.
-# args: cachename, ip, type, url
+# args: cachename, ip, type, url?
 # des-cachename: The name to cache this client under. This is can be the
 #                logged in username, the value of a guest cookie, or
 #                simply "ip" to indicate a cookie-less client.
@@ -587,10 +606,11 @@ sub send_statserv {
 }
 
 # <LJFUNC>
+# class: web
 # name: LJ::make_cookie
 # des: Prepares cookie header lines.
 # returns: An array of cookie lines.
-# args: name, value, expires, path, domain
+# args: name, value, expires, path?, domain?
 # des-name: The name of the cookie.
 # des-value: The value to set the cookie to.
 # des-expires: The time (in seconds) when the cookie is supposed to expire.
@@ -639,8 +659,9 @@ sub make_cookie
 # class: logging
 # name: LJ::statushistory_add
 # des: Adds a row to a user's statushistory
+# info: See the [dbtable[statushistory]] table.
 # returns: boolean; 1 on success, 0 on failure
-# args: dbarg, userid, adminid, shtype, notes
+# args: dbarg, userid, adminid, shtype, notes?
 # des-userid: The user getting acted on.
 # des-adminid: The site admin doing the action.
 # des-shtype: The status history type code.
@@ -668,8 +689,9 @@ sub statushistory_add
 # des: Takes a group of key=value pairs to append to a url
 # returns: The finished url
 # args: url, vars
-# des-url: A string with the url to append to.
-# des-vars: A hash of the key=value pairs to append with.
+# des-url: A string with the URL to append to.  The URL
+#          shouldn't have a question mark in it.
+# des-vars: A hashref of the key=value pairs to append with.
 # </LJFUNC>
 sub make_link
 {
@@ -774,9 +796,12 @@ sub auth_fields
 }
 
 # <LJFUNC>
+# class: component
 # name: LJ::auth_fields_2
-# des: Creates the HTML for a login box if user not logged in. Creates a drop-down 
-#      selection box of possible journals to switch to if user is logged in.
+# des: Makes a login form.
+# info: Like [func[LJ::auth_fields]], with a lot more functionality.  Creates the
+#       HTML for a login box if user not logged in. Creates a drop-down 
+#       selection box of possible journals to switch to if user is logged in.
 # returns: The resultant HTML form box.
 # args: form, opts
 # des-form: Form results from the previous page.
@@ -827,6 +852,7 @@ sub auth_fields_2
 }
 
 # <LJFUNC>
+# class: component
 # name: LJ::make_shared_select
 # des: Creates a list of shared journals a user has access to
 #      for insertion into a drop-down menu.
@@ -961,14 +987,14 @@ sub get_effective_user
 }
 
 # <LJFUNC>
+# class: web
 # name: LJ::self_link
 # des: Takes the URI of the current page, and adds the current form data
 #      to the url, then adds any additional data to the url.
-# returns: The full url
+# returns: scalar; the full url
 # args: form, newvars
 # des-form: A hashref of the form information from the page.
-# des-newvars: A hashref of information to add to the link which is not in
-#              the form hash.
+# des-newvars: A hashref of information to add/override to the link.
 # </LJFUNC>
 sub self_link
 {
@@ -991,6 +1017,7 @@ sub self_link
 }
 
 # <LJFUNC>
+# class: web
 # name: LJ::get_query_string
 # des: Returns the query string, which can be in a number of spots
 #      depending on the webserver & configuration, sadly.
@@ -1006,6 +1033,7 @@ sub get_query_string
 }
 
 # <LJFUNC>
+# class: web
 # name: LJ::get_form_data
 # des: Loads a hashref with form data from a GET or POST request.
 # args: hashref, type?
@@ -1032,13 +1060,13 @@ sub get_form_data
 }
 
 # <LJFUNC>
+# class: web
 # name: LJ::urlargs_to_hash
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Parse URL-style arg/value pairs into a hash.
+# args: buffer, hashref
+# des-buffer: Scalar buffer to parse.
+# des-hashref: Hashref to populate.
+# returns: boolean; true.
 # </LJFUNC>
 sub urlargs_to_hash
 {
@@ -1081,6 +1109,7 @@ sub is_valid_authaction
 }
 
 # <LJFUNC>
+# class: s1
 # name: LJ::fill_var_props
 # args: vars, key, hashref
 # des: S1 utility function to interpolate %%variables%% in a variable.  If
@@ -1100,6 +1129,7 @@ sub fill_var_props
 }
 
 # <LJFUNC>
+# class: s1
 # name: LJ::fvp_transform
 # des: Called from [func[LJ::fill_var_props]] to do trasformations.
 # args: transform, vars, hashref, attr
@@ -3279,8 +3309,8 @@ sub use_diff_db
 
 # <LJFUNC>
 # name: LJ::get_dbh
-# class: 
-# des: 
+# class: db
+# des: Given one or more roles, returns a database handle.
 # info: 
 # args: 
 # des-: 

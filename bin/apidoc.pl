@@ -25,7 +25,7 @@ unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
 }
 
-my @classes = qw(general db logging time component);
+my @classes = qw(general api db logging time component s1);
 my %classname = 
     (
      'general' => "General",
@@ -35,6 +35,8 @@ my %classname =
      'time' => "Date & Time",
      'text' => "Text Processing",
      'security' => "Security",
+     'web' => "Web Programming",
+     's1' => "Style System v1",
      );
 
 my %common_args = 
