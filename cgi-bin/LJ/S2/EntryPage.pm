@@ -175,7 +175,7 @@ sub EntryPage
             $s2com->{'metadata'}->{'poster_ip'} = $com->{'props'}->{'poster_ip'} if 
                 ($com->{'props'}->{'poster_ip'} && $remote &&
                  ($remote->{'userid'} == $entry->{'posterid'} ||
-                  LJ::can_manage($remote, $u)));
+                  LJ::can_manage($remote, $u) || $viewall));
             
             push @$destlist, $s2com;
 

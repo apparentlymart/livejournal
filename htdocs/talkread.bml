@@ -388,7 +388,7 @@ body<=
              $ret .= "<br />$datepost\n";
              if ($post->{'props'}->{'poster_ip'} && $remote &&
                  ($remote->{'user'} eq $up->{'user'} ||
-                  LJ::can_manage($remote, $u)))
+                  LJ::can_manage($remote, $u) || $viewall))
              {
                  $ret .= BML::ml('.fromip', {'ip'=>$post->{'props'}->{'poster_ip'}});
              }
