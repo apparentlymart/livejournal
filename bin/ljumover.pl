@@ -1078,10 +1078,12 @@ sub getMaxThreads {
             # Read the process limit from a file, or default to unlimited
             if ( open my $ifh, $MoverWorkersFile ) {
                 chomp( $maxThreads = <$ifh> );
+                $maxThreads = int($maxThreads);
             }
         }
     }
 
+    $maxThreads = 1 if !defined $maxThreads;
     return $maxThreads;
 }
 
