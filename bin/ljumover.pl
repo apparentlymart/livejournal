@@ -170,7 +170,7 @@ sub abort (@);
 ###############################################################################
 our (
     $Debug, $VerboseFlag, $ClusterSpecRe, $CommandRe,
-    $ReadOnlyBit, $DaemonPid,
+    $ReadOnlyBit, $DaemonPid, $MoverWorkersFile,
    );
 
 # -d and -v option flags
@@ -209,6 +209,9 @@ BEGIN {
 
 # The PID of the distributed lock daemon
 $DaemonPid      = undef;
+
+# The path to the file that controls the number of running threads.
+$MoverWorkersFile = "$ENV{LJHOME}/var/mover-workers";
 
 
 
@@ -260,7 +263,7 @@ MAIN: {
     }
 
     # Commands specified on the command line
-    elsif ( $ARGV[0] =~ m{^[\d]} ) {
+    elsif ( @ARGV && $ARGV[0] =~ m{^[\d]} ) {
         debugMsg( "Command-line mode." );
         @commands = @ARGV;
     }
@@ -675,29 +678,30 @@ sub new {
     my %args = @_;
 
     my $self = bless {
-        sources         => [],
-        dests           => [],
-        max             => 0,
-        activeUsersOnly => 0,
-        chunksize       => 500,
-        maxThreads      => 0,
+        sources           => [],
+        dests             => [],
+        max               => 0,
+        activeUsersOnly   => 0,
+        chunksize         => 500,
+        maxThreads        => 0,
+        moverWorkersMtime => 0,
 
-        lockedUsers     => {},
-        activeThreads   => {},
-        fakeMoveddUsers => {},
+        userThreads       => {},
+        activeThreads     => {},
+        fakeMoveddUsers   => {},
 
-        debugFunction   => undef,
-        messageFunction => undef,
-        debugMode       => 0,
+        debugFunction     => undef,
+        messageFunction   => undef,
+        debugMode         => 0,
 
-        instanceId      => undef,
-        lockIp          => undef,
-        lockPort        => undef,
+        instanceId        => undef,
+        lockIp            => undef,
+        lockPort          => undef,
 
-        _signals        => {},
-        _haltFlag       => 0,
-        _shutdownFlag   => 0,
-        _lastStat       => 0,
+        _signals          => {},
+        _haltFlag         => 0,
+        _shutdownFlag     => 0,
+        _lastStat         => 0,
 
         %args,
     }, $class;
@@ -759,10 +763,11 @@ sub start {
         $uid,
         $pid,
         $dest,
+        $dbh,
        );
 
     $maxUsers = $self->max || 1e+33;
-    $maxThreads = 1;
+    $maxThreads = $self->{maxThreads};
     $chunksize = $self->chunksize;
     $chunksize = $maxUsers if $maxUsers < $chunksize;
     $count = 0;
@@ -819,6 +824,18 @@ sub start {
                     usleep 0.5;
                 }
 
+                # Mark the user as "in progress" by setting the destination
+                # cluster field. :FIXME: This is obviously stupid to disconnect
+                # and reconnect every time, but since the handle is b0rked after
+                # the ->run() below fork()s, this is necessary for it to work.
+                LJ::disconnect_dbs();
+                $dbh = LJ::get_db_writer()
+                    or die "Couldn't fetch a writer.";
+                $dbh->do(q{
+                    UPDATE clustermove_inprogress SET dstclust = ? WHERE userid = ?
+                }, undef, $thread->dest, $thread->userid )
+                    or die "Failed to update lock: ", $dbh->errstr;
+
                 # Run the thread
                 $count++;
                 $thread->testingMode( $self->testingMode );
@@ -827,6 +844,8 @@ sub start {
                                 $thread->dest, $count );
                 $pid = $thread->run;
                 $self->{activeThreads}{ $pid } = $thread;
+
+                $self->reapChildren;
             }
         }
 
@@ -1036,11 +1055,20 @@ sub getMaxThreads {
     my $self = shift or confess "Cannot be called as a function";
     my $maxThreads = shift;
 
-    return $self->{maxThreads} if $self->{maxThreads};
+    if ( -r $MoverWorkersFile ) {
+        $self->{moverWorkersMtime} ||= (stat _)[9];
+        my $mtime = $self->{moverWorkersMtime};
 
-    # Read the process limit from a file, or default to unlimited
-    if ( open my $ifh, "$ENV{LJHOME}/var/mover-workers" ) {
-        chomp( $maxThreads = <$ifh> );
+        if ( !$maxThreads || (stat _)[9] > $mtime ) {
+            $self->{moverWorkersMtime} = (stat _)[9];
+            $self->message( "(Re)-reading $MoverWorkersFile: %s",
+                            scalar localtime($mtime) );
+
+            # Read the process limit from a file, or default to unlimited
+            if ( open my $ifh, $MoverWorkersFile ) {
+                chomp( $maxThreads = <$ifh> );
+            }
+        }
     }
 
     return $maxThreads;
