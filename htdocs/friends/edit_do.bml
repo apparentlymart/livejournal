@@ -1,8 +1,7 @@
 <?page
-title=>Edit Friends
+title=><?_ML .title _ML?>
 body<=
-
-<SCRIPT language="JavaScript"><!--
+<script language="JavaScript"><!--
 
 previewOn = 0;
 lastFriend = 0;
@@ -47,35 +46,32 @@ if (user_name.length==0) { user_name = "username"; }
 
 d = winPreview.document;
 d.open();
-d.write("<HTML><HEAD>");
-d.write("<TITLE>Mr. Color Viewer</TITLE>");
-d.write("</HEAD><BODY BGCOLOR=#FFFFFF TEXT=#000000>");
-d.write("<FORM><B><FONT FACE='Trebuchet MS, Arial, Helvetica' SIZE=4 COLOR=#000066><I>Color Viewer</I></FONT></B><HR>");
-d.write("<BR><CENTER><TABLE WIDTH=350 ALIGN=CENTER CELLPADDING=5><TR VALIGN=MIDDLE>");
-d.write("<TD WIDTH=80%><B><FONT FACE='Arial, Helvetica' SIZE=2>");
-d.write("Text Color:&nbsp; <FONT COLOR=#000066>" + fg_color_text + "");
-d.write("</FONT></B><BR></TD><TD WIDTH=20% BGCOLOR=");
+d.write("<html><head>");
+d.write("<title><?_ML .mrcolor _ML?></title>");
+d.write("</head><body bgcolor='#ffffff' text='#000000'>");
+d.write("<form><b><font face='Trebuchet MS, Arial, Helvetica' size='4' COLOR='#000066'><i><?_ML .viewer _ML?></i></font></b><hr>");
+d.write("<br /><center><table width='350' align='center' cellpadding='5'><tr valign='middle'>");
+d.write("<td width='80%'><b><font face='Arial, Helvetica' size='2'>");
+d.write("<?_ML .textcolor _ML?>&nbsp; <font color='#000066'>" + fg_color_text + "");
+d.write("</font></b><br /></td><td width='20%' bgcolor=");
 d.write("" + fg_color + "");
-d.write(">&nbsp;</TD>");
-d.write("</TR><TR><TD WIDTH=80%><B><FONT FACE='Arial, Helvetica' SIZE=2>");
-d.write("Background Color:&nbsp; <FONT COLOR=#000066>" + bg_color_text + "");
-d.write("</FONT></B><BR></TD><TD WIDTH=20% BGCOLOR=");
+d.write(">&nbsp;</td>");
+d.write("</tr><tr><td width='80%'><b><font face='Arial, Helvetica' size='2'>");
+d.write("<?_ML .bgcolor _ML?>&nbsp; <font color='#000066'>" + bg_color_text + "");
+d.write("</font></b><br></td><td width='20%' bgcolor=");
 d.write("" + bg_color + "");
-d.write(">&nbsp;</TD>");
-d.write("</TR><TR><TD><BR></TR><TR><TD COLSPAN=3 BGCOLOR=" + bg_color + "><FONT COLOR=" + fg_color + ">");
-d.write("<CENTER><B>" + user_name + "</B></CENTER></TD>");
-d.write("</TR></TABLE><BR>");
-d.write("<HR><FORM><INPUT TYPE='button' VALUE='Close' onClick='self.close();'></FORM>");
-d.write("</CENTER>");
-d.write("</BODY></HTML>");
+d.write(">&nbsp;</td>");
+d.write("</tr><tr><td><br /></tr><tr><td colspan='3' bgcolor=" + bg_color + "><font color=" + fg_color + ">");
+d.write("<center><b>" + user_name + "</b></center></td>");
+d.write("</tr></table><br />");
+d.write("<hr><form><input type='button' value='<?_ML .btn.close _ML?>' onClick='self.close();'></form>");
+d.write("</center>");
+d.write("</body></html>");
 d.close();
     }
 
 // -->
-</SCRIPT>
-
-
-<?_code
+</SCRIPT><?_code
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
  return "<?badinput?>" unless LJ::text_in(\%FORM);
@@ -91,7 +87,7 @@ d.close();
  my $u = LJ::load_user($dbs, $user);
  unless ($u) { push @errors, "Invalid username"; }
 
- if (scalar(@errors)==0 && ! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) { push @errors, "Incorrect password."; }
+ if (scalar(@errors)==0 && ! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) { push @errors, $ML{'error.badpassword'}; }
 
  return LJ::bad_input(@errors) if @errors;
 
@@ -111,8 +107,8 @@ d.close();
          }, \%res, { "noauth" => 1 });
      if ($res{'friendof_count'})
      {
-         $ret .= "<?h1 Fellow Friends h1?><?p The following people have listed you as their friend... You may want to list them as your friend too.  More than anything this is provided as a reference so you know their LiveJournal usernames too.  You are under no obligation to add them to your list. p?>\n";
-         $ret .= "<center><p align='center'><table><tr bgcolor='<?emcolor?>'><td width='150'><b>User</b></td><td width='150'><b>Name</b></td></tr>\n";
+         $ret .= "<?h1 $ML{'.fellowfriends.head'} h1?><?p $ML{'.fellowfriends.text'} p?>\n";
+         $ret .= "<center><p align='center'><table><tr bgcolor='<?emcolor?>'><td width='150'><b>$ML{'.user'}</b></td><td width='150'><b>$ML{'.name'}</b></td></tr>\n";
          for (my $i=1; $i <= $res{'friendof_count'}; $i++)
          {
            $ret .= "<tr align='left'><td><?ljuser " . $res{"friendof_${i}_user"}. " ljuser?></td><td>" . LJ::eall($res{"friendof_${i}_name"}) . "</td></tr>\n";
@@ -122,10 +118,10 @@ d.close();
 
      ### who do you have defiend as a friend?
 
-     $ret .= "<FORM METHOD=POST NAME=editFriends>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=domodify>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=<?_eh $user _eh?>>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
+     $ret .= "<form method='post' name='editFriends'>\n";
+     $ret .= "<input type='hidden' name='mode' value='domodify'>\n";
+     $ret .= "<input type='hidden' name='user' value='<?_eh $user _eh?>'>\n";
+     $ret .= "<input type='hidden' name='hpassword' value='$hpassword'>\n";
 
      %res = ();
      LJ::do_request($dbs, {
@@ -138,8 +134,8 @@ d.close();
 
      if ($res{'friend_count'})
      {
-         $ret .= "<?h1 Your Friends h1?><?p You have the following friends currently defined: p?>\n";
-         $ret .= "<p><center><table><tr bgcolor='<?emcolor?>' align='left'><td width='150'><b>Friend</b></td><td width='250'><b>Name</b></td><td align='center'><b>Delete?</b></td></tr>\n";
+         $ret .= "<?h1 $ML{'.yourfriends.head'} h1?><?p $ML{'.yourfriends.text'} p?>\n";
+         $ret .= "<p><center><table><tr bgcolor='<?emcolor?>' align='left'><td width='150'><b>$ML{'.friend'}</b></td><td width='250'><b>$ML{'.name'}</b></td><td align='center'><b>$ML{'.opt.delete'}</b></td></tr>\n";
          for (my $i=1; $i<=$res{'friend_count'}; $i++)
          {
              my $fruser = $res{"friend_${i}_user"};
@@ -154,12 +150,12 @@ d.close();
      }
      else
      {
-         $ret .= "<?h1 No Friends? h1?><?p You do not currently have any friends defined.  However, we're sure you have to have a few friends!  <tt>:)</tt>  Just enter their LiveJournal names below.... p?>\n";
+         $ret .= "<?h1 $ML{'.nofriends.head'} h1?><?p $ML{'.nofriends.text'} p?>\n";
      }
-    
-     $ret .= "<?h1 Add Friends h1?><?p Enter your friends' LiveJournal user names in the boxes below, and pick what background and foreground colors you want to associate with them.... p?>\n";
-     $ret .= "<SCRIPT LANGUAGE=\"JavaScript\"><!--\ndocument.write(\"<P><CENTER><INPUT TYPE=BUTTON VALUE=\\\"Toggle Preview Window\\\" onClick='togglePreview(); return true;'></CENTER></P>\");\n// -->\n</SCRIPT>\n";
-     $ret .= "<P><CENTER><TABLE CELLPADDING=4><TR><TD><B>Friend</B></TD><TD><B>Foreground</B></TD><TD><B>Background</B></TD></TR>\n";
+
+     $ret .= "<?h1 $ML{'.addfriends.head'} h1?><?p $ML{'.addfriends.text'} p?>\n";
+     $ret .= "<script language=\"JavaScript\"><!--\ndocument.write(\"<p><center><input type=button value=\\\"<?_ML .btn.toggle _ML?>\\\" onClick='togglePreview(); return true;'></center></p>\");\n// -->\n</script>\n";
+     $ret .= "<p><center><table cellpadding='4'><tr><td><b>$ML{'.friend'}</b></td><td><b>$ML{'.foregound'}</b></td><td><b>$ML{'.background'}</b></td></tr>\n";
 
      # load the colors
      my @color = ();
@@ -167,47 +163,47 @@ d.close();
 
      for (my $i=0; $i<6; $i++)
      {
-         $ret .= "<TR><TD><INPUT SIZE=15 MAXLENGTH=15 NAME=\"editfriend_add_${i}_user\" onChange=\"updatePreview(); return true;\" onFocus=\"setFriend($i);\"></TD>";
-         $ret .= "<TD><SELECT NAME=\"editfriend_add_${i}_fg\" onChange=\"updatePreview(); return true;\" onFocus=\"setFriend($i);\">";
+         $ret .= "<tr><td><input size='15' maxlength='15' NAME=\"editfriend_add_${i}_user\" onChange=\"updatePreview(); return true;\" onFocus=\"setFriend($i);\"></td>";
+         $ret .= "<td><select name=\"editfriend_add_${i}_fg\" onChange=\"updatePreview(); return true;\" onFocus=\"setFriend($i);\">";
          foreach (@color) {
            my $selected = $_->{'code'} eq "#000000" ? " SELECTED" : "";
-           $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
+           $ret .= "<option value=\"$_->{'code'}\"$selected>$_->{'item'}\n";
          }
-         $ret .= "</SELECT></TD>\n";
+         $ret .= "</select></td>\n";
 
-         $ret .= "<TD><SELECT NAME=\"editfriend_add_${i}_bg\" onChange=\"updatePreview(); return true;\" onFocus=\"setFriend($i);\">";
+         $ret .= "<td><select name=\"editfriend_add_${i}_bg\" onChange=\"updatePreview(); return true;\" onFocus=\"setFriend($i);\">";
          foreach (@color) {
-           my $selected = $_->{'code'} eq "#FFFFFF" ? " SELECTED" : "";
-           $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
+           my $selected = $_->{'code'} eq "#FFFFFF" ? " selected" : "";
+           $ret .= "<option value=\"$_->{'code'}\"$selected>$_->{'item'}\n";
          }
-         $ret .= "</SELECT></TD>\n";
+         $ret .= "</select></td>\n";
 
-         $ret .= "</TR>\n";
+         $ret .= "</tr>\n";
      }
-     $ret .= "</TABLE>\n";
+     $ret .= "</table>\n";
 
      ### color swatch
      my $col = 0;
-     $ret .= "<P><TABLE border=0 cellspacing=0 cellpadding=0>";
+     $ret .= "<p><table border='0' cellspacing='0' cellpadding='0'>";
      foreach (@color) {
-         if ($col==0) { $ret .= "<TR>\n"; }
+         if ($col==0) { $ret .= "<tr>\n"; }
          $col++;
          my $ecolor = LJ::ehtml($_->{'item'});
-         $ret .= "<TD bgcolor=$_->{'code'}><IMG SRC=\"/img/dot.gif\" WIDTH=14 HEIGHT=14 TITLE=\"$ecolor\" ALT=\"$ecolor\"></TD>\n";
-         if ($col==23) { $ret .= "</TR>\n"; $col==0; }
+         $ret .= "<td bgcolor=$_->{'code'}><img src=\"/img/dot.gif\" width='14' height='14' title=\"$ecolor\" alt=\"$ecolor\"></td>\n";
+         if ($col==23) { $ret .= "</tr>\n"; $col==0; }
      }
-     if ($col) { $ret .= "</TR>\n"; $col==0; }
-     $ret .= "</TABLE>\n";
-     $ret .= "<FONT SIZE=-2 FACE=\"Arial,Helvetica\">(Hover your mouse over a color to see its name)</FONT>";
+     if ($col) { $ret .= "</tr>\n"; $col==0; }
+     $ret .= "</table>\n";
+     $ret .= "<font size=-2 face=\"Arial,Helvetica\">($ML{'.hover'})</font>";
 
 
-     $ret .= "</CENTER>\n";
-     $ret .= "<P>If you need to add more friends than you have room for on this form, save the changes below, then come back to add more.\n";
+     $ret .= "</center>\n";
+     $ret .= "<p>$ML{'.needmore'}\n";
 
      ### ending submit block
-     $ret .= "<?h1 Done? h1?><?p When done, press the \"Save Changes\" button below... p?>\n";
-     $ret .= "<?standout <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> standout?>\n";
-     $ret .= "</FORM>\n";
+     $ret .= "<?h1 $ML{'.done.head'} h1?><?p $ML{'.done.text'} p?>\n";
+     $ret .= "<?standout <input type='submit' value=\"$ML{'.btn.save'}\"> standout?>\n";
+     $ret .= "</form>\n";
 
      return $ret;
  }
@@ -232,15 +228,15 @@ d.close();
      if ($response{'success'} eq "OK")
      {
          # tell the user all is well
-         return "<?h1 Success h1?><?p Your friends have been updated.  You may view your newly updated friends page <A HREF=\"/users/$user/friends\">here</A>. p?>";
+         return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text", {'url' => "/users/$user/friends"})." p?>";
      }
      else
      {
-         return "<?h1 Error h1?><?p There was an error updating your friends list:<UL><LI><B>$response{'errmsg'}</B></UL> p?>\n";
+         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.updating'} <UL><LI><B>$response{'errmsg'}</B></UL> p?>\n";
      }
  }
 
- return "Unknown mode."
+ return $ML{'error.unknownmode'};
 
 _code?>
 

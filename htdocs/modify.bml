@@ -18,9 +18,9 @@ p?>
 </table>
 standout?>
 
-<?h1 <?_ml .lostinfo.head _ml?> h1?>
+<?h1 <?_ml lostinfo.head _ml?> h1?>
 <?p
-<?_ml .lostinfo.text _ml?>
+<?_ml lostinfo.text _ml?>
 p?>
 
 <=body

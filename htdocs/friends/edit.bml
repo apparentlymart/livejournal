@@ -1,11 +1,8 @@
 <?page
-title=>Edit Friends
+title=><?_ML .title _ML?>
 body<=
 
-<?h1 Edit Your Friends h1?>
-<?p
-Enter your username and password to modify your friends.  To use this, you must already have your own LiveJournal account.  You can make your own LiveJournal from the <a href="/create.bml">create journal page</a>.  Once you have defined your fellow LiveJournal-using friends, you'll be able to easily keep track of what they're all doing, as they're doing it.
-p?>
+<?h1 <?_ML .edit.head _ML?> h1?><?p <?_ML .edit.text _ML?> p?>
 
 <form action="edit_do.bml" method="post">
 
@@ -15,14 +12,11 @@ p?>
  return LJ::auth_fields(\%FORM);
  _code?>
 <tr><td colspan="2" align="center">
-<input type="submit" value="Proceed..."></td></tr>
+<input type="submit" value="<?_ML .btn.proceed _ML?>"></td></tr>
 </table>
 standout?>
 
-<?h1 Forget something? h1?>
-<?p
-If you forgot your username or password, <a href="/lostinfo.bml">recover it here!</a>.
-p?>
+<?h1 <?_ML lostinfo.head _ML?> h1?> <?p <?_ML lostinfo.text _ML?> p?>
 
 <=body
 page?><?_c <LJDEP>

@@ -750,6 +750,72 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/add.bml.remove.title=Friend Removed!
 
+/friends/edit.bml.btn.proceed=Proceed...
+
+/friends/edit.bml.edit.head=Edit Your Friends
+
+/friends/edit.bml.edit.text=Enter your username and password to modify your friends.  To use this, you must already have your own LiveJournal account.  You can make your own LiveJournal from the <a href="/create.bml">create journal page</a>.  Once you have defined your fellow LiveJournal-using friends, you'll be able to easily keep track of what they're all doing, as they're doing it.
+
+/friends/edit.bml.title=Edit Friends
+
+/friends/edit_do.bml.addfriends.head=Add Friends
+
+/friends/edit_do.bml.addfriends.text=Enter your friends' LiveJournal user names in the boxes below, and pick what background and foreground colors you want to associate with them....
+
+/friends/edit_do.bml.background=Background
+
+/friends/edit_do.bml.bgcolor=Background Color:
+
+/friends/edit_do.bml.btn.close=Close
+
+/friends/edit_do.bml.btn.save=Save Changes
+
+/friends/edit_do.bml.btn.toggle=Toggle Preview Window
+
+/friends/edit_do.bml.done.head=Done?
+
+/friends/edit_do.bml.done.text=When done, press the "Save Changes" button below...
+
+/friends/edit_do.bml.error.updating=There was an error updating your friends list:
+
+/friends/edit_do.bml.fellowfriends.head=Fellow Friends
+
+/friends/edit_do.bml.fellowfriends.text=The following people have listed you as their friend... You may want to list them as your friend too.  More than anything this is provided as a reference so you know their LiveJournal usernames too.  You are under no obligation to add them to your list.
+
+/friends/edit_do.bml.foreground=Foreground
+
+/friends/edit_do.bml.friend=Friend
+
+/friends/edit_do.bml.hover=Hover your mouse over a color to see its name
+
+/friends/edit_do.bml.mrcolor=Mr. Color Viewer
+
+/friends/edit_do.bml.name=Name
+
+/friends/edit_do.bml.needmore=If you need to add more friends than you have room for on this form, save the changes below, then come back to add more.
+
+/friends/edit_do.bml.nofriends.head=No Friends?
+
+/friends/edit_do.bml.nofriends.text=You do not currently have any friends defined.  However, we're sure you have to have a few friends!  <tt>:)</tt>  Just enter their LiveJournal names below....
+
+/friends/edit_do.bml.opt.delete=Delete?
+
+/friends/edit_do.bml.success.head=Success
+
+/friends/edit_do.bml.success.text=Your friends have been updated.  You may view your newly updated friends page <a href="[[url]]">here</a>.
+
+/friends/edit_do.bml.textcolor=Text Color:
+
+/friends/edit_do.bml.title=Edit Friends
+
+/friends/edit_do.bml.user=User
+
+/friends/edit_do.bml.viewer=Color Viewer
+
+/friends/edit_do.bml.yourfriends.head=Your Friends
+
+/friends/edit_do.bml.yourfriends.text=You have the following friends currently defined:
+
 /friends/index.bml.title=Friends Tools
 
 /interests.bml.add.added.head=Added!

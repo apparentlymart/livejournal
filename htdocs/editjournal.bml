@@ -36,7 +36,7 @@ _code?>
 </table>
 standout?>
 
-<?h1 <?_ML .lostinfo.head _ML?> h1?> <?p <?_ML .lostinfo.text _ML?> p?>
+<?h1 <?_ML lostinfo.head _ML?> h1?> <?p <?_ML lostinfo.text _ML?> p?>
 
 <=body
 page?><?_c <LJDEP>

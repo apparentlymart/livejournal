@@ -25,7 +25,7 @@ body<=
      $ret .= LJ::auth_fields_2($dbs, \%FORM, { 'shared' => 1, 'getother' => 1 });
      $ret .= "<tr><td colspan='2' align='center'><input type='submit' value='Proceed...'>";
      $ret .= "</td></tr></table> standout?></form>\n";
-     $ret .= "<?h1 $ML{'.login.forgot.header'} h1?><?p $ML{'.login.forgot.recover'} p?> ";
+     $ret .= "<?h1 $ML{'lostinfo.head'} h1?><?p $ML{'lostinfo.text'} p?> ";
      return $ret;
  }
  my ($u, $user, $err);
