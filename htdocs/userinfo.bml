@@ -552,7 +552,6 @@
      $body .= "<TR><TD ALIGN=RIGHT NOWRAP><B><A HREF=\"/support/\">Support points</A>:</B></TD><TD COLSPAN=2>" . &comma($row->{'points'}) . "</TD></TR>";     
  }
  
-
  sub comma {
      my $num = shift;
      if ($num =~ s/(\d)(\d\d\d)$/$1,$2/) {
@@ -573,7 +572,8 @@ $sth->execute;
 $row = $sth->fetchrow_hashref;
 my $com_got = $row->{'count'} + 0;
 #$body .= "<TR><TD ALIGN=RIGHT><B>Comments:</B></TD><TD COLSPAN=2><B>Posted:</B> <A HREF=\"/comment_post.bml?user=$user\">$com_post</A>, <B>Received:</B> <A HREF=\"/comment_recv.bml?user=$user\">$com_got</A></TD></TR>";
-$body .= "<TR><TD ALIGN=RIGHT><B>Comments:</B></TD><TD COLSPAN=2><B>Posted:</B> $com_post, <B>Received:</B> $com_got</TD></TR>";
+$body .= "<TR><TD ALIGN=RIGHT><B>Comments:</B></TD><TD COLSPAN=2><B>Posted:</B> " .
+    comma($com_post) . " - <B>Received:</B> " . comma($com_got) . "</TD></TR>";
 
 
 ###
