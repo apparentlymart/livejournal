@@ -2533,6 +2533,9 @@ sub check_rate {
 
     # we require memcache to do rate limiting efficiently
     return 1 unless @LJ::MEMCACHE_SERVERS;
+    
+    # return right away if the account is suspended
+    return 0 if $remote && $remote->{'statusvis'} =~ /[SD]/;
 
     my $ip = LJ::get_remote_ip();
     my $now = time();
