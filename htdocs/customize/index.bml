@@ -148,10 +148,13 @@ body<=
                         LJ::S2::can_use_layer($u, $pub->{$_}->{'uniq'})  } keys %$pub;
     # add user ones
     {
-        my @user = map { $_, LJ::ehtml($userlay->{$_}->{'name'}) } 
-                  grep { /^\d+$/ && $userlay->{$_}->{'type'} eq "layout" } keys %$userlay;
+        my @user = map { $_, $userlay->{$_}->{'name'} ? $userlay->{$_}->{'name'} : "\#$_" } 
+                   sort { $userlay->{$a}->{'name'} cmp $userlay->{$b}->{'name'} || 
+                          $userlay->{$a}->{'s2lid'} <=> $userlay->{$b}->{'s2lid'} }
+                   grep { /^\d+$/ && $userlay->{$_}->{'type'} eq "layout" }
+                   keys %$userlay;
         if (@user) {
-            push @layouts, "", "------", @user;
+            push @layouts, "", "---", @user;
         }
     }
     $ret .= "<?h1 Step 1: Layout h1?><?p Pick your layout.  Because theme selection and custom modifications depend on your layout, changing this setting discards all other edits you may have made. p?>";
@@ -177,7 +180,21 @@ body<=
     $ret .= "</blockquote>";
     
     # theme
-    my @themes = LJ::S2::get_layout_themes_select([$pub, $userlay], $style{'layout'});
+    my @themes = LJ::S2::get_layout_themes_select([$pub], $style{'layout'});
+    # add user ones
+    {
+        my @user = map { $userlay->{$_}->{'s2lid'}, $userlay->{$_}->{'name'} ? 
+                                                    $userlay->{$_}->{'name'} : 
+                                                    "\#$userlay->{$_}->{'s2lid'}" }
+                   sort { $userlay->{$a}->{'name'} cmp $userlay->{$b}->{'name'} ||
+                          $userlay->{$a}->{'s2lid'} <=> $userlay->{$b}->{'s2lid'} }
+                   grep { /^\d+$/ && $userlay->{$_}->{'b2lid'} == $style{'layout'} && $userlay->{$_}->{'type'} eq "theme" }
+                   keys %$userlay;
+        if (@user) {
+            push @themes, "", "---", @user;
+        }
+    }
+
     $ret .= "<?h2 Theme h2?><?p Choose from the following optional themes for this layout. p?>";
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'themeid',
