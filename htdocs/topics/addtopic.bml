@@ -73,4 +73,7 @@ BODY<=
 
 _CODE=)
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+post: htdocs/topics/addtopic.bml
+link: htdocs/topics/index.bml
+</LJDEP> _C=)

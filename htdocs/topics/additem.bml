@@ -67,4 +67,7 @@ BODY<=
 
 _CODE=)
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+form: htdocs/topics/additem.bml
+link: htdocs/topics/add.bml, htdocs/topics/addtopic.bml, htdocs/support/faqbrowse.bml
+</LJDEP> _C=)

@@ -142,4 +142,8 @@
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
 BODY=>(=_CODE return $body; _CODE=)
-PAGE=)
+PAGE=)(=_C <LJDEP>
+img: htdocs/img/btn_next.gif, htdocs/img/btn_prev.gif
+form: htdocs/view/index.bml
+link: htdocs/users, htdocs/talkread.bml
+</LJDEP> _C=)
