@@ -705,13 +705,13 @@ whether to allow <em>all</em>, <em>registered users</em>, or
 
 /delcomment.bml.title=Delete Comment
 
-/directory.bml.browse.usa.title=Browse Journals by US State
-
-/directory.bml.browse.usa.desc=Click a US state below to read journals from that state, or click a country name below the map to read journals from that country.
+/directory.bml.browse.country.desc=Select a country to read journals from that country...
 
 /directory.bml.browse.country.title=Browse Journals by Country
 
-/directory.bml.browse.country.desc=Select a country to read journals from that country...
+/directory.bml.browse.usa.desc=Click a US state below to read journals from that state, or click a country name below the map to read journals from that country.
+
+/directory.bml.browse.usa.title=Browse Journals by US State
 
 /directory.bml.error.accounttype<<
 Sorry, your account type doesn't permit usage of the
@@ -1216,11 +1216,11 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.error.filetoolarge=Image uploaded is too large.  File size cannot exceed [[maxsize]].
 
-/editpics.bml.error.keywords=You used the keyword "[[ekw]]" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.
-
 /editpics.bml.error.imagetoolarge=The dimensions of your image ([[imagesize]]) exceed maximum size.  Your picture can only be 100x100 pixels large.  Use a image/photo editing program to reduce the image to thumbnail-size.
 
 /editpics.bml.error.invalidimage=Invalid image file.
+
+/editpics.bml.error.keywords=You used the keyword "[[ekw]]" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.
 
 /editpics.bml.error.toomanypics2=You are already at your limit of [[maxpics]] pictures.  You cannot upload this picture until you delete one of your existing ones.
 
@@ -1239,28 +1239,26 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 /editpics.bml.fromurl.key=r
 
 /editpics.bml.imagesize.by|notes=This character is inserted between two numbers to indicate "by" when specifying image dimensions, for example "100x100".
-
 /editpics.bml.imagesize.by=x
 
 /editpics.bml.kilobytes=KB
 
-/editpics.bml.label.delete=Delete:
-
 /editpics.bml.label.default=Default:
+
+/editpics.bml.label.delete=Delete:
 
 /editpics.bml.label.keywords=Keywords:
 
 /editpics.bml.makedefault=Make this your <u>d</u>efault picture
 
 /editpics.bml.makedefault.key|notes=Enter here a <b>lower-case</b> version of the letter you underlined in ".makedefault". This is the shortcut key for the makedefault option.
-
 /editpics.bml.makedefault.key=d
 
 /editpics.bml.nodefault=No Default Picture
 
-/editpics.bml.nopics=No Pictures
-
 /editpics.bml.noneupload=You have no pictures uploaded.  Please upload one using the form below.
+
+/editpics.bml.nopics=No Pictures
 
 /editpics.bml.restriction.fileformat=File format must be either PNG, GIF or JPG
 
@@ -2403,6 +2401,20 @@ that area. p?>
 
 /syn/index.bml.using.title=Using [[sitename]] for syndication
 
+/syn/list.bml.error.nofeeds=<b>Error:</b> No syndicated feeds have been updated in the past 24 hours.
+
+/syn/list.bml.feeddesc=Feed Description
+
+/syn/list.bml.feedurl=Feed URL
+
+/syn/list.bml.numreaders=Number of readers
+
+/syn/list.bml.title=Syndicated Feeds
+
+/syn/list.bml.username=Username
+
+/syn/list.bml.xml_icon.alt=[View Raw Feed]
+
 /talkmulti.bml.deleted.body=The comments have been deleted. You can view the rest of the thread <a href="[[link]]">here</a>.
 
 /talkmulti.bml.deleted.title=Comments deleted
@@ -2791,8 +2803,6 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /tools/memories.bml.edit=edit
 
-/tools/memories.bml.plur_entry=[[num]] [[?num|entry|entries]]
-
 /tools/memories.bml.error.noentries.body<<
 This could be because: <ol>
 <li>the user hasn't defined any memorable events,</li>
@@ -2813,6 +2823,8 @@ This could be because: <ol>
 /tools/memories.bml.form.sort=Sort entries by:
 
 /tools/memories.bml.form.switch=Switch
+
+/tools/memories.bml.plur_entry=[[num]] [[?num|entry|entries]]
 
 /tools/memories.bml.sort.description=Description
 
@@ -2842,9 +2854,9 @@ This could be because: <ol>
 
 /update.bml.error.cantpost=Sorry, you cannot post at this time.
 
-/update.bml.error.disabled.title=Posting access disabled
-
 /update.bml.error.disabled=Your account type does not permit posting.
+
+/update.bml.error.disabled.title=Posting access disabled
 
 /update.bml.error.login=Error logging on:
 
