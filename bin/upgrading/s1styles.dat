@@ -1910,7 +1910,7 @@ color:%%color:stronger_text%%;
 Style: day/Generator
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2001-09-02 10:10:53
+lastupdate: 2002-05-09 18:48:49
 
 DAY_TALK_LINKS<=
 <tr>
@@ -1933,8 +1933,7 @@ DAY_CURRENT<=
 
 DAY_EVENT_PRIVATE<=
 <table width="600" cellpadding="2" cellspacing="0"
-border="0"
-summary="">
+border="0" summary="" class="entrybox">
 <tr>
 <td bgcolor="%%color:stronger_back%%" align="center">
 <table width="100%" cellpadding="5" cellspacing="0"
@@ -1971,8 +1970,7 @@ DAY_WEBSITE<=
 
 DAY_EVENT_PROTECTED<=
 <table width="600" cellpadding="2" cellspacing="0"
-border="0"
-summary="">
+border="0" summary="" class="entrybox">
 <tr>
 <td bgcolor="%%color:stronger_back%%" align="center">
 <table width="100%" cellpadding="5" cellspacing="0"
@@ -2013,8 +2011,7 @@ DAY_DATE_FORMAT=>%%dd%%&nbsp;%%monshort%%&nbsp;%%yyyy%%|<b>%%12hh%%:%%min%%%%amp
 
 DAY_EVENT<=
 <table width="600" cellpadding="2" cellspacing="0"
-border="0"
-summary="">
+border="0" summary="" class="entrybox">
 <tr>
 <td bgcolor="%%color:stronger_back%%" align="center">
 <table width="100%" cellpadding="5" cellspacing="0"
@@ -3524,7 +3521,7 @@ FRIENDS_SUBJECT=>%%subject%%
 Style: friends/Generator
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2002-01-15 21:54:34
+lastupdate: 2002-06-24 05:34:59
 
 FRIENDS_RANGE_HISTORY=>%%skip%% entries back
 
@@ -3535,8 +3532,7 @@ FRIENDS_ALTPOSTER<=
 
 FRIENDS_EVENT_PROTECTED<=
 <table width="600" cellpadding="2" cellspacing="0"
-border="0"
-summary="">
+border="0" summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="%%color:stronger_back%%" align="center">
 <table width="100%" cellpadding="5" cellspacing="0"
@@ -3577,8 +3573,7 @@ FRIENDS_RANGE_MOSTRECENT=>most recent entries
 
 FRIENDS_EVENT_PRIVATE<=
 <table width="600" cellpadding="2" cellspacing="0"
-border="0"
-summary="">
+border="0" summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="%%color:stronger_back%%" align="center">
 <table width="100%" cellpadding="5" cellspacing="0"
@@ -3600,7 +3595,7 @@ summary="">
 <tr align='left'><td bgcolor="%%bgcolor%%" align="center">
 <a class="index" href="%%cons:siteroot%%/users/%%user%%">
 %%friendpic%%
-<font color="%%fgcolor%%">%%user%%</font>
+<font color="%%fgcolor%%">%%user%%</font>%%altposter%%
 </a>
 </td></tr></table>
 </td></tr></table>
@@ -3781,8 +3776,7 @@ FRIENDS_SKIP_FORWARD=><a href="%%url%%">later</a>
 
 FRIENDS_EVENT<=
 <table width="600" cellpadding="2" cellspacing="0"
-border="0"
-summary="">
+border="0" summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="%%color:stronger_back%%" align="center">
 <table width="100%" cellpadding="5" cellspacing="0"
@@ -4031,14 +4025,14 @@ FRIENDS_SUBJECT=> - <em>%%subject%%</em>
 Style: friends/Notepad
 is_embedded: N
 is_colorfree: N
-lastupdate: 2002-04-12 20:56:33
+lastupdate: 2002-08-09 11:13:30
 
 FRIENDS_RANGE_HISTORY=>
 
 FRIENDS_ALTPOSTER=><br>[ <A HREF="%%cons:siteroot%%/users/%%poster%%/">%%poster%%</A> ]
 
 FRIENDS_EVENT_PROTECTED<=
-<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="/~%%user%%">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"> 
+<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"> 
 <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
 %%event%%
 %%currents%%
@@ -4049,7 +4043,7 @@ FRIENDS_EVENT_PROTECTED<=
 FRIENDS_RANGE_MOSTRECENT=>
 
 FRIENDS_EVENT_PRIVATE<=
-<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="/~%%user%%">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Private"> 
+<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Private"> 
 <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
 %%event%%
 %%currents%%
@@ -4379,7 +4373,7 @@ FRIENDS_SUBJECT=><BR><FONT COLOR="%%color:page_text_em%%" FACE="Arial"><I><B>%%s
 Style: friends/Refried Paper
 is_embedded: N
 is_colorfree: N
-lastupdate: 2002-04-07 15:18:41
+lastupdate: 2002-08-13 10:45:23
 
 FRIENDS_RANGE_HISTORY=>%%skip%% posts back
 
@@ -4390,8 +4384,8 @@ FRIENDS_EVENT_PROTECTED<=
 <table>
 <tr>%%friendpic%%<td><font class="date"><b>User:</b></font></td><td><font class="date"><lj user="%%user%%">%%altposter%%</font></td></tr>
 <tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
-<tr><td><font class="date"><b>Subject:</b><font class="date"></td><td><font class="date">%%subject%%<font class="date"></td></tr>
-<tr><td><font class="date"><b>Security:</b><font class="date"></td><td><font class="date">Protected</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b></font></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Security:</b></font></td><td><font class="date">Protected</font></td></tr>
 %%currents%%
 </table>
 <p>%%event%%</p>
@@ -4404,10 +4398,10 @@ FRIENDS_RANGE_MOSTRECENT=>%%numitems%% most recent posts
 FRIENDS_EVENT_PRIVATE<=
 <br>
 <table>
-<tr>%%friendpic%%<td><font class="date"><b>User:</b></font></td><td><font class="date"><a href="http://www.livejournal.com/userinfo.bml?user=%%user%%&mode=full"><img src="http://img.livejournal.com/userinfo.gif" border="0" height="17" width="17" align="absmiddle"></a><a href="http://www.livejournal.com/users/%%user%%"><b>%%user%%</b></a>%%altposter%%</font></td></tr>
+<tr>%%friendpic%%<td><font class="date"><b>User:</b></font></td><td><font class="date"><a href="http://www.livejournal.com/userinfo.bml?user=%%user%%&mode=full"><img src="%%cons:img%%/userinfo.gif" border="0" height="17" width="17" align="absmiddle"></a><a href="http://www.livejournal.com/users/%%user%%"><b>%%user%%</b></a>%%altposter%%</font></td></tr>
 <tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
-<tr><td><font class="date"><b>Subject:</b><font class="date"></td><td><font class="date">%%subject%%<font class="date"></td></tr>
-<tr><td><font class="date"><b>Security:</b><font class="date"></td><td><font class="date">Private</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b></font></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Security:</b></font></td><td><font class="date">Private</font></td></tr>
 %%currents%%
 </table>
 <p>%%event%%</p>
@@ -4458,11 +4452,11 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 
 <table border="0" cellspacing="0" cellpadding="0" width="100%">
 <tr>
-<td width="100%" bgcolor="#666666"><img src="http://img.livejournal.com/dot.gif" width="1" height="13"></td>
+<td width="100%" bgcolor="#666666"><img src="%%cons:img%%/dot.gif" width="1" height="13"></td>
 </tr>
 
 <tr>
-<td width="100%" bgcolor="#FFFFFF"><img src="http://img.livejournal.com/dot.gif" width="1" height="2"></td>
+<td width="100%" bgcolor="#FFFFFF"><img src="%%cons:img%%/dot.gif" width="1" height="2"></td>
 </tr>
 
 <tr>
@@ -4471,7 +4465,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 </tr>
 
 <tr>
-<td width="100%" bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+<td width="100%" bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 </tr>
 </table>
 
@@ -4479,20 +4473,20 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 <tr>
 
 <td valign="top" width="100%" class="body">
-<img src="http://img.livejournal.com/dot.gif" width="100%" height="1">
+<img src="%%cons:img%%/dot.gif" width="100%" height="1">
 
 %%events%%
 	
 </td>
 
-<td width="1" bgcolor="#000000" rowspan="2"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+<td width="1" bgcolor="#000000" rowspan="2"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 
 <td valign="top" width="175">
 	
 	<table border="0" cellspacing="0" cellpadding="0" width="100%">
 	
 	<tr>
-	<td bgcolor="#CCCCCC"><img src="http://img.livejournal.com/dot.gif" width="175" height="1"></td>
+	<td bgcolor="#CCCCCC"><img src="%%cons:img%%/dot.gif" width="175" height="1"></td>
 	</tr>
 	
 	</table>
@@ -4506,7 +4500,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 	</tr>
 	
 	<tr>
-	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 	</tr>
 	
 	<tr>
@@ -4516,7 +4510,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 	</tr>
 	
 	<tr>
-	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 	</tr>
 
 	<!-- END ARCHIVES -->
@@ -4528,7 +4522,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 	</tr>
 	
 	<tr>
-	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 	</tr>
 	
 	<tr>
@@ -4540,7 +4534,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 	</tr>
 	
 	<tr>
-	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 	</tr>
 
 	<!-- JOURNAL BLOCK-->
@@ -4549,14 +4543,14 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 
 </td>
 
-<td width="1" bgcolor="#000000" rowspan="2"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+<td width="1" bgcolor="#000000" rowspan="2"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 
-<td bgcolor="#AAAAAA" rowspan="2"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+<td bgcolor="#AAAAAA" rowspan="2"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 
 </tr>
 
 <tr>
-<td colspan="5" bgcolor="#999999"><img src="http://img.livejournal.com/dot.gif" width="1" height="10"></td>
+<td colspan="5" bgcolor="#999999"><img src="%%cons:img%%/dot.gif" width="1" height="10"></td>
 </tr>
 
 </table>
@@ -4587,10 +4581,10 @@ FRIENDS_SKIP_FORWARD=><a href="%%url%%">forward %%lc:numitems%% posts</a>
 FRIENDS_EVENT<=
 <br>
 <table>
-<tr>%%friendpic%%<td><font class="date"><b>User:</b></font></td><td><font class="date"><a href="http://www.livejournal.com/userinfo.bml?user=%%user%%&mode=full"><img src="http://img.livejournal.com/userinfo.gif" border="0" height="17" width="17" align="absmiddle"></a><a href="http://www.livejournal.com/users/%%user%%"><b>%%user%%</b></a>%%altposter%%</font></td></tr>
+<tr>%%friendpic%%<td><font class="date"><b>User:</b></font></td><td><font class="date"><a href="http://www.livejournal.com/userinfo.bml?user=%%user%%&mode=full"><img src="%%cons:img%%/userinfo.gif" border="0" height="17" width="17" align="absmiddle"></a><a href="http://www.livejournal.com/users/%%user%%"><b>%%user%%</b></a>%%altposter%%</font></td></tr>
 <tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
-<tr><td><font class="date"><b>Subject:</b><font class="date"></td><td><font class="date">%%subject%%<font class="date"></td></tr>
-<tr><td><font class="date"><b>Security:</b><font class="date"></td><td><font class="date">Public</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b></font></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Security:</b></font></td><td><font class="date">Public</font></td></tr>
 %%currents%%
 </table>
 <p>%%event%%</p>
@@ -4632,7 +4626,6 @@ FRIENDS_WEBSITE<=
 <=FRIENDS_WEBSITE
 
 FRIENDS_SUBJECT=>%%subject%%
-
 
 .
 
@@ -6408,15 +6401,15 @@ LASTN_WEBSITE=><A HREF="%%url%%">&gt; %%name%%</A><BR>
 Style: lastn/Refried Paper
 is_embedded: N
 is_colorfree: N
-lastupdate: 2002-04-07 15:14:20
+lastupdate: 2002-08-13 10:42:26
 
 LASTN_EVENT_PROTECTED<=
 <br>
 <table>
 %%altposter%%
 <tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
-<tr><td><font class="date"><b>Subject:</b><font class="date"></td><td><font class="date">%%subject%%<font class="date"></td></tr>
-<tr><td><font class="date"><b>Security:</b><font class="date"></td><td><font class="date">Protected</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b></font></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Security:</b></font></td><td><font class="date">Protected</font></td></tr>
 %%currents%%
 </table>
 <p>%%event%%</p>
@@ -6472,11 +6465,11 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 
 <table border="0" cellspacing="0" cellpadding="0" width="100%">
 <tr>
-<td width="100%" bgcolor="#666666"><img src="http://img.livejournal.com/dot.gif" width="1" height="13"></td>
+<td width="100%" bgcolor="#666666"><img src="%%cons:img%%/dot.gif" width="1" height="13"></td>
 </tr>
 
 <tr>
-<td width="100%" bgcolor="#FFFFFF"><img src="http://img.livejournal.com/dot.gif" width="1" height="2"></td>
+<td width="100%" bgcolor="#FFFFFF"><img src="%%cons:img%%/dot.gif" width="1" height="2"></td>
 </tr>
 
 <tr>
@@ -6485,7 +6478,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 </tr>
 
 <tr>
-<td width="100%" bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+<td width="100%" bgcolor="#000000"><img src="%%cons:img%%dot.gif" width="1" height="1"></td>
 </tr>
 </table>
 
@@ -6493,20 +6486,20 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 <tr>
 
 <td valign="top" width="100%" class="body">
-<img src="http://img.livejournal.com/dot.gif" width="100%" height="1">
+<img src="%%cons:img%%/dot.gif" width="100%" height="1">
 
 %%events%%
 	
 </td>
 
-<td width="1" bgcolor="#000000" rowspan="2"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+<td width="1" bgcolor="#000000" rowspan="2"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 
 <td valign="top" width="175">
 	
 	<table border="0" cellspacing="0" cellpadding="0" width="100%">
 	
 	<tr>
-	<td bgcolor="#CCCCCC"><img src="http://img.livejournal.com/dot.gif" width="175" height="1"></td>
+	<td bgcolor="#CCCCCC"><img src="%%cons:img%%/dot.gif" width="175" height="1"></td>
 	</tr>
 	
 	</table>
@@ -6520,7 +6513,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 	</tr>
 	
 	<tr>
-	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 	</tr>
 	
 	<tr>
@@ -6530,7 +6523,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 	</tr>
 	
 	<tr>
-	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 	</tr>
 
 	<!-- END ARCHIVES -->
@@ -6542,7 +6535,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 	</tr>
 	
 	<tr>
-	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 	</tr>
 	
 	<tr>
@@ -6554,7 +6547,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 	</tr>
 	
 	<tr>
-	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	<td bgcolor="#000000"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 	</tr>
         
         <tr>
@@ -6568,14 +6561,14 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 
 </td>
 
-<td width="1" bgcolor="#000000" rowspan="2"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+<td width="1" bgcolor="#000000" rowspan="2"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 
-<td bgcolor="#AAAAAA" rowspan="2"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+<td bgcolor="#AAAAAA" rowspan="2"><img src="%%cons:img%%/dot.gif" width="1" height="1"></td>
 
 </tr>
 
 <tr>
-<td colspan="5" bgcolor="#999999"><img src="http://img.livejournal.com/dot.gif" width="1" height="10"></td>
+<td colspan="5" bgcolor="#999999"><img src="%%cons:img%%/dot.gif" width="1" height="10"></td>
 </tr>
 
 </table>
@@ -6589,8 +6582,8 @@ LASTN_EVENT<=
 <table>
 %%altposter%%
 <tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
-<tr><td><font class="date"><b>Subject:</b><font class="date"></td><td><font class="date">%%subject%%<font class="date"></td></tr>
-<tr><td><font class="date"><b>Security:</b><font class="date"></td><td><font class="date">Public</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b></font></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Security:</b></font></td><td><font class="date">Public</font></td></tr>
 %%currents%%
 </table>
 <p>%%event%%</p>
@@ -6616,8 +6609,8 @@ LASTN_EVENT_PRIVATE<=
 <table>
 %%altposter%%
 <tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
-<tr><td><font class="date"><b>Subject:</b><font class="date"></td><td><font class="date">%%subject%%<font class="date"></td></tr>
-<tr><td><font class="date"><b>Security:</b><font class="date"></td><td><font class="date">Private</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b></font></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Security:</b></font></td><td><font class="date">Private</font></td></tr>
 %%currents%%
 </table>
 <p>%%event%%</p>
