@@ -637,6 +637,7 @@ sub show_poll
         $ret .= "<i>$po->{'name'}</i>";
     }
     $ret .= "<br />Open to: <b>$po->{'whovote'}</b>, results viewable to: <b>$po->{'whoview'}</b>";
+    $ret .= LJ::run_hook('extra_poll_description', $po, $mode, \@qs, \%its);
 
     ## go through all questions, adding to buffer to return
     foreach my $q (@qs)
