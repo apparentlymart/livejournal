@@ -72,8 +72,8 @@ if ($uri =~ m!/(\d+)\.html$!) {
  return $ML{'talk.error.nojournal'} unless $u;
 
  my $clustered = $init->{'clustered'};
- my $ditemid = $init->{'ditemid'}+0;
  my $thread = $init->{'thread'};
+ $itemid = $init->{'itemid'}+0;
 
  my ($dbcs, $dbcm, $dbcr) = ($dbs, $dbh, $dbr);
  if ($clustered) {
@@ -82,6 +82,18 @@ if ($uri =~ m!/(\d+)\.html$!) {
      $dbcr = $dbcs->{'reader'};
  }
 
+ my $item = LJ::Talk::get_journal_item($dbs, $dbcs, $u, $itemid);
+
+ if ($init->{'oldurl'} && $item) {
+     $init->{'anum'} = $item->{'anum'};
+     $init->{'ditemid'} = $init->{'itemid'}*256 + $item->{'anum'};
+ }
+
+ unless ($item && $item->{'anum'} == $init->{'anum'}) {
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
+ }
+
+ my $ditemid = $init->{'ditemid'}+0;
  my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
  my $jargent = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
 
@@ -95,11 +107,8 @@ if ($uri =~ m!/(\d+)\.html$!) {
      my $sep = ($talkurl =~ /\?/) ? "&" : "?";
      return "$talkurl$sep$args";
  };
- 
 
  my $ret = "";
-
- $itemid = $init->{'itemid'}+0;
 
  # redirect if account was renamed
  if ($u->{'journaltype'} eq "R") {
@@ -110,16 +119,6 @@ if ($uri =~ m!/(\d+)\.html$!) {
      }
  }
 
- my $item = LJ::Talk::get_journal_item($dbs, $dbcs, $u, $itemid);
-
- if ($init->{'oldurl'} && $item) {
-     $init->{'anum'} = $item->{'anum'};
-     $init->{'ditemid'} = $init->{'itemid'}*256 + $item->{'anum'};
- }
-
- unless ($item && $item->{'anum'} == $init->{'anum'}) {
-     return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
- }
 
  my %logprops = %{$item->{'logprops'}};
 
