@@ -4,50 +4,67 @@ layerinfo type = "layout";
 layerinfo name = "Tabular Indent";
 layerinfo redist_uniq = "tabularindent/layout";
 
-property bool show_entry_userpic { des = "Show the userpic on the journal entries?"; }
-set show_entry_userpic = false;
+property bool show_entry_userpic { 
+    des = "Show the userpic on the journal entries?";
+}
+property Color body_bgcolor { 
+    des = "Body background color";
+    s1color = "page_back";
+}
+property Color main_bgcolor { 
+    des = "Background of main text areas";
+    s1color = "page_back";
+}
+property Color main_fgcolor { 
+    des = "Main text color"; 
+    s1color = "page_text";
+}
+property Color border_color { 
+    des = "Color of borders";
+    # No s1color equivalent
+}
+property Color headerbar_bgcolor { 
+    des = "Background color of header bar(s)";
+    s1color = "stronger_back";
+}
+property Color headerbar_fgcolor { 
+    des = "Header bar text color";
+    s1color = "stronger_text";
+}
+property Color captionbar_mainbox_bgcolor { 
+    des = "Main background color of caption bar";
+    s1color = "page_back";
+}
+property Color captionbar_mainbox_fgcolor { 
+    des = "Text color of caption bar";
+    s1color = "page_text";
+}
+property Color captionbar_userpicbox_color { 
+    des = "User picture background color of caption bar";
+    s1color = "strong_back";
+}
+property Color accent_bgcolor { 
+    des = "Background color of accented areas";
+    s1color = "weak_back";
+}
+property Color accent_fgcolor { 
+    des = "Accented area text color";
+    s1color = "weak_text";
+}
+property Color link_color { 
+    des = "Link color";
+    s1color = "page_link";
+}
+property Color vlink_color {
+    des = "Visited link color";
+    s1color = "page_vlink";
+}
+property Color alink_color {
+    des = "Active link color";
+    s1color = "page_alink";
+}
 
-property Color body_bgcolor { des = "Body background color"; }
-set body_bgcolor = "#ffffff";
-
-property Color main_bgcolor { des = "Background of main text areas"; }
-set main_bgcolor = "#ffffff";
-
-property Color main_fgcolor { des = "Main text color"; }
-set main_fgcolor = "#000000";
-
-property Color border_color { des = "Color of borders"; }
-set border_color = "#000000";
-
-property Color headerbar_bgcolor { des = "Background color of header bar(s)"; }
-set headerbar_bgcolor = "#6666cc";
-
-property Color headerbar_fgcolor { des = "Header bar text color"; }
-set headerbar_fgcolor = "#ffffff";
-
-property Color captionbar_mainbox_bgcolor { des = "Main background color of caption bar"; }
-set captionbar_mainbox_bgcolor = "#ffffff";
-
-property Color captionbar_mainbox_fgcolor { des = "Text color of caption bar"; }
-set captionbar_mainbox_fgcolor = "#000000";
-
-property Color captionbar_userpicbox_color { des = "User picture background color of caption bar"; }
-set captionbar_userpicbox_color = "#c0c0ff";
-
-property Color accent_bgcolor { des = "Background color of accented areas"; }
-set accent_bgcolor = "#eeeeff";
-
-property Color accent_fgcolor { des = "Accented area text color"; }
-set accent_fgcolor = "#000000";
-
-property Color link_color { des = "Link color"; }
-set link_color = "#000050";
-
-property Color vlink_color { des = "Visited link color"; }
-set vlink_color = "#500050";
-
-property Color alink_color { des = "Active link color"; }
-set alink_color = "#ff00c0";
+# Inherited properties
 
 property use page_recent_items;
 property use text_post_comment;
@@ -57,6 +74,24 @@ property use page_friends_items;
 property use text_post_comment_friends;
 property use text_read_comments_friends;
 
+# Default colors
+set body_bgcolor = "#ffffff";
+set main_bgcolor = "#ffffff";
+set main_fgcolor = "#000000";
+set border_color = "#000000";
+set headerbar_bgcolor = "#6666cc";
+set headerbar_fgcolor = "#ffffff";
+set captionbar_mainbox_bgcolor = "#ffffff";
+set captionbar_mainbox_fgcolor = "#000000";
+set captionbar_userpicbox_color = "#c0c0ff";
+set accent_bgcolor = "#eeeeff";
+set accent_fgcolor = "#000000";
+set link_color = "#000050";
+set vlink_color = "#500050";
+set alink_color = "#ff00c0";
+
+# Other options
+set show_entry_userpic = false;
 set page_recent_items = 20;
 set page_friends_items = 20;
 

@@ -5,39 +5,51 @@ layerinfo name = "Generator";
 layerinfo redist_uniq = "generator/layout";
 layerinfo previews = "generator/generator.jpg";
 
-property Color entry_back { des = "Entry background"; }
-set entry_back = "#ffffff";
+property Color entry_back {
+    des = "Entry background";
+    s1color = "page_back";
+}
+property Color entry_text { 
+    des = "Entry text color";
+    s1color = "page_text";
+}
+property Color page_link { 
+    des = "Link color";
+    s1color = "page_link";
+}
+property Color page_vlink { 
+    des = "Visited link color"; 
+    s1color = "page_vlink";
+}
+property Color page_alink { 
+    des = "Active link color";
+    s1color = "page_alink";
+}
+property Color page_back { 
+    des = "Page background color (and around userpics)";
+    s1color = "strong_back";
+}
+property Color stronger_back { 
+    des = "Background color for the bar above entries";
+    s1color = "strong_back";
+}
+property Color stronger_text { 
+    des = "Text color for the bar above entries";
+    s1color = "stronger_text";
+}
+property Color weak_back { 
+    des = "Background color for the bar below entries";
+    s1color = "weak_back";
+}
+property Color weak_text { 
+    des = "Text color for the bar below entries";
+    s1color = "weak_text";
+}
+property int box_width { 
+    des = "Box width (pixels)";
+}
 
-property Color entry_text { des = "Entry text color"; }
-set entry_text = "#000000";
-
-property Color page_link { des = "Link color"; }
-set page_link = "#0000ff";
-
-property Color page_vlink { des = "Visited link color"; }
-set page_vlink = "#0000ff";
-
-property Color page_alink { des = "Active link color"; }
-set page_alink = "#00ffff";
-
-property Color page_back { des = "Page background color (and around userpics)"; }
-set page_back = "#2d4f89";
-
-property Color stronger_back { des = "Background color for the bar above entries"; }
-set stronger_back = "#000000";
-
-property Color stronger_text { des = "Text color for the bar above entries"; }
-set stronger_text = "#ffffff";
-
-property Color weak_back { des = "Background color for the bar below entries"; }
-set weak_back = "#aaaaaa";
-
-property Color weak_text { des = "Text color for the bar below entries"; }
-set weak_text = "#000000";
-
-property int box_width { des = "Box width (pixels)"; }
-set box_width = 600;
-
+# Inherited properties
 property use page_recent_items;
 property use text_post_comment;
 property use text_read_comments;
@@ -46,8 +58,22 @@ property use page_friends_items;
 property use text_post_comment_friends;
 property use text_read_comments_friends;
 
+# Set default colors
+set entry_back = "#ffffff";
+set entry_text = "#000000";
+set page_link = "#0000ff";
+set page_vlink = "#0000ff";
+set page_alink = "#00ffff";
+set page_back = "#2d4f89";
+set stronger_back = "#000000";
+set stronger_text = "#ffffff";
+set weak_back = "#aaaaaa";
+set weak_text = "#000000";
+
+set box_width = 600;
+
 function print_stylesheet () {
-    " /// stylesheeet!!!\n";
+    " /* Yes, a stylesheet would go here. */\n";
 }
 
 function Page::lay_top_userpic () { 

@@ -5,51 +5,67 @@ layerinfo name = "Magazine";
 layerinfo redist_uniq = "magazine/layout";
 layerinfo previews = "magazine/magazine.jpg";
 
-property bool show_entry_userpic { des = "Show the userpic on the journal entries? [Excludes friends page]"; }
-set show_entry_userpic = false;
+property bool show_entry_userpic { 
+    des = "Show the userpic on the journal entries? [Excludes friends page]"; 
+}
+property Color main_bgcolor { 
+    des = "Main Background color";
+    s1color = "page_back";
+}
+property Color main_fgcolor {
+    des = "Main text color";
+    s1color = "page_text";
+}
+property Color sidebar_color {
+    des = "Sidebar color"; 
+    s1color = "stronger_back";
+}
+property Color headerbar_bgcolor { 
+    des = "Headerbar background color";
+    s1color = "strong_back";
+}
+property Color headerbar_fgcolor { 
+    des = "Text color on headerbar"; 
+    s1color = "strong_text";
+}
+property Color headerbar_bevel_color { 
+    des = "Accent line color for headerbar"; 
+    s1color = "stronger_back";
+}
+property Color highlight_bgcolor { 
+    des = "Highlighting color for accented text";
+    s1color = "weak_back";
+}
+property Color highlight_fgcolor { 
+    des = "Highlighted text color"; 
+    s1color = "weak_text";
+}
+property Color border_color { 
+    des = "Color of borders"; 
+    s1color = "weak_text";
+}
+property Color title_color  { 
+    des = "Text color of top title"; 
+    s1color = "page_text_title";
+}
+property Color meta_color { 
+    des = "Text color of meta descriptions"; 
+    s1color = "page_text_em";
+}
+property Color link_color { 
+    des = "Text color of links"; 
+    s1color = "page_link";
+}
+property Color vlink_color { 
+    des = "Text color of visited links"; 
+    s1color = "page_vlink";
+}
+property Color alink_color { 
+    des = "Text color of active links"; 
+    s1color = "page_alink";
+}
 
-property Color main_bgcolor { des = "Main Background color"; }
-set main_bgcolor = "#ffffff";
-
-property Color main_fgcolor { des = "Main text color"; }
-set main_fgcolor = "#000000";
-
-property Color sidebar_color { des = "Sidebar color"; }
-set sidebar_color = "#6666cc";
-
-property Color headerbar_bgcolor { des = "Headerbar background color"; }
-set headerbar_bgcolor = "#c0c0ff";
-
-property Color headerbar_fgcolor { des = "Text color on headerbar"; }
-set headerbar_fgcolor = "#000000";
-
-property Color headerbar_bevel_color { des = "Accent line color for headerbar"; }
-set headerbar_bevel_color = "#6666cc";
-
-property Color highlight_bgcolor { des = "Highlighting color for accented text"; }
-set highlight_bgcolor = "#eeeeff";
-
-property Color highlight_fgcolor { des = "Highlighted text color"; }
-set highlight_fgcolor = "#000000";
-
-property Color border_color { des = "Color of borders"; }
-set border_color = "#000000";
-
-property Color title_color  { des = "Text color of top title"; }
-set title_color = "#8b1a1";
-
-property Color meta_color { des = "Text color of meta descriptions"; }
-set meta_color = "#c00000";
-
-property Color link_color { des = "Text color of links"; }
-set link_color = "#000050";
-
-property Color vlink_color { des = "Text color of visited links"; }
-set vlink_color = "#500050";
-
-property Color alink_color { des = "Text color of active links"; }
-set alink_color = "#ff00c0";
-
+# Inherited properties
 property use page_recent_items;
 property use text_post_comment;
 property use text_read_comments;
@@ -58,6 +74,24 @@ property use page_friends_items;
 property use text_post_comment_friends;
 property use text_read_comments_friends;
 
+# Default Colors
+set main_bgcolor = "#ffffff";
+set main_fgcolor = "#000000";
+set sidebar_color = "#6666cc";
+set headerbar_bgcolor = "#c0c0ff";
+set headerbar_fgcolor = "#000000";
+set headerbar_bevel_color = "#6666cc";
+set highlight_bgcolor = "#eeeeff";
+set highlight_fgcolor = "#000000";
+set border_color = "#000000";
+set title_color = "#8b1a1";
+set meta_color = "#c00000";
+set link_color = "#000050";
+set vlink_color = "#500050";
+set alink_color = "#ff00c0";
+
+# Other Options
+set show_entry_userpic = false;
 
 function Page::lay_skip_navigation() {}
 
