@@ -92,8 +92,7 @@ sub do_upload
             'X-FB-Auth'               => make_auth($chal, $u->{'password'}),
             'X-FB-Gallery'            =>
                     'name=' . (uri_escape($opts->{'galname'})) .
-                    '&picsec=' . $opts->{'imgsec'} . '&galsec=255',
-            'X-FB-CreateMixedGallery' => 1,
+                    '&picsec=' . $opts->{'imgsec'} . '&galsec=255' . '&mixed=1',
             );
 
     foreach my $hdr (keys %headers) {
