@@ -219,6 +219,16 @@ $maint{'synsuck'} = sub
                     "<a href='$it->{'link'}'>$it->{'link'}</a></p>";
             }
 
+            # Show the <guid> link if it's present and different than the
+            # <link>.
+            # [zilla: 267] Patch: Chaz Meyers <lj-zilla@thechaz.net>
+            if ( defined $it->{'id'} && $it->{'id'} ne $it->{'link'}
+                     && $it->{'id'} =~ m!http://! )
+                {
+                    $htmllink .= "<p class='ljsyndicationlink'>" .
+                        "<a href='$it->{'id'}'>$it->{'id'}</a></p>";
+                }
+
             # rewrite relative URLs to absolute URLs, but only invoke the HTML parser
             # if we see there's some image or link tag, to save us some work if it's
             # unnecessary (the common case)
