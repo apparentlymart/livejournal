@@ -400,7 +400,7 @@
             $ret .= LJ::html_text({ 'name' => "pq_${q}_question", 'size' => '50',
                                     'maxlength' => $RULES{'question'}->{'maxlength'},
                                     'value' => $elem->{"question"} }) . "\n";
-            $ret .= "<br /><font size='1'><b>[" . $errors->[$q]->{'question'} ."]</b></font>\n"
+            $ret .= "<br /><font size='1'><b>[$errors->[$q]->{'question'}]</b></font>\n"
                 if $errors->[$q]->{'question'};
             
             $ret .= "<div style='margin: 10px 0 10px 40px'>\n";
@@ -416,7 +416,8 @@
 
                     $ret .= LJ::html_text({ 'type' => 'text', 'name' => "pq_${q}_opt_$o", 'size' => '35',
                                             'maxlength' => $RULES{'items'}->{'maxlength'}, 'value' => $elem->{'opt'}->[$o] }) . "\n";
-                    $ret .= "<br /><font size='1'><b>[" . $errors->[$q]->{$o}->{'items'} . "]</b></font>\n" if $errors->[$q]->{$o}->{"items"};
+                    $ret .= "<br /><font size='1'><b>[$errors->[$q]->{$o}->{'items'}]</b></font>\n"
+                        if $errors->[$q]->{$o}->{"items"};
                 }
                 $ret .= $elem->{'opts'} < $RULES{'items'}->{'max'} 
                     ? "<br />" . LJ::html_submit("request:$q:do", undef, { 'raw' => " value='More &gt;&gt;'" }) . "\n"
@@ -439,14 +440,13 @@
                     $ret .= LJ::html_text({ 'name' => "pq_${q}_$atr", 
                                             'value' => defined $elem->{$atr} ? $elem->{$atr} : $RULES{'scale'}->{$atr},
                                             'size' => '3', 'maxlength' => '9' }) . "\n";
+                }
+                foreach my $atr ( qw(from to by items) ) {
                     $ret .= "<br /><font size='1'><b>[$errors->[$q]->{$atr}]</b></font>\n"
                         if $errors->[$q]->{$atr};
                 }
             }
 
-            $ret .= "<br /><font size='1'><b>[$errors->[$q]->{'items'}]</b></font>\n"
-                if $errors->[$q]->{'items'};
-            
             $ret .= "</div>\n</td></tr>\n</table>\n\n";
             
             # add a new element unless they're already at the max
