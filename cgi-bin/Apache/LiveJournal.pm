@@ -339,24 +339,24 @@ sub trans
         $r->handler("perl-script");
         if ($int eq "/fotobilder") {
             return 403 unless $LJ::FOTOBILDER_IP{$r->connection->remote_ip};
-            $r->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
+            $r->set_handlers(PerlHandler => [ \&Apache::LiveJournal::Interface::FotoBilder::handler ]);
             return OK;
         }
         $RQ{'interface'} = $int eq "/flat" ? "flat" : "xmlrpc";
-        $r->push_handlers(PerlHandler => \&interface_content);
+        $r->set_handlers(PerlHandler => [ \&interface_content ]);
         return OK;
     }
 
     # customview
     if ($uri =~ m!^/customview\.cgi!) {
         $r->handler("perl-script");
-        $r->push_handlers(PerlHandler => \&customview_content);
+        $r->set_handlers(PerlHandler => [ \&customview_content ]);
         return OK;
     }
 
     if ($uri =~ m!^/palimg/!) {
         $r->handler("perl-script");
-        $r->push_handlers(PerlHandler => \&Apache::LiveJournal::PalImg::handler);
+        $r->set_handlers(PerlHandler => [ \&Apache::LiveJournal::PalImg::handler ]);
         return OK;
     }
 
