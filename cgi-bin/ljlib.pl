@@ -3876,6 +3876,9 @@ sub activate_userpics
                  undef, $userid) if $activate_in;
     }
 
+    # delete userpic info object from memcache
+    LJ::MemCache::delete([$userid, "upicinf:$userid"]);
+
     return;
 }
 
