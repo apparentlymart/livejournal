@@ -2040,7 +2040,7 @@ sub get_talktext
     my @sources = ([$dbs->{'dbh'}, "talktext"]);
     if ($dbs->{'has_slave'}) {
         if ($LJ::USE_RECENT_TABLES) {
-	    my $dbt = LJ::get_dbh("recenttext!");	    
+	    my $dbt = LJ::get_dbh("recenttext");	    
             unshift @sources, [ $dbt || $dbs->{'dbr'}, "recent_talktext" ];
         } else {
             unshift @sources, [ $dbs->{'dbr'}, "talktext" ];
@@ -2091,7 +2091,7 @@ sub get_logtext
     my @sources = ([$dbs->{'dbh'}, "logtext"]);
     if ($dbs->{'has_slave'}) { 
 	if ($LJ::USE_RECENT_TABLES) {
-	    my $dbt = LJ::get_dbh("recenttext!");
+	    my $dbt = LJ::get_dbh("recenttext");
 	    unshift @sources, [ $dbt || $dbs->{'dbr'}, "recent_logtext" ];
 	} else {
 	    unshift @sources, [ $dbs->{'dbr'}, "logtext" ];
@@ -2858,149 +2858,171 @@ sub decode_url_string
     }
 }
 
-# called by nearly all the other functions
+# given two db roles, returns true only if the two roles are for sure
+# served by different database servers.  this is useful for, say,
+# the moveusercluster script:  you wouldn't want to select something
+# from one db, copy it into another, and then delete it from the 
+# source if they were both the same machine.
+sub use_diff_db
+{
+    my ($role1, $role2) = @_;
+    
+    return 0 if $role1 eq $role2;
+
+    # this is implied:  (makes logic below more readable by forcing it)
+    $LJ::DBINFO{'master'}->{'role'}->{'master'} = 1;
+
+    foreach (keys %LJ::DBINFO) {
+	next if /^_/;
+	next unless ref $LJ::DBINFO{$_} eq "HASH";
+	if ($LJ::DBINFO{$_}->{'role'}->{$role1} &&
+	    $LJ::DBINFO{$_}->{'role'}->{$role2}) {
+	    return 0;
+	}
+    }
+
+    return 1;    
+}
+
 sub get_dbh
 {
-    my $type = shift;  # 'master', 'slave', or 'slave!'. (the latter won't fall back to master)
-                       # or 'type', or 'type!' (where type! won't fall back to slave)
-    my $dbh;
+    my @roles = @_;
+    my $role = shift @roles;
+    return undef unless $role;
 
-    # with an exclamation mark, the caller only wants a slave, never
-    # the master.  presumably, the caller already has a master handle
-    # and only wants a slave for a performance gain and having two
-    # masters would not only be silly, but slower, if it tries to use
-    # both of them.
+    my $now = time();
 
-    my $no_fallback = 0;
-    if ($type =~ s/\!$//) { $no_fallback = 1; }
-
-    return undef
-	if ($type eq "slave" && $no_fallback && ! $LJ::DBINFO{'slavecount'});
-
-    # make the 'ub' upper bound values on the DBINFO for each role
-    # and assume role=slave for slaves that don't define their roles
-    # explictly.
-    unless ($LJ::DBINFO{'_ubs_set'}) 
-    {
-	foreach my $type (qw(slave recenttext log)) 
-	{
-	    my $total_weight;
-	    for (my $i=1; $i<=$LJ::DBINFO{'slavecount'}; $i++) {
-		$total_weight += $LJ::DBINFO{"slave$i"}->{'role'}->{$type};
-	    }
-	    if ($total_weight) {
-		my $at = 0;
-		for (my $i=1; $i<=$LJ::DBINFO{'slavecount'}; $i++) {
-		    $at += $LJ::DBINFO{"slave$i"}->{'role'}->{$type} / $total_weight;
-		    $LJ::DBINFO{"slave$i"}->{'_ub'}->{$type} = $at;
-		}
-		$LJ::DBINFO{'_roledefined'}->{$type} = 1;
-	    } else {
-		if ($type eq "slave") {
-		    # split slave traffic evenly
-		    for (my $i=1; $i<=$LJ::DBINFO{'slavecount'}; $i++) {
-			$LJ::DBINFO{"slave$i"}->{'_ub'}->{'slave'} = $i / $LJ::DBINFO{'slavecount'};
-		    }
-		} else {
-		    # copy role type from slave's version
-		    for (my $i=1; $i<=$LJ::DBINFO{'slavecount'}; $i++) {
-			$LJ::DBINFO{"slave$i"}->{'_ub'}->{$type} =
-			    $LJ::DBINFO{"slave$i"}->{'_ub'}->{'slave'};
-		    }
-		}
-	    }
-	}
-	$LJ::DBINFO{'_ubs_set'} = 1;
-    }
-
-    # if we're asking for a special type of role and it isn't defined,
-    # return undef right away in no_fallback mode.
-    return undef
-	if ($type ne "slave" && $type ne "master" && 
-	    $no_fallback && ! $LJ::DBINFO{'_roledefined'}->{$type});
-
-    # did we already get_dbh() this $type for this request?
-    # if so, we're not even going to ping it to check if it's 
-    # alive... we'll just return it, knowing that it's good
-    if (ref $LJ::DBREQCACHE{$type}) {
-	return $LJ::DBREQCACHE{$type};
-    }
-
-    # already have a dbh of this type open? 
-    if (ref $LJ::DBCACHE{$type}) 
-    {
-        $dbh = $LJ::DBCACHE{$type};
-
-	# make sure connection is still good.
-	if ($dbh->selectrow_array("SELECT CONNECTION_ID()")) {
-	    # mysql specific ^^
-	    $LJ::DBREQCACHE{$type} = $dbh;
-	    return $dbh;
-	}
-	undef $dbh;
-	undef $LJ::DBCACHE{$type};
-    }
-
-
-    # if we don't have a dbh cached already, which one would we try to
-    # connect to?
-    my $key;
-    if ($type ne "master") {
-	my $ct = $LJ::DBINFO{'slavecount'};
-	if ($ct) {
-	    my $rand = rand(1);
-	    my $i = 1;
-	    while (! $key && $i <= $ct) {
-		if ($rand < $LJ::DBINFO{"slave$i"}->{'_ub'}->{$type}) {
-		    $key = "slave$i";
-		} else {
-		    $i++;
-		}
-	    }
-	    unless ($key) {
-		$key = "slave" . int(rand($ct)+1);
-	    }
-	} else {
-	    $key = "master";
-	}
+    # otherwise, see if we have a role -> full DSN mapping already
+    my ($fdsn, $dbh);
+    if ($role eq "master") { 
+	$fdsn = _get_dbh_fdsn($LJ::DBINFO{'master'});
     } else {
-	$key = "master";
+	if ($LJ::DBCACHE{$role}) {
+	    $fdsn = $LJ::DBCACHE{$role};
+	    if ($now > $LJ::DBCACHE_UNTIL{$role}) {
+		# this role -> DSN mapping is too old.  invalidate,
+		# and while we're at it, clean up any connections we have
+		# that are too idle.
+		undef $fdsn;
+		my @idle;
+		foreach (keys %LJ::DB_USED_AT) {
+		    push @idle, $_ if ($LJ::DB_USED_AT{$_} < $now - 60);
+		}
+		foreach (@idle) {
+		    delete $LJ::DB_USED_AT{$_};
+		    delete $LJ::DBCACHE{$_};
+		}
+	    }
+	}
     }
 
-    # are we connecting to a slave that might be the master?
-    # if so, we don't want to open up two connections.  (wasteful)
-    if (ref $LJ::DBCACHE{'master'} && $key ne 'master' && 
-	$LJ::DBINFO{$key}->{'host'} eq $LJ::DBINFO{'master'}->{'host'})
+    if ($fdsn) {
+	$dbh = _get_dbh_conn($fdsn);
+	return $dbh if $dbh;
+	delete $LJ::DBCACHE{$role};  # guess it was bogus
+    }
+    return undef if $role eq "master";  # no hope now
+    
+    # time to randomly weightedly select one.
+    my @applicable;
+    my $total_weight;
+    foreach (keys %LJ::DBINFO) {
+	next if /^_/;
+	next unless ref $LJ::DBINFO{$_} eq "HASH";
+	my $weight = $LJ::DBINFO{$_}->{'role'}->{$role};
+	next unless $weight;
+	push @applicable, [ $LJ::DBINFO{$_}, $weight ];
+	$total_weight += $weight;
+    }
+
+    while (@applicable)
     {
-	$dbh = $LJ::DBCACHE{'master'};
-	if ($dbh->selectrow_array("SELECT CONNECTION_ID()")) {
-	    $LJ::DBCACHE{$type} = $dbh;
+	my $rand = rand($total_weight);
+	my ($i, $t) = (0, 0);
+	for (; $i<@applicable; $i++) {
+	    $t += $applicable[$i]->[1];
+	    last if $t > $rand;
+	}
+	my $fdsn = _get_dbh_fdsn($applicable[$i]->[0]);
+	$dbh = _get_dbh_conn($fdsn);
+	if ($dbh) {
+	    $LJ::DBCACHE{$role} = $fdsn;
+	    $LJ::DBCACHE_UNTIL{$role} = $now + 20;
 	    return $dbh;
 	}
-	undef $dbh;
-	undef $LJ::DBCACHE{'master'};
+       
+	# otherwise, discard that one.
+	$total_weight -= $applicable[$i]->[1];
+	splice(@applicable, $i, 1);
     }
 
-    my $dsn = "DBI:mysql";
-    my $db = $LJ::DBINFO{$key};
+    # try others
+    return get_dbh(@roles);
+}
+
+sub _get_dbh_fdsn
+{
+    my $db = shift;   # hashref with DSN info, from ljconfig.pl's %LJ::DBINFO
+    my $fdsn = "DBI:mysql";  # join("|",$dsn,$user,$pass) (because no refs as hash keys)
+
+    return $db->{'_fdsn'} if $db->{'_fdsn'};
+
     $db->{'dbname'} ||= "livejournal";
-    $dsn .= ":$db->{'dbname'}:";
+    $fdsn .= ":$db->{'dbname'}:";
     if ($db->{'host'}) {
-	$dsn .= "host=$db->{'host'};";
+	$fdsn .= "host=$db->{'host'};";
     }
     if ($db->{'sock'}) {
-	$dsn .= "mysql_socket=$db->{'sock'};";
+	$fdsn .= "mysql_socket=$db->{'sock'};";
     }
+    $fdsn .= "|$db->{'user'}|$db->{'pass'}";
 
-    $dbh = DBI->connect($dsn, $db->{'user'}, $db->{'pass'}, {
+    $db->{'_fdsn'} = $fdsn;
+    return $fdsn;
+}
+
+sub _get_dbh_conn
+{
+    my $fdsn = shift;
+    my $now = time();
+
+    # have we already created or verified a handle this request for this DSN?
+    if ($LJ::DBREQCACHE{$fdsn}) {
+	$LJ::DB_USED_AT{$fdsn} = $now;
+	return $LJ::DBREQCACHE{$fdsn};
+    }
+    
+    # check to see if we recently tried to connect to that dead server
+    return undef if $now < $LJ::DBDEADUNTIL{$fdsn};
+
+    # if not, we'll try to find one we used sometime in this process lifetime
+    my $dbh = $LJ::DBCACHE{$fdsn};
+
+    # if it exists, verify it's still alive and return it:
+    if ($dbh) {
+	if ($dbh->selectrow_array("SELECT CONNECTION_ID()")) {
+	    $LJ::DBREQCACHE{$fdsn} = $dbh;  # validated.
+	    $LJ::DB_USED_AT{$fdsn} = $now;
+	    return $dbh;
+	}
+	undef $dbh;
+	undef $LJ::DBCACHE{$fdsn};
+    }
+    
+    # time to make one!
+    my ($dsn, $user, $pass) = split(/\|/, $fdsn);
+    $dbh = DBI->connect($dsn, $user, $pass, {			
 	PrintError => 0,
     });
-    
-    # save a reference to the database handle for later
-    $LJ::DBCACHE{$type} = $dbh;
-    $LJ::DBREQCACHE{$type} = $dbh;
 
-    return $dbh;
+    # mark server as dead if dead.  won't try to reconnect again for 5 seconds.
+    if ($dbh) {
+	$LJ::DB_USED_AT{$fdsn} = $now;
+    } else {
+	$LJ::DB_DEAD_UNTIL{$fdsn} = $now + 5;
+    }
+
+    return $LJ::DBREQCACHE{$fdsn} = $LJ::DBCACHE{$fdsn} = $dbh;
 }
 
 # <LJFUNC>
@@ -3015,7 +3037,7 @@ sub get_dbh
 sub get_dbs
 {
     my $dbh = LJ::get_dbh("master");
-    my $dbr = LJ::get_dbh("slave!");
+    my $dbr = LJ::get_dbh("slave");
     return make_dbs($dbh, $dbr);
 }
 
