@@ -2879,6 +2879,13 @@ sub get_keyword_id
     return $kwid;
 }
 
+# <LJFUNC>
+# name: LJ::trim
+# des: Removes whitespace from left and right side of a string.
+# args: string
+# des-string: string to be trimmed
+# returns: string trimmed
+# </LJFUNC>
 sub trim
 {
     my $a = $_[0];
