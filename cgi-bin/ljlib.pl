@@ -4829,7 +4829,9 @@ sub load_talk_props2
     my ($uuserid, $listref, $hashref) = @_;
 
     my $userid = want_userid($uuserid);
-    return unless ref $hashref eq "HASH";
+    my $u = ref $uuserid ? $uuserid : undef;
+
+    $hashref = {} unless ref $hashref eq "HASH";
 
     my %need;
     my @memkeys;
@@ -4838,20 +4840,20 @@ sub load_talk_props2
         $need{$id} = 1;
         push @memkeys, [$userid,"talkprop:$userid:$id"];
     }
-    return unless %need;
+    return $hashref unless %need;
 
     my $mem = LJ::MemCache::get_multi(@memkeys) || {};
     while (my ($k, $v) = each %$mem) {
         next unless $k =~ /(\d+):(\d+)/ && ref $v eq "HASH";
         delete $need{$2};
-        $hashref->{$2} = $v;
+        $hashref->{$2}->{$_[0]} = $_[1] while @_ = each %$v;
     }
-    return unless %need;
+    return $hashref unless %need;
 
-    unless ($db) {
-        my $u = LJ::load_userid($userid);
+    if (!$db || @LJ::MEMCACHE_SERVERS) {
+        $u ||= LJ::load_userid($userid);
         $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($u) :  LJ::get_cluster_reader($u);
-        return unless $db;
+        return $hashref unless $db;
     }
 
     LJ::load_props("talk");
@@ -4867,6 +4869,7 @@ sub load_talk_props2
     foreach my $id (keys %need) {
         LJ::MemCache::set([$userid,"talkprop:$userid:$id"], $hashref->{$id} || {});
     }
+    return $hashref;
 }
 
 # <LJFUNC>

@@ -47,10 +47,9 @@ sub ReplyPage
         my $tt = LJ::get_talktext2($u, $re_talkid);
         $parpost->{'subject'} = $tt->{$re_talkid}->[0];
         $parpost->{'body'} = $tt->{$re_talkid}->[1];
-        $parpost->{'props'} = {};
+        $parpost->{'props'} =
+            LJ::load_talk_props2($u, [ $re_talkid ])->{$re_talkid} || {};
 
-        LJ::load_talk_props2($dbcs->{'reader'}, $u->{'userid'}, 
-                             [ $re_talkid ], { $re_talkid => $parpost->{'props'} }); 
         if($LJ::UNICODE && $parpost->{'props'}->{'unknown8bit'}) {
             LJ::item_toutf8($u, \$parpost->{'subject'}, \$parpost->{'body'}, {});
         }
