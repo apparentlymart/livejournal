@@ -166,6 +166,9 @@ sub process {
     $body =~ s/^\s*-----BEGIN PGP SIGNED MESSAGE-----.+?\n\n//s;
     $body =~ s/-----BEGIN PGP SIGNATURE-----.+//s;
 
+    # trim off excess whitespace (html cleaner converts to breaks)
+    $body =~ s/\n+$/\n/;
+
     # Find and set entry props.
     my $props = {};
     my (%lj_headers,$amask);
@@ -247,7 +250,7 @@ sub process {
     # if we found and successfully uploaded some images...
     if (ref $fb_upload eq 'HASH') {
         my $icount = scalar keys %$fb_upload;
-        $body .= "\n\n";
+        $body .= "\n";
 
         # set journal image display size
         my @valid_sizes = qw(100x100 320x240 640x480);
@@ -289,7 +292,7 @@ sub process {
     if ($fb_upload == 400) { 
         # bad request - don't retry, but go ahead and post the body to
         # the journal, postfixed with the remote error.
-        $body .= "\n\n";
+        $body .= "\n";
         $body .= "($fb_upload_errstr)";
     }
 
