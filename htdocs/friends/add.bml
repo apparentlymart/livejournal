@@ -31,6 +31,12 @@
          return;
      }
 
+     unless ($remote->{'userid'} == $FORM{'remid'}) {
+         $title = $ML{'Error'};
+         $body = "<?h1 $ML{'Error'} h1?><?p Session info changed.  Try again. p?>";
+         return;
+     }
+
      my $gmask = 1;
      foreach my $bit (1..30) {
          next unless $FORM{"bit_$bit"};
@@ -94,6 +100,7 @@
  $body .= "<form method='post'>";
  $body .= "<input type='hidden' name='mode' value='add'>";
  $body .= "<input type='hidden' name='user' value=\"$user\">";
+ $body .= "<input type='hidden' name='remid' value=\"$remote->{'userid'}\">";
 
  if ($fr) {
      $body .= "<center><input type='submit' value=\"$ML{'.btn.modify'}\">";
