@@ -4713,6 +4713,7 @@ sub load_user
         my $u = shift;
         $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
         $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u;
+        return $u;
     };
 
     my $get_user = sub {
@@ -4723,8 +4724,7 @@ sub load_user
 
         # set caches since we got a u from the master
         LJ::memcache_set_u($u);
-        $set_req_cache->($u);
-        return $u;
+        return $set_req_cache->($u);
     };
 
     # caller is forcing a master, return now
@@ -4738,10 +4738,7 @@ sub load_user
 
     # check memcache
     $u = LJ::memcache_get_u("user:$user");
-    if ($u) {
-        $set_req_cache->($u);
-        return $u;
-    }
+    return $set_req_cache->($u) if $u;
 
     # try to load from master if using memcache, otherwise from slave
     $u = $get_user->(@LJ::MEMCACHE_SERVERS);
@@ -4809,6 +4806,7 @@ sub load_userid
         my $u = shift;
         $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
         $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u;
+        return $u;
     };
 
     my $get_user = sub {
@@ -4819,8 +4817,7 @@ sub load_userid
 
         # set caches since we got a u from the master
         LJ::memcache_set_u($u);
-        $set_req_cache->($u);
-        return $u;
+        return $set_req_cache->($u);
     };
 
     # user is forcing master, return now
@@ -4834,10 +4831,7 @@ sub load_userid
 
     # check memcache
     $u = LJ::memcache_get_u([$userid,"userid:$userid"]);
-    if ($u) {
-        $set_req_cache->($u);
-        return $u;
-    }
+    return $set_req_cache->($u) if $u;
 
     # get from master if using memcache
     return $get_user->("master") if @LJ::MEMCACHE_SERVERS;
