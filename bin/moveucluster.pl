@@ -292,13 +292,16 @@ if ($sclust == 0)
                   "($u->{'userid'}, $picid, $imagedata)");
     }
 
-    # before we start deleting, record they've moved servers.
-    $dbh->do("UPDATE user SET dversion=2, clusterid=$dclust WHERE userid=$userid");
     $dbh->do("UPDATE userusage SET lastitemid=0 WHERE userid=$userid");
+
+    my $dversion = 2;
 
     # if everything's good (nothing's died yet), then delete all from source
     if ($opt_del)
     {
+        # before we start deleting, record they've moved servers.
+        $dbh->do("UPDATE user SET dversion=$dversion, clusterid=$dclust WHERE userid=$userid");
+
         $done = 0;
         $stime = time();
         foreach my $itemid (@itemids) {
@@ -322,11 +325,16 @@ if ($sclust == 0)
             print "  picid\#$picid...\n";
             $dbh->do("DELETE FROM userpicblob WHERE picid=$picid");
         }
+
+        # unset read-only bit (marks the move is complete, also, and not aborted mid-delete)
+        $dbh->do("UPDATE user SET caps=caps&~(1<<$readonly_bit) WHERE userid=$userid");
     }
-
-    # unset read-only bit (marks the move is complete, also, and not aborted mid-delete)
-    $dbh->do("UPDATE user SET caps=caps&~(1<<$readonly_bit) WHERE userid=$userid");
-
+    else
+    {
+        # unset readonly and move to new cluster in one update
+        $dbh->do("UPDATE user SET dversion=$dversion, clusterid=$dclust, caps=caps&~(1<<$readonly_bit) ".
+                 "WHERE userid=$userid");
+    }
 }
 
 sub deletefrom0_logitem
