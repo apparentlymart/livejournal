@@ -989,7 +989,7 @@ sub get_urls
 {
     my $text = shift;
     my @urls;
-    while ($text =~ s!http://[^\s\"\>]+!!) {
+    while ($text =~ s!http://[^\s\"\'\>]+!!) {
 	push @urls, $&;
     }
     return @urls;
