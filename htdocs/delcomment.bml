@@ -22,12 +22,15 @@ BODY<=
  
  ### get some info about the comment being deleted ... which journal entry is it about?
  ### and if it's being deleted, is it authorized to be deleted by this user?
- $sth = $dbh->prepare("SELECT talkid, nodetype, nodeid AS 'itemid', parenttalkid, journalid, posterid FROM talk WHERE talkid=$qid");
+ $sth = $dbh->prepare("SELECT talkid, nodetype, state, nodeid AS 'itemid', parenttalkid, journalid, posterid FROM talk WHERE talkid=$qid");
  $sth->execute;
  if ($dbh->err) { return "<B>Error:</B>" . $dbh->errstr; }
  $tp = $sth->fetchrow_hashref;
  unless ($tp) {
      return "(=H1 Error H1=)(=P The comment doesn't even exist... P=)";
+ }
+ if ($tp->{'state'} eq "D") {
+     return "(=H1 Error H1=)(=P This comment has already been deleted. P=)";
  }
  if ($tp->{'posterid'}) {
      $tp->{'userpost'} = LJ::get_username($dbs, $tp->{'posterid'});
