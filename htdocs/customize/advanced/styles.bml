@@ -220,7 +220,7 @@
         pop @opts, pop @opts unless scalar(@opts) > $startsize;
 
         # add blank option to beginning of list
-        unshift @opts, ('', @opts ? '' : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+        unshift @opts, ('', @opts ? '' : ' ');
 
         return $html_select->();
     };
@@ -244,6 +244,7 @@
     # i18nc
     $body .= "<tr><td>Language (i18nc): </td><td>";
     $body .= $layerselect->('i18nc', $core)->[0];
+    $body .= "</td></tr>\n";
 
     # layout
     $body .= "<tr><td>Layout: </td><td>";
