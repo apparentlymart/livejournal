@@ -89,8 +89,13 @@
             $ret .= "<td>";
             if ($hist->{$_} && ($_ eq 'user' || $_ eq 'admin')) {
                 $ret .= LJ::ljuser($hist->{$_});
+            } elsif ($_ eq 'notes') {
+                # notes need to be ehtml'd, but afterwards, we can convert \n to <br />
+                my $enotes = LJ::ehtml($hist->{$_});
+                $enotes =~ s!\n!<br />\n!g; 
+                $ret .= $enotes;
             } else {
-                $ret .= LJ::eall($hist->{$_});
+                $ret .= LJ::ehtml($hist->{$_});
             }
             $ret .= "</td>";
         }
