@@ -29,7 +29,8 @@ use XML::Parser;
 #    subject - subject
 #    time - in format 'yyyy-mm-dd hh:mm' (optional)
 # the second argument returned is $error, which, if defined, is a human-readable
-# error string
+# error string. the third argument is arrayref of items, same as 
+# $feed->{'items'}.
 
 sub parse_feed
 {
@@ -60,7 +61,7 @@ sub parse_feed
             # there was a top-level <feed> there, or we're forced to treat
             # as an Atom feed, so even if $error is set,
             # don't try RSS
-            return ($feed, $error);
+            return ($feed, $error, $items);
         }
     }
 
@@ -100,7 +101,7 @@ sub parse_feed
         push @{$feed->{'items'}}, $item;
     }
 
-    return $feed;
+    return ($feed, undef, $feed->{'items'});
 }
 
 # convert rfc822-time in RSS's <pubDate> to our time
@@ -153,7 +154,7 @@ sub startaccum {
     my $name = shift;
 
     return err("Tag found under neither <feed> nor <entry>")
-        unless $feed or $item;
+        unless $feed || $item;
     $data = ""; # defining $data triggers accumulation
     $ddepth = 1;
 
@@ -239,7 +240,7 @@ sub StartTag {
                 unless $item;
             # if type is multipart/alternative, we continue recursing
             # otherwise we accumulate
-            my $type = $_{'type'} or "text/plain";
+            my $type = $_{'type'} || "text/plain";
             unless ($type eq "multipart/alternative") {
                 push @{$item->{'contents'}}, [$type, ""];
                 startaccum(\$item->{'contents'}->[-1]->[1]);
