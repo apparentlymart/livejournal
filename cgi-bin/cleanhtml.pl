@@ -180,12 +180,13 @@ sub clean
                     }
 
                     if ($attr eq 'style' && $opts->{'cleancss'}) {
-                        my $value = $hash->{$attr};
                         # css2 spec, section 4.1.3
                         # position === p\osition  :(
-                        $value =~ s/\\//g;
-                        foreach my $css (qw(absolute relative fixed)) {
-                            if ($value =~ /$css/i) {
+                        # strip all slashes no matter what.
+                        $hash->{$attr} =~ s/\\//g;
+                        # and catch the obvious ones.
+                        foreach my $css (qw(absolute fixed)) {
+                            if ($hash->{$attr} =~ /$css/i) {
                                 delete $hash->{$attr};
                                 last;
                             }
