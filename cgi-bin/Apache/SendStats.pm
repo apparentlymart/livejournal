@@ -10,7 +10,16 @@ use strict;
 use IO::Socket::INET;
 use Apache::Constants qw(:common);
 
-Inline->init() if $LJ::HAVE_INLINE && $LJ::FREECHILDREN_BCAST;
+if ($LJ::HAVE_INLINE && $LJ::FREECHILDREN_BCAST) {
+    eval {
+        Inline->init();
+    };
+    if ($@ && ! $LJ::JUST_COMPILING) {
+        print STDERR "Warning: You seem to have Inline.pm, but you haven't run \$LJHOME/bin/lj-inline.pl.  " .
+            "Continuing without it, but stats won't broadcast.\n";
+        $LJ::HAVE_INLINE = 0;
+    }
+}
 
 sub handler
 {
