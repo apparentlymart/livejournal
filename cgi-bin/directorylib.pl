@@ -275,7 +275,9 @@ sub do_search
 
     $alias_used{'u'} = "user";
     $alias_used{'uu'} = "userusage";
-    my ($fromwhat, $joinwhere);
+
+    $fromwhat = "";
+    my $joinwhere;
     if ($req->{'opt_format'} eq "com") {
 	$fromwhat .= ", community c";
 	$joinwhere .= " AND c.userid=u.userid";
