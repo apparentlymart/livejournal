@@ -192,13 +192,15 @@ sub _weblogscom {
     my $a = $c->{'args'};
     eval {
         eval "use XMLRPC::Lite;";
-        XMLRPC::Lite
-            ->new( proxy => "http://rpc.weblogs.com/RPC2",
-                   timeout => 5 )
-            ->call('weblogUpdates.ping', # xml-rpc method call
-                   LJ::ehtml($a->{'title'}) . " \@ $LJ::SITENAMESHORT",
-                   $a->{'url'},
-                   "$LJ::SITEROOT/misc/weblogs-change.bml?user=$a->{'user'}");
+        unless ($@) {
+            XMLRPC::Lite
+                ->new( proxy => "http://rpc.weblogs.com/RPC2",
+                       timeout => 5 )
+                ->call('weblogUpdates.ping', # xml-rpc method call
+                       LJ::ehtml($a->{'title'}) . " \@ $LJ::SITENAMESHORT",
+                       $a->{'url'},
+                       "$LJ::SITEROOT/misc/weblogs-change.bml?user=$a->{'user'}");
+        }
     };
 
     return 1;
@@ -219,23 +221,24 @@ sub _dirty {
 
     if ($what eq 'friends') {
         eval {
-            eval {
+            eval qq{
                 use RPC::XML;
                 use RPC::XML::Client;
             };
+            unless ($@) {
+                my $u = LJ::load_userid($c->{journalid});
+                my %req = ( user => $u->{user} );
 
-            my $u = LJ::load_userid($c->{journalid});
-            my %req = ( user => $u->{user} );
+                # fill in groups info
+                LJ::fill_groups_xmlrpc($u, \%req);
 
-            # fill in groups info
-            LJ::fill_groups_xmlrpc($u, \%req);
-
-            my $res = RPC::XML::Client
-                ->new("$LJ::FB_SITEROOT/interface/xmlrpc")
-                ->send_request('FB.XMLRPC.groups_push',
-                               # FIXME: don't be lazy with the smart_encode
-                               # FIXME: log useful errors from outcome
-                               RPC::XML::smart_encode(\%req));
+                my $res = RPC::XML::Client
+                    ->new("$LJ::FB_SITEROOT/interface/xmlrpc")
+                    ->send_request('FB.XMLRPC.groups_push',
+                                   # FIXME: don't be lazy with the smart_encode
+                                   # FIXME: log useful errors from outcome
+                                   RPC::XML::smart_encode(\%req));
+            }
         };
     }
     
