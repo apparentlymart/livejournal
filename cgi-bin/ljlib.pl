@@ -4,6 +4,7 @@
 # lib: DBI::, Digest::MD5, URI::URL, HTML::TokeParser
 # lib: cgi-bin/ljconfig.pl, cgi-bin/ljlang.pl, cgi-bin/ljpoll.pl
 # link: htdocs/paidaccounts/index.bml, htdocs/users, htdocs/view/index.bml
+# hook: canonicalize_url, name_caps, name_caps_short, post_create
 # </LJDEP>
 
 use strict;
