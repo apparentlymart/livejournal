@@ -2080,14 +2080,19 @@ sub enter_comment {
         ( my $dbh = LJ::get_db_writer() )) # don't log if no db available
     {
         my (@bind, @vals);
+        my $ip = LJ::get_remote_ip();
         while (my ($url, undef) = each %urls) {
             push @bind, '(?,?,?,UNIX_TIMESTAMP(),?)';
-            push @vals, $posterid, $journalu->{userid}, $jtalkid, $url;
+            push @vals, $posterid, $journalu->{userid}, $ip, $jtalkid, $url;
             last if @bind >= $LJ::TALK_MAX_URLS;
         }
         my $bind = join(',', @bind);
-        $dbh->do("INSERT DELAYED INTO commenturls (posterid, journalid, jtalkid, timecreate, url) " .
-                 "VALUES $bind", undef, @vals);
+        my $sql = qq{
+            INSERT DELAYED INTO commenturls
+                (posterid, journalid, ip, jtalkid, timecreate, url)
+            VALUES $bind
+        };
+        $dbh->do($sql, undef, @vals);
     }
     
     # update the "replycount" summary field of the log table
