@@ -171,7 +171,7 @@ sub dequeue
     my $msg = shift;
     debug("\t\t dequeued: $msg") if $msg;
     unlink("$mailspool/$last_file") || debug("\t\t Can't unlink $last_file!");
-    File::Path::rmtree("$workdir/$last_tempdir");
+    File::Path::rmtree($last_tempdir);
     return 0;
 }
 
