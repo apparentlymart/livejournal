@@ -103,6 +103,8 @@
     $body .= "<a href='viewuser.bml?journal=$journal&as=theme'>As Theme</a>\n";
 
     $body .= "<p><textarea rows='40' cols='60' wrap='off'>";
+    
+    $body .= "# for layout: $lyr_layout->{'s2lid'} ($lyr_layout->{'uniq'})\n";
 
     if ($GET{'as'} eq "") {
         $body .= "layerinfo type = user;\n\n";
