@@ -7,7 +7,7 @@ mark_clustered("useridmap", "userbio", "cmdbuffer", "dudata",
                "talk2", "talkprop2", "talktext2", "talkleft",
                "userpicblob2", "events",
                "ratelog", "loginstall", "sessions", "sessions_data",
-               "fvcache", "s1usercache", "modlog", "modblob", "counter",
+               "s1usercache", "modlog", "modblob", "counter",
                "userproplite2", "links", "s1overrides", "s1style",
                "s1stylecache", "userblob",
                );
@@ -927,6 +927,9 @@ register_tabledrop("hintlastnview");
 register_tabledrop("batchdelete");
 register_tabledrop("ftpusers");
 register_tabledrop("ipban");
+register_tabledrop("ban");
+register_tabledrop("logaccess");
+register_tabledrop("fvcache");
 
 register_tablecreate("portal", <<'EOC');
 CREATE TABLE portal (
@@ -1404,14 +1407,6 @@ CREATE TABLE sessions_data (
 )
 EOC
 
-register_tablecreate("fvcache", <<'EOC'); # user cluster
-CREATE TABLE fvcache (
-   userid    MEDIUMINT UNSIGNED NOT NULL PRIMARY KEY,
-   maxupdate DATETIME,
-   items     BLOB
-)
-EOC
-
 # what:  ip, email, ljuser, ua, emailnopay
 # emailnopay means don't allow payments from that email
 register_tablecreate("sysban", <<'EOC');
@@ -1470,9 +1465,6 @@ post_create("reluser",
                 print "# Finished converting logaccess.\n";
             },
             );
-
-register_tabledrop("ban");
-register_tabledrop("logaccess");
 
 register_tablecreate("clustermove", <<'EOC');
 CREATE TABLE clustermove (
