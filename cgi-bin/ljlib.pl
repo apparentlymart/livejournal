@@ -3420,17 +3420,9 @@ sub _get_dbh_conn
     if ($dbh) 
     {
 	if ($role eq "master" && $LJ::NEED_DBWEIGHTS) {
-	    my $serial = 
-		$dbh->selectrow_array("SELECT fdsn AS 'serial' FROM dbinfo WHERE dbid=0");
-	    if (! $dbh->err) {
-		if ($serial != $LJ::CACHE_DBWEIGHT_SERIAL) {
-		    $LJ::CACHE_DBWEIGHT_SERIAL = $serial;
-		    _reload_weights($dbh);
-		}
-		return $retdb->($dbh);
-	    }
-	} elsif ($dbh->selectrow_array("SELECT CONNECTION_ID()")) {
-	    return $retdb->($dbh);
+	    return $retdb->($dbh) if _reload_weights($dbh);
+	} else { 
+	    return $retdb->($dbh) if $dbh->selectrow_array("SELECT CONNECTION_ID()");
 	}
 
 	# bogus:
@@ -3460,6 +3452,14 @@ sub _get_dbh_conn
 sub _reload_weights
 {
     my $dbh = shift;
+
+    my $serial = 
+	$dbh->selectrow_array("SELECT fdsn AS 'serial' FROM dbinfo WHERE dbid=0");
+
+    return 0 if $dbh->err;
+    $LJ::NEED_DBWEIGHTS = 0;
+    return 1 if $serial == $LJ::CACHE_DBWEIGHT_SERIAL;
+    
     my $sth = $dbh->prepare("SELECT i.masterid, i.name, i.fdsn, ".
 			    "w.role, w.curr FROM dbinfo i, dbweights w ".
 			    "WHERE i.dbid=w.dbid");
@@ -3492,7 +3492,8 @@ sub _reload_weights
     }
 
     # copy new config.  good to go!
-    %LJ::DBINFO = %dbinfo;    
+    %LJ::DBINFO = %dbinfo;
+    1;
 }
 
 # <LJFUNC>
