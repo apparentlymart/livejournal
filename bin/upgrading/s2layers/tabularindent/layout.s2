@@ -113,14 +113,19 @@ function captionbar (Page p) {
 
     var string links;
     $links = "$links<tr><td>View:</td><td>" + ($p.view == "recent" ? 
-                       "Recent&nbsp;Entries" :
-                       "<a href='$p.base_url/'>Recent&nbsp;Entries</a>") + ".</td></tr>";
+                       $*text_view_recent :
+                       "<a href='$p.base_url/'>$*text_view_recent</a>") + ".</td></tr>";
+
     $links = "$links<tr><td>View:</td><td>" + ($p.view == "friends" ? 
-                       "Friends" :
-                       "<a href='$p.base_url/friends/'>Friends</a>") + ".</td></tr>";
+                       $*text_view_friends :
+                       "<a href='$p.base_url/friends/'>$*text_view_friends</a>") + ".</td></tr>";
+
     $links = "$links<tr><td>View:</td><td>" + ($p.view == "archive" ? 
-                       "Archive" :
-                       "<a href='$p.base_url/calendar/'>Archive</a>") + ".</td></tr>";
+                       $*text_view_archive :
+                       "<a href='$p.base_url/calendar/'>$*text_view_archive</a>") + ".</td></tr>";
+
+    $links = "$links<tr><td>View:</td><td><a href='" + get_url($p.journal, "userinfo") + "'>$*text_view_userinfo</a>.</td></tr>";
+
     "<table border='0' width='100%' height='100' cellpadding='5' cellspacing='1' bgcolor='$*border_color'>";
     "<tr><td bgcolor='$*captionbar_userpicbox_color' align='center' valign='center' width='100'>";
     "$userpic</td><td bgcolor='$*captionbar_mainbox_bgcolor'>";
