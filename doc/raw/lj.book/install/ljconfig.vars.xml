@@ -87,19 +87,6 @@
         </para></listitem>
       </varlistentry>
 
-      <varlistentry>
-        <term><literal role="variable">$LJ::DIR_DB</literal></term>
-        <listitem><para>
-          Optional database that hosts the directory.
-        </para></listitem>
-      </varlistentry>
-
-      <varlistentry id='ljconfig.var.dbinfo'>
-        <term><literal role="variable">$LJ::DIR_DB_HOST</literal></term>
-        <listitem><para>
-          Specifies which host role the directory should use to connect to the database.
-        </para></listitem>
-      </varlistentry>
 
     </variablelist>
     <variablelist>
