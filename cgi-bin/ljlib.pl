@@ -286,7 +286,7 @@ sub get_groupmask
                                       undef, $jid, $fid);
         LJ::MemCache::set($memkey, $mask+0, time()+60*15);
     }
-    return $mask;
+    return $mask+0;  # force it to a numeric scalar
 }
 
 #
