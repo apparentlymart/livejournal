@@ -236,9 +236,13 @@
      }
      push @vals, $val;
 
-     ## item
-     $val = "<a href=\"item.bml?id=$it->{'todoid'}\"><B>" . LJ::ehtml($it->{'subject'}) . "</B></A><BR><FONT SIZE=-1>" . LJ::ehtml($it->{'des'}) . "</FONT>";
-     push @vals, $val;
+     ## item & description
+     {
+	 my $des = LJ::ehtml($it->{'des'});
+	 $des =~ s,(http://\S+),<a href="$1">$1</a>,g;
+	 $val = "<a href=\"item.bml?id=$it->{'todoid'}\"><b>" . LJ::ehtml($it->{'subject'}) . "</b></a><br /><font size='-1'>$des</font>";
+	 push @vals, $val;
+     }
 
      ## due
      {
