@@ -1097,7 +1097,7 @@ my %dt_vars = (
                'HH' => "sprintf('%02d', \$time->{hour})",
                'h' => "(\$time->{hour} % 12 || 12)",
                'hh' => "sprintf('%02d', (\$time->{hour} % 12 || 12))",
-               'mm' => "sprintf('%02d', \$time->{min})",
+               'min' => "sprintf('%02d', \$time->{min})",
                'a' => "(\$time->{hour} < 12 ? 'a' : 'p')",
                'A' => "(\$time->{hour} < 12 ? 'A' : 'P')",
             );

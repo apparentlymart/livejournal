@@ -523,7 +523,7 @@ property string lang_fmt_time_short {
     noui = 1; 
     des = "Time format.";
 }
-set lang_fmt_time_short = "%%hh%%:%%mm%% %%a%%m";
+set lang_fmt_time_short = "%%hh%%:%%min%% %%a%%m";
 
 property string lang_fmt_month_short {
     noui = 1; 
