@@ -1,0 +1,88 @@
+<?page
+title=>Email gateway settings
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%POST %GET);
+
+    return "Sorry, this site is not configured to allow updating your
+        journal via email." unless $LJ::EMAIL_POST_DOMAIN;
+    return LJ::server_down_html() if $LJ::SERVER_DOWN;
+
+    my $u = LJ::get_remote();
+    return $ML{'error.noremote'} unless $u;
+
+    return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+
+    if ($POST{userid} == $u->{userid}) {
+        my @errors;
+
+        my $addresses = $POST{addresses};
+        my $pin = $POST{pin};
+
+        # needs $ML{'.error.pin'}
+        push @errors, "Your PIN is currently limited to alphabet
+            characters and numbers, and needs to be at least 4
+            characters long." unless $pin =~ /^([a-z0-9]){4,20}$/i;
+
+        my @allow_from;
+        foreach (split(/\0/, $addresses)) {
+            s/\s+//g;
+            next unless $_;
+            push @errors, "Invalid email address: " . LJ::ehtml($_) unless /\@/;
+            push @allow_from, $_;
+        }
+        return LJ::bad_input(@errors) if @errors;
+
+        LJ::set_userprop($u, "emailpost_pin", $pin);
+        LJ::set_userprop($u, "emailpost_allowfrom", join(", ", @allow_from));
+
+        my $ret;
+        $ret .= "<?h1 Success h1?>";
+        $ret .= "<?p Your email gateway settings have been saved. p?>";
+        if ($LJ::HELPURL{emailpost}) {
+            $ret .= "<?h1 Instructions h1?>";
+            $ret .= "<?p FIXME: link to helpurl p?>";
+        }
+        return $ret;
+    }
+
+    LJ::load_user_props($u, qw(emailpost_pin emailpost_allowfrom));
+    my @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
+
+    my $ret;
+    $ret .= "<form method='get' action='phonepost.bml'>\n";
+    $ret .= "</form>\n\n";
+
+    $ret .= "<?p If you'd like to be able to update your journal via email, please fill out the following fields: p?>";
+    $ret .= "<?h1 Allowed sender addresses h1?>";
+    $ret .= "<?p Only the addresses listed below are allowed to post to your account via the email gateway.  If no addresses are listed, posting via the email gateway will be disabled for your account.  p?>";
+    $ret .= "<form method='post' action='emailpost.bml'>\n";
+    $ret .= LJ::html_hidden(userid => $u->{userid});
+    $ret .= "<div style='margin-left:40px;'>";
+    for(1..3) { # Limited to 3 addresses.
+        $ret .= LJ::html_text({name=>'addresses',
+                value=>$address[$_ - 1], size=>40, maxlength=>80}) . '<br />';
+    }
+    $ret .= '</div><br />';
+
+    $ret .= "<?h1 PIN h1?>";
+    $ret .= "<?p Your PIN is used only for the email gateway. Do not
+        use your regular password for this. This way, if someone obtains
+        your PIN, they can't obtain full access to your journal.  The PIN
+        should be at least 4 characters long, and may only contain alphabet
+        characters and/or numbers. p?>";
+    $ret .= "<div style='margin-left:40px;'>";
+    $ret .= LJ::html_text({name=>'pin', value=>$u->{emailpost_pin}, maxlength=>20});
+
+    $ret .= "<?standout ";
+    $ret .= LJ::html_submit($ML{'/manage/phonepost.bml.save'});
+    $ret .= " standout?>";
+    $ret .= "</form>";
+    $ret .= '</div>';
+    return $ret;
+
+} _code?>
+<=body
+page?>

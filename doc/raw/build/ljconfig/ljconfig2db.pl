@@ -230,6 +230,10 @@ my %ljconfig =
                 'desc' => "If [ljconfig[user_vhosts]] is enabled, this will is the part of the URL that follows 'username'.",
                 'example' => '$DOMAIN',
             },
+            'email_post_domain' => {
+                'desc' => "If set, and your MTA is configured, users can post to their account via username@\$EMAIL_POST_DOMAIN.",
+                'example' => 'post.$DOMAIN',
+            },
             'default_style' => {
                 'desc' => "A hash that defines the default S2 layers to use for accounts.",
                 'default' => "{ 

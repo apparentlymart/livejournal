@@ -142,6 +142,10 @@
     #$USER_VHOSTS = 1;
     #$USER_DOMAIN = $DOMAIN;
 
+    # Support updating of journals via email?
+    # Users can post to user@$EMAIL_POST_DOMAIN.
+    #$EMAIL_POST_DOMAIN = "post.$DOMAIN";
+
     # Allow users to point their own domains here?
     #OTHER_VHOSTS = 1;
 
