@@ -52,11 +52,11 @@
 
     # check permissions
     return $err->($ML{'.error.privs.screen'})
-        if $mode eq "screen" && ! LJ::Talk::can_screen($dbs, $remote, $u, $up);
+        if $mode eq "screen" && ! LJ::Talk::can_screen($remote, $u, $up);
     return $err->($ML{'.error.privs.unscreen'})
-        if $mode eq "unscreen" && ! LJ::Talk::can_unscreen($dbs, $remote, $u, $up);
+        if $mode eq "unscreen" && ! LJ::Talk::can_unscreen($remote, $u, $up);
     return $err->($ML{'.error.privs.delete'})
-        if $mode eq "delete" && ! LJ::Talk::can_delete($dbs, $remote, $u, $up);
+        if $mode eq "delete" && ! LJ::Talk::can_delete($remote, $u, $up);
 
     # filter our talkids down to those that are actually attached to the log2
     # specified.  also, learn the state of all the items.
