@@ -107,7 +107,8 @@ sub clean
     my $cutcount = 0;
 
     my $total_fail = sub {
-        $$data = "[<b>Error:</b> Irreparable invalid markup in entry.  ".
+        my $tag = LJ::ehtml(@_);
+        $$data = "[<b>Error:</b> Irreparable invalid markup ('&lt;$tag&gt;') in entry.  ".
             "Owner must fix manually.  Raw contents below.]<br /><br />" .
             '<div style="width: 95%; overflow: auto">' .
             LJ::ehtml($$data) .
@@ -128,7 +129,7 @@ sub clean
             # for tags like <name/>, pretend it's <name> and reinsert the slash later
             $slashclose = 1 if ($tag =~ s!/$!!); 
 
-            return $total_fail->() unless $tag =~ /^\w([\w\-:_]*\w)?$/;
+            return $total_fail->($tag) unless $tag =~ /^\w([\w\-:_]*\w)?$/;
 
             # for incorrect tags like <name/attrib=val> (note the lack of a space) 
             # delete everything after 'name' to prevent a security loophole which happens
@@ -224,7 +225,7 @@ sub clean
                         # is returned by HTML::Parser as P_tag("='" => "='") Text( onmouseover...)
                         # which leads to reconstruction of valid HTML.  Clever!
                         # detect this, and fail.
-                        return $total_fail->();
+                        return $total_fail->("$tag $attr");
                     }
 
                     $hash->{$attr} =~ s/[\t\n]//g;
