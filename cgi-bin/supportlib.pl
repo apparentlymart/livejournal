@@ -654,7 +654,11 @@ sub mail_response_to_user
     my $body = "";
     my $dbh = LJ::get_db_writer();
     my $what = $type eq "answer" ? "an answer to" : "a comment on";
-    $body .= "Below is $what your support question regarding \"$sp->{'subject'}\".\n";
+    $body .= "Below is $what your support question regarding \"$sp->{'subject'}\"\n";
+
+    my $miniauth = mini_auth($sp);
+    $body .= "($LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth).\n\n";
+
     $body .= "="x70 . "\n\n";
     if ($faqid) {
         my $faqname = "";
@@ -662,34 +666,19 @@ sub mail_response_to_user
         $sth->execute;
         ($faqname) = $sth->fetchrow_array;
         if ($faqname) {
-            $body .= "FAQ QUESTION: " . $faqname . "\n";
+            $body .= "FAQ REFERENCE: $faqname\n";
             $body .= "$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid";
             $body .= "\n\n";
         }
     }
 
-    $body .= $res->{'message'};
-    $body .= "\n\n" . "="x70 . "\n";
-    $body .= "Did this answer your question?  If so, please CLOSE THIS SUPPORT REQUEST\n";
-    $body .= "so we can help other people by going here:\n";
-    if ($type eq "answer") {
-        $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'};$splid";
-    } else {
-        $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'}";
-    }
-    
-    if ($type eq "answer")
-    {
-        $body .= "\n\nIf this wasn't helpful, you need to go to the following address to prevent\n";
-        $body .= "this request from being closed in 7 days.  Click here:\n";
-        $body .= "$LJ::SITEROOT/support/act.bml?touch;$spid;$sp->{'authcode'}";
-    }
-    
-    my $miniauth = mini_auth($sp);
-    $body .= "\n\nTo read all the comments or add more, go here:\n";
-    $body .= "$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth\n\n";
+    $body .= "$res->{'message'}\n\nDid this answer your question?\nYES:\n";
+
+    $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'}";
+    $body .= ";$splid" if $type eq "answer";
+    $body .= "\nNO:\n$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth\n\n";
     $body .= "If you are having problems using any of the links in this email, please try copying and pasting the *entire* link into your browser's address bar rather than clicking on it.";
-    
+
     my $fromemail = $LJ::BOGUS_EMAIL;
     if ($sp->{_cat}->{'replyaddress'}) {
         my $miniauth = mini_auth($sp);
@@ -698,7 +687,7 @@ sub mail_response_to_user
         my $rep = "+${spid}z$miniauth\@";
         $fromemail =~ s/\@/$rep/;
     }
-    
+
     LJ::send_mail({ 
         'to' => $email,
         'from' => $fromemail,
