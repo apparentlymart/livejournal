@@ -400,5 +400,5 @@ function _writeControlRow(doc,caption,name) {
 }
 
 function colPic_set_imgprefix(prefix) {
-    cp_imgprefix = prefix;
+    colpic_imgprefix = prefix;
 }
