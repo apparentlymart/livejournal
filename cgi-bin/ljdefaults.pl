@@ -57,6 +57,30 @@
     $MAX_HINTS_LASTN ||= 100;
     $MAX_SCROLLBACK_LASTN ||= 400;
 
+    # set default capability limits if the user hasn't.
+    {
+	my %defcap = (
+		      'checkfriends' => 1,
+		      'checkfriends_interval' => 60,
+		      'friendsviewupdate' => 1,
+		      'friendsviewupdate' => 30,
+		      'makepoll' => 1,
+		      'maxfriends' => 500,
+		      'moodthemecreate' => 1,
+		      'moodthemecreate' => 1,
+		      'styles' => 1,
+		      'textmessage' => 1,
+		      'todomax' => 100,
+		      'todosec' => 1,
+		      'userdomain' => 0,
+		      'useremail' => 0,
+		      'userpics' => 5,
+		      );
+	foreach my $k (keys %defcap) {
+	    next if (defined $LJ::CAP_DEF{$k});
+	    $LJ::CAP_DEF{$k} = $defcap{$k};	    
+	}
+    }
 }
 
 # no dependencies.
