@@ -93,6 +93,10 @@
      foreach my $g (@{$greq->{'friendgroups'}}) {
 	 my $ck = ($fr && ($fr->{'groupmask'} & (1 << $g->{'id'}))) ?
 	     "checked='1'" : "";
+
+	 # by default, newly added friends are in default view unless unchecked
+	 $ck = "checked='1'" if (! $fr && $g->{'name'} eq "Default View");
+
 	 $body .= "<input type='checkbox' value='1' name='bit_$g->{'id'}' $ck> ";
 	 $body .= LJ::ehtml($g->{'name'}) . "<br />\n";
      }
