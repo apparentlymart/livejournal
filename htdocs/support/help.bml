@@ -72,12 +72,7 @@ my $total_open;
      unless ($total_count) {
          return "<?h1 No support requests! h1?><?p The support queue is currently empty.  :-) p?>";
      }
-     my $all = BML::self_link({ 'all' => 1 });
-     $ret .= "<p>[<b>$total_count</b> <a href='$all'>total</a> open requests]";
-
-     unless ($FORM{'all'}) {
-         $filterwhere .= " AND s.timecreate > UNIX_TIMESTAMP()-60*60*24*30";
-     }
+     $ret .= "<p>[<b>$total_count</b> total open requests]";
 
      $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='open' $filterwhere ORDER BY timecreate DESC");
  }
