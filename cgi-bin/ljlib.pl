@@ -8459,7 +8459,12 @@ sub clear_rel
 sub alloc_user_counter
 {
     my ($u, $dom, $recurse) = @_;
-    return undef unless $dom =~ /^[LTMBSRK]$/;
+
+    ##################################################################
+    # IF YOU UPDATE THIS MAKE SURE YOU ADD INITIALIZATION CODE BELOW #
+    return undef unless $dom =~ /^[LTMBSRK]$/;                       #
+    ##################################################################
+
     my $dbh = LJ::get_db_writer();
     return undef unless $dbh;
 
@@ -8505,6 +8510,9 @@ sub alloc_user_counter
                                       undef, $uid);
     } elsif ($dom eq "K") {
         $newmax = $u->selectrow_array("SELECT MAX(kwid) FROM userkeywords WHERE userid=?",
+                                      undef, $uid);
+    } elsif ($dom eq "B") {
+        $newmax = $u->selectrow_array("SELECT MAX(blobid) FROM userblob WHERE journalid=?",
                                       undef, $uid);
     }
     $newmax += 0;
