@@ -1,5 +1,12 @@
-Enter a username in the box at left.
+<html>
+<head>
+<title>Style Browser</title>
+</head>
+<body>
+<h1>Style Browser</h1>
+<p>Enter a username in the box on the left and click "Preview" to see a list of that users'
+public styles. In the list, click on the style name to view what the style looks like, or
+click the dash to view style information.</p>
+</body>
+</html>
 
-<p>Press "Make links"
-
-<p>You'll see that user's public styles.  Click the name or bullet for more info on that style.

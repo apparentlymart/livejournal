@@ -8,6 +8,9 @@
  my $sth = $dbh->prepare("SELECT * FROM style WHERE is_public='Y' AND styleid=$styleid");
  $sth->execute;
  my $sty = $sth->fetchrow_hashref;
+ unless ($sth->rows) {
+   return "Style $styleid does not exist or is not public.";
+ }
  my $ret = "";
 
  $ret .= "<H1>Style Info</H1>\n";

@@ -1,8 +1,7 @@
 <FORM TARGET="links" ACTION="links.bml" METHOD=GET>
-Username to preview:
+View styles of user:
 <INPUT NAME="user" SIZE=15 MAXLENGTH=15>
 <BR>
-<FONT SIZE=-1>Leave blank to see style info w/o a preview</FONT>
 
-<P><INPUT TYPE="SUBMIT" VALUE="Make links">
+<INPUT TYPE="SUBMIT" VALUE="Preview">
 </FORM>
