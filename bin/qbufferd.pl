@@ -73,6 +73,13 @@ if (!$opt_foreground && ($pid = fork))
     exit;
 } 
 
+# Close filehandles unless running in --debug or --foreground mode.
+unless ( $opt_debug || $opt_foreground ) {
+    close STDIN && open STDIN, "</dev/null";
+    close STDOUT && open STDOUT, "+>&STDIN";
+    close STDERR && open STDERR, "+>&STDIN";
+}
+
 # fork off a separate qbufferd process for all specified
 # job types in @LJ::QBUFFERD_ISOLATE, and then
 # another process for all other job types. The current process
