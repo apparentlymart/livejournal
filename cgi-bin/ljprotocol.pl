@@ -262,12 +262,13 @@ sub getdaycounts
     return undef unless check_altusage($dbs, $req, $err, $flags);
 
     my $u = $flags->{'u'};
+    my $uowner = $flags->{'u_owner'} || $u;
     my $ownerid = $flags->{'ownerid'};
 
     my $res = {};
     my ($db, $table, $ownercol) = ($dbs->{'reader'}, "log", "ownerid");
-    if ($u->{'clusterid'}) {
-        $db = LJ::get_cluster_reader($u);
+    if ($uowner->{'clusterid'}) {
+        $db = LJ::get_cluster_reader($uowner);
         ($table, $ownercol) = ("log2", "journalid");
     }
 
