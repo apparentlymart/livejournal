@@ -53,6 +53,8 @@ sub EntryPage
         'view' => $get->{'view'},
         'userpicref' => \%userpic,
         'userref' => \%user,
+        # user object is cached from call just made in EntryPage_entry
+        'up' => LJ::load_user($s2entry->{'poster'}->{'username'}),
     };
 
     my $userlite_journal = UserLite($u);

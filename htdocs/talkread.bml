@@ -251,6 +251,7 @@ body<=
      'view' => $GET{'view'},
      'userpicref' => \%userpics,
      'userref' => \%user,
+     'up' => $up,
  };
 
  my @comments = LJ::Talk::load_comments($u, $remote, "L", $itemid, $opts);
