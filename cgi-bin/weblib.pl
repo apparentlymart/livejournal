@@ -176,6 +176,30 @@ sub bad_input
     return $ret;
 }
 
+
+# <LJFUNC>
+# name: LJ::error_list
+# des: Returns an error bar with bulleted list of errors
+# returns: BML showing errors
+# args: error*
+# des-error: A list of errors
+# </LJFUNC>
+sub error_list
+{
+    my @errors = @_;
+    my $ret;
+    $ret .= "<?errorbar ";
+    $ret .= "<strong>";
+    $ret .= BML::ml('error.procrequest');
+    $ret .= "</strong><ul>";
+
+    foreach (@errors) {
+        $ret .= "<li>$_</li>";
+    }
+    $ret .= " </ul> errorbar?>";
+    return $ret;
+}
+
 sub tosagree_widget {
     my ($checked, $errstr) = @_;
 
