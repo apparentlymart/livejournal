@@ -1056,7 +1056,11 @@ that area. p?>
 
 /talkpost.bml.error.noreplypost=Replyto post not found (deleted?)
 
+/talkpost.bml.label.picturetouse= <a href='/allpics.bml?user=[[username]]'>Picture</a> to use: 
+
 /talkpost.bml.loganonip=<b>Notice!</b> This user has turned on the option that logs IP addresses of anonymous posters.
+
+/talkpost.bml.loginq=Login?
 
 /talkpost.bml.logyourip=<b>Notice!</b> This user has turned on the option that logs your IP address when posting.
 
@@ -1286,6 +1290,90 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /tools/memories.bml.uncategorized=Uncategorized
 
+/update.bml.altpost=Journal to post in:
+
+/update.bml.btn.update=Update Journal
+
+/update.bml.currmood=Current <a href="/moodlist.bml">Mood</a>:
+
+/update.bml.currmusic=Current Music:
+
+/update.bml.date=Date:
+
+/update.bml.default=default
+
+/update.bml.defaultjournal=([[user]]) -- default
+
+/update.bml.error.login=Error logging on:
+
+/update.bml.error.update=Error updating journal:
+
+/update.bml.event=Event:
+
+/update.bml.full=Full Update Page
+
+/update.bml.htmlokay=HTML okay; by default, newlines will be auto-formatted to <tt>&lt;BR&gt;</tt>
+
+/update.bml.localtime=Local time:
+
+/update.bml.loggingin=Logging in to server...
+
+/update.bml.login.success=Login successful.  Hello, [[name]]!
+
+/update.bml.noneother=None, or other:
+
+/update.bml.note=<b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.
+
+/update.bml.opt.backdate=Backdate Entry:
+
+/update.bml.opt.backdate.about=won't show on friends view
+
+/update.bml.opt.nocomments=Disallow Comments:
+
+/update.bml.opt.noemail=Don't email Comments:
+
+/update.bml.opt.noformat=Don't auto-format:
+
+/update.bml.opt.spellcheck=Spell check entry before posting
+
+/update.bml.options=Optional Settings
+
+/update.bml.other=Other:
+
+/update.bml.picture=<a href="[[url]]">Picture</a> to use:
+
+/update.bml.security.custom=Custom...
+
+/update.bml.security.friends=Friends
+
+/update.bml.security.head=Security Level:
+
+/update.bml.security.private=Private
+
+/update.bml.security.public=Public
+
+/update.bml.servermsg=Also, the server has a message for you:
+
+/update.bml.simple=You're looking at the simple page.  For more options, <a href="[[url]]">click here</a>.
+
+/update.bml.spellchecked=Your spell-checked post:
+
+/update.bml.subject=<b>Subject:</b> <i>(optional, for use on longer entries)</i>
+
+/update.bml.timeformat=24 hour time
+
+/update.bml.title=Update Journal
+
+/update.bml.title.readonly=Read-only mode
+
+/update.bml.update.about=If you don't want to <a href="/download/">download a client</a> for your computer, or if one doesn't exist for your computer, you may use this page to update your LiveJournal.  This is also useful if you're on vacation or away from your primary computer.
+
+/update.bml.update.head=Update your Journal...
+
+/update.bml.update.success=Update successful.  You may view your updated journal <a href="[[uri]]">here</a>.
+
+/update.bml.updating=Updating journal...
+
 BML.parse_multipart.parse=Error parsing upload
 
 BML.parse_multipart.toolarge=Upload too large
@@ -1345,7 +1433,17 @@ error.username_notfound=Username not found.
 
 Help=Help
 
+label.switch.button=Switch
+
+label.switch.header=Switch Journal
+
+label.switch.workwith=Work with journal:
+
 langname.en=English
+
+lostinfo.head=Forget something?
+
+lostinfo.text=If you forgot your username or password, <a href="lostinfo.bml">recover it here</a>.
 
 Password=Password
 

@@ -12,7 +12,7 @@
      ($title, $body, $bodyopts) = (\$r_title, \$r_body, \$r_bodyopts);
  }
 
- $$title = "Update Journal";
+ $$title = $ML{'.title'};
 
  if ($LJ::SERVER_DOWN) {
      $$body = LJ::server_down_html();
@@ -35,7 +35,7 @@
  if (LJ::get_cap($remote, "readonly") ||
      ($remote && $remote->{'clusterid'} && ! $dbcm))
  {
-     $$title = "Read-only mode";
+     $$title = $ML{'.title.readonly'};
      $$body = $LJ::MSG_READONLY_USER;
      return;
  }
@@ -56,7 +56,7 @@
  if ($mode eq "update")
  {
      unless (LJ::did_post()) {
-         $$title = "Error";
+         $$title = $ML{'Error'};
          $$body = "<?requirepost?>";
          return;
      }
@@ -79,18 +79,18 @@
      }
      LJ::do_request($dbs, \%FORM, \%res, $flags);
      
-     $$body .= "<?h1 Logging in to server... h1?>\n";
+     $$body .= "<?h1 $ML{'.loggingin'} h1?>\n";
      if ($res{'success'} eq "OK")
      {
          my $message = "";
          if ($res{'message'}) {
-             $message = "Also, the server has a message for you: <UL><LI><B><?_eh $res{'message'} _eh?></B></UL>";
+             $message = "$ML{'.servermsg'} <UL><LI><B><?_eh $res{'message'} _eh?></B></UL>";
          }
-         $$body .= "<?p Login successful.  Hello, <?_eh $res{'name'} _eh?>! $message p?>";
+         $$body .= "<?p ".BML::ml(".login.success", {'name' => "<?_eh $res{'name'} _eh?>"}) ." $message p?>";
      }
      else
      {
-         $$body .= "<?p Error logging on: <UL><LI><B><?_eh $res{'errmsg'} _eh?></B></UL> p?>";
+         $$body .= "<?p $ML{'.error.login'} <UL><LI><B><?_eh $res{'errmsg'} _eh?></B></UL> p?>";
          return;
      }
 
@@ -127,7 +127,7 @@
      delete $FORM{'clientversion'};
      LJ::do_request($dbs, \%FORM, \%res, $flags);
      
-     $$body .= "<?h1 Updating journal... h1?>\n";
+     $$body .= "<?h1 $ML{'.updating'} h1?>\n";
      if ($res{'success'} eq "OK")
      {
          my $uri = "/users/$FORM{'user'}/";
@@ -142,11 +142,11 @@
                  $uri = "/users/$FORM{'usejournal'}/";
              }	 
          }
-         $$body .= "<?p Update successful.  You may view your updated journal <A HREF=\"$uri\">here</A>. p?>";
+         $$body .= "<?p ".BML::ml(".update.success",{'uri' => $uri}) ." p?>";
      }
      else
      {
-         $$body .= "<?p Error updating journal: <UL><LI><B><?_eh $res{'errmsg'} _eh?></B></UL> p?>";
+         $$body .= "<?p $ML{'.error.update'} <UL><LI><B><?_eh $res{'errmsg'} _eh?></B></UL> p?>";
          return;
      }
      
@@ -157,15 +157,15 @@
  {
      $$bodyopts = "onLoad=\"settime();\"";
      
-     $$body .= "<?h1 Update your Journal... h1?><?p If you don't want to <A HREF=\"/download/\">download a client</A> for your computer, or if one doesn't exist for your computer, you may use this page to update your LiveJournal.  This is also useful if you're on vacation or away from your primary computer. p?><?hr?>";
+     $$body .= "<?h1 $ML{'.update.head'} h1?><?p $ML{'.update.about'} p?><?hr?>";
      
-     $$body .= "<FORM METHOD=POST ACTION=\"$SELF\" NAME=updateForm>";
-     $$body .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=update>";
+     $$body .= "<form method='post' action='$SELF' name='updateForm'>";
+     $$body .= "<input type='hidden' name='mode' value='update'>";
      if ($FORM{'do_spellcheck'}) {
-         $$body .= "<INPUT TYPE=HIDDEN NAME=did_spellcheck VALUE=1>";
+         $$body .= "<input type='hidden' name='did_spellcheck' value='1'>";
      }
-     $$body .= "<INPUT TYPE=HIDDEN NAME=oldmode VALUE=$mode>";
-     $$body .= "<TABLE><TR><TD><TABLE>";
+     $$body .= "<input type='hidden' name='oldmode' value='$mode'>";
+     $$body .= "<table><tr><td><table>";
      {
          my $opts = {};
          if ($remote && $FORM{'user'} && $FORM{'user'} ne $remote->{'user'}) {
@@ -176,9 +176,9 @@
          }
          $$body .= LJ::auth_fields(\%FORM, $opts);
      }
-     $$body .= "</TABLE></TD><TD>";
+     $$body .= "</table></td><td>";
 
-     $$body .= "<TABLE CELLSPACING=0 CELLPADDING=0>";
+     $$body .= "<table cellspacing='0' cellpadding='0'>";
   
      my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
      $year+=1900;
@@ -195,37 +195,37 @@
          $min = $FORM{'min'};
      }
 
-     $$body .= "<TR VALIGN=TOP><TD ALIGN=RIGHT ROWSPAN=2><B>Date:</B>&nbsp;</TD><TD NOWRAP><INPUT NAME=year SIZE=5 MAXLENGTH=4 VALUE=$year>-";
-     $$body .= "<INPUT NAME=mon SIZE=3 MAXLENGTH=2 VALUE=$mon>-";
-     $$body .= "<INPUT NAME=day SIZE=3 MAXLENGTH=2 VALUE=$mday></TD></TR>\n";
-     $$body .= "<TR><TD><I>(yyyy-mm-dd)</I></TD></TR>\n";
+     $$body .= "<tr valign='top'><td align='right' rowspan='2'><b>$ML{'.date'}</b>&nbsp;</td><td nowrap><input name='year' size='5' maxlength='4' value='$year'>-";
+     $$body .= "<input name='mon' size='3' maxlength='2' value='$mon'>-";
+     $$body .= "<input name='day' size='3' maxlength='2' value='$mday'></td></tr>\n";
+     $$body .= "<tr><td><i>(yyyy-mm-dd)</i></td></tr>\n";
      
-     $$body .= "<TR VALIGN=TOP><TD ALIGN=RIGHT ROWSPAN=2><B>Local time:</B>&nbsp;</TD><TD>";
-     $$body .= "<INPUT NAME=hour SIZE=3 MAXLENGTH=2 VALUE=$hour>:";
-     $$body .= "<INPUT NAME=min SIZE=3 MAXLENGTH=2 VALUE=$min></TD></TR>\n";
-     $$body .= "<TR><TD><I>(24 hour time)</I></TD></TR>\n";
+     $$body .= "<tr valign='top'><td align='right' rowspan='2'><b>$ML{'.localtime'}</b>&nbsp;</td><td>";
+     $$body .= "<input name='hour' size='3' maxlength='2' value='$hour'>:";
+     $$body .= "<input name='min' size='3' maxlength='2' value='$min'></td></tr>\n";
+     $$body .= "<tr><td><i>($ML{'.timeformat'})</i></td></tr>\n";
 
-     $$body .= "</TABLE></TD></TR></TABLE>\n";
-     $$body .= "<noscript><p style=\"font-size: 0.85em;\"><b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.</p></noscript>";
+     $$body .= "</table></td></tr></table>\n";
+     $$body .= "<noscript><p style=\"font-size: 0.85em;\">$ML{'.note'}</p></noscript>";
 
-     $$body .= "<UL><TABLE width=90%><TR><TD><B>Subject:</B> <I>(optional, for use on longer entries)</I><BR>";
-     $$body .= "<INPUT NAME=\"subject\" SIZE=50 MAXLENGTH=100 VALUE=\"" . LJ::ehtml($FORM{'subject'}) . "\"><P>";
+     $$body .= "<ul><table width='90%'><tr><td>$ML{'.subject'}<br>";
+     $$body .= "<input name='subject' size='50' maxlength='100' value='" . LJ::ehtml($FORM{'subject'}) . "'><p>";
 
      if ($spellcheck_html) {
-        $$body .= "<B>Your spell-checked post:</B><br>";
+         $$body .= "<b>$ML{'.spellchecked'}</b><br />";
          $$body .= $spellcheck_html;
-         $$body .= "<P>";
+         $$body .= "<p>";
      }
 
-     $$body .= "<b>Event:</b><br />";
+     $$body .= "<b>$ML{'.event'}</b><br />";
      $$body .= "<textarea name=\"event\" cols=\"50\" rows=\"10\" wrap=\"soft\" style=\"width: 99%\">";
      $$body .= LJ::ehtml($FORM{'event'});
      $$body .= "</textarea>";
-     $$body .= "<BR><?de (HTML okay; by default, newlines will be auto-formatted to <TT>&lt;BR&gt;</TT>) de?>";
+     $$body .= "<br /><?de ($ML{'.htmlokay'}) de?>";
      if ($LJ::SPELLER) {
-         $$body .= "<BR><input type=checkbox name=do_spellcheck value=1 id=\"spellcheck\"> <label for=\"spellcheck\">Spell check entry before posting</label>";
+         $$body .= "<br /><input type='checkbox' name='do_spellcheck' value='1' id='spellcheck'> <label for='spellcheck'>$ML{'.opt.spellcheck'}</label>";
      }
-     $$body .= "</TD></TR><TR><TD ALIGN=CENTER><INPUT TYPE=SUBMIT VALUE=\"Update Journal\"></TD></TR>";
+     $$body .= "</td></tr><tr><td align='center'><input type='submit' value=\"$ML{'.btn.update'}\"></td></tr>";
 
      if ($mode eq "full") 
      {
@@ -245,24 +245,24 @@
              });
          }
 
-         $$body .= "<TR><TD NOWRAP><INPUT TYPE=hidden NAME=webversion VALUE=full><?h2 Optional Settings h2?>";
+         $$body .= "<tr><td nowrap><input type='hidden' name='webversion' value='full'><?h2 $ML{'.options'} h2?>";
      
          if (@{$res->{'usejournals'}}) {
-             $$body .= "<P><B>Journal to post in: </B> ";
+             $$body .= "<p><b>$ML{'.altpost'} </b> ";
              $$body .= LJ::html_select({ 'name' => 'usejournal', 
                                         'selected' => $FORM{'usejournal'}, },
-                                      "", "($remote->{'user'}) -- default",
+                                      "", BML::ml(".defaultjournal", {'user' => $remote->{'user'}}),
                                       map { $_, $_ } @{$res->{'usejournals'}});
          }
 
-         $$body .= "<P><B>Security Level:</B> ";
-         my @secs = ("public", "Public",
-                     "private", "Private",
-                     "friends", "Friends");
+         $$body .= "<p><b>$ML{'.security.head'}</b> ";
+         my @secs = ("public", $ML{'.security.public'},
+                     "private", $ML{'.security.private'},
+                     "friends", $ML{'.security.friends'});
 
          my $raw;
          if (@{$res->{'friendgroups'}}) {
-             push @secs, ("custom", "Custom...");
+             push @secs, ("custom", $ML{'.security.custom'});
              $raw = "onChange=\"document.getElementById('custom_boxes').style.display = (this.selectedIndex == 3) ? 'block' : 'none';\"";
          }
          $$body .= LJ::html_select({ 'name' => 'security', 
@@ -285,27 +285,27 @@
              $$body .= "</blockquote>"
          }
          
-         $checked = $FORM{'prop_opt_preformatted'} ? "CHECKED" : "";
-         $$body .= "<P> <B>Don't auto-format:</B><INPUT TYPE=CHECKBOX NAME=\"prop_opt_preformatted\" VALUE=1 $checked>";
+         $checked = $FORM{'prop_opt_preformatted'} ? "checked" : "";
+         $$body .= "<p> <b>$ML{'.opt.noformat'}</b><input type='checkbox' name='prop_opt_preformatted' value='1' $checked>";
          $$body .= LJ::help_icon("noautoformat", " ", " ");
          $$body .= "&nbsp; ";
-         $checked = $FORM{'prop_opt_nocomments'} ? "CHECKED" : "";
-         $$body .= "<B>Disallow Comments:</B><INPUT TYPE=CHECKBOX NAME=\"prop_opt_nocomments\" VALUE=1 $checked>";
+         $checked = $FORM{'prop_opt_nocomments'} ? "checked" : "";
+         $$body .= "<b>$ML{'.opt.nocomments'}</b><input type='checkbox' name='prop_opt_nocomments' value='1' $checked>";
          $checked = $FORM{'prop_opt_noemail'} ? "checked" : "";
-         $$body .= "&nbsp; <b>Don't email Comments:</b><input type=\"checkbox\" name=\"prop_opt_noemail\" value=\"1\" $checked>";
+         $$body .= "&nbsp; <b>$ML{'.opt.noemail'}</b><input type='checkbox' name='prop_opt_noemail' value='1' $checked>";
 
-         $checked = $FORM{'prop_opt_backdated'} ? "CHECKED" : "";
-         $$body .= "<P><b>Backdate Entry:</b><INPUT TYPE=CHECKBOX NAME=\"prop_opt_backdated\" VALUE=1 $checked> (won't show on friends view)";
+         $checked = $FORM{'prop_opt_backdated'} ? "checked" : "";
+         $$body .= "<p><b>$ML{'.opt.backdate'}</b><input type='checkbox' name='prop_opt_backdated' value='1' $checked> ($ML{'.opt.backdate.about'})";
          
          if (@{$res->{'pickws'}}) {
-             $$body .= "<p><b><a href=\"$LJ::SITEROOT/allpics.bml?user=$remote->{'user'}\">Picture</a> to use:</b> ";
+             $$body .= "<p><b>".BML::ml(".picture", {'url' => "$LJ::SITEROOT/allpics.bml?user=$remote->{'user'}"})."</b> ";
              $$body .= LJ::html_select({'name' => 'prop_picture_keyword', 
                                        'selected' => $FORM{'prop_picture_keyword'}, },
                                       ("", "(default)", map { ($_, $_) } @{$res->{'pickws'}}));
              $$body .= LJ::help_icon("userpics", " ");
          }
 
-         $$body .= "<P><B>Current <A HREF=\"/moodlist.bml\">Mood</A>:</B>";
+         $$body .= "<p><b>$ML{'.currmood'}</b>";
 
          LJ::load_moods($dbs);
          my @sel;
@@ -317,22 +317,22 @@
 
          $$body .= LJ::html_select({'name' => 'prop_current_moodid',
                                    'selected' => $FORM{'prop_current_moodid'}, },
-                                  ("", "None, or other:", @sel));
+                                  ("", $ML{'.noneother'}, @sel));
 
-         $$body .= " Other: <INPUT NAME=\"prop_current_mood\" SIZE=15 MAXLENGTH=30 VALUE=\"" . LJ::ehtml($FORM{'prop_current_mood'}) . "\">";
-         $$body .= "<P><B>Current Music:</B> <INPUT NAME=\"prop_current_music\" SIZE=40 MAXLENGTH=60 VALUE=\"" . LJ::ehtml($FORM{'prop_current_music'}) . "\">";
-         $$body  .= "</TD></TR><TR><TD ALIGN=CENTER><INPUT TYPE=SUBMIT VALUE=\"Update Journal\">";
+         $$body .= " $ML{'.other'} <input name='prop_current_mood' size='15' maxlength='30' value='" . LJ::ehtml($FORM{'prop_current_mood'}) . "'>";
+         $$body .= "<p><b>$ML{'.currmusic'}</b> <input name='prop_current_music' size='40' maxlength='60' value='" . LJ::ehtml($FORM{'prop_current_music'}) . "'>";
+         $$body  .= "</td></tr><tr><td align='center'><input type='submit' value='$ML{'.btn.update'}'>";
      }
      else 
      {
-         $$body .= "<TR><TD>&nbsp;<P>You're looking at the simple page.  For more options, <A HREF=\"$SELF?mode=full\">click here</A>.</TD></TR>\n";
-         $$body .= "<link href='$SELF?mode=full' rel='Alternate' title='Full Update Page'>\n";
+         $$body .= "<tr><td>&nbsp;<p>" .BML::ml(".simple", {'url' => "$SELF?mode=full"}) ."</td></tr>\n";
+         $$body .= "<link href=\"$SELF?mode=full\" rel=\"Alternate\" title=\"$ML{'.full'}\">\n";
      }
      
-     $$body .= "</TD></TR></TABLE></UL></FORM>";
+     $$body .= "</td></tr></table></ul></form>";
 
      $$body .= <<'JAVASCRIPT_STUFF';
-<SCRIPT LANGUAGE="JavaScript"><!--
+<script language="JavaScript"><!--
         // for those of you reading the source.... the server will
         // automatically fill in the form with the time values for
         // the west coast, but what this does is if the client can
@@ -354,11 +354,11 @@ function settime() {
         f.min.value = twodigit(now.getMinutes());
 }
 
-// --></SCRIPT>
+// --></script>
 JAVASCRIPT_STUFF
 
  unless ($remote) {
-     $$body .= "<?h1 Forget something? h1?><?p If you forgot your username or password, <A HREF=\"lostinfo.bml\">recover it here!</A>. p?>";
+     $$body .= "<?h1 $ML{'lostinfo.head'} h1?><?p $ML{'lostinfo.text'} p?>";
  }
  return;
 }
