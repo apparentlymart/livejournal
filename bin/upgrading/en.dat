@@ -920,7 +920,7 @@ If yours is not listed, please contact us with information about how your servic
 
 /editinfo.bml.getselfemails.header=Get comments you post emailed to you
 
-/editinfo.bml.getselfemails.about=Check this if you wish to get an email every time you post a comment in a journal or community.  You will not get emails for anonymous comments.
+/editinfo.bml.getselfemails.about=Check this if you wish to get an email every time you post a comment in a journal or community.  You will not get email for anonymous comments.
 
 /editinfo.bml.hidefriendof.about=If you check this, the list of people that list you as a friend is hidden on your profile page.
 

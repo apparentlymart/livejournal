@@ -1472,7 +1472,7 @@ sub mail_comments {
     # them, so it shouldn't matter.)
     my $u = $comment->{u};
     LJ::load_user_props($u, 'opt_getselfemail', 'mailencoding') if $u;
-    if ($u && $u->{'opt_getselfemail'}) {
+    if ($u && $u->{'opt_getselfemail'} && LJ::get_cap($u, 'getselfemail')) {
         LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
             unless %LJ::CACHE_ENCODINGS;
         my $encoding = $u->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$u->{'mailencoding'}} : "UTF-8";

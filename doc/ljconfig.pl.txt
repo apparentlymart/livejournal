@@ -311,6 +311,7 @@
             'todosec' => 0,
             'friendsviewupdate' => 30,
             'findsim' => 1,
+            'getselfemail' => 0,
             );
 
     # capability class limits.

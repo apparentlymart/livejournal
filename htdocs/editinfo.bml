@@ -414,10 +414,11 @@ _code?>
                                 $extra ? ("$maxwidth|$maxheight", $extra) : ());
         $ret .= "</td></tr>\n";
 
-        # opt_bdaymail
+        # opt_getselfemail
         $ret .= "<tr valign='middle'><td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_getselfemail', 'id' => 'opt_getselfemail',
-                                 'selected' => $u->{'opt_getselfemail'} });
+                                 'selected' => $u->{'opt_getselfemail'}, 
+                                 'disabled' => !LJ::get_cap($u, 'getselfemail') });
         $ret .= "</td><td><b><label for='opt_getselfemail'>$ML{'.getselfemails.header'}</label></b></td></tr>\n";
         $ret .= "<tr><td>&nbsp;</td><td>$ML{'.getselfemails.about'}</td></tr>\n";
 
