@@ -93,8 +93,7 @@ sub process {
 
     # Validity checks.  We only care about these if they aren't using PGP.
     unless (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
-        return $err->("No allowed senders have been saved for your account.", $err_addr)
-            unless ref $addrlist;
+        return $err->("No allowed senders have been saved for your account.") unless ref $addrlist;
         my $ok = 0;
         foreach (keys %$addrlist) {
             if (lc($from) eq lc) {
