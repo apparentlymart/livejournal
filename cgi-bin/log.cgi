@@ -25,7 +25,7 @@ REQUEST:
 	print "\n";
 	
 	foreach (sort keys %out) {
-	    print &eurl($_), "=", &eurl($out{$_}), "&";
+	    print LJ::eurl($_), "=", LJ::eurl($out{$_}), "&";
 	}
     } 
     else 
