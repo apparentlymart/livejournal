@@ -308,13 +308,16 @@ sub screen_comment {
     my $prop = LJ::get_prop("log", "hasscreened");
 
     if ($clustered) {
-        my $updated = $dbcm->do("UPDATE talk2 SET state='S' WHERE journalid=$userid AND jtalkid IN ($in)");
+        my $updated = $dbcm->do("UPDATE talk2 SET state='S' ".
+                                "WHERE journalid=$userid AND jtalkid IN ($in) ".
+                                "AND nodetype='L' AND nodeid=$itemid ".
+                                "AND state NOT IN ('S','D')");
         if ($updated > 0) {
             $dbcm->do("UPDATE log2 SET replycount=replycount-$updated WHERE journalid=$userid AND jitemid=$itemid");
             $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ($userid, $itemid, $prop->{'id'}, '1')");
         }
     } else {
-        my $updated = $dbcm->do("UPDATE talk SET state='S' WHERE talkid IN ($in)");
+        my $updated = $dbcm->do("UPDATE talk SET state='S' WHERE talkid IN ($in) AND state NOT IN ('S','D')");
         if ($updated > 0) {
             $dbcm->do("UPDATE log SET replycount=replycount-$updated WHERE itemid=$itemid");
             $dbcm->do("REPLACE INTO logprop (itemid, propid, value) VALUES ($itemid, $prop->{'id'}, '1')");
@@ -341,7 +344,10 @@ sub unscreen_comment {
     my $prop = LJ::get_prop("log", "hasscreened");
 
     if ($clustered) {
-        my $updated = $dbcm->do("UPDATE talk2 SET state='A' WHERE journalid=$userid AND jtalkid IN ($in) AND state='S'");
+        my $updated = $dbcm->do("UPDATE talk2 SET state='A' ".
+                                "WHERE journalid=$userid AND jtalkid IN ($in) ".
+                                "AND nodetype='L' AND nodeid=$itemid ".
+                                "AND state='S'");
         if ($updated > 0) {
             $dbcm->do("UPDATE log2 SET replycount=replycount+$updated WHERE journalid=$userid AND jitemid=$itemid");
 
