@@ -1,6 +1,7 @@
 <?_code
 
  use strict;
+ use vars qw($title $body);
 
  $title = "Birthdays";
  $body = "";
@@ -15,9 +16,17 @@
  my $lastmon = 0;
 
  my $dbr = LJ::get_db_reader();
- my $sth = $dbr->prepare("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0 ORDER BY 3, 4");
+ my $sth = $dbr->prepare("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0 LIMIT 750");
  $sth->execute;
- while (my $bday = $sth->fetchrow_hashref) {
+ my @bdays;
+ push @bdays, $_ while $_ = $sth->fetchrow_hashref;
+ @bdays = sort {
+     ($a->{'month'} <=> $b->{'month'}) ||
+     ($a->{'day'} <=> $b->{'day'}) ||
+     ($a->{'user'} cmp $b->{'user'})
+ } @bdays;
+
+ foreach my $bday (@bdays) {
      LJ::text_out(\$bday->{'name'});
      if ($bday->{'month'} != $lastmon) {
          if ($lastmon) { $body .= "</ul>\n"; }
