@@ -22,12 +22,12 @@ body<=
     }
 
     # sort bar
-    $ret .= "<?p <strong>Sort by:</strong> [<a href='users.bml'> Nothing
-	    </a>|<a href='users.bml?sort=id'> User ID
-	    </a>|<a href='users.bml?sort=user'> Username
-	    </a>|<a href='users.bml?sort=jt'> Journal Type
-	    </a>|<a href='users.bml?sort=sv'> Status Vis
-	    </a>|<a href='users.bml?sort=re'> Number of reluser edges
+    $ret .= "<?p <strong>Sort by:</strong> [<a href='userlist.bml'> Nothing
+	    </a>|<a href='userlist.bml?sort=id'> User ID
+	    </a>|<a href='userlist.bml?sort=user'> Username
+	    </a>|<a href='userlist.bml?sort=jt'> Journal Type
+	    </a>|<a href='userlist.bml?sort=sv'> Status Vis
+	    </a>|<a href='userlist.bml?sort=re'> Number of reluser edges
 	    </a>] <br /><br /> p?>";
 
     my @keyorder;
@@ -49,6 +49,8 @@ body<=
         };
         @keyorder = sort { $g->($ss{$a}->{'reluser'}) <=>
 			       $g->($ss{$b}->{'reluser'}) } keys %ss;
+    } else {
+        @keyorder = keys %ss;
     }
 
     $ret .= "<table width='100%' border='1'>
