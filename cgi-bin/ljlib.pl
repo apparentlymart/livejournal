@@ -3726,6 +3726,7 @@ sub start_request
     %LJ::S1::REQ_CACHE_STYLEMAP = (); # styleid -> uid mappings
     %LJ::REQ_DBIX_TRACKER = ();       # canonical dbrole -> DBIx::StateTracker
     %LJ::REQ_DBIX_KEEPER = ();        # dbrole -> DBIx::StateKeeper
+    %LJ::REQ_HEAD_HAS = ();           # avoid code duplication for js
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
