@@ -11,6 +11,7 @@ my $opt_drop = 0;
 my $opt_pop = 0;
 my $opt_confirm = "";
 my $opt_skip = "";
+my $opt_help = 0;
 my $cluster = 0;   # by default, upgrade master.
 exit 1 unless
 GetOptions("runsql" => \$opt_sql,
@@ -19,8 +20,17 @@ GetOptions("runsql" => \$opt_sql,
            "confirm=s" => \$opt_confirm,
            "cluster=i" => \$cluster,
            "skip=s" => \$opt_skip,
+           "help" => \$opt_help,
            );
 
+if ($opt_help) {
+    die "Usage: update-db.pl
+  -r  --runsql       Actually do the SQL, instead of just showing it.
+  -p  --populate     Populate the database with the latest required base data.
+  -d  --drop         Drop old unused tables (default is to never)
+      --cluster <n>  Upgrade cluster number <n> (default is global cluster)
+";
+}
 
 ## make sure $LJHOME is set so we can load & run everything
 unless (-d $ENV{'LJHOME'}) {
