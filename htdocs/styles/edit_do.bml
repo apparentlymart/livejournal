@@ -99,6 +99,10 @@ body<=
         $sth = $dbh->prepare("DELETE FROM style WHERE user=? AND styleid=?");
         $sth->execute($u->{'user'}, $styleid);
 
+        # delete from stylecache and memcache, too
+        $dbh->do("DELETE FROM s1stylecache WHERE user=? AND styleid=?", undef, $u->{'user'}, $styleid);
+        LJ::MemCache::delete([$styleid,"s1styc:$styleid"]);
+
         # success
         return "<?h1 Deleted h1?><?p The style has been deleted. You can view your current list of styles " .
                "<a href='edit.bml$getextra'>here</a> p?>"
