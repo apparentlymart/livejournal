@@ -165,8 +165,8 @@ sub trans
             if (-d _) { $file .= "/index.bml"; }
             $file =~ s!/{2,}!/!g;
             $r->filename($file);
-            $LJ::IMGPREFIX = "/img";
-            $LJ::STATPREFIX = "/stc";
+            $LJ::IMGPREFIX = "$LJ::SSLROOT/img";
+            $LJ::STATPREFIX = "$LJ::SSLROOT/stc";
             return OK;
         }
         return FORBIDDEN;
