@@ -329,19 +329,7 @@ sub bml_block
         $req->{'didcode'} = 1;
         %CodeBlockOpts = ();
 
-        # create the anon sub
-        my ($csub, $pop_cache);
-        if ($data =~ /^\#BML:cache/) {
-            my $md5 = Digest::MD5::md5_hex($data);
-            $csub = $CodeBlockCache{$md5};
-            $pop_cache = $md5 unless $csub;
-        }
-        $csub ||= (eval("sub {\n package BMLCodeBlock; no strict; \n $data\n }"))[0];
-        if ($@) { return "<B>[Error: $@]</B>"; }
-        $CodeBlockCache{$pop_cache} = $csub if $pop_cache;
-
-        # and try to run it (wrapped in eval to catch run-time errors)
-        my $ret = (eval { $csub->(); })[0];
+        my $ret = (eval("{\n package BMLCodeBlock; no strict; \n $data\n }"))[0];
         if ($@) { return "<B>[Error: $@]</B>"; }
         
         return $ret if $CodeBlockOpts{'raw'} or $ret eq "";
