@@ -477,6 +477,11 @@
     #        'your_class' => 3,  # define any special MogileFS classes you need
     #    },
     #);
+
+    # In addition to setting up MogileFS above, you need to enable some options
+    # if you want to use MogileFS.
+    #$CAPTCHA_MOGILEFS = 1; # turn this on to put captchas in MogileFS
+    #$USERPIC_MOGILEFS = 1; # uncomment to put userpics in MogileFS
     
 }
 

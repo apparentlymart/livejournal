@@ -197,6 +197,7 @@
     $MOGILEFS_CONFIG{domain}                 ||= 'livejournal';
     $MOGILEFS_CONFIG{classes}                ||= {};
     $MOGILEFS_CONFIG{classes}->{userpics}    ||= 3;
+    $MOGILEFS_CONFIG{classes}->{captcha}     ||= 2;
 
 }
 
