@@ -892,7 +892,7 @@ set text_month_screened_comments = "w/ Screened";
 property string text_multiform_check {
     des = "Text beside a comment multi-action checkbox.";
 }
-set text_multiform_check = "Select";
+set text_multiform_check = "Select:";
 
 property string text_multiform_des {
     des = "Text on the multiform action line.";
@@ -1280,12 +1280,7 @@ function Page::print_entry_poster(Entry e) {
 function Page::print_entry(Entry e) {
     ## For most styles, this will be overridden by FriendsPage::print_entry and such.
     """<div class="entry" id="entry$e.itemid">\n""";
-    "<h3>";
-    print $e.security_icon->as_string();
-    if ($e.subject) {
-        " $e.subject";
-    }
-    "</h3>\n";
+    "<h3>$e.security_icon $e.subject</h3>\n";
     if ($.view == "friends" or $e.poster.username != $e.journal.username) {
         "<div>"; $this->print_entry_poster($e); "</div>";
     }
@@ -1441,22 +1436,17 @@ function MonthPage::print_body {
 }
 
 function MonthDay::print_subjectlist() {
-    "<table>\n";
+    # Too many tables...
     foreach var Entry e ($.entries) {
-        "<tr><td>";
-        print $e.time->time_format("short");
-        "</td><td>";
+        print $e.time->time_format("short") + ": ";
         if ($e.poster.username != $e.journal.username) {
-            $e.poster->print();
+            $e.poster->print(); " ";
         }
-        "</td><td>";
-        if ($e.security != "") { 
-            " " + $e.security_icon->as_string(); 
-        } 
+        print $e.security_icon;
         if ($e.subject != "") {
-            "<a href=\"$e.permalink_url\">$e.subject</a>";
+            " <a href=\"$e.permalink_url\">$e.subject</a>";
         } else {
-            "<a href=\"$e.permalink_url\" style=\"font-style: italic;\">($*text_nosubject)</a>";
+            " <a href=\"$e.permalink_url\" style=\"font-style: italic;\">($*text_nosubject)</a>";
         }
         if ($e.comments.count > 0) {
             " - " + get_plural_phrase($e.comments.count, "text_read_comments");
@@ -1464,9 +1454,8 @@ function MonthDay::print_subjectlist() {
         if ($e.comments.screened) {
             " <b>$*text_month_screened_comments</b>";
         }
-        "</td></tr>\n";
+        "<br />\n";
     }
-    "</table>";
 }
 
 ### Day view
@@ -1568,11 +1557,10 @@ function EntryPage::print_comment (Comment c) {
     $barlight->lightness(($barlight->lightness() + 255) / 2);
     var Color barc = $c.depth % 2 ? $*color_comment_bar : $barlight;
     var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
-    "<div style='background: $barc; margin-top: 10px;'>";
-    "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%;'><tr valign='top'>";
-    var int td = 3;
+
+    "<div style='background: $barc; margin-top: 10px; padding: 2px'>";
+    "<table summary='0' style='width: 100%;'><tr valign='top'>";
     if (defined $c.userpic and $*comment_userpic_style != "off") { 
-        $td = 4;
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
         # WARNING: this will later be done by the system (it'll be a
@@ -1582,15 +1570,26 @@ function EntryPage::print_comment (Comment c) {
             $w = $w / 2;
             $h = $h / 2;
         }
-        print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' alt='' /></td>";
+        print "<td><img src='$c.userpic.url' width='$w' height='$h' alt='' /></td>";
     }
-    print "<td align='left'><strong>$*text_comment_from</strong> $poster</td>\n";
-    print "<td align='left'><strong>$*text_comment_date</strong> ";
-        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td>\n";
-    print "<td align='right'><strong>(<a href='$c.permalink_url'>$*text_permalink</a>)</strong></td>\n</tr>\n";
-    print "<tr valign='top'><td colspan='$td' style='width: 95%'>";
+    "<td align='left'>";
     if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>\n"; }
+    print "<strong>$*text_comment_from</strong> $poster<br />\n";
+    print "<strong>$*text_comment_date</strong> ";
+        print $c.time->date_format("long") + " - " + $c.time->time_format();
     if ($c.metadata{"poster_ip"}) { print " ($*text_comment_ipaddr " + $c.metadata{"poster_ip"} + ")"; }
+    print " <strong>(<a href='$c.permalink_url'>$*text_permalink</a>)</strong>\n";
+
+    var Link link;
+    $link = $c->get_link("delete_comment"); " $link";
+    $link = $c->get_link("screen_comment"); " $link";
+    $link = $c->get_link("unscreen_comment"); " $link";
+
+    if ($this.multiform_on) {
+        " <label for='ljcomsel_$c.talkid'>$*text_multiform_check</label> ";
+        $c->print_multiform_check();
+    }
+
     print "</td></tr></table></div>";
     print "<div style='margin-left: 5px'>$c.text</div>\n";
     print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>$*text_comment_reply</a>) ";
@@ -1639,7 +1638,7 @@ function EntryPage::print_body
     "</td></tr></table>\n";
 
     "<h2>"; 
-    print $e.security_icon->as_string();
+    print $e.security_icon;
     if ($e.subject) { " $e.subject"; }
     "</h2>\n";
 
@@ -1653,11 +1652,15 @@ function EntryPage::print_body
     {
         print """<hr />(<a href="$e.comments.post_url">$*text_post_comment</a>)""";
         if ($.comment_pages.total_subitems > 0) {
+            "<hr />";
             $.comment_pages->print();
+            $this->print_multiform_start();
             $this->print_comments($.comments);
             print "<hr />";
             print """(<a href="$e.comments.post_url">$*text_post_comment</a>)""";
             if ($.comment_pages.all_subitems_displayed) { print "<hr />"; }
+            $this->print_multiform_actionline();
+            $this->print_multiform_end();
             $.comment_pages->print();
         }
     }
