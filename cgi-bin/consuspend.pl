@@ -11,6 +11,7 @@ $cmd{'suspend'}->{'handler'} = \&suspend;
 $cmd{'unsuspend'}->{'handler'} = \&suspend;
 $cmd{'getemail'}->{'handler'} = \&getemail;
 $cmd{'get_maintainer'}->{'handler'} = \&get_maintainer;
+$cmd{'get_moderator'}->{'handler'} = \&get_moderator;
 $cmd{'finduser'}->{'handler'} = \&finduser;
 $cmd{'infohistory'}->{'handler'} = \&infohistory;
 $cmd{'change_journal_status'}->{'handler'} = \&change_journal_status;
@@ -211,7 +212,8 @@ sub finduser
 
 sub get_maintainer
 {
-    my ($dbh, $remote, $args, $out) = @_;
+    my ($dbh, $remote, $args, $out, $edge) = @_;
+    $edge ||= 'A';
 
     unless (scalar(@$args) == 2) {
         push @$out, [ "error", "This command takes exactly 1 argument.  Consult the reference." ];
@@ -235,14 +237,20 @@ sub get_maintainer
     # plain user and we should get a list of what they maintain instead of
     # getting a list of what maintains them
     my $ids = $u->{journaltype} eq 'P' ?
-              LJ::load_rel_target($u->{userid}, 'A') :
-              LJ::load_rel_user($u->{userid}, 'A');
+              LJ::load_rel_target($u->{userid}, $edge) :
+              LJ::load_rel_user($u->{userid}, $edge);
     $ids ||= [];
 
     # finduser loop
     finduser($dbh, $remote, ['finduser', 'userid', $_], $out) foreach @$ids;
 
     return 1;
+}
+
+sub get_moderator
+{
+    # simple pass through, but specify to use the 'M' edge
+    return get_maintainer(@_, 'M');
 }
 
 sub infohistory

@@ -519,6 +519,16 @@ $cmd{'get_maintainer'} = {
                'community or user name' => "The username of the account you want to lookup.",
                ],
     };
+
+$cmd{'get_moderator'} = {
+    'def' => 'consuspend.pl',
+    'privs' => [qw(finduser)],
+    'des' => "Finds out the current moderator(s) of a community or the communities that a user moderates.  If you pass a community as the argument, the moderator(s) will be listed.  Otherwise, if you pass a user account, the account(s) they moderate will be listed.",
+    'argsummary' => '<community or user name>',
+    'args' => [
+               'community or user name' => "The username of the account you want to lookup.",
+               ],
+    };
     
 $cmd{'change_journal_type'} = {
     'privs' => [qw(changejournaltype)],
