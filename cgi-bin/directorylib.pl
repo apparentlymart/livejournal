@@ -102,11 +102,12 @@ sub do_search
 
     ## keep track of what table aliases we've used
     my %alias_used;
-    $alias_used{'u'} = "user";  # used later.
+    $alias_used{'u'} = "?";     # never used anymore?
     $alias_used{'c'} = "?";     # might be used later, if opt_format eq "com"
     $alias_used{'uu'} = "?";    # might be used later, if opt_sort is by time
 
-    my %conds;
+    my %conds;      # where condition -> 1
+    my %useridcol;  # all keys here equal each other (up.userid == uu.userid == ..)
 
     ## foreach each critera, build up the query
     foreach my $crit (@crits)
@@ -147,7 +148,7 @@ sub do_search
         my $cond = $crit->{'userid'};
         if ($cond) {
             $cond =~ s/\{(\w+?)\}/$map_alias{$1}/g;
-            $conds{"$cond=u.userid"} = 1;
+            $useridcol{$cond} = 1;
         }
     }
 
@@ -164,35 +165,41 @@ sub do_search
     } elsif ($req->{'opt_format'} eq "com") {
         $fields .= ", u.name, c.ownerid, c.membership, c.postlevel";
         $alias_used{'c'} = "community";
-        $conds{"c.userid=u.userid"} = 1;
+        $useridcol{"c.userid"} = 1;
     }
 
     $req->{'opt_sort'} ||= "ut";
     if ($req->{'opt_sort'} eq "ut") {
         $alias_used{'uu'} = 'userusage';
-        $conds{'uu.userid=u.userid'} = 1;
+        $useridcol{"uu.userid"} = 1;
         $orderby = "ORDER BY uu.timeupdate DESC";
     } elsif ($req->{'opt_sort'} eq "user") {
         $orderby = "ORDER BY u.user";
     } elsif ($req->{'opt_sort'} eq "name") {
         $orderby = "ORDER BY u.name";
-    } 
+    }
 
     my $all_fields = "u.userid, u.user, u.journaltype, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(u.timeupdate) AS 'secondsold' $fields";
 
     # delete reserved table aliases the didn't end up being used
-    {
-        my @del;
-        foreach (keys %alias_used) {
-            push @del, $_ if ($alias_used{$_} eq "?");
+    foreach (keys %alias_used) {
+        delete $alias_used{$_} if $alias_used{$_} eq "?";
+    }
+
+    # add clauses to make all userid cols equal each other
+    my $useridcol;  # any one
+    foreach my $ca (keys %useridcol) {
+        foreach my $cb (keys %useridcol) {
+            next if $ca eq $cb;
+            $conds{"$ca=$cb"} = 1;
         }
-        foreach (@del) { delete $alias_used{$_}; }
+        $useridcol = $ca;
     }
 
     my $fromwhat = join(", ", map { "$alias_used{$_} $_" } keys %alias_used);
     my $conds = join(" AND ", keys %conds);
 
-    my $sql = "SELECT u.userid FROM $fromwhat WHERE $conds $orderby LIMIT $MAX_RETURN_RESULT";
+    my $sql = "SELECT $useridcol FROM $fromwhat WHERE $conds $orderby LIMIT $MAX_RETURN_RESULT";
 
     if ($req->{'sql'}) {
         $info->{'errmsg'} = "SQL: $sql";
@@ -206,7 +213,8 @@ sub do_search
 
     ## let's see if it's cached.
     {
-        my $csql = "SELECT userids FROM dirsearchres2 WHERE qdigest=$qdig AND dateins > DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
+        my $csql = "SELECT userids FROM dirsearchres2 WHERE qdigest=$qdig ".
+            "AND dateins > DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
         my $sth = $dbdir->prepare($csql);
         $sth->execute;
         if ($dbdir->err) {  $info->{'errmsg'} = $dbdir->errstr; return 0; }
