@@ -155,12 +155,6 @@ sub handle_userid {
     # get a handle
     my $dbcm = get_db_handle($u->{clusterid});
 
-    # get all their photos that aren't in mogile already
-    my $rows = $dbcm->selectall_arrayref
-        ("SELECT filetype, blobid FROM phonepostentry WHERE userid = ? AND (location <> 'mogile' OR location IS NULL)",
-         undef, $u->{userid});
-    return unless @$rows;
-
     # print that we're doing this user
     print "$extra$u->{user}($u->{userid})\n";
 
@@ -169,6 +163,12 @@ sub handle_userid {
     if ($u->{clusterid} != $cid) {
         return unless $purge;
 
+        # verify they have some rows on the new side
+        my $count = $dbcm->selectrow_array
+            ("SELECT COUNT(*) FROM phonepostentry WHERE userid = ?",
+             undef, $u->{userid});
+        return unless $count;
+    
         # if we get here, the user has indicated they want data purged, get handle
         my $to_purge_dbcm = get_db_handle($cid);
 
@@ -185,6 +185,13 @@ sub handle_userid {
         # nothing else to do here
         return;
     } 
+
+    # get all their photos that aren't in mogile already
+    my $rows = $dbcm->selectall_arrayref
+        ("SELECT filetype, blobid FROM phonepostentry WHERE userid = ? AND (location <> 'mogile' OR location IS NULL)",
+         undef, $u->{userid});
+    return unless @$rows;
+
 
     # if a user has been moved to another cluster, but the source data from
     # phonepost2 wasn't deleted, we need to ignore the user
