@@ -1437,6 +1437,9 @@ function EntryPage::print_comment (Comment c) {
     if (defined $c.userpic and $*comment_userpic_style != "off") { 
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
+        # WARNING: this will later be done by the system (it'll be a
+        # constructional property), so don't copy this hack into your
+        # layout layers or you'll be messed up later.
         if ($*comment_userpic_style == "small") {
             $w = $w / 2;
             $h = $h / 2;
