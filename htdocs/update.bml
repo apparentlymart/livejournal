@@ -351,11 +351,12 @@
         writeRichText('rte', 'event', '$jevent', '100%', 300, true);
     //-->
 </script>
+<noscript>
 RTE
     }
     $$body .= LJ::html_textarea({ 'name' => 'event', 'value' => $POST{event} || $GET{event},
-            'rows' => '20', 'cols' => '50', 'style' => 'width: 100%', 'wrap' => 'soft' });
-    $$body .= '<noscript><?de ' . $ML{'.htmlokay.norich'} . ' de?></noscript>';
+        'rows' => '20', 'cols' => '50', 'style' => 'width: 100%', 'wrap' => 'soft' });
+    $$body .= '</noscript>' if $richtext;
 
     my $jrich = "<?de " . LJ::ejs(BML::ml(".htmlokay.rich", { 'opts' => 'href="#" onClick="enable_rte()"' })) . " de?>";
     my $jnorich = "<?de " . LJ::ejs($ML{'.htmlokay.norich'}) . " de?>";
@@ -373,6 +374,7 @@ RTE
     //-->
 </script>
 RTE
+        $$body .= '<noscript><?de ' . $ML{'.htmlokay.norich'} . ' de?></noscript>';
     }
     $$body .= '<br />';
 
