@@ -191,6 +191,8 @@ sub make_feed
             $event =~ s!<lj-poll-$pollid>!<div><a href="$LJ::SITEROOT/poll/?id=$pollid">View Poll: $name</a></div>!g;
         }
 
+        my $ppid = $1
+                if $event =~ m!<lj-phonepost journalid=['"]\d+['"] dpid=['"](\d+)['"] />!;
         $event = LJ::exml($event);
 
         my $ditemid = $itemid*256 + $it->{'anum'};
@@ -214,6 +216,7 @@ sub make_feed
             comments   => ($logprops{$itemid}->{'opt_nocomments'} == 0),
             music      => LJ::exml($logprops{$itemid}->{'current_music'}),
             mood       => $mood,
+            ppid       => $ppid,
         };
         push @cleanitems, $cleanitem;
     }
@@ -280,6 +283,9 @@ sub create_view_rss
         if ($it->{comments}) {
             $ret .= "  <comments>$journalinfo->{link}$ditemid.html</comments>\n";
         }
+        # support 'podcasting' enclosures
+        $ret .= LJ::run_hook( "pp_rss_enclosure",
+                undef, $u->{userid}, ( $it->{ppid} >> 8 ), 'rss' ) if $it->{ppid};
         # TODO: add author field with posterid's email address, respect communities
         $ret .= "  <lj:music>$it->{music}</lj:music>\n" if $it->{music};
         $ret .= "  <lj:mood>$it->{mood}</lj:mood>\n" if $it->{mood};
