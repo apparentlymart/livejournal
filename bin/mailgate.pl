@@ -72,7 +72,8 @@ $body =~ s/\s+$//;
 ### spam
 if ($body =~ /I send you this file in order to have your advice/ ||
     $body =~ /^Content-Type: application\/octet-stream/ ||
-    $body =~ /^(Please see|See) the attached file for details(\.)?$/)
+    $body =~ /^(Please see|See) the attached file for details\.?$/ ||
+    $subject =~ /^(Undelive|Mail System Error - |ScanMail Message: |\+\s*SPAM|Norton AntiVirus)/)
 {
     $parser->filer->purge;
     exit 0;
