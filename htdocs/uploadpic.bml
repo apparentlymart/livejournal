@@ -18,12 +18,11 @@ P=)
 (=STANDOUT
 <TABLE>
 (=_CODE
- require 'ljlib.pl'; 
  return &auth_fields();
  _CODE=)
-<TR><TD><INPUT TYPE=RADIO NAME="src" VALUE="file" CHECKED> From File:</TD><TD><INPUT TYPE="file" NAME="userpic"></TD></TR>
-<TR><TD><INPUT TYPE=RADIO NAME="src" VALUE="url"> From URL:</TD><TD><INPUT NAME="urlpic" SIZE=40></TD></TR>
-<TR><TD></TD><TD><INPUT TYPE="CHECKBOX" NAME="make_default" CHECKED VALUE=1> Make this your default picture</FONT></TD></TR>
+<TR><TD><INPUT TYPE=RADIO NAME="src" VALUE="file" CHECKED> From File:</TD><td align="left"><input type="file" name="userpic"></TD></TR>
+<TR><TD><INPUT TYPE=RADIO NAME="src" VALUE="url"> From URL:</TD><td align="left"><input name="urlpic" size="40"></TD></TR>
+<TR><TD></TD><td align="left"><INPUT TYPE="CHECKBOX" NAME="make_default" CHECKED VALUE=1> Make this your default picture</FONT></TD></TR>
 <TR><TD></TD><TD><INPUT TYPE="SUBMIT" VALUE="Proceed..."></FONT></TD></TR>
 </TABLE>
 STANDOUT=)

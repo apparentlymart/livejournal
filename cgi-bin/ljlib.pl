@@ -147,19 +147,19 @@ sub auth_fields
 	$alturl .= ($alturl =~ /\?/) ? "&amp;" : "?";
 	$alturl .= "altlogin=1";
 
-	$ret .= "<TR><TD COLSPAN=2>You are currently logged in as <B>$remote->{'user'}</B>.<BR>If this is not you, <A HREF=\"$alturl\">click here</A>.\n";
-	$ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$remote->{'user'}\">\n";
-	$ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpass\"><BR>&nbsp;\n";
-	$ret .= "</TD></TR>\n";
+	$ret .= "<tr><td colspan=\"2\" align=\"left\">You are currently logged in as <B>$remote->{'user'}</B>.<BR>If this is not you, <a href=\"$alturl\">click here</a>.\n";
+	$ret .= "<input type=\"hidden\" name=\"user\" value=\"$remote->{'user'}\">\n";
+	$ret .= "<input type=\"hidden\" name=\"hpassword\" value=\"$hpass\"><br />&nbsp;\n";
+	$ret .= "</td></tr>\n";
     } else {
-	$ret .= "<TR><TD>Username:</TD><TD><INPUT TYPE=TEXT NAME=user SIZE=15 MAXLENGTH=15 VALUE=\"";
+	$ret .= "<tr><td>Username:</td><td align=\"left\"><input type=\"text\" name=\"user\" size=\"15\" maxlength=\"15\" value=\"";
 	my $user = $opts->{'user'};
 	unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
 	$ret .= BMLUtil::escapeall($user) unless ($FORM{'altlogin'});
-	$ret .= "\"></TD></TR>\n";
-	$ret .= "<TR><TD>Password:</TD><TD>\n";
-	$ret .= "<INPUT TYPE=password NAME=password SIZE=15 MAXLENGTH=30 VALUE=\"" . LJ::ehtml($opts->{'password'}) . "\">";
-	$ret .= "</TD></TR>\n";
+	$ret .= "\"></td></tr>\n";
+	$ret .= "<tr><td>Password:</td><td align=\"left\">\n";
+	$ret .= "<input type=\"password\" name=\"password\" size=\"15\" maxlength=\"30\" value=\"" . LJ::ehtml($opts->{'password'}) . "\">";
+	$ret .= "</td></tr>\n";
     }
     return $ret;
 }
