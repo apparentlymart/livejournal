@@ -10,7 +10,7 @@
      my $url = $FORM{'url'};
      my $skip = $FORM{'skip'};
      my $qskip = $skip+0;
-     my $qurl = $dbh->quote($url);
+     my $qurl = $dbr->quote($url);
      my $eurl = LJ::ehtml($url);
      my $uurl = LJ::eurl($url);
 
