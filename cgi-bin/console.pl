@@ -272,6 +272,42 @@ $cmd{'print'} = {
     },
 };
 
+$cmd{'deletetalk'} = {
+    'handler' => \&delete_talk,
+    'privs' => [qw(deletetalk)],
+    'des' => "Delete a comment.",
+    'argsummary' => '<talkid>',
+    'args' => [
+	       'itemid' => "The unique 'talkid' number of the comment to be deleted.",
+	       ],
+    };
+
+
+sub delete_talk
+{
+    my ($dbh, $remote, $args, $out) = @_;
+
+    unless ($remote->{'priv'}->{'deletetalk'}) {
+	push @$out, [ "error", "You do not have the required privlidge to do this command." ];
+	return 0;
+    }
+
+    my $qtalkid = $args->[1]+0;
+    unless ($qtalkid > 0) {
+	push @$out, [ "error", "Argument must be a positive integer (the talkid)." ];
+        return 0;
+    }
+    
+    my $sth = $dbh->do("UPDATE talk SET state='D' WHERE talkid=$qtalkid");
+    if ($dbh->err) { 
+	push @$out, [ "error", $dbh->errstr ];
+	return 0;
+    } else { 
+	push @$out, [ "info", "talkid $qtalkid state changed to deleted" ];
+	return 1;
+    }
+}
+
 sub change_journal_type
 {
     my ($dbh, $remote, $args, $out) = @_;
