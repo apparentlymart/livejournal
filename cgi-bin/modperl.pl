@@ -64,4 +64,7 @@ ErrorDocument 500 /500-error.html
 });
 }
 
+# set this before we fork
+$LJ::CACHE_CONFIG_MODTIME = (stat("$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"))[9];
+
 1;
