@@ -39,9 +39,7 @@ if ($LJ::IS_DEV_SERVER) {
 $LJ::DBIRole = new DBI::Role {
     'timeout' => $LJ::DB_TIMEOUT,
     'sources' => \%LJ::DBINFO,
-    'weights_from_db' => $LJ::DBWEIGHTS_FROM_DB,
     'default_db' => "livejournal",
-    'messages_to' => \&procnotify_callback,
     'time_check' => 60,
     'time_report' => \&dbtime_callback,
 };
@@ -6624,7 +6622,7 @@ sub procnotify_check
     my $now = time;
     return if $LJ::CACHE_PROCNOTIFY_CHECK + 30 > $now;
     $LJ::CACHE_PROCNOTIFY_CHECK = $now;
-    
+
     my $dbr = LJ::get_db_reader();
     my $max = $dbr->selectrow_array("SELECT MAX(nid) FROM procnotify");
     return unless defined $max;
