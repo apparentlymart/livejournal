@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 #
 
+use strict;
+
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
@@ -12,7 +14,7 @@ sub do_request
     my ($dbh, $req, $res, $flags) = @_;
 
     # declare stuff
-    my ($user, $userid, $lastitemid, $name, $paidfeatures, $correctpassword, $status, $statusvis, $track, $sth);
+    my ($user, $userid, $lastitemid, $journaltype, $name, $paidfeatures, $correctpassword, $status, $statusvis, $track, $sth);
 
     # initialize some stuff
     %{$res} = ();                      # clear the given response hash
@@ -102,6 +104,9 @@ sub do_request
     }
 
     $userid += 0;
+    
+    # setup the user object manually since the above stuff is old
+    my $u = { 'user' => $user, 'userid' => $userid };
 
     ################################ AUTHENTICATED NOW ################################
 
@@ -410,15 +415,13 @@ sub do_request
     if ($req->{'mode'} eq "friendof" ||
 	($req->{'mode'} eq "getfriends" && $req->{'includefriendof'}))
     {
-        $sth = $dbh->prepare("SELECT u.user, u.journaltype, f.fgcolor, f.bgcolor FROM friends f, user u WHERE u.userid=f.userid AND f.friendid=$userid AND u.statusvis='V' ORDER BY user");
+	my $limitnum = $req->{'friendoflimit'}+0;
+	my $limit = $limitnum ? "LIMIT $limitnum" : "";
+        $sth = $dbh->prepare("SELECT u.user, u.name, u.journaltype, f.fgcolor, f.bgcolor FROM friends f, user u WHERE u.userid=f.userid AND f.friendid=$userid AND u.statusvis='V' ORDER BY user $limit");
         $sth->execute;
         my @friendof;
         push @friendof, $_ while $_ = $sth->fetchrow_hashref;
-        my $userin = join(", ", map { $dbh->quote($_->{'user'}) } @friendof);
-        $sth = $dbh->prepare("SELECT user, name FROM user WHERE user IN ($userin)");
-        $sth->execute;
-        my %name;
-        $name{$_->{'user'}} = $_->{'name'} while $_ = $sth->fetchrow_hashref;
+
         my $i=0;
         foreach (@friendof)
         {
@@ -427,7 +430,7 @@ sub do_request
 	  if ($_->{'journaltype'} eq "C") {
 	      $res->{"friendof_${i}_type"} = "community";
 	  }
-	  $res->{"friendof_${i}_name"} = $name{$_->{'user'}};
+	  $res->{"friendof_${i}_name"} = $_->{'name'};
 	  $res->{"friendof_${i}_fg"} = $_->{'fgcolor'};
 	  $res->{"friendof_${i}_bg"} = $_->{'bgcolor'};
         }
@@ -443,23 +446,19 @@ sub do_request
     ###
     if ($req->{'mode'} eq "getfriends")
     {
-        $sth = $dbh->prepare("SELECT u.user AS 'friend', u.journaltype, f.fgcolor, f.bgcolor, f.groupmask FROM user u, friends f WHERE u.userid=f.friendid AND f.userid=$userid AND u.statusvis='V'");
+	my $limitnum = $req->{'friendlimit'}+0;
+	my $limit = $limitnum ? "LIMIT $limitnum" : "";
+        $sth = $dbh->prepare("SELECT u.user AS 'friend', u.name, u.journaltype, f.fgcolor, f.bgcolor, f.groupmask FROM user u, friends f WHERE u.userid=f.friendid AND f.userid=$userid AND u.statusvis='V' ORDER BY u.user $limit");
         $sth->execute;
-        my @friendof;
-        push @friendof, $_ while $_ = $sth->fetchrow_hashref;
-	@friendof = sort { $a->{'friend'} cmp $b->{'friend'} } @friendof;
+        my @friends;
+        push @friends, $_ while $_ = $sth->fetchrow_hashref;
 
-        my $userin = join(", ", map { $dbh->quote($_->{'friend'}) } @friendof);
-        $sth = $dbh->prepare("SELECT user, name FROM user WHERE user IN ($userin)");
-        $sth->execute;
-        my %name;
-        $name{$_->{'user'}} = $_->{'name'} while $_ = $sth->fetchrow_hashref;
         my $i=0;
-        foreach (@friendof)
+        foreach (@friends)
         {
 	  $i++;
 	  $res->{"friend_${i}_user"} = $_->{'friend'};
-	  $res->{"friend_${i}_name"} = $name{$_->{'friend'}};
+	  $res->{"friend_${i}_name"} = $_->{'name'};
 	  $res->{"friend_${i}_fg"} = $_->{'fgcolor'};
 	  $res->{"friend_${i}_bg"} = $_->{'bgcolor'};
 	  if ($_->{'groupmask'} != 1) {
@@ -531,7 +530,7 @@ sub do_request
 		    $friend_count++;
 		}
 
-		if ($friend_count > LJ::get_limit("friends", $paidfeatures, 250)) {
+		if ($friend_count > LJ::get_limit("friends", $paidfeatures, 750)) {
 		    $error_flag = 1;
 		    next ADDFRIEND;
 		}
@@ -692,7 +691,7 @@ sub do_request
 		'view' => 'lastn',
 		'userid' => $ownerid,
 		'remoteid' => $ownerid,
-		'itemshow' => $MAX_HINTS_LASTN,
+		'itemshow' => $LJ::MAX_HINTS_LASTN,
 	    });
 	    
             my $itemid_in = join(",", 0, @itemids);
@@ -850,13 +849,14 @@ sub do_request
 	if ($posterid != $oldevent->{'posterid'}) {
 	    my $allow = 0;
 	    if ($req->{'event'} !~ /\S/) {
-		## deleting.  check to see if this person's a community maintainer.  (has 'sharedjournal' priv on it)
-		my $quser = $dbh->quote($req->{'usejournal'});
-		$sth = $dbh->prepare("SELECT COUNT(*) FROM priv_map pm, priv_list pl WHERE pm.prlid=pl.prlid AND pl.privcode='sharedjournal' AND pm.userid=$userid AND pm.arg=$quser");
-		$sth->execute;
-		my ($is_manager) = $sth->fetchrow_array;
-		if ($is_manager) { $allow = 1; }
-		
+		## deleting.
+		if ($ownerid == $u->{'userid'}) {
+		    ## community account can delete it (ick)
+		    $allow = 1;
+		} elsif (LJ::check_priv($dbh, $u, "sharedjournal", $req->{'usejournal'})) {
+		    ## if user is a community maintainer they can delete it too (good)
+		    $allow = 1;
+		}
 	    }
 	    if (! $allow) {
 		$res->{'errmsg'} = "You can only edit journal entries in shared journals that you posted.";
@@ -964,7 +964,7 @@ sub do_request
 		$qallowmask != $oldevent->{'allowmask'}
 		)
 	    {
-		$qsecurity = $dbh->quote($security);
+		my $qsecurity = $dbh->quote($security);
 		$sth = $dbh->prepare("UPDATE log SET eventtime=$qeventtime, year=$qyear, month=$qmonth, day=$qday, security=$qsecurity, allowmask=$qallowmask WHERE itemid=$qitemid");
 		$sth->execute;
 	    }
@@ -975,7 +975,7 @@ sub do_request
 		if ($security eq "public" || $security eq "private") {
 		    $dbh->do("DELETE FROM logsec WHERE ownerid=$ownerid AND itemid=$qitemid");
 		} else {
-		    $qsecurity = $dbh->quote($security);
+		    my $qsecurity = $dbh->quote($security);
 		    $dbh->do("REPLACE INTO logsec (ownerid, itemid, allowmask) VALUES ($ownerid, $qitemid, $qallowmask)");		    
 		}
 	    }
@@ -1397,7 +1397,7 @@ sub do_request
 	my ($lastdate, $sth);
 
 	## have a valid date?
-	$lastupdate = $req->{'lastupdate'};
+	my $lastupdate = $req->{'lastupdate'};
 	if ($lastupdate) {
 	    if ($lastupdate !~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/) {
 		$res->{'success'} = "FAIL";
