@@ -221,6 +221,10 @@ border: 1px solid #000000;
 margin-top: 1em;
 }
 
+form#postform table {
+background: $*clr_box_back;
+color: $*clr_box_text;
+}
 """;
 }
 
@@ -725,7 +729,7 @@ function ReplyPage::print_body() {
         print ": "+$c.subject;
     }
 
-    "</h3>\n<div class=\"entry\">\n";
+    "</h2>\n<div class=\"entry\">\n";
     if (defined $c.userpic and $*comment_userpic_style != "off") {
         """<img src="$c.userpic.url" """;
         """width="$c.userpic.width" height="$c.userpic.height" """;
