@@ -4689,14 +4689,6 @@ sub make_journal
     return $ret;
 }
 
-sub syn_cost
-{
-    my $watchers = shift;
-    return 1 if $watchers < 1;
-    return 1/(log($watchers)/log(5)+1);
-}
-
-
 # <LJFUNC>
 # name: LJ::canonical_username
 # des:
@@ -6054,36 +6046,6 @@ sub can_use_journal
 
     $res->{'errmsg'} = "You do not have access to post to this journal.";
     return 0;
-}
-
-sub can_add_syndicated
-{
-    my ($u, $su) = @_;  # user and syndicated user
-    my $quota = LJ::get_cap($u, "synd_quota");
-    return 0 unless $quota;
-
-    my $used;
-
-    # TAG:FR:ljlib:can_add_syndicated1
-    my $dbh = LJ::get_dbh("master");
-    my $sth = $dbh->prepare("SELECT s.userid, COUNT(*) FROM syndicated s, friends fa, friends fb ".
-                            "WHERE fa.userid=? AND fa.friendid=s.userid  ".
-                            "AND fb.friendid=s.userid GROUP BY 1");
-    $sth->execute($u->{'userid'});
-    while (my ($sid, $ct) = $sth->fetchrow_array) {
-        # if user already has this friend, doesn't change their count to add it again.
-        return 1 if ($sid == $su->{'userid'});
-        $used += LJ::syn_cost($ct);
-        return 0 if $used > $quota;
-    }
-
-    # TAG:FR:ljlib:can_add_syndicated2
-    # they're under quota so far.  would this account push them over?
-    my $ct = $dbh->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=?", undef,
-                                   $su->{'userid'});
-    $used += LJ::syn_cost($ct + 1);
-    return 0 if $used > $quota;
-    return 1;
 }
 
 sub set_logprop

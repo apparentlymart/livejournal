@@ -25,18 +25,10 @@ $caps_general{'checkfriends_interval'} = {
     type => 'integer',
     desc => 'Time before clients can call "checkfriends" (use min).',
 };
-$caps_general{'synd_befriend'} = {
-    type => 'boolean',
-    desc => 'User can befriend syndicated accounts.',
-};
 $caps_general{'synd_create'} = {
     type => 'boolean',
     desc => 'User can create syndicated accounts.',
 };
-$caps_general{'synd_quota'} = {
-    type => 'integer',
-    desc => "Limit used to determine how many syndicated accounts can be added to friends lists",
-},
 $caps_general{'findsim'} = {
     type => 'boolean',
     desc => 'User is able to use the similar interests matching feature',

@@ -152,5 +152,16 @@ general /create.bml.tos.p1
 general /create.bml.email.text
 general /create.bml.email.note
 
-
-
+general /syn/index.bml.table.cost
+general /syn/index.bml.quota.text
+general /syn/index.bml.quota.your
+general /syn/index.bml.quota.numbers
+general /syn/index.bml.invalid.overquota
+general /syn/index.bml.invalid.overquota.text
+general /syn/index.bml.invalid.overquota.title
+general /syn/index.bml.invalid.overquota.username
+general /syn/index.bml.accounttype.notallowed
+general /syn/index.bml.add.other.title
+general /syn/index.bml.add.other.text
+general /syn/index.bml.notused
+general /userinfo.bml.syn.cost

@@ -84,9 +84,7 @@ sub error_message
              "307" => "Selected journal no longer exists.",
 
              # Limit errors
-             "401" => "Your account type doesn't permit adding syndicated accounts as friends.",
              "402" => "Your IP address is temporarily banned for exceeding the login failure rate.",
-             "403" => "This would push you over your syndication quota.",
              "404" => "Cannot post",
              "405" => "Post frequency limit.",
              "406" => "Client is making repeated requests.  Perhaps it's broken?",
@@ -1681,12 +1679,6 @@ sub editfriends
         # point the user to the redirected username.
         if (! $row) {
             $error_flag = 1;
-        } elsif ($row->{'journaltype'} eq "Y" && 
-                 ! LJ::get_cap($u, "synd_befriend")) {
-            return $fail->(401);
-        } elsif ($row->{'journaltype'} eq "Y" && 
-                 ! LJ::can_add_syndicated($u, $row)) {
-            return $fail->(403);
         } elsif ($row->{'journaltype'} eq "R") {
             return $fail->(154);
         } elsif ($row->{'statusvis'} ne "V") {

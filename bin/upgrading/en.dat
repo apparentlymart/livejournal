@@ -1436,6 +1436,10 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /friends/add.bml.confirm.text=To add <b>[[user]]</b> to your friends list, click the button below.
 
+/friends/add.bml.confirm.syn.header=Add syndicated feed <b>[[user]]</b> as a friend?
+
+/friends/add.bml.confirm.syn.title=Add Syndicated Feed
+
 /friends/add.bml.confirm.title=Add Friend
 
 /friends/add.bml.error1.header=Log In First
@@ -2627,13 +2631,11 @@ that area. p?>
 
 /syn/index.bml.account=Account:
 
-/syn/index.bml.accounttype.notallowed=Your account type doesn't allow befriending syndicated accounts.
-
 /syn/index.bml.add=Add Feed
 
-/syn/index.bml.add.other.text=Add a feed to your friends list.  Enter either the account name, the feed URL, or both, if you're creating a new feed.
+/syn/index.bml.add.byurl.text=Add a feed to your friends list by entering the feed URL below.
 
-/syn/index.bml.add.other.title=Add Other Feed
+/syn/index.bml.add.byurl.title=Add Feed by URL
 
 /syn/index.bml.add.pop.text=The following are some popular feeds you're not currently watching:
 
@@ -2642,6 +2644,12 @@ that area. p?>
 /syn/index.bml.add.selected=Add Selected
 
 /syn/index.bml.back=Back
+
+/syn/index.bml.create=Create Feed
+
+/syn/index.bml.create.name=The URL you have entered is not currently being syndicated on this site.  Please enter an account name to use to syndicate this feed.
+
+/syn/index.bml.error.nocreate=The URL you have entered is not currently being syndicated on this site.  Your account type does not have the ability to create new syndicated feeds.
 
 /syn/index.bml.error.unknown=Unknown Error
 
@@ -2673,14 +2681,6 @@ that area. p?>
 
 /syn/index.bml.invalid.notrss.title=Data not XML formatted
 
-/syn/index.bml.invalid.overquota=Adding this feed would put you over your syndication account quota.
-
-/syn/index.bml.invalid.overquota.text=Creating this RSS feed would put you over your syndication quota.
-
-/syn/index.bml.invalid.overquota.title=Over quota
-
-/syn/index.bml.invalid.overquota.username=Watching [[user]] would put you over your syndication account quota.
-
 /syn/index.bml.invalid.port=Non-standard port number not allowed
 
 /syn/index.bml.invalid.reserved=This account name is reserved. Please choose a different account name.
@@ -2693,21 +2693,11 @@ that area. p?>
 
 /syn/index.bml.loginrequired.title=Login Required
 
-/syn/index.bml.notused=(won't be used if feed exists)
-
 /syn/index.bml.promo.text=After you've created a syndicated account, share it with others! The more people there are watching a syndicated account, the more points are freed up to read and create syndicated accounts.
-
-/syn/index.bml.quota.numbers=You are using <b>[[used]]</b> of your allowed <b>[[total]]</b> points.
-
-/syn/index.bml.quota.text=All users have a quota for how many feeds they can befriend, based on account type.  Befriending a syndicated account costs a variable amount, depending on the popularity of the feed.  Popular feeds cost less, as the expense of the system maintaining the feed is shared by all the watchers.   If you're the sole watcher of a feed, it costs 1 point.  If there are 5 people, it costs a half point.  At 25 people, one third of a point, and so on.
-
-/syn/index.bml.quota.your=Your quota
 
 /syn/index.bml.remove=Remove Selected
 
 /syn/index.bml.table.account=Account
-
-/syn/index.bml.table.cost=Point Cost
 
 /syn/index.bml.table.feed=Feed
 
@@ -3428,8 +3418,6 @@ This could be because: <ol>
 /userinfo.bml.nonexist.name=Unknown user
 
 /userinfo.bml.sendmessage.body=<a href="[[link]]">Send <b>[[user]]</b> a text message</a><br />on his/her cellphone/pager.
-
-/userinfo.bml.syn.cost=Syndication Cost
 
 /userinfo.bml.syn.last.never=Never
 

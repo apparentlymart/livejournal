@@ -15,11 +15,6 @@ body<=
     }
     return "<?h1 $ML{'error.suspended.title'} h1?><?p $ML{'error.suspended.text'} p?>" if $u->{'statusvis'} eq "S";
 
-    my $quota = LJ::get_cap($u, "synd_quota");
-    unless ($quota) {
-        return "<?h1 $ML{'Sorry'} h1?><?p $ML{'.accounttype.notallowed'} p?>";
-    }
-
     if (LJ::did_post() && $POST{'userid'} != $u->{'userid'}) {
         return "<?h1 $ML{'.invalid.submission'} h1?><?p $ML{'.user.nomatch'} p?>";
     }
@@ -32,7 +27,6 @@ body<=
     $sth->execute($u->{'userid'});
     my $used = 0;
     my %count;
-    my %cost;
     my %syn;
     while (my ($suserid, $user, $url, $count) = $sth->fetchrow_array) {
         if ($POST{'action:remove'} && $POST{"defriend_$user"}) {
@@ -42,8 +36,6 @@ body<=
             next;
         }
         $count{$user} = $count;
-        $cost{$user} = LJ::syn_cost($count);
-        $used += $cost{$user};
         $syn{$user} = $url;
     }
 
@@ -54,12 +46,12 @@ body<=
     
     # add custom feed
     if ($POST{'action:addcustom'}) {
-        my $acct = $POST{'acct'};
-        my $url = $POST{'synurl'};
+        my $acct = LJ::trim($POST{'acct'});
+        my $url = LJ::trim($POST{'synurl'});
 
         if ($acct ne "") {
             return $error->($ML{'.invalid.accountname'})
-                unless $acct =~ /^\w{3,15}$/;
+                if $acct && $acct !~ /^\w{3,15}$/;
             foreach my $re ("^system\$", @LJ::PROTECTED_USERNAMES) {
                 next unless ($acct =~ /$re/);
                 return $error->($ML{'.invalid.reserved'});
@@ -87,8 +79,22 @@ body<=
                                           undef, $url);
             
             unless ($su) {
-                return "<?h1 $ML{'.invalid.overquota.title'} h1?><?p $ML{'.invalid.overquota.text'} p?>"
-                    if $used+1 > $quota;
+                # check cap to create new feeds
+                return $error->($ML{'.error.nocreate'})
+                    unless LJ::get_cap($u, 'synd_create');
+
+                # if no account name, give them a proper entry form to pick one, but don't reprompt
+                # for the url, just pass that through (we'll recheck it anyway, though)
+                unless ($acct) {
+                    my $ret .= "<?h1 $ML{'.create'} h1?><?p $ML{'.create.name'} p?>";
+                    $ret .= "<form method='post' action='./'>"; 
+                    $ret .= LJ::html_hidden("userid", $u->{'userid'}, 'synurl', $url);
+                    $ret .= "<blockquote>";
+                    $ret .= "<p>$ML{'.account'} <input size='15' maxlength='15' name='acct' />";
+                    $ret .= "<p><input name='action:addcustom' type='submit' value='" . LJ::ehtml($ML{'.create'}) . "' />";
+                    $ret .= "</blockquote></form>";
+                    return $ret;
+                }
                 
                 return "<?h1 $ML{'.invalid.needname.title'} h1?><?p $ML{'.invalid.needname.text'} p?>"
                     unless $acct;
@@ -123,6 +129,7 @@ body<=
                                               undef, $id);
             }
         } elsif ($acct) {
+            # account but no URL, we can add this in any case
             $su = $dbh->selectrow_hashref("SELECT u.user, s.* FROM syndicated s, useridmap u ".
                                           "WHERE u.userid=s.userid AND u.user=?",
                                           undef, $acct);
@@ -130,27 +137,22 @@ body<=
                 return $error->($ML{'.invalid.notexist'});
             }
         } else {
+            # need at least a URL
             return $error->($ML{'.invalid.needurl'});
         }
-        
+
         return $error->($ML{'.error.unknown'}) unless $su;
-        unless ($cost{$su->{'user'}}) 
-        {
-            # TAG:FR:bml_syn:count_friendofs
-            my $count = $dbh->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=?", undef,
-                                              $su->{'userid'});
-            $count = $count + 1;
-            my $cost = LJ::syn_cost($count);
-            if ($used + $cost > $quota) {
-                return "<?h1 $ML{'Sorry'} h1?><?p $ML{'.invalid.overquota'} p?><?p " .
-                        BML::ml('Backlink', {'link' => '/syn/', 'text' => $ML{'.back'}}) . " p?>";
-            }
-            LJ::add_friend($u->{'userid'}, $su->{'userid'}, { 'defaultview' => 1 });
-            $count{$su->{'user'}} = $count;
-            $cost{$su->{'user'}} = $cost;
-            $syn{$su->{'user'}} = $su->{'synurl'};
-            $used += $cost;
-        }
+
+        # at this point, we have a new account, or an old account, but we have an account, so
+        # let's redirect them to the add page
+        return BML::redirect("$LJ::SITEROOT/friends/add.bml?user=$su->{user}");
+        
+        # TAG:FR:bml_syn:count_friendofs
+        my $count = $dbh->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=?", undef,
+                                          $su->{'userid'});
+        LJ::add_friend($u->{'userid'}, $su->{'userid'}, { 'defaultview' => 1 });
+        $count{$su->{'user'}} = $count+1; # +1 to include us
+        $syn{$su->{'user'}} = $su->{'synurl'};
     }
 
     # get most popular feeds from memcache
@@ -169,18 +171,10 @@ body<=
         # skip suspended/deleted accounts, already watched feeds
         next if $friends->{$suserid} || $suser->{'statusvis'} ne "V";
 
-        my $cost = LJ::syn_cost($count + 1);
         if ($POST{'action:add'} && $POST{"add_$user"}) {
-            if ($used + $cost < $quota) {
-                LJ::add_friend($u->{'userid'}, $suserid, { 'defaultview' => 1 });
-                $count{$user} = $count+1;
-                $cost{$user} = $cost;
-                $syn{$user} = $url;
-                $used += $cost;
-            } else {
-                return "<?h1 $ML{'Sorry'} h1?><?p " . BML::ml ('.invalid.overquota.username', {'user' => LJ::ljuser($user, { 'type' => 'Y' })}) . " p?><?p " .
-                        BML::ml('Backlink', {'link' => '/syn/', 'text' => $ML{'.back'}}) . " p?>";
-            }
+            LJ::add_friend($u->{'userid'}, $suserid, { 'defaultview' => 1 });
+            $count{$user} = $count+1;
+            $syn{$user} = $url;
         } else {
             push @pop, [ $user, $url, $count ];
             last if @pop >= 20;
@@ -189,12 +183,7 @@ body<=
 
     # intro paragraph
     my $title = BML::ml('.using.title', {'sitename' => $LJ::SITENAME});
-    my $ret = "<?h1 $title h1?><?p $ML{'.using.text'} p?>" .
-              "<?p $ML{'.quota.text'} p?><?p $ML{'.promo.text'} p?>";
-
-    $used = sprintf("%0.03f", $used);
-    $quota = sprintf("%0.03f", $quota);
-    $ret .= "<?h1 $ML{'.quota.your'} h1?><?p " . BML::ml('.quota.numbers', {'used' => $used, 'total' => $quota}) . " p?>";
+    my $ret = "<?h1 $title h1?><?p $ML{'.using.text'} p?><?p $ML{'.promo.text'} p?>";
 
     $ret .= "<form method='post' action='./'>"; 
     $ret .= LJ::html_hidden("userid", $u->{'userid'});
@@ -202,15 +191,13 @@ body<=
     if ($used) {
         $ret .= "<p><table cellpadding='3' style='margin-bottom: 10px;'>";
         $ret .= "<tr><td></td><td><b>$ML{'.table.account'}</b></td><td><b>$ML{'.table.feed'}</b></td>";
-        $ret .= "<td align='right'><b>$ML{'.table.watchers'}</b></td><td align='right'><b>$ML{'.table.cost'}</b></td></tr>\n";
+        $ret .= "<td align='right'><b>$ML{'.table.watchers'}</b></td></tr>\n";
         foreach my $user (sort { $count{$a} <=> $count{$b} } keys %count) {
             $ret .= "<tr>";
             $ret .= "<td><input type='checkbox' value='1' name='defriend_$user' /></td>";
             $ret .= "<td>" . LJ::ljuser($user, { 'type' => 'Y' }) . "</td>";
             $ret .= "<td><a href=\"$syn{$user}\">$syn{$user}</a></td>";
-            $ret .= "<td align='right'>$count{$user}</td><td align='right'>";
-            $ret .= sprintf("%.03f", $cost{$user});
-            $ret .= "</td>";
+            $ret .= "<td align='right'>$count{$user}</td>";
             $ret .= "</tr>";
         }
         $ret .= "<tr><td align='left' colspan='4'>";
@@ -223,17 +210,14 @@ body<=
         $ret .= "<?h1 $ML{'.add.pop.title'} h1?><?p $ML{'.add.pop.text'} p?>";
         $ret .= "<p><table cellpadding='3' style='margin-bottom: 10px;'>";
         $ret .= "<tr><td></td><td><b>$ML{'.table.account'}</b></td><td><b>$ML{'.table.feed'}</b></td>";
-        $ret .= "<td><b>$ML{'.table.watchers'}</b></td><td><b>$ML{'.table.cost'}</b></td></tr>";
+        $ret .= "<td><b>$ML{'.table.watchers'}</b></td></tr>";
         foreach (@pop) {
             my ($user, $url, $count) = @$_;
-            my $cost = LJ::syn_cost($count + 1);  # plus one because we're including ourselves, friendof-to-be
             $ret .= "<tr>";
             $ret .= "<td><input type='checkbox' value='1' name='add_$user' /></td>";
             $ret .= "<td>" . LJ::ljuser($user, { 'type' => 'Y' }) . "</td>";
             $ret .= "<td><a href=\"$url\">$url</a></td>";
-            $ret .= "<td align='right'>$count</td><td align='right'>";
-            $ret .= sprintf("%.03f", $cost);
-            $ret .= "</td>";
+            $ret .= "<td align='right'>$count</td>";
             $ret .= "</tr>";
         }
         $ret .= "<tr><td align='left' colspan='4'>";
@@ -242,10 +226,11 @@ body<=
         $ret .= "</table>";
     }
 
-    $ret .= "<?h1 $ML{'.add.other.title'} h1?><?p $ML{'.add.other.text'} p?>";
-    $ret .= "<blockquote>$ML{'.account'} <input size='15' maxlength='15' name='acct' /> <i>$ML{'.notused'}</i>";
+    $ret .= "<?h1 $ML{'.add.byurl.title'} h1?><?p $ML{'.add.byurl.text'} p?>";
+    $ret .= "<blockquote>";
     $ret .= "<p>$ML{'.feed.url'} <input size='40' maxlength='255' name='synurl' />";
-    $ret .= "<p><input name='action:addcustom' type='submit' value='" . LJ::ehtml($ML{'.add'}) . "' /></blockquote>";
+    $ret .= "<p><input name='action:addcustom' type='submit' value='" . LJ::ehtml($ML{'.add'}) . "' />";
+    $ret .= "</blockquote>";
 
     $ret .= "</form>";
 
