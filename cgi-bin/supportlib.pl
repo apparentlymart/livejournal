@@ -158,6 +158,14 @@ sub can_bounce
     return 0;
 }
 
+sub can_lock
+{
+    my ($sp, $remote) = @_;
+    return 1 if $sp->{_cat}->{public_read} && LJ::check_priv($remote, 'supportclose', '');
+    return 1 if LJ::check_priv($remote, 'supportclose', $sp->{_cat}->{catkey});
+    return 0;
+}
+
 sub can_close
 {
     my ($sp, $remote, $auth) = @_;
@@ -179,6 +187,29 @@ sub can_append
     if ($sp->{_cat}->{'allow_screened'}) { return 1; }
     if (can_help($sp, $remote)) { return 1; }
     return 0;
+}
+
+sub is_locked
+{
+    my $sp = shift;
+    my $props = LJ::Support::load_props($sp->{spid});
+    return $props->{locked} ? 1 : 0;
+}
+
+sub lock
+{
+    my $sp = shift;
+    return unless $sp->{spid};
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("REPLACE INTO supportprop (spid, prop, value) VALUES (?, 'locked', 1)", undef, $sp->{spid});
+}
+
+sub unlock
+{
+    my $sp = shift;
+    return unless $sp->{spid};
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("DELETE FROM supportprop WHERE spid = ? AND prop = 'locked'", undef, $sp->{spid});
 }
 
 # privilege policy:

@@ -7,10 +7,7 @@
      ($action, $spid, $authcode, $splid) = ($1, $2, $3, $4);
  }
  $title = "Error";
- if ($action eq "touch") {
-     $title = "Request #$spid";
- }
- if ($action eq "close") {
+ if ($action =~ /(?:touch|close|unlock|lock)/) {
      $title = "Request #$spid";
  }
  return;
@@ -33,6 +30,9 @@ body<=
  }
 
  if ($action eq "touch") {
+     return "<?h1 Error h1?><?p That request has been locked and cannot be reopened. p?>"
+         if LJ::Support::is_locked($sp);
+
      LJ::Support::touch_request($spid)
        or return "<?h1 Error h1?><?p Touch failed. p?>";
 
@@ -69,9 +69,41 @@ body<=
      $ret .= '<textarea rows="10" cols="50" name="body"></textarea><br />';
      $ret .= "\n<?de No HTML allowed, so don't worry about about escaping &lt; and &gt;<br />URLs are automatically link-ified, so just reference those. de?><br />\n";
      $ret .= '<input type="submit" name="submitpost" value="Post Comment/Solution" />';
-     $ret .= "\n</td></tr></table>";
+     $ret .= "\n</td></tr></table></form>";
 
      return $ret;
+ }
+
+ if ($action eq 'lock') {
+     return "<?h1 Error h1?><?p You are not allowed to lock this request. p?>"
+         unless $remote && LJ::Support::can_lock($sp, $remote);
+     return "<?h1 Error h1?><?p That request has already been locked. p?>"
+         if LJ::Support::is_locked($sp);
+
+     # close this request and IC on it
+     LJ::Support::lock($sp);
+     LJ::Support::append_request($sp, {
+         body => '(Locking request.)',
+         remote => $remote,
+         type => 'internal',
+     });
+     return "<?h1 Success h1?><?p The <a href='/support/see_request.bml?id=$sp->{spid}'>request</a> has been locked. p?>";
+ }
+
+ if ($action eq 'unlock') {
+     return "<?h1 Error h1?><?p You are not allowed to unlock this request. p?>"
+         unless $remote && LJ::Support::can_lock($sp, $remote);
+     return "<?h1 Error h1?><?p That request is not locked. p?>"
+         unless LJ::Support::is_locked($sp);
+
+     # reopen this request and IC on it
+     LJ::Support::unlock($sp);
+     LJ::Support::append_request($sp, {
+         body => '(Unlocking request.)',
+         remote => $remote,
+         type => 'internal',
+     });
+     return "<?h1 Success h1?><?p This <a href='/support/see_request.bml?id=$sp->{spid}'>request</a> has been unlocked. p?>";
  }
 
  if ($action eq "close") {

@@ -278,7 +278,16 @@ body<=
     $ret .= "<tr><td align='right'><b>Status:</b></td><td>$state";
     if ($owner_mode) {
         $ret .= $sp->{'state'} eq "open" ? ", <a href='act.bml?close;$sp->{'spid'};$sp->{'authcode'}'><b>close without credit</b></a>" : "";
-        $ret .= $sp->{'state'} eq "closed" ? ", <a href='act.bml?touch;$sp->{'spid'};$sp->{'authcode'}'><b>reopen this request</b></a>" : "";
+        if ($sp->{state} eq 'closed') {
+            my $permastatus = LJ::Support::is_locked($sp);
+            $ret .= $sp->{'state'} eq "closed" && !$permastatus ? 
+                    ", <a href='act.bml?touch;$sp->{'spid'};$sp->{'authcode'}'><b>reopen this request</b></a>" : "";
+            if (LJ::Support::can_lock($sp, $remote)) {
+                $ret .= $permastatus ?
+                    ", <a href='act.bml?unlock;$sp->{spid};$sp->{authcode}'><b>unlock request</b></a>" :
+                    ", <a href='act.bml?lock;$sp->{spid};$sp->{authcode}'><b>lock request</b></a>";
+            }
+        }
     }
     $ret .= "</td></tr>\n";
     $ret .= "<tr><td align='right'><b>Summary:</b></td><td><span style='font-size: 1.1em'><b>" . LJ::ehtml($sp->{'subject'}) . "</b></span></td></tr>\n";
