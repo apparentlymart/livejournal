@@ -42,30 +42,39 @@ die "No values?" unless $in;
 my $start = time();
 while (my @list = get_some()) {
     LJ::start_request();
+      
+    my %cluster;  # clusterid -> [ $u* ]
     foreach my $u (@list) {
-        my $dbcm = LJ::get_cluster_master($u);
+        push @{$cluster{$u->{'clusterid'}}}, $u;
+    }
+
+    foreach my $cid (keys %cluster) {
+        my $dbcm = LJ::get_cluster_master($cid);
         next unless $dbcm;
         
-        my %set;
+        my $uid_in = join(',', map { $_->{'userid'} } @{$cluster{$cid}});
+
+        my @vals;
         foreach my $table (qw(userprop userproplite)) {
-            $sth = $dbh->prepare("SELECT upropid, value FROM $table WHERE userid=? AND upropid IN ($in)");
-            $sth->execute($u->{'userid'});
-            while (my ($id, $v) = $sth->fetchrow_array) {
-                $set{$id} = $v;
+            $sth = $dbh->prepare("SELECT userid, upropid, value FROM $table ".
+                                 "WHERE userid IN ($uid_in) AND upropid IN ($in)");
+            $sth->execute();
+            while (my ($uid, $pid, $v) = $sth->fetchrow_array) {
+                push @vals, "($uid,$pid," . $dbh->quote($v) . ")";
             }
         }
-        if (%set) {
-            my $sql = "REPLACE INTO userproplite2 VALUES " . join(',', map {
-                "($u->{'userid'},$_," . $dbh->quote($set{$_}) . ")" } keys %set);
+        if (@vals) {
+            my $sql = "REPLACE INTO userproplite2 VALUES " . join(',', @vals);
+            print "SQL: $sql\n";
             $dbcm->do($sql);
             if ($dbcm->err) {
                 die "Error: " . $dbcm->errstr . "\n\n(Do you need to --runsql on your clusters first?)\n";
             }
-            $dbh->do("DELETE FROM userprop WHERE userid=$u->{'userid'} AND upropid IN ($in)");
-            $dbh->do("DELETE FROM userproplite WHERE userid=$u->{'userid'} AND upropid IN ($in)");
+            $dbh->do("DELETE FROM userprop WHERE userid IN ($uid_in) AND upropid IN ($in)");
+            $dbh->do("DELETE FROM userproplite WHERE userid IN ($uid_in) AND upropid IN ($in)");
         }
-        $dbh->do("UPDATE user SET dversion=$tover WHERE userid=$u->{'userid'} AND dversion=$fromver");
-        $done++;
+        $dbh->do("UPDATE user SET dversion=$tover WHERE userid IN ($uid_in) AND dversion=$fromver");
+        $done += scalar @{$cluster{$cid}};
     }
 
     my $perc = $done/$todo;
