@@ -32,15 +32,11 @@ sub make_journal
 
     my ($entry, $page);
 
-    my $run_opts = {
-        'content_type' => 'text/html',
-    };
-
     if ($view eq "res") {
         if ($opts->{'pathextra'} =~ m!/(\d+)/stylesheet$!) {
             $styleid = $1;
             $entry = "print_stylesheet()";
-            $run_opts->{'content_type'} = 'text/css';
+            $opts->{'contenttype'} = 'text/css';
         } else {
             $opts->{'handler_return'} = 404;
             return;
@@ -100,7 +96,7 @@ sub make_journal
 
     return if $opts->{'handler_return'};
 
-    s2_run($r, $ctx, $run_opts, $entry, $page);
+    s2_run($r, $ctx, $opts, $entry, $page);
     
     if (ref $opts->{'errors'} eq "ARRAY" && @{$opts->{'errors'}}) {
         return join('', 
@@ -121,7 +117,7 @@ sub s2_run
 {
     my ($r, $ctx, $opts, $entry, $page) = @_;
 
-    my $ctype = $opts->{'content_type'} || "text/html";
+    my $ctype = $opts->{'contenttype'} || "text/html";
     my $cleaner;
     if ($ctype =~ m!^text/html!) {
         $cleaner = new HTMLCleaner ('output' => sub { $$LJ::S2::ret_ref .= $_[0]; });
@@ -134,27 +130,22 @@ sub s2_run
         $r->send_http_header();
     };
     
-    if ($entry eq "prop_init()") {
-        S2::set_output(sub {});
-        S2::set_output_safe(sub {});
-    } else {
-        my $need_flush;
-        my $out_straight = sub { 
-            # Hacky: forces text flush.  see:
-            # http://zilla.livejournal.org/906
-            if ($need_flush) {
-                $cleaner->parse("<!-- -->");
-                $need_flush = 0;
-            }
-            $$LJ::S2::ret_ref .= $_[0]; 
-        };
-        my $out_clean = sub { 
-            $cleaner->parse($_[0]); 
-            $need_flush = 1;
-        };
-        S2::set_output($out_straight);
-        S2::set_output_safe($cleaner ? $out_clean : $out_straight);
-    }
+    my $need_flush;
+    my $out_straight = sub { 
+        # Hacky: forces text flush.  see:
+        # http://zilla.livejournal.org/906
+        if ($need_flush) {
+            $cleaner->parse("<!-- -->");
+            $need_flush = 0;
+        }
+        $$LJ::S2::ret_ref .= $_[0]; 
+    };
+    my $out_clean = sub { 
+        $cleaner->parse($_[0]); 
+        $need_flush = 1;
+    };
+    S2::set_output($out_straight);
+    S2::set_output_safe($cleaner ? $out_clean : $out_straight);
           
     $LJ::S2::CURR_PAGE = $page;
     $LJ::S2::RES_MADE = 0;  # standard resources (Image objects) made yet
@@ -168,7 +159,6 @@ sub s2_run
         S2::pout("<b>Error running style:</b> $error");
         return 0;
     }
-    S2::pout(undef);  # send the HTTP header, if it hasn't been already
     $cleaner->eof if $cleaner;  # flush any remaining text/tag not yet spit out
     return 1;    
 }

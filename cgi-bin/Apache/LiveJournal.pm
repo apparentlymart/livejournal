@@ -603,12 +603,12 @@ sub journal_content
     }
 
     my $status = $opts->{'status'} || "200 OK";
-    unless ($opts->{'contenttype'}) {
-        $opts->{'contenttype'} = "text/html";
-        if ($LJ::UNICODE) {
-            $opts->{'contenttype'} .= "; charset=utf-8";
-        }
+    $opts->{'contenttype'} ||= $opts->{'contenttype'} = "text/html";
+    if ($opts->{'contenttype'} =~ m!^text/! &&
+        $LJ::UNICODE && $opts->{'contenttype'} !~ /charset=/) {
+        $opts->{'contenttype'} .= "; charset=utf-8";
     }
+    Apache->log_error("ctype: $opts->{'contenttype'} ($LJ::UNICODE)");
 
     if ($opts->{'badargs'}) 
     {
