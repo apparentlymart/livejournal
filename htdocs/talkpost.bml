@@ -71,7 +71,7 @@ body<=
          } else {
              $tt = LJ::get_talktext($dbs, $init->{'replyto'});
          }
-         $parpost->{'subject'} = BML::eall($tt->{$init->{'replyto'}}->[0]);
+         $parpost->{'subject'} = $tt->{$init->{'replyto'}}->[0];
          $parpost->{'body'} = $tt->{$init->{'replyto'}}->[1];
      }
      
@@ -262,7 +262,7 @@ body<=
  if ($parpost->{'subject'}) {
      my $cleansubject = $parpost->{'subject'};
      LJ::CleanHTML::clean_subject(\$cleansubject);
-     BML::ebml(\$cleansubject);
+     $cleansubject = BML::eall($cleansubject);
      $ret .= "<FONT FACE=\"Arial,Helvetica\" size=+1><I><B>$cleansubject</B></I></FONT><BR />\n";
  }
  
@@ -353,7 +353,7 @@ body<=
      $basesubject =~ s/^Re:\s*//i;
      if ($basesubject) {
          $basesubject = "Re: $basesubject";
-         $basesubject = LJ::ehtml($basesubject);
+         $basesubject = BML::eall($basesubject);
      }
  }
 
