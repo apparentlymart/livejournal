@@ -2,8 +2,13 @@
 #
 
 use strict;
+
+require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
+
 use MIME::Lite ();
 use Text::Wrap ();
+use Time::HiRes ('gettimeofday', 'tv_interval');
+use Sys::Hostname ('hostname');
 
 package LJ;
 
@@ -59,7 +64,7 @@ sub send_mail
 
     # if send operation fails, buffer and send later
     my $buffer = sub {
-
+        my $starttime = [gettimeofday()];
         my $tries = 0;
 
         # aim to try 10 times, but that's redundant if there are fewer clusters
@@ -76,10 +81,24 @@ sub send_mail
         return undef unless $cid;
 
         # try sending later
-        LJ::cmd_buffer_add($cid, 0, 'send_mail', Storable::freeze($msg));
+        my $rval = LJ::cmd_buffer_add($cid, 0, 'send_mail', Storable::freeze($msg));
+
+        my $notes = sprintf( "Queued mail send to %s %s: %s",
+                             $msg->get('to'),
+                             $rval ? "succeeded" : "failed",
+                             $msg->get('subject') );
+        LJ::blocking_report( hostname(), 'send_mail', tv_interval($starttime), $notes );
+
+        $rval; # return
     };
 
+    my $starttime = [gettimeofday()];
     my $rv = eval { $msg->send && 1; };
+    my $notes = sprintf( "Direct mail send to %s %s: %s",
+                         $msg->get('to'),
+                         $rv ? "succeeded" : "failed",
+                         $msg->get('subject') );
+    LJ::blocking_report( hostname(), 'send_mail', tv_interval($starttime), $notes );
     return 1 if $rv;
     return 0 if $@ =~ /no data in this part/;  # encoding conversion error higher
     return $buffer->($msg);

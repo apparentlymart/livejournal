@@ -4,6 +4,8 @@
 use strict;
 use IO::File;
 use File::Path;
+use Time::HiRes qw{gettimeofday tv_interval};
+use Sys::Hostname qw{hostname};
 
 package BlobClient::Local;
 
@@ -14,9 +16,21 @@ our @ISA = ("BlobClient");
 
 sub new {
     my ($class, $args) = @_;
-    my $self = $class->SUPER::new($args); 
+    my $self = $class->SUPER::new($args);
     bless $self, ref $class || $class;
     return $self;
+}
+
+### Time a I<block> and send a report for the specified I<op> with the given
+### I<notes> when it finishes.
+sub report_blocking_time (&@) {
+    my ( $block, $op, $notes ) = ( @_ );
+
+    my $start = [gettimeofday()];
+    my $rval = $block->();
+    LJ::blocking_report( hostname(), "blob_$op", tv_interval($start), $notes );
+
+    return $rval;
 }
 
 sub get {
@@ -25,12 +39,17 @@ sub get {
     local $/ = undef;
     my $path = make_path(@_);
     print STDERR "Blob::Local: requesting $path\n" if DEBUG;
-    unless (open($fh, '<', $path)) {
-        return undef;
-    }
-    print STDERR "Blob::Local: serving $path\n" if DEBUG;
-    my $data = <$fh>;
-    close($fh);
+
+    my $data;
+    report_blocking_time {
+        unless (open($fh, '<', $path)) {
+            return undef;
+        }
+        print STDERR "Blob::Local: serving $path\n" if DEBUG;
+        $data = <$fh>;
+        close($fh);
+    } "get", $path;
+
     return $data;
 }
 
@@ -39,15 +58,19 @@ sub get_stream {
 
     my $fh = new IO::File;
     my $path = make_path(@_);
-    unless (open($fh, '<', $path)) {
-        $$errref = "Error opening '$path'";
-        return undef;
-    }
+
     my $data;
-    while (read($fh, $data, 1024*50)) {
-        $callback->($data);
-    }
-    close($fh);
+    report_blocking_time {
+        unless (open($fh, '<', $path)) {
+            $$errref = "Error opening '$path'";
+            return undef;
+        }
+        while (read($fh, $data, 1024*50)) {
+            $callback->($data);
+        }
+        close($fh);
+    } "get_stream", $path;
+
     return 1;
 }
 
@@ -60,12 +83,14 @@ sub put {
     eval { File::Path::mkpath($dir, 0, 0775); };
     return undef if $@;
 
-    my $fh = new IO::File;
-    unless (open($fh, '>', $filename)) {
-        return undef;
-    }
-    print $fh $content;
-    close $fh;
+    report_blocking_time {
+        my $fh = new IO::File;
+        unless (open($fh, '>', $filename)) {
+            return undef;
+        }
+        print $fh $content;
+        close $fh;
+    } "put", $filename;
 
     return 1;
 }
@@ -76,8 +101,13 @@ sub delete {
     my $filename = make_path(@_);
 
     return 0 unless -e $filename;
-    return unlink($filename);
-    # FIXME: rmdir up the tree
+    my $rval;
+    report_blocking_time {
+        # FIXME: rmdir up the tree
+        $rval = unlink($filename);
+    } "delete", $filename;
+
+    return $rval;
 }
 
 sub make_path { my $self = shift; return $self->SUPER::make_path(@_); }
