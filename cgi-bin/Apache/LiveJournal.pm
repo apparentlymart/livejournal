@@ -662,16 +662,22 @@ sub userpic_content
              $r->header_in('X-Proxy-Capabilities') &&
              $r->header_in('X-Proxy-Capabilities') =~ m{\breproxy-file\b}i )
         {
-            my @paths = $LJ::MogileFS->get_paths( $key, 1 );
+            my $memkey = [$picid, "mogp.up.$picid"];
+            my $paths = LJ::MemCache::get($memkey);
+            unless ($paths) {
+                my @paths = $LJ::MogileFS->get_paths( $key, 1 );
+                $paths = \@paths;
+                LJ::MemCache::add($memkey, $paths, 3600) if @paths;
+            }
 
             # reproxy url
-            if ($paths[0] =~ m/^http:/) {
-                $r->header_out('X-REPROXY-URL', join(' ', @paths));
+            if ($paths->[0] =~ m/^http:/) {
+                $r->header_out('X-REPROXY-URL', join(' ', @$paths));
             }
 
             # reproxy file
             else {
-                $r->header_out('X-REPROXY-FILE', $paths[0]);
+                $r->header_out('X-REPROXY-FILE', $paths->[0]);
             }
 
             $send_headers->();

@@ -52,6 +52,7 @@ sysban:uniq == hashref of uniq => unix expiration time
 <uid> upicinf:<uid> == packed data, userpic keywords
 <uid> upiccom:<uid> == packed data, userpic comments
 <uid> upicurl:<uid> == packed data, userpic urls
+<picid> mogp.up.<picid> == arrayref of paths (URLs)
 
 rate_eperr:<email_address> == rate limiting errors sent via email for email gateway
 rate:tracked:<userid> == cluster tracking on login, posts, and comments
