@@ -37,6 +37,10 @@ $maint{'synsuck'} = sub
         my $delay = sub {
             my $minutes = shift;
             my $status = shift;
+
+            # add some random backoff to avoid waves building up
+            $minutes += int(rand(5));
+
             $dbh->do("UPDATE syndicated SET lastcheck=NOW(), checknext=DATE_ADD(NOW(), ".
                      "INTERVAL ? MINUTE), laststatus=? WHERE userid=?",
                      undef, $minutes, $status, $userid);
@@ -364,7 +368,7 @@ $maint{'synsuck'} = sub
 
         # if readers are gone, don't check for a whole day
         $int = 60*24 unless $readers;
- 
+
         $dbh->do("UPDATE syndicated SET checknext=DATE_ADD(NOW(), INTERVAL $int MINUTE), ".
                  "lastcheck=NOW(), lastmod=?, etag=?, laststatus=?, numreaders=? $updatenew ".
                  "WHERE userid=$userid", undef, $r_lastmod, $r_etag, $status, $readers);
