@@ -325,16 +325,15 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     {
         # Lots of muddled logic. Yay.
 
-        """<td valign=top align="middle" style="background-color: $bgcolor" width="100">
-        <span style="color: $fgcolor">""";
+        """<td valign=top align="middle" style="background-color: $bgcolor" width="100">""";
         if ($p.view == "friends") { 
-            """<a href='""" + $e.journal->base_url() + """'><b>$e.journal.username</b></a><br />""";
+            """<a href='""" + $e.journal->base_url() + """' style="color: $fgcolor; font-weight: bold">$e.journal.username</a><br />""";
         }
         if ($e.poster.username != $e.journal.username) {
             if ($p.view == "friends") { 
-                """[<a href='""" + $e.poster->base_url() + """'><span style="color: $fgcolor">$e.poster.username</span></a>]<br />""";
+                """[<a href='""" + $e.poster->base_url() + """' style="color: $fgcolor">$e.poster.username</a>]<br />""";
             } else {
-                """<a href='""" +  $e.poster->base_url() + """'><span style="color: $fgcolor"><b>$e.poster.username</b></span></a><br />""";
+                """<a href='""" +  $e.poster->base_url() + """' style="color: $fgcolor; font-weight: bold">$e.poster.username</a><br />""";
             }
         }
         if (defined $e.userpic) {
@@ -344,7 +343,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
             else { """<img border="0" src="$e.userpic.url" width="$e.userpic.width" height="$e.userpic.height" alt="" />""";
             }
         }
-        "</span></td>";
+        "</td>";
     }
     "<td valign='top'><strong>$time";
     if ($e.subject) { " - <span style='color: $*subject_color'>$e.subject</span>"; }
