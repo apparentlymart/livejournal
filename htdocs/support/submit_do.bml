@@ -59,7 +59,7 @@ body<=
  
  $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
  
- return "Your LiveJournal support request has been filed and will be answered as soon as possible.  Your request tracking number is <B>$spid</B>.  You can track its progress here: <UL><A HREF=\"$url\">$url</A></UL>";    
+ return "Your $LJ::SITENAMESHORT support request has been filed and will be answered as soon as possible.  Your request tracking number is <B>$spid</B>.  You can track its progress here: <UL><A HREF=\"$url\">$url</A></UL>";    
 
 _code?>
 

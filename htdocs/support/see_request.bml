@@ -82,7 +82,7 @@ body<=
  $ret .= LJ::name_caps($u->{'caps'}) || "<I>Unknown</I>";
  $ret .= "</TD></TR>\n";
 
- $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT><B>LiveJournal:</B></TD><TD>";
+ $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT><B>$LJ::SITENAMESHORT:</B></TD><TD>";
  if ($u->{'userid'}) {
      $ret .= "username: <?ljuserf $u->{'user'} ljuserf?>";
      $ret .= "<BR>styles: ";
