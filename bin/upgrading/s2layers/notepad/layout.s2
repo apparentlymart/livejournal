@@ -332,7 +332,7 @@ function YearPage::print_year_links ()
         if ($y.displayed) {
             "$y.year&nbsp;"; 
         } else {
-            "<a href='$y.url'>$y.year</a>&nbsp;</a>";
+            "<a href='$y.url'>$y.year</a>&nbsp;";
         }
     }
 }
