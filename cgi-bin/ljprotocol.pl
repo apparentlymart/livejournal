@@ -2030,8 +2030,13 @@ sub list_friends
             $r->{'bgcolor'} = "#ffffff";
         }
 
-        $r->{"type"} = "community" if $u->{'journaltype'} eq "C";
-        $r->{"type"} = "syndicated" if $u->{'journaltype'} eq "Y";
+        $r->{"type"} = {
+            'C' => 'community',
+            'Y' => 'syndicated',
+            'N' => 'news',
+            'S' => 'shared',
+        }->{$u->{'journaltype'}} if $u->{'journaltype'} ne 'P';
+
         $r->{"status"} = {
             'D' => "deleted",
             'S' => "suspended",

@@ -10,7 +10,7 @@ The full name of the friend.
 </des></scalar></key>
 
 <key name="type" count="opt"><scalar><des>
-The type of journal the friend item is.  This is present only if the journal is a community or syndicated feed, and in those cases it will be set to "community" or "syndicated" as necessary.
+The type of journal the friend item is.  This value can be one of 'community', 'syndicated', 'news', or 'shared', depending on the journaltype of the account in question.  The account is a normal personal account when this value is not sent.
 </des></scalar></key>
 
 <key name="fgcolor" count="1"><scalar><des>
