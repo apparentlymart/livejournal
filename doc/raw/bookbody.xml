@@ -14,9 +14,10 @@
 <part>
 <title>Client/Server Protocol</title>
 <chapter>
-<title>foo</title>
-<para>hi</para>
+<title>Using the Protocol</title>
+<para>FIXME: import other documentation into here</para>
 </chapter>
+&refXMLRPC;
 </part>
 
 <part>
@@ -32,7 +33,7 @@
 &chSchema;
 &chSchemaRef;
 
-&refXMLRPC;
+
 </part>
 
 <part>
