@@ -1,7 +1,7 @@
 (=_INFO
 NOCACHE=>1
 _INFO=)(=PAGE
-TITLE=>Lost Password
+TITLE=>(=_ML .title _ML=)
 BODY<=
 
 (=_CODE
@@ -24,7 +24,7 @@ BODY<=
 
      if (! $u)
      {
-         push @errors, "Username not found.";
+         push @errors, $ML{'error.username_notfound'};
      }
 
      # can we send them the password where they want it?
@@ -45,7 +45,7 @@ BODY<=
          ($okay) = $sth->fetchrow_array;
 
          unless ($okay) {
-             push @errors, "You never used that email address with this account or it was never validated.";
+             push @errors, $ML{'.error1.text'};
          }
      }
 
@@ -75,7 +75,7 @@ BODY<=
      print MAIL "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
      close MAIL;
 
-     return "(=H1 Password mailed! H1=)\n(=P Success.  Your password has been mailed. P=)";
+     return "(=H1 $ML{'.password_mailed.title'} H1=)\n(=P $ML{'.password_mailed.text'} P=)";
  }
 
 
@@ -93,7 +93,7 @@ BODY<=
      }
 
      unless (@users) {
-         push @errors, "No username(s) for that email address. qe=$qe";
+         push @errors, BML::ml('.error.no_usernames_for_email', {'address'=>$qe});
      }
      
      return LJ::bad_input(@errors) if @errors;
@@ -111,10 +111,10 @@ BODY<=
      print MAIL "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
      close MAIL;
 
-     return "(=H1 Username mailed! H1=)\n(=P Success.  Your usename has been mailed. P=)";
+     return "(=H1 $ML{'.username_mailed.title'} H1=)\n(=P $ML{'.username_mailed.text'} P=)";
  }
 
- return "No button pressed?";
+ return $ML{'error.nobutton'};
 
 _CODE=)
 

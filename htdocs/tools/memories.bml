@@ -16,14 +16,14 @@
 
  my $userid = LJ::get_userid($dbs, $user);
  unless ($userid) {
-     $title = "Error";
-     $body = "Missing or invalid username.";
+     $title = $ML{'Error'};
+     $body = $ML{'error.username_notfound'};
      return;
  }
 
- my %filters = ("all" => "All memories",
-                "own" => "Only '$user' entries",
-                "other" => "Only other entries");
+ my %filters = ("all" => $ML{'.filter.all'},
+                "own" => BML::ml(".filter.own", { 'user' => $user }),
+                "other" => $ML{'.filter.other'});
  my $filter = $FORM{'filter'} || "all";
  unless (defined $filters{$filter}) { $filter = "all"; }
 
@@ -40,13 +40,13 @@
  {
      my $qkw = $dbh->quote($FORM{'keyword'});
      if ($FORM{'keyword'} eq "*") {
-         $title = "Memorable Posts";
-              $body .= "(=H1 Memorable Posts H1=)(=P The following is a list of uncategorized journal entries that user <B>$user</B> found memorable. P=)";
+         $title = $ML{'.title.memorable'};
+         $body .= "(=H1 $ML{'.title.memorable'} H1=)(=P " . BML::ml(".body.memorable", { 'user' => $user }) . " P=)";
      } else {
-         $title = "Memorable $FORM{'keyword'} Posts";
-              $body .= "(=H1 $FORM{'keyword'} H1=)(=P The following is a list of \"$FORM{'keyword'}\" journal entries that user <B>$user</B> found memorable. P=)";
+         $title = BML::ml(".title.keyword", { 'keyword' => $FORM{'keyword'}, 'user' => $user });
+         $body .= BML::ml(".body.keyword", { 'keyword' => $FORM{'keyword'}, 'user' => $user });
      }
-     $body .= "(=P <A HREF=\"/tools/memories.bml?user=$user\">&lt;&lt; Back</A> P=)";
+     $body .= "(=P <A HREF=\"/tools/memories.bml?user=$user\">&lt;&lt; $ML{'.back'}</A> P=)";
 
      my $extrawhere = "";
      if ($filter eq "own" || $filter eq "other") {
@@ -65,7 +65,7 @@
          my $edit = "";
          my $jargent = $mem->{'user'} ? "journal=$mem->{'user'}&amp;" : "";
          if ($remote && $remote->{'user'} eq $user) {
-             $edit = " [<a href=\"/tools/memadd.bml?${jargent}itemid=$mem->{'jitemid'}\">edit</a>]";
+             $edit = " [<a href=\"/tools/memadd.bml?${jargent}itemid=$mem->{'jitemid'}\">$ML{'.edit'}</a>]";
          }
          $body .= "<p><li><a href=\"/talkread.bml?${jargent}itemid=$mem->{'jitemid'}\"><b>$eh_des</b></a>$edit<br /><font size='-1'><b>$mem->{'user'}</b></font></li>";
      }
@@ -73,8 +73,8 @@
      return;
  }
 
- $title = "Memorable Posts";
- $body .= "(=H1 Memorable Posts H1=)(=P The following is a list of categories that user <B>$user</B> has placed memorable journal entries in. P=)";
+ $title = $ML{'.title.memorable'};
+ $body .= BML::ml(".body.list_categories", { 'user' => $user });
 
  if ($filter eq "all") {
      $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid $secwhere GROUP BY k.keyword ORDER BY k.keyword");
@@ -91,7 +91,7 @@
      my $sel = $filter eq $filt ? "SELECTED" : "";
      $body .= "<OPTION VALUE=\"$filt\" $sel>$filters{$filt}\n";
  }	     
- $body .= "</SELECT> <INPUT TYPE=SUBMIT VALUE=\"Switch\">";
+ $body .= "</SELECT> <INPUT TYPE=SUBMIT VALUE=\"$ML{'.form.switch'}\">";
  $body .= "</FORM>";
  
  my $rows = 0;
@@ -101,15 +101,15 @@
      if ($rows==1) {
          $body .= "<UL>";
      }
-     my $noun = $row->{'count'}==1 ? "entry" : "entries";
+     my $noun = $row->{'count'}==1 ? $ML{'.entry'} : $ML{'.entries'};
      my $ue_keyword = LJ::eurl($row->{'keyword'});
      my $keyword = $row->{'keyword'};
      LJ::text_out(\$keyword);
-     if ($keyword eq "*") { $keyword = "Uncategorized"; }
+     if ($keyword eq "*") { $keyword = $ML{'.uncategorized'}; }
      $body .= "<LI><B><A HREF=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</A></B>: $row->{'count'} $noun\n";
  }
  unless ($rows) {
-     $body .= "<P><I>No memories found.</I>  This could be because 1) the user hasn't defined any memorable events, 2) the user's memorable events are protected and you don't have access to view them, or 3) the user doesn't have any memories that match your filter criteria.";
+     $body .= "(=H1 $ML{'.error.noentries.title'} H1=)(=P $ML{'.error.noentries.body'} P=)";
  } else {
      $body .= "</UL>";
 }

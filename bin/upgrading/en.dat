@@ -1,5 +1,357 @@
 ;; -*- coding: utf-8 -*-
+/editinfo.bml.allowshocontact.email.if_domainaddy<<
+only show your livejournal email address 
+(<a href="[[siteroot]]/paidaccounts/">paid accounts</a> only), or to show them both.
+.
+
+/editinfo.bml.allowshowcontact.about<<
+You should keep this option enabled.  This lets other people be able to contact 
+you by showing your email address, ICQ number, and AOL Instant Messenger screenname 
+all on your LiveJournal.
+.
+
+/editinfo.bml.allowshowcontact.email=If visible, email address to be displayed:
+
+/editinfo.bml.allowshowcontact.email.actual_only=Actual address only
+
+/editinfo.bml.allowshowcontact.email.both=Both (actual + [[domain]])
+
+/editinfo.bml.allowshowcontact.email.lj_only=LiveJournal address only
+
+/editinfo.bml.allowshowcontact.email.neither=Neither. Don't show any email address.
+
+/editinfo.bml.allowshowcontact.email.no_show=Don't show email address
+
+/editinfo.bml.allowshowcontact.email.reason<<
+If you checked the above option, you may also choose to hide your email 
+address (while still showing other contact information)
+.
+
+/editinfo.bml.allowshowcontact.email.show=Show email address
+
+/editinfo.bml.allowshowcontact.title=Show your contact information on your LiveJournal?
+
+/editinfo.bml.allowshowinfo.about=Turn this on if you want your city/state/country and birthday to be visible to other users.
+
+/editinfo.bml.allowshowinfo.title=Show location &amp; birthday?
+
+/editinfo.bml.autotranslate.about<<
+Use this option to tell LiveJournal which encoding to assume for your entries and comments entered before the site was converted to Unicode. 
+If you write in English, choose "Western European" here.
+.
+
+/editinfo.bml.autotranslate.header=Auto-translate older entries from:
+
+/editinfo.bml.bday.title=Birthday
+
+/editinfo.bml.bday.year.opt=year is optional
+
+/editinfo.bml.bdayreminders.about=If you want to get email reminding you of birthdays for your friends on LiveJournal, click this box.
+
+/editinfo.bml.bdayreminders.header=Send me birthday reminders
+
+/editinfo.bml.bio.about=Here you can enter a little mini-biography about yourself that will show up on your user-info page.
+
+/editinfo.bml.bio.header=About You
+
+/editinfo.bml.blockrobots.about<<
+If you check this option, robots will be told to go away.  
+Not all robots respect the rules, but the popular search sites' robots do.
+.
+
+/editinfo.bml.blockrobots.header=Block Robots/Spiders from indexing your journal
+
+/editinfo.bml.city.title=City
+
+/editinfo.bml.country.choose=Pick a country
+
+/editinfo.bml.country.title=Country
+
+/editinfo.bml.donotlog=No
+
+/editinfo.bml.email.title=Email
+
+/editinfo.bml.enableboards.about=Check this if you want people to be able to reply to journal entries you post.  (the journal style you select must also support this)
+
+/editinfo.bml.enableboards.header=Enable message boards
+
+/editinfo.bml.encoding.about=Don't worry about this stuff.  In general, only international users that write in several different languages will need to change anything here.
+
+/editinfo.bml.encoding.header=Encoding Options
+
+/editinfo.bml.error.email.lj_domain<<
+You cannot enter an @[[domain]] email address.  
+Enter your real address in that field.  
+If you're a paid user, your [[user]]@[[domain]] address will forward to your real address.  
+To choose which email address (or both) is displayed publicly, see the option below the "Show your Contact Information" option.
+.
+
+/editinfo.bml.error.email.no_space<<
+No spaces are allowed in an email address.  
+If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>@aol.com</b>
+.
+
+/editinfo.bml.error.excessive_int<<
+Sorry, you listed too many interests.  The limit is 150, but you've listed [[intcount]].  
+Any changes you made to your interests were not saved.  Go back and cut down your list, 
+then save again.
+.
+
+/editinfo.bml.error.invalidbio<<
+Your stored bio contains invalid characters. You must visit 
+the <a href='/utf8convert.bml'><b>conversion page</b></a> to convert it 
+to Unicode.
+.
+
+/editinfo.bml.error.invalidints<<
+Your currently stored list of interests contains invalid characters. You must visit 
+the <a href='/utf8convert.bml'><b>conversion page</b></a> to convert it 
+to Unicode.
+.
+
+/editinfo.bml.error.invalidname<<
+Your name contains invalid characters. You must visit 
+the <a href='/utf8convert.bml'><b>conversion page</b></a> to convert it 
+to Unicode.
+.
+
+/editinfo.bml.error.locale.country_ne_state=You specified United States as your country, but you typed in a non-US state in the "other state" field.
+
+/editinfo.bml.error.locale.invalid_country=Somehow you selected an invalid country.
+
+/editinfo.bml.error.locale.state_ne_country=You specified a non-US country but selected a US state.
+
+/editinfo.bml.error.locale.zip_ne_state<<
+Your zip code does not match the state you specified.  
+Either correct the information, or erase one or both of the state and zip code fields.
+.
+
+/editinfo.bml.error.locale.zip_requires_us<<
+You entered a zip-code but you did not select United States as you country.  
+We only collect zip code information about people in the US.  
+Please go back and remove the zip code or select United States as your country.
+.
+
+/editinfo.bml.error.tm.require.number=If you're going to use text messaging, you must enter your phone number.
+
+/editinfo.bml.error.tm.require_provider<<
+If you're going to use text messaging, you must select your service provider.  
+If yours is not listed, please contact us with information about how your service's text messaging feature so we can add support for it.
+.
+
+/editinfo.bml.finished.about=When done, press the "Save Changes" button below:
+
+/editinfo.bml.finished.header=Done?
+
+/editinfo.bml.finished.save_button=Save Changes
+
+/editinfo.bml.gender.title=Gender
+
+/editinfo.bml.getreplies.about=Check this if you want to get email updates when people reply to your journal entries in the message boards.
+
+/editinfo.bml.getreplies.header=Get message board replies
+
+/editinfo.bml.hidefriendof.about=If you check this, the list of people that list you as a friend is hidden on your profile page.
+
+/editinfo.bml.hidefriendof.header=Hide "Friend of" list
+
+/editinfo.bml.howhear.about<<
+Just for curiousity's sake, where did you hear about [[sitename]] from?  
+If it was a specific person, enter their username, if it 
+was from another source/article/link/website, enter the appropriate information.
+.
+
+/editinfo.bml.howhear.header=Curiosity
+
+/editinfo.bml.htmlemail.about<<
+Check this if your email program fully supports HTML in your email.  
+Many clients try to support it but fail horribly.  
+If you uncheck it, LiveJournal will only send text emails.
+.
+
+/editinfo.bml.htmlemail.header=Send HTML Emails
+
+/editinfo.bml.int.about<<
+If you want other people to be able to search the directory and find you by interest, 
+list below everything you're interested in, separated by commas.  
+Short single-word phrases are best.  <b>Rule of thumb:</b> You should be able to put 
+the interest in the sentence "I like ________".  When referring to nouns, use the 
+plural form for consistency.  "I like DVDs" instead of "I like DVD".
+.
+
+/editinfo.bml.int.ex.bad=<FONT COLOR=#FF0000><B>BAD</B></FONT> Example: <B>I like lots of bands and watching movies and talking to friends and going to clubs.</B>  That sort of stuff goes in your bio above.
+
+/editinfo.bml.int.ex.good=<FONT COLOR=#009000><B>GOOD</B></FONT> Example: <B>biking, snow skiing, computers, dvds, mp3s, cheese, women</B>
+
+/editinfo.bml.int.header=Interests
+
+/editinfo.bml.login.enterinfo=Enter your username and password to modify your personal information.
+
+/editinfo.bml.login.forgot.header=Forget something?
+
+/editinfo.bml.login.forgot.recover=If you forgot your username or password, <a href='lostinfo.bml'>recover it here!</a>.
+
+/editinfo.bml.logip.always=Always
+
+/editinfo.bml.logip.anon_only=Anonymous posters only
+
+/editinfo.bml.logip.header=Log IP addresses of people replying?
+
+/editinfo.bml.mangleaddress.about<<
+If you have the above option selected and are afraid spam-robots will find your email 
+address on LiveJournal, select this option and your email address will be modified 
+so your email address won't be found by email-collecting robots.
+.
+
+/editinfo.bml.mangleaddress.header=Mangle your displayed email address
+
+/editinfo.bml.name.title=Name
+
+/editinfo.bml.numcomments.about=Check this if you want to append the comment count to URLs to make your browser possibly display the links in a different color.
+
+/editinfo.bml.numcomments.header=Add &amp;nc=xx to comment URLs
+
+/editinfo.bml.optional=Optional
+
+/editinfo.bml.opt_in.about<<
+If you want to know when we add some cool new feature to LiveJournal, check this box.  
+The emails you get will be pretty rare, no more than once or twice a month usually.  
+Your email address will not be visible to other users, and you can turn this off at anytime.
+.
+
+/editinfo.bml.opt_in.header=Send me LiveJournal news.
+
+/editinfo.bml.persinfo.disclaimer<<
+Fill in some quick information about yourself, for our own curiosity and statistical purposes. 
+We're not going to do anything evil or annoying with this information, we'd just like to see 
+who and where our users are.  Please, fill it in correctly.  If you're concerned, 
+read our <a href="/legal/privacy.bml">privacy policy</a>.
+.
+
+/editinfo.bml.persinfo.header=Personal Information
+
+/editinfo.bml.security.header=Security
+
+/editinfo.bml.security.visibility.anybody=Anybody
+
+/editinfo.bml.security.visibility.everybody=Everybody
+
+/editinfo.bml.security.visibility.friends=Friends only
+
+/editinfo.bml.security.visibility.regusers=Registered Users
+
+/editinfo.bml.settings.about=Select below your personal privacy options and preferences.
+
+/editinfo.bml.settings.header=LiveJournal Options
+
+/editinfo.bml.showsubjicons.about<<
+By default, a bunch of icons are shown that people can use when replying to your messages.  
+A lot of users feel these are ugly and a waste of space, so uncheck this box if you'd like to never see them again. <tt>:-)</tt>
+.
+
+/editinfo.bml.showsubjicons.header=Show subject icons
+
+/editinfo.bml.state.other=Or, type other state/province/territory
+
+/editinfo.bml.state.title=State
+
+/editinfo.bml.state.us=US States
+
+/editinfo.bml.success.header=Success!
+
+/editinfo.bml.success.message=Your information and <a href="/users/[[user]]/">journal</a> settings and <a href="/userinfo.bml?user=[[user]]">profile</a> have been updated.
+
+/editinfo.bml.switch.button=Switch
+
+/editinfo.bml.switch.header=Switch Journal
+
+/editinfo.bml.switch.workwith=Work with journal:
+
+/editinfo.bml.title=Edit Personal Information
+
+/editinfo.bml.tm.about=<a href="/support/faqbrowse.bml?faqid=30">about this feature</a>
+
+/editinfo.bml.tm.details=<a href="/tools/textmessage.bml?mode=details">details</a>
+
+/editinfo.bml.tm.phonenum=Full phone number:
+
+/editinfo.bml.tm.sec.about=Enable text messaging from other users.
+
+/editinfo.bml.tm.sec.title=Security Level:
+
+/editinfo.bml.tm.servprov=Service Provider
+
+/editinfo.bml.tm.title=Text Messaging
+
+/editinfo.bml.topicdir.about=If you check this, other users will be able to easily add your journal entries to the hierarchial <a href="/topics/">topic directory</a>.
+
+/editinfo.bml.topicdir.header=Allow Topic Directory Inclusion
+
+/editinfo.bml.translatemailto.about<<
+In case you chose to receive message board replies by email, and your email client doesn't handle Unicode (UTF-8) 
+messages very well, use this option to specify a different encoding into which LiveJournal will automatically translate the text of comments sent to you.
+.
+
+/editinfo.bml.translatemailto.header=Translate email notifications into: 
+
+/editinfo.bml.unbanusers.about=You have the following users banned from posting in your journal.  Check the checkbox by their username to remove the ban on them.
+
+/editinfo.bml.unbanusers.header=Unban Users
+
+/editinfo.bml.userpic.about<<
+Below is the miniature picture you have uploaded to represent you 
+throughout the LiveJournal site and in your journal and in your friends' journals:
+.
+
+/editinfo.bml.userpic.edit=To delete this picture, or upload a new one, <a href="/uploadpic.bml" target="_blank">go here</a>.
+
+/editinfo.bml.userpic.header=Your Picture
+
+/editinfo.bml.userpic.none=no image uploaded
+
+/editinfo.bml.webpagename.title=Webpage Name
+
+/editinfo.bml.webpageurl.title=Webpage URL
+
+/editinfo.bml.whoreply.header=Who can reply to your entries?
+
+/editinfo.bml.zip.title=ZIP Code
+
+/editinfo.bml.zip.usonly=5 digit ZIP code; US residents only
+
 /friends/index.bml.title=Friends Tools
+
+/lostinfo.bml.btn.proceed=Proceed
+
+/lostinfo.bml.enter_email=Enter your email address:
+
+/lostinfo.bml.enter_email_optional=Email address:  (optional)
+
+/lostinfo.bml.enter_username=Enter your username:
+
+/lostinfo.bml.lostpassword.text=If you've lost your password, enter your username and optionally, the email address you'd like the password sent to.  Note that the email address must be one you've used at LiveJournal before and had confirmed at one point.  If you leave the email field blank, it'll be mailed to your current address.
+
+/lostinfo.bml.lostpassword.title=Lose your password?
+
+/lostinfo.bml.lostusername.text=If you've lost your username, enter your email address and we'll send you your username.
+
+/lostinfo.bml.lostusername.title=Lose your username?
+
+/lostinfo.bml.title=Lost Information
+
+/lostinfo_do.bml.error.no_usernames_for_email=No username(s) for this email address: [[address]] .
+
+/lostinfo_do.bml.error1.text=You never used that email address with this account or it was never validated.
+
+/lostinfo_do.bml.password_mailed.text=Success.  Your password has been mailed.
+
+/lostinfo_do.bml.password_mailed.title=Password mailed!
+
+/lostinfo_do.bml.title=Lost Information
+
+/lostinfo_do.bml.username_mailed.text=Success.  Your username has been mailed.
+
+/lostinfo_do.bml.username_mailed.title=Username mailed!
 
 /setlang.bml.select=Select your preferred language:
 
@@ -139,6 +491,128 @@
 
 /talkread.bml.title=Read Comments
 
+/tools/memadd.bml.add_previous<<
+  (=H1 Add to memories... H1=)
+  (=P To add the journal entry you were just viewing to your "memories", fill out the form below. P=)
+.
+
+/tools/memadd.bml.body.added.body=Your list of memorable posts has been updated.
+
+/tools/memadd.bml.body.added.header=Success
+
+/tools/memadd.bml.description=Description:
+
+/tools/memadd.bml.description.text<<
+  Give this journal entry a description that you can remember it by.  
+  To delete this entry from your list of memorable posts, enter a blank description.
+.
+
+/tools/memadd.bml.error.deleted.body=The journal entry previously described as "[[desc]]" has been removed from your list of memorable posts.
+
+/tools/memadd.bml.error.deleted.title=Memory deleted
+
+/tools/memadd.bml.error.entry_deleted=Journal entry no longer exists.  Memory deleted.
+
+/tools/memadd.bml.error.fivekeywords=Only 5 keywords/categories are allowed per memorable post.
+
+/tools/memadd.bml.error.invalid_security=Invalid or missing security option.
+
+/tools/memadd.bml.error.login=You must be <a href="/login.bml?ret=1">logged in</a> to use this feature.  Go login and you'll be brought back here.
+
+/tools/memadd.bml.error.maxsize=This keyword exceeds the maximum allowed size: "[[keyword]]"
+
+/tools/memadd.bml.error.nodescription.body<<
+To add a journal entry to your list of memories, you need to provide a description.  
+To delete a memory, you can edit it and remove the description, but you didn't already have this entry in your memories.
+.
+
+/tools/memadd.bml.error.nodescription.title=No description
+
+/tools/memadd.bml.form.reset=Reset
+
+/tools/memadd.bml.form.submit=Submit
+
+/tools/memadd.bml.keywords=Keywords:
+
+/tools/memadd.bml.keywords.example=Example:  <B>Funny, Geeky, Romantic</B>
+
+/tools/memadd.bml.keywords.select=Or, you can also select keywords you've used in the past:
+
+/tools/memadd.bml.keywords.text<<
+  Why is this post memorable?
+  Enter zero to five keywords or categories so you can find it back later.
+.
+
+/tools/memadd.bml.multiple_selections=Hold down 'Control' while clicking keywords to select multiple ones.
+
+/tools/memadd.bml.security.friendsonly=Friends Only
+
+/tools/memadd.bml.security.private=Private
+
+/tools/memadd.bml.security.public=Public 
+
+/tools/memadd.bml.title=Add to Memories
+
+/tools/memadd.bml.title.added=Added
+
+/tools/memadd.bml.title.deleted=Deleted
+
+/tools/memadd.bml.title.edit_memory=Edit Memorable Entry
+
+/tools/memadd.bml.whocansee<<
+  Who can see that you've marked this post as memorable?
+  Everybody, only people you list as a friend, or just you?
+.
+
+/tools/memories.bml.back=Back
+
+/tools/memories.bml.body.keyword<<
+  (=H1 [[keyword]] H1=)
+  (=P The following is a list of "[[keyword]]" journal entries that user <B>[[user]]</B> found memorable. P=)
+.
+
+/tools/memories.bml.body.list_categories<<
+  (=H1 Memorable Posts H1=)
+  (=P The following is a list of categories that user <B>[[user]]</B> has placed memorable journal entries in. P=)
+.
+
+/tools/memories.bml.body.memorable=The following is a list of uncategorized journal entries that user <B>[[user]]</B> found memorable.
+
+/tools/memories.bml.edit=edit
+
+/tools/memories.bml.entries=entries
+
+/tools/memories.bml.entry=entry
+
+/tools/memories.bml.error.noentries.body<<
+  This could be because 
+  1) the user hasn't defined any memorable events, 
+  2) the user's memorable events are protected and you don't have access to view them, or 
+  3) the user doesn't have any memories that match your filter criteria.
+.
+
+/tools/memories.bml.error.noentries.title=No memories found.
+
+/tools/memories.bml.filter.all=All memories
+
+/tools/memories.bml.filter.other=Only other entries
+
+/tools/memories.bml.filter.own=Only '[[user]]' entries
+
+/tools/memories.bml.form.switch=Switch
+
+/tools/memories.bml.title.keyword=Memorable [[keyword]] Posts
+
+/tools/memories.bml.title.memorable=Memorable Posts
+
+/tools/memories.bml.uncategorized=Uncategorized
+
+BML.parse_multipart.parse=Error parsing upload
+
+BML.parse_multipart.toolarge=Upload too large
+
+BML.parse_multipart.unknowntype=Unknown content type
+
 btn.search=Search
 
 Email=Email
@@ -146,9 +620,21 @@ Email=Email
 Error|notes=typically used inside an H1 tag to announce an error.
 Error=Error
 
+error.dberror=A database error occurred:
+
+error.nobutton=No button pressed?
+
 error.nodb=Database temporary unavailable.
 
 error.nodbmaintenance=This part of the database is temporarily down for maintenance.  Try again in a few minutes.
+
+error.noentry=No such journal entry.
+
+error.nojournal=Unknown Journal
+
+error.unknownmode=Unknown mode.
+
+error.username_notfound=Username not found.
 
 Help=Help
 
@@ -202,12 +688,6 @@ talk.somebodywrote_comm=[[realname]] ([[userlink]]) wrote in [[commlink]],
 talk.threadlink=Thread
 
 uploadpic.error.toolarge=Image uploaded is too large.  File size cannot exceed [[maxsize]].
-
-BML.parse_multipart.toolarge=Upload too large
-
-BML.parse_multipart.unknowntype=Unknown content type
-
-BML.parse_multipart.parse=Error parsing upload
 
 Username=Username
 

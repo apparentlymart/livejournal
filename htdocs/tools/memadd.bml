@@ -9,14 +9,14 @@
 
  my $remote = LJ::get_remote($dbs);
 
+ $title = $ML{'title'};
+ $body = "";
+
  unless (defined $remote) {
-     $title = "Add Memory";
-     $body = "You must be <a href=\"/login.bml?ret=1\">logged in</a> to use this feature.  Go login and you'll be brought back here.";
+     $body = $ML{'.error.login'};
      return;
  }
 
- $title = "Add to Memories";
- $body = "";
 
  $FORM{'oldkeywords'} = [ split('\0', $FORM{'oldkeywords'}) ];
 
@@ -25,9 +25,9 @@
      return;
  }
 
- my %secopts = ( 'public' => "Public",
-                 'friends' => "Your Friends",
-                 'private' => "Private", );
+ my %secopts = ( 'public' => $ML{'.security.public'},
+                 'friends' => $ML{'.security.friendsonly'},
+                 'private' => $ML{'.security.private'}, );
 
  my $sth;
  my $journal = $FORM{'journal'};
@@ -41,8 +41,8 @@
  if ($journal) {
      $ju = LJ::load_user($dbs, $journal);
      unless ($ju) {
-         $title = "Error";
-         $body = "Unknown journal.";
+         $title = $ML{'Error'};
+         $body = $ML{'error.nojournal'};
          return;
      }
      $anum = $itemid % 256;
@@ -96,7 +96,7 @@
      @all_keywords = sort @all_keywords;
 
      if (defined $memory) {
-         $title = "Edit Memorable Entry";
+         $title = $ML{'.title.edit_memory'};
          $des = $memory->{'des'};
          $sth = $dbr->prepare("SELECT k.keyword FROM keywords k, memkeyword mk WHERE mk.kwid=k.kwid AND mk.memid=$memory->{'memid'}");
          $sth->execute;
@@ -110,16 +110,16 @@
          {
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
              $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
-             $title = "Error";
-             $body = "Journal entry no longer exists.  Memory deleted.";
+             $title = $ML{'Error'};
+             $body = $ML{'.error.entry_deleted'};
              return;
          }
 
      } 
      elsif (!$log || ($jid && $log->{'anum'} != $anum))
      {
-         $title = "Error";
-         $body = "No such journal entry.";
+         $title = $ML{'Error'};
+         $body = $ML{'error.noentry'};
          return;
      }
      else 
@@ -134,29 +134,29 @@
      LJ::text_out(\$des);
      LJ::text_out(\$keywords);
 
-     $body .= "(=H1 Add to memories... H1=)(=P To add the journal entry you were just viewing to your \"memories\", fill out the form below. P=)";
+     $body .= $ML{'add_previous'};
      $body .= "<FORM METHOD=POST>";
      $body .= "<input type='hidden' name='itemid' value='$ditemid'>";
      $body .= "<input type='hidden' name='journal' value='$ju->{'user'}'>" if $ju;
      $body .= "<input type=hidden name=mode value=\"save\">";
      $body .= "<TABLE cellpadding=4>";
 
-     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Description:</B></TD><TD><input name=des value=\"$des\" maxlength=@{[ LJ::CMAX_MEMORY ]} size=40><BR><FONT SIZE=-1>Give this journal entry a description that you can remember it by.  To delete this entry from your list of memorable posts, enter a blank description.</FONT></TD></TR>\n";
+     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>$ML{'.description'}</B></TD><TD><input name=des value=\"$des\" maxlength=@{[ LJ::CMAX_MEMORY ]} size=40><BR><FONT SIZE=-1>$ML{'.description.text'}</FONT></TD></TR>\n";
      
-     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Keywords:</B></TD><TD><input name=keywords maxlength=@{[ LJ::CMAX_KEYWORD ]} size=40><BR><FONT SIZE=-1>Why is this post memorable?  Enter zero to five keywords or categories so you can find it back later.  ";
+     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>$ML{'.keywords'}</B></TD><TD><input name=keywords maxlength=@{[ LJ::CMAX_KEYWORD ]} size=40><BR><FONT SIZE=-1>$ML{'.keywords.text'}";
 
      if (@all_keywords) {
          my $size = scalar(@all_keywords);
          if ($size > 15) { $size = 15; }
-         $body .= "Or, you can also select keywords you've used in the past:<ul><select name=oldkeywords multiple size=$size>";
+         $body .= "$ML{'.keywords.select'}<ul><select name=oldkeywords multiple size=$size>";
          foreach my $kw (@all_keywords) {
              my $sel = $selected_keyword{$kw} ? " selected" : "";
              LJ::text_out(\$kw);
              $body .= "<option$sel>$kw</option>\n";
          }
-         $body .= "</select></ul>Hold down 'Control' while clicking keywords to select multiple ones.";
+         $body .= "</select></ul>$ML{'.multiple_selections'}";
      } else {
-         $body .= "Example:  <B>Funny, Geeky, Romantic</B></FONT>";
+         $body .= "$ML{'.keywords.example'}</FONT>";
      }
 
 
@@ -167,9 +167,9 @@
          $body .= "<OPTION VALUE=\"$sec\" $sel>$secopts{$sec}\n";
      }
      $body .= "</SELECT>\n";
-     $body .= "<BR><FONT SIZE=-1>Who can see that you've marked this post as memorable?  Everybody, only people you list as a friend, or just you?</FONT></TD></TR>\n";
-     $body .= "<TR><TD></TD><TD><INPUT type=submit value=\"Submit\"> ";
-     if (defined $memory) { $body .= "<INPUT type=reset value=\"Reset\">"; }
+     $body .= "<BR><FONT SIZE=-1>$ML{'.whocansee'}</FONT></TD></TR>\n";
+     $body .= "<TR><TD></TD><TD><INPUT type=submit value=\"$ML{'.form.submit'}\"> ";
+     if (defined $memory) { $body .= "<INPUT type=reset value=\"$ML{'.form.reset'}\">"; }
      $body .= "</td></tr>";
      $body .= "</TABLE>";
 
@@ -183,12 +183,16 @@
          if (defined $memory) {
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
              $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
-             $title = "Deleted";
-             $body = "(=H1 Memory deleted H1=)(=P The journal entry previously described as \"$memory->{'des'}\" has been removed from your list of memorable posts P=)";
+             $title = $ML{'.title.deleted'};
+             $body = "(=H1 .error.deleted.title H1=)(=P " . 
+                     BML::ml(".error.deleted.body", { 'desc' => $memory->{'des'} }) .
+                     "P=)";
              return;	     
          } else {
-             $title = "Error";
-             $body = "(=H1 No description H1=)(=P To add a journal entry to your list of memories, you need to provide a description.  To delete a memory, you can edit it and remove the description, but you didn't already have this entry in your memories. P=)";
+             $title = $ML{'Error'};
+             $body = "(=H1 $ML{'.error.nodescription.title'} H1=)(=P ";
+             $body .= BML::ml('.error.nodescription.body');
+             $body .= " P=)";
              return;
          }
      }
@@ -203,8 +207,8 @@
          @keywords = keys %kws;
      }
      if (scalar(@keywords) > 5) { 
-         $title = "Error";
-         $body = "(=H1 Error H1=)(=P Only 5 keywords/categories are allowed per memorable post. P=)";
+         $title = $ML{'Error'};
+         $body = "(=H1 $ML{'Error'} H1=)(=P $ML{'.error.fivekeywords'} P=)";
          return;
      }
      @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
@@ -213,8 +217,9 @@
 
      foreach my $kw (@keywords) {
          if (length($kw) > 40) {
-             $title = "Error";
-             $body = "(=H1 Error H1=)(=P This keyword exceeds the maximum allowed size: \"$kw\" P=)";
+             $title = $ML{'Error'};
+             $body = "(=H1 $ML{'Error'} H1=)(=P " . 
+                     BML::ml(".error.maxsize", { 'keyword' => $kw }) . "P=)";
              return;
          }
 
@@ -223,8 +228,8 @@
      }
 
      unless (exists $secopts{$FORM{'security'}}) {
-         $title = "Error";
-         $body = "Invalid or missing security option.";
+         $title = $ML{'Error'};
+         $body = $ML{'.error.invalid_security'};
          return;
      }
 
@@ -259,13 +264,13 @@
          $dbh->do($sql);
      }
 
-     $title = "Added";
-     $body = "(=H1 Success H1=)(=P Your list of memorable posts has been updated. P=)";
+     $title = $ML{'.title.added'};
+     $body = "(=H1 $ML{'.body.added.header'} H1=)(=P $ML{'.body.added.body'} P=)";
      return;
  }
 
- $title = "Error";
- $body = "Unknown mode";
+ $title = $ML{'Error'};
+ $body = $ML{'error.unknownmode'};
 
  return;
 _CODE=)(=PAGE

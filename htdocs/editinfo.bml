@@ -1,5 +1,5 @@
 (=PAGE
-TITLE=>Edit Personal Information
+TITLE=>(=_ML .title _ML=)
 BODY<=
 (=_CODE
 
@@ -18,15 +18,14 @@ BODY<=
 
  if ($mode eq "loginform")
  {
-     $ret .= "(=H1 Edit Personal Information H1=)(=P Enter your username and password to modify your personal information. P=)";
+     $ret .= "(=H1 $ML{'.title'} H1=)(=P $ML{'.login.enterinfo'} P=)";
      $ret .= "<form action='editinfo.bml' method='post'>";
      $ret .= "<input type='hidden' name='mode' value='modify'>";
      $ret .= "(=STANDOUT <table> ";
      $ret .= LJ::auth_fields_2($dbs, \%FORM, { 'shared' => 1, 'getother' => 1 });
      $ret .= "<tr><td colspan='2' align='center'><input type='submit' value='Proceed...'>";
      $ret .= "</td></tr></table> STANDOUT=)</form>\n";
-     $ret .= "(=H1 Forget something? H1=)(=P If you forgot your username or password, ";
-     $ret .= "<a href='lostinfo.bml'>recover it here!</a>. P=)";
+     $ret .= "(=H1 $ML{'.login.forgot.header'} H1=)(=P $ML{'.login.forgot.recover'} P=) ";
      return $ret;
  }
  my ($u, $user, $err);
@@ -93,18 +92,18 @@ BODY<=
 
      if ($remote) {
          $ret .= "<form method='post'>";
-         $ret .= "(=H1 Switch Journal H1=)(=P Work with journal: ";
+         $ret .= "(=H1 $ML{'.switch.header'} H1=)(=P $ML{'.switch.workwith'} ";
          $ret .= LJ::make_shared_select($dbs, $remote, \%FORM);
-         $ret .= " <input type='submit' value='Switch'> P=)</form>";
+         $ret .= " <input type='submit' value='$ML{'.switch.button'}'> P=)</form>";
      }
 
-     $ret .= "<FORM METHOD=POST>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=domodify>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=(=_EH $user _EH=)>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
+     $ret .= "<form method=\"POST\">\n";
+     $ret .= "<input type=\"hidden\" name=\"mode\" value=\"domodify\" />\n";
+     $ret .= "<input type=\"hidden\" name=\"user\" value=\"(=_EH $user _EH=)\" />\n";
+     $ret .= "<input type=\"hidden\" name=\"hpassword\" value=\"$hpassword\" />\n";
 
      ### personal information
-     $ret .= "(=H1 Personal Information H1=)(=P Fill in some quick information about yourself, for our own curiosity and statistical purposes.  We're not going to do anything evil or annoying with this information, we'd just like to see who and where our users are.  Please, fill it in correctly.  If you're concerned, read our <A HREF=\"/legal/privacy.bml\">privacy policy</A>. P=)\n";
+     $ret .= "(=H1 $ML{'.persinfo.header'} H1=)(=P $ML{'.persinfo.disclaimer'} P=)\n";
 
      my %htmlu = ();
      foreach my $v (qw(name email url urlname zip city url aolim jabber icq yahoo msn howhear bio))
@@ -115,16 +114,16 @@ BODY<=
      $ret .= "<P><TABLE WIDTH=100%>\n";
 
      # name
-     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Name</TD>";
+     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$ML{'.name.title'}</TD>";
      if(LJ::text_in($saved{'name'})) {
          $ret .= "<TD><INPUT NAME=name VALUE=\"$htmlu{'name'}\" MAXLENGTH=50></TD></TR>\n";
      } else {
          $ret .= "<input type='hidden' name='name_absent' value='yes' />";
-         $ret .= "<td>(=INERR Your name contains invalid characters. You must visit the <a href='/utf8convert.bml'><b>conversion page</b></a> to convert it to Unicode. INERR=)</td></tr>\n";
+         $ret .= "<td>(=INERR $ML{'.error.invalidname'} INERR=)</td></tr>\n";
      }
 
      # birthday
-     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Birthday</TD><TD>";
+     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$ML{'.bday.title'}</TD><TD>";
      my %bdpart;
      if ($u->{'bdate'} =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/)
      {
@@ -138,12 +137,12 @@ BODY<=
          $ret .= "<OPTION VALUE=$i$sel>" . LJ::Lang::month_long("EN", $i) . "\n";
      }
      $ret .= "</SELECT> ";
-     $ret .= "<INPUT SIZE=3 MAXLENGTH=2 NAME=day VALUE=\"$bdpart{'day'}\">, <INPUT SIZE=5 MAXLENGTH=4 NAME=year VALUE=\"$bdpart{'year'}\"> (year is optional)";
+     $ret .= "<INPUT SIZE=3 MAXLENGTH=2 NAME=day VALUE=\"$bdpart{'day'}\">, <INPUT SIZE=5 MAXLENGTH=4 NAME=year VALUE=\"$bdpart{'year'}\"> ($ML{'.bday.year.opt'})";
 
      $ret .= "</TD></TR>\n";
 
      # gender
-     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Gender</TD><TD><SELECT NAME=\"gender\">";
+     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$ML{'.gender.title'}</TD><TD><SELECT NAME=\"gender\">";
      my @gender = ("U" => "(Unspecified)", "M" => "Male", "F" => "Female");
      while (my ($g, $gword)=splice(@gender, 0, 2))
      {
@@ -153,24 +152,24 @@ BODY<=
      $ret .= "</SELECT></TD></TR>\n";
 
      # email
-     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Email</TD><TD><INPUT NAME=email VALUE=\"$htmlu{'email'}\" MAXLENGTH=50 SIZE=40></TD></TR>\n";
+     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$ML{'.email.title'}</TD><TD><INPUT NAME=email VALUE=\"$htmlu{'email'}\" MAXLENGTH=50 SIZE=40></TD></TR>\n";
 
      # url
-     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Webpage URL</TD><TD><INPUT NAME=url VALUE=\"$htmlu{'url'}\" SIZE=40> (opt.)</TD></TR>\n";
+     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$ML{'.webpageurl.title'}</TD><TD><INPUT NAME=url VALUE=\"$htmlu{'url'}\" SIZE=40> ($ML{'.optional'})</TD></TR>\n";
 
      # urlname
-     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Webpage Name</TD><TD><INPUT NAME=urlname VALUE=\"$htmlu{'urlname'}\" SIZE=40> (opt.)</TD></TR>\n";
+     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$ML{'.webpagename.title'}</TD><TD><INPUT NAME=urlname VALUE=\"$htmlu{'urlname'}\" SIZE=40> ($ML{'.optional'})</TD></TR>\n";
 
      # chat thingies
      foreach my $p (["aolim", "AOL IM", 16], ["icq", "ICQ \#", 12], 
                     ["yahoo", "Yahoo! ID", 33], ["msn", "MSN Messenger", 60],
                     ["jabber", "Jabber Address", 60])
      {
-         $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$p->[1]</TD><TD><INPUT NAME=\"$p->[0]\" VALUE=\"$htmlu{$p->[0]}\" SIZE=20 MAXLENGTH=$p->[2]> (opt.)</TD></TR>\n";
+         $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$p->[1]</TD><TD><INPUT NAME=\"$p->[0]\" VALUE=\"$htmlu{$p->[0]}\" SIZE=20 MAXLENGTH=$p->[2]> ($ML{'.optional'})</TD></TR>\n";
      }
              
      # country
-     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Country</TD><TD><SELECT NAME=country><OPTION VALUE=\"\">(Pick a country)\n";
+     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$ML{'.country.title'}</TD><TD><SELECT NAME=country><OPTION VALUE=\"\">($ML{'.country.choose'})\n";
      $ret .= "<OPTION VALUE=\"US\">United States\n";
      foreach (sort { $countries{$a} cmp $countries{$b} } keys %countries)
      {
@@ -180,20 +179,20 @@ BODY<=
      $ret .= "</SELECT></TD></TR>\n";
 
      # city
-     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>City</TD><TD><INPUT NAME=city VALUE=\"$htmlu{'city'}\"></TD></TR>\n";
+     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$ML{'.city.title'}</TD><TD><INPUT NAME=city VALUE=\"$htmlu{'city'}\"></TD></TR>\n";
 
      # state
-     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>State</TD><TD><SELECT NAME=statedrop><OPTION VALUE=\"\">(US States)\n";
+     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$ML{'.state.title'}</TD><TD><SELECT NAME=statedrop><OPTION VALUE=\"\">($ML{'.state.us'})\n";
      foreach (sort { $states{$a} cmp $states{$b} } keys %states)
      {
          my $sel = $_ eq $u->{'state'} ? " SELECTED" : "";
          $ret .= "<OPTION VALUE=\"$_\"$sel>$states{$_}\n";
      }
      my $otherstate = BML::eall(defined($states{$u->{'state'}}) ? "" : $u->{'state'});
-     $ret .= "</SELECT><BR>Or, type other state/province/territory: <INPUT NAME=stateother SIZE=20 MAXLENGTH=50 VALUE=\"$otherstate\"></TD></TR>\n";
+     $ret .= "</SELECT><BR>$ML{'.state.other'}: <INPUT NAME=stateother SIZE=20 MAXLENGTH=50 VALUE=\"$otherstate\"></TD></TR>\n";
 
      # zip
-     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>ZIP Code</TD><TD><INPUT NAME=zip VALUE=\"$htmlu{'zip'}\" SIZE=6 MAXLENGTH=5> (5 digit ZIP code; US residents only)</TD></TR>\n";
+     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$ML{'.zip.title'}</TD><TD><INPUT NAME=zip VALUE=\"$htmlu{'zip'}\" SIZE=6 MAXLENGTH=5> ($ML{'.zip.usonly'})</TD></TR>\n";
 
      # text messaging
      if (LJ::get_cap($u, "textmessaging"))
@@ -204,13 +203,13 @@ BODY<=
          foreach (values %$tminfo) { LJ::text_out(\$_); }
 
          # text messaging
-         $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Text Messaging<BR>(<A HREF=\"/support/faqbrowse.bml?faqid=30\">about this feature</A>)</TD><TD>";
+         $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>$ML{'.tm.title'}<BR>($ML{'.tm.about'})</TD><TD>";
          $ret .= "<TABLE BORDER=0><TR><TD>";
-         $ret .= "<INPUT TYPE=CHECKBOX NAME=\"use_txtmsg\" " . ($u->{'txtmsg_status'} eq "on" ? "CHECKED" : "") . "></TD><TD COLSPAN=2><B>Enable text messaging from other users.</B></TD></TR>";
-         $ret .= "<TR><TD ROWSPAN=3>&nbsp;</TD><TD>Security Level:</TD><TD>";
-         my %levels = ("all" => "Anybody",
-                       "reg" => "Registered Users",
-                       "friends" => "Friends only");
+         $ret .= "<INPUT TYPE=CHECKBOX NAME=\"use_txtmsg\" " . ($u->{'txtmsg_status'} eq "on" ? "CHECKED" : "") . "></TD><TD COLSPAN=2><B>$ML{'.tm.sec.about'}</B></TD></TR>";
+         $ret .= "<TR><TD ROWSPAN=3>&nbsp;</TD><TD>$ML{'.tm.sec.title'}</TD><TD>";
+         my %levels = ("all" => BML::ml(".security.visibility.anybody"),
+                       "reg" => BML::ml(".security.visibility.regusers"),
+                       "friends" => BML::ml(".security.visibility.friends"));
          my @levels = qw(all reg friends);
          $ret .= "<SELECT NAME=\"txtmsg_security\">";
          foreach my $lev (@levels) {
@@ -219,7 +218,7 @@ BODY<=
          }
          $ret .= "</SELECT>\n";
          $ret .= "</TD></TR>";
-         $ret .= "<TR><TD>Service Provider:</TD><TD>";
+         $ret .= "<TR><TD>$ML{'.tm.servprov'}</TD><TD>";
          {
              my @opts = ("", "");
              foreach my $p (LJ::TextMessage::providers()) {
@@ -231,8 +230,8 @@ BODY<=
                                      @opts);
          }
          
-         $ret .= " (<A HREF=\"/tools/textmessage.bml?mode=details\">details</A>)</TD></TR>";
-         $ret .= "<TR><TD>Full phone #:</TD><TD><INPUT NAME=\"txtmsg_number\" SIZE=15 MAXLENGTH=40 VALUE=\"$tminfo->{'number'}\"></TD></TR>";
+         $ret .= " ($ML{'.tm.details'})</TD></TR>";
+         $ret .= "<TR><TD>$ML{'.tm.phonenum'}</TD><TD><INPUT NAME=\"txtmsg_number\" SIZE=15 MAXLENGTH=40 VALUE=\"$tminfo->{'number'}\"></TD></TR>";
          $ret .= "</TABLE></TD></TR>\n";
      }
 
@@ -240,40 +239,42 @@ BODY<=
      $ret .= "</TABLE>\n";
 
      ### User bio
-     $ret .= "(=H1 About You H1=)(=P Here you can enter a little mini-biography about yourself that will show up on your user-info page.... P=)";
+     $ret .= "(=H1 $ML{'.bio.header'} H1=)(=P $ML{'.bio.about'} P=)";
      if (LJ::text_in($saved{'bio'})) {
          $ret .= "<UL><TEXTAREA NAME=bio ROWS=10 COLS=50 WRAP=SOFT>$htmlu{'bio'}</TEXTAREA></UL>";
      } else {
          $ret .= "<input type='hidden' name='bio_absent' value='yes' />";
-         $ret .= "(=P (=INERR Your stored biography contains invalid symbols. You must visit the <a href='/utf8convert.bml'><b>conversion page</b></a> to convert it to Unicode. INERR=) P=)";
+         $ret .= "(=P (=INERR $ML{'.invalidbio'} INERR=) P=)";
      }
 
      ### How heard Settings
      unless ($htmlu{'howhear'}) {
-         $ret .= "(=H1 Curiosity H1=)(=P Just for my own curiosity, where did you hear about $LJ::SITENAME from?  If it was a specific person, enter their LiveJournal username, if it was from another source/article/link/website, tell us where.... ";
+         $about = BML::ml(".howhear.about", { 'sitename' => $LJ::SITENAME, });
+         $ret .= "(=H1 $ML{'.howhear.header'} H1=)(=P $about";
          $ret .= "<UL><INPUT NAME=howhear VALUE=\"$htmlu{'ints'}\" SIZE=60 MAXLENGTH=100></UL>";
          $ret .= " P=)";
      }
 
      {
          ### Interests
+         $ret .= "(=H1 $ML{'.int.header'} H1=)";
          my $eints = BML::eall(join(", ", sort keys %interests));
          if (LJ::text_in($eints)) {
              LJ::text_out(\$eints);
-             $ret .= "(=H1 Interests H1=)(=P If you want other people to be able to search the directory and find you by interest, list below everything you're interested in, separated by commas.  Short single-word phrases are best.  <B>Rule of thumb:</B> You should be able to put the interest in the sentence \"I like ________\".  When referring to nouns, use the plural form for consistency.  \"I like DVDs\" instead of \"I like DVD\". P=)";
-             $ret .= "(=P <FONT COLOR=#009000><B>GOOD</B></FONT> Example: <B>biking, snow skiing, computers, dvds, mp3s, cheese, women</B> P=)";
-             $ret .= "(=P <FONT COLOR=#FF0000><B>BAD</B></FONT> Example: <B>I like lots of bands and watching movies and talking to friends and going to clubs.</B>  That sort of stuff goes in your bio above. P=)";
+             $ret .= "(=P $ML{'.int.about'} P=)";
+             $ret .= "(=P $ML{'.int.ex.good'} P=)";
+             $ret .= "(=P $ML{'.int.ex.bad'} P=)";
              $ret .= "<UL><TEXTAREA NAME=interests ROWS=10 COLS=50 WRAP=SOFT>$eints</TEXTAREA></UL>";
          } else {
              $ret .= "<input type='hidden' name='interests_absent' value='yes' />";
-             $ret .= "(=H1 Interests H1=)(=P (=INERR Your currently stored list of interests contains invalid symbols. You must visit the <a href='/utf8convert.bml'><b>conversion page</b></a> to convert it to Unicode. INERR=) P=)";
+             $ret .= "(=P (=INERR $ML{'.error.invalidints'} INERR=) P=)";
          }
      }
      
         
 
      ### Picture Settings
-     $ret .= "(=H1 Your Picture H1=)(=P Below is the miniature picture you have uploaded to represent you throughout the LiveJournal site and in your journal and in your friends' journals... \n<P><CENTER>";
+     $ret .= "(=H1 $ML{'.userpic.header'} H1=)(=P $ML{'.userpic.about'}\n<P><CENTER>";
      if ($u->{'defaultpicid'})
      {
          my $picid = $u->{'defaultpicid'};
@@ -281,43 +282,43 @@ BODY<=
          $ret .= "<IMG SRC=\"/userpic/$picid\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'}>";
      } else
      {
-         $ret .= "<I>(no image uploaded)</I>";
+         $ret .= "<I>($ML{'.userpic.none'})</I>";
      }
-     $ret .= "</CENTER><P>To delete this picture, or upload a new one, <A HREF=\"/uploadpic.bml\" TARGET=_blank>go here</A>. P=)\n";
+     $ret .= "</CENTER><P>$ML{'.userpic.edit'} P=)\n";
 
 
      ### Permission Settings
-     $ret .= "(=H1 LiveJournal Options H1=)(=P Select below your personal privacy options and preferences. P=)";
+     $ret .= "(=H1 $ML{'.settings.header'} H1=)(=P $ML{'.settings.about'} P=)";
      $ret .= "<P><TABLE>\n";
 
      my $checked;
      $checked = $u->{'allow_infoshow'} eq "Y" ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_infoshow $checked></TD><TD><B>Show location & birthday</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>Turn this on if you want your city/state/country and birthday to be visible to other users.</TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_infoshow $checked></TD><TD><B>$ML{'.allowshowinfo.title'}</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.allowshowinfo.about'}</TD></TR>\n";
 
      $checked = $u->{'allow_contactshow'} ne "N" ? "CHECKED" : "";
-     $ret .= "<tr valign=middle><td width=50 align=right><input type=checkbox name=allow_contactshow $checked></td><td><b>Show your contact information on your LiveJournal?</b></td></tr>\n";
-     $ret .= "<tr><td>&nbsp;</td><td>You should keep this option enabled.  This lets other people be able to contact you by showing your email address, ICQ number, and AOL Instant Messenger screenname all on your LiveJournal.";
+     $ret .= "<tr valign=middle><td width=50 align=right><input type=checkbox name=allow_contactshow $checked></td><td><b>$ML{'.allowshowcontact.title'}</b></td></tr>\n";
+     $ret .= "<tr><td>&nbsp;</td><td> $ML{'.allowshowcontact.about'}";
 
      {
-         $ret .= "<p><b>Security:</b> ";
+         $ret .= "<p><b>$ML{'.security.header'}</b> ";
          $ret .= LJ::html_select({ 'name' => 'contactshow_sec',
                                    'selected' => $u->{'allow_contactshow'},
                                }, 
-                                 "Y" => "Everybody",
-                                 "F" => "Friends only",
+                                 "Y" => BML::ml(".security.visibility.everybody"),
+                                 "F" => BML::ml(".security.visibility.friends"),
                                  );
 
-         $ret .= "<p><b>If visible, email address to be displayed:</b><ul>";
+         $ret .= "<p><b>$ML{'.allowshowcontact.email'}</b><ul>";
 
          my $cur = $u->{'opt_whatemailshow'} || "B";
          my @vals = ( ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail"))
-                     ? ("B" => "Both (actual + \@$LJ::USER_DOMAIN)",
-                        "A" => "Actual address only",
-                        "L" => "LiveJournal address only",
-                        "N" => "Neither.  Don't show any email address.")
-                     : ("A" => "Show email address",
-                        "N" => "Don't show email address"));
+                     ? ("B" => BML::ml(".allowshowcontact.email.both", { 'domain' => @$LJ::USER_DOMAIN}),
+                        "A" => BML::ml(".allowshowcontact.email.actual_only"),
+                        "L" => BML::ml(".allowshowcontact.email.lj_only"),
+                        "N" => BML::ml(".allowshowcontact.email.neither"))
+                     : ("A" => BML::ml(".allowshowcontact.email.show"),
+                        "N" => BML::ml(".allowshowcontact.email.no_show")));
          $ret .= "<SELECT NAME=\"opt_whatemailshow\">";
          while (my ($key, $des) = splice(@vals, 0, 2)) {
              my $sel = $key eq $cur ? "SELECTED" : "";
@@ -325,82 +326,82 @@ BODY<=
          }
          $ret .= "</SELECT>";
          
-         $ret .= "</ul>If you checked the above option, you may also choose to hide your email address (while still showing other contact information)";
+         $ret .= "</ul>$ML{'.allowshowcontact.email.reason'}";
          $ret .= ($LJ::USER_EMAIL
-                  ? ", only show your livejournal email address (<A HREF=\"$LJ::SITEROOT/paidaccounts/\">paid accounts</A> only), or to show them both."
+                  ? "," . BML::ml(".allowshocontact.email.if_domainaddy", { 'siteroot' => $LJ::SITEROOT, })
                   : ".");
      }
 
      $ret .= "</TD></TR>\n";
 
      $checked = $u->{'opt_mangleemail'} eq "Y" ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_mangleemail $checked></TD><TD><B>Mangle your displayed email address</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>If you have the above option selected and are afraid spam-robots will find your email address on LiveJournal, select this option and your email address will be modified so your email address won't be found by email-collecting robots.</TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_mangleemail $checked></TD><TD><B>$ML{'.mangleaddress.header'}</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.mangleaddress.about'}</TD></TR>\n";
 
      $checked = $u->{'opt_blockrobots'} ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_blockrobots VALUE=1 $checked></TD><TD><B>Block Robots/Spiders from indexing your journal</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>If you check this option, robots will be told to go away.  Not all robots respect the rules, but the popular search sites' robots do.</TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_blockrobots VALUE=1 $checked></TD><TD><B>$ML{'.blockrobots.header'}</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.blockrobots.about'}</TD></TR>\n";
 
      $checked = $u->{'allow_getljnews'} eq "Y" ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_getljnews $checked></TD><TD><B>Send me LiveJournal news.</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>If you want to know when we add some cool new feature to LiveJournal, check this box.  The emails you get will be pretty rare, no more than once or twice a month usually.  Your email address will not be visible to other users, and you can turn this off at anytime.</TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_getljnews $checked></TD><TD><B>$ML{'.opt_in.header'}</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.opt_in.about'}</TD></TR>\n";
 
      $checked = $u->{'opt_bdaymail'} ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_bdaymail $checked></TD><TD><B>Send me birthday reminders</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>If you want to get email reminding you of birthdays for your friends on LiveJournal, click this box.</TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_bdaymail $checked></TD><TD><B>$ML{'.bdayreminders.header'}</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.bdayreminders.about'}</TD></TR>\n";
 
      $checked = $u->{'opt_hidefriendofs'} ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_hidefriendofs $checked></TD><TD><B>Hide \"Friend of\" list</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>If you check this, the list of people that list you as a friend is hidden on your profile page.</TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_hidefriendofs $checked></TD><TD><B>$ML{'.hidefriendof.header'}</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.hidefriendof.about'}</TD></TR>\n";
 
      $checked = $u->{'opt_nctalklinks'} ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_nctalklinks $checked></TD><TD><B>Append &amp;nc=xx to comment URLs</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>Check this if you want to append the comment count to URLs to make your browser possibly display the links in a different color.</TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_nctalklinks $checked></TD><TD><B>$ML{'.numcomments.header'}</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.numcomments.about'}</TD></TR>\n";
 
      $checked = $u->{'opt_showtalklinks'} eq "Y" ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_showtalklinks $checked></TD><TD><B>Enable message boards</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>Check this if you want people to be able to reply to journal entries you post.  (the journal style you select must also support this)\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_showtalklinks $checked></TD><TD><B>$ML{'.enableboards.header'}</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.enableboards.about'}\n";
 
-     $ret .= "<P><B>Who can reply to your entries?</B> ";
+     $ret .= "<P><B>$ML{'.whoreply.header'}</B> ";
      $ret .= LJ::html_select({ 'name' => 'opt_whocanreply', 'selected' => $u->{'opt_whocanreply'}, },
-                          "all" => "Anybody", "reg" => "Registered Users", "friends" => "Friends only");
+                          "all" => BML::ml(".security.visibility.anybody"), "reg" => BML::ml(".security.visibility.regusers"), "friends" => BML::ml(".security.visibility.friends"));
 
-     $ret .= "<P><B>Log IP addresses of people replying?</B> ";
+     $ret .= "<P><B>$ML{'.logip.header'}</B> ";
      $ret .= LJ::html_select({ 'name' => 'opt_logcommentips', 'selected' => $u->{'opt_logcommentips'}, },
-                          "N" => "No", "S" => "Anonymous posters only", "A" => "Always");
+                          "N" => BML::ml(".donotlog"), "S" => BML::ml(".logip.anon_only"), "A" => BML::ml(".logip.always"));
      
      $ret .= "<P><TABLE>\n";
 
      $checked = $u->{'opt_gettalkemail'} eq "Y" ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_gettalkemail $checked></TD><TD><B>Get message board replies</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>Check this if you want to get email updates when people reply to your journal entries in the message boards.</TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_gettalkemail $checked></TD><TD><B>$ML{'.getreplies.header'}</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.getreplies.about'}</TD></TR>\n";
 
      $checked = $u->{'opt_htmlemail'} eq "Y" ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_htmlemail $checked></TD><TD><B>Send HTML Emails</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>Check this if your email program fully supports HTML in your email.  Many clients try to support it but fail horribly.  If you uncheck it, LiveJournal will only send text emails.</TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_htmlemail $checked></TD><TD><B>$ML{'.htmlemail.header'}</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.htmlemail.about'}</TD></TR>\n";
 
      $checked = $u->{'opt_notalkicons'} ? "" : "CHECKED";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX VALUE=1 NAME=opt_talkicons $checked></TD><TD><B>Show subject icons</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>By default, a bunch of icons are shown that people can use when replying to your messages.  A lot of users feel these are ugly and a waste of space, so uncheck this box if you'd like to never see them again. <TT>:-)</TT></TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX VALUE=1 NAME=opt_talkicons $checked></TD><TD><B>$ML{'.showsubjicons.header'}</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.showsubjicons.about'}</TD></TR>\n";
 
      $ret .= "</TABLE></TD></TR>\n";
 
      $checked = $u->{'opt_showtopicstuff'} ne "N" ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_showtopicstuff $checked></TD><TD><B>Show Topic Stuff</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>If you check this, other users will be able to easily add your journal entries to the hierarchial <A HREF=\"/topics/\">topic directory</A>.</TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_showtopicstuff $checked></TD><TD><B>$ML{'.topicdir.header'}</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.topicdir.about'}</TD></TR>\n";
 
      $ret .= "</table>\n";
 
      if ($LJ::UNICODE) {
-         $ret .= "(=H2 Encoding Options H2=)(=P Don't worry about this stuff.  In general, only international users that write in several different languages will need to change anything here.  P=)<table>\n";
+         $ret .= "(=H2 $ML{'.encoding.header'} H2=)(=P $ML{'.encoding.about'} P=)<table>\n";
          LJ::load_codes($dbs, { "encname" => \%LJ::CACHE_ENCNAMES } )
              unless %LJ::CACHE_ENCNAMES;
-         $ret .= "<tr><td width='50'>&nbsp;</td><td><p><b>Auto-translate older entries from: </b>";
+         $ret .= "<tr><td width='50'>&nbsp;</td><td><p><b>$ML{'.autotranslate.header'}</b>";
          $ret .= LJ::html_select({'name'=>'oldenc', 'selected'=>$u->{'oldenc'}}, %LJ::CACHE_ENCNAMES);
-         $ret .= "</p><p>Use this option to tell LiveJournal which encoding to assume for your entries and comments entered before the site was converted to Unicode. If you write in English, choose \"Western European\" here.</p></td></tr>";
-         $ret .= "<tr><td>&nbsp;</td><td><p><b>Translate email notifications into: </b>";
+         $ret .= "</p><p>$ML{'.autotranslate.about'}</p></td></tr>";
+         $ret .= "<tr><td>&nbsp;</td><td><p><b>$ML{'.translatemailto.header'}</b>";
          $ret .= LJ::html_select({'name'=>'mailencoding', 'selected'=>$u->{'mailencoding'}}, %LJ::CACHE_ENCNAMES);
-         $ret .= "</p><p>In case you chose to receive message board replies by email, and your email client doesn't handle Unicode (UTF-8) messages very well, use this option to specify a different encoding into which LiveJournal will automatically translate the text of comments sent to you.</p></td></tr>";
+         $ret .= "</p><p>$ML{'.translatemailto.about'}</p></td></tr>";
          $ret .= "</table>\n";
      }
 
@@ -412,7 +413,7 @@ BODY<=
      push @banned, $_ while ($_ = $sth->fetchrow_hashref);
      
      if (@banned) {
-         $ret .= "(=H1 Unban Users H1=)(=P You have the following users banned from posting in your journal.  Check the checkbox by their username to remove the ban on them. P=)";
+         $ret .= "(=H1 $ML{'.unbanusers.header'} H1=)(=P $ML{'.unbanusers.about'} P=)";
          $ret .= "<UL>";
          foreach (@banned) {
              $ret .= "<INPUT TYPE=CHECKBOX NAME=\"unban\" VALUE=\"$_->{'banneduserid'}\"> $_->{'user'}<BR>\n";
@@ -422,8 +423,8 @@ BODY<=
      }
 
      ### ending submit block
-     $ret .= "(=H1 Done? H1=)(=P When done, press the \"Save Changes\" button below... P=)\n";
-     $ret .= "(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> STANDOUT=)\n";
+     $ret .= "(=H1 $ML{'.finished.header'} H1=)(=P $ML{'.finished.about'} P=)\n";
+     $ret .= "(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"$ML{'.finished.save_button'}\"> STANDOUT=)\n";
      $ret .= "</FORM>\n";
 
      return $ret;
@@ -457,21 +458,21 @@ BODY<=
 
      if ($FORM{'country'} ne "US" && $FORM{'zip'})
      {
-         push @errors, "You entered a zip-code but you did not select United States as you country.  We only collect zip code information about people in the US.  Please go back and remove the zip code or select United States as your country.";
+         push @errors, "$ML{'.error.locale.zip_requires_us'}";
      }
      if ($FORM{'country'} eq "US" && $FORM{'stateother'})
      {
-         push @errors, "You specified United States as your country, but you typed in a non-US state in the \"other state\" field.";
+         push @errors, "$ML{'.error.locale.country_ne_state'}";
      } elsif ($FORM{'country'} && $FORM{'country'} ne "US" && $FORM{'statedrop'})
      {
-         push @errors, "You specified a non-US country but selected a US state.";
+         push @errors, "$ML{'.error.locale.state_ne_country'}";
      }
      
      # zip-code validation stuff
      if ($FORM{'country'} eq "US") 
      {
          if ($FORM{'statedrop'} && $zipstate && $FORM{'statedrop'} ne $zipstate) {
-             push @errors, "Your zip code does not match the state you specified.  Either correct the information, or erase one or both of the state and zip code fields.";
+             push @errors, "$ML{'.error.locale.zip_ne_state'}";
          }
          if ($zipcity) {
              $FORM{'statedrop'} = $zipstate;
@@ -480,23 +481,23 @@ BODY<=
      }
 
      if ($FORM{'country'} && !defined($countries{$FORM{'country'}})) {
-         push @errors, "Somehow you selected an invalid country.";
+         push @errors, $ML{'.error.locale.invalid_country'};
      }
      
      if ($FORM{'use_txtmsg'}) {
          unless ($FORM{'txtmsg_provider'}) {
-             push @errors, "If you're going to use text messaging, you must select your service provider.  If yours is not listed, please contact us with information about how your service's text messaging feature so we can add support for it.";
+             push @errors, $ML{'.error.tm.require_provider'};
          }
          unless ($FORM{'txtmsg_number'}) {
-             push @errors, "If you're going to use text messaging, you must enter your phone number.";
+             push @errors, $ML{'.error.tm.require_number'};
          }
      }
 
      unless ($FORM{'email'}) { push @errors, "You must provide your email address"; }
      if ($LJ::USER_EMAIL and $FORM{'email'} =~ /\@\Q$LJ::USER_DOMAIN\E$/i) {
-         push @errors, "You cannot enter an \@$LJ::USER_DOMAIN email address.  Enter your real address in that field.  If you're a paid user, your $u->{'user'}\@$LJ::USER_DOMAIN address will forward to your real address.  To choose which email address (or both) is displayed publicly, see the option below the \"Show your Contact Information\" option.";
+         push @errors, BML::ml(".error.email.lj_domain", { 'user' => $u->{'user'}, 'domain' => $LJ::USER_DOMAIN, });
      }
-     if ($FORM{'email'} =~ /\s/) { push @errors, "No spaces allowed in email address.  If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <B>\@aol.com</B>"; }
+     if ($FORM{'email'} =~ /\s/) { push @errors, "$ML{'.error.email.no_space'}"; }
      unless (@errors)
      {
          &check_email($FORM{'email'}, \@errors);
@@ -566,7 +567,7 @@ BODY<=
 
      my $sql = "UPDATE user SET $sets WHERE user=$quser";
      $dbh->do($sql);
-     if ($dbh->err) { return "(=H1 Error! H1=)(=P A database error occurred: <B>" . $dbh->errstr . "</B> P=)"; }
+     if ($dbh->err) { return "(=H1 $ML{'Error'} H1=)(=P $ML{'error.dberror'} <b>" . $dbh->errstr . "</b> P=)"; }
 
      ### change any of the userprops ?
      {
@@ -660,7 +661,7 @@ BODY<=
          my @ints = split (/\s*,\s*/, $FORM{'interests'});
          my $intcount = scalar(@ints);
          if ($intcount > 150) {
-             return LJ::bad_input("Sorry, you listed too many interests.  The limit is 150, but you've listed $intcount.  Any changes you made to your interests were not saved.  Go back and cut down your list, then save again.");
+             return LJ::bad_input(BML::ml(".error.excessive_int", {'intcount' => $intcount}));
          }
          LJ::set_interests($dbs, $u->{'userid'}, \%interests, \@ints);
      }
@@ -692,11 +693,13 @@ BODY<=
      }
 
      # tell the user all is well
-     my $ret = "(=H1 Success H1=)(=P Your information and <a href=\"/users/$user/\">journal</a> settings and <a href=\"/userinfo.bml?user=$user\">profile</a> have been updated. P=)";
+     my $ret = "(=H1 $ML{'.success.header'} H1=)(=P ";
+     $ret .= BML::ml(".success.message", { 'user' => $user, }); 
+     $ret .= " P=)";
      return $ret;
  }
 
- return "Unknown mode."
+ return "(=H1 $ML{'Error'} H1=)(=P $ML{'error.unknownmode'} P=)"
 
 _CODE=)
 
