@@ -1629,6 +1629,7 @@ sub editfriends
     my $friends_added = 0;
     my $fail = sub {
         LJ::memcache_kill($userid, "friends");
+        LJ::mark_dirty($userid, "friends");
         return fail($err, $_[0], $_[1]);
     };
 
@@ -1709,6 +1710,7 @@ sub editfriends
             unless ($dbh->err) {
                 my $memkey = [$userid,"frgmask:$userid:$friendid"];
                 LJ::MemCache::set($memkey, $gmask+0, time()+60*15);
+                LJ::mark_dirty($userid, "friends");
             }
             return $fail->(501,$dbh->errstr) if $dbh->err;
 
@@ -1719,6 +1721,7 @@ sub editfriends
 
     # invalidate memcache of friends
     LJ::memcache_kill($userid, "friends");
+    LJ::mark_dirty($userid, "friends");
 
     return $res;
 }
