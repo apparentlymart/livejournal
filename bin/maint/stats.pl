@@ -278,6 +278,25 @@ $maint{'genstats'} = sub
 
 };
 
+$maint{'genstats_size'} = sub {
+    my $dbh = LJ::get_dbh("master");
+    return unless $dbh;
+
+    print "-I- Finding total & active size.\n";
+    my $period = 30;  # one month is considered active
+    my $size = $dbh->selectrow_array("SELECT COUNT(*) FROM userusage");
+    my $active = $dbh->selectrow_array("SELECT COUNT(*) FROM userusage WHERE ".
+                                       "timecheck > DATE_SUB(NOW(), INTERVAL $period DAY) OR ".
+                                       "timeupdate > DATE_SUB(NOW(), INTERVAL $period DAY) OR ".
+                                       "timecreate > DATE_SUB(NOW(), INTERVAL $period DAY)");
+    return unless $size && $active;
+    $dbh->do("REPLACE INTO stats (statcat, statkey, statval) ".
+             "VALUES ('size', 'accounts', ?), ('size', 'accounts_active', ?)",
+             undef, $size, $active);
+    print "-I- Done.\n";
+};
+
+
 $maint{'genstats_weekly'} = sub
 {
     my $dbh = LJ::get_dbh("master");

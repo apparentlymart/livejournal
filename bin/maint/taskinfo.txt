@@ -4,6 +4,7 @@ bday.pl:
 stats.pl:
   build_randomuserset - builds/cleans table of users applicable for inclusion in random listings
   genstats - Generates the nightly statistics
+  genstats_size - Generates the site size stats
   genstats_weekly - Generates the weekly statistics
   memeclean - Removes things from meme summary that are excluded by new URL cleaner rules
 

@@ -19,7 +19,7 @@ p?>
  $now = time();
  %stat = ();
 
- $sth = $dbr->prepare("SELECT statcat, statkey, statval FROM stats WHERE statcat IN ('userinfo', 'client', 'age', 'gender', 'account')");
+ $sth = $dbr->prepare("SELECT statcat, statkey, statval FROM stats WHERE statcat IN ('userinfo', 'client', 'age', 'gender', 'account', 'size')");
  $sth->execute;
  while ($_ = $sth->fetchrow_hashref) {
      $stat{$_->{'statcat'}}->{$_->{'statkey'}} = $_->{'statval'};
@@ -47,14 +47,16 @@ p?>
  $used7 = $stat{'userinfo'}->{'updated_last7'}+0;
  $usedlastday = $stat{'userinfo'}->{'updated_last1'}+0;
  $allow_getljnews = $stat{'userinfo'}->{'allow_getljnews'}+0;
+ $active = $stat{'size'}->{'accounts_active'}+0;
 
  $ret .= "<?h1 Users h1?>\n";
  $ret .= "<?p How many users, and how many of those are active? <UL>";
- $ret .= "<LI><B>Total users: </B> $total\n";
- $ret .= "<LI><B>Users that have ever updated: </B> $usedever\n";
- $ret .= "<LI><B>Users updating in last 30 days: </B> $used30\n";
- $ret .= "<LI><B>Users updating in last 7 days: </B> $used7\n";
- $ret .= "<LI><B>Users updating in past 24 hours: </B> $usedlastday\n";
+ $ret .= "<LI><B>Total accounts: </B> $total\n";
+ $ret .= "<LI><B>... active in some way: </B> $active\n" if $active;
+ $ret .= "<LI><B>... that have ever updated: </B> $usedever\n";
+ $ret .= "<LI><B>... updating in last 30 days: </B> $used30\n";
+ $ret .= "<LI><B>... updating in last 7 days: </B> $used7\n";
+ $ret .= "<LI><B>... updating in past 24 hours: </B> $usedlastday\n";
  $ret .= "</UL> p?>\n";
 
  $ret .= "<?h1 Gender h1?>\n";
