@@ -203,6 +203,9 @@ sub do_search
     my $count = 0;
     my @ids;
 
+    # delete any stale results
+    $dbdir->do("DELETE FROM dirsearchres2 WHERE qdigest=$qdig AND ".
+               "dateins < DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
     # mark query as in progress.
     $dbdir->do("INSERT INTO dirsearchres2 (qdigest, dateins, userids) ".
                "VALUES ($qdig, NOW(), '[searching]')");

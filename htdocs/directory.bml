@@ -106,8 +106,8 @@ BODY<=
          next unless ($count{'stateus'}->{$state});
          my $shape = "POLY";
          if ($coords =~ /^[^,]+,[^,]+,[^,]+,[^,]+$/) { $shape = "RECTANGLE"; }
-         $ret .= "<AREA SHAPE=$shape COORDS=\"$coords\" HREF=\"$LJ::DIRURI?s_loc=1&loc_cn=US&loc_st=$state&opt_sort=ut\" onMouseOver=\"updateStatus('";
-         $ret .= &BMLUtil::escapeall($state{$state});
+         $ret .= "<AREA SHAPE=$shape COORDS=\"$coords\" HREF=\"$LJ::DIRURI?loc_cn=US&loc_st=$state&opt_sort=ut\" onMouseOver=\"updateStatus('";
+         $ret .= BMLUtil::escapeall($state{$state});
          $ret .= " - ";
          $ret .= ($count{'stateus'}->{$state}+0);
          $s = $count{'stateus'}->{$state} != 1 ? "s" : "";
@@ -125,7 +125,7 @@ BODY<=
      foreach (sort { $country{$a} cmp $country{$b} } keys %{$count{'country'}})
      {
          $count++;
-         $ret .= "<LI><A HREF=\"$LJ::DIRURI?s_loc=1&loc_cn=$_&opt_sort=ut\">$country{$_}</A> <I>($count{'country'}->{$_})</I>\n";
+         $ret .= "<LI><A HREF=\"$LJ::DIRURI?loc_cn=$_&opt_sort=ut\">$country{$_}</A> <I>($count{'country'}->{$_})</I>\n";
          if ($col==0 && $count > ($total/2)) { $ret .= "</td><td>"; $col = 1; }
      }
      $ret .= "</tr></table></ul>\n";
@@ -135,8 +135,10 @@ BODY<=
 
  my $remote = LJ::get_remote($dbs);
 
- unless (LJ::check_priv($dbs, $remote, "betatest", "directory")) {
-     return "The directory is currently unavailable.";
+ unless (LJ::check_priv($dbs, $remote, "betatest", "directory") ||
+         LJ::get_cap($remote, "directory"))
+ {
+     return "Sorry, your account type doesn't permit usage of the directory.";
  }
 
  unless (LJ::Dir::do_search($dbr, $dbdir, \%FORM, \@matches, \%info)) {
