@@ -283,8 +283,6 @@
 
 /community/search.bml.checkbox.onlywithpics=Only communities with pictures
 
-/community/search.bml.contasmember=Contains user <INPUT NAME="fr_user" SIZE=15 MAXLENGTH=15> as a member.
-
 /community/search.bml.label.byinterest=By Interest
 
 /community/search.bml.label.bylocation=By Location

@@ -30,3 +30,7 @@ general /community/manage.bml.actmembers
 general /community/members.bml.manage
 
 general /community/settings.bml.manage
+
+general /community/search.bml.contasmember
+
+
