@@ -346,6 +346,9 @@ class Page
     var readonly UserLink[] linklist
     "An array of UserLink objects defined by the user to be displayed on their journal.";
 
+    var readonly DateTime time
+    "A DateTime object filled with the time (GMT) when the page was created.";
+
     function print
     "The main entry point that LiveJournal calls. Layouts should override this to create HTML that's the
     same for all view types, and use \$this->title, \$this->head and \$this->body to include view-specific

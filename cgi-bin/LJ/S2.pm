@@ -1055,6 +1055,7 @@ sub Page
         'args' => \%args,
         'journal' => User($u),
         'journal_type' => $u->{'journaltype'},
+        'time' => DateTime_unix(time),
         'base_url' => $base_url,
         'stylesheet_url' => "$base_url/res/$styleid/stylesheet?$stylemodtime",
         'view_url' => {
