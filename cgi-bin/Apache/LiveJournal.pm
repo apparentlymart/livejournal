@@ -374,6 +374,11 @@ sub trans
         return redir($r, "$LJ::SITEROOT/register.bml?$1");
     }
 
+    # approve
+    if ($uri =~ m!^/approve/(\w+\.\w+)!) {
+        return redir($r, "$LJ::SITEROOT/approve.bml?$1");
+    }
+
     return FORBIDDEN if $uri =~ m!^/userpics!;
     return DECLINED;
 }

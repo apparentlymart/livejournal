@@ -6,43 +6,89 @@ body<=
     use strict;
     use vars qw(%GET %POST);
 
-    return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+    return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    my $ret;
-    my $remote = LJ::get_remote($dbs);
-
-    $ret .= BML::ml('Backlink', {
-        'link'=>'/community/manage.bml',
-        'text'=>$ML{'.manage2'},
+    # always have links at top
+    my $ret = BML::ml('Backlink', {
+        'link' => '/community/manage.bml',
+        'text' => $ML{'.manage2'},
     });
 
+    # get remote
+    my $remote = LJ::get_remote();
     unless ($remote) {
         $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.noremote'} p?>";
         return $ret;
     }
 
+    my $cname = $GET{'comm'};
+    return BML::redirect("$LJ::SITEROOT/community/manage.bml") unless $cname;
+
+    # get $c object
+    my $c = LJ::load_user($cname);
+    unless ($c) {
+        $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.nocomm'} p?>";
+        return $ret;
+    }
+    my $cid = $c->{'userid'};
+
+    # is $remote an admin?
+    unless (LJ::check_rel($c, $remote, 'A')) {
+        $ret .= "<?h1 $ML{'Error'} h1?><?p ";
+        $ret .= BML::ml('.error.noaccess', { 'comm' => LJ::ljuser($cname, { 'type' => 'C' }) }) . " p?>";
+        return $ret;
+    }
+
     my @allattribs = ('member', 'post', 'preapprove', 'moderate', 'admin');
 
-    my $mode = $POST{'mode'} || "";
+    # saving a form submission
+    if ($POST{'action:update'}) {
 
-    if ($mode eq 'save') {
-        my $cid = $POST{'cid'};
-        my $cname = LJ::get_username($dbs, $cid);
-        my @userids = split(',', $POST{'ids'});
         my @saveattribs = split(',', $POST{'attribs'});
-        unless ($cid) {
-            $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.nocomm'} p?>";
-            return $ret;
-        }
-        unless (LJ::check_rel($dbs, $cid, $remote, 'A')) {
-            $ret .= "<?h1 $ML{'Error'} h1?><?p " . BML::ml('.error.noaccess',{'comm'=>"<?ljcomm $cname ljcomm?>"}) . " p?>";
-            return $ret;  
+
+        # add new users
+        foreach my $num (1..5) {
+            next unless $POST{"add_$num"} =~ /^\w+$/ ||
+                        grep { defined $POST{"add_${num}_$_"} } @saveattribs;
+
+            my $target = LJ::load_user($POST{"add_$num"});
+            next unless $target->{'journaltype'} eq 'P';
+            
+            # make a urlencoded arg string
+            my $arg = join("&", "targetid=$target->{'userid'}",
+                                map { "$_=1" }
+                                grep { defined $POST{"add_${num}_$_"} }
+                                @saveattribs);
+
+            # insert authactions row
+            my $aa = LJ::register_authaction($cid, 'comm_invite', $arg);
+            unless ($aa) {
+                $ret .= "<?h1 $ML{'Error'} h1?><?p Error registering authaction. p?>";
+                return $ret;
+            }
+
+            # email recipient user to tell them about it
+            my $body = "An administrator of the $cname community has requested " .
+                "that you be added to the community.  If you do not wish to be " .
+                "added to $cname, just ignore this email.  However, if " .
+                "you would like to join the community, please click the link " .
+                "below to authorize this action.\n\n" .
+                "     $LJ::SITEROOT/approve/$aa->{'aaid'}.$aa->{'authcode'}\n\n" .
+                "Regards\n$LJ::SITENAME Team\n";
+
+            LJ::send_mail({
+                'to' => $target->{'email'},
+                'from' => $LJ::ADMIN_EMAIL,
+                'fromname' => $LJ::SITENAME,
+                'charset' => 'utf-8',
+                'subject' => "Community Membership: $cname",
+                'body' => $body
+            });
+
         }
 
+        # initialize lists of users to update and delete
+        # keyed on attribute type
         my %add = ();
         my %delete = ();
         foreach (@allattribs) {
@@ -50,8 +96,34 @@ body<=
             $delete{$_} = {};
         }
 
+        # need a db handle now
+        my $dbh = LJ::get_db_writer();
+
+        # check that listed userids are actually members
+        # so we don't add them without going through
+        # authactions first
+        my $in = join(',', map { $dbh->quote($_) } split(',', $POST{'ids'}));
+        my $users = $dbh->selectcol_arrayref("SELECT friendid FROM friends " .
+                                             "WHERE userid=? AND friendid IN ($in)",
+                                             undef, $cid);
+        my %users = map { $_, 1} @$users;
+        my @userids = grep { defined $users{$_} } split(',', $POST{'ids'});
+
+        # build new $in from now-verified @userids
+        $in = join(',', map { $dbh->quote($_) } @userids);
+        my $other_maints = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser " .
+                                                 "WHERE userid=? AND type='A' " .
+                                                 "AND targetid NOT IN ($in)",
+                                                 undef, $cid);
+
+        # if we have $other_maints, then there are maintainers not in our
+        # current view, so they will not be modified, so the user can delete
+        # all maintainers from the current view
+
+        # users already in community
+        my $maints = 0;
         foreach my $id (@userids) {
-            $id = $id + 0;      
+            $id = $id + 0;
             foreach (@saveattribs) {
                 if ($POST{"edit_${id}_$_"}) {
                     $add{$_}->{$id} = 1;
@@ -59,6 +131,18 @@ body<=
                     $delete{$_}->{$id} = 1;
                 }
             }
+            $maints++ if $add{'admin'}->{$id};
+        }
+
+        # can't remove ALL maintainers, give them an error so they can
+        # go back and decide who to keep
+        if (! $other_maints && $maints < 1) {
+             $ret .= "<?h1 $ML{'Error'} h1?><?p Your community, " .
+                     LJ::ljuser($cname, { 'type' => 'C' }) . 
+                     ", must have at least one maintainer. " .
+                     "Please <a href='" . BML::get_uri() . "?comm=$cname'>" .
+                     "go back</a> and add a maintainer. p?>";
+             return $ret;
         }
    
         # revocation of membership implies revocation of posting access    
@@ -66,90 +150,74 @@ body<=
             $delete{'post'}->{$_} = 1;
             delete $add{'post'}->{$_};
         }
-    
-        # perform deletions
-        my $in;
 
+        # perform deletions
         if (%{$delete{'member'}}) {
-            $in = join(',', keys %{$delete{'member'}});
+            my $in = join(',', keys %{$delete{'member'}});
             $dbh->do("DELETE FROM friends WHERE userid=$cid AND friendid IN ($in)");
         }
         if (%{$delete{'admin'}}) {
-            $in = join(',', keys %{$delete{'admin'}});
+            my $in = join(',', keys %{$delete{'admin'}});
             $dbh->do("DELETE FROM reluser WHERE userid=$cid AND type='A' AND targetid IN ($in)");
         }
         if (%{$delete{'post'}}) {
-            $in = join(',', keys %{$delete{'post'}});
+            my $in = join(',', keys %{$delete{'post'}});
             $dbh->do("DELETE FROM reluser WHERE userid=$cid AND type='P' AND targetid IN ($in)");
         }
         if (%{$delete{'moderate'}}) {
-            $in = join(',', keys %{$delete{'moderate'}}); 
+            my $in = join(',', keys %{$delete{'moderate'}}); 
             $dbh->do("DELETE FROM reluser WHERE userid=$cid AND type='M' AND targetid IN ($in)");
         }
         if (%{$delete{'preapprove'}}) {
-            $in = join(',', keys %{$delete{'preapprove'}}); 
+            my $in = join(',', keys %{$delete{'preapprove'}}); 
             $dbh->do("DELETE FROM reluser WHERE userid=$cid AND type='N' AND targetid IN ($in)");
         }
 
         # perform additions
         if (%{$add{'member'}}) {
-            $in = join(',', map { "($cid, $_)" } keys %{$add{'member'}});
+            my $in = join(',', map { "($cid, $_)" } keys %{$add{'member'}});
             $dbh->do("REPLACE INTO friends (userid,friendid) VALUES $in");
         }
         if (%{$add{'admin'}}) {
-            $in = join(',', map { "($cid, $_, 'A')" } keys %{$add{'admin'}});
+            my $in = join(',', map { "($cid, $_, 'A')" } keys %{$add{'admin'}});
             $dbh->do("REPLACE INTO reluser (userid,targetid,type) VALUES $in");
         }
         if (%{$add{'post'}}) {
-            $in = join(',', map { "($cid, $_, 'P')" } keys %{$add{'post'}});
+            my $in = join(',', map { "($cid, $_, 'P')" } keys %{$add{'post'}});
             $dbh->do("REPLACE INTO reluser (userid,targetid,type) VALUES $in");
         }
         if (%{$add{'moderate'}}) {
-            $in = join(',', map { "($cid, $_, 'M')" } keys %{$add{'moderate'}});
+            my $in = join(',', map { "($cid, $_, 'M')" } keys %{$add{'moderate'}});
             $dbh->do("REPLACE INTO reluser (userid,targetid,type) VALUES $in");
         }
         if (%{$add{'preapprove'}}) {
-            $in = join(',', map { "($cid, $_, 'N')" } keys %{$add{'preapprove'}});
+            my $in = join(',', map { "($cid, $_, 'N')" } keys %{$add{'preapprove'}});
             $dbh->do("REPLACE INTO reluser (userid,targetid,type) VALUES $in");
         }
 
         $ret .= "<?h1 $ML{'.success.header'} h1?><?p $ML{'.success.message'} p?>";
-        $ret .= "<?p " . BML::ml(".success.return",{'link'=>BML::get_uri() . "?comm=$cname"}) . " p?>";
+        $ret .= "<?p " . BML::ml(".success.return", { 'link' => BML::get_uri() . "?comm=$cname" }) . " p?>";
 
         return $ret;
 
-    }
-
-    # if no community was specified, redirect to manage.bml
-    unless ($GET{'comm'}) {
-        return BML::redirect("$LJ::SITEROOT/community/manage.bml");
     }
 
     # browsing mode
-    my $cname = $GET{'comm'};
-    my $c = LJ::load_user($dbs, $cname);
-
-    unless ($c) {
-        $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.nocomm'} p?>";
-        return $ret;
-    }
-
-    unless (LJ::check_rel($dbs, $c, $remote, 'A')) {
-        $ret .= "<?h1 $ML{'Error'} h1?><?p " . BML::ml('.error.noaccess',{'comm'=>"<?ljcomm $cname ljcomm?>"}) . " p?>";
-        return $ret;
-    }
 
     # columns of our table, excluding username
     my @attribs = ('member', 'post');
-  LJ::load_user_props($dbs, $c, 'moderated');
+    LJ::load_user_props($c, 'moderated');
     push @attribs, ('preapprove', 'moderate')
         if $c->{'moderated'};
     push @attribs, 'admin';
 
     # now get lists of: members, admins, able to post, moderators
-    my $cid = $c->{'userid'};
     my %users = ();
 
+    # need a dbr now
+    my $dbr = LJ::get_db_reader();
+
+    # get community members
     my $sth = $dbr->prepare("SELECT u.userid, u.user FROM user u, friends f WHERE u.userid=f.friendid AND f.userid=$cid");
     $sth->execute;
 
@@ -179,44 +247,93 @@ body<=
     $cmp = sub {$b->{'moderate'} <=> $a->{'moderate'}} if $method eq 'moderate';
     $cmp = sub {$b->{'preapprove'} <=> $a->{'preapprove'}} if $method eq 'preapprove';
 
-    my @users = sort $cmp (values %users);
+    my @users = sort $cmp values %users;
+    my $page_size = 100; # change to adjust page size
 
-    my %items = BML::paging(\@users, $GET{'page'}, 100);
-    my $navcrap = LJ::paging_bar($items{'page'}, $items{'pages'});
+    # are we going to jump to a specific user ?
+    my $jumppage;
+    my $jumpuser;
+    if (@users > $page_size && $POST{'jumpto'} =~ /^\w+$/) {
+        my $ct;
+        foreach (@users) {
+            $jumppage++ if $ct % $page_size == 0;
+            if ($POST{'jumpto'} eq $_->{'name'}) {
+                $jumpuser = $_->{'name'};
+                last;
+            }
+            $ct++;
+        }
+        undef $jumppage unless $jumpuser;
+    }
+
+    # how to make links back to this page
+    my $self_link = sub {
+        my $sort = "&sort=$GET{'sort'}" if $GET{'sort'};
+        return "members.bml?comm=$cname&page=$_[0]$sort";
+    };
+
+    my %items = BML::paging(\@users, $jumppage || $GET{'page'}, $page_size);
+    my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'},
+                                 { 'self_link' => $self_link });
     @users = @{$items{'items'}};
 
     # output starts here
-    $ret .= "<?p " . BML::ml('.name',{'name'=>"<?ljcomm $cname ljcomm?>"});
-    $ret .= " " . BML::ml('.settings',{'link'=>"/community/settings.bml?comm=$cname"}) . " p?>";
+    $ret .= "<?p " . BML::ml('.name', { 'name' => LJ::ljuser($cname, { 'type' => 'C' }) });
+    $ret .= " " . BML::ml('.settings', { 'link' => BML::get_uri() . "?comm=$cname"}) . " p?>";
 
-    $ret .= "<form method='post' action='members.bml'>";
-    $ret .= $navcrap;
+    $ret .= "<form method='post' action='members.bml?comm=$cname'>";
 
-    my $sortlink = BML::get_uri() . "?comm=$cname&sort=";
-    $ret .= "<br /><center><table border='2' cellpadding='5'><tr>" .
-            "<td><a href='${sortlink}name'>$ML{'.key.name'}</a></td>";
-    $ret .= "<td><a href='${sortlink}$_'><b>".$ML{".key.$_"}."</b></a></td>" for (@attribs);
-    $ret .= "</tr>";
+    # jump to user
+    if ($items{'pages'} > 1) {
+        $ret .= "<div style='margin-left: 30px;'>Jump to user: ";
+        $ret .= LJ::html_text({ 'name' => 'jumpto', 'value' => $POST{'jumpto'},
+                                'size' => '10', 'maxlength' => '15' }) . " ";
+        $ret .= LJ::html_submit(undef, 'Go') . "</div>";
 
-    foreach(@users) {
-        $ret .= "<tr><td><?ljuser $_->{'name'} ljuser?></td>";
-        foreach my $key (@attribs) {
-            $ret .= "<td align='center'><input type='checkbox' value='1' name='edit_" . $_->{'userid'} . "_" . "$key'";
-            $ret .= ($_->{$key} ? ' checked>' : '>') . "</td>" ;
-        }
-        $ret .= "</tr>";
+        $ret .= $navbar;
     }
 
-    $ret .= "</table>";
-    $ret .= "<input type='hidden' name='cid' value='$cid'>";
-    $ret .= LJ::html_hidden('ids', join(',', map { $_->{'userid'}} @users));
-    $ret .= LJ::html_hidden('attribs', join(',', @attribs));
-    $ret .= "<input type='hidden' name='mode' value='save'>";
-    $ret .= "<p><input type='submit' value='$ML{'.update'}'></p>";
-    $ret .= "</form>";
+    my $sortlink = BML::get_uri() . "?comm=$cname&sort=";
+    $ret .= "<br /><div align='center'><table border='2' cellpadding='5'>\n<tr>" .
+            "<td><a href='${sortlink}name'>$ML{'.key.name'}</a></td>";
+    $ret .= "<td><a href='${sortlink}$_'><b>".$ML{".key.$_"}."</b></a></td>" for (@attribs);
+    $ret .= "</tr>\n";
 
-    $ret .= "</center>";
-    $ret .= $navcrap;
+    # rows for existing users
+    foreach(@users) {
+        $ret .= "<tr><td>" . LJ::ljuser($_->{'name'}) . "</td>";
+        foreach my $key (@attribs) {
+            $ret .= "<td align='center'>";
+            $ret .= LJ::html_check({ 'name' => "edit_$_->{'userid'}_$key",
+                                     'selected' => $_->{$key} });
+            $ret .= "</td>";
+        }
+        $ret .= "</tr>\n";
+    }
+
+    # if on the last page, let users add to the list
+    if ($items{'page'} == $items{'pages'}) {
+        foreach(1..5) {
+            $ret .= "<tr><td>" . LJ::html_text({ 'name' => "add_$_", 'size' => '10',
+                                                 'maxlength' => '15' }) . "</td>";
+            foreach my $key (@attribs) {
+                $ret .= "<td align='center'>";
+                $ret .= LJ::html_check({ 'name' => "add_${_}_$key" });
+                $ret .= "</td>";
+            }
+            $ret .= "</tr>\n";
+        }
+    }
+    $ret .= "</table>\n";
+
+    # some hidden values
+    $ret .= LJ::html_hidden('ids', join(',', map { $_->{'userid'}} @users),
+                            'attribs', join(',', @attribs)) . "\n";
+
+    $ret .= "<p>" . LJ::html_submit('action:update', $ML{'.update'}) . "</p>\n";
+    $ret .= "</form></div>\n\n";
+
+    $ret .= $navbar;
 
     return $ret;
 
@@ -225,4 +342,3 @@ _code?>
 
 <=body
 page?>
-

@@ -1,0 +1,62 @@
+<?_info
+nocache=>1
+_info?><?page
+title=>Action Approval
+
+body<=
+<?_code
+{
+    use strict;
+
+    my $qs = BML::get_query_string();
+    return LJ::bad_input("Invalid argument given")
+        unless $qs && $qs =~ /^(\d+)\.(.+)$/;
+
+    my ($aaid, $auth) = ($1, $2);
+    my $aa = LJ::is_valid_authaction($aaid, $auth);
+    return LJ::bad_input("Invalid argument given")
+        unless $aa;
+
+    my $arg = {};
+    LJ::decode_url_string($aa->{'arg1'}, $arg);
+
+    # perform actions according to the action type
+    if ($aa->{'action'} eq 'comm_invite') {
+
+        my $dbh = LJ::get_db_writer();
+
+        my $targetid = $arg->{'targetid'};
+        return LJ::bad_input("Internal error: invalid action") unless $targetid;
+
+        # add to community
+        $dbh->do("REPLACE INTO friends (userid, friendid) VALUES (?, ?)",
+                 undef, $aa->{'userid'}, $targetid);
+
+        # set up rels with this community
+        my @rels = ();
+        push @rels, 'A' if $arg->{'admin'};
+        push @rels, 'P' if $arg->{'post'};
+        push @rels, 'M' if $arg->{'moderate'};
+        push @rels, 'N' if $arg->{'preapprove'};
+
+        if (@rels) {
+            my $sets = join(", ", map { "($aa->{'userid'}, $targetid, '$_')" } @rels);
+            $dbh->do("REPLACE INTO reluser (userid, targetid, type) VALUES $sets");
+
+            my $username = LJ::get_username($aa->{'userid'});
+            return "<?h1 Success h1?><?p You have been added to " .
+                   LJ::ljuser($username, { 'type' => 'C' }) . ". p?>";
+        }
+    }
+
+    # not other action types right now
+    return LJ::bad_input("Unknown action type");
+}
+_code?>
+
+<=body
+page?>
+
+
+
+
