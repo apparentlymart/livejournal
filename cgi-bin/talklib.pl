@@ -458,7 +458,7 @@ sub load_comments
     my $thread = $opts->{'thread'}+0;
     $thread = 0 unless $posts{$thread};
 
-    unless ($children{$thread}) {
+    unless ($thread || $children{$thread}) {
         $opts->{'out_error'} = "noposts";
         return;
     }
