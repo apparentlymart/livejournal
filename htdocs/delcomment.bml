@@ -92,4 +92,7 @@ BODY<=
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/editinfo.bml
+post: htdocs/delcomment.bml
+</LJDEP> _C=)

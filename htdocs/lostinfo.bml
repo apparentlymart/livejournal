@@ -26,9 +26,9 @@ Enter your email address:<BR>
 <INPUT TYPE="TEXT" NAME="email_u" SIZE="30" MAXLENGTH="70"> <INPUT TYPE="SUBMIT" name="lostuser" VALUE="Proceed">
 STANDOUT=)
 
-
-
 </FORM>
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+post: htdocs/lostinfo_do.bml
+</LJDEP> _C=)

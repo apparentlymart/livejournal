@@ -24,13 +24,15 @@
      }
      if ($jumpid) {
 	 print "Location: $LJ::SITEROOT/talkread.bml?itemid=$jumpid\n\n";
-	 &BML::finish();
+	 BML::finish();
      }
  }
 
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
 BODY=>(=_CODE return $body; _CODE=)
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/talkread.bml
+</LJDEP> _C=)

@@ -57,6 +57,8 @@ STANDOUT=)
 If you forgot your username or password, <A HREF="lostinfo.bml">recover it here!</A>.
 P=)
 
-
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/lostinfo.bml
+post: htdocs/export_do.bml
+</LJDEP> _C=)

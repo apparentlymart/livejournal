@@ -44,6 +44,9 @@ STANDOUT=)
 If you forgot your username or password, <A HREF="lostinfo.bml">recover it here!</A>.
 P=)
 
-
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+post: htdocs/editjournal_do.bml
+link: htdocs/lostinfo.bml
+</LJDEP> _C=)
+

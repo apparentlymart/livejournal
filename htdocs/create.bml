@@ -304,4 +304,9 @@ BODY<=
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/legal/privacy.bml
+post: htdocs/create.bml, htdocs/editinfo_do.bml
+file: htdocs/inc/account-codes, htdocs/inc/email-welcome
+hook: post_create
+</LJDEP> _C=)

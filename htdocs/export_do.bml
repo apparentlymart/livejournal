@@ -125,4 +125,5 @@ _INFO=)(=_CODE
 
 	return "";
 
-_CODE=)
+_CODE=)(=_C <LJDEP>
+</LJDEP> _C=)

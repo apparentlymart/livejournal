@@ -38,4 +38,5 @@ NOCACHE=>1
 _INFO=)(=PAGE
 TITLE=>Logout
 BODY=>(=_CODE return $body; _CODE=)
-PAGE=)
+PAGE=)(=_C <LJDEP>
+</LJDEP> _C=)

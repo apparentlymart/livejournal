@@ -214,4 +214,8 @@ BODY<=
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/interests.bml, htdocs/editinfo.bml
+post: htdocs/interests.bml
+form: htdocs/interests.bml
+</LJDEP> _C=)

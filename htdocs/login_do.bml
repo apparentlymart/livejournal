@@ -81,4 +81,8 @@ NOCACHE=>1
 _INFO=)(=PAGE
 TITLE=>Login
 BODY=>(=_CODE return $body; _CODE=)
-PAGE=)
+PAGE=)(=_C <LJDEP>
+hook: post_login
+link: htdocs/login.bml, htdocs/todo/index.bml, htdocs/users
+post: htdocs/login_do.bml
+</LJDEP> _C=)

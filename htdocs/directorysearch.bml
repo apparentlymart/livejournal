@@ -31,7 +31,6 @@ P=)
 <CENTER>
 
 (=_CODE
- require 'ljlib.pl';
  return "<FORM ACTION=\"$LJ::DIRURI\" METHOD=\"GET\">";
 _CODE=)
 
@@ -203,4 +202,6 @@ BAR=)
 </CENTER>
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+form: htdocs/directory.bml
+</LJDEP> _C=)
