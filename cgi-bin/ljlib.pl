@@ -939,9 +939,9 @@ sub get_friendofs {
     # database and insert those into memcache
 
     my $dbh = LJ::get_db_writer();
-    my $limit = $LJ::MAX_FRIENDOF_LOAD + 1;
+    my $limit = $opts->{force} ? '' : " LIMIT " . ($LJ::MAX_FRIENDOF_LOAD+1);
     my $friendofs = $dbh->selectcol_arrayref
-        ("SELECT userid FROM friends WHERE friendid=? LIMIT $limit",
+        ("SELECT userid FROM friends WHERE friendid=?$limit",
          undef, $userid) || [];
     die $dbh->errstr if $dbh->err;
 
