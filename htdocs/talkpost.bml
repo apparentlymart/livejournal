@@ -246,7 +246,7 @@ BODY<=
 	 next unless ($mape->{'status'} eq "on");
 	 unless ($in_topic) {
 	     $in_topic = 1;
-	     $ret .= "<B>Read similiar journal entries:</B><BR>";
+	     $ret .= "<B>Read similar journal entries:</B><BR>";
 	 }
 	 
 	 # TODO: ljtopic doesn't yet support $dbs/$dbarg
