@@ -133,12 +133,11 @@ foreach my $k (keys %output) {
 print "Dumping s1styles.dat\n";
 require "$ENV{'LJHOME'}/bin/upgrading/s1style-rw.pl";
 my $ss = {};
-my $pubstyles = LJ::S1::get_public_styles();
+my $pubstyles = LJ::S1::get_public_styles({ 'formatdata' => 1});
 foreach my $s (values %$pubstyles) {
     my $uniq = "$s->{'type'}/$s->{'styledes'}";
     $ss->{$uniq}->{$_} = $s->{$_} foreach keys %$s;
 }
-
 s1styles_write($ss);
 
 # and dump mood info

@@ -8870,6 +8870,8 @@ package LJ::S1;
 
 sub get_public_styles {
 
+    my $opts = shift;
+
     # now try memcache
     my $memkey = "s1pubstyc";
     my $pubstyc = LJ::MemCache::get($memkey);
@@ -8884,6 +8886,7 @@ sub get_public_styles {
     # it'll be loaded by LJ::S1::get_style
     my $cols = "styleid, styledes, type, is_public, is_embedded, ".
         "is_colorfree, opt_cache, has_ads, lastupdate";
+    $cols .= ", formatdata" if $opts->{'formatdata'};
 
     # first try new table
     my $dbh = LJ::get_db_writer();
