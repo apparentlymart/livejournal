@@ -1295,8 +1295,8 @@ sub editfriends
                       };
             push @{$res->{'added'}}, $added;
 
-            my $qfg = $dbh->quote($fg);
-            my $qbg = $dbh->quote($bg);
+            my $qfg = LJ::color_todb($fg);
+            my $qbg = LJ::color_todb($bg);
 
             my $friendid = $row->{'userid'};
 
@@ -1479,8 +1479,8 @@ sub list_friends
         my $r =  { 'username' => $f->{'friend'},
                    'fullname' => $f->{'name'},
                };
-        $r->{'fgcolor'} = $f->{'fgcolor'} if ($f->{'fgcolor'});
-        $r->{'bgcolor'} = $f->{'bgcolor'} if ($f->{'bgcolor'});
+        $r->{'fgcolor'} = LJ::color_fromdb($f->{'fgcolor'});
+        $r->{'bgcolor'} = LJ::color_fromdb($f->{'bgcolor'});
         if (! $opts->{'friendof'} && $f->{'groupmask'} != 1) {
             $r->{"groupmask"} = $f->{'groupmask'};
         }

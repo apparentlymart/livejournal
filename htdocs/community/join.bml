@@ -58,12 +58,12 @@
  {
      ### make remote user a friend of the community
      ###
-     $dbh->do("INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES ($cuserid, $remote->{'userid'}, '#000000', '#ffffff', 1)");
+     LJ::add_friend($dbh, $cuserid, $remote->{'userid'});
      
      ### make community a friend of the remote user
      ###
      if ($FORM{'addfriend'}) { 
-         $dbh->do("INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES ($remote->{'userid'}, $cuserid, '#000000', '#ffffff', 1)");
+         LJ::add_friend($dbh, $remote->{'userid'}, $cuserid);
      }
      
      $body .= "(=H1 Success H1=)(=P You are now a member of the <A HREF=\"/userinfo.bml?user=$ci->{'user'}\">$ecname Community</A> P=)";

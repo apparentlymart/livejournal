@@ -183,7 +183,7 @@ sub community
     
     if ($action eq "add") 
     {
-        $dbh->do("INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES ($com_id, $target_id, '#000000', '#ffffff', 1)");
+        LJ::add_friend($dbh, $com_id, $target_id);
         push @$out, [ "info", "User \"$target_user\" is now a member of \"$com_user\"." ];
         
         if ($ci->{'postlevel'} eq "members") {

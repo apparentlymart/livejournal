@@ -10,6 +10,7 @@ my $opt_sql = 0;
 my $opt_drop = 0;
 my $opt_pop = 0;
 my $opt_confirm = "";
+my $opt_skip = "";
 my $cluster = 0;   # by default, upgrade master.
 exit 1 unless
 GetOptions("runsql" => \$opt_sql,
@@ -17,6 +18,7 @@ GetOptions("runsql" => \$opt_sql,
            "populate" => \$opt_pop,
            "confirm=s" => \$opt_confirm,
            "cluster=i" => \$cluster,
+           "skip=s" => \$opt_skip,
            );
 
 
@@ -128,6 +130,11 @@ if ($opt_pop)
 
 
 print "# Done.\n";
+
+sub skip_opt
+{
+    return $opt_skip;
+}
 
 sub do_sql
 {

@@ -4862,7 +4862,6 @@ sub load_talk_props2
     }
 }
 
-
 # <LJFUNC>
 # name: LJ::eurl
 # class: text
@@ -5201,6 +5200,56 @@ sub dudata_set
         $dbcm->do("DELETE FROM dudata WHERE userid=$journalid AND ".
                   "area=$area AND areaid=$areaid");
     }
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::color_fromdb
+# des: Takes a value of unknown type from the db and returns an #rrggbb string.
+# args: color
+# des-color: either a 24-bit decimal number, or an #rrggbb string.
+# returns: scalar; #rrggbb string, or undef if unknown input format
+# </LJFUNC>
+sub color_fromdb
+{
+    my $c = shift;
+    return $c if $c =~ /^\#[0-9a-f]{6,6}$/i;
+    return sprintf("\#%06x", $c) if $c =~ /^\d+$/;
+    return undef;
+}
+
+# <LJFUNC>
+# name: LJ::color_todb
+# des: Takes an #rrggbb value and returns a 24-bit decimal number.
+# args: color
+# des-color: scalar; an #rrggbb string.
+# returns: undef if bogus color, else scalar; 24-bit decimal number, can be up to 8 chars wide as a string.
+# </LJFUNC>
+sub color_todb
+{
+    my $c = shift;
+    return undef unless $c =~ /^\#[0-9a-f]{6,6}$/i;
+    return hex(substr($c, 1, 6));
+}
+
+# <LJFUNC>
+# name: LJ::add_friend
+# des: Simple interface to add a friend edge.
+# args: dbh, userida, useridb
+# des-userida: Userid of source user (befriender)
+# des-useridb: Userid of target user (befriendee)
+# returns: boolean; 1 on success (or already friend), 0 on failure (bogus args)
+# </LJFUNC>
+sub add_friend
+{
+    my ($dbh, $ida, $idb) = @_;
+    return 0 unless $dbh;
+    return 0 unless $ida =~ /^\d+$/ && $ida;
+    return 0 unless $idb =~ /^\d+$/ && $idb;
+    my $black = LJ::color_todb("#000000");
+    my $white = LJ::color_todb("#ffffff");
+    $dbh->do("INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) ".
+             "VALUES ($ida, $idb, $black, $white, 1)");
     return 1;
 }
 

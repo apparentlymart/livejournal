@@ -1496,8 +1496,23 @@ register_alter(sub {
                  "ADD INDEX idxversion (dversion)");
     }
 
-    
-    ### / cluster config
+    if (column_type("friends", "bgcolor") eq "char(7)") {
+        do_alter("friends", "ALTER TABLE friends ".
+                 "MODIFY bgcolor CHAR(8) NOT NULL DEFAULT '16777215', ".
+                 "MODIFY fgcolor CHAR(8) NOT NULL DEFAULT '0'");
+        do_sql("UPDATE friends SET ".
+               "bgcolor=CONV(RIGHT(bgcolor,6),16,10), ".
+               "fgcolor=CONV(RIGHT(fgcolor,6),16,10)")
+            unless skip_opt() eq "colorconv";
+    }
+
+    return if skip_opt() eq "colorconv";
+
+    if (column_type("friends", "bgcolor") eq "char(8)") {
+        do_alter("friends", "ALTER TABLE friends ".
+                 "MODIFY bgcolor MEDIUMINT UNSIGNED NOT NULL DEFAULT 16777215, ".
+                 "MODIFY fgcolor MEDIUMINT UNSIGNED NOT NULL DEFAULT 0");
+    }
 
 });
 

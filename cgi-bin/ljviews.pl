@@ -512,6 +512,8 @@ sub create_view_friends
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
         next unless ($_->{'statusvis'} eq "V");  # ignore suspended/deleted users.
+        $_->{'fgcolor'} = LJ::color_fromdb($_->{'fgcolor'});
+        $_->{'bgcolor'} = LJ::color_fromdb($_->{'bgcolor'});
         $friends{$_->{'userid'}} = $_;
     }
 
