@@ -1478,7 +1478,7 @@ function EntryPage::print_comment (Comment c) {
         $sub_icon = $c.subject_icon->as_string();
     }
     "<div style='background: $barc; margin-top: 10px;'>";
-    "<table cellpadding='0' cellspacing='0' summary='0' style='width: 100%; padding: 5px;'><tr valign='top'>";
+    "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%;'><tr valign='top'>";
     var int td = 3;
     if (defined $c.userpic and $*comment_userpic_style != "off") { 
         $td = 4;
@@ -1493,10 +1493,10 @@ function EntryPage::print_comment (Comment c) {
         }
         print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' /></td>";
     }
-    print "<td style='width: auto'><strong>From:</strong> $poster</td>";
-    print "<td style='width: auto'><strong>Date:</strong> ";
+    print "<td align='left'><strong>From:</strong> $poster</td>";
+    print "<td align='left'><strong>Date:</strong> ";
         print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td>";
-    print "<td style='width: 10%'><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td></tr>";
+    print "<td align='right'><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td></tr>";
     print "<tr valign='top'><td colspan='$td' style='width: 95%'>";
     if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>"; }
     if ($c.metadata{"poster_ip"}) { print " (IP Address: " + $c.metadata{"poster_ip"} + ")"; }
@@ -1506,7 +1506,6 @@ function EntryPage::print_comment (Comment c) {
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
     if ($c.thread_url != "") { "(<a href='$c.thread_url'>Thread</a>) "; }
     "</div>";
-    
 }
 
 function EntryPage::print_comment_partial (Comment c) {
