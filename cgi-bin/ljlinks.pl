@@ -135,12 +135,15 @@ sub make_linkobj_from_form
         # smartly add http:// to url unless they are just inserting a blank line
         if ($url && $title ne '-') {
 
-            # start with http:// if doesn't start with *://
-            $url = "http://$url" unless $url =~ m!^(\w+)://!;
+            # see what protocol they want, default to http
+            $url =~ /^(https?|ftp):/;
             my $pref = $1 || "http";
 
-            # is there something AFTER the *:// ?
-            $url = undef unless $url =~ m!^$pref://.+$!;
+            # strip out the protocol section
+            $url =~ s!^.*?:/*!!;
+
+            # rebuild safe url
+            $url = "$pref://$url" if $url;
         }
 
         # build link object element
