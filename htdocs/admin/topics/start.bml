@@ -4,3 +4,9 @@ Username to preview:
 
 <P><INPUT TYPE="SUBMIT" VALUE="Make links">
 </FORM>
+
+<!--
+(=_C <LJDEP>
+post: htdocs/admin/topics/links.bml
+</LJDEP> _C=)
+-->

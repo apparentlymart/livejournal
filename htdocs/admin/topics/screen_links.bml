@@ -101,4 +101,8 @@
      }
  }
 
-_CODE=)
+_CODE=)(=_C <LJDEP>
+link: htdocs/talkpost.bml
+post: htdocs/admin/topics/screen_links.bml
+</LJDEP> _C=)
+

@@ -9,4 +9,7 @@ FILE=>community
 _INCLUDE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+# NONE
+</LJDEP> _C=)
+

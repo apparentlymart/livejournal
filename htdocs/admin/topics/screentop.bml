@@ -83,4 +83,7 @@ BODY<=
 
 _CODE=)
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+post: htdocs/admin/topics/screentop_do.bml
+</LJDEP> _C=)
+
