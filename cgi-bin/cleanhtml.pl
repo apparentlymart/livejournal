@@ -93,6 +93,15 @@ sub clean
         if ($type eq "S")     # start tag
         {
             my $tag = $token->[1];
+            my $slashclose = 0;   # If set to 1, use XML-style empty tag marker
+            
+            # for tags like <name/>, pretend it's <name> and reinsert the slash later
+            $slashclose = 1 if ($tag =~ s!/$!!); 
+
+            # for incorrect tags like <name/attrib=val> (note the lack of a space) 
+            # delete everything after 'name' to prevent a security loophole which happens
+            # because IE understands them.
+            $tag =~ s!/.+$!!;
 
             if ($action{$tag} eq "eat") {
                 $p->unget_token($token);
@@ -136,6 +145,9 @@ sub clean
                 my $alt_output = 0;
 
                 my $hash = $token->[2];
+                
+                $slashclose = 1 if delete $hash->{'/'};
+
                 foreach (@attrstrip) {
                     delete $hash->{$_};
                 }
@@ -189,7 +201,6 @@ sub clean
 
                         if ($allow) { $newdata .= "<$tag"; }
                         else { $newdata .= "&lt;$tag"; }
-                        my $slashclose = delete $hash->{'/'};
                         foreach (keys %$hash) {
                             $newdata .= " $_=\"" . LJ::ehtml($hash->{$_}) . "\"";
                         }
