@@ -1,0 +1,523 @@
+# -*-s2-*-
+
+layerinfo type = "layout";
+layerinfo name = "Classic";
+layerinfo redist_uniq = "classic/layout";
+layerinfo previews = "classic/classic.jpg";
+
+property bool show_entry_userpic {
+    des = "Show your userpic with your journal's entries?"; 
+}
+
+# Colors
+property Color body_bgcolor {
+    des = "Background color of page";
+    s1color = "stronger_back";
+}
+property Color main_bgcolor {
+    des = "Background color of main text area";
+    s1color = "page_back";
+}
+property Color main_fgcolor {
+    des = "Color of text on main text areas";
+    s1color = "page_text";
+}
+property Color headerbar_bgcolor {
+    des = "Background color of header bars";
+    s1color = "strong_back";
+}
+property Color headerbar_fgcolor {
+    des = "Color of text on header bars";
+    s1color = "strong_text";
+}
+property Color metabar_bgcolor {
+    des = "Background color of side bar";
+    s1color = "weak_back";
+}
+property Color metabar_fgcolor {
+    des = "Color of text on side bar";
+    s1color = "weak_text";
+}
+property Color page_title_color {
+    des = "Text color of the page's main title";
+    s1color = "page_text_title";
+}
+property Color page_subtitle_color {
+    des = "Text color of the page's subtitles";
+    s1color = "page_text_em";
+}
+property Color link_color {
+    des = "Text color of links";
+    s1color = "page_link";
+}
+property Color vlink_color {
+    des = "Text color of visited links";
+    s1color = "page_vlink";
+}
+property Color alink_color {
+    des = "Text color of active links";
+    s1color = "page_alink";
+}
+
+# Inherited properties
+
+property use font_base;
+property use font_fallback;
+
+property use page_recent_items;
+property use text_post_comment;
+property use text_read_comments;
+
+property use page_friends_items;
+property use text_post_comment_friends;
+property use text_read_comments_friends;
+
+set page_recent_items = 20;
+set page_friends_items = 25;
+set show_entry_userpic = false;
+set font_base = "Arial, Helvetica";
+set font_fallback = "sans-serif";
+
+#Default Colors
+set body_bgcolor = "#6666cc";
+set main_bgcolor = "#ffffff";
+set main_fgcolor = "#000000";
+set headerbar_bgcolor = "#c0c0ff";
+set headerbar_fgcolor = "#000000";
+set metabar_bgcolor = "#eeeeff";
+set metabar_fgcolor = "#000000";
+set page_title_color = "#8b1a1a";
+set page_subtitle_color = "#c00000";
+set link_color = "#000050";
+set vlink_color = "#500050";
+set alink_color = "#ff00c0";
+
+function print_stylesheet ()
+{
+    var string font;
+    if ($*font_base != "") {
+        $font = "\"$*font_base\"";
+        if ($*font_fallback != "none") {
+            $font = "$font, ";
+        }
+    }
+    if ($*font_fallback != "none") {
+        $font = "$font $*font_fallback";
+    }
+    """
+body,.body {
+    background-color:    $*body_bgcolor;
+    color:               $*main_fgcolor;
+    padding:             5pt;
+}
+a, a:link {
+    color:               $*link_color;
+}
+a:vlink {
+    color:               $*vlink_color;
+}
+a:alink {
+    color:               $*alink_color;
+}
+table.main {
+    background-color:    $*main_bgcolor;
+    color:               $*main_fgcolor;
+}
+.page_title {
+    color:               $*page_title_color;
+    font-family:         $font;
+    font-size:           18pt;
+}
+.view_links {
+    font-family:         monospace;
+    white-space:         nowrap;
+}
+td.headerbar {
+    background-color:    $*headerbar_bgcolor;
+    color:               $*headerbar_fgcolor;
+    font-weight:         bold;
+    font-size:           16pt;
+}
+td.metabar {
+    text-align:          right;
+    white-space:         nowrap;
+}
+.subject {
+    color:               $*page_subtitle_color;
+    font-weight:         bold;
+}
+.comments {
+    text-align:          right;
+}
+#yearheader {
+    color:               $*page_subtitle_color;
+    font-family:         $font;
+    font-weight:         bold;
+    font-style:          italic;
+    font-size:           14pt;
+}
+th.monthheader {
+    background-color:    $*headerbar_bgcolor;
+    font-size:           12pt;
+    font-family:         $font;
+}
+th.daysheader {
+    background-color:    $*metabar_bgcolor;
+    font-weight:         normal;
+}
+td.weekday_empty {
+    background-color:    $*metabar_bgcolor;
+}
+.day_id {
+    font-weight:         bold;
+    font-size:           10pt;
+}
+#archiveyearpage_nav {
+    font-size:           14pt;
+    font-weight:         bold;
+}
+    """;
+}
+
+function Page::lay_nav_blurb() { }
+
+function Page::print ()
+{
+    var string title = $this->title();
+    var string userpic;
+    var Image default_userpic = $.journal.default_pic;
+    if (defined $default_userpic)
+    {
+        $userpic = "<img align='right' hspace='2' vspace='2' src='$default_userpic.url' "+
+                   "width='$default_userpic.width' height='$default_userpic.height' alt='' />";
+    }
+    var string website;
+    if ($.journal.website_url != "")
+    {
+        $website = """<td><a href="$.journal.website_url">$.journal.website_name</a></td><td class="body">&nbsp;</td>""";
+    }
+    var string links;
+    $links = $links + ($.view == "recent" ? "[$*text_view_recent]" : "[<a href='$.base_url/'>$*text_view_recent</a>]");
+    $links = $links + ($.view == "archive" ? "[$*text_view_archive]" : "[<a href='$.base_url/calendar'>$*text_view_archive</a>]");
+    $links = $links + ($.view == "friends" ? "[$*text_view_friends]" : "[<a href='$.base_url/friends'>$*text_view_friends</a>]");
+"""
+<html>
+<head>
+<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />
+$.head_content
+<title>$title</title>
+</head>
+<body>
+<table class="main" width='100%'><tr><td>
+$userpic
+<span class="page_title">$title</span>
+<p class="view_links">$links</p>
+""";
+    $this->lay_nav_blurb();
+    $this->print_body();
+    "</td></tr></table>\n";
+
+    ### Affliations
+
+    "<table class='main' align='right'><tr>";
+
+    # Website?
+    print $website;
+    # Server Signature
+    "<td>"; server_sig(); "</td></tr>";
+
+    "</table></body></html>";
+}
+
+function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
+{
+    var string time = $e.time->time_format();
+    var string userpic = "";
+    if (defined $e.userpic)
+    {
+        $userpic = "<img src='$e.userpic.url' />";
+    }
+    if ($e.new_day)
+    {
+        if ($p.view == "day")
+        {
+            "<tr><td class='headerbar'>Time</td><td class='headerbar'>Event</td></tr>";
+        } else {
+            "<tr><td colspan='2' align='left' class='headerbar'>";
+            print $e.time->date_format("%%month%% %%dayord%%, %%yyyy%%");
+            "</td></tr>\n";
+        }
+    }
+    "<tr valign='top'>";
+
+    # Metabar
+      "<td style='background-color: $bgcolor;' class='metabar'>";
+      # Time
+      "<em>$time</em><br />";
+      # Altposter crap
+      if ($p.view == "friends")
+      {
+          "<strong style='color: $fgcolor'><a href='"; $e.journal->base_url(); "'>"; 
+          print $e.journal.username;
+          "</a></strong><br />";
+      }
+      if ($e.journal.username != $e.poster.username)
+      {
+          "[<a href='"; $e.poster->base_url(); "'>";
+          print $e.poster.username;
+          "</a>]<br />";
+      }
+      if ($userpic != "" and ($p.view == "friends" or $*show_entry_userpic == true))
+      {
+          print $userpic;
+      }
+      # Security icon
+      if ($e.security != "") { $e.security_icon->print(); }
+      # Permalink
+      "<p>[<a href='$e.permalink_url'>$*text_permalink</a>]</p>";
+      "</td>";
+
+    # Entry
+      "<td style='text-align:left'>";
+      if ($e.subject != "") { "\n\n<span class='subject'>$e.subject</span><br />"; }
+      print $e.text; "\n\n";
+
+      if (size $e.metadata)
+      {
+          "<p>";
+          foreach var string k ($e.metadata)
+          {
+              var string key = $k;
+              var string val = $e.metadata{$k};
+              if ($k == "mood")  { $key = $*text_meta_mood;  }
+              if ($k == "music") { $key = $*text_meta_music; }
+              if ($k == "mood" and defined $e.mood_icon)
+              {
+                  var Image i = $e.mood_icon;
+                  $val = "<img src='$i.url' width='$i.width' height='$i.height' alt='' /> $val";
+              }
+              "<strong>$key:</strong> $val<br />";
+          }
+          "</p>";
+      }
+      $e.comments->print();
+      "</td>";
+    "</tr>\n";
+}
+
+function Page::print_entry (Entry e)
+{
+    print_entry($this, $e, $*metabar_bgcolor, $*metabar_fgcolor);
+}
+
+function FriendsPage::print_entry (Entry e)
+{
+    var Friend f = $.friends{$e.journal.username};
+    print_entry($this, $e, $f.bgcolor, $f.fgcolor);
+}
+
+function RecentPage::lay_nav_blurb ()
+{
+    var int total = size $.entries;
+    var string user = "<a href='$.base_url/info'>$.journal.name</a>";
+    if ($.nav.skip > 0)
+    {
+        "Below are $total entries, after skipping $.nav.skip most recent ones in the \"$user\" journal:";
+    } else {
+        "Below are the $total most recent journal entries recorded in the \"$user\" journal:";
+    }
+}
+
+function RecentPage::print_body ()
+{
+    var string nav = "";
+    if ($.nav.forward_url != "" or $.nav.backward_url != "")
+    {
+        if ($.nav.backward_url != "")
+        {
+            $nav = "<a href='$.nav.backward_url'>&lt;&lt; Previous $.nav.backward_count entries</a>";
+        }
+        if ($.nav.backward_url != "" and $.nav.forward_url != "")
+        {
+            $nav = "$nav --";
+        }
+        if ($.nav.forward_url != "")
+        {
+            $nav = "$nav <a href='$.nav.forward_url'>Next $.nav.forward_count entries &gt;&gt;</a>";
+        }
+        $nav = "<p align='center'>[$nav]</p>";
+    }
+    if ($nav != "") { print $nav; }
+    "<ul><table>\n";
+    foreach var Entry e ($.entries) { $this->print_entry($e); }
+    "</table></ul>\n";
+    if ($nav != "") { print $nav; }
+}
+
+function FriendsPage::lay_nav_blurb ()
+{
+    var int total = size $.entries;
+    if ($.nav.skip > 0)
+    {
+        "Below are $total friends entries, after skipping $.nav.skip most recent ones:";
+    } else {
+        "Below are the $total most recent friends journal entries:";
+    }
+}
+
+function CommentInfo::print ()
+{
+    "<p class='comments'>(";
+    if ($.count > 0 or $.screened) {
+        $this->print_readlink();
+        "&nbsp;|&nbsp;";
+    }
+    $this->print_postlink();
+    ")</p>";
+}
+
+function YearPage::lay_nav_blurb()
+{
+    "<p id='yearpage_nav'>";
+    $this->print_year_links();
+    "</p>";
+}
+
+function YearPage::print_body 
+{
+    "<p id='yearheader'>$.year&hellip;</p>\n";
+    foreach var YearMonth m ($.months) {
+        $this->print_month($m);
+    }
+}
+
+function YearPage::print_year_links ()
+{
+    foreach var YearYear y ($.years) {
+        if ($y.displayed) {
+            "[ $y.year ]";
+        } else {
+            "[ <a href=\"$y.url\">$y.year</a> ]";
+        }
+    }
+}
+
+function YearPage::print_month(YearMonth m)
+{
+    if (not $m.has_entries) { return; }
+    # Table Wrapper
+    "<center><p><table border='1' cellpadding='4' width='80%'>\n";
+
+    # Month Header
+    "<tr align='center'><th colspan='7' class='monthheader'>\n";
+    print $m->month_format();
+    "</th></tr>\n";
+
+    # Weekdays Header
+    "<tr align='center'>\n";
+    foreach var int d ($.weekdays) {
+        "<th class='daysheader'>"+$*lang_dayname_short[$d]+"</th>\n";
+    }
+    "</tr>\n";
+
+    # Weeks
+    foreach var YearWeek w ($m.weeks) {
+        $w->print();
+    }
+
+    # Footer
+    "<tr><td colspan='7'><div style='text-align: center'><a href='$m.url'>$*text_view_month</a></div></td></tr>\n";
+
+    # End Table
+    "</table></p></center>\n";
+}
+
+function YearWeek::print () 
+{
+    "<tr>";
+    if ($.pre_empty) { "<td colspan='$.pre_empty' class='weekday_empty'>&nbsp;</td>"; }
+    foreach var YearDay d ($.days) {
+        "<td valign='top'><span class='day_id'>$d.day</span><div style='text-align: center'>";
+        if ($d.num_entries) {
+            "<a href='$d.url'>$d.num_entries</a>";
+        } else {
+            "&nbsp;";
+        }
+        "</div></td>\n";
+    }
+    if ($.post_empty) { "<td colspan='$.post_empty' class='weekday_empty'>&nbsp;</td>"; }
+    "</tr>";
+}
+
+function DayPage::print_body ()
+{
+    "<h2 class='daypage_header'>"; print $.date->date_format("%%month%% %%dayord%%, %%yyyy%%"); "</h2>";
+    if (not $.has_entries)
+    {
+        "<blockquote><em>"; print ehtml($*text_noentries_day); "</em></blockquote>";
+    } else {
+        "<ul><table>";
+        foreach var Entry e ($.entries) { $this->print_entry($e); }
+        "</table></ul>";
+    }
+
+    var string tprev = ehtml($*text_day_prev);
+    var string tnext = ehtml($*text_day_next);
+
+    "<table align='center'><tr align='middle'>\n";
+
+    "<td width='33%' align='left'><a href='$.prev_url'>$tprev</a></td>\n";
+    "<td align='center' width='33%'>";
+      "<strong>"; print $.date->date_format("%%yyyy%%/%%mm%%/%%dd%%"); "</strong><br />";
+      "[<a href='"; print $this.journal->base_url(); "/calendar'>$*text_view_archive</a>]</td>\n";
+    "<td width='33%' align='right'><a href='$.next_url'>$tnext</a></td>\n";
+
+    "</tr></table>";
+
+}
+
+function print_theme_preview ()
+{
+
+    """
+<table width='100%' style='background-color: $*body_bgcolor'>
+  <tr><td>
+    <table height='95%' cellpadding='5' width='100%' bgcolor='$*main_bgcolor'>
+      <tr><td>
+        <span style='font: normal bold 16pt $*font_base, $*font_fallback; color: $*page_title_color'>John Doe</span>
+
+        <ul><table>
+          <tr><td align="left" style="background-color: $*headerbar_bgcolor; color: $*headerbar_fgcolor" colspan="2">
+            <span style='font: normal bold 14pt $*font_base, $*font_fallback'>Friday, November 15th, 2002</span>
+          </td></tr>
+          <tr valign="top"><td style="text-align: right; background-color: $*metabar_bgcolor; white-space: nowrap">
+            <span style="font: italic normal 10pt $*font_base, $*font_fallback; color: $*metabar_fgcolor">
+10:21 pm</span>
+          </td><td>
+
+<p style="text-align:left">
+  <span style="font: italic bold 10pt $*font_base, $*font_fallback; color: $*page_subtitle_color">
+Neque porro quisquam est&hellip;
+  </span><br />
+
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+
+</p><p style="text-align:right; font-size: 8pt">
+  (<a href="#" style="font-weight: bold; color: $*link_color">1 Comment</a> | 
+   <a href="#" style="color: $*vlink_color">Comment on this</a>)
+
+</p>
+
+          </td></tr>
+        </table></ul>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+    """;
+}
