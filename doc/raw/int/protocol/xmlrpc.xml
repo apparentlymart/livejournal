@@ -9,6 +9,7 @@
 <!ENTITY friendsList             SYSTEM "friendslist.ent.xml">
 
 <!ENTITY mode.checkfriends       SYSTEM "checkfriends.mode.xml">
+<!ENTITY mode.consolecommand     SYSTEM "consolecommand.mode.xml">
 <!ENTITY mode.editevent          SYSTEM "editevent.mode.xml">
 <!ENTITY mode.editfriendgroups   SYSTEM "editfriendgroups.mode.xml">
 <!ENTITY mode.editfriends        SYSTEM "editfriends.mode.xml">
@@ -35,5 +36,6 @@
 &mode.getdaycounts;
 &mode.syncitems;
 &mode.checkfriends;
+&mode.consolecommand;
     
 </ljxmlrpc>
