@@ -227,6 +227,7 @@ sub community
         push @$out, [ "info", "User \"$target_user\" is no longer a member of \"$com_user\"." ];
 
         LJ::clear_rel($com_id, $target_id, 'P');
+        LJ::clear_rel($com_id, $target_id, 'N');
         push @$out, [ "info", "User \"$target_user\" can no longer post in \"$com_user\"." ];
     }
 
@@ -234,5 +235,3 @@ sub community
 }
 
 1;
-
-

@@ -20,7 +20,7 @@
  my $ci = $dbr->selectrow_hashref("SELECT u.user, u.userid, u.name, c.membership, c.postlevel ".
                                   "FROM user u, community c WHERE u.userid=c.userid $extrawhere");
 
- ### does this community even exit?
+ ### does this community even exist?
  ###
  unless ($ci) {
      $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.label.infoerror'} p?>";
@@ -42,6 +42,7 @@
      $body .= "<?h1 $ML{'.success'} h1?><?p ".BML::ml('.label.removed',{'commuser'=>$ci->{'user'},'commname'=>$ci->{'name'}})." p?>";
 
      LJ::clear_rel($ci, $remote, 'P');
+     LJ::clear_rel($ci, $remote, 'N');
      
  }   
  else 
