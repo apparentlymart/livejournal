@@ -14,6 +14,7 @@
 <!ENTITY mode.editfriendgroups   SYSTEM "editfriendgroups.mode.xml">
 <!ENTITY mode.editfriends        SYSTEM "editfriends.mode.xml">
 <!ENTITY mode.friendof           SYSTEM "friendof.mode.xml">
+<!ENTITY mode.getchallenge       SYSTEM "getchallenge.mode.xml">
 <!ENTITY mode.getdaycounts       SYSTEM "getdaycounts.mode.xml">
 <!ENTITY mode.getevents          SYSTEM "getevents.mode.xml">
 <!ENTITY mode.getfriendgroups    SYSTEM "getfriendgroups.mode.xml">
@@ -24,18 +25,19 @@
 ]>
 <ljxmlrpc>
 
-&mode.login;
-&mode.postevent;
+&mode.checkfriends;
+&mode.consolecommand;
 &mode.editevent;
 &mode.editfriendgroups;
 &mode.editfriends;
+&mode.friendof;
+&mode.getchallenge;  
+&mode.getdaycounts;
 &mode.getevents;
 &mode.getfriends;
-&mode.friendof;
 &mode.getfriendgroups;
-&mode.getdaycounts;
+&mode.login;
+&mode.postevent;
 &mode.syncitems;
-&mode.checkfriends;
-&mode.consolecommand;
     
 </ljxmlrpc>

@@ -11,6 +11,7 @@
 
 <!ENTITY ljp.csp.index                          SYSTEM "../ljp.book/csp/index.xml">
 <!ENTITY ljp.csp.guide                          SYSTEM "../ljp.book/csp/cs.xml">
+<!ENTITY ljp.csp.auth                           SYSTEM "../ljp.book/csp/auth.xml">
 <!ENTITY ljp.csp.proplist                       SYSTEM "../ljp.book/csp/proplist.xml">
 <!ENTITY ljp.csp.proplist.ref                   SYSTEM "../ljp.book/csp/proplist.ref.gen.xml">
 <!ENTITY ljp.csp.versions                       SYSTEM "../ljp.book/csp/versions.xml">

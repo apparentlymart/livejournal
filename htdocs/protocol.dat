@@ -644,3 +644,28 @@ This is what you should use to determine if there are new entries.  Its value is
 How many seconds you <b>must</b> wait before polling the server again.  If your client disobeys, this protocol will just return error messages saying "slow down, bad client!" instead of giving you the data you were trying to cheat to obtain.  Note that this also means your client should have an option to disable polling for updates, since some users run multiple operating systems with multiple LiveJournal clients, and both would be fighting each other.
 }
 }
+
+{ getchallenge
+.des
+Generate a one-time, quick expiration challenge to be used in challenge/response authentication methods.
+.response
+{ auth_scheme
+.des
+You can ignore this for now. By default this is the highest version of our
+authentication schemes, if in the future if we implement other auth schemes or change the default.
+In that case we'd add a new capabilities exchange: your client could say, "I know c0 and c1", and
+our server would then say, "Use c1, it's the best."
+}
+{ challenge
+.des
+An opaque cookie to generate a hashed response from.
+}
+{ expire_time
+.des
+The expiration time of the challenge, as measured in seconds since the Unix epoch.
+}
+{ server_time
+.des
+The server time when the challenge was generated, as measured in seconds since the Unix epoch.
+}
+}

@@ -18,15 +18,18 @@
      cleanse(\$des);
 
      unshift (@{$mode->{'props'}->{'request'}}, 
-              { 'name' => "mode", 'props' => { 'des' => "The protocol request mode: <literal>$name</literal>", } },
+              { 'name' => "mode", 'props' => { 'des' => "The protocol request mode: <tt>$name</tt>", } },
               { 'name' => "user", 'props' => { 'des' => "Username.  Leading and trailing whitespace is ignored, as is case.", } },
-              { 'name' => "password", 'props' => { 'des' => "Password in plain-text.  Either this needs to be sent, or <literal>hpassword</literal>.", } },
-              { 'name' => "hpassword", 'props' => { 'des' => "Alternative to plain-text <literal>password</literal>.  Password as an MD5 hex digest.  Not perfectly secure, but defeats the most simple of network sniffers.", } },
-              { 'name' => "ver", 'props' => { 'des' => "Protocol version supported by the client; assumed to be 0 if not specified.  See <xref linkend='ljp.csp.versions' /> for details on the protocol version.", 'optional' => 1, } },
-              );
+              { 'name' => "auth_method", 'props' => { 'des' => "The authentication method used for this request. Default is 'clear', for plain-text authentication. 'cookie' or any of the challenge / response methods are also acceptable.", } },
+              { 'name' => "password", 'props' => { 'des' => "DEPRECATED. Password in plain-text. For the default authentication method, either this needs to be sent, or <tt>hpassword</tt>.", } },
+              { 'name' => "hpassword", 'props' => { 'des' => "DEPRECATED. Alternative to plain-text <tt>password</tt>.  Password as an MD5 hex digest.  Not perfectly secure, but defeats the most simple of network sniffers.", } },
+              { 'name' => "auth_challenge", 'props' => { 'des' => "If using challenge / response authentication, this should be the challenge that was generated for your client.", } },
+              { 'name' => "auth_response", 'props' => { 'des' => "If using challenge / response authentication, this should be the response hash you generate based on the challenge's formula.", } },
+              { 'name' => "ver", 'props' => { 'des' => "Protocol version supported by the client; assumed to be 0 if not specified.  See [special[cspversion]] for details on the protocol version.", 'optional' => 1, } },
+              ) unless $name eq "getchallenge";
      unshift (@{$mode->{'props'}->{'response'}}, 
-              { 'name' => "success", 'props' => { 'des' => "<emphasis role='bold'><literal>OK</literal></emphasis> on success or <emphasis role='bold'><literal>FAIL</literal></emphasis> when there's an error.  When there's an error, see <literal>errmsg</literal> for the error text.  The absence of this variable should also be considered an error.", } },
-              { 'name' => "errmsg", 'props' => { 'des' => "The error message if <literal>success</literal> was <literal>FAIL</literal>, not present if <literal>OK</literal>.  If the success variable isn't present, this variable most likely won't be either (in the case of a server error), and clients should just report \"Server Error, try again later.\".", } },
+              { 'name' => "success", 'props' => { 'des' => "<b><tt>OK</tt></b> on success or <b><tt>FAIL</tt></b> when there's an error.  When there's an error, see <tt>errmsg</tt> for the error text.  The absence of this variable should also be considered an error.", } },
+              { 'name' => "errmsg", 'props' => { 'des' => "The error message if <tt>success</tt> was <tt>FAIL</tt>, not present if <tt>OK</tt>.  If the success variable isn't present, this variable most likely won't be either (in the case of a server error), and clients should just report \"Server Error, try again later.\".", } },
               );
      print "<refentry id=\"ljp.csp.flat.$name\">\n";
      print "  <refnamediv>\n    <refname>$name</refname>\n";

@@ -17,6 +17,7 @@
     </tip>
   </partintro>
   &ljp.csp.guide;
+  &ljp.csp.auth;
   &ljp.csp.flat.index;
   &ljp.csp.xml-rpc.index;
   &ljp.csp.blogger;
