@@ -91,6 +91,10 @@ The name of the friend group with number <I>num</I>.
 .des
 The sort-order of the friend group with number <I>num</I>.  An integer value between 0 and 255.
 }
+{ frgrp_<I>num</I>_public
+.des
+If this key is returned and its value is "1", then group <I>num</I> is a public group.  (that is, other users can see the name of the group and who is in it)
+}
 { frgrp_maxnum
 .des
 The largest friend group number that was returned.  This is <B>not</B> the number of friend groups returned, it is simply the upper bound.  In other words, there may be holes as you iterate from 1 to <TT>frgrp_maxnum</TT>, so don't assume the presence of any key/value pairs returned.  If this value is 0, however, you can safely assume there are no friend groups, as the minimum allowed friend group number is 1.
