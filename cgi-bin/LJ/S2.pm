@@ -1102,8 +1102,9 @@ sub Page
     };
     if ($LJ::UNICODE && $opts) {
         $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
-        # "Automatic Discovery of RSS feeds"
+        # Automatic Discovery of RSS/Atom
         $p->{'head_content'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$p->{'base_url'}/data/rss" />\n};
+        $p->{'head_content'} .= qq{<link rel="alternate" type="application/atom+xml" title="Atom" href="$p->{'base_url'}/data/atom" />\n};
     }
 
     return $p;
