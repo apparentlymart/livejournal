@@ -547,7 +547,7 @@ if ($u->{'journaltitle'}) {
  ##
  ## friends
  ## 
- unless ($synd) {
+ unless ($synd || $LJ::FORCE_EMPTY_FRIENDS{$userid}) {
      my $label = $com ? $ML{'.friends.comm'} : $ML{'.friends.user'};
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
      $body .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/$dir/$user/friends'>$label</a>:</b></td><td colspan='$span'>";
