@@ -3285,10 +3285,10 @@ sub get_pic_from_keyword
 
 # <LJFUNC>
 # name: LJ::send_mail
-# des: Sends email.
+# des: Sends email.  Character set will only be used if message is not ascii.
 # args: opt
 # des-opt: Hashref of arguments.  <b>Required:</b> to, from, subject, body.
-#          <b>Optional:</b> toname, fromname, cc, bcc
+#          <b>Optional:</b> toname, fromname, cc, bcc, charset
 # </LJFUNC>
 sub send_mail
 {
@@ -3307,8 +3307,9 @@ sub send_mail
                               'Subject' => $opt->{'subject'},
                               'Data' => $opt->{'body'});
 
-    $msg->attr("content-type.charset" => $opt->{'charset'})
-        if $opt->{'charset'};
+    if ($opt->{'charset'} && ! (LJ::is_ascii($opt->{'body'}) && LJ::is_ascii($opt->{'subject'}))) {
+        $msg->attr("content-type.charset" => $opt->{'charset'});        
+    }
 
     return eval { $msg->send; 1; }
 }
