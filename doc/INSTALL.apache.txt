@@ -1,30 +1,101 @@
-<VirtualHost www.lj.com>
+<VirtualHost www.ljsite.com>
+
+  ServerAdmin webmaster@ljsite.com
+  DocumentRoot /home/lj/htdocs 
+  ServerName www.ljsite.com
+  ServerAlias ljsite.com *.ljsite.com
+
+  DirectoryIndex index.html index.bml
+
+  Options +ExecCGI
+  ScriptAlias /cgi-bin/ /home/lj/cgi-bin/
+ 
+  SetEnv LJHOME /home/lj
+  FastCgiServer /home/lj/cgi-bin/404notfound.cgi -processes 1 -initial-env LJHOME=/home/lj
+  FastCgiServer /home/lj/cgi-bin/bmlp.pl -processes 2 -initial-env LJHOME=/home/lj
+  FastCgiServer /home/lj/cgi-bin/log.cgi -processes 2 -initial-env LJHOME=/home/lj
+  FastCgiServer /home/lj/htdocs/customview.cgi -processes 2 -initial-env LJHOME=/home/lj
+  FastCgiServer /home/lj/htdocs/userpic -processes 1 -initial-env LJHOME=/home/lj
+  FastCgiServer /home/lj/htdocs/users -processes 5 -initial-env LJHOME=/home/lj
+
+  AddType text/bml BML 
+  AddType text/rdf rdf
+  AddType text/plain TCL
+  AddType application/x-httpd-cgi CGI
+
+  Action text/bml /cgi-bin/bmlp.pl
+
   RewriteEngine on
+  RewriteLog /home/lj/logs/rewrite.log
   RewriteLogLevel 0
+
+  RewriteCond %{HTTP_HOST} ^(www\.)?ljsite\.com$ [NC]
   RewriteRule ^/~([a-z0-9_]+)(/?.*)$ /users/$1$2 [L,PT,NS]
 
   RewriteCond %{REQUEST_URI} !\.bml
   RewriteRule ^/community/([a-z0-9_]+)(/?.*)$ /users/$1$2 [L,PT,NS]
 
-  RewriteCond %{HTTP_HOST} ^([a-z0-9_\-]+)\.lj\.com$ [NC]
+  RewriteCond %{HTTP_HOST} ^([a-z0-9_\-]+)\.ljsite\.com$ [NC]
   RewriteCond %1 !^www$ [NC]
   RewriteRule ^(.+) %{HTTP_HOST}$1  [C]
-  RewriteRule ^([a-z0-9_\-]+)\.lj\.com(.+)  /users/$1$2  [L,PT,NS]
+  RewriteRule ^([a-z0-9_\-]+)\.ljsite\.com(.+)  /users/$1$2  [L,PT,NS]
 
-  RewriteRule ^/confirm/([a-z0-9]+\.[a-z0-9]+) http://www.lj.com/register.bml?$1 [L,R]
+  RewriteCond %{HTTP_HOST} ^(www\.)?ljsite\.com$ [NC]
+  RewriteRule ^/confirm/([a-z0-9]+\.[a-z0-9]+) http://www.ljsite.com/register.bml?$1 [L,R]
 
-  ServerAdmin webmaster@lj.com
-  DocumentRoot /home/lj/htdocs 
-  ServerName www.lj.com
-  ServerAlias lj.com *.lj.com
+  RewriteCond %{HTTP_HOST} ^mrtg\.ljsite\.com$ [NC]
+  RewriteRule ^(.+)$ http://mrtg.ljsite.com:88$1 [L,R]
+
+  # if they send any Host header with letters (an IP address or blank
+  # is okay) then it has to be www.ljsite.com or ljsite.com
+  # (optional port, too)
+  RewriteCond %{HTTP_HOST} [a-z] [NC]
+  RewriteCond %{HTTP_HOST} !^(www\.)?ljsite\.com(:[0-9]+)?$ [NC]
+  RewriteRule . . [F]
+
+  ErrorDocument 403 /403.html
+  ErrorDocument 500 /500.html
+  ErrorDocument 404 /cgi-bin/404notfound.cgi
 
   DirectoryIndex index.html index.bml
-  ScriptAlias /cgi-bin/ /home/lj/cgi-bin/
- 
-  AddType text/bml BML 
-  Action text/bml /cgi-bin/bmlp.pl
 
-  <Location /users> 
-      SetHandler cgi-script
+  <Location /cgi-bin/404notfound.cgi>
+    SetHandler fastcgi-script
   </Location>
+  <Location /userpic>
+    SetHandler fastcgi-script
+  </Location>
+  <Location /users>
+    SetHandler fastcgi-script
+  </Location>
+  <Location /cgi-bin/log.cgi>
+    ErrorDocument 500 /500-log.html
+    SetHandler fastcgi-script
+  </Location>
+  <Location /cgi-bin/bmlp.pl>
+    SetHandler fastcgi-script
+  </Location>
+  <Location /customview.cgi>
+    SetHandler fastcgi-script
+  </Location>
+  <Directory /home/lj/htdocs/img>
+    AllowOverride None
+    Options None
+    ExpiresActive on
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+  </Directory>
+
+  <FilesMatch "~$">
+    Deny from all
+  </FilesMatch>
+
+  <Directory /home/lj/htdocs/inc/>
+    Deny from all
+  </Directory>
+
+  <Directory /home/lj/htdocs/files/>
+    Options -ExecCGI
+  </Directory>
+
 </VirtualHost>
