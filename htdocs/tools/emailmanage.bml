@@ -25,7 +25,7 @@ body<=
     }, undef, $u->{'userid'}, $u->{'email'});
 
     my @deleted;
-    if (LJ::did_post()) {
+    if (LJ::did_post() && $u->{'status'} eq 'A') {
         my $sth = $dbh->prepare("SELECT timechange, oldvalue " .
                                 "FROM infohistory WHERE userid=? " . 
                                 "AND what='email' ORDER BY timechange");
