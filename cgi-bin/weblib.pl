@@ -289,15 +289,18 @@ sub make_cookie
 # args: dbarg?, u, old, new
 # arg-old: hashref of old interests (hashing being interest => intid)
 # arg-new: listref of new interests
-# returns: 1
+# returns: 1 on success, undef on failure
 # </LJFUNC>
 sub set_interests
 {
     my ($u, $old, $new) = @_;
 
-    $u = ref $u eq 'HASH' ? $u : LJ::load_userid($u);
+    $u = LJ::want_user($u);
     my $userid = $u->{'userid'};
-    return unless $userid;
+    return undef unless $userid;
+
+    return undef unless ref $old eq 'HASH';
+    return undef unless ref $new eq 'ARRAY';
 
     my $dbh = LJ::get_db_writer();
     my %int_new = ();
