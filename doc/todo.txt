@@ -12,11 +12,18 @@
 
 * option to strip target= on <a> on friends pages (halkeye)
 * goatctl, cvsreport --init
+* deprecate /cgi-bin/log.cgi, make /interface?mode=<...>
 
 +------+
 | Todo |
 +------+
 
+* LJ::get_friend_items: if 10,000 friends, we load all into memory
+  to sort and iterate over.  let's have db sort and limit to, say, 1000.
+  only 100 unique can be on page at once anyway * 4 pages... 400.
+  so 601 of most recent 1000 would have to be non-public posts for 
+  people to become missing.  rare.  and unimportant with 10,000 friend
+  communities?  if it was a problem, we could change 1000 to 1500.
 * add "scope enum('general','local')" to all prop tables
   -- change SQL exporter to recognize only general
 * add hooks to verify people aren't faking their paid user cookie
@@ -24,7 +31,6 @@
 * htdocs/userpic: doesn't clean disk cache yet
 * postevent dup locking
 * rate limiting (bradfitz)
-* deprecate /cgi-bin/log.cgi, make /interface?mode=<...>
 * /fz/ joins on logtext (requires master) 
 * talk* joins on logtext (requires master)
 * "unpay" console command
@@ -44,8 +50,6 @@
 * store as UTF-8 in database (avva investigating)
 * ehtml current mood/music ?
 * bug: multiple talkread delete: /support/see_request.bml?id=10159
-* dakus: need to be able to mark support requests as "still needs help"
-* dakus: switch to next support request in category when closing one
 * privacy problem: multisearch.bml returns AIM/ICQ to all when friends only
 * perf: don't preload friends in ljprotocol.pl:editfriends, check $sth->rows
 
