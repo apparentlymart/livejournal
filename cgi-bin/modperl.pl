@@ -29,6 +29,7 @@ BEGIN {
     require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
     require "$ENV{'LJHOME'}/cgi-bin/ljtodo.pl";
     require "$ENV{'LJHOME'}/cgi-bin/directorylib.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/ljemailgateway.pl";
 }
 
 # auto-load some stuff before fork:

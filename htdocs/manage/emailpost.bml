@@ -96,18 +96,23 @@ body<=
             characters and numbers, and needs to be at least 4
             characters long." unless $pin =~ /^([a-z0-9]){4,20}$/i or $pin eq '';
 
-        my @allow_from;
+        # Check email, add flags if needed.
+        my %allowed;
+        my $addrcount = 0;
         foreach (split(/\0/, $addresses)) {
             s/\s+//g;
             next unless $_;
             next if length > 80;
+            $_ = lc;
             push @errors, "Invalid email address: " . LJ::ehtml($_) unless /\@/;
-            push @allow_from, $_;
+            $allowed{$_} = {};
+            $allowed{$_}->{'get_errors'} = 1 if $POST{"check_$addrcount"};
+            $addrcount++;
         }
         return LJ::bad_input(@errors) if @errors;
 
+        LJ::Emailpost::set_allowed_senders($u, \%allowed);
         LJ::set_userprop($u, "emailpost_pin", $pin);
-        LJ::set_userprop($u, "emailpost_allowfrom", join(", ", @allow_from));
 
         my $ret;
         $ret .= "<?h1 Success h1?>";
@@ -121,9 +126,11 @@ body<=
     }
 
     # Initial page
-    LJ::load_user_props($u, qw(emailpost_pin emailpost_allowfrom));
-    my @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
-
+    LJ::load_user_props($u, qw(emailpost_pin));
+    my $addrlist = LJ::Emailpost::get_allowed_senders($u);
+    my @address;
+    foreach (sort keys %$addrlist) { push(@address, $_) }
+    
     my $ret;
     $ret .= "<form method='get' action='phonepost.bml'>\n";
     $ret .= "</form>\n\n";
@@ -131,22 +138,32 @@ body<=
     $ret .= "<?p If you'd like to be able to update your journal via email, please fill out the following fields. 
         For more help using this feature, check out the <a href='?mode=help'>instructions</a>. p?>";
 
-    unless (LJ::get_cap($u, "emailpost")) {
+    unless (LJ::get_cap($u, 'emailpost')) {
         $ret .= "Sorry, updating your journal via email is not available for your account type.";
         return $ret;
     }
 
     $ret .= "<?h1 Allowed sender addresses h1?>";
     $ret .= "<?p Only the addresses listed below are allowed to post to your account via the email gateway. 
-        If no addresses are listed, posting via the email gateway will be disabled for your account.  p?>";
+        If no addresses are listed, posting via the email gateway will be disabled for your account. 
+        Marked addresses will receive errors if there are any to send. p?>";
     $ret .= "<form method='post' action='emailpost.bml'>\n";
     $ret .= LJ::html_hidden(userid => $u->{userid});
     $ret .= "<div style='margin-left:40px;'>";
-    for(1..3) { # Limited to 3 addresses.
+    $ret .= '<table border="0"><tr><td>Address:</td><td>Send errors?</td></tr>';
+    for(0..2) { # Limited to 3 addresses.
+        $ret .= '<tr><td>';
+        my $selected = 0;
         $ret .= LJ::html_text({name=>'addresses',
-                value=>$address[$_ - 1], size=>40, maxlength=>80}) . '<br />';
+                value=>$address[$_], size=>40, maxlength=>80});
+        $ret .= '</td><td>';
+        $selected = 1 if $addrlist->{$address[$_]}->{'get_errors'};
+        $ret .= '<center>' . 
+            LJ::html_check({name => "check_$_", selected => $selected})
+            . '</center>';
+        $ret .= '</td></tr>';
     }
-    $ret .= '</div><br />';
+    $ret .= '</table></div><br />';
 
     $ret .= "<?h1 PIN h1?>";
     $ret .= "<?p Your PIN is used only for the email gateway. Do not

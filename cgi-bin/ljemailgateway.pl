@@ -9,32 +9,82 @@ use MIME::Words ();
 sub process {
     my ($entity, $to) = @_;
     my $head = $entity->head;
+    my ($subject, $body);
     $head->unfold;
 
     my $err = sub {
-        # FIXME: email error message and subject/body back
-        # to $u->{email} with rate limiting.
-        my $msg = shift;
-        return 0;
+        my ($msg, $who) = @_;
+
+        # FIXME: Need to log last 10 errors to DB / memcache
+        # and create a page to watch this stuff.
+
+        return 0 unless $who;
+        my $errbody;
+        $errbody .= "There was an error during your email posting:\n\n";
+        $errbody .= $msg;
+        if ($body) {
+            $errbody .= "\n\n\nOriginal posting follows:\n\n";
+            $errbody .= $body;
+        }
+
+        # Rate limit email to 1/5min/address
+        if (LJ::MemCache::add("rate_eperr:$who", 5, 300)) {
+            LJ::send_mail({ 
+                    'to' => $who,
+                    'from' => $LJ::BOGUS_EMAIL,
+                    'fromname' => "$LJ::SITENAME Error",
+                    'subject' => "$LJ::SITENAME posting error: $subject",
+                    'body' => $errbody  
+                    });
+        }
     };
 
     # Get various email parts.
     my @froms = Mail::Address->parse($head->get('From:'));
     my $from = $froms[0]->address;
-    my $subject = $head->get('Subject:');
     my $content_type = $head->get('Content-type:');
     my $tent = get_text_entity($entity);
-    return $err->("Unable to find any text in your email.") unless $tent;
-    my $body = $tent->bodyhandle->as_string;
+    return $err->("Unable to find any text content in your mail") unless $tent;
+    $subject = $head->get('Subject:');
+    $body = $tent->bodyhandle->as_string;
     $body =~ s/^\s+//;
     $body =~ s/\s+$//;
+
+    # Parse email for lj specific info                                                                                
+    my ($user, $journal, $pin);
+    ($user, $pin) = split(/\+/, $to);
+    ($user, $journal) = split(/\./, $user) if $user =~ /\./;
+    my $u = LJ::load_user($user);
+    return 0 unless $u;
+    LJ::load_user_props($u, 'emailpost_pin');
+
+    # Pick what address to send potential errors to.
+    my $addrlist = LJ::Emailpost::get_allowed_senders($u);
+    my $err_addr;
+    foreach (keys %$addrlist) {
+        if (lc($from) eq lc &&
+                $addrlist->{$_}->{'get_errors'}) {
+            $err_addr = $from;
+            last;
+        }
+    }
+    $err_addr ||= $u->{email};
+
+    # Strip (and maybe use) pin data from viewable areas
+    if ($subject =~ s/^\s*\+([a-z0-9]+)\s+//i) {
+        $pin = $1 unless defined $pin;
+    }
+    if ($body =~ s/^\s*\+([a-z0-9]+)\s+//i) {
+        $pin = $1 unless defined $pin;
+    }
+    return $err->("Unable to locate your PIN.", $err_addr) unless $pin;
 
     # Snag charset and do utf-8 conversion
     my ($charset, $format);
     $charset = $1 if $content_type =~ /\bcharset=['"]?(\S+?)['"]?[\s\;]/i;
     $format = $1 if $content_type =~ /\bformat=['"]?(\S+?)['"]?[\s\;]/i;
     if (defined($charset) && $charset !~ /^UTF-?8$/i) { # no charset? assume us-ascii
-        return $err->("Unknown encoding type.")
+        return $err->("Unknown charset encoding type.", $err_addr)
             unless Unicode::MapUTF8::utf8_supported_charset($charset);
         $body = Unicode::MapUTF8::to_utf8({-string=>$body, -charset=>$charset});
         # check subject for rfc-1521 junk 
@@ -46,39 +96,24 @@ sub process {
             }
         }
     }
-   
-    # Parse email for lj specific info                                                                                
-    my ($user, $journal, $pin);                                                                                    
-    ($user, $pin) = split(/\+/, $to);                                                                              
-    ($user, $journal) = split(/\./, $user) if $user =~ /\./;                                                       
-    my $u = LJ::load_user($user);
-    return 0 unless $u;
-    LJ::load_user_props($u, qw(emailpost_pin emailpost_allowfrom));
-
-    # Strip (and maybe use) pin data from viewable areas
-    if ($subject =~ s/^\s*\+([a-z0-9]+)\s+//i) {
-        $pin = $1 unless defined $pin;
-    }
-    if ($body =~ s/^\s*\+([a-z0-9]+)\s+//i) {
-        $pin = $1 unless defined $pin;
-    }
-    return $err->("No PIN specified.") unless $pin;
 
     # Validity checks
-    my @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
-    return $err->("No allowed senders have been saved for your account.")
-        unless scalar(@address) > 0;
+    return $err->("No allowed senders have been saved for your account.", $err_addr)
+        unless ref $addrlist;
     my $ok = 0;
-    foreach (@address) {
-        $ok = 1 if lc eq lc($from);
+    foreach (keys %$addrlist) {
+        if (lc($from) eq lc) {
+            $ok = 1;
+            last;
+        }
     }
-    return $err->("Unauthorized sender address: $from") unless $ok;
-    return $err->("Invalid PIN.") unless lc($pin) eq lc($u->{emailpost_pin});
-    return $err->("Email gateway access denied for your account type.")
+    return $err->("Unauthorized sender address: $from") unless $ok; # don't mail user due to bounce spam
+    return $err->("Invalid PIN.", $err_addr) unless lc($pin) eq lc($u->{emailpost_pin});
+    return $err->("Email gateway access denied for your account type.", $err_addr)
         unless LJ::get_cap($u, "emailpost");
 
     $body =~ s/^[\-_]{2,}\s*\r?\n.*//ms; # trim sigs
-    $body =~ s/ \n/ /g if $format eq lc('flowed'); # respect flowed text
+    $body =~ s/ \n/ /g if lc($format) eq 'flowed'; # respect flowed text
     
     my $req = {
         'usejournal' => $journal,
@@ -95,6 +130,53 @@ sub process {
     return $err->(LJ::Protocol::error_message($post_error)) if $post_error;
 
     return 1; 
+}
+
+# Retreives an allowed email addr list for a given user object.
+# Returns a hashref with addresses / flags.
+sub get_allowed_senders {
+    my $u = shift;
+    my (%addr, @address);
+
+    LJ::load_user_props($u, 'emailpost_allowfrom');
+    @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
+    return undef unless scalar(@address) > 0;
+    
+    my %flag_english = ( 'E' => 'get_errors' );
+
+    foreach my $add (@address) {
+        my $flags;
+        $flags = $1 if $add =~ s/\((.+)\)$//;
+        $addr{$add} = {};
+        if ($flags) {
+            $addr{$add}->{$flag_english{$_}} = 1 foreach split(//, $flags);
+        }
+    }
+
+    return \%addr;
+}
+
+# Inserts email addresses into the database.
+# Adds flags if needed.
+sub set_allowed_senders {
+    my ($u, $addr) = @_;
+    my %flag_letters = ( 'get_errors' => 'E' );
+
+    my @addresses;
+    foreach (keys %$addr) {
+        my $email = $_;
+        my $flags = $addr->{$_};
+        if (%$flags) {
+            $email .= '(';
+            foreach my $flag (keys %$flags) {
+                $email .= $flag_letters{$flag};
+            }
+            $email .= ')';
+        }
+        push(@addresses, $email);
+    }
+    close T;
+    LJ::set_userprop($u, "emailpost_allowfrom", join(", ", @addresses));
 }
 
 # Yoinked from mailgate.  
