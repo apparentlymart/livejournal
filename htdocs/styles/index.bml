@@ -1,35 +1,18 @@
 <?page
-title=>Custom Styles
+title=><?_ml .title _ml?>
 body<=
 
-<?h1 Making your journal purty... h1?>
-<?p This section of the site allows you to create, edit and delete
-customised LiveJournal styles. This allows you to control the
-look of your LiveJournal to a great extent, whether you want to make
-it look like your website, or just feel like being different. p?>
-<?p You can also create <em>embedded</em> styles which, rather than
-creating a full page, include only the Journal entries and leave
-you to <a href="/developer/embedding.bml">embed
-your journal in another site</a>. p?>
-<?p You can read more about the style system in the
-<a href="/developer/styles.bml">style
-documentation</a> in the
-<a href="/developer/">developer area</a>. p?>
-<?p Please note that only journals on
-<a href="/paidaccounts/">paid accounts</a>
-may have custom styles. Free Accounts have a selection of predefined
-LiveJournal styles which you can select from the
-<a href="/modify.bml">Modify Your Journal</a> page. p?>
-<ul>
-<li><b><a href="create.bml">Create a new style</a></b> - You may create
-a new style from scratch, or base your style apon an existing
-style.</li>
-<li><b><a href="edit.bml">Edit/Delete an existing style</a></b> - You
-may only edit styles "owned" by your account. In order to customise
-a style provided by LiveJournal, you must first create a new style
-based on that style using the above link.</li>
-<li><b><a href="browse/">Style Browser</a></b> - The Style Browser
-lets you browse through public styles created by other users.</li>
+<?h1 <?_ml .about.header _ml?> h1?>
+<?_ml .about _ml?>
+<dl>
+  <dt><a href="/modify.bml"><?_ml .nav.modify _ml?></a></dt>
+  <dd><?_ml .nav.modify.about _ml?></dd>
+  <dt><a href="create.bml"><?_ml .nav.create _ml?></a></dt>
+  <dd><?_ml .nav.create.about _ml?></dd>
+  <dt><a href="edit.bml"><?_ml .nav.edit _ml?></a></dt>
+  <dd><?_ml .nav.edit.about _ml?></dd>
+  <dt><a href="browse/"><?_ml .nav.browse _ml?></a></dt>
+  <dd><?_ml .nav.browse.about _ml?></dd>
 </ul>
 <=body
 page?><?_c <LJDEP>
