@@ -51,17 +51,6 @@ sub process {
         }
     };
 
-    # Get various email parts.
-    my @froms = Mail::Address->parse($head->get('From:'));
-    my $from = $froms[0]->address;
-    my $content_type = $head->get('Content-type:');
-    my $tent = get_entity($entity, 'text');
-    return $err->("Unable to find any text content in your mail") unless $tent;
-    $subject = $head->get('Subject:');
-    $body = $tent->bodyhandle->as_string;
-    $body =~ s/^\s+//;
-    $body =~ s/\s+$//;
-
     # Parse email for lj specific info                                                                                
     my ($user, $journal, $pin);
     ($user, $pin) = split(/\+/, $to);
@@ -71,6 +60,8 @@ sub process {
     LJ::load_user_props($u, 'emailpost_pin') unless (lc($pin) eq 'pgp' && $LJ::USE_PGP);
 
     # Pick what address to send potential errors to.
+    my @froms = Mail::Address->parse($head->get('From:'));
+    my $from = $froms[0]->address;
     my $addrlist = LJ::Emailpost::get_allowed_senders($u);
     my $err_addr;
     foreach (keys %$addrlist) {
@@ -81,6 +72,15 @@ sub process {
         }
     }
     $err_addr ||= $u->{email};
+
+    # Get various email parts.
+    my $content_type = $head->get('Content-type:');
+    my $tent = get_entity($entity, 'text');
+    return $err->("Unable to find any text content in your mail", $err_addr) unless $tent;
+    $subject = $head->get('Subject:');
+    $body = $tent->bodyhandle->as_string;
+    $body =~ s/^\s+//;
+    $body =~ s/\s+$//;
 
     # Strip (and maybe use) pin data from viewable areas
     if ($subject =~ s/^\s*\+([a-z0-9]+)\s+//i) {
