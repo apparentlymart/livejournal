@@ -69,7 +69,7 @@
              $body .= ' ' . BML::ml('.edit2', { 'editlink' => "$LJ::SITEROOT/editpics.bml?authas=$user",
                                               'uploadlink' => "$LJ::SITEROOT/uploadpic.bml?authas=$user" });
          }
-         $body .= " p?><div style='margin-left: 50px;'><table cellpadding='5' border='0' cellspacing='1'>";
+         $body .= " p?><div style='margin: 50px 0px;'><table cellpadding='5' border='0' cellspacing='1'>";
              
      }
 
@@ -77,7 +77,9 @@
      my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}||[]});
      $eh_keywords = LJ::eall($eh_keywords);
 
-     $body .= "<tr valign='middle'>";
+     if ($piccount % 2 == 1) {
+         $body .= "<tr valign='middle'>";
+     }
      $body .= "<td align='center'><img src='$LJ::USERPIC_ROOT/$pic->{'picid'}/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}' alt='$eh_keywords' /></td>";
      $body .= "<td>";
      if ($u->{'defaultpicid'} == $pic->{'picid'}) {
@@ -93,11 +95,20 @@
      }
 
      $body .= "</td>";
-     $body .= "</tr>\n";
 
+     if ($piccount % 2 == 1) {
+         $body .= "<td width='50px'></td>";
+     } else {
+         $body .= "</tr>\n";
+     } 
  }
 
  if ($piccount) {
+     if ($piccount % 2 == 1) {
+        # finish off this row.
+        # we need 2 columns: the pic and the text.
+        $body .= "<td colspan='2'></td></tr>";
+     }
      $body .= "</table></div>";
  } else {
      if ($can_manage) {
