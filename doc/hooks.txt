@@ -49,7 +49,7 @@
     dbs
     user
 
-* userinfo_row(\%args)
+* userinfo_rows(\%args)
 
   Returns a two-element arrayref for a row on a userinfo page, containing
   first the left side label, then the body.
@@ -57,3 +57,10 @@
   arg keys:
     dbs
     u
+
+* name_caps($caps)
+* name_caps_short($caps)
+
+  Return the long name and short code for the given capability class
+  bits, respectively.
+
