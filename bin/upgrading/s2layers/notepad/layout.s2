@@ -241,7 +241,7 @@ function RecentPage::lay_bottom_navigation ()
         $nav = """<a href="$.nav.backward_url">Back a Page</a>""";
     }
     if ($.nav.forward_url != "" and $.nav.backward_url != "") {
-        $nav = " - ";
+        $nav = "$nav - ";
     }
     if ($.nav.forward_url != "") {
         $nav = """$nav<a href="$.nav.forward_url">Forward a Page</a>""";
