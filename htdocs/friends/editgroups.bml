@@ -1,90 +1,90 @@
 <?_code
+{
+    $title = $ML{'.title'};
+    $body = "";
 
- $title = $ML{'.title'};
- $body = "";
+    # these are only used by the client-side for JS to play with.
+    # we delete them because they may contain embedded NULLs, which
+    # text_in won't like.
+    delete $FORM{'list_in'};
+    delete $FORM{'list_out'};
+    
+    unless (LJ::text_in(\%FORM)) {
+        $body = "<?badinput?>";
+        return;
+    }
+    
+    my $remote = LJ::get_remote();
+    unless ($remote) {
+        $body = "<?h1 $ML{'.login.header'} h1?><?p $ML{'.login.text'} p?>";
+        return;
+    }
+    
+    if ($FORM{'mode'} eq "save") {
+        my %res;
+        $FORM{'mode'} = "editfriendgroups";
+        $FORM{'user'} = $remote->{'user'};
+        $FORM{'ver'} = $LJ::PROTOCOL_VER;
+        LJ::do_request(\%FORM, \%res, {
+            'userid' => $remote->{'userid'},
+            'noauth' => 1, 
+        });
+        
+        if ($res{'success'} eq "OK") {
+            $body .= "<?h1 $ML{'.saved.header'} h1?><?p $ML{'.saved.text'} p?>";
+        } else {
+            $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.text'} p?><?p $res{'errmsg'} p?>";
+        }
+        return;
+    }
+    
+    my %res;
+    LJ::do_request({ 'mode' => 'getfriends',
+                     'user' => $remote->{'user'}, 
+                     'ver'  => $LJ::PROTOCOL_VER,
+                     'includegroups' => 1,
+                 },
+                   \%res, { 'userid' => $remote->{'userid'},
+                            'noauth' => 1, });
+    my @num_used;
+    my @num_free;
 
- # these are only used by the client-side for JS to play with.
- # we delete them because they may contain embedded NULLs, which
- # text_in won't like.
- delete $FORM{'list_in'};
- delete $FORM{'list_out'};
-
- unless (LJ::text_in(\%FORM)) {
-     $body = "<?badinput?>";
-     return;
- }
-
- my $remote = LJ::get_remote();
- unless ($remote) {
-     $body = "<?h1 $ML{'.login.header'} h1?><?p $ML{'.login.text'} p?>";
-     return;
- }
-
- if ($FORM{'mode'} eq "save") {
-     my %res;
-     $FORM{'mode'} = "editfriendgroups";
-     $FORM{'user'} = $remote->{'user'};
-     $FORM{'ver'} = $LJ::PROTOCOL_VER;
-     LJ::do_request(\%FORM, \%res, {
-         'userid' => $remote->{'userid'},
-         'noauth' => 1, 
-     });
-
-     if ($res{'success'} eq "OK") {
-         $body .= "<?h1 $ML{'.saved.header'} h1?><?p $ML{'.saved.text'} p?>";
-     } else {
-         $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.text'} p?><?p $res{'errmsg'} p?>";
-     }
-     return;
- }
-
- my %res;
- LJ::do_request({ 'mode' => 'getfriends',
-                  'user' => $remote->{'user'}, 
-                  'ver'  => $LJ::PROTOCOL_VER,
-                  'includegroups' => 1,
-              },
-                \%res, { 'userid' => $remote->{'userid'},
-                         'noauth' => 1, });
- my @num_used;
- my @num_free;
-
- $body .= "<?h1 $ML{'.title'} h1?><?p $ML{'.text'} p?><?p $ML{'.text.sec'} p?><p>";
- $body .= "<form method='post' name='fg' action='editgroups.bml'>";
- $body .= "<input type='hidden' name='mode' value='save' />";
- for (my $i=1; $i<=30; $i++) {
-     my $sort = 255;
-     my $name = "";
-     my $public = 0;
-     if ($res{"frgrp_${i}_name"}) {
-         $sort = $res{"frgrp_${i}_sortorder"}+0;
-         $name = LJ::ehtml($res{"frgrp_${i}_name"});
-         $public = $res{"frgrp_${i}_public"}+0;
-         push @num_used, $i;
-     } else {
-         push @num_free, $i;
-     }
-     $body .= "<input type='hidden' name='efg_set_${i}_name' value='$name' />";
-     $body .= "<input type='hidden' name='efg_set_${i}_sort' value='$sort' />";
-     $body .= "<input type='hidden' name='efg_delete_${i}' value='0' />";
-     $body .= "<input type='hidden' name='efg_set_${i}_public' value='$public' />";
- }
- for (my $i=1; $i<=$res{'friend_count'}; $i++) {
-     my $user = $res{"friend_${i}_user"};
-     my $mask = $res{"friend_${i}_groupmask"} || 1;
-     $body .= "<input type='hidden' name='editfriend_groupmask_$user' value='$mask' />";
- }
-
- # escape strings for JavaScript
- my %T = qw(public  .group.public
-            rename  .prompt.rename
-            newname .prompt.newname
-            delete  .confirm.delete
-            max30   .error.max30
-            );
- foreach (keys %T) { $T{$_} = LJ::ejs($ML{$T{$_}}); }
-
- $body .= <<"END_JS";
+    $body .= "<?h1 $ML{'.title'} h1?><?p $ML{'.text'} p?><?p $ML{'.text.sec'} p?><p>";
+    $body .= "<form method='post' name='fg' action='editgroups.bml'>";
+    $body .= "<input type='hidden' name='mode' value='save' />";
+    for (my $i=1; $i<=30; $i++) {
+        my $sort = 255;
+        my $name = "";
+        my $public = 0;
+        if ($res{"frgrp_${i}_name"}) {
+            $sort = $res{"frgrp_${i}_sortorder"}+0;
+            $name = LJ::ehtml($res{"frgrp_${i}_name"});
+            $public = $res{"frgrp_${i}_public"}+0;
+            push @num_used, $i;
+        } else {
+            push @num_free, $i;
+        }
+        $body .= "<input type='hidden' name='efg_set_${i}_name' value='$name' />";
+        $body .= "<input type='hidden' name='efg_set_${i}_sort' value='$sort' />";
+        $body .= "<input type='hidden' name='efg_delete_${i}' value='0' />";
+        $body .= "<input type='hidden' name='efg_set_${i}_public' value='$public' />";
+    }
+    for (my $i=1; $i<=$res{'friend_count'}; $i++) {
+        my $user = $res{"friend_${i}_user"};
+        my $mask = $res{"friend_${i}_groupmask"} || 1;
+        $body .= "<input type='hidden' name='editfriend_groupmask_$user' value='$mask' />";
+    }
+    
+    # escape strings for JavaScript
+    my %T = qw(public  .group.public
+               rename  .prompt.rename
+               newname .prompt.newname
+               delete  .confirm.delete
+               max30   .error.max30
+               );
+    foreach (keys %T) { $T{$_} = LJ::ejs($ML{$T{$_}}); }
+    
+    $body .= <<"END_JS";
 <SCRIPT LANGUAGE="JavaScript"><!--
 
  var selectedGroup = 0;
@@ -346,55 +346,55 @@
 // --></SCRIPT>
 END_JS
 
- $body .= "<table cellspacing='5'><tr valign='bottom'>";
- $body .= "<td nowrap='1' colspan='2'><strong>$ML{'.yourgroups'}</strong></td>";
- $body .= "<td nowrap='1' colspan='2'><strong>$ML{'.ingroup.not'}</strong></td>";
- $body .= "<td nowrap='1'><strong>$ML{'.ingroup'}</strong></td></tr>";
+    $body .= "<table cellspacing='5'><tr valign='bottom'>";
+    $body .= "<td nowrap='1' colspan='2'><strong>$ML{'.yourgroups'}</strong></td>";
+    $body .= "<td nowrap='1' colspan='2'><strong>$ML{'.ingroup.not'}</strong></td>";
+    $body .= "<td nowrap='1'><strong>$ML{'.ingroup'}</strong></td></tr>";
 
- $body .= "<tr valign='top'>";
- $body .= "<td><select name='list_groups' style='width: 150px;' size='15' onchange='groupClicked();'>";
- foreach my $num (sort { $res{"frgrp_${a}_sortorder"} <=> 
-                         $res{"frgrp_${b}_sortorder"} } @num_used) 
- {
-     my $listname = $res{"frgrp_${num}_name"};
-     $listname .= " $ML{'.group.public'}" if $res{"frgrp_${num}_public"};
-     $body .= "<option value='$num'>" . LJ::ehtml($listname);
- }
+    $body .= "<tr valign='top'>";
+    $body .= "<td><select name='list_groups' style='width: 150px;' size='15' onchange='groupClicked();'>";
+    foreach my $num (sort { $res{"frgrp_${a}_sortorder"} <=> 
+                            $res{"frgrp_${b}_sortorder"} } @num_used) {
 
- $body .= "</select></td>";
+        my $listname = $res{"frgrp_${num}_name"};
+        $listname .= " $ML{'.group.public'}" if $res{"frgrp_${num}_public"};
+        $body .= "<option value='$num'>" . LJ::ehtml($listname);
+    }
+
+    $body .= "</select></td>";
  
- $body .= "<td valign='middle'>";
- $body .= "<input type='button' value='$ML{'.btn.mv.up'}' onClick='moveGroup(-1);' /><br /><br />";
- $body .= "<input type='button' value='$ML{'.btn.mv.down'}' onClick='moveGroup(1);' /></td>";
+    $body .= "<td valign='middle'>";
+    $body .= "<input type='button' value='$ML{'.btn.mv.up'}' onClick='moveGroup(-1);' /><br /><br />";
+    $body .= "<input type='button' value='$ML{'.btn.mv.down'}' onClick='moveGroup(1);' /></td>";
 
- $body .= "<td><select name='list_out' multiple='1' size='15'>";
- $body .= "<option value=''>---------------</option></select></td>";
+    $body .= "<td><select name='list_out' multiple='1' size='15'>";
+    $body .= "<option value=''>---------------</option></select></td>";
 
- $body .= "<td valign='middle'>";
- $body .= "<input type='button' onClick='moveIn();' value='&gt;&gt;' /><br /><br />";
- $body .= "<input type='button' onClick='moveOut();' value='&lt;&lt;' /></td>";
+    $body .= "<td valign='middle'>";
+    $body .= "<input type='button' onClick='moveIn();' value='&gt;&gt;' /><br /><br />";
+    $body .= "<input type='button' onClick='moveOut();' value='&lt;&lt;' /></td>";
 
- $body .= "<td><select name='list_in' multiple='1' size='15'>";
- $body .= "<option value=''>---------------</option></select></td>";
+    $body .= "<td><select name='list_in' multiple='1' size='15'>";
+    $body .= "<option value=''>---------------</option></select></td>";
 
- $body .= "</tr><tr><td colspan='2'>";
- $body .= "<nobr>";
- $body .= "<input type='button' value='$ML{'.btn.ge.new'}' onClick='newGroup();' /> ";
- $body .= "<input type='button' value='$ML{'.btn.ge.del'}' onClick='deleteGroup();' /> ";
- $body .= "<input type='button' value='$ML{'.btn.ge.ren'}' onClick='renameGroup();' />";
- $body .= "</nobr><br /><nobr>";
- $body .= "<input type='button' value='$ML{'.btn.gs.public'}' onClick='makePublic();' /> ";
- $body .= "<input type='button' value='$ML{'.btn.gs.private'}' onClick='makePrivate();' />";
- $body .= "</nobr></td><td></td><td></td><td></td>";
+    $body .= "</tr><tr><td colspan='2'>";
+    $body .= "<nobr>";
+    $body .= "<input type='button' value='$ML{'.btn.ge.new'}' onClick='newGroup();' /> ";
+    $body .= "<input type='button' value='$ML{'.btn.ge.del'}' onClick='deleteGroup();' /> ";
+    $body .= "<input type='button' value='$ML{'.btn.ge.ren'}' onClick='renameGroup();' />";
+    $body .= "</nobr><br /><nobr>";
+    $body .= "<input type='button' value='$ML{'.btn.gs.public'}' onClick='makePublic();' /> ";
+    $body .= "<input type='button' value='$ML{'.btn.gs.private'}' onClick='makePrivate();' />";
+    $body .= "</nobr></td><td></td><td></td><td></td>";
 
- $body .= "</tr></table>";
+    $body .= "</tr></table>";
 
- $body .= "<?h1 $ML{'.done.header'} h1?><?p $ML{'.done.text'} p?>";
- $body .= "<?p <input type='submit' value='$ML{'.done.btn'}' /> p?>";
- $body .= "</form>";
+    $body .= "<?h1 $ML{'.done.header'} h1?><?p $ML{'.done.text'} p?>";
+    $body .= "<?p <input type='submit' value='$ML{'.done.btn'}' /> p?>";
+    $body .= "</form>";
 
- return;
-
+    return;
+}
 _code?><?page
 title=><?_code return $title; _code?>
 body=><?_code return $body; _code?>
