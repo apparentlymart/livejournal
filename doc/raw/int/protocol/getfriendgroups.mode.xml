@@ -1,4 +1,10 @@
 <method name="getfriendgroups">
+<shortdes>
+Retrieves a list of the user's defined groups of friends.
+</shortdes>
+<des>
+Retrieves a list of the user's defined groups of friends.
+</des>
 <arguments><struct count="1">
 
 &authInfo;

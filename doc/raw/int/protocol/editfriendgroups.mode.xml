@@ -1,0 +1,45 @@
+<method name="editfriendgroups">
+<shortdes>
+Edit the user's defined groups of friends.
+</shortdes>
+<des>
+Given several optional lists, will add/delete/update/rename the friends groups for a user.
+</des>
+<arguments><struct count="1">
+
+&authInfo;
+
+<key name="groupmasks" count="opt"><struct count="1">
+<des>
+A structure of friend userids. The values of each are a string representing an unsigned 32-bit integer with bit 0 set (or the server will force it on anyway), bits 1-30 set for each group the friend belongs to, and bit 31 unset (reserved for future use).
+</des>
+</struct></key>
+
+<key name="set" count="opt"><struct count="1">
+<des>
+Given the bit of a friend group, the value contains a structure of information on it.
+</des>
+<struct count="0more">
+  <key name="name" count="1"><scalar><des>
+      Create or rename the friend group by sending this key. The value is the name of the group.
+  </des></scalar></key>
+  <key name="sort" count="opt"><scalar><des>
+      This field should be sent to indicate the sorting order of this group. The value must be in the range of 0-255. The default is 50.
+  </des></scalar></key>
+  <key name="public" count="opt"><scalar><des>
+      If this is "1", then this group is marked as public. If public, other users can see the name of the group and the people that are in it.
+  </des></scalar></key>
+</struct>
+</struct></key>
+
+<key name="delete" count="opt"><list count="1"><scalar count="0more"><des>
+A number of a friend group to delete (which can be from 1-30, inclusive). The server will modify all old entries that allow access to that friend group, so a new friend group using that number won't have access to old non-related entries. However, it is the client's responsibility to modify each friend's groupmask to remove them from the group as it's deleted.
+</des></scalar></list></key>
+
+</struct></arguments>
+
+<!--===================[ RETURN ]==============================-->
+<returns><struct count="1">
+
+</struct></returns>    
+</method>

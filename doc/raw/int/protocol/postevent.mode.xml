@@ -1,4 +1,10 @@
 <method name="postevent">
+<shortdes>
+The most important mode, this is how a user actually submits a new log entry to the server.
+</shortdes>
+<des>
+Given all of the require information on a post, optioanlly adding security or meta data, will create a new entry. Will return the itemid of the new post.
+</des>
 <arguments><struct count="1">
 
 &authInfo;

@@ -1,0 +1,29 @@
+<method name="getdaycounts">
+<shortdes>
+This mode retrieves the number of journal entries per day.
+</shortdes>
+<des>
+This mode retrieves the number of journal entries per day. Useful for populating calendar widgets in GUI clients. Optionally a journal can be specified. It returns a list of the dates and accompanied counts.
+</des>
+<arguments><struct count="1">
+
+&authInfo;
+
+<key name="usejournal" count="opt">
+<des>
+If getting the day counts of a shared journal, include this key and the username you wish to get the counts of. By default, you load the counts of "user" as specified above.
+</des>
+&useJournal;
+</key>
+
+</struct></arguments>
+
+<!--===================[ RETURN ]==============================-->
+<returns><struct count="1">
+
+<key name="daycounts" count="1"><list count="1"><scalar count="0more"><des>
+For each day that the user has posted a journal entry, a key in the form yyyy-mm-dd  is returned, with the value being the number of entries posted that day. The absence of a key implies zero entries for that day, as well as the presence of a key with the value "0". Note that mm and dd are always two digits, zero padded, so the total key length will always be 10 characters.
+</des></scalar></list></key>
+
+</struct></returns>    
+</method>

@@ -1,4 +1,10 @@
 <method name="getevents">
+<shortdes>
+Download parts of the user's journal.
+</shortdes>
+<des>
+Given a set of specifications, will return a segment of entries up to a limit set by the server. Has a set of options for less, extra, or special data to be returned.
+</des>
 <arguments><struct count="1">
 
 &authInfo;

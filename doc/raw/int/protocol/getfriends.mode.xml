@@ -1,4 +1,10 @@
 <method name="getfriends">
+<shortdes>
+Returns a list of which other LiveJournal users this user lists as their friend.
+</shortdes>
+<des>
+Returns a verbose list of information on friends a user has listed. Optionally able to include their friends of list, the friends group associated with each user, and a limit on the number of friends to return.
+</des>
 <arguments><struct count="1">
 
 &authInfo;
