@@ -62,6 +62,7 @@ sub setup_start {
         Image::Size::imgsize(\$minifile);
     }
     DBI->install_driver("mysql");
+    LJ::CleanHTML::helper_preload();
 
     # set this before we fork
     $LJ::CACHE_CONFIG_MODTIME = (stat("$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"))[9];

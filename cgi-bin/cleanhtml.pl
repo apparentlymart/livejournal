@@ -10,7 +10,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 use strict;
 use HTML::TokeParser ();
 
-#     &LJ::CleanHTML::clean(\$u->{'bio'}, { 
+#     LJ::CleanHTML::clean(\$u->{'bio'}, { 
 #	 'wordlength' => 100, # maximum length of an unbroken "word"
 #	 'addbreaks' => 1,    # insert <br/> after newlines where appropriate
 #	 'tablecheck' => 1,   # make sure they aren't closing </td> that weren't opened.
@@ -26,6 +26,13 @@ use HTML::TokeParser ();
 #     });
 
 package LJ::CleanHTML;
+
+sub helper_preload
+{
+    my $p = HTML::TokeParser->new("");
+    eval {$p->DESTROY(); };
+}
+
 
 # this treats normal characters and &entities; as single characters
 # also treats UTF-8 chars as single characters if $LJ::UNICODE
