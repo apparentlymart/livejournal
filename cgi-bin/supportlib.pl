@@ -154,6 +154,7 @@ sub can_append
     my ($dbh, $sp, $remote, $auth) = @_;
     if (is_poster($sp, $remote, $auth)) { return 1; }
     return 0 unless $remote;
+    return 0 unless $remote->{'statusvis'} eq "V";
     if ($sp->{_cat}->{'allow_screened'}) { return 1; }
     if (can_help($dbh, $sp, $remote)) { return 1; }
     return 0;
