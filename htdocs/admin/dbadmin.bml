@@ -14,6 +14,8 @@
  return"<b>Error:</b> You don't have access to administer databases."
  unless (LJ::check_priv($dbs, $remote, "dbadmin"));
 
+ my $can_save = LJ::check_priv($dbs, $remote, "dbadmin", "change");
+
  my %dbinfo;  # dbid
  my %slaves;  # dbid
  my $sth;
@@ -37,7 +39,7 @@
  my $p = sub { $ret .= shift; };
  my $status;
 
- if (defined $FORM{'action:save'}) {
+ if ($can_save && defined $FORM{'action:save'}) {
      return "<b>Error:</b> Not a POST request." unless LJ::did_post();
 
      my $curr_changed = 0;
@@ -102,8 +104,10 @@
  $p->('<tr bgcolor="#404040"><td><b>Host</b>/Role</td><td><b>Norm</b></td><td><b>Curr</b></td></tr>');
  $dumpslaves->(0, 0, $dumpslaves);  # root
  $p->('</table>');
- $p->('<p><input type="submit" name="action:refresh" value="Refresh"> ');
- $p->('<input type="submit" name="action:save" value="Save"></p>');
+ if ($can_save) {
+     $p->('<p><input type="submit" name="action:refresh" value="Refresh"> ');
+     $p->('<input type="submit" name="action:save" value="Save"></p>');
+ }
  $p->('</form>');
  $p->($status);
 
