@@ -128,6 +128,10 @@ BODY<=
 
          $errors{'username'} = "Sorry, that's a reserved username.";
      }
+     # sadly enough:  (can't read english?  or AOL users?)
+     if ($LJ::USE_ACCT_CODES && $user =~ /^.....a[ab].....$/) {
+         $errors{'username'} = "Username appears to be an invite code, not a username.";
+     }
      
      my $u = LJ::load_user($dbs, $user);
      my $second_submit = 0;
