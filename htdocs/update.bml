@@ -99,7 +99,8 @@ if ($remote && ! LJ::get_cap($remote, "can_post")) {
          my $message = "";
          if ($res{'message'}) {
              $res{'message'} = LJ::eall($res{'message'});
-             $res{'message'} =~ s!(&quot;|&#39;)?(http://[a-z0-9A-Z_\-\.\/\?\%\+\=\&\;]+)!$1 ? "$1$2" : "<a href=\"$2\">$2</a>"!eg;
+             $res{'message'} =~ s!(&quot;|&#39;)?(https?://\S+[a-zA-Z0-9_/&=\-])!$1 ? $& : "<a href=\"$2\">$2</a>"!eg;
+
              $message = "$ML{'.servermsg'} <ul><li><b>$res{'message'}</b></li></ul>";
          }
          $$body .= "<?p ".BML::ml(".login.success", {'name' => "<?_eh $res{'name'} _eh?>"}) ." $message p?>";
