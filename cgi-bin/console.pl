@@ -448,6 +448,17 @@ $cmd{'infohistory'} = {
     ],
 };
 
+$cmd{'set'} = {
+    'des' => 'Set a userprop.',
+    'handler' => \&set,
+    'argsummary' => '["for" <community>] <propname> <value>',
+    'args' => [
+               'community' => "Community to set property for, if you're a maintainer.",
+               'propname' => "Property name to set.",
+               'value' => "Value to set property to.",
+               ],
+    };
+
 sub infohistory
 {
     my ($dbh, $remote, $args, $out) = @_;
@@ -843,6 +854,41 @@ sub friend
 
     push @$out, [ "error", "Invalid command.  See reference." ];
     return 0;
+
+}
+
+sub set
+{
+    my ($dbh, $remote, $args, $out) = @_;
+    my $err = sub { push @$out, [ "error", $_[0] ]; return 0; };
+
+    return $err->("You need to be logged in to use this command.")
+        unless $remote;
+
+    LJ::load_remote($dbh, $remote);
+    my $u = $remote;
+
+    my @args = @$args;
+    shift @args;  # remove command name "set"
+
+    if ($args[0] eq "for") {
+        shift @args;
+        my $comm = shift @args;
+        $u = LJ::load_user($dbh, $comm);
+        return $err->("Community doesn't exist.") unless $u;
+        return $err->("You're not an admin of this community.")
+            unless LJ::check_priv($dbh, $remote, "sharedjournal", $u->{'user'});
+    }
+    return $err->("Wrong number of arguments") unless @args == 2;
+    my ($k, $v) = @args;
+    return $err->("Unknown property") unless ref $LJ::SETTER{$k} eq "CODE";
+
+    my $errmsg;
+    my $rv = $LJ::SETTER{$k}->($dbh, $u, $remote, $v, \$errmsg);
+    return $err->($errmsg) unless $rv;
+
+    push @$out, [ '', "User property '$k' set to '$v'." ];
+    return 1;
 }
 
 1;

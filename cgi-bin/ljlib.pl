@@ -1566,6 +1566,21 @@ sub register_hook
 }
 
 # <LJFUNC>
+# name: LJ::register_setter
+# des: Installs code to run for the "set" command in the console.
+# info: Setters can be general or site-specific.
+# args: key, subref
+# des-key: Key to set.
+# des-subref: Subroutine reference to run later.
+# </LJFUNC>
+sub register_setter
+{
+    my $key = shift;
+    my $subref = shift;
+    $LJ::SETTER{$key} = $subref;
+}
+
+# <LJFUNC>
 # name: LJ::make_auth_code
 # des: Makes a random string of characters of a given length.
 # returns: string of random characters, from an alphabet of 30
