@@ -22,6 +22,8 @@
     $HTDOCS = "$HOME/htdocs";
     $BIN = "$HOME/bin";
 
+    $UNICODE = 1 unless defined $UNICODE;
+
     $SITENAMESHORT = "LiveJournal";
     $SITENAMEABBREV = "LJ";
 
