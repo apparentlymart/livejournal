@@ -5,112 +5,107 @@ title=>Delete Comment
 body<=
 
 <?_code
+{
+    use strict;
+    use vars qw(%GET %POST);
 
- my $ret = "";
+    my $remote = LJ::get_remote();
+    return LJ::bad_input($ML{'error.noremote'})
+        unless $remote;
 
- my $remote = LJ::get_remote();
+    # $u is user object of journal that owns the talkpost
+    my $u = LJ::load_user($GET{'journal'});
+    return LJ::bad_input($ML{'error.nojournal'})
+        unless $u;
 
- unless ($remote) {
-     return "<?h1 Error h1?><?p You must be logged in to delete a comment. p?>";
- }
+    return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
- my $qid = $FORM{'id'}+0;
- my $u = LJ::load_user($FORM{'journal'});
- return "<?h1 Error h1?><?p Bogus journal arg p?>" unless $u;
- my $dbcm = LJ::get_cluster_master($u);
- unless ($dbcm) {
-     return "<?h1 Maintenance h1?><?p Database currently unavailable.  Most likely, maintenance is being performed. p?>";
- }
+    my $dbcm = LJ::get_cluster_master($u);
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'error.nodb'} p?>"
+        unless $dbcm;
 
- ### get some info about the comment being deleted ... which journal entry is it about?
- ### and if it's being deleted, is it authorized to be deleted by this user?
- my $tp;
- $qid = int($qid / 256);  # public ID (with anum) for consistency
- $tp = $dbcm->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, nodeid AS 'itemid', ".
-                                "parenttalkid, journalid, posterid FROM talk2 ".
-                                "WHERE journalid=$u->{'userid'} AND jtalkid=$qid");
+    # $tp is a hashref of info about this individual talkpost row
+    my $tpid = $GET{'id'} >> 8;
+    my $tp = $dbcm->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, " .
+                                      "nodeid AS 'itemid', parenttalkid, journalid, posterid " .
+                                      "FROM talk2 ".
+                                      "WHERE journalid=? AND jtalkid=?",
+                                      undef, $u->{'userid'}, $tpid);
 
- unless ($tp) {
-     return "<?h1 Error h1?><?p The comment doesn't even exist... p?>";
- }
- if ($tp->{'state'} eq "D") {
-     return "<?h1 Error h1?><?p This comment has already been deleted. p?>";
- }
+    return LJ::bad_input("The specified comment does not exist.")
+        unless $tp;
 
- $u ||= LJ::load_userid($tp->{'journalid'});
- return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+    return LJ::bad_input("Invalid comment type.  This page only handles comments on journal entries.")
+        unless $tp->{'nodetype'} eq 'L';
 
- if ($tp->{'posterid'}) {
-     $tp->{'userpost'} = LJ::get_username($tp->{'posterid'});
- }
+    return LJ::bad_input("The specified comment has already been deleted.")
+        if $tp->{'state'} eq "D";
 
- my $qitemid = $tp->{'itemid'}+0;
+    # get username of poster
+    $tp->{'userpost'} = LJ::get_username($tp->{'posterid'});
 
- # the poster of a comment or the journal owner can delete a comment
- my $can_delete = ($tp->{'journalid'} == $remote->{'userid'} ||
-                   $tp->{'posterid'} == $remote->{'userid'});
+    # userid of user who posted journal entry
+    my $jposterid = $dbcm->selectrow_array("SELECT posterid FROM log2 WHERE " .
+                                           "journalid=? AND jitemid=?",
+                                           undef, $u->{'userid'}, $tp->{'itemid'});
 
- # or, a community admin can:
- $can_delete ||= LJ::check_rel($tp->{'journalid'}, $remote, 'A');
+    # can $remote delete this comment?
+    unless (LJ::Talk::can_delete($remote, $u, $jposterid, $tp->{'userpost'})) {
+        return "<?h1 $ML{'Error'} h1?><?p A comment may only be deleted by the author of the journal entry, or the author of the comment. If the entry has been posted in a community, then the maintainer(s) of the community may also delete comments. p?>";
+    }
 
- # or, for a journal item (nodetype == "L"), the poster can delete it,
- # if this happens to be in a community journal (so the
- # $tp->{'journlaid'} would have been the community id)
- if (! $can_delete && $tp->{'nodetype'} eq "L") {
-     my $posterid;
-     $posterid = $dbcm->selectrow_array("SELECT posterid FROM log2 WHERE ".
-                                        "journalid=$u->{'userid'} AND jitemid=$qitemid");
-     $can_delete = 1 if ($posterid == $remote->{'userid'});
- }
+    my $can_manage = LJ::can_manage($remote, $u);
+    my $can_ban = $can_manage && $remote->{'user'} ne $u->{'user'};
 
- unless ($can_delete) {
-     return "<?h1 Error h1?><?p A comment may only be deleted by the journal owner or the one who posted it. (pid=$tp->{'posterid'}; jid=$tp->{'journalid'}; ruid=$remote->{'userid'}) p?>";
- }
 
- unless ($FORM{'confirm'} eq "Y") {
-     $ret .= "<?h1 Delete this comment? h1?><?p Are you sure you want to delete this comment? p?>";
-     $ret .= "<P><FORM METHOD=POST ACTION=\"delcomment.bml\"><CENTER>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=id VALUE=\"$FORM{'id'}\">\n";
-     $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=confirm VALUE=\"Y\">\n";
-     $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Yes, delete it!\">";
-     $ret .= "</CENTER>";
-     if ($tp->{'posterid'} &&
-         $tp->{'posterid'} != $remote->{'userid'} &&
-         $remote->{'userid'} == $tp->{'journalid'}) {
-         $ret .= "<P><INPUT TYPE=CHECKBOX NAME=\"ban\"> And also ban user <B>$tp->{'userpost'}</B> from ever commenting again.";
-     }
-     if ($remote->{'userid'} == $tp->{'journalid'}) {
-         $ret .= "<P><B>Note:</B> From the <A HREF=\"/editinfo.bml\">Edit Personal Info & Settings</A> page you can choose whether to allow <I>all</I>, <I>registered users</I>, or <I>friends only</I> to post.";
-     }
-     $ret .= "</FORM>\n";
-     return $ret;
- }
+    ### perform actions
+    if (LJ::did_post() && $POST{'confirm'}) {
 
- # if it's screened, unscreen it first to properly adjust
- # replycount and the hasscreened logprop
- LJ::Talk::unscreen_comment($u, $tp->{'itemid'}, $qid) if $tp->{'state'} eq 'S';
+        # if it's screened, unscreen it first to properly adjust
+        # replycount and the hasscreened logprop
+        LJ::Talk::unscreen_comment($u, $tp->{'itemid'}, $tpid)
+            if $tp->{'state'} eq 'S';
 
- my $jid = $u->{'userid'};
- LJ::delete_talkitem($dbcm, $jid, $qid, "LIGHT");
- if ($tp->{'nodetype'} eq "L") {
-     $dbcm->do("UPDATE log2 SET replycount=replycount-1 WHERE ".
-               "journalid=$jid AND jitemid=$tp->{'itemid'}");
- }
+        LJ::delete_talkitem($dbcm, $u->{'userid'}, $tpid, "LIGHT");
+        $dbcm->do("UPDATE log2 SET replycount=replycount-1 WHERE ".
+                  "journalid=? AND jitemid=?",
+                  undef, $u->{'userid'}, $tp->{'itemid'});
 
- LJ::Talk::update_commentalter($u, $qitemid);
+        LJ::Talk::update_commentalter($u, $tp->{'itemid'});
 
- # ban the user, if selected
- my $and;
- if ($FORM{'ban'})
- {
-     LJ::set_rel($remote, $tp->{'posterid'}, 'B');
-     $and .= "Additionally, user <B>$tp->{'userpost'}</B> has been banned from commenting in your journal.";
- }
+        # ban the user, if selected
+        my $and;
+        if ($POST{'ban'} && $can_ban) {
+            LJ::set_rel($u->{'userid'}, $tp->{'posterid'}, 'B');
+            $and .= " Additionally, user <b>$tp->{'userpost'}</b> has been banned from commenting in your journal.";
+        }
 
- $ret .= "<?h1 Deleted h1?><?p The comment has been deleted. $and p?>";
- return $ret;
+        return "<?h1 Deleted h1?><?p The comment has been deleted.$and p?>";
+    }
 
+    ### show edit form
+
+    my $ret;
+    $ret .= "<?h1 Delete this comment? h1?>";
+    $ret .= "<?p Are you sure you want to delete this comment? p?>\n\n";
+    $ret .= "<form method='post' action='delcomment.bml?";
+    $ret .= "journal=$u->{'user'}&id=$GET{'id'}'>\n";
+
+    $ret .= "<p align='center'>" . LJ::html_submit('confirm', "Yes, delete it!") . "</p>\n";
+
+    if ($can_ban) {
+        $ret .= "<p>" . LJ::html_check({ 'type' => 'check', 'name' => 'ban', 'id' => 'ban' });
+        $ret .= "<label for='ban'>And also ban user <b>$tp->{'userpost'}</b> from ever commenting again.</label></p>";
+    }
+
+    if ($can_manage) {
+        $ret .= "<p><b>Note:</b> From the <a href='/editinfo.bml?authas=$u->{'user'}'>Edit Personal Info & Settings</a> page you can choose whether to allow <i>all</i>, <i>registered users</i>, or <i>friends only</i> to post.</p>";
+    }
+
+    $ret .= "</form>\n";
+
+    return $ret;
+}
 _code?>
 
 <=body
