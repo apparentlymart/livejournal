@@ -13,10 +13,11 @@ exit 1 unless GetOptions('help' => \$help,
 			 'sync' => \$sync);
 
 if ($help) {
-    die "Usage: cvsreport.pl \n" .
+    die "Usage: cvsreport.pl [opts] [files]\n" .
 	"    --help          Get this help\n" .
 	"    --sync          Put files where they need to go.\n" .
-	    "    --full          Show main files not in a CVS repository\n";
+	"                    All files, unless you specify which ones.\n".
+	"    --full          Show main files not in a CVS repository\n";
 }
 
 unless (-d $ENV{'LJHOME'}) { 
@@ -37,13 +38,15 @@ scan_main();
 # checks to see if new CVS files aren't in the main tree yet
 scan_cvs();
 
-foreach my $file (sort keys %status)
+my @files = scalar(@ARGV) ? @ARGV : sort keys %status;
+foreach my $file (@files) 
 {
     my $status = $status{$file};
     if ($status eq "main -> ??") { 
 	next if ($sync);
 	next unless ($full);
     }
+    $status ||= "-"x20;
     printf "%-20s %s\n", $status, $file;
     if ($sync) {
 	if ($status eq "main <- cvs") {
@@ -54,9 +57,7 @@ foreach my $file (sort keys %status)
 	    unless (copy("$maind/$file", "$cvslocal/$file")) { print "   Error: $!\n"; }
 	} elsif ($status eq "main -> cvs") {
 	    unless (copy("$maind/$file", "$cvs/$file")) { print "   Error: $!\n"; }
-	} else {
-	    print "   unknown sync action.\n";
-	}
+	} 
     }
 }
 
