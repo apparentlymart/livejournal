@@ -593,6 +593,11 @@ head<=
         var remotelogin = document.getElementById('remotelogin');
         if (! remotelogin) return false;
         remotelogin.onclick = altlogin;
+        f = document.updateForm;
+        if (! f) return false;
+        var userbox = f.user;
+        if (! userbox) return false;
+        if (userbox.value) altlogin();
         var simplemsg = document.getElementById('simplemsg');
         if (! simplemsg) return false;
         simplemsg.onclick = showfull;
