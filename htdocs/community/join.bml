@@ -31,9 +31,12 @@
      return;
  }
 
+ # get the community's owner username for nice links.
+ my $cowner = LJ::get_username($dbs, $ci->{'ownerid'});
+
  ### can members join this community even?
  unless ($ci->{'membership'} eq "open") {
-     $body .= "(=H1 Sorry... H1=)(=P This community is closed.  If you're interested in joining it, please contact <A HREF=\"/userinfo.bml?userid=$ci->{'ownerid'}\">its maintainer</A>. P=)";
+     $body .= "(=H1 Sorry... H1=)(=P This community is closed.  If you're interested in joining it, please contact <A HREF=\"/userinfo.bml?user=$cowner\">its maintainer</A>. P=)";
      return;
  }
 
@@ -70,7 +73,7 @@
 	 $dbh->do("INSERT INTO logaccess (ownerid, posterid) VALUES ($cuserid, $remote->{'userid'})");
 	 $body .= "(=P This community allows posting by all members, so you now have access to post in it.  If you already have a LiveJournal client open on your computer you'll have to log out and log back in for this journal to show up in your list of journals you can post to. P=)";
      } else {
-	 $body .= "(=P Although you are now listed as a member, this community only allows posting by authorized users.  Contact <A HREF=\"/userinfo.bml?userid=$ci->{'ownerid'}\">the community maintainer</A> if you desire posting access. P=)";
+	 $body .= "(=P Although you are now listed as a member, this community only allows posting by authorized users.  Contact <A HREF=\"/userinfo.bml?user=$cowner\">the community maintainer</A> if you desire posting access. P=)";
      }
      return;
      

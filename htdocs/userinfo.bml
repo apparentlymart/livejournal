@@ -157,13 +157,20 @@
  } else {
      $body .= "(=H1 Community Information H1=)(=P Below is information about the \"$u->{'name'}\" community on LiveJournal. ";
      if ($ci) {
+         my $cowner;
+         if ($ci->{'membership'} eq "closed" || 
+             $ci->{'postlevel'} eq "select")  {
+             # fetch the community owner's username
+             $cowner = LJ::get_username($dbs, $ci->{'ownerid'});
+         }
+     
 	 if ($ci->{'membership'} eq "open") {
 	     $body .= "This an open-membership community.  To join, <A HREF=\"/community/join.bml?cuserid=$u->{'userid'}\">click here</A>.\n";
 	     if ($ci->{'postlevel'} eq "select") {
-		 $body .= " Although it's open, the setting for this community is that only select users are able to post to it.  To request access, contact <A HREF=\"userinfo.bml?userid=$ci->{'ownerid'}\">its maintainer</A>.";
+		 $body .= " Although it's open, the setting for this community is that only select users are able to post to it.  To request access, contact <A HREF=\"userinfo.bml?user=$cowner\">its maintainer</A>.";
 	     }
 	 } elsif ($ci->{'membership'} eq "closed") {
-	     $body .= "This is a closed community.  To become a member you must contact <A HREF=\"userinfo.bml?userid=$ci->{'ownerid'}\">its maintainer</A>.";
+	     $body .= "This is a closed community.  To become a member you must contact <A HREF=\"userinfo.bml?user=$cowner\">its maintainer</A>.";
 	 }
 	$body .= " You may <A HREF=\"/community/leave.bml?cuserid=$u->{'userid'}\">leave the community</A> at any time.";
      }
