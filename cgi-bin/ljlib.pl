@@ -7452,7 +7452,10 @@ sub add_friend
         ($userid, "INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES $bind", @vals);
 
     # delete friend-of memcache keys for anyone who was added
-    LJ::memcache_kill($_, 'friendofs') foreach @add_ids;
+    foreach (@add_ids) {
+        LJ::MemCache::delete([ $userid, "frgmask:$userid:$_" ]);
+        LJ::memcache_kill($_, 'friendofs');
+    }
 
     return $res;
 }
