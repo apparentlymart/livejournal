@@ -2573,7 +2573,7 @@ Sincerely,
 
 /register.bml.error.usernotfound=User not found.
 
-/register.bml.new.body=Thanks!  Your email address has now been verified.  From here, you may be interested in doing the following things:
+/register.bml.new.bodyuser=Thanks!  The email address for [[user]] has now been verified.  From here, you may be interested in doing the following things:
 
 /register.bml.new.editinfo=<a href="/editinfo.bml">Edit Information</a> -- Fill out your user profile and set various settings.
 

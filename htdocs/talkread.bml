@@ -12,6 +12,39 @@ body<=
  my $head = $_[1] ? \$_[1]->{'head'} : \$r_head;
  my $title = $_[1] ? \$_[1]->{'title'} : \$r_title;
 
+ $$head .= "
+    <script language='Javascript' type='text/javascript'>
+    <!--
+    var lastDiv;
+
+    function quickreply(dtid, pid, depth) {
+        if (! document.getElementById) return true;
+
+        var old_div = document.getElementById(lastDiv);
+        if (old_div) {
+            old_div.innerHTML = '';
+        }
+        lastDiv = dtid;
+
+        var my_div = document.getElementById(dtid);
+        var qr_div = document.getElementById('qr');
+
+        var qr_itemid = document.getElementById('itemid');
+        qr_itemid.value = dtid;
+        var qr_pid = document.getElementById('parenttalkid');
+        qr_pid.value = pid;
+        var qr_rto = document.getElementById('replyto');
+        qr_rto.value = pid;
+
+        var px = (depth+1+(depth/7)) * 20;
+        my_div.style.marginLeft = px+'px';
+        my_div.innerHTML = qr_div.innerHTML;
+
+        return false;
+    }
+    //  -->
+    </script>\n";
+
  return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
  my $pics = LJ::Talk::get_subjecticons();
@@ -296,6 +329,57 @@ body<=
  }
  ####### end navcrap
 
+ if ($remote) {
+
+     $ret .= "<div id='qr' name='qr' style='display:none'>";
+
+#     $ret .= "<form method='post' action='http://david.office.danga.com/talkpost_do.bml' id='postform'>";
+     $ret .= "<input type='hidden' name='replyto' id='replyto' value='' />";
+     $ret .= "<input type='hidden' name='parenttalkid' id='parenttalkid' value='' />";
+     $ret .= "<input type='hidden' name='itemid' id='itemid' value='' />";
+     $ret .= "<input type='hidden' name='journal' value='$u->{'user'}' />";
+     $ret .= "<input type='hidden' name='usertype' value='cookieuser' />";
+
+     $ret .= "<table style='border: 1px solid black'>";
+     $ret .= "<tr valign='center'>";
+     $ret .= "<td align='right'>From:</td>";
+     $ret .= "<td align='left'><b>Logged in user:</b> <i>$remote->{'user'}</i></td></tr>";
+
+     $ret .= "<tr valign='top'><td align='right'>Subject:</td><td colspan='4'>";
+     $ret .= "<input class='textbox' type='text' size='50' maxlength='100' name='subject' value='' />";
+     $ret .= "<div id='ljnohtmlsubj' class='ljdeem'>No HTML allowed in subject</div></td></tr>";
+     $ret .= "<tr><td align='right'>&nbsp;</td><td colspan='4'>Don't auto-format: <input type='checkbox' value='1' name='prop_opt_preformatted' /></td></tr>";
+     $ret .= "<tr valign='top'><td align='right'>Message:</td><td colspan='4' style='width: 90%'>";
+     $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext' style='width: 100%'></textarea>";
+     $ret .= "<br />";
+
+     $ret .= "
+                <script language='JavaScript' type='text/javascript'>
+                <!--
+                function checkLength() {
+                    if (!document.getElementById) return true;
+                    var textbox = document.getElementById('commenttext');
+                    if (!textbox) return true;
+                    if (textbox.value.length > 4300) {
+                        alert('Sorry, but your comment of ' + textbox.value.length + ' characters exceeds the maximum character length of 4300.  Please try shortening it and then post again.');
+                        return false;
+                    }
+                    return true;
+                }
+                // -->
+                </script>
+              ";
+     $ret .= "<input type='submit' name='submitpost' value='Post Comment' onclick='return checkLength() && sendForm(\"postform\", \"username\")' />";
+     $ret .= "&nbsp;<input type='submit' name='submitpreview' value='Preview' />";
+
+     $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>Check spelling during preview</label>";
+     $ret .= "</td></tr></table>";
+
+     $ret .= "<script type='text/javascript' language='JavaScript' src='/js/talkpost.js'></script>";
+#    $ret .= "</form>";
+     $ret .= "</div>";
+ }
+
  my $recurse_post = sub
  {
      my ($self_sub, $post, $opts) = @_;
@@ -401,7 +485,12 @@ body<=
              $ret .= "<p style='margin: 0.7em 0 0.2em 0'><font size='-2'>";
              my $replyurl = LJ::Talk::talkargs($talkurl, "replyto=$dtid", $stylemine);
              $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
-             
+
+             if ($remote) {
+                 my $pid = int($dtid / 256);
+                 $ret .= "(<a href='javascript:void(0)' onclick='quickreply($dtid, $pid, $opts->{'depth'})'>Quick reply</a>) ";
+             }
+
              if ($post->{'parenttalkid'} != 0) {
                  my $dpid = $post->{'parenttalkid'} * 256 + $init->{'anum'};
                  $ret .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine) . "#t$dpid'>$T{'parent'}</a>) ";
@@ -411,6 +500,13 @@ body<=
                  $ret .= "(<a href='$url'>$T{'thread'}</a>)";
              }
              $ret .= "</font></p>";
+             $ret .= "</td></tr>";
+
+             if ($remote) {
+                 $ret .= "<tr><td colspan='2'><div name='$dtid' id='$dtid' ></div>";
+                 $ret .= "</td></tr>";
+             }
+
              $ret .= "</td></tr></table>\n";  # close colored table
          } else {
              # link to message
@@ -443,7 +539,7 @@ body<=
 
      if (@comments > 0)
      {
-         $ret .= "<form style='display: inline' method='post' action='/talkmulti.bml' name='multiform'>";
+         $ret .= "<form style='display: inline' method='post' action='/dev/crap.bml' name='multiform'>";
          $ret .= LJ::html_hidden("ditemid", $ditemid);
          $ret .= LJ::html_hidden("journal", $u->{'user'});
 

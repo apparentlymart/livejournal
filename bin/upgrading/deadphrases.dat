@@ -81,6 +81,8 @@ general /modify_do.bml.title
 
 general /multisearch.bml.region.text
 
+general /register.bml.new.body
+
 general /setlang.bml.select
 general /setlang.bml.switch
 general /setlang.bml.title

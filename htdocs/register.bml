@@ -52,7 +52,7 @@ body<=
      if ($u->{'status'} eq "T") {
          $ret .= "<?h1 $ML{'.trans.header'} h1?><?p $ML{'.trans.body'} p?>";
      } else {
-         $ret .= "<?h1 $ML{'.new.header'} h1?><?p $ML{'.new.body'} p?>";
+         $ret .= "<?h1 $ML{'.new.header'} h1?><?p " . BML::ml('.new.bodyuser', {'user'=>LJ::ljuser($u)}) . " p?>";
          $ret .= "<ul>";
          $ret .= "<li>$ML{'.new.login'}</li>";
          $ret .= "<li>$ML{'.new.editinfo'}</li>";
