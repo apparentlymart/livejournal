@@ -23,6 +23,11 @@ BEGIN {
 
 my $DELAY = $LJ::QBUFFERD_DELAY || 15;
 
+# HACK: there's a memory leak somewhere in the code path that flushes 'dirty' jobs (SOAP?  LWP?)
+#       that causes those processes to grow out of control.  So we respawn them after a certain
+#       number of jobs have been processed.
+my $DIRTY_MAX = 250;
+
 my $pidfile = $LJ::QBUFFERD_PIDFILE || "$ENV{'LJHOME'}/var/qbufferd.pid";
 my $pid;
 if (-e $pidfile) {
@@ -208,6 +213,14 @@ while (LJ::start_request())
             }
             LJ::cmd_buffer_flush($dbh, $db, $cmd);
             print "  Finished $cmd.\n" if $opt_debug;
+
+            # kill off children handling "dirty" after $dirty_max "dirty" jobs are handled
+            if ($cmd eq "dirty" && $started{dirty} >= $DIRTY_MAX) {
+                # trigger reload of current child process
+                print "Child suicide.  Too many dirty jobs (ct $started{dirty} >= max $DIRTY_MAX)\n" if $opt_debug;
+                exit 0;
+            }
+
         }
     }
 
