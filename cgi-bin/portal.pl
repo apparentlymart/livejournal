@@ -730,7 +730,7 @@ $box{'lastnview'} =
             LJ::CleanHTML::clean_event(\$event, 
                 { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'} }) if ($event);
             
-            my $linkurl = "<a href=\"/talkread.bml?journal=$user&amp;item=" . ($itemid * 256 + $i->{'anum'}) . "\"><b>(Link)</b></a>";
+            my $linkurl = "<a href='" . LJ::item_link($u, $itemid, $i->{'anum'}) . "'><b>(Link)</b></a>";
             if ($box->{'args'}->{'showtext'}) {
                 $$bd .= "<b>$subject</b> $linkurl<br />";
                 $$bd .= "$event<br />";
