@@ -116,7 +116,17 @@ body<=
  $ret .= "<tr><td align=right><b>Time posted:</b></td><td>$timecreate ($age)</td></tr>\n";
  my $state = $sp->{'state'};
  if ($state eq "open") { 
-     $state = "<B><FONT COLOR=#FF0000>open</FONT></B>"; 
+     # check if it's still open or needing help or what
+     if ($sp->{'timelasthelp'} > ($sp->{'timetouched'}+5)) {
+         # open, answered
+	 $state = '<B><FONT COLOR=#FF0000>answered</FONT></B> (awaiting close)';
+     } elsif ($sp->{'timelasthelp'} && $sp->{'timetouched'} > $sp->{'timelasthelp'}+5) {
+         # open, still needs help
+	 $state = '<B><FONT COLOR=#FF0000>answered</FONT></B> (<B>still needs help</B>)';
+     } else {
+         # default
+	 $state = "<B><FONT COLOR=#FF0000>open</FONT></B>"; 
+     }
  }
  if ($state eq "closed" && $winner && LJ::Support::can_see_helper($dbh, $sp, $remote)) {
      my $s = $winner->{'points'} > 1 ? "s" : "";
