@@ -821,21 +821,26 @@ sub create_account
 }
 
 # returns true if user B is a friend of user A (or if A == B)
+# arguments can be user objects (hashrefs) or userids (scalars)
 sub is_friend
 {
     my $dbarg = shift;
     my $ua = shift;
     my $ub = shift;
     
+    my $uaid = (ref $ua ? $ua->{'userid'} : $ua)+0;
+    my $ubid = (ref $ub ? $ub->{'userid'} : $ub)+0;
+
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 		
-    return 0 unless ($ua->{'userid'});
-    return 0 unless ($ub->{'userid'});
-    return 1 if ($ua->{'userid'} == $ub->{'userid'});
+    return 0 unless $uaid;
+    return 0 unless $ubid;
+    return 1 if ($uaid == $ubid);
 
-    my $sth = $dbr->prepare("SELECT COUNT(*) FROM friends WHERE userid=$ua->{'userid'} AND friendid=$ub->{'userid'}");
+    my $sth = $dbr->prepare("SELECT COUNT(*) FROM friends WHERE ".
+			    "userid=$uaid AND friendid=$ubid");
     $sth->execute;
     my ($is_friend) = $sth->fetchrow_array;
     $sth->finish;

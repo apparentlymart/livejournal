@@ -4,7 +4,7 @@
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
 
  $title = "";
  $body = "";
@@ -15,7 +15,7 @@
      $user = $remote->{'user'};
  }
 
- my $userid = &LJ::get_userid($dbs, $user);
+ my $userid = LJ::get_userid($dbs, $user);
  unless ($userid) {
      $title = "Error";
      $body = "Missing or invalid username.";
