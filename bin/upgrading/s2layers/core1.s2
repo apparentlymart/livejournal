@@ -324,6 +324,9 @@ class FriendsPage extends RecentPage
 {
     var Friend{} friends
     "A mapping from friend username to color association information.  There will only be keys for friends whose entries are in the entries array.";
+
+    var string friends_title
+    "A user-selected title for their friends page.";
 }
 
 class DayPage extends Page 
