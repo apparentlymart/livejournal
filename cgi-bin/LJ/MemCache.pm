@@ -18,7 +18,6 @@ package LJ::MemCache;
 
 
 my $memc;  # memcache object
-my $namespace = 'LJ';
 
 sub init {
     $memc = new Cache::Memcached;
@@ -41,20 +40,20 @@ sub disconnect_all    { $memc->disconnect_all();    }
 
 sub delete {
     # use delete time if specified
-    return $memc->delete(key_namespace(@_)) if defined $_[1];
+    return $memc->delete(@_) if defined $_[1];
 
     # else default to 4 seconds:
     # version 1.1.7 vs. 1.1.6
-    $memc->delete(key_namespace(@_), 4) || $memc->delete(key_namespace(@_));
+    $memc->delete(@_, 4) || $memc->delete(@_);
 }
 
-sub add       { $memc->add(key_namespace(@_));       }
-sub replace   { $memc->replace(key_namespace(@_));   }
-sub set       { $memc->set(key_namespace(@_));       }
-sub get       { $memc->get(key_namespace(@_));       }
-sub get_multi { $memc->get_multi( map { key_namespace($_) } @_); }
-sub incr      { $memc->incr(key_namespace(@_));      }
-sub decr      { $memc->decr(key_namespace(@_));      }
+sub add       { $memc->add(@_);       }
+sub replace   { $memc->replace(@_);   }
+sub set       { $memc->set(@_);       }
+sub get       { $memc->get(@_);       }
+sub get_multi { $memc->get_multi(@_); }
+sub incr      { $memc->incr(@_);      }
+sub decr      { $memc->decr(@_);      }
 
 sub _get_sock { $memc->get_sock(@_);   }
 
@@ -85,16 +84,6 @@ sub hash_to_array {
         $ar->[$i] = $hash->{$fmt->[$i]};
     }
     return $ar;
-}
-
-# Tag all keys with a unique namespace value.
-# This allows the sharing of a memcache process across
-# applications, without needing to worry about keyname
-# collisions.
-sub key_namespace {
-    @val = @_;
-    $val[0] = $namespace . ':' . $val[0];
-    return @val;
 }
 
 1;
