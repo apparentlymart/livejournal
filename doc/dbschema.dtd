@@ -1,0 +1,35 @@
+<!-- DTD for LiveJournal database schema documentation in XML -->
+<!-- draft version created by Tribeless Nomad (AJW), April 30, 2001 -->
+<!-- Send questions and comments to: tribelessnomad (at) att.net -->
+
+<!-- Revision history:
+     1.0.2   2001 May  1   AJW   modified dbtbl, dbcol, dbkey, dbtblref, dbcolref
+     1.0.1   2001 May  1   AJW   added dbkey, modified dbtbl, dbcol
+     1.0.0   2001 Apr 30   AJW   released first draft version
+-->
+
+<!-- Documents are expected to use 'dbschema' as the root element. -->
+
+<!ELEMENT dbschema  (dbtbl+)>
+
+<!ELEMENT dbtbl  (name, description?, dbcol+, dbkey*, data?)>
+<!ATTLIST dbtbl  id ID #IMPLIED  public_browsable (0|1) #IMPLIED>
+
+<!ELEMENT dbcol  (name, description?)>
+<!ATTLIST dbcol  type CDATA #REQUIRED  size CDATA #IMPLIED  required (true|false) #REQUIRED  default CDATA #IMPLIED>
+
+<!ELEMENT dbkey  EMPTY>
+<!ATTLIST dbkey  name NMTOKEN #IMPLIED  type (INDEX|UNIQUE|PRIMARY) #REQUIRED  colids IDREFS #REQUIRED>
+
+<!ELEMENT data  ANY>
+
+<!ELEMENT name  (#PCDATA)>
+
+<!ELEMENT description  (#PCDATA | dbtblref | dbcolref)*>
+
+<!ELEMENT dbtblref  (#PCDATA)>
+<!ATTLIST dbtblref  tblid IDREF #REQUIRED>
+
+<!ELEMENT dbcolref  (#PCDATA)>
+<!ATTLIST dbcolref  colid IDREF #REQUIRED>
+
