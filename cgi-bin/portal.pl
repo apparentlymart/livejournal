@@ -982,7 +982,7 @@ function settime(f) {
 	}
 
 	now = new Date();
-	// javascript's getYear method is really fucked up:
+	// javascript getYear method is really fucked up:
 	f.year.value = now.getYear() < 1900 ? now.getYear() + 1900 : now.getYear();
 	f.mon.value = twodigit(now.getMonth()+1);
 	f.day.value = twodigit(now.getDate());
@@ -1038,12 +1038,14 @@ $box{'randuser'} =
 	if ($size eq "small" && $count > 5) { $count = 5; }
 	if ($size eq "large" && $count > 10) { $count = 10; }
 
-	my $sth;
-	$sth = $dbh->prepare("SELECT userid FROM randomuserset ORDER BY RAND() LIMIT $count");
-	$sth->execute;
-	my @ruserid = ();
-	push @ruserid, $_ while ($_ = $sth->fetchrow_array);
-	unless (@ruserid) {
+	my $max = $dbh->selectrow_array("SELECT statval FROM stats WHERE statcat='userinfo' AND statkey='randomcount'");
+	$count = $max if ($count > $max);
+	my %ruserid;
+	while (keys %ruserid < $count) {
+	    $ruserid{int(rand($max))+1} = 1;
+	}
+
+	unless ($count) {
 	    box_start($b, $box, {'title' => "Random User",
 				 'align' => "center",
 			     });
@@ -1052,12 +1054,12 @@ $box{'randuser'} =
 	    return;
 	}
 
-	box_start($b, $box, {'title' => "Random User" . (@ruserid > 1 ? "s" : ""),
+	box_start($b, $box, {'title' => "Random User" . (keys %ruserid > 1 ? "s" : ""),
 			     'align' => "center",
 			 });
 
-	my $ruser = $dbh->selectall_hashref("SELECT user, name, defaultpicid FROM user WHERE userid IN (" . join(",",@ruserid) . ")");
-	
+	my $ruser = $dbh->selectall_hashref("SELECT user, name, defaultpicid FROM user WHERE userid IN (" . join(",", keys %ruserid) . ")");
+
 	my %pic;
 	unless ($box->{'args'}->{'hidepic'}) {
 	    LJ::load_userpics($dbh, \%pic, [ map { $_->{'defaultpicid'} } @$ruser ]);
