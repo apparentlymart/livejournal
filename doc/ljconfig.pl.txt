@@ -14,7 +14,14 @@
 {
     package LJ;
 
+    $HOME = $ENV{'LJHOME'};
+    $HTDOCS = "$HOME/htdocs";
+    $BIN = "$HOME/bin";
+    $TEMP = "$HOME/temp";
+    $VAR = "$HOME/var";
+
     # human readable name of this site
+    # CHANGE THIS
     $SITENAME = "Some LiveJournal Site";
     
     ## turn $SERVER_DOWN on while you do any maintenance
@@ -23,7 +30,8 @@
     $SERVER_DOWN_MESSAGE = "$SITENAME is down right now while we upgrade.  It should be up in a few minutes.";
 
     # the base domain of your site.
-    $DOMAIN = "lj.com";
+    # CHANGE THIS.
+    $DOMAIN = "ljsite.com"; 
 
     # regexp to match domains that could load the site.  this default should be fine.
     $DOMAIN_RE = "(www\.)?\Q$DOMAIN\E(:\\d+)?";
@@ -44,7 +52,9 @@
     # $SPELLER = "/usr/local/bin/aspell pipe --sug-mode=fast --ignore-case";
 
     # where we set the cookies (note the period before the domain)
-    $COOKIE_DOMAIN = ".$DOMAIN";
+    # can be one value or an array ref (to accomodate certain old
+    # broken browsers)
+    $COOKIE_DOMAIN = ["", ".$DOMAIN"]; 
     $COOKIE_PATH   = "/";
 
     # email addresses
@@ -72,19 +82,33 @@
     ## Directory optimizations
     $DIR_DB = "";   # by default, hit the main database (bad for big sites!)
 
+    # DB role to use when connecting to directory DB   
+    $DIR_DB_HOST = "master";
+
     # database info.  only the master is necessary.  
+    # you should probably CHANGE THIS
     %DBINFO = (
-	       'master' => {
-		   'host' => '127.0.0.1',
-		   'user' => 'lj',
-		   'pass' => 'ljpass',
-	       },
-	      #'slave1' => {
-	      #	   'host' => '10.0.0.1',
-	      #           'user' => 'ljro',
-	      #	   'pass' => 'ljropass',
-	      #},
-	       );
+           'master' => {
+               'host' => "localhost",
+               'port' => 3306,
+               'user' => 'lj',
+               'pass' => 'ljpass',
+           },
+           'slavecount' => 0,
+           # example of a TCP-based DB connection
+           #'slave1' => {
+           #    'host' => "somehost",
+           #    'port' => 1234,
+           #    'user' => 'username',
+           #    'pass' => 'password',
+           #},
+           # example of a UNIX domain-socket DB connection
+           #'slave2' => {
+           #    'sock' => "$LJ::HOME/var/mysqld.sock",
+           #    'user' => 'username',
+           #    'pass' => 'password',
+           #},
+           );
 
     # list of regular expressions matching usernames that people can't have.
     @PROTECTED_USERNAMES = ("^ex_", "^lj_");
@@ -113,11 +137,9 @@
     # turns these from 0 to 1 to disable parts of the site that are
     # CPU & database intensive.
     %DISABLED = (
-		 'interests-findsim' => 0,
-		 'directory' => 0,
-		 );
-
-    
+         'interests-findsim' => 0,
+         'directory' => 0,
+         );
 
     # require new free acounts to be referred by an existing user?
     # NOTE: new and mostly ljcom-specific.  some features
@@ -127,75 +149,81 @@
     # if you define these, little help bubbles appear next to common
     # widgets to the URL you define:
     %HELPURL = (
-		#"accounttype" =>
-		#"",
-		#"security" => 
-		#"http://www.livejournal.com/support/faqbrowse.bml?faqid=24",
-		#"noautoformat" => 
-		#"http://www.livejournal.com/support/faqbrowse.bml?faqid=26",
-		#"userpics" =>
-		#"http://www.livejournal.com/support/faqbrowse.bml?faqid=46",
-		#"iplogging" =>
-		#"http://www.livejournal.com/support/faqbrowse.bml?faqid=66",
-		);
+        #"accounttype" =>
+        #"",
+        #"security" => 
+        #"http://www.livejournal.com/support/faqbrowse.bml?faqid=24",
+        #"noautoformat" => 
+        #"http://www.livejournal.com/support/faqbrowse.bml?faqid=26",
+        #"userpics" =>
+        #"http://www.livejournal.com/support/faqbrowse.bml?faqid=46",
+        #"iplogging" =>
+        #"http://www.livejournal.com/support/faqbrowse.bml?faqid=66",
+        );
 
     # USER CAPABILITIES CLASSES:
     {
-	# default capability class mask for new users: 
-	# (16 bit unsigned int ... each bit is capability class flag)
-	$NEWUSER_CAPS = 2;
+    # default capability class mask for new users: 
+    # (16 bit unsigned int ... each bit is capability class flag)
+    $NEWUSER_CAPS = 2;
 
-	# default capability limits, used only when no other
-	# class-specific limit below matches.
-	%CAP_DEF = (
-		    'maxfriends' => 5,
-		    'userpics' => 1,
-		    'checkfriends_interval' => 60,
-		    'checkfriends' => 1,
-		    'styles' => 0,
-		    'todomax' => 25,
-		    'todosec' => 0,
-		    'friendsviewupdate' => 30,
-		    );
+    # default capability limits, used only when no other
+    # class-specific limit below matches.
+    %CAP_DEF = (
+            'maxfriends' => 5,
+            'userpics' => 1,
+            'checkfriends_interval' => 60,
+            'checkfriends' => 1,
+            'styles' => 0,
+            'todomax' => 25,
+            'todosec' => 0,
+            'friendsviewupdate' => 30,
+            );
 
-	# capability class limits.
-	# keys are bit numbers, from 0 .. 15.  values are hashrefs
-	# with limit names and values (see doc/capabilities.txt)
-	%CAP = (
-		## 0x01 -- new user
-		'0' => { 
-		    'userpics' => 1,
-		},
-		## 0x02 -- free user 
-		'1' => {
-		    'userpics' => 3,
-		},
-		## 0x04 -- early adopter
-		'2' => {
-		    'userpics' => 5,
-		    'styles' => 1,
-		},
-		## 0x08 -- paid user 
-		'3' => {
-		    'styles' => 1,
-		    'makepoll' => 1,
-		    'userpics' => 10,
-		    'paid' => 1,
-		    'useremail' => 1,
-		    'textmessaging' => 1,
-		},
-		## 0x10 -- permanent account
-		'4' => {
-		    'paid' => 1,
-		    'useremail' => 1,
-		},
-		);
+    # capability class limits.
+    # keys are bit numbers, from 0 .. 15.  values are hashrefs
+    # with limit names and values (see doc/capabilities.txt)
+    %CAP = (
+        ## 0x01 -- new user
+        '0' => { 
+            'userpics' => 1,
+        },
+        ## 0x02 -- free user 
+        '1' => {
+            'userpics' => 3,
+        },
+        ## 0x04 -- early adopter
+        '2' => {
+            'userpics' => 5,
+            'styles' => 1,
+        },
+        ## 0x08 -- paid user 
+        '3' => {
+            'styles' => 1,
+            'makepoll' => 1,
+            'userpics' => 10,
+            'paid' => 1,
+            'useremail' => 1,
+            'textmessaging' => 1,
+        },
+        ## 0x10 -- permanent account
+        '4' => {
+            'paid' => 1,
+            'useremail' => 1,
+        },
+        );
     }
 
     # keep this next line.  it lets you upgrade LiveJournal without
     # having to change your config file.  if there is a new required
     # configuration option, the following line will set it:
     require "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
+    
+    # if there is a local configuration file, read it.
+    if (-e "$HOME/cgi-bin/ljconfig-local.pl") {
+        do "$HOME/cgi-bin/ljconfig-local.pl";
+    }
+    
 }
 
 1;  # return true
