@@ -95,7 +95,7 @@ CHOICES<=
 
 PAGE<=
 {F}<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<HTML>(=LOAD_PAGE_INFO=)
+<HTML><?load_page_info?>
 <HEAD>
 <TITLE>%%TITLE%%</TITLE>
 </HEAD>
@@ -109,33 +109,33 @@ PAGE<=
       <TR>
         <TD WIDTH=3>&nbsp;</TD>
         <TD HEIGHT=53 WIDTH=406 VALIGN=BOTTOM>
-(=_CODE
+<?_code
 $is_home = (BML::get_uri() =~ m!^/(index\.bml)?!);
 if (0 && $is_home)
 {
 	return '<IMG SRC="/img/bluewhite/title.gif" WIDTH=600 HEIGHT=53><!-- ';
 }
 return "";
-_CODE=)
+_code?>
 
 <FONT SIZE=6 COLOR="#000a3f" FACE="Arial, Helvetica"><B>%%TITLE%%</B></FONT>
 
-(=_CODE
+<?_code
 if (0 && $is_home)
 {
 	return ' -->';
 }
 return "";
-_CODE=)
+_code?>
 
       </TD>
       <TD VALIGN=TOP ALIGN=RIGHT>
-(=_CODE
+<?_code
  unless ($is_home) {
      return "<A HREF=\"/\"><IMG SRC=\"/img/bluewhite/home.gif\" WIDTH=35 HEIGHT=36 BORDER=0></A>&nbsp;";
  }
  return "";
-_CODE=)
+_code?>
       </TD>
     </TR>
     </TABLE>
@@ -151,7 +151,7 @@ _CODE=)
 <TR><TD>
 
 <FONT FACE="Arial,Helvetica" SIZE=-1>
-(=_CODE
+<?_code
 
  $ret = "";
 
@@ -197,7 +197,7 @@ _CODE=)
 
  return $ret;
 
-_CODE=)
+_code?>
 </FONT>
 
 </TD></TR></TABLE>

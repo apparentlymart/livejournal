@@ -99,7 +99,7 @@ PAGE<=
         <TD WIDTH="520"><IMG SRC="/img/bluedot.gif" ALT="" WIDTH="520" HEIGHT="4" HSPACE="0" VSPACE="0" BORDER="0"><BR>
             <TABLE WIDTH="520" CELLSPACING="0" CELLPADDING="0" BORDER="0">
                  <TR ALIGN=CENTER VALIGN=MIDDLE>
-(=_CODE
+<?_code
 	@headers = (
 		{ width => 55, href => "/", text => "Home" },
 		{ width => 50, href => "/news.bml", text => "News" },
@@ -124,12 +124,12 @@ PAGE<=
 		}
 	}
 	return $ret;
-_CODE=)
+_code?>
                  </TR>
 	<TR>
 <TD COLSPAN=7 ALIGN=RIGHT>
 <FONT SIZE=2 FACE="Verdana,Arial">
-(=_CODE
+<?_code
  if (BML::get_uri() =~ /^\/log(in|out)/) {
      return "";
  }
@@ -140,7 +140,7 @@ _CODE=)
  } else {
      return "<B>Not Logged in.</B> <A HREF=\"/login.bml\">Login</A>";
  }
-_CODE=)
+_code?>
 </FONT>
 </TD>
 </TR>
