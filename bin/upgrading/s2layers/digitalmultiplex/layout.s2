@@ -774,11 +774,16 @@ a:visited {
     color: $*main_fgcolor;
     text-align: left;
 }
-#server_sig {
+#top_of_page, #server_sig{
     background-color: $*server_sig_bgcolor;
     border-top: 1px solid $*border_color;
     color: $*server_sig_fgcolor;
     padding: 5px;
+}
+#top_of_page {
+    width: $*sidebar_width;
+}
+#server_sig {
     text-align: right;
     width: $*page_content_width;
 }
@@ -815,7 +820,7 @@ function Page::print() {
     println "<title>$title</title>";
     println "</head><body>";
 
-    println """<div align="center">""";
+    println """<a name="top"></a><div align="center">""";
 
     println """<table cellspacing="0" cellpadding="0" id="top_title"><tr><td id="speck">&nbsp;</td><td id="journal_title"><h1>$title</h1></td></tr></table>""";
     println """<table cellspacing="0" cellpadding="0" id="main">""";
@@ -830,7 +835,7 @@ function Page::print() {
     $this->print_body();
     println "</td></tr></table></td></tr>";
 
-    println """<tr><td height="15" id="server_sig" colspan="2">""";
+    println """<tr><td height="15" id="top_of_page"><a href="#top">Top of Page</a></td><td id="server_sig">""";
     server_sig();
     println """</td></tr></table>""";
 
@@ -863,6 +868,19 @@ function RecentPage::print_body ()
             print_entry_full($this, $e, null Color, null Color, false);
         }
     }
+}
+
+function RecentPage::lay_sidebar_view_navigation() : string {
+    var string return;
+    if ($.nav.forward_url != "" or $.nav.backward_url != "") {
+        if ($.nav.forward_url != "") {
+            $return = $return + """<tr><td>$*text_sidebar_link_separator<a href="$.nav.forward_url">Next Page</a></td></tr>""";
+        }
+        if ($.nav.backward_url != "") {
+            $return = $return + """<tr><td>$*text_sidebar_link_separator<a href="$.nav.backward_url">Previous Page</a></td></tr>""";
+        }
+    }
+    return $return;
 }
 
 function RecentPage::lay_sidebar_view_summary() : string {
