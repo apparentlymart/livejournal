@@ -176,6 +176,8 @@ th.headerbar {
 td.metabar {
     text-align:          right;
     white-space:         nowrap;
+    background-color:    $*metabar_bgcolor;
+    color:               $*metabar_fgcolor;
 }
 .subject {
     color:               $*page_subtitle_color;
