@@ -572,8 +572,8 @@
 
     # optional LDAP support
     # required:
-    #    $LJ::LDAP_HOST = "ldap.sixapart.com";  # anything that the Net::LDAP constructor takes
-    #    $LJ::LDAP_BASE = "ou=People,dc=sixapart,dc=com";
+    #    $LJ::LDAP_HOST = "ldap.example.com";  # anything that the Net::LDAP constructor takes
+    #    $LJ::LDAP_BASE = "ou=People,dc=exampleorg,dc=com";
     # optional:
     #    $LJ::LDAP_UID = "uid";  # field containing the username.  defaults to "uid".
 
