@@ -296,7 +296,7 @@
          if defined $memory;
      LJ::Memories::create($memoryu, { 
                               journalid => $jid,
-                              ditemid => $itemid,
+                              ditemid => $ditemid,
                               des => $des,
                               security => $sec,
                           }, \@kwid);
