@@ -19,6 +19,8 @@
  my $dbcr;
 
  my $MAX_FRIENDS_SHOW = 500;
+ my $MAX_FRIENDOF_SHOW_SOFT = 150;
+ my $MAX_FRIENDOF_SHOW_HARD = 5000;
         
  my $remote = LJ::get_remote($dbr);
  if ($FORM{'user'} eq "" && !$remote) {
@@ -191,7 +193,7 @@
 
  my @friendsof;
  if ($friendsof{'load'}) {
-     my $limit = $MAX_FRIENDS_SHOW + 1;
+     my $limit = $FORM{'mode'} eq 'full' ? $MAX_FRIENDOF_SHOW_HARD : ($MAX_FRIENDOF_SHOW_SOFT + 1);
      my $sth = $dbr->prepare("SELECT u.userid, u.user, u.journaltype ".
                              "FROM friends f, user u WHERE f.userid=u.userid AND f.friendid=? ".
                              "AND u.statusvis='V' LIMIT $limit");
@@ -200,9 +202,10 @@
      @friendsof = sort { $a->{'user'} cmp $b->{'user'} } @friendsof;
      $friendsof{'count'} = scalar @friendsof;
      $friendsof{'loaded'} = 1;
-     if ($friendsof{'count'} > $MAX_FRIENDS_SHOW) {
+     if ($friendsof{'count'} > $MAX_FRIENDOF_SHOW_SOFT && $FORM{'mode'} ne 'full') {
          # note: not entirely accurate (includes suspended/deleted users) but close enough:
          $friendsof{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=$u->{'userid'}");
+         $friendsof{'clipped'} = 1;
      }
  }
 
@@ -567,18 +570,20 @@
                  $body  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
              }
              $body .= "</td>";
-             $body .= "<td colspan='2' valign='top'><b>" . scalar(@friend_of) . ":</b> ";
+             $body .= "<td colspan='2' valign='top'><b>" . $friendsof{'count'} . ":</b> ";
              my $count = 0;
              foreach (@friend_of) {
                  my $frlink = "<a href=\"/userinfo.bml?user=$_->{'user'}\">$_->{'user'}</a>";
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
-                 if (++$count == 150 && $FORM{'mode'} ne "full") {
-                     $body .= "<a href='" . BML::self_link({ 'mode' => 'full' }) . "'>...</a>";
+                 if (++$count == $MAX_FRIENDOF_SHOW_SOFT && $FORM{'mode'} ne "full") {
+                     $friendsof{'clipped'} = 1;
                      last;
                  }
              }
              chop $body; chop $body;
+             $body .= ", <a href='" . BML::self_link({ 'mode' => 'full' }) . "'>...</a>"
+                 if $friendsof{'clipped'};
              $body .= "</td></tr>\n";
          };
          if (@member_of) {
