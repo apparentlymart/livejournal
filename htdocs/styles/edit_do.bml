@@ -49,7 +49,7 @@ BODY<=
  my @style_transforms = (
                          { 'trans' => 'lc', des => "Lower case.", },
                          { 'trans' => 'uc', des => "Upper case.", },
-                         { 'trans' => 'ue', des => "URL-Encode.  Turn spaces to +, and all weird characters to <TT>%hh</TT>, the hex representation.  This is useful for builing data files to be used in Flash-4 movies.", },
+                         { 'trans' => 'ue', des => "URL-Encode.  Turn spaces to +, and all weird characters to <TT>%hh</TT>, the hex representation.  This is useful for building data files to be used in Flash-4 movies.", },
                          { 'trans' => 'xe', des => "XML-Encode.  Makes value acceptable for use in an XML attribute or element.  Escapes ampersands, angle brackets, and both types of quotes.  Does <I>not</I> however, escape ]]&gt;, so don't use CDATA elements." },
                          { 'trans' => 'color', des => "A weird transform that handles color codes.  See the color code table.", },
                          { 'trans' => 'cons', des => "Access site constants.  Currently supported are 'siteroot', 'sitename', and 'img' (the image root).  Example use: %%cons:img%%/icon_protected.gif", },

@@ -115,7 +115,7 @@
          $body .= "(=P You can <b><a href=\"utf8convert.bml\">return to the area list</a></b> or <b><a href=\"utf8convert.bml?mode=browse&area=$area&encid=$encid&forceview=1\">force the information to be shown anyway</a></b>. P=)";
      } else {
          $body .= "(=H1 Information needs to be converted H1=)";
-         $body .= "(=P Below your information is shown in the encoding <b>$LJ::CACHE_ENCNAMES{$encid}</b>. If it appears correct, press Save to convert and store it in the database. If some or all characters are displayed corrupted, you porbably should choose another encoding from the list below and press Browse to see it displayed in that encoding. P=)";
+         $body .= "(=P Below your information is shown in the encoding <b>$LJ::CACHE_ENCNAMES{$encid}</b>. If it appears correct, press Save to convert and store it in the database. If some or all characters are displayed corrupted, you probably should choose another encoding from the list below and press Browse to see it displayed in that encoding. P=)";
          $body .= "(=HR=)";
          $body .= $disp;
          $body .= "(=HR=)";

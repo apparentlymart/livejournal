@@ -396,7 +396,7 @@ BODY<=
              unless %LJ::CACHE_ENCNAMES;
          $ret .= "<tr><td width='50'>&nbsp;</td><td><p><b>Auto-translate older entries from: </b>";
          $ret .= LJ::html_select({'name'=>'oldenc', 'selected'=>$u->{'oldenc'}}, %LJ::CACHE_ENCNAMES);
-         $ret .= "</p><p>Use this option to tell LiveJournal which encoding to to assume for your entries and comments entered before the site was converted to Unicode. If you write in English, choose \"Western European\" here.</p></td></tr>";
+         $ret .= "</p><p>Use this option to tell LiveJournal which encoding to assume for your entries and comments entered before the site was converted to Unicode. If you write in English, choose \"Western European\" here.</p></td></tr>";
          $ret .= "<tr><td>&nbsp;</td><td><p><b>Translate email notifications into: </b>";
          $ret .= LJ::html_select({'name'=>'mailencoding', 'selected'=>$u->{'mailencoding'}}, %LJ::CACHE_ENCNAMES);
          $ret .= "</p><p>In case you chose to receive message board replies by email, and your email client doesn't handle Unicode (UTF-8) messages very well, use this option to specify a different encoding into which LiveJournal will automatically translate the text of comments sent to you.</p></td></tr>";
