@@ -1248,7 +1248,7 @@ sub htmlattr
     return "" if $value eq "";
     $name = lc($name);
     return "" if $name =~ /[^a-z]/;
-    return " $name=\"" . LJ::ehtml($value ). "\"";
+    return " $name=\"" . LJ::ehtml($value) . "\"";
 }
 
 sub rand

@@ -1053,46 +1053,38 @@ function lang_viewname(string viewid) [notags] : string
 function Image::as_string(string{} opts) [fixed] : string {
     var string img = "";
     if ($opts{"href"} != "") { $img = $img + "<a href=\"" + eurl($opts{"href"}) + "\" $opts{"a_attr"}>"; }
-    $img = $img + $this->as_string();
+    $img = $img + $this->as_string($opts{"alt"});
     if ($opts{"href"} != "") { $img = $img + "</a>"; }
 
     return $img;
 }
 
 function Image::as_string(string alttext) [fixed] : string {
-    var string img = """<img src="$.url" """;
-    $img = $img + htmlattr("height", $.height); 
-    $img = $img + htmlattr("width", $.width);
-    $img = $img + htmlattr("alt", $alttext);
-    $img = $img + " />";
-
-    return $img;
+    return "<img src=\"$.url\" alt=\"" + ehtml($alttext) + "\"" +
+        htmlattr("height", $.height) +
+        htmlattr("width", $.width) + " />";
 }
 
 function Image::as_string() [fixed] : string {
-    return """<img src="$.url" alt="" """ +
+    return "<img src=\"$.url\" alt=''" +
         htmlattr("height", $.height) +
         htmlattr("width", $.width) + " />";
 }
 
 function Image::print (string{} opts)
 {
+    # must do safe here because opts could have the 'a_attr' key set
     print safe $this->as_string($opts);
 }
 
 function Image::print (string alttext)
 {
-    print "<img src=\"$.url\" " +
-        htmlattr("alt", $alttext) +
-        htmlattr("height", $.height) +
-        htmlattr("width", $.width) + " />";
+    print $this->as_string($alttext);
 }
 
 function Image::print
 {
-    print "<img src=\"$.url\" " +
-        htmlattr("height", $.height) +
-        htmlattr("width", $.width) + " />";
+    print $this->as_string("");
 }
 
 function userinfoicon(UserLite user) : Image {
