@@ -662,10 +662,15 @@ elsif ($sclust > 0)
         if (@styleids) {
             my $styleids_in = join(",", map { $dbo->quote($_) } @styleids);
             if ($dbo->do("DELETE FROM s1stylecache WHERE styleid IN ($styleids_in)") > 0) {
-                print "  deleted from s1stylecache\n" if $optv; 
+                print "  deleted from s1stylecache\n" if $optv;
             }
         }
+    } else {
+        # at minimum, we delete the clustertrack2 row, in which case we also need
+        # to mark the user as moved away
+        $dbo->do("DELETE FROM clustertrack2 WHERE userid=$userid");
     }
+
     $dbh->do("UPDATE clustermove SET sdeleted=?, timedone=UNIX_TIMESTAMP() ".
              "WHERE cmid=?", undef, $opt_del ? 1 : 0, $cmid);
     exit 0;

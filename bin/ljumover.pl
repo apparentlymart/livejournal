@@ -1036,8 +1036,17 @@ sub getPendingUsers {
 
             # populate the rest of the row
             if ($self->activeUsersOnly) {
-                my $u = LJ::load_userid($row->{userid});
+                my $u = LJ::load_userid($row->{userid}, "force");
                 die "Couldn't load userid: $row->{userid}" unless $u;
+
+                # if for some reason this user had a clustertrack2 row they shouldn't have,
+                # delete the clustertrack2 on this cluster and move along.
+                if ($u->{'clusterid'} != $cid) {
+                    $seldbh->do("DELETE FROM clustertrack2 WHERE userid=?",
+                                undef, $u->{userid});
+                    next;
+                }
+
                 $row = $u;
             }
 
