@@ -133,15 +133,6 @@ body<=
 
  my $remote = LJ::get_remote($dbs);
 
- # incomplete ref tracking.
- if ($remote || $ENV{'HTTP_REFERER'}) {
-     my @refs;
-     if ($remote) { push @refs, "lj://user/$remote->{'user'}"; }
-     if ($ENV{'HTTP_REFERER'} =~ m!livejournal.com/talk....\.bml\?itemid=(\d+)\b!) {
-         push @refs, "lj://entry/$1";
-     }
- }
-
  ####  Check security before viewing this post
  return $errtxt unless LJ::Talk::check_viewable($dbs, $remote, $item, \%FORM, \$errtxt);
  

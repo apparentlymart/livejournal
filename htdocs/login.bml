@@ -28,9 +28,10 @@
    $body .= "<tr valign='top'><td>Expiration:</td><td>\n";
    $body .= "<input type='radio' name='expire' value='close' checked id='close'> <label for='close'>When browser closes</label><br />\n";
    $body .= "<input type='radio' name='expire' value='never' id='never'> <label for='never'>Never</label>\n";
-   if ($FORM{'ret'} && $ENV{'HTTP_REFERER'}) {
-     my $eh_ref = LJ::ehtml($ENV{'HTTP_REFERER'});
-     $body .= "<input type='hidden' NAME='ref' value='$eh_ref'>\n";
+   my $referer = BML::get_client_header('Referer');
+   if ($FORM{'ret'} && $referer) {
+       my $eh_ref = LJ::ehtml($referer);
+       $body .= "<input type='hidden' NAME='ref' value='$eh_ref'>\n";
    }
    $body .= "</td></tr>\n";
    $body .= "<tr><td></td><td align='left'><input type='submit' value='Login...'>\n";

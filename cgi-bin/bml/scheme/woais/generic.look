@@ -111,9 +111,10 @@ PAGE<=
 	);
 
 	my $ret = "";
+        my $uri = BML::get_uri();
 	foreach $h (@headers)
 	{
-		if ($ENV{'REQUEST_URI'} eq $h->{'href'})
+		if ($uri eq $h->{'href'})
 		{
 			$ret .= "<TD ALIGN=CENTER WIDTH=$h->{'width'} BGCOLOR=#000066><FONT FACE=\"Arial, Helvetica\" SIZE=-1 COLOR=#CCCCCC><STRONG>$h->{'text'}</STRONG></FONT><BR></TD>\n";
 		}
@@ -129,7 +130,7 @@ _CODE=)
 <TD COLSPAN=7 ALIGN=RIGHT>
 <FONT SIZE=2 FACE="Verdana,Arial">
 (=_CODE
- if ($ENV{'REQUEST_URI'} =~ /^\/log(in|out)/) {
+ if (BML::get_uri() =~ /^\/log(in|out)/) {
      return "";
  }
  my $cooku = $BML::COOKIE{"ljuser"};

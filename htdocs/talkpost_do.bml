@@ -391,10 +391,10 @@ body<=
      if ($u->{'opt_logcommentips'} eq "A" || 
          ($u->{'opt_logcommentips'} eq "S" && $FORM{'usertype'} ne "user")) 
      {
-         my $ip = $ENV{'REMOTE_ADDR'};
-         if ($ENV{'HTTP_X_FORWARDED_FOR'}) { $ip = "$ENV{'HTTP_X_FORWARDED_FOR'}, via $ip"; }
+         my $ip = BML::get_remote_ip();
+         my $forwarded = BML::get_client_header('X-Forwarded-For');
+         $ip = "$forwarded, via $ip" if $forwarded && $forwarded ne $ip;
          $talkprop{'poster_ip'} = $ip;
-
      }
 
      # remove blank/0 values (defaults)

@@ -25,7 +25,7 @@
          $ret .= "<b>[ $mode ]</b>  " if ($format eq "html");
      } else {
          if ($format eq "html") {
-             $ret .= "<b>[</b> <a href=\"" . LJ::self_link(\%FORM, {'mode' => $m});
+             $ret .= "<b>[</b> <a href=\"" . BML::self_link(\%FORM, {'mode' => $m});
              $ret .= "\">$m</a> <b>]</b>  ";
          }
      }

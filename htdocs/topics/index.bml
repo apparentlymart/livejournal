@@ -80,13 +80,13 @@
          if ($pages > 1) {
              $navcrap .= "<BR>Page $page of $pages shown (records $first-$last)<BR>";
              my $left = "<B>&lt;&lt;</B>";
-             if ($page > 1) { $left = "<A HREF=\"" . LJ::self_link(\%FORM, { 'page' => $page-1 }) . "\">$left</A>"; }
+             if ($page > 1) { $left = "<A HREF=\"" . BML::self_link(\%FORM, { 'page' => $page-1 }) . "\">$left</A>"; }
              my $right = "<B>&gt;&gt;</B>";
-             if ($page < $pages) { $right = "<A HREF=\"" . LJ::self_link(\%FORM, { 'page' => $page+1 }) . "\">$right</A>"; }
+             if ($page < $pages) { $right = "<A HREF=\"" . BML::self_link(\%FORM, { 'page' => $page+1 }) . "\">$right</A>"; }
              $navcrap .= $left . " ";
              for (my $i=1; $i<=$pages; $i++) {
              my $link = "[$i]";
-             if ($i != $page) { $link = "<A HREF=\"" . LJ::self_link(\%FORM, { 'page' => $i }) . "\">$link</A>"; }
+             if ($i != $page) { $link = "<A HREF=\"" . BML::self_link(\%FORM, { 'page' => $i }) . "\">$link</A>"; }
              else { $link = "<FONT SIZE=+1><B>$link</B></FONT>"; }
              $navcrap .= "$link ";
          }

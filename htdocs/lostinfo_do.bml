@@ -66,7 +66,8 @@ body<=
          print MAIL "To confirm your email address, go here:\n\n";
          print MAIL "    $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";	
      }
-     print MAIL "This information was requested on the website from $ENV{'REMOTE_HOST'} ($ENV{'REMOTE_ADDR'}).\n\n";
+     print MAIL "This information was requested on the website from " . BML::get_remote_host() . 
+         " (" . BML::get_remote_ip() . ").\n\n";
      print MAIL "Useful links:\n\n";
      print MAIL "  Your LiveJournal:\n";
      print MAIL "    $LJ::SITEROOT/users/$u->{'user'}/\n\n";
@@ -107,7 +108,8 @@ body<=
          print MAIL "          $ru\n";
      }
 
-     print MAIL "\nThis information was requested on the website from $ENV{'REMOTE_HOST'} ($ENV{'REMOTE_ADDR'}).\n\n";
+     print MAIL "\nThis information was requested on the website from " . BML::get_remote_host() . 
+         " (" . BML::get_remote_ip() . ").\n\n";
      print MAIL "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
      close MAIL;
 

@@ -113,11 +113,11 @@
      if ($FORM{'cat'} eq $cat) {
          $body .= "<b>" . LJ::ehtml($cat) . " ($keyword{$kwid}->{'count'})</b>, ";
      } else {
-         $body .= "<b><a href=\"" . LJ::self_link(\%FORM, { 'user' => $u->{'user'}, 'cat' => $cat }) . "\">" . LJ::ehtml($cat) . "</a></b> ($keyword{$kwid}->{'count'}), ";
+         $body .= "<b><a href=\"" . BML::self_link(\%FORM, { 'user' => $u->{'user'}, 'cat' => $cat }) . "\">" . LJ::ehtml($cat) . "</a></b> ($keyword{$kwid}->{'count'}), ";
      }
  }
  if ($FORM{'cat'}) {
-     $body .= "<b><a href=\"" . LJ::self_link(\%FORM, { 'user' => $u->{'user'}, 'cat' => '' }) . "\">(Show All)</a></b>, "
+     $body .= "<b><a href=\"" . BML::self_link(\%FORM, { 'user' => $u->{'user'}, 'cat' => '' }) . "\">(Show All)</a></b>, "
  }
 
  if (keys %keyword) {
@@ -209,7 +209,7 @@
          } elsif ($col->[1] eq $FORM{'sort'}) {
              $body .= "<td bgcolor=<?emcolor?>><b>$col->[0]</b></td>";
          } else {
-             $body .= "<td><a href=\"" . LJ::self_link(\%FORM, { 'user' => $u->{'user'}, 'sort' => $col->[1] }) . "\"><b>$col->[0]</b></a></td>";
+             $body .= "<td><a href=\"" . BML::self_link(\%FORM, { 'user' => $u->{'user'}, 'sort' => $col->[1] }) . "\"><b>$col->[0]</b></a></td>";
          }
      }
  }

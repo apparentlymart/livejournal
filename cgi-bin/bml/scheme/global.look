@@ -156,7 +156,8 @@ LOAD_PAGE_INFO<=
 	     );
  
  my $remuser = $BML::COOKIE{'ljuser'};
- if ($remuser ne "" && $ENV{'REQUEST_URI'} ne "/logout.bml") 
+ my $uri = BML::get_uri();        
+ if ($remuser ne "" && $uri ne "/logout.bml") 
  {
      my $subdomain = $remuser;
      $subdomain =~ s/_/-/g;
@@ -182,7 +183,7 @@ LOAD_PAGE_INFO<=
 					  'uri' => '/logout.bml', },
 					]
 					};
- } elsif ($ENV{'REQUEST_URI'} ne "/login.bml") {
+ } elsif ($uri ne "/login.bml") {
      unshift @sidebar, { 'name' => "Log In",
 			 'uri' => '/login.bml', }
  }

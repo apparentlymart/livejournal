@@ -798,7 +798,7 @@ sub postevent
         # us to do it without killing the database and/or servers as we do O(n) scans
         # over everything and grep the hell out of hundreds of gigs of webserver logs.
         my $quserid = $u->{'userid'}+0;
-        my $qip = $dbh->quote($ENV{'REMOTE_ADDR'});
+        my $qip = $dbh->quote($ENV{'_REMOTE_IP'});
         $dbh->do("INSERT INTO tracking (userid, acttime, ip, actdes, associd) ".
                  "VALUES ($quserid, NOW(), $qip, 'post', $itemid)");
     }

@@ -387,8 +387,8 @@ sub create_view_friends
 
     # see if they have a previously cached copy of this page they
     # might be able to still use.
-    if ($env->{'HTTP_IF_MODIFIED_SINCE'}) {
-        my $theirtime = LJ::http_to_time($env->{'HTTP_IF_MODIFIED_SINCE'});
+    if ($env->{'header'}->{'If-Modified-Since'}) {
+        my $theirtime = LJ::http_to_time($env->{'header'}->{'If-Modified-Since'});
 
         # send back a 304 Not Modified if they say they've reloaded this 
         # document in the last $newinterval seconds:

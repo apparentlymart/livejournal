@@ -6,7 +6,7 @@ _info?><?_code
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
  
- if ($ENV{'PATH_INFO'} =~ m!^/(\w+)\.dot(\.txt)?$!) {
+if (BML::get_path_info() =~ m!^/(\w+)\.dot(\.txt)?$!) {
      BML::set_content_type("text/plain");
      return "# dot file for $1:\n" . LJ::make_graphviz_dot_file($dbs, $1);
  }

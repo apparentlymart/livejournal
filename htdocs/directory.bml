@@ -20,7 +20,7 @@ body<=
  my %info;
  my $ret = "";
 
- if ($ENV{'QUERY_STRING'} eq "")
+ if (BML::get_query_string() eq "")
  {
      LJ::load_codes($dbs, { state => \%state, country => \%country  });
      $ret = "";
@@ -149,7 +149,9 @@ body<=
  $info{'allwhat'} ||= "users";
 
  if ($info{'searching'}) {
-     $head .= "<meta http-equiv='Refresh' content='3;URL=$LJ::SITEROOT$ENV{'REQUEST_URI'}'>\n";
+     my ($uri, $args) = (BML::get_uri(), BML::get_query_string());
+     $uri .= '?' . $args if $args;
+     $head .= "<meta http-equiv='Refresh' content='3;URL=$LJ::SITEROOT$uri'>\n";
      return "<center><b>Searching<img src='$LJ::IMGPREFIX/searchingdots.gif' width='18' height='12'></b><p>".
          "Hundreds of trained monkeys are currently running about finding your search results.  Please stand by.</center>";
  }
@@ -194,13 +196,13 @@ body<=
      if ($info{'pages'} > 1) {
          $navcrap .= "<BR>Page $info{'page'} of $info{'pages'} shown (records $info{'first'}-$info{'last'})<BR>";
          my $left = "<B>&lt;&lt;</B>";
-         if ($info{'page'} > 1) { $left = "<A HREF=\"" . LJ::self_link(\%FORM, { 'page' => $info{'page'}-1 }) . "\">$left</A>"; }
+         if ($info{'page'} > 1) { $left = "<A HREF=\"" . BML::self_link(\%FORM, { 'page' => $info{'page'}-1 }) . "\">$left</A>"; }
          my $right = "<B>&gt;&gt;</B>";
-         if ($info{'page'} < $info{'pages'}) { $right = "<A HREF=\"" . LJ::self_link(\%FORM, { 'page' => $info{'page'}+1 }) . "\">$right</A>"; }
+         if ($info{'page'} < $info{'pages'}) { $right = "<A HREF=\"" . BML::self_link(\%FORM, { 'page' => $info{'page'}+1 }) . "\">$right</A>"; }
          $navcrap .= $left . " ";
          for (my $i=1; $i<=$info{'pages'}; $i++) {
              my $link = "[$i]";
-             if ($i != $info{'page'}) { $link = "<A HREF=\"" . LJ::self_link(\%FORM, { 'page' => $i }) . "\">$link</A>"; }
+             if ($i != $info{'page'}) { $link = "<A HREF=\"" . BML::self_link(\%FORM, { 'page' => $i }) . "\">$link</A>"; }
              else { $link = "<FONT SIZE=+1><B>$link</B></FONT>"; }
              $navcrap .= "$link ";
          }

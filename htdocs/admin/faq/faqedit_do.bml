@@ -26,8 +26,6 @@ body<=
  $qa = $dbh->quote($FORM{'a'});
  $qfaqcat = $dbh->quote($FORM{'faqcat'});
  
- $quser = $dbh->quote($ENV{'REMOTE_USER'});
- 
  $sortorder = $FORM{'sortorder'}+0 || 50;
 
  unless (LJ::did_post()) {

@@ -151,8 +151,8 @@ PAGE<=
 		 $$ret .= "$name$extra<BR>";
 	     }
 	 } elsif ($mi->{'match'} ? 
-		  ($ENV{'REQUEST_URI'} =~ /$mi->{'match'}/) :
-		  ($ENV{'REQUEST_URI'} eq $mi->{'uri'})
+		  (BML::get_uri() =~ /$mi->{'match'}/) :
+		  (BML::get_uri() eq $mi->{'uri'})
 		  ){
 	     $$ret .= "<B><SPAN style=\"background-color: #D0D0FF\"><FONT COLOR=#0000D0>$name</FONT></SPAN></B>$extra<BR>";
 	 } else {
@@ -160,7 +160,7 @@ PAGE<=
 	 }
 
 	 if ($mi->{'children'} && 
-	     ($mi->{'recursematch'} ? $ENV{'REQUEST_URI'} =~ /$mi->{'recursematch'}/ : 1)) {
+	     ($mi->{'recursematch'} ? BML::get_uri() =~ /$mi->{'recursematch'}/ : 1)) {
 	     &dump_entry($ret, $mi->{'children'}, $depth+1);
 	 }
      }
@@ -184,7 +184,7 @@ _CODE=)
       <TR>
         <TD VALIGN=TOP ALIGN=RIGHT>
 (=_CODE
-$is_home = $ENV{'REQUEST_URI'} =~ m!^/(index\.bml)?(\?.+)?$!;
+$is_home = (BML::get_uri() =~ m!^/(index\.bml)?!);
 if (! $is_home)
 {
 	return '<P><A HREF="/"><IMG SRC="(=IMGPREFIX=)/opal/home.gif" WIDTH=87 HEIGHT=51 BORDER=0 HSPACE=0></A></P>';

@@ -37,10 +37,30 @@ sub handler
                                              "Apache::LiveJournal::db_logger" ]);
 
     # if we're behind a lite mod_proxy front-end, we need to trick future handlers
-    # into thinking they know the real remote IP address and requested host name
-    $r->connection->remote_ip($1) if $r->header_in('X-Forwarded-For') =~ /([^,\s]+)$/;
-    # added only by mod_proxy_add_forward:
-    $r->header_in('Host', $_) if $_ = $r->header_in('X-Host');
+    # into thinking they know the real remote IP address.  problem is, it's complicated
+    # by the fact that mod_proxy did nothing, requiring mod_proxy_add_forward, then
+    # decided to do X-Forwarded-For, then did X-Forwarded-Host, so we have to deal
+    # with all permutations of versions, hence all the ugliness:
+    if (my $forward = $r->header_in('X-Forwarded-For'))
+    {
+        my (@hosts, %seen);
+        foreach (split(/\s*,\s*/, $forward)) {
+            next if $seen{$_}++;
+            push @hosts, $_;
+        }
+        if (@hosts) {
+            my $real = pop @hosts;
+            $r->connection->remote_ip($real);
+        }
+        $r->header_in('X-Forwarded-For', join(", ", @hosts));
+    }
+       
+    # and now, deal with getting the right Host header
+    if ($_ = $r->header_in('X-Host')) {
+        $r->header_in('Host', $_);
+    } elsif ($_ = $r->header_in('X-Forwarded-Host')) {
+        $r->header_in('Host', $_);
+    }
 
     return OK;
 }
@@ -349,7 +369,9 @@ sub journal_content
 	'args' => $RQ{'args'},
 	'vhost' => $RQ{'vhost'},
         'pathextra' => $RQ{'pathextra'},
-	'env' => \%ENV,
+        'header' => {
+            'If-Modified-Since' => $r->header_in("If-Modified-Since"),
+        },
     };
 
     my $user = $RQ{'user'};
@@ -501,7 +523,9 @@ sub interface_content
     my $content;
     $r->read($content, $r->header_in("Content-Length"));
     LJ::decode_url_string($content, \%FORM);
-
+    
+    # the protocol needs the remote IP in just one place, where tracking is done.
+    $ENV{'_REMOTE_IP'} = $r->connection()->remote_ip();
     LJ::do_request($dbs, \%FORM, \%out);
 
     if ($FORM{'responseenc'} eq "urlenc") {

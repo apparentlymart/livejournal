@@ -926,7 +926,7 @@ sub auth_fields_2
     # logged in mode
     $ret .= "<tr><td align='right'><u>U</u>sername:</td><td align='left'>";
 
-    my $alturl = LJ::self_link($form, { 'altlogin' => 1 });
+    my $alturl = BMl::self_link($form, { 'altlogin' => 1 });
     my @shared = ($remote->{'user'});
 
     my $sopts = {};
@@ -936,7 +936,7 @@ sub auth_fields_2
     $ret .= LJ::make_shared_select($dbs, $remote, $form, $sopts);
 
     if ($sopts->{'getother'}) {
-        my $alturl = LJ::self_link($form, { 'altlogin' => 1 });
+        my $alturl = BML::self_link($form, { 'altlogin' => 1 });
         $ret .= "&nbsp;(<a href='$alturl'>Other</a>)";
     }
 
@@ -1077,36 +1077,6 @@ sub get_effective_user
     # else, complain.
     $$referr = "Invalid privileges to act as requested community.";
     return;
-}
-
-# <LJFUNC>
-# class: web
-# name: LJ::self_link
-# des: Takes the URI of the current page, and adds the current form data
-#      to the url, then adds any additional data to the url.
-# returns: scalar; the full url
-# args: form, newvars
-# des-form: A hashref of the form information from the page.
-# des-newvars: A hashref of information to add/override to the link.
-# </LJFUNC>
-sub self_link
-{
-    my $form = shift;
-    my $newvars = shift;
-    my $link = $ENV{'REQUEST_URI'};
-    $link =~ s/\?.+//;
-    $link .= "?";
-    foreach (keys %$newvars) {
-        if (! exists $form->{$_}) { $form->{$_} = ""; }
-    }
-    foreach (sort keys %$form) {
-        if (defined $newvars->{$_} && ! $newvars->{$_}) { next; }
-        my $val = $newvars->{$_} || $form->{$_};
-        next unless $val;
-        $link .= LJ::eurl($_) . "=" . LJ::eurl($val) . "&";
-    }
-    chop $link;
-    return $link;
 }
 
 # <LJFUNC>

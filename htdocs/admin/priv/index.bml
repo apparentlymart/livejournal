@@ -237,7 +237,7 @@
      }
      $ret .= "</table>";
      if ($foundcount >= $limit) {
-         $ret .= "<a href='" . LJ::self_link(\%FORM, {'skip'=>($skip +$limit)}) . "'>See more...</a>\n";
+         $ret .= "<a href='" . BML::self_link(\%FORM, {'skip'=>($skip +$limit)}) . "'>See more...</a>\n";
      }
 
      if ($showgrant) {

@@ -110,7 +110,7 @@ PAGE<=
         <TD WIDTH=3>&nbsp;</TD>
         <TD HEIGHT=53 WIDTH=406 VALIGN=BOTTOM>
 (=_CODE
-$is_home = $ENV{'REQUEST_URI'} =~ m!^/(index\.bml)?(\?.+)?$!;
+$is_home = (BML::get_uri() =~ m!^/(index\.bml)?!);
 if (0 && $is_home)
 {
 	return '<IMG SRC="/img/bluewhite/title.gif" WIDTH=600 HEIGHT=53><!-- ';
@@ -177,8 +177,8 @@ _CODE=)
 		 $$ret .= "$name<BR>";
 	     }
 	 } elsif ($mi->{'match'} ? 
-		  ($ENV{'REQUEST_URI'} =~ /$mi->{'match'}/) :
-		  ($ENV{'REQUEST_URI'} eq $mi->{'uri'})
+		  (BML::get_uri() =~ /$mi->{'match'}/) :
+		  (BML::get_uri() eq $mi->{'uri'})
 		  ){
 	     $$ret .= "<B><SPAN style=\"background-color: #FFFFFF\"><FONT COLOR=#0000D0>$name</FONT></SPAN></B><BR>";
 	 } else {
@@ -186,7 +186,7 @@ _CODE=)
 	 }
 
 	 if ($mi->{'children'} && 
-	     ($mi->{'recursematch'} ? $ENV{'REQUEST_URI'} =~ /$mi->{'recursematch'}/ : 1)) {
+	     ($mi->{'recursematch'} ? BML::get_uri() =~ /$mi->{'recursematch'}/ : 1)) {
 	     &dump_entry($ret, $mi->{'children'}, $depth+1);
 	 }
      }
