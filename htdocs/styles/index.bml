@@ -28,9 +28,8 @@ style.</li>
 may only edit styles "owned" by your account. In order to customise
 a style provided by LiveJournal, you must first create a new style
 based on that style using the above link.</li>
-<li><strong>Style Browser</strong> - Currently down for a revamp,
-the Style Browser will let you browse through public styles
-created by other users.</li>
+<li><b><a href="browse/">Style Browser</a></b> - The Style Browser
+lets you browse through public styles created by other users.</li>
 </ul>
 <=body
 page?><?_c <LJDEP>
