@@ -406,7 +406,7 @@ $maint{'synsuck'} = sub
 
         # need to get some more rows
         my $dbh = LJ::get_db_writer();
-        my $current_jobs = join(",", map { $dbh->quote($_) } values %child_jobs);
+        my $current_jobs = join(",", map { $dbh->quote($_->[0]) } values %child_jobs);
         my $in_sql = " AND u.userid NOT IN ($current_jobs)" if $current_jobs;
         my $sth = $dbh->prepare("SELECT u.user, s.userid, s.synurl, s.lastmod, " .
                                 "       s.etag, s.numreaders, s.checknext " .
