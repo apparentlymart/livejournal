@@ -71,7 +71,7 @@
 
         if ($POST{'user'} &&                            # user argument given
             ! $user_is_remote &&                        # user != remote 
-            $GET{'altlogin'}) {                         # user has clicked alt auth
+            (!$remote || $GET{'altlogin'})) {           # user has clicked alt auth
             
             $user = $POST{'user'};
 
