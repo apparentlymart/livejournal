@@ -103,7 +103,7 @@ BODY<=
  # ban the user, if selected
  if ($FORM{'ban'}) 
  {
-     $dbh->do("INSERT INTO ban (userid, banneduserid) VALUES ($remote->{'userid'}, $tp->{'posterid'})");
+     $dbh->do("REPLACE INTO ban (userid, banneduserid) VALUES ($remote->{'userid'}, $tp->{'posterid'})");
      $and .= "Additionally, user <B>$tp->{'userpost'}</B> has been banned from posting anything else in your journal.";
  }
 
