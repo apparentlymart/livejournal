@@ -9,7 +9,7 @@ mark_clustered("useridmap", "userbio", "cmdbuffer", "dudata",
                "ratelog", "loginstall", "sessions", "sessions_data",
                "s1usercache", "modlog", "modblob", "counter",
                "userproplite2", "links", "s1overrides", "s1style",
-               "s1stylecache", "userblob",
+               "s1stylecache", "userblob", "userpropblob",
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -733,7 +733,7 @@ CREATE TABLE userproplist (
   des varchar(255) default NULL,
   PRIMARY KEY  (upropid),
   UNIQUE KEY name (name)
-) 
+)
 EOC
 
 # global, indexed
@@ -767,6 +767,16 @@ CREATE TABLE userproplite2 (
   PRIMARY KEY  (userid,upropid),
   KEY (upropid)
 ) 
+EOC
+
+# clustered
+register_tablecreate( "userpropblob", <<'EOC');
+CREATE TABLE userpropblob (
+    userid INT(10) unsigned NOT NULL default '0',
+    upropid SMALLINT(5) unsigned NOT NULL default '0',
+    value blob,
+    PRIMARY KEY (userid,upropid)
+)
 EOC
 
 register_tablecreate("zip", <<'EOC');
@@ -1620,6 +1630,11 @@ CREATE TABLE clustertrack (
 )
 EOC
 
+
+
+# NOTE: new table declarations go here
+
+
 ### changes
 
 register_alter(sub {
@@ -1957,6 +1972,13 @@ register_alter(sub {
         do_alter("acctinvite",
                  "ALTER TABLE acctinvite MODIFY reason VARCHAR(40)");
     }
+
+    # Add BLOB flag to proplist
+    if (column_type("userproplist", "is_blob") eq "") {
+        do_alter("userproplist",
+                 "ALTER TABLE userproplist ADD is_blob enum('0','1') NOT NULL default '0' AFTER cldversion");
+    }
+
 });
 
 1; # return true
