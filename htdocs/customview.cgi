@@ -10,7 +10,8 @@ my $REQ_COUNT = 0;
 my $REQ_MAX = 500;
 my $dbh;
 
-while(++$REQ_COUNT <= $REQ_MAX && FCGI::accept() >= 0) 
+while(LJ::handle_caches() && 
+      ++$REQ_COUNT <= $REQ_MAX && FCGI::accept() >= 0) 
 {
     $dbh = &LJ::get_dbh("master");
 

@@ -27,10 +27,11 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
 }
 
  REQUEST:
-    while((($SERVING=0) || 1) &&       # set serving to 0,
+    while(LJ::handle_caches() &&       # clear caches if we received a HUP earlier
+	  (($SERVING=0) || 1) &&       # set serving to 0,
 	  $CONTINUE &&                 # didn't get a quit signal earlier?
 	  ++$REQ_COUNT <= $REQ_MAX &&  # not time to restart?
-	FCGI::accept() >= 0)
+	  FCGI::accept() >= 0)
 {
     my $cgi = new CGI;
 
@@ -43,7 +44,8 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
     ##### check for username.$LJ::USER_DOMAIN/ [mode]
     #####
     if ($LJ::USER_VHOSTS && 
-	$ENV{'HTTP_HOST'} =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/i && ($1 ne "www")) 
+	$ENV{'HTTP_HOST'} =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/i && 
+	($1 ne "www")) 
     {
 	$user = lc($1);
 	$user =~ s/-/_/g;
