@@ -456,7 +456,7 @@ CREATE TABLE blobcache (
   bckey VARCHAR(40) NOT NULL,
   PRIMARY KEY (bckey),
   dateupdate  DATETIME,
-  value    BLOB
+  value    MEDIUMBLOB
 ) 
 EOC
 
