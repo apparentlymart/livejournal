@@ -1,7 +1,7 @@
 <?_info
 nocache=>1
 _info?><?page
-title=>Registration
+title=><?_ml .title _ml?>
 
 body<=
 
