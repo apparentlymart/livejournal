@@ -6965,48 +6965,45 @@ sub clear_rel
     return;
 }
 
-# $dom: 'L' == log, 'T' == talk, 'M' == modlog
+# $dom: 'L' == log, 'T' == talk, 'M' == modlog, 'B' == blob (userpic, etc)
 sub alloc_user_counter
 {
-    my ($u, $dom, $pre_locked) = @_;
+    my ($u, $dom, $recurse) = @_;
     return undef unless $dom =~ /^[LTMB]$/;
     my $dbcm = LJ::get_cluster_master($u);
     return undef unless $dbcm;
 
-    my $uid = $u->{'userid'}+0;
-    my $key = "usercounter-$uid-$dom";
-    unless ($pre_locked) {
-        my $r = $dbcm->selectrow_array("SELECT GET_LOCK(?, 3)", undef, $key);
-        return undef unless $r;
-    }
     my $newmax;
-
-    my $rs = $dbcm->do("UPDATE counter SET max=max+1 WHERE journalid=? AND area=?",
+    my $uid = $u->{'userid'}+0;
+    my $rs = $dbcm->do("UPDATE counter SET max=LAST_INSERT_ID(max+1) WHERE journalid=? AND area=?",
                        undef, $uid, $dom);
     if ($rs > 0) {
-        $newmax = $dbcm->selectrow_array("SELECT max FROM counter WHERE journalid=? AND area=?",
-                                         undef, $uid, $dom);
-    } else {
-        if ($dom eq "L") {
-            $newmax = $dbcm->selectrow_array("SELECT MAX(jitemid) FROM log2 WHERE journalid=?",
-                                            undef, $uid);
-        } elsif ($dom eq "T") {
-            $newmax = $dbcm->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
-                                            undef, $uid);
-        } elsif ($dom eq "M") {
-            $newmax = $dbcm->selectrow_array("SELECT MAX(modid) FROM modlog WHERE journalid=?",
-                                            undef, $uid);
-        }
-        $newmax++;
-        $dbcm->do("INSERT INTO counter (journalid, area, max) VALUES (?,?,?)",
-                  undef, $uid, $dom, $newmax) or return undef;
+        $newmax = $dbcm->selectrow_array("SELECT LAST_INSERT_ID()");
+        return $newmax;
+    }   
+
+    if ($recurse) {
+        # We shouldn't ever get here if all is right with the world.
+        return undef;
     }
 
-    unless ($pre_locked) {
-        $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $key);
+    # Make sure the counter table is populated for this uid/dom.
+    if ($dom eq "L") {
+        $newmax = $dbcm->selectrow_array("SELECT MAX(jitemid) FROM log2 WHERE journalid=?",
+                    undef, $uid);
+    } elsif ($dom eq "T") {
+        $newmax = $dbcm->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
+                undef, $uid);
+    } elsif ($dom eq "M") {
+        $newmax = $dbcm->selectrow_array("SELECT MAX(modid) FROM modlog WHERE journalid=?",
+                undef, $uid);
     }
-    
-    return $newmax;
+    $dbcm->do("INSERT IGNORE INTO counter (journalid, area, max) VALUES (?,?,?)",
+                undef, $uid, $dom, $newmax) or return undef;
+            
+    # The 2nd invocation of the alloc_user_counter sub should do the
+    # intended incrementing.
+    return LJ::alloc_user_counter($u, $dom, 1);
 }
 
 # $dom: 'S' == style

@@ -754,7 +754,7 @@ sub postevent
             return fail($err, 155, "You must have an authenticated email address in order to post to moderated communities") unless $u->{'status'} eq 'A';
 
             # store
-            my $modid = LJ::alloc_user_counter($uowner, "M"); # note: does GET_LOCK
+            my $modid = LJ::alloc_user_counter($uowner, "M");
             return fail($err, 501) unless $modid;
 
             $dbcm->do("INSERT INTO modlog (journalid, modid, posterid, subject, logtime) ".
@@ -807,7 +807,7 @@ sub postevent
         return $fail->($err,405);
     }
     
-    my $itemid = LJ::alloc_user_counter($uowner, "L", 1);
+    my $itemid = LJ::alloc_user_counter($uowner, "L");
     return $fail->($err,501,"No itemid could be generated.") unless $itemid;
 
     LJ::replycount_do($uowner, $itemid, "init");

@@ -1265,7 +1265,7 @@ sub enter_comment {
         return 0;
     };
 
-    my $jtalkid = LJ::alloc_user_counter($journalu, "T"); # grepnote: does GET_LOCK
+    my $jtalkid = LJ::alloc_user_counter($journalu, "T");
     return $err->("Database Error", "Could not generate a talkid necessary to post this comment.")
         unless $jtalkid; 
 
