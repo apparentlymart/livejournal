@@ -1,5 +1,10 @@
 <html>
-<head><title>DB Admin - (=SITENAME=)</title></head>
+<head><title>DB Admin - (=SITENAME=)</title>
+<style>
+    p, td { font-size: 9pt; font-family: sans-serif; }
+    input { font-size: 8pt; font-family: sans-serif; }
+</style>
+</head>
 <body bgcolor='#000000' text='#ffffff'>
 (=_CODE
 
@@ -100,14 +105,14 @@
  };
 
  $p->('<form method="post">');
- $p->('<table cellpadding="3" border="1" bgcolor="#606060">');
+ $p->('<table cellpadding="1" border="0" bgcolor="#606060">');
  $p->('<tr bgcolor="#404040"><td><b>Host</b>/Role</td><td><b>Norm</b></td><td><b>Curr</b></td></tr>');
  $dumpslaves->(0, 0, $dumpslaves);  # root
- $p->('</table>');
  if ($can_save) {
-     $p->('<p><input type="submit" name="action:refresh" value="Refresh"> ');
-     $p->('<input type="submit" name="action:save" value="Save"></p>');
+     $p->('<tr><td colspan="3" align="center" bgcolor="#404040"><input type="submit" name="action:refresh" value="Refresh"> ');
+     $p->('<input type="submit" name="action:save" value="Save"></td></tr>');
  }
+ $p->('</table>');
  $p->('</form>');
  $p->($status);
 
