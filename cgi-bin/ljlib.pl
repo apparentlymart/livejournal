@@ -857,6 +857,48 @@ sub is_friend
     return $is_friend;
 }
 
+# args: ($dbs, @talkids)
+# return: hashref with keys being talkids, values being [ $subject, $body ]
+sub get_talktext
+{
+    my $dbs = shift;
+
+    # return structure.
+    my $lt = {};
+
+    # keep track of itemids we still need to load.
+    my %need;
+    foreach (@_) { $need{$_+0} = 1; }
+
+    # always consider hitting the master database, but if a slave is 
+    # available, hit that first.
+    my @sources = ([$dbs->{'dbh'}, "talktext"]);
+    if ($dbs->{'has_slave'}) {
+        if ($LJ::USE_RECENT_TABLES) {
+            unshift @sources, [ $dbs->{'dbr'}, "recent_talktext" ];
+        } else {
+            unshift @sources, [ $dbs->{'dbr'}, "talktext" ];
+        }
+    }
+
+    while (@sources && %need)
+    {
+        my $s = shift @sources;
+        my ($db, $table) = ($s->[0], $s->[1]);
+        my $talkid_in = join(", ", keys %need);
+
+        my $sth = $db->prepare("SELECT talkid, subject, body FROM $table ".
+                               "WHERE talkid IN ($talkid_in)");
+        $sth->execute;
+        while (my ($id, $subject, $body) = $sth->fetchrow_array) {
+            $lt->{$id} = [ $subject, $body ];
+            delete $need{$id};
+        }
+    }
+    return $lt;
+
+}
+
 # args: ($dbs, @itemids)
 # return: hashref with keys being itemids, values being [ $subject, $text ]
 sub get_logtext
@@ -1247,6 +1289,7 @@ sub make_journal
 
     my $dbs = LJ::make_dbs_from_arg($db_arg);
     my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
 
     if ($LJ::SERVER_DOWN) {
 	if ($opts->{'vhost'} eq "customview") {
@@ -1274,7 +1317,7 @@ sub make_journal
     if ($opts->{'u'}) {
 	$u = $opts->{'u'};
     } else {
-	$u = LJ::load_user($dbh, $user);
+	$u = LJ::load_user($dbs, $user);
     }
 
     unless ($u)
@@ -1639,14 +1682,20 @@ sub escapeall
     return $a;
 }
 
+# $db_arg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
 sub load_user
 {
-    my $dbh = shift;
+    my $db_arg = shift;
     my $user = shift;
+
+    my $dbs = LJ::make_dbs_from_arg($db_arg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
     $user = LJ::canonical_username($user);
 
-    my $quser = $dbh->quote($user);
-    my $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+    my $quser = $dbr->quote($user);
+    my $sth = $dbr->prepare("SELECT * FROM user WHERE user=$quser");
     $sth->execute;
     my $u = $sth->fetchrow_hashref;
     $sth->finish;
@@ -1671,6 +1720,13 @@ sub load_user
 		return undef;
 	    }
 	}
+    } elsif (! $u && $dbs->{'has_slave'}) {
+        # If the user still doesn't exist, and there isn't an alternate auth code
+        # try grabbing it from the master.
+        $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+        $sth->execute;
+        $u = $sth->fetchrow_hashref;
+        $sth->finish;
     }
 
     return $u;
@@ -1877,18 +1933,32 @@ sub get_userid
 }
 
 ## get a username from a userid (returns undef if invalid user)
+# $db_arg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
 sub get_username
 {
-    my $dbh = shift;
+    my $db_arg = shift;
     my $userid = shift;
     my $user;
     $userid += 0;
+
+    # Checked the cache first. 
     if ($LJ::CACHE_USERNAME{$userid}) { return $LJ::CACHE_USERNAME{$userid}; }
-    
-    my $sth = $dbh->prepare("SELECT user FROM user WHERE userid=$userid");
+
+    my $dbs = LJ::make_dbs_from_arg($db_arg);
+    my $dbr = $dbs->{'reader'};
+
+    my $sth = $dbr->prepare("SELECT user FROM user WHERE userid=$userid");
     $sth->execute;
-    ($user) = $sth->fetchrow_array;
-    if ($user) { $LJ::CACHE_USERNAME{$userid} = $user; }
+    $user = $sth->fetchrow_array;
+
+    # Fall back to master if it doesn't exist.
+    if (! defined($user) && $dbs->{'has_slave'}) {
+        my $dbh = $dbs->{'dbh'};
+        $sth = $dbh->prepare("SELECT user FROM user WHERE userid=$userid");
+        $sth->execute;
+        $user = $sth->fetchrow_array;
+    }
+    if (defined($user)) { $LJ::CACHE_USERNAME{$userid} = $user; }
     return ($user);
 }
 
@@ -2008,19 +2078,34 @@ sub hash_password
     return Digest::MD5::md5_hex($_[0]);
 }
 
+# $db_arg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
 sub can_use_journal
 {
-    my ($dbh, $posterid, $reqownername, $res) = @_;
+    my ($db_arg, $posterid, $reqownername, $res) = @_;
+
+    my $dbs = LJ::make_dbs_from_arg($db_arg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
     my $qreqownername = $dbh->quote($reqownername);
     my $qposterid = $posterid+0;
 
     ## find the journal owner's userid
-    my $sth = $dbh->prepare("SELECT userid FROM user WHERE user=$qreqownername");
+    my $sth = $dbr->prepare("SELECT userid FROM user WHERE user=$qreqownername");
     $sth->execute;
-    my ($ownerid) = $sth->fetchrow_array;
+    my $ownerid = $sth->fetchrow_array;
+    # First, fall back to the master.
     unless ($ownerid) {
-	$res->{'errmsg'} = "User \"$reqownername\" does not exist.";
-	return 0;
+        if ($dbs->{'has_slave'}) {
+            $sth = $dbh->prepare("SELECT userid FROM user WHERE user=$qreqownername");
+            $sth->execute;
+            $ownerid = $sth->fetchrow_array;
+        }
+        # If it still doesn't exist, it doesn't exist.
+        unless ($ownerid) {
+            $res->{'errmsg'} = "User \"$reqownername\" does not exist.";
+            return 0;
+        }
     }
     
     ## check if user has access

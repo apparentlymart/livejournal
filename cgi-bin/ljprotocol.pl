@@ -11,12 +11,15 @@ package LJ;
 sub do_request
 {
     # get the request and response hash refs
-    my ($dbh, $req, $res, $flags) = @_;
+    my ($db_arg, $req, $res, $flags) = @_;
 
     # declare stuff
     my ($user, $userid, $lastitemid, $journaltype, $name, $paidfeatures, $correctpassword, $status, $statusvis, $track, $sth);
 
     # initialize some stuff
+    my $dbs = LJ::make_dbs_from_arg($db_arg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
     %{$res} = ();                      # clear the given response hash
     $user = &trim(lc($req->{'user'}));
     my $quser = $dbh->quote($user);
@@ -55,7 +58,7 @@ sub do_request
     # authenticate user
     unless ($flags->{'noauth'}) # && $req->{'mode'} ne "login")
     {
-        $sth = $dbh->prepare("SELECT user, userid, lastitemid, journaltype, name, paidfeatures, password, status, statusvis, track FROM user WHERE user=$quser");
+        $sth = $dbr->prepare("SELECT user, userid, lastitemid, journaltype, name, paidfeatures, password, status, statusvis, track FROM user WHERE user=$quser");
         $sth->execute;
         if ($dbh->err)
         {
@@ -97,7 +100,7 @@ sub do_request
 	if ($flags->{'userid'}) {
 	    $userid = $flags->{'userid'};
 	} else {
-	    $sth = $dbh->prepare("SELECT userid FROM user WHERE user=$quser");
+	    $sth = $dbr->prepare("SELECT userid FROM user WHERE user=$quser");
 	    $sth->execute;
 	    ($userid) = $sth->fetchrow_array;
 	}
@@ -388,7 +391,7 @@ sub do_request
 	my $ownerid = $userid;
 	if ($req->{'usejournal'}) {
             my $info = {};
-	    if (&can_use_journal($dbh, $userid, $req->{'usejournal'}, $info)) {
+	    if (&can_use_journal($dbs, $userid, $req->{'usejournal'}, $info)) {
 		$ownerid = $info->{'ownerid'};
 	    } else {
                 $res->{'errmsg'} = $info->{'errmsg'};
@@ -530,7 +533,7 @@ sub do_request
 		    $friend_count++;
 		}
 
-		if ($friend_count > LJ::get_limit("friends", $paidfeatures, 750)) {
+		if ($friend_count > LJ::get_limit("friends", $paidfeatures, 1500)) {
 		    $error_flag = 1;
 		    next ADDFRIEND;
 		}
@@ -613,7 +616,7 @@ sub do_request
 
 	if ($req->{'usejournal'}) {
             my $info = {};
-	    if (&can_use_journal($dbh, $posterid, $req->{'usejournal'}, $info)) {
+	    if (&can_use_journal($dbs, $posterid, $req->{'usejournal'}, $info)) {
 		$ownerid = $info->{'ownerid'};
 		$qowner = $dbh->quote($req->{'usejournal'});
 	    } else {
@@ -823,7 +826,7 @@ sub do_request
 
 	if ($req->{'usejournal'}) {
             my $info = {};
-	    if (&can_use_journal($dbh, $posterid, $req->{'usejournal'}, $info)) {
+	    if (&can_use_journal($dbs, $posterid, $req->{'usejournal'}, $info)) {
 		$ownerid = $info->{'ownerid'};
 		$qowner = $dbh->quote($req->{'usejournal'});
 	    } else {
@@ -1141,7 +1144,7 @@ sub do_request
 
 	if ($req->{'usejournal'}) {
 	    my $info = {};
-	    if (&can_use_journal($dbh, $posterid, $req->{'usejournal'}, $info)) {
+	    if (&can_use_journal($dbs, $posterid, $req->{'usejournal'}, $info)) {
 		$ownerid = $info->{'ownerid'};
 		$qowner = $dbh->quote($req->{'usejournal'});
 	    } else {

@@ -13,6 +13,7 @@ sub create_view_lastn
 {
     my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
     my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
     
     my $user = $u->{'user'};
 
@@ -102,7 +103,7 @@ sub create_view_lastn
 
     # load the log items
     my $itemid_in = join(", ", map { $_+0; } @itemids);
-    $sth = $dbh->prepare("SELECT posterid, itemid, security, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', replycount FROM log WHERE itemid IN ($itemid_in) ORDER BY $order_by");
+    $sth = $dbr->prepare("SELECT posterid, itemid, security, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', replycount FROM log WHERE itemid IN ($itemid_in) ORDER BY $order_by");
     $sth->execute;
 
     my $lastday = -1;
@@ -206,7 +207,7 @@ sub create_view_lastn
 	{
 	    my %lastn_altposter = ();
 
-	    my $poster = &LJ::get_username($dbh, $posterid);
+	    my $poster = &LJ::get_username($dbs, $posterid);
 	    $lastn_altposter{'poster'} = $poster;
 	    $lastn_altposter{'owner'} = $user;
 	    
@@ -518,8 +519,8 @@ sub create_view_friends
 	my $event = $logtext->{$itemid}->[1];
 
 	my ($friend, $poster);
-	$friend = LJ::get_username($dbh, $friendid);
-	$poster = LJ::get_username($dbh, $posterid);
+	$friend = LJ::get_username($dbs, $friendid);
+	$poster = LJ::get_username($dbs, $posterid);
 	
 	$eventnum++;
 	my @dateparts = split(/ /, $alldatepart);

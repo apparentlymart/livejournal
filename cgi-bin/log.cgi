@@ -2,7 +2,6 @@
 
 use FCGI;
 use strict;
-use vars qw($dbh);
 
 require 'ljlib.pl';
 require 'ljprotocol.pl';
@@ -10,7 +9,8 @@ require 'ljprotocol.pl';
 REQUEST:
     while(FCGI::accept() >= 0) 
 {
-    &connect_db;
+    my $dbs = LJ::get_dbs();
+    my $dbh = $dbs->{'dbh'};
     
     my %out = ();
     my %FORM = ();
@@ -18,7 +18,7 @@ REQUEST:
 
     print "Content-type: text/plain\n";
     
-    LJ::do_request($dbh, \%FORM, \%out);
+    LJ::do_request($dbs, \%FORM, \%out);
 
     if ($FORM{'responseenc'} eq "urlenc")
     {
