@@ -19,6 +19,19 @@ my $lastuser;
 # what pass are we on?
 my $pass;
 
+my $get_db_writer = sub {
+    return LJ::get_dbh({raw=>1}, "master");
+};
+
+my $get_db_slow = sub {
+    return LJ::get_dbh({raw=>1}, "slow", "master");
+};
+
+my $get_cluster_master = sub {
+    my $cid = shift;
+    return LJ::get_dbh({raw=>1}, "cluster$cid");
+};
+
 # percentage complete
 my $status = sub {
     my ($ct, $tot, $units, $pass, $user) = @_;
@@ -58,11 +71,11 @@ my $move_user = sub {
                     $stats{'move'}->{$pass}->{'total'}, "rows", $pass, $user);
 
     # get a handle for every user to revalidate our connection?
-    my $dbh = LJ::get_db_writer()
+    my $dbh = $get_db_writer->()
         or die "Can't connect to global  master";
-    my $dbslo = LJ::get_dbh("slow", "master")
+    my $dbslo = $get_db_slow->()
         or die "Can't connect to global slow master";
-    my $dbcm = LJ::get_cluster_master($u)
+    my $dbcm = $get_cluster_master->($u->{'clusterid'})
         or die "Can't connect to cluster master";
 
     # be careful, we're moving data
@@ -183,10 +196,10 @@ my $move_user = sub {
     return 1;
 };
 
-my $dbh = LJ::get_db_writer();
+my $dbh = $get_db_writer->();
 die "Could not connect to global master" unless $dbh;
 $dbh->{'RaiseError'} = 1;
-my $dbslo = LJ::get_dbh("slow", "master");
+my $dbslo = $get_db_slow->();
 die "Could not connect to global slow master" unless $dbslo;
 $dbslo->{'RaiseError'} = 1;
 
