@@ -1309,6 +1309,9 @@ function MonthDay::print_subjectlist() {
             $e.poster->print();
         }
         "</td><td>";
+        if ($e.security != "") { 
+            " " + $e.security_icon->as_string(); 
+        } 
         if ($e.subject != "") {
             "<a href=\"$e.permalink_url\">$e.subject</a>";
         } else {
