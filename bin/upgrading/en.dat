@@ -1548,6 +1548,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /update.bml.opt.backdate.about=won't show on friends view
 
+/update.bml.opt.defpic=(default)
+
 /update.bml.opt.nocomments=Disallow Comments:
 
 /update.bml.opt.noemail=Don't email Comments:

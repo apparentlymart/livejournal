@@ -308,10 +308,11 @@
          $$body .= "<p><b>$ML{'.opt.backdate'}</b><input type='checkbox' name='prop_opt_backdated' value='1' $checked> ($ML{'.opt.backdate.about'})";
          
          if (@{$res->{'pickws'}}) {
+             my @sortedpics = sort { lc($a) cmp lc($b) } @{$res->{'pickws'}};
              $$body .= "<p><b>".BML::ml(".picture", {'url' => "$LJ::SITEROOT/allpics.bml?user=$remote->{'user'}"})."</b> ";
              $$body .= LJ::html_select({'name' => 'prop_picture_keyword', 
                                        'selected' => $FORM{'prop_picture_keyword'}, },
-                                      ("", "(default)", map { ($_, $_) } @{$res->{'pickws'}}));
+                                      ("", $ML{'.opt.defpic'}, map { ($_, $_) } @sortedpics));
              $$body .= LJ::help_icon("userpics", " ");
          }
 
