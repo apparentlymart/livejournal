@@ -275,8 +275,7 @@ sub FriendsPage
             'count' => $replycount,
             'enabled' => ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" &&
                           ! $logprops{$datakey}->{'opt_nocomments'}) ? 1 : 0,
-            'screened' => ($logprops{$datakey}->{'hasscreened'} && $remote &&
-                           ($remote->{'user'} eq $u->{'user'} || LJ::check_rel($u, $remote, 'A'))) ? 1 : 0,
+            'screened' => ($logprops{$datakey}->{'hasscreened'} && ($remote->{'user'} eq $fr->{'user'}|| LJ::check_rel($fr, $remote, 'A'))) ? 1 : 0,
         });
 
         my $moodthemeid = $u->{'opt_forcemoodtheme'} eq 'Y' ?
