@@ -94,7 +94,7 @@ set comment_bar_screened_fgcolor = "#000000";
 
 propgroup presentation {
   property bool show_entry_userpic {
-      des = "Show your userpic with your journal's entries?"; 
+      des = "Show your userpic with your journal's entries?";
   }
   property use font_base;
   property use font_fallback;
@@ -140,6 +140,15 @@ function print_stylesheet ()
     if ($*font_fallback != "none") {
         $font = "$font $*font_fallback";
     }
+
+if ($font != "") {
+"""
+body, table, td, th, .page_title, #yearheader {
+font-family: $font;
+}
+""";
+}
+
     """
 body,.body {
     background-color:    $*body_bgcolor;
@@ -161,7 +170,6 @@ table.main {
 }
 .page_title {
     color:               $*page_title_color;
-    font-family:         $font;
     font-size:           18pt;
 }
 .view_links {
@@ -194,7 +202,6 @@ td.metabar {
 }
 #yearheader {
     color:               $*page_subtitle_color;
-    font-family:         $font;
     font-weight:         bold;
     font-style:          italic;
     font-size:           14pt;
@@ -202,7 +209,6 @@ td.metabar {
 th.monthheader {
     background-color:    $*headerbar_bgcolor;
     font-size:           12pt;
-    font-family:         $font;
 }
 th.daysheader {
     background-color:    $*metabar_bgcolor;
@@ -342,7 +348,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
       # Altposter crap
       if ($p.view == "friends")
       {
-          "<strong style='color: $fgcolor'><a href='" + $e.journal->base_url() + "'>"; 
+          "<strong style='color: $fgcolor'><a href='" + $e.journal->base_url() + "'>";
           print $e.journal.username;
           "</a></strong><br />";
       }
@@ -477,7 +483,7 @@ function YearPage::lay_nav_blurb()
     "</p>";
 }
 
-function YearPage::print_body 
+function YearPage::print_body
 {
     "<p id='yearheader'>$.year&hellip;</p>\n";
     foreach var YearMonth m ($.months) {
@@ -526,7 +532,7 @@ function YearPage::print_month(YearMonth m)
     "</table></p></center>\n";
 }
 
-function YearWeek::print () 
+function YearWeek::print ()
 {
     "<tr>";
     if ($.pre_empty) { "<td colspan='$.pre_empty' class='weekday_empty'>&nbsp;</td>"; }
@@ -614,7 +620,7 @@ function EntryPage::print_comment (Comment c) {
     }
     "<a name='$c.anchor'></a><div style='background-color: $background; color: $color; margin-top: 10px; width: 100%'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
-    if (defined $c.userpic and $*comment_userpic_style != "off") { 
+    if (defined $c.userpic and $*comment_userpic_style != "off") {
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
         # WARNING: this will later be done by the system (it'll be a
@@ -737,7 +743,7 @@ Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adi
 Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
 
 </p><p style="text-align:right; font-size: 8pt">
-  (<a href="#" style="font-weight: bold; color: $*link_color">1 Comment</a> | 
+  (<a href="#" style="font-weight: bold; color: $*link_color">1 Comment</a> |
    <a href="#" style="color: $*vlink_color">Comment on this</a>)
 
 </p>
