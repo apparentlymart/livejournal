@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+use strict;
+use vars qw(%maint);
+
 use LJ::Captcha qw{};
 use LJ::Blob    qw{};
 use File::Temp  qw{tempdir};
@@ -244,8 +247,7 @@ $maint{clean_captchas} = sub {
         $err,                   # Error message reference for Blob::delete calls
        );
 
-    print "-I- Cleaning captchas that have been used or were issued before ",
-        scalar localtime($expiredate), "...\n";
+    print "-I- Cleaning captchas.\n";
 
     # Find captchas to delete
     $sql = q{
