@@ -42,12 +42,15 @@ BODY<=
  {
      my $qparentid = $init->{'replyto'};
 
-     $sql = "SELECT posterid, nodetype, nodeid AS 'itemid', ".
-	 "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(datepost) AS 'secondsold' FROM ";
      if ($clustered) {
-	 $sql .= "talk2 WHERE journalid=$u->{'userid'} AND jtalkid=$qparentid";
+	 $sql = "SELECT t.posterid, t.nodetype, t.nodeid AS 'itemid', ".
+	     "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(t.datepost) AS 'secondsold', ".
+	     "l.anum FROM talk2 t, log2 l WHERE l.journalid=$u->{'userid'} AND ".
+	     "l.jitemid=t.nodeid AND t.journalid=$u->{'userid'} AND t.jtalkid=$qparentid";
      } else {
-	 $sql .= "talk WHERE talkid=$qparentid";
+	 $sql = "SELECT posterid, nodetype, nodeid AS 'itemid', ".
+	     "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(datepost) AS 'secondsold' FROM ".
+	     "talk WHERE talkid=$qparentid";
      }
      $parpost = LJ::dbs_selectrow_hashref($dbcs, $sql);
      return "Replyto post not found (deleted?)" unless $parpost;
@@ -55,7 +58,7 @@ BODY<=
      unless ($parpost->{'nodetype'} eq "L" && $parpost->{'itemid'}) {
 	 return "(=H1 Error H1=)(=P You cannot reply to a non-existent post P=)";
      }
-     
+
      ## load its text
      {
 	 my $tt;
@@ -84,6 +87,11 @@ BODY<=
      }
      
      $init->{'itemid'} = $parpost->{'itemid'};
+     if ($clustered) {
+	 $init->{'ditemid'} = $parpost->{'itemid'}*256 + $parpost->{'anum'};
+     } else {
+	 $init->{'ditemid'} = $init->{'itemid'};
+     }
  }
 
  my $itemid = $init->{'itemid'};
