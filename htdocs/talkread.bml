@@ -23,8 +23,13 @@ BODY<=
 
  my $pics = LJ::Talk::get_subjecticons();
 
- ## workaround mail client bug when don't understand quoted-printable:
- $FORM{'itemid'} =~ s/^3D//;
+ ## workaround mail client bug when don't understand quoted-printable.
+ ## Only correct 'journal' if 'itemid' was also broken, to avoid the 
+ ## unlikely clash with a journal name.
+ if ($FORM{'itemid'} =~ s/^3D//) {
+     $FORM{'journal'} =~ s/^3D//;
+     $FORM{'thread'} =~ s/^3D//; 
+ }
  my $init = LJ::Talk::init($dbs, \%FORM);
  my $u = $init->{'journalu'};
 
