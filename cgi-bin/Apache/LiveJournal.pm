@@ -150,6 +150,7 @@ sub trans
 
     LJ::start_request();
     LJ::procnotify_check();
+    S2::set_domain('LJ');
 
     my $is_ssl = LJ::run_hook("ssl_check", {
         r => $r,
