@@ -170,10 +170,10 @@ function css_fontspec(string base, string fallback)
 
 function print_stylesheet ()
 {
-    print $*page_background_image ? "body { background-image: url($*page_background_image); }" : "";
+    var string bgimg = $*page_background_image ? "url($*page_background_image)" : "none";
 """
 body {
-background: $*body_bgcolor none;
+background: $*body_bgcolor $bgimg;
 color: $*entry_fgcolor;
 padding: $*opt_margin_size;
 margin: 0;
