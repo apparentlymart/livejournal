@@ -24,8 +24,24 @@ unless (-e $ENV{'SGML_CATALOG_FILES'}) {
 if ($opt_getxsl) {
     chdir "$home/doc/raw/build" or die "Where is build dir?";
     unlink "xsl-docbook.tar.gz";
-    system("wget", "http://www.livejournal.org/misc/xsl-docbook.tar.gz")
-        and die "Error running wget.  Not installed?\n";
+    my $fetched =  0;
+    my $url = "http://www.livejournal.org/misc/xsl-docbook.tar.gz";
+    my @fetcher = ([ 'wget', "wget $url", ],
+                   [ 'lynx', "lynx -source $url > xsl-docbook.tar.gz", ],
+                   [ 'GET', "GET $url > xsl-docbook.tar.gz", ]);
+    foreach my $fet (@fetcher) {
+        next if $fetched;
+        print "Looking for $fet->[0] ...\n";
+        next unless `which $fet->[0]`;
+        print "RUNNING: $fet->[1]\n";
+        system($fet->[1])
+            and die "Error running $fet->[0].  Interrupted?\n";
+        $fetched = 1;
+    }
+    unless ($fetched) {
+        die "Couldn't find a program to download things from the web.  I looked for:\n\t".
+            join(", ", map { $_->[0] } @fetcher) . "\n";
+    }
     system("tar", "zxvf", "xsl-docbook.tar.gz")
         and die "Error extracting xsl-doxbook.tar.gz; have GNU tar?\n";
 }
