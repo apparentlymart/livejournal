@@ -298,6 +298,11 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
              LJ::add_friend($userid, $friendid) if $friendid and $POST{"initial_optional_friend_$friend"};
          }
 
+         # Set any properties that get set in new users
+         while ( my($name,$val) = each %LJ::USERPROP_INIT ) {
+             LJ::set_userprop($u, $name, $val);
+         }
+
          # Mark the turing test for deletion
          if ($LJ::HUMAN_CHECK{create}) {
              LJ::Captcha::expire($capid, $anum, $userid);
