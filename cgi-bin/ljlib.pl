@@ -6151,15 +6151,16 @@ sub md5_struct
     my ($st, $md5) = @_;
     $md5 ||= Digest::MD5->new;
     unless (ref $st) {
-        if ($] < 5.007 && $Digest::MD5::VERSION > 2.13) {
-            # remove the Sv_UTF8 flag from the scalar, otherwise
-            # stupid later Digest::MD5s crash while trying to work-
-            # around what they think is perl 5.6's lack of utf-8 
-            # support, even though it's not totally necessary
-            # see http://zilla.livejournal.org/show_bug.cgi?id=851
+        # later Digest::MD5s die while trying to 
+        # get at the bytes of an invalid utf-8 string.
+        # this really shouldn't come up, but when it
+        # does, we clear the utf8 flag on the string and retry.
+        # see http://zilla.livejournal.org/show_bug.cgi?id=851
+        eval { $md5->add($st); };
+        if ($@) {
             $st = pack('C*', unpack('C*', $st));
+            $md5->add($st);
         }
-        $md5->add($st);
         return $md5;
     }
     if (ref $st eq "HASH") {
