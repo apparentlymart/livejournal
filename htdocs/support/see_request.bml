@@ -362,7 +362,7 @@ body<=
  
  sub wrap_link
  {
-     my $url = FB::eall(shift);
+     my $url = LJ::eall(shift);
      return "<a href=\"$url\">$url</a>";
  }
  
