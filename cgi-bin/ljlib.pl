@@ -2969,7 +2969,7 @@ sub get_posts_raw
     # first, check memcache.
     my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
     while (my ($k, $v) = each %$mem) {
-        next unless $v;
+        next unless defined $v;
         next unless $k =~ /(\w+):(?:\d+:)?(\d+):(\d+)/;
         my ($type, $jid, $jitemid) = ($1, $2, $3);
         my $cid = $cidsbyjid{$jid};
