@@ -115,7 +115,8 @@ If you're using Debian this should get everything:
                   libimage-size-perl libdbd-mysql-perl libdbi-perl \
                   libnet-perl libdigest-md5-perl libgd-graph-perl \
                   libgd-text-perl libcompress-zlib-perl \
-		  libunicode-maputf8-perl libproc-process-perl
+		  libunicode-maputf8-perl libproc-process-perl \
+		  libapache-mod-fastcgi
 
 NOTE: there used to be three custom LJ:: modules that needed
 installing.  We no longer install those in the system.  Instead LJ
