@@ -130,17 +130,21 @@ body<=
      my $op = $POST{email};
      $op = '' if $op && $op !~ /[N]/; # add D back in here when Digest goes live
      LJ::set_userprop($remote, 'opt_communityjoinemail', $op);
+
+     my $mod_emails = $POST{modemail} ? 1 : 0;
+     LJ::set_userprop($remote, 'opt_nomodemail', $mod_emails ? undef : 1);
  }
 
  # load up our userprop
- LJ::load_user_props($remote, 'opt_communityjoinemail');
+ LJ::load_user_props($remote, 'opt_communityjoinemail', 'opt_nomodemail');
  my $op = $remote->{opt_communityjoinemail};
  $op ||= 'Y';
+ my $mod_emails = $remote->{opt_nomodemail} ? 0 : 1;
 
  # form for setting email option
  $ret .= "<?h1 $ML{'.joinmail.title'} h1?>";
  $ret .= "<?p $ML{'.joinmail.body'} p?>";
- $ret .="<form method='post' action='manage.bml'>";
+ $ret .= "<form method='post' action='manage.bml'>";
  $ret .= "<div style='margin-left: 30px;'>";
  $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_all', 
                           value => '', selected => ($op eq 'Y') });
@@ -156,8 +160,22 @@ body<=
  $ret .= LJ::html_check({ type => 'radio', name => 'email', id => 'email_none', 
                           value => 'N', selected => ($op eq 'N') });
  $ret .= "<label for='email_none'>$ML{'.joinmail.email.none'}</label><br />";
+ $ret .= "</div>";
+
+ # options for getting moderation emails
+ $ret .= "<?p $ML{'.modemail.body'} p?>";
+ $ret .= "<div style='margin-left: 30px;'>";
+
+ $ret .= LJ::html_check({ type => 'radio', name => 'modemail', id => 'modemail_yes', 
+                          value => '1', selected => $mod_emails });
+ $ret .= "<label for='modemail_yes'>$ML{'.modemail.yes'}</label><br />";
+
+ $ret .= LJ::html_check({ type => 'radio', name => 'modemail', id => 'modemail_no', 
+                          value => '0', selected => !$mod_emails });
+ $ret .= "<label for='modemail_no'>$ML{'.modemail.no'}</label><br />";
+ $ret .= "</div><?p ";
  $ret .= LJ::html_submit($ML{'.joinmail.save'});
- $ret .= "</form></div>";
+ $ret .= " p?></form>";
 
  $ret .= "<?h1 $ML{'.create.header'} h1?>";
  $ret .= "<?p " . BML::ml('.create.text', {'link'=>'/community/create.bml'}) . " p?>";

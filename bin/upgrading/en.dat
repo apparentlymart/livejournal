@@ -321,6 +321,12 @@ p?>
 
 /community/manage.bml.joinmail.title=Administrative options
 
+/community/manage.bml.modemail.body=For moderated communities, you can whether to send emails or not:
+
+/community/manage.bml.modemail.no=No email, I will manage the moderation queue manually
+
+/community/manage.bml.modemail.yes=Email me every time someone submits a post to the queue
+
 /community/manage.bml.title=Community Management
 
 /community/members.bml.error.adding=[[user]] has banned this community from sending them invitations.
