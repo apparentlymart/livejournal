@@ -8504,13 +8504,37 @@ sub alloc_user_counter
         return undef;
     }
 
+    my $qry_map = {
+        # for entries:
+        'log'         => "SELECT MAX(jitemid) FROM log2     WHERE journalid=?",
+        'logtext'     => "SELECT MAX(jitemid) FROM logtext2 WHERE journalid=?",
+        'talk_nodeid' => "SELECT MAX(nodeid)  FROM talk2    WHERE nodetype='L' AND journalid=?",
+        # for comments:
+        'talk'     => "SELECT MAX(jtalkid) FROM talk2     WHERE journalid=?",
+        'talktext' => "SELECT MAX(jtalkid) FROM talktext2 WHERE journalid=?",
+    };
+
+    my $consider = sub {
+        my @tables = @_;
+        foreach my $t (@tables) {
+            my $res = $u->selectrow_array($qry_map->{$t}, undef, $uid);
+            $newmax = $res if $res > $newmax;
+        }
+    };
+
     # Make sure the counter table is populated for this uid/dom.
     if ($dom eq "L") {
-        $newmax = $u->selectrow_array("SELECT MAX(jitemid) FROM log2 WHERE journalid=?",
-                                      undef, $uid);
+        # back in the ol' days IDs were reused (because of MyISAM)
+        # so now we're extra careful not to reuse a number that has
+        # foreign junk "attached".  turns out people like to delete
+        # each entry by hand, but we do lazy deletes that are often
+        # too lazy and a user can see old stuff come back alive
+        $consider->("log", "logtext", "talk_nodeid");
     } elsif ($dom eq "T") {
-        $newmax = $u->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
-                                      undef, $uid);
+        # just paranoia, not as bad as above.  don't think we've ever
+        # run into cases of talktext without a talk, but who knows.
+        # can't hurt.
+        $consider->("talk", "talktext");
     } elsif ($dom eq "M") {
         $newmax = $u->selectrow_array("SELECT MAX(modid) FROM modlog WHERE journalid=?",
                                       undef, $uid);
