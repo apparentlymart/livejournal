@@ -159,7 +159,7 @@ $cmd{'gencodes'} = {
         my $quantity = int(shift @$args)   or return $usage->($out, $myname);
         not @$args                         or return $usage->($out, $myname);
 
-        $remote or $fail->($out, "Not logged in.");
+        $remote or return $fail->($out, "Not logged in.");
             
         $remote->{'priv'}->{'gencodes'}
             or return $fail->($out, "You don't have privileges needed to run this command.");
