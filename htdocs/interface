@@ -1,0 +1,103 @@
+#!/usr/bin/perl
+#
+
+use strict;
+use FCGI;
+use XMLRPC::Transport::HTTP;
+
+# workaround incompatibility with FCGI.pm + CGI.pm 
+# (which XMLRPC's HTTP uses)
+sub FCGI::Stream::BINMODE { }
+
+require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
+
+REQUEST:
+    while(FCGI::accept() >= 0) 
+{
+    # XML-RPC interface
+    if ($ENV{'PATH_INFO'} eq "/xmlrpc") {
+	my $server = XMLRPC::Transport::HTTP::CGI
+	    -> dispatch_to('LJ::XMLRPC')
+		-> handle;
+	next REQUEST;
+    }
+
+    # flat interface
+    if ($ENV{'PATH_INFO'} eq "/flat") {
+	my $dbs = LJ::get_dbs();
+	my $dbh = $dbs->{'dbh'};
+	
+	my %out = ();
+	my %FORM = ();
+        LJ::get_form_data(\%FORM);
+	
+	print "Content-type: text/plain\n";
+        LJ::do_request($dbs, \%FORM, \%out);
+	
+	if ($FORM{'responseenc'} eq "urlenc") {
+	    print "\n";
+	    foreach (sort keys %out) {
+		print LJ::eurl($_), "=", LJ::eurl($out{$_}), "&";
+	    }
+	} else {
+	    my $length = 0;
+	    foreach (sort keys %out) {
+		$length += length($_)+1;
+		$length += length($out{$_})+1;
+	    }
+	    
+	    print "Content-length: $length\n\n";
+	    foreach (sort keys %out) {
+		print $_, "\n", $out{$_}, "\n";
+	    }
+	}
+
+	next REQUEST;
+    }
+
+    # unknown interface
+    print "Content-type: text/plain\n\nUnknown interface.\n";
+}
+
+package LJ::Protocol;
+
+sub xmlrpc_method {
+    my $method = shift;
+    shift;   # get rid of package name that dispatcher includes.
+    my $req = shift;
+
+    if (@_) {
+	# don't allow extra arguments
+	die SOAP::Fault
+	    ->faultstring(LJ::Protocol::error_message(202))
+	    ->faultcode(202);
+    }
+    my $error = 0;
+    my $res = LJ::Protocol::do_request_without_db($method, $req, \$error);
+    if ($error) {
+	die SOAP::Fault
+	    ->faultstring(LJ::Protocol::error_message($error))
+	    ->faultcode($error);
+    }
+    return $res;
+}
+
+package LJ::XMLRPC;
+
+sub checkfriends     { LJ::Protocol::xmlrpc_method("checkfriends",     @_); }
+sub consolecommand   { LJ::Protocol::xmlrpc_method("consolecommand",   @_); }
+sub editevent        { LJ::Protocol::xmlrpc_method("editevent",        @_); }
+sub editfriendgroups { LJ::Protocol::xmlrpc_method("editfriendgroups", @_); }
+sub editfriends      { LJ::Protocol::xmlrpc_method("editfriends",      @_); }
+sub friendof         { LJ::Protocol::xmlrpc_method("friendof",         @_); }
+sub getdaycounts     { LJ::Protocol::xmlrpc_method("getdaycounts",     @_); }
+sub getevents        { LJ::Protocol::xmlrpc_method("getevents",        @_); }
+sub getfriendgroups  { LJ::Protocol::xmlrpc_method("getfriendgroups",  @_); }
+sub getfriends       { LJ::Protocol::xmlrpc_method("getfriends",       @_); }
+sub login            { LJ::Protocol::xmlrpc_method("login",            @_); }
+sub postevent        { LJ::Protocol::xmlrpc_method("postevent",        @_); }
+sub syncitems        { LJ::Protocol::xmlrpc_method("syncitems",        @_); }
+
+1;
+

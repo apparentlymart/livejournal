@@ -13,7 +13,7 @@
   SetEnv LJHOME /home/lj
   FastCgiServer /home/lj/cgi-bin/404notfound.cgi -processes 1 -initial-env LJHOME=/home/lj
   FastCgiServer /home/lj/cgi-bin/bmlp.pl -processes 2 -initial-env LJHOME=/home/lj
-  FastCgiServer /home/lj/cgi-bin/log.cgi -processes 2 -initial-env LJHOME=/home/lj
+  FastCgiServer /home/lj/htdocs/interface -processes 2 -initial-env LJHOME=/home/lj
   FastCgiServer /home/lj/htdocs/customview.cgi -processes 2 -initial-env LJHOME=/home/lj
   FastCgiServer /home/lj/htdocs/userpic -processes 1 -initial-env LJHOME=/home/lj
   FastCgiServer /home/lj/htdocs/users -processes 5 -initial-env LJHOME=/home/lj
@@ -50,6 +50,9 @@
   RewriteCond %{HTTP_HOST} !^(www\.)?ljsite\.com(:[0-9]+)?$ [NC]
   RewriteRule . . [F]
 
+  # compatibility for old clients.
+  RewriteRule ^/cgi-bin/log\.cgi(.*) /interface/flat$1 [L,PT,NS]
+
   ErrorDocument 403 /403.html
   ErrorDocument 500 /500.html
   ErrorDocument 404 /cgi-bin/404notfound.cgi
@@ -65,7 +68,7 @@
   <Location /users>
     SetHandler fastcgi-script
   </Location>
-  <Location /cgi-bin/log.cgi>
+  <Location /interface>
     ErrorDocument 500 /500-log.html
     SetHandler fastcgi-script
   </Location>

@@ -105,6 +105,7 @@ Now, install the following modules:
 	Bundle::Mysql
 	Mail::Address
 	Proc::ProcessTable
+	SOAP::Lite
 
 NOTE: there used to be three custom LJ:: modules that needed
 installing.  We no longer install those in the system.  Instead LJ
