@@ -1,7 +1,7 @@
 _parent=>../../lj-bml-blocks.pl
 
-loginboxstyle=>{s}background: url(<?imgprefix?>/userinfo.gif) no-repeat; background-color: #fff; background-position: 0px 1px; padding-left: 18px; color: #00C; font-weight: bold;
-commloginboxstyle=>background: url(<?imgprefix?>/community.gif) no-repeat; background-color: #fff; background-position: 0px 2px; padding-left: 19px; color: #00C; font-weight: bold;
+loginboxstyle=>{Ss}background: url(<?imgprefix?>/userinfo.gif) no-repeat; background-color: #fff; background-position: 0px 1px; padding-left: 18px; color: #00C; font-weight: bold;
+commloginboxstyle=>{Ss}background: url(<?imgprefix?>/community.gif) no-repeat; background-color: #fff; background-position: 0px 2px; padding-left: 19px; color: #00C; font-weight: bold;
 
 SECURITYPRIVATE=>{Ss}<img src="<?imgprefix?>/icon_private.gif" width=16 height=16 align=absmiddle>
 SECURITYPROTECTED=>{Ss}<img src="<?imgprefix?>/icon_protected.gif" width=14 height=15 align=absmiddle>
