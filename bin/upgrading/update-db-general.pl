@@ -2232,7 +2232,7 @@ register_alter(sub {
                  "ADD multihomed ENUM('1', '0') NOT NULL DEFAULT '0' AFTER cldversion");
     }
     
-    unless (index_name("moodthemedata", "KEY:moodthemeid")) {
+    if (index_name("moodthemedata", "INDEX:moodthemeid")) {
         do_alter("moodthemedata", "ALTER IGNORE TABLE moodthemedata DROP KEY moodthemeid");
     }
 
