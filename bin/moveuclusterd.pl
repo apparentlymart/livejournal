@@ -30,6 +30,13 @@ Output a help message and exit.
 
 Listen on the specified I<HOST> instead of the default '0.0.0.0'.
 
+=item -m, --maxlocktime=SECONDS
+
+Set the number of seconds that is targeted as the timespan to keep jobs locked
+before assigning them. If the oldest job in a cluster's queue is older than this
+value (120 by default), no users will be locked for that queue until the next
+check.
+
 =item -p, --port=PORT
 
 Listen to the given I<PORT> instead of the default 2789.
@@ -42,9 +49,9 @@ to I<INTEGER>. The default rate is 1.
 =item -s, --lockscale=INTEGER
 
 Set the lock-scaling factor to I<INTEGER>. The lock scaling factor is used to
-decide how many users to lock per source cluster. The value is a multiple 
-
-:TODO: finish documenting this.
+decide how many users to lock per source cluster; a scaling factor of C<3> (the
+default) would cause the jobserver to try to maintain 3 x the number of jobs as
+there are allowed connections for a given cluster, modulo the C<maxlocktime>.
 
 =item -v, --verbose
 
@@ -124,6 +131,7 @@ MAIN: {
         $port,                  # Port to listen on
         $host,                  # Address to listen on
         $lockScale,             # Lock scaling factor
+        $maxLockTime,           # Max time to keep users locked
        );
 
     # Print the program header and read in command line options
@@ -132,6 +140,7 @@ MAIN: {
         'H|host=s'        => \$host,
         'd|debug+'        => \$debugLevel,
         'h|help'          => \$helpFlag,
+        'm|maxlocktime=i' => \$maxLockTime,
         'p|port=i'        => \$port,
         'r|defaultrate=i' => \$defaultRate,
         's|lockscale=i'   => \$lockScale,
@@ -148,6 +157,7 @@ MAIN: {
     $config{debugLevel} = $debugLevel || 0;
     $config{defaultRate} = $defaultRate if $defaultRate;
     $config{lockScale} = $lockScale if $lockScale;
+    $config{maxLockTime} = $maxLockTime if defined $maxLockTime;
 
     # Create a new daemon object
     $server = new JobServer ( %config );
@@ -239,6 +249,7 @@ INIT {
         debugLevel   => 0,              # Debugging log level
         defaultRate  => 1,              # The default src cluster rate
         lockScale    => 3,              # Scaling factor for locking users
+        maxLockTime  => 120,            # Max seconds to keep users locked
        );
 
     my $level = 0;
@@ -500,6 +511,7 @@ sub prelockSomeUsers {
         $target,                # Number of queued jobs we'd like to be locked
         $lockcount,             # Number of users locked
         $scale,                 # Lock scaling factor
+        $maxLockTime,           # Max number of seconds to keep users locked
         $clients,               # Number of currently-connected clients
         $jobs,                  # Job queue per cluster
        );
@@ -510,6 +522,9 @@ sub prelockSomeUsers {
     # Set the scaling factor -- this is a command-line setting that affects how
     # deep the queue is locked per source cluster.
     $scale = $self->{config}{lockScale};
+    $maxLockTime = $self->{config}{maxLockTime};
+
+    $self->debugMsg( 3, "Prelocking with scale: $scale, maxlocktime: $maxLockTime" );
 
     # Iterate over all the queues we have by cluster
   CLUSTER: foreach my $clusterid ( keys %{$self->{jobs}} ) {
@@ -521,9 +536,11 @@ sub prelockSomeUsers {
         $jobs = $self->{jobs}{ $clusterid };
       JOB: for ( my $i = 0; $i <= $target; $i++ ) {
 
-            # If there are fewer jobs than the target number to be locked, skip
-            # to the next cluster
+            # If there are fewer jobs than the target number to be locked, or
+            # the current job is older than the maximum number of seconds to
+            # keep a user locked, skip to the next cluster
             next CLUSTER if $i > $#$jobs;
+            next CLUSTER if $jobs->[$i]->secondsSinceLock > $maxLockTime;
 
             # Skip jobs that are already prelocked. If locking fails, assume
             # there's some database problem and don't try to prelock any more
