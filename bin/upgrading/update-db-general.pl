@@ -945,14 +945,16 @@ CREATE TABLE userusage
 EOC
 
 # wknum - number of weeks past unix epoch time
-# ubefore - units before (unit = 10 seconds)
+# ubefore - units before next week (unit = 10 seconds)
+# uafter - units after this week (unit = 10 seconds)
 register_tablecreate("weekuserusage", <<'EOC');
 CREATE TABLE weekuserusage
 (
    wknum  SMALLINT UNSIGNED NOT NULL,
    userid INT UNSIGNED NOT NULL,
    PRIMARY KEY (wknum, userid),
-   ubefore  SMALLINT UNSIGNED NOT NULL
+   ubefore  SMALLINT UNSIGNED NOT NULL,
+   uafter   SMALLINT UNSIGNED NOT NULL
 )
 EOC
 
@@ -1780,6 +1782,11 @@ register_alter(sub {
     {
         do_alter("community",
                  "ALTER TABLE community DROP ownerid");
+    }
+
+    unless (column_type("weekuserusage", "uafter")) {
+        do_sql("DROP TABLE weekuserusage");
+        create_table("weekuserusage");
     }
 
 });

@@ -209,8 +209,7 @@ body<=
      my $qclusterid = ($LJ::ALLOW_CLUSTER_SELECT
                        ? $FORM{'cluster_id'}
                        : LJ::new_account_cluster()) + 0;
-
-     my $qdversion = $qclusterid ? 2 : 0;
+     die "Cluster 0 not supported" unless $qclusterid;
 
      $qpassword = $dbh->quote($FORM{'password1'});
      my $userid = $u->{'userid'}+0;
@@ -219,7 +218,7 @@ body<=
          my $caps   = int($LJ::NEWUSER_CAPS);
          my $status = ($LJ::EVERYONE_VALID ? 'A'  : 'N');
          $dbh->do("INSERT INTO user (user, email, password, status, caps, name, clusterid, dversion) ".
-                  "VALUES ($quser, $qemail, $qpassword, '$status', $caps, $qname, $qclusterid, $qdversion)");
+                  "VALUES ($quser, $qemail, $qpassword, '$status', $caps, $qname, $qclusterid, $LJ::MAX_DVERSION)");
          if ($dbh->err) {
              return "<?h1 $ML{'Error'} h1?><?p $ML{'error.procrequest'} <b>" . $dbh->errstr . "</b> p?>";
          }

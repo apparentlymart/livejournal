@@ -14,7 +14,7 @@
         'i18n' => 'generator/en',
     };
 
-    # cluster 0 is deprecated.
+    # cluster 0 is no longer supported
     $DEFAULT_CLUSTER ||= 1;
     @CLUSTERS = (1) unless @CLUSTERS;
 

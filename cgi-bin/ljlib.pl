@@ -5890,15 +5890,34 @@ sub alloc_user_counter
 
 # given a unix time, returns;
 #   ($week, $ubefore)
-# week: weeks from first sunday to the next sunday after given time
+# week: week number (week 0 is first 3 days of unix time)
 # ubefore:  seconds before the next sunday, divided by 10
 sub weekuu_parts {
     my $time = shift;
     $time -= 86400*3;  # time from the sunday after unixtime 0
-    my $WEEK = 86400*7;
-    my $week = int(($time+$WEEK) / $WEEK);
-    my $ubefore = 60480 - int(($time % $WEEK) / 10);
-    return ($week, $ubefore);
+    my $WEEKSEC = 86400*7;
+    my $week = int(($time+$WEEKSEC) / $WEEKSEC);
+    my $uafter = int(($time % $WEEKSEC) / 10);
+    my $ubefore = int(60480 - ($time % $WEEKSEC) / 10);
+    return ($week, $uafter, $ubefore);
+}
+
+sub weekuu_before_to_time
+{
+    my ($week, $ubefore) = @_;
+    my $WEEKSEC = 86400*7;
+    my $time = $week * $WEEKSEC + 86400*3;
+    $time -= 10 * $ubefore;
+    return $time;
+}
+
+sub weekuu_after_to_time
+{
+    my ($week, $uafter) = @_;
+    my $WEEKSEC = 86400*7;
+    my $time = ($week-1) * $WEEKSEC + 86400*3;
+    $time += 10 * $uafter;
+    return $time;
 }
 
 sub paging_bar

@@ -638,6 +638,11 @@ sub postevent
         });
         return fail($err,103,$error) if $error;
     }
+
+    my $dbcm = LJ::get_cluster_master($uowner);
+    return fail($err,306) unless $dbcm;
+    my $now = $dbcm->selectrow_array("SELECT UNIX_TIMESTAMP()");
+    my $anum  = int(rand(256));
     
     # by default we record the true reverse time that the item was entered.
     # however, if backdate is on, we put the reverse time at the end of time
@@ -645,13 +650,10 @@ sub postevent
     # it... where clause there is: < $LJ::EndOfTime).  but this way we can
     # have entries that don't show up on friends view, now that we don't have
     # the hints table to not insert into.
-    my $rlogtime = "$LJ::EndOfTime";
+    my $rlogtime = $LJ::EndOfTime;
     unless ($req->{'props'}->{"opt_backdated"}) {
-        $rlogtime .= "-UNIX_TIMESTAMP()";
+        $rlogtime -= $now;
     }
-
-    my $dbcm = $dbh;
-    my $anum  = int(rand(256));
 
     my $dupsig = Digest::MD5::md5_hex(join('', map { $req->{$_} } 
                                            qw(subject event usejournal security allowmask)));
@@ -684,9 +686,6 @@ sub postevent
             $release->();
         }
     };
-
-    $dbcm = LJ::get_cluster_master($uowner);
-    return fail($err,306) unless $dbcm;
 
     # if posting to a moderated community, store and bail out here
     if ($uowner->{'journaltype'} eq 'C' && $uowner->{'moderated'} && !$flags->{'nomod'}) {
@@ -780,7 +779,7 @@ sub postevent
 
     $dbcm->do("INSERT INTO log2 (journalid, jitemid, posterid, eventtime, logtime, security, ".
               "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
-              "VALUES ($ownerid, $itemid, $posterid, $qeventtime, NOW(), $qsecurity, $qallowmask, ".
+              "VALUES ($ownerid, $itemid, $posterid, $qeventtime, FROM_UNIXTIME($now), $qsecurity, $qallowmask, ".
               "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
               "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     return $fail->($err,501,$dbcm->errstr) if $dbcm->err;
@@ -901,9 +900,14 @@ sub postevent
 
     # update weekuserusage table, which keeps track of user activity
     # for a given week.
-    my ($weeknum, $ubefore) = LJ::weekuu_parts(time());
-    $dbh->do("REPLACE INTO weekuserusage (wknum, userid, ubefore) VALUES (?,?,?)",
-             undef, $weeknum, $ownerid, $ubefore);
+    {
+        my ($weeknum, $uafter, $ubefore) = LJ::weekuu_parts($now);
+        my $rv = $dbh->do("UPDATE weekuserusage SET ubefore=? WHERE ".
+                          "wknum=? AND userid=?", undef, $ubefore, $weeknum, $ownerid);
+        $dbh->do("INSERT IGNORE INTO weekuserusage (wknum, userid, ubefore, uafter) ".
+                 "VALUES (?,?,?,?)", undef, 
+                 $weeknum, $ownerid, $ubefore, $uafter) unless $rv > 0;
+    }
 
      # notify weblogs.com of post if necessary
     if ($u->{'opt_weblogscom'} && LJ::get_cap($u, "weblogscom") &&

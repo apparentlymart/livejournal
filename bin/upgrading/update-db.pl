@@ -102,14 +102,14 @@ foreach my $t (keys %table_unknown)
 ## create tables
 foreach my $t (keys %table_create)
 {
-    next if ($table_exists{$t});
+    next if $table_exists{$t};
     create_table($t); 
 }
 
 ## drop tables
 foreach my $t (keys %table_drop)
 {
-    next if (! $table_exists{$t});
+    next unless $table_exists{$t};
     drop_table($t); 
 }
 
@@ -365,6 +365,11 @@ if ($opt_pop)
         }
     }
 
+    # convert users from dversion2
+    if (my $d2 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=2")) {
+        system("$ENV{'LJHOME'}/bin/upgrading/pop-weekuu.pl");
+    }
+
     print "\nThe system user was created with a random password.\nRun \$LJHOME/bin/upgrading/make_system.pl to change its password and grant the necessary privileges."
         if $made_system;
     print "\nRemember to also run:\n  bin/upgrading/texttool.pl load\n\n";
@@ -494,11 +499,7 @@ sub register_tablecreate
 
     return if $cluster && ! defined $clustered_table{$table};
 
-    unless ($table_exists{$table}) {
-        $table_create{$table} = $create;
-    } else {
-        $table_create{$table} = "--";   # save memory, won't use it.
-    }
+    $table_create{$table} = $create;
 }
 
 sub register_tabledrop
