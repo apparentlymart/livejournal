@@ -48,7 +48,7 @@
     }
 
     # query db and get data
-    my $sth = $dbr->prepare("SELECT faqid, question, answer, lastmoduserid, ".
+    my $sth = $dbr->prepare("SELECT faqid, question, answer, faqcat, lastmoduserid, ".
                             "DATE_FORMAT(lastmodtime, '%Y-%m-%d'), ".
                             "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
                             "WHERE $where ORDER BY sortorder");
@@ -61,7 +61,7 @@
 
     my $count = 0;
     my $dbh;
-    while (my ($faqid, $question, $answer, $lastmoduserid, 
+    while (my ($faqid, $question, $answer, $faqcat, $lastmoduserid, 
                $lastmodtime, $unixmodtime) = $sth->fetchrow_array)
     {
 
@@ -102,6 +102,11 @@
         my $lastmodwho = LJ::get_username($lastmoduserid);
         if ($lastmodwho) {
             $$body .= "<p align=\"right\"><b>$ML{'.lastupdated'}</b><br />$lastmodwho, $lastmodtime</p>";
+        }
+        if (LJ::check_priv($remote, "faqedit", "*") ||
+            LJ::check_priv($remote, "faqedit", $faqcat))
+        {
+            $$body .= "<p align=\"right\"><a href=\"/admin/faq/faqedit.bml?id=$faqid\">$ML{'.edit.faq'}</a></p>";
         }
 
         $count++;

@@ -2042,6 +2042,8 @@ that area. p?>
 
 /support/faqbrowse.bml.backsupport=Back to <a href="./">the support area</a>.
 
+/support/faqbrowse.bml.edit.faq=Edit this FAQ
+
 /support/faqbrowse.bml.error.nofaq=The specified FAQ does not exist.
 
 /support/faqbrowse.bml.lastupdated=Last Updated:
