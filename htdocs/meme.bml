@@ -6,20 +6,49 @@
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
+ my $sth;
+
+ if ($FORM{'url'}) {
+     my $url = $FORM{'url'};
+     my $qurl = $dbh->quote($url);
+     my $eurl = LJ::ehtml($url);
+     
+     $body .= "(=H1 Who linked this? H1=)(=P The following journal entries link to:<blockquote><a href='$eurl'><b>$eurl</b></a></blockquote>P=)";
+
+     $body .= "<table>";
+     $body .= "<tr align='left'><td width='100'><b>User</b></td><td><b>Subject of Post</b></td></tr>\n";
+
+     $sth = $dbr->prepare("SELECT u.user, m.itemid, ls.subject FROM useridmap u, meme m, logsubject ls WHERE u.userid=m.posterid AND m.url=$qurl AND ls.itemid=m.itemid");
+     $sth->execute;
+     while (my ($user, $itemid, $subject) = $sth->fetchrow_array)
+     {
+	 $body .= "<tr align='left'><td>(=LJUSER $user LJUSER=)</td>";
+	 my $esub = LJ::ehtml($subject) || "(no subject)";
+	 $body .= "<td><a href='$LJ::SITEROOT/talkread.bml?itemid=$itemid'>$esub</a></td>";
+	 $body .= "</tr>";
+     }
+
+     $body .= "</table>";
+     
+
+     $body .= "(=HR=)&lt;&lt; <a href='meme.bml'>Back to Meme Listing</a>";
+     return "";
+ }
 
  $body .= "(=H1 Top 40 $LJ::SITENAME Memes H1=)\n";
- $body .= "(=P The following 40 URLs are the most popular referenced URLs in the past week: P=)(=HR=)";
+ $body .= "(=P From this page you can see the most popular URLs referenced recently. P=)(=HR=)";
 
- my $sth;
  $sth = $dbr->prepare("SELECT url, count(*) FROM meme GROUP BY 1 ORDER BY 2 DESC LIMIT 40");
  $sth->execute;
 
  $body .= "<table>\n";
- my $i = 1;
+ $body .= "<tr align='left'><td width='50' align='left'><b>Count</b></td><td><b>URL</b></td></tr>\n";
  while (my ($url, $ct) = $sth->fetchrow_array)
  {
      my $eurl = LJ::ehtml($url);
-     $body  .= "<tr><td><b>$ct</b></td><td><a href='$eurl'>$eurl</a></td></tr>\n";
+     my $uurl = LJ::eurl($url);
+     $body  .= "<tr align='left'><td><b><a href='meme.bml?url=$uurl'><nobr>$ct links</nobr></a></b></td>";
+     $body .= "<td><a href='$eurl'>$eurl</a></td></tr>\n";
  }
  $body .= "</table>";
  $sth->finish;
