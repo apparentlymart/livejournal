@@ -17,6 +17,11 @@ head<=
         font-weight: bold;
     }
 
+    .settings td
+    {
+        padding: 3px;
+    }
+
     </style>
 <=head
 body<=
@@ -33,13 +38,23 @@ body<=
 
     my $u = LJ::get_remote();
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+    my @props =
+      qw/
+      emailpost_pin emailpost_allowfrom
+      emailpost_userpic emailpost_security
+      emailpost_comments emailpost_gallery
+      emailpost_imgsecurity emailpost_imgsize
+      emailpost_imglayout emailpost_imgcut
+      /;
 
     my ($mode, $type) = ($GET{mode}, $GET{type});
     if ($u) {
-        LJ::load_user_props($u, qw(emailpost_pin emailpost_allowfrom));
+        LJ::load_user_props( $u, @props );
     } else {
         $mode = 'help';
     }
+
+#--------------------------------------------------------------------------
 
     # Help text
     if ($mode eq 'help') {
@@ -50,6 +65,7 @@ body<=
 
         my @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
         my $addr    = $address[0] || 'allowed_sender@example.com';
+        $addr =~ s/\(\w\)$//;
         my $pin     = $u->{emailpost_pin} || 'PIN';
         my $to      = "To: $user" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />'; 
         my $to_pin  = "To: $user+$pin" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />'; 
@@ -398,6 +414,8 @@ EOT
         return $ret;
     }
 
+#--------------------------------------------------------------------------
+
     # Update settings
     if ($POST{userid} == $u->{userid}) {
         my @errors;
@@ -412,7 +430,8 @@ EOT
             characters long." unless $pin =~ /^([a-z0-9]){4,20}$/i or $pin eq '';
 
         push @errors, "This PIN is invalid.  You should change it to something that does <b>NOT</b>
-            have anything to do with your $LJ::SITENAMESHORT account." if $pin eq $u->{password} or $pin eq $u->{user};
+            have anything to do with your $LJ::SITENAMESHORT account."
+            if $pin eq $u->{password} or $pin eq $u->{user};
 
         # Check email, add flags if needed.
         my %allowed;
@@ -427,9 +446,28 @@ EOT
             $allowed{$_}->{'get_errors'} = 1 if $POST{"check_$addrcount"};
             $addrcount++;
         }
+
+        if ( $POST{'emailpost_imgcut'} eq 'none' &&
+             $POST{'email_imgsize'} ne 'default' ) {
+            my ($w, $h) = split 'x', $POST{'emailpost_imgsize'};
+            push @errors, "Image size must be 320x240 or less to disable the lj-cut."
+                if $w > 320 || $h > 240;
+        }
+
         return LJ::bad_input(@errors) if @errors;
 
         LJ::Emailpost::set_allowed_senders($u, \%allowed);
+        foreach my $prop (@props) {
+            next if $prop =~ /emailpost_(allowfrom|pin)/;
+            next if $u->{'prop'} eq $POST{$prop};
+            if ($POST{$prop} && $POST{$prop} ne 'default') {
+                $POST{$prop} = undef if $prop eq 'emailpost_gallery' &&
+                                        $POST{$prop} eq 'LJ_emailpost';
+                LJ::set_userprop($u, $prop, $POST{$prop});
+            } else {
+                LJ::set_userprop($u, $prop, undef);
+            }
+        }
         LJ::set_userprop($u, "emailpost_pin", $pin);
 
         my $ret;
@@ -443,14 +481,34 @@ EOT
         return $ret;
     }
 
+#--------------------------------------------------------------------------
+
     # Initial page
     my $addrlist = LJ::Emailpost::get_allowed_senders($u);
-    my @address;
-    foreach (sort keys %$addrlist) { push(@address, $_) }
+    my (@address, $res, $ret);
+    push @address, $_ foreach sort keys %$addrlist;
+
+    # get userpics and friendgroups
+    $res = LJ::Protocol::do_request(
+        "login",
+        {
+            "ver" => ( $LJ::UNICODE ? "1" : "0" ),
+            "username"     => $u->{'user'},
+            "friendgroups" => 1,
+            "getpickws"    => 1,
+        },
+        undef,
+        { "noauth" => 1, }
+    );
+
+    my @groups = map { $_->{'name'} } @{ $res->{'friendgroups'} };
+    unshift @groups, $_ foreach qw/ -------- friends private public default /;
+
+    my @userpics = @{ $res->{'pickws'} };
+    unshift @userpics, $_ foreach qw/ default /;
     
-    my $ret;
     $ret .= "<?p If you'd like to be able to update your journal via email, please fill out the following fields. 
-        For more help using this feature, check out the <a href='emailpost.bml?mode=help'>instructions</a>. p?>";
+        For more help using this feature, check out the <a href='emailpost.bml?mode=help'>instructions</a>. p?><br />";
 
     unless (LJ::get_cap($u, 'emailpost')) {
         $ret .= "Sorry, updating your journal via email is not available for your account type.";
@@ -487,12 +545,67 @@ EOT
         characters and/or numbers. p?>";
     $ret .= "<div style='margin-left:40px;'>";
     $ret .= LJ::html_text({name=>'pin', value=>$u->{emailpost_pin}, maxlength=>20});
+    $ret .= '</div><br />';
+
+    $ret .= "<?h1 Default settings h1?>";
+    $ret .= "<?p 
+        These settings apply to all journal updates via email.  You can leave these options
+        alone to let your journal defaults take over, or override on a per message basis using 
+        lj-headers.  These settings (and lj-header overrides) are described
+        <a href='emailpost.bml?mode=help'>here</a>. p?>";
+    $ret .= "<div style='margin-left:40px;'>";
+    $ret .= "<table cellspacing='0' class='settings'>";
+
+    $ret .= "<tr><td colspan='2'><?h2 Journal entry defaults h2?></td></tr>";
+    $ret .= "<tr><td>Userpic:</td><td>";
+    $ret .= LJ::html_select({ name=> 'emailpost_userpic', selected => $u->{'emailpost_userpic'} },
+                            map { $_ => $_ } @userpics);
+    $ret .= "</td></tr>";
+    $ret .= "<tr><td>Security:</td><td>";
+    $ret .= LJ::html_select({ name=> 'emailpost_security', selected => $u->{'emailpost_security'} },
+                            map { $_ => $_ } @groups);
+    $ret .= "</td></tr>";
+    $ret .= "<tr><td>Comments:</td><td>";
+    $ret .= LJ::html_select({ name=> 'emailpost_comments', selected => $u->{'emailpost_comments'} },
+                            'default','default','noemail','No email','off','off');
+    $ret .= "</td></tr>";
+
+    if ($LJ::FB_SITEROOT && %LJ::FOTOBILDER_IP && LJ::get_cap($u, 'fb_account')) {
+        $ret .= "<tr><td colspan='2'>&nbsp;</td></tr>";
+        $ret .= "<tr><td colspan='2'><?h2 Image hosting defaults h2?></td></tr>";
+
+        $ret .= "<tr><td>Gallery name:</td><td>";
+        $ret .= LJ::html_text({ name=> 'emailpost_gallery',
+                    value => $u->{'emailpost_gallery'} || 'LJ_emailpost' });
+        $ret .= "</td></tr>";
+        $ret .= "<tr><td>Image security:</td><td>";
+        $ret .= LJ::html_select({ name=> 'emailpost_imgsecurity', selected => $u->{'emailpost_imgsecurity'} },
+                            default => 'default',public => 'public',
+                            regusers => 'registered users',
+                            friends => 'friends', private => 'private');
+        $ret .= "</td></tr>";
+        $ret .= "<tr><td>Image size:</td><td>";
+        $ret .= LJ::html_select({ name=> 'emailpost_imgsize', selected => $u->{'emailpost_imgsize'} },
+                                map { $_ => $_ } qw/ default 100x100 320x240 640x480 /);
+        $ret .= "</td></tr>";
+        $ret .= "<tr><td>Image layout:</td><td>";
+        $ret .= LJ::html_select({ name=> 'emailpost_imglayout', selected => $u->{'emailpost_imglayout'} },
+                                map { $_ => $_ } qw/ default horizontal vertical /);
+        $ret .= "</td></tr>";
+        $ret .= "<tr><td>Image cut type:</td><td>";
+        $ret .= LJ::html_select({ name=> 'emailpost_imgcut', selected => $u->{'emailpost_imgcut'} },
+                                map { $_ => $_ } qw/ default titles none /);
+        $ret .= "</td></tr>";
+    }
+
+    $ret .= "</table>";
+    $ret .= '</div><br />';
+
 
     $ret .= "<?standout ";
     $ret .= LJ::html_submit($ML{'/manage/phonepost.bml.save'});
     $ret .= " standout?>";
     $ret .= "</form>";
-    $ret .= '</div>';
     return $ret;
 
 } _code?>

@@ -90,6 +90,33 @@ sub process {
     $body =~ s/^\s+//;
     $body =~ s/\s+$//;
 
+    # Snag charset and do utf-8 conversion
+    my ($charset, $format);
+    $charset = $1 if $content_type =~ /\bcharset=['"]?(\S+?)['"]?[\s\;]/i;
+    $format = $1 if $content_type =~ /\bformat=['"]?(\S+?)['"]?[\s\;]/i;
+    if (defined($charset) && $charset !~ /^UTF-?8$/i) { # no charset? assume us-ascii
+        return $err->("Unknown charset encoding type.", { sendmail => 1 })
+            unless Unicode::MapUTF8::utf8_supported_charset($charset);
+        $body = Unicode::MapUTF8::to_utf8({-string=>$body, -charset=>$charset});
+    }
+
+    # check subject for rfc-1521 junk
+    if ($subject =~ /^=\?/) {
+        my @subj_data = MIME::Words::decode_mimewords( $subject );
+        if (@subj_data) {
+            if ($subject =~ /utf-8/i) {
+                $subject = $subj_data[0][0];
+            } else {
+                $subject = Unicode::MapUTF8::to_utf8(
+                        {
+                        -string  => $subj_data[0][0],
+                        -charset => $subj_data[0][1]
+                        }
+                        );
+            }
+        }
+    }
+    
     # Strip (and maybe use) pin data from viewable areas
     if ($subject =~ s/^\s*\+([a-z0-9]+)\s+//i) {
         $pin = $1 unless defined $pin;
@@ -114,31 +141,6 @@ sub process {
     }
     return $err->("Email gateway access denied for your account type.", { sendmail => 1 })
         unless LJ::get_cap($u, "emailpost");
-
-    # Snag charset and do utf-8 conversion
-    my ($charset, $format);
-    $charset = $1 if $content_type =~ /\bcharset=['"]?(\S+?)['"]?[\s\;]/i;
-    $format = $1 if $content_type =~ /\bformat=['"]?(\S+?)['"]?[\s\;]/i;
-    if (defined($charset) && $charset !~ /^UTF-?8$/i) { # no charset? assume us-ascii
-        return $err->("Unknown charset encoding type.", { sendmail => 1 })
-            unless Unicode::MapUTF8::utf8_supported_charset($charset);
-        $body = Unicode::MapUTF8::to_utf8({-string=>$body, -charset=>$charset});
-
-        # check subject for rfc-1521 junk
-        if ($subject =~ /^=\?/) {
-            my @subj_data = MIME::Words::decode_mimewords($subject);
-            if (@subj_data) {
-                $subject = Unicode::MapUTF8::to_utf8({-string=>$subj_data[0][0],
-                                                      -charset=>$subj_data[0][1]});
-            }
-        }
-    }
-
-    # Also check subjects of UTF-8 emails for encoded subject lines [support: 220926]
-    elsif ($subject =~ /^=\?utf-8/i) {
-        my @subj_data = MIME::Words::decode_mimewords( $subject );
-        $subject = $subj_data[0][0] if @subj_data;
-    }
 
     # PGP signed mail?  We'll see about that.
     if (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
@@ -173,13 +175,32 @@ sub process {
             $lj_headers{lc($1)} = $2 if /^lj-(\w+):\s*(.+?)\s*$/i;
         }
     }
-    $props->{picture_keyword} = $lj_headers{userpic};
-    $props->{current_mood} = $lj_headers{mood};
-    $props->{current_music} = $lj_headers{music};
-    $props->{opt_nocomments} = 1 if $lj_headers{comments} =~ /off/i;
-    $props->{opt_noemail} = 1 if $lj_headers{comments} =~ /noemail/i;
 
-    $lj_headers{security} = lc($lj_headers{security});
+    LJ::load_user_props(
+        $u,
+        qw/
+          emailpost_userpic emailpost_security
+          emailpost_comments emailpost_gallery
+          emailpost_imgsecurity emailpost_imgsize
+          emailpost_imglayout emailpost_imgcut /
+    );
+
+    # Get post options, using lj-headers first, and falling back
+    # to user props.  If neither exist, the regular journal defaults
+    # are used.
+    $props->{picture_keyword} = $lj_headers{'userpic'} ||
+                                $u->{'emailpost_userpic'};
+    $props->{current_mood}   = $lj_headers{'mood'};
+    $props->{current_music}  = $lj_headers{'music'};
+    $props->{opt_nocomments} = 1
+      if $lj_headers{comments}      =~ /off/i
+      || $u->{'emailpost_comments'} =~ /off/i;
+    $props->{opt_noemail} = 1
+      if $lj_headers{comments}      =~ /noemail/i
+      || $u->{'emailpost_comments'} =~ /noemail/i;
+
+    $lj_headers{security} = lc($lj_headers{security}) ||
+                            $u->{'emailpost_security'};
     if ($lj_headers{security} =~ /^(public|private|friends)$/) {
         if ($1 eq 'friends') {
             $lj_headers{security} = 'usemask';
@@ -192,13 +213,15 @@ sub process {
             $amask = (1 << $group->{groupnum});
             $lj_headers{security} = 'usemask';
         } else {
-            $err->("Friendgroup \"$lj_headers{security}\" not found.  Your journal entry was posted privately.", { sendmail => 1 });
+            $err->("Friendgroup \"$lj_headers{security}\" not found.  Your journal entry was posted privately.",
+                   { sendmail => 1 });
             $lj_headers{security} = 'private';
         }
     }
 
     # if they specified a imgsecurity header but it isn't valid, default
     # to private.  Otherwise, set to what they specified.
+    $lj_headers{'imgsecurity'} ||= $u->{'emailpost_imgsecurity'};
     if ($lj_headers{'imgsecurity'} &&
         $lj_headers{'imgsecurity'} !~ /^(private|regusers|friends|public)$/) {
         $lj_headers{'imgsecurity'} = 0;
@@ -210,16 +233,16 @@ sub process {
         $lj_headers{'imgsecurity'} = $groupmap{$1};
     }
 
-    $lj_headers{'imgcut'}    ||= 'totals';
-    $lj_headers{'imglayout'} ||= 'vertical';
+    $lj_headers{'imgcut'}    ||= ($u->{'emailpost_imgcut'}    || 'totals');
+    $lj_headers{'imglayout'} ||= ($u->{'emailpost_imglayout'} || 'vertical');
 
     # upload picture attachments to fotobilder.
     my $fb_upload_errstr;
     # undef return value? retry posting for later.
     my $fb_upload = upload_images($entity, $u, \$fb_upload_errstr, 
-                               { imgsec  => $lj_headers{'imgsecurity'},
-                                 galname => $lj_headers{'gallery'},
-                               }) || return $err->($fb_upload_errstr, { retry => 1 });
+                       { imgsec  => $lj_headers{'imgsecurity'} || $u->{'emailpost_imgsecurity'},
+                         galname => $lj_headers{'gallery'}     || $u->{'emailpost_gallery'}
+                       }) || return $err->($fb_upload_errstr, { retry => 1 });
 
     # if we found and successfully uploaded some images...
     if (ref $fb_upload eq 'HASH') {
@@ -228,10 +251,13 @@ sub process {
 
         # set journal image display size
         my @valid_sizes = qw(100x100 320x240 640x480);
-        my $size = lc($lj_headers{'imgsize'});
+        my $size = lc($lj_headers{'imgsize'}) || $u->{'emailpost_imgsize'};
         $size = '320x240' unless grep { $size eq $_; } @valid_sizes;
-        my ($width, $height) = split /x/, $size;
+        my ($width, $height) = split 'x', $size;
         $size = "/s$size";
+
+        # force lj-cut on images larger than 320x240
+        $lj_headers{'imgcut'} = 'totals' if $width > 320 || $height > 240;
 
         # insert image links into post body
         $body .= "<lj-cut text='$icount " .
