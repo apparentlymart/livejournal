@@ -26,6 +26,23 @@ set vlink_color = "#500050";
 property Color alink_color { des = "Active link color"; }
 set alink_color = "#ff00c0";
 
+property Color comment_bar_one_bgcolor {
+    des = "Alternating background color for comment bars (one)";
+}
+property Color comment_bar_two_fgcolor {
+    des = "Text color on alternating comment bars (one)";
+}
+property Color comment_bar_two_bgcolor {
+    des = "Alternating background color for comment bars (two)";
+}
+property Color comment_bar_one_fgcolor {
+    des = "Text color on alternating comment bars (two)";
+}
+set comment_bar_one_bgcolor = "#c0c0ff";
+set comment_bar_one_fgcolor = "#000000";
+set comment_bar_two_bgcolor = "#eeeeff";
+set comment_bar_two_fgcolor = "#000000";
+
 property use page_recent_items;
 property use text_post_comment;
 property use text_read_comments;
@@ -37,8 +54,6 @@ property use text_read_comments_friends;
 property string imguri { noui=1; } #  URI to notepad images (no trailing slash)
 set imguri = "";
 
-set view_entry_disabled = true;
-
 function prop_init()
 {
     if ($*imguri == "") { $*imguri = "$*SITEROOT/img/style/notepad"; }
@@ -46,17 +61,9 @@ function prop_init()
 
 function Page::lay_bottom_navigation() { }
 
-function Page::print()
+function print_stylesheet ()
 {
-    var string title = $this->title();
-    """
-<html>
- <head>
-  <title>$title</title>
-  $.head_content
-  <style type="text/css">
-   <!--
-body {
+    """body {
     background-color: $*body_bgcolor;
 }
 td,body,p,div {
@@ -88,9 +95,18 @@ a:hover {
     text-decoration: underline;
     font-family: verdana,arial,helvetica;
     font-size:12px;
+}""";
 }
-   -->
-  </style>
+
+function Page::print()
+{
+    var string title = $this->title();
+    """
+<html>
+ <head>
+  <title>$title</title>
+  $.head_content
+  <link rel="stylesheet" href="$.stylesheet_url" type="text/css" />
  </head>
  <body>
   <table width="70%" border="0" cellpadding="0" cellspacing="0">
@@ -140,7 +156,7 @@ a:hover {
     """;
 }
 
-function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
+function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
     "<table border='0'><tr>";
     if ($p.view == "friends" or
@@ -161,24 +177,28 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
     }
     """<td valign="top"><font size="+1">"""; print $e.time->date_format("med"); " "; print $e.time->time_format();
     if ($e.subject != "") { " <span style='color: $*subject_color'>$e.subject</span>"; }
-    "</font><p>$e.text</p>";
-    if (size $e.metadata) {
-        "<p>";
-        foreach var string k ($e.metadata) {
-            var string key = $k;
-            var string val = $e.metadata{$k};
-            if ($k == "mood") {
-                $key = $*text_meta_mood;
-            } elseif ($k == "music") {
-                $key = $*text_meta_music;
+    "</font>";
+    if (not $hide_text) 
+    {
+        print "<p>$e.text</p>";
+        if (size $e.metadata) {
+            "<p>";
+            foreach var string k ($e.metadata) {
+                var string key = $k;
+                var string val = $e.metadata{$k};
+                if ($k == "mood") {
+                    $key = $*text_meta_mood;
+                } elseif ($k == "music") {
+                    $key = $*text_meta_music;
+                }
+                if ($k == "mood" and defined $e.mood_icon) {
+                    var Image i = $e.mood_icon;
+                    $val = "<img src='$i.url' width='$i.width' height='$i.height' align='absmiddle' alt='[mood icon]' /> $val";
+                }
+                "<strong>$key:</strong> $val<br />";
             }
-            if ($k == "mood" and defined $e.mood_icon) {
-                var Image i = $e.mood_icon;
-                $val = "<img src='$i.url' width='$i.width' height='$i.height' align='absmiddle' alt='[mood icon]' /> $val";
-            }
-            "<strong>$key:</strong> $val<br />";
+            "</p>";
         }
-        "</p>";
     }
     $e.comments->print();
     """</td></tr>""";
@@ -188,12 +208,12 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
 
 function Page::print_entry (Entry e) 
 {
-    print_entry($this, $e, null Color, null Color);
+    print_entry($this, $e, null Color, null Color, false);
 }
 
 function FriendsPage::print_entry (Entry e) {
     var Friend f = $.friends{$e.journal.username};
-    print_entry($this, $e, $f.bgcolor, $f.fgcolor);
+    print_entry($this, $e, $f.bgcolor, $f.fgcolor, false);
 }
 
 function RecentPage::lay_bottom_navigation ()
@@ -307,6 +327,83 @@ function DayPage::print_body()
     } else {
         foreach var Entry e ($.entries) { $this->print_entry($e); }
     }
+}
+
+function EntryPage::print_body () 
+{
+    print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
+    print "<h2>Comments:</h2>";
+    if ($.comment_pages.total_subitems > 0) {
+        $.comment_pages->print();
+        $this->print_comments($.comments);
+    }
+}
+
+function EntryPage::print_comment (Comment c) {
+    var Color background; var Color color;
+    if ($c.depth % 2) {
+        $background = $*comment_bar_one_bgcolor;
+        $color = $*comment_bar_one_fgcolor;
+    } else {
+        $background = $*comment_bar_two_bgcolor;
+        $color = $*comment_bar_two_fgcolor;
+    }
+    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
+    var string sub_icon;
+    if (defined $c.subject_icon) {
+        $sub_icon = $c.subject_icon->as_string();
+    }
+    "<div style='background-color: $background; color: $color; margin-top: 10px;'>";
+    "<table cellpadding='2' cellspacing='0' summary='0' style='width: auto'><tr valign='top'>";
+    var int td = 3;
+    if (defined $c.userpic and $*comment_userpic_style != "off") { 
+        $td = 4;
+        var int w = $c.userpic.width;
+        var int h = $c.userpic.height;
+        # WARNING: this will later be done by the system (it'll be a
+        # constructional property), so don't copy this hack into your
+        # layout layers or you'll be messed up later.
+        if ($*comment_userpic_style == "small") {
+            $w = $w / 2;
+            $h = $h / 2;
+        }
+        print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' alt='[User Picture]' /></td>";
+    }
+    print "<td align='left'><strong>From:</strong> $poster</td>\n";
+    print "<td align='left'><strong>Date:</strong> ";
+        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td>\n";
+    print "<td align='right'><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td>\n</tr>\n";
+    print "<tr valign='top'><td colspan='$td' style='width: 95%'>";
+    if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>\n"; }
+    if ($c.metadata{"poster_ip"}) { print " (IP Address: " + $c.metadata{"poster_ip"} + ")"; }
+    print "</td></tr></table></div>";
+    print "<div style='margin-left: 5px'>$c.text</div>\n";
+    print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>Reply to this</a>) ";
+    if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
+    if ($c.thread_url != "") { "(<a href='$c.thread_url'>Thread</a>) "; }
+    "</div>\n";
+}
+
+function ReplyPage::print_body ()
+{
+    "<table border='0'><tr>";
+    "<td valign='top' width='100' align='center'>";
+    print defined $.replyto.userpic ? "<img src='$.replyto.userpic.url' /><br />" : "";
+    print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
+    "</td>";
+
+    """<td valign="top"><font size="+1">"""; print $.replyto.time->date_format("med"); " "; print $.replyto.time->time_format();
+    if ($.replyto.subject) { " <span style='color: $*subject_color'>$.replyto.subject</span>"; }
+    "</font>";
+    print "<p>$.replyto.text</p>";
+
+
+    "<a href='$.entry.permalink_url'>Read Comments</a>";
+    """</td></tr>""";
+    """<tr><td colspan="2"><p align="center"><img src="$*imguri/hr.gif" width="345" height="23"></p>""";
+    "</td></tr></table>\n";
+    print "<h2>Reply</h2>";
+    $.form->print();
 }
 
 function print_theme_preview ()
