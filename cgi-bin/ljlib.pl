@@ -158,7 +158,7 @@ sub get_friend_items
 
     my @friends_buffer = ();
     my $total_loaded = 0;
-    my $buffer_unit = $getitems;  # nice guess: 1 entry per friend.
+    my $buffer_unit = int($getitems * 1.5);  # load a bit more first to avoid 2nd load
 
     my $get_next_friend = sub 
     {
@@ -171,11 +171,11 @@ sub get_friend_items
 	# if we just finished a batch.
 	if ($total_loaded % $buffer_unit == 0) 
 	{
-	    my $sth = $dbr->prepare("SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate) FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V' AND uu.timeupdate IS NOT NULL ORDER BY 2 LIMIT $total_loaded, $buffer_unit");
+	    my $sth = $dbr->prepare("SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V' AND uu.timeupdate IS NOT NULL ORDER BY 2 LIMIT $total_loaded, $buffer_unit");
 	    $sth->execute;
 
-	    while (my ($userid, $update) = $sth->fetchrow_array) {
-		push @friends_buffer, [ $userid, $update ];
+	    while (my ($userid, $update, $clusterid) = $sth->fetchrow_array) {
+		push @friends_buffer, [ $userid, $update, $clusterid ];
 		$total_loaded++;
 	    }
 
@@ -206,6 +206,8 @@ sub get_friend_items
 	my $friendid = $fr->[0];
 
 	my @newitems = LJ::get_recent_items($dbs, {
+	    'clustersource' => 'slave',  # no effect for cluster 0
+	    'clusterid' => $fr->[2],
 	    'userid' => $friendid,
 	    'remote' => $remote,
 	    'itemshow' => $itemsleft,
@@ -214,6 +216,13 @@ sub get_friend_items
 	    'friendsview' => 1,
 	    'notafter' => $lastmax,
 	});
+	
+	# stamp each with clusterid if from cluster, so ljviews and other
+	# callers will know which items are old (no/0 clusterid) and which
+	# are new
+	if ($fr->[2]) {
+	    foreach (@newitems) { $_->{'clusterid'} = $fr->[2]; }
+	}
 	
 	if (@newitems)
 	{
@@ -245,9 +254,22 @@ sub get_friend_items
     # remove skipped ones
     splice(@items, 0, $skip) if $skip;
 
-    # return the itemids for them if they wanted them
+    # TODO: KILL! this knows nothing about clusters.
+    # return the itemids for them if they wanted them 
     if (ref $opts->{'itemids'} eq "ARRAY") {
 	@{$opts->{'itemids'}} = map { $_->{'itemid'} } @items;
+    }
+
+    # return the itemids grouped by clusters, if callers wants it.
+    if (ref $opts->{'idsbycluster'} eq "HASH") {
+	foreach (@items) {
+	    if ($_->{'clusterid'}) {
+		push @{$opts->{'idsbycluster'}->{$_->{'clusterid'}}}, 
+		[ $_->{'ownerid'}, $_->{'itemid'} ];
+	    } else {
+		push @{$opts->{'idsbycluster'}->{'0'}}, $_->{'itemid'};
+	    }
+	}
     }
     
     return @items;
@@ -1004,16 +1026,17 @@ sub prepare_currents
     my $args = shift;
 
     my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $datakey = $args->{'datakey'} || $args->{'itemid'}; # new || old
 
     my %currents = ();
     my $val;
-    if ($val = $args->{'props'}->{$args->{'itemid'}}->{'current_music'}) {
+    if ($val = $args->{'props'}->{$datakey}->{'current_music'}) {
 	$currents{'Music'} = $val;
     }
-    if ($val = $args->{'props'}->{$args->{'itemid'}}->{'current_mood'}) {
+    if ($val = $args->{'props'}->{$datakey}->{'current_mood'}) {
 	$currents{'Mood'} = $val;
     }
-    if ($val = $args->{'props'}->{$args->{'itemid'}}->{'current_moodid'}) {
+    if ($val = $args->{'props'}->{$datakey}->{'current_moodid'}) {
 	my $theme = $args->{'user'}->{'moodthemeid'};
 	LJ::load_mood_theme($dbs, $theme);
 	my %pic;
@@ -2090,6 +2113,72 @@ sub get_logtext2
 	    delete $need{$id};
 	}
     }
+    return $lt;
+}
+
+sub get_logtext2multi
+{
+    my ($dbs, $idsbyc) = @_;
+    my $sth;
+
+    # return structure.
+    my $lt = {};
+
+    # keep track of itemids we still need to load per cluster
+    my %need;
+    my @needold;
+    foreach my $c (keys %$idsbyc) {
+	foreach (@{$idsbyc->{$c}}) {
+	    if ($c) {
+		$need{$c}->{"$_->[0] $_->[1]"} = 1;
+	    } else {
+		push @needold, $_+0;
+	    }
+	}
+    }
+
+    # don't handle non-cluster stuff ourselves
+    if (@needold)
+    {
+	my $olt = LJ::get_logtext($dbs, @needold);
+	foreach (keys %$olt) {
+	    $lt->{"0 $_"} = $olt->{$_};
+	}
+    }
+
+    # pass 1: slave (trying recent), pass 2: master
+    foreach my $pass (1, 2) 
+    {
+	foreach my $c (keys %need) 
+	{
+	    next unless keys %{$need{$c}}; 
+	    my $db;
+	    my $table = "logtext2";
+	    if ($pass == 1) { 
+		$db = LJ::get_dbh("cluster${c}slave");
+		$table = "recent_logtext2" if $LJ::USE_RECENT_TABLES;
+	    } else {
+		$db = LJ::get_dbh("cluster${c}");		
+	    }
+	    next unless $db;
+
+	    my $fattyin;
+	    foreach (keys %{$need{$c}}) {
+		$fattyin .= " OR " if $fattyin;
+		my ($a, $b) = split(/ /, $_);
+		$fattyin .= "(journalid=$a AND jitemid=$b)";
+	    }
+	    
+	    $sth = $db->prepare("SELECT journalid, jitemid, subject, event ".
+				"FROM $table WHERE $fattyin");
+	    $sth->execute;
+	    while (my ($jid, $jitemid, $subject, $event) = $sth->fetchrow_array) {
+		delete $need{$c}->{"$jid $jitemid"};
+		$lt->{"$jid $jitemid"} = [ $subject, $event ];
+	    }
+	}
+    }
+
     return $lt;
 }
 
@@ -3732,6 +3821,73 @@ sub load_log_props2
 	$hashref->{$jitemid}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
     }
 }
+
+# Note: requires caller to first call LJ::load_props($dbs, "log")
+sub load_log_props2multi
+{
+    # ids by cluster (hashref),  output hashref (keys = "$ownerid $jitemid",
+    # where ownerid could be 0 for unclustered)
+    my ($dbs, $idsbyc, $hashref) = @_;
+    my $sth;
+    return unless ref $idsbyc eq "HASH";
+    return unless defined $LJ::CACHE_PROPID{'log'};
+
+    foreach my $c (keys %$idsbyc)
+    {
+	if ($c) {
+	    # clustered:
+	    my $fattyin = join(" OR ", map {
+		"(journalid=" . ($_->[0]+0) . " AND jitemid=" . ($_->[1]+0) . ")"
+	    } @{$idsbyc->{$c}});
+	    my $db = LJ::get_cluster_reader($c);
+	    $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
+				"FROM logprop2 WHERE $fattyin");
+	    $sth->execute;
+	    while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
+		$hashref->{"$jid $jitemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+	    }
+	} else {
+	    # unclustered:
+	    my $dbr = $dbs->{'reader'};
+	    my $in = join(",", map { $_+0 } @{$idsbyc->{'0'}});
+	    $sth = $dbr->prepare("SELECT itemid, propid, value FROM logprop ".
+				 "WHERE itemid IN ($in)");
+	    $sth->execute;
+	    while (my ($itemid, $propid, $value) = $sth->fetchrow_array) {
+		$hashref->{"0 $itemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+	    }
+	    
+	}
+    }
+    foreach my $c (keys %$idsbyc)
+    {
+	if ($c) {
+	    # clustered:
+	    my $fattyin = join(" OR ", map {
+		"(journalid=" . ($_->[0]+0) . " AND jitemid=" . ($_->[1]+0) . ")"
+	    } @{$idsbyc->{$c}});
+	    my $db = LJ::get_cluster_reader($c);
+	    $sth = $db->prepare("SELECT journalid, jitemid, propid, value ".
+				"FROM logprop2 WHERE $fattyin");
+	    $sth->execute;
+	    while (my ($jid, $jitemid, $propid, $value) = $sth->fetchrow_array) {
+		$hashref->{"$jid $jitemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+	    }
+	} else {
+	    # unclustered:
+	    my $dbr = $dbs->{'reader'};
+	    my $in = join(",", map { $_+0 } @{$idsbyc->{'0'}});
+	    $sth = $dbr->prepare("SELECT itemid, propid, value FROM logprop ".
+				 "WHERE itemid IN ($in)");
+	    $sth->execute;
+	    while (my ($itemid, $propid, $value) = $sth->fetchrow_array) {
+		$hashref->{"0 $itemid"}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+	    }
+	    
+	}
+    }
+}
+
 
 sub load_talk_props
 {

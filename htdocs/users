@@ -233,7 +233,7 @@ sub dump_error {
   my $error = "";
   $error = "Error in /users/ on url " . $ENV{'REQUEST_URI'};
   foreach my $type (keys %LJ::DBCACHE) {
-      if ($LJ::DBCACHE{$type}->err) {
+      if (ref $LJ::DBCACHE{$type} && $LJ::DBCACHE{$type}->err) {
           $error .= " DBERROR from $type " . $LJ::DBCACHE{$type}->errstr;
       }
   }

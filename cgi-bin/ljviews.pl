@@ -507,8 +507,9 @@ sub create_view_friends
 	return 1;
     }
     
-    ## load the itemids
-    my @itemids;
+    ## load the itemids 
+    my @itemids;  #DIE
+    my %idsbycluster;
     my @items = LJ::get_friend_items($dbs, {
         'userid' => $u->{'userid'},
         'remote' => $remote,
@@ -516,7 +517,8 @@ sub create_view_friends
         'skip' => $skip,
 	'filter' => $filter,
 	'owners' => \%owners,
-	'itemids' => \@itemids,
+	'itemids' => \@itemids,  #DIE
+	'idsbycluster' => \%idsbycluster,
     });
 
     my $ownersin = join(",", keys %owners);
@@ -545,8 +547,9 @@ sub create_view_friends
     $friendsin = join(", ", map { $dbr->quote($_) } keys %friends);
     
     ### load the log properties
-    my %logprops = ();
-    LJ::load_log_props($dbs, \@itemids, \%logprops);
+    my %logprops = ();  # key is "$owneridOrZero $[j]itemid"
+    LJ::load_props($dbs, "log");
+    LJ::load_log_props2multi($dbs, \%idsbycluster, \%logprops);
     LJ::load_moods($dbs);
 
     # load the pictures for the user
@@ -555,7 +558,7 @@ sub create_view_friends
     LJ::load_userpics($dbs, \%userpics, [ @picids ]);
 
     # load the text of the entries
-    my $logtext = LJ::get_logtext($dbs, @itemids);
+    my $logtext = LJ::get_logtext2multi($dbs, \%idsbycluster);
   
     my %posterdefpic;  # map altposter userids -> default picture ids
     
@@ -569,8 +572,13 @@ sub create_view_friends
 	my ($friendid, $posterid, $itemid, $security, $alldatepart, $replycount) = 
 	    map { $item->{$_} } qw(ownerid posterid itemid security alldatepart replycount);
 
-	my $subject = $logtext->{$itemid}->[0];
-	my $event = $logtext->{$itemid}->[1];
+	my $clusterid = $item->{'clusterid'}+0;
+	
+	my $datakey = "0 $itemid";   # no cluster
+	$datakey = "$friendid $itemid" if $clusterid;
+	    
+	my $subject = $logtext->{$datakey}->[0];
+	my $event = $logtext->{$datakey}->[1];
 
 	my ($friend, $poster);
 	$friend = LJ::get_username($dbs, $friendid);
@@ -629,7 +637,7 @@ sub create_view_friends
 	    });
 	}
 	
-	LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
+	LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
 					       'cuturl' => LJ::item_link($u, $itemid), });
 	LJ::expand_embedded($dbs, $itemid, $remote, \$event);
 	$friends_event{'event'} = $event;
@@ -650,10 +658,10 @@ sub create_view_friends
 		    LJ::load_userpics($dbs, \%userpics, [ $picid ]);
 		}
 	    }
-	    if ($logprops{$itemid}->{'picture_keyword'} && 
+	    if ($logprops{$datakey}->{'picture_keyword'} && 
 		(! $u->{'opt_usesharedpic'} || ($posterid == $friendid))) 
 	    {
-		my $qkw = $dbh->quote($logprops{$itemid}->{'picture_keyword'});
+		my $qkw = $dbh->quote($logprops{$datakey}->{'picture_keyword'});
 		my $sth = $dbh->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$posterid AND m.kwid=k.kwid AND k.keyword=$qkw");
 		$sth->execute;
 		my ($alt_picid) = $sth->fetchrow_array;
@@ -688,13 +696,15 @@ sub create_view_friends
 	$friends_event{'bgcolor'} = $friends{$friendid}->{'bgcolor'} || "#ffffff";
 	
 	if ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" &&
-	    ! $logprops{$itemid}->{'opt_nocomments'}
+	    ! $logprops{$datakey}->{'opt_nocomments'}
 	    ) {
+	    my $jarg = $clusterid ? "journal=$friend&amp;" : "";
+
 	    $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
 		'itemid' => $itemid,
-		'urlpost' => "$LJ::SITEROOT/talkpost.bml?itemid=$itemid",
+		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$itemid",
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'FRIENDS_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&amp;nc=$replycount",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$itemid&amp;nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount==1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
@@ -706,7 +716,7 @@ sub create_view_friends
 	## current stuff
 	LJ::prepare_currents($dbs, {
 	    'props' => \%logprops, 
-	    'itemid' => $itemid, 
+	    'datakey' => $datakey, 
 	    'vars' => $vars, 
 	    'prefix' => "FRIENDS",
 	    'event' => \%friends_event,
