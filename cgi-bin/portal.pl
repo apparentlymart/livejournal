@@ -438,8 +438,8 @@ sub box_start
 
     $$b .= "<map name='$mapname'>\n";
     $$b .= "<area shape='rect' target='_self' coords='0,0,16,16' href='/portal/alter.bml?op=d&amp;t=$t' alt='Down' />\n";
-    $$b .= "<area shape='rect' target='_self' coords='16,0,32,16' href='/portal/alter.bml?op=u&amp;t=$t alt='Up' />\n";
-    $$b .= "<area shape='rect' coords='32,0,48,16' href='/portal/alter.bml?op=a&amp;t=$t alt=\"Add/Modify\" />\n";
+    $$b .= "<area shape='rect' target='_self' coords='16,0,32,16' href='/portal/alter.bml?op=u&amp;t=$t' alt='Up' />\n";
+    $$b .= "<area shape='rect' coords='32,0,48,16' href='/portal/alter.bml?op=a&amp;t=$t' alt=\"Add/Modify\" />\n";
     $$b .= "<area shape='rect' target='_self' coords='48,0,64,16' href='/portal/alter.bml?op=x&amp;t=$t' alt='Kill' />\n";
     $$b .= "</map>\n";
 
