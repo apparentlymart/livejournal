@@ -440,6 +440,16 @@ elsif ($sclust > 0)
         'links' => 'journalid',
     };
 
+    # ask the local mods if they have any tables to move
+    my @local_tables;
+    my $local_tables = LJ::run_hook("moveucluster_local_tables");
+    if ($local_tables) {
+        while (my ($tab, $key) = each %$local_tables) {
+            push @local_tables, $tab;
+            $pri_key->{$tab} = $key;
+        }
+    }
+
     my @existing_data;
     print "Checking for existing data on target cluster...\n" if $optv > 1;
     foreach my $table (sort keys %$pri_key) {
@@ -493,7 +503,7 @@ elsif ($sclust > 0)
     foreach my $table (qw(loginstall ratelog sessions userproplite2
                           sessions_data userbio userpicblob2
                           s1usercache modlog modblob counter
-                          s1style s1overrides links userblob)) {
+                          s1style s1overrides links userblob), @local_tables) {
 	next if $table =~ /^mod/ && $u->{journaltype} eq "P";
         print "  moving $table ...\n" if $optv > 1;
         my @cols;
