@@ -124,7 +124,7 @@ BODY<=
 	 $status = "answered<BR>awaiting close"; 
 	 $barbg = "BGCOLOR=#EEEED0";
      }
-     elsif ($sp->{'timetouched'} > $sp->{'timelasthelp'}+5) { 
+     elsif ($sp->{'timelasthelp'} && $sp->{'timetouched'} > $sp->{'timelasthelp'}+5) { 
 	 $status = "answered<BR><B>still needs help</B>"; 
 	 $barbg = "BGCOLOR=#D0EED0";	 
      }
