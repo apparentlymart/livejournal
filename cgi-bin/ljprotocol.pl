@@ -63,6 +63,7 @@ sub error_message
              "401" => "Your account type doesn't permit adding syndicated accounts as friends.",
              "402" => "Your IP address is temporarily banned for exceeding the login failure rate.",
              "403" => "This would push you over your syndication quota.",
+             "404" => "Cannot post",
 
              # Server Errors
              "500" => "Internal server error",
@@ -505,6 +506,9 @@ sub postevent
 
     # check the journal's read-only bit
     return fail($err,306) if LJ::get_cap($uowner, "readonly");
+
+    # is the user allowed to post?
+    return fail($err,404,$LJ::MSG_NO_POST) unless LJ::get_cap($u, "can_post");
 
     # can't post to deleted/suspended community
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";

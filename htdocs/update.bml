@@ -48,6 +48,12 @@
      return;
  }
 
+if ($remote && ! LJ::get_cap($remote, "can_post")) {
+    $$title = "Can't post";
+    $$body = $LJ::MSG_NO_POST || "Sorry, you cannot post at this time.";
+    return;
+}
+
  my $mode = $FORM{'mode'} || "";  # full will be default, once portal is in.
 
  my $spellcheck_html;

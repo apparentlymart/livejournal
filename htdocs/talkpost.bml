@@ -309,6 +309,14 @@ body<=
      LJ::strip_bad_code(\$ret);
      return $ret;
  }
+ unless (LJ::get_cap($u, "get_comments") ||
+         ($remote && LJ::get_cap($remote, "leave_comments"))) {
+     $ret .= "<?h1 $ML{'Sorry'} h1?><?p ";
+     $ret .= $LJ::MSG_NO_COMMENT || "Sorry, you cannot leave comments at this time.";
+     $ret .= " p?>";
+     LJ::strip_bad_code(\$ret);
+     return $ret;
+ }
 
  $ret .= "<?h1 $ML{'.postresponse'} h1?>";
 
