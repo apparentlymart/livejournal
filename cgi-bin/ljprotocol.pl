@@ -651,6 +651,7 @@ sub editevent
 
     my $u = $flags->{'u'};    
     my $ownerid = $flags->{'ownerid'};
+    my $uowner = $flags->{'u_owner'} || $u;
     my $posterid = $u->{'userid'};
     my $dbr = $dbs->{'reader'};
     my $dbh = $dbs->{'dbh'};
@@ -658,15 +659,26 @@ sub editevent
 
     my $qitemid = $req->{'itemid'}+0;
 
+    # check the journal's read-only bit
+    return fail($err,306) if LJ::get_cap($uowner, "readonly");    
+
+    my ($dbcm, $dbcr, $clustered) = ($dbh, $dbr, 0);
+    if ($uowner->{'clusterid'}) {
+	$dbcm = LJ::get_cluster_master($uowner);
+	$dbcr = LJ::get_cluster_reader($uowner);
+	$clustered = 1;
+    }
+    
     # fetch the old entry from master database so we know what we
     # really have to update later.  usually people just edit one part,
     # not every field in every table.  reads are quicker than writes,
     # so this is worth it.
     my $oldevent;
+    if ($clustered)
     {
-	my $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, l.eventtime, l.logtime, l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, MD5(lt.event) AS 'md5event', l.rlogtime FROM log l, logtext lt WHERE l.itemid=$qitemid AND lt.itemid=$qitemid");
-	$sth->execute;
-	$oldevent = $sth->fetchrow_hashref;
+	$oldevent = $dbcm->selectrow_hashref("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, l.logtime, l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, MD5(lt.event) AS 'md5event', l.rlogtime FROM log2 l, logtext2 lt WHERE l.journalid=$ownerid AND lt.journalid=$ownerid AND l.jitemid=$qitemid AND lt.jitemid=$qitemid");
+    } else {
+	$oldevent = $dbcm->selectrow_hashref("SELECT l.ownerid, l.posterid, l.eventtime, l.logtime, l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, MD5(lt.event) AS 'md5event', l.rlogtime FROM log l, logtext lt WHERE l.itemid=$qitemid AND lt.itemid=$qitemid");
     }
 
     ### make sure this user is allowed to edit this entry
@@ -695,13 +707,20 @@ sub editevent
 
     ## update sync table (before we actually do it!  in case updates
     ## partially fail below)
-    $dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) VALUES ($ownerid, NOW(), 'L', $qitemid, 'update')");
+    if ($clustered) {
+	$dbcm->do("REPLACE INTO syncupdates2 (userid, atime, nodetype, nodeid, atype) VALUES ($ownerid, NOW(), 'L', $qitemid, 'update')");
+    } else {
+	$dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) VALUES ($ownerid, NOW(), 'L', $qitemid, 'update')");
+    }
     
     # simple logic for deleting an entry
     if ($req->{'event'} !~ /\S/)
     {
-        LJ::delete_item($dbh, $ownerid, $req->{'itemid'});
-	return fail($err,501,$dbh->errstr) if $dbh->err;
+	if ($clustered) {
+	    LJ::delete_item2($dbcm, $ownerid, $req->{'itemid'});
+        } else {
+	    LJ::delete_item($dbh, $ownerid, $req->{'itemid'});	    
+	}
 	my $res = { 'itemid' => $qitemid };
 	return $res;
     }
@@ -712,7 +731,12 @@ sub editevent
     
     ### load existing meta-data
     my %curprops;
-    LJ::load_log_props($dbh, [ $qitemid ], \%curprops);
+
+    if ($clustered) {
+	LJ::load_log_props2($dbcm, $ownerid, [ $qitemid ], \%curprops);
+    } else {
+	LJ::load_log_props($dbh, [ $qitemid ], \%curprops);
+    }
     
     ## handle meta-data (properties)
     my %props_byname = ();
@@ -761,19 +785,31 @@ sub editevent
 	)
     {
 	my $qsecurity = $dbh->quote($security);
-	$sth = $dbh->prepare("UPDATE log SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, security=$qsecurity, allowmask=$qallowmask WHERE itemid=$qitemid");
-	$sth->execute;
+	if ($clustered) {
+	    $dbcm->do("UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid AND jitemid=$qitemid");
+	} else {
+	    $dbh->do("UPDATE log SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, security=$qsecurity, allowmask=$qallowmask WHERE itemid=$qitemid");
+	}
     }
     
     if ($security ne $oldevent->{'security'} ||
 	$qallowmask != $oldevent->{'allowmask'})
     {
 	if ($security eq "public" || $security eq "private") {
-	    $dbh->do("DELETE FROM logsec WHERE ownerid=$ownerid AND itemid=$qitemid");
+	    if ($clustered) {
+		$dbcm->do("DELETE FROM logsec2 WHERE journalid=$ownerid AND jitemid=$qitemid");
+	    } else {
+		$dbh->do("DELETE FROM logsec WHERE ownerid=$ownerid AND itemid=$qitemid");
+	    }
 	} else {
 	    my $qsecurity = $dbh->quote($security);
-	    $dbh->do("REPLACE INTO logsec (ownerid, itemid, allowmask) VALUES ($ownerid, $qitemid, $qallowmask)");		    
+	    if ($clustered) {
+		$dbcm->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) VALUES ($ownerid, $qitemid, $qallowmask)");		    
+	    } else {
+		$dbh->do("REPLACE INTO logsec (ownerid, itemid, allowmask) VALUES ($ownerid, $qitemid, $qallowmask)");
+	    }
 	}
+	return fail($err,501,$dbcm->errstr) if $dbcm->err;
     }
     
     if (Digest::MD5::md5_hex($event) ne $oldevent->{'md5event'} ||
@@ -784,14 +820,21 @@ sub editevent
 	my @prefix = ("");
 	if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
 	foreach my $pfx (@prefix) {
-	    $sth = $dbh->prepare("UPDATE ${pfx}logtext SET event=$qevent, subject=$qsubject WHERE itemid=$qitemid");
-	    $sth->execute;
+	    if ($clustered) {
+		$dbcm->do("UPDATE ${pfx}logtext2 SET event=$qevent, subject=$qsubject WHERE journalid=$ownerid AND jitemid=$qitemid");
+	    } else {
+		$dbh->do("UPDATE ${pfx}logtext SET event=$qevent, subject=$qsubject WHERE itemid=$qitemid");
+	    }
+	    return fail($err,501,$dbcm->errstr) if $dbcm->err;
 	}
-	$dbh->do("REPLACE INTO logsubject (itemid, subject) VALUES ($qitemid, $qsubject)");
+	if ($clustered) {
+	    $dbcm->do("REPLACE INTO logsubject2 (journalid, jitemid, subject) VALUES ($ownerid, $qitemid, $qsubject)");
+	} else {
+	    $dbh->do("REPLACE INTO logsubject (itemid, subject) VALUES ($qitemid, $qsubject)");
+	}
+	return fail($err,501,$dbcm->errstr) if $dbcm->err;
     }
     
-    return fail($err,501,$dbh->errstr) if $dbh->err;
-
     if (%{$req->{'props'}}) {
 	my $propinsert = "";
 	my @props_to_delete;
@@ -806,15 +849,28 @@ sub editevent
 	    if ($propinsert) {
 		$propinsert .= ", ";
 	    } else {
-		$propinsert = "REPLACE INTO logprop (itemid, propid, value) VALUES ";
+		if ($clustered) {
+		    $propinsert = "REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ";
+		} else {
+		    $propinsert = "REPLACE INTO logprop (itemid, propid, value) VALUES ";
+		}
 	    }
 	    my $qvalue = $dbh->quote($val);
-	    $propinsert .= "($qitemid, $p->{'id'}, $qvalue)";
+	    if ($clustered) {
+		$propinsert .= "($qitemid, $p->{'id'}, $qvalue)";
+	    } else {
+		$propinsert .= "($ownerid, $qitemid, $p->{'id'}, $qvalue)";
+	    }
 	}
 	if ($propinsert) { $dbh->do($propinsert); }
 	if (@props_to_delete) {
 	    my $propid_in = join(", ", @props_to_delete);
-	    $dbh->do("DELETE FROM logprop WHERE itemid=$qitemid AND propid IN ($propid_in)");
+	    if ($clustered) {
+		$dbcm->do("DELETE FROM logprop2 WHERE journalid=$ownerid AND ".
+			  "jitemid=$qitemid AND propid IN ($propid_in)");
+	    } else {
+		$dbh->do("DELETE FROM logprop WHERE itemid=$qitemid AND propid IN ($propid_in)");
+	    }
 	}
     }
     
@@ -824,16 +880,26 @@ sub editevent
     # rlogtime to $EndOfTime if they're turning backdate on.
     if ($req->{'props'}->{'opt_backdated'} eq "1" && 
 	$oldevent->{'rlogtime'} != $LJ::EndOfTime) {
-	$dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime WHERE ".
-		 "itemid=$qitemid");
+	if ($clustered) {
+	    $dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime WHERE".
+		     "itemid=$qitemid");
+	} else {
+	    $dbcm->do("UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
+		      "journalid=$ownerid AND jitemid=$qitemid");
+	}
     }
     if ($req->{'props'}->{'opt_backdated'} eq "0" &&
 	$oldevent->{'rlogtime'} == $LJ::EndOfTime) {
-	$dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
-		 "WHERE itemid=$qitemid");
+	if ($clustered) {
+	    $dbcm->do("UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
+		      "WHERE journalid=$ownerid AND jitemid=$qitemid");
+	} else {
+	    $dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
+		     "WHERE itemid=$qitemid");
+	}
     }
   
-    return fail($err,501,$dbh->errstr) if $dbh->err;
+    return fail($err,501,$dbcm->errstr) if $dbcm->err;
 
     # just return something.
     my $res = { 'itemid' => $qitemid };
@@ -1412,6 +1478,10 @@ sub login_message
 	if ($u->{'status'} eq "T") { $res->{'message'} = "You need to validate your new email address.  Your old one was good, but since you've changed it, you need to re-validate the new one.  Visit the support area for more information."; }
     }
     if ($u->{'status'} eq "B") { $res->{'message'} = "You are currently using a bad email address.  All mail we try to send you is bouncing.  We require a valid email address for continued use.  Visit the support area for more information."; }
+
+    if (LJ::get_cap($u, "readonly")) {
+	$res->{'message'} = "Your account is temporarily in read-only mode.  Some operations will fail for a few minutes.";
+    }
 
 }
 

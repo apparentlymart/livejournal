@@ -3384,6 +3384,40 @@ sub query_buffer_add
     }
 }
 
+# <LJFUNC>
+# name: LJ::cmd_buffer_add
+# des: Schedules some command to be run sometime in the future which would
+#      be too slow to do syncronously with the web request.  An example
+#      is deleting a journal entry, which requires recursing through a lot
+#      of tables and deleting all the appropriate stuff.
+# args: db, journalid, cmd, hargs
+# des-db: Cluster master db handle to run command on.
+# des-journalid: Journal id command affects.  This is indexed in the
+#                [dbtable[cmdbuffer]] table so that all of a user's queued
+#                actions can be run before that user is potentially moved
+#                between clusters.
+# des-cmd: Text of the command name.  30 chars max.
+# des-hargs: Hashref of command arguments.
+# </LJFUNC>
+sub cmd_buffer_add
+{
+    my ($db, $journalid, $cmd, $h_args) = @_;
+    
+    return 0 unless $db;
+    $journalid += 0;
+    my $qcmd = $db->quote($cmd);
+    my $qargs;
+    if (ref $h_args eq "HASH") {
+	foreach (sort keys %$h_args) {
+	    $qargs .= LJ::eurl($_) . "=" . LJ::eurl($h_args->{$_}) . "&";
+	}
+	chop $qargs;
+    }
+    $qargs = $db->quote($qargs);
+    $db->do("INSERT INTO cmdbuffer (journalid, cmd, instime, args) ".
+	    "VALUES ($journalid, $qcmd, NOW(), $qargs)");
+}
+
 sub query_buffer_flush
 {
     my ($dbarg, $table) = @_;
@@ -4037,21 +4071,31 @@ sub delete_item
     }
 }
 
-####
-### delete a clustered log item and all its associated data
-##  if $quick is specified, that means items are being deleted en-masse
-#
+# <LJFUNC>
+# name: LJ::delete_item2
+# des: Deletes a user's journal item from a cluster.
+# args: dbcm, journalid, jitemid, quick?
+# des-dbcm: Cluster master db handle to delete item from.
+# des-journalid: Journal ID item is in.
+# des-jitemid: Journal itemid of item to delete.
+# des-quick: Optional boolean.  If set, only [dbtable[log2]] table
+#            is deleted from and the rest of the content is deleted
+#            later using [func[LJ::cmd_buffer_add]].
+# returns: boolean; 1 on sucess, 0 on failure.
+# </LJFUNC>
 sub delete_item2
 {
-    my ($dbcm, $journalid, $jitemid, $quick, $deleter) = @_;
-    my $sth;
-		
-    $journalid += 0;
-    $jitemid += 0;
+    my ($dbcm, $journalid, $jitemid, $quick) = @_;
+    $journalid += 0; $jitemid += 0;
 
     $dbcm->do("DELETE FROM log2 WHERE journalid=$journalid AND jitemid=$jitemid");
 
+    return LJ::cmd_buffer_add($dbcm, $journalid, "delitem", {
+	'itemid' => $jitemid,
+    }) if $quick;
+    
     # FIXME: TODO: make log of this deletion, do the rest of the deletions async
+    return 1;
 }
 
 1;

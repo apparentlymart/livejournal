@@ -452,6 +452,19 @@ CREATE TABLE querybuffer (
 ) 
 EOC
 
+register_tablecreate("cmdbuffer", <<'EOC');
+CREATE TABLE cmdbuffer (
+  cbid INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  journalid INT UNSIGNED NOT NULL,
+  cmd VARCHAR(30) NOT NULL default '',
+  instime datetime NOT NULL default '0000-00-00 00:00:00',
+  args TEXT NOT NULL,
+  PRIMARY KEY  (cbid),
+  KEY (cmd),
+  KEY (journalid)
+) 
+EOC
+
 register_tablecreate("randomuserset", <<'EOC');
 CREATE TABLE randomuserset (
   rid INT UNSIGNED NOT NULL AUTO_INCREMENT,
