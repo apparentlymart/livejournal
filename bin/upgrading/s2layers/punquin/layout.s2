@@ -88,6 +88,8 @@ set link_color = "#000050";
 set vlink_color = "#500050";
 set alink_color = "#ff00c0";
 
+set view_entry_disabled = true;
+
 function print_stylesheet ()
 {
     var string font = "$*font_base, $*font_fallback";

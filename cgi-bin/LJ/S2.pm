@@ -52,6 +52,13 @@ sub make_journal
         $opts->{'handler_return'} = Apache::Constants::OK();
         return;
     }
+
+    # let layouts disable EntryPage / ReplyPage, using the BML version
+    # instead.
+    if ($ctx->[S2::PROPS]->{'view_entry_disabled'} && $view eq "item") {
+        ${$opts->{'handle_with_bml_ref'}} = 1;
+        return;
+    }
     
     escape_context_props($ctx);
     

@@ -93,6 +93,8 @@ set alink_color = "#ff00c0";
 # Other Options
 set show_entry_userpic = false;
 
+set view_entry_disabled = true;
+
 function Page::lay_skip_navigation() {}
 
 function Page::lay_bottom_navigation() {}

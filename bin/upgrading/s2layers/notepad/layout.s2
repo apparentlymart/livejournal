@@ -34,9 +34,10 @@ property use page_friends_items;
 property use text_post_comment_friends;
 property use text_read_comments_friends;
 
-
 property string imguri { noui=1; } #  URI to notepad images (no trailing slash)
 set imguri = "";
+
+set view_entry_disabled = true;
 
 function prop_init()
 {

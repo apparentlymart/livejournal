@@ -96,6 +96,8 @@ set show_entry_userpic = false;
 set page_recent_items = 20;
 set page_friends_items = 20;
 
+set view_entry_disabled = true;
+
 function Page::lay_captionbar_navigation () { }
 
 function captionbar (Page p) {

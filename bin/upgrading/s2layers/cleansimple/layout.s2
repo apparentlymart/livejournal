@@ -107,6 +107,8 @@ set opt_margin_size = "50px";
 set font_topbar_fallback = "none";
 set font_sidebar_fallback = "none";
 
+set view_entry_disabled = true;
+
 function css_fontspec(string base, string fallback)
  "Prints a CSS font-family specification based on the base and fallback given" 
 {

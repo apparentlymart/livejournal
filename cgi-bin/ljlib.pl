@@ -3207,10 +3207,6 @@ sub make_journal
         ${$opts->{'handle_with_bml_ref'}} = 1;
         return;
     }
-    if ($stylesys == 2 && $view eq "item" && ! $opts->{'s2id'} && ! $LJ::DEV_S2ALL) {
-        ${$opts->{'handle_with_bml_ref'}} = 1;
-        return;
-    }
 
     if ($r) {
         $r->notes('journalid' => $u->{'userid'});

@@ -92,6 +92,8 @@ set link_color = "#000050";
 set vlink_color = "#500050";
 set alink_color = "#ff00c0";
 
+set view_entry_disabled = true;
+
 function print_stylesheet ()
 {
     var string font;
@@ -181,11 +183,19 @@ td.weekday_empty {
 
 function Page::lay_nav_blurb() { }
 
+function Page::lay_primary_userpic() : Image {
+   return $.journal.default_pic;
+}
+
+function EntryPage::lay_primary_userpic() : Image {
+   return $.entry.userpic;
+}
+
 function Page::print ()
 {
     var string title = $this->title();
     var string userpic;
-    var Image default_userpic = $.journal.default_pic;
+    var Image default_userpic = $this->lay_primary_userpic();
     if (defined $default_userpic)
     {
         $userpic = "<img align='right' hspace='2' vspace='2' src='$default_userpic.url' "+

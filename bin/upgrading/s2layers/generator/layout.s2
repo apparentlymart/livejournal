@@ -72,6 +72,8 @@ set weak_text = "#000000";
 
 set box_width = 600;
 
+set view_entry_disabled = true;
+
 function print_stylesheet () {
     " /* Yes, a stylesheet would go here. */\n";
 }

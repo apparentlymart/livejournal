@@ -137,7 +137,7 @@ sub EntryPage
                 },
                 'permalink_url' => "$permalink?thread=$dtalkid#t$dtalkid",
                 'reply_url' => "$permalink?replyto=$dtalkid",
-                'poster' => UserLite($user{$com->{'posterid'}}),
+                'poster' => $com->{'posterid'} ? UserLite($user{$com->{'posterid'}}) : undef,
                 'replies' => [],
                 'subject' => LJ::ehtml($com->{'subject'}),
                 'subject_icon' => $subject_icon,
@@ -159,7 +159,7 @@ sub EntryPage
     $convert_comments->($convert_comments, $p->{'comments'}, \@comments, undef, 1);
 
     $p->{'comment_pages'} = ItemRange({
-        'all_sub_items_displayed' => ($copts->{'out_pages'} == 1),
+        'all_subitems_displayed' => ($copts->{'out_pages'} == 1),
         'current' => $copts->{'out_page'},
         'from_subitem' => $copts->{'out_itemfirst'},
         'num_subitems_displayed' => scalar @comments,
