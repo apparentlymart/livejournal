@@ -455,7 +455,7 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
       }
       if ($u->{'yahoo'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.yahooid'}</nobr></b></td><td colspan='$span'><a href='http://profiles.yahoo.com/$u->{'yahoo'}'>$u->{'yahoo'}</a> (<b><a href='http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=$u->{'yahoo'}'>$ML{'.label.adduser'}</a>, <a href='http://edit.yahoo.com/config/send_webmesg?.target=$u->{'yahoo'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
+          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.yahooid'}</nobr></b></td><td colspan='$span'><img src='http://opi.yahoo.com/online?u=$u->{'yahoo'}&m=g&t=0' width='12' height='12' /> <a href='http://profiles.yahoo.com/$u->{'yahoo'}'>$u->{'yahoo'}</a> (<b><a href='http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=$u->{'yahoo'}'>$ML{'.label.adduser'}</a>, <a href='http://edit.yahoo.com/config/send_webmesg?.target=$u->{'yahoo'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
       }
       if ($u->{'msn'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
