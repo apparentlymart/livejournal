@@ -1607,16 +1607,14 @@ sub Entry__get_link
     my ($ctx, $this, $key) = @_;
     if ($key eq "nav_prev" || $key eq "edit_entry" || $key eq "mem_add" || $key eq "tell_friend" || $key eq "nav_next")
     {
-        my $page = get_page();
-        my $u = $page->{'_u'};
-        my $journal = $u->{'user'};
+        my $journal = $this->{'journal'}->{'username'};
         my $poster = $this->{'poster'}->{'username'};
         my $remote = LJ::get_remote();
 
         if ($key eq "edit_entry") {
             return undef unless (defined $remote && ($remote->{'user'} eq $journal ||
                                  $remote->{'user'} eq $poster || 
-                                 LJ::check_rel($u, $remote, 'A')));
+                                 LJ::check_rel(LJ::load_user($journal), $remote, 'A')));
             return {
                 '_type' => "Link",
                 'url' => "$LJ::SITEROOT/editjournal_do.bml?journal=$journal&amp;itemid=$this->{'itemid'}",
