@@ -1,5 +1,8 @@
 <?_code
 
+ use strict;
+ use vars qw($title $head $body %GET %POST %FORM);
+
  $title = "";
  $head = "";
  $body = "";
@@ -27,7 +30,7 @@ $r->notes("codepath" => "bml.view.index");
      $body .= "No user given.";
      return;
  }
- 
+
  my $u = LJ::load_user($user);
  unless ($u) {
      $title = "Error";
@@ -54,14 +57,14 @@ $r->notes("codepath" => "bml.view.index");
  my $viewall = 0;
  if ($GET{'viewall'} && LJ::check_priv($remote, "viewall")) {
      $viewall = 1;
-     LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+     LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                            "viewall", "month: $u->{'user'}, statusvis: $u->{'statusvis'}");
 
  # check for deleted/suspended
  } else {
 
      # check suspended
-     if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S") {
+     if ($u->{'statusvis'} eq "S") {
          $body = "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>";
          return;
      }
@@ -77,7 +80,7 @@ $r->notes("codepath" => "bml.view.index");
  if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
      $head .= LJ::robot_meta_tags();
  }
- 
+
  my $base = LJ::journal_base($u);
 
  if (LJ::did_post()) {
@@ -95,7 +98,7 @@ $r->notes("codepath" => "bml.view.index");
              if $gmask;
      }
  }
- 
+
  my $year = $FORM{'y'}+0;
  my $month = $FORM{'m'}+0;
  unless ($year =~ /^\d\d\d\d$/ && ($month >= 1 && $month <= 12)) {
@@ -121,7 +124,7 @@ $r->notes("codepath" => "bml.view.index");
      if ($next[1] > 12) { @next = ($year+1, 1); }
      my @prev = ($year, $month-1);
      if ($prev[1] < 1) { @prev = ($year-1, 12); }
-     
+
      my $next = "<a href=\"" . $base . "/$next[0]/" . sprintf("%02d", $next[1]) . "/\"><img src=\"$LJ::IMGPREFIX/btn_next.gif\" width='22' height='20' border='0'></a>";
      my $prev = "<a href=\"" . $base . "/$prev[0]/" . sprintf("%02d", $prev[1]) . "/\"><img src=\"$LJ::IMGPREFIX/btn_prev.gif\" width='22' height='20' border='0'></a>";
 
@@ -141,32 +144,34 @@ $r->notes("codepath" => "bml.view.index");
  }
 
  $body .= "<dl>\n";
- my $lday = 0;
 
- # yay for repeating nearly-identical code!
  my $db = LJ::get_cluster_reader($u);
- if ($is_person) {
-     $sth = $db->prepare("SELECT l.jitemid, l.anum, l.day, ls.subject, l.eventtime, NULL, ".
-                         "l.replycount, l.security ".
-                         "FROM log2 l, logtext2 ls ".
-                         "WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} ".
-                         "AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid ".
-                         "$secwhere LIMIT 2000");
- } else {
-     $sth = $db->prepare("SELECT l.jitemid, l.anum, l.day, ls.subject, l.eventtime, u.user, ".
-                         "l.replycount, l.security ".
-                         "FROM log2 l, logtext2 ls, ${LJ::DB_USERIDMAP}useridmap u ".
-                         "WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} ".
-                         "AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid ".
-                         "AND l.posterid=u.userid $secwhere LIMIT 2000");
- }
-
- # sort on eventtime
+ my $sth = $db->prepare("SELECT l.jitemid, l.anum, l.day, l.eventtime, l.posterid, ".
+                        "l.replycount, l.security ".
+                        "FROM log2 l ".
+                        "WHERE l.journalid=$u->{'userid'} AND l.year=$year AND l.month=$month ".
+                        "$secwhere LIMIT 2000");
  my $items = $db->selectall_arrayref($sth);
 
- foreach my $it (sort { $a->[4] cmp $b->[4] } @$items)
+ # figure out what we need to load
+ my @itemids;
+ my %need_userid;  # userid -> 1
+ foreach my $it (@$items) {
+     push @itemids, $it->[0];
+     $need_userid{$it->[4]} = 1;
+ }
+ my $lt = LJ::get_logtext2($u, @itemids);
+ my %u;
+ LJ::load_userids_multiple([map { $_ => \$u{$_} } keys %need_userid], []);
+
+ # sort on event time
+ my $lday = 0;  # last day shown
+ foreach my $it (sort { $a->[3] cmp $b->[3] } @$items)
  {
-     my ($itemid, $anum, $day, $subject, $eventtime, $poster, $replycount, $security) = @$it;
+     my ($itemid, $anum, $day, $eventtime, $posterid, $replycount, $security) = @$it;
+
+     my $subject = $lt->{$itemid}->[0];
+     my $poster = $u{$posterid}->{user};
 
      if ($day != $lday) {
          if ($lday) { $body .= "</table></dd>"; }
@@ -179,7 +184,7 @@ $r->notes("codepath" => "bml.view.index");
      }
 
      # we need to convert the subject to UTF-8 if it's a pre-Unicode entry
-     # loading all the props for all the posts and checking 'unknown8bit' 
+     # loading all the props for all the posts and checking 'unknown8bit'
      # is too long. The heuristic "if it's not UTF-8, convert it" works
      # well here.
      if ($LJ::UNICODE && !LJ::is_utf8($subject)) {

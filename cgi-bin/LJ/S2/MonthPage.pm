@@ -36,7 +36,7 @@ sub MonthPage
     if ($opts->{'pathextra'} =~ m!^/(\d\d\d\d)/(\d\d)\b!) {
         ($year, $month) = ($1, $2);
     }
-    
+
     $opts->{'errors'} = [];
     if ($month < 1 || $month > 12) { push @{$opts->{'errors'}}, "Invalid month: $month"; }
     if ($year < 1970 || $year > 2038) { push @{$opts->{'errors'}}, "Invalid year: $year"; }
@@ -55,7 +55,7 @@ sub MonthPage
 
         # do they have the viewall priv?
         if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
-            LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+            LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
                                   "viewall", "month: $user, statusvis: $u->{'statusvis'}");
             $viewall = 1;
         }
@@ -68,16 +68,14 @@ sub MonthPage
                 if $gmask;
         }
     }
-    
-    # FIXME: remove the join with logtext.  get that with the API (thus memcache)
-    $sth = $dbcr->prepare("SELECT l.jitemid, l.posterid, l.anum, l.day, lt.subject, ".
+
+    $sth = $dbcr->prepare("SELECT l.jitemid, l.posterid, l.anum, l.day, ".
                           "       DATE_FORMAT(l.eventtime, '$dateformat') AS 'alldatepart', ".
                           "       l.replycount, l.security ".
-                          "FROM log2 l, logtext2 lt ".
-                          "WHERE l.journalid=$u->{'userid'} AND lt.journalid=$u->{'userid'} ".
-                          "AND l.year=$year AND l.month=$month AND l.jitemid=lt.jitemid ".
+                          "FROM log2 l ".
+                          "WHERE l.journalid=? AND l.year=? AND l.month=? ".
                           "$secwhere LIMIT 2000");
-    $sth->execute;
+    $sth->execute($u->{userid}, $year, $month);
 
     my @items;
     push @items, $_ while $_ = $sth->fetchrow_hashref;
@@ -88,6 +86,7 @@ sub MonthPage
     # load the log properties
     my %logprops = ();
     LJ::load_log_props2($u->{'userid'}, \@itemids, \%logprops);
+    my $lt = LJ::get_logtext2($u, @itemids);
 
     my (%pu, %pu_lite);  # poster users; UserLite objects
     foreach (@items) {
@@ -100,13 +99,13 @@ sub MonthPage
 
     my $opt_text_subjects = S2::get_property_value($ctx, "page_month_textsubjects");
     my $userlite_journal = UserLite($u);
-    
+
   ENTRY:
     foreach my $item (@items)
     {
-        my ($posterid, $itemid, $security, $alldatepart, $replycount, $anum) = 
+        my ($posterid, $itemid, $security, $alldatepart, $replycount, $anum) =
             map { $item->{$_} } qw(posterid jitemid security alldatepart replycount anum);
-        my $subject = $item->{'subject'};
+        my $subject = $lt->{$itemid}->[0];
         my $day = $item->{'day'};
 
         # don't show posts from suspended users
