@@ -2,11 +2,11 @@
 # vim:ts=4 sw=4 et:
 
 use strict;
+package BlobClient::Local;
+
 use IO::File;
 use File::Path;
 use Time::HiRes qw{gettimeofday tv_interval};
-
-package BlobClient::Local;
 
 use constant DEBUG => 0;
 
