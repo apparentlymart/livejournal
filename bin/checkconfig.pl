@@ -49,6 +49,10 @@ my %modules = (
                    'deb' => 'libxml-rss-perl',
                    'opt' => 'Required for retrieving RSS off of other sites (syndication).',
                },
+               "String::CRC32" => { 
+                   'deb' => 'libstring-crc32-perl',
+                   'opt' => 'Required for palette-altering of PNG files.  Only necessary if you plan to make your own S2 styles that use PNGs, not GIFs.',
+               },
                );
 
 my @debs;

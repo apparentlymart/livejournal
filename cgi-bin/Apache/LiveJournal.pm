@@ -7,6 +7,7 @@ use strict;
 use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED HTTP_MOVED_PERMANENTLY);
 use Apache::File ();
 use lib "$ENV{'LJHOME'}/cgi-bin";
+use Apache::LiveJournal::PalImg;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
@@ -251,6 +252,12 @@ sub trans
     if ($uri =~ m!^/customview\.cgi!) {
         $r->handler("perl-script");
         $r->push_handlers(PerlHandler => \&customview_content);
+        return OK;
+    }
+
+    if ($uri =~ m!^/palimg/!) {
+        $r->handler("perl-script");
+        $r->push_handlers(PerlHandler => \&Apache::LiveJournal::PalImg::handler);
         return OK;
     }
 

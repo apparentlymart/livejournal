@@ -148,7 +148,7 @@ function _updatebrightnessgrad(p) {
     gradclr = _hex(fbc.r)+
               _hex(fbc.g)+
               _hex(fbc.b);
-    var newgradurl = "/img/colorpicker/longgrad.gif/pg00000000fe"+gradclr.toLowerCase();
+    var newgradurl = "/palimg/colorpicker/longgrad.gif/pg00000000fe"+gradclr.toLowerCase();
     var oldgradurl = grad.src;
     if (oldgradurl != newgradurl) {
         grad.src = newgradurl;
@@ -370,7 +370,7 @@ function _createInterface(p) {
     d.write('<table cellspacing="5" cellpadding="0" border="0">\n');
     d.write('<tr><td><img src="/img/colorpicker/spectrum.png" '+
             'ismap width="512" height="256" id="spectrum"></td>\n');
-    d.write('<td><img src="/img/colorpicker/longgrad.png" '+
+    d.write('<td><img src="/palimg/colorpicker/longgrad.gif" '+
             'ismap width="25" height="256" id="brightness"></td></tr></table>\n');
     d.write('<form action="about:blank" method="GET" onsubmit="return false;">\n');
     d.write('<center><table cellspacing="5" cellpadding="0" border="0" width="95%">\n');
