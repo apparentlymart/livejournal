@@ -1226,7 +1226,7 @@ sub init {
 
     if ($partid) {
         $sth = $dbcm->prepare("SELECT posterid, state FROM talk2 ".
-                              "WHERE journalid=? AND jtalkid=? AND state<>'D'");
+                              "WHERE journalid=? AND jtalkid=?");
         $sth->execute($journalu->{userid}, $partid);
         $parpost = $sth->fetchrow_hashref;
 
