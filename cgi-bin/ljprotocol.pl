@@ -69,6 +69,7 @@ sub error_message
              "500" => "Internal server error",
              "501" => "Database error",
              "502" => "Database temporarily unavailable",
+             "503" => "Error obtaining necessary database lock",
              );
 
     my $prefix = "";
@@ -578,7 +579,18 @@ sub postevent
         if ($req->{'security'} eq "usemask" &&
             $qallowmask != 1 && ($ownerid != $posterid));
 
-    ### do processing of embedded polls
+    # make sure this user isn't banned from posting here (if
+    # this is a community journal)
+    return fail($err,151) if
+        LJ::is_banned($dbs, $posterid, $ownerid);
+
+    # don't allow backdated posts in communities
+    return fail($err,152) if
+        ($req->{'props'}->{"opt_backdated"} &&
+         $uowner->{'journaltype'} ne "P");
+
+    # do processing of embedded polls (doesn't add to database, just
+    # does validity checking)
     my @polls = ();
     if (LJ::Poll::contains_new_poll(\$event))
     {
@@ -595,16 +607,6 @@ sub postevent
         });
         return fail($err,103,$error) if $error;
     }
-
-    # make sure this user isn't banned from posting here (if
-    # this is a community journal)
-    return fail($err,151) if
-        LJ::is_banned($dbs, $posterid, $ownerid);
-
-    # don't allow backdated posts in communities
-    return fail($err,152) if
-        ($req->{'props'}->{"opt_backdated"} &&
-         $uowner->{'journaltype'} ne "P");
 
     my $qownerid = $ownerid+0;
     my $qposterid = $posterid+0;
@@ -625,6 +627,39 @@ sub postevent
     my $anum  = int(rand(256));
     my $udbh_now;  # current time on the master user db
 
+    my $dupsig = Digest::MD5::md5_hex(join('', map { $req->{$_} } 
+                                           qw(subject event usejournal security allowmask)));
+    my $lock_key = "post-$qposterid-$dupsig";
+
+    # release our duplicate lock
+    my $release = sub {  $dbcm->do("SELECT RELEASE_LOCK(?)", undef, $lock_key); };
+
+    # our own local version of fail that releases our lock first
+    my $fail = sub { $release->(); return fail(@_); };
+
+    my $res = {};
+    my $res_done = 0;  # set true by getlock when post was duplicate, or error getting lock
+
+    my $getlock = sub {
+        my $r = $dbcm->selectrow_array("SELECT GET_LOCK(?, 2)", undef, $lock_key);
+        unless ($r) {
+            $res = undef;    # a failure case has an undef result
+            fail($err,503);  # set error flag to "can't get lock";
+            $res_done = 1;   # tell caller to bail out
+            return;
+        }
+        LJ::load_user_props($dbs, $u, "dupsig_post");
+        my @parts = split(/:/, $u->{'dupsig_post'});
+        if ($parts[0] eq $dupsig) {
+            # duplicate!  let's make the client think this was just the
+            # normal first response.
+            $res->{'itemid'} = $parts[1];
+            $res->{'anum'} = $parts[2] if $clustered;
+            $res_done = 1;
+            $release->();
+        }
+    };
+
     if ($uowner->{'clusterid'}) {
         $dbcm = LJ::get_cluster_master($uowner);
         $clustered = 1;
@@ -635,11 +670,14 @@ sub postevent
         # delitem cmd buffer, otherwise we could have a race and that might
         # wake up later and delete this item which is replacing in the database
         # the old last item which is marked for deletion:
+        # NOTE: cmd_buffer_flush uses GET_LOCK!  So we can't lock until after this.
+        #       (but it'd be kinda silly to lock before this, anyway)
         LJ::cmd_buffer_flush($dbh, $dbcm, "delitem", $ownerid);
 
         $udbh_now = $dbcm->selectrow_array("SELECT NOW()");
         $rlogtime =~ s/\?/\'$udbh_now\'/;  # replace parameter above with current time
 
+        $getlock->(); return $res if $res_done;
         $dbcm->do("INSERT INTO log2 (journalid, posterid, eventtime, logtime, security, ".
                   "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
                   "VALUES ($qownerid, $qposterid, $qeventtime, '$udbh_now', $qsecurity, $qallowmask, ".
@@ -647,16 +685,24 @@ sub postevent
                   "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     } else {
         $rlogtime =~ s/\?//;  # kill the parameter, which we don't use in this case.
+
+        $getlock->(); return $res if $res_done;
         $dbcm->do("INSERT INTO log (ownerid, posterid, eventtime, logtime, security, ".
                   "allowmask, replycount, year, month, day, revttime, rlogtime) ".
                   "VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, ".
                   "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
                   "UNIX_TIMESTAMP($qeventtime), $rlogtime)");
     }
-    return fail($err,501,$dbcm->errstr) if $dbcm->err;
+    return $fail->($err,501,$dbcm->errstr) if $dbcm->err;
 
     my $itemid = $dbcm->{'mysql_insertid'};
-    return fail($err,501,"No itemid could be generated.") unless $itemid;
+    return $fail->($err,501,"No itemid could be generated.") unless $itemid;
+
+    # keep track of itemid/anum for later potential duplicates
+    LJ::set_userprop($dbs, $u, "dupsig_post", "$dupsig:$itemid:$anum");
+
+    # end duplicate locking section
+    $release->();
 
     my $ditemid = $clustered ? ($itemid * 256 + $anum) : $itemid;
 
@@ -836,7 +882,6 @@ sub postevent
         }
     }
 
-    my $res = {};
     $res->{'itemid'} = $itemid;  # by request of mart
     $res->{'anum'} = $anum if $clustered;
     return $res;

@@ -1014,3 +1014,5 @@ INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope
 UPDATE userproplist SET datatype='char',des='Yahoo ID',indexed='1',prettyname='Yahoo ID',scope='general' WHERE name='yahoo';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', '5 digit zip code (if in US)', '1', 'zip', 'ZIP code', 'general');
 UPDATE userproplist SET datatype='char',des='5 digit zip code (if in US)',indexed='1',prettyname='ZIP code',scope='general' WHERE name='zip';
+INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'On each postevent, the dupsig is checked and updated to prevent accidental duplicate posts', '0', 'dupsig_post', 'Duplicate signature for last post', 'general');
+UPDATE userproplist SET datatype='char',des='On each postevent, the dupsig is checked and updated to prevent accidental duplicate posts',indexed='0',prettyname='Duplicate signature for last post',scope='general' WHERE name='dupsig_post';
