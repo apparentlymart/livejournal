@@ -33,6 +33,7 @@ BODY<=
  ### and if it's being deleted, is it authorized to be deleted by this user?
  my $tp;
  if ($clustered) {
+     $qid = int($qid / 256);  # public ID (with anum) for consistency
      $tp = $dbcm->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, nodeid AS 'itemid', ".
                                     "parenttalkid, journalid, posterid FROM talk2 ".
                                     "WHERE journalid=$u->{'userid'} AND jtalkid=$qid");

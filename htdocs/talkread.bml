@@ -61,7 +61,7 @@ BODY<=
 
  my $ditemid = $init->{'ditemid'}+0;
  my $page = int($FORM{'page'}) || 1;
- my $thread = int($FORM{'thread'}) || 0;
+ my $thread = $init->{'thread'};
 
  ### load the log properties
  my %logprops = ();
@@ -414,6 +414,8 @@ sub recurse_post
 
     if ($tid)
     {
+        my $dtid = $clustered ? ($tid * 256 + $init->{'anum'}) : $tid;
+
         my $datepost = "<font size='-1'>" . substr($post->{'datepost'}, 0, 16) . "</font>";
         my $userpost = $post->{'userpost'};
         my $user = "<i>(Anonymous)</i>";
@@ -422,11 +424,11 @@ sub recurse_post
         }
 
         if ($post->{'state'} eq "D") {
-            $$ret .= "<p><a name='t$tid'></a><table><tr>";
+            $$ret .= "<p><a name='t$dtid'></a><table><tr>";
             $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
             $$ret .= "<td><b>(Deleted post)</b></td></tr></table>\n";
         } elsif ($userpost && $user{$userpost}->{'statusvis'} eq "S") {
-            $$ret .= "<p><a name='t$tid'></a><table><tr>";
+            $$ret .= "<p><a name='t$dtid'></a><table><tr>";
             $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
             $$ret .= "<td><b>(Reply from suspended user)</b></td></tr></table>\n";
         } else {
@@ -436,7 +438,7 @@ sub recurse_post
             my $icon = LJ::Talk::show_image($pics, $post->{'subjecticon'});
 
             if ($post->{'_loaded'}) {
-                $$ret .= "<p><a name='t$tid'></a><table width='100%'><tr>";
+                $$ret .= "<p><a name='t$dtid'></a><table width='100%'><tr>";
                 $$ret .= "<td rowspan='2'><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
                 $$ret .= "<td bgcolor='$bgcolor' width='100%'>";
                 if ($userpost) {
@@ -484,14 +486,14 @@ sub recurse_post
                     $$ret .= "(from $post->{'poster_ip'})";
                 }
 
-                $$ret .= " <font size='-1'>(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid#t$tid'>link</a>)</font> ";
+                $$ret .= " <font size='-1'>(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid#t$dtid'>link</a>)</font> ";
 
                 if ($remote && ($remote->{'user'} eq $userpost ||
                                 $remote->{'user'} eq $u->{'user'} ||
                                 $remote->{'user'} eq $up->{'user'} ||
                                 LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
                 {
-                    $$ret .= "<a href='delcomment.bml?${jargent}id=$tid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+                    $$ret .= "<a href='delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
                 }
 
                 $$ret .= "</td></tr>";
@@ -507,17 +509,16 @@ sub recurse_post
                     $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$post->{'parenttalkid'}'>(Parent)</a> ";
                 }
                 if (defined $opts->{'children'}->{$tid} && $post_count >= $PAGE_SIZE) {
-                    $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid'>(Thread)</a> ";
+                    $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid'>(Thread)</a> ";
                 }
 
-                my $dtid = $clustered ? ($tid * 256 + $init->{'anum'}) : $tid;
                 $$ret .= "<a href='/talkpost.bml?${jargent}replyto=$dtid'>(Reply to this)</a></font>";
                 $$ret .= "</td></tr></table>\n";  # close colored table
             } else {
                 # link to message
-                $$ret .= "<a name='t$tid'></a><table><tr>";
+                $$ret .= "<a name='t$dtid'></a><table><tr>";
                 $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-                $$ret .= "<td><a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$tid'>" . BML::eall($post->{'subject'} || "(no subject)") . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
+                $$ret .= "<td><a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid'>" . BML::eall($post->{'subject'} || "(no subject)") . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
             }
         }
     }

@@ -125,6 +125,7 @@ sub init
     $init->{'clustered'} = 0;
     $init->{'replyto'} = $form->{'replyto'}+0;
     $init->{'ditemid'} = $init->{'itemid'};
+    $init->{'thread'} = $form->{'thread'}+0;
     
     if ($journal) {
         # they specified a journal argument, which indicates new style.
@@ -138,6 +139,8 @@ sub init
             $init->{$_} = int($init->{$_} / 256);
             last;
         }
+        $init->{'thread'} = int($init->{'thread'} / 256)
+            if $init->{'thread'};
     } else {
         # perhaps it's an old URL for a user that's since been clustered.
         # look up the itemid and see what user it belongs to.
@@ -149,6 +152,10 @@ sub init
                 $init->{'clustered'} = 1;
                 $init->{'itemid'} = $newinfo->[1];
                 $init->{'oldurl'} = 1;
+                if ($form->{'thread'}) {
+                    my $tinfo = LJ::get_newids($dbs, 'T', $init->{'thread'});
+                    $init->{'thread'} = $tinfo->[1] if $tinfo;
+                }
             } else {
                 my $jid = LJ::dbs_selectrow_array($dbs, "SELECT ownerid FROM log WHERE itemid=$itemid");
                 return { 'error' => "No such entry" } unless $jid;
