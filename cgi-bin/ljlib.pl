@@ -3249,6 +3249,9 @@ sub make_journal
 
     $opts->{'view'} = $view;
 
+    # what charset we put in the HTML
+    $opts->{'saycharset'} ||= "utf-8";
+
     if ($stylesys == 2 && $view ne 'rss') {
         $r->notes('codepath' => "s2.$view") if $r;
         return LJ::S2::make_journal($u, $styleid, $view, $remote, $opts);
@@ -3336,9 +3339,6 @@ sub make_journal
         $vars{"color-$_"} = $cols->{$_};
     }
         
-    # what charset we put in the HTML
-    $opts->{'saycharset'} ||= "utf-8";
-
     # instruct some function to make this specific view type
     return unless defined $LJ::viewinfo{$view}->{'creator'};
     my $ret = "";
