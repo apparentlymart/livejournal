@@ -35,7 +35,6 @@ ANYBODY:
 
 misc:
 developers/doc link wrong
-new talk view mode
 topics / named entries (url space control)
 logaccess bypass
 talkleft_xfp investigation
@@ -69,7 +68,6 @@ MISC:
 * support: dakus wants to be able to mark requests as "still needs help"
 * LJ::delete_user()
 * require POST for all do actions (use LJ::did_post to check)
-* ehtml current mood/music ?
 * perf: don't preload friends in ljprotocol.pl:editfriends, check $sth->rows
 * comprehensive fix for adding communities as friends: befriending vs.
   watching: provide a way for users to turn bit 0 off in allowmask,
