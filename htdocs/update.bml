@@ -56,6 +56,9 @@
         }
     }
 
+    # see if we need to do any transformations
+    LJ::run_hooks("transform_update_$GET{transform}", \%GET, \%POST) if $GET{transform};
+
     # are we spellchecking before we post?
     my $spellcheck_html;
     my $did_spellcheck;
@@ -68,7 +71,7 @@
     }
 
     ### define some bools with common logic ###
-    my $did_post = LJ::did_post();
+    my $did_post = LJ::did_post() && !$GET{transform};                            # transforms aren't posts
     my $user_is_remote = $remote && $remote->{'user'} eq $POST{'user'};           # user is remote
     my $auth_as_remote = $remote && (! $GET{'altlogin'} || $user_is_remote);      # auth as remote
     my $auth_missing = $POST{'user'} &&
