@@ -951,9 +951,7 @@ CREATE TABLE log2 (
   day tinyint(4) NOT NULL default '0',
   rlogtime int(10) unsigned NOT NULL default '0',
   revttime int(10) unsigned NOT NULL default '0',
-  KEY (year,month,day),
   KEY (journalid,year,month,day),
-  KEY (logtime),
   KEY `rlogtime` (`journalid`,`rlogtime`),
   KEY `revttime` (`journalid`,`revttime`),
   KEY `posterid` (`posterid`,`journalid`)
