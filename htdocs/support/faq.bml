@@ -42,7 +42,7 @@ P=)
      {
 	 next unless ($faqq{$faqid}->{'question'});
 	 &main::note_mod_time($faqq{$faqid}->{'lastmodtime'});	 
-	 my $q = &BMLUtil::ehtml($faqq{$faqid}->{'question'});
+	 my $q = LJ::ehtml($faqq{$faqid}->{'question'});
 	 $q =~ s/^\s+//; $q =~ s/\s+$//;
 	 $q =~ s/\n/<BR>/g;
 	 $ret .= "<LI><A HREF=\"faqbrowse.bml?faqid=$faqid\">$q</A>\n";
@@ -58,5 +58,6 @@ _CODE=)
 Back to <A HREF="./">the support area</A>.
 
 <=BODY
-PAGE=)
-
+PAGE=)(=_C <LJDEP>
+link: htdocs/support/faqbrowse.bml, htdocs/support/index.bml
+</LJDEP> _C=)
