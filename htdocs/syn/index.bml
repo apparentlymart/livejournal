@@ -224,6 +224,9 @@ body<=
         $ret .= "</table>";
     }
 
+    $ret .= "</form><form method='post' action='./'>"; 
+    $ret .= LJ::html_hidden("userid", $u->{'userid'});
+
     $ret .= "<?h1 $ML{'.add.byurl.title'} h1?><?p $ML{'.add.byurl.text'} p?>";
     $ret .= "<blockquote>";
     $ret .= "<p>$ML{'.feed.url'} <input size='40' maxlength='255' name='synurl' />";
