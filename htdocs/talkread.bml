@@ -485,26 +485,29 @@ body<=
 
      $ret .= "<form style='display: inline' method='post' action='/talkmulti.bml' name='multiform' id='multiform' >";
 
+     # Quick Reply when posting a new top level comment
+     # requires setup.
      $ret .= "<p class='lesstop' align='center'><b>$readlink";
-     $ret .= "(" . LJ::make_qr_link('top', '', $T{'postcomments'}, $posturl) . "</a>)" if $remote && @comments > 0;
+     $ret .= "(" . LJ::make_qr_link('top', '', $T{'postcomments'}, $posturl) . "</a>)" if $remote;
      $ret .= "</b></p>";
 
+     $ret .= "<div align='center'>" . LJ::make_qr_target('top') . "</div>" if $remote;
+
+     my $stylemine = $GET{'style'} eq 'mine' ? 1 : 0;
+     $ret .= LJ::create_qr_div($u, $ditemid, $stylemine, $GET{'prop_picture_keyword'});
+
+     $ret .= LJ::html_hidden("ditemid", $ditemid);
+     $ret .= LJ::html_hidden("journal", $u->{'user'});
+
+     # Print out each comment
      if (@comments > 0)
      {
-         $ret .= "<div align='center'>" . LJ::make_qr_target('top') . "</div>" if $remote;
-
-         my $stylemine = $GET{'style'} eq 'mine' ? 1 : 0;
-         $ret .= LJ::create_qr_div($u, $ditemid, $stylemine, $GET{'prop_picture_keyword'});
-
          $recurse_post->($recurse_post, $_, { "depth" => 0 }) foreach (@comments);
 
          $ret .= "<hr /><p class='lesstop' align='center'><b>$readlink";
          $ret .= "(" . LJ::make_qr_link('bottom', '', $T{'postcomments'}, $posturl) . "</a>)" if $remote;
          $ret .= "</b></p>";
          $ret .= "<div align='center'>" . LJ::make_qr_target('bottom') . "</div>" if $remote;
-
-         $ret .= LJ::html_hidden("ditemid", $ditemid);
-         $ret .= LJ::html_hidden("journal", $u->{'user'});
 
          if ($showmultiform && $multiform_selects) {
              $ret .= "<p>$ML{'.talkmulti.des'} ";
@@ -518,9 +521,10 @@ body<=
                                                    "|| confirm(\"" . LJ::ejs($ML{'.confirm.action'}) . "\");" });
              $ret .= "</p>";
          }
-         $ret .= "</form>";
-
      }
+
+     $ret .= "</form>";
+
      if ($navcrap) {
          $ret .= "<p>$navcrap</p>";
      }
