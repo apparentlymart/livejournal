@@ -562,24 +562,25 @@ function EntryPage::print_body () {
 
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
 
-    """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
+    if ($.entry.comments.enabled)
+    {
+        """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="$*stronger_back" align="center">
 <table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
 <tr align='left'>
 <td class="caption" colspan='2'>Comments:</td></tr>""";
  
-    """
-<tr align='left'>
+        """<tr align='left'>
 <td colspan="2" bgcolor="$*entry_back">""";
 
-    if ($.comment_pages.total_subitems > 0) {
-        $.comment_pages->print();
-        $this->print_comments($.comments);
-    }
-    """</td></tr></table>
+        if ($.comment_pages.total_subitems > 0) {
+            $.comment_pages->print();
+            $this->print_comments($.comments);
+        }
+        """</td></tr></table>
 </td></tr></table><p>""";
-
+    }
 }
 
 function EntryPage::print_comment (Comment c) {
@@ -629,6 +630,20 @@ function EntryPage::print_comment (Comment c) {
 }
 
 function ReplyPage::print_body () {
+    if (not $.entry.comments.enabled) {
+        """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
+<tr align='left'>
+<td bgcolor="$*stronger_back" align="center">
+<table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
+<tr align='left'>
+<td class="caption" colspan='2'>$*text_reply_nocomments_header</td></tr>
+<tr align='left'>
+<td colspan="2" bgcolor="$*entry_back">""";
+
+        print "<p>$*text_reply_nocomments</p>";
+        """</td></tr></table></td></tr></table><p>""";
+        return; 
+    }
     var string datetime;
     $datetime = $.replyto.time->date_format("med")+"|<b>" + $.replyto.time->time_format() + "</b>";
     """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">

@@ -676,10 +676,13 @@ function EntryPage::print_body () {
 
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
 
-    """<div class="day"><h3>Comments</h3></div>""";
-    if ($.comment_pages.total_subitems > 0) {
-        $.comment_pages->print();
-        $this->print_comments($.comments);
+    if ($.entry.comments.enabled) 
+    {
+        """<div class="day"><h3>Comments</h3></div>""";
+        if ($.comment_pages.total_subitems > 0) {
+            $.comment_pages->print();
+            $this->print_comments($.comments);
+        }
     }
 }
 
@@ -738,6 +741,12 @@ function ReplyPage::print_body () {
 <span class="entryheading">
     """;
 
+    if (not $.entry.comments.enabled)
+    {
+        print "<span class='subject'>$*text_reply_nocomments_header</span></span><br />
+               $*text_reply_nocomments</div></div>";
+        return;
+    }
     "<span style='padding-left: 0.5em; padding-right: 0.5em;'>";
     print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
     "</span> @ ";

@@ -500,13 +500,16 @@ function EntryPage::print_body () {
     "<table style='margin-left: 30px'>\n";
     print_entry($this, $.entry, $*metabar_bgcolor, $*metabar_fgcolor, $.viewing_thread);
 
-    "<tr valign='top'><th class='headerbar' colspan='2'>Comments</th></tr>";
-    "<tr valign='top'><td style='background-color: $*metabar_bgcolor'>&nbsp;</td><td style='width: 100%'>";
-    if ($.comment_pages.total_subitems > 0) {
-        $.comment_pages->print();
-        $this->print_comments($.comments);
+    if ($.entry.comments.enabled)
+    {
+        "<tr valign='top'><th class='headerbar' colspan='2'>Comments</th></tr>";
+        "<tr valign='top'><td style='background-color: $*metabar_bgcolor'>&nbsp;</td><td style='width: 100%'>";
+        if ($.comment_pages.total_subitems > 0) {
+            $.comment_pages->print();
+            $this->print_comments($.comments);
+        }
+        "</td></tr>";
     }
-    "</td></tr>";
     "</table>\n";
 }
 
@@ -558,6 +561,10 @@ function EntryPage::print_comment (Comment c) {
 function ReplyPage::print_body()
 {
     "<table style='margin-left: 30px'>\n";
+    if (not $.entry.comments.enabled) {
+        print "<tr><th class='headerbar'>$*text_reply_nocomments_header</th></tr><tr><td>$*text_reply_nocomments</td></tr></table>";
+        return;
+    }
     var string time = $.replyto.time->time_format();
     var string userpic = "";
     if (defined $.replyto.userpic)

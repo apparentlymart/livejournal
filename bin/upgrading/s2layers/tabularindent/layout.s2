@@ -425,10 +425,13 @@ function DayPage::print_body ()
 
 function EntryPage::print_body () {
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
-    print "<h3 class='page-header'>Comments:</h3>";
-    if ($.comment_pages.total_subitems > 0) {
-        $.comment_pages->print();
-        $this->print_comments($.comments);
+    if ($.entry.comments.enabled)
+    {
+        print "<h3 class='page-header'>Comments:</h3>";
+        if ($.comment_pages.total_subitems > 0) {
+            $.comment_pages->print();
+            $this->print_comments($.comments);
+        }
     }
 }
 
@@ -490,6 +493,12 @@ function EntryPage::print_comment (Comment c) {
 }
 
 function ReplyPage::print_body () {
+    if (not $.entry.comments.enabled)
+    {
+        print "<h3 class='page-header'>$*text_reply_nocomments_header</h3>";
+        print "<p>$*text_reply_nocomments</p>";
+        return;
+    }
     "<div align='right'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
     "<tr><td bgcolor='$*accent_bgcolor'>";
     "<table border='0' width='100%'><tr>";

@@ -489,11 +489,14 @@ function DayPage::print_body() {
 function EntryPage::print_body () 
 {
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
-    print "<h2 class='date'>Comments:</h2>";
-    "<hr class='seperator' />";
-    if ($.comment_pages.total_subitems > 0) {
-        $.comment_pages->print();
-        $this->print_comments($.comments);
+    if ($.entry.comments.enabled)
+    {
+        print "<h2 class='date'>Comments:</h2>";
+        "<hr class='seperator' />";
+        if ($.comment_pages.total_subitems > 0) {
+            $.comment_pages->print();
+            $this->print_comments($.comments);
+        }
     }
 }
 
@@ -543,6 +546,13 @@ function EntryPage::print_comment (Comment c) {
 }
 
 function ReplyPage::print_body() {
+    if (not $.entry.comments.enabled)
+    {
+        "<h2 class='date'>$*text_reply_nocomments_header</h2>";
+        "<hr class='seperator' />";
+        "<p>$*text_reply_nocomments</p>";
+        return;
+    }
     "<p class='date'>"; print $.replyto.time->date_format("%%month%% %%dayord%%, %%yyyy%%"); "</p>";
     "<hr class='seperator' />";
 

@@ -350,10 +350,13 @@ function DayPage::print_body()
 function EntryPage::print_body () 
 {
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
-    print "<h2>Comments:</h2>";
-    if ($.comment_pages.total_subitems > 0) {
-        $.comment_pages->print();
-        $this->print_comments($.comments);
+    if ($.entry.comments.enabled)
+    {
+        print "<h2>Comments:</h2>";
+        if ($.comment_pages.total_subitems > 0) {
+            $.comment_pages->print();
+            $this->print_comments($.comments);
+        }
     }
 }
 
@@ -404,6 +407,11 @@ function EntryPage::print_comment (Comment c) {
 
 function ReplyPage::print_body ()
 {
+    if (not $.entry.comments.enabled)
+    {
+        print "<h2>$*text_reply_nocomments_header</h2><p>$*text_reply_nocomments</p>";
+        return;
+    }
     "<table border='0'><tr>";
     "<td valign='top' width='100' align='center'>";
     print defined $.replyto.userpic ? "<img src='$.replyto.userpic.url' /><br />" : "";

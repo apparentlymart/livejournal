@@ -504,10 +504,13 @@ function DayPage::print_body ()
 function EntryPage::print_body () 
 {
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
-    print "<h2>Comments:</h2><div style='margin-left: 30px;'>";
-    if ($.comment_pages.total_subitems > 0) {
-        $.comment_pages->print();
-        $this->print_comments($.comments);
+    if ($.entry.comments.enabled)
+    {
+        print "<h2>Comments:</h2><div style='margin-left: 30px;'>";
+        if ($.comment_pages.total_subitems > 0) {
+            $.comment_pages->print();
+            $this->print_comments($.comments);
+        }
     }
     "</div>";
 }
@@ -560,6 +563,12 @@ function EntryPage::print_comment (Comment c) {
 function ReplyPage::print_body () 
 {
     var string time = $.replyto.time->time_format();
+
+    if (not $.entry.comments.enabled)
+    {
+        print "<h2>$*text_reply_nocomments_header</h2><p>$*text_reply_nocomments</p>";
+        return;
+    }
 
     "<h2>" + $.replyto.time->date_format("med") + "</h2>";
 
