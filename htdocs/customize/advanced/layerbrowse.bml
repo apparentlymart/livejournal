@@ -46,13 +46,8 @@
             my $typedes = " ($lay->{'type'}" . (! $is_child ? ": <b>$lid</b>" : '') . ")";
 
             # show link to detailed view
-            my $layname = $layerinfo{$lid}->{'name'};
-            my $layinfo = $layerinfo{$lid};
-            if (exists $layinfo->{'source_viewable'} && $layinfo->{'source_viewable'} == 0) {
-                $body .= "<li>$layname$typedes</li>";
-            } else {
-                $body .= "<li><a href='layerbrowse.bml?id=$lay->{'uniq'}'>$layname</a>$typedes</li>";
-            }
+            $body .= "<li><a href='layerbrowse.bml?id=$lay->{'uniq'}'>$layerinfo{$lid}->{'name'}";
+            $body .= "</a>$typedes</li>";
 
             # done unless there are children to recurse through
             return unless ! $is_child && $lay->{'children'};
@@ -106,8 +101,7 @@
 
     # do they have access?
     return $err->("You are not authorized to view this layer.") 
-        unless defined $pub->{$id} && (! defined $srcview || $srcview != 0) ||
-               $srcview == 1 ||
+        unless defined $pub->{$id} || $srcview == 1 ||
                LJ::can_manage($remote, $layer->{'userid'});
     
     my $rv = S2::load_layers_from_db($dbr, $id);
@@ -135,10 +129,16 @@
         $body .= BML::ml('backlink', { 'link' => "layers.bml", 'text' => 'Your Layers' }) . "\n";
         $body .= BML::ml('actionlink', { 'link' => "<a href='layeredit.bml?id=$id'>Edit Layer</a>" }) . "\n";
     }
-    $body .= "[<a href=\"layersource.bml?id=$id\">Download</a>]\n";
-    $body .= "[<a href=\"layersource.bml?id=$id&fmt=html\">View as HTML</a>]\n";
+
     if ($layer->{'b2lid'}) {
         $body .= "[<a href=\"layerbrowse.bml?id=$layer->{'b2lid'}\">Parent Layer</a>]\n";
+    }
+    if (defined $pub->{$id} && (! defined $srcview || $srcview != 0) ||
+            $srcview == 1 ||
+            LJ::can_manage($remote, $layer->{'userid'})) {
+
+        $body .= "[<a href=\"layersource.bml?id=$id\">Download</a>]\n";
+        $body .= "[<a href=\"layersource.bml?id=$id&fmt=html\">View as HTML</a>]\n";
     }
 
     # layerinfo
