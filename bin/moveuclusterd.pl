@@ -199,7 +199,7 @@ BEGIN {
         'users',                # Users in the queue
         'ratelimits',           # Hash of source cluster rates
         'jobcounts',            # Counts per cluster of running jobs
-        'dbh',                  # Database handle
+        'starttime',            # Server startup epoch time
        );
 
     use lib "$ENV{LJHOME}/cgi-bin";
@@ -230,6 +230,8 @@ INIT {
         lockScale    => 3,              # Scaling factor for locking users
        );
 
+    $Data::Dumper::Terse = 1;
+    $Data::Dumper::Indent = 1;
 }
 
 #
@@ -274,9 +276,9 @@ sub new {
     # Client and job queues
     $self->{clients}     = {};  # fd -> client obj
     $self->{jobs}        = {};  # pending jobs srcluster -> [ jobs ]
-    $self->{users}       = {};  # by-userid hash of jobs (for uniquification)
+    $self->{users}       = {};  # by-userid hash of jobs
     $self->{assignments} = {};  # fd -> job arrayref
-    $self->{totaljobs}   = 0;   # Count of total jobs queued
+    $self->{totaljobs}   = 0;   # Count of total jobs added
     $self->{ratelimits}  = {};  # Rate limits by srcclusterid
     $self->{jobcounts}   = {};  # Count of jobs by srcclusterid
 
@@ -287,8 +289,9 @@ sub new {
         %config,
     };                          # merge
 
-    # The listener socket; gets set by start()
-    $self->{listener}    =  undef;
+    # These two get set by start()
+    $self->{listener}    = undef;
+    $self->{starttime}   = undef;
 
     # CODE refs for handling various events. Keyed by event name, each subhash
     # contains registrations for event callbacks. Each subhash is keyed by the
@@ -299,9 +302,6 @@ sub new {
         log          => {},
     };
 
-    # Database handle to the global to select source clusterids; set in start()
-    $self->{dbh} = undef;
-
     return $self;
 }
 
@@ -311,10 +311,6 @@ sub new {
 ### Start the event loop.
 sub start {
     my JobServer $self = shift;
-
-    # Connect to the database
-    $self->{dbh} = LJ::get_dbh({raw=>1}, "master")
-        or die "Can't get a master dbh: ", $DBI::errstr;
 
     # Start the listener socket
     my $listener = new IO::Socket::INET
@@ -332,6 +328,9 @@ sub start {
                    $listener->sockhost, $listener->sockport );
     $self->{listener} = $listener;
     $self->daemonize if $self->{config}{daemon};
+
+    # Remember the startup time
+    $self->{starttime} = time;
 
     # I don't understand this design -- the Client class is where the event loop
     # is? Weird. Thanks to SPUD, though, for the example code.
@@ -400,8 +399,9 @@ sub disconnectClient {
     # If requeueing is requested, re-queue any job that was assigned to the
     # client. Otherwise just remove it.
     if ( $requeue && ($retask = delete $self->{assignments}{$fd}) ) {
-        $self->logMsg( 'info', "Re-adding job %d:%d to queue", @$retask );
-        unshift @{$self->{jobs}}, $retask;
+        $self->logMsg( 'info', "Re-adding job %s to queue", $retask->stringify );
+        $self->{jobs}{ $retask->srcclusterid } ||= [];
+        unshift @{$self->{jobs}{ $retask->srcclusterid }}, $retask;
     } else {
         delete $self->{assignments}{$fd};
     }
@@ -414,14 +414,13 @@ sub disconnectClient {
 
 ### METHOD: addJobs( @jobs=JobServer::Job )
 ### Add a job to move the user with the given I<userid> to the cluster with the
-### specified I<destclustid>.
+### specified I<dstclustid>.
 sub addJobs {
     my JobServer $self = shift;
     my @jobs = @_;
 
     my (
         @responses,
-        $sth,
         $clusterid,
         $job,
         $userid,
@@ -432,17 +431,22 @@ sub addJobs {
     # Iterate over job specifications
   JOB: for ( my $i = 0; $i <= $#jobs; $i++ ) {
         $job = $jobs[ $i ];
+        $self->debugMsg( 5, "Adding job: %s", $job->stringify );
+
+        ( $userid, $clusterid ) = ( $job->userid, $job->srcclusterid );
 
         # Check to be sure this job isn't already queued or in progress.
         if ( exists $self->{users}{$userid} ) {
-            $self->debugMsg( 2, "Request for duplicate job %s", $job->to_string );
+            $self->debugMsg( 2, "Request for duplicate job %s", $job->stringify );
             $responses[$i] = "Duplicate job for userid $userid";
             next JOB;
         }
 
         # Queue the job and point the user index at it.
+        $self->{jobs}{$clusterid} ||= [];
         push @{$self->{jobs}{$clusterid}}, $job;
         $self->{users}{ $userid } = $job;
+        $self->{jobcounts}{$clusterid} ||= 0;
 
         $responses[$i] = "Added job ". ++$self->{totaljobs};
     }
@@ -475,17 +479,31 @@ sub prelockSomeUsers {
 
     # Iterate over all the queues we have by cluster
   CLUSTER: foreach my $clusterid ( keys %{$self->{jobs}} ) {
-        $rate = $self->{ratelimits}{ $clusterid };
+        $rate = $self->getClusterRateLimit( $clusterid );
         $target = $rate * $scale;
 
         $jobs = $self->{jobs}{ $clusterid };
       JOB: for ( my $i = 0; $i <= $target; $i++ ) {
-            next JOB if $jobs->[$i]->is_prelocked;
+            next CLUSTER if $i > $#$jobs;
+            next JOB if $jobs->[$i]->isPrelocked;
             $jobs->[$i]->prelock;
         }
     }
 
     return $lockcount;
+}
+
+
+### METHOD: getClusterRateLimit( $clusterid )
+### Return the number of connections which can be reading from the cluster with
+### the given I<clusterid>.
+sub getClusterRateLimit {
+    my JobServer $self = shift;
+    my $clusterid = shift or croak "No clusterid";
+
+    return $self->{ratelimits}{ $clusterid } if exists $self->{ratelimits}{ $clusterid };
+    return $self->{ratelimits}{global} if exists $self->{ratelimits}{global};
+    return $self->{config}{defaultRate};
 }
 
 
@@ -508,7 +526,7 @@ sub getJob {
     if ( exists $self->{assignments}{ $fd } ) {
         $job = delete $self->{assignments}{ $fd };
         $self->logMsg( 'warn', "Client %d didn't finish job %s",
-                       $fd, join(':', @$job) );
+                       $fd, $job->stringify );
     }
 
     return $self->assignNextJob( $fd );
@@ -553,17 +571,26 @@ sub finishJob {
         $job,                   # The client's currently assigned job
        );
 
+    # Fetch the fdno of the client and try to get the job object they were last
+    # assigned. If it doesn't exist, all jobs are stopped or something else has
+    # happened, so advise the client to abort.
     $fdno = $client->fdno;
-    $job = $self->{assignments}{$fdno};
-
-    if ( $job->[0] != $userid ) {
-        $self->logMsg( 'warn', "Client %d requested finish for non-assigned job %d:%d:%d",
-                       $fdno, $userid, $srcclusterid, $dstclusterid );
-        return sprintf "Abort: Mismatched userids (%d vs. %d)", $userid, $job->[0];
+    if ( ! exists $self->{assignments}{$fdno} ) {
+        $self->logMsg( 'warn', "Client $fdno requested finish for cleared or unassigned job" );
+        return "Abort: Not assigned";
     }
 
-    
+    # If the job the client was last assigned doesn't match the userid they've
+    # specified, abort.
+    $job = $self->{assignments}{$fdno};
+    if ( $job->userid != $userid ) {
+        $self->logMsg( 'warn', "Client %d requested finish for non-assigned job %d:%d:%d",
+                       $fdno, $userid, $srcclusterid, $dstclusterid );
+        return sprintf "Abort: Mismatched userids (%d vs. %d)", $userid, $job->userid;
+    }
 
+    # Otherwise advise them that it's okay to finish
+    return 'OK';
 }
 
 
@@ -623,27 +650,63 @@ sub assignJobFromCluster {
 }
 
 
-### METHOD: markUserReadonly( $userid )
-### Mark the user with the given I<userid> read-only.
-sub markUserReadonly {
+### METHOD: getJobForUser( $userid )
+### Return the job associated with a given userid.
+sub getJobForUser {
     my JobServer $self = shift;
-    my $userid = shift;
+    my $userid = shift or croak "No userid specified";
 
-    # :TODO: Needs implementation
-
-    return 1;
+    return exists $self->{users}{ $userid }
+        ? $self->{users}{ $userid }
+        : undef;
 }
 
 
-### METHOD: unmarkUserReadonly( $userid )
-### Mark the user with the given I<userid> read-write.
-sub unmarkUserReadonly {
+### METHOD: getJobList( undef )
+### Return a list of job statistics, one line per source cluster.
+sub getJobList {
     my JobServer $self = shift;
-    my $userid = shift;
 
-    # :TODO: Needs implementation
+    my (
+        @list,
+        $queuedCount,
+        $assignedCount,
+        $job,
+       );
 
-    return 1;
+    @list = ([], []);
+    $queuedCount = $assignedCount = 0;
+
+    # The first sublist: queued jobs
+    foreach my $clusterid ( sort keys %{$self->{jobs}} ) {
+        push @{$list[0]}, sprintf( "%3d: %5d jobs queued @ limit %d",
+                             $clusterid,
+                             scalar @{$self->{jobs}{$clusterid}},
+                             $self->getClusterRateLimit($clusterid) );
+        $queuedCount += scalar @{$self->{jobs}{$clusterid}};
+    }
+
+    # Second sublist: assigned jobs
+    foreach my $fdno ( sort keys %{$self->{assignments}} ) {
+        $job = $self->{assignments}{$fdno};
+        push @{$list[1]}, sprintf( "%3d: working on moving %7d from %3d to %3d",
+                                $fdno, $job->userid, $job->srcclusterid,
+                                $job->dstclusterid );
+        $assignedCount++;
+    }
+
+    # Append the footer lines
+    push @list, sprintf( "  %d queued jobs, %d assigned jobs for %d clusters",
+                         $queuedCount, $assignedCount, scalar keys %{$self->{jobs}} );
+    push @list, sprintf( "  %d of %d total jobs assigned since %s (%0.1f/s)",
+                         $self->{totaljobs} - $queuedCount,
+                         $self->{totaljobs},
+                         scalar localtime($self->{starttime}),
+                         (time - $self->{starttime}) / ($self->{totaljobs}||0.005)
+                        );
+
+
+    return wantarray ? @list : \@list;
 }
 
 
@@ -661,9 +724,6 @@ sub shutdown {
     $self->{users} = {};
     $self->logMsg( 'notice', "Server shutdown by $agent" );
 
-    # Close the db connection
-    $self->{dbh}->disconnect;
-
     # Drop all clients
     foreach my $client ( values %{$self->{clients}} ) {
         $client->write( "Server shutdown.\r\n" );
@@ -674,6 +734,8 @@ sub shutdown {
     exit;
 }
 
+
+### Handler methods
 
 ### METHOD: removeAllHandlers( $key )
 ### Remove all event callbacks for the specified I<key>. Returns the number of
@@ -861,6 +923,221 @@ sub logMsg {
 
 
 
+#####################################################################
+### J O B   C L A S S
+#####################################################################
+package JobServer::Job;
+use strict;
+
+BEGIN {
+    use Carp qw{croak confess};
+
+    use lib "$ENV{LJHOME}/cgi-bin";
+    require 'ljlib.pl';
+    require 'ljconfig.pl';
+
+    use fields (
+        'server',               # The server this job belongs to
+        'userid',               # The userid of the user to move
+        'srcclusterid',         # The cluster id of the source cluster
+        'dstclusterid',         # Cluster id of the destination cluster
+        'prelocktime'           # Has the corresponding user already been prelocked?
+       );
+}
+
+
+### Class globals
+our ( $ReadOnlyCapBit, $LockUserSql, $Dbh );
+
+INIT {
+    # Find the readonly cap class, complain if not found
+    $ReadOnlyCapBit = undef;
+
+    # Find the moveinprogress bit from the caps hash
+    foreach my $bit ( keys %LJ::CAP ) {
+        next unless exists $LJ::CAP{$bit}{_name};
+        if ( $LJ::CAP{$bit}{_name} eq '_moveinprogress' &&
+             $LJ::CAP{$bit}{readonly} == 1 )
+        {
+            $ReadOnlyCapBit = $bit;
+            last;
+        }
+    }
+
+    die "Cannot mark user readonly without a ReadOnlyCapBit. Check %LJ::CAP"
+        unless $ReadOnlyCapBit;
+
+    # SQL used to create the source cluster id for users being moved.
+    $LockUserSql = qq{
+        UPDATE user
+        SET caps = caps | (1<<$ReadOnlyCapBit)
+        WHERE userid = ?
+    };
+
+    # Database handle -- instantiated on demand by getDbh()
+    $Dbh = undef;
+
+}
+
+
+### (CLASS) METHOD: getDbh( undef )
+### Fetch a database handle for marking users read-only.
+sub getDbh {
+    my JobServer::Job $class = shift;
+
+    unless ( $Dbh && $Dbh->ping ) {
+        # Connect to the database
+        $Dbh = LJ::get_dbh( {raw=>1}, "master" )
+            or die "Can't get a master dbh: ", $DBI::errstr;
+    }
+
+    return $Dbh;
+}
+
+
+### (CONSTRUCTOR) METHOD: new( [$userid, $srcclusterid, $dstclusterid, $prelocked )
+### Create and return a new JobServer::Job object.
+sub new {
+    my JobServer::Job $self = shift;
+    my $server = shift or croak "no server object";
+
+    $self = fields::new( $self ) unless ref $self;
+
+    # Split instance vars from a string with a colon in the second or later
+    # position
+    if ( index($_[0], ':') > 0 ) {
+        @{$self}{qw{userid srcclusterid dstclusterid}} =
+            split /:/, $_[0], 3;
+    }
+
+    # Allow list arguments as well
+    else {
+        @{$self}{qw{userid srcclusterid dstclusterid}} = @_;
+    }
+
+    $self->{server} = $server;
+    $self->{prelocktime} = 0;
+
+    return $self;
+}
+
+
+### METHOD: userid( [$newuserid] )
+### Get/set the job's userid.
+sub userid {
+    my JobServer::Job $self = shift;
+    $self->{userid} = shift if @_;
+    return $self->{userid};
+}
+
+
+### METHOD: srcclusterid( [$newsrcclusterid] )
+### Get/set the job's srcclusterid.
+sub srcclusterid {
+    my JobServer::Job $self = shift;
+    $self->{srcclusterid} = shift if @_;
+    return $self->{srcclusterid};
+}
+
+
+### METHOD: dstclusterid( [$newdstclusterid] )
+### Get/set the job's dstclusterid.
+sub dstclusterid {
+    my JobServer::Job $self = shift;
+    $self->{dstclusterid} = shift if @_;
+    return $self->{dstclusterid};
+}
+
+
+### METHOD: stringify( undef )
+### Return a scalar containing the stringified representation of the job.
+sub stringify {
+    my JobServer::Job $self = shift;
+    return sprintf '%d:%d:%d', @{$self}{'userid', 'srcclusterid', 'dstclusterid'};
+}
+
+
+### METHOD: prelock( undef )
+### Mark the user in this job read-only and set the prelocktime.
+sub prelock {
+    my JobServer::Job $self = shift;
+
+    my $sth = $self->getUserLockCursor;
+
+    if ( $sth->execute($self->{userid}) ) {
+        $self->{prelocktime} = time;
+        $self->{server}->debugMsg( 4, q{Prelocked user %d}, $self->{userid} );
+    } else {
+        $self->{server}->logMsg( 'warn', q{Couldn't prelock user %d: %s},
+                                 $self->{userid}, $sth->errstr );
+    }
+
+    return $self->{prelocktime};
+}
+
+
+### METHOD: getUserLockCursor( undef )
+sub getUserLockCursor {
+    my JobServer::Job $self = shift;
+
+    # Prepare the handle and return it
+    my $dbh = $self->getDbh;
+    my $sth = $dbh->prepare( $LockUserSql )
+        or die sprintf( 'prepare: %s: %s',
+                        $LockUserSql,
+                        $dbh->errstr );
+
+    return $sth;
+}
+
+
+### METHOD: prelocktime( [$newprelocktime] )
+### Get/set the epoch time when the user record corresponding to the job's
+### C<userid> was set read-only.
+sub prelocktime {
+    my JobServer::Job $self = shift;
+    $self->{prelocktime} = shift if @_;
+    return $self->{prelocktime};
+}
+
+
+### METHOD: secondsSinceLock( undef )
+### Return the number of seconds since the job's user was prelocked, or 0 if the
+### user isn't prelocked.
+sub secondsSinceLock {
+    my JobServer::Job $self = shift;
+    return 0 unless $self->{prelocktime};
+    return time - $self->{prelocktime};
+}
+
+
+### METHOD: isPrelocked( undef )
+### Returns a true value if the user corresponding to the job has already been
+### marked read-only.
+sub isPrelocked {
+    my JobServer::Job $self = shift;
+    return $self->{prelocktime} != 0;
+}
+
+
+### METHOD: debugMsg( $level, $format, @args )
+### Send a debugging message to the server this job belongs to.
+sub debugMsg {
+    my JobServer::Job $self = shift;
+    $self->{server}->debugMsg( @_ );
+}
+
+
+### METHOD: logMsg( $type, $format, @args )
+### Send a log message to the server this job belongs to.
+sub logMsg {
+    my JobServer::Job $self = shift;
+    $self->{server}->logMsg( @_ );
+}
+
+
+
+
 
 #####################################################################
 ### C L I E N T   B A S E   C L A S S
@@ -957,6 +1234,12 @@ INIT {
             args => qr{^$},
         },
 
+        lock     => {
+            help => "Pre-lock a given user's job. The job must have already been added.",
+            form => '<userid>',
+            args => qr{^(\d+)$},
+        },
+
         help     => {
             help => "show list of commands or help for a particular command, if given.",
             form => "[<command>]",
@@ -993,7 +1276,7 @@ sub event_read {
     my JobServer::Client $self = shift;
 
     my $bref = $self->read( 1024 );
-    return $self->{server}->disconnectClient( $self, 1 ) unless defined $bref;
+    return $self->{server}->disconnectClient( $self ) unless defined $bref;
     $self->{read_buf} .= $$bref;
 
     while ($self->{read_buf} =~ s/^(.+?)\r?\n//) {
@@ -1028,12 +1311,16 @@ sub event_hup {
 }
 
 
+### METHOD: debugMsg( $level, $format, @args )
+### Send a debugging message to the server.
 sub debugMsg {
     my JobServer::Client $self = shift;
     $self->{server}->debugMsg( @_ );
 }
 
 
+### METHOD: logMsg( $type, $format, @args )
+### Send a log message to the server.
 sub logMsg {
     my JobServer::Client $self = shift;
     $self->{server}->logMsg( @_ );
@@ -1058,7 +1345,6 @@ sub processLine {
     ( $cmd, $args ) = split /\s+/, $line, 2;
     $args ||= '';
 
-    $self->debugMsg( 5, "Command table is: %s", \%CommandTable );
     $self->debugMsg( 4, "Matching '%s' against command table pattern %s",
                      $cmd, $CommandPattern );
 
@@ -1145,7 +1431,7 @@ sub cmd_add_jobs {
 
     # Turn the argument into an array of arrays
     my @tuples = map {
-        JobServer::Job->new( $_ )
+        JobServer::Job->new( $self, $_ )
     } split /\s*,\s*/, $argstring;
 
     $self->{state} = sprintf 'adding %d jobs', scalar @tuples;
@@ -1200,7 +1486,20 @@ sub cmd_check_instance {
 sub cmd_list_jobs {
     my JobServer::Client $self = shift;
     $self->{state} = 'list jobs';
-    return $self->error( "Unimplemented command." );
+
+    my @list = $self->{server}->getJobList;
+
+    return join( "\r\n",
+                 "",
+                 "-- Job List ---------------",
+                 "ScId  Jobs",
+                 @{$list[0]},
+                 "-- Assigned ---------------",
+                 "Clnt   Assignment",
+                 @{$list[1]},
+                 "---------------------------",
+                 @list[2..$#list],
+                 "" );
 }
 
 
@@ -1258,6 +1557,24 @@ sub cmd_help {
     }
 }
 
+
+### METHOD: cmd_lock( $userid )
+### Command handler for the (debugging) C<lock> command.
+sub cmd_lock {
+    my JobServer::Client $self = shift;
+    my $userid = shift;
+
+    my $job = $self->{server}->getJobForUser( $userid )
+        or return $self->error( "No such user '$userid'." );
+    return $self->error( "User $userid has been locked for %d seconds.",
+                         $job->secondsSinceLock )
+        if $job->isPrelocked;
+
+    my $time = $job->prelock;
+    return "User $userid locked at: $time (". scalar localtime($time) .")";
+}
+
+
 ### METHOD: cmd_quit( undef )
 ### Command handler for the C<quit> command.
 sub cmd_quit {
@@ -1265,7 +1582,7 @@ sub cmd_quit {
 
     $self->{state} = 'quitting';
 
-    my $msg = $self->{server}->disconnectClient( $self, 1 );
+    my $msg = $self->{server}->disconnectClient( $self );
     $self->write( "$msg\r\n" );
     $self->close;
 
@@ -1292,132 +1609,6 @@ sub cmd_shutdown {
 
 
 
-
-#####################################################################
-### J O B   C L A S S
-#####################################################################
-package JobServer::Job;
-use strict;
-
-BEGIN {
-    use Carp qw{croak confess};
-
-    use lib "$ENV{LJHOME}/cgi-bin";
-    require 'ljlib.pl';
-
-    use fields (
-        'userid',               # The userid of the user to move
-        'srcclusterid',         # The cluster id of the source cluster
-        'dstclusterid',         # Cluster id of the destination cluster
-        'prelocktime'           # Has the corresponding user already been prelocked?
-       );
-}
-
-
-### Class globals
-our ( $ReadOnlyCapBit, $LockUserSql );
-
-INIT {
-    # Find the readonly cap class, complain if not found
-    $ReadOnlyCapBit = undef;
-
-    # Find the moveinprogress bit from the caps hash
-    foreach my $bit ( keys %LJ::CAP ) {
-        if ( $LJ::CAP{$bit}{_name} eq '_moveinprogress' &&
-             $LJ::CAP{$bit}{readonly} == 1 )
-        {
-            $ReadOnlyCapBit = $bit;
-            last;
-        }
-    }
-
-    # SQL used to create the source cluster id for users being moved.
-    $LockUserSql = q{
-        UPDATE user
-        SET caps = caps | (1<<$ReadOnlyCapBit)
-        WHERE userid = ?
-    };
-
-}
-
-
-### (CONSTRUCTOR) METHOD: new( [$userid, $srcclusterid, $dstclusterid, $prelocked )
-### Create and return a new JobServer::Job object.
-sub new {
-    my JobServer::Job $self = shift;
-
-    $self = fields::new( $self ) unless ref $self;
-
-    # Split instance vars from a string with a colon in the second or later
-    # position
-    if ( index($_[0], ':') > 0 ) {
-        @{$self}{qw{userid srcclusterid dstclusterid}} =
-            split /:/, $$_[0], 3;
-    }
-
-    # Allow list arguments as well
-    else {
-        @{$self}{qw{userid srcclusterid dstclusterid}} = @_;
-    }
-
-    $self->{prelocktime} = 0;
-
-    return $self;
-}
-
-
-### METHOD: userid( [$newuserid] )
-### Get/set the job's userid.
-sub userid {
-    my JobServer::Job $self = shift;
-    $self->{userid} = shift if @_;
-    return $self->{userid};
-}
-
-
-### METHOD: srcclusterid( [$newsrcclusterid] )
-### Get/set the job's srcclusterid.
-sub srcclusterid {
-    my JobServer::Job $self = shift;
-    $self->{srcclusterid} = shift if @_;
-    return $self->{srcclusterid};
-}
-
-
-### METHOD: dstclusterid( [$newdstclusterid] )
-### Get/set the job's dstclusterid.
-sub dstclusterid {
-    my JobServer::Job $self = shift;
-    $self->{dstclusterid} = shift if @_;
-    return $self->{dstclusterid};
-}
-
-
-### METHOD: to_string( undef )
-### Return a scalar containing the stringified representation of the job.
-sub to_string {
-    my JobServer::Job $self = shift;
-    return sprintf '%d:%d:%d', @{$self}{'userid', 'srcclusterid', 'dstclusterid'};
-}
-
-
-### METHOD: prelocktime( [$newprelocktime] )
-### Get/set the epoch time when the user record corresponding to the job's
-### C<userid> was set read-only.
-sub prelocktime {
-    my JobServer::Job $self = shift;
-    $self->{prelocktime} = shift if @_;
-    return $self->{prelocktime};
-}
-
-
-### METHOD: is_prelocked( undef )
-### Returns a true value if the user corresponding to the job has already been
-### marked read-only.
-sub is_prelocked {
-    my JobServer::Job $self = shift;
-    return $self->{prelocktime} != 0;
-}
 
 
 # Local Variables:
