@@ -2,6 +2,7 @@
 #
 
 use strict;
+use Getopt::Long;
 $| = 1;
 
 use lib ("$ENV{LJHOME}/cgi-bin");
@@ -13,6 +14,15 @@ use constant DEBUG => 0;  # turn on for debugging (mostly db handle crap)
 my $BLOCK_MOVE   = 5000;  # user rows to get at a time before moving
 my $BLOCK_INSERT =   25;  # rows to insert at a time when moving users
 my $BLOCK_UPDATE = 1000;  # users to update at a time if they had no data to move
+
+# get options
+my %opts;
+exit 1 unless
+    GetOptions("lock=s" => \$opts{locktype},);
+
+# if no locking, notify them about it
+die "ERROR: Lock must be of types 'ddlockd' or 'none'\n"
+    if $opts{locktype} && $opts{locktype} !~ m/^(?:ddlockd|none)$/;
 
 # used for keeping stats notes
 my %stats = (); # { 'stat' => 'value' }
@@ -79,6 +89,13 @@ my $move_user = sub {
 
     # make sure our user is of the proper dversion
     return 0 unless $u->{'dversion'} == 5;
+
+    # at this point, try to get a lock for this user
+    my $lock;
+    if ($opts{locktype} eq 'ddlockd') {
+        $lock = LJ::locker()->trylock("d5d6-$u->{user}");
+        return 1 unless $lock;
+    }
 
     # ignore expunged users
     if ($u->{'statusvis'} eq "X") {
