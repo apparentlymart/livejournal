@@ -177,12 +177,20 @@ $maint{'synsuck'} = sub
 
             my $des = $rss->channel('description');
             if ($des && $udbh) {
-                my $bio = $udbh->selectrow_array("SELECT bio FROM userbio WHERE userid=?", undef,
-                                                 $su->{'userid'});
+                my $bio;
+                if ($su->{'has_bio'} eq "Y") {
+                    $bio = $udbh->selectrow_array("SELECT bio FROM userbio WHERE userid=?", undef,
+                                                  $su->{'userid'});
+                }
                 if ($bio ne $des && $bio !~ /\[LJ:KEEP\]/) {
-                    $udbh->do("REPLACE INTO userbio (userid, bio) VALUES (?,?)", undef,
-                              $su->{'userid'}, $des);
-                    die $udbh->errstr if $udbh->err;
+                    if ($des) {
+                        $udbh->do("REPLACE INTO userbio (userid, bio) VALUES (?,?)", undef,
+                                  $su->{'userid'}, $des);
+                    } else {
+                        $udbh->do("DELETE FROM userbio WHERE userid=?", undef, $su->{'userid'});
+                    }
+                    $dbh->do("UPDATE user SET has_bio=? WHERE userid=?", undef,
+                             ($des ? "Y" : "N"), $su->{'userid'});
                 }
             }
         }
