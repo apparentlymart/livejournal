@@ -303,15 +303,15 @@ function EntryPage::lay_page_nav() {
     println "<li>&nbsp;</li>";
     var Link l = new Link;
     $l = $.entry->get_link("nav_next");
-    println """<li><a href="$l.url">$*text_entry_links{"nav_next"}</li>""";
+    println """<li><a href="$l.url">$*text_entry_links{"nav_next"}</a></li>""";
     foreach var string ls ($.entry.link_keyseq) {
         $l = $.entry->get_link($ls);
         if (defined $l) {
-            println """<li><a href="$l.url">$*text_entry_links{$ls}</li>""";
+            println """<li><a href="$l.url">$*text_entry_links{$ls}</a></li>""";
         }
     }
     $l = $.entry->get_link("nav_prev");
-    println """<li><a href="$l.url">$*text_entry_links{"nav_prev"}</li>""";
+    println """<li><a href="$l.url">$*text_entry_links{"nav_prev"}</a></li>""";
     println "</ul></div>";
 }
 
