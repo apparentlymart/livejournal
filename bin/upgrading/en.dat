@@ -25,9 +25,19 @@ langname.en=English
 
 Password=Password
 
+talk.commentpermlink=link
+
 talk.commentpost=Post a new comment
 
 talk.commentsread=Read comments
+
+talk.parentlink=Parent
+
+talk.replytothis=Reply to this
+
+talk.somebodywrote=[[realname]] ([[userlink]]) wrote,
+
+talk.threadlink=Thread
 
 Username=Username
 

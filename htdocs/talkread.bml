@@ -23,6 +23,16 @@ BODY<=
 
  my $pics = LJ::Talk::get_subjecticons();
 
+ # pre-load common strings for little speed and less typing later
+ my %T = qw(postcomments   talk.commentpost
+            readcomments   talk.commentsread
+            parent         talk.parentlink
+            thread         talk.threadlink
+            replythis      talk.replytothis
+            link           talk.commentpermlink
+            );
+ foreach (keys %T) { $T{$_} = BML::ml($T{$_}); }
+
  ## workaround mail client bug when don't understand quoted-printable.
  ## Only correct 'journal' if 'itemid' was also broken, to avoid the 
  ## unlikely clash with a journal name.
@@ -121,7 +131,8 @@ BODY<=
  }
 
  $ret .= "<td>";
- $ret .= BML::eall($up->{'name'}) . " ((=LJUSER $up->{'user'} LJUSER=)) wrote,";
+ $ret .= BML::ml("talk.somebodywrote", { 'realname' => BML::eall($up->{'name'}),
+                                         'userlink' => LJ::ljuser($up->{'user'}) });
  if ($up->{'user'} ne $u->{'user'}) {
      $ret .= " in (=LJCOMM $u->{'user'} LJCOMM=),";
  }
@@ -405,16 +416,16 @@ BODY<=
      $ret .= "<p>$navcrap</p>" if $navcrap;
      my $readlink;
      if ($FORM{'thread'} && $pages == 1) {
-         $readlink = "(<a href='talkread.bml?${jargent}itemid=$ditemid'>(=_ML talk.commentsread _ML=)</a>) - ";
+         $readlink = "(<a href='talkread.bml?${jargent}itemid=$ditemid'>$T{'readcomments'}</a>) - ";
      }
-     $ret .= "<center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>(=_ML talk.commentpost _ML=)</a>)</b></center>";
+     $ret .= "<center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></center>";
 
      if ($post_count > 0)
      {
          recurse_post(\%posts, \$ret, $thread, {}, { "newfirst" => 0,
                                                      "children" => \%children,
                                                  });
-         $ret .= "<p><hr /><center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>(=_ML talk.commentpost _ML=))</a></b></center></p>";
+         $ret .= "<p><hr /><center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></center></p>";
      }
 
      if ($navcrap) {
@@ -521,7 +532,7 @@ sub recurse_post
                     $$ret .= "(from $post->{'poster_ip'})";
                 }
 
-                $$ret .= " <font size='-1'>(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid#t$dtid'>link</a>)</font> ";
+                $$ret .= " <font size='-1'>(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid#t$dtid'>$T{'link'}</a>)</font> ";
 
                 if ($remote && ($remote->{'user'} eq $userpost ||
                                 $remote->{'user'} eq $u->{'user'} ||
@@ -542,13 +553,13 @@ sub recurse_post
                 $$ret .= "<p><font size='-2'>";
                 if ($post->{'parenttalkid'} != 0) {
                     my $dpid =  $clustered ? ($post->{'parenttalkid'} * 256 + $init->{'anum'}) : $post->{'parenttalkid'};
-                    $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dpid'>(Parent)</a> ";
+                    $$ret .= "(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dpid'>$T{'parent'}</a>) ";
                 }
                 if (defined $opts->{'children'}->{$tid}) {
-                    $$ret .= "<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid'>(Thread)</a> ";
+                    $$ret .= "(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid'>$T{'thread'}</a>) ";
                 }
 
-                $$ret .= "<a href='/talkpost.bml?${jargent}replyto=$dtid'>(Reply to this)</a></font>";
+                $$ret .= "(<a href='/talkpost.bml?${jargent}replyto=$dtid'>$T{'replythis'}</a>)</font>";
                 $$ret .= "</td></tr></table>\n";  # close colored table
             } else {
                 # link to message
