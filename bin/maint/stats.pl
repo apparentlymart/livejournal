@@ -99,20 +99,15 @@ $maint{'genstats'} = sub
         print "-I- Getting user stats...\n";
 
         my $now = time();
-        my $count;
-        $sth = $dbr->prepare("SELECT COUNT(*) FROM user");
-        $sth->execute;
-        my ($usertotal) = $sth->fetchrow_array;
+        my $usertotal = $dbr->selectrow_array("SELECT MAX(userid) FROM user");
         my $pagesize = 1000;
         my $pages = int($usertotal / $pagesize) + (($usertotal % $pagesize) ? 1 : 0);
         
         for (my $page=0; $page < $pages; $page++)
         {
-            my $skip = $page*$pagesize;
-            my $first = $skip+1;
-            my $last = $skip+$pagesize;
-            print "  getting records $first-$last...\n";
-            $sth = $dbr->prepare("SELECT DATE_FORMAT(uu.timecreate, '%Y-%m-%d') AS 'datereg', u.user, u.caps, FLOOR((TO_DAYS(NOW())-TO_DAYS(u.bdate))/365.25) AS 'age', UNIX_TIMESTAMP(uu.timeupdate) AS 'timeupdate', u.status, u.allow_getljnews FROM user u, userusage uu WHERE u.userid=uu.userid LIMIT $skip,$pagesize");
+            my ($loid, $hiid) = ($page*$pagesize+1, ($page+1)*$pagesize);
+            print "  getting records $loid-$hiid...\n";
+            $sth = $dbr->prepare("SELECT DATE_FORMAT(uu.timecreate, '%Y-%m-%d') AS 'datereg', u.user, u.caps, FLOOR((TO_DAYS(NOW())-TO_DAYS(u.bdate))/365.25) AS 'age', UNIX_TIMESTAMP(uu.timeupdate) AS 'timeupdate', u.status, u.allow_getljnews FROM user u, userusage uu WHERE u.userid=uu.userid AND u.userid BETWEEN $loid AND $hiid");
             $sth->execute;
             while (my $rec = $sth->fetchrow_hashref)
             {
