@@ -433,16 +433,16 @@ sub box_start
     my $t = join("-", $box->{'key'}, $box->{'loc'}, $box->{'pos'});
 
     $$b .= "<MAP name=$mapname>\n";
-    $$b .= "<area shape=rect target=_self coords=0,0,7,16 href=/portal/alter.bml?op=u&t=$t alt=Up>\n";
-    $$b .= "<area shape=rect target=_self coords=8,0,17,16 href=/portal/alter.bml?op=x&t=$t alt=Kill>\n";
-    $$b .= "<area shape=rect target=_self coords=18,0,25,16 href=/portal/alter.bml?op=d&t=$t alt=Down>\n";
-    $$b .= "<area shape=rect coords=26,0,35,16 href=/portal/alter.bml?op=a&t=$t alt=\"Add/Modify\">\n";
+    $$b .= "<area shape=rect target=_self coords=0,0,16,16 href=/portal/alter.bml?op=d&t=$t alt=Down>\n";
+    $$b .= "<area shape=rect target=_self coords=16,0,32,16 href=/portal/alter.bml?op=u&t=$t alt=Up>\n";
+    $$b .= "<area shape=rect coords=32,0,48,16 href=/portal/alter.bml?op=a&t=$t alt=\"Add/Modify\">\n";
+    $$b .= "<area shape=rect target=_self coords=48,0,64,16 href=/portal/alter.bml?op=x&t=$t alt=Kill>\n";
     $$b .= "</MAP>\n";
 
     if ($box->{'pos'} > 1) { $$b .= "<p>"; }
     $$b .= "<table width=100% bgcolor=(=EMCOLOR=) border=0 cellpadding=1 cellspacing=0>";
     $$b .= "<tr bgcolor=(=EMCOLOR=)><td bgcolor=(=EMCOLOR=)>";
-    $$b .= "<img align=right width=35 height=15 border=0 src=\"$LJ::IMGPREFIX/knobs.gif\" usemap=\"\#$mapname\"><b>";
+    $$b .= "<img align=right width=64 height=16 border=0 src=\"$LJ::IMGPREFIX/knobs.gif\" usemap=\"\#$mapname\"><b>";
 
     $$b .= "&nbsp;";
     if ($opts->{'url'}) { $$b .= "<a href=\"$opts->{'url'}\">"; }
