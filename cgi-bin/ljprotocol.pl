@@ -574,8 +574,31 @@ sub postevent
     }
 
     unless (grep { defined $req->{$_} } qw(year mon day hour min)) {
-        # FIXME this is so lame.  should use timezones.
-        my @ltime = gmtime();
+        # no time specified?  guess at their timezone.
+        # FIXME this is lame.  we should let the users specify their timezone.
+
+        # we guess their current timezone's offset
+        # by comparing the gmtime of their last post
+        # with the time they specified on that post.
+        my $dbcm = LJ::get_cluster_master($uowner);
+        return fail($err, 306) unless $dbcm;
+
+        my $offset = 0;  # assume gmt at first.
+
+        # grab the times on the last post.
+        if (my $last_row = $dbcm->selectrow_hashref(
+                            "SELECT rlogtime, eventtime ".
+                            "FROM log2 WHERE journalid=? ".
+                            "ORDER BY rlogtime LIMIT 1",
+                            undef, $uowner->{userid})) {
+            my $logtime = $LJ::EndOfTime - $last_row->{'rlogtime'};
+            my $eventtime = LJ::mysqldate_to_time($last_row->{'eventtime'}, 1);
+            my $hourdiff = ($eventtime - $logtime) / 3600;
+
+            # if they're up to a quarter hour behind, round up.
+            $offset = $hourdiff > 0 ? int($hourdiff + 0.25) : int($hourdiff - 0.25);
+        }
+        my @ltime = gmtime(time() + ($offset*3600));
         $req->{'year'} = $ltime[5]+1900;
         $req->{'mon'}  = $ltime[4]+1;
         $req->{'day'}  = $ltime[3];
