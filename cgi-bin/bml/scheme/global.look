@@ -70,8 +70,6 @@ LOAD_PAGE_INFO<=
 #				'uri' => '/todo.bml', },
 			      { 'name' => 'Contributors',
 				'uri' => '/contributors.bml', },
-			      { 'name' => 'Supporters',
-				'uri' => '/supporters.bml', },
 			      ],
 	       },
 	     { 'name' => 'Customize',
