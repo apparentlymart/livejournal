@@ -24,13 +24,14 @@ if ($LJ::SMTP_SERVER) {
 # <LJFUNC>
 # name: LJ::send_mail
 # des: Sends email.  Character set will only be used if message is not ascii.
-# args: opt
+# args: opt[, async_caller]
 # des-opt: Hashref of arguments.  <b>Required:</b> to, from, subject, body.
 #          <b>Optional:</b> toname, fromname, cc, bcc, charset, wrap
 # </LJFUNC>
 sub send_mail
 {
     my $opt = shift;
+    my $async_caller = shift;
 
     my $msg = $opt;
 
@@ -82,6 +83,8 @@ sub send_mail
 
         $rval; # return
     };
+
+    return $buffer->($msg) if $LJ::ASYNC_MAIL && ! $async_caller;
 
     my $starttime = [gettimeofday()];
     my $rv = eval { $msg->send && 1; };

@@ -5671,7 +5671,7 @@ sub cmd_buffer_flush
                 my ($dbh, $db, $c) = @_;
 
                 my $msg = Storable::thaw($c->{'args'});
-                LJ::send_mail($msg);
+                LJ::send_mail($msg, "async");
             }
         },
         # send notifications for support requests
