@@ -4889,19 +4889,17 @@ sub make_graphviz_dot_file
     &nodb;
     my $user = shift;
 
+    # the code below is inefficient.  let sites disable it.
+    return if $LJ::DISABLED{'graphviz_dot'};
+
     my $dbr = LJ::get_db_reader();
 
     my $quser = $dbr->quote($user);
     my $sth;
     my $ret;
 
-    $sth = $dbr->prepare("SELECT u.*, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(uu.timeupdate) AS 'secondsold' FROM user u, userusage uu WHERE u.userid=uu.userid AND u.user=$quser");
-    $sth->execute;
-    my $u = $sth->fetchrow_hashref;
-
-    unless ($u) {
-        return "";
-    }
+    my $u = LJ::load_user($user);
+    return unless $u;
 
     $ret .= "digraph G {\n";
     $ret .= "  node [URL=\"$LJ::SITEROOT/userinfo.bml?user=\\N\"]\n";
