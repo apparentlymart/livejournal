@@ -85,6 +85,7 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('AN', 'Netherlands Anti
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AO', 'Angola', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AQ', 'Antarctica', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AR', 'Argentina', '0', 'country');
+REPLACE INTO codes (code, item, sortorder, type) VALUES ('AP', 'Armed Forces Pacific', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AR', 'Arkansas', '0', 'state');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AS', 'American Samoa', '0', 'country');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('AT', 'Austria', '0', 'country');
