@@ -230,7 +230,7 @@ sub get_recent_items
     my $sql = ("SELECT itemid, posterid, security, replycount, $extra_sql ".
 	       "DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i ".
 	       "%l %h %k %H\") AS 'alldatepart' ".
-	       "FROM log WHERE ownerid=$userid $secwhere ".
+	       "FROM log WHERE ownerid=$userid AND $sort_key >= 0 $secwhere ".
 	       "ORDER BY ownerid, $sort_key ".
 	       "LIMIT $skip,$itemshow");
 
