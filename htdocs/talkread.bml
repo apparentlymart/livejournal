@@ -142,7 +142,7 @@ body<=
      }
      LJ::text_out(\$alt);
      $alt = LJ::ehtml($alt);
-     $ret .= "<td><img src='/userpic/$picid' width='$userpics{$picid}->{'width'}' ".
+     $ret .= "<td><img src='/userpic/$picid/$up->{'userid'}' width='$userpics{$picid}->{'width'}' ".
          "height='$userpics{$picid}->{'height'}' align='absmiddle' ".
          "hspace='3' title='$alt' alt=''></td>";
  }
@@ -553,7 +553,7 @@ body<=
                         }
                         $alt = LJ::ehtml($alt);
 
-                        $$ret .= "<img align='left' hspace='3' src='/userpic/$picid'";
+                        $$ret .= "<img align='left' hspace='3' src='/userpic/$picid/$user{$userpost}->{'userid'}'";
                         $$ret .= " width='$userpics{$picid}->{'width'}'";
                         $$ret .= " title='$alt' alt=''";
                         $$ret .= " height='$userpics{$picid}->{'height'}' />";

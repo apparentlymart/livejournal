@@ -183,7 +183,7 @@ body<=
          $alt .= ": $pickw";
      }
      $alt = LJ::ehtml($alt);
-     $ret .= "<td><img src='/userpic/$picid' width='$userpics{$picid}->{'width'}' ".
+     $ret .= "<td><img src='/userpic/$picid/$ur->{'userid'}' width='$userpics{$picid}->{'width'}' ".
          "height='$userpics{$picid}->{'height'}' align='absmiddle' ".
          "hspace='3' title='$alt' alt=''></td>";
  }
