@@ -54,7 +54,9 @@ $LJ::CMAX_EVENT   = 65535;
 # declare some charset aliases
 # we need this at least for cases when the only name supported
 # by MapUTF8.pm isn't recognized by browsers
-Unicode::MapUTF8::utf8_charset_alias('windows-1251','CP1251');
+Unicode::MapUTF8::utf8_charset_alias('windows-1251','cp1251');
+Unicode::MapUTF8::utf8_charset_alias('windows-1252','cp1252');
+Unicode::MapUTF8::utf8_charset_alias('windows-1253','cp1253');
 
 # declare views (calls into ljviews.pl)
 @LJ::views = qw(lastn friends calendar day);
