@@ -462,11 +462,13 @@ $cmd{'ban_unset'} = {
 $cmd{'friend'} = {
     'handler' => \&friend,
     'des' => 'List your friends, add a friend, or remove a friend.  Optionally, add friends to friend groups.',
-    'argsummary' => '<command> [<username>] [<group>]',
+    'argsummary' => '<command> [<username>] [<group>] [<fgcolor>] [<bgcolor>]',
     'args' => [
                'command' => "Either 'list' to list friend, 'add' to add a friend, or 'remove' to remove a friend.",
                'username' => "The username of the person to add or remove when using the add or remove command.",
-               'group' => "When using command 'add', this 3rd parameter can list the name of a friend group to add the friend to.  The group must already exist.",
+               'group' => "When using command 'add', this optional parameter can list the name of a friend group to add the friend to.  The group must already exist.",
+               'fgcolor' => "When using command 'add', this optional parameter specifies the foreground color associated with this friend. The parameter must have the form \"fgcolor=#num\" where 'num' is a 6-digit hexadecimal number.",
+               'bgcolor' => "When using command 'add', this optional parameter specifies the background color associated with this friend. The parameter must have the form \"bgcolor=#num\" where 'num' is a 6-digit hexadecimal number.",
                ],
     };
 
@@ -976,7 +978,13 @@ sub friend
                 push @$out, [ "", "$friend removed from friends list" ];
             }
         } elsif ($command eq "add") {
-            my $group = $args->[3];
+            my ($group, $fg, $bg);
+            foreach(@{$args}[3..5]) {
+                last unless $_;
+                $fg = $1 and next if m!fgcolor=(.*)!;
+                $bg = $1 and next if m!bgcolor=(.*)!;
+                $group = $_;
+            }
             my $gmask = 0;
             if ($group ne "") {
                 my $qgroup = $dbh->quote($group);
@@ -991,6 +999,8 @@ sub friend
     
             my $fhash = {'username' => $friend};
             $fhash->{'groupmask'} = $gmask if $gmask;
+            $fhash->{'fgcolor'} = $fg if $fg;
+            $fhash->{'bgcolor'} = $bg if $bg;
 
             my $oreq = LJ::Protocol::do_request($dbs, "editfriends", {
                 'username' => $remote->{'user'},
