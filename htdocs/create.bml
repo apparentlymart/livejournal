@@ -211,7 +211,7 @@ BODY<=
      $ret .= $error_msg->('email', '<br>', '');
      $ret .= "</td></tr></table> STANDOUT=)";
 
-     $ret .= "(=H2 Password H2=)(=P elect a password. P=)";
+     $ret .= "(=H2 Password H2=)(=P Select a password. P=)";
 
      ### password
      $ret .= "(=STANDOUT Password:<br /><input type=\"password\" name=\"password1\" size=\"30\" maxlength=\"30\"><br />Re-type password:<br /><input type=\"password\" name=\"password2\" size=\"30\" maxlength=\"30\">";
