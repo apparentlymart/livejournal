@@ -5416,6 +5416,14 @@ sub md5_struct
     my ($st, $md5) = @_;
     $md5 ||= Digest::MD5->new;
     unless (ref $st) {
+        if ($] < 5.007 && $Digest::MD5::VERSION > 2.13) {
+            # remove the Sv_UTF8 flag from the scalar, otherwise
+            # stupid later Digest::MD5s crash while trying to work-
+            # around what they think is perl 5.6's lack of utf-8 
+            # support, even though it's not totally necessary
+            # see http://zilla.livejournal.org/show_bug.cgi?id=851
+            $st = pack('C*', unpack('C*', $st));
+        }
         $md5->add($st);
         return $md5;
     }
