@@ -1,0 +1,98 @@
+(=PAGE
+TITLE=>Customize
+BODY<=
+(=_CODE
+
+ return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
+ unless ($dbh && $dbr) {
+     return "Database temporarily unavailable.";
+ }
+
+ my $ret;
+ my $remote = LJ::get_remote($dbs);
+ my $mode = $FORM{'mode'} || ($remote && $FORM{'authas'} ne "(other)" ? "modify" : "loginform");
+
+ if ($mode eq "loginform")
+ {
+     $ret .= "(=H1 Customize Journal H1=)(=P Enter your username and password to customize your journal.. P=)";
+     $ret .= "<form action='./' method='post'>";
+     $ret .= "<input type='hidden' name='mode' value='modify'>";
+     $ret .= "(=STANDOUT <table> ";
+     $ret .= LJ::auth_fields_2($dbs, \%FORM, { 'shared' => 1, 'getother' => 1 });
+     $ret .= "<tr><td colspan='2' align='center'><input type='submit' value='Proceed...'>";
+     $ret .= "</td></tr></table> STANDOUT=)</form>\n";
+     $ret .= "(=H1 Forget something? H1=)(=P If you forgot your username or password, ";
+     $ret .= "<a href='/lostinfo.bml'>recover it here!</a>. P=)";
+     return $ret;
+ }
+ my ($u, $user, $err);
+ my $user = LJ::get_effective_user($dbs, {
+     'form' => \%FORM,
+     'out_u' => \$u,
+     'remote' => $remote,
+     'out_err' => \$err,
+ });
+ $u = LJ::load_user($dbs, $user) unless $u;
+ my $userid = $u->{'userid'};
+
+ my $dbcs = LJ::get_cluster_set($u);
+ my $dbch = $dbcs->{'dbh'};
+ my $dbcr = $dbcs->{'reader'};
+
+ return $LJ::MSG_READONLY_USER if LJ::get_cap($remote, "readonly");
+ return LJ::bad_input($err) if $err;
+ $u ||= LJ::load_user($dbs, $user);
+ return LJ::bad_input("Invalid username") unless $u;
+ my $hpassword = LJ::hash_password($u->{'password'});
+
+ if ($remote) {
+     $ret .= "<form method='post'>";
+     $ret .= "(=H1 Switch Journal H1=)(=P Work with journal: ";
+     $ret .= LJ::make_shared_select($dbs, $remote, \%FORM);
+     $ret .= " <input type='submit' value='Switch'> P=)</form>";
+ }
+
+ my $sth;
+
+ # load their existing settings
+ my %style;
+ $sth = $dbcr->prepare("SELECT type, s2lid FROM s2style");
+ $sth->execute;
+ while (my ($type, $s2lid) = $sth->fetchrow_array) {
+     $style{$type} = $s2lid;
+ }
+
+ my @layouts;
+
+
+ # new user.  find them their core layer.
+ unless ($style{'core'}) {
+     
+ }
+
+ $ret .= "<form method='post'>";
+ $ret .= "(=H1 Step 1: Layout H1=)(=P Pick your layout.  Because language and theme selection depends on your layout, changing this setting discards all other edits you may have made. P=)";
+ $ret .= "<blockquote>";
+ $ret .= "Layout: ";
+ $ret .= LJ::html_select({ 'name' => 'layoutid' },
+                         5, "Happy Foofoo Land");
+ $ret .= " <input type='submit' name='save:layout' value='Switch Layout'>";
+ $ret .= "</blockquote>";
+
+ unless ($style{'layout'}) {
+     $ret .= "</form>";
+     return $ret;
+ }
+
+ $ret .= "(=H1 Step 2: Theme H1=)";
+
+ return $ret;
+
+_CODE=)
+<=BODY
+PAGE=)
