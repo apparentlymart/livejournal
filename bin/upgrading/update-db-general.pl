@@ -1983,6 +1983,21 @@ CREATE TABLE userlog (
 )
 EOC
 
+# external user mappings
+# note: extuser/extuserid are expected to sometimes be NULL, even
+# though they are keyed.  (Null values are not taken into account when
+# using indexes)
+register_tablecreate("extuser", <<'EOC');
+CREATE TABLE extuser (
+  userid  INT UNSIGNED NOT NULL PRIMARY KEY,
+  siteid  INT UNSIGNED NOT NULL,
+  extuser    VARCHAR(50),
+  extuserid  INT UNSIGNED,
+  UNIQUE KEY `extuser` (siteid, extuser),
+  UNIQUE KEY `extuserid` (siteid, extuserid)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 
