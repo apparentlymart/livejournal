@@ -392,11 +392,14 @@ sub common_event_validation
     }
 
     # column width
+    # we only trim Unicode data
 
-    $req->{'subject'} = LJ::text_trim($req->{'subject'}, $LJ::BMAX_SUBJECT, $LJ::CMAX_SUBJECT);
-    $req->{'event'} = LJ::text_trim($req->{'event'}, $LJ::BMAX_EVENT, $LJ::CMAX_EVENT);
-    foreach (keys %{$req->{'props'}}) {
-        $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, $LJ::BMAX_PROP, $LJ::CMAX_PROP);
+    if ($req->{'ver'} >=1 ) {
+        $req->{'subject'} = LJ::text_trim($req->{'subject'}, $LJ::BMAX_SUBJECT, $LJ::CMAX_SUBJECT);
+        $req->{'event'} = LJ::text_trim($req->{'event'}, $LJ::BMAX_EVENT, $LJ::CMAX_EVENT);
+        foreach (keys %{$req->{'props'}}) {
+            $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, $LJ::BMAX_PROP, $LJ::CMAX_PROP);
+        }
     }
 
     # setup non-user meta-data.  it's important we define this here to
