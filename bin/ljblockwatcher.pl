@@ -180,7 +180,7 @@ MAIN: {
             # Get the message and split it back into four parts
             my $addr = $sock->recv( $msg, 1024, 0 );
             print ">>> Message: $msg\n" if $Debug;
-            ( $host, $type, $time, $notes ) = split( /:/, $msg, 4 );
+            ( $host, $type, $time, $notes ) = split( /\x3/, $msg, 4 );
 
             # Add the time and notes to the table of hosts
             $buffers{ $host } ||= new SampleBuffer ( $host, depth => SAMPLE_DEPTH );

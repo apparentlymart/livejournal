@@ -3,6 +3,7 @@
 
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use Cache::Memcached;
+use strict;
 
 package LJ::MemCache;
 
@@ -29,11 +30,13 @@ sub client_stats {
 }
 
 sub reload_conf {
+    my $stat_callback;
+
     $memc->set_servers(\@LJ::MEMCACHE_SERVERS);
     $memc->set_debug($LJ::MEMCACHE_DEBUG);
     $memc->set_compress_threshold($LJ::MEMCACHE_COMPRESS_THRESHOLD);
     if ($LJ::DB_LOG_HOST) {
-        my $stat_callback = sub {
+        $stat_callback = sub {
             my ($stime, $etime, $host, $action) = @_;
             LJ::blocking_report($host, 'memcache', $etime - $stime, "memcache: $action");
         };

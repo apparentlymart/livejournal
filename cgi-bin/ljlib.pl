@@ -5328,7 +5328,7 @@ sub cmd_buffer_add
 
         # insert command
         $db->do('INSERT INTO cmdbuffer (cbid, journalid, cmd, instime, args) ' .
-                'VALUES (?, ?, NOW(), ?, ?)', undef, 
+                'VALUES (?, ?, NOW(), ?, ?)', undef,
                 $max, $journalid, $cmd, $arg_str);
 
         # release lock
@@ -6529,7 +6529,7 @@ sub blocking_report {
                ) or return;
         }
 
-        my $msg = join( ':', $host, $type, $time, $notes );
+        my $msg = join( "\x3", $host, $type, $time, $notes );
         $LJ::ReportSock->send( $msg );
     }
 }
