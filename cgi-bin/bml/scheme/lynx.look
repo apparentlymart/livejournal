@@ -10,9 +10,10 @@ h2=>{D}<h2>%%DATA%%</h2>
 page<=
 {Fps}<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <?_code
- $BML::Lynx::remote = LJ::get_remote();
- return;
-_code?><html xmlns="http://www.w3.org/1999/xhtml">
+        $u = LJ::get_remote();
+        return;
+_code?>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <link rel="home" title="<?_ml lynx.nav.home _ml?>" href="/" />
 <link rel="contents" title="<?_ml lynx.nav.sitemap _ml?>" href="/site/" />
@@ -31,9 +32,7 @@ _code?><html xmlns="http://www.w3.org/1999/xhtml">
 <hr />
 
 <p>[ <a href='/'><?_ml lynx.nav.home _ml?></a> | <a href='/update.bml'><?_ml lynx.nav.update _ml?></a> | <?_code
-   return unless $BML::Lynx::remote;
-   my $user = $BML::Lynx::remote->{'user'};
-   return "<a href='/users/$user/'>$ML{'lynx.nav.recent'}</a> | <a href='/users/$user/friends/'>$ML{'lynx.nav.friends'}</a> | ";
+   return "<a href='/users/$u->{'user'}/'>$ML{'lynx.nav.recent'}</a> | <a href='/users/$u->{'user'}/friends/'>$ML{'lynx.nav.friends'}</a> | ";
 _code?><a href='/login.bml'><?_ml lynx.nav.login _ml?></a>/<a href='/logout.bml'><?_ml lynx.nav.logout _ml?></a> | <a href='/manage/siteopts.bml'><?_ml lynx.nav.siteopts _ml?></a> | <a href='/site/'><?_ml lynx.nav.sitemap _ml?></a> ]</p>
 
 </body>
