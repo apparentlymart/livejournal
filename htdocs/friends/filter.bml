@@ -1,6 +1,6 @@
 <?_code
 
- $title = "Friends Filter";
+ $title = $ML{'.title'};
  $body = "";
  
  if ($FORM{'mode'} eq "view") 
@@ -30,7 +30,7 @@
  
  
  unless ($res{'frgrp_maxnum'}) {
-     $body = "<?h1 Sorry... h1?><?p You cannot filter your friends list because you must first <a href=\"/friends/editgroups.bml\">setup your friend groups</a>. p?>";
+     $body = "<?h1 $ML{'.error.nogroups.header'} h1?><?p $ML{'.error.nogroups'} p?>";
      return;
  }
 
@@ -44,7 +44,7 @@
      } 
  }
  
- $body .= "<?h1 Select groups... h1?><?p Check the group(s) of friends you want to view right now on your friends list. p?>";
+ $body .= "<?h1 $ML{'.select.header'} h1?><?p $ML{'.select'} p?>";
  $body .= "<form method='post' style='display: inline' action='filter.bml'>\n";
  $body .= LJ::html_hidden("user", $remote->{'user'},
                           "mode", "view");
@@ -56,8 +56,8 @@
      $body .= "<input type='checkbox' value='1' name=\"bit_$g\" /> <a href=\"$url\">" . LJ::ehtml($group{$g}->{'name'}) . "</a><br />\n";
  }
 
- $body .= "<input type='submit' value=\"View!\"> <input type='reset' value=\"Clear\"></div>";
- $body .= "<?p If you want to edit your friends groups, <a href=\"editgroups.bml\">go here</a>. p?>";
+ $body .= "<input type='submit' value=\"$ML{'.submit'}\"> <input type='reset' value=\"$ML{'.reset'}\"></div>";
+ $body .= "<?p $ML{'.editgroups'} p?>";
  $body .= "</form>";
 
  return;

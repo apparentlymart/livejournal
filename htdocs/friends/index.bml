@@ -1,23 +1,28 @@
 <?page
-title=>Friends Tools
+title=><?_ml .title _ml?>
 body<=
-
-LiveJournal has the concept of a "friends list".<p>
-By adding other LiveJournal uses to your friends list, you can easily
-track what is going on in the lives of multiple other people simultaneously.
-Pick the "Friends" link under "Your Journal" on the sidebar to view your friends page.<p>
-<ul><li><a href="edit.bml"><b>Edit Friends</b></a> -- add, edit, or remove users from your friends list.</ul>
-In addition, subgroups of friends can be specified.
-<ul><li><a href="editgroups.bml"><b>Edit Friend Groups</b></a> -- create, edit, or delete subgroups of your friends list.</ul>
-These friend groups can be used to filter your friends list: you can pick a
-specific friend group to view.
-<ul><li><a href="filter.bml"><b>Filter</b></a> -- filter your friends list to display a specific friend group.</ul>
-<hr>
-Your friends list is also used for posts with restricted access.<br>
-<ul><li>"Friends-Only" posts are (as you'd expect) viewable only by other users on your friends list.
-<li>On "Custom" posts, you can specify which friend groups can view your post.  (Not all <a href="/download/">clients</a> currently support custom security.)
+<?p <?_ml .about _ml?> p?>
+<?h1 <?_ml .tools _ml?> h1?>
+<dl>
+  <dt><a href="edit.bml"><?_ml /friends/edit.bml.title _ml?></a></dt>
+  <dd><?_ml .edit.about _ml?></dd>
+</dl>
+<?p <?_ml .groups _ml?> p?> 
+<dl>
+  <dt><a href="editgroups.bml"><?_ml /friends/editgroups.bml.title _ml?></a></dt>
+  <dd><?_ml .editgroups.about _ml?></dd>
+</dl>
+<?p <?_ml .filter _ml?> p?>
+<dl>
+  <dt><a href="filter.bml"><?_ml /friends/filter.bml.title _ml?></a></dt>
+  <dd><?_ml .filter.about _ml?></dd>
+</dl>
+<?h1 <?_ml .security.header _ml?> h1?>
+<?p <?_ml .security _ml?> p?>
+<ul>
+  <li><?_ml .security.only _ml?></li>
+  <li><?_ml .security.custom _ml?></li>
 </ul>
-
 <=body
 page?><?_c <LJDEP>
 link: htdocs/friends/edit.bml, htdocs/friends/editgroups.bml
