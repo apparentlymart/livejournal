@@ -201,6 +201,12 @@ $maint{'synsuck'} = sub
         # post these items
         my $newcount = 0;
         my $errorflag = 0;
+        my $mindate;  # "yyyy-mm-dd hh:mm:ss";
+        my $notedate = sub {
+            my $date = shift;
+            $mindate = $date if ! $mindate || $date lt $mindate;
+        };
+
         foreach my $it (@items) {
 
             # remove the SvUTF8 flag.  it's still UTF-8, but 
@@ -212,11 +218,20 @@ $maint{'synsuck'} = sub
             }
 
             my $dig = LJ::md5_struct($it)->b64digest;
-            next if $dbh->selectrow_array("SELECT COUNT(*) FROM synitem WHERE ".
-                                          "userid=$userid AND item=?", undef,
-                                          $dig);
-            $dbh->do("INSERT INTO synitem (userid, item, dateadd) VALUES (?,?,NOW())",
-                     undef, $userid, $dig);
+            my $prevadd = $dbh->selectrow_array("SELECT MAX(dateadd) FROM synitem WHERE ".
+                                                "userid=? AND item=?", undef,
+                                                $userid, $dig);
+            if ($prevadd) {
+                $notedate->($prevadd);
+                next;
+            }
+
+            my $now_dateadd = $dbh->selectrow_array("SELECT NOW()");
+            die "unexpected format" unless $now_dateadd =~ /^\d\d\d\d\-\d\d\-\d\d \d\d:\d\d:\d\d$/;
+
+            $dbh->do("INSERT INTO synitem (userid, item, dateadd) VALUES (?,?,?)",
+                     undef, $userid, $dig, $now_dateadd);
+            $notedate->($now_dateadd);
 
             $newcount++;
             print "[$$] $dig - $it->{'subject'}\n" if $verbose;
@@ -322,6 +337,18 @@ $maint{'synsuck'} = sub
                 $errorflag = 1;
             }
         }
+
+        # delete some unneeded synitems.  the limit 1000 is because
+        # historically we never deleted and there are accounts with
+        # 222,000 items on a myisam table, and that'd be quite the
+        # delete hit.
+        # the 14 day interval is because if a remote site deleted an
+        # entry, it's possible for the oldest item that was previously
+        # gone to reappear, and we want to protect against that a
+        # little.
+        $dbh->do("DELETE FROM synitem WHERE userid=? AND ".
+                 "dateadd < ? - INTERVAL 14 DAY LIMIT 1000",
+                 undef, $userid, $mindate);
 
         # bail out if errors, and try again shortly
         if ($errorflag) {
