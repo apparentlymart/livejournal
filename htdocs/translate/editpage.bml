@@ -129,12 +129,12 @@
          if ($plat) {
              $ret .= "<dt><b>$lp->{'lnname'}:</b></dt>";
              my $t = $ml_text{"$plat->{'dmid'}-$plat->{'txtid'}"}->{'text'};
-             $t = LJ::ehtml($t);
+             $t = LJ::eall($t);
              $t =~ s/\n( *)/"<br \/>" . "&nbsp;"x length($1)/eg;
              $ret .= "<dd>$t</dd>";
          }
 
-         my $curtext = LJ::ehtml($ml_text{"$lat->{'dmid'}-$lat->{'txtid'}"}->{'text'});
+         my $curtext = LJ::eall($ml_text{"$lat->{'dmid'}-$lat->{'txtid'}"}->{'text'});
          if ($curtext =~ /\n/) { $use_textarea = 1; }
          if ($lat->{'staleness'} >= 3) {
              # if wrong language, why populate it with stuff they'll just have to delete?
