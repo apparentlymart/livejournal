@@ -46,13 +46,12 @@ BODY<=
  my $user = $u->{'user'};
  my $quser = $dbr->quote($user);
 
- my $dbcr;
- $dbcr = LJ::get_cluster_reader($u) if $u->{'clusterid'};
-
- my $db_bio = $dbcr || $dbr;
+ my $dbcs = $dbs;
+ $dbcs = LJ::get_cluster_set($u) if $u->{'clusterid'};
 
  if ($u->{'has_bio'}) {
-     $u->{'bio'} = $db_bio->selectrow_array("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
+     $u->{'bio'} = LJ::dbs_selectrow_array($dbcs, "SELECT bio FROM userbio ".
+					   "WHERE userid=$u->{'userid'}");
  }
  
  $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$u->{'userid'}");
@@ -554,14 +553,14 @@ BODY<=
 
 
      #### update their bio text
-     if ($has_bio eq "N") {
-	 if ($u->{'has_bio'} eq "Y") {
-	     # had one, but not any more.
+     if ($u->{'bio'} ne $FORM{'bio'}) {
+	 my $db_bio = $dbcs->{'dbh'};
+	 if ($has_bio eq "N") {
 	     $db_bio->do("DELETE FROM userbio WHERE userid=$u->{'userid'}");
+	 } else {
+	     my $qbio = $dbh->quote($FORM{'bio'});
+	     $db_bio->do("REPLACE INTO userbio (userid, bio) VALUES ($u->{'userid'}, $qbio)");
 	 }
-     } else {
-	 my $qbio = $dbh->quote($FORM{'bio'});
-	 $db_bio->do("REPLACE INTO userbio (userid, bio) VALUES ($u->{'userid'}, $qbio)");
      }
 
      #### update their text messaging info
