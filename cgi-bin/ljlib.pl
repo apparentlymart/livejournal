@@ -3960,9 +3960,11 @@ sub cmd_buffer_flush
         $where .= " AND journalid=" . $dbh->quote($userid);
     }
 
+    my $LIMIT = 30;
+
     while ($loop &&
            ($clist = $db->selectcol_arrayref("SELECT cbid FROM cmdbuffer ".
-                                             "WHERE $where ORDER BY cbid LIMIT 30")) &&
+                                             "WHERE $where ORDER BY cbid LIMIT $LIMIT")) &&
            $clist && @$clist)
     {
         foreach my $cbid (@$clist) {
@@ -3980,7 +3982,7 @@ sub cmd_buffer_flush
             $db->do("DELETE FROM cmdbuffer WHERE cbid=$cbid");
             $db->do("SELECT RELEASE_LOCK('cbid-$cbid')");
         }
-        $loop = 0 unless scalar(@$clist) == 20;
+        $loop = 0 unless scalar(@$clist) == $LIMIT;
     }
 
     return 1;
