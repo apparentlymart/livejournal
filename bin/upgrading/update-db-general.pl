@@ -2171,6 +2171,11 @@ register_alter(sub {
                  "membership ENUM('open','closed','moderated') DEFAULT 'open' NOT NULL");
     }
 
+    if (column_type("userproplist", "multihomed") eq '') {
+        do_alter("userproplist", "ALTER TABLE userproplist " .
+                 "ADD multihomed ENUM('1', '0') NOT NULL DEFAULT '0' AFTER cldversion");
+    }
+
 });
 
 1; # return true

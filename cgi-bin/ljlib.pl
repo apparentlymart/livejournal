@@ -1413,10 +1413,16 @@ sub set_userprop
     my $hash = ref $propname eq "HASH" ? $propname : { $propname => $value };
 
     my %action;  # $table -> {"replace"|"delete"} -> [ "($userid, $propid, $qvalue)" | propid ]
+    my %multihomed;  # { $propid => $value }
 
     foreach $propname (keys %$hash) {
         my $p = LJ::get_prop("user", $propname) or
             die "Invalid userprop $propname passed to LJ::set_userprop.";
+        if ($p->{multihomed}) {
+            # collect into array for later handling
+            $multihomed{$p->{id}} = $hash->{$propname};
+            next;
+        }
         my $table = $p->{'indexed'} ? "userprop" : "userproplite";
         if ($p->{datatype} eq 'blobchar') {
             $table = 'userpropblob';
@@ -1457,6 +1463,32 @@ sub set_userprop
             LJ::MemCache::set([$userid,"uprop:$userid:$_"], "", $expire) foreach (@$list);
         }
     }
+
+    # if we had any multihomed props, set them here
+    if (%multihomed) {
+        my ($dbh, $dbcm) = (LJ::get_db_writer(), LJ::get_cluster_master($u));
+        return 0 unless $dbh && $dbcm;
+        while (my ($propid, $pvalue) = each %multihomed) {
+            if (defined $pvalue && $pvalue) {
+                # replace data into master
+                $dbh->do("REPLACE INTO userprop VALUES (?, ?, ?)",
+                         undef, $userid, $propid, $pvalue);
+            } else {
+                # delete data from master, but keep in cluster
+                $dbh->do("DELETE FROM userprop WHERE userid = ? AND upropid = ?",
+                         undef, $userid, $propid);
+            }
+
+            # fail out?
+            return 0 if $dbh->err;
+
+            # put data in cluster
+            $dbcm->do("REPLACE INTO userproplite2 VALUES (?, ?, ?)",
+                      undef, $userid, $propid, $pvalue || '');
+            return 0 if $dbcm->err;
+        }
+    }
+
     return 1;
 }
 
@@ -2617,8 +2649,13 @@ sub load_user_props
     my @needwrite;  # [propid, propname] entries we need to save to memcache later
 
     my %loadfrom;
+    my %multihomed; # ( $propid => 0/1 ) # 0 if we haven't loaded it, 1 if we have
     unless (@props) {
         # case 1: load all props for a given user.
+        # multihomed props are stored on userprop and userproplite2, but since they
+        # should always be in sync, it doesn't matter which gets loaded first, the
+        # net results should be the same.  see doc/designnotes/multihomed_props.txt
+        # for more information.
         $loadfrom{'userprop'} = 1;
         $loadfrom{'userproplite'} = 1;
         $loadfrom{'userproplite2'} = 1;
@@ -2641,11 +2678,16 @@ sub load_user_props
             elsif ($p->{'cldversion'} && $u->{'dversion'} >= $p->{'cldversion'}) {
                 $source = "userproplite2";  # clustered
             }
+            elsif ($p->{multihomed}) {
+                $multihomed{$p->{id}} = 0;
+                $source = "userproplite2";
+            }
             push @{$loadfrom{$source}}, $p->{'id'};
         }
     }
 
-    foreach my $table (keys %loadfrom) {
+    foreach my $table (qw{userproplite2 userpropblob userprop}) {
+        next unless exists $loadfrom{$table};
         my $db;
         if ($use_master) {
             $db = ($table =~ m{userprop(lite2|blob)}) ?
@@ -2665,7 +2707,34 @@ sub load_user_props
         $sth = $db->prepare($sql);
         $sth->execute;
         while (my ($id, $v) = $sth->fetchrow_array) {
+            delete $multihomed{$id} if $table eq 'userproplite2';
             $u->{$LJ::CACHE_PROPID{'user'}->{$id}->{'name'}} = $v;
+        }
+
+        # push back multihomed if necessary
+        if ($table eq 'userproplite2') {
+            push @{$loadfrom{userprop}}, $_ foreach keys %multihomed;
+        }
+    }
+
+    # see if we failed to get anything above and need to hit the master.
+    # this usually happens the first time a multihomed prop is hit.  this
+    # code will propogate that prop down to the cluster.
+    if (%multihomed) {
+        my $dbcm = LJ::get_cluster_master($u);
+
+        # verify that we got the database handle before we try propogating data
+        if ($dbcm) {
+            my @values;
+            foreach my $id (keys %multihomed) {
+                my $pname = $LJ::CACHE_PROPID{user}{$id}{name};
+                if (defined $u->{$pname} && $u->{$pname}) {
+                    push @values, "($uid, $id, " . $dbcm->quote($u->{$pname}) . ")";
+                } else {
+                    push @values, "($uid, $id, '')";
+                }
+            }
+            $dbcm->do("REPLACE INTO userproplite2 VALUES " . join ',', @values);
         }
     }
 
