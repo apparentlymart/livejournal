@@ -19,10 +19,11 @@ sub create_view_lastn
     if ($u->{'clusterid'}) {
         $dbcr = LJ::get_cluster_reader($u);
     }
-    
+
     my $user = $u->{'user'};
 
     LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
+    foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
 
     my %FORM = ();
     LJ::get_form_data(\%FORM);
@@ -408,6 +409,7 @@ sub create_view_friends
     }
 
     LJ::load_user_props($dbs, $u, "opt_usesharedpic", "url", "urlname");
+    foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
 
     my %friends_page = ();
     $friends_page{'name'} = LJ::ehtml($u->{'name'});
@@ -804,6 +806,8 @@ sub create_view_calendar
     
     my $user = $u->{'user'};
     LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
+    foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
+
     my %FORM = ();
     LJ::get_form_data(\%FORM);
 
@@ -1023,6 +1027,8 @@ sub create_view_day
     my $user = $u->{'user'};
 
     LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
+    foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
+
     my %day_page = ();
     $day_page{'username'} = $user;
     if ($u->{'opt_blockrobots'}) {
@@ -1284,6 +1290,7 @@ sub create_view_rss
     
     my $user = $u->{'user'};
     LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
+    foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
 
     ## load the itemids
     my @itemids;
