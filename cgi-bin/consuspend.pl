@@ -115,7 +115,7 @@ sub finduser
     }
     while (my $u = $sth->fetchrow_hashref) {        
         push @$out, [ "info", "User: $u->{'user'} ".
-                      "($u->{'userid'}), email: ($u->{'status'}) $u->{'email'}" ];
+                      "($u->{'userid'}), statusvis: $u->{'statusvis'}, email: ($u->{'status'}) $u->{'email'}" ];
         foreach (LJ::run_hooks("finduser_extrainfo", { 'dbh' => $dbh, 'u' => $u })) {
             next unless $_->[0];
             foreach (split(/\n/, $_->[0])) {
