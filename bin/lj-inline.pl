@@ -3,8 +3,9 @@
 
 use strict;
 use lib "$ENV{LJHOME}/cgi-bin";
+
 BEGIN {
-    $LJ::HAVE_INLINE = eval 'use Inline Config => DIRECTORY => "$ENV{LJHOME}/Inline"; use Inline "C"; 1;';
+    $LJ::HAVE_INLINE = eval 'use Inline Config => DIRECTORY => ("$ENV{LJHOME}/Inline" || $ENV{LJ_INLINE_DIR}); use Inline "C"; 1;';
 
     # to shutup Apache::SendStat's warning:
     $LJ::JUST_COMPILING = 1;
