@@ -160,22 +160,22 @@ BODY<=
      while ($_ = $sth->fetchrow_hashref) {
 	 $count++;
 	 my $name = ehtml($_->{'name'});
-	 $list .= "<LI><A HREF=\"/userinfo.bml?user=$_->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/community.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A> <A HREF=\"/community/$_->{'user'}/\"><B>$_->{'user'}</B></A> - $name\n";
+	 $list .= "<li>(=LJCOMM $_->{'user'} LJCOMM=) - $name\n";
      }
 
      my $s = $count > 1 ? "es" : "";
      if ($count) {
-	 $ret .= "(=H1 Relevant Communities H1=)(=P The following communities are also interested in <B>\"$interest\"</B>. P=)";
-	 $ret .= "<P><B>$count match$s:</B><UL>";
+	 $ret .= "(=H1 Relevant Communities H1=)(=P The following communities are also interested in <b>\"$interest\"</b>. P=)";
+	 $ret .= "<p><b>$count match$s:</b><ul>";
 	 $ret .= $list;
-	 $ret .= "</UL>";
+	 $ret .= "</ul></p>";
      }
 
      ##### users
 
-     $ret .= "(=H1 Interested users H1=)(=P The following users are also interested in <B>\"$interest\"</B>.  ";
+     $ret .= "(=H1 Interested users H1=)(=P The following users are also interested in <b>\"$interest\"</b>.  ";
      if ($remote) {
-	 $ret .= "If you're also interested in this and would like to be added to this list, <A HREF=\"/interests.bml?mode=add&amp;intid=$qintid\">click here</A>.  ";
+	 $ret .= "If you're also interested in this and would like to be added to this list, <a href=\"/interests.bml?mode=add&amp;intid=$qintid\">click here</A>.  ";
      }
      $ret .= "More fun stuff can be found on the <A HREF=\"/interests.bml\">interests page</A>. P=)";
 
@@ -188,12 +188,12 @@ BODY<=
      while (my ($iuser, $iname) = $sth->fetchrow_array) {
 	 $count++;
 	 my $name = ehtml($iname);
-	 $list .= "<LI><A HREF=\"/userinfo.bml?user=$iuser\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A> <A HREF=\"/users/$iuser/\"><B>$iuser</B></A> - $name\n";
+	 $list .= "<li>(=LJUSER $iuser LJUSER=) - $name\n";
      }
-     $list .= "</UL>\n";
+     $list .= "</ul>\n";
 
      my $s = $count > 1 ? "es" : "";
-     $ret .= "<P><B>$count match$s:</B>";
+     $ret .= "<p><b>$count match$s:</b></p>";
      $ret .= $list;
 
      ## end

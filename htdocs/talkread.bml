@@ -420,7 +420,7 @@ sub recurse_post
 	    $$ret .= "<TD><B>(Reply from suspended user)</B></TD></TR></TABLE>\n";
 	} else {
 	    if ($userpost) {
-		$user = "<B><A HREF=\"/users/$userpost/\">$userpost</A></B> <A HREF=\"/userinfo.bml?user=$userpost\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>";
+		$user = "(=LJUSER $userpost LJUSER=)";
 	    }
 	    my $icon = &show_image($post->{'subjecticon'});
 

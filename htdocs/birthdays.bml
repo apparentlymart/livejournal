@@ -27,8 +27,8 @@
      }
      my $day = sprintf("%2s", $bday->{'day'});
      $day =~ s/ /&nbsp;/;
-     my $name = ehtml($bday->{'name'});
-     $body .= "<b><tt>$day</tt></b>: <A HREF=\"/userinfo.bml?user=$bday->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A> <A HREF=\"/users/$bday->{'user'}/\">$bday->{'user'}</a> - $name<br>";
+     my $name = LJ::ehtml($bday->{'name'});
+     $body .= "<b><tt>$day</tt></b>: (=LJUSER $bday->{'user'} LJUSER=) - $name<br />\n";
      
  }
 

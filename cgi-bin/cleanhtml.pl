@@ -99,7 +99,7 @@ sub clean
 		if ($attr->{'user'}) {
 		    my $user = LJ::canonical_username($attr->{'user'});
 		    if ($user) {
-			$newdata .= "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$user\"><img src=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href=\"$LJ::SITEROOT/users/$user/\">$user</a></b>";
+			$newdata .= LJ::ljuser($user);
 		    } else {
 			$newdata .= "<b>[Bad username in LJ tag]</b>";
 		    }

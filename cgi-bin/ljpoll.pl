@@ -469,7 +469,7 @@ sub show_poll
 		$value = join(", ", map { $it{$_} } split(/,/, $value));
 	    }
 
-	    $ret .= "<p><a href=\"$LJ::SITEROOT/userinfo.bml?user=$user\"><img src=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href=\"/users/$user/\">$user</a></b> -- $value";
+	    $ret .= "<p>" . LJ::ljuser($user) . " -- $value";
 	}
 	
 	return $ret;

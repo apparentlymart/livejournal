@@ -585,6 +585,25 @@ sub get_query_string
 package LJ;
 
 # <LJFUNC>
+# name: LJ::ljuser
+# des: Returns the HTML for an userinfo/journal link pair for a given user 
+#      name, just like LJUSER does in BML.  But files like cleanhtml.pl
+#      and ljpoll.pl need to do that too, but they aren't run as BML.
+# args: user, opts?
+# des-user: Username to link to.
+# des-opts: Optional hashref to control output.  Currently only recognized key
+#           is 'full' which when true causes a link to the mode=full userinfo.
+# returns: HTML with a little head image & bold text link.
+# </LJFUNC>
+sub ljuser
+{
+    my $user = shift;
+    my $opts = shift;
+    my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
+    return "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$user$andfull\"><img src=\"$LJ::IMGPREFIX/userinfo.gif\" width=\"17\" height=\"17\" align=\"absmiddle\" border=\"0\"></a><b><a href=\"$LJ::SITEROOT/users/$user/\">$user</a></b>";
+}
+
+# <LJFUNC>
 # name: LJ::get_urls
 # des: Returns a list of all referenced URLs from a string
 # args: text

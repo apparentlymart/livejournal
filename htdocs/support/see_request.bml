@@ -107,8 +107,8 @@ BODY<=
  if ($state eq "closed" && $winner && LJ::Support::can_see_helper($dbh, $sp, $remote)) {
      my $s = $winner->{'points'} > 1 ? "s" : "";
      my $wuser = $winner->{'user'};
-     $state .= " (<B>$winner->{'points'}</B> point$s to <A HREF=\"/users/$wuser/\"><B>$wuser</B></A> ";
-     $state .= "<A HREF=\"/userinfo.bml?user=$wuser&amp;mode=full\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>)";
+     $state .= " (<B>$winner->{'points'}</B> point$s to ";
+     $state .= LJ::ljuser($wuser, { 'full' => 1 }) . ")";
  }
  $ret .= "<tr><td align=right><b>Status:</b></td><td>$state";
  if ($sp->{'state'} eq "open" && $owner_mode) {
@@ -161,9 +161,11 @@ BODY<=
      if ($le->{'userid'} && LJ::Support::can_see_helper($dbh, $sp, $remote)) {
 	 my $up = $userinfo{$le->{'userid'}};
 	 my $picid = $up->{'defaultpicid'};
-	 $header = "<IMG ALIGN=BASELINE SRC=\"/userpic/$picid\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'} HSPACE=3>";
-	 $header .= "$up->{'name'} (<B><A HREF=\"$LJ::SITEROOT/users/$up->{'user'}/\">$up->{'user'}</A></B> ";
-	 $header .= "<A HREF=\"/userinfo.bml?user=$up->{'user'}&amp;mode=full\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=BASELINE></A>)";
+	 $header = "<table><tr valign=\"bottom\">";
+	 if ($picid) { 
+	     $header .= "<td><img src=\"/userpic/$picid\" width=\"$userpics{$picid}->{'width'}\" height=\"$userpics{$picid}->{'height'}\" hspace=\"3\"></td>";
+	 }
+	 $header .= "<td>" . LJ::ljuser($up->{'user'}, { 'full' => 1 }) . " - $up->{'name'}</td></tr></table>\n";
      }
 
      my $what = "Answer";
@@ -171,7 +173,7 @@ BODY<=
      elsif ($le->{'type'} eq "comment") { $what = "Comment"; }
      elsif ($le->{'type'} eq "screened") { $what = "Screened Answer"; }
 
-     $header .= "<BR><FONT SIZE=-1><b>$what</b> (\#$le->{'splid'})</FONT>";
+     $header .= "<FONT SIZE=-1><b>$what</b> (\#$le->{'splid'})</FONT>";
      if ($owner_mode && $sp->{'state'} eq "open" && $le->{'type'} eq "answer") {
 	 $header .= ", <A HREF=\"act.bml?close;$sp->{'spid'};$sp->{'authcode'};$le->{'splid'}\"><B>credit fix here</B></A>";
      }
