@@ -3226,11 +3226,10 @@ sub activate_userpics
 # memory format:
 # [
 #   version number of format,
+#   userid,
 #   "packed string", which expands to an array of {width=>..., ...}
 #   "packed string", which expands to { 'kw1' => id, 'kw2' => id, ...}
 # ]
-
-$LJ::STOREPICVERSION = 1;
 
 sub get_userpic_info
 {
@@ -3239,6 +3238,8 @@ sub get_userpic_info
     my $userid = want_userid($uuid);
     return $LJ::CACHE_USERPIC_INFO{$userid} if $LJ::CACHE_USERPIC_INFO{$userid};
     
+    my $VERSION_PICINFO = 2;
+
     my $memkey = [$userid,"upicinf:$userid"];
     my ($info, $minfo);
 
@@ -3246,23 +3247,24 @@ sub get_userpic_info
         # the pre-versioned memcache data was a two-element hash.
         # since then, we use an array and include a version number.
         if (ref $minfo eq 'HASH' ||
-            $minfo->[0] != $LJ::STOREPICVERSION) {
+            $minfo->[0] != $VERSION_PICINFO) {
             # old data in the cache.  delete.
             LJ::MemCache::delete($memkey);
         } else {
-            while (length $minfo->[1] > 11) {
-                my $pic = {};
-                ($pic->{userid}, $pic->{picid},
+            my (undef, $userid, $picstr, $kwstr) = @$minfo;
+            while (length $picstr >= 7) {
+                my $pic = { userid => $userid };
+                ($pic->{picid},
                  $pic->{width}, $pic->{height},
-                 $pic->{state}) = unpack "NNCCA", substr($minfo->[1], 0, 11, '');
+                 $pic->{state}) = unpack "NCCA", substr($picstr, 0, 7, '');
                 $info->{pic}{$pic->{picid}} = $pic;
             }
 
             my ($pos, $nulpos);
             $pos = $nulpos = 0;
-            while (($nulpos = index($minfo->[2], "\0", $pos)) > 0) {
-                my $kw = substr($minfo->[2], $pos, $nulpos-$pos);
-                my $id = unpack("N", substr($minfo->[2], $nulpos+1, 4));
+            while (($nulpos = index($kwstr, "\0", $pos)) > 0) {
+                my $kw = substr($kwstr, $pos, $nulpos-$pos);
+                my $id = unpack("N", substr($kwstr, $nulpos+1, 4));
                 $pos = $nulpos + 5; # skip NUL + 4 bytes.
                 $info->{kw}{$kw} = $info->{pic}{$id} if $info;
             }
@@ -3274,7 +3276,7 @@ sub get_userpic_info
             'pic' => {},
             'kw' => {},
         };
-        $minfo = [ $LJ::STOREPICVERSION, "", "" ]; # see structure above
+        my ($picstr, $kwstr);
         
         my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
         my $sth = $db->prepare("SELECT picid, width, height, state, userid ".
@@ -3285,7 +3287,7 @@ sub get_userpic_info
             push @pics, $pic;
             $info->{'pic'}->{$pic->{'picid'}} = $pic;
         }
-        $minfo->[1] = join('', map { pack("NNCCA", $_->{userid}, $_->{picid},
+        $picstr = join('', map { pack("NCCA", $_->{picid},
                                  $_->{width}, $_->{height}, $_->{state}) } @pics);
         
         $sth = $db->prepare("SELECT k.keyword, m.picid FROM userpicmap m, keywords k ".
@@ -3298,7 +3300,9 @@ sub get_userpic_info
             $info->{'kw'}->{$kw} = $info->{'pic'}->{$id};
             $minfokw{$kw} = int($id);
         }
-        $minfo->[2] = join('', map { pack("Z*N", $minfokw{$_}, $_) } keys %minfokw);
+        $kwstr = join('', map { pack("Z*N", $_, $minfokw{$_}) } keys %minfokw);
+
+        $minfo = [ $VERSION_PICINFO, $userid+0, $picstr, $kwstr ];
         LJ::MemCache::add($memkey, $minfo);
     }
 
