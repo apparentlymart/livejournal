@@ -133,6 +133,28 @@ if ($sclust == 0)
 	$stmsg->(sprintf "$user: copy $done/$todo (%.2f%%) +${elapsed}s -${timeremain}s\n", 100*$percent);
     }
 
+    # update their memories.  in particular, any memories of their own
+    # posts need to to be updated from the (0, globalid) to
+    # (journalid, jitemid) format, to make the memory filter feature
+    # work.  (it checks the first 4 bytes only, not joining the
+    # globalid on the clustered log table)
+    print "Fixing memories.\n";
+    my @fix = @{$dbh->selectall_arrayref("SELECT m.memid, o.newid FROM memorable m, oldids o WHERE ".
+					 "m.userid=$u->{'userid'} AND m.journalid=0 AND o.area='L' ".
+					 "AND o.userid=$u->{'userid'} AND m.jitemid=o.oldid")};
+    foreach my $f (@fix) {
+	my ($memid, $newid) = ($f->[0], $f->[1]);
+	my ($newid2, $anum) = $dbch->selectrow_array("SELECT jitemid, anum FROM log2 ".
+						     "WHERE journalid=$u->{'userid'} AND ".
+						     "jitemid=$newid");
+	if ($newid2 == $newid) {
+	    my $ditemid = $newid * 256 + $anum;
+	    print "UPDATE $memid TO $ditemid\n";
+	    $dbh->do("UPDATE memorable SET journalid=$u->{'userid'}, jitemid=$ditemid ".
+		     "WHERE memid=$memid");
+	}
+    }
+
     # before we start deleting, record they've moved servers.
     $dbh->do("UPDATE user SET dversion=1, clusterid=$dclust WHERE userid=$userid");
     $dbh->do("UPDATE userusage SET lastitemid=0 WHERE userid=$userid");
