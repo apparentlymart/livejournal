@@ -3,6 +3,7 @@
 layerinfo type = "layout";
 layerinfo name = "Magazine";
 layerinfo redist_uniq = "magazine/layout";
+layerinfo previews = "magazine/magazine.jpg";
 
 property bool show_entry_userpic { des = "Show the userpic on the journal entries? [Excludes friends page]"; }
 set show_entry_userpic = false;
