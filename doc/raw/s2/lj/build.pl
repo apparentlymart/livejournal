@@ -217,6 +217,13 @@ sub autogen_core
             if ($class->{$cname}->{'parent'}) {
                 $ds .= "<refsect1><title>Parent Class</title><para> Child class of [class[$class->{$cname}->{'parent'}]].</para></refsect1>";
             }
+            
+            my @children = grep { $class->{$_}->{'parent'} eq $cname } keys %$class;
+            if (@children) {
+                $ds .= "<refsect1><title>Derived Classes</title><para> Child classes: " . 
+                    join(", ", map { "[class[$_]]" } @children) . ".</para></refsect1>";
+            }
+
             if ($ds) {
                 $xlink->(\$ds);
                 print AC $ds;
