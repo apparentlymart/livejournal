@@ -1,7 +1,7 @@
 <base target=_top>
 <?_code
 
- my $user = LJ::canonical_username($FORM{'user'});
+ my $user = LJ::canonical_username($FORM{'user'}) || 'system';
  unless ($user) {
      return "Enter a username.";
  } 
