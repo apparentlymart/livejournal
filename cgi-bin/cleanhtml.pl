@@ -108,10 +108,12 @@ sub clean
 
     my $total_fail = sub {
         my $tag = LJ::ehtml(@_);
+        $$data = LJ::ehtml($$data);
+        $$data =~ s/\r?\n/<br \/>/g if $addbreaks;
         $$data = "[<b>Error:</b> Irreparable invalid markup ('&lt;$tag&gt;') in entry.  ".
             "Owner must fix manually.  Raw contents below.]<br /><br />" .
             '<div style="width: 95%; overflow: auto">' .
-            LJ::ehtml($$data) .
+            $$data .
             '</div>';
         return undef;
     };
