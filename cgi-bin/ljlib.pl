@@ -1314,7 +1314,18 @@ sub get_dbh
     if ($type eq "slave") {
 	my $ct = $LJ::DBINFO{'slavecount'};
 	if ($ct) {
-	    $key = "slave" . int(rand($ct)+1);
+	    my $rand = rand(1);
+	    my $i = 1;
+	    while (! $key && $i <= $ct) {
+		if ($rand < $LJ::DBINFO{"slave$i"}->{'ub'}) {
+		    $key = "slave$i";
+		} else {
+		    $i++;
+		}
+	    }
+	    unless ($key) {
+		$key = "slave" . int(rand($ct)+1);
+	    }
 	} else {
 	    $key = "master";
 	}
