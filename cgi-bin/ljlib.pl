@@ -3533,6 +3533,8 @@ sub start_request
                 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"; 
                 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl"; 
             };
+            $LJ::IMGPREFIX_BAK = $LJ::IMGPREFIX;
+            $LJ::STATPREFIX_BAK = $LJ::STATPREFIX;
             $LJ::DBIRole->set_sources(\%LJ::DBINFO);
             LJ::MemCache::trigger_bucket_reconstruct();
             if ($modtime > $now - 60) {

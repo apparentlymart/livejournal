@@ -153,6 +153,7 @@ sub trans
     my $is_ssl = LJ::run_hook("ssl_check", {
         r => $r,
     });
+    $LJ::IS_SSL = $is_ssl;
 
     # only allow certain pages over SSL
     if ($is_ssl) {
@@ -164,9 +165,14 @@ sub trans
             if (-d _) { $file .= "/index.bml"; }
             $file =~ s!/{2,}!/!g;
             $r->filename($file);
+            $LJ::IMGPREFIX = "/img";
+            $LJ::STATPREFIX = "/stc";
             return OK;
         }
         return FORBIDDEN;
+    } else {
+        $LJ::IMGPREFIX = $LJ::IMGPREFIX_BAK;
+        $LJ::STATPREFIX = $LJ::STATPREFIX_BAK;
     }
 
     # let foo.com still work, but redirect to www.foo.com

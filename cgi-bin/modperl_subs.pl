@@ -46,6 +46,8 @@ require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
 require "$ENV{'LJHOME'}/cgi-bin/modperl_subs-local.pl"
     if -e "$ENV{'LJHOME'}/cgi-bin/modperl_subs-local.pl";
 
+$LJ::IMGPREFIX_BAK = $LJ::IMGPREFIX;
+$LJ::STATPREFIX_BAK = $LJ::STATPREFIX;
 
 package LJ::ModPerl;
 
