@@ -231,8 +231,6 @@
      $body .= "<?h1 $ML{'.userinfo.name'} h1?><?p " . BML::ml('.userinfo.body',{'username'=>$u->{'name'},'siteroot'=>$LJ::SITEROOT}) . " p?>";
  }
 
- $body .= "<p align='center'>";
-
  ## standout bar
  {
      my @linkele;
