@@ -186,12 +186,13 @@ class ItemRange
 class CommentInfo
 "Information about comments attached to something"
 {
-    var string url_read "URL pointer to the 'Read Comments' view";
-    var string url_post "URL pointer to the 'Post Comments' view";
-    var int comment_count "Current number of comments available to be read by the viewer";
+    var string read_url "URL pointer to the 'Read Comments' view.";
+    var string post_url "URL pointer to the 'Post Comments' view.";
+    var int count "Current number of comments available to be read by the viewer.";
+    var bool screened "Set to true if there are screened comments and remote user can unscreen them.";
     var bool enabled "Set to false if comments disabled journal-wide or just on this item.";
 
-    function print()
+    function print
     "Print all comment related links";
     function print_readlink
     "Print the formatted link to the 'Read Comments' view";
@@ -216,25 +217,23 @@ class Entry
 {
     var string subject "Entry subject";
     var string text "Entry text. (Will be blank on some viewtypes, like 'month' view)";
-    var DateTime entrytime "The user specificed entrytime of this entry";
+    var DateTime time "The user specificed time of this entry";
 
-    var string security "The security level of the entry ('private', 'friends', 'custom), or blank if public.";
+    var string security "The security level of the entry ('private', 'protected'), or blank if public.";
     var Image securityicon "A little icon which should be displayed somewhere on an entry to represent the security setting";
 
     var UserLite poster "Author of the journal entry";
     var UserLite journal "Journal the entry has been posted to";
 
-    var string{} metadata "Post metadata.";
-    var CommentInfo commentinfo "Comment information on this entry";
+    var string{} metadata "Post metadata. Keys: 'music', 'mood'";
+    var Image mood_icon "Mood icon, or null.";
+    var CommentInfo comments "Comment information on this entry";
 
     var bool new_day "Is this entry on a different day to the previous one?";
     var bool end_day "Is this the last entry of a day?";
     var Image userpic "The userpic selected to relate to this entry";
     var Link{} links "Hash of links that the server suggests be linked from this entry, eg to edit an entry if a user is viewing their own journal.";
-    var Link previousentry "A link to the previous entry in this user's journal";
-    var Link nextentry "A link to the next entry in this user's journal";
     var int itemid "Server stored ID number for this entry";
-    var string uniqueid "An alphanumeric ID for the entry which is guaranteed to be globally unique (probably username-12354)";
     var string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
 
     function print_metadata ();
@@ -322,14 +321,26 @@ class Page
     Used only when such content is integrated into a journal-wide template.";
 }
 
+class RecentNav {
+    var int version        "Currently version 1.  A new method of navigation has been frequently discussed, so this is planning for the future";
+
+    # version 1 attributes:
+    var int skip            "Indicates how many entries are being skipped back.";
+    var string forward_url  "URL to go forward in time, or blank if furthest forward.";
+    var int forward_skip    "Number of items we'd be skipping going forward.";
+    var int forward_count   "Number of items we'd be potentially seeing going forward.";
+    var string backward_url "URL to go backward in time, or blank if furthest back server will allow.";
+    var int backward_skip   "Number of items we'd be skipping going back more.";
+    var int backward_count  "Number of items we'd be potentially seeing going backward.";
+}
+
 class RecentPage extends Page 
 "Most recent entries page, formally known as the LASTN view in the previous style system"
 {
     var Entry[] entries
     "Array of entries available to be seen by the viewer of the page.";
 
-    var int skip
-    "Indicates how many entries are being skipped back.";
+    var RecentNav nav;
 }
 
 class FriendsPage extends RecentPage
@@ -803,7 +814,7 @@ function Image::as_string() : string {
 #    foreach var string attr ($.attributes) {
 #        $img = $img + htmlattr($attr, $.attributes{$attr});
 #    }
-    $img = $img + "/>";
+    $img = $img + " />";
 
     return $img;
 }
@@ -844,11 +855,18 @@ function userinfoicon(UserLite user) : Image {
 
 ### UserLite functions
 
+function UserLite::base_url() : string {
+    if ($.journal_type == "C") {
+        return "$*SITEROOT/community/$.username";
+    }
+    return "$*SITEROOT/users/$.username";
+}
+
 function UserLite::as_string() : string {
     var Image uiimg;
-    $uiimg = userinfoicon($this);
-    return "<a href=\"" + get_url($this,"userinfo") + "\">" + $uiimg->as_string() + "</a>" +
-    "<b><a" + htmlattr("title",$.name) + " href=\""+$this->base_url()+"\">$.username</a></b>";
+    #$uiimg = userinfoicon($this);
+    return "<a href=\"" + get_url($this,"userinfo") + "\"></a><b><a" + htmlattr("title",$.name) + " href=\""+$this->base_url()+"\">$.username</a></b>";
+    #return "<a href=\"" + get_url($this,"userinfo") + "\">" + $uiimg->as_string() + "</a><b><a" + htmlattr("title",$.name) + " href=\""+$this->base_url()+"\">$.username</a></b>";
 }
 
 function UserLite::print() {
@@ -982,7 +1000,7 @@ function Page::print_entry_poster(Entry e) {
         " posting in ";
         $e.journal->print();
     }
-    #" at "+$e.entrytime->time_long();
+    #" at "+$e.time->time_long();
 }
 function Page::print_entry(Entry e) {
     ## For most styles, this will be overridden by FriendsPage::print_entry and such.
@@ -998,8 +1016,8 @@ function Page::print_entry(Entry e) {
     "</h3>\n";
     """<div class="entrytext">\n$e.text\n</div>\n""";
     $e->print_metadata();
-    if ($e.commentinfo.enabled) {
-        $e.commentinfo->print();
+    if ($e.comments.enabled) {
+        $e.comments->print();
     }
     "</div>\n\n";
 }
@@ -1021,8 +1039,8 @@ function FriendsPage::print_entry(Entry e) {
     "</h3>\n";
     """<div class="entrytext">\n$e.text\n</div>\n""";
     $e->print_metadata();
-    if ($e.commentinfo.enabled) {
-        $e.commentinfo->print();
+    if ($e.comments.enabled) {
+        $e.comments->print();
     }
     "</div>\n\n";
 }
@@ -1049,7 +1067,7 @@ function RecentPage::print_body {
         }
         if ($e.new_day) {
             """<div class="day" id="dayYYYYMMMDD">\n<h2>""";
-            print $e.entrytime->date_long();
+            print $e.time->date_long();
             "</h2>\n";
         }
         # Print the entry
@@ -1142,7 +1160,7 @@ function CalendarMonthPageDay::print_subjectlist() {
     "<table>\n";
     foreach var Entry e ($.entries) {
         "<tr><td>";
-        $e.entrytime->time_short();
+        $e.time->time_short();
         "</td><td>";
         if ($e.poster.username != $e.journal.username) {
             $e.poster->print();
@@ -1184,21 +1202,21 @@ function DayPage::print_body() {
 ### CommentInfo functions
 
 function CommentInfo::print_readlink {
-    if ($.comment_count == 1) {
-        "<a href=\"$.url_read\">"+ehtml($*text_read_comment)+"</a>";
+    if ($.count == 1) {
+        "<a href=\"$.read_url\">"+ehtml($*text_read_comment)+"</a>";
     } else {
-        "<a href=\"$.url_read\">";
+        "<a href=\"$.read_url\">";
         print ehtml($*text_read_comments);
         "</a>";
     }
 }
 function CommentInfo::print_postlink() {
-    "<a href=\"$.url_post\">"+ehtml($*text_post_comment)+"</a>";
+    "<a href=\"$.post_url\">"+ehtml($*text_post_comment)+"</a>";
 }
 function CommentInfo::print() {
     if (not $.enabled) { return; }
     """<div style="text-align: right;">\n(""";
-    if ($.comment_count > 0) {
+    if ($.count > 0) {
         $this->print_readlink();
         " | ";
     }

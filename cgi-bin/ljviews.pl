@@ -4,8 +4,277 @@
 # lib: cgi-bin/ljlib.pl, cgi-bin/ljconfig.pl, cgi-bin/ljlang.pl, cgi-bin/cleanhtml.pl
 # </LJDEP>
 
-package LJ::S1;
+package LJ;
+use strict;
 
+# <LJFUNC>
+# name: LJ::alldateparts_to_hash
+# class: s1
+# des: Given a date/time format from MySQL, breaks it into a hash.
+# info: This is used by S1.
+# args: alldatepart
+# des-alldatepart: The output of the MySQL function
+#                  DATE_FORMAT(sometime, "%a %W %b %M %y %Y %c %m %e %d
+#                  %D %p %i %l %h %k %H")
+# returns: Hash (whole, not reference), with keys: dayshort, daylong,
+#          monshort, monlong, yy, yyyy, m, mm, d, dd, dth, ap, AP,
+#          ampm, AMPM, min, 12h, 12hh, 24h, 24hh
+
+# </LJFUNC>
+sub alldateparts_to_hash
+{
+    my $alldatepart = shift;
+    my @dateparts = split(/ /, $alldatepart);
+    return (
+            'dayshort' => $dateparts[0],
+            'daylong' => $dateparts[1],
+            'monshort' => $dateparts[2],
+            'monlong' => $dateparts[3],
+            'yy' => $dateparts[4],
+            'yyyy' => $dateparts[5],
+            'm' => $dateparts[6],
+            'mm' => $dateparts[7],
+            'd' => $dateparts[8],
+            'dd' => $dateparts[9],
+            'dth' => $dateparts[10],
+            'ap' => substr(lc($dateparts[11]),0,1),
+            'AP' => substr(uc($dateparts[11]),0,1),
+            'ampm' => lc($dateparts[11]),
+            'AMPM' => $dateparts[11],
+            'min' => $dateparts[12],
+            '12h' => $dateparts[13],
+            '12hh' => $dateparts[14],
+            '24h' => $dateparts[15],
+            '24hh' => $dateparts[16],
+            );
+}
+
+# <LJFUNC>
+# class: s1
+# name: LJ::fill_var_props
+# args: vars, key, hashref
+# des: S1 utility function to interpolate %%variables%% in a variable.  If
+#      a modifier is given like %%foo:var%%, then [func[LJ::fvp_transform]]
+#      is called.
+# des-vars: hashref with keys being S1 vars
+# des-key: the variable in the vars hashref we're expanding
+# des-hashref: hashref of values that could interpolate.
+# returns: Expanded string.
+# </LJFUNC>
+sub fill_var_props
+{
+    my ($vars, $key, $hashref) = @_;
+    my $data = $vars->{$key};
+    $data =~ s/%%(?:([\w:]+:))?(\S+?)%%/$1 ? LJ::fvp_transform(lc($1), $vars, $hashref, $2) : $hashref->{$2}/eg;
+    return $data;
+}
+
+# <LJFUNC>
+# class: s1
+# name: LJ::fvp_transform
+# des: Called from [func[LJ::fill_var_props]] to do trasformations.
+# args: transform, vars, hashref, attr
+# des-transform: The transformation type.
+# des-vars: hashref with keys being S1 vars
+# des-hashref: hashref of values that could interpolate. (see
+#              [func[LJ::fill_var_props]])
+# des-attr: the attribute name that's being interpolated.
+# returns: Transformed interpolated variable.
+# </LJFUNC>
+sub fvp_transform
+{
+    my ($transform, $vars, $hashref, $attr) = @_;
+    my $ret = $hashref->{$attr};
+    while ($transform =~ s/(\w+):$//) {
+        my $trans = $1;
+        if ($trans eq "ue") {
+            $ret = LJ::eurl($ret);
+        }
+        elsif ($trans eq "xe") {
+            $ret = LJ::exml($ret);
+        }
+        elsif ($trans eq "lc") {
+            $ret = lc($ret);
+        }
+        elsif ($trans eq "uc") {
+            $ret = uc($ret);
+        }
+        elsif ($trans eq "color") {
+            $ret = $vars->{"color-$attr"};
+        }
+        elsif ($trans eq "cons") {
+            if ($attr eq "siteroot") { return $LJ::SITEROOT; }
+            if ($attr eq "sitename") { return $LJ::SITENAME; }
+            if ($attr eq "img") { return $LJ::IMGPREFIX; }
+        }
+    }
+    return $ret;
+}
+
+
+# <LJFUNC>
+# class: s1
+# name: LJ::load_style_fast
+# des: Loads a style, and does minimal caching (data sticks for 60 seconds).
+# returns: Nothing. Modifies a data reference.
+# args: styleid, dataref, typeref, nocache?
+# des-styleid: Numeric, primary key.
+# des-dataref: Dataref to store data in.
+# des-typeref: Optional dataref to store the style tyep in (undef for none).
+# des-nocache: Flag to say don't cache.
+# </LJFUNC>
+sub load_style_fast
+{
+    my ($dbarg, $styleid, $dataref, $typeref, $nocache) = @_;
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
+    $styleid += 0;
+    my $now = time();
+
+    if ((defined $LJ::CACHE_STYLE{$styleid}) &&
+        ($LJ::CACHE_STYLE{$styleid}->{'lastpull'} > ($now-300)) &&
+        (! $nocache)
+        )
+    {
+        $$dataref = $LJ::CACHE_STYLE{$styleid}->{'data'};
+        if (ref $typeref eq "SCALAR") { $$typeref = $LJ::CACHE_STYLE{$styleid}->{'type'}; }
+    }
+    else
+    {
+        my @h = ($dbh);
+        if ($dbs->{'has_slave'}) {
+            unshift @h, $dbr;
+        }
+        if (my $s_db = LJ::get_dbh("s1styles")) {
+            unshift @h, $s_db;
+        }       
+        my ($data, $type, $cache);
+        my $sth;
+        foreach my $db (@h)
+        {
+            $sth = $dbr->prepare("SELECT formatdata, type, opt_cache FROM style WHERE styleid=$styleid");
+            $sth->execute;
+            ($data, $type, $cache) = $sth->fetchrow_array;
+            last if ($data);
+        }
+        if ($cache eq "Y") {
+            $LJ::CACHE_STYLE{$styleid} = { 'lastpull' => $now,
+                                       'data' => $data,
+                                       'type' => $type,
+                                   };
+        }
+
+        $$dataref = $data;
+        if (ref $typeref eq "SCALAR") { $$typeref = $type; }
+    }
+}
+
+# <LJFUNC>
+# class: s1
+# name: LJ::parse_vars
+# des: Parses S1 style data into hashref.
+# returns: Nothing.  Modifies a hashref.
+# args: dataref, hashref
+# des-dataref: Reference to scalar with data to parse. Format is
+#              a BML-style full block, as used in the S1 style system.
+# des-hashref: Hashref to populate with data.
+# </LJFUNC>
+sub parse_vars
+{
+    my ($dataref, $hashref) = @_;
+    my @data = split(/\n/, $$dataref);
+    my $curitem = "";
+
+    foreach (@data)
+    {
+        $_ .= "\n";
+        s/\r//g;
+        if ($curitem eq "" && /^([A-Z0-9\_]+)=>([^\n\r]*)/)
+        {
+            $hashref->{$1} = $2;
+        }
+        elsif ($curitem eq "" && /^([A-Z0-9\_]+)<=\s*$/)
+        {
+            $curitem = $1;
+            $hashref->{$curitem} = "";
+        }
+        elsif ($curitem && /^<=$curitem\s*$/)
+        {
+            chop $hashref->{$curitem};  # remove the false newline
+            $curitem = "";
+        }
+        else
+        {
+            $hashref->{$curitem} .= $_ if ($curitem =~ /\S/);
+        }
+    }
+}
+
+# <LJFUNC>
+# class: s1
+# name: LJ::prepare_currents
+# des: do all the current music/mood/weather/whatever stuff.  only used by ljviews.pl.
+# args: dbarg, args
+# des-args: hashref with keys: 'props' (a hashref with itemid keys), 'vars' hashref with
+#           keys being S1 variables.
+# </LJFUNC>
+sub prepare_currents
+{
+    my $dbarg = shift;
+    my $args = shift;
+
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $datakey = $args->{'datakey'} || $args->{'itemid'}; # new || old
+
+    my %currents = ();
+    my $val;
+    if ($val = $args->{'props'}->{$datakey}->{'current_music'}) {
+        $currents{'Music'} = $val;
+    }
+    if ($val = $args->{'props'}->{$datakey}->{'current_mood'}) {
+        $currents{'Mood'} = $val;
+    }
+    if ($val = $args->{'props'}->{$datakey}->{'current_moodid'}) {
+        my $theme = $args->{'user'}->{'moodthemeid'};
+        LJ::load_mood_theme($dbs, $theme);
+        my %pic;
+        if (LJ::get_mood_picture($theme, $val, \%pic)) {
+            $currents{'Mood'} = "<img src=\"$pic{'pic'}\" align='absmiddle' width='$pic{'w'}' ".
+                "height='$pic{'h'}' vspace='1'> $LJ::CACHE_MOODS{$val}->{'name'}";
+        } else {
+            $currents{'Mood'} = $LJ::CACHE_MOODS{$val}->{'name'};
+        }
+    }
+    if (%currents) {
+        if ($args->{'vars'}->{$args->{'prefix'}.'_CURRENTS'})
+        {
+            ### PREFIX_CURRENTS is defined, so use the correct style vars
+
+            my $fvp = { 'currents' => "" };
+            foreach (sort keys %currents) {
+                $fvp->{'currents'} .= LJ::fill_var_props($args->{'vars'}, $args->{'prefix'}.'_CURRENT', {
+                    'what' => $_,
+                    'value' => $currents{$_},
+                });
+            }
+            $args->{'event'}->{'currents'} =
+                LJ::fill_var_props($args->{'vars'}, $args->{'prefix'}.'_CURRENTS', $fvp);
+        } else
+        {
+            ### PREFIX_CURRENTS is not defined, so just add to %%events%%
+            $args->{'event'}->{'event'} .= "<br />&nbsp;";
+            foreach (sort keys %currents) {
+                $args->{'event'}->{'event'} .= "<br /><b>Current $_</b>: " . $currents{$_} . "\n";
+            }
+        }
+    }
+}
+
+
+package LJ::S1;
 use strict;
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";

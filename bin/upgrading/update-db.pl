@@ -15,6 +15,7 @@ my $opt_help = 0;
 my $cluster = 0;   # by default, upgrade master.
 my $opt_listtables;
 my $opt_forcebuild = 0;
+my $opt_compiletodisk = 0;
 exit 1 unless
 GetOptions("runsql" => \$opt_sql,
            "drop" => \$opt_drop,
@@ -25,6 +26,7 @@ GetOptions("runsql" => \$opt_sql,
            "help" => \$opt_help,
            "listtables" => \$opt_listtables,
            "forcebuild|fb" => \$opt_forcebuild,
+           "ctd" => \$opt_compiletodisk,
            );
 
 if ($opt_help) {
@@ -229,10 +231,18 @@ if ($opt_pop)
                     'type' => $type,
                 };
                 my $error = "";
+                my $compiled;
                 die $error unless LJ::S2::layer_compile($lay, \$error, { 
                     's2ref' => \$s2source, 
                     'redist_uniq' => $base,
+                    'compiledref' => \$compiled,
                 });
+
+                if ($opt_compiletodisk) {
+                    open (CO, ">$LD/$base.pl") or die;
+                    print CO $compiled;
+                    close CO;
+                }
 
                 # put raw S2 in database.
                 $dbh->do("REPLACE INTO s2source (s2lid, s2code) ".
