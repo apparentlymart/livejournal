@@ -19,6 +19,13 @@ body<=
  my $just_last = 0;
  my $jump_to_item = 0;
 
+my $remote = LJ::get_remote($dbs);
+if ($remote && $user eq $remote->{'user'} && 
+    $FORM{'password'} eq "" && $FORM{'hpassword'} eq "")
+{
+    $hpassword = $FORM{'hpassword'} = LJ::hash_password($remote->{'password'});
+}
+
  my $clustered = 0;
  if (defined $FORM{'clustered'}) {
      $clustered = $FORM{'clustered'};
@@ -43,18 +50,12 @@ body<=
  if ($FORM{'mode'} eq "" && $FORM{'itemid'}) 
  {
      $jump_to_item = 1;
-     my $remote = LJ::get_remote($dbs);
      unless ($remote) {
          return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.mustlogin'} p?>";
      }
      $user = $FORM{'user'} = $remote->{'user'};
      $userid = $remote->{'userid'};
 
-     my $sth = $dbr->prepare("SELECT password FROM user WHERE userid=$remote->{'userid'}");
-     $sth->execute;
-     my $password = $sth->fetchrow_array;
-     $hpassword = LJ::hash_password($password);
-     
      my $itemid = $FORM{'itemid'}+0;
      my $owner = $FORM{'journal'};
 
@@ -96,7 +97,8 @@ body<=
          $ret .= "<input type='hidden' name='mode' value='getevents'>\n";
          $ret .= "<input type='hidden' name='selecttype' value='one'>\n";
          $ret .= "<input type='hidden' name='user' value='$user'>\n";
-         $ret .= "<input type='hidden' name='hpassword' value='$hpassword'>\n";
+         $ret .= "<input type='hidden' name='hpassword' value='$hpassword'>\n"
+             unless $remote && $remote->{'user'} eq $user;
 
          $clustered = 1 if defined $res{"events_1_anum"};
          $ret .= "<input type='hidden' name='clustered' value='$clustered'>\n";	 
@@ -224,7 +226,8 @@ body<=
          $ret .= "<form method='post' action='editjournal_do.bml'>\n";
          $ret .= "<input type='hidden' name='mode' value='editevent'>\n";
          $ret .= "<input type='hidden' name='user' value='$user'>\n";
-         $ret .= "<input type='hidden' name='hpassword' value='$hpassword'>\n";
+         $ret .= "<input type='hidden' name='hpassword' value='$hpassword'>\n"
+             unless $remote && $remote->{'user'} eq $user;
          $ret .= "<input type='hidden' name='itemid' value='$ditemid'>\n";
          $ret .= "<input type='hidden' name='clustered' value='$clustered'>\n";  # for link later
          if ($FORM{'usejournal'}) {
