@@ -35,7 +35,12 @@ if ($ENV{'REQUEST_METHOD'} eq "GET") {
 
     $ret .= "</pre>\n";
 } 
+
+$ret .= "<form method=post>post:<textarea name=foo></textarea><input type=submit></form>";
+$ret .= "<form method=get>get:<textarea name=foo></textarea><input type=submit></form>";
+
 $ret .= "</body></html>\n";
+
 
 print "ETag: ", Digest::MD5::md5_hex($ret), "\n";
 print "Last-Modified: ", HTTP::Date::time2str(time()), "\n";

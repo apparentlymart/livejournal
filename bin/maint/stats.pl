@@ -40,19 +40,23 @@ $maint{'genstats'} = sub
 	for (my $days_back = 30; $days_back > 0; $days_back--) {
 	    print "  going back $days_back days... ";
 	    $time = $nowtime - 86400*$days_back;
-	    $dbr->do("SET \@d=DATE_FORMAT(FROM_UNIXTIME($time), \"%Y-%m-%d\")");
-	    $sth = $dbr->prepare("SELECT COUNT(*) FROM stats WHERE statcat='postsbyday' AND statkey=\@d");
+	    my ($year, $month, $day) = (localtime($time))[5, 4, 3];
+	    $year += 1900;
+	    $month += 1;
+	    my $date = sprintf("%04d-%02d-%02d", $year, $month, $day);
+	    my $qdate = $dbr->quote($date);
+	    $sth = $dbr->prepare("SELECT COUNT(*) FROM stats WHERE statcat='postsbyday' AND statkey=$qdate");
 	    $sth->execute;
 	    my ($exist) = $sth->fetchrow_array;
 	    if ($exist) {
 		print "exists.\n";
 	    } else {
-		$sth = $dbr->prepare("SELECT \@d, COUNT(*) FROM log WHERE year=YEAR(\@d) AND month=MONTH(\@d) AND day=DAYOFMONTH(\@d)");
+		$sth = $dbr->prepare("SELECT COUNT(*) FROM log WHERE year=$year AND month=$month AND day=$day");
 		$sth->execute;
-		my ($date, $count) = $sth->fetchrow_array;
+		my ($count) = $sth->fetchrow_array;
 		print "$date = $count entries\n";
 		$count += 0;
-		$dbh->do("REPLACE INTO stats (statcat, statkey, statval) VALUES ('postsbyday', \@d, $count)");	    
+		$dbh->do("REPLACE INTO stats (statcat, statkey, statval) VALUES ('postsbyday', $qdate, $count)");	    
 	    }
 	    
 	}
