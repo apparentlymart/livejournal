@@ -4,25 +4,25 @@
  $body = "";
 
  my @errors = ();
- my $user = lc($FORM{'user'});
+ my $user = LJ::canonical_username($FORM{'user'});
  my $password = $FORM{'password'};
  my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
 
- &connect_db;
+ my $dbh = LJ::get_dbh("master");
 
  my $quser = $dbh->quote($user);
- if (length($user) > 15) { push @errors, "Username is too long, 15 character max"; }
- unless ($user) { push @errors, "You must <A HREF=\"/login.bml\">enter a username</A>."; }
+ if (length($FORM{'user'}) > 15) { push @errors, "Username is too long, 15 character max"; }
+ unless ($FORM{'user'}) { push @errors, "You must <A HREF=\"/login.bml\">enter a username</A>."; }
  if ($user =~ /[^\w]/) { push @errors, "Username contains invalid characters."; }
 
  unless (LJ::did_post()) { push @errors, "(=REQUIREPOST=)"; }
 
- $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
- $sth->execute;
- my $u = $sth->fetchrow_hashref;
+ my $u = LJ::load_user($dbh, $FORM{'user'});
  unless ($u) { push @errors, "Unknown user."; }
 
- if (! &valid_password($u->{'password'}, \%FORM)) { push @errors, "Invalid password."; }
+ unless (LJ::auth_okay($u, $password, $hpassword)) {
+     push @errors, "Invalid password. (p=$password, hp=$hpassword)"; 
+ }
  
  if (@errors)
  {

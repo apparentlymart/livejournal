@@ -53,11 +53,15 @@ BODY<=
      push @errors, "You entered a username, but selected to post anonymously or as the currently logged in user.  Go back and decide which you really want to do.";
  }
 
+ my $remote;
+ my $cookie_auth;
  if ($FORM{'usertype'} eq "cookieuser") {
-     # setup all the variable to make this look like a "user" usertype
-     $FORM{'userpost'} = $FORM{'cookieuser'};
-     $FORM{'hpassword'} = $FORM{'cookiehpassword'};
-     delete $FORM{'password'};
+     $remote = LJ::get_remote($dbh);
+     return LJ::badinput("Your login cookie seems to have disappeared?") 
+	 unless ($remote && $remote->{'user'} eq $FORM{'cookieuser'});
+     
+     $cookie_auth = 1;
+     $FORM{'userpost'} = $remote->{'user'};
      $FORM{'usertype'} = "user";
  }
 
@@ -68,15 +72,11 @@ BODY<=
  }
 
  my $userpost = lc($FORM{'userpost'});
- my $quserpost = $dbh->quote("");
  my $up;
 
  if ($FORM{'usertype'} eq "user") {
      if ($FORM{'userpost'}) {
-	 $quserpost = $dbh->quote($userpost);
-	 $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quserpost");
-	 $sth->execute;
-	 $up = $sth->fetchrow_hashref;
+	 $up = LJ::load_user($dbh, $FORM{'userpost'});
 	 if ($up) 
 	 {
 	     ### see if the user is banned from posting here
@@ -93,7 +93,7 @@ BODY<=
 		 push @errors, "You can't post as a shared or community account.  Shared accounts represent groups of people, not individual people.";
 	     }
 
-	     if (!&valid_password($up->{'password'}, \%FORM))
+	     unless ($cookie_auth || LJ::auth_okay($up, $FORM{'password'}))
 	     { 
 		 push @errors, "Incorrect password given for the LiveJournal username you specified.  You can recover your password <A HREF=\"/lostinfo.bml\">here</A> if you've forgotten it.";
 	     }
@@ -151,17 +151,7 @@ BODY<=
      push @errors, "Sorry, but your comment of length $length exceeds the maximum allowed length of $max_length.  Please go back, shorten it, and try posting it again.";
  }
 
- if (@errors)
- {
-     my $ret = "";
-     $ret .= "(=BADCONTENT=)\n<UL>\n";		
-     foreach (@errors)
-     {
-         $ret .= "<LI>$_\n";
-     }
-     $ret .= "</UL>\n";
-     return $ret;
- }
+ return LJ::bad_input(@errors) if @errors;
 
  ###################################################3
 

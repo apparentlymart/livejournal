@@ -66,16 +66,13 @@ BODY<=
  }
  &load_user_props($u,  "opt_showtopicstuff", "opt_notalkicons", "opt_logcommentips");
 
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbh);
 
  if ($remote || $ENV{'HTTP_REFERER'}) {
      my @refs;
      if ($remote) { push @refs, "lj://user/$remote->{'user'}"; }
      if ($ENV{'HTTP_REFERER'} =~ m!livejournal.com/talk....\.bml\?itemid=(\d+)\b!) {
 	 push @refs, "lj://entry/$1";
-     }
-     if ($remote->{'user'} eq "bradfitz") {
-	# $ret .= "<p>refs:@refs";
      }
  }
 
@@ -280,13 +277,10 @@ BODY<=
      $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>From:</TD><TD ALIGN=MIDDLE>(  )</TD><TD ALIGN=LEFT COLSPAN=3><FONT COLOR=#C0C0C0><B>Anonymous</B></FONT> - this user has disabled anonymous and non-friend posting.  You may post here if <B>$u->{'user'}</B> lists you as a friend.</TD></TR>\n";
  }
 
- my $cooku = $BMLClient::COOKIE{"ljuser"};
  my $checked = "CHECKED";
- if ($cooku && $BMLClient::COOKIE{"ljhpass"} =~ /^$cooku:(.+)/) {
-     my $cookpass = $1;
-     $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>&nbsp;</TD><TD ALIGN=MIDDLE><INPUT TYPE=\"radio\" NAME=\"usertype\" VALUE=\"cookieuser\" $checked></TD><TD ALIGN=LEFT><B>Logged in user:</B> <I>$cooku</I>\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=cookieuser VALUE=\"$cooku\">\n";
-     $ret .= "<INPUT TYPE=HIDDEN NAME=cookiehpassword VALUE=\"$cookpass\">\n";
+ if ($remote) {
+     $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>&nbsp;</TD><TD ALIGN=MIDDLE><INPUT TYPE=\"radio\" NAME=\"usertype\" VALUE=\"cookieuser\" $checked></TD><TD ALIGN=LEFT><B>Logged in user:</B> <I>$remote->{'user'}</I>\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=cookieuser VALUE=\"$remote->{'user'}\">\n";
      $ret .= "</TD></TR>\n";
      $checked = "";
  }

@@ -13,29 +13,33 @@ BODY<=
 (=_CODE
 #line 14
  use LJ::TextMessage;
+ return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
- return &server_down_html() if ($LJ::SERVER_DOWN);
-
- my @errors = ();
- my $user = lc($FORM{'user'});
  my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
 
  my $ret;
- &connect_db();
- my $quser = $dbh->quote($user);
+ my $dbh = LJ::get_dbh("master");
 
- $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
- $sth->execute;
- unless ($sth->rows) { push @errors, "Invalid username"; }
- my $u = $sth->fetchrow_hashref;
- &load_user_props($u, 
-		  "opt_whatemailshow",
-		  "opt_showtopicstuff",
-		  "country", "state", "city", "zip",
-		  "icq", "aolim", "yahoo", "msn", "url", "urlname", "gender", "jabber",
-		  "opt_blockrobots", "opt_notalkicons",
-		  "opt_logcommentips", "howhear", "opt_bdaymail", "opt_hidefriendofs"
-		  );
+ my $u = LJ::load_user($dbh, $FORM{'user'});
+
+ unless ($u) {
+     return LJ::bad_input("Invalid username");
+ }
+
+ unless (LJ::auth_okay($u, $undef, $hpassword)) {
+     return LJ::bad_input("Incorrect password");
+ }
+ 
+
+ LJ::load_user_props($dbh, $u, "opt_whatemailshow",
+		     "opt_showtopicstuff", "country", "state", "city",
+		     "zip", "icq", "aolim", "yahoo", "msn", "url",
+		     "urlname", "gender", "jabber", "opt_blockrobots",
+		     "opt_notalkicons", "opt_logcommentips",
+		     "howhear", "opt_bdaymail", "opt_hidefriendofs");
+
+ my $user = $u->{'user'};
+ my $quser = $dbh->quote($user);
 
  if ($u->{'has_bio'}) {
      $sth = $dbh->prepare("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
@@ -49,20 +53,6 @@ BODY<=
  my %interests = ();
  while ($_ = $sth->fetchrow_hashref) {
      $interests{$_->{'interest'}} = $_->{'intid'};
- }
-
- if (scalar(@errors)==0 && !&valid_password($u->{'password'}, \%FORM)) { push @errors, "Incorrect password."; }
-
- if (@errors)
- {
-     my $ret = "";
-     $ret .= "(=BADCONTENT=)\n<UL>\n";		
-     foreach (@errors)
-     {
-         $ret .= "<LI>$_\n";
-     }
-     $ret .= "</UL>\n";
-     return $ret;
  }
 
  my %countries;
@@ -448,18 +438,8 @@ BODY<=
      {
 	 &check_email($FORM{'email'}, \@errors);
      }
-
-     if (@errors)
-     {
-         my $ret = "";
-         $ret .= "(=BADCONTENT=)\n<UL>\n";		
-         foreach (@errors)
-         {
-	   $ret .= "<LI>$_\n";
-         }
-         $ret .= "</UL>\n";
-         return $ret;
-     }
+     
+     return LJ::bad_input(@errors) if @errors;
 
      $state = $FORM{'statedrop'} || $FORM{'stateother'};
      my $email_changed = ($u->{'email'} ne $FORM{'email'});
@@ -710,11 +690,11 @@ BODY<=
      # tell the user all is well
      my $ret = "(=H1 Success H1=)(=P Your information and <a href=\"/users/$user/\">journal</a> settings and <a href=\"/userinfo.bml?user=$user\">profile</a> have been updated. P=)";
      if (@errors) {
-         $ret .= "(=P However, one or more errors occured while processing your request:\n<UL>\n";
+         $ret .= "(=P However, one or more errors occured while processing your request:\n<ul>\n";
          foreach (@errors) {
-	   $ret .= "<LI>$_\n";
+	   $ret .= "<li>$_\n";
          }
-         $ret .= "</UL> P=)\n";
+         $ret .= "</ul> P=)\n";
      }
      return $ret;
  }
