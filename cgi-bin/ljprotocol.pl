@@ -1112,7 +1112,7 @@ sub editevent
     # make year/mon/day/hour/min optional in an edit event,
     # and just inherit their old values
     {
-        $oldevent->{'logtime'} =~ /^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/;
+        $oldevent->{'eventtime'} =~ /^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/;
         $req->{'year'} = $1 unless defined $req->{'year'};
         $req->{'mon'} = $2+0 unless defined $req->{'mon'};
         $req->{'day'} = $3+0 unless defined $req->{'day'};
