@@ -104,8 +104,6 @@ foreach my $s (@alters)
 
 if ($opt_pop)
 {
-    $| = 1;
-    
     print "Populating public system styles (S1):\n";
     require "$ENV{'LJHOME'}/bin/upgrading/s1style-rw.pl";
     my $ss = s1styles_read();
@@ -144,8 +142,8 @@ if ($opt_pop)
     foreach my $file ("base-data.sql", "base-data-local.sql") {
         my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
         next unless -e $ffile;
-        print "Populating database with $file:\n";
-        open (BD, $ffile) or die "Can't open $file file";
+        print "Populating database with $file.\n";
+        open (BD, $ffile) or die "Can't open $file file\n";
         while (my $q = <BD>)
         {
             chomp $q;  # remove newline
@@ -159,7 +157,8 @@ if ($opt_pop)
         }
         close (BD);
     }
-    print "Done populating.\n";
+
+    print "\nRemember to also run:\n  bin/upgrading/texttool.pl load\n\n";
 }
 
 
