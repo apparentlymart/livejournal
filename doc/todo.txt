@@ -25,8 +25,12 @@
   people to become missing.  rare.  and unimportant with 10,000 friend
   communities?  if it was a problem, we could change 1000 to 1500.
 * fix LJ::get_itemid_{before|after} to respect security of $remote
-* add "scope enum('general','local')" to all prop tables
+* [X] add "scope enum('general','local')" to all prop tables
   -- change SQL exporter to recognize only general
+* change dumpsql.pl to not dump auto_increment primary keys when other
+  unique varchar key exists (so we don't clobber locate IDs with gen stuff)
+  this involves writing our own mysqldump, but that's trivial.
+* respect user.status=="L" --> never let be modified, deleted, purged, etc
 * add hooks to verify people aren't faking their paid user cookie
 * htdocs/userpic: why use LJ::Cache at all if we're using disk now?
 * htdocs/userpic: doesn't clean disk cache yet
