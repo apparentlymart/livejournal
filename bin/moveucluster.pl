@@ -71,10 +71,18 @@ die "Can't move back to legacy cluster 0\n" unless $dclust;
 
 # original cluster db handle.
 my $dbo;
+my $is_movemaster;
+
 if ($sclust) {
-    $dbo = $opt_movemaster ?
-        LJ::get_dbh({raw=>1}, "cluster$u->{clusterid}movemaster") :
-	LJ::get_cluster_master({raw=>1}, $u);
+    if ($opt_movemaster) {
+        $dbo = LJ::get_dbh({raw=>1}, "cluster$u->{clusterid}movemaster");
+        if ($dbo) {
+            my $ss = $dbo->selectrow_hashref("show slave status");
+            die "Move master not a slave?" unless $ss;
+        }
+        $is_movemaster = 1;
+    }
+    $dbo ||= LJ::get_cluster_master({raw=>1}, $u);
     die "Can't get source cluster handle.\n" unless $dbo;
     $dbo->{'RaiseError'} = 1;
     $dbo->do("SET wait_timeout=28800");
@@ -155,6 +163,26 @@ unless ($opt_prelocked) {
     if ($secidle) {
         sleep(2) unless $secidle > 86400*7;
         sleep(1) unless $secidle > 86400;
+    }
+}
+
+
+if ($is_movemaster) {
+    my $diff = 999_999;
+    my $tries = 0;
+    while ($diff > 50_000) {
+        my $ss = $dbo->selectrow_hashref("show slave status");
+        $tries++;
+        if ($ss->{'Slave_IO_Running'} eq "Yes" && $ss->{'Slave_SQL_Running'} eq "Yes") {
+            if ($ss->{'Master_Log_File'} eq $ss->{'Relay_Master_Log_File'}) {
+                $diff = $ss->{'Read_Master_Log_Pos'} - $ss->{'Exec_master_log_pos'};
+                print "  diff: $diff\n" if $optv >= 1;
+            } else {
+                print "  (Wrong log file):  $ss->{'Relay_Master_Log_File'}($ss->{'Exec_master_log_pos'}) not $ss->{'Master_Log_File'}($ss->{'Read_Master_Log_Pos'})\n" if $optv >= 1;
+            }
+        } else {
+            die "Movemaster slave not running";
+        }
     }
 }
 
