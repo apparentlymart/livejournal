@@ -41,7 +41,7 @@
 
      my @all_keywords;
      my %selected_keyword;
-     $sth = $dbr->prepare("SELECT k.keyword FROM keywords k, memkeyword mk, memorable m WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=$remote->{'userid'} GROUP BY 1");
+     $sth = $dbr->prepare("SELECT DISTINCT k.keyword FROM keywords k, memkeyword mk, memorable m WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=$remote->{'userid'}");
      $sth->execute;
      while (my ($kw) = $sth->fetchrow_array) {
 	 push @all_keywords, $kw;
