@@ -2066,6 +2066,8 @@ label.switch.workwith=Work with journal:
 
 langname.en=English
 
+ljlib.pageofpages=Page [[page]] of [[total]]
+
 lostinfo.head=Forget something?
 
 lostinfo.text=If you forgot your username or password, <a href="lostinfo.bml">recover it here</a>.
