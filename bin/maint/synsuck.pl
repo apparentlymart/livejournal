@@ -388,8 +388,8 @@ $maint{'synsuck'} = sub
                 $is_child = 1;
 
                 # handles won't survive the fork
-                $LJ::DBIRole->disconnect_all();
-
+                LJ::disconnect_dbs();
+                
                 $process_user->($urow);
 
                 # exit child process
@@ -406,7 +406,7 @@ $maint{'synsuck'} = sub
     }
 
     print "[$$] $userct users processed\n" if $verbose;
-    exit 0;
+    return;
 };
 
 1;

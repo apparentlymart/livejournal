@@ -118,7 +118,9 @@ sub run_task
         print LOCK ("Started at: " . time() . " (" . scalar(localtime()) . ")\n");
         require "$MAINT/$maintinfo{$task}->{'source'}";
         $LJ::LJMAINT_VERBOSE = $VERBOSE;
-        $maint{$task}->(@args);
+        eval {
+            $maint{$task}->(@args);
+        };
         unlink $lock_file;
         flock(LOCK, LOCK_UN);
         close LOCK;
