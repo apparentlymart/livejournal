@@ -28,6 +28,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
+require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
 
 $LJ::USERPIC_ROOT ||= "$LJ::SITEROOT/userpic";
 
@@ -3118,173 +3119,12 @@ sub make_journal
     return $ret;
 }
 
-# <LJFUNC>
-# name: LJ::html_datetime
-# class: component
-# des:
-# info: Parse output later with [func[LJ::html_datetime_decode]].
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub html_datetime
-{
-    my $opts = shift;
-    my $lang = $opts->{'lang'} || "EN";
-    my ($yyyy, $mm, $dd, $hh, $nn, $ss);
-    my $ret;
-    my $name = $opts->{'name'};
-    my $disabled = $opts->{'disabled'} ? "DISABLED" : "";
-    if ($opts->{'default'} =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d):(\d\d))?/) {
-        ($yyyy, $mm, $dd, $hh, $nn, $ss) = ($1 > 0 ? $1 : "",
-                                            $2+0,
-                                            $3 > 0 ? $3+0 : "",
-                                            $4 > 0 ? $4 : "",
-                                            $5 > 0 ? $5 : "",
-                                            $6 > 0 ? $6 : "");
-    }
-    $ret .= LJ::html_select({ 'name' => "${name}_mm", 'selected' => $mm, 'disabled' => $opts->{'disabled'} },
-                         map { $_, LJ::Lang::month_long($lang, $_) } (0..12));
-    $ret .= "<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_dd VALUE=\"$dd\" $disabled>, <INPUT SIZE=4 MAXLENGTH=4 NAME=${name}_yyyy VALUE=\"$yyyy\" $disabled>";
-    unless ($opts->{'notime'}) {
-        $ret.= " <INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_hh VALUE=\"$hh\" $disabled>:<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_nn VALUE=\"$nn\" $disabled>";
-        if ($opts->{'seconds'}) {
-            $ret .= "<INPUT SIZE=2 MAXLENGTH=2 NAME=${name}_ss VALUE=\"$ss\" $disabled>";
-        }
-    }
-
-    return $ret;
-}
-
 sub syn_cost
 {
     my $watchers = shift;
     return 1/(log($watchers)/log(5)+1);
 }
 
-# <LJFUNC>
-# name: LJ::html_datetime_decode
-# class: component
-# des:
-# info: Generate the form controls with [func[LJ::html_datetime]].
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub html_datetime_decode
-{
-    my $opts = shift;
-    my $hash = shift;
-    my $name = $opts->{'name'};
-    return sprintf("%04d-%02d-%02d %02d:%02d:%02d",
-                   $hash->{"${name}_yyyy"},
-                   $hash->{"${name}_mm"},
-                   $hash->{"${name}_dd"},
-                   $hash->{"${name}_hh"},
-                   $hash->{"${name}_nn"},
-                   $hash->{"${name}_ss"});
-}
-
-# <LJFUNC>
-# name: LJ::html_select
-# class: component
-# des:
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub html_select
-{
-    my $opts = shift;
-    my @items = @_;
-    my $disabled = $opts->{'disabled'} ? " disabled='1'" : "";
-    my $ret;
-    $ret .= "<select";
-    if ($opts->{'name'}) { $ret .= " name='$opts->{'name'}'"; }
-    if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
-    $ret .= "$disabled>";
-    while (my ($value, $text) = splice(@items, 0, 2)) {
-        my $sel = "";
-        if ($value eq $opts->{'selected'}) { $sel = " selected"; }
-        $ret .= "<option value=\"$value\"$sel>$text</option>";
-    }
-    $ret .= "</select>";
-    return $ret;
-}
-
-# <LJFUNC>
-# name: LJ::html_check
-# class: component
-# des:
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub html_check
-{
-    my $opts = shift;
-
-    my $disabled = $opts->{'disabled'} ? " DISABLED" : "";
-    my $ret;
-    if ($opts->{'type'} eq "radio") {
-        $ret .= "<input type=\"radio\" ";
-    } else {
-        $ret .= "<input type=\"checkbox\" ";
-    }
-    if ($opts->{'selected'}) { $ret .= " checked='1'"; }
-    if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
-    if ($opts->{'name'}) { $ret .= " name=\"$opts->{'name'}\""; }
-    if (defined $opts->{'value'}) { $ret .= " value=\"$opts->{'value'}\""; }
-    $ret .= "$disabled>";
-    return $ret;
-}
-
-# <LJFUNC>
-# name: LJ::html_text
-# class: component
-# des:
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub html_text
-{
-    my $opts = shift;
-
-    my $disabled = $opts->{'disabled'} ? " DISABLED" : "";
-    my $ret;
-    $ret .= "<input type=\"text\"";
-    if ($opts->{'size'}) { $ret .= " size=\"$opts->{'size'}\""; }
-    if ($opts->{'maxlength'}) { $ret .= " maxlength=\"$opts->{'maxlength'}\""; }
-    if ($opts->{'name'}) { $ret .= " name=\"" . LJ::ehtml($opts->{'name'}) . "\""; }
-    if ($opts->{'value'}) { $ret .= " value=\"" . LJ::ehtml($opts->{'value'}) . "\""; }
-    $ret .= "$disabled>";
-    return $ret;
-}
-
-# <LJFUNC>
-# name: LJ::html_hidden
-# class: component
-# des: Makes the HTML for a hidden form element
-# args: name, val
-# des-name: Name of form element (will be HTML escaped)
-# des-val: Value of form element (will be HTML escaped)
-# returns: HTML
-# </LJFUNC>
-sub html_hidden
-{
-    my $ret;
-    while (@_) {
-        my $name = shift;
-        my $val = shift;
-        $ret .= "<input type='hidden' name='" . LJ::ehtml($name) . "' value='" .
-            LJ::ehtml($val) . "' />\n";
-    }
-    return $ret;
-}
 
 # <LJFUNC>
 # name: LJ::canonical_username
@@ -4154,6 +3994,14 @@ sub get_userid
 
     return ($userid+0);
 }
+
+sub want_userid
+{
+    my $uuserid = shift;
+    return $uuserid->{'userid'} if ref $uuserid;
+    return $uuserid;
+}
+
 
 # <LJFUNC>
 # name: LJ::get_username
@@ -5605,6 +5453,37 @@ sub kill_session
     LJ::kill_sessions($udbh, $u->{'userid'}, $u->{'_session'}->{'sessid'});
     delete $BML::COOKIE{'ljsession'};
     return 1;
+}
+
+sub last_error_code
+{
+    return $LJ::last_error;
+}
+
+sub last_error
+{
+    my $err = {
+        'utf8' => "Encoding isn't valid UTF-8",
+        'db' => "Database error",
+    };
+    my $des = $err->{$LJ::last_error};
+    if ($LJ::last_error eq "db" && $LJ::db_error) {
+        $des .= ": $LJ::db_error";
+    }
+    return $des || $LJ::last_error;
+}
+
+sub error
+{
+    my $err = shift;
+    if (ref $err eq "DBI::db") {
+        $LJ::db_error = $err->errstr;
+        $err = "db";
+    } elsif ($err eq "db") {
+        $LJ::db_error = "";
+    }
+    $LJ::last_error = $err;
+    return undef;
 }
 
 1;

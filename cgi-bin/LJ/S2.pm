@@ -413,7 +413,7 @@ sub load_style
 sub create_layer
 {
     my ($userid, $b2lid, $type) = @_;
-    $userid = want_userid($userid);
+    $userid = LJ::want_userid($userid);
 
     return 0 unless $b2lid;  # caller should ensure b2lid exists and is of right type
     return 0 unless 
@@ -489,7 +489,7 @@ sub layer_compile_user
     }
 
     my $error;
-    return 1 if LJ::layer_compile($layer, \$error, { 's2ref' => \$s2 });
+    return 1 if LJ::S2::layer_compile($layer, \$error, { 's2ref' => \$s2 });
     return LJ::error($error);
 }
 

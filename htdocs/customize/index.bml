@@ -93,13 +93,29 @@ body<=
         return BML::redirect("/customize/?journal=$u->{'user'}");
     }
 
+    if ($POST{'action:deluser'}) {
+        LJ::S2::delete_layer($style{'user'});
+        LJ::S2::set_style_layers($u, $u->{'s2_style'}, "user", 0) if $style{'user'};
+        return BML::redirect("/customize/?journal=$u->{'user'}");
+    }
+
+    if ($FORM{'action:edituser'}) {
+        $implicit_style_create->();
+        my $id = $style{'user'};
+        unless ($id) {
+            $id = LJ::S2::create_layer($u, $style{'layout'}, "user");
+            return "Error: couldn't generate user layer" unless $id;
+            LJ::S2::set_style_layers($u, $u->{'s2_style'}, "user", $id);
+        }
+        return BML::redirect("/customize/layer.bml?w=user");
+    }
+
     if ($POST{'save:theme'}) {
         my $themeid = $POST{'themeid'}+0;
         my $lay = $pub->{$themeid} || $userlay->{$themeid};
         return "Error: not your theme" if $themeid && ! $lay;
         $implicit_style_create->();
-        $style{'theme'} = $themeid;
-        LJ::S2::set_style_layers($u, $u->{'s2_style'}, %style);
+        LJ::S2::set_style_layers($u, $u->{'s2_style'}, "theme", $themeid);
 
         # TODO: conflict resolution.  check if there
         # exists a user layer, and ask user if they want to 
@@ -160,11 +176,21 @@ body<=
     $ret .= " <input type='submit' name='save:theme' value='Change'> (<a href=\"preview.bml?show=themes&amp;layid=$style{'layout'}\">previews</a>)";
     $ret .= "</blockquote>";
     
-    # 
+    # customize
+    $ret .= "<?h2 Change Individual Settings h2?><?p If you want to customize your journal further, here you can tweak individual settings to get it looking exactly how you want... p?>";
+    $ret .= "<blockquote>";
+    if ($style{'user'}) {
+        $ret .= "<input type='submit' name='action:deluser' value='Remove Customizations'>\n";
+        $ret .= "<input type='submit' name='action:edituser' value='Edit Customizations...'>\n";
+    } else {
+        $ret .= "<input type='submit' name='action:edituser' value='Customize...'>\n";
+    }
+    $ret .= "</blockquote>";
 
     #use Data::Dumper;
     #$ret .= "<pre>" . Dumper($pub) . "</pre>";
     
+    $ret .= "</form>";
     return $ret;
 
 }
