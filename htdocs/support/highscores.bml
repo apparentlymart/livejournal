@@ -6,27 +6,13 @@ body<=
 The following people have helped other users in the support area:
 
 <?_code
+ use strict;
+ use vars qw(%GET);
 
  my $dbr = LJ::get_db_reader();
 
  my $sth;
  my %rank;
-
- my $remote = LJ::get_remote();
- my $admin = (LJ::check_priv($remote, "admin", "supporthelp") ||
-              LJ::check_priv($remote, "admin", "*"));
- 
- my %helper;
- if ($admin) {
-     # if remote user has power to assign 'supporthelp' priv, then find out who
-     # already has it so we can make links later on people without it
-     $sth = $dbr->prepare("SELECT DISTINCT pm.userid FROM priv_map pm, priv_list pl ".
-                          "WHERE pm.prlid=pl.prlid AND pl.privcode='supporthelp'");
-     $sth->execute;
-     while (my ($userid) = $sth->fetchrow_array) {
-         $helper{$userid} = 1;
-     }
- }
 
  $sth = $dbr->prepare("SELECT statcat, statkey, statval FROM stats ".
                       "WHERE statcat IN ('supportrank', 'supportrank_prev')");
@@ -40,13 +26,16 @@ The following people have helped other users in the support area:
      }
  }
 
- $sth = $dbr->prepare("SELECT u.userid, u.user, u.name, sp.totpoints AS 'points' ".
+ $sth = $dbr->prepare("SELECT u.userid, u.user, u.name, sp.totpoints AS 'points', sp.lastupdate ".
                       "FROM user u, supportpointsum sp WHERE u.userid=sp.userid");
  $sth->execute;
  my @rows;
  push @rows, $_ while $_ = $sth->fetchrow_hashref;
- @rows = sort { $b->{points} <=> $a->{points} } @rows;
-
+ if ($GET{'sort'} eq "lastupdate") { 
+     @rows = sort { $b->{lastupdate} <=> $a->{lastupdate} } @rows;
+ } else {
+     @rows = sort { $b->{points} <=> $a->{points} } @rows;
+ }
  my $ret;
  $ret .= "<p><table>";
  my $rank = 0;
@@ -79,17 +68,7 @@ The following people have helped other users in the support area:
      my $s = $pts > 1 ? "s" : "";
      
      my $name = LJ::ehtml($_->{'name'});
-     my $privcol = "";
-     if ($admin) {
-         my $data;
-         if ($helper{$userid}) {
-             $data = "*";
-         } elsif ($pts >= 25) {
-             $data = "<a href=\"/admin/priv/?user=$_->{'user'}\">+</a>";
-         }
-         $privcol = "<td align=\"center\">$data</td>";
-     }
-     $ret .= "<tr><td align=\"right\">$rank.</td><td>$change</td>$privcol<td><?ljuser $_->{'user'} ljuser?> - $name</td><td><b>$_->{'points'} point$s</b></td></tr>\n";
+     $ret .= "<tr><td align=\"right\">$rank.</td><td>$change</td><td><?ljuser $_->{'user'} ljuser?> - $name</td><td><b>$_->{'points'} point$s</b></td></tr>\n";
  }
  $ret .= "</table></p>";
  $ret .= "<p><b>$total</b> total supporting users.</p>";
