@@ -11,10 +11,12 @@ use Data::Dumper;
 my $opt_warn = 0;
 my $opt_file;
 my $opt_stubs = 0;  # generate stubs of undoced funcs
-GetOptions(
+my $opt_class = 0;  # group by class
+die unless GetOptions(
 	   'warn' => \$opt_warn,
 	   'file=s' => \$opt_file,
 	   'stubs' => \$opt_stubs,
+	   'class' => \$opt_class,
 	   );
 
 die "Unknown arguments.\n" if @ARGV;
@@ -22,6 +24,18 @@ die "Unknown arguments.\n" if @ARGV;
 unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
 }
+
+my @classes = qw(general db logging time component);
+my %classname = 
+    (
+     'general' => "General",
+     'db' => "Database",
+     'component' => "Components",
+     'logging' => "Logging",
+     'time' => "Date & Time",
+     'text' => "Text Processing",
+     'security' => "Security",
+     );
 
 my %common_args = 
     (
@@ -42,10 +56,24 @@ if ($opt_file) {
     find(qw(cgi-bin));
 }
 
-unless ($opt_warn) {
-    print Dumper(\%funcs);
+exit if $opt_warn;
+
+if ($opt_class)
+{
+    my %by_class;
+    foreach my $n (sort keys %funcs) {
+	my $f = $funcs{$n};
+	push @{$by_class{$f->{'class'}}}, $f;
+    }
+    my $ret = [];
+    foreach my $cn (@classes) {
+	push @$ret, [ $classname{$cn}, $by_class{$cn} ];
+    }
+    print Dumper($ret);
+    exit;
 }
 
+print Dumper(\%funcs);
 exit;
 
 sub find
@@ -93,7 +121,7 @@ sub check_file
 	if ($l =~ /^package\s*(.+);/) {
 	    $curpackage = $1;
 	}
-	if ($opt_warn && $curpackage && $l =~ /^sub\s*(\S+)/) {
+	if ($opt_warn && $curpackage && $l =~ /^sub\s+([a-zA-Z0-9]\S+)/) {
 	    my $s = $1;
 	    my $total = $curpackage . "::" . $s;
 	    unless ($funcs{$total}) {
@@ -130,6 +158,10 @@ sub check_file
 	    $contlen = 0;
 	    if ($f->{'name'}) {
 		$f->{'source'} = $file;
+		$f->{'class'} ||= "general";
+		unless ($classname{$f->{'class'}}) {
+		    print STDERR "Unknown class: $f->{'class'} ($f->{'name'})\n";
+		}
 		$funcs{$f->{'name'}} = $f;
 		treeify($f);
 	    }

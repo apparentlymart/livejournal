@@ -3362,15 +3362,6 @@ sub get_dbh
     return get_dbh(@roles);
 }
 
-# <LJFUNC>
-# name: LJ::_get_dbh_fdsn
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
-# </LJFUNC>
 sub _get_dbh_fdsn
 {
     my $db = shift;   # hashref with DSN info, from ljconfig.pl's %LJ::DBINFO
@@ -3392,15 +3383,6 @@ sub _get_dbh_fdsn
     return $fdsn;
 }
 
-# <LJFUNC>
-# name: LJ::_get_dbh_conn
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
-# </LJFUNC>
 sub _get_dbh_conn
 {
     my $fdsn = shift;
@@ -3463,7 +3445,7 @@ sub get_dbs
 
 # <LJFUNC>
 # name: LJ::get_cluster_reader
-# class: 
+# class: db
 # des: 
 # info: 
 # args: 
@@ -3480,7 +3462,7 @@ sub get_cluster_reader
 
 # <LJFUNC>
 # name: LJ::get_cluster_master
-# class: 
+# class: db
 # des: 
 # info: 
 # args: 
@@ -3496,7 +3478,7 @@ sub get_cluster_master
 
 # <LJFUNC>
 # name: LJ::get_cluster_set
-# class: 
+# class: db
 # des: 
 # info: 
 # args: 
@@ -3517,6 +3499,7 @@ sub get_cluster_set
 
 # <LJFUNC>
 # name: LJ::make_dbs
+# class: db
 # des: Makes a $dbs structure from a master db
 #      handle and optionally a slave.  This function
 #      is called from [func[LJ::get_dbs]].  You shouldn't need
@@ -3564,7 +3547,7 @@ sub make_dbs_from_arg
 ## also a user object (hashref)
 # <LJFUNC>
 # name: LJ::date_to_view_links
-# class: 
+# class: component
 # des: 
 # info: 
 # args: 
