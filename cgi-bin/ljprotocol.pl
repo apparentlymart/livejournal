@@ -367,10 +367,20 @@ sub checkfriends
     my $memkey = [$u->{'userid'},"checkfriends:$u->{userid}:$mask"];
     my $update = LJ::MemCache::get($memkey);
     unless ($update) {
-        my $sql = "SELECT MAX(u.timeupdate) FROM userusage u, friends f ".
-            "WHERE u.userid=f.friendid AND f.userid=$u->{'userid'}";
-        $sql .= " AND f.groupmask & $mask > 0" if $mask;
-        $update = $dbr->selectrow_array($sql);
+        if (@LJ::MEMCACHE_SERVERS) {
+            my $fr = LJ::get_friends($u, $mask);
+            my $tu = LJ::get_timeupdate_multi({ memcache_only => 1 }, keys %$fr);
+            my $max = 0;
+            while ($_ = each %$tu) {
+                $max = $tu->{$_} if $tu->{$_} > $max;
+            }
+            $update = LJ::mysql_time($max) if $max;
+        } else {
+            my $sql = "SELECT MAX(u.timeupdate) FROM userusage u, friends f ".
+                "WHERE u.userid=f.friendid AND f.userid=$u->{'userid'}";
+            $sql .= " AND f.groupmask & $mask > 0" if $mask;
+            $update = $dbr->selectrow_array($sql);
+        }
         LJ::MemCache::set($memkey,$update,time()+$interval) if $update;
     }
     $update ||= "0000-00-00 00:00:00";
