@@ -4,6 +4,11 @@
  $body = "";
 
  LJ::set_active_crumb('meme');
+
+ if ($LJ::DISABLED{'meme'}) {
+    $body .= $ML{'.meme.disabled'};
+    return;
+ }
  
  my $dbr = LJ::get_db_reader();
  my $sth;

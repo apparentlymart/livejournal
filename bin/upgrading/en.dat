@@ -57,9 +57,9 @@ Click <a [[aopts]]>here</a> to add the shared journal to your friends list.
 
 /approve.bml.title=Action Approval
 
-/birthdays.bml.title=Birthdays
-
 /birthdays.bml.description=Below are the birthdays for everyone that you list as a friend.
+
+/birthdays.bml.title=Birthdays
 
 /changepassword.bml.btn.proceed=Proceed
 
@@ -733,11 +733,11 @@ whether to allow <em>all</em>, <em>registered users</em>, or
 
 /delcomment.bml.success.andban=The comment has been deleted, and user [[user]] has been banned from commenting in your journal.
 
-/delcomment.bml.success.spam=Additionally, the administrators of this site have been notified that this comment was spam.  Thank you for your report.
-
 /delcomment.bml.success.head=Deleted
 
 /delcomment.bml.success.noban=The comment has been deleted.
+
+/delcomment.bml.success.spam=Additionally, the administrators of this site have been notified that this comment was spam.  Thank you for your report.
 
 /delcomment.bml.title=Delete Comment
 
@@ -1604,19 +1604,19 @@ pick a specific friend group to view.
 
 /friends/index.bml.tools=Tools
 
-/go.bml.defaulttitle=Error
-
 /go.bml.defaultbody=No parameters given.
 
-/go.bml.error.redirkey=Bogus redir_key.
-
-/go.bml.error.usernotfound=User not found.
-
-/go.bml.error.noentrytitle=No Entry
+/go.bml.defaulttitle=Error
 
 /go.bml.error.noentry.next=There is no entry following this one.
 
 /go.bml.error.noentry.prev=There is no entry preceding this one.
+
+/go.bml.error.noentrytitle=No Entry
+
+/go.bml.error.redirkey=Bogus redir_key.
+
+/go.bml.error.usernotfound=User not found.
 
 /interests.bml.add.added.head=Added!
 
@@ -2065,6 +2065,8 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /manage/siteopts.bml.title=Browse Preferences
 
+/meme.bml.meme.disabled=The site administrator has disabled this feature.
+
 /modify.bml.title=Modify Journal
 
 /modify_do.bml.availablestyles.head=Available Styles
@@ -2163,17 +2165,17 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /multisearch.bml.formaterror=Format Error
 
-/multisearch.bml.noaddress.title=No Address
-
 /multisearch.bml.noaddress.text=You did not enter an email address.
 
-/multisearch.bml.nointerest.title=No Interest
+/multisearch.bml.noaddress.title=No Address
 
 /multisearch.bml.nointerest.text=You did not enter an interest.
 
-/multisearch.bml.nomatch.title=No Match
+/multisearch.bml.nointerest.title=No Interest
 
 /multisearch.bml.nomatch.text=There were no results for the criteria you specified.
+
+/multisearch.bml.nomatch.title=No Match
 
 /multisearch.bml.region.bodytext<<
 You can search by region in one of the following formats:
@@ -2934,15 +2936,15 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /tools/memories.bml.delete.confirm=You are about to delete one or more memories.  Are you sure you want to do this?
 
-/tools/memories.bml.delete.deleted.title=Memories Deleted
-
 /tools/memories.bml.delete.deleted.head=Success
 
 /tools/memories.bml.delete.deleted.text=The selected memories have been deleted.  You may return to your <a [[aopts]]>list of memorable posts</a>.
 
-/tools/memories.bml.delete.error.noneselected=You did not select any memories to delete.
+/tools/memories.bml.delete.deleted.title=Memories Deleted
 
 /tools/memories.bml.delete.error.dberror=There was a database error while deleting your memories.  The error is [[error]].  Please try again.
+
+/tools/memories.bml.delete.error.noneselected=You did not select any memories to delete.
 
 /tools/memories.bml.edit=edit
 
