@@ -317,11 +317,11 @@ body<=
         $message =~ s/\n/<br \/>\n/g;
         $message = LJ::auto_linkify($message);
 
-        # insert support diagnostics from props
-        $message .= "<?hr?><strong>Diagnostics:</strong> $props->{useragent}" if $props->{useragent};
-        
         # special case: original request
         if ($le->{'type'} eq "req") {
+            # insert support diagnostics from props
+            $message .= "<?hr?><strong>Diagnostics:</strong> $props->{useragent}" if $props->{useragent};
+
             $ret .= "<div style='margin-top: 15px;'>\n";
             $ret .= "<b>Original Request:</b><br />\n";
             $ret .= "<div style='border: 3px solid #000000; margin-left: auto; margin-right: auto; padding: 3px;'>\n$message\n</div></div>";
