@@ -28,7 +28,7 @@ sub create_view_lastn
     }
 
     my %lastn_page = ();
-    $lastn_page{'name'} = &ehtml($u->{'name'});
+    $lastn_page{'name'} = LJ::ehtml($u->{'name'});
     $lastn_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
     $lastn_page{'username'} = $user;
     $lastn_page{'numitems'} = $vars->{'LASTN_OPT_ITEMS'} || 20;
@@ -52,14 +52,18 @@ sub create_view_lastn
     if ($u->{'url'} =~ m!^http://!) {
 	$lastn_page{'website'} =
 	    &fill_var_props($vars, 'LASTN_WEBSITE', {
-		"url" => &ehtml($u->{'url'}),
-		"name" => &ehtml($u->{'urlname'} || "My Website"),
+		"url" => LJ::ehtml($u->{'url'}),
+		"name" => LJ::ehtml($u->{'urlname'} || "My Website"),
 	    });
     }
 
     $lastn_page{'events'} = "";
     if ($u->{'opt_blockrobots'}) {
 	$lastn_page{'head'} = "<meta name=\"robots\" content=\"noindex\">\n";
+    }
+    if ($FORM{'skip'}) {
+	# if followed a skip link back, prevent it from going back further
+	$lastn_page{'head'} = "<meta name=\"robots\" content=\"noindex,nofollow\">\n";
     }
     $lastn_page{'head'} .= 
 	$vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'LASTN_HEAD'};
@@ -352,7 +356,7 @@ sub create_view_friends
     LJ::load_user_props($dbs, $u, "opt_usesharedpic", "url", "urlname");
 
     my %friends_page = ();
-    $friends_page{'name'} = &ehtml($u->{'name'});
+    $friends_page{'name'} = LJ::ehtml($u->{'name'});
     $friends_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
     $friends_page{'username'} = $user;
     $friends_page{'numitems'} = $vars->{'FRIENDS_OPT_ITEMS'} || 20;
@@ -366,8 +370,8 @@ sub create_view_friends
     if ($u->{'url'} =~ m!^http://!) {
 	$friends_page{'website'} =
 	    &fill_var_props($vars, 'FRIENDS_WEBSITE', {
-		"url" => &ehtml($u->{'url'}),
-		"name" => &ehtml($u->{'urlname'} || "My Website"),
+		"url" => LJ::ehtml($u->{'url'}),
+		"name" => LJ::ehtml($u->{'urlname'} || "My Website"),
 	    });
     }
 
@@ -468,7 +472,7 @@ sub create_view_friends
     unless (%friends)
     {
         $friends_page{'events'} = &fill_var_props($vars, 'FRIENDS_NOFRIENDS', {
-	  "name" => &ehtml($u->{'name'}),
+	  "name" => LJ::ehtml($u->{'name'}),
 	  "name-\'s" => ($u->{'name'} =~ /s$/i) ? "'" : "'s",
 	  "username" => $user,
         });
@@ -755,7 +759,7 @@ sub create_view_calendar
     &get_form_data(\%FORM);
 
     my %calendar_page = ();
-    $calendar_page{'name'} = &ehtml($u->{'name'});
+    $calendar_page{'name'} = LJ::ehtml($u->{'name'});
     $calendar_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
     $calendar_page{'username'} = $user;
     if ($u->{'opt_blockrobots'}) {
@@ -769,8 +773,8 @@ sub create_view_calendar
     if ($u->{'url'} =~ m!^http://!) {
 	$calendar_page{'website'} =
 	    &fill_var_props($vars, 'CALENDAR_WEBSITE', {
-		"url" => &ehtml($u->{'url'}),
-		"name" => &ehtml($u->{'urlname'} || "My Website"),
+		"url" => LJ::ehtml($u->{'url'}),
+		"name" => LJ::ehtml($u->{'urlname'} || "My Website"),
 	    });
     }
 
@@ -964,14 +968,14 @@ sub create_view_day
     }
     $day_page{'head'} .= 
 	$vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};
-    $day_page{'name'} = &ehtml($u->{'name'});
+    $day_page{'name'} = LJ::ehtml($u->{'name'});
     $day_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
 
     if ($u->{'url'} =~ m!^http://!) {
 	$day_page{'website'} =
 	    &fill_var_props($vars, 'DAY_WEBSITE', {
-		"url" => &ehtml($u->{'url'}),
-		"name" => &ehtml($u->{'urlname'} || "My Website"),
+		"url" => LJ::ehtml($u->{'url'}),
+		"name" => LJ::ehtml($u->{'urlname'} || "My Website"),
 	    });
     }
 
