@@ -11,31 +11,31 @@ p?>
 <form action="export_do.bml" method="post">
 
 <?standout
-<TABLE>
+<table>
 <?_code
  return LJ::auth_fields(\%FORM);
  _code?>
-<TR VALIGN=TOP><TD>Export what:</TD>
-<TD>
-    <SELECT NAME="what">
-    <OPTION VALUE="journal">Journal entries
-    </SELECT>
-</TD></TR>
+<tr valign='top'><td>Export what:</td>
+<td>
+    <select name="what">
+    <option value="journal">Journal entries</option>
+    </select>
+</td></tr>
 
-<TR VALIGN=MIDDLE><TD>Select month:</TD>
-<TD>
-    yyyy: <INPUT NAME="year" SIZE=4 MAXLENGTH=4> - 
-    mm: <INPUT NAME="month" SIZE=2 MAXLENGTH=2>
-</TD></TR>
+<tr valign='middle'><td>Select month:</td>
+<td>
+    yyyy: <input name="year" size='4' maxlength='4' /> - 
+    mm: <input name="month" size='2' maxlength='2' />
+</td></tr>
 
-<TR VALIGN=TOP><TD>Format:</TD>
-<TD>
-    <SELECT NAME="format">
-    <OPTION VALUE="csv">CSV (Comma Separated Values)
-    <OPTION VALUE="xml">XML
-    </SELECT><BR>
-    <INPUT TYPE=CHECKBOX NAME="header" CHECKED> Header<BR>
-    Encoding: (=_CODE
+<tr valign='top'><td>Format:</td>
+<td>
+    <select name="format">
+    <option value="csv">CSV (Comma Separated Values)</option>
+    <option value="xml">XML</option>
+    </select><br />
+    <input type='checkbox' name="header" checked='checked' /> Header<br />
+    Encoding: <?_code
  my $ret = "";
  if ($LJ::UNICODE) {
      my (%encodings, %encnames);
@@ -49,34 +49,35 @@ p?>
      }
      $ret .= LJ::html_select({'name'=>'encid', 'selected'=>$selected}, %encnames);
  } else {
-     $ret .= "<input type='text' name='encoding' size='15' maxlength='15' value='iso-8859-1'/>";
+     $ret .= "<input type='text' name='encoding' size='15' maxlength='15' value='iso-8859-1' />";
  }
  return $ret . "<br />";
-_CODE=)
+_code?>
 
- <input type=checkbox name="notranslation">Do not translate between encodings<br />
+ <input type='checkbox' name="notranslation" />Do not translate between encodings<br />
 
-</TD></TR>
-<TR><TD COLSPAN=2><HR></TD></TR>
-<TR VALIGN=TOP><TD>Fields:</TD>
-<TD>
-  <INPUT TYPE=CHECKBOX NAME="field_itemid" CHECKED> ID Number<BR>
-  <INPUT TYPE=CHECKBOX NAME="field_eventtime" CHECKED> Event Time (from user's clock)<BR>
-  <INPUT TYPE=CHECKBOX NAME="field_logtime" CHECKED> Log Time (from system's clock)<BR>
-  <INPUT TYPE=CHECKBOX NAME="field_subject" CHECKED> Subject<BR>
-  <INPUT TYPE=CHECKBOX NAME="field_event" CHECKED> <B>Event</B><BR>
-  <INPUT TYPE=CHECKBOX NAME="field_security" CHECKED> Security Level<BR>
-  <INPUT TYPE=CHECKBOX NAME="field_allowmask" CHECKED> Allow Mask<BR>
-  <input type='checkbox' name='field_currents' checked> Current Mood & Music<br />
-</TD></TR>
+</td></tr>
+<tr><td colspan='2'><hr /></td></tr>
+<tr valign='top'><td>Fields:</td>
+<td>
+  <input type='checkbox' name="field_itemid" checked='checked' /> ID Number<br />
+  <input type='checkbox' name="field_eventtime" checked='checked' /> Event Time (from user's clock)<br />
+  <input type='checkbox' name="field_logtime" checked='checked' /> Log Time (from system's clock)<br />
+  <input type='checkbox' name="field_subject" checked='checked' /> Subject<br />
+  <input type='checkbox' name="field_event" checked='checked' /> <b>Event</b><br />
+  <input type='checkbox' name="field_security" checked='checked' /> Security Level<br />
+  <input type='checkbox' name="field_allowmask" checked='checked' /> Allow Mask<br />
+  <input type='checkbox' name='field_currents' checked='checked' /> Current Mood & Music<br />
+</td></tr>
 
-<TR><TD></TD><TD><INPUT TYPE="SUBMIT" VALUE="Proceed..."></TD></TR>
-</TABLE>
+<tr><td></td><td><input type="submit" value="Proceed..." /></td></tr>
+</table>
 standout?>
+</form>
 
 <?h1 Forget something? h1?>
 <?p
-If you forgot your username or password, <A HREF="lostinfo.bml">recover it here!</A>.
+If you forgot your username or password, <a href="lostinfo.bml">recover it here!</a>.
 p?>
 
 <=body
