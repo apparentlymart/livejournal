@@ -7,13 +7,11 @@
 use strict;
 use MIME::Parser;
 use Mail::Address;
-use vars qw($dbh);
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
 
-$dbh = LJ::get_dbh("master");
-my $email2cat = LJ::Support::load_email_to_cat_map($dbh);
+my $email2cat = LJ::Support::load_email_to_cat_map();
 
 my $parser = new MIME::Parser;
 $parser->output_dir("/tmp");
@@ -91,7 +89,7 @@ if ($toarg =~ /^(\d+)z(.+)$/)
 {
     my $spid = $1;
     my $miniauth = $2;
-    my $sp = LJ::Support::load_request($dbh, $spid);
+    my $sp = LJ::Support::load_request($spid);
 
     LJ::Support::mini_auth($sp) eq $miniauth
         or die "Invalid authentication?";
@@ -108,13 +106,13 @@ if ($toarg =~ /^(\d+)z(.+)$/)
     $body =~ s!(\S+.*?)\bOn [^\n]+ wrote:\n.+!$1!s;
 
     # append the comment, re-open the request if necessary
-    my $splid = LJ::Support::append_request($dbh, $sp, {
+    my $splid = LJ::Support::append_request($sp, {
         'type' => 'comment',
         'body' => $body,
         'posterid' => 0,
     }) or die "Error appending request?";
 
-    LJ::Support::touch_request($dbh, $spid);
+    LJ::Support::touch_request($spid);
 
     exit 0;
 }
@@ -122,7 +120,7 @@ if ($toarg =~ /^(\d+)z(.+)$/)
 
 # make a new post.
 my @errors;
-my $spid = LJ::Support::file_request($dbh, \@errors, {
+my $spid = LJ::Support::file_request(\@errors, {
     'spcatid' => $email2cat->{$to}->{'spcatid'},
     'subject' => $subject,
     'reqtype' => 'email',
