@@ -399,6 +399,7 @@ sub getdaycounts
     my $db = LJ::get_cluster_reader($uowner);
     return fail($err,502) unless $db;
 
+    # FIXME: memcache this
     my $sth = $db->prepare("SELECT year, month, day, COUNT(*) AS 'count' ".
                            "FROM log2 WHERE journalid=? GROUP BY 1, 2, 3");
     $sth->execute($ownerid);

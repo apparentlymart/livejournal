@@ -4082,6 +4082,8 @@ sub make_journal
         return LJ::S2::make_journal($u, $styleid, $view, $remote, $opts);
     }
 
+    # Everything from here on down is S1.  FIXME: this should be moved to LJ::S1::make_journal
+    # to be more like LJ::S2::make_journal.
     $r->notes('codepath' => "s1.$view") if $r;
 
     # load the user-related S1 data  (overrides and colors)

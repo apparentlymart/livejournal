@@ -348,6 +348,7 @@ sub trans
         my $checkhost = lc($host);
         $checkhost =~ s/^www\.//i;
         $checkhost = $dbr->quote($checkhost);
+        # FIXME: memcache this?
         my $user = $dbr->selectrow_array(qq{
             SELECT u.user FROM useridmap u, domains d WHERE
             u.userid=d.userid AND d.domain=$checkhost
