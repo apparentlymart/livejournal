@@ -5741,13 +5741,11 @@ sub load_log_props2
 
     if (%needrc) {
         my $in = join(",", keys %needrc);
-        my $sth = $db->prepare("SELECT jitemid, replycount FROM logprop2 WHERE journalid=? AND jitemid IN ($in)");
+        my $sth = $db->prepare("SELECT jitemid, replycount FROM log2 WHERE journalid=? AND jitemid IN ($in)");
         $sth->execute($userid);
         while (my ($jitemid, $rc) = $sth->fetchrow_array) {
             $hashref->{$jitemid}->{'replycount'} = $rc;
-        }
-        foreach my $id (keys %needrc) {
-            LJ::MemCache::add([$userid, "rc:$userid:$id"], $hashref->{$id}->{'replycount'});
+            LJ::MemCache::add([$userid, "rc:$userid:$jitemid"], $rc);
         }
     }                  
         
