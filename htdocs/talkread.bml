@@ -349,10 +349,24 @@ if ($uri =~ m!/(\d+)\.html$!) {
  my $pages = int($top_replies / $PAGE_SIZE);
  if ($top_replies % $PAGE_SIZE) { $pages++; }
 
- my $page = int($FORM{'page'}) || 1;
+ my @top_replies = $thread ? ($thread) : sort { $posts{$a}->{'datepost'} cmp $posts{$b}->{'datepost'} } @{$children{$thread}};
+ my $page_from_view = 0;
+ if ($FORM{'view'} && !$FORM{'page'}) {
+     # find top-level comment that this comment is under
+     my $viewid = $clustered ? $FORM{'view'} >> 8 : $FORM{'view'}+0;
+     while ($posts{$viewid} && $posts{$viewid}->{'parenttalkid'}) {
+         $viewid = $posts{$viewid}->{'parenttalkid'};
+     }
+     for (my $ti = 0; $ti < @top_replies; ++$ti) {
+         if ($posts{$top_replies[$ti]}->{'talkid'} == $viewid) {
+             $page_from_view = int($ti/$PAGE_SIZE)+1;
+             last;
+         }
+     }
+ }
+ my $page = int($FORM{'page'}) || $page_from_view || 1;
  $page = $page < 1 ? 1 : $page > $pages ? $pages : $page;
 
- my @top_replies = $thread ? ($thread) : sort { $posts{$a}->{'datepost'} cmp $posts{$b}->{'datepost'} } @{$children{$thread}};
  foreach (@top_replies) {  $posts{$_}->{'_hide'} = 1; }
  my $itemfirst = $PAGE_SIZE * ($page-1) + 1;
  my $itemlast = $page==$pages ? $top_replies : ($PAGE_SIZE * $page);
@@ -514,7 +528,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
      return if ($mark->{$tid});
      $mark->{$tid} = 1;
 
-     # find child messages (replys to $tid)
+     # find child messages (replies to $tid)
     my @childs = sort { $postref->{$a}->{'datepost'} cmp $postref->{$b}->{'datepost'} }
     grep { ($postref->{$_}->{'state'} eq "A" || $postref->{$_}->{'_haschildren'} ||
             ($postref->{$_}->{'state'} eq "S" && 
