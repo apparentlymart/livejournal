@@ -374,7 +374,7 @@ sub make_box_link
 }
 
 # XXXXXXXX DEAD / OLD
-sub make_mozilla_box
+ sub make_mozilla_box
 {
     my $dbs = shift;
     my $remote = shift;
@@ -719,8 +719,13 @@ $box{'lastnview'} =
         } else {
             $text = LJ::get_logtext($dbs, $opts, @itemids);
         }
-                            
+        
+        my %posteru = ();  # map posterids to u objects
+        LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
+        
         foreach my $i (@items) {
+            next if $posteru{$i->{'posterid'}}->{'statusvis'} eq 'S';
+            
             my $itemid = $i->{'itemid'};
             my $event = $text->{$itemid}->[1];
             my $subject = $text->{$itemid}->[0];

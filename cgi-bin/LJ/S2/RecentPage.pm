@@ -103,18 +103,13 @@ sub RecentPage
         $apu{$_->{'posterid'}} = undef;
     }
     if (%apu) {
-        my $in = join(',', keys %apu);
-        my $sth = $dbr->prepare("SELECT userid, user, defaultpicid, statusvis, name, journaltype ".
-                                "FROM user WHERE userid IN ($in)");
-        $sth->execute;
-        while ($_ = $sth->fetchrow_hashref) {
-            $apu{$_->{'userid'}} = $_;
-            $apu_lite{$_->{'userid'}} = UserLite($_);
-        }
+        LJ::load_userids_multiple($dbs, [map { $_, \$apu{$_} } keys %apu], [$u]);
+        $apu_lite{$_} = UserLite($apu{$_}) foreach keys %apu;
     }
 
     my $userlite_journal = UserLite($u);
 
+  ENTRY:
     foreach my $item (@items) 
     {
         my ($posterid, $itemid, $security, $alldatepart, $replycount) = 
@@ -122,6 +117,9 @@ sub RecentPage
 
         my $subject = $logtext->{$itemid}->[0];
         my $text = $logtext->{$itemid}->[1];
+
+        # don't show posts from suspended users
+        next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S';
 
 	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
 	    LJ::item_toutf8($dbs, $u, \$subject, \$text, $logprops{$itemid});

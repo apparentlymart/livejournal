@@ -596,7 +596,7 @@ sub create_view_lastn
 
     $lastn_page{'events'} = "";
     if ($u->{'opt_blockrobots'}) {
-        $lastn_page{'head'} = "<meta name=\"robots\" content=\"noindex\">\n";
+        $lastn_page{'head'} = "<meta name='robots' content='noindex' />\n";
     }
 
     if ($FORM{'skip'}) {
@@ -616,7 +616,8 @@ sub create_view_lastn
     my $events = \$lastn_page{'events'};
     
     my $quser = $dbh->quote($user);
-    
+
+    # to show
     my $itemshow = $vars->{'LASTN_OPT_ITEMS'} + 0;
     if ($itemshow < 1) { $itemshow = 20; }
     if ($itemshow > 50) { $itemshow = 50; }
@@ -670,12 +671,18 @@ sub create_view_lastn
     my $lastyear = -1;
     my $eventnum = 0;
 
-    my %altposter_picid = ();  # map ALT_POSTER userids to defaultpicids
+    my %posteru = ();  # map posterids to u objects
+    LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} }
+@items], [$u]);
 
+  ENTRY:
     foreach my $item (@items) 
     {
         my ($posterid, $itemid, $security, $alldatepart, $replycount) = 
             map { $item->{$_} } qw(posterid itemid security alldatepart replycount);
+
+        my $pu = $posteru{$posterid};
+        next ENTRY if $pu && $pu->{'statusvis'} eq 'S';
 
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
@@ -776,28 +783,19 @@ sub create_view_lastn
         {
             my %lastn_altposter = ();
 
-            my $poster = LJ::get_username($dbs, $posterid);
+            my $poster = $pu->{'user'};
             $lastn_altposter{'poster'} = $poster;
             $lastn_altposter{'owner'} = $user;
             
             my $picid = 0;
             my $picuserid = $posterid;
             if ($logprops{$itemid}->{'picture_keyword'}) {
-                my $qkw = $dbr->quote($logprops{$itemid}->{'picture_keyword'});
-                my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$posterid AND m.kwid=k.kwid AND k.keyword=$qkw");
-                $sth->execute;
-                ($picid) = $sth->fetchrow_array;
+                my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k ".
+                                        "WHERE m.userid=? AND m.kwid=k.kwid AND k.keyword=?");
+                $sth->execute($posterid, $logprops{$itemid}->{'picture_keyword'});
+                $picid = $sth->fetchrow_array;
             } 
-            unless ($picid) {
-                if (exists $altposter_picid{$posterid}) {
-                    $picid = $altposter_picid{$posterid};
-                } else {
-                    my $st2 = $dbr->prepare("SELECT defaultpicid FROM user WHERE userid=$posterid");
-                    $st2->execute;
-                    ($picid) = $st2->fetchrow_array;
-                    $altposter_picid{$posterid} = $picid;
-                }
-            }
+            $picid ||= $pu->{'defaultpicid'};
 
             if ($picid) 
             {
@@ -823,16 +821,20 @@ sub create_view_lastn
 
     $$events .= LJ::fill_var_props($vars, 'LASTN_END_DAY', {});
 
+    my $item_shown = $eventnum;
+    my $item_total = @items;
+    my $item_hidden = $item_total - $item_shown;
+
     if ($skip) {
         $lastn_page{'range'} = 
             LJ::fill_var_props($vars, 'LASTN_RANGE_HISTORY', {
-                "numitems" => $eventnum,
+                "numitems" => $item_shown,
                 "skip" => $skip,
             });
     } else {
         $lastn_page{'range'} = 
             LJ::fill_var_props($vars, 'LASTN_RANGE_MOSTRECENT', {
-                "numitems" => $eventnum,
+                "numitems" => $item_shown,
             });
     }
 
@@ -859,7 +861,7 @@ sub create_view_lastn
     ## page, then there are more (unless there are exactly the number shown 
     ## on the page, but who cares about that)
 
-    unless ($eventnum != $itemshow) {
+    unless ($item_total != $itemshow) {
         $skip_b = 1;
 
         if ($skip==$maxskip) {
@@ -1080,7 +1082,7 @@ sub create_view_friends
 
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
-        next unless ($_->{'statusvis'} eq "V");  # ignore suspended/deleted users.
+        next unless $_->{'statusvis'} eq 'V';  # ignore suspended/deleted users.
         $_->{'fgcolor'} = LJ::color_fromdb($_->{'fgcolor'});
         $_->{'bgcolor'} = LJ::color_fromdb($_->{'bgcolor'});
         $friends{$_->{'userid'}} = $_;
@@ -1099,6 +1101,12 @@ sub create_view_friends
         return 1;
     }
 
+    my %aposter;  # alt-posterid -> u object (if not in friends already)
+    LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$aposter{$_->{'posterid'}} }
+                                     grep { $friends{$_->{'ownerid'}} &&
+                                          ! $friends{$_->{'posterid'}} } @items],
+                              [ $u, $remote ]);
+
     ### load the log properties
     my %logprops = ();  # key is "$owneridOrZero $[j]itemid"
     LJ::load_props($dbs, "log");
@@ -1108,22 +1116,28 @@ sub create_view_friends
     # load the pictures for the user
     my %userpics;
     my @picids = map { $friends{$_}->{'defaultpicid'} } keys %friends;
-    LJ::load_userpics($dbs, \%userpics, [ @picids ]);
+    LJ::load_userpics($dbs, \%userpics, [ @picids, map { $_->{'defaultpicid'} } values %aposter ]);
 
     # load the text of the entries
     my $logtext = LJ::get_logtext2multi($dbs, \%idsbycluster);
   
-    my %posterdefpic;  # map altposter userids -> default picture ids
-    
     my %friends_events = ();
     my $events = \$friends_events{'events'};
     
     my $lastday = -1;
     my $eventnum = 0;
+
+  ENTRY:
     foreach my $item (@items) 
     {
         my ($friendid, $posterid, $itemid, $security, $alldatepart, $replycount) = 
             map { $item->{$_} } qw(ownerid posterid itemid security alldatepart replycount);
+
+        my $pu = $friends{$posterid} || $aposter{$posterid};
+        next ENTRY if $pu && $pu->{'statusvis'} eq 'S';
+
+        # counting excludes skipped entries
+        $eventnum++;
 
         my $clusterid = $item->{'clusterid'}+0;
         
@@ -1143,9 +1157,8 @@ sub create_view_friends
 
         my ($friend, $poster);
         $friend = $poster = $friends{$friendid}->{'user'};
-        $poster = LJ::get_username($dbs, $posterid) if $friendid != $posterid;
+        $poster = $pu->{'user'};
         
-        $eventnum++;
         my %friends_date_format = LJ::alldateparts_to_hash($alldatepart);
 
         if ($lastday != $friends_date_format{'d'})
@@ -1191,17 +1204,9 @@ sub create_view_friends
             my $picid = $friends{$friendid}->{'defaultpicid'};  # this could be the shared journal pic
             my $picuserid = $friendid;
             if ($friendid != $posterid && ! $u->{'opt_usesharedpic'}) {
-                unless (defined $posterdefpic{$posterid}) {
-                    my $pdpic = 0;
-                    my $sth = $dbr->prepare("SELECT defaultpicid FROM user WHERE userid=$posterid");
-                    $sth->execute;
-                    ($pdpic) = $sth->fetchrow_array;
-                    $posterdefpic{$posterid} = $pdpic ? $pdpic : 0;
-                }
-                if ($posterdefpic{$posterid}) { 
-                    $picid = $posterdefpic{$posterid}; 
+                if ($pu->{'defaultpicid'}) {
+                    $picid = $pu->{'defaultpicid'};
                     $picuserid = $posterid;
-                    LJ::load_userpics($dbs, \%userpics, [ $picid ]);
                 }
             }
             if ($logprops{$datakey}->{'picture_keyword'} && 
@@ -1211,7 +1216,7 @@ sub create_view_friends
                 my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k ".
                                         "WHERE m.userid=$posterid AND m.kwid=k.kwid AND k.keyword=$qkw");
                 $sth->execute;
-                my ($alt_picid) = $sth->fetchrow_array;
+                my $alt_picid = $sth->fetchrow_array;
                 if ($alt_picid) {
                     LJ::load_userpics($dbs, \%userpics, [ $alt_picid ]);
                     $picid = $alt_picid;
@@ -1298,18 +1303,22 @@ sub create_view_friends
     $$events .= LJ::fill_var_props($vars, 'FRIENDS_END_DAY', {});
     $friends_page{'events'} = LJ::fill_var_props($vars, 'FRIENDS_EVENTS', \%friends_events);
 
+    my $item_shown = $eventnum;
+    my $item_total = @items;
+    my $item_hidden = $item_total - $item_shown;
+    
     ### set the range property (what entries are we looking at)
 
     if ($skip) {
         $friends_page{'range'} = 
             LJ::fill_var_props($vars, 'FRIENDS_RANGE_HISTORY', {
-                "numitems" => $eventnum,
+                "numitems" => $item_shown,
                 "skip" => $skip,
             });
     } else {
         $friends_page{'range'} = 
             LJ::fill_var_props($vars, 'FRIENDS_RANGE_MOSTRECENT', {
-                "numitems" => $eventnum,
+                "numitems" => $item_shown,
             });
     }
 
@@ -1349,7 +1358,7 @@ sub create_view_friends
     ## page, then there are more (unless there are exactly the number shown 
     ## on the page, but who cares about that)
 
-    unless ($eventnum != $itemshow || $skip == $maxskip) {
+    unless ($item_total != $itemshow || $skip == $maxskip) {
         $skip_b = 1;
         my %linkvars;
 
@@ -1509,7 +1518,9 @@ sub create_view_calendar
         {
           my $daysinmonth = LJ::days_in_month($month, $year);
           
-          # TODO: wtf is this doing?  picking a random day that it knows day of week from?  ([0] from hash?)
+          # this picks a random day there were journal entries (thus, we know
+          # the %dayweek from above)  from that we go backwards and forwards
+          # to find the rest of the days of week
           my $firstday = (%{$count{$year}->{$month}})[0];
 
           # go backwards from first day
@@ -1689,7 +1700,12 @@ sub create_view_day
         return 0;
     }
 
-    my @itemids = ();
+    my $logdb = LJ::get_cluster_reader($u);
+    unless ($logdb) {
+        $opts->{'errcode'} = "nodb";
+        $$ret = "";
+        return 0;
+    }
 
     my $optDESC = $vars->{'DAY_SORT_MODE'} eq "reverse" ? "DESC" : "";
 
@@ -1698,30 +1714,25 @@ sub create_view_day
         if ($remote->{'userid'} == $u->{'userid'}) {
             $secwhere = "";   # see everything
         } elsif ($remote->{'journaltype'} eq 'P') {
-            my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
+            my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends ".
+                                              "WHERE userid=? AND friendid=?", undef, 
+                                              $u->{'userid'}, $remote->{'userid'});
             $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $gmask))"
                 if $gmask;
         }
     }
 
-    my $logdb = LJ::get_cluster_reader($u);
-    unless ($logdb) {
-        $opts->{'errcode'} = "nodb";
-        $$ret = "";
-        return 0;
-    }
-    $sth = $logdb->prepare("SELECT jitemid FROM log2 WHERE journalid=$u->{'userid'} ".
-                           "AND year=$year AND month=$month AND day=$day $secwhere ".
-                           "ORDER BY eventtime LIMIT 200");
-    $sth->execute;
-    if ($logdb->err) {
-        $$ret .= $logdb->errstr;
-        return 1;
-    }
-
-    push @itemids, $_ while ($_ = $sth->fetchrow_array);
-
-    my $itemid_in = join(", ", map { $_+0; } @itemids);
+    # load the log items
+    my $dateformat = "%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H";
+    $sth = $logdb->prepare("SELECT jitemid AS itemid, posterid, security, replycount, ".
+                           "       DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum " .
+                           "FROM log2 " .
+                           "WHERE journalid=? AND year=? AND month=? AND day=? $secwhere " .
+                           "ORDER BY eventtime $optDESC, logtime $optDESC LIMIT 200");
+    $sth->execute($u->{'userid'}, $year, $month, $day);
+    my @items;
+    push @items, $_ while $_ = $sth->fetchrow_hashref;
+    my @itemids = map { $_->{'itemid'} } @items;
 
     ### load the log properties
     my %logprops = ();
@@ -1730,13 +1741,19 @@ sub create_view_day
     my $logtext = LJ::get_logtext2($u, @itemids);
     LJ::load_moods($dbs);
 
-    # load the log items
-    $sth = $logdb->prepare("SELECT jitemid, security, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart', anum FROM log2 WHERE journalid=$u->{'userid'} AND jitemid IN ($itemid_in) ORDER BY eventtime $optDESC, logtime $optDESC");
-    $sth->execute;
+    my %posteru = ();  # map posterids to u objects
+    LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
 
     my $events = "";
-    while (my ($itemid, $security, $replycount, $alldatepart, $anum) = $sth->fetchrow_array)
+
+  ENTRY:
+    foreach my $item (@items)
     {
+        my ($itemid, $posterid, $security, $replycount, $alldatepart, $anum) = 
+            map { $item->{$_} } qw(itemid posterid security replycount alldatepart anum);
+
+        next ENTRY if $posteru{$posterid} && $posteru{$posterid}->{'statusvis'} eq 'S';
+
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
 
@@ -1969,11 +1986,18 @@ sub create_view_rss
         $$ret .= "  </image>\n\n";
     }
 
-    # output individual image blocks
+    my %posteru = ();  # map posterids to u objects
+    LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
+
+    # output individual item blocks
+
+  ENTRY:
     foreach my $it (@items) 
     {
         # load required data
         my $itemid = $it->{'itemid'};
+
+        next ENTRY if $posteru{$it->{'posterid'}} && $posteru{$it->{'posterid'}}->{'statusvis'} eq 'S';
 
         if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
             LJ::item_toutf8($dbs, $u, \$logtext->{$itemid}->[0],

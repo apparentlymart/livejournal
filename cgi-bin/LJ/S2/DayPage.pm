@@ -60,8 +60,6 @@ sub DayPage
 
     $p->{'date'} = Date($year, $month, $day);
     
-    my @itemids = ();
-
     my $secwhere = "AND security='public'";
     if ($remote) {
         if ($remote->{'userid'} == $u->{'userid'}) {
@@ -78,15 +76,19 @@ sub DayPage
         push @{$opts->{'errors'}}, "Database temporarily unavailable";
         return;
     }
-    my $sth = $logdb->prepare("SELECT jitemid FROM log2 WHERE journalid=$u->{'userid'} ".
-                              "AND year=$year AND month=$month AND day=$day $secwhere ".
-                              "ORDER BY eventtime LIMIT 200");
+
+    # load the log items
+    my $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
+    my $sth = $logdb->prepare("SELECT jitemid AS itemid, posterid, security, replycount, DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
+                              "FROM log2 " .
+                              "WHERE journalid=$u->{'userid'} AND year=$year AND month=$month AND day=$day $secwhere " . 
+                              "ORDER BY eventtime, logtime LIMIT 200");
     $sth->execute;
 
-    push @itemids, $_ while ($_ = $sth->fetchrow_array);
-
-    my $itemid_in = join(", ", map { $_+0; } @itemids);
-
+    my @items;
+    push @items, $_ while $_ = $sth->fetchrow_hashref;
+    my @itemids = map { $_->{'itemid'} } @items;
+    
     ### load the log properties
     my %logprops = ();
     my $logtext;
@@ -95,40 +97,29 @@ sub DayPage
     $logtext = LJ::get_logtext2($u, @itemids);
     LJ::load_moods($dbs);
 
-    # load the log items
-    my $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
-    $sth = $logdb->prepare("SELECT posterid, jitemid, security, replycount, DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
-                           "FROM log2 WHERE journalid=$u->{'userid'} AND jitemid IN ($itemid_in) ORDER BY eventtime, logtime");
-    $sth->execute;
-
-    my @items;
-    push @items, $_ while $_ = $sth->fetchrow_hashref;
-
     my (%apu, %apu_lite);  # alt poster users; UserLite objects
     foreach (@items) {
         next unless $_->{'posterid'} != $u->{'userid'};
         $apu{$_->{'posterid'}} = undef;
     }
     if (%apu) {
-        my $in = join(',', keys %apu);
-        my $sth = $dbr->prepare("SELECT userid, user, defaultpicid, statusvis, name, journaltype ".
-                                "FROM user WHERE userid IN ($in)");
-        $sth->execute;
-        while ($_ = $sth->fetchrow_hashref) {
-            $apu{$_->{'userid'}} = $_;
-            $apu_lite{$_->{'userid'}} = UserLite($_);
-        }
+        LJ::load_userids_multiple($dbs, [map { $_, \$apu{$_} } keys %apu], [$u]);
+        $apu_lite{$_} = UserLite($apu{$_}) foreach keys %apu;
     }
 
     my $userlite_journal = UserLite($u);
 
+  ENTRY:
     foreach my $item (@items)
     {
         my ($posterid, $itemid, $security, $alldatepart, $replycount, $anum) = 
-            map { $item->{$_} } qw(posterid jitemid security alldatepart replycount anum);
+            map { $item->{$_} } qw(posterid itemid security alldatepart replycount anum);
 
         my $subject = $logtext->{$itemid}->[0];
         my $text = $logtext->{$itemid}->[1];
+
+        # don't show posts from suspended users
+        next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S';
 
 	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
 	    LJ::item_toutf8($dbs, $u, \$subject, \$text, $logprops{$itemid});

@@ -212,6 +212,7 @@ sub FriendsPage
     };
     
     my $eventnum = 0;
+  ENTRY:
     foreach my $item (@items) 
     {
         my ($friendid, $posterid, $itemid, $security, $alldatepart, $replycount) = 
@@ -253,6 +254,9 @@ sub FriendsPage
 
         # get the poster user
         my $po = $posters{$posterid} || $friends{$posterid};  
+
+        # don't allow posts from suspended users
+        next ENTRY if $po->{'statusvis'} eq 'S';
 
         # do the picture
         my $picid = 0;
