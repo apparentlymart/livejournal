@@ -56,9 +56,16 @@ $LJ::CMAX_INTEREST = 50;
 # declare some charset aliases
 # we need this at least for cases when the only name supported
 # by MapUTF8.pm isn't recognized by browsers
-Unicode::MapUTF8::utf8_charset_alias('windows-1251','cp1251');
-Unicode::MapUTF8::utf8_charset_alias('windows-1252','cp1252');
-Unicode::MapUTF8::utf8_charset_alias('windows-1253','cp1253');
+# note: newer versions of MapUTF8 know these
+{
+    my %alias = ( 'windows-1251' => 'cp1251',
+		  'windows-1252' => 'cp1252',
+		  'windows-1253' => 'cp1253', );
+    foreach (keys %alias) {
+	next if Unicode::MapUTF8::utf8_supported_charset($_);
+	Unicode::MapUTF8::utf8_charset_alias($_, $alias{$_});
+    }
+}
 
 # declare views (calls into ljviews.pl)
 @LJ::views = qw(lastn friends calendar day);
