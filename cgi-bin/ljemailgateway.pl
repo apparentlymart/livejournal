@@ -151,7 +151,7 @@ sub process {
     if ($body =~ s/^(lj-.+?)\n\n//is) {
         my @headers = split(/\n/, $1);
         foreach (@headers) {
-            $lj_headers{lc($1)} = $2 if /^lj-(\w+):\s*(.+)/i;
+            $lj_headers{lc($1)} = $2 if /^lj-(\w+):\s*(.+?)\s*$/i;
         }
     }
     $props->{picture_keyword} = $lj_headers{userpic};
@@ -160,6 +160,7 @@ sub process {
     $props->{opt_nocomments} = 1 if $lj_headers{comments} =~ /off/i;
     $props->{opt_noemail} = 1 if $lj_headers{comments} =~ /noemail/i;
 
+    $lj_headers{security} = lc($lj_headers{security});
     if ($lj_headers{security} =~ /^(public|private|friends)$/) {
         if ($1 eq 'friends') {
             $lj_headers{security} = 'usemask';
@@ -172,6 +173,7 @@ sub process {
             $amask = (1 << $group->{groupnum});
             $lj_headers{security} = 'usemask';
         } else {
+            $err->("Friendgroup \"$lj_headers{security}\" not found.  Your journal entry was posted privately.", $err_addr);
             $lj_headers{security} = 'private';
         }
     }
