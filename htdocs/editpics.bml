@@ -43,10 +43,11 @@
 
     # Put $count and $max in larger scope so they can be used in output
     my $count;
+    $dbcm = LJ::get_cluster_master($u);
+    return $err->($ML{'error.nodb'}) unless $dbcm;
     if ($u->{'dversion'} > 6) {
-        $dbcm = LJ::get_cluster_master($u);
         $dbcr = LJ::get_cluster_def_reader($u);
-        return $err->($ML{'error.nodb'}) unless $dbcm && $dbcr;
+        return $err->($ML{'error.nodb'}) unless $dbcr;
         $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM userpic2 " .
                                         "WHERE userid=? AND state <> 'X'", undef, $u->{'userid'});
     } else {
