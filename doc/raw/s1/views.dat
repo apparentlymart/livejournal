@@ -4,7 +4,7 @@ Most Recent Entries
 .des
 The default view, a reverse-chronological list of the last 'n' items in your journal, where 'n' is an integer value that the user may specify.  Usually 'n' defaults to something like 20.
 .url
-http://www.livejournal.com/users/test/
+http://www.livejournal.com/users/exampleusername/
 }
 
 { calendar
@@ -13,7 +13,7 @@ Calendar view
 .des
 A page that looks like a calendar, with months shown for any month that you've submitted a journal entry.  Each day on the calendar with entries for that day shows a number of how many entries were submitted on that day, and clicking the day brings you to the [view[day]] view.
 .url
-http://www.livejournal.com/users/test/calendar
+http://www.livejournal.com/users/exampleusername/calendar
 }
 
 { day
@@ -51,5 +51,5 @@ Friends View
 Shows what all of the user's friends have been doing, all mixed in together in a page
 that looks almost identical to the [view[lastn]] view.
 .url
-http://www.livejournal.com/users/test/friends
+http://www.livejournal.com/users/exampleusername/friends
 }
