@@ -10,6 +10,7 @@ my $opt_sql = 0;
 my $opt_drop = 0;
 my $opt_pop = 0;
 
+exit 1 unless
 GetOptions("runsql" => \$opt_sql,
 	   "drop" => \$opt_drop,
 	   "populate" => \$opt_pop,

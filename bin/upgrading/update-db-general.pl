@@ -473,10 +473,9 @@ EOC
 
 register_tablecreate("stats", <<'EOC');
 CREATE TABLE stats (
-  statcat varchar(100) default NULL,
-  statkey varchar(100) default NULL,
-  statval int(10) unsigned default NULL,
-  KEY (statcat),
+  statcat varchar(30) NOT NULL,
+  statkey varchar(150) NOT NULL,
+  statval int(10) unsigned NOT NULL,
   UNIQUE KEY statcat_2 (statcat,statkey)
 ) 
 EOC
@@ -1182,6 +1181,19 @@ register_alter(sub {
 	do_alter("priv_list",
 		 "ALTER TABLE priv_list ADD scope ENUM('general', 'local') ".
 		 "DEFAULT 'general' NOT NULL");
+    }
+
+    # change size of stats table to accomodate meme data, and shrink statcat,
+    # since it's way too big
+    if (column_type("stats", "statcat") eq "varchar(100)") {
+	do_alter("stats",
+		 "ALTER TABLE stats ".
+		 "MODIFY statcat VARCHAR(30) NOT NULL, ".
+		 "MODIFY statkey VARCHAR(150) NOT NULL, ".
+		 "MODIFY statval INT UNSIGNED NOT NULL, ". 
+		 "DROP INDEX statcat");
+    } else {
+	print "column type = ", column_type("stats", "statcat"), "\n";
     }
    
 });
