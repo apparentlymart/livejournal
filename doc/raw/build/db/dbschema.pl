@@ -67,6 +67,7 @@ my %coldes;
 $sth = $dbr->prepare("SHOW TABLES");
 $sth->execute;
 while (my ($table) = $sth->fetchrow_array) {
+    next if $table =~ /^access\d\d\d\d/;
     $table{$table} = {};
 }
 
