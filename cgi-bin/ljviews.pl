@@ -779,14 +779,17 @@ sub create_view_friends
 
     # $linkfilter is distinct from $filter: if user has a default view,
     # $filter is now set according to it but we don't want it to show in the links.
+    # $incfilter may be true even if $filter is 0: user may use filter=0 to turn
+    # off the default group
 
     my $linkfilter = $FORM{'filter'} + 0;
+    my $incfilter = defined $FORM{'filter'};
 
     if ($skip) {
         $skip_f = 1;
         my %linkvars;
 
-        $linkvars{'filter'} = $linkfilter if $linkfilter;
+        $linkvars{'filter'} = $linkfilter if $incfilter;
 
         my $newskip = $skip - $itemshow;
         if ($newskip > 0) { $linkvars{'skip'} = $newskip; }
@@ -806,7 +809,7 @@ sub create_view_friends
         $skip_b = 1;
         my %linkvars;
 
-        $linkvars{'filter'} = $linkfilter if $linkfilter;
+        $linkvars{'filter'} = $linkfilter if $incfilter;
 
         my $newskip = $skip + $itemshow;
         $linkvars{'skip'} = $newskip;
