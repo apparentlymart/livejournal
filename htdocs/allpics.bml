@@ -85,7 +85,7 @@ $user = $u->{'user'};
 
      if ($remote && $remote->{'userid'} == $u->{'userid'} && 
          $pic->{'state'} eq 'I') {
-         $body .= "<i>[$ML{'userpic.inactive'}]</i><br />";
+         $body .= "<i>[$ML{'userpic.inactive'}]</i>&nbsp;" . LJ::help_icon('userpic_inactive') . "<br />";
      }
 
      if ($eh_keywords) {
