@@ -3190,6 +3190,10 @@ sub make_journal
         if ($opts->{'s2id'}) {
             $stylesys = 2;
             $styleid = $opts->{'s2id'};
+        } elsif ($view eq "res" && $opts->{'pathextra'} =~ m!^/(\d+)/!) {
+            # resource URLs have the styleid in it
+            $stylesys = 2;
+            $styleid = $1;
         } elsif ($u->{'stylesys'} == 2) {
             $stylesys = 2;
             $styleid = $u->{'s2_style'};
