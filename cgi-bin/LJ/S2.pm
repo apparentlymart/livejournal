@@ -1036,6 +1036,9 @@ sub Page
         $args{$k} = $v;
     }
 
+    # used to prevent caching of stylesheets
+    my $stylemodtime = S2::get_style_modtime($opts->{'ctx'});
+
     my $p = {
         '_type' => 'Page',
         '_u' => $u,
@@ -1044,7 +1047,7 @@ sub Page
         'journal' => User($u),
         'journal_type' => $u->{'journaltype'},
         'base_url' => $base_url,
-        'stylesheet_url' => "$base_url/res/$styleid/stylesheet",
+        'stylesheet_url' => "$base_url/res/$styleid/stylesheet?$stylemodtime",
         'view_url' => {
             'recent' => "$base_url/",
             'userinfo' => "$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}",
@@ -1061,6 +1064,7 @@ sub Page
         # "Automatic Discovery of RSS feeds"
         $p->{'head_content'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$p->{'base_url'}/rss" />\n};
     }
+
     return $p;
 }
 
