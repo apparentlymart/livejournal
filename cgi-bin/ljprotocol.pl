@@ -1719,6 +1719,7 @@ sub editfriends
 
     foreach (keys %$req) {
 	if (/^editfriend_add_(\d+)_user$/) {
+	    next unless ($req->{"editfriend_add_${n}_user"} =~ /\S/);
 	    my $n = $1;
 	    my $fa = { 'username' => $req->{"editfriend_add_${n}_user"},
 		       'fgcolor' => $req->{"editfriend_add_${n}_fg"},
