@@ -39,6 +39,26 @@ BODY<=
      }
      my $qintid = $FORM{'intid'}+0;
 
+     # force them to either come from the interest.bml page, or have posted the request.
+     # if both fail, ask them to confirm with a post form.
+     
+     my $ref_match = "^http://$LJ::DOMAIN_RE/interests\\.bml\\?";
+     unless ($ENV{'HTTP_REFERER'} =~ /$ref_match/ || LJ::did_post())
+     {
+	 $sth = $dbh->prepare("SELECT interest FROM interests WHERE intid=$qintid");
+	 $sth->execute;
+	 my ($int) = $sth->fetchrow_array;
+
+	 $ret .= "(=H1 Confirm H1=)";
+	 $ret .= "(=P To add <b>$int</b> as an interest, click the button below. ";
+	 $ret .= "<form method=post action=\"/interests.bml\">";
+	 $ret .= "<input type=hidden name=mode value=add>";
+	 $ret .= "<input type=hidden name=intid value=$qintid>";
+	 $ret .= "<center><input type=submit value=\"Add $int\"></center>";
+	 $ret .= "</form> P=)";
+	 return $ret;	 
+     }
+
      $sth = $dbh->prepare("SELECT COUNT(*) FROM userinterests WHERE userid=$remote->{'userid'}");
      $sth->execute;
      my ($count) = $sth->fetchrow_array;
