@@ -17,7 +17,7 @@ body<=
 
     my $quota = LJ::get_cap($u, "synd_quota");
     unless ($quota) {
-        return "<?h1 $ML{'Sorry'} h1?><?p $ML{'.accountype.notallowed'} p?>";
+        return "<?h1 $ML{'Sorry'} h1?><?p $ML{'.accounttype.notallowed'} p?>";
     }
 
     if (LJ::did_post() && $POST{'userid'} != $u->{'userid'}) {

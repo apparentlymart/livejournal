@@ -2391,7 +2391,7 @@ that area. p?>
 
 /syn/index.bml.invalid.url=The URL you have typed is invalid. Please make sure you have typed the URL correctly and try again.
 
-/syn/index.bml.loginrequired.text=To manage your syndicated accounts, first <a href=\"/login.bml?ret=1\">login</a>.
+/syn/index.bml.loginrequired.text=To manage your syndicated accounts, first <a href="/login.bml?ret=1">login</a>.
 
 /syn/index.bml.loginrequired.title=Login Required
 
