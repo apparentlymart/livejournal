@@ -1006,10 +1006,7 @@ sub load_user_theme
     my $sth;
     my $quser = $dbh->quote($user);
 
-    if ($u->{'_contesttheme'}) {
-	my $qnum = $dbh->quote($u->{'_contesttheme'});
-	$sth = $dbh->prepare("SELECT name AS 'coltype', value AS 'color' FROM contest1data WHERE contestid=$qnum");
-    } elsif ($u->{'themeid'} == 0) {
+    if ($u->{'themeid'} == 0) {
 	$sth = $dbh->prepare("SELECT coltype, color FROM themecustom WHERE user=$quser");
     } else {
 	my $qtid = $dbh->quote($u->{'themeid'});
@@ -1142,9 +1139,6 @@ sub make_journal
     if ($styleid == -1) {
 	$styleid = $u->{"${view}_style"};
     }
-
-    ## temporary, for contest1 themes
-    $u->{'_contesttheme'} = $opts->{'contesttheme'};
 
     if ($LJ::USER_VHOSTS && $opts->{'vhost'} eq "users" && $u->{'paidfeatures'} eq "off")
     {
