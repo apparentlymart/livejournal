@@ -41,7 +41,10 @@ BODY<=
               sub { $b->{'lastupdate'} cmp $a->{'lastupdate'} }]);
  my $ret;
  my $sorter = sub { $a->{$sortcol} cmp $b->{$sortcol} };
- $ret .= "<table border='1' cellspacing='1' cellpadding='3'><tr>";
+
+ $ret .= "The following table lists the progress by each of the different <a href='teams.bml'>translation teams</a>.";
+
+ $ret .= "<p><table border='1' cellspacing='1' cellpadding='3'><tr>";
  foreach (@cols) {
      if ($sortcol eq $_->[0]) {
          $ret .= "<td><b>$_->[1]</b></td>";
