@@ -48,3 +48,12 @@
     u
     dbs
     user
+
+* userinfo_row(\%args)
+
+  Returns a two-element arrayref for a row on a userinfo page, containing
+  first the left side label, then the body.
+
+  arg keys:
+    dbs
+    u
