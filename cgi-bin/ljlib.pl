@@ -3789,7 +3789,9 @@ sub canonical_username
 {
     my $user = shift;
     if ($user =~ /^\s*([\w\-]{1,15})\s*$/) {
-        $user = lc($1);
+        # perl 5.8 bug:  $user = lc($1) sometimes causes corruption when $1 points into $user.
+        $user = $1;
+        $user = lc($user);
         $user =~ s/-/_/g;
         return $user;
     }
