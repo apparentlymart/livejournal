@@ -1048,23 +1048,14 @@ sub editevent
     # not every field in every table.  reads are quicker than writes,
     # so this is worth it.
     my $oldevent = $dbcm->selectrow_hashref
-        ("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, l.logtime, ".
-         "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, ".
-         "lt.event, l.rlogtime, l.anum FROM log2 l, logtext2 lt ".
-         "WHERE l.journalid=$ownerid AND lt.journalid=$ownerid ".
-         "AND l.jitemid=$itemid AND lt.jitemid=$itemid");
-    
-    # a few times, logtext2 has been empty, with log2 existing,
-    # and then the post is undeletable since the join matches
-    # nothing.  this is a ugly hack work-around, but without using
-    # transactions to guarantee we never bomb out between log2 and
-    # logtext2 insertion, this is the price we pay.
-    unless ($oldevent) {
-        $oldevent = $dbcm->selectrow_hashref
-            ("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, l.logtime, ".
-             "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, ".
-             "l.rlogtime, l.anum FROM log2 l WHERE l.journalid=$ownerid AND l.jitemid=$itemid");
-    }
+	("SELECT journalid AS 'ownerid', posterid, eventtime, logtime, ".
+	 "compressed, security, allowmask, year, month, day, ".
+	 "rlogtime, anum FROM log2 WHERE journalid=$ownerid AND jitemid=$itemid");
+
+    ($oldevent->{event}, $oldevent->{subject}) = $dbcm->selectrow_array
+        ("SELECT subject, event FROM logtext2 ".
+         "WHERE journalid=$ownerid AND jitemid=$itemid");
+
     LJ::text_uncompress(\$oldevent->{'event'});
 
     # kill seconds in eventtime, since we don't use it, then we can use 'eq' and such
