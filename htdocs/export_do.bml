@@ -48,10 +48,11 @@ _INFO=)(=_CODE
 	    }	    
 	}
 	if ($FORM{'format'} eq "xml") {
+	    my $encoding = $FORM{'encoding'} ? " encoding='$FORM{'encoding'}'" : "";
 	    $format = "xml";
 	    print "Content-type: text/plain\n\n";
 	    $| = 1;
-	    print "<?xml version=\"1.0\"?>\n";
+	    print "<?xml version=\"1.0\"$encoding?>\n";
 	    print "<livejournal>\n";
 	}
 

@@ -35,6 +35,14 @@ P=)
     <OPTION VALUE="xml">XML
     </SELECT><BR>
     <INPUT TYPE=CHECKBOX NAME="header" CHECKED> Header<BR>
+    XML Encoding: <select name="encoding">
+<option value="" selected='1'>(optional)</option>
+<option value="utf-8">utf-8</option>
+<option value="iso-8859-1">iso-8859-1</option>
+<option value="windows-1252">windows-1252</option>
+<option value="windows-1251">windows-1251</option>
+</select>
+
 </TD></TR>
 <TR><TD COLSPAN=2><HR></TD></TR>
 <TR VALIGN=TOP><TD>Fields:</TD>
