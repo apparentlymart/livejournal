@@ -573,7 +573,7 @@ _code?>
     ### we have a post, process edits
     ###
 
-    if (LJ::did_post()) {
+    if (LJ::did_post() && LJ::check_referer()) {
 
         $POST{'unban'} =~ s/\0/,/g;
         return "<?badinput?>" unless LJ::text_in(\%POST);
