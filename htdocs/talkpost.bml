@@ -34,6 +34,9 @@ BODY<=
      $dbcr = $dbcs->{'reader'};
  }
 
+ return $LJ::MSG_READONLY_USER unless $dbcm && $dbh;
+ return "Database temporarily unavailable" unless $dbcr && $dbr;
+
  my $ret = "";
 
  my $parpost;

@@ -2330,6 +2330,7 @@ sub get_logtext2
     {
         my $s = shift @sources;
         my ($db, $table) = ($s->[0], $s->[1]);
+        next unless $db;
         my $jitemid_in = join(", ", keys %need);
 
         my $sth = $db->prepare("SELECT jitemid, $snag_what FROM $table ".

@@ -38,6 +38,9 @@ BODY<=
      $dbcr = $dbcs->{'reader'};
  }
 
+ return $LJ::MSG_READONLY_USER unless $dbcm && $dbh;
+ return "Database temporarily unavailable" unless $dbcr && $dbr;
+
  my $jarg = $clustered ? "journal=$u->{'user'}&" : "";
  my $jargent = $clustered ? "journal=$u->{'user'}&amp;" : "";
 
@@ -317,7 +320,13 @@ BODY<=
          my ($db, $table) = ($dbh, "talkleft_xfp");
          if ($up->{'clusterid'}) {
              $db = LJ::get_cluster_master($up);
-             $table = "talkleft";
+             if ($db) {
+                 # remote's cluster is writable
+                 $table = "talkleft";
+             } else {
+                 # do it later, as if user was not yet clustered
+                 $db = $dbh;
+             }
          }
          my $pub  = $item->{'security'} eq "public" ? 1 : 0;
          $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
@@ -401,7 +410,7 @@ BODY<=
          $dbcm->do("UPDATE log2 SET replycount=replycount+1 WHERE ".
                    "journalid=$u->{'userid'} AND jitemid=$itemid");
      } else {
-         LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");	 
+         LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");	
      }
 
      # log the event

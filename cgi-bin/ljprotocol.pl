@@ -44,11 +44,12 @@ sub error_message
              "303" => "Can't edit post in community journal",
              "304" => "Can't delete post in this community journal",
              "305" => "Action forbidden; account is suspended.",
-             "306" => "This journal is temporarily in read-only mode.  Try again later.",
+             "306" => "This journal is temporarily in read-only mode.  Try again in a couple minutes.",
 
              # Server Errors
              "500" => "Internal server error",
              "501" => "Database error",
+             "502" => "Database temporarily unavailable",
              );
 
     my $prefix = "";
@@ -100,6 +101,8 @@ sub login
     return undef unless authenticate($dbs, $req, $err, $flags);
 
     my $dbh = $dbs->{'dbh'};
+    return fail($err,502) unless $dbh && $dbs->{'reader'};
+
     my $u = $flags->{'u'};
     my $res = {};
 
@@ -174,6 +177,7 @@ sub getfriends
 {
     my ($dbs, $req, $err, $flags) = @_;
     return undef unless authenticate($dbs, $req, $err, $flags);
+    return fail($req,502) unless $dbs->{'reader'};
     my $u = $flags->{'u'};
     my $res = {};
     if ($req->{'includegroups'}) {
@@ -195,6 +199,7 @@ sub friendof
 {
     my ($dbs, $req, $err, $flags) = @_;
     return undef unless authenticate($dbs, $req, $err, $flags);
+    return fail($req,502) unless $dbs->{'reader'};
     my $u = $flags->{'u'};
     my $res = {};
     $res->{'friendofs'} = list_friends($dbs, $u, {
@@ -230,6 +235,17 @@ sub checkfriends
         $lastupdate = "0000-00-00 00:00:00";
     }
 
+    my $interval = LJ::get_cap_min($u, "checkfriends_interval");
+    $res->{'interval'} = $interval;
+
+    unless ($dbr) {
+        # rather than return a 502 no-db error, just say no updates,
+        # because problem'll be fixed soon enough by db admins
+        $res->{'new'} = 0;
+        $res->{'lastupdate'} = $lastupdate;
+        return $res;
+    }
+
     my $sql = "SELECT MAX(u.timeupdate) FROM userusage u, friends f ".
               "WHERE u.userid=f.friendid AND f.userid=$u->{'userid'}";
     if ($req->{'mask'} and $req->{'mask'} !~ /\D/) {
@@ -248,9 +264,6 @@ sub checkfriends
     }
 
     $res->{'lastupdate'} = $update;
-
-    my $interval = LJ::get_cap_min($u, "checkfriends_interval");
-    $res->{'interval'} = $interval;
 
     return $res;
 }
@@ -271,6 +284,7 @@ sub getdaycounts
         $db = LJ::get_cluster_reader($uowner);
         ($table, $ownercol) = ("log2", "journalid");
     }
+    return fail($err,502) unless $db;
 
     my $sth = $db->prepare("SELECT year, month, day, COUNT(*) AS 'count' ".
                            "FROM $table WHERE $ownercol=$ownerid GROUP BY 1, 2, 3");
@@ -379,6 +393,7 @@ sub postevent
     my $dbr = $dbs->{'reader'};
     my $dbh = $dbs->{'dbh'};
 
+    return fail($err,306) unless $dbh;
     return fail($err,200) unless ($req->{'event'} =~ /\S/);
 
     ### make sure community, shared, or news journals don't post
@@ -483,6 +498,8 @@ sub postevent
     if ($uowner->{'clusterid'}) {
         $dbcm = LJ::get_cluster_master($uowner);
         $clustered = 1;
+
+        return fail($err,306) unless $dbcm;
 
         # before we get going here, we want to make sure to purge this user's
         # delitem cmd buffer, otherwise we could have a race and that might
@@ -705,9 +722,9 @@ sub editevent
     my ($dbcm, $dbcr, $clustered) = ($dbh, $dbr, 0);
     if ($uowner->{'clusterid'}) {
         $dbcm = LJ::get_cluster_master($uowner);
-        $dbcr = LJ::get_cluster_reader($uowner);
         $clustered = 1;
     }
+    return fail($err,306) unless $dbcm;
 
     # fetch the old entry from master database so we know what we
     # really have to update later.  usually people just edit one part,
@@ -1008,6 +1025,7 @@ sub getevents
         $dbcr = LJ::get_cluster_reader($uowner);
         $clustered = 1;
     }
+    return fail($err,502) unless $dbcr;
 
     # if this is on, we sort things different (logtime vs. posttime)
     # to avoid timezone issues
@@ -1123,8 +1141,10 @@ sub getevents
     }
 
     # whatever selecttype might have wanted us to use the master db.
-    $dbcr = $clustered ?  LJ::get_cluster_master($uowner) : $dbh
+    $dbcr = $clustered ? LJ::get_cluster_master($uowner) : $dbh
         if $use_master;
+
+    return fail($err,502) unless $dbcr;
 
     ## load the log rows
     ($sth = $dbcr->prepare($sql))->execute;
@@ -1229,6 +1249,8 @@ sub editfriends
     my $dbr = $dbs->{'reader'};
     my $dbh = $dbs->{'dbh'};
     my $sth;
+
+    return fail($err,306) unless $dbh;
 
     my $res = {};
 
@@ -1336,6 +1358,9 @@ sub editfriendgroups
     my $dbr = $dbs->{'reader'};
     my $dbh = $dbs->{'dbh'};
     my $sth;
+
+    return fail($err,306) unless $dbh;
+    return fail($err,502) unless $dbr;
 
     my $res = {};
 
@@ -1512,6 +1537,8 @@ sub syncitems
     ($db, $table) = (LJ::get_cluster_reader($uowner), "syncupdates2")
         if $uowner->{'clusterid'};
 
+    return fail($err,502) unless $db;
+
     ## have a valid date?
     $date = $req->{'lastsync'};
     if ($date) {
@@ -1553,6 +1580,7 @@ sub consolecommand
 
     # TODO: LJ::Con doesn't yet support $dbs/$dbarg
     my $dbh = $dbs->{'dbh'};
+    return fail($err,502) unless $dbh;
 
     # logging in isn't necessary, but most console commands do require it
     my $remote = undef;
@@ -1772,6 +1800,7 @@ sub authenticate
     my $u = $flags->{'u'};
     unless ($u) {
         my $dbr = $dbs->{'reader'};
+        return fail($err,502) unless $dbr;
         my $quser = $dbr->quote($username);
         my $sth = $dbr->prepare("SELECT user, userid, journaltype, name, ".
                                 "password, status, statusvis, caps, ".
