@@ -25,6 +25,9 @@ body<=
         // Cannot understand a crash report since it has no useful debug info in it.
         if ((navigator.userAgent.indexOf('Mac') != -1) && (navigator.appName == 'Microsoft Internet Explorer')) return true;
 
+        // Netscape 6 and below does not do Quick Reply anyway so make sure it doesn't try to
+        if ((navigator.appName == 'Netscape') && (parseInt(navigator.appVersion) < 5)) return true;
+
         var ptalkid = document.getElementById('parenttalkid');
         ptalkid.value = pid;
 
