@@ -296,7 +296,7 @@ BODY<=
  }
 
  $ret .= "<TR VALIGN=MIDDLE><TD>&nbsp;</TD><TD ALIGN=MIDDLE><INPUT TYPE=\"radio\" NAME=\"usertype\" VALUE=\"user\" id='talkpostfromlj' $checked></TD><TD  ALIGN=LEFT><B><label for='talkpostfromlj'>LiveJournal user</label> (<A HREF=\"/create.bml\">create account</A>)</B></TD></TR>\n";
- $ret .= "<TR VALIGN=MIDDLE><TD>&nbsp;</TD><TD>&nbsp;</TD><TD> <TABLE border=1><TR VALIGN=MIDDLE ALIGN=LEFT><TD>Username: <INPUT CLASS=textbox NAME=userpost SIZE=13 MAXLENGTH=18></TD><TD>&nbsp;Password:</TD><TD><INPUT CLASS=textbox NAME=password TYPE=password MAXLENGTH=30 SIZE=13></TD><TD> <LABEL for='logincheck'>login?</LABEL> <INPUT TYPE='checkbox' NAME='do_login' ID='logincheck'></TD></TR></TABLE> </TD></TR>\n";
+ $ret .= "<TR VALIGN=MIDDLE><TD>&nbsp;</TD><TD>&nbsp;</TD><TD> <TABLE><TR VALIGN=MIDDLE ALIGN=LEFT><TD>Username: <INPUT CLASS=textbox NAME=userpost SIZE=13 MAXLENGTH=18></TD><TD>&nbsp;Password:</TD><TD><INPUT CLASS=textbox NAME=password TYPE=password MAXLENGTH=30 SIZE=13></TD><TD> <LABEL for='logincheck'>login?</LABEL> <INPUT TYPE='checkbox' NAME='do_login' ID='logincheck'></TD></TR></TABLE> </TD></TR>\n";
  
  $basesubject = "";
  if ($FORM{'replyto'}) {
