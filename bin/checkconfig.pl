@@ -19,7 +19,7 @@ my $only = 0;
 
 arg: foreach my $arg (@ARGV) {
     ($w, $c) = ($arg =~ /^-(no|only)(.*)/) or die "unknown option $arg";
-    die "only one '-onlyfoo' option may be speified" if $w eq "only" and $only++;
+    die "only one '-onlyfoo' option may be specified" if $w eq "only" and $only++;
     foreach my $check (@checks) {
         if ($check eq $c) {
             if ($w eq "only") { %dochecks = ( $check => 1 ); }
@@ -75,7 +75,10 @@ my %modules = (
                    'deb' => 'libxml-rss-perl',
                    'opt' => 'Required for retrieving RSS off of other sites (syndication).',
                },
-               "XML::Simple" => { 'deb' => 'libxml-simple-perl' },
+               "XML::Simple" => {
+                   'deb' => 'libxml-simple-perl',
+                   'ver' => 2.12,
+               },
                "String::CRC32" => {
                    'deb' => 'libstring-crc32-perl',
                    'opt' => 'Required for palette-altering of PNG files.  Only necessary if you plan to make your own S2 styles that use PNGs, not GIFs.',
@@ -99,6 +102,13 @@ sub check_modules {
                 push @errors, "Missing perl module: $mod";
             }
             push @debs, $dt->{'deb'} if $dt->{'deb'};
+            next;
+        }
+
+        my $ver_want = $modules{$mod}{ver};
+        my $ver_got = $mod->VERSION;
+        if ($ver_want && $ver_got && $ver_got < $ver_want) {
+            push @errors, "Out of date module: $mod (need $ver_want, $ver_got installed)";
         }
     }
     if (@debs && -e '/etc/debian_version') {
