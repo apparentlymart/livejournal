@@ -110,11 +110,18 @@ body<=
     my $email = $sp->{'reqemail'};
 
     my $u = {};
+    my $clusterdown = 0;
     if ($sp->{'reqtype'} eq "user") {
         $u = LJ::load_userid($sp->{'requserid'});
+
+        # now do a check for a down cluster?
+        my $dbr = LJ::get_cluster_reader($u);
+        $clusterdown = 1 unless $dbr;
+
         $email = $u->{'email'};
         LJ::load_user_props($u, "s1_lastn_style", "s1_calendar_style", "s1_day_style", 
-                            "s1_friends_style", "stylesys", "s2_style", );
+                            "s1_friends_style", "stylesys", "s2_style", )
+            unless $clusterdown;
     }
 
     my $winner;  # who closed it?
@@ -206,6 +213,11 @@ body<=
     $ret .= "</td></tr>\n";
 
     $ret .= "<tr valign='top'><td align='right'><b>$LJ::SITENAMESHORT:</b></td><td>";
+    if ($clusterdown) {
+        $ret .= "<span style='color: red; font-weight: bold;'>" .
+                "(unable to connect to cluster, some data temporarily unavailable)</span><br />"
+            if $clusterdown;
+    }
     if ($u->{'userid'}) {
         $ret .= "username: <?ljuserf $u->{'user'} ljuserf?>";
         $ret .= "<br />style: ";
