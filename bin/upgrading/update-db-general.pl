@@ -1578,7 +1578,7 @@ register_alter(sub {
     if (column_type("supportcat", "scope") eq "")
     {
         do_alter("supportcat",
-                 "ALTER TABLE supportcat ADD scope ENUM('general', 'local') ".
+                 "ALTER IGNORE TABLE supportcat ADD scope ENUM('general', 'local') ".
                  "NOT NULL DEFAULT 'general', ADD UNIQUE (catkey)");
     }
 });
