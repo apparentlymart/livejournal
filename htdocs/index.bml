@@ -1,0 +1,59 @@
+(=PAGE
+TITLE=>(=SITENAME=)
+HEAD<=
+<meta name="description" content="(=SITENAME=) ... words words.">
+<meta name="keywords" content="diary,journal">
+<meta name="rating" content="General"> 
+<meta name="ROBOTS" content="All">
+<meta name="revisit-after" Content="14 days">
+<=HEAD
+BODYOPTS<=(=_CODE
+#  return "onLoad=\""";
+	   _CODE=)
+<=BODYOPTS
+BODY<=
+
+(=H1 What is (=SITENAME=)? H1=)
+(=P
+Word words.
+P=)
+(=P
+You'll want to customize this page.  Read the docs/customizing.txt file.
+P=)
+
+
+(=H1 Getting Started H1=)
+(=CHOICES
+ITEMS<=
+(=CHOICE Create A Journal|create.bml|Come and create your very own LiveJournal! CHOICE=)
+(=CHOICE Update Journal|update.bml|Update your LiveJournal from the web. CHOICE=)
+<=ITEMS
+ITEMSB<=
+(=CHOICE Download|/download/|Download the LiveJournal update tool for your computer. CHOICE=)
+(=CHOICE Modify Journal|modify.bml|Customize the your LiveJournal's appearance and options. CHOICE=)
+<=ITEMSB
+CHOICES=)
+
+(=H1 Other Options H1=)
+(=CHOICES
+ITEMS<=
+(=CHOICE Edit Personal Information|editinfo.bml|Edit your personal information and preferences.  CHOICE=)
+(=CHOICE Edit Journal Entries|editjournal.bml|Edit or delete journal entries you've made in the past.  CHOICE=)
+<=ITEMS
+ITEMSB<=
+(=CHOICE Edit Friends|/friends/edit.bml|Edit your list of online LiveJournal friends to track from your LiveJournal friends page.  CHOICE=)
+<=ITEMSB
+CHOICES=)
+
+(=H1 Tech Support & Documentation H1=)
+(=CHOICES
+ITEMS<=
+(=CHOICE Support|/support/|Mail the support team and get a quick answer to your question.  CHOICE=)
+<=ITEMS
+ITEMSB<=
+
+<=ITEMSB
+CHOICES=)
+
+<=BODY
+PAGE=)
