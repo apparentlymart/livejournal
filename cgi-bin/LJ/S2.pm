@@ -851,6 +851,8 @@ sub Date
     $dt->{'month'} = $parts[1]+0;
     $dt->{'day'} = $parts[2]+0;
     $dt->{'_dayofweek'} = $parts[3];
+    die "S2 Builtin Date() takes day of week 1-7, not 0-6"
+        if defined $parts[3] && $parts[3] == 0;
     return $dt;
 }
 
@@ -864,7 +866,9 @@ sub DateTime_parts
     $dt->{'hour'} = $parts[3]+0;
     $dt->{'min'} = $parts[4]+0;
     $dt->{'sec'} = $parts[5]+0;
-    $dt->{'_dayofweek'} = $parts[6];
+    # the parts string comes from MySQL which has range 0-6,
+    # but internally and to S2 we use 1-7.
+    $dt->{'_dayofweek'} = $parts[6] + 1 if defined $parts[6];
     return $dt;
 }
 
@@ -1114,7 +1118,7 @@ sub Date__day_of_week
 {
     my ($ctx, $dt) = @_;
     return $dt->{'_dayofweek'} if defined $dt->{'_dayofweek'};
-    return $dt->{'_dayofweek'} = LJ::day_of_week($dt->{'year'}, $dt->{'month'}, $dt->{'day'});
+    return $dt->{'_dayofweek'} = LJ::day_of_week($dt->{'year'}, $dt->{'month'}, $dt->{'day'}) + 1;
 }
 *DateTime__day_of_week = \&Date__day_of_week;
 
