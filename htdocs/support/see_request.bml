@@ -1,5 +1,36 @@
 <?page
 title=>Request #<?_code return ($FORM{'id'}+0); _code?>
+head<=
+<script language="JavaScript"><!--
+    function check_replytype (e) {
+        if (! e) var e = window.event;
+        if (! document.getElementById) return false;
+
+        f = document.supportForm;
+        if (! f) return false;
+
+        var replytype = f.replytype;
+        if (! replytype) return false;
+
+        var bounce_email = document.getElementById('bounce_email');
+        if (! bounce_email) return false;
+
+        if (replytype.value == 'bounce')
+            bounce_email.style.display = 'inline';
+        else
+            bounce_email.style.display = 'none';
+
+        if (e) {
+            e.cancelBubble = true;
+            if (e.stopPropagation) e.stopPropagation();
+        }
+
+        return false;
+    }
+// -->
+</script>
+<=head
+bodyopts=>onLoad="check_replytype();"
 body<=
         
 <?_code
@@ -342,7 +373,7 @@ body<=
  
     # append_request form
 
-    $ret .= "<br /><form method='post' action='append_request.bml'>\n";
+    $ret .= "<br /><form method='post' action='append_request.bml' name='supportForm'>\n";
 
     # hidden values
     $ret .= LJ::html_hidden('spid', $spid, 'auth', $auth) . "\n";
@@ -402,8 +433,16 @@ body<=
     # answer type
     {
         $ret .= "<tr><td align='right'>Reply Type:</td><td>";
+
+        # if less than 2, remote is the person filing the request
+        # so all they can do is add more info
         if (@ans_type > 2) {
-            $ret .= LJ::html_select({ 'name' => 'replytype' }, @ans_type) . "\n";
+            $ret .= LJ::html_select({ 'name' => 'replytype',
+                                      'onchange' => "check_replytype()" },
+                                    @ans_type) . "\n";
+            $ret .= "<div id='bounce_email' style='display:none'>";
+            $ret .= "&nbsp;Email: " . LJ::html_text({ 'name' => 'bounce_email', 'size' => '25' });
+            $ret .= "</div>";
         } else {
             $ret .= LJ::html_hidden('replytype', $ans_type[0]) . "\n";
             $ret .= "<b>$ans_type[1]</b>";

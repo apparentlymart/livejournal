@@ -77,21 +77,57 @@ body<=
      return LJ::bad_input("Your message was blank.  Please type at least something in the message field.");
  }
 
+ # get dbh now, it's always needed
+ my $dbh = LJ::get_db_writer();
+
  ## touch/untouch request
  if ($FORM{'touch'}) {
-     my $dbh = LJ::get_db_writer();
      $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
      $status .= "(Inserting request into queue)\n\n";
  }
  if ($FORM{'untouch'}) {
-     my $dbh = LJ::get_db_writer();
      $dbh->do("UPDATE support SET timelasthelp=UNIX_TIMESTAMP() WHERE spid=$spid");
      $status .= "(Removing request from queue)\n\n";
  }
 
+ ## bounce request to email
+ if ($type eq 'bounce' && $FORM{'bounce_email'}) {
+
+     # check email using BMLCodeBlock::check_email
+     my @email_errors;
+     check_email($FORM{'bounce_email'}, \@email_errors);
+     return LJ::bad_input(@email_errors) if @email_errors;
+
+     # append notice that this message was bounced
+     my $splid = LJ::Support::append_request($sp, {
+         'body' => "(Bouncing mail to '$FORM{'bounce_email'}' and closing)\n\n" . $FORM{'body'},
+         'posterid' => $remote ? $remote->{'userid'} : 0,
+         'type' => $type,
+     });
+
+     # bounce original request to email
+     my $message = $dbh->selectrow_array("SELECT message FROM supportlog " .
+                                         "WHERE spid=? ORDER BY splid LIMIT 1",
+                                         undef, $sp->{'spid'});
+
+     LJ::send_mail({ 
+         'to' => $FORM{'bounce_email'},
+         'from' => $sp->{'reqemail'},
+         'fromname' => $sp->{'reqname'},
+         'subject' => "$sp->{'subject'} (support request #$sp->{'spid'})",
+         'body' => "$message\n\n$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}",
+     });
+
+     # close request, nobody gets credited
+     $dbh->do("UPDATE support SET state='closed', timeclosed=UNIX_TIMESTAMP() WHERE spid=?",
+              undef, $sp->{'spid'});
+
+     return "<?h1 Bounced h1?><?p The selected support request has been bounced to <b>$FORM{'bounce_email'}</b> and closed. p?>";
+ 
+ }
+
  if (LJ::Support::is_poster($sp, $remote, $FORM{'auth'})) 
  {
-     my $dbh = LJ::get_db_writer();
      $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
  }
 
@@ -100,7 +136,6 @@ body<=
      my $newcat = $FORM{'changecat'}+0;
      my $cats = LJ::Support::load_cats($newcat);
      if ($cats->{$newcat}) {
-         my $dbh = LJ::get_db_writer();
          $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
          $status .= "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n";
          $sp->{'spcatid'} = $newcat; # update category so IC e-mail goes to right place
@@ -117,7 +152,6 @@ body<=
          return LJ::bad_input('Invalid type to approve screened response as.')
             if (($FORM{'approveas'} ne 'answer') && ($FORM{'approveas'} ne 'comment'));
          # approve
-         my $dbh = LJ::get_db_writer();
          my $qtype = $dbh->quote($FORM{'approveas'});
          $dbh->do("UPDATE supportlog SET type=$qtype WHERE splid=$splid");
          $status .= "(Approving $FORM{'approveas'} \#$splid)\n\n";
@@ -130,7 +164,6 @@ body<=
  ## change summary
  if ($FORM{'changesum'}) {
      $FORM{'body'} =~ s/[\n\r]//g;
-     my $dbh = LJ::get_db_writer();
      my $qnewsub = $dbh->quote($FORM{'body'});
      $dbh->do("UPDATE support SET subject=$qnewsub WHERE spid=$spid");
      $status .= "Changing subject from \"$sp->{'subject'}\" to: ";

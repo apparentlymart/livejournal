@@ -272,12 +272,13 @@ sub get_answer_types
     if (is_poster($sp, $remote, $auth)) {
         push @ans_type, ("comment", "More information");
         return @ans_type;
-    } 
+    }
 
     if (can_help($sp, $remote)) {
         push @ans_type, ("screened" => "Screened Response", 
                          "answer" => "Answer",                         
-                         "comment" => "Comment or Question");
+                         "comment" => "Comment or Question",
+                         "bounce" => "Bounce to Email & Close");
     } elsif ($sp->{_cat}->{'allow_screened'}) {
         push @ans_type, ("screened" => "Screened Response");
     }
