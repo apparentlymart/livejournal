@@ -1528,7 +1528,6 @@ sub register_setter
 
 register_setter("newpost_minsecurity", sub {
     my ($dba, $u, $remote, $key, $value, $err) = @_;
-    my $dbs = LJ::make_dbs_from_arg($dba);
     unless ($value =~ /^(public|friends|private)$/) {
         $$err = "Illegal value.  Must be 'public', 'friends', or 'private'";
         return 0;
@@ -1545,7 +1544,6 @@ register_setter("newpost_minsecurity", sub {
 
 register_setter("stylesys", sub {
     my ($dba, $u, $remote, $key, $value, $err) = @_;
-    my $dbs = LJ::make_dbs_from_arg($dba);
     unless ($value =~ /^[sS]?(1|2)$/) {
         $$err = "Illegal value.  Must be S1 or S2.";
         return 0;
@@ -3702,12 +3700,10 @@ sub item_link
 # </LJFUNC>
 sub make_graphviz_dot_file
 {
-    my $dbarg = shift;
+    &nodb;
     my $user = shift;
 
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
 
     my $quser = $dbr->quote($user);
     my $sth;
@@ -3733,7 +3729,7 @@ sub make_graphviz_dot_file
         push @friends, $_->{'friendid'};
     }
 
-    my $friendsin = join(", ", map { $dbh->quote($_); } ($u->{'userid'}, @friends));
+    my $friendsin = join(", ", map { $dbr->quote($_); } ($u->{'userid'}, @friends));
     my $sql = "SELECT uu.user, uf.user AS 'friend' FROM friends f, user uu, user uf WHERE f.userid=uu.userid AND f.friendid=uf.userid AND f.userid<>f.friendid AND uu.statusvis='V' AND uf.statusvis='V' AND (f.friendid=$u->{'userid'} OR (f.userid IN ($friendsin) AND f.friendid IN ($friendsin)))";
     $sth = $dbr->prepare($sql);
     $sth->execute;
@@ -5210,7 +5206,7 @@ sub event_register
 # name: LJ::procnotify_add
 # des: Sends a message to all other processes on all clusters.
 # info: You'll probably never use this yourself.
-# args: dbarg, cmd, args?
+# args: cmd, args?
 # des-cmd: Command name.  Currently recognized: "DBI::Role::reload" and "rename_user"
 # des-args: Hashref with key/value arguments for the given command.  See
 #           relevant parts of [func[LJ::procnotify_callback]] for required args for different commands.
@@ -5218,9 +5214,9 @@ sub event_register
 # </LJFUNC>
 sub procnotify_add
 {
-    my ($dbarg, $cmd, $argref) = @_;
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
+    &nodb;
+    my ($cmd, $argref) = @_;
+    my $dbh = LJ::get_db_writer();
     return 0 unless $dbh;
 
     my $args = join('&', map { LJ::eurl($_) . "=" . LJ::eurl($argref->{$_}) }

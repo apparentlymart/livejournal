@@ -39,9 +39,7 @@ sub get_box_types
 sub construct_page
 {
     my $opts = shift;
-    my $dbs = $opts->{'dbs'};
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+
     my $body = $opts->{'body'};
     my $remote = $opts->{'remote'};
     my $puri = $opts->{'puri'};
@@ -52,7 +50,7 @@ sub construct_page
                   'left' => "width=180",
                   );
 
-    my $portopts = load_portopts($dbs, $remote);
+    my $portopts = load_portopts($remote);
 
     $$body .= "<table border=$opts->{'border'} cellpadding=3 width=100% height=500>\n";
     $$body .= "<tr valign=top>\n";
@@ -79,7 +77,7 @@ sub construct_page
             $box->{'pos'} = "$pbox->[$BOX_POS]";
             $box->{'uniq'} = "$loc$pbox->[$BOX_POS]";
 
-            $box{$bname}->{'handler'}->($dbs, $remote, $opts, $box);
+            $box{$bname}->{'handler'}->($remote, $opts, $box);
         }
 
         $$body .= "</td>\n";
@@ -95,9 +93,8 @@ sub construct_page
 
 sub load_portopts
 {
-    my $dbs = shift;
     my $remote = shift;
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
 
     my $portopts;
 
@@ -150,15 +147,15 @@ sub count_boxes
     return $count;
 }
 
+# FIXME: portal info should be clustered!
 sub save_portopts
 {
-    my $dbs = shift;
-    my $dbh = $dbs->{'dbh'};
     my $remote = shift;
     my $portopts = shift;
 
+    my $dbh = LJ::get_db_writer(); 
     my $userid = $remote->{'userid'}+0;
-    return unless ($userid);
+    return unless $userid;
 
     my @delsql;
 
@@ -314,7 +311,6 @@ sub make_box_modify_form
 
 sub modify_box
 {
-    my $dbs = shift;
     my $remote = shift;
     my $portopts = shift;
     my $loc = shift;
@@ -334,7 +330,7 @@ sub modify_box
         $box->[$BOX_DIRTY] = 1;
     }
 
-    save_portopts($dbs, $remote, $portopts);
+    save_portopts($remote, $portopts);
     return $newargs;
 }
 
@@ -379,7 +375,6 @@ sub make_box_link
 # XXXXXXXX DEAD / OLD
  sub make_mozilla_box
 {
-    my $dbs = shift;
     my $remote = shift;
     my $form = shift;
     my $opts = shift;
@@ -393,17 +388,16 @@ sub make_box_link
     $box->{'pos'} = "moz";
     $box->{'loc'} = 1;
     $box->{'uniq'} = "moz1";
-    $box{$bname}->{'handler'}->($dbs, $remote, $opts, $box);
+    $box{$bname}->{'handler'}->($remote, $opts, $box);
 }
 
 sub make_mozilla_bar
 {
-    my $dbs = shift;
     my $remote = shift;
     my $form = shift;
     my $opts = shift;
 
-    my $portopts = load_portopts($dbs, $remote);
+    my $portopts = load_portopts($remote);
     my $loc = "moz";
     
     foreach my $pbox (@{$portopts->{$loc}})
@@ -422,7 +416,7 @@ sub make_mozilla_bar
         $box->{'pos'} = "$pbox->[$BOX_POS]";
         $box->{'uniq'} = "$loc$pbox->[$BOX_POS]";
         
-        $box{$bname}->{'handler'}->($dbs, $remote, $opts, $box);
+        $box{$bname}->{'handler'}->($remote, $opts, $box);
     }
     
     
@@ -487,7 +481,7 @@ $box{'login'} =
     'small' => 1,
     'large' => 0,
     'handler' => sub {
-        my ($dbs, $remote, $opts, $box) = @_;
+        my ($remote, $opts, $box) = @_;
         my $b = $opts->{'body'};
 
         box_start($b, $box, { 'title' => "Login", 
@@ -520,8 +514,8 @@ $box{'stats'} =
     'small' => 1,
     'large' => 0,
     'handler' => sub {
-        my ($dbs, $remote, $opts, $box) = @_;
-        my $dbr = $dbs->{'reader'};
+        my ($remote, $opts, $box) = @_;
+        my $dbr = LJ::get_db_reader();
         my $b = $opts->{'body'};
         my $sth;
         my @stats;
@@ -569,8 +563,8 @@ $box{'bdays'} =
                   'default' => 5 },
                 ],
     'handler' => sub {
-        my ($dbs, $remote, $opts, $box) = @_;
-        my $dbr = $dbs->{'reader'};
+        my ($remote, $opts, $box) = @_;
+        my $dbr = LJ::get_db_reader();
         my $bd = $opts->{'body'};
         my $sth;
 
@@ -660,7 +654,7 @@ $box{'lastnview'} =
                   'default' => 0 },
                 ],
     'handler' => sub {
-        my ($dbs, $remote, $opts, $box) = @_;
+        my ($remote, $opts, $box) = @_;
         my $bd = $opts->{'body'};
         my $sth;
 
@@ -676,7 +670,7 @@ $box{'lastnview'} =
             return;
         }
 
-        my $u = LJ::load_user($dbs, $user);
+        my $u = LJ::load_user($user);
         my $dbcr = LJ::get_cluster_reader($u);
             
         box_start($bd, $box, { 'title' => "$u->{'name'}",
@@ -689,7 +683,7 @@ $box{'lastnview'} =
         }
 
         my @itemids;
-        my @items = LJ::get_recent_items($dbs, {
+        my @items = LJ::get_recent_items({
             'clustersource' => 'slave', 
             'clusterid' => $u->{'clusterid'},
             'remote' => $remote,
@@ -710,9 +704,8 @@ $box{'lastnview'} =
         my $text = LJ::get_logtext2($u, @itemids);
         
         my %posteru = ();  # map posterids to u objects
-        LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
+        LJ::load_userids_multiple([map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
         # Loads the log table into cache, in the unlikely event that it is not already in cache
-        LJ::load_props($dbs, "log");
         LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
         
         foreach my $i (@items) {
@@ -758,7 +751,7 @@ $box{'update'} =
                 ],
     'handler' => sub 
     {
-        my ($dbs, $remote, $opts, $box) = @_;
+        my ($remote, $opts, $box) = @_;
         my $bd = $opts->{'body'};
         my $h = $opts->{'head'};
 
@@ -869,7 +862,7 @@ $box{'update'} =
             
             $$bd .= "<P><B>Current <A HREF=\"/moodlist.bml\">Mood</A>:</B>";
             
-            LJ::load_moods($dbs);
+            LJ::load_moods();
             my @sel;
             foreach my $moodid (sort { $LJ::CACHE_MOODS{$a}->{'name'} cmp  
                                            $LJ::CACHE_MOODS{$b}->{'name'} } keys %LJ::CACHE_MOODS)
@@ -953,8 +946,8 @@ $box{'randuser'} =
                 ],
     'handler' => sub 
     {
-        my ($dbs, $remote, $opts, $box) = @_;
-        my $dbr = $dbs->{'reader'};
+        my ($remote, $opts, $box) = @_;
+        my $dbr = LJ::get_db_reader();
         my $b = $opts->{'body'};
         my $h = $opts->{'head'};
 
@@ -994,7 +987,7 @@ $box{'randuser'} =
         
         my %pic;
         unless ($box->{'args'}->{'hidepic'}) {
-            LJ::load_userpics($dbs, \%pic, [ map { $_->{'defaultpicid'} } @ruser ]);
+            LJ::load_userpics(\%pic, [ map { $_->{'defaultpicid'} } @ruser ]);
         }
 
         if ($size eq "large") {  $$b .= "<table width=100%><tr valign=bottom>"; }
@@ -1029,13 +1022,13 @@ $box{'popfaq'} =
     'small' => 1,
     'large' => 0,
     'handler' => sub {
-        my ($dbs, $remote, $opts, $box) = @_;
+        my ($remote, $opts, $box) = @_;
         my $b = $opts->{'body'};
 
         box_start($b, $box, { 'title' => BML::ml('portal.popfaq.portaltitle'),
                               'align' => "left",
                               'url' => '/support/faqpop.bml', });
-        my $dbr = $dbs->{'reader'};
+        my $dbr = LJ::get_db_reader();
 
         my $sth = $dbr->prepare("SELECT f.faqid, f.question, s.statval AS 'uses' ".
                       "FROM faq f, stats s WHERE f.faqcat<>'int-abuse' AND s.statcat='popfaq' ".
@@ -1063,8 +1056,8 @@ $box{'memories'} =
     'small' => 1,
     'large' => 0,
     'handler' => sub {
-        my ($dbs, $remote, $opts, $box) = @_;
-        my $dbr = $dbs->{'reader'};
+        my ($remote, $opts, $box) = @_;
+        my $dbr = LJ::get_db_reader();
         my $b = $opts->{'body'};
 
         box_start($b, $box, { 'title' => BML::ml('portal.memories.portaltitle'),

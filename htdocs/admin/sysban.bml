@@ -44,7 +44,7 @@
                  ($POST{'modify_status'} && $POST{'modify_status'} ne $ban->{'status'} &&
                   $POST{'modify_status'} eq 'expired')) ) {
 
-                LJ::procnotify_add($dbh, "unban_ip", { 'ip' => $ban->{'value'} });
+                LJ::procnotify_add("unban_ip", { 'ip' => $ban->{'value'} });
             }
 
             # what
@@ -59,7 +59,7 @@
                  ($POST{'modify_status'} && $POST{'modify_status'} ne $ban->{'status'} &&
                   $POST{'modify_status'} eq 'active')) ) {
 
-                LJ::procnotify_add($dbh, "ban_ip", { 'ip' => $POST{'modify_value'} });
+                LJ::procnotify_add("ban_ip", { 'ip' => $POST{'modify_value'} });
             }
 
             # value
@@ -167,7 +167,7 @@
 
         # special case: modifying ip ban
         if ($POST{'create_what'} eq 'ip') {
-            LJ::procnotify_add($dbh, "ban_ip", { 'ip' => $POST{'create_value'} });
+            LJ::procnotify_add("ban_ip", { 'ip' => $POST{'create_value'} });
         }
 
         # log in statushistory

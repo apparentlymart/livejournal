@@ -103,7 +103,7 @@
              
              $status .= "<p>Wrote config.</p>";
          } else {
-             my $newserial = LJ::procnotify_add($dbh, "DBI::Role::reload");
+             my $newserial = LJ::procnotify_add("DBI::Role::reload");
              $status .= "<p>New Serial: $newserial</p>\n";
          }
      }

@@ -1,8 +1,6 @@
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
  
  $title = $LJ::SITENAME;
  $body = "";
@@ -11,7 +9,7 @@
 
  #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
- LJ::Portal::construct_page({ 'dbs' => $dbs,
+ LJ::Portal::construct_page({ 
                               'form' => \%FORM,
                               'remote' => $remote,
                               'head' => \$head,
