@@ -8614,6 +8614,28 @@ sub load_include {
     return $val;
 }
 
+# <LJFUNC>
+# name: LJ::infohistory_add
+# des: Add a line of text to the infohistory table for an account.
+# args: uuid, what, value, other?
+# des-uuid: User id or user object to insert infohistory for.
+# des-what: What type of history being inserted (15 chars max).
+# des-value: Value for the item (255 chars max).
+# des-other: Extra information (30 chars max).
+# returns: 1 on success, 0 on error.
+# </LJFUNC>
+sub infohistory_add {
+    my ($uuid, $what, $value, $other) = @_;
+    $uuid = LJ::want_userid($uuid);
+    return unless $uuid && $what && $value;
+
+    # get writer and insert
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("INSERT INTO infohistory (userid, what, timechange, oldvalue, other) VALUES (?, ?, NOW(), ?, ?)",
+             undef, $uuid, $what, $value, $other);
+    return $dbh->err ? 0 : 1;
+}
+
 sub last_error_code
 {
     return $LJ::last_error;

@@ -916,7 +916,13 @@ sub change_journal_type
                 # now clear old email address from their infohistory to prevent account hijacking and such
                 $dbh->do("UPDATE infohistory SET what='emailreset' WHERE userid=? AND what='email'", undef, $u->{userid})
                     or $err->("Error updating infohistory for emailreset: " . $dbh->errstr);
+                LJ::infohistory_add($u, 'emailreset', $u->{email}, $u->{status})
+                    unless $email eq $u->{email}; # record only if it changed
             }
+
+            # password changed too?
+            LJ::infohistory_add($u, 'password', Digest::MD5::md5_hex($u->{password} . 'change'))
+                if $password ne $u->{password};
             
             # now update the user table and kill memcache
             LJ::update_user($u, { journaltype => $journaltype,
@@ -1313,9 +1319,9 @@ sub reset_password
     return $err->("Invalid user $user") unless $u;
 
     my $newpass = LJ::rand_chars(8);
-    my $oldpass = $dbh->quote(Digest::MD5::md5_hex($u->{'password'} . "change"));
-    $dbh->do("INSERT INTO infohistory (userid, what, oldvalue, timechange) VALUES ($u->{'userid'}, 'passwordreset', $oldpass, NOW())");
-    return $err->("Failed to insert old password into information history table") if $dbh->err;
+    my $oldpass = Digest::MD5::md5_hex($u->{'password'} . "change");
+    my $rval = LJ::infohistory_add($u, 'passwordreset', $oldpass);
+    return $err->("Failed to insert old password into information history table") unless $rval;
 
     LJ::update_user($u, { password => $newpass, })
         or return $err->("Failed to update user table");
