@@ -1,54 +1,47 @@
 #!/usr/bin/perl
-#
-# Moves a user between clusters.
-#
+##############################################################################
 
-use strict;
-use Getopt::Long;
+=head1 NAME
 
-my $opt_del = 0;
-my $opt_destdel = 0;
+moveucluster.pl - Moves a LiveJournal user between database clusters
 
-my $opt_verbose = 1;
-my $opt_movemaster = 0;
-my $opt_prelocked = 0;
-my $opt_expungedel = 0;
-my $opt_ignorebit = 0;
-my $opt_verify = 0;
-exit 1 unless GetOptions('delete' => \$opt_del, # from source
-                         'destdelete' => \$opt_destdel, # from dest (if exists, before moving)
-                         'verbose=i' => \$opt_verbose,
-                         'movemaster|mm' => \$opt_movemaster, # use separate dedicated source
-                         'prelocked' => \$opt_prelocked, # don't do own locking; master does (harness, ljumover)
-                         'expungedel' => \$opt_expungedel, # mark as expunged if possible (+del to delete)
-                         'ignorebit' => \$opt_ignorebit, # ignore move in progress bit cap (force)
-                         'verify' => \$opt_verify,  # slow verification pass (just for debug)
-                         );
-my $optv = $opt_verbose;
+=head1 SYNOPSIS
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+  $ moveucluster.pl OPTIONS <user> <dest_clusterid>
 
-my $dbh = LJ::get_dbh({raw=>1}, "master");
-die "No master db available.\n" unless $dbh;
-$dbh->do("SET wait_timeout=28800");
+=head1 OPTIONS
 
-my $user = LJ::canonical_username(shift @ARGV);
-my $dclust = shift @ARGV;
-$dclust = 0 if !defined $dclust && $opt_expungedel;
+=over 4
 
-sub usage {
-    die <<USAGE;
-moveucluster.pl [options] <user> [destination cluster name or number]
+=item -h, --help
 
-Available options:
-    verbose=n       Set verbosity level to n (1 or 2).
-    verify          Verify count of copied rows to ensure accuracy (slow)
-    ignorebit       Ignore the move in progress bit (force user move)
-    prelocked       Do not do own locking; let harness handle (ljumover, etc)
-    movemaster      Enable usage of clusterNmovemaster roles for moving
-    delete          Delete data from source cluster when done moving
-    destdelete      Delete data from destination cluster before moving
-    expungedel      See below.
+Output a help message and exit.
+
+=item --verbose[=<n>]
+
+Verbosity level, 0, 1, or 2.
+
+=item --verify
+
+Verify count of copied rows to ensure accuracy (slower)
+
+=item --ignorebit
+
+Ignore the move in progress bit (force user move)
+
+=item --prelocked
+
+Do not set user readonly and sleep (somebody else did it)
+
+=item --delete
+
+Delete data from source cluster when done moving
+
+=item --destdelete
+
+Delete data from destination cluster before moving
+
+=item --expungedel
 
 The expungedel option is used to indicate that when a user is encountered
 with a statusvis of D (deleted journal) and they've been deleted for at
@@ -57,53 +50,144 @@ least 31 days, instead of moving their data, mark the user as expunged.
 Further, if you specify the delete and expungedel options at the same time,
 if the user is expunged, all of their data will be deleted from the source
 cluster.  THIS IS IRREVERSIBLE AND YOU WILL NOT BE ASKED FOR CONFIRMATION.
-    
-USAGE
+
+=item --jobserver=host:port
+
+Specify a job server to get tasks from.  In this mode, no other
+arguments are necessary, and moveucluster.pl just runs in a loop
+getting directions from the job server.
+
+=back
+
+=head1 AUTHOR
+
+Brad Fitzpatrick E<lt>brad@danga.comE<gt>
+Copyright (c) 2002-2004 Danga Interactive. All rights reserved.
+
+=cut
+
+##############################################################################
+
+use strict;
+use Getopt::Long;
+use Pod::Usage qw{pod2usage};
+
+# NOTE: these options are used both by Getopt::Long for command-line parsing
+# in single user move move, and also set by hand when in --jobserver mode,
+# and the jobserver gives us directions, including whether or not users
+# are prelocked, need to be source-deleted, verified, etc, etc, etc.
+my $opt_del = 0;
+my $opt_destdel = 0;
+my $opt_verbose = 1;
+my $opt_movemaster = 0;
+my $opt_prelocked = 0;
+my $opt_expungedel = 0;
+my $opt_ignorebit = 0;
+my $opt_verify = 0;
+my $opt_help = 0;
+my $opt_jobserver = "";
+
+abortWithUsage() unless
+    GetOptions('delete' => \$opt_del, # from source
+               'destdelete' => \$opt_destdel, # from dest (if exists, before moving)
+               'verbose=i' => \$opt_verbose,
+               'movemaster|mm' => \$opt_movemaster, # use separate dedicated source
+               'prelocked' => \$opt_prelocked, # don't do own locking; master does (harness, ljumover)
+               'expungedel' => \$opt_expungedel, # mark as expunged if possible (+del to delete)
+               'ignorebit' => \$opt_ignorebit, # ignore move in progress bit cap (force)
+               'verify' => \$opt_verify,  # slow verification pass (just for debug)
+               'jobserver=s' => \$opt_jobserver,
+               'help' => \$opt_help,
+               );
+my $optv = $opt_verbose;
+
+my $dbo;  # original cluster db handle.  (may be a movemaster (a slave))
+my $dboa; # the actual master handle, which we delete from if deleting from source
+
+abortWithUsage() if $opt_help;
+
+if ($opt_jobserver) {
+    # the job server can keep giving us new jobs to move (or a stop command)
+    # over and over, so we avoid perl exec times
+    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+    multiMove();
+} else {
+    singleMove();
 }
 
-# check arguments
-usage() unless defined $user && defined $dclust;
-
-# get lock
-die "Failed to get move lock.\n"
-    unless $dbh->selectrow_array("SELECT GET_LOCK('moveucluster-$user', 10)");
-
-# get the user
-my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
-die "Non-existent user $user.\n" unless $u;
-
-# if we want to delete the user, we don't need a destination cluster, so only get
-# one if we have a real valid destination cluster
-my $dbch;
-if ($dclust) {
-    # get the destination DB handle, with a long timeout
-    $dbch = LJ::get_cluster_master({raw=>1}, $dclust);
-    die "Undefined or down cluster \#$dclust\n" unless $dbch;
-    $dbch->do("SET wait_timeout=28800");
-
-    # make sure any error is a fatal error.  no silent mistakes.
-    $dbh->{'RaiseError'} = 1;
-    $dbch->{'RaiseError'} = 1;
+sub multiMove {
+    die "FIXME: contact job server and loop on moveUser(...)";
 }
 
-# we can't move to the same cluster
-my $sclust = $u->{'clusterid'};
-if ($sclust == $dclust) {
-    die "User '$user' is already on cluster $dclust\n";
+sub singleMove {
+    my $user = shift @ARGV;
+    my $dclust = shift @ARGV;
+    $dclust = 0 if !defined $dclust && $opt_expungedel;
+
+    # check arguments
+    abortWithUsage() unless defined $user && defined $dclust;
+
+    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+
+    $user = LJ::canonical_username($user);
+    abortWithUsage("Invalid username") unless length($user);
+
+    my $rv = eval { moveUser($user, $dclust); };
+
+    if ($rv) {
+        print "Moved '$user' to cluster $dclust.\n";
+        exit 0;
+    }
+    if ($@) {
+        die "Failed to move '$user' to cluster $dclust: $@\n";
+    }
+
+    print "ERROR: move failed.\n";
+    exit 1;
 }
 
-# we don't support "cluster 0" (the really old format)
-die "This mover tool doesn't support moving from cluster 0.\n" unless $sclust;
-die "Can't move back to legacy cluster 0\n" unless $dclust || $opt_expungedel;
+sub moveUser {
+    my ($user, $dclust) = @_;
 
-# original cluster db handle.  (may be a movemaster (a slave))
-my $dbo;
-my $is_movemaster;
+    my $dbh = LJ::get_dbh({raw=>1}, "master");
+    die "No master db available.\n" unless $dbh;
+    $dbh->do("SET wait_timeout=28800");
 
-# the actual master handle, which we delete from if deleting from source
-my $dboa;
+    # get lock
+    die "Failed to get move lock.\n"
+        unless $dbh->selectrow_array("SELECT GET_LOCK('moveucluster-$user', 10)");
 
-if ($sclust) {
+    # get the user
+    my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
+    die "Non-existent user $user.\n" unless $u;
+
+    # if we want to delete the user, we don't need a destination cluster, so only get
+    # one if we have a real valid destination cluster
+    my $dbch;
+    if ($dclust) {
+        # get the destination DB handle, with a long timeout
+        $dbch = LJ::get_cluster_master({raw=>1}, $dclust);
+        die "Undefined or down cluster \#$dclust\n" unless $dbch;
+        $dbch->do("SET wait_timeout=28800");
+
+        # make sure any error is a fatal error.  no silent mistakes.
+        $dbh->{'RaiseError'} = 1;
+        $dbch->{'RaiseError'} = 1;
+    }
+
+    # we can't move to the same cluster
+    my $sclust = $u->{'clusterid'};
+    if ($sclust == $dclust) {
+        die "User '$user' is already on cluster $dclust\n";
+    }
+
+    # we don't support "cluster 0" (the really old format)
+    die "This mover tool doesn't support moving from cluster 0.\n" unless $sclust;
+    die "Can't move back to legacy cluster 0\n" unless $dclust || $opt_expungedel;
+
+    my $is_movemaster;
+
+    # the actual master handle, which we delete from if deleting from source
     $dboa = LJ::get_cluster_master({raw=>1}, $u);
     die "Can't get source cluster handle.\n" unless $dboa;
 
@@ -121,414 +205,409 @@ if ($sclust) {
     }
     $dboa->{'RaiseError'} = 1;
     $dboa->do("SET wait_timeout=28800");
-}
 
-my $userid = $u->{'userid'};
+    my $userid = $u->{'userid'};
 
-# load the info on how we'll move each table.  this might die (if new tables
-# with bizarre layouts are added which this thing can't auto-detect) so want
-# to do it early.
-my $tinfo;   # hashref of $table -> {
-             #   'idx' => $index_name   # which we'll be using to iterate over
-             #   'idxcol' => $col_name  # first part of index
-             #   'cols' => [ $col1, $col2, ]
-             #   'pripos' => $idxcol_pos,   # what field in 'cols' is $col_name
-             #   'verifykey' => $col        # key used in the debug --verify pass
-             # }
-$tinfo = fetch_tableinfo();
+    # load the info on how we'll move each table.  this might die (if new tables
+    # with bizarre layouts are added which this thing can't auto-detect) so want
+    # to do it early.
+    my $tinfo;   # hashref of $table -> {
+                 #   'idx' => $index_name   # which we'll be using to iterate over
+                 #   'idxcol' => $col_name  # first part of index
+                 #   'cols' => [ $col1, $col2, ]
+                 #   'pripos' => $idxcol_pos,   # what field in 'cols' is $col_name
+                 #   'verifykey' => $col        # key used in the debug --verify pass
+                 # }
+    $tinfo = fetchTableInfo();
 
-
-# find readonly cap class, complain if not found
-my $readonly_bit = undef;
-foreach (keys %LJ::CAP) {
-    if ($LJ::CAP{$_}->{'_name'} eq "_moveinprogress" &&
-        $LJ::CAP{$_}->{'readonly'} == 1) {
-        $readonly_bit = $_;
-        last;
+    # find readonly cap class, complain if not found
+    my $readonly_bit = undef;
+    foreach (keys %LJ::CAP) {
+        if ($LJ::CAP{$_}->{'_name'} eq "_moveinprogress" &&
+            $LJ::CAP{$_}->{'readonly'} == 1) {
+            $readonly_bit = $_;
+            last;
+        }
     }
-}
-unless (defined $readonly_bit) {
-    die "Won't move user without %LJ::CAP capability class named '_moveinprogress' with readonly => 1\n";
-}
-
-# make sure a move isn't already in progress
-if ($opt_prelocked) {
-    unless (($u->{'caps'}+0) & (1 << $readonly_bit)) {
-        die "User '$user' should have been prelocked.\n";
+    unless (defined $readonly_bit) {
+        die "Won't move user without %LJ::CAP capability class named '_moveinprogress' with readonly => 1\n";
     }
-} else {
-    if (($u->{'caps'}+0) & (1 << $readonly_bit)) {
-        die "User '$user' is already in the process of being moved? (cap bit $readonly_bit set)\n"
-            unless $opt_ignorebit;
+
+    # make sure a move isn't already in progress
+    if ($opt_prelocked) {
+        unless (($u->{'caps'}+0) & (1 << $readonly_bit)) {
+            die "User '$user' should have been prelocked.\n";
+        }
+    } else {
+        if (($u->{'caps'}+0) & (1 << $readonly_bit)) {
+            die "User '$user' is already in the process of being moved? (cap bit $readonly_bit set)\n"
+                unless $opt_ignorebit;
+        }
     }
-}
 
-if ($opt_expungedel && $u->{'statusvis'} eq "D" &&
-    LJ::mysqldate_to_time($u->{'statusvisdate'}) < time() - 86400*31) {
+    if ($opt_expungedel && $u->{'statusvis'} eq "D" &&
+        LJ::mysqldate_to_time($u->{'statusvisdate'}) < time() - 86400*31) {
 
-    print "Expunging user '$u->{'user'}'\n";
-    $dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart, timedone) ".
-             "VALUES (?,?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())", undef, 
-             $userid, $sclust, 0);
-    LJ::update_user($userid, { clusterid => 0,
-                               statusvis => 'X',
-                               raw => "caps=caps&~(1<<$readonly_bit), statusvisdate=NOW()" });
+        print "Expunging user '$u->{'user'}'\n";
+        $dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart, timedone) ".
+                 "VALUES (?,?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())", undef, 
+                 $userid, $sclust, 0);
+        LJ::update_user($userid, { clusterid => 0,
+                                   statusvis => 'X',
+                                   raw => "caps=caps&~(1<<$readonly_bit), statusvisdate=NOW()" });
 
-    # now delete all content from user cluster for this user
+        # now delete all content from user cluster for this user
+        if ($opt_del) {
+            print "Deleting expungeable user data...\n" if $optv;
+
+            # figure out if they have any S1 styles
+            my $styleids = $dboa->selectcol_arrayref("SELECT styleid FROM s1style WHERE userid = $userid");
+
+            # now delete from the main tables
+            foreach my $table (keys %$tinfo) {
+                my $pri = $tinfo->{$table}->{idxcol};
+                while ($dboa->do("DELETE FROM $table WHERE $pri=$userid LIMIT 1000") > 0) {
+                    print "  deleted from $table\n" if $optv;
+                }
+            }
+
+            # and from the s1stylecache table
+            if (@$styleids) {
+                my $styleids_in = join(",", map { $dboa->quote($_) } @$styleids);
+                if ($dboa->do("DELETE FROM s1stylecache WHERE styleid IN ($styleids_in)") > 0) {
+                    print "  deleted from s1stylecache\n" if $optv;
+                }
+            }
+        }
+        return 1;
+    }
+
+    # if we get to this point we have to enforce that there's a destination cluster, because
+    # apparently the user failed the expunge test
+    if (!defined $dclust || !defined $dbch) {
+        die "User is not eligible for expunging.\n" if $opt_expungedel;
+    }
+
+    print "Moving '$u->{'user'}' from cluster $sclust to $dclust\n" if $optv >= 1;
+
+    # mark that we're starting the move
+    $dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart) ".
+             "VALUES (?,?,?,UNIX_TIMESTAMP())", undef, $userid, $sclust, $dclust);
+    my $cmid = $dbh->{'mysql_insertid'};
+
+    # set readonly cap bit on user
+    unless ($opt_prelocked ||
+            LJ::update_user($userid, { raw => "caps=caps|(1<<$readonly_bit)" }))
+    {
+        die "Failed to set readonly bit on user: $user\n";
+    }
+    $dbh->do("SELECT RELEASE_LOCK('moveucluster-$user')");
+
+    unless ($opt_prelocked) {
+        # wait a bit for writes to stop if journal is somewhat active (last week update)
+        my $secidle = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
+                                            "FROM userusage WHERE userid=$userid");
+        if ($secidle) {
+            sleep(2) unless $secidle > 86400*7;
+            sleep(1) unless $secidle > 86400;
+        }
+    }
+
+    if ($is_movemaster) {
+        my $diff = 999_999;
+        my $tries = 0;
+        while ($diff > 50_000) {
+            my $ss = $dbo->selectrow_hashref("show slave status");
+            $tries++;
+            if ($ss->{'Slave_IO_Running'} eq "Yes" && $ss->{'Slave_SQL_Running'} eq "Yes") {
+                if ($ss->{'Master_Log_File'} eq $ss->{'Relay_Master_Log_File'}) {
+                    $diff = $ss->{'Read_Master_Log_Pos'} - $ss->{'Exec_master_log_pos'};
+                    print "  diff: $diff\n" if $optv >= 1;
+                } else {
+                    print "  (Wrong log file):  $ss->{'Relay_Master_Log_File'}($ss->{'Exec_master_log_pos'}) not $ss->{'Master_Log_File'}($ss->{'Read_Master_Log_Pos'})\n" if $optv >= 1;
+                }
+            } else {
+                die "Movemaster slave not running";
+            }
+        }
+    }
+
+    print "Moving away from cluster $sclust\n" if $optv;
+
+    my %cmd_done;  # cmd_name -> 1
+    while (my $cmd = $dboa->selectrow_array("SELECT cmd FROM cmdbuffer WHERE journalid=$userid")) {
+        die "Already flushed cmdbuffer job '$cmd' -- it didn't take?\n" if $cmd_done{$cmd}++;
+        print "Flushing cmdbuffer for cmd: $cmd\n" if $optv > 1;
+        require "$ENV{'LJHOME'}/cgi-bin/ljcmdbuffer.pl";
+        LJ::Cmdbuffer::flush($dbh, $dboa, $cmd, $userid);
+    }
+
+    # setup dependencies (we can skip work by not checking a table if we know
+    # its dependent table was empty).  then we have to order things so deps get
+    # processed first.
+    my %was_empty;  # $table -> bool, table was found empty
+    my %dep = (
+               "logtext2" => "log2",
+               "logprop2" => "log2",
+               "logsec2" => "log2",
+               "talkprop2" => "talk2",
+               "talktext2" => "talk2",
+               "phoneposttrans" => "phonepostentry", # FIXME: ljcom
+               "modblob" => "modlog",
+               "sessions_data" => "sessions",
+               );
+
+    # all tables we could be moving.  we need to sort them in
+    # order so that we check dependant tables first
+    my @alltables = (@LJ::USER_TABLES, @LJ::USER_TABLES_LOCAL);
+    my @tables;
+    push @tables, grep { ! $dep{$_} } @alltables;
+    push @tables, grep { $dep{$_} } @alltables;
+
+    # these are ephemeral or handled elsewhere
+    my %skip_table = (
+                      "cmdbuffer" => 1,       # pre-flushed
+                      "events" => 1,          # handled by qbufferd (not yet used)
+                      "s1stylecache" => 1,    # will be recreated
+                      "captcha_session" => 1, # temporary
+                      "tempanonips" => 1,     # temporary ip storage for spam reports
+                      );
+
+    $skip_table{'inviterecv'} = 1 if $u->{journaltype} ne 'P'; # non-person, skip invites received
+    $skip_table{'invitesent'} = 1 if $u->{journaltype} ne 'C'; # not community, skip invites sent
+
+    # we had a concern at the time of writing this dependency optization
+    # that we might use "log3" and "talk3" tables in the future with the
+    # old talktext2/etc tables.  if that happens and we forget about this,
+    # this code will trip it up and make us remember:
+    if (grep { $_ eq "log3" || $_ eq "talk3" } @tables) {
+        die "This script needs updating.\n";
+    }
+
+    # check if dest has existing data for this user.  (but only check a few key tables)
+    # if anything else happens to have data, we'll just fail later.  but unlikely.
+    print "Checking for existing data on target cluster...\n" if $optv > 1;
+    foreach my $table (qw(userbio talkleft log2 talk2 sessions userproplite2)) {
+        my $ti = $tinfo->{$table} or die "No table info for $table.  Aborting.";
+
+        eval { $dbch->do("HANDLER $table OPEN"); };
+        if ($@) {
+            die "This mover currently only works on MySQL 4.x and above.\n" .
+                $@;
+        }
+
+        my $idx = $ti->{idx};
+        my $is_there = $dbch->selectrow_array("HANDLER $table READ `$idx` = ($userid) LIMIT 1");
+        $dbch->do("HANDLER $table CLOSE");
+        next unless $is_there;
+
+        if ($opt_destdel) {
+            foreach my $table (@tables) {
+                # these are ephemeral or handled elsewhere
+                next if $skip_table{$table};
+                my $ti = $tinfo->{$table} or die "No table info for $table.  Aborting.";
+                my $pri = $ti->{idxcol};
+                while ($dbch->do("DELETE FROM $table WHERE $pri=$userid LIMIT 500") > 0) {
+                    print "  deleted from $table\n" if $optv;
+                }
+            }
+            last;
+        } else {
+            die "  Existing data on destination cluster\n";
+        }
+    }
+
+    # start copying from source to dest.
+    my $rows = 0;
+    my @to_delete;  # array of [ $table, $prikey ]
+    my @styleids;   # to delete, potentially
+
+    foreach my $table (@tables) {
+        next if $skip_table{$table};
+
+        # people accounts don't have moderated posts
+        next if $u->{'journaltype'} eq "P" && ($table eq "modlog" ||
+                                               $table eq "modblob");
+
+        # don't waste time looking at dependent tables with empty parents
+        next if $dep{$table} && $was_empty{$dep{$table}};
+
+        my $ti = $tinfo->{$table} or die "No table info for $table.  Aborting.";
+        my $idx = $ti->{idx};
+        my $idxcol = $ti->{idxcol};
+        my $cols = $ti->{cols};
+        my $pripos = $ti->{pripos};
+
+        eval { $dbo->do("HANDLER $table OPEN"); };
+        if ($@) {
+            die "This mover currently only works on MySQL 4.x and above.\n".
+                $@;
+        }
+
+        my $tct = 0;            # total rows read for this table so far.
+        my $hit_otheruser = 0;  # bool, set to true when we encounter data from a different userid
+        my $batch_size = 1000;
+        my $ct = 0;             # rows read in latest batch
+        my $did_start = 0;      # bool, if process has started yet (used to enter loop, and control initial HANDLER commands)
+        my $pushed_delete = 0;  # bool, if we've pushed this table on the delete list (once we find it has something)
+
+        my $sqlins = "";
+        my $sqlvals = 0;
+        my $flush = sub {
+            return unless $sqlins;
+            print "# Flushing $table ($sqlvals recs, ", length($sqlins), " bytes)\n" if $optv;
+            $dbch->do($sqlins);
+            $sqlins = "";
+            $sqlvals = 0;
+        };
+
+        my $insert = sub {
+            my $r = shift;
+
+            # now that we know it has something to delete (many tables are empty for users)
+            unless ($pushed_delete++) {
+                push @to_delete, [ $table, $idxcol ];
+            }
+
+            if ($sqlins) {
+                $sqlins .= ", ";
+            } else {
+                $sqlins = "INSERT INTO $table (" . join(', ', @{$cols}) . ") VALUES ";
+            }
+            $sqlins .= "(" . join(", ", map { $dbo->quote($_) } @$r) . ")";
+
+            $sqlvals++;
+            $flush->() if $sqlvals > 5000 || length($sqlins) > 800_000;
+        };
+
+        # let tables perform extra processing on the $r before it's 
+        # sent off for inserting.
+        my $magic;
+
+        # we know how to compress these two tables (currently the only two)
+        if ($table eq "logtext2" || $table eq "talktext2") {
+            $magic = sub {
+                my $r = shift;
+                return unless length($r->[3]) > 200;
+                LJ::text_compress(\$r->[3]);
+            };
+        }
+        if ($table eq "s1style") {
+            $magic = sub {
+                my $r = shift;
+                push @styleids, $r->[0];
+            };
+        }
+
+        while (! $hit_otheruser && ($ct == $batch_size || ! $did_start)) {
+            my $qry = "HANDLER $table READ `$idx` NEXT LIMIT $batch_size";
+            unless ($did_start) {
+                $qry = "HANDLER $table READ `$idx` = ($userid) LIMIT $batch_size";
+                $did_start = 1;
+            }
+
+            my $sth = $dbo->prepare($qry);
+            $sth->{'mysql_use_result'} = 1;
+            $sth->execute;
+
+            $ct = 0;
+            while (my $r = $sth->fetchrow_arrayref) {
+                if ($r->[$pripos] != $userid) {
+                    $hit_otheruser = 1;
+                    last;
+                }
+                $magic->($r) if $magic;
+                $insert->($r);
+                $tct++;
+                $ct++;
+            }
+        }
+        $flush->();
+
+        $dbo->do("HANDLER $table CLOSE");
+
+        # verify the important tables
+        if ($table =~ /^(talk|log)(2|text2)$/) {
+            my $dblcheck = $dbo->selectrow_array("SELECT COUNT(*) FROM $table WHERE $idxcol=$userid");
+            die "# Expecting: $dblcheck, but got $tct\n" unless $dblcheck == $tct;
+        }
+
+        my $verifykey = $ti->{verifykey};
+        if ($opt_verify && $verifykey) {
+            if ($table eq "dudata" || $table eq "ratelog") {
+                print "# Verifying $table on size\n";
+                my $pre = $dbo->selectrow_array("SELECT COUNT(*) FROM $table WHERE $idxcol=$userid");
+                my $post = $dbch->selectrow_array("SELECT COUNT(*) FROM $table WHERE $idxcol=$userid");
+                die "Moved sized is smaller" if $post < $pre;
+            } else {
+                print "# Verifying $table on key $verifykey\n";
+                my %pre;
+                my %post;
+                my $sth;
+
+                $sth = $dbo->prepare("SELECT $verifykey FROM $table WHERE $idxcol=$userid");
+                $sth->execute;
+                while (my @ar = $sth->fetchrow_array) {
+                    $_ = join(",",@ar);
+                    $pre{$_} = 1;
+                }
+
+                $sth = $dbch->prepare("SELECT $verifykey FROM $table WHERE $idxcol=$userid");
+                $sth->execute;
+                while (my @ar = $sth->fetchrow_array) {
+                    $_ = join(",",@ar);
+                    unless (delete $pre{$_}) {
+                        die "Mystery row showed up in $table: uid=$userid, $verifykey=$_";
+                    }
+                }
+                my $count = scalar keys %pre;
+                die "Rows not moved for uid=$userid, table=$table.  unmoved count = $count"
+                    if $count;
+            }
+        }
+
+        $was_empty{$table} = 1 unless $tct;
+        $rows += $tct;
+    }
+
+    print "# Rows done for '$user': $rows\n" if $optv;
+
+    ## TODO: verify with jobserver that it's okay to finish this transaction
+
+    # unset readonly and move to new cluster in one update
+    LJ::update_user($userid, { clusterid => $dclust, raw => "caps=caps&~(1<<$readonly_bit)" });
+    print "Moved.\n" if $optv;
+
+    # delete from source cluster
     if ($opt_del) {
-        print "Deleting expungeable user data...\n" if $optv;
-
-        # figure out if they have any S1 styles
-        my $styleids = $dboa->selectcol_arrayref("SELECT styleid FROM s1style WHERE userid = $userid");
-
-        # now delete from the main tables
-        foreach my $table (keys %$tinfo) {
-            my $pri = $tinfo->{$table}->{idxcol};
+        print "Deleting from source cluster...\n" if $optv;
+        foreach my $td (@to_delete) {
+            my ($table, $pri) = @$td;
             while ($dboa->do("DELETE FROM $table WHERE $pri=$userid LIMIT 1000") > 0) {
                 print "  deleted from $table\n" if $optv;
             }
         }
 
-        # and from the s1stylecache table
-        if (@$styleids) {
-            my $styleids_in = join(",", map { $dboa->quote($_) } @$styleids);
+        # s1stylecache table
+        if (@styleids) {
+            my $styleids_in = join(",", map { $dboa->quote($_) } @styleids);
             if ($dboa->do("DELETE FROM s1stylecache WHERE styleid IN ($styleids_in)") > 0) {
                 print "  deleted from s1stylecache\n" if $optv;
             }
         }
-    }
-    
-    exit 0;
-}
-
-# if we get to this point we have to enforce that there's a destination cluster, because
-# apparently the user failed the expunge test
-if (!defined $dclust || !defined $dbch) {
-    die "User is not eligible for expunging.\n" if $opt_expungedel;
-    usage();
-}
-
-print "Moving '$u->{'user'}' from cluster $sclust to $dclust\n" if $optv >= 1;
-
-# mark that we're starting the move
-$dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart) ".
-         "VALUES (?,?,?,UNIX_TIMESTAMP())", undef, $userid, $sclust, $dclust);
-my $cmid = $dbh->{'mysql_insertid'};
-
-# set readonly cap bit on user
-unless ($opt_prelocked || 
-        LJ::update_user($userid, { raw => "caps=caps|(1<<$readonly_bit)" })) 
-{
-    die "Failed to set readonly bit on user: $user\n";
-}
-$dbh->do("SELECT RELEASE_LOCK('moveucluster-$user')");
-
-unless ($opt_prelocked) {
-# wait a bit for writes to stop if journal is somewhat active (last week update)
-    my $secidle = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
-                                        "FROM userusage WHERE userid=$userid");
-    if ($secidle) {
-        sleep(2) unless $secidle > 86400*7;
-        sleep(1) unless $secidle > 86400;
-    }
-}
-
-
-if ($is_movemaster) {
-    my $diff = 999_999;
-    my $tries = 0;
-    while ($diff > 50_000) {
-        my $ss = $dbo->selectrow_hashref("show slave status");
-        $tries++;
-        if ($ss->{'Slave_IO_Running'} eq "Yes" && $ss->{'Slave_SQL_Running'} eq "Yes") {
-            if ($ss->{'Master_Log_File'} eq $ss->{'Relay_Master_Log_File'}) {
-                $diff = $ss->{'Read_Master_Log_Pos'} - $ss->{'Exec_master_log_pos'};
-                print "  diff: $diff\n" if $optv >= 1;
-            } else {
-                print "  (Wrong log file):  $ss->{'Relay_Master_Log_File'}($ss->{'Exec_master_log_pos'}) not $ss->{'Master_Log_File'}($ss->{'Read_Master_Log_Pos'})\n" if $optv >= 1;
-            }
-        } else {
-            die "Movemaster slave not running";
-        }
-    }
-}
-
-
-print "Moving away from cluster $sclust\n" if $optv;
-
-while (my $cmd = $dboa->selectrow_array("SELECT cmd FROM cmdbuffer WHERE journalid=$userid")) {
-    print "Flushing cmdbuffer for cmd: $cmd\n" if $optv > 1;
-    require "$ENV{'LJHOME'}/cgi-bin/ljcmdbuffer.pl";
-    LJ::Cmdbuffer::flush($dbh, $dboa, $cmd, $userid);
-}
-
-
-# setup dependencies (we can skip work by not checking a table if we know 
-# its dependent table was empty).  then we have to order things so deps get
-# processed first.
-my %was_empty;  # $table -> bool, table was found empty
-my %dep = (
-           "logtext2" => "log2",
-           "logprop2" => "log2",
-           "logsec2" => "log2",
-           "talkprop2" => "talk2",
-           "talktext2" => "talk2",
-           "phoneposttrans" => "phonepostentry", # FIXME: ljcom
-           "modblob" => "modlog",
-           "sessions_data" => "sessions",
-           );
-
-# all tables we could be moving.  we need to sort them in
-# order so that we check dependant tables first
-my @alltables = (@LJ::USER_TABLES, @LJ::USER_TABLES_LOCAL);
-my @tables;
-push @tables, grep { ! $dep{$_} } @alltables;
-push @tables, grep { $dep{$_} } @alltables;
-
-
-# these are ephemeral or handled elsewhere
-my %skip_table = (
-                  "cmdbuffer" => 1,       # pre-flushed
-                  "events" => 1,          # handled by qbufferd (not yet used)
-                  "s1stylecache" => 1,    # will be recreated
-                  "captcha_session" => 1, # temporary
-                  "tempanonips" => 1,     # temporary ip storage for spam reports
-                  );
-$skip_table{'inviterecv'} = 1 if $u->{journaltype} ne 'P'; # non-person, skip invites received
-$skip_table{'invitesent'} = 1 if $u->{journaltype} ne 'C'; # not community, skip invites sent
-
-# we had a concern at the time of writing this dependency optization
-# that we might use "log3" and "talk3" tables in the future with the
-# old talktext2/etc tables.  if that happens and we forget about this,
-# this code will trip it up and make us remember:
-if (grep { $_ eq "log3" || $_ eq "talk3" } @tables) {
-    die "This script needs updating.\n";
-}
-
-
-# check if dest has existing data for this user.  (but only check a few key tables)
-# if anything else happens to have data, we'll just fail later.  but unlikely.
-print "Checking for existing data on target cluster...\n" if $optv > 1;
-foreach my $table (qw(userbio talkleft log2 talk2 sessions userproplite2)) {
-    my $ti = $tinfo->{$table} or die "No table info for $table.  Aborting.";
-
-    eval { $dbch->do("HANDLER $table OPEN"); };
-    if ($@) {
-        die "This mover currently only works on MyISAM tables on MySQL 4.x and above.\n" .
-            "Support for InnoDB tables coming later.\n\nActual error: " .
-            $@;
-    }
-
-    my $idx = $ti->{idx};
-    my $is_there = $dbch->selectrow_array("HANDLER $table READ `$idx` = ($userid) LIMIT 1");
-    $dbch->do("HANDLER $table CLOSE");
-    next unless $is_there;
-
-    if ($opt_destdel) {
-        foreach my $table (@tables) {
-            # these are ephemeral or handled elsewhere
-            next if $skip_table{$table};
-            my $ti = $tinfo->{$table} or die "No table info for $table.  Aborting.";
-            my $pri = $ti->{idxcol};
-            while ($dbch->do("DELETE FROM $table WHERE $pri=$userid LIMIT 500") > 0) {
-                print "  deleted from $table\n" if $optv;
-            }
-        }
-        last;
     } else {
-        die "  Existing data on destination cluster\n";
+        # at minimum, we delete the clustertrack2 row so it doesn't get
+        # included in a future ljumover.pl query from that cluster.
+        $dboa->do("DELETE FROM clustertrack2 WHERE userid=$userid");
     }
+
+    $dbh->do("UPDATE clustermove SET sdeleted=?, timedone=UNIX_TIMESTAMP() ".
+             "WHERE cmid=?", undef, $opt_del ? 1 : 0, $cmid);
+
+    return 1;
 }
 
-# start copying from source to dest.
-my $rows = 0;
-my @to_delete;  # array of [ $table, $prikey ]
-my @styleids;   # to delete, potentially
-
-foreach my $table (@tables) {
-    next if $skip_table{$table};
-
-    # people accounts don't have moderated posts
-    next if $u->{'journaltype'} eq "P" && ($table eq "modlog" ||
-                                           $table eq "modblob");
-
-    # don't waste time looking at dependent tables with empty parents
-    next if $dep{$table} && $was_empty{$dep{$table}};
-
-    my $ti = $tinfo->{$table} or die "No table info for $table.  Aborting.";
-    my $idx = $ti->{idx};
-    my $idxcol = $ti->{idxcol};
-    my $cols = $ti->{cols};
-    my $pripos = $ti->{pripos};
-
-    eval { $dbo->do("HANDLER $table OPEN"); };
-    if ($@) {
-        die "This mover currently only works on MyISAM tables on MySQL 4.x and above.\n".
-            "Support for InnoDB tables coming later.\n\nERROR: " .
-            $@;
-    }
-
-    my $tct = 0;            # total rows read for this table so far.
-    my $hit_otheruser = 0;  # bool, set to true when we encounter data from a different userid
-    my $batch_size = 1000;
-    my $ct = 0;             # rows read in latest batch
-    my $did_start = 0;      # bool, if process has started yet (used to enter loop, and control initial HANDLER commands)
-    my $pushed_delete = 0;  # bool, if we've pushed this table on the delete list (once we find it has something)
-
-    my $sqlins = "";
-    my $sqlvals = 0;
-    my $flush = sub {
-        return unless $sqlins;
-        print "# Flushing $table ($sqlvals recs, ", length($sqlins), " bytes)\n" if $optv;
-        $dbch->do($sqlins);
-        $sqlins = "";
-        $sqlvals = 0;
-    };
-
-    my $insert = sub {
-        my $r = shift;
-
-        # now that we know it has something to delete (many tables are empty for users)
-        unless ($pushed_delete++) {
-            push @to_delete, [ $table, $idxcol ];
-        }
-
-        if ($sqlins) {
-            $sqlins .= ", ";
-        } else {
-            $sqlins = "INSERT INTO $table (" . join(', ', @{$cols}) . ") VALUES ";
-        }
-        $sqlins .= "(" . join(", ", map { $dbo->quote($_) } @$r) . ")";
-
-        $sqlvals++;
-        $flush->() if $sqlvals > 5000 || length($sqlins) > 800_000;
-    };
-
-    # let tables perform extra processing on the $r before it's 
-    # sent off for inserting.
-    my $magic;
-
-    # we know how to compress these two tables (currently the only two)
-    if ($table eq "logtext2" || $table eq "talktext2") {
-        $magic = sub {
-            my $r = shift;
-            return unless length($r->[3]) > 200;
-            LJ::text_compress(\$r->[3]);
-        };
-    }
-    if ($table eq "s1style") {
-        $magic = sub {
-            my $r = shift;
-            push @styleids, $r->[0];
-        };
-    }
-
-    while (! $hit_otheruser && ($ct == $batch_size || ! $did_start)) {
-        my $qry = "HANDLER $table READ `$idx` NEXT LIMIT $batch_size";
-        unless ($did_start) {
-            $qry = "HANDLER $table READ `$idx` = ($userid) LIMIT $batch_size";
-            $did_start = 1;
-        }
-
-        my $sth = $dbo->prepare($qry);
-        $sth->{'mysql_use_result'} = 1;
-        $sth->execute;
-
-        $ct = 0;
-        while (my $r = $sth->fetchrow_arrayref) {
-            if ($r->[$pripos] != $userid) {
-                $hit_otheruser = 1;
-                last;
-            }
-            $magic->($r) if $magic;
-            $insert->($r);
-            $tct++;
-            $ct++;
-        }
-    }
-    $flush->();
-
-    $dbo->do("HANDLER $table CLOSE");
-
-    # verify the important tables
-    if ($table =~ /^(talk|log)(2|text2)$/) {
-        my $dblcheck = $dbo->selectrow_array("SELECT COUNT(*) FROM $table WHERE $idxcol=$userid");
-        die "# Expecting: $dblcheck, but got $tct\n" unless $dblcheck == $tct;
-    }
-
-    my $verifykey = $ti->{verifykey};
-    if ($opt_verify && $verifykey) {
-        if ($table eq "dudata" || $table eq "ratelog") {
-            print "# Verifying $table on size\n";
-            my $pre = $dbo->selectrow_array("SELECT COUNT(*) FROM $table WHERE $idxcol=$userid");
-            my $post = $dbch->selectrow_array("SELECT COUNT(*) FROM $table WHERE $idxcol=$userid");
-            die "Moved sized is smaller" if $post < $pre;
-        } else {
-            print "# Verifying $table on key $verifykey\n";
-            my %pre;
-            my %post;
-            my $sth;
-
-            $sth = $dbo->prepare("SELECT $verifykey FROM $table WHERE $idxcol=$userid");
-            $sth->execute;
-            while (my @ar = $sth->fetchrow_array) {
-                $_ = join(",",@ar);
-                $pre{$_} = 1;
-            }
-
-            $sth = $dbch->prepare("SELECT $verifykey FROM $table WHERE $idxcol=$userid");
-            $sth->execute;
-            while (my @ar = $sth->fetchrow_array) {
-                $_ = join(",",@ar);
-                unless (delete $pre{$_}) {
-                    die "Mystery row showed up in $table: uid=$userid, $verifykey=$_";
-                }
-            }
-            my $count = scalar keys %pre;
-            die "Rows not moved for uid=$userid, table=$table.  unmoved count = $count"
-                if $count;
-        }
-    }
-
-    $was_empty{$table} = 1 unless $tct;
-    $rows += $tct;
-}
-
-print "# Rows done for '$user': $rows\n" if $optv;
-
-# unset readonly and move to new cluster in one update
-LJ::update_user($userid, { clusterid => $dclust, raw => "caps=caps&~(1<<$readonly_bit)" });
-print "Moved.\n" if $optv;
-
-# delete from source cluster
-if ($opt_del) {
-    print "Deleting from source cluster...\n" if $optv;
-    foreach my $td (@to_delete) {
-        my ($table, $pri) = @$td;
-        while ($dboa->do("DELETE FROM $table WHERE $pri=$userid LIMIT 1000") > 0) {
-            print "  deleted from $table\n" if $optv;
-        }
-    }
-
-    # s1stylecache table
-    if (@styleids) {
-        my $styleids_in = join(",", map { $dboa->quote($_) } @styleids);
-        if ($dboa->do("DELETE FROM s1stylecache WHERE styleid IN ($styleids_in)") > 0) {
-            print "  deleted from s1stylecache\n" if $optv;
-        }
-    }
-} else {
-    # at minimum, we delete the clustertrack2 row so it doesn't get
-    # included in a future ljumover.pl query from that cluster.
-    $dboa->do("DELETE FROM clustertrack2 WHERE userid=$userid");
-}
-
-$dbh->do("UPDATE clustermove SET sdeleted=?, timedone=UNIX_TIMESTAMP() ".
-         "WHERE cmid=?", undef, $opt_del ? 1 : 0, $cmid);
-
-exit 0;
-
-sub fetch_tableinfo
+sub fetchTableInfo
 {
     my @tables = (@LJ::USER_TABLES, @LJ::USER_TABLES_LOCAL);
     my $memkey = "moveucluster:" . Digest::MD5::md5_hex(join(",",@tables));
@@ -582,3 +661,16 @@ sub fetch_tableinfo
     LJ::MemCache::set($memkey, $tinfo, 90);  # not for long, but quick enough to speed a series of moves
     return $tinfo;
 }
+
+### FUNCTION: abortWithUsage( $message )
+### Abort the program showing usage message.
+sub abortWithUsage {
+    my $msg = join '', @_;
+
+    if ( $msg ) {
+        pod2usage( -verbose => 1, -exitval => 1, -message => "$msg" );
+    } else {
+        pod2usage( -verbose => 1, -exitval => 1 );
+    }
+}
+
