@@ -13,7 +13,7 @@ BEGIN {
 
 my $DELAY = $LJ::QBUFFERD_DELAY || 15;
 
-my $pidfile = '/home/lj/var/qbufferd.pid';
+my $pidfile = $LJ::QBUFFERD_PIDFILE || "$ENV{'LJHOME'}/var/qbufferd.pid";
 my $pid;
 if (-e $pidfile) {
     open (PID, $pidfile);
@@ -50,7 +50,10 @@ $SIG{'HUP'} = sub {
 if ($pid = fork) 
 {
     $is_parent = 1;
-    open (PID, ">$pidfile") or die "Couldn't write PID file.  Exiting.\n";
+    unless (open (PID, ">$pidfile")) {
+        kill 15, $pid;
+        die "Couldn't write PID file.  Exiting.\n";
+    }
     print PID $pid, "\n";
     close PID;
     print "qbufferd started with pid $pid\n";
