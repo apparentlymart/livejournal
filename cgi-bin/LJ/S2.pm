@@ -1100,8 +1100,10 @@ sub get_plural_phrase
 sub get_url
 {
     my ($ctx, $obj, $view) = @_;
+    # FIXME: make this generate community URLs when $obj is a UserLite and we know the journal_type
     my $user = ref $obj ? $obj->{'username'} : $obj;
     $view = "info" if $view eq "userinfo";
+    $view = "calendar" if $view eq "archive";
     $view = "" if $view eq "recent";
     return "$LJ::SITEROOT/users/$user/$view";
 }
