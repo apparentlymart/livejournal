@@ -4155,8 +4155,8 @@ sub expunge_userpic {
     LJ::MemCache::delete([$userid, "upicinf:$userid"]);
 
     # call the hook and get out of here
-    LJ::run_hooks('expunge_userpic', $picid, $userid);
-    return $userid;
+    my $rval = LJ::run_hook('expunge_userpic', $picid, $userid);
+    return ($userid, $rval);
 }
 
 # <LJFUNC>

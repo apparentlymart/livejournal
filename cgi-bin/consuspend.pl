@@ -30,7 +30,10 @@ sub expunge_userpic {
     }
 
     # the actual expunging happens in ljlib
-    my $rval = LJ::expunge_userpic($picid);
+    my ($rval, $hookval) = LJ::expunge_userpic($picid);
+    push @$out, $hookval if @{$hookval || []};
+
+    # now load up from the return value we got
     my $u = LJ::load_userid($rval+0);
     unless ($rval && $u) {
         push @$out, [ "error", "Error expunging user picture icon." ];
@@ -39,7 +42,7 @@ sub expunge_userpic {
 
     # but make sure to log it
     LJ::statushistory_add($u->{userid}, $remote->{userid}, 'expunge_userpic', "expunged userpic; id=$picid");
-    push @$out, [ "info", "User picture icon $picid for $u->{user} expunged." ];
+    push @$out, [ "info", "User picture icon $picid for $u->{user} expunged from $LJ::SITENAMESHORT." ];
 
     return 1;
 }
