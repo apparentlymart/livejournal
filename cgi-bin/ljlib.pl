@@ -3159,7 +3159,8 @@ sub make_journal
     my %vars = ();
     # load the base style
     my $basevars = "";
-    LJ::load_style_fast($dbs, $styleid, \$basevars)
+    my $viewref = $view eq "" ? \$view : undef;
+    LJ::load_style_fast($dbs, $styleid, \$basevars, $viewref)
         unless $LJ::viewinfo{$view}->{'nostyle'};
 
     # load the overrides
