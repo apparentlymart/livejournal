@@ -226,8 +226,9 @@ body<=
         $users{$id}->{'member'} = 1;
     }
 
-    my $sth = $dbr->prepare("SELECT r.targetid, r.type, u.user FROM reluser r, user u WHERE r.targetid = u.userid AND r.userid=$cid AND r.type IN ('A','P','M','N')");
-    $sth->execute;
+    my $sth = $dbr->prepare("SELECT r.targetid, r.type, u.user FROM reluser r, useridmap u " .
+                            "WHERE r.targetid = u.userid AND r.userid=? AND r.type IN ('A','P','M','N')");
+    $sth->execute($cid);
 
     while (my ($id, $type, $user) = $sth->fetchrow_array) {
         $users{$id}->{'userid'} = $id;
