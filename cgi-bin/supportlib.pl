@@ -71,7 +71,7 @@ sub filter_cats
     my $cats = shift;
 
     return grep {
-        can_read_cat(undef, $_, $remote);
+        can_read_cat($_, $remote);
     } sorted_cats($cats);
 }
 
@@ -124,17 +124,17 @@ sub can_see_helper
 
 sub can_read
 {
-    my ($dbh, $sp, $remote, $auth) = @_;
+    my ($sp, $remote, $auth) = @_;
     return (is_poster($sp, $remote, $auth) ||
-            can_read_cat($dbh, $sp->{_cat}, $remote));
+            can_read_cat($sp->{_cat}, $remote));
 }
 
 sub can_read_cat
 {
-    my ($dbh, $cat, $remote) = @_;
+    my ($cat, $remote) = @_;
     return unless ($cat);
     return ($cat->{'public_read'} || 
-            LJ::check_priv($dbh, $remote, "supportread", $cat->{'catkey'}));
+            LJ::check_priv($remote, "supportread", $cat->{'catkey'}));
 }
 
 sub can_close

@@ -22,7 +22,7 @@ body<=
  if ($filtercat eq "_nonpublic") {
      $filterwhere = " AND s.spcatid IN (0";
      foreach my $cat (values %$cats) {
-         if (! $cat->{'public_read'} && LJ::Support::can_read_cat($dbr, $cat, $remote)) {
+         if (! $cat->{'public_read'} && LJ::Support::can_read_cat($cat, $remote)) {
              $filterwhere .= ", $cat->{'spcatid'}";
          }
      }
@@ -37,7 +37,7 @@ body<=
      $filterwhere .= ")";
  } else {
      my $fcat = LJ::Support::get_cat_by_key($cats, $filtercat);
-     if (LJ::Support::can_read_cat($dbr, $fcat, $remote)) {
+     if (LJ::Support::can_read_cat($fcat, $remote)) {
          $filterwhere = " AND s.spcatid=$fcat->{'spcatid'}";
      } else {
          $filtercat = "";
@@ -102,9 +102,9 @@ my $total_open;
  my @filter_cats = LJ::Support::filter_cats($remote, $cats);
  if (LJ::check_priv($dbr, $remote, "supportread")) {
      unshift @filter_cats, { 'catkey' => '_nonpublic',
-                             'catname' => '(Non-Public)' };
+                             'catname' => '(Private)' };
      unshift @filter_cats, { 'catkey' => '_nonprivate',
-                             'catname' => '(Non-Private)' };
+                             'catname' => '(Public)' };
  }
  foreach my $cat (@filter_cats)
  {
@@ -127,7 +127,7 @@ my $total_open;
  while ($sp = $sth->fetchrow_hashref)
  {
      LJ::Support::fill_request_with_cat($sp, $cats);
-     next unless (LJ::Support::can_read($dbr, $sp, $remote));
+     next unless (LJ::Support::can_read($sp, $remote));
 
      my $status = "open";
      my $barbg = "BGCOLOR=#D0EED0";

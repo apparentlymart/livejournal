@@ -42,7 +42,7 @@ body<=
          ## if user used to be able to read a category, subscribed, then lost
          ## privs, this ensures any future save will turn off things they 
          ## don't have access to:
-         if (LJ::Support::can_read_cat($dbh, $cats->{$spcatid}, $remote)) {
+         if (LJ::Support::can_read_cat($cats->{$spcatid}, $remote)) {
              $notify{$spcatid} = $level;
          }
      }
