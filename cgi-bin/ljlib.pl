@@ -486,6 +486,7 @@ sub register_authaction
 }
 
 # <LJFUNC>
+# class: logging
 # name: LJ::send_statserv
 # des: Sends a line to the statistics server.
 # returns: Nothing.
@@ -584,6 +585,7 @@ sub make_cookie
 
 
 # <LJFUNC>
+# class: logging
 # name: LJ::statushistory_add
 # des: Adds a row to a user's statushistory
 # returns: boolean; 1 on success, 0 on failure
@@ -632,9 +634,11 @@ sub make_link
 }
 
 # <LJFUNC>
+# class: time
 # name: LJ::ago_text
-# des: Turns a number of seconds into the largest possible unit of
-#      time. "2 weeks", "4 days", or "20 hours".
+# des: Converts integer seconds to English time span 
+# info: Turns a number of seconds into the largest possible unit of
+#       time. "2 weeks", "4 days", or "20 hours".
 # returns: A string with the number of largest units found
 # args: secondsold
 # des-secondsold: The number of seconds from now something was made.
@@ -665,9 +669,11 @@ sub ago_text
 }
 
 # <LJFUNC>
+# class: components
 # name: LJ::auth_fields
-# des: Returns a form for either submitting username/password to a script or
-#      entering a new username/password.
+# des: Makes a login form.
+# info: Returns a form for either submitting username/password to a script or
+#       entering a new username/password.
 # returns: The built form
 # args: form, opts?
 # des-form: The hash of form information, which is used to determine whether to
@@ -1122,9 +1128,11 @@ sub prepare_currents
 
 
 # <LJFUNC>
+# class: time
 # name: LJ::http_to_time
-# des: Wrapper around HTTP::Date::str2time.  Converts an HTTP
-#      date to a Unix time.  See also [func[LJ::time_to_http]].
+# des: Converts HTTP date to Unix time.
+# info: Wrapper around HTTP::Date::str2time. 
+#       See also [func[LJ::time_to_http]].
 # args: string
 # des-string: HTTP Date.  See RFC 2616 for format.
 # returns: integer; Unix time.
@@ -1135,9 +1143,11 @@ sub http_to_time {
 }
 
 # <LJFUNC>
+# class: time
 # name: LJ::time_to_http
-# des: Wrapper around HTTP::Date::time2str.  Converts a Unix time
-#      to an HTTP date (RFC 1123 format)  See also [func[LJ::http_to_time]].
+# des: Converts a Unix time to an HTTP date.
+# info: Wrapper around HTTP::Date::time2str to make an
+#       HTTP date (RFC 1123 format)  See also [func[LJ::http_to_time]].
 # args: time
 # des-time: Integer; Unix time.
 # returns: String; RFC 1123 date.
@@ -1148,10 +1158,12 @@ sub time_to_http {
 }
 
 # <LJFUNC>
+# class: component
 # name: LJ::ljuser
-# des: Returns the HTML for an userinfo/journal link pair for a given user 
-#      name, just like LJUSER does in BML.  But files like cleanhtml.pl
-#      and ljpoll.pl need to do that too, but they aren't run as BML.
+# des: Make link to userinfo/journal of user.
+# info: Returns the HTML for an userinfo/journal link pair for a given user 
+#       name, just like LJUSER does in BML.  But files like cleanhtml.pl
+#       and ljpoll.pl need to do that too, but they aren't run as BML.
 # args: user, opts?
 # des-user: Username to link to.
 # des-opts: Optional hashref to control output.  Currently only recognized key
