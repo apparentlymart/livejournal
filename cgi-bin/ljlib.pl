@@ -6437,7 +6437,7 @@ sub get_userid
     if ($LJ::CACHE_USERID{$user}) { return $LJ::CACHE_USERID{$user}; }
 
     my $userid = LJ::MemCache::get("uidof:$user");
-    return $userid if $userid;
+    return $LJ::CACHE_USERID{$user} = $userid if $userid;
 
     my $dbr = LJ::get_db_reader();
     $userid = $dbr->selectrow_array("SELECT userid FROM useridmap WHERE user=?", undef, $user);
