@@ -112,6 +112,51 @@ body<=
         return BML::redirect("/customize/?journal=$u->{'user'}");
     }
 
+    if ($POST{'save:langcode'}) {
+        my $langcode = $POST{'langcode'};
+        return BML::redirect("/customize/?journal=$u->{'user'}")
+            if $langcode eq 'custom';
+
+        my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
+        my ($i18n, $i18nc);
+
+        # scan for an i18n user layer
+        foreach (values %$userlay) {
+            last if
+                $_->{'b2lid'} == $style{'layout'} &&
+                $_->{'type'} eq 'i18n' &&
+                $_->{'langcode'} eq $langcode &&
+                ($i18n = $_->{'s2lid'});
+        }
+
+        # scan for i18nc public layer and i18n layer if necessary
+        foreach (values %$pub) {
+            last if $i18nc && $i18n;
+
+            next if
+                ! $i18nc &&
+                $_->{'type'} eq 'i18nc' &&
+                $_->{'langcode'} eq $langcode &&
+                ($i18nc = $_->{'s2lid'});
+
+            next if
+                ! $i18n && 
+                $_->{'b2lid'} == $style{'layout'} &&
+                $_->{'type'} eq 'i18n' &&
+                $_->{'langcode'} eq $langcode &&
+                ($i18n = $_->{'s2lid'});
+        }
+
+        $implicit_style_create->();
+        LJ::S2::set_style_layers($u, $u->{'s2_style'}, "i18nc", $i18nc);
+        LJ::S2::set_style_layers($u, $u->{'s2_style'}, "i18n", $i18n);
+
+        # TODO: conflict resolution.  check if there
+        # exists a user layer, and ask user if they want to 
+        # override it using the theme exclusively.
+        return BML::redirect("/customize/?journal=$u->{'user'}");
+    }
+
     # choose style system
     $ret .= "<form method='post' action='./?journal=$u->{'user'}'>";
     $ret .= "<?h1 Choose style system h1?><?p Do you want to use the old style system, or the new one? p?>";
@@ -159,6 +204,14 @@ body<=
 
     # langauge
     my @langs = LJ::S2::get_layout_langs($pub, $style{'layout'});
+
+    # they have set a custom i18n layer
+    if ($style{'i18n'} && 
+        ($style{'i18nc'} != $style{'i18n'} || ! defined $pub->{$style{'i18n'}})) {
+        push @langs, 'custom', '(Custom)';
+        $langcode = 'custom';
+    }
+    
     $ret .= "<?h2 Language h2?><?p The following languages are fully or partially supported by this layout. p?>";
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'langcode',
@@ -204,9 +257,6 @@ body<=
     $ret .= "</blockquote>";
 
     $ret .= "</form>";
-
-#    use Data::Dumper;
-#    $ret .= "<pre>" . Dumper($pub) . "</pre>";
 
     return $ret;
 }
