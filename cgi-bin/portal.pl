@@ -502,7 +502,8 @@ $box{'login'} =
         $$b .= "</td></tr><tr><td align='right'>";
 
         $$b .= <<LOGIN;
-        <script>
+        <script language="JavaScript" type='text/javascript'> 
+        <!--
             if (document.getElementById && document.getElementById('portallogin')) {
                 document.write("<img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' />");
                 document.write("&nbsp;");
@@ -510,6 +511,7 @@ $box{'login'} =
               } else {
                 document.write("<input name='action:login' type='submit' value='Login' />");
               }
+        // -->
         </script>
         <noscript>
             <input name='action:login' type='submit' value='Login' />
@@ -826,12 +828,14 @@ $box{'update'} =
         $$bd .= "</TD></TR><TR><TD ALIGN=CENTER>";
 
         $$bd .= <<UPDATE;
-        <script>
+        <script language="JavaScript" type='text/javascript'> 
+        <!--
             if (document.getElementById && document.getElementById('updatebox')) {
                 document.write("<input onclick='return sendForm(\\"updatebox\\")' type='submit' value='Update Journal' />");
               } else {
                 document.write("<input type='submit' value='Update Journal' />");
               }
+        // -->
         </script>
         <noscript>
             <input type='submit' value='Update Journal' />
