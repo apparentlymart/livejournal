@@ -4336,7 +4336,7 @@ sub make_journal
 
     # FIXME: remove this after all affected accounts have been fixed
     # see http://zilla.livejournal.org/1443 for details
-    if ($u->{$s1prop} =~ /^\w/) {
+    if ($u->{$s1prop} =~ /^\D/) {
         $u->{$s1prop} = $LJ::USERPROP_DEF{$s1prop};
         LJ::set_userprop($u, $s1prop, $u->{$s1prop});
     }
