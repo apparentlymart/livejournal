@@ -11,6 +11,7 @@ use Apache::LiveJournal::PalImg;
 use LJ::S2;
 use LJ::Blob;
 use Apache::LiveJournal::Interface::Blogger;
+use Apache::LiveJournal::Interface::AtomAPI;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
@@ -430,7 +431,8 @@ sub trans
             $r->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
             return OK;
         }
-	if ($int eq "flat" || $int eq "xmlrpc" || $int eq "blogger") {
+	if ($int eq "flat" || $int eq "xmlrpc" || $int eq "blogger" ||
+            $int eq "atomapi") {
 	    $RQ{'interface'} = $int;
 	    $RQ{'is_ssl'} = $is_ssl;
 	    $r->push_handlers(PerlHandler => \&interface_content);
@@ -665,6 +667,18 @@ sub journal_content
             $r->print("Disallow: /\n");
         }
         return OK;
+    }
+
+    # handle HTTP digest authentication
+    if ($GET{'auth'} eq 'digest' || 
+        $r->header_in("Authorization") =~ /^Digest/) {
+        my $res = LJ::auth_digest($r);
+        unless ($res) {
+            $r->content_type("text/html");
+            $r->send_http_header();
+            $r->print("<b>Digest authentication failed.</b>");
+            return OK;
+        }
     }
 
     my $criterr = 0;
@@ -934,6 +948,13 @@ sub interface_content
 	    -> dispatch_with({ 'blogger' => $pkg })
 	    -> dispatch_to($pkg)
             -> handle($r);
+        return OK;
+    }
+
+    if ($RQ{'interface'} eq "atomapi") {
+        # the interface package will set up all headers and 
+        # print everything
+        Apache::LiveJournal::Interface::AtomAPI::handle($r);
         return OK;
     }
 
