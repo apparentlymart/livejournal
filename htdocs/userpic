@@ -16,19 +16,16 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 $dbh = LJ::get_dbh("master");
 if ($LJ::DBINFO{'slavecount'}) { $dro = LJ::get_dbh("slave"); }
 
-my $cache = new LJ::Cache { 'maxsize' => $CACHE_SIZE };
-
 sub make_dir
 {
     my $d = shift;
     return if (-d $d);
     mkdir $d, 0777;
 }
-foreach my $d ("$ENV{'LJHOME'}/temp",
-	       "$ENV{'LJHOME'}/temp/userpic") {
-    make_dir($d);
-}
-my $CACHE_DIR = "$ENV{'LJHOME'}/temp/userpic";
+
+my $CACHE_DIR = "$ENV{'LJHOME'}/htdocs/userpics";
+my $USE_DISK_CACHE = -d $CACHE_DIR;
+my $cache = $USE_DISK_CACHE ? undef : new LJ::Cache { 'maxsize' => $CACHE_SIZE };
 
 my $hits = 0;
 my $misses = 0;
@@ -61,6 +58,11 @@ my $lastconn;
 
     if ($FORM{'id'} =~ /^info/) {
 	print "Content-type: text/html\n\n<h1>userpic stats</h1>";
+	unless ($cache) {
+	    print "(in disk cache mode; no stats available)";
+	    next REQUEST;
+	}
+
 	print "<PRE>";
 	my $pid = $$;
 	my $cached = $cache->{'size'};
@@ -88,7 +90,7 @@ my $lastconn;
 	print "</PRE>";
 
 	my $show = 400;
-	print "<h2>first $show of $cache->{'size'} cache entries:</h2>\n";
+	print "<h2>first $show of $cached cache entries:</h2>\n";
 	print "with seconds alive in cache shown in parentheses.<BR>";
 	print "<A HREF=\"/userpic/info?sort=recent\">[sort by recently hit]</A> ";
 	print "<A HREF=\"/userpic/info?sort=time\">[sort by time in cache]</A> ";
@@ -129,15 +131,28 @@ my $lastconn;
 
     my $qid = $FORM{'id'} + 0;
     my $pic = $cache->get($qid);
-    my $modnum = $qid % 1000;
-    my $cache_file = "$CACHE_DIR/$modnum/$qid";
-    my @s = stat($cache_file);
-    my $on_disk = $s[7];
+
+    my $cache_file;
+    my $on_disk;
+    my @s;
+    my @dirs_make;
+    if ($USE_DISK_CACHE) {
+	if ($qid =~ /^\d*(\d\d)(\d\d\d)$/) {
+	    push @dirs_make, ("$CACHE_DIR/$2",
+			      "$CACHE_DIR/$2/$1");
+	    $cache_file = "$CACHE_DIR/$2/$1/$qid";
+	} else {
+	    my $mod = sprintf("%03d", $qid % 1000);
+	    push @dirs_make, "$CACHE_DIR/$mod";
+	    $cache_file = "$CACHE_DIR/$mod/p$qid"; # p to prevent dir name clash
+	}
+	@s = stat($cache_file);
+	$on_disk = $s[7];
+    }
 
     if (! defined $pic || ! $on_disk)
     {
 	$misses++;
-
 
 	## every 10 seconds, revalidate/reconnect our db connections
 	if (($now - $lastconn) > 10) {
@@ -185,21 +200,23 @@ my $lastconn;
 	$pic->{'time'} = time();
 
 	# store the picture on disk, not in memory
-	if ($on_disk) {
-	    # touch it if modify time is older than a day, to keep it in
-	    # disk cache for tomorrow.
-	    if ($s[9] < time()-86400) {  
-		open (ID, ">>$cache_file");
+	if ($USE_DISK_CACHE) {
+	    if ($on_disk) {
+		# touch it if modify time is older than a day, to keep it in
+		# disk cache for tomorrow.
+		if ($s[9] < time()-86400) {  
+		    open (ID, ">>$cache_file");
+		    close ID;
+		}
+	    } elsif ($cache_file) {
+		foreach (@dirs_make) { make_dir($_); }
+		open (ID, ">$cache_file");
+		binmode (ID);  # poor windows users
+		print ID $pic->{'imagedata'};
 		close ID;
 	    }
-	} else {
-	    make_dir("$CACHE_DIR/$modnum");
-	    open (ID, ">$cache_file");
-	    binmode (ID);  # poor windows users
-	    print ID $pic->{'imagedata'};
-	    close ID;
 	}
-	$cache->set($qid, $pic);
+	$cache->set($qid, $pic) if $cache;
     } else {
 	$hits++;
     }
