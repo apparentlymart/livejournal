@@ -7853,11 +7853,15 @@ sub is_open_proxy
     my $stat = $dbr->selectrow_hashref("SELECT status, asof FROM openproxy WHERE addr=?",
                                        undef, $ip);
 
+    # only cache 'clear' hosts for a day; 'proxy' for two days
+    $stat = undef if $stat && $stat->{'status'} eq "clear" && $stat->{'asof'} < time()-86400;
+    $stat = undef if $stat && $stat->{'status'} eq "proxy" && $stat->{'asof'} < time()-2*86400;
+
     # open proxies are considered open forever, unless cleaned by another site-local mechanism
     return 1 if $stat && $stat->{'status'} eq "proxy";
 
-    # only cache 'clear' hosts for a day
-    $stat = undef if $stat && $stat->{'status'} eq "clear" && $stat->{'asof'} < time()-86400;
+    # allow things to be cached clear for a day before re-checking
+    return 0 if $stat && $stat->{'status'} eq "clear";
 
     # no RBL defined?
     return 0 unless @LJ::RBL_LIST;
