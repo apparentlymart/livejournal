@@ -124,10 +124,12 @@ if ($modify) {
 
         if ($ban->{'what'} eq 'ip') {
             LJ::procnotify_add("unban_ip", { 'ip' => $value || $ban->{'value'}});
+            LJ::MemCache::delete("sysban:ip");
         }
         
         if ($ban->{'what'} eq 'uniq') {
             LJ::procnotify_add("unban_uniq", { 'uniq' => $value || $ban->{'value'} });
+            LJ::MemCache::delete("sysban:uniq");
         }
     }
         
