@@ -103,6 +103,10 @@ if ($toarg =~ /^(\d+)z(.+)$/)
     LJ::Support::mini_auth($sp) eq $miniauth
         or die "Invalid authentication?";
 
+    if (LJ::sysban_check('support_email', $from)) {
+        return LJ::sysban_block(0, "Support request blocked based on email", { 'email' => $from });
+    }
+
     # valid.  need to strip out stuff now with authcodes:
     $body =~ s!http://.+/support/act\.bml\S+![snipped]!g;
     $body =~ s!\+(\d)+z\w{1,10}\@!\@!g;
