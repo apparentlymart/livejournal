@@ -343,6 +343,7 @@ sub plural_form {
     return plural_form_ru($count) if $lang =~ /^ru/ || $lang =~ /^uk/;
     return plural_form_fr($count) if $lang =~ /^fr/ || $lang =~ /^pt_BR/;
     return plural_form_lt($count) if $lang =~ /^lt/;
+    return plural_form_pl($count) if $lang =~ /^pl/;
     return plural_form_singular() if $lang =~ /^hu/ || $lang =~ /^ja/ || $lang =~ /^tr/;
     return plural_form_lv($count) if $lang =~ /^lv/;
     return plural_form_en($count);  # default
