@@ -110,15 +110,12 @@ if ($modify) {
 
     my @set = ();
 
-    # status - must have a value
-    if ($status && $status ne $ban->{'status'}) {
-        $ban->{'status'} = ($status eq 'expired' ? 'expired' : 'active');
-        push @set, "status=" . $dbh->quote($ban->{'status'});
-    }
-
     # ip ban and we're going to change the value
-    if ($ban->{'what'} eq 'ip' && $value ne $ban->{'value'}) {
-        LJ::procnotify_add($dbh, "unban_ip", { 'ip' => $ban->{'value'} });
+    if ($ban->{'what'} eq 'ip' &&
+        (($value && $value ne $ban->{'value'}) ||
+        ($status && $status ne $ban->{'status'} && $status eq 'expired')) ) {
+
+        LJ::procnotify_add($dbh, "unban_ip", { 'ip' => $ban->{'value'} || $ban->{'value'}});
     }
         
     # what - must have a value
@@ -128,14 +125,23 @@ if ($modify) {
     }
 
     # ip ban and we are going to change the value
-    if ($ban->{'what'} eq 'ip' && $value ne $ban->{'value'}) {
-        LJ::procnotify_add($dbh, "ban_ip", { 'ip' => $value});
+    if ($ban->{'what'} eq 'ip' &&
+        (($value && $value ne $ban->{'value'}) ||
+        ($status && $status ne $ban->{'status'} && $status eq 'active')) ) {
+
+        LJ::procnotify_add($dbh, "ban_ip", { 'ip' => $value || $ban->{'value'}});
     }
 
     # value - must have a value
     if ($value && $value ne $ban->{'value'}) {
         $ban->{'value'} = $value;
         push @set, "value=" . $dbh->quote($ban->{'value'});
+    }
+
+    # status - must have a value
+    if ($status && $status ne $ban->{'status'}) {
+        $ban->{'status'} = ($status eq 'expired' ? 'expired' : 'active');
+        push @set, "status=" . $dbh->quote($ban->{'status'});
     }
 
     # banuntil
