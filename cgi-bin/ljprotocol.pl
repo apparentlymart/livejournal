@@ -722,13 +722,16 @@ sub authenticate
     return fail($err,200) unless $username;
     return fail($err,100) unless LJ::canonical_username($username);
 
-    my $dbr = $dbs->{'reader'};
-    my $quser = $dbr->quote($username);
-    my $sth = $dbr->prepare("SELECT user, userid, journaltype, name, ".
-			    "paidfeatures, password, status, statusvis, ".
-			    "track FROM user WHERE user=$quser");
-    $sth->execute;
-    my $u = $sth->fetchrow_hashref;
+    my $u = $flags->{'u'};
+    unless ($u) {
+	my $dbr = $dbs->{'reader'};
+	my $quser = $dbr->quote($username);
+	my $sth = $dbr->prepare("SELECT user, userid, journaltype, name, ".
+				"paidfeatures, password, status, statusvis, ".
+				"track FROM user WHERE user=$quser");
+	$sth->execute;
+	$u = $sth->fetchrow_hashref;
+    }
 
     return fail($err,100) unless $u;
     return fail($err,101) unless ($flags->{'nopassword'} || 
@@ -1831,7 +1834,11 @@ sub upgrade_request
     my $r = shift;
     my $new = { %{ $r } };
     $new->{'username'} = $r->{'user'};
-    delete $r->{'user'};
+
+    # but don't delete $r->{'user'}, as it might be, say, %FORM,
+    # that'll get reused in a later request in, say, update.bml after
+    # the login before postevent.  whoops.
+
     return $new;
 }
 

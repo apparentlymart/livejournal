@@ -8,16 +8,15 @@
  $body = "";
  $bodyopts = "";
 
- my $remote = undef;
-
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
  if ($LJ::SERVER_DOWN) {
      $body = LJ::server_down_html();
      return "";
  }
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+ my $remote = LJ::get_remote($dbs);
 
  my $mode = $FORM{'mode'} || "";  # full will be default, once portal is in.
 
@@ -34,12 +33,9 @@
      my %res;
      my $flags = {};
 
-     if ($FORM{'usertype'} eq "remote") {
-	 unless ($remote) { $remote = LJ::get_remote($dbs); }
-	 if ($remote) {
-	     $FORM{'user'} = $remote->{'user'};
-	     $flags->{'nopassword'} = 1;
-	 }	 
+     if ($FORM{'user'} eq "" && $remote) {
+	 $FORM{'user'} = $remote->{'user'};
+	 $flags->{'nopassword'} = 1;
      }
 
      # first, login
@@ -194,7 +190,6 @@
 
      if ($mode eq "full") 
      {
-	 $remote = LJ::get_remote($dbs);
 	 my %res;
 
 	 if (! $FORM{'altlogin'} && $remote)
