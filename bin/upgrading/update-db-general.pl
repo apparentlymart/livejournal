@@ -22,7 +22,7 @@ CREATE TABLE adopt (
   PRIMARY KEY  (adoptid),
   KEY (helperid),
   KEY (newbieid)
-) 
+)
 EOC
 
 register_tablecreate("adoptlast", <<'EOC');
@@ -31,7 +31,7 @@ CREATE TABLE adoptlast (
   lastassigned datetime NOT NULL default '0000-00-00 00:00:00',
   lastadopted datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (userid)
-) 
+)
 EOC
 
 register_tablecreate("authactions", <<'EOC');
@@ -43,7 +43,7 @@ CREATE TABLE authactions (
   action varchar(50) default NULL,
   arg1 varchar(255) default NULL,
   PRIMARY KEY  (aaid)
-) 
+)
 EOC
 
 register_tablecreate("clients", <<'EOC');
@@ -52,10 +52,10 @@ CREATE TABLE clients (
   client varchar(40) default NULL,
   PRIMARY KEY  (clientid),
   KEY (client)
-) 
+)
 EOC
 
-post_create("clients", 
+post_create("clients",
             "sqltry" => "INSERT INTO clients (client) SELECT DISTINCT client FROM logins",
             );
 
@@ -66,10 +66,10 @@ CREATE TABLE clientusage (
   lastlogin datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (clientid,userid),
   UNIQUE KEY userid (userid,clientid)
-) 
+)
 EOC
-    
-post_create("clientusage", 
+
+post_create("clientusage",
             "sqltry" => "INSERT INTO clientusage SELECT u.userid, c.clientid, l.lastlogin FROM user u, clients c, logins l WHERE u.user=l.user AND l.client=c.client",
             );
 
@@ -90,7 +90,7 @@ CREATE TABLE community (
   membership enum('open','closed') NOT NULL default 'open',
   postlevel enum('members','select','screened') default NULL,
   PRIMARY KEY  (userid)
-) 
+)
 EOC
 
 register_tablecreate("dirsearchres2", <<'EOC');
@@ -100,7 +100,7 @@ CREATE TABLE dirsearchres2 (
   userids blob,
   PRIMARY KEY  (qdigest),
   KEY (dateins)
-) 
+)
 EOC
 
 register_tablecreate("duplock", <<'EOC');
@@ -112,7 +112,7 @@ CREATE TABLE duplock (
   dupid int(10) unsigned NOT NULL default '0',
   instime datetime NOT NULL default '0000-00-00 00:00:00',
   KEY (realm,reid,userid)
-) 
+)
 EOC
 
 register_tablecreate("faq", <<'EOC');
@@ -145,7 +145,7 @@ CREATE TABLE faquses (
   PRIMARY KEY (userid, faqid),
   KEY (faqid),
   KEY (dateview)
-) 
+)
 EOC
 
 register_tablecreate("friendgroup", <<'EOC');
@@ -156,7 +156,7 @@ CREATE TABLE friendgroup (
   sortorder tinyint(3) unsigned NOT NULL default '50',
   is_public enum('0','1') NOT NULL default '0',
   PRIMARY KEY  (userid,groupnum)
-) 
+)
 EOC
 
 register_tablecreate("friends", <<'EOC');
@@ -169,7 +169,7 @@ CREATE TABLE friends (
   showbydefault enum('1','0') NOT NULL default '1',
   PRIMARY KEY  (userid,friendid),
   KEY (friendid)
-) 
+)
 EOC
 
 register_tablecreate("interests", <<'EOC');
@@ -188,7 +188,7 @@ CREATE TABLE keywords (
   keyword varchar(80) binary NOT NULL default '',
   PRIMARY KEY  (kwid),
   UNIQUE KEY kwidx (keyword)
-) 
+)
 EOC
 
 register_tablecreate("logproplist", <<'EOC');
@@ -201,7 +201,7 @@ CREATE TABLE logproplist (
   des varchar(255) default NULL,
   PRIMARY KEY  (propid),
   UNIQUE KEY name (name)
-) 
+)
 EOC
 
 register_tablecreate("memkeyword", <<'EOC');
@@ -209,7 +209,7 @@ CREATE TABLE memkeyword (
   memid int(10) unsigned NOT NULL default '0',
   kwid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (memid,kwid)
-) 
+)
 EOC
 
 register_tablecreate("memorable", <<'EOC');
@@ -222,7 +222,7 @@ CREATE TABLE memorable (
   PRIMARY KEY  (memid),
   UNIQUE KEY userid (userid,itemid),
   KEY (itemid)
-) 
+)
 EOC
 
 register_tablecreate("moods", <<'EOC');
@@ -232,7 +232,7 @@ CREATE TABLE moods (
   parentmood int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (moodid),
   UNIQUE KEY mood (mood)
-) 
+)
 EOC
 
 register_tablecreate("moodthemedata", <<'EOC');
@@ -244,7 +244,7 @@ CREATE TABLE moodthemedata (
   height tinyint(3) unsigned NOT NULL default '0',
   KEY (moodthemeid),
   PRIMARY KEY  (moodthemeid,moodid)
-) 
+)
 EOC
 
 register_tablecreate("moodthemes", <<'EOC');
@@ -257,7 +257,7 @@ CREATE TABLE moodthemes (
   PRIMARY KEY  (moodthemeid),
   KEY (is_public),
   KEY (ownerid)
-) 
+)
 EOC
 
 register_tablecreate("news_sent", <<'EOC');
@@ -281,7 +281,7 @@ CREATE TABLE noderefs (
   urlmd5 varchar(32) NOT NULL default '',
   url varchar(120) NOT NULL default '',
   PRIMARY KEY  (nodetype,nodeid,urlmd5)
-) 
+)
 EOC
 
 register_tablecreate("overrides", <<'EOC'); # global, old
@@ -289,7 +289,7 @@ CREATE TABLE overrides (
   user varchar(15) NOT NULL default '',
   override text,
   PRIMARY KEY  (user)
-) 
+)
 EOC
 
 register_tablecreate("poll", <<'EOC');
@@ -305,7 +305,7 @@ CREATE TABLE poll (
   KEY (itemid),
   KEY (journalid),
   KEY (posterid)
-) 
+)
 EOC
 
 register_tablecreate("pollitem", <<'EOC');
@@ -316,7 +316,7 @@ CREATE TABLE pollitem (
   sortorder tinyint(3) unsigned NOT NULL default '0',
   item varchar(255) default NULL,
   PRIMARY KEY  (pollid,pollqid,pollitid)
-) 
+)
 EOC
 
 register_tablecreate("pollquestion", <<'EOC');
@@ -328,7 +328,7 @@ CREATE TABLE pollquestion (
   opts varchar(20) default NULL,
   qtext text,
   PRIMARY KEY  (pollid,pollqid)
-) 
+)
 EOC
 
 register_tablecreate("pollresult", <<'EOC');
@@ -339,7 +339,7 @@ CREATE TABLE pollresult (
   value varchar(255) default NULL,
   PRIMARY KEY  (pollid,pollqid,userid),
   KEY (pollid,userid)
-) 
+)
 EOC
 
 register_tablecreate("pollsubmission", <<'EOC');
@@ -349,7 +349,7 @@ CREATE TABLE pollsubmission (
   datesubmit datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (pollid,userid),
   KEY (userid)
-) 
+)
 EOC
 
 register_tablecreate("priv_list", <<'EOC');
@@ -361,7 +361,7 @@ CREATE TABLE priv_list (
   is_public ENUM('1', '0') DEFAULT '1' NOT NULL,
   PRIMARY KEY  (prlid),
   UNIQUE KEY privcode (privcode)
-) 
+)
 EOC
 
 register_tablecreate("priv_map", <<'EOC');
@@ -373,7 +373,7 @@ CREATE TABLE priv_map (
   PRIMARY KEY  (prmid),
   KEY (userid),
   KEY (prlid)
-) 
+)
 EOC
 
 register_tablecreate("cmdbuffer", <<'EOC');
@@ -386,7 +386,7 @@ CREATE TABLE cmdbuffer (
   PRIMARY KEY  (cbid),
   KEY (cmd),
   KEY (journalid)
-) 
+)
 EOC
 
 register_tablecreate("randomuserset", <<'EOC');
@@ -394,7 +394,7 @@ CREATE TABLE randomuserset (
   rid INT UNSIGNED NOT NULL AUTO_INCREMENT,
   userid INT UNSIGNED NOT NULL,
   PRIMARY KEY  (rid)
-) 
+)
 EOC
 
 register_tablecreate("schemacols", <<'EOC');
@@ -403,7 +403,7 @@ CREATE TABLE schemacols (
   colname varchar(40) NOT NULL default '',
   des varchar(255) default NULL,
   PRIMARY KEY  (tablename,colname)
-) 
+)
 EOC
 
 register_tablecreate("schematables", <<'EOC');
@@ -413,7 +413,7 @@ CREATE TABLE schematables (
   redist_mode enum('off','insert','replace') NOT NULL default 'off',
   des text,
   PRIMARY KEY  (tablename)
-) 
+)
 EOC
 
 register_tablecreate("stats", <<'EOC');
@@ -422,7 +422,7 @@ CREATE TABLE stats (
   statkey varchar(150) NOT NULL,
   statval int(10) unsigned NOT NULL,
   UNIQUE KEY statcat_2 (statcat,statkey)
-) 
+)
 EOC
 
 register_tablecreate("blobcache", <<'EOC');
@@ -431,7 +431,7 @@ CREATE TABLE blobcache (
   PRIMARY KEY (bckey),
   dateupdate  DATETIME,
   value    MEDIUMBLOB
-) 
+)
 EOC
 
 register_tablecreate("style", <<'EOC');
@@ -491,7 +491,7 @@ CREATE TABLE support (
   timeclosed int(10) unsigned default NULL,
   PRIMARY KEY  (spid),
   KEY (state)
-) 
+)
 EOC
 
 register_tablecreate("supportcat", <<'EOC');
@@ -501,7 +501,7 @@ CREATE TABLE supportcat (
   sortorder mediumint(8) unsigned NOT NULL default '0',
   basepoints tinyint(3) unsigned NOT NULL default '1',
   PRIMARY KEY  (spcatid)
-) 
+)
 EOC
 
 register_tablecreate("supportlog", <<'EOC');
@@ -515,7 +515,7 @@ CREATE TABLE supportlog (
   message text,
   PRIMARY KEY  (splid),
   KEY (spid)
-) 
+)
 EOC
 
 register_tablecreate("supportnotify", <<'EOC');
@@ -526,7 +526,7 @@ CREATE TABLE supportnotify (
   KEY (spcatid),
   KEY (userid),
   PRIMARY KEY  (spcatid,userid)
-) 
+)
 EOC
 
 register_tablecreate("supportpoints", <<'EOC');
@@ -536,7 +536,7 @@ CREATE TABLE supportpoints (
   points tinyint(3) unsigned default NULL,
   KEY (spid),
   KEY (userid)
-) 
+)
 EOC
 
 register_tablecreate("supportpointsum", <<'EOC');
@@ -547,7 +547,7 @@ CREATE TABLE supportpointsum (
   lastupdate  INT UNSIGNED NOT NULL,
   INDEX (totpoints, lastupdate),
   INDEX (lastupdate)
-) 
+)
 EOC
 
 post_create("supportpointsum",
@@ -565,7 +565,7 @@ CREATE TABLE talkproplist (
   des varchar(255) default NULL,
   PRIMARY KEY  (tpropid),
   UNIQUE KEY name (name)
-) 
+)
 EOC
 
 register_tablecreate("themedata", <<'EOC');
@@ -582,7 +582,7 @@ CREATE TABLE themelist (
   themeid mediumint(8) unsigned NOT NULL auto_increment,
   name varchar(50) NOT NULL default '',
   PRIMARY KEY  (themeid)
-) 
+)
 EOC
 
 register_tablecreate("todo", <<'EOC');
@@ -605,7 +605,7 @@ CREATE TABLE todo (
   KEY (journalid),
   KEY (posterid),
   KEY (ownerid)
-) 
+)
 EOC
 
 register_tablecreate("tododep", <<'EOC');
@@ -614,7 +614,7 @@ CREATE TABLE tododep (
   depid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (todoid,depid),
   KEY (depid)
-) 
+)
 EOC
 
 register_tablecreate("todokeyword", <<'EOC');
@@ -622,7 +622,7 @@ CREATE TABLE todokeyword (
   todoid int(10) unsigned NOT NULL default '0',
   kwid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (todoid,kwid)
-) 
+)
 EOC
 
 register_tablecreate("txtmsg", <<'EOC');
@@ -632,7 +632,7 @@ CREATE TABLE txtmsg (
   number varchar(60) default NULL,
   security enum('all','reg','friends') NOT NULL default 'all',
   PRIMARY KEY  (userid)
-) 
+)
 EOC
 
 register_tablecreate("user", <<'EOC');
@@ -678,7 +678,7 @@ CREATE TABLE userbio (
   userid int(10) unsigned NOT NULL default '0',
   bio text,
   PRIMARY KEY  (userid)
-) 
+)
 EOC
 
 register_tablecreate("userinterests", <<'EOC');
@@ -687,7 +687,7 @@ CREATE TABLE userinterests (
   intid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (userid,intid),
   KEY (intid)
-) 
+)
 EOC
 
 register_tablecreate("userpic", <<'EOC');
@@ -703,7 +703,7 @@ CREATE TABLE userpic (
   PRIMARY KEY  (picid),
   KEY (userid),
   KEY (state)
-) 
+)
 EOC
 
 register_tablecreate("userpicblob2", <<'EOC');
@@ -721,7 +721,7 @@ CREATE TABLE userpicmap (
   kwid int(10) unsigned NOT NULL default '0',
   picid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (userid,kwid)
-) 
+)
 EOC
 
 # - blobids aren't necessarily unique between domains;
@@ -762,7 +762,7 @@ CREATE TABLE userprop (
   value varchar(60) default NULL,
   PRIMARY KEY  (userid,upropid),
   KEY (upropid,value)
-) 
+)
 EOC
 
 # global, not indexed
@@ -773,7 +773,7 @@ CREATE TABLE userproplite (
   value varchar(255) default NULL,
   PRIMARY KEY  (userid,upropid),
   KEY (upropid)
-) 
+)
 EOC
 
 # clustered, not indexed
@@ -784,7 +784,7 @@ CREATE TABLE userproplite2 (
   value varchar(255) default NULL,
   PRIMARY KEY  (userid,upropid),
   KEY (upropid)
-) 
+)
 EOC
 
 # clustered
@@ -818,7 +818,7 @@ CREATE TABLE zips (
   lon float(10,7) NOT NULL default '0.0000000',
   lat float(10,7) NOT NULL default '0.0000000',
   PRIMARY KEY  (zip)
-) 
+)
 EOC
 
 ################# above was a snapshot.  now, changes:
@@ -845,7 +845,7 @@ CREATE TABLE log2 (
   KEY `rlogtime` (`journalid`,`rlogtime`),
   KEY `revttime` (`journalid`,`revttime`),
   KEY `posterid` (`posterid`,`journalid`)
-) 
+)
 EOC
 
 register_tablecreate("logtext2", <<'EOC');
@@ -879,7 +879,7 @@ EOC
 
 register_tablecreate("talk2", <<'EOC');
 CREATE TABLE talk2 (
-  journalid INT UNSIGNED NOT NULL,  
+  journalid INT UNSIGNED NOT NULL,
   jtalkid MEDIUMINT UNSIGNED NOT NULL,
   nodetype CHAR(1) NOT NULL DEFAULT '',
   nodeid INT UNSIGNED NOT NULL default '0',
@@ -891,7 +891,7 @@ CREATE TABLE talk2 (
   KEY (nodetype,journalid,nodeid),
   KEY (journalid,state,nodetype),
   KEY (posterid)
-) 
+)
 EOC
 
 register_tablecreate("talkprop2", <<'EOC');
@@ -968,7 +968,7 @@ CREATE TABLE portal (
   boxargs varchar(255) default NULL,
   PRIMARY KEY  (userid,loc,pos),
   KEY boxname (boxname)
-) 
+)
 EOC
 
 register_tablecreate("infohistory", <<'EOC');
@@ -979,7 +979,7 @@ CREATE TABLE infohistory (
   oldvalue varchar(255) default NULL,
   other varchar(30) default NULL,
   KEY userid (userid)
-) 
+)
 EOC
 
 register_tablecreate("useridmap", <<'EOC');
@@ -1239,7 +1239,7 @@ CREATE TABLE ml_domains
   PRIMARY KEY (dmid),
   type VARCHAR(30) NOT NULL,
   args VARCHAR(255) NOT NULL DEFAULT '',
-  UNIQUE (type,args)  
+  UNIQUE (type,args)
 )
 EOC
 
@@ -1263,7 +1263,7 @@ CREATE TABLE ml_langs
    lncode   VARCHAR(16) NOT NULL,  # en_US en_LJ en ch_HK ch_B5 etc... de_DE
    UNIQUE (lncode),
    lnname   VARCHAR(60) NOT NULL,   # "Deutsch"
-   parenttype   ENUM('diff','sim') NOT NULL,   
+   parenttype   ENUM('diff','sim') NOT NULL,
    parentlnid   SMALLINT UNSIGNED NOT NULL,
    lastupdate  DATETIME NOT NULL
 )
@@ -1275,7 +1275,7 @@ CREATE TABLE ml_langdomains
    lnid   SMALLINT UNSIGNED NOT NULL,
    dmid   TINYINT UNSIGNED NOT NULL,
    PRIMARY KEY (lnid, dmid),
-   dmmaster ENUM('0','1') NOT NULL,   
+   dmmaster ENUM('0','1') NOT NULL,
    lastgetnew DATETIME,
    lastpublish DATETIME,
    countokay    SMALLINT UNSIGNED NOT NULL,
@@ -1330,7 +1330,7 @@ CREATE TABLE procnotify
    nid   INT UNSIGNED NOT NULL AUTO_INCREMENT,
    PRIMARY KEY (nid),
    cmd   VARCHAR(50),
-   args  VARCHAR(255) 
+   args  VARCHAR(255)
 )
 EOC
 
@@ -1424,7 +1424,7 @@ CREATE TABLE sessions (
    ipfixed    CHAR(15)  # if null, not fixed at IP.
 ) TYPE=MYISAM
 EOC
-    
+
 register_tablecreate("sessions_data", <<'EOC');  # user cluster
 CREATE TABLE sessions_data (
    userid     MEDIUMINT UNSIGNED NOT NULL,
@@ -1479,7 +1479,7 @@ post_create("reluser",
                 $sth->execute;
                 my ($maxid) = $sth->fetchrow_array;
                 return unless $maxid;
-                
+
                 my $from = 1; my $to = $from + 10000 - 1;
                 while ($from <= $maxid) {
                     printf "#  logaccess status: (%0.1f%%)\n", ($from * 100 / $maxid);
@@ -1548,7 +1548,7 @@ CREATE TABLE comminterests (
   intid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (userid,intid),
   KEY (intid)
-) 
+)
 EOC
 
 # links
@@ -1579,7 +1579,7 @@ CREATE TABLE s1overrides (
   userid int unsigned NOT NULL default '',
   override text NOT NULL,
   PRIMARY KEY  (userid)
-) 
+)
 EOC
 
 # s1style
@@ -1648,7 +1648,7 @@ CREATE TABLE clustertrack2 (
 )
 EOC
 
-# rotating site secret values 
+# rotating site secret values
 register_tablecreate("secrets", <<'EOC'); # global
 CREATE TABLE secrets  (
     stime   INT UNSIGNED NOT NULL,
@@ -1672,6 +1672,18 @@ CREATE TABLE captchas (
 )
 EOC
 
+register_tablecreate("clustermove_inprogress", <<'EOC');
+CREATE TABLE clustermove_inprogress (
+    userid      INT UNSIGNED NOT NULL,
+    locktime    INT UNSIGNED NOT NULL,
+    dstclust    SMALLINT UNSIGNED NOT NULL,
+    moverhost   INT UNSIGNED NOT NULL,
+    moverport   SMALLINT UNSIGNED NOT NULL,
+    moverinstance CHAR(22) NOT NULL, # base64ed MD5 hash
+    PRIMARY KEY (userid)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 
@@ -1691,7 +1703,7 @@ register_alter(sub {
                  "DEFAULT '1', ADD allow_screened ENUM('1','0') NOT NULL ".
                  "DEFAULT '0', ADD replyaddress VARCHAR(50), ADD hide_helpers ".
                  "ENUM('1','0') NOT NULL DEFAULT '0' AFTER allow_screened");
-        
+
     }
     if (column_type("supportlog", "type") =~ /faqref/)
     {
@@ -1704,9 +1716,9 @@ register_alter(sub {
         do_alter("supportlog",
                  "ALTER TABLE supportlog MODIFY type ENUM('req', 'answer', ".
                  "'comment', 'internal', 'screened') NOT NULL");
-        
+
     }
-    if (table_relevant("supportcat") && column_type("supportcat", "catkey") eq "") 
+    if (table_relevant("supportcat") && column_type("supportcat", "catkey") eq "")
     {
         do_alter("supportcat",
                  "ALTER TABLE supportcat ADD catkey VARCHAR(25) AFTER spcatid");
@@ -1714,13 +1726,13 @@ register_alter(sub {
         do_alter("supportcat",
                  "ALTER TABLE supportcat MODIFY catkey VARCHAR(25) NOT NULL");
     }
-    if (column_type("supportcat", "no_autoreply") eq "") 
+    if (column_type("supportcat", "no_autoreply") eq "")
     {
         do_alter("supportcat",
                  "ALTER TABLE supportcat ADD no_autoreply ENUM('1', '0') ".
                  "NOT NULL DEFAULT '0'");
     }
-    
+
     if (column_type("support", "timelasthelp") eq "")
     {
         do_alter("supportlog",
@@ -1728,7 +1740,7 @@ register_alter(sub {
         do_alter("support",
                  "ALTER TABLE support ADD timelasthelp INT UNSIGNED");
     }
-    
+
     if (column_type("duplock", "realm") !~ /payments/)
     {
         do_alter("duplock",
@@ -1742,7 +1754,7 @@ register_alter(sub {
                  "ALTER TABLE schematables ADD ".
                  "redist_where varchar(255) AFTER redist_mode");
     }
-    
+
     # upgrade people to the new capabilities system.  if they're
     # using the the paidfeatures column already, we'll assign them
     # the same capability bits that ljcom will be using.
@@ -1776,11 +1788,11 @@ register_alter(sub {
         try_sql("INSERT INTO userproplist VALUES (null, 's1_calendar_style', 0, 'Calendar View StyleID', 'num', 'The style ID# of the S1 style for the calendar view.')");
         try_sql("INSERT INTO userproplist VALUES (null, 's1_day_style', 0, 'Day View StyleID', 'num', 'The style ID# of the S1 style for the day view.')");
         try_sql("INSERT INTO userproplist VALUES (null, 's1_friends_style', 0, 'Friends View StyleID', 'num', 'The style ID# of the S1 style for the friends view.')");
-        
+
         foreach my $v (qw(lastn day calendar friends)) {
             do_sql("INSERT INTO userproplite SELECT u.userid, upl.upropid, u.${v}_style FROM user u, userproplist upl WHERE upl.name='s1_${v}_style'");
         }
-        
+
         do_alter("user",
                  "ALTER TABLE user DROP lastn_style, DROP calendar_style, DROP search_style, DROP searchres_style, DROP day_style, DROP friends_style");
     }
@@ -1817,9 +1829,9 @@ register_alter(sub {
                  "ALTER TABLE stats ".
                  "MODIFY statcat VARCHAR(30) NOT NULL, ".
                  "MODIFY statkey VARCHAR(150) NOT NULL, ".
-                 "MODIFY statval INT UNSIGNED NOT NULL, ". 
+                 "MODIFY statval INT UNSIGNED NOT NULL, ".
                  "DROP INDEX statcat");
-    } 
+    }
 
     if (column_type("priv_list", "is_public") eq "") {
         do_alter("priv_list",
@@ -1929,7 +1941,7 @@ register_alter(sub {
                  "ALTER IGNORE TABLE supportcat ADD scope ENUM('general', 'local') ".
                  "NOT NULL DEFAULT 'general', ADD UNIQUE (catkey)");
     }
-    
+
     # convert 'all' arguments to '*'
     if (table_relevant("priv_map") && !check_dbnote("privcode_all_to_*")) {
 
@@ -1944,7 +1956,7 @@ register_alter(sub {
 
         # set_dbnote will return true if $opt_sql is set and it sets
         # the note successfully.  only then do we run the wizard updater
-        set_dbnote("s2style-wizard-update", 1) && 
+        set_dbnote("s2style-wizard-update", 1) &&
             system("$ENV{'LJHOME'}/bin/upgrading/s2style-wizard-update.pl");
     }
 
@@ -1969,7 +1981,7 @@ register_alter(sub {
                  "DROP KEY themeid, MODIFY coltype VARCHAR(30) NOT NULL, ".
                  "ADD UNIQUE `thuniq` (themeid, coltype)");
     }
-    
+
     unless (column_type("syndicated", "numreaders")) {
         do_alter("syndicated",
                  "ALTER TABLE syndicated ".
