@@ -105,7 +105,7 @@ sub get_maintainer
     $commname = $dbh->quote($user);
     
     my $sth = $dbh->prepare("SELECT pm.userid FROM priv_map pm, priv_list pl WHERE ".
-                            "pl.privcode='sharedjournal' AND pm.prlid=pm.prlid AND pm.arg=$commname");
+                            "pl.privcode='sharedjournal' AND pl.prlid=pm.prlid AND pm.arg=$commname");
     $sth->execute;
     while (my $r = $sth->fetchrow_hashref) {
         $username = LJ::get_username($dbh, $r->{'userid'});
