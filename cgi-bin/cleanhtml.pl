@@ -11,8 +11,9 @@ use strict;
 use HTML::TokeParser ();
 
 #     &LJ::CleanHTML::clean(\$u->{'bio'}, { 
-#	 'wordlength' => 100,
-#	 'addbreaks' => 1,
+#	 'wordlength' => 100, # maximum length of an unbroken "word"
+#	 'addbreaks' => 1,    # insert <br/> after newlines where appropriate
+#	 'tablecheck' => 1,   # make sure they aren't closing </td> that weren't opened.
 #	 'eat' => [qw(head title style layer iframe)],
 #	 'mode' => 'allow',
 #	 'deny' => [qw(marquee)],
@@ -256,7 +257,7 @@ sub clean
                 $token->[1] =~ s/about://g;
                 $token->[1] =~ s/expression//g;
             }
-            my $auto_format = $addbreaks && ! $opencount{'table'} && ! $opencount{'pre'};
+            my $auto_format = $addbreaks && ($opencount{'table'} <= $opencount{'td'}) && ! $opencount{'pre'};
             if ($auto_format && ! $opencount{'a'}) {
                 $token->[1] =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=\~\:\;\#\&\,]+!$url{++$urlcount}=$&;"\{url$urlcount\}";!egi;
             }
