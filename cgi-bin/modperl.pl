@@ -56,11 +56,14 @@ PerlFixupHandler Apache::CompressClientFixup
 DirectoryIndex index.html index.bml
 });
 
+if ($LJ::BML_DENY_CONFIG) {
+    Apache->httpd_conf("PerlSetVar BML_denyconfig \"$LJ::BML_DENY_CONFIG\"\n");
+}
+
 unless ($LJ::SERVER_TOTALLY_DOWN)
 {
     Apache->httpd_conf(qq{
 # BML support:
-PerlSetVar BML_denyconfig "$LJ::BML_DENY_CONFIG"
 <Files ~ "\\.bml\$">
   SetHandler perl-script
   PerlHandler Apache::BML
