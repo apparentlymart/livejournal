@@ -550,9 +550,8 @@ sub mail_response_to_user
     
     my $miniauth = mini_auth($sp);
     $body .= "\n\nTo read all the comments or add more, go here:\n";
-    $body .= "$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth";
-    
-    $body .= "\n";
+    $body .= "$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth\n\n";
+    $body .= "If you are having problems using any of the links in this email, please try copying and pasting the *entire* link into your browser's address bar rather than clicking on it.";
     
     my $fromemail = $LJ::BOGUS_EMAIL;
     if ($sp->{_cat}->{'replyaddress'}) {
