@@ -2117,6 +2117,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /tools/memadd.bml.title.deleted=Deleted
 
+/tools/memadd.bml.title.add_memory=Add Memorable Entry
+
 /tools/memadd.bml.title.edit_memory=Edit Memorable Entry
 
 /tools/memadd.bml.whocansee<<

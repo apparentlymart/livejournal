@@ -1,7 +1,7 @@
 <?_code
 
  use strict;
- use vars qw(%FORM $head $title $body);
+ use vars qw(%GET $head $title $body);
 
  my $dbr = LJ::get_db_reader();
  my $remote = LJ::get_remote();
@@ -12,8 +12,8 @@
  $head = "";
  $body = "";
 
- my $user = LJ::canonical_username($FORM{'user'});
- if ($FORM{'user'} && ! $user) {
+ my $user = LJ::canonical_username($GET{'user'});
+ if ($GET{'user'} && ! $user) {
      $body = $ML{'error.malformeduser'};
      return;
  }
@@ -58,32 +58,47 @@
      return;
  }
 
+ my $authasu = LJ::get_authas_user($GET{'authas'} || $user);
+ my $authasarg;
+ if ($authasu) {
+     $body .= "<form class='postheading' method='get' action='memories.bml'>\n";
+     $body .= LJ::make_authas_select($remote, { 'authas' => $authasu->{user} }) . "\n";
+     $body .= LJ::html_hidden(keyword => $GET{keyword}) if $GET{keyword};
+     $body .= "</form>\n\n";
+
+     $user = $authasu->{user};
+     $userid = $authasu->{userid};
+     $authasarg = "authas=$authasu->{user}&";
+ } else {
+     $authasu = $remote;
+ }
+
  my %filters = ("all" => $ML{'.filter.all'},
                 "own" => BML::ml(".filter.own", { 'user' => $user }),
                 "other" => $ML{'.filter.other'});
- my $filter = $FORM{'filter'} || "all";
+ my $filter = $GET{'filter'} || "all";
  unless (defined $filters{$filter}) { $filter = "all"; }
 
  my $secwhere = "AND m.security='public'";
- if ($remote) {
-     if ($remote->{'userid'} == $userid) {
+ if ($authasu) {
+     if ($authasu->{userid} == $userid) {
          $secwhere = "";
-     } elsif (LJ::is_friend($userid, $remote->{'userid'})) {
+     } elsif ($authasu->{'type'} eq 'P' and LJ::is_friend($userid, $authasu->{'userid'})) {
          $secwhere = "AND m.security IN ('public', 'friends')";
      }
  }
 
- if ($FORM{'keyword'}) 
+ if ($GET{'keyword'}) 
  {
-     my $qkw = $dbr->quote($FORM{'keyword'});
-     if ($FORM{'keyword'} eq "*") {
+     my $qkw = $dbr->quote($GET{'keyword'});
+     if ($GET{'keyword'} eq "*") {
          $title = $ML{'.title.memorable'};
          $body .= "<?h1 $ML{'.title.memorable'} h1?><?p " . BML::ml(".body.memorable", { 'user' => $user }) . " p?>";
      } else {
-         $title = BML::ml(".title.keyword", { 'keyword' => $FORM{'keyword'}, 'user' => $user });
-         $body .= BML::ml(".body.keyword", { 'keyword' => $FORM{'keyword'}, 'user' => $user });
+         $title = BML::ml(".title.keyword", { 'keyword' => $GET{'keyword'}, 'user' => $user });
+         $body .= BML::ml(".body.keyword", { 'keyword' => $GET{'keyword'}, 'user' => $user });
      }
-     $body .= "<?p <A HREF=\"/tools/memories.bml?user=$user\">&lt;&lt; $ML{'.back'}</A> p?>";
+     $body .= "<?p <a href=\"/tools/memories.bml?${authasarg}user=$user\">&lt;&lt; $ML{'.back'}</a> p?>";
 
      my $extrawhere = "";
      if ($filter eq "own" || $filter eq "other") {
@@ -106,13 +121,13 @@
              my $itemid = int($mem->{'jitemid'} / 256);
              my $anum = $mem->{'jitemid'} % 256;
              $entrylink = LJ::item_link($mem->{user}, $itemid, $anum);
-             $editlink = "/tools/memadd.bml?journal=$mem->{user}&amp;itemid=$mem->{jitemid}";
+             $editlink = "/tools/memadd.bml?${authasarg}journal=$mem->{user}&amp;itemid=$mem->{jitemid}";
          } else {
              $entrylink = "/talkread.bml?itemid=$mem->{jitemid}";
-             $editlink = "/tools/memadd.bml?itemid=$mem->{jitemid}";
+             $editlink = "/tools/memadd.bml?${authasarg}itemid=$mem->{jitemid}";
          }
 
-         if ($remote && $remote->{'user'} eq $user) {
+         if ($authasu && $authasu->{user} eq $user) {
              $edit = " [<a href=\"$editlink\">$ML{'.edit'}</a>]";
          }
 
@@ -135,33 +150,33 @@
  
  $body .= "<form method='get' action='memories.bml'>";
  $body .= "<input type='hidden' name='user' value=\"$user\" />";
- $body .= "Filter entries: <SELECT NAME=\"filter\">";
+ $body .= "Filter entries: <select name=\"filter\">";
  foreach my $filt ("all", "own", "other") {
-     my $sel = $filter eq $filt ? "SELECTED" : "";
-     $body .= "<OPTION VALUE=\"$filt\" $sel>$filters{$filt}\n";
+     my $sel = $filter eq $filt ? "selected" : "";
+     $body .= "<option value=\"$filt\" $sel>$filters{$filt}\n";
  }	     
- $body .= "</SELECT> <INPUT TYPE=SUBMIT VALUE=\"$ML{'.form.switch'}\">";
- $body .= "</FORM>";
+ $body .= "</select> <input type='submit' value=\"$ML{'.form.switch'}\">";
+ $body .= "</form>";
  
  my $rows = 0;
  while (my $row = $sth->fetchrow_hashref)
  {
      $rows++;
      if ($rows==1) {
-         $body .= "<UL>";
+         $body .= "<ul>";
      }
      my $noun = $row->{'count'}==1 ? $ML{'.entry'} : $ML{'.entries'};
      my $ue_keyword = LJ::eurl($row->{'keyword'});
      my $keyword = $row->{'keyword'};
      LJ::text_out(\$keyword);
      if ($keyword eq "*") { $keyword = $ML{'.uncategorized'}; }
-     $body .= "<LI><B><A HREF=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</A></B>: $row->{'count'} $noun\n";
+     $body .= "<li><b><a href=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</a></b>: $row->{'count'} $noun\n";
  }
  unless ($rows) {
      $body .= "<?h1 $ML{'.error.noentries.title'} h1?><?p $ML{'.error.noentries.body'} p?>";
  } else {
-     $body .= "</UL>";
-}
+     $body .= "</ul>";
+ }
  return;
 
 _code?><?page

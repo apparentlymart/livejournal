@@ -1,38 +1,44 @@
 <?_code
 
  use strict;
- use vars qw(%FORM $title $body);
+ use vars qw(%GET %POST $title $body);
 
  my $dbr = LJ::get_db_reader();
-
- my $remote = LJ::get_remote();
 
  $title = $ML{'title'};
  $body = "";
 
- unless (defined $remote) {
-     $body = $ML{'.error.login'};
+ my $err = sub {
+     $title = "Error";
+     $body = LJ::bad_input(@_);
      return;
+ };
+
+ unless (LJ::text_in(\%POST)) {
+     return $err->("Invalid UTF-8 Input");
  }
 
+ my $remote = LJ::get_remote();
+ return $err->($ML{'error.noremote'})
+     unless $remote;
 
- $FORM{'oldkeywords'} = [ split('\0', $FORM{'oldkeywords'}) ];
+ my $authas = $GET{'authas'} || $remote->{'user'};
+ my $memoryu = LJ::get_authas_user($authas);
+ return $err->($ML{'error.invalidauth'})
+     unless $memoryu;
 
- unless (LJ::text_in(\%FORM)) {
-     $body = "<?badinput?>";
-     return;
- }
+ $POST{'oldkeywords'} = [ split('\0', $POST{'oldkeywords'}) ];
 
  my %secopts = ( 'public' => $ML{'label.security.public'},
                  'friends' => $ML{'label.security.friends'},
                  'private' => $ML{'label.security.private'}, );
 
  my $sth;
- my $journal = $FORM{'journal'};
- my $ditemid = $FORM{'itemid'}+0;
+ my $journal = $GET{'journal'};
+ my $ditemid = $GET{'itemid'}+0;
 
  # OK.  the memories schema is weird and stores *display* itemids in the database.
- # additionally, we distringuish precluster itemids because they're stored without a userid.
+ # additionally, we distinguish precluster itemids because they're stored without a userid.
  # it's too late to fix it in the db, so we just work around it--
  # all new memories still get userid+ditemid because we can't change the ditemid/itemid problem,
  # but old-style itemids get fixed up to userid+ditemid.
@@ -79,9 +85,8 @@
 
  my $log = $dbcr->selectrow_hashref("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, ls.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold', l.anum FROM log2 l, logtext2 ls WHERE ls.journalid=$jid AND l.journalid=$jid AND ls.jitemid=l.jitemid AND l.jitemid=$itemid");
 
- unless ($journal) {
-     # this was an old-style itemid,
-     # and it should always point at the right entry.
+ if ($oldstyle) {
+     # ditemid was an old-style itemid, so we update it to the new style.
      $anum = $log->{anum};
      $ditemid = $itemid<<8 + $anum;
  }
@@ -103,17 +108,19 @@
  # check to see if it already is memorable (thus we're editing, not adding);
  $sth = $dbr->prepare("SELECT memid, des, security FROM memorable WHERE ".
                       "userid=? AND journalid=? AND jitemid=?");
- $sth->execute($remote->{userid}, $oldstyle ? 0 : $jid, $dbitemid);
+ $sth->execute($memoryu->{userid}, $oldstyle ? 0 : $jid, $dbitemid);
  my $memory = $sth->fetchrow_hashref;
  
- if ($FORM{'mode'} eq "") 
+ if ($POST{'mode'} eq "") 
  {
      my ($des, $keywords);
 
      my @all_keywords;
      my %selected_keyword;
-     $sth = $dbr->prepare("SELECT DISTINCT k.keyword FROM keywords k, memkeyword mk, memorable m WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=$remote->{'userid'}");
-     $sth->execute;
+     $sth = $dbr->prepare("SELECT DISTINCT k.keyword ".
+                          "FROM keywords k, memkeyword mk, memorable m ".
+                          "WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=?");
+     $sth->execute($memoryu->{userid});
      while (my ($kw) = $sth->fetchrow_array) {
          push @all_keywords, $kw;
      }
@@ -122,8 +129,9 @@
      if (defined $memory) {
          $title = $ML{'.title.edit_memory'};
          $des = $memory->{'des'};
-         $sth = $dbr->prepare("SELECT k.keyword FROM keywords k, memkeyword mk WHERE mk.kwid=k.kwid AND mk.memid=$memory->{'memid'}");
-         $sth->execute;
+         $sth = $dbr->prepare("SELECT k.keyword FROM keywords k, memkeyword mk ".
+                              "WHERE mk.kwid=k.kwid AND mk.memid=?");
+         $sth->execute($memory->{memid});
          while (my ($kw) = $sth->fetchrow_array) {
              next if ($kw eq "*");
              if ($keywords) { $keywords .= ", "; }
@@ -147,12 +155,26 @@
          $body = $ML{'error.noentry'};
          return;
      }
-     else 
+     else
      {
+         $title = $ML{'.title.add_memory'};
+
+         # this is a new memory.
          my $user = LJ::get_username($log->{'ownerid'});
          my $dt = substr($log->{'eventtime'}, 0, 10);
          $des = "$dt: $user: $log->{'subject'}";
      }
+
+     # it'd be nice to only show the authas form when adding an entry and not
+     # when editing one, but if user u is logged in and has post p as a memory
+     # already then wants to add it to community c, when u clicks the "add memory"
+     # link on p, u gets the "edit entry" page and they need to be able to switch
+     # to c.
+     $body .= "<form class='postheading' method='get' action='memadd.bml'>\n";
+     $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+     $body .= LJ::html_hidden(journal => $GET{journal}) if $GET{journal};
+     $body .= LJ::html_hidden(itemid => $GET{itemid});
+     $body .= "</form>\n\n";
 
      $des = LJ::ehtml($des);
      $keywords = LJ::ehtml($keywords);
@@ -160,21 +182,26 @@
      LJ::text_out(\$keywords);
 
      $body .= $ML{'add_previous'};
-     $body .= "<form method='post' action='memadd.bml'>";
-     # we still need to pass the messed-up values to ourself, so we can edit them.
-     $body .= "<input type='hidden' name='itemid' value='$dbitemid'>";
-     $body .= "<input type='hidden' name='journal' value='$ju->{'user'}'>" unless $oldstyle;
-     $body .= "<input type=hidden name=mode value=\"save\">";
+
+     my $getextra = "?";
+     $getextra .= "authas=$authas&" if $authas ne $remote->{'user'};
+     # we still need to pass the dbitemid and not the itemid to ourself.
+     $getextra .= "journal=$journal&" unless $oldstyle;
+     $getextra .= "itemid=$dbitemid&";
+     chop $getextra;
+     $body .= "<form method='post' action='memadd.bml$getextra'>";
+     $body .= LJ::html_hidden(mode => "save");
+
      $body .= "<TABLE cellpadding=4>";
 
      $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>$ML{'.description'}</B></TD><TD><input name=des value=\"$des\" maxlength=@{[ LJ::CMAX_MEMORY ]} size=40><BR><FONT SIZE=-1>$ML{'.description.text'}</FONT></TD></TR>\n";
      
-     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>$ML{'.keywords'}</B></TD><TD><input name=keywords maxlength=@{[ LJ::CMAX_KEYWORD ]} size=40><BR><FONT SIZE=-1>$ML{'.keywords.text'}";
+     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>$ML{'.keywords'}</B></TD><TD><input name=keywords maxlength=@{[ LJ::CMAX_KEYWORD ]} size=40><BR><FONT SIZE=-1>$ML{'.keywords.text'}  ";
 
      if (@all_keywords) {
          my $size = scalar(@all_keywords);
          if ($size > 15) { $size = 15; }
-         $body .= "$ML{'.keywords.select'}<ul><select name=oldkeywords multiple size=$size>";
+         $body .= "$ML{'.keywords.select'}<ul><select name='oldkeywords' multiple size='$size'>";
          foreach my $kw (@all_keywords) {
              my $sel = $selected_keyword{$kw} ? " selected" : "";
              LJ::text_out(\$kw);
@@ -203,11 +230,11 @@
      return;
  }
 
- if ($FORM{'mode'} eq "save") 
+ if ($POST{'mode'} eq "save") 
  {
      my $dbh = LJ::get_db_writer();
 
-     if (! $FORM{'des'}) {
+     if (! $POST{'des'}) {
          # then we're deleting.
          if (defined $memory) {
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
@@ -230,9 +257,9 @@
      my @keywords;
      { 
          my %kws;
-         foreach (split(/\s*,\s*/, $FORM{'keywords'})) { $kws{$_} = 1; }
+         foreach (split(/\s*,\s*/, $POST{'keywords'})) { $kws{$_} = 1; }
          # oldkeywords were split at the beginning
-         foreach (@{$FORM{'oldkeywords'}}) { $kws{$_} = 1; }
+         foreach (@{$POST{'oldkeywords'}}) { $kws{$_} = 1; }
          @keywords = keys %kws;
      }
      if (scalar(@keywords) > 5) { 
@@ -256,15 +283,14 @@
          push @kwid, $kwid;
      }
 
-     unless (exists $secopts{$FORM{'security'}}) {
+     unless (exists $secopts{$POST{'security'}}) {
          $title = $ML{'Error'};
          $body = $ML{'.error.invalid_security'};
          return;
      }
 
-     $FORM{'des'} = LJ::text_trim($FORM{'des'}, LJ::BMAX_MEMORY, LJ::CMAX_MEMORY);
-     my $qdes = $dbh->quote($FORM{'des'});
-     my $qsec = $dbh->quote($FORM{'security'});
+     my $des = LJ::text_trim($POST{'des'}, LJ::BMAX_MEMORY, LJ::CMAX_MEMORY);
+     my $sec = $POST{'security'};
 
      ## this is easiest... just delete it, then add it again.
      if (defined $memory) {
@@ -276,14 +302,14 @@
      if (defined $memory) 
      {
          $memid = $memory->{'memid'};
-         $sth = $dbh->prepare("UPDATE memorable SET des=$qdes, security=$qsec WHERE memid=$memid");
-         $sth->execute;
+         $sth = $dbh->prepare("UPDATE memorable SET des=?, security=? WHERE memid=?");
+         $sth->execute($des, $sec, $memid);
      } 
      else 
      {
          $sth = $dbh->prepare("INSERT INTO memorable (memid, userid, journalid, jitemid, des, security) ".
-                              "VALUES (NULL, $remote->{'userid'}, $jid, $dbitemid, $qdes, $qsec)");
-         $sth->execute;
+                              "VALUES (NULL, ?, ?, ?, ?, ?)");
+         $sth->execute($memoryu->{userid}, $jid, $dbitemid, $des, $sec);
          $memid = $dbh->{'mysql_insertid'};
      }
      if (@kwid) {
