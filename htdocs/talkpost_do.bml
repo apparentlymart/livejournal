@@ -372,7 +372,7 @@ body<=
  # unscreen the parent comment if needed
  my $unscreened = 0;
  if ($parpost->{'state'} eq 'S') {
-     LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $itemid, $qpartid);
+     LJ::Talk::unscreen_comment($dbs, $dbcs, $u, $itemid, $partid);
      $unscreened = 1;
  }
  
