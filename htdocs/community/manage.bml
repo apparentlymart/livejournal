@@ -29,7 +29,9 @@ body<=
     my $in = join(',', @$cids);
     my %names = ();
  
-    my $sth = $dbr->prepare("SELECT user, name FROM user WHERE userid IN ($in)") || [];
+    my $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, community c ".
+                            "WHERE u.userid IN ($in) AND u.userid=c.userid ".
+                            "AND u.statusvis='V'");
     $sth->execute;
     while (my ($user, $name) = $sth->fetchrow_array) {
        $names{$user} = $name;
@@ -58,4 +60,4 @@ _code?>
 
 <=body
 page?>
-    
+
