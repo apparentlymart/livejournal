@@ -4,7 +4,7 @@
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
- my $max = $dbr->selectrow_array("SELECT statval FROM stats WHERE statcat='userinfo' AND statkey='updated_last1'");
+ my $max = $dbr->selectrow_array("SELECT statval FROM stats WHERE statcat='userinfo' AND statkey='randomcount'");
  if ($max) {
      my $rand = int(rand($max))+1;
      my $user = $dbr->selectrow_array("SELECT u.user FROM randomuserset r, useridmap u WHERE r.userid=u.userid AND r.rid=$rand");

@@ -320,6 +320,8 @@ $maint{'build_randomuserset'} = sub
     print "-I- Building randomuserset.\n";
     $dbh->do("TRUNCATE TABLE randomuserset");
     $dbh->do("REPLACE INTO randomuserset (userid) SELECT uu.userid FROM userusage uu, user u WHERE u.userid=uu.userid AND u.allow_infoshow='Y' AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 1 DAY)");
+    my $num = $dbh->do("SELECT MAX(rid) FROM randomuserset");
+    $dbh->do("REPLACE INTO stats (statcat, statkey, statval) VALUES ('userinfo', 'randomcount', $num)");
     print "-I- Done.\n";
 };
 
