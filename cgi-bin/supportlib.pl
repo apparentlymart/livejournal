@@ -54,7 +54,8 @@ sub init_remote
                         qw(supportclose supporthelp 
                            supportdelete supportread
                            supportviewinternal supportmakeinternal
-                           supportmovetouch supportviewscreened));
+                           supportmovetouch supportviewscreened
+                           supportchangesummary));
 }
 
 # given all the categories, maps a catkey into a cat
@@ -180,54 +181,51 @@ sub can_append
     return 0;
 }
 
+# privilege policy:
+#   supporthelp with no argument gives you all abilities in all public_read categories
+#   supporthelp with a catkey arg gives you all abilities in that non-public_read category
+#   supportread with a catkey arg is required to view requests in a non-public_read category
+#   all other privs work like:
+#      no argument = global, where category is public_read or user has supportread on that category
+#      argument = local, priv applies in that category only if it's public or user has supportread
+sub support_check_priv
+{
+    my ($sp, $remote, $priv) = @_;
+    return 1 if can_help($sp, $remote);
+    return 0 unless can_read_cat($sp->{_cat}, $remote);
+    return 1 if LJ::check_priv($remote, $priv, '') && $sp->{_cat}->{public_read};
+    return 1 if LJ::check_priv($remote, $priv, $sp->{_cat}->{catkey});
+    return 0;
+}
+
 # can they read internal comments?  if they're a helper or have
 # extended supportread (with a plus sign at the end of the category key)
 sub can_read_internal
 {
     my ($sp, $remote) = @_;
-    if (can_help($sp, $remote)) { return 1; }
-    return 0 unless can_read_cat($sp->{_cat}, $remote);
-    if (LJ::check_priv($remote, "supportviewinternal", "")) { return 1; }
-    my $catkey = $sp->{_cat}->{'catkey'};
-    if (LJ::check_priv($remote, "supportread", $catkey."+")) { return 1; }
-    if (LJ::check_priv($remote, "supportviewinternal", $catkey)) { return 1; }
+    return 1 if LJ::Support::support_check_priv($sp, $remote, 'supportviewinternal'); 
+    return 1 if LJ::check_priv($remote, "supportread", $sp->{_cat}->{catkey}."+");
     return 0;
 }
 
 sub can_make_internal
 {
-    my ($sp, $remote) = @_;
-    if (can_help($sp, $remote)) { return 1; }
-    return 0 unless can_read_cat($sp->{_cat}, $remote);
-    if (LJ::check_priv($remote, "supportmakeinternal", "")) { return 1; }
-    if (LJ::check_priv($remote, "supportmakeinternal", $sp->{_cat}->{'catkey'})) { 
-        return 1; 
-    }
-    return 0;
+    return LJ::Support::support_check_priv(@_, 'supportmakeinternal');
 }
 
 sub can_read_screened
 {
-    my ($sp, $remote) = @_;
-    if (can_help($sp, $remote)) { return 1; }
-    return 0 unless can_read_cat($sp->{_cat}, $remote);
-    if (LJ::check_priv($remote, "supportviewscreened", "")) { return 1; }
-    if (LJ::check_priv($remote, "supportviewscreened", $sp->{_cat}->{'catkey'})) {
-        return 1;
-    }
-    return 0;
+    return LJ::Support::support_check_priv(@_, 'supportviewscreened');
 }
 
 sub can_perform_actions
 {
-    my ($sp, $remote) = @_;
-    if (can_help($sp, $remote)) { return 1; }
-    return 0 unless can_read_cat($sp->{_cat}, $remote);
-    if (LJ::check_priv($remote, "supportmovetouch", "")) { return 1; }
-    if (LJ::check_priv($remote, "supportmovetouch", $sp->{_cat}->{'catkey'})) {
-        return 1;
-    }
-    return 0;
+    return LJ::Support::support_check_priv(@_, 'supportmovetouch');
+}
+
+sub can_change_summary
+{
+    return LJ::Support::support_check_priv(@_, 'supportchangesummary');
 }
 
 sub can_help

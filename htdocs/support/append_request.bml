@@ -68,7 +68,7 @@ body<=
             ($type ne "internal" || ! LJ::Support::can_perform_actions($sp, $remote));
 
     return LJ::bad_input($ML{'.internal.changesum'})
-        if $FORM{'changesum'} && ($type ne "internal" || ! LJ::Support::can_help($sp, $remote));
+        if $FORM{'changesum'} && ($type ne "internal" || ! LJ::Support::can_change_summary($sp, $remote));
 
     return LJ::bad_input($ML{'.invalid.blank'})
         if $FORM{'body'} !~ /\S/ && !$FORM{'approveans'} && !$FORM{'changecat'} &&
