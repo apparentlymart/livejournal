@@ -64,7 +64,7 @@ sub get_stream {
     my ($u, $domain, $fmt, $bid, $callback) = @_;
     _load_bcid($u);
     my $bc = get_blobclient_reader($u);
-    return $bc->get($u->{blob_clusterid}, $u->{userid}, $domain, $fmt, $bid, $callback);
+    return $bc->get_stream($u->{blob_clusterid}, $u->{userid}, $domain, $fmt, $bid, $callback);
 }
 
 sub put {

@@ -329,6 +329,7 @@ sub trans
         if (my $func = $LJ::SUBDOMAIN_FUNCTION{$user}) {
             my $code = {
                 'userpics' => \&userpic_trans,
+                'files' => \&files_trans,
             };
             return $code->{$func}->($r) if $code->{$func};
             return 404;  # bogus ljconfig
@@ -600,6 +601,21 @@ sub userpic_content
     $send_headers->();
     $r->print($data) unless $r->header_only;
     return OK;
+}
+
+sub files_trans
+{
+    my $r = shift;
+    return 404 unless $r->uri =~ m!^/(\w{1,15})/(\w+)(/\S+)!;
+    my ($user, $domain, $rest) = ($1, $2, $3);
+
+    if (my $handler = LJ::run_hook("files_handler:$domain", $user, $rest)) {
+        $r->notes("codepath" => "files.$domain");
+        $r->handler("perl-script");
+        $r->push_handlers(PerlHandler => $handler);
+        return OK;
+    }
+    return 404;
 }
 
 sub journal_content
