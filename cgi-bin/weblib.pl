@@ -892,7 +892,7 @@ sub entry_form {
         ### Subject
         $out .= "<tr valign='top'><th>Subject:</th><td>";
         $out .= LJ::html_text({ 'name' => 'subject', 'value' => $opts->{'subject'},
-                                'size' => '50', 'maxlength' => '100', 'style' => "width: 100%", 'tabindex' => $tabindex->() }) . "\n";
+                                'size' => '60', 'maxlength' => '100', 'tabindex' => $tabindex->() }) . "\n";
         $out .= "</td></tr>";
         $out .= "</table></td>";
     }

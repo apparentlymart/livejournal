@@ -1,6 +1,7 @@
 var layout_mode = "wide";
 var sc_old_border_style;
 var column_two_rows = new Array();
+var shift_init = "true";
 
 function shift_contents() {
     if (! document.getElementById) return false;
@@ -8,14 +9,28 @@ function shift_contents() {
     var column_one = document.getElementById('column_one_td');
     var column_two = document.getElementById('column_two_td');
     var column_one_table = document.getElementById('column_one_table');
-    var column_two_table = document.getElementById('column_two_table');
-    
-    column_two_rows[0] = document.getElementById('backdate_row');
-    column_two_rows[1] = document.getElementById('comment_settings_row');
-    column_two_rows[2] = document.getElementById('comment_screen_settings_row');
-    column_two_rows[3] = document.getElementById('userpic_list_row');
-    
-    if (document.width < 750) {
+    var column_two_table = document.getElementById("column_two_table");
+
+    if (shift_init == "true") {
+        column_two_rows[0] = document.getElementById('backdate_row');
+        column_two_rows[1] = document.getElementById('comment_settings_row');
+        column_two_rows[2] = document.getElementById('comment_screen_settings_row');
+        if (document.getElementById('userpic_list_row') != null) {
+            column_two_rows[3] = document.getElementById('userpic_list_row');
+        }
+        shift_init = "false";
+    }
+
+    var width;
+    if (self.innerWidth) {       
+	width = self.innerWidth;
+    } else if (document.documentElement && document.documentElement.clientWidth) {
+	width = document.documentElement.clientWidth;
+    } else if (document.body) {
+        width = document.body.clientWidth;
+    }
+
+    if (width < 750) {
         if (layout_mode == "thin") { return; }
         layout_mode = "thin";
         sc_old_border_style = column_one.style.borderRight;
@@ -24,22 +39,20 @@ function shift_contents() {
         
         infobox.style.display = "none";
         for (var i = 0;  i < column_two_rows.length; i++) {
-            var append = column_two_rows[i].parentNode.removeChild(column_two_rows[i]);
-            column_one_table.appendChild(append);
+            column_one_table.lastChild.appendChild(column_two_rows[i]);        
         }
     } else {
         if (layout_mode == "wide") { return; }
         layout_mode = "wide";
         column_one.style.borderRight = sc_old_border_style;
-        column_two.style.display = "table-cell";
+        column_two.style.display = "block";
         
         infobox.style.display = "block";
         for (var i = 0;  i < column_two_rows.length; i++) {
-            var append = column_two_rows[i].parentNode.removeChild(column_two_rows[i]);
-            column_two_table.appendChild(append);
+            column_two_table.lastChild.appendChild(column_two_rows[i]);
         }
     }
-    return false;
+    return;
 }
 
 function enable_rte () {
@@ -98,7 +111,7 @@ function pageload (dotime) {
     var userbox = f.user;
     if (! userbox) return false;
     if (userbox.value) altlogin();
-    
+
     return false;
 }
 
