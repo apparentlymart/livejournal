@@ -1,20 +1,22 @@
 <base target=_top>
 (=_CODE
 
- require 'ljlib.pl';
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
  
  my $user = $FORM{'user'};
  unless ($user) {
      return "Enter a username.";
  } 
  my $quser = $dbh->quote($user);
+
  # Faking doesn't do any harm here.
- my $remote = &get_remote_noauth();
+ my $remote = LJ::get_remote_noauth();
 
  my $dispuser = $remote->{'user'} || $user;
 
- my $sth = $dbh->prepare("SELECT styleid, user, styledes, type, is_embedded, is_colorfree FROM style WHERE is_public='Y' AND user=$quser ORDER BY type DESC,styledes");
+ my $sth = $dbr->prepare("SELECT styleid, user, styledes, type, is_embedded, is_colorfree FROM style WHERE is_public='Y' AND user=$quser ORDER BY type DESC,styledes");
  $sth->execute;
  unless ($sth->rows) {
    return "(=LJUSER $user LJUSER=) has no public styles.";

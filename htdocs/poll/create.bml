@@ -38,11 +38,12 @@
 	   "scale" => {
 	       "from" => 1,			 # default from value for a scale
 	       "to" => 10,			 # default to value for a scale
-	       "by" => 1			 # default by value for a scale
+	       "by" => 1,			 # default by value for a scale
+	       "maxitems" => 20			 # maximum number of items allowed in a scale
            }
  );
 
- %TYPENAME = ( "radio" => "Radio Boxes",
+ %TYPENAME = ( "radio" => "Radio Buttons",
 	       "check" => "Check Boxes",
 	       "drop" => "Drop-down box",
 	       "text" => "Text entry",
@@ -108,7 +109,7 @@
 	my $chkd_scale = 0;
 
 	foreach (qw(question type opts size maxlength from to by)) {
-            if ($formref->{"pq_$x\_$_"}) {
+            if (defined $formref->{"pq_$x\_$_"}) {
 		my $val = $formref->{"pq_$x\_$_"};
 
 		# invalid type?
@@ -116,8 +117,12 @@
 			next;  # ignore it
 		}
 
-		# question too long
-		if ($_ eq 'question' && length($val) > $RULES{'question'}{'maxlength'}) {
+		# question too long/nonexistant
+		if ($_ eq 'question' && $val eq '') {
+			$h{$_} = $val;
+			$errors[$x]->{'question'} = "You need text explaining what your question is about";
+			$error_count++;
+		} elsif ($_ eq 'question' && length($val) > $RULES{'question'}{'maxlength'}) {
 			$h{$_} = substr($val, 0, $RULES{'question'}{'maxlength'});
 		}
 
@@ -150,7 +155,7 @@
 			
 			$h{'to'} = int($formref->{"pq_$x\_to"});
 			$h{'from'} = int($formref->{"pq_$x\_from"});
-			$h{'by'} = int($formref->{"pq_$x\_by"});
+			$h{'by'} = (int($formref->{"pq_$x\_by"}) >= 1) ? int($formref->{"pq_$x\_by"}) : 1;
 
 		        if ($h{'by'} < $RULES{'by'}{'min'}) {
 				$errors[$x]->{'by'} = "Scale increment must be at least $RULES{'by'}{'min'}";
@@ -160,8 +165,8 @@
 				$errors[$x]->{'from'} = "Scale 'from' value must be less than 'to' value.";
 				$error_count++;
 			}
-			if ((($h{'to'}-$h{'from'})/$h{'by'}) > 20) {
-				$errors[$x]->{'scale'} = "Your scale exceeds the limit of 20 selections (to-from)/by > 20";
+			if ((($h{'to'}-$h{'from'})/$h{'by'}) > $RULES{'scale'}{'maxitems'}) {
+				$errors[$x]->{'scale'} = "Limit of $RULES{'scale'}{'maxitems'} selections (to-from)/by > 20";
 				$error_count++;
 			}
 
@@ -188,7 +193,7 @@
             }
 	}
 	if ($num_opts < $RULES{'items'}{'min'} && $h{'type'} =~ /^(drop|check|radio)$/) {
-		$errors[$x]->{'items'} = "You must have at least one non-blank item in a non-text poll question.";
+		$errors[$x]->{'items'} = "All items cannot be blank.";
 		$error_count++;
 	}
 
@@ -226,11 +231,6 @@
 	# make sure that if two poll items get swapped, we don't leave their errors behind
 	($errors->[$adj], $errors->[$action->{'item'}]) = &swap($errors->[$adj], $errors->[$action->{'item'}]);
 
-	# when you move an elements, its errors don't get moved with it.
-	# need to make sure they follow it along.
-
-	# fix fix fix.
-
     # delete
     } elsif ($action->{'type'} eq "delete") {
 	splice(@{$poll->{"pq"}}, $action->{'item'}, 1);
@@ -259,6 +259,9 @@
 				"opt" => []
 			    }
 	       );
+
+	# need to be sure to increment the %errors hash when we insert.  we do when we move.
+	splice ( @{$errors}, '', 0, '' );
     }
 
     return ($poll, $errors);
@@ -276,7 +279,7 @@
     }
 
     # basic info -- name, whovote, whoview
-    $ret .= "<p><b>Basic Poll Info</b><hr size=\"1\" width=\"60%\" align=\"left\">\n";
+    $ret .= "<p>(=H1 Basic Poll Info H1=)<hr size=\"2\" width=\"60%\" align=\"left\">\n";
 
     $ret .= "<p>Who can view this poll?<br><select name=\"whoview\">\n";
     foreach ( qw(all friends none) ) {
@@ -303,12 +306,12 @@
     for ($x = 0; $x < $poll->{'count'}; $x++) {
 	my $elem = @{$poll->{'pq'}}[$x];
 
-	$ret .= "<P><TABLE BORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" WIDTH=\"60%\"><TR>\n";
-	$ret .= "<TD ALIGN=\"left\" COLSPAN=\"2\">\n";
-	$ret .= "<B>Question #" . ($x + 1) . " - " . $TYPENAME{$elem->{'type'}} . "</B></FONT><BR><BR>\n";
-	$ret .= "</TD></TR>\n";
+	$ret .= "<p><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"600\"><tr>\n";
+	$ret .= "<td align=\"left\" colspan=\"2\">\n";
+	$ret .= "(=H1 Question #" . ($x + 1) . " - " . $TYPENAME{$elem->{'type'}} . " H1=)<br><br>\n";
+	$ret .= "</td></tr>\n";
 
-	$ret .= "<TR><TD ALIGN=\"left\" WIDTH=\"15%\">\n";
+	$ret .= "<tr><td align=\"left\" width=\"15%\">\n";
 
 	# can't move the first element up
 	if ($x > 0) {
@@ -316,52 +319,53 @@
 	}
 
 	# delete button
-	$ret .= "<BR>" . LJ::img("btn_del", "input", "delete:$x:do");
+	$ret .= "<br>" . LJ::img("btn_del", "input", "delete:$x:do");
 
 	# can't move the last element down
 	if ($x < ($poll->{'count'} - 1)) {
-	    $ret .= "<BR>" . LJ::img("btn_down", "input", "move:$x:dn");
+	    $ret .= "<br>" . LJ::img("btn_down", "input", "move:$x:dn");
 	}
 
-	$ret .= "</TD>\n";
-	$ret .= "<TD ALIGN=\"left\" VALIGN=\"top\">\n";
+	$ret .= "</td>\n";
+	$ret .= "<td align=\"left\" valign=\"top\">\n";
 
 	# question text and hidden fields
-	$ret .= "<INPUT TYPE=\"hidden\" NAME=\"pq_$x\_type\" VALUE=\"$elem->{'type'}\">\n";
-	$ret .= "<INPUT TYPE=\"hidden\" NAME=\"pq_$x\_opts\" VALUE=\"$elem->{'opts'}\">\n";
-	$ret .= "<P><P>Question:<BR><INPUT TYPE=\"text\" SIZE=\"30\" NAME=\"pq_$x\_question\" VALUE=\"" . $elem->{"question"} . "\">\n";
+	$ret .= "<input type=\"hidden\" name=\"pq_$x\_type\" value=\"$elem->{'type'}\">\n";
+	$ret .= "<input type=\"hidden\" name=\"pq_$x\_opts\" value=\"$elem->{'opts'}\">\n";
+	$ret .= "<p><p>Question:<br><input type=\"text\" size=\"30\" name=\"pq_$x\_question\" value=\"" . $elem->{"question"} . "\">\n";
+	$ret .= "<br><font size=\"1\"><b>[" . $errors->[$x]->{'question'} ."]</b></font>\n" if ($errors->[$x]->{'question'});
 
-	$ret .= "<BLOCKQUOTE>\n";
+	$ret .= "<blockquote>\n";
 	if ($elem->{'type'} =~ /^(radio|check|drop)$/) {
 	    # spit out "items" -- choices for drop-down, radio, etc questions
-	    $ret .= "<BR>Options:\n";
+	    $ret .= "<br>Options:\n";
 	    for ($y = 0; $y < $elem->{'opts'}; $y++) {
-	        $ret .= "<BR><INPUT TYPE=\"text\" NAME=\"pq_$x\_opt_$y\" VALUE=\"" . @{$elem->{'opt'}}[$y] . "\" MAXLENGTH=\"$RULES{'items'}{'maxlength'}\" SIZE=\"20\">\n";
-		$ret .= "<BR><FONT SIZE=\"1\"><B>[" . $errors->[$x]->{$y}->{'items'} . "]</B></FONT>\n" if ($errors->[$x]->{$y}->{"items"});
+	        $ret .= "<br><input type=\"text\" name=\"pq_$x\_opt_$y\" value=\"" . @{$elem->{'opt'}}[$y] . "\" maxlength=\"$RULES{'items'}{'maxlength'}\" size=\"20\">\n";
+		$ret .= "<br><font size=\"1\"><b>[" . $errors->[$x]->{$y}->{'items'} . "]</b></font>\n" if ($errors->[$x]->{$y}->{"items"});
 	    }
-	    $ret .= ($elem->{'opts'} < $RULES{'items'}{'max'}) ? "<BR><INPUT TYPE=\"submit\" NAME=\"request:$x:do\" VALUE=\"More >>\">\n" : "<BR><B>[Option limit reached]</B>";
+	    $ret .= ($elem->{'opts'} < $RULES{'items'}{'max'}) ? "<br><input type=\"submit\" name=\"request:$x:do\" value=\"More >>\">\n" : "<br>(=DE [Option limit reached] DE=)\n";
 	} elsif ($elem->{'type'} eq 'text') {
 	    foreach ( qw(size maxlength) ) {
-	        $ret .= "" . ucfirst($_) . ": <INPUT TYPE=\"text\" NAME=\"pq_$x\_$_\" VALUE=\"";
+	        $ret .= "" . ucfirst($_) . ": <input type=\"text\" name=\"pq_$x\_$_\" value=\"";
 		$ret .= $elem->{$_} || $RULES{'text'}{$_};
-		$ret .= "\" SIZE=\"3\" MAXLENGTH=\"3\">\n";
+		$ret .= "\" size=\"3\" maxlength=\"3\">\n";
 	    }
 	    foreach ( qw(size maxlength) ) {
-		$ret .= "<BR><FONT SIZE=\"1\"><B>[" . $errors->[$x]->{$_} . "]</B></FONT>\n" if ($errors->[$x]->{$_});
+		$ret .= "<br><font size=\"1\"><b>[" . $errors->[$x]->{$_} . "]</b></font>\n" if ($errors->[$x]->{$_});
 	    }
 	} elsif ($elem->{'type'} eq 'scale') {
 	    foreach ( qw(from to by) ) {
-	        $ret .= " " . ucfirst($_) . ": <INPUT TYPE=\"text\" NAME=\"pq_$x\_$_\" VALUE=\"";
+	        $ret .= " " . ucfirst($_) . ": <input type=\"text\" name=\"pq_$x\_$_\" value=\"";
 		$ret .= $elem->{$_} || $RULES{'scale'}{$_};
-		$ret .= "\" SIZE=\"2\" MAXLENGTH=\"2\">\n";
+		$ret .= "\" size=\"3\" maxlength=\"9\">\n";
 	    }
 	    foreach ( qw(from by scale) ) {
-	        $ret .= "<BR><FONT SIZE=\"1\"><B>[" . $errors->[$x]->{$_} . "]</B></FONT>\n" if ($errors->[$x]->{$_});
+	        $ret .= "<br><font size=\"1\"><b>[" . $errors->[$x]->{$_} . "]</b></font>\n" if ($errors->[$x]->{$_});
 	    }
 	}
-	    $ret .= "<BR><B>" . $errors->[$x]->{'items'} if ($errors->[$x]->{'items'});
+	    $ret .= "<br><font size=\"1\"><b>[" . $errors->[$x]->{'items'} . "]</b></font>\n" if ($errors->[$x]->{'items'});
 	
-	$ret .= "</BLOCKQUOTE>\n</TD></TR>\n</TABLE>";
+	$ret .= "</blockquote>\n</td></tr>\n</table>";
 
 	# add a new element unless they're already at the max
 	$ret .= &insert_element($x + 1, $poll);
@@ -374,26 +378,26 @@
 	my $poll = shift;
 	my $ret = "";
 
-        $ret .= "<TABLE BORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" WIDTH=\"60%\">\n";
-	$ret .= "<TR><TD ALIGN=\"middle\"><HR SIZE=\"1\"></TD></TR>\n";
-	$ret .= "<TR><TD ALIGN=\"middle\">";
+        $ret .= "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"60%\">\n";
+	$ret .= "<tr><td align=\"middle\"><hr size=\"1\"></td></tr>\n";
+	$ret .= "<tr><td align=\"middle\">";
 	if ($after >= $RULES{"elements"}{"max"}) {
-		$ret .= "<B>[Element limit reached]</B>\n";
+		$ret .= "(=DE [Element limit reached] DE=)\n";
 	} else {
-		$ret .= "Insert Element: <SELECT NAME=\"insert:$after\">\n";
+		$ret .= "Insert Question: <select name=\"insert:$after\">\n";
 		foreach (qw(-- radio check drop text scale)) {
-		    $ret .= "<OPTION VALUE=\"$_\">" . $TYPENAME{$_} . "\n";
+		    $ret .= "<option value=\"$_\">" . $TYPENAME{$_} . "\n";
 		}
-		$ret .= "</SELECT>\n";
-		$ret .= "<INPUT TYPE=\"submit\" NAME=\"insert:$after:do\" VALUE=\"Insert\">\n";
+		$ret .= "</select>\n";
+		$ret .= "<input type=\"submit\" name=\"insert:$after:do\" value=\"Insert\">\n";
 	}
-	$ret .= "</TD></TR>\n<TR><TD ALIGN=\"middle\"><HR SIZE=\"1\"></TD></TR>\n</TABLE>\n";
+	$ret .= "</tr></tr>\n<tr><td align=\"middle\"><hr size=\"1\"></td></tr>\n</table>\n";
 
 	return $ret;
     }
 
     if ($poll->{'count'} > 0) {
-       $ret .= "<P><INPUT TYPE=\"submit\" NAME=\"generate\" VALUE=\"Generate Code!\">\n";
+       $ret .= "<p><input type=\"submit\" name=\"generate\" value=\"Generate Code!\">\n";
     }
 
     $ret .= "</form>\n";
@@ -424,7 +428,8 @@ sub make_code {
 		        $ret .= " $_=\"" . $elem->{$_} . "\"";
 		    }
 		}
-		$ret .= ">\n" . $elem->{"question"} . "\n";
+		$ret .= ">\n";
+		$ret .= $elem->{'question'} . "\n" if ($elem->{'question'});
 
 		if ($elem->{'type'} =~ /^(radio|drop|check)$/) {
                     # make <lj-pi> tags
@@ -453,17 +458,17 @@ sub make_code {
  my ($poll, $action, $errors, $error_count) = &build_poll(\%FORM);
 
  if ($FORM{'generate'} && $$error_count == 0) {
-     $body .= "(=P Below is the poll code that you need to insert into your journal entry.  Just copy and paste all of the text in the box below into your LiveJournal entry and your poll will appear. P=)";
+     $body .= "(=P Below is the poll code that you need to insert into your journal entry.  Just copy and paste all of the text in the box below into your LiveJournal entry and your poll will appear. P=)\n\n";
  }
 
- # authenticate - but bypass db hit if we THINK they're already in.  not secure, but good enough.
+ # authenticate - but bypass db hit if we think they're already in.
  unless ($FORM{'count'}) {
-     my $remote = &get_remote_noauth();
+     my $remote = LJ::get_remote_noauth();
      unless ($remote) {
         $body = "(=H1 Error H1=)(=P You must be <a href=\"/login.bml?ret=1\">logged in</a> to use the poll creator. P=)";
         return '';
-     };
-
+     }
+     
      my $dbh = LJ::get_dbh("master");
      my $u = LJ::load_user($dbh, $remote->{'user'});
 

@@ -1,14 +1,16 @@
 (=_CODE
 
- require 'ljlib.pl';
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
  
  my $styleid = $FORM{'styleid'}+0;
 
- my $sth = $dbh->prepare("SELECT * FROM style WHERE is_public='Y' AND styleid=$styleid");
+ my $sth = $dbr->prepare("SELECT * FROM style WHERE is_public='Y' AND styleid=$styleid");
  $sth->execute;
  my $sty = $sth->fetchrow_hashref;
  unless ($sth->rows) {
+   # TODO: allow people with supporthelp in any category to see it anyway
    return "Style $styleid does not exist or is not public.";
  }
  my $ret = "";
@@ -25,13 +27,13 @@
  $ret .= "</DL>";
 
  my %vars;
- &parse_vars(\$sty->{'formatdata'}, \%vars);
+ LJ::parse_vars(\$sty->{'formatdata'}, \%vars);
 
  $ret .= "<H1>Style Variables</H1>\n";
 
  foreach my $v (sort keys %vars) {
      $ret .= "<H2>$v</H2>\n";
-     my $val = &ehtml($vars{$v});
+     my $val = LJ::ehtml($vars{$v});
      $val =~ s/\n/<BR>\n/g;
      $ret .= $val;     
  }
