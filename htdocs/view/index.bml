@@ -77,15 +77,15 @@ if (LJ::did_post()) {
      $month = $now[4] + 1;
  }
 
- my $monlang = LJ::Lang::month_long("EN", $month);
+ my $monlang = LJ::Lang::month_long($month);
  $title = $monlang;
  $title .= ", $year - $u->{'user'}";
 
  my $is_person = $u->{'journaltype'} eq "P";
  if ($is_person) {
-     $body .= "<?h1 Month View h1?><?p Here are the subjects of all posts by user <?ljuser $u->{'user'} ljuser?> in $monlang, $year. p?>";
+     $body .= "<?h1 Month View h1?><?p Here are the subjects of all posts by user " . LJ::ljuser($u->{'user'}) . " in $monlang, $year. p?>";
  } else {
-     $body .= "<?h1 Month View h1?><?p Here are the subjects of all posts in the <?ljuser $u->{'user'} ljuser?> journal in $monlang, $year. p?>";
+     $body .= "<?h1 Month View h1?><?p Here are the subjects of all posts in the " . LJ::ljuser($u->{'user'}) . " journal in $monlang, $year. p?>";
  }
 
  ### make standout box
@@ -103,9 +103,9 @@ if (LJ::did_post()) {
      $body .= "<table><tr valign='middle'>";
      $body .= "<td><b>$prev</b></td>";
      $body .= "<td><select name='m'>";
-     for ($i=1;$i<=12;$i++) {
+     for (my $i=1;$i<=12;$i++) {
          my $sel = ($i == $month) ? " selected='selected'" : "";
-         $body .= "<option value='$i'$sel'>" . LJ::Lang::month_long("EN", $i) . "</option>";
+         $body .= "<option value='$i'$sel'>" . LJ::Lang::month_long($i) . "</option>";
      }
      $body .= "</select> <input type=text name=y maxlength=4 size=4 value=$year> <input type=submit value=\"View\"></td>";
      $body .= "<td><b>$next</b></td>";
@@ -119,14 +119,14 @@ if (LJ::did_post()) {
  # yay for repeating nearly-identical code!
  my $db = LJ::get_cluster_reader($u);
  if ($is_person) {
-     $sth = $db->prepare("SELECT l.jitemid*256+l.anum, l.day, ls.subject, l.eventtime, NULL, ".
+     $sth = $db->prepare("SELECT l.jitemid, l.anum, l.day, ls.subject, l.eventtime, NULL, ".
                          "l.replycount, l.security ".
                          "FROM log2 l, logtext2 ls ".
                          "WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} ".
                          "AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid ".
                          "$secwhere ORDER BY l.eventtime");
  } else {
-     $sth = $db->prepare("SELECT l.jitemid*256+l.anum, l.day, ls.subject, l.eventtime, u.user, ".
+     $sth = $db->prepare("SELECT l.jitemid, l.anum, l.day, ls.subject, l.eventtime, u.user, ".
                          "l.replycount, l.security ".
                          "FROM log2 l, logtext2 ls, useridmap u ".
                          "WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} ".
@@ -135,12 +135,12 @@ if (LJ::did_post()) {
  }
 
  $sth->execute;
- while (my ($itemid, $day, $subject, $eventtime, $poster, $replycount, $security) = $sth->fetchrow_array)
+ while (my ($itemid, $anum, $day, $subject, $eventtime, $poster, $replycount, $security) = $sth->fetchrow_array)
  {
      if ($day != $lday) {
          if ($lday) { $body .= "</table></dd>"; }
          $lday = $day;
-         my $ord = LJ::Lang::day_ord("EN", $day);
+         my $ord = LJ::Lang::day_ord($day);
          my $dayview_url = sprintf("$LJ::SITEROOT/users/$u->{'user'}/%04d/%02d/%02d/",
                                    $year, $month, $day);
          $body .= "<dt><b><a href=\"$dayview_url\">$day$ord</a></b></dt>";
@@ -173,14 +173,13 @@ if (LJ::did_post()) {
      }
      $body .= "<tr><td align=right><i>" . LJ::Lang::time_format(12, $h, $m, "short") . "</i></td>";
      if (! $is_person) {
-         $body .= "<td><?ljuser $poster ljuser?></td>";
+         $body .= "<td>" . LJ::ljuser($poster) . "</td>";
      }
 
      BML::ebml(\$subject);
      LJ::CleanHTML::clean_subject_all(\$subject);
 
-     my $itemurl = "$LJ::SITEROOT/users/$u->{'user'}/$itemid.html";
-     $body .= "<td><a href=\"$itemurl\">$subject</a>$sec$rep</td></tr>\n";
+     $body .= "<td><a href='" . LJ::item_link($u, $itemid, $anum) . "'>$subject</a>$sec$rep</td></tr>\n";
  }
  if ($lday) { $body .= "</table></dd>\n"; }
  $body .= "</dl>";

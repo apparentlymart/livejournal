@@ -200,7 +200,7 @@
  if ($FORM{'mode'} eq "add") {
      $body .= "<?h1 Add To-Do Item... h1?><?p All you need to fill out is the subject.  Everything else is optional.  p?>";
  } else {
-     $body .= "<?h1 To-Do Item \#$it->{'todoid'} h1?>";
+     $body .= "<div style='margin-bottom: 20px;'><?h1 To-Do Item \#$it->{'todoid'} h1?></div>";
      if ($permission{'edit'}) {
          $title = "Edit To-Do Item";
      } else {
@@ -234,8 +234,7 @@
 
  ## date due
  $body .= "<tr><td><b>Due Date:</b></td><td>";
- $body .= LJ::html_datetime({ 'name' => 'datedue', 'default' => $it->{'datedue'}, 'disabled' => $disabled,
-                           'lang' => 'EN',     }),
+ $body .= LJ::html_datetime({ 'name' => 'datedue', 'default' => $it->{'datedue'}, 'disabled' => $disabled }),
  $body .= "</td></tr>";
 
  ## categories

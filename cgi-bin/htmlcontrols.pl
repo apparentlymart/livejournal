@@ -27,21 +27,21 @@ sub html_datetime
                                             $6 > 0 ? $6 : "");
     }
     $ret .= html_select({ 'name' => "${name}_mm", 'selected' => $mm, 'disabled' => $disabled },
-                         map { $_, LJ::Lang::month_long($lang, $_) } (0..12));
+                         map { $_, LJ::Lang::month_long($_) } (1..12));
     $ret .= html_text({ 'name' => "${name}_dd", 'size' => '2', 'maxlength' => '2', 'value' => $dd,
-                            'disabled' => $disabled }) . ", ";
+                        'disabled' => $disabled }) . ", ";
     $ret .= html_text({ 'name' => "${name}_yyyy", 'size' => '4', 'maxlength' => '4', 'value' => $yyyy,
-                            'disabled' => $disabled });
+                        'disabled' => $disabled });
     unless ($opts->{'notime'}) {
         $ret .= ' ';
         $ret .= html_text({ 'name' => "${name}_hh", 'size' => '2', 'maxlength' => '2', 'value' => $hh,
-                                'disabled' => $disabled }) . ':';
+                            'disabled' => $disabled }) . ':';
         $ret .= html_text({ 'name' => "${name}_nn", 'size' => '2', 'maxlength' => '2', 'value' => $nn,
-                                'disabled' => $disabled });
+                            'disabled' => $disabled });
         if ($opts->{'seconds'}) {
             $ret .= ':';
             $ret .= html_text({ 'name' => "${name}_ss", 'size' => '2', 'maxlength' => '2', 'value' => $ss,
-                                    'disabled' => $disabled });
+                                'disabled' => $disabled });
         }
     }
 

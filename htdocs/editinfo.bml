@@ -133,7 +133,7 @@ body<=
      $ret .= "<select name=\"month\"><option value=\"\"></option>";
      for (my $i=1; $i<=12; $i++) {
          my $sel = $bdpart{'month'} == $i ? " selected='selected'" : "";
-         $ret .= "<option value='$i'$sel>" . LJ::Lang::month_long("EN", $i) . "</option>\n";
+         $ret .= "<option value='$i'$sel>" . LJ::Lang::month_long($i) . "</option>\n";
      }
      $ret .= "</select> ";
      $ret .= "<input size='3' maxlength='2' name='day' value=\"$bdpart{'day'}\" />, <input size='5' maxlength='4' name='year' value=\"$bdpart{'year'}\" /> ($ML{'.bday.year.opt'})";

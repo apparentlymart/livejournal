@@ -7,57 +7,43 @@ use LJ::Cache;
 
 package LJ::Lang;
 
-my %day_short = ('EN' => [qw[Sun Mon Tue Wed Thu Fri Sat]],
-                 'DE' => [qw[Son Mon Dien Mitt Don Frei Sam]],
-                 );
-my %day_long = ('EN' => [qw[Sunday Monday Tuesday Wednesday Thursday Friday Saturday]],
-                'DE' => [qw[Sonntag Montag Dienstag Mittwoch Donnerstag Freitag Samstag]],
-                'ES' => [("Domingo", "Lunes", "Martes", "Mi\xC3\xA9rcoles", "Viernes", "Jueves", "Sabado")],
-                );
-my %month_short = ('EN' => [qw[Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec]],
-                   'DE' => [qw[Jan Feb Mar Apr Mai Jun Jul Aug Sep Okt Nov Dez]],
-                   );
-my %month_long = ('EN' => [qw[January February March April May June July August September October November December]],
-                  'DE' => [("Januar", "Februar", "M\xC3\xA4rz", "April", "Mai", "Juni",
-                            "Juli", "August", "September", "Oktober", "November", "Dezember")],
-                  'ES' => [qw[Enero Febrero Marzo Abril Mayo Junio Julio Agosto Setiembre Octubre Noviembre Diciembre]],
-                  );
+my @day_short   = (qw[Sun Mon Tue Wed Thu Fri Sat]);
+my @day_long    = (qw[Sunday Monday Tuesday Wednesday Thursday Friday Saturday]);
+my @month_short = (qw[Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec]);
+my @month_long  = (qw[January February March April May June July August September October November December]);
 
-sub enum_trans 
-{
-    my ($hash, $lang, $num) = @_;
-    return "" unless defined $num;
-    unless (defined $hash->{$lang}) { $lang = "EN"; }
-    return $hash->{$lang}->[$num-1];
-}
+# get entire array of days and months
+sub day_list_short   { return @LJ::Lang::day_short;   }
+sub day_list_long    { return @LJ::Lang::day_long;    }
+sub month_list_short { return @LJ::Lang::month_short; }
+sub month_list_long  { return @LJ::Lang::month_long;  }
 
-sub day_short   { return &enum_trans(\%day_short,   @_); }
-sub day_long    { return &enum_trans(\%day_long,    @_); }
-sub month_short { return &enum_trans(\%month_short, @_); }
-sub month_long  { return &enum_trans(\%month_long,  @_); }
+# access individual day or month given integer
+sub day_short   { return   $day_short[$_[0] - 1]; }
+sub day_long    { return    $day_long[$_[0] - 1]; }
+sub month_short { return $month_short[$_[0] - 1]; }
+sub month_long  { return  $month_long[$_[0] - 1]; }
+
+# lang codes for individual day or month given integer
+sub day_short_langcode   { return "date.day."   . lc(LJ::Lang::day_long(@_))    . ".short"; }
+sub day_long_langcode    { return "date.day."   . lc(LJ::Lang::day_long(@_))    . ".long";  }
+sub month_short_langcode { return "date.month." . lc(LJ::Lang::month_long(@_))  . ".short"; }
+sub month_long_langcode  { return "date.month." . lc(LJ::Lang::month_long(@_))  . ".long";  }
 
 ## ordinal suffix
-sub day_ord 
-{
-    my ($lang, $day) = @_;
-    if ($lang eq "DE") {
-        
-    }
-    else
-    {
-        ### default to english
-        
-        # teens all end in 'th'
-        if ($day =~ /1\d$/) { return "th"; }
-        
-        # otherwise endings in 1, 2, 3 are special
-        if ($day % 10 == 1) { return "st"; }
-        if ($day % 10 == 2) { return "nd"; }
-        if ($day % 10 == 3) { return "rd"; }
+sub day_ord {
+    my $day = shift;
 
-        # everything else (0,4-9) end in "th"
-        return "th";
-    }
+    # teens all end in 'th'
+    if ($day =~ /1\d$/) { return "th"; }
+        
+    # otherwise endings in 1, 2, 3 are special
+    if ($day % 10 == 1) { return "st"; }
+    if ($day % 10 == 2) { return "nd"; }
+    if ($day % 10 == 3) { return "rd"; }
+
+    # everything else (0,4-9) end in "th"
+    return "th";
 }
 
 sub time_format

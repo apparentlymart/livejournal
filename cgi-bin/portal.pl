@@ -8,8 +8,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
 use strict;
 
 package LJ::Portal;
-use vars qw(%box %colname
-            );
+use vars qw(%box %colname);
 
 %colname = ("left" => "Left Sidebar",
             "main" => "Main Area",
@@ -578,7 +577,7 @@ $box{'bdays'} =
         box_start($bd, $box, { 'title' => BML::ml('portal.bdays.portaltitle'),
                               'url' => '/birthdays.bml' });
 
-        $sth = $dbr->prepare("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0");
+        $sth = $dbr->prepare("SELECT u.user, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0");
         $sth->execute;
 
         # what day is it now?  server time... suck, yeah.
@@ -586,11 +585,11 @@ $box{'bdays'} =
         my ($mnow, $dnow) = ($time[4]+1, $time[3]);
 
         my @bdays;
-        while (my ($user, $name, $m, $d) = $sth->fetchrow_array) {
-            my $ref = [ $user, $name, $m, $d ];
-            if ($m < $mnow || ($m == $mnow && $d < ($dnow-1))) {
+        while (my ($user, $m, $d) = $sth->fetchrow_array) {
+            my $ref = [ $user, $m, $d ];
+            if ($m < $mnow || ($m == $mnow && $d < ($dnow))) {
                 # birthday passed this year already
-                $ref->[4] = 1;
+                $ref->[3] = 1;
             }
             push @bdays, $ref;
         }	    
@@ -600,14 +599,14 @@ $box{'bdays'} =
         @bdays = sort {
             
             # passed sort
-            ($a->[4] <=> $b->[4]) ||
+            ($a->[3] <=> $b->[3]) ||
                 
             # month sort
-                ($a->[2] <=> $b->[2]) ||
+                ($a->[1] <=> $b->[1]) ||
                         
 
             # day sort
-                    ($a->[3] <=> $b->[3])
+                    ($a->[2] <=> $b->[2])
 
         } @bdays;
 
@@ -616,13 +615,16 @@ $box{'bdays'} =
         if ($show > 100) { $show = 100; }
         if (@bdays > $show) { @bdays = @bdays[0..$show-1]; }
 
-        $$bd .= "<table width=100%>";
-        my $lang = "EN";
-        foreach my $bi (@bdays) 
+        $$bd .= "<table width='100%'>";
+        my $add_ord = BML::get_language() =~ /^en/i;
+        foreach my $bi (@bdays)
         {
-            my $mon = LJ::Lang::month_short($lang, $bi->[2]);
-            my $day = $bi->[3] . LJ::Lang::day_ord($lang, $bi->[3]);
-            $$bd .= "<tr><td nowrap='nowrap'><b><?ljuser $bi->[0] ljuser?></b></td><td align='right' nowrap='nowrap'>$mon $day</td></tr>";
+            my $mon = BML::ml( LJ::Lang::month_short_langcode($bi->[1]) );
+            my $day = $bi->[2];
+            $day .= LJ::Lang::day_ord($bi->[2]) if $add_ord;
+
+            $$bd .= "<tr><td nowrap='nowrap'><b>" . LJ::ljuser($bi->[0]) . "</b></td>";
+            $$bd .= "<td align='right' nowrap='nowrap'>$mon $day</td></tr>";
         }
         $$bd .= "</table>";
 
@@ -827,11 +829,11 @@ $box{'update'} =
             
             if (! $opts->{'form'}->{'altlogin'} && $remote)
             {
-                LJ::do_request($dbs, { "mode" => "login",
-                                       "ver" => $LJ::PROTOCOL_VER,
-                                        "user" => $remote->{'user'},
-                                        "getpickws" => 1,
-                                    }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
+                LJ::do_request({ "mode" => "login",
+                                 "ver" => $LJ::PROTOCOL_VER,
+                                 "user" => $remote->{'user'},
+                                 "getpickws" => 1,
+                               }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
             }
             
             $$bd .= "<tr><td nowrap='nowrap'><input type='hidden' name='webversion' value='full' /><?h2 Optional Settings h2?>";

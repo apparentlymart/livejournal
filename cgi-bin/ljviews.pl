@@ -1528,8 +1528,8 @@ sub create_view_calendar
           }
 
           my %calendar_month = ();
-          $calendar_month{'monlong'} = LJ::Lang::month_long($u->{'lang'}, $month);
-          $calendar_month{'monshort'} = LJ::Lang::month_short($u->{'lang'}, $month);
+          $calendar_month{'monlong'} = LJ::Lang::month_long($month);
+          $calendar_month{'monshort'} = LJ::Lang::month_short($month);
           $calendar_month{'yyyy'} = $year;
           $calendar_month{'yy'} = substr($year, 2, 2);
           $calendar_month{'weeks'} = "";
