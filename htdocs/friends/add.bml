@@ -36,23 +36,36 @@
          next unless $FORM{"bit_$bit"};
          $gmask |= (1 << $bit);
      }
-     
-     my %res = ();
-     LJ::do_request($dbh, {
+
+     my $req = {
          "user" => $remote->{'user'},
          "mode" => "editfriends",
          "ver"  => $LJ::PROTOCOL_VER,
-         "editfriend_add_1_user" => $user,
-         "editfriend_add_1_fg" => $FORM{'editfriend_add_1_fg'}, 
-         "editfriend_add_1_bg" => $FORM{'editfriend_add_1_bg'},
-         "editfriend_add_1_groupmask" => $gmask,
-     }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} } );
-     
+     };
 
+
+     if ($FORM{'action:delete'}) {
+         $req->{"editfriend_delete_$user"} = 1;
+     } else {
+         $req->{"editfriend_add_1_user"} = $user;
+         $req->{"editfriend_add_1_fg"} = $FORM{'editfriend_add_1_fg'};
+         $req->{"editfriend_add_1_bg"} = $FORM{'editfriend_add_1_bg'};
+         $req->{"editfriend_add_1_groupmask"} = $gmask;
+     }
+     
+     my %res = ();
+     LJ::do_request($dbh, $req, \%res, 
+                    { "noauth" => 1, "userid" => $remote->{'userid'} } );
+     
      if ($res{'success'} eq "OK") 
      {
-         $title = "Friend Added!";
-         $body = "(=H1 Success H1=)(=P User <B>$user</B> was added to your friend list.  You can view your friends page <A HREF=\"$LJ::SITEROOT/users/$remote->{'user'}/friends\">here</A>. P=)";
+         if ($FORM{'action:delete'}) {
+             $title = "Friend Removed";
+             $body = "(=H1 Success H1=)(=P User (=LJUSER $user LJUSER=) was removed from your friends list.  You can view your friends page <A HREF=\"$LJ::SITEROOT/users/$remote->{'user'}/friends\">here</A>. P=)";
+         } else {
+             $title = "Friend Added!";
+             $body = "(=H1 Success H1=)(=P User (=LJUSER $user LJUSER=) was added to your friend list.  You can view your friends page <A HREF=\"$LJ::SITEROOT/users/$remote->{'user'}/friends\">here</A>. P=)";
+         }
      } else {
          $title = "Error";
          $body = "(=H1 Error H1=)(=P $res{'errmsg'} P=)";
@@ -67,20 +80,21 @@
  
  if ($fr) {
      $title .= "Modify Friend";
-     $body .= "(=H1 Modify Friend H1=)(=P You already have <b>$user</b> listed as a friend.  However, you can modify the colors you've chosen to represent him/her. P=)";
+     $body .= "(=H1 Modify Friend H1=)(=P You already have (=LJUSER $user LJUSER=) listed as a friend.  Here you can either modify the settings (colors & groups) or remove $user from your friends list. P=)";
  } else {
      $title .= "Add Friend";
      $body .= "(=H1 Add $user as a friend? H1=)(=P To add <B>$user</B> to your friends list, click the button below.  P=)";
  }
 
- $body .= "<form method=post>";
- $body .= "<input type=hidden name=mode value=add>";
- $body .= "<input type=hidden name=user value=\"$user\">";
+ $body .= "<form method='post'>";
+ $body .= "<input type='hidden' name='mode' value='add'>";
+ $body .= "<input type='hidden' name='user' value=\"$user\">";
 
  if ($fr) {
-     $body .= "<center><input type=submit value=\"Save.\"></center>";
+     $body .= "<center><input type='submit' value=\"Modify\">";
+     $body .= " - <input type='submit' name='action:delete' value=\"Remove\"></center>";
  } else {
-     $body .= "<center><input type=submit value=\"Add $user!\"></center>";
+     $body .= "<center><input type='submit' value=\"Add $user!\"></center>";
  }
 
  ## let them pick friend groups
