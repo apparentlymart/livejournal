@@ -1,3 +1,254 @@
+Style: calendar/Clean and Simple
+is_embedded: N
+is_colorfree: Y
+lastupdate: 2002-04-09 09:56:36
+
+CALENDAR_YEAR_DISPLAYED<=
+<li class="active">%%yyyy%%</li>
+
+<=CALENDAR_YEAR_DISPLAYED
+
+CALENDAR_YEAR_LINK<=
+<li><a href="%%url%%">%%yyyy%%</a></li>
+
+<=CALENDAR_YEAR_LINK
+
+CALENDAR_DAY=><td valign="top"><b><font size="-1">%%d%%</font></b>%%dayevent%%%%daynoevent%%</td>
+
+CALENDAR_DAY_NOEVENT=><center>&nbsp;</center>
+
+CALENDAR_YEAR_LINKS=><ul id="skiplinks">%%years%%</ul>
+
+CALENDAR_EMPTY_DAYS=><td colspan="%%numempty%%">&nbsp;</td>
+
+CALENDAR_PAGE<=
+<html>
+<head>
+<style type="text/css" media="all">
+<!--
+body {
+background: %%color:stronger_back%% none;
+color: %%color:page_text%%;
+margin: 50px;
+}
+a:link {
+color: %%color:page_link%%;
+background: transparent;
+}
+a:visited {
+color: %%color:page_vlink%%;
+background: transparent;
+}
+a:active {
+color: %%color:page_alink%%;
+background: transparent;
+}
+img {
+vertical-align: absmiddle;
+}
+table {
+width: 100%;
+}
+pre {
+text-align: left;
+}
+#topbar {
+background: %%color:strong_back%% none;
+color: %%color:strong_text%%;
+}
+#topbar h1 {
+margin-top: 5px;
+margin-bottom: 0;
+text-align: center;
+font-size: 1.5em;
+}
+#topbar h2 {
+margin-top: 0;
+margin-bottom: 5px;
+text-align: center;
+font-size: 1.25em;
+}
+#navbar {
+background: %%color:weak_back%% none;
+color: %%color:weak_text%%;
+width: 25%;
+}
+#navbar ul {
+list-style: none;
+margin: 10px;
+}
+#navbar ul li {
+margin: 0;
+}
+#navbar ul li:before {
+content: "> "
+font-weight: normal;
+}
+#navbar ul li.active {
+font-weight: bold;
+}
+#navbar a:link, #navbar a:active, #navbar a:visited {
+background: %%color:weak_back%% none;
+color: %%color:weak_text%%;
+text-decoration: none;
+}
+#navbar a:hover {
+text-decoration: underline;
+}
+#mainstuff {
+width: 75%;
+background: %%color:page_back%% none;
+color: %%color:page_text%%;
+}
+#userpic {
+text-align: center;
+margin: 10px;
+}
+#userpic img {
+border: 2px solid %%color:strong_back%%;
+background: %%color:strong_back%% none;
+color: %%color:strong_text%%;
+}
+#entries {
+margin: 10px;
+}
+#range {
+margin-bottom: 0.5em;
+}
+..day {
+border-top: 1px dashed %%color:page_text%%;
+}
+..day h3 {
+border-bottom: 1px dashed %%color:page_text%%;
+padding: 2px;
+margin: 0;
+font-size: 1.1em;
+text-align: center;
+}
+
+address {
+text-align: center;
+font-style: normal;
+font-size: 0.95em;
+}
+
+/* entries */
+..entrytext {
+padding: 2px;
+text-align: justify;
+}
+..entrytext p, .entrytext ul, .entrytext ol, .entrytext table {
+margin-top: 0.5em;
+margin-bottom: 0.5em;
+}
+..entryheading {
+font-weight: bold;
+}
+..timestamp, .subject, .altposter {
+font-weight: bold;
+color: %%color:page_text_em%%;
+background: %%color:page_back%%;
+}
+..altposter a {
+color: %%color:page_text_em%%;
+background: %%color:page_back%%;
+text-decoration: underline;
+}
+..altposter img {
+border: 2px %%color:strong_back%% solid;
+background: %%color:strong_back%% none;
+color: %%color:strong_text%%;
+}
+..talklinks {
+font-size: 0.75em;
+text-align: right;
+margin-bottom: 2px;
+clear: right;
+}
+-->
+</style>
+%%head%%
+<title>%%name%%%%name-'s%% History</title>
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="2" id="topbar" valign="top">
+<h1>%%name%%</h1>
+<h2>History</h2>
+</td></tr>
+
+<tr><td id="navbar" valign="top">
+
+<ul id="viewlinks">
+<li><a href="%%urllastn%%">Recent&nbsp;Entries</a></li>
+<li><a href="%%urlfriends%%">Friends</a></li>
+<li class="active">History</li>
+<li><a href="%%cons:siteroot%%/userinfo.bml?user=%%username%%">Info</a></li>
+%%website%%
+</ul>
+
+%%yearlinks%%
+
+</td>
+<td id="mainstuff" valign="top">
+<div id="entries">
+
+%%months%%
+
+</div>
+
+<address>Powered by <a href="%%cons:siteroot%%/">%%cons:sitename%%</a></address>
+
+</td></tr>
+
+</table>
+
+</body>
+</html>
+
+<=CALENDAR_PAGE
+
+CALENDAR_MONTH<=
+<center>
+<table border="0" cellpadding="4" cellspacing="0" style="margin-top: 10px; margin-bottom: 10px;">
+<tr align="center"><td colspan="7" bgcolor="%%color:strong_back%%"><font color="%%color:strong_text%%"><b>%%monlong%% %%yyyy%%</b> (<a href="%%urlmonthview%%">...</a>)</font></TD></TR>
+<tr align="center" bgcolor="%%color:weak_back%%">
+<td><font color="%%color:weak_text%%">Sun</font></td>
+<td><font color="%%color:weak_text%%">Mon</font></td>
+<td><font color="%%color:weak_text%%">Tue</font></td>
+<td><font color="%%color:weak_text%%">Wed</font></td>
+<td><font color="%%color:weak_text%%">Thu</font></td>
+<td><font color="%%color:weak_text%%">Fri</font></td>
+<td><font color="%%color:weak_text%%">Sat</font></td>
+</tr>
+%%weeks%%
+</table>
+</center>
+
+<=CALENDAR_MONTH
+
+CALENDAR_WEBSITE<=
+<li><a href="%%url%%">%%name%%</a></li>
+
+<=CALENDAR_WEBSITE
+
+CALENDAR_NEW_YEAR=><h3>%%yyyy%%</h3>
+
+CALENDAR_SORT_MODE=>forward
+
+CALENDAR_DAY_EVENT=><center><a href="%%dayurl%%">%%eventcount%%</a></center>
+
+CALENDAR_WEEK<=
+<tr>
+%%emptydays_beg%%
+%%days%%
+%%emptydays_end%%
+</tr>
+<=CALENDAR_WEEK
+
+
+.
+
 Style: calendar/Default Calendar
 is_embedded: N
 is_colorfree: Y
@@ -91,6 +342,233 @@ CALENDAR_WEEK<=
 
 .
 
+Style: calendar/Disjointed
+is_embedded: N
+is_colorfree: Y
+lastupdate: 2002-04-19 09:03:31
+
+CALENDAR_YEAR_DISPLAYED=><div>&gt;&gt;&nbsp;%%yyyy%%</a>
+
+CALENDAR_YEAR_LINK=><div><a href="%%url%%">%%yyyy%%</a>
+
+CALENDAR_DAY=><TD VALIGN=TOP><div class="day">%%d%%</div>%%dayevent%%%%daynoevent%%</TD>
+
+CALENDAR_DAY_NOEVENT=><center>&nbsp;</center>
+
+CALENDAR_YEAR_LINKS=>%%years%%
+
+CALENDAR_EMPTY_DAYS=><TD COLSPAN=%%numempty%%>&nbsp;</TD>
+
+CALENDAR_PAGE<=
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<style type="text/css">
+<!--
+body {
+background:%%color:page_back%%;
+}
+body, table, td, div {
+font-size:8pt;
+font-family: "OCR A Extended", "Courier";
+}
+..day {
+border:solid 2px %%color:weak_back%%;
+text-align:center;
+padding:4px;
+color:%%color:strong_text%%;
+background:%%color:strong_back%%;
+font-weight:bold;
+}
+..dayevent {
+margin-top:3px
+}
+..entries {
+width:85%;
+margin-bottom:50px;
+}
+..entries td {
+padding:4px;
+}
+..metabox {
+background:%%color:strong_back%%;
+width:50%;
+border:solid 2px %%color:weak_back%%;
+font-weight:bold;
+color:%%color:strong_text%%;
+}
+..necorn {
+background:%%color:stronger_back%%;
+text-align:right;
+font-style:italic;
+border-right:solid 2px %%color:weak_back%%;
+border-top:solid 2px %%color:weak_back%%;
+color:%%color:stronger_text%%;
+}
+..sidepad {
+width: 5%;
+}
+..entrybox {
+background:%%color:stronger_back%%;
+width:90%;
+border-right:solid 2px %%color:weak_back%%;
+border-left:solid 2px %%color:weak_back%%;
+color:%%color:stronger_text%%;
+}
+..swcorn {
+background:%%color:stronger_back%%;
+border-left:solid 2px %%color:weak_back%%;
+border-bottom:solid 2px %%color:weak_back%%;
+color:%%color:stronger_text%%;
+}
+..daycol {
+width:14%;
+}
+a {
+color:%%color:page_link%%;
+text-decoration:none;
+}
+a img {
+border: 0;
+}
+a:hover, .entrybox a:hover {
+color:%%color:page_alink%%;
+text-decoration: underline overline;
+}
+#secorn {
+background:%%color:stronger_back%%;
+border-right:solid 2px %%color:weak_back%%;
+border-bottom:solid 2px %%color:weak_back%%;
+width:40%;
+color:%%color:stronger_text%%;
+}
+#navlink, #yearlink {
+text-align:right;
+width:60%;
+}
+..nav {
+background:%%color:stronger_back%%;
+border:solid 2px %%color:weak_back%%;
+border-bottom:0;
+text-align:center;
+color:%%color:stronger_text%%;
+}
+-->
+</style>
+%%head%%
+<title>%%name%%%%name-'s%% Calendar</title>
+</head>
+<body>
+
+<table width="100%">
+<tr>
+<td valign="top" align="center">
+
+%%months%%
+
+</td>
+
+<td valign="top" width=20%>
+
+<table cellspacing=0 cellpadding=4 width=100%>
+ <tr>
+  <td width="15%">&nbsp;</td>
+  <td width="85%" colspan=2 class="nav">
+   <span style="font-weight:bold">%%username%%</span></td>
+ </tr>
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox" id="navlink">
+   <a class="links" href="%%urllastn%%">Recent Entries</a><br>
+   <a class="links" href="%%urlfriends%%">Friends</a><br>
+   <a class="links" href="%%cons:siteroot%%/userinfo.bml?user=%%username%%&amp;mode=full">Info<br>
+%%website%%</td>
+  <td id="secorn">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+ </tr>
+</table>
+<table cellspacing=0 cellpadding=4 style="width:80%; float:right; margin-top:2em">
+ <tr>
+  <td width="85%" colspan=2 class="nav">
+   <a href="%%cont:siteroot%%/allpics.bml?user=%%username%%">%%userpic%%</a>
+   <span style="font-weight:bold">years</span></td>
+  <td width="15%">&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="swcorn" width=40%>&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox" id="yearlink">
+%%yearlinks%%</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+ </tr>
+</table>
+
+</td></tr></table>
+</body>
+</html>
+<=CALENDAR_PAGE
+
+CALENDAR_MONTH<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox">%%monlong%% %%yyyy%%</td>
+  <td class="nopad">%%altposter%%</td>
+  <td>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+<table width=90% align="center" cellpadding=1 cellspacing=0 style="margin-bottom:4px; color:%%color:stronger_text%%">
+<TR ALIGN=CENTER>
+<TD class="daycol"><b>Sun</b></TD>
+<TD class="daycol"><b>Mon</b></TD>
+<TD class="daycol"><b>Tue</b></TD>
+<TD class="daycol"><b>Wed</b></TD>
+<TD class="daycol"><b>Thu</b></TD>
+<TD class="daycol"><b>Fri</b></TD>
+<TD class="daycol"><b>Sat</b></TD>
+</TR>
+%%weeks%%
+</TABLE>
+<p></td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox"><a href="%%urlmonthview%%">View Subjects</a></td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=CALENDAR_MONTH
+
+CALENDAR_WEBSITE=><br><a class="links" href="%%url%%">%%name%%</a>
+
+CALENDAR_NEW_YEAR=>
+
+CALENDAR_SORT_MODE=>
+
+CALENDAR_DAY_EVENT=><div class="dayevent">&nbsp;<A HREF="%%dayurl%%">%%eventcount%%</A></div>
+
+CALENDAR_WEEK<=
+<tr>
+%%emptydays_beg%%
+%%days%%
+%%emptydays_end%%
+</tr>
+
+<=CALENDAR_WEEK
+
+
+.
+
 Style: calendar/Generator
 is_embedded: N
 is_colorfree: Y
@@ -158,16 +636,16 @@ text-decoration: underline;
 font-size: 8pt;
 background: %%color:weak_back%%;
 }
-.meta {
+..meta {
 font-size: 8pt;
 }
-.index {
+..index {
 font-size: 8pt;
 }
-.caption, .index {
+..caption, .index {
 color: %%color:stronger_text%%;
 }
-.comments {
+..comments {
 font-size: 8pt;
 }
 </style>
@@ -302,10 +780,104 @@ CALENDAR_WEEK<=
 
 .
 
+Style: calendar/Magazine
+is_embedded: N
+is_colorfree: Y
+lastupdate: 2002-04-09 21:24:19
+
+CALENDAR_YEAR_DISPLAYED=> (<span class="Active">%%yyyy%%</span>)
+
+CALENDAR_YEAR_LINK=> (<a href="%%url%%">%%yyyy%%</a>)
+
+CALENDAR_DAY<=
+    <td>%%d%%%%dayevent%%%%daynoevent%%</td>
+
+<=CALENDAR_DAY
+
+CALENDAR_DAY_NOEVENT=><br><br>
+
+CALENDAR_YEAR_LINKS=>Navigate: %%years%%
+
+CALENDAR_EMPTY_DAYS<=
+    <td class="Empty" colspan="%%numempty%%"></td>
+
+<=CALENDAR_EMPTY_DAYS
+
+CALENDAR_PAGE<=
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+ <head>
+  <style type="text/css">
+   <!--
+    HTML { border-left: 1cm solid %%color:stronger_back%%; padding: 1cm; }
+    BODY { line-height: 1.3; margin: 0; background-color: %%color:page_back%%; color: %%color:page_text%%; }
+    P { margin-top: 0; text-align: justify; }
+    H1 { font: x-large Verdana, sans-serif; text-align: center; letter-spacing: -0.09em; color: %%color:page_text_title%%; }
+    H2 { background-color: %%color:strong_back%%; color: %%color:strong_text%%; border-bottom: thin solid %%color:stronger_back%%; font: normal 1.3em Georgia, serif; }
+    A:link { color: %%color:page_link%%; }
+    A:visited { color: %%color:page_vlink%%; }
+    A:active { color: %%color:page_alink%%; }
+    .Navigation { text-align: center; font-family: sans-serif; }
+    .Empty { background-color: %%color:weak_back%%; }
+    .Month { margin-top: 1em; }
+    .MonthHeader { color: %%color:strong_text%%; background-color: %%color:strong_back%%; line-height: 1.5; }
+    TD { color: %%color:weak_text%%; width: 14%; }
+    TH { background-color: %%color:weak_back%%; font-family: Verdana, sans-serif; }
+    TH, TD { border: thin outset; }
+    .Active { background-color: %%color:weak_back%%; }
+   -->
+  </style>
+%%head%%
+  <title>%%name%%%%name-'s%% Calendar</title>
+ </head>
+ <body>
+  <h1>%%name%%%%name-'s%% Calendar</h1>
+  <p class="Navigation">(<a href="%%urllastn%%">Latest&nbsp;entries</a>) (<span class="Active">Calendar</span>) (<a href="%%urlfriends%%">Friends</a>) %%website%% (<a href="%%urllastn%%info">User&nbsp;info</a>)<br>%%yearlinks%%</p>
+%%months%%
+ </body>
+</html>
+<=CALENDAR_PAGE
+
+CALENDAR_MONTH<=
+  <table class="Month">
+   <tr><th class="MonthHeader" colspan="7"><a href="%%urlmonthview%%">%%monlong%% %%yyyy%%</a></th></tr>
+   <tr>
+    <th>Sun</th>
+    <th>Mon</th>
+    <th>Tue</th>
+    <th>Wed</th>
+    <th>Thu</th>
+    <th>Fri</th>
+    <th>Sat</th>
+   </tr>
+%%weeks%%  </table>
+
+<=CALENDAR_MONTH
+
+CALENDAR_WEBSITE=>(<a href="%%url%%">%%name%%</a>)
+
+CALENDAR_NEW_YEAR<=
+  <h2>%%yyyy%%</h2>
+
+<=CALENDAR_NEW_YEAR
+
+CALENDAR_SORT_MODE=>
+
+CALENDAR_DAY_EVENT=><div align="center"><a href="%%dayurl%%"><strong>%%eventcount%%</strong></a></div>
+
+CALENDAR_WEEK<=
+   <tr valign="top">
+%%emptydays_beg%%%%days%%%%emptydays_end%%   </tr>
+
+<=CALENDAR_WEEK
+
+
+.
+
 Style: calendar/Notepad
 is_embedded: N
 is_colorfree: N
-lastupdate: 2001-09-19 15:39:42
+lastupdate: 2002-04-12 20:57:20
 
 CALENDAR_MONTH<=
 <CENTER><P>
@@ -351,7 +923,8 @@ CALENDAR_PAGE<=
 <HTML>
  <HEAD>
   <TITLE>%%name%%%%name-'s%% Calendar</TITLE>
-  <STYLE>
+  %%head%%
+  <STYLE type="text/css">
    <!--
     td,body,p,div    {color:#000000; text-decoration:none; font-family:Verdana,Arial,Helvetica; font-size:12px}
     a:link           {color:#000000; text-decoration:underline; font-family:Verdana,Arial,Helvetica; font-size:12px}
@@ -658,36 +1231,291 @@ CALENDAR_WEEK<=
 
 .
 
+Style: day/Clean and Simple
+is_embedded: N
+is_colorfree: Y
+lastupdate: 2002-04-09 09:58:59
+
+DAY_TALK_LINKS=><div class="talklinks" clear="all">%%readlink%% <a href="%%urlpost%%">Comment on this</a></div>
+
+DAY_CURRENT<=
+<div class="current%%lc:what%%"><strong>Current %%what%%:</strong> %%value%%</div>
+
+<=DAY_CURRENT
+
+DAY_EVENT_PRIVATE<=
+<div class="entry" id="entry%%itemid%%">
+<div class="entrytext">
+<span class="entryheading">
+<span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_private.gif" width=16 height=16 vspace=0 hspace=0 alt="[Private]"> %%subject%%</span>
+%%event%%
+%%currents%%</div>
+%%talklinks%%
+</div>
+
+<=DAY_EVENT_PRIVATE
+
+DAY_WEBSITE=><li><a href="%%url%%">%%name%%</a></li>
+
+DAY_EVENT_PROTECTED<=
+<div class="entry" id="entry%%itemid%%">
+<div class="entrytext">
+<span class="entryheading">
+<span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_protected.gif" width=16 height=16 vspace=0 hspace=0 alt="[Protected]"> %%subject%%</span>
+%%event%%
+%%currents%%</div>
+%%talklinks%%
+</div>
+
+<=DAY_EVENT_PROTECTED
+
+DAY_SUBJECT<=
+ <span class="subject">%%subject%%</span><br>
+
+<=DAY_SUBJECT
+
+DAY_NOEVENTS=><p>There were no entries made on this day.</p>
+
+DAY_EVENTS=>%%events%%
+
+DAY_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% Comment%%mc-plural-s%%</a> -
+
+DAY_SORT_MODE=>forward
+
+DAY_DATE_FORMAT=>%%12h%%:%%min%%%%ampm%%
+
+DAY_EVENT<=
+<div class="entry" id="entry%%itemid%%" clear="all">
+<div class="entrytext">
+<span class="entryheading"><span class="timestamp">%%datetime%%</span>: %%subject%%</span>
+%%event%%
+%%currents%%</div>
+%%talklinks%%
+</div>
+
+<=DAY_EVENT
+
+DAY_CURRENTS<=
+<div class="currents">
+%%currents%%
+</div>
+
+<=DAY_CURRENTS
+
+DAY_PAGE<=
+<html>
+<head>
+<style type="text/css" media="all">
+<!--
+body {
+background: %%color:stronger_back%% none;
+color: %%color:page_text%%;
+margin: 50px;
+}
+a:link {
+color: %%color:page_link%%;
+background: transparent;
+}
+a:visited {
+color: %%color:page_vlink%%;
+background: transparent;
+}
+a:active {
+color: %%color:page_alink%%;
+background: transparent;
+}
+img {
+vertical-align: absmiddle;
+}
+table {
+width: 100%;
+}
+pre {
+text-align: left;
+}
+#topbar {
+background: %%color:strong_back%% none;
+color: %%color:strong_text%%;
+}
+#topbar h1 {
+margin-top: 5px;
+margin-bottom: 0;
+text-align: center;
+font-size: 1.5em;
+}
+#topbar h2 {
+margin-top: 0;
+margin-bottom: 5px;
+text-align: center;
+font-size: 1.25em;
+}
+#navbar {
+background: %%color:weak_back%% none;
+color: %%color:weak_text%%;
+width: 25%;
+}
+#navbar ul {
+list-style: none;
+margin: 10px;
+}
+#navbar ul li {
+margin: 0;
+}
+#navbar ul li:before {
+content: "> "
+font-weight: normal;
+}
+#navbar ul li.active {
+font-weight: bold;
+}
+#navbar a:link, #navbar a:active, #navbar a:visited {
+background: %%color:weak_back%% none;
+color: %%color:weak_text%%;
+text-decoration: none;
+}
+#navbar a:hover {
+text-decoration: underline;
+}
+#mainstuff {
+width: 75%;
+background: %%color:page_back%% none;
+color: %%color:page_text%%;
+}
+#userpic {
+text-align: center;
+margin: 10px;
+}
+#userpic img {
+border: 2px solid %%color:strong_back%%;
+background: %%color:strong_back%% none;
+color: %%color:strong_text%%;
+}
+#entries {
+margin: 10px;
+}
+#range {
+margin-bottom: 0.5em;
+}
+..day {
+border-top: 1px dashed %%color:page_text%%;
+}
+..day h3 {
+border-bottom: 1px dashed %%color:page_text%%;
+padding: 2px;
+margin: 0;
+font-size: 1.1em;
+text-align: center;
+}
+
+address {
+text-align: center;
+font-style: normal;
+font-size: 0.95em;
+}
+
+/* entries */
+..entrytext {
+padding: 2px;
+text-align: justify;
+}
+..entrytext p, .entrytext ul, .entrytext ol, .entrytext table {
+margin-top: 0.5em;
+margin-bottom: 0.5em;
+}
+..entryheading {
+font-weight: bold;
+}
+..timestamp, .subject, .altposter {
+font-weight: bold;
+color: %%color:page_text_em%%;
+background: %%color:page_back%%;
+}
+..altposter a {
+color: %%color:page_text_em%%;
+background: %%color:page_back%%;
+text-decoration: underline;
+}
+..altposter img {
+border: 2px %%color:strong_back%% solid;
+background: %%color:strong_back%% none;
+color: %%color:strong_text%%;
+}
+..talklinks {
+font-size: 0.75em;
+text-align: right;
+margin-bottom: 2px;
+clear: right;
+}
+-->
+</style>
+%%head%%
+<title>%%name%%%%name-'s%% Entries on %%dth%% %%monlong%% %%yyyy%%</title>
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="2" id="topbar" valign="top">
+<h1>%%name%%</h1>
+<h2>History</h2>
+</td></tr>
+
+<tr><td id="navbar" valign="top">
+
+<ul id="viewlinks">
+<li><a href="%%urllastn%%">Recent&nbsp;Entries</a></li>
+<li><a href="%%urlfriends%%">Friends</a></li>
+<li><a href="%%urlcalendar%%">History</a></li>
+<li><a href="%%cons:siteroot%%/userinfo.bml?user=%%username%%">Info</a></li>
+%%website%%
+</ul>
+
+<ul id="skiplinks">
+<li><a href="%%prevday_url%%">Previous Day</a></li>
+<li><a href="%%nextday_url%%">Next Day</a></li>
+</ul>
+
+</td>
+<td id="mainstuff" valign="top">
+<div id="entries">
+<div id="range">%%range%%</div>
+
+<div class="day" id="day%%yyyy%%%%mm%%%%dd%%">
+<h3>%%dth%% %%monlong%% %%yyyy%%</h3>
+%%events%%
+
+</div>
+
+</div>
+
+<address>Powered by <a href="%%cons:siteroot%%/">%%cons:sitename%%</a></address>
+
+</td></tr>
+
+</table>
+
+</body>
+</html>
+
+<=DAY_PAGE
+
+.
+
 Style: day/Default Day View
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2000-07-18 16:43:04
-
-DAY_EVENT<=
-<TR VALIGN=TOP><TD BGCOLOR=%%color:weak_back%% ALIGN=RIGHT><FONT COLOR=%%color:weak_text%%><tt><I>%%datetime%%</I></tt></FONT></TD>
-<TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
-<=DAY_EVENT
-
-DAY_CURRENT=><BR><FONT FACE="Arial,Helvetica" SIZE=-1><B>Current %%what%%:</B> <I>%%value%%</I></FONT>
-
-DAY_DATE_FORMAT=>%%12h%%:%%min%%%%ap%%
-
-DAY_EVENT_PROTECTED<=
-<TR VALIGN=TOP><TD BGCOLOR=%%color:weak_back%% ALIGN=RIGHT><FONT COLOR=%%color:weak_text%%><tt><I>%%datetime%%</I></tt></FONT><BR>
-<IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"></TD>
-<TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
-<=DAY_EVENT_PROTECTED
+lastupdate: 2002-04-11 00:45:39
 
 DAY_TALK_LINKS<=
 <DIV STYLE="text-align:right">
   <FONT SIZE=-2>(%%readlink%%<A HREF="%%urlpost%%">Comment on this</A>)</FONT></DIV>
 <=DAY_TALK_LINKS
 
-DAY_SORT_MODE=>forward
+DAY_CURRENT=><BR><FONT FACE="Arial,Helvetica" SIZE=-1><B>Current %%what%%:</B> <I>%%value%%</I></FONT>
 
-DAY_SUBJECT=><FONT COLOR="%%color:page_text_em%%" FACE="Arial"><I><B>%%subject%%</B></I></FONT><BR>
-
-DAY_NOEVENTS=><I>(no journal entries for this day)</I>
+DAY_EVENT_PRIVATE<=
+<TR VALIGN=TOP><TD BGCOLOR=%%color:weak_back%% ALIGN=RIGHT><FONT COLOR=%%color:weak_text%%><tt><I>%%datetime%%</I></tt></FONT><BR>
+<IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Private"></TD>
+<TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
+<=DAY_EVENT_PRIVATE
 
 DAY_WEBSITE<=
 <TD>
@@ -695,6 +1523,16 @@ DAY_WEBSITE<=
 </TD>
 <TD BGCOLOR=%%color:stronger_back%%>&nbsp;</TD>
 <=DAY_WEBSITE
+
+DAY_EVENT_PROTECTED<=
+<TR VALIGN=TOP><TD BGCOLOR=%%color:weak_back%% ALIGN=RIGHT><FONT COLOR=%%color:weak_text%%><tt><I>%%datetime%%</I></tt></FONT><BR>
+<IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"></TD>
+<TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
+<=DAY_EVENT_PROTECTED
+
+DAY_SUBJECT=><FONT COLOR="%%color:page_text_em%%" FACE="Arial"><I><B>%%subject%%</B></I></FONT><BR>
+
+DAY_NOEVENTS=><I>(no journal entries for this day)</I>
 
 DAY_EVENTS<=
 <TABLE WIDTH=80%>
@@ -708,13 +1546,16 @@ DAY_EVENTS<=
 
 DAY_TALK_READLINK=><B><A HREF="%%urlread%%">%%messagecount%% Comment%%mc-plural-s%%</A></B> | 
 
-DAY_CURRENTS=><BR>%%currents%%
+DAY_SORT_MODE=>forward
 
-DAY_EVENT_PRIVATE<=
-<TR VALIGN=TOP><TD BGCOLOR=%%color:weak_back%% ALIGN=RIGHT><FONT COLOR=%%color:weak_text%%><tt><I>%%datetime%%</I></tt></FONT><BR>
-<IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=16 HEIGHT=16 VSPACE=2 HSPACE=2 ALT="Private"></TD>
+DAY_DATE_FORMAT=>%%12h%%:%%min%%%%ap%%
+
+DAY_EVENT<=
+<TR VALIGN=TOP><TD BGCOLOR=%%color:weak_back%% ALIGN=RIGHT><FONT COLOR=%%color:weak_text%%><tt><I>%%datetime%%</I></tt></FONT></TD>
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
-<=DAY_EVENT_PRIVATE
+<=DAY_EVENT
+
+DAY_CURRENTS=><BR>%%currents%%
 
 DAY_PAGE<=
 <HTML>
@@ -745,7 +1586,7 @@ DAY_PAGE<=
 </TD>
 <TD ALIGN=CENTER WIDTH=33%>
 <B>%%yyyy%%/%%mm%%/%%dd%%</B><BR>
-[<A HREF="/users/%%username%%/calendar">Calendar</A>]
+[<A HREF="%%urlcalendar%%">Calendar</A>]
 </TD>
 <TD WIDTH=33% ALIGN=RIGHT>
 <A HREF="%%nextday_url%%">Next Day &gt;&gt;</A>
@@ -768,6 +1609,299 @@ DAY_PAGE<=
 
 </BODY>
 </HTML>
+<=DAY_PAGE
+
+
+.
+
+Style: day/Disjointed
+is_embedded: N
+is_colorfree: Y
+lastupdate: 2002-04-19 09:03:48
+
+DAY_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">Post</a>
+
+DAY_CURRENT=><div><span style="font-weight:bold">%%lc:what%%:</span> %%value%%</div>
+
+DAY_EVENT_PRIVATE<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_private.gif">%%subject%%&nbsp;</td>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">%%datetime%%</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+  %%currents%%
+  %%event%%</td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox">%%talklinks%%</td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=DAY_EVENT_PRIVATE
+
+DAY_WEBSITE=><br><a class="links" href="%%url%%">%%name%%</a>
+
+DAY_EVENT_PROTECTED<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_protected.gif">%%subject%%&nbsp;</td>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">%%datetime%%</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+  %%currents%%
+  %%event%%</td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox">%%talklinks%%</td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=DAY_EVENT_PROTECTED
+
+DAY_SUBJECT=>%%subject%%
+
+DAY_NOEVENTS<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox">No Events</td>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+  There are no events on this day</td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox">&nbsp;</td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=DAY_NOEVENTS
+
+DAY_EVENTS=>%%events%%
+
+DAY_TALK_READLINK=><a href="%%urlread%%">Read %%messagecount%%</a>&nbsp;-&nbsp;
+
+DAY_SORT_MODE=>
+
+DAY_DATE_FORMAT=>%%12hh%%:%%min%%%%ampm%% %%dd%%/%%mm%%/%%yyyy%%
+
+DAY_EVENT<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox">%%subject%%&nbsp;</td>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">%%datetime%%</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+  %%currents%%
+  %%event%%</td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox">%%talklinks%%</td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=DAY_EVENT
+
+DAY_CURRENTS<=
+<table class="currbox">
+<tr><td>
+%%currents%%
+</td></tr></table>
+<=DAY_CURRENTS
+
+DAY_PAGE<=
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<style type="text/css">
+<!--
+body {
+background:%%color:page_back%%;
+}
+body, table, td, div {
+font-size:8pt;
+font-family: "OCR A Extended", "Courier";
+}
+..entries {
+width:85%;
+margin-bottom:50px;
+}
+..entries td {
+padding:4px;
+}
+..entries td.nopad {
+padding:0;
+}
+..altposter {
+background:%%color:strong_back%%;
+border:solid 2px %%color:weak_back%%;
+border-bottom:0;
+font-weight:bold;
+text-align:center;
+color:%%color:strong_text%%;
+}
+..metabox {
+background:%%color:strong_back%%;
+width:50%;
+border:solid 2px %%color:weak_back%%;
+font-weight:bold;
+color:%%color:strong_text%%;
+}
+..necorn {
+background:%%color:stronger_back%%;
+text-align:right;
+font-style:italic;
+border-right:solid 2px %%color:weak_back%%;
+border-top:solid 2px %%color:weak_back%%;
+color:%%color:stronger_text%%;
+}
+..sidepad {
+width:5%
+}
+..entrybox {
+background:%%color:stronger_back%%;
+width:90%;
+border-right:solid 2px %%color:weak_back%%;
+border-left:solid 2px %%color:weak_back%%;
+color:%%color:stronger_text%%;
+}
+..currbox {
+width:30%;
+background:%%color:strong_back%%;
+border:solid 2px %%color:weak_back%%;
+margin:3px;
+float:right;
+color:%%color:strong_text%%;
+}
+..swcorn {
+background:%%color:stronger_back%%;
+border-left:solid 2px %%color:weak_back%%;
+border-bottom:solid 2px %%color:weak_back%%;
+color:%%color:stronger_text%%;
+}
+a {
+color:%%color:page_link%%;
+text-decoration:none;
+}
+a img {
+border:0
+}
+a:hover, .entrybox a:hover {
+color:%%color:page_alink%%;
+text-decoration: underline overline;
+}
+#secorn {
+background:%%color:stronger_back%%;
+border-right:solid 2px %%color:weak_back%%;
+border-bottom:solid 2px %%color:weak_back%%;
+width:40%;
+color:%%color:stronger_text%%;
+}
+#navlink, #daylink {
+text-align:right;
+width:60%;
+
+}
+..nav {
+background:%%color:stronger_back%%;
+border:solid 2px %%color:weak_back%%;
+border-bottom:0;
+text-align:center;
+color:%%color:stronger_text%%;
+}
+-->
+</style>
+%%head%%
+<title>%%name%%%%name-'s%% Journal - %%dth%% %%monlong%% '%%yy%%</title>
+</head>
+<body>
+
+<table width="100%">
+<tr>
+<td valign="top" align="center">
+
+%%events%%
+
+</td>
+
+<td valign="top" width=20%>
+
+<table cellspacing=0 cellpadding=4 width=100%>
+ <tr>
+  <td width="15%">&nbsp;</td>
+  <td width="85%" colspan=2 class="nav">
+   <span style="font-weight:bold">%%username%%</span></td>
+ </tr>
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox" id="navlink">
+   <a class="links" href="%%urllastn%%">Recent Entries</a><br>
+   <a class="links" href="%%urlfriends%%">Friends</a><br>
+   <a class="links" href="%%cons:siteroot%%/userinfo.bml?user=%%username%%&amp;mode=full">Info<br>
+   <a class="links" href="%%urlcalendar%%">Calendar</a><br>%%website%%
+  <td id="secorn">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+ </tr>
+</table>
+<table style="width:80%; float:right; margin-top:2em" cellpadding="4" cellspacing="0">
+ <tr>
+  <td class="nav" width="85%" colspan="2">
+   <span style="font-weight:bold">days</span></td>
+  <td width="15%">&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="swcorn" width="40%">&nbsp;</td>
+  <td class="metabox" id="daylink" colspan="2" rowspan="2"><a href="%%prevday_url%%">Previous</a><br><a href="%%nextday_url%%">Next</a></td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+ </tr>
+</table>
+
+</td></tr></table>
+</body>
+</html>
 <=DAY_PAGE
 
 
@@ -934,16 +2068,16 @@ text-decoration: underline;
 font-size: 8pt;
 background: %%color:weak_back%%;
 }
-.meta {
+..meta {
 font-size: 8pt;
 }
-.index {
+..index {
 font-size: 8pt;
 }
-.caption, .index {
+..caption, .index {
 color: %%color:stronger_text%%;
 }
-.comments {
+..comments {
 font-size: 8pt;
 }
 </style>
@@ -1051,10 +2185,113 @@ summary="">
 
 .
 
+Style: day/Magazine
+is_embedded: N
+is_colorfree: Y
+lastupdate: 2002-04-10 18:19:04
+
+DAY_TALK_LINKS=>   <div class="Comment">(%%readlink%%<a href="%%urlpost%%">comment&nbsp;on&nbsp;this</a>)</div>
+
+DAY_CURRENT=><div><strong>Current %%lc:what%%:</strong> %%value%%</div>
+
+DAY_EVENT_PRIVATE<=
+  <div class="H3Holder">
+   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_private.gif" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Private"></h3>
+<p>%%event%%</p>
+%%currents%%
+%%talklinks%%
+  </div>
+
+<=DAY_EVENT_PRIVATE
+
+DAY_WEBSITE=>(<a href="%%url%%">%%name%%</a>)
+
+DAY_EVENT_PROTECTED<=
+  <div class="H3Holder">
+   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_protected.gif" style="width: 14px; height: 15px; margin: 2px; vertical-align: bottom;" alt="Protected"></h3>
+<p>%%event%%</p>
+%%currents%%
+%%talklinks%%
+  </div>
+
+<=DAY_EVENT_PROTECTED
+
+DAY_SUBJECT=> - <em>%%subject%%</em>
+
+DAY_NOEVENTS=><p style="margin: 0.5em;">(No journal entries for this day)</p>
+
+DAY_EVENTS=>%%events%%
+
+DAY_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
+
+DAY_SORT_MODE=>forward
+
+DAY_DATE_FORMAT=>%%12h%%:%%min%%<small>%%AMPM%%</small>
+
+DAY_EVENT<=
+  <div class="H3Holder">
+   <h3><span>%%datetime%%%%subject%%</span></h3>
+<p>%%event%%</p>
+%%currents%%
+%%talklinks%%
+  </div>
+
+<=DAY_EVENT
+
+DAY_CURRENTS=>   <div class="Current">%%currents%%</div>
+
+DAY_PAGE<=
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+ <head>
+  <style type="text/css">
+   <!--
+    HTML { border-left: 1cm solid %%color:stronger_back%%; padding: 1cm; }
+    BODY { line-height: 1.3; margin: 0; background-color: %%color:page_back%%; color: %%color:page_text%%; }
+    P { margin-top: 0; text-align: justify; }
+    H1 { font: x-large Verdana, sans-serif; text-align: center; letter-spacing: -0.09em; color: %%color:page_text_title%%; }
+    H2 { background-color: %%color:strong_back%%; color: %%color:strong_text%%; border-bottom: thin solid %%color:stronger_back%%; font: normal 1.3em Georgia, serif; }
+    H3 { color: %%color:weak_text%%; font: medium sans-serif; }
+    H3 SPAN { background-color: %%color:weak_back%%; border-right: thin solid %%color:weak_text%%; border-bottom: thin solid %%color:weak_text%%; padding-right: 0.5ex; }
+    H3 EM { color: %%color:page_text_em%%; font-style: normal; }
+    .H3Holder { clear: both; padding-left: 2ex; border-left: thin solid %%color:weak_text%%; border-bottom: thin solid %%color:weak_text%%; margin-bottom: 1em; }
+    A:link { color: %%color:page_link%%; }
+    A:visited { color: %%color:page_vlink%%; }
+    A:active { color: %%color:page_alink%%; }
+    .Navigation { text-align: center; font-family: sans-serif; }
+    .Comment { font-size: 0.7em; margin-top: -1em; text-align: right; }
+    .Comment, .Current { margin-bottom: 1em; }
+    .Active { background-color: %%color:weak_back%%; }
+    ACRONYM { border-bottom: thin dashed %%color:page_text%%; cursor: help; }
+   -->
+  </style>
+%%head%%
+  <title>%%name%%%%name-'s%% Journal - %%monlong%% %%d%%, %%yyyy%%</title>
+ </head>
+ <body>
+  <h1>%%name%%%%name-'s%% Day</h1>
+  <p class="Navigation">(<a href="%%urllastn%%">Latest&nbsp;entries</a>) (<a href="%%urlcalendar%%">Calendar</a>) (<a href="%%urlfriends%%">Friends</a>) %%website%% (<a href="%%urllastn%%info">User&nbsp;info</a>)<br>Navigate: (<a href="%%prevday_url%%">Previous&nbsp;day</a>&nbsp;|&nbsp;<a href="%%nextday_url%%">Next&nbsp;day</a>)</p>
+
+  <h2>%%daylong%%, %%monlong%% %%d%%, %%yyyy%%</h2>
+%%events%%
+  <table style="border-top: thin solid %%color:weak_back%%;" width="100%">
+   <tr>
+    <td width="33%">&larr; <a href="%%prevday_url%%">Previous day</a></td>
+    <td width="34%" align="center">(<a href="%%urlcalendar%%">Calendar</a>)</td>
+    <td width="33%" align="right"><a href="%%nextday_url%%">Next day</a> &rarr;</td>
+   </tr>
+  </table>
+ </body>
+</html>
+<=DAY_PAGE
+
+
+.
+
 Style: day/Notepad
 is_embedded: N
 is_colorfree: N
-lastupdate: 2001-05-13 10:37:59
+lastupdate: 2002-04-12 20:56:57
 
 DAY_SUBJECT=> <FONT COLOR="red">%%subject%%</FONT>
 
@@ -1104,7 +2341,8 @@ DAY_PAGE<=
 <HTML>
  <HEAD>
   <TITLE>%%name%%%%name-'s%% Journal</TITLE>
-  <STYLE>
+  %%head%%
+  <STYLE type="text/css">
    <!--
     td,body,p,div    {color:#000000; text-decoration:none; font-family:Verdana,Arial,Helvetica; font-size:12px}
     a:link           {color:#000000; text-decoration:underline; font-family:Verdana,Arial,Helvetica; font-size:12px}
@@ -1502,6 +2740,310 @@ DAY_PAGE<=
 
 .
 
+Style: friends/Clean and Simple
+is_embedded: N
+is_colorfree: Y
+lastupdate: 2002-04-09 09:54:59
+
+FRIENDS_RANGE_HISTORY=>You are viewing %%numitems%% entries, %%skip%% into the past.
+
+FRIENDS_ALTPOSTER=><span class="altposter"><a href="%%cons:siteroot%%/userinfo.bml?user=%%poster%%">%%poster%%</a></span>, posting in
+
+FRIENDS_EVENT_PROTECTED<=
+<div class="entry" id="entry%%itemid%%" clear="all">
+<div class="entrytext">
+<span class="entryheading">
+%%altposter%%
+<span style="color: %%fgcolor%%; background: %%bgcolor%%; padding-left: 0.5em; padding-right: 0.5em;"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%" style="color: %%fgcolor%%; background: %%bgcolor%%;">%%user%%</a></span> @ <span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_protected.gif" width=16 height=16 vspace=0 hspace=0 alt="[Protected]"> %%subject%%</span>
+%%friendpic%%%%event%%
+%%currents%%</div>
+%%talklinks%%
+</div>
+
+<=FRIENDS_EVENT_PROTECTED
+
+FRIENDS_RANGE_MOSTRECENT=>You are viewing the most recent %%numitems%% entries.
+
+FRIENDS_EVENT_PRIVATE<=
+<div class="entry" id="entry%%itemid%%" clear="all">
+<div class="entrytext">
+<span class="entryheading">
+%%altposter%%
+<span style="color: %%fgcolor%%; background: %%bgcolor%%; padding-left: 0.5em; padding-right: 0.5em;"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%" style="color: %%fgcolor%%; background: %%bgcolor%%;">%%user%%</a></span> @ <span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_private.gif" width=16 height=16 vspace=0 hspace=0 alt="[Private]"> %%subject%%</span>
+%%friendpic%%%%event%%
+%%currents%%</div>
+%%talklinks%%
+</div>
+
+<=FRIENDS_EVENT_PRIVATE
+
+FRIENDS_OPT_ITEMS=>25
+
+FRIENDS_PAGE<=
+<html>
+<head>
+<style type="text/css" media="all">
+<!--
+body {
+background: %%color:stronger_back%% none;
+color: %%color:page_text%%;
+margin: 50px;
+}
+a:link {
+color: %%color:page_link%%;
+background: transparent;
+}
+a:visited {
+color: %%color:page_vlink%%;
+background: transparent;
+}
+a:active {
+color: %%color:page_alink%%;
+background: transparent;
+}
+img {
+vertical-align: absmiddle;
+}
+table {
+width: 100%;
+}
+pre {
+text-align: left;
+}
+#topbar {
+background: %%color:strong_back%% none;
+color: %%color:strong_text%%;
+}
+#topbar h1 {
+margin-top: 5px;
+margin-bottom: 0;
+text-align: center;
+font-size: 1.5em;
+}
+#topbar h2 {
+margin-top: 0;
+margin-bottom: 5px;
+text-align: center;
+font-size: 1.25em;
+}
+#navbar {
+background: %%color:weak_back%% none;
+color: %%color:weak_text%%;
+width: 25%;
+}
+#navbar ul {
+list-style: none;
+margin: 10px;
+}
+#navbar ul li {
+margin: 0;
+}
+#navbar ul li:before {
+content: "> "
+font-weight: normal;
+}
+#navbar ul li.active {
+font-weight: bold;
+}
+#navbar a:link, #navbar a:active, #navbar a:visited {
+background: %%color:weak_back%% none;
+color: %%color:weak_text%%;
+text-decoration: none;
+}
+#navbar a:hover {
+text-decoration: underline;
+}
+#mainstuff {
+width: 75%;
+background: %%color:page_back%% none;
+color: %%color:page_text%%;
+}
+#entries {
+margin: 10px;
+}
+#range {
+margin-bottom: 0.5em;
+}
+..day {
+border-top: 1px dashed %%color:page_text%%;
+clear: both;
+}
+..day h3 {
+border-bottom: 1px dashed %%color:page_text%%;
+padding: 2px;
+margin: 0;
+font-size: 1.1em;
+text-align: center;
+}
+
+address {
+text-align: center;
+font-style: normal;
+font-size: 0.95em;
+}
+
+/* entries */
+..entry {
+clear: both;
+}
+..entrytext {
+padding: 2px;
+text-align: justify;
+}
+..entrytext p, .entrytext ul, .entrytext ol, .entrytext table {
+margin-top: 0.5em;
+margin-bottom: 0.5em;
+}
+..entryheading {
+font-weight: bold;
+}
+..timestamp, .subject, .altposter {
+font-weight: bold;
+color: %%color:page_text_em%%;
+background: %%color:page_back%%;
+}
+..altposter a {
+color: %%color:page_text_em%%;
+background: %%color:page_back%%;
+text-decoration: underline;
+}
+..talklinks {
+font-size: 0.75em;
+text-align: right;
+margin-bottom: 2px;
+clear: right;
+}
+..frienduserpic {
+border: 2px solid %%color:strong_back%%;
+background: %%color:strong_back%% none;
+color: %%color:strong_text%%;
+}
+-->
+</style>
+%%head%%
+<title>%%name%%%%name-'s%% Friends</title>
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="2" id="topbar" valign="top">
+<h1>%%name%%</h1>
+<h2>Friends' Entries</h2>
+</td></tr>
+
+<tr><td id="navbar" valign="top">
+
+<ul id="viewlinks">
+<li><a href="%%urllastn%%">Recent Entries</a></li>
+<li class="active">Friends</li>
+<li><a href="%%urlcalendar%%">History</a></li>
+<li><a href="%%cons:siteroot%%/userinfo.bml?user=%%username%%">Info</a></li>
+%%website%%
+</ul>
+
+%%skiplinks%%
+
+</td>
+<td id="mainstuff" valign="top">
+<div id="entries">
+<div id="range">%%range%%</div>
+
+%%events%%
+
+</div>
+
+<address>Powered by <a href="%%cons:siteroot%%/">%%cons:sitename%%</a></address>
+
+</td></tr>
+
+</table>
+
+</body>
+</html>
+
+<=FRIENDS_PAGE
+
+FRIENDS_END_DAY<=
+</div>
+
+<=FRIENDS_END_DAY
+
+FRIENDS_NOFRIENDS<=
+<p>There are a few reasons why you might not see posts on this friends page:
+<ul>
+<li>%%name%% might have no friends defined.  If you are %%name%%, you can <a href="%%cons:siteroot%%/friends/edit.bml?%%username%%">edit your LiveJournal friends</a> so they show up here.</li>
+<li>%%name%% might have friends defined, but all of their friends' posts might be over two weeks old (according to the times on our servers), and thus wouldn't be displayed here.</li>
+<li>%%name%% might have friends defined that post only protected entries that you can't view, because they haven't defined you as a friend in return.</li>
+</ul>
+</p>
+
+<=FRIENDS_NOFRIENDS
+
+FRIENDS_SKIP_FORWARD<=
+<li><a href="%%url%%">Next %%numitems%% Entries</a></li>
+
+<=FRIENDS_SKIP_FORWARD
+
+FRIENDS_EVENT<=
+<div class="entry" id="entry%%itemid%%" clear="all">
+<div class="entrytext">
+<span class="entryheading">%%altposter%%
+<span style="color: %%fgcolor%%; background: %%bgcolor%%; padding-left: 0.5em; padding-right: 0.5em;"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%" style="color: %%fgcolor%%; background: %%bgcolor%%;">%%user%%</a></span> @ <span class="timestamp">%%datetime%%</span>: %%subject%%</span>
+%%friendpic%%%%event%%
+%%currents%%</div>
+%%talklinks%%
+</div>
+
+<=FRIENDS_EVENT
+
+FRIENDS_SKIP_SPACER=>
+
+FRIENDS_CURRENT<=
+<div class="current%%lc:what%%"><strong>Current %%what%%:</strong> %%value%%</div>
+
+<=FRIENDS_CURRENT
+
+FRIENDS_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% Comment%%mc-plural-s%%</a> -
+
+FRIENDS_SKIP_LINKS<=
+<ul id="skiplinks">
+%%skipforward%%%%skipbackward%%
+</ul>
+<=FRIENDS_SKIP_LINKS
+
+FRIENDS_EVENTS<=
+%%events%%
+
+<=FRIENDS_EVENTS
+
+FRIENDS_NEW_DAY<=
+<div class="day" id="day%%yyyy%%%%mm%%%%dd%%">
+<h3>%%dth%% %%monlong%% %%yyyy%%</h3>
+
+<=FRIENDS_NEW_DAY
+
+FRIENDS_NO_SUBJECT=>
+
+FRIENDS_SKIP_BACKWARD=><li><a href="%%url%%">Previous %%numitems%% Entries</a></li>
+
+FRIENDS_TALK_LINKS=><div class="talklinks" clear="all">%%readlink%% <a href="%%urlpost%%">Comment on this</a></div>
+
+FRIENDS_CURRENTS<=
+<div class="currents">
+%%currents%%
+</div>
+<=FRIENDS_CURRENTS
+
+FRIENDS_DATE_FORMAT=>%%12h%%:%%min%%%%ampm%%
+
+FRIENDS_FRIENDPIC=><img src="%%src%%" alt="" align="right" width="%%width%%" height="%%height%%" class="frienduserpic">
+
+FRIENDS_WEBSITE=><li><a href="%%url%%">%%name%%</a></li>
+
+FRIENDS_SUBJECT=> <span class="subject">%%subject%%</span><br>
+
+
+.
+
 Style: friends/Default Friends View
 is_embedded: N
 is_colorfree: Y
@@ -1656,10 +3198,333 @@ FRIENDS_SUBJECT=><FONT COLOR="%%color:page_text_em%%" FACE="Arial"><I><B>%%subje
 
 .
 
+Style: friends/Disjointed
+is_embedded: N
+is_colorfree: Y
+lastupdate: 2002-04-19 09:04:37
+
+FRIENDS_RANGE_HISTORY=>
+
+FRIENDS_ALTPOSTER=> - (<a href="%%cons:siteroot%%/users/%%poster%%">%%poster%%</a>)
+
+FRIENDS_EVENT_PROTECTED<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_protected.gif" style="float:left">%%subject%%</td>
+  <td class="nopad" valign="bottom">
+   <table cellspacing=0 style="float:right">
+    <tr>
+     <td>&nbsp;</td>
+     <td class="altposter"><a href="%%cons:siteroot%%/users/%%user%%">%%user%%</a>%%altposter%%</td>
+    </tr>
+   </table>
+  </td>
+  <td>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">%%datetime%%</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+  %%currents%%
+  %%event%%</td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox">&nbsp;%%talklinks%%</td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=FRIENDS_EVENT_PROTECTED
+
+FRIENDS_RANGE_MOSTRECENT=>
+
+FRIENDS_EVENT_PRIVATE<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_private.gif" style="float:left">%%subject%%</td>
+  <td class="nopad" valign="bottom">
+   <table cellspacing=0 style="float:right">
+    <tr>
+     <td>&nbsp;</td>
+     <td class="altposter"><a href="%%cons:siteroot%%/users/%%user%%">%%user%%</a>%%altposter%%</td>
+    </tr>
+   </table>
+  </td>
+  <td>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">%%datetime%%</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+  %%currents%%
+  %%event%%</td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox">&nbsp;%%talklinks%%</td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=FRIENDS_EVENT_PRIVATE
+
+FRIENDS_OPT_ITEMS=>20
+
+FRIENDS_PAGE<=
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<style type="text/css">
+<!--
+body {
+background:%%color:page_back%%;
+}
+body, table, td, div {
+font-size:8pt;
+font-family: "OCR A Extended", "Courier";
+}
+..entries {
+width:85%;
+margin-bottom:50px;
+}
+..entries td {
+padding:4px;
+}
+..entries td.nopad {
+padding:0;
+}
+..metabox {
+background:%%color:strong_back%%;
+width:50%;
+border:solid 2px %%color:weak_back%%;
+font-weight:bold;
+color:%%color:strong_text%%;
+}
+..altposter {
+background:%%color:strong_back%%;
+border:solid 2px %%color:weak_back%%;
+border-bottom:0;
+font-weight:bold;
+text-align:center;
+color:%%color:strong_text%%;
+}
+..necorn {
+background:%%color:stronger_back%%;
+text-align:right;
+font-style:italic;
+border-right:solid 2px %%color:weak_back%%;
+border-top:solid 2px %%color:weak_back%%;
+color:%%color:stronger_text%%;
+}
+..sidepad {
+width:5%
+}
+..entrybox {
+background:%%color:stronger_back%%;
+width:90%;
+border-right:solid 2px %%color:weak_back%%;
+border-left:solid 2px %%color:weak_back%%;
+color:%%color:stronger_text%%;
+}
+..currbox {
+width:30%;
+background:%%color:strong_back%%;
+border:solid 2px %%color:weak_back%%;
+margin:3px;
+float:right;
+color:%%color:strong_text%%;
+}
+..swcorn {
+background:%%color:stronger_back%%;
+border-left:solid 2px %%color:weak_back%%;
+border-bottom:solid 2px %%color:weak_back%%;
+color:%%color:stronger_text%%;
+}
+a {
+text-decoration:none;
+}
+a:link, a:hover {
+color: %%color:page_link%%;
+}
+a:visited {
+color: %%color:page_vlink%%;
+}
+a img {
+border: 0;
+}
+a:hover, .entrybox a:hover, a:active {
+color: %%color:page_alink%%;
+text-decoration: underline;
+}
+#secorn {
+background:%%color:stronger_back%%;
+border-right:solid 2px %%color:weak_back%%;
+border-bottom:solid 2px %%color:weak_back%%;
+width:40%;
+color:%%color:stronger_text%%;
+}
+#navlink, #skiplink {
+text-align:right;
+width:60%;
+
+}
+..nav {
+background:%%color:stronger_back%%;
+border:solid 2px %%color:weak_back%%;
+border-bottom:0;
+text-align:center;
+color:%%color:stronger_text%%;
+}
+-->
+</style>
+%%head%%
+<title>%%name%%%%name-'s%% Friends</title>
+</head>
+<body>
+
+<table width="100%">
+<tr>
+<td valign="top" align="center">
+
+%%events%%
+
+</td>
+
+<td valign="top" width=20%>
+
+<table cellspacing=0 cellpadding=4 width=100%>
+ <tr>
+  <td width="15%">&nbsp;</td>
+  <td width="85%" colspan=2 class="nav">
+   <span style="font-weight:bold">%%username%%</span></td>
+ </tr>
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox" id="navlink">
+   <a class="links" href="%%urllastn%%">Recent Entries</a><br>
+   <a class="links" href="%%cons:siteroot%%/userinfo.bml?user=%%username%%&amp;mode=full">Info<br>
+   <a class="links" href="%%urlcalendar%%">Calendar</a>
+%%website%%</td>
+  <td id="secorn">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+ </tr>
+</table>
+%%skiplinks%%
+
+</td></tr></table>
+</body>
+</html>
+<=FRIENDS_PAGE
+
+FRIENDS_END_DAY=>
+
+FRIENDS_NOFRIENDS=>
+
+FRIENDS_SKIP_FORWARD=><a href="%%url%%">Forward</a>
+
+FRIENDS_EVENT<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox">%%subject%%</td>
+  <td class="nopad" valign="bottom">
+   <table cellspacing=0 style="float:right;">
+    <tr>
+     <td>&nbsp;</td>
+     <td class="altposter"><a href="%%cons:siteroot%%/users/%%user%%">%%user%%</a>%%altposter%%</td>
+    </tr>
+   </table>
+  </td>
+  <td>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">%%datetime%%</td>
+  <td>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+  %%currents%%
+  %%event%%</td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox">&nbsp;%%talklinks%%</td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=FRIENDS_EVENT
+
+FRIENDS_SKIP_SPACER=><br>
+
+FRIENDS_CURRENT=><div><span style="font-weight:bold">%%lc:what%%:</span> %%value%%</div>
+
+FRIENDS_TALK_READLINK=><a href="%%urlread%%">Read %%messagecount%%</a>&nbsp;-&nbsp;
+
+FRIENDS_SKIP_LINKS<=
+<table style="width:80%; float:right; margin-top:2em" cellpadding="4" cellspacing="0">
+ <tr>
+  <td class="nav" width="85%" colspan="2">
+   <span style="font-weight:bold">skip</span></td>
+  <td width="15%">&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="swcorn" width="40%">&nbsp;</td>
+  <td class="metabox" id="skiplink" colspan="2" rowspan="2">%%skipbackward%%%%skipspacer%%%%skipforward%%</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+ </tr>
+</table>
+<=FRIENDS_SKIP_LINKS
+
+FRIENDS_EVENTS=>%%events%%
+
+FRIENDS_NEW_DAY=>
+
+FRIENDS_NO_SUBJECT=><span style="color:%%color:page_text_em%%; font-weight:normal; font-style:italic">no subject</span>
+
+FRIENDS_SKIP_BACKWARD=><a href="%%url%%">Backward</a>
+
+FRIENDS_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">Post</a>
+
+FRIENDS_CURRENTS<=
+<table class="currbox">
+<tr><td>
+%%currents%%
+</td></tr></table>
+<=FRIENDS_CURRENTS
+
+FRIENDS_DATE_FORMAT=>%%12hh%%:%%min%%%%ampm%% %%dd%%/%%mm%%/%%yyyy%%
+
+FRIENDS_FRIENDPIC=>
+
+FRIENDS_WEBSITE=><br><a class="links" href="%%url%%">%%name%%</a>
+
+FRIENDS_SUBJECT=>%%subject%%
+
+
+.
+
 Style: friends/Generator
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2001-12-23 17:56:25
+lastupdate: 2002-01-15 21:54:34
 
 FRIENDS_RANGE_HISTORY=>%%skip%% entries back
 
@@ -1693,8 +3558,7 @@ summary="">
 <tr align='left'><td bgcolor="%%bgcolor%%" align="center">
 <a class="index" href="%%cons:siteroot%%/users/%%user%%">
 %%friendpic%%
-<font color="%%fgcolor%%">%%user%%</font>
-</a>
+<font color="%%fgcolor%%">%%user%%</font></a>%%altposter%%
 </td></tr></table>
 </td></tr></table>
 %%currents%%
@@ -1775,16 +3639,16 @@ text-decoration: underline;
 font-size: 8pt;
 background: %%color:weak_back%%;
 }
-.meta {
+..meta {
 font-size: 8pt;
 }
-.index {
+..index {
 font-size: 8pt;
 }
-.caption, .index {
+..caption, .index {
 color: %%color:stronger_text%%;
 }
-.comments {
+..comments {
 font-size: 8pt;
 }
 </style>
@@ -2029,10 +3893,145 @@ FRIENDS_SUBJECT=>%%subject%%
 
 .
 
+Style: friends/Magazine
+is_embedded: N
+is_colorfree: Y
+lastupdate: 2002-04-10 18:16:55
+
+FRIENDS_RANGE_HISTORY=>(<span class="Active"><a href="./friends">Latest&nbsp;friends</a> - %%skip%%</span>)
+
+FRIENDS_ALTPOSTER=></a></div><div><a href="%%cons:siteroot%%/users/%%poster%%/"><small>(%%poster%%)</small>
+
+FRIENDS_EVENT_PROTECTED<=
+  <div class="H3Holder">
+   <div class="Picture" style="background-color: %%bgcolor%%;">
+    <div><a href="%%cons:siteroot%%/users/%%user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
+    <div>%%friendpic%%<a href="%%cons:siteroot%%/users/%%user%%/">%%altposter%%</a></div>
+   </div>
+   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_protected.gif" style="width: 14px; height: 15px; margin: 0.2em; vertical-align: bottom;" alt="Protected"></h3>
+   <p>%%event%%</p>
+%%currents%%
+%%talklinks%%
+  </div>
+
+<=FRIENDS_EVENT_PROTECTED
+
+FRIENDS_RANGE_MOSTRECENT=>(<span class="Active">Latest&nbsp;friends</span>)
+
+FRIENDS_EVENT_PRIVATE<=
+  <div class="H3Holder">
+   <div class="Picture" style="background-color: %%bgcolor%%;">
+    <div><a href="%%cons:siteroot%%/users/%%user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
+    <div>%%friendpic%%<a href="%%cons:siteroot%%/users/%%user%%/">%%altposter%%</a></div>
+   </div>
+   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_private.gif" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Private"></h3>
+   <p>%%event%%</p>
+%%currents%%
+%%talklinks%%
+  </div>
+
+<=FRIENDS_EVENT_PRIVATE
+
+FRIENDS_OPT_ITEMS=>20
+
+FRIENDS_PAGE<=
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+ <head>
+  <style type="text/css">
+   <!--
+    HTML { border-left: 1cm solid %%color:stronger_back%%; padding: 1cm; }
+    BODY { line-height: 1.3; margin: 0; background-color: %%color:page_back%%; color: %%color:page_text%%; }
+    P { margin-top: 0; text-align: justify; }
+    H1 { font: x-large Verdana, sans-serif; text-align: center; letter-spacing: -0.09em; color: %%color:page_text_title%%; }
+    H2 { background-color: %%color:strong_back%%; color: %%color:strong_text%%; border-bottom: thin solid %%color:stronger_back%%; font: normal 1.3em Georgia, serif; }
+    H3 { color: %%color:weak_text%%; font: medium sans-serif; }
+    H3 SPAN { background-color: %%color:weak_back%%; border-right: thin solid %%color:weak_text%%; border-bottom: thin solid %%color:weak_text%%; padding-right: 0.5ex; }
+    H3 EM { color: %%color:page_text_em%%; font-style: normal; }
+    .H3Holder { clear: both; padding-left: 2ex; border-left: thin solid %%color:weak_text%%; border-bottom: thin solid %%color:weak_text%%; margin-bottom: 1em; }
+    A:link { color: %%color:page_link%%; }
+    A:visited { color: %%color:page_vlink%%; }
+    A:active { color: %%color:page_alink%%; }
+    .Navigation { text-align: center; font-family: sans-serif; }
+    .Comment { font-size: 0.7em; margin-top: -1em; text-align: right; }
+    .Comment, .Current { margin-bottom: 1em; clear: right; }
+    .Picture { border-left: thin solid %%color:weak_text%%; border-top: thin solid %%color:weak_text%%; float: right; margin: 0 0 0.5em 0.5em; padding: 0.2em; }
+    .Picture DIV { text-align: center; }
+    .Active { background-color: %%color:weak_back%%; }
+    ACRONYM { border-bottom: thin dashed %%color:page_text%%; cursor: help; }
+    .Bottom { border-top: thin solid %%color:weak_back%%; text-align: center; }
+   -->
+  </style>
+%%head%%
+  <title>%%name%%%%name-'s%% Friends</title>
+ </head>
+ <body>
+  <h1>%%name%%%%name-'s%% Friends</h1>
+  <p class="Navigation">(<a href="%%urllastn%%">Latest&nbsp;entries</a>) (<a href="%%urlcalendar%%">Calendar</a>) %%range%% %%website%% (<a href="%%urllastn%%info">User&nbsp;info</a>)<br>%%skiplinks%%</p>
+%%events%%
+  <p class="Bottom">%%skiplinks%%</p>
+ </body>
+</html>
+<=FRIENDS_PAGE
+
+FRIENDS_END_DAY=>
+
+FRIENDS_NOFRIENDS=>%%name%% has no friends defined. %%name%% can <a href="%%cons:siteroot%%/friends/edit.bml?%%username%%">add friends</a>.
+
+FRIENDS_SKIP_FORWARD=><a href="%%url%%">Next&nbsp;%%numitems%%&nbsp;friends</a>
+
+FRIENDS_EVENT<=
+  <div class="H3Holder">
+   <div class="Picture" style="background-color: %%bgcolor%%;">
+    <div><a href="%%cons:siteroot%%/users/%%user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
+    <div>%%friendpic%%<a href="%%cons:siteroot%%/users/%%user%%/">%%altposter%%</a></div>
+   </div>
+   <h3><span>%%datetime%%%%subject%%</span></h3>
+   <p>%%event%%</p>
+%%currents%%
+%%talklinks%%
+  </div>
+
+<=FRIENDS_EVENT
+
+FRIENDS_SKIP_SPACER=>&nbsp;|&nbsp;
+
+FRIENDS_CURRENT=><div><strong>Current %%lc:what%%:</strong> %%value%%</div>
+
+FRIENDS_TALK_READLINK=><a href="%%urlread%%">%%messagecount%%&nbsp;comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
+
+FRIENDS_SKIP_LINKS=>Navigate: (%%skipbackward%%%%skipspacer%%%%skipforward%%)
+
+FRIENDS_EVENTS=>%%events%%
+
+FRIENDS_NEW_DAY<=
+  <h2>%%daylong%%, %%monlong%% %%d%%, %%yyyy%%</h2>
+
+<=FRIENDS_NEW_DAY
+
+FRIENDS_NO_SUBJECT=>
+
+FRIENDS_SKIP_BACKWARD=><a href="%%url%%">Previous&nbsp;%%numitems%%&nbsp;friends</a>
+
+FRIENDS_TALK_LINKS=>   <div class="Comment">(%%readlink%%<a href="%%urlpost%%">comment&nbsp;on&nbsp;this</a>)</div>
+
+FRIENDS_CURRENTS=>   <div class="Current">%%currents%%</div>
+
+FRIENDS_DATE_FORMAT=>%%12h%%:%%min%%<small>%%AMPM%%</small>
+
+FRIENDS_FRIENDPIC=><img src="%%src%%" style="width: %%width%%px; height: %%height%%px; border: 0;">
+
+FRIENDS_WEBSITE=>(<a href="%%url%%">%%name%%</a>)
+
+FRIENDS_SUBJECT=> - <em>%%subject%%</em>
+
+
+.
+
 Style: friends/Notepad
 is_embedded: N
 is_colorfree: N
-lastupdate: 2001-12-23 17:57:44
+lastupdate: 2002-04-12 20:56:33
 
 FRIENDS_RANGE_HISTORY=>
 
@@ -2064,7 +4063,8 @@ FRIENDS_PAGE<=
 <HTML>
  <HEAD>
   <TITLE>%%name%%%%name-'s%% Friends</TITLE>
-  <STYLE>
+  %%head%%
+  <STYLE type="text/css">
    <!--
     td,body,p,div    {color:#000000; text-decoration:none; font-family:Verdana,Arial,Helvetica; font-size:12px}
     a:link           {color:#000000; text-decoration:underline; font-family:Verdana,Arial,Helvetica; font-size:12px}
@@ -2176,7 +4176,7 @@ FRIENDS_SUBJECT=> <FONT COLOR="red">%%subject%%</FONT>
 Style: friends/Punquin Elegant w/ Sidebar
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2001-12-28 22:25:54
+lastupdate: 2002-04-10 18:20:55
 
 FRIENDS_RANGE_HISTORY=>below are <B>%%numitems%%</B> friends' journal entries, after skipping by the <B>%%skip%%</B> most recent ones
 
@@ -2291,7 +4291,7 @@ A:active { color: %%color:page_alink%% ; }
 <TABLE WIDTH=150 BGCOLOR="%%color:page_back%%" BORDER="0" CELLPADDING="5" CELLSPACING="0">
 <TR VALIGN=TOP><TD ALIGN=LEFT>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
-%%skiplinks%%
+%%skiplinks%%<br />
 <A HREF="#top">&gt; top of page</A><BR>
 </FONT>
 </TD></TR></TABLE>
@@ -2346,7 +4346,7 @@ FRIENDS_SKIP_SPACER=><BR>
 
 FRIENDS_CURRENT=><BR><FONT FACE="Verdana,Arial,Helvetica" SIZE=-1><B>current %%lc:what%%:</B> %%value%%</FONT>
 
-FRIENDS_TALK_READLINK=><A HREF="%%urlread%%">%%messagecount%% comment%%mc-plural-s%%</A> |
+FRIENDS_TALK_READLINK=><A HREF="%%urlread%%">%%messagecount%%&nbsp;comment%%mc-plural-s%%</A>&nbsp;|&nbsp;
 
 FRIENDS_SKIP_LINKS<=
 %%skipbackward%%%%skipspacer%%%%skipforward%%
@@ -2361,7 +4361,7 @@ FRIENDS_NO_SUBJECT=>
 
 FRIENDS_SKIP_BACKWARD=><A HREF="%%url%%">&gt; previous %%numitems%% entries</A>
 
-FRIENDS_TALK_LINKS=><FONT FACE="Verdana,Arial,Helvetica" SIZE=1>(%%readlink%%<A HREF="%%urlpost%%">comment on this</A>)</FONT>
+FRIENDS_TALK_LINKS=><FONT FACE="Verdana,Arial,Helvetica" SIZE=1>(%%readlink%%<A HREF="%%urlpost%%">comment&nbsp;on&nbsp;this</A>)</FONT>
 
 FRIENDS_CURRENTS=><BR>%%currents%%
 
@@ -2372,6 +4372,266 @@ FRIENDS_FRIENDPIC=><BR><IMG SRC="%%src%%" WIDTH=%%width%% HEIGHT=%%height%% BORD
 FRIENDS_WEBSITE=><A HREF="%%url%%">&gt; %%name%%</A><BR>
 
 FRIENDS_SUBJECT=><BR><FONT COLOR="%%color:page_text_em%%" FACE="Arial"><I><B>%%subject%%</B></I></FONT>
+
+
+.
+
+Style: friends/Refried Paper
+is_embedded: N
+is_colorfree: N
+lastupdate: 2002-04-07 15:18:41
+
+FRIENDS_RANGE_HISTORY=>%%skip%% posts back
+
+FRIENDS_ALTPOSTER=> (posted by <lj user="%%poster%%">)
+
+FRIENDS_EVENT_PROTECTED<=
+<br>
+<table>
+<tr>%%friendpic%%<td><font class="date"><b>User:</b></font></td><td><font class="date"><lj user="%%user%%">%%altposter%%</font></td></tr>
+<tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b><font class="date"></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Security:</b><font class="date"></td><td><font class="date">Protected</font></td></tr>
+%%currents%%
+</table>
+<p>%%event%%</p>
+<font class="author">%%talklinks%%</font>
+<br><br><hr size="1">
+<=FRIENDS_EVENT_PROTECTED
+
+FRIENDS_RANGE_MOSTRECENT=>%%numitems%% most recent posts
+
+FRIENDS_EVENT_PRIVATE<=
+<br>
+<table>
+<tr>%%friendpic%%<td><font class="date"><b>User:</b></font></td><td><font class="date"><a href="http://www.livejournal.com/userinfo.bml?user=%%user%%&mode=full"><img src="http://img.livejournal.com/userinfo.gif" border="0" height="17" width="17" align="absmiddle"></a><a href="http://www.livejournal.com/users/%%user%%"><b>%%user%%</b></a>%%altposter%%</font></td></tr>
+<tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b><font class="date"></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Security:</b><font class="date"></td><td><font class="date">Private</font></td></tr>
+%%currents%%
+</table>
+<p>%%event%%</p>
+<font class="author">%%talklinks%%</font>
+<br><br><hr size="1">
+
+<=FRIENDS_EVENT_PRIVATE
+
+FRIENDS_OPT_ITEMS=>20
+
+FRIENDS_PAGE<=
+<html>
+<head>
+%%head%%
+<title>%%name%%%%name-'s%% Friends</title>
+
+<style type="text/css">
+
+body { margin-top: 0px; margin-left: 0px; margin-right: 0px; background-color:#ffffff; }
+
+A 			{ color: #CC6633; text-decoration: none; } 
+A:link		{ color: #CC6633; text-decoration: none; } 
+A:visited	{ color: #CC6633; text-decoration: none; } 
+A:active	{ color: #FF9966;  } 
+A:hover		{ color: #FF9966;  } 
+	
+	
+td.body { padding:20px;}
+td.title { padding:20px; font-family: verdana, sans-serif; font-size: 16px; color: #666666; font-weight:bold; letter-spacing:.1em; }
+td.links { padding:8px; font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px;}
+
+font.descrip { font-family: verdana, sans-serif; font-size: 10px; color: #999966; text-transform:uppercase; font-weight:bold; letter-spacing:.2em; padding:5px;}
+
+font.date { font-family: georgia, sans-serif; font-size: 12px; color: #336699; line-height:16px;}
+font.author { font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px; text-transform:uppercase;}
+font.time { font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px; text-transform:uppercase;}
+font { font-family: verdana, sans-serif; font-size: 10px; color: #666666; line-height:16px;}
+font.subhead { font-family: verdana, sans-serif; font-size: 11px; color: #333333; font-weight:bold; padding:8px; 
+letter-spacing:  .1em}
+
+p,td,tr,table,hr,br,ul,ol,li { font-family: georgia, verdana, arial; font-size:12px; color:#666666; line-height:18px; text-align:justify; }
+p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-height:12px; }
+
+</style>
+</head>
+
+<body>
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr>
+<td width="100%" bgcolor="#666666"><img src="http://img.livejournal.com/dot.gif" width="1" height="13"></td>
+</tr>
+
+<tr>
+<td width="100%" bgcolor="#FFFFFF"><img src="http://img.livejournal.com/dot.gif" width="1" height="2"></td>
+</tr>
+
+<tr>
+<td class="title" width="100%" bgcolor="#CCCC99" valign="top">%%name%%%%name-'s%% Friends<br><font class="descrip">%%range%%</span></font>
+</td>
+</tr>
+
+<tr>
+<td width="100%" bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+</tr>
+</table>
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr>
+
+<td valign="top" width="100%" class="body">
+<img src="http://img.livejournal.com/dot.gif" width="100%" height="1">
+
+%%events%%
+	
+</td>
+
+<td width="1" bgcolor="#000000" rowspan="2"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+
+<td valign="top" width="175">
+	
+	<table border="0" cellspacing="0" cellpadding="0" width="100%">
+	
+	<tr>
+	<td bgcolor="#CCCCCC"><img src="http://img.livejournal.com/dot.gif" width="175" height="1"></td>
+	</tr>
+	
+	</table>
+	
+	<table border="0" cellspacing="0" cellpadding="0" width="100%">
+
+	<!-- ARCHIVES -->
+	
+	<tr>
+	<td bgcolor="#CCCCCC"><font class="subhead">archives</font></td>
+	</tr>
+	
+	<tr>
+	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	</tr>
+	
+	<tr>
+	<td class="links">
+	%%skiplinks%%
+	</td>
+	</tr>
+	
+	<tr>
+	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	</tr>
+
+	<!-- END ARCHIVES -->
+		
+	<!-- JOURNAL BLOCK-->
+	
+	<tr>
+	<td bgcolor="#CCCCCC"><font class="subhead">my journal</font></td>
+	</tr>
+	
+	<tr>
+	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	</tr>
+	
+	<tr>
+	<td class="links">
+	<a href="http://www.livejournal.com/users/%%username%%/info">my userinfo</a><br>
+	<a href="%%urllastn%%">my journal</a><br>
+	<a href="%%urlcalendar%%">my calendar</a>
+        %%website%%</td>
+	</tr>
+	
+	<tr>
+	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	</tr>
+
+	<!-- JOURNAL BLOCK-->
+		
+	</table>
+
+</td>
+
+<td width="1" bgcolor="#000000" rowspan="2"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+
+<td bgcolor="#AAAAAA" rowspan="2"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+
+</tr>
+
+<tr>
+<td colspan="5" bgcolor="#999999"><img src="http://img.livejournal.com/dot.gif" width="1" height="10"></td>
+</tr>
+
+</table>
+
+</body>
+</html>
+<=FRIENDS_PAGE
+
+FRIENDS_END_DAY=>
+
+FRIENDS_NOFRIENDS<=
+<br>
+<table>
+<tr><td><font class="date"><b>Oops:</b></font></td><td><font class="date">There's a problem...</font></td></tr>
+</table>
+<p>There are a few reasons why you might not see posts on this friends page:
+<ul>
+<li>%%name%% might not have any friends defined.  If you are %%name%%, you can <a href="%%cons:siteroot%%/friends/edit.bml?%%username%%">edit your LiveJournal friends</a> so they show up here.</li>
+<li>%%name%% might have friends defined, but all of their friend's posts might be over two weeks old (according to the times on our servers), and thus wouldn't be displayed here.</li>
+<li>%%name%% might have friends defined that post only protected entries that you can't view, because they haven't defined you as a friend in return.</li>
+</ul>
+</p>
+<br><br><hr size="1">
+<=FRIENDS_NOFRIENDS
+
+FRIENDS_SKIP_FORWARD=><a href="%%url%%">forward %%lc:numitems%% posts</a>
+
+FRIENDS_EVENT<=
+<br>
+<table>
+<tr>%%friendpic%%<td><font class="date"><b>User:</b></font></td><td><font class="date"><a href="http://www.livejournal.com/userinfo.bml?user=%%user%%&mode=full"><img src="http://img.livejournal.com/userinfo.gif" border="0" height="17" width="17" align="absmiddle"></a><a href="http://www.livejournal.com/users/%%user%%"><b>%%user%%</b></a>%%altposter%%</font></td></tr>
+<tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b><font class="date"></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Security:</b><font class="date"></td><td><font class="date">Public</font></td></tr>
+%%currents%%
+</table>
+<p>%%event%%</p>
+<font class="author">%%talklinks%%</font>
+<br><br><hr size="1">
+<=FRIENDS_EVENT
+
+FRIENDS_SKIP_SPACER=>
+
+FRIENDS_CURRENT=><tr><td><font class="date"><b>%%what%%:</b></font></td><td><font class="date">%%value%%</font></td></tr>
+
+FRIENDS_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% comment%%mc-plural-s%%</a> | 
+
+FRIENDS_SKIP_LINKS<=
+%%skipbackward%%<br>
+%%skipforward%%
+<=FRIENDS_SKIP_LINKS
+
+FRIENDS_EVENTS=>%%events%%
+
+FRIENDS_NEW_DAY=>
+
+FRIENDS_NO_SUBJECT=>
+
+FRIENDS_SKIP_BACKWARD=><a href="%%url%%">back %%lc:numitems%% posts</a>
+
+FRIENDS_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">post a comment</a>
+
+FRIENDS_CURRENTS=>%%currents%%
+
+FRIENDS_DATE_FORMAT=>%%yyyy%%-%%mm%%-%%dd%% %%24hh%%:%%min%%
+
+FRIENDS_FRIENDPIC=><td rowspan="6" width="100" align="center" valign="middle"><div align="center" valign="middle"><img src="%%src%%" width="%%width%%" height="%%height%%" align="center" valign="middle"></div></td>
+
+FRIENDS_WEBSITE<=
+<br>
+	<a href="%%url%%">my website</a>
+
+<=FRIENDS_WEBSITE
+
+FRIENDS_SUBJECT=>%%subject%%
 
 
 .
@@ -2617,6 +4877,311 @@ FRIENDS_SUBJECT=><TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Subject
 
 .
 
+Style: lastn/Clean and Simple
+is_embedded: N
+is_colorfree: Y
+lastupdate: 2002-04-09 09:47:08
+
+LASTN_EVENT_PROTECTED<=
+<div class="entry" id="entry%%itemid%%">
+<div class="entrytext">
+<span class="entryheading">
+%%altposter%%<span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_protected.gif" width=16 height=16 vspace=0 hspace=0 alt="[Protected]"> %%subject%%</span>
+%%event%%
+%%currents%%</div>
+%%talklinks%%
+</div>
+
+<=LASTN_EVENT_PROTECTED
+
+LASTN_SUBJECT=> <span class="subject">%%subject%%</span><br>
+
+LASTN_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% Comment%%mc-plural-s%%</a> -
+
+LASTN_TALK_LINKS=><div class="talklinks" clear="all">%%readlink%% <a href="%%urlpost%%">Comment on this</a></div>
+
+LASTN_SKIP_BACKWARD<=
+<li><a href="%%url%%">Previous %%numitems%% Entries</a></li>
+
+<=LASTN_SKIP_BACKWARD
+
+LASTN_PAGE<=
+<html>
+<head>
+<style type="text/css" media="all">
+<!--
+body {
+background: %%color:stronger_back%% none;
+color: %%color:page_text%%;
+margin: 50px;
+}
+a:link {
+color: %%color:page_link%%;
+background: transparent;
+}
+a:visited {
+color: %%color:page_vlink%%;
+background: transparent;
+}
+a:active {
+color: %%color:page_alink%%;
+background: transparent;
+}
+img {
+vertical-align: absmiddle;
+}
+table {
+width: 100%;
+}
+pre {
+text-align: left;
+}
+#topbar {
+background: %%color:strong_back%% none;
+color: %%color:strong_text%%;
+}
+#topbar h1 {
+margin-top: 5px;
+margin-bottom: 0;
+text-align: center;
+font-size: 1.5em;
+}
+#topbar h2 {
+margin-top: 0;
+margin-bottom: 5px;
+text-align: center;
+font-size: 1.25em;
+}
+#navbar {
+background: %%color:weak_back%% none;
+color: %%color:weak_text%%;
+width: 25%;
+}
+#navbar ul {
+list-style: none;
+margin: 10px;
+}
+#navbar ul li {
+margin: 0;
+}
+#navbar ul li:before {
+content: "> "
+font-weight: normal;
+}
+#navbar ul li.active {
+font-weight: bold;
+}
+#navbar a:link, #navbar a:active, #navbar a:visited {
+background: %%color:weak_back%% none;
+color: %%color:weak_text%%;
+text-decoration: none;
+}
+#navbar a:hover {
+text-decoration: underline;
+}
+#mainstuff {
+width: 75%;
+background: %%color:page_back%% none;
+color: %%color:page_text%%;
+}
+#userpic {
+text-align: center;
+margin: 10px;
+}
+#userpic img {
+border: 2px solid %%color:strong_back%%;
+background: %%color:strong_back%% none;
+color: %%color:strong_text%%;
+}
+#entries {
+margin: 10px;
+}
+#range {
+margin-bottom: 0.5em;
+}
+..day {
+border-top: 1px dashed %%color:page_text%%;
+clear: both;
+}
+..day h3 {
+border-bottom: 1px dashed %%color:page_text%%;
+padding: 2px;
+margin: 0;
+font-size: 1.1em;
+text-align: center;
+}
+
+address {
+text-align: center;
+font-style: normal;
+font-size: 0.95em;
+}
+
+/* entries */
+..entrytext {
+padding: 2px;
+text-align: justify;
+}
+..entry {
+clear: both;
+}
+..entrytext p, .entrytext ul, .entrytext ol, .entrytext table {
+margin-top: 0.5em;
+margin-bottom: 0.5em;
+}
+..entryheading {
+font-weight: bold;
+}
+..timestamp, .subject, .altposter {
+font-weight: bold;
+color: %%color:page_text_em%%;
+background: %%color:page_back%%;
+}
+..altposter a {
+color: %%color:page_text_em%%;
+background: %%color:page_back%%;
+text-decoration: underline;
+}
+..altposter img {
+border: 2px %%color:strong_back%% solid;
+background: %%color:strong_back%% none;
+color: %%color:strong_text%%;
+}
+..talklinks {
+font-size: 0.75em;
+text-align: right;
+margin-bottom: 2px;
+clear: right;
+}
+-->
+</style>
+%%head%%
+<title>%%name%%%%name-'s%% Recent Entries</title>
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="2" id="topbar" valign="top">
+<h1>%%name%%</h1>
+<h2>Recent Entries</h2>
+</td></tr>
+
+<tr><td id="navbar" valign="top">
+
+<ul id="viewlinks">
+<li class="active">Recent&nbsp;Entries</li>
+<li><a href="%%urlfriends%%">Friends</a></li>
+<li><a href="%%urlcalendar%%">History</a></li>
+<li><a href="%%cons:siteroot%%/userinfo.bml?user=%%username%%">Info</a></li>
+%%website%%
+</ul>
+
+%%skiplinks%%
+
+%%userpic%%
+
+</td>
+<td id="mainstuff" valign="top">
+<div id="entries">
+<div id="range">%%range%%</div>
+
+%%events%%
+
+</div>
+
+<address>Powered by <a href="%%cons:siteroot%%/">%%cons:sitename%%</a></address>
+
+</td></tr>
+
+</table>
+
+</body>
+</html>
+
+<=LASTN_PAGE
+
+LASTN_EVENT<=
+<div class="entry" id="entry%%itemid%%">
+<div class="entrytext">
+<span class="entryheading">
+%%altposter%%<span class="timestamp">%%datetime%%</span>: %%subject%%</span>
+%%event%%
+%%currents%%</div>
+%%talklinks%%
+</div>
+<=LASTN_EVENT
+
+LASTN_ALTPOSTER_PIC=><img src="%%src%%" alt="" align="right" width="%%width%%" height="%%height%%">
+
+LASTN_SKIP_FORWARD<=
+<li><a href="%%url%%">Next %%numitems%% Entries</a></li>
+
+<=LASTN_SKIP_FORWARD
+
+LASTN_RANGE_HISTORY=>You are viewing %%numitems%% entries, %%skip%% into the past.
+
+LASTN_USERPIC<=
+<div id="userpic">
+<img src="%%src%%" width="%%width%%" height="%%height%%" alt="">
+</div>
+
+<=LASTN_USERPIC
+
+LASTN_SKIP_SPACER=>
+
+LASTN_END_DAY<=
+</div>
+
+<=LASTN_END_DAY
+
+LASTN_CURRENTS<=
+<div class="currents">
+%%currents%%
+</div>
+
+<=LASTN_CURRENTS
+
+LASTN_EVENT_PRIVATE<=
+<div class="entry" id="entry%%itemid%%">
+<div class="entrytext">
+<span class="entryheading">
+%%altposter%%<span class="timestamp">%%datetime%%</span>: <img src="%%cons:img%%/icon_private.gif" width=16 height=16 vspace=0 hspace=0 alt="[Private]"> %%subject%%</span>
+%%event%%
+%%currents%%</div>
+%%talklinks%%
+</div>
+
+<=LASTN_EVENT_PRIVATE
+
+LASTN_ALTPOSTER=><span class="altposter">%%pic%%<a href="%%cons:siteroot%%/userinfo.bml?user=%%poster%%">%%poster%%</a></span> @&nbsp;
+
+LASTN_OPT_ITEMS=>25
+
+LASTN_CURRENT<=
+<div class="current%%lc:what%%"><strong>Current %%what%%:</strong> %%value%%</div>
+
+<=LASTN_CURRENT
+
+LASTN_RANGE_MOSTRECENT=>You are viewing the most recent %%numitems%% entries.
+
+LASTN_NEW_DAY<=
+<div class="day" id="day%%yyyy%%%%mm%%%%dd%%">
+<h3>%%dth%% %%monlong%% %%yyyy%%</h3>
+
+<=LASTN_NEW_DAY
+
+LASTN_DATE_FORMAT=>%%12h%%:%%min%%%%ampm%%
+
+LASTN_SKIP_LINKS<=
+<ul id="skiplinks">
+%%skipforward%%%%skipbackward%%
+</ul>
+<=LASTN_SKIP_LINKS
+
+LASTN_WEBSITE=><li><a href="%%url%%">%%name%%</a></li>
+
+
+.
+
 Style: lastn/Default LiveJournal
 is_embedded: N
 is_colorfree: Y
@@ -2743,15 +5308,320 @@ LASTN_USERPIC=><IMG ALIGN=RIGHT HSPACE=2 VSPACE=2 SRC="%%src%%" WIDTH=%%width%% 
 
 .
 
+Style: lastn/Disjointed
+is_embedded: N
+is_colorfree: Y
+lastupdate: 2002-04-19 09:04:11
+
+LASTN_EVENT_PROTECTED<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_protected.gif">%%subject%%&nbsp;</td>
+  <td class="nopad">%%altposter%%</td>
+  <td>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">%%datetime%%</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+  %%currents%%
+  %%event%%</td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox">&nbsp;%%talklinks%%</td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=LASTN_EVENT_PROTECTED
+
+LASTN_SUBJECT=>%%subject%%
+
+LASTN_TALK_READLINK=><a href="%%urlread%%">Read %%messagecount%%</a>&nbsp;-&nbsp;
+
+LASTN_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">Post</a>
+
+LASTN_SKIP_BACKWARD=><a href="%%url%%">Backward</a>
+
+LASTN_PAGE<=
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<style type="text/css">
+<!--
+body {
+background:%%color:page_back%%;
+}
+body, table, td, div {
+font-size:8pt;
+font-family: "OCR A Extended", "Courier";
+}
+..entries {
+width:85%;
+margin-bottom:50px;
+}
+..entries td {
+padding:4px;
+}
+..entries td.nopad {
+padding:0;
+}
+..altposter {
+background:%%color:strong_back%%;
+border:solid 2px %%color:weak_back%%;
+border-bottom:0;
+font-weight:bold;
+text-align:center;
+color:%%color:strong_text%%;
+}
+..metabox {
+background:%%color:strong_back%%;
+width:50%;
+border:solid 2px %%color:weak_back%%;
+font-weight:bold;
+color:%%color:strong_text%%;
+}
+..necorn {
+background:%%color:stronger_back%%;
+text-align:right;
+font-style:italic;
+border-right:solid 2px %%color:weak_back%%;
+border-top:solid 2px %%color:weak_back%%;
+color:%%color:stronger_text%%;
+}
+..sidepad {
+width:5%
+}
+..entrybox {
+background:%%color:stronger_back%%;
+width:90%;
+border-right:solid 2px %%color:weak_back%%;
+border-left:solid 2px %%color:weak_back%%;
+color:%%color:stronger_text%%;
+}
+..currbox {
+width:30%;
+background:%%color:strong_back%%;
+border:solid 2px %%color:weak_back%%;
+margin:3px;
+float:right;
+color:%%color:strong_text%%;
+}
+..swcorn {
+background:%%color:stronger_back%%;
+border-left:solid 2px %%color:weak_back%%;
+border-bottom:solid 2px %%color:weak_back%%;
+color:%%color:stronger_text%%;
+}
+a {
+text-decoration:none;
+}
+a:link, a:hover {
+color: %%color:page_link%%;
+}
+a:visited {
+color: %%color:page_vlink%%;
+}
+a img {
+border: 0;
+}
+a:hover, .entrybox a:hover, a:active {
+color: %%color:page_alink%%;
+text-decoration: underline;
+}
+#secorn {
+background:%%color:stronger_back%%;
+border-right:solid 2px %%color:weak_back%%;
+border-bottom:solid 2px %%color:weak_back%%;
+width:40%;
+color:%%color:stronger_text%%;
+}
+#navlink, #skiplink {
+text-align:right;
+width:60%;
+
+}
+..nav {
+background:%%color:stronger_back%%;
+border:solid 2px %%color:weak_back%%;
+border-bottom:0;
+text-align:center;
+color:%%color:stronger_text%%;
+}
+-->
+</style>
+%%head%%
+<title>%%name%%%%name-'s%% Journal</title>
+</head>
+<body>
+
+<table width="100%">
+<tr>
+<td valign="top" align="center">
+
+%%events%%
+
+</td>
+
+<td valign="top" width=20%>
+
+<table cellspacing=0 cellpadding=4 width=100%>
+ <tr>
+  <td width="15%">&nbsp;</td>
+  <td width="85%" colspan=2 class="nav">
+   <a href="%%cont:siteroot%%/allpics.bml?user=%%username%%">%%userpic%%</a>
+   <span style="font-weight:bold">%%username%%</span></td>
+ </tr>
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox" id="navlink">
+   <a class="links" href="%%urlfriends%%">Friends</a><br>
+   <a class="links" href="%%cons:siteroot%%/userinfo.bml?user=%%username%%&amp;mode=full">Info<br>
+   <a class="links" href="%%urlcalendar%%">Calendar</a>
+%%website%%</td>
+  <td id="secorn">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+ </tr>
+</table>
+%%skiplinks%%
+
+</td></tr></table>
+</body>
+</html>
+<=LASTN_PAGE
+
+LASTN_EVENT<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox">%%subject%%&nbsp;</td>
+  <td class="nopad">%%altposter%%</td>
+  <td>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">%%datetime%%</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+  %%currents%%
+  %%event%%</td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox">&nbsp;%%talklinks%%</td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=LASTN_EVENT
+
+LASTN_ALTPOSTER_PIC=>
+
+LASTN_SKIP_FORWARD=><a href="%%url%%">Forward</a>
+
+LASTN_RANGE_HISTORY=>
+
+LASTN_USERPIC=><img src="%%src%%"><br>
+
+LASTN_SKIP_SPACER=><br>
+
+LASTN_END_DAY=>
+
+LASTN_CURRENTS<=
+<table class="currbox">
+<tr><td>
+%%currents%%
+</td></tr></table>
+<=LASTN_CURRENTS
+
+LASTN_EVENT_PRIVATE<=
+<table cellspacing=0 class="entries">
+ <tr>
+  <td colspan=2 rowspan=2 class="metabox"><img src="%%cons:img%%/icon_private.gif">%%subject%%&nbsp;</td>
+  <td class="nopad">%%altposter%%</td>
+  <td>&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="necorn">%%datetime%%</td>
+ </tr>
+ <tr>
+  <td class="sidepad">&nbsp;</td>
+  <td colspan=2 class="entrybox">
+  %%currents%%
+  %%event%%</td>
+  <td class="sidepad">&nbsp;</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+  <td class="swcorn">&nbsp;</td>
+  <td colspan=2 rowspan=2 class="metabox">&nbsp;%%talklinks%%</td>
+ </tr>
+ <tr>
+  <td colspan=2>&nbsp;</td>
+ </tr>
+</table>
+<=LASTN_EVENT_PRIVATE
+
+LASTN_ALTPOSTER<=
+   <table cellspacing=0 cellpadding=10 style="width:100%;margin:0">
+    <tr>
+     <td style="width:80%">&nbsp;</td>
+     <td class="altposter"><a href="%%cons:siteroot%%/users/%%poster%%">%%poster%%</a></td>
+    </tr>
+   </table>
+<=LASTN_ALTPOSTER
+
+LASTN_OPT_ITEMS=>20
+
+LASTN_CURRENT=><div><span style="font-weight:bold">%%lc:what%%:</span> %%value%%</div>
+
+LASTN_RANGE_MOSTRECENT=>
+
+LASTN_NEW_DAY=>
+
+LASTN_DATE_FORMAT=>%%12hh%%:%%min%%%%ampm%% %%dd%%/%%mm%%/%%yyyy%%
+
+LASTN_SKIP_LINKS<=
+<table style="width:80%; float:right; margin-top:2em" cellpadding="4" cellspacing="0">
+ <tr>
+  <td class="nav" width="85%" colspan="2">
+   <span style="font-weight:bold">skip</span></td>
+  <td width="15%">&nbsp;</td>
+ </tr>
+ <tr>
+  <td class="swcorn" width="40%">&nbsp;</td>
+  <td class="metabox" id="skiplink" colspan="2" rowspan="2">%%skipbackward%%%%skipspacer%%%%skipforward%%</td>
+ </tr>
+ <tr>
+  <td>&nbsp;</td>
+ </tr>
+</table>
+<=LASTN_SKIP_LINKS
+
+LASTN_WEBSITE=><br><a class="links" href="%%url%%">%%name%%</a>
+
+
+.
+
 Style: lastn/Generator
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2001-09-30 21:01:03
+lastupdate: 2002-04-14 00:35:32
 
 LASTN_EVENT_PRIVATE<=
 <table width="600" cellpadding="2" cellspacing="0"
 border="0"
-summary="">
+summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="%%color:stronger_back%%" align="center">
 <table width="100%" cellpadding="5" cellspacing="0"
@@ -2798,16 +5668,16 @@ text-decoration: underline;
 font-size: 8pt;
 background: %%color:weak_back%%;
 }
-.meta {
+..meta {
 font-size: 8pt;
 }
-.index {
+..index {
 font-size: 8pt;
 }
-.caption, .index {
+..caption, .index {
 color: %%color:stronger_text%%;
 }
-.comments {
+..comments {
 font-size: 8pt;
 }
 </style>
@@ -2926,7 +5796,7 @@ summary="">
 LASTN_EVENT<=
 <table width="600" cellpadding="2" cellspacing="0"
 border="0"
-summary="">
+summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="%%color:stronger_back%%" align="center">
 <table width="100%" cellpadding="5" cellspacing="0"
@@ -2970,7 +5840,7 @@ LASTN_SKIP_FORWARD=><a href="%%url%%">later</a>
 LASTN_EVENT_PROTECTED<=
 <table width="600" cellpadding="2" cellspacing="0"
 border="0"
-summary="">
+summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="%%color:stronger_back%%" align="center">
 <table width="100%" cellpadding="5" cellspacing="0"
@@ -3068,10 +5938,141 @@ summary="">
 
 .
 
+Style: lastn/Magazine
+is_embedded: N
+is_colorfree: Y
+lastupdate: 2002-04-10 18:12:58
+
+LASTN_EVENT_PROTECTED<=
+  <div class="H3Holder">
+%%altposter%%
+   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_protected.gif" style="width: 14px; height: 15px; margin: 2px; vertical-align: bottom;" alt="Protected"></h3>
+<p>%%event%%</p>
+%%currents%%
+%%talklinks%%
+  </div>
+
+<=LASTN_EVENT_PROTECTED
+
+LASTN_SUBJECT=> - <em>%%subject%%</em>
+
+LASTN_TALK_READLINK=><a href="%%urlread%%">%%messagecount%%&nbsp;comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
+
+LASTN_TALK_LINKS<=
+    <div class="Comment">(%%readlink%%<a href="%%urlpost%%">comment&nbsp;on&nbsp;this</a>)</div>
+
+<=LASTN_TALK_LINKS
+
+LASTN_SKIP_BACKWARD=><a href="%%url%%">Previous&nbsp;%%numitems%%&nbsp;entries</a>
+
+LASTN_PAGE<=
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+ <head>
+  <style type="text/css">
+   <!--
+    HTML { border-left: 1cm solid %%color:stronger_back%%; padding: 1cm; }
+    BODY { line-height: 1.3; margin: 0; background-color: %%color:page_back%%; color: %%color:page_text%%; }
+    P { margin-top: 0; text-align: justify; }
+    H1 { font: x-large Verdana, sans-serif; text-align: center; letter-spacing: -0.09em; color: %%color:page_text_title%%; }
+    H2 { background-color: %%color:strong_back%%; color: %%color:strong_text%%; border-bottom: thin solid %%color:stronger_back%%; font: normal 1.3em Georgia, serif; }
+    H3 { color: %%color:weak_text%%; font: medium sans-serif; }
+    H3 SPAN { background-color: %%color:weak_back%%; border-right: thin solid %%color:weak_text%%; border-bottom: thin solid %%color:weak_text%%; padding-right: 0.5ex; }
+    H3 EM { color: %%color:page_text_em%%; font-style: normal; }
+    .H3Holder { clear: both; padding-left: 2ex; border-left: thin solid %%color:weak_text%%; border-bottom: thin solid %%color:weak_text%%; margin-bottom: 1em; }
+    A:link { color: %%color:page_link%%; }
+    A:visited { color: %%color:page_vlink%%; }
+    A:active { color: %%color:page_alink%%; }
+    .Navigation { text-align: center; font-family: sans-serif; }
+    .Comment { font-size: 0.7em; margin-top: -1em; text-align: right; }
+    .Comment, .Current { margin-bottom: 1em; clear: right; }
+    .Picture { border-left: thin solid %%color:weak_text%%; border-top: thin solid %%color:weak_text%%; float: right; margin: 0 0 0.5em 0.5em; padding: 0.2em; }
+    .Picture DIV { text-align: center; }
+    .Active { background-color: %%color:weak_back%%; }
+    ACRONYM { border-bottom: thin dashed %%color:page_text%%; cursor: help; }
+    .Bottom { border-top: thin solid %%color:weak_back%%; text-align: center; }
+   -->
+  </style>
+%%head%%
+  <title>%%name%%%%name-'s%% Journal</title>
+ </head>
+ <body>
+  <h1>%%name%%%%name-'s%% Journal</h1>
+  <p class="Navigation">(<span class="Active">%%range%%</span>) (<a href="%%urlcalendar%%">Calendar</a>) (<a href="%%urlfriends%%">Friends</a>) %%website%% (<a href="http://www.livejournal.com/users/%%username%%/info">User&nbsp;info</a>)<br>%%skiplinks%%</p>
+%%events%%
+  <p class="Bottom">%%skiplinks%%</p>
+ </body>
+</html>
+<=LASTN_PAGE
+
+LASTN_EVENT<=
+  <div class="H3Holder">
+%%altposter%%
+   <h3><span>%%datetime%%%%subject%%</span></h3>
+<p>%%event%%</p>
+%%currents%%
+%%talklinks%%
+  </div>
+
+<=LASTN_EVENT
+
+LASTN_ALTPOSTER_PIC=><img src=%%src%% style="width: %%width%%px; height: %%height%%px; border: 0;">
+
+LASTN_SKIP_FORWARD=><a href="%%url%%">Next&nbsp;%%numitems%%&nbsp;entries</a>
+
+LASTN_RANGE_HISTORY=><a href=".">Latest&nbsp;entries</a> - %%skip%%
+
+LASTN_USERPIC=><img src="%%src%%" style="width: %%width%%px; height: %%height%%px; border: thin solid %%color:page_text%%; vertical-align: top; margin-top: 0.2em;">
+
+LASTN_SKIP_SPACER=>&nbsp;|&nbsp;
+
+LASTN_END_DAY=>
+
+LASTN_CURRENTS=>    <div class="Current">%%currents%%</div>
+
+LASTN_EVENT_PRIVATE<=
+  <div class="H3Holder">
+%%altposter%%
+   <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_private.gif" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Private"></h3>
+<p>%%event%%</p>
+%%currents%%
+%%talklinks%%
+  </div>
+
+<=LASTN_EVENT_PRIVATE
+
+LASTN_ALTPOSTER<=
+   <div class="Picture">
+    <!-- <div><a href="%%cons:siteroot%%/users/%%owner%%/"><small>%%owner%%</small></a></div> -->
+    <div><a href="%%cons:siteroot%%/users/%%poster%%/">%%pic%%</a></div>
+    <div><a href="%%cons:siteroot%%/users/%%poster%%/"><small>(%%poster%%)</small></a></div>
+   </div>
+<=LASTN_ALTPOSTER
+
+LASTN_OPT_ITEMS=>20
+
+LASTN_CURRENT=><div><strong>Current %%lc:what%%:</strong> %%value%%</div>
+
+LASTN_RANGE_MOSTRECENT=>Latest&nbsp;%%numitems%%&nbsp;entries
+
+LASTN_NEW_DAY<=
+  <h2>%%daylong%%, %%monlong%% %%d%%, %%yyyy%%</h2>
+
+<=LASTN_NEW_DAY
+
+LASTN_DATE_FORMAT=>%%12h%%:%%min%%<small>%%AMPM%%</small>
+
+LASTN_SKIP_LINKS=>Navigate: (%%skipbackward%%%%skipspacer%%%%skipforward%%)
+
+LASTN_WEBSITE=>(<a href="%%url%%">%%name%%</a>)
+
+
+.
+
 Style: lastn/Notepad
 is_embedded: N
 is_colorfree: N
-lastupdate: 2001-08-31 06:05:30
+lastupdate: 2002-04-12 20:56:00
 
 LASTN_EVENT_PRIVATE<=
 <IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=14 HEIGHT=15 VSPACE=2 
@@ -3088,7 +6089,8 @@ LASTN_PAGE<=
 <HTML>
  <HEAD>
   <TITLE>%%name%%%%name-'s%% Journal</TITLE>
-  <STYLE>
+  %%head%%
+  <STYLE type="text/css">
    <!--
     td,body,p,div    {color:#000000; text-decoration:none; font-family:Verdana,Arial,Helvetica; font-size:12px}
     a:link           {color:#000000; text-decoration:underline; font-family:Verdana,Arial,Helvetica; font-size:12px}
@@ -3213,7 +6215,7 @@ LASTN_USERPIC=><IMG ALIGN=MIDDLE HSPACE=2 VSPACE=2 SRC="%%src%%" WIDTH=%%width%%
 Style: lastn/Punquin Elegant w/ Sidebar
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2001-12-28 22:25:25
+lastupdate: 2002-04-10 17:59:03
 
 LASTN_EVENT_PROTECTED<=
 <TR><TD VALIGN=TOP>
@@ -3237,9 +6239,9 @@ ALT="Protected">
 
 LASTN_SUBJECT=><B> - <FONT COLOR="%%color:page_text_em%%">%%subject%%</FONT></B>
 
-LASTN_TALK_READLINK=><A HREF="%%urlread%%">%%messagecount%% comment%%mc-plural-s%%</A> |
+LASTN_TALK_READLINK=><A HREF="%%urlread%%">%%messagecount%%&nbsp;comment%%mc-plural-s%%</A>&nbsp;|&nbsp;
 
-LASTN_TALK_LINKS=><P ALIGN="RIGHT"><FONT FACE="Verdana,Arial,Helvetica" SIZE=1>(%%readlink%%<A HREF="%%urlpost%%">comment on this</A>)</FONT></P>
+LASTN_TALK_LINKS=><P ALIGN="RIGHT"><FONT FACE="Verdana,Arial,Helvetica" SIZE=1>(%%readlink%%<A HREF="%%urlpost%%">comment&nbsp;on&nbsp;this</A>)</FONT></P>
 
 LASTN_SKIP_BACKWARD=><A HREF="%%url%%">&gt; previous %%numitems%% entries</A>
 
@@ -3305,7 +6307,7 @@ A:active { color: %%color:page_alink%% ; }
 <TABLE WIDTH=150 BGCOLOR=%%color:page_back%% BORDER="0" CELLPADDING="5" CELLSPACING="0">
 <TR VALIGN=TOP><TD ALIGN=LEFT>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
-%%skiplinks%%
+%%skiplinks%%<br />
 <A HREF="#top">&gt; top of page</A><BR>
 </FONT>
 </TD></TR></TABLE>
@@ -3400,6 +6402,253 @@ LASTN_SKIP_LINKS<=
 
 LASTN_WEBSITE=><A HREF="%%url%%">&gt; %%name%%</A><BR>
 
+
+.
+
+Style: lastn/Refried Paper
+is_embedded: N
+is_colorfree: N
+lastupdate: 2002-04-07 15:14:20
+
+LASTN_EVENT_PROTECTED<=
+<br>
+<table>
+%%altposter%%
+<tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b><font class="date"></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Security:</b><font class="date"></td><td><font class="date">Protected</font></td></tr>
+%%currents%%
+</table>
+<p>%%event%%</p>
+<font class="author">%%talklinks%%</font>
+<br><br><hr size="1">
+<=LASTN_EVENT_PROTECTED
+
+LASTN_SUBJECT=>%%subject%%
+
+LASTN_TALK_READLINK=><a href="%%urlread%%">%%messagecount%% comment%%mc-plural-s%%</a>&nbsp;|&nbsp;
+
+LASTN_TALK_LINKS=>%%readlink%%<a href="%%urlpost%%">post a comment</a>
+
+LASTN_SKIP_BACKWARD=><a href="%%url%%">back %%lc:numitems%% posts</a>
+
+LASTN_PAGE<=
+<html>
+<head>
+%%head%%
+<title>%%name%%%%name-'s%% Journal</title>
+
+<style type="text/css">
+
+body { margin-top: 0px; margin-left: 0px; margin-right: 0px; background-color:#ffffff; }
+
+A 			{ color: #CC6633; text-decoration: none; } 
+A:link		{ color: #CC6633; text-decoration: none; } 
+A:visited	{ color: #CC6633; text-decoration: none; } 
+A:active	{ color: #FF9966;  } 
+A:hover		{ color: #FF9966;  } 
+	
+	
+td.body { padding:20px;}
+td.title { padding:20px; font-family: verdana, sans-serif; font-size: 16px; color: #666666; font-weight:bold; letter-spacing:.1em; }
+td.links { padding:8px; font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px;}
+
+font.descrip { font-family: verdana, sans-serif; font-size: 10px; color: #999966; text-transform:uppercase; font-weight:bold; letter-spacing:.2em; padding:5px;}
+
+font.date { font-family: georgia, sans-serif; font-size: 12px; color: #336699; line-height:16px;}
+font.author { font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px; text-transform:uppercase;}
+font.time { font-family: verdana, sans-serif; font-size: 10px; color: #336699; line-height:16px; text-transform:uppercase;}
+font { font-family: verdana, sans-serif; font-size: 10px; color: #666666; line-height:16px;}
+font.subhead { font-family: verdana, sans-serif; font-size: 11px; color: #333333; font-weight:bold; padding:8px; 
+letter-spacing:  .1em}
+
+p,td,tr,table,hr,br,ul,ol,li { font-family: georgia, verdana, arial; font-size:12px; color:#666666; line-height:18px; text-align:justify; }
+p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-height:12px; }
+
+</style>
+</head>
+
+<body>
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr>
+<td width="100%" bgcolor="#666666"><img src="http://img.livejournal.com/dot.gif" width="1" height="13"></td>
+</tr>
+
+<tr>
+<td width="100%" bgcolor="#FFFFFF"><img src="http://img.livejournal.com/dot.gif" width="1" height="2"></td>
+</tr>
+
+<tr>
+<td class="title" width="100%" bgcolor="#CCCC99" valign="top">%%name%%%%name-'s%% Journal<br><font class="descrip">%%range%%</span></font>
+</td>
+</tr>
+
+<tr>
+<td width="100%" bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+</tr>
+</table>
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+<tr>
+
+<td valign="top" width="100%" class="body">
+<img src="http://img.livejournal.com/dot.gif" width="100%" height="1">
+
+%%events%%
+	
+</td>
+
+<td width="1" bgcolor="#000000" rowspan="2"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+
+<td valign="top" width="175">
+	
+	<table border="0" cellspacing="0" cellpadding="0" width="100%">
+	
+	<tr>
+	<td bgcolor="#CCCCCC"><img src="http://img.livejournal.com/dot.gif" width="175" height="1"></td>
+	</tr>
+	
+	</table>
+	
+	<table border="0" cellspacing="0" cellpadding="0" width="100%">
+
+	<!-- ARCHIVES -->
+	
+	<tr>
+	<td bgcolor="#CCCCCC"><font class="subhead">archives</font></td>
+	</tr>
+	
+	<tr>
+	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	</tr>
+	
+	<tr>
+	<td class="links">
+	%%skiplinks%%
+	</td>
+	</tr>
+	
+	<tr>
+	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	</tr>
+
+	<!-- END ARCHIVES -->
+		
+	<!-- JOURNAL BLOCK-->
+	
+	<tr>
+	<td bgcolor="#CCCCCC"><font class="subhead">my journal</font></td>
+	</tr>
+	
+	<tr>
+	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	</tr>
+	
+	<tr>
+	<td class="links">
+	<a href="http://www.livejournal.com/users/%%username%%/info">my userinfo</a><br>
+	<a href="%%urlfriends%%">my friends</a><br>
+	<a href="%%urlcalendar%%">my calendar</a>
+        %%website%%</td>
+	</tr>
+	
+	<tr>
+	<td bgcolor="#000000"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+	</tr>
+        
+        <tr>
+	<td class="links">%%userpic%%</td>
+	</tr>
+
+
+	<!-- JOURNAL BLOCK-->
+		
+	</table>
+
+</td>
+
+<td width="1" bgcolor="#000000" rowspan="2"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+
+<td bgcolor="#AAAAAA" rowspan="2"><img src="http://img.livejournal.com/dot.gif" width="1" height="1"></td>
+
+</tr>
+
+<tr>
+<td colspan="5" bgcolor="#999999"><img src="http://img.livejournal.com/dot.gif" width="1" height="10"></td>
+</tr>
+
+</table>
+
+</body>
+</html>
+<=LASTN_PAGE
+
+LASTN_EVENT<=
+<br>
+<table>
+%%altposter%%
+<tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b><font class="date"></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Security:</b><font class="date"></td><td><font class="date">Public</font></td></tr>
+%%currents%%
+</table>
+<p>%%event%%</p>
+<font class="author">%%talklinks%%</font>
+<br><br><hr size="1">
+
+<=LASTN_EVENT
+
+LASTN_ALTPOSTER_PIC=>
+
+LASTN_SKIP_FORWARD=><a href="%%url%%">forward %%lc:numitems%% posts</a>
+
+LASTN_RANGE_HISTORY=>%%skip%% posts back
+
+LASTN_USERPIC=><div style="text-align: center"><img src="%%src%%" width="%%width%%" height="%%height%%" alt="%%name%%"></div>
+
+LASTN_SKIP_SPACER=>
+
+LASTN_END_DAY=>
+
+LASTN_EVENT_PRIVATE<=
+<br>
+<table>
+%%altposter%%
+<tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
+<tr><td><font class="date"><b>Subject:</b><font class="date"></td><td><font class="date">%%subject%%<font class="date"></td></tr>
+<tr><td><font class="date"><b>Security:</b><font class="date"></td><td><font class="date">Private</font></td></tr>
+%%currents%%
+</table>
+<p>%%event%%</p>
+<font class="author">%%talklinks%%</font>
+<br><br><hr size="1">
+<=LASTN_EVENT_PRIVATE
+
+LASTN_CURRENTS=>%%currents%%
+
+LASTN_ALTPOSTER=><tr><td><font class="date"><b>Poster:</b></font></td><td><font class="date"><lj user="%%poster%%"></font></td></tr>
+
+LASTN_OPT_ITEMS=>20
+
+LASTN_CURRENT=><tr><td><font class="date"><b>%%what%%:</b></font></td><td><font class="date">%%value%%</font></td></tr>
+
+LASTN_RANGE_MOSTRECENT=>%%numitems%% most recent posts
+
+LASTN_NEW_DAY=>
+
+LASTN_DATE_FORMAT=>%%yyyy%%-%%mm%%-%%dd%% %%24hh%%:%%min%%
+
+LASTN_SKIP_LINKS<=
+%%skipbackward%%<br>
+%%skipforward%%
+<=LASTN_SKIP_LINKS
+
+LASTN_WEBSITE<=
+<br>
+	<a href="%%url%%">my website</a>
+
+<=LASTN_WEBSITE
 
 .
 
@@ -3608,14 +6857,25 @@ LASTN_WEBSITE=><TR><TD>View:</TD><TD><A HREF="%%url%%">Website (%%name%%)</A>.</
 Style: lastn/Webley Boxes on White
 is_embedded: N
 is_colorfree: N
-lastupdate: 2001-08-31 06:27:03
+lastupdate: 2002-03-11 05:32:08
 
-LASTN_EVENT_PRIVATE=>
+LASTN_EVENT_PROTECTED=>
+
+LASTN_SUBJECT=><b>%%subject%%</b>
+
+LASTN_TALK_READLINK=>%%messagecount%%
+
+LASTN_TALK_LINKS<=
+<a href="%%xe:urlread%%">
+<img src="%%cons:img%%/style/webley/jwc%%readlink%%.png" border="0" /></a>
+<=LASTN_TALK_LINKS
+
+LASTN_SKIP_BACKWARD=><a href="%%url%%">&lt;&lt; Previous %%numitems%%</a>
 
 LASTN_PAGE<=
-<HTML>
-<HEAD>
-   <TITLE>%%name%%%%name-'s%% LiveJournal</TITLE>
+<html>
+<head>
+   <title>%%name%%%%name-'s%% LiveJournal</title>
 %%head%%
 <style type="text/css">
 <!--
@@ -3624,40 +6884,36 @@ text-align: left;
 }
 -->
 </style>
-</HEAD>
-<BODY BGCOLOR="white">
+</head>
+<body bgcolor="white">
 
-<CENTER>
+<center>
 
 <table>
 <tr valign=top>
 <td>%%userpic%%</td>
 <td align=left>
-<a href="%%cons:siteroot%%/userinfo.bml?user=%%username%%">User Profile</a><br>
-<a href="%%urlfriends%%">Friends</a><br>
+<a href="%%cons:siteroot%%/userinfo.bml?user=%%username%%">User Profile</a><br />
+<a href="%%urlfriends%%">Friends</a><br />
 <a href="%%urlcalendar%%">Calendar</a>
 </td>
 </tr>
 </table>
 
-<B>%%name%%%%name-'s%% LiveJournal</B><p>
+<b>%%name%%%%name-'s%% LiveJournal</b><p />
 
-%%range%%<br>
+%%range%%<br />
 %%skiplinks%%
 
-<p>&nbsp;<br>
+<p />&nbsp;<br />
 %%events%%
 
-%%skiplinks%%<br>
+%%skiplinks%%<br />
 %%website%%
 
-</BODY>
-</HTML>
+</body>
+</html>
 <=LASTN_PAGE
-
-LASTN_RANGE_HISTORY=>Below are <B>%%numitems%%</B> recent journal entries, after skipping <B>%%skip%%</B.
-
-LASTN_ALTPOSTER=><a href="%%cons:siteroot%%/users/%%poster%%/">%%pic%%%%poster%%</a>
 
 LASTN_EVENT<=
 <CENTER>
@@ -3687,53 +6943,46 @@ LASTN_EVENT<=
 <TR>
 <TD COLSPAN=1><IMG SRC="%%cons:img%%/style/webley/ll.png"></TD>
 <TD COLSPAN=1 BACKGROUND="%%cons:img%%/style/webley/bottom.png">&nbsp;</TD>
-<TD COLSPAN=2>%%talklinks%%</TD>
+<TD COLSPAN=2 BACKGROUND="http://img.livejournal.com/style/webley/jwc.png">%%talklinks%%</TD>
 </TR>
 </TABLE>
 </CENTER><br><br>
 <=LASTN_EVENT
 
-LASTN_CURRENT=><br>%%what%%: <I>%%value%%</I>
+LASTN_ALTPOSTER_PIC=><img src="%%src%%" height="%%height%%" width="%%width%%" border="0" /><br />
 
-LASTN_DATE_FORMAT=>%%yyyy%%.%%mm%%.%%dd%%&nbsp;&nbsp;%%24hh%%.%%min%%
+LASTN_SKIP_FORWARD=><a href="%%url%%">Next %%numitems%% &gt;&gt;</a>
 
-LASTN_NEW_DAY=>
+LASTN_RANGE_HISTORY=>Below are <b>%%numitems%%</b> recent journal entries, after skipping <b>%%skip%%</b>
 
-LASTN_SKIP_FORWARD=><A HREF="%%url%%">Next %%numitems%% &gt;&gt;</A>
-
-LASTN_EVENT_PROTECTED=>
-
-LASTN_TALK_LINKS<=
-<A HREF="%%cons:siteroot%%/talkread.bml?itemid=%%itemid%%">
-<IMG SRC="%%cons:img%%/style/webley/jwc%%readlink%%.png" border=0></A>
-<=LASTN_TALK_LINKS
-
-LASTN_RANGE_MOSTRECENT=>Below are the <B>%%numitems%%</B> most recent journal entries.
-
-LASTN_SUBJECT=><B>%%subject%%</B>
-
-LASTN_WEBSITE=>[ <b><A HREF="%%url%%">%%name%%</A></b> ]
+LASTN_USERPIC=><img align="right" hspace="2" vspace="2" src="%%xe:src%%" width="%%width%%" height="%%height%%">
 
 LASTN_SKIP_SPACER=>&nbsp;--&nbsp;
 
 LASTN_END_DAY=>
 
+LASTN_EVENT_PRIVATE=>
+
+LASTN_CURRENTS=><br />%%currents%%
+
+LASTN_ALTPOSTER=><a href="%%cons:siteroot%%/users/%%poster%%/">%%pic%%%%poster%%</a>
+
 LASTN_OPT_ITEMS=>25
 
-LASTN_SKIP_BACKWARD=><A HREF="%%url%%">&lt;&lt; Previous %%numitems%%</A>
+LASTN_CURRENT=><br>%%what%%: <I>%%value%%</I>
 
-LASTN_TALK_READLINK=>%%messagecount%%
+LASTN_RANGE_MOSTRECENT=>Below are the <b>%%numitems%%</b> most recent journal entries.
 
-LASTN_CURRENTS=><BR>%%currents%%
+LASTN_NEW_DAY=>
+
+LASTN_DATE_FORMAT=>%%yyyy%%.%%mm%%.%%dd%%&nbsp;&nbsp;%%24hh%%.%%min%%
 
 LASTN_SKIP_LINKS<=
-<CENTER>[ %%skipbackward%%%%skipspacer%%%%skipforward%% ]</CENTER>
+<center>[ %%skipbackward%%%%skipspacer%%%%skipforward%% ]</center>
 
 <=LASTN_SKIP_LINKS
 
-LASTN_ALTPOSTER_PIC=><img src="%%src%%" height="%%height%%" width="%%width%%" border="0"><br>
-
-LASTN_USERPIC=><IMG ALIGN=RIGHT HSPACE=2 VSPACE=2 SRC="%%src%%" WIDTH=%%width%% HEIGHT=%%height%%>
+LASTN_WEBSITE=>[ <b><a href="%%url%%">%%name%%</a></b> ]
 
 
 .
