@@ -8,7 +8,7 @@ sub YearPage
 {
     my ($u, $remote, $opts) = @_;
 
-    my $p = Page($u, $opts->{'vhost'});
+    my $p = Page($u, $opts);
     $p->{'_type'} = "YearPage";
     $p->{'view'} = "archive";
 
