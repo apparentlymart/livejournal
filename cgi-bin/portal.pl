@@ -748,7 +748,7 @@ $box{'update'} =
 
         $$bd .= "<table>";
         if ($remote) {
-            $$bd .= "<input type=hidden name=usertype value=remote>";
+            $$bd .= "<input type='hidden' name='remoteuser' value='$remote->{'user'}'>\n";
             $$bd .= "<tr><td><b>Logged in user:</b> $remote->{'user'} (<a href=\"/update.bml?altlogin=1\">other user?</a>)</td></tr>\n";
         } else {
             $$bd .= "<input type=hidden name=usertype value=explicit>";

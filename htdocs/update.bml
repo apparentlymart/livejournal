@@ -32,6 +32,14 @@
 
  my $dbcm = LJ::get_cluster_master($remote);
 
+ # portal uses this, to avoid putting username/auth in hidden fields:
+ if ($FORM{'remoteuser'} ne "" && $remote && 
+     $remote->{'user'} eq $FORM{'remoteuser'}) 
+ {
+     $FORM{'user'} = $remote->{'user'};
+     $FORM{'password'} = $remote->{'password'};
+ }
+
  if (LJ::get_cap($remote, "readonly") ||
      ($remote && $remote->{'clusterid'} && ! $dbcm))
  {
