@@ -222,9 +222,13 @@ $maint{'synsuck'} = sub
             }
 
             my $err;
+            my $pre_time = time();
             my $res = LJ::Protocol::do_request($dbs, $command, $req, \$err, $flags);
+            my $post_time = time();
             if ($res && ! $err) {
-                sleep 1; # so 20 items in a row don't get the same logtime second value, so they sort correctly
+                # so 20 items in a row don't get the same logtime 
+                # second value, so they sort correctly:
+                sleep 1 if $pre_time == $post_time;
             } else {
                 print "  Error: $err\n";
                 $errorflag = 1;
