@@ -2176,7 +2176,7 @@ sub post_comment {
             join(":", ($comment->{body}, $comment->{subject},
                        $comment->{subjecticon}, $comment->{preformat},
                        $comment->{picture_keyword})));
-        $memkey = [$journalu->{userid}, "tdup:$journalu->{userid}:$item->{itemid}-$posterid-$md5_b64" ];
+        $memkey = [$journalu->{userid}, "tdup:$journalu->{userid}:$item->{itemid}-$parent->{talkid}-$posterid-$md5_b64" ];
         $jtalkid = LJ::MemCache::get($memkey);
     }
 
