@@ -62,7 +62,7 @@ my $remote = LJ::get_remote();
      return;
  }
 
- if ($FORM{'confirm'}) 
+ if ($POST{'confirm'}) 
  {
      ### make remote user a friend of the community
      ###
