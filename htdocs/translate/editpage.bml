@@ -112,7 +112,13 @@
              my $d = LJ::Lang::get_dom_id($dmid);
              $ret .= "[$d->{'uniq'}] ";
          }
-         $ret .= "$it->{'itcode'}</td>";
+
+         my $difflink;
+         if ($lat->{'staleness'}) {
+             $difflink = "(<a target='_new' href='diff.bml?it=$i->{'dmid'}:$i->{'itid'}&lang=$lp->{'lncode'}'>diff</a>)";
+         }
+
+         $ret .= "$it->{'itcode'} $difflink</td>";
          $ret .= "<td align='right'><b><a target='_new' href='help-severity.bml'>Sev</a>:</b> $lat->{'staleness'}</td>";
          $ret .= "</tr></table>";
 
