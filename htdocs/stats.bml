@@ -12,9 +12,7 @@ p?>
 
  my $ret = "";
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbr = $dbr = LJ::get_db_reader();
 
  $now = time();
  %stat = ();
