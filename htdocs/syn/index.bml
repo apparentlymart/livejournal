@@ -76,7 +76,7 @@ body<=
                 unless $hostname =~ /\.[a-z]/i;
 
             return $error->($ML{'.invalid.port'})
-                if $port && $port != 80 && $port < 1024;
+                if defined $port && $port != 80 && $port < 1024;
             $url =~ s/:80// if $port == 80;
         }
 
