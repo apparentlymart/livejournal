@@ -180,7 +180,7 @@ BODY<=
  }
 
  if ($up && $up->{'status'} eq "N") {
-     push @errors, ML{'.error.noverify'};
+     push @errors, $ML{'.error.noverify'};
 
  }
 
