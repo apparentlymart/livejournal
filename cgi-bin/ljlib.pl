@@ -1003,17 +1003,19 @@ sub get_timeupdate_multi {
     # if everything was in memcache, return now
     return \%timeupdate if $opt->{'memcache_only'} || ! @need;
 
-    # fill in holes from the database
-    my $dbh = LJ::get_db_writer();
+    # fill in holes from the database.  safe to use the reader because we
+    # only do an add to memcache, whereas postevent does a set, overwriting
+    # any potentially old data
+    my $dbr = LJ::get_db_reader();
     my $need_bind = join(",", map { "?" } @need);
-    my $sth = $dbh->prepare("SELECT userid, UNIX_TIMESTAMP(timeupdate) " .
+    my $sth = $dbr->prepare("SELECT userid, UNIX_TIMESTAMP(timeupdate) " .
                             "FROM userusage WHERE userid IN ($need_bind)");
     $sth->execute(@need);
     while (my ($uid, $tu) = $sth->fetchrow_array) {
         $timeupdate{$uid} = $tu;
 
         # set memcache for this row
-        LJ::MemCache::set([$uid, "tu:$uid"], pack("N", $tu), 30*60);
+        LJ::MemCache::add([$uid, "tu:$uid"], pack("N", $tu), 30*60);
     }
 
     return \%timeupdate;
