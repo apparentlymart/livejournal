@@ -8,55 +8,57 @@ body<=
 <?_code
 
  use strict;
- my @errors;
+ use vars qw(%POST);
+
  my $ret;
  my $qs = BML::get_query_string();
- my $u;
 
- #### new way
- if ($qs =~ /^(\d+)\.(.+)$/)
- {
+ if ($POST{'action:send'}) {
+     my $remote = LJ::get_remote();
+     my $u = LJ::load_user($remote->{'user'});
+     my $aa = {};
+     $aa = LJ::register_authaction($u->{'userid'},
+                                  "validateemail", $u->{'email'});
+     LJ::send_mail({
+         'to' => $u->{'email'},
+         'from' => $LJ::ADMIN_EMAIL,
+         'charset' => 'utf-8',
+         'subject' => $ML{'.email.subject'},
+         'body' => BML::ml('.email.body',
+                           { 'sitename' => $LJ::SITENAME,
+                             'sitelink' => $LJ::SITEROOT,
+                             'conflink' => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}" }),
+    });
+     $ret .= "<?h1 $ML{'.sent.header'} h1?><?p " . BML::ml('.sent.body',{'email'=>$u->{'email'}}) . " p?>";
+
+ } elsif ($qs =~ /^(\d+)[;\.](.+)$/) {
      my ($aaid, $auth) = ($1, $2);
      my $aa = LJ::is_valid_authaction($aaid, $auth);
-     if ($aa) {
-         $u = LJ::load_userid($aa->{'userid'});
-         push @errors, "User not found." unless $u;
-         
-         # FIXME: the only reason for the $aa->{'arg1'} truth test is to allow existing authcodes out there
-         # to still work.  that part can be removed 30 days from May-18-2001, along with this comment.
-         if ($aa->{'arg1'} && $u->{'email'} ne $aa->{'arg1'}) {
-             push @errors, "This confirmation URL was for a different email address.  You cannot use it to validate your most recently set email address.";
-         }
-         
+     if (!$aa) { return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.invalidcode'} p?>"; }
+     my $u = LJ::load_userid($aa->{'userid'});
+     LJ::update_user($u, { status => 'A' });
+     LJ::run_hooks("emailconfirmed", $u);
+     if ($u->{'status'} eq "T") {
+         $ret .= "<?h1 $ML{'.trans.header'} h1?><?p $ML{'.trans.body'} p?>";
      } else {
-         push @errors, "Invalid registration code. ($aaid, $auth)";
+         $ret .= "<?h1 $ML{'.new.header'} h1?><?p $ML{'.new.body'} p?>";
+         $ret .= "<ul>";
+         $ret .= "<li>$ML{'.new.login'}</li>";
+         $ret .= "<li>$ML{'.new.editinfo'}</li>";
+         $ret .= "<li>$ML{'.new.modify'}</li>";
+         $ret .= "<li>$ML{'.new.update'}</li>";
+         $ret .= "</ul>";
      }
- }
-
- #### old way
- elsif ($qs =~ /^(\w+)=(.+)$/) 
- {
-     push @errors, "Error. Old-style registrations no longer work.  You shouldn't be getting this message, unless you created a journal months ago and forgot to register";
- }
- else {
-     push @errors, "You cannot go to this page directly, you must have a registration URL to complete this registration.";
- }
- 
- return LJ::bad_input(@errors) if @errors;
-
- LJ::update_user($u, { status => 'A' });
- LJ::run_hooks("emailconfirmed", $u);
-
- if ($u->{'status'} eq "T") {
-     $ret .= "<?h1 Registration Complete h1?><?p Thanks!  Your new email address has now been verified. p?>";
- }
- else 
- {
-     $ret .= "<?h1 Registration Complete h1?><?p Thanks!  Your email address has now been verified.  From here, you may be interested in doing the following things: p?><ul>";
-     $ret .= "<li><a href=\"/login.bml\"><b>Login</b></a> - so you don't have to enter your username and password everywhere";
-     $ret .= "<li><a href=\"/editinfo.bml\"><b>Edit Personal Info</b></a> - fill out your user profile and set various settings";
-     $ret .= "<li><a href=\"/modify.bml\"><b>Modify Journal</b></a> - modify the look of your journal";
-     $ret .= "<li><a href=\"/update.bml\"><b>Update Journal</b></a> - write in your journal!";
+ } else {
+     my $remote = LJ::get_remote();
+     return LJ::bad_input("You must be logged in to view this page.") unless $remote;
+     my $ru = LJ::load_user($remote->{'user'});
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.alreadyvalidated'} p?>" if ($ru->{'status'} eq "A");
+     $ret .= "<?h1 $ML{'.ask.header'} h1?>";
+     $ret .= "<?p " . BML::ml('.ask.body',{'email'=>$ru->{'email'}}) . " p?>";
+     $ret .= "<form action='register.bml' method='post'>";
+     $ret .= LJ::html_submit("action:send", "$ML{'.ask.button'}");
+     $ret .= "</form>";
  }
 
  return $ret;
@@ -65,5 +67,6 @@ _code?>
 
 <=body
 page?><?_c <LJDEP>
-link: htdocs/login.bml, htdocs/editinfo.bml, htdocs/modify.bml, htdocs/update.bml
+link: htdocs/login.bml, htdocs/editinfo.bml
+link: htdocs/modify.bml, htdocs/update.bml
 </LJDEP> _c?>
