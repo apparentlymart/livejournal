@@ -595,7 +595,7 @@ sub s1_attribute_clean {
     return $a;
 }
 
-sub clean_url {
+sub canonical_url {
     my $url = shift;
     return unless $url;
     

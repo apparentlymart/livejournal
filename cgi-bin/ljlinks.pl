@@ -134,7 +134,7 @@ sub make_linkobj_from_form
 
         # smartly add http:// to url unless they are just inserting a blank line
         if ($url && $title ne '-') {
-            $url = LJ::CleanHTML::clean_url($url);
+            $url = LJ::CleanHTML::canonical_url($url);
         }
 
         # build link object element
