@@ -277,6 +277,22 @@ STANDOUT<=
 </blockquote>
 <=STANDOUT
 
+ERRORBAR<=
+{D}<blockquote>
+<hr />
+%%data%%
+<hr />
+</blockquote>
+<=ERRORBAR
+
+WARNINGBAR<=
+{D}<blockquote>
+<hr />
+%%data%%
+<hr />
+</blockquote>
+<=WARNINGBAR
+
 BADCONTENT<=
 <?h1 <?_ml Error _ml?> h1?>
 <?p <?_ml bml.badcontent.body _ml?> p?>
