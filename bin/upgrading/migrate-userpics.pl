@@ -66,17 +66,7 @@ if ($picker) {
 
         if ($resp =~ /^userid (\d+)/) {
             # got a userid, handle it
-            my $userid = $1;
-            my $rv = handle_userid($userid);
-            if ($rv == 1) {
-                # tell the picker that we processed the user, it's okay to delete
-                # all of their userpics at this point
-                print $p_out "moved $userid\n";
-            } elsif ($rv == 2) {
-                # return value of 2 means user is not dversion 7 or something else
-                # that we should take to mean just skip this user
-                next;
-            }
+            handle_userid($1);
         } elsif ($resp =~ /^done/) {
             # no more userids, end this run
             last;
@@ -134,7 +124,7 @@ sub handle_userid {
     my $picids = $dbcm->selectall_arrayref
         ("SELECT picid, fmt FROM userpic2 WHERE userid = ? OR location <> 'mogile' OR location IS NULL",
          undef, $u->{userid});
-    return 1 unless @$picids;
+    return unless @$picids;
 
     # now we have a userid and picids, get the photos from the blob server
     foreach my $row (@$picids) {
