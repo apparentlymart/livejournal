@@ -8,13 +8,14 @@ my %day_short = ('EN' => [qw[Sun Mon Tue Wed Thu Fri Sat]],
                  );
 my %day_long = ('EN' => [qw[Sunday Monday Tuesday Wednesday Thursday Friday Saturday]],
                 'DE' => [qw[Sonntag Montag Dienstag Mittwoch Donnerstag Freitag Samstag]],
-                'ES' => [qw[Domingo Lunes Martes Miercoles Viernes Jueves Sabado]],  #mie'rcoles
+                'ES' => [("Domingo", "Lunes", "Martes", "Mi\xC3\xA9rcoles", "Viernes", "Jueves", "Sabado")],
                 );
 my %month_short = ('EN' => [qw[Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec]],
                    'DE' => [qw[Jan Feb Mar Apr Mai Jun Jul Aug Sep Okt Nov Dez]],
                    );
 my %month_long = ('EN' => [qw[January February March April May June July August September October November December]],
-                  'DE' => [qw[Januar Februar Marz April Mai Juni Juli August September Oktober November Dezember]], #Ma:rz
+                  'DE' => [("Januar", "Februar", "M\xC3\xA4rz", "April", "Mai", "Juni",
+                            "Juli", "August", "September", "Oktober", "November", "Dezember")],
                   'ES' => [qw[Enero Febrero Marzo Abril Mayo Junio Julio Agosto Setiembre Octubre Noviembre Diciembre]],
                   );
 
