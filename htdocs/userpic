@@ -190,6 +190,7 @@ my $lastconn;
 	    if (defined $pic) { 
 		$from{'master'}++; 
 	    } else {
+		print "Status: 404 Not Found\n";
 		print "Content-type: text/html\n\nNo userpic by that id.\n"; 
 		next REQUEST;
 	    }
@@ -208,10 +209,10 @@ my $lastconn;
 		    open (ID, ">>$cache_file");
 		    close ID;
 		}
-	    } elsif ($cache_file) {
+	    } elsif ($cache_file && $pic->{'imagedata'}) {
 		foreach (@dirs_make) { make_dir($_); }
 		open (ID, ">$cache_file");
-		binmode (ID);  # poor windows users
+		binmode (ID);  # for windows users
 		print ID $pic->{'imagedata'};
 		close ID;
 	    }
@@ -221,17 +222,17 @@ my $lastconn;
 	$hits++;
     }
 
-    if ($pic)
-    {
-	unless ($pic->{'imagedata'}) {
-	    open (ID, $cache_file);
-	    while (<ID>) {
-		$pic->{'imagedata'} .= $_;
-	    }
-	    close ID;
-	    $pic->{'length'} = length($pic->{'imagedata'});	    
+    if ($pic && ! $pic->{'imagedata'}) {
+	open (ID, $cache_file);
+	while (<ID>) {
+	    $pic->{'imagedata'} .= $_;
 	}
+	close ID;
+	$pic->{'length'} = length($pic->{'imagedata'});	    
+    }
 
+    if ($pic && $pic->{'length'})
+    {
 	print "Content-type: $pic->{'contenttype'}\n";
 	print "Content-length: $pic->{'length'}\n";
 	print "Cache-Control: no-transform\n";
