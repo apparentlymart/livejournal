@@ -2009,7 +2009,8 @@ sub get_talktext
     my @sources = ([$dbs->{'dbh'}, "talktext"]);
     if ($dbs->{'has_slave'}) {
         if ($LJ::USE_RECENT_TABLES) {
-            unshift @sources, [ $dbs->{'dbr'}, "recent_talktext" ];
+	    my $dbt = LJ::get_dbh("recenttext!");	    
+            unshift @sources, [ $dbt || $dbs->{'dbr'}, "recent_talktext" ];
         } else {
             unshift @sources, [ $dbs->{'dbr'}, "talktext" ];
         }
@@ -2059,7 +2060,8 @@ sub get_logtext
     my @sources = ([$dbs->{'dbh'}, "logtext"]);
     if ($dbs->{'has_slave'}) { 
 	if ($LJ::USE_RECENT_TABLES) {
-	    unshift @sources, [ $dbs->{'dbr'}, "recent_logtext" ];
+	    my $dbt = LJ::get_dbh("recenttext!");
+	    unshift @sources, [ $dbt || $dbs->{'dbr'}, "recent_logtext" ];
 	} else {
 	    unshift @sources, [ $dbs->{'dbr'}, "logtext" ];
 	}
@@ -2328,9 +2330,11 @@ sub start_request
     handle_caches();
     # TODO: check process growth size
     # TODO: auto-restat and reload ljconfig.pl if changed.
-    # TODO: clear %LJ::DBREQCACHE (like DBCACHE, but verified already for
-    #       this request to be ->ping'able).  also need to change get_dbh
-    #       then to initialize this and use it.  one day.
+
+    # clear %LJ::DBREQCACHE (like DBCACHE, but verified already for
+    # this request to be ->ping'able).  
+    %LJ::DBREQCACHE = ();
+
     return 1;
 }
 
@@ -2826,6 +2830,7 @@ sub decode_url_string
 sub get_dbh
 {
     my $type = shift;  # 'master', 'slave', or 'slave!'. (the latter won't fall back to master)
+                       # or 'type', or 'type!' (where type! won't fall back to slave)
     my $dbh;
 
     # with an exclamation mark, the caller only wants a slave, never
@@ -2834,26 +2839,11 @@ sub get_dbh
     # masters would not only be silly, but slower, if it tries to use
     # both of them.
 
-    if ($type eq "slave!") {
-	if (! $LJ::DBINFO{'slavecount'}) {
-	    return undef;
-	}
-	$type = "slave";
-    }
+    my $no_fallback = 0;
+    if ($type =~ s/\!$//) { $no_fallback = 1; }
 
-    # already have a dbh of this type open?
-    if (ref $LJ::DBCACHE{$type}) 
-    {
-        $dbh = $LJ::DBCACHE{$type};
-
-	# make sure connection is still good.
-	if ($dbh->selectrow_array("SELECT CONNECTION_ID()")) {
-	    # mysql specific
-	    return $dbh;
-	}
-	undef $dbh;
-	undef $LJ::DBCACHE{$type};
-    }
+    return undef
+	if ($type eq "slave" && $no_fallback && ! $LJ::DBINFO{'slavecount'});
 
     # make the 'ub' upper bound values on the DBINFO for each role
     # and assume role=slave for slaves that don't define their roles
@@ -2872,6 +2862,7 @@ sub get_dbh
 		    $at += $LJ::DBINFO{"slave$i"}->{'role'}->{$type} / $total_weight;
 		    $LJ::DBINFO{"slave$i"}->{'_ub'}->{$type} = $at;
 		}
+		$LJ::DBINFO{'_roledefined'}->{$type} = 1;
 	    } else {
 		if ($type eq "slave") {
 		    # split slave traffic evenly
@@ -2888,8 +2879,36 @@ sub get_dbh
 	    }
 	}
 	$LJ::DBINFO{'_ubs_set'} = 1;
-
     }
+
+    # if we're asking for a special type of role and it isn't defined,
+    # return undef right away in no_fallback mode.
+    return undef
+	if ($type ne "slave" && $type ne "master" && 
+	    $no_fallback && ! $LJ::DBINFO{'_roledefined'}->{$type});
+
+    # did we already get_dbh() this $type for this request?
+    # if so, we're not even going to ping it to check if it's 
+    # alive... we'll just return it, knowing that it's good
+    if (ref $LJ::DBREQCACHE{$type}) {
+	return $LJ::DBREQCACHE{$type};
+    }
+
+    # already have a dbh of this type open? 
+    if (ref $LJ::DBCACHE{$type}) 
+    {
+        $dbh = $LJ::DBCACHE{$type};
+
+	# make sure connection is still good.
+	if ($dbh->selectrow_array("SELECT CONNECTION_ID()")) {
+	    # mysql specific ^^
+	    $LJ::DBREQCACHE{$type} = $dbh;
+	    return $dbh;
+	}
+	undef $dbh;
+	undef $LJ::DBCACHE{$type};
+    }
+
 
     # if we don't have a dbh cached already, which one would we try to
     # connect to?
@@ -2915,8 +2934,6 @@ sub get_dbh
     } else {
 	$key = "master";
     }
-
-    print "$type = $key\n";
 
     # are we connecting to a slave that might be the master?
     # if so, we don't want to open up two connections.  (wasteful)
@@ -2949,6 +2966,7 @@ sub get_dbh
     
     # save a reference to the database handle for later
     $LJ::DBCACHE{$type} = $dbh;
+    $LJ::DBREQCACHE{$type} = $dbh;
 
     return $dbh;
 }
