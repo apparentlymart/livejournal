@@ -5,6 +5,7 @@ use strict;
 unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
 }
+
 my $LJHOME = $ENV{'LJHOME'};
 require "$LJHOME/doc/raw/build/docbooklib.pl";
 
