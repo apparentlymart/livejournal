@@ -27,10 +27,10 @@
     return $err->($ML{'error.invalidauth'})
         unless $u;
 
-    my $fotobilder = defined $GET{'ret'} && index $GET{'ret'}, $LJ::FB_DOMAIN >= 0
-        && defined $GET{'urlpic'} && $GET{'urlpic'} =~ m!$LJ::FB_SITEROOT/~?$remote->{'user'}/pic/! ? 1 : 0;
-
     my $returl = LJ::CleanHTML::canonical_url(LJ::durl($GET{'ret'}));
+
+    my $fotobilder = $returl ne '' && index $returl, $LJ::FB_DOMAIN >= 0
+        && defined $GET{'urlpic'} && $GET{'urlpic'} =~ m!$LJ::FB_SITEROOT/~?$remote->{'user'}/pic/! ? 1 : 0;
 
     if ($fotobilder &&
         (LJ::check_referer($returl) || LJ::check_referer('/editpics.bml'))) {
