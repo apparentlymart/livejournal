@@ -1067,17 +1067,22 @@ $box{'randuser'} =
                              'align' => "center",
                          });
 
-        my $ruser = $dbr->selectall_hashref("SELECT user, name, defaultpicid FROM user WHERE userid IN (" . join(",", keys %ruserid) . ")");
-
+        my @ruser;
+        my $sth = $dbr->prepare(qq{
+            SELECT user, name, defaultpicid FROM user WHERE userid IN
+        } . "(" . join(",", keys %ruserid) . ")");
+        $sth->execute;
+        push @ruser, $_ while $_ = $sth->fetchrow_hashref;
+        
         my %pic;
         unless ($box->{'args'}->{'hidepic'}) {
-            LJ::load_userpics($dbs, \%pic, [ map { $_->{'defaultpicid'} } @$ruser ]);
+            LJ::load_userpics($dbs, \%pic, [ map { $_->{'defaultpicid'} } @ruser ]);
         }
 
         if ($size eq "large") {  $$b .= "<table width=100%><tr valign=bottom>"; }
 
         my $rct = 1;
-        foreach my $r (@$ruser)
+        foreach my $r (@ruser)
         {
             if ($size eq "large") {  $$b .= "<td align=center>"; }
             elsif ($size eq "small" && $rct > 1) {  $$b .= "<p>"; }
