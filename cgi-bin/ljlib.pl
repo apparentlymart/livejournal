@@ -2735,7 +2735,7 @@ sub auth_digest {
     my $authname = shift @vals;
     my %attrs;
     foreach (@vals) {
-        if (/^(\S*)=(\S*)$/) {
+        if (/^(\S*?)=(\S*)$/) {
             my ($attr, $value) = ($1,$2);
             if ($value =~ m/^\"([^\"]*)\"$/) {
                 $value = $1;
