@@ -19,3 +19,5 @@
 <uid> frgmask:<uid>:<uid_friend>  -- scalar numeric mask, 15 minutes
 
 <uid> upicinfo:<uid> == { 'pic' => { upicrow }, 'kw' => { keyword => upicrow, ... } }
+
+ml.<lang>.<dmid>.<code>
