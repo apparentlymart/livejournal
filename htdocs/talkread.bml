@@ -259,7 +259,7 @@ body<=
  $ret .= $event;
  $ret .= "</div>";
 
- $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' /><div id='Comments'>";
+ $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' />";
 
  my %user;
  my $opts = {
@@ -484,6 +484,7 @@ body<=
 
  unless ($nocomments)
  {
+     $ret .= "<div id='Comments'>";
      $ret .= "$navcrap" if $navcrap;
      my $readlink;
      if ($dthread && $pages == 1) {
