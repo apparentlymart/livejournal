@@ -500,7 +500,7 @@ sub prepare_currents
         my $name = defined $LJ::CACHE_MOODS{$val} ? $LJ::CACHE_MOODS{$val}->{'name'} : '';
         if (LJ::get_mood_picture($theme, $val, \%pic)) {
             $currents{'Mood'} = "<img src=\"$pic{'pic'}\" align='absmiddle' width='$pic{'w'}' ".
-                "height='$pic{'h'}' vspace='1'> $name";
+                "height='$pic{'h'}' vspace='1' /> $name";
         } else {
             $currents{'Mood'} = $name;
         }
@@ -601,10 +601,10 @@ sub create_view_lastn
 
     if ($FORM{'skip'}) {
         # if followed a skip link back, prevent it from going back further
-        $lastn_page{'head'} = "<meta name=\"robots\" content=\"noindex,nofollow\">\n";
+        $lastn_page{'head'} = "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
     }
     if ($LJ::UNICODE) {
-        $lastn_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\">\n";
+        $lastn_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
     }
 
     # "Automatic Discovery of RSS feeds"
@@ -965,9 +965,9 @@ sub create_view_friends
 
     ## never have spiders index friends pages (change too much, and some 
     ## people might not want to be indexed)
-    $friends_page{'head'} = "<meta name=\"robots\" content=\"noindex\">\n";
+    $friends_page{'head'} = "<meta name=\"robots\" content=\"noindex\" />\n";
     if ($LJ::UNICODE) {
-        $friends_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'">';
+        $friends_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
     $friends_page{'head'} .= 
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'FRIENDS_HEAD'};
@@ -1419,10 +1419,10 @@ sub create_view_calendar
     $calendar_page{'title'} = LJ::ehtml($u->{'journaltitle'} ||
                               $calendar_page{'name'} . $calendar_page{'name-\'s'} . " Journal");
     if ($u->{'opt_blockrobots'}) {
-        $calendar_page{'head'} = "<meta name=\"robots\" content=\"noindex\">\n";
+        $calendar_page{'head'} = "<meta name=\"robots\" content=\"noindex\" />\n";
     }
     if ($LJ::UNICODE) {
-        $calendar_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'">';
+        $calendar_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
     $calendar_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
@@ -1643,10 +1643,10 @@ sub create_view_day
     my %day_page = ();
     $day_page{'username'} = $user;
     if ($u->{'opt_blockrobots'}) {
-        $day_page{'head'} = "<meta name=\"robots\" content=\"noindex\">\n";
+        $day_page{'head'} = "<meta name=\"robots\" content=\"noindex\" />\n";
     }
     if ($LJ::UNICODE) {
-        $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'">';
+        $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
     $day_page{'head'} .= 
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};
