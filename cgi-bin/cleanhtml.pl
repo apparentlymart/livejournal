@@ -354,10 +354,10 @@ sub clean
                     my $str = shift;
                     if ($str =~ /^(.*?)(&(#39|quot|lt|gt)(;.*)?)$/) {
                         $url{++$urlcount} = $1;
-                        return "&url$urlcount;$2";
+                        return "&url$urlcount;$1&urlend;$2";
                     } else {
                         $url{++$urlcount} = $str;
-                        return "&url$urlcount;";
+                        return "&url$urlcount;$str&urlend;";
                     }
                 };
                 $token->[1] =~ s!https?://[^\s\'\"\<\>]+[a-zA-Z0-9_/&=\-]! $match->($&); !ge;
@@ -394,7 +394,7 @@ sub clean
             if ($auto_format) {
                 $token->[1] =~ s/(\r)?\n/<br \/>/g;
                 if (! $opencount{'a'}) {
-                    $token->[1] =~ s/&url(\d+);/<a href=\"$url{$1}\">$url{$1}<\/a>/g;
+                    $token->[1] =~ s/&url(\d+);(.*?)&urlend;/<a href=\"$url{$1}\">$2<\/a>/g;
                 }
             }
 
