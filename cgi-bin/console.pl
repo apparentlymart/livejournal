@@ -438,6 +438,51 @@ $cmd{'help'} = {
     ],
   };
 
+$cmd{'infohistory'} = {
+    'privs' => [qw(finduser)],
+    'des' => 'Retrieve the infohistory of a given user',
+    'handler' => \&infohistory,
+    'argsummary' => '<user>',
+    'args' => [
+        'user' => "The user whose infohistory is being retrieved.",
+    ],
+};
+
+sub infohistory
+{
+    my ($dbh, $remote, $args, $out) = @_;
+
+    unless ($remote->{'privarg'}->{'finduser'}->{'infohistory'}) {
+        push @$out, [ "error", "$remote->{'user'}, you are not authorized to use this command." ];
+        return 0;
+    }
+
+    my $user = $args->[1];
+    my $userid = LJ::get_userid($dbh, $user);
+
+    unless ($userid) {
+        push @$out, [ "error", "Invalid user $user" ];
+        return 0;
+    }
+
+    my $sth = $dbh->prepare("SELECT * FROM infohistory WHERE userid='$userid'");
+    $sth->execute;
+    if (! $sth->rows) {
+        push @$out, [ "error", "No matches." ];
+    } else {
+        push @$out, ["info", "Infohistory of user: $user"];
+        while (my $info = $sth->fetchrow_hashref) {        
+            $info->{'oldvalue'} ||= '(none)';
+            push @$out, [ "info", 
+                          "Changed $info->{'what'} at $info->{'timechange'}.\n".
+                          "Old value of $info->{'what'} was $info->{'oldvalue'}.".
+                          ($info->{'other'} ? 
+                           "\nOther information recorded: $info->{'other'}" : "") ];
+        }
+    }
+    return 1;
+}
+
 sub conhelp 
 {
     my ($dbh, $remote, $args, $out) = @_;
