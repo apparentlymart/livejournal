@@ -118,6 +118,12 @@ sub can_see_helper
         if (can_help($sp, $remote)) {
             $see = 1;
         }
+        if (LJ::check_priv($remote, "supportviewinternal", $sp->{_cat}->{'catkey'})) {
+            $see = 1;
+        }
+        if (LJ::check_priv($remote, "supportviewscreened", $sp->{_cat}->{'catkey'})) {
+            $see = 1;
+        }
     }
     return $see;
 }
