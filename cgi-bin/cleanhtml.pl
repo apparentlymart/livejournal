@@ -271,7 +271,14 @@ sub clean
                 }
             }
         }
-        elsif ($type eq "T" || $type eq "D") {
+        elsif ($type eq "D") {
+            # remove everything past first closing tag
+            $token->[1] =~ s/>.+/>/s;
+            # kill any opening tag except the starting one
+            $token->[1] =~ s/.<//sg;
+            $newdata .= $token->[1];
+        }
+        elsif ($type eq "T") {
             my %url = ();
             my $urlcount = 0;
 
