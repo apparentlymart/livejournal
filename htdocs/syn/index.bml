@@ -2,12 +2,11 @@
 title=>Syndication
 body<=
 
-<?_code #'
+<?_code 
 {
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
+    my $dbh = LJ::get_db_writer();
+    my $u = LJ::get_remote();
 
-    my $u = LJ::get_remote($dbs);
     unless ($u) {
         return "<?h1 Login Required h1?><?p To manage your syndicated accounts, first <a href=\"/login.bml?ret=1\">login</a>. p?>";
     }
@@ -22,7 +21,8 @@ body<=
         return "<?h1 Invalid form submission h1?><?p User posting doesn't match user that filled out the form. p?>";
     }
 
-    my $sth = $dbh->prepare("SELECT s.userid, us.user, s.synurl, COUNT(*) FROM useridmap us, syndicated s, friends fa, friends fb ".
+    my $sth = $dbh->prepare("SELECT s.userid, us.user, s.synurl, COUNT(*) ".
+                            "FROM useridmap us, syndicated s, friends fa, friends fb ".
                             "WHERE fa.userid=? AND fa.friendid=s.userid AND us.userid=s.userid ".
                             "AND fb.friendid=s.userid GROUP BY 1, 2, 3");
     $sth->execute($u->{'userid'});
@@ -128,7 +128,7 @@ body<=
             if ($used + $cost > $quota) {
                 return "<?h1 Sorry h1?><?p Adding this feed would put you over your syndication account quota. p?><?p [&lt;&lt; <a href='/syn/'>Back</a>] p?>";
             }
-            LJ::add_friend($dbs, $u->{'userid'}, $su->{'userid'}, { 'defaultview' => 1 });
+            LJ::add_friend($u->{'userid'}, $su->{'userid'}, { 'defaultview' => 1 });
             $count{$su->{'user'}} = $count;
             $cost{$su->{'user'}} = $cost;
             $syn{$su->{'user'}} = $su->{'synurl'};
@@ -144,7 +144,7 @@ body<=
         my $cost = LJ::syn_cost($count + 1);
         if ($POST{'action:add'} && $POST{"add_$user"}) {
             if ($used + $cost < $quota) {
-                LJ::add_friend($dbs, $u->{'userid'}, $suserid, { 'defaultview' => 1 });
+                LJ::add_friend($u->{'userid'}, $suserid, { 'defaultview' => 1 });
                 $count{$user} = $count+1;
                 $cost{$user} = $cost;
                 $syn{$user} = $url;
