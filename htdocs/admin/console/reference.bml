@@ -10,7 +10,7 @@
 <P><B>Command Reference</B>
 <BR>Arguments in &lt;angle brackets&gt; are required.  Arguments in [brackets] are optional.  If there is more than one optional argument, you can't skip one and provide one after it.  Once you skip one, you have to skip the rest.
 
-(=_CODE
+<?_code
 
  use strict;
  use vars qw(%cmd);
@@ -40,9 +40,9 @@
  $ret .= "</dl>";
  return $ret;
 
-_CODE=)
+_code?>
 
-</body></html>(=_C <LJDEP>
+</body></html><?_c <LJDEP>
 lib: cgi-bin/console.pl, cgi-bin/ljlib.pl
 link: htdocs/admin/console/index.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
