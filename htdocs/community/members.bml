@@ -157,7 +157,7 @@ body<=
                     $delete{$_}->{$id} = 1 if $POST{"w_${id}_$_"};
                 }
             }
-            $maints++ if $add{'admin'}->{$id};
+            $maints++ if $POST{"edit_${id}_admin"};
         }
 
         # can't remove ALL maintainers, give them an error so they can
