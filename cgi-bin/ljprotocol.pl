@@ -37,6 +37,7 @@ sub error_message
              "152" => "Can't make back-dated entries in non-personal journal.",
              "153" => "Incorrect time value",
              "154" => "Can't add a redirected account as a friend",
+             "155" => "Non-authenticated email address",
 
              # Client Errors
              "200" => "Missing required argument(s)",
@@ -708,6 +709,8 @@ sub postevent
 
             my $fr = $dbcm->quote(Storable::freeze($req));
             return fail($err, 409) if length($fr) > 200_000;
+
+            return fail($err, 155, "You must have an authenticated email address in order to post to moderated communities") unless $u->{'status'} eq 'A';
 
             # store
             $dbcm->do("INSERT INTO modlog (journalid, posterid, subject, logtime) ".
