@@ -696,8 +696,9 @@ sub journal_content
     }
     elsif ($opts->{'baduser'}) 
     {
-	$status = "404 Unknown User";
-	$html = "<h1>Unknown User</h1><p>There is no user <b>$user</b> at $LJ::SITENAME.</p>";
+        $status = "404 Unknown User";
+        $html = "<h1>Unknown User</h1><p>There is no user <b>$user</b> at $LJ::SITENAME.</p>";
+        $generate_iejunk = 1;
     }
     elsif ($opts->{'badfriendgroup'})
     {
