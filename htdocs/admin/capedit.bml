@@ -46,7 +46,7 @@
          next unless $FORM{"class_$n"};
          $newcaps |= (1 << $n);
      }
-     $dbh->do("UPDATE user SET caps=$newcaps WHERE userid=$u->{'userid'}");
+     LJ::update_user($u, { caps => $newcaps });
      $u->{'caps'} = $newcaps;  # so user object is correct in memory
 
      # re-evaluate userpics for activation

@@ -193,6 +193,15 @@ sub use_diff_db {
 # returns:
 # </LJFUNC>
 sub get_dbh {
+    if ($LJ::DEBUG{'get_dbh'} && $_[0] ne "logs") {
+        my $errmsg = "get_dbh(@_) at \n";
+        my $i = 0;
+        while (my ($p, $f, $l) = caller($i++)) {
+            next if $i > 3;
+            $errmsg .= "  $p, $f, $l\n";
+        }
+        warn $errmsg;
+    }
     $LJ::DBIRole->get_dbh(@_);
 }
 
@@ -2727,12 +2736,6 @@ sub get_remote
 
     return $LJ::CACHE_REMOTE if $LJ::CACHED_REMOTE;
 
-    unless ($dbarg) {
-        $dbarg = LJ::get_db_reader();
-    }
-
-    my $dbs = make_dbs_from_arg($dbarg);
-
     $$criterr = 0;
 
     my $cookie = sub {
@@ -2746,7 +2749,6 @@ sub get_remote
         my $hookparam = {
             'user' => $a->{'user'},
             'userid' => $a->{'userid'},
-            'dbs' => $dbs,
             'caps' => $a->{'caps'},
             'criterr' => $criterr,
             'cookiesource' => $cookie,
@@ -3984,6 +3986,34 @@ sub make_remote
     return undef;
 }
 
+sub update_user
+{
+    my ($uuserid, $ref) = @_;
+    my $uid = want_userid($uuserid);
+    return 0 unless $uid;
+
+    my @sets;
+    my @bindparams;
+    while (my ($k, $v) = each %$ref) {
+        if ($k eq "raw") {
+            push @sets, $v;
+        } else {
+            push @sets, "$k=?";
+            push @bindparams, $v;
+        }
+    }
+    return 1 unless @sets;
+    my $dbh = LJ::get_db_writer();
+    { local $" = ",";
+      $dbh->do("UPDATE user SET @sets WHERE userid=?", undef,
+               @bindparams, $uid) or return 0; }
+    if (@LJ::MEMCACHE_SERVERS) {
+        my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, $uid);
+        LJ::memcache_set_u($u);
+    }
+    return 1;
+}
+
 # <LJFUNC>
 # name: LJ::load_userids_multiple
 # des: Loads a number of users at once, efficiently.
@@ -4001,7 +4031,6 @@ sub load_userids_multiple
     shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my ($map, $have) = @_;
 
-    my $dbr = LJ::get_db_reader();
     my $sth;
 
     my %need;
@@ -4031,11 +4060,20 @@ sub load_userids_multiple
             $satisfy->($u);
         }
     }
+    
+    if (%need) {
+        my $mem = LJ::MemCache::get_multi(map { [$_,"userid:$_"] } keys %need) || {};
+        $satisfy->($_) foreach (values %$mem);
+    }
 
-    if (keys %need) {
+    if (%need) {
         my $in = join(", ", map { $_+0 } keys %need);
-        ($sth = $dbr->prepare("SELECT * FROM user WHERE userid IN ($in)"))->execute;
-        $satisfy->($_) while $_ = $sth->fetchrow_hashref;
+        my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
+        ($sth = $db->prepare("SELECT * FROM user WHERE userid IN ($in)"))->execute;
+        while (my $u = $sth->fetchrow_hashref) {
+            LJ::memcache_set_u($u);
+            $satisfy->($u); 
+          }
     }
 }
 
@@ -4055,8 +4093,6 @@ sub load_user
         my $dbarg = shift;
         my $dbs = LJ::make_dbs_from_arg($dbarg);
         $db = $dbs->{'dbh'};
-    } else {
-        $db = LJ::get_db_reader();
     }
     my ($user, $force) = @_;
 
@@ -4066,7 +4102,14 @@ sub load_user
     return $LJ::REQ_CACHE_USER_NAME{$user} if
         $LJ::REQ_CACHE_USER_NAME{$user} && ! $force;
 
-    my $u = $db->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
+    my $u = LJ::MemCache::get("user:$user");
+
+    # try a reader, unless we're using memcache, otherwise we'll wait and
+    # load from master below.
+    unless ($u || @LJ::MEMCACHE_SERVERS) {
+        $db ||= LJ::get_db_reader();
+        $u = $db->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
+    }
 
     # if user doesn't exist in the LJ database, it's possible we're using
     # an external authentication source and we should create the account
@@ -4092,12 +4135,22 @@ sub load_user
             # If the user still doesn't exist, and there isn't an alternate auth code
             # try grabbing it from the master.
             $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
+            LJ::memcache_set_u($u) if $u;
         }
     }
 
     $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u if $u;
     $LJ::REQ_CACHE_USER_ID{$u->{'userid'}} = $u if $u;
     return $u;
+}
+
+sub memcache_set_u
+{
+    my $u = shift;
+    return unless $u;
+    my $expire = time() + 1800;
+    LJ::MemCache::set([$u->{'userid'}, "userid:$u->{'userid'}"], $u, $expire);
+    LJ::MemCache::set("user:$u->{'user'}", $u, $expire);
 }
 
 # <LJFUNC>
@@ -4118,14 +4171,27 @@ sub load_userid
     return $LJ::REQ_CACHE_USER_ID{$userid} if
         $LJ::REQ_CACHE_USER_ID{$userid} && ! $force;
 
-    my $dbs = LJ::make_dbs_from_arg($dbarg || LJ::get_db_reader());
-    my $dbr = $dbs->{'reader'};
-    my $u;
+    my $u = LJ::MemCache::get([$userid,"userid:$userid"]);
 
-    $u = $dbr->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, $userid);
-    if (!$u && ($dbs->{'has_slave'} || !$dbarg)) {
-        my $dbh = $dbarg ? $dbs->{'dbh'} : LJ::get_db_writer();
-        $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, $userid);
+    unless ($u) {
+        my $master = 0;
+        unless ($dbarg) {
+            $dbarg = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
+            $master = @LJ::MEMCACHE_SERVERS ? 1 : 0;
+        }
+
+        my $dbs = LJ::make_dbs_from_arg($dbarg);
+        my $db = $dbs->{'reader'};
+        my $u;
+
+        $u = $db->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, 
+                                    $userid);
+        LJ::memcache_set_u($u) if $u && $master;
+            
+        if (!$u && ($dbs->{'has_slave'} || !$dbarg)) {
+            my $dbh = $dbarg ? $dbs->{'dbh'} : LJ::get_db_writer();
+            $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, $userid);
+        }
     }
 
     $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u if $u;

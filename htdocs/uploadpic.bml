@@ -175,8 +175,7 @@ body<=
  
     # make it their default pic?
     if ($POST{'make_default'}) {
-        $dbh->do("UPDATE user SET defaultpicid=? WHERE userid=?", undef, $picid, $u->{'userid'});
-        return LJ::bad_input($dbh->errstr) if $dbh->err;
+        LJ::update_user($u, { defaultpicid => $picid });
     }
 
     return "<?h1 $ML{'.success.header'} h1?>\n" .

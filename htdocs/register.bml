@@ -47,7 +47,7 @@ body<=
  
  return LJ::bad_input(@errors) if @errors;
 
- $dbh->do("UPDATE user SET status='A' WHERE userid=$u->{'userid'}");
+ LJ::update_user($u, { status => 'A' });
  LJ::run_hooks("emailconfirmed", $dbs, $u);
 
  if ($u->{'status'} eq "T") {

@@ -406,8 +406,7 @@ body<=
         }
         chop $sets;
 
-        $dbh->do("UPDATE user SET $sets WHERE userid=?", undef, $u->{'userid'});
-        return $dberr->($dbh->{'errstr'}) if $dbh->err;
+        LJ::update_user($u, { raw => $sets });
 
         # what userprops we'll be setting.
         my %uprop;

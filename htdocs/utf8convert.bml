@@ -437,11 +437,7 @@
      $name = $u->{'name'};
      unless (LJ::is_utf8($name)) {
          convert(\$name, $encid);
-         my $qname = $dbh->quote($name);
-         $dbh->do("UPDATE user SET name=$qname WHERE userid=$userid");
-         if ($dbh->err) {
-             return 0, "Database error: $dbh->errstr";
-         }
+         LJ::update_user($userid, { name => $name });
          $message .= "<?p Converted the name. p?>";
      }
 

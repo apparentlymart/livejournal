@@ -131,10 +131,7 @@
          # see if they are trying to make an inactive userpic their default
          my $state = $dbh->selectrow_array("SELECT state FROM userpic WHERE picid=?",
                                            undef, $new_default);
-
-         $dbh->do("UPDATE user SET defaultpicid=? WHERE userid=?",
-                  undef, $new_default, $u->{'userid'})
-             unless $state eq 'I';
+         LJ::update_user($u, { defaultpicid => $new_default }) unless $state eq 'I';
      }
 
      # errors occurred during processing?

@@ -97,7 +97,7 @@ body<=
                 return "<?h1 Username in use h1?><?p That account name is already in use. p?>"
                     unless $id;
 
-                $dbh->do("UPDATE user SET journaltype='Y' WHERE userid=?", undef, $id);
+                LJ::update_user($id, { journaltype => 'Y' });
                 $dbh->do("INSERT INTO syndicated (userid, synurl, checknext) VALUES (?,?,NOW())",
                          undef, $id, $url);
 

@@ -759,7 +759,7 @@ sub change_journal_type
     $dbh->do("DELETE FROM community WHERE userid=$quserid");
     
     if ($type eq "person") {
-        $dbh->do("UPDATE user SET journaltype='P' WHERE userid=$quserid");
+        LJ::update_user($u, { journaltype => 'P' });
         LJ::clear_rel($quserid, '*', 'P'); # post
         LJ::clear_rel($quserid, '*', 'A'); # admin
         LJ::clear_rel($quserid, '*', 'M'); # moderate
@@ -774,7 +774,7 @@ sub change_journal_type
         }
 
     } elsif ($type eq "shared") {
-        $dbh->do("UPDATE user SET journaltype='S' WHERE userid=$quserid");
+        LJ::update_user($u, { journaltype => 'S' });
     }
 
     push @$out, [ "info", "User: $u->{'user'} converted." ];
@@ -1016,8 +1016,8 @@ sub reset_email
     my $email = $args->[2];
     my $aa = LJ::register_authaction($dbh, $userid, "validateemail", $email);
 
-    $dbh->do("UPDATE user SET email=?, status='T' WHERE userid=?",
-             undef, $email, $userid) or return $err->($dbh->errstr);
+    LJ::update_user($userid, { email => $email, status => 'T' })
+        or return $err->($dbh->errstr);
 
     my $body;
     $body .= "Your email address for $LJ::SITENAME has been reset.  To validate the change, please go to this address:\n\n";

@@ -662,16 +662,7 @@ body<=
             $update{'oldenc'} = $POST{'oldenc'};
         }
 
-        # update 'user' table
-        my $sets = "";
-        foreach (keys %update)
-        {
-            $sets .= "$_=" . $dbh->quote($update{$_}) . ",";
-        }
-        chop $sets;
-
-        $dbh->do("UPDATE user SET $sets WHERE userid=?", undef, $u->{'userid'});
-        if ($dbh->err) { return "<?h1 $ML{'Error'} h1?><?p $ML{'error.dberror'} <b>" . $dbh->errstr . "</b> p?>"; }
+        LJ::update_user($u, \%update);
 
         ### change any of the userprops ?
         {

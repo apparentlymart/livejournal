@@ -21,7 +21,7 @@ sub suspend
 
     my $cmd = $args->[0];
     my ($user, $reason) = ($args->[1], $args->[2]);
-    my $userid = LJ::get_userid($dbh, $user);
+
     if ($cmd eq "suspend" && $reason eq "off") {
         push @$out, [ "error", "The second argument to the 'suspend' command is no longer 'off' to unsuspend.  Use the 'unsuspend' command instead." ];
         return 0;
@@ -30,16 +30,21 @@ sub suspend
     unless ($remote->{'priv'}->{'suspend'}) {
         push @$out, [ "error", "You don't have access to $cmd users." ];
         return 0;
-
     }
 
-    unless ($userid) {
-        push @$out, [ "error", "Invalid user \"$user\"" ];
+    my $u = LJ::load_user($dbh, $user);
+    my $status = ($cmd eq "unsuspend") ? "V" : "S";
+    unless ($u) {
+        push @$out, [ "error", "Invalid user." ];
         return 0;
     }
-    
-    my $status = ($cmd eq "unsuspend") ? "V" : "S";
-    $dbh->do("UPDATE user SET statusvis='$status', statusvisdate=NOW() WHERE userid=$userid AND statusvis<>'$status'");
+
+    if ($u->{'statisvis'} eq $status) {
+        push @$out, [ "error", "User was already in that state ($status)" ];
+        return 0;
+    }
+
+    LJ::update_user($userid, { statusvis => $status, raw => 'statusvisdate=NOW()' });
 
     LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, $cmd, $reason);
 

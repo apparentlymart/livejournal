@@ -22,7 +22,7 @@ body<=
      if ($FORM{'confirm'}) 
      {
          my $quid = $aa->{'userid'}+0;
-         $dbh->do("UPDATE user SET allow_getljnews='N' WHERE userid=$quid");
+         LJ::update_user($quid, { allow_getljnews => 'N' });
          return "<?h1 Done. h1?><?p You won't get $LJ::SITENAME news anymore. p?>";
      } 
      else 
