@@ -3,38 +3,38 @@ title=>Append Request
 body<=
 
 <?_code
+{
+    my $status = "";
 
- my $status = "";
+    my $spid = $FORM{'spid'}+0;
+    my $sp = LJ::Support::load_request($spid);
+    unless ($sp) { return "<?h1 Error h1?><?p Unknown support request. p?>"; }
 
- my $spid = $FORM{'spid'}+0;
- my $sp = LJ::Support::load_request($spid);
- unless ($sp) { return "<?h1 Error h1?><?p Unknown support request. p?>"; }
+    if ($sp->{'state'} eq "closed") {
+        return "<?h1 Closed h1?><?p This support request has since been closed. p?>";
+    }
 
- if ($sp->{'state'} eq "closed") {
-     return "<?h1 Closed h1?><?p This support request has since been closed. p?>";
- }
+    my $u;
+    if ($sp->{'reqtype'} eq "user") {
+        $u = LJ::load_userid($sp->{'requserid'});
+    }
 
- my $u;
- if ($sp->{'reqtype'} eq "user") {
-     $u = LJ::load_userid($sp->{'requserid'});
- }
+    my $remote = LJ::get_remote();
+    LJ::Support::init_remote($remote);
 
- my $remote = LJ::get_remote();
- LJ::Support::init_remote($remote);
+    unless (LJ::Support::can_append($sp, $remote, $FORM{'auth'}) || $remote) {
+        return LJ::bad_input("You must <a href=\"/login.bml\">login</a> to help people out.");
+    }
 
- unless (LJ::Support::can_append($sp, $remote, $FORM{'auth'}) || $remote) {
-     return LJ::bad_input("You must <a href=\"/login.bml\">login</a> to help people out.");
- }
-
- my $scat = $sp->{_cat};
- my $problemarea = $scat->{'catname'};
- my $catkey = $scat->{'catkey'};
+    my $scat = $sp->{_cat};
+    my $problemarea = $scat->{'catname'};
+    my $catkey = $scat->{'catkey'};
  
- unless ($FORM{'spid'}) { return LJ::bad_input("need spid"); }
- unless (LJ::did_post) { return LJ::bad_input("<?requirepost?>"); }
+    unless ($FORM{'spid'}) { return LJ::bad_input("need spid"); }
+    unless (LJ::did_post) { return LJ::bad_input("<?requirepost?>"); }
 
- ### links to show on success
- my $successlinks = qq{
+    ### links to show on success
+    my $successlinks = qq{
 <ul>
    <li>Go back to <a href='see_request.bml?id=$sp->{'spid'}'>Request #$sp->{'spid'}</a></li>
    <li>Go back to the <a href='help.bml'>open support requests</a></li>
@@ -47,179 +47,181 @@ body<=
 };
 
 
- ### insert record
- my $faqid = $FORM{'faqid'}+0;
+    ### insert record
+    my $faqid = $FORM{'faqid'}+0;
  
- my %answer_types = LJ::Support::get_answer_types($sp, $remote, $FORM{'auth'});
+    my %answer_types = LJ::Support::get_answer_types($sp, $remote, $FORM{'auth'});
 
- my $type = $FORM{'replytype'};
- unless (defined $answer_types{$type}) {
-     return LJ::bad_input("Invalid reply type.");
- }
+    my $type = $FORM{'replytype'};
+    unless (defined $answer_types{$type}) {
+        return LJ::bad_input("Invalid reply type.");
+    }
 
- ## can we do the action we want?
- if ($FORM{'approveans'} && 
-     ($type ne "internal" || ! LJ::Support::can_help($sp, $remote)))
- {
-     return LJ::bad_input("To approve an answer, you must select \"Internal Comment ".
-                       "/ Action\" and optionally explain why you're approving it.");
- }
+    ## can we do the action we want?
+    if ($FORM{'approveans'} && 
+        ($type ne "internal" || ! LJ::Support::can_help($sp, $remote)))
+    {
+        return LJ::bad_input("To approve an answer, you must select \"Internal Comment ".
+                             "/ Action\" and optionally explain why you're approving it.");
+    }
 
- if ($FORM{'changecat'} &&
-     ($type ne "internal" || ! LJ::Support::can_perform_actions($sp, $remote)))
- {
-     return LJ::bad_input("To change a request's category, you must select \"Internal Comment ".
-                       "/ Action\" and explain why you're changing it.");
- }
+    if ($FORM{'changecat'} &&
+        ($type ne "internal" || ! LJ::Support::can_perform_actions($sp, $remote)))
+    {
+        return LJ::bad_input("To change a request's category, you must select \"Internal Comment ".
+                             "/ Action\" and explain why you're changing it.");
+    }
 
- if (($FORM{'touch'} || $FORM{'untouch'}) &&
-     ($type ne "internal" || ! LJ::Support::can_perform_actions($sp, $remote)))
- {
-     return LJ::bad_input("To touch this request, you must select \"Internal Comment ".
-                       "/ Action\" and explain why you're touching it.");
- }
+    if (($FORM{'touch'} || $FORM{'untouch'}) &&
+        ($type ne "internal" || ! LJ::Support::can_perform_actions($sp, $remote)))
+    {
+        return LJ::bad_input("To touch this request, you must select \"Internal Comment ".
+                             "/ Action\" and explain why you're touching it.");
+    }
 
- if ($FORM{'changesum'} && ($type ne "internal" ||
-     ! LJ::Support::can_help($sp, $remote)))
- {
-     return LJ::bad_input("To change the summary of the request, you must select \"Internal Comment".
-                       "/ Action\" and enter in the new summary.");
- }
+    if ($FORM{'changesum'} && ($type ne "internal" ||
+                               ! LJ::Support::can_help($sp, $remote)))
+    {
+        return LJ::bad_input("To change the summary of the request, you must select \"Internal Comment".
+                             "/ Action\" and enter in the new summary.");
+    }
 
- if ($FORM{'body'} !~ /\S/ && !$FORM{'approveans'} && !$FORM{'changecat'} && !$FORM{'touch'} && !$FORM{'untouch'}) {
-     return LJ::bad_input("Your message was blank.  Please type at least something in the message field.");
- }
+    if ($FORM{'body'} !~ /\S/ && !$FORM{'approveans'} && !$FORM{'changecat'} && !$FORM{'touch'} && !$FORM{'untouch'}) {
+        return LJ::bad_input("Your message was blank.  Please type at least something in the message field.");
+    }
 
- # get dbh now, it's always needed
- my $dbh = LJ::get_db_writer();
+    # get dbh now, it's always needed
+    my $dbh = LJ::get_db_writer();
 
- ## touch/untouch request
- if ($FORM{'touch'}) {
-     $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
-     $status .= "(Inserting request into queue)\n\n";
- }
- if ($FORM{'untouch'}) {
-     $dbh->do("UPDATE support SET timelasthelp=UNIX_TIMESTAMP() WHERE spid=$spid");
-     $status .= "(Removing request from queue)\n\n";
- }
+    ## touch/untouch request
+    if ($FORM{'touch'}) {
+        $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
+        $status .= "(Inserting request into queue)\n\n";
+    }
+    if ($FORM{'untouch'}) {
+        $dbh->do("UPDATE support SET timelasthelp=UNIX_TIMESTAMP() WHERE spid=$spid");
+        $status .= "(Removing request from queue)\n\n";
+    }
 
- ## bounce request to email
- if ($type eq 'bounce') {
+    ## bounce request to email
+    if ($type eq 'bounce') {
 
-     return LJ::bad_input("No email address specified for bounce.")
-         unless $FORM{'bounce_email'};
+        return LJ::bad_input("No email address specified for bounce.")
+            unless $FORM{'bounce_email'};
 
-     return LJ::bad_input("You are not authorized to bounce this request")
-         unless LJ::Support::can_bounce($sp, $remote);
+        return LJ::bad_input("You are not authorized to bounce this request")
+            unless LJ::Support::can_bounce($sp, $remote);
 
-     # check given emails using BMLCodeBlock::check_email
-     my @form_emails = split(/\s*,\s*/, $FORM{'bounce_email'});
+        # check given emails using BMLCodeBlock::check_email
+        my @form_emails = split(/\s*,\s*/, $FORM{'bounce_email'});
 
-     return LJ::bad_input("You can only send to 5 email addresses.  Go back and remove some.")
-         if @form_emails > 5;
+        return LJ::bad_input("You can only send to 5 email addresses.  Go back and remove some.")
+            if @form_emails > 5;
      
-     my @emails; # error-checked, good emails
-     my @email_errors;
-     foreach my $email (@form_emails) {
+        my @emails; # error-checked, good emails
+        my @email_errors;
+        foreach my $email (@form_emails) {
 
-         # see if it's a valid lj username
-         unless ($email =~ /\@/) {
-             my $eu = LJ::load_user($email); # $email is a username
-             $email = $eu->{'email'} if $eu;
-         }
+            # see if it's a valid lj username
+            unless ($email =~ /\@/) {
+                my $eu = LJ::load_user($email); # $email is a username
+                $email = $eu->{'email'} if $eu;
+            }
 
-         check_email($email, \@email_errors);
-         @email_errors = map { "<b>$email:</b> $_" } @email_errors;
-         return LJ::bad_input(@email_errors) if @email_errors;
+            check_email($email, \@email_errors);
+            @email_errors = map { "<b>$email:</b> $_" } @email_errors;
+            return LJ::bad_input(@email_errors) if @email_errors;
 
-         # push onto our list of valid emails
-         push @emails, $email;
-     }
+            # push onto our list of valid emails
+            push @emails, $email;
+        }
 
-     # append notice that this message was bounced
-     my $splid = LJ::Support::append_request($sp, {
-         'body' => "(Bouncing mail to '" . join(', ', @emails) . "' and closing)\n\n" . $FORM{'body'},
-         'posterid' => $remote ? $remote->{'userid'} : 0,
-         'type' => 'internal',
-     });
+        # append notice that this message was bounced
+        my $splid = LJ::Support::append_request($sp, {
+            'body' => "(Bouncing mail to '" . join(', ', @emails) . "' and closing)\n\n" . $FORM{'body'},
+            'posterid' => $remote ? $remote->{'userid'} : 0,
+            'type' => 'internal',
+        });
 
-     # bounce original request to email
-     my $message = $dbh->selectrow_array("SELECT message FROM supportlog " .
-                                         "WHERE spid=? ORDER BY splid LIMIT 1",
-                                         undef, $sp->{'spid'});
+        # bounce original request to email
+        my $message = $dbh->selectrow_array("SELECT message FROM supportlog " .
+                                            "WHERE spid=? ORDER BY splid LIMIT 1",
+                                            undef, $sp->{'spid'});
 
-     LJ::send_mail({ 
-         'to' => join(", ", @emails),
-         'from' => $sp->{'reqemail'},
-         'fromname' => $sp->{'reqname'},
-         'headers' => { 'X-Bounced-By' => $remote->{'user'} },
-         'subject' => "$sp->{'subject'} (support request #$sp->{'spid'})",
-         'body' => "$message\n\n$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}",
-     });
+        LJ::send_mail({ 
+            'to' => join(", ", @emails),
+            'from' => $sp->{'reqemail'},
+            'fromname' => $sp->{'reqname'},
+            'headers' => { 'X-Bounced-By' => $remote->{'user'} },
+            'subject' => "$sp->{'subject'} (support request #$sp->{'spid'})",
+                'body' => "$message\n\n$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}",
+            });
 
-     # close request, nobody gets credited
-     $dbh->do("UPDATE support SET state='closed', timeclosed=UNIX_TIMESTAMP() WHERE spid=?",
-              undef, $sp->{'spid'});
+        # close request, nobody gets credited
+        $dbh->do("UPDATE support SET state='closed', timeclosed=UNIX_TIMESTAMP() WHERE spid=?",
+                 undef, $sp->{'spid'});
 
-     return "<?h1 Bounced h1?><?p The selected support request has been bounced to <b>" .
-         join(', ', @emails) . "</b> and closed. p?>" . $successlinks;
+        return "<?h1 Bounced h1?><?p The selected support request has been bounced to <b>" .
+            join(', ', @emails) . "</b> and closed. p?>" . $successlinks;
  
- }
+    }
 
- if (LJ::Support::is_poster($sp, $remote, $FORM{'auth'})) 
- {
-     $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
- }
+    if (LJ::Support::is_poster($sp, $remote, $FORM{'auth'})) 
+    {
+        $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
+    }
 
- ## change category
- if ($FORM{'changecat'}) {
-     my $newcat = $FORM{'changecat'}+0;
-     my $cats = LJ::Support::load_cats($newcat);
-     if ($cats->{$newcat}) {
-         $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
-         $status .= "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n";
-         $sp->{'spcatid'} = $newcat; # update category so IC e-mail goes to right place
-     } else {
-         return LJ::bad_input("That category doesn't seem to exist.");
-     }
- }
+    ## change category
+    if ($FORM{'changecat'}) {
+        my $newcat = $FORM{'changecat'}+0;
+        my $cats = LJ::Support::load_cats($newcat);
+        if ($cats->{$newcat}) {
+            $dbh->do("UPDATE support SET spcatid=$newcat WHERE spid=$spid");
+            $status .= "Changing from $catkey => $cats->{$newcat}->{'catkey'}\n\n";
+            $sp->{'spcatid'} = $newcat; # update category so IC e-mail goes to right place
+        } else {
+            return LJ::bad_input("That category doesn't seem to exist.");
+        }
+    }
 
- ## approving a screened entry
- if ($FORM{'approveans'}) {
-     my $splid = $FORM{'approveans'}+0;
-     my $res = LJ::Support::load_response($splid);
-     if ($res->{'spid'} == $spid && $res->{'type'} eq "screened") {
-         return LJ::bad_input('Invalid type to approve screened response as.')
-            if (($FORM{'approveas'} ne 'answer') && ($FORM{'approveas'} ne 'comment'));
-         # approve
-         my $qtype = $dbh->quote($FORM{'approveas'});
-         $dbh->do("UPDATE supportlog SET type=$qtype WHERE splid=$splid");
-         $status .= "(Approving $FORM{'approveas'} \#$splid)\n\n";
-         LJ::Support::mail_response_to_user($sp, $splid);
-     } else {
-         return LJ::bad_input("Invalid screened response to approve.");
-     }
- }
+    ## approving a screened entry
+    if ($FORM{'approveans'}) {
+        my $splid = $FORM{'approveans'}+0;
+        my $res = LJ::Support::load_response($splid);
+        if ($res->{'spid'} == $spid && $res->{'type'} eq "screened") {
+            return LJ::bad_input('Invalid type to approve screened response as.')
+                if (($FORM{'approveas'} ne 'answer') && ($FORM{'approveas'} ne 'comment'));
+            # approve
+            my $qtype = $dbh->quote($FORM{'approveas'});
+            $dbh->do("UPDATE supportlog SET type=$qtype WHERE splid=$splid");
+            $status .= "(Approving $FORM{'approveas'} \#$splid)\n\n";
+            LJ::Support::mail_response_to_user($sp, $splid);
+        } else {
+            return LJ::bad_input("Invalid screened response to approve.");
+        }
+    }
 
- ## change summary
- if ($FORM{'changesum'}) {
-     $FORM{'body'} =~ s/[\n\r]//g;
-     my $qnewsub = $dbh->quote($FORM{'body'});
-     $dbh->do("UPDATE support SET subject=$qnewsub WHERE spid=$spid");
-     $status .= "Changing subject from \"$sp->{'subject'}\" to: ";
- }
+    ## change summary
+    if ($FORM{'changesum'}) {
+        $FORM{'body'} =~ s/[\n\r]//g;
+        my $qnewsub = $dbh->quote($FORM{'body'});
+        $dbh->do("UPDATE support SET subject=$qnewsub WHERE spid=$spid");
+        $status .= "Changing subject from \"$sp->{'subject'}\" to: ";
+    }
 
- my $splid = LJ::Support::append_request($sp, {
-     'body' => $status . $FORM{'body'},
-     'posterid' => $remote ? $remote->{'userid'} : 0,
-     'type' => $type,
-     'faqid' => $faqid,
- });
+    my $splid = LJ::Support::append_request($sp, {
+        'body' => $status . $FORM{'body'},
+        'posterid' => $remote ? $remote->{'userid'} : 0,
+        'type' => $type,
+        'faqid' => $faqid,
+    });
 
- LJ::Support::mail_response_to_user($sp, $splid);
+    LJ::Support::mail_response_to_user($sp, $splid);
 
- my $auth_arg = $FORM{'auth'} ? "&auth=$FORM{'auth'}" : "";
- return "<?h1 Logged h1?><?p Your comment/solution <a href=\"see_request.bml?id=$spid$auth_arg\">has been recorded</a>. p?>" . $successlinks;
+    my $auth_arg = $FORM{'auth'} ? "&auth=$FORM{'auth'}" : "";
+    return "<?h1 Logged h1?><?p Your comment/solution <a href=\"see_request.bml?id=$spid$auth_arg\">has been recorded</a>. p?>" . $successlinks;
+
+}
 _code?>
 <?hr?>
 Back to the <A HREF="help.bml">list of open requests</A>.<BR>
