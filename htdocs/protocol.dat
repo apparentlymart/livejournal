@@ -30,7 +30,7 @@ Send a key in the form editfriend_groupmask_<I>friend</I> where <I>friend</I> is
 }
 { efg_delete_<I>groupnum</I>
 .des
-Send a key of this type to delete the friend group with number <I>groupnum</I> (which can be from 1-30, inclusive).  The server will modify all old entries that allow access to that friend group, so a new friend group using that number won't have access to old non-related entries.  However, it is the client's responsibility to modify each friend's groupmask to remove them from the group as it's deleted.
+Send a key of this type to delete the friend group with number <I>groupnum</I> (which can be from 1-30, inclusive).  The server will modify all old entries that allow access to that friend group, so a new friend group using that number won't have access to old non-related entries, and unset the bit for that friend group on the groupmask of each friend, unless your client sends the friend's new groupmask explicitly.
 }
 { efg_set_<I>groupnum</I>_name
 .des

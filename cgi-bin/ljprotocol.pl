@@ -1613,10 +1613,8 @@ sub editfriendgroups
     $req->{'delete'} = [] unless
         (ref $req->{'delete'} eq "ARRAY");
 
-    ###
-    ## Keep track of what bits are already set, so we can know later whether to INSERT
-    #  or UPDATE.
-
+    # Keep track of what bits are already set, so we can know later
+    # whether to INSERT or UPDATE.
     my %bitset;
     $sth = $dbr->prepare("SELECT groupnum FROM friendgroup WHERE userid=$userid");
     $sth->execute;
@@ -1626,7 +1624,6 @@ sub editfriendgroups
 
     ## before we perform any DB operations, validate input text 
     # (groups' names) for correctness so we can fail gracefully
-
     if ($LJ::UNICODE) {
         foreach my $bit (keys %{$req->{'set'}})
         {
@@ -1644,19 +1641,6 @@ sub editfriendgroups
         $bit += 0;
         next unless ($bit >= 1 && $bit <= 30);
         $bitset{$bit} = 0;  # so later we replace into, not update.
-    }
-
-    ## change friends' masks
-    foreach my $friend (keys %{$req->{'groupmasks'}})
-    {
-        my $mask = int($req->{'groupmasks'}->{$friend}) | 1;
-
-        my $friendid = LJ::get_userid($dbs, $friend);
-        if ($friendid) {
-            $sth = $dbh->prepare("UPDATE friends SET groupmask=$mask ".
-                                 "WHERE userid=$userid AND friendid=$friendid");
-            $sth->execute;
-        }
     }
 
     ## do additions/modifications ('set' hash)
@@ -1687,14 +1671,13 @@ sub editfriendgroups
             if (defined $sa->{'public'}) {
                 $sets .= ", is_public=$qpublic";
             }
-            $sth = $dbh->prepare("UPDATE friendgroup SET groupname=$qname, sortorder=$qsort ".
-                                 "$sets WHERE userid=$userid AND groupnum=$bit");
+            $dbh->do("UPDATE friendgroup SET groupname=$qname, sortorder=$qsort ".
+                     "$sets WHERE userid=$userid AND groupnum=$bit");
         } else {
-            $sth = $dbh->prepare("REPLACE INTO friendgroup (userid, groupnum, ".
-                                 "groupname, sortorder, is_public) VALUES ".
-                                 "($userid, $bit, $qname, $qsort, $qpublic)");
+            $dbh->do("REPLACE INTO friendgroup (userid, groupnum, ".
+                     "groupname, sortorder, is_public) VALUES ".
+                     "($userid, $bit, $qname, $qsort, $qpublic)");
         }
-        $sth->execute;
         $added{$bit} = 1;
     }
 
@@ -1708,14 +1691,22 @@ sub editfriendgroups
         $clustered = 1;
     }
 
-    foreach my $bit (@{$req->{'delete'}})
+    # ignore bits that aren't integers or that are outside 1-30 range
+    my @delete_bits = grep {$_ >= 1 and $_ <= 30} map {$_+0} @{$req->{'delete'}};
+    my $delete_mask = 0;
+    foreach my $bit (@delete_bits) {
+        $delete_mask |= (1 << $bit)
+    }
+
+    # remove the bits for deleted groups from all friends groupmasks
+    if ($delete_mask) {
+        $dbh->do("UPDATE friends".
+                 "   SET groupmask = groupmask & ~$delete_mask".
+                 " WHERE userid = $userid");
+    }
+
+    foreach my $bit (@delete_bits)
     {
-        $bit += 0;
-        next unless ($bit >= 1 && $bit <= 30);
-
-        # Old note: remove all friend's priviledges on that bit
-        # number?  No, client should do this.
-
         # remove all posts from allowing that group:
         my @posts_to_clean = ();
         if ($clustered) {
@@ -1754,6 +1745,15 @@ sub editfriendgroups
                                  "userid=$userid AND groupnum=$bit");
             $sth->execute;
         }
+    }
+
+    ## change friends' masks
+    foreach my $friend (keys %{$req->{'groupmasks'}})
+    {
+        my $mask = int($req->{'groupmasks'}->{$friend}) | 1;
+        $dbh->do("UPDATE friends SET groupmask=$mask ".
+                 "WHERE userid=$userid AND friendid=?",
+                 undef, LJ::get_userid($dbs, $friend));
     }
 
     # return value for this is nothing.
