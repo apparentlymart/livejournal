@@ -471,13 +471,13 @@ sub conhelp
     my $cmd = $LJ::Con::cmd{$which};
     
     $pr->("$which ".$cmd->{'argsummary'});
-    $pr->(wrap('  ','  ',$cmd->{'des'}));
+    $pr->(Text::Wrap::wrap('  ','  ',$cmd->{'des'}));
     if ($cmd->{'args'}) {
         $pr->("  --------");
         my @des = @{$cmd->{'args'}};
         while (my ($arg, $des) = splice(@des, 0, 2)) {
             $pr->("  $arg");
-            $pr->(wrap('    ','    ',$des));
+            $pr->(Text::Wrap::wrap('    ','    ',$des));
         }
     }
     return 1;
