@@ -348,13 +348,13 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
       # Altposter crap
       if ($p.view == "friends")
       {
-          "<strong style='color: $fgcolor'><a href='" + $e.journal->base_url() + "'>";
+          "<strong style='color: $fgcolor'><a href='" + $e.journal->base_url() + "/'>";
           print $e.journal.username;
           "</a></strong><br />";
       }
       if ($e.journal.username != $e.poster.username)
       {
-          "[<a href='" + $e.poster->base_url() + "'>";
+          "[<a href='" + $e.poster->base_url() + "/'>";
           print $e.poster.username;
           "</a>]<br />";
       }

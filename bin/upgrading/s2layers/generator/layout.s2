@@ -406,7 +406,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     {
         """<table cellpadding="1" align="right" cellspacing="0" border="0" summary=""><tr align='left'><td bgcolor="$*stronger_back">""";
         """<table cellpadding="2" align="center" cellspacing="0" border="0" summary="">""";
-        """<tr align='left'><td bgcolor="$bgcolor" align="center"><a class="index" href=\"""" + $e.journal->base_url() + "\">";
+        """<tr align='left'><td bgcolor="$bgcolor" align="center"><a class="index" href=\"""" + $e.journal->base_url() + "/\">";
         if (defined $e.userpic) {
             """<img border="0" src="$e.userpic.url" width="$e.userpic.width" height="$e.userpic.height" alt=""><br>""";
         }
@@ -414,7 +414,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         "<font color=\"$fgcolor\">$e.journal.username</font></a>";
         if ($e.poster.username != $e.journal.username) {
             "<br>[<a class=\"index\" href=\"" +
-                $e.poster->base_url() + "\"><font color=\"$fgcolor\">$e.poster.username</font></a>]";
+                $e.poster->base_url() + "/\"><font color=\"$fgcolor\">$e.poster.username</font></a>]";
         }
         "</td></tr></table></td></tr></table>";
     }
@@ -836,7 +836,7 @@ function ReplyPage::print_body () {
 <tr align='left'><td align="center" style="color: $*stronger_text">""";
 
 if (defined $.replyto.poster) {
-    "<a href='" + $.replyto.poster->base_url() + "'>";
+    "<a href='" + $.replyto.poster->base_url() + "/'>";
     if (defined $.replyto.userpic) {
         """<img border="0" src="$.replyto.userpic.url" width="$.replyto.userpic.width" """;
         """height="$.replyto.userpic.height" alt=""><br />""";

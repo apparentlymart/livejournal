@@ -233,12 +233,12 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         var string userpic = defined $e.userpic ? "<img src='$e.userpic.url' /><br />" : "";
         "<td valign='top' width='100' align='center'>";
         if ($p.view == "friends" or $*show_entry_userpic == true) { print $userpic; }
-        if ($p.view == "friends") { "<strong><a href='"; print $e.journal->base_url(); "'>$e.journal.username</a></strong>"; }
+        if ($p.view == "friends") { "<strong><a href='"; print $e.journal->base_url(); "/'>$e.journal.username</a></strong>"; }
         if ($e.journal.username != $e.poster.username) 
         {
             print ($p.view == "friends" ? 
-            "<br />[ <a href='" + $e.poster->base_url() + "'>$e.poster.username</a> ]" :
-            "<strong><a href='" + $e.poster->base_url() + "'>$e.poster.username</a></strong>");
+            "<br />[ <a href='" + $e.poster->base_url() + "/'>$e.poster.username</a> ]" :
+            "<strong><a href='" + $e.poster->base_url() + "/'>$e.poster.username</a></strong>");
         }
         "</td>";
     }

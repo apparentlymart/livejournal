@@ -1305,7 +1305,7 @@ function Friend::as_string() : string {
     var string style = "";
     $style = "color: $.fgcolor; background: $.bgcolor;";
     return "<a" + htmlattr("style",$style) + " href=\"" + get_url($this,"userinfo") + "\">" + $uiimg->as_string() + "</a>" +
-    "<b><a" + htmlattr("style",$style) + htmlattr("title",$.name) + " href=\""+$this->base_url()+"\">$.username</a></b>";
+    "<b><a" + htmlattr("style",$style) + htmlattr("title",$.name) + " href=\""+$this->base_url()+"/\">$.username</a></b>";
 }
 
 function Friend::print() {
