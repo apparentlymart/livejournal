@@ -256,17 +256,18 @@ sub FriendsPage
         # do the picture
         my $picid = 0;
         {
-            $picid = $friends{$friendid}->{'defaultpicid'};  # this could be the shared journal pic
-            if ($friendid != $posterid &&
-                ! S2::get_property_value($opts->{'ctx'}, "use_shared_pic")) {
+            # use shared pic for community?
+            $picid = $friends{$friendid}->{defaultpicid} 
+                if $friendid != $posterid && 
+                   S2::get_property_value($opts->{ctx}, 'use_shared_pic');
+            last if $picid;
 
-                $picid = $po->{'defaultpicid'};
-            }
-            if ($logprops{$datakey}->{'picture_keyword'} && 
-                (! $u->{'opt_usesharedpic'} || $posterid == $friendid))
-            {
-                $picid = LJ::get_picid_from_keyword($po, $logprops{$datakey}->{'picture_keyword'});
-            }
+            # check if they specified one
+            $picid = LJ::get_picid_from_keyword($po, $logprops{$datakey}->{picture_keyword})
+                if $logprops{$datakey}->{picture_keyword};
+            
+            # fall back on the poster's default
+            $picid ||= $po->{defaultpicid};
         }
 
         my $nc = "";
