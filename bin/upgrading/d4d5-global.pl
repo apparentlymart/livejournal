@@ -80,7 +80,7 @@ my $move_user = sub {
 
     # get a handle for every user to revalidate our connection?
     my $dbh = $get_db_writer->()
-        or die "Can't connect to global  master";
+        or die "Can't connect to global master";
     my $dbslo = $get_db_slow->()
         or die "Can't connect to global slow master";
     my $dbcm = $get_cluster_master->($u->{'clusterid'})
@@ -108,7 +108,7 @@ my $move_user = sub {
                     qw(styleid cleandate type opt_cache vars_stor vars_cleanver) ];
     }
     
-    # user 'system' is a spacial case.  if we encounter this user we'll swap $dbcm
+    # user 'system' is a special case.  if we encounter this user we'll swap $dbcm
     # to secretly be a $dbh.  because the 'system' user uses the clustered tables
     # on the global dbs, the queries will still work, we just need to misdirect them
     $dbcm = $dbh if $u->{'user'} eq 'system';
@@ -157,16 +157,16 @@ my $move_user = sub {
         };
 
         # s1stylecache is the only table keyed on styleid, not user
-        my $where = "user=" . $dbslo->quote($u->{'user'});
+        my $where = "user=" . $dbh->quote($u->{'user'});
         if ($src_table eq "s1stylecache") {
-            my $ids = $dbslo->selectcol_arrayref("SELECT styleid FROM style WHERE user=?",
-                                                 undef, $u->{'user'});
-            my $ids_in = join(",", map { $dbslo->quote($_) } @$ids);
+            my $ids = $dbh->selectcol_arrayref("SELECT styleid FROM style WHERE user=?",
+					       undef, $u->{'user'});
+            my $ids_in = join(",", map { $dbh->quote($_) } @$ids) || "0";
             $where = "styleid IN ($ids_in)";
         }
 
         # select from source table and build data for insert
-        my $sth = $dbslo->prepare("SELECT * FROM $src_table WHERE $where");
+        my $sth = $dbh->prepare("SELECT * FROM $src_table WHERE $where");
         $sth->execute();
         while (my $row = $sth->fetchrow_hashref) {
 
