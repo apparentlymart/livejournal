@@ -7,21 +7,73 @@ LJ::Test::Assertions - Assertion-function library
 
 =head1 SYNOPSIS
 
-  
+  use LJ::Test::Assertions qw{:all};
 
 =head1 REQUIRES
 
-I<Token requires line>
+C<Carp>, C<Danga::Exceptions>, C<Data::Compare>, C<Data::Dumper>,
+C<Scalar::Util>
 
 =head1 DESCRIPTION
 
 None yet.
 
+=head1 EXPORTS
+
+Nothing by default.
+
+This module exports several useful assertion functions for the following tags:
+
+=over 4
+
+=item B<:assertions>
+
+A collection of assertion functions for testing. You can define your own
+assertion functions by implementing them in terms of L<assert/"Assertion
+Functions">.
+
+L<assert|/"Assertion Functions">, L<assert_not|/"Assertion Functions">,
+L<assert_defined|/"Assertion Functions">, L<assert_undef|/"Assertion Functions">,
+L<assert_no_exception|/"Assertion Functions">, L<assert_exception|/"Assertion
+Functions">, L<assert_exception_type|/"Assertion Functions">,
+L<assert_exception_matches|/"Assertion Functions">, L<assert_equals|/"Assertion
+Functions">, L<assert_matches|/"Assertion Functions">, L<assert_ref|/"Assertion
+Functions">, L<assert_not_ref|/"Assertion Functions">,
+L<assert_instance_of|/"Assertion Functions">, L<assert_kind_of|/"Assertion
+Functions">, L<fail|/"Assertion Functions">
+
+=item B<:skip>
+
+L<skip_one|/"Skip Functions">, L<skip_all|/"Skip Functions">
+
+=back
+
+=head1 TO DO
+
+=over 4
+
+=item Skip Functions
+
+The skip functions are functional, but the backend isn't set up to handle them
+yet.
+
+=item Test::Harness Integration
+
+I ripped out the L<Test::Harness> code when I ported over the
+L<Test::SimpleUnit> code for the sake of simplicity. I plan to move that over at
+some point.
+
+=item Docs
+
+The docs for most of this stuff is still sketchy.
+
+=back
+
 =head1 AUTHOR
 
-Michael Granger <ged@FaerieMUD.org>
+Michael Granger E<lt>ged@danga.comE<gt>
 
-Copyright (c) 2004 The FaerieMUD Consortium. All rights reserved.
+Copyright (c) 2004 Danga Interactive. All rights reserved.
 
 This module is free software. You may use, modify, and/or redistribute this
 software under the terms of the Perl Artistic License. (See
@@ -119,7 +171,6 @@ BEGIN {
         return $proto->SUPER::new( @_ );
     }
 
-    ### METHOD: error()
     ### Override the base class's error message to make sense as an exception
     ### failure.
     sub error {
@@ -202,7 +253,7 @@ sub remove_observer {
 }
 
 
-### FUNCTION: notify_observers( $type )
+### METHOD: notify_observers( $type )
 ### Notify any registered observers that an assertion has been made. The
 ### I<arguments> will be passed to each observer.
 sub notify_observers {
@@ -219,7 +270,9 @@ sub notify_observers {
     }
 }
 
-
+### (PRIVATE) FUNCTION: makeMessage( $failureInfo, $format, @args )
+### Do sprintf-style formatting on I<format> and I<args> and catenate it with
+### the given I<failureInfo> if it's defined and not empty.
 sub makeMessage {
     my ( $failureInfo, $fmt, @rawargs ) = @_;
     local $Data::Dumper::Terse = 1;
@@ -242,7 +295,7 @@ sub makeMessage {
 #####################################################################
 
 ### (ASSERTION) FUNCTION: assert( $value[, $failureInfo] )
-### Die with a failure message if the specified value is not true. If the
+### Die with a failure message if the specified I<value> is not true. If the
 ### optional I<failureInfo> is given, It will precede the failure message.
 sub assert ($;$) {
     my ( $assert, $message ) = @_;
@@ -256,7 +309,7 @@ sub assert ($;$) {
 }
 
 ### (ASSERTION) FUNCTION: assert_not( $value[, $failureInfo] )
-### Die with a failure message if the specified value B<is> true. If the
+### Die with a failure message if the specified I<value> B<is> true. If the
 ### optional I<failureInfo> is given, it will precede the failure message.
 sub assert_not ($;$) {
     my ( $assert, $info ) = @_;
@@ -265,7 +318,7 @@ sub assert_not ($;$) {
 }
 
 ### (ASSERTION) FUNCTION: assert_defined( $value[, $failureInfo] )
-### Die with a failure message if the specified value is undefined. If the
+### Die with a failure message if the specified I<value> is undefined. If the
 ### optional I<failureInfo> is given, it will precede the failure message.
 sub assert_defined ($;$) {
     my ( $assert, $info ) = @_;
@@ -274,7 +327,7 @@ sub assert_defined ($;$) {
 }
 
 ### (ASSERTION) FUNCTION: assert_undef( $value[, $failureInfo] )
-### Die with a failure message if the specified value is defined. If the
+### Die with a failure message if the specified I<value> is B<defined>. If the
 ### optional I<failureInfo> is given, it will precede the failure message.
 sub assert_undef ($;$) {
     my ( $assert, $info ) = @_;
@@ -283,8 +336,8 @@ sub assert_undef ($;$) {
     assert( !defined($assert), $message );
 }
 
-### (ASSERTION) FUNCTION: assert_no_exception( \&code[, $failureInfo] )
-### Evaluate the specified coderef, and die with a failure message if it
+### (ASSERTION) FUNCTION: assert_no_exception( \&coderef[, $failureInfo] )
+### Evaluate the specified I<coderef>, and die with a failure message if it
 ### generates an exception. If the optional I<failureInfo> is given, it will
 ### precede the failure message.
 sub assert_no_exception (&;$) {
@@ -297,7 +350,7 @@ sub assert_no_exception (&;$) {
     assert( ! $@, $message );
 }
 
-### (ASSERTION) FUNCTION: assert_exception( \&code[, $failureInfo] )
+### (ASSERTION) FUNCTION: assert_exception( \&coderef[, $failureInfo] )
 ### Evaluate the specified I<coderef>, and die with a failure message if it does
 ### not generate an exception. If the optional I<failureInfo> is given, it will
 ### precede the failure message.
@@ -308,7 +361,7 @@ sub assert_exception (&;$) {
     assert( $@, makeMessage($info, "No exception raised.") );
 }
 
-### (ASSERTION) FUNCTION: assert_exception_type( \&code, $type[, $failureInfo] )
+### (ASSERTION) FUNCTION: assert_exception_type( \&coderef, $type[, $failureInfo] )
 ### Evaluate the specified I<coderef>, and die with a failure message if it does
 ### not generate an exception which is an object blessed into the specified
 ### I<type> or one of its subclasses (ie., the exception must return true to
@@ -341,10 +394,10 @@ sub assert_exception_matches (&$;$) {
 
 
 ### (ASSERTION) FUNCTION: assert_equal( $wanted, $tested[, $failureInfo] )
-### Die with a failure message if the specified wanted value doesn't equal the
-### specified tested value. The comparison is done with Data::Compare, so
+### Die with a failure message if the specified I<wanted> value doesn't equal the
+### specified I<tested> value. The comparison is done with L<Data::Compare>, so
 ### arbitrarily complex data structures may be compared, as long as they contain
-### no GLOB, CODE, or REF references. If the optional I<failureInfo> is
+### no C<GLOB>, C<CODE>, or C<REF> references. If the optional I<failureInfo> is
 ### given, it will precede the failure message.
 sub assert_equal ($$;$) {
     my ( $wanted, $tested, $info ) = @_;
@@ -357,9 +410,9 @@ sub assert_equal ($$;$) {
 
 
 ### (ASSERTION) FUNCTION: assert_matches( $wantedRegexp, $testedValue[, $failureInfo] )
-### Die with a failure message if the specified tested value doesn't match
-### the specified wanted regular expression. If the optional I<failureInfo> is
-### given, it will precede the failure message.
+### Die with a failure message if the specified I<testedValue> doesn't match the
+### specified I<wantedRegExp>. If the optional I<failureInfo> is given, it will
+### precede the failure message.
 sub assert_matches ($$;$) {
     my ( $wanted, $tested, $info ) = @_;
 
@@ -373,8 +426,8 @@ sub assert_matches ($$;$) {
 }
 
 ### (ASSERTION) FUNCTION: assert_ref( $wantedType, $testedValue[, $failureInfo] )
-### Die with a failure message if the specified testedValue is not of the
-### specified wantedType. The wantedType can either be a ref-type like 'ARRAY'
+### Die with a failure message if the specified I<testedValue> is not of the
+### specified I<wantedType>. The I<wantedType> can either be a ref-type like 'ARRAY'
 ### or 'GLOB' or a package name for testing object classes.  If the optional
 ### I<failureInfo> is given, it will precede the failure message.
 sub assert_ref ($$;$) {
@@ -390,7 +443,7 @@ sub assert_ref ($$;$) {
 
 
 ### (ASSERTION) FUNCTION: assert_not_ref( $testedValue[, $failureInfo] )
-### Die with a failure message if the specified testedValue is a reference of
+### Die with a failure message if the specified I<testedValue> is a reference of
 ### any kind. If the optional I<failureInfo> is given, it will precede the
 ### failure message.
 sub assert_not_ref ($;$) {
@@ -402,8 +455,8 @@ sub assert_not_ref ($;$) {
 
 
 ### (ASSERTION) FUNCTION: assert_instance_of( $wantedClass, $testedValue[, $failureInfo] )
-### Die with a failure message if the specified testedValue is not an instance
-### of the specified wantedClass. If the optional I<failureInfo> is given, it will
+### Die with a failure message if the specified I<testedValue> is not an instance
+### of the specified I<wantedClass>. If the optional I<failureInfo> is given, it will
 ### precede the failure message.
 sub assert_instance_of ($$;$) {
     my ( $wantedClass, $testValue, $info ) = @_;
@@ -418,8 +471,8 @@ sub assert_instance_of ($$;$) {
 
 
 ### (ASSERTION) FUNCTION: assert_kind_of( $wantedClass, $testedValue[, $failureInfo] )
-### Die with a failure message if the specified testedValue is not an instance
-### of the specified wantedClass B<or> one of its derivatives. If the optional
+### Die with a failure message if the specified I<testedValue> is not an instance
+### of the specified I<wantedClass> B<or> one of its derivatives. If the optional
 ### I<failureInfo> is given, it will precede the failure message.
 sub assert_kind_of ($$;$) {
     my ( $wantedClass, $testValue, $info ) = @_;
@@ -431,9 +484,9 @@ sub assert_kind_of ($$;$) {
 }
 
 
-### (ASSERTION) FUNCTION: fail( [$failureInfo] )
-### Die with a failure message unconditionally. If the optional I<failureInfo>
-### is given, it will precede the failure message.
+### (ASSERTION) FUNCTION: fail( [$message] )
+### Die with a failure message unconditionally. If the optional I<message> is
+### not given, the failure message will be C<Failed (no reason given)>.
 sub fail (;$) {
     my $message = shift || "Failed (no reason given)";
     __PACKAGE__->notify_observers( 'assert' );
@@ -468,4 +521,156 @@ END {}
 
 1;
 
+
+###	AUTOGENERATED DOCUMENTATION FOLLOWS
+
+=head1 FUNCTIONS
+
+=head2 Assertion Functions
+
+=over 4
+
+=item I<assert( $value[, $failureInfo] )>
+
+Die with a failure message if the specified I<value> is not true. If the
+optional I<failureInfo> is given, It will precede the failure message.
+
+=item I<assert_defined( $value[, $failureInfo] )>
+
+Die with a failure message if the specified I<value> is undefined. If the
+optional I<failureInfo> is given, it will precede the failure message.
+
+=item I<assert_equal( $wanted, $tested[, $failureInfo] )>
+
+Die with a failure message if the specified I<wanted> value doesn't equal the
+specified I<tested> value. The comparison is done with L<Data::Compare>, so
+arbitrarily complex data structures may be compared, as long as they contain
+no C<GLOB>, C<CODE>, or C<REF> references. If the optional I<failureInfo> is
+given, it will precede the failure message.
+
+=item I<assert_exception( \&coderef[, $failureInfo] )>
+
+Evaluate the specified I<coderef>, and die with a failure message if it does
+not generate an exception. If the optional I<failureInfo> is given, it will
+precede the failure message.
+
+=item I<assert_exception_matches( \&code, $regex[, $failureInfo] )>
+
+Evaluate the specified I<coderef>, and die with a failure message if it does
+not generate an exception which matches the specified I<regex>.  If the
+optional I<failureInfo> is given, it will precede the failure message.
+
+=item I<assert_exception_type( \&coderef, $type[, $failureInfo] )>
+
+Evaluate the specified I<coderef>, and die with a failure message if it does
+not generate an exception which is an object blessed into the specified
+I<type> or one of its subclasses (ie., the exception must return true to
+C<$exception->isa($type)>.  If the optional I<failureInfo> is given, it will
+precede the failure message.
+
+=item I<assert_instance_of( $wantedClass, $testedValue[, $failureInfo] )>
+
+Die with a failure message if the specified I<testedValue> is not an instance
+of the specified I<wantedClass>. If the optional I<failureInfo> is given, it will
+precede the failure message.
+
+=item I<assert_kind_of( $wantedClass, $testedValue[, $failureInfo] )>
+
+Die with a failure message if the specified I<testedValue> is not an instance
+of the specified I<wantedClass> B<or> one of its derivatives. If the optional
+I<failureInfo> is given, it will precede the failure message.
+
+=item I<assert_matches( $wantedRegexp, $testedValue[, $failureInfo] )>
+
+Die with a failure message if the specified I<testedValue> doesn't match the
+specified I<wantedRegExp>. If the optional I<failureInfo> is given, it will
+precede the failure message.
+
+=item I<assert_no_exception( \&coderef[, $failureInfo] )>
+
+Evaluate the specified I<coderef>, and die with a failure message if it
+generates an exception. If the optional I<failureInfo> is given, it will
+precede the failure message.
+
+=item I<assert_not( $value[, $failureInfo] )>
+
+Die with a failure message if the specified I<value> B<is> true. If the
+optional I<failureInfo> is given, it will precede the failure message.
+
+=item I<assert_not_ref( $testedValue[, $failureInfo] )>
+
+Die with a failure message if the specified I<testedValue> is a reference of
+any kind. If the optional I<failureInfo> is given, it will precede the
+failure message.
+
+=item I<assert_ref( $wantedType, $testedValue[, $failureInfo] )>
+
+Die with a failure message if the specified I<testedValue> is not of the
+specified I<wantedType>. The I<wantedType> can either be a ref-type like 'ARRAY'
+or 'GLOB' or a package name for testing object classes.  If the optional
+I<failureInfo> is given, it will precede the failure message.
+
+=item I<assert_undef( $value[, $failureInfo] )>
+
+Die with a failure message if the specified I<value> is B<defined>. If the
+optional I<failureInfo> is given, it will precede the failure message.
+
+=item I<fail( [$message] )>
+
+Die with a failure message unconditionally. If the optional I<message> is
+not given, the failure message will be C<Failed (no reason given)>.
+
+=back
+
+=head2 Private Functions
+
+=over 4
+
+=item I<makeMessage( $failureInfo, $format, @args )>
+
+Do sprintf-style formatting on I<format> and I<args> and catenate it with
+the given I<failureInfo> if it's defined and not empty.
+
+=back
+
+=head2 Skip Functions
+
+=over 4
+
+=item I<skip_all( [$message] )>
+
+Skip all the remaining tests, optionally outputting a message as to why the
+they were skipped.
+
+=item I<skip_one( [$message] )>
+
+Skip the rest of this test, optionally outputting a message as to why the
+rest of the test was skipped.
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item I<add_observer( $observer )>
+
+Add the given object, package, or coderef (I<observer>) to the list of
+observers. When an assertion is called, a notification will be sent to the
+registrant. If the specified I<observer> is an object or a package, the
+C<update> method will be called on it. If the observer is a coderef, the
+coderef itself will be called.
+
+=item I<notify_observers( $type )>
+
+Notify any registered observers that an assertion has been made. The
+I<arguments> will be passed to each observer.
+
+=item I<remove_observer( $observer )>
+
+Remove the given I<observer> from the list of observers.
+
+=back
+
+=cut
 
