@@ -2264,6 +2264,10 @@ register_alter(sub {
         do_alter("userblob", "ALTER TABLE userblob MODIFY blobid INT UNSIGNED NOT NULL");
     }
 
+    if (column_type("counter", "max") =~ /mediumint/) {
+        do_alter("counter", "ALTER TABLE counter MODIFY max INT UNSIGNED NOT NULL DEFAULT 0");
+    }
+
 
 });
 
