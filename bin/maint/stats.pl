@@ -131,7 +131,7 @@ $maint{'genstats'} = sub
 
     if ($do{'countries'})
     {
-	$to_pop{'county'} = \%country;
+	$to_pop{'country'} = \%country;
 
 	print "-I- Countries.\n";
 	$sth = $dbr->prepare("SELECT value, COUNT(*) AS 'count' FROM userprop WHERE upropid=3 AND value<>'' GROUP BY 1 ORDER BY 2");
