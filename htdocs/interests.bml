@@ -22,6 +22,7 @@ body<=
         my $sth = $dbr->prepare("SELECT statkey, statval FROM stats WHERE ".
                                 "statcat=? ORDER BY statval DESC, statkey ASC");
         $sth->execute('pop_interests');
+        return "Sorry, interest data currently unavailable." unless $sth->rows();
 
         $ret .= "<p><table><tr><td><b>$ML{'.interest'}</b></td><td><b>$ML{'.count'}</b></td></tr>";
         while (my ($int, $count) = $sth->fetchrow_array)
