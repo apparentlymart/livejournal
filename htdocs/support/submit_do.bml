@@ -34,6 +34,8 @@ BODY<=
          push @errors, "Invalid username" unless $u;
          if (LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) {
              $req{'requserid'} = $u->{'userid'};
+         } else {
+             push @errors, "Invalid password";
          }
      }
      $req{'reqemail'} = $u->{'email'};

@@ -263,10 +263,13 @@ sub file_request
     my $errors = shift;
     my $o = shift;
 
-    unless ($o->{'subject'}) {
+    my $reqsubject = LJ::trim($o->{'subject'});
+    my $reqbody = LJ::trim($o->{'body'});
+
+    unless ($reqsubject) {
         push @$errors, "You must enter a problem summary.";
     }
-    unless ($o->{'body'}) {
+    unless ($reqbody) {
         push @$errors, "You did not enter a support request.";
     }
     my $scat = $o->{'supportcat'};
@@ -274,8 +277,8 @@ sub file_request
     if (@$errors) { return 0; }
     
     my $dup_id = 0;
-    my $qsubject = $dbh->quote($o->{'subject'});
-    my $qbody = $dbh->quote($o->{'body'});
+    my $qsubject = $dbh->quote($reqsubject);
+    my $qbody = $dbh->quote($reqbody);
     my $qreqtype = $dbh->quote($o->{'reqtype'});
     my $qrequserid = $o->{'requserid'}+0;
     my $qreqname = $dbh->quote($o->{'reqname'});
