@@ -77,8 +77,8 @@
                 # and now, fun with regular expressions
                 my $ct = 0;
                 $snippet =~ s!(.*?)\n!sprintf("%3d", ++$ct) . ": " . 
-                    LJ::ehtml($1) . "\n"!ge;                      # add line breaks and numbering
-
+                    $1 . "\n"!ge;                      # add line breaks and numbering
+                $snippet = LJ::ehtml($snippet);
                 $snippet =~ s!^((?:.*?\n){$kill,$kill})           # kill before relevant lines
                                ((?:.*?\n){$prehilite,$prehilite}) # capture context before error
                                (.*?\n){0,1}                       # capture error
