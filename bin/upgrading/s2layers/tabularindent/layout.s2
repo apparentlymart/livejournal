@@ -206,7 +206,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
         }
     }
     "</table></td></tr></table></td></tr>";
-    "<tr><td bgcolor='$*main_bgcolor'>$e.text</td></tr>";
+    "<tr><td bgcolor='$*main_bgcolor'><font color='$*main_fgcolor'>$e.text</font></td></tr>";
     $e.comments->print();
     "</table></div><br />";
 }
@@ -340,4 +340,25 @@ function DayPage::print_body ()
             $this->print_entry($e);
         }
     }
+}
+
+function print_theme_preview()
+{
+    "<table width='100%' bgcolor='$*body_bgcolor' cellpadding=10><tr><td>";
+    "<table border='0' width='100%' cellpadding='5' cellspacing='1' bgcolor='$*border_color'>";
+    "<tr><td bgcolor='$*headerbar_bgcolor'><font color='$*headerbar_fgcolor'>October 29th, 2003";
+    "</font></td></tr></table><br />";
+    "<div align='right'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
+    "<tr><td align='left' bgcolor='$*accent_bgcolor'>";
+    "<table border='0' width='100%'><tr>";
+    "<td valign='top'><table border='0'>";
+    "<tr><td align='right'><font color='$*accent_fgcolor'>Subject:</font>";
+    "</td><td><font color='$*accent_fgcolor'>Words Words Words</font></td></tr>";
+    "<tr><td align='right'><font color='$*accent_fgcolor'>Time:</font></td>";
+    "<td><font color='$*accent_fgcolor'>1:37 pm</font></td></tr>";
+    "</table></td></tr></table></td></tr>";
+    "<tr><td align='left' bgcolor='$*main_bgcolor'><font color='$*main_fgcolor'>Preview text, preview text, etc, etc..... words, words and more words.</font></td></tr>";
+    """<tr><td align='left' bgcolor='$*accent_bgcolor'><font color='$*accent_fgcolor'><nobr>comments: <a href="#">20 comments</a> or <a href="#">Leave a comment</a></nobr></font></td></tr>""";
+    "</table></div><br />";
+    "</td></tr></table>";
 }
