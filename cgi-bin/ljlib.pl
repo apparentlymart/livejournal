@@ -75,7 +75,14 @@ if ($SIG{'HUP'}) {
 
 package LJ;
 
-# interface to oldids table (URL compatability)
+# <LJFUNC>
+# name: LJ::get_newids
+# des: interface to oldids table (URL compatability)
+# returns: An array reference of "userid, newid" arrays.
+# args: area, oldid
+# des-area: The "area" of the id. L (log) or T (talk)
+# des-oldid: The old id of the item.
+# </LJFUNC>
 sub get_newids
 {
     my $dbarg = shift;
@@ -91,7 +98,15 @@ sub get_newids
 				    "WHERE area=$area AND oldid=$oldid");
 }
 
-# takes a dbset and query.  will try query on slave first, then master if not in slave yet.
+# <LJFUNC>
+# name: LJ::dbs_selectrow_array
+# des: Given a db and a query, will try query on slave first.
+#      Falls back to master if not in slave yet.
+# returns: An array with the row in list context, or the first
+#          column of the result row in scalar context.
+# args: dbs, query
+# des-query: The SQL query to run.
+# </LJFUNC>
 sub dbs_selectrow_array
 {
     my $dbs = shift;
@@ -106,7 +121,14 @@ sub dbs_selectrow_array
     return undef;
 }
 
-# takes a dbset and query.  will try query on slave first, then master if not in slave yet.
+# <LJFUNC>
+# name: LJ::dbs_selectrow_hashref
+# des: takes a dbset and query.  will try query on slave first, 
+#      then master if not in slave yet.
+# returns: A hash reference of the results.
+# args: dbs, query
+# des-query: The SQL query to run.
+# </LJFUNC>
 sub dbs_selectrow_hashref
 {
     my $dbs = shift;
@@ -722,7 +744,15 @@ sub auth_fields
     return $ret;
 }
 
-
+# <LJFUNC>
+# name: LJ::auth_fields_2
+# des: Creates the HTML for a login box if user not logged in. Creates a drop-down 
+#      selection box of possible journals to switch to if user is logged in.
+# returns: The resultant HTML form box.
+# args: form, opts
+# des-form: Form results from the previous page.
+# des-opts: Journal/password options for changing the login box. 
+# </LJFUNC>
 sub auth_fields_2
 {
     my $dbs = shift;
@@ -767,6 +797,16 @@ sub auth_fields_2
     return $ret;
 }
 
+# <LJFUNC>
+# name: LJ::make_shared_select
+# des: Creates a list of shared journals a user has access to
+#      for insertion into a drop-down menu.
+# returns: The HTML for the options menu.
+# args: u, form, opts
+# des-u: A user hash.
+# des-form: The form hash from the previous page.
+# des-opts: A hash of options to change the types of selections shown.
+# </LJFUNC>
 sub make_shared_select
 {
     my ($dbs, $u, $form, $opts) = @_;
@@ -802,6 +842,14 @@ sub make_shared_select
     }
 }
 
+# <LJFUNC>
+# name: LJ::get_shared_journals
+# des: Gets an array of shared journals a user has access to.
+# returns: An array of shared journals.
+# args: dbs, u
+# des-dbs: A db structure.
+# des-u: A user hash.
+# </LJFUNC>
 sub get_shared_journals
 {
     my $dbs = shift;
@@ -810,6 +858,19 @@ sub get_shared_journals
     return sort keys %{$u->{'_priv'}->{'sharedjournal'}};
 }
 
+# <LJFUNC>
+# name: LJ::get_effective_user
+# des: Given a set of input, will return the effective user to process as.
+# info: Is passed a reference to a form hash, a remote hash reference, a
+#       reference to an error variable, and a reference to a user hash to
+#       possibly fill. Given the form input, it will authenticate and return
+#       the user (logged in user, a community, other user) that the remote
+#       user requested to do an action with. 
+# returns: The user to process as.
+# args: dbs, opts
+# des-dbs: A db structure.
+# des-opts: A hash of options to pass. 
+# </LJFUNC>
 sub get_effective_user
 {
     my $dbs = shift;
@@ -2176,7 +2237,7 @@ sub get_logtext
 # des-opts: Optional hashref of special options.  Currently only 'prefersubjects'
 #           key is supported, which returns subjects instead of events when
 #           there's a subject, and the subject always being undef.
-# des-itemid: List of jitemids to retrieve the subject & text for.
+# des-jitemid: List of jitemids to retrieve the subject & text for.
 # </LJFUNC>
 sub get_logtext2
 {
@@ -2225,6 +2286,18 @@ sub get_logtext2
     return $lt;
 }
 
+# <LJFUNC>
+# name: LJ::get_talktext2
+# des: Retrieves comment text. Tries slave servers first, then master.
+# info: Efficiently retreives batches of comment text. Will try alternate
+#       servers first. See also [func[LJ::get_logtext2]].
+# returns: Hashref with the talkids as keys, values being [ $subject, $event ].
+# args: u, opts?, jtalkids
+# des-u: A user hashref.
+# des-opts: A hashref of options. 'usermaster' will force checking of the
+#           master only.
+# des-jtalkids: A list of talkids to get text for.
+# </LJFUNC>
 sub get_talktext2
 {
     my $u = shift;
@@ -2268,6 +2341,15 @@ sub get_talktext2
     return $lt;
 }
 
+# <LJFUNC>
+# name: LJ::get_logtext2multi
+# des: Gets log text from clusters.
+# info: Fetches log text from clusters. Trying slaves first if available.
+# returns: hashref with keys being "jid jitemid", values being [ $subject, $body ]
+# args: idsbyc
+# des-idsbyc: A hashref where the key is the clusterid, and the data
+#             is an arrayref of [ ownerid, itemid ] array references.
+# </LJFUNC>
 sub get_logtext2multi
 {
     my ($dbs, $idsbyc) = @_;
@@ -2722,6 +2804,16 @@ sub strip_bad_code
     $$data = $newdata;
 }
 
+# <LJFUNC>
+# name: LJ::load_user_theme
+# des: Populates a variable hash with color theme data.
+# returns: Nothing. Modifies a hash reference.
+# args: user, u, vars
+# des-user: The username to search for data with.
+# des-u: A hashref of user data.
+# des-vars: A hashref to fill with color data. Adds keys "color-$coltype"
+#           with values $color.
+# </LJFUNC>
 sub load_user_theme
 {
     # hashref, hashref
@@ -2744,6 +2836,14 @@ sub load_user_theme
     $vars->{"color-$_->{'coltype'}"} = $_->{'color'} while ($_ = $sth->fetchrow_hashref);
 }
 
+# <LJFUNC>
+# name: LJ::parse_vars
+# des: Chops up a chunk of data into a proper hash.
+# returns: Nothing. Modifies a hashref.
+# args: dataref, hashref
+# des-dataref: Reference to a data chunk of assignments to run.
+# des-hashref: Hashref to populate with data.
+# </LJFUNC>
 sub parse_vars
 {
     my ($dataref, $hashref) = @_;
@@ -2775,22 +2875,28 @@ sub parse_vars
     }
 }
 
+# <LJFUNC>
+# name: LJ::server_down_html
+# des: Returns an HTML server down message.
+# returns: A string with a server down message in HTML.
+# </LJFUNC>
 sub server_down_html
 {
     return "<b>$LJ::SERVER_DOWN_SUBJECT</b><br />$LJ::SERVER_DOWN_MESSAGE";
 }
 
-##
-## loads a style and takes into account caching (don't reload a system style
-## until 60 seconds)
-##
+# <LJFUNC>
+# name: LJ::load_style_fast
+# des: Loads a style, and does minimal caching (data sticks for 60 seconds).
+# returns: Nothing. Modifies a data reference.
+# args: styleid, dataref, typeref, nocache?
+# des-styleid: Numeric, primary key.
+# des-dataref: Dataref to store data in.
+# des-typeref: Optional dataref to store the style tyep in (undef for none).
+# des-nocache: Flag to say don't cache.
+# </LJFUNC>
 sub load_style_fast
 {
-    ### styleid -- numeric, primary key
-    ### dataref -- pointer where to store data
-    ### typeref -- optional pointer where to store style type (undef for none)
-    ### nocache -- flag to say don't cache
-
     my ($dbarg, $styleid, $dataref, $typeref, $nocache) = @_;
 
     my $dbs = make_dbs_from_arg($dbarg);
