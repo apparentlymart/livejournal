@@ -40,7 +40,7 @@ foreach my $func (sort keys %$api) {
     my $argstring;
     xlinkify(\$f->{'des'});
 
-    my $canonized = canonize($func);
+    my $canonized = canonize("func" , $func);
     print "  <refentry id=\"$canonized\">\n";
 
     ### name and short description:
@@ -126,12 +126,17 @@ sub cleanse {
 
 sub xlinkify {
     my $a = shift;
-    $$a =~ s/\[func\[(\S+?)\]\]/"<link linkend='" . canonize($1) . "'>$1<\/link>"/ge;
+    $$a =~ s/\[(\S+?)\[(\S+?)\]\]/"<link linkend='" . canonize($1, $2) . "'>$2<\/link>"/ge;
 }
 
 sub canonize {
+    my $type = shift;
     my $string = lc(shift);
-    $string =~ s/::/./g;
-    $string = "ljp.api.$string";
+    if ($type eq "func") { 
+        $string =~ s/::/./g;
+        $string = "ljp.api.$string";
+    } elsif($type eq "dbtable") {
+        $string = "ljp.dbschema.$string";
+    }
 }
 
