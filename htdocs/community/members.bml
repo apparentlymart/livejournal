@@ -23,7 +23,7 @@ body<=
  }
 
  # columns of our table, excluding username
- my @attribs = ('member', 'admin', 'post', 'moderate');
+ my @attribs = ('member', 'post', 'moderate', 'admin');
 
  my $mode = $POST{'mode'} || "";
 
@@ -109,8 +109,12 @@ body<=
 
  }
 
+ # if no community was specified, redirect to manage.bml
+ unless ($GET{'comm'}) {
+     return BML::redirect("$LJ::SITEROOT/community/manage.bml");
+ }
+
  # browsing mode
-     
  my $cname = $GET{'comm'};
  my $c = LJ::load_user($dbs, $cname);
 
@@ -171,11 +175,9 @@ body<=
 
  my $sortlink = BML::get_uri() . "?comm=$cname&sort=";
  $ret .= "<br /><center><table border='2' cellpadding='5'><tr>" .
- "<td><a href='${sortlink}name'>$ML{'.key.name'}</a></td>" .
- "<td><a href='${sortlink}member'>$ML{'.key.member'}</a></td>" .
- "<td><a href='${sortlink}admin'>$ML{'.key.admin'}</a></td>" .
- "<td><a href='${sortlink}post'>$ML{'.key.post'}</a></td>" .
- "<td><a href='${sortlink}moderate'>$ML{'.key.moderate'}</a></td></tr>";
+ 	"<td><a href='${sortlink}name'>$ML{'.key.name'}</a></td>";
+ $ret .= "<td><a href='${sortlink}$_'>".$ML{".key.$_"}."</a></td>" for (@attribs);
+ $ret .= "</tr>";
 
  foreach(@users) {
     $ret .= "<tr><td><?ljuser $_->{'name'} ljuser?></td>";
