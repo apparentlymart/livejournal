@@ -215,7 +215,7 @@ sub get_journal_item
     my %logprops = ();
     LJ::load_props($dbs, "log");
     LJ::load_log_props2($dbcs->{'reader'}, $u->{'userid'}, [ $itemid ], \%logprops);
-    $item->{'logprops'} = \%logprops;
+    $item->{'props'} = $logprops{$itemid} || {};
 
     if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
         LJ::item_toutf8($dbs, $u, \$item->{'subject'}, \$item->{'event'},
@@ -362,6 +362,7 @@ sub unscreen_comment {
 #   out_itemfirst:  first comment number on page (1-based, not db numbers)
 #   out_itemlast:  last comment number on page (1-based, not db numbers)
 #   out_pagesize:  size of each page
+#   out_items:  number of total top level items
 #
 #   userpicref -- hashref to load userpics into, or undef to
 #                 not load them.
@@ -523,6 +524,7 @@ sub load_comments
     $opts->{'out_itemfirst'} = $itemfirst;
     $opts->{'out_itemlast'} = $itemlast;
     $opts->{'out_pagesize'} = $page_size;
+    $opts->{'out_items'} = $top_replies;
     
     # load text of posts
     my ($posts_loaded, $subjects_loaded);

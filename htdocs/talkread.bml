@@ -109,8 +109,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
      }
  }
 
-
- my %logprops = %{$item->{'logprops'}};
+ my $props = $item->{'props'};
 
  ### load users
  my ($up);  # $up = user posted journal item
@@ -142,7 +141,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
  my $event = $item->{'event'};
 
  LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
- LJ::CleanHTML::clean_event(\$event, $logprops{$itemid}->{'opt_preformatted'});
+ LJ::CleanHTML::clean_event(\$event, $props->{'opt_preformatted'});
  BML::ebml(\$event);
 
  # make the title
@@ -160,8 +159,8 @@ if ($uri =~ m!/(\d+)\.html$!) {
  $ret .= "<table><tr valign='middle'>";
 
  my $picid;
- if ($logprops{$itemid}->{'picture_keyword'}) {
-     my $qkw = $dbr->quote($logprops{$itemid}->{'picture_keyword'});
+ if ($props->{'picture_keyword'}) {
+     my $qkw = $dbr->quote($props->{'picture_keyword'});
      $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
                                     "WHERE m.userid=$up->{'userid'} ".
                                     "AND m.kwid=k.kwid AND k.keyword=$qkw");
@@ -173,8 +172,8 @@ if ($uri =~ m!/(\d+)\.html$!) {
  if ($picid) {
      LJ::load_userpics($dbs, \%userpics, [ $picid ]);
      my $alt = $up->{'name'};
-     if ($logprops{$itemid}->{'picture_keyword'}) {
-         $alt .= ": $logprops{$itemid}->{'picture_keyword'}";
+     if ($props->{'picture_keyword'}) {
+         $alt .= ": $props->{'picture_keyword'}";
      }
      LJ::text_out(\$alt);
      $alt = LJ::ehtml($alt);
@@ -206,11 +205,11 @@ if ($uri =~ m!/(\d+)\.html$!) {
  unless ($thread)
  {
      my %current;
-     if ($logprops{$itemid}->{'current_mood'} || $logprops{$itemid}->{'current_moodid'}) {
+     if ($props->{'current_mood'} || $props->{'current_moodid'}) {
          LJ::load_moods($dbs);
-         $current{'Mood'} = $logprops{$itemid}->{'current_mood'};
+         $current{'Mood'} = $props->{'current_mood'};
          LJ::CleanHTML::clean_subject(\$current{'Mood'});
-         my $mid = $logprops{$itemid}->{'current_moodid'};
+         my $mid = $props->{'current_moodid'};
          if ($mid) {
              my $theme = $up->{'moodthemeid'};
                LJ::load_mood_theme($dbs, $theme);
@@ -223,8 +222,8 @@ if ($uri =~ m!/(\d+)\.html$!) {
              }
          }
      }
-     if ($logprops{$itemid}->{'current_music'}) {
-         $current{'Music'} = $logprops{$itemid}->{'current_music'};
+     if ($props->{'current_music'}) {
+         $current{'Music'} = $props->{'current_music'};
          LJ::CleanHTML::clean_subject(\$current{'Music'});
      }
 
@@ -442,7 +441,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
      } 
  };
 
- unless ($logprops{$itemid}->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N")
+ unless ($props->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N")
  {
      $ret .= "$navcrap" if $navcrap;
      my $readlink;
