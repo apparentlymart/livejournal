@@ -61,12 +61,13 @@
 
   RewriteRule ^/confirm/([a-z0-9]+\.[a-z0-9]+) http://%{HTTP_HOST}/register.bml?$1 [L,R]
 
+  # OPTIONAL:
   # if they send any Host header with letters (an IP address or blank
   # is okay) then it has to be www.ljsite.com or ljsite.com
   # (optional port, too)
-  RewriteCond %{HTTP_HOST} [a-z] [NC]
-  RewriteCond %{HTTP_HOST} !^(www\.)?ljsite\.com(:[0-9]+)?$ [NC]
-  RewriteRule . . [F]
+  # RewriteCond %{HTTP_HOST} [a-z] [NC]
+  # RewriteCond %{HTTP_HOST} !^(www\.)?ljsite\.com(:[0-9]+)?$ [NC]
+  # RewriteRule . . [F]
 
   # compatibility for old clients.
   RewriteRule ^/cgi-bin/log\.cgi(.*) /interface/flat$1 [L,PT,NS]
