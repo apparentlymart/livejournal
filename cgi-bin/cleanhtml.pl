@@ -141,22 +141,7 @@ sub clean
                         if ($opts->{'textonly'}) {
                             $newdata .= $user;
                         } else {
-                            my $u;
-
-                            if ($LJ::DYNAMIC_LJUSER) {
-                                # Try to automatically pick the user type, but still
-                                # make something if we can't (user doesn't exist?)
-                                $u = LJ::load_user($user);
-
-                                # Traverse the renames to the final journal
-                                while ($u and $u->{'journaltype'} eq 'R') {
-                                    LJ::load_user_props($u, 'renamedto');
-                                    last unless length $u->{'renamedto'};
-                                    $user = $u->{'renamedto'};
-                                    $u = LJ::load_user($u->{'renamedto'});
-                                }
-                            }
-                            $newdata .= LJ::ljuser($u || $user);
+                            $newdata .= LJ::ljuser($user);
                         }
                     } else {
                         $newdata .= "<b>[Bad username in LJ tag]</b>";
