@@ -158,38 +158,51 @@ $maint{'genstats'} = sub
                    my $blocks = LJ::Stats::num_blocks($usertotal);
 
                    my %ret; # return hash, (statname => { arg => val } since 'statname' is arrayref above
-        
+
                    # iterate over user table in batches
                    foreach my $block (1..$blocks) {
 
                        my ($low, $high) = LJ::Stats::get_block_bounds($block);
 
+                       # user query: gets user,caps,age,status,allow_getljnews
                        $db = $db_getter->(); # revalidate connection
                        my $sth = $db->prepare
-                           ("SELECT DATE_FORMAT(uu.timecreate, '%Y-%m-%d') AS 'datereg', " .
-                            "DATE_FORMAT(NOW(), '%Y-%m-%d') AS 'nowdate', " .
-                            "u.user, u.caps, FLOOR((TO_DAYS(NOW())-TO_DAYS(u.bdate))/365.25) " .
-                            "AS 'age', UNIX_TIMESTAMP(uu.timeupdate) AS 'timeupdate', " .
-                            "u.status, u.allow_getljnews " .
-                            "FROM user u, userusage uu " .
-                            "WHERE u.userid=uu.userid AND u.userid BETWEEN $low AND $high");
+                           ("SELECT user, caps, " .
+                            "FLOOR((TO_DAYS(NOW())-TO_DAYS(bdate))/365.25) AS 'age', " .
+                            "status, allow_getljnews " .
+                            "FROM user WHERE userid BETWEEN $low AND $high");
                        $sth->execute;
                        die $db->errstr if $db->err;
-
                        while (my $rec = $sth->fetchrow_hashref) {
 
                            # account types
                            my $capnameshort = LJ::name_caps_short($rec->{'caps'});
                            $ret{'account'}->{$capnameshort}++;
 
-                           # date registered
-                           $ret{'newbyday'}->{$rec->{'datereg'}}++
-                               unless $rec->{'datereg'} eq $rec->{'nowdate'};
-                
                            # ages
                            $ret{'age'}->{$rec->{'age'}}++
                                if $rec->{'age'} > 4 && $rec->{'age'} < 110;
 
+                           # users receiving news emails
+                           $ret{'userinfo'}->{'allow_getljnews'}++
+                               if $rec->{'status'} eq "A" && $rec->{'allow_getljnews'} eq "Y";
+                       }
+                       
+                       # userusage query: gets timeupdate,datereg,nowdate
+                       my $sth = $db->prepare
+                           ("SELECT DATE_FORMAT(timecreate, '%Y-%m-%d') AS 'datereg', " .
+                            "DATE_FORMAT(NOW(), '%Y-%m-%d') AS 'nowdate', " .
+                            "UNIX_TIMESTAMP(timeupdate) AS 'timeupdate' " .
+                            "FROM userusage WHERE userid BETWEEN $low AND $high");
+                       $sth->execute;
+                       die $db->errstr if $db->err;
+
+                       while (my $rec = $sth->fetchrow_hashref) {
+
+                           # date registered
+                           $ret{'newbyday'}->{$rec->{'datereg'}}++
+                               unless $rec->{'datereg'} eq $rec->{'nowdate'};
+                
                            # total user/activity counts
                            $ret{'userinfo'}->{'total'}++;
                            if (my $time = $rec->{'timeupdate'}) {
@@ -199,10 +212,6 @@ $maint{'genstats'} = sub
                                $ret{'userinfo'}->{'updated_last7'}++ if $time > $now-60*60*24*7;
                                $ret{'userinfo'}->{'updated_last1'}++ if $time > $now-60*60*24*1;
                            }
-                
-                           # users receiving news emails
-                           $ret{'userinfo'}->{'allow_getljnews'}++
-                               if $rec->{'status'} eq "A" && $rec->{'allow_getljnews'} eq "Y";
                        }
 
                        print LJ::Stats::block_status_line($block, $blocks);
