@@ -573,6 +573,8 @@ sub postevent
         $event =~ s/\r//g;
     }
 
+    my $time_was_faked = 0;
+
     unless (grep { defined $req->{$_} } qw(year mon day hour min)) {
         # no time specified?  guess at their timezone.
         # FIXME this is lame.  we should let the users specify their timezone.
@@ -604,6 +606,7 @@ sub postevent
         $req->{'day'}  = $ltime[3];
         $req->{'hour'} = $ltime[2];
         $req->{'min'}  = $ltime[1];
+        $time_was_faked = 1;
     }
 
     return undef
@@ -632,8 +635,9 @@ sub postevent
     }
 
     # are they trying to post back in time?
-    if ($posterid == $ownerid && $u->{'newesteventtime'} && 
-        $eventtime lt $u->{'newesteventtime'} &&!$req->{'props'}->{'opt_backdated'}) {
+    if ($posterid == $ownerid && !$time_was_faked && 
+        $u->{'newesteventtime'} && $eventtime lt $u->{'newesteventtime'} &&
+        !$req->{'props'}->{'opt_backdated'}) {
         return fail($err, 153, "Your most recent journal entry is dated $u->{'newesteventtime'}, but you're trying to post one at $eventtime without the backdate option turned on.  Please check your computer's clock.  Or, if you really mean to post in the past, use the backdate option.");
     }
 
@@ -835,7 +839,7 @@ sub postevent
 
         # record the eventtime of the last update (for own journals only)
         $set_userprop{"newesteventtime"} = $eventtime
-            if $posterid == $ownerid and not $req->{'props'}->{'opt_backdated'};
+            if $posterid == $ownerid and not $req->{'props'}->{'opt_backdated'} and not $time_was_faked;
 
         LJ::set_userprop($u, \%set_userprop);
     }
