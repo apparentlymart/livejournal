@@ -1885,8 +1885,10 @@ sub ljuser
         # make something if we can't (user doesn't exist?)
         $user = LJ::load_user($user) || $user;
 
+        my $hops = 0;
+
         # Traverse the renames to the final journal
-        while (ref $user and $user->{'journaltype'} eq 'R') {
+        while (ref $user and $user->{'journaltype'} eq 'R' && $hops++ < 5) {
             LJ::load_user_props($user, 'renamedto');
             last unless length $user->{'renamedto'};
             $user = LJ::load_user($user->{'renamedto'});
