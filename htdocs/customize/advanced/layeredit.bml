@@ -1,53 +1,74 @@
 <style>
     em.error { font-weight: bold; color: red; font-style: normal; }
-    textarea.s2 { width: 100%; display: block; clear: both; padding: 2px; }
+    textarea.s2code { width: 100%; display: block; clear: both; padding: 2px; }
 </style>
 <?_code # -*-bml-*-
 {
     use strict;
     use vars qw(%GET %POST);
 
-    my $pub = LJ::S2::get_public_layers();
+    # for error reporting
+    my $err = sub {
+        return "<h2>Error</h2>" . shift;
+    };
 
+    # we need a valid id
+    my $id = $GET{'id'} if $GET{'id'} =~ /^\d+$/;
+    return $err->("You have not specified a layer to edit.")
+        unless $id;
+
+    # get database handles
     my $dbh = LJ::get_db_writer();
-    my $remote = LJ::get_remote() or return "Must be logged in.";
 
-    my $id = $GET{'id'}+0 or return BML::redirect('layers.bml');
-    my $lay = LJ::S2::load_layer($dbh, $id) or return "Bogus layer";
+    # authenticate user;
+    my $remote = LJ::get_remote();
+    return $err->("You must be logged in to edit layers.")
+        unless $remote;
 
-    my $has_priv = LJ::get_cap($remote, "s2styles");
+    # load layer
+    my $lay = LJ::S2::load_layer($dbh, $id);
+    return $err->("The specified layer does not exist.")
+        unless $lay;
 
-    unless ($remote && ($remote->{'userid'} == $lay->{'userid'})) {
-        return "Unauthorized.";
-    }
+    # is authorized admin for this layer?
+    return $err->('You are not authorized to edit this layer.')
+        unless LJ::can_manage($remote, $lay->{'userid'});
 
+    # get u of user they are acting as
+    my $u = $lay->{'userid'} == $remote->{'userid'} ? $remote : LJ::load_userid($lay->{'userid'});
+
+    # check priv and ownership
+    return $err->("You are not authorized to edit styles.")
+        unless LJ::get_cap($u, "s2styles");
+
+    # at this point, they are authorized, allow viewing & editing
     my $ret;
-    $ret .= "<form method='post' action='layeredit.bml?id=$id'>";
-    $ret .= BML::ml('backlink', { 'text' => 'Layers', 'link' => 'layers.bml' });
+    $ret .= "<form method='post' action='layeredit.bml?id=$id'>\n";
+    $ret .= BML::ml('backlink', { 'text' => 'Your Layers', 'link' => "layers.bml?authas=$u->{'user'}" }) . "\n";
 
-    my $s2 = $POST{'s2'};
-    $s2 = $dbh->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?",
-                                undef, $lay->{'s2lid'}) unless $s2;
+    my $s2code = $POST{'s2code'};
+    $s2code = $dbh->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?",
+                                    undef, $lay->{'s2lid'}) unless $s2code;
 
     # we tried to compile something
-    if ($POST{'action'} eq "compile" && $has_priv) {
+    if ($POST{'action'} eq "compile") {
         $ret .= "<div style='margin: 20px 0 20px 40px'>\n";
         $ret .= "<b>Compiler Output</b><br />\n";
 
         my $error;
-        unless (LJ::S2::layer_compile($lay, \$error, { 's2ref' => \$POST{'s2'} })) {
+        unless (LJ::S2::layer_compile($lay, \$error, { 's2ref' => \$POST{'s2code'} })) {
 
             $error =~ s/LJ::S2,.+//s;
             $error =~ s!, .+?(src/s2|cgi-bin)/!, !g;
 
-            $ret .= "Error compiling layer:<pre>$error</pre>";
+            $ret .= "Error compiling layer:\n<pre>$error</pre>";
 
             # display error with helpful context
             if ($error =~ /^compile error: line (\d+)/i) {
                 my $errline = $1;
                 my $kill = $errline - 5 < 0 ? 0 : $errline - 5;
                 my $prehilite = $errline - 1 > 4 ? 4: $errline - 1;
-                my $snippet = $s2;
+                my $snippet = $s2code;
 
                 # make sure there's a newlilne at the end
                 chomp $snippet;
@@ -74,15 +95,14 @@
         $ret .= "</div>\n\n";
     }
 
-    my @dis = $has_priv ? () : ( 'disabled' => 'disabled' );
-    $ret .= LJ::html_hidden("action", "compile");
-    $ret .= LJ::html_submit('submit', 'Compile', { @dis,
-                                                   'style' => 'float: right; margin-bottom: 2px' } );
+    $ret .= LJ::html_hidden("action", "compile") . "\n";
+    $ret .= "<p>" . LJ::html_submit('submit', 'Compile', { 'style' => 'float: right; margin-bottom: 2px' } ) . "\n";
     $ret .= "<b>Edit layer source</b>\n";
-    $ret .= "<textarea class='s2' cols='50' name='s2' wrap='off' rows='40'>";
-    $ret .= LJ::eall($s2);
-    $ret .= "</textarea>\n";
-    $ret .= LJ::html_submit('submit', 'Compile', { @dis }) . "</form>\n";
+    $ret .= LJ::html_textarea({ 'name' => 's2code', 'class' => 's2code', 'wrap' => 'off',
+                                'cols' => '50', 'rows' => '40', 'value' => $s2code }) . "\n";
+    $ret .= LJ::html_submit('submit', 'Compile') . "\n";
+    $ret .= "</p></form>\n";
 
+    return $ret;
 }
 _code?>

@@ -6,31 +6,37 @@
     my %layerinfo;
     my $pub = LJ::S2::get_public_layers();
 
+    # for error reporting
+    my $err = sub {
+        return "<h2>Error</h2>" . shift;
+    };
+
     my $dbr = LJ::get_db_reader();
     my $remote = LJ::get_remote();
 
     my $id = $GET{'id'};
-    return BML::redirect('layers.bml') unless $id =~ /^\d+$/;
-    my $lay;
-    unless (defined $pub->{$id}) {
-        $lay = LJ::S2::load_layer($id);
-        unless ($lay && $remote && $lay->{'userid'} == $remote->{'userid'}) {
-            return "Unauthorized or invalid.";
-        }
-    } else {
-        $lay = $pub->{$id};
-    }
-    $id = $lay->{'s2lid'};
+    return BML::redirect('layerbrowse.bml') unless $id =~ /^\d+$/;
 
-    my $s2 = $dbr->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?",
-                                   undef, $id);
+    my $lay = defined $pub->{$id} ? $pub->{$id} : LJ::S2::load_layer($id);
+    return $err->("The specified layer does not exist.")
+        unless $lay;
 
+    # authorized to view this layer?
+    return $err->("You are not authorized to view this layer.")
+        unless defined $pub->{$id} ||
+               LJ::check_priv($dbr, $remote, "supportviewinternal") ||
+               LJ::check_priv($dbr, $remote, "supporthelp") ||
+               LJ::can_manage($remote, $lay->{'userid'});
+
+    my $s2code = $dbr->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?", undef, $id);
+
+    # get html version of the code?
     if ($GET{'fmt'} eq "html") {
         my $html;
         my ($md5, $save_cache);
         if ($pub->{$id}) {
             # let's see if we have it cached
-            $md5 = Digest::MD5::md5_hex($s2);
+            $md5 = Digest::MD5::md5_hex($s2code);
             my $cache = $dbr->selectrow_array("SELECT value FROM blobcache WHERE bckey='s2html-$id'");
             if ($cache =~ s/^\[$md5\]//) {
                 $html = $cache;
@@ -42,7 +48,7 @@
         unless ($html) {
             my $cr = new S2::Compiler;
             $cr->compile_source({
-                'source' => \$s2,
+                'source' => \$s2code,
                 'output' => \$html,
                 'format' => "html",
                 'type' => $pub->{$id}->{'type'},
@@ -57,7 +63,8 @@
         return $html;
     }
 
+    # return text version
     BML::set_content_type("text/plain");
-    return $s2;
+    return $s2code;
 }
 _code?>

@@ -3,15 +3,6 @@
     use strict;
     use vars qw(%GET %POST $title $body);
 
-    my $dbs = LJ::get_dbs();
-
-    # start of output
-    $title = "Styles";
-    $body = BML::ml("Backlink", {
-        'link' => './',
-        'text' => 'Advanced Customization',
-    }) . "\n";
-
     # used for error messages
     my $err = sub {
         $title = "Error";
@@ -19,19 +10,37 @@
         return;        
     };
 
-    # authenticate
+    # authenticate user
     my $remote = LJ::get_remote();
     return $err->('You must be logged in to view your styles.') 
         unless $remote;
+
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return $err->('You could not be authenticated as the specified user.')
+        unless $u;
+
     return $err->('Your account type does not permit you to modify S2 styles')
-        unless LJ::get_cap($remote, 's2styles');
+        unless LJ::get_cap($u, 's2styles');
 
     # style id to edit, if we have one
     # if we have this we're assumed to be in 'edit' mode
     my $id = $GET{'id'}+0;
 
+    my $dbs = LJ::get_dbs();
+    my $dbh = $dbs->{'dbh'};
     my ($core, $layout);      # scalars
     my ($pub, $ulay, $style); # hashrefs
+
+    # start of output
+    $title = "Styles";
+    $body = BML::ml("backlink", {
+        'link' => './',
+        'text' => 'Advanced Customization',
+    }) . "\n";
+    $body .= BML::ml("actionlink", {
+        'link' => "<a href='layers.bml?authas=$authas'>Your Layers</a>",
+    }) . "\n";
 
     # edit mode
     if ($id) {
@@ -42,22 +51,22 @@
 
         # check that they own the style
         return $err->("You do not own this style.")
-            unless $style->{'userid'} == $remote->{'userid'};
+            unless $style->{'userid'} == $u->{'userid'};
 
         # use selected style
         if ($POST{'action:usestyle'}) {
 
             # save to db and update user object
-            LJ::set_userprop($dbs, $remote, "stylesys", '2');
-            LJ::set_userprop($dbs, $remote, "s2_style", $id);
-            return BML::redirect('styles.bml');
+            LJ::set_userprop($dbs, $u, "stylesys", '2');
+            LJ::set_userprop($dbs, $u, "s2_style", $id);
+            return BML::redirect("styles.bml?authas=$authas");
         }
 
         # get public layers
         $pub = LJ::S2::get_public_layers();
 
         # get user layers
-        $ulay = LJ::S2::get_layers_of_user($remote);
+        $ulay = LJ::S2::get_layers_of_user($u);
 
         # core lid
         $POST{'core'} ||= $POST{'core_hidden'};
@@ -74,7 +83,8 @@
         $layout = defined $POST{'layout'} ? $POST{'layout'} : $style->{'layer'}->{'layout'};
 
         # if we're changing core, clear everything
-        if ($POST{'core'} && $POST{'core'} != $style->{'layer'}->{'core'}) {
+        if ($POST{'core'} && $style->{'layer'}->{'core'} &&
+            $POST{'core'} != $style->{'layer'}->{'core'}) {
             foreach (qw(i18nc layout theme i18n user)) {
                 delete $POST{$_};
             }
@@ -82,7 +92,8 @@
         }
 
         # if we're changing layout, clear everything below
-        if ($POST{'layout'} && $POST{'layout'} != $style->{'layer'}->{'layout'}) {
+        if ($POST{'layout'} && $style->{'layer'}->{'layout'} &&
+            $POST{'layout'} != $style->{'layer'}->{'layout'}) {
             foreach (qw(theme i18n user)) {
                 delete $POST{$_};
             }
@@ -90,20 +101,33 @@
 
         # set up start of output
         $title = "Edit Style";
-        $body .= "<br />" . BML::ml('backlink', { 'text' => 'Your Styles', 'link' => 'styles.bml' }) . "\n";
+        $body .= "<br />" . BML::ml('backlink', { 'text' => 'Your Styles', 'link' => "styles.bml?authas=$authas" }) . "\n";
 
         ### process edit actions
 
         # delete
         if ($POST{'action:delete'}) {
-            LJ::S2::delete_user_style($remote, $id);
+            LJ::S2::delete_user_style($u, $id);
             undef $id; # don't show form below
-            return BML::redirect('styles.bml');
+            return BML::redirect("styles.bml?authas=$authas");
         }
 
         # change changes
         if ($POST{'action:change'} || $POST{'action:savechanges'}) {
 
+            # are they renaming their style?
+            if ($POST{'stylename'} && $style->{'name'} &&
+                $POST{'stylename'} ne $style->{'name'}) {
+
+                # update db
+                $dbh->do("UPDATE s2styles SET name=? WHERE styleid=? AND userid=?",
+                         undef, $POST{'stylename'}, $style->{'styleid'}, $u->{'userid'});
+
+                # update style object
+                $style->{'name'} = $POST{'stylename'};
+            }
+
+            # error check layer modifications
             my $baseid = sub {
                 my $id = shift;
                 my $layer = $ulay->{$id} || $pub->{$id};
@@ -116,17 +140,21 @@
                 next if ! $POST{$_} || $baseid->($POST{$_}) == $core;
                 return $err->("Layer hierarchy mismatch: $_");
             }
-            foreach (qw(theme i18n user)) {
-                next if ! $POST{$_} || $baseid->($POST{$_}) == $layout;
-                return $err->("Layer hierarchy mismatch: $_");
+
+            # don't check sub-layout layers if there's no layout
+            if ($layout) {
+                foreach (qw(theme i18n user)) {
+                    next if ! $POST{$_} || $baseid->($POST{$_}) == $layout;
+                    return $err->("Layer hierarchy mismatch: $_");
+                }
             }
 
             # save in database
-            LJ::S2::set_style_layers($remote, $style->{'styleid'}, 
+            LJ::S2::set_style_layers($u, $style->{'styleid'}, 
                                      map { $_, $POST{$_} } qw(core i18nc layout i18n theme user));
 
             # redirect if they clicked the bottom button
-            return BML::redirect('styles.bml') if $POST{'action:savechanges'};
+            return BML::redirect("styles.bml?authas=$authas") if $POST{'action:savechanges'};
         }
 
     # no style id, process actions for non-edit mode
@@ -134,40 +162,46 @@
     } else {
 
         # load user styles
-        my $ustyle = LJ::S2::load_user_styles($remote);
+        my $ustyle = LJ::S2::load_user_styles($u);
 
         # process create action
         if ($POST{'action:create'} && $POST{'stylename'}) {
 
             return $err->('You have reached your maximum number of styles.')
-                if scalar(keys %$ustyle) >= LJ::get_cap($remote, 's2stylesmax');
+                if scalar(keys %$ustyle) >= LJ::get_cap($u, 's2stylesmax');
 
-            my $styleid = LJ::S2::create_style($remote, $POST{'stylename'});
+            my $styleid = LJ::S2::create_style($u, $POST{'stylename'});
             return $err->('Style not created: Database error') unless $styleid;
 
-            return BML::redirect("styles.bml?id=$styleid");
+            return BML::redirect("styles.bml?authas=$authas&id=$styleid");
         }
 
         # load style currently in use
-        LJ::load_user_props($dbs, $remote, 's2_style');
+        LJ::load_user_props($dbs, $u, 's2_style');
 
         # set up page header
         $title = "Your Styles";
+
+        # authas switcher form
+        $body .= "<form class='postheading' method='get' action='styles.bml?authas=$authas'>\n";
+        $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+        $body .= "</form>\n\n";
+
         $body .= "<div class='postheading'><?h1 Your Styles h1?></div>\n";
 
         # show style listing
         $body .= "<table class='postheading' style='margin-left: 40px'>\n";
         if (%$ustyle) {
-            foreach (sort { $ustyle->{$a} cmp $ustyle->{$b} || $a <=> $b} keys %$ustyle) {
-                $body .= "<tr><td><form style='display:inline' method='post' action='styles.bml?id=$_'>";
-                $body .= LJ::html_check({ 'type' => 'radio', 'selected' => $_ == $remote->{'s2_style'} }) . " ";
-                $body .= LJ::ehtml($ustyle->{$_});
-                $body .= " (<a href='" . LJ::journal_base($remote) . "/?s2id=$_'>\#$_</a>) </td>";
-                $body .= "<td>";
+            foreach my $styleid (sort { $ustyle->{$a} cmp $ustyle->{$b} || $a <=> $b} keys %$ustyle) {
+                $body .= "<tr><td><form style='display:inline' method='post' action='styles.bml?authas=$authas&id=$styleid'>";
+                my @b = $styleid == $u->{'s2_style'} ? "<b>" : "</b>";
+                $body .= $b[0] . LJ::ehtml($ustyle->{$styleid});
+                $body .= " (<a href='" . LJ::journal_base($u) . "/?s2id=$styleid'>\#$styleid</a>)$b[1] ";
+                $body .= "</td><td>";
                 $body .= LJ::html_submit('action:edit', 'Edit') . " ";
                 $body .= LJ::html_submit('action:delete', 'Delete', 
-                                         { 'onclick' => "return confirm('Are you sure you want to delete style \#$_?')" }) . " ";
-                $body .= LJ::html_submit('action:usestyle', 'Use', { 'disabled' => $_ == $remote->{'s2_style'} }),
+                                         { 'onclick' => "return confirm('Are you sure you want to delete style \#$styleid?')" }) . " ";
+                $body .= LJ::html_submit('action:usestyle', 'Use', { 'disabled' => $styleid == $u->{'s2_style'} }),
                 $body .= "</form></td></tr>\n";
             }
         } else {
@@ -179,11 +213,13 @@
 
     ### show create / edit form
 
-    my $act = $id ? "?id=$id" : '';
-    $body .= "<form class='postheading' method='post' action='styles.bml$act'>";
+    my $extra = $id ? "&id=$id" : '';
+    $body .= "<form class='postheading' method='post' action='styles.bml?authas=$authas$extra'>";
 
-    # create a new style
-    $body .= "<?h1 Style Options h1?>\n";
+    # create a new style, or change the name of the style currently being edited
+    # note: this little bit of code appears whether there is an id passed or not.
+    #       the textbox just has a different purpose depending on the context.
+    $body .= "<?h1 " . ($id ? "Style Options" : "Create Style") . " h1?>\n";
     $body .= "<table class='postheading' style='margin-bottom: 10px'>\n";
     $body .= "<tr><td>Name: </td><td>";
     $body .= LJ::html_text({ 'name' => 'stylename', 'size' => '30', 'maxlength' => '255', 

@@ -3,45 +3,57 @@
     use strict;
     use vars qw(%GET %POST $title $body);
 
-    $title = "Your Layers";
-    $body = "<div style='margin-bottom: 10px'>";
-    $body .= BML::ml("Backlink", {
-        'link' => './',
-        'text' => 'Advanced Customization',
-    }) . "</div>\n";
-
+    # for error reporting
     my $err = sub {
         $title = "Error";
         $body = shift;
         return;        
     };
 
-    my $id;
-    if ($POST{'id'} =~ /^\d+$/) {
-        $id = $POST{'id'};
-    }
+    # id is optional
+    my $id = $POST{'id'} if $POST{'id'} =~ /^\d+$/;
 
     # this catches core_hidden if it's set
     $POST{'parid'} ||= $POST{'parid_hidden'};
 
-    my $dbr = LJ::get_db_reader();
-    my $remote = LJ::get_remote();
+    # get database handles
+    my $dbs = LJ::get_dbs();
+    my $dbr = $dbs->{'reader'};
+
+    # authenticate user
+    my $remote = LJ::get_remote($dbs);
     return $err->('You must be logged in to view your layers.') 
         unless $remote;
 
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return $err->('You could not be authenticated as the specified user.')
+        unless $u;
+
     # load user and public layers
     my $pub = LJ::S2::get_public_layers();
-    my $ulay = LJ::S2::get_layers_of_user($remote);
+    my $ulay = LJ::S2::get_layers_of_user($u);
 
-    my $has_priv = LJ::get_cap($remote, 's2styles');
+    my $has_priv = LJ::get_cap($u, 's2styles');
+    return $err->("Your account type doesn't permit creating layers.") unless $has_priv;
+
+    # start of output
+    $title = "Your Layers";
+    $body .= BML::ml("backlink", {
+        'link' => './',
+        'text' => 'Advanced Customization',
+    }) . "\n";
+    $body .= BML::ml("actionlink", {
+        'link' => "<a href='styles.bml?authas=$authas'>Your Styles</a>",
+    }) . "\n";
+
 
     ### perform actions ###
 
     # create
     if ($POST{'action:create'}) {
-        return $err->("Account type doesn't permit creating styles") unless $has_priv;
         return $err->("You have reached your maximum number of allowed layers") 
-            if keys %$ulay >= LJ::get_cap($remote, 's2layersmax');
+            if keys %$ulay >= LJ::get_cap($u, 's2layersmax');
 
         my $err_badparid = "No/bogus parent layer ID given (for layouts and core languages, use core parent ID; for themes and layout languages, use layout ID)";
         my $type = $POST{'type'} or return $err->("No layer type selected.");
@@ -60,11 +72,11 @@
                 ! $ulay->{$parid} || $ulay->{$parid}->{'type'} != $parent_type;
         }
 
-        my $id = LJ::S2::create_layer($remote, $parid, $type);
+        my $id = LJ::S2::create_layer($u, $parid, $type);
         return $err->("Error creating layer") unless $id;
 
         my $lay = { 
-            'userid' => $remote->{'userid'},
+            'userid' => $u->{'userid'},
             'type' => $type,
             'b2lid' => $parid,
             's2lid' => $id,
@@ -79,24 +91,31 @@
         }
 
         # redirect so they can't refresh and create a new layer again
-        return BML::redirect('layers.bml');
+        return BML::redirect("layers.bml?authas=$authas");
     }
 
     # delete
     if ($POST{'action:del'}) {
-        return $err->("Account type doesn't permit modifying layers") unless $has_priv;
         my $id = $POST{'id'}+0;
-        my $lay = LJ::S2::load_layer($dbr, $id) or return $err->("Non-existant layer");
-        return $err->("Not your layer") unless $lay->{'userid'} == $remote->{'userid'};
+        my $lay = LJ::S2::load_layer($dbr, $id);
+        return $err->("The specified layer does not exist")
+            unless $lay;
+
+        return $err->("You do not own the specified layer")
+            unless $lay->{'userid'} == $u->{'userid'};
 
         unless ($POST{'confirm'}) {
             LJ::S2::load_layer_info($lay, $id);
             my $name = $lay->{'name'} ? "'$lay->{'name'}'" : "#$id";
 
             $title = "Deleting layer $name";
-            $body .= "<form method='post' action='layers.bml'>";
-            $body .= LJ::html_hidden('id', $id);
-            $body .= LJ::html_hidden('action:del', 'action:del');
+            $body .= "<br /> ";
+            $body .= BML::ml("backlink", {
+                'link' => "layers.bml?authas=$authas",
+                'text' => 'Your Layers',
+            }) . "\n";
+            $body .= "<form class='postheading' method='post' action='layers.bml?authas=$authas'>";
+            $body .= LJ::html_hidden('action:del', '1', 'id', $id);
               
             $body .= "Are you sure you want to delete $lay->{'type'} layer $name?";
             $body .= "<p>" . LJ::html_submit('confirm', 'Delete') . "</p>\n";;
@@ -105,13 +124,18 @@
         }
 
         LJ::S2::delete_layer($id);
-        return BML::redirect('layers.bml');
+        return BML::redirect("layers.bml?authas=$authas");
     }
 
+    # authas switcher form
+    $body .= "<form class='postheading' method='get' action='layers.bml'>\n";
+    $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+    $body .= "</form>\n\n";
+
     # show list of layers
-    $body .= "<?h1 Your Layers h1?>";
+    $body .= "<?h1 Your Layers h1?>\n";
     if (%$ulay) {
-        $body .= "<table style='margin-bottom: 10px' cellpadding='3' border='1' class='postheading'>";
+        $body .= "<table style='margin-bottom: 10px' cellpadding='3' border='1' class='postheading'>\n";
         $body .= "<tr><td><b>LayerID</b></td><td><b>Type</b></td><td><b>Name</b></td><td><b>Actions</b></td></tr>\n";
         my $lastbase = 0;
         foreach my $lid (sort { $ulay->{$a}->{'b2lid'} <=> $ulay->{$b}->{'b2lid'} || $a <=> $b } 
@@ -128,51 +152,52 @@
             my $name = LJ::ehtml($lay->{'name'}) || "<i>(none)</i>";
             $body .= "<tr><td><a href='layerbrowse.bml?id=$lid'>$lid</a></td><td>$lay->{'type'}</td><td>$name</td><td>";
             $body .= "<form method='post' style='display:inline' action='layeredit.bml?id=$lid'>";
-            $body .= "<input type='submit' name='action:edit' value='Edit...' /></form>\n";
-            $body .= "<form method='post' style='display:inline' action='layers.bml'>";
-            $body .= LJ::html_hidden('id', $lid);
-            $body .= "<input type='submit' name='action:del' value='Delete...' />";
-            $body .= "</form>\n";
-            $body .= "</td></tr>"
-        }
-        $body .= "</table>";
-    } else {
-        $body .= "<?p <i>None</i> p?>";
-    }
+            $body .= LJ::html_submit('action:edit', 'Edit...');
+            $body .= "</form>";
 
+            $body .= "<form method='post' style='display:inline' action='layers.bml?authas=$authas'>";
+            $body .= LJ::html_hidden('id', $lid);
+            $body .= LJ::html_submit('action:del', 'Delete...');
+            $body .= "</form>";
+            $body .= "</td></tr>\n"
+        }
+        $body .= "</table>\n\n";
+    } else {
+        $body .= "<?p <i>None</i> p?>\n\n";
+    }
 
     # create layer
-    $body .= "<?h1 Create Layer h1?>";
-    unless ($has_priv) {
-        $body .= "<?p Your account type doesn't allow layer creation. p?>";
-        return;
-    }
+    $body .= "<?h1 Create Layer h1?>\n";
 
+    $body .= "<div style='margin-top: 10px;'>\n";
     $body .= "<?h2 Create top-level layer h2?>\n";
-    $body .= "<form class='postheading' method='post' action='layers.bml'>";
+    $body .= "<form class='postheading' method='post' action='layers.bml?authas=$authas'>\n";
     
     $body .= "Type: " . LJ::html_select({ 'name' => 'type' },
-                                        "" => "",
-                                        "layout" => "Layout",
-                                        "i18nc" => "Language",
-                                        );
+                                          "" => "",
+                                          "layout" => "Layout",
+                                          "i18nc" => "Language",
+                                        ) . "\n";
 
     my @corelayers = map { $_, $pub->{$_}->{'majorversion'} }
                      sort { $pub->{$b}->{'majorversion'} <=> $pub->{$a}->{'majorversion'} }
                      grep { $pub->{$_}->{'b2lid'} == 0 && $pub->{$_}->{'type'} eq 'core' && /^\d+$/}
                      keys %$pub;
     $body .= " Core Version: " . LJ::html_select({ 'name' => 'parid', 
+                                                   'selected' => $corelayers[0],
                                                    'disabled' => @corelayers > 2 ? 0: 1 },
                                                  @corelayers ) . "\n";
 
     # store value in hidden to later be copied to 'parid' if necessary
     # defaults to $corelayers[0] which should be the highest numbered core
-    $body .= LJ::html_hidden("parid_hidden", $POST{'parid'} || $corelayers[0]);
-    $body .= LJ::html_submit("action:create", "Create");
-    $body .= "</form>\n\n";
+    $body .= LJ::html_hidden("parid_hidden", $POST{'parid'} || $corelayers[0]) . "\n";
+    $body .= LJ::html_submit("action:create", "Create") . "\n";
+    $body .= "</form>\n";
+    $body .= "</div>\n\n";
 
     $body .= "<?h2 Create layout-specific layer h2?>\n";
-    $body .= "<form class='postheading' method='post' action='layers.bml'>\n";
+    $body .= "<form class='postheading' method='post' action='layers.bml?authas=$authas'>\n";
+
     $body .= "Type: " . LJ::html_select({ 'name' => 'type' },
                                         "" => "",
                                         "theme" => "Theme",
@@ -186,17 +211,18 @@
                    grep { $pub->{$_}->{'type'} eq 'layout' && /^\d+$/} 
                    keys %$pub;
     if (%$ulay) {
-        push @layouts, ('', '---');
-        push @layouts, map { $_, "$ulay->{$_}->{'name'} (#$_)" } 
-                       sort { $ulay->{$a}->{'name'} cmp $ulay->{$b}->{'name'} || $a <=> $b}
-                       grep { $ulay->{$_}->{'type'} eq 'layout' } 
-                       keys %$ulay;
+        my @ulayouts = ();
+        push @ulayouts, map { $_, "$ulay->{$_}->{'name'} (#$_)" } 
+                        sort { $ulay->{$a}->{'name'} cmp $ulay->{$b}->{'name'} || $a <=> $b}
+                        grep { $ulay->{$_}->{'type'} eq 'layout' } 
+                        keys %$ulay;
+        push @layouts, ('', '---', @ulayouts) if @ulayouts;
     }
 
-    $body .= "Layout: " . LJ::html_select({ 'name' => 'parid' }, @layouts);
+    $body .= "Layout: " . LJ::html_select({ 'name' => 'parid' }, @layouts) . "\n";
 
-    $body .= LJ::html_submit("action:create", "Create");
-    $body .= "</form>";
+    $body .= LJ::html_submit("action:create", "Create") . "\n";
+    $body .= "</form>\n\n";
     
     return;
 }

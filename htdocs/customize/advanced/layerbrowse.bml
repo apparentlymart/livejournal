@@ -3,6 +3,7 @@
     use strict;
     use vars qw(%GET %POST $title $body);
 
+    # start of content
     $body = BML::ml("Backlink", {
         'link' => './',
         'text' => 'Advanced Customization',
@@ -14,22 +15,23 @@
         return;        
     };
 
-    my %layerinfo;
     my $pub = LJ::S2::get_public_layers();
 
     my $id;
-    if ($GET{'id'} =~ /^\d+$/) {
+    if ($GET{'id'} =~ /^\d+$/) { # numeric
         $id = $GET{'id'};
-    } elsif ($GET{'id'}) {
+    } elsif ($GET{'id'}) {       # redist_uniq
         $id = $pub->{$GET{'id'}}->{'s2lid'};
     }
 
-    my $dbr = LJ::get_db_reader();
-    my $remote = LJ::get_remote();
+    my $dbs = LJ::get_dbs();
+    my $dbr = $dbs->{'reader'};
+    my $remote = LJ::get_remote($dbs);
 
     # show the public layers
     unless ($id) {
         $title = "Public Layers";
+        my %layerinfo;
         my @to_load = grep { /^\d+$/ } keys %$pub;
         LJ::S2::load_layer_info(\%layerinfo, \@to_load);
 
@@ -73,6 +75,8 @@
         return;
     }
 
+    ### details on a specific layer ###
+
     my $xlink = sub {
         my $r = shift;
         $$r =~ s/\[class\[(\w+)\]\]/<a href=\"\#class.$1\">$1<\/a>/g;
@@ -81,18 +85,17 @@
         $$r =~ s/\[member\[(.+?)\]\]/<a href=\"\#member.$1\">$1<\/a>/g;
     };
 
-    # details on a layer
-    my $layer = LJ::S2::load_layer($id);
-    return $err->("Layer not found") unless $layer;
-    return $err->("Can't view other people's layers") 
+    # load layer info
+    my $layer = defined $pub->{$id} ? $pub->{$id} : LJ::S2::load_layer($id);
+    return $err->("The specified layer does not exist.") unless $layer;
+    return $err->("You are not authorized to view this layer.") 
         unless defined $pub->{$id} ||
-        LJ::check_priv($dbr, $remote, "supportviewinternal") ||
-        LJ::check_priv($dbr, $remote, "supporthelp") ||
-        $layer->{'userid'} == $remote->{'userid'};
+               LJ::check_priv($dbr, $remote, "supportviewinternal") ||
+               LJ::check_priv($dbr, $remote, "supporthelp") ||
+               LJ::can_manage($remote, $layer->{'userid'});
     
     my $rv = S2::load_layers_from_db($dbr, $id);
     my $s2info = S2::get_layer_all($id);
-
     my $class = $s2info->{'class'} || {};
 
     my $xlink_args = sub {
@@ -108,13 +111,20 @@
         $xlink->($r);
     };
 
-    $body .= "<p>[&lt;&lt; <a href=\"layerbrowse.bml\">Layer List</a>]\n";
+    $body .= "<br />";
+    # link to layer list if this is a public layer, otherwise user's layer list
+    if (defined $pub->{$id}) {
+        $body .= BML::ml('backlink', { 'link' => 'layerbrowse.bml', 'text' => 'Public Layers' }) . "\n";
+    } else {
+        my $user = LJ::get_username($dbs, $layer->{'userid'});
+        $body .= BML::ml('backlink', { 'link' => "layers.bml?authas=$user", 'text' => 'Your Layers' }) . "\n";
+        $body .= BML::ml('actionlink', { 'link' => "<a href='layeredit.bml?id=$id'>Edit Layer</a>" }) . "\n";
+    }
     $body .= "[<a href=\"layersource.bml?id=$id\">Download</a>]\n";
     $body .= "[<a href=\"layersource.bml?id=$id&fmt=html\">View as HTML</a>]\n";
     if ($layer->{'b2lid'}) {
         $body .= "[<a href=\"layerbrowse.bml?id=$layer->{'b2lid'}\">Parent Layer</a>]\n";
     }
-    $body .= "</p>";
 
     # layerinfo
     if (my $info = $s2info->{'info'}) {

@@ -1203,7 +1203,6 @@ sub get_shared_journals
     my $in = join(",", map { $dbr->quote($_); } @$ids);
     my $names = $dbr->selectcol_arrayref("SELECT user FROM user WHERE userid IN ($in)") || [];
     return sort @$names;
-    
 }
 
 # <LJFUNC>
@@ -1286,6 +1285,118 @@ sub get_effective_user
     # else, complain.
     $$referr = "Invalid privileges to act as requested community.";
     return;
+}
+
+# <LJFUNC>
+# name: LJ::get_authas_user
+# des: Given a username, will return a user object if remote is an admin for the
+#      username.  Otherwise returns undef
+# returns: user object if authenticated, otherwise undef.
+# args: user
+# des-opts: Username of user to attempt to auth as.
+# </LJFUNC>
+sub get_authas_user {
+    my $user = shift;
+    return undef unless $user;
+
+    # get a remote
+    my $remote = LJ::get_remote();
+    return undef unless $remote;
+
+    # remote is already what they want?
+    return $remote if $remote->{'user'} eq $user;
+
+    # load user and authenticate
+    my $dbs = LJ::get_dbs();
+    my $u = LJ::load_user($dbs, $user);
+    return undef unless $u;
+
+    # does $u have admin access?
+    return undef unless LJ::can_manage($remote, $u);
+
+    # passed all checks, return $u
+    return $u;
+}
+
+# <LJFUNC>
+# name: LJ::can_manage
+# des: Given a user and a target user, will determine if the first user is an
+#      admin for the target user.
+# returns: bool: true if authorized, otherwise fail
+# args: remote, u
+# des-remote: user object or userid of user to try and authenticate
+# des-u: user object or userid of target user
+# </LJFUNC>
+sub can_manage {
+    my ($remote, $u) = @_;
+    return undef unless $remote && $u;
+
+    # is same user?
+    return 1 if want_userid($remote) == want_userid($u);
+
+    # check for admin access
+    my $dbs = LJ::get_dbs();
+    return undef unless LJ::check_rel($dbs, $u, $remote, 'A');
+
+    # passed checks, return true
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::get_authas_list
+# des: Get a list of usernames a given user can authenticate as
+# returns: an array of usernames
+# args: u, type?
+# des-type: Optional.  'P' to only return users of journaltype 'P'
+# </LJFUNC>
+sub get_authas_list {
+    my ($u, $type) = @_;
+
+    # only one valid type right now
+    $type = 'P' if $type;
+
+    my $dbs = LJ::get_dbs();
+    my $ids = LJ::load_rel_target($dbs, $u, 'A');
+    return undef unless $ids;
+
+    # load_userids_multiple
+    my %users;
+    LJ::load_userids_multiple($dbs, [ map { $_, \$users{$_} } @$ids ], [$u]);
+
+    return $u->{'user'}, sort map { $_->{'user'} }
+                         grep { ! $type || $type eq $_->{'journaltype'} }
+                         values %users;
+}
+
+# <LJFUNC>
+# name: LJ::make_authas_select
+# des: Given a u object and some options, determines which users the given user
+#      can switch to.  If the list exists, returns a select list and a submit
+#      button with labels.  Otherwise returns a hidden element.
+# returns: string of html elements
+# args: u, opts?
+# des-opts: Optional.  Valid keys are:
+#           'type' - the type argument to pass to LJ::get_authas_list
+#           'authas' - current user, gets selected in drop-down
+#           'label' - label to go before form elements
+#           'button' - button label for submit button
+# </LJFUNC>
+sub make_authas_select {
+    my ($u, $opts) = @_; # type, authas, label, button
+
+    my @list = LJ::get_authas_list($u, $opts->{'type'});
+
+    # only do most of form if there are options to select from
+    if (@list > 1) {
+        return ($opts->{'label'} || 'Work as user:') . " " . 
+               LJ::html_select({ 'name' => 'authas',
+                                 'selected' => $opts->{'authas'} || $u->{'user'}},
+                                 map { $_, $_ } @list) . " " .
+               LJ::html_submit(undef, $opts->{'button'} || 'Switch');
+    }
+
+    # no communities to choose from, give the caller a hidden
+    return  LJ::html_hidden('authas', $opts->{'authas'} || $u->{'user'});
 }
 
 # <LJFUNC>
