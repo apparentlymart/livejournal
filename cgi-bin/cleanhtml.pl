@@ -351,7 +351,7 @@ sub clean
                         (! defined $hash->{'height'} ||
                          $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
 
-                    $hash->{src} = canonical_url($hash->{src});
+                    $hash->{src} = canonical_url($hash->{src}, 1);
 
                     if ($img_bad) {
                         $newdata .= "<a class=\"ljimgplaceholder\" href=\"" .
