@@ -46,14 +46,15 @@ body<=
 
         if ($res{'friendof_count'}) {
             $ret .= "<?h1 $ML{'.fellowfriends.head'} h1?><?p $ML{'.fellowfriends.text'} p?>\n";
-            $ret .= "<p align='center'><table><tr bgcolor='<?emcolor?>'><td width='150'><b>$ML{'.user'}</b></td>";
+            $ret .= "<table style='margin-top: 20px;' align='center'>\n";
+            $ret .= "<tr bgcolor='<?emcolor?>'><td width='150'><b>$ML{'.user'}</b></td>";
             $ret .= "<td width='150'><b>$ML{'.name'}</b></td></tr>\n";
 
             for (my $i=1; $i <= $res{'friendof_count'}; $i++) {
                 $ret .= "<tr align='left'><td>" . LJ::ljuser($res{"friendof_${i}_user"}) . "</td>";
                 $ret .= "<td>" . LJ::eall($res{"friendof_${i}_name"}) . "</td></tr>\n";
             }
-            $ret .= "</table></p>";
+            $ret .= "</table>";
         }
 
         ### who do you have defined as a friend?
@@ -97,7 +98,8 @@ body<=
 
         ### add friends
         $ret .= "<?h1 $ML{'.addfriends.head'} h1?><?p $ML{'.addfriends.text'} p?>\n";
-        $ret .= "<p align='center'><input type='button' value='$ML{'.btn.toggle'}' onClick='togglePreview(); return true;'></p>\n";
+        $ret .= "<p align='center'><input type='button' value='" . LJ::ehtml($ML{'.btn.toggle'}) . "' ";
+        $ret .= "onClick='togglePreview(); return true;'></p>\n";
 
         $ret .= "<p align='center'><table cellpadding='4'>\n";
         $ret .= "<tr><td><b>$ML{'.friend'}</b></td><td><b>$ML{'.foreground'}</b></td><td><b>$ML{'.background'}</b></td></tr>\n";
