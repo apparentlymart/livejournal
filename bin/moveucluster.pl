@@ -71,6 +71,7 @@ Copyright (c) 2002-2004 Danga Interactive. All rights reserved.
 use strict;
 use Getopt::Long;
 use Pod::Usage qw{pod2usage};
+use IO::Socket::INET;
 
 # NOTE: these options are used both by Getopt::Long for command-line parsing
 # in single user move move, and also set by hand when in --jobserver mode,
@@ -107,16 +108,87 @@ my $dboa; # the actual master handle, which we delete from if deleting from sour
 abortWithUsage() if $opt_help;
 
 if ($opt_jobserver) {
-    # the job server can keep giving us new jobs to move (or a stop command)
-    # over and over, so we avoid perl exec times
-    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
     multiMove();
 } else {
     singleMove();
 }
 
 sub multiMove {
-    die "FIXME: contact job server and loop on moveUser(...)";
+    # the job server can keep giving us new jobs to move (or a stop command)
+    # over and over, so we avoid perl exec times
+    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+
+    my $sock;
+  ITER:
+    while (1) {
+        if ($sock && $sock->connected) {
+            my $pipe = 0;
+            local $SIG{PIPE} = sub { $pipe = 1; };
+
+            LJ::start_request();
+            my $dbh = LJ::get_dbh({raw=>1}, "master");
+            unless ($dbh) {
+                print "  master db unavailable\n";
+                sleep 2;
+                next ITER;
+            }
+            $dbh->do("SET wait_timeout=28800");
+
+            my $rv = $sock->write("get_job\r\n");
+            print "RV: $rv, ! = $!, pipe = $pipe\n";
+            if ($pipe || ! $rv) {
+                $sock = undef;
+                sleep 1;
+                next ITER;
+            }
+            my $line = <$sock>;
+            print "Heard: $line\n";
+            if ($line =~ /^OK IDLE/) {
+                sleep 5;
+                next ITER;
+            } elsif ($line =~ /^OK JOB (\d+):(\d+):(\d+)/) {
+                my ($uid, $srcid, $dstid) = ($1, $2, $3);
+
+                my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?",
+                                                undef, $uid);
+                next ITER unless $u;
+                next ITER unless $u->{clusterid} == $u->{srcid};
+
+                my $verify = sub {
+                    my $pipe = 0;
+                    local $SIG{PIPE} = sub { $pipe = 1; };
+                    my $rv = $sock->write("finish $uid:$srcid:$dstid\r\n");
+                    return 0 unless $rv;
+                    my $res = <$sock>;
+                    return $res =~ /^OK/ ? 1 : 0;
+                };
+
+                my $rv = eval { moveUser($dbh, $u, $dstid, $verify); };
+                if ($rv) {
+                    print "moveUser($u->{user}/$u->{userid}) = 1\n";
+                } else {
+                    print "moveUser($u->{user}/$u->{userid}) = fail: $@\n";
+                }
+            }
+        } else {
+            print "Need job server sock...\n";
+            $sock = IO::Socket::INET->new(PeerAddr => $opt_jobserver,
+                                          Proto    => 'tcp', );
+            unless ($sock) {
+                print "  failed.\n";
+                sleep 1;
+                next ITER;
+            }
+            my $ready = <$sock>;
+            unless ($ready =~ /Ready/) {
+                print "Bogus greeting.\n";
+                $sock = undef;
+                sleep 1;
+                next ITER;
+            }
+        }
+
+    }
 }
 
 sub singleMove {
@@ -132,7 +204,13 @@ sub singleMove {
     $user = LJ::canonical_username($user);
     abortWithUsage("Invalid username") unless length($user);
 
-    my $rv = eval { moveUser($user, $dclust); };
+    my $dbh = LJ::get_dbh({raw=>1}, "master");
+    die "No master db available.\n" unless $dbh;
+    $dbh->do("SET wait_timeout=28800");
+
+    my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
+
+    my $rv = eval { moveUser($dbh, $u, $dclust); };
 
     if ($rv) {
         print "Moved '$user' to cluster $dclust.\n";
@@ -147,19 +225,14 @@ sub singleMove {
 }
 
 sub moveUser {
-    my ($user, $dclust) = @_;
-
-    my $dbh = LJ::get_dbh({raw=>1}, "master");
-    die "No master db available.\n" unless $dbh;
-    $dbh->do("SET wait_timeout=28800");
+    my ($dbh, $u, $dclust, $verify_code) = @_;
+    die "Non-existent db.\n" unless $dbh;
+    die "Non-existent user.\n" unless $u && $u->{userid};
+    my $user = $u->{user};
 
     # get lock
     die "Failed to get move lock.\n"
-        unless $dbh->selectrow_array("SELECT GET_LOCK('moveucluster-$user', 10)");
-
-    # get the user
-    my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
-    die "Non-existent user $user.\n" unless $u;
+        unless $dbh->selectrow_array("SELECT GET_LOCK('moveucluster-$u->{userid}', 5)");
 
     # if we want to delete the user, we don't need a destination cluster, so only get
     # one if we have a real valid destination cluster
@@ -572,11 +645,16 @@ sub moveUser {
 
     print "# Rows done for '$user': $rows\n" if $optv;
 
-    ## TODO: verify with jobserver that it's okay to finish this transaction
-
-    # unset readonly and move to new cluster in one update
-    LJ::update_user($userid, { clusterid => $dclust, raw => "caps=caps&~(1<<$readonly_bit)" });
-    print "Moved.\n" if $optv;
+    if (! $verify_code || $verify_code->()) {
+        # unset readonly and move to new cluster in one update
+        LJ::update_user($userid, { clusterid => $dclust, raw => "caps=caps&~(1<<$readonly_bit)" });
+        print "Moved.\n" if $optv;
+    } else {
+        # job server went away or we don't have permission to flip the clusterid attribute
+        # so just unlock them
+        LJ::update_user($userid, { raw => "caps=caps&~(1<<$readonly_bit)" });
+        die "Job server said no.\n";
+    }
 
     # delete from source cluster
     if ($opt_del) {
