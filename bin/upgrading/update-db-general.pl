@@ -1038,7 +1038,7 @@ CREATE TABLE talk2 (
   PRIMARY KEY  (journalid,jtalkid),
   KEY (nodetype,journalid,nodeid),
   KEY (journalid,state,nodetype),
-  KEY (posterid,nodetype)
+  KEY (posterid)
 ) 
 EOC
 
@@ -1072,6 +1072,19 @@ CREATE TABLE recent_talktext2 (
   PRIMARY KEY (journalid, jtalkid),
   INDEX idxtime (datepost)
 ) 
+EOC
+
+register_tablecreate("talkleft", <<'EOC');
+CREATE TABLE talkleft (
+  userid    INT UNSIGNED NOT NULL,
+  posttime  INT UNSIGNED NOT NULL,
+  INDEX (userid, posttime),
+  journalid  INT UNSIGNED NOT NULL,
+  nodetype   CHAR(1) NOT NULL,
+  nodeid     INT UNSIGNED NOT NULL,
+  INDEX (journalid, nodetype, nodeid),
+  jtalkid    MEDIUMINT UNSIGNED NOT NULL
+)
 EOC
 
 register_tabledrop("ibill_codes");

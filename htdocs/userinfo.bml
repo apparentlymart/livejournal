@@ -578,13 +578,20 @@
      if ($lastclient) { chop $body; chop $body; }
      $body .= "</TD></TR>";
  }
-     
- $sth = $dbr->prepare("SELECT COUNT(*) AS 'count' FROM log WHERE ownerid=$userid");
- $sth->execute;
- $row = $sth->fetchrow_hashref;
- $row->{'count'} += 0;
- $body .= "<TR><TD ALIGN=RIGHT NOWRAP><B>Journal entries:</B></TD><TD COLSPAN=2>" . &comma($row->{'count'}) . "</TD></TR>";
 
+ # count journal entries
+ {
+     my $count;
+     
+     if ($u->{'clusterid'}) {
+	 $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM log2 WHERE journalid=$userid");
+     } else {
+	 $count = $dbr->selectrow_array("SELECT COUNT(*) FROM log WHERE ownerid=$userid"); 
+     }
+     $body .= "<tr><td align='right' nowrap='1'><b>Journal entries:</b></td><td colspan='2'>" . 
+	 &comma($count) . "</td></tr>";
+ }
+ 
  $sth = $dbr->prepare("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
  $sth->execute;
  $row = $sth->fetchrow_hashref;
@@ -603,19 +610,28 @@
 
 ##
 ## journal comments
-
-$sth = $dbr->prepare("SELECT COUNT(*) AS 'count' FROM talk WHERE posterid=$userid");
-$sth->execute;
-$row = $sth->fetchrow_hashref;
-my $com_post = $row->{'count'} + 0;
-$sth = $dbr->prepare("SELECT COUNT(*) AS 'count' FROM talk WHERE journalid=$userid");
-$sth->execute;
-$row = $sth->fetchrow_hashref;
-my $com_got = $row->{'count'} + 0;
-#$body .= "<TR><TD ALIGN=RIGHT><B>Comments:</B></TD><TD COLSPAN=2><B>Posted:</B> <A HREF=\"/comment_post.bml?user=$user\">$com_post</A>, <B>Received:</B> <A HREF=\"/comment_recv.bml?user=$user\">$com_got</A></TD></TR>";
-$body .= "<TR><TD ALIGN=RIGHT><B>Comments:</B></TD><TD COLSPAN=2><B>Posted:</B> " .
-    comma($com_post) . " - <B>Received:</B> " . comma($com_got) . "</TD></TR>";
-
+ {
+     my ($com_post, $com_got);
+     $com_post = "<b>Posted:</b> ";
+     if ($u->{'clusterid'}) {
+	 if ($LJ::DISABLED{'show-talkleft'}) {
+	     # for a period of time during conversion, this number would be totally whack.
+	     # this code & check can & will die in time.	 
+	     $com_post = "";
+	 } else {
+	     $com_post .= comma($dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft WHERE userid=$userid")) . " - ";
+	 }
+     } else {
+	 $com_post .= comma($dbr->selectrow_array("SELECT COUNT(*) FROM talk WHERE posterid=$userid")) . " - ";
+     }
+     if ($u->{'clusterid'}) {
+	 $com_got = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 WHERE journalid=$userid");
+     } else {
+	 $com_got = $dbr->selectrow_array("SELECT COUNT(*) FROM talk WHERE journalid=$userid");
+     }
+     $body .= "<tr><td align='right'><b>Comments:</b></td><td colspan='2'>$com_post" .
+	 "<b>Received:</b> " . comma($com_got) . "</td></tr>";
+ }
 
 ###
 ### shared journal access
