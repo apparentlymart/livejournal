@@ -44,6 +44,13 @@
      return;
  }
 
+ # redirect renamed users
+ if ($u->{'journaltype'} eq "R") {
+     LJ::load_user_props($u, "renamedto");
+     return BML::redirect("$LJ::SITEROOT/allpics.bml?user=$u->{'renamedto'}")
+        if $u->{'renamedto'};
+ }
+
  my ($can_manage, $getextra);
  if ($remote) {
      $can_manage = LJ::can_manage($remote, $u->{'userid'});
