@@ -1628,7 +1628,7 @@ sub make_preview {
     my $cleansubject = $form->{'subject'};
     LJ::CleanHTML::clean_subject(\$cleansubject);
 
-    $ret .= "<?h1 $BML::ML{'talk.preview.title'} h1?><?p $BML::ML{'talk.preview'} p?><?hr?>";
+    $ret .= "<?h1 $BML::ML{'/talkpost_do.bml.preview.title'} h1?><?p $BML::ML{'/talkpost_do.bml.preview'} p?><?hr?>";
     $ret .= "<div align=\"center\"><b>(<a href=\"$talkurl\">$BML::ML{'talk.commentsread'}</a>)</b></div>";
 
     my $event = $form->{'body'};
@@ -1640,7 +1640,7 @@ sub make_preview {
     }
     LJ::CleanHTML::clean_comment(\$event, $form->{'prop_opt_preformatted'});
 
-    $ret .= "$BML::ML{'$SC.preview.subject'} " . LJ::ehtml($cleansubject) . "<hr />\n";
+    $ret .= "$BML::ML{'/talkpost_do.bml.preview.subject'} " . LJ::ehtml($cleansubject) . "<hr />\n";
     if ($spellcheck_html) {
         $ret .= $spellcheck_html;
         $ret .= "<p>";
@@ -1667,19 +1667,19 @@ sub make_preview {
             unless $_ eq 'body' || $_ eq 'subject' || $_ eq 'prop_opt_preformatted';
     }
 
-    $ret .= "<br /><input type='submit' value='$BML::ML{'talk.preview.submit'}' />\n";
-    $ret .= "<input type='submit' name='submitpreview' value='$BML::ML{'$SC.btn.preview'}' />\n";
+    $ret .= "<br /><input type='submit' value='$BML::ML{'/talkpost_do.bml.preview.submit'}' />\n";
+    $ret .= "<input type='submit' name='submitpreview' value='$BML::ML{'talk.btn.preview'}' />\n";
     if ($LJ::SPELLER) {
-        $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>$BML::ML{'$SC.spellcheck'}</label>";
+        $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>$BML::ML{'/talkpost_do.bml.opt.spellcheck'}</label>";
     }
     $ret .= "<p>";
-    $ret .= "$BML::ML{'talk.opt.noautoformat'} ".
+    $ret .= "$BML::ML{'/talkpost.bml.opt.noautoformat'} ".
         LJ::html_check({ 'name' => 'prop_opt_preformatted', 
                          selected => $form->{'prop_opt_preformatted'} });
     $ret .= LJ::help_icon("noautoformat", " ");
     $ret .= "</p>";
 
-    $ret .= "<p> <?de $BML::ML{'$SC.allowedhtml'}: ";
+    $ret .= "<p> <?de $BML::ML{'/talkpost.bml.allowedhtml'}: ";
     foreach (sort &LJ::CleanHTML::get_okay_comment_tags()) {
         $ret .= "&lt;$_&gt; ";
     }
