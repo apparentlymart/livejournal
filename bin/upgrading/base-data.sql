@@ -644,6 +644,11 @@ REPLACE INTO schemacols VALUES ('clients', 'clientid', 'Primary key.  Auto-gener
 REPLACE INTO schemacols VALUES ('clientusage', 'clientid', 'Clientid of client from [dbtable[clients]] table.');
 REPLACE INTO schemacols VALUES ('clientusage', 'lastlogin', 'The most recent time this user used this client.');
 REPLACE INTO schemacols VALUES ('clientusage', 'userid', 'Userid of [dbtable[user]] using client.');
+REPLACE INTO schemacols VALUES ('cmdbuffer', 'args', 'A URL string of arguments.');
+REPLACE INTO schemacols VALUES ('cmdbuffer', 'cbid', 'unique id');
+REPLACE INTO schemacols VALUES ('cmdbuffer', 'cmd', 'Text of the command name.');
+REPLACE INTO schemacols VALUES ('cmdbuffer', 'instime', 'The time the query was buffered. Not used by applications, but useful for debugging/humans.');
+REPLACE INTO schemacols VALUES ('cmdbuffer', 'journalid', 'Journal id the command affects. This is so that all of a user\'s queued actions can be run before that user is potentially movedbetween clusters.');
 REPLACE INTO schemacols VALUES ('community', 'membership', 'Can people join without being invited?');
 REPLACE INTO schemacols VALUES ('community', 'ownerid', 'The userid of the [dbtable[user]] who primarily owns the community.  (many people can have equal privs)');
 REPLACE INTO schemacols VALUES ('community', 'postlevel', 'Who can post?  Members only, or a select group.  "screened" is not yet used.');
@@ -659,6 +664,10 @@ REPLACE INTO schemacols VALUES ('dbweights', 'norm', 'The normal weighting value
 REPLACE INTO schemacols VALUES ('dbweights', 'role', 'The database role type:  master, slave, clusterN, clusterNslave, etc...  See other documentation.');
 REPLACE INTO schemacols VALUES ('domains', 'domain', 'domain name, without any leading http:// or www.  Example:  foo.com');
 REPLACE INTO schemacols VALUES ('domains', 'userid', 'Userid of [dbtable[user]] whose journal should be loaded.');
+REPLACE INTO schemacols VALUES ('dudata', 'area', 'The type of usage: "L" for log, "T" for talk, "B" for bio, "P" for pic.');
+REPLACE INTO schemacols VALUES ('dudata', 'areaid', 'Unique ID within area, or \'0\' if area has no ids (like bio)');
+REPLACE INTO schemacols VALUES ('dudata', 'bytes', 'Number of bytes item takes up.');
+REPLACE INTO schemacols VALUES ('dudata', 'userid', 'The userid the disk usage item belongs to.');
 REPLACE INTO schemacols VALUES ('duplock', 'digest', 'The md5 digest of the event.  Concatenate everything important and run it through perl\'s md5_hex (or MySQL\'s md5)');
 REPLACE INTO schemacols VALUES ('duplock', 'dupid', 'The unique ID this action generated the first time.');
 REPLACE INTO schemacols VALUES ('duplock', 'instime', 'The time the action first completed.');
@@ -740,11 +749,13 @@ REPLACE INTO schematables VALUES ('ban', '0', 'off', NULL, 'Keeps track of what 
 REPLACE INTO schematables VALUES ('batchdelete', '0', 'off', NULL, 'Each row in this table represent a hint that needs to be deleted sometime, but not now.  Hints only help speed queries.  Deleting them immediately slows the system, so they\'re batched up.  When it\'s detected a hint is old, the system adds to this table (which is much faster).  Hints are purged every few minutes.  Note that this table will eventually be replaced by the much more abstract and functional [dbtable[querybuffer]] table.');
 REPLACE INTO schematables VALUES ('clients', '0', 'off', NULL, 'Keeps track of clients that access the protocol.\n\r\nWhenever the protocol encounters a new client, a new row (and thus a new clientid) is generated.');
 REPLACE INTO schematables VALUES ('clientusage', '0', 'off', NULL, 'Keeps track of when different users use which clients, for purposes of statistics.');
+REPLACE INTO schematables VALUES ('cmdbuffer', '0', 'off', NULL, 'Clustered version of [dbtable[querybuffer]]. Uses specialized commands instead of general table locking');
 REPLACE INTO schematables VALUES ('codes', '1', 'replace', NULL, 'Lookup table for states, countries, languages, etc...');
 REPLACE INTO schematables VALUES ('community', '0', 'off', NULL, 'Keeps track of properties of community accounts (which are just normal [dbtable[user]] accounts with some extra behavior)');
 REPLACE INTO schematables VALUES ('dbinfo', '0', 'off', NULL, 'For LiveJournal installations with many databases, the database connection info, roles, and weightings can be stored in the database instead of the %LJ::DBINFO hash, for easier (web-based) management.\n');
 REPLACE INTO schematables VALUES ('dbweights', '0', 'off', NULL, 'The [dbtable[dbinfo]] table keeps track of which databases exist.  This ones keeps track of each database\'s roles and weights.');
 REPLACE INTO schematables VALUES ('domains', '0', 'off', NULL, 'Keeps track of user-owned domain names, and which journals they map to when pointed at the LiveJournal installation\'s IP address.');
+REPLACE INTO schematables VALUES ('dudata', '0', 'off', NULL, 'Tracks user-based disk usage totals.');
 REPLACE INTO schematables VALUES ('duplock', '0', 'off', NULL, 'Provides a place to record that an action has been done, so it doesn\'t get done a second time later by a user accidentally double-clicking a single-click button in their browser.\r\n\r\nThe idea is that the application should grab a write lock for both the table it\'s inserting into, and the duplock table.  Then, check the duplock table for a duplicate.  If it\'s already in there, unlock the tables and remember the dupid to tell the user (app should pretend it was the first time... don\'t show an error message!), or if it\'s not in there, put it in the table, and then put the resulting uniqueid from the table handler into the duplock table (as dupid).\r\n\r\nThe duplock table is purged every hour or so of all locks older than an hour.');
 REPLACE INTO schematables VALUES ('faq', '0', 'off', NULL, '');
 REPLACE INTO schematables VALUES ('faqcat', '1', 'off', NULL, 'Categories that frequently asked questions can be classified under');
