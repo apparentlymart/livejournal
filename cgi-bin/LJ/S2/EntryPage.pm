@@ -143,7 +143,6 @@ sub EntryPage
                     'picture_keyword' => $com->{'props'}->{'picture_keyword'},
                 },
                 'permalink_url' => "$permalink?thread=$dtalkid#t$dtalkid",
-                'thread_url' => "$permalink?thread=$dtalkid",
                 'reply_url' => "$permalink?replyto=$dtalkid",
                 'poster' => $com->{'posterid'} ? UserLite($user{$com->{'posterid'}}) : undef,
                 'replies' => [],
@@ -157,6 +156,8 @@ sub EntryPage
                 'depth' => $depth,
                 'parent_url' => $par_url,
             };
+
+            $s2com->{'thread_url'} = "$permalink?thread=$dtalkid" if @{$com->{'children'}};
             
             push @$destlist, $s2com;
 
