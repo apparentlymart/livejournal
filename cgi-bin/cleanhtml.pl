@@ -833,6 +833,10 @@ my @comment_close = qw(
 );
 my @comment_all = (@comment_close, "img", "br", "hr", "p", "col");
 
+my $userbio_eat = $event_eat;
+my $userbio_remove = $event_remove;
+my @userbio_close = @comment_close;
+
 sub clean_event
 {
     my ($ref, $opts) = @_;
@@ -905,6 +909,23 @@ sub clean_comment
         'autoclose' => \@comment_close,
         'cleancss' => 1,
         'extractlinks' => $opts->{'anon_comment'},
+    });
+}
+
+sub clean_userbio {
+    my $ref = shift;
+    return undef unless ref $ref;
+
+    clean($ref, {
+        'wordlength' => 100,
+        'addbreaks' => 1,
+        'attrstrip' => [qw[style]],
+        'mode' => 'allow',
+        'noearlyclose' => 1,
+        'tablecheck' => 1,
+        'eat' => $userbio_eat,
+        'remove' => $userbio_remove,
+        'autoclose' => \@userbio_close,
     });
 }
 

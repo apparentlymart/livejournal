@@ -587,18 +587,7 @@ if ($u->{'journaltitle'}) {
      my $span = ($narrow_left-- > 0) ? 1 : 2;
      my $label = $com ? $ML{'.about.comm'} : $ML{'.about.user'};
 
-     LJ::CleanHTML::clean(\$u->{'bio'}, { 
-         'wordlength' => 100,
-         'addbreaks' => 1,
-         'attrstrip' => [qw[style]],
-         'eat' => [qw[head title style layer iframe applet]],
-         'mode' => 'allow',
-         'deny' => [qw[]],
-         'remove' => [qw[marquee bgsound embed object caption link noscript]],
-	 'noearlyclose' => 1,
-	 'tablecheck' => 1,
-	 'autoclose' => [qw[table tr th td textarea pre xmp]],
-     });
+     LJ::CleanHTML::clean_userbio(\$u->{'bio'});
 
      $body .= "<tr><td align='right' valign='top'><b>$label</b></td><td colspan='$span'>$u->{'bio'}</td></tr>\n";
  }
