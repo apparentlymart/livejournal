@@ -298,6 +298,8 @@ propgroup sidebar
     property string sidebar_blurb {
         des = "Text to be added to the sidebar";
         note = "Appears in the sidebar 'Blurb'";
+        rows = 10;
+        cols = 25;
     }
 
     ### Positions ###
@@ -869,7 +871,7 @@ function print_sidebar_linklist()
 function print_sidebar_blurb () 
 {
     if ($*sidebar_blurb != "") {
-        print_sidebar_box("Blurb",$*sidebar_blurb);
+        print_sidebar_box($*text_sidebar_blurb,$*sidebar_blurb);
     }
 }
 
@@ -1104,6 +1106,15 @@ function format_entry(Page p, Entry e, Color bgcolor, Color fgcolor, bool viewin
             $entry = $entry + "&nbsp;|&nbsp;";
         }
         $entry = $entry + """<a href="$e.comments.post_url">""" + ($p.view == "friends" ? $*text_post_comment_friends : $*text_post_comment) + "</a>";
+    } elseif ($p.view == "entry") {
+        var Link l = new Link;
+        foreach var string ls ($e.link_keyseq) {
+            $l = $e->get_link($ls);
+            if (defined $l) {
+                $entry = $entry + """<a href="$l.url">$l.caption</a> """;
+            }
+            if($ls != $e.link_keyseq[size($e.link_keyseq) - 1]) { $entry = $entry + """&nbsp;|&nbsp;"""; }
+        }
     } else {
         $entry = $entry + "&nbsp;";
     }
