@@ -1,0 +1,82 @@
+<?page
+title=>Email Management
+body<=
+
+<?_code
+{
+    my $dbs = LJ::get_dbs();
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    
+    my $ret;
+    my $remote = LJ::get_remote($dbs);
+    LJ::load_remote($dbs, $remote);
+    
+    unless ($remote) {
+        return "<?h1 Login Required h1?><?p You must first <a href='/login.bml?ret=1'>login</a> before using this tool. p?>";
+    }
+
+    my $firstdate = $dbh->selectrow_array(qq{
+        SELECT MIN(timechange) FROM infohistory
+        WHERE userid=$remote->{'userid'} AND what='email'
+        AND oldvalue=?
+    }, undef, $remote->{'email'});
+
+    my $log;
+    if (LJ::did_post()) {
+        my $sth = $dbh->prepare("SELECT timechange, oldvalue FROM infohistory WHERE userid=$remote->{'userid'} AND what='email' ORDER BY timechange");
+        $sth->execute;
+        while (my ($time, $email) = $sth->fetchrow_array)
+        {
+            my $checkname = "$email-$time";
+            my $can_del = defined $firstdate && $time gt $firstdate;
+            if ($can_del && $FORM{$checkname}) {
+                $log .= "<p>Deleted: $email @ $time.</p>";
+                $dbh->do("DELETE FROM infohistory WHERE what='email' AND userid=$remote->{'userid'} AND timechange='$time' AND oldvalue=?", undef, $email);
+            }            
+        }
+    }
+    
+    $ret .= <<"ENDINTRO";
+<?h1 Description h1?>
+<?p
+This page lets you remove past email addresses that were used with your account.  By removing them, they'll no longer be able to have your password mailed to them.  This is useful if somebody discovered your password and hijacked your journal.  Simply have the new password mailed to your old address, change it back, remove the attacker's email address, and change your password.  And this time--- protect your email account so your password doesn't get stolen again!
+p?>
+<?p
+This page only lets you remove email addresses that were used after the first time you used the email address your account is currently validated with.  In particular, this means the attacker isn't able to remove your original email address.
+p?>
+<?hr?>
+ENDINTRO
+
+    LJ::load_remote($dbs, $remote);
+    unless ($remote->{'status'} eq "A") {
+        $ret .= "<?h1 Email not validated h1?><?p To use this tool, your current email address ($remote->{'email'}) must be validated.  To do this, visit the <a href='/lostinfo.bml'>lost info</a> page, which will send you an authorization URL.  After visiting it, come back here. p?>";
+        return $ret;
+    }
+    
+    my $sth = $dbh->prepare("SELECT timechange, oldvalue FROM infohistory WHERE userid=$remote->{'userid'} AND what='email' ORDER BY timechange");
+    $sth->execute;
+
+    $ret .= "<form method='post'>";
+    $ret .= "<?h1 Old email addresses h1?><?p The following is a list of old email addresses that were used, and the time they were deactivated as the primary email address.  Check the ones you want to delete. p?>";
+    
+    $ret .= "<p><table border='1' cellpadding='2'>\n";
+    while (my ($time, $email) = $sth->fetchrow_array)
+    {
+        my $checkname = LJ::eall("$email-$time");
+        my $can_del = defined $firstdate && $time gt $firstdate;
+        my $dis = $can_del ? "" : " disabled='disabled'";
+        $ret .= "<tr><td><input type='checkbox' name='$checkname' $dis></td>";
+        $ret .= "<td>$email</td><td>$time</td></tr>\n";
+
+    }
+    $ret .= "</table>\n";
+    $ret .= "<input type='submit' value='Deleted Selected'></form>";
+    $ret .= "<p>Current email = $remote->{'email'}";
+    $ret .= $log;
+    return $ret;
+
+}
+_code?>
+<=body
+page?>
