@@ -175,12 +175,16 @@ body<=
             $visemail =~ s/^.+\@/********\@/; 
         }
         my $ename = $sp->{'reqtype'} eq 'user' ? LJ::ljuser($u) : LJ::ehtml($sp->{reqname});
-        if ($helper_mode) {
-            # supporthelp can link to previous requests
+        
+        # we show links to the history page if the user is a helper in this category or if it's a
+        # private category and the person has supporthelp somewhere (which is the general rule of
+        # thumb to use the history viewer)
+        my $show_history = !$sp->{_cat}->{public_read} && LJ::check_priv($remote, 'supporthelp');
+        if ($helper_mode || $show_history) {
             $ret .= $sp->{reqtype} eq 'user' ? 
                     "$ename <a href=\"history.bml?user=$u->{user}\">$u->{name}</a>" :
                     "$ename";
-            $ret .= $owner_mode ?
+            $ret .= $owner_mode || $show_history ?
                     " (<a href=\"history.bml?email=" . LJ::eurl($email) . "\">$visemail</a>)" :
                     " ($visemail)";
         } else {
