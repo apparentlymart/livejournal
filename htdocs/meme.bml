@@ -10,6 +10,8 @@
 
  if ($FORM{'url'}) {
      my $url = $FORM{'url'};
+     my $skip = $FORM{'skip'};
+     my $qskip = $skip+0;
      my $qurl = $dbh->quote($url);
      my $eurl = LJ::ehtml($url);
      
@@ -18,19 +20,29 @@
      $body .= "<table>";
      $body .= "<tr align='left'><td width='100'><b>User</b></td><td><b>Subject of Post</b></td></tr>\n";
 
-     $sth = $dbr->prepare("SELECT u.user, m.itemid, ls.subject FROM useridmap u, meme m, logsubject ls WHERE u.userid=m.posterid AND m.url=$qurl AND ls.itemid=m.itemid");
+     $sth = $dbr->prepare("SELECT u.user, m.itemid, ls.subject FROM useridmap u, meme m, logsubject ls WHERE u.userid=m.posterid AND m.url=$qurl AND ls.itemid=m.itemid LIMIT $qskip,500");
      $sth->execute;
+     my $count = 0;
      while (my ($user, $itemid, $subject) = $sth->fetchrow_array)
      {
 	 $body .= "<tr align='left'><td>(=LJUSER $user LJUSER=)</td>";
 	 my $esub = LJ::ehtml($subject) || "(no subject)";
 	 $body .= "<td><a href='$LJ::SITEROOT/talkread.bml?itemid=$itemid'>$esub</a></td>";
 	 $body .= "</tr>";
+         $count++;
      }
 
      $body .= "</table>";
      
-
+     if ($skip > 0) {
+         my $newskip = $skip - 500;
+         $body .= "&lt;&lt; <a href=\"meme.bml?url=$url&amp;skip=$newskip\">Previous 500</a>&nbsp;";
+     }
+     if ($count == 500) {
+         my $newskip = 500;
+         if ($skip) { $newskip = $skip + 500; }
+         $body .= "<a href=\"meme.bml?url=$url&amp;skip=$newskip\">Next 500</a> &gt;&gt;";
+     }
      $body .= "(=HR=)&lt;&lt; <a href='meme.bml'>Back to Meme Listing</a>";
      return "";
  }
