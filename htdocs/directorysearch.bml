@@ -2,19 +2,19 @@
 LOCALBLOCKS<=
 CRIT<=
 {F}
-<TR BGCOLOR=(=EMCOLOR=)>
-<TD><INPUT TYPE=CHECKBOX NAME="%%CODE%%" VALUE=1></TD>
-<TD><B>%%NAME%%</B>
-</TR>
-<TR><TD>&nbsp;</TD><TD>%%FORM%%</TD></TR>
+<tr bgcolor='(=EMCOLOR=)'>
+<td><input type='checkbox' name="%%CODE%%" value='1'></td>
+<td align='left'><b>%%NAME%%</b>
+</tr>
+<tr align='left'><td>&nbsp;</td><td>%%FORM%%</td></tr>
 <=CRIT
 BAR<=
 {F}
-<TR BGCOLOR=(=EMCOLOR=)>
-<TD>&nbsp;</TD>
-<TD><B>%%NAME%%</B>
-</TR>
-<TR><TD>&nbsp;</TD><TD>%%FORM%%</TD></TR>
+<tr bgcolor='(=EMCOLOR=)' align='left'>
+<td>&nbsp;</td>
+<td><b>%%NAME%%</b></td>
+</tr>
+<tr align='left'><td>&nbsp;</td><td>%%FORM%%</td></tr>
 <=BAR
 <=LOCALBLOCKS
 _INFO=)(=PAGE
@@ -31,10 +31,10 @@ P=)
 <CENTER>
 
 (=_CODE
- return "<FORM ACTION=\"$LJ::DIRURI\" METHOD=\"GET\">";
+ return "<FORM ACTION='$LJ::DIRURI' METHOD='GET'>";
 _CODE=)
 
-<TABLE CELLPADDING=4 CELLSPACING=0 BORDER=0>
+<table cellpadding='4' cellspacing='0' border='0'>
 
 <!--- location --->
 (=CRIT
@@ -42,9 +42,9 @@ NAME=>By Location
 CODE=>s_loc
 FORM<=
 
-<TABLE>
-<TR><TD ALIGN=RIGHT>Country:</TD><TD>
-<SELECT NAME="loc_cn">
+<table>
+<tr><td align='right'>Country:</td><td align='left'>
+<select name="loc_cn">
 (=_CODE
 
  my $dbs = LJ::get_dbs();
@@ -58,10 +58,10 @@ FORM<=
  return $ret; 
  
 _CODE=)
-</SELECT></TD></TR>
-<TR><TD ALIGN=RIGHT>State/Province:</TD><TD><INPUT NAME="loc_st"></TD></TR>
-<TR><TD ALIGN=RIGHT>City:</TD><TD><INPUT NAME="loc_ci"></TD></TR>
-</TABLE>
+</select></td></tr>
+<tr><td align='right'>State/Province:</td><td align='left'><input name="loc_st"></td></tr>
+<tr><td align='right'>City:</td><td align='left'><input name="loc_ci"></td></tr>
+</table>
 
 <=FORM
 CRIT=)
@@ -72,12 +72,12 @@ NAME=>By Journal Update Time
 CODE=>s_ut
 FORM<=
 Updated in last 
-<SELECT NAME="ut_days">
-<OPTION VALUE="">-------
-<OPTION VALUE="1">day
-<OPTION VALUE="7">week
-<OPTION VALUE="30">month
-</SELECT>
+<select name="ut_days">
+<option value="">-------</option>
+<option value="1">day</option>
+<option value="7">week</option>
+<option value="30">month</option>
+</select>
 <=FORM
 CRIT=)
 

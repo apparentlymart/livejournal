@@ -34,6 +34,7 @@ require 'portal.pl';
 require 'talklib.pl';
 require 'topiclib.pl';
 require 'ljtodo.pl';
+require 'directorylib.pl';
 
 
 1;

@@ -12,14 +12,9 @@
 #   userproplist
 #
 
-
-
 use strict;
 
-package ljdir;
-
-require 'ljconfig.pl';
-
+package LJ::Dir;
 use Digest::MD5 qw(md5_hex);
 
 my $MAX_RETURN_RESULT = 1000;
@@ -27,21 +22,14 @@ my $MAX_RETURN_RESULT = 1000;
 my %filters = (
 	    'int' => { 'searcher' => \&search_int, 
 		       'validate' => \&validate_int, },
-	    'indir' => { 'searcher' => \&search_indir, },
 	    'fr' => { 'searcher' => \&search_fr, },
 	    'fro' => { 'searcher' => \&search_fro, },
-	    'client' => { 'searcher' => \&search_client, 
-			  'validate' => \&validate_client, 
-		      },
-	    'withpic' => { 'searcher' => \&search_withpic, },
+#	    'client' => { 'searcher' => \&search_client, 
+#			  'validate' => \&validate_client, 
+#		      },
+#	    'withpic' => { 'searcher' => \&search_withpic, },
 	    'loc' => { 'validate' => \&validate_loc, 
 		       'searcher' => \&search_loc, },
-	    'lcn' => { 'searcher' => \&search_lcn, 
-		       'subrequest' => 1, },
-	    'lst' => { 'searcher' => \&search_lst, 
-		       'subrequest' => 1, },
-	    'lci' => { 'searcher' => \&search_lci, 
-		       'subrequest' => 1, },
 	    'gen' => { 'validate' => \&validate_gen,
 		       'searcher' => \&search_gen, },
 	    'age' => { 'validate' => \&validate_age,
@@ -82,7 +70,8 @@ sub do_search
     @{$users} = ();  
     %{$info} = ();  
 
-    $req->{"s_indir"} = 1; # force the "in public directory" filter to be on.
+    # load some stuff we'll need for searchers probably
+    LJ::load_props($dbh, "user");
 
     my @crits;
     foreach my $f (sort keys %filters) 
@@ -97,13 +86,13 @@ sub do_search
 	if (@criteria) {
 	    push @crits, @criteria;
 	} else {
-	    # filters return 0 signal an error, and should have set $info->{'errmsg'}
+	    # filters return nothing to signal an error, and should have set $info->{'errmsg'}
 	    $info->{'errmsg'} = "[Filter $f failed] $info->{'errmsg'}";
 	    return 0;
 	}
     }
 
-    if (scalar(@crits) == 1) {
+    unless (scalar(@crits)) {
 	$info->{'errmsg'} = "You did not enter any search criteria.";
 	return 0;
     }
@@ -126,6 +115,7 @@ sub do_search
     my %alias_used;
     $alias_used{'u'} = 1;  # used later.
     $alias_used{'c'} = 1;  # might be used later, if opt_format eq "com"
+    $alias_used{'uu'} = 1;  # might be used later, if opt_sort is by time
 
     ## foreach each critera, build up the query
     foreach my $crit (@crits)
@@ -183,7 +173,8 @@ sub do_search
 
     $req->{'opt_sort'} ||= "ut";
     if ($req->{'opt_sort'} eq "ut") {
-	$orderby = "ORDER BY u.timeupdate DESC";
+	$extrafrom2 .= ", userusage uu";  # FIX: don't open two copies of table when already using
+	$orderby = "ORDER BY uu.timeupdate DESC";
     } elsif ($req->{'opt_sort'} eq "user") {
 	$orderby = "ORDER BY u.user";
     } elsif ($req->{'opt_sort'} eq "name") {
@@ -299,18 +290,6 @@ sub ago_text
     return "$num $unit" . ($num==1?"":"s") . " ago";
 }
 
-########## IN PUBLIC DIRECTORY? ############3
-
-sub search_indir
-{
-    my ($dbh, $req, $info) = @_;
-
-    ## doesn't need a new table
-    return {
-	'conds' => [ "u.allow_infoshow='Y'", ],
-    };
-}
-
 ########## INTEREST ############
 
 sub validate_int
@@ -357,6 +336,7 @@ sub search_int
 
 ######## HAVE A PICTURE? ##############3
 
+### NO INDEX!
 sub search_withpic
 {
     my ($dbh, $req, $info) = @_;
@@ -477,9 +457,6 @@ sub validate_loc
 	return;
     }
     
-#    if ($req->{'loc_cn'} eq "US" && $req->{'loc_ci'} && ! $req->{'loc_st'}) {
-#	push @$errors, "You cannot search for a city without a state.";
-#    }
 }
 
 sub search_loc
@@ -519,87 +496,30 @@ sub search_loc
     }
 
     push @{$info->{'english'}}, "live in " . join(", ", grep { $_; } ($longcity, $longstate, $longcountry));
+
+    my $p = LJ::get_prop("user", "sidx_loc");
+    unless ($p) {
+	$info->{'errmsg'} = "Userprop sidx_loc doesn't exist. Run update-db.pl?";
+	return;
+    }
+
+    my $prefix = join("-", $req->{'loc_cn'}, $req->{'loc_st'}, $req->{'loc_ci'});
+    $prefix =~ s/\-+$//;  # remove trailing hyphens
+    $prefix =~ s![\_\%\"\']!\\$&!g;
 								  
     #### do the sub requests.
 
-    my @ds_res;
-
-    push @ds_res, $filters{'lcn'}->{'searcher'}->($dbh, {
-	'lcn_code' => $req->{'loc_cn'},
-    }, $info);
-
-    if ($req->{'loc_st'}) {
-	push @ds_res, $filters{'lst'}->{'searcher'}->($dbh, {
-	    'lst_code' => $req->{'loc_st'},
-	}, $info);
-    }
-
-    if ($req->{'loc_ci'}) {
-	push @ds_res, $filters{'lci'}->{'searcher'}->($dbh, {
-	    'lci_code' => $req->{'loc_ci'},
-	}, $info);
-    }
-
-    return @ds_res;
-}
-
-
-########### LOCATION - Country ###############
-
-sub search_lcn
-{
-    my ($dbh, $req, $info) = @_;
-
-    my $qcn = $dbh->quote($req->{'lcn_code'});
     return {
 	'tables' => {
 	    'up' => 'userprop', 
-	    'upl' => 'userproplist', 
 	}, 
-	'conds' => [ "{up}.upropid={upl}.upropid",
-		     "{upl}.name='country'",
-		     "{up}.value=$qcn",
+	'conds' => [ "{up}.upropid=$p->{'id'}",
+		     "{up}.value LIKE '$prefix%'",
 		     ],
 	'userid' => "{up}.userid",
     };
+
 }
-
-sub search_lst
-{
-    my ($dbh, $req, $info) = @_;
-
-    my $qcn = $dbh->quote($req->{'lst_code'});
-    return {
-	'tables' => {
-	    'up' => 'userprop', 
-	    'upl' => 'userproplist', 
-	}, 
-	'conds' => [ "{up}.upropid={upl}.upropid",
-		     "{upl}.name='state'",
-		     "{up}.value=$qcn",
-		     ],
-	'userid' => "{up}.userid",
-    };
-}
-
-sub search_lci
-{
-    my ($dbh, $req, $info) = @_;
-
-    my $qcn = $dbh->quote($req->{'lci_code'});
-    return {
-	'tables' => {
-	    'up' => 'userprop', 
-	    'upl' => 'userproplist', 
-	}, 
-	'conds' => [ "{up}.upropid={upl}.upropid",
-		     "{upl}.name='city'",
-		     "{up}.value=$qcn",
-		     ],
-	'userid' => "{up}.userid",
-    };
-}
-
 
 ########### GENDER ###################
 
@@ -621,13 +541,17 @@ sub search_gen
     push @{$info->{'english'}}, "are " . ($args eq "M" ? "male" : "female");
     my $qgen = $dbh->quote($args);
 
+    my $p = LJ::get_prop("user", "gender");
+    unless ($p) {
+	$info->{'errmsg'} = "Userprop gender doesn't exist. Run update-db.pl?";
+	return;
+    }
+
     return {
 	'tables' => {
 	    'up' => 'userprop', 
-	    'upl' => 'userproplist', 
 	}, 
-	'conds' => [ "{up}.upropid={upl}.upropid",
-		     "{upl}.name='gender'",
+	'conds' => [ "{up}.upropid=$p->{'id'}",
 		     "{up}.value=$qgen",
 		     ],
 	'userid' => "{up}.userid",
@@ -667,12 +591,19 @@ sub search_age
     } else {
 	push @{$info->{'english'}}, "are between $req->{'age_min'} and $req->{'age_max'} years old";
     }
-
+    
+    my $p = LJ::get_prop("user", "sidx_bdate");
+    unless ($p) {
+	$info->{'errmsg'} = "Userprop sidx_bdate doesn't exist. Run update-db.pl?";
+	return;
+    }
+    
     return {
 	'tables' => {
-	    'u' => 'user', 
+	    'up' => 'userprop', 
 	}, 
-	'conds' => [ "FLOOR((TO_DAYS(NOW())-TO_DAYS({u}.bdate))/365.25) BETWEEN $qagemin AND $qagemax",
+	'conds' => [ "{up}.upropid=$p->{'id'}",
+		     "{up}.value BETWEEN DATE_SUB(NOW(), INTERVAL $qagemax YEAR) AND DATE_SUB(NOW(), INTERVAL $qagemin YEAR)",
 		     ],
 	'userid' => "{u}.userid",
     };
@@ -704,10 +635,10 @@ sub search_ut
 
     return {
 	'tables' => {
-	    'u' => 'user',
+	    'uu' => 'userusage',
 	},
-	'conds' => [ "(TO_DAYS(NOW())-TO_DAYS({u}.timeupdate)) <= $qdays", ],
-	'userid' => "{u}.userid",
+	'conds' => [ "{uu}.timeupdate > DATE_SUB(NOW(), INTERVAL $qdays DAY)", ],
+	'userid' => "{uu}.userid",
     };
 }
 
