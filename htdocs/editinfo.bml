@@ -259,20 +259,16 @@ body<=
      {
          ### Interests
          $ret .= "<?h1 $ML{'.int.header'} h1?>";
-         my $eints = BML::eall(join(", ", sort keys %interests));
-         if (LJ::text_in($eints)) {
-             LJ::text_out(\$eints);
-             $ret .= "<?p $ML{'.int.about'} p?>";
-             $ret .= "<?p $ML{'.int.ex.good'} p?>";
-             $ret .= "<?p $ML{'.int.ex.bad'} p?>";
-             $ret .= "<UL><TEXTAREA NAME=interests ROWS=10 COLS=50 WRAP=SOFT>$eints</TEXTAREA></UL>";
-         } else {
-             $ret .= "<input type='hidden' name='interests_absent' value='yes' />";
-             $ret .= "<?p <?inerr $ML{'.error.invalidints'} inerr?> p?>";
+         my @eintsl;
+         foreach (sort keys %interests) {
+             push @eintsl, $_ if LJ::text_in($_);
          }
+         my $eints = BML::eall(join(", ", @eintsl));
+         $ret .= "<?p $ML{'.int.about'} p?>";
+         $ret .= "<?p $ML{'.int.ex.good'} p?>";
+         $ret .= "<?p $ML{'.int.ex.bad'} p?>";
+         $ret .= "<ul><textarea name='interests' rows='10' cols='50' wrap='soft'>$eints</textarea></ul>";
      }
-     
-        
 
      ### Picture Settings
      $ret .= "<?h1 $ML{'.userpic.header'} h1?><?p $ML{'.userpic.about'}\n<P><CENTER>";
