@@ -3,8 +3,8 @@
  use strict;
  use vars qw($title $body %GET %POST);
 
- $title = "Error";
- $body = "No parameters given";
+ $title = $ML{'.defaulttitle'};
+ $body = $ML{'.defaultbody'};
 
  # S2 Redirector
  if ($POST{'redir_type'} eq "monthview") {
@@ -15,7 +15,7 @@
          # FIXME: lookup their domain alias, and make vhost be "other:domain.com";
      }
      my $base = LJ::journal_base($user, $vhost);
-     return "Bogus redir_key" unless $POST{'redir_key'} =~/^(\d\d\d\d)(\d\d)$/;
+     return $ML{'.error.redirkey'} unless $POST{'redir_key'} =~/^(\d\d\d\d)(\d\d)$/;
      my ($year, $month) = ($1, $2);
      return BML::redirect("$base/$year/$month/");
  }
@@ -29,7 +29,7 @@
 
      # sanity check
      unless ($u) {
-         $body = "User not found";
+         $body = $ML{'.error.usernotfound'};
          return;
      }
      my $journalid = $u->{'userid'}+0;
@@ -37,14 +37,14 @@
      $itemid = int($itemid / 256);
      
      my $jumpid = 0;
-     $title = "No Entry";
+     $title = $ML{'.error.noentrytitle'};
      
      if ($GET{'dir'} eq "next") {
          $jumpid = LJ::get_itemid_after2($u, $itemid);
-         $body = "There is no journal entry following this one.";
+         $body = $ML{'.error.noentry.next'};
      } elsif ($GET{'dir'} eq "prev") {
          $jumpid = LJ::get_itemid_before2($u, $itemid);
-         $body = "There is no journal entry preceeding this one.";
+         $body = $ML{'.error.noentry.prev'};
      }
 
      if ($jumpid) {
@@ -57,6 +57,4 @@
 _code?><?page
 title=><?_code return $title; _code?>
 body=><?_code return $body; _code?>
-page?><?_c <LJDEP>
-link: htdocs/talkread.bml
-</LJDEP> _c?>
+page?>

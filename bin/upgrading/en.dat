@@ -1592,6 +1592,20 @@ pick a specific friend group to view.
 
 /friends/index.bml.tools=Tools
 
+/go.bml.defaulttitle=Error
+
+/go.bml.defaultbody=No parameters given.
+
+/go.bml.error.redirkey=Bogus redir_key.
+
+/go.bml.error.usernotfound=User not found.
+
+/go.bml.error.noentrytitle=No Entry
+
+/go.bml.error.noentry.next=There is no entry following this one.
+
+/go.bml.error.noentry.prev=There is no entry preceding this one.
+
 /interests.bml.add.added.head=Added!
 
 /interests.bml.add.added.text=The interest has been added to your list.
