@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 #
+# <LJDEP>
+# lib: MIME::Parser, Mail::Address, cgi-bin/ljlib.pl, cgi-bin/supportlib.pl
+# </LJDEP>
 
 use strict;
 use MIME::Parser;

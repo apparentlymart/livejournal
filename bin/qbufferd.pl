@@ -1,7 +1,10 @@
 #!/usr/bin/perl
 #
+# <LJDEP>
+# lib: Proc::ProcessTable, cgi-bin/ljlib.pl
+# </LJDEP>
 
-require '/home/lj/cgi-bin/ljlib.pl';
+require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 exit unless ($LJ::BUFFER_QUERIES);
 
 use Proc::ProcessTable;
