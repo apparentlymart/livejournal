@@ -55,6 +55,10 @@ BODY<=
 
  if ($FORM{'mode'} eq "findsim") 
  {
+     if ($LJ::DISABLED{'interests-findsim'}) {
+	 return "This is disabled temporarily.";
+     }
+
      my $ret = "";
      $ret .= "(=H1 Similar Users H1=)(=P This tool lets you find users with the most similiar interests to a given user.  More fun stuff can be found on the <A HREF=\"/interests.bml\">interests page</A>. P=)";
      $ret .= "<CENTER><FORM METHOD=GET><INPUT TYPE=HIDDEN NAME=mode VALUE=findsim_do>";
@@ -64,6 +68,10 @@ BODY<=
 
  if ($FORM{'mode'} eq "findsim_do")
  {
+     if ($LJ::DISABLED{'interests-findsim'}) {
+	 return "This is disabled temporarily.";
+     }
+
      my $ret = "";
      my $quser = $dbh->quote(lc($FORM{'user'}));
      $sth = $dbh->prepare("SELECT userid FROM user WHERE user=$quser");
@@ -128,7 +136,8 @@ BODY<=
      $sth->execute;
      while ($_ = $sth->fetchrow_hashref) {
 	 $count++;
-	 $list .= "<LI><A HREF=\"/userinfo.bml?user=$_->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/community.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A> <A HREF=\"/community/$_->{'user'}/\"><B>$_->{'user'}</B></A> - $_->{'name'}\n";
+	 my $name = ehtml($_->{'name'});
+	 $list .= "<LI><A HREF=\"/userinfo.bml?user=$_->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/community.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A> <A HREF=\"/community/$_->{'user'}/\"><B>$_->{'user'}</B></A> - $name\n";
      }
 
      my $s = $count > 1 ? "es" : "";
@@ -154,7 +163,8 @@ BODY<=
      $sth->execute;
      while ($_ = $sth->fetchrow_hashref) {
 	 $count++;
-	 $list .= "<LI><A HREF=\"/userinfo.bml?user=$_->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A> <A HREF=\"/users/$_->{'user'}/\"><B>$_->{'user'}</B></A> - $_->{'name'}\n";
+	 my $name = ehtml($_->{'name'});
+	 $list .= "<LI><A HREF=\"/userinfo.bml?user=$_->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A> <A HREF=\"/users/$_->{'user'}/\"><B>$_->{'user'}</B></A> - $name\n";
      }
      $list .= "</UL>\n";
 
@@ -170,7 +180,7 @@ BODY<=
  $ret .= "(=H1 Interests H1=)(=P Here are some fun things you can do with interests.... P=)";
  $ret .= "<FORM METHOD=GET><UL>";
  $ret .= "<LI><A HREF=\"/interests.bml?view=popular\">View popular interests</A>\n";
- $ret .= "<LI><A HREF=\"/interests.bml?mode=findsim\">Find similiar people</A> -- see who has the most number of common interests with you\n";
+ $ret .= "<LI><A HREF=\"/interests.bml?mode=findsim\">Find similiar people</A> -- see who has the most number of common interests with you\n" unless ($LJ::DISABLED{'interests-findsim'});
  $ret .= "<LI>Find people interested in: <INPUT NAME=int SIZE=20><INPUT TYPE=SUBMIT VALUE=\"Find\">\n";
  $ret .= "</UL></FORM>\n";
  $ret .= "Don't have any interests listed?  Add some by going to the <A HREF=\"/editinfo.bml\">Edit Personal Info & Settings</A> page.";
