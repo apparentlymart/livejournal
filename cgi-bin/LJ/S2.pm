@@ -965,7 +965,7 @@ sub UserLite
     my $o = {
         '_type' => 'UserLite',
         'username' => $u->{'user'},
-        'name' => $u->{'name'},
+        'name' => LJ::ehtml($u->{'name'}),
         'journal_type' => $u->{'journaltype'},
     };
     return $o;
@@ -990,6 +990,14 @@ sub ehtml
 {
     my ($ctx, $text) = @_;
     return LJ::ehtml($text);
+}
+
+# escape tags only
+sub etags {
+    my ($ctx, $text) = @_;
+    $text =~ s/</&lt;/g;
+    $text =~ s/>/&gt;/g;
+    return $text;
 }
 
 sub get_page
