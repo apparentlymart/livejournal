@@ -3996,6 +3996,11 @@ sub activate_userpics
 
     # should have a $u object now
     return undef unless ref $u eq 'HASH';
+
+    # can't get a cluster read for expunged users since they are clusterid 0,
+    # so just return 1 to the caller from here and act like everything went fine
+    return 1 if $u->{'statusvis'} eq 'X';
+
     my $userid = $u->{'userid'};
 
     # active / inactive lists
