@@ -6,19 +6,15 @@ AWAITING MERGE:
 * postevent duplicate locking (avva: somewhat good patch, is
   going to improve it)
 
-SYSADMIN THINGS:
-
-* netsaint improvements
-
 SHERM:
 
 * billing systems
 
-DORMANDO:
+ALANJ:
 
 * statserv (rate limiting detection daemon)
 
-* bandwidth limiting per-connection for free users
+* netsaint improvements
 
 AVVA:
 
@@ -38,8 +34,6 @@ DOCUMENTATION: (JPROULX)
 -- document all the db roles, and how to set 'em up in %LJ::DBINFO.
 
 ANYBODY:
-
--- cluster<n>lite db role
 
 -- redo system of sending mail out.  ideally, LJ::send_mail tries
    to use Net::SMTP first to $LJ::SMTP_SERVER and if that fails
@@ -66,8 +60,6 @@ ANYBODY:
 
 -- ESN system (Event/Subscription/Notification) (have plan/API)
 
--- new logprop:  no_emails (comments on, emails off)
-
 -- new logprop:  comments_until = "yyyymmmdd" on which date talkpost
    won't accept new comments or replies.
 
@@ -78,8 +70,7 @@ ANYBODY:
 * suspended users shouldn't show up in community journals
 
 * fix LJ::get_itemid_{before|after} to respect security of $remote
-
-* editjournal_do: clean HTML (marquees don't close, etc.)
+   NOTE: not easy to do fast.  maybe best not to do it. not a big deal.
 
 * talklib.pl (clean up / rewrite talk*.bml).  won't be important
   until bradfitz finishes S2.
