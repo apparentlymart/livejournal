@@ -14,6 +14,15 @@
  $sth->execute;
  my $po = $sth->fetchrow_hashref;
 
+ unless ($po) {
+   $title = "Error";
+   $body = "Poll not found.";
+   return;
+ }
+
+ my $u = LJ::load_userid($dbs, $po->{'journalid'});
+ my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
+
  my $mode = "";
  foreach my $m ([ "enter", "Fill-out Poll" ], [ "results" , "View Poll Results" ]) {
      if ($FORM{'mode'} eq $m->[0]) {
@@ -23,7 +32,7 @@
 	 $body .= "<a href=\"$LJ::SITEROOT/poll/?id=$pollid&amp;mode=$m->[0]\">[ $m->[1] ]</a> ";
      }
  }
- $body .= "<a href=\"$LJ::SITEROOT/talkread.bml?itemid=$po->{'itemid'}\">[ Discuss Results ]</a> ";
+ $body .= "<a href=\"$LJ::SITEROOT/talkread.bml?${jarg}itemid=$po->{'itemid'}\">[ Discuss Results ]</a> ";
  
  if ($FORM{'mode'} eq "ans") { $mode = "ans"; } # also allowed, but not shown
 
