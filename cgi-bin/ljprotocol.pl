@@ -1065,12 +1065,12 @@ sub getevents
 		"FROM log2 l, syncupdates2 s ".
 		"WHERE s.userid=$ownerid AND l.journalid=$ownerid ".
 		"AND s.atime>='$date' AND s.nodetype='L' AND s.nodeid=l.jitemid ".
-		"AND s.nodeid=lt.jitemid ORDER BY s.atime LIMIT $LIMIT";
+		"AND s.nodeid=l.jitemid ORDER BY s.atime LIMIT $LIMIT";
 	} else {
 	    $sql = "SELECT itemid, eventtime, security, allowmask ".
 		"FROM log l, syncupdates s WHERE s.userid=$ownerid ".
 		"AND s.atime>='$date' AND s.nodetype='L' AND s.nodeid=l.itemid ".
-		"AND s.nodeid=lt.itemid ORDER BY s.atime LIMIT $LIMIT";
+		"AND s.nodeid=l.itemid ORDER BY s.atime LIMIT $LIMIT";
 	}
     }
     else 
