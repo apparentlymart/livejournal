@@ -58,6 +58,8 @@
     $MAX_HINTS_LASTN ||= 100;
     $MAX_SCROLLBACK_LASTN ||= 400;
 
+    $RECENT_SPAN ||= 14;
+
     # set default capability limits if the site maintainer hasn't.
     {
 	my %defcap = (
