@@ -222,9 +222,10 @@ while (LJ::start_request())
             }
 
             # is it our time to go?
-            my $cinfo = $LJ::Cmdbuffer::cmds{$cmd};
-            if ($cinfo->{kill_job_ct} && $started{$cmd} >= $cinfo->{kill_job_ct} ||
-                $cinfo->{kill_mem_size} && $size >= $cinfo->{kill_mem_size})
+            my $kill_job_ct   = LJ::Cmdbuffer::get_property($cmd, 'kill_job_ct')   || 0;
+            my $kill_mem_size = LJ::Cmdbuffer::get_property($cmd, 'kill_mem_size') || 0;
+            if ($kill_job_ct && $started{$cmd} >= $kill_job_ct ||
+                $kill_mem_size && $size >= $kill_mem_size)
             {
 
                 # trigger reload of current child process
