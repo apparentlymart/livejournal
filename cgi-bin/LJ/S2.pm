@@ -110,7 +110,12 @@ sub make_journal
 
     return if $opts->{'suspendeduser'};
     return if $opts->{'handler_return'};
-    return $page if ref $page ne 'HASH';
+
+    # the friends mode=live returns raw HTML in $page, in which case there's
+    # nothing to "run" with s2_run.  so $page isn't runnable, return it now.
+    # but we have to make sure it's defined at all first, otherwise things
+    # like print_stylesheet() won't run, which don't have an method invocant
+    return $page if $page && ref $page ne 'HASH';
 
     s2_run($r, $ctx, $opts, $entry, $page);
     
