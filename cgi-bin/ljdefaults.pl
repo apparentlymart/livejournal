@@ -153,6 +153,7 @@
         'text/xml' => 1,                # regular XML files
         'application/xml' => 1,         # XHTML 1.1 "may" be this
         'application/xhtml+xml' => 1,   # XHTML 1.1 "should" be this
+        'application/rdf+xml' => 1,     # FOAF should be this
     ) unless %GZIP_OKAY;
 
     # maximum FOAF friends to return (so the server doesn't get overloaded)

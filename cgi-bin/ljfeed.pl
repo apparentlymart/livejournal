@@ -362,6 +362,9 @@ sub create_view_foaf {
         $opts->{handler_return} = 404;
         return undef;
     }
+
+    # set our content type
+    $opts->{contenttype} = 'application/rdf+xml; charset=' . $opts->{saycharset};
     
     # setup userprops we will need
     LJ::load_user_props($u, qw{
