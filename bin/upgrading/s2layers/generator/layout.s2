@@ -728,6 +728,7 @@ function EntryPage::print_body () {
 
         $.comment_pages->print();
         $this->print_comments($.comments);
+        $.comment_pages->print();
         """</td></tr></table></td></tr></table><p>""";
 
         if ($this.multiform_on) {
