@@ -13,14 +13,14 @@ BODY<=
 
  my ($sth, $ret);
 
- my $qs = &get_query_string();
+ my $qs = LJ::get_query_string();
  my $u;
 
  #### new way
  if ($qs =~ /^(\d+)[;\.](.+)$/)
  {
      my ($aaid, $auth) = ($1, $2);
-     my $aa = &is_valid_authaction($aaid, $auth);
+     my $aa = LJ::is_valid_authaction($dbs, $aaid, $auth);
      if ($aa) {
 	 $sth = $dbr->prepare("SELECT userid, email, user, status, password FROM user WHERE userid=$aa->{'userid'}");
 	 $sth->execute;

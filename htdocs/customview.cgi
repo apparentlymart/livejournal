@@ -13,10 +13,10 @@ my $dbh;
 while(LJ::handle_caches() && 
       ++$REQ_COUNT <= $REQ_MAX && FCGI::accept() >= 0) 
 {
-    $dbh = &LJ::get_dbh("master");
+    $dbh = LJ::get_dbh("master");
 
     my %FORM = ();
-    &get_form_data(\%FORM);
+    LJ::get_form_data(\%FORM);
 
     my $ctype = "text/html";
     if ($FORM{'type'} eq "xml") {
@@ -28,14 +28,14 @@ while(LJ::handle_caches() &&
     my $styleid = $FORM{'styleid'} + 0;
     my $nooverride = $FORM{'nooverride'} ? 1 : 0;
 
-    my $data = (&LJ::make_journal($dbh, $user, "", undef,
-				  { "nocache" => $FORM{'nocache'}, 
-				    "contesttheme" => $FORM{'contesttheme'},
-				    "vhost" => "customview",
-				    "nooverride" => $nooverride,
-				    "styleid" => $styleid,
-				})
-		|| "<B>[LiveJournal: Bad username, styleid, or style definition]</B>");
+    my $data = (LJ::make_journal($dbh, $user, "", undef,
+				 { "nocache" => $FORM{'nocache'}, 
+				   "contesttheme" => $FORM{'contesttheme'},
+				   "vhost" => "customview",
+				   "nooverride" => $nooverride,
+				   "styleid" => $styleid,
+			       })
+		|| "<b>[$LJ::SITENAME: Bad username, styleid, or style definition]</b>");
     
     if ($FORM{'enc'} eq "js") {
 	$data =~ s/\\/\\\\/g;

@@ -14,10 +14,6 @@ use Text::Wrap;
 use MIME::Lite;
 use HTTP::Date qw();
 
-########################
-# CONSTANTS
-#
-
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
@@ -42,12 +38,6 @@ require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 		 },
 		 );
 
-## for use in style system's %%cons:.+%% mapping
-%LJ::constant_map = ('siteroot' => $LJ::SITEROOT,
-		     'sitename' => $LJ::SITENAME,
-		     'img' => $LJ::IMGPREFIX,
-		     );
-
 ## we want to set this right away, so when we get a HUP signal later
 ## and our signal handler sets it to true, perl doesn't need to malloc,
 ## since malloc may not be thread-safe and we could core dump.
@@ -66,18 +56,14 @@ if ($SIG{'HUP'}) {
     $SIG{'HUP'} = \&LJ::clear_caches;    
 }
 
-sub is_valid_authaction
-{
-    &connect_db();
-    my ($aaid, $auth) = map { $dbh->quote($_) } @_;
-    my $sth = $dbh->prepare("SELECT aaid, userid, datecreate, authcode, action, arg1 FROM authactions WHERE aaid=$aaid AND authcode=$auth");
-    $sth->execute;
-    return $sth->fetchrow_hashref;
-}
 
 #  DEPRECATED.  use LJ:: versions.
 sub can_use_journal { &connect_db(); return LJ::can_use_journal($dbh, @_); }
-sub connect_db { $dbh = ($BMLPersist::dbh = LJ::get_dbh("master")); }
+sub connect_db { 
+    my $c = join(",",caller);
+    LJ::debug("$0: connect_db called from [$c]");
+    $dbh = ($BMLPersist::dbh = LJ::get_dbh("master")); 
+}
 sub days_in_month { return LJ::days_in_month(@_); }
 sub get_friend_itemids { return LJ::get_friend_itemids($dbh, @_); }
 sub get_recent_itemids { &connect_db(); return LJ::get_recent_itemids($dbh, @_); }
@@ -102,6 +88,9 @@ sub send_mail { return LJ::send_mail(@_); }
 sub server_down_html { return LJ::server_down_html(); }
 sub strip_bad_code { return LJ::strip_bad_code(@_); }
 sub valid_password { return LJ::valid_password(@_); }
+sub ehtml { return LJ::ehtml(@_); }
+sub eurl { return LJ::eurl(@_); }
+sub exml { return LJ::exml(@_); }
 
 sub register_authaction
 {
@@ -208,30 +197,6 @@ sub set_userprop
     $dbh->do("REPLACE INTO $table (userid, upropid, value) VALUES ($userid, $p->{'upropid'}, $value)");
 }
 
-##
-## returns 1 and populates %$retref if successful, else returns 0
-##
-sub get_mood_picture
-{
-    my ($themeid, $moodid, $ref) = @_;
-    do 
-    {
-	if ($LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}) {
-	    %{$ref} = %{$LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}};
-	    if ($ref->{'pic'} =~ m!^/!) {
-		$ref->{'pic'} =~ s!^/img!!;
-		$ref->{'pic'} = $LJ::IMGPREFIX . $ref->{'pic'};
-	    }
-	    $ref->{'moodid'} = $moodid;
-	    return 1;
-	} else {
-	    $moodid = $LJ::CACHE_MOODS{$moodid}->{'parent'};
-	}
-    } 
-    while ($moodid);
-    return 0;
-}
-
 sub ago_text
 {
     my $secondsold = shift;
@@ -257,153 +222,6 @@ sub ago_text
     return "$num $unit" . ($num==1?"":"s") . " ago";
 }
 
-
-# do all the current music/mood/weather/whatever stuff
-sub prepare_currents
-{
-    my $args = shift;
-
-    my %currents = ();
-    my $val;
-    if ($val = $args->{'props'}->{$args->{'itemid'}}->{'current_music'}) {
-	$currents{'Music'} = $val;
-    }
-    if ($val = $args->{'props'}->{$args->{'itemid'}}->{'current_mood'}) {
-	$currents{'Mood'} = $val;
-    }
-    if ($val = $args->{'props'}->{$args->{'itemid'}}->{'current_moodid'}) {
-	my $theme = $args->{'user'}->{'moodthemeid'};
-	&load_mood_theme($theme);
-	my %pic;
-	if (&get_mood_picture($theme, $val, \%pic)) {
-	    $currents{'Mood'} = "<IMG SRC=\"$pic{'pic'}\" ALIGN=ABSMIDDLE WIDTH=$pic{'w'} HEIGHT=$pic{'h'} VSPACE=1> $LJ::CACHE_MOODS{$val}->{'name'}";
-	} else {
-	    $currents{'Mood'} = $LJ::CACHE_MOODS{$val}->{'name'};
-	}
-    }
-    if (%currents) {
-	if ($args->{'vars'}->{$args->{'prefix'}.'_CURRENTS'}) 
-	{
-	    ### PREFIX_CURRENTS is defined, so use the correct style vars
-
-	    my $fvp = { 'currents' => "" };
-	    foreach (sort keys %currents) {
-		$fvp->{'currents'} .= &fill_var_props($args->{'vars'}, $args->{'prefix'}.'_CURRENT', {
-		    'what' => $_,
-		    'value' => $currents{$_},
-		});
-	    }
-	    $args->{'event'}->{'currents'} = 
-		&fill_var_props($args->{'vars'}, $args->{'prefix'}.'_CURRENTS', $fvp);
-	} else 
-	{
-	    ### PREFIX_CURRENTS is not defined, so just add to %%events%%
-	    $args->{'event'}->{'event'} .= "<BR>&nbsp;";
-	    foreach (sort keys %currents) {
-		$args->{'event'}->{'event'} .= "<BR><B>Current $_</B>: " . $currents{$_} . "\n";
-	    }
-	}
-    }
-}
-
-sub fill_var_props
-{
-    my ($vars, $key, $hashref) = @_;
-    my $data = $vars->{$key};
-    $data =~ s/%%(?:([\w:]+:))?(\S+?)%%/$1 ? &fvp_transform(lc($1), $vars, $hashref, $2) : $hashref->{$2}/eg;
-    return $data;
-}
-
-sub fvp_transform
-{
-    my ($transform, $vars, $hashref, $attr) = @_;
-    my $ret = $hashref->{$attr};
-    while ($transform =~ s/(\w+):$//) {
-	my $trans = $1;
-	if ($trans eq "ue") {
-	    $ret = &eurl($ret);
-	}
-	elsif ($trans eq "xe") {
-	    $ret = &exml($ret);
-	}
-	elsif ($trans eq "lc") {
-	    $ret = lc($ret);
-	}
-	elsif ($trans eq "uc") {
-	    $ret = uc($ret);
-	}  
-	elsif ($trans eq "color") {
-	    $ret = $vars->{"color-$attr"};
-	}
-	elsif ($trans eq "cons") {
-	    $ret = $LJ::constant_map{$attr};
-	}
-	elsif ($trans eq "ad") {
-	    $ret = "<LJAD $attr>";
-	}
-    }
-    return $ret;
-}
-
-sub eurl
-{
-    my $a = $_[0];
-    $a =~ s/([^a-zA-Z0-9_\,\-.\/\\\: ])/uc sprintf("%%%02x",ord($1))/eg;
-    $a =~ tr/ /+/;
-    return $a;
-}
-
-### escape stuff so it can be used in XML attributes or elements
-sub exml
-{
-    my $a = shift;
-    $a =~ s/\&/&amp;/g;
-    $a =~ s/\"/&quot;/g;
-    $a =~ s/\'/&apos;/g;
-    $a =~ s/</&lt;/g;
-    $a =~ s/>/&gt;/g;
-    return $a;
-}
-
-sub ehtml
-{
-    my $a = $_[0];
-    $a =~ s/\&/&amp;/g;
-    $a =~ s/\"/&quot;/g;
-    $a =~ s/</&lt;/g;
-    $a =~ s/>/&gt;/g;
-    return $a;	
-}
-
-# pass this a hashref, and it'll populate it.
-sub get_form_data 
-{
-    my ($hashref) = shift;
-    my $buffer = shift;
-
-    if ($ENV{'REQUEST_METHOD'} eq 'POST') {
-        read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
-    } else {
-        $buffer = $ENV{'QUERY_STRING'} || $ENV{'REDIRECT_QUERY_STRING'};
-	if ($buffer eq "" && $ENV{'REQUEST_URI'} =~ /\?(.+)/) {
-	    $buffer = $1;
-	}
-    }
-    
-    # Split the name-value pairs
-    my $pair;
-    my @pairs = split(/&/, $buffer);
-    my ($name, $value);
-    foreach $pair (@pairs)
-    {
-        ($name, $value) = split(/=/, $pair);
-        $value =~ tr/+/ /;
-        $value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
-        $name =~ tr/+/ /;
-        $name =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
-        $hashref->{$name} .= $hashref->{$name} ? "\0$value" : $value;
-    }
-}
 
 sub bullet_errors
 {
@@ -494,7 +312,7 @@ sub self_link
 	if (defined $newvars->{$_} && ! $newvars->{$_}) { next; }
 	my $val = $newvars->{$_} || $FORM{$_};
 	next unless $val;
-	$link .= &BMLUtil::eurl($_) . "=" . &BMLUtil::eurl($val) . "&";
+	$link .= LJ::eurl($_) . "=" . LJ::eurl($val) . "&";
     }
     chop $link;
     return $link;
@@ -572,6 +390,14 @@ sub html_datetime
     return $ret;
 }
 
+package LJ;
+
+# <LJFUNC>
+# name: LJ::get_query_string
+# des: Returns the query string, which can be in a number of spots
+#      depending on the webserver & configuration, sadly.
+# returns: String; query string.
+# </LJFUNC>
 sub get_query_string
 {
     my $q = $ENV{'QUERY_STRING'} || $ENV{'REDIRECT_QUERY_STRING'};
@@ -581,8 +407,210 @@ sub get_query_string
     return $q;
 }
 
+# <LJFUNC>
+# name: LJ::get_form_data
+# des: Loads a hashref with form data from a GET or POST request.
+# args: hashref
+# des-hashref: Hashref to populate with form data.
+# </LJFUNC>
+sub get_form_data 
+{
+    my ($hashref) = shift;
+    my $buffer = shift;
 
-package LJ;
+    if ($ENV{'REQUEST_METHOD'} eq 'POST') {
+        read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
+    } else {
+        $buffer = $ENV{'QUERY_STRING'} || $ENV{'REDIRECT_QUERY_STRING'};
+	if ($buffer eq "" && $ENV{'REQUEST_URI'} =~ /\?(.+)/) {
+	    $buffer = $1;
+	}
+    }
+    
+    # Split the name-value pairs
+    my $pair;
+    my @pairs = split(/&/, $buffer);
+    my ($name, $value);
+    foreach $pair (@pairs)
+    {
+        ($name, $value) = split(/=/, $pair);
+        $value =~ tr/+/ /;
+        $value =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
+        $name =~ tr/+/ /;
+        $name =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
+        $hashref->{$name} .= $hashref->{$name} ? "\0$value" : $value;
+    }
+}
+
+# <LJFUNC>
+# name: LJ::is_valid_authaction
+# des: Validates a shared secret (authid/authcode pair)
+# returns: Hashref of authaction row from database.
+# args: dbarg, aaid, auth
+# des-aaid: Integer; the authaction ID.
+# des-auth: String; the auth string. (random chars the client already got)
+# </LJFUNC>
+sub is_valid_authaction
+{
+    my $dbarg = shift;
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    
+    # TODO: make this use slave if available (low usage/priority)
+    my ($aaid, $auth) = map { $dbh->quote($_) } @_;
+    my $sth = $dbh->prepare("SELECT aaid, userid, datecreate, authcode, action, arg1 FROM authactions WHERE aaid=$aaid AND authcode=$auth");
+    $sth->execute;
+    return $sth->fetchrow_hashref;
+}
+
+# <LJFUNC>
+# name: LJ::fill_var_props
+# args: vars, key, hashref
+# des: S1 utility function to interpolate %%variables%% in a variable.  If
+#      a modifier is given like %%foo:var%%, then [func[LJ::fvp_transform]]
+#      is called.
+# des-vars: hashref with keys being S1 vars
+# des-key: the variable in the vars hashref we're expanding
+# des-hashref: hashref of values that could interpolate.
+# returns: Expanded string.
+# </LJFUNC>
+sub fill_var_props
+{
+    my ($vars, $key, $hashref) = @_;
+    my $data = $vars->{$key};
+    $data =~ s/%%(?:([\w:]+:))?(\S+?)%%/$1 ? LJ::fvp_transform(lc($1), $vars, $hashref, $2) : $hashref->{$2}/eg;
+    return $data;
+}
+
+# <LJFUNC>
+# name: LJ::fvp_transform
+# des: Called from [func[LJ::fill_var_props]] to do trasformations.
+# args: transform, vars, hashref, attr
+# des-transform: The transformation type.
+# des-vars: hashref with keys being S1 vars
+# des-hashref: hashref of values that could interpolate. (see 
+#              [func[LJ::fill_var_props]])
+# des-attr: the attribute name that's being interpolated.
+# returns: Transformed interpolated variable.
+# </LJFUNC>
+sub fvp_transform
+{
+    my ($transform, $vars, $hashref, $attr) = @_;
+    my $ret = $hashref->{$attr};
+    while ($transform =~ s/(\w+):$//) {
+	my $trans = $1;
+	if ($trans eq "ue") {
+	    $ret = LJ::eurl($ret);
+	}
+	elsif ($trans eq "xe") {
+	    $ret = LJ::exml($ret);
+	}
+	elsif ($trans eq "lc") {
+	    $ret = lc($ret);
+	}
+	elsif ($trans eq "uc") {
+	    $ret = uc($ret);
+	}  
+	elsif ($trans eq "color") {
+	    $ret = $vars->{"color-$attr"};
+	}
+	elsif ($trans eq "cons") {
+	    if ($attr eq "siteroot") { return $LJ::SITEROOT; }
+	    if ($attr eq "sitename") { return $LJ::SITENAME; }
+	    if ($attr eq "img") { return $LJ::IMGPREFIX; }
+	}
+    }
+    return $ret;
+}
+
+# <LJFUNC>
+# name: LJ::get_mood_picture
+# des: Loads a mood icon hashref given a themeid and moodid.
+# args: themeid, moodid, ref
+# des-themeid: Integer; mood themeid.
+# des-moodid: Integer; mood id.
+# des-ref: Hashref to load mood icon data into.
+# returns: Boolean; 1 on success, 0 otherwise.
+# </LJFUNC>
+sub get_mood_picture
+{
+    my ($themeid, $moodid, $ref) = @_;
+    do 
+    {
+	if ($LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}) {
+	    %{$ref} = %{$LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}};
+	    if ($ref->{'pic'} =~ m!^/!) {
+		$ref->{'pic'} =~ s!^/img!!;
+		$ref->{'pic'} = $LJ::IMGPREFIX . $ref->{'pic'};
+	    }
+	    $ref->{'moodid'} = $moodid;
+	    return 1;
+	} else {
+	    $moodid = $LJ::CACHE_MOODS{$moodid}->{'parent'};
+	}
+    } 
+    while ($moodid);
+    return 0;
+}
+
+
+# <LJFUNC>
+# name: LJ::prepare_currents
+# des: do all the current music/mood/weather/whatever stuff.  only used by ljviews.pl.
+# args: dbarg, args
+# des-args: hashref with keys: 'props' (a hashref with itemid keys), 'vars' hashref with
+#           keys being S1 variables.
+# </LJFUNC>
+sub prepare_currents
+{
+    my $dbarg = shift;
+    my $args = shift;
+
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+
+    my %currents = ();
+    my $val;
+    if ($val = $args->{'props'}->{$args->{'itemid'}}->{'current_music'}) {
+	$currents{'Music'} = $val;
+    }
+    if ($val = $args->{'props'}->{$args->{'itemid'}}->{'current_mood'}) {
+	$currents{'Mood'} = $val;
+    }
+    if ($val = $args->{'props'}->{$args->{'itemid'}}->{'current_moodid'}) {
+	my $theme = $args->{'user'}->{'moodthemeid'};
+	LJ::load_mood_theme($dbs, $theme);
+	my %pic;
+	if (LJ::get_mood_picture($theme, $val, \%pic)) {
+	    $currents{'Mood'} = "<IMG SRC=\"$pic{'pic'}\" ALIGN=ABSMIDDLE WIDTH=$pic{'w'} HEIGHT=$pic{'h'} VSPACE=1> $LJ::CACHE_MOODS{$val}->{'name'}";
+	} else {
+	    $currents{'Mood'} = $LJ::CACHE_MOODS{$val}->{'name'};
+	}
+    }
+    if (%currents) {
+	if ($args->{'vars'}->{$args->{'prefix'}.'_CURRENTS'}) 
+	{
+	    ### PREFIX_CURRENTS is defined, so use the correct style vars
+
+	    my $fvp = { 'currents' => "" };
+	    foreach (sort keys %currents) {
+		$fvp->{'currents'} .= LJ::fill_var_props($args->{'vars'}, $args->{'prefix'}.'_CURRENT', {
+		    'what' => $_,
+		    'value' => $currents{$_},
+		});
+	    }
+	    $args->{'event'}->{'currents'} = 
+		LJ::fill_var_props($args->{'vars'}, $args->{'prefix'}.'_CURRENTS', $fvp);
+	} else 
+	{
+	    ### PREFIX_CURRENTS is not defined, so just add to %%events%%
+	    $args->{'event'}->{'event'} .= "<BR>&nbsp;";
+	    foreach (sort keys %currents) {
+		$args->{'event'}->{'event'} .= "<BR><B>Current $_</B>: " . $currents{$_} . "\n";
+	    }
+	}
+    }
+}
+
 
 # <LJFUNC>
 # name: LJ::http_to_time
@@ -1643,6 +1671,14 @@ sub handle_caches
 {
     return 1 unless ($LJ::CLEAR_CACHES);
     $LJ::CLEAR_CACHES = 0;
+
+    do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+      
+    foreach (keys %LJ::DBCACHE) { 
+	my $v = $LJ::DBCACHE{$_};
+	$v->disconnect;
+	delete $LJ::DBCACHE{$_}; 
+    }
 
     %LJ::CACHE_PROP = ();
     %LJ::CACHE_STYLE = ();

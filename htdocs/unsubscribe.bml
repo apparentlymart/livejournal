@@ -4,23 +4,23 @@ BODY<=
 
 (=_CODE
 
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my $aaid = $FORM{'aaid'};
  my $auth = $FORM{'auth'};
 
  unless ($aaid && $auth) {
-     return "(=H1 Error H1=)(=P How did you get to this page?  You should only get here via a link in a newsletter. P=)(=P Another way to unsubscribe from the newsletter is to visit the <A HREF=\"/editinfo.bml\">edit info</A> page and change the setting there. P=)";
+     return "(=H1 Error H1=)(=P How did you get to this page?  You should only get here via a link in a newsletter. P=)(=P Another way to unsubscribe from the newsletter is to visit the <a href=\"/editinfo.bml\">edit info</a> page and change the setting there. P=)";
  }
 
- if (($aa = &is_valid_authaction($aaid, $auth))
+ if (($aa = LJ::is_valid_authaction($dbs, $aaid, $auth))
      && $aa->{'action'} eq "nonews"
    ) 
  {
      if ($FORM{'confirm'}) 
      {
-	 my $dbs = LJ::get_dbs();
-	 my $dbh = $dbs->{'dbh'};
-	 my $dbr = $dbs->{'reader'};
-	 
 	 my $quid = $aa->{'userid'}+0;
 	 $dbh->do("UPDATE user SET allow_getljnews='N' WHERE userid=$quid");
 	 return "(=H1 Done. H1=)(=P You won't get $LJ::SITENAME news anymore. P=)";
@@ -30,8 +30,8 @@ BODY<=
 	 my $ret = "";
 	 $ret .= "(=H1 Are you sure? H1=)(=P If you want to unsubscribe from the $LJ::SITENAME news mailing list, press the button below.... P=)";
 	 $ret .= "<FORM METHOD=POST ACTION=/unsubscribe.bml>\n";
-	 my $eaaid = &BMLUtil::ehtml($aaid);
-	 my $eauth = &BMLUtil::ehtml($auth);
+	 my $eaaid = LJ::ehtml($aaid);
+	 my $eauth = LJ::ehtml($auth);
 	 $ret .= "<INPUT TYPE=HIDDEN NAME=aaid VALUE=\"$eaaid\">\n";
 	 $ret .= "<INPUT TYPE=HIDDEN NAME=auth VALUE=\"$eauth\">\n";
 	 $ret .= "<INPUT TYPE=HIDDEN NAME=confirm VALUE=1>\n";

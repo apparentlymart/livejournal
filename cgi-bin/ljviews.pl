@@ -20,7 +20,7 @@ sub create_view_lastn
     LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
 
     my %FORM = ();
-    &get_form_data(\%FORM);
+    LJ::get_form_data(\%FORM);
 
     if ($opts->{'args'}) {
 	$opts->{'badargs'} = 1;
@@ -42,7 +42,7 @@ sub create_view_lastn
 	my $picid = $u->{'defaultpicid'};
 	LJ::load_userpics($dbs, \%userpics, [ $picid ]);
 	$lastn_page{'userpic'} = 
-	    &fill_var_props($vars, 'LASTN_USERPIC', {
+	    LJ::fill_var_props($vars, 'LASTN_USERPIC', {
 		"src" => "$LJ::SITEROOT/userpic/$picid",
 		"width" => $userpics{$picid}->{'width'},
 		"height" => $userpics{$picid}->{'height'},
@@ -51,7 +51,7 @@ sub create_view_lastn
 
     if ($u->{'url'} =~ m!^http://!) {
 	$lastn_page{'website'} =
-	    &fill_var_props($vars, 'LASTN_WEBSITE', {
+	    LJ::fill_var_props($vars, 'LASTN_WEBSITE', {
 		"url" => LJ::ehtml($u->{'url'}),
 		"name" => LJ::ehtml($u->{'urlname'} || "My Website"),
 	    });
@@ -156,9 +156,9 @@ sub create_view_lastn
 	      $lastn_new_day{$_} = $lastn_date_format{$_};
 	  }
 	  unless ($lastday==-1) {
-	      $$events .= &fill_var_props($vars, 'LASTN_END_DAY', {});
+	      $$events .= LJ::fill_var_props($vars, 'LASTN_END_DAY', {});
 	  }
-	  $$events .= &fill_var_props($vars, 'LASTN_NEW_DAY', \%lastn_new_day);
+	  $$events .= LJ::fill_var_props($vars, 'LASTN_NEW_DAY', \%lastn_new_day);
 
 	  $lastday = $lastn_date_format{'d'};
 	  $lastmonth = $lastn_date_format{'m'};
@@ -169,10 +169,10 @@ sub create_view_lastn
         $eventnum++;
         $lastn_event{'eventnum'} = $eventnum;
         $lastn_event{'itemid'} = $itemid;
-        $lastn_event{'datetime'} = &fill_var_props($vars, 'LASTN_DATE_FORMAT', \%lastn_date_format);
+        $lastn_event{'datetime'} = LJ::fill_var_props($vars, 'LASTN_DATE_FORMAT', \%lastn_date_format);
 	if ($subject) {
 	    LJ::CleanHTML::clean_subject(\$subject);
-	    $lastn_event{'subject'} = &fill_var_props($vars, 'LASTN_SUBJECT', { 
+	    $lastn_event{'subject'} = LJ::fill_var_props($vars, 'LASTN_SUBJECT', { 
 		"subject" => $subject,
 	    });
 	}
@@ -185,10 +185,10 @@ sub create_view_lastn
 	if ($u->{'opt_showtalklinks'} eq "Y" && 
 	    ! $logprops{$itemid}->{'opt_nocomments'}
 	    ) {
-	    $lastn_event{'talklinks'} = &fill_var_props($vars, 'LASTN_TALK_LINKS', {
+	    $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
 		'itemid' => $itemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?itemid=$itemid",
-		'readlink' => $replycount ? &fill_var_props($vars, 'LASTN_TALK_READLINK', {
+		'readlink' => $replycount ? LJ::fill_var_props($vars, 'LASTN_TALK_READLINK', {
 		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&amp;nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount == 1 ? "" : "s",
@@ -199,13 +199,14 @@ sub create_view_lastn
 	}
 
 	## current stuff
-	&prepare_currents({ 'props' => \%logprops, 
-			    'itemid' => $itemid, 
-			    'vars' => $vars, 
-			    'prefix' => "LASTN",
-			    'event' => \%lastn_event,
-			    'user' => $u,
-			});
+        LJ::prepare_currents($dbs, {
+	    'props' => \%logprops, 
+	    'itemid' => $itemid, 
+	    'vars' => $vars, 
+	    'prefix' => "LASTN",
+	    'event' => \%lastn_event,
+	    'user' => $u,
+	});
 
 	if ($u->{'userid'} != $posterid) 
 	{
@@ -237,14 +238,14 @@ sub create_view_lastn
 	    {
 		my $pic = {};
 		LJ::load_userpics($dbs, $pic, [ $picid ]);
-		$lastn_altposter{'pic'} = &fill_var_props($vars, 'LASTN_ALTPOSTER_PIC', {
+		$lastn_altposter{'pic'} = LJ::fill_var_props($vars, 'LASTN_ALTPOSTER_PIC', {
 		    "src" => "$LJ::SITEROOT/userpic/$picid",
 		    "width" => $pic->{$picid}->{'width'},
 		    "height" => $pic->{$picid}->{'height'},
 		});
 	    }
 	    $lastn_event{'altposter'} = 
-		&fill_var_props($vars, 'LASTN_ALTPOSTER', \%lastn_altposter);
+		LJ::fill_var_props($vars, 'LASTN_ALTPOSTER', \%lastn_altposter);
 	}
 
 	my $var = 'LASTN_EVENT';
@@ -252,20 +253,20 @@ sub create_view_lastn
 	    $vars->{'LASTN_EVENT_PRIVATE'}) { $var = 'LASTN_EVENT_PRIVATE'; }
 	if ($security eq "usemask" && 
 	    $vars->{'LASTN_EVENT_PROTECTED'}) { $var = 'LASTN_EVENT_PROTECTED'; }
-        $$events .= &fill_var_props($vars, $var, \%lastn_event);
+        $$events .= LJ::fill_var_props($vars, $var, \%lastn_event);
     } # end huge while loop
 
-    $$events .= &fill_var_props($vars, 'LASTN_END_DAY', {});
+    $$events .= LJ::fill_var_props($vars, 'LASTN_END_DAY', {});
 
     if ($skip) {
 	$lastn_page{'range'} = 
-	    &fill_var_props($vars, 'LASTN_RANGE_HISTORY', {
+	    LJ::fill_var_props($vars, 'LASTN_RANGE_HISTORY', {
 		"numitems" => $eventnum,
 		"skip" => $skip,
 	    });
     } else {
 	$lastn_page{'range'} = 
-	    &fill_var_props($vars, 'LASTN_RANGE_MOSTRECENT', {
+	    LJ::fill_var_props($vars, 'LASTN_RANGE_MOSTRECENT', {
 		"numitems" => $eventnum,
 	    });
     }
@@ -283,7 +284,7 @@ sub create_view_lastn
 	else { $newskip = "?skip=$newskip"; }
 
 	$skiplinks{'skipforward'} = 
-	    &fill_var_props($vars, 'LASTN_SKIP_FORWARD', {
+	    LJ::fill_var_props($vars, 'LASTN_SKIP_FORWARD', {
 		"numitems" => $itemshow,
 		"url" => "$journalbase/$newskip",
 	    });
@@ -298,7 +299,7 @@ sub create_view_lastn
 
 	if ($skip==$maxskip) {
 	    $skiplinks{'skipbackward'} = 
-		&fill_var_props($vars, 'LASTN_SKIP_BACKWARD', {
+		LJ::fill_var_props($vars, 'LASTN_SKIP_BACKWARD', {
 		    "numitems" => "Day",
 		    "url" => "$journalbase/day/" . sprintf("%04d/%02d/%02d", $lastyear, $lastmonth, $lastday),
 		});
@@ -306,7 +307,7 @@ sub create_view_lastn
 	    my $newskip = $skip + $itemshow;
 	    $newskip = "?skip=$newskip";
 	    $skiplinks{'skipbackward'} = 
-		&fill_var_props($vars, 'LASTN_SKIP_BACKWARD', {
+		LJ::fill_var_props($vars, 'LASTN_SKIP_BACKWARD', {
 		    "numitems" => $itemshow,
 		    "url" => "$journalbase/$newskip",
 		});
@@ -321,10 +322,10 @@ sub create_view_lastn
     ### if either are on, put skiplinks into lastn_page
     if ($skip_b || $skip_f) {
 	$lastn_page{'skiplinks'} = 
-	    &fill_var_props($vars, 'LASTN_SKIP_LINKS', \%skiplinks);
+	    LJ::fill_var_props($vars, 'LASTN_SKIP_LINKS', \%skiplinks);
     }
 
-    $$ret = &fill_var_props($vars, 'LASTN_PAGE', \%lastn_page);
+    $$ret = LJ::fill_var_props($vars, 'LASTN_PAGE', \%lastn_page);
 
     return 1;
 }
@@ -367,7 +368,7 @@ sub create_view_friends
     $$ret = "";
 
     my %FORM = ();
-    &get_form_data(\%FORM);
+    LJ::get_form_data(\%FORM);
 
     if ($FORM{'mode'} eq "live") {
 	$$ret .= "<html><head><title>${user}'s friends: live!</title></head>\n";
@@ -394,7 +395,7 @@ sub create_view_friends
 
     if ($u->{'url'} =~ m!^http://!) {
 	$friends_page{'website'} =
-	    &fill_var_props($vars, 'FRIENDS_WEBSITE', {
+	    LJ::fill_var_props($vars, 'FRIENDS_WEBSITE', {
 		"url" => LJ::ehtml($u->{'url'}),
 		"name" => LJ::ehtml($u->{'urlname'} || "My Website"),
 	    });
@@ -496,14 +497,14 @@ sub create_view_friends
 
     unless (%friends)
     {
-        $friends_page{'events'} = &fill_var_props($vars, 'FRIENDS_NOFRIENDS', {
+        $friends_page{'events'} = LJ::fill_var_props($vars, 'FRIENDS_NOFRIENDS', {
 	  "name" => LJ::ehtml($u->{'name'}),
 	  "name-\'s" => ($u->{'name'} =~ /s$/i) ? "'" : "'s",
 	  "username" => $user,
         });
 
 	$$ret .= "<BASE TARGET=_top>" if ($FORM{'mode'} eq "framed");
-	$$ret .= &fill_var_props($vars, 'FRIENDS_PAGE', \%friends_page);
+	$$ret .= LJ::fill_var_props($vars, 'FRIENDS_PAGE', \%friends_page);
 	return 1;
     }
 
@@ -584,22 +585,22 @@ sub create_view_friends
 		$friends_new_day{$_} = $friends_date_format{$_};
 	    }
 	    unless ($lastday==-1) {
-		$$events .= &fill_var_props($vars, 'FRIENDS_END_DAY', {});
+		$$events .= LJ::fill_var_props($vars, 'FRIENDS_END_DAY', {});
 	    }
-	    $$events .= &fill_var_props($vars, 'FRIENDS_NEW_DAY', \%friends_new_day);
+	    $$events .= LJ::fill_var_props($vars, 'FRIENDS_NEW_DAY', \%friends_new_day);
 	    $lastday = $friends_date_format{'d'};
 	}
 	
 	my %friends_event = ();
 	$friends_event{'itemid'} = $itemid;
-	$friends_event{'datetime'} = &fill_var_props($vars, 'FRIENDS_DATE_FORMAT', \%friends_date_format);
+	$friends_event{'datetime'} = LJ::fill_var_props($vars, 'FRIENDS_DATE_FORMAT', \%friends_date_format);
 	if ($subject) {
 	    LJ::CleanHTML::clean_subject(\$subject);
-	    $friends_event{'subject'} = &fill_var_props($vars, 'FRIENDS_SUBJECT', { 
+	    $friends_event{'subject'} = LJ::fill_var_props($vars, 'FRIENDS_SUBJECT', { 
 		"subject" => $subject,
 	    });
 	} else {
-	    $friends_event{'subject'} = &fill_var_props($vars, 'FRIENDS_NO_SUBJECT', { 
+	    $friends_event{'subject'} = LJ::fill_var_props($vars, 'FRIENDS_NO_SUBJECT', { 
 		"friend" => $friend,
 		"name" => $friends{$friendid}->{'name'},
 	    });
@@ -640,7 +641,7 @@ sub create_view_friends
 	    }
 	    if ($picid) {
 		$friends_event{'friendpic'} = 
-		    &fill_var_props($vars, 'FRIENDS_FRIENDPIC', {
+		    LJ::fill_var_props($vars, 'FRIENDS_FRIENDPIC', {
 			"src" => "$LJ::SITEROOT/userpic/$picid",
 			"width" => $userpics{$picid}->{'width'},
 			"height" => $userpics{$picid}->{'height'},
@@ -650,7 +651,7 @@ sub create_view_friends
 	
 	if ($friend ne $poster) {
 	    $friends_event{'altposter'} = 
-		&fill_var_props($vars, 'FRIENDS_ALTPOSTER', {
+		LJ::fill_var_props($vars, 'FRIENDS_ALTPOSTER', {
 		    "poster" => $poster,
 		    "owner" => $friend,
 		    "fgcolor" => $friends{$friendid}->{'fgcolor'} || "#000000",
@@ -666,10 +667,10 @@ sub create_view_friends
 	if ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" &&
 	    ! $logprops{$itemid}->{'opt_nocomments'}
 	    ) {
-	    $friends_event{'talklinks'} = &fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
+	    $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
 		'itemid' => $itemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?itemid=$itemid",
-		'readlink' => $replycount ? &fill_var_props($vars, 'FRIENDS_TALK_READLINK', {
+		'readlink' => $replycount ? LJ::fill_var_props($vars, 'FRIENDS_TALK_READLINK', {
 		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&amp;nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount==1 ? "" : "s",
@@ -680,13 +681,15 @@ sub create_view_friends
 	}
 
 	## current stuff
-	&prepare_currents({ 'props' => \%logprops, 
-			    'itemid' => $itemid, 
-			    'vars' => $vars, 
-			    'prefix' => "FRIENDS",
-			    'event' => \%friends_event,
-			    'user' => ($u->{'opt_forcemoodtheme'} eq "Y" ? $u : $friends{$friendid}),
-			});
+	LJ::prepare_currents($dbs, {
+	    'props' => \%logprops, 
+	    'itemid' => $itemid, 
+	    'vars' => $vars, 
+	    'prefix' => "FRIENDS",
+	    'event' => \%friends_event,
+	    'user' => ($u->{'opt_forcemoodtheme'} eq "Y" ? $u :
+		       $friends{$friendid}),
+	});
 
 	my $var = 'FRIENDS_EVENT';
 	if ($security eq "private" && 
@@ -694,23 +697,23 @@ sub create_view_friends
 	if ($security eq "usemask" && 
 	    $vars->{'FRIENDS_EVENT_PROTECTED'}) { $var = 'FRIENDS_EVENT_PROTECTED'; }
 	
-	$$events .= &fill_var_props($vars, $var, \%friends_event);
+	$$events .= LJ::fill_var_props($vars, $var, \%friends_event);
     } # end while
 
-    $$events .= &fill_var_props($vars, 'FRIENDS_END_DAY', {});
-    $friends_page{'events'} = &fill_var_props($vars, 'FRIENDS_EVENTS', \%friends_events);
+    $$events .= LJ::fill_var_props($vars, 'FRIENDS_END_DAY', {});
+    $friends_page{'events'} = LJ::fill_var_props($vars, 'FRIENDS_EVENTS', \%friends_events);
 
     ### set the range property (what entries are we looking at)
 
     if ($skip) {
 	$friends_page{'range'} = 
-	    &fill_var_props($vars, 'FRIENDS_RANGE_HISTORY', {
+	    LJ::fill_var_props($vars, 'FRIENDS_RANGE_HISTORY', {
 		"numitems" => $eventnum,
 		"skip" => $skip,
 	    });
     } else {
 	$friends_page{'range'} = 
-	    &fill_var_props($vars, 'FRIENDS_RANGE_MOSTRECENT', {
+	    LJ::fill_var_props($vars, 'FRIENDS_RANGE_MOSTRECENT', {
 		"numitems" => $eventnum,
 	    });
     }
@@ -729,7 +732,7 @@ sub create_view_friends
 	if ($newskip > 0) { $linkvars{'skip'} = $newskip; }
 
 	$skiplinks{'skipforward'} = 
-	    &fill_var_props($vars, 'FRIENDS_SKIP_FORWARD', {
+	    LJ::fill_var_props($vars, 'FRIENDS_SKIP_FORWARD', {
 		"numitems" => $itemshow,
 		"url" => &make_link("$journalbase/friends", \%linkvars),
 	    });
@@ -748,7 +751,7 @@ sub create_view_friends
 	$linkvars{'skip'} = $newskip;
 
 	$skiplinks{'skipbackward'} = 
-	    &fill_var_props($vars, 'FRIENDS_SKIP_BACKWARD', {
+	    LJ::fill_var_props($vars, 'FRIENDS_SKIP_BACKWARD', {
 		"numitems" => $itemshow,
 		"url" => &make_link("$journalbase/friends", \%linkvars),
 	    });
@@ -762,11 +765,11 @@ sub create_view_friends
     ### if either are on, put skiplinks into lastn_page
     if ($skip_b || $skip_f) {
 	$friends_page{'skiplinks'} = 
-	    &fill_var_props($vars, 'FRIENDS_SKIP_LINKS', \%skiplinks);
+	    LJ::fill_var_props($vars, 'FRIENDS_SKIP_LINKS', \%skiplinks);
     }
     
     $$ret .= "<BASE TARGET=_top>" if ($FORM{'mode'} eq "framed");
-    $$ret .= &fill_var_props($vars, 'FRIENDS_PAGE', \%friends_page);
+    $$ret .= LJ::fill_var_props($vars, 'FRIENDS_PAGE', \%friends_page);
 
     return 1;
 }
@@ -781,7 +784,7 @@ sub create_view_calendar
     my $user = $u->{'user'};
     LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
     my %FORM = ();
-    &get_form_data(\%FORM);
+    LJ::get_form_data(\%FORM);
 
     my %calendar_page = ();
     $calendar_page{'name'} = LJ::ehtml($u->{'name'});
@@ -797,7 +800,7 @@ sub create_view_calendar
 
     if ($u->{'url'} =~ m!^http://!) {
 	$calendar_page{'website'} =
-	    &fill_var_props($vars, 'CALENDAR_WEBSITE', {
+	    LJ::fill_var_props($vars, 'CALENDAR_WEBSITE', {
 		"url" => LJ::ehtml($u->{'url'}),
 		"name" => LJ::ehtml($u->{'urlname'} || "My Website"),
 	    });
@@ -850,20 +853,20 @@ sub create_view_calendar
 	    my $yy = sprintf("%02d", $year % 100);
 	    my $url = "$journalbase/calendar/$year";
 	    if ($year != $dispyear) { 
-		$yearlinks .= &fill_var_props($vars, 'CALENDAR_YEAR_LINK', {
+		$yearlinks .= LJ::fill_var_props($vars, 'CALENDAR_YEAR_LINK', {
 		    "url" => $url, "yyyy" => $year, "yy" => $yy });
 	    } else {
-		$yearlinks .= &fill_var_props($vars, 'CALENDAR_YEAR_DISPLAYED', {
+		$yearlinks .= LJ::fill_var_props($vars, 'CALENDAR_YEAR_DISPLAYED', {
 		    "yyyy" => $year, "yy" => $yy });
 	    }
 	}
 	$calendar_page{'yearlinks'} = 
-	    &fill_var_props($vars, 'CALENDAR_YEAR_LINKS', { "years" => $yearlinks });
+	    LJ::fill_var_props($vars, 'CALENDAR_YEAR_LINKS', { "years" => $yearlinks });
     }
 
     foreach $year (@years)
     {
-        $$months .= &fill_var_props($vars, 'CALENDAR_NEW_YEAR', {
+        $$months .= LJ::fill_var_props($vars, 'CALENDAR_NEW_YEAR', {
 	  'yyyy' => $year,
 	  'yy' => substr($year, 2, 2),
         });
@@ -912,7 +915,7 @@ sub create_view_calendar
 	  {
 	      my $spaces = $dayweek{$year}->{$month}->{1} - 1;
 	      $calendar_week{'emptydays_beg'} = 
-		  &fill_var_props($vars, 'CALENDAR_EMPTY_DAYS', 
+		  LJ::fill_var_props($vars, 'CALENDAR_EMPTY_DAYS', 
 				  { 'numempty' => $spaces });
 	  }
 
@@ -929,7 +932,7 @@ sub create_view_calendar
 	      $calendar_day{'eventcount'} = $count{$year}->{$month}->{$i};
 	      if ($count{$year}->{$month}->{$i})
 	      {
-		$calendar_day{'dayevent'} = &fill_var_props($vars, 'CALENDAR_DAY_EVENT', {
+		$calendar_day{'dayevent'} = LJ::fill_var_props($vars, 'CALENDAR_DAY_EVENT', {
 		    'eventcount' => $count{$year}->{$month}->{$i},
 		    'dayurl' => "$journalbase/day/" . sprintf("%04d/%02d/%02d", $year, $month, $i),
 		});
@@ -939,11 +942,11 @@ sub create_view_calendar
 		$calendar_day{'daynoevent'} = $vars->{'CALENDAR_DAY_NOEVENT'};
 	      }
 
-	      $$days .= &fill_var_props($vars, 'CALENDAR_DAY', \%calendar_day);
+	      $$days .= LJ::fill_var_props($vars, 'CALENDAR_DAY', \%calendar_day);
 
 	      if ($dayweek{$year}->{$month}->{$i} == 7)
 	      {
-		$$weeks .= &fill_var_props($vars, 'CALENDAR_WEEK', \%calendar_week);
+		$$weeks .= LJ::fill_var_props($vars, 'CALENDAR_WEEK', \%calendar_week);
 		$rowopen = 0;
 		$calendar_week{'emptydays_beg'} = "";
 		$calendar_week{'emptydays_end'} = "";
@@ -958,20 +961,20 @@ sub create_view_calendar
 	      {
 		$spaces = 7 - $dayweek{$year}->{$month}->{$daysinmonth};
 		$calendar_week{'emptydays_end'} = 
-		    &fill_var_props($vars, 'CALENDAR_EMPTY_DAYS', 
+		    LJ::fill_var_props($vars, 'CALENDAR_EMPTY_DAYS', 
 				{ 'numempty' => $spaces });
 	      }
-	      $$weeks .= &fill_var_props($vars, 'CALENDAR_WEEK', \%calendar_week);
+	      $$weeks .= LJ::fill_var_props($vars, 'CALENDAR_WEEK', \%calendar_week);
 	  }
 
-	  $$months .= &fill_var_props($vars, 'CALENDAR_MONTH', \%calendar_month);
+	  $$months .= LJ::fill_var_props($vars, 'CALENDAR_MONTH', \%calendar_month);
         } # end foreach months
 
     } # end foreach years
 
     ######## new code
 
-    $$ret .= &fill_var_props($vars, 'CALENDAR_PAGE', \%calendar_page);
+    $$ret .= LJ::fill_var_props($vars, 'CALENDAR_PAGE', \%calendar_page);
 
     return 1;  
 }
@@ -998,7 +1001,7 @@ sub create_view_day
 
     if ($u->{'url'} =~ m!^http://!) {
 	$day_page{'website'} =
-	    &fill_var_props($vars, 'DAY_WEBSITE', {
+	    LJ::fill_var_props($vars, 'DAY_WEBSITE', {
 		"url" => LJ::ehtml($u->{'url'}),
 		"name" => LJ::ehtml($u->{'urlname'} || "My Website"),
 	    });
@@ -1015,7 +1018,7 @@ sub create_view_day
     my $qremoteid = $remote->{'userid'}+0;
 
     my %FORM = ();
-    &get_form_data(\%FORM);
+    LJ::get_form_data(\%FORM);
     my $month = $FORM{'month'};
     my $day = $FORM{'day'};
     my $year = $FORM{'year'};
@@ -1124,10 +1127,10 @@ END_SQL
 
         my %day_event = ();
 	$day_event{'itemid'} = $itemid;
-        $day_event{'datetime'} = &fill_var_props($vars, 'DAY_DATE_FORMAT', \%day_date_format);
+        $day_event{'datetime'} = LJ::fill_var_props($vars, 'DAY_DATE_FORMAT', \%day_date_format);
 	if ($subject) {
 	    LJ::CleanHTML::clean_subject(\$subject);
-	    $day_event{'subject'} = &fill_var_props($vars, 'DAY_SUBJECT', { 
+	    $day_event{'subject'} = LJ::fill_var_props($vars, 'DAY_SUBJECT', { 
 		"subject" => $subject,
 	    });
 	}
@@ -1140,10 +1143,10 @@ END_SQL
 	if ($u->{'opt_showtalklinks'} eq "Y" &&
 	    ! $logprops{$itemid}->{'opt_nocomments'}
 	    ) {
-	    $day_event{'talklinks'} = &fill_var_props($vars, 'DAY_TALK_LINKS', {
+	    $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
 		'itemid' => $itemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?itemid=$itemid",
-		'readlink' => $replycount ? &fill_var_props($vars, 'DAY_TALK_READLINK', {
+		'readlink' => $replycount ? LJ::fill_var_props($vars, 'DAY_TALK_READLINK', {
 		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&amp;nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount==1 ? "" : "s",
@@ -1154,13 +1157,14 @@ END_SQL
 	}
 
 	## current stuff
-	&prepare_currents({ 'props' => \%logprops, 
-			    'itemid' => $itemid, 
-			    'vars' => $vars, 
-			    'prefix' => "DAY",
-			    'event' => \%day_event,
-			    'user' => $u,
-			});
+	LJ::prepare_currents($dbs, {
+	    'props' => \%logprops, 
+	    'itemid' => $itemid, 
+	    'vars' => $vars, 
+	    'prefix' => "DAY",
+	    'event' => \%day_event,
+	    'user' => $u,
+	});
 
 	my $var = 'DAY_EVENT';
 	if ($security eq "private" && 
@@ -1168,7 +1172,7 @@ END_SQL
 	if ($security eq "usemask" && 
 	    $vars->{'DAY_EVENT_PROTECTED'}) { $var = 'DAY_EVENT_PROTECTED'; }
 	    
-        $events .= &fill_var_props($vars, $var, \%day_event);
+        $events .= LJ::fill_var_props($vars, $var, \%day_event);
     }
 
     if (! $initpagedates)
@@ -1182,11 +1186,11 @@ END_SQL
 	  $day_page{$_} = shift @dateparts;
         }
 
-        $day_page{'events'} = &fill_var_props($vars, 'DAY_NOEVENTS', {});
+        $day_page{'events'} = LJ::fill_var_props($vars, 'DAY_NOEVENTS', {});
     }
     else
     {
-        $day_page{'events'} = &fill_var_props($vars, 'DAY_EVENTS', { 'events' => $events });
+        $day_page{'events'} = LJ::fill_var_props($vars, 'DAY_EVENTS', { 'events' => $events });
         $events = "";  # free some memory maybe
     }
 
@@ -1217,7 +1221,7 @@ END_SQL
     $day_page{'prevday_url'} = "$journalbase/day/" . sprintf("%04d/%02d/%02d", $pdyear, $pdmonth, $pdday); 
     $day_page{'nextday_url'} = "$journalbase/day/" . sprintf("%04d/%02d/%02d", $nxyear, $nxmonth, $nxday); 
 
-    $$ret .= &fill_var_props($vars, 'DAY_PAGE', \%day_page);
+    $$ret .= LJ::fill_var_props($vars, 'DAY_PAGE', \%day_page);
     return 1;
 }
 

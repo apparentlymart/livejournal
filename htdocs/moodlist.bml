@@ -56,7 +56,7 @@ P=)
      foreach my $mood (@{$lists{$num}}) {
 	 $ret .= "<LI><B><A HREF=\"http://www.dictionary.com/cgi-bin/dict.pl?term=$mood->{'mood'}\" TARGET=dict>$mood->{'mood'}</A></B> (#$mood->{'moodid'})\n";
 	 my %pic;
-	 if (&get_mood_picture($moodtheme, $mood->{'moodid'}, \%pic)) {
+	 if (LJ::get_mood_picture($moodtheme, $mood->{'moodid'}, \%pic)) {
 	     unless ($FORM{'hidederived'} && $pic{'moodid'} != $mood->{'moodid'}) {
 		 $ret .= "<IMG ALIGN=ABSMIDDLE SRC=\"$pic{'pic'}\" WIDTH=$pic{'w'} HEIGHT=$pic{'h'} HSPACE=2 VSPACE=2>\n";     
 	     }

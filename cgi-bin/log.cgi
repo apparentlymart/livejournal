@@ -14,7 +14,7 @@ REQUEST:
     
     my %out = ();
     my %FORM = ();
-    &get_form_data(\%FORM);
+    LJ::get_form_data(\%FORM);
 
     print "Content-type: text/plain\n";
     
