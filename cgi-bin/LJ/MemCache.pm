@@ -23,6 +23,10 @@ sub init {
     trigger_bucket_reconstruct();
 }
 
+sub client_stats {
+    return $memc->{'stats'} || {};
+}
+
 sub trigger_bucket_reconstruct {
     $memc->set_servers(\@LJ::MEMCACHE_SERVERS);
     $memc->set_debug($LJ::MEMCACHE_DEBUG);
