@@ -498,7 +498,9 @@ sub interface_content
 
     my %out = ();
     my %FORM = ();
-    LJ::decode_url_string(scalar($r->content), \%FORM);
+    my $content;
+    $r->read($content, $r->header_in("Content-Length"));
+    LJ::decode_url_string($content, \%FORM);
 
     LJ::do_request($dbs, \%FORM, \%out);
 
