@@ -230,7 +230,7 @@ sub process {
         my %groupmap = ( private => 0, regusers => 253,
                          friends => 254, public => 255 );
 
-        $lj_headers{'imgsecurity'} = $groupmap{$1};
+        $lj_headers{'imgsecurity'} = $groupmap{ lc $1 };
     }
 
     $lj_headers{'imgcut'}    ||= ($u->{'emailpost_imgcut'}    || 'totals');
@@ -240,8 +240,8 @@ sub process {
     my $fb_upload_errstr;
     # undef return value? retry posting for later.
     my $fb_upload = upload_images($entity, $u, \$fb_upload_errstr, 
-                       { imgsec  => $lj_headers{'imgsecurity'} || $u->{'emailpost_imgsecurity'},
-                         galname => $lj_headers{'gallery'}     || $u->{'emailpost_gallery'}
+                       { imgsec  => $lj_headers{'imgsecurity'},
+                         galname => $lj_headers{'gallery'} || $u->{'emailpost_gallery'}
                        }) || return $err->($fb_upload_errstr, { retry => 1 });
 
     # if we found and successfully uploaded some images...
