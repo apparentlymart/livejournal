@@ -904,6 +904,8 @@ sub auth_fields
             $hpass = $form->{'hpassword'} || LJ::hash_password($form->{'password'});
         } elsif ($remote) {
             $ret .= "<input type='hidden' name='remoteuser' value='$remote->{'user'}'>\n";
+            # this is merely to assist old code that only sends hpassword to auth_okay:
+            $hpass = "_(remote)";
         }
 
         my $alturl = BML::self_link({ 'altlogin' => 1 });
@@ -2118,6 +2120,16 @@ sub auth_okay
     } else {
         my $dbs = LJ::get_dbs();
         $u = LJ::load_user($dbs, $u);
+    }
+    
+    # this magic hpassword value is set by auth_fields() to make 
+    # moving the old to the new login system faster.  it should
+    # be killed in phase 2, though, where we remove hpassword
+    # entirely.
+    if ($md5 eq "_(remote)") {
+        my $remote = LJ::get_remote();
+        return 1 if 
+            $remote && $remote->{'userid'} == $u->{'userid'};
     }
 
     # set the IP banned flag, if it was provided.
