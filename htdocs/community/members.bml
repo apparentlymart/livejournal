@@ -269,7 +269,7 @@ body<=
 
     # output starts here
     $ret .= "<?p " . BML::ml('.name', { 'name' => LJ::ljuser($cname, { 'type' => 'C' }) });
-    $ret .= " " . BML::ml('.settings', { 'link' => BML::get_uri() . "?comm=$cname"}) . " p?>";
+    $ret .= " " . BML::ml('.settings', { 'link' => "settings.bml?comm=$cname"}) . " p?>";
 
     $ret .= "<form method='post' action='members.bml?comm=$cname'>";
 
