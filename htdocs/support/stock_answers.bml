@@ -72,8 +72,8 @@ body<=
             unless $dbh;
 
         if ($POST{'action:new'}) {
-            my $newid = LJ::alloc_user_counter($remote, 'A');
-            return "<?h1 Error h1?><?p Unable to allocate user counter.  Please try again. p?>"
+            my $newid = LJ::alloc_global_counter('A');
+            return "<?h1 Error h1?><?p Unable to allocate counter.  Please try again. p?>"
                 unless $newid;
 
             $dbh->do("INSERT INTO support_answers (ansid, spcatid, subject, body, lastmodtime, lastmoduserid) " .

@@ -8701,7 +8701,7 @@ sub alloc_user_counter
 sub alloc_global_counter
 {
     my ($dom, $recurse) = @_;
-    return undef unless $dom =~ /^[SPC]$/;
+    return undef unless $dom =~ /^[SPCA]$/;
     my $dbh = LJ::get_db_writer();
     return undef unless $dbh;
 
