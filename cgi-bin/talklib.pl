@@ -1,5 +1,11 @@
 #!/usr/bin/perl
 #
+# <LJDEP>
+# link: htdocs/userinfo.bml, htdocs/go.bml, htdocs/tools/memadd.bml, htdocs/editjournal.bml
+# link: htdocs/topics/additem.bml, htdocs/tools/tellafriend.bml
+# img: htdocs/img/btn_prev.gif, htdocs/img/memadd.gif, htdocs/img/btn_edit.gif, htdocs/img/topic_add.gif
+# img: htdocs/img/btn_next.gif, htdocs/img/btn_tellafriend.gif
+# </LJDEP>
 
 use strict;
 package LJ::Talk;
