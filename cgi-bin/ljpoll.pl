@@ -724,9 +724,8 @@ sub show_poll
         if ($q->{'type'} eq "text" && $do_form) {
             my ($size, $max) = split(m!/!, $q->{'opts'});
 
-            my $pval = LJ::eall($preval{$qid});
             $ret .= LJ::html_text({ 'size' => $size, 'maxlength' => $max, 
-                                    'name' => "pollq-$qid", 'value' => $pval });
+                                    'name' => "pollq-$qid", 'value' => $preval{$qid} });
         }
 
         #### drop-down list
@@ -931,8 +930,7 @@ sub submit
     
     foreach my $q (@qs) {
         my $qid = $q->{'pollqid'}+0;
-        my $val;
-        $val = $form->{"pollq-$qid"};
+        my $val = $form->{"pollq-$qid"};
         if ($q->{'type'} eq "check") {
             ## multi-selected items are comma separated from htdocs/poll/index.bml
             $val = join(",", sort { $a <=> $b } split(/,/, $val));
