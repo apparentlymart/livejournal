@@ -861,6 +861,41 @@ sub parse_vars
     }
 }
 
+sub current_mood_str {
+    my ($themeid, $moodid, $mood) = @_;
+
+    # ideal behavior: if there is a moodid, that defines the picture.
+    # if there is a current_mood, that overrides as the mood name,
+    # otherwise show the mood name associated with current_moodid
+
+    my $moodname;
+    my $moodpic;
+
+    # favor custom mood over system mood
+    if (my $val = $mood) {
+        LJ::CleanHTML::clean_subject(\$val);
+        $moodname = $val;
+    }
+
+    if (my $val = $moodid) {
+        $moodname ||= LJ::mood_name($val);
+        my %pic;
+        if (LJ::get_mood_picture($themeid, $val, \%pic)) {
+            $moodpic = "<img src=\"$pic{'pic'}\" align='absmiddle' width='$pic{'w'}' " .
+                       "height='$pic{'h'}' vspace='1' alt='' /> ";
+        }
+    }
+
+    return "$moodpic$moodname";
+}
+
+sub current_music_str {
+    my $val = shift;
+
+    LJ::CleanHTML::clean_subject(\$val);
+    return $val;
+}
+
 # <LJFUNC>
 # class: s1
 # name: LJ::prepare_currents
@@ -878,26 +913,13 @@ sub prepare_currents
     my %currents = ();
     my $val;
     if ($val = $args->{'props'}->{$datakey}->{'current_music'}) {
-        LJ::CleanHTML::clean_subject(\$val);
-        $currents{'Music'} = $val;
+        $currents{'Music'} = LJ::current_music_str($val);
     }
 
-    # favor custom mood over system mood
-    if ($val = $args->{'props'}->{$datakey}->{'current_mood'}) {
-        LJ::CleanHTML::clean_subject(\$val);
-        $currents{'Mood'} = $val;
+    $currents{'Mood'} = LJ::current_mood_str($args->{'user'}->{'moodthemeid'},
+                                             $args->{'props'}->{$datakey}->{'current_moodid'},
+                                             $args->{'props'}->{$datakey}->{'current_mood'});
 
-    } elsif ($val = $args->{'props'}->{$datakey}->{'current_moodid'}) {
-        my $theme = $args->{'user'}->{'moodthemeid'};
-        my %pic;
-        my $name = LJ::mood_name($val);
-        if (LJ::get_mood_picture($theme, $val, \%pic)) {
-            $currents{'Mood'} = "<img src=\"$pic{'pic'}\" align='absmiddle' width='$pic{'w'}' ".
-                "height='$pic{'h'}' vspace='1' alt='' /> $name";
-        } else {
-            $currents{'Mood'} = $name;
-        }
-    }
     if (%currents) {
         if ($args->{'vars'}->{$args->{'prefix'}.'_CURRENTS'})
         {

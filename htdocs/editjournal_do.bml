@@ -123,8 +123,6 @@ body<=
                 if (my $id = LJ::mood_id($POST{'prop_current_mood'})) {
                     $req{'prop_current_moodid'} = $id;
                     delete $req{'prop_current_mood'};
-                } else {
-                    delete $req{'prop_current_moodid'};
                 }
             }
 
@@ -315,7 +313,7 @@ body<=
             $ret .= LJ::html_select({ 'name' => 'prop_current_moodid',
                                       'selected' => $sel }, @moodlist);
             $ret .= " $ML{'.other'} " . LJ::html_text({ 'name' => 'prop_current_mood',
-                                                        'value' => $sel ? '' : $props{'current_mood'},
+                                                        'value' => $props{'current_mood'},
                                                         'size' => '15', 'maxlength' => '30' });
         }	     
 
