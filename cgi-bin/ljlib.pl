@@ -5940,6 +5940,28 @@ sub kill_session
 }
 
 # <LJFUNC>
+# name: LJ::auto_linkify
+# des: Takes a plain-text string and changes URLs into <a href> tags (auto-linkification)
+# args: str
+# arg-str: The string to perform auto-linkification on.
+# returns: The auto-linkified text.
+# </LJFUNC>
+sub auto_linkify
+{
+    my $str = shift;
+    my $match = sub {
+        my $str = shift;
+        if ($str =~ /^(.*?)(&(#39|quot|lt|gt)(;.*)?)$/) {
+            return "<a href='$1'>$1</a>$2";
+        } else {
+            return "<a href='$str'>$str</a>";
+        }
+    };
+    $str =~ s!https?://[^\s\'\"\<\>]+[a-zA-Z0-9_/&=\-]! $match->($&); !ge;
+    return $str;
+}
+
+# <LJFUNC>
 # name: LJ::load_rel_user
 # des: Load user relationship information. Loads all relationships of type 'type' in
 #      which user 'userid' participates on the left side (is the source of the

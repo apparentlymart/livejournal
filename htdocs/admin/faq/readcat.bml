@@ -36,24 +36,22 @@ body<=
 
  foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> $faqcat{$b}->{'catorder'} } keys %faqcat)
  {
-     $ret .= "<H2>" . LJ::ehtml($faqcat{$faqcat}->{'faqcatname'}) . "</H2>\n";
-     $ret .= "<UL>\n";
+     $ret .= "<h2>" . LJ::ehtml($faqcat{$faqcat}->{'faqcatname'}) . "</h2>\n";
+     $ret .= "<ul>\n";
      foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
      {
          next unless ($faqq{$faqid}->{'question'});
          BML::note_mod_time($faqq{$faqid}->{'lastmodtime'}); 
          my $q = LJ::ehtml($faqq{$faqid}->{'question'});
          $q =~ s/^\s+//; $q =~ s/\s+$//;
-         $q =~ s/\n/<BR>/g;
+         $q =~ s!\n!<br />!g;
          my $a = LJ::ehtml($faqq{$faqid}->{'answer'});
          $a =~ s/^\s+//; $a =~ s/\s+$//;
          $a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
-         $a =~ s/\n/<BR>/g;
-         $a =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=]+!<A HREF="$&">$&</A>!g;
-         $ret .= "<P><TABLE BGCOLOR=#C0C0C0><TR><TD><B>$q</B></TD></TR></TABLE>$a";
-
+         $a =~ s!\n!<br />!g;
+         $ret .= "<p><table bgcolor='#c0c0c0'><tr><td><b>$q</b></td></tr></table>" . LJ::auto_linkify($a);
      }
-     $ret .= "</UL>\n";
+     $ret .= "</ul>\n";
  }
 
  return $ret;

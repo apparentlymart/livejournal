@@ -322,7 +322,17 @@ sub clean
                  ! $opencount{'lj-raw'};
             
             if ($auto_format && ! $opencount{'a'}) {
-                $token->[1] =~ s!https?://[^\s\'\"]+[a-zA-Z0-9_/&=\-]!$url{++$urlcount}=$&;"&url$urlcount;";!egi;
+                my $match = sub {
+                    my $str = shift;
+                    if ($str =~ /^(.*?)(&(#39|quot|lt|gt)(;.*)?)$/) {
+                        $url{++$urlcount} = $1;
+                        return "&url$urlcount;$2";
+                    } else {
+                        $url{++$urlcount} = $str;
+                        return "&url$urlcount;";
+                    }
+                };
+                $token->[1] =~ s!https?://[^\s\'\"\<\>]+[a-zA-Z0-9_/&=\-]! $match->($&); !ge;
             }
 
             # escape tags in text tokens.  shouldn't belong here!

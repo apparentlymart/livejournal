@@ -75,18 +75,18 @@
             $question = LJ::Lang::get_text($curlang, "$faqid.1question", $mld->{'dmid'});
             $answer   = LJ::Lang::get_text($curlang, "$faqid.2answer",   $mld->{'dmid'});
         }
-          
+
         # escape question and answers
         my $q = LJ::ehtml($question);
         $q =~ s/^\s+//; $q =~ s/\s+$//;
         $q =~ s/\n/<br \/>/g;
-     
+
         my $a = LJ::ehtml($answer);
         $a =~ s/^\s+//; $a =~ s/\s+$//;
         $a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
         $a =~ s/\n/<br \/>/g;
-     
-        $a =~ s!(&quot;|&#39;)?(https?://\S+[a-zA-Z0-9_/&=\-])!$1 ? $& : "<a href=\"$2\">$2</a>"!eg;
+
+        $a = LJ::auto_linkify($a);
 
         # display output
         $$body .= "<?h1 $q h1?><div style='margin-left: 20px;'>$a</div>";

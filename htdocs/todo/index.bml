@@ -235,8 +235,7 @@
 
      ## item & description
      {
-         my $des = LJ::ehtml($it->{'des'});
-         $des =~ s,(http://\S+),<a href="$1">$1</a>,g;
+         my $des = LJ::auto_linkify(LJ::ehtml($it->{'des'}));
          $val = "<a href=\"item.bml?id=$it->{'todoid'}\"><b>" . LJ::ehtml($it->{'subject'}) . "</b></a><br /><font size='-1'>$des</font>";
          push @vals, $val;
      }

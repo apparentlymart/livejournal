@@ -241,13 +241,12 @@ body<=
         my %url;
         my $urlN = 0;
 
-        $message =~ s!https?://\S+[a-zA-Z0-9_/&=\-]!$url{++$urlN} = "<a href='$&'>" . LJ::eall($&) . "</a>"; ":URL:$urlN"!eg;
-        $message = LJ::eall($message);
+        $message = LJ::ehtml($message);
         $message =~ s/^\s+//;
         $message =~ s/\s+$//;
         $message =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
         $message =~ s/\n/<br \/>\n/g;
-        $message =~ s/:URL:(\d+)/$url{$1}/eg;
+        $message = LJ::auto_linkify($message);
         
         # special case: original request
         if ($le->{'type'} eq "req") {

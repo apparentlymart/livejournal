@@ -106,10 +106,8 @@
             }
 
             # server login message for user?
-            if ($res{'message'}) {
-                $login_message = LJ::ehtml($res{'message'});
-                $login_message =~ s!(&quot;|&\#39;)?(https?://\S+[a-zA-Z0-9_/&=\-])!$1 ? $& : "<a href=\"$2\">$2</a>"!eg;
-            }
+            $login_message = LJ::auto_linkify(LJ::ehtml($res{'message'}))
+                if $res{'message'};
         }
 
         # do update postevent
@@ -165,8 +163,7 @@
             # examine response
             my $update_message;
             if ($res{'success'} eq "OK" && $res{'message'}) {
-                $update_message = LJ::ehtml($res{'message'});
-                $update_message =~ s!(&quot;|&\#39;)?(https?://\S+[a-zA-Z0-9_/&=\-])!$1 ? $& : "<a href=\"$2\">$2</a>"!eg;
+                $update_message = LJ::auto_linkify(LJ::ehtml($res{'message'}));
             }
      
             # report results
