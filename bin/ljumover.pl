@@ -1013,7 +1013,7 @@ sub getPendingUsers {
             FROM
                 clustertrack2
             WHERE
-                timeactive > UNIX_TIMESTAMP() - 86400*30
+                timeactive > UNIX_TIMESTAMP() - 86400*2
                 AND clusterid = ?
             LIMIT %d
         }, $limit;
@@ -1042,7 +1042,7 @@ sub getPendingUsers {
         die "Couldn't obtain db handle for cluster $cid\n" unless $seldbh;
 
         # Prepare the selection cursor and execute it
-        $selsth = $seldbh->prepare( $sql ) or die "prepare: ", $dbh->errstr;
+        $selsth = $seldbh->prepare( $sql ) or die "prepare: ", $seldbh->errstr;
         $self->debugMsg( "Running user-select query '%s' on cluster %d", $sql, $cid );
         $selsth->execute( $cid ) or die "execute: ", $selsth->errstr;
 
@@ -1058,8 +1058,10 @@ sub getPendingUsers {
                 # if for some reason this user had a clustertrack2 row they shouldn't have,
                 # delete the clustertrack2 on this cluster and move along.
                 if ($u->{'clusterid'} != $cid) {
-                    $seldbh->do("DELETE FROM clustertrack2 WHERE userid=?",
-                                undef, $u->{userid});
+                    $seldbh->do("DELETE FROM clustertrack2 WHERE userid=? AND clusterid=?",
+                                undef, $u->{userid}, $cid);
+                    print("deleted invalid clustertrack2 for userid=$u->{userid} ",
+                          "(not cluster $cid, but $u->{clusterid}\n");
                     next;
                 }
 
