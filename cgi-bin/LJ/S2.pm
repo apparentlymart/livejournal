@@ -1091,6 +1091,7 @@ sub Image_userpic
 
     unless ($picid) {
         $picid = $kw ? $u->{'_userpics'}->{'kw'}->{$kw} : $u->{'defaultpicid'};
+        $picid ||= $u->{'defaultpicid'};
     }
 
     return Null("Image") unless defined $u->{'_userpics'}->{$picid};
