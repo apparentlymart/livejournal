@@ -54,7 +54,7 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
 	if ($ENV{'REQUEST_URI'} eq "/robots.txt") 
 	{
 	    my $u = { 'user' => $user };
-	    &load_user_props($u, "opt_blockrobots");
+	    LJ::load_user_props($dbs, $u, "opt_blockrobots");
 	    print "Status: 200 OK\n";
 	    print "Content-type: text/plain\n\n";
 	    print "User-Agent: *\n";

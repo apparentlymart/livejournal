@@ -3,8 +3,10 @@ TITLE=>Add to Topic
 BODY<=
 (=_CODE
 
- require 'ljlib.pl';
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my ($sth, $ret);
  my $topid = $FORM{'topid'}+0;
  my $itemid = $FORM{'itemid'}+0;
@@ -51,9 +53,9 @@ BODY<=
  }
 
  my $status = "new";
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
  my %cataccess;
- &remote_has_priv($remote, "topicscreencat", \%cataccess);
+ LJ::remote_has_priv($dbs, $remote, "topicscreencat", \%cataccess);
  if ($cataccess{'all'} || $cataccess{$catid}) { 
      $status = "on";
  }

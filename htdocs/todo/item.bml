@@ -1,10 +1,11 @@
 (=_CODE
-#line 2
 
-# use strict;
+ use strict;
  use vars qw($dbh $title $body %FORM);
- require 'ljtodo.pl';
- &connect_db();
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
  $title = "";
  $body = "";
@@ -12,13 +13,11 @@
  my ($sth, $hval, $disabled);
  my %permission;
  my $u;
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
 
  my $quser = $dbh->quote($FORM{'user'});
  if ($FORM{'user'}) {
-     $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
-     $sth->execute;
-     $u = $sth->fetchrow_hashref;
+     $u = LJ::load_user($dbs, $user);
  }
 
  my $mode;
@@ -26,7 +25,7 @@
 
  if ($FORM{'id'} =~ /^\d+$/ && $FORM{'id'}) {
      my $id = $FORM{'id'}+0;
-     $sth = $dbh->prepare("SELECT t.*, up.user AS 'posteruser' FROM todo t, user up WHERE t.posterid=up.userid AND t.todoid=$id");
+     $sth = $dbr->prepare("SELECT t.*, up.user AS 'posteruser' FROM todo t, useridmap up WHERE t.posterid=up.userid AND t.todoid=$id");
      $sth->execute;
      $it = $sth->fetchrow_hashref;
      unless ($it) {
@@ -35,9 +34,7 @@
 	 return "";
      }
      
-     $sth = $dbh->prepare("SELECT * FROM user WHERE userid=$it->{'journalid'}");
-     $sth->execute;
-     $u = $sth->fetchrow_hashref;
+     $u = LJ::load_userid($dbs, $it->{'journalid'})
 
      if ($it->{'security'} eq "private") {
 	 unless ($remote && $remote->{'userid'} == $it->{'journalid'}) {
@@ -207,24 +204,24 @@
  $body .= "<table>";
  
  ## subject
- $hval = &ehtml($it->{'subject'});
+ $hval = LJ::ehtml($it->{'subject'});
  $body .= "<tr><td><b>Subject:</b></td><td><input type=text name=subject value=\"$hval\" size=30 maxlength=40 $disabled>";
  $body .= " <b>Priority:</b> ";
- $body .= &html_select({ 'name' => 'priority', 'selected' => $it->{'priority'}, 'disabled' => $disabled },
+ $body .= LJ::html_select({ 'name' => 'priority', 'selected' => $it->{'priority'}, 'disabled' => $disabled },
                        5, "++ High", 4, "+", 3, "Normal", 2, "-", 1, "-- Low");
  $body .= "</td></tr>\n";
 
  ## des
- $hval = &ehtml($it->{'des'});
+ $hval = LJ::ehtml($it->{'des'});
  $body .= "<tr><td><b>Details:</b></td><td><input type=text name=des value=\"$hval\" size=50 maxlength=80 $disabled></td></tr>\n";
 
  ## statusline
- $hval = &ehtml($it->{'statusline'});
+ $hval = LJ::ehtml($it->{'statusline'});
  $body .= "<tr><td><b>Status:</b></td><td>";
  $body .= "<input type=text name=statusline value=\"$hval\" size=15 maxlength=15 $disabled>";
 
  ## progress (percent complete)
- $hval = &ehtml($it->{'progress'});
+ $hval = LJ::ehtml($it->{'progress'});
  $body .= " <b>Percent Done:</b> <input type=text name=progress value=\"$hval\" size=3 maxlength=3 $disabled>%";
  $body .= "</td></tr>\n";
 
@@ -236,7 +233,7 @@
 
  ## categories
  $body .= "<tr valign=top><td><b>Categories:</b></td><td>";
- $hval = &ehtml($it->{'_cats'});
+ $hval = LJ::ehtml($it->{'_cats'});
  $body .= "<input type=text name=categories value=\"$hval\" size=60 maxlength=80 $disabled><br>(=DE Up to 10 comma separated categories DE=)";
  $body .= "</td></tr>";
 
@@ -245,7 +242,7 @@
  {
      if ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid") {
 
-	 $body .= &html_select({ 'name' => 'security', 'selected' => $it->{'security'}, 'disabled' => $disabled },
+	 $body .= LJ::html_select({ 'name' => 'security', 'selected' => $it->{'security'}, 'disabled' => $disabled },
 			       "public" => "Public",
 			       "private" => "Private", 
 			       "friends" => $u->{'journaltype'} eq "C" ? "Community Members" : "Friends");

@@ -40,7 +40,7 @@
 	 return "";
      }
 
-     &send_mail({
+     LJ::send_mail({
 	 'to' => $FORM{'toemail'},
 	 'toname' => $FORM{'toname'},
 	 'from' => $u->{'emailpref'},

@@ -172,7 +172,7 @@
      $body .= "<noscript><p style=\"font-size: 0.85em;\"><b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.</p></noscript>";
 
      $body .= "<UL><TABLE><TR><TD><B>Subject:</B> <I>(optional, for use on longer entries)</I><BR>";
-     $body .= "<INPUT NAME=\"subject\" SIZE=50 MAXLENGTH=100 VALUE=\"" . &ehtml($FORM{'subject'}) . "\"><P>";
+     $body .= "<INPUT NAME=\"subject\" SIZE=50 MAXLENGTH=100 VALUE=\"" . LJ::ehtml($FORM{'subject'}) . "\"><P>";
 
      if ($spellcheck_html) {
 	$body .= "<B>Your spell-checked post:</B><br>";
@@ -182,7 +182,7 @@
 
      $body .= "<B>Event:</B><BR>";
      $body .= "<TEXTAREA NAME=\"event\" COLS=50 ROWS=10 WRAP=VIRTUAL>";
-     $body .= &ehtml($FORM{'event'});
+     $body .= LJ::ehtml($FORM{'event'});
      $body .= "</TEXTAREA>";
      $body .= "<BR>(=DE (HTML okay; by default, newlines will be auto-formatted to <TT>&lt;BR&gt;</TT>) DE=)";
      if ($LJ::SPELLER) {
@@ -213,15 +213,15 @@
 	     for (my $i=1; $i<=$res{'access_count'}; $i++) {
 		 push @access, $res{"access_$i"};
 	     }
-	     $body .= &html_select({ 'name' => 'usejournal', 'selected' => $FORM{'usejournal'}, },
-				   "", "($remote->{'user'}) -- default", map { $_, $_ } @access);
+	     $body .= LJ::html_select({ 'name' => 'usejournal', 'selected' => $FORM{'usejournal'}, },
+				      "", "($remote->{'user'}) -- default", map { $_, $_ } @access);
 	 }
 
 	 $body .= "<P><B>Security Level:</B> ";
-	 $body .= &html_select({ 'name' => 'security', 'selected' => $FORM{'security'}, },
-			       "public", "Public",
-			       "private", "Private",
-			       "friends", "Friends");
+	 $body .= LJ::html_select({ 'name' => 'security', 'selected' => $FORM{'security'}, },
+				  "public", "Public",
+				  "private", "Private",
+				  "friends", "Friends");
 	 $body .= " (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=24 HELP=)";
 	 my $checked;
 	 $checked = $FORM{'prop_opt_preformatted'} ? "CHECKED" : "";
@@ -239,15 +239,15 @@
 		 push @pics, $res{"pickw_$i"};
 	     }
 	     @pics = sort { lc($a) cmp lc($b) } @pics;
-	     $body .= &html_select({'name' => 'prop_picture_keyword', 
-				    'selected' => $FORM{'prop_picture_keyword'}, },
-				   ("", "(default)", map { ($_, $_) } @pics));
+	     $body .= LJ::html_select({'name' => 'prop_picture_keyword', 
+				       'selected' => $FORM{'prop_picture_keyword'}, },
+				      ("", "(default)", map { ($_, $_) } @pics));
 	     $body .= " (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=46 HELP=)";
 	 }
 
 	 $body .= "<P><B>Current <A HREF=\"/moodlist.bml\">Mood</A>:</B>";
 
-	 &load_moods();
+	 LJ::load_moods($dbs);
 	 my @sel;
 	 foreach my $moodid (sort { $LJ::CACHE_MOODS{$a}->{'name'} cmp 
 			     $LJ::CACHE_MOODS{$b}->{'name'} } keys %LJ::CACHE_MOODS)
@@ -255,12 +255,12 @@
 	     push @sel, $moodid, $LJ::CACHE_MOODS{$moodid}->{'name'};
 	 }
 
-	 $body .= &html_select({'name' => 'prop_current_moodid',
-				'selected' => $FORM{'prop_current_moodid'}, },
-			       ("", "None, or other:", @sel));
+	 $body .= LJ::html_select({'name' => 'prop_current_moodid',
+				   'selected' => $FORM{'prop_current_moodid'}, },
+				  ("", "None, or other:", @sel));
 
-	 $body .= "Other: <INPUT NAME=\"prop_current_mood\" SIZE=15 MAXLENGTH=30 VALUE=\"" . &ehtml($FORM{'prop_current_mood'}) . "\">";
-	 $body .= "<P><B>Current Music:</B> <INPUT NAME=\"prop_current_music\" SIZE=40 MAXLENGTH=60 VALUE=\"" . &ehtml($FORM{'prop_current_music'}) . "\">";
+	 $body .= "Other: <INPUT NAME=\"prop_current_mood\" SIZE=15 MAXLENGTH=30 VALUE=\"" . LJ::ehtml($FORM{'prop_current_mood'}) . "\">";
+	 $body .= "<P><B>Current Music:</B> <INPUT NAME=\"prop_current_music\" SIZE=40 MAXLENGTH=60 VALUE=\"" . LJ::ehtml($FORM{'prop_current_music'}) . "\">";
 	 $body  .= "</TD></TR><TR><TD ALIGN=CENTER><INPUT TYPE=SUBMIT VALUE=\"Update Journal\">";
 	 
      }

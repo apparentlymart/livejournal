@@ -3,8 +3,11 @@ TITLE=>Request #(=_CODE return ($FORM{'id'}+0); _CODE=)
 BODY<=
 	
 (=_CODE
-#line 6 
- &connect_db();
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my $sth;
  
  my $spid = $FORM{'id'}+0;
@@ -54,7 +57,7 @@ BODY<=
  if ($u->{'defaultpicid'}) {
      my %pic;
      my $picid = $u->{'defaultpicid'};
-     &load_userpics(\%pic, [ $picid ]);
+     LJ::load_userpics($dbs, \%pic, [ $picid ]);
      $ret .= "<IMG ALIGN=BASELINE SRC=\"/userpic/$picid\" WIDTH=$pic{$picid}->{'width'} HEIGHT=$pic{$picid}->{'height'} ALIGN=ABSMIDDLE HSPACE=3>";
  }
  $ret .= "$sp->{'reqname'} (*******\@$domain)</TD></TR>\n";
@@ -117,7 +120,7 @@ BODY<=
 
  my %userpics;
  my @pics = map { $userinfo{$_}->{'defaultpicid'} } keys %userinfo;
- &load_userpics(\%userpics, \@pics);
+ LJ::load_userpics($dbs, \%userpics, \@pics);
 
  my @screened;
 
@@ -134,7 +137,7 @@ BODY<=
      }
 
      my $message = $le->{'message'};
-     $message = &BMLUtil::ehtml($message);
+     $message = LJ::ehtml($message);
      $message =~ s/^\s+//;
      $message =~ s/\s+$//;
      $message =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
@@ -255,12 +258,12 @@ BODY<=
      
      foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> $faqcat{$b}->{'catorder'} } keys %faqcat)
      {
-	 $ret .= "<option value=0>[ " . &BMLUtil::ehtml($faqcat{$faqcat}->{'faqcatname'}) . " ]\n";
+	 $ret .= "<option value=0>[ " . LJ::ehtml($faqcat{$faqcat}->{'faqcatname'}) . " ]\n";
 	 $ret .= "<ul>\n";
 	 foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
 	 {
 	     next unless ($faqq{$faqid}->{'question'});
-	     my $q = &BMLUtil::ehtml("... " . $faqq{$faqid}->{'question'});
+	     my $q = LJ::ehtml("... " . $faqq{$faqid}->{'question'});
 	     $q =~ s/^\s+//;
 	     $q =~ s/\s+$//;
 	     $q =~ s/\n/ /g;

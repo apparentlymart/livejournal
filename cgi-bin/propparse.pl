@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 #
 
+package LJ;
+
 $verbose = 0;
 @obs = ();
 

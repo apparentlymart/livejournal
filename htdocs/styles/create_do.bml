@@ -4,24 +4,25 @@ BODY<=
 
 (=_CODE
 
- return &server_down_html() if ($LJ::SERVER_DOWN);
+ return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
  my @errors = ();
  my $user = lc($FORM{'user'});
- my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+ my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
 
- &connect_db;
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
  my $quser = $dbh->quote($user);
 
- if (length($user) > 15) { push @errors, "Username is too long, 15 character max"; }
- unless ($user) { push @errors, "You must enter a username"; }
- if ($user =~ /[^\w]/) { push @errors, "Username contains invalid characters"; }
+ unless ($user) { push @errors, "You must enter a username."; }
+ elsif (! LJ::canonical_username($user)) {
+     push @errors, "Invalid username."; 
+ }
 
- $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
- $sth->execute;
- if ($sth->rows == 0) { push @errors, "Unknown user."; }
- my $u = $sth->fetchrow_hashref;
+ my $u = LJ::load_user($dbs, $user);
+ unless ($u) { push @errors, "Unknown user."; }
 
  unless ($u->{'paidfeatures'} eq "on" ||
 	 $u->{'paidfeatures'} eq "paid" ||
@@ -30,7 +31,7 @@ BODY<=
      push @errors, "Only users with <A HREF=\"/paidaccounts/\">paid accounts</A> may create styles.";
  }
 
- if (! &valid_password($u->{'password'}, \%FORM)) { push @errors, "Invalid password."; }
+ if (! LJ::valid_password($u->{'password'}, \%FORM)) { push @errors, "Invalid password."; }
 
  unless ($FORM{'type'}) { push @errors, "You didn't select a style type."; }
  if ($FORM{'type'} && !defined $LJ::viewinfo{$FORM{'type'}}) { push @errors, "Invalid style type."; }

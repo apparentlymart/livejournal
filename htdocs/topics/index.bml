@@ -6,8 +6,9 @@
  $title = "Journal Entries by Topic";
  $body = "";
 
- require 'topiclib.pl';
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
  my $catid = $FORM{'catid'}+0;
  my $topid = $FORM{'topid'}+0;
@@ -113,7 +114,7 @@
 	     $userinfo{$_->{'userid'}} = $_;
 	     push @pics, $_->{'defaultpicid'} if ($_->{'defaultpicid'});
 	 }
-	 &load_userpics(\%picinfo, \@pics);
+	 LJ::load_userpics($dbs, \%picinfo, \@pics);
      }
 
      foreach my $it (@items) 

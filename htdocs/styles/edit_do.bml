@@ -6,31 +6,31 @@ BODY<=
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
- require 'propparse.pl';
  my @vars;
- load_objects_from_file("../htdocs/vars.dat", \@vars);
+ LJ::load_objects_from_file("$LJ::HOME/htdocs/vars.dat", \@vars);
 
  my @errors = ();
  my $user = lc($FORM{'user'});
  my $password = $FORM{'password'};
- my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+ my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
  my $ide = $FORM{'ide'};
  unless ($ide eq "v1" || $ide eq "v2" || $ide eq "delete") { $ide = "v2"; }
 
- &connect_db;
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
  my $quser = $dbh->quote($user);
 
+ # TODO: use canonical_username logic like in create_do.bml
  if (length($user) > 15) { push @errors, "Username is too long, 15 character max"; }
  unless ($user) { push @errors, "You must <A HREF=\"/styles/edit.bml\">enter a username</A>."; }
  if ($user =~ /[^\w]/) { push @errors, "Username contains invalid characters."; }
 
- $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
- $sth->execute;
- if ($sth->rows == 0) { push @errors, "Unknown user."; }
- $userdat = $sth->fetchrow_hashref;
+ my $u = LJ::load_user($dbs, $user);
+ unless ($u) { push @errors, "Unknown user."; }
 
- if (! &valid_password($userdat->{'password'}, \%FORM)) { push @errors, "Invalid password."; }
+ if (! LJ::valid_password($u->{'password'}, \%FORM)) { push @errors, "Invalid password."; }
  
  if (@errors)
  {
@@ -106,8 +106,8 @@ BODY<=
      $sth->execute;
      while ($sty = $sth->fetchrow_hashref)
      {
-         $ret .= "<OPTION VALUE=$sty->{'styleid'}>" . &BMLUtil::escapeall($sty->{'type'});
-         $ret .= "($sty->{'styleid'}): " . &BMLUtil::escapeall($sty->{'styledes'}) . "\n";
+         $ret .= "<OPTION VALUE=$sty->{'styleid'}>" . BMLUtil::escapeall($sty->{'type'});
+         $ret .= "($sty->{'styleid'}): " . BMLUtil::escapeall($sty->{'styledes'}) . "\n";
      }
      $ret .= "</SELECT><BR>";
      $ret .= "Action: <SELECT NAME=ide><OPTION VALUE=v2>Edit in Easy Mode<OPTION VALUE=v1>Edit in Raw Mode (Old)<OPTION VALUE=delete>Delete this style!</SELECT><FONT SIZE=1><BR><BR></FONT>";
@@ -148,7 +148,7 @@ BODY<=
      $ret .= " <A TARGET=preview HREF=\"/customview.cgi?username=$user&amp;styleid=$sty->{'styleid'}$extravars\">[Preview Current Style]</A> (must save below to see your changes, keep this window open and reload it whenever you save)";
      $ret .= "</TD></TR>\n";
      
-     $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style Description:</B></TD><TD><INPUT NAME=styledes SIZE=50 MAXLENGTH=50 VALUE=\"" . &BMLUtil::escapeall($sty->{'styledes'}) . "\"></TD></TR>";
+     $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style Description:</B></TD><TD><INPUT NAME=styledes SIZE=50 MAXLENGTH=50 VALUE=\"" . BMLUtil::escapeall($sty->{'styledes'}) . "\"></TD></TR>";
 
      $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style Options:</B></TD><TD><TABLE>\n";
      foreach my $opt (@style_opts)
@@ -192,7 +192,7 @@ BODY<=
      if ($ide eq "v2") 
      {
 	 my %styvar = ();
-	 &parse_vars(\$sty->{'formatdata'}, \%styvar);
+	 LJ::parse_vars(\$sty->{'formatdata'}, \%styvar);
 	 
 	 $ret .= "(=H1 Customizable Variables H1=)";
 	 my %mark = ();
@@ -233,7 +233,7 @@ BODY<=
 		 
 		 my $editrows = $prop->{'editrows'} || 5;
 		 my $editcols = $prop->{'editcols'} || 70;
-		 my $estyval = &BMLUtil::escapeall($styvar{$f});
+		 my $estyval = BMLUtil::escapeall($styvar{$f});
 
 		 if ($vars->{$f}->{'props'}->{'override'} eq "only") {
 		     $ret .= "<SPAN STYLE=\"background-color: #FFFF00\"><B>Override only.</B></SPAN>  Only end-users may override this.  You cannot define it in a style.";
@@ -253,7 +253,7 @@ if ($ide eq "v1") {
     
     $ret .= "<P><B>Style Variables:</B> <A TARGET=_blank HREF=\"/developer/views.bml#$sty->{'type'}\">(reference information)</A><BR>\n";
 $ret .= "<TEXTAREA ROWS=30 COLS=80 WRAP=OFF NAME=formatdata>";
-$ret .= &BMLUtil::escapeall($sty->{'formatdata'});
+$ret .= BMLUtil::escapeall($sty->{'formatdata'});
 $ret .= "</TEXTAREA>\n";
 }
 

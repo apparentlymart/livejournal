@@ -67,6 +67,4 @@ sub show_image
 
 package LJ::Talk;
 
-
-
 1;

@@ -14,7 +14,7 @@ BODY<=
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
- &load_subjecticon;
+ &load_subjecticon;  # TODO: blech
 
  my $SELF = "/talkread.bml";
  my $ret = "";
@@ -81,7 +81,7 @@ BODY<=
  $event = $item->{'event'};
 
  LJ::expand_embedded($dbs, $itemid, $remote, \$event);
- $event = &BML::ebml(LJ::CleanHTML::clean_event(\$event, $logprops{$itemid}->{'opt_preformatted'}));
+ $event = BML::ebml(LJ::CleanHTML::clean_event(\$event, $logprops{$itemid}->{'opt_preformatted'}));
  
  $ret .= "<P>";
  $ret .= "<TABLE><TR VALIGN=MIDDLE>";
@@ -109,12 +109,12 @@ BODY<=
  }
  $ret .= "<TD>";
  $ret .= "<A HREF=\"/userinfo.bml?user=$up->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>";
- $ret .= "<B><A HREF=\"$LJ::SITEROOT/users/$up->{'user'}/\">" . &BML::eall($up->{'name'}) . "</A> ";
+ $ret .= "<B><A HREF=\"$LJ::SITEROOT/users/$up->{'user'}/\">" . BML::eall($up->{'name'}) . "</A> ";
 
  $ret .= "$extra said...</B>";
 
  my $etime = $item->{'eventtime'};
- $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!&LJ::date_to_view_links($u, $&)!e;
+ $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!LJ::date_to_view_links($u, $&)!e;
  $ret .= "<BR><FONT SIZE=-1>@ $etime</FONT>";
  $ret .= "</TD></TR></TABLE>";
 
@@ -180,7 +180,7 @@ BODY<=
      ###
      if ($item->{'subject'}) {
 	my $subject = $item->{'subject'};
-	&LJ::CleanHTML::clean_subject(\$subject);
+	LJ::CleanHTML::clean_subject(\$subject);
 	 $ret .= "<FONT FACE=\"Arial,Helvetica\" size=+1><I><B>$subject</B></I></FONT><BR>\n";
      }
 
@@ -233,7 +233,7 @@ BODY<=
  ## temporary:
  if ($item->{'replycount'} > $post_count) {
      # something messed?
-     &LJ::query_buffer_flush($dbh, "log");
+     LJ::query_buffer_flush($dbh, "log");
      
      my $qpc = $post_count + 0;
      $dbh->do("UPDATE log SET replycount=$qpc WHERE itemid=$qitemid");
@@ -457,7 +457,7 @@ sub recurse_post
 		}
 		
 		my $cleansubject = $post->{'subject'};
-		&LJ::CleanHTML::clean_subject(\$cleansubject);
+		LJ::CleanHTML::clean_subject(\$cleansubject);
 
 		$$ret .= "<FONT SIZE=+1 FACE=\"Arial,Helvetica\"><B>$cleansubject</B></FONT> $icon";
 		$$ret .= "<BR>$user\n";
@@ -478,7 +478,7 @@ sub recurse_post
 		
 		## escape BML block codes.  so (=TAG ... TAG=) turns into (&#0061; ... TAG=)
 		$post->{'body'} =~ s/\(=/\(&\#0061\;/g;
-		&LJ::CleanHTML::clean_comment(\$post->{'body'}, $post->{'opt_preformatted'});
+		LJ::CleanHTML::clean_comment(\$post->{'body'}, $post->{'opt_preformatted'});
 		$$ret .= $post->{'body'};
 		
 		$$ret .= "<P><FONT SIZE=-2>";
@@ -494,7 +494,7 @@ sub recurse_post
 		# link to message
 		$$ret .= "<A NAME=\"t$tid\"></A><TABLE><TR>";
 		$$ret .= "<TD><IMG SRC=\"$LJ::IMGPREFIX/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
-		$$ret .= "<TD><a href=\"$SELF?itemid=$itemid&amp;thread=$tid\">" . &BML::eall($post->{'subject'} || "(no subject)") . "</A> - $user, <i>$post->{'datepost'}</i></TD></TR></TABLE>\n";
+		$$ret .= "<TD><a href=\"$SELF?itemid=$itemid&amp;thread=$tid\">" . BML::eall($post->{'subject'} || "(no subject)") . "</A> - $user, <i>$post->{'datepost'}</i></TD></TR></TABLE>\n";
 	    }
 	}
     }
@@ -514,7 +514,7 @@ sub recurse_post
     }
 }
 
-&strip_bad_code(\$ret);
+LJ::strip_bad_code(\$ret);
 return $ret;
 
 _CODE=)

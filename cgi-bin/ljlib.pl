@@ -84,6 +84,7 @@ sub get_remote { &connect_db(); return LJ::get_remote($dbh, @_); }
 sub get_remote_noauth { return LJ::get_remote_noauth(); }
 sub get_userid { return LJ::get_userid($dbh, @_); }
 sub get_username { return LJ::get_username($dbh, @_); }
+sub hash_password { return md5_hex($_[0]); }
 sub html_select { return LJ::html_select(@_); }
 sub load_codes {  &connect_db(); LJ::load_codes($dbh, @_); }
 sub load_log_props { &connect_db(); return LJ::load_log_props($dbh, @_); }
@@ -99,6 +100,7 @@ sub remote_has_priv { return LJ::remote_has_priv($dbh, @_); }
 sub send_mail { return LJ::send_mail(@_); }
 sub server_down_html { return LJ::server_down_html(); }
 sub strip_bad_code { return LJ::strip_bad_code(@_); }
+sub valid_password { return LJ::valid_password(@_); }
 
 sub register_authaction
 {
@@ -161,9 +163,6 @@ sub auth_fields
     return $ret;
 }
 
-
-sub valid_password { return LJ::valid_password(@_); }
-sub hash_password { return md5_hex($_[0]); }
 
 sub remap_event_links
 {
