@@ -497,12 +497,12 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
     }
     print_heading_bar("$prev $subject", "$time $next");
 
-    println """<a name="entry_$e.itemid"></a><table cellspacing="0" cellpadding="0" class="full_entry"><tr><td valign="top">""";
+    println """<a name="entry_$e.itemid"></a><table cellspacing="0" cellpadding="0" class="full_entry"><tr>""";
 
     if (($p.view == "friends" or
         $e.poster.username != $e.journal.username or
         defined $e.userpic) and $p.view != "entry") {
-        println """<table cellspacing="0" cellpadding="0" class="full_entry_userpic"><tr><td align="center">""";
+        println """<td valign="top"><table cellspacing="0" cellpadding="0" class="full_entry_userpic"><tr><td align="center">""";
         if ($p.view == "friends") {
             if (defined $e.userpic) {
                 """<img src="$e.userpic.url" width="$e.userpic.width"
@@ -809,6 +809,8 @@ a:visited {
 function Page::print() {
     var string title = $this->title();
     var string view_title = $this->view_title() != "" ? $this->view_title() : "&nbsp;";
+
+    println """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">""";
 
     println "<html><head>";
     if ($*external_stylesheet) {
