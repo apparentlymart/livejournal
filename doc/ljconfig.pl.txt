@@ -118,7 +118,7 @@
            );
 
     # List of all clusters - each one needs a 'cluster$i' role in %DBINFO
-    @CLUSTERS = qw(1);
+    @CLUSTERS = (1);    # eg: (1, 2, 3) (for scalability)
 
     # Which cluster(s) get new users?
     # If it's an arrayref, choose one of the listed clusters at random.

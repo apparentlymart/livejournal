@@ -71,6 +71,7 @@ my %clustered_table; # $table -> 1
 $sth = $dbh->prepare("SHOW TABLES");
 $sth->execute;
 while (my ($table) = $sth->fetchrow_array) {
+    next if $table =~ /^access\d+$/;
     $table_exists{$table} = 1;
 }
 %table_unknown = %table_exists;  # for now, later we'll delete from table_unknown
@@ -352,6 +353,15 @@ if ($opt_pop)
     print "\nRemember to also run:\n  bin/upgrading/texttool.pl load\n\n";
 }
 
+# make sure they don't have cluster0 users (support for that will be going away)
+my $cluster0 = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE clusterid=0");
+if ($cluster0) {
+    print "\n", "* "x35, "\nWARNING: You have $cluster0 users on cluster 0.\n\n".
+        "Support for that old database schema is deprecated and will be removed soon.\n".
+        "You should stop updating from CVS until you've moved all your users to a cluster \n".
+        "(probably cluster '1', which you can run on the same database). \n".
+        "See bin/moveucluster.pl for instructions.\n" . "* "x35 . "\n\n";
+}
 
 print "# Done.\n";
 

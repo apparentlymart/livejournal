@@ -14,6 +14,10 @@
         'i18n' => 'generator/en',
     };
 
+    # cluster 0 is deprecated.
+    $DEFAULT_CLUSTER ||= 1;
+    @CLUSTERS = (1) unless @CLUSTERS;
+
     $HOME = $ENV{'LJHOME'};
     $HTDOCS = "$HOME/htdocs";
     $BIN = "$HOME/bin";
