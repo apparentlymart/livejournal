@@ -110,13 +110,12 @@ d.close();
      if ($res{'friendof_count'})
      {
          $ret .= "(=H1 Fellow Friends H1=)(=P The following people have listed you as their friend... You may want to list them as your friend too.  More than anything this is provided as a reference so you know their LiveJournal usernames too.  You are under no obligation to add them to your list. P=)\n";
-         $ret .= "<CENTER><P ALIGN=CENTER><TABLE><TR BGCOLOR=(=EMCOLOR=)><TD WIDTH=150><B>User</B></TD><TD WIDTH=150><B>Name</B></TD></TR>\n";
+         $ret .= "<center><p align='center'><table><tr bgcolor='(=EMCOLOR=)'><td width='150'><b>User</b></td><td width='150'><b>Name</b></td></tr>\n";
          for (my $i=1; $i <= $res{'friendof_count'}; $i++)
          {
-	   $ret .= "<TR><TD>(=LJUSER " . $res{"friendof_${i}_user"}. " LJUSER=)</TD><TD>" . $res{"friendof_${i}_name"} . "</TD>";
-#	   $ret .= "<TD BGCOLOR=" . $res{"friendof_${i}_bg"} . "><FONT COLOR=" . $res{"friendof_${i}_fg"} . "><B>$user</B></FONT></TD></TR>\n";
+	   $ret .= "<tr align='left'><td>(=LJUSER " . $res{"friendof_${i}_user"}. " LJUSER=)</td><td>" . $res{"friendof_${i}_name"} . "</td></tr>\n";
          }
-         $ret .= "</TABLE></P></CENTER>";
+         $ret .= "</table></p></center>";
      }
 
      ### who do you have defiend as a friend?
