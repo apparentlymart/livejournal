@@ -39,7 +39,9 @@
 
  ### can members join this community even?
  unless ($ci->{'membership'} eq "open") {
-     $body .= "<?h1 $ML{'Sorry'}... h1?><?p $ML{'.label.closedcomm'} p?>";
+     $body .= "<?h1 $ML{'Sorry'}... h1?><?p " . 
+         BML::ml('.label.closedcomm',{'maintainer'=>$cowner}) . 
+         " p?>";
      return;
  }
 
