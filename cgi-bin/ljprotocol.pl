@@ -206,7 +206,9 @@ sub login
     LJ::text_out(\$res->{'fullname'}) if $ver >= 1;
 
     ## update or add to clientusage table
-    if ($req->{'clientversion'} =~ /^\S+\/\S+$/)  {
+    if ($req->{'clientversion'} =~ /^\S+\/\S+$/ && 
+        ! $LJ::DISABLED{'clientversionlog'})
+    {
         my $client = $req->{'clientversion'};
 
         return fail($err, 208, "Bad clientversion string")
