@@ -30,11 +30,16 @@
 <!ENTITY lj.customize.text                SYSTEM "../lj.book/customize/text.xml">
 <!ENTITY lj.customize.tasks               SYSTEM "../lj.book/customize/tasks.xml">
 <!ENTITY lj.customize.hooks               SYSTEM "../lj.book/customize/hooks.xml">
+
 <!-- Administration -->
 
 <!ENTITY lj.admin.index                   SYSTEM "../lj.book/admin/index.xml">
 <!ENTITY lj.admin.createusers             SYSTEM "../lj.book/admin/create_users.xml">
 <!ENTITY lj.admin.caps                    SYSTEM "../lj.book/admin/caps_list.xml">
+<!ENTITY lj.admin.privs                   SYSTEM "../lj.book/admin/privs.xml">
+<!ENTITY lj.admin.privs.ref               SYSTEM "../lj.book/admin/privs.ref.gen.xml">
+<!ENTITY lj.admin.console                 SYSTEM "../lj.book/admin/console.xml">
+<!ENTITY lj.admin.console.ref             SYSTEM "../lj.book/admin/console.ref.gen.xml">
 
 <!-- Features -->
 

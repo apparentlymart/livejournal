@@ -2,9 +2,11 @@
   <title>Administering a LiveJournal Site</title>
   <partintro>
     <para>
-	    Part III covers all of the functions necessary to fine tune and run your LiveJournal site.
+	    Part III covers all of the information necessary to fine-tune and run your LiveJournal site.
     </para>
   </partintro>
   &lj.admin.createusers;
   &lj.admin.caps;
+  &lj.admin.privs;
+  &lj.admin.console;
 </part>

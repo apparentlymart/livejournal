@@ -1,0 +1,12 @@
+<chapter id="lj.admin.console">
+  <title>The Administrative Console</title>
+  <section id="lj.admin.console.intro">
+    <title>Introduction to the Console</title>
+    <para>If you would consider <abbrev>BML</abbrev> pages to be the <abbrev>GUI</abbrev>, then the admin console would be the command line interface. 
+    </para>
+  </section>
+  <section id="lj.admin.console.ref">
+    <title>Console Command Reference</title>
+    &lj.admin.console.ref;
+  </section>
+</chapter>

@@ -49,6 +49,7 @@ if ($opt_getxsl) {
 my $output_dir = "$home/htdocs/doc/server";
 my $docraw_dir = "$home/doc/raw";
 my $XSL = "$docraw_dir/build/xsl-docbook";
+my $stylesheet = "";
 open (F, "$XSL/VERSION");
 my $XSL_VERSION;
 { 
@@ -78,9 +79,11 @@ if (! $XSL_VERSION) {
 chdir "$docraw_dir/build" or die;
 
 print "Generating API reference\n";
-system("api/api2db.pl > $docraw_dir/ljp.book/api/api.gen.xml")
-    and die "Errror generating API reference.\n";
-
+system("api/api2db.pl --exclude=BML:: > $docraw_dir/ljp.book/api/api.gen.xml")
+    and die "Errror generating General API reference.\n";
+system("api/api2db.pl --include=BML:: > $docraw_dir/ljp.book/bml/api.gen.xml")
+    and die "Errror generating BML API reference.\n";
+ 
 print "Generating DB Schema reference\n";
 chdir "$docraw_dir/build/db" or die;
 system("./dbschema.pl > dbschema.gen.xml")
@@ -99,11 +102,29 @@ system("xsltproc", "-o", "$docraw_dir/ljp.book/csp/xml-rpc/protocol.gen.xml",
        "xml-rpc2db.xsl", "xmlrpc.xml") 
     and die "Error processing protocol reference.\n";
 
+print "Generating Privilege list reference\n";
+chdir "$docraw_dir/build/priv" or die;
+system("./priv2db.pl > $docraw_dir/lj.book/admin/privs.ref.gen.xml")
+   and die "Error generating privilege list\n";
+
+print "Generating Console Command Reference\n";
+chdir "$docraw_dir/build/console" or die;
+system("./console2db.pl > $docraw_dir/lj.book/admin/console.ref.gen.xml")
+    and die "Error generating console reference\n";
+
+if ($LJ::DOC_CSS && -e $LJ::DOC_CSS) {
+    print "Moving CSS file (pretty output)\n";
+    system("cp", "$LJ::DOC_CSS", "$output_dir")
+        and die "Couldn't copy CSS file";
+    $LJ::DOC_CSS =~ s/^.*[\\\/]([^\\\/]+)$/$1/g;
+    $stylesheet = "--stringparam html.stylesheet " . scalar $LJ::DOC_CSS;
+}
+
 print "Converting to HTML\n";
 mkdir $output_dir, 0755 unless -d $output_dir;
 chdir $output_dir or die "Couldn't chdir to $output_dir\n";
-system("xsltproc --nonet --catalogs --stringparam use.id.as.filename 1 ".
-       "$XSL/html/chunk.xsl $docraw_dir/index.xml")
+system("xsltproc --nonet --catalogs ".
+       "$docraw_dir/build/ljdocs2html.xsl $docraw_dir/index.xml")
     and die "Error generating final HTML.\n";
 
 if ($opt_clean) {
