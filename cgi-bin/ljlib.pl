@@ -570,11 +570,11 @@ sub get_log2_recent_user
         next unless $opts->{'remote'} || $item->{'security'} eq 'public';
         next if $item->{'security'} eq 'private' 
             and $item->{'journalid'} != $opts->{'remote'}->{'userid'};
-        if($item->{'security'} eq 'usemask') {
+        if ($item->{'security'} eq 'usemask') {
             next unless 
                 ($item->{'journalid'} == $opts->{'remote'}->{'userid'})
                 or
-                ($item->{'allowmask'} & $opts->{'mask'});
+                ($item->{'allowmask'}+0 & $opts->{'mask'}+0);
         }
         
         # date conversion
