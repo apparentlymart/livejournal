@@ -2727,15 +2727,33 @@ sub check_rate {
     my $now = time();
     my @watch;
 
-    # registered human (or human-impersonating robot)
-    push @watch, ["talklog:$remote->{userid}", $LJ::RATE_COMMENT_AUTH ||
-                  [ [200,3600], [20,60] ],
-                  ] if $remote;
+    if ($remote) {
+        # registered human (or human-impersonating robot)
+        push @watch,
+          [
+            "talklog:$remote->{userid}",
+            $LJ::RATE_COMMENT_AUTH || [ [ 200, 3600 ], [ 20, 60 ] ],
+          ];
+    } else {
+        # anonymous, per IP address (robot or human)
+        push @watch,
+          [
+            "talklog:$ip",
+            $LJ::RATE_COMMENT_ANON ||
+                [ [ 300, 3600 ], [ 200, 1800 ], [ 150, 900 ], [ 15, 60 ] ]
+          ];
 
-    # anonymous (robot or human)
-    push @watch, ["talklog:$ip", $LJ::RATE_COMMENT_ANON ||
-                  [ [300,3600], [200,1800], [150,900], [15,60] ]
-                  ] if !$remote;
+        # anonymous, per journal.
+        # this particular limit is intended to combat flooders, instead
+        # of the other 'spammer-centric' limits.
+        push @watch,
+          [
+            "talklog:$journalu->{u}",
+            $LJ::RATE_COMMENT_ANON ||
+                [ [ 300, 3600 ], [ 200, 1800 ], [ 150, 900 ], [ 15, 60 ] ]
+          ];
+    }
+
 
   WATCH:
     foreach my $watch (@watch) {
