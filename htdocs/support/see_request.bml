@@ -7,30 +7,58 @@ body<=
     use strict;
     use vars qw(%FORM);
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    my $sth;
- 
+    my $dbh = LJ::get_db_writer();
+    my $dbr = LJ::get_db_reader();
     my $spid = $FORM{'id'}+0;
-    my $auth = $FORM{'auth'};
-    my $sp = LJ::Support::load_request($dbh, $spid);
-    unless ($sp) { return "<?h1 Error h1?><?p Unknown support number. p?>"; }
+    my $sp = LJ::Support::load_request($dbr, $spid);
+    my $cats = LJ::Support::load_cats($dbr);
+    my $remote = LJ::get_remote($dbr);
+    LJ::Support::init_remote($dbr, $remote);
 
-    my $cats = LJ::Support::load_cats($dbh);
+    if ($FORM{'find'}) {
+        my $find = $FORM{'find'};
+        my $op = '<';
+        my $sort = 'DESC';
+        if ($find eq 'next' || $find eq 'cnext' || $find eq 'first') {
+            $op = '>';
+            $sort = 'ASC';
+        }
+        my $spcatand = '';
+        if ($sp && ($find eq 'cnext' || $find eq 'cprev')) {
+            my $spcatid = $sp->{_cat}->{'spcatid'} + 0;
+            $spcatand = "AND spcatid=$spcatid";
+        } else {
+            my @filter_cats = LJ::Support::filter_cats($remote, $cats);
+            return "<?h1 Error h1?><?p You do not appear to have permission to read any support categories. p?>"
+                unless @filter_cats;
+            my $cats_in = join(",", map { $_->{'spcatid'} } @filter_cats);
+            $spcatand = "AND spcatid IN ($cats_in)";
+        }
+        my $clause = "";
+        $clause = "AND spid$op$spid" unless ($find eq 'first' || $find eq 'last');
+        my ($foundspid) = $dbh->selectrow_array("SELECT spid FROM support WHERE state='open' $spcatand $clause ORDER BY spid $sort LIMIT 1");
+        if ($foundspid) {
+            return BML::redirect("see_request.bml?id=$foundspid");
+        } else {
+            my $goback = "<?p Go back to <a href='see_request.bml?id=$spid'>Request #$spid</a> p?>" if $sp;
+            my $what = $find eq 'next' || $find eq 'cnext' ? 'next' : 'previous';
+            my $cat = "in the same category" if $find eq 'cnext' || $find eq 'cprev';
+            return "<?h1 Error h1?><?p No $what open request $cat found. p?>$goback";
+        }
+    }
+
+    unless ($sp) { return "<?h1 Error h1?><?p Unknown support number. p?>"; }
+    my $sth;
+    my $auth = $FORM{'auth'};
 
     my $email = $sp->{'reqemail'};
 
     my $u = {};
     if ($sp->{'reqtype'} eq "user") {
-        $u = LJ::load_userid($dbs, $sp->{'requserid'});
+        $u = LJ::load_userid($sp->{'requserid'});
         $email = $u->{'email'};
-        LJ::load_user_props($dbs, $u, 
-                            "s1_lastn_style", "s1_calendar_style",
-                            "s1_day_style", "s1_friends_style",
-                            "stylesys", "s2_style",
-                            );
+        LJ::load_user_props($u, "s1_lastn_style", "s1_calendar_style", "s1_day_style", 
+                            "s1_friends_style", "stylesys", "s2_style", );
     }
 
     my $winner;  # who closed it?
@@ -41,9 +69,6 @@ body<=
     }
 
     my $owner_mode = 0;
-    my $remote = LJ::get_remote($dbh);
- 
-    LJ::Support::init_remote($dbh, $remote);
  
     # load category this request is in
     my $problemarea = $sp->{_cat}->{'catname'};
@@ -65,7 +90,7 @@ body<=
     if ($u->{'defaultpicid'}) {
         my %pic;
         my $picid = $u->{'defaultpicid'};
-        LJ::load_userpics($dbs, \%pic, [ $picid ]);
+        LJ::load_userpics(\%pic, [ $picid ]);
         $ret .= "<a href='$LJ::SITEROOT/allpics.bml?user=$u->{'user'}'>";
         $ret .= "<img align='baseline' src='$LJ::USERPIC_ROOT/$picid/$u->{'userid'}' width='$pic{$picid}->{'width'}' ".
             "height='$pic{$picid}->{'height'}' align='absmiddle' hspace='3' border='0' alt='$u->{'user'}' />";
@@ -135,6 +160,8 @@ body<=
     $ret .= "<tr><td align='right' nowrap='nowrap'><b>Support category:</b></td><td>";
     if (LJ::Support::can_read_cat($sp->{_cat}, $remote)) {
         $ret .= "<a href='$LJ::SITEROOT/support/help.bml?cat=$sp->{_cat}->{'catkey'}'>$problemarea</a>";
+        $ret .= " [<a href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=cprev'>previous</a>|";
+        $ret .= "<a href='$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}&amp;find=cnext'>next</a>]";
     } else {
         $ret .= $problemarea;
     }
@@ -189,7 +216,7 @@ body<=
 
     my %userpics;
     my @pics = map { $userinfo{$_}->{'defaultpicid'} } keys %userinfo;
-    LJ::load_userpics($dbs, \%userpics, \@pics);
+    LJ::load_userpics(\%userpics, \@pics);
 
     my @screened;
 
@@ -442,9 +469,19 @@ body<=
 } 
 _code?>
 <?hr?>
+<?_code
+{
+    use strict;
+    use vars qw(%FORM);
+    return '' if $FORM{'find'};
+    my $spid = $FORM{'id'}+0;
+    return "Go to: <a href='$LJ::SITEROOT/support/see_request.bml?id=$spid&amp;find=prev'>previous open request</a>, " .
+           "<a href='$LJ::SITEROOT/support/see_request.bml?id=$spid&amp;find=next'>next open request</a>"
+}
+_code?>
+<br />
 Back to the <a href="help.bml">list of open requests</a>.<br />
 Back to the <a href="./">support area</a>.
-
 
 <=body
 page?><?_c <LJDEP>
