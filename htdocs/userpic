@@ -4,7 +4,7 @@ use FCGI;
 use LJ::Cache;
 use vars qw($dbh $dro);
 
-require '/home/lj/cgi-bin/ljlib.pl';
+require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 $dbh = LJ::get_dbh("master");
 if ($LJ::DBINFO{'slavecount'}) { $dro = LJ::get_dbh("slave"); }

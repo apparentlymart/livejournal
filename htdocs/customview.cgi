@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-require '/home/lj/cgi-bin/ljlib.pl';
-require '/home/lj/cgi-bin/ljviews.pl';
+require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl";
 
 use Compress::Zlib;
 use FCGI;

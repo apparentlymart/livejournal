@@ -4,8 +4,8 @@ use CGI;
 use FCGI;
 use Compress::Zlib;
 
-require '/home/lj/cgi-bin/ljlib.pl';
-require '/home/lj/cgi-bin/ljviews.pl';
+require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl";
 
 my $REQ_COUNT = 0;
 my $REQ_MAX = 300;
@@ -22,14 +22,15 @@ $SIG{'TERM'} = sub {
 };
 
 unless ($ENV{'SERVER_SOFTWARE'}) {
-    $ENV{'REQUEST_URI'} = "/users/bradfitz/friends";
+    $ENV{'REQUEST_URI'} = "/users/test/friends";
     $LJ::DEBUG = 1;
 }
 
  REQUEST:
-    while((($SERVING=0) || 1) &&    # heh.  set serving to 0 (since so many ways to get here), but be true.
-	  $CONTINUE &&              # didn't get a quit signal earlier.
-	  ++$REQ_COUNT <= $REQ_MAX && FCGI::accept() >= 0)
+    while((($SERVING=0) || 1) &&       # set serving to 0,
+	  $CONTINUE &&                 # didn't get a quit signal earlier?
+	  ++$REQ_COUNT <= $REQ_MAX &&  # not time to restart?
+	FCGI::accept() >= 0)
 {
     my $cgi = new CGI;
 
