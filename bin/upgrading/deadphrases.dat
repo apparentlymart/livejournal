@@ -1,6 +1,8 @@
-# one day, write a tool to remove these during popualte.  
+# one day, write a tool to remove these during populate.  
 # for now, we'll keep track here.
 
 general /userinfo.bml.label.viewlabel
 general /userinfo.bml.syn.lastnew
+general /editinfo.bml.allowshowcontact.email.reason
+general /editinfo.bml.allowshocontact.email.if_domainaddy
 
