@@ -876,7 +876,8 @@ sub postevent
     LJ::dudata_set($dbcm, $ownerid, 'L', $itemid, $bytes);
 
     $dbcm->do("REPLACE INTO logtext2 (journalid, jitemid, subject, event) ".
-              "VALUES ($ownerid, $itemid, ?, ?)", undef, $req->{'subject'}, $event);
+              "VALUES ($ownerid, $itemid, ?, ?)", undef, $req->{'subject'}, 
+              LJ::text_compress($event));
     if ($dbcm->err) {
         my $msg = $dbcm->errstr;
         LJ::delete_entry($uowner, $itemid);   # roll-back
@@ -1018,6 +1019,7 @@ sub editevent
         if ($ownerid != $posterid && # community post
             ($req->{'security'} eq "private" ||
             ($req->{'security'} eq "usemask" && $qallowmask != 1 )));
+
     # fetch the old entry from master database so we know what we
     # really have to update later.  usually people just edit one part,
     # not every field in every table.  reads are quicker than writes,
@@ -1025,7 +1027,7 @@ sub editevent
     my $oldevent = $dbcm->selectrow_hashref
         ("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, l.logtime, ".
          "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, ".
-         "MD5(lt.event) AS 'md5event', l.rlogtime, l.anum FROM log2 l, logtext2 lt ".
+         "lt.event, l.rlogtime, l.anum FROM log2 l, logtext2 lt ".
          "WHERE l.journalid=$ownerid AND lt.journalid=$ownerid ".
          "AND l.jitemid=$itemid AND lt.jitemid=$itemid");
     
@@ -1033,13 +1035,14 @@ sub editevent
     # and then the post is undeletable since the join matches
     # nothing.  this is a ugly hack work-around, but without using
     # transactions to guarantee we never bomb out between log2 and
-    # logtext2 insertion, this is the price we way.
+    # logtext2 insertion, this is the price we pay.
     unless ($oldevent) {
         $oldevent = $dbcm->selectrow_hashref
             ("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, l.logtime, ".
              "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, ".
              "l.rlogtime, l.anum FROM log2 l WHERE l.journalid=$ownerid AND l.jitemid=$itemid");
     }
+    LJ::text_uncompress(\$oldevent->{'event'});
 
     # kill seconds in eventtime, since we don't use it, then we can use 'eq' and such
     $oldevent->{'eventtime'} =~ s/:00$//;
@@ -1210,12 +1213,12 @@ sub editevent
     LJ::MemCache::set([$ownerid,"logtext:$clusterid:$ownerid:$itemid"],
                       [ $req->{'subject'}, $event ]);
 
-    if (Digest::MD5::md5_hex($event) ne $oldevent->{'md5event'} ||
+    if ($event ne $oldevent->{'event'} ||
         $req->{'subject'} ne $oldevent->{'subject'})
     {
         $dbcm->do("UPDATE logtext2 SET subject=?, event=? ".
                   "WHERE journalid=$ownerid AND jitemid=$itemid", undef,
-                  $req->{'subject'}, $event);
+                  $req->{'subject'}, LJ::text_compress($event));
         return fail($err,501,$dbcm->errstr) if $dbcm->err;
 
         # update disk usage

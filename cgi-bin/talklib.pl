@@ -1099,11 +1099,13 @@ sub mail_comments {
     # if a response to another comment, send a mail to the parent commenter.
     if ($parent->{talkid}) {  
         my $dbcm = LJ::get_cluster_master($journalu);
+        # FIXME: remove this query:
         my $sth = $dbcm->prepare("SELECT t.posterid, tt.body FROM talk2 t, talktext2 tt ".
                                  "WHERE t.journalid=? AND tt.journalid=? ".
                                  "AND   t.jtalkid=?   AND tt.jtalkid=?");
         $sth->execute($journalu->{userid}, $journalu->{userid}, $parent->{talkid}, $parent->{talkid});
         my ($paruserid, $parbody) = $sth->fetchrow_array;
+        LJ::text_uncompress(\$parbody);
         $parentcomment = $parbody;
 
         my %props = ($parent->{talkid} => {});
@@ -1314,7 +1316,8 @@ sub enter_comment {
 
     $dbcm->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
               "VALUES (?, ?, ?, ?)", undef,
-              $journalu->{userid}, $jtalkid, $comment->{subject}, $comment->{body});
+              $journalu->{userid}, $jtalkid, $comment->{subject}, 
+              LJ::text_compress($comment->{body}));
     die $dbcm->errstr if $dbcm->err;
 
     my $memkey = "$journalu->{'clusterid'}:$journalu->{'userid'}:$jtalkid";
@@ -1693,29 +1696,15 @@ sub post_comment {
     my $posterid = $comment->{u} ? $comment->{u}{userid} : 0;
     my $jtalkid;
 
-    # base64 format used with memcache.
-    my $md5_b64; my $memkey;
+    # check for dup ID in memcache.
+    my $memkey;
     if (@LJ::MEMCACHE_SERVERS) {
-        $md5_b64 = Digest::MD5::md5_base64(
+        my $md5_b64 = Digest::MD5::md5_base64(
             join(":", ($comment->{body}, $comment->{subject},
                        $comment->{subjecticon}, $comment->{preformat},
                        $comment->{picture_keyword})));
         $memkey = [$journalu->{userid}, "tdup:$journalu->{userid}:$item->{itemid}-$posterid-$md5_b64" ];
         $jtalkid = LJ::MemCache::get($memkey);
-    } else {
-        my $dbcm = LJ::get_cluster_master($journalu);
-        my $md5_body = Digest::MD5::md5_hex($comment->{body});
-        $jtalkid = $dbcm->selectrow_array(
-                          "SELECT t.jtalkid FROM talk2 t, talktext2 tt WHERE ".
-                          "t.journalid=? AND tt.journalid=t.journalid ".
-                          "AND t.jtalkid=tt.jtalkid ".
-                          "AND t.nodetype='L' AND t.nodeid=? ".
-                          "AND t.datepost > DATE_SUB(NOW(), INTERVAL 10 MINUTE) ".
-                          "AND t.posterid=? AND tt.subject=? AND MD5(tt.body)=? ".
-                          "AND t.parenttalkid=?", undef,
-                          $journalu->{userid}, $item->{itemid}, $posterid,
-                          $comment->{subject}, $md5_body, $parent->{talkid}
-                          );
     }
 
     # they don't have a duplicate...

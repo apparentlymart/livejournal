@@ -2918,6 +2918,7 @@ sub get_logtext2
                                "WHERE journalid=$journalid AND jitemid IN ($jitemid_in)");
         $sth->execute;
         while (my ($id, $subject, $event) = $sth->fetchrow_array) {
+            LJ::text_uncompress(\$event);
             my $val = [ $subject, $event ];
             $lt->{$id} = $val;
             LJ::MemCache::add([$journalid,"logtext:$clusterid:$journalid:$id"], $val);
@@ -2990,6 +2991,7 @@ sub get_talktext2
                                "WHERE journalid=$journalid AND jtalkid IN ($in)");
         $sth->execute;
         while (my ($id, $subject, $body) = $sth->fetchrow_array) {
+            LJ::text_uncompress(\$body);
             $lt->{$id} = [ $subject, $body ];
             LJ::MemCache::add([$journalid,"talkbody:$clusterid:$journalid:$id"], $body)
                 unless $opts->{'onlysubjects'};
@@ -3181,6 +3183,7 @@ sub get_posts_raw
                                 "FROM logtext2 WHERE $in");
             $sth->execute;
             while (my ($jid, $jitemid, $subject, $event) = $sth->fetchrow_array) {
+                LJ::text_uncompress(\$event);
                 my $id = "$jid:$jitemid";
                 my $val = [ $subject, $event ];
                 $ret->{text}{$id} = $val;
