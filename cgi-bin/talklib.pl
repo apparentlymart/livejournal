@@ -1638,7 +1638,17 @@ sub blockquote {
     my $a = shift;
     return "<blockquote style='border-left: #000040 2px solid; margin-left: 0px; margin-right: 0px; padding-left: 15px; padding-right: 0px'>$a</blockquote>";
 }
- 
+
+sub generate_messageid {
+    my ($type, $journalu, $did) = @_;
+    # $type = {"entry" | "comment"}
+    # $journalu = $u of journal
+    # $did = display id of comment/entry
+
+    my $jid = $journalu->{userid};
+    return "<$type-$jid-$did\@$LJ::DOMAIN>";
+}
+
 # entryu     : user who posted the entry this comment is under.
 # journalu   : journal this entry is in.
 # parent     : comment/entry this post is in response to.
@@ -1656,6 +1666,19 @@ sub mail_comments {
     # mail them the response
     my $parentcomment = "";
     my $parentmailed = "";  # who if anybody was just mailed
+
+    # message ID of the mythical top-level journal entry (which
+    # currently is never emailed) so mail clients can group things
+    # together with a comment ancestor if parents are missing
+    my $top_msgid = generate_messageid("entry", $journalu, $ditemid);
+    # find first parent
+    my $par_msgid;
+    if (my $ptid = $parent->{talkid}) {
+        $par_msgid = generate_messageid("comment", $journalu,
+                                        $ptid * 256 + $item->{anum});
+    }
+    # and this message ID
+    my $this_msgid = generate_messageid("comment", $journalu, $dtalkid);
 
     # if a response to another comment, send a mail to the parent commenter.
     if ($parent->{talkid}) {  
@@ -1711,11 +1734,17 @@ sub mail_comments {
                 }
 
                 my $fromname = $comment->{u} ? "$comment->{u}{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
+
                 my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
                                            'To' => $paru->{'email'},
                                            'Subject' => ($headersubject || "Reply to your comment..."),
-                                           'Type' => 'multipart/alternative');
-                
+                                           'Type' => 'multipart/alternative',
+                                           'Message-Id' => $this_msgid,
+                                           'In-Reply-To:' => $par_msgid,
+                                           'References' => "$par_msgid $top_msgid",
+                                           );
+                $msg->add('X-LJ-JOURNAL' => $journalu->{'user'}); # for mail filters
+
                 $parent->{u} = $paru;
                 $parent->{body} = $parentcomment;
                 $parent->{ispost} = 0;
@@ -1777,7 +1806,11 @@ sub mail_comments {
         my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
                                    'To' => $entryu->{'email'},
                                    'Subject' => ($headersubject || "Reply to your post..."),
-                                   'Type' => 'multipart/alternative');
+                                   'Type' => 'multipart/alternative',
+                                   'Message-Id' => $this_msgid,
+                                   'In-Reply-To:' => $par_msgid,
+                                   'References' => "$par_msgid $top_msgid",
+                                   );
         $msg->add('X-LJ-JOURNAL' => $journalu->{'user'}); # for mail filters
 
         my $quote = $parentcomment ? $parentcomment : $item->{'event'};
@@ -1847,10 +1880,15 @@ sub mail_comments {
             $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
         }
 
-        my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($u->{'user'} - $LJ::SITENAMEABBREV Comment)",
-                                   'To' => $u->{'email'},
-                                   'Subject' => ($headersubject || "Comment you posted..."),
-                                   'Type' => 'multipart/alternative');
+        my $msg = new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($u->{'user'} - $LJ::SITENAMEABBREV Comment)",
+                                  'To' => $u->{'email'},
+                                  'Subject' => ($headersubject || "Comment you posted..."),
+                                  'Type' => 'multipart/alternative',
+                                  'Message-Id' => $this_msgid,
+                                  'In-Reply-To:' => $par_msgid,
+                                  'References' => "$par_msgid $top_msgid",
+                                  );
+        $msg->add('X-LJ-JOURNAL' => $journalu->{'user'}); # for mail filters
 
         my $quote = $parentcomment ? $parentcomment : $item->{'event'};
 
