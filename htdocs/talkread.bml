@@ -412,7 +412,7 @@ sub recurse_post
 	    $$ret .= "<TD><IMG SRC=\"$LJ::IMGPREFIX/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
 	    $$ret .= "<TD><B>(Deleted post)</B></TD></TR></TABLE>\n";
 	} elsif ($userpost && $user{$userpost}->{'statusvis'} eq "S") {
-	    $$ret .= "<P><A NAME=\"t$tid\"><TABLE><TR>";
+	    $$ret .= "<P><A NAME=\"t$tid\"></A><TABLE><TR>";
 	    $$ret .= "<TD><IMG SRC=\"$LJ::IMGPREFIX/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
 	    $$ret .= "<TD><B>(Reply from suspended user)</B></TD></TR></TABLE>\n";
 	} else {
@@ -422,7 +422,7 @@ sub recurse_post
 	    my $icon = &show_image($post->{'subjecticon'});
 
 	    if ($post->{'_loaded'}) {
-		$$ret .= "<P><A NAME=\"t$tid\"><TABLE WIDTH=100%><TR>";
+		$$ret .= "<P><A NAME=\"t$tid\"></A><TABLE WIDTH=100%><TR>";
 		$$ret .= "<TD ROWSPAN=2><IMG SRC=\"$LJ::IMGPREFIX/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
 		$$ret .= "<TD BGCOLOR=$bgcolor WIDTH=100%>";
 		if ($userpost) {
@@ -492,7 +492,7 @@ sub recurse_post
 		$$ret .= "</TD></TR></TABLE>\n";  # close colored table
 	    } else {
 		# link to message
-		$$ret .= "<A NAME=\"t$tid\"><TABLE><TR>";
+		$$ret .= "<A NAME=\"t$tid\"></A><TABLE><TR>";
 		$$ret .= "<TD><IMG SRC=\"$LJ::IMGPREFIX/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
 		$$ret .= "<TD><a href=\"$SELF?itemid=$itemid&amp;thread=$tid\">" . &BML::eall($post->{'subject'} || "(no subject)") . "</A> - $user, <i>$post->{'datepost'}</i></TD></TR></TABLE>\n";
 	    }
