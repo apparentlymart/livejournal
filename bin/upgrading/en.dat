@@ -1,4 +1,22 @@
 ;; -*- coding: utf-8 -*-
+/allpics.bml.current=Current Pictures
+
+/allpics.bml.default=<u>Default</u>
+
+/allpics.bml.edit=You may be interested in <a href='/editpics.bml'>editing your picture keywords</a> or <a href='/uploadpic.bml'>uploading a new picture</a>.
+
+/allpics.bml.error.noparam=You need to specify a user parameter.
+
+/allpics.bml.keywords=Keywords:
+
+/allpics.bml.nopics.text=You have no pictures uploaded. To upload one, go <a href='/uploadpic.bml'>here</a>.
+
+/allpics.bml.nopics.title=No Pictures
+
+/allpics.bml.pics=Here are the user pictures for [[user]].
+
+/allpics.bml.title=User Pictures
+
 /community/create.bml.button.createcommunity=Create Community
 
 /community/create.bml.commsite=Community website
@@ -410,7 +428,7 @@ Please go back and remove the zip code or select United States as your country.
 
 /editinfo.bml.error.tm.require_provider<<
 If you're going to use text messaging, you must select your service provider.  
-If yours is not listed, please contact us with information about how your service's text messaging feature so we can add support for it.
+If yours is not listed, please contact us with information about how your service's text messaging feature works so we can add support for it.
 .
 
 /editinfo.bml.finished.about=When done, press the "Save Changes" button below:
@@ -624,13 +642,13 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 /friends/add.bml.error1.header=Login First
 
 /friends/add.bml.error1.text<<
-To add a user to your friends list you must first go and <A HREF="/login.bml?ret=1">log in</A>.  If you don't
+To add a user to your friends list you must first go and <a href="/login.bml?ret=1">log in</a>.  If you don't
 already have an account you can <a href="/create.bml">create one</a> to track your friend's journals. 
 .
 
 /friends/add.bml.error1.title=Add Friend
 
-/friends/add.bml.error2.text=Invalid or missing username given.  To add a friend, go to the <A HREF="/friends/edit.bml">edit friends</A> page.
+/friends/add.bml.error2.text=Invalid or missing username given.  To add a friend, go to the <a href="/friends/edit.bml">edit friends</a> page.
 
 /friends/add.bml.error3.text=You already have <b>[[user]]</b> listed as a friend.  However, you can modify the colors you've chosen to represent him/her.
 
@@ -1091,8 +1109,8 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 /talkread.bml.title=Read Comments
 
 /tools/memadd.bml.add_previous<<
-  <?h1 Add to memories... h1?>
-  <?p To add the journal entry you were just viewing to your "memories", fill out the form below. p?>
+<?h1 Add to memories... h1?>
+<?p To add the journal entry you were just viewing to your "memories", fill out the form below. p?>
 .
 
 /tools/memadd.bml.body.added.body=Your list of memorable posts has been updated.
@@ -1166,13 +1184,13 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 /tools/memories.bml.back=Back
 
 /tools/memories.bml.body.keyword<<
-  <?h1 [[keyword]] h1?>
-  <?p The following is a list of "[[keyword]]" journal entries that user <B>[[user]]</B> found memorable. p?>
+<?h1 [[keyword]] h1?>
+<?p The following is a list of "[[keyword]]" journal entries that user <B>[[user]]</B> found memorable. p?>
 .
 
 /tools/memories.bml.body.list_categories<<
-  <?h1 Memorable Posts h1?>
-  <?p The following is a list of categories that user <B>[[user]]</B> has placed memorable journal entries in. p?>
+<?h1 Memorable Posts h1?>
+<?p The following is a list of categories that user <b>[[user]]</b> has placed memorable journal entries in. p?>
 .
 
 /tools/memories.bml.body.memorable=The following is a list of uncategorized journal entries that user <B>[[user]]</B> found memorable.
@@ -1216,16 +1234,22 @@ btn.search=Search
 
 Email=Email
 
-Error|notes=typically used inside an h1 tag to announce an error.
+Error|notes=typically used inside an H1 tag to announce an error.
 Error=Error
 
 error.badpassword=Incorrect Password.
 
 error.dberror=A database error occurred:
 
+error.deleted.name=Deleted
+
+error.deleted.text=This journal has been deleted.  If you are [[user]], you have a period of 30 days from the deletion time to undelete the journal.  After 30 days we will delete all content permanently from our servers.
+
+error.deleted.title=Deleted Account
+
 error.nobutton=No button pressed?
 
-error.nodb=Database temporary unavailable.
+error.nodb=Database temporarily unavailable.
 
 error.nodbmaintenance=This part of the database is temporarily down for maintenance.  Try again in a few minutes.
 
@@ -1234,6 +1258,18 @@ error.noentry=No such journal entry.
 error.nojournal=Unknown Journal
 
 error.procrequest=There was an error processing your request:
+
+error.purged.name=Deleted
+
+error.purged.text=This journal has been deleted and purged.  This username will be available again shortly.
+
+error.purged.title=Purged Account
+
+error.suspended.name=Suspended
+
+error.suspended.text=This journal has been either temporarily or permanently suspended by [[sitename]] for policy violation.  If you are [[user]], contact us for more information.
+
+error.suspended.title=Suspended Account
 
 error.tempdisabled=This is disabled temporarily.
 
@@ -1270,6 +1306,10 @@ talk.curname_Music=<b>Current music:</b>
 
 talk.error.bogusargs=Bogus arguments
 
+talk.error.deleted=This journal is deleted.
+
+talk.error.deleted.title=Deleted
+
 talk.error.mustlogin=You must be logged in to view this protected entry.
 
 talk.error.noentry=No such entry.
@@ -1283,10 +1323,6 @@ talk.error.notauthorised=You are not authorized to view this protected entry.
 talk.error.suspended=This journal/poster is suspended.
 
 talk.error.suspended.title=Suspended
-
-talk.error.deleted.title=Deleted
-
-talk.error.deleted=This journal is deleted.
 
 talk.parentlink=Parent
 

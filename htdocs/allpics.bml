@@ -15,17 +15,37 @@
  }
 
  my $quser = $dbr->quote($user);
+ $title = $ML{'.title'};
 
  my $u = LJ::load_user($dbs, $user);
  unless ($u) {
-     $title = "User Pictures";
-     $body = "<?h1 Error h1?><?p You need to specify a user parameter. p?>";
+     $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noparam'} p?>";
+     return;
+ }
+
+ if ($u->{'statusvis'} eq "S") {
+     $title = $ML{'error.suspended.title'};
+     $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " .
+             BML::ml('error.suspended.text', {'user'=>"<?ljuser $user ljuser?>"}) . 
+            " p?>";
+     return;
+ }
+ if ($u->{'statusvis'} eq "D") {
+     $title = $ML{'error.deleted.title'};
+     $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " .
+             BML::ml('error.deleted.text', {'user'=>"<?ljuser $user ljuser?>"}) . 
+            " p?>";
+     return;
+ }
+ if ($u->{'statusvis'} eq "X") {
+     $title = $ML{'error.purged.title'};
+     $body = "<?h1 $ML{'error.purged.name'} h1?><?p " .
+             BML::ml('error.purged.text', {'user'=>"<?ljuser $user ljuser?>"}) . 
+            " p?>";
      return;
  }
 
  #### edit mode
-
- $title = "User Pictures";
 
  my %keywords = ();
  $sth = $dbr->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
@@ -44,34 +64,36 @@
      if ($piccount++ == 0) {
          my $edit;
          if ($remote && $remote->{'user'} eq $u->{'user'}) {
-             $edit = "You may be interested in <a href=\"/editpics.bml\">editing your picture keywords</a> or <a href=\"/uploadpic.bml\">uploading a new picture</a>.";
+             $edit = $ML{'.edit'};
          }
-         $body .= "<?h1 Current Pictures h1?><?p Here are the user pictures for <?ljuser $user ljuser?>. $edit p?>";
-          $body .= "<UL><TABLE CELLPADDING=5 BORDER=0 CELLSPACING=1>";
+         $body .= "<?h1 $ML{'.current'} h1?><?p ";
+         $body .= BML::ml('.pics', {'user'=>"<?ljuser $user ljuser?>"});
+         $body .= "$edit p?>";
+         $body .= "<ul><table cellpadding='5' border='0' cellspacing='1'>";
              
      }
-     $body .= "<TR VALIGN=MIDDLE>";
-     $body .= "<TD ALIGN=CENTER><IMG SRC=\"/userpic/$pic->{'picid'}\" WIDTH=$pic->{'width'} HEIGHT=$pic->{'height'}></TD>";
-     $body .= "<TD>";
+     $body .= "<tr valign='middle'>";
+     $body .= "<td align='center'><img src='/userpic/$pic->{'picid'}' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
+     $body .= "<td>";
      if ($u->{'defaultpicid'} == $pic->{'picid'}) {
-         $body .= "<U>Default</U><BR>";
+         $body .= "$ML{'.default'}<br />";
      }
 
      my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}});
      $eh_keywords = LJ::eall($eh_keywords);
      if ($eh_keywords) {
-         $body .= "<B>Keywords:</B> $eh_keywords\n";
+         $body .= "<b>$ML{'.keywords'}</b> $eh_keywords\n";
      }
 
-     $body .= "</TD>";
-     $body .= "</TR>\n";     
+     $body .= "</td>";
+     $body .= "</tr>\n";     
 
  }
 
  if ($piccount) {
-     $body .= "</TABLE>";
+     $body .= "</table>";
  } else {
-     $body = "<?h1 No Pictures h1?><?p You have no pictures uploaded.  To upload one, go <A HREF=\"/uploadpic.bml\">here</A>. p?>";
+     $body = "<?h1 $ML{'.nopics.title'} h1?><?p $ML{'.nopics.text'} p?>";
  }
  
  return;
