@@ -102,8 +102,10 @@ sub trans
         return $journal_view->(undef);
     }
 
-    if ($LJ::OTHER_VHOSTS && $host && $host ne $LJ::DOMAIN
-        && $host ne $LJ::DOMAIN_WEB)
+    # custom used-specified domains
+    if ($LJ::OTHER_VHOSTS && $host ne $LJ::DOMAIN_WEB &&
+        $host ne $LJ::DOMAIN && $host =~ /\./ &&
+        $host =~ /[^\d\.]/)
     {
         my $dbr = LJ::get_dbh("slave", "master");
         my $checkhost = lc($host);
