@@ -37,11 +37,15 @@
       <term>tellafriend</term>
       <listitem><simpara>Show the <quote>Tell a Friend</quote> button on comment pages.</simpara></listitem>
     </varlistentry>
+    <varlistentry>
+      <term>clientversionlog</term>
+      <listitem><simpara>Show the client usage statistics on the <filename>stats.bml</filename> page.</simpara></listitem>
+    </varlistentry>
   </variablelist>
 </section>
 <!--
 Local Variables:
 mode:sgml
-sgml-parent-document: ("ljconfig.xml" "section")
+sgml-parent-document: ("ljconfig.xml" "chapter" "section")
 End:
 -->
