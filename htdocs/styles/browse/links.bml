@@ -35,7 +35,7 @@
 	 $ret .= "<B>$last</B><BR>\n";
      }
      my $view=substr($sty->{'type'},0,1);
-     $ret .= "<nobr>&nbsp;&nbsp;<A TARGET=\"main\" HREF=\"styleinfo.bml?styleid=$sty->{'styleid'}\">-</A> <A TARGET=\"main\" HREF=\"/customview.cgi?styleid=$sty->{'styleid'}&user=$dispuser$extra{$sty->{'type'}}\">$sty->{'styledes'}</A></nobr><BR>\n";
+     $ret .= "<nobr>&nbsp;&nbsp;<A TARGET=\"main\" HREF=\"styleinfo.bml?styleid=$sty->{'styleid'}\">-</A> <A TARGET=\"main\" HREF=\"/customview.cgi?styleid=$sty->{'styleid'}&user=$dispuser&nooverride=1$extra{$sty->{'type'}}\">$sty->{'styledes'}</A></nobr><BR>\n";
  }
 
  return $ret; 
