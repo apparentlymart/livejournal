@@ -226,7 +226,7 @@ sub get_recent_items
 	$gmask_from = {};
 	if ($remid) {
 	    ## then we need to load the group mask for this friend
-	    $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$userid AND friendid=$remid");
+	    $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE userid=$userid AND friendid=$remid");
 	    $sth->execute;
 	    my ($mask) = $sth->fetchrow_array;
 	    $gmask_from->{$userid} = $mask;
@@ -259,11 +259,26 @@ sub get_recent_items
 	       "ORDER BY ownerid, $sort_key ".
 	       "LIMIT $skip,$itemshow");
 
+    # this whole @need_update stuff is unnecessary if the web-server
+    # was stopped during the upgrade from the old code to the new
+    # non-hint code, but it might not have been, and some log
+    # rows might have an rlogtime == 0, which needs fixing.
+    my @need_update;
+
     $sth = $dbr->prepare($sql);
     $sth->execute;
     while (my $li = $sth->fetchrow_hashref) {
 	push @items, $li;
 	push @{$opts->{'itemids'}}, $li->{'itemid'};
+
+	# cleanup hack; see above.
+	push @need_update, $li->{'itemid'}
+	    if ($opts->{'friendsview'} && $li->{'rlogtime'} == 0);
+    }
+
+    if (@need_update) {
+	$dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
+		 "WHERE itemid IN (" . join(",",@need_update) . ")");
     }
     
     return @items;
