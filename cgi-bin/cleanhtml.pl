@@ -367,7 +367,7 @@ sub ExpandLJURL
 }
 
 my $subject_eat = [qw[head title style layer iframe applet object]];
-my $subject_allow = [qw[a b i u]];
+my $subject_allow = [qw[a b i u em strong cite]];
 my $subject_remove = [qw[bgsound embed object caption link font]];
 sub clean_subject
 {
