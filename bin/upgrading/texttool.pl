@@ -292,6 +292,9 @@ sub poptext
             $source{$lang} = $file;            
         }
     }
+
+    my %existing_item;  # langid -> code -> 1
+
     foreach my $source (keys %source)
     {
         $out->("$source", '+');
@@ -357,12 +360,19 @@ sub poptext
 
             $out->('x', 'No language defined!') unless $l;
 
+            unless (exists $existing_item{$l->{'lnid'}}) {
+                $existing_item{$l->{'lnid'}} = {};
+                my $sth = $dbh->prepare(qq{
+                    SELECT i.itcode
+                    FROM ml_latest l, ml_items i
+                    WHERE i.dmid=1 AND l.dmid=1 AND i.itid=l.itid AND l.lnid=$l->{'lnid'}
+                });
+                $sth->execute;
+                $existing_item{$l->{'lnid'}}->{$_} = 1
+                    while $_ = $sth->fetchrow_array;
+            }
 
-            my $qcode = $dbh->quote($code);
-            my $exists = $dbh->selectrow_array("SELECT COUNT(*) FROM ml_latest l, ml_items i ".
-                                               "WHERE l.dmid=1 AND i.dmid AND i.itcode=$qcode AND ".
-                                               "i.itid=l.itid AND l.lnid=$l->{'lnid'}");
-            if (! $exists) {
+            unless ($existing_item{$l->{'lnid'}}->{$code}) {
                 $addcount++;
                 my $staleness = $metadata{'staleness'}+0;
                 my $res = LJ::Lang::set_text($dbh, 1, $l->{'lncode'}, $code, $text,
