@@ -98,14 +98,6 @@ my $move_user = sub {
         return 1 unless $lock;
     }
 
-    # ignore expunged users
-    if ($u->{'statusvis'} eq "X") {
-        LJ::update_user($u, { dversion => 7 })
-            or die "error updating dversion";
-        $u->{dversion} = 7; # update local copy in memory
-        return 1;
-    }
-
     # get a handle for every user to revalidate our connection?
     my ($dbh, $dbcm) = $get_db_handles->($u->{clusterid});
     return 0 unless $dbh && $dbcm;
@@ -113,6 +105,18 @@ my $move_user = sub {
     # assign this dbcm to the user
     $u->set_dbcm($dbcm)
         or die "unable to set database for $u->{user}: dbcm=$dbcm\n";
+
+    # verify dversion hasn't changed on us (done by another job?)
+    my $dversion = $dbh->selectrow_array("SELECT dversion FROM user WHERE userid = $u->{userid}");
+    return 1 unless $dversion == 6;
+
+    # ignore expunged users
+    if ($u->{'statusvis'} eq "X") {
+        LJ::update_user($u, { dversion => 7 })
+            or die "error updating dversion";
+        $u->{dversion} = 7; # update local copy in memory
+        return 1;
+    }
 
     # step 0.5: delete all the bogus userblob rows for this user
     # This is due to the auto_increment for the blobid overflowing
@@ -309,7 +313,8 @@ while (1) {
     
     my $slow_todo = scalar keys %uids;
     print "Of $BLOCK_MOVE, $slow_todo have to be slow-converted...\n";
-    foreach my $id (keys %uids) {
+    my @ids = randlist(keys %uids);
+    foreach my $id (@ids) {
         # this person has userpics, move them the slow way
         die "Userid $id in \$has_upics, but not in \%us...fatal error\n" unless $us{$id};
 
@@ -327,3 +332,16 @@ while (1) {
 print $header->("Dversion 6->7 conversion completed");
 print "  Users moved: " . $zeropad->($stats{'slow_moved'}) . "\n";
 print "Users updated: " . $zeropad->($stats{'fast_moved'}) . "\n\n";
+
+# helper function to randomize stuff
+sub randlist
+{
+    my @rlist = @_;
+    my $size = scalar(@rlist);
+    
+    my $i;
+    for ($i=0; $i<$size; $i++) {
+        unshift @rlist, splice(@rlist, $i+int(rand()*($size-$i)), 1);
+    }
+    return @rlist;
+}
