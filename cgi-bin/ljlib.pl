@@ -2297,6 +2297,7 @@ sub html_select
     my $ret;
     $ret .= "<select";
     if ($opts->{'name'}) { $ret .= " name=\"$opts->{'name'}\""; }
+    if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
     $ret .= "$disabled>";
     while (my ($value, $text) = splice(@items, 0, 2)) {
 	my $sel = "";
