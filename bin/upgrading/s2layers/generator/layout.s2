@@ -267,6 +267,15 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
 <td colspan="2" bgcolor="$*entry_back">
 """;
 
+    print "<div style='text-align: center'>";
+    var Link link;
+    $link = $e->get_link("navprev"); " $link";
+    $link = $e->get_link("edit_entry"); " $link";
+    $link = $e->get_link("memorify_entry"); " $link";
+    $link = $e->get_link("tellafriend"); " $link";
+    $link = $e->get_link("navnext"); " $link";
+    print "</div>";
+
     if ($p.view == "friends" or
         $p.journal_type == "C" or
         $e.poster.username != $e.journal.username) 
@@ -306,6 +315,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         }
         $metadata = """$metadata</table><p>""";
     }
+
     if (not $hide_text) { print $metadata; print $e.text; }
 """</td></tr>
 <tr bgcolor="$*weak_back"><td align='left' class='comments'>

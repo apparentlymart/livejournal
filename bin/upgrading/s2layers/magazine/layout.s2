@@ -310,7 +310,16 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     }
     # Time / Subject / Security
     var string subject = ($e.subject != "" ? " - <em>$e.subject</em>" : "");
-    "<h3><span>$time$subject</span> "; if ($e.security != "") { $e.security_icon->print(); } "</h3>";
+    "<h3><span>$time$subject</span> $e.security_icon</h3>";
+
+    print "<div style='text-align: center'>";
+    var Link link;
+    $link = $e->get_link("navprev"); " $link";
+    $link = $e->get_link("edit_entry"); " $link";
+    $link = $e->get_link("memorify_entry"); " $link";
+    $link = $e->get_link("tellafriend"); " $link";
+    $link = $e->get_link("navnext"); " $link";
+    print "</div>";
 
     if (not $hide_text)
     {

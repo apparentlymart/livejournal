@@ -185,6 +185,7 @@ function Page::print()
 function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_text)
 {
     "<table border='0'><tr>";
+
     if ($p.view == "friends" or
         $*show_entry_userpic == true or
         $e.journal.username != $e.poster.username)
@@ -201,9 +202,19 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         }
         "</td>";
     }
-    """<td valign="top"><font size="+1">"""; print $e.time->date_format("med"); " "; print $e.time->time_format();
+    """<td valign="top" width='100%'><font size="+1">"""; print $e.time->date_format("med"); " "; print $e.time->time_format();
     if ($e.subject != "") { " <span style='color: $*subject_color'>$e.subject</span>"; }
     "</font>";
+
+    print "<div style='text-align: center'>";
+    var Link link;
+    $link = $e->get_link("navprev"); " $link";
+    $link = $e->get_link("edit_entry"); " $link";
+    $link = $e->get_link("memorify_entry"); " $link";
+    $link = $e->get_link("tellafriend"); " $link";
+    $link = $e->get_link("navnext"); " $link";
+    print "</div>";
+
     if (not $hide_text) 
     {
         print "<p>$e.text</p>";

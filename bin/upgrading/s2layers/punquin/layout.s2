@@ -288,6 +288,15 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         "<hr class='seperator' />";
     }
 
+    print "<div style='text-align: center'>";
+    var Link link;
+    $link = $e->get_link("navprev"); " $link";
+    $link = $e->get_link("edit_entry"); " $link";
+    $link = $e->get_link("memorify_entry"); " $link";
+    $link = $e->get_link("tellafriend"); " $link";
+    $link = $e->get_link("navnext"); " $link";
+    print "</div>";
+
     "<table border='0' cellpadding='2' cellspacing='0'><tr>";
 
     if ($p.view == "friends" or

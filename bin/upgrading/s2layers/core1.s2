@@ -1634,6 +1634,15 @@ function EntryPage::print_body
     print "<br />@ " + $e.time->date_format("long") + " - " + $e.time->time_format();
     "</td></tr></table>\n";
 
+    print "<div style='text-align: center'>";
+    var Link link;
+    $link = $e->get_link("navprev"); " $link";
+    $link = $e->get_link("edit_entry"); " $link";
+    $link = $e->get_link("memorify_entry"); " $link";
+    $link = $e->get_link("tellafriend"); " $link";
+    $link = $e->get_link("navnext"); " $link";
+    print "</div>";
+
     "<h2>$e.security_icon $e.subject</h2>\n"; 
 
     if (not $.viewing_thread) {
@@ -1666,6 +1675,22 @@ function ReplyPage::print_body
         print "<h2>$*text_reply_nocomments_header/h2><p>$*text_reply_nocomments</p>";
         return; 
     }
+
+    "<table>";
+    if (defined $.replyto.poster) {
+        if (defined $.replyto.userpic) { 
+            print "<tr valign='middle'><td><img src='$.replyto.userpic.url' /></td>"; 
+        }
+        print "<td>"; 
+        $.replyto.poster->print();
+    } else {
+        "<td><i>Anonymous</i>";
+    }
+    " wrote:";
+    print "<br />@ " + $.replyto.time->date_format("long") + " - " + $.replyto.time->time_format();
+       
+    "</td></tr></table>\n";
+
     print "<h2>$.replyto.subject</h2>";
     print "<div>$.replyto.text</div>";
 

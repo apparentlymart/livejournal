@@ -305,6 +305,16 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
 
     # Entry
       "<td style='text-align:left'>";
+
+      print "<div style='text-align: center'>";
+      var Link link;
+      $link = $e->get_link("navprev"); " $link";
+      $link = $e->get_link("edit_entry"); " $link";
+      $link = $e->get_link("memorify_entry"); " $link";
+      $link = $e->get_link("tellafriend"); " $link";
+      $link = $e->get_link("navnext"); " $link";
+      print "</div>";
+
       if ($e.subject != "") { "\n\n<span class='subject'>$e.subject</span><br />"; }
       if (not $hide_text) {
           print $e.text; "\n\n";

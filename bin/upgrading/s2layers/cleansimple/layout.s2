@@ -478,11 +478,18 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     if ($e.new_day) {
         """<div class="day"><h3>"""+$e.time->date_format("long")+"</h3>";
     }
-    """
-<div class="entry" id="entry$e.itemid">
-<div class="entrytext">
-<span class="entryheading">
-    """;
+    """<div class="entry" id="entry$e.itemid"><div class="entrytext">""";
+
+    print "<div style='text-align: center'>";
+    var Link link;
+    $link = $e->get_link("navprev"); " $link";
+    $link = $e->get_link("edit_entry"); " $link";
+    $link = $e->get_link("memorify_entry"); " $link";
+    $link = $e->get_link("tellafriend"); " $link";
+    $link = $e->get_link("navnext"); " $link";
+    print "</div>";
+
+    """<span class="entryheading">""";
 
 
     if ($p.view == "friends") {
