@@ -919,6 +919,68 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/edit.bml.title=Edit Friends
 
+/friends/editgroups.bml.btn.ge.del=Delete
+
+/friends/editgroups.bml.btn.ge.new=New
+
+/friends/editgroups.bml.btn.ge.ren=Rename
+
+/friends/editgroups.bml.btn.gs.private=Private
+
+/friends/editgroups.bml.btn.gs.public=Public
+
+/friends/editgroups.bml.btn.mv.down=Move down
+
+/friends/editgroups.bml.btn.mv.up=Move up
+
+/friends/editgroups.bml.confirm.delete=Are you sure you wish to delete this custom friends group?
+
+/friends/editgroups.bml.done.btn=Save Changes
+
+/friends/editgroups.bml.done.header=Done?
+
+/friends/editgroups.bml.done.text=When you are done, press the button below to save your changes.
+
+/friends/editgroups.bml.error.max30|notes=It is important for the JavaScript on this page to work that this string remains a single line without linebreaks. Additionally, it must not contain any quotation marks.
+/friends/editgroups.bml.error.max30=You have reached the maximum limit of 30 custom friends groups. If you have deleted one or more groups but have not saved the changes yet, do so now, then come back to this page and reload it. You will then be able to create new custom friends groups.
+
+/friends/editgroups.bml.error.text=The server returned the following error message:
+
+/friends/editgroups.bml.group.public=(public)
+
+/friends/editgroups.bml.ingroup=In group:
+
+/friends/editgroups.bml.ingroup.not=Not in group:
+
+/friends/editgroups.bml.login.header=Login First
+
+/friends/editgroups.bml.login.text=To edit your custom friends groups, you must first <a href="/login.bml?ret=1">log in</a>.
+
+/friends/editgroups.bml.prompt.newname=Enter the name for the new custom friends group:
+
+/friends/editgroups.bml.prompt.rename=Rename this custom friends group to:
+
+/friends/editgroups.bml.saved.header=Saved
+
+/friends/editgroups.bml.saved.text=Your custom friends groups are now saved.
+
+/friends/editgroups.bml.text<<
+This page allows you to edit your custom friends groups.  Custom friends groups are used
+for setting security on items and for filtering your friends page.
+This page requires JavaScript to work.
+.
+
+/friends/editgroups.bml.text.sec<<
+<strong>Security note:</strong> If you wish to delete a group and make a new group,
+do <strong>not</strong> do this by renaming one group and then editing it.
+If you do this, all your old entries which are accessible to the old group will
+then be accessible to the new group.
+.
+
+/friends/editgroups.bml.title=Edit Custom Friends Groups
+
+/friends/editgroups.bml.yourgroups=Your custom friends groups:
+
 /friends/edit_do.bml.addfriends.head=Add Friends
 
 /friends/edit_do.bml.addfriends.text=Enter your friends' LiveJournal user names in the boxes below, and pick what background and foreground colors you want to associate with them....
@@ -1999,7 +2061,8 @@ BML.parse_multipart.unknowntype=Unknown content type
 
 btn.search=Search
 
-email.newacct.subject=Welcome to [[sitename]]
+Email=Email
+
 email.newacct.body<<
 Congratulations, you have a new [[sitename]] account!
 
@@ -2027,7 +2090,7 @@ Enjoy!
 [[siteroot]]/
 .
 
-Email=Email
+email.newacct.subject=Welcome to [[sitename]]
 
 Error|notes=typically used inside an H1 tag to announce an error.
 Error=Error

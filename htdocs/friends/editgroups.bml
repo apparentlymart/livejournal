@@ -1,6 +1,6 @@
 <?_code
 
- $title = "Edit Friend Groups";
+ $title = $ML{'.title'};
  $body = "";
 
  # these are only used by the client-side for JS to play with.
@@ -19,7 +19,7 @@
 
  my $remote = LJ::get_remote($dbs);
  unless ($remote) {
-     $body = "<?h1 Login First h1?><?p To edit your friend groups you must first <A HREF=\"/login.bml?ret=1\">log in</A>. p?>";
+     $body = "<?h1 $ML{'.login.header'} h1?><?p $ML{'.login.text'} p?>";
      return;
  }
 
@@ -34,9 +34,9 @@
      });
 
      if ($res{'success'} eq "OK") {
-         $body .= "<?h1 Saved h1?><?p Your friend groups are now saved. p?>\n";     
+         $body .= "<?h1 $ML{'.saved.header'} h1?><?p $ML{'.saved.text'} p?>";
      } else {
-         $body .= "<?h1 Error h1?><?p Server says: <B>$res{'errmsg'}</B> p?>";
+         $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.text'} p?><?p $res{'errmsg'} p?>";
      }
      return;
  }
@@ -52,11 +52,9 @@
  my @num_used;
  my @num_free;
 
- $body .= "<?h1 Friend Groups h1?><?p From here you can edit your groups of friends.  Friend groups are used for setting security on items and for filtering your friends page.  This page requires JavaScript to work. p?>";
- $body .= "<?p <b>Security note:</b> If you want to delete a group and make a new group, do <B>NOT</B> simply rename one group to something else and change the people that are in the group.  If you do, all the people in the new group can see all your old entries you made for people in the old group. p?>";
- $body .= "<P>";
- $body .= "\n<FORM METHOD=POST NAME=\"fg\">\n";
- $body .= "<input type=hidden name=mode value=save>\n";
+ $body .= "<?h1 $ML{'.title'} h1?><?p $ML{'.text'} p?><?p $ML{'.text.sec'} p?><p>";
+ $body .= "<form method='post' name='fg'>";
+ $body .= "<input type='hidden' name='mode' value='save' />";
  for (my $i=1; $i<=30; $i++) {
      my $sort = 255;
      my $name = "";
@@ -69,18 +67,18 @@
      } else {
          push @num_free, $i;
      }
-     $body .= "<input type=hidden name=efg_set_${i}_name value=\"$name\">\n";
-     $body .= "<input type=hidden name=efg_set_${i}_sort value=\"$sort\">\n";
-     $body .= "<input type=hidden name=efg_delete_${i} value=\"0\">\n";
-     $body .= "<input type=hidden name=efg_set_${i}_public value=\"$public\">\n";
+     $body .= "<input type='hidden' name='efg_set_${i}_name' value='$name' />";
+     $body .= "<input type='hidden' name='efg_set_${i}_sort' value='$sort' />";
+     $body .= "<input type='hidden' name='efg_delete_${i}' value='0' />";
+     $body .= "<input type='hidden' name='efg_set_${i}_public' value='$public' />";
  }
  for (my $i=1; $i<=$res{'friend_count'}; $i++) {
      my $user = $res{"friend_${i}_user"};
      my $mask = $res{"friend_${i}_groupmask"} || 1;
-     $body .= "<input type=hidden name=editfriend_groupmask_$user value=\"$mask\">\n";
+     $body .= "<input type='hidden' name='editfriend_groupmask_$user' value='$mask' />";
  }
 
- $body .= <<'END_JS';
+ $body .= <<"END_JS";
 <SCRIPT LANGUAGE="JavaScript"><!--
 
  var selectedGroup = 0;
@@ -223,7 +221,7 @@
  function realName (name)
  {
      var rname = name;
-     var index = name.lastIndexOf(" (public)");
+     var index = name.lastIndexOf(" $ML{'.group.public'}");
      if (index != -1) {
          rname = name.substr(0, index);
      }
@@ -238,13 +236,13 @@
      var item = list.options[selindex];
 
      var newtext = realName(item.text);
-     newtext = prompt("Rename group:", newtext);
+     newtext = prompt("$ML{'.prompt.rename'}", newtext);
      if (newtext==null || newtext == "") { return; }
 
      var gnum = item.value;
      document.fg["efg_set_"+gnum+"_name"].value = newtext;     
      if (document.fg["efg_set_"+gnum+"_public"].value == 1) {
-         newtext = newtext + " (public)";
+         newtext = newtext + " $ML{'.group.public'}";
      }
      item.text = newtext;
  }
@@ -256,7 +254,7 @@
      if (selindex==-1) { return; }
      var item = list.options[selindex];
 
-     var conf = confirm("Are you sure you want to delete this group?");
+     var conf = confirm("$ML{'.confirm.delete'}");
      if (!conf) { return; }
 
      // mark it to be deleted later
@@ -291,7 +289,7 @@
      var item = list.options[selindex];
 
      var name = realName(item.text);
-     item.text = name + " (public)";
+     item.text = name + " $ML{'.group.public'}";
    
      var gnum = item.value;
      document.fg["efg_set_"+gnum+"_public"].value = "1";
@@ -323,13 +321,13 @@
          break;	 
      }
      if (! foundg) {
-         alert("Sorry, you can only have 30 groups of friends.  If you've deleted friends but haven't saved yet, do so now and then come back.  You'll then be able to create new groups to fill the voids that the delete groups leave.");
+         alert("$ML{'.error.max30'}");
          return;
      }
      var gnum = i;
-     var groupname = prompt("Enter name of new group:", "");
+     var groupname = prompt("$ML{'.prompt.newname'}", "");
      if (groupname==null || groupname=="") { return; }
-     
+
      form["efg_set_"+gnum+"_name"].value = groupname;
      var item = new Option(groupname, gnum, false, true);
      var list = form.list_groups;
@@ -342,42 +340,52 @@
 // --></SCRIPT>
 END_JS
 
- $body .= "<TABLE CELLSPACING=5><TR VALIGN=TOP>";
+ $body .= "<table cellspacing='5'><tr valign='bottom'>";
+ $body .= "<td nowrap='1' colspan='2'><strong>$ML{'.yourgroups'}</strong></td>";
+ $body .= "<td nowrap='1' colspan='2'><strong>$ML{'.ingroup.not'}</strong></td>";
+ $body .= "<td nowrap='1'><strong>$ML{'.ingroup'}</strong></td></tr>";
 
- $body .= "\n<TD><B>Your groups:</B><BR><SELECT NAME=list_groups STYLE=\"width: 150px;\" SIZE=15 onChange=\"groupClicked();\">";
+ $body .= "<tr valign='top'>";
+ $body .= "<td><select name='list_groups' style='width: 150px;' size='15' onchange='groupClicked();'>";
  foreach my $num (sort { $res{"frgrp_${a}_sortorder"} <=> 
                          $res{"frgrp_${b}_sortorder"} } @num_used) 
  {
      my $listname = $res{"frgrp_${num}_name"};
-     $listname .= " (public)" if $res{"frgrp_${num}_public"};
-     $body .= "\n<OPTION VALUE=\"$num\">" . LJ::ehtml($listname);
+     $listname .= " $ML{'.group.public'}" if $res{"frgrp_${num}_public"};
+     $body .= "<option value='$num'>" . LJ::ehtml($listname);
  }
-# foreach my $num (sort { $a <=> $b } @num_free) {
-#     $body .= "\n<OPTION VALUE=\"$num\">";
-# }
- $body .= "</SELECT><BR><NOBR>";
- $body .= "<input type=button value=\"New\" onClick=\"newGroup();\"> ";
- $body .= "<input type=button value=\"Del\" onClick=\"deleteGroup();\"> ";
- $body .= "<input type=button value=\"Rename\" onClick=\"renameGroup();\">";
+
+ $body .= "</select></td>";
+ 
+ $body .= "<td valign='middle'>";
+ $body .= "<input type='button' value='$ML{'.btn.mv.up'}' onClick='moveGroup(-1);' /><br /><br />";
+ $body .= "<input type='button' value='$ML{'.btn.mv.down'}' onClick='moveGroup(1);' /></td>";
+
+ $body .= "<td><select name='list_out' multiple='1' size='15'>";
+ $body .= "<option value=''>---------------</option></select></td>";
+
+ $body .= "<td valign='middle'>";
+ $body .= "<input type='button' onClick='moveIn();' value='&gt;&gt;' /><br /><br />";
+ $body .= "<input type='button' onClick='moveOut();' value='&lt;&lt;' /></td>";
+
+ $body .= "<td><select name='list_in' multiple='1' size='15'>";
+ $body .= "<option value=''>---------------</option></select></td>";
+
+ $body .= "</tr><tr><td colspan='2'>";
+ $body .= "<nobr>";
+ $body .= "<input type='button' value='$ML{'.btn.ge.new'}' onClick='newGroup();' /> ";
+ $body .= "<input type='button' value='$ML{'.btn.ge.del'}' onClick='deleteGroup();' /> ";
+ $body .= "<input type='button' value='$ML{'.btn.ge.ren'}' onClick='renameGroup();' />";
  $body .= "</nobr><br /><nobr>";
- $body .= "<input type=button value=\"Public\" onClick=\"makePublic();\"> ";
- $body .= "<input type=button value=\"Private\" onClick=\"makePrivate();\">";
- $body .= "</NOBR></TD>";
+ $body .= "<input type='button' value='$ML{'.btn.gs.public'}' onClick='makePublic();' /> ";
+ $body .= "<input type='button' value='$ML{'.btn.gs.private'}' onClick='makePrivate();' />";
+ $body .= "</nobr></td><td></td><td></td><td></td>";
 
- $body .= "\n<TD VALIGN=MIDDLE><INPUT TYPE=BUTTON VALUE=\"Up\" onClick=\"moveGroup(-1);\"><P><INPUT TYPE=BUTTON VALUE=\"Down\" onClick=\"moveGroup(1);\"></td>";
+ $body .= "</tr></table>";
 
- $body .= "\n<TD WIDTH=120><B>Not in group:</B><BR><SELECT NAME=list_out MULTIPLE SIZE=15>";
- $body .= "<OPTION VALUE=\"\">---------------</SELECT></TD>";
-
- $body .= "\n<TD VALIGN=MIDDLE><INPUT TYPE=BUTTON onClick=\"moveIn();\" VALUE=\"&gt;&gt;\"><P><INPUT TYPE=BUTTON onClick=\"moveOut();\" VALUE=\"&lt;&lt;\"></td>";
-
- $body .= "\n<TD><B>In group:</B><BR><SELECT NAME=list_in MULTIPLE SIZE=15>";
- $body .= "<OPTION VALUE=\"\">---------------</SELECT></TD>";
-
- $body .= "</TR></TABLE>\n";
-
- $body .= "<?h1 Done? h1?><?p When you're all done, press <INPUT TYPE=submit VALUE=\"Save\"> p?>\n";
- $body .= "</FORM>\n";
+ $body .= "<?h1 $ML{'.done.header'} h1?><?p $ML{'.done.text'} p?>";
+ $body .= "<?p <input type='submit' value='$ML{'.done.btn'}' /> p?>";
+ $body .= "</form>";
 
  return;
 
