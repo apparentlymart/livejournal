@@ -37,6 +37,15 @@ general /editjournal.bml.lostinfo.text
 
 general /editjournal_do.bml.error.mustlogin
 
+general /interests.bml.findsim.account.notallowed
+general /interests.bml.findsim.account.notloggedin
+general /interests.bml.findsim.btn.find
+general /interests.bml.findsim.head
+general /interests.bml.findsim.simtouser
+general /interests.bml.findsim.text
+general /interests.bml.interests.findsim1
+general /interests.bml.interests.findsim2
+
 general /modify.bml.btn.proceed
 general /modify.bml.journalstatus.about
 general /modify.bml.journalstatus.head
@@ -50,6 +59,17 @@ general /modify.bml.modify.head
 general /modify.bml.modify.text
 
 general /modify_do.bml.title
+
+general /setlang.bml.select
+general /setlang.bml.switch
+general /setlang.bml.title
+
+general /setscheme.bml.current
+general /setscheme.bml.default
+general /setscheme.bml.noschemes
+general /setscheme.bml.select
+general /setscheme.bml.switch
+general /setscheme.bml.title
 
 general /support/faqbrowse.bml.title
 
@@ -97,12 +117,3 @@ general /userinfo.bml.openmembership.body
 general /userinfo.bml.posthere
 general /userinfo.bml.rpmembership.body
 general /userinfo.bml.syn.lastnew
-
-general /interests.bml.findsim.account.notallowed
-general /interests.bml.findsim.account.notloggedin
-general /interests.bml.findsim.btn.find
-general /interests.bml.findsim.head
-general /interests.bml.findsim.simtouser
-general /interests.bml.findsim.text
-general /interests.bml.interests.findsim1
-general /interests.bml.interests.findsim2

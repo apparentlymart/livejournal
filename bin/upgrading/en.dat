@@ -1684,6 +1684,16 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /manage/index.bml.userpictures.header=User Picture Icons
 
+/manage/siteopts.bml.btn.lang=Switch Language
+
+/manage/siteopts.bml.btn.scheme=Switch Scheme
+
+/manage/siteopts.bml.head.lang=Select Your Language
+
+/manage/siteopts.bml.head.scheme=Select Your Preferred Scheme
+
+/manage/siteopts.bml.title=Browse Preferences
+
 /modify.bml.title=Modify Journal
 
 /modify_do.bml.availablestyles.head=Available Styles
@@ -1779,24 +1789,6 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 /modify_do.bml.success.head=Success
 
 /modify_do.bml.success.text=Your journal settings have been updated.  You can view your journal <A HREF="[[url]]">here</A>.
-
-/setlang.bml.select=Select your preferred language:
-
-/setlang.bml.switch=Switch
-
-/setlang.bml.title=Set Language
-
-/setscheme.bml.current=Current Scheme Preference
-
-/setscheme.bml.default=Default
-
-/setscheme.bml.noschemes=No schemes are available for selection.
-
-/setscheme.bml.select=Select your preferred scheme:
-
-/setscheme.bml.switch=Switch
-
-/setscheme.bml.title=Set Scheme Preference
 
 /support/encodings.bml.edit.header=I cannot edit my entries in the web interface!
 

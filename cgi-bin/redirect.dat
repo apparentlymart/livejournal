@@ -26,3 +26,5 @@
 /sitemap.bml		/site/
 /faq.bml		/support/faq.bml
 /faqbrowse.bml		/support/faqbrowse.bml
+/setscheme.bml          /manage/siteopts.bml
+/setlang.bml            /manage/siteopts.bml
