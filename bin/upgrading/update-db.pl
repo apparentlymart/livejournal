@@ -5,6 +5,10 @@
 
 use strict;
 use Getopt::Long;
+use File::Path ();
+use File::Basename ();
+use File::Copy ();
+use Image::Size ();
 
 my $opt_sql = 0;
 my $opt_drop = 0;
@@ -232,11 +236,29 @@ if ($opt_pop)
                 };
                 my $error = "";
                 my $compiled;
+                my $info;
                 die $error unless LJ::S2::layer_compile($lay, \$error, { 
                     's2ref' => \$s2source, 
                     'redist_uniq' => $base,
                     'compiledref' => \$compiled,
+                    'layerinfo' => \$info,
                 });
+
+                if ($info->{'previews'}) {
+                    my @pvs = split(/\s*\,\s*/, $info->{'previews'});
+                    foreach my $pv (@pvs) {
+                        my $from = "$LD/$pv";
+                        next unless -e $from;
+                        my $dir = File::Basename::dirname($pv);
+                        File::Path::mkpath("$LJ::HOME/htdocs/img/s2preview/$dir");
+                        my $target = "$LJ::HOME/htdocs/img/s2preview/$pv";
+                        File::Copy::copy($from, $target);
+                        my ($w, $h) = Image::Size::imgsize($target);
+                        $pv = "$pv|$w|$h";
+                    }
+                    $dbh->do("REPLACE INTO s2info (s2lid, infokey, value) VALUES (?,?,?)",
+                             undef, $id, '_previews', join(",", @pvs));
+                }
 
                 if ($opt_compiletodisk) {
                     open (CO, ">$LD/$base.pl") or die;

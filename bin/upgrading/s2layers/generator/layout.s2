@@ -3,6 +3,7 @@
 layerinfo type = "layout";
 layerinfo name = "Generator";
 layerinfo redist_uniq = "generator/layout";
+layerinfo previews = "generator/generator.jpg";
 
 property Color entry_back { des = "Entry background"; }
 set entry_back = "#ffffff";

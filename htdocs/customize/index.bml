@@ -142,13 +142,14 @@ body<=
 
     # choose layout
     my @layouts = map { $_, LJ::ehtml($pub->{$_}->{'name'}) }
-                  grep { /^\d+$/ && $pub->{$_}->{'type'} eq "layout" } keys %$pub;
+                 grep { /^\d+$/ && $pub->{$_}->{'type'} eq "layout" &&
+                        LJ::S2::can_use_layer($u, $pub->{$_}->{'uniq'})  } keys %$pub;
     $ret .= "<?h1 Step 1: Layout h1?><?p Pick your layout.  Because theme selection and custom modifications depend on your layout, changing this setting discards all other edits you may have made. p?>";
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'layoutid',
                               'selected' => $style{'layout'},  },
                             @layouts);
-    $ret .= " <input type='submit' name='save:layout' value='Change'> (<a href=\"preview.bml?show=layouts\">previews</a>)";
+    $ret .= " <input type='submit' name='save:layout' value='Change'> (<a href=\"preview.bml?show=layouts&amp;journal=$u->{'user'}\">previews</a>)";
     $ret .= "</blockquote>";
 
     # pick other stuff
@@ -187,12 +188,12 @@ body<=
     }
     $ret .= "</blockquote>";
 
-    #use Data::Dumper;
-    #$ret .= "<pre>" . Dumper($pub) . "</pre>";
-    
     $ret .= "</form>";
-    return $ret;
 
+#    use Data::Dumper;
+#    $ret .= "<pre>" . Dumper($pub) . "</pre>";
+
+    return $ret;
 }
 _code?>
 <=body

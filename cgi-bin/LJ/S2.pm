@@ -142,24 +142,23 @@ sub get_public_layers
     my %existing;  # uniq -> id
     my $sth = $dbr->prepare("SELECT i.infokey, i.value, l.s2lid, l.b2lid, l.type ".
                             "FROM s2layers l, s2info i ".
-                            "WHERE l.userid=$sysid AND l.s2lid=i.s2lid AND i.infokey IN ('redist_uniq', 'name', 'langcode')");
+                            "WHERE l.userid=$sysid AND l.s2lid=i.s2lid AND ".
+                            "i.infokey IN ('redist_uniq', 'name', 'langcode', '_previews')");
     $sth->execute;
     die $dbr->errstr if $dbr->err;
     while (my ($key, $val, $id, $bid, $type) = $sth->fetchrow_array) {
         $existing{$id}->{'b2lid'} = $bid;
         $existing{$id}->{'s2lid'} = $id;
         $existing{$id}->{'type'} = $type;
-        if ($key eq "redist_uniq") {
-            $existing{$id}->{'uniq'} = $val;
-            $existing{$val} = $existing{$id};
-        } elsif ($key eq "name" || $key eq "langcode") {
-            $existing{$id}->{$key} = $val;
-        }
+        $key = "uniq" if $key eq "redist_uniq";
+        $existing{$id}->{$key} = $val;
     }
 
-    # setup children keys
     foreach (keys %existing) {
-        next unless /^\d+$/;
+        # setup uniq alias.
+        $existing{$existing{$_}->{'uniq'}} = $existing{$_};
+
+        # setup children keys
         next unless $existing{$_}->{'b2lid'};
         my $bid = $existing{$_}->{'b2lid'};
         unless ($existing{$bid}) {
@@ -578,6 +577,9 @@ sub layer_compile
         $dbh->do("REPLACE INTO s2info (s2lid, infokey, value) VALUES $values") or die;
         $dbh->do("DELETE FROM s2info WHERE s2lid=? AND infokey NOT IN ($notin)", undef, $lid);
     }
+    if ($opts->{'layerinfo'}) {
+        ${$opts->{'layerinfo'}} = \%info;
+    }
     
     # put compiled into database, with its ID number
     $dbh->do("REPLACE INTO s2compiled (s2lid, comptime, compdata) ".
@@ -663,6 +665,70 @@ sub get_layout_themes
         }
     }
     return map { $_, $theme{$_} } sort keys %theme;
+}
+
+sub get_policy
+{
+    return $LJ::S2::CACHE_POLICY if $LJ::S2::CACHE_POLICY;
+    my $policy = {};
+
+    foreach my $infix ("", "-local") {
+        my $file = "$LJ::HOME/bin/upgrading/s2layers/policy${infix}.dat";
+        my $layer = undef;
+        open (P, $file) or next;
+        while (<P>) {
+            s/\#.*//;
+            next unless /\S/;
+            if (/^\s*layer\s*:\s*(\S+)\s*$/) {
+                $layer = $1;
+                next;
+            }
+            next unless $layer;
+            s/^\s+//; s/\s+$//;
+            my @words = split(/\s+/, $_);
+            next unless $words[-1] eq "allow" || $words[-1] eq "deny";
+            my $allow = $words[-1] eq "allow" ? 1 : 0;
+            if ($words[0] eq "use" && @words == 2) {
+                $policy->{$layer}->{'use'} = $allow;
+            }
+            if ($words[0] eq "props" && @words == 2) {
+                $policy->{$layer}->{'props'} = $allow;
+            }
+            if ($words[0] eq "prop" && @words == 3) {
+                $policy->{$layer}->{'prop'}->{$words[1]} = $allow;
+            }
+        }
+    }
+
+    return $LJ::S2::CACHE_POLICY = $policy;
+}
+
+sub can_use_layer
+{
+    my ($u, $uniq) = @_;  # $uniq = redist_uniq value
+    return 1 if LJ::get_cap($u, "s2everything");
+    my $pol = get_policy();
+    my $can = 0;
+    foreach ('*', $uniq) {
+        next unless defined $pol->{$_};
+        next unless defined $pol->{$_}->{'use'};
+        $can = $pol->{$_}->{'use'};
+    }
+    return $can;
+}
+
+sub can_use_prop
+{
+    my ($u, $uniq, $prop) = @_;  # $uniq = redist_uniq value
+    return 1 if LJ::get_cap($u, "s2everything");
+    my $pol = get_policy();
+    my $can = 0;
+    foreach my $lay ('*', $uniq) {
+        next unless defined $pol->{$_};
+        next unless defined $pol->{$_}->{'use'};
+        $can = $pol->{$_}->{'use'};
+    }
+    return $can;
 }
 
 ## S2 object constructors

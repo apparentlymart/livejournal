@@ -3,6 +3,7 @@
 layerinfo type = "layout";
 layerinfo name = "Punquin Elegant with Sidebar";
 layerinfo redist_uniq = "punquin/layout";
+layerinfo previews = "punquin/punquin.jpg";
 
 property bool show_recent_userpic { des = "Show the userpic on the recent entries page?"; }
 set show_recent_userpic = false;

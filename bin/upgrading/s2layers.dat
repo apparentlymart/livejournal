@@ -12,6 +12,7 @@ cleansimple/en          i18n            cleansimple/layout
 
 generator/layout        layout          core1
 generator/en            i18n            generator/layout
+generator/mintchoc      theme           generator/layout
 
 magazine/layout         layout          core1
 magazine/en             i18n            magazine/layout

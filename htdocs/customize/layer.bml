@@ -20,7 +20,8 @@
     };
 
     my ($style, $layer);
-    my $savearg;
+    my $save_arg;
+    my $save_redir;
 
     # when given 'w' argument, load user's current style, and edit the user layer.
     # this is the mode redirected to from /customize/ (the simple customization UI)
@@ -29,7 +30,8 @@
         $style = LJ::S2::load_style($u->{'s2_style'});
         return $err->("Style not found.") unless $style && $style->{'userid'} == $u->{'userid'};
         $layer = LJ::S2::load_layer($dbh, $style->{'layer'}->{'user'});
-        $savearg = "w=user";
+        $save_arg = "w=user";
+        $save_redir = "/customize/?journal=$u->{'user'}";
     }
 
     return BML::redirect("/customize/") unless $layer;
@@ -88,6 +90,7 @@
         }
         
         if (LJ::S2::layer_compile_user($layer, \%override)) {
+            return BML::redirect($save_redir) if $save_redir;
             $body = "Saved.";
             return;
         } else {
@@ -97,7 +100,7 @@
         return;
     }
 
-    $body .= "<form method='post' action='layer.bml?$savearg'>";
+    $body .= "<form method='post' action='layer.bml?$save_arg'>";
     $body .= LJ::html_hidden("userid", $u->{'userid'});
     
     foreach my $prop (S2::get_properties($lyr_layout->{'s2lid'}))
