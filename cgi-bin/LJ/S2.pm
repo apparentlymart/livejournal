@@ -1234,6 +1234,11 @@ sub get_plural_phrase
         $a = $ctx->[S2::PROPS]->{"_plurals_$prop"} = [ split(m!\s*//\s*!, $ctx->[S2::PROPS]->{$prop}) ];
     }
     my $text = $a->[$form];
+
+    # this fixes missing plural forms for russians (who have 2 plural forms)
+    # using languages like english with 1 plural form
+    $text = $a->[-1] unless defined $text;
+
     $text =~ s/\#/$n/;
     return LJ::ehtml($text);
 }
