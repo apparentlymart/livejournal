@@ -57,12 +57,13 @@ BODY<=
      ### LAYOUT OPTIONS
      ###
 
-     $and = ($u->{'paidfeatures'} eq "off") ? "  Users with free accounts are only able to select between a small number of default styles.  If you get a <A HREF=\"/paidaccounts/\">paid account</A> you'll be able to use more styles or customize the HTML yourself." : "";
+     $and = ($u->{'paidfeatures'} eq "off") ? "  Users with free accounts are only able to select between a small number of default styles.  If you get a <A HREF=\"/paidaccounts/\">paid account</A> you'll be able to make your own styles." : "";
      $ret .= "(=H2 Page Layout Style H2=)(=P Setting this controls how your journal is laid out on the screen. $and P=)<UL><TABLE><TR BGCOLOR=#D0D0D0><TD></TD><TD>Available Styles</TD></TR>\n";
      my %styles = ();
 
-     $and = ($u->{'paidfeatures'} eq "off") ? " AND has_ads='Y'" : "";
-     $sth = $dbh->prepare("SELECT styleid, styledes, user, type FROM style WHERE (user='system' AND is_public='Y' $and) OR user=$quser ORDER BY styledes");
+     $sth = $dbh->prepare("SELECT styleid, styledes, user, type ".
+			  "FROM style WHERE (user='system' AND is_public='Y') ".
+			  "OR user=$quser ORDER BY styledes");
      $sth->execute;
      push @{$styles{$_->{'type'}}}, $_ while ($_ = $sth->fetchrow_hashref);
 
@@ -285,7 +286,9 @@ BODY<=
 	 if ($u->{'paidfeatures'} eq "off") {
 	     # verify they haven't forged the style numbers
 	     my $in = join(",", 0, @picked);
-	     $sth = $dbh->prepare("SELECT COUNT(*) FROM style WHERE ((user='system' AND is_public='Y' AND has_ads='Y') OR user=$quser) AND styleid IN ($in)");
+	     $sth = $dbh->prepare("SELECT COUNT(*) FROM style WHERE ".
+				  "((user='system' AND is_public='Y) OR user=$quser) ".
+				  "AND styleid IN ($in)");
 	     $sth->execute;
 	     if ($dbh->err) { return $dbh->errstr; }
 	     my ($count) = $sth->fetchrow_array;
