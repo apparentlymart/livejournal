@@ -1369,7 +1369,7 @@ sub create_view_rss
         $subject = LJ::exml($subject);
 
         my $ditemid = $u->{'clusterid'} ? ($itemid*256 + $it->{'anum'}) : $itemid;
-        my $itemargs = $u->{'clusterid'} ? "journal=$user&itemid=$ditemid" : "itemid=$ditemid";
+        my $itemargs = $u->{'clusterid'} ? "journal=$user&amp;itemid=$ditemid" : "itemid=$ditemid";
 
         $$ret .= "<title>$subject</title>\n";
         $$ret .= "<link>$LJ::SITEROOT/talkread.bml?$itemargs</link>\n";
