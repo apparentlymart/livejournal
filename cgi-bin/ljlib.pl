@@ -2203,9 +2203,11 @@ sub strip_bad_code
 		    if ($hash->{'lowsrc'} =~ /javascript:/) { delete $hash->{'lowsrc'}; }
 		}
 		$newdata .= "<" . $tag;
+		my $slashclose = delete $hash->{'/'};
 		foreach (keys %$hash) {
 		    $newdata .= " $_=\"$hash->{$_}\"";
 		}
+		$newdata .= " /" if $slashclose;
 		$newdata .= ">";
 	    }
 	}

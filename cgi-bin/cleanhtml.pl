@@ -165,8 +165,13 @@ sub clean
 		    {
 			if ($allow) { $newdata .= "<$tag"; }
 			else { $newdata .= "&lt;$tag"; }
+			my $slashclose = delete $hash->{'/'};
 			foreach (keys %$hash) {
 			    $newdata .= " $_=\"$hash->{$_}\"";
+			}
+			if ($slashclose) {
+			    $newdata .= " /";
+			    $opencount{$tag}--;
 			}
 			if ($allow) { $newdata .= ">"; }
 			else { $newdata .= "&gt;"; }
