@@ -1905,8 +1905,11 @@ sub time_to_w3c {
 # des-user: Username to link to, or user hashref.
 # des-opts: Optional hashref to control output.  Key 'full' when true causes
 #           a link to the mode=full userinfo.   Key 'type' when 'C' makes
-#           a community link, not a user link.  If user parameter is a hashref,
-#           its 'journaltype' overrides this 'type'.
+#           a community link, when 'Y' makes a syndicated account link,
+#           when 'N' makes a news account link, otherwise makes a user account
+#           link. If user parameter is a hashref, its 'journaltype' overrides
+#           this 'type'.  Key 'del', when true, makes a tag for a deleted user.
+#           If user parameter is a hashref, its 'statusvis' overrides 'del'.
 # returns: HTML with a little head image & bold text link.
 # </LJFUNC>
 sub ljuser
@@ -1915,14 +1918,27 @@ sub ljuser
     my $opts = shift;
     if (ref $user eq 'HASH') {
         $opts->{'type'} = $user->{'journaltype'};
+        $opts->{'del'} = $user->{'statusvis'} ne 'V';
         $user = $user->{'user'};
     }
     my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
     my $img = $opts->{'imgroot'} || $LJ::IMGPREFIX;
-    if ($opts->{'type'} eq "C") {
-        return "<span class='ljuser' style='white-space:nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/community.gif' alt='userinfo' width='16' height='16' style='vertical-align:bottom;border:0;' /></a><a href='$LJ::SITEROOT/community/$user/'><b>$user</b></a></span>";
+    my $strike = $opts->{'del'} ? ' style="text-decoration: line-through underline;"' : '';
+    my $make_tag = sub {
+        my ($fil, $dir, $x, $y) = @_;
+        $y ||= $x;  # make square if only one dimension given
+
+        return "<span class='ljuser' style='white-space: nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/$fil' alt='userinfo' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$LJ::SITEROOT/$dir/$user/'$strike><b>$user</b></a></span>";
+    };
+
+    if ($opts->{'type'} eq 'C') {
+        return $make_tag->('community.gif', 'community', 16);
+    } elsif ($opts->{'type'} eq 'Y') {
+        return $make_tag->('syndicated.gif', 'users', 16);
+    } elsif ($opts->{'type'} eq 'N') {
+        return $make_tag->('newsinfo.gif', 'users', 16);
     } else {
-        return "<span class='ljuser' style='white-space:nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/userinfo.gif' alt='userinfo' width='17' height='17' style='vertical-align:bottom;border:0;' /></a><a href='$LJ::SITEROOT/users/$user/'><b>$user</b></a></span>";
+        return $make_tag->('userinfo.gif', 'users', 17);
     }
 }
 

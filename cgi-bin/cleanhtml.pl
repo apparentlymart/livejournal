@@ -127,21 +127,36 @@ sub clean
             elsif ($tag eq "lj") 
             {
                 my $attr = $token->[2];
-                if ($attr->{'user'} || $attr->{'comm'}) {
-                    my $user = LJ::canonical_username($attr->{'user'} || $attr->{'comm'});
+
+                # keep <lj comm> working for backwards compatibility, but pretend
+                # it was <lj user> so we don't have to account for it below.
+                my $user = $attr->{'user'} = exists $attr->{'user'} ? $attr->{'user'} :
+                                             exists $attr->{'comm'} ? $attr->{'comm'} : undef;
+
+                if (length $user) {
+                    $user = LJ::canonical_username($user);
                     if ($s1var) {
-                        if ($attr->{'user'} =~ /^\%\%([\w\-\']+)\%\%$/) {
-                            $newdata .= "%%ljuser:$1%%";
-                        } elsif ($attr->{'comm'} =~ /^\%\%([\w\-\']+)\%\%$/) {
-                            $newdata .= "%%ljcomm:$1%%";
-                        }
-                    } elsif ($user) {
+                        $newdata .= "%%ljuser:$1%%" if $attr->{'user'} =~ /^\%\%([\w\-\']+)\%\%$/;
+                    } elsif (length $user) {
                         if ($opts->{'textonly'}) {
                             $newdata .= $user;
                         } else {
-                            $newdata .= LJ::ljuser($user, { 
-                                'type' => $attr->{'user'} ? "" : "C"
-                                });
+                            my $u;
+
+                            if ($LJ::DYNAMIC_LJUSER) {
+                                # Try to automatically pick the user type, but still
+                                # make something if we can't (user doesn't exist?)
+                                $u = LJ::load_user($user);
+
+                                # Traverse the renames to the final journal
+                                while ($u and $u->{'journaltype'} eq 'R') {
+                                    LJ::load_user_props($u, 'renamedto');
+                                    last unless length $u->{'renamedto'};
+                                    $user = $u->{'renamedto'};
+                                    $u = LJ::load_user($u->{'renamedto'});
+                                }
+                            }
+                            $newdata .= LJ::ljuser($u || $user);
                         }
                     } else {
                         $newdata .= "<b>[Bad username in LJ tag]</b>";

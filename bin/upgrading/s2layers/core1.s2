@@ -1229,15 +1229,19 @@ function Image::print
 
 function userinfoicon(UserLite user) : Image {
     var Image uimage;
-    $uimage.width = 17;
-    $uimage.height = 17;
+    $uimage.width = 16;
+    $uimage.height = 16;
 
     if ($user.journal_type == "C") {
         $uimage->set_url("$*IMGDIR/community.gif");
+    } elseif ($user.journal_type == "Y") {
+        $uimage->set_url("$*IMGDIR/syndicated.gif");
     } elseif ($user.journal_type == "N") {
         $uimage->set_url("$*IMGDIR/newsinfo.gif");
     } else {
         $uimage->set_url("$*IMGDIR/userinfo.gif");
+        $uimage.width = 17;
+        $uimage.height = 17;
     }
     return $uimage;
 }

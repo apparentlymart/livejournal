@@ -809,13 +809,12 @@ sub fvp_transform
         elsif ($trans eq "xe") {
             $ret = LJ::exml($ret);
         }
-        elsif ($trans eq "ljuser") {
-            $ret = LJ::ljuser(LJ::canonical_username($ret));
+        elsif ($trans eq 'ljuser' or $trans eq 'ljcomm') {
+            my $u;
+            my $user = LJ::canonical_username($ret);
+            $u = LJ::load_user($user) if $LJ::DYNAMIC_LJUSER;
+            $ret = LJ::ljuser($u || $user);
         }
-        elsif ($trans eq "ljcomm") {
-            $ret = LJ::ljuser(LJ::canonical_username($ret), {'type'=>'C'});
-        }
-
     }
     return $ret;
 }
