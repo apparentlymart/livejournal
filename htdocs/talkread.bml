@@ -12,104 +12,9 @@ body<=
  my $head = $_[1] ? \$_[1]->{'head'} : \$r_head;
  my $title = $_[1] ? \$_[1]->{'title'} : \$r_title;
 
- $$head .= "
-    <script language='Javascript' type='text/javascript'>
-    <!--
-    var lastDiv;
-    lastDiv = 'qrdiv';
-
-    function quickreply(dtid, pid, newsubject) {
-        if (! document.getElementById) return true;
-
-        // Mac IE 5.x does not like the replaceChild function!
-        // Cannot understand a crash report since it has no useful debug info in it.
-        if ((navigator.userAgent.indexOf('Mac') != -1) && (navigator.appName == 'Microsoft Internet Explorer')) return true;
-
-        // Netscape 6 and below does not do Quick Reply anyway so make sure it doesn't try to
-        if ((navigator.appName == 'Netscape') && (parseInt(navigator.appVersion) < 5)) return true;
-
-        var ptalkid = document.getElementById('parenttalkid');
-        ptalkid.value = pid;
-
-        var rto = document.getElementById('replyto');
-        rto.value = pid;
-
-        var subject = document.getElementById('subject');
-        subject.value = newsubject;
-
-        var dtid_field = document.getElementById('dtid');
-        dtid_field.value = dtid;
-
-        var qr_div = document.getElementById('qrdiv');
-        var cur_div = document.getElementById(dtid);
-
-        if (lastDiv == 'qrdiv') {
-            qr_div.style.display = 'inline';
-
-            // only one swap
-            swapnodes(qr_div, cur_div);
-        } else if (lastDiv != dtid) {
-              var last_div = document.getElementById(lastDiv);
-
-              // Two swaps
-              swapnodes(last_div, cur_div);
-              swapnodes(qr_div, last_div);
-        }
-
-        lastDiv = dtid;
-
-        var multi_form = document.getElementById('multiform');
-        multi_form.action = '/talkpost_do.bml';
-
-        // So it doesn't follow the link
-        return false;
-    }
-
-    function moreopts()
-    {
-        var multi_form = document.getElementById('multiform');
-        var basepath = document.getElementById('basepath');
-        var dtid = document.getElementById('dtid');
-
-        multi_form.action = basepath.value + dtid.value;
-        return true;
-    }
-
-   function submitform()
-   {
-        var submit = document.getElementById('submitpost');
-        submit.disabled = true;
-
-        var submitmore = document.getElementById('submitmoreopts');
-        submitmore.disabled = true;
-
-        var multi_form = document.getElementById('multiform');
-        multi_form.submit();
-   }
-
-   function swapnodes (orig, to_swap) {
-        var parent_node = orig.parentNode;
-        var next_sibling = orig.nextSibling;
-        to_swap.parentNode.replaceChild(orig, to_swap);
-        parent_node.insertBefore(to_swap, next_sibling);
-        return true;
-   }
-
-   function checkLength() {
-        if (!document.getElementById) return true;
-        var textbox = document.getElementById('body');
-        if (!textbox) return true;
-        if (textbox.value.length > 4300) {
-             alert('Sorry, but your comment of ' + textbox.value.length + ' characters exceeds the maximum character length of 4300.  Please try shortening it and then post again.');
-             return false;
-        }
-        return true;
-   }
-
-    //  -->
-    </script>\n";
-
  return LJ::server_down_html() if $LJ::SERVER_DOWN;
+
+ $$head .= $LJ::COMMON_CODE{'quickreply'};
 
  my $pics = LJ::Talk::get_subjecticons();
 
@@ -395,7 +300,7 @@ body<=
  ####### end navcrap
 
  # Quick reply variables.  Not always set.
- my ($qr_jid, $qr_talkid);
+ my ($last_talkid, $last_jid) = LJ::get_lastcomment();
 
  my $recurse_post = sub
  {
@@ -411,7 +316,7 @@ body<=
      $bgcolor = BML::get_template_def($bgcolor);
      if ($post->{'state'} eq "S") {
          $bgcolor = BML::get_template_def("screenedbarcolor") || $bgcolor;
-     } elsif ($qr_talkid == $dtid && $qr_jid == $u->{'userid'}) {
+     } elsif ($last_talkid == $dtid && $last_jid == $u->{'userid'}) {
          $bgcolor = BML::get_template_def("altcolor1");
      }
 
@@ -512,8 +417,9 @@ body<=
                  $multiform_selects = 1;
              }
 
+             # Comment Posted Notice
              $ret .= "<br /><b>$ML{'.posted'}</b>"
-                 if $qr_talkid == $dtid && $qr_jid == $u->{'userid'};
+                 if $last_talkid == $dtid && $last_jid == $u->{'userid'};
 
              $ret .= "</td></tr><tr><td>";
 
@@ -527,16 +433,7 @@ body<=
              if ($post->{'state'} eq 'F') {
                  $ret .= "($T{'frozen'}) ";
              } elsif ($remote) {
-                 my $pid = int($dtid / 256);
-                 my $basesubject = $post->{'subject'};
-                 $basesubject =~ s/^(Re:\s*)*//i;
-                 $basesubject = "Re: $basesubject" if $basesubject;
-                 $basesubject = LJ::ejs($basesubject);
-
-                 my $onclick = "return quickreply($dtid, $pid, '$basesubject')";
-                 $onclick = LJ::ehtml($onclick);
-
-                 $ret .= "(<a onclick='$onclick' href='$replyurl' >$T{'replythis'}</a>) ";
+                 $ret .= "(" . LJ::make_qr_link($dtid, $post->{'subject'}, $T{'replythis'}, $replyurl) .  ")";
              } else {
                  $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
              }
@@ -551,7 +448,7 @@ body<=
              }
              $ret .= "</font></p>";
 
-             $ret .= "<div name='$dtid' id='$dtid'></div>" if $remote;
+             $ret .= LJ::make_qr_target($dtid) if $remote;
 
              $ret .= "</td></tr></table>\n";  # close colored table
          } else {
@@ -559,7 +456,12 @@ body<=
 
              $ret .= "<a name='t$dtid'></a><table><tr>";
              $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-             $ret .= "<td><a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine) . "#t$dtid'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
+             $ret .= "<td><a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine) . "#t$dtid'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i>";
+
+             # Comment Posted Notice
+             $ret .= " - <b>$ML{'.posted'}</b>"
+                 if $last_talkid == $dtid && $last_jid == $u->{'userid'};
+             $ret .= "</td></tr></table>\n";
          }
      }
      
@@ -581,109 +483,28 @@ body<=
 
      my $posturl = LJ::Talk::talkargs($talkurl, "mode=reply", $stylemine);
 
-     $ret .= "<p align='center' class='lesstop'><b>$readlink(<a href='$posturl'>$T{'postcomments'}</a>)</b></p>";
+     $ret .= "<form style='display: inline' method='post' action='/talkmulti.bml' name='multiform' id='multiform' >";
+
+     $ret .= "<p class='lesstop' align='center'><b>$readlink";
+     $ret .= "(" . LJ::make_qr_link('top', '', $T{'postcomments'}, $posturl) . "</a>)" if $remote && @comments > 0;
+     $ret .= "</b></p>";
 
      if (@comments > 0)
      {
-         $ret .= "<form style='display: inline' method='post' action='/talkmulti.bml' name='multiform' id='multiform' >";
-         $ret .= LJ::html_hidden("ditemid", $ditemid);
-         $ret .= LJ::html_hidden("journal", $u->{'user'});
+         $ret .= "<div align='center'>" . LJ::make_qr_target('top') . "</div>" if $remote;
 
-         # Do Quick Reply stuff
-         LJ::load_user_props($remote, "opt_no_quickreply") if $remote;
-         if ($remote && !$remote->{'opt_no_quickreply'}) {
-             my $basepath = LJ::journal_base($u) . "/$ditemid.html?replyto=";
-             $ret .= LJ::html_hidden({'name' => 'replyto', 'id' => 'replyto', 'value' => ''},
-                                     {'name' => 'parenttalkid', 'id' => 'parenttalkid', 'value' => ''},
-                                     {'name' => 'itemid', 'id' => 'itemid', 'value' => $ditemid},
-                                     {'name' => 'usertype', 'id' => 'usertype', 'value' => 'cookieuser'},
-                                     {'name' => 'userpost', 'id' => 'userpost', 'value' => $remote->{'user'}},
-                                     {'name' => 'qr', 'id' => 'qr', 'value' => '1'},
-                                     {'name' => 'cookieuser', 'id' => 'cookieuser', 'value' => $remote->{'user'}},
-                                     {'name' => 'dtid', 'id' => 'dtid', 'value' => ''},
-                                     {'name' => 'basepath', 'id' => 'basepath', 'value' => $basepath},
-                                     {'name' => 'stylemine', 'id' => 'stylemine', 'value' => $GET{'style'} eq 'mine' ? 1 : 0},
-                                  );
-
-             # rate limiting challenge
-             {
-                 my ($time, $secret) = LJ::get_secret();
-                 my $rchars = LJ::rand_chars(20);
-                 my $chal = $opts->{ditemid} . "-$u->{userid}-$time-$rchars";
-                 my $res = Digest::MD5::md5_hex($secret . $chal);
-                 $ret .= LJ::html_hidden("chrp1", "$chal-$res");
-             }
-
-             $ret .= "<div id='qrdiv' name='qrdiv' style='display:none;'>";
-             $ret .= "<table style='border: 1px solid black'>";
-             $ret .= "<tr valign='center'>";
-             $ret .= "<td align='right'><b>$ML{'/talkpost.bml.opt.from'}</b></td><td>";
-             $ret .= LJ::ljuser($remote->{'user'});
-             $ret .= "</td><td align='center'>";
-
-             my %res;
-             if ($remote) {
-                 LJ::do_request({ "mode" => "login",
-                                  "ver" => ($LJ::UNICODE ? "1" : "0"),
-                                  "user" => $remote->{'user'},
-                                  "getpickws" => 1,
-                              }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
-               }
-             if ($res{'pickw_count'}) {
-                 $ret .= BML::ml('/talkpost.bml.label.picturetouse',{'username'=>$remote->{'user'}});
-                 my @pics;
-                 for (my $i=1; $i<=$res{'pickw_count'}; $i++) {
-                     push @pics, $res{"pickw_$i"};
-                 }
-                 @pics = sort { lc($a) cmp lc($b) } @pics;
-                 $ret .= LJ::html_select({'name' => 'prop_picture_keyword',
-                                          'selected' => $GET{'prop_picture_keyword'}, },
-                                         ("", $BML::ML{'/talkpost.bml.opt.defpic'}, map { ($_, $_) } @pics));
-                 $ret .= LJ::help_icon("userpics", " ");
-             }
-             $ret .= "</td></tr>";
-
-             $ret .= "<tr><td align='right'>";
-             $ret .= "<b>$ML{'/talkpost.bml.opt.subject'}</b></td>";
-             $ret .= "<td colspan='2'>";
-             $ret .= "<input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value='' />";
-             $ret .= "</td></tr>";
-
-             $ret .= "<tr valign='top'>";
-             $ret .= "<td align='right'><b>$ML{'/talkpost.bml.opt.message'}</b></td>";
-             $ret .= "<td colspan='3' style='width: 90%'>";
-
-             $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='body' style='width: 100%'></textarea>";
-             $ret .= "</td></tr>";
-
-             $ret .= "<tr><td>&nbsp;</td>";
-             $ret .= "<td colspan='3'>";
-
-             $ret .= LJ::html_submit('submitpost', $ML{'.button.post'},
-                                     { "id" => "submitpost",
-                                       "raw" => "onclick='if (checkLength()) {submitform();}'"
-                                       });
-
-             $ret .= "&nbsp;" . LJ::html_submit('submitmoreopts', $ML{'.button.more'},
-                                                { "id" => "submitmoreopts",
-                                                  "raw" => "onclick='if (moreopts()) {submitform();}'"
-                                                  });
-             if ($LJ::SPELLER) {
-                 $ret .= "&nbsp;<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>$ML{'.qr.spellcheck'}</label>";
-             }
-
-             $ret .= "</td></tr></table>";
-             $ret .= "</div>";
-
-             # Figure out their last quick reply post
-             my $memkey = [$remote->{'userid'}, "lastcomm:$remote->{'userid'}"];
-             my $memval = LJ::MemCache::get($memkey);
-             ($qr_jid, $qr_talkid) = split(/:/, $memval) if $memval;
-         }
+         my $stylemine = $GET{'style'} eq 'mine' ? 1 : 0;
+         $ret .= LJ::create_qr_div($u, $ditemid, $stylemine, $GET{'prop_picture_keyword'});
 
          $recurse_post->($recurse_post, $_, { "depth" => 0 }) foreach (@comments);
 
-         $ret .= "<hr /><p class='lesstop' align='center'><b>$readlink(<a href='$posturl'>$T{'postcomments'}</a>)</b></p>";
+         $ret .= "<hr /><p class='lesstop' align='center'><b>$readlink";
+         $ret .= "(" . LJ::make_qr_link('bottom', '', $T{'postcomments'}, $posturl) . "</a>)" if $remote;
+         $ret .= "</b></p>";
+         $ret .= "<div align='center'>" . LJ::make_qr_target('bottom') . "</div>" if $remote;
+
+         $ret .= LJ::html_hidden("ditemid", $ditemid);
+         $ret .= LJ::html_hidden("journal", $u->{'user'});
 
          if ($showmultiform && $multiform_selects) {
              $ret .= "<p>$ML{'.talkmulti.des'} ";

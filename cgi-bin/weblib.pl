@@ -593,6 +593,221 @@ sub check_form_auth {
     return $opts->{valid} && ! $opts->{expired};
 }
 
+# <LJFUNC>
+# name: LJ::create_qr_div
+# class: web
+# des: Creates the hidden div that stores the Quick Reply form
+# returns: undef upon failure or HTML for the div upon success
+# args: user, remote, ditemid, stylemine, userpic
+# des-u: user object or userid for journal reply in
+# des-ditemid: ditemid for this comment
+# des-stylemine: if the user has specified style=mine for this page
+# des-userpic: alternate default userpic
+# </LJFUNC>
+sub create_qr_div {
+
+    my ($user, $ditemid, $stylemine, $userpic) = @_;
+    my $u = LJ::want_user($user);
+    my $remote = LJ::get_remote();
+    return undef unless $u && $remote && $ditemid;
+
+    $stylemine ||= 0;
+    my $qrhtml;
+
+    LJ::load_user_props($remote, "opt_no_quickreply");
+    if (!$remote->{'opt_no_quickreply'}) {
+        my $basepath = LJ::journal_base($u) . "/$ditemid.html?replyto=";
+        $qrhtml .= LJ::html_hidden({'name' => 'replyto', 'id' => 'replyto', 'value' => ''},
+                                {'name' => 'parenttalkid', 'id' => 'parenttalkid', 'value' => ''},
+                                {'name' => 'itemid', 'id' => 'itemid', 'value' => $ditemid},
+                                {'name' => 'usertype', 'id' => 'usertype', 'value' => 'cookieuser'},
+                                {'name' => 'userpost', 'id' => 'userpost', 'value' => $remote->{'user'}},
+                                {'name' => 'qr', 'id' => 'qr', 'value' => '1'},
+                                {'name' => 'cookieuser', 'id' => 'cookieuser', 'value' => $remote->{'user'}},
+                                {'name' => 'dtid', 'id' => 'dtid', 'value' => ''},
+                                {'name' => 'basepath', 'id' => 'basepath', 'value' => $basepath},
+                                {'name' => 'stylemine', 'id' => 'stylemine', 'value' => $stylemine},
+                                );
+
+        # rate limiting challenge
+        {
+            my ($time, $secret) = LJ::get_secret();
+            my $rchars = LJ::rand_chars(20);
+            my $chal = $ditemid . "-$u->{userid}-$time-$rchars";
+            my $res = Digest::MD5::md5_hex($secret . $chal);
+            $qrhtml .= LJ::html_hidden("chrp1", "$chal-$res");
+        }
+
+        # Start making the div itself
+        $qrhtml .= "<div id='qrdiv' name='qrdiv' style='display:none;'>";
+        $qrhtml .= "<table style='border: 1px solid black'>";
+        $qrhtml .= "<tr valign='center'>";
+        $qrhtml .= "<td align='right'><b>".BML::ml('/talkpost.bml.opt.from')."</b></td><td>";
+        $qrhtml .= LJ::ljuser($remote->{'user'});
+        $qrhtml .= "</td><td align='center'>";
+
+        # Userpic selector
+        {
+            my %res;
+            LJ::do_request({ "mode" => "login",
+                             "ver" => ($LJ::UNICODE ? "1" : "0"),
+                             "user" => $remote->{'user'},
+                             "getpickws" => 1, },
+                           \%res, { "noauth" => 1, "userid" => $remote->{'userid'}}
+                           );
+
+            if ($res{'pickw_count'}) {
+                $qrhtml .= BML::ml('/talkpost.bml.label.picturetouse',{'username'=>$remote->{'user'}});
+                my @pics;
+                for (my $i=1; $i<=$res{'pickw_count'}; $i++) {
+                    push @pics, $res{"pickw_$i"};
+                }
+                @pics = sort { lc($a) cmp lc($b) } @pics;
+                $qrhtml .= LJ::html_select({'name' => 'prop_picture_keyword',
+                                         'selected' => $userpic, },
+                                        ("", BML::ml('/talkpost.bml.opt.defpic'), map { ($_, $_) } @pics));
+            $qrhtml .= LJ::help_icon("userpics", " ");
+            }
+        }
+
+        $qrhtml .= "</td></tr>";
+
+        $qrhtml .= "<tr><td align='right'>";
+        $qrhtml .= "<b>".BML::ml('/talkpost.bml.opt.subject')."</b></td>";
+        $qrhtml .= "<td colspan='2'>";
+        $qrhtml .= "<input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value='' />";
+        $qrhtml .= "</td></tr>";
+
+        $qrhtml .= "<tr valign='top'>";
+        $qrhtml .= "<td align='right'><b>".BML::ml('/talkpost.bml.opt.message')."</b></td>";
+        $qrhtml .= "<td colspan='3' style='width: 90%'>";
+
+        $qrhtml .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='body' style='width: 100%'></textarea>";
+        $qrhtml .= "</td></tr>";
+
+        $qrhtml .= "<tr><td>&nbsp;</td>";
+        $qrhtml .= "<td colspan='3'>";
+
+        $qrhtml .= LJ::html_submit('submitpost', BML::ml('/talkread.bml.button.post'),
+                                { "id" => "submitpost",
+                                  "raw" => "onclick='if (checkLength()) {submitform();}'"
+                                  });
+
+        $qrhtml .= "&nbsp;" . LJ::html_submit('submitmoreopts', BML::ml('/talkread.bml.button.more'),
+                                           { "id" => "submitmoreopts",
+                                             "raw" => "onclick='if (moreopts()) {submitform();}'"
+                                             });
+        if ($LJ::SPELLER) {
+            $qrhtml .= "&nbsp;<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>";
+            $qrhtml .= BML::ml('/talkread.bml.qr.spellcheck');
+            $qrhtml .= "</label>";
+        }
+
+        $qrhtml .= "</td></tr></table>";
+        $qrhtml .= "</div>";
+    }
+
+    my $ret;
+    $ret = "<script language='JavaScript'>\n";
+    $ret .= "<!--\n";
+    $qrhtml = LJ::ejs($qrhtml);
+    $ret .= "document.write('$qrhtml');\n";
+    $ret .= "-->\n";
+    $ret .= "</script>";
+    return $ret;
+}
+
+# <LJFUNC>
+# name: LJ::make_qr_link
+# class: web
+# des: Creates the link to toggle the QR reply form or if
+# JavaScript is not enabled, then forwards the user through
+# to replyurl.
+# returns: undef upon failure or HTML for the link
+# args: dtid, basesubject, linktext, replyurl
+# des-dtid: dtalkid for this comment
+# des-basesubject: parent comment's subject
+# des-linktext: text for the user to click
+# des-replyurl: URL to forward user to if their browser
+# does not support QR
+# </LJFUNC>
+sub make_qr_link
+{
+    my ($dtid, $basesubject, $linktext, $replyurl) = @_;
+
+    return undef unless defined $dtid && $linktext && $replyurl;
+
+    my $pid = int($dtid / 256);
+
+    $basesubject =~ s/^(Re:\s*)*//i;
+    $basesubject = "Re: $basesubject" if $basesubject;
+    $basesubject = LJ::ejs($basesubject);
+    my $onclick = "return quickreply('$dtid', $pid, '$basesubject')";
+    $onclick = LJ::ehtml($onclick);
+
+    return "<a onclick='$onclick' href='$replyurl' >$linktext</a>";
+}
+
+# <LJFUNC>
+# name: LJ::get_lastcomment
+# class: web
+# des: Looks up the last talkid and journal the remote user posted in
+# returns: talkid, jid
+# args:
+# </LJFUNC>
+sub get_lastcomment {
+    my $remote = LJ::get_remote;
+    return (undef, undef) unless $remote;
+
+    # Figure out their last post
+    my $memkey = [$remote->{'userid'}, "lastcomm:$remote->{'userid'}"];
+    my $memval = LJ::MemCache::get($memkey);
+    my ($jid, $talkid) = split(/:/, $memval) if $memval;
+
+    return ($talkid, $jid);
+}
+
+# <LJFUNC>
+# name: LJ::make_qr_target
+# class: web
+# des: Returns a div usable for Quick Reply boxes
+# returns: HMTML for the div
+# args:
+# </LJFUNC>
+sub make_qr_target {
+    my $name = shift;
+
+    return "<div id='$name' name='$name'></div>";
+}
+
+# <LJFUNC>
+# name: LJ::set_lastcomment
+# class: web
+# des: Sets the lastcomm Memcache key for this user's last comment
+# returns: undef on failure
+# args: u, remote, dtalkid, life?
+# des-u: Journal they just posted in, either u or userid
+# des-remote: Remote user
+# des-dtalkid: Talkid for the comment they just posted
+# des-life: How long, in seconds, the Memcache key should live
+# </LJFUNC>
+sub set_lastcomment
+{
+    my ($u, $remote, $dtalkid, $life) = @_;
+
+    my $userid = LJ::want_userid($u);
+    return undef unless $userid && $remote && $dtalkid;
+
+    # By default, this key lasts for 10 seconds.
+    $life ||= 10;
+
+    # Set memcache key for highlighting the comment
+    my $memkey = [$remote->{'userid'}, "lastcomm:$remote->{'userid'}"];
+    LJ::MemCache::set($memkey, "$userid:$dtalkid", time()+$life);
+
+    return;
+}
+
 # Common challenge/response javascript, needed by both login pages and comment pages alike.
 # Forms that use this should onclick='return sendForm()' in the submit button.
 # Returns true to let the submit continue.
@@ -646,6 +861,111 @@ $LJ::COMMON_CODE{'autoradio_check'} = q{
     }
 // -->
 </script>
+};
+
+# Common Javascript functions for Quick Reply
+$LJ::COMMON_CODE{'quickreply'} = q{
+    <script language='Javascript' type='text/javascript'>
+    <!--
+    var lastDiv;
+    lastDiv = 'qrdiv';
+
+    function quickreply(dtid, pid, newsubject) {
+        if (! document.getElementById) return true;
+
+        // Mac IE 5.x does not like the replaceChild function!
+        // Cannot understand a crash report since it has no useful debug info in it.
+        if ((navigator.userAgent.indexOf('Mac') != -1) && (navigator.appName == 'Microsoft Internet Explorer')) return true;
+
+        // Netscape 6 and below does not do Quick Reply anyway so make sure it doesn't try to
+        if ((navigator.appName == 'Netscape') && (parseInt(navigator.appVersion) < 5)) return true;
+
+        var ptalkid = document.getElementById('parenttalkid');
+        ptalkid.value = pid;
+
+        var rto = document.getElementById('replyto');
+        rto.value = pid;
+
+        var subject = document.getElementById('subject');
+        subject.value = newsubject;
+
+        var dtid_field = document.getElementById('dtid');
+        dtid_field.value = dtid;
+
+        var qr_div = document.getElementById('qrdiv');
+        var cur_div = document.getElementById(dtid);
+
+        if (lastDiv == 'qrdiv') {
+            qr_div.style.display = 'inline';
+
+            // only one swap
+            swapnodes(qr_div, cur_div);
+        } else if (lastDiv != dtid) {
+              var last_div = document.getElementById(lastDiv);
+
+              // Two swaps
+              swapnodes(last_div, cur_div);
+              swapnodes(qr_div, last_div);
+        }
+
+        lastDiv = dtid;
+
+        var multi_form = document.getElementById('multiform');
+        multi_form.action = '/talkpost_do.bml';
+
+        // So it doesn't follow the link
+        return false;
+    }
+
+    function moreopts()
+    {
+        var multi_form = document.getElementById('multiform');
+        var basepath = document.getElementById('basepath');
+        var dtid = document.getElementById('dtid');
+
+        multi_form.action = basepath.value + dtid.value;
+        return true;
+    }
+
+   function submitform()
+   {
+        var submit = document.getElementById('submitpost');
+        submit.disabled = true;
+
+        var submitmore = document.getElementById('submitmoreopts');
+        submitmore.disabled = true;
+
+        // New top-level comments
+        var dtid = document.getElementById('dtid');
+        if (dtid.value == 'top' || dtid.value == 'bottom') {
+            dtid.value = 0;
+        }
+
+        var multi_form = document.getElementById('multiform');
+        multi_form.submit();
+   }
+
+   function swapnodes (orig, to_swap) {
+        var parent_node = orig.parentNode;
+        var next_sibling = orig.nextSibling;
+        to_swap.parentNode.replaceChild(orig, to_swap);
+        parent_node.insertBefore(to_swap, next_sibling);
+        return true;
+   }
+
+   function checkLength() {
+        if (!document.getElementById) return true;
+        var textbox = document.getElementById('body');
+        if (!textbox) return true;
+        if (textbox.value.length > 4300) {
+             alert('Sorry, but your comment of ' + textbox.value.length + ' characters exceeds the maximum character length of 4300.  Please try shortening it and then post again.');
+             return false;
+        }
+        return true;
+   }
+
+    //  -->
+    </script>
 };
 
 1;

@@ -100,7 +100,6 @@ body<=
     ## insertion
     my $wasscreened = ($parent->{state} eq 'S');
     my $err;
-
     unless (LJ::Talk::Post::post_comment($entryu, $journalu,
                                          $comment, $parent, $item, \$err)) {
         return $err;
@@ -119,11 +118,10 @@ body<=
 
     my $mlcode;
     if ($comment->{state} eq 'A') {
-        if ($POST{'qr'} && !($wasscreened and $parent->{state} ne 'S')) {
-            # Set memcache key for highlighting post
-            my $memkey = [$remote->{'userid'}, "lastcomm:$remote->{'userid'}"];
-            LJ::MemCache::set($memkey, "$journalu->{'userid'}:$dtalkid", time()+10);
-
+        # Redirect the user back to their post as long as it didn't unscreen its parent,
+        # is screened itself, or they logged in
+        if (!($wasscreened and $parent->{state} ne 'S') && !$init->{didlogin}) {
+            LJ::set_lastcomment($journalu->{'userid'}, $remote, $dtalkid);
             return BML::redirect($commentlink);
         }
 
