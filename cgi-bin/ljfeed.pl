@@ -271,11 +271,11 @@ sub create_view_atom
 
     # header
     $ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
-    $ret .= "<feed version='1.0' xmlns='http://example.com/newformat#'>\n";
+    $ret .= "<feed version='0.2' xmlns='http://purl.org/atom/ns#'>\n";
 
     # attributes
     $ret .= "<title>$journalinfo->{title}</title>\n";
-    $ret .= "<subtitle>$journalinfo->{subtitle}</subtitle>\n";
+    $ret .= "<tagline>$journalinfo->{subtitle}</tagline>\n";
     $ret .= "<link>$journalinfo->{link}</link>\n";
 
     # output individual item blocks
@@ -287,7 +287,7 @@ sub create_view_atom
 
         $ret .= "  <entry>\n";
         $ret .= "    <title>$it->{subject}</title>\n"; # include empty tag if we don't have a subject.
-        $ret .= "    <id>urn:$LJ::DOMAIN:atom1:$journalinfo->{u}{user}:$ditemid</id>\n";
+        $ret .= "    <id>urn:lj:$LJ::DOMAIN:atom1:$journalinfo->{u}{user}:$ditemid</id>\n";
         $ret .= "    <link>$journalinfo->{link}$ditemid.html</link>\n";
         $ret .= "    <created>" . LJ::time_to_w3c($it->{createtime}, 'Z') . "</created>\n"
              if $it->{createtime} != $it->{modtime};
