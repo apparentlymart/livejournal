@@ -311,10 +311,10 @@ sub new {
     $self = fields::new( $self ) unless ref $self;
 
     # Client and job queues
-    $self->{clients}     = {};  # fd -> client obj
-    $self->{jobs}        = {};  # pending jobs srcluster -> [ jobs ]
+    $self->{clients}     = {};  # fd => client obj
+    $self->{jobs}        = {};  # pending jobs: srcluster => [ jobs ]
     $self->{users}       = {};  # by-userid hash of jobs
-    $self->{assignments} = {};  # fd -> job arrayref
+    $self->{assignments} = {};  # fd => job object
     $self->{totaljobs}   = 0;   # Count of total jobs added
     $self->{raterules}   = {};  # User-set rate-limit rules
     $self->{ratelimits}  = {};  # Cached rate limits by srcclusterid
@@ -769,6 +769,9 @@ sub stopAllJobs {
     $self->stopNewJobs( $client );
     $self->logMsg( 'notice', "Clearing currently-assigned jobs." );
     %{$self->{assignments}} = ();
+    %{$self->{jobs}} = ();
+    %{$self->{jobcounts}} = ();
+    %{$self->{users}} = ();
 
     return "Cleared all jobs.";
 }
@@ -782,6 +785,9 @@ sub stopNewJobs {
 
     $self->logMsg( 'notice', "Clearing pending jobs." );
     %{$self->{jobs}} = ();
+    foreach my $userid ( keys %{$self->{users}} ) {
+        delete $self->{users}{ $userid } unless $self->{users}{$userid}->isFetched;
+    }
 
     return "Cleared pending jobs.";
 }
