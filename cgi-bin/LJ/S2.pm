@@ -1082,6 +1082,144 @@ sub AUTOLOAD {
     die "No such builtin: $AUTOLOAD";
 }
 
+sub int__zeropad
+{
+    my ($ctx, $this, $digits) = @_;
+    $digits += 0;
+    sprintf("%0${digits}d", $this);
+}
+
+sub string__substr
+{
+    my ($ctx, $this, $start, $length) = @_;
+    use utf8;
+    return substr($this, $start, $length);
+}
+
+sub string__length
+{
+    use utf8;
+    my ($ctx, $this) = @_;
+    return length($this);
+}
+
+sub string__lower
+{
+    use utf8;
+    my ($ctx, $this) = @_;
+    return lc($this);
+}
+
+sub string__upper
+{
+    use utf8;
+    my ($ctx, $this) = @_;
+    return uc($this);
+}
+
+sub string__upperfirst
+{
+    use utf8;
+    my ($ctx, $this) = @_;
+    return ucfirst($this);
+}
+
+sub string__starts_with
+{
+    use utf8;
+    my ($ctx, $this, $str) = @_;
+    return $this =~ /^\Q$str\E/;
+}
+
+sub string__ends_with
+{
+    use utf8;
+    my ($ctx, $this, $str) = @_;
+    return $this =~ /\Q$str\E$/;
+}
+
+sub string__contains
+{
+    use utf8;
+    my ($ctx, $this, $str) = @_;
+    return $this =~ /\Q$str\E/;
+}
+
+sub string__repeat
+{
+    use utf8;
+    my ($ctx, $this, $num) = @_;
+    $num += 0;
+    my $size = length($this) * $num;
+    return "[too large]" if $size > 5000;
+    return $this x $num;
+}
+
+
+sub Color__Color
+{
+    my ($s) = @_;
+    my $this = { '_type' => 'Color' };
+    $this->{'r'} = hex(substr($s, 1, 2));
+    $this->{'g'} = hex(substr($s, 3, 2));
+    $this->{'b'} = hex(substr($s, 5, 2));
+    Color__make_string($this);
+    return $this;
+}
+
+
+sub Color__make_string
+{
+    my ($this) = @_;
+    $this->{'as_string'} = sprintf("\#%02x%02x%02x",
+				  $this->{'r'},
+				  $this->{'g'},
+				  $this->{'b'});
+}
+
+sub Color__red {
+    my ($ctx, $this, $v) = @_;
+    if ($v) { $this->{'r'} = $v; Color__make_string($this); }
+    $this->{'r'};
+}
+
+sub Color__green {
+    my ($ctx, $this, $v) = @_;
+    if ($v) { $this->{'g'} = $v; Color__make_string($this); }
+    $this->{'g'};
+}
+
+sub Color__blue {
+    my ($ctx, $this, $v) = @_;
+    if ($v) { $this->{'b'} = $v; Color__make_string($this); }
+    $this->{'b'};
+}
+
+sub Color__inverse {
+    my ($ctx, $this) = @_;
+    my $new = {
+        '_type' => 'Color',
+        'r' => 255 - $this->{'r'},
+        'g' => 255 - $this->{'g'},
+        'b' => 255 - $this->{'b'},
+    };
+    Color__make_string($new);
+    return $new;
+}
+
+sub Color__average {
+    my ($ctx, $this, $other) = @_;
+    my $new = {
+        '_type' => 'Color',
+        'r' => int(($this->{'r'} + $other->{'r'}) / 2),
+        'g' => int(($this->{'g'} + $other->{'g'}) / 2),
+        'b' => int(($this->{'b'} + $other->{'b'}) / 2),
+    };
+    Color__make_string($new);
+    return $new;
+}
+
+
 sub ehtml
 {
     my ($ctx, $text) = @_;
