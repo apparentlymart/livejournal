@@ -162,7 +162,9 @@ if ($uri =~ m!/(\d+)\.html$!) {
     my $subject = $item->{'subject'} || $item->{'event'};
     LJ::CleanHTML::clean_subject_all(\$subject);
     $subject =~ s/\n.*//s;
-    $subject = LJ::text_trim($subject, 0, 40);
+    # yes, the 3 param to text_trim is chars, and length returns bytes, but
+    # it works, as bytes >= chars:
+    $subject = LJ::text_trim($subject, 0, length($item->{'subject'}) || 40);
     $$title = "$u->{'user'}: $subject";
 }
 
@@ -750,7 +752,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
 _code?>
 <=body
-title=><?_code return $_[1] ? $_[1]->{'title'} : $r_title _code?>
+windowtitle=><?_code return $_[1] ? $_[1]->{'title'} : $r_title _code?>
 head=><?_code return $_[1] ? $_[1]->{'head'} : $r_head _code?>
 page?><?_c <LJDEP>
 link: htdocs/talkpost.bml, htdocs/talkread.bml, htdocs/delcomment.bml

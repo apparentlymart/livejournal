@@ -523,7 +523,7 @@ _code?>
 
 <=body
 head=><?_code return $head _code?>
-title=><?_ml /talkpost.bml.title _ml?>
+windowtitle=><?_ml /talkpost.bml.title _ml?>
 page?><?_c <LJDEP>
 post: htdocs/talkpost_do.bml
 link: htdocs/talkread.bml, htdocs/allpics.bml, htdocs/create.bml
