@@ -184,3 +184,5 @@ general /community/settings.bml.label.closedmemb
 general /talkscreen.bml.title
 
 general /community/members.bml.success.message
+
+general /community/transfer.bml.error.banned

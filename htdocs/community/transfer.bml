@@ -30,9 +30,6 @@
             # are they already a maintainer?
             $errors{username} = $ML{'.error.alreadyadmin'} if !%errors && LJ::can_manage($remote, $cu);
 
-            # and make sure the comm hasn't banned them
-            $errors{username} = $ML{'.error.banned'} if !%errors && LJ::is_banned($remote, $cu);
-
             # check the password last
             $errors{password} = $ML{'.error.nopassword'} if !%errors && !$POST{password};
             $errors{password} = $ML{'.error.mismatch'} if !%errors && !LJ::auth_okay($cu, $POST{password});

@@ -675,8 +675,6 @@ p?>
 
 /community/transfer.bml.error.badstatus=Community is not active.
 
-/community/transfer.bml.error.banned=Community has banned you.
-
 /community/transfer.bml.error.mismatch=Password does not match.
 
 /community/transfer.bml.error.nopassword=No password provided.
