@@ -150,6 +150,11 @@ body<=
      return "<?h1 Error h1?><?p Error: $info{'errmsg'} p?>";
  }
 
+ # opt_format and opt_sort might've been modified by do_search,
+ # filling in appropriate defaults based on other parameters
+ my $opt_format = $FORM{'opt_format'};
+ my $opt_sort = $FORM{'opt_sort'};
+
  $info{'allwhat'} ||= "users";
 
  if ($info{'searching'}) {
@@ -234,11 +239,11 @@ body<=
 
  unless ($info{'count'}) { return $ret; }
 
- if ($GET{'opt_sort'} eq "loc") {
+ if ($opt_sort eq "loc") {
      LJ::load_codes({ state => \%state, country => \%country  });
  }
 
- if ($GET{'opt_format'} eq "simple") 
+ if ($opt_format eq "simple") 
  {
      my $showloc = $GET{'opt_sort'} eq "loc" ? 1 : 0;
      my %last = ();
@@ -276,7 +281,7 @@ body<=
      $ret .= "</ul>\n";
  }
 
- if ($GET{'opt_format'} eq "com") 
+ if ($opt_format eq "com") 
  {
      $ret .= "<TABLE CELLSPACING=3>\n";
      $ret .= "<TR><TD>&nbsp;</TD><TD><B>User</B></TD><TD><B>Community Name</B></TD><TD><B>Open</B></TD><TD><B>Post</B></TD></TR>\n";
@@ -304,7 +309,7 @@ body<=
      $ret .= "</TABLE>\n";
  }
 
- if ($GET{'opt_format'} eq "pics")
+ if ($opt_format eq "pics")
  {
      my $showloc = $GET{'opt_sort'} eq "loc" ? 1 : 0;
      my %last = ();
