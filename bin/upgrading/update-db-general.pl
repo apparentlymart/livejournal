@@ -780,17 +780,6 @@ CREATE TABLE topic_map (
 ) 
 EOC
 
-register_tablecreate("tracking", <<'EOC');
-CREATE TABLE tracking (
-  userid int(10) unsigned NOT NULL default '0',
-  acttime datetime default NULL,
-  ip char(15) default NULL,
-  actdes char(10) default NULL,
-  associd int(10) unsigned NOT NULL default '0',
-  KEY (userid)
-) 
-EOC
-
 register_tablecreate("txtmsg", <<'EOC');
 CREATE TABLE txtmsg (
   userid int(10) unsigned NOT NULL default '0',
@@ -828,7 +817,6 @@ CREATE TABLE user (
   defaultpicid int(10) unsigned default NULL,
   has_bio enum('Y','N') NOT NULL default 'N',
   txtmsg_status enum('none','on','off') NOT NULL default 'none',
-  track enum('no','yes') NOT NULL default 'no',
   is_system enum('Y','N') NOT NULL default 'N',
   journaltype enum('P','N','C','S') NOT NULL default 'P',
   lang char(2) NOT NULL default 'EN',
@@ -1502,14 +1490,6 @@ register_alter(sub {
                  "ALTER TABLE support ADD timelasthelp INT UNSIGNED");
     }
     
-    if (column_type("user", "track") !~ /temp/)
-    {
-        do_alter("tracking",
-                 "ALTER TABLE tracking ADD INDEX(ip)");
-        do_alter("user",
-                 "ALTER TABLE user MODIFY track ENUM('no','yes','temp'), ADD INDEX(track)");
-    }
-
     if (column_type("duplock", "realm") !~ /payments/)
     {
         do_alter("duplock",
@@ -1729,6 +1709,11 @@ register_alter(sub {
         do_alter("supportcat",
                  "ALTER IGNORE TABLE supportcat ADD scope ENUM('general', 'local') ".
                  "NOT NULL DEFAULT 'general', ADD UNIQUE (catkey)");
+    }
+
+    # this never ended up being useful, and just freaked people out unnecessarily.
+    if (column_type("user", "track")) {
+        do_alter("user", "ALTER TABLE user DROP track");
     }
 
     # change themedata. key to being unique, if it's not already

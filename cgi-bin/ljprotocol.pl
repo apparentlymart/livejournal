@@ -793,17 +793,6 @@ sub postevent
         }
     }
 
-    if ($u->{'track'} eq "yes") {
-        # dear community, relax.  if we get a court order to provide data on somebody,
-        # we're legally required to.  this doesn't enable us to do that.  it enables
-        # us to do it without killing the database and/or servers as we do O(n) scans
-        # over everything and grep the hell out of hundreds of gigs of webserver logs.
-        my $quserid = $u->{'userid'}+0;
-        my $qip = $dbh->quote($ENV{'_REMOTE_IP'});
-        $dbh->do("INSERT INTO tracking (userid, acttime, ip, actdes, associd) ".
-                 "VALUES ($quserid, NOW(), $qip, 'post', $itemid)");
-    }
-
     my $res = {};
     $res->{'itemid'} = $itemid;  # by request of mart
     $res->{'anum'} = $anum if $clustered;
@@ -2046,8 +2035,8 @@ sub authenticate
         my $other = $LJ::UNICODE ? ", oldenc" : "";
         my $sth = $dbr->prepare("SELECT user, userid, journaltype, name, ".
                                 "password, status, statusvis, caps, ".
-                                "clusterid, dversion, ".
-                                "track $other FROM user WHERE user=$quser");
+                                "clusterid, dversion ".
+                                "$other FROM user WHERE user=$quser");
         $sth->execute;
         return fail($err,501,$dbr->errstr) if $dbr->err;
         $u = $sth->fetchrow_hashref;
@@ -2091,8 +2080,7 @@ sub do_request
     %{$res} = ();                      # clear the given response hash
     $flags = {} unless (ref $flags eq "HASH");
 
-    my ($user, $userid, $journaltype, $name, $correctpassword, $status, $statusvis, $track, $sth);
-    $user = LJ::canonical_username($req->{'user'});
+    my $user = LJ::canonical_username($req->{'user'});
     my $quser = $dbh->quote($user);
 
     # check for an alive database connection
