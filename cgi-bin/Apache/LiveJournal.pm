@@ -741,11 +741,6 @@ sub journal_content
         }
     }
 
-    if ($opts->{'nocontent'}) {
-        $r->send_http_header();
-        return OK;
-    }
-
     $r->content_type($opts->{'contenttype'});
     $r->header_out("Cache-Control", "private, proxy-revalidate");
 

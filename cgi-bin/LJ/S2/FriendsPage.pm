@@ -40,8 +40,7 @@ sub FriendsPage
         # send back a 304 Not Modified if they say they've reloaded this 
         # document in the last $newinterval seconds:
         unless ($theirtime < $lastmod) {
-            $opts->{'status'} = "304 Not Modified";
-            $opts->{'nocontent'} = 1;
+            $opts->{'handler_return'} = 304;
             return 1;
         }
     }
