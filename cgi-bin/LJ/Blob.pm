@@ -56,7 +56,7 @@ sub _load_bcid {
 sub get {
     my ($u, $domain, $fmt, $bid) = @_;
     _load_bcid($u);
-    my $bc = get_blobclient_reader($u->{blob_clusterid});
+    my $bc = get_blobclient_reader($u);
     return $bc->get($u->{blob_clusterid}, $u->{userid}, $domain, $fmt, $bid);
 }
 
