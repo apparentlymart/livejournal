@@ -74,6 +74,12 @@ propgroup colors {
   property Color comment_bar_one_fgcolor {
       des = "Text color on alternating comment bars (two)";
   }
+  property Color comment_bar_screened_bgcolor {
+      des = "Background bar color for screened comments";
+  }
+  property Color comment_bar_screened_fgcolor {
+      des = "Text color on background bar for screened comments";
+  }
 }
 set main_bgcolor = "#ffffff";
 set main_fgcolor = "#000000";
@@ -93,6 +99,8 @@ set comment_bar_one_bgcolor = "#c0c0ff";
 set comment_bar_one_fgcolor = "#000000";
 set comment_bar_two_bgcolor = "#eeeeff";
 set comment_bar_two_fgcolor = "#000000";
+set comment_bar_screened_bgcolor = "#dddddd";
+set comment_bar_screened_fgcolor = "#000000";
 
 propgroup presentation {
   property bool show_entry_userpic { 
@@ -504,20 +512,30 @@ function DayPage::print_body ()
 function EntryPage::print_body () 
 {
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
-    if ($.entry.comments.enabled)
+    if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
+        $this->print_multiform_start();
         print "<h2>Comments:</h2><div style='margin-left: 30px;'>";
         if ($.comment_pages.total_subitems > 0) {
             $.comment_pages->print();
             $this->print_comments($.comments);
         }
+        "</div>";
+        if ($this.multiform_on) {
+            "<h2>Mass Action</h2><div style='margin-left: 30px;'>";
+            $this->print_multiform_actionline();
+            $this->print_multiform_end();
+            "</div>";
+        }
     }
-    "</div>";
 }
 
 function EntryPage::print_comment (Comment c) {
     var Color background; var Color color;
-    if ($c.depth % 2) {
+    if ($c.screened) {
+        $background = $*comment_bar_screened_bgcolor;
+        $color = $*comment_bar_screened_fgcolor;
+    } elseif ($c.depth % 2) {
         $background = $*comment_bar_one_bgcolor;
         $color = $*comment_bar_one_fgcolor;
     } else {
@@ -531,9 +549,9 @@ function EntryPage::print_comment (Comment c) {
     }
     "<div style='background-color: $background; color: $color; margin-top: 10px;'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%;'><tr valign='top'>";
-    var int td = 3;
+    var int td = 6;
     if (defined $c.userpic and $*comment_userpic_style != "off") { 
-        $td = 4;
+        $td = 7;
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
         # WARNING: this will later be done by the system (it'll be a
@@ -545,13 +563,25 @@ function EntryPage::print_comment (Comment c) {
         }
         print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' alt='[User Picture]' /></td>";
     }
-    print "<td align='left'><strong>From:</strong> $poster</td>\n";
-    print "<td align='left'><strong>Date:</strong> ";
+    print "<td align='left' style='white-space: nowrap'><strong>From:</strong> $poster</td>\n";
+    print "<td align='left' style='white-space: nowrap'><strong>Date:</strong> ";
         print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td>\n";
+
+    var Link lnk;
+    $lnk = $c->get_link("delete_comment"); "<td align='right'>$lnk</td>";
+    $lnk = $c->get_link("screen_comment"); "<td>$lnk</td>";
+    $lnk = $c->get_link("unscreen_comment"); "<td>$lnk</td>";
+
     print "<td align='right'><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td>\n</tr>\n";
     print "<tr valign='top'><td colspan='$td' style='width: 95%'>";
     if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>\n"; }
     if ($c.metadata{"poster_ip"}) { print " (IP Address: " + $c.metadata{"poster_ip"} + ")"; }
+
+    if ($this.multiform_on) {
+        " <label for='ljcomsel_$c.talkid'>$*text_multiform_check</label>";
+        $c->print_multiform_check();
+    }
+
     print "</td></tr></table></div>";
     print "<div style='margin-left: 5px'>$c.text</div>\n";
     print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>Reply to this</a>) ";

@@ -74,6 +74,12 @@ propgroup colors {
   property Color comment_bar_one_fgcolor {
       des = "Text color on alternating comment bars (two)";
   }
+  property Color comment_bar_screened_bgcolor {
+      des = "Background bar color for screened comments";
+  }
+  property Color comment_bar_screened_fgcolor {
+      des = "Text color on background bar for screened comments";
+  }
 }
 set body_bgcolor = "#ffffff";
 set main_bgcolor = "#ffffff";
@@ -93,6 +99,8 @@ set comment_bar_one_bgcolor = "#c0c0ff";
 set comment_bar_one_fgcolor = "#000000";
 set comment_bar_two_bgcolor = "#eeeeff";
 set comment_bar_two_fgcolor = "#000000";
+set comment_bar_screened_bgcolor = "#dddddd";
+set comment_bar_screened_fgcolor = "#000000";
 
 propgroup presentation {
   property bool show_entry_userpic { 
@@ -425,19 +433,28 @@ function DayPage::print_body ()
 
 function EntryPage::print_body () {
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
-    if ($.entry.comments.enabled)
+    if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
+        $this->print_multiform_start();
         print "<h3 class='page-header'>Comments:</h3>";
         if ($.comment_pages.total_subitems > 0) {
             $.comment_pages->print();
             $this->print_comments($.comments);
+        }
+        if ($this.multiform_on) {
+            "<h3 class='page-header'>Mass Action:</h3>";
+             $this->print_multiform_actionline();
+             $this->print_multiform_end();
         }
     }
 }
 
 function EntryPage::print_comment (Comment c) {
     var Color background; var Color color;
-    if ($c.depth % 2) {
+    if ($c.screened) {
+        $background = $*comment_bar_screened_bgcolor;
+        $color = $*comment_bar_screened_fgcolor;
+    } elseif ($c.depth % 2) {
         $background = $*comment_bar_one_bgcolor;
         $color = $*comment_bar_one_fgcolor;
     } else {
@@ -481,6 +498,17 @@ function EntryPage::print_comment (Comment c) {
         "<tr><td align='right'><font color='$color'>IP Address:</font>";
         "</td><td><font color='$color'>" + $c.metadata{"poster_ip"} + "</font></td></tr>";
     }
+    if ($this.multiform_on) {
+        "<tr><td align='right'><label for='ljcomsel_$c.talkid'>$*text_multiform_check</label>";
+        "</td><td>"; $c->print_multiform_check(); "</td></tr>";
+    }
+
+    var Link lnk; "<tr>";
+    $lnk = $c->get_link("delete_comment"); "<td align='right'>$lnk</td>";
+    $lnk = $c->get_link("screen_comment"); "<td align='left'>$lnk</td>";
+    $lnk = $c->get_link("unscreen_comment"); "<td align='left'>$lnk</td>";
+    "</tr>";
+
     "</table></td></tr></table></td></tr>";
     "<tr><td bgcolor='$*main_bgcolor'><font color='$*main_fgcolor'>$c.text";
     "</font></td></tr>";

@@ -59,10 +59,10 @@ propgroup colors {
         des = "Text color on alternating comment bars (two)";
     }
     property Color comment_bar_screened_bgcolor {
-        des = "Alternating background color for comment bars (two)";
+        des = "Background bar color for screened comments";
     }
     property Color comment_bar_screened_fgcolor {
-        des = "Text color on alternating comment bars (two)";
+        des = "Text color on background bar for screened comments";
     }
 }
 
@@ -572,7 +572,7 @@ function EntryPage::print_body () {
 
     if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
-        if ($this.multiform_on) { $this->print_multiform_start(); }
+        $this->print_multiform_start();
         """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="$*stronger_back" align="center">
