@@ -122,6 +122,8 @@ BODY<=
  while ($le = $sth->fetchrow_hashref)
  {
      next if ($le->{'type'} eq "internal" && ! LJ::Support::can_help($dbh, $sp, $remote));
+     next if ($le->{'type'} eq "screened" && ! (LJ::Support::can_help($dbh, $sp, $remote) ||
+						($remote && $remote->{'userid'} == $le->{'userid'} )));
 
      if ($le->{'type'} eq "screened") {
 	 push @screened, $le;
