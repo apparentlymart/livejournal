@@ -7,7 +7,7 @@ mark_clustered("useridmap", "userbio", "cmdbuffer", "dudata",
                "talk2", "talkprop2", "talktext2", "talkleft",
                "userpicblob2", "events",
                "ratelog", "loginstall", "sessions", "sessions_data",
-               "fvcache",
+               "fvcache", "s1usercache",
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -517,6 +517,28 @@ CREATE TABLE style (
   KEY (user),
   KEY (type)
 )  PACK_KEYS=1
+EOC
+
+# cache Storable-frozen pre-cleaned style variables
+register_tablecreate("s1stylecache", <<'EOC');
+CREATE TABLE s1stylecache (
+   styleid   INT UNSIGNED NOT NULL PRIMARY KEY,
+   cleandate     DATETIME,
+   type          VARCHAR(10) NOT NULL DEFAULT '',
+   opt_cache     ENUM('Y','N') NOT NULL DEFAULT 'N',
+   vars_stor     BLOB,
+   vars_cleanver SMALLINT UNSIGNED NOT NULL
+)
+EOC
+
+# caches Storable-frozen pre-cleaned overrides & colors
+register_tablecreate("s1usercache", <<'EOC');
+CREATE TABLE s1usercache (
+   userid            INT UNSIGNED NOT NULL PRIMARY KEY,
+   override_stor     BLOB,
+   override_cleanver SMALLINT UNSIGNED NOT NULL,
+   color_stor        BLOB
+)
 EOC
 
 register_tablecreate("support", <<'EOC');

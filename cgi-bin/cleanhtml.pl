@@ -50,6 +50,7 @@ sub clean
     my $keepcomments = $opts->{'keepcomments'};
     my $mode = $opts->{'mode'};
     my $cut = $opts->{'cuturl'};
+    my $s1var = $opts->{'s1var'};
 
     my %action = ();
     my %remove = ();
@@ -68,28 +69,7 @@ sub clean
 
     $action{'script'} = "eat";
 
-    my @attrstrip = qw(onabort onactivate onafterprint onafterupdate
-			onbeforeactivate onbeforecopy onbeforecut
-			onbeforedeactivate onbeforeeditfocus
-			onbeforepaste onbeforeprint onbeforeunload
-			onbeforeupdate onblur onbounce oncellchange
-			onchange onclick oncontextmenu oncontrolselect
-			oncopy oncut ondataavailable ondatasetchanged
-			ondatasetcomplete ondblclick ondeactivate
-			ondrag ondragend ondragenter ondragleave
-			ondragover ondragstart ondrop onerror
-			onerrorupdate onfilterchange onfinish onfocus
-			onfocusin onfocusout onhelp onkeydown
-			onkeypress onkeyup onlayoutcomplete onload
-			onlosecapture onmousedown onmouseenter
-			onmouseleave onmousemove onmouseout
-			onmouseover onmouseup onmousewheel onmove
-			onmoveend onmovestart onpaste onpropertychange
-			onreadystatechange onreset onresize
-			onresizeend onresizestart onrowenter onrowexit
-			onrowsdelete onrowsinserted onscroll onselect
-			onselectionchange onselectstart onstart onstop
-			onsubmit onunload datasrc datafld);
+    my @attrstrip = qw();
 
     if (ref $opts->{'attrstrip'} eq "ARRAY") {
         foreach (@{$opts->{'attrstrip'}}) { push @attrstrip, $_; }
@@ -179,9 +159,42 @@ sub clean
 
                 foreach my $attr (keys %$hash)
                 {
+                    delete $hash->{$attr} if $attr =~ /^(on|dynsrc|data)/;
+
                     $hash->{$attr} =~ s/[\t\n]//g;
-                    # god IE is a fucking piece of shit:
+                    # IE sucks:
                     if ($hash->{$attr} =~ /(j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t|a\s*b\s*o\s*u\s*t)\s*:/i) { delete $hash->{$attr}; }
+                    if ($s1var) {
+                        if ($attr =~ /%%/) {
+                            delete $hash->{$attr};
+                            next;
+                        }
+
+                        my $props = $LJ::S1::PROPS->{$s1var};
+
+                        if ($hash->{$attr} =~ /^%%([\w:]+:)?(\S+?)%%$/ && $props->{$2} =~ /[aud]/) {
+                            # don't change it.
+                        } elsif ($hash->{$attr} =~ /^%%cons:\w+%%[^\%]*$/) {
+                            # a site constant with something appended is also fine.
+                        } elsif ($hash->{$attr} =~ /%%/) {
+                            my $clean_var = sub {
+                                my ($mods, $prop) = @_;
+                                # HTML escape and kill line breaks
+                                $mods = "attr:$mods" unless
+                                    $mods =~ /^(color|cons|siteroot|sitename|img):/ ||
+                                    $props->{$prop} =~ /[ud]/;
+                                return '%%' . $mods . $prop . '%%';
+                            };
+
+                            $hash->{$attr} =~ s/[\n\r]//g;
+                            $hash->{$attr} =~ s/%%([\w:]+:)?(\S+?)%%/$clean_var->(lc($1), $2)/eg;
+
+                            if ($attr =~ /^(href|src|lowsrc|style)$/) {
+                                $hash->{$attr} = "\%\%[attr[$hash->{$attr}]]\%\%";
+                            }
+                        }
+
+                    }
                 }
                 foreach my $attr (qw(href)) {
                     $hash->{$attr} =~ s/^lj:(?:\/\/)?(.*)$/ExpandLJURL($1)/ei
@@ -495,4 +508,37 @@ sub clean_comment
         'allow' => \@comment_all,
         'autoclose' => \@comment_close,
     });
+}
+
+sub clean_s1_style
+{
+    my $s1 = shift;
+    my $clean;
+    
+    my %tmpl;
+    LJ::parse_vars(\$s1, \%tmpl);
+    foreach my $v (keys %tmpl) {
+        clean(\$tmpl{$v}, {
+            'eat' => [qw[layer iframe script object embed]],
+            'mode' => 'allow',
+            'keepcomments' => 1, # allows CSS to work
+            's1var' => $v,
+        });
+    }
+
+    return Storable::freeze(\%tmpl);
+}
+
+sub s1_attribute_clean {
+    my $a = $_[0];
+    $a =~ s/[\t\n]//g;
+    $a =~ s/\&/&amp;/g;
+    $a =~ s/\"/&quot;/g;
+    $a =~ s/\'/&\#39;/g;
+    $a =~ s/</&lt;/g;
+    $a =~ s/>/&gt;/g;
+
+    # IE sucks:
+    if ($a =~ /(j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t|a\s*b\s*o\s*u\s*t)\s*:/i) { return ""; }
+    return $a;
 }

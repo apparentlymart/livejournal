@@ -3041,39 +3041,6 @@ sub strip_bad_code
 }
 
 # <LJFUNC>
-# name: LJ::load_user_theme
-# des: Populates a variable hash with color theme data.
-# returns: Nothing. Modifies a hash reference.
-# args: user, u, vars
-# des-user: The username to search for data with.
-# des-vars: A hashref to fill with color data. Adds keys "color-$coltype"
-#           with values $color.
-# </LJFUNC>
-sub load_user_theme
-{
-    # hashref, hashref
-    my ($dbarg, $user, $u, $vars) = @_;
-
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    my $sth;
-    my $quser = $dbh->quote($user);
-
-    if ($u->{'themeid'} == 0) {
-        my $db = LJ::get_dbh("s1styles") || $dbr;
-        $sth = $db->prepare("SELECT coltype, color FROM themecustom WHERE user=$quser");
-    } else {
-        my $qtid = $dbh->quote($u->{'themeid'});
-        $sth = $dbr->prepare("SELECT coltype, color FROM themedata WHERE themeid=$qtid");
-    }
-    $sth->execute;
-    $vars->{"color-$_->{'coltype'}"} = $_->{'color'} while ($_ = $sth->fetchrow_hashref);
-}
-
-
-# <LJFUNC>
 # name: LJ::server_down_html
 # des: Returns an HTML server down message.
 # returns: A string with a server down message in HTML.
@@ -3215,34 +3182,87 @@ sub make_journal
 
     $r->notes('codepath' => "s1.$view") if $r;
 
-    my %vars = ();
-    # load the base style
-    my $basevars = "";
-    my $viewref = $view eq "" ? \$view : undef;
-    LJ::load_style_fast($dbs, $styleid, \$basevars, $viewref)
-        unless $LJ::viewinfo{$view}->{'nostyle'};
-
-    # load the overrides
-    my $overrides;
-    if ($opts->{'nooverride'}==0 && $u->{'useoverrides'} eq "Y") {
-        my $db = LJ::get_dbh("s1styles") || $dbr;
-        $overrides = $db->selectrow_array("SELECT override FROM overrides WHERE user=$quser");
+    # load the user-related S1 data  (overrides and colors)
+    my $s1uc = {};
+    if ($u->{'useoverrides'} eq "Y" || $u->{'themeid'} == 0) {
+        my $dbcr = LJ::get_cluster_reader($u, 1);
+        $s1uc = $dbcr->selectrow_hashref("SELECT * FROM s1usercache WHERE userid=?",
+                                         undef, $u->{'userid'});
     }
 
-    # populate the variable hash
-    LJ::parse_vars(\$basevars, \%vars);
-    LJ::parse_vars(\$overrides, \%vars);
-    LJ::load_user_theme($dbs, $user, $u, \%vars);
+    # we should have our cache row!  we'll update it in a second.
+    my $dbcm;
+    if (! $s1uc) {
+        $dbcm ||= LJ::get_cluster_master($u, 1);
+        $dbcm->do("INSERT IGNORE INTO s1usercache (userid) VALUES (?)", undef, $u->{'userid'});
+        $s1uc = {};
+    }
+    
+    # conditionally rebuild parts of our cache that are missing
+    my %update;
 
-    # kinda free some memory
-    $basevars = "";
-    $overrides = "";
+    # is the overrides cache old or missing?
+    if ($u->{'useoverrides'} eq "Y" && (! $s1uc->{'override_stor'} ||
+                                        $s1uc->{'override_cleanver'} < $LJ::S1::CLEANER_VERSION)) {
+        $dbcm ||= LJ::get_cluster_master($u, 1);
+        my $overrides = $dbh->selectrow_array("SELECT override FROM overrides WHERE user=?",
+                                              undef, $u->{'user'});
+        $update{'override_stor'} = LJ::CleanHTML::clean_s1_style($overrides);
+        $update{'override_cleanver'} = $LJ::S1::CLEANER_VERSION;
+    }
+     
+    # is the color cache here if it's a custom user theme?
+    if ($u->{'themeid'} == 0 && ! $s1uc->{'color_stor'}) {
+        my $col = {};
+        my $sth = $dbh->prepare("SELECT coltype, color FROM themecustom WHERE user=?");
+        $sth->execute($u->{'user'});
+        $col->{$_->{'coltype'}} = $_->{'color'} while $_ = $sth->fetchrow_hashref;
+        $update{'color_stor'} = Storable::freeze($col);
+    }
 
+    # save the updates
+    if (%update) {
+        my $set;
+        foreach my $k (keys %update) {
+            $s1uc->{$k} = $update{$k};
+            $set .= ", " if $set;
+            $set .= "$k=" . $dbh->quote($update{$k});
+        }
+        $dbcm->do("UPDATE s1usercache SET $set WHERE userid=?", undef, $u->{'userid'});
+    }
+
+    # load the style
+    my $viewref = $view eq "" ? \$view : undef;
+    my $style = $LJ::viewinfo{$view}->{'nostyle'} ? {} :
+        LJ::S1::load_style($dbs, $styleid, $viewref);
+
+    my %vars = ();
+    
+    # apply the style
+    foreach (keys %$style) {
+        $vars{$_} = $style->{$_};
+    }
+
+    # apply the overrides
+    if ($opts->{'nooverride'}==0 && $u->{'useoverrides'} eq "Y") {
+        my $tw = Storable::thaw($s1uc->{'override_stor'});
+        foreach (keys %$tw) {
+            $vars{$_} = $tw->{$_};
+        }
+    }
+
+    # apply the color theme
+    my $cols = $u->{'themeid'} ? LJ::S1::get_themeid($dbs, $u->{'themeid'}) :
+        Storable::thaw($s1uc->{'color_stor'});
+    foreach (keys %$cols) {
+        $vars{"color-$_"} = $cols->{$_};
+    }
+        
     # what charset we put in the HTML
     $opts->{'saycharset'} ||= "utf-8";
 
     # instruct some function to make this specific view type
-    return unless (defined $LJ::viewinfo{$view}->{'creator'});
+    return unless defined $LJ::viewinfo{$view}->{'creator'};
     my $ret = "";
 
     # call the view creator w/ the buffer to fill and the construction variables
@@ -3262,10 +3282,9 @@ sub make_journal
         return undef;
     }
 
-    # remove bad stuff
-    unless ($opts->{'trusted_html'}) {
-        LJ::strip_bad_code(\$ret);
-    }
+    # clean up attributes which we weren't able to quickly verify
+    # as safe in the Storable-stored clean copy of the style.
+    $ret =~ s/\%\%\[attr\[(.+?)\]\]\%\%/LJ::CleanHTML::s1_attribute_clean($1)/eg;
 
     # return it...
     return $ret;

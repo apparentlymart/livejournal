@@ -290,6 +290,9 @@ if ($FORM{'remoteuser'} eq $user) {
              my $qcolor = $dbh->quote($FORM{"theme_cust:$ct"});
              $dbh->do("INSERT INTO themecustom (user, coltype, color) VALUES ($quser, $qct, $qcolor)");
          }
+
+         my $dbcm = LJ::get_cluster_master($u, 1);
+         $dbcm->do("UPDATE s1usercache SET color_stor=NULL WHERE userid=?", undef, $u->{'userid'});
      }
 
      # update 'overrides' table
@@ -364,6 +367,9 @@ if ($FORM{'remoteuser'} eq $user) {
              my $qoverrides = $dbh->quote($overr);
              $dbh->do("REPLACE INTO overrides SET user=$quser, override=$qoverrides");
              $update{'useoverrides'} = "Y";
+
+             my $dbcm = LJ::get_cluster_master($u, 1);
+             $dbcm->do("UPDATE s1usercache SET override_stor=NULL WHERE userid=?", undef, $u->{'userid'});
          }
      }
 

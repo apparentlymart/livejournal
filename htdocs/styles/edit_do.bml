@@ -300,12 +300,13 @@ if ($FORM{'mode'} eq "savechanges")
         else { $opts .= "'N'"; }
     }
     
-    $sth = $dbh->prepare("UPDATE style SET formatdata=$qformatdata, styledes=$qstyledes, lastupdate=NOW() $opts WHERE styleid=$qstyleid");
-    $sth->execute;
-    if ($dbh->err || $sth->rows == 0)
-    {
+    $dbh->do("UPDATE style SET formatdata=$qformatdata, styledes=$qstyledes, lastupdate=NOW() $opts WHERE styleid=$qstyleid");
+    if ($dbh->err) {
         return "<?h1 Error h1?><?p There was some error updating this style. p?>";
     }
+
+    $dbh->do("UPDATE s1stylecache SET vars_stor=NULL, vars_cleanver=0 WHERE styleid=$qstyleid");
+    
 
      # get this style's view type
      $sth = $dbh->prepare("SELECT type FROM style WHERE styleid=$qstyleid");

@@ -4,8 +4,286 @@
 # lib: cgi-bin/ljlib.pl, cgi-bin/ljconfig.pl, cgi-bin/ljlang.pl, cgi-bin/cleanhtml.pl
 # </LJDEP>
 
-package LJ;
 use strict;
+
+package LJ::S1;
+
+# updated everytime new S1 style cleaning rules are added,
+# so cached cleaned versions are invalidated.
+$LJ::S1::CLEANER_VERSION = 2;
+
+# PROPERTY Flags:
+
+# /a/:
+#    safe in styles as sole attributes, without any cleaning.  for
+#    example: <a href="%%urlread%%"> is okay, # if we're in
+#    LASTN_TALK_READLINK, because the system generates # %%urlread%%.
+#    by default, if we don't declare things trusted here, # we'll
+#    double-check all attributes at the end for potential XSS #
+#    problems.
+#
+# /u/:
+#    is a URL.  implies /a/.
+#
+#
+# /d/:
+#    is a number.  implies /a/.
+#
+# /t/:
+#    tainted!  User controls via other some other variable.
+#
+# /s/:
+#    some system string... probably safe.  but maybe possible to coerce it
+#    alongside something else.
+
+my $commonprop = {
+    'dateformat' => {
+        'yy' => 'd', 'yyyy' => 'd',
+        'm' => 'd', 'mm' => 'd',
+        'd' => 'd', 'dd' => 'd',
+        'min' => 'd',
+        '12h' => 'd', '12hh' => 'd',
+        '24h' => 'd', '24hh' => 'd',
+    },
+    'talklinks' => {
+        'messagecount' => 'd',
+        'urlread' => 'u',
+        'urlpost' => 'u',
+        'itemid' => 'd',
+    },
+    'talkreadlink' => {
+        'messagecount' => 'd',
+        'urlread' => 'u',
+    },
+    'event' => {
+        'itemid' => 'd',
+    },
+    'pic' => {
+        'src' => 'u',
+        'width' => 'd',
+        'height' => 'd',
+    },
+    'newday' => {
+        yy => 'd', yyyy => 'd', m => 'd', mm => 'd',
+        d => 'd', dd => 'd',
+    },
+    'skip' => {
+        'numitems' => 'd',
+        'url' => 'u',
+    },
+
+};
+
+$LJ::S1::PROPS = {
+    'CALENDAR_DAY' => {
+        'd' => 'd',
+        'eventcount' => 'd',
+        'dayevent' => 't',
+        'daynoevent' => 't',
+    },
+    'CALENDAR_DAY_EVENT' => {
+        'eventcount' => 'd',
+        'dayurl' => 'u',
+    },
+    'CALENDAR_DAY_NOEVENT' => {
+    },
+    'CALENDAR_EMPTY_DAYS' => {
+        'numempty' => 'd',
+    },
+    'CALENDAR_MONTH' => {
+        'monlong' => 's',
+        'monshort' => 's',
+        'yy' => 'd',
+        'yyyy' => 'd',
+        'weeks' => 't',
+        'urlmonthview' => 'u',
+    },
+    'CALENDAR_NEW_YEAR' => {
+        'yy' => 'd',
+        'yyyy' => 'd',
+    },
+    'CALENDAR_PAGE' => {
+        'name' => 't',
+        "name-'s" => 's',
+        'yearlinks' => 't',
+        'months' => 't',
+        'username' => 's',
+        'website' => 't',
+        'head' => 't',
+        'urlfriends' => 'u',
+        'urllastn' => 'u',
+    },
+    'CALENDAR_WEBSITE' => {
+        'url' => 't',
+        'name' => 't',
+    },
+    'CALENDAR_WEEK' => {
+        'days' => 't',
+        'emptydays_beg' => 't',
+        'emptydays_end' => 't',
+    },
+    'CALENDAR_YEAR_DISPLAYED' => {
+        'yyyy' => 'd',
+        'yy' => 'd',
+    },
+    'CALENDAR_YEAR_LINK' => {
+        'yyyy' => 'd',
+        'yy' => 'd',
+        'url' => 'u',
+    },
+    'CALENDAR_YEAR_LINKS' => {
+        'years' => 't',
+    },
+
+    # day
+    'DAY_DATE_FORMAT' => $commonprop->{'dateformat'},
+    'DAY_EVENT' => $commonprop->{'event'},
+    'DAY_EVENT_PRIVATE' => $commonprop->{'event'},
+    'DAY_EVENT_PROTECTED' => $commonprop->{'event'},
+    'DAY_PAGE' => {
+        'prevday_url' => 'u',
+        'nextday_url' => 'u',
+        'yy' => 'd', 'yyyy' => 'd',
+        'm' => 'd', 'mm' => 'd',
+        'd' => 'd', 'dd' => 'd',
+        'urllastn' => 'u',
+        'urlcalendar' => 'u',
+        'urlfriends' => 'u',
+    },
+    'DAY_TALK_LINKS' => $commonprop->{'talklinks'},
+    'DAY_TALK_READLINK' => $commonprop->{'talkreadlink'},
+
+    # friends
+    'FRIENDS_DATE_FORMAT' => $commonprop->{'dateformat'},
+    'FRIENDS_EVENT' => $commonprop->{'event'},
+    'FRIENDS_EVENT_PRIVATE' => $commonprop->{'event'},
+    'FRIENDS_EVENT_PROTECTED' => $commonprop->{'event'},
+    'FRIENDS_FRIENDPIC' => $commonprop->{'pic'},
+    'FRIENDS_NEW_DAY' => $commonprop->{'newday'},
+    'FRIENDS_RANGE_HISTORY' => {
+        'numitems' => 'd',
+        'skip' => 'd',
+    },
+    'FRIENDS_RANGE_MOSTRECENT' => {
+        'numitems' => 'd',
+    },
+    'FRIENDS_SKIP_BACKWARD' => $commonprop->{'skip'},
+    'FRIENDS_SKIP_FORWARD' => $commonprop->{'skip'},
+    'FRIENDS_TALK_LINKS' => $commonprop->{'talklinks'},
+    'FRIENDS_TALK_READLINK' => $commonprop->{'talkreadlink'},
+
+    # lastn
+    'LASTN_ALTPOSTER' => {
+        'poster' => 's',
+        'owner' => 's',
+        'pic' => 't',
+    },
+    'LASTN_ALTPOSTER_PIC' => $commonprop->{'pic'},
+    'LASTN_CURRENT' => {
+        'what' => 's',
+        'value' => 't',
+    },
+    'LASTN_CURRENTS' => {
+        'currents' => 't',
+    },
+    'LASTN_DATEFORMAT' => $commonprop->{'dateformat'},
+    'LASTN_EVENT' => $commonprop->{'event'},
+    'LASTN_EVENT_PRIVATE' => $commonprop->{'event'},
+    'LASTN_EVENT_PROTECTED' => $commonprop->{'event'},
+    'LASTN_NEW_DAY' => $commonprop->{'newday'},
+    'LASTN_PAGE' => {
+        'urlfriends' => 'u',
+        'urlcalendar' => 'u',
+    },
+    'LASTN_RANGE_HISTORY' => {
+        'numitems' => 'd',
+        'skip' => 'd',
+    },
+    'LASTN_RANGE_MOSTRECENT' => {
+        'numitems' => 'd',
+    },
+    'LASTN_SKIP_BACKWARD' => $commonprop->{'skip'},
+    'LASTN_SKIP_FORWARD' => $commonprop->{'skip'},
+    'LASTN_TALK_LINKS' => $commonprop->{'talklinks'},
+    'LASTN_TALK_READLINK' => $commonprop->{'talkreadlink'},
+    'LASTN_USERPIC' => {
+        'src' => 'u',
+        'width' => 'd',
+        'height' => 'd',
+    },
+    
+};
+
+# <LJFUNC>
+# name: LJ::S1::get_themeid
+# des: Loads or returns cached version of given color theme data.
+# returns: Hashref with color names as keys
+# args: dbarg, themeid
+# des-themeid: S1 themeid.
+# </LJFUNC>
+sub get_themeid
+{
+    my ($dbarg, $themeid) = @_;
+    return $LJ::S1::CACHE_THEMEID{$themeid} if $LJ::S1::CACHE_THEMEID{$themeid};
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbr = $dbs->{'reader'};
+    my $ret = {};
+    my $sth = $dbr->prepare("SELECT coltype, color FROM themedata WHERE themeid=?");
+    $sth->execute($themeid);
+    $ret->{$_->{'coltype'}} = $_->{'color'} while $_ = $sth->fetchrow_hashref;
+    return $LJ::S1::CACHE_THEMEID{$themeid} = $ret;
+}
+
+# returns: hashref of vars (cleaned)
+sub load_style
+{
+    my ($dbarg, $styleid, $viewref) = @_;
+    
+    my $cch = $LJ::S1::CACHE_STYLE{$styleid};
+    if ($cch && $cch->{'cachetime'} > time() - 300) {
+        $$viewref = $cch->{'type'} if ref $viewref eq "SCALAR";
+        return $cch->{'style'};
+    }
+
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
+    my $styc = $dbr->selectrow_hashref("SELECT * FROM s1stylecache WHERE styleid=?",
+                                      undef, $styleid);
+    if (! $styc || $styc->{'vars_cleanver'} < $LJ::S1::CLEANER_VERSION) {
+        my ($type, $data, $opt_cache) = 
+            $dbh->selectrow_array("SELECT type, formatdata, opt_cache FROM style WHERE styleid=?",
+                                  undef, $styleid);
+        return {} unless $type;
+
+        $styc = {
+            'type' => $type,
+            'opt_cache' => $opt_cache,
+            'vars_stor' => LJ::CleanHTML::clean_s1_style($data),
+            'vars_cleanver' => $LJ::S1::CLEANER_VERSION,
+        };
+        
+        $dbh->do("REPLACE INTO s1stylecache (styleid, cleandate, type, opt_cache, vars_stor, vars_cleanver) ".
+                 "VALUES (?,NOW(),?,?,?,?)", undef, $styleid, 
+                 map { $styc->{$_} } qw(type opt_cache vars_stor vars_cleanver));
+    }
+    
+    my $ret = Storable::thaw($styc->{'vars_stor'});
+    $$viewref = $styc->{'type'} if ref $viewref eq "SCALAR";
+
+    if ($styc->{'opt_cache'} eq "Y") {
+        $LJ::S1::CACHE_STYLE{$styleid} = {
+            'style' => $ret,
+            'cachetime' => time(),
+            'type' => $styc->{'type'},
+        };
+    }
+
+    return $ret;
+}
+
+package LJ;
 
 # <LJFUNC>
 # name: LJ::alldateparts_to_hash
@@ -65,7 +343,7 @@ sub fill_var_props
 {
     my ($vars, $key, $hashref) = @_;
     my $data = $vars->{$key};
-    $data =~ s/%%(?:([\w:]+:))?(\S+?)%%/$1 ? LJ::fvp_transform(lc($1), $vars, $hashref, $2) : $hashref->{$2}/eg;
+    $data =~ s/%%([\w:]+:)?([^\s\[\]\<\>]+?)%%/$1 ? LJ::fvp_transform(lc($1), $vars, $hashref, $2) : $hashref->{$2}/eg;
     return $data;
 }
 
@@ -90,15 +368,6 @@ sub fvp_transform
         if ($trans eq "ue") {
             $ret = LJ::eurl($ret);
         }
-        elsif ($trans eq "xe") {
-            $ret = LJ::exml($ret);
-        }
-        elsif ($trans eq "lc") {
-            $ret = lc($ret);
-        }
-        elsif ($trans eq "uc") {
-            $ret = uc($ret);
-        }
         elsif ($trans eq "color") {
             $ret = $vars->{"color-$attr"};
         }
@@ -107,69 +376,25 @@ sub fvp_transform
             if ($attr eq "sitename") { return $LJ::SITENAME; }
             if ($attr eq "img") { return $LJ::IMGPREFIX; }
         }
+        elsif ($trans eq "attr") {
+            $ret =~ s/\"/&quot;/g;
+            $ret =~ s/\'/&\#39;/g;
+            $ret =~ s/</&lt;/g;
+            $ret =~ s/>/&gt;/g;
+            $ret =~ s/\]\]//g;  # so they can't end the parent's [attr[..]] wrapper
+        }
+        elsif ($trans eq "lc") {
+            $ret = lc($ret);
+        }
+        elsif ($trans eq "uc") {
+            $ret = uc($ret);
+        }
+        elsif ($trans eq "xe") {
+            $ret = LJ::exml($ret);
+        }
+
     }
     return $ret;
-}
-
-
-# <LJFUNC>
-# class: s1
-# name: LJ::load_style_fast
-# des: Loads a style, and does minimal caching (data sticks for 60 seconds).
-# returns: Nothing. Modifies a data reference.
-# args: styleid, dataref, typeref, nocache?
-# des-styleid: Numeric, primary key.
-# des-dataref: Dataref to store data in.
-# des-typeref: Optional dataref to store the style tyep in (undef for none).
-# des-nocache: Flag to say don't cache.
-# </LJFUNC>
-sub load_style_fast
-{
-    my ($dbarg, $styleid, $dataref, $typeref, $nocache) = @_;
-
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    $styleid += 0;
-    my $now = time();
-
-    if ((defined $LJ::CACHE_STYLE{$styleid}) &&
-        ($LJ::CACHE_STYLE{$styleid}->{'lastpull'} > ($now-300)) &&
-        (! $nocache)
-        )
-    {
-        $$dataref = $LJ::CACHE_STYLE{$styleid}->{'data'};
-        if (ref $typeref eq "SCALAR") { $$typeref = $LJ::CACHE_STYLE{$styleid}->{'type'}; }
-    }
-    else
-    {
-        my @h = ($dbh);
-        if ($dbs->{'has_slave'}) {
-            unshift @h, $dbr;
-        }
-        if (my $s_db = LJ::get_dbh("s1styles")) {
-            unshift @h, $s_db;
-        }       
-        my ($data, $type, $cache);
-        my $sth;
-        foreach my $db (@h)
-        {
-            $sth = $dbr->prepare("SELECT formatdata, type, opt_cache FROM style WHERE styleid=$styleid");
-            $sth->execute;
-            ($data, $type, $cache) = $sth->fetchrow_array;
-            last if ($data);
-        }
-        if ($cache eq "Y") {
-            $LJ::CACHE_STYLE{$styleid} = { 'lastpull' => $now,
-                                       'data' => $data,
-                                       'type' => $type,
-                                   };
-        }
-
-        $$dataref = $data;
-        if (ref $typeref eq "SCALAR") { $$typeref = $type; }
-    }
 }
 
 # <LJFUNC>
