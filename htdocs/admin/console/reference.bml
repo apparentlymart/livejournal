@@ -24,7 +24,9 @@
      next if ($cmd->{'hidden'});
 
      my $args = LJ::ehtml($cmd->{'argsummary'});
-     $ret .= "<dt><p><table width=100% cellpadding=2><tr><td bgcolor=#d0d0d0><tt><b>$cmdname</b> $args</tt></td></tr></table>";
+     my $anchor = "cmd.$cmdname";
+     $ret .= "<a name='$anchor'><dt><p><table width=100% cellpadding=2><tr><td bgcolor=#d0d0d0>";
+     $ret .= "<tt><a href='\#$anchor'><b>$cmdname</b></a> $args</tt></td></tr></table>";
      $ret .= "<dd><p>$cmd->{'des'}";
      if ($cmd->{'args'}) {
 	 my @des = @{$cmd->{'args'}};
@@ -32,7 +34,7 @@
 	 while (my ($arg, $des) = splice(@des, 0, 2)) {
 	     $ret .= "<dt><b><i>$arg</i></b><dd>$des";
 	 }
-	 $ret .= "</dl>";
+	 $ret .= "</dl></a>";
      }
  }
  $ret .= "</dl>";
