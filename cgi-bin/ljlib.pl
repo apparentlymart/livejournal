@@ -626,6 +626,10 @@ sub get_cap
 # <LJFUNC>
 # name: LJ::get_cap_min
 # des: Just like [func[LJ::get_cap]], but returns the minimum value.
+#      Although it might not make sense at first, some things are 
+#      better when they're low, like the minimum amount of time
+#      a user might have to wait between getting updates or being
+#      allowed to refresh a page.
 # args: u_cap, capname
 # des-u_cap: 16 bit capability bitmask or a user object from which the
 #            bitmask could be obtained
@@ -671,7 +675,6 @@ sub help_icon
 # des: Returns true if the site has one or more hooks installed for
 #      the given hookname.
 # args: hookname
-# des-hookname: Name of hook. See doc/hooks.txt.
 # </LJFUNC>
 sub are_hooks
 {
@@ -685,7 +688,6 @@ sub are_hooks
 # returns: list of arrayrefs, one for each hook ran, their
 #          contents being their own return values.
 # args: hookname, args*
-# des-hookname: Name of hook. See doc/hooks.txt.
 # des-args: Arguments to be passed to hook.
 # </LJFUNC>
 sub run_hooks
@@ -704,7 +706,6 @@ sub run_hooks
 # des: Installs a site-specific hook.  Installing multiple hooks per hookname
 #      is valid.  They're run later in the order they're registered.
 # args: hookname, subref
-# des-hookname: Name of hook. See doc/hooks.txt.
 # des-subref: Subroutine reference to run later.
 # </LJFUNC>
 sub register_hook
@@ -766,7 +767,6 @@ sub acid_decode
 #      for use by anybody.
 # returns: Account/Invite code.
 # args: dbarg, userid?
-# des-dbarg: a master db handle, or a master/slave dbset
 # des-userid: Userid to make the invitation code from,
 #             else the code will be from userid 0 (system)
 # </LJFUNC>
@@ -822,7 +822,6 @@ sub acct_code_decode
 # des: Checks the validity of a given account code
 # returns: boolean; 0 on failure, 1 on validity. sets $$err on failure.
 # args: dbarg, code, err?, userid?
-# des-dbarg: a master db handle, or a master/slave dbset
 # des-code: account code to check
 # des-err: optional scalar ref to put error message into on failure
 # des-userid: optional userid which is allowed in the rcptid field,
@@ -866,7 +865,6 @@ sub acct_code_check
 # name: LJ::load_mood_theme
 # des: Loads and caches a mood theme, or returns immediately if already loaded.
 # args: dbarg, themeid
-# des-dbarg: a master db handle, or a master/slave dbset
 # des-themeid: the mood theme ID to load
 # </LJFUNC>
 sub load_mood_theme
@@ -887,6 +885,16 @@ sub load_mood_theme
     $sth->finish;
 }
 
+# <LJFUNC>
+# name: LJ::load_props
+# des: Loads and caches one or more of the various *proplist tables:
+#      logproplist, talkproplist, and userproplist, which describe
+#      the various meta-data that can be stored on log (journal) items,
+#      comments, and users, respectively.
+# args: dbarg, table*
+# des-table: a list of tables' proplists to load.  can be one of
+#            "log", "talk", or "user".
+# </LJFUNC>
 sub load_props
 {
     my $dbarg = shift;
@@ -912,6 +920,19 @@ sub load_props
     }
 }
 
+# <LJFUNC>
+# name: LJ::get_prop
+# des: This is used after [func[LJ::load_props]] is called to retrieve
+#      a hashref of a row from the given tablename's proplist table.
+#      One difference from getting it straight from the database is
+#      that the 'id' key is always present, as a copy of the real
+#      proplist unique id for that table.
+# args: table, name
+# returns: hashref of proplist row from db
+# des-table: the tables to get a proplist hashref from.  can be one of
+#            "log", "talk", or "user".
+# des-name: the name of the prop to get the hashref of.
+# </LJFUNC>
 sub get_prop
 {
     my $table = shift;
@@ -920,6 +941,16 @@ sub get_prop
     return $LJ::CACHE_PROP{$table}->{$name};
 }
 
+# <LJFUNC>
+# name: LJ::load_codes
+# des: Populates hashrefs with lookup data from the database or from memory,
+#      if already loaded in the past.  Examples of such lookup data include
+#      state codes, country codes, color name/value mappings, etc.
+# args: dbarg, whatwhere
+# des-whatwhere: a hashref with keys being the code types you want to load
+#                and their associated values being hashrefs to where you
+#                want that data to be populated.
+# </LJFUNC>
 sub load_codes
 {
     my $dbarg = shift;
@@ -954,6 +985,21 @@ sub load_codes
     }
 }
 
+# <LJFUNC>
+# name: LJ::img
+# des: Returns an HTML &lt;img&gt; or &lt;input&gt; tag to an named image
+#      code, which each site may define with a different image file with 
+#      its own dimensions.  This prevents hard-coding filenames & sizes
+#      into the source.  The real image data is stored in LJ::Img, which
+#      has default values provided in cgi-bin/imageconf.pl but can be 
+#      overridden in cgi-bin/ljconfig.pl.
+# args: imagecode, type?, name?
+# des-imagecode: The unique string key to reference the image.  Not a filename,
+#                but the purpose or location of the image.
+# des-type: By default, the tag returned is an &lt;img&gt; tag, but if 'type'
+#           is "input", then an input tag is returned.
+# des-name: The name of the input element, if type == "input".
+# </LJFUNC>
 sub img
 {
     my $ic = shift;
@@ -970,6 +1016,13 @@ sub img
     return "<b>XXX</b>";
 }
 
+# <LJFUNC>
+# name: LJ::load_user_props
+# des: Given a user hashref, loads the values of the given named properties
+#      into that user hashref.
+# args: dbarg, u, propname*
+# des-propname: the name of a property from the userproplist table.
+# </LJFUNC>
 sub load_user_props
 {
     my $dbarg = shift;
@@ -1011,7 +1064,14 @@ sub load_user_props
     }
 }
 
-
+# <LJFUNC>
+# name: LJ::bad_input
+# des: Returns common BML for reporting form validation errors in
+#      a bulletted list.
+# returns: BML showing errors.
+# args: error*
+# des-error: A list of errors
+# </LJFUNC>
 sub bad_input
 {
     my @errors = @_;
@@ -1024,6 +1084,14 @@ sub bad_input
     return $ret;
 }
 
+# <LJFUNC>
+# name: LJ::debug
+# des: When $LJ::DEBUG is set, logs the given message to 
+#      $LJ::VAR/debug.log.
+# returns: 1 if logging disabled, 0 on failure to open log, 1 otherwise
+# args: message
+# des-message: Message to log.
+# </LJFUNC>
 sub debug 
 {
     return 1 unless ($LJ::DEBUG);
@@ -1033,6 +1101,27 @@ sub debug
     return 1;
 }
 
+# <LJFUNC>
+# name: LJ::auth_okay
+# des: Validates a user's password.  The "clear" or "md5" argument
+#      must be present, and either the "actual" argument (the correct
+#      password) must be set, or the first argument must be a user
+#      object ($u) with the 'password' key set.  Note that this is
+#      the preferred way to validate a password (as opposed to doing
+#      it by hand) since this function will use a pluggable authenticator
+#      if one is defined, so LiveJournal installations can be based
+#      off an LDAP server, for example.
+# returns: boolean; 1 if authentication succeeded, 0 on failure
+# args: user_u, clear, md5, actual?
+# des-user_u: Either the user name or a user object.
+# des-clear: Clear text password the client is sending. (need this or md5)
+# des-md5: MD5 of the password the client is sending. (need this or clear).
+#          If this value instead of clear, clear can be anything, as md5
+#          validation will take precedence.
+# des-actual: The actual password for the user.  Ignored if a pluggable
+#             authenticator is being used.  Required unless the first
+#             argument is a user object instead of a username scalar.
+# </LJFUNC>
 sub auth_okay
 {
     my $user = shift;
@@ -1048,7 +1137,7 @@ sub auth_okay
 	$user = $user->{'user'};
     }
 
-  LJ::debug("auth_okay(user=$user, clear=$clear, md5=$md5, act=$actual)");
+    LJ::debug("auth_okay(user=$user, clear=$clear, md5=$md5, act=$actual)");
 
     ## custom authorization:
     if (ref $LJ::AUTH_CHECK eq "CODE") {
@@ -1063,8 +1152,15 @@ sub auth_okay
     return 0;
 }
 
-# the caller is responsible for making sure the username isn't reserved.  this
-# function only ensures that it's a valid username.
+# <LJFUNC>
+# name: LJ::create_account
+# des: Creates a new basic account.  <b>Note:</b> This function is
+#      not really too useful but should be extended to be useful so
+#      htdocs/create.bml can use it, rather than doing the work itself.
+# returns: integer of userid created, or 0 on failure.
+# args: dbarg, opts
+# des-opts: hashref containing keys 'user', 'name', and 'password'
+# </LJFUNC>
 sub create_account
 {
     my $dbarg = shift;
@@ -1090,11 +1186,24 @@ sub create_account
     my $userid = $sth->{'mysql_insertid'};
     $dbh->do("INSERT INTO useridmap (userid, user) VALUES ($userid, $quser)");
     $dbh->do("INSERT INTO userusage (userid, timecreate) VALUES ($userid, NOW())");
+
+    LJ::run_hooks("post_create", {
+	'dbs' => $dbs,
+	'userid' => $userid,
+	'user' => $user,
+	'code' => undef,
+    });
     return $userid;
 }
 
-# returns true if user B is a friend of user A (or if A == B)
-# arguments can be user objects (hashrefs) or userids (scalars)
+# <LJFUNC>
+# name: LJ::is_friend
+# des: Checks to see if a user is a friend of another user.
+# returns: boolean; 1 iff user B is a friend of user A (or if A == B)
+# args: dbarg, usera, userb
+# des-usera: Source user hashref or userid.
+# des-userb: Destination user hashref or userid.
+# </LJFUNC>
 sub is_friend
 {
     my $dbarg = shift;
