@@ -2722,6 +2722,8 @@ sub auth_okay
     return 0 unless ref $u eq "HASH";
 
     $actual ||= $u->{'password'};
+    return 0 if $actual eq "";
+
     my $user = $u->{'user'};
 
     # set the IP banned flag, if it was provided.
@@ -2955,6 +2957,7 @@ sub challenge_check_login
     my ($u, $chal, $res, $banned, $opts) = @_;
     return 0 unless $u;
     my $pass = $u->{'password'};
+    return 0 if $pass eq "";
 
     # set the IP banned flag, if it was provided.
     my $fake_scalar;
