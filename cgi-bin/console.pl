@@ -529,6 +529,19 @@ $cmd{'get_moderator'} = {
                'community or user name' => "The username of the account you want to lookup.",
                ],
     };
+
+$cmd{'set_underage'} = {
+    'def' => 'consuspend.pl',
+    'privs' => [qw(siteadmin)],
+    'des' => "Change a journal's underage flag.",
+    'argsummary' => '<journal> <on/off> <note>',
+    'args' => [
+               'journal' => "The username of the journal that type is changing.",
+               'on/off' => "Either 'on' or 'off' which is whether to turn it on or off.",
+               'note' => "Required information about why you are setting this status.",
+               ],
+
+    };
     
 $cmd{'change_journal_type'} = {
     'privs' => [qw(changejournaltype)],

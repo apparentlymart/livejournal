@@ -15,6 +15,51 @@ $cmd{'get_moderator'}->{'handler'} = \&get_moderator;
 $cmd{'finduser'}->{'handler'} = \&finduser;
 $cmd{'infohistory'}->{'handler'} = \&infohistory;
 $cmd{'change_journal_status'}->{'handler'} = \&change_journal_status;
+$cmd{'set_underage'}->{'handler'} = \&set_underage;
+
+sub set_underage {
+    my ($dbh, $remote, $args, $out) = @_;
+
+    my $err = sub { push @$out, [ "error", shift ]; 0; };
+    my $info = sub { push @$out, [ "info", shift ]; 1; };
+
+    return $err->("This command takes three arguments.  Consult the reference for details.")
+        unless scalar(@$args) == 4;
+    return $err->("You don't have the necessary privilege (siteadmin:underage) to change an account's underage flag.")
+        unless LJ::check_priv($remote, 'siteadmin', 'underage') || LJ::check_priv($remote, 'siteadmin', '*');
+
+    my $u = LJ::load_user($args->[1]);
+    return $err->("Invalid user.")
+        unless $u;
+
+    return $err->("Second argument must be 'on' or 'off'.")
+        unless $args->[2] =~ /^(?:on|off)$/;
+    my $on = $args->[2] eq 'on' ? 1 : 0;
+
+    my $note = $args->[3];
+    return $err->("You must provide a reason for this change as the third argument.")
+        unless $note;
+
+    # can't set state to what it is already
+    return $err->("User is already of the requested underage state.")
+        unless $on ^ $u->underage;
+
+    my ($res, $sh, $status);
+    if ($on) {
+        $status = 'M'; # "M"anually turned on
+        $res = "User marked as underage.";
+        $sh = "marked; $note";
+    } else {
+        $status = undef; # no status change
+        $res = "User no longer marked as underaged.";
+        $sh = "unmarked; $note";
+    }
+
+    # now record this change
+    LJ::statushistory_add($u->{userid}, $remote->{userid}, "set_underage", $sh);
+    $u->underage($on, $status);
+    return $info->($res);
+}
 
 sub change_journal_status {
     my ($dbh, $remote, $args, $out) = @_;
