@@ -4208,11 +4208,11 @@ sub load_userpics
         my $dbcr = LJ::get_cluster_def_reader($cid);
         my (@bindings, @data);
         foreach my $row (@{$db_load{$cid}}) {
-            push @bindings, "(userid = ? && picid = ?)";
+            push @bindings, "(userid=? AND picid=?)";
             push @data, ($row->[0]->{userid}, $row->[1]);
         }
         my $sth = $dbcr->prepare("SELECT userid, picid, width, height FROM userpic2 WHERE " . join(' OR ', @bindings));
-        $sth->execute();
+        $sth->execute(@data);
 
         while ($_ = $sth->fetchrow_hashref) {
             my $id = $_->{'picid'};
