@@ -325,4 +325,24 @@ $maint{'build_randomuserset'} = sub
     print "-I- Done.\n";
 };
 
+$maint{'memeclean'} = sub
+{
+    my $dbh = LJ::get_dbh("master");
+    my $sth;
+
+    $sth = $dbh->prepare("SELECT statkey FROM stats WHERE statcat='popmeme'");
+    $sth->execute;
+    while (my $url = $sth->fetchrow_array)
+    {
+	my $copy = $url;
+	LJ::run_hooks("canonicalize_url", \$copy);
+	unless ($copy) {
+	    my $d = $dbh->quote($url);
+	    $dbh->do("DELETE FROM stats WHERE statcat='popmeme' AND statkey=$d");
+	    print "Deleting: $url\n";
+	}
+    }
+    print "done.\n";
+};
+
 1;
