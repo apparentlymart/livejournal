@@ -279,7 +279,7 @@ my %ljconfig =
                 'example' => "qw(test test2);",
             },
             'no_password_check' => {
-                'desc' => "Set this option false if you haven't installed the Crypt::Cracklib perl module and don't wish to do so.",
+                'desc' => "Set this option true if you are running an installation using ljcom code and if you haven't installed the Crypt::Cracklib perl module.",
             },
             'schemes' => {
                 'desc' => "An array of hashes with keys being a BML scheme name and the values being the scheme description. When set, users can change their ".
@@ -305,6 +305,11 @@ my %ljconfig =
                 'desc' => "Set true if your installation is a publically available development server and if you would like ".
                           "beta testers to ensure that they understand as such. If left alone your installation might become susceptible to ".
                           "hordes of squatter accounts.",
+            },
+            's2_trusted' => {
+                'desc' => "Allows a specific user's S2 layers to run javascript, something that is considered a potential security risk and is disabled for all accounts. The hash structure is a series of userid => username pairs. Note that the system account is trusted by default, so it is not necessary to add to this hash.",
+                'type' => "hash",
+                'example' => "( '2' => 'whitaker', '3' => 'test', );",
             },
         },
 
