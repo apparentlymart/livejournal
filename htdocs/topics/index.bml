@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  ### NOTE: this code needs to use APIs, not fatty joins on the master assuming all data is in
  ###       on place.  with clusters, log+logtext joins are impossible.
@@ -75,7 +75,7 @@
      
      ### make the navigation crap
      my $navcrap;
-     $navcrap .= "(=STANDOUT <CENTER><FONT FACE=\"Arial,Helvetica\" SIZE=-1><B>$count matches</B>";
+     $navcrap .= "<?standout <CENTER><FONT FACE=\"Arial,Helvetica\" SIZE=-1><B>$count matches</B>";
      if ($count) {
          if ($pages > 1) {
              $navcrap .= "<BR>Page $page of $pages shown (records $first-$last)<BR>";
@@ -92,9 +92,9 @@
          }
              $navcrap .= "$right";
          }
-         $navcrap .= "</FONT></CENTER> STANDOUT=)\n";
+         $navcrap .= "</FONT></CENTER> standout?>\n";
      } else {
-         $navcrap .= "</CENTER> STANDOUT=)\n";
+         $navcrap .= "</CENTER> standout?>\n";
      }
      ####### end navcrap
      
@@ -196,9 +196,9 @@ my @children;
 push @children, $_ while ($_ = $sth->fetchrow_hashref);
 if (@children) {
     if ($catid) {
-        $body .= "(=H1 Sub categories H1=)"; 
+        $body .= "<?h1 Sub categories h1?>"; 
     } else {
-        $body .= "(=H1 Topic Categories H1=)"; 
+        $body .= "<?h1 Topic Categories h1?>"; 
     }
     $body .= "<UL>\n";
     foreach my $chi (@children) 
@@ -229,7 +229,7 @@ if ($cat->{'topicsort'} eq "alpha") {
          $listcount{$_->{'tptopid'}} = $_->{'count'} while ($_ = $sth->fetchrow_hashref);
      }
 
-     $body .= "(=H1 Topics H1=)(=P Below are the list of topics for this category. P=)";
+     $body .= "<?h1 Topics h1?><?p Below are the list of topics for this category. p?>";
      $body .= "<UL>\n";
      foreach my $top (@list) 
      {
@@ -247,18 +247,18 @@ $body .= "Want to <A HREF=\"addtopic.bml?catid=$catid\">add a topic</A> to this 
 $body .= "How does this all work?  <A HREF=\"/support/faqbrowse.bml?faqid=29\">Read this</A>.</FONT>";
 
  return;
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
+_code?><?page
+TITLE=><?_code return $title; _code?>
 BODY<=
-(=_CODE
+<?_code
 
 return $body;
 
-_CODE=)
+_code?>
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/topics/index.bml, htdocs/users, htdocs/userinfo.bml
 link: htdocs/topics/add.bml, htdocs/support/faqbrowse.bml, htdocs/talkread.bml
 link: htdocs/topics/addtopic.bml
 img: htdocs/userpic, htdocs/img/userinfo.gif
-</LJDEP> _C=)
+</LJDEP> _c?>

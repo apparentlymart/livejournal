@@ -1,7 +1,7 @@
-(=PAGE
+<?page
 TITLE=>Add Topic
 BODY<=
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -17,7 +17,7 @@ BODY<=
 
  unless ($FORM{'topname'})
  {
-     $ret .= "(=H1 Add topic to \"$cat->{'catname'}\" H1=)(=P Fill out this form to add a new topic to the \"$cat->{'catname'}\" category.  P=)";
+     $ret .= "<?h1 Add topic to \"$cat->{'catname'}\" h1?><?p Fill out this form to add a new topic to the \"$cat->{'catname'}\" category.  p?>";
      $ret .= "<P><FORM METHOD=POST><INPUT TYPE=HIDDEN NAME=catid VALUE=$catid>";
      $ret.= "<UL><B>Topic Name:</B> <INPUT NAME=topname SIZE=30 MAXLENGTH=80> <INPUT TYPE=SUBMIT VALUE=\"Submit\"></UL>\n";
      $ret .= "Note that unless you have administrative rights to this category, the submitted topic will not appear in the topic listing immediately.  One of the editors will first need to approve it.";
@@ -46,10 +46,10 @@ BODY<=
          $dbh->do("UPDATE topic_list SET status=$qstatus WHERE tptopid=$topid");
      }
      if ($status eq "new" && $oldstatus eq "deny") {
-         return "(=H1 Error H1=)(=P The topic has already been suggested and previously was denied.  If you feel this is an error, please contact us. P=)";
+         return "<?h1 Error h1?><?p The topic has already been suggested and previously was denied.  If you feel this is an error, please contact us. p?>";
      }
      if ($status eq "new" && $oldstatus eq "off") {
-         return "(=H1 Error H1=)(=P The topic was previously active but has since been turned off.  If you feel this is an error, please contact us. P=)";
+         return "<?h1 Error h1?><?p The topic was previously active but has since been turned off.  If you feel this is an error, please contact us. p?>";
      }
  }
 
@@ -61,19 +61,19 @@ BODY<=
 
  
  if ($status eq "new") {
-     $ret .= "(=H1 Submitted H1=)(=P Thanks for your submission.  The editors will now be notified and will review your topic for submission.  Nearly everything gets approved.  The editors exist to make sure the topic directory stays clean and that you didn't accidentally make a mistake entering the information. P=)";
+     $ret .= "<?h1 Submitted h1?><?p Thanks for your submission.  The editors will now be notified and will review your topic for submission.  Nearly everything gets approved.  The editors exist to make sure the topic directory stays clean and that you didn't accidentally make a mistake entering the information. p?>";
  }
  if ($status eq "on") {
-     $ret .= "(=H1 Submitted H1=)(=P Because you have access to create new topics, the topic is now setup and working. P=)";
+     $ret .= "<?h1 Submitted h1?><?p Because you have access to create new topics, the topic is now setup and working. p?>";
  }
  
- $ret .= "(=P You may visit the topic already here and submit new items to it:<UL><A HREF=\"./?topid=$topid\">$FORM{'topname'}</A></UL> P=)";
+ $ret .= "<?p You may visit the topic already here and submit new items to it:<UL><A HREF=\"./?topid=$topid\">$FORM{'topname'}</A></UL> p?>";
 
  return $ret;
 
-_CODE=)
+_code?>
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 post: htdocs/topics/addtopic.bml
 link: htdocs/topics/index.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

@@ -1,7 +1,7 @@
-(=PAGE
+<?page
 TITLE=>Add to topic directory
 BODY<=
-(=_CODE
+<?_code
 
  return "The topic directory is currently down until it is revised to use the new database format.";
 
@@ -20,8 +20,8 @@ BODY<=
  $sth->execute;
  my $cat = $sth->fetchrow_hashref;
 
- $ret .= "(=H1 $catdepth H1=)";
- $ret .= "(=P Your current category in the topic directory is shown above.  To move up a level or down a level, use this form: P=)";
+ $ret .= "<?h1 $catdepth h1?>";
+ $ret .= "<?p Your current category in the topic directory is shown above.  To move up a level or down a level, use this form: p?>";
  $ret .= "<UL><FORM METHOD=GET>";
  $ret .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$itemid SELECTED>";
  $ret .= "<SELECT NAME=catid>";
@@ -38,8 +38,8 @@ BODY<=
  $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Go\">";
  $ret .= "</UL>";
  
- $ret .= "(=H1 Topics in this category... H1=)";
- $ret .= "(=P You may add the journal entry you were just reading to one of the following topics.  Click the topic name to proceed. P=)";
+ $ret .= "<?h1 Topics in this category... h1?>";
+ $ret .= "<?p You may add the journal entry you were just reading to one of the following topics.  Click the topic name to proceed. p?>";
 
  $sth = $dbh->prepare("SELECT tptopid, topname, des FROM topic_list WHERE tpcatid=$catid AND status='on' ORDER BY timeenter DESC LIMIT 50");
  $sth->execute;
@@ -67,9 +67,9 @@ BODY<=
  
   return $ret;
 
-_CODE=)
+_code?>
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 form: htdocs/topics/additem.bml
 link: htdocs/topics/add.bml, htdocs/topics/addtopic.bml, htdocs/support/faqbrowse.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
