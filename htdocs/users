@@ -170,6 +170,8 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
     }
 
     my $status = $opts->{'status'} || "200 OK";
+    my $contenttype = $opts->{'contenttype'} || "text/html";
+
     if ($opts->{'badargs'}) 
     {
 	$status = "404 Not Found";
@@ -190,11 +192,11 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
 	print "$_: $headers{$_}\n";
     }
     print "Status: $status\n";
-    
+
     if ($opts->{'nocontent'}) {
 	print "\n";
     } else {
-	print "Content-type: text/html\n";
+	print "Content-type: $contenttype\n";
 	print "Cache-Control: private, proxy-revalidate\n";
 	print "Vary: Accept-Encoding, Cookie\n";
 	if ($ENV{'HTTP_ACCEPT_ENCODING'} =~ /gzip/) {

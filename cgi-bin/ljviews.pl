@@ -1214,4 +1214,69 @@ END_SQL
     return 1;
 }
 
+# the creator for the RSS XML syndication view
+sub create_view_rss
+{
+    my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+    
+    my $user = $u->{'user'};
+    LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
+
+    ## load the itemids
+    my @itemids;
+    my @items = LJ::get_recent_items($dbs, {
+	'userid' => $u->{'userid'},
+	'itemshow' => 50,
+	'order' => $u->{'journaltype'} eq "C" ? "logtime" : "",
+	'itemids' => \@itemids,
+    });
+
+    $opts->{'contenttype'} = 'text/xml';
+
+    my $logtext = LJ::get_logtext($dbs, @itemids);
+
+    my $clink = "$LJ::SITEROOT/users/$user/";
+    my $ctitle = LJ::exml($u->{'name'});
+    if ($u->{'journaltype'} eq "C") {
+	$clink = "$LJ::SITEROOT/community/$user/";
+    }
+
+    $$ret .= "<?xml version='1.0' ?>\n";
+    $$ret .= "<!DOCTYPE rss PUBLIC \"-//Netscape Communications//DTD RSS 0.91//EN\"\n";
+    $$ret .= "             \"http://my.netscape.com/publish/formats/rss-0.91.dtd\">\n";
+    $$ret .= "<rss version='0.91'>\n";
+    $$ret .= "<channel>\n";
+    $$ret .= "  <title>$ctitle</title>\n";
+    $$ret .= "  <link>$clink</link>\n";
+    $$ret .= "  <description>$ctitle - $LJ::SITENAME</description>\n";
+    $$ret .= "  <language>" . lc($u->{'lang'}) . "</language>\n";
+
+    foreach my $it (@items) 
+    {
+	$$ret .= "<item>\n";
+
+	my $itemid = $it->{'itemid'};
+
+	my $subject = $logtext->{$itemid}->[0] || 
+	    substr($logtext->{$itemid}->[1], 0, 40);
+ 
+	# remove HTML crap and encode it:
+        LJ::CleanHTML::clean_subject_all(\$subject);
+	$subject ||= "(No subject or text)";
+	$subject = LJ::exml($subject);
+
+	$$ret .= "<title>$subject</title>\n";
+	$$ret .= "<url>$LJ::SITEROOT/talkread.bml?itemid=$itemid</url>\n";
+
+	$$ret .= "</item>\n";
+    } # end huge while loop
+
+    $$ret .= "</channel>\n";
+    $$ret .= "</rss>\n";
+
+    return 1;
+}
+
 1;

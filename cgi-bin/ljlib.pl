@@ -39,6 +39,11 @@ $LJ::EndOfTime = 2147483647;
 		     "creator" => \&create_view_friends,
 		     "des" => "Friends View",
 		 },
+		 "rss" => { 
+		     "creator" => \&create_view_rss,
+		     "des" => "RSS View (XML)",
+		     "nostyle" => 1,
+		 },
 		 "info" => {
 		     # just a redirect to userinfo.bml for now. 
 		     # in S2, will be a real view.
@@ -496,7 +501,7 @@ sub auth_fields
 
     my $remote = LJ::get_remote_noauth();
     my $ret = "";
-    if (!$form->{'altlogin'} && !$form->{'user'} && $remote->{'user'}) {
+    if (!$form->{'altlogin'} && !$form->{'user'} && $remote) {
 	my $hpass;
 	if ($BMLClient::COOKIE{"ljhpass"} =~ /^$remote->{'user'}:(.+)/) {
 	    $hpass = $1;
@@ -2373,7 +2378,7 @@ sub make_journal
 	    $opts->{'badargs'} = 1;
 	}
     }
-    return "" unless ($styleid);
+    return unless ($styleid);
 
     my $quser = $dbh->quote($user);
     my $u;
@@ -2418,7 +2423,8 @@ sub make_journal
     my %vars = ();
     # load the base style
     my $basevars = "";
-    LJ::load_style_fast($dbs, $styleid, \$basevars, \$view);
+    LJ::load_style_fast($dbs, $styleid, \$basevars, \$view)
+	unless ($LJ::viewinfo{$view}->{'nostyle'});
 
     # load the overrides
     my $overrides = "";
@@ -2440,7 +2446,7 @@ sub make_journal
     $overrides = "";
 
     # instruct some function to make this specific view type
-    return "" unless (defined $LJ::viewinfo{$view}->{'creator'});
+    return unless (defined $LJ::viewinfo{$view}->{'creator'});
     my $ret = "";
 
     # call the view creator w/ the buffer to fill and the construction variables
