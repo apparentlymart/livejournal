@@ -111,42 +111,56 @@ sub do_search
 
     my $distinct = "";
 
+    my %only_one_copy = qw(community c user u userusage uu);
+
     ## keep track of what table aliases we've used
     my %alias_used;
-    $alias_used{'u'} = 1;  # used later.
-    $alias_used{'c'} = 1;  # might be used later, if opt_format eq "com"
-    $alias_used{'uu'} = 1;  # might be used later, if opt_sort is by time
+    $alias_used{'u'} = "user";  # used later.
+    $alias_used{'c'} = "?";     # might be used later, if opt_format eq "com"
+    $alias_used{'uu'} = "?";    # might be used later, if opt_sort is by time
+
+    my %conds;
 
     ## foreach each critera, build up the query
     foreach my $crit (@crits)
     {
 	### each search criteria has its own table aliases.  make those unique.
 	my %map_alias = ();  # keep track of local -> global table alias mapping
-	foreach my $localalias (keys %{$crit->{'tables'}}) {
-	    my $ct = 1;
-	    my $newalias = $localalias;
-	    while ($alias_used{$newalias}) {
-		$ct++;
-		$newalias = "$localalias$ct";
-	    }
-	    $map_alias{$localalias} = $newalias;
-	    $alias_used{$newalias} = 1;
 
-	    my $tablename = $crit->{'tables'}->{$localalias};
-	    $extrafrom .= ", $pfx$tablename $newalias";
+	foreach my $localalias (keys %{$crit->{'tables'}}) 
+	{
+	    my $table = $crit->{'tables'}->{$localalias};
+	    my $newalias;
+	    
+	    # some tables might be used multiple times but they're
+	    # setup such that opening them multiple times is useless.
+	    if ($only_one_copy{$table}) {
+		$newalias = $only_one_copy{$table};
+		$alias_used{$newalias} = $table;
+	    } else {
+		my $ct = 1;
+		$newalias = $localalias;
+		while ($alias_used{$newalias}) {
+		    $ct++;
+		    $newalias = "$localalias$ct";
+		}
+		$alias_used{$newalias} = $table;
+	    }
+
+	    $map_alias{$localalias} = $newalias;
 	}
 	
 	## add each condition to the where clause, after fixing up aliases
 	foreach my $cond (@{$crit->{'conds'}}) {
 	    $cond =~ s/\{(\w+?)\}/$map_alias{$1}/g;
-	    $extrawhere .= "AND $cond ";
+	    $conds{$cond} = 1;
 	}
 
 	## add join to u.userid table
 	my $cond = $crit->{'userid'};
 	if ($cond) {
 	    $cond =~ s/\{(\w+?)\}/$map_alias{$1}/g;
-	    $extrawhere .= "AND $cond=u.userid ";
+	    $conds{"$cond=u.userid"} = 1;
 	}
 
 	## does this crit require a distinct select?
@@ -167,26 +181,36 @@ sub do_search
 	$fields .= ", u.name";
     } elsif ($req->{'opt_format'} eq "com") {
 	$fields .= ", u.name, c.ownerid, c.membership, c.postlevel";
-	$extrafrom2 .= ", ${pfx}community c";
-	$extrawhere2 .= "AND c.userid=u.userid";
+	$alias_used{'c'} = "community";
+	$conds{"c.userid=u.userid"} = 1;
     }
 
     $req->{'opt_sort'} ||= "ut";
     if ($req->{'opt_sort'} eq "ut") {
-	$extrafrom2 .= ", userusage uu";  # FIX: don't open two copies of table when already using
+	$alias_used{'uu'} = 'userusage';
+	$conds{'uu.userid=u.userid'} = 1;
 	$orderby = "ORDER BY uu.timeupdate DESC";
     } elsif ($req->{'opt_sort'} eq "user") {
 	$orderby = "ORDER BY u.user";
     } elsif ($req->{'opt_sort'} eq "name") {
 	$orderby = "ORDER BY u.name";
-    } elsif ($req->{'opt_sort'} eq "loc") {
-#	$orderby = "ORDER BY country, state, city";
-#	$extrawhere = "AND country <> '' AND country IS NOT NULL";
-#	$fields .= ", u.country, u.state, u.city";
-    }
+    } 
 
     my $all_fields = "u.userid, u.user, u.journaltype, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(u.timeupdate) AS 'secondsold' $fields";
-    my $sql = "SELECT $distinct u.userid FROM ${pfx}user u $extrafrom $extrafrom2 WHERE 1 $extrawhere $extrawhere2 $orderby LIMIT $MAX_RETURN_RESULT";
+
+    # delete reserved table aliases the didn't end up being used
+    {
+	my @del;
+	foreach (keys %alias_used) {
+	    push @del, $_ if ($alias_used{$_} eq "?");
+	}
+	foreach (@del) { delete $alias_used{$_}; }
+    }
+
+    my $fromwhat = join(", ", map { "$alias_used{$_} $_" } keys %alias_used);
+    my $conds = join(" AND ", keys %conds);
+
+    my $sql = "SELECT $distinct u.userid FROM $fromwhat WHERE $conds $orderby LIMIT $MAX_RETURN_RESULT";
 
     if ($req->{'sql'}) {
 	$info->{'errmsg'} = "SQL: $sql";
@@ -249,7 +273,7 @@ sub do_search
     @ids = @ids[($info->{'first'}-1)..($info->{'last'}-1)];
    
     my $in = join(",", grep { $_+0; } @ids);
-    my $fsql = "SELECT $all_fields FROM ${pfx}user u $extrafrom2 WHERE u.userid IN ($in) $extrawhere2";
+    my $fsql = "SELECT $all_fields FROM $fromwhat WHERE u.userid IN ($in) $extrawhere2";
     $sth = $dbh->prepare($fsql);
     $sth->execute;
 
@@ -413,38 +437,6 @@ sub search_fro
     };
 }
 
-######## CLIENT USAGE ##############
-
-sub validate_client
-{
-    my ($req, $errors) = @_;
-    unless (length($req->{'client_match'})) {
-	push @$errors, "You must enter at least a substring of the client name to search for.";
-    }
-}
-
-sub search_client
-{
-    my ($dbh, $req, $info) = @_;
-
-    my $client = lc($req->{'client_match'});
-    my $arg = $client;
-    my $qlike = $dbh->quote("$client%");
-
-    push @{$info->{'english'}}, "have used the \"$arg\" LiveJournal client";
-
-    return {
-	'distinct' => 1,
-	'tables' => {
-	    'l' => 'logins',
-	    'u' => 'user',
-	},
-	'conds' => [ "{u}.user={l}.user",
-		     "{l}.client LIKE $qlike" ],
-	'userid' => "{u}.userid",
-    };
-}
-
 
 ########### LOCATION ###############
 
@@ -605,7 +597,7 @@ sub search_age
 	'conds' => [ "{up}.upropid=$p->{'id'}",
 		     "{up}.value BETWEEN DATE_SUB(NOW(), INTERVAL $qagemax YEAR) AND DATE_SUB(NOW(), INTERVAL $qagemin YEAR)",
 		     ],
-	'userid' => "{u}.userid",
+	'userid' => "{up}.userid",
     };
 }
 
