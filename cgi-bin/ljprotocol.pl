@@ -389,7 +389,7 @@ sub postevent
     if (LJ::Poll::contains_new_poll(\$event))
     {
 	return fail($err,301,"Your account type doesn't permit creating polls.")
-	    if (LJ::get_cap($u, "makepoll"));
+	    unless (LJ::get_cap($u, "makepoll"));
 	
 	my $error = "";
 	@polls = LJ::Poll::parse($dbh, \$event, \$error, {

@@ -143,13 +143,40 @@
     {
 	# default for new users: (16 bit unsigned int ... each bit is
 	# capability flag)
-	$NEWUSER_CAPS = 0;
+	$NEWUSER_CAPS = 2;
     
-	# capability sets (0..15).  set limits on each capability.
+	# capability limits.
+	# keys are bit numbers, from 0 .. 15.  values are hashrefs
+	# with limit names and values (see doc/capabilities.txt)
 	%CAP = (
-		'0' => {
+		## 0x01 -- new user
+		'0' => { 
+		    'userpics' => 1,
 		},
-	    );
+		## 0x02 -- free user 
+		'1' => {
+		    'userpics' => 3,
+		},
+		## 0x04 -- early adopter
+		'2' => {
+		    'userpics' => 5,
+		    'styles' => 1,
+		},
+		## 0x08 -- paid user 
+		'3' => {
+		    'styles' => 1,
+		    'makepoll' => 1,
+		    'userpics' => 10,
+		    'paid' => 1,
+		    'useremail' => 1,
+		    'textmessaging' => 1,
+		},
+		## 0x10 -- permanent account
+		'4' => {
+		    'paid' => 1,
+		    'useremail' => 1,
+		},
+		);
     }
 
     # keep this next line.  it lets you upgrade LiveJournal without
