@@ -95,15 +95,23 @@ sub parse_feed
         $item->{'link'} = $_->{'link'} if $_->{'link'};
         $item->{'id'} = $_->{'guid'} if $_->{'guid'};
 
+        my $nsdc = 'http://purl.org/dc/elements/1.1/';
         my $nsenc = 'http://purl.org/rss/1.0/modules/content/';
         if ($_->{$nsenc} && ref($_->{$nsenc}) eq "HASH") {
-            # use content:encoded if present and no description
-            $item->{'text'} ||= $_->{$nsenc}->{'encoded'};
+            # prefer content:encoded if present
+            $item->{'text'} = $_->{$nsenc}->{'encoded'}
+                if defined $_->{$nsenc}->{'encoded'};
         }
 
         if ($_->{'pubDate'}) {
             my $time = time822_to_time($_->{'pubDate'});
             $item->{'time'} = $time if $time;
+        }
+        if ($_->{$nsdc} && ref($_->{$nsdc}) eq "HASH") {
+            if ($_->{$nsdc}->{date}) {
+                my $time = w3cdtf_to_time($_->{$nsdc}->{date});
+                $item->{'time'} = $time if $time;
+            }
         }
         push @{$feed->{'items'}}, $item;
     }
@@ -115,7 +123,6 @@ sub parse_feed
 # see http://www.faqs.org/rfcs/rfc822.html
 # RFC822 specifies 2 digits for year, and RSS2.0 refers to RFC822,
 # but real RSS2.0 feeds apparently use 4 digits. 
-
 sub time822_to_time {
     my $t822 = shift;
     # remove day name if present
@@ -133,6 +140,36 @@ sub time822_to_time {
         return undef unless $mon;
         return "$year-$mon-$day $hour:$min";
     } else {
+        return undef;
+    }
+}
+
+# convert W3C-DTF to our internal format
+# see http://www.w3.org/TR/NOTE-datetime
+# Based very loosely on code from DateTime::Format::W3CDTF,
+# which isn't stable yet so we can't use it directly.
+sub w3cdtf_to_time {
+    my $tw3 = shift;
+    
+
+    # TODO: Should somehow return the timezone offset
+    #   so that it can stored... but we don't do timezones
+    #   yet anyway. For now, just strip the timezone
+    #   portion if it is present.
+    
+    $tw3 =~ s/([+-]\d\d:\d\d|Z)$//;
+    $tw3 =~ s/^\s*//; $tw3 =~ s/\s*$//; # Eat any superflous whitespace
+
+    my $tw3len = length($tw3);
+
+    # We can only use complete times, so anything which
+    # doesn't feature the time part is considered invalid.
+    
+    if ($tw3 =~ /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)(:\d\d)?$/) {
+        my ($year, $mon, $day, $hour, $min) = ($1,$2,$3,$4,$5);
+        return "$1-$2-$3 $4:$5";
+    }
+    else {
         return undef;
     }
 }
