@@ -7764,6 +7764,8 @@ sub get_public_styles {
     my $pubstyc = LJ::MemCache::get($memkey);
     return $pubstyc if $pubstyc;
 
+    $pubstyc = {};
+
     # not cached, build from db
     my $sysid = LJ::get_userid("system");
 
