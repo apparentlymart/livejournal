@@ -15,7 +15,7 @@ BODY<=
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
- my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+ my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
 
  my $ret;
  my $dbs = LJ::get_dbs();
@@ -32,7 +32,6 @@ BODY<=
      return LJ::bad_input("Incorrect password");
  }
  
-
  LJ::load_user_props($dbr, $u, "opt_whatemailshow",
 		     "opt_showtopicstuff", "country", "state", "city",
 		     "zip", "icq", "aolim", "yahoo", "msn", "url",

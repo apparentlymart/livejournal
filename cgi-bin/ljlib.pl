@@ -63,7 +63,6 @@ sub connect_db {
     LJ::debug("$0: connect_db called from [$c]");
     $dbh = ($BMLPersist::dbh = LJ::get_dbh("master")); 
 }
-sub hash_password { return md5_hex($_[0]); }
 sub html_select { return LJ::html_select(@_); }
 sub load_codes {  &connect_db(); LJ::load_codes($dbh, @_); }
 sub load_log_props { &connect_db(); return LJ::load_log_props($dbh, @_); }
@@ -346,17 +345,6 @@ sub html_datetime
 }
 
 package LJ;
-
-sub bullet_errors
-{
-    my ($errorref) = @_;
-    my $ret = "(=BADCONTENT=)\n<ul>\n";
-    foreach (@{$errorref}) {
-	$ret .= "<li>$_</li>\n";
-    }
-    $ret .= "</ul>\n";
-    return $ret;
-}
 
 sub self_link
 {

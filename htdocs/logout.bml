@@ -3,7 +3,7 @@
  my @errors = ();
  my $user = lc($FORM{'user'});
  my $password = $FORM{'password'};
- my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+ my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
  $body = "";
 
  if ($BMLClient::COOKIE{'ljuser'}) 
@@ -14,9 +14,9 @@
 
      foreach my $dom ($LJ::DOMAIN, $LJ::COOKIE_DOMAIN, $site_domain)
      {
-	 &BMLClient::set_cookie("ljuser", "", undef, $LJ::COOKIE_PATH, $dom);
-	 &BMLClient::set_cookie("ljhpass", "", undef, $LJ::COOKIE_PATH, $dom);
-	 &BMLClient::set_cookie("ljfastserver", "", undef, $LJ::COOKIE_PATH, $dom);
+	 BMLClient::set_cookie("ljuser", "", undef, $LJ::COOKIE_PATH, $dom);
+	 BMLClient::set_cookie("ljhpass", "", undef, $LJ::COOKIE_PATH, $dom);
+	 BMLClient::set_cookie("ljfastserver", "", undef, $LJ::COOKIE_PATH, $dom);
      }
      delete $BMLClient::COOKIE{'ljhpass'};
      delete $BMLClient::COOKIE{'ljuser'};

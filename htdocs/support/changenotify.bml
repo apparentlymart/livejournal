@@ -23,7 +23,7 @@ BODY<=
  if ($mode eq "save" && ! LJ::did_post) {
      push @errors, "(=REQUIREPOST=)";
  }
- return LJ::bullet_errors(\@errors) if @errors;
+ return LJ::bad_input(@errors) if @errors;
  
  LJ::Support::init_remote($dbh, $remote);
  my $cats = LJ::Support::load_cats($dbh);

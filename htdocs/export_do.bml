@@ -4,7 +4,7 @@ _INFO=)(=_CODE
 
 	my @errors = ();
 	my $user = LJ::canonical_username($FORM{'user'});
-	my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+	my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
 	
 	my $dbs = LJ::get_dbs();
 	my $dbh = $dbs->{'dbh'};
@@ -18,19 +18,13 @@ _INFO=)(=_CODE
 	my $year = $FORM{'year'}+0;
 	my $month = $FORM{'month'}+0;
 
-	if (scalar(@errors)==0 && !&valid_password($u->{'password'}, \%FORM)) { push @errors, "Incorrect password."; }
+	if (scalar(@errors)==0 && ! LJ::valid_password($u->{'password'}, \%FORM)) { 
+	    push @errors, "Incorrect password."; 
+	}
 	
-	if (@errors)
-	{
+	if (@errors) {
 	    print "Content-type: text/html\n\n";
-	    my $ret = "";
-	    $ret .= "(=BADCONTENT=)\n<UL>\n";		
-	    foreach (@errors)
-	    {
-		$ret .= "<LI>$_\n";
-	    }
-	    $ret .= "</UL>\n";
-	    return $ret;
+	    return LJ::bad_input(@errors);
 	}
 
 	##### figure out what fields we're exporting
