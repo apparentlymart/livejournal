@@ -151,19 +151,23 @@ $r->notes("codepath" => "bml.view.index");
                          "FROM log2 l, logtext2 ls ".
                          "WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} ".
                          "AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid ".
-                         "$secwhere ORDER BY l.eventtime");
+                         "$secwhere");
  } else {
      $sth = $db->prepare("SELECT l.jitemid, l.anum, l.day, ls.subject, l.eventtime, u.user, ".
                          "l.replycount, l.security ".
                          "FROM log2 l, logtext2 ls, ${LJ::DB_USERIDMAP}useridmap u ".
                          "WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} ".
                          "AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid ".
-                         "AND l.posterid=u.userid $secwhere ORDER BY l.eventtime");
+                         "AND l.posterid=u.userid $secwhere");
  }
 
- $sth->execute;
- while (my ($itemid, $anum, $day, $subject, $eventtime, $poster, $replycount, $security) = $sth->fetchrow_array)
+ # sort on eventtime
+ my $items = $db->selectall_arrayref($sth);
+
+ foreach my $it (sort { $a->[4] cmp $b->[4] } @$items)
  {
+     my ($itemid, $anum, $day, $subject, $eventtime, $poster, $replycount, $security) = @$it;
+
      if ($day != $lday) {
          if ($lday) { $body .= "</table></dd>"; }
          $lday = $day;
@@ -203,7 +207,6 @@ $r->notes("codepath" => "bml.view.index");
          $body .= "<td>" . LJ::ljuser($poster) . "</td>";
      }
 
-     BML::ebml(\$subject);
      LJ::CleanHTML::clean_subject_all(\$subject);
 
      $body .= "<td><a href='" . LJ::item_link($u, $itemid, $anum) . "'>$subject</a>$sec$rep</td></tr>\n";
