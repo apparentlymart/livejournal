@@ -1,0 +1,252 @@
+(=PAGE
+TITLE=>Request #(=_CODE return ($FORM{'id'}+0); _CODE=)
+BODY<=
+	
+(=_CODE
+ 
+ &connect_db();
+ my $sth;
+
+ my $spid = $FORM{'id'}+0;
+ $sth = $dbh->prepare("SELECT * FROM support WHERE spid=$spid");
+ $sth->execute;
+ my $sp = $sth->fetchrow_hashref;
+ unless ($sp) { return "(=H1 Error H1=)(=P Unknown support number. P=)"; }
+
+ my $email = $sp->{'reqemail'};
+
+ my $u = {};
+ if ($sp->{'reqtype'} eq "user") {
+     $sth = $dbh->prepare("SELECT * FROM user WHERE userid=$sp->{'requserid'}");
+     $sth->execute;
+     $u = $sth->fetchrow_hashref;
+     $email = $u->{'email'};
+ }
+
+ my $winner;  ## who closed it?
+ if ($sp->{'state'} eq "closed") {
+     $sth = $dbh->prepare("SELECT u.user, sp.points FROM user u, supportpoints sp WHERE u.userid=sp.userid AND sp.spid=$spid");
+     $sth->execute;
+     $winner = $sth->fetchrow_hashref;
+ }
+
+ my $owner_mode = 0;
+ my $remote = &get_remote();
+ if ($remote && $remote->{'user'} eq $u->{'user'}) {
+     $owner_mode = 1;
+ } elsif (&remote_has_priv($remote, "supportclose")) {
+     $owner_mode = 1;
+ }
+
+ my $problemarea = "";
+ $sth = $dbh->prepare("SELECT catname FROM supportcat WHERE spcatid=$sp->{'spcatid'}");
+ $sth->execute;
+ ($problemarea) = $sth->fetchrow_array;
+
+ my $domain = $email;
+ $domain =~ s/^.+\@//; 
+
+ my $ret = "";
+ $ret .= "<TABLE>\n";
+ $ret .= "<TR><TD VALIGN=BOTTOM ALIGN=RIGHT><B>From:</B></TD><TD>";
+ if ($u->{'defaultpicid'}) {
+     my %pic;
+     my $picid = $u->{'defaultpicid'};
+     &load_userpics(\%pic, [ $picid ]);
+     $ret .= "<IMG ALIGN=BASELINE SRC=\"/userpic/$picid\" WIDTH=$pic{$picid}->{'width'} HEIGHT=$pic{$picid}->{'height'} ALIGN=ABSMIDDLE HSPACE=3>";
+ }
+ $ret .= "$sp->{'reqname'} (*******\@$domain)</TD></TR>\n";
+
+ ###
+ ### account type
+ ###
+ $ret .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B><A HREF=\"/support/faqbrowse.bml?faqid=38\"><NOBR>Account type</NOBR></A>:</B></TD><TD>";
+ $ret .= $LJ::acct_name{$u->{'paidfeatures'}} || "<I>Unknown</I>";
+ $ret .= "</TD></TR>\n";
+
+ $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT><B>LiveJournal:</B></TD><TD>";
+ if ($u->{'userid'}) {
+     $ret .= "username: (=LJUSERF $u->{'user'} LJUSERF=)";
+     $ret .= "<BR>styles: ";
+     foreach my $view (@LJ::views) {
+	 my $styid = $u->{"${view}_style"};
+	 $ret .= "$view: <A HREF=\"/styles/browse/styleinfo.bml?styleid=$styid\">$styid</A> ";
+     }
+     $ret .= "<BR>email validated? ";
+     if ($u->{'status'} eq "A") { $ret .= "<B>yes</B>"; }
+     if ($u->{'status'} eq "N") { $ret .= "<B>no</B>"; }
+     if ($u->{'status'} eq "T") { $ret .= "<B>transitioning</B> (used to be validated, but changed email addresses and hasn't reconfirmed)"; }
+ } else {
+     $ret .= "<I>not a user</I>";
+ }
+ $ret .= "</TD></TR>\n";
+ $ret .= "<TR><TD ALIGN=RIGHT><B>Problem with:</B></TD><TD>$problemarea</TD></TR>\n";
+ my $age = &ago_text(time() - $sp->{'timecreate'});
+ $ret .= "<TR><TD ALIGN=RIGHT><B>Time opened:</B></TD><TD>$age</TD></TR>\n";
+ my $state = $sp->{'state'};
+ if ($state eq "open") { $state = "<B><FONT COLOR=#FF0000>open</FONT></B>"; }
+ if ($state eq "closed" && $winner) {
+     my $s = $winner->{'points'} > 1 ? "s" : "";
+     my $wuser = $winner->{'user'};
+     $state .= " (<B>$winner->{'points'}</B> point$s to <A HREF=\"/users/$wuser/\"><B>$wuser</B></A> ";
+     $state .= "<A HREF=\"/userinfo.bml?user=$wuser&mode=full\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>)";
+ }
+ $ret .= "<TR><TD ALIGN=RIGHT><B>Status:</B></TD><TD>$state</TD></TR>\n";
+ $ret .= "<TR><TD ALIGN=RIGHT><B>Summary:</B></TD><TD><FONT FACE=\"Arial\" SIZE=+1><B>$sp->{'subject'}</B></FONT></TD></TR>\n";
+ $ret .= "</TABLE>\n";
+
+ my %userinfo;
+ $sth = $dbh->prepare("SELECT DISTINCT u.userid, u.user, u.name, u.defaultpicid FROM supportlog s, user u WHERE s.spid=$spid AND u.userid=s.userid");
+ $sth->execute;
+ $userinfo{$_->{'userid'}} = $_ while ($_ = $sth->fetchrow_hashref);
+
+ my %userpics;
+ my @pics = map { $userinfo{$_}->{'defaultpicid'} } keys %userinfo;
+ &load_userpics(\%userpics, \@pics);
+
+ sub wrap_link
+ {
+     my $url = shift;
+     $url =~ s/\&amp;/\&/g;
+     return "<a href=\"$url\">$url</a>";
+ }
+
+ $sth = $dbh->prepare("SELECT splid, UNIX_TIMESTAMP()-timelogged AS 'age', type, faqid, userid, message FROM supportlog WHERE spid=$spid ORDER BY timelogged");
+ $sth->execute;
+ while ($le = $sth->fetchrow_hashref)
+ {
+     my $message = $le->{'message'};
+     $message = &BMLUtil::ehtml($message);
+     $message =~ s/^\s+//;
+     $message =~ s/\s+$//;
+     $message =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
+     $message =~ s/\n/<BR>\n/g;
+     $message =~ s!http://(([a-z0-9A-Z_\-\.\/\?\%\+\=\~\:\#])|(&amp;))+!&wrap_link($&);!eg;
+
+
+     if ($le->{'type'} eq "req") {
+	 $ret .= "<P><B>Original Request:</B><BR><TABLE BGCOLOR=#000000 WIDTH=100%><TR><TD><TABLE BGCOLOR=#FFFFFF WIDTH=100%><TR><TD>\n";
+	 $ret .= $message;
+	 $ret .= "</TD></TR></TABLE></TD></TR></TABLE>\n";
+	 next;
+     }
+     
+     my $header = "<B>Comment:</B>";
+     if ($le->{'userid'}) {
+	 my $up = $userinfo{$le->{'userid'}};
+	 my $picid = $up->{'defaultpicid'};
+	 $header = "<IMG ALIGN=BASELINE SRC=\"/userpic/$picid\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'} HSPACE=3>";
+	 $header .= "$up->{'name'} (<B><A HREF=\"$LJ::SITEROOT/users/$up->{'user'}/\">$up->{'user'}</A></B> ";
+	 $header .= "<A HREF=\"/userinfo.bml?user=$up->{'user'}&mode=full\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=BASELINE></A>)";
+     }
+     $header .= "<BR><FONT SIZE=-1>Comment \#$le->{'splid'}</FONT>";
+     if ($owner_mode && $sp->{'state'} eq "open") {
+	 $header .= ", <A HREF=\"act.bml?close;$sp->{'spid'};$sp->{'authcode'};$le->{'splid'}\"><B>credit fix here</B></A>";
+     }
+
+     $ret .= "<P>$header<BR><TABLE BGCOLOR=#000000 WIDTH=100%><TR><TD><TABLE BGCOLOR=#FFFFFF WIDTH=100%><TR><TD>\n";
+     if ($le->{'faqid'}) {
+	 my $faqname = "";
+	 my $sth = $dbh->prepare("SELECT question FROM faq WHERE faqid=$le->{'faqid'}");
+	 $sth->execute;
+	 ($faqname) = $sth->fetchrow_array;
+	 $ret .= "<CENTER>\n";
+	 $ret .= "<TABLE BGCOLOR=#D0D0D0><TR><TD ALIGN=CENTER><B>FAQ Reference:</B><BR><A HREF=\"faqbrowse.bml?faqid=$le->{'faqid'}\">$faqname</A></TD></TR></TABLE>\n";
+	 $ret .= "</CENTER>\n";
+     }
+     $ret .= $message;
+     $ret .= "</TD></TR></TABLE></TD></TR></TABLE>\n";
+
+ } 
+
+if ($sp->{'state'} eq "closed") {
+    return $ret;
+}
+
+$ret .= "<P><B>Post a comment or solution:</B><br>";
+
+unless ($remote) {
+    $ret .= "You must <a href=\"/login.bml?ret=1\">login</a> to help people out.";
+    return $ret;
+}
+
+unless (&LJ::remote_has_priv($dbh, $remote, "supporthelp") || $owner_mode)
+{
+    $ret .= "Sorry, you do not have access to answer people's support requests.  We'll put instructions here later when we decide what the policy is on giving people access.  The situation was getting out of control with a lot of new helpers giving totally bogus answers.";
+    return $ret;
+}
+
+
+$ret .= "(=STANDOUT <B>Important Notes:</B>";
+$ret .= "<ul>";
+$ret .= "<li>Before answering somebody's question, read the <b><a href=\"/guide/support.bml\">support guide</a></b>.";
+$ret .= "<li>Do <b>NOT</b> answer people if you're not sure of your answer.  Don't answer if your solution is just a guess.  Only answer if you really know what you're talking about ... guessing only makes other people in the support area think you might be right and spread the misinformation further, until it's accepted as truth.";
+if ($LJ::LJDOTCOM) {
+    $ret .= "<li>Never recommend asking someone else, or somewhere else.  That qualifies as not knowing the answer.  If a support request is open for a day or two, one of the support leaders will find out the answer and reply, and likely post about it in (=LJUSER lj_support LJUSER=) so all the support people will know the answer in the future.";
+}
+$ret .= "</ul>Thanks! STANDOUT=)";
+
+
+$ret .= "<BR><FORM METHOD=POST ACTION=append_request.bml>";
+# hidden values
+$ret .= "<INPUT TYPE=HIDDEN NAME=\"spid\" VALUE=\"$spid\">\n";
+$ret .= "<TABLE BORDER=0>\n";
+
+$ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>From:</TD><td>(=LJUSER $remote->{'user'} LJUSER=)</td></tr>\n";
+ 
+ # FAQ reference
+ $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>Reference <A HREF=\"faq.bml\">FAQ</A>:</TD><TD COLSPAN=2><SELECT NAME=\"faqid\"><OPTION VALUE=0>(don't reference FAQ)";
+ {
+     my %faqcat;
+     my %faqq;
+     $sth = $dbh->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat WHERE faqcat<>'int-abuse'");
+     $sth->execute;
+     while ($_ = $sth->fetchrow_hashref)
+     {
+	 $faqcat{$_->{'faqcat'}} = $_;
+     }
+     
+     $sth = $dbh->prepare("SELECT faqid, question, sortorder, faqcat, lastmodtime FROM faq WHERE faqcat<>'int-abuse'");
+     $sth->execute;
+     while ($_ = $sth->fetchrow_hashref)
+     {
+	 $faqq{$_->{'faqid'}} = $_;
+     }
+     
+     foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> $faqcat{$b}->{'catorder'} } keys %faqcat)
+     {
+	 $ret .= "<OPTION VALUE=0>[ " . &BMLUtil::ehtml($faqcat{$faqcat}->{'faqcatname'}) . " ]\n";
+	 $ret .= "<UL>\n";
+	 foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
+	 {
+	     next unless ($faqq{$faqid}->{'question'});
+	     my $q = &BMLUtil::ehtml("... " . $faqq{$faqid}->{'question'});
+	     $q =~ s/^\s+//;
+	     $q =~ s/\s+$//;
+	     $q =~ s/\n/ /g;
+	     if (length($q) > 50) {
+		 $q = substr($q, 0, 50) . "...";
+	     }
+	     $ret .= "<OPTION VALUE=$faqid>$q\n";
+	 }
+	 $ret .= "</UL>\n";
+     }
+ }
+ $ret .= "</SELECT></TD></TR>\n";
+  
+ # textarea for their message body
+ $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT>Message:</TD><TD COLSPAN=2><TEXTAREA ROWS=10 COLS=50 WRAP=VIRTUAL NAME=\"body\"></TEXTAREA><BR>";
+ $ret .= "(=DE No HTML allowed, so don't worry about about escaping &lt; and &gt;<BR>URLs are automatically link-ified, so just reference those. DE=)<BR>";
+ $ret .= "<INPUT TYPE=SUBMIT NAME=submitpost VALUE=\"Post Comment/Solution\">\n";
+ $ret .= "</TD></TR></TABLE>";
+
+ return $ret;
+ 
+_CODE=)
+(=HR=)
+Back to the <A HREF="help.bml">list of open requests</A>.<BR>
+Back to the <A HREF="./">support area</A>.
+
+
+<=BODY
+PAGE=)

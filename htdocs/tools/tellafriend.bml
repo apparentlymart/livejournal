@@ -1,0 +1,129 @@
+(=_CODE
+
+ $title = "Tell a Friend!";
+ $body = "";
+
+ require 'ljlib.pl';
+ require 'emailcheck.pl';
+ &connect_db();
+ my $remote = &get_remote();
+ my ($sth);
+
+ unless ($remote) {
+     $body .= "(=H1 Sorry... H1=)(=P To use the \"Tell a Friend\" feature, you must first <a href=\"/login.bml?ret=1\">login</a>.  P=)(=P If we didn't require you to login for this, we'd be essentially providing an anonymous email gateway and there'd be tons of people abusing it and harassing each other.  (We tried this on another website once...)  P=)";
+     return "";
+ }
+
+ $sth = $dbh->prepare("SELECT user, name, email, status, paidfeatures FROM user WHERE userid=$remote->{'userid'}");
+ $sth->execute;
+ my $u = $sth->fetchrow_hashref;
+ $u->{'emailpref'} = $u->{'email'};
+ if ($LJ::USER_EMAIL && ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid")) {
+     $u->{'emailpref'} = $u->{'user'} . '@livejournal.com';
+ }
+ 
+ unless ($u->{'status'} eq "A") {
+     $body .= "(=H1 Sorry... H1=)(=P Your current email address ($u->{'email'}) isn't validated, so we can't let you use the \"Tell a Friend\" feature.  To validate your email address, have the confirmation email resent at the <a href=\"/lostinfo.bml\">lost information</a> page, and then follow the instructions in it when you get it. P=)";
+     return "";
+ }
+ 
+ if ($FORM{'mode'} eq "mail") 
+ {
+     my $email = $FORM{'toemail'};
+     my @errors;
+     &check_email($email, \@errors);
+     if (@errors) {
+	 $body = "(=BADCONTENT=)\n<UL>\n";		
+	 foreach (@errors) {
+	     $body .= "<LI>$_\n";
+	 }
+	 $body .= "</UL>\n";
+	 return "";
+     }
+
+     &send_mail({
+	 'to' => $FORM{'toemail'},
+	 'toname' => $FORM{'toname'},
+	 'from' => $u->{'emailpref'},
+	 'fromname' => $FORM{'fromname'},
+	 'subject' => $FORM{'subject'},
+	 'body' => $FORM{'body'},
+     });
+
+     $body .= "(=H1 Sent! H1=)(=P $FORM{'toemail'} has been mailed. P=)";    
+     return "";
+ }
+
+ $body .= "<form method=post><input type=hidden name=mode value=mail>";
+ $body .= "<table cellpadding=3 border=0>";
+ 
+ $body .= "<tr><td align=right nowrap><b>From:</b></td><td><input name=fromname size=30 value=\"" . &ehtml($u->{'name'} || "LiveJournal User") . "\"></td></tr>\n";
+ $body .= "<tr><td align=right nowrap><b>&nbsp;</b></td><td>$u->{'emailpref'}</td></tr>\n"; 
+
+ $body .= "<tr><td align=right nowrap><b>To (Name):</b></td><td><input name=toname size=30></td></tr>\n";
+ $body .= "<tr><td align=right nowrap><b>To (Email):</b></td><td><input name=toemail size=30></td></tr>\n";
+
+ my ($subject, $msg);
+ $subject = "Check this out...";
+ if ($FORM{'itemid'} =~ /^\d+$/) {
+     my $itemid = $FORM{'itemid'}+0;
+     $sth = $dbh->prepare("SELECT u.user, lt.subject FROM user u, log l, logtext lt WHERE l.itemid=$itemid AND lt.itemid=$itemid AND l.ownerid=u.userid");
+     $sth->execute;
+     my ($user, $subject) = $sth->fetchrow_array;
+     my $url = "$LJ::SITEROOT/talkread.bml?itemid=$itemid";
+
+     if ($user eq $u->{'user'}) {
+	 $msg .= "Hey,\n\nCheck out this journal entry of mine:\n\n";
+     } else {
+	 $msg .= "Hey,\n\nCheck this out... I saw this journal entry while reading ${user}'s journal:\n\n";
+     }
+     $msg .= "  $subject\n" if ($subject);
+     $msg .= "  $url\n\n";
+     $msg .= "I thought you might be interested.\n\n";
+ }
+
+ if ($FORM{'user'} =~ /^\w{1,15}$/) {
+     my $user = $FORM{'user'};
+     my $quser = $dbh->quote($user);
+     $sth = $dbh->prepare("SELECT user, name, email, status, paidfeatures FROM user WHERE user=$quser");
+     $sth->execute;
+     my $uj = $sth->fetchrow_hashref;
+     my $url;
+     if ($uj->{'paidfeatures'} eq "on" || $uj->{'paidfeatures'} eq "paid") {
+	 my $sub = $user;
+	 $sub =~ s/_/-/g;
+	 $url .= "http://$sub.$LJ::USER_DOMAIN/";
+     } else {
+	 $url .= "$LJ::SITEROOT/users/$user/";
+     }
+     
+     if ($user eq $u->{'user'}) {
+	 $msg .= "Hey,\n\nCheck out my journal that I'm keeping online:\n\n";
+	 $msg .= "  $url\n\n";
+	 $name = $u->{'name'};
+	 $name =~ s/\s.+//;
+	 $msg .= "- $name\n";
+     } else {
+	 $msg .= "Hey,\n\nCheck out my friend's journal online:\n\n";
+	 $msg .= "  $url\n\n";
+	 $name = $u->{'name'};
+	 $name =~ s/\s.+//;
+	 $msg .= "- $name\n";
+     }
+ }
+
+ my $subject = "Check it out...";
+ $body .= "<tr><td align=right nowrap><b>Subject:</b></td><td><input name=subject size=40 maxlength=60 value=\"" . &ehtml($subject) . "\"></td></tr>\n";
+
+ $body .= "<tr><td align=right nowrap valign=top><b>Body:</b></td><td><textarea name=body rows=15 cols=59 wrap=soft>" . &ehtml($msg) . "</textarea></td></tr>\n";
+ 
+ $body .= "<tr><td>&nbsp;</td><td><input type=submit value=\"Send email\"></td></tr>\n";
+ $body .= "</table>";
+
+
+ return "";
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)

@@ -1,0 +1,68 @@
+(=PAGE
+TITLE=>High Scores
+BODY<=
+
+The following people have helped other users in the support area:
+
+(=_CODE
+
+ require 'ljlib.pl';
+ &connect_db();
+ my $sth;
+ my %rank;
+ $sth = $dbh->prepare("SELECT statcat, statkey, statval FROM stats WHERE statcat IN ('supportrank', 'supportrank_prev')");
+ $sth->execute;
+ if ($dbh->err) { return $dbh->errstr; }
+ while (my ($cat, $userid, $rank) = $sth->fetchrow_array) {
+     if ($cat eq "supportrank") {
+	 $rank{$userid}->{'now'} = $rank;
+     } else {
+	 $rank{$userid}->{'last'} = $rank;
+     }
+ }
+
+ $sth = $dbh->prepare("SELECT u.userid, u.user, u.name, SUM(sp.points) AS 'points' FROM user u, supportpoints sp WHERE u.userid=sp.userid GROUP BY 1, 2, 3 ORDER BY 4 DESC");
+ $sth->execute;
+
+ my $ret;
+ $ret .= "<p><table>";
+ my $rank = 0;
+ my $lastpoints = 0;
+ my $buildup = 0;
+ my $total = 0;
+ while ($_ = $sth->fetchrow_hashref) 
+ {
+     $total++;
+     my $userid = $_->{'userid'};
+     if ($_->{'points'} != $lastpoints) {
+	 $lastpoints = $_->{'points'};
+	 $rank += (1 + $buildup);
+	 $buildup = 0;
+     } else {
+	 $buildup++;
+     }
+     my $change = "";
+     if ($rank{$userid}->{'now'} && $rank{$userid}->{'last'}) {
+	 $change = $rank{$userid}->{'last'} - $rank{$userid}->{'now'};  # from 5th to 4th is 5-4 = 1 (+1 for increase)
+	 if ($change == 0) {
+	     $change = "";
+	 } elsif ($change > 0) {
+	     $change = "<font color=#00dd00>(+$change)</font>";
+	 } else {
+	     $change = "<font color=#dd0000>($change)</font>";
+	 }
+     }
+     my $s = $_->{'points'} > 1 ? "s" : "";
+     
+     $ret .= "<tr><td align=right>$rank.</td><td>$change</td><td>(=LJUSER $_->{'user'} LJUSER=) - $_->{'name'}</td><td><b>$_->{'points'} point$s</b></td></tr>\n";
+ }
+ $ret .= "</table>";
+ $ret .= "<p>$total total supporting users.";
+ return $ret;
+
+_CODE=)
+(=HR=)
+Back to the <A HREF="./">support area</A>.
+
+<=BODY
+PAGE=)

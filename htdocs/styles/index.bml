@@ -1,0 +1,36 @@
+(=PAGE
+TITLE=>Custom Styles
+BODY<=
+
+(=H1 Making your journal purty... H1=)
+(=P This section of the site allows you to create, edit and delete
+customised LiveJournal styles. This allows you to control the
+look of your LiveJournal to a great extent, whether you want to make
+it look like your website, or just feel like being different. P=)
+(=P You can also create <em>embedded</em> styles which, rather than
+creating a full page, include only the Journal entries and leave
+you to <a href="/developer/embedding.bml">embed
+your journal in another site</a>. P=)
+(=P You can read more about the style system in the
+<a href="/developer/styles.bml">style
+documentation</a> in the
+<a href="/developer/">developer area</a>. P=)
+(=P Please note that only journals on
+<a href="/paidaccounts/">paid accounts</a>
+may have custom styles. Free Accounts have a selection of predefined
+LiveJournal styles which you can select from the
+<a href="/modify.bml">Modify Your Journal</a> page. P=)
+<ul>
+<li><b><a href="create.bml">Create a new style</a></b> - You may create
+a new style from scratch, or base your style apon an existing
+style.</li>
+<li><b><a href="edit.bml">Edit/Delete an existing style</a></b> - You
+may only edit styles "owned" by your account. In order to customise
+a style provided by LiveJournal, you must first create a new style
+based on that style using the above link.</li>
+<li><strong>Style Browser</strong> - Currently down for a revamp,
+the Style Browser will let you browse through public styles
+created by other users.</li>
+</ul>
+<=BODY
+PAGE=)

@@ -1,0 +1,329 @@
+(=PAGE
+TITLE=>Edit Style
+BODY<=
+
+(=_CODE
+
+ return &server_down_html() if ($LJ::SERVER_DOWN);
+
+ require 'propparse.pl';
+ my @vars;
+ load_objects_from_file("../htdocs/vars.dat", \@vars);
+
+ my @errors = ();
+ my $user = lc($FORM{'user'});
+ my $password = $FORM{'password'};
+ my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+ my $ide = $FORM{'ide'};
+ unless ($ide eq "v1" || $ide eq "v2" || $ide eq "delete") { $ide = "v2"; }
+
+ &connect_db;
+
+ my $quser = $dbh->quote($user);
+
+ if (length($user) > 15) { push @errors, "Username is too long, 15 character max"; }
+ unless ($user) { push @errors, "You must <A HREF=\"/styles/edit.bml\">enter a username</A>."; }
+ if ($user =~ /[^\w]/) { push @errors, "Username contains invalid characters."; }
+
+ $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+ $sth->execute;
+ if ($sth->rows == 0) { push @errors, "Unknown user."; }
+ $userdat = $sth->fetchrow_hashref;
+
+ if (! &valid_password($userdat->{'password'}, \%FORM)) { push @errors, "Invalid password."; }
+ 
+ if (@errors)
+ {
+     my $ret = "";
+     $ret .= "(=BADCONTENT=)\n<UL>\n";		
+     foreach (@errors)
+     {
+         $ret .= "<LI>$_\n";
+     }
+     $ret .= "</UL>\n";
+     return $ret;
+ }
+
+ my @style_opts = (
+		   { 'code' => "is_public",
+		     'title' => 'Public?',
+		     'des' => "Mark this style public if you want other people to be able to use it or copy it.", },
+		   { 'code' => "is_embedded", 
+		     'title' => 'Embedded?',
+		     'des' => "Is this style designed to be embedded in somebody's homepage?  Mark \"Yes\" if so, but mark \"No\" if it's a full page style." },
+		   { 'code' => "is_colorfree",
+		     'title' => 'Color Free?',
+		     'des' => "A style is color-free if it does not contain any hard-coded color tags, but only uses the generic color codes listed in the table below." }
+		   );
+
+ my @style_transforms = (
+			 { 'trans' => 'lc', des => "Lower case.", },
+			 { 'trans' => 'uc', des => "Upper case.", },
+			 { 'trans' => 'ue', des => "URL-Encode.  Turn spaces to +, and all weird characters to <TT>%hh</TT>, the hex representation.  This is useful for builing data files to be used in Flash-4 movies.", },
+			 { 'trans' => 'xe', des => "XML-Encode.  Makes value acceptable for use in an XML attribute or element.  Escapes ampersands, angle brackets, and both types of quotes.  Does <I>not</I> however, escape ]]&gt;, so don't use CDATA elements." },
+			 { 'trans' => 'color', des => "A weird transform that handles color codes.  See the color code table.", },
+			 { 'trans' => 'cons', des => "Access site constants.  Currently supported are 'siteroot', 'sitename', and 'img' (the image root).  Example use: %%cons:img%%/icon_protected.gif", },
+			 );
+ 
+
+ my $ret = "";
+ if ($ide eq "delete") { $FORM{'mode'} = "delete"; }
+ $FORM{'mode'} ||= "choosestyle";
+
+ if ($FORM{'mode'} eq "delete") {
+     $ret .= "(=H1 Are you sure? H1=)(=P Are you sure you want to delete this style?  If so, press the button below.  This will temporarily break your journal if you're using this style, until you select a different style to use. P=)";
+
+     my $qstyleid = $FORM{'styleid'} + 0;
+     $ret .= "<FORM METHOD=POST>";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=\"delete_confirm\">";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=styleid VALUE=\"$qstyleid\">";
+     $ret .= "<CENTER><INPUT TYPE=SUBMIT VALUE=\"Yes, delete it!\"></CENTER></FORM>\n";
+     return $ret;
+ }
+
+ if ($FORM{'mode'} eq "delete_confirm") {
+     my $qstyleid = $FORM{'styleid'} + 0;
+     $sth = $dbh->prepare("DELETE FROM style WHERE user=$quser AND styleid=$qstyleid");
+     $sth->execute;
+
+     if ($sth->rows) {
+	 $ret .= "(=H1 Deleted H1=)(=P The style has been deleted. P=)";
+     } else {
+	 $ret .= "(=H1 Error H1=)(=P The style was attempted to be deleted, but it doesn't seem to exist anymore.  Perhaps you clicked the proceed button twice. P=)";
+     }
+
+     return $ret;
+ }
+
+ if ($FORM{'mode'} eq "choosestyle")
+ {
+     $ret .= "(=H1 Edit which style? H1=)(=P You own the following styles.  Choose which one you want to modify.  P=)\n";
+     $ret .= "<FORM METHOD=POST><INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\"><INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\"><INPUT TYPE=HIDDEN NAME=mode VALUE=\"editstyle\">\n";
+     $ret .= "(=STANDOUT <CENTER>Pick a style:<BR><SELECT SIZE=10 NAME=styleid>";
+     $sth = $dbh->prepare("SELECT styleid, type, styledes FROM style WHERE user=$quser ORDER BY type, styledes");
+     $sth->execute;
+     while ($sty = $sth->fetchrow_hashref)
+     {
+         $ret .= "<OPTION VALUE=$sty->{'styleid'}>" . &BMLUtil::escapeall($sty->{'type'});
+         $ret .= "($sty->{'styleid'}): " . &BMLUtil::escapeall($sty->{'styledes'}) . "\n";
+     }
+     $ret .= "</SELECT><BR>";
+     $ret .= "Action: <SELECT NAME=ide><OPTION VALUE=v2>Edit in Easy Mode<OPTION VALUE=v1>Edit in Raw Mode (Old)<OPTION VALUE=delete>Delete this style!</SELECT><FONT SIZE=1><BR><BR></FONT>";
+     $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Proceed\"></CENTER> STANDOUT=)\n";
+     return $ret;
+ }
+ 
+ if ($FORM{'mode'} eq "editstyle")
+ {
+     my $qstyleid = $FORM{'styleid'} + 0;
+     unless ($qstyleid) { return "(=H1 Error H1=)(=P You did not select a style to edit. P=)"; }
+     
+     $ret .= "(=H1 Edit Style H1=)(=P Make the changes and press \"Save\" when done. P=)\n";
+     $ret .= "<FORM METHOD=POST>";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=\"savechanges\">";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=styleid VALUE=\"$qstyleid\">";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=ide VALUE=\"$ide\">";
+     
+     $sth = $dbh->prepare("SELECT * FROM style WHERE user=$quser AND styleid=$qstyleid");
+     $sth->execute;
+     $sty = $sth->fetchrow_hashref;
+     unless ($sty) { return "(=H1 Error H1=)(=P Style not found. P=)"; }
+
+     $ret .= "<TABLE BORDER=1 CELLSPACING=1 CELLPADDING=2>\n";
+     $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style View Type:</B></TD><TD><I>$LJ::viewinfo{$sty->{'type'}}->{'des'}</I> -- <B>$sty->{'type'}</B></TD></TR>\n";
+     $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style ID Number:</B></TD><TD><B>$sty->{'styleid'}</B>";
+     if ($sty->{'type'} eq "lastn"  || $sty->{'type'} eq "calendar" || 
+         $sty->{'type'} eq "search" || $sty->{'type'} eq "friends")
+     {
+	 my $extravars = "";
+	 if ($sty->{'opt_cache'} eq "Y") { $extravars .= "&nocache=1"; }
+         $ret .= " <A TARGET=preview HREF=\"/customview.cgi?username=$user&styleid=$sty->{'styleid'}$extravars\">[Preview Current Style]</A> (must save below to see your changes, keep this window open and reload it whenever you save)";
+     }
+     $ret .= "</TD></TR>\n";
+     
+     $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style Description:</B></TD><TD><INPUT NAME=styledes SIZE=50 MAXLENGTH=50 VALUE=\"" . &BMLUtil::escapeall($sty->{'styledes'}) . "\"></TD></TR>";
+
+     $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style Options:</B></TD><TD><TABLE>\n";
+     foreach my $opt (@style_opts)
+     {
+	 my $checked = $sty->{$opt->{'code'}} eq "Y" ? "CHECKED" : "";
+	 $ret .= "<TR VALIGN=TOP><TD><INPUT TYPE=CHECKBOX NAME=$opt->{'code'} VALUE=1 $checked></TD>";
+	 $ret .= "<TD><B>$opt->{'title'}</B><BR>$opt->{'des'}</TD></TR>\n";	     
+     }
+     $ret .= "</TABLE></TD></TR>";
+
+     $ret .= "</TABLE>\n";
+
+     $ret .= "(=H1 Color Codes H1=)(=P When designing a style, it's always best to avoid hard-coding colors in if possible.  That way, if you get bored of your colors you can change them at one place (the modify journal page) and it'll affect all your styles where you use that color code.  Obviously, if you need to use special images in your style, you may have to hard-code certain colors, but try to use them when you can.  It's your call.  If you're contributing styles to LiveJournal for us to make public, we prefer color-neutral styles.  <B>The following color codes can be used in any variable below that contains HTML:</B> P=)";
+
+     $ret .= "<CENTER><P><TABLE CELLPADDING=2 BORDER=1 CELLSPACING=1><TR BGCOLOR=#D0D0D0><TD>Code</TD><TD>Description</TD></TR>\n";
+     $sth = $dbh->prepare("SELECT coltype, des FROM themecoltypes ORDER BY sortorder");
+     $sth->execute;
+     while ($_ = $sth->fetchrow_hashref) 
+     {
+	 $ret .= "<TR><TD><TT>%%color:<B>$_->{'coltype'}</B>%%</TT></TD><TD>$_->{'des'}</TD></TR>\n";
+     }
+     $ret .= "</TABLE></CENTER>\n";
+
+     $ret .= "(=H1 Transforms H1=)(=P What if you want to use a property but don't like its formatting?  Any property can be transformed 0 or more times by transform rules.  Say you want to use <TT>%%monlong%%</TT> (March, April, May, etc...) but you don't like that the default has those upper case initial letters.  You can apply the <B><TT>lc</TT></B> (lowercase) transform to it:  <B><TT>%%lc:monlong%%</TT></B>.  Transform are applied in order from the right to the left, so if you went <TT>%%a:b:c:d:property%%</TT>, <I>d</I> would be applied first.  Here are a list of the supported transforms: P=)";
+     
+     $ret .= "<CENTER><P><TABLE WIDTH=75% CELLPADDING=2 BORDER=1 CELLSPACING=1><TR BGCOLOR=#D0D0D0><TD>Transform</TD><TD>Description</TD></TR>\n";
+     foreach (@style_transforms) 
+     {
+	 $ret .= "<TR><TD><TT>$_->{'trans'}</TT></TD><TD>$_->{'des'}</TD></TR>\n";
+     }
+     $ret .= "</TABLE></CENTER>\n";
+
+
+     ### customizable vars section
+     foreach my $v (sort { $a->{'name'} cmp $b->{'name'} } @vars)
+     {
+	 next unless ($v->{'props'}->{'scope'} =~ /\b$sty->{'type'}\b/);
+	 $var{$v->{'name'}} = $v;
+     }
+     
+     if ($ide eq "v2") 
+     {
+	 my %styvar = ();
+	 &parse_vars(\$sty->{'formatdata'}, \%styvar);
+	 
+	 $ret .= "(=H1 Customizable Variables H1=)";
+	 my %mark = ();
+	 &make_var_edit_fields(\%var, \%mark, uc("$sty->{'type'}_PAGE"), keys %var);
+	 
+	 sub make_var_edit_fields
+	 {
+	     my ($vars, $marked, @fields) = @_;
+	     foreach my $f (@fields) {
+		 next if ($marked->{$f}++);
+		 my $prop = $vars->{$f}->{'props'};
+		 &make_var_edit_fields($vars, $marked, split(/\s*,\s*/, $prop->{'deps'}));
+		 my $des = $prop->{'des'};
+		 $des =~ s/\[var\[(\S+?)\]\]/<A HREF="#$1">$1<\/A>/g;
+		 $des =~ s/\[view\[(\S+?)\]\]/$1/g;
+		 $des =~ s/%%\S+?%%/<TT>$&<\/TT>/g;
+		 
+		 $ret .= "<P><A NAME=$f><FONT SIZE=+1><TT><B>$f</B></TT></FONT><BR>$des<P>\n";
+		 
+		 if (defined $prop->{'props'})
+		 {
+		     $ret .= "<TABLE CELLSPACING=1 BORDER=1 CELLPADDING=2>\n";
+		     foreach my $p (@{$prop->{'props'}})
+		     {
+			 $p->{'props'}->{'des'} =~ s/\[var\[(\S+?)\]\]/<A HREF="#$1">$1<\/A>/g;
+			 $p->{'props'}->{'des'} =~ s/\[view\[(\S+?)\]\]/$1/g;
+			 $p->{'props'}->{'des'} =~ s/%%\S+?%%/<TT>$&<\/TT>/g;
+			 $ret .= "<TR VALIGN=TOP><TD BGCOLOR=#D0D0D0 ALIGN=RIGHT><B>$p->{'name'}</B></TD>\n";
+			 $ret .= "<TD>$p->{'props'}->{'des'} ";
+			 if ($p->{'props'}->{'min'} > 0)
+			 {
+			     $ret .= "<FONT COLOR=#FF0000>[required]</FONT>";
+			 }
+			 $ret .= "</TD></TR>\n";
+		     }
+		     $ret .= "</TABLE><P>\n";
+		 }
+		 
+		 my $editrows = $prop->{'editrows'} || 5;
+		 my $editcols = $prop->{'editcols'} || 70;
+		 my $estyval = &BMLUtil::escapeall($styvar{$f});
+
+		 if ($vars->{$f}->{'props'}->{'override'} eq "only") {
+		     $ret .= "<SPAN STYLE=\"background-color: #FFFF00\"><B>Override only.</B></SPAN>  Only end-users may override this.  You cannot define it in a style.";
+		 } else {
+		     if ($editrows == 1) {
+			 $ret .= "<INPUT TYPE=TEXT NAME=\"var:$f\" SIZE=$editcols VALUE=\"$estyval\">\n";
+		     } else {
+			 $ret .= "<TEXTAREA ROWS=$editrows COLS=$editcols WRAP=SOFT NAME=\"var:$f\">$estyval</TEXTAREA>\n";
+		     }
+		 }
+		 $ret .= "(=HR=)\n";
+	     }
+	 }
+}  # end sub
+
+if ($ide eq "v1") {
+    
+    $ret .= "<P><B>Style Variables:</B> <A TARGET=_blank HREF=\"/developer/views.bml#$sty->{'type'}\">(reference information)</A><BR>\n";
+$ret .= "<TEXTAREA ROWS=30 COLS=80 WRAP=OFF NAME=formatdata>";
+$ret .= &BMLUtil::escapeall($sty->{'formatdata'});
+$ret .= "</TEXTAREA>\n";
+}
+
+    $ret .= "<CENTER><P><INPUT TYPE=SUBMIT VALUE=\"Save style\"></CENTER>\n";
+
+
+if ($ide eq "v2") {
+    $ret .= "(=H1 Convenience Links H1=)(=P You can use these links to scroll the page up to where the variable is declared... P=) <UL>";
+     foreach my $v (sort { $a->{'name'} cmp $b->{'name'} } @vars)
+     {
+	 next unless ($v->{'props'}->{'scope'} =~ /\b$sty->{'type'}\b/);
+	 $ret .= "<LI><A HREF=\"#$v->{'name'}\">$v->{'name'}</A>";
+     }
+$ret .= "</UL>";
+}
+
+return $ret;
+}
+
+if ($FORM{'mode'} eq "savechanges")
+{
+    my $formatdata;
+    if ($ide eq "v1") 
+    {
+	$FORM{'formatdata'} =~ s/\r//;   # carriage returns shouldn't be necessary
+	$formatdata = $FORM{'formatdata'};
+    }
+    elsif ($ide eq "v2") 
+    {
+	$formatdata = "";
+	foreach (grep { /^var:.+/ } keys %FORM) 
+	{
+	    /^var:(.+)$/;
+	    my ($key, $var) = ($&, $1);
+	    $FORM{$key} =~ s/\r//;   # carriage returns shouldn't be necessary
+	    if ($FORM{$key} =~ /\n/) {
+		$formatdata .= "$var<=\n$FORM{$key}\n<=$var\n\n";
+	    } else {
+		$formatdata .= "$var=>$FORM{$key}\n\n";
+	    }
+	}
+    }
+    
+    my $qformatdata = $dbh->quote($formatdata);
+    my $qstyleid = $FORM{'styleid'} + 0;
+    my $qstyledes = $dbh->quote($FORM{'styledes'});
+
+    my $opts = "";
+    foreach (@style_opts) {
+	$opts .= ", $_->{'code'}=";
+	if ($FORM{$_->{'code'}}) { $opts .= "'Y'"; } 
+	else { $opts .= "'N'"; }
+    }
+    
+    $sth = $dbh->prepare("UPDATE style SET formatdata=$qformatdata, styledes=$qstyledes, lastupdate=NOW() $opts WHERE styleid=$qstyleid");
+    $sth->execute;
+    if ($dbh->err || $sth->rows == 0)
+    {
+	return "(=H1 Error H1=)(=P There was some error updating this style. P=)";
+    }
+
+     # get this style's view type
+     $sth = $dbh->prepare("SELECT type FROM style WHERE styleid=$qstyleid");
+     $sth->execute;
+     my $viewtype = $sth->fetchrow_arrayref->[0];
+
+     # all good
+     return "(=H1 Success H1=)(=P Style has been updated. P=)";
+ }
+
+ return "<B>Error:</B> Unknown mode ($FORM{'mode'}).";
+
+_CODE=)
+
+<=BODY
+PAGE=)

@@ -1,0 +1,33 @@
+(=_INFO
+NOCACHE=>1
+_INFO=)(=PAGE
+TITLE=>Notification Settings
+
+BODY<=
+
+(=H1 Change Notification Settings H1=)
+(=P
+Log in here and select which support topics you'd like to be notified about.
+P=)
+
+<FORM ACTION="changenotify_do.bml" METHOD="POST">
+
+(=STANDOUT
+<TABLE>
+(=_CODE
+ require 'ljlib.pl'; 
+ return &auth_fields();
+ _CODE=)
+<TR><TD COLSPAN=2 ALIGN=CENTER>
+<INPUT TYPE="SUBMIT" VALUE="Proceed...">
+</TD></TR>
+</TABLE>
+STANDOUT=)
+
+(=H1 Forget something? H1=)
+(=P
+If you forgot your username or password, <A HREF="/lostinfo.bml">recover it here!</A>.
+P=)
+
+<=BODY
+PAGE=)

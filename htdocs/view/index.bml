@@ -1,0 +1,144 @@
+(=_CODE
+
+ $title = "";
+ $body = "";
+
+ my $view = $FORM{'type'};
+ my $user = $FORM{'user'};
+
+ if ($view ne "month") {
+     $title = "Error";
+     $body .= "Unknown view.";
+     return "";
+ }
+ unless ($user) {
+     $title = "Error";
+     $body .= "No user given.";
+     return "";
+ }
+ 
+ &connect_db();
+ my $u = LJ::load_user($dbh, $user);
+ unless ($u) {
+     $title = "Error";
+     $body .= "User doesn't exist.";
+     return "";
+ }
+
+ my $remote = &get_remote();
+ my $gmask = 0;
+ my $is_owner = 0;
+
+ if ($remote && $remote->{'userid'} == $u->{'userid'}) {
+     $is_owner = 1;
+ }
+
+ if ($remote && ! $is_owner) {
+     $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
+     $sth->execute;
+     ($gmask) = $sth->fetchrow_array;
+ }
+ 
+ my $year = $FORM{'y'}+0;
+ my $month = $FORM{'m'}+0;
+ unless ($year =~ /^\d\d\d\d$/ && ($month >= 1 && $month <= 12)) {
+     my @now = localtime();
+     $year = $now[5] + 1900;
+     $month = $now[4] + 1;
+ }
+
+ my $monlang = LJ::Lang::month_long("EN", $month);
+ $title = $monlang;
+ $title .= ", $year - $u->{'user'}";
+
+ my $is_person = $u->{'journaltype'} eq "P";
+ if ($is_person) {
+     $body .= "(=H1 Month View H1=)(=P Here are the subjects of all posts by user (=LJUSER $u->{'user'} LJUSER=) in $monlang, $year. P=)";
+ } else {
+     $body .= "(=H1 Month View H1=)(=P Here are the subjects of all posts in the (=LJUSER $u->{'user'} LJUSER=) journal in $monlang, $year. P=)";
+ }
+
+ ### make standout box
+ {
+     my @next = ($year, $month+1);
+     if ($next[1] > 12) { @next = ($year+1, 1); }
+     my @prev = ($year, $month-1);
+     if ($prev[1] < 1) { @prev = ($year-1, 12); }
+     
+     my $next = "<a href=\"" . &self_link({ 'y' => $next[0], 'm' => $next[1] }) . "\"><img src=\"$LJ::IMGPREFIX/btn_next.gif\" width=22 height=20 border=0></a>";
+     my $prev = "<a href=\"" . &self_link({ 'y' => $prev[0], 'm' => $prev[1] }) . "\"><img src=\"$LJ::IMGPREFIX/btn_prev.gif\" width=22 height=20 border=0></a>";
+
+     $body .= "(=STANDOUT ";
+     $body .= "<form method=get><input type=hidden name=type value=month><input type=hidden name=user value=$u->{'user'}>";
+     $body .= "<table><tr valign=middle>";
+     $body .= "<td><b>$prev</b></td>";
+     $body .= "<td><select name=m>";
+     for ($i=1;$i<=12;$i++) {
+	 my $sel = ($i == $month) ? " SELECTED" : "";
+	 $body .= "<option value=$i$sel>" . LJ::Lang::month_long("EN", $i);
+     }
+     $body .= "</select> <input type=text name=y maxlength=4 size=4 value=$year> <input type=submit value=\"View\"></td>";
+     $body .= "<td><b>$next</b></td>";
+     $body .= "</tr></table>";
+     $body .= " STANDOUT=)</form>\n";
+ }
+
+ 
+$body .= "<dl>\n";
+ my $lday = 0;
+
+ if ($is_person) {
+     $sth = $dbh->prepare("SELECT l.itemid, l.day, ls.subject, l.eventtime, NULL, l.replycount, l.security, l.allowmask FROM log l, logsubject ls WHERE l.ownerid=$u->{'userid'} AND l.year=$year AND l.month=$month AND l.itemid=ls.itemid ORDER BY l.eventtime");
+ } else {
+     $sth = $dbh->prepare("SELECT l.itemid, l.day, ls.subject, l.eventtime, u.user, l.replycount, l.security, l.allowmask FROM log l, logsubject ls, user u WHERE l.ownerid=$u->{'userid'} AND l.year=$year AND l.month=$month AND l.itemid=ls.itemid AND l.posterid=u.userid ORDER BY l.eventtime");
+ }
+
+
+
+ $sth->execute;
+ while (my ($itemid, $day, $subject, $eventtime, $poster, $replycount, $security, $allowmask) = $sth->fetchrow_array)
+ {
+     if (! $is_owner) {
+	 if ($security eq "private") { next; }
+	 if ($security eq "usemask" && ! (int($gmask) & int($allowmask))) { next; }
+     }
+
+     if ($day != $lday) {
+	 if ($lday) { $body .= "</table></dd>"; }
+	 $lday = $day;
+	 my $ord = LJ::Lang::day_ord("EN", $day);
+	 $body .= "<dt><b>$day$ord</b></dt><dd><table cellpadding=2>";
+     }
+     unless ($subject ne "") { $subject = "(no subject)"; }
+     my $h = substr($eventtime, 11, 2);
+     my $m = substr($eventtime, 14, 2);
+     my ($rep, $sec);
+     if ($security eq "private") {
+	 $sec = " (=SECURITYPRIVATE=)";
+     } elsif ($security eq "usemask") {
+	 $sec = " (=SECURITYPROTECTED=)";
+     }
+     if ($replycount) {
+	 if ($replycount == 1) { $rep .= " - $replycount reply"; }
+	 else { $rep .= " - $replycount replies"; }
+     }
+     $body .= "<tr><td align=right><i>" . LJ::Lang::time_format(12, $h, $m, "short") . "</i></td>";
+     if (! $is_person) {
+	 $body .= "<td>(=LJUSER $poster LJUSER=)</td>";
+     }
+
+     &LJ::CleanHTML::clean_subject_all(\$subject);
+
+     $body .= "<td><a href=\"/talkread.bml?itemid=$itemid\">$subject</a>$sec$rep</td></tr>\n";
+ }
+ if ($lday) { $body .= "</table></dd>\n"; }
+ $body .= "</dl>";
+
+ if (0) { &BML::finish(); }
+
+ return "";
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)

@@ -1,0 +1,46 @@
+(=PAGE
+TITLE=>LiveJournal Support
+BODY<=
+
+(=H1 Welcome! H1=)
+(=P
+Welcome to the LiveJournal community support center.  Listed below are some of the most frequent questions people ask.  If you don't find what you're looking for, you can submit a support request below.
+P=)
+
+(=_INCLUDE
+BML=>1
+CODE=>0
+FILE=>support-currentproblems
+_INCLUDE=)
+
+(=HR=)
+
+(=_INCLUDE
+BML=>0
+CODE=>0
+FILE=>support-links
+_INCLUDE=)
+
+(=H1 Support Areas H1=)(=P Here are the three major things you can do here in the support area. P=)
+
+<UL>
+<LI><FONT SIZE=+1><B><A HREF="faq.bml">Read the Frequently Asked Questions</A></B></FONT><BR>
+Try and solve the problem first by yourself before asking other people.  You'll probably get the answer faster, too!
+
+<P><LI><FONT SIZE=+1><B><A HREF="submit.bml">Ask a question</A></B></FONT><BR>
+Is your question not in the FAQ?  Click "Ask a question" and you can submit a new support request and somebody in the LiveJournal community will read it and get back to you with an answer.  If they don't help you, your support request stays open until somebody does help and you confirm that your problem is solved.
+
+<p><LI><FONT SIZE=+1><B><A HREF="help.bml">Help somebody out</A></B></FONT><BR>
+Got some extra time on your hands?  Help out a LiveJournal user that has an open support request.  Users that help other users out will get "support points" that will show up on your userinfo page.  There are multiple reasons for helping other users out:
+<p><UL>
+<LI>Just to be nice
+<LI>To get points just for fun and competition
+</UL>
+<P>If you're curious, check out the list of <A HREF="highscores.bml">high scores</A>, showing who helps the most.
+<P>If you want to be notified when new support requests come in, <A HREF="changenotify.bml">set your notification settings</A>.
+
+</UL>
+
+
+<=BODY
+PAGE=)

@@ -1,0 +1,311 @@
+(=_CODE
+
+ use LJ::SpellCheck;
+
+ my $SELF = "/update.bml";
+ 
+ $title = "Update Journal";
+ $body = "";
+ $bodyopts = "";
+
+ my $remote = undef;
+
+ if ($LJ::SERVER_DOWN) {
+     $body = &server_down_html();
+     return "";
+ }
+
+ my $mode = $FORM{'mode'} || "";  # full will be default, once portal is in.
+
+ my $spellcheck_html;
+ if ($LJ::SPELLER && $FORM{'do_spellcheck'}) {
+     my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
+				  'color' => '(=HOTCOLOR=)', };
+     $spellcheck_html = $s->check_html(\$FORM{'event'});
+ }
+ if ($mode eq "update" && $FORM{'do_spellcheck'} && $spellcheck_html) { $mode = $FORM{'oldmode'}; }
+
+ if ($mode eq "update")
+ {
+     &connect_db();
+     my %res;
+     my $flags = {};
+
+     if ($FORM{'usertype'} eq "remote") {
+	 unless ($remote) { $remote = &get_remote(); }
+	 if ($remote) {
+	     $FORM{'user'} = $remote->{'user'};
+	     $flags->{'nopassword'} = 1;
+	 }	 
+     }
+
+     # first, login
+     $FORM{'mode'} = "login";
+     if ($FORM{'webversion'} eq "full") {
+	 $FORM{'clientversion'} = "Web/1.1";
+     } else {
+	 $FORM{'clientversion'} = "Web/1.0";
+     }
+     if ($FORM{'did_spellcheck'} || $FORM{'do_spellcheck'}) {
+	 $FORM{'clientversion'} .= "s";
+     }
+     &LJ::do_request($dbh, \%FORM, \%res, $flags);
+     
+     $body .= "(=H1 Logging in to server... H1=)\n";
+     if ($res{'success'} eq "OK")
+     {
+	 my $message = "";
+	 if ($res{'message'}) {
+	     $message = "Also, the server has a message for you: <UL><LI><B>(=_EH $res{'message'} _EH=)</B></UL>";
+	 }
+	 $body .= "(=P Login successful.  Hello, (=_EH $res{'name'} _EH=)! $message P=)";
+     }
+     else
+     {
+	 $body .= "(=P Error logging on: <UL><LI><B>(=_EH $res{'errmsg'} _EH=)</B></UL> P=)";
+	 return "";
+     }
+
+     ## see if an "other" mood they typed in has an equivalent moodid
+     if ($FORM{'prop_current_mood'} ne "") 
+     {
+	 delete $FORM{'prop_current_moodid'};
+	 my $qmood = $dbh->quote(lc($FORM{'prop_current_mood'}));
+	 my $sth = $dbh->prepare("SELECT moodid FROM moods WHERE mood=$qmood");
+	 $sth->execute;
+	 my ($moodid) = $sth->fetchrow_array;
+	 if ($moodid) {
+	     delete $FORM{'prop_current_mood'};
+	     $FORM{'prop_current_moodid'} = $moodid;
+	 }
+     }
+
+     my $sec = "public";
+     my $amask = 0;
+     if ($FORM{'security'} eq "private") { $sec = "private"; }
+     if ($FORM{'security'} eq "friends") { $sec = "usemask"; $amask = 1; }
+     $FORM{'security'} = $sec;
+     $FORM{'allowmask'} = $amask;
+     
+     # next, postevent
+     $FORM{'mode'} = "postevent";
+     delete $FORM{'clientversion'};
+     &LJ::do_request($dbh, \%FORM, \%res, $flags);
+     
+     $body .= "(=H1 Updating journal... H1=)\n";
+     if ($res{'success'} eq "OK")
+     {
+	 my $uri = "/users/$FORM{'user'}/";
+	 if ($FORM{'usejournal'}) {
+	     my $quj = $dbh->quote($FORM{'usejournal'});
+	     my $sth = $dbh->prepare("SELECT journaltype FROM user WHERE user=$quj");
+	     $sth->execute;
+	     my ($type) = $sth->fetchrow_array;
+	     if ($type eq "C") {
+		 $uri = "/community/$FORM{'usejournal'}/";
+	     } else {
+		 $uri = "/users/$FORM{'usejournal'}/";
+	     }	 
+	 }
+	 $body .= "(=P Update successful.  You may view your updated journal <A HREF=\"$uri\">here</A>. P=)";
+     }
+     else
+     {
+	 $body .= "(=P Error updating journal: <UL><LI><B>(=_EH $res{'errmsg'} _EH=)</B></UL> P=)";
+	 return "";
+     }
+     
+     return "";     
+ }
+
+ if ($mode eq "" || $mode eq "full") 
+ {
+     $bodyopts = "onLoad=\"settime();\"";
+     
+     $body .= "(=H1 Update your Journal... H1=)(=P If you don't want to <A HREF=\"/download/\">download a client</A> for your computer, or if one doesn't exist for your computer, you may use this page to update your LiveJournal.  This is also useful if you're on vacation or away from your primary computer. P=)(=HR=)";
+     
+     $body .= "<FORM METHOD=POST ACTION=\"$SELF\" NAME=updateForm>";
+     $body .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=update>";
+     if ($FORM{'do_spellcheck'}) {
+	 $body .= "<INPUT TYPE=HIDDEN NAME=did_spellcheck VALUE=1>";
+     }
+     $body .= "<INPUT TYPE=HIDDEN NAME=oldmode VALUE=$mode>";
+     $body .= "<TABLE><TR><TD><TABLE>";
+     {
+	 my $opts = {};
+	 if ($remote && $FORM{'user'} ne $remote->{'user'}) {
+	     $opts = { 'user' => $FORM{'user'}, 'password' => $FORM{'password'}};
+	 }
+	 $body .= &auth_fields($opts);
+     }
+     $body .= "</TABLE></TD><TD>";
+
+     $body .= "<TABLE CELLSPACING=0 CELLPADDING=0>";
+  
+     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+     $year+=1900;
+     $mon=sprintf("%02d", $mon+1);
+     $mday=sprintf("%02d", $mday);
+     $min=sprintf("%02d", $min);
+
+     if ($FORM{'do_spellcheck'}) {
+	 $bodyopts = "";
+	 $mon = $FORM{'mon'};
+	 $mday = $FORM{'day'};
+	 $year = $FORM{'year'};
+	 $hour = $FORM{'hour'};
+	 $min = $FORM{'min'};
+     }
+
+     $body .= "<TR VALIGN=TOP><TD ALIGN=RIGHT ROWSPAN=2><B>Date:</B>&nbsp;</TD><TD NOWRAP><INPUT NAME=year SIZE=5 MAXLENGTH=4 VALUE=$year>-";
+     $body .= "<INPUT NAME=mon SIZE=3 MAXLENGTH=2 VALUE=$mon>-";
+     $body .= "<INPUT NAME=day SIZE=3 MAXLENGTH=2 VALUE=$mday></TD></TR>\n";
+     $body .= "<TR><TD><I>(yyyy-mm-dd)</I></TD></TR>\n";
+     
+     $body .= "<TR VALIGN=TOP><TD ALIGN=RIGHT ROWSPAN=2><B>Local time:</B>&nbsp;</TD><TD>";
+     $body .= "<INPUT NAME=hour SIZE=3 MAXLENGTH=2 VALUE=$hour>:";
+     $body .= "<INPUT NAME=min SIZE=3 MAXLENGTH=2 VALUE=$min></TD></TR>\n";
+     $body .= "<TR><TD><I>(24 hour time)</I></TD></TR>\n";
+
+     $body .= "</TABLE></TD></TR></TABLE>\n";
+     $body .= "<noscript><p style=\"font-size: 0.85em;\"><b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.</p></noscript>";
+
+     $body .= "<UL><TABLE><TR><TD><B>Subject:</B> <I>(optional, for use on longer entries)</I><BR>";
+     $body .= "<INPUT NAME=\"subject\" SIZE=50 MAXLENGTH=100 VALUE=\"" . &ehtml($FORM{'subject'}) . "\"><P>";
+
+     if ($spellcheck_html) {
+	$body .= "<B>Your spell-checked post:</B><br>";
+	 $body .= $spellcheck_html;
+	 $body .= "<P>";
+     }
+
+     $body .= "<B>Event:</B><BR>";
+     $body .= "<TEXTAREA NAME=\"event\" COLS=50 ROWS=10 WRAP=VIRTUAL>";
+     $body .= &ehtml($FORM{'event'});
+     $body .= "</TEXTAREA>";
+     $body .= "<BR>(=DE (HTML okay; by default, newlines will be auto-formatted to <TT>&lt;BR&gt;</TT>) DE=)";
+     if ($LJ::SPELLER) {
+	 $body .= "<BR><input type=checkbox name=do_spellcheck value=1 id=\"spellcheck\"> <label for=\"spellcheck\">Spell check entry before posting</label>";
+     }
+     $body .= "</TD></TR><TR><TD ALIGN=CENTER><INPUT TYPE=SUBMIT VALUE=\"Update Journal\"></TD></TR>";
+
+     if ($mode eq "full") 
+     {
+	 &connect_db();
+	 $remote = &get_remote();
+	 my %res;
+
+	 if (! $FORM{'altlogin'} && $remote)
+	 {
+	     &LJ::do_request($dbh, { "mode" => "login",
+				     "user" => $remote->{'user'},
+				     "getpickws" => 1,
+				 }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
+	 }
+
+	 $body .= "<TR><TD NOWRAP><INPUT TYPE=hidden NAME=webversion VALUE=full>(=H2 Optional Settings H2=)";
+     
+	 if ($res{'access_count'}) {
+	     $body .= "<P><B>Journal to post in: </B> ";
+	     my @access;
+	     for (my $i=1; $i<=$res{'access_count'}; $i++) {
+		 push @access, $res{"access_$i"};
+	     }
+	     $body .= &html_select({ 'name' => 'usejournal', 'selected' => $FORM{'usejournal'}, },
+				   "", "($remote->{'user'}) -- default", map { $_, $_ } @access);
+	 }
+
+	 $body .= "<P><B>Security Level:</B> ";
+	 $body .= &html_select({ 'name' => 'security', 'selected' => $FORM{'security'}, },
+			       "public", "Public",
+			       "private", "Private",
+			       "friends", "Friends");
+	 $body .= " (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=24 HELP=)";
+	 my $checked;
+	 $checked = $FORM{'prop_opt_preformatted'} ? "CHECKED" : "";
+	 $body .= "<P> <B>Don't auto-format:</B><INPUT TYPE=CHECKBOX NAME=\"prop_opt_preformatted\" VALUE=1 $checked> (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=26 HELP=) &nbsp; ";
+	 $checked = $FORM{'prop_opt_nocomments'} ? "CHECKED" : "";
+	 $body .= "<B>Disallow Comments:</B><INPUT TYPE=CHECKBOX NAME=\"prop_opt_nocomments\" VALUE=1 $checked>";
+
+	 $checked = $FORM{'prop_opt_backdated'} ? "CHECKED" : "";
+	 $body .= "<P><b>Backdate Entry:</b><INPUT TYPE=CHECKBOX NAME=\"prop_opt_backdated\" VALUE=1 $checked> (will only show on calendar)";
+	 
+	 if ($res{'pickw_count'}) {
+	     $body .= "<P><B>Picture to use:</B> ";
+	     my @pics;
+	     for (my $i=1; $i<=$res{'pickw_count'}; $i++) {
+		 push @pics, $res{"pickw_$i"};
+	     }
+	     @pics = sort { lc($a) cmp lc($b) } @pics;
+	     $body .= &html_select({'name' => 'prop_picture_keyword', 
+				    'selected' => $FORM{'prop_picture_keyword'}, },
+				   ("", "(default)", map { ($_, $_) } @pics));
+	     $body .= " (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=46 HELP=)";
+	 } else {
+	     $body .= "<P><B>$res{'errmsg'}</B>";
+	 }
+	 
+
+	 $body .= "<P><B>Current <A HREF=\"/moodlist.bml\">Mood</A>:</B>";
+
+	 &load_moods();
+	 my @sel;
+	 foreach my $moodid (sort { $LJ::CACHE_MOODS{$a}->{'name'} cmp 
+			     $LJ::CACHE_MOODS{$b}->{'name'} } keys %LJ::CACHE_MOODS)
+	 {
+	     push @sel, $moodid, $LJ::CACHE_MOODS{$moodid}->{'name'};
+	 }
+
+	 $body .= &html_select({'name' => 'prop_current_moodid',
+				'selected' => $FORM{'prop_current_moodid'}, },
+			       ("", "None, or other:", @sel));
+
+	 $body .= "Other: <INPUT NAME=\"prop_current_mood\" SIZE=15 MAXLENGTH=30 VALUE=\"" . &ehtml($FORM{'prop_current_mood'}) . "\">";
+	 $body .= "<P><B>Current Music:</B> <INPUT NAME=\"prop_current_music\" SIZE=40 MAXLENGTH=60 VALUE=\"" . &ehtml($FORM{'prop_current_music'}) . "\">";
+	 $body  .= "</TD></TR><TR><TD ALIGN=CENTER><INPUT TYPE=SUBMIT VALUE=\"Update Journal\">";
+	 
+     }
+     else 
+     {
+	 $body .= "<TR><TD>&nbsp;<P>You're looking at the simple page.  For more options, <A HREF=\"$SELF?mode=full\">click here</A>.</TD></TR>\n";
+     }
+     
+     $body .= "</TD></TR></TABLE></UL></FORM>";
+
+     $body .= <<'JAVASCRIPT_STUFF';
+<SCRIPT LANGUAGE="JavaScript"><!--
+	// for those of you reading the source.... the server will
+	// automatically fill in the form with the time values for
+	// the west coast, but what this does is if the client can
+	// use JavaScript (nearly 99% of the time nowadays), we'll
+	// prefill the time in from their computer's clock
+function settime() {
+	function twodigit (n) {
+		if (n < 10) { return "0" + n; }
+		else { return n; }
+	}
+
+	now = new Date();
+	f = document.updateForm;
+	// javascript's getYear method is really fucked up:
+	f.year.value = now.getYear() < 1900 ? now.getYear() + 1900 : now.getYear();
+	f.mon.value = twodigit(now.getMonth()+1);
+	f.day.value = twodigit(now.getDate());
+	f.hour.value = twodigit(now.getHours());
+	f.min.value = twodigit(now.getMinutes());
+}
+
+// --></SCRIPT>
+JAVASCRIPT_STUFF
+
+ unless ($remote) {
+     $body .= "(=H1 Forget something? H1=)(=P If you forgot your username or password, <A HREF=\"lostinfo.bml\">recover it here!</A>. P=)";
+ }
+ return "";
+}
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)
+BODYOPTS=>(=_CODE return $bodyopts; _CODE=)
+PAGE=)

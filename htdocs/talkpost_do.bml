@@ -1,0 +1,492 @@
+(=PAGE
+TITLE=>Post Comment
+BODY<=
+
+(=_CODE
+
+ use Fcntl ':flock'; # import LOCK_* constants
+ use Text::Wrap qw(wrap fill $columns);
+ use Digest::MD5 qw(md5_hex);
+ use MIME::Lite;
+ $columns = 76;
+
+ return &server_down_html() if ($LJ::SERVER_DOWN);
+
+ &connect_db;
+ require 'talklib.pl';
+
+ my $ret = "";
+ my @errors = ();
+
+ my $DEBUG = $FORM{'debug'} ? 1 : 0;
+
+ # start quoting shit to insert
+ my $qitemid = $FORM{'itemid'}+0;
+ $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, lt.event, l.eventtime, lt.subject, l.security, l.allowmask FROM log l, logtext lt WHERE lt.itemid=l.itemid AND l.itemid=$qitemid");
+ $sth->execute;
+ my $item = $sth->fetchrow_hashref;
+ unless ($item) { push @errors, "No such entry."; }
+
+ my %logprops;
+ &load_log_props([ $qitemid ], \%logprops);
+
+ my $mod = $qitemid % 100;
+
+ ### load users
+ $sth = $dbh->prepare("SELECT * FROM user WHERE userid IN ($item->{'ownerid'}, $item->{'posterid'})");
+ $sth->execute;
+ my ($u, $ujp);  ## user owner and user journal poster
+ my ($quser, $qjpuser);
+ while ($_ = $sth->fetchrow_hashref) {
+     if ($_->{'userid'} == $item->{'ownerid'})  { 
+	 $u  = $_; 
+	 $quser = $dbh->quote($u->{'user'});
+     }
+     if ($_->{'userid'} == $item->{'posterid'}) {
+	 $ujp = $_;
+	 $qjpuser = $dbh->quote($ujp->{'user'});
+     }
+ }
+ &load_user_props($u, "opt_logcommentips");
+
+ if ($FORM{'userpost'} && $FORM{'usertype'} ne "user") {
+     push @errors, "You entered a username, but selected to post anonymously or as the currently logged in user.  Go back and decide which you really want to do.";
+ }
+
+ if ($FORM{'usertype'} eq "cookieuser") {
+     # setup all the variable to make this look like a "user" usertype
+     $FORM{'userpost'} = $FORM{'cookieuser'};
+     $FORM{'hpassword'} = $FORM{'cookiehpassword'};
+     delete $FORM{'password'};
+     $FORM{'usertype'} = "user";
+ }
+
+ if (($FORM{'userpost'} eq "test" || $FORM{'userpost'} eq "test2")
+     && !($u->{'user'} eq "test" || $u->{'user'} eq "test2")) 
+ {
+     push @errors, "The test account can only be used in the 'test' or 'test2' journals.";
+ }
+
+ my $userpost = lc($FORM{'userpost'});
+ my $quserpost = $dbh->quote("");
+ my $up;
+
+ if ($FORM{'usertype'} eq "user") {
+     if ($FORM{'userpost'}) {
+	 $quserpost = $dbh->quote($userpost);
+	 $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quserpost");
+	 $sth->execute;
+	 $up = $sth->fetchrow_hashref;
+	 if ($up) 
+	 {
+	     ### see if the user is banned from posting here
+	     my $quid = $u->{'userid'}+0;
+	     my $qupid = $up->{'userid'}+0;
+	     my $sth = $dbh->prepare("SELECT COUNT(*) AS 'banned' FROM ban WHERE userid=$quid AND banneduserid=$qupid");
+	     $sth->execute;
+	     my ($banned) = $sth->fetchrow_array;
+	     if ($banned) {
+		 push @errors, "You are not allowed to post in this user's journal.";
+	     }
+
+	     if ($up->{'journaltype'} ne "P") {
+		 push @errors, "You can't post as a shared or community account.  Shared accounts represent groups of people, not individual people.";
+	     }
+
+	     if (!&valid_password($up->{'password'}, \%FORM))
+	     { 
+		 push @errors, "Incorrect password given for the LiveJournal username you specified.  You can recover your password <A HREF=\"/lostinfo.bml\">here</A> if you've forgotten it.";
+	     }
+	 } else {
+	     push @errors, "The LiveJournal username you specified does not exist.  You can recover your username <A HREF=\"/lostinfo.bml\">here</A> if you've forgotten it, or you may post as \"Anonymous\" instead.";
+	 }
+     } else {
+	 push @errors, "You did not enter your LiveJournal username.  You can choose to post as \"Anonymous\" if you don't have a LiveJournal user account.";
+     }
+ }
+
+ if ($FORM{'usertype'} ne "user" && $u->{'opt_whocanreply'} ne "all") {
+     push @errors, "You can't post anonymously in this person's journal.";
+ }
+
+ if ($logprops{$qitemid}->{'opt_nocomments'}) {
+     push @errors, "User has disabled commenting on this journal entry.";
+ }
+
+ if ($up && $up->{'status'} eq "N") {
+     push @errors, "Sorry, you aren't allowed to post comments in other people's journals until your email address has been verified.  If you've lost the confirmation email to do this, you can have it resent from the <a href=\"/lostinfo.bml\">lost information page</a>.";
+ }
+
+ if ($up && $up->{'statusvis'} eq "D") {
+     push @errors, "Your journal has been deleted.  You can't post messages.";
+ }
+ if ($up && $up->{'statusvis'} eq "S") {
+     push @errors, "Your journal has been suspended.  You can't post messages.";
+ }
+
+ if ($u->{'opt_whocanreply'} eq "friends") {
+     if ($up) {
+	 if ($up->{'userid'} != $u->{'userid'}) 
+	 {
+	     $sth = $dbh->prepare("SELECT COUNT(*) FROM friends WHERE userid=$u->{'userid'} AND friendid=$up->{'userid'}");
+	     $sth->execute;
+	     my ($is_friend) = $sth->fetchrow_array;
+	     unless ($is_friend) {
+		 push @errors, "Sorry, user <B>$u->{'user'}</B> does not list you as a friend, and they've set the \"friends only\" option for who can reply to their journal.";
+	     }
+	 }
+     } else {
+	 push @errors, "Only friends of <B>$u->{'user'}</B> may post in this journal.";
+     }
+ }
+
+ unless ($FORM{'body'} =~ /\S/) {
+     push @errors, "Your message was blank.  Please type at least something in the message field.";
+ }
+
+ my $max_length = 2000;
+ my $length = length($FORM{'body'});
+ if ($userpost) { $max_length = 4000; }
+ if ($length > $max_length) {
+     push @errors, "Sorry, but your comment of length $length exceeds the maximum allowed length of $max_length.  Please go back, shorten it, and try posting it again.";
+ }
+
+ if (@errors)
+ {
+     my $ret = "";
+     $ret .= "(=BADCONTENT=)\n<UL>\n";		
+     foreach (@errors)
+     {
+         $ret .= "<LI>$_\n";
+     }
+     $ret .= "</UL>\n";
+     return $ret;
+ }
+
+ ###################################################3
+
+ my $textsubject = $FORM{'subject'};
+ &LJ::CleanHTML::clean_subject_all(\$textsubject);
+ my $cleansubject = $FORM{'subject'};
+ &LJ::CleanHTML::clean_subject(\$cleansubject);
+
+ ## preview
+
+ if ($FORM{'submitpreview'}) {
+     $ret .= "(=H1 Preview H1=)(=P Below is how your post will look.  Press your browser's back button to make changes. Or, submit it. P=)(=HR=)";
+
+     my $event = $FORM{'body'};
+     &LJ::CleanHTML::clean_comment(\$event, $FORM{'prop_opt_preformatted'});
+
+     $ret .= "<B>Subject: </B> $cleansubject<hr>\n";
+     $ret .= $event;
+
+     $ret .= "<hr>";
+     $ret .= "<form method=post>\n";
+     # change mode:
+     delete $FORM{'submitpreview'}; $FORM{'submitpost'} = 1;
+     foreach (keys %FORM) {
+	 $ret .= "<input type=hidden name=\"$_\" value=\"" . &ehtml($FORM{$_}) . "\">\n";
+     }
+     
+
+     $ret .= "<input type=submit value=\"Submit\">\n";
+     $ret .= "</form>";
+     return $ret;
+ }
+
+
+ ## insertion
+
+ my $qpartid = $dbh->quote($FORM{'parenttalkid'});
+ my $qsubject = $dbh->quote($FORM{'subject'});
+ my $subjecticon = ($FORM{'subjecticon'} eq "none" || $FORM{'subjecticon'} eq "") ? "" : &trim(lc($FORM{'subjecticon'}));
+ my $qsubjecticon = $dbh->quote($subjecticon);
+ my $qbody = $dbh->quote($FORM{'body'});
+ my $datepost = &LJ::mysql_time();
+ my $qdatepost = $dbh->quote($datepost);
+
+ my $insertid;
+ my $md5_body = md5_hex($FORM{'body'});
+ 
+ ### check for duplicate entry (double submission)
+ my $posterid = $up ? $up->{'userid'} : 0;
+ $sth = $dbh->prepare("SELECT t.talkid FROM talk t, talktext tt WHERE t.talkid=tt.talkid AND t.journalid=$u->{'userid'} AND t.nodetype='L' AND t.nodeid=$qitemid AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' AND t.parenttalkid=$qpartid");
+ $sth->execute;
+ ($insertid) = $sth->fetchrow_array;
+ 
+ # they don't have a duplicate...
+ unless ($insertid)
+ {
+     # insert the comment
+     $sth = $dbh->prepare("INSERT INTO talk (nodetype, nodeid, parenttalkid, journalid, posterid, datepost) VALUES ('L', $qitemid, $qpartid, $u->{'userid'}, $posterid, NOW())");
+     $sth->execute;
+     
+     # uh oh?  is there an error?  show them if there is.
+     if ($dbh->err) {
+	 return "<H2>Database Error</H2>There was an error posting your comment to the database.  Please report this to <B>$LJ::SUPPORT_EMAIL</B>.  The error is: <B>" . $dbh->errstr . "</B>";
+     }
+     
+     # what's the tid of the newly inserted message?
+     $insertid = $sth->{'mysql_insertid'};
+
+     $sth = $dbh->prepare("INSERT INTO talktext (talkid, subject, body) VALUES ($insertid, $qsubject, $qbody)");
+     $sth->execute;
+
+     # meta-data
+     if ($subjecticon) {
+	 $sth = $dbh->prepare("INSERT INTO talkprop (talkid, tpropid, value) SELECT $insertid, tpropid, $qsubjecticon FROM talkproplist WHERE name='subjecticon'");
+	 $sth->execute;
+     }
+     if ($FORM{'prop_picture_keyword'}) {
+	 my $qprop = $dbh->quote($FORM{'prop_picture_keyword'});
+	 $sth = $dbh->prepare("INSERT INTO talkprop (talkid, tpropid, value) SELECT $insertid, tpropid, $qprop FROM talkproplist WHERE name='picture_keyword'");
+	 $sth->execute;
+     }
+     if ($FORM{'prop_opt_preformatted'}) {
+	 my $qprop = $dbh->quote($FORM{'prop_opt_preformatted'});
+	 $sth = $dbh->prepare("INSERT INTO talkprop (talkid, tpropid, value) SELECT $insertid, tpropid, $qprop FROM talkproplist WHERE name='opt_preformatted'");
+	 $sth->execute;
+     }
+     if ($u->{'opt_logcommentips'} eq "A" || 
+	 ($u->{'opt_logcommentips'} eq "S" && $FORM{'usertype'} ne "user")) 
+     {
+	 my $ip = $ENV{'REMOTE_ADDR'};
+	 if ($ENV{'HTTP_X_FORWARDED_FOR'}) { $ip = "$ENV{'HTTP_X_FORWARDED_FOR'}, via $ip"; }
+	 my $qprop = $dbh->quote($ip);
+	 $sth = $dbh->prepare("INSERT INTO talkprop (talkid, tpropid, value) SELECT $insertid, tpropid, $qprop FROM talkproplist WHERE name='poster_ip'");
+	 $sth->execute;
+     }
+
+     # update the "replycount" field of the log table (redudant? yes. -> optimization)
+     &LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$qitemid");
+     
+     # send some emails
+     my $who = $up->{'name'} || "Somebody";
+     my $whouser = $up->{'user'} ? " ($up->{'user'})" : "";
+     my $whouserhtml = $up->{'user'} ? " (<A HREF=\"$LJ::SITEROOT/userinfo.bml?user=$up->{'user'}\">$up->{'user'}</A>)" : "";
+     my $whopic;
+     if ($up->{'defaultpicid'} || $FORM{'prop_picture_keyword'}) {
+	 my $picid;
+	 if ($FORM{'prop_picture_keyword'}) {
+	     my $qkw = $dbh->quote($FORM{'prop_picture_keyword'});
+	     my $sth = $dbh->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid AND k.keyword=$qkw");
+	     $sth->execute;
+	     ($picid) = $sth->fetchrow_array;
+	 }
+	 $picid ||= $up->{'defaultpicid'};
+	 if ($picid) {
+	     my %pics;
+	     &load_userpics(\%pics, [ $picid ]);
+	     $whopic = "<IMG SRC=\"$LJ::SITEROOT/userpic/$picid\" ALIGN=ABSMIDDLE WIDTH=$pics{$picid}->{'width'} HEIGHT=$pics{$picid}->{'height'} HSPACE=1 VSPACE=2> ";
+	 }
+     }
+
+     # check to see if parent post is from a registerd livejournal user, and 
+     # mail them the response
+     my $parentcomment = "";
+     my $parentmailed = "";  # who if anybody was just mailed
+
+     if ($FORM{'parenttalkid'}) 
+     {	
+	 $sth = $dbh->prepare("SELECT u.user, tt.body FROM talk t, talktext tt, user u WHERE t.talkid=$qpartid AND tt.talkid=$qpartid AND u.userid=t.posterid");
+	 $sth->execute;
+	 my ($paruser, $parbody) = $sth->fetchrow_array;
+	 $parentcomment = $parbody;
+	 if ($paruser) {
+	     my $qparuser = $dbh->quote($paruser);
+	     $sth = $dbh->prepare("SELECT email, opt_htmlemail, password, status, opt_gettalkemail FROM user WHERE user=$qparuser");
+	     $sth->execute;
+	     my $paru = $sth->fetchrow_hashref;
+	     
+	     if ($paru->{'opt_gettalkemail'} eq "Y" &&
+		 $paru->{'email'} ne $up->{'email'} &&
+		 $paru->{'status'} eq "A")
+	     {
+		 if ($DEBUG) {
+		     $debug .= "Parent mailed ($paruser, $paru->{'email'})<br>\n";
+		 }
+		 $parentmailed = $paru->{'email'};
+
+		 my $fromname = $up->{'user'} ? "$up->{'user'} - LJ Comment" : "LiveJournal Comment";
+		 my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
+					    'To' => $paru->{'email'},
+					    'Subject' => ($textsubject || "Reply to your comment..."),
+					    'Type' => 'multipart/alternative');
+		 
+		 my $text = "";
+		 $text .= "$who$whouser replied to your LiveJournal comment in which you said:\n\n";
+		 $text .= &indent($parbody, ">");
+		 $text .= "\n\nTheir reply was:\n\n";
+		 $text .= &indent("Subject: $cleansubject\n\n$FORM{'body'}");
+		 $text .= "\n\nYou can view the discussion and reply here:\n\n";
+		 $text .= "     $LJ::SITEROOT/talkread.bml?itemid=$FORM{'itemid'}\n\n";
+		 $text .= "-- $LJ::SITENAME\n\n";
+		 $msg->attach('Type' => 'TEXT',
+			      'Data' => $text,
+			      'Encoding' => 'quoted-printable',
+			      );
+
+		 my $html = "";
+		 $html .= "<BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
+		 $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?itemid=$FORM{'itemid'}\">your LiveJournal comment</A> in which you said:</TD></TR></TABLE>\n\n";
+		 &LJ::CleanHTML::clean_comment(\$parbody);
+		 $html .= &blockquote($parbody);
+		 
+		 $html .= "\n\nTheir reply was:\n\n";
+		 my $cleanbody = $FORM{'body'};
+		 &LJ::CleanHTML::clean_comment(\$cleanbody, $FORM{'prop_opt_preformatted'});
+		 $html .= &blockquote("<TT><B>Subject:</B> $cleansubject</TT><P>$cleanbody");
+
+		 $html .= "You can reply at the webpage, or here...";
+		 $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
+		 $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
+		 $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
+		 $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$FORM{'itemid'}>";
+		 $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$paruser\">";
+		 $html .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . &ehtml(&hash_password($paru->{'password'})) . "\">";
+		 my $newsub = $FORM{'subject'};
+		 unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
+		 $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . &ehtml($newsub) . "\">";
+		 $html .= "<P><B>Message</B><BR><TEXTAREA ROWS=10 COLS=50 WRAP=SOFT NAME=body></TEXTAREA>";
+		 $html .= "<BR><INPUT TYPE=SUBMIT VALUE=\"Post Reply\">";
+		 $html .= "</FORM></BLOCKQUOTE>\n";
+		 $html .= "<FONT SIZE=-1>(if you'd prefer to not get these updates, go to <A HREF=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</A> and turn off the relevant options)</FONT>\n";
+		 $html .= "</BODY>\n";
+		 if ($paru->{'opt_htmlemail'} eq "Y") 
+		 {
+		     $msg->attach('Type' => 'text/html',
+				  'Data' => $html,
+				  'Encoding' => 'quoted-printable',
+				  );
+		 }
+
+		 open(MAIL, "|$LJ::SENDMAIL");
+		 $msg->print(\*MAIL);
+		 close MAIL;
+	     } else {
+		 if ($DEBUG) {
+		     $debug .= "Parent not mailed<br>\n";
+		 }
+	     }
+	 }
+     }
+
+     # send mail to journal owner
+     if ($ujp->{'opt_gettalkemail'} eq "Y" &&
+	 $userpost ne $ujp->{'user'} &&
+	 $ujp->{'email'} ne $parentmailed &&
+	 $ujp->{'status'} eq "A") 
+     {
+	 if ($DEBUG) { 
+	     $debug .= "send mail to journal owner. (to $ujp->{'email'})<br>\n";
+	 }
+	 my $fromname = $up->{'user'} ? "$up->{'user'} - LJ Comment" : "LiveJournal Comment";
+	 my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
+				    'To' => $ujp->{'email'},
+				    'Subject' => ($textsubject || "Reply to your post..."),
+				    'Type' => 'multipart/alternative');
+	 my $text = "";
+	 if ($parentcomment)  {
+	     $text .= "$who$whouser replied to another comment somebody left in your LiveJournal post.  The comment they replied to was:\n\n";
+	     $text .= &indent($parentcomment, ">");
+	 } else {
+	     $text .= "$who$whouser replied to your LiveJournal post in which you said:\n\n";
+	     $text .= &indent($item->{'event'}, ">");
+	 }
+	 $text .= "\n\nTheir reply was:\n\n";
+	 $text .= &indent("Subject: $textsubject\n\n$FORM{'body'}");
+	 $text .= "\n\nYou can view the discussion and reply here:\n\n";
+	 $text .= "     $LJ::SITEROOT/talkread.bml?itemid=$FORM{'itemid'}\n\n";
+	 $text .= "-- $LJ::SITENAME\n\n";
+	 $text .= "(if you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options)\n";
+	 $msg->attach('Type' => 'TEXT',
+		      'Data' => $text,
+		      'Encoding' => 'quoted-printable',
+		      );
+	 
+	 my $html = "";
+	 $html .= "<BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
+	 if ($parentcomment)  {
+	     $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$LJ::SITEROOT/talkread.bml?itemid=$FORM{'itemid'}\">your LiveJournal post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
+	     my $cleancom = $parentcomment;
+	     &LJ::CleanHTML::clean_comment(\$cleancom);
+	     $html .= &blockquote($cleancom);
+	 } else {
+	     $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?itemid=$FORM{'itemid'}\">your LiveJournal post</A> in which you said:</TD></TR></TABLE>\n";
+	     my $clean = $item->{'event'};
+	     &LJ::CleanHTML::clean_event(\$clean);
+	     $html .= &blockquote($clean);
+	 }
+	 $html .= "\n\nTheir reply was:\n\n";
+	 my $clean = $FORM{'body'};
+	 &LJ::CleanHTML::clean_comment(\$clean, $FORM{'prop_opt_preformatted'});
+	 $html .= &blockquote("<TT><B>Subject: </B> $textsubject</TT><HR>$clean");
+
+	 # begin form
+	 $html .= "You can reply at the webpage, or here...";
+	 $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
+	 $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
+	 $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
+	 $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$FORM{'itemid'}>";
+	 $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$ujp->{'user'}\">";
+	 $html .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . &ehtml(&hash_password($ujp->{'password'})) . "\">";
+	 my $newsub = $FORM{'subject'};
+	 unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
+	 $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . &ehtml($newsub) . "\">";
+	 $html .= "<P><B>Message</B><BR><TEXTAREA ROWS=10 COLS=50 WRAP=SOFT NAME=body></TEXTAREA>";
+	 $html .= "<BR><INPUT TYPE=SUBMIT VALUE=\"Post Reply\">";
+	 $html .= "</FORM></BLOCKQUOTE>\n";
+	 # end form
+
+	 $html .= "<FONT SIZE=-1>(if you'd prefer to not get these updates, go to <A HREF=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</A> and turn off the relevant options)</FONT>\n";
+	 $html .= "</BODY>\n";
+	 if ($ujp->{'opt_htmlemail'} eq "Y") 
+	 {
+	     $msg->attach('Type' => 'text/html',
+			  'Data' => $html,
+			  'Encoding' => 'quoted-printable',
+			  );
+	 }
+	 
+	 open(MAIL, "|$LJ::SENDMAIL");
+	 $msg->print(\*MAIL);
+	 close MAIL;
+     } else {
+	 $debug .= "don't send mail to journal owner.<ul>\n";
+	 $debug .= "<li>ujp--opt_gettalkemail = $ujp->{'opt_gettalkemail'}\n";
+	 $debug .= "<li>userpost = $userpost\n";
+	 $debug .= "<li>ujp--user = $ujp->{'user'}\n";
+	 $debug .= "<li>ujp--email = $ujp->{'email'}\n";
+	 $debug .= "<li>parentmailed = $parentmailed\n";
+	 $debug .= "<li>ujp--status = $ujp->{'status'}\n";
+	 $debug .= "</ul>\n";
+
+     }
+ }
+ 
+ # Yeah, we're done.
+ $ret .= "(=H1 Success H1=)(=P Your comment has been added.  You can view it <A HREF=\"talkread.bml?itemid=$FORM{'itemid'}&view=$insertid\">here</A>. P=)";
+
+ if ($DEBUG) {
+     $ret .= "<P>" . $debug;
+ }
+ return $ret;
+
+ sub indent {
+     my $a = shift;
+     my $leadchar = shift || " ";
+     return fill("$leadchar  ", "$leadchar  ", $a);
+ }
+
+sub blockquote {
+     my $a = shift;
+     return "<BLOCKQUOTE style=\"BORDER-LEFT: #000040 2px solid; MARGIN-LEFT: 0px; MARGIN-RIGHT: 0px; PADDING-LEFT: 15px; PADDING-RIGHT: 0px\">$a</BLOCKQUOTE>";
+}
+
+_CODE=)
+
+
+
+<=BODY
+PAGE=)

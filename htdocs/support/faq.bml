@@ -1,0 +1,56 @@
+(=PAGE
+TITLE=>FAQ
+BODY<=
+
+(=H1 Frequently Asked Questions H1=)
+(=P
+Below are some frequently asked questions, and answers, too!  Oh boy.  Try to read this before you ask a new question.  If you know something we should add to this, let us know.
+P=)
+
+(=_CODE
+
+ &connect_db;
+
+ my %faqcat;
+ my %faqq;
+ my $ret = "";
+ $sth = $dbh->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat WHERE faqcat<>'int-abuse'");
+ $sth->execute;
+ while ($_ = $sth->fetchrow_hashref)
+ {
+     $faqcat{$_->{'faqcat'}} = $_;
+ }
+ 
+ $sth = $dbh->prepare("SELECT faqid, question, sortorder, faqcat, lastmodtime FROM faq WHERE faqcat<>'int-abuse'");
+ $sth->execute;
+ while ($_ = $sth->fetchrow_hashref)
+ {
+     $faqq{$_->{'faqid'}} = $_;
+ }
+
+ foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> $faqcat{$b}->{'catorder'} } keys %faqcat)
+ {
+     $ret .= "(=H2 " . &BMLUtil::ehtml($faqcat{$faqcat}->{'faqcatname'}) . " H2=)\n";
+     $ret .= "<UL>\n";
+     foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
+     {
+	 next unless ($faqq{$faqid}->{'question'});
+	 &main::note_mod_time($faqq{$faqid}->{'lastmodtime'});	 
+	 my $q = &BMLUtil::ehtml($faqq{$faqid}->{'question'});
+	 $q =~ s/^\s+//; $q =~ s/\s+$//;
+	 $q =~ s/\n/<BR>/g;
+	 $ret .= "<LI><A HREF=\"faqbrowse.bml?faqid=$faqid\">$q</A>\n";
+     }
+     $ret .= "</UL>\n";
+ }
+
+return $ret;
+
+_CODE=)
+
+(=HR=)
+Back to <A HREF="./">the support area</A>.
+
+<=BODY
+PAGE=)
+

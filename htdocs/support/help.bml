@@ -1,0 +1,91 @@
+(=PAGE
+TITLE=>Support Requests
+BODY<=
+
+(=_CODE
+ require 'ljlib.pl';
+ require 'supportlib.pl';
+ &connect_db();
+ my ($ret, $sth);
+
+ my %cats;
+ ljsupport::load_spcats($dbh, \%cats, 0);
+
+ if ($FORM{'state'} eq "closed")
+ {
+     $ret .= "(=H1 Recently Closed Support Requests H1=)(=P Below are all support requests that have been recently closed.  To return to the open requests, <a href=\"./help.bml\">click here</a>. P=)";
+     
+     $sth = $dbh->prepare("SELECT s.* FROM support s WHERE s.state='closed' AND s.timeclosed>UNIX_TIMESTAMP()-(3600*24) ORDER BY timecreate DESC");
+
+ }
+ else 
+ {
+     $ret .= "(=H1 Open Support Requests H1=)(=P Below are all support requests that are open (they just came in and haven't been touched yet) or answered (either awaiting to be closed by the person needing help, or the person requested they still need help).  The <a href=\"./help.bml?state=closed\">closed reports</a> are also available.  If you help somebody out and they confirm you helped them, you get the number of points indicated in the status column.  These points will show up on your userinfo page. P=)";
+ 
+     $sth =	 $dbh->prepare("SELECT COUNT(*) FROM support WHERE state='open'");
+     $sth->execute;
+     my ($count) = $sth->fetchrow_array;
+     unless ($count) {
+	 return "(=H1 No support requests! H1=)(=P The support queue is currently empty.  :-) P=)";
+     }
+     $sth = $dbh->prepare("SELECT s.*, MAX(sl.timelogged) AS 'timelogged' FROM support s, supportlog sl WHERE s.spid=sl.spid AND s.state='open' GROUP BY s.spid ORDER BY timecreate DESC");
+ }
+ $sth->execute;
+
+ $ret .= "<p><TABLE CELLPADDING=4 CELLSPACING=1 BORDER=1 BGCOLOR=#FFFFFF><TR BGCOLOR=#D0D0D0>\n";
+ $ret .= "<TD><B>ID#</B></TD>\n";
+ $ret .= "<TD><B>Summary</B></TD>\n";
+ $ret .= "<TD><B>Problem Area</B></TD>\n";
+ $ret .= "<TD><B>Posted</B></TD>\n";
+ $ret .= "<TD><B>Status</B></TD>\n";
+ $ret .= "</TR>";
+
+ while ($sp = $sth->fetchrow_hashref)
+ {
+     my $status = "open";
+     my $barbg = "BGCOLOR=#D0EED0";
+     if ($sp->{'timeclosed'}) { 
+	 $status = "closed"; 
+	 $barbg = "BGCOLOR=#EED0D0";
+     }
+     elsif ($sp->{'timelogged'} > $sp->{'timetouched'}+5) { 
+	 $status = "answered<BR>awaiting close"; 
+	 $barbg = "BGCOLOR=#EEEED0";
+     }
+     elsif ($sp->{'timetouched'} > $sp->{'timelogged'}+5) { 
+	 $status = "answered<BR><B>still needs help</B>"; 
+	 $barbg = "BGCOLOR=#D0EED0";	 
+     }
+
+     my $summary = &BMLUtil::ehtml($sp->{'subject'});
+     my $secold = time() - $sp->{'timecreate'};
+     my $age = &ago_text($secold);
+     my $probarea = $cats{$sp->{'spcatid'}}->{'catname'};
+     my $points = ljsupport::calc_points($cats{$sp->{'spcatid'}}->{'basepoints'}, $secold);
+
+     unless ($status eq "closed") {
+	 $status .= "<BR>($points point";
+	 if ($points > 1) { $status .= "s"; }
+	 $status .= ")";
+     }
+
+     $ret .= "<TR VALIGN=TOP $barbg>\n";
+     $ret .= "<TD><B><A HREF=\"see_request.bml?id=$sp->{'spid'}\">$sp->{'spid'}</A></B></TD>\n";
+     $ret .= "<TD><B>$summary</B></TD>\n";
+     $ret .= "<TD>$probarea</TD>\n";
+     $ret .= "<TD NOWRAP><FONT SIZE=-1>$age</FONT></TD>\n";
+     $ret .= "<TD NOWRAP><FONT SIZE=-1>$status</FONT></TD>\n";
+     $ret .= "</TR>";
+
+ }
+ $ret .= "</TABLE>\n";
+
+ return $ret;
+
+_CODE=)
+
+(=HR=)
+Back to the <A HREF="./">support area</A>.
+
+<=BODY
+PAGE=)

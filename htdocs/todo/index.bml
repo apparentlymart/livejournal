@@ -1,0 +1,286 @@
+(=_CODE
+#line 2
+ $title = "";
+ $body = "";
+
+ require 'ljtodo.pl';
+ &connect_db();
+
+ use strict;
+ use vars qw($dbh $title $body %FORM);
+ my $sth;
+ my %permission;
+ my $remote = &get_remote();
+
+ my $user = lc($FORM{'user'});
+ if (! $user && $remote) { $user = $remote->{'user'}; }
+ my $u = undef;
+
+ if ($user && $FORM{'mode'} ne "pickuser") {
+     my $quser = $dbh->quote($user);
+     $sth = $dbh->prepare("SELECT userid, user FROM user WHERE user=$quser");
+     $sth->execute;
+     $u = $sth->fetchrow_hashref;
+     unless ($u) {
+	 $body .= "(=H1 Error H1=)(=P <B>Unknown user: </B> " . &ehtml($user) . " P=)\n";
+     }
+ }
+
+ unless ($u) {
+     $title = "To-Do List";
+     $body .= "<FORM METHOD=GET>";
+     $body .= "Enter the username of the user whose to-do list you would like to view:<UL><INPUT NAME=\"user\" SIZE=15 MAXLENGTH=15> <INPUT TYPE=SUBMIT VALUE=\"View\"></UL></FORM>\n";
+     return "";
+ }
+
+ LJ::Todo::get_permissions($dbh, \%permission, { 'user' => $u, 'remote' => $remote });
+
+ $title = "To-Do List: $user";
+ $body .= "(=DE To view another user's to-do list, <a href=\"./?mode=pickuser\">go here</a>.  DE=)";
+
+ ####
+ ### security stuff
+ ##
+
+ my $where;
+ unless ($remote && $remote->{'userid'} == $u->{'userid'}) {
+     my $friendclause;
+     if ($remote) {
+	 # check to see if this user's a friend
+	 $sth = $dbh->prepare("SELECT COUNT(*) AS 'isfriend' FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
+	 $sth->execute;
+	 my ($isfriend) = $sth->fetchrow_array;
+	 if ($isfriend) { $friendclause = ", 'friends'"; }
+     }
+     $where .= "AND t.security IN ('public' $friendclause)";
+ } 
+
+ ####
+ ### load the todo items
+ ##
+ 
+ my %keyword;
+ my %itemkws;
+ my @tdids;
+ my @delete;
+ my $total;
+ $sth = $dbh->prepare("SELECT t.todoid, tk.kwid, k.keyword FROM todo t LEFT JOIN todokeyword tk ON t.todoid=tk.todoid LEFT JOIN keywords k ON tk.kwid=k.kwid WHERE t.journalid=$u->{'userid'} $where");
+ $sth->execute;
+ while (my ($id, $kwid, $keyword) = $sth->fetchrow_array) {
+     if ($kwid) {
+	 $keyword{$kwid}->{'count'}++;
+	 $keyword{$kwid}->{'keyword'} = $keyword;
+	 push @{$itemkws{$id}}, $kwid;
+     }
+     $total++;
+     if (! $FORM{'cat'} || ($kwid && $keyword eq $FORM{'cat'})) {
+	 push @tdids, $id;
+	 if ($FORM{"delete_$id"}) { 
+	     push @delete, $id;
+	 }
+     }
+ }
+
+ ### deleting?
+ if (@delete) {
+     unless ($permission{'delete'}) {
+	 $title = "Error";
+	 $body = "(=H1 Security H1=)(=P You're not allowed to delete these to-do items. P=)";
+	 return "";
+     }
+
+     my $in = join(",", @delete);
+     $dbh->do("DELETE FROM todo WHERE todoid IN ($in)");
+     $dbh->do("DELETE FROM tododep WHERE todoid IN ($in)");
+     $dbh->do("DELETE FROM tododep WHERE depid IN ($in)");
+     $dbh->do("DELETE FROM todokeyword WHERE todoid IN ($in)");
+
+     $title = "Deleted";
+     $body = "";
+     $body .= "<a href=\"./?user=$u->{'user'}\">&lt;&lt; To-Do List</a>";
+     $body .= "(=H1 Items Deleted H1=)(=P The items checked have been deleted. P=)";
+     return "";
+ }
+
+ $body .= "<FORM METHOD=GET>";
+ $body .= "<INPUT TYPE=HIDDEN NAME=user VALUE=$FORM{'user'}>\n" if ($FORM{'user'});
+ $body .= "(=H1 Filter Items H1=)(=P ";
+ foreach my $kwid (sort { lc($keyword{$a}->{'keyword'}) cmp lc($keyword{$b}->{'keyword'}) } 
+		   keys %keyword)
+ {
+     my $cat = $keyword{$kwid}->{'keyword'};
+     if ($FORM{'cat'} eq $cat) {
+	 $body .= "<b>" . &ehtml($cat) . " ($keyword{$kwid}->{'count'})</b>, ";
+     } else {
+	 $body .= "<b><a href=\"" . &self_link({ 'user' => $u->{'user'}, 'cat' => $cat }) . "\">" . &ehtml($cat) . "</a></b> ($keyword{$kwid}->{'count'}), ";
+     }
+ }
+ if ($FORM{'cat'}) {
+     $body .= "<b><a href=\"" . &self_link({ 'user' => $u->{'user'}, 'cat' => '' }) . "\">(Show All)</a></b>, "
+ }
+
+ if (keys %keyword) {
+     chop $body; chop $body;  # remove final ", "
+ } else {
+     $body .= "No categories to filter on.";
+ }
+ $body .= " P=)";
+
+ unless (@tdids) {
+     $body .= "(=H1 No entries H1=)(=P Either this user has no to-do items, they're all private, or your filter criteria has returned zero matches. P=)";
+ }
+
+ ###
+ ## links
+ #
+ {
+     my @actions = ();
+     if ($permission{'add'}) {
+	 push @actions, [ "item.bml?user=$u->{'user'}&mode=add&cat=" . &eurl($FORM{'cat'}), "Add Item" ];
+     }
+     
+     if (@actions) 
+     {
+	 $body .= "(=H1 Actions H1=)(=P ";
+	 foreach (@actions) {
+	     $body .= "[ <a href=\"$_->[0]\">$_->[1]</a> ]";
+	 }
+	 $body .= " P=)";
+     }
+ }
+
+ unless (@tdids) {
+     return "";
+ }
+
+ $sth = $dbh->prepare("SELECT todoid, posterid, ownerid, statusline, security, subject, des, priority, UNIX_TIMESTAMP(datecreate) AS 'datecreate_unix', dateupdate, datedue, dateclosed, progress FROM todo WHERE todoid IN (" . join(",", @tdids) . ")");
+ $sth->execute;
+ 
+ my @items;
+ push @items, $_ while ($_ = $sth->fetchrow_hashref);
+
+ foreach my $it (@items) {
+     $it->{'_duesort'} = $it->{'datedue'};
+     if ($it->{'_duesort'} =~ s/^0000-/9999-/) {
+	 $it->{'datedue'} = "";
+     } elsif (length($it->{'datedue'})==0) {
+	 $it->{'_duesort'} = "9999";
+	 }
+ }
+ 
+ ### 
+ ## sort 
+ #
+
+ $FORM{'sort'} ||= "due";
+
+ if ($FORM{'sort'} eq "due") {
+     @items = sort { $b->{'priority'} <=> $a->{'priority'} } @items;
+     @items = sort { $a->{'_duesort'} cmp $b->{'_duesort'} } @items;
+ }
+
+ if ($FORM{'sort'} eq "priority") {
+     @items = sort { $a->{'_duesort'} cmp $b->{'_duesort'} } @items;
+     @items = sort { $b->{'priority'} <=> $a->{'priority'} } @items;
+ }
+
+ if ($FORM{'sort'} eq "status") {
+     @items = sort { $b->{'progress'} <=> $a->{'progress'} } @items;
+ }
+
+ if ($FORM{'sort'} eq "item") {
+     @items = sort { lc($a->{'subject'}) cmp lc($b->{'subject'}) } @items;
+ }
+
+ 
+ $body .= "<FORM METHOD=POST><P><TABLE BORDER=1 CELLPADDING=4 CELLSPACING=1>\n";
+ $body .= "<TR BGCOLOR=(=EMCOLORLITE=) ALIGN=LEFT VALIGN=BOTTOM>\n";
+ $body .= "<TD><B>&nbsp;</B></TD>\n" if ($permission{'delete'});
+ {
+     my @cols = (["Status", "status"],
+		 ["P", "priority"],
+		 ["Item", "item"],
+		 ["Date Due", "due"],
+		 ["Category", ""]);
+     foreach my $col (@cols) {
+	 if ($col->[1] eq "") {
+	     $body .= "<td><b>$col->[0]</b></td>";
+	 } elsif ($col->[1] eq $FORM{'sort'}) {
+	     $body .= "<td bgcolor=(=EMCOLOR=)><b>$col->[0]</b></td>";
+	 } else {
+	     $body .= "<td><a href=\"" . &self_link({ 'user' => $u->{'user'}, 'sort' => $col->[1] }) . "\"><b>$col->[0]</b></a></td>";
+	 }
+     }
+ }
+		 
+ $body .= "</TR>\n";
+
+ foreach my $it (@items) 
+ {
+     my $val;
+     my @vals;
+
+     ## status
+     $val = $it->{'progress'} . "%<BR>" . &ehtml($it->{'statusline'});
+     push @vals, $val;
+
+     ## priority
+     {
+	 my $color;
+	 if ($it->{'priority'} < 3) { $val = "-"; $color = "#0000C0"; }
+	 if ($it->{'priority'} == 1) { $val = "--"; }
+	 if ($it->{'priority'} > 3) { $val = "!"; $color = "#FF0000"; }
+	 if ($it->{'priority'} == 5) { $val = "!!"; }
+	 $val = $color ? "<FONT FACE=\"Arial,Helvetica\" COLOR=$color><B>$val</B></FONT>" : "&nbsp;";
+     }
+     push @vals, $val;
+
+     ## item
+     $val = "<a href=\"item.bml?id=$it->{'todoid'}\"><B>" . &ehtml($it->{'subject'}) . "</B></A><BR><FONT SIZE=-1>" . &ehtml($it->{'des'}) . "</FONT>";
+     push @vals, $val;
+
+     ## due
+     {
+	 $val = "&nbsp;";
+	 my $due = $it->{'datedue'};
+	 $due =~ s/:00$//;
+	 $due =~ s/00:00$//;
+	 if ($due) {
+	     $val = "<nobr><font size=-1>$due</font></nobr>";
+	 }
+	 push @vals, $val;
+     }
+
+     ## categories
+     {
+	 $val = "";
+	 foreach my $kwid (@{$itemkws{$it->{'todoid'}}}) {
+	     if ($val) { $val .= ", "; }
+	     $val .= $keyword{$kwid}->{'keyword'};
+	 }
+	 $val = $val ? "<font size=-1>$val</font>" : "&nbsp;";
+	 push @vals, $val;
+     }
+
+     ## print the row
+
+     $body .= "<TR ALIGN=LEFT VALIGN=TOP>\n";
+     $body .= "<TD><B><INPUT TYPE=CHECKBOX NAME=\"delete_$it->{'todoid'}\"></B></TD>\n" if ($permission{'delete'});
+     foreach $val (@vals) {
+	 $body .= "<TD>$val</TD>";
+     }
+     $body .= "</TR>\n";
+ }
+
+ $body .= "</TABLE>\n";
+
+ $body .= "<p><input type=submit value=\"Delete Selected\">" if ($permission{'delete'});
+ $body .= "</form>";
+
+ return "";
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)<p>(=STANDOUT <B>Note:</B> The to-do list system is in beta.  We're well aware it has a lot of work needed, and it definitely needs to be documented-- especially the security related things. STANDOUT=)
+PAGE=)
+

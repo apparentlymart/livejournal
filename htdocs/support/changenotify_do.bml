@@ -1,0 +1,111 @@
+(=_INFO
+NOCACHE=>1
+_INFO=)(=PAGE
+TITLE=>Change Notifications
+BODY<=
+
+(=_CODE
+
+ require 'ljlib.pl';
+
+ my @errors = ();
+ my $user = lc($FORM{'user'});
+ my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+
+ &connect_db;
+ my $quser = $dbh->quote($user);
+
+ $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+ $sth->execute;
+ unless ($sth->rows) { push @errors, "Invalid username"; }
+ my $u = $sth->fetchrow_hashref;
+ if (scalar(@errors)==0 && !&valid_password($u->{'password'}, \%FORM)) { push @errors, "Incorrect password."; }
+ if (@errors)
+ {
+     my $ret = "";
+     $ret .= "(=BADCONTENT=)\n<UL>\n";		
+     foreach (@errors)
+     {
+         $ret .= "<LI>$_\n";
+     }
+     $ret .= "</UL>\n";
+     return $ret;
+ }
+
+ my $mode = $FORM{'mode'} || "modify";
+
+ if ($mode eq "modify")
+ {
+     my $ret = "";
+     $ret .= "<FORM METHOD=POST>\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=domodify>\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=(=_EH $user _EH=)>\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
+
+     $ret .= "(=H1 Change Notification Settings H1=)(=P Here you may select what categories of support requests you'd like to be notified about.  Choices are <B>off</B> (the default), <B>new</B> (you'll get notifications when a new support request in that category is posted) or <B>all</B> (you'll get notifications and then a copy of each comment/solution posted). P=)";
+
+     my %notify;
+     $sth = $dbh->prepare("SELECT spcatid, level FROM supportnotify WHERE userid=$u->{'userid'}");
+     $sth->execute;
+     while ($_ = $sth->fetchrow_hashref) {
+	 $notify{$_->{'spcatid'}} = $_->{'level'};
+     }
+
+     my %valname = ("" => "Off.",
+		    "new" => "New only.",
+		    "all" => "All",
+		    );
+
+     $ret .= "<UL>\n";
+     $sth = $dbh->prepare("SELECT spcatid, catname FROM supportcat ORDER BY sortorder");
+     $sth->execute;
+     while ($_ = $sth->fetchrow_hashref) {
+	 $ret .= "<P><SELECT NAME=\"spcatid_$_->{'spcatid'}\">";
+	 foreach my $val ("", "new", "all") {
+	     my $sel = "";
+	     if ($notify{$_->{'spcatid'}} eq $val) { $sel = " SELECTED"; }
+	     $ret .= "<OPTION VALUE=\"$val\"$sel>$valname{$val}\n";
+	 }
+	 $ret .= "</SELECT> $_->{'catname'}\n";
+     }
+     $ret .= "</UL>\n";
+
+
+     ### ending submit block
+     $ret .= "(=H1 Done? H1=)(=P When done, press the \"Save Changes\" button below... P=)\n";
+     $ret .= "(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> STANDOUT=)\n";
+     $ret .= "</FORM>\n";
+
+     return $ret;
+ }
+
+ if ($mode eq "domodify")
+ {
+     $dbh->do("DELETE FROM supportnotify WHERE userid=$u->{'userid'}");
+     my $sql;
+
+     $sth = $dbh->prepare("SELECT spcatid, catname FROM supportcat ORDER BY sortorder");
+     $sth->execute;
+     while ($_ = $sth->fetchrow_hashref) 
+     {
+	 my $id = $_->{'spcatid'};
+	 my $setting = $FORM{"spcatid_$id"};
+	 if ($setting eq "all" || 
+	     $setting eq "new") 
+	 {
+	     if ($sql) { $sql .= ", "; }
+	     else { $sql .= "REPLACE INTO supportnotify (spcatid, userid, level) VALUES "; }
+	     $sql .= "($id, $u->{'userid'}, '$setting')";
+	 }
+     }     
+     if ($sql) { $dbh->do($sql); }
+     
+     return "(=H1 Success H1=)(=P Your notification settings have been updated. P=)";
+ }
+
+ return "Unknown mode."
+
+_CODE=)
+
+<=BODY
+PAGE=)

@@ -1,0 +1,53 @@
+(=PAGE
+TITLE=>FAQ Question
+BODY<=
+
+(=_CODE
+
+$id = $FORM{'faqid'} + 0;
+$ret = "";
+
+&connect_db;
+
+$q = "";
+$a = "";
+
+if ($id)
+{
+	my $sth = $dbh->prepare("SELECT f.question, f.answer, u.user, DATE_FORMAT(f.lastmodtime, '%Y-%m-%d'), UNIX_TIMESTAMP(f.lastmodtime) FROM faq f, user u WHERE u.userid=f.lastmoduserid AND f.faqid=$id");
+	$sth->execute;
+	($question, $answer, $lastmodwho, $lastmodtime, $unixmodtime) = $sth->fetchrow_array;
+
+	$dbh->do("UPDATE faq SET uses=uses+1 WHERE faqid=$id");
+
+	&main::note_mod_time($unixmodtime);
+
+	$q = &BMLUtil::ehtml($question);
+	$q =~ s/^\s+//; $q =~ s/\s+$//;
+	$q =~ s/\n/<BR>/g;
+
+	$a = &BMLUtil::ehtml($answer);
+	$a =~ s/^\s+//; $a =~ s/\s+$//;
+	$a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
+	$a =~ s/\n/<BR>/g;
+
+	$a =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=]+!<A HREF="$&">$&</A>!g;
+}
+
+$ret .= "(=H1 $q H1=)<P>$a";
+
+if ($lastmodwho)
+{
+	$ret .= "<P ALIGN=RIGHT><B>Last Updated:</B><BR><a href=\"/userinfo.bml?user=$lastmodwho\">$lastmodwho</a>, $lastmodtime</P>";
+}
+
+return $ret;
+
+_CODE=)
+
+(=HR=)
+Back to <A HREF="faq.bml">the FAQ</A>.
+<BR>Back to <A HREF="./">the support area</A>.
+
+<=BODY
+PAGE=)

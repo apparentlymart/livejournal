@@ -1,0 +1,179 @@
+#!/usr/bin/perl
+
+use CGI;
+use FCGI;
+use Compress::Zlib;
+
+require '/home/lj/cgi-bin/ljlib.pl';
+require '/home/lj/cgi-bin/ljviews.pl';
+
+my $REQ_COUNT = 0;
+my $REQ_MAX = 300;
+
+my $CONTINUE = 1;
+my $SERVING = 0;
+
+$SIG{'TERM'} = sub {
+    if ($SERVING) {
+	$CONTINUE = 0;  # when next request finishes, end.
+    } else {
+	exit;
+    }
+};
+
+unless ($ENV{'SERVER_SOFTWARE'}) {
+    $ENV{'REQUEST_URI'} = "/users/bradfitz/friends";
+    $LJ::DEBUG = 1;
+}
+
+ REQUEST:
+    while((($SERVING=0) || 1) &&    # heh.  set serving to 0 (since so many ways to get here), but be true.
+	  $CONTINUE &&              # didn't get a quit signal earlier.
+	  ++$REQ_COUNT <= $REQ_MAX && FCGI::accept() >= 0)
+{
+    my $cgi = new CGI;
+
+    $SERVING = 1;
+    &connect_db;
+
+    my ($html, $user, $mode, $args, $vhost);
+
+    #####
+    ##### check for username.$LJ::USER_DOMAIN/ [mode]
+    #####
+    if ($LJ::USER_VHOSTS && 
+	$ENV{'HTTP_HOST'} =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/i && ($1 ne "www")) 
+    {
+	$user = lc($1);
+	$user =~ s/-/_/g;
+	if ($ENV{'REQUEST_URI'} eq "/robots.txt") 
+	{
+	    my $u = { 'user' => $user };
+	    &load_user_props($u, "opt_blockrobots");
+	    print "Status: 200 OK\n";
+	    print "Content-type: text/plain\n\n";
+	    print "User-Agent: *\n";
+	    if ($u->{'opt_blockrobots'}) {
+		print "Disallow: /\n";
+	    }
+	    next REQUEST;
+	} 
+	elsif ($ENV{'REQUEST_URI'} =~ m!/(\w+)?([^\?]*)!) {
+	    $mode = $1;
+	    $args = $2;	    
+	    $vhost = "users";
+	} else {
+	    $user = "";  # invalid
+	}
+    }
+
+    #####
+    ##### check for /users/username [ / [ mode ] ]
+    #####
+    elsif ($ENV{'REQUEST_URI'} =~ m!
+	   ^/(users|community)/         # mandatory /users/ directory
+	   (\w{1,15})       # mandatory username
+	   (?:/(\w+)?)?     # optional /<viewname>
+	   ([^\?]*)         # extra args
+	   !x && ($3 eq "" || defined $LJ::viewinfo{$3}))
+    {
+	$vhost = ($1 eq "community") ? "community" : "";
+        $user = $2;
+	$mode = $3;
+	$args = $4;
+    }
+
+    ####
+    #### check for /users without a username (redirect to directory)
+    ####
+    elsif ($ENV{'REQUEST_URI'} =~ /^\/users\/?/) 
+    {
+	print "Status: 301 Moved Permanently\n";
+	print "Location: $LJ::SITEROOT$LJ::DIRURI\n";
+	print "Content-type: text/html\n\n";
+	print "Directory is <A HREF=\"$LJ::SITEROOT$LJ::DIRURI\">here</A>.";
+	next REQUEST;
+    }
+
+    #####
+    ##### check for /~username [ / [ mode ] ]
+    #####
+    elsif ($ENV{'REQUEST_URI'} =~ m!
+        ^/\~(\w{1,15})       # mandatory username
+        (?:/(\w+)?)?     # optional /<viewname>
+        ([^\?]*)             # extra args
+        !x && ($2 eq "" || defined $LJ::viewinfo{$2}))
+    {
+	$vhost = "tilde";
+        $user = $1;
+	$mode = $2;
+	$args = $3;
+    }
+
+    ### made request
+    ###
+    unless ($user) 
+    {
+	print "Content-type: text/html\n\n";
+	print "<!-- users: ($REQ_COUNT/$REQ_MAX) REQUEST_URI ($ENV{'REQUEST_URI'}) !~ --><H1>Not Found</H1>The program or document you requested does not exist on this server.";
+	next REQUEST;
+    }
+
+    if ($user ne lc($user))
+    {
+	my $url = &LJ::journal_base(lc($user), $vhost) . "/";
+	print "Status: 301 Moved Permanently\n";
+	print "Location: $url\n";
+	print "Content-type: text/html\n\n";
+	print "The journal you are looking for is actually <a href=\"$url\">here</a>.";
+	next REQUEST;
+    }
+    
+    my $remote = &get_remote(undef, $cgi);
+
+    my %headers = ();
+    my $opts = {
+	'headers' => \%headers,
+	'args' => $args,
+	'vhost' => $vhost,
+    };
+
+    $html = &LJ::make_journal($dbh, $user, $mode, $remote, $opts);
+
+    my $status = "200 OK";
+    if ($opts->{'badargs'}) 
+    {
+	$status = "404 Not Found";
+	$html = "<H1>Not Found</H1>Unknown page or arguments.";
+    }
+    elsif ($opts->{'baduser'}) 
+    {
+	$status = "404 Not Found";
+	$html = "<H1>Unknown User</H1>There is no user <b>$user</b> at $LJ::SITENAME.";
+    }
+
+    unless ($html) {
+	$html = "<H1>Error</H1>User <b>$user</b> has messed up their journal template definition.";
+    }
+    
+    foreach (keys %headers) {
+	print "$_: $headers{$_}\n";
+    }
+    print "Content-type: text/html\n";
+    print "Cache-Control: private, proxy-revalidate\n";
+    print "Status: $status\n";
+    if ($ENV{'HTTP_ACCEPT_ENCODING'} =~ /gzip/) {
+	my $gzip = Compress::Zlib::memGzip($html);
+	print "Content-Encoding: gzip\n";
+	print "Content-length: ", length($gzip), "\n\n";
+	print $gzip;
+    } else {
+	print "Content-length: ", length($html), "\n";
+	print "\n";
+	print $html;
+    }
+        
+    next REQUEST;
+}
+
+

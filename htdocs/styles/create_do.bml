@@ -1,0 +1,130 @@
+(=PAGE
+TITLE=>Create Style
+BODY<=
+
+(=_CODE
+
+ return &server_down_html() if ($LJ::SERVER_DOWN);
+
+ my @errors = ();
+ my $user = lc($FORM{'user'});
+ my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+
+ &connect_db;
+
+ my $quser = $dbh->quote($user);
+
+ if (length($user) > 15) { push @errors, "Username is too long, 15 character max"; }
+ unless ($user) { push @errors, "You must enter a username"; }
+ if ($user =~ /[^\w]/) { push @errors, "Username contains invalid characters"; }
+
+ $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+ $sth->execute;
+ if ($sth->rows == 0) { push @errors, "Unknown user."; }
+ my $u = $sth->fetchrow_hashref;
+
+ unless ($u->{'paidfeatures'} eq "on" ||
+	 $u->{'paidfeatures'} eq "paid" ||
+	 $u->{'paidfeatures'} eq "early")
+ {
+     push @errors, "Only users with <A HREF=\"/paidaccounts/\">paid accounts</A> may create styles.";
+ }
+
+ if (! &valid_password($u->{'password'}, \%FORM)) { push @errors, "Invalid password."; }
+
+ unless ($FORM{'type'}) { push @errors, "You didn't select a style type."; }
+ if ($FORM{'type'} && !defined $LJ::viewinfo{$FORM{'type'}}) { push @errors, "Invalid style type."; }
+
+ my $view = $FORM{'type'};
+ my $qview = $dbh->quote($FORM{'type'});
+ my $base = "";
+ my $sth;
+ my $baseid = $FORM{"base_$view"} || $FORM{"basenum_$view"};
+
+ if ($baseid && scalar(@errors)==0)
+ {
+     my $qbaseid = $baseid + 0;
+     $sth = $dbh->prepare("SELECT user, is_public, formatdata FROM style WHERE styleid=$baseid AND type=$qview");
+     $sth->execute;
+     my $rec = $sth->fetchrow_hashref;
+     unless ($rec) {
+	 push @errors, "The style you're trying to make a new style from ($baseid), does not seem to exist.";
+     }
+     else {
+	 unless ($rec->{'is_public'} eq "Y" ||
+		 $rec->{'user'} eq $user) 
+	 {
+	     push @errors, "The style you're trying to make a new style from ($baseid) is not public so you cannot copy it.";
+	 }
+	 $base = $rec->{'formatdata'};
+     }
+
+ }
+
+ if (@errors)
+ {
+     my $ret = "";
+     $ret .= "(=BADCONTENT=)\n<UL>\n";		
+     foreach (@errors)
+     {
+         $ret .= "<LI>$_\n";
+     }
+     $ret .= "</UL>\n";
+     return $ret;
+ }
+
+ my $ret = "";
+
+ my $des = "$user-$view-new";
+ my $qdes = $dbh->quote($des);
+
+ # let's see if they accidentally double-clicked:
+ my $double_clicked = 0;
+ my $new_id = 0;
+ $sth = $dbh->prepare("SELECT styleid, formatdata FROM style WHERE user=$quser AND styledes=$qdes AND type=$qview");
+ $sth->execute;
+ my ($oldid, $olddata) = $sth->fetchrow_array;
+ if ($oldid)
+ {
+     if ($olddata eq $base)
+     {
+         # the user double-clicked
+         $double_clicked = 1;
+         $new_id = $oldid;
+     }
+     else
+     {
+         $ret .= "(=H1 Error H1=)(=P You already have a style of this type named <B>$des</B>.  If you really want to create a new style of type <B>$view</B>, then go modify your old $view style, change its name, and then come back here to create a new style of this type.";
+         $ret .= "<CENTER><FORM METHOD=POST ACTION=\"/styles/edit_do.bml\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=\"editstyle\">\n";
+         $ret .= "<INPUT TYPE=HIDDEN NAME=styleid VALUE=\"$oldid\">\n";
+         $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Edit Style\"></FORM></CENTER> P=)";
+         return $ret;
+         
+     }
+ }
+
+ unless ($double_clicked)
+ {
+     $base = $dbh->quote($base); 
+     $sth = $dbh->prepare("INSERT INTO style (user, styledes, type, formatdata) VALUES ($quser, $qdes, $qview, $base)");
+     $sth->execute;
+     $new_id = $sth->{'mysql_insertid'};
+ }
+
+ $ret .= "(=H1 Success H1=)(=P Your style has been created and has been temporarily named <B>$des</B>.  You can begin editing it by pressing the button below.... \n";
+ $ret .= "<CENTER><FORM METHOD=POST ACTION=\"/styles/edit_do.bml\">\n";
+ $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">\n";
+ $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
+ $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=\"editstyle\">\n";
+ $ret .= "<INPUT TYPE=HIDDEN NAME=styleid VALUE=\"$new_id\">\n";
+ $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Edit Style\"></FORM></CENTER> P=)";
+
+ return $ret;
+
+_CODE=)
+
+<=BODY
+PAGE=)

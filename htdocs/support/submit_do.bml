@@ -1,0 +1,171 @@
+(=PAGE
+TITLE=>Submit Request
+BODY<=
+
+(=_CODE
+
+ use Digest::MD5 qw(md5_hex);
+ use Fcntl ':flock'; 
+
+ require 'ljlib.pl';
+ require 'emailcheck.pl';
+ &connect_db;
+ my @errors = ();
+
+ my $u = {};
+ my $user;
+
+ if ($FORM{'reqtype'} eq "user") 
+ {
+     $user = lc($FORM{'user'});
+     my $quser = $dbh->quote($user);
+     $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+     $sth->execute;
+     $u = $sth->fetchrow_hashref;
+ }
+
+ unless ($FORM{'reqname'}) {
+     push @errors, "You must enter your name, or at least an alias that we can call you when helping you solve your problem."; 
+ }
+ if ($FORM{'reqtype'} eq "user") {
+     if ($user && $FORM{'password'} ne $u->{'password'}) {
+	 push @errors, "Your password is incorrect.";
+     }
+     unless ($user) {
+	 push @errors, "You selected that you were a LiveJournal user, but you didn't enter your username.";
+     }
+ }
+ elsif ($FORM{'reqtype'} eq "email") {
+     &check_email($FORM{'email'}, \@errors);
+ } else {
+     push @errors, "Unknown reqtype.";
+ }
+
+ unless ($FORM{'subject'}) {
+     push @errors, "You must enter a problem summary.";
+ }
+ unless ($FORM{'message'}) {
+     push @errors, "You did not enter a support request.";
+ }
+
+ if (@errors)
+ {
+     my $ret = "";
+     $ret .= "(=BADCONTENT=)\n<UL>\n";		
+     foreach (@errors)
+     {
+	 $ret .= "<LI>$_\n";
+		}
+     $ret .= "</UL>\n";
+     return $ret;
+ }
+
+ my $dup_id = 0;
+
+ my $qsubject = $dbh->quote($FORM{'subject'});
+ my $qmessage = $dbh->quote($FORM{'message'});
+ my $qreqtype = $dbh->quote($FORM{'reqtype'});
+ my $qrequserid = $u->{'userid'}+0;
+ my $qreqname = $dbh->quote($FORM{'reqname'});
+ my $qreqemail = $dbh->quote($FORM{'reqtype'} eq "email" ? $FORM{'email'} : undef);
+ my $qspcatid = $FORM{'spcatid'}+0;
+ 
+ # make the authcode
+ my $authcode = "";
+ my $vchars = "abcdefghijklmnopqrstuvwxyz0123456789";
+ srand();
+ for (1..15) {
+     $authcode .= substr($vchars, int(rand()*36), 1);
+ }
+ $qauthcode = $dbh->quote($authcode);
+
+ my $md5 = md5_hex("$qreqname$qreqemail$qsubject$qmessage");
+ 
+ $dbh->do("LOCK TABLES support WRITE, duplock WRITE");
+ $sth = $dbh->prepare("SELECT dupid FROM duplock WHERE realm='support' AND reid=0 AND userid=$qrequserid AND digest='$md5'");
+ $sth->execute;
+ ($dup_id) = $sth->fetchrow_array;
+ if ($dup_id) {
+     $dbh->do("UNLOCK TABLES");
+ }
+
+ my ($url, $spid);  # used at the bottom
+ 
+ if (! $dup_id)
+ {
+     my $sql = "INSERT INTO support (spid, reqtype, requserid, reqname, reqemail, state, authcode, spcatid, subject, timecreate, timetouched, timeclosed) VALUES (NULL, $qreqtype, $qrequserid, $qreqname, $qreqemail, 'open', $qauthcode, $qspcatid, $qsubject, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0)";
+     $sth = $dbh->prepare($sql);
+     $sth->execute;
+     
+     if ($dbh->err) { 
+	 my $error = $dbh->errstr;
+	 $dbh->do("UNLOCK TABLES");
+	 return "<B>Database error:</B> (report this)<BR>$error";
+     }
+     $spid = $dbh->{'mysql_insertid'};
+     
+     $dbh->do("INSERT INTO duplock (realm, reid, userid, digest, dupid, instime) VALUES ('support', 0, $qrequserid, '$md5', $spid, NOW())");
+     $dbh->do("UNLOCK TABLES");
+
+     unless ($spid) { return "<B>Database error:</B> (report this)<BR>Didn't get a spid."; }
+     
+     $sth = $dbh->prepare("INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) VALUES (NULL, $spid, UNIX_TIMESTAMP(), 'req', 0, $qrequserid, $qmessage)");
+     $sth->execute;
+     
+     my $email = $FORM{'reqtype'} eq "email" ? $FORM{'email'} : $u->{'email'};
+ 
+     my $body;
+     $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
+     $body = "Your LiveJournal support request regarding \"$FORM{'subject'}\" has been filed and will be answered as soon as possible.  Your request tracking number is $spid.\n\n";
+     $body .= "You can track your request's progress or add information here:\n\n  ";
+     $body .= &make_text_link($url, $email);
+     
+     $body .= "\n\nIf you figure out the problem before somebody gets back to you, please cancel your request by clicking this:\n\n  ";
+     $body .= &make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$authcode", $email);
+     
+     $body .= "\n\nIf you have any questions about this system (unrelated to your support request) feel free to reply to this email.";
+     
+     &send_mail({ 
+	 'to' => $email,
+	 'from' => $LJ::BOGUS_EMAIL,
+	 'fromname' => 'LiveJournal Support',
+	 'subject' => "Support Request \#$spid",
+	 'body' => $body  
+	 });
+     
+     ########## send notifications
+     
+     $sth = $dbh->prepare("SELECT u.email FROM supportnotify sn, user u WHERE sn.userid=u.userid AND sn.spcatid=$qspcatid AND sn.level IN ('new', 'all')");
+     $sth->execute;
+     my @to_notify;
+     while ($_ = $sth->fetchrow_hashref) {
+	 push @to_notify, $_->{'email'};
+     }
+     $body = "A LiveJournal support request regarding \"$FORM{'subject'}\" has been submitted.  You can track its progress or add information here:\n\n  ";
+     $body .= &make_text_link($url, $_->{'email'});
+     $body .= "\n\n" . "="x70 . "\n\n";
+     $body .= $FORM{'message'};
+     
+     &send_mail({ 
+	 'bcc' => join(", ", @to_notify),
+	 'from' => $LJ::BOGUS_EMAIL,
+	 'fromname' => 'LiveJournal Support',
+	 'subject' => "Support Request \#$spid",
+	 'body' => $body
+	 });
+ }
+ else 
+ {
+     $spid = $dup_id; 
+     $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
+ }
+ 
+ return "Your LiveJournal support request has been filed and will be answered as soon as possible.  Your request tracking number is <B>$spid</B>.  You can track its progress here: <UL><A HREF=\"$url\">$url</A></UL>";    
+
+_CODE=)
+
+(=HR=)
+Back to the <A HREF="./">support area</A>.
+
+<=BODY
+PAGE=)

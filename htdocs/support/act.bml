@@ -1,0 +1,78 @@
+(=_CODE
+ 
+ require 'ljlib.pl';
+ require 'supportlib.pl';
+ &connect_db();
+ my $cmd = &get_query_string();
+ if ($cmd =~ /^(\w+);(\d+);(\w{15})(?:;(\d+))?$/) {
+     ($action, $spid, $authcode, $splid) = ($1, $2, $3, $4);
+ }
+ $title = "Error";
+ if ($action eq "touch") {
+     $title = "Request #$spid";
+ }
+ if ($action eq "close") {
+     $title = "Request #$spid";
+ }
+ return "";
+ 
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY<=
+(=_CODE
+
+ if ($title eq "Error") { 
+     return "(=H1 Error H1=)(=P Improper arguments. P=)";
+ }
+
+ my $sth = $dbh->prepare("SELECT * FROM support WHERE spid=$spid");
+ $sth->execute;
+ $sp = $sth->fetchrow_hashref;
+
+ if ($sp->{'authcode'} ne $authcode) {
+     return "(=H1 Error H1=)(=P Invalid authcode. P=)";
+ }
+
+ if ($action eq "touch") {
+     $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
+     if ($sp->{'state'} eq "open") {
+	 return "(=H1 Touched H1=)(=P Your support request will stay open now. P=)";
+     } else {
+	 $dbh->do("DELETE FROM supportpoints WHERE spid=$spid");
+	 return "(=H1 Touched H1=)(=P Your support request has been re-opened now. P=)";
+     }
+ }
+
+ if ($action eq "close") {
+     if ($sp->{'state'} eq "open") {
+	 $dbh->do("UPDATE support SET state='closed', timeclosed=UNIX_TIMESTAMP() WHERE spid=$spid");
+	 $splid += 0;
+	 if ($splid) {
+	     $sth = $dbh->prepare("SELECT userid, timelogged FROM supportlog WHERE splid=$splid");
+	     $sth->execute;
+	     my ($userid, $timelogged) = $sth->fetchrow_array;
+
+	     ## can't credit yourself.
+	     if ($userid != $sp->{'requserid'}) {
+		 my %cats;
+		 &ljsupport::load_spcats($dbh, \%cats, $sp->{'spcatid'});
+		 my $secold = $timelogged - $sp->{'timecreate'};
+		 my $points = ljsupport::calc_points($cats{$sp->{'spcatid'}}->{'basepoints'}, $secold);
+		 $dbh->do("INSERT INTO supportpoints (spid, userid, points) VALUES ($spid, $userid, $points)");
+	     }
+	 }
+     }
+     return "(=H1 Closed H1=)(=P Your support request has been closed. P=)";
+ }
+
+ return "";
+
+_CODE=)
+
+<=BODY
+PAGE=)
+
+
+
+
+

@@ -1,0 +1,70 @@
+(=PAGE
+TITLE=>Add to topic directory
+BODY<=
+(=_CODE
+
+ require 'ljlib.pl';
+ require 'topiclib.pl';
+ &connect_db();
+ my ($ret, $sth);
+
+ my $catid = $FORM{'catid'}+0;
+ my @hier = ljtopic::get_hierarchy($dbh, { 'catid' => $catid });
+ my $itemid = $FORM{'itemid'}+0;
+ my $catdepth = join(":", map { $_->{'name'} } @hier);
+ $catdepth ||= "Top Level";
+ 
+ $sth = $dbh->prepare("SELECT parent, topicsort, catname FROM topic_cats WHERE tpcatid=$catid");
+ $sth->execute;
+ my $cat = $sth->fetchrow_hashref;
+
+ $ret .= "(=H1 $catdepth H1=)";
+ $ret .= "(=P Your current category in the topic directory is shown above.  To move up a level or down a level, use this form: P=)";
+ $ret .= "<UL><FORM METHOD=GET>";
+ $ret .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$itemid SELECTED>";
+ $ret .= "<SELECT NAME=catid>";
+ if ($catid) {
+     $ret .= "<OPTION VALUE=\"$cat->{'parent'}\">(up a level)";
+ }
+ $ret .= "<OPTION VALUE=\"$catid\" SELECTED>--";
+ $sth = $dbh->prepare("SELECT tpcatid, catname FROM topic_cats WHERE parent=$catid AND status='on' ORDER BY catname");
+ $sth->execute;
+ while ($_ = $sth->fetchrow_hashref) {
+     $ret .= "<OPTION VALUE=\"$_->{'tpcatid'}\">$_->{'catname'}";
+ }
+ $ret .= "</SELECT>";
+ $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Go\">";
+ $ret .= "</UL>";
+ 
+ $ret .= "(=H1 Topics in this category... H1=)";
+ $ret .= "(=P You may add the journal entry you were just reading to one of the following topics.  Click the topic name to proceed. P=)";
+
+ $sth = $dbh->prepare("SELECT tptopid, topname, des FROM topic_list WHERE tpcatid=$catid AND status='on' ORDER BY timeenter DESC LIMIT 50");
+ $sth->execute;
+ my @list;
+ push @list, $_ while ($_ = $sth->fetchrow_hashref);
+ 
+ if ($cat->{'topicsort'} eq "alpha") {
+     @list = sort { &ljtopic::no_prefix($a->{'topname'}) cmp &ljtopic::no_prefix($b->{'topname'}) } @list;
+ }
+ 
+ $ret .= "<UL>\n";
+ foreach my $top (@list) 
+ {
+     $ret .= "<LI><A HREF=\"/topics/add.bml?itemid=$itemid&conf=1&topid=$top->{'tptopid'}\">$top->{'topname'}</A>";
+     if ($top->{'des'}) { $ret .= " - "; $ret .= $top->{'des'}; }
+ }
+ unless (@list) {
+     $ret .= "<I>No topics in this category.</I>";
+ }
+
+ $ret .= "</UL>\n";
+ 
+ $ret .= "<P><HR><FONT SIZE=-1>Want to <A HREF=\"addtopic.bml?catid=$catid\">add a topic</A> to this category?";
+ $ret .= "<BR>How does this all work?  <A HREF=\"/support/faqbrowse.bml?faqid=29\">Read this</A>.</FONT>";
+ 
+  return $ret;
+
+_CODE=)
+<=BODY
+PAGE=)

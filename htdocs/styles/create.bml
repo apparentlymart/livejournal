@@ -1,0 +1,62 @@
+(=PAGE
+TITLE=>Create Style
+BODY<=
+
+(=H1 Create a Style H1=)
+(=P
+From here you can create a new personal-style, useful if you're going to either <A HREF="/developer/embedding.bml">embed LiveJournal in your homepage</A> or you want to make a public style that everybody can use and you need to work on it here first, rather than in your overrides section.  Note that only users with <A HREF="/paidaccounts/">paid accounts</A> can create their own styles.
+ P=)
+    
+<FORM ACTION="/styles/create_do.bml" METHOD="POST">
+
+(=STANDOUT
+<TABLE>
+(=_CODE
+ return &auth_fields();
+ _CODE=)
+</TR>
+</TABLE>
+STANDOUT=)
+
+(=H1 Select Style Type H1=)
+(=P
+A style only affects one <A HREF="/developer/views.bml">view type</A>.  If you want to create a matching set of styles for your journal, you have to create your style for each view type.
+P=)
+
+(=_CODE
+
+ &connect_db();
+ 
+ my $ret = "";
+ 
+ my %styles = ();
+ my $sth = $dbh->prepare("SELECT styleid, styledes, type FROM style WHERE user='system' AND is_public='Y'");
+ $sth->execute;
+ push @{$styles{$_->{'type'}}}, $_ while ($_ = $sth->fetchrow_hashref);
+ 
+ foreach my $view (@LJ::views)
+ {
+     $ret .= "<P><INPUT TYPE=RADIO NAME=type VALUE=\"$view\"> <B>$LJ::viewinfo{$view}->{'des'}</B>\n";
+     $ret .= "<UL>Choose base style to start with and edit:<BR><SELECT NAME=\"base_$view\"><OPTION VALUE=\"\">(None, or other below:)\n";
+     foreach my $st (sort { $a->{'styledes'} cmp $b->{'styledes'} } @{$styles{$view}})
+     {
+	 $ret .= "<OPTION VALUE=\"$st->{'styleid'}\">" . &BMLUtil::escapeall($st->{'styledes'}) . "\n";
+     }
+     $ret .= "</SELECT>";
+     $ret .= "<BR>Or, enter a non-system public Style ID#: <INPUT SIZE=5 NAME=\"basenum_$view\">";
+     $ret .= "</UL>\n";
+     
+ }
+ 
+ return $ret;
+
+_CODE=)
+
+(=STANDOUT
+<INPUT TYPE="SUBMIT" VALUE="Create">
+STANDOUT=)
+
+</FORM>
+
+<=BODY
+PAGE=)
