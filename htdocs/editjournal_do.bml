@@ -205,6 +205,17 @@ body<=
             $ret .= LJ::html_submit('action:save', $ML{'.btn.save'},
                                     { 'disabled' => $disabled_save });
             $ret .= '<br /><br />';
+
+            # carry post edits
+            foreach (qw(year mon day hour min
+                        prop_picture_keyword prop_current_moodid
+                        prop_current_mood prop_current_music
+                        prop_opt_screening)) {
+                $res{$_} = $POST{$_};
+            }
+            $res{'events_1_event'} = $POST{'event'};
+            $res{'events_1_subject'} = $POST{'subject'};
+
         }
 
         $ret .= "<?h1 $ML{'.title'} h1?>\n";
@@ -215,13 +226,18 @@ body<=
 
         $ret .= "<table>\n";
         $ret .= "<tr><td align='right'>$ML{'.date'}<br /><i>(yyyy-mm-dd)</i></td>";
-        $ret .= "<td>" . LJ::html_text({ 'name' => 'year', 'value' => $year, 'size' => '5', 'maxlength' => '4' }) . "-";
-        $ret .= LJ::html_text({ 'name' => 'mon', 'value' => $mon, 'size' => '3', 'maxlength' => '2' }) . "-";
-        $ret .= LJ::html_text({ 'name' => 'day', 'value' => $mday, 'size' => '3', 'maxlength' => '2' }) . "</td>\n";
-            
+        $ret .= "<td>" . LJ::html_text({ 'name' => 'year', 'value' => $POST{'year'} || $year,
+                                         'size' => '5', 'maxlength' => '4' }) . "-";
+        $ret .= LJ::html_text({ 'name' => 'mon', 'value' => $POST{'mon'} || $mon,
+                                'size' => '3', 'maxlength' => '2' }) . "-";
+        $ret .= LJ::html_text({ 'name' => 'day', 'value' => $POST{'day'} || $mday,
+                                'size' => '3', 'maxlength' => '2' }) . "</td>\n";
+
         $ret .= "<td align='right'>$ML{'.localtime'}<br /><i>($ML{'.timeformat'})</i></td><td>";
-        $ret .= LJ::html_text({ 'name' => 'hour', 'value' => $hour, 'size' => '3', 'maxlength' => '2' }) . ":";
-        $ret .= LJ::html_text({ 'name' => 'min', 'value' => $min, 'size' => '3', 'maxlength' => '2' }) . "</td></tr>\n";
+        $ret .= LJ::html_text({ 'name' => 'hour', 'value' => $POST{'hour'} || $hour,
+                                'size' => '3', 'maxlength' => '2' }) . ":";
+        $ret .= LJ::html_text({ 'name' => 'min', 'value' => $POST{'min'} || $min,
+                                'size' => '3', 'maxlength' => '2' }) . "</td></tr>\n";
         $ret .= "</table>\n";
 
         # subject
@@ -232,7 +248,6 @@ body<=
         # event body
         my $postedby = " (Posted by: " . LJ::ljuser($res{'events_1_poster'}) . ")" if $usejournal;
         $ret .= "<p><b>$ML{'.event'}</b>$postedby<br />";
-        $res{'events_1_event'} = $POST{'event'} if $POST{'event'} && $POST{'action:preview'};
         $ret .= LJ::html_textarea({ 'name' => 'event', 'value' => LJ::durl($res{'events_1_event'}), 'rows' => '12',
                                     'cols' => '60', 'wrap' => 'soft', 'style' => 'width: 99%;' }) . "</p>\n";
 
@@ -250,7 +265,7 @@ body<=
         
         # selected mark
         my $curmask = $res{'events_1_allowmask'};
-        my $cursec = $res{'events_1_security'};
+        my $cursec = $POST{'security'} || $res{'events_1_security'};
         if ($cursec eq 'usemask') {
             $cursec = $curmask == 1 ? "friends" : "custom";
         }
@@ -278,7 +293,8 @@ body<=
         my @levels = ('', $ML{'label.screening.default'}, 'N', $ML{'label.screening.none'},
                       'R', $ML{'label.screening.anonymous'}, 'F', $ML{'label.screening.nonfriends'},
                       'A', $ML{'label.screening.all'});
-        $ret .= LJ::html_select({ name => 'prop_opt_screening', selected => $props{opt_screening} }, @levels);
+        $ret .= LJ::html_select({ name => 'prop_opt_screening',
+                                  selected => $POST{'prop_opt_screening'} || $props{opt_screening} }, @levels);
         $ret .= LJ::help_icon('screening', ' ');
         $ret .= "\n";
         
@@ -292,7 +308,7 @@ body<=
                    LJ::html_check({ 'type' => 'check',
                                     'name' => "prop_opt_$prop",
                                     'id' => "prop_opt_$prop",
-                                    'selected' => $props{"opt_$prop"},
+                                    'selected' => $POST{"prop_opt_$prop"} || $props{"opt_$prop"},
                                     'disabled' => $dis });
         };
 
@@ -316,7 +332,7 @@ body<=
             if (@pics) {
                 $ret .= "<p><b>".BML::ml(".picture", { 'url' => "$LJ::SITEROOT/allpics.bml?user=$u->{'user'}" }) ."</b> ";
                 $ret .= LJ::html_select({ 'name' => 'prop_picture_keyword',
-                                          'selected' => $props{'picture_keyword'} },
+                                          'selected' => $POST{'prop_picture_keyword'} || $props{'picture_keyword'} },
                                           '', $ML{'.default'},
                                           map { $_, $_ } @pics
                                        );
@@ -339,17 +355,19 @@ body<=
                 }
             }
 
+            $sel = $POST{'prop_current_moodid'} if $POST{'prop_current_moodid'};
             $ret .= "<p><b>$ML{'.currmood'}</b>";
             $ret .= LJ::html_select({ 'name' => 'prop_current_moodid',
                                       'selected' => $sel }, @moodlist);
             $ret .= " $ML{'.other'} " . LJ::html_text({ 'name' => 'prop_current_mood',
-                                                        'value' => $props{'current_mood'},
+                                                        'value' => $POST{'prop_current_mood'} || $props{'current_mood'},
                                                         'size' => '15', 'maxlength' => '30' });
         }	     
 
         ## current music
         $ret .= "<p><b>$ML{'.currmusic'}</b> ";
-        $ret .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $props{'current_music'},
+        $ret .= LJ::html_text({ 'name' => 'prop_current_music',
+                                'value' => $POST{'prop_current_music'} || $props{'current_music'},
                                 'size' => '40', 'maxlength' => '60' }) . "</p>\n";
 
         $ret .= "<?h1 $ML{'.save.head'} h1?><?p $ML{'.save.text'} p?>\n";
