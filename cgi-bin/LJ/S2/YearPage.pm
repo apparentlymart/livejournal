@@ -139,8 +139,6 @@ sub YearYear {
              'year' => $year, 'url' => $url, 'displayed' => $displayed };
 }
 
-1;
-
 sub YearDay {
     my ($u, $year, $month, $day, $count, $dow) = @_;
     my $d = {
@@ -156,5 +154,4 @@ sub YearDay {
     return $d;
 }
 
-
-
+1;
