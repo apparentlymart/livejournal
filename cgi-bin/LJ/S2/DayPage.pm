@@ -28,7 +28,7 @@ sub DayPage
     }
 
     if ($u->{'opt_blockrobots'}) {
-        $p->{'head_content'} = "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
+        $p->{'head_content'} .= LJ::robot_meta_tags();
     }
 
     my %FORM = ();

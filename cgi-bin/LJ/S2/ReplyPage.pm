@@ -19,7 +19,7 @@ sub ReplyPage
     my $ditemid = $entry->{'itemid'}*256 + $entry->{'anum'};
 
     if ($u->{'opt_blockrobots'}) {
-        $p->{'head_content'} .= "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
+        $p->{'head_content'} .= LJ::robot_meta_tags();
     }
 
     $p->{'entry'} = $s2entry;

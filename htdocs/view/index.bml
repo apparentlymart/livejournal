@@ -1,6 +1,7 @@
 <?_code
 
  $title = "";
+ $head = "";
  $body = "";
 
 my $uri = BML::get_uri();
@@ -38,7 +39,19 @@ $r->notes("codepath" => "bml.view.index");
      return;
  }
 
-my $base = LJ::journal_base($u);
+ my $base = LJ::journal_base($u);
+
+ if ($u->{'journaltype'} eq "R") {
+     LJ::load_user_props($dbs, $u, "renamedto");
+     if ($u->{'renamedto'}) {
+         return BML::redirect(sprintf(LJ::journal_base($u->{'renamedto'}) . "/%04d/%02d/", $FORM{'y'}, $FORM{'m'}));
+     }
+ }
+
+ LJ::load_user_props($dbs, $u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
+ if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
+     $head .= LJ::robot_meta_tags();
+ }
  
 if (LJ::did_post()) {
     my $newuri = sprintf("$base/%04d/%02d/", $POST{'y'}, $POST{'m'});
@@ -178,6 +191,7 @@ if (LJ::did_post()) {
 
 _code?><?page
 title=><?_code return $title; _code?>
+head=><?_code return $head; _code?>
 body=><?_code return $body; _code?>
 page?><?_c <LJDEP>
 img: htdocs/img/btn_next.gif, htdocs/img/btn_prev.gif

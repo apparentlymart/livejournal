@@ -583,13 +583,10 @@ sub create_view_lastn
     }
 
     $lastn_page{'events'} = "";
-    if ($u->{'opt_blockrobots'}) {
-        $lastn_page{'head'} = "<meta name='robots' content='noindex,nofollow,noarchive' />\n";
-        $lastn_page{'head'} .= "<meta name='googlebot' content='nosnippet' />\n";
-    }
-    elsif ($FORM{'skip'}) {
-        # if followed a skip link back, prevent it from going back further
-        $lastn_page{'head'} = "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
+
+    # if user has requested, or a skip back link has been followed, don't index or follow
+    if ($u->{'opt_blockrobots'} || $FORM{'skip'}) {
+        $lastn_page{'head'} = LJ::robot_meta_tags()
     }
     if ($LJ::UNICODE) {
         $lastn_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
@@ -973,8 +970,7 @@ sub create_view_friends
 
     ## never have spiders index friends pages (change too much, and some 
     ## people might not want to be indexed)
-    $friends_page{'head'} = "<meta name=\"robots\" content=\"noindex,nofollow,noarchive\" />\n";
-    $friends_page{'head'} .= "<meta name=\"googlebot\" content=\"nosnippet\" />\n";
+    $friends_page{'head'} = LJ::robot_meta_tags();
     if ($LJ::UNICODE) {
         $friends_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
@@ -1428,8 +1424,7 @@ sub create_view_calendar
     $calendar_page{'title'} = LJ::ehtml($u->{'journaltitle'} ||
                                         $u->{'name'} . $calendar_page{'name-\'s'} . " Journal");
     if ($u->{'opt_blockrobots'}) {
-        $calendar_page{'head'} = "<meta name=\"robots\" content=\"noindex,nofollow,noarchive\" />\n";
-        $calendar_page{'head'} .= "<meta name=\"googlebot\" content=\"nosnippet\" />\n";
+        $calendar_page{'head'} = LJ::robot_meta_tags();
     }
     if ($LJ::UNICODE) {
         $calendar_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
@@ -1653,8 +1648,7 @@ sub create_view_day
     my %day_page = ();
     $day_page{'username'} = $user;
     if ($u->{'opt_blockrobots'}) {
-        $day_page{'head'} = "<meta name=\"robots\" content=\"noindex,nofollow,noarchive\" />\n";
-        $day_page{'head'} = "<meta name=\"googlebot\" content=\"nosnippet\" />\n";
+        $day_page{'head'} = LJ::robot_meta_tags();
     }
     if ($LJ::UNICODE) {
         $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';

@@ -1,5 +1,6 @@
 <?page
 title=><?_ml .title _ml?>
+head=><?_code return LJ::robot_meta_tags(); _code?>
 body<=
 
 <?_code

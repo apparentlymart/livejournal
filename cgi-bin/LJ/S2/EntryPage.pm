@@ -20,8 +20,22 @@ sub EntryPage
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
     return if $opts->{'handler_return'};
 
+    my $itemid = $entry->{'itemid'};
+    my $ditemid = $entry->{'itemid'} * 256 + $entry->{'anum'};
+    my $jbase = LJ::journal_base($u);
+    my $permalink = "$jbase/$ditemid.html";
+
+    if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
+        $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) .
+            "/$ditemid.html" . $opts->{'pathextra'};
+        return 1;
+    }
+
     if ($u->{'opt_blockrobots'}) {
-        $p->{'head_content'} .= "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
+        $p->{'head_content'} .= LJ::robot_meta_tags();
+    }
+    if ($LJ::UNICODE) {
+        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
     }
 
     $p->{'entry'} = $s2entry;
@@ -37,10 +51,6 @@ sub EntryPage
         'userref' => \%user,
     };
 
-    my $itemid = $entry->{'itemid'};
-    my $ditemid = $entry->{'itemid'} * 256 + $entry->{'anum'};
-    my $jbase = LJ::journal_base($u);
-    my $permalink = "$jbase/$ditemid.html";
     my $userlite_journal = UserLite($u);
 
     my @comments = LJ::Talk::load_comments($u, $remote, "L", $itemid, $copts);
@@ -157,7 +167,7 @@ sub EntryPage_entry
         $opts->{'handler_return'} = 403;
         return;
     }
-    
+  
     my $replycount = $entry->{'replycount'};
     my $nc = "";
     $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};

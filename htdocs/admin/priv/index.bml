@@ -1,3 +1,7 @@
+<html><head>
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<meta name="googlebot" content="nosnippet" />
+</head><body>
 <?_code
 
  use strict;
@@ -257,7 +261,10 @@
 
  return "Unknown mode.";
 
-_code?><?_c <LJDEP>
+_code?>
+</body>
+</html>
+<?_c <LJDEP>
 lib: cgi-bin/ljlib.pl
 link: htdocs/admin/priv/index.bml
 post: htdocs/admin/priv/index.bml

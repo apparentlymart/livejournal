@@ -126,6 +126,13 @@ body<=
 
     my $remote = LJ::get_remote($dbs);
 
+    my @user_props = ("opt_notalkicons", "opt_logcommentips", "opt_whoscreened");
+    push @user_props, "opt_blockrobots" if $u->{'statusvis'} eq 'V';
+    LJ::load_user_props($dbs, $u, @user_props);
+    if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
+        $head = LJ::robot_meta_tags();
+    }
+
     # check suspended
     return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
         if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S");
@@ -138,8 +145,6 @@ body<=
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_screened'} p?>"
         if $parpost->{'state'} eq "S" 
         and not LJ::Talk::can_unscreen($dbs, $remote, $u, $up, $ur->{'user'});
-
-    LJ::load_user_props($dbs, $u, "opt_logcommentips", "opt_whoscreened");
 
     # don't allow anonymous comments on syndicated items
     if ($u->{'journaltype'} eq "Y" && $u->{'opt_whocanreply'} eq "all") {

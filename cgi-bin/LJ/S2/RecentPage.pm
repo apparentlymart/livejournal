@@ -33,7 +33,7 @@ sub RecentPage
     }
     
     if ($u->{'opt_blockrobots'} || $get->{'skip'}) {
-        $p->{'head_content'} .= "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
+        $p->{'head_content'} .= LJ::robot_meta_tags();
     }
 
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_recent_items")+0;

@@ -1,5 +1,6 @@
 <?page
 title=>High Scores
+head=><?_code return LJ::robot_meta_tags(); _code?>
 body<=
 
 The following people have helped other users in the support area:

@@ -1,7 +1,7 @@
 <?_code
 
  use strict;
- use vars qw(%FORM $title $body);
+ use vars qw(%FORM $head $title $body);
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -12,6 +12,7 @@
  my $sth;
 
  $title = "";
+ $head = "";
  $body = "";
 
  my $user = LJ::canonical_username($FORM{'user'});
@@ -35,6 +36,11 @@
  if ($u->{'journaltype'} eq "R") {
     LJ::load_user_props($dbr, $u, "renamedto");
     return BML::redirect("/tools/memories.bml?user=$u->{'renamedto'}");
+ }
+
+ LJ::load_user_props($dbs, $u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
+ unless ($u->{'statusvis'} eq 'V' && ! $u->{'opt_blockrobots'}) {
+     $head = LJ::robot_meta_tags();
  }
 
  if ($u->{'statusvis'} eq "S") {
@@ -151,6 +157,7 @@
 
 _code?><?page
 title=><?_code return $title; _code?>
+head=><?_code return $head; _code?>
 body<=
 <?_code return $body; _code?>
 <=body

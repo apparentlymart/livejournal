@@ -30,7 +30,7 @@ sub MonthPage
     }
 
     if ($u->{'opt_blockrobots'}) {
-        $p->{'head_content'} = "<meta name=\"robots\" content=\"noindex\" />\n";
+        $p->{'head_content'} .= LJ::robot_meta_tags();
     }
 
     my ($year, $month);

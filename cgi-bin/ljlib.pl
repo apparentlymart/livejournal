@@ -3177,6 +3177,17 @@ sub server_down_html
 }
 
 # <LJFUNC>
+# name: LJ::robot_meta_tags
+# des: Returns meta tags to block a robot from indexing or following links
+# returns: A string with appropriate meta tags
+# </LJFUNC>
+sub robot_meta_tags
+{
+    return "<meta name=\"robots\" content=\"noindex, nofollow, noarchive\" />\n" .
+           "<meta name=\"googlebot\" content=\"nosnippet\" />\n";
+}
+
+# <LJFUNC>
 # name: LJ::make_journal
 # class:
 # des:

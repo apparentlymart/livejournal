@@ -28,7 +28,7 @@ sub YearPage
     }
 
     if ($u->{'opt_blockrobots'}) {
-        $p->{'head_content'} = "<meta name=\"robots\" content=\"noindex\" />\n";
+        $p->{'head_content'} .= LJ::robot_meta_tags();
     }
     if ($LJ::UNICODE) {
         $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";

@@ -62,6 +62,11 @@ if ($uri =~ m!/(\d+)\.html$!) {
  my $init = LJ::Talk::init($dbs, \%GET);
  my $u = $init->{'journalu'};
 
+ LJ::load_user_props($dbs, $u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
+ if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
+     $$head = LJ::robot_meta_tags();
+ }
+
  $r->notes("journalid" => $u->{'userid'});
  $r->notes("codepath" => "bml.talkread");
 
