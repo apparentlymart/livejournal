@@ -1,0 +1,330 @@
+# -*-s2-*-
+
+layerinfo type = "layout";
+layerinfo name = "Tabular Indent";
+layerinfo redist_uniq = "tabularindent/layout";
+
+property bool show_entry_userpic { des = "Show the userpic on the journal entries?"; }
+set show_entry_userpic = false;
+
+property Color body_bgcolor { des = "Body background color"; }
+set body_bgcolor = "#ffffff";
+
+property Color main_bgcolor { des = "Background of main text areas"; }
+set main_bgcolor = "#ffffff";
+
+property Color main_fgcolor { des = "Main text color"; }
+set main_fgcolor = "#000000";
+
+property Color border_color { des = "Color of borders"; }
+set border_color = "#000000";
+
+property Color headerbar_bgcolor { des = "Background color of header bar(s)"; }
+set headerbar_bgcolor = "#6666cc";
+
+property Color headerbar_fgcolor { des = "Header bar text color"; }
+set headerbar_fgcolor = "#ffffff";
+
+property Color captionbar_mainbox_bgcolor { des = "Main background color of caption bar"; }
+set captionbar_mainbox_bgcolor = "#ffffff";
+
+property Color captionbar_mainbox_fgcolor { des = "Text color of caption bar"; }
+set captionbar_mainbox_fgcolor = "#000000";
+
+property Color captionbar_userpicbox_color { des = "User picture background color of caption bar"; }
+set captionbar_userpicbox_color = "#c0c0ff";
+
+property Color accent_bgcolor { des = "Background color of accented areas"; }
+set accent_bgcolor = "#eeeeff";
+
+property Color accent_fgcolor { des = "Accented area text color"; }
+set accent_fgcolor = "#000000";
+
+property Color link_color { des = "Link color"; }
+set link_color = "#000050";
+
+property Color vlink_color { des = "Visited link color"; }
+set vlink_color = "#500050";
+
+property Color alink_color { des = "Active link color"; }
+set alink_color = "#ff00c0";
+
+set page_recent_items = 20;
+set page_friends_items = 20;
+
+function Page::lay_captionbar_navigation () { }
+
+function captionbar (Page p) {
+    var string title = $p->title();
+
+    var string userpic;
+    var Image up_img = $p.journal.default_pic;
+    if (defined $up_img) {
+        $userpic = """<img src="$up_img.url" height="$up_img.height" width="$up_img.width" alt="[icon]" />""";
+    }
+    var string website;
+    if ($p.journal.website_url != "") {
+        $website = """<tr><td>View:</td><td><a href="$p.journal.website_url">Website ($p.journal.website_name)</a>.</td></tr>""";
+    }
+
+    var string links;
+    $links = "$links<tr><td>View:</td><td>" + ($p.view == "recent" ? 
+                       "Recent&nbsp;Entries" :
+                       "<a href='$p.base_url/'>Recent&nbsp;Entries</a>") + ".</td></tr>";
+    $links = "$links<tr><td>View:</td><td>" + ($p.view == "friends" ? 
+                       "Friends" :
+                       "<a href='$p.base_url/friends/'>Friends</a>") + ".</td></tr>";
+    $links = "$links<tr><td>View:</td><td>" + ($p.view == "archive" ? 
+                       "Archive" :
+                       "<a href='$p.base_url/calendar/'>Archive</a>") + ".</td></tr>";
+    "<table border='0' width='100%' height='100' cellpadding='5' cellspacing='1' bgcolor='$*border_color'>";
+    "<tr><td bgcolor='$*captionbar_userpicbox_color' align='center' valign='center' width='100'>";
+    "$userpic</td><td bgcolor='$*captionbar_mainbox_bgcolor'>";
+    "<b>$title</b><br /><table border='0'>$links$website";
+    "<tr><td>View:</td><td><a href='$*SITEROOT/memories.bml?user=$p.journal.username'>Memories</a>.<br></td></tr>";
+    "<tr><td colspan='2'>"; $p->lay_captionbar_navigation(); "</td></tr></table></td></tr></table>";
+}
+
+function Page::print () 
+{
+    var string title = $this->title();
+"""
+<html>
+<head>
+<link rel="stylesheet" href="$.stylesheet_url" type="text/css"/>
+  <style>
+   <!--
+body {
+    background-color:  $*body_bgcolor;
+}
+body,td,p {
+    font-family:       verdana, arial, helvetica, sans-serif; 
+    font-size:         8pt;
+}
+a {
+    color:             $*link_color;
+    font-family:       verdana, arial, helvetica, sans-serif; 
+    font-size:         8pt;
+    text-decoration:   none;
+}
+a:visited {
+    color:             $*vlink_color;
+    font-family:       verdana, arial, helvetica, sans-serif;
+    font-size:         8pt;
+    text-decoration:   none; 
+}
+a:active {
+    color:             $*alink_color;
+    font-family:       verdana, arial, helvetica, sans-serif;
+    font-size:         8pt;
+    text-decoration:   none;
+}
+a:hover {
+    color:             $*alink_color;
+    font-family:       verdana, arial, helvetica, sans-serif; 
+    font-size:         8pt;
+    text-decoration:   underline;
+}
+   -->
+  </style>
+  $.head_content
+  <title>$title</title>
+ </head>
+ <body>
+    """;
+    "<p>"; captionbar($this); "</p>";
+
+    "<p>"; $this->print_body(); "</p>";
+
+    "<p>"; captionbar($this); "</p>";
+
+    "</body></html>";
+}
+
+function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
+{
+    if ($e.new_day) {
+        "<table border='0' width='100%' cellpadding='5' cellspacing='1' bgcolor='$*border_color'>";
+        "<tr><td bgcolor='$*headerbar_bgcolor'><font color='$*headerbar_fgcolor'>";
+        print $e.time->date_format("%%month%% %%dayord%%, %%yyyy%%");
+        "</font></td></tr></table><br />";
+    }
+    "<div align='right'><table border='0' width='95%' cellpadding='5' cellspacing='1' bgcolor='$*accent_bgcolor'>";
+    "<tr><td bgcolor='$*accent_bgcolor'>";
+    "<table border='0' width='100%'><tr>";
+    # Userpic
+    if ($p.view == "friends" or
+        $*show_entry_userpic == true or
+        $e.journal.username != $e.poster.username)
+    {
+        var string userpic = defined $e.userpic ? "<img src='$e.userpic.url' />" : "";
+        "<td width='100' valign='top' bgcolor='$bgcolor' align='center'>";
+        "<a href='"; print $e.journal->base_url(); "'>$userpic</a>";
+        if ($e.journal.username != $e.poster.username) { "<br /><font color='$fgcolor'>[$e.poster.username]</font>"; } 
+        if ($p.view == "friends") { "<br /><font color='$fgcolor'>$e.journal.username</font>"; }
+        "</td>";
+    }
+    "<td valign='top'><table border='0'>";
+    # Security Icon
+    if ($e.security != "") {
+        "<tr><td align='right'><font color='$*accent_fgcolor'>Security:</font>";
+        "</td><td><font color='$*accent_fgcolor'>"; $e.security_icon->print(); " $e.security</font></td></tr>";
+    }
+    # Subject
+    if ($e.subject != "") {
+        "<tr><td align='right'><font color='$*accent_fgcolor'>Subject:</font>";
+        "</td><td><font color='$*accent_fgcolor'>$e.subject</font></td></tr>";
+    }
+    # Time posted
+    var string time = $e.time->time_format();
+    "<tr><td align='right'><font color='$*accent_fgcolor'>Time:</font></td>";
+    "<td><font color='$*accent_fgcolor'>$time</font></td></tr>";
+    # Current
+    if (size $e.metadata) {
+        foreach var string k ($e.metadata) {
+            var string key = $k;
+            var string val = $e.metadata{$k};
+            if ($k == "mood" and defined $e.mood_icon) {
+                var Image i = $e.mood_icon;
+                $val = "<img src='$i.url' width='$i.width' height='$i.height' align='absmiddle' alt='[mood icon]' /> $val";
+            }
+            "<tr><td align='right'><font color='$*accent_fgcolor'>$key:</font></td>";
+            "<td><font color='$*accent_fgcolor'>$val</font></td></tr>";
+        }
+    }
+    "</table></td></tr></table></td></tr>";
+    "<tr><td bgcolor='$*main_bgcolor'>$e.text</td></tr>";
+    $e.comments->print();
+    "</table></div><br />";
+}
+
+function Page::print_entry (Entry e) 
+{
+    print_entry($this, $e, null Color, null Color);
+}
+
+function FriendsPage::print_entry (Entry e) {
+    var Friend f = $.friends{$e.journal.username};
+    print_entry($this, $e, $f.bgcolor, $f.fgcolor);
+}
+
+function RecentPage::lay_captionbar_navigation() 
+{
+    var int total = size $.entries;
+    var string nav = "";
+    if ($.nav.backward_url != "") {
+        $nav = """<a href="$.nav.backward_url">back $total entries</a>""";
+    }
+    if ($.nav.forward_url != "" and $.nav.backward_url != "") {
+        $nav = "$nav or ";
+    }
+    if ($.nav.forward_url != "") {
+        $nav = """$nav<a href="$.nav.forward_url">forward $total entries</a>""";
+    }
+    print "You're looking at the latest ";
+    print size $.entries;
+    print ($.nav.skip > 0) ? " entries, after skipping $.nav.skip newer ones." :" entries.";
+    if ($nav != "") { print "<br />Missed some entries?  Then simply jump $nav"; }
+}
+
+function RecentPage::print_body {
+    foreach var Entry e ($.entries) {
+        $this->print_entry($e);
+    }
+}
+
+function FriendsPage::print_body {
+    foreach var Entry e ($.entries) {
+        $this->print_entry($e);
+    }
+}
+
+function CommentInfo::print()
+{
+    "<tr><td bgcolor='$*accent_bgcolor'><font color='$*accent_fgcolor'>";
+    "<nobr>comments: ";
+    if ($.count > 0 or $.screened) {
+        $this->print_readlink(); " or ";
+    }
+    $this->print_postlink();
+    "</nobr></font></td></tr>";
+}
+
+function ArchiveYearPage::print_body {
+    foreach var ArchiveYearMonth m ($.months) {
+        $this->print_month($m);
+    }
+}
+
+function ArchiveYearPage::lay_captionbar_navigation()
+{
+    $this->print_year_links();
+}
+
+function ArchiveYearPage::print_year_links ()
+{
+    foreach var ArchiveYearYear y ($.years) {
+        if ($y.displayed) {
+            "$y.year&nbsp;";
+        } else {
+            "<a href=\"$y.url\">$y.year</a>&nbsp;";
+        }
+    }
+}
+
+function ArchiveYearPage::print_month(ArchiveYearMonth m)
+{
+    if (not $m.has_entries) { return; }
+    "<center><table border='1' cellpadding='4' width='80%'>";
+    # Month header
+    "<tr align='center'><td colspan='7' bgcolor='$*headerbar_bgcolor'>";
+    "<font color='$*headerbar_fgcolor'><b>"; print $m->month_format(); "</b></font></td></tr>";
+    # Weekdays
+    "<tr align='center' bgcolor='$*accent_bgcolor'>";
+    foreach var int d ($.weekdays) {
+        "<td><font color='$*accent_fgcolor'>"+$*lang_dayname_short[$d]+"</font></td>\n";
+    }
+    "</tr>";
+    foreach var ArchiveYearWeek w ($m.weeks) {
+        $w->print();
+    }
+    "<tr align='center'><td colspan='7'><a href='$m.url'>View Subjects</a>";
+    "</td></tr></table></center>";
+}
+
+function ArchiveYearWeek::print () {
+    "<tr>";
+    if ($.pre_empty) { "<td colspan='$.pre_empty' bgcolor='$*accent_bgcolor'>&nbsp;</td>"; }
+    foreach var ArchiveYearDay d ($.days) {
+        "<td valign='top'><b>$d.day</b>";
+        "<div align='center'>";
+        if ($d.num_entries) {
+            """<a href="$d.url">$d.num_entries</a>""";
+        } else {
+            "&nbsp;";
+        }
+        "</div></td>";
+    }
+    if ($.post_empty) { "<td colspan='$.post_empty' bgcolor='$*accent_bgcolor'>&nbsp;</td>"; }
+    "</tr>";
+}
+
+function DayPage::lay_captionbar_navigation()
+{
+    print "Missed some entries? Then simply jump to the <a href='$.prev_url'>previous day</a> or the <a href='$.next_url'>next day</a>.";
+}
+
+function DayPage::print_body () 
+{
+    if (not $.has_entries) {
+        "<table border='0' width='100%' cellpadding='5' cellspacing='1' bgcolor='$*border_color'>";
+        "<tr><td bgcolor='$*headerbar_bgcolor'><font color='$*headerbar_fgcolor'>";
+        print $.date->date_format("%%month%% %%dayord%%, %%yyyy%%");
+        "</font></td></tr></table><br />";
+        print "No journal entries for this day.";
+    } else {
+        foreach var Entry e ($.entries) {
+            $this->print_entry($e);
+        }
+    }
+}
