@@ -823,7 +823,7 @@ sub talkargs {
 }
 
 sub format_text_mail {
-    my ($myjournal, $parent, $comment, $talkurl, $item) = @_;
+    my ($targetu, $parent, $comment, $talkurl, $item) = @_;
     my $dtalkid = $comment->{talkid}*256 + $item->{anum};
 
     $Text::Wrap::columns = 76;
@@ -834,7 +834,7 @@ sub format_text_mail {
     }
 
     my $text = "";
-    if ($myjournal) {
+    if ($targetu == $item->{entryu}) {
         if ($parent->{ispost}) {
             $text .= "$who replied to your $LJ::SITENAMESHORT post in which you said:";
         } else {
@@ -860,26 +860,31 @@ sub format_text_mail {
                  "or unscreen it before others can see it.\n\n";
     }
 
-    $text .= "Options:\n";
-    $text .= " - View the discussion:\n";
-    $text .= "   " . talkargs($talkurl, "thread=$dtalkid") . "\n";
-    $text .= " - View all comments on the entry:\n";
-    $text .= "   $talkurl\n";
-    $text .= " - Reply to the comment:\n";
-    $text .= "   " . talkargs($talkurl, "replyto=$dtalkid") . "\n";
+    my $opts = "";
+    $opts .= "Options:\n\n";
+    $opts .= "  - View the discussion:\n";
+    $opts .= "    " . talkargs($talkurl, "thread=$dtalkid") . "\n";
+    $opts .= "  - View all comments on the entry:\n";
+    $opts .= "    $talkurl\n";
+    $opts .= "  - Reply to the comment:\n";
+    $opts .= "    " . talkargs($talkurl, "replyto=$dtalkid") . "\n";
     if ($comment->{state} eq 'S') {
-        $text .= " - Unscreen the comment:\n";
-        $text .= "   $LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\n";
+        $opts .= "  - Unscreen the comment:\n";
+        $opts .= "    $LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\n";
     }
-    $text .= " - Delete the comment:\n";
-    $text .= "   $LJ::SITEROOT/delcomment.bml?journal=$item->{journalu}{user}&talkid=$dtalkid\n";
-    $text .= "\n-- $LJ::SITENAME\n\n";
-    $text .= "(If you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options.)";
-    return Text::Wrap::wrap("", "", $text);
+    if (LJ::Talk::can_delete($targetu, $item->{journalu}, $item->{entryu}, $comment->{u})) {
+        $opts .= "  - Delete the comment:\n";
+        $opts .= "    $LJ::SITEROOT/delcomment.bml?journal=$item->{journalu}{user}&id=$dtalkid\n";
+    }
+    
+    my $footer = "";
+    $footer .= "-- $LJ::SITENAME\n\n";
+    $footer .= "(If you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options.)";
+    return Text::Wrap::wrap("", "", $text) . "\n" . $opts . "\n" . Text::Wrap::wrap("", "", $footer);
 }
 
 sub format_html_mail {
-    my ($myjournal, $parent, $comment, $encoding, $talkurl, $item) = @_;
+    my ($targetu, $parent, $comment, $encoding, $talkurl, $item) = @_;
     my $ditemid =    $item->{itemid}*256 + $item->{anum};
     my $dtalkid = $comment->{talkid}*256 + $item->{anum};
     my $threadurl = talkargs($talkurl, "thread=$dtalkid");
@@ -895,7 +900,7 @@ sub format_html_mail {
 
     my $intro;
     my $cleanbody = $parent->{body};
-    if ($myjournal) {
+    if ($targetu == $item->{entryu}) {
         if ($parent->{ispost}) {
             $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which you said:";
             LJ::CleanHTML::clean_event(\$cleanbody, {preformatted => $parent->{preformat}});
@@ -959,7 +964,9 @@ sub format_html_mail {
     if ($comment->{state} eq 'S') {
         $html .= "<li><a href=\"$LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\">Unscreen the comment</a></li>";
     }
-    $html .= "<li><a href=\"$LJ::SITEROOT/delcomment.bml?journal=$item->{journalu}{user}&talkid=$dtalkid\">Delete the comment</a></li>";
+    if (LJ::Talk::can_delete($targetu, $item->{journalu}, $item->{entryu}, $comment->{u})) {
+        $html .= "<li><a href=\"$LJ::SITEROOT/delcomment.bml?journal=$item->{journalu}{user}&id=$dtalkid\">Delete the comment</a></li>";
+    }
     $html .= "</ul></p>";
 
     my $want_form = 1;  # this should probably be a preference, or maybe just always off.
@@ -972,8 +979,8 @@ sub format_html_mail {
             parenttalkid =>  $comment->{talkid},
             itemid       =>  $ditemid,
             journal      =>  $item->{journalu}{user},
-            userpost     =>  $parent->{u}{user},
-            ecphash      =>  ecphash($item->{itemid}, $comment->{talkid}, $parent->{u}{password})
+            userpost     =>  $targetu->{user},
+            ecphash      =>  ecphash($item->{itemid}, $comment->{talkid}, $targetu->{password})
         );
 
         $html .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
@@ -1072,8 +1079,9 @@ sub mail_comments {
                 $parent->{u} = $paru;
                 $parent->{body} = $parentcomment;
                 $parent->{ispost} = 0;
+                $item->{entryu} = $entryu;
                 $item->{journalu} = $journalu;
-                my $text = format_text_mail(0, $parent, $comment, $talkurl, $item);
+                my $text = format_text_mail($paru, $parent, $comment, $talkurl, $item);
  
                 if ($LJ::UNICODE && $encoding ne "UTF-8") {
                     $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding}); 
@@ -1086,7 +1094,7 @@ sub mail_comments {
                     if $LJ::UNICODE;
 
                 if ($paru->{'opt_htmlemail'} eq "Y") {
-                    my $html = format_html_mail(0, $parent, $comment, $encoding, $talkurl, $item);
+                    my $html = format_html_mail($paru, $parent, $comment, $encoding, $talkurl, $item);
                     if ($LJ::UNICODE && $encoding ne "UTF-8") {
                         $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
                     }
@@ -1133,12 +1141,22 @@ sub mail_comments {
 
         my $quote = $parentcomment ? $parentcomment : $item->{'event'};
 
-        $parent->{u} = $entryu;
-        $parent->{body} = $parentcomment ? $parentcomment : $item->{'event'},
-        $parent->{ispost} = $parentcomment ? 0 : 1,
+        # if this is a response to a comment inside our journal,
+        # we don't know who made the parent comment
+        # (and it's potentially anonymous).
+        if ($parentcomment) {
+            $parent->{u} = undef;
+            $parent->{body} = $parentcomment;
+            $parent->{ispost} = 0;
+        } else {
+            $parent->{u} = $entryu;
+            $parent->{body} = $item->{'event'},
+            $parent->{ispost} = 1; 
+        }
+        $item->{entryu} = $entryu;
         $item->{journalu} = $journalu;
 
-        my $text = format_text_mail(1, $parent, $comment, $talkurl, $item);
+        my $text = format_text_mail($entryu, $parent, $comment, $talkurl, $item);
 
         if ($LJ::UNICODE && $encoding ne "UTF-8") {
             $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding}); 
@@ -1151,7 +1169,7 @@ sub mail_comments {
             if $LJ::UNICODE;
         
         if ($entryu->{'opt_htmlemail'} eq "Y") {
-            my $html = format_html_mail(1, $parent, $comment, $encoding, $talkurl, $item);
+            my $html = format_html_mail($entryu, $parent, $comment, $encoding, $talkurl, $item);
             if ($LJ::UNICODE && $encoding ne "UTF-8") {
                 $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
             }
