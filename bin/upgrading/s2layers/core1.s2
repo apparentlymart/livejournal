@@ -217,7 +217,7 @@ class UserLite
 class EntryLite
 "Base class for both journal entries and comments."
 {
-    var readonly string subject "Subject";
+    var readonly string subject "Subject.  May contain HTML.  Don't do substring chops on this.";
     var readonly string text "Text (will be blank on some viewtypes, like 'month' view, or with collapsed threads)";
     var DateTime time "The user-specified time of the post, or the GMT time if it's a comment.";
 
@@ -232,6 +232,7 @@ class EntryLite
     var int depth "Visual depth of entry.  Top-level journal entries are always depth zero.  Comments have a depth greater than or equal to one, depending on where the thread is rooted at.";
 
     function builtin get_link (string key) : Link;
+    function builtin get_plain_subject () : string "For Entries that can contain HTML subjects, this returns the subjeft without HTML.  Comments can't have HTML in subjects, so this is equivalent to just using \$.subject.  The returned 'plain' subject may still contain HTML entities, so don't do substring chops on it either.";
 }
 
 class Entry extends EntryLite
@@ -1232,12 +1233,10 @@ function YearPage::view_title() : string {
     return string($.year);
 }
 function EntryPage::view_title() : string {
-    return $.entry.subject ? $.entry.subject->substr(0,40) : "";
+    return $.entry.subject ? $.entry->get_plain_subject() : "";
 }
 function ReplyPage::view_title() : string {
-    return $.entry.subject ? 
-        "Reply to " + $.entry.subject->substr(0,40) :
-        "Post a new comment";
+    return "Post a comment";
 }
 function Page::title() [notags] : string {
     var string title = $.global_title;

@@ -957,8 +957,8 @@ sub Entry
         'links' => {}, # TODO: finish
         'metadata' => {},
     };
-    foreach (qw(subject text journal poster new_day end_day comments 
-                userpic permalink_url itemid)) {
+    foreach (qw(subject _rawsubject text journal poster new_day end_day
+                comments userpic permalink_url itemid)) {
         $e->{$_} = $arg->{$_};
     }
 
@@ -1602,6 +1602,17 @@ sub EntryLite__get_link
     my ($ctx, $this, $key) = @_;
     return undef;
 }
+
+sub EntryLite__get_plain_subject
+{
+    my ($ctx, $this) = @_;
+    return $this->{'_plainsubject'} if $this->{'_plainsubject'};
+    return $this->{'subject'} unless $this->{'_rawsubject'};
+    my $subj = $this->{'subject'};
+    LJ::CleanHTML::clean_subject_all(\$subj);
+    return $this->{'_plainsubject'} = $subj;
+}
+*Entry__get_plain_subject = \&EntryLite__get_plain_subject;
 
 sub Entry__get_link
 {
