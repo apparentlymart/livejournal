@@ -15,14 +15,13 @@ sub change_community_admin
     my ($dbh, $remote, $args, $out) = @_;
     my $sth;
     my $err = sub { push @$out, [ "error", $_[0] ]; return 0; };
-    my $dbs = LJ::make_dbs_from_arg($dbh);
 
     return $err->("This command takes exactly 2 arguments.  Consult the reference.")
         unless scalar(@$args) == 3;
 
     my ($comm_name, $newowner_name) = ($args->[1], $args->[2]);
-    my $ucomm = LJ::load_user($dbh, $comm_name);
-    my $unew  = LJ::load_user($dbh, $newowner_name);
+    my $ucomm = LJ::load_user($comm_name);
+    my $unew  = LJ::load_user($newowner_name);
 
     return $err->("Given community doesn't exist or isn't a community.")
         unless ($ucomm && $ucomm->{'journaltype'} eq "C");
@@ -52,8 +51,8 @@ sub change_community_admin
     LJ::update_user($ucomm, { password => $unew->{'password'}, email => $unew->{'email'} });
 
     ## log to status history
-    LJ::statushistory_add($dbh, $commid, $remote->{'userid'}, "communityxfer", "Changed maintainer to '$unew->{'user'}'($newid)");
-    LJ::statushistory_add($dbh, $newid, $remote->{'userid'}, "communityxfer", "Control of '$ucomm->{'user'}'($commid) given.");
+    LJ::statushistory_add($commid, $remote->{'userid'}, "communityxfer", "Changed maintainer to '$unew->{'user'}'($newid)");
+    LJ::statushistory_add($newid, $remote->{'userid'}, "communityxfer", "Control of '$ucomm->{'user'}'($commid) given.");
 
     push @$out, [ "info", "Transfered ownership of \"$ucomm->{'user'}\"." ];
     return 1;
@@ -137,7 +136,6 @@ sub community
     my ($dbh, $remote, $args, $out) = @_;
     my $error = 0;
     my $sth;
-    my $dbs = LJ::make_dbs_from_arg($dbh);
 
     unless (scalar(@$args) == 4) {
         $error = 1;
@@ -186,7 +184,7 @@ sub community
     
     # user doesn't need admin priv to remove themselves from community
 
-    unless (LJ::check_rel($dbs, $com_id, $remote, 'A') ||
+    unless (LJ::check_rel($com_id, $remote, 'A') ||
             $remote->{'privarg'}->{'sharedjournal'}->{'*'} ||
             ($remote->{'user'} eq $target_user && $action eq "remove")) 
     {

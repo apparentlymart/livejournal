@@ -49,7 +49,7 @@ sub suspend
 
     LJ::update_user($u->{'userid'}, { statusvis => $status, raw => 'statusvisdate=NOW()' });
 
-    LJ::statushistory_add($dbh, $u->{'userid'}, $remote->{'userid'}, $cmd, $reason);
+    LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, $cmd, $reason);
 
     push @$out, [ "info", "User ${cmd}ed." ];
 
@@ -66,7 +66,7 @@ sub getemail
     }
     
     my ($user) = ($args->[1]);
-    my $userid = &LJ::get_userid($dbh, $user);
+    my $userid = &LJ::get_userid($user);
 
     unless ($remote->{'priv'}->{'suspend'}) {
         push @$out, [ "error", "You don't have access to see email addresses." ];
@@ -145,7 +145,7 @@ sub get_maintainer
     }
     
     my ($user) = ($args->[1]);
-    my $userid = LJ::get_userid($dbh, $user);
+    my $userid = LJ::get_userid($user);
 
     unless ($remote->{'priv'}->{'finduser'}) {
         push @$out, [ "error", "$remote->{'user'}, you are not authorized to use this command." ];
@@ -157,8 +157,7 @@ sub get_maintainer
         return 0;
     }
     
-    my $dbs = LJ::make_dbs_from_arg($dbh);
-    my $admins = LJ::load_rel_user($dbs, $userid, 'A') || [];
+    my $admins = LJ::load_rel_user($userid, 'A') || [];
     foreach (@$admins) {
         finduser($dbh, $remote, ['finduser', 'userid', $_], $out);
     }
@@ -176,7 +175,7 @@ sub infohistory
     }
 
     my $user = $args->[1];
-    my $userid = LJ::get_userid($dbh, $user);
+    my $userid = LJ::get_userid($user);
 
     unless ($userid) {
         push @$out, [ "error", "Invalid user $user" ];

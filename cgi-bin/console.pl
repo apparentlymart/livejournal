@@ -199,7 +199,7 @@ $cmd{'priv'} =
         # get the userids, fail if any of them are invalid
         my %userids = ();       # username => userid
         foreach my $username (@usernames) {
-            $userids{$username} = LJ::get_userid($dbh, $username)
+            $userids{$username} = LJ::get_userid($username)
               or return $fail->($out, "No such username '$username'");
         }
 
@@ -249,7 +249,7 @@ $cmd{'priv'} =
                                          join(',', keys %userids)));
                 foreach my $userid (values %userids) {
                     foreach my $privname (keys %prlids) {
-                        LJ::statushistory_add($dbh, $userid, $remote->{userid},
+                        LJ::statushistory_add($userid, $remote->{userid},
                                               'privdel',
                                               qq{Denying: "$privname" with all args});
                     }
@@ -280,7 +280,7 @@ $cmd{'priv'} =
 
                 if ($sth->execute($userid, $prlid, $arg)) {
                     $success->($out, "$desc to $username");
-                    LJ::statushistory_add($dbh, $userid, $remote->{userid},
+                    LJ::statushistory_add($userid, $remote->{userid},
                                           $is_grant ? "privadd" : "privdel",
                                           $desc);
                 } else {
@@ -313,12 +313,12 @@ $cmd{'gencodes'} = {
         $remote->{'priv'}->{'gencodes'}
             or return $fail->($out, "You don't have privileges needed to run this command.");
 
-        my $userid = LJ::get_userid($dbh, $username)
+        my $userid = LJ::get_userid($username)
             or return $fail->($out, "Invalid user $username");
-        my $generated = LJ::acct_code_generate($dbh, $userid, $quantity)
-            or return $fail->($out, "Failed to generate codes: $dbh->errstr");
+        my $generated = LJ::acct_code_generate($userid, $quantity)
+            or return $fail->($out, "Failed to generate codes");
 
-        LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, "gencodes", "$generated created");
+        LJ::statushistory_add($userid, $remote->{'userid'}, "gencodes", "$generated created");
         
         return $success->($out, "$quantity codes requested for $username, generated $generated.");
     },
@@ -679,7 +679,7 @@ sub delete_talk
     my $user = LJ::canonical_username($args->[1]);
     return $err->("First argument must be a username.")	unless $user;
 
-    my $u = LJ::load_user($dbh, $user);
+    my $u = LJ::load_user($user);
     return $err->("User '$user' not found.") unless $u;
 
     my $qitemid = $args->[2]+0;
@@ -901,8 +901,7 @@ sub friend
     {
         my $friend = $args->[2];
         my $err;
-        my $dbs = LJ::make_dbs_from_arg($dbh);
-        my $fid = LJ::get_userid($dbh, $friend);
+        my $fid = LJ::get_userid($friend);
         if (! $fid) {
             push @$out, [ "error", "Unknown friend \"$friend\"" ];
             return 0;
@@ -967,7 +966,6 @@ sub set
 {
     my ($dbh, $remote, $args, $out) = @_;
     my $err = sub { push @$out, [ "error", $_[0] ]; return 0; };
-    my $dbs = LJ::make_dbs_from_arg($dbh);
     
     return $err->("You need to be logged in to use this command.")
         unless $remote;
@@ -980,10 +978,10 @@ sub set
     if ($args[0] eq "for") {
         shift @args;
         my $comm = shift @args;
-        $u = LJ::load_user($dbh, $comm);
+        $u = LJ::load_user($comm);
         return $err->("Community doesn't exist.") unless $u;
         return $err->("You're not an admin of this community.")
-            unless LJ::check_rel($dbs, $u, $remote, 'A');
+            unless LJ::check_rel($u, $remote, 'A');
     }
     return $err->("Wrong number of arguments") unless @args == 2;
     my ($k, $v) = @args;
@@ -1009,15 +1007,15 @@ sub reset_email
         unless ($remote->{'priv'}->{'reset_email'});
 
     my $user = $args->[1];
-    my $userid = LJ::get_userid($dbh, $user);
+    my $userid = LJ::get_userid($user);
 
     return $err->("Invalid user $user") unless ($userid);
 
     my $email = $args->[2];
-    my $aa = LJ::register_authaction($dbh, $userid, "validateemail", $email);
+    my $aa = LJ::register_authaction($userid, "validateemail", $email);
 
     LJ::update_user($userid, { email => $email, status => 'T' })
-        or return $err->($dbh->errstr);
+        or return $err->("A database error has occurred");
 
     my $body;
     $body .= "Your email address for $LJ::SITENAME has been reset.  To validate the change, please go to this address:\n\n";
@@ -1035,7 +1033,7 @@ sub reset_email
              undef, $userid) or return $err->($dbh->errstr);
 
     my $reason = $args->[3];
-    LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, "reset_email", $reason);
+    LJ::statushistory_add($userid, $remote->{'userid'}, "reset_email", $reason);
 
     push @$out, [ '', "Address reset." ];
     return 1;
@@ -1053,7 +1051,7 @@ sub syn_editurl
 
     my $user = $args->[1];
     my $newurl = $args->[2];
-    my $u = LJ::load_user($dbh, $user);
+    my $u = LJ::load_user($user);
 
     return $err->("Invalid user $user") unless $u;
     return $err->("Not a syndicated account") unless $u->{'journaltype'} eq 'Y';

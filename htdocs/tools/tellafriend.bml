@@ -6,11 +6,7 @@
  $title = "Tell a Friend!";
  $body = "";
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
  my $sth;
 
  if ($LJ::DISABLED{'tellafriend'}) {
@@ -23,7 +19,7 @@
      return;
  }
 
- my $u = LJ::load_userid($dbs, $remote->{'userid'});
+ my $u = LJ::load_userid($remote->{'userid'});
  $u->{'emailpref'} = $u->{'email'};
  if ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail")) {
      $u->{'emailpref'} = $u->{'user'} . '@' . $LJ::USER_DOMAIN;
@@ -86,17 +82,17 @@
 
      $itemid = int($itemid / 256);
          
-     $uj = LJ::load_user($dbs, $journal);
+     $uj = LJ::load_user($journal);
      return $err->("Unknown journal") unless $uj;
-     my $db = LJ::get_cluster_reader($uj);
-     
-     my ($posterid, $subject) = $dbr->selectrow_array("SELECT l.posterid, ls.subject ".
-                                                      "FROM log2 l, logtext2 ls ".
-                                                      "WHERE l.journalid=? AND ls.journalid=l.journalid ".
-                                                      "AND l.jitemid=? AND ls.jitemid=l.jitemid",
-                                                      undef, $uj->{'userid'}, $itemid);
+
+     my $dbcr = LJ::get_cluster_reader($uj);
+     my ($posterid, $subject) = $dbcr->selectrow_array("SELECT l.posterid, ls.subject ".
+                                                       "FROM log2 l, logtext2 ls ".
+                                                       "WHERE l.journalid=? AND ls.journalid=l.journalid ".
+                                                       "AND l.jitemid=? AND ls.jitemid=l.jitemid",
+                                                       undef, $uj->{'userid'}, $itemid);
      my $up;
-     LJ::load_userids_multiple($dbs, [ $posterid => \$up ], [ $uj, $u ]);
+     LJ::load_userids_multiple([ $posterid => \$up ], [ $uj, $u ]);
 
      my $base = LJ::journal_base($uj);
      my $url = "$base/$ditemid.html";
@@ -113,8 +109,7 @@
 
  if ($FORM{'user'} =~ /^\w{1,15}$/) {
      my $user = $FORM{'user'};
-     my $quser = $dbh->quote($user);
-     my $uj = LJ::load_user($dbs, $quser);
+     my $uj = LJ::load_user($user);
      my $url;
      if (LJ::get_cap($uj, "userdomain")) {
          my $sub = $user;
@@ -126,7 +121,7 @@
      
      if ($user eq $u->{'user'}) {
          $msg .= "Hey,\n\nCheck out my journal that I'm keeping online:\n\n";
-         $msg .= "  $url\n\n";
+         $msg .= "   $url\n\n";
          my $name = $u->{'name'};
          $name =~ s/\s.+//;
          $msg .= "- $name\n";

@@ -21,8 +21,7 @@ sub get_permissions
         my $quser = $dbh->quote($u->{'user'});
         
         ## check if you're an admin of that journal 
-        my $dbs = LJ::make_dbs_from_arg($dbh);
-        my $is_manager = LJ::check_rel($dbs, $u, $remote, 'A');
+        my $is_manager = LJ::check_rel($u, $remote, 'A');
         if ($is_manager) {
             $perm->{'add'} = 1;
             $perm->{'delete'} = 1;

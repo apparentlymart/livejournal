@@ -1,20 +1,15 @@
 <?_code
-
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
  
  my $styleid = $FORM{'styleid'}+0;
 
- my $sth = $dbr->prepare("SELECT * FROM style WHERE is_public='Y' AND styleid=$styleid");
- $sth->execute;
- my $sty = $sth->fetchrow_hashref;
- unless ($sth->rows) {
+ my $dbr = LJ::get_db_reader();
+ my $sty = $dbr->selectrow_hashref("SELECT * FROM style WHERE is_public='Y' AND styleid=$styleid");
+ unless ($sty) {
    # TODO: allow people with supporthelp in any category to see it anyway
    return "Style $styleid does not exist or is not public.";
  }
- my $ret = "";
 
+ my $ret = "";
  $ret .= "<H1>Style Info</H1>\n";
 
  $ret .= "<DL>\n";

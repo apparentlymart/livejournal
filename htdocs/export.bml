@@ -58,9 +58,8 @@ HTMLBLOCK
     # unicode encoding selection
     if ($LJ::UNICODE) {
         my (%encodings, %encnames);
-        my $dbs = LJ::get_dbs();
-        LJ::load_codes($dbs, { "encoding" => \%encodings } );
-        LJ::load_codes($dbs, { "encname" => \%encnames } );
+        LJ::load_codes({ "encoding" => \%encodings } );
+        LJ::load_codes({ "encname" => \%encnames } );
         my $selected = 0;
         foreach my $id (keys %encodings) {
             $selected = $id if lc($encodings{$id}) eq 'utf-8';

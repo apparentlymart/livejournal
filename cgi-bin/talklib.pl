@@ -198,8 +198,7 @@ sub init
 # dbs?, dbcs?, $u, $itemid
 sub get_journal_item
 {
-    my $dbs = ref $_[0] eq "LJ::DBSet" ? shift : undef;
-    my $dbcs = ref $_[0] eq "LJ::DBSet" ? shift : undef;
+    shift @_ while ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my ($u, $itemid) = @_;
 
     my $uid = $u->{'userid'}+0;
@@ -212,11 +211,10 @@ sub get_journal_item
         "FROM log2 WHERE journalid=$uid AND jitemid=$itemid";
 
     my $item;
-    my $dbc;
     foreach my $role ("slave", "master") {
         next if $item;
-        $dbc = $role eq "slave" ? LJ::get_cluster_reader($u) : LJ::get_cluster_master($u);
-        $item = $dbc->selectrow_hashref($sql);
+        my $db = $role eq "slave" ? LJ::get_cluster_reader($u) : LJ::get_cluster_master($u);
+        $item = $db->selectrow_hashref($sql);
     }
     return undef unless $item;
 
@@ -230,7 +228,7 @@ sub get_journal_item
 
     ### load the log properties
     my %logprops = ();
-    LJ::load_log_props2($dbc, $u->{'userid'}, [ $itemid ], \%logprops);
+    LJ::load_log_props2($u->{'userid'}, [ $itemid ], \%logprops);
     $item->{'props'} = $logprops{$itemid} || {};
 
     if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {

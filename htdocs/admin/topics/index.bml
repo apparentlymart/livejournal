@@ -6,13 +6,9 @@ body<=
  
  use strict;
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $ret;
 
- my ($ret);
-
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  if (LJ::remote_has_priv($remote, "topicaddtopic")) {
      $ret .= "<P><A HREF=\"screentop.bml\"><B>Screen Topic Submissions</B></A> that are awaiting approval into a category.";

@@ -3,9 +3,7 @@
  use strict;
  use vars qw($title $body %FORM);
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbh = LJ::get_db_writer();
 
  $title = "";
  $body = "";
@@ -13,10 +11,10 @@
  my ($sth, $hval, $disabled);
  my %permission;
  my $u;
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  if ($FORM{'user'}) {
-     $u = LJ::load_user($dbs, $FORM{'user'});
+     $u = LJ::load_user($FORM{'user'});
  }
 
  my $mode;
@@ -24,6 +22,7 @@
 
  if ($FORM{'id'} =~ /^\d+$/ && $FORM{'id'}) {
      my $id = $FORM{'id'}+0;
+     my $dbr = LJ::get_db_reader();
      $sth = $dbr->prepare("SELECT t.*, up.user AS 'posteruser' FROM todo t, useridmap up WHERE t.posterid=up.userid AND t.todoid=$id");
      $sth->execute;
      $it = $sth->fetchrow_hashref;
@@ -33,7 +32,7 @@
          return;
      }
      
-     $u = LJ::load_userid($dbs, $it->{'journalid'});
+     $u = LJ::load_userid($it->{'journalid'});
 
      if ($it->{'security'} eq "private") {
          unless ($remote && $remote->{'userid'} == $it->{'journalid'}) {
@@ -43,7 +42,7 @@
          }
      }
      if ($it->{'security'} eq "friends") {
-         unless (LJ::is_friend($dbs, $u, $remote)) {
+         unless (LJ::is_friend($u, $remote)) {
              $title = "Sorry...";
              $body = "<?h1 Security h1?><?p The requested to-do item marked 'friends only' by the owner. p?>";
              return;
@@ -141,7 +140,7 @@
                  return;
              }
              
-             my $kwid = LJ::get_keyword_id($dbh, $kw);
+             my $kwid = LJ::get_keyword_id($kw);
              push @kwid, $kwid;
          }
          

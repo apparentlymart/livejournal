@@ -43,8 +43,7 @@ form<=
 <tr><td align='right'>Country:</td><td align='left'>
 <?_code
 
- my $dbs = LJ::get_dbs();
- LJ::load_codes($dbs, { "country" => \%countries });
+ LJ::load_codes({ "country" => \%countries });
  return LJ::html_select({
      'name' => 'loc_cn',
  }, "", "", map { $_, $countries{$_} } "US", sort { $countries{$a} cmp $countries{$b} } keys %countries);
