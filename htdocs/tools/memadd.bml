@@ -1,8 +1,10 @@
 (=_CODE
 
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
- my $remote = &get_remote();
+ my $remote = LJ::get_remote($dbs);
  unless (defined $remote) {
      $title = "Add Memory";
      $body = "You must be <A HREF=\"/login.bml?ret=1\">logged in</A> to use this feature.  Go login and you'll be brought back here.";
@@ -19,7 +21,7 @@
  my $sth;
  my $itemid = $FORM{'itemid'}+0;
 
- $sth = $dbh->prepare("SELECT l.ownerid, l.posterid, l.eventtime, lt.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold' FROM log l, logtext lt WHERE lt.itemid=l.itemid AND l.itemid=$itemid");
+ $sth = $dbr->prepare("SELECT l.ownerid, l.posterid, l.eventtime, ls.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold' FROM log l, logsubject ls WHERE ls.itemid=l.itemid AND l.itemid=$itemid");
  $sth->execute;
  my $log = $sth->fetchrow_hashref;
  unless ($log) {
@@ -29,7 +31,7 @@
  }
 
  # check to see if it already is memorable (thus we're editing, not adding);
- $sth = $dbh->prepare("SELECT memid, des, security FROM memorable WHERE userid=$remote->{'userid'} AND itemid=$itemid");
+ $sth = $dbr->prepare("SELECT memid, des, security FROM memorable WHERE userid=$remote->{'userid'} AND itemid=$itemid");
  $sth->execute;
  my $memory = $sth->fetchrow_hashref;
  
@@ -39,7 +41,7 @@
 
      my @all_keywords;
      my %selected_keyword;
-     $sth = $dbh->prepare("SELECT k.keyword FROM keywords k, memkeyword mk, memorable m WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=$remote->{'userid'} GROUP BY 1");
+     $sth = $dbr->prepare("SELECT k.keyword FROM keywords k, memkeyword mk, memorable m WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=$remote->{'userid'} GROUP BY 1");
      $sth->execute;
      while (my ($kw) = $sth->fetchrow_array) {
 	 push @all_keywords, $kw;
@@ -48,7 +50,7 @@
      if (defined $memory) {
 	 $title = "Edit Memorable Entry";
 	 $des = $memory->{'des'};
-	 $sth = $dbh->prepare("SELECT k.keyword FROM keywords k, memkeyword mk WHERE mk.kwid=k.kwid AND mk.memid=$memory->{'memid'}");
+	 $sth = $dbr->prepare("SELECT k.keyword FROM keywords k, memkeyword mk WHERE mk.kwid=k.kwid AND mk.memid=$memory->{'memid'}");
 	 $sth->execute;
 	 while (my ($kw) = $sth->fetchrow_array) {
 	     next if ($kw eq "*");
@@ -59,7 +61,7 @@
      } 
      else 
      {
-	 my $user = LJ::get_username($dbh, $log->{'ownerid'});
+	 my $user = LJ::get_username($dbs, $log->{'ownerid'});
 	 $des = "$user: " . ($log->{'subject'} || $log->{'eventtime'});
      }
 
@@ -147,7 +149,7 @@
 	     return "";
 	 }
 
-	 my $kwid = LJ::get_keyword_id($dbh, $kw);
+	 my $kwid = LJ::get_keyword_id($dbs, $kw);
 	 push @kwid, $kwid;
      }
 

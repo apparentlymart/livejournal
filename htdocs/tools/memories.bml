@@ -1,6 +1,9 @@
 (=_CODE
 
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my $remote = &get_remote();
 
  $title = "";
@@ -12,7 +15,7 @@
      $user = $remote->{'user'};
  }
 
- my $userid = &LJ::get_userid($dbh, $user);
+ my $userid = &LJ::get_userid($dbs, $user);
  unless ($userid) {
      $title = "Error";
      $body = "Missing or invalid username.";
@@ -31,7 +34,7 @@
 	 push @sec_in, "private", "friends";
      } else {
 	 ## see if they're a friend
-	 $sth = $dbh->prepare("SELECT COUNT(*) FROM friends WHERE userid=$userid AND friendid=$remote->{'userid'}");
+	 $sth = $dbr->prepare("SELECT COUNT(*) FROM friends WHERE userid=$userid AND friendid=$remote->{'userid'}");
 	 $sth->execute;
 	 my ($is_friend) = $sth->fetchrow_array;
 	 if ($is_friend) {
@@ -59,7 +62,7 @@
 	 $extrawhere = "AND l.ownerid $op $userid";
      }
      
-     $sth = $dbh->prepare("SELECT u.user, l.eventtime, m.itemid, m.des, m.security FROM memorable m, memkeyword mk, keywords k, log l, user u WHERE k.keyword=$qkw AND mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid AND m.itemid=l.itemid AND u.userid=l.ownerid AND m.security IN ($sec_in) $extrawhere ORDER BY k.keyword, l.eventtime");
+     $sth = $dbr->prepare("SELECT u.user, l.eventtime, m.itemid, m.des, m.security FROM memorable m, memkeyword mk, keywords k, log l, user u WHERE k.keyword=$qkw AND mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid AND m.itemid=l.itemid AND u.userid=l.ownerid AND m.security IN ($sec_in) $extrawhere ORDER BY k.keyword, l.eventtime");
      $sth->execute;
     
      $body .= "<UL>\n";
@@ -81,10 +84,10 @@
  $body .= "(=H1 Memorable Posts H1=)(=P The following is a list of categories that user <B>$user</B> has placed memorable journal entries in. P=)";
 
  if ($filter eq "all") {
-     $sth = $dbh->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid AND m.security IN ($sec_in) GROUP BY k.keyword ORDER BY k.keyword");
+     $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid AND m.security IN ($sec_in) GROUP BY k.keyword ORDER BY k.keyword");
  } else {
      my $op = $filter eq "own" ? "=" : "<>";
-     $sth = $dbh->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k, log l WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid AND m.security IN ($sec_in) AND m.itemid=l.itemid AND l.ownerid $op $userid GROUP BY k.keyword ORDER BY k.keyword");     
+     $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k, log l WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid AND m.security IN ($sec_in) AND m.itemid=l.itemid AND l.ownerid $op $userid GROUP BY k.keyword ORDER BY k.keyword");     
  }
  $sth->execute;
  
