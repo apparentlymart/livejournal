@@ -294,30 +294,42 @@ sub load_props
     return \%props;
 }
 
+# $loadreq is used by /abuse/report.bml and
+# ljcmdbuffer.pl to signify that the full request
+# should not be loaded.  To simplify code going live,
+# Whitaker and I decided to not try and merge it
+# into the new $opts hash.
+
+# $opts->{'db_force'} loads the request from a
+# global master.  Needed to prevent a race condition
+# where the request may not have replicated to slaves
+# in the time needed to load an auth code.
+
 sub load_request
 {
-    my ($spid, $loadreq) = @_;
+    my ($spid, $loadreq, $opts) = @_;
     my $sth;
 
     $spid += 0;
 
     # load the support request
-    my $dbr = LJ::get_db_reader();
-    $sth = $dbr->prepare("SELECT * FROM support WHERE spid=$spid");
+    my $db = $opts->{'db_force'} ? LJ::get_db_writer() : LJ::get_db_reader();
+
+    $sth = $db->prepare("SELECT * FROM support WHERE spid=$spid");
     $sth->execute;
     my $sp = $sth->fetchrow_hashref;
 
     return undef unless $sp;
 
     # load the category the support requst is in
-    $sth = $dbr->prepare("SELECT * FROM supportcat WHERE spcatid=$sp->{'spcatid'}");
+    $sth = $db->prepare("SELECT * FROM supportcat WHERE spcatid=$sp->{'spcatid'}");
     $sth->execute;
     $sp->{_cat} = $sth->fetchrow_hashref;
 
     # now load the user's request text, if necessary
     if ($loadreq) {
-        $sp->{body} = $dbr->selectrow_array("SELECT message FROM supportlog WHERE spid = ? AND type = 'req'",
-                                            undef, $sp->{spid});
+        $sp->{body} = $db->selectrow_array("SELECT message FROM supportlog WHERE spid = ? AND type = 'req'",
+					   undef, $sp->{spid});
     }
 
     return $sp;
