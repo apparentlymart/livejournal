@@ -47,13 +47,10 @@ sub init_remote
 {
     my $dbh = shift;
     my $remote = shift;
-    return unless ($remote);
-
-    if ($remote->{'userid'}) {
-        LJ::load_user_privs($dbh, $remote, 
-                            qw(supportclose supporthelp 
-                               supportdelete supportread));
-    }
+    return unless $remote;
+    LJ::load_user_privs($dbh, $remote, 
+                        qw(supportclose supporthelp 
+                           supportdelete supportread));
 }
 
 # given all the categories, maps a catkey into a cat
