@@ -550,6 +550,13 @@ sub check_referer {
     return undef;
 }
 
+# <LJFUNC>
+# name: LJ::form_auth
+# class: web
+# des: Creates an authentication token to be used later to verify that a form
+#   submission came from a particular user.
+# returns: HTML hidden field to be inserted into the output of a page.
+# </LJFUNC>
 sub form_auth {
     my $remote = LJ::get_remote()    or return "";
     my $sess = $remote->{'_session'} or return "";
@@ -560,6 +567,15 @@ sub form_auth {
     return LJ::html_hidden("lj_form_auth", LJ::challenge_generate(86400, $auth));
 }
 
+# <LJFUNC>
+# name: LJ::check_form_auth
+# class: web
+# des: Verifies form authentication created with LJ::form_auth.
+# returns: Boolean; true if the current data in %POST is a valid form submitted
+#   by the user in $remote using the current session, false if the user has changed,
+#   the challenge has expired, or the user has changed session (logged out and in
+#   again, or something).
+# </LJFUNC>
 sub check_form_auth {
     my $remote = LJ::get_remote()    or return 0;
     my $sess = $remote->{'_session'} or return 0;
