@@ -544,19 +544,18 @@ _code?>
         }
         
         ### let them un-ban users if they've banned users
-        my @banned = ();
-        $sth = $dbr->prepare("SELECT r.targetid, u.user FROM reluser r, user u " .
-                             "WHERE r.targetid=u.userid AND r.userid=? AND r.type='B'");
-        $sth->execute($u->{'userid'});
-        push @banned, $_ while ($_ = $sth->fetchrow_hashref);
-        
-        if (@banned) {
+        my $banned = LJ::load_rel_user($u, 'B');
+        if ($banned && @$banned) {
+	    my $us = LJ::load_userids(@$banned);
+
             $ret .= "<?h1 $ML{'.unbanusers.header'} h1?><?p $ML{'.unbanusers.about'} p?>\n";
             $ret .= "<div style='margin: 10px 0 20px 30px'>\n";
-            foreach (@banned) {
-                $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'unban', 'id' => "unban-$_->{'user'}",
-                                         'value' => $_->{'targetid'} });
-                $ret .= " <label for='unban-$_->{'user'}'>$_->{'user'}</label><br />\n";
+            foreach (@$banned) {
+		my $bu = $us->{$_};
+		next unless $bu;
+                $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'unban', 'id' => "unban-$bu->{'user'}",
+                                         'value' => $bu->{'userid'} });
+                $ret .= " <label for='unban-$bu->{'user'}'>$bu->{'user'}</label><br />\n";
             }
             $ret .= "</div>\n";
         }
