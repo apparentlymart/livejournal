@@ -532,7 +532,7 @@ sub get_crumb
 # Returns true to let the submit continue.
 $LJ::COMMON_CODE{'chalresp_js'} = q{
 <script type="text/javascript" src="/js/md5.js"></script>
-<script language="JavaScript">
+<script language="JavaScript" type="text/javascript">
     <!--
 function sendForm (formid, checkuser)
 {
