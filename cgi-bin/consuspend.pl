@@ -144,23 +144,29 @@ sub get_maintainer
         return 0;
     }
     
-    my ($user) = ($args->[1]);
-    my $userid = LJ::get_userid($user);
-
     unless ($remote->{'priv'}->{'finduser'}) {
         push @$out, [ "error", "$remote->{'user'}, you are not authorized to use this command." ];
         return 0;
     }
 
-    unless ($userid) {
+    my $user = $args->[1];
+    my $u = LJ::load_user($user);
+
+    unless ($u) {
         push @$out, [ "error", "Invalid user \"$user\"" ];
         return 0;
     }
-    
-    my $admins = LJ::load_rel_user($userid, 'A') || [];
-    foreach (@$admins) {
-        finduser($dbh, $remote, ['finduser', 'userid', $_], $out);
-    }
+
+    # journaltype eq 'P' means we're calling get_maintainer on a
+    # plain user and we should get a list of what they maintain instead of
+    # getting a list of what maintains them
+    my $ids = $u->{journaltype} eq 'P' ?
+              LJ::load_rel_target($u->{userid}, 'A') :
+              LJ::load_rel_user($u->{userid}, 'A');
+    $ids ||= [];
+
+    # finduser loop
+    finduser($dbh, $remote, ['finduser', 'userid', $_], $out) foreach @$ids;
 
     return 1;
 }
