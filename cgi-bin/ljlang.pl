@@ -240,25 +240,35 @@ sub set_text
              "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), $staleness)");
     return set_error("Error inserting ml_latest: ".$dbh->errstr) if $dbh->err;
 
-    # set descendants to use this mapping
-    if ($opts->{'childrenlatest'}) {
+    {
         my $vals;
+        my $langids;
         my $rec = sub {
             my $l = shift;
             my $rec = shift;
             foreach my $cid (@{$l->{'children'}}) {
                 my $clid = $LN_ID{$cid};
-                my $stale = $clid->{'parenttype'} eq "diff" ? 3 : 0;
-                $vals .= "," if $vals;
-                $vals .= "($cid, $dmid, $itid, $txtid, NOW(), $stale)";
+                if ($opts->{'childrenlatest'}) {
+                    my $stale = $clid->{'parenttype'} eq "diff" ? 3 : 0;
+                    $vals .= "," if $vals;
+                    $vals .= "($cid, $dmid, $itid, $txtid, NOW(), $stale)";
+                }
+                $langids .= "," if $langids;
+                $langids .= $cid+0;
                 $rec->($clid, $rec);
             }
         };
         $rec->($l, $rec);
+
+        # set descendants to use this mapping
         $dbh->do("INSERT IGNORE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) ".
                  "VALUES $vals") if $vals;
+
+        # update languages that have no translation yet
+        $dbh->do("UPDATE ml_latest SET txtid=$txtid WHERE dmid=$dmid ".
+                 "AND lnid IN ($langids) AND itid=$itid AND staleness >= 3") if $langids;
     }
-    
+
     if ($opts->{'changeseverity'} && $l->{'children'} && @{$l->{'children'}}) {
         my $in = join(",", @{$l->{'children'}});
         my $newstale = $opts->{'changeseverity'} == 2 ? 2 : 1;
