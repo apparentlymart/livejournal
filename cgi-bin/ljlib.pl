@@ -744,12 +744,16 @@ sub get_recent_items
     my $gmask_from = $opts->{'gmask_from'};
     unless (ref $gmask_from eq "HASH") {
         $gmask_from = {};
-        if ($remote && $remote->{'journaltype'} eq "P") {
+        if ($remote && $remote->{'journaltype'} eq "P" && $remoteid != $userid) {
             ## then we need to load the group mask for this friend
-            $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE userid=$userid ".
-                                 "AND friendid=$remoteid");
-            $sth->execute;
-            my ($mask) = $sth->fetchrow_array;
+            my $memkey = [$userid,"frgmask:$userid:$remoteid"];
+            my $mask = LJ::MemCache::get($memkey);
+            unless (defined $mask) {
+                $mask = $dbr->selectrow_array("SELECT groupmask FROM friends ".
+                                              "WHERE userid=? AND friendid=?",
+                                              undef, $userid, $remoteid);
+                LJ::MemCache::set($memkey, $mask+0, time()+60*15);
+            }
             $gmask_from->{$userid} = $mask;
         }
     }

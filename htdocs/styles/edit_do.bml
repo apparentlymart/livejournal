@@ -302,6 +302,7 @@ body<=
         # update stylecache row
         $dbh->do("UPDATE s1stylecache SET vars_stor=NULL, vars_cleanver=0 WHERE styleid=?",
                  undef, $styleid);
+        LJ::MemCache::delete([$styleid,"s1styc:$styleid"]);
         return "<?h1 Error h1?><?p There was a database error updating this style: $dbh->errstr p?>"
             if $dbh->err;
     

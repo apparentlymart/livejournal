@@ -265,9 +265,15 @@ sub load_style
         return $cch->{'style'};
     }
 
-    my $dbr = LJ::get_db_reader();
-    my $styc = $dbr->selectrow_hashref("SELECT * FROM s1stylecache WHERE styleid=?",
-                                       undef, $styleid);
+    my $memkey = [$styleid, "s1styc:$styleid"];
+    my $styc = LJ::MemCache::get($memkey);
+
+    unless ($styc) {
+        my $dbr = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
+        $styc = $dbr->selectrow_hashref("SELECT * FROM s1stylecache WHERE styleid=?",
+                                        undef, $styleid);
+        LJ::MemCache::set($memkey, $styc, time()+60*30) if $styc;
+    }
 
     if (! $styc || $styc->{'vars_cleanver'} < $LJ::S1::CLEANER_VERSION) {
         my $dbh = LJ::get_db_writer();
@@ -605,7 +611,7 @@ sub create_view_lastn
 
     # do they want to 
     my $viewall = 0;
-    if ($FORM{'viewall'} && LJ::check_priv($dbr, $remote, "viewall")) {
+    if ($FORM{'viewall'} && LJ::check_priv($remote, "viewall")) {
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
                               "viewall", "lastn: $user");
         $viewall = 1;
