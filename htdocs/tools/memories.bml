@@ -55,7 +55,7 @@
 	 $extrawhere = "AND l.ownerid $op $userid";
      }
      
-     $sth = $dbr->prepare("SELECT u.user, l.eventtime, m.itemid, m.des, m.security FROM memorable m, memkeyword mk, keywords k, log l, user u WHERE k.keyword=$qkw AND mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid AND m.itemid=l.itemid AND u.userid=l.ownerid AND m.security IN ($sec_in) $extrawhere ORDER BY k.keyword, l.eventtime");
+     $sth = $dbr->prepare("SELECT m.memid, u.user, m.journalid, m.jitemid, m.des, m.security FROM memorable m, memkeyword mk, keywords k LEFT JOIN useridmap u ON m.journalid=u.userid WHERE k.keyword=$qkw AND mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid AND m.security IN ($sec_in) $extrawhere ORDER BY m.memid");
      $sth->execute;
     
      $body .= "<UL>\n";
@@ -64,12 +64,13 @@
 	 my $eh_des = LJ::ehtml($mem->{'des'});
 	 my $eventtime = substr($mem->{'eventtime'}, 0, 10);
 	 my $edit = "";
+	 my $jargent = $mem->{'user'} ? "journal=$mem->{'user'}&amp;" : "";
 	 if ($remote && $remote->{'user'} eq $user) {
-	     $edit = " [<a href=\"/tools/memadd.bml?itemid=$mem->{'itemid'}\">edit</a>]";
+	     $edit = " [<a href=\"/tools/memadd.bml?${jargent}itemid=$mem->{'jitemid'}\">edit</a>]";
 	 }
-	 $body .= "<p><LI><A HREF=\"/talkread.bml?itemid=$mem->{'itemid'}\"><b>$eh_des</b></A>$edit<BR><FONT SIZE=-1><B>$mem->{'user'}</B> \@ $eventtime</FONT>";
+	 $body .= "<p><li><a href=\"/talkread.bml?${jargent}itemid=$mem->{'jitemid'}\"><b>$eh_des</b></a>$edit<br /><font size='-1'><b>$mem->{'user'}</b> \@ $eventtime</font></li>";
      }
-     $body .= "</UL>";
+     $body .= "</ul>";
      return;
  }
 

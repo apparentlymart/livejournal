@@ -171,10 +171,11 @@ sub topic_links
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
-    return if $u->{'clusterid'};  # FIXME: finish topic support for cluster-ers
+    my $jid = $u->{'clusterid'} ? $u->{'userid'} : 0;
 
     my $in_topic = 0;
-    my $sth = $dbr->prepare("SELECT tptopid, status FROM topic_map WHERE itemid=$itemid");
+    my $sth = $dbr->prepare("SELECT tptopid, status FROM topic_map WHERE ".
+			    "journalid=$jid AND jitemid=$itemid");
     $sth->execute;
     while (my ($tptopid, $status) = $sth->fetchrow_array)
     {

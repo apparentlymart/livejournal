@@ -169,7 +169,7 @@ BODY<=
 
  $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' />";
  ### is this in a topic?
- $ret .= LJ::Talk::topic_links($dbs, $u, $itemid) unless $FORM{'replyto'};
+ $ret .= LJ::Talk::topic_links($dbs, $u, $ditemid) unless $FORM{'replyto'};
 
  my %users_to_load;
  my @posts_to_load;

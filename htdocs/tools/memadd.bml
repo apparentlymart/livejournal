@@ -1,13 +1,17 @@
 (=_CODE
 
+ use strict;
+ use vars qw(%FORM $title $body);
+
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
  my $remote = LJ::get_remote($dbs);
+
  unless (defined $remote) {
      $title = "Add Memory";
-     $body = "You must be <A HREF=\"/login.bml?ret=1\">logged in</A> to use this feature.  Go login and you'll be brought back here.";
+     $body = "You must be <a href=\"/login.bml?ret=1\">logged in</a> to use this feature.  Go login and you'll be brought back here.";
      return;
  }
 
@@ -19,19 +23,41 @@
 		 'private' => "Private", );
 
  my $sth;
+ my $journal = $FORM{'journal'};
  my $itemid = $FORM{'itemid'}+0;
+ my $ditemid = $itemid;
+ my $ju;
+ my $dbcr;
+ my $jid = 0;  # journal id
+ my $anum;
 
- $sth = $dbr->prepare("SELECT l.ownerid, l.posterid, l.eventtime, ls.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold' FROM log l, logsubject ls WHERE ls.itemid=l.itemid AND l.itemid=$itemid");
+ if ($journal) {
+     $ju = LJ::load_user($dbs, $journal);
+     unless ($ju) {
+	 $title = "Error";
+	 $body = "Unknown journal.";
+	 return;
+     }
+     $anum = $itemid % 256;
+     $itemid = int($itemid / 256);
+     $jid = $ju->{'userid'};
+     $dbcr = LJ::get_cluster_reader($ju);
+
+     $sth = $dbcr->prepare("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, ls.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold', l.anum FROM log2 l, logsubject2 ls WHERE ls.journalid=$jid AND l.journalid=$jid AND ls.jitemid=l.jitemid AND l.jitemid=$itemid");
+ } else {
+     $sth = $dbr->prepare("SELECT l.ownerid, l.posterid, l.eventtime, ls.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold' FROM log l, logsubject ls WHERE ls.itemid=l.itemid AND l.itemid=$itemid");     
+ }
  $sth->execute;
  my $log = $sth->fetchrow_hashref;
- unless ($log) {
+ unless ($log && $log->{'anum'} == $anum) {
      $title = "Error";
      $body = "No such journal entry";
      return;
  }
 
  # check to see if it already is memorable (thus we're editing, not adding);
- $sth = $dbr->prepare("SELECT memid, des, security FROM memorable WHERE userid=$remote->{'userid'} AND itemid=$itemid");
+ $sth = $dbr->prepare("SELECT memid, des, security FROM memorable WHERE ".
+		      "userid=$remote->{'userid'} AND journalid=$jid AND jitemid=$ditemid");
  $sth->execute;
  my $memory = $sth->fetchrow_hashref;
  
@@ -71,7 +97,8 @@
 
      $body .= "(=H1 Add to memories... H1=)(=P To add the journal entry you were just viewing to your \"memories\", fill out the form below. P=)";
      $body .= "<FORM METHOD=POST>";
-     $body .= "<input type=hidden name=itemid value=$itemid>";
+     $body .= "<input type='hidden' name='itemid' value='$ditemid'>";
+     $body .= "<input type='hidden' name='journal' value='$ju->{'user'}'>" if $ju;
      $body .= "<input type=hidden name=mode value=\"save\">";
      $body .= "<TABLE cellpadding=4>";
 
@@ -178,7 +205,8 @@
      } 
      else 
      {
-	 $sth = $dbh->prepare("INSERT INTO memorable (memid, userid, itemid, des, security) VALUES (NULL, $remote->{'userid'}, $itemid, $qdes, $qsec)");
+	 $sth = $dbh->prepare("INSERT INTO memorable (memid, userid, journalid, jitemid, des, security) ".
+			      "VALUES (NULL, $remote->{'userid'}, $jid, $ditemid, $qdes, $qsec)");
 	 $sth->execute;
 	 $memid = $dbh->{'mysql_insertid'};
      }

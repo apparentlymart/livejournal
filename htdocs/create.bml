@@ -303,7 +303,8 @@ BODY<=
 
      if ($LJ::ALLOW_CLUSTER_SELECT) {
 	 $ret .= "(=H2 Cluster Selection H2=)(=P Please select the cluster you want to create this ".
-	     "account on. P=)";
+	     "account on. <b>Note:</b>  This is a debugging/test option only.  In production, users won't ".
+	     "pick this, or know anything about it.  P=)";
 	 $ret .= "(=STANDOUT Cluster:<br />";
 	 $ret .= LJ::html_select({ 'name' => 'cluster_id' },
 				 "0", "No Cluster", 
