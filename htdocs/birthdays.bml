@@ -4,21 +4,37 @@ body<=
 <?_code
 {
     use strict;
+    use vars qw(%GET);
 
     LJ::set_active_crumb('birthdays');
 
     my $remote = LJ::get_remote();
     return "<?needlogin?>" unless $remote;
 
-    my $body = $ML{'.description'};
+    my $u;
+    if ($GET{user}) {
+        $u = LJ::load_user($GET{user});
+        return BML::ml('.error.invaliduser', { user => LJ::ehtml($GET{user}) })
+            unless $u;
+    }
+
+    my $body;
     my $lastmon = 0;
+
+    $body .= '<?p ';
+    if ($u) {
+        $body .= BML::ml('.description.others', { user => LJ::ljuser($u) });
+    } else {
+        $body .= $ML{'.description'};
+    }
+    $body .= ' p?>';
 
     # TAG:fr:bml_birthdays:get_bdays
     my $dbr = LJ::get_db_reader();
     my $sth = $dbr->prepare(
         qq|SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day'
            FROM friends f, user u
-           WHERE f.userid = $remote->{'userid'} 
+           WHERE f.userid = ?
              AND f.friendid = u.userid
              AND u.journaltype = 'P'
              AND u.statusvis = 'V'
@@ -26,7 +42,7 @@ body<=
              AND MONTH(bdate) != 0
              AND DAYOFMONTH(bdate) != 0
            LIMIT 750|);
-    $sth->execute;
+    $sth->execute($u ? $u->{userid} : $remote->{userid});
 
     my @bdays;
     push @bdays, $_ while $_ = $sth->fetchrow_hashref;
@@ -52,7 +68,17 @@ body<=
         $body .= "<b><tt>$day</tt></b>: " . LJ::ljuser($bday->{'user'}) . " - $name<br />\n";
     }
 
-    $body .= "</ul>\n" if @bdays;
+    if (@bdays) {
+        $body .= "</ul>\n";
+    } else {
+        $body .= "<?p $ML{'.nobirthdays'} p?>";
+    }
+
+    $body .= "<?p $ML{'.findothers'} p?>";
+    $body .= "<form method='get' action='$LJ::SITEROOT/birthdays.bml'>";
+    $body .= LJ::html_text({ name => 'user', maxlength => 15, size => 15 });
+    $body .= LJ::html_submit(undef, $ML{'.view'});
+    $body .= "</form>";
 
     return $body;
 }

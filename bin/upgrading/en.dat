@@ -85,7 +85,17 @@ Click <a [[aopts]]>here</a> to add the shared journal to your friends list.
 
 /birthdays.bml.description=Below are the birthdays for everyone that you list as a friend.
 
+/birthdays.bml.description.others=Below are the birthdays for everyone that [[user]] lists as a friend.
+
+/birthdays.bml.error.invaliduser=Invalid user: <b>[[user]]</b>.  The specified account does not exist.
+
+/birthdays.bml.findothers=If you would like to see the birthdays of the friends of another user, or of the members of a community, enter a username below:
+
+/birthdays.bml.nobirthdays=There are no birthdays to display. This happens when a user doesn't have anyone added to their Friends list, or if none of the user's friends list their birthday publically.
+
 /birthdays.bml.title=Birthdays
+
+/birthdays.bml.view=View
 
 /changepassword.bml.btn.proceed=Proceed
 
