@@ -206,7 +206,7 @@ sub get_layers_of_user
     my $sth = $dbr->prepare("SELECT i.infokey, i.value, l.s2lid, l.b2lid, l.type ".
                             "FROM s2layers l, s2info i ".
                             "WHERE l.userid=? AND l.s2lid=i.s2lid AND ".
-                            "i.infokey IN ($extrainfo 'name', 'langcode', ".
+                            "i.infokey IN ($extrainfo 'type', 'name', 'langcode', ".
                             "'majorversion', '_previews')");
     $sth->execute($userid);
     die $dbr->errstr if $dbr->err;
