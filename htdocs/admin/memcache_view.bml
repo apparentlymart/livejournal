@@ -148,6 +148,34 @@
          $val = $newval;
      }
 
+     if ($key =~ /^upicinf:(\d+)$/) {
+         my $userid = $1;
+         my ($ver, $picstr, $kwstr) = @$val;
+         my $info = {
+             'version' => $ver,
+             'pic' => {},
+             'kw' => {},
+         };
+
+         while (length $picstr >= 7) {
+             my $pic = { userid => $userid };
+             ($pic->{picid},
+              $pic->{width}, $pic->{height},
+              $pic->{state}) = unpack "NCCA", substr($picstr, 0, 7, '');
+             $info->{pic}{$pic->{picid}} = $pic;
+         }
+
+         my ($pos, $nulpos);
+         $pos = $nulpos = 0;
+         while (($nulpos = index($kwstr, "\0", $pos)) > 0) {
+             my $kw = substr($kwstr, $pos, $nulpos-$pos);
+             my $id = unpack("N", substr($kwstr, $nulpos+1, 4));
+             $pos = $nulpos + 5; # skip NUL + 4 bytes.
+             $info->{kw}{$kw} = $info->{pic}{$id} if $info;
+         }
+         $val = $info;
+     }
+
      if ($key =~ /^friends:/) {
          my $ver = substr($val, 0, 1, '');
          my $packfmt = "NH6H6NC";
