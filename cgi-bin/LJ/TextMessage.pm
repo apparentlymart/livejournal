@@ -22,7 +22,7 @@ use LWP::UserAgent;
 use strict;
 use vars qw($VERSION $SENDMAIL %providers);
 
-$VERSION = '1.4.7';
+$VERSION = '1.4.8';
 
 # default path to sendmail, if none other specified.  we should probably
 # use something more perl-ish and less unix-specific, but whateva'
@@ -32,27 +32,27 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
 %providers = (
 
     'email' => {
-        'name'		=> 'Other',
-        'notes'		=> 'If your provider isn\'t supported directly, enter the email address that sends you a text message in phone number field.  To be safe, the entire message is sent in the body of the message, and the length limit is really short.  We\'d prefer you give us information about your provider so we can support it directly.',
-        'fromlimit'	=> 15,
-        'msglimit'	=> 100,
-        'totlimit'	=> 100,
+        'name'       => 'Other',
+        'notes'      => 'If your provider isn\'t supported directly, enter the email address that sends you a text message in phone number field.  To be safe, the entire message is sent in the body of the message, and the length limit is really short.  We\'d prefer you give us information about your provider so we can support it directly.',
+        'fromlimit'  => 15,
+        'msglimit'   => 100,
+        'totlimit'   => 100,
     },
 
     'airtouch' => {
-        'name'		=> 'Verizon Wireless (formerly Airtouch)',
-        'notes'		=> '10-digit phone number.  Goes to @airtouchpaging.com.  This is ONLY for former Airtouch customers.  Normal Verizon Wireless customers should use the normal Verizon Wireless option.',
-        'fromlimit'	=> 20,
-        'msglimit'	=> 120,
-        'totlimit'	=> 120,
+        'name'       => 'Verizon Wireless (formerly Airtouch)',
+        'notes'      => 'Enter your 10 digit phone number. Messages are sent to number@airtouchpaging.com. This is ONLY for former AirTouch customers. Verizon Wireless customers should use Verizon Wireless, instead.',
+        'fromlimit'  => 20,
+        'msglimit'   => 120,
+        'totlimit'   => 120,
     },
 
     'alltel' => {
-        'name'		=> 'Alltel',
-        'notes'		=> '10-digit phone number.  Goes to Alltel web text messaging gateway.',
-        'fromlimit'	=> 50,
-        'msglimit'	=> 116,
-        'totlimit'	=> 116,
+        'name'          => 'Alltel',
+        'notes'         => '10-digit phone number.  Goes to @message.alltel.com, not Alltel web text messaging gateway.',
+        'fromlimit'     => 50,
+        'msglimit'      => 116,
+        'totlimit'      => 116,
     },
 
     'ameritech' => {
@@ -67,8 +67,8 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'name'		=> 'Arch Wireless',
         'notes'		=> 'Enter your 10-digit phone number.  Sent via http://www.arch.com/message/ gateway.  Assumes blank PIN.',
         'fromlimit'	=> 15,
-        'msglimit'	=> 220,
-        'totlimit'	=> 220,
+        'msglimit'	=> 240,
+        'totlimit'	=> 240,
     },
 
     'att' => {
@@ -87,6 +87,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 120,
     },
 
+    'beemail' => {
+        'name'		=> 'BeeLine GSM',
+        'notes'		=> 'Sent by addressing the message to number@sms.beemail.ru',
+        'fromlimit'	=> 50,
+        'msglimit'	=> 255,
+        'totlimit'	=> 255,
+    },
+
     'bellsouthmobility' => {
         'name'		=> 'BellSouth Mobility',
         'notes'		=> 'Enter your 10-digit phone number.  Goes to @blsdcs.net via email.',
@@ -95,20 +103,28 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 160,
     },
 
-    'btcellnet' => {
-        'name'		=> 'BT Cellnet',
-        'notes'		=> 'Input phone number - must be enabled first.  Goes to +44[number]@mmail.co.uk.',
-        'fromlimit'	=> 20,
+    'blueskyfrog' => {
+        'name'		=> 'Blue Sky Frog',
+        'notes'		=> 'Sent by addressing the message to number@blueskyfrog.com',
+        'fromlimit'	=> 30,
         'msglimit'	=> 120,
         'totlimit'	=> 120,
     },
-
+    
     'cellularonedobson' => {
         'name'		=> 'CellularOne (Dobson)',
         'notes'		=> 'Enter your 10 digit phone number.  Sent through email gateway @mobile.celloneusa.com.',
         'fromlimit'	=> 20,
         'msglimit'	=> 120,
         'totlimit'	=> 120,
+    },
+
+    'centennial' => {
+        'name'		=> 'Centennial Wireless',
+        'notes'		=> 'Sent through web form at http://www.centennialcom.com',
+        'fromlimit'	=> 10,
+        'msglimit'	=> 110,
+        'totlimit'	=> 110,
     },
 
     'cingular' => 
@@ -135,6 +151,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'fromlimit'	=> 20,
         'msglimit'	=> 150,
         'totlimit'	=> 150,
+    },
+
+    'cricket' => {
+        'name'		=> 'Cricket',
+        'notes'		=> 'Enter your 10-digit phone number.  Messages are sent via Cricket\'s web gateway.',
+        'fromlimit'	=> 15,
+        'msglimit'	=> 140,
+        'totlimit'	=> 140,	      
     },
 
     'csouth1' => {
@@ -169,6 +193,22 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'fromlimit'	=> 100,
         'msglimit'	=> 16000,
         'totlimit'	=> 16000,
+    },
+
+    'kyivstar' => {
+        'name'		=> 'Kyivstar',
+        'notes'		=> 'Sent by addressing the message to number@sms.kyivstar.net',
+        'fromlimit'	=> 30,
+        'msglimit'	=> 160,
+        'totlimit'	=> 160,
+    },
+
+    'lmt' => {
+        'name'		=> 'LMT',
+        'notes'		=> 'Sent by addressing the message to number@smsmail.lmt.lv',
+        'fromlimit'	=> 30,
+        'msglimit'	=> 120,
+        'totlimit'	=> 120,
     },
 
     'metrocall' => {
@@ -211,12 +251,20 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 120,
     },
 
-    'one2one' => {
-        'name' => 'One 2 One',
-        'notes' => 'Enter the 11 digit One 2 One mobile number',
-        'fromlimit' => 50,
-        'msglimit' => 160,
-        'totlimit' => 160,       
+    'o2' => {
+        'name'          => 'O2 (formerly BTCellnet)',
+        'notes'         => 'Enter O2 username - must be enabled first at http://www.o2.co.uk. Goes to username@o2.co.uk.',
+        'fromlimit'     => 20,
+        'msglimit'      => 120,
+        'totlimit'      => 120,
+    },
+
+    'o2mmail' => {
+        'name'          => 'O2 M-mail (formerly BTCellnet)',
+        'notes'         => 'Enter phone number, omitting intial zero - must be enabled first by sending an SMS saying "ON" to phone number "212".  Goes to +44[number]@mmail.co.uk.',
+        'fromlimit'     => 20,
+        'msglimit'      => 120,
+        'totlimit'      => 120,
     },
 
     'pacbell' => {
@@ -283,12 +331,28 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 120,	      
     },
 
+    'tmobile' => {
+        'name'          => 'T-Mobile (formerly One-2-One)',
+        'notes'         => 'Enter your 11 digit phone number',
+        'fromlimit'     => 50,
+        'msglimit'      => 160,
+        'totlimit'      => 160,
+    },
+
     'telus' => {
         'name'		=> 'Telus Mobility',
         'notes'		=> '10-digit phone number.  Goes to 10digits@msg.telus.com.',
         'fromlimit'	=> 30,
         'msglimit'	=> 120,
         'totlimit'	=> 120,
+    },
+    
+    'tmomail' => {
+        'name'		=> 'T-Mobile',
+        'notes'		=> 'Messages are sent to number@tmomail.net',
+        'fromlimit'	=> 30,
+        'msglimit'	=> 160,
+        'totlimit'	=> 160,	      
     },
 
     'tms-suncom' => {
@@ -306,9 +370,17 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'msglimit'	=> 146,
         'totlimit'	=> 146,
     },
+    
+    'umc' => {
+        'name'		=> 'UMC',
+        'notes'		=> 'Sent by addressing the message to number@sms.umc.com.ua',
+        'fromlimit'	=> 10,
+        'msglimit'	=> 120,
+        'totlimit'	=> 120,
+    },    
 
     'uscc' => {
-        'name'		=> 'Verizon Wireless Mobile Messenger(SM) [beta]',
+        'name'		=> 'US Cellular',
         'notes'		=> 'Enter a 10 digit USCC Phone Number. Messages are sent via http://uscc.textmsg.com/scripts/send.idc and only contain the message field',
         'msglimit'	=> 150,
         'totlimit'	=> 150,	      
@@ -322,31 +394,38 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 140,	      
     },
 
-    'voicestream' => {
-        'name'		=> 'Voicestream',
-        'notes'		=> 'Enter your 10-digit phone number.  Message is sent via the web gateway on Voicestream.com which is often a lot faster than the email gateway.  Expect arrival within 5 or 6 seconds.',
+    'vodacom' => {
+        'name'		=> 'Vodacom',
+        'notes'		=> 'Enter your 10 digit phone number. Messages are sent via Vodacom\'s web gateway.',
         'fromlimit'	=> 15,
         'msglimit'	=> 140,
         'totlimit'	=> 140,
     },
 
-    'voicestream2' => {
+    'voicestream' => {
         'name'		=> 'Voicestream',
         'notes'		=> 'Enter your 10-digit phone number.  Message is sent via the email gateway, since they changed their web gateway and we have not gotten it working with the new one yet.',
         'fromlimit'	=> 15,
         'msglimit'	=> 140,
         'totlimit'	=> 140,
     },
+    
+    'vtext' => {
+        'name'		=> 'Vtext (Verizon)',
+        'notes'		=> 'Message is sent via the email gateway @ vtext.com',
+        'fromlimit'	=> 20,
+        'msglimit'	=> 150,
+        'totlimit'	=> 150,
+    },
 
-    'wyndtell' => 
-    {
+    'wyndtell' => {
         'name'		=> 'WyndTell',
         'notes'		=> 'Enter username/phone number.  Goes to @wyndtell.com',
         'fromlimit'	=> 20,
         'msglimit'	=> 480,
         'totlimit'	=> 500,
     },
-
+    
 );
 
 sub providers
@@ -423,9 +502,10 @@ sub send
 
     elsif ($provider eq "alltel")
     {
-        post_webform("http://message.alltel.com/webservr/page_gen", $errors, {
-            "To"	=> $self->{'number'},
-            "MESSAGE"	=> "($msg->{'from'}) $msg->{'message'}",
+        send_mail($self, { 
+            'to'	=> "$self->{'number'}\@message.alltel.com",
+            'from'	=> "$msg->{'from'}",
+            'body'	=> "$msg->{'message'}",
         });
     }
 
@@ -440,11 +520,10 @@ sub send
 
     elsif ($provider eq "arch")
     {
-        post_webform("http://www.arch.com/cgi-bin/archepage.exe", $errors, {
-            "ACCESS"	=> $self->{'number'},
-            "MSSG"	=> "($msg->{'from'}) $msg->{'message'}",
-            "Q1"	=> "1",
-            "PIN"	=> "",
+        send_mail($self, { 
+            'to'	=> "$self->{'number'}\@archwireless.net",
+            'from'	=> "$msg->{'from'}",
+            'body'	=> "$msg->{'message'}",
         });
     }
 
@@ -454,6 +533,14 @@ sub send
             'to'	=> "$self->{'number'}\@mobile.att.net",
             'from'	=> "$msg->{'from'}",
             'body'	=> $msg->{'message'},
+        });
+    }
+
+    elsif ($provider eq "beemail") 
+    {
+        send_mail($self, {
+            'to'	=> "$self->{'number'}@\sms.beemail.ru",
+            'body'	=> "$msg->{'from'} - $msg->{'message'}",
         });
     }
 
@@ -476,14 +563,15 @@ sub send
         });
     }
 
-    elsif ($provider eq "btcellnet")
+   
+    elsif ($provider eq "blueskyfrog") 
     {
-        send_mail($self, { 
-            'to'	=> "+44".$self->{'number'}."\@mmail.co.uk",
+        send_mail($self, {
+            'to'	=> "$self->{'number'}\@blueskyfrog.com",
             'from'	=> "$msg->{'from'}",
             'body'	=> "$msg->{'message'}",
         });
-    }
+    } 
 
     elsif ($provider eq "cellularonedobson")
     {
@@ -491,6 +579,15 @@ sub send
             'to'	=> "$self->{'number'}\@mobile.celloneusa.com",
             'from'	=> "$msg->{'from'}",
             'body'	=> $msg->{'message'},
+        });
+    }
+
+    elsif ($provider eq "centennial")
+    {
+        post_webform("http://matrix.wysdom.com/cgi-bin/mim/newxmessage.cgi", $errors, {
+            'ToNumber'	 => $self->{'number'},
+            'Message'	 => $msg->{'message'},
+	    'FromNumber' => $msg->{'from'},
         });
     }
 
@@ -503,10 +600,10 @@ sub send
         });
     }
 
-    elsif ($provider eq "cingular-acs")  # Cingular Wireless - digitaledge acswireless
+    elsif ($provider eq "cingular-acs")
     {
-        send_mail($self, {
-            'to'        => "$self->{'number'}\@digitaledge.acswireless.com",
+	send_mail($self, {
+            'to'        => "$self>{'number'}\@digitaledge.acswireless.com",
             'from'      => "$msg->{'from'}",
             'body'      => "$msg->{'message'}",
             'subject'	=> "LJ",
@@ -522,13 +619,20 @@ sub send
         });
     }
 
-elsif ($provider eq "csouth1") {
-    send_mail($self, {
-        'to' => "$self->{'number'}\@csouth1.com",
-        'from' => $msg->{'from'},
-        'body' => $msg->{'message'},
-    });
-}
+    elsif ($provider eq "cricket") {
+        post_webform("http://www.cricketcommunications.com/text/sendto_sms_system.asp", $errors, {
+            "Cricket_Phone_Number" => $self->{'number'},
+            "msg"                  => $msg->{'message'},
+        });
+    }
+
+    elsif ($provider eq "csouth1") {
+        send_mail($self, {
+            'to' => "$self->{'number'}\@csouth1.com",
+            'from' => $msg->{'from'},
+            'body' => $msg->{'message'},
+        });
+    }
 
     elsif ($provider eq "fidoca" )
     {
@@ -554,6 +658,24 @@ elsif ($provider eq "csouth1") {
             'to'	=> "$self->{'number'}\@mobile.mycingular.com",
             'from'	=> $msg->{'from'},
             'body'	=> $msg->{'message'},
+        });
+    }
+    
+    elsif ($provider eq "kyivstar") 
+    {
+        send_mail($self, {
+            'to'	=> "$self->{'number'}@\sms.kyivstar.net",
+            'from'	=> "$msg->{'from'}",
+            'body'	=> "$msg->{'message'}",
+        });
+    } 
+
+    elsif ($provider eq "lmt") 
+    {
+        send_mail($self, {
+            'to'	=> "$self->{'number'}@\smsmail.lmt.lv",
+            'from'	=> "$msg->{'from'}",
+            'body'	=> "$msg->{'message'}",
         });
     }
 
@@ -604,11 +726,21 @@ elsif ($provider eq "csouth1") {
         });
     }
 
-    elsif ($provider eq "one2one") {
-    send_mail($self, {
-    'to' => "$self->{'number'}\@one2one.net",
-        'from' => "$msg->{'from'}",
-        'body' => "$msg->{'message'}",
+    elsif ($provider eq "o2")
+    {
+        send_mail($self, {
+            'to'        => $self->{'number'}."\@o2.co.uk",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+        });
+    }
+
+    elsif ($provider eq "o2mmail")
+    {
+        send_mail($self, {
+            'to'        => "+44".$self->{'number'}."\@mmail.co.uk",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
         });
     }
 
@@ -634,8 +766,8 @@ elsif ($provider eq "csouth1") {
     {
         send_mail($self, { 
             'to'	=> "$self->{'number'}\@pcs.rogers.com",
-            'from'	=> "$msg->{'from'}",
-            'body'	=> "$msg->{'message'}",
+            # 'from'	=> "$msg->{'from'}",
+            'body'	=> "$msg->{'from'}: $msg->{'message'}",
 	    'subject'	=> "LJ",
         });
     }
@@ -678,13 +810,13 @@ elsif ($provider eq "csouth1") {
         });
     }
 
-elsif ($provider eq "suncom") {
-    send_mail($self, {
-        'to' => "$self->{'number'}\@suncom1.com",
-        'from' => $msg->{'from'},
-        'body' => $msg->{'message'},
-    });
-}
+    elsif ($provider eq "suncom") {
+        send_mail($self, {
+            'to' => "$self->{'number'}\@suncom1.com",
+            'from' => $msg->{'from'},
+            'body' => $msg->{'message'},
+        });
+    }
 
     elsif ($provider eq "telus")  # Telus Mobility
     {
@@ -696,13 +828,31 @@ elsif ($provider eq "suncom") {
         });
     }
 
-elsif ($provider eq "tms-suncom") {
-    send_mail($self, {
-        'to' => "$self->{'number'}\@tms.suncom.com",
-        'from' => $msg->{'from'},
-        'body' => $msg->{'message'},
-    });
-}
+    elsif ($provider eq "tmomail")  # T-Mobile
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@tmomail.net",
+            'subject'   => "$msg->{'from'}", # Message Subject Contains Sender Name
+            'body'      => "$msg->{'message'}",
+            'from'      => "LJ", # This Does Not Show on The Phone
+        });
+    }
+    
+    elsif ($provider eq "tmobile") {
+        send_mail($self, {
+            'to' => "$self->{'number'}\@one2one.net",
+            'from' => "$msg->{'from'}",
+            'body' => "$msg->{'message'}",
+        });
+    }
+
+    elsif ($provider eq "tms-suncom") {
+        send_mail($self, {
+            'to' => "$self->{'number'}\@tms.suncom.com",
+            'from' => $msg->{'from'},
+            'body' => $msg->{'message'},
+        });
+    }
 
     elsif ($provider eq "uboot")
     {
@@ -713,6 +863,15 @@ elsif ($provider eq "tms-suncom") {
             "text"	=> "LiveJournal($msg->{'from'}) $msg->{'message'}",
         });
     }
+    
+    elsif ($provider eq "uma") 
+    {
+        send_mail($self, {
+            'to'	=> "$self->{'number'}@\sms.umc.com.ua",
+            'from'	=> "$msg->{'from'}",
+            'body'	=> "$msg->{'message'}",
+        });
+    }    
 
     elsif ($provider eq "uscc")  # U.S Cellular
     {
@@ -733,20 +892,27 @@ elsif ($provider eq "tms-suncom") {
         });
     }
 
-    elsif ($provider eq "voicestream" )
+    elsif ($provider eq "vodacom" )
     {
-        post_webform("http://www.voicestream.com/messagecenter/".
-                     "default.asp?num=$self->{'number'}", $errors, {
-            "txtNum"		=> $self->{'number'},
-            "txtFrom"		=> $msg->{'from'},
-            "txtMessage"	=> $msg->{'message'},
+        post_webform("http://websms.vodacom.net/send.php3", $errors, {
+            "cellnum"         => $self->{'number'},
+            "message"         => $msg->{'message'},
         });
     }
 
-    elsif ($provider eq "voicestream2" )
+    elsif ($provider eq "voicestream" )
     {
         send_mail($self, {
             'to'        => "$self->{'number'}\@voicestream.net",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+        });
+    }
+    
+    elsif ($provider eq "vtext" )
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@vtext.com",
             'from'      => "$msg->{'from'}",
             'body'      => "$msg->{'message'}",
         });
@@ -781,7 +947,7 @@ sub post_webform
 
     # Pass request to the user agent and get a response back
     my $res = $ua->request($req);
-    if ($res->is_success) {
+    if ($res->is_success || $res->is_redirect) {
         return;
     } else {
         push @$errors, "There was some error contacting the user's text messaging service via its web gateway.  The message was most likely not sent.";
@@ -906,6 +1072,7 @@ and members of the LJ Textmessage community:
   - cbartow
   - 22dip
   - halkeye
+  - idigital
 (if you've been forgotten, please give a holler!)
 
 Based on (mostly still, actually) code by:
