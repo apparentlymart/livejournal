@@ -1,6 +1,6 @@
 <style>
     em.error { font-weight: bold; color: red; font-style: normal; }
-    textarea.s2 { width: 100%; height: 80%; display: block; clear: both; padding: 2px; }
+    textarea.s2 { width: 100%; display: block; clear: both; padding: 2px; }
 </style>
 <?_code # -*-bml-*-
 {
