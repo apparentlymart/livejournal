@@ -1004,12 +1004,15 @@ sub editfriends
 		    
 	    my $friendid = $row->{'userid'};
 
-	    ### get the group mask if friend already exists, or
-	    ### default to 1 (bit 0 (friend bit) set)
-	    my $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$userid AND friendid=$friendid");
-	    $sth->execute;
-	    my ($gmask) = $sth->fetchrow_array;
-	    $gmask ||= 1;
+	    my $gmask = $fa->{'groupmask'};
+	    if (! $gmask && $curfriend{$aname}) {
+		# if no group mask sent, use the existing one if this is an existing friend
+		my $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$userid AND friendid=$friendid");
+		$sth->execute;
+		$gmask = $sth->fetchrow_array;
+	    }
+	    # force bit 0 on.
+	    $gmask |= 1;
 		    
 	    $sth = $dbh->prepare("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES ($userid, $friendid, $qfg, $qbg, $gmask)");
 	    $sth->execute;
@@ -1759,6 +1762,7 @@ sub editfriends
 	    my $fa = { 'username' => $req->{"editfriend_add_${n}_user"},
 		       'fgcolor' => $req->{"editfriend_add_${n}_fg"},
 		       'bgcolor' => $req->{"editfriend_add_${n}_bg"},
+		       'groupmask' => $req->{"editfriend_add_${n}_groupmask"},
 		   };
 	    push @{$rq->{'add'}}, $fa;
 	} elsif (/^editfriend_delete_(\w+)$/) {

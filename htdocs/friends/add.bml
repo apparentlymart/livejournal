@@ -30,6 +30,12 @@
 	 $body = "(=H1 Error H1=)(=P (=REQUIREPOST=) P=)";
 	 return "";
      }
+
+     my $gmask = 1;
+     foreach my $bit (1..30) {
+	 next unless $FORM{"bit_$bit"};
+	 $gmask |= (1 << $bit);
+     }
      
      my %res = ();
      LJ::do_request($dbh, {
@@ -38,6 +44,7 @@
 	 "editfriend_add_1_user" => $user,
 	 "editfriend_add_1_fg" => $FORM{'editfriend_add_1_fg'}, 
 	 "editfriend_add_1_bg" => $FORM{'editfriend_add_1_bg'},
+	 "editfriend_add_1_groupmask" => $gmask,
      }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} } );
      
 
@@ -45,9 +52,7 @@
      {
 	 $title = "Friend Added!";
 	 $body = "(=H1 Success H1=)(=P User <B>$user</B> was added to your friend list.  You can view your friends page <A HREF=\"$LJ::SITEROOT/users/$remote->{'user'}/friends\">here</A>. P=)";
- } 
-     else 
-     {
+     } else {
 	 $title = "Error";
 	 $body = "(=H1 Error H1=)(=P $res{'errmsg'} P=)";
      }
@@ -55,7 +60,7 @@
  }
 
  # check to see if user is already a friend.
- $sth = $dbh->prepare("SELECT * FROM friends WHERE userid=$remote->{'userid'} AND friendid=$userid");
+ $sth = $dbr->prepare("SELECT * FROM friends WHERE userid=$remote->{'userid'} AND friendid=$userid");
  $sth->execute;
  my $fr = $sth->fetchrow_hashref;
  
@@ -77,11 +82,30 @@
      $body .= "<center><input type=submit value=\"Add $user!\"></center>";
  }
 
+ ## let them pick friend groups
+ $body .= "(=H1 Friend Groups H1=)(=P What friend groups do you want to put this user in?  Friend groups are used for filtering your friends list view and also for group-based viewing security of items. P=)<blockquote>";
+ my $err;
+ my $greq = LJ::Protocol::do_request($dbs, "getfriendgroups", {
+     'username' => $remote->{'user'},
+ }, \$err, { 'noauth' => 1 });
+
+ if (@{$greq->{'friendgroups'}}) {
+     foreach my $g (@{$greq->{'friendgroups'}}) {
+	 my $ck = ($fr && ($fr->{'groupmask'} & (1 << $g->{'id'}))) ?
+	     "checked='1'" : "";
+	 $body .= "<input type='checkbox' value='1' name='bit_$g->{'id'}' $ck> ";
+	 $body .= LJ::ehtml($g->{'name'}) . "<br />\n";
+     }
+ } else {
+     $body .= "<i>No friend groups setup.</i>";
+ }
+ $body .= "</blockquote>";
+
+ ## let them pick the colors
  $body .= "(=H1 Colors H1=)(=P You may also optionally select the colors that will represent $user in your friends list.  P=)";
 
  $ret .= "<P><CENTER><TABLE CELLPADDING=4><TR><TD><B>Foreground</B></TD><TD><B>Background</B></TD></TR>\n";
 
- # load the colors
  my @color = ();
  LJ::load_codes($dbs, { "color" => \@color });
 
@@ -110,7 +134,7 @@
  foreach (@color) {
      if ($col==0) { $ret .= "<TR>\n"; }
      $col++;
-	 my $ecolor = LJ::ehtml($_->{'item'});
+     my $ecolor = LJ::ehtml($_->{'item'});
      $ret .= "<TD bgcolor=$_->{'code'}><IMG SRC=\"/img/dot.gif\" WIDTH=14 HEIGHT=14 TITLE=\"$ecolor\" ALT=\"$ecolor\"></TD>\n";
      if ($col==23) { $ret .= "</TR>\n"; $col==0; }
  }

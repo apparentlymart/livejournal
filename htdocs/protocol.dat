@@ -310,13 +310,17 @@ To add a friend, send a variable of this form, where <I>i</I> is any unique inte
 }
 { editfriend_add_<I>i</I>_fg
 .des
-Sets the text color of the friend <I>i</I> being added.  This value is a HTML-style
+Optional.  Sets the text color of the friend <I>i</I> being added.  This value is a HTML-style
 hex-triplet, and must either be of the form <B><TT>#rrggbb</TT></B> or not sent
 at all.  By default, the value assumed is <TT>#000000</TT>, black.
 }
 { editfriend_add_<I>i</I>_bg
 .des
-Sets the background color of the friend <I>i</I> being added.  This value is a HTML-style hex-triplet, and must either be of the form <B><TT>#rrggbb</TT></B> or not sent at all.  By default, the value assumed is <TT>#FFFFFF</TT>, white.
+Optional.  Sets the background color of the friend <I>i</I> being added.  This value is a HTML-style hex-triplet, and must either be of the form <B><TT>#rrggbb</TT></B> or not sent at all.  By default, the value assumed is <TT>#FFFFFF</TT>, white.
+}
+{ editfriend_add_<I>i</I>_groupmask
+.des
+Optional.  Sets this user's groupmask.  Only use this in clients if you've very recently loaded the friend groups.  If your client has been loaded on the end user's desktop for days and you haven't loaded friend groups since it started, they may be inaccurate if they've modified their friend groups through the website or another client.  In general, don't use this key unless you know what you're doing.
 }
 .response
 { friends_added
