@@ -1765,7 +1765,7 @@ sub make_link
 sub ago_text
 {
     my $secondsold = shift;
-    return "Never." unless ($secondsold);
+    return "Never." unless defined $secondsold;
     my $num;
     my $unit;
     if ($secondsold > 60*60*24*7) {
