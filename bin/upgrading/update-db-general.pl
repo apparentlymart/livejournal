@@ -1718,6 +1718,31 @@ CREATE TABLE captcha_session (
 )
 EOC
 
+register_tablecreate("spamreports", <<'EOC'); # global
+CREATE TABLE spamreports (
+    reporttime  INT(10) UNSIGNED NOT NULL,
+    ip          VARCHAR(15),
+    journalid   INT(10) UNSIGNED NOT NULL,
+    posterid    INT(10) UNSIGNED NOT NULL DEFAULT 0,
+    subject     VARCHAR(255) BINARY,
+    body        BLOB NOT NULL,
+    PRIMARY KEY (reporttime, journalid),
+    INDEX       (ip),
+    INDEX       (posterid),
+)
+EOC
+
+register_tablecreate("tempanonips", <<'EOC'); # clustered
+CREATE TABLE tempanonips (
+    reporttime  INT(10) UNSIGNED NOT NULL,
+    ip          VARCHAR(15) NOT NULL,
+    journalid   INT(10) UNSIGNED NOT NULL,
+    jtalkid     MEDIUMINT(8) UNSIGNED NOT NULL,
+    PRIMARY KEY (journalid, jtalkid),
+    INDEX       (reporttime),
+)
+EOC
+
 # NOTE: new table declarations go here
 
 

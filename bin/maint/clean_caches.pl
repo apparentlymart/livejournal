@@ -24,6 +24,16 @@ $maint{'clean_caches'} = sub
         $dbcm->do("DELETE FROM captcha_session WHERE sesstime < UNIX_TIMESTAMP()-86400");
     }
 
+    print "-I- Cleaning old anonymous comment IP logs.\n";
+    my $count;
+    foreach my $c (@LJ::CLUSTERS) {
+        my $dbcm = LJ::get_cluster_master($c);
+        next unless $dbcm;
+        # 432,000 seconds is 5 days
+        $count += $dbcm->do('DELETE FROM tempanonips WHERE reporttime < (UNIX_TIMESTAMP() - 432000)');
+    }
+    print "    deleted $count\n";
+
     print "-I- Cleaning diresearchres.\n";
     # need insert before delete so master logs delete and slaves actually do it
     $dbh->do("INSERT INTO dirsearchres2 VALUES (MD5(NOW()), DATE_SUB(NOW(), INTERVAL 31 MINUTE), '')");

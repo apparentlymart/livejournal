@@ -73,6 +73,10 @@ body<=
         LJ::Talk::unscreen_comment($u, $tp->{'itemid'}, $tpid)
             if $tp->{'state'} eq 'S';
 
+        # mark this as spam?
+        LJ::Talk::mark_comment_as_spam($u, $tp->{talkid})
+            if $POST{spam};
+
         my $num = LJ::delete_comments($u, "L", $tp->{'itemid'}, $tpid);
         LJ::replycount_do($u, $tp->{'itemid'}, "decr", $num);
         LJ::Talk::update_commentalter($u, $tp->{'itemid'});
@@ -84,6 +88,7 @@ body<=
             $msg = BML::ml('.success.andban', { 'user' => LJ::ljuser($tp->{'userpost'}) });
         }
         $msg ||= $ML{'.success.noban'};
+        $msg .= "<?p $ML{'.success.spam'} p?>" if $POST{spam};
 
         return "<?h1 $ML{'.success.head'} h1?><?p $msg p?>";
     }
@@ -95,15 +100,21 @@ body<=
     $ret .= "<?p $ML{'.confirm.body'} p?>";
     $ret .= "<form method='post' action='delcomment.bml?";
     $ret .= "journal=$u->{'user'}&id=$GET{'id'}'>\n";
+    $ret .= "<?standout ";
 
-    $ret .= "<p align='center'>" . LJ::html_submit('confirm', $ML{'.confirm.submit'}) . "</p>\n";
+    $ret .= "<div align='center' style='margin: 8px'>" . LJ::html_submit('confirm', $ML{'.confirm.submit'}) . "</div>\n";
 
     if ($can_ban) {
-        $ret .= "<p>" . LJ::html_check({ 'type' => 'check', 'name' => 'ban', 'id' => 'ban' });
+        $ret .= "<div>" . LJ::html_check({ 'type' => 'check', 'name' => 'ban', 'id' => 'ban' });
         $ret .= "<label for='ban'>";
         $ret .= BML::ml('.confirm.banuser', { 'user' => LJ::ljuser($tp->{'userpost'}) });
-        $ret .= "</label></p>";
+        $ret .= "</label></div>";
     }
+
+    $ret .= "<div>" . LJ::html_check({name => 'spam', id => 'spam'});
+    $ret .= "<label for='spam'>$ML{'.confirm.spam'}</label></div>";
+
+    $ret .= " standout?>";
 
     if ($can_manage) {
         my $msg = BML::ml('.changeoptions', { 'link' =>

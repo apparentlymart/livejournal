@@ -1100,6 +1100,73 @@ LOGIN
     return $ret;
 }
 
+# <LJFUNC>
+# name: LJ::record_anon_comment_ip
+# class: web
+# des: Records the IP address of an anonymous comment
+# args: journalu, jtalkid, ip
+# des-journalu: User object of journal comment was posted in.
+# des-jtalkid: ID of this comment.
+# des-ip: IP address of the poster.
+# returns: 1 for success, 0 for failure
+# </LJFUNC> 
+sub record_anon_comment_ip {
+    my ($journalu, $jtalkid, $ip) = @_;
+    $journalu = LJ::want_user($journalu);
+    $jtalkid += 0;
+    return 0 unless $journalu && $jtalkid && $ip;
+    
+    my $dbcm = LJ::get_cluster_master($journalu);
+    $dbcm->do("INSERT INTO tempanonips (reporttime, journalid, jtalkid, ip) VALUES (UNIX_TIMESTAMP(),?,?,?)",
+              undef, $journalu->{userid}, $jtalkid, $ip);
+    return 0 if $dbcm->err;
+    return 1;
+}
+
+# <LJFUNC>
+# name: LJ::mark_comment_as_spam
+# class: web
+# des: Copies a comment into the global spamreports table
+# args: journalu, jtalkid
+# des-journalu: User object of journal comment was posted in.
+# des-jtalkid: ID of this comment.
+# returns: 1 for success, 0 for failure
+# </LJFUNC> 
+sub mark_comment_as_spam {
+    my ($journalu, $jtalkid) = @_;
+    $journalu = LJ::want_user($journalu);
+    $jtalkid += 0;
+    return 0 unless $journalu && $jtalkid;
+
+    my $dbcm = LJ::get_cluster_master($journalu);
+    my $dbh = LJ::get_db_writer();
+
+    # step 1: get info we need
+    my $sql = 'SELECT tt.subject, tt.body, t.posterid FROM talk2 t, talktext2 tt ' .
+              'WHERE t.journalid=? AND t.jtalkid=? AND tt.journalid=t.journalid AND tt.jtalkid=t.jtalkid';
+    my ($subject, $body, $posterid) = $dbcm->selectrow_array($sql, undef, $journalu->{userid}, $jtalkid);
+    return 0 if $dbcm->err;
+
+    # step 2: get ip if anon
+    my $ip;
+    unless ($posterid) {
+        $ip = $dbcm->selectrow_array('SELECT ip FROM tempanonips WHERE journalid=? AND jtalkid=?',
+                                      undef, $journalu->{userid}, $jtalkid);
+        return 0 if $dbcm->err;
+
+        # we want to fail out if we have no IP address and this is anonymous, because otherwise
+        # we have a completely useless spam report.  pretend we were successful, too.
+        return 1 unless $ip;
+    }
+    
+    # step 3: insert into spamreports
+    $dbh->do('INSERT INTO spamreports (reporttime, ip, journalid, posterid, subject, body) ' .
+             'VALUES (UNIX_TIMESTAMP(), ?, ?, ?, ?, ?)', 
+             undef, $ip, $journalu->{userid}, $posterid, $subject, $body);
+    return 0 if $dbh->err;
+    return 1;
+}
+
 package LJ::Talk::Post;
 
 sub format_text_mail {
@@ -1605,6 +1672,10 @@ sub enter_comment {
     LJ::MemCache::incr([$journalu->{'userid'}, "talk2ct:$journalu->{'userid'}"]);
 
     $comment->{talkid} = $jtalkid;
+
+    # record IP if anonymous
+    LJ::Talk::record_anon_comment_ip($journalu, $comment->{talkid}, LJ::get_remote_ip()) 
+        unless $posterid;
     
     # add to poster's talkleft table, or the xfer place
     if ($posterid) {

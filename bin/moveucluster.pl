@@ -232,6 +232,7 @@ my %skip_table = (
                   "events" => 1,          # handled by qbufferd (not yet used)
                   "s1stylecache" => 1,    # will be recreated
                   "captcha_session" => 1, # temporary
+                  "tempanonips" => 1,     # temporary ip storage for spam reports
                   );
 
 # we had a concern at the time of writing this dependency optization

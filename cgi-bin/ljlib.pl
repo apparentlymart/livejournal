@@ -43,7 +43,7 @@ do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
                     "userproplite2", "links", "s1overrides", "s1style",
                     "s1stylecache", "userblob", "userpropblob",
                     "clustertrack2", "captcha_session", "reluser2",
-                    );
+                    "tempanonips");
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"
     if -e "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl";

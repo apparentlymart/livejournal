@@ -719,6 +719,8 @@ whether to allow <em>all</em>, <em>registered users</em>, or
 
 /delcomment.bml.confirm.head=Delete this comment?
 
+/delcomment.bml.confirm.spam=Mark this comment as spam
+
 /delcomment.bml.confirm.submit=Delete Comment
 
 /delcomment.bml.error.alreadydeleted=The specified comment has already been deleted.
@@ -732,6 +734,8 @@ whether to allow <em>all</em>, <em>registered users</em>, or
 /delcomment.bml.error.nocomment=The specified comment does not exist.
 
 /delcomment.bml.success.andban=The comment has been deleted, and user [[user]] has been banned from commenting in your journal.
+
+/delcomment.bml.success.spam=Additionally, the administrators of this site have been notified that this comment was spam.  Thank you for your report.
 
 /delcomment.bml.success.head=Deleted
 
