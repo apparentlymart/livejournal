@@ -53,7 +53,7 @@ BML::register_hook('include_getter', sub {
         my $dbh = LJ::get_db_writer();
         $val = $dbh->selectrow_array("SELECT inctext FROM includetext ".
                                      "WHERE incname=?", undef, $file);
-        LJ::MemCache::set("includefile:$file", $val);
+        LJ::MemCache::set("includefile:$file", $val, time() + 3600);
     }
 
     # return the value and that we handled this
