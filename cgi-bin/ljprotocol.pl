@@ -874,7 +874,7 @@ sub postevent
     my $bytes = length($event) + length($req->{'subject'});
     LJ::dudata_set($dbcm, $ownerid, 'L', $itemid, $bytes);
 
-    $dbcm->do("REPLACE INTO logtext2 (journalid, jitemid, subject, event) ".
+    $dbcm->do("INSERT INTO logtext2 (journalid, jitemid, subject, event) ".
               "VALUES ($ownerid, $itemid, ?, ?)", undef, $req->{'subject'}, 
               LJ::text_compress($event));
     if ($dbcm->err) {
@@ -887,7 +887,7 @@ sub postevent
 
     # keep track of custom security stuff in other table.
     if ($uselogsec) {
-        $dbcm->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) ".
+        $dbcm->do("INSERT INTO logsec2 (journalid, jitemid, allowmask) ".
                   "VALUES ($ownerid, $itemid, $qallowmask)");
         if ($dbcm->err) {
             my $msg = $dbcm->errstr;
