@@ -56,19 +56,19 @@ body<=
             return "<?h1 $title h1?>\n<?p $msg p?>";
         };
 
-        if ($u->{'statusvis'} eq 'D' || $u->{'statusvis'} eq 'X') {
-            return $err->("Cannot retrieve password for a deleted account.");
+        if ($u->{'statusvis'} eq 'X') {
+            return $err->( $ML{'.error.purged'} );
         }
 
         if ($u->{'statusvis'} eq 'R') {
-            return $err->("Cannot retrieve password for a renamed account.");
+            return $err->( $ML{'.error.renamed'} );
         }
 
         # Check to see if they are banned from sending a password
         if (LJ::sysban_check('lostpassword', $u->{'user'})) {
             LJ::sysban_note($u->{'userid'}, "Password retrieval blocked based on user",
                             { 'user' => $u->{'user'} });
-            return $err->('Sorry...', "Your account is not allowed to email passwords.");
+            return $err->( $ML{'Sorry'}, $ML{'.error.sysbanned'} );
         }
         
         # can we send them the password where they want it?
