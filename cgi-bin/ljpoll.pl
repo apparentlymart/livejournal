@@ -488,8 +488,6 @@ sub show_poll
 
         while (my ($user, $value) = $sth->fetchrow_array) 
         {
-            clean_poll(\$value);
-
             ## some question types need translation; type 'text' doesn't.
             if ($q->{'type'} eq "radio" || $q->{'type'} eq "drop") {
                 $value = $it{$value};
@@ -498,7 +496,8 @@ sub show_poll
                 $value = join(", ", map { $it{$_} } split(/,/, $value));
             }
 
-            $ret .= "<p>" . LJ::ljuser($user) . " -- $value";
+            clean_poll(\$value);
+            $ret .= "<p>" . LJ::ljuser($user) . " -- $value</p>\n";
         }
         
         return $ret;
