@@ -237,22 +237,25 @@ body<=
         my $info;
 
         # Figure out if they are editing a theme and which one they are
-        foreach (split(",", $POST{'themeids'})) {
+        my @ids = split ',', $POST{'themeids'};
+        foreach (@ids) {
             $themeid = $_ if $POST{"edit:$_"};
         }
-        unless ($themeid) { # They decided to actually use a custom theme
+        if (!$themeid) { # They decided to actually use a custom theme
             my $use_theme;
-            foreach (split(",", $POST{'themeids'})) {
+            foreach (@ids) {
                 $use_theme = $_ if $POST{"use:$_"};
             }
 
-            my %update;
-            $update{'moodthemeid'} = $use_theme;
-            foreach (keys %update) {
-                delete $update{$_} if $u->{$_} eq $update{$_};
+            if ($use_theme) {
+                my %update;
+                $update{'moodthemeid'} = $use_theme;
+                foreach (keys %update) {
+                    delete $update{$_} if $u->{$_} eq $update{$_};
+                }
+                LJ::update_user($u, \%update);
+                return BML::redirect($self_uri);
             }
-            LJ::update_user($u, \%update);
-            return BML::redirect($self_uri);
         }
         elsif ($POST{'isnew'} != 1) { # Make sure they can even edit this theme and fill in the $info variable for later use
             my $dbr = LJ::get_db_reader();
@@ -261,6 +264,18 @@ body<=
             $info = $sth->fetchrow_hashref;
             return LJ::bad_input("You do not have permission to edit this theme.")
                 unless defined $info;
+        }
+
+        # are we deleting a theme?
+        foreach my $tid (@ids) {
+            if ($POST{"delete:$tid"}) {
+                # good, delete this one
+                my $dbh = LJ::get_db_writer();
+                my $c = $dbh->do("DELETE FROM moodthemes WHERE moodthemeid = ? AND ownerid = ?", undef, $tid, $u->{userid})+0;
+                return "<?h1 $ML{'Error'} h1?><?p There was an error deleting this moodtheme. p?>" unless $c;
+                $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid = ?", undef, $tid); # safe since we verified $c
+                return BML::redirect($self_uri);
+            }
         }
 
         # We are either making changes to an existing theme or showing the edit form for a new theme
@@ -391,7 +406,10 @@ body<=
                     $ret .= "</td>";
                 }
 
-                $ret .= "<td>" . LJ::html_submit("edit:$tid" => "Edit") . " " . LJ::html_submit("use:$tid", "Use", {'disabled' => $use_dis}) . "</td>";
+                $ret .= "<td>" . LJ::html_submit("edit:$tid" => "Edit") . " " . 
+                                 LJ::html_submit("use:$tid", "Use", {'disabled' => $use_dis}) . " " .
+                                 LJ::html_submit("delete:$tid", "Delete", 
+                                         { onclick => 'return confirm("Are you sure you want to delete this mood theme?");' }) . "</td>";
                 $ret .= "</tr>";
             }
             $ret .= "</table>";
