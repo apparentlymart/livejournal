@@ -150,6 +150,7 @@ sub trans
     }
 
     LJ::start_request();
+    LJ::procnotify_check();
     foreach (@req_hosts) {
         return FORBIDDEN if LJ::sysban_check('ip', $_);
     }

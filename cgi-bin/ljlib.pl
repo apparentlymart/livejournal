@@ -2949,6 +2949,7 @@ sub start_request
             };
         }
         $LJ::CACHE_CONFIG_MODTIME_LASTCHECK = $now;
+        $LJ::DBIRole->set_sources(\%LJ::DBINFO);
     }
 
     return 1;
@@ -2956,7 +2957,7 @@ sub start_request
 
 sub end_request
 {
-    # TODO: optionally close DB connections
+    $LJ::DBIRole->disconnect_all() if $LJ::DISCONNECT_DBS;
 }
 
 # <LJFUNC>
@@ -5265,6 +5266,27 @@ sub procnotify_callback
     if ($cmd eq "unban_ip") {
         delete $LJ::IP_BANNED{$arg->{'ip'}};
         return;
+    }
+}
+
+sub procnotify_check
+{
+    my $now = time;
+    return if $LJ::CACHE_PROCNOTIFY_CHECK + 30 > $now;
+    $LJ::CACHE_PROCNOTIFY_CHECK = $now;
+    
+    my $dbr = LJ::get_db_reader();
+    my $max = $dbr->selectrow_array("SELECT MAX(nid) FROM procnotify");
+    return unless defined $max;
+    my $old = $LJ::CACHE_PROCNOTIFY_MAX;
+    if (defined $old && $max > $old) {
+        my $sth = $dbr->prepare("SELECT cmd, args FROM procnotify ".
+                                "WHERE nid > ? AND nid <= $max ORDER BY nid");
+        $sth->execute($old);
+        while (my ($cmd, $args) = $sth->fetchrow_array) {
+            LJ::procnotify_callback($cmd, $args);
+        }
+        $LJ::CACHE_PROCNOTIFY_MAX = $max;
     }
 }
 
