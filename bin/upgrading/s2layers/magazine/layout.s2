@@ -263,7 +263,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
         if ($p.view == "friends")
         {
             "<div><a href='";
-            $e.journal->base_url();
+            print $e.journal->base_url();
             "' style='color: $fgcolor;'><small>$e.journal.username</small></a></div>";
         }
         if ($*show_entry_userpic == true or $p.view == "friends") 
@@ -273,7 +273,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
         if ($e.journal.username != $e.poster.username) 
         {
             "<div><a href='";
-            $e.poster->base_url();
+            print $e.poster->base_url();
             "'>$e.poster.username</a></div>";
         }
         "</div>";
