@@ -1063,6 +1063,12 @@ set text_comment_reply = "Reply";
 set text_comment_parent = "Parent";
 set text_comment_thread = "Thread";
 
+property string text_poster_anonymous {
+    des = "The placeholder used when something is posted by an anonymous user";
+    example = "(Anonymous)";
+}
+set text_poster_anonymous = "(Anonymous)";
+
 property string text_reply_back {
     des = "Text to link back to the single entry view from the read comments page";
     example = "Read Comments";
@@ -1127,15 +1133,6 @@ set external_stylesheet = false;
 
 ###[ global function implementations ]
 
-function lang_map_plural (int n) : int {
-    if ($n == 1) { return 0; } # singular
-    return 1;             # plural
-}
-
-function lang_page_of_pages (int pg, int pgs) [notags] : string {
-    return "Page $pg of $pgs";
-}
-
 function prop_init ()
   "This function is the first thing called and is the place to set properties based on the values of other properties.  It's called before the style system looks at its builtin properties, so if you need to conditionally setup something based on your own custom properties, do it here.  You can't print from this function."
 {
@@ -1153,6 +1150,28 @@ function builtin htmlattr(string name, int value) : string
 "If the value isn't blank, return in HTML attribute format with a leading space.  HTML of name is not escaped.";
 
 ### Language
+
+function lang_map_plural (int n) : int {
+    if ($n == 1) { return 0; } # singular
+    return 1;             # plural
+}
+
+function lang_page_of_pages (int pg, int pgs) [notags] : string {
+    return "Page $pg of $pgs";
+}
+
+function lang_user_wrote(UserLite u) : string "Returns text describing that the user wrote something. i18nc layers should override this." {
+    if (defined $u) {
+        return $u->as_string()+" wrote";
+    }
+    else {
+        return "An anonymous user wrote";
+    }
+}
+
+function lang_at_datetime(DateTime d) : string "Returns a string saying \"at {the data and time given}\". Used in the core implementation of EntryPage and ReplyPage. i18nc layers should override this." {
+    return "on " + $d->date_format("long") + " at " + $d->time_format();
+}
 
 function lang_ordinal(int num) [notags] : string
 "Make an ordinal number from a cardinal number"
@@ -1707,7 +1726,7 @@ function EntryPage::print_comment (Comment c) {
     var Color barlight = $*color_comment_bar->clone();
     $barlight->lightness(($barlight->lightness() + 255) / 2);
     var Color barc = $c.depth % 2 ? $*color_comment_bar : $barlight;
-    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
+    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>$*text_poster_anonymous</i>";
 
     "<a name='$c.anchor'></a><div style='background-color: $barc; margin-top: 10px; width: 100%'>";
     "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
@@ -1756,7 +1775,7 @@ function EntryPage::print_comment (Comment c) {
 }
 
 function EntryPage::print_comment_partial (Comment c) {
-    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
+    var string poster = defined $c.poster ? $c.poster->as_string() : "<i>$*text_poster_anonymous</i>";
     var string subj = $c.subject != "" ? $c.subject : $*text_nosubject;
     print "<a href='$c.permalink_url'>$subj</a> - $poster";
 }
@@ -1799,14 +1818,8 @@ function EntryPage::print_body
     if (defined $e.userpic) { 
         print "<tr valign='middle'><td>$e.userpic</td>"; 
     }
-    print "<td>"; 
-    $e.poster->print();
-    if ($e.poster.username != $e.journal.username) {
-        " posting in ";
-        $e.journal->print();
-    }
-    " wrote:";
-    print "<br />@ " + $e.time->date_format("long") + " - " + $e.time->time_format();
+    print "<td>"+lang_user_wrote($e.poster);
+    print "<br />"+lang_at_datetime($e.time);
     "</td></tr></table>\n";
 
     print "<div style='text-align: center'>";
@@ -1852,18 +1865,11 @@ function ReplyPage::print_body
     }
 
     "<table>";
-    if (defined $.replyto.poster) {
         if (defined $.replyto.userpic) { 
             print "<tr valign='middle'><td>$.replyto.userpic</td>"; 
         }
-        print "<td>"; 
-        $.replyto.poster->print();
-    } else {
-        "<td><i>Anonymous</i>";
-    }
-    " wrote:";
-    print "<br />@ " + $.replyto.time->date_format("long") + " - " + $.replyto.time->time_format();
-       
+    print "<td>"+lang_user_wrote($.replyto.poster);
+    print "<br />"+lang_at_datetime($.replyto.time);
     "</td></tr></table>\n";
 
     print "<h2>$.replyto.subject</h2>";
