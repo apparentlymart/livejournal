@@ -20,7 +20,7 @@ P=)
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
  
- $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y'");
+ $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y' ORDER BY name");
  $sth->execute;
  my @themes = ();
  push @themes, $_ while ($_ = $sth->fetchrow_hashref);
