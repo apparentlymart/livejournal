@@ -288,10 +288,20 @@ $maint{'genstats_size'} = sub {
     print "-I- Finding total & active size.\n";
     my $period = 30;  # one month is considered active
     my $size = $dbh->selectrow_array("SELECT COUNT(*) FROM userusage");
-    my $active = $dbh->selectrow_array("SELECT COUNT(*) FROM userusage WHERE ".
-                                       "timecheck > DATE_SUB(NOW(), INTERVAL $period DAY) OR ".
-                                       "timeupdate > DATE_SUB(NOW(), INTERVAL $period DAY) OR ".
-                                       "timecreate > DATE_SUB(NOW(), INTERVAL $period DAY)");
+
+    my $active = 0;
+    foreach my $c (@LJ::CLUSTERS) {
+        my $dbcr = LJ::get_cluster_reader($c);
+        # no partialstats support yet, so we just have to bail, rather than
+        # skip a cluster and get really bad results
+        return unless $dbcr;
+        
+        my $ca = $dbcr->selectrow_array("SELECT COUNT(*) FROM clustertrack2 WHERE ".
+                                        "timeactive > UNIX_TIMESTAMP()-86400*$period AND clusterid=?",
+                                        undef, $c);
+        $active += $ca;
+    }
+
     return unless $size && $active;
     $dbh->do("REPLACE INTO stats (statcat, statkey, statval) ".
              "VALUES ('size', 'accounts', ?), ('size', 'accounts_active', ?)",
