@@ -18,6 +18,9 @@
     &s2.notes;
   </chapter>
   &s2.s2onlj;
+  <appendix id='&s2.idroot;siteapi'>
+    &s2.siteapi;
+  </appendix>
   <appendix id='&s2.idroot;faq'>
     &s2.faq;
   </appendix>

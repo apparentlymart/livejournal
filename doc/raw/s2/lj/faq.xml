@@ -1,4 +1,4 @@
-<qandaentry>
+<qandaentry id='&s2.idroot;faq.s1tos2'>
   <question><simpara>Will there be an S1 to S2 converter?</simpara></question>
   <answer>
     <para>Short answer: No.</para>
@@ -6,7 +6,7 @@
     <para>Actually, what we hope will happen is that somebody (or many people) will get inspired and start making new style languages <emphasis>on top of</emphasis> S2, many of which would likely be targetted at the HTML-hacker audience who want a style system more like S1.</para>
   </answer>
 </qandaentry>
-<qandaentry>
+<qandaentry id='&s2.idroot;faq.s2large'>
   <question><simpara>Why is S2 so large/complex/difficult?</simpara></question>
   <answer>
     <para>It's not, really. You're probably just overwhelmed and frustrated, hoping it was like S1 with more support for certain pages. Unfortunately, S1 was a dead-end and couldn't be usefully extended.</para>

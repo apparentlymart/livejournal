@@ -26,6 +26,10 @@
 
 <!ENTITY s2.s2onlj                 SYSTEM "s2onlj.xml">
 <!ENTITY s2.faq.extra              SYSTEM "faq.xml">
+<!ENTITY s2.siteapi                SYSTEM "siteapi.xml">
+
+<!ENTITY s2.siteapi.core1.autogen     SYSTEM "autogen-core1.xml">
+<!ENTITY s2.siteapi.core1.dateformats SYSTEM "dateformats.xml">
 
 <!-- Auto-generated include -->
 <!ENTITY % autogen                 SYSTEM "autogen-entities.xml">

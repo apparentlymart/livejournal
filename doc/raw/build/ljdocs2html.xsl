@@ -15,11 +15,13 @@
 <!-- Label sections -->
 <xsl:param name="section.autolabel" select="1"/>
 
-<xsl:param name="chunk.section.depth" select="0"/>
-
 <xsl:param name="local.l10n.xml" select="document('')"/>
 
 <xsl:param name="toc.section.depth">2</xsl:param>
+
+<xsl:param name="chunk.section.depth" select="1"/>
+
+<xsl:param name="chunk.first.sections" select="1"/>
 
 <xsl:param name="navig.showtitles">1</xsl:param>
 
