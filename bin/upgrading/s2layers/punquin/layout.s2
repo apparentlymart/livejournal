@@ -359,7 +359,10 @@ function RecentPage::lay_sidebar_navigation () {
 
 function CommentInfo::print ()
 {
-    if (not $.enabled) { return; }
+    if (not $.enabled) {
+        "<p align='right' class='comments'>&nbsp;</p>";
+        return;
+    }
     "<p align='right' class='comments'>(";
     if ($.count > 0 or $.screened) {
         $this->print_readlink();
