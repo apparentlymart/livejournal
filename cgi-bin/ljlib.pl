@@ -3046,7 +3046,7 @@ sub sysban_check {
         $sth->execute();
         return undef $LJ::IP_BANNED_LOADED if $sth->err;
         while (my ($val, $exp) = $sth->fetchrow_array) {
-            $LJ::IP_BANNED{$val} = $exp;
+            $LJ::IP_BANNED{$val} = $exp || 0;
         }
 
         # return value to user
@@ -3076,7 +3076,7 @@ sub sysban_check {
         $sth->execute();
         return undef $LJ::UNIQ_BANNED_LOADED if $sth->err;
         while (my ($val, $exp) = $sth->fetchrow_array) {
-            $LJ::UNIQ_BANNED{$val} = $exp;
+            $LJ::UNIQ_BANNED{$val} = $exp || 0;
         }
 
         # return value to user
