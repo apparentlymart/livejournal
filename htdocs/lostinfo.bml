@@ -2,7 +2,7 @@
 title=><?_ml .title _ml?>
 body<=
 
-<FORM ACTION="lostinfo_do.bml" METHOD="POST">
+<form action="lostinfo_do.bml" method="post">
 
 <?h1 <?_ml .lostpassword.title _ml?> h1?>
 <?p
@@ -10,10 +10,10 @@ body<=
 p?>
 
 <?standout
-<?_ml .enter_username _ml?><BR>
-<INPUT TYPE="TEXT" NAME="user" SIZE="30" MAXLENGTH="70">
-<p><?_ml .enter_email_optional _ml?><br>
-<INPUT TYPE="TEXT" NAME="email_p" SIZE="30" MAXLENGTH="70"> <INPUT TYPE="SUBMIT" name="lostpass" VALUE="<?_ml .btn.proceed _ml?>">
+<?_ml .enter_username _ml?><br />
+<input type="text" name="user" size="30" maxlength="70" /><br /><br />
+<?_ml .enter_email_optional _ml?><br />
+<input type="text" name="email_p" size="30" maxlength="70" /> <input type="submit" name="lostpass" value="<?_ml .btn.proceed _ml?>" />
 standout?>
 
 <?h1 <?_ml .lostusername.title _ml?> h1?>
@@ -22,11 +22,11 @@ standout?>
 p?>
 
 <?standout
-<?_ml .enter_email _ml?><BR>
-<INPUT TYPE="TEXT" NAME="email_u" SIZE="30" MAXLENGTH="70"> <INPUT TYPE="SUBMIT" name="lostuser" VALUE="<?_ml .btn.proceed _ml?>">
+<?_ml .enter_email _ml?><br />
+<input type="text" name="email_u" size="30" maxlength="70" /> <input type="submit" name="lostuser" value="<?_ml .btn.proceed _ml?>" />
 standout?>
 
-</FORM>
+</form>
 
 <=body
 page?><?_c <LJDEP>
