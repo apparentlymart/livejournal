@@ -270,11 +270,10 @@ body<=
 
      my $nu = LJ::load_userid($dbh, $userid);
 
-     if ($LJ::TOS_CHECK) {
+     if ($LJ::TOS_CHECK && -f "$LJ::HOME/htdocs/inc/legal-tos") {
          my $rev;
          open (TOS, "$LJ::HOME/htdocs/inc/legal-tos");
-         while (! $rev) {
-             my $line = <TOS>;
+         while ((!$rev) && (my $line = <TOS>)) {
              my $rcstag = "Revision";
              if ($line =~ /\$$rcstag:\s*(\S+)\s*\$/) {
                  $rev = $1;
