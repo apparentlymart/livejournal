@@ -35,7 +35,6 @@ sub ReplyPage
             return;
         }
 
-        my $parpost;
         my $sql = "SELECT jtalkid, posterid, state, datepost FROM talk2 ".
             "WHERE journalid=$u->{'userid'} AND jtalkid=$re_talkid ".
             "AND nodetype='L' AND nodeid=$entry->{'jitemid'}";
