@@ -29,14 +29,42 @@ sub new {
     return $self;
 }
 
+sub walk_items {
+    my ($self, $code) = @_;
+    my $iter = $self->{'head'};
+    while ($iter) {
+        my $it = $self->{'items'}->{$iter};
+        $code->($iter, $it->[3], $it->[4]);
+        $iter = $it->[2];
+    }
+}
+
 sub init {
     my ($self, $args) = @_;
 
     $self->{'head'} = 0;
     $self->{'tail'} = 0;
-    $self->{'items'} = {};
+    $self->{'items'} = {}; # key -> [ prev_key, value, next_key, bytes, instime ]
     $self->{'size'} = 0;
-    $self->{'maxsize'} = $args->{'maxsize'};
+    $self->{'bytes'} = 0;
+    $self->{'maxsize'} = $args->{'maxsize'}+0;
+    $self->{'maxbytes'} = $args->{'maxbytes'}+0;
+}
+
+sub get_item_count {
+    my $self = shift;
+    $self->{'size'};
+}
+
+sub get_byte_count {
+    my $self = shift;
+    $self->{'bytes'};
+}
+
+sub get_max_age {
+    my $self = shift;
+    return undef unless $self->{'tail'};
+    return $self->{'items'}->{$self->{'tail'}}->[4];
 }
 
 sub validate_list
@@ -108,16 +136,12 @@ sub drop_tail
     }
 
     ## kill the item
-    my $presize = scalar(keys %{$self->{'items'}});
+    my $bytes = $self->{'items'}->{$to_die}->[3];
     delete $self->{'items'}->{$to_die};
-    my $postsize = scalar(keys %{$self->{'items'}});
-    unless ($postsize == $presize-1) {
-	die "Tail drop didn't work!\n";
-    }
 
     ## shrink the overall size
     $self->{'size'}--;
-
+    $self->{'bytes'} -= $bytes;
 }
 
 sub print_list {
@@ -169,21 +193,29 @@ sub get {
     return undef;
 }
 
+# bytes is optional
 sub set {
-    my ($self, $key, $value) = @_;
+    my ($self, $key, $value, $bytes) = @_;
     
-    $self->drop_tail() if ($self->{'maxsize'} && 
-			   $self->{'size'} == $self->{'maxsize'} &&
-			   ! exists $self->{'items'}->{$key});
+    $self->drop_tail() while ($self->{'maxsize'} && 
+                              $self->{'size'} >= $self->{'maxsize'} &&
+                              ! exists $self->{'items'}->{$key}) ||
+                              ($self->{'maxbytes'} && $self->{'size'} &&
+                               $self->{'bytes'} + $bytes >= $self->{'maxbytes'} &&
+                               ! exists $self->{'items'}->{$key});
+    
     
     if (exists $self->{'items'}->{$key}) {
 	# update the value
 	my $item = $self->{'items'}->{$key};
 	$item->[1] = $value;
+        my $bytedelta = $bytes - $item->[3];
+        $self->{'bytes'} += $bytedelta;
+        $item->[3] = $bytes;
     }
     else {
 	# stick it at the end, for now
-	$self->{'items'}->{$key} = [undef, $value, undef];
+	$self->{'items'}->{$key} = [undef, $value, undef, $bytes, time() ];
 	if ($self->{'size'}) {
 	    $self->{'items'}->{$self->{'tail'}}->[2] = $key;
 	    $self->{'items'}->{$key}->[0] = $self->{'tail'};
@@ -192,6 +224,7 @@ sub set {
 	}
 	$self->{'tail'} = $key;
 	$self->{'size'}++;
+	$self->{'bytes'} += $bytes;
     }
 
     # this will promote it to the top:

@@ -281,23 +281,31 @@ sub load_user_lang
 sub get_text
 {
     my ($lang, $code, $dmid, $vars) = @_;
-    $dmid ||= 1;   # defaults to 1, "general"
+    $dmid = int($dmid || 1);
 
     load_lang_struct() unless $LS_CACHED;
+    my $cache_key = "ml.$lang$;$dmid$;$code";
 
-    my $text = $TXT_CACHE->get("$lang$;$dmid$;$code");
+    my $text = $TXT_CACHE->get($cache_key);
 
-    if (not defined $text) {
-        my $l = $LN_CODE{$lang} or return "?lang?";
-        my $dbr = LJ::get_dbh("slave", "master");
-        my $qcode = $dbr->quote($code);
-        my $qdmid = $dmid + 0;
-        $text = $dbr->selectrow_array("SELECT t.text".
-                                      "  FROM ml_text t, ml_latest l, ml_items i".
-                                      " WHERE t.dmid=$qdmid AND t.txtid=l.txtid".
-                                      "   AND l.dmid=$qdmid AND l.lnid=$l->{lnid} AND l.itid=i.itid".
-                                      "   AND i.dmid=$qdmid AND i.itcode=$qcode");
-        $TXT_CACHE->set("$lang$;$qdmid$;$code", $text) if defined $text;
+    unless (defined $text) {
+        my $mem_good = 1;
+        $text = LJ::MemCache::get(0, $cache_key);
+        unless (defined $text) {
+            $mem_good = 0;
+            my $l = $LN_CODE{$lang} or return "?lang?";
+            my $dbr = LJ::get_dbh("slave", "master");
+            $text = $dbr->selectrow_array("SELECT t.text".
+                                          "  FROM ml_text t, ml_latest l, ml_items i".
+                                          " WHERE t.dmid=$dmid AND t.txtid=l.txtid".
+                                          "   AND l.dmid=$dmid AND l.lnid=$l->{lnid} AND l.itid=i.itid".
+                                          "   AND i.dmid=$dmid AND i.itcode=?", undef,
+                                          $code);
+        }
+        if (defined $text) {
+            $TXT_CACHE->set($cache_key, $text);
+            LJ::MemCache::set(0, $cache_key, $text) unless $mem_good;
+        }
     }
 
     if ($vars) {
@@ -306,6 +314,5 @@ sub get_text
 
     return $text;
 }
-
    
 1;

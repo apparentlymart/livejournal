@@ -21,6 +21,7 @@ use MIME::Lite ();
 use HTTP::Date ();
 use Unicode::MapUTF8 ();
 use LJ::S2;
+use LJ::MemCache;
 use Time::Local ();
 use Storable ();
 
