@@ -244,6 +244,8 @@ propgroup sidebar {
     property string sidebar_blurb {
         des = "Free text to be added to the sidebar";
         note = "Appears in the sidebar 'Blurb'";
+        cols = 30;
+        rows = 10;
     }
     property bool sidebar_disable_recent_summary {
         des = "Disable 'Page Summary' on Recent Entries and Friends view";
