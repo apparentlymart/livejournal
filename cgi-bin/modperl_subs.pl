@@ -35,6 +35,7 @@ require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljtodo.pl";
 require "$ENV{'LJHOME'}/cgi-bin/directorylib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljemailgateway.pl";
+require "$ENV{'LJHOME'}/cgi-bin/emailcheck.pl";
 
 sub setup_start {
 

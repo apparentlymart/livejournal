@@ -17,8 +17,6 @@ LJ::ModPerl::setup_restart();
 
 delete $INC{"$ENV{'LJHOME'}/cgi-bin/modperl.pl"};
 
-# other packages
-package BMLCodeBlock;
-require "$ENV{'LJHOME'}/cgi-bin/emailcheck.pl";
+# Other packages should be loaded here:
 
 1;
