@@ -270,6 +270,8 @@ body<=
         if ($u->{'status'} eq "A") { $ret .= "<b>yes</b>"; }
         if ($u->{'status'} eq "N") { $ret .= "<b>no</b>" . $extraval->(); }
         if ($u->{'status'} eq "T") { $ret .= "<b>transitioning</b> (used to be validated, but changed email addresses and hasn't reconfirmed)" . $extraval->(); }
+        if ($u->{clusterid}) { $ret .= "<br />cluster: " . LJ::get_cluster_description($u->{clusterid}, 1); }
+        $ret .= "<br />data version: <b>$u->{dversion}</b>";
         $ret .= "<br />underage? ";
         if ($u->underage) {
             $ret .= "<strong>yes because of ";
@@ -285,8 +287,6 @@ body<=
             }
             $ret .= "</strong>";
         }
-        if ($u->{clusterid}) { $ret .= "<br />cluster: " . LJ::get_cluster_description($u->{clusterid}, 1); }
-        $ret .= "<br />data version: <b>$u->{dversion}</b>";
     } else {
         $ret .= "<i>not a user</i>";
     }
