@@ -1174,7 +1174,34 @@ sub db_logger
     return if $uri =~ m!^/(img|userpic)/! and $LJ::DONT_LOG_IMAGES;
 
     my $dbl = LJ::get_dbh("logs");
-    return unless $dbl;
+    my @dinsertd_socks;
+
+    my $now = time;
+    my @now = localtime($now);
+
+    foreach my $hostport (@LJ::DINSERTD_HOSTS) {
+        next if $LJ::CACHE_DINSERTD_DEAD{$hostport} > $now - 15;
+
+        my $sock =
+            $LJ::CACHE_DINSERTD_SOCK{$hostport} ||=
+            IO::Socket::INET->new(PeerAddr => $hostport,
+                                  Proto    => 'tcp',
+                                  Timeout  => 2,
+                                  );
+
+        print STDERR "sock for $hostport = $sock\n";
+
+        if ($sock) {
+            delete $LJ::CACHE_DINSERTD_DEAD{$hostport};
+            push @dinsertd_socks, [ $hostport, $sock ];
+        } else {
+            delete $LJ::CACHE_DINSERTD_SOCK{$hostport};
+            $LJ::CACHE_DINSERTD_DEAD{$hostport} = $now;
+        }
+    }
+
+    # why go on if we have nowhere to log to?
+    return unless $dbl || @dinsertd_socks;
 
     $ctype =~ s/;.*//;  # strip charset
 
@@ -1223,13 +1250,11 @@ sub db_logger
         }
     }
 
-    my $now = time();
-    my @now = localtime($now);
     my $table = sprintf("access%04d%02d%02d%02d", $now[5]+1900,
                         $now[4]+1, $now[3], $now[2]);
 
     unless ($LJ::CACHED_LOG_CREATE{"$table"}++) {
-        $dbl->do("CREATE TABLE IF NOT EXISTS $table (".
+        my $sql = "(".
                  "whn TIMESTAMP(14) NOT NULL,".
                  "INDEX(whn),".
                  "server VARCHAR(30),".
@@ -1257,12 +1282,25 @@ sub db_logger
                  "mem_vsize INT,".
                  "mem_share INT,".
                  "mem_rss INT,".
-                 "mem_unshared INT) DELAY_KEY_WRITE = 1");
-        $r->log_error("error creating log table ($table), perhaps due to old MySQL not supporting delayed key writes?  Error is: " .
-                      $dbl->errstr) if $dbl->err;
+                 "mem_unshared INT) DELAY_KEY_WRITE = 1";
+
+        if ($dbl) {
+            $dbl->do("CREATE TABLE IF NOT EXISTS $table $sql");
+            $r->log_error("error creating log table ($table), perhaps due to old MySQL not supporting delayed key writes?  Error is: " .
+                          $dbl->errstr) if $dbl->err;
+        }
+
+        foreach my $rec (@dinsertd_socks) {
+            my $sock = $rec->[1];
+            my $url = LJ::eurl("CREATE TABLE IF NOT EXISTS [tablename] $sql");
+            print $sock "SET_NOTE lj_create_table $url\r\n";
+            my $res = <$sock>;
+            $r->log_error("res: $res");
+        }
     }
 
     my $var = {
+        'whn' => sprintf("%04d%02d%02d%02d%02d%02d", $now[5]+1900, $now[4]+1, @now[3, 2, 1, 0]),
         'server' => $LJ::SERVER_NAME,
         'addr' => $r->connection->remote_ip,
         'ljuser' => $rl->notes('ljuser'),
@@ -1313,11 +1351,24 @@ sub db_logger
         }
     }
 
-    my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
-    $dbl->do("INSERT $delayed INTO $table (" . join(',', keys %$var) . ") ".
-             "VALUES (" . join(',', map { $dbl->quote($var->{$_}) } keys %$var) . ")");
+    if ($dbl) {
+        my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
+        $dbl->do("INSERT $delayed INTO $table (" . join(',', keys %$var) . ") ".
+                 "VALUES (" . join(',', map { $dbl->quote($var->{$_}) } keys %$var) . ")");
 
-    $dbl->disconnect if $LJ::DISCONNECT_DB_LOG;
+        $dbl->disconnect if $LJ::DISCONNECT_DB_LOG;
+    }
+
+    if (@dinsertd_socks) {
+        my $string = "INSERT $table " . join("&", map { LJ::eurl($_) . "=" . LJ::eurl($var->{$_}) } keys %$var) . "\r\n";
+        foreach my $rec (@dinsertd_socks) {
+            my $sock = $rec->[1];
+            print $sock $string;
+            my $res = <$sock>;
+            delete $LJ::CACHE_DINSERTD_SOCK{$rec->[0]} unless $res =~ /^OK\b/;
+        }
+    }
+
 
     # Now clear the profiling data for each handle we're profiling at the last
     # possible second to avoid the next request's data being skewed by
