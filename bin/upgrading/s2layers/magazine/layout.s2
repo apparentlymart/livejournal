@@ -314,11 +314,11 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
 
     print "<div style='text-align: center'>";
     var Link link;
-    $link = $e->get_link("navprev"); " $link";
+    $link = $e->get_link("nav_prev"); " $link";
     $link = $e->get_link("edit_entry"); " $link";
-    $link = $e->get_link("memorify_entry"); " $link";
-    $link = $e->get_link("tellafriend"); " $link";
-    $link = $e->get_link("navnext"); " $link";
+    $link = $e->get_link("mem_add"); " $link";
+    $link = $e->get_link("tell_friend"); " $link";
+    $link = $e->get_link("nav_next"); " $link";
     print "</div>";
 
     if (not $hide_text)

@@ -1620,7 +1620,7 @@ sub EntryLite__get_link
 sub Entry__get_link
 {
     my ($ctx, $this, $key) = @_;
-    if ($key eq "navprev" || $key eq "edit_entry" || $key eq "memorify_entry" || $key eq "tellafriend" || $key eq "navnext")
+    if ($key eq "nav_prev" || $key eq "edit_entry" || $key eq "mem_add" || $key eq "tell_friend" || $key eq "nav_next")
     {
         my $page = get_page();
         my $u = $page->{'_u'};
@@ -1639,7 +1639,7 @@ sub Entry__get_link
                 'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_edit.gif", 22, 20),
             }
         }
-        if ($key eq "tellafriend") {
+        if ($key eq "tell_friend") {
             return undef if ($LJ::DISABLED{'tellafriend'});
             return {
                 '_type' => "Link",
@@ -1648,7 +1648,7 @@ sub Entry__get_link
                 'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_tellfriend.gif", 22, 20),
             };
         }
-        if ($key eq "memorify_entry") {
+        if ($key eq "mem_add") {
             return undef if ($LJ::DISABLED{'memories'});
             return {
                 '_type' => "Link",
@@ -1657,7 +1657,7 @@ sub Entry__get_link
                 'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_memories.gif", 22, 20),
             };
         }
-        if ($key eq "navprev") {
+        if ($key eq "nav_prev") {
             return {
                 '_type' => "Link",
                 'url' => "$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=prev",
@@ -1665,7 +1665,7 @@ sub Entry__get_link
                 'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_prev.gif", 22, 20),
             };
         }
-        if ($key eq "navnext") {
+        if ($key eq "nav_next") {
             return {
                 '_type' => "Link",
                 'url' => "$LJ::SITEROOT/go.bml?journal=$journal&amp;itemid=$this->{'itemid'}&amp;dir=next",
