@@ -35,9 +35,9 @@ sub ReplyPage
             return;
         }
         my $dbcs = LJ::get_cluster_set($u);
-        my $sql = "SELECT t.posterid, t.state, t.datepost FROM talk2 ".
-            "WHERE t.journalid=$u->{'userid'} AND t.jtalkid=$re_talkid ".
-            "AND nodetype='L' AND nodeid=$re_talkid";
+        my $sql = "SELECT posterid, state, datepost FROM talk2 ".
+            "WHERE journalid=$u->{'userid'} AND jtalkid=$re_talkid ".
+            "AND nodetype='L' AND nodeid=$entry->{'jitemid'}";
         $parpost = LJ::dbs_selectrow_hashref($dbcs, $sql);
         unless ($parpost) {
             $opts->{'handler_return'} = 404;
@@ -49,7 +49,8 @@ sub ReplyPage
         $parpost->{'body'} = $tt->{$replyto}->[1];
         $parpost->{'props'} = {};
 
-        LJ::load_talk_props2($dbcs, $u->{'userid'}, [ $re_talkid ], { $re_talkid => $parpost->{'props'} }); 
+        LJ::load_talk_props2($dbcs->{'reader'}, $u->{'userid'}, 
+                             [ $re_talkid ], { $re_talkid => $parpost->{'props'} }); 
         if($LJ::UNICODE && $parpost->{'props'}->{'unknown8bit'}) {
             LJ::item_toutf8($u, \$parpost->{'subject'}, \$parpost->{'body'}, {});
         }
