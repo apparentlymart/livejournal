@@ -6,6 +6,421 @@ use strict;
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
+#### New interface (meta handler) ... other handlers should call into this.
+package LJ::Protocol;
+
+sub error_message
+{
+    my $code = shift;
+    my %e = (
+	     # User Errors
+	     "100" => "Invalid username",
+	     "101" => "Invalid password",
+
+	     # Client Errors
+	     "200" => "Missing required argument(s)",
+	     "201" => "Unknown method",
+	     "202" => "Too many arguments",
+	     "203" => "Invalid argument(s)",
+
+	     # Server Errors
+	     "500" => "Internal server error",
+	     );
+
+    my $prefix = "";
+    if ($code >= 200) { $prefix = "Client error: "; }
+    if ($code >= 500) { $prefix = "Server error: "; }
+    return "$prefix$e{$code}";
+}
+
+# returns result, or undef on failure
+sub do_request 
+{
+    # get the request and response hash refs
+    my ($method, $req, $err, $flags) = @_;
+    my $dbs = LJ::get_dbs();
+    $flags ||= {};
+    my @args = ($dbs, $req, $err, $flags);
+
+    return fail($err,500) unless $dbs;
+    
+    if ($method eq "login")           { return login(@args);           }
+    if ($method eq "getfriendgroups") { return getfriendgroups(@args); }
+    if ($method eq "getfriends")      { return getfriends(@args);      }
+    if ($method eq "friendof")        { return friendof(@args);      }
+    if ($method eq "checkfriends")    { return checkfriends(@args);      }
+
+    return fail($err,201);    
+}
+
+sub login
+{
+    my ($dbs, $req, $err, $flags) = @_;
+    return undef unless authenticate($dbs, $req, $err, $flags);
+
+    my $dbh = $dbs->{'dbh'};
+    my $u = $flags->{'u'};    
+    my $res = {};
+
+    ## return a message to the client to be displayed (optional)
+    login_message($dbs, $req, $res, $flags);
+
+    ## report what shared journals this user may post in
+    $res->{'usejournals'} = list_usejournals($dbs, $u);
+
+    ## return their friend groups
+    $res->{'friendgroups'} = list_friendgroups($dbs, $u);
+
+    ## if they gave us a number of moods to get higher than, then return them
+    if (defined $req->{'getmoods'}) {
+	$res->{'moods'} = list_moods($dbs, $req->{'getmoods'});
+    }
+
+    ### picture keywords, if they asked for them.
+    if ($req->{'getpickws'}) {
+	$res->{'pickws'} = list_pickws($dbs, $u);
+    }
+
+    ## return client menu tree, if requested
+    if ($req->{'getmenus'}) {
+	$res->{'menus'} = hash_menus($dbs, $u);
+    }
+
+    ## tell paid users they can hit the fast servers later.
+    if ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid") {
+	$res->{'fastserver'} = 1;
+    }
+
+    ## user info
+    $res->{'userid'} = $u->{'userid'};
+    $res->{'fullname'} = $u->{'name'};
+
+    ## update or add to clientusage table
+    if ($req->{'clientversion'} =~ /^\S+\/\S+$/)  {
+	my $qclient = $dbh->quote($req->{'clientversion'});
+	my $cu_sql = "REPLACE INTO clientusage (userid, clientid, lastlogin) " .
+	    "SELECT $u->{'userid'}, clientid, NOW() FROM clients WHERE client=$qclient";
+	my $sth = $dbh->prepare($cu_sql);
+	$sth->execute;
+	unless ($sth->rows) {
+	    # only way this can be 0 is if client doesn't exist in clients table, so
+	    # we need to add a new row there, to get a new clientid for this new client:
+	    $dbh->do("INSERT INTO clients (client) VALUES ($qclient)");
+	    # and now we can do the query from before and it should work:
+	    $sth = $dbh->prepare($cu_sql);
+	    $sth->execute;
+	}
+    }
+
+    return $res;
+}
+
+sub getfriendgroups
+{
+    my ($dbs, $req, $err, $flags) = @_;
+    return undef unless authenticate($dbs, $req, $err, $flags);
+    my $u = $flags->{'u'};    
+    my $res = {};
+    $res->{'friendgroups'} = list_friendgroups($dbs, $u);
+    return $res;
+}
+
+sub getfriends
+{
+    my ($dbs, $req, $err, $flags) = @_;
+    return undef unless authenticate($dbs, $req, $err, $flags);
+    my $u = $flags->{'u'};    
+    my $res = {};
+    if ($req->{'includegroups'}) {
+	$res->{'friendgroups'} = list_friendgroups($dbs, $u);
+    }
+    if ($req->{'includefriendof'}) {
+	$res->{'friendofs'} = list_friends($dbs, $u, {
+	    'limit' => $req->{'friendoflimit'},
+	    'friendof' => 1,
+	});
+    }
+    $res->{'friends'} = list_friends($dbs, $u, {
+	'limit' => $req->{'friendlimit'} 
+    });
+    return $res;
+}
+
+sub friendof
+{
+    my ($dbs, $req, $err, $flags) = @_;
+    return undef unless authenticate($dbs, $req, $err, $flags);
+    my $u = $flags->{'u'};    
+    my $res = {};
+    $res->{'friendofs'} = list_friends($dbs, $u, {
+	'friendof' => 1,
+	'limit' => $req->{'friendoflimit'},
+    });
+    return $res;
+}
+
+sub checkfriends
+{
+    my ($dbs, $req, $err, $flags) = @_;
+    return undef unless authenticate($dbs, $req, $err, $flags);
+    my $u = $flags->{'u'};    
+    my $res = {};
+
+    my $dbr = $dbs->{'reader'};
+    my ($lastdate, $sth);
+
+    ## have a valid date?
+    my $lastupdate = $req->{'lastupdate'};
+    if ($lastupdate) {
+	return fail($err,203) unless
+	    ($lastupdate =~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/);
+    } else {
+	$lastupdate = "0000-00-00 00:00:00";
+    }
+
+    my $sql = "SELECT MAX(u.timeupdate) FROM userusage u, friends f WHERE u.userid=f.friendid AND f.userid=$u->{'userid'}";
+    if ($req->{'mask'} and $req->{'mask'} !~ /\D/) {
+	$sql .= " AND f.groupmask & $req->{mask} > 0";
+    }
+	
+    $sth = $dbr->prepare($sql);
+    $sth->execute;
+    my ($update) = $sth->fetchrow_array;
+    $update ||= "0000-00-00 00:00:00";
+
+    if ($req->{'lastupdate'} && $update gt $lastupdate) {
+	$res->{'new'} = 1;
+    } else {
+	$res->{'new'} = 0;
+    }
+    
+    $res->{'lastupdate'} = $update;
+
+    if ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid") {
+	$res->{'interval'} = 30;
+    } else {
+	$res->{'interval'} = 60;
+    }
+
+    return $res;
+}
+
+sub list_friends
+{
+    my ($dbs, $u, $opts) = @_;
+    my $dbr = $dbs->{'reader'};
+
+    my $limitnum = $opts->{'limit'}+0;
+    my $where = "u.userid=f.friendid AND f.userid=$u->{'userid'}";
+    if ($opts->{'friendof'}) {
+	$where = "u.userid=f.userid AND f.friendid=$u->{'userid'}";
+    }
+
+    my $limit = $limitnum ? "LIMIT $limitnum" : "";
+    my $sth = $dbr->prepare("SELECT u.user AS 'friend', u.name, u.journaltype, f.fgcolor, f.bgcolor, f.groupmask FROM user u, friends f WHERE $where AND u.statusvis='V' ORDER BY u.user $limit");
+    $sth->execute;
+    my @friends;
+    push @friends, $_ while $_ = $sth->fetchrow_hashref;
+    $sth->finish;
+
+    my $res = [];
+    foreach my $f (@friends)
+    {
+	my $r =  { 'username' => $f->{'friend'},
+		   'fullname' => $f->{'name'},
+	       };
+	$r->{'fgcolor'} = $f->{'fgcolor'} if ($f->{'fgcolor'});
+	$r->{'bgcolor'} = $f->{'bgcolor'} if ($f->{'bgcolor'});
+	if (! $opts->{'friendof'} && $f->{'groupmask'} != 1) {
+	    $r->{"groupmask"} = $f->{'groupmask'};
+	}
+	if ($f->{'journaltype'} eq "C") {
+	    $r->{"type"} = "community";
+	}
+	
+	push @$res, $r;
+    }
+    return $res;
+}
+
+sub login_message
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $u = $flags->{'u'};
+
+    if ($u eq "test") { 
+	$res->{'message'} = "Hello Test Account!"; 
+    }
+    if ($req->{'clientversion'} =~ /^Win32-MFC\/(1.2.[0123456])$/ ||
+	$req->{'clientversion'} =~ /^Win32-MFC\/(1.3.[01234])\b/)
+    {
+	$res->{'message'} = "There's a significantly newer version of LiveJournal for Windows available.";
+    }
+    unless ($LJ::EVERYONE_VALID)
+    {
+	if ($u->{'status'} eq "N") { $res->{'message'} = "You are currently not validated.  You may continue to use LiveJournal, but please validate your email address for continued use.  See the instructions that were mailed to you when you created your journal, or see $LJ::SITEROOT/support/ for more information."; }
+	if ($u->{'status'} eq "T") { $res->{'message'} = "You need to validate your new email address.  Your old one was good, but since you've changed it, you need to re-validate the new one.  Visit the support area for more information."; }
+    }
+    if ($u->{'status'} eq "B") { $res->{'message'} = "You are currently using a bad email address.  All mail we try to send you is bouncing.  We require a valid email address for continued use.  Visit the support area for more information."; }
+
+}
+
+sub list_friendgroups
+{
+    my $dbs = shift;
+    my $u = shift;
+    
+    my $res = [];
+    my $dbr = $dbs->{'reader'};
+
+    my $sth = $dbr->prepare("SELECT groupnum, groupname, sortorder, is_public ".
+			    "FROM friendgroup WHERE userid=$u->{'userid'} ".
+			    "ORDER BY sortorder");
+    $sth->execute;
+    while (my ($gid, $name, $sort, $public) = $sth->fetchrow_array) {
+	push @$res, { 'id' => $gid,
+		      'name' => $name,
+		      'sortorder' => $sort,
+		      'public' => $public };
+    }
+    $sth->finish;
+    return $res;
+}
+
+sub list_usejournals
+{
+    my $dbs = shift;
+    my $u = shift;
+    
+    my $res = [];
+
+    my $dbr = $dbs->{'reader'};
+    my $sth = $dbr->prepare("SELECT u.user FROM useridmap u, logaccess la WHERE la.ownerid=u.userid AND la.posterid=$u->{'userid'} ORDER BY u.user");
+    $sth->execute;
+    while (my $u = $sth->fetchrow_array) {
+	push @$res, $u;
+    }
+    $sth->finish;
+    return $res;
+}
+
+sub hash_menus
+{
+    my $dbs = shift;
+    my $u = shift;
+    my $user = $u->{'user'};
+
+    my $menu = [
+		{ 'text' => "Recent Entries",
+		  'url' => "$LJ::SITEROOT/users/$user/", },
+		{ 'text' => "Calendar View",
+		  'url' => "$LJ::SITEROOT/users/$user/calendar", },
+		{ 'text' => "Friends View",
+		  'url' => "$LJ::SITEROOT/users/$user/friends", },
+		{ 'text' => "-", },
+		{ 'text' => "Your Profile",
+		  'url' => "$LJ::SITEROOT/userinfo.bml?user=$user", },
+		{ 'text' => "Your To-Do List",
+		  'url' => "$LJ::SITEROOT/todo/?user=$user", },
+		{ 'text' => "-", },
+		{ 'text' => "Change Settings",
+		  'sub' => [ { 'text' => "Personal Info",
+			       'url' => "$LJ::SITEROOT/editinfo.bml", },
+			     { 'text' => "Journal Settings",
+			       'url' =>"$LJ::SITEROOT/modify.bml", }, ] },
+		{ 'text' => "-", },
+		{ 'text' => "Support", 
+		  'url' => "$LJ::SITEROOT/support/", }
+		];
+    
+    unless ($u->{'paidfeatures'} eq "on" || 
+	    $u->{'paidfeatures'} eq "paid") 
+    {
+	push @$menu, { 'text' => 'Upgrade your account',
+		       'url' => "$LJ::SITEROOT/paidaccounts/", };
+    }
+    return $menu;
+}
+
+sub list_pickws
+{
+    my $dbs = shift;
+    my $u = shift;
+
+    my $dbr = $dbs->{'reader'};
+    my $res = [];
+
+    my $sth = $dbr->prepare("SELECT k.keyword FROM userpicmap m, keywords k ".
+			    "WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid ".
+			    "ORDER BY k.keyword");
+    $sth->execute;
+    while ($_ = $sth->fetchrow_array) {
+	s/[\n\r\0]//g;  # used to be a bug that allowed these characters to get in.
+	push @$res, $_;
+    }
+    $sth->finish;
+    return $res;
+}
+
+sub list_moods
+{
+    my $dbs = shift;
+    my $mood_max = int(shift);
+
+    LJ::load_moods($dbs);
+
+    my $res = [];    
+    return $res unless ($mood_max < $LJ::CACHED_MOOD_MAX);
+
+    for (my $id = $mood_max+1; $id <= $LJ::CACHED_MOOD_MAX; $id++) {
+	next unless defined $LJ::CACHE_MOODS{$id};
+	my $mood = $LJ::CACHE_MOODS{$id};
+	push @$res, { 'id' => $id, 
+		      'name' => $mood->{'name'},
+		      'parent' => $mood->{'parent'} };
+    }
+    
+    return $res;
+}
+
+
+sub authenticate
+{
+    my ($dbs, $req, $err, $flags) = @_;
+
+    my $username = $req->{'username'};
+    return fail($err,200) unless $username;
+    return fail($err,100) unless LJ::canonical_username($username);
+
+    my $dbr = $dbs->{'reader'};
+    my $quser = $dbr->quote($username);
+    my $sth = $dbr->prepare("SELECT user, userid, journaltype, name, ".
+			    "paidfeatures, password, status, statusvis, ".
+			    "track FROM user WHERE user=$quser");
+    $sth->execute;
+    my $u = $sth->fetchrow_hashref;
+
+    return fail($err,100) unless $u;
+    return fail($err,101) unless ($flags->{'nopassword'} || 
+  				  LJ::auth_okay($username,
+						$req->{'password'},
+						$req->{'hpassword'},
+						$u->{'password'}));
+    # remember the user record for later.
+    $flags->{'u'} = $u;
+    return 1;
+}
+
+sub fail
+{
+    my $err = shift;
+    my $code = shift;
+    $$err = $code;
+    return undef;
+}
+
+#### Old interface (flat key/values) -- wrapper aruond LJ::Protocol
 package LJ;
 
 sub do_request
@@ -13,48 +428,62 @@ sub do_request
     # get the request and response hash refs
     my ($db_arg, $req, $res, $flags) = @_;
 
-    # declare stuff
-    my ($user, $userid, $journaltype, $name, $paidfeatures, $correctpassword, $status, $statusvis, $track, $sth);
-
     # initialize some stuff
     my $dbs = LJ::make_dbs_from_arg($db_arg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
     %{$res} = ();                      # clear the given response hash
 
+    my ($user, $userid, $journaltype, $name, $paidfeatures, $correctpassword, $status, $statusvis, $track, $sth);
+    $user = &trim(lc($req->{'user'}));
+    my $quser = $dbh->quote($user);
+
+
     # check for an alive database connection
-    unless ($dbh)
-    {
+    unless ($dbh) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = "Server error: cannot connect to database.";
         return;
     }
 
-    $user = &trim(lc($req->{'user'}));
-    my $quser = $dbh->quote($user);
-
     # did they send a mode?
-    unless ($req->{'mode'})
-    {
+    unless ($req->{'mode'}) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = "Client error: No mode specified.";
         return;
     }
     
-    unless ($user)
-    {
+    unless ($user) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = "Client error: No username sent.";
         return;
     }
 
     ### see if the server's under maintenance now
-    if ($LJ::SERVER_DOWN) 
-    {
+    if ($LJ::SERVER_DOWN) {
         $res->{'success'} = "FAIL";
         $res->{'errmsg'} = $LJ::SERVER_DOWN_MESSAGE;
         return;
     }
+
+    ## dispatch wrappers
+    if ($req->{'mode'} eq "login") {
+	return login($dbs, $req, $res, $flags);
+    }
+    if ($req->{'mode'} eq "getfriendgroups") {
+	return getfriendgroups($dbs, $req, $res, $flags);
+    }
+    if ($req->{'mode'} eq "getfriends") {
+	return getfriends($dbs, $req, $res, $flags);
+    }
+    if ($req->{'mode'} eq "friendof") {
+	return friendof($dbs, $req, $res, $flags);
+    }
+    if ($req->{'mode'} eq "checkfriends") {
+	return checkfriends($dbs, $req, $res, $flags);
+    }
+
+    ### OLD CODE FOLLOWS:
 
     # authenticate user
     unless ($flags->{'noauth'}) # && $req->{'mode'} ne "login")
@@ -112,169 +541,7 @@ sub do_request
 
     ################################ AUTHENTICATED NOW ################################
 
-    if ($req->{'mode'} eq "login" || 
-	$req->{'mode'} eq "getfriendgroups" ||
-	($req->{'mode'} eq "getfriends" && $req->{'includegroups'}))
-    {
-	$sth = $dbr->prepare("SELECT groupnum, groupname, sortorder, is_public FROM friendgroup WHERE userid=$userid");
-	$sth->execute;
-	my $maxnum = 0;
-	while ($_ = $sth->fetchrow_hashref) {
-	    my $num = $_->{'groupnum'};
-	    $res->{"frgrp_${num}_name"} = $_->{'groupname'};
-	    $res->{"frgrp_${num}_sortorder"} = $_->{'sortorder'};
-	    if ($_->{'is_public'}) {
-		$res->{"frgrp_${num}_public"} = 1;
-	    }
-	    if ($num > $maxnum) { $maxnum = $num; }
-	}
-	$res->{'frgrp_maxnum'} = $maxnum;
-
-	if ($req->{'mode'} eq "getfriendgroups") {
-	    $res->{'success'} = "OK";
-	    return;
-	}
-	if ($user eq "test") {
-	    sleep(2);
-	}
-    }
-
-    if ($req->{'mode'} eq "login")
-    {
-        $res->{'success'} = "OK";
-        $res->{'name'} = $name;
-        if ($user eq "test") { 
-	    $res->{'message'} = "Hello Test Account!"; 
-	}
-	if ($req->{'clientversion'} =~ /^Win32-MFC\/(1.2.[0123456])$/ ||
-	    $req->{'clientversion'} =~ /^Win32-MFC\/(1.3.[01234])\b/)
-	{
-	    $res->{'message'} = "There's a significantly newer version of LiveJournal for Windows available.";
-	}
-	unless ($LJ::EVERYONE_VALID)
-	{
-	    if ($status eq "N") { $res->{'message'} = "You are currently not validated.  You may continue to use LiveJournal, but please validate your email address for continued use.  See the instructions that were mailed to you when you created your journal, or see $LJ::SITEROOT/support/ for more information."; }
-	    if ($status eq "T") { $res->{'message'} = "You need to validate your new email address.  Your old one was good, but since you've changed it, you need to re-validate the new one.  Visit the support area for more information."; }
-	}
-	if ($status eq "B") { $res->{'message'} = "You are currently using a bad email address.  All mail we try to send you is bouncing.  We require a valid email address for continued use.  Visit the support area for more information."; }
-
-	### report what shared journals this user may post in
-	my $access_count = 0;
-	my $sth = $dbr->prepare("SELECT u.user FROM useridmap u, logaccess la WHERE la.ownerid=u.userid AND la.posterid=$userid ORDER BY u.user");
-	$sth->execute;
-	while ($_ = $sth->fetchrow_hashref) {
-	    $access_count++;
-	    $res->{"access_${access_count}"} = $_->{'user'};
-	}
-	if ($access_count) {
-	    $res->{"access_count"} = $access_count;
-	}
-
-	### picture keywords
-	if (defined $req->{"getpickws"}) 
-	{
-	    my $pickw_count = 0;
-	    my $sth = $dbr->prepare("SELECT k.keyword FROM userpicmap m, keywords k WHERE m.userid=$userid AND m.kwid=k.kwid ORDER BY k.keyword");
-	    $sth->execute;
-	    while ($_ = $sth->fetchrow_array) {
-		s/[\n\r\0]//g;  # used to be a bug that allowed these characters to get in.
-		$pickw_count++;
-		$res->{"pickw_${pickw_count}"} = $_;
-	    }
-	    if ($pickw_count) {
-		$res->{"pickw_count"} = $pickw_count;
-	    }
-	}
-
-	### report new moods that this client hasn't heard of, if they care
-	if (defined $req->{"getmoods"}) {
-	    my $mood_max = $req->{"getmoods"}+0;
-	    my $mood_count = 0;
-	    &load_moods($dbh);
-
-	    if ($mood_max < $LJ::CACHED_MOOD_MAX) 
-	    {
-		for (my $id=$mood_max+1; $id <= $LJ::CACHED_MOOD_MAX; $id++)
-		{
-		    if (defined $LJ::CACHE_MOODS{$id}) {
-			my $mood = $LJ::CACHE_MOODS{$id};
-			$mood_count++;
-			$res->{"mood_${mood_count}_id"} = $id;
-			$res->{"mood_${mood_count}_name"} = $mood->{'name'};
-		    }
-		}
-	    }
-	    if ($mood_count) {
-		$res->{"mood_count"} = $mood_count;
-	    }
-	}
-
-	#### send web menus
-	if ($req->{"getmenus"} == 1) {
-	    my $menu = [
-			{ 'text' => "Recent Entries",
-			  'url' => "$LJ::SITEROOT/users/$user/", },
-			{ 'text' => "Calendar View",
-			  'url' => "$LJ::SITEROOT/users/$user/calendar", },
-			{ 'text' => "Friends View",
-			  'url' => "$LJ::SITEROOT/users/$user/friends", },
-			{ 'text' => "-", },
-			{ 'text' => "Your Profile",
-			  'url' => "$LJ::SITEROOT/userinfo.bml?user=$user", },
-			{ 'text' => "Your To-Do List",
-			  'url' => "$LJ::SITEROOT/todo/?user=$user", },
-			{ 'text' => "-", },
-			{ 'text' => "Change Settings",
-			  'sub' => [ { 'text' => "Personal Info",
-				       'url' => "$LJ::SITEROOT/editinfo.bml", },
-				     { 'text' => "Journal Settings",
-				       'url' =>"$LJ::SITEROOT/modify.bml", }, ] },
-			{ 'text' => "-", },
-			{ 'text' => "Support", 
-			  'url' => "$LJ::SITEROOT/support/", }
-			];
-
-	    unless ($paidfeatures eq "on" || $paidfeatures eq "paid") 
-	    {
-		push @$menu, { 'text' => 'Upgrade your account',
-			       'url' => "$LJ::SITEROOT/paidaccounts/", };
-	    }
-	    
-	    my $menu_num = 0;
-	    &populate_web_menu($res, $menu, \$menu_num);
-
-        }
-
-	# tell the client it's a paid user so it can send the "ljfastserver" 
-	# cookie and get access to the fast servers through the load balancer
-	if ($paidfeatures eq "on" || $paidfeatures eq "paid") 
-	{
-	    $res->{'fastserver'} = "1";
-	}
-	
-	## update or add to clientusage table
-	##
-	if ($req->{'clientversion'} =~ /^\S+\/\S+$/) 
-	{
-	    my $qclient = $dbh->quote($req->{'clientversion'});
-	    my $cu_sql = "REPLACE INTO clientusage (userid, clientid, lastlogin) " .
-		"SELECT $userid, clientid, NOW() FROM clients WHERE client=$qclient";
-	    $sth = $dbh->prepare($cu_sql);
-	    $sth->execute;
-	    unless ($sth->rows) {
-		# only way this can be 0 is if client doesn't exist in clients table, so
-		# we need to add a new row there, to get a new clientid for this new client:
-		$dbh->do("INSERT INTO clients (client) VALUES ($qclient)");
-		
-		# and now we can do the query from before and it should work:
-		$sth = $dbh->prepare($cu_sql);
-		$sth->execute;
-	    }
-	}
-
-        return;
-    }
-  
+ 
     ###
     ### MODE: editfriendgroups
     ### (rename, add, and delete friend groups)
@@ -392,7 +659,7 @@ sub do_request
 	    } else {
                 $res->{'errmsg'} = $info->{'errmsg'};
 		$res->{'success'} = "FAIL"; 
-		return;
+		return; 
 	    }
 	}
 	
@@ -405,71 +672,6 @@ sub do_request
         }
         $res->{'success'} = "OK";
 	return; 
-    }
-
-    ###
-    ### MODE: friendsof
-    ### (who all lists you as a friend?)
-    ###
-    if ($req->{'mode'} eq "friendof" ||
-	($req->{'mode'} eq "getfriends" && $req->{'includefriendof'}))
-    {
-	my $limitnum = $req->{'friendoflimit'}+0;
-	my $limit = $limitnum ? "LIMIT $limitnum" : "";
-        $sth = $dbr->prepare("SELECT u.user, u.name, u.journaltype, f.fgcolor, f.bgcolor FROM friends f, user u WHERE u.userid=f.userid AND f.friendid=$userid AND u.statusvis='V' ORDER BY user $limit");
-        $sth->execute;
-        my @friendof;
-        push @friendof, $_ while $_ = $sth->fetchrow_hashref;
-
-        my $i=0;
-        foreach (@friendof)
-        {
-	  $i++;
-	  $res->{"friendof_${i}_user"} = $_->{'user'};
-	  if ($_->{'journaltype'} eq "C") {
-	      $res->{"friendof_${i}_type"} = "community";
-	  }
-	  $res->{"friendof_${i}_name"} = $_->{'name'};
-	  $res->{"friendof_${i}_fg"} = $_->{'fgcolor'};
-	  $res->{"friendof_${i}_bg"} = $_->{'bgcolor'};
-        }
-        $res->{'friendof_count'} = $i;
-        $res->{'success'} = "OK";
-
-	if ($req->{'mode'} eq "friendof") { return; }
-    }
-
-    ###
-    ### MODE: getfriends
-    ### (who are your friends?)
-    ###
-    if ($req->{'mode'} eq "getfriends")
-    {
-	my $limitnum = $req->{'friendlimit'}+0;
-	my $limit = $limitnum ? "LIMIT $limitnum" : "";
-        $sth = $dbr->prepare("SELECT u.user AS 'friend', u.name, u.journaltype, f.fgcolor, f.bgcolor, f.groupmask FROM user u, friends f WHERE u.userid=f.friendid AND f.userid=$userid AND u.statusvis='V' ORDER BY u.user $limit");
-        $sth->execute;
-        my @friends;
-        push @friends, $_ while $_ = $sth->fetchrow_hashref;
-
-        my $i=0;
-        foreach (@friends)
-        {
-	  $i++;
-	  $res->{"friend_${i}_user"} = $_->{'friend'};
-	  $res->{"friend_${i}_name"} = $_->{'name'};
-	  $res->{"friend_${i}_fg"} = $_->{'fgcolor'};
-	  $res->{"friend_${i}_bg"} = $_->{'bgcolor'};
-	  if ($_->{'groupmask'} != 1) {
-	      $res->{"friend_${i}_groupmask"} = $_->{'groupmask'};
-	  }
-	  if ($_->{'journaltype'} eq "C") {
-	      $res->{"friend_${i}_type"} = "community";
-	  }
-        }
-        $res->{'friend_count'} = $i;
-        $res->{'success'} = "OK";
-        return;
     }
 
     ####
@@ -1386,60 +1588,241 @@ sub do_request
         return 1;
     }
 
-    ###
-    ### MODE: checkfriends
-    ### 
-    if ($req->{'mode'} eq "checkfriends")
-    {
-	my ($lastdate, $sth);
-
-	## have a valid date?
-	my $lastupdate = $req->{'lastupdate'};
-	if ($lastupdate) {
-	    if ($lastupdate !~ /^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d/) {
-		$res->{'success'} = "FAIL";
-		$res->{'errmsg'} = "Invalid date format";
-		return;
-	    }
-	} else {
-	    $lastupdate = "0000-00-00 00:00:00";
-	}
-
-	my $sql = "SELECT MAX(u.timeupdate) FROM userusage u, friends f WHERE u.userid=f.friendid AND f.userid=$userid";
-	if ($req->{'mask'} and $req->{'mask'} !~ /\D/) {
-	    $sql .= " AND f.groupmask & $req->{mask} > 0";
-	}
-	
-	$sth = $dbr->prepare($sql);
-	$sth->execute;
-	my ($update) = $sth->fetchrow_array;
-	$update ||= "0000-00-00 00:00:00";
-
-	if ($req->{'lastupdate'} && $update gt $lastupdate) {
-	    $res->{'new'} = 1;
-	} else {
-	    $res->{'new'} = 0;
-	}
-
-	$res->{'lastupdate'} = $update;
-
-	if ($paidfeatures eq "on" || $paidfeatures eq "paid") {
-	    $res->{'interval'} = 30;
-	} else {
-	    $res->{'interval'} = 60;
-	}
-
-
-	$res->{'success'} = "OK";
-        return 1;
-    }
-       
-
-
     ### unknown mode!
     $res->{'success'} = "FAIL";
     $res->{'errmsg'} = "Client error: Unknown mode ($req->{'mode'})";
     return;
 }
+
+## flat wrapper
+sub login
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+    
+    my $rs = LJ::Protocol::do_request("login", $rq, \$err);
+    unless ($rs) {
+	$res->{'success'} = "FAIL";
+	$res->{'errmsg'} = LJ::Protocol::error_message($err);
+	return 0;
+    }
+
+    $res->{'success'} = "OK";
+    $res->{'name'} = $rs->{'fullname'};
+    $res->{'message'} = $rs->{'message'} if $rs->{'message'};
+    $res->{'fastserver'} = 1 if $rs->{'fastserver'};
+    
+    # shared journals
+    my $access_count = 0;
+    foreach my $user (@{$rs->{'usejournals'}}) {
+	$access_count++;
+	$res->{"access_${access_count}"} = $user;
+    }
+    if ($access_count) {
+	$res->{"access_count"} = $access_count;
+    }
+
+    # friend groups
+    populate_friend_groups($res, $rs->{'friendgroups'});
+    
+    ### picture keywords
+    if (defined $req->{"getpickws"}) 
+    {
+	my $pickw_count = 0;
+	foreach (@{$rs->{'pickws'}}) {
+	    $pickw_count++;
+	    $res->{"pickw_${pickw_count}"} = $_;
+	}
+	if ($pickw_count) {
+	    $res->{"pickw_count"} = $pickw_count;
+	}
+    }
+    
+    ### report new moods that this client hasn't heard of, if they care
+    if (defined $req->{"getmoods"}) {
+	my $mood_count = 0;	
+	foreach my $m (@{$rs->{'moods'}}) {
+	    $mood_count++;
+	    $res->{"mood_${mood_count}_id"} = $m->{'id'};
+	    $res->{"mood_${mood_count}_name"} = $m->{'name'};
+	}
+	if ($mood_count) {
+	    $res->{"mood_count"} = $mood_count;
+	}
+    }
+    
+    #### send web menus
+    if ($req->{"getmenus"} == 1) {
+	my $menu = $rs->{'menus'};
+	my $menu_num = 0;
+	populate_web_menu($res, $menu, \$menu_num);
+    }
+    
+    return 1;
+}
+
+## flat wrapper
+sub getfriendgroups
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+    
+    my $rs = LJ::Protocol::do_request("getfriendgroups", $rq, \$err);
+    unless ($rs) {
+	$res->{'success'} = "FAIL";
+	$res->{'errmsg'} = LJ::Protocol::error_message($err);
+	return 0;
+    }
+    $res->{'success'} = "OK";
+    populate_friend_groups($res, $rs->{'friendgroups'});
+    
+    return 1;
+}
+
+## flat wrapper
+sub getfriends
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+    
+    my $rs = LJ::Protocol::do_request("getfriends", $rq, \$err);
+    unless ($rs) {
+	$res->{'success'} = "FAIL";
+	$res->{'errmsg'} = LJ::Protocol::error_message($err);
+	return 0;
+    }
+
+    $res->{'success'} = "OK";
+    if ($req->{'includegroups'}) {
+	populate_friend_groups($res, $rs->{'friendgroups'});
+    }
+    if ($req->{'includefriendof'}) {
+	populate_friends($res, "friendof", $rs->{'friendofs'});
+    }
+    populate_friends($res, "friend", $rs->{'friends'});
+    
+    return 1;
+}
+
+## flat wrapper
+sub friendof
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+    
+    my $rs = LJ::Protocol::do_request("friendof", $rq, \$err);
+    unless ($rs) {
+	$res->{'success'} = "FAIL";
+	$res->{'errmsg'} = LJ::Protocol::error_message($err);
+	return 0;
+    }
+
+    $res->{'success'} = "OK";
+    populate_friends($res, "friendof", $rs->{'friendofs'});
+    return 1;
+}
+
+## flat wrapper
+sub checkfriends
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+    
+    my $rs = LJ::Protocol::do_request("checkfriends", $rq, \$err);
+    unless ($rs) {
+	$res->{'success'} = "FAIL";
+	$res->{'errmsg'} = LJ::Protocol::error_message($err);
+	return 0;
+    }
+
+    $res->{'success'} = "OK";
+    $res->{'new'} = $rs->{'new'};
+    $res->{'lastupdate'} = $rs->{'lastupdate'};
+    $res->{'interval'} = $rs->{'interval'};
+    return 1;
+}
+
+sub populate_friends
+{
+    my ($res, $pfx, $list) = @_;
+    my $count = 0;
+    foreach my $f (@$list)
+    {
+	$count++;
+	$res->{"${pfx}_${count}_name"} = $f->{'fullname'};
+	$res->{"${pfx}_${count}_user"} = $f->{'username'};
+	$res->{"${pfx}_${count}_bg"} = $f->{'bgcolor'};
+	$res->{"${pfx}_${count}_fg"} = $f->{'fgcolor'};
+	if (defined $f->{'groupmask'}) {
+	    $res->{"${pfx}_${count}_groupmask"} = $f->{'groupmask'};
+	}
+	if (defined $f->{'type'}) {
+	    $res->{"${pfx}_${count}_type"} = $f->{'type'};
+	}
+    }
+    $res->{"${pfx}_count"} = $count;    
+}
+
+
+sub upgrade_request
+{
+    my $r = shift;
+    my $new = { %{ $r } };
+    $new->{'username'} = $r->{'user'};
+    delete $r->{'user'};
+    return $new;
+}
+
+## given a $res hashref and friend group subtree (arrayref), flattens it
+sub populate_friend_groups
+{
+    my ($res, $fr) = @_;
+
+    my $maxnum = 0;
+    foreach my $fg (@$fr)
+    {
+	my $num = $fg->{'id'};
+	$res->{"frgrp_${num}_name"} = $fg->{'name'};
+	$res->{"frgrp_${num}_sortorder"} = $fg->{'sortorder'};
+	if ($fg->{'public'}) {
+	    $res->{"frgrp_${num}_public"} = 1;
+	}
+	if ($num > $maxnum) { $maxnum = $num; }
+    }
+    $res->{'frgrp_maxnum'} = $maxnum;
+}
+
+## given a menu tree, flattens it into $res hashref
+sub populate_web_menu 
+{
+    my ($res, $menu, $numref) = @_;
+    my $mn = $$numref;  # menu number
+    my $mi = 0;         # menu item
+    foreach my $it (@$menu) {
+	$mi++;
+	$res->{"menu_${mn}_${mi}_text"} = $it->{'text'};
+	if ($it->{'text'} eq "-") { next; }
+	if ($it->{'sub'}) { 
+	    $$numref++; 
+	    $res->{"menu_${mn}_${mi}_sub"} = $$numref;
+	    &populate_web_menu($res, $it->{'sub'}, $numref); 
+	    next;
+	    
+	}
+	$res->{"menu_${mn}_${mi}_url"} = $it->{'url'};
+    }
+    $res->{"menu_${mn}_count"} = $mi;
+}
+
 
 1;

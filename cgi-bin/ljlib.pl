@@ -2624,27 +2624,6 @@ sub days_in_month
     return ((31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)[$month-1]);
 }
 
-sub populate_web_menu {
-    my ($res, $menu, $numref) = @_;
-    my $mn = $$numref;  # menu number
-    my $mi = 0;         # menu item
-    foreach my $it (@$menu) {
-	$mi++;
-	$res->{"menu_${mn}_${mi}_text"} = $it->{'text'};
-	if ($it->{'text'} eq "-") { next; }
-	if ($it->{'sub'}) { 
-	    $$numref++; 
-	    $res->{"menu_${mn}_${mi}_sub"} = $$numref;
-	    &populate_web_menu($res, $it->{'sub'}, $numref); 
-	    next;
-	    
-	}
-	$res->{"menu_${mn}_${mi}_url"} = $it->{'url'};
-    }
-    $res->{"menu_${mn}_count"} = $mi;
-}
-
-
 ####
 ### delete an itemid.  if $quick is specified, that means items are being deleted en-masse
 ##  and the batch deleter will take care of some of the stuff, so this doesn't have to
