@@ -1508,7 +1508,7 @@ package JobServer::Client;
 BEGIN {
     use Carp        qw{croak confess};
     use base        qw{Danga::Socket};
-    use fields      qw{server state};
+    use fields      qw{read_buf server state};
 }
 
 
