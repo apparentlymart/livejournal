@@ -4205,12 +4205,26 @@ sub make_journal
     
     my $notice = sub {
         my $msg = shift;
+        my $status = shift;
+
         my $url = "$LJ::SITEROOT/users/$user/";
+        $opts->{'status'} = $status if $status;
+        
         return qq{
             <h1>Notice</h1>
             <p>$msg</p>
             <p>Instead, please use <nobr><a href=\"$url\">$url</a></nobr></p>
-        };
+        }.("<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->\n" x 50);
+    };
+    my $error = sub {
+        my $msg = shift;
+        my $status = shift;
+        $opts->{'status'} = $status if $status;
+        
+        return qq{
+            <h1>Error</h1>
+            <p>$msg</p>
+        }.("<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->\n" x 50);
     };
     if ($LJ::USER_VHOSTS && $opts->{'vhost'} eq "users" && $u->{'journaltype'} ne 'R' &&
         ! LJ::get_cap($u, "userdomain")) {
@@ -4233,10 +4247,10 @@ sub make_journal
 
     unless ($geta->{'viewall'} && LJ::check_priv($remote, "viewall") ||
             $opts->{'pathextra'} =~ m#/(\d+)/stylesheet$#) { # don't check style sheets
-        return "<h1>Error</h1>Journal has been deleted.  If you are <b>$user</b>, you have a period of 30 days to decide to undelete your journal." if ($u->{'statusvis'} eq "D");
-        return "<h1>Error</h1>This journal has been suspended." if ($u->{'statusvis'} eq "S");
+        return $error->("Journal has been deleted.  If you are <b>$user</b>, you have a period of 30 days to decide to undelete your journal.", "404 Not Found") if ($u->{'statusvis'} eq "D");
+        return $error->("This journal has been suspended.", "403 Forbidden") if ($u->{'statusvis'} eq "S");
     }
-    return "<h1>Error</h1>This journal has been deleted and purged." if ($u->{'statusvis'} eq "X");
+    return $error->("This journal has been deleted and purged.", "410 Gone") if ($u->{'statusvis'} eq "X");
 
     $opts->{'view'} = $view;
 
@@ -4363,6 +4377,12 @@ sub make_journal
             'nosyn' => 'No syndication URL available.',
         }->{$errcode};
         return "<!-- $errmsg -->" if ($opts->{'vhost'} eq "customview");
+
+        # If not customview, set the error response code.
+        $opts->{'status'} = {
+            'nodb' => '503 Maintenance',
+            'nosyn' => '404 Not Found',
+        }->{$errcode} || '500 Server Error';
         return $errmsg;
     }   
 

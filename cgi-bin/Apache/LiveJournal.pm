@@ -613,9 +613,11 @@ sub journal_content
 
     # check for faked cookies here, since this is pretty central.
     if ($criterr) {
+        $r->status_line("500 Invalid Cookies");
         $r->content_type("text/html");
         $r->send_http_header();
         $r->print("Invalid cookies.  Try <a href='$LJ::SITEROOT/logout.bml'>logging out</a> and then logging back in.\n");
+        $r->print("<!-- xxxxxxxxxxxxxxxxxxxxxxxx -->\n") for (0..100);
         return OK;
     }
 
@@ -685,6 +687,10 @@ sub journal_content
         $opts->{'contenttype'} .= "; charset=utf-8";
     }
 
+    # Set to 1 if the code should generate junk to help IE
+    # display a more meaningful error message.
+    my $generate_iejunk = 0;
+
     if ($opts->{'badargs'}) 
     {
         # No special information to give to the user, so just let
@@ -698,7 +704,9 @@ sub journal_content
     }
 
     unless ($html) {
-	$html = "<h1>Error</h1><p>User <b>$user</b> has messed up their journal template definition.</p>";
+        $status = "500 Bad Template";
+        $html = "<h1>Error</h1><p>User <b>$user</b> has messed up their journal template definition.</p>";
+        $generate_iejunk = 1;
     }
     
     $r->status_line($status);
@@ -720,6 +728,8 @@ sub journal_content
     $r->content_type($opts->{'contenttype'});
     $r->header_out("Cache-Control", "private, proxy-revalidate");
 
+    $html .= ("<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxx -->\n" x 100) if $generate_iejunk;
+
     my $do_gzip = $LJ::DO_GZIP && $LJ::OPTMOD_ZLIB;
     $do_gzip = 0 if $do_gzip && $opts->{'contenttype'} !~ m!^text/html!;
     $do_gzip = 0 if $do_gzip && $r->header_in("Accept-Encoding") !~ /gzip/;
@@ -732,12 +742,14 @@ sub journal_content
         $html = Compress::Zlib::memGzip($html);
         $length = length($html);
         $r->header_out('Content-Encoding', 'gzip');
-        $r->header_out('Vary', 'Accept-Encoding');
     }
+    # Let caches know that Accept-Encoding will change content
+    $r->header_out('Vary', 'Accept-Encoding');
 
     $r->header_out("Content-length", $length);
     $r->send_http_header();
     $r->print($html) unless $r->header_only;
+    
     return OK;
 }
 
