@@ -85,18 +85,14 @@ while (LJ::start_request())
 
     # do main cluster updates
     my $dbh = LJ::get_dbh("master");
-    if ($dbh) {
-        my $sth = $dbh->prepare("SELECT tablename, COUNT(*) FROM querybuffer GROUP BY 1");
-        $sth->execute;
-        my @tables;
-        while (my ($table, $count) = $sth->fetchrow_array) {
-            push @tables, $table;
-        }
-        foreach my $table (@tables) {
-            my $count = LJ::query_buffer_flush($dbh, $table);
-        }
+    unless ($dbh) {
+        sleep 10;
+        next;
     }
-        
+    
+    # keep track of what commands we've run the start hook for
+    my %started;
+
     # handle clusters
     foreach my $c (@LJ::CLUSTERS) {
         print "Cluster: $c\n" if $opt_debug;
@@ -108,9 +104,18 @@ while (LJ::start_request())
         my @cmds;
         while (my ($cmd, $count) = $sth->fetchrow_array) {
             print "  $cmd ($count)\n" if $opt_debug;
+            unless ($started{$cmd}++) {
+                LJ::cmd_buffer_flush($dbh, $db, "$cmd:start");
+            }
             LJ::cmd_buffer_flush($dbh, $db, $cmd);
         }
     }
+
+    # run the end hook for all commands we've rn
+    foreach my $cmd (keys %started) {
+        LJ::cmd_buffer_flush($dbh, undef, "$cmd:finish");
+    }
+    
 
     print "Sleeping.\n" if $opt_debug;
     my $elapsed = time() - $cycle_start;

@@ -391,17 +391,6 @@ CREATE TABLE priv_map (
 ) 
 EOC
 
-register_tablecreate("querybuffer", <<'EOC');
-CREATE TABLE querybuffer (
-  qbid int(10) unsigned NOT NULL auto_increment,
-  tablename varchar(30) NOT NULL default '',
-  instime datetime NOT NULL default '0000-00-00 00:00:00',
-  query text NOT NULL,
-  PRIMARY KEY  (qbid),
-  KEY (tablename)
-) 
-EOC
-
 register_tablecreate("cmdbuffer", <<'EOC');
 CREATE TABLE cmdbuffer (
   cbid INT UNSIGNED NOT NULL AUTO_INCREMENT,

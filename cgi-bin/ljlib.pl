@@ -1409,13 +1409,8 @@ sub record_meme
     # we don't want to record it.
     return unless $url;
 
-    my $qurl = $dbh->quote($url);
-    $posterid += 0;
-    $itemid += 0;
-    $jid += 0;
-    LJ::query_buffer_add($dbs, "meme",
-                         "REPLACE INTO meme (url, posterid, journalid, itemid) " .
-                         "VALUES ($qurl, $posterid, $jid, $itemid)");
+    $dbh->do("REPLACE DELAYED INTO meme (url, posterid, journalid, itemid) " .
+             "VALUES (?, ?, ?, ?)", undef, $url, $posterid, $jid, $itemid);
 }
 
 # <LJFUNC>
@@ -3846,42 +3841,6 @@ sub load_moods
 }
 
 # <LJFUNC>
-# name: LJ::query_buffer_add
-# des: Schedules an insert/update query to be run on a certain table sometime
-#      in the near future in a batch with a lot of similar updates, or
-#      immediately if the site doesn't provide query buffering.  Returns
-#      nothing (no db error code) since there's the possibility it won't
-#      run immediately anyway.
-# args: dbarg, table, query
-# des-table: Table to modify.
-# des-query: Query that'll update table.  The query <b>must not</b> access
-#            any table other than that one, since the update is done inside
-#            an explicit table lock for performance.
-# </LJFUNC>
-sub query_buffer_add
-{
-    my ($dbarg, $table, $query) = @_;
-
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    if ($LJ::BUFFER_QUERIES)
-    {
-        # if this is a high load site, you'll want to batch queries up and send them at once.
-
-        my $table = $dbh->quote($table);
-        my $query = $dbh->quote($query);
-        $dbh->do("INSERT INTO querybuffer (qbid, tablename, instime, query) VALUES (NULL, $table, NOW(), $query)");
-    }
-    else
-    {
-        # low load sites can skip this, and just have queries go through immediately.
-        $dbh->do($query);
-    }
-}
-
-# <LJFUNC>
 # name: LJ::cmd_buffer_add
 # des: Schedules some command to be run sometime in the future which would
 #      be too slow to do syncronously with the web request.  An example
@@ -3929,6 +3888,11 @@ sub cmd_buffer_flush
     my ($dbh, $db, $cmd, $userid) = @_;
     return 0 unless $cmd;
 
+    my $mode = "run";
+    if ($cmd =~ s/:(\w+)//) {
+        $mode = $1;
+    } 
+
     # built-in commands
     my $cmds = {
         'delitem' => {
@@ -3941,27 +3905,25 @@ sub cmd_buffer_flush
         },
     };
 
-    my ($run_cmd, $finish_cmd, $start_cmd);
+    my $code;
 
     # is it a built-in command?
     if ($cmds->{$cmd}) {
-        $run_cmd = $cmds->{$cmd}->{'run'};
-        $finish_cmd = $cmds->{$cmd}->{'finish'};
-        $start_cmd = $cmds->{$cmd}->{'start'};
+        $code = $cmds->{$cmd}->{$mode};
 
     # otherwise it might be a site-local command
     } else {
-        $run_cmd = $LJ::HOOKS{"cmdbuf:$cmd:run"}->[0]
-            if $LJ::HOOKS{"cmdbuf:$cmd:run"};
-        $start_cmd = $LJ::HOOKS{"cmdbuf:$cmd:start"}->[0]
-            if $LJ::HOOKS{"cmdbuf:$cmd:start"};
-        $finish_cmd = $LJ::HOOKS{"cmdbuf:$cmd:finish"}->[0]
-            if $LJ::HOOKS{"cmdbuf:$cmd:finish"};
+        $code = $LJ::HOOKS{"cmdbuf:$cmd:$mode"}->[0]
+            if $LJ::HOOKS{"cmdbuf:$cmd:$mode"};
     }
 
-    return 0 unless $run_cmd;
+    return 0 unless $code;
 
-    $start_cmd->($dbh, $db) if $start_cmd;
+    # start/finish modes
+    if ($mode ne "run") {
+        $code->($dbh);
+        return;
+    }
 
     my $clist;
     my $loop = 1;
@@ -3973,76 +3935,28 @@ sub cmd_buffer_flush
 
     while ($loop &&
            ($clist = $db->selectcol_arrayref("SELECT cbid FROM cmdbuffer ".
-                                             "WHERE $where ORDER BY cbid LIMIT 20")) &&
+                                             "WHERE $where ORDER BY cbid LIMIT 30")) &&
            $clist && @$clist)
     {
         foreach my $cbid (@$clist) {
             my $got_lock = $db->selectrow_array("SELECT GET_LOCK('cbid-$cbid',10)");
             return 0 unless $got_lock;
+            # FIXME: why don't we just load the whole row above?
             my $c = $db->selectrow_hashref("SELECT * FROM cmdbuffer WHERE cbid=$cbid");
             next unless $c;
 
             my $a = {};
             LJ::decode_url_string($c->{'args'}, $a);
             $c->{'args'} = $a;
-            $run_cmd->($dbh, $db, $c);
+            $code->($dbh, $db, $c);
 
             $db->do("DELETE FROM cmdbuffer WHERE cbid=$cbid");
             $db->do("SELECT RELEASE_LOCK('cbid-$cbid')");
         }
         $loop = 0 unless scalar(@$clist) == 20;
     }
-    $finish_cmd->($dbh, $db) if $finish_cmd;
 
     return 1;
-}
-
-# <LJFUNC>
-# name: LJ::query_buffer_flush
-# class:
-# des:
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub query_buffer_flush
-{
-    my ($dbarg, $table) = @_;
-
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    return -1 unless ($table);
-    return -1 if ($table =~ /[^\w]/);
-
-    $dbh->do("LOCK TABLES $table WRITE, querybuffer WRITE");
-
-    my $count = 0;
-    my $max = 0;
-    my $qtable = $dbh->quote($table);
-
-    # We want to leave this pointed to the master to ensure we are
-    # getting the most recent data!  (also, querybuffer doesn't even
-    # replicate to slaves in the recommended configuration... it's
-    # pointless to do so)
-    my $sth = $dbh->prepare("SELECT qbid, query FROM querybuffer WHERE tablename=$qtable ORDER BY qbid");
-    if ($dbh->err) { $dbh->do("UNLOCK TABLES"); die $dbh->errstr; }
-    $sth->execute;
-    if ($dbh->err) { $dbh->do("UNLOCK TABLES"); die $dbh->errstr; }
-    while (my ($id, $query) = $sth->fetchrow_array)
-    {
-        $dbh->do($query);
-        $count++;
-        $max = $id;
-    }
-
-    $dbh->do("DELETE FROM querybuffer WHERE tablename=$qtable");
-    if ($dbh->err) { $dbh->do("UNLOCK TABLES"); die $dbh->errstr; }
-
-    $dbh->do("UNLOCK TABLES");
-    return $count;
 }
 
 # <LJFUNC>
