@@ -14,6 +14,7 @@ require "cleanhtml.pl";
 $maintinfo{'synsuck'}{opts}{no_locking} = 1;
 $maint{'synsuck'} = sub
 {
+    my $maxcount = shift || 0;
     my $verbose = $LJ::LJMAINT_VERBOSE;
 
     my %child_jobs; # child pid => userid
@@ -142,6 +143,7 @@ $maint{'synsuck'} = sub
             return;
         }
 
+        # TAG:LOG2:synsuck_delete_olderitems
         my $secs = ($LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14)+0;  # 2 week default.
         my $sth = $udbh->prepare("SELECT jitemid, anum FROM log2 WHERE journalid=? AND ".
                                  "logtime < DATE_SUB(NOW(), INTERVAL $secs SECOND)");
@@ -291,6 +293,7 @@ $maint{'synsuck'} = sub
                 # the editevent requires us to resend the date info, which
                 # we have to go fetch first, in case the feed doesn't have it
                 
+                # TAG:LOG2:synsuck_fetch_itemdates
                 unless($own_time) {
                     my $origtime = 
                         $udbh->selectrow_array("SELECT eventtime FROM log2 WHERE ".
@@ -419,7 +422,8 @@ $maint{'synsuck'} = sub
     my $threads = 0;
     my $userct = 0;
     my $keep_forking = 1;
-    while (1) {
+    while ( $maxcount == 0 || $userct < $maxcount ) {
+
         if ($threads < $max_threads && $keep_forking) {
             my $urow = $get_next_user->();
             $keep_forking = 0 unless $urow;
@@ -439,7 +443,14 @@ $maint{'synsuck'} = sub
                 # handles won't survive the fork
                 LJ::disconnect_dbs();
                 
+                my $lockname = sprintf "synsuck-user-%s", $urow->{user};
+                if (( my $lock = LJ::locker()->trylock($lockname) )) {
+                    print "Got lock on '$lockname'. Running\n" if $verbose;
                 $process_user->($urow);
+                } else {
+                    print "Task '$lockname' already running. Skipping.\n"
+                        if $verbose;
+                }
 
                 # exit child process
                 exit 0;
@@ -454,8 +465,23 @@ $maint{'synsuck'} = sub
         }
     }
 
+    # Now wait on any remaining children so we don't leave zombies behind.
+    while ( %child_jobs ) {
+        my $child = wait();
+        last if $child == -1;
+        delete $child_jobs{ $child };
+        $threads--;
+    }
+
     print "[$$] $userct users processed\n" if $verbose;
     return;
 };
 
 1;
+
+
+# Local Variables:
+# mode: perl
+# c-basic-indent: 4
+# indent-tabs-mode: nil
+# End:
