@@ -161,6 +161,10 @@ sub find_server
 {
     # operate on a copy of the server list.
     my @objects = @LJ::MAIL_TRANSPORTS;
+
+    # backwards compatibility with earlier ljconfig.
+    $objects[0] = [ 'sendmail', $LJ::SENDMAIL, 1 ] unless @objects;
+
     my ( $server, $proto, $hostname );
 
     while ( @objects && !$proto ) {
