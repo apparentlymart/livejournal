@@ -45,7 +45,7 @@
      push @errors, "<?requirepost?>" unless LJ::did_post();
      if (@errors) {
          $title = "Error";
-         $body = return LJ::bad_input(@errors);
+         $body = LJ::bad_input(@errors);
          return;
      }
 
