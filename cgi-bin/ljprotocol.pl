@@ -815,6 +815,8 @@ sub postevent
               "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     return $fail->($err,501,$dbcm->errstr) if $dbcm->err;
 
+    LJ::MemCache::incr([$ownerid, "log2ct:$ownerid"]);
+
     # set userprops.
     {
         my %set_userprop;

@@ -283,6 +283,7 @@ $maint{'synsuck'} = sub
                         $udbh->do("DELETE FROM userbio WHERE userid=?", undef, $su->{'userid'});
                     }
                     LJ::update_user($su, { has_bio => ($des ? "Y" : "N") });
+                    LJ::MemCache::delete($su->{'userid'}, "bio:$su->{'userid'}");
                 }
             }
         }

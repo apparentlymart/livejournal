@@ -4698,6 +4698,37 @@ sub load_userid
 }
 
 # <LJFUNC>
+# name: LJ::get_bio
+# des: gets a user bio, from db or memcache
+# args: u, force
+# des-force: true to get data from cluster master
+# returns: string
+# </LJFUNC>
+sub get_bio {
+    my ($u, $force) = @_;
+    return unless $u && $u->{'has_bio'} eq "Y";
+
+    my $bio;
+
+    my $memkey = [$u->{'userid'}, "bio:$u->{'userid'}"];
+    unless ($force) {
+        my $bio = LJ::MemCache::get($memkey);
+        return $bio if defined $bio;
+    }
+
+    # not in memcache, fall back to disk
+    my $db = @LJ::MEMCACHE_SERVERS || $force ?
+      LJ::get_cluster_master($u) : LJ::get_cluster_reader($u);
+    $bio = $db->selectrow_array("SELECT bio FROM userbio WHERE userid=?",
+                                undef, $u->{'userid'});
+
+    # set in memcache
+    LJ::MemCache::add($memkey, $bio);
+
+    return $bio;
+}
+
+# <LJFUNC>
 # name: LJ::load_moods
 # class:
 # des:
@@ -5744,6 +5775,7 @@ sub delete_entry
     if (defined $anum) { $and = "AND anum=" . ($anum+0); }
 
     LJ::MemCache::delete([$jid, "log2:$jid:$jitemid"]);
+    LJ::MemCache::decr([$jid, "log2ct:$jid"]);
     my $dc = $dbcm->do("DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
     # if this is running the second time (started by the cmd buffer),
     # the log2 row will already be gone and we shouldn't check for it.
@@ -5805,6 +5837,8 @@ sub delete_all_comments {
             $dbcm->do("DELETE FROM $table WHERE journalid=? AND jtalkid IN ($in)",
                       undef, $u->{'userid'});
         }
+        # decrement memcache
+        LJ::MemCache::decr([$u->{'userid'}, "talk2ct:$u->{'userid'}"], @$t);
         $loop = 0 unless @$t == $chunk_size;
     }
     return 1;
@@ -7054,7 +7088,7 @@ sub get_public_styles {
 
     # set in memcache
     my $expire = time() + 60*30; # 30 minutes
-    LJ::MemCache::set($memkey, $pubstyc);
+    LJ::MemCache::set($memkey, $pubstyc, $expire);
 
     return $pubstyc;
 }

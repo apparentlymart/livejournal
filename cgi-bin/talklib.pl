@@ -1287,6 +1287,8 @@ sub enter_comment {
             "Please report this.  The error is: <b>$errstr</b>");
     }
 
+    LJ::MemCache::incr([$journalu->{'userid'}, "talk2ct:$journalu->{'userid'}"]);
+
     $comment->{talkid} = $jtalkid;
     
     # add to poster's talkleft table, or the xfer place
@@ -1306,6 +1308,8 @@ sub enter_comment {
                 "nodeid, jtalkid, publicitem) VALUES (?, UNIX_TIMESTAMP(), ".
                 "?, 'L', ?, ?, ?)", undef,
                 $posterid, $journalu->{userid}, $itemid, $jtalkid, $pub);
+
+        LJ::MemCache::incr([$posterid, "talkleftct:$posterid"]);
     }
 
     $dbcm->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".

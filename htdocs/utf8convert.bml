@@ -461,6 +461,7 @@
                 if ($dbcm->err) {
                     return 0, "Database error: " . $dbcm->errstr;
                 }
+                LJ::MemCache::delete([$userid, "bio:$userid"]);
                 $message .= "<?p Converted the bio. p?>";
             }
         }

@@ -162,13 +162,8 @@
  $user = $u->{'user'};
  $userid = $u->{'userid'};
 
- if ($u->{'has_bio'} eq "Y") {
-     $sth = $dbcr->prepare("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
-     $sth->execute;
-     $_ = $sth->fetchrow_hashref;
-     $u->{'bio'} = $_->{'bio'};
-     LJ::text_out(\$u->{'bio'});
- }
+ $u->{'bio'} = LJ::get_bio($u);
+ LJ::text_out(\$u->{'bio'});
 
  my $u_uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
  $sth = $dbr->prepare("SELECT i.interest, i.intcount, i.intid FROM interests i, $u_uitable ui " .
@@ -736,9 +731,17 @@ if ($u->{'journaltitle'}) {
 
  # count journal entries
  {
-     my $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM log2 WHERE journalid=$userid");
-     $body .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.label.journalentrs'}</b></td><td colspan='2'>" .
-         &comma($count) . "</td></tr>";
+     my $memkey = [$userid, "log2ct:$userid"];
+     my $count = LJ::MemCache::get($memkey);
+     unless ($count) {
+         my $expire = time() + 3600*24*2; # 2 days
+         $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM log2 WHERE journalid=?",
+                                         undef, $userid);
+         LJ::MemCache::set($memkey, $count, $expire);
+     }
+         
+     $body .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.label.journalentrs'}</b></td>" .
+         "<td colspan='2'>" . &comma($count) . "</td></tr>";
  }
  
  my $points = $dbr->selectrow_array("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
@@ -759,12 +762,28 @@ if ($u->{'journaltitle'}) {
  {
      my ($com_post, $com_got);
      unless ($LJ::DISABLED{'show-talkleft'}) {
-         $com_post = comma($dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft ".
-                                                  "WHERE userid=$userid"));
+         my $memkey = [$userid, "talkleftct:$userid"];
+         my $count = LJ::MemCache::get($memkey);
+         unless ($count) {
+             my $expire = time() + 3600*24*2; # 2 days
+             $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft " .
+                                             "WHERE userid=?", undef, $userid);
+             LJ::MemCache::set($memkey, $count, $expire);
+         }
+         $com_post = comma($count);
          $com_post = BML::ml('.label.composted', {'num'=>$com_post});
      }
-     $com_got = comma($dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 ".
-                                             "WHERE journalid=$userid"));
+
+     my $memkey = [$userid, "talk2ct:$userid"];
+     my $count = LJ::MemCache::get($memkey);
+     unless ($count) {
+         my $expire = time() + 3600*24*2; # 2 days;
+         $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 ".
+                                         "WHERE journalid=?", undef, $userid);
+         LJ::MemCache::set($memkey, $count, $expire);
+     }
+
+     $com_got = comma($count);
      $com_got = BML::ml('.label.comreceived', {'num'=>$com_got});
      $body .= "<tr><td align='right'><b>$ML{'.label.comments'}</b></td><td colspan='2'>$com_post" .
          $com_got . "</td></tr>";

@@ -25,7 +25,6 @@ body<=
     ### user is now authenticated ###
 
     my $dbr = LJ::get_db_reader();
-    my $dbcm = LJ::get_cluster_master($u);
     my $sth;
 
     # load user props
@@ -48,12 +47,9 @@ body<=
     foreach (values %$u) { LJ::text_out(\$_); }
 
     # load and clean bio
-    if ($u->{'has_bio'}) {
-        $u->{'bio'} = $dbcm->selectrow_array("SELECT bio FROM userbio ".
-                                             "WHERE userid=$u->{'userid'}");
-        $saved{'bio'} = $u->{'bio'};
-        LJ::text_out(\$u->{'bio'});
-    }
+    $u->{'bio'} = LJ::get_bio($u);
+    $saved{'bio'} = $u->{'bio'};
+    LJ::text_out(\$u->{'bio'}, "force");
 
     # load interests
     my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
@@ -746,6 +742,7 @@ body<=
 
         # update their bio text
         if (($u->{'bio'} ne $POST{'bio'}) && !defined($POST{'bio_absent'})) {
+            my $dbcm = LJ::get_cluster_master($u);
             if ($has_bio eq "N") {
                 $dbcm->do("DELETE FROM userbio WHERE userid=?", undef, $u->{'userid'});
                 LJ::dudata_set($dbcm, $u->{'userid'}, 'B', 0, 0);
@@ -754,6 +751,7 @@ body<=
                             undef, $u->{'userid'}, $POST{'bio'});
                 LJ::dudata_set($dbcm, $u->{'userid'}, 'B', 0, length($POST{'bio'}));
             }
+            LJ::MemCache::set([$u->{'userid'}, "bio:$u->{'userid'}"], $POST{'bio'});
         }
 
         # update their text messaging info

@@ -2,15 +2,19 @@
 <uid> userid:<uid>   == $u, 30 min
 <uid> uprop:<uid>:<propid> == scalar, 30 minutes
 <uid> sess:<uid>:<sessid> == sessions row hashref
+<uid> bio:<uid> == user bio text
 
 <uid> talkprop:<uid>:<jtalkid> == { propname => $value, ... }
 <uid> talksubject:<cid>:<uid>:<jtalkid> == scalar
 <uid> talkbody:<cid>:<uid>:<jtalkid> == scalar
 <uid> talk2:<uid>:<nodetype>:<nodeid> == packed data
+<uid> talk2ct:<uid> == rows for user
+<uid> talkleftct:<uid> == rows for user
 
 <uid> logtext:<cid>:<uid>:<jitemid> == [ subject, text ]
 <uid> logprop:<uid>:<jitemid> == { propname => $value, ... }
 <uid> log2:<uid>:<jitemid> == packed data
+<uid> log2ct:<uid> == rows for user
 <uid> log2lt:<uid> == packed data: array of recent log2 entries in rlogtime order, last 2 weeks by default
 <uid> rc:<uid>:<jitemid> == scalar, the replycount value 
 
