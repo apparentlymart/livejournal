@@ -6,12 +6,9 @@ LJUSERF=>{DSs}<a href="/userinfo.bml?user=%%DATA%%&mode=full"><img src="(=IMGPRE
 HELP=>{DS}(<a href="%%DATA%%"><i>help</i></a>)
 
 REQUIREPOST<=
-{S}(=H1 Error H1=)
-(=P
-As a security precaution, the page you're viewing requires a POST request, 
+{S}As a security precaution, the page you're viewing requires a POST request, 
 not a GET.  If you're trying to submit this form legitimately, please 
 contact us.
-P=)
 <=REQUIREPOST
 
 LOAD_PAGE_INFO<=
