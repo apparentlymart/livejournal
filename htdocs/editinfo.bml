@@ -245,7 +245,7 @@ body<=
          $ret .= "<UL><TEXTAREA NAME=bio ROWS=10 COLS=50 WRAP=SOFT>$htmlu{'bio'}</TEXTAREA></UL>";
      } else {
          $ret .= "<input type='hidden' name='bio_absent' value='yes' />";
-         $ret .= "<?p <?inerr $ML{'.invalidbio'} inerr?> p?>";
+         $ret .= "<?p <?inerr $ML{'.error.invalidbio'} inerr?> p?>";
      }
 
      ### How heard Settings
