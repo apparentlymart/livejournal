@@ -3,7 +3,6 @@
     use strict;
     use vars qw(%GET %POST $title $body @errors);
 
-    $title = $ML{'.title'};
     $body = "";
     @errors = ();
 
@@ -423,7 +422,7 @@
                                   'raw' => "id='nodefpic'" });
 
         $body .= "</td><td>&nbsp;</td></tr>\n";
-        $body .= "<tr><td></td><td>&nbsp;" . LJ::html_submit('action:save', "Save Settings") . "</td></tr>\n";
+        $body .= "<tr><td></td><td>&nbsp;" . LJ::html_submit('action:save', $ML{'.btn.save'}) . "</td></tr>\n";
         $body .= "</table>";
         $body .= "</form>";
 

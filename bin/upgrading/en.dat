@@ -1176,6 +1176,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.btn.proceed=Proceed
 
+/editpics.bml.btn.save=Save Settings
+
 /editpics.bml.curpics=Current Pictures
 
 /editpics.bml.curpics.desc=Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, use the form at the bottom of the page.
