@@ -1034,5 +1034,5 @@ INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed,
 UPDATE userproplist SET cldversion='4',datatype='char',des='5 digit zip code (if in US)',indexed='1',multihomed='0',prettyname='ZIP code',scope='general' WHERE name='zip';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'bool', 'Disable QuickReply', '0', '0', 'opt_no_quickreply', 'Disable QuickReply', 'general');
 UPDATE userproplist SET cldversion='4',datatype='bool',des='Disable QuickReply',indexed='0',multihomed='0',prettyname='Disable QuickReply',scope='general' WHERE name='opt_no_quickreply';
-INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'bool', 'Number of Public Fotobilder Pictures', '0', '0', 'fb_num_pubpics', 'Num FB Pics', 'general');
-UPDATE userproplist SET cldversion='4',datatype='bool',des='Number of Public Fotobilder Pictures',indexed='0',multihomed='0',prettyname='Num FB Pics',scope='general' WHERE name='fb_num_pubpics';
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, multihomed, name, prettyname, scope) VALUES ('4', 'num', 'Number of Public Fotobilder Pictures', '0', '0', 'fb_num_pubpics', 'Num FB Pics', 'general');
+UPDATE userproplist SET cldversion='4',datatype='num',des='Number of Public Fotobilder Pictures',indexed='0',multihomed='0',prettyname='Num FB Pics',scope='general' WHERE name='fb_num_pubpics';
