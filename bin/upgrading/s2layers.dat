@@ -21,6 +21,9 @@ cleansimple/themes      theme+          cleansimple/layout
 digitalmultiplex/layout layout          core1
 digitalmultiplex/en     i18n            digitalmultiplex/layout
 
+haven/layout            layout          core1
+haven/themes            theme+          haven/layout
+
 generator/layout        layout          core1
 generator/en            i18n            generator/layout
 generator/themes        theme+          generator/layout
