@@ -96,7 +96,7 @@ if ($opt_pop)
     {
 	chomp $q;  # remove newline
 	next unless ($q =~ /^(REPLACE|INSERT) INTO (\w+).+;/);
-	chomp $q;  # remove semicolon
+	chop $q;  # remove semicolon
 	my $type = $1;
 	my $table = $2;
 	if ($table ne $lasttable) {
