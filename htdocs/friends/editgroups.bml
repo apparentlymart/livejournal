@@ -60,9 +60,11 @@
  for (my $i=1; $i<=30; $i++) {
      my $sort = 255;
      my $name = "";
+     my $public = 0;
      if ($res{"frgrp_${i}_name"}) {
          $sort = $res{"frgrp_${i}_sortorder"}+0;
          $name = LJ::ehtml($res{"frgrp_${i}_name"});
+         $public = $res{"frgrp_${i}_public"}+0;
          push @num_used, $i;
      } else {
          push @num_free, $i;
@@ -70,6 +72,7 @@
      $body .= "<input type=hidden name=efg_set_${i}_name value=\"$name\">\n";
      $body .= "<input type=hidden name=efg_set_${i}_sort value=\"$sort\">\n";
      $body .= "<input type=hidden name=efg_delete_${i} value=\"0\">\n";
+     $body .= "<input type=hidden name=efg_set_${i}_public value=\"$public\">\n";
  }
  for (my $i=1; $i<=$res{'friend_count'}; $i++) {
      my $user = $res{"friend_${i}_user"};
@@ -217,6 +220,16 @@
      }
  }
 
+ function realName (name)
+ {
+     var rname = name;
+     var index = name.lastIndexOf(" (public)");
+     if (index != -1) {
+         rname = name.substr(0, index);
+     }
+     return rname;
+ }
+    
  function renameGroup ()
  {
      var list = document.fg.list_groups;
@@ -224,12 +237,16 @@
      if (selindex==-1) { return; }
      var item = list.options[selindex];
 
-     var newtext = prompt("Rename group:", item.text);
+     var newtext = realName(item.text);
+     newtext = prompt("Rename group:", newtext);
      if (newtext==null || newtext == "") { return; }
 
-     item.text = newtext;
      var gnum = item.value;
      document.fg["efg_set_"+gnum+"_name"].value = newtext;     
+     if (document.fg["efg_set_"+gnum+"_public"].value == 1) {
+         newtext = newtext + " (public)";
+     }
+     item.text = newtext;
  }
 
  function deleteGroup ()
@@ -264,6 +281,34 @@
      list.options[selindex] = null;
      eraseList(document.fg.list_in);
      eraseList(document.fg.list_out);
+ }
+
+ function makePublic ()
+ {
+     var list = document.fg.list_groups;
+     var selindex = list.selectedIndex;
+     if (selindex==-1) { return; }
+     var item = list.options[selindex];
+
+     var name = realName(item.text);
+     item.text = name + " (public)";
+   
+     var gnum = item.value;
+     document.fg["efg_set_"+gnum+"_public"].value = "1";
+ }
+
+ function makePrivate ()
+ {
+     var list = document.fg.list_groups;
+     var selindex = list.selectedIndex;
+     if (selindex==-1) { return; }
+     var item = list.options[selindex];
+
+     var name = realName(item.text);
+     item.text = name;     
+
+     var gnum = item.value;
+     document.fg["efg_set_"+gnum+"_public"].value = "0";
  }
 
  function newGroup ()
@@ -303,7 +348,9 @@ END_JS
  foreach my $num (sort { $res{"frgrp_${a}_sortorder"} <=> 
                          $res{"frgrp_${b}_sortorder"} } @num_used) 
  {
-     $body .= "\n<OPTION VALUE=\"$num\">" . LJ::ehtml($res{"frgrp_${num}_name"});
+     my $listname = $res{"frgrp_${num}_name"};
+     $listname .= " (public)" if $res{"frgrp_${num}_public"};
+     $body .= "\n<OPTION VALUE=\"$num\">" . LJ::ehtml($listname);
  }
 # foreach my $num (sort { $a <=> $b } @num_free) {
 #     $body .= "\n<OPTION VALUE=\"$num\">";
@@ -312,6 +359,9 @@ END_JS
  $body .= "<input type=button value=\"New\" onClick=\"newGroup();\"> ";
  $body .= "<input type=button value=\"Del\" onClick=\"deleteGroup();\"> ";
  $body .= "<input type=button value=\"Rename\" onClick=\"renameGroup();\">";
+ $body .= "</nobr><br /><nobr>";
+ $body .= "<input type=button value=\"Public\" onClick=\"makePublic();\"> ";
+ $body .= "<input type=button value=\"Private\" onClick=\"makePrivate();\">";
  $body .= "</NOBR></TD>";
 
  $body .= "\n<TD VALIGN=MIDDLE><INPUT TYPE=BUTTON VALUE=\"Up\" onClick=\"moveGroup(-1);\"><P><INPUT TYPE=BUTTON VALUE=\"Down\" onClick=\"moveGroup(1);\"></td>";
