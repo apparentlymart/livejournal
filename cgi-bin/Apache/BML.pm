@@ -33,6 +33,8 @@ use vars qw(%CodeBlockOpts);
     }
 }
 
+tie %BML::ML, 'BML::ML';
+
 sub handler
 {
     my $r = shift;
@@ -84,6 +86,9 @@ sub handler
         next unless ($_ =~ /(.*)=(.*)/);
         $BML::COOKIE{BML::durl($1)} = BML::durl($2);
     }
+    
+    # tied interface to BML::ml();
+    *BMLCodeBlock::ML = *BML::ML;
 
     # let BML code blocks see input
     %BMLCodeBlock::GET = ();
@@ -1005,6 +1010,7 @@ sub set_language
 }
 
 # multi-lang string
+# note: duplicated code for performance in BML::ML below!
 sub ml
 {
     my ($code, $vars) = @_;
@@ -1122,6 +1128,29 @@ sub set_cookie
         delete $BML::COOKIE{$name};
     }
 }
+
+# provide %BML::ML & %BMLCodeBlock::ML support:
+package BML::ML;
+
+sub TIEHASH {
+    my $class = shift;
+    my $self = {};
+    bless $self;
+    return $self;
+}
+
+# note: duplicated code for performance in BML::ml() above!
+sub FETCH {
+    my ($t, $code) = @_;
+
+    return "[ml_getter not defined]" unless $Apache::BML::ML_GETTER;
+    $code = $Apache::BML::cur_req->{'r'}->parsed_uri()->path() . $code
+        if $code =~ /^\./;
+    return $Apache::BML::ML_GETTER->($Apache::BML::cur_req->{'lang'}, $code);
+}
+
+# do nothing
+sub CLEAR { }
 
 # deprecated:
 package BMLClient;

@@ -56,6 +56,8 @@ my (%FileModTime, %Config, %FileBlockData, %FileBlockFlags);
 my ($time_a, $time_b);
 use vars qw(%Lang);                    # iso639-2 2-letter lang code -> BML lang code
 
+tie %BML::ML, 'BML::ML';
+
 &reset_caches;
 $SIG{'HUP'} = sub {
     $HUP_COUNT++;
@@ -176,6 +178,8 @@ sub handle_request
     %IncludeOpen = ();
     @IncludeStack = ();
     @DO_LATER = ();
+    # tied interface to BML::ml();
+    *BMLCodeBlock::ML = *BML::ML;
 
     unless (&load_cfg()) {
         print "Content-type: text/html\n\n";
@@ -1353,5 +1357,28 @@ sub paging
     
     return %self;
 }
+
+# provide %BML::ML & %BMLCodeBlock::ML support:
+package BML::ML;
+
+sub TIEHASH {
+    my $class = shift;
+    my $self = {};
+    bless $self;
+    return $self;
+}
+
+# note: duplicated code for performance in BML::ml() above!
+sub FETCH {
+    my ($t, $code) = @_;
+
+    return "[ml_getter not defined]" unless $main::ML_GETTER;
+    $code = "$ENV{'PATH_INFO'}$code"
+        if $code =~ /^\./;
+    return $main::ML_GETTER->($main::REQ_LANG, $code);
+}
+
+# do nothing
+sub CLEAR { }
 
 package main;
