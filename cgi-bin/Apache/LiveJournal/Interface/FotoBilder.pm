@@ -43,7 +43,7 @@ sub handler
 
     $res->{"fotobilder-interface-version"} = 1;
 
-    $r->print(join("\n", map { "$_: $res->{$_}" } keys %$res));
+    $r->print(join("", map { "$_: $res->{$_}\n" } keys %$res));
 
     return OK;
 }
