@@ -7,7 +7,7 @@ HELP=>{DS}(<a href="%%DATA%%"><i>help</i></a>)
 INERR=>{DS}<font color="#ff0000"><b>%%DATA%%</b></font>
 
 NEEDLOGIN<=
-{S}(=H1 Login Required H1=)
+(=H1 Login Required H1=)
 (=P
 To view this page you must first <a href="/login.bml?ret=1">go login</a>.
 P=)
