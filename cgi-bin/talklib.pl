@@ -1071,13 +1071,14 @@ sub talkform {
 
         # Remote user, remote equals userpost
         return $default if $type eq 'remote' &&
-                           $form->{'userpost'} eq $form->{'cookieuser'};
+                           ($form->{'usertype'} eq 'cookieuser' ||
+                            $form->{'userpost'} eq $form->{'cookieuser'});
 
         # Possible remote, using ljuser field
         if ($type eq 'ljuser') {
         return $default if
             # Remote user posting as someone else.
-            ($form->{'userpost'} ne $form->{'cookieuser'} && $form->{'usertype'} ne 'anonymous') ||
+            ($form->{'userpost'} && $form->{'userpost'} ne $form->{'cookieuser'} && $form->{'usertype'} ne 'anonymous') ||
             ($form->{'usertype'} eq 'user' && ! $form->{'userpost'}) ||
             # Initial page load (no remote)
             (! $form->{'usertype'} && ! $remote);
