@@ -31,9 +31,9 @@ body<=
    
     if ($u->{public_key}) {
         $ret .= '<?p ' . BML::ml('.label', { user => LJ::ljuser($u->{user})}) . ' p?>';
-        $ret .= '<table border=0><tr><td class=key><pre>';
+        $ret .= "<table border=0><tr><td class=key><pre>\n";
         $ret .= LJ::ehtml($u->{public_key});
-        $ret .= '</pre></td></tr></table>';
+        $ret .= "\n</pre></td></tr></table>";
     } else {
         $ret .= '<?p ' . BML::ml('.nokey', { user => LJ::ljuser($u->{user})}) . ' p?>';
     }
