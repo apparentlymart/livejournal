@@ -150,8 +150,8 @@ body<=
     # populate @pop and add users they've chosen to add
     my @pop;
     for (0 .. 99) {
-        next if not defined @$popsyn[$_];
-        my ($user, $name, $suserid, $url, $count) = @{ @$popsyn[$_] };
+        next if not defined $popsyn->[$_];
+        my ($user, $name, $suserid, $url, $count) = @{ $popsyn->[$_] };
 
         my $suser = LJ::load_userid($suserid);
         # skip suspended/deleted accounts, already watched feeds
