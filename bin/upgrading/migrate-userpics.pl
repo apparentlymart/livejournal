@@ -96,20 +96,19 @@ if ($user) {
         my $dbcm = get_db_handle($cid);
 
         # get all userids
+        print "Getting userids...\n";
         my $limit = $one ? 'LIMIT 1' : '';
         my $userids = $dbcm->selectcol_arrayref
             ("SELECT DISTINCT userid FROM userpic2 WHERE location <> 'mogile' OR location IS NULL $limit");
         my $total = scalar(@$userids);
 
-        # now load these users
-        my $us = LJ::load_userids(@$userids);
-
         # iterate over userids
         my $count = 0;
-        foreach my $u (values %$us) {
+        print "Beginning iteration over userids...\n";
+        foreach my $userid (@$userids) {
             # move this userpic
             my $extra = sprintf("[%6.2f%%, $ccount of $ctotal] ", (++$count/$total*100));
-            handle_userid($u, $dbcm, $extra);
+            handle_userid($userid, $cid, $dbcm, $extra);
         }
 
         # don't hit up more clusters
@@ -127,8 +126,16 @@ print "Updater terminating.\n";
 # move of a user's pictures, and 2 meaning the user isn't ready for moving
 # (dversion < 7, etc)
 sub handle_userid {
-    my ($u, $dbcm, $extra) = @_;
+    my ($userid, $cid, $dbcm, $extra) = @_;
     
+    # load user to move and do some sanity checks
+    my $u = LJ::load_userid($userid)
+        or die "ERROR: Unable to load userid $userid\n";
+
+    # if a user has been moved to another cluster, but the source data from
+    # userpic2 wasn't deleted, we need to ignore the user
+    return unless $u->{clusterid} == $cid;
+
     # get a handle if we weren't given one
     $dbcm ||= get_db_handle($u->{clusterid});
 
