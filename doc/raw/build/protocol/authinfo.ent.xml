@@ -13,4 +13,9 @@
     MD5 digest of user's password.  Not much more secure than password, but at least it's not in plain text.
   </des></scalar>
   </key>
+  <key name="ver" count="opt">
+  <scalar><des>
+    Protocol version supported by the client; assumed to be 0 if not specified. See <link id="ljp.csp.versions" /> for details on the protocol version
+  </des></scalar>
+  </key>
 

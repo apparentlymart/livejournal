@@ -1,0 +1,8 @@
+<chapter id="ljp.csp.proplist">
+  <title>Journal Item Meta Data</title>
+  <para>
+    This is a list of the Post Event Properties that are available when 
+    making entries via clients:
+  </para>
+  &ljp.csp.proplist.ref;
+</chapter>

@@ -62,7 +62,6 @@
       Feel free to install wherever and as whoever ... there shouldn't
       be any problems.  (and if there are, we'll fix it right away!)
     </para>
-
     <formalpara>
       <title>Creating your <link linkend='ljhome_var'><literal>$LJHOME</literal></link>.</title>
       <para>
@@ -73,8 +72,6 @@
         <screen><prompt>#</prompt> <userinput>mkdir <replaceable>/home/lj</replaceable></userinput>
 <prompt>#</prompt> <userinput>chown <replaceable>lj.lj /home/lj</replaceable></userinput></screen></para>
     </formalpara>
-
-<!-- Uhh, lame:
     <formalpara>
       <title>Using the distributed tarball archives</title>
       <para>
@@ -82,17 +79,21 @@
       </para>
       <note>
         <para>
-          The tarball creates a directory ("LiveJournal-YYYYMMDD"), so you'll either want to untar at <filename>/home/</filename> and then rename that directory to be lj, or do something like:
+          The tarball creates a directory ("LiveJournal-YYYYMMDD"), so you'll want to untar the archive at <filename>/home/lj</filename>, like so:
         </para>
         <para>
-          <screen><prompt>$</prompt> <userinput>cd <replaceable>/home/lj</replaceable></userinput>
-<prompt>$</prompt> <userinput>tar zxvf LiveJournal-<replaceable>YYYYMMDD</replaceable>.tar.gz</userinput>
-<prompt>$</prompt> <userinput>mv LiveJournal-<replaceable>YYYYMMDD</replaceable>/* .</userinput>
-<prompt>$</prompt> <userinput>rm -r LiveJournal-<replaceable>YYYYMMDD</replaceable></userinput></screen>
+<screen><prompt>$</prompt> <userinput>cd <replaceable>/home/lj</replaceable></userinput>
+<prompt>$</prompt> <userinput>tar zxvf LiveJournal-<replaceable>YYYYMMDD</replaceable>.tar.gz</userinput></screen>
+        </para>
+        <para>
+          At this point, you're going to want to run the provided install  script, located at: 
+          <filename>./LiveJournal-<replaceable>YYYYMMDD</replaceable>/install.pl</filename>. 
+          When run for the first time, it will prompt you for the directory to set the <envar>$LJHOME</envar>
+          environment variable, otherwise it will prompt you for important changes, and will copy over the
+          necessary files for LiveJournal to run correctly.
         </para>
       </note>
     </formalpara>
--->
     <formalpara>
       <title>Installing from CVS</title>
       <para>

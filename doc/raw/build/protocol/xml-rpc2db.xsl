@@ -41,6 +41,10 @@
   </refentry>
 </xsl:template>
 
+<xsl:template match="link">
+  <xref><xsl:attribute name="linkend"><xsl:value-of select="@id"/></xsl:attribute></xref>
+</xsl:template>
+
 <xsl:template match="struct">
 <listitem><para>
 <emphasis>[struct]</emphasis>
@@ -57,8 +61,13 @@ Containing keys:
 <xsl:template match="scalar">
 <listitem><para>
 <emphasis>[scalar]</emphasis>
-<xsl:call-template name="count"/>
-<xsl:value-of select="des"/>
+<xsl:call-template name="count">
+  <xsl:with-param name="count" select="count"/>
+</xsl:call-template>
+    <xsl:for-each select="*">
+      <xsl:apply-templates select="."/>
+    </xsl:for-each>
+
 </para></listitem>
 </xsl:template>
 
@@ -66,7 +75,10 @@ Containing keys:
 <listitem><para>
 <emphasis role="bold"><xsl:value-of select="@name"/></emphasis>:
   <itemizedlist>
-  <xsl:value-of select="./des"/>
+  <xsl:value-of select="des"/>
+<xsl:call-template name="count">
+  <xsl:with-param name="count" select="count"/>
+</xsl:call-template>
     <xsl:for-each select="*">
       <xsl:apply-templates select="."/>
     </xsl:for-each>

@@ -3,28 +3,25 @@
 <!ENTITY % content SYSTEM "entities/content.ent">
 %content;
 ]>
-<set id="index" status="prelim">
-<setinfo>
-  <title>LiveJournal Server</title>
-  <subtitle>Technical Info</subtitle>
-<!-- Commented out because the resultant HTML is ugly.  Fix that, 
-     then uncomment this.  ~Brad  -->    
-<!-- 
-  <authorgroup>
-    &author.jproulx;
-    &author.bradfitz;
-  </authorgroup>
--->
-  <abstract>
-    <para>
-      This documentation intends to cover everything related to
-      installing, administrating, and programming the LiveJournal
-      Server software.
-    </para>
-  </abstract>
-  &copyright;
-  &legalnotice;
-</setinfo>
-&lj.index;
-&ljp.book;
+<set id="index" status="prelim" lang="en">
+  <setinfo>
+    <title>LiveJournal Server</title>
+    <subtitle>Technical Info</subtitle>
+    <authorgroup>
+      &author.jproulx;
+      &author.bradfitz;
+    </authorgroup>
+    <abstract>
+      <para>
+        This documentation intends to cover everything related to
+        installing, administrating, and programming the LiveJournal
+        Server software.
+      </para>
+    </abstract>
+    &copyright;
+    &legalnotice;
+  </setinfo>
+  &lj.index;
+  &bml.index;
+  &ljp.index;
 </set>

@@ -32,6 +32,8 @@
 <!ATTLIST list %countatt;>
 
 <!ELEMENT shortdes (#PCDATA)>
-<!ELEMENT des (#PCDATA)>
+<!ELEMENT des (#PCDATA|link)*>
 
+<!ELEMENT link (#PCDATA)>
+<!ATTLIST link id NMTOKEN #REQUIRED>
 

@@ -128,6 +128,25 @@
       </varlistentry>
 
     </variablelist>
+
+    <variablelist>
+      <title>Optimization</title>
+
+      <varlistentry>
+        <term><literal role="">$LJ::MAX_HINTS_LASTN</literal></term>
+        <listitem><para>
+          Sets how many entries a user can have on their <literal>LASTN</literal> page. A higher value majorly affects the speed of the installation.
+        </para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="">$LJ::MAX_SCROLLBACK_LASTN</literal></term>
+        <listitem><para>
+          Sets how far back someone can go on a user's <literal>LASTN</literal> page. A higher value majorly affects the speed of the installation.
+        </para></listitem>
+      </varlistentry>
+
+    </variablelist>
   </section>
     
   <section id='lj.install.ljconfig.vars.auto'>
@@ -141,6 +160,7 @@
     </para>
 
     <variablelist>
+      <title>Directories</title>
       <varlistentry>
         <term><literal role="variable">$LJ::HOME</literal></term>
         <listitem><para><literal>ljdefaults.pl</literal> sets this to the same value as <literal>$ENV{'LJHOME'}</literal>.  You don't have to set it.</para></listitem>

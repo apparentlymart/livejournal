@@ -7,20 +7,24 @@
   <section id="lj.customize.layout.config">
     <title><filename>bmlp-local.cfg</filename></title>
     <para>
-      You'll want to look at the BML section in ljp docs that details writing
-      a local <filename>bmlp.cfg</filename> file, which you can use to specify
-      certain directives.
-      <!-- FIXME: write that section; clean up this text -->
-      To start, you're going to want to create a directory under the local cvs
+      You'll want to create a new <filename class="config">cgi-bin/bmlp-local.cfg</filename>
+      file in your <filename class="directory">cvs/local</filename> directory.
+
+
+      To start your scheme, you're going to want to create a folder under the
       bml scheme directory (<filename class="directory">/cvs/local/cgi-bin/bml/scheme/</filename>).
-      The name of this directory will be the unique identifier for the template
+      The name of this folder will be the unique identifier for the template
       you're creating, which you will use later for testing purposes.
     </para>
   </section>
   <section id="lj.customize.layout.bml_blocks">
     <title><abbrev>BML</abbrev> Blocks to Worry About</title>
     <para>
-      FIXME
+      In <abbrev>BML</abbrev>, global blocks are defined in the file
+      <filename>cgi-bin/bml/scheme/global.look</filename>. Global blocks are simply 
+      initial template definitions, which other schemes look up to fall back on when their
+      own local template hasn't been defined.
+      
     </para>
   </section>
 </chapter>

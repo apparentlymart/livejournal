@@ -31,7 +31,7 @@
       If you know what you're doing, you can set this up however you
       like.  You tell LiveJournal how to connect to its database server(s) 
       in your <filename>ljconfig.pl</filename>, as
-      detailed in: <xref linkend="ljconfig.var.dbinfo" />.
+      detailed in: <xref linkend="lj.install.ljconfig.dbinfo" />.
   </para>
   </section>
 

@@ -1,6 +1,6 @@
 <!ENTITY % lj.book     SYSTEM "lj.book.ent">
 <!ENTITY % ljp.book    SYSTEM "ljp.book.ent">
-<!ENTITY appx.gfdl     SYSTEM "../appendices/gfdl.xml">
+<!ENTITY % bml.book    SYSTEM "../bml.book/book.ent">
 <!-- Legal Notice should cover both books adequately -->
 <!ENTITY legalnotice   "
 <legalnotice>
@@ -25,3 +25,4 @@
 '>
 %lj.book;
 %ljp.book;
+%bml.book;

@@ -3,6 +3,11 @@
 
 use strict;
 
+unless (-d $ENV{'LJHOME'}) {
+    die "\$LJHOME not set.\n";
+}
+
+require "$ENV{'LJHOME'}/doc/raw/build/docbooklib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 my $dbr = LJ::get_dbh("slave", "master");
@@ -26,6 +31,7 @@ sub dump_privs
 
         print "<listitem><formalpara>\n";
         print "<title>$privs->{$priv}->{'name'}</title>\n";
+        cleanse(\$des);
         print "<para>$des</para>\n";
 
         print "<para><emphasis>Argument:</emphasis> $args</para>\n" if $args;

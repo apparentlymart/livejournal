@@ -13,8 +13,64 @@
   </para>
   <para>
     LiveJournal has many intra-office uses as well, with its easy
-    update and polling features. Use LiveJournal as the meeting board
-    for your office, complete with project communities, topic
-    directories, and office wide contact book.
+    update and polling features. Use LiveJournal for:
+    <variablelist>
+      <varlistentry>
+        <term>Work journals</term>
+        <listitem><para>
+          Record what you're working on, or scribble notes for future reference.
+        </para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Project logs</term>
+        <listitem><para>
+          Multiple members of a project team to record
+          their work, post meeting minutes, and discuss ideas.
+        </para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Announcement pages</term>
+        <listitem><para>
+          Recording status updates to projects or
+          systems on a single page, while notifying interested users.
+       </para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Discussion boards</term>
+        <listitem><para>
+          Brainstorming ideas or soliciting opinions
+          with a group, in a persistent but nonintrusive medium.
+        </para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>Weblogs</term>
+        <listitem><para>
+          Posting links to web content of interest to a particular group.
+        </para></listitem>
+      </varlistentry>
+    </variablelist>
+  </para>
+  <para>
+    There are many benefits of using LiveJournal
+    <itemizedlist>
+      <listitem><para>
+        Enhances personal productivity by providing a convenient way to
+        record notes in a searchable, web-accessible medium
+      </para></listitem>
+      <listitem><para>
+        Provides visibility between departments or geographically separate offices
+      </para></listitem>
+      <listitem><para>
+        Encourages communication by making it easy to share thoughts and comments
+      </para></listitem>
+      <listitem><para>
+        Encourages people to get knowledge out of their heads and notebooks
+        and into a visible, searchable, central location
+      </para></listitem>
+      <listitem><para>
+        Provides more powerful tools for creating and accessing content than
+        are available for ad-hoc log-structured web pages
+      </para></listitem>
+    </itemizedlist>
   </para>
 </chapter>

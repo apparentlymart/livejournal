@@ -4,10 +4,11 @@
 use strict;
 use Getopt::Long;
 
-my ($opt_include, $opt_exclude);
+my ($opt_include, $opt_exclude, $opt_book);
 die unless GetOptions(
                       'include=s' => \$opt_include,
                       'exclude=s' => \$opt_exclude,
+                      'book=s' => \$opt_book,
 		      );
 die "Unknown arguments.\n" if @ARGV;
 die "Can't exclude and include at same time!\n" if $opt_include && $opt_exclude;
@@ -16,35 +17,32 @@ unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
 }
 
+require "$ENV{'LJHOME'}/doc/raw/build/docbooklib.pl";
+
 chdir $ENV{'LJHOME'} or die "Can't cd to $ENV{'LJOME'}\n";
+
+unless ($opt_book) { $opt_book = "ljp"; }
 
 ### apidoc.pl does all the hard work.
 my $VAR1;
 my $param;
 $param = "--include=$opt_include" if $opt_include;
 $param = "--exclude=$opt_exclude" if $opt_exclude;
-eval `$ENV{'LJHOME'}/bin/apidoc.pl $param`;
+eval `$ENV{'LJHOME'}/bin/apidoc.pl --conf=$ENV{'LJHOME'}/doc/raw/build/api/apidoc.conf $param`;
 my $api = $VAR1;
 
-if ($opt_include) {
-    my $package = lc($opt_include);
-    $package =~ s/:://g;
-    print "<reference id=\"ljp.$package.api.ref\">\n";
-} else {
-    print "<reference id=\"ljp.api.ref\">\n";
-} 
+print "<reference id=\"$opt_book.api.ref\">\n";
 print "  <title>API Documentation</title>\n";
 
 foreach my $func (sort keys %$api) {
     my $f = $api->{$func};
     my $argstring;
-    xlinkify(\$f->{'des'});
 
-    my $canonized = canonize("func" , $func);
+    my $canonized = canonize("func" , $func, "", $opt_book);
     print "  <refentry id=\"$canonized\">\n";
 
     ### name and short description:
-    cleanse(\$f->{'des'});
+    cleanse(\$f->{'des'}, $opt_book);
     print "    <refnamediv>\n";
     print "      <refname>$func</refname>\n";
     print "      <refpurpose>$f->{'des'}</refpurpose>\n";
@@ -75,8 +73,7 @@ foreach my $func (sort keys %$api) {
             print "        <listitem><formalpara>\n";
             print "          <title>$arg->{'name'}</title>\n";
             my $des = $arg->{'des'};
-            cleanse(\$des);
-            xlinkify(\$des);
+            cleanse(\$des, $opt_book);
             print "          <para>$des</para>\n";
             print "        </formalpara></listitem>\n";
         }
@@ -86,8 +83,7 @@ foreach my $func (sort keys %$api) {
 
     ### info:
     if ($f->{'info'}) {
-        cleanse(\$f->{'info'});
-        xlinkify(\$f->{'info'});
+        cleanse(\$f->{'info'}, $opt_book);
         print "    <refsect1>\n";
         print "      <title>Info</title>\n";
         print "      <para>$f->{'info'}</para>\n";
@@ -102,8 +98,7 @@ foreach my $func (sort keys %$api) {
     
     ### returning:
     if ($f->{'returns'}) {
-        cleanse(\$f->{'returns'});
-        xlinkify(\$f->{'returns'});
+        cleanse(\$f->{'returns'}, $opt_book);
         print "    <refsect1>\n";
         print "      <title>Returns:</title>\n";
         print "      <para>$f->{'returns'}</para>\n";
@@ -113,30 +108,4 @@ foreach my $func (sort keys %$api) {
     print "  </refentry>\n";
 }
 
-
 print "</reference>\n";
-
-sub cleanse {
-    my $text = shift;
-    ### convert any ampersand that is not followed by [a-zA-Z0-9]+; or #\d+; to &amp;
-    $$text =~ s/&(?!(?:[a-zA-Z0-9]+|#\d+);)/&amp;/g;
-    ### "<b>Note:</b>" in source turns to <emphasis role='bold'>Note:</emphasis> in docbook
-    $$text =~ s/<b>(.+?)<\/b>/<emphasis role='bold'>$1<\/emphasis>/ig;
-}
-
-sub xlinkify {
-    my $a = shift;
-    $$a =~ s/\[(\S+?)\[(\S+?)\]\]/"<link linkend='" . canonize($1, $2) . "'>$2<\/link>"/ge;
-}
-
-sub canonize {
-    my $type = shift;
-    my $string = lc(shift);
-    if ($type eq "func") { 
-        $string =~ s/::/./g;
-        $string = "ljp.api.$string";
-    } elsif($type eq "dbtable") {
-        $string = "ljp.dbschema.$string";
-    }
-}
-

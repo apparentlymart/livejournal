@@ -48,3 +48,5 @@
 <!ENTITY lj.features.index                SYSTEM "../lj.book/features/index.xml">
 <!ENTITY lj.features.support              SYSTEM "../lj.book/features/support.xml">
 <!ENTITY lj.features.topics               SYSTEM "../lj.book/features/topics.xml">
+
+<!ENTITY appx.gfdl                        SYSTEM "../appendices/gfdl.xml">
