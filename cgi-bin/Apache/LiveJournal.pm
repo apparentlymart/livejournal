@@ -329,7 +329,7 @@ sub journal_content
         return OK;
     }
 
-    $r->header_out("Content-type", $opts->{'contenttype'});
+    $r->content_type($opts->{'contenttype'});
     $r->header_out("Cache-Control", "private, proxy-revalidate");
     $r->header_out("Vary", "Accept-Encoding, Cookie");
     $r->header_out("Content-length", length($html));
