@@ -12,7 +12,7 @@ body<=
         return "<?h1 Login Required h1?><?p To manage your syndicated accounts, first <a href=\"/login.bml?ret=1\">login</a>. p?>";
     }
 
-    my $quota = LJ::get_cap($u, "synquota");
+    my $quota = LJ::get_cap($u, "synd_quota");
     unless ($quota) {
         return "<?h1 Sorry h1?><?p Your account type doesn't allow befriending syndicated accounts. p?>";
     }
