@@ -68,6 +68,7 @@
 
     # return text version
     BML::set_content_type("text/plain");
+    BML::noparse();
     return $s2code;
 }
 _code?>
