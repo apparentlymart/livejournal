@@ -37,6 +37,19 @@ $r->notes("codepath" => "bml.view.index");
      return;
  }
 
+ # check for purged
+ if ($u->{'statusvis'} eq "X") {
+     $body = "<?h1 $ML{'error.purged.title'} h1?><?p $ML{'error.purged.text'} p?>";
+     return;
+ }
+
+ if ($u->{'journaltype'} eq "R") {
+     LJ::load_user_props($u, "renamedto");
+     if ($u->{'renamedto'}) {
+         return BML::redirect(sprintf(LJ::journal_base($u->{'renamedto'}) . "/%04d/%02d/", $FORM{'y'}, $FORM{'m'}));
+     }
+ }
+
  my $remote = LJ::get_remote();
 
  # do they have the viewall priv?
@@ -57,13 +70,6 @@ $r->notes("codepath" => "bml.view.index");
      if ($u->{'statusvis'} eq "D") {
          $body = "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>";
          return;
-     }
- }
-
- if ($u->{'journaltype'} eq "R") {
-     LJ::load_user_props($u, "renamedto");
-     if ($u->{'renamedto'}) {
-         return BML::redirect(sprintf(LJ::journal_base($u->{'renamedto'}) . "/%04d/%02d/", $FORM{'y'}, $FORM{'m'}));
      }
  }
 

@@ -132,20 +132,31 @@
 
  $friends{'load'} = $friendsof{'load'} = 0 if $com && $u->{'dont_load_members'};
 
- if ($u->{'statusvis'} eq "S") {
-     $title = $ML{'error.suspended.title'};
-     $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " . BML::ml('error.suspended.text',{'sitename'=>$LJ::SITENAME,'user'=>$user}) . " p?>";
-     return;
- }
- if ($u->{'statusvis'} eq "D") {
-     $title = $ML{'error.deleted.title'};
-     $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " . BML::ml('error.deleted.text',{'user'=>$user}) . " p?>";
-     return;
- }
+ # account purged?
  if ($u->{'statusvis'} eq "X") {
      $title = $ML{'error.purged.title'};
      $body = "<?h1 $ML{'error.purged.name'} h1?><?p $ML{'error.purged.text'} p?>";
      return;
+ }
+
+ # do they have the viewall priv?
+ if ($FORM{'viewall'} && LJ::check_priv($remote, "viewall")) {
+   LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+                         "viewall", "userinfo: $u->{'user'}, statusvis: $u->{'statusvis'}");
+ } else {
+
+     if ($u->{'statusvis'} eq "S") {
+         $title = $ML{'error.suspended.title'};
+         $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " .
+           BML::ml('error.suspended.text',{'sitename'=>$LJ::SITENAME,'user'=>$user}) . " p?>";
+         return;
+     }
+     if ($u->{'statusvis'} eq "D") {
+         $title = $ML{'error.deleted.title'};
+         $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " .
+           BML::ml('error.deleted.text',{'user'=>$user}) . " p?>";
+         return;
+     }
  }
 
  $user = $u->{'user'};
