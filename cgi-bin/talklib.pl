@@ -777,8 +777,8 @@ sub talkform {
     $ret .= "</td></tr>\n";
 
     # textarea for their message body
-    $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}</td><td colspan='4'><fieldset style='border: solid 0 transparent; padding: 0;'>";
-    $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext' style='width: 99%'></textarea></fieldset>";
+    $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}</td><td colspan='4'>";
+    $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext'></textarea>";
     $ret .= "<br /><input type='submit' name='submitpost' value='$BML::ML{'.opt.submit'}' />\n";
 
     ## preview stuff
