@@ -1,14 +1,25 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+del {
+    text-decoration: none;
+    color: #ff0000;
+    background-color: #ffd0d0;
+}
+ins {
+    text-decoration: none;
+    color: #002000;
+    background-color: #20ff20;
+}
+</style>
 </head>
 <body>
 <?_code
 {
     use strict;
     use vars qw(%GET);
-    use Fcntl;
-    use POSIX qw(tmpnam);
+    use File::Temp qw/tempfile/;
     
     BML::set_content_type("text/html; charset=utf-8");
     
@@ -64,27 +75,34 @@
         $$_ .= "\n";
     }
 
-    my ($was_file, $then_file);
+    my ($was_file, $then_file, $fh);
     my $tries = 0;
 
-    $tries = 0;
-    do { $was_file = tmpnam(); $tries++; } until sysopen(FH, $was_file, O_RDWR|O_CREAT|O_EXCL) || $tries > 5;
-    return "Error creating temp file" if $tries > 5;
-    print FH $was_alt; close FH;
-
-    $tries = 0;
-    do { $then_file = tmpnam(); $tries++; } until sysopen(FH, $then_file, O_RDWR|O_CREAT|O_EXCL) || $tries > 5;
-    return "Error creating temp file" if $tries > 5;
-    print FH $then_alt; close FH;
+    ($fh, $was_file) = tempfile();
+    print $fh $was_alt; close $fh;
+    ($fh, $then_file) = tempfile();
+    print $fh $then_alt; close $fh;
 
     my @words = split(/\n/, $was_alt);
     my $diff = `diff -u $was_file $then_file`;
 
     my $pos = 0;
+    my $mode;
+    my $setmode = sub {
+        my $newmode = shift;
+        return if $newmode eq $mode;
+        my $ret;
+        $ret .= "</$mode>" if $mode;
+        $ret .= "<$newmode>" if $newmode;
+        $mode = $newmode;
+        return $ret;
+    };
+
     foreach my $dl (split(/\n/, $diff)) {
         next if $dl =~ /^(\+\+\+|\-\-\-)/;
         if ($dl =~ /^\@\@ \-(\d+),(\d+)/) {
             my $newpos = $1;
+            $ret .= $setmode->("");
             for (my $i=$pos+1; $i<$newpos; $i++) {
                 my $word = LJ::ehtml($words[$i-1]);
                 $word =~ s/\*NEWLINE\*/<br>\n/g;
@@ -97,23 +115,36 @@
             $pos++;
             my $word = LJ::ehtml($words[$pos-1]);
             $word =~ s/\*NEWLINE\*/<br>\n/g;
-            $ret .= "$word ";
+            $ret .= $setmode->("") . "$word ";
         }
         if ($dl =~ /^\-/) {
             $pos++;
             my $word = LJ::ehtml($words[$pos-1]);
             $word =~ s/\*NEWLINE\*/<br>\n/g;  
-            $ret .= "<span style='background-color: #ffd0d0; color: #ff0000'>$word</span> ";
+            $ret .= $setmode->("del") . $word . " ";
         }
         if ($dl =~ /^\+(.*)/) {
             my $word = LJ::ehtml($1);
             $word =~ s/\*NEWLINE\*/<br>\n/g;
-            $ret .= "<span style='background-color: #20ff20; color: #002000'>$word</span> ";
+            $ret .= $setmode->("ins") . $word . " ";
         }
     }
 
-    $ret .= "<hr><b>Was:</b><br>" . LJ::ehtml($was);
-    $ret .= "<hr><b>Then:</b><br>" . LJ::ehtml($then);
+    $ret .= $setmode->("");
+    while ($pos < @words) {  # off by one?  untested.
+        my $word = $words[$pos];
+        $word =~ s/\*NEWLINE\*/<br>\n/g;
+        $ret .= "$word ";
+        $pos++;
+    }
+
+    $was = LJ::eall($was);
+    $was =~ s/\n( *)/"<br \/>" . "&nbsp;"x length($1)/eg;
+    $then = LJ::eall($then);
+    $then =~ s/\n( *)/"<br \/>" . "&nbsp;"x length($1)/eg;
+    
+    $ret .= "<p><table width='100%' border='1'><tr valign='top'><td width='50%'><b>Before:</b><br>$was</td>";
+    $ret .= "<td width='50%'><b>After:</b><br>$then</td></tr></table>";
 
     unlink($was_file, $then_file);
 
