@@ -20,9 +20,11 @@
     $TEMP = "$HOME/temp";
     $VAR = "$HOME/var";
 
-    # human readable name of this site
+    # human readable name of this site as well as shortened versions
     # CHANGE THIS
     $SITENAME = "Some LiveJournal Site";
+    $SITENAMESHORT = "YourSite";
+    $SITENAMEABBREV = "YS";
     
     ## turn $SERVER_DOWN on while you do any maintenance
     $SERVER_DOWN = 0;

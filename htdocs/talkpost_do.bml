@@ -616,14 +616,14 @@ body<=
                      $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
                  }
 
-                 my $fromname = $up->{'user'} ? "$up->{'user'} - LJ Comment" : "LiveJournal Comment";
+                 my $fromname = $up->{'user'} ? "$up->{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITESHORT  Comment";
                  my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
                                             'To' => $paru->{'email'},
                                             'Subject' => ($headersubject || "Reply to your comment..."),
                                             'Type' => 'multipart/alternative');
                  
                  my $text = "";
-                 $text .= "$who$whouser replied to your LiveJournal comment in which you said:\n\n";
+                 $text .= "$who$whouser replied to your $LJ::SITENAMESHORT comment in which you said:\n\n";
                  $text .= &indent($parentcomment, ">");
                  $text .= "\n\nTheir reply was:\n\n";
                  $text .= &indent("Subject: $cleansubject\n\n$FORM{'body'}");
@@ -647,7 +647,7 @@ body<=
 
                  my $html = "";
                  $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\"></head><BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
-                 $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your LiveJournal comment</A> in which you said:</TD></TR></TABLE>\n\n";
+                 $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your $LJ::SITENAMESHORT comment</A> in which you said:</TD></TR></TABLE>\n\n";
                  my $htmlbody = $parentcomment;
                  LJ::CleanHTML::clean_comment(\$htmlbody, $parentpreformatted);
                  $html .= &blockquote($htmlbody);
@@ -730,17 +730,17 @@ body<=
          }
 
 
-         my $fromname = $up->{'user'} ? "$up->{'user'} - LJ Comment" : "LiveJournal Comment";
+         my $fromname = $up->{'user'} ? "$up->{'user'} - $LJ::SITENAMEABBREV Comment" : "$LJ::SITENAMESHORT Comment";
          my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
                                     'To' => $ujp->{'email'},
                                     'Subject' => ($headersubject || "Reply to your post..."),
                                     'Type' => 'multipart/alternative');
          my $text = "";
          if ($parentcomment)  {
-             $text .= "$who$whouser replied to another comment somebody left in your LiveJournal post.  The comment they replied to was:\n\n";
+             $text .= "$who$whouser replied to another comment somebody left in your $LJ::SITENAMESHORT post.  The comment they replied to was:\n\n";
              $text .= &indent($parentcomment, ">");
          } else {
-             $text .= "$who$whouser replied to your LiveJournal post in which you said:\n\n";
+             $text .= "$who$whouser replied to your $LJ::SITENAMESHORT post in which you said:\n\n";
              $text .= &indent($item->{'event'}, ">");
          }
          $text .= "\n\nTheir reply was:\n\n";
@@ -768,12 +768,12 @@ body<=
          my $html = "";
          $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\"></head><BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
          if ($parentcomment)  {
-             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your LiveJournal post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
+             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your $LJ::SITENAMESHORT post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
              my $cleancom = $parentcomment;
              LJ::CleanHTML::clean_comment(\$cleancom, $parentpreformatted);
              $html .= &blockquote($cleancom);
          } else {
-             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your LiveJournal post</A> in which you said:</TD></TR></TABLE>\n";
+             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your $LJ::SITENAMESHORT post</A> in which you said:</TD></TR></TABLE>\n";
              my $clean = $item->{'event'};
              LJ::CleanHTML::clean_event(\$clean, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'}});
              $html .= &blockquote($clean);

@@ -12,6 +12,9 @@
     $HTDOCS = "$HOME/htdocs";
     $BIN = "$HOME/bin";
 
+    $SITENAMESHORT = "LiveJournal";
+    $SITENAMEABBREV = "LJ";
+
     $NODB_MSG ||= "Database temporarily unavailable.  Try again shortly.";
 
     $SITEROOT ||= "http://www.$DOMAIN:8011";
