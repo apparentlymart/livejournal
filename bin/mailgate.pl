@@ -79,6 +79,7 @@ if ($toarg =~ /^(\d+)z(.+)$/)
 	# valid.  need to strip out stuff now with authcodes:
 	$body =~ s!http://.+/support/act\.bml\S+![snipped]!g;
 	$body =~ s!\+(\d)+z\w{1,10}\@!\@!g;
+	$body =~ s!&auth=\S+!!g;
 
 	## try to get rid of reply stuff.
 	# Outlook Express:

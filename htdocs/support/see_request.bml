@@ -29,10 +29,12 @@ BODY<=
  }
 
  my $owner_mode = 0;
- my $remote = &get_remote();
- LJ::Support::init_remote($dbh, $remote);
+ my $remote = LJ::get_remote($dbh) || {};
+ 
+ $remote->{'_support'}->{'foo_s1'} = "s1";
 
-
+ LJ::Support::init_remote($dbh, $remote, \%FORM);
+ 
  # load category this request is in
  my $problemarea = $sp->{_cat}->{'catname'};
  my $catkey = $sp->{_cat}->{'catkey'};
@@ -45,13 +47,6 @@ BODY<=
      $owner_mode = 1;
  }
 
-# use Data::Dumper;
-# $ret .= "Owner: $owner_mode<br>\n";
-# $ret .= "Can_close: " . LJ::Support::can_close($dbh, $sp, $remote) . "<br>";
-# $ret .= "<pre>" . Dumper($remote) . "</pre>\n";
-# return $ret;
-
- 
  my $domain = $email;
  $domain =~ s/^.+\@//; 
 
@@ -221,9 +216,16 @@ BODY<=
  $ret .= "<BR><FORM METHOD=POST ACTION=append_request.bml>";
  # hidden values
  $ret .= "<INPUT TYPE=HIDDEN NAME=\"spid\" VALUE=\"$spid\">\n";
+ $ret .= "<INPUT TYPE=HIDDEN NAME=\"auth\" VALUE=\"$FORM{'auth'}\">\n";
  $ret .= "<TABLE BORDER=0>\n";
  
- $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>From:</TD><td>(=LJUSER $remote->{'user'} LJUSER=)</td></tr>\n";
+ $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>From:</TD><td>";
+ if ($remote->{'userid'}) {
+     $ret .= "(=LJUSER $remote->{'user'} LJUSER=)";
+ } else {
+     $ret .= "(not logged in)";
+ }
+ $ret .= "</td></tr>\n";
  
  # FAQ reference
  $ret .= "<TR VALIGN=MIDDLE><TD ALIGN=RIGHT>Reference <A HREF=\"faq.bml\">FAQ</A>:</TD><TD COLSPAN=2><SELECT NAME=\"faqid\"><OPTION VALUE=0>(don't reference FAQ)";

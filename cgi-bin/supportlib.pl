@@ -47,12 +47,22 @@ sub init_remote
 {
     my $dbh = shift;
     my $remote = shift;
+    my $form = shift;
     return unless ($remote);
-    my $u = LJ::load_userid($dbh, $remote->{'userid'});
-    %$remote = %$u;
-    LJ::load_user_privs($dbh, $remote, 
-			qw(supportclose supporthelp 
-			   supportdelete supportread));
+
+    if ($remote->{'userid'}) {
+	my $u = LJ::load_userid($dbh, $remote->{'userid'});
+	%$remote = %$u;
+        LJ::load_user_privs($dbh, $remote, 
+			    qw(supportclose supporthelp 
+			       supportdelete supportread));
+    }
+
+    # on see_request.bml page, an 'auth' argument can be passed in
+    # to let the requester see their own stuff, regardless of login status.
+    if (defined $form->{'auth'}) { 
+	$remote->{'_support'}->{'miniauth'} = $form->{'auth'};
+    }
 }
 
 # given all the categories, maps a catkey into a cat
@@ -95,6 +105,9 @@ sub is_poster
 {
     my ($sp, $remote) = @_;
     return 0 unless ($remote);
+    if ($remote->{'_support'}->{'miniauth'} eq mini_auth($sp)) {
+	return 1;
+    }
     if ($sp->{'reqtype'} eq "email") {
 	if ($remote->{'email'} eq $sp->{'reqemail'} && $remote->{'status'} eq "A") {
 	    return 1;
@@ -254,7 +267,7 @@ sub file_request
 	return $dup_id;
     }
 
-    my ($url, $spid);  # used at the bottom
+    my ($urlauth, $url, $spid);  # used at the bottom
 
     my $sql = "INSERT INTO support (spid, reqtype, requserid, reqname, reqemail, state, authcode, spcatid, subject, timecreate, timetouched, timeclosed) VALUES (NULL, $qreqtype, $qrequserid, $qreqname, $qreqemail, 'open', $qauthcode, $qspcatid, $qsubject, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0)";
     $sth = $dbh->prepare($sql);
@@ -288,10 +301,13 @@ sub file_request
     }
     
     my $body;
+    my $miniauth = mini_auth({ 'authcode' => $authcode });
     $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
+    $urlauth = "$url&auth=$miniauth";
+
     $body = "Your LiveJournal support request regarding \"$o->{'subject'}\" has been filed and will be answered as soon as possible.  Your request tracking number is $spid.\n\n";
     $body .= "You can track your request's progress or add information here:\n\n  ";
-    $body .= LJ::make_text_link($url, $email);
+    $body .= LJ::make_text_link($urlauth, $email);
     
     $body .= "\n\nIf you figure out the problem before somebody gets back to you, please cancel your request by clicking this:\n\n  ";
     $body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$authcode", $email);
@@ -456,9 +472,10 @@ sub mail_response_to_user
 	$body .= "this request from being closed in 7 days.  Click here:\n";
 	$body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?touch;$spid;$sp->{'authcode'}", $email);
     }
-    
+
+    my $miniauth = mini_auth($sp);
     $body .= "\n\nTo read all the comments or add more, go here:\n";
-    $body .= LJ::make_text_link("$LJ::SITEROOT/support/see_request.bml?id=$spid", $email);
+    $body .= LJ::make_text_link("$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth", $email);
     
     $body .= "\n";
     

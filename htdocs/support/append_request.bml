@@ -19,12 +19,11 @@ BODY<=
      $u = LJ::load_userid($dbh, $sp->{'requserid'});
  }
 
- my $remote = LJ::get_remote($dbh);
-	
- unless ($remote) {
+ my $remote = LJ::get_remote($dbh) || {};
+ LJ::Support::init_remote($dbh, $remote, \%FORM);
+
+ unless (LJ::Support::can_append($dbh, $sp, $remote) || $remote) {
      return done_error("You must <a href=\"/login.bml\">login</a> to help people out.");
- } else {
-     LJ::Support::init_remote($dbh, $remote);
  }
 
  my $scat = $sp->{_cat};
@@ -99,7 +98,8 @@ BODY<=
  
  LJ::Support::mail_response_to_user($dbh, $sp, $splid);
 
- return "(=H1 Logged H1=)(=P Your comment/solution <a href=\"see_request.bml?id=$spid\">has been recorded</a>.  Thanks.  P=)";
+ my $auth_arg = $FORM{'auth'} ? "&auth=$FORM{'auth'}" : "";
+ return "(=H1 Logged H1=)(=P Your comment/solution <a href=\"see_request.bml?id=$spid$auth_arg\">has been recorded</a>.  Thanks.  P=)";
 
  sub done_error
  {
