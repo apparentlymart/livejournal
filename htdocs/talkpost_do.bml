@@ -346,7 +346,7 @@ BODY<=
 
 
      # meta-data
-     $talkprop{'unknownbit'} = 1 if $unknown8bit;
+     $talkprop{'unknown8bit'} = 1 if $unknown8bit;
      $talkprop{'subjecticon'} = $subjecticon;
      $talkprop{'picture_keyword'} = $FORM{'prop_picture_keyword'};
      $talkprop{'opt_preformatted'} = $FORM{'prop_opt_preformatted'} ? 1 : 0;
