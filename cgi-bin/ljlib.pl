@@ -790,6 +790,15 @@ sub are_hooks
 }
 
 # <LJFUNC>
+# name: LJ::clear_hooks
+# des: Removes all hooks.
+# </LJFUNC>
+sub clear_hooks
+{
+    %LJ::HOOKS = ();
+}
+
+# <LJFUNC>
 # name: LJ::run_hooks
 # des: Runs all the site-specific hooks of the given name.
 # returns: list of arrayrefs, one for each hook ran, their
