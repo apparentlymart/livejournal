@@ -254,6 +254,10 @@ sub movefrom0_logitem
     foreach my $t (sort { $a <=> $b } @$talkids) {
 	movefrom0_talkitem($t, $jitemid, \%newtalkids);
     }
+
+    # update polls
+    $dbh->do("UPDATE poll SET itemid=$jitemid WHERE ".
+	     "itemid=$itemid AND journalid=$userid");
 }
 
 sub movefrom0_talkitem
