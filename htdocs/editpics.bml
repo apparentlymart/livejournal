@@ -490,6 +490,74 @@
                 $u->{'defaultpicid'} = $picid;
             }
 
+            # set default keywords?
+            if ($POST{'keywords'} ne '') {
+                if ($u->{'dversion'} > 6) {
+                    $sth = $dbcr->prepare("SELECT kwid, picid FROM userpicmap2 WHERE userid=?");
+                } else {
+                    $sth = $dbh->prepare("SELECT kwid, picid FROM userpicmap WHERE userid=?");
+                }
+                $sth->execute($u->{'userid'});
+
+                my @exist_kwids;
+                while (my ($kwid, $picid) = $sth->fetchrow_array) {
+                    $exist_kwids[$kwid] = $picid;
+                }
+
+                my @keywords = split(/\s*,\s*/, $POST{'keywords'});
+                @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
+
+                my (@bind, @data, @kw_errors);
+                my $c = 0;
+
+                foreach my $kw (@keywords) {
+                    my $kwid = ($u->{'dversion'} > 6) ? LJ::get_keyword_id($u, $kw) : LJ::get_keyword_id($kw);
+                    next unless $kwid; # Houston we have a problem!  This should always return an id.
+
+                    if ($c > $LJ::MAX_USERPIC_KEYWORDS) {
+                        my $ekw = LJ::ehtml($kw);
+                        push @kw_errors, $ekw;
+                        next;
+                    }
+
+                    if ($exist_kwids[$kwid]) { # Already used on another picture
+                        my $ekw = LJ::ehtml($kw);
+                        push @errors, BML::ml(".error.keywords", {'ekw' => $ekw});
+                        next;
+                    } else { # New keyword, so save it
+                        push @bind, '(?, ?, ?)';
+                        push @data, $u->{'userid'}, $kwid, $picid;
+                    }
+                    $c++;
+                }
+
+                # Let the user know about any we didn't save
+                if (@kw_errors) {
+                    my $num_words = scalar(@kw_errors);
+                    my $kws = join (", ", @kw_errors);
+                    push @errors, BML::ml(".error.toomanykeywords", {'numwords' => $num_words, 'words' => $kws, 'max' => $LJ::MAX_USERPIC_KEYWORDS});
+                }
+
+                if (@data && @bind) {
+                    my $bind = join(',', @bind);
+
+                    if ($u->{'dversion'} > 6) {
+                        $u->do("INSERT INTO userpicmap2 (userid, kwid, picid) VALUES $bind",
+                               undef, @data);
+                    } else {
+                        $dbh->do("INSERT INTO userpicmap (userid, kwid, picid) VALUES $bind",
+                                 undef, @data);
+                    }
+                }
+            }
+
+            # set default comments?
+            if ($POST{'comments'} ne '' && $u->{'dversion'} > 6) {
+                my $comment = LJ::text_trim($POST{'comments'}, LJ::BMAX_UPIC_COMMENT, LJ::CMAX_UPIC_COMMENT);
+                $u->do("UPDATE userpic2 SET comment=? WHERE userid=? AND picid=?",
+                       undef, $POST{'comments'}, $u->{'userid'}, $picid);
+            }
+
             my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
             LJ::MemCache::delete($memkey);
         }
@@ -636,21 +704,39 @@
         $body .= "<form action='editpics.bml$getextra' method='post' " .
                  "enctype='multipart/form-data' style='display: inline;'>\n";
 
-        $body .= "<table>\n<tr><td>\n";
+        $body .= "<table>\n<tr><td align='right'>\n";
         $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
                                   'value' => 'file', 'selected' => '1',
                                   'accesskey' => $ML{'.fromfile.key'} });
-      
+        $body .= "</td><td align='right'>";
         $body .= "<label for='radio_file'>$ML{'.fromfile'}</label></td>";
-        $body .= "<td align='left'><input type='file' name='userpic' /></td></tr>\n";
+        $body .= "<td align='left'><input type='file' name='userpic' size='28' /></td></tr>\n";
 
-        $body .= "<tr><td>";
+        $body .= "<tr><td align='right'>";
         $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'value' => 'url',
                                   'id' => 'radio_url', 'accesskey' => $ML{'.fromurl.key'} });
+        $body .= "</td><td align='right'>";
         $body .= "<label for='radio_url'>$ML{'.fromurl'}</label></td><td align='left'>";
         $body .= LJ::html_text({ 'name' => 'urlpic', 'size' => '40' }) . "</td></tr>\n";
 
-        $body .= "<tr><td>&nbsp;</td><td align='left'>";
+        $body .= "<tr><td colspan='3' align='center'><hr></td></tr>";
+
+        $body .= "<tr><td align='right'>";
+        $body .= "<?help $LJ::HELPURL{'upic_keywords'} help?>";
+        $body .= "</td><td align='right'><label for='keywords'>";
+        $body .= "Keywords:</label></td><td align='left'>";
+        $body .= LJ::html_text({ 'name' => 'keywords', 'size' => '40' });
+        $body .= "</td></tr>";
+
+        if ($u->{'dversion'} > 6) {
+            $body .= "<tr><td align='right'>";
+            $body .= "<?help $LJ::HELPURL{'upic_comments'} help?>";
+            $body .= "</td><td align='right'><label for='comments'> Comments:</label></td><td align='left'>";
+            $body .= LJ::html_text({ 'name' => 'comments', 'size' => '40', 'maxlength' => LJ::CMAX_UPIC_COMMENT });
+            $body .= "</td></tr>";
+        }
+
+        $body .= "<tr><td colspan='2'>&nbsp;</td><td align='left'>";
         $body .= LJ::html_check({ 'type' => 'checkbox',
                                   'name' => 'make_default',
                                   'id' => 'make_default',
@@ -659,7 +745,7 @@
 
         $body .= "<label for='make_default'>$ML{'.makedefault'}</label></td></tr>\n";
 
-        $body .= "<tr><td>&nbsp;</td><td>" .LJ::html_submit(undef, $ML{'.btn.proceed'}) . "</td></tr>\n";
+        $body .= "<tr><td colspan='3' align='center'><br />" .LJ::html_submit(undef, $ML{'.btn.proceed'}) . "</td></tr>\n";
         $body .= "</table>\n</form>\n";
     } else {
         $body .= "<?standout \n";
