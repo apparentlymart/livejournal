@@ -795,7 +795,7 @@ sub talkform {
     $ret .= "</td><td align='left'><b><label for='talkpostfromlj'>$BML::ML{'.opt.ljuser'}</label></b> ";
     $ret .= $BML::ML{'.opt.willscreenfriend'} if $journalu->{'opt_whoscreened'} eq 'F';
     $ret .= $BML::ML{'.opt.willscreen'} if $journalu->{'opt_whoscreened'} eq 'A';
-    $ret .= "</tr>\n";
+    $ret .= "</td></tr>\n";
 
     # Username: [    ] Password: [    ]  Login? [ ]
     $ret .= "<tr valign='middle' align='left'><td colspan='2'></td><td>";
