@@ -1930,9 +1930,10 @@ sub create_view_rss
         'clustersource' => 'slave',
         'remote' => $remote,
         'userid' => $u->{'userid'},
-        'itemshow' => 50,
+        'itemshow' => 25,
         'order' => "logtime",
         'itemids' => \@itemids,
+        'friendsview' => 1,           # this makes rlogtimes return
     });
 
     $opts->{'contenttype'} = 'text/xml; charset='.$opts->{'saycharset'};
@@ -1940,34 +1941,69 @@ sub create_view_rss
     ### load the log properties
     my %logprops = ();
     my $logtext;
-    my $logdb = $dbs->{'reader'};
-    if ($u->{'clusterid'}) {
-        $logdb = LJ::get_cluster_reader($u);
-        LJ::load_props($dbs, "log");
-        LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
-        $logtext = LJ::get_logtext2($u, @itemids);
-    } else {
-        LJ::load_log_props($dbs, \@itemids, \%logprops);
-        $logtext = LJ::get_logtext($dbs, @itemids);
-    }
+    my $logdb = LJ::get_cluster_reader($u);
+    LJ::load_props($dbs, "log", "user");
+    LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
+    LJ::load_user_props($dbs, $u, 'opt_whatemailshow', 'no_mail_alias');
+    $logtext = LJ::get_logtext2($u, @itemids);
 
+    # some data used throughout the channel
     my $clink = LJ::journal_base($u) . "/";
     my $ctitle = LJ::exml($u->{'name'});
+    my $cbuilddate = LJ::time_to_http($LJ::EndOfTime - $items[0]->{'rlogtime'});
 
+    # email address of journal owner, but respect their privacy settings
+    my $ceditor;
+    if ($u->{'opt_whatemailshow'} ne "N" && $u->{'opt_mangleemail'} ne "Y") {
+        
+        # default to their actual email
+        $ceditor = $u->{'email'};
+        
+        # use their livejournal email if they have one
+        if ($LJ::USER_EMAIL && $u->{'opt_whatemailshow'} eq "L" &&
+            LJ::get_cap($u, "useremail") && ! $u->{'no_mail_alias'}) {
+
+            $ceditor = "$u->{'user'}\@$LJ::USER_DOMAIN";
+        } 
+
+        # clean it up since we know we have one now
+        $ceditor = LJ::exml($ceditor);
+    }
+    
+
+    # header
     $$ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
-    $$ret .= "<!DOCTYPE rss PUBLIC \"-//Netscape Communications//DTD RSS 0.91//EN\"\n";
-    $$ret .= "             \"http://my.netscape.com/publish/formats/rss-0.91.dtd\">\n";
-    $$ret .= "<rss version='0.91'>\n";
+    $$ret .= "<rss version='2.0'>\n";
+
+    # channel attributes
     $$ret .= "<channel>\n";
     $$ret .= "  <title>$ctitle</title>\n";
     $$ret .= "  <link>$clink</link>\n";
     $$ret .= "  <description>$ctitle - $LJ::SITENAME</description>\n";
-    $$ret .= "  <language>" . lc($u->{'lang'}) . "</language>\n";
+    $$ret .= "  <managingEditor>$ceditor</managingEditor>\n" if $ceditor;
+    $$ret .= "  <lastBuildDate>$cbuilddate</lastBuildDate>\n";
+    $$ret .= "  <generator>LiveJournal / $LJ::SITENAME</generator>\n";
+    # TODO: add 'language' field when user.lang has more useful information
 
+    ### image block, returns info for their current userpic
+    if ($u->{'defaultpicid'}) {
+        my $pic = {};
+        LJ::load_userpics($dbs, $pic, [$u->{'defaultpicid'}]);
+        $pic = $pic->{$u->{'defaultpicid'}}; # flatten
+        
+        $$ret .= "  <image>\n";
+        $$ret .= "    <url>$LJ::USERPIC_ROOT/$u->{'defaultpicid'}/$u->{'userid'}</url>\n";
+        $$ret .= "    <title>$ctitle</title>\n";
+        $$ret .= "    <link>$clink</link>\n";
+        $$ret .= "    <width>$pic->{'width'}</width>\n";
+        $$ret .= "    <height>$pic->{'height'}</height>\n";
+        $$ret .= "  </image>\n\n";
+    }
+
+    # output individual image blocks
     foreach my $it (@items) 
     {
-        $$ret .= "<item>\n";
-
+        # load required data
         my $itemid = $it->{'itemid'};
 
         if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
@@ -1975,30 +2011,41 @@ sub create_view_rss
                             \$logtext->{$itemid}->[1], $logprops{$itemid});
         }
 
-        # see if we have a subject
+        # see if we have a subject and clean it
         my $subject = $logtext->{$itemid}->[0];
-
-        if ($subject ne "") {
-            # strip HTML from subject
-            LJ::CleanHTML::clean_subject_all(\$subject);
-        } else {
-            # if no subject, use logtext with all HTML stripped
-            $subject = $logtext->{$itemid}->[1];
-            LJ::CleanHTML::clean_subject_all(\$subject);
-            $subject = LJ::text_trim($subject, 80, 40);
-        }
-        # if still no subject....
-        $subject ||= "(No subject or text)";
-
+        LJ::CleanHTML::clean_subject_all(\$subject);
         $subject = LJ::exml($subject);
 
-        my $ditemid = $u->{'clusterid'} ? ($itemid*256 + $it->{'anum'}) : $itemid;
-        my $itemargs = $u->{'clusterid'} ? "journal=$user&amp;itemid=$ditemid" : "itemid=$ditemid";
+        # if no subject, use logtext with all HTML stripped
+        my $event = $logtext->{$itemid}->[1];
 
-        $$ret .= "<title>$subject</title>\n";
-        $$ret .= "<link>$LJ::SITEROOT/talkread.bml?$itemargs</link>\n";
+        # users without 'full_rss' get their logtext bodies truncated
+        # do this now so that the html cleaner will hopefully fix html we break
+        unless (LJ::get_cap($u, 'full_rss')) {
+            my $trunc = LJ::text_trim($event, 0, 80);
+            $event = "$trunc..." if $trunc ne $event;
+        }
 
+        # clean the event
+        LJ::CleanHTML::clean_event(\$event, 
+                                   { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'} });
+        $event = LJ::exml($event);
+
+        my $ditemid = $itemid*256 + $it->{'anum'};
+
+        $$ret .= "<item>\n";
+        $$ret .= "  <guid isPermaLink='true'>$clink$ditemid.html</guid>\n";
+        $$ret .= "  <pubDate>" . LJ::time_to_http($LJ::EndOfTime - $it->{'rlogtime'}) . "</pubDate>\n";
+        $$ret .= "  <title>$subject</title>\n" if $subject;
+        $$ret .= "  <author>$ceditor</author>" if $ceditor;
+        $$ret .= "  <link>$clink$ditemid.html</link>\n";
+        $$ret .= "  <description>$event</description>\n";
+        unless ($logprops{$itemid}->{'opt_nocomments'}) {
+            $$ret .= "  <comments>$clink$ditemid.html</comments>\n";
+        }
+        # TODO: add author field with posterid's email address, respect communities
         $$ret .= "</item>\n";
+
     } # end huge while loop
 
     $$ret .= "</channel>\n";

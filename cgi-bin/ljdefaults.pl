@@ -92,6 +92,7 @@
                       'useremail' => 0,
                       'userpics' => 5,
                       'findsim' => 1,
+                      'full_rss' => 1,
                       'can_post' => 1,
                       'get_comments' => 1,
                       'leave_comments' => 1,
