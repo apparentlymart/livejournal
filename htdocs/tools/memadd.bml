@@ -50,9 +50,9 @@
      $jid = $ju->{'userid'};
      $dbcr = LJ::get_cluster_reader($ju);
 
-     $sth = $dbcr->prepare("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, ls.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold', l.anum FROM log2 l, logsubject2 ls WHERE ls.journalid=$jid AND l.journalid=$jid AND ls.jitemid=l.jitemid AND l.jitemid=$itemid");
+     $sth = $dbcr->prepare("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, ls.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold', l.anum FROM log2 l, logtext2 ls WHERE ls.journalid=$jid AND l.journalid=$jid AND ls.jitemid=l.jitemid AND l.jitemid=$itemid");
  } else {
-     $sth = $dbr->prepare("SELECT l.ownerid, l.posterid, l.eventtime, ls.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold' FROM log l, logsubject ls WHERE ls.itemid=l.itemid AND l.itemid=$itemid");     
+     $sth = $dbr->prepare("SELECT l.ownerid, l.posterid, l.eventtime, ls.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold' FROM log l, logtext ls WHERE ls.itemid=l.itemid AND l.itemid=$itemid");     
  }
  $sth->execute;
  my $log = $sth->fetchrow_hashref;

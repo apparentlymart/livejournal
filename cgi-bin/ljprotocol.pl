@@ -766,24 +766,6 @@ sub postevent
         }
     }
 
-    # this is to speed month view and other places that don't need full text.
-    if ($clustered) {
-        $dbcm->do("REPLACE INTO logsubject2 (journalid, jitemid, subject) ".
-                  "VALUES ($ownerid, $itemid, $qsubject)");
-        if ($dbcm->err) {
-            my $msg = $dbcm->errstr;
-            LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
-            return fail($err,501,"logsubject:$msg");
-        }
-    } else {
-        $dbh->do("INSERT INTO logsubject (itemid, subject) VALUES ($itemid, $qsubject)");
-        if ($dbh->err) {
-            my $msg = $dbh->errstr;
-            LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-            return fail($err,501,$msg);
-        }
-    }
-
     # keep track of custom security stuff in other table.
     if ($uselogsec) {
         if ($clustered) {
@@ -1117,13 +1099,6 @@ sub editevent
                          "WHERE itemid=$qitemid");
             }
             return fail($err,501,$dbcm->errstr) if $dbcm->err;
-        }
-        if ($clustered) {
-            $dbcm->do("REPLACE INTO logsubject2 (journalid, jitemid, subject) ".
-                      "VALUES ($ownerid, $qitemid, $qsubject)");
-        } else {
-            $dbh->do("REPLACE INTO logsubject (itemid, subject) ".
-                     "VALUES ($qitemid, $qsubject)");
         }
 
         # update disk usage

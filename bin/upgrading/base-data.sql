@@ -591,7 +591,6 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('intcount', 'The numbe
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('interest', 'The text of the interest.', 'interests');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('intid', 'Unique id assigned to the interest.', 'interests');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('is_public', 'Determines if the group can be seen by anyone, or just the owner.', 'friendgroup');
-REPLACE INTO schemacols (colname, des, tablename) VALUES ('itemid', 'The journal entry\'s unique ID ... references [dbtable[log]].', 'logsubject');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('itemid', 'The unique id given to the entry.', 'log');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('itemid', 'The unique itemid of the journal entry.  References the [dbtable[log]] table.', 'logtext');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('itsid', 'The hintid of whatever type to delete later.', 'batchdelete');
@@ -639,8 +638,7 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('sortorder', 'An integ
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('sortorder', 'The sorting number the questions are ordered by. Used while SELECT\'ing them.', 'faq');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('sortorder', 'The sorting order.', 'friendgroup');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('state', 'State code (see [dbtable[codes]] for how to turn this into a full state name)', 'zip');
-REPLACE INTO schemacols (colname, des, tablename) VALUES ('subject', 'Journal entry subject.  Also duplicated in the [dbtable[logsubject]] table.', 'logtext');
-REPLACE INTO schemacols (colname, des, tablename) VALUES ('subject', 'The subject of the journal entry.', 'logsubject');
+REPLACE INTO schemacols (colname, des, tablename) VALUES ('subject', 'Journal entry subject.', 'logtext');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('tablename', 'Table to lock to do this query.  Note:  query CANNOT reference any other table, else it will fail.  Need to make a querybuffer2 sometime that handles more complex locking', 'querybuffer');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('tablename', 'The name of the table being described.', 'schematables');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('talkid', 'Each comment\'s unique id.', 'talk');
@@ -712,7 +710,6 @@ REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tab
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('The types of color codes there can be.  Part of the style system, version 1.', '1', 'replace', NULL, 'themecoltypes');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('This holds all the variable-length data for journal entries.', '0', 'off', NULL, 'logtext');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('This table holds all journal entries, although the table name may be confusing (LiveJournal was originally called "Brad\'s log").\r\n\r\nActually, this table only stores metadata about journal entries... the actual content is stored in [dbtable[logtext]].', '0', 'off', NULL, 'log');
-REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('This table is a subset of the [dbtable[logtext]] table.  This table is for selects when we know we only want the subject and we\'re selecting a lot of entries.  The number of disk seeks is less.', '0', 'off', NULL, 'logsubject');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('This table is the documentation for the database tables.', '0', 'replace', NULL, 'schematables');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Tracks user-based disk usage totals.', '0', 'off', NULL, 'dudata');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Tracks viewings of the individual [dbtable[faq]]s from logged-in users.', '0', 'off', NULL, 'faquses');

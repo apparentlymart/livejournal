@@ -3,7 +3,7 @@
 #
 
 mark_clustered("useridmap", "userbio", "cmdbuffer", "dudata",
-               "log2", "logtext2", "logsubject2", "logprop2", "logsec2",
+               "log2", "logtext2", "logprop2", "logsec2",
                "talk2", "talkprop2", "talktext2", "talkleft",
                "userpicblob2", "events",
                "ratelog", "loginstall", "sessions", "sessions_data",
@@ -256,14 +256,6 @@ CREATE TABLE logsec (
   itemid int(10) unsigned NOT NULL default '0',
   allowmask int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (ownerid,itemid)
-) 
-EOC
-
-register_tablecreate("logsubject", <<'EOC');
-CREATE TABLE logsubject (
-  itemid int(10) unsigned NOT NULL default '0',
-  subject varchar(255) default NULL,
-  PRIMARY KEY  (itemid)
 ) 
 EOC
 
@@ -974,15 +966,6 @@ CREATE TABLE logtext2 (
   jitemid MEDIUMINT UNSIGNED NOT NULL,
   subject VARCHAR(255) DEFAULT NULL,
   event TEXT,
-  PRIMARY KEY (journalid, jitemid)
-) max_rows=100000000
-EOC
-
-register_tablecreate("logsubject2", <<'EOC');
-CREATE TABLE logsubject2 (
-  journalid INT UNSIGNED NOT NULL,
-  jitemid MEDIUMINT UNSIGNED NOT NULL,
-  subject VARCHAR(255) DEFAULT NULL,
   PRIMARY KEY (journalid, jitemid)
 ) max_rows=100000000
 EOC

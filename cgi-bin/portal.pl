@@ -691,7 +691,7 @@ $box{'lastnview'} =
             return;
         }
 
-        # FIXME: need an LJ::get_logsubject 
+        # FIXME: need an LJ::get_logsubject?
         if ($box->{'args'}->{'showtext'}) {
         } else {
         }

@@ -372,7 +372,6 @@ elsif ($sclust > 0)
         'logprop2' => 'journalid',
 
         'logtext2' => 'journalid',
-        'logsubject2' => 'journalid',
 
         # talk
         'talk2' => 'journalid',
@@ -482,15 +481,13 @@ elsif ($sclust > 0)
                 $write->("logprop2:(journalid,jitemid,propid,value)", @vals);
             }
 
-            # logtext2/logsubject2
+            # logtext2
             $sth = $dbo->prepare("SELECT journalid,jitemid,subject,event ".
                                  "FROM logtext2 WHERE journalid=$userid AND jitemid BETWEEN $lo AND $hi");
             $sth->execute;
             while (my @vals = $sth->fetchrow_array) {
                 $write->("logtext2:(journalid,jitemid,subject,event)", @vals);
                 my $size = length($vals[2]) + length($vals[3]);
-                pop @vals;  # get rid of event
-                $write->("logsubject2:(journalid,jitemid,subject)", @vals);
                 $write->("dudata:(userid,area,areaid,bytes)", $userid, 'L', $vals[1], $size);
             }
 
@@ -586,7 +583,7 @@ sub deletefrom0_logitem
     }
 
     $dbh->do("DELETE FROM logsec WHERE ownerid=$userid AND itemid=$itemid");
-    foreach my $table (qw(logprop logtext logsubject log)) {
+    foreach my $table (qw(logprop logtext log)) {
         $dbh->do("DELETE FROM $table WHERE itemid=$itemid");
     }
 
@@ -621,9 +618,6 @@ sub movefrom0_logitem
 
     $replace_into->("logtext2", "(journalid, jitemid, subject, event)", 10,
                     $userid, $jitemid, map { $itemtext->{$_} } qw(subject event));
-
-    $replace_into->("logsubject2", "(journalid, jitemid, subject)", 50,
-                    $userid, $jitemid, $itemtext->{'subject'});
 
     # add disk usage info!  (this wasn't in cluster0 anywhere)
     my $bytes = length($itemtext->{'event'}) + length($itemtext->{'subject'});

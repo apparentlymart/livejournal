@@ -90,9 +90,14 @@
          return $err->("Unknown journal") unless $uj;
          my $db = LJ::get_cluster_reader($uj);
          
-         $sth = $dbr->prepare("SELECT l.posterid, ls.subject FROM log2 l, logsubject2 ls WHERE l.journalid=$uj->{'userid'} AND ls.journalid=$uj->{'userid'} AND l.jitemid=$itemid AND ls.jitemid=$itemid");	 
+         $sth = $dbr->prepare("SELECT l.posterid, ls.subject ".
+                              "FROM log2 l, logtext2 ls ".
+                              "WHERE l.journalid=$uj->{'userid'} AND ls.journalid=$uj->{'userid'} ".
+                              "AND l.jitemid=$itemid AND ls.jitemid=$itemid");	 
      } else {
-         $sth = $dbr->prepare("SELECT l.posterid, ls.subject FROM log l, logsubject ls WHERE l.itemid=$itemid AND ls.itemid=$itemid");
+         $sth = $dbr->prepare("SELECT l.posterid, ls.subject ".
+                              "FROM log l, logtext ls ".
+                              "WHERE l.itemid=$itemid AND ls.itemid=$itemid");
          
      }
 

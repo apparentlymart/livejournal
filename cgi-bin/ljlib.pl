@@ -4821,7 +4821,7 @@ sub delete_item
 
     $deleter->("memorable", "itemid", $itemid);
     $dbh->do("UPDATE userusage SET lastitemid=0 WHERE userid=$ownerid AND lastitemid=$itemid") unless ($quick);
-    foreach my $t (qw(log logtext logsubject logprop)) {
+    foreach my $t (qw(log logtext logprop)) {
         $deleter->($t, "itemid", $itemid);
     }
     $dbh->do("DELETE FROM logsec WHERE ownerid=$ownerid AND itemid=$itemid");
@@ -4862,7 +4862,7 @@ sub delete_item2
     }) if $quick;
 
     # delete from clusters
-    foreach my $t (qw(logtext2 logprop2 logsec2 logsubject2)) {
+    foreach my $t (qw(logtext2 logprop2 logsec2)) {
         $dbcm->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$jitemid");
     }
     LJ::dudata_set($dbcm, $jid, 'L', $jitemid, 0);
