@@ -152,7 +152,7 @@
                 $body .= "<td><form style='display:inline' method='post' action='styles.bml?id=$_'>";
                 $body .= LJ::html_submit('action:edit', 'Edit') . " ";
                 $body .= LJ::html_submit('action:delete', 'Delete', 
-                                         { 'onclick' => "confirm('Are you sure you want to delete style \#$_?')" });
+                                         { 'onclick' => "return confirm('Are you sure you want to delete style \#$_?')" });
                 $body .= "</form></td></tr>\n";
             }
         } else {
