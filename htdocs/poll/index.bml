@@ -59,6 +59,7 @@
         my $udbr = LJ::get_cluster_reader($u);
         $log = $udbr->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=? AND anum=?",
                                         undef, $u->{'userid'}, int($po->{'itemid'} / 256), $po->{'itemid'} % 256);
+        $log->{'ownerid'} = $log->{'journalid'};
     } else {
         $log = $dbr->selectrow_hashref("SELECT * FROM log WHERE itemid=?",
                                        undef, $po->{'itemid'});
