@@ -4,11 +4,7 @@ use LJ::Captcha qw{};
 use LJ::Blob    qw{};
 use File::Temp  qw{tempdir};
 
-our ( $MaxItems, $FakeUserId, $ClusterId, $Digits, $DigitCount, $ExpireThreshold );
-
-# Max # of items that can be in the DB. Will create no more than this number -
-# <count of items in the DB>
-$MaxItems = 500;
+our ( $FakeUserId, $ClusterId, $Digits, $DigitCount, $ExpireThreshold );
 
 # Data for code-generation
 $Digits = "abcdefghkmnpqrstuvwzyz23456789";
@@ -80,6 +76,8 @@ $maint{gen_audio_captchas} = sub {
 
     $dbr = LJ::get_db_reader() or die "Failed to get_db_reader()";
     ( $count ) = $dbr->selectrow_array( $sql );
+
+    my $MaxItems = $LJ::CAPTCHA_AUDIO_PREGEN || 500;
 
     # If there are enough, don't generate any more
     print "Current count is $count of $MaxItems...";
@@ -163,6 +161,8 @@ $maint{gen_image_captchas} = sub {
     $dbr = LJ::get_db_reader() or die "Failed to get_db_reader()";
     ( $count ) = $dbr->selectrow_array( $sql );
 
+    my $MaxItems = $LJ::CAPTCHA_IMAGE_PREGEN || 1000;
+
     # If there are enough, don't generate any more
     print "Current count is $count of $MaxItems...";
     if ( $count >= $MaxItems ) {
@@ -224,18 +224,17 @@ $maint{clean_captchas} = sub {
 
     $expiredate = time() - $ExpireThreshold;
 
-    # :FIXME: Is this correct? I don't know what '-I-' means, but lots of other
-    # scripts use it...
     print "-I- Cleaning captchas that have been used or were issued before ",
         scalar localtime($expiredate), "...\n";
 
     # Find captchas to delete
+    # FIXME: does this query suck?  (wait for live data)
     $sql = q{
         SELECT
             capid, type
         FROM captchas
         WHERE
-            used = 1
+            userid > 0
             OR ( issuetime <> 0 AND issuetime < ? )
     };
     $dbr = LJ::get_db_reader();

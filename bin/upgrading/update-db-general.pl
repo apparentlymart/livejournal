@@ -1666,7 +1666,7 @@ CREATE TABLE captchas (
     userid      INT UNSIGNED NOT NULL DEFAULT 0,
     anum        SMALLINT UNSIGNED NOT NULL,
     INDEX(type,issuetime),
-    INDEX(used),
+    INDEX(userid),
     PRIMARY KEY(capid)
 )
 EOC
