@@ -664,6 +664,10 @@
         return;
     }
 
+    # should we pregenerate something?
+    my $pgid = $FORM{pregen}+0;
+    LJ::run_hook('pregenerate_poll', $pgid, \%poll) if $pgid;
+
     # show them the startup screen
     if (LJ::did_post() && ! $FORM{'start_over'}) {
 
@@ -679,6 +683,9 @@
             return;
         }
     }
+
+    # show pregenerate options
+    $body .= LJ::run_hook('poll_pregeneration_html', $remote) unless LJ::did_post();
 
     # show start page
     $body .= make_form(\%poll, \@errors, \$error_count);

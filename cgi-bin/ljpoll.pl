@@ -523,41 +523,57 @@ sub show_poll
     my $mode = $opts->{'mode'};
     $pollid += 0;
     
-    $sth = $dbr->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=?");
-    $sth->execute($pollid);
-    my $po = $sth->fetchrow_hashref;
-    unless ($po) {
-        return "<b>[Error: poll #$pollid not found]</b>"
-    }
-    
-    if ($itemid && $po->{'itemid'} != $itemid) {
-        return "<b>[Error: this poll is not attached to this journal entry]</b>"	
-    }
+    my $po = $dbr->selectrow_hashref("SELECT * FROM poll WHERE pollid=?", undef, $pollid);
+    return "<b>[Error: poll #$pollid not found]</b>" unless $po;
+    return "<b>[Error: this poll is not attached to this journal entry]</b>"
+        if $itemid && $po->{'itemid'} != $itemid;
+
     my ($can_vote, $can_view) = find_security($po, $remote);
 
-    ### prepare our output buffer
-    my $ret;
+    # update the mode if we need to
+    $mode = 'results' unless $remote;
+    if (!$mode && $remote) {
+        my $time = $dbr->selectrow_array('SELECT datesubmit FROM pollsubmission '.
+                                         'WHERE pollid=? AND userid=?', undef, $pollid, $remote->{userid});
+        $mode = $time ? 'results' : $can_vote ? 'enter' : 'results';
+    }
+
+    ### load all the questions
+    my @qs;
+    $sth = $dbr->prepare('SELECT * FROM pollquestion WHERE pollid=?');
+    $sth->execute($pollid);
+    push @qs, $_ while $_ = $sth->fetchrow_hashref;
+    @qs = sort { $a->{sortorder} <=> $b->{sortorder} } @qs;
+
+    ### load all the items
+    my %its;
+    $sth = $dbr->prepare("SELECT pollqid, pollitid, item FROM pollitem WHERE pollid=? ORDER BY sortorder");
+    $sth->execute($pollid);
+    while (my ($qid, $itid, $item) = $sth->fetchrow_array) {
+        push @{$its{$qid}}, [ $itid, $item ];
+    }
+
+    # see if we have a hook for alternate poll contents
+    my $ret = LJ::run_hook('alternate_show_poll_html', $po, $mode, \@qs, \%its);
+    return $ret if $ret;
 
     ### view answers to a particular question in a poll
     if ($mode eq "ans") 
     {
-        unless ($can_view) {
-            return "<b>[Error: you don't have access to view these poll results]</b>";
-        }
+        return "<b>[Error: you don't have access to view these poll results]</b>"
+            unless $can_view;
 
-        $sth = $dbr->prepare("SELECT type, qtext FROM pollquestion WHERE pollid=? AND pollqid=?");
-        $sth->execute($pollid, $opts->{'qid'});
-        my $q = $sth->fetchrow_hashref;
-        unless ($q) {
-            return "<b>[Error: this poll question doesn't exist.]</b>";
+        # get the question from @qs, which we loaded earlier
+        my $q;
+        foreach (@qs) {
+            $q = $_ if $_->{pollqid} == $opts->{qid};
         }
+        return "<b>[Error: this poll question doesn't exist.]</b>"
+            unless $q;
 
+        # get the item information from %its, also loaded earlier
         my %it;
-        $sth = $dbr->prepare("SELECT pollitid, item FROM pollitem WHERE pollid=? AND pollqid=?");
-        $sth->execute($pollid, $opts->{'qid'});
-        while (my ($itid, $item) = $sth->fetchrow_array) {
-            $it{$itid} = $item;
-        }
+        $it{$_->[0]} = $_->[1] foreach (@{$its{$opts->{qid}}});
 
         LJ::Poll::clean_poll(\$q->{'qtext'});
         $ret .= $q->{'qtext'};
@@ -597,34 +613,11 @@ sub show_poll
         return $ret;
     }
 
-    ### show a poll form, or the result to it.
-
-    unless ($mode) 
-    {
-        # need to choose a mode
-        #
-        
-        if ($remote)
-        {
-            $sth = $dbr->prepare("SELECT pollid FROM pollsubmission WHERE pollid=? AND userid=?");
-            $sth->execute($pollid, $remote->{'userid'});
-            my ($cast) = $sth->fetchrow_array;
-            if ($cast) { $mode = "results"; }
-            else {
-                if ($can_vote) { $mode = "enter"; }
-                else { $mode = "results"; }
-            }
-        } else {
-            $mode = "results";
-        }
-    }
-
     # Users cannot vote unless they are logged in
-    if ($mode eq 'enter' && ! $remote) {
-        return "<?p In order to participate in a poll you must first <a href=\"$LJ::SITEROOT/login.bml?ret=1\">login</a>. p?>";
-    }
+    return "<?p In order to participate in a poll you must first <a href=\"$LJ::SITEROOT/login.bml?ret=1\">login</a>. p?>"
+        if $mode eq 'enter' && !$remote;
 
-    my $do_form = ($mode eq "enter" && $can_vote);
+    my $do_form = $mode eq 'enter' && $can_vote;
     my %preval;
 
     if ($do_form) {
@@ -644,22 +637,6 @@ sub show_poll
         $ret .= "<i>$po->{'name'}</i>";
     }
     $ret .= "<br />Open to: <b>$po->{'whovote'}</b>, results viewable to: <b>$po->{'whoview'}</b>";
-
-    ### load all the questions
-    my @qs;
-    $sth = $dbr->prepare("SELECT pollqid, type, opts, qtext, sortorder ".
-                         "FROM pollquestion WHERE pollid=?");
-    $sth->execute($pollid);
-    push @qs, $_ while $_ = $sth->fetchrow_hashref;
-    @qs = sort { $a->{sortorder} <=> $b->{sortorder} } @qs;
-    
-    ### load all the items
-    my %its;
-    $sth = $dbr->prepare("SELECT pollqid, pollitid, item FROM pollitem WHERE pollid=? ORDER BY sortorder");
-    $sth->execute($pollid);
-    while (my ($qid, $itid, $item) = $sth->fetchrow_array) {
-        push @{$its{$qid}}, [ $itid, $item ];
-    }
 
     ## go through all questions, adding to buffer to return
     foreach my $q (@qs)
