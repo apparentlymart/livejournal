@@ -1472,7 +1472,7 @@ CREATE TABLE counter (
   journalid  INT UNSIGNED NOT NULL,
   area       CHAR(1) NOT NULL,
   PRIMARY KEY (journalid, area),
-  max        MEDIUMINT UNSIGNED NOT NULL,
+  max        MEDIUMINT UNSIGNED NOT NULL
 )
 EOC
 
