@@ -11,6 +11,8 @@
 
 /accountstatus.bml.journalstatus.select.suspended=Suspended
 
+/accountstatus.bml.title=Account Status
+
 /allpics.bml.current=Current Pictures
 
 /allpics.bml.default=<u>Default</u>

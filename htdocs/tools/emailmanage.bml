@@ -1,5 +1,5 @@
 <?page
-title=>Email Management
+title=><?_ml .title _ml?>
 body<=
 
 <?_code

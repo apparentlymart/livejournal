@@ -1,5 +1,5 @@
 <?page
-title=>Account Status
+title=><?_ml .title _ml?>
 body<=
 <?_code
 {
