@@ -3,7 +3,7 @@
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
-foreach (@LJ::LANGS) {
+foreach (@LJ::LANGS, @LJ::LANGS_IN_PROGRESS) {
     BML::register_isocode(substr($_, 0, 2), $_);
     BML::register_language($_);
 }
