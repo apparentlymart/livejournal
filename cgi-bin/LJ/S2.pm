@@ -1021,10 +1021,20 @@ sub Page
     my ($u, $opts) = @_;
     my $styleid = $u->{'_s2styleid'} + 0;
     my $base_url = $u->{'_journalbase'};
+
+    my $get = $opts->{'getargs'};
+    my %args;
+    foreach my $k (keys %$get) {
+        my $v = $get->{$k};
+        next unless $k =~ s/^\.//;
+        $args{$k} = $v;
+    }
+
     my $p = {
         '_type' => 'Page',
         '_u' => $u,
         'view' => '',
+        'args' => \%args,
         'journal' => User($u),
         'journal_type' => $u->{'journaltype'},
         'base_url' => $base_url,

@@ -310,25 +310,28 @@ class Page
 "Base template for all views"
 {
     var readonly string view "The view type (recent, friends, archive, month, day, entry)";
+    var readonly string{} args
+    "Arguments from the URL's query string (after the question mark). S2 code can only access arguments starting with a period, and this period is not included in the hash key.";
+
     var User journal "User whose journal is being viewed";
     var readonly string journal_type "Journal type, ex: 'P' (personal), 'C' (community), etc.";
     var readonly string base_url "The base URL of the journal being viewed.";
     var readonly string{} view_url
-    "Links to top-level views where id equals the name of the view being linked to. 
+    "Links to top-level views where id equals the name of the view being linked to.
     (if one of views == \$.view, already looking at that view)";
 
     var readonly string[] views_order "An array of view identifiers which can be used to order the views hash.";
-    var readonly string head_content 
-    "Extra tags supplied by the server to go in the <head> section of the output HTML document. Layouts 
+    var readonly string head_content
+    "Extra tags supplied by the server to go in the <head> section of the output HTML document. Layouts
     should include this in the head section if they are writing HTML.";
- 
-    var readonly string stylesheet_url 
+
+    var readonly string stylesheet_url
     "The URL to use in a link element for the server-supported external stylesheet to put stuff in it)";
-    
-    var readonly string global_title 
+
+    var readonly string global_title
     "A title selected by the user for their whole journal.";
 
-    var readonly string global_subtitle 
+    var readonly string global_subtitle
     "A sub-title selected by the user for their whole journal.";
 
     function print
@@ -338,7 +341,7 @@ class Page
 
     function view_title : string
     "Return a title for this particular page, such as \"Friends' Recent Entries\" for the friends view,
-    or a date for the day view. Should be overridden in i18n layers. Ideally, layout layers should never touch
+    or a date for the day view. Should be overridden in i18n layers. Ideally, layout layers should never override
     this.  See [method[Page.title()]].";
 
     function title : string 
