@@ -20,4 +20,5 @@ general /editinfo.bml.topicdir.about
 
 general /community/create.bml.*
 
+general /update.bml.login.success
 

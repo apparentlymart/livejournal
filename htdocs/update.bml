@@ -92,20 +92,14 @@ if ($remote && ! LJ::get_cap($remote, "can_post")) {
      }
      LJ::do_request($dbs, \%FORM, \%res, $flags);
      
-     $$body .= "<?h1 $ML{'.loggingin'} h1?>\n";
-     if ($res{'success'} eq "OK")
-     {
-         my $message = "";
+     my $message = "";
+     if ($res{'success'} eq "OK") {
          if ($res{'message'}) {
-             $res{'message'} = LJ::eall($res{'message'});
-             $res{'message'} =~ s!(&quot;|&#39;)?(https?://\S+[a-zA-Z0-9_/&=\-])!$1 ? $& : "<a href=\"$2\">$2</a>"!eg;
-
-             $message = "$ML{'.servermsg'} <ul><li><b>$res{'message'}</b></li></ul>";
+             $message = LJ::eall($res{'message'});
+             $message =~ s!(&quot;|&\#39;)?(https?://\S+[a-zA-Z0-9_/&=\-])!$1 ? $& : "<a href=\"$2\">$2</a>"!eg;
          }
-         $$body .= "<?p ".BML::ml(".login.success", {'name' => "<?_eh $res{'name'} _eh?>"}) ." $message p?>";
-     }
-     else
-     {
+     } else {
+         $$body .= "<?h1 $ML{'.loggingin'} h1?>\n";
          $$body .= "<?p $ML{'.error.login'} <UL><LI><B><?_eh $res{'errmsg'} _eh?></B></UL> p?>";
          return;
      }
@@ -144,8 +138,7 @@ if ($remote && ! LJ::get_cap($remote, "can_post")) {
      LJ::do_request($dbs, \%FORM, \%res, $flags);
      
      $$body .= "<?h1 $ML{'.updating'} h1?>\n";
-     if ($res{'success'} eq "OK")
-     {
+     if ($res{'success'} eq "OK") {
          my $uri = "/users/$FORM{'user'}/";
          if ($FORM{'usejournal'}) {
              my $quj = $dbr->quote($FORM{'usejournal'});
@@ -159,9 +152,12 @@ if ($remote && ! LJ::get_cap($remote, "can_post")) {
              }	 
          }
          $$body .= "<?p ".BML::ml(".update.success",{'uri' => $uri}) ." p?>";
-     }
-     else
-     {
+
+         if ($message) {
+             $$body .= "<?h1 $ML{'.loggingin'} h1?>\n";
+             $$body .= "<?p $ML{'.servermsg'} p?><div style='margin-left: 40px'><b>$message</b></div>";
+         }
+     } else {
          $$body .= "<?p $ML{'.error.update'} <UL><LI><B><?_eh $res{'errmsg'} _eh?></B></UL> p?>";
          return;
      }

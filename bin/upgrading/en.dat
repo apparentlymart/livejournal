@@ -1935,8 +1935,6 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /update.bml.loggingin=Logging in to server...
 
-/update.bml.login.success=Login successful.  Hello, [[name]]!
-
 /update.bml.noneother=None, or other:
 
 /update.bml.note=<b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.
