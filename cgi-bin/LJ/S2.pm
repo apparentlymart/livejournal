@@ -602,6 +602,8 @@ sub cleanup_layers {
 
 sub clone_layer
 {
+    die "LJ::S2::clone_layer() has not been ported to use s2compiled2, but this function is not currently in use anywhere; if you use this function, please update it to use s2compiled2.\n";
+
     my $id = shift;
     return 0 unless $id;
 
@@ -779,6 +781,20 @@ sub delete_layer
     foreach my $t (qw(s2layers s2compiled s2info s2source s2checker)) {
         $dbh->do("DELETE FROM $t WHERE s2lid=?", undef, $lid);
     }
+
+    # make sure we have a user object if possible
+    unless ($u) {
+        my $us = LJ::S2::get_layer_owners($lid);
+        $u = $us->{$lid} if $us->{$lid};
+    }
+
+    # delete s2compiled2 if this is a layer owned by someone other than system
+    if ($u && $u->{user} ne 'system') {
+        $u->do("DELETE FROM s2compiled2 WHERE userid = ? AND s2lid = ?",
+               undef, $u->{userid}, $lid);
+    }
+
+    # now clear memcache of the compiled data
     LJ::MemCache::delete([ $lid, "s2c:$lid" ]);
 
     # now delete the mappings for this particular layer
