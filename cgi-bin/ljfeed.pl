@@ -285,7 +285,7 @@ sub create_view_rss
         }
         # support 'podcasting' enclosures
         $ret .= LJ::run_hook( "pp_rss_enclosure",
-                undef, $u->{userid}, ( $it->{ppid} >> 8 ), 'rss' ) if $it->{ppid};
+                { userid => $u->{userid}, ppid => $it->{ppid} }) if $it->{ppid};
         # TODO: add author field with posterid's email address, respect communities
         $ret .= "  <lj:music>$it->{music}</lj:music>\n" if $it->{music};
         $ret .= "  <lj:mood>$it->{mood}</lj:mood>\n" if $it->{mood};
