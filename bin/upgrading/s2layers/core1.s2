@@ -396,9 +396,6 @@ class YearPage extends Page
     var int year "The year being viewed";
     var YearYear[] years "Information for linking to other years";
     var YearMonth[] months "12 months objects, even if no entries are in that month.";
-    var int[] weekdays 
-    "Integers representing the days of the week. This will start on Monday (2) or Sunday (1) depending on 
-     the property setting for start-of-week and go to Sunday (1) or Saturday (7)";
 
     function print_month(YearMonth m)
     "Print the calendar cell for the given month";
@@ -486,6 +483,9 @@ function builtin set_content_type(string text)
 
 function builtin get_plural_phrase(int n, string prop) : string
 "Picks the phrase with the proper plural form from those in the property \$prop, passing \$n to [func[lang_map_plural(int)]] to get the proper form for the current language, and then substituting the # character with \$n.  Also, returned string is HTML-escaped.";
+
+function builtin weekdays() : int[] 
+"Integers representing the days of the week. This will start on Monday (2) or Sunday (1) depending on the property setting for start-of-week and go to Sunday (1) or Saturday (7)";
 
 ##[ properties ]
 
@@ -1120,7 +1120,7 @@ function YearPage::print_month(YearMonth m) {
        <tr><th colspan="7" style="text-align: center; border: 1px solid;">""";
     print $m->month_format();
     """</th></tr>\n""";
-    foreach var int d ($.weekdays) {
+    foreach var int d (weekdays()) {
         "<th>"+$*lang_dayname_short[$d]+"</th>\n";
     }
     "</tr>\n";

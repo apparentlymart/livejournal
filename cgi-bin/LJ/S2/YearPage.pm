@@ -11,7 +11,6 @@ sub YearPage
     my $p = Page($u, $opts->{'vhost'});
     $p->{'_type'} = "YearPage";
     $p->{'view'} = "archive";
-    $p->{'weekdays'} = [ 1..7 ];
 
     my $dbs = LJ::get_dbs();
     my $dbh = $dbs->{'dbh'};

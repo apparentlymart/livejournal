@@ -416,7 +416,7 @@ function YearPage::print_month(YearMonth m)
     "<tr><th class='MonthHeader' colspan='7'>";
     "<a href='$m.url'>"; print $m->month_format(); "</a></th></tr>\n";
     "<tr>";
-    foreach var int d ($.weekdays)
+    foreach var int d (weekdays())
     {
         "<th>"+$*lang_dayname_short[$d]+ "</th>\n";
     }

@@ -1130,6 +1130,12 @@ sub viewer_is_owner
     return $remote->{'userid'} == $LJ::S2::CURR_PAGE->{'_u'}->{'userid'};
 }
 
+sub weekdays
+{
+    my ($ctx) = @_;
+    return [ 1..7 ];  # FIXME: make this conditionally monday first: [ 2..7, 1 ]
+}
+
 sub Date__day_of_week
 {
     my ($ctx, $dt) = @_;

@@ -259,7 +259,7 @@ function YearPage::print_month(YearMonth m)
 
     # Weekdays
     "<tr align='center'>";
-    foreach var int d ($.weekdays)
+    foreach var int d (weekdays())
     {
         "<td>" + $*lang_dayname_short[$d] + "</td>\n";
     }

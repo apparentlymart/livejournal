@@ -408,7 +408,7 @@ function YearPage::print_month (YearMonth m)
 <table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
 <tr align="center">
 """;
-    foreach var int d ($.weekdays) {
+    foreach var int d (weekdays()) {
         "<td>"+$*lang_dayname_short[$d]+"</td>\n";
     }
     

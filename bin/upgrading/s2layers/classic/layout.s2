@@ -416,7 +416,7 @@ function YearPage::print_month(YearMonth m)
 
     # Weekdays Header
     "<tr align='center'>\n";
-    foreach var int d ($.weekdays) {
+    foreach var int d (weekdays()) {
         "<th class='daysheader'>"+$*lang_dayname_short[$d]+"</th>\n";
     }
     "</tr>\n";

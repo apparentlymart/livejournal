@@ -340,7 +340,7 @@ function YearPage::print_month(YearMonth m)
     "<font color='$*headerbar_fgcolor'><b>"; print $m->month_format(); "</b></font></td></tr>";
     # Weekdays
     "<tr align='center' bgcolor='$*accent_bgcolor'>";
-    foreach var int d ($.weekdays) {
+    foreach var int d (weekdays()) {
         "<td><font color='$*accent_fgcolor'>"+$*lang_dayname_short[$d]+"</font></td>\n";
     }
     "</tr>";
