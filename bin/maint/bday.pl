@@ -6,8 +6,7 @@ use vars qw(%maint);
 
 $maint{'bdaymail'} = sub
 {
-    my $dbs = LJ::get_dbs();
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my $sth;
     
     # get everybody whose birthday is today.

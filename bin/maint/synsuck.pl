@@ -2,7 +2,7 @@
 #
 
 use strict;
-use vars qw($dbh %maint);
+use vars qw(%maint);
 use lib "$ENV{'LJHOME'}/cgi-bin";  # extra XML::Encoding files in cgi-bin/XML/*
 use LWP::UserAgent;
 use XML::RSS;

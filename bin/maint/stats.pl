@@ -2,7 +2,7 @@
 #
 
 use strict;
-use vars qw($dbh %maint);
+use vars qw(%maint);
 
 $maint{'genstats'} = sub
 {

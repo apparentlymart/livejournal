@@ -5,8 +5,8 @@ use GD::Graph::bars;
 
 $maint{'genstatspics'} = sub 
 {
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
+    my $dbh = LJ::get_db_writer();
+    my $sth;
 
     ### get posts by day data from summary table
     print "-I- new accounts by day.\n";
