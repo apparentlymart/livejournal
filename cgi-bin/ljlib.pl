@@ -516,7 +516,8 @@ sub auth_fields
 	$ret .= BMLUtil::escapeall($user) unless ($form->{'altlogin'});
 	$ret .= "'></td></tr>\n";
 	$ret .= "<tr><td>Password:</td><td align='left'>\n";
-	$ret .= "<input type='password' name='password' size='15' maxlength='30'>";
+	my $epass = LJ::ehtml($form->{'password'});
+	$ret .= "<input type='password' name='password' size='15' maxlength='30' value='$epass'>";
 	$ret .= "</td></tr>\n";
     }
     return $ret;
