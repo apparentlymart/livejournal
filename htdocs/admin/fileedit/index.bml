@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -147,8 +147,8 @@
 
  return "unknown mode";
 
-_CODE=)(=_C <LJDEP>
+_code?><?_c <LJDEP>
 lib: cgi-bin/ljlib.pl
 form: htdocs/admin/fileedit/index.bml
 post: htdocs/admin/fileedit/index.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
