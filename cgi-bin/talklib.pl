@@ -1579,22 +1579,33 @@ sub post_comment {
     # check for duplicate entry (double submission)
     # Note:  we don't do it inside a locked section like ljprotocol.pl's postevent,
     # so it's not perfect, but it works pretty well.
-    my $md5_body = Digest::MD5::md5_hex($comment->{body});
     my $posterid = $comment->{u} ? $comment->{u}{userid} : 0;
-    my $dbcm = LJ::get_cluster_master($journalu);
+    my $jtalkid;
 
-    my $jtalkid = $dbcm->selectrow_array(
-        "SELECT t.jtalkid FROM talk2 t, talktext2 tt WHERE ".
-        "t.journalid=? AND tt.journalid=? ".
-        "AND t.jtalkid=tt.jtalkid ".
-        "AND t.nodetype='L' AND t.nodeid=? ".
-        "AND t.datepost > DATE_SUB(NOW(), INTERVAL 10 MINUTE) ".
-        "AND t.posterid=? AND tt.subject=? AND MD5(tt.body)=? ".
-        "AND t.parenttalkid=?", undef,
-        $journalu->{userid}, $journalu->{userid}, $item->{itemid}, $posterid,
-        $comment->{subject}, $md5_body, $parent->{talkid}
-    );
-    $comment->{talkid} = $jtalkid;
+    # base64 format used with memcache.
+    my $md5_b64; my $memkey;
+    if (@LJ::MEMCACHE_SERVERS) {
+        $md5_b64 = Digest::MD5::md5_base64(
+            join(":", ($comment->{body}, $comment->{subject},
+                       $comment->{subjecticon}, $comment->{preformat},
+                       $comment->{picture_keyword})));
+        $memkey = [$journalu->{userid}, "tdup:$journalu->{userid}:$item->{itemid}-$posterid-$md5_b64" ];
+        $jtalkid = LJ::MemCache::get($memkey);
+    } else {
+        my $dbcm = LJ::get_cluster_master($journalu);
+        my $md5_body = Digest::MD5::md5_hex($comment->{body});
+        $jtalkid = $dbcm->selectrow_array(
+                          "SELECT t.jtalkid FROM talk2 t, talktext2 tt WHERE ".
+                          "t.journalid=? AND tt.journalid=t.journalid ".
+                          "AND t.jtalkid=tt.jtalkid ".
+                          "AND t.nodetype='L' AND t.nodeid=? ".
+                          "AND t.datepost > DATE_SUB(NOW(), INTERVAL 10 MINUTE) ".
+                          "AND t.posterid=? AND tt.subject=? AND MD5(tt.body)=? ".
+                          "AND t.parenttalkid=?", undef,
+                          $journalu->{userid}, $item->{itemid}, $posterid,
+                          $comment->{subject}, $md5_body, $parent->{talkid}
+                          );
+    }
 
     # they don't have a duplicate...
     unless ($jtalkid) {
@@ -1608,13 +1619,20 @@ sub post_comment {
         $jtalkid = enter_comment($journalu, $parent, $item, $comment, $errref);
         return 0 unless $jtalkid;
 
+        # save its identifying characteristics to protect against duplicates.
+        LJ::MemCache::set($memkey, $jtalkid+0, time()+60*10);
+
         # send some emails
         mail_comments($entryu, $journalu, $parent, $comment, $item);
 
         # log the event
-        LJ::event_register($dbcm, "R", $journalu->{'userid'}, $ditemid);
+        # this function doesn't do anything.
+        # LJ::event_register($dbcm, "R", $journalu->{'userid'}, $ditemid);
         # FUTURE: log events type 'T' (thread) up to root
     }
+
+    # the caller wants to know the comment's talkid.
+    $comment->{talkid} = $jtalkid;
 
     return 1;
 }
