@@ -5139,7 +5139,7 @@ sub make_journal
     if ($opts->{'vhost'} eq "customview" && ! LJ::get_cap($u, "styles")) {
         return $notice->("This user's account type is not permitted to create and embed styles.");
     }
-    if ($opts->{'vhost'} eq "community" && $u->{'journaltype'} ne "C") {
+    if ($opts->{'vhost'} eq "community" && $u->{'journaltype'} !~ /[CR]/) {
         $opts->{'badargs'} = 1; # Output a generic 'bad URL' message if available
         return "<h1>Notice</h1><p>This account isn't a community journal.</p>";
     }
