@@ -2,26 +2,26 @@
 
         my $req = shift;
         my $r = $req->{'r'};
+
+        my $remote = LJ::get_remote();
+        return LJ::bad_input("You must be logged in to use this tool.")
+            unless $remote;
+
+        my $authas = $GET{'authas'} || $remote->{'user'};
+        my $u = LJ::get_authas_user($authas);
+        return LJ::bad_input("You could not be authenticated as the specified user.")
+            unless $u;
           
         my @errors = ();
-        my $user = LJ::canonical_username($FORM{'user'});
-        my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
         
         my $dbs = LJ::get_dbs();
         my $dbh = $dbs->{'dbh'};
         my $dbr = $dbs->{'reader'};
 
-        my $quser = $dbr->quote($user);
+        my $quser = $dbr->quote($u->{'user'});
         
-        my $u = LJ::load_user($dbs, $user);
-        unless ($u) { push @errors, "Invalid username"; }
-
         my $year = $FORM{'year'}+0;
         my $month = $FORM{'month'}+0;
-
-        if (scalar(@errors)==0 && ! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) { 
-            push @errors, "Incorrect password."; 
-        }
 
         my $dbcs = $dbs;
         $dbcs = LJ::get_cluster_set($u) if $u->{'clusterid'};
