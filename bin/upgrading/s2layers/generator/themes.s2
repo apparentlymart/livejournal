@@ -90,4 +90,224 @@ set stronger_text = "#ceecc";
 set weak_back   = "#008888";
 set weak_text   = "#002222";
 
+#NEWLAYER: generator/darkgreens
+layerinfo type = "theme";
+layerinfo name = "Dark Greens";
+layerinfo redist_uniq = "generator/darkgreens";
+layerinfo author_name = "Ryan Fitzpatrick";
 
+set entry_back = "#020202";
+set entry_text = "#fbfbfb";
+set page_link = "#9aff8d";
+set page_vlink = "#e3ee39";
+set page_alink = "#ff0220";
+set page_back = "#117218";
+set stronger_back = "#38e616";
+set stronger_text = "#020100";
+set weak_back = "#020100";
+set weak_text = "#000000";
+
+#NEWLAYER: generator/satin
+layerinfo type = theme;
+layerinfo name = "Satin Handshake";
+layerinfo redist_uniq = "generator/satin";
+
+set entry_back = "#d06464";
+set entry_text = "#000000";
+set page_link = "#ffffff";
+set page_vlink = "#6f2222";
+set page_alink = "#333333";
+set page_back = "#480c0c";
+set stronger_back = "#9d0404";
+set stronger_text = "#ffffff";
+set weak_text = "#ffffff";
+
+#NEWLAYER: generator/sunset
+layerinfo type = theme;
+layerinfo name = "Sunset";
+layerinfo redist_uniq = "generator/sunset";
+
+set entry_back = "#ff7301";
+set entry_text = "#fdb54f";
+set page_link = "#ffe65e";
+set page_vlink = "#ff9879";
+set page_alink = "#ffb866";
+set page_back = "#070494";
+set stronger_back = "#f8a402";
+set stronger_text = "#ffd510";
+set weak_back = "#f51700";
+set weak_text = "#f77603";
+
+#NEWLAYER: generator/redbliss
+layerinfo type = theme;
+layerinfo name = "Red Bliss";
+layerinfo redist_uniq = "generator/redbliss"; 
+
+set entry_back = "#ffcccc";
+set entry_text = "#000000";
+set page_link = "#ffffff";
+set page_vlink = "#ffcccc";
+set page_alink = "#00ffff";
+set page_back = "#ff3300";
+set stronger_back = "#cc3333";
+set stronger_text = "#ffffff";
+set weak_back = "#cc3333";
+set weak_text = "#fafafa";
+
+#NEWLAYER: generator/pastelneons
+layerinfo type = theme;
+layerinfo name = "Pastel Neons";
+layerinfo redist_uniq = "generator/pastelneons";
+
+set entry_back = "#ffffff";
+set entry_text = "#1a6b6a";
+set page_link = "#330f42";
+set page_vlink = "#033339";
+set page_alink = "#9923ca";
+set page_back = "#00ffff";
+set stronger_back = "#60d2cb";
+set stronger_text = "#000000";
+set weak_back = "#d385f3";
+set weak_text = "#000000";
+
+#NEWLAYER: generator/classdesk
+layerinfo type = "theme";
+layerinfo name = "Classic Desktop";
+layerinfo redist_uniq = "generator/classdesk";
+
+set page_link = "#ff7b05";
+set page_vlink = "#ce4900";
+set page_alink = "#ff9e2b";
+set page_back = "#007782";
+set stronger_back = "#00545c";
+set stronger_text = "#ffffff";
+set weak_back = "#ffeddd";
+set weak_text = "#ffffff";
+
+#NEWLAYER: generator/everwhite
+layerinfo type = theme;
+layerinfo name = "Everwhite";
+layerinfo redist_uniq = "generator/everwhite";
+
+set entry_back = "#ffffff";
+set entry_text = "#000000";
+set page_link = "#ff0000";
+set page_vlink = "#ff0000";
+set page_alink = "#ffffff";
+set page_back = "#ffffff";
+set stronger_back = "#ffffff";
+set stronger_text = "#ffffff";
+set weak_back = "#ffffff";
+set weak_text = "#ffffff";
+
+#NEWLAYER: generator/everblue
+layerinfo type = theme;
+layerinfo name = "Everblue with Grey";
+layerinfo redist_uniq = "generator/everblue";
+
+set entry_back = "#ffffff";
+set entry_text = "#000000";
+set page_link = "#0000ff";
+set page_vlink = "#060667";
+set page_alink = "#ffffff";
+set page_back = "#0f0c6d";
+set stronger_back = "#000000";
+set stronger_text = "#ffffff";
+set weak_back = "#aaaaaa";
+set weak_text = "#000000";
+
+#NEWLAYER: generator/purplesky
+layerinfo type = theme;
+layerinfo name = "Purple Sky";
+layerinfo redist_uniq = "generator/purplesky";
+
+set entry_back = "#24d8df";
+set entry_text = "#0424e4";
+set page_link = "#a917c4";
+set page_vlink = "#9911e8";
+set page_alink = "#ea09ff";
+set page_back = "#99e3e2";
+set stronger_back = "#8802fa";
+set stronger_text = "#ffffff";
+set weak_back = "#89e5e9";
+set weak_text = "#000000";
+
+#NEWLAYER: generator/bruise
+layerinfo type = theme;
+layerinfo name = "Bruise";
+layerinfo redist_uniq = "generator/bruise";
+
+set entry_back = "#bcbcbc";
+set entry_text = "#000000";
+set page_link = "#0000ff";
+set page_vlink = "#0000ff";
+set page_alink = "#0000ff";
+set page_back = "#000000";
+set stronger_back = "#1114a0";
+set stronger_text = "#ffffff";
+set weak_back = "#21c2f1";
+set weak_text = "#000000";
+
+#NEWLAYER: generator/elegant
+layerinfo type = theme;
+layerinfo name = "Elegant";
+layerinfo redist_uniq = "generator/elegant";
+
+set entry_back = "#ffffff";
+set entry_text = "#000000";
+set page_link = "#e91822";
+set page_vlink = "#bf1418";
+set page_alink = "#f71e28";
+set page_back = "#ffffff";
+set stronger_back = "#777777";
+set stronger_text = "#000000";
+set weak_back = "#e6e6e6";
+set weak_text = "#000000";
+
+#NEWLAYER: generator/bananapeel
+layerinfo type = theme;
+layerinfo name = "Banana Peel";
+layerinfo redist_uniq = "generator/bananapeel";
+
+set entry_back = "#f2f688";
+set entry_text = "#ee2914";
+set page_link = "#db9129";
+set page_vlink = "#c58f1b";
+set page_alink = "#ffc518";
+set page_back = "#ffffff";
+set stronger_back = "#f0f905";
+set stronger_text = "#000000";
+set weak_back = "#dcdf02";
+set weak_text = "#000000";
+
+#NEWLAYER: generator/melodrama
+layerinfo type = theme;
+layerinfo name = "Deep MeloDrama";
+layerinfo redist_uniq = "generator/melodrama";
+
+set entry_back = "#719cff";
+set entry_text = "#9348a1";
+set page_link = "#f5d3ff";
+set page_vlink = "#e2ffe3";
+set page_alink = "#e2ffe3";
+set page_back = "#872d89";
+set stronger_back = "#3794b3";
+set stronger_text = "#a4b8ff";
+set weak_back = "#65b2c1";
+set weak_text = "#98bac5";
+
+#NEWLAYER: generator/iceburg
+layerinfo type = theme;
+layerinfo name = "Iceburg";
+layerinfo redist_uniq = "generator/iceburg";
+
+set entry_back = "#ffffff";
+set entry_text = "#000000";
+set page_link = "#0000ff";
+set page_vlink = "#0000ff";
+set page_alink = "#387bf7";
+set page_back = "#c6c2f5";
+set stronger_back = "#7c6ccd";
+set stronger_text = "#ffffff";
+set weak_back = "#eef0fd";
+set weak_text = "#000000";
