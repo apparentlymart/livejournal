@@ -85,19 +85,13 @@ sub xmlrpc_method {
 
 package LJ::XMLRPC;
 
-sub checkfriends     { LJ::Protocol::xmlrpc_method("checkfriends",     @_); }
-sub consolecommand   { LJ::Protocol::xmlrpc_method("consolecommand",   @_); }
-sub editevent        { LJ::Protocol::xmlrpc_method("editevent",        @_); }
-sub editfriendgroups { LJ::Protocol::xmlrpc_method("editfriendgroups", @_); }
-sub editfriends      { LJ::Protocol::xmlrpc_method("editfriends",      @_); }
-sub friendof         { LJ::Protocol::xmlrpc_method("friendof",         @_); }
-sub getdaycounts     { LJ::Protocol::xmlrpc_method("getdaycounts",     @_); }
-sub getevents        { LJ::Protocol::xmlrpc_method("getevents",        @_); }
-sub getfriendgroups  { LJ::Protocol::xmlrpc_method("getfriendgroups",  @_); }
-sub getfriends       { LJ::Protocol::xmlrpc_method("getfriends",       @_); }
-sub login            { LJ::Protocol::xmlrpc_method("login",            @_); }
-sub postevent        { LJ::Protocol::xmlrpc_method("postevent",        @_); }
-sub syncitems        { LJ::Protocol::xmlrpc_method("syncitems",        @_); }
+use vars qw($AUTOLOAD);
+
+sub AUTOLOAD {
+    my $method = $AUTOLOAD;
+    $method =~ s/^.*:://;
+    LJ::Protocol::xmlrpc_method($method, @_);
+}
 
 1;
 
