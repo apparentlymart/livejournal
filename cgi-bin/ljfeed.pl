@@ -447,7 +447,8 @@ sub create_view_foaf {
     my $intu = LJ::get_interests($u);
     foreach my $int (@$intu) {
         LJ::text_out(\$int->[1]); # 1==interest
-        $ret .= "    <foaf:interest dc:title=\"". LJ::exml($int->[1]) . "\" />\n";
+        $ret .= "    <foaf:interest dc:title=\"". LJ::exml($int->[1]) . "\" " .
+                "rdf:resource=\"$LJ::SITEROOT/interests.bml?int=" . LJ::eurl($int->[1]) . "\" />\n";
     }
 
     # check if the user has a "FOAF-knows" group
