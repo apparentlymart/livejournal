@@ -472,7 +472,7 @@ sub mail_response_to_user
 	$body .= "this request from being closed in 7 days.  Click here:\n";
 	$body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?touch;$spid;$sp->{'authcode'}", $email);
     }
-
+    
     my $miniauth = mini_auth($sp);
     $body .= "\n\nTo read all the comments or add more, go here:\n";
     $body .= LJ::make_text_link("$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth", $email);
@@ -484,9 +484,10 @@ sub mail_response_to_user
 	my $miniauth = mini_auth($sp);
 	$fromemail = $sp->{_cat}->{'replyaddress'};
 	# insert mini-auth stuff:
-	$fromemail =~ s/\@/+${spid}z$miniauth\@/;
+	my $rep = "+${spid}z$miniauth\@";
+	$fromemail =~ s/\@/$rep/;
     }
-
+    
     LJ::send_mail({ 
 	'to' => $email,
 	'from' => $fromemail,
@@ -494,6 +495,10 @@ sub mail_response_to_user
 	'subject' => "Re: $sp->{'subject'}",
 	'body' => $body  
 	});
+
+    if ($type eq "answer") {
+	$dbh->do("UPDATE support SET timelasthelp=UNIX_TIMESTAMP() WHERE spid=$spid");
+    }
 }
 
 sub mini_auth
