@@ -74,29 +74,48 @@ sub html_datetime_decode
 # <WCMFUNC>
 # name: html_select
 # class: component
-# des:
+# des: Creates a drop-down box or listbox HTML form element (the <select> tag).
 # info:
-# args:
-# des-:
-# returns:
+# args: opts
+# des-opts: A hashref of options. Special options are:
+#           raw: inserts value unescaped into select tag;
+#           noescape: won't escape key values if set to 1
+#           disabled: disables the element;
+#           multiple: creates a drop-down if 0, a multi-select listbox if 1;
+#           selected: if multiple, an arrayref of selected values; otherwise, a scalar equalling the selected value;
+#           All other options will be treated as html attribute/value pairs
+# returns: the generated HTML.
 # </WCMFUNC>
 sub html_select
 {
     my $opts = shift;
     my @items = @_;
-    my $disabled = $opts->{'disabled'} ? " disabled='disabled'" : "";
     my $ehtml = $opts->{'noescape'} ? 0 : 1;
     my $ret;
     $ret .= "<select";
-    if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
-    foreach (grep { ! /^(raw|disabled|selected|noescape)$/ } keys %$opts) {
+    $ret .= " $opts->{'raw'}" if $opts->{'raw'};
+    $ret .= " disabled='disabled'" if $opts->{'disabled'};
+    $ret .= " multiple='multiple'" if $opts->{'multiple'};
+    foreach (grep { ! /^(raw|disabled|selected|noescape|multiple)$/ } keys %$opts) {
         $ret .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\"";
     }
-    $ret .= "$disabled>";
+    $ret .= ">";
+
+    # build hashref from arrayref if multiple selected
+    my $selref = { map { $_, 1 } @{$opts->{'selected'}} }
+        if $opts->{'multiple'} && ref $opts->{'selected'} eq 'ARRAY';
+
     my $did_sel = 0;
     while (my ($value, $text) = splice(@items, 0, 2)) {
         my $sel = "";
-        if ($value eq $opts->{'selected'} && ! $did_sel++) { $sel = " selected='selected'"; }
+
+        # multiple-mode or single-mode?
+        if (ref $selref eq 'HASH' && $selref->{$value} ||
+            $opts->{'selected'} eq $value && !$did_sel++) {
+
+            $sel = " selected='selected'";
+        }
+
         $ret .= "<option value=\"" . ($ehtml ? ehtml($value) : $value) . "\"$sel>" .
                  ($ehtml ? ehtml($text) : $text) . "</option>";
     }
@@ -262,16 +281,19 @@ sub html_submit
 {
     my ($name, $val, $opts) = @_;
     my ($eopts, $disabled, $raw);
+    my $type = 'submit';
+
     if ($opts && ref $opts eq 'HASH') {
         $disabled = " disabled='disabled'" if $opts->{'disabled'};
         $raw = " $opts->{'raw'}" if $opts->{'raw'};
+        $type = 'reset' if $opts->{'type'} eq 'reset';
 
         my $ehtml = $opts->{'noescape'} ? 0 : 1;
-        foreach (grep { ! /^(raw|disabled|noescape)$/ } keys %$opts) {
+        foreach (grep { ! /^(raw|disabled|noescape|type)$/ } keys %$opts) {
             $eopts .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\""
         }
     }
-    my $ret = "<input type='submit'";
+    my $ret = "<input type='$type'";
     # allow override of these in 'raw'
     $ret .= " name=\"" . ($ehtml ? ehtml($name) : $name) . "\"" if $name;
     $ret .= " value=\"" . ($ehtml ? ehtml($val) : $val) . "\"" if defined $val;
