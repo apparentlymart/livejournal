@@ -443,6 +443,10 @@
 
 /create.bml.age.check.yes=Yes, I am under 13 years old.
 
+/create.bml.age.check2.question=Are you over 13 years of age?
+
+/create.bml.age.check2.yes=Yes, I am over 13 years old.
+
 /create.bml.age.head=Age
 
 /create.bml.aolnotice.head=Notice to AOL Users
@@ -471,7 +475,7 @@
 
 /create.bml.email.text=For verification and security purposes, we need your email address.  It will never ever, under any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a href="/legal/privacy.bml" TARGET="privacy">privacy policy</a> for more information.
 
-/create.bml.error.coppa.under13=Sorry, due to COPPA restrictions, you cannot use the LiveJournal service until you're 13 years old.  Please come back on your 13th birthday.
+/create.bml.error.coppa.under13=Sorry, due to COPPA restrictions, you cannot use the service until you're 13 years old.  Please come back on your 13th birthday.
 
 /create.bml.error.email.blank=You must provide your email address.
 

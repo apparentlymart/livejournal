@@ -183,7 +183,8 @@ body<=
          $errors{'password'} = "$ML{'.error.password.asciionly'}";
      }
 
-     if ($FORM{'under13'}) {
+     if ($FORM{'under13'} ||
+         $LJ::COPPA_CHECK eq "over" && ! $FORM{'over13'}) {
          return "$ML{'.error.coppa.under13'}";
      }
 
@@ -359,7 +360,11 @@ body<=
      {
          $ret .= "<?h2 $ML{'.aolnotice.head'} h2?><?p ".BML::ml(".aolnotice.text", {'sitename' => $LJ::SITENAME}) ." p?>";
 
-         $ret .= "<?h2 $ML{'.age.head'} h2?><?p $ML{'.age.check.question'} <blockquote><input type=\"checkbox\" value=\"1\" name=\"under13\" /> $ML{'.age.check.yes'}</blockquote>  p?>";
+         if ($LJ::COPPA_CHECK eq "over") {
+             $ret .= "<?h2 $ML{'.age.head'} h2?><?p $ML{'.age.check2.question'} <blockquote><input type=\"checkbox\" value=\"1\" name=\"over13\" /> $ML{'.age.check2.yes'}</blockquote>  p?>";
+         } else {
+             $ret .= "<?h2 $ML{'.age.head'} h2?><?p $ML{'.age.check.question'} <blockquote><input type=\"checkbox\" value=\"1\" name=\"under13\" /> $ML{'.age.check.yes'}</blockquote>  p?>";
+         }
      }
 
      if ($LJ::TOS_CHECK)
