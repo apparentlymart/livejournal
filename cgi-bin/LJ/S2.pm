@@ -848,6 +848,10 @@ sub get_policy
     return $LJ::S2::CACHE_POLICY if $LJ::S2::CACHE_POLICY;
     my $policy = {};
 
+    # localize $_ so that the while (<P>) below doesn't clobber it and cause problems
+    # in anybody that happens to be calling us
+    local $_;
+
     foreach my $infix ("", "-local") {
         my $file = "$LJ::HOME/bin/upgrading/s2layers/policy${infix}.dat";
         my $layer = undef;
