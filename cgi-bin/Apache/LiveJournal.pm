@@ -158,29 +158,31 @@ sub trans
         my $opts = shift;
         $opts ||= {};
 
+        my $orig_user = $opts->{'user'};
         $opts->{'user'} = LJ::canonical_username($opts->{'user'});
 
         if ($opts->{'mode'} eq "info") {
             return redir($r, "$LJ::SITEROOT/userinfo.bml?user=$opts->{'user'}");
         }
 
-        if ($opts->{'user'} ne lc($opts->{'user'})) {
-            my $url = LJ::journal_base(lc($opts->{'user'}), $opts->{'vhost'}) .
-                "/$opts->{'mode'}$opts->{'pathextra'}$args_wq";
-            return redir($r, $url);
-        }
-
         %RQ = %$opts;
 
-        # bounce communities 
+        # redirect communities to /community/<name>
         my $dbr = LJ::get_db_reader();
         my $u = LJ::load_user($dbr, $opts->{'user'});
         if ($u && $u->{'journaltype'} eq "C" && 
             ($opts->{'vhost'} eq "" || $opts->{'vhost'} eq "tilde")) {
             my $newurl = $uri;
-            $newurl =~ s!^/(users/|~)$opts->{'user'}+!!;
+            $newurl =~ s!^/(users/|~)\Q$orig_user\E!!;
             $newurl = "$LJ::SITEROOT/community/$opts->{'user'}$newurl$args_wq";
             return redir($r, $newurl);
+        }
+
+        # redirect case errors in username
+        if ($orig_user ne lc($orig_user)) {
+            my $url = LJ::journal_base($opts->{'user'}, $opts->{'vhost'}) .
+                "/$opts->{'mode'}$opts->{'pathextra'}$args_wq";
+            return redir($r, $url);
         }
 
         # can't show BML on user domains... redirect them
