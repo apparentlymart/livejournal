@@ -17,7 +17,10 @@ body<=
     return LJ::bad_input("You could not be authenticated as the specified user.")
         unless $u;
 
-    return $LJ::MSG_READONLY_USER if LJ::get_cap($remote, "readonly");
+    return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
+
+    # extra arguments for get requests
+    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
 
     ### user is now authenticated ###
 
@@ -81,7 +84,7 @@ body<=
         $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
         $ret .= "</form>\n\n";
 
-        $ret .= "<form method='post' action='editinfo.bml?authas=$authas'>\n";
+        $ret .= "<form method='post' action='editinfo.bml$getextra'>\n";
 
         # personal information
         $ret .= "<?h1 $ML{'.persinfo.header'} h1?><?p $ML{'.persinfo.disclaimer'} p?>\n";
@@ -267,7 +270,7 @@ body<=
             my $picid = $u->{'defaultpicid'};
             my %userpics = ();
             LJ::load_userpics(\%userpics, [ $picid ]);
-            $ret .= "<a href='editpics.bml?authas=$u->{'user'}'><img src=\"$LJ::USERPIC_ROOT/$picid/$u->{'userid'}\" width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'} alt='$u->{'user'}' border='0'></a>";
+            $ret .= "<a href='editpics.bml$getextra'><img src=\"$LJ::USERPIC_ROOT/$picid/$u->{'userid'}\" width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'} alt='$u->{'user'}' border='0'></a>";
         } else
         {
             $ret .= "<i>($ML{'.userpic.none'})</i>";
