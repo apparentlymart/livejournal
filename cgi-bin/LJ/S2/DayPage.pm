@@ -170,14 +170,14 @@ sub DayPage
         my ($permalink, $readurl, $posturl);
         if ($u->{'clusterid'}) {
             $permalink = "$journalbase/$ditemid.html";
-            $readurl = $permalink . "?$nc"
-                if $nc;
+            $readurl = $permalink;
+            $readurl .= "?$nc" if $nc;
             $posturl = $permalink . "?mode=reply";
         } else {
-            $permalink = "$LJ::SITEROOT/talkread.bml?itemargs";
-            $readurl = $permalink . "&amp;$nc"
-                if $nc;
-            $posturl = "$LJ::SITEROOT/talkpost.bml?itemargs";
+            $permalink = "$LJ::SITEROOT/talkread.bml?$itemargs";
+            $readurl = $permalink;
+            $readurl .= "&amp;$nc" if $nc;
+            $posturl = "$LJ::SITEROOT/talkpost.bml?$itemargs";
         }
 
         my $comments = CommentInfo({
