@@ -3,115 +3,97 @@ title=>Create Style
 body<=
 
 <?_code
+{
+    use strict;
+    use vars qw(%GET %POST);
 
- return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+    return LJ::server_down_html() if $LJ::SERVER_DOWN;
+    return BML::redirect("create.bml") unless LJ::did_post();
 
- my @errors = ();
- my $user = lc($FORM{'user'});
- my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
+    my $remote = LJ::get_remote();
+    return LJ::bad_input("You must be logged in to use this tool.")
+        unless $remote;
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input("You could not be authenticated as the specified user.")
+        unless $u;
+ 
+    unless (LJ::get_cap($u, "styles")) {
+        return LJ::bad_input("Your account type doesn't permit you to make styles.");
+    }
 
- my $quser = $dbh->quote($user);
+    # error check submission
+    return LJ::bad_input("You did not select a valid style type.")
+        unless $POST{'type'} && defined $LJ::viewinfo{$POST{'type'}};
 
- unless ($user) { push @errors, "You must enter a username."; }
- elsif (! LJ::canonical_username($user)) {
-     push @errors, "Invalid username."; 
- }
+    my $view = $POST{'type'};
+    my $base = "";
+    my $baseid = $POST{"base_$view"} || $POST{"basenum_$view"};
 
- my $u = LJ::load_user($dbs, $user);
- unless ($u) { push @errors, "Unknown user."; }
+    # get a database handle
+    my $dbh = LJ::get_db_writer();
 
- unless (LJ::get_cap($u, "styles")) {
-     push @errors, "Your account type doesn't permit you to make styles.";
- }
+    if ($baseid) {
+        my $rec = $dbh->selectrow_hashref("SELECT user, is_public, formatdata FROM style WHERE styleid=? AND type=?",
+                                          undef, $baseid, $view);
 
- if (! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) { push @errors, "Invalid password."; }
+        return LJ::bad_input("The style you're trying to make a new style from ($baseid), does not seem to exist.")
+            unless $rec;
 
- unless ($FORM{'type'}) { push @errors, "You didn't select a style type."; }
- if ($FORM{'type'} && !defined $LJ::viewinfo{$FORM{'type'}}) { push @errors, "Invalid style type."; }
+        return LJ::bad_input("The style you're trying to make a new style from ($baseid) is not public so you cannot copy it.")
+            unless $rec->{'is_public'} eq "Y" || $rec->{'user'} eq $u->{'user'};
 
- my $view = $FORM{'type'};
- my $qview = $dbh->quote($FORM{'type'});
- my $base = "";
- my $sth;
- my $baseid = $FORM{"base_$view"} || $FORM{"basenum_$view"};
+        # they're allowed to base on this style
+        $base = $rec->{'formatdata'};
+    }
 
- if ($baseid && scalar(@errors)==0)
- {
-     my $qbaseid = $baseid + 0;
-     $sth = $dbh->prepare("SELECT user, is_public, formatdata FROM style WHERE styleid=$baseid AND type=$qview");
-     $sth->execute;
-     my $rec = $sth->fetchrow_hashref;
-     unless ($rec) {
-         push @errors, "The style you're trying to make a new style from ($baseid), does not seem to exist.";
-     }
-     else {
-         unless ($rec->{'is_public'} eq "Y" ||
-                 $rec->{'user'} eq $user) 
-         {
-             push @errors, "The style you're trying to make a new style from ($baseid) is not public so you cannot copy it.";
-         }
-         $base = $rec->{'formatdata'};
-     }
+    ### start of output
 
- }
+    my $ret = "";
+    my $des = "$u->{'user'}-$view-new";
 
- return LJ::bad_input(@errors) if @errors;
+    # let's see if they accidentally double-clicked:
+    my $double_clicked = 0;
+    my $new_id = 0;
+    my ($oldid, $olddata) = $dbh->selectrow_array("SELECT styleid, formatdata FROM style WHERE user=? AND styledes=? AND type=?",
+                                                  undef, $u->{'user'}, $des, $view);
 
- my $ret = "";
+    # closure to show edit form
+    my $editform = sub {
+        my $getextra = "?authas=$authas" if $u->{'user'} ne $remote->{'user'};
+        return "<div align='center'><form method='post' action='$LJ::SITEROOT/styles/edit_do.bml$getextra'>\n" .
+               LJ::html_hidden('mode', 'editstyle', 'styleid', $_[0]) . "\n" .
+               LJ::html_submit(undef, "Edit Style") . "</form></div>\n";
+    };
 
- my $des = "$user-$view-new";
- my $qdes = $dbh->quote($des);
+    if ($oldid) {
+        if ($olddata eq $base) {
+            # the user double-clicked
+            $double_clicked = 1;
+            $new_id = $oldid;
 
- # let's see if they accidentally double-clicked:
- my $double_clicked = 0;
- my $new_id = 0;
- $sth = $dbh->prepare("SELECT styleid, formatdata FROM style WHERE user=$quser AND styledes=$qdes AND type=$qview");
- $sth->execute;
- my ($oldid, $olddata) = $sth->fetchrow_array;
- if ($oldid)
- {
-     if ($olddata eq $base)
-     {
-         # the user double-clicked
-         $double_clicked = 1;
-         $new_id = $oldid;
-     }
-     else
-     {
-         $ret .= "<?h1 Error h1?><?p You already have a style of this type named <B>$des</B>.  If you really want to create a new style of type <B>$view</B>, then go modify your old $view style, change its name, and then come back here to create a new style of this type.";
-         $ret .= "<CENTER><FORM METHOD=POST ACTION=\"/styles/edit_do.bml\">\n";
-         $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">\n";
-         $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
-         $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=\"editstyle\">\n";
-         $ret .= "<INPUT TYPE=HIDDEN NAME=styleid VALUE=\"$oldid\">\n";
-         $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Edit Style\"></FORM></CENTER> p?>";
-         return $ret;
-         
-     }
- }
+        } else {
+            $ret .= "<?h1 Error h1?><?p You already have a style of this type named <b>$des</b>.  If you really want to create a new style of type <b>$view</b>, then go modify your old $view style, change its name, and then come back here to create a new style of this type. p?>";
 
- unless ($double_clicked)
- {
-     $base = $dbh->quote($base); 
-     $sth = $dbh->prepare("INSERT INTO style (user, styledes, type, formatdata) VALUES ($quser, $qdes, $qview, $base)");
-     $sth->execute;
-     $new_id = $sth->{'mysql_insertid'};
- }
+            $ret .= $editform->($oldid);
+            return $ret;
+        }
+    }
 
- $ret .= "<?h1 Success h1?><?p Your style has been created and has been temporarily named <B>$des</B>.  You can begin editing it by pressing the button below.... \n";
- $ret .= "<CENTER><FORM METHOD=POST ACTION=\"/styles/edit_do.bml\">\n";
- $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">\n";
- $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\">\n";
- $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=\"editstyle\">\n";
- $ret .= "<INPUT TYPE=HIDDEN NAME=styleid VALUE=\"$new_id\">\n";
- $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Edit Style\"></FORM></CENTER> p?>";
+    unless ($double_clicked) {
+        $dbh->do("INSERT INTO style (user, styledes, type, formatdata) VALUES (?, ?, ?, ?)",
+                 undef, $u->{'user'}, $des, $view, $base);
+        $new_id = $dbh->{'mysql_insertid'};
+    }
 
- return $ret;
+    $ret .= "<?h1 Success h1?><?p Your style has been created and has been temporarily named <b>$des</b>.  You can begin editing it by pressing the button below.... p?>\n";
 
+    $ret .= $editform->($new_id);
+
+    return $ret;
+
+}
 _code?>
 
 <=body

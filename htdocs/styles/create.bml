@@ -2,63 +2,61 @@
 title=>Create Style
 body<=
 
-<?h1 Create a Style h1?>
-<?p
-From here you can create a new personal-style, useful if you're going to either <A HREF="/developer/embedding.bml">embed LiveJournal in your homepage</A> or you want to make a public style that everybody can use and you need to work on it here first, rather than in your overrides section.  Note that only users with <A HREF="/paidaccounts/">paid accounts</A> can create their own styles.
- p?>
+<?_code
+{
+    use strict;
+    use vars qw(%GET);
+
+    my $remote = LJ::get_remote();
+    return LJ::bad_input($ML{'error.noremote'})
+        unless $remote;
+
+    my $ret;
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $getextra = "?authas=$authas" if $authas ne $remote->{'user'};
+
+    # no authentication needs to be done on this page, it's just a form anyway
+
+    # user switcher
+    $ret .= "<form action='create.bml' method='get'>\n";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+    $ret .= "</form>\n\n";
+
+    $ret .= "<form action='create_do.bml$getextra' method='post'>\n";
     
-<FORM ACTION="/styles/create_do.bml" METHOD="POST">
+    # main form
+    $ret .= "<?h1 Create a Style h1?>\n";
+    $ret .= "<?p From here you can create a new personal-style, useful if you're going to either <a href='$LJ::SITEROOT/developer/embedding.bml'>embed LiveJournal in your homepage</a> or you want to make a public style that everybody can use and you need to work on it here first, rather than in your overrides section.  Note that only users with <a href='$LJ::SITEROOT/paidaccounts/'>paid accounts</a> can create their own styles. p?>";
 
-<?standout
-<TABLE>
-<?_code
- return LJ::auth_fields(\%FORM);
- _code?>
-</TR>
-</TABLE>
-standout?>
+    $ret .= "<?h1 Select Style Type h1?>\n";
+    $ret .= "<?p A style only affects one <a href='$LJ::SITEROOT/developer/views.bml'>view type</a>.  If you want to create a matching set of styles for your journal, you have to create your style for each view type. p?>\n";
 
-<?h1 Select Style Type h1?>
-<?p
-A style only affects one <A HREF="/developer/views.bml">view type</A>.  If you want to create a matching set of styles for your journal, you have to create your style for each view type.
-p?>
+    # get a database handle
+    my $dbr = LJ::get_db_reader;
 
-<?_code
-
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
- my $ret = "";
+    my %styles = ();
+    my $sth = $dbr->prepare("SELECT styleid, styledes, type FROM style WHERE user='system' AND is_public='Y'");
+    $sth->execute;
+    push @{$styles{$_->{'type'}}}, $_ while $_ = $sth->fetchrow_hashref;
  
- my %styles = ();
- my $sth = $dbr->prepare("SELECT styleid, styledes, type FROM style WHERE user='system' AND is_public='Y'");
- $sth->execute;
- push @{$styles{$_->{'type'}}}, $_ while ($_ = $sth->fetchrow_hashref);
- 
- foreach my $view (@LJ::views)
- {
-     $ret .= "<P><INPUT TYPE=RADIO NAME=type VALUE=\"$view\"> <B>$LJ::viewinfo{$view}->{'des'}</B>\n";
-     $ret .= "<UL>Choose base style to start with and edit:<BR><SELECT NAME=\"base_$view\"><OPTION VALUE=\"\">(None, or other below:)\n";
-     foreach my $st (sort { $a->{'styledes'} cmp $b->{'styledes'} } @{$styles{$view}})
-     {
-         $ret .= "<OPTION VALUE=\"$st->{'styleid'}\">" . BML::eall($st->{'styledes'}) . "\n";
-     }
-     $ret .= "</SELECT>";
-     $ret .= "<BR>Or, enter a non-system public Style ID#: <INPUT SIZE=5 NAME=\"basenum_$view\">";
-     $ret .= "</UL>\n";
-     
- }
- 
- return $ret;
+    foreach my $view (@LJ::views) {
+        $ret .= "<p>" . LJ::html_check({ 'type' => 'radio', 'name' => 'type', 'id' => "type-$view", 'value' => $view });
+        $ret .= "<b><label for='type-$view'>$LJ::viewinfo{$view}->{'des'}</label></b></p>\n";
+        $ret .= "<div style='margin: 10px 0 20px 30px;'>Choose base style to start with and edit:<br />\n";
+        $ret .= LJ::html_select({ 'name' => "base_$view" },
+                                '', "(None, or other below:)",
+                                map { $_->{'styleid'}, $_->{'styledes'} }
+                                sort { $a->{'styledes'} cmp $b->{'styledes'} } @{$styles{$view}} );
+        $ret .= "<br />Or, enter a non-system public Style ID#: ";
+        $ret .= LJ::html_text({ 'name' => "basenum_$view", 'size' => '5', 'maxlength' => '10' }) . "</div>\n";
+    }
 
+    $ret .= "<?standout " . LJ::html_submit(undef, 'Create Style') . " standout?>\n";
+    $ret .= "</form>\n";
+    
+    return $ret;
+}
 _code?>
-
-<?standout
-<INPUT TYPE="SUBMIT" VALUE="Create">
-standout?>
-
-</FORM>
 
 <=body
 page?><?_c <LJDEP>
