@@ -1,84 +1,33 @@
-+------------+
-| Dislaimer: |
-+------------+
+    (Don't try to make much sense of this list.  It's mainly for the
+     core developers to keep track of things.)
 
-    Don't try to make much sense of this list.  It's mainly for the
-    core developers to keep track of things.
-
-+----------------+
-| Awaiting merge |
-+----------------+
+AWAITING MERGE:
 
 * option to strip target= on <a> on friends pages (halkeye)
-* goatctl, cvsreport --init
+* goatctl
 
-+----------+
-| dormando |
-+----------+
+DORMANDO:
 
-* User journal stats
-  - how to obtain (log grepping vs. update set count=count+1)
-  - how to store/index
-  - code to do it all & view
-  - security userprop: who can view my journal's stats?
-  - brad: UDP packet to logging daemon w/ sep db, summaries nightly
-          to main db
-* Netsaint on mayor.
-* Write new netsaint modules (warning if slaves are too far behind, 
-  using an updated db_check script, etc.)
+* statserv
+* netsaint
+* bugzilla
 
-+------+
-| avva |
-+------+
+AVVA:
 
-HIGH PRIORITY:
+* utf8
+* releases
 
-* Goal: store as UTF-8 in database. 
-  Benefit:
-    - Always be able to produce valid XML
-    - Multi-encoding friends pages.
-    - No need to toggle browser "Encoding" option, 
-      we can just add send text/html; charset=utf-8
+ANYBODY:
 
-  Research:
-    - how can we tell from an HTTP post the encoding type?
-    - when posting in mixed-encoding Unicode IE ??.? sends entities, 
-       can we disable this and have it send in utf-8?
-       the HTML spec mentions a form attribute 'accept-charset'
-       but does anything obey it?
-    - Unicode::MapUTF8 is great, if we can guess/tell the
-      source encoding.
-    - how do we 'upgrade' the old items in a lazy fashion,
-      or we write a program to retroactively update everything?
-    - do we force non-English users to upgrade their client?
-      we might have to, sadly.
-    - from the Win32 client, can we ask Windows what encoding
-      it's using for a given widget before getting its data
-      and sending it? 
-  
-  The postevent/editevent protocol should let them specify
-  the encoding?  Or should the protocol handler be updated
-  to reject posts that don't validated as UTF-8?  But then
-  we break clients.  See above about upgrading clients.
+* need a 'replyanywhere' priv that lets site admins reply in journals
+  that are friends only, when the site admins aren't part of the
+  community.
 
-  Add new userprop for default encoding for lazy conversion?
+* suspended/deleted users shouldn't show up in community journals
 
-* RELEASE!  need maintained tarball release.  people don't like
-  getting code from CVS.
+* suspended/deleted talkread/post pages shouldn't show
 
-  * write/revise release script (which must build docs too)
-     - must take a scope argument to make 'livejournal' generic
-       release or a 'local' release (which for us would be ljcom)
-     - change dumpsql.pl to take a 'general' or 'local' scope arg
-       and only dump SQL in that scope.
-  * decide location/formats of compiled documentation.
-
-* documentation: both producing raw docs, and our build/output system.
-
-MEDIUM PRIORITY:
-
-* journal titles vs. names:
-    http://www.livejournal.com/talkread.bml?itemid=14018511
+* need 
 
 * postevent duplicate locking (avva: somewhat good patch, is
   going to improve it)
@@ -90,8 +39,6 @@ MEDIUM PRIORITY:
 
 * editjournal_do: clean HTML (marquees don't close, etc.)
 
-FUTURE / LOW PRIORITY:
-
 * talklib.pl (clean up / rewrite talk*.bml).  won't be important
   until bradfitz finishes S2.
 
@@ -99,22 +46,34 @@ FUTURE / LOW PRIORITY:
 | bradfitz |
 +----------+
 
-HIGH PRIORITY:
+* clustering:
+   -- console
+   -- after user's moved, update their memories:
+                 (0,global)->(userid,ditemid)
+      that way, filtering on "my own" will work.
 
-* ljcom: automate username changes (payments and renaming)
-  - use a '^do:' table in qbuffferd
+* journal titles vs. names:
+    http://www.livejournal.com/talkread.bml?itemid=14018511
+
+* drop time* from user table.  (still used?)
+
 * directory.
+
 * S2.
+
 * rate limiting
 
 MISC:
 
-* db-based fileedit (livejournal) uses syncweb.pl (ljcom) to update,
-  and each slave connects to master db once a minute to check for
-  new stuff.  make a new livejournal daemon which does controls
-  all periodic stuff like this with one persistent db connection?
+* new authentication/login system...
+   -- SSL logins & login tokens
+   -- for non-SSL clients:  challenge/response (with challenge
+      being request body, plus GMT yyyymmddhh)
+* ljcom: automate username changes (payments and renaming)
 * BML::500_on_die option: make BML send a 500 server error on any
   _CODE block failure
+* BML: let VarInitScript define a hook to run on server error to
+  get error message, look at it, and decide new error message.
 * Syndicating channels:
      http://www.livejournal.com/talkread.bml?itemid=14311193
 * /fz/ joins on logtext (requires master) 
@@ -153,7 +112,6 @@ MISC:
 * internals/system (dormando)
 * BML (avva)
 * guide
-* BML
 * INSTALL
     /inc/ protected
 
