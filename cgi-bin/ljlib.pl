@@ -3526,9 +3526,11 @@ sub date_to_view_links
 sub item_link
 {
     my ($u, $itemid, $anum) = @_;
-    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
-    my $ditemid = defined $anum ? ($itemid*256 + $anum) : $itemid;
-    return "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
+    if ($u->{'clusterid'}) {
+        my $ditemid = $itemid*256 + $anum;
+        return LJ::journal_base($u) . "/$ditemid.html";
+    }
+    return "$LJ::SITEROOT/talkread.bml?itemid=$itemid";
 }
 
 # <LJFUNC>
