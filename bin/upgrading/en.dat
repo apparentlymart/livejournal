@@ -1653,7 +1653,7 @@ When you're done, click "Save Changes".
 
 /interests.bml.nointerests.text=Don't have any interests listed?  Add some by going to the <A HREF="/editinfo.bml">Edit Personal Info & Settings</A> page.
 
-/interests.bml.popular.disabled=Sorry, the popular interests feature has been disabled for system performance reasons.
+/interests.bml.popular.disabled=Sorry, the popular interests feature has been disabled.
 
 /interests.bml.popular.head=Popular Interests
 
