@@ -1,75 +1,164 @@
 <?page
 title=>LiveJournal Moods
+head<=
+<style>
+.lj_moodlist_link {
+  text-decoration: none;
+}
+.lj_moodlist_link:link {
+  text-decoration: none;
+}
+.lj_moodlist_link:visited {
+  text-decoration: none;
+}
+.lj_moodlist_link:hover {
+  text-decoration: underline;
+}
+</style>
+<=head
 body<=
-
-<?h1 Moods h1?>
-<?p
-The following are server-supported moods on <?sitename?>.  You can always enter your own, but these are the ones that can have pictures associated with them and can be searched on, etc.  You're encouraged to use these if possible.
-p?>
-<?p
-<b>To change the icons in your journal</b>, go to the <a href="/modify.bml">modify journal page</a> and select your preferred icon set.
-p?>
-
-<?hr?>
-
-<?_code #'
+<?_code
 {
+    use strict;
+    use vars qw(%GET);
+
     my $ret;
     my $sth;
-
     my $dbr = LJ::get_db_reader();
+
+    my $add_header = sub {
+        $ret .= "<?h1 Moods h1?><?p The following are server-supported moods on <?sitename?>.  You can always enter your own, but these are the ones that can have pictures associated with them and can be searched on, etc.  You're encouraged to use these if possible.  p?><?p To change the icons in your journal, go to the <a href=\"/modify.bml\">modify journal page</a> and select your preferred icon set. p?>";
+    };
     
+    # Get a list of all possible moods
+    my $moods = LJ::get_moods();
+    my @mlist = ();
+    foreach (sort { $moods->{$a}->{'name'} cmp $moods->{$b}->{'name'} } keys %$moods) {
+        my $m = $moods->{$_};
+        push @mlist, $m;
+    }
+                                                                                    
     # FIXME: cache this.  it's small.
-    $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y' ORDER BY name");
+    my $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y' ORDER BY name");
     $sth->execute;
     my @themes = ();
     push @themes, $_ while $_ = $sth->fetchrow_hashref;
 
-    my $moods = LJ::get_moods();
-    my %lists = ();
-    foreach (sort { $moods->{$a}->{'name'} cmp $moods->{$b}->{'name'} } keys %$moods) {
-        my $m = $moods->{$_};
-        push @{$lists{$m->{'parent'}}}, $m;
+    if($GET{'theme'}) {
+        $ret .= BML::ml('Backlink', {
+                'link'=>'/moodlist.bml',
+                'text'=>'Mood Themes',
+            }). "<br />"; 
+
+       $add_header->();
+        do_theme_detail($GET{'theme'});
+    } else {
+        $add_header->();
+        do_mood_list();
     }
-
-    my $moodtheme = $GET{'moodtheme'}+0;
-    $moodtheme ||= 1;
-
-    $ret .= "<form method='get' action='moodlist.bml'><b>Preview mood icon set: </b> ";
-    $ret .= LJ::html_select({ name => 'moodtheme',
-                              selected => $moodtheme, },
-                            map { $_->{'moodthemeid'}, $_->{'name'} }
-                            @themes);
-    $ret .= "<input type='submit' value=\"Change\" /></form>\n";
- 
- 
-    &do_mood_tree(0);
     return $ret;
 
-    sub do_mood_tree
+    sub do_mood_list
     {
-        my $num = shift;
-        return unless $lists{$num};
-        $ret .= "<ul>\n";
-        foreach my $mood (@{$lists{$num}}) {
-            $ret .= "<li><b><a href=\"http://www.dictionary.com/cgi-bin/dict.pl?term=$mood->{'name'}\" target='dict'>$mood->{'name'}</a></b> (#$mood->{'id'})</li>\n";
-            my %pic;
-            if (LJ::get_mood_picture($moodtheme, $mood->{'id'}, \%pic)) {
-             unless ($GET{'hidederived'} && $pic{'moodid'} != $mood->{'id'}) {
-                 $ret .= "<img align='absmiddle' src=\"$pic{'pic'}\" width='$pic{'w'}' height='$pic{'h'}' hspace='2' vspace='2' />\n";     
-             }
-             if ($GET{'details'} && ($pic{'moodid'} != $mood->{'id'})) {
-                 $ret .= " (from parent)";
-             }
-         } else {
-             if ($GET{'details'}) {
-                 $ret .= "<b>(no pic for theme \#$moodtheme)</b>";
-             }
-         }
-         &do_mood_tree($mood->{'id'});
-     }
-     $ret .= "</ul>\n";
- }
+        # Setup the paging bar
+        my $perpage = 15;
+        my $start;
+        my $self_link;
+        my %items = BML::paging(\@themes, $GET{'page'} || 1, $perpage);
+        my $navbar = LJ::paging_bar($items{'page'}, $items{'pages'}, { 'self_link' => $self_link });
+
+        if ($items{'page'} == 1) {
+            $start = 0;
+        } else {
+            $start = ($items{'page'} - 1) * $perpage;
+        }
+        my @show_themes = splice (@themes, $start, $perpage);
+
+        # See if the user changed the shown moods
+        my @show_moods;
+        if($GET{'theme1'} && $GET{'theme2'} &&$ GET{'theme3'} && $GET{'theme4'}) {
+            @show_moods = ($GET{'theme1'}, $GET{'theme2'}, $GET{'theme3'}, $GET{'theme4'});
+        } else {
+            @show_moods = ('happy', 'sad', 'angry', 'tired');
+        }
+
+        $ret .= "<form action='moodlist.bml' method='get'>\n";
+        $ret .= LJ::html_hidden("page", $items{page});
+        $ret .= "<table width='100%' border='0'><tr><td></td>";
+    
+        # Create the table columns for each mood
+        my $mname;
+        my $n = 1;
+        foreach $mname (@show_moods) {
+            $ret .= "<td align='center'>" . 
+                LJ::html_select({'name' => "theme$n", 'selected' => "$mname", 
+                                 'style' => "text-align: center"}, 
+                                map {$_->{name}, $_->{name}} @mlist) . "</td>\n";
+            $n++;
+        }
+
+        $ret .= "<td align='center'><input type='submit' value='Switch' /></td></tr>\n";
+
+        # Output a table row for each mood theme
+        foreach my $theme (@show_themes) {
+            $ret .= "<tr><td>$theme->{'name'}</td>\n";
+
+            LJ::load_mood_theme($theme->{'moodthemeid'});
+           
+            # Output each of the displayed moods
+            foreach my $mood (@show_moods) {
+                if (LJ::get_mood_picture($theme->{'moodthemeid'}, LJ::mood_id($mood), \ my %pic)) {
+                    $ret .= "<td align='center'><img align='absmiddle' alt='$theme->{name}' src=\"$pic{'pic'}\" width='$pic{'w'}' height='$pic{'h'}' hspace='2' vspace='2' />" .
+                        "</td>\n";
+                } else {
+                    $ret .= "<td></td>\n";
+                }
+            }
+            
+            $ret .= "<td align='center'>";
+            $ret .= BML::ml('Actionlink', {
+                'link' => "<a href='/moodlist.bml?theme=$theme->{moodthemeid}'>View&nbsp;All</a>"
+            });
+            $ret .= "</td>";
+        }
+        $ret .= "<tr><td colspan='8' align='center'><br />$navbar</td></tr></table></form>";
+    }
+
+   sub do_theme_detail
+   {
+       my ($themeid) = @_;
+
+       my $name = $dbr->selectrow_array("SELECT name FROM moodthemes WHERE moodthemeid=?", undef, $themeid);
+
+       $ret .= "<br /><table width='100%'><tr><td colspan='5' align='center'>" .
+           "<form action='moodlist.bml' method='GET'>" .
+           LJ::html_select({'name' => "theme", 'selected' => "$themeid"}, 
+                           map {$_->{moodthemeid}, $_->{name}} @themes) .
+           "&nbsp;<input type='submit' value='View' /></form></td>";
+
+       # Output all the moods
+       while (@mlist) {
+           $ret .= "<tr>";
+
+           # Show five moods in a row
+           for (my $i = 0; $i < 5; $i++) {
+               my $m = shift @mlist;
+               my $mood = $m->{name};
+               my %pic;
+               if (LJ::get_mood_picture($themeid, $m->{id}, \%pic)) {
+                   $ret .= "<td style='text-align:center; vertical-align:bottom'>" .
+                       "<img align='absmiddle' style='margin-top:25px' alt='$m->{name}' src=\"$pic{'pic'}\" width='$pic{'w'}' height='$pic{'h'}' hspace='2' vspace='2' />" .
+                       "<br /><a class='lj_moodlist_link' href='http://www.dictionary.com/cgi-bin/dict.pl?term=$mood'>$mood</a><br /></td>";
+               } else {
+                   $ret .= "<td style='text-align:center; vertical-align:bottom'>" .
+                       "<a class='lj_moodlist_link' href='http://www.dictionary.com/cgi-bin/dict.pl?term=$mood'>$mood</a>" .
+                       "<br /></td>";
+               }
+           }
+           $ret .= "</tr>";
+       }
+       $ret .= "</table>";
+   }
 
 }
 _code?>
