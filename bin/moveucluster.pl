@@ -308,13 +308,26 @@ sub moveUser {
     die "Can't get source cluster handle.\n" unless $dboa;
 
     if ($opts->{movemaster}) {
-        $dbo = LJ::get_dbh({raw=>1}, "cluster$u->{clusterid}movemaster");
-        if ($dbo) {
-            $dbo->{'RaiseError'} = 1;
-            $dbo->do("SET wait_timeout=28800");
-            my $ss = $dbo->selectrow_hashref("show slave status");
-            die "Move master not a slave?" unless $ss;
+        # if an a/b cluster, the movemaster (the source for moving) is
+        # the opposite side.  if not a/b, then look for a special "movemaster"
+        # role for that clusterid
+        my $mm_role = "cluster$u->{clusterid}";
+        my $ab = lc($LJ::CLUSTER_PAIR_ACTIVE{$u->{clusterid}});
+        if ($ab eq "a") {
+            $mm_role .= "b";
+        } elsif  ($ab eq "b") {
+            $mm_role .= "a";
+        } else {
+            $mm_role .= "movemaster";
         }
+
+        $dbo = LJ::get_dbh({raw=>1}, $mm_role);
+        die "Couldn't get movemaster handle" unless $dbo;
+
+        $dbo->{'RaiseError'} = 1;
+        $dbo->do("SET wait_timeout=28800");
+        my $ss = $dbo->selectrow_hashref("show slave status");
+        die "Move master not a slave?" unless $ss;
         $is_movemaster = 1;
     } else {
         $dbo = $dboa;
@@ -470,14 +483,14 @@ sub moveUser {
 
     if ($is_movemaster) {
         my $diff = 999_999;
-        my $tries = 0;
-        while ($diff > 50_000) {
+        my $tolerance = 50_000;
+        while ($diff > $tolerance) {
             my $ss = $dbo->selectrow_hashref("show slave status");
-            $tries++;
             if ($ss->{'Slave_IO_Running'} eq "Yes" && $ss->{'Slave_SQL_Running'} eq "Yes") {
                 if ($ss->{'Master_Log_File'} eq $ss->{'Relay_Master_Log_File'}) {
                     $diff = $ss->{'Read_Master_Log_Pos'} - $ss->{'Exec_master_log_pos'};
                     print "  diff: $diff\n" if $optv >= 1;
+                    sleep 1 if $diff > $tolerance;
                 } else {
                     print "  (Wrong log file):  $ss->{'Relay_Master_Log_File'}($ss->{'Exec_master_log_pos'}) not $ss->{'Master_Log_File'}($ss->{'Read_Master_Log_Pos'})\n" if $optv >= 1;
                 }
