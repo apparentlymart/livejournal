@@ -82,6 +82,7 @@
                       'maxfriends' => 500,
                       'moodthemecreate' => 1,
                       'styles' => 1,
+                      's2styles' => 1,
                       'textmessage' => 1,
                       'todomax' => 100,
                       'todosec' => 1,
