@@ -336,9 +336,6 @@ sub checkfriends
         return $res;
     }
 
-    my $dbr = LJ::get_db_reader();
-    my ($lastdate, $sth);
-
     ## have a valid date?
     my $lastupdate = $req->{'lastupdate'};
     if ($lastupdate) {
@@ -350,14 +347,6 @@ sub checkfriends
 
     my $interval = LJ::get_cap_min($u, "checkfriends_interval");
     $res->{'interval'} = $interval;
-
-    unless ($dbr) {
-        # rather than return a 502 no-db error, just say no updates,
-        # because problem'll be fixed soon enough by db admins
-        $res->{'new'} = 0;
-        $res->{'lastupdate'} = $lastupdate;
-        return $res;
-    }
 
     my $mask;
     if ($req->{'mask'} and $req->{'mask'} !~ /\D/) {
@@ -376,6 +365,14 @@ sub checkfriends
             }
             $update = LJ::mysql_time($max) if $max;
         } else {
+            my $dbr = LJ::get_db_reader();
+            unless ($dbr) {
+                # rather than return a 502 no-db error, just say no updates,
+                # because problem'll be fixed soon enough by db admins
+                $res->{'new'} = 0;
+                $res->{'lastupdate'} = $lastupdate;
+                return $res;
+            }
             my $sql = "SELECT MAX(u.timeupdate) FROM userusage u, friends f ".
                 "WHERE u.userid=f.friendid AND f.userid=$u->{'userid'}";
             $sql .= " AND f.groupmask & $mask > 0" if $mask;
