@@ -1083,7 +1083,8 @@ CREATE TABLE talkleft (
   nodetype   CHAR(1) NOT NULL,
   nodeid     INT UNSIGNED NOT NULL,
   INDEX (journalid, nodetype, nodeid),
-  jtalkid    MEDIUMINT UNSIGNED NOT NULL
+  jtalkid    MEDIUMINT UNSIGNED NOT NULL,
+  publicitem   ENUM('1','0') NOT NULL DEFAULT '1'
 )
 EOC
 
