@@ -653,6 +653,14 @@ on your layout, changing this setting discards all other edits you may have made
 
 /customize/index.bml.s2.layout.header=Step 1: Layout
 
+/customize/index.bml.s2.related.editinfo.about=Set your journal's titles and various options.
+
+/customize/index.bml.s2.related.header=Related Pages
+
+/customize/index.bml.s2.related.links.about=Some styles can include your managed link list.
+
+/customize/index.bml.s2.related.modify.about=Set your journal's mood icon set.
+
 /customize/index.bml.title=Customize Journal
 
 /directory.bml.error.accounttype<<
@@ -1836,6 +1844,22 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 /manage/index.bml.userpictures.edit.about=Upload and Manage Your User Picture Icons
 
 /manage/index.bml.userpictures.header=User Picture Icons
+
+/manage/links.bml.about=Use the form below to create a list of links to appear on your journal. Links will only appear if this feature is supported by your S2 style.
+
+/manage/links.bml.about.blank=To create a blank line, etner a "-" for the title.
+
+/manage/links.bml.about.heading=To create a heading, enter a title with no URL.
+
+/manage/links.bml.about.reorder=To reorder links in the list, modify the order number at left (decimal numbers are ok).
+
+/manage/links.bml.error.s2required=The link list is only available on supported S2 styles. To switch to S2, see the [[link]] page.
+
+/manage/links.bml.error.s2required.header=S2 Required
+
+/manage/links.bml.success=Success!  Your links have been saved.
+
+/manage/links.bml.title=Links List
 
 /manage/siteopts.bml.btn.lang=Switch Language
 

@@ -1,5 +1,5 @@
 <?page
-title=>Link List
+title=><?_ml .title _ml?>
 body<=
 <?_code
 {
@@ -28,11 +28,8 @@ body<=
     # require S2
     unless ($u->{'stylesys'} == 2) {
         my $getextra = $u->{'userid'} == $remote->{'userid'} ? '' : "?authas=$u->{'user'}";
-        $ret .= "<?h1 S2 Required h1?>" .
-            "<?p The link list is only available on supported S2 styles. " .
-            "To switch to S2, see the <a href='$LJ::SITEROOT/customize/$getextra'>" .
-            "customize page</a>. p?>";
-
+        my $link = "<a href=\"$LJ::SITEROOT/customize/$getextra\">$ML{'/customize/index.bml.title'}</a>";
+        $ret .= "<?h1 $ML{'.error.s2required.header'} h1?><?p " . BML::ml('.error.s2required',{'link'=>$link}) . " p?>"; 
         return $ret;
     }
 
@@ -47,17 +44,14 @@ body<=
     # save any changes to the database
     if ($POST{'action:savelinks'}) {
         LJ::Links::save_linkobj($u, $linkobj);
-        $ret .= "<p><b>Success!  Your links have been saved.</b></p>";
+        $ret .= "<p><b>$ML{'.success'}</b></p>";
     }
 
     # intro paragraph
-    $ret .= "<?p Use the form below to create a list of links to appear on your journal. ";
-    $ret .= "Links will only appear if this feature is supported by your S2 style. p?>";
-    $ret .= "<ul>";
-    $ret .= "<li>To reorder links in the list, modify the order number at left (decimal numbers okay).</li>";
-    $ret .= "<li>To create a blank line, enter a \"-\" for the title.</li>";
-    $ret .= "<li>To create a heading, enter a title with no URL.</li>";
-    $ret .= "</ul>";
+    $ret .= "<?p $ML{'.about'} p?>";
+    $ret .= "<ul><li>$ML{'.about.reorder'}</li>";
+    $ret .= "<li>$ML{'.about.blank'}</li>";
+    $ret .= "<li>$ML{'.about.heading'}</li></ul>";
 
     # link modify form
     $ret .= "<form method='post' action='links.bml' style='margin-top: 1.5em;'>";

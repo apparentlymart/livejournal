@@ -288,12 +288,20 @@ body<=
 
     $ret .= "</form>";
 
-    $ret .= "<?h1 $ML{'.s2.advanced.header'} h1?><?p ";
+    $ret .= "<?h1 $ML{'.s2.related.header'} h1?>";
+    $ret .= "<dl><dt>$ML{'.s2.advanced.header'}</dt><dd>";
     $ret .= LJ::get_cap($u, 's2styles') ? $ML{'.s2.advanced.permitted'} : $ML{'.s2.advanced.denied'};
-    $ret .= " p?>";
+    $ret .= "</dd><dt><a href='/manage/links.bml'>$ML{'/manage/links.bml.title'}</a></dt><dd>$ML{'.s2.related.links.about'}</dd>";
+    $ret .= "<dt><a href='/modify.bml'>$ML{'/modify.bml.title'}</a></dt><dd>$ML{'.s2.related.modify.about'}</dd>";
+    $ret .= "<dt><a href='/editinfo.bml'>$ML{'/editinfo.bml.title'}</a></dt><dd>$ML{'.s2.related.editinfo.about'}</dd></dl>";
 
     return $ret;
 }
 _code?>
 <=body
+head<=
+<style type='text/css'>
+    dt { font-weight: bold }
+</style>
+<=head
 page?>
