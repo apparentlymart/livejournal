@@ -3498,3 +3498,20 @@ Username=Username
 
 userpic.inactive=Inactive
 
+lynx.nav.home=Home
+
+lynx.nav.update=Update Journal
+
+lynx.nav.recent=Recent Entries
+
+lynx.nav.friends=Friends
+
+lynx.nav.login=Login
+
+lynx.nav.logout=Logout
+
+lynx.nav.siteopts=Browse Options
+
+lynx.nav.sitemap=Site Map
+
+lynx.nav.help=Technical Support
