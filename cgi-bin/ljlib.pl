@@ -1977,7 +1977,7 @@ sub ljuser
         my ($fil, $dir, $x, $y) = @_;
         $y ||= $x;  # make square if only one dimension given
 
-        return "<span class='ljuser' style='white-space: nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/$fil' alt='userinfo' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$LJ::SITEROOT/$dir/$user/'$strike><b>$user</b></a></span>";
+        return "<span class='ljuser' style='white-space: nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$LJ::SITEROOT/$dir/$user/'$strike><b>$user</b></a></span>";
     };
 
     if ($opts->{'type'} eq 'C') {
