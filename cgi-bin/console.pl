@@ -788,6 +788,10 @@ sub change_journal_type
     return $err->("This command cannot be used on an account you are logged in as.")
         if LJ::u_equals($remote, $u);
 
+    # take advantage of the fact that we know type...
+    return $err->("You cannot convert $type accounts to $type.")
+        if $type =~ /^$u->{journaltype}/i;
+
     # get any owner specified
     my $ou = $owner ? LJ::load_user($owner) : undef;
     return $err->("Owner must be a personal journal.")
