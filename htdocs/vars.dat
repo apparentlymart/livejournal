@@ -914,7 +914,13 @@ The user's full name, from the "user" field in the database.
 An apostrophe folled by an "s" if the user's name does not end in "s", else 
 just an apostrophe.  Used in conjunction with the "name" property, can be 
 used to show possession.  For instance, "%%name%%%%name-'s%% Journal" could
-translate to "Bob's Journal".
+translate to "Bob's Journal".  This is old.  You should just use the title instead.
+}
+{ title
+.des
+The base title of the user's journal, which is normally used in the HTML
+title tags and headings alongside something which indicates that this is
+a calendar view.
 }
 { yearlinks
 .des
