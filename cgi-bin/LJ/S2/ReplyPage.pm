@@ -206,7 +206,14 @@ sub ReplyForm__print
     # subject
     my $txt_subject = "Subject:";
     my $txt_nohtml_subject = "No HTML allowed in subject";
-    $ret .= "<tr valign='top'><td align='right'>$txt_subject</td><td colspan='4'><input class='textbox' type='text' size='50' maxlength='100' name='subject' value=\"" . LJ::ehtml($par_subject) . "\" />";
+
+    my $resubject = $par_subject;
+    $resubject =~ s/^Re:\s*//i;
+    if ($resubject) {
+        $resubject = "Re: $resubject";
+        $resubject = LJ::ehtml($resubject);
+    }
+    $ret .= "<tr valign='top'><td align='right'>$txt_subject</td><td colspan='4'><input class='textbox' type='text' size='50' maxlength='100' name='subject' value=\"$resubject\" />";
 
     # Subject Icon toggle button
     {
