@@ -2806,9 +2806,7 @@ sub start_request
     # the serial number of last db weight change on every request
     # to validate master db connection, instead of selecting
     # the connection ID... just as fast, but with a point!)
-    if ($LJ::DBWEIGHTS_FROM_DB) {  # defined in ljconfig.pl
-        $LJ::NEED_DBWEIGHTS = 1;
-    }
+    $LJ::DBIRole->trigger_weight_reload();
 
     # reset BML's cookies
     eval { BML::reset_cookies() };
