@@ -468,7 +468,8 @@ sub recurse_post
 		$$ret .= " <font size=\"-1\">(<a href=\"$SELF?itemid=$itemid&amp;thread=$tid#t$tid\">link</a>)</font> ";
 		
 		if ($remote && ($remote->{'user'} eq $userpost ||
-				$remote->{'user'} eq $u->{'user'}))
+				$remote->{'user'} eq $u->{'user'} ||
+			        LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
 		{
 		    $$ret .= "<A HREF=\"delcomment.bml?id=$tid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/delcomment.gif\" WIDTH=22 HEIGHT=20 TITLE=\"Click to delete\" ALT=\"Delete\" BORDER=0></A>";
 		}

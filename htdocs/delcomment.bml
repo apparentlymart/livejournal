@@ -6,10 +6,6 @@ BODY<=
 
 (=_CODE
 
- use Fcntl ':flock'; # import LOCK_* constants
- 
- require 'ljlib.pl';
-
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
@@ -34,12 +30,15 @@ BODY<=
      return "(=H1 Error H1=)(=P The comment doesn't even exist... P=)";
  }
  if ($tp->{'posterid'}) {
-     $tp->{'userpost'} = &LJ::get_username($dbh, $tp->{'posterid'});
+     $tp->{'userpost'} = LJ::get_username($dbs, $tp->{'posterid'});
  }
- if ($tp->{'journalid'} != $remote->{'userid'} &&
-     $tp->{'posterid'} != $remote->{'userid'}) 
+ unless ($tp->{'journalid'} == $remote->{'userid'} ||
+	 $tp->{'posterid'} == $remote->{'userid'})
  {
-     return "(=H1 Error H1=)(=P A comment may only be deleted by the journal owner or the one who posted it. (pid=$tp->{'posterid'}; jid=$tp->{'journalid'}; ruid=$remote->{'uid'}) P=)";
+     my $journal = LJ::get_username($dbs, $tp->{'journalid'});
+     unless (LJ::check_priv($dbs, $remote, "sharedjournal", $journal)) {
+	 return "(=H1 Error H1=)(=P A comment may only be deleted by the journal owner or the one who posted it. (pid=$tp->{'posterid'}; jid=$tp->{'journalid'}; ruid=$remote->{'uid'}) P=)";
+     }
  }
  
  if ($FORM{'confirm'} ne "Y") {
@@ -75,7 +74,7 @@ BODY<=
  my $mod = $qitemid % 100;
 
  # update the "replycount" field of the log table
- &LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount-1 WHERE itemid=$qitemid");
+ LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount-1 WHERE itemid=$qitemid");
 
  my $and;
 
