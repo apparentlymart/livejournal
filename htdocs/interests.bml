@@ -200,7 +200,8 @@ body<=
      if ($intcount > 2000) {
          # temporary hack.  saves the database, though.
          # FIXME: make this redirect to a directory.bml text-results search, which knows how to do it efficiently.
-         return "<?h1 $ML{'.toomany.head'} h1?><?p $ML{'.toomany.body'} p?>";
+         return "<?h1 $ML{'.toomany.head'} h1?><?p " . 
+             BML::ml('.toomany.body', { 'intcount' => 2000 }) . " p?>";
      }
      
      my $ret = "";
