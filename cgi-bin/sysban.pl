@@ -19,12 +19,17 @@ sub sysban_check {
     # cache if ip ban
     if ($what eq 'ip') {
 
+        my $now = time();
+        my $ip_ban_delay = $LJ::SYSBAN_IP_REFRESH || 120; 
+
         # check memcache first if not loaded
-        unless ($LJ::IP_BANNED_LOADED) {
+        unless ($LJ::IP_BANNED_LOADED + $ip_ban_delay > $now) {
             my $memval = LJ::MemCache::get("sysban:ip");
             if ($memval) {
                 *LJ::IP_BANNED = $memval;
-                $LJ::IP_BANNED_LOADED++;
+                $LJ::IP_BANNED_LOADED = $now;
+            } else {
+                $LJ::IP_BANNED_LOADED = 0;
             }
         }
         
@@ -38,24 +43,21 @@ sub sysban_check {
         my $dbh = LJ::get_db_writer();
         return undef unless $dbh;
 
-        # set this now before  the query
-        $LJ::IP_BANNED_LOADED++;
-
         # build cache from db
         %LJ::IP_BANNED = ();
         my $sth = $dbh->prepare("SELECT value, UNIX_TIMESTAMP(banuntil) FROM sysban " .
                                 "WHERE status='active' AND what='ip' " .
                                 "AND NOW() > bandate " .
                                 "AND (NOW() < banuntil OR banuntil IS NULL)");
-        $sth->execute();
-        return undef $LJ::IP_BANNED_LOADED if $sth->err;
+        $sth->execute;
+        return undef if $dbh->err;
         while (my ($val, $exp) = $sth->fetchrow_array) {
             $LJ::IP_BANNED{$val} = $exp || 0;
         }
 
         # set in memcache
-        my $exp = 60*15; # 15 minutes
-        LJ::MemCache::set("sysban:ip", \%LJ::IP_BANNED, $exp);
+        LJ::MemCache::set("sysban:ip", \%LJ::IP_BANNED, $ip_ban_delay);
+        $LJ::IP_BANNED_LOADED = time();
 
         # return value to user
         return $LJ::IP_BANNED{$value};
