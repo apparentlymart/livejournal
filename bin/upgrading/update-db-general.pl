@@ -1178,6 +1178,12 @@ register_alter(sub {
 		 "ALTER TABLE talkproplist ADD scope ENUM('general', 'local') ".
 		 "DEFAULT 'general' NOT NULL");
     }
+
+    if (column_type("priv_list", "scope") eq "") {
+	do_alter("priv_list",
+		 "ALTER TABLE priv_list ADD scope ENUM('general', 'local') ".
+		 "DEFAULT 'general' NOT NULL");
+    }
    
 });
 
