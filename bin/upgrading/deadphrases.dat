@@ -58,6 +58,35 @@ general /talkread.bml.pageofpages
 general /update.bml.login.success
 
 general /uploadpic.bml.success.text
+general /uploadpic.bml.btn.proceed
+general /uploadpic.bml.error.badurl
+general /uploadpic.bml.error.databasedown
+general /uploadpic.bml.error.filetoolarge
+general /uploadpic.bml.error.imagetoolarge
+general /uploadpic.bml.error.invalidauth
+general /uploadpic.bml.error.invalidimage
+general /uploadpic.bml.error.toomanypics
+general /uploadpic.bml.error.unknownmode
+general /uploadpic.bml.error.urlerror
+general /uploadpic.bml.fromfile
+general /uploadpic.bml.fromfile.key
+general /uploadpic.bml.fromurl
+general /uploadpic.bml.fromurl.key
+general /uploadpic.bml.header
+general /uploadpic.bml.imagesize.by
+general /uploadpic.bml.kilobytes
+general /uploadpic.bml.makedefault
+general /uploadpic.bml.makedefault.key
+general /uploadpic.bml.restriction.fileformat
+general /uploadpic.bml.restriction.filesize
+general /uploadpic.bml.restriction.imagesize
+general /uploadpic.bml.success.editpics
+general /uploadpic.bml.success.header
+general /uploadpic.bml.success.preview
+general /uploadpic.bml.success.upload
+general /uploadpic.bml.text
+general /uploadpic.bml.title
+
 general /uploadpic_do.bml.error.urlerror
 general uploadpic.error.toolarge
 
