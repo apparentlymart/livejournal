@@ -321,7 +321,7 @@ p?>
 
 /community/manage.bml.joinmail.title=Administrative options
 
-/community/manage.bml.modemail.body=For moderated communities, you can whether to send emails or not:
+/community/manage.bml.modemail.body=For moderated communities, you can choose whether to send emails or not:
 
 /community/manage.bml.modemail.no=No email, I will manage the moderation queue manually
 
