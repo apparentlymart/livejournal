@@ -913,6 +913,7 @@ sub call_xmlrpc {
     # challenge response stuff so we never send the user's password or md5 digest over
     # the intarweb.  of course, we say nothing about the user's password security anyway...
     my ($mode, $hash) = @_;
+    $hash ||= {};
 
     my $xmlrpc = new XMLRPC::Lite;
     $xmlrpc->proxy("http://$opts{server}/interface/xmlrpc");
