@@ -86,7 +86,9 @@ exit 1 unless
                "clean" => \$opts{clean},
                "file=s" => \$opts{file},
                "password=s" => \$opts{password},
-               "md5pass=s" => \$opts{md5password},);
+               "md5pass=s" => \$opts{md5password},
+               "alter-security=s" => \$opts{alter_security},
+               "confirm-alter" => \$opts{confirm_alter},);
 
 # hit up .jbackup for other options
 if (-e "$ENV{HOME}/.jbackup") {
@@ -107,7 +109,7 @@ $opts{server} = "$opts{server}:$opts{port}"
     if $opts{port} && $opts{port} != 80;
 
 # now figure out what we're doing
-if ($opts{help} || !($opts{sync} || $opts{dumptype})) {
+if ($opts{help} || !($opts{sync} || $opts{dumptype} || $opts{alter_security})) {
     print <<HELP;
 jbackup.pl -- journal database generator and formatter
 
@@ -125,12 +127,29 @@ jbackup.pl -- journal database generator and formatter
     --port=X        Use a non-default port.  (Default: 80)
 
   Data update options:
-    --sync          Update the database with any new data.
- 
+    --sync          Update or create the database.
+
+  Journal modification options:
+    --alter-security=X  Change the security setting of your public entries.
+    --confirm-alter     Confirm that you wish to actually edit your entries.
+
   Data output options:
     --dump=X        Dump data in the specified format: html, xml, raw.
     --publiconly    When dumping, only spit out public entries.
     --file=X        Dump to specified file instead of the screen.
+
+Usage examples:
+
+   ./jbackup.pl --sync
+Create or update the local copy of your journal.  You can put this command
+in a cron or just run it whenever you want.
+
+   ./jbackup.pl --alter-security=friends
+If you wish to alter all of your public entries to be friends only, you can
+use this command to see exactly what will be done.  If you are sure that
+the program is going to take the actions you want, add the 'confirm-alter'
+command line flag.  You can also specify private or the name of some friend
+group that you have defined.
 
 The script also checks for the presence of a ~/.jbackup file, and you can
 put options into it like this:
@@ -170,6 +189,7 @@ my $filename = "$ENV{HOME}/$opts{user}." . ($opts{usejournal} ? "$opts{usejourna
 my $tied = do_tie();
 
 # do something
+do_alter_security($opts{alter_security}, $opts{confirm_alter}) if $opts{alter_security};
 do_sync() if $opts{sync};
 do_dump($opts{dumptype}) if $opts{dumptype};
 
@@ -481,7 +501,7 @@ sub do_dump {
     # raw handler preemption
     my $dt = shift;
     return raw_dump() if $dt eq 'raw';
-    
+
     # put our data into a format usable by the dumpers
     d("do_dump: loading comments");
     my %data;
@@ -522,6 +542,101 @@ sub do_dump {
         # just throw it out, oh well
         print $content;
     }
+}
+
+sub do_alter_security {
+    # raw handler preemption
+    my ($newsec, $confirmed) = @_;
+
+    # verify new security
+    my ($security, $allowmask);
+    if ($newsec eq 'friends') {
+        ($security, $allowmask) = ('usemask', 1);
+    } elsif ($newsec eq 'private') {
+        ($security, $allowmask) = ('private', 0);
+    } else {
+        # probably a group? load their groups
+        my $groups = call_xmlrpc('getfriendgroups', { ver => 1 });
+        foreach my $group (@{$groups->{friendgroups} || []}) {
+            if ($group->{name} eq $newsec) {
+                # it's this group, set it up
+                ($security, $allowmask) = ('usemask', 1 << $group->{id});
+            }
+        }
+    }
+    die "New security must be one of: friends, private, or the name of a group you have.\n"
+        unless defined $security && defined $allowmask;
+    d("do_alter_security: new security = $security ($allowmask)");
+    
+    # load up the user's events
+    d("do_alter_security: loading events");
+    my %events;
+    my @ids = split ',', $bak{"event:ids"};
+    foreach my $id (@ids) {
+        $events{$id} = load_event($id);
+
+        # delete events that are not public
+        delete $events{$id} if $events{$id}->{security} &&
+                               $events{$id}->{security} ne 'public';
+    }
+
+    # now spit out to the user what we're going to change
+    unless ($confirmed) {
+        foreach my $evt (sort { $a->{eventtime} cmp $b->{eventtime} } values %events) {
+            my ($subj, $time) = ($evt->{subject} || '(no subject)', $evt->{eventtime});
+            my $ditemid = $evt->{itemid} * 256 + $evt->{anum};
+            $subj = substr($subj, 0, 40);
+            printf "\%-45s\%s\n", $subj, "http://$opts{server}/users/$opts{linkuser}/$ditemid.html";
+        }
+        return;
+    }
+
+    # if we're confirmed we get here and we should handle uploading the changed entries
+    foreach my $evt (sort { $a->{eventtime} cmp $b->{eventtime} } values %events) {
+        # make SURE we have event text (otherwise we delete their entry)
+        die "FATAL: no event text for event itemid $evt->{itemid}!\n"
+            unless $evt->{event};
+
+        # break up the event time
+        my ($year, $mon, $day, $hour, $min);
+        if ($evt->{eventtime} =~ /^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):\d\d$/) {
+            ($year, $mon, $day, $hour, $min) = ($1, $2, $3, $4, $5);
+        } else {
+            # if we have no time, this is also fatal
+            die "FATAL: $evt->{eventtime} does not match expected eventtime format.\n";
+        }
+
+        # now call for the update
+        my $hash = call_xmlrpc('editevent', {
+            ver => 1,
+            itemid => $evt->{itemid},
+            event => $evt->{event},
+            subject => $evt->{subject},
+            security => $security,
+            allowmask => $allowmask,
+            props => $evt->{props}, # hashref
+            usejournal => $evt->{linkuser},
+            year => $year,
+            mon => $mon,
+            day => $day,
+            hour => $hour,
+            min => $min,
+        });
+
+        # see what we got back and make sure it's kosher
+        die "FATAL: Server sent back ($hash->{itemid}, $hash->{anum}) but expected ($evt->{itemid}, $evt->{anum}).\n"
+            if $hash->{itemid} != $evt->{itemid} || $hash->{anum} != $evt->{anum};
+
+        # print success
+        my $ditemid = $hash->{itemid} * 256 + $hash->{anum};
+        printf "\%s\n%-35s\%s\n\n", ($evt->{subject} || "(no subject)"), "public -> $security ($allowmask)",
+            "http://$opts{server}/users/$opts{linkuser}/$ditemid.html";
+    }
+
+    # tell user to run --sync
+    print "WARNING: you should now run jbackup.pl again with the --sync\n" .
+          "option, AFTER making a backup copy of your current jbak GDBM\n" .
+          "file. That way, if anything got messed up, you still have your journal.\n";
 }
 
 sub dump_invalid {
