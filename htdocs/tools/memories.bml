@@ -111,10 +111,10 @@
      $body .= LJ::html_hidden(authas => $GET{user}) if $GET{authas};
      $body .= "$ML{'.form.sort'} <select name='sortby'>";
      foreach my $sorttype (qw(memid des user)) {
-         my $sel = $sort eq $sorttype ? 'selected' : '';
-         $body .= "<option id='$sorttype' value='$sorttype' $sel><label for='$sorttype'>$sorts{$sorttype}</label>\n";
+         my $sel = $sort eq $sorttype ? 'selected="selected"' : '';
+         $body .= "<option id='$sorttype' value='$sorttype' $sel>$sorts{$sorttype}</option>\n";
      }
-     $body .= "</select> <input type='submit' value='$ML{'.form.switch'}'>";
+     $body .= "</select> <input type='submit' value='$ML{'.form.switch'}' />";
      $body .= "</form>\n";
      $body .= "<a href=\"/tools/memories.bml?${authasarg}user=$user\">&lt;&lt; $ML{'.back'}</a>";
 
@@ -186,10 +186,10 @@
  $body .= "<input type='hidden' name='user' value=\"$user\" />";
  $body .= "$ML{'.form.filter'} <select name=\"filter\">";
  foreach my $filt ("all", "own", "other") {
-     my $sel = $filter eq $filt ? "selected" : "";
-     $body .= "<option value=\"$filt\" $sel>$filters{$filt}\n";
+     my $sel = $filter eq $filt ? "selected='selected'" : "";
+     $body .= "<option value=\"$filt\" $sel>$filters{$filt}</option>\n";
  }
- $body .= "</select> <input type='submit' value=\"$ML{'.form.switch'}\">";
+ $body .= "</select> <input type='submit' value=\"$ML{'.form.switch'}\" />";
  $body .= "</form>";
 
  unless (@sortedrows) {
@@ -202,7 +202,7 @@
          my $keyword = $row->{'keyword'};
          LJ::text_out(\$keyword);
          if ($keyword eq "*") { $keyword = $ML{'.uncategorized'}; }
-         $body .= "<li><b><a href=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</a></b>: $row->{'count'} $noun\n";
+         $body .= "<li><b><a href=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</a></b>: $row->{'count'} $noun\n</li>";
      }
      $body .= "</ul>";
  }
