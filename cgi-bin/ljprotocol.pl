@@ -5,6 +5,7 @@ use strict;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+require "$ENV{'LJHOME'}/cgi-bin/console.pl";
 
 #### New interface (meta handler) ... other handlers should call into this.
 package LJ::Protocol;
@@ -84,8 +85,9 @@ sub do_request
     if ($method eq "getevents")        { return getevents(@args);        }
     if ($method eq "editfriends")      { return editfriends(@args);      }
     if ($method eq "editfriendgroups") { return editfriendgroups(@args); }
+    if ($method eq "consolecommand")   { return consolecommand(@args);   }
 
-    return fail($err,201);    
+    return fail($err,201);
 }
 
 sub login
@@ -1244,6 +1246,36 @@ sub syncitems
     return $res;
 }
 
+sub consolecommand
+{
+    my ($dbs, $req, $err, $flags) = @_;
+
+    # TODO: LJ::Con doesn't yet support $dbs/$dbarg
+    my $dbh = $dbs->{'dbh'};
+
+    # logging in isn't necessary, but most console commands do require it
+    my $remote = undef;
+    $remote = $flags->{'u'} if authenticate($dbs, $req, $err, $flags);
+    
+    my $res = {};
+    my $cmdout = $res->{'results'} = [];
+    
+    foreach my $cmd (@{$req->{'commands'}})  
+    {
+	# callee can pre-parse the args, or we can do it bash-style
+	$cmd = [ LJ::Con::parse_line($cmd) ] unless (ref $cmd eq "ARRAY");
+	
+	my @output;
+	my $rv = LJ::Con::execute($dbh, $remote, $cmd, \@output);
+	push @{$cmdout}, {
+	    'success' => $rv,
+	    'output' => \@output,
+	};
+    }
+
+    return $res;
+}
+
 sub login_message
 {
     my ($dbs, $req, $res, $flags) = @_;
@@ -1538,6 +1570,9 @@ sub do_request
     if ($req->{'mode'} eq "editfriendgroups") {
 	return editfriendgroups($dbs, $req, $res, $flags);
     }
+    if ($req->{'mode'} eq "consolecommand") {
+	return consolecommand($dbs, $req, $res, $flags);
+    }
 
     ### unknown mode!
     $res->{'success'} = "FAIL";
@@ -1752,6 +1787,38 @@ sub syncitems
 	}
     }
     return 1;
+}
+
+## flat wrapper: limited functionality.  (1 command only, server-parsed only)
+sub consolecommand
+{
+    my ($dbs, $req, $res, $flags) = @_;
+
+    my $err = 0;
+    my $rq = upgrade_request($req);
+    delete $rq->{'command'};
+
+    $rq->{'commands'} = [ $req->{'command'} ];
+
+    my $rs = LJ::Protocol::do_request($dbs, "consolecommand", $rq, \$err, $flags);
+    unless ($rs) {
+	$res->{'success'} = "FAIL";
+	$res->{'errmsg'} = LJ::Protocol::error_message($err);
+	return 0;
+    }
+
+    $res->{'cmd_success'} = $rs->{'results'}->[0]->{'success'};
+    $res->{'cmd_line_count'} = 0;
+    foreach my $l (@{$rs->{'results'}->[0]->{'output'}}) {
+	$res->{'cmd_line_count'}++;
+	my $line = $res->{'cmd_line_count'};
+	$res->{"cmd_line_${line}_type"} = $l->[0] 
+	    if $l->[0];
+	$res->{"cmd_line_${line}"} = $l->[1];
+    }
+
+    $res->{'success'} = "OK";
+
 }
 
 ## flat wrapper
