@@ -1,0 +1,33 @@
+###
+###       Lynx Scheme - Very simple for text browsers
+###
+
+h1=>{D}<h2>%%DATA%%</h2>
+
+page<=
+{F}<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><?_code
+ $BML::Lynx::remote = LJ::get_remote();
+ return;
+_code?><html>
+<head>
+<title>%%TITLE%%</title>
+%%HEAD%%
+</head>
+
+<body>
+<h1>%%TITLE%%</h1>
+
+%%BODY%%
+
+<hr />
+
+<p>[ <a href='/'>Home</a> | <?_code
+   return unless $BML::Lynx::remote;
+   my $user = $BML::Lynx::remote->{'user'};
+   return "<a href='/users/$user'>Recent Entries</a> | <a href='/users/$user/friends'>Friends</a> | ";
+_code?><a href='/login.bml'>Login</a>/<a href='/logout.bml'>Logout</a> | <a href='/setscheme.bml'>Set Scheme</a> | <a href='/sitemap.bml'>Site Map</a>]</p>
+
+</body>
+</html>
+<=page
+
