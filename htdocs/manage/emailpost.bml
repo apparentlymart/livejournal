@@ -11,7 +11,7 @@ body<=
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     my $u = LJ::get_remote();
-    return $ML{'error.noremote'} unless $u;
+    $GET{mode} = 'help' unless $u;
 
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
@@ -19,6 +19,11 @@ body<=
     if ($GET{mode} eq 'help') {
 
         my $ret;
+        my $need_login;
+        unless ($u) {
+            $need_login = 1;
+            $u->{user} = 'example';
+        }
 
         LJ::load_user_props($u, qw(emailpost_pin emailpost_allowfrom));
         my @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
@@ -28,6 +33,12 @@ body<=
         my $subject = "Subject: Neat, I can post via email." . '<br /><br />';
         my $from = "From: $addr <br />";
         my $body = "This is the body of my post.";
+
+        if ($need_login) {
+            $ret .= '<?h1 Please log in! h1?>';
+            $ret .= "<?p $ML{'error.noremote'} p?>";
+        }
+
         $ret .= '<?h1 How does this feature work? h1?>';
         $ret .= '<?p Email posting uses normal email messages to post to your journal or a community.
             Your PIN needs to be embedded in the email address, subject, or body of the message.
