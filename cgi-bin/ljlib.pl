@@ -3451,6 +3451,25 @@ sub can_view
 }
 
 # <LJFUNC>
+# name: LJ::wipe_major_memcache
+# des:  invalidate all major memcache items associated with a given user
+# args: u
+# returns: nothing
+# </LJFUNC>
+sub wipe_major_memcache
+{
+    my $u = shift;
+    my $userid = LJ::want_userid($u);
+    foreach my $key ("userid","bio","talk2ct","talkleftct","log2ct",
+                     "log2lt","memkwid","dayct","s1overr","s1uc","fgrp",
+                     "friends","friendofs","tu","upicinf","upiccom",
+                     "upicurl", "intids", "memct", "lastcomm") 
+    {
+        LJ::memcache_kill($userid, $key);
+    }
+}
+
+# <LJFUNC>
 # name: LJ::get_logtext2
 # des: Efficiently retrieves a large number of journal entry text, trying first
 #      slave database servers for recent items, then the master in
