@@ -3250,18 +3250,20 @@ sub get_userpic_info
             # old data in the cache.  delete.
             LJ::MemCache::delete($memkey);
         } else {
-            my @picsflat = unpack "(NNCCA)*", $minfo->[1];
-            while (scalar @picsflat > 0) {
+            while (length $minfo->[1] > 11) {
                 my $pic = {};
                 ($pic->{userid}, $pic->{picid},
                  $pic->{width}, $pic->{height},
-                 $pic->{state}) = splice(@picsflat, 0, 5);
+                 $pic->{state}) = unpack "NNCCA", substr($minfo->[1], 0, 11, '');
                 $info->{pic}{$pic->{picid}} = $pic;
             }
 
-            my %mpickws = unpack "(Z*N)*", $minfo->[2];
-            foreach my $kw (keys %mpickws) {
-                my $id = int($mpickws{$kw});
+            my ($pos, $nulpos);
+            $pos = $nulpos = 0;
+            while (($nulpos = index($minfo->[2], "\0", $pos)) > 0) {
+                my $kw = substr($minfo->[2], $pos, $nulpos-$pos);
+                my $id = unpack("N", substr($minfo->[2], $nulpos+1, 4));
+                $pos = $nulpos + 5; # skip NUL + 4 bytes.
                 $info->{kw}{$kw} = $info->{pic}{$id} if $info;
             }
         }
@@ -3283,8 +3285,8 @@ sub get_userpic_info
             push @pics, $pic;
             $info->{'pic'}->{$pic->{'picid'}} = $pic;
         }
-        $minfo->[1] = pack "(NNCCA)*", map { ($_->{userid}, $_->{picid},
-                                 $_->{width}, $_->{height}, $_->{state}) } @pics;
+        $minfo->[1] = join('', map { pack("NNCCA", $_->{userid}, $_->{picid},
+                                 $_->{width}, $_->{height}, $_->{state}) } @pics);
         
         $sth = $db->prepare("SELECT k.keyword, m.picid FROM userpicmap m, keywords k ".
                             "WHERE m.userid=? AND m.kwid=k.kwid");
@@ -3296,7 +3298,7 @@ sub get_userpic_info
             $info->{'kw'}->{$kw} = $info->{'pic'}->{$id};
             $minfokw{$kw} = int($id);
         }
-        $minfo->[2] = pack "(Z*N)*", %minfokw;
+        $minfo->[2] = join('', map { pack("Z*N", $minfokw{$_}, $_) } keys %minfokw);
         LJ::MemCache::add($memkey, $minfo);
     }
 
