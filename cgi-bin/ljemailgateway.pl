@@ -2,9 +2,22 @@
 
 package LJ::Emailpost;
 use strict;
+
+BEGIN {
+    require "$ENV{LJHOME}/cgi-bin/ljconfig.pl";
+    if ($LJ::USE_PGP) {
+        eval 'use GnuPG::Interface';
+        die "Could not load GnuPG::Interface." if $@;
+        eval 'use Mail::GnuPG';
+        die "Could not load Mail::GnuPG." if $@;
+    }
+}
+
 require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 require "$ENV{LJHOME}/cgi-bin/ljprotocol.pl";
 use MIME::Words ();
+use IO::Handle;
+use File::Temp ();
 
 sub process {
     my ($entity, $to) = @_;
@@ -56,7 +69,7 @@ sub process {
     ($user, $journal) = split(/\./, $user) if $user =~ /\./;
     my $u = LJ::load_user($user);
     return 0 unless $u;
-    LJ::load_user_props($u, 'emailpost_pin');
+    LJ::load_user_props($u, 'emailpost_pin') unless (lc($pin) eq 'pgp' && $LJ::USE_PGP);
 
     # Pick what address to send potential errors to.
     my $addrlist = LJ::Emailpost::get_allowed_senders($u);
@@ -97,24 +110,38 @@ sub process {
         }
     }
 
-    # Validity checks
-    return $err->("No allowed senders have been saved for your account.", $err_addr)
-        unless ref $addrlist;
-    my $ok = 0;
-    foreach (keys %$addrlist) {
-        if (lc($from) eq lc) {
-            $ok = 1;
-            last;
+    # Validity checks.  We only care about these if they aren't using PGP.
+    unless (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
+        return $err->("No allowed senders have been saved for your account.", $err_addr)
+            unless ref $addrlist;
+        my $ok = 0;
+        foreach (keys %$addrlist) {
+            if (lc($from) eq lc) {
+                $ok = 1;
+                last;
+            }
         }
+        return $err->("Unauthorized sender address: $from") unless $ok; # don't mail user due to bounce spam
+        return $err->("Invalid PIN.", $err_addr) unless lc($pin) eq lc($u->{emailpost_pin});
     }
-    return $err->("Unauthorized sender address: $from") unless $ok; # don't mail user due to bounce spam
-    return $err->("Invalid PIN.", $err_addr) unless lc($pin) eq lc($u->{emailpost_pin});
     return $err->("Email gateway access denied for your account type.", $err_addr)
         unless LJ::get_cap($u, "emailpost");
 
+    # PGP signed mail?  We'll see about that.
+    if (lc($pin) eq 'pgp' && $LJ::USE_PGP) {
+        my %gpg_errcodes = ( # temp mapping until translation
+                'bad' => "PGP signature found to be invalid.",
+                'no_key' => "You don't have a PGP key uploaded.",
+                'bad_tmpdir' => "Problem generating tempdir: Please try again.",
+                'invalid_key' => "Your PGP key is invalid.  Please upload a proper key.",
+                'not_signed' => "You specified PGP verification, but your message isn't PGP signed!");
+        my $gpgcode = LJ::Emailpost::check_sig($u, $entity);
+        return $err->($gpg_errcodes{$gpgcode}) unless $gpgcode eq 'good';
+    }
+
     $body =~ s/^[\-_]{2,}\s*\r?\n.*//ms; # trim sigs
     $body =~ s/ \n/ /g if lc($format) eq 'flowed'; # respect flowed text
-    
+   
     my $req = {
         'usejournal' => $journal,
         'ver' => 1,
@@ -126,7 +153,7 @@ sub process {
     };
 
     my $post_error;
-    my $res = LJ::Protocol::do_request("postevent", $req, \$post_error, { noauth=>1 });
+    LJ::Protocol::do_request("postevent", $req, \$post_error, { noauth=>1 });
     return $err->(LJ::Protocol::error_message($post_error)) if $post_error;
 
     return 1; 
@@ -192,6 +219,7 @@ sub get_text_entity
     }
 
     if ($mime_type eq "multipart/alternative" ||
+        $mime_type eq "multipart/signed" ||
         $mime_type eq "multipart/mixed") {
         my $partcount = $entity->parts;
         for (my $i=0; $i<$partcount; $i++) {
@@ -214,4 +242,43 @@ sub get_text_entity
     return undef;
 }
 
-1;
+
+# Verifies an email pgp signature as being valid.
+# Returns codes so we can use the pre-existing err subref, 
+# without passing everything all over the place.
+sub check_sig {
+    my ($u, $entity) = @_;
+
+    LJ::load_user_props($u, 'public_key');
+    my $key = $u->{public_key};
+    return 'no_key' unless $key;
+
+    # Create work directory.
+    my $tmpdir = File::Temp::tempdir( DIR=>'/tmp', CLEANUP=>1 );
+    return 'bad_tmpdir' unless chdir($tmpdir);
+
+    # Pull in user's key, add to keyring.
+    my ($in, $out, $err, $gpg_handles, $gpg, $gpg_pid);
+    $_ = IO::Handle->new() foreach $in, $out, $err;
+    $gpg_handles = GnuPG::Handles->new( stdin=>$in, stdout=>$out, stderr=>$err );
+    $gpg = GnuPG::Interface->new();
+    $gpg->options->hash_init( armor=>1, homedir=>$tmpdir );
+    $gpg_pid = $gpg->import_keys( handles=>$gpg_handles );
+    print $in $key;
+    close $in; close $out;
+    waitpid $gpg_pid, 0;
+    return 'invalid_key' if int($? / 256);  # invalid pgp key
+
+    # Don't need this stuff anymore.
+    undef foreach $gpg, $gpg_handles;
+
+    my ($gpg_email, $ret);
+    $gpg_email = new Mail::GnuPG( keydir=>$tmpdir );
+    eval { $ret = $gpg_email->verify($entity); };
+    if (defined($ret)) {
+        $ret == 0 ? return 'good' : return 'bad';
+    } else {
+        return 'not_signed';
+    }
+}
+

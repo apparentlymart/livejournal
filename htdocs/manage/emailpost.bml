@@ -11,25 +11,24 @@ body<=
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     my $u = LJ::get_remote();
-    $GET{mode} = 'help' unless $u;
+    my $mode = $GET{mode};
+    $mode = 'help' unless $u;
 
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
     # Help text
-    if ($GET{mode} eq 'help') {
+    if ($mode eq 'help') {
 
         my $ret;
         my $need_login;
-        unless ($u) {
-            $need_login = 1;
-            $u->{user} = 'example';
-        }
+        my $user = $u ? $u->{user} : 'exampleusername';
+        $need_login = 1 unless $u;
 
         LJ::load_user_props($u, qw(emailpost_pin emailpost_allowfrom));
         my @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
         my $addr = $address[0] || 'allowed_sender@example.com';
         my $pin = $u->{emailpost_pin} || 'PIN';
-        my $to = "To: " .  $u->{user} . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />'; 
+        my $to = "To: $user" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />'; 
         my $subject = "Subject: Neat, I can post via email." . '<br /><br />';
         my $from = "From: $addr <br />";
         my $body = "This is the body of my post.";
@@ -46,11 +45,11 @@ body<=
             from an email address on your "Allowed sender addresses" list. If you embed your PIN
             in either the subject or the body, it will be automatically removed before posting. p?>';
 
-        $ret .= '<?h1 Examples h1?><br />';
+        $ret .= '<?h1 Basic usage h1?><br />';
 
         $ret .= '<?h2 PIN in email address h2?>';
         $ret .= '<div style="margin-left:40px" class="postheading">';
-        $ret .= "To: " . $u->{user} . '<b>+' . $pin . '</b>@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
+        $ret .= "To: $user". '<b>+' . $pin . '</b>@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
         $ret .= $from . $subject . $body;
         $ret .= '</div><br />';
         
@@ -65,19 +64,21 @@ body<=
         $ret .= '<div style="margin-left:40px" class="postheading">';
         $ret .= $to . $from . $subject;
         $ret .= "<b>+$pin</b> " . $body;
-        $ret .= '</div><br />';
+        $ret .= '</div><br /><br />';
+
+        $ret .= '<?h1 Optional features h1?><br />';
 
         $ret .= '<?h2 Posting to a community h2?>';
         $ret .= '<?p Simply embed the community name in the email address. p?>';
         $ret .= '<div style="margin-left:40px">';
-        $ret .= "To: " . $u->{user} . '.<b>community</b>+' . $pin . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
+        $ret .= "To: $user" . '.<b>community</b>+' . $pin . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
         $ret .= $from . $subject . $body;
         $ret .= '</div><br />';
 
         $ret .= '<?h2 Removing unwanted text h2?>';
         $ret .= '<?p All text below two or more dashes or underscores ("--" or "__") on a line by itself will be automatically removed. The red text below won\'t show up in your posting. p?>';
         $ret .= '<div style="margin-left:40px">';
-        $ret .= "To: " . $u->{user} . '<b>+' . $pin . '</b>@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
+        $ret .= "To: $user" . '<b>+' . $pin . '</b>@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
         $ret .= $from . $subject . $body;
         $ret .= "<br />--<br /><font color='red'>";
         $ret .= "This text and anything underneath it will be ignored, including automatic signatures added by free email services.<br />";
@@ -89,6 +90,21 @@ body<=
         $ret .= '<div style="margin-left:40px">';
         $ret .= 'To: <b>some-user.some-community</b>+' . $pin . '</b>@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
         $ret .= $from . $subject . $body;
+        $ret .= '</div><br /><br />';
+
+        $ret .= '<?h1 Advanced usage h1?><br />';
+
+        $ret .= '<a name="pgp"></a>';
+        $ret .= '<?h2 PGP/GPG message signing <img src="/img/key.gif" width="16" height="16"> h2?>';
+        $ret .= '<?p If you specify "<b>PGP</b>" as your PIN,
+                    allowed sender addresses and saved PIN are completely ignored.
+                    Your email will only be posted if it is signed with a valid PGP/GPG private key.
+                    You must first upload your public key <a href="/manage/pubkey.bml">here</a>. p?>';
+        $ret .= '<div style="margin-left:40px">';
+        $ret .= "To: $user<b>+PGP</b>" . '@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
+        $ret .= 'From: anywhere@example.com <br />';
+        $ret .= $subject . $body;
+        $ret .= '<br />This body should be properly signed with my private key.'; 
         $ret .= '</div><br />';
 
         return $ret;
@@ -143,9 +159,6 @@ body<=
     foreach (sort keys %$addrlist) { push(@address, $_) }
     
     my $ret;
-    $ret .= "<form method='get' action='phonepost.bml'>\n";
-    $ret .= "</form>\n\n";
-
     $ret .= "<?p If you'd like to be able to update your journal via email, please fill out the following fields. 
         For more help using this feature, check out the <a href='?mode=help'>instructions</a>. p?>";
 

@@ -100,7 +100,7 @@
  ### load user props.  some don't apply to communities
  {
      my @props = qw(opt_whatemailshow country state city zip renamedto
-                    journaltitle journalsubtitle
+                    journaltitle journalsubtitle public_key
                     url urlname opt_hidefriendofs dont_load_members no_mail_alias);
      unless ($com || $synd) { push @props, qw(aolim icq yahoo msn gender jabber); }
      if ($synd) { push @props, qw(rssparseerror); }
@@ -285,7 +285,12 @@
          'u' => $u,
          'ret' => \$hook_extra,
      });
-     $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='/$dir/$user/'><b>$user</b></a> ($u->{'userid'}) $hook_extra</td>\n";
+     $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.user'}</b></td><td width='100%'><a href='/$dir/$user/'><b>$user</b></a> ($u->{'userid'}) $hook_extra ";
+     if ($u->{public_key}) {
+         $body .= "<a href='/pubkey.bml?user=$user'>";
+         $body .= "<img src='/img/key.gif' width='16' height='16' border='0' alt='View public key' title='View public key'></a>"
+     }
+     $body .= "</td>\n";
  }
      
 ### picture

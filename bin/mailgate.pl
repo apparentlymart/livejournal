@@ -190,7 +190,8 @@ sub get_text_entity
     }
 
     if ($mime_type eq "multipart/alternative" ||
-        $mime_type eq "multipart/mixed") {
+        $mime_type eq "multipart/mixed" ||
+        $mime_type eq "multipart/signed") {
         my $partcount = $entity->parts;
         for (my $i=0; $i<$partcount; $i++) {
             my $alte = $entity->parts($i);
