@@ -141,7 +141,7 @@
  
  $body .= "<tr><td>&nbsp;</td><td><input type=submit value=\"Send email\"></td></tr>\n";
  $body .= "</table>";
-
+ $body .= "</form>";
 
  return;
 
