@@ -92,6 +92,7 @@ general /talkpost_do.bml.opt.spellcheck
 
 general /talkread.bml.pageofpages
 
+general /update.bml.update.about
 general /update.bml.login.success
 general /update.bml.htmlokay
 

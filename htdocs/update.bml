@@ -97,7 +97,7 @@
 
         my $out;
 
-        $out .= "<?h1 $ML{'.update.head'} h1?><?p $ML{'.update.about'} p?><?hr?>";
+        $out .= "<?h1 $ML{'.update.head'} h1?><?p $ML{'.update.alternate'} p?><?hr?>";
 
         {
             # if they submit the form and are spellchecking, remember

@@ -3056,7 +3056,7 @@ This could be because: <ol>
 
 /update.bml.title.readonly=Read-only mode
 
-/update.bml.update.about=If you don't want to <a href="/download/">download a client</a> for your computer, or if one doesn't exist for your computer, you may use this page to update your LiveJournal.  This is also useful if you're on vacation or away from your primary computer.
+/update.bml.update.alternate=If you don't want to <a href="/download/">download a client</a> for your computer, or if one doesn't exist for your computer, you may use this page to update your journal.  This is also useful if you're on vacation or away from your primary computer.
 
 /update.bml.update.head=Update your Journal...
 
