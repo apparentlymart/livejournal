@@ -623,9 +623,10 @@ $body .= "<TR><TD ALIGN=RIGHT><B>Comments:</B></TD><TD COLSPAN=2><B>Posted:</B> 
 	    $body .= "<a href='userinfo.bml?user=$_'><b>$_</b></a> can post to $u->{'user'}<br>\n";
 	}
 	$body .= "</td></tr>";
-	$body .= "</table>\n";
     }
 }
+
+$body .= "</table>\n";
 
 # removed until we run graphviz locally
 # $body .= "<P><A HREF=\"/friends/graph.bml?user=$user\"><B>Graph of friends</B></A>";
