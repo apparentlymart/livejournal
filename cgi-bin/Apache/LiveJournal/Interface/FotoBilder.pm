@@ -17,7 +17,7 @@ sub handler
     my %POST = $r->content;
     $r->content_type("text/plain");
     $r->send_http_header();
-    
+
     $r->print("fotobilder-interface-version: 1\n");
 
     if ($cmd eq "checksession") {
@@ -33,8 +33,7 @@ sub handler
     if ($cmd eq "makechals") {
         my $count = int($POST{'count'}) || 1;
         if ($count > 50) { $count = 50; }
-        my $dbr = LJ::get_dbh("slave", "master");
-        my $u = LJ::load_user($dbr, $POST{'user'});
+        my $u = LJ::load_user($POST{'user'});
         return OK unless $u;
 
         $r->print("count: $count\n");
