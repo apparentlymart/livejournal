@@ -94,12 +94,13 @@
             my %picid_of_kwid;
             my %ctype;  # picid -> contenttype, for delete mode
             my %states; # picid -> state, for setting new default
+            my %locations; # picid -> location, for deleting
             my @comments;
             my %exist_comments;
 
             # select all of their userpics and iterate through them
             if ($u->{'dversion'} > 6) {
-                $sth = $dbcr->prepare("SELECT picid, width, height, state, fmt, comment " .
+                $sth = $dbcr->prepare("SELECT picid, width, height, state, fmt, comment, location " .
                                      "FROM userpic2 WHERE userid=?");
             } else {
                 $sth = $dbh->prepare("SELECT picid, width, height, state, contenttype " .
@@ -111,6 +112,12 @@
                 # ignore anything expunged
                 next if $pic->{state} eq 'X';
                 
+                # store picture information
+                $states{$pic->{picid}} = $pic->{state};
+                $locations{$pic->{picid}} = $pic->{location}
+                    if $u->{dversion} > 6;
+                $exist_comments{$pic->{picid}} = $pic->{comment};
+
                 # delete this pic
                 if ($POST{"delete_$pic->{'picid'}"}) {
                     push @delete, $pic->{'picid'};
@@ -119,14 +126,10 @@
                 }
                 
                 # make a list of inactive picids
-                $states{$pic->{picid}} = $pic->{state};
                 if ($pic->{'state'} eq 'I') {
                     push @inactive_picids, $pic->{'picid'};
                     next;
                 }
-
-                # comments
-                $exist_comments{$pic->{'picid'}} = $pic->{'comment'};
 
                 # we're going to modify keywords on active pictures
                 my $c = 1;
@@ -206,7 +209,10 @@
 
                     # try and delete from either the blob server or database,
                     # and only after deleting the image do we delete the metadata.
-                    if ($LJ::USERPIC_BLOBSERVER &&
+                    if ($LJ::USERPIC_MOGILEFS && $locations{$picid} eq 'mogile') {
+                        $deleted = 1
+                            if $LJ::MogileFS->delete($u->mogfs_userpic_key($picid));
+                    } elsif ($LJ::USERPIC_BLOBSERVER &&
                         LJ::Blob::delete($u, "userpic", $fmt, $picid)) {
                         $deleted = 1;
                     } elsif ($u->do("DELETE FROM userpicblob2 WHERE ".
@@ -214,6 +220,8 @@
                                     $u->{userid}, $picid) > 0) {
                         $deleted = 1;
                     }
+
+                    # now delete the metadata if we got the real data
                     if ($deleted) {
                         if ($u->{'dversion'} > 6) {
                             $u->do("DELETE FROM userpic2 WHERE picid=? AND userid=?",
@@ -235,7 +243,10 @@
                     # that and make sure they can delete their metadata
                     if (! $deleted) {
                         my $present;
-                        if ($LJ::USERPIC_BLOBSERVER) {
+                        if ($LJ::USERPIC_MOGILEFS && $locations{$picid} eq 'mogile') {
+                            my $blob = $LJ::MogileFS->get_file_data($u->mogfs_userpic_key($picid));
+                            $present = length($blob) ? 1 : 0;
+                        } elsif ($LJ::USERPIC_BLOBSERVER) {
                             my $blob = LJ::Blob::get($u, "userpic", $fmt, $picid);
                             $present = length($blob) ? 1 : 0;
                         }
