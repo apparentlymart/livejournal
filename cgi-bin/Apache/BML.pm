@@ -341,8 +341,7 @@ sub bml_block
         $CodeBlockCache{$pop_cache} = $csub if $pop_cache;
 
         # and try to run it (wrapped in eval to catch run-time errors)
-        #my $ret = (eval { $csub->(); })[0];
-        my $ret = $csub->();
+        my $ret = (eval { $csub->(); })[0];
         if ($@) { return "<B>[Error: $@]</B>"; }
         
         return $ret if $CodeBlockOpts{'raw'} or $ret eq "";
@@ -507,18 +506,20 @@ sub bml_block
     my $expanded = $template;
     $expanded = parsein($expanded, \%element) unless $preparsed;
 
-    # wants variable interpolation, but no expansion:
-    return $expanded if $blockflags =~ /R/;
-    
-    my $out;
-    push @{$req->{'BlockStack'}}, "";
-    my $opts = { %{$option_ref} };
-    if ($preparsed) {
-        $opts->{'DO_CODE'} = $req->{'env'}->{'AllowTemplateCode'};
+    # {R} flag wants variable interpolation, but no expansion:
+    unless ($blockflags =~ /R/)
+    {    
+        my $out;
+        push @{$req->{'BlockStack'}}, "";
+        my $opts = { %{$option_ref} };
+        if ($preparsed) {
+            $opts->{'DO_CODE'} = $req->{'env'}->{'AllowTemplateCode'};
+        }
+        bml_decode($req, \$expanded, \$out, $opts);
+        pop @{$req->{'BlockStack'}};
+        $expanded = $out;
     }
-    bml_decode($req, \$expanded, \$out, $opts);
-    pop @{$req->{'BlockStack'}};
-    $expanded = $out;
+
     $expanded = parsein($expanded, \%element) if $preparsed;
     return $expanded;    
 }
