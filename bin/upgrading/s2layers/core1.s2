@@ -152,7 +152,7 @@ class Link
     alt text works similarly to [member[Link.caption]].";
 
     function print_button
-    "Output this Link as a clickable button using [member[Link.image]]";
+    "Output this Link as a clickable button using [member[Link.icon]]";
 
     function print_text
     "Output this Link as a simple HTML link.";
@@ -291,7 +291,7 @@ class Redirector
     var readonly string type;
     var readonly string url;
     
-    function start_form() "Starts an inline HTML form, then calls [method[Redirector.print_hiddens()]].  You can also make it yourself, using [member[Redirectory.url]], if you need special form attributes.";
+    function start_form() "Starts an inline HTML form, then calls [method[Redirector.print_hiddens()]].  You can also make it yourself, using [member[Redirector.url]], if you need special form attributes.";
     function print_hiddens() "Prints the necessary hidden elements for a form.  Called automatically by [method[Redirector.start_form()]].";
     function end_form() "Prints a form close tag.";
     
@@ -333,14 +333,14 @@ class Page
     function view_title : string
     "Return a title for this particular page, such as \"Friends' Recent Entries\" for the friends view,
     or a date for the day view. Should be overridden in i18n layers. Ideally, layout layers should never touch
-    this.  See [member[Page.title]].";
+    this.  See [method[Page.title()]].";
 
     function title : string 
-    "Return a relevant combination of [member[global_title]] and [method[Page::view_title()]]. Should be
-    overridden in layout layers.";
+    "Return a relevant combination of [member[Page.global_title]] and [method[Page.view_title()]].  May be
+    overridden in layout layers or left untouched for the core layer to handle.";
     
     function print_body 
-    "Call from [method[Page::print()]] to render parts of the view that are specific to the view, eg print
+    "Call from [method[Page.print()]] to render parts of the view that are specific to the view, eg print
     the recent set of journal entries, recent friends entries, or rows of user information";
  
     function print_entry(Entry e) 
@@ -550,7 +550,7 @@ function builtin viewer_is_owner() : bool
 Useful for returning links to manage information, or edit entries.";
 
 function builtin get_page () : Page
-"Gets the top-level [class[Page]] instance that LiveJournal ran the [method[Page::print()]] method on.";
+"Gets the top-level [class[Page]] instance that LiveJournal ran the [method[Page.print()]] method on.";
 
 function builtin get_url(string user, string view) : string 
 "Returns a URL to the specified view for the specified user. Views use the same names as elsewhere. (recent, friends, archive, month, userinfo)";
@@ -705,7 +705,8 @@ set page_day_sortorder = "forward";
 set page_year_sortorder = "forward";
 
 property bool page_month_textsubjects {
-    des = "If set, subjects will be provided in plain text only, with HTML removed.";
+    des = "If set, subjects will be provided for the month view in plain text only, with HTML removed.";
+    doc = "If set, subjects will be provided for the [class[MonthPage]] in plain text only, with HTML removed.";
 }
 set page_month_textsubjects = true;
 
@@ -912,7 +913,7 @@ function prop_init ()
 }
 
 function print_stylesheet ()
-  "Prints a stylesheet, the URL of which can be referenced by [member[Page.stylesheet_url]].  This is another S2 entry point, in addition to [member[Page::print()]]." {
+  "Prints a stylesheet, the URL of which can be referenced by [member[Page.stylesheet_url]].  This is another S2 entry point, in addition to [method[Page.print()]]." {
 }
 
 function htmlattr(string name, string value) : string 

@@ -145,15 +145,15 @@ sub autogen_core
     # sets
     if (my $prop = $s2info->{'prop'}) {
         my $set = $s2info->{'set'};
-        print AC "<section id='&s2.idroot;siteapi.core$cv.props'>\n";
+        print AC "<section id='&s2.idroot;core$cv.props'>\n";
         print AC "<title>Properties</title>";
         print AC "<variablelist>\n";
 
         foreach my $pname (sort keys %$prop) {
             my $prop = $prop->{$pname};
-            my $des = $prop->{'des'};
+            my $des = $prop->{'doc'} || $prop->{'des'};
             $xlink->(\$des);
-            print AC "<varlistentry id='&s2.idroot;siteapi.core$cv.prop.$pname'><term><varname>\$*$pname</varname> : <classname>$prop->{type}</classname></term>\n";
+            print AC "<varlistentry id='&s2.idroot;core$cv.prop.$pname'><term><varname>\$*$pname</varname> : <classname>$prop->{type}</classname></term>\n";
             print AC "<listitem><para>$des</para></listitem>";
          
             my $v = $set->{$pname};
@@ -182,7 +182,7 @@ sub autogen_core
     # global functions
     my $gb = $s2info->{'global'};
     if (ref $gb eq "HASH" && %$gb) {
-        print AC "<section id='&s2.idroot;siteapi.core$cv.funcs'>\n";
+        print AC "<section id='&s2.idroot;core$cv.funcs'>\n";
         print AC "<title>Functions</title>";
         print AC "<variablelist>\n";
 
@@ -199,7 +199,7 @@ sub autogen_core
             $xlink_args->(\$args);
             
             my $idsig = $fname;
-            print AC "<varlistentry id='&s2.idroot;siteapi.core$cv.func.$idsig'><term><function>$args</function> : $rt</term><listitem><para>$ds</para></listitem></varlistentry>\n";
+            print AC "<varlistentry id='&s2.idroot;core$cv.func.$idsig'><term><function>$args</function> : $rt</term><listitem><para>$ds</para></listitem></varlistentry>\n";
         }
 
         print AC "</variablelist>\n";
@@ -208,7 +208,7 @@ sub autogen_core
         
     if (%$class) 
     {
-        print AC "<section id='&s2.idroot;siteapi.core$cv.classes'>\n";
+        print AC "<section id='&s2.idroot;core$cv.classes'>\n";
         print AC "  <title>Classes</title>\n";
         foreach my $cname (sort { lc($a) cmp lc($b) } keys %$class) {
             print AC "<refentry id='&s2.idroot;core$cv.class.$cname'>";
@@ -272,7 +272,7 @@ sub autogen_core
                 my $args = $_;
                 $xlink_args->(\$args);
 
-                print AC "<varlistentry id='&s2.idroot;core$cv.meth.${cname}::$_'>";
+                print AC "<varlistentry id='&s2.idroot;core$cv.meth.${cname}.$_'>";
                 print AC "<term><methodname>$args : $rt</methodname></term>";
                 print AC "<listitem><para>$ds</para></listitem></varlistentry>";
             }
