@@ -495,8 +495,8 @@ sub auth_fields
 #      to the url, then adds any additional data to the url.
 # returns: The full url
 # args: form, newvars
-# des-form: A hash of the form information from the page.
-# des-newvars: A hash of information to add to the link which is not in
+# des-form: A hashref of the form information from the page.
+# des-newvars: A hashref of information to add to the link which is not in
 #              the form hash.
 # </LJFUNC>
 sub self_link
@@ -2318,7 +2318,7 @@ sub html_select
     while (my ($value, $text) = splice(@items, 0, 2)) {
 	my $sel = "";
 	if ($value eq $opts->{'selected'}) { $sel = " selected"; }
-	$ret .= "<option value=\"$value\"$sel>$text";
+	$ret .= "<option value=\"$value\"$sel>$text</option>";
     }
     $ret .= "</select>";
     return $ret;
