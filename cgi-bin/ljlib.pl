@@ -2617,12 +2617,12 @@ sub get_talktext2
         $k =~ /^talk(.*):(\d+):(\d+):(\d+)/;
         if ($opts->{'onlysubjects'} && $1 eq "subject") {
             delete $need{$4};
-            $lt->{$3} = [ $v ];
+            $lt->{$4} = [ $v ];
         }
         if (! $opts->{'onlysubjects'} && $1 eq "body" &&
             exists $mem->{"talksubject:$2:$3:$4"}) {
             delete $need{$4};
-            $lt->{$3} = [ $mem->{"talksubject:$2:$3:$4"}, $v ];
+            $lt->{$4} = [ $mem->{"talksubject:$2:$3:$4"}, $v ];
         }
     }
     return $lt unless %need;
