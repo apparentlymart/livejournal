@@ -20,7 +20,7 @@ BML::register_block("SUPPORT_EMAIL", "S", $LJ::SUPPORT_EMAIL);
     if ($LJ::FTPPREFIX) {
         $dl .= " - <a href=\"$LJ::FTPPREFIX/%%DATA%%\">FTP</a>";
     }
-    BML::register_block("DL", "DS", $dl);
+    BML::register_block("DL", "DR", $dl);
 }
 
 # set default path/domain for cookies
