@@ -20,7 +20,7 @@ BODY<=
  if (length($user) > 15) { push @errors, "Username is too long, 15 character max"; }
  unless ($user) { push @errors, "You must enter a username"; }
  if ($user =~ /[^\w]/) { push @errors, "Username contains invalid characters"; }
- foreach my $re (@LJ::PROTECTED_USERNAMES) {
+ foreach my $re ('^system$', @LJ::PROTECTED_USERNAMES) {
      if ($user =~ /$re/) { push @errors, "Sorry, that's a reserved username."; }     
  }
  
