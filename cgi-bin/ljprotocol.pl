@@ -1419,11 +1419,11 @@ sub do_request
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
     %{$res} = ();                      # clear the given response hash
+    $flags = {} unless (ref $flags eq "HASH");
 
     my ($user, $userid, $journaltype, $name, $paidfeatures, $correctpassword, $status, $statusvis, $track, $sth);
     $user = &trim(lc($req->{'user'}));
     my $quser = $dbh->quote($user);
-
 
     # check for an alive database connection
     unless ($dbh) {
