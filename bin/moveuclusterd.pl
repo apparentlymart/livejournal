@@ -119,7 +119,7 @@ BEGIN {
 ###############################################################################
 
 ### Main body
-MAIN: {
+sub MAIN {
     my (
         $debugLevel,            # Debugging level to set in server
         $helpFlag,              # User requested help?
@@ -194,6 +194,11 @@ sub abortWithUsage {
         pod2usage( -verbose => 1, -exitval => 1 );
     }
 }
+
+
+
+### If run from the command line, run the server.
+if ( $0 eq __FILE__ ) { MAIN() }
 
 
 #####################################################################
@@ -915,7 +920,7 @@ sub shutdown {
 
 
 #####################################################################
-###	E V E N T   S U B S Y S T E M   M E T H O D S
+### E V E N T   S U B S Y S T E M   M E T H O D S
 #####################################################################
 
 ### METHOD: handleEvent( $type, @args )
@@ -1272,8 +1277,9 @@ package JobServer::Job;
 use strict;
 
 BEGIN {
-    use Carp        qw{croak confess};
-    use Time::HiRes qw{time};
+    use Carp            qw{croak confess};
+    use Time::HiRes     qw{time};
+    use Scalar::Util    qw{blessed};
 
     use lib "$ENV{LJHOME}/cgi-bin";
     require 'ljlib.pl';
@@ -1321,6 +1327,9 @@ INIT {
 sub new {
     my JobServer::Job $self = shift;
     my $server = shift or confess "no server object";
+    croak "Illegal first argument: expected a JobServer::Client, got a ",
+        ref $server ? ref $server : "simple scalar ('$server')"
+        unless blessed $server && $server->isa( 'JobServer::Client' );
 
     $self = fields::new( $self ) unless ref $self;
 
@@ -1351,6 +1360,14 @@ sub new {
         # Any remaining are assumed to be pairs in an options hash
         $self->{options} = { @_ };
     }
+
+    # Check for the stuff we need
+    croak "Invalid job specifications: No userid"
+        unless defined $self->{userid};
+    croak "Invalid job specifications: No source clusterid"
+        unless defined $self->{srcclusterid};
+    croak "Invalid job specifications: No destination clusterid"
+        unless defined $self->{dstclusterid};
 
     $self->{server} = $server;
     $self->{prelocktime} = 0.0;
@@ -2332,8 +2349,7 @@ sub cmd_shutdown {
 # 
 # 
 
-
-
+1;
 
 # Local Variables:
 # mode: perl
