@@ -8,43 +8,8 @@ $maint{'genstatspics'} = sub
     my $dbs = LJ::get_dbs();
     my $dbh = $dbs->{'dbh'};
 
-    print "-I- paid accounts by day.\n";
-
-    ### suck the data in
-    $sth = $dbh->prepare("SELECT DATE_FORMAT(datesent, '%Y-%m-%d') AS 'day', COUNT(*) AS 'count' FROM payments GROUP BY 1 ORDER BY 1 DESC LIMIT 60");
-    $sth->execute;
-    if ($dbh->err) { die $dbh->errstr; }
-
-    my @data;
-    my $i;
-    my $max;
-    while (my ($date, $count) = $sth->fetchrow_array) 
-    {
-	$date =~ s/^\d\d\d\d-//;
-	unshift @{$data[0]}, ($i++ % 5 == 0 ? $date : "");
-	unshift @{$data[1]}, $count;
-	if ($count > $max) { $max = $count; }
-    }
-
-    # posts by day graph
-    my $g = GD::Graph::bars->new(520, 350);
-    $g->set(
-	    x_label           => 'Day',
-	    y_label           => 'Accounts',
-	    title             => 'Paid accounts per day',
-	    tranparent        => 0,
-	    y_max_value       => $max,
-	    );
-
-    my $gd = $g->plot(\@data);
-    open(IMG, ">$LJ::HTDOCS/stats/paidbyday.png") or die $!;
-    binmode IMG;
-    print IMG $gd->png;
-    close IMG;
-
+    ### get posts by day data from summary table
     print "-I- new accounts by day.\n";
-
-    ### suck the data in
     $sth = $dbh->prepare("SELECT DATE_FORMAT(statkey, '%m-%d') AS 'day', statval AS 'new' FROM stats WHERE statcat='newbyday' ORDER BY statkey DESC LIMIT 60");
     $sth->execute;
     if ($dbh->err) { die $dbh->errstr; }
