@@ -1,9 +1,9 @@
 SECURITYPRIVATE=>{Ss}<img src="(=IMGPREFIX=)/icon_private.gif" width=16 height=16 align=absmiddle>
 SECURITYPROTECTED=>{Ss}<img src="(=IMGPREFIX=)/icon_protected.gif" width=14 height=15 align=absmiddle>
-LJUSER=>{DSs}<a href="/userinfo.bml?user=%%DATA%%"><img src="(=IMGPREFIX=)/userinfo.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
-LJCOMM=>{DSs}<a href="/userinfo.bml?user=%%DATA%%"><img src="(=IMGPREFIX=)/community.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
-LJUSERF=>{DSs}<a href="/userinfo.bml?user=%%DATA%%&amp;mode=full"><img src="(=IMGPREFIX=)/userinfo.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
-HELP=>{DS}(<a href="%%DATA%%"><i>help</i></a>)
+LJUSER=>{DRs}<a href="/userinfo.bml?user=%%DATA%%"><img src="(=IMGPREFIX=)/userinfo.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
+LJCOMM=>{DRs}<a href="/userinfo.bml?user=%%DATA%%"><img src="(=IMGPREFIX=)/community.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
+LJUSERF=>{DRs}<a href="/userinfo.bml?user=%%DATA%%&amp;mode=full"><img src="(=IMGPREFIX=)/userinfo.gif" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE border=0></a><b><a href="/users/%%DATA%%/">%%DATA%%</a></b>
+HELP=>{DR}(<a href="%%DATA%%"><i>help</i></a>)
 INERR=>{DS}<font color="#ff0000"><b>%%DATA%%</b></font>
 
 NEEDLOGIN<=
@@ -194,25 +194,17 @@ _CODE=)
 AL=>{P}<I><A HREF="%%DATA1%%">%%DATA2%%</A></I> <IMG SRC="/img/external_link.gif" WIDTH=16 HEIGHT=11 ALIGN=ABSMIDDLE>
 AWAYLINK=>{P}<I><A HREF="%%DATA1%%">%%DATA2%%</A></I> <IMG SRC="/img/external_link.gif" WIDTH=16 HEIGHT=11 ALIGN=ABSMIDDLE>
 
-H1=>{DS}<H1>%%DATA%%</H1>
-H2=>{DS}<H2>%%DATA%%</H2>
+H1=>{D}<H1>%%DATA%%</H1>
+H2=>{D}<H2>%%DATA%%</H2>
 
 # Banner Header: search results banner, content desriptor, etc...
-BH=>{DS}<P ALIGN=CENTER><FONT FACE="Arial,Helvetica" COLOR="#CC0000" SIZE=-1><B>%%DATA%%</B></FONT>
+BH=>{D}<P ALIGN=CENTER><FONT FACE="Arial,Helvetica" COLOR="#CC0000" SIZE=-1><B>%%DATA%%</B></FONT>
 
-GRIN=>&lt;grin&gt;
+GRIN=>{S}&lt;grin&gt;
 HR=>{S}<HR>
 
 NEWLINE=>{S}<BR>&nbsp;&nbsp;&nbsp;&nbsp;
 P=>{D}<P>%%DATA%%</P>
-
-STANDOUTO<=
-{D}<CENTER><FONT SIZE=1><BR></FONT><TABLE ALIGN=CENTER CELLPADDING=8 BORDER=1 BGCOLOR=#CCCCFF BORDERCOLORLIGHT=#DDDDFF
-BORDERCOLORDARK=#BBBBFF><TR><TD VALIGN=CENTER>
-%%DATA%%
-
-</TD></TR></TABLE></CENTER>
-<=STANDOUTO
 
 STANDOUT<=
 {D}<BLOCKQUOTE>
@@ -234,9 +226,9 @@ DE<=
 %%DATA%%
 <=DE
 
-EMCOLOR=>#c0c0c0
-HOTCOLOR=>#ff0000
-EMCOLORLITE=>#e2e2e2
+EMCOLOR=>{S}#c0c0c0
+HOTCOLOR=>{S}#ff0000
+EMCOLORLITE=>{S}#e2e2e2
 
 CHOICE=>{P}<DT><A HREF="%%DATA2%%"><FONT SIZE="+1"><TT><B>%%DATA1%%</B></TT></FONT></A><DD><FONT SIZE="2">%%DATA3%%</FONT>
 

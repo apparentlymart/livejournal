@@ -501,10 +501,14 @@ sub bml_block
 
     my $template = $req->{'blockdata'}->{$realtype};
 
+    # template has no variables or BML tags:
     return $template if $blockflags =~ /S/;
 
     my $expanded = $template;
     $expanded = parsein($expanded, \%element) unless $preparsed;
+
+    # wants variable interpolation, but no expansion:
+    return $expanded if $blockflags =~ /R/;
     
     my $out;
     push @{$req->{'BlockStack'}}, "";

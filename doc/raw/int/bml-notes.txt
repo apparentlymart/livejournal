@@ -1,0 +1,61 @@
+TEMPLATE FLAGS
+==============
+This documents the flags in braces at the beginning of .look
+file block template definitions.  The flags fall into one
+of three classes:
+
+1) Varible definition types:
+
+   F: full, mix of multi & single line property definitions:
+
+       (=TEMPLATE
+       <=FOO
+       Multi
+       line
+       string
+       <=FOO
+       BAR=>Single line string
+       TEMPLATE=)
+
+   P: pipe delimited, properites are named DATA<n>, where <n> starts at
+      1 and increases.
+
+        (=TEMPLATE DATA1|second arg|DATA3 TEMPLATE=)
+
+   D: one proprety, and it's named DATA
+
+        (=TEMPLATE I am the DATA TEMPLATE=)
+
+
+2) Static template definitions:
+
+   S: static: output won't have more BML to expand, or properties to fill-in, 
+      so don't try.
+
+   R: less static: add pRoperties, but then don't BML expand.
+
+3) Controlling expansion vs. interpolation order:
+
+   p: pre-parsed.  BML-expand parameters first, then interpolate into
+      template.  by default, parameters are interpolated first, then
+      everything is expanded.  but if you use %%TITLE%% twice in your
+      PAGE, for example, and your .bml file defines TITLE=> with a
+      _CODE block, it will be run twice, so it's generally a good idea
+      to make PAGE definitions pre-parsed.  also, then, you avoid
+      re-running most of your output through the BML expander a second
+      time.
+ 
+   s: expand embedded parameterless static blocks in definition early.
+      so when the template file is read, any blocks of the form (=FOO=) 
+      are expanded ahead of time.  Useful in conjunction with the {S} 
+      flag.  consider:
+
+        # Our image server:
+        IMGPREFIX=>{S}http://www.site.com:8080/
+
+        # Some block that has an image:
+        SPACER=>{Ss}<img src='(=IMGPREFIX=)/spacer.gif' width='1' height='10'>
+
+      The SPACER block isn't really static, but because {s} is used and IMGPREFIX
+      is static, then SPACER can also be static.
+
