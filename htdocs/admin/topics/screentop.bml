@@ -1,8 +1,8 @@
-(=PAGE
+<?page
 TITLE=>Screen Topics
 BODY<=
 
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -81,9 +81,9 @@ BODY<=
  }
 
 
-_CODE=)
+_code?>
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 post: htdocs/admin/topics/screentop_do.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 

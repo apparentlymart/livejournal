@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -25,7 +25,7 @@
 
  return $ret; 
 
-_CODE=)(=_C <LJDEP>
+_code?><?_c <LJDEP>
 link: htdocs/customview.cgi, htdocs/admin/topics/styleinfo.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 

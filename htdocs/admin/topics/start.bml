@@ -6,7 +6,7 @@ Username to preview:
 </FORM>
 
 <!--
-(=_C <LJDEP>
+<?_c <LJDEP>
 post: htdocs/admin/topics/links.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 -->

@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -101,8 +101,8 @@
      }
  }
 
-_CODE=)(=_C <LJDEP>
+_code?><?_c <LJDEP>
 link: htdocs/talkpost.bml
 post: htdocs/admin/topics/screen_links.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 
