@@ -919,6 +919,7 @@ sub prepare_currents
     $currents{'Mood'} = LJ::current_mood_str($args->{'user'}->{'moodthemeid'},
                                              $args->{'props'}->{$datakey}->{'current_moodid'},
                                              $args->{'props'}->{$datakey}->{'current_mood'});
+    delete $currents{'Mood'} unless $currents{'Mood'};
 
     if (%currents) {
         if ($args->{'vars'}->{$args->{'prefix'}.'_CURRENTS'})
