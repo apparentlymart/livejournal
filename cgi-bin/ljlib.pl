@@ -4954,9 +4954,7 @@ sub delete_item2
                                            "AND nodeid=$jitemid LIMIT 50"))
            && $t && @$t)
     {
-        foreach my $jtalkid (@$t) {
-            LJ::delete_talkitem($dbcm, $jid, $jtalkid);
-        }
+        LJ::delete_talkitem($dbcm, $jid, $t);
         $loop = 0 unless @$t == 50;
     }
     return 1;
@@ -4964,7 +4962,7 @@ sub delete_item2
 
 # <LJFUNC>
 # name: LJ::delete_talkitem
-# des: Deletes a comment and associated metadata.
+# des: Deletes a comment (or multiple) and associated metadata.
 # info: The tables [dbtable[talk2]], [dbtable[talkprop2]], [dbtable[talktext2]],
 #       and [dbtable[dudata]] are all
 #       deleted from, immediately. Unlike [func[LJ::delete_item2]], there is
@@ -4973,7 +4971,7 @@ sub delete_item2
 # args: dbcm, journalid, jtalkid, light?
 # des-journalid: Journalid (userid from [dbtable[user]] to delete comment from).
 #                The journal must reside on the $dbcm you provide.
-# des-jtalkid: The jtalkid of the comment.
+# des-jtalkid: The jtalkid of the comment.  Or, an arrayref of jtalkids to delete multiple
 # des-dbcm: Cluster master db to delete item from.
 # des-light: boolean; if true, only mark entry as deleted, so children will thread.
 # returns: boolean; 1 on success, 0 on failure.# des-dbh: Master database handle.
@@ -4981,9 +4979,13 @@ sub delete_item2
 sub delete_talkitem
 {
     my ($dbcm, $jid, $jtalkid, $light) = @_;
-    $jid += 0; $jtalkid += 0;
+    $jid += 0;
+    $jtalkid = [ $jtalkid ] unless ref $jtalkid eq "ARRAY";
 
-    my $where = "WHERE journalid=$jid AND jtalkid=$jtalkid";
+    my $in = join(',', map { $_+0 } @$jtalkid);
+    return 1 unless $in;
+    my $where = "WHERE journalid=$jid AND jtalkid IN ($in)";
+
     my @delfrom = qw(talkprop2);
     if ($light) {
         $dbcm->do("UPDATE talk2 SET state='D' $where");
@@ -4996,7 +4998,8 @@ sub delete_talkitem
         $dbcm->do("DELETE FROM $t $where");
         return 0 if $dbcm->err;
     }
-    LJ::dudata_set($dbcm, $jid, 'T', $jtalkid, 0);
+    
+    LJ::dudata_set($dbcm, $jid, 'T', $_, 0) foreach (@$jtalkid);
     return 0 if $dbcm->err;
     return 1;
 }
