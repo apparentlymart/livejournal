@@ -417,6 +417,18 @@ sub common_event_validation
 {
     my ($req, $err, $flags) = @_;
 
+    # clean up event whitespace
+    # remove surrounding whitespace
+    $req->{event} =~ s/^\s+//;
+    $req->{event} =~ s/\s+$//;
+
+    # convert line endings to unix format
+    if ($req->{'lineendings'} eq "mac") {
+        $req->{event} =~ s/\r/\n/g;
+    } else {
+        $req->{event} =~ s/\r//g;
+    }
+
     # date validation
     if ($req->{'year'} !~ /^\d\d\d\d$/ ||
         $req->{'year'} < 1970 ||    # before unix time started = bad
@@ -466,6 +478,12 @@ sub common_event_validation
     # line is making the metadata be deleted on edit.
     $req->{'props'}->{'unknown8bit'} = 0;
 
+    # we don't want attackers sending something that looks like gzipped data
+    # in protocol version 0 (unknown8bit allowed), otherwise they might
+    # inject a 100MB string of single letters in a few bytes.
+    return fail($err,208,"Cannot send gzipped data") 
+        if substr($req->{'event'},0,2) eq "\037\213";
+    
     # non-ASCII?
     unless ( LJ::is_ascii($req->{'event'}) && 
         LJ::is_ascii($req->{'subject'}) &&
@@ -539,9 +557,10 @@ sub postevent
     my $clusterid = $uowner->{'clusterid'};
 
     my $dbh = LJ::get_db_writer();
+    my $dbcm = LJ::get_cluster_master($uowner);
 
-    return fail($err,306) unless $dbh;
-    return fail($err,200) unless ($req->{'event'} =~ /\S/);
+    return fail($err,306) unless $dbh && $dbcm;
+    return fail($err,200) unless $req->{'event'} =~ /\S/;
 
     ### make sure community, shared, or news journals don't post
     ### note: shared and news journals are deprecated.  every shared journal
@@ -562,20 +581,6 @@ sub postevent
     # can't post to deleted/suspended community
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";
     
-    #### clean up the event text
-    my $event = $req->{'event'};
-
-    # remove surrounding whitespace
-    $event =~ s/^\s+//;
-    $event =~ s/\s+$//;
-
-    # convert line endings to unix format
-    if ($req->{'lineendings'} eq "mac") {
-        $event =~ s/\r/\n/g;
-    } else {
-        $event =~ s/\r//g;
-    }
-
     my $time_was_faked = 0;
     my $offset = 0;  # assume gmt at first.
 
@@ -601,6 +606,8 @@ sub postevent
 
     return undef
         unless common_event_validation($req, $err, $flags);
+
+    my $event = $req->{'event'};
 
     ### allow for posting to journals that aren't yours (if you have permission)
     my $posterid = $u->{'userid'}+0;
@@ -686,8 +693,6 @@ sub postevent
         return fail($err,103,$error) if $error;
     }
 
-    my $dbcm = LJ::get_cluster_master($uowner);
-    return fail($err,306) unless $dbcm;
     my $now = $dbcm->selectrow_array("SELECT UNIX_TIMESTAMP()");
     my $anum  = int(rand(256));
     
@@ -996,7 +1001,6 @@ sub editevent
     my $uowner = $flags->{'u_owner'} || $u;
     my $clusterid = $uowner->{'clusterid'};
     my $posterid = $u->{'userid'};
-    my $dbh = LJ::get_db_writer();
     my $qallowmask = $req->{'allowmask'}+0;
     my $sth;
 
@@ -1124,25 +1128,12 @@ sub editevent
         }
     }
 
-    #### clean up the event text
     my $event = $req->{'event'};
-
-    # remove surrounding whitespace
-    $event =~ s/^\s+//;
-    $event =~ s/\s+$//;
-
-    # convert line endings to unix format
-    if ($req->{'lineendings'} eq "mac") {
-        $event =~ s/\r/\n/g;
-    } else {
-        $event =~ s/\r//g;
-    }
-
     my $bytes = length($event) + length($req->{'subject'});
 
     my $eventtime = sprintf("%04d-%02d-%02d %02d:%02d",
                             map { $req->{$_} } qw(year mon day hour min));
-    my $qeventtime = $dbh->quote($eventtime);
+    my $qeventtime = $dbcm->quote($eventtime);
 
     my $security = "public";
     if ($req->{'security'} eq "private" || $req->{'security'} eq "usemask") {
@@ -1159,7 +1150,7 @@ sub editevent
         $qallowmask != $oldevent->{'allowmask'})
     {
         # are they changing their most recent post?
-        LJ::load_user_props($dbh, $u, "newesteventtime");
+        LJ::load_user_props($u, "newesteventtime");
         if ($u->{userid} == $uowner->{userid} &&
             $u->{newesteventtime} eq $oldevent->{eventtime}) {
             # did they change the time?
@@ -1173,7 +1164,7 @@ sub editevent
             } 
         }
         
-        my $qsecurity = $dbh->quote($security);
+        my $qsecurity = $dbcm->quote($security);
         LJ::log2_do($dbcm, $ownerid, undef, "UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
                   "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
                   "security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid ".
@@ -1200,7 +1191,6 @@ sub editevent
         if ($security eq "public" || $security eq "private") {
             $dbcm->do("DELETE FROM logsec2 WHERE journalid=$ownerid AND jitemid=$itemid");
         } else {
-            my $qsecurity = $dbh->quote($security);
             $dbcm->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) ".
                       "VALUES ($ownerid, $itemid, $qallowmask)");
         }
@@ -1366,8 +1356,7 @@ sub getevents
         # broken client loop prevention
         if ($req->{'lastsync'}) {
             my $pname = "rl_syncitems_getevents_loop";
-            my $dbh = LJ::get_db_writer();
-            LJ::load_user_props($dbh, $u, $pname);
+            LJ::load_user_props($u, $pname);
             # format is:  time/date/time/date/time/date/... so split
             # it into a hash, then delete pairs that are older than an hour
             my %reqs = split(m!/!, $u->{$pname});
