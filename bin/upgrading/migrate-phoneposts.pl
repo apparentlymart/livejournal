@@ -209,9 +209,7 @@ sub handle_userid {
         # extra verification
         if ($verify) {
             my $data2 = $LJ::MogileFS->get_file_data("pp:$u->{userid}:$blobid");
-            print "\tverified length = " . length($$data2) . " bytes...\n"
-                if $verbose;
-            my $eq = ($$data2 eq $data) ? 1 : 0;
+            my $eq = ($data2 && $$data2 eq $data) ? 1 : 0;
             if ($besteffort && !$eq) {
                 print STDERR "verify_failed userid=$u->{userid} blobid=$blobid\n";
                 print "\twarning: verify failed; phone post not updated\n\n"
@@ -220,6 +218,8 @@ sub handle_userid {
             }
             die "\tERROR: phone post NOT stored successfully, content mismatch\n"
                 unless $eq;
+            print "\tverified length = " . length($$data2) . " bytes...\n"
+                if $verbose;
         }
 
         # done moving this phone post

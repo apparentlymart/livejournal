@@ -224,9 +224,7 @@ sub handle_userid {
         # extra verification
         if ($verify) {
             my $data2 = $LJ::MogileFS->get_file_data($u->mogfs_userpic_key($picid));
-            print "\tverified length = " . length($$data2) . " bytes...\n"
-                if $verbose;
-            my $eq = ($$data2 eq $data) ? 1 : 0;
+            my $eq = ($data2 && $$data2 eq $data) ? 1 : 0;
             if ($besteffort && !$eq) {
                 print STDERR "verify_failed userid=$u->{userid} picid=$picid\n";
                 print "\twarning: verify failed; picture not updated\n\n"
@@ -235,6 +233,8 @@ sub handle_userid {
             }
             die "\tERROR: picture NOT stored successfully, content mismatch\n"
                 unless $eq;
+            print "\tverified length = " . length($$data2) . " bytes...\n"
+                if $verbose;
         }
 
         # done moving this picture
