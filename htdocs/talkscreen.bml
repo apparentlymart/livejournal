@@ -10,7 +10,6 @@ body<=
  my $mode = $POST{'mode'} || $GET{'mode'};
  my $talkid = $POST{'talkid'} || $GET{'talkid'};
  my $journal = $POST{'journal'} || $GET{'journal'};
- my $confirm = $POST{'confirm'} || $GET{'confirm'};
 
  my $remote = LJ::get_remote();
 
@@ -68,7 +67,7 @@ body<=
  if ($mode eq 'screen') {
      return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.privs.screen'} p?>"
          unless $can_screen;
-     unless ($confirm eq 'Y' && LJ::did_post()) {
+     unless ($POST{'confirm'} eq 'Y') {
          $ret .= "<?h1 $ML{'.screen.sure.title'} h1?><?p $ML{'.screen.sure.body'} p?>";
          $ret .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
          $ret .= "<input type='hidden' name='mode' value='screen' />\n";
@@ -89,7 +88,7 @@ body<=
  if ($mode eq 'unscreen') {
      return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.privs.unscreen'} p?>"
          unless $can_unscreen;
-     unless ($confirm eq 'Y' && LJ::did_post()) {
+     unless ($POST{'confirm'} eq 'Y') {
          $ret .= "<?h1 $ML{'.unscreen.sure.title'} h1?><?p $ML{'.unscreen.sure.body'} p?>";
          $ret .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
          $ret .= "<input type='hidden' name='mode' value='unscreen' />\n";
