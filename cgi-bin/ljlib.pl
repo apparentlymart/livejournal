@@ -25,6 +25,7 @@ use LJ::S2;
 use Time::Local ();
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
