@@ -5420,6 +5420,30 @@ sub text_convert
 
 
 # <LJFUNC>
+# name: LJ::text_length
+# des: returns both byte length and character length of a string. In a non-Unicode
+#      environment, this means byte length twice. In a Unicode environment,
+#      the function assumes that its argument is a valid UTF-8 string.
+# args: text
+# des-text: the string to measure
+# returns: a list of two values, (byte_length, char_length).
+# </LJFUNC>
+
+sub text_length 
+{
+    my $text = shift;
+    my $bl = length($text);
+    unless ($LJ::UNICODE) {
+        return ($bl, $bl);
+    }
+    my $cl = 0;
+    my $utf_char = "([\x00-\x7f]|[\xc0-\xdf].|[\xe0-\xef]..|[\xf0-\xf7]...)";
+
+    while ($text =~ m/$utf_char/go) { $cl++; }
+    return ($bl, $cl);
+}
+
+# <LJFUNC>
 # name: LJ::text_trim
 # des: truncate string according to requirements on byte length, char
 #      length, or both. "char length" means number of UTF-8 characters if

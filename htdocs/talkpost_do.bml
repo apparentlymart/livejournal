@@ -224,12 +224,14 @@ BODY<=
      }
  }
 
- my $max_length = 2000;
- my $length = length($FORM{'body'});
- if ($userpost) { $max_length = 4000; }
- if ($length > $max_length) {
-     push @errors, "Sorry, but your comment of length $length exceeds the maximum allowed length of $max_length.  Please go back, shorten it, and try posting it again.";
+ my ($bl, $cl) = LJ::text_length($FORM{'body'});
+ if ($cl > $LJ::CMAX_COMMENT) {
+     push @errors, "Sorry, but your comment of $cl characters exceeds the maximum character length of $LJ::CMAX_COMMENT. Please go back, shorten it, and try posting it again.";
+ } elsif ($bl > $LJ::BMAX_COMMENT) {
+     push @errors, "Sorry, but your comment of $bl bytes exceeds the maximum byte length of $LJ::BMAX_COMMENT. Please go back, shorten it, and try posting it again.";
  }
+ # the Subject can be silently shortened, no need to reject the whole comment
+ $FORM{'subject'} = LJ::text_trim($FORM{'subject'}, 100, 100);
 
  return LJ::bad_input(@errors) if @errors;
 
@@ -269,9 +271,6 @@ BODY<=
  }
 
  ## insertion
-
- $FORM{'subject'} = LJ::text_trim($FORM{'subject'}, 100, 100);
- $FORM{'body'} = LJ::text_trim($FORM{'body'}, $LJ::BMAX_COMMENT, $LJ::CMAX_COMMENT);
 
  my $partid = $FORM{'parenttalkid'};
  my $qpartid = $dbh->quote($partid);
