@@ -1870,6 +1870,15 @@ register_alter(sub {
         set_dbnote("privcode_all_to_*", 1);
     }
 
+    # convert 'wizard' s2 styles to 'wizard-uniq'
+    if (table_relevant("s2styles") && !check_dbnote("s2style-wizard-update")) {
+
+        # set_dbnote will return true if $opt_sql is set and it sets
+        # the note successfully.  only then do we run the wizard updater
+        set_dbnote("s2style-wizard-update", 1) && 
+            system("$ENV{'LJHOME'}/bin/upgrading/s2style-wizard-update.pl");
+    }
+
     # this never ended up being useful, and just freaked people out unnecessarily.
     if (column_type("user", "track")) {
         do_alter("user", "ALTER TABLE user DROP track");

@@ -50,27 +50,60 @@ body<=
     }
 
     my $implicit_style_create = sub {
-        return if $u->{'s2_style'};
-        unless ($u->{'s2_style'} = LJ::S2::create_style($u, "wizard")) {
-            die "<?h1 $ML{'Error'} h1?><?p $ML{'.error.fail_create_style'} p?>";
+
+        # create new style if necessary
+        unless ($u->{'s2_style'}) {
+            my $layid = $style{'layout'};
+            my $lay = $pub->{$layid} || $userlay->{$layid};
+            my $uniq = (split("/", $lay->{'uniq'}))[0] || $lay->{'s2lid'};
+
+            unless ($u->{'s2_style'} = LJ::S2::create_style($u, "wizard-$uniq")) {
+                die "<?h1 $ML{'Error'} h1?><?p $ML{'.error.fail_create_style'} p?>";
+            }
+            LJ::set_userprop($u, "s2_style", $u->{'s2_style'});
         }
+
+        # save values in %style to db
         LJ::S2::set_style_layers($u, $u->{'s2_style'}, %style);
-        LJ::set_userprop($u, "s2_style", $u->{'s2_style'});
     };
 
     if ($POST{'save:layout'}) {
         my $layid = $POST{'layoutid'};
-        return BML::redirect("/customize/?journal=$u->{'user'}") if $layid == $style{'layout'};
+        return BML::redirect("/customize/?journal=$u->{'user'}")
+            if $layid == $style{'layout'};
+
         my $lay = $pub->{$layid} || $userlay->{$layid};
         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_layout'} p?>"
             unless $lay && LJ::S2::can_use_layer($u, $lay->{'uniq'});
-        my $coreid = $lay->{'b2lid'} or return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.no_core_parent'} p?>";
-        $implicit_style_create->();
-        LJ::S2::delete_layer($style{'user'});
-        $style{'user'} = $style{'theme'} = $style{'i18nc'} = $style{'i18n'} = 0;
-        $style{'layout'} = $layid;
-        $style{'core'} = $coreid;
-        LJ::S2::set_style_layers($u, $u->{'s2_style'}, %style);
+
+        my $coreid = $lay->{'b2lid'};
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.no_core_parent'} p?>"
+            unless $coreid;
+
+        # delete s2_style and replace it with a new
+        # or existing style for this layout
+        delete $u->{'s2_style'};
+
+        my $uniq = (split("/", $lay->{'uniq'}))[0] || $lay->{'s2lid'};
+        my $usersty = LJ::S2::load_user_styles($u);
+        foreach (keys %$usersty) {
+            next unless $usersty->{$_} eq "wizard-$uniq";
+
+            $u->{'s2_style'} = $_;
+            LJ::set_userprop($u, "s2_style", $u->{'s2_style'});
+            last;
+        }
+
+        # no existing style found, create a new one
+        unless ($u->{'s2_style'}) {
+            $style{'user'} = $style{'theme'} = $style{'i18nc'} = $style{'i18n'} = 0;
+            $style{'layout'} = $layid;
+            $style{'core'} = $coreid;
+            $implicit_style_create->();
+        }
+
+        # if we're using an existing style, no need to modify style layers now
+
         return BML::redirect("/customize/?journal=$u->{'user'}");
     }
 
@@ -80,14 +113,17 @@ body<=
         return BML::redirect("/customize/?journal=$u->{'user'}");
     }
 
-    if ($FORM{'action:edituser'}) {
-        $implicit_style_create->();
-        my $id = $style{'user'};
-        unless ($id) {
-            $id = LJ::S2::create_layer($u, $style{'layout'}, "user");
-            return "<?h1 $ML{'Error'} h1?> <?p $ML{'.error.cant_generate_user_layer'} p?>" unless $id;
-            LJ::S2::set_style_layers($u, $u->{'s2_style'}, "user", $id);
+    if ($POST{'action:edituser'}) {
+
+        unless ($style{'user'}) {
+            $style{'user'} = LJ::S2::create_layer($u, $style{'layout'}, "user");
+            return "<?h1 $ML{'Error'} h1?> <?p $ML{'.error.cant_generate_user_layer'} p?>"
+                unless $style{'user'};
         }
+
+        $implicit_style_create->();
+        LJ::S2::set_style_layers($u, $u->{'s2_style'}, %style);
+
         return BML::redirect("/customize/layer.bml?w=user&journal=$authas");
     }
 
@@ -95,8 +131,9 @@ body<=
         my $themeid = $POST{'themeid'}+0;
         my $lay = $pub->{$themeid} || $userlay->{$themeid};
         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.not_your_theme'} p?>" if $themeid && ! $lay;
+        $style{'theme'} = $themeid;
+
         $implicit_style_create->();
-        LJ::S2::set_style_layers($u, $u->{'s2_style'}, "theme", $themeid);
 
         # TODO: conflict resolution.  check if there
         # exists a user layer, and ask user if they want to 
@@ -139,9 +176,10 @@ body<=
                 ($i18n = $_->{'s2lid'});
         }
 
+        $style{'i18nc'} = $i18nc;
+        $style{'i18n'} = $i18n;
+
         $implicit_style_create->();
-        LJ::S2::set_style_layers($u, $u->{'s2_style'}, "i18nc", $i18nc);
-        LJ::S2::set_style_layers($u, $u->{'s2_style'}, "i18n", $i18n);
 
         # TODO: conflict resolution.  check if there
         # exists a user layer, and ask user if they want to 
