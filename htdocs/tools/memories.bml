@@ -1,7 +1,7 @@
 <?_code
 
  use strict;
- use vars qw(%FORM);
+ use vars qw(%FORM $title $body);
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
