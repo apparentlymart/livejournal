@@ -54,6 +54,8 @@ unless (-d $ENV{'LJHOME'}) {
         "You must fix this before you can run this database update script.";
 }
 
+die "Can't --populate a cluster" if $opt_pop && $cluster;
+
 ## make sure we can connect
 my $dbh = $cluster ? LJ::get_cluster_master($cluster) : LJ::get_dbh("master");
 unless ($dbh) {
