@@ -11,6 +11,7 @@ LJUSERF=>{DRs}<span class='ljuser' style='white-space:nowrap;'><a href='/userinf
 HELP=>{DR}(<a href="%%data%%"><i>help</i></a>)
 INERR=>{DR}<font color="#ff0000"><b>%%data%%</b></font>
 SOERROR=>{DR}<div><b>%%data%%</b></div>
+EMAILEX=><div style='font-family: courier; border: solid black 1px; padding: 5px;'>%%data%%</div>
 
 NEEDLOGIN<=
 <?h1 <?_ml bml.needlogin.head _ml?> h1?>

@@ -70,6 +70,7 @@ STANDOUT<=
 </CENTER>
 <=STANDOUT
 SOERROR=><div style='background-color:#f3f4fe; color:red; font-weight:bold; text-align:center'>%%data%%</div>
+EMAILEX=><div style='width: 50%; font-family: courier; background-color: #efefef; border: dotted #cdcdcd 2px; padding: 5px;'>%%data%%</div>
 
 ######################### choices stuff
 

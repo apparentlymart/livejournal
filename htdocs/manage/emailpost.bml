@@ -2,14 +2,6 @@
 title=>Email gateway settings
 head<=
     <style type="text/css">
-    .email
-    {
-        width: 50%;
-        font-family: courier;
-        background-color: #efefef;
-        border: dotted #cdcdcd 2px;
-        padding: 5px;
-    }
     
     fieldset
     {
@@ -79,28 +71,28 @@ body<=
                     <?h1 PIN usage examples h1?><br />
 
                     <fieldset><legend>PIN in email address</legend>
-                    <div class='email'>
+                    <?emailex
                     To: $user<b>+$pin</b>\@$LJ::EMAIL_POST_DOMAIN<br />
                     $from
                     $subject
                     $body
-                    </div></fieldset>
+                    emailex?></fieldset>
     
                     <fieldset><legend>PIN in subject</legend>
-                    <div class='email'>
+                    <?emailex
                     $to
                     $from
                     Subject: <b>+$pin</b> Post subject <br /><br />
                     $body
-                    </div></fieldset>
+                    emailex?></fieldset>
 
                     <fieldset><legend>PIN in body</legend>
-                    <div class='email'>
+                    <?emailex
                     $to
                     $from
                     $subject
                     <b>+$pin</b> $body
-                    </div></fieldset>
+                    emailex?></fieldset>
                 }
             },
 
@@ -113,18 +105,18 @@ body<=
 
                     <fieldset><legend>Posting to a community</legend>
                     <?p Simply embed the community name in the email address. p?>
-                    <div class='email'>
+                    <?emailex
                     To: $user.<b>community</b>+$pin\@$LJ::EMAIL_POST_DOMAIN<br />
                     $from
                     $subject
                     $body
-                    </div></fieldset>
+                    emailex?></fieldset>
 
                     <fieldset><legend>Removing unwanted text</legend>
                     <?p All text below two or more dashes or underscores ("--" or "__")
                     on a line by itself will be automatically removed.
                     The red text below won't show up in your posting. p?>
-                    <div class='email'>
+                    <?emailex
                     $to_pin
                     $from
                     $subject
@@ -135,19 +127,19 @@ body<=
                     including automatic signatures added by free email services.<br />
                     __________________________________________________<br />
                     Try the all new SUPER FREE MAIL version 17 today!!!<br />
-                    </font></div></fieldset>
+                    </font>emailex?></fieldset>
 
                     <fieldset><legend>Hyphens and underscores</legend>
                     <?p To compensate for mobile phones that don't have an underscore key,
                     you may substitute a hyphen in their place inside any user or
                     community account name. The hyphens will be automatically converted
                     to underscores. p?>
-                    <div class='email'>
+                    <?emailex
                     To: <b>some-user.some-community</b>+$pin</b>\@$LJ::EMAIL_POST_DOMAIN<br />
                     $from
                     $subject
                     $body
-                    </div></fieldset>
+                    emailex?></fieldset>
                 }
             },
 
@@ -163,7 +155,7 @@ body<=
                     body of your message. The lj-headers should be at the top of your message,
                     separated by a newline.  All lj-headers are completely optional, and simply
                     override your journal defaults. p?>
-                    <div class='email'>
+                    <?emailex
                     $to_pin
                     $from
                     $subject
@@ -173,7 +165,7 @@ body<=
                     <b>lj-comments:</b> ("off" or "noemail")<br />
                     <br />
                     $body
-                    </div></fieldset>
+                    emailex?></fieldset>
 
                     <fieldset><legend>Journal entry security</legend>
                     <?p Security options are set via the lj-header "lj-security". 
@@ -214,18 +206,18 @@ body<=
                     allowed sender addresses and saved PIN are completely ignored.
                     Your email will only be posted if it is signed with a valid PGP/GPG private key. p?>
                     <?p You must first upload your public key <a href="/manage/pubkey.bml">here</a>. p?>
-                    <div class='email'>
+                    <?emailex
                     To: $user<b>+PGP</b>\@$LJ::EMAIL_POST_DOMAIN<br />
                     From: anywhere\@example.com <br />
                     $subject
                     $body
                     <br />This body should be properly signed with my private key.
-                    </div></fieldset>
+                    emailex?></fieldset>
                 }
             },
         );
 
-        if ($LJ::FB_SITEROOT && %LJ::FOTOBILDER_IP) {
+        if ($LJ::FB_SITEROOT && %LJ::FOTOBILDER_IP && ! $LJ::DISABLED{fb_email_docs}) {
             $subject = "Subject: Neat, I can post pictures via email.<br /><br />";
             $body    = "This is the body of my post, with image attachments.";
             splice @topics, -1, 0,
@@ -260,14 +252,14 @@ body<=
                     you decide to move your images into different galleries in
                     the future, the images posted in your journal will still
                     work correctly.  p?>
-                    <div class='email'>
+                    <?emailex
                     $to
                     $from
                     $subject
                     <b>lj-gallery:</b> vacation photos<br />
                     <br />
                     $body
-                    </div></fieldset>
+                    emailex?></fieldset>
 
                     <fieldset><legend>Image security</legend>
                     <?p Images are publicly viewable by default. Use the
@@ -278,14 +270,14 @@ body<=
                     it are public. This feature only changes the security
                     on the images themselves - not the journal entry. p?>
                     <p? Valid options are "private", "regusers", or "friends". p?>
-                    <div class='email'>
+                    <?emailex
                     $to
                     $from
                     $subject
                     <b>lj-imgsecurity:</b> private<br />
                     <br />
                     $body
-                    </div></fieldset>
+                    emailex?></fieldset>
 
                     <fieldset><legend>Changing the image display size</legend>
                     <?p You may attach images of any size.  They will be displayed
@@ -293,14 +285,14 @@ body<=
                     is 320x240.  You may specify a size using the <b>lj-imgsize</b>
                     header.  p?>
                     <?p Valid sizes are "100x100", "320x240", and "640x480". p?>
-                    <div class='email'>
+                    <?emailex
                     $to
                     $from
                     $subject
                     <b>lj-imgsize:</b> 640x480<br />
                     <br />
                     $body
-                    </div></fieldset>
+                    emailex?></fieldset>
 
                     <fieldset><legend>Changing image layout</legend>
                     <?p If you attach multiple images, you can change the way they
@@ -318,14 +310,14 @@ body<=
                     <img src='$LJ::IMGPREFIX/imageplaceholder2.png' width='35' height='35'>
                     </span>
                     <br /><br />
-                    <div class='email'>
+                    <?emailex
                     $to
                     $from
                     $subject
                     <b>lj-imglayout:</b> horizontal<br />
                     <br />
                     $body
-                    </div></fieldset>
+                    emailex?></fieldset>
 
                     <fieldset><legend>lj-cut behavior</legend>
                     <?p All images are placed in your journal under a
@@ -335,14 +327,14 @@ body<=
                     read, "( 3 images )".  Setting the <b>lj-imgcut</b> header to
                     "titles" changes the cut caption to the title of the filename, 
                     one cut per image. "( emo.jpg ) ( pict002.jpg ) ( me_and_bob.jpg )" p?>
-                    <div class='email'>
+                    <?emailex
                     $to
                     $from
                     $subject
                     <b>lj-imgcut:</b> titles<br />
                     <br />
                     $body
-                    </div></fieldset>
+                    emailex?></fieldset>
 
                 }
             };
