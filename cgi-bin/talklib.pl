@@ -1393,7 +1393,7 @@ sub format_html_mail {
     }
     $html .= "</ul></p>";
 
-    my $want_form = $can_unscreen;  # this should probably be a preference, or maybe just always off.
+    my $want_form = $comment->{state} eq 'A' || $can_unscreen;  # this should probably be a preference, or maybe just always off.
     if ($want_form) {
         $html .= "If your mail client supports it, you can also reply here:\n";
         $html .= "<blockquote><form method='post' target='ljreply' action=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
