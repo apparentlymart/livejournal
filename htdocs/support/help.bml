@@ -99,13 +99,13 @@ body<=
  if ($filtercat && $LJ::SUPPORT_ABSTRACTS{$filtercat} && $fcat && $can_read && $state ne 'youreplied') {
      # yes, we should show abstracts for this category, so do so
      if ($state eq "closed") {
-         $sth = $dbr->prepare("SELECT s.*, SUBSTRING(sl.message, 1, 100) AS 'message' " .
+         $sth = $dbr->prepare("SELECT s.*, SUBSTRING(sl.message, 1, 200) AS 'message' " .
                               "FROM support s, supportlog sl " .
                               "WHERE s.state='closed' AND s.spid = sl.spid AND sl.type = 'req' " .
                               "AND s.timeclosed > (UNIX_TIMESTAMP() - (3600*24)) " .
                               "AND s.spcatid = ?");
      } else { # triggers on green, open
-         $sth = $dbr->prepare("SELECT s.*, SUBSTRING(sl.message, 1, 100) AS 'message' " .
+         $sth = $dbr->prepare("SELECT s.*, SUBSTRING(sl.message, 1, 200) AS 'message' " .
                               "FROM support s, supportlog sl " .
                               "WHERE s.state='open' AND s.spid = sl.spid AND sl.type = 'req' " .
                               "AND s.spcatid = ?");
@@ -253,7 +253,12 @@ body<=
      };
 
      # fix up the message if we have one
-     $sp->{message} .= (length $sp->{message} >= 100) ? '...' : " <b>&#x00b6;</b>";
+     my $temp = LJ::text_trim($sp->{message}, 0, 100); # 100 character max
+     if ($temp ne $sp->{message}) {
+         $sp->{message} = "$temp ...";
+     } else {
+         $sp->{message} .= " <b>&#x00b6;</b>";
+     }
      my $des = $abstracts ? "<br /><i>$sp->{message}</i>" : '';
 
      # other content for this request
