@@ -885,8 +885,8 @@ sub entry_form {
             $datetime .=   LJ::html_text({ size => 2, maxlength => 2, value => $hour, name => "hour", tabindex => $tabindex->() }) . ":"; 
             $datetime .=   LJ::html_text({ size => 2, maxlength => 2, value => $min, name => "min", tabindex => $tabindex->() });
             
-            $out .= "<tr valign='top'><th>Date:</th><td id='datetime_box' nowrap='nowrap'>$datetime <?de (24 hour time) de?></td></tr>";
-            $out .= "<noscript><tr><th></th><td style='font-size: 0.85em;'>" . BML::ml('/update.bml.note') . "</td></tr></noscript>\n";
+            $out .= "<tr valign='top'><th>Date:</th><td id='datetime_box' nowrap='nowrap'>$datetime <?de (24 hour time) de?>";
+            $out .= "<noscript><br /><span style='font-size: 0.85em;'>" . BML::ml('/update.bml.note') . "</span></noscript></td></tr>\n";
         }
     
         ### Subject
@@ -1266,7 +1266,7 @@ PREVIEW
         }
         $out .= "</div></div>";
     }
-    $out .= "</div></div>";
+    $out .= "</div>";
     return $out;
 }
 
