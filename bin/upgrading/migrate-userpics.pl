@@ -16,8 +16,8 @@ use Digest::MD5;
 # aren't in mogile right now, and put them there
 
 # determine 
-my ($one, $ignoreempty, $dryrun, $user, $verify, $verbose, $clusters);
-my $rv = GetOptions("ignore-empty" => \$ignoreempty,
+my ($one, $besteffort, $dryrun, $user, $verify, $verbose, $clusters);
+my $rv = GetOptions("best-effort"  => \$besteffort,
                     "one"          => \$one,
                     "dry-run"      => \$dryrun,
                     "user=s"       => \$user,
@@ -49,11 +49,11 @@ This script supports the following command line arguments:
         and make sure everything is okay.  It will not update the
         userpic2 table, though.
 
-    --ignore-empty
-        Normally if we encounter a 0 byte userpic we die.  This
-        makes it so that we just warn instead.  Also, if the MD5
-        source from the blobserver is empty, we also just warn and
-        continue instead of dying.
+    --best-effort
+        Normally, if a problem is encountered (null userpic, md5
+        mismatch, connection failure, etc) the script will die to
+        make sure everything goes well.  With this flag, we don't
+        die and instead just print to standard error.
 
     --verbose
         Be very chatty.
@@ -65,6 +65,13 @@ die "Please define a 'userpics' class in your \%LJ::MOGILEFS_CONFIG\n"
     unless defined $LJ::MOGILEFS_CONFIG{classes}->{userpics};
 die "Unable to find MogileFS object (\%LJ::MOGILEFS_CONFIG not setup?)\n"
     unless $LJ::MogileFS;
+
+# setup stderr if we're in best effort mode
+if ($besteffort) {
+    my $oldfd = select(STDERR);
+    $| = 1;
+    select($oldfd);
+}
 
 # operation modes
 if ($user) {
@@ -167,7 +174,8 @@ sub handle_userid {
 
         # get length
         my $len = length($data);
-        if ($ignoreempty && !$len) {
+        if ($besteffort && !$len) {
+            print STDERR "empty_userpic userid=$u->{userid} picid=$picid\n";
             print "\twarning: empty userpic.\n\n"
                 if $verbose;
             next;
@@ -177,7 +185,8 @@ sub handle_userid {
 
         # verify the md5 of this picture with what's in the database
         my $blobmd5 = Digest::MD5::md5_base64($data);
-        if ($ignoreempty && ($md5 ne $blobmd5)) {
+        if ($besteffort && ($md5 ne $blobmd5)) {
+            print STDERR "md5_mismatch userid=$u->{userid} picid=$picid dbmd5=$md5 blobmd5=$blobmd5\n";
             print "\twarning: md5 mismatch; database=$md5, blobserver=$blobmd5\n\n"
                 if $verbose;
             next;
@@ -190,19 +199,42 @@ sub handle_userid {
         # get filehandle to Mogile and put the file there
         print "\tdata length = $len bytes, uploading to MogileFS...\n"
             if $verbose;
-        my $fh = $LJ::MogileFS->new_file($u->mogfs_userpic_key($picid), 'userpics')
-            or die "Unable to get filehandle to save file to MogileFS\n";
+        my $fh = $LJ::MogileFS->new_file($u->mogfs_userpic_key($picid), 'userpics');
+        if ($besteffort && !$fh) {
+            print STDERR "new_file_failed userid=$u->{userid} picid=$picid\n";
+            print "\twarning: failed in call to new_file\n\n"
+                if $verbose;
+            next;
+        }
+        die "Unable to get filehandle to save file to MogileFS\n"
+            unless $fh;
+
+        # now save the file and close the handles
         $fh->print($data);
-        $fh->close
-            or die "Unable to save file to MogileFS: $@\n";
+        my $rv = $fh->close;
+        if ($besteffort && !$rv) {
+            print STDERR "close_failed userid=$u->{userid} picid=$picid reason=$@\n";
+            print "\twarning: failed in call to cloes: $@\n\n"
+                if $verbose;
+            next;
+        }
+        die "Unable to save file to MogileFS: $@\n"
+            unless $rv;
 
         # extra verification
         if ($verify) {
             my $data2 = $LJ::MogileFS->get_file_data($u->mogfs_userpic_key($picid));
             print "\tverified length = " . length($$data2) . " bytes...\n"
                 if $verbose;
+            my $eq = ($$data2 eq $data) ? 1 : 0;
+            if ($besteffort && !$eq) {
+                print STDERR "verify_failed userid=$u->{userid} picid=$picid\n";
+                print "\twarning: verify failed; picture not updated\n\n"
+                    if $verbose;
+                next;
+            }
             die "\tERROR: picture NOT stored successfully, content mismatch\n"
-                unless $$data2 eq $data;
+                unless $eq;
         }
 
         # done moving this picture
@@ -227,8 +259,11 @@ sub handle_userid {
 sub get_db_handle {
     my $cid = shift;
     
-    my $dbcm = LJ::get_cluster_master({ raw => 1 }, $cid)
-        or die "ERROR: unable to get raw handle to cluster $cid\n";
+    my $dbcm = LJ::get_cluster_master({ raw => 1 }, $cid);
+    unless ($dbcm) {
+        print STDERR "handle_unavailable clusterid=$cid\n";
+        die "ERROR: unable to get raw handle to cluster $cid\n";
+    }
     eval {
         $dbcm->do("SET wait_timeout = 28800");
         die $dbcm->errstr if $dbcm->err;
