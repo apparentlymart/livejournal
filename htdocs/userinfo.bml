@@ -24,15 +24,28 @@
  my $quser = $dbr->quote($user);
 
  my $userid = $FORM{'userid'};
+ my $u;
  $userid += 0;
 
  {
      my $where = $userid ? "userid=$userid" : "user=$quser";
-     $sth = $dbr->prepare("SELECT userid, user, statusvis, paidfeatures, has_bio, name, defaultpicid, txtmsg_status, allow_infoshow, bdate, allow_contactshow, opt_mangleemail, email, paiduntil, timecreate, timeupdate, journaltype, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) AS 'secondsold' FROM user WHERE $where");
+     $sth = $dbr->prepare("SELECT userid, user, statusvis, paidfeatures, has_bio, name, defaultpicid, txtmsg_status, allow_infoshow, bdate, allow_contactshow, opt_mangleemail, email, paiduntil, journaltype FROM user WHERE $where");
      $sth->execute;
      if ($dbr->err) { return $dbr->errstr; }
+     $u = $sth->fetchrow_hashref;
+     $userid = $u->{'userid'}+0;
+
+     if ($FORM{'mode'} eq "full") {
+	 $sth = $dbr->prepare("SELECT timeupdate, timecreate, ".
+			      "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
+			      "AS 'secondsold' FROM userusage ".
+			      "WHERE userid=$userid");
+	 $sth->execute;
+	 ($u->{'timeupdate'}, 
+	  $u->{'timecreate'},
+	  $u->{'secondsold'}) = $sth->fetchrow_array;
+     }
  }
- my $u = $sth->fetchrow_hashref;
 
  unless ($u) {
      $title = "Error";

@@ -182,12 +182,13 @@ BODY<=
      my $list;
      my $count = 0;
      $list .= "<UL>\n";
-     $sth = $dbh->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='P' ORDER BY u.user");
+     # FIXME: LIMIT 1000 is a temporary hack.  better solution:  paging.
+     $sth = $dbh->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='P' ORDER BY u.user LIMIT 1000");
      $sth->execute;
-     while ($_ = $sth->fetchrow_hashref) {
+     while (my ($iuser, $iname) = $sth->fetchrow_array) {
 	 $count++;
-	 my $name = ehtml($_->{'name'});
-	 $list .= "<LI><A HREF=\"/userinfo.bml?user=$_->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A> <A HREF=\"/users/$_->{'user'}/\"><B>$_->{'user'}</B></A> - $name\n";
+	 my $name = ehtml($iname);
+	 $list .= "<LI><A HREF=\"/userinfo.bml?user=$iuser\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A> <A HREF=\"/users/$iuser/\"><B>$iuser</B></A> - $name\n";
      }
      $list .= "</UL>\n";
 
