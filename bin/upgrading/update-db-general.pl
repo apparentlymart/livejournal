@@ -451,6 +451,15 @@ CREATE TABLE stats (
 ) 
 EOC
 
+register_tablecreate("blobcache", <<'EOC');
+CREATE TABLE blobcache (
+  bckey VARCHAR(40) NOT NULL,
+  PRIMARY KEY (bckey),
+  dateupdate  DATETIME,
+  value    BLOB
+) 
+EOC
+
 register_tablecreate("style", <<'EOC');
 CREATE TABLE style (
   styleid int(11) NOT NULL auto_increment,
