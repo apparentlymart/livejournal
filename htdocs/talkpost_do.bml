@@ -413,9 +413,9 @@ BODY<=
          my $picid;
          if ($FORM{'prop_picture_keyword'}) {
              my $qkw = $dbr->quote($FORM{'prop_picture_keyword'});
-             my $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
-                                               "WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid ".
-                                               "AND k.keyword=$qkw");
+             $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
+                                            "WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid ".
+                                            "AND k.keyword=$qkw");
          }
          $picid ||= $up->{'defaultpicid'};
          if ($picid) {
