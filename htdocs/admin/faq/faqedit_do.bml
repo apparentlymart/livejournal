@@ -85,7 +85,7 @@ body<=
      if ($FORM{'q'} =~ /\S/)
      {
          $dbh->do("UPDATE faq SET question=$qq, answer=$qa, faqcat=$qfaqcat, lastmoduserid=$remote->{'userid'}, lastmodtime=NOW(), sortorder=$sortorder WHERE faqid=$id");
-         $ret .= "Updated FAQ item.  All good.  faqid is <B>$id</B>";
+         $ret .= "Updated FAQ item.  All good.  faqid is <b><a href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=$id'>$id</a></b>";
 
          $do_trans->($id);
      }
