@@ -1039,6 +1039,7 @@ sub db_logger
     unless ($LJ::CACHED_LOG_CREATE{"$table"}++) {
         $dbl->do("CREATE TABLE IF NOT EXISTS $table (".
                  "whn TIMESTAMP(14) NOT NULL,".
+                 "INDEX(whn),".
                  "server VARCHAR(30),".
                  "addr VARCHAR(15) NOT NULL,".
                  "ljuser VARCHAR(15),".
@@ -1063,7 +1064,9 @@ sub db_logger
                  "cpu_total MEDIUMINT UNSIGNED,".
                  "mem_vsize INT,".
                  "mem_share INT,".
-                 "mem_rss INT)");
+                 "mem_rss INT) DELAY_KEY_WRITE = 1");
+        $r->log_error("error creating log table ($table), perhaps due to old MySQL not supporting delayed key writes?  Error is: " .
+                      $dbl->errstr) if $dbl->err;
     }
 
     my $var = {
