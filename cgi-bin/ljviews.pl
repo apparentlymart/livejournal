@@ -1308,6 +1308,9 @@ sub create_view_rss
     ## load the itemids
     my @itemids;
     my @items = LJ::get_recent_items($dbs, {
+        'clusterid' => $u->{'clusterid'},
+        'clustersource' => 'slave',
+        'remote' => $remote,
         'userid' => $u->{'userid'},
         'itemshow' => 50,
         'order' => $u->{'journaltype'} eq "C" ? "logtime" : "",
@@ -1316,7 +1319,19 @@ sub create_view_rss
 
     $opts->{'contenttype'} = 'text/xml; charset='.$opts->{'saycharset'};
 
-    my $logtext = LJ::get_logtext($dbs, @itemids);
+    ### load the log properties
+    my %logprops = ();
+    my $logtext;
+    my $logdb = $dbs->{'reader'};
+    if ($u->{'clusterid'}) {
+        $logdb = LJ::get_cluster_reader($u);
+        LJ::load_props($dbs, "log");
+        LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
+        $logtext = LJ::get_logtext2($u, @itemids);
+    } else {
+        LJ::load_log_props($dbs, \@itemids, \%logprops);
+        $logtext = LJ::get_logtext($dbs, @itemids);
+    }
 
     my $clink = "$LJ::SITEROOT/users/$user/";
     my $ctitle = LJ::exml($u->{'name'});
@@ -1340,16 +1355,24 @@ sub create_view_rss
 
         my $itemid = $it->{'itemid'};
 
-        my $subject = $logtext->{$itemid}->[0] || 
-            substr($logtext->{$itemid}->[1], 0, 40);
+        if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
+            LJ::item_toutf8($dbs, $u, \$logtext->{$itemid}->[0],
+                            \$logtext->{$itemid}->[1], $logprops{$itemid});
+        }
 
+        my $subject = $logtext->{$itemid}->[0] || 
+            LJ::text_trim($logtext->{$itemid}->[1], 80, 40);
+ 
         # remove HTML crap and encode it:
         LJ::CleanHTML::clean_subject_all(\$subject);
         $subject ||= "(No subject or text)";
         $subject = LJ::exml($subject);
 
+        my $ditemid = $u->{'clusterid'} ? ($itemid*256 + $it->{'anum'}) : $itemid;
+        my $itemargs = $u->{'clusterid'} ? "journal=$user&itemid=$ditemid" : "itemid=$ditemid";
+
         $$ret .= "<title>$subject</title>\n";
-        $$ret .= "<link>$LJ::SITEROOT/talkread.bml?itemid=$itemid</link>\n";
+        $$ret .= "<link>$LJ::SITEROOT/talkread.bml?$itemargs</link>\n";
 
         $$ret .= "</item>\n";
     } # end huge while loop
