@@ -67,7 +67,7 @@ sub make_journal
     } elsif ($view eq "day") {
         $entry = "DayPage::print()";
         $page = DayPage($u, $remote, $opts);
-    } elsif ($view eq "friends") {
+    } elsif ($view eq "friends" || $view eq "friendsfriends") {
         $entry = "FriendsPage::print()";
         $page = FriendsPage($u, $remote, $opts);
     }

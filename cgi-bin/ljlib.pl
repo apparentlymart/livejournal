@@ -3054,6 +3054,8 @@ sub make_journal
     return "<h1>Error</h1>This journal has been suspended." if ($u->{'statusvis'} eq "S");
     return "<h1>Error</h1>This journal has been deleted and purged." if ($u->{'statusvis'} eq "X");
 
+    $opts->{'view'} = $view;
+
     if ($stylesys == 2) {
         return LJ::S2::make_journal($u, $styleid, $view, $remote, $opts);
     }
@@ -3090,8 +3092,6 @@ sub make_journal
     # instruct some function to make this specific view type
     return unless (defined $LJ::viewinfo{$view}->{'creator'});
     my $ret = "";
-
-    $opts->{'view'} = $view;
 
     # call the view creator w/ the buffer to fill and the construction variables
     my $res = $LJ::viewinfo{$view}->{'creator'}->($dbs, \$ret, $u, \%vars, $remote, $opts);
