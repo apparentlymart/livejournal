@@ -21,9 +21,6 @@
      return;
  }
 
- my $dbr = LJ::get_db_reader();
- my $dbcr;
-
  my $MAX_FRIENDS_SHOW = 500;
  my $MAX_FRIENDOF_SHOW = 150;
 
@@ -52,6 +49,9 @@
  if ($user eq "" && $remote) {
      $user = $remote->{'user'};
  }
+
+ my $dbr = LJ::get_db_reader();
+ return $error->($ML{'error.nodb'}) unless $dbr;
 
  my $userid = $GET{'userid'};
  my $u;
@@ -89,7 +89,8 @@
      return;
  }
 
- $dbcr = LJ::get_cluster_reader($u);
+ my $dbcr = LJ::get_cluster_reader($u);
+ return $error->($ML{'error.nodb'}) unless $dbcr;
 
  # option
  my %hide_fo;  # userid -> 1
