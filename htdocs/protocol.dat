@@ -270,6 +270,10 @@ The text color the <I>n</I>th user chose to represent the current user.
 .des
 The account type of this user, if it's not a personal account.  Currently the only possible value is "community", which means you're a member of that community.
 }
+{ friendof_<I>n</I>_status
+.des
+The status of this user. If this field is absent, the user has a normal active account. Otherwise the currently possible values for this field are "deleted", "suspended" and "purged".
+}
 }
 
 { getfriends
@@ -323,6 +327,10 @@ If the group mask is not "1" (just bit 0 set), then this variable is returned wi
 { friend_<I>n</I>_type
 .des
 The account type of this friend, if it's not a personal account.  Currently the only possible value is "community", which means you're monitoring this community on your friends list.  (but it does not imply that you're a member of the community)
+}
+{ friend_<I>n</I>_status
+.des
+The status of this user. If this field is absent, the user has a normal active account. Otherwise the currently possible values for this field are "deleted", "suspended" and "purged".
 }
 }
 
