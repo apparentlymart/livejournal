@@ -25,7 +25,6 @@ use Image::Size ();
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
-require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 require "$ENV{'LJHOME'}/cgi-bin/weblib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/imageconf.pl";
 require "$ENV{'LJHOME'}/cgi-bin/propparse.pl";
@@ -34,10 +33,13 @@ require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 require "$ENV{'LJHOME'}/cgi-bin/portal.pl";
 require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljtodo.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljfeed.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljlinks.pl";
 require "$ENV{'LJHOME'}/cgi-bin/directorylib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljemailgateway.pl";
 require "$ENV{'LJHOME'}/cgi-bin/emailcheck.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljmemories.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljmail.pl";
 
 # preload site-local libraries, if present:
 require "$ENV{'LJHOME'}/cgi-bin/modperl_subs-local.pl"

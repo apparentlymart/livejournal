@@ -12,26 +12,20 @@
 package LJ;
 
 use strict;
+use Carp;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use DBI;
 use DBI::Role;
 use DBIx::StateKeeper;
 use Digest::MD5 ();
-use MIME::Lite ();
 use HTTP::Date ();
 use LJ::MemCache;
 use Time::Local ();
 use Storable ();
-use Text::Wrap ();
 use Compress::Zlib ();
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
-
-require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljfeed.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljlinks.pl";
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"
     if -e "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl";
@@ -40,16 +34,6 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"
 if ($LJ::IS_DEV_SERVER) {
     eval "use Data::Dumper ();";
     *LJ::D = \&Data::Dumper::Dumper;
-}
-
-# determine how we're going to send mail
-$LJ::OPTMOD_NETSMTP = eval "use Net::SMTP (); 1;";
-
-if ($LJ::SMTP_SERVER) {
-    die "Net::SMTP not installed\n" unless $LJ::OPTMOD_NETSMTP;
-    MIME::Lite->send('smtp', $LJ::SMTP_SERVER, Timeout => 10);
-} else {
-    MIME::Lite->send('sendmail', $LJ::SENDMAIL);
 }
 
 $LJ::DBIRole = new DBI::Role {
@@ -4142,75 +4126,6 @@ sub get_timezone {
 }
 
 # <LJFUNC>
-# name: LJ::send_mail
-# des: Sends email.  Character set will only be used if message is not ascii.
-# args: opt
-# des-opt: Hashref of arguments.  <b>Required:</b> to, from, subject, body.
-#          <b>Optional:</b> toname, fromname, cc, bcc, charset, wrap
-# </LJFUNC>
-sub send_mail
-{
-    my $opt = shift;
-
-    my $msg = $opt;
-
-    # did they pass a MIME::Lite object already?
-    unless (ref $msg eq 'MIME::Lite') {
-
-        my $clean_name = sub {
-            my $name = shift;
-            return "" unless $name;
-            $name =~ s/[\n\t\(\)]//g;
-            return $name ? " ($name)" : "";
-        };
-
-        my $body = $opt->{'wrap'} ? Text::Wrap::wrap('','',$opt->{'body'}) : $opt->{'body'};
-        $msg = new MIME::Lite ('From' => "$opt->{'from'}" . $clean_name->($opt->{'fromname'}),
-                                  'To' => "$opt->{'to'}" . $clean_name->($opt->{'toname'}),
-                                  'Cc' => $opt->{'cc'},
-                                  'Bcc' => $opt->{'bcc'},
-                                  'Subject' => $opt->{'subject'},
-                                  'Data' => $body);
-
-        if ($opt->{'charset'} && ! (LJ::is_ascii($opt->{'body'}) && LJ::is_ascii($opt->{'subject'}))) {
-            $msg->attr("content-type.charset" => $opt->{'charset'});        
-        }
-
-        if ($opt->{'headers'}) {
-            $msg->add(%{$opt->{'headers'}});
-        }
-    }
-
-    # if send operation fails, buffer and send later
-    my $buffer = sub {
-
-        my $dbcm;
-        my $tries = 0;
-
-        # aim to try 10 times, but that's redundant if there are fewer clusters
-        my $maxtries = @LJ::CLUSTERS;
-        $maxtries = 10 if $maxtries > 10;
-
-        # select a random cluster master to insert to
-        while (! $dbcm && $tries < $maxtries) {
-            my $idx = int(rand() * @LJ::CLUSTERS);
-            $dbcm = LJ::get_cluster_master($LJ::CLUSTERS[$idx]);
-            $tries++;
-        }
-        return undef unless $dbcm;
-        
-        # try sending later
-        LJ::cmd_buffer_add($dbcm, 0, 'send_mail', Storable::freeze($msg));
-    };
-
-    my $rv = eval { $msg->send && 1; };
-    return 1 if $rv;
-    return 0 if $@ =~ /no data in this part/;  # encoding conversion error higher
-    return $buffer->($msg);
-
-}
-
-# <LJFUNC>
 # name: LJ::strip_bad_code
 # class: security
 # des: Removes malicious/annoying HTML.
@@ -5230,7 +5145,7 @@ sub cmd_buffer_flush
     my $mode = "run";
     if ($cmd =~ s/:(\w+)//) {
         $mode = $1;
-    } 
+    }
 
     # built-in commands
     my $cmds = {
@@ -7715,6 +7630,16 @@ sub nodb {
 sub isdb { return ref $_[0] && (ref $_[0] eq "DBI::db" || 
                                 ref $_[0] eq "DBIx::StateKeeper" ||
                                 ref $_[0] eq "Apache::DBI::db"); }
+
+
+use vars qw($AUTOLOAD);
+sub AUTOLOAD {
+    if ($AUTOLOAD eq "LJ::send_mail") {
+        require "$ENV{'LJHOME'}/cgi-bin/ljmail.pl";
+        goto &$AUTOLOAD;
+    }
+    croak "Undefined subroutine: $AUTOLOAD";
+}
 
 # LJ::S1::get_public_styles lives here in ljlib.pl so that 
 # cron jobs can call LJ::load_user_props without including
