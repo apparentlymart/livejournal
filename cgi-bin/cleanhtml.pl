@@ -225,9 +225,10 @@ sub clean
 
                     }
                 }
-                foreach my $attr (qw(href)) {
-                    $hash->{$attr} =~ s/^lj:(?:\/\/)?(.*)$/ExpandLJURL($1)/ei
-                        if exists $hash->{$attr};
+                if (exists $hash->{href}) {
+                    unless ($hash->{href} =~ s/^lj:(?:\/\/)?(.*)$/ExpandLJURL($1)/ei) {
+                        $hash->{href} = canonical_url($hash->{href}, 1);
+                    }
                 }
                 if ($hash->{'style'} =~ /expression/i) {
                     delete $hash->{'style'};
@@ -242,6 +243,8 @@ sub clean
                     if ($opts->{'maximgheight'} &&
                         (! defined $hash->{'height'} ||
                          $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
+
+                    $hash->{src} = canonical_url($hash->{src}, 1);
 
                     if ($img_bad) {
                         $newdata .= "<a href=\"$hash->{'src'}\"><b>(Image Link)</b></a>";
@@ -597,23 +600,34 @@ sub s1_attribute_clean {
 
 sub canonical_url {
     my $url = shift;
-    return unless $url;
+    my $allow_all = shift;
     
-    # see what protocol they want, default to http
-    my $pref = "http";
-    $pref = $1 if  $url =~ /^(https?|ftp):/;
-
-    # strip out the protocol section
-    $url =~ s!^.*?:/*!!;
-
     # strip leading and trailing spaces
     $url =~ s/^\s*//;
     $url =~ s/\s*$//;
 
     return unless $url;
 
-    # rebuild safe url
-    $url = "$pref://$url";
+    unless ($allow_all) {
+        # see what protocol they want, default to http
+        my $pref = "http";
+        $pref = $1 if $url =~ /^(https?|ftp):/;
+
+        # strip out the protocol section
+        $url =~ s!^.*?:/*!!;
+
+        return unless $url;
+
+        # rebuild safe url
+        $url = "$pref://$url";
+    }
+
+    if ($LJ::FIXUP_AOL) {
+        # aol blocks http referred from lj, but ftp has no referer header.
+        if ($url =~ m!^http://(?:www\.)?(?:members|hometown|users)\.aol\.com/!) {
+            $url =~ s!^http!ftp!;
+        }
+    }
 
     return $url;
 }
