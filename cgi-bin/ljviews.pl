@@ -17,7 +17,7 @@ sub create_view_lastn
     my $dbcr;
 
     if ($u->{'clusterid'}) {
-        $dbcr = LJ::get_dbh("cluster$u->{'clusterid'}slave");
+        $dbcr = LJ::get_cluster_reader($u);
     }
     
     my $user = $u->{'user'};
