@@ -3,7 +3,7 @@
     use strict;
     use vars qw(%GET);
 
-    BML::set_content_type("text/plain");
+    BML::set_content_type("text/plain; charset=utf-8");
     my $user = LJ::canonical_username($GET{'user'});
     return "! bogus username\n" unless $user;
     my $u = LJ::load_user($user);
