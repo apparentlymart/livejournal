@@ -4562,6 +4562,8 @@ sub can_add_syndicated
 {
     my ($u, $su) = @_;  # user and syndicated user
     my $quota = LJ::get_cap($u, "synd_quota");
+    return 0 unless $quota;
+
     my $used;
 
     # see where we're
