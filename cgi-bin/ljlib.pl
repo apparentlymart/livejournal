@@ -3490,8 +3490,11 @@ sub make_journal
         return "<b>Sorry</b><br />This user's account type doesn't permit showing friends of friends.";
     }
 
-    return "<h1>Error</h1>Journal has been deleted.  If you are <b>$user</b>, you have a period of 30 days to decide to undelete your journal." if ($u->{'statusvis'} eq "D");
-    return "<h1>Error</h1>This journal has been suspended." if ($u->{'statusvis'} eq "S");
+    unless ($geta->{'viewall'} && LJ::check_priv($remote, "viewall") ||
+            $opts->{'pathextra'} =~  m!/(\d+)/stylesheet$!) { # don't check style sheets
+        return "<h1>Error</h1>Journal has been deleted.  If you are <b>$user</b>, you have a period of 30 days to decide to undelete your journal." if ($u->{'statusvis'} eq "D");
+        return "<h1>Error</h1>This journal has been suspended." if ($u->{'statusvis'} eq "S");
+    }
     return "<h1>Error</h1>This journal has been deleted and purged." if ($u->{'statusvis'} eq "X");
 
     $opts->{'view'} = $view;

@@ -50,8 +50,17 @@ sub DayPage
     $p->{'date'} = Date($year, $month, $day);
     
     my $secwhere = "AND security='public'";
+    my $viewall = 0;
     if ($remote) {
-        if ($remote->{'userid'} == $u->{'userid'}) {
+
+        # do they have the viewall priv?
+        if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
+            LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+                                  "viewall", "day: $user");
+            $viewall = 1;
+        }
+
+        if ($remote->{'userid'} == $u->{'userid'} || $viewall) {
             $secwhere = "";   # see everything
         } elsif ($remote->{'journaltype'} eq 'P') {
             my $gmask = LJ::get_groupmask($u, $remote);
@@ -111,7 +120,7 @@ sub DayPage
         }
 
         # don't show posts from suspended users
-        next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S';
+        next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S' && ! $viewall;
 
 	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
 	    LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});

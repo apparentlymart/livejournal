@@ -180,6 +180,8 @@ sub EntryPage_entry
 {
     my ($u, $remote, $opts) = @_;
 
+    my $get = $opts->{'getargs'};
+
     my $r = $opts->{'r'};
     my $uri = $r->uri;
 
@@ -198,11 +200,20 @@ sub EntryPage_entry
         $opts->{'handler_return'} = 404;
         return;
     }
-    unless (LJ::can_view($remote, $entry)) {
+
+    # do they have the viewall priv?
+    if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
+        LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+                              "viewall", "entry: $u->{'user'}");
+
+        # do nothing, let them pass
+
+    # check using normal rules
+    } elsif (! LJ::can_view($remote, $entry)) {
         $opts->{'handler_return'} = 403;
         return;
     }
-  
+    
     my $replycount = $entry->{'replycount'};
     my $nc = "";
     $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};

@@ -8,6 +8,8 @@ sub MonthPage
 {
     my ($u, $remote, $opts) = @_;
 
+    my $get = $opts->{'getargs'};
+
     my $p = Page($u, $opts);
     $p->{'_type'} = "MonthPage";
     $p->{'view'} = "month";
@@ -49,8 +51,17 @@ sub MonthPage
     my $sth;
 
     my $secwhere = "AND l.security='public'";
+    my $viewall = 0;
     if ($remote) {
-        if ($remote->{'userid'} == $u->{'userid'}) {
+
+        # do they have the viewall priv?
+        if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
+            LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+                                  "viewall", "month: $user");
+            $viewall = 1;
+        }
+
+        if ($remote->{'userid'} == $u->{'userid'} || $viewall) {
             $secwhere = "";   # see everything
         } elsif ($remote->{'journaltype'} eq 'P') {
             my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} ".
@@ -101,7 +112,7 @@ sub MonthPage
 
         # don't show posts from suspended users
         next unless $pu{$posterid};
-        next ENTRY if $pu{$posterid}->{'statusvis'} eq 'S';
+        next ENTRY if $pu{$posterid}->{'statusvis'} eq 'S' && ! $viewall;
 
 	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
             my $text;

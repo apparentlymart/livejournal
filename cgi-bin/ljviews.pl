@@ -607,7 +607,7 @@ sub create_view_lastn
     if ($skip < 0) { $skip = 0; }
     if ($skip > $maxskip) { $skip = $maxskip; }
 
-    # do they want to 
+    # do they have the viewall priv?
     my $viewall = 0;
     if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
@@ -686,7 +686,7 @@ sub create_view_lastn
             map { $item->{$_} } qw(posterid itemid security alldatepart replycount);
 
         my $pu = $posteru{$posterid};
-        next ENTRY if $pu && $pu->{'statusvis'} eq 'S';
+        next ENTRY if $pu && $pu->{'statusvis'} eq 'S' && ! $viewall;
 
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
@@ -1685,8 +1685,17 @@ sub create_view_day
     my $optDESC = $vars->{'DAY_SORT_MODE'} eq "reverse" ? "DESC" : "";
 
     my $secwhere = "AND security='public'";
+    my $viewall = 0;
     if ($remote) {
-        if ($remote->{'userid'} == $u->{'userid'}) {
+
+        # do they have the viewall priv?
+        if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
+            LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
+                                  "viewall", "day: $user");
+            $viewall = 1;
+        }
+
+        if ($remote->{'userid'} == $u->{'userid'} || $viewall) {
             $secwhere = "";   # see everything
         } elsif ($remote->{'journaltype'} eq 'P') {
             my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends ".
@@ -1725,7 +1734,7 @@ sub create_view_day
         my ($itemid, $posterid, $security, $replycount, $alldatepart, $anum) = 
             map { $item->{$_} } qw(itemid posterid security replycount alldatepart anum);
 
-        next ENTRY if $posteru{$posterid} && $posteru{$posterid}->{'statusvis'} eq 'S';
+        next ENTRY if $posteru{$posterid} && $posteru{$posterid}->{'statusvis'} eq 'S' && ! $viewall;
 
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
