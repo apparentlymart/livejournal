@@ -88,6 +88,7 @@ body<=
  if ($init->{'oldurl'} && $item) {
      $init->{'anum'} = $item->{'anum'};
      $init->{'ditemid'} = $init->{'itemid'}*256 + $item->{'anum'};
+     $ditemid = $init->{'ditemid'} + 0;
  }
 
  unless ($item && $item->{'anum'} == $init->{'anum'}) {
