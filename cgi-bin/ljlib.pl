@@ -3128,7 +3128,7 @@ sub make_journal
 
     unless ($u) {
         $opts->{'baduser'} = 1;
-        return "<H1>Error</H1>No such user <B>$user</B>";
+        return "<h1>Error</h1>No such user <b>$user</b>";
     }
 
     my $eff_view = $LJ::viewinfo{$view}->{'styleof'} || $view;
@@ -3199,7 +3199,7 @@ sub make_journal
         return "<b>Sorry</b><br />This user's account type doesn't permit showing friends of friends.";
     }
 
-    return "<h1>Error</h1>Journal has been deleted.  If you are <B>$user</B>, you have a period of 30 days to decide to undelete your journal." if ($u->{'statusvis'} eq "D");
+    return "<h1>Error</h1>Journal has been deleted.  If you are <b>$user</b>, you have a period of 30 days to decide to undelete your journal." if ($u->{'statusvis'} eq "D");
     return "<h1>Error</h1>This journal has been suspended." if ($u->{'statusvis'} eq "S");
     return "<h1>Error</h1>This journal has been deleted and purged." if ($u->{'statusvis'} eq "X");
 

@@ -1037,7 +1037,7 @@ sub create_view_friends
         });
         my $first = @items ? $items[0]->{'itemid'} : 0;
 
-        $$ret .= "time = " . scalar(time()) . "<br>";
+        $$ret .= "time = " . scalar(time()) . "<br />";
         $opts->{'headers'}->{'Refresh'} = "30;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&lastitemid=$first";
         if ($FORM{'lastitemid'} == $first) {
             $$ret .= "nothing new!";
@@ -1386,7 +1386,7 @@ sub create_view_friends
             LJ::fill_var_props($vars, 'FRIENDS_SKIP_LINKS', \%skiplinks);
     }
     
-    $$ret .= "<BASE TARGET=_top>" if ($FORM{'mode'} eq "framed");
+    $$ret .= "<base target='_top' />" if ($FORM{'mode'} eq "framed");
     $$ret .= LJ::fill_var_props($vars, 'FRIENDS_PAGE', \%friends_page);
 
     return 1;

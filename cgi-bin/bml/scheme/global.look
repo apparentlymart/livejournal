@@ -186,27 +186,27 @@ return "";
 _code?>
 <=LOAD_PAGE_INFO
 
-AL=>{P}<I><A HREF="%%data1%%">%%data2%%</A></I> <IMG SRC="/img/external_link.gif" WIDTH=16 HEIGHT=11 ALIGN=ABSMIDDLE>
-AWAYLINK=>{P}<I><A HREF="%%data1%%">%%data2%%</A></I> <IMG SRC="/img/external_link.gif" WIDTH=16 HEIGHT=11 ALIGN=ABSMIDDLE>
+AL=>{P}<i><a href="%%data1%%">%%data2%%</a></i> <img src="/img/external_link.gif" width='16' height='11' align='absmiddle' />
+AWAYLINK=>{P}<i><a href="%%data1%%">%%data2%%</a></i> <img src="/img/external_link.gif" width='16' height='11' align='absmiddle' />
 
-H1=>{D}<H1>%%data%%</H1>
-H2=>{D}<H2>%%data%%</H2>
+H1=>{D}<h1>%%data%%</h1>
+H2=>{D}<h2>%%data%%</h2>
 
 # Banner Header: search results banner, content desriptor, etc...
-BH=>{D}<P ALIGN=CENTER><FONT FACE="Arial,Helvetica" COLOR="#CC0000" SIZE=-1><B>%%data%%</B></FONT>
+BH=>{D}<p align='center'><font face="Arial,Helvetica" color="#CC0000" size='-1'><b>%%data%%</b></font>
 
 GRIN=>{S}&lt;grin&gt;
-HR=>{S}<HR>
+HR=>{S}<hr />
 
 NEWLINE=>{S}<BR>&nbsp;&nbsp;&nbsp;&nbsp;
 P=>{D}<P>%%data%%</P>
 
 STANDOUT<=
-{D}<BLOCKQUOTE>
-<HR>
+{D}<blockquote>
+<hr />
 %%data%%
-<HR>
-</BLOCKQUOTE>
+<hr />
+</blockquote>
 <=STANDOUT
 
 BADCONTENT<=
@@ -226,30 +226,30 @@ HOTCOLOR=>{S}#ff0000
 EMCOLORLITE=>{S}#e2e2e2
 screenedbarcolor=>{S}#d0d0d0
 
-CHOICE=>{P}<DT><A HREF="%%data2%%"><FONT SIZE="+1"><TT><B>%%data1%%</B></TT></FONT></A><DD><FONT SIZE="2">%%data3%%</FONT>
+CHOICE=>{P}<dt><a href="%%data2%%"><font size="+1"><tt><b>%%data1%%</b></tt></font></a><dd><font size="2">%%data3%%</font>
 
 CHOICES<=
-{F}<TABLE WIDTH="100%" CELLPADDING="2" CELLSPACING="5">
-<TR>
-<TD VALIGN=TOP WIDTH="50%">
-<DL>
+{F}<table width="100%" cellpadding="2" cellspacing="5">
+<tr>
+<td valign='top' width="50%">
+<dl>
 %%items%%
-</DL>
-</TD>
-<TD VALIGN=TOP WIDTH="50%">
-<DL>
+</dl>
+</td>
+<td valign='top' width="50%">
+<dl>
 %%itemsb%%
-</DL>
-</TD>
-</TR>
-</TABLE>
+</dl>
+</td>
+</tr>
+</table>
 <=CHOICES
 
 PAGE<=
-{Fp}<HTML>
-<HEAD><TITLE>%%title%%</TITLE>%%head%%</HEAD>
-<BODY %%bodyopts%%>
+{Fp}<html>
+<head><title>%%title%%</title>%%head%%</head>
+<body %%bodyopts%%>
 %%body%%
-</BODY>
-</HTML>
+</body>
+</html>
 <=PAGE

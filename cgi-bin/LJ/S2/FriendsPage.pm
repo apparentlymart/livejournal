@@ -72,9 +72,9 @@ sub FriendsPage
 
     ## never have spiders index friends pages (change too much, and some 
     ## people might not want to be indexed)
-    $p->{'head_content'} = "<meta name=\"robots\" content=\"noindex,nofollow\">\n";
+    $p->{'head_content'} = "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
     if ($LJ::UNICODE) {
-        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\">\n";
+        $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
     }
 
     my $itemshow = S2::get_property_value($opts->{'ctx'}, "page_friends_items")+0;
@@ -124,7 +124,7 @@ sub FriendsPage
         });
         my $first = @items ? $items[0]->{'itemid'} : 0;
 
-        $ret .= "time = " . scalar(time()) . "<br>";
+        $ret .= "time = " . scalar(time()) . "<br />";
         $opts->{'headers'}->{'Refresh'} = "30;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&lastitemid=$first";
         if ($FORM{'lastitemid'} == $first) {
             $ret .= "nothing new!";

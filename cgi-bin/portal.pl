@@ -296,7 +296,7 @@ sub make_box_modify_form
                                      'value' => $curargs->{$key} });
         }
         if ($opt->{'des'}) {
-            $ret .= "<br>$opt->{'des'}";
+            $ret .= "<br />$opt->{'des'}";
         }
         
     }
@@ -436,17 +436,17 @@ sub box_start
     my $align = $opts->{'align'} || "left";
     my $t = join("-", $box->{'key'}, $box->{'loc'}, $box->{'pos'});
 
-    $$b .= "<MAP name=$mapname>\n";
-    $$b .= "<area shape=rect target=_self coords=0,0,16,16 href=/portal/alter.bml?op=d&amp;t=$t alt=Down>\n";
-    $$b .= "<area shape=rect target=_self coords=16,0,32,16 href=/portal/alter.bml?op=u&amp;t=$t alt=Up>\n";
-    $$b .= "<area shape=rect coords=32,0,48,16 href=/portal/alter.bml?op=a&amp;t=$t alt=\"Add/Modify\">\n";
-    $$b .= "<area shape=rect target=_self coords=48,0,64,16 href=/portal/alter.bml?op=x&amp;t=$t alt=Kill>\n";
-    $$b .= "</MAP>\n";
+    $$b .= "<map name='$mapname'>\n";
+    $$b .= "<area shape='rect' target='_self' coords='0,0,16,16' href='/portal/alter.bml?op=d&amp;t=$t' alt='Down' />\n";
+    $$b .= "<area shape='rect' target='_self' coords='16,0,32,16' href='/portal/alter.bml?op=u&amp;t=$t alt='Up' />\n";
+    $$b .= "<area shape='rect' coords='32,0,48,16' href='/portal/alter.bml?op=a&amp;t=$t alt=\"Add/Modify\" />\n";
+    $$b .= "<area shape='rect' target='_self' coords='48,0,64,16' href='/portal/alter.bml?op=x&amp;t=$t' alt='Kill' />\n";
+    $$b .= "</map>\n";
 
     if ($box->{'pos'} > 1) { $$b .= "<p>"; }
-    $$b .= "<table width=100% bgcolor=<?emcolor?> border=0 cellpadding=1 cellspacing=0>";
-    $$b .= "<tr bgcolor=<?emcolor?>><td bgcolor=<?emcolor?>>";
-    $$b .= "<img align=right width=64 height=16 border=0 src=\"$LJ::IMGPREFIX/knobs.gif\" usemap=\"\#$mapname\"><b>";
+    $$b .= "<table width='100%' bgcolor='<?emcolor?>' border='0' cellpadding='1' cellspacing='0'>";
+    $$b .= "<tr bgcolor='<?emcolor?>'><td bgcolor='<?emcolor?>'>";
+    $$b .= "<img align='right' width='64' height='16' border='0' src=\"$LJ::IMGPREFIX/knobs.gif\" usemap=\"\#$mapname\" /><b>";
 
     $$b .= "&nbsp;";
     if ($opts->{'url'}) { $$b .= "<a href=\"$opts->{'url'}\">"; }
@@ -457,7 +457,7 @@ sub box_start
     if ($box->{'loc'} eq "main") {
         $$b .="</table>\n";
     } else {
-        $$b .= "<tr><td><table bgcolor=#ffffff width=100%><tr><td valign=top align=$align>";
+        $$b .= "<tr><td><table bgcolor='#ffffff' width='100%'><tr><td valign='top' align='$align'>";
     }
 }
 
@@ -492,14 +492,14 @@ $box{'login'} =
                               'url' => '/login.bml', });
 
         $$b .= "<form method='post' action='/login.bml'>";
-        $$b .= "<input type='hidden' name='mode' value='login'>";
-        $$b .= "<table><tr><td align=left>";
-        $$b .= "<b>Username:</b><br><input name=user size=14 maxlength=15><br> ";
-        $$b .= "<b>Password:</b><br><input name=password type=password size=14><br>";
-        $$b .= "<input type=checkbox name=expire value=never> Remember me";
-        $$b .= "<input type=hidden name=ref value=\"$LJ::SITEROOT$LJ::PORTAL_URI\">";
-        $$b .= "</td></tr><tr><td align=right>";
-        $$b .= "<input type=submit value=\"Login\">";
+        $$b .= "<input type='hidden' name='mode' value='login' />";
+        $$b .= "<table><tr><td align='left'>";
+        $$b .= "<b>Username:</b><br /><input name='user' size='14' maxlength='15' /><br /> ";
+        $$b .= "<b>Password:</b><br /><input name='password' type='password' size='14' /><br />";
+        $$b .= "<input type='checkbox' name='expire' value='never' /> Remember me";
+        $$b .= "<input type='hidden' name='ref' value=\"$LJ::SITEROOT$LJ::PORTAL_URI\" />";
+        $$b .= "</td></tr><tr><td align='right'>";
+        $$b .= "<input type='submit' value=\"Login\" />";
         $$b .= "</td></tr></table>";
 
         box_end($b, $box);
@@ -542,7 +542,7 @@ $box{'stats'} =
             $k = shift @stats;
             $v = shift @stats;
             $$b .= "<tr><td><b>$k</b></td></tr>";
-            $$b .= "<tr><td align=right>$v</td></tr>";
+            $$b .= "<tr><td align='right'>$v</td></tr>";
         }
         $$b .= "</table>";
 
@@ -618,7 +618,7 @@ $box{'bdays'} =
         {
             my $mon = LJ::Lang::month_short($lang, $bi->[2]);
             my $day = $bi->[3] . LJ::Lang::day_ord($lang, $bi->[3]);
-            $$bd .= "<tr><td nowrap><b><?ljuser $bi->[0] ljuser?></b></td><td align=right nowrap>$mon $day</td></tr>";
+            $$bd .= "<tr><td nowrap='nowrap'><b><?ljuser $bi->[0] ljuser?></b></td><td align='right' nowrap='nowrap'>$mon $day</td></tr>";
         }
         $$bd .= "</table>";
 
@@ -832,10 +832,10 @@ $box{'update'} =
                                     }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
             }
             
-            $$bd .= "<TR><TD NOWRAP><INPUT TYPE=hidden NAME=webversion VALUE=full><?h2 Optional Settings h2?>";
+            $$bd .= "<tr><td nowrap='nowrap'><input type='hidden' name='webversion' value='full' /><?h2 Optional Settings h2?>";
             
             if ($res{'access_count'}) {
-                $$bd .= "<P><B>Journal to post in: </B> ";
+                $$bd .= "<p><b>Journal to post in: </b> ";
                 my @access;
                 for (my $i=1; $i<=$res{'access_count'}; $i++) {
                     push @access, $res{"access_$i"};

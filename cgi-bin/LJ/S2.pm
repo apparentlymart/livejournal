@@ -122,7 +122,7 @@ sub s2_run
     };
     if ($@) { 
         my $error = $@;
-        $error =~ s/\n/<br>\n/g;
+        $error =~ s/\n/<br \/>\n/g;
         S2::pout("<b>Error running style:</b> $error");
         return 0;
     }

@@ -419,7 +419,7 @@ $cmd{'shared'} = {
     'argsummary' => '<sharedjournal> <action> <user>',
     'args' => [
                'sharedjournal' => "The username of the shared journal.",
-               'action' => 'Either <B>add</B> or <B>remove</B>.',
+               'action' => 'Either <b>add</b> or <b>remove</b>.',
                'user' => "The user you want to add or remove from posting in the shared journal.",
                ],
     };
@@ -443,7 +443,7 @@ $cmd{'community'} = {
     'argsummary' => '<community> <action> <user>',
     'args' => [
                'community' => "The username of the community.",
-               'action' => 'Either <B>add</B> or <B>remove</B>.',
+               'action' => 'Either <b>add</b> or <b>remove</b>.',
                'user' => "The user you want to add or remove from the community.",
                ],
     };

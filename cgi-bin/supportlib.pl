@@ -342,7 +342,7 @@ sub file_request
     if ($dbh->err) { 
         my $error = $dbh->errstr;
         $dbh->do("UNLOCK TABLES");
-        push @$errors, "<B>Database error:</B> (report this)<BR>$error";
+        push @$errors, "<b>Database error:</b> (report this)<br>$error";
         return 0;
     }
     $spid = $dbh->{'mysql_insertid'};
@@ -351,7 +351,7 @@ sub file_request
     $dbh->do("UNLOCK TABLES");
     
     unless ($spid) { 
-        push @$errors, "<B>Database error:</B> (report this)<BR>Didn't get a spid."; 
+        push @$errors, "<b>Database error:</b> (report this)<br>Didn't get a spid."; 
         return 0;
     }
         

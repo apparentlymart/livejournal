@@ -322,7 +322,7 @@ body<=
 
         $ret .= "<hr />";
         $ret .= "<form method='post'>\n";
-        $ret .= "<input name='subject' size='50' maxlength='100' value='" . LJ::ehtml($FORM{'subject'}) . "'><p>";
+        $ret .= "<input name='subject' size='50' maxlength='100' value='" . LJ::ehtml($FORM{'subject'}) . "' /><p>";
         $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' style='width: 99%'>";
         $ret .= LJ::ehtml($FORM{'body'});
         $ret .= "</textarea>";
@@ -334,14 +334,14 @@ body<=
         }
         delete $FORM{'do_spellcheck'};
         foreach (keys %FORM) {
-            $ret .= "<input type='hidden' name=\"$_\" value=\"" . LJ::ehtml($FORM{$_}) . "\">\n"
+            $ret .= "<input type='hidden' name=\"$_\" value=\"" . LJ::ehtml($FORM{$_}) . "\" />\n"
 		unless $_ eq 'body' || $_ eq 'subject';
         }
 
-        $ret .= "<br /><input type='submit' value='$ML{'.preview.submit'}'>\n";
-        $ret .= "<input type='submit' name='submitpreview' value='$ML{'talk.btn.preview'}'>\n";
+        $ret .= "<br /><input type='submit' value='$ML{'.preview.submit'}' />\n";
+        $ret .= "<input type='submit' name='submitpreview' value='$ML{'talk.btn.preview'}' />\n";
         if ($LJ::SPELLER) {
-            $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck'> <label for='spellcheck'>$ML{'talk.spellcheck'}</label>";
+            $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>$ML{'talk.spellcheck'}</label>";
         }
         $ret .= "</form>";
         return $ret;
@@ -521,7 +521,7 @@ body<=
             if ($pic) {
                 $whopic = "<img src=\"$LJ::USERPIC_ROOT/$picid/$pic->{'userid'}\" align='absmiddle' ".
                     "width='$pic->{'width'}' height='$pic->{'height'}' ".
-                    "hspace='1' vspace='2'> ";
+                    "hspace='1' vspace='2' alt='' /> ";
             }
         }
 
@@ -566,7 +566,7 @@ body<=
                     $paru->{'status'} eq "A")
                 {
                     if ($DEBUG) {
-                        $debug .= "Parent mailed ($paru->{'user'}, $paru->{'email'})<br>\n";
+                        $debug .= "Parent mailed ($paru->{'user'}, $paru->{'email'})<br />\n";
                     }
                     $parentmailed = $paru->{'email'};
                     my $encoding = $paru->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$paru->{'mailencoding'}} : "UTF-8";
@@ -611,8 +611,8 @@ body<=
                         if $LJ::UNICODE;
 
                     my $html = "";
-                    $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\"></head><BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
-                    $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$talkurl\">your $LJ::SITENAMESHORT comment</A> in which you said:</TD></TR></TABLE>\n\n";
+                    $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\" /></head><body bgcolor='#EFEFFF' text='#000000' link='#0000FF' vlink='#A000C0'>";
+                    $html .= "<table><tr valign='top'><td>$whopic</td><td width='100%'><b>$who</b>$whouserhtml replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT comment</a> in which you said:</td></tr></table>\n\n";
                     my $htmlbody = $parentcomment;
                     LJ::CleanHTML::clean_comment(\$htmlbody, $parentpreformatted);
                     $html .= &blockquote($htmlbody);
@@ -620,26 +620,26 @@ body<=
                     $html .= "\n\nTheir reply was:\n\n";
                     my $cleanbody = $FORM{'body'};
                     LJ::CleanHTML::clean_comment(\$cleanbody, $FORM{'prop_opt_preformatted'});
-                    $html .= &blockquote("<TT><B>Subject:</B> $cleansubject</TT> $icon<P>$cleanbody");
+                    $html .= &blockquote("<tt><b>Subject:</b> $cleansubject</tt> $icon<p>$cleanbody");
 
                     $html .= "You can <a href=\"$threadurl\">view the thread</a> starting from this comment, or <a href=\"$talkurl\">view all comments</a> to this entry.<br />";
                     $html .= "You can also reply <a href=\"" . $talkargs->("replyto=$dtalkid") . "\">at the webpage</a>, or here:";
-                    $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
-                    $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
-                    $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
-                    $html .= "<INPUT TYPE=HIDDEN NAME=journal VALUE='$u->{'user'}'>";
-                    $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$ditemid>";
-                    $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$paru->{'user'}\">";
-                    $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $paru->{'password'})) . "\">";
-                    $html .= "<input type=hidden name=encoding value=$encoding>" unless $encoding eq "UTF-8";
+                    $html .= "<blockquote><form method='post' target='ljreply' action=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
+                    $html .= "<input type='hidden' name='usertype' value='user' />";
+                    $html .= "<input type='hidden' name='parenttalkid' value='$insertid' />";
+                    $html .= "<input type='hidden' name='journal' value='$u->{'user'}' />";
+                    $html .= "<input type='hidden' name='itemid' value='$ditemid' />";
+                    $html .= "<input type='hidden' name='userpost' value=\"$paru->{'user'}\" />";
+                    $html .= "<input type='hidden' name='ecphash' value=\"" . LJ::ehtml(ecphash($itemid, $insertid, $paru->{'password'})) . "\" />";
+                    $html .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
                     my $newsub = $FORM{'subject'};
                     unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
-                    $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . LJ::ehtml($newsub) . "\">";
-                    $html .= "<P><B>Message</B><BR><TEXTAREA ROWS=10 COLS=50 WRAP=SOFT NAME=body></TEXTAREA>";
-                    $html .= "<BR><INPUT TYPE=SUBMIT VALUE=\"Post Reply\">";
-                    $html .= "</FORM></BLOCKQUOTE>\n";
-                    $html .= "<FONT SIZE=-1>(if you'd prefer to not get these updates, go to <A HREF=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</A> and turn off the relevant options)</FONT>\n";
-                    $html .= "</BODY>\n";
+                    $html .= "<b>Subject: </b> <input name='subject' size='40' value=\"" . LJ::ehtml($newsub) . "\" />";
+                    $html .= "<p><b>Message</b><br /><textarea rows='10' cols='50' wrap='soft' name='body'></textarea>";
+                    $html .= "<br /><input type='submit' value=\"Post Reply\">";
+                    $html .= "</form></blockquote>\n";
+                    $html .= "<font size='-1'>(if you'd prefer to not get these updates, go to <a href=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</a> and turn off the relevant options)</font>\n";
+                    $html .= "</body>\n";
 
                     if ($LJ::UNICODE && $encoding ne "UTF-8") {
                         $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
@@ -660,7 +660,7 @@ body<=
                     $msg->send;
                 } else {
                     if ($DEBUG) {
-                        $debug .= "Parent not mailed<br>\n";
+                        $debug .= "Parent not mailed<br />\n";
                     }
                 }
             }
@@ -674,7 +674,7 @@ body<=
             $ujp->{'status'} eq "A") 
         {
             if ($DEBUG) { 
-                $debug .= "send mail to journal owner. (to $ujp->{'email'})<br>\n";
+                $debug .= "send mail to journal owner. (to $ujp->{'email'})<br />\n";
             }
 
             LJ::load_user_props($dbs, $ujp, 'mailencoding');
@@ -729,14 +729,14 @@ body<=
 
             
             my $html = "";
-            $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\"></head><BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
+            $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\" /></head><body bgcolor='#EFEFFF' text='#000000' link='#0000FF' vlink='#A000C0'>";
             if ($parentcomment)  {
-                $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$talkurl\">your $LJ::SITENAMESHORT post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
+                $html .= "<table><tr valign='top'><td>$whopic</td><td width='100%'><b>$who</b>$whouserhtml replied to another comment somebody left in <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a>.  The comment they replied to was:</td></tr></table>\n";
                 my $cleancom = $parentcomment;
                 LJ::CleanHTML::clean_comment(\$cleancom, $parentpreformatted);
                 $html .= &blockquote($cleancom);
             } else {
-                $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$talkurl\">your $LJ::SITENAMESHORT post</A> in which you said:</TD></TR></TABLE>\n";
+                $html .= "<table><tr valign='top'><td>$whopic</td><td width='100%'><b>$who</b>$whouserhtml replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which you said:</td></tr></table>\n";
                 my $clean = $item->{'event'};
                 LJ::CleanHTML::clean_event(\$clean, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'}});
                 $html .= &blockquote($clean);
@@ -744,31 +744,31 @@ body<=
             $html .= "\n\nTheir reply was:\n\n";
             my $clean = $FORM{'body'};
             LJ::CleanHTML::clean_comment(\$clean, $FORM{'prop_opt_preformatted'});
-            $html .= &blockquote("<TT><B>Subject: </B> $textsubject</TT> $icon<HR>$clean");
+            $html .= &blockquote("<tt><b>Subject: </b> $textsubject</tt> $icon<hr />$clean");
 
             # begin form
             $html .= "You can <a href=\"$threadurl\">view the thread</a> starting from this comment, or <a href=\"$talkurl\">view all comments</a> to this entry.<br />";
             $html .= "You can also reply <a href=\"" . $talkargs->("replyto=$dtalkid") . "\">at the webpage</a>, or here:";
 
-            $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
-            $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
-            $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
-            $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$ditemid>";
-            $html .= "<INPUT TYPE=HIDDEN NAME=journal VALUE='$u->{'user'}'>";
-            $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$ujp->{'user'}\">";
-            $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $ujp->{'password'})) . "\">";
-            $html .= "<input type=hidden name=encoding value=$encoding>" unless $encoding eq "UTF-8";
+            $html .= "<blockquote><form method='post' target='ljreply' action=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
+            $html .= "<input type='hidden' name='usertype' value='user' />";
+            $html .= "<input type='hidden' name='parenttalkid' value='$insertid' />";
+            $html .= "<input type='hidden' name='itemid' value='$ditemid' />";
+            $html .= "<input type='hidden' name='journal' value='$u->{'user'}' />";
+            $html .= "<input type='hidden' name='userpost' value=\"$ujp->{'user'}\" />";
+            $html .= "<input type='hidden' name='ecphash' value=\"" . LJ::ehtml(ecphash($itemid, $insertid, $ujp->{'password'})) . "\" />";
+            $html .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
 
             my $newsub = $FORM{'subject'};
             unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
-            $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . LJ::ehtml($newsub) . "\">";
-            $html .= "<P><B>Message</B><BR><TEXTAREA ROWS=10 COLS=50 WRAP=SOFT NAME=body></TEXTAREA>";
-            $html .= "<BR><INPUT TYPE=SUBMIT VALUE=\"Post Reply\">";
-            $html .= "</FORM></BLOCKQUOTE>\n";
+            $html .= "<b>Subject: </b> <input name='subject' size='40' value=\"" . LJ::ehtml($newsub) . "\">";
+            $html .= "<p><b>Message</b><br><textarea rows='10' cols='50' wrap='soft' name='body'></textarea>";
+            $html .= "<br><input type='submit' value=\"Post Reply\">";
+            $html .= "</form></blockquote>\n";
             # end form
 
-            $html .= "<FONT SIZE=-1>(if you'd prefer to not get these updates, go to <A HREF=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</A> and turn off the relevant options)</FONT>\n";
-            $html .= "</BODY>\n";
+            $html .= "<font size='-1'>(if you'd prefer to not get these updates, go to <a href=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</a> and turn off the relevant options)</font>\n";
+            $html .= "</body>\n";
 
             if ($LJ::UNICODE && $encoding ne "UTF-8") {
                 $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
@@ -787,12 +787,12 @@ body<=
             $msg->send;
         } else {
             $debug .= "don't send mail to journal owner.<ul>\n";
-            $debug .= "<li>ujp--opt_gettalkemail = $ujp->{'opt_gettalkemail'}\n";
-            $debug .= "<li>userpost = $userpost\n";
-            $debug .= "<li>ujp--user = $ujp->{'user'}\n";
-            $debug .= "<li>ujp--email = $ujp->{'email'}\n";
-            $debug .= "<li>parentmailed = $parentmailed\n";
-            $debug .= "<li>ujp--status = $ujp->{'status'}\n";
+            $debug .= "<li>ujp--opt_gettalkemail = $ujp->{'opt_gettalkemail'}</li>\n";
+            $debug .= "<li>userpost = $userpost</li>\n";
+            $debug .= "<li>ujp--user = $ujp->{'user'}</li>\n";
+            $debug .= "<li>ujp--email = $ujp->{'email'}</li>\n";
+            $debug .= "<li>parentmailed = $parentmailed</li>\n";
+            $debug .= "<li>ujp--status = $ujp->{'status'}</li>\n";
             $debug .= "</ul>\n";
 
         }
@@ -837,7 +837,7 @@ body<=
 
     sub blockquote {
         my $a = shift;
-        return "<blockquote style='BORDER-LEFT: #000040 2px solid; MARGIN-LEFT: 0px; MARGIN-RIGHT: 0px; PADDING-LEFT: 15px; PADDING-RIGHT: 0px'>$a</blockquote>";
+        return "<blockquote style='border-left: #000040 2px solid; margin-left: 0px; margin-right: 0px; padding-left: 15px; padding-right: 0px'>$a</blockquote>";
     }
 
 }
