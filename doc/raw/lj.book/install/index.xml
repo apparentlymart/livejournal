@@ -14,8 +14,8 @@
   &lj.install.general_setup;
   &lj.install.perl_setup;
   &lj.install.apache_setup;
-  &lj.install.mysql_setup;
   &lj.install.ljconfig;
+  &lj.install.mysql_setup;
   &lj.install.schedule_tasks;
   &lj.install.finishing;
 </part>

@@ -1,6 +1,26 @@
 <chapter id="lj.customize.layout">
-  <title>Creating a New Layout</title>
+  <title>Creating a New <abbrev>BML</abbrev> Scheme</title>
   <para>
-    (FIXME - this is a stub - we need to detail a BML layout, etc)
+    The look of your site is probably the first thing you're going to want 
+    to customize, because c'mon, who wants a LiveJournal.com clone?
   </para>
+  <section id="lj.customize.layout.config">
+    <title><filename>bmlp-local.cfg</filename></title>
+    <para>
+      You'll want to look at the BML section in ljp docs that details writing
+      a local <filename>bmlp.cfg</filename> file, which you can use to specify
+      certain directives.
+      <!-- FIXME: write that section; clean up this text -->
+      To start, you're going to want to create a directory under the local cvs
+      bml scheme directory (<filename class="directory">/cvs/local/cgi-bin/bml/scheme/</filename>).
+      The name of this directory will be the unique identifier for the template
+      you're creating, which you will use later for testing purposes.
+    </para>
+  </section>
+  <section id="lj.customize.layout.bml_blocks">
+    <title><abbrev>BML</abbrev> Blocks to Worry About</title>
+    <para>
+      FIXME
+    </para>
+  </section>
 </chapter>

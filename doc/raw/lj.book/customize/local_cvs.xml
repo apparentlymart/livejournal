@@ -9,7 +9,7 @@
   </para>
   <para>
     At this point, <link linkend='lj.install.install_files'>you already have</link> a directory named
-    <literal>cvs</literal> underneith your <literal><link
+    <literal>cvs</literal> underneath your <literal><link
     linkend='ljhome_var'>$LJHOME</link></literal> directory.  Further, that directory
       already has under it a directory called <literal>livejournal</literal>, which holds
       the <quote>general</quote> files.

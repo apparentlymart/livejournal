@@ -8,21 +8,14 @@
         customization, and maintenance of a LiveJournal server.
       </para>
     </abstract>
+    &copyright;
+    &legalnotice;
   </bookinfo>
-  <preface id="lj.preface">
-    <title>Preface</title>
-    <para>
-      This is a comprehensive manual aimed towards people wishing to
-      use the LiveJournal set of tools for their online-community
-      needs. Topics covered are installation, customization, and
-      administration, with included information on built-in
-      LiveJournal features, and a brief glimpse into what LiveJournal
-      is, and how it can be used to its fullest.
-    </para>
-  </preface>
+  &lj.preface;
   &lj.intro.index;
   &lj.install.index;
   &lj.customize.index;
   &lj.admin.index;
   &lj.features.index;
+  &appx.gfdl;
 </book>

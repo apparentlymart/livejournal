@@ -88,7 +88,6 @@
         <listitem><para>MIME::Base64</para></listitem>
         <listitem><para>HTML::Tagset</para></listitem>
         <listitem><para>HTML::Parser</para></listitem>
-        <listitem><para>Time::Modules</para></listitem>
         <listitem><para>GD</para></listitem>
         <listitem><para>GDGraph</para></listitem>
         <listitem><para>GDTextUtil</para></listitem>
@@ -99,7 +98,8 @@
       </itemizedlist>
     </para>
     <para>
-      The following packages are currently <emphasis role="bold">Not</emphasis> available through PPM. You will need to have a make utility and a C++ compiler:
+      The following packages are currently <emphasis role="bold">Not</emphasis> available through PPM. 
+      You will need to have a make utility and a C++ compiler:
       <itemizedlist>
         <listitem><para>Compress::Zlib</para></listitem>
         <listitem><para>Jcode</para></listitem>
@@ -110,8 +110,15 @@
   </note>
   <note>
     <para>
-      There used to be three custom <filename>LJ::</filename> modules that needed installing.  We no longer install those in the system.  Instead LJ uses them right out of <filename>/cgi-bin/LJ/*</filename>.  If you have those old LJ modules installed, it's best to go remove them since Perl will prefer system-level ones over local ones.
+      There used to be three custom <filename>LJ::</filename> modules that needed installing.
+      We no longer install those in the system.  
+      Instead LJ uses them right out of <filename>/cgi-bin/LJ/*</filename>.  
+      If you have those old LJ modules installed, it's best to go remove them since Perl will prefer system-level ones over local ones.
     </para>
   </note>
+  <para>
+    To ensure that you have installed the necessary modules, be sure to run the included tool: <filename>/bin/checkconfig.pl</filename>. 
+    If <filename>checkconfig.pl</filename> doesn't detect all of the required modules, it will tell you which ones you are missing.
+  </para>
   </section>
 </chapter>

@@ -27,4 +27,5 @@
     new options you feel like setting.
   </para>
   &lj.install.ljconfig.vars;
+  &lj.install.ljconfig.dbinfo;
 </chapter>

@@ -1,12 +1,15 @@
-  <part id="ljp.dbschema" status="prelim">
+<part id="ljp.dbschema.index" status="prelim">
+  <partinfo>
     <title>Database Schema</title>
-    <partintro>
-      <para>
-        This is the complete database layout (schema) documentation. To see this reference in BML, visit: <ulink url="http://www.livejournal.com/admin/schema" />.
-      </para>
-    </partintro>
-    <reference id="ljp.dbschema.ref">
-      <title>Database Schema Browser</title>
+  </partinfo>
+  <title>Database Schema</title>
+  <partintro>
+    <para>
+      This is the complete database layout (schema) documentation.
+    </para>
+  </partintro>
+  <reference id="ljp.dbschema.ref">
+    <title>Database Schema Browser</title>
     &ljp.dbschema.ref;
-    </reference>
-  </part>
+  </reference>
+</part>

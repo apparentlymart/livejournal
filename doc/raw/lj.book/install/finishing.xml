@@ -4,7 +4,8 @@
   </chapterinfo>
   <title>Finishing Up</title>
   <para>
-    You should now just about have a working LiveJournal installation. There are many things you can still do, but all are outside the scope of this document.
+    You should now just about have a working LiveJournal installation. 
+    There are many things you can still do, but all are outside the scope of this document.
   </para>
   <para>
   If you haven't restarted Apache, you'll want to do that now:

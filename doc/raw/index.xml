@@ -22,10 +22,8 @@
       Server software.
     </para>
   </abstract>
-  <copyright>
-    <year>2002</year>
-    <holder>LiveJournal.com</holder>
-  </copyright>
+  &copyright;
+  &legalnotice;
 </setinfo>
 &lj.index;
 &ljp.book;

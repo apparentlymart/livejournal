@@ -9,6 +9,7 @@
 <!ENTITY ljp.bml.index                          SYSTEM "../ljp.book/bml/index.xml">
 <!ENTITY ljp.bml.api.ref                        SYSTEM "../ljp.book/bml/api.gen.xml">
 <!ENTITY ljp.bml.flags                          SYSTEM "../ljp.book/bml/flags.xml">
+<!ENTITY ljp.bml.core                           SYSTEM "../ljp.book/bml/core.xml">
 
 <!-- Client/Server Protocol Reference -->
 

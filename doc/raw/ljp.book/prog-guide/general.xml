@@ -3,7 +3,7 @@
   <itemizedlist>
     <title>General</title>
     <listitem><para>
-      BML pages shouldn't interface with the database much.  <footnote><para>See <xref linkend="ljp.dbschema" /></para></footnote>.
+      BML pages shouldn't interface with the database much.  <footnote><para>See <xref linkend="ljp.dbschema.index" /></para></footnote>.
     </para></listitem>
     <listitem><para>
       Always use the <function>LJ::</function> functions that take an explicit database handle.  Don't use the old <function>main::</function> functions that use the global $dbh.

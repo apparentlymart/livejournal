@@ -1,4 +1,5 @@
 <!ENTITY lj.index                         SYSTEM "../lj.book/index.xml">
+<!ENTITY lj.preface                       SYSTEM "../lj.book/preface.xml">
 
 <!-- Introduction to the System -->
 
@@ -17,6 +18,7 @@
 <!ENTITY lj.install.mysql_setup           SYSTEM "../lj.book/install/mysql_setup.xml">
 <!ENTITY lj.install.ljconfig              SYSTEM "../lj.book/install/ljconfig.xml">
 <!ENTITY lj.install.ljconfig.vars         SYSTEM "../lj.book/install/ljconfig.vars.xml">
+<!ENTITY lj.install.ljconfig.dbinfo       SYSTEM "../lj.book/install/ljconfig.dbinfo.xml">
 <!ENTITY lj.install.schedule_tasks        SYSTEM "../lj.book/install/schedule_tasks.xml">
 <!ENTITY lj.install.finishing             SYSTEM "../lj.book/install/finishing.xml">
 

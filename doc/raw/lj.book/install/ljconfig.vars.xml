@@ -10,10 +10,21 @@
       New installations will probably want to set these variables.  Some are automatically set by <literal>ljdefaults.pl</literal> based on your other settings, but it wouldn't hurt to specify them all explicitly.
     </para>
     <variablelist>
+      <title>Domain Related</title>
 
       <varlistentry>
         <term><literal role="variable">$LJ::SITENAME</literal></term>
         <listitem><para>The name of the site.  (example: "LiveJournal")</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::SITEROOT</literal></term>
+        <listitem><para>The URL prefix to construct canonical pages. This can include the port number, if 80 is not in use. (default: "http://www.$DOMAIN:8011")</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::IMGPREFIX</literal></term>
+        <listitem><para>The URL prefix of the image directory.  (default: "$SITEROOT/img")</para></listitem>
       </varlistentry>
 
       <varlistentry>
@@ -32,6 +43,16 @@
       </varlistentry>
 
       <varlistentry>
+        <term><literal role="variable">$LJ::COOKIE_DOMAIN</literal></term>
+        <listitem><para>Cookie domains should simply be set to .$domain.com, based 
+        on the Netscape Cookie Spec, but some older browsers don't adhere to the 
+        specs too well. <literal>$LJ::COOKIE_DOMAIN</literal> can be a single string 
+        value, or it can be a perl array ref like: 
+        <programlisting>["", ".$DOMAIN"];</programlisting> (default: ".$DOMAIN")
+        </para></listitem>
+      </varlistentry>
+
+      <varlistentry>
         <term><literal role="variable">$LJ::SERVER_NAME</literal></term>
         <listitem><para>Optional.  If using db-based web logging, this field is stored in the database in the server column, so you can see later how well each server performed.</para>
           <para>
@@ -42,25 +63,61 @@
         </listitem>
       </varlistentry>
 
-      <varlistentry id='ljconfig.var.dbinfo'>
+    </variablelist>
+    <variablelist>
+      <title>Database Related</title>
+
+      <varlistentry>
         <term><literal role="variable">%LJ::DBINFO</literal></term>
-        <listitem><para><literal role="variable">%DBINFO</literal> is a hash that contains the necessary information to connect to your database, as well as the configuration for multiple database clusters, if your installation supports them. For example:
-          <programlisting><![CDATA[%DBINFO = (
-  # master must be named 'master'
-  'master' => { 
-     'host' => "localhost",
-     'port' => 3306,
-     # or, leave out host/port and use a socket to connect:
-     #'sock' => "/var/run/mysqld.sock"; 
-     # optional dbname, if not "livejournal":
-     #'dbname' => 'livejournal', 
-     'user' => 'lj',
-     'pass' => 'ljpass',
-     'role' => {
-         'cluster1' => 1,
-     }, },
-);]]></programlisting>
- That's the basic configuration for an installation with only one database server.  (FIXME: add link to new section on configuring a site with many database servers)
+        <listitem><para><literal role="variable">%LJ::DBINFO</literal> is a hash that contains the necessary information to connect to your database, as well as the configuration for multiple database clusters, if your installation supports them.
+        See <xref linkend="lj.install.ljconfig.dbinfo" /> for more details.          
+        </para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="variable">@LJ::CLUSTERS</literal></term>
+        <listitem><para><literal role="variable">@LJ::CLUSTERS</literal> is an array that contains the names of the clusters that your configuration uses.
+        (example: "qw(fast slow)")
+        </para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::DEFAULT_CLUSTER</literal></term>
+        <listitem><para>The default cluster to choose when creating new accounts.
+        </para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::DIR_DB</literal></term>
+        <listitem><para>
+          Optional database that hosts the directory.
+        </para></listitem>
+      </varlistentry>
+
+      <varlistentry id='ljconfig.var.dbinfo'>
+        <term><literal role="variable">$LJ::DIR_DB_HOST</literal></term>
+        <listitem><para>
+          Specifies which host role the directory should use to connect to the database.
+        </para></listitem>
+      </varlistentry>
+
+    </variablelist>
+    <variablelist>
+      <title>System Tools</title>
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::SENDMAIL</literal></term>
+        <listitem><para>
+          The system path to the sendmail program, along with any necessary parameters. 
+          (example: "/usr/sbin/sendmail -t")
+        </para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::SPELLER</literal></term>
+        <listitem><para>
+          The system path to a spell checking binary, along with any necessary parameters. 
+          (example: "/usr/local/bin/aspell pipe --sug-mode=fast --ignore-case")
         </para></listitem>
       </varlistentry>
 
