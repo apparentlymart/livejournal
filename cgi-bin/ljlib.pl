@@ -4053,10 +4053,10 @@ sub modify_caps {
 sub activate_userpics
 {
     # this behavior is optional, but enabled by default
-    return if $LJ::ALLOW_PICS_OVER_QUOTA;
+    return 1 if $LJ::ALLOW_PICS_OVER_QUOTA;
 
     my $u = shift;
-    return unless $u;
+    return undef unless $u;
 
     # get a database handle for reading/writing
     # need to get this now so we can pass it to load_userid if necessary
@@ -4066,7 +4066,7 @@ sub activate_userpics
     $u = LJ::load_userid($u, "force") unless ref $u eq "HASH";
 
     # should have a $u object now
-    return unless ref $u eq 'HASH';
+    return undef unless ref $u eq 'HASH';
     my $userid = $u->{'userid'};
 
     # active / inactive lists
@@ -4076,7 +4076,7 @@ sub activate_userpics
 
     # get database cluster reader handle
     my $dbcr = LJ::get_cluster_reader($u);
-    return unless $dbcr;
+    return undef unless $dbcr;
 
     # select all userpics and build active / inactive lists
     my $sth = $dbh->prepare("SELECT picid, state FROM userpic WHERE userid=?");
@@ -4154,7 +4154,7 @@ sub activate_userpics
     # delete userpic info object from memcache
     LJ::MemCache::delete([$userid, "upicinf:$userid"]);
 
-    return;
+    return 1;
 }
 
 # for efficiency, we store the userpic structures
