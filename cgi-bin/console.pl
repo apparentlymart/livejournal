@@ -1326,13 +1326,20 @@ sub syn_editurl
     return $err->("Not a syndicated account") unless $u->{'journaltype'} eq 'Y';
     return $err->("Invalid URL") unless $newurl =~ m!^http://(.+?)/!;
 
+    my $oldurl = $dbh->selectrow_array("SELECT synurl FROM syndicated WHERE userid=?",
+                                       undef, $u->{userid});
+
     $dbh->do("UPDATE syndicated SET synurl=? WHERE userid=?", undef,
              $newurl, $u->{'userid'});
     if ($dbh->err)
     {
         push @$out, [ 'error', "URL for account $user not changed - Duplicate Entry" ];
     } else {
-        push @$out, [ '', "URL for account $user changed to $newurl ." ];
+        push @$out, [ '', "URL for account $user changed: $oldurl => $newurl ." ];
+
+        # log to statushistory
+        LJ::statushistory_add($u->{userid}, $remote->{userid}, 'synd_edit',
+                              "URL changed: $oldurl => $newurl");
     }
     return 1;
 }
@@ -1374,7 +1381,8 @@ sub syn_merge
 
     # 1) set up redirection for 'from_user' -> 'to_user'
     LJ::update_user($from_u, { 'journaltype' => 'R', 'statusvis' => 'R' });
-    LJ::set_userprop($from_u, 'renamedto' => $to_user);
+    LJ::set_userprop($from_u, 'renamedto' => $to_user)
+        or return $err->("Unable to set userprop.  Database unavailable?");
 
     # 2) update the url of the destination syndicated account, if applicable
     if ($url) {
@@ -1424,6 +1432,12 @@ sub syn_merge
 
         # clear memcache keys
         LJ::memcache_kill($_, 'friend') foreach @ids;
+    }
+
+    # log to statushistory
+    foreach ($from_userid, $to_userid) {
+        LJ::statushistory_add($_, $remote->{userid}, 'synd_merge',
+                              "Merged $from_user => $to_user using URL: " . ($url ? $url : 'none'));
     }
 
     push @$out, [ '', "Syndicated accounts merged: '$from_user' to '$to_user'" ];
