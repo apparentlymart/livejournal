@@ -800,7 +800,7 @@ sub load_elements
         if ($curitem eq "" && /^([a-zA-Z0-9\_\/]+)=>(.*)/)
         {
             $hashref->{uc($1)} = $2;
-            push @$ol, $1;
+            push @$ol, uc($1);
         }
         elsif (/^([a-zA-Z0-9\_\/]+)<=\s*$/)
         {
