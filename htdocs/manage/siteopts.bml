@@ -179,8 +179,13 @@
     $body .= "<table border='0' width='100%' cellpadding='2'>";
     $body .= "<tr valign='top' align='left'>";
     
-    foreach my $code (@LJ::LANGS) {
+    my @inc;
+    push @inc, $GET{'addlang'} if $GET{'addlang'};
+
+    foreach my $code (@LJ::LANGS, @inc) {
         my $l = LJ::Lang::get_lang($code);
+        next unless $l;
+
         my $item = "langname.$code";
         my $namethislang = BML::ml($item);
         my $namenative = LJ::Lang::get_text($l->{'lncode'}, $item);
