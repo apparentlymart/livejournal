@@ -9,7 +9,7 @@
 
  ### is there a user out there?
  ###
- my $remote = LJ::get_remote($dbh);
+ my $remote = LJ::get_remote($dbs);
  unless ($remote) {
      $body = "(=H1 Sorry.. H1=)(=P To join a community you must first <A HREF=\"/login.bml?ret=1\">log in</A>. P=)";
      return;
@@ -21,6 +21,8 @@
  $sth = $dbh->prepare("SELECT u.user, u.name, c.ownerid, c.membership, c.postlevel FROM user u, community c WHERE u.userid=c.userid AND c.userid=$cuserid");
  $sth->execute;
  my $ci = $sth->fetchrow_hashref;
+
+ my $ecname = LJ::ehtml($ci->{'name'});
 
  ### does this community even exit?
  ###
@@ -57,9 +59,11 @@
      
      ### make community a friend of the remote user
      ###
-     $dbh->do("INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES ($remote->{'userid'}, $cuserid, '#000000', '#ffffff', 1)");
+     if ($FORM{'addfriend'}) { 
+	 $dbh->do("INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES ($remote->{'userid'}, $cuserid, '#000000', '#ffffff', 1)");
+     }
      
-     $body .= "(=H1 Success H1=)(=P You are now a member of the <A HREF=\"/userinfo.bml?user=$ci->{'user'}\">$ci->{'name'} Community</A> P=)";
+     $body .= "(=H1 Success H1=)(=P You are now a member of the <A HREF=\"/userinfo.bml?user=$ci->{'user'}\">$ecname Community</A> P=)";
      
      ### if community permits it, give remote user access to post in this community
      if ($ci->{'postlevel'} eq "members") {
@@ -72,8 +76,8 @@
      
  } else {
 
-     $body .= "(=H1 You sure? H1=)(=P Press the button below to join the \"$ci->{'name'}\" community.";
-     $body .= "<FORM METHOD=POST ACTION=\"join.bml\"><input type=hidden name=cuserid value=$cuserid><input type=hidden name=confirm value=1><center><input type=submit value=\"Join Community\"></FORM> P=)";
+     $body .= "(=H1 You sure? H1=)(=P Press the button below to join the \"$ecname\" community. Uncheck the box below if you want to join the community without seeing community entries on your friends page.";
+     $body .= "<form method='post' action='join.bml'><input type='hidden' name='cuserid' value='$cuserid'><input type='hidden' name='confirm' value='1'><center><input type='checkbox' name='addfriend' checked> Add \"$ecname\" to friends list.<br><br><input type='submit' value='Join Community'></center></form> P=)";
      return;
  }
 
