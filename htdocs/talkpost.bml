@@ -480,7 +480,7 @@ body<=
  }
 
 
- $ret .= "<br /><?de $ML{'paraformat'}<br />  <b>$ML{'.allowedhtml'}</b>: ";
+ $ret .= "<br />$ML{'.paraformat'}<br /> <?de $ML{'.allowedhtml'}: ";
  foreach (sort &LJ::CleanHTML::get_okay_comment_tags()) {
      $ret .= "&lt;$_&gt; ";
  }
