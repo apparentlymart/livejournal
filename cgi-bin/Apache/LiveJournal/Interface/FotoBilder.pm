@@ -74,7 +74,7 @@ sub get_user_info
                statusvis       => $u->{statusvis},
                can_upload      => can_upload($u),
                gallery_enabled => can_upload($u),
-               diskquota       => LJ::get_cap($u, 'disk_quota') << 20, # mb -> bytes
+               diskquota       => LJ::get_cap($u, 'disk_quota') * (1 << 20), # mb -> bytes
                fb_account      => LJ::get_cap($u, 'fb_account'),
                fb_usage        => LJ::Blob::get_disk_usage($u, 'fotobilder'),
                );
@@ -169,7 +169,7 @@ sub set_quota
 
     return {} unless $u->writer;
 
-    my $used = $POST->{'used'} << 10;  # Kb -> bytes
+    my $used = $POST->{'used'} * (1 << 10);  # Kb -> bytes
     my $result = $u->do('REPLACE INTO userblob SET ' .
                         'domain=?, length=?, journalid=?, blobid=0',
                         undef, LJ::get_blob_domainid('fotobilder'),
