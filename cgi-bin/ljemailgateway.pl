@@ -230,6 +230,8 @@ sub process {
         my @valid_sizes = qw(100x100 320x240 640x480);
         my $size = lc($lj_headers{'imgsize'});
         $size = '320x240' unless grep { $size eq $_; } @valid_sizes;
+        my ($width, $height) = split /x/, $size;
+        $size = "/s$size";
 
         # insert image links into post body
         $body .= "<lj-cut text='$icount " .
@@ -238,9 +240,15 @@ sub process {
         $body .= "<span style='white-space: nowrap;'>" if $lj_headers{'imglayout'} =~ /^horiz/i;
         foreach my $img (keys %$fb_upload) {
             my $i = $fb_upload->{$img};
+
+            # don't set a size on images smaller than the requested width/height
+            # (we never scale larger, just smaller)
+            undef $size if $i->{width}  <= $width || 
+                           $i->{height} <= $height;
+
             $body .= "<lj-cut text='$img'>" if $lj_headers{'imgcut'} eq lc('titles');
             $body .= "<a href='$i->{'url'}/'>";
-            $body .= "<img src='$i->{'url'}/s$size' alt='$img' border='0'></a>";
+            $body .= "<img src='$i->{'url'}$size' alt='$img' border='0'></a>";
             $body .= ($lj_headers{'imglayout'} =~ /^horiz/i) ? '&nbsp;' : '<br />';
             $body .= "</lj-cut> " if $lj_headers{'imgcut'} eq lc('titles');
         }
