@@ -105,7 +105,7 @@ body<=
                                              'color' => '<?hotcolor?>', };
                 my $event = LJ::ehtml($POST{'event'});
                 $spellcheck_html = $s->check_html(\$event);
-                $spellcheck_html = "<?inerr No spelling errors found inerr?>" unless $spellcheck_html ne "";
+                $spellcheck_html = "<?inerr $ML{'entryform.spellcheck.noerrors'} inerr?>" unless $spellcheck_html ne "";
             }
             
             # they clicked the save or delete button
@@ -154,7 +154,7 @@ body<=
             }
 
             my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
-            my $auth = "<tr><th>Poster:</th><td>";
+            my $auth = "<tr><th>$ML{'.auth.poster'}</th><td>";
             $auth .= $usejournal ? LJ::ljuser($res{'events_1_poster'}) . " in community " . LJ::ljuser($usejournal) :
                                    LJ::ljuser($remote);
             $auth .= "</td></tr>";
@@ -378,7 +378,7 @@ head<=
 
 <=head
 page?><?_c <LJDEP>
-post: htdocs/editjournal_do.bml
+post: htdocs/editjournal.bml
 link: htdocs/lostinfo.bml
 </LJDEP> _c?>
 

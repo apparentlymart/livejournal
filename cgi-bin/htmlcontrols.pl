@@ -110,7 +110,7 @@ sub html_select
     my $did_sel = 0;
     while (my ($value, $text) = splice(@items, 0, 2)) {
         my $sel = "";
-
+        $value  = $ehtml ? ehtml($value) : $value;
         # multiple-mode or single-mode?
         if (ref $selref eq 'HASH' && $selref->{$value} ||
             $opts->{'selected'} eq $value && !$did_sel++) {
@@ -118,7 +118,12 @@ sub html_select
             $sel = " selected='selected'";
         }
 
-        $ret .= "<option value=\"" . ($ehtml ? ehtml($value) : $value) . "\"$sel>" .
+        my $id;
+        if ($opts->{'name'} ne "" && $value ne "") {
+            $id = " id='$opts->{'name'}_$value'";
+        }
+        
+        $ret .= "<option value=\"$value\" $id $sel>" .
                  ($ehtml ? ehtml($text) : $text) . "</option>";
     }
     $ret .= "</select>";

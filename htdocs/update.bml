@@ -101,7 +101,7 @@
                                      'color' => '<?hotcolor?>', };
         my $event = LJ::ehtml($event);
         $spellcheck_html = $s->check_html(\$event);
-        $spellcheck_html = "<?inerr No spelling errors found inerr?>" unless $spellcheck_html ne "";
+        $spellcheck_html = "<?inerr $ML{'entryform.spellcheck.noerrors'} inerr?>" unless $spellcheck_html ne "";
         $onload .= "pageload(0); "; # js fill-in off
 
         my $date = LJ::html_datetime_decode({ 'name' => "date_ymd", }, \%POST);
@@ -228,10 +228,10 @@
                 my ($itemid, $anum) = ($res{'itemid'}, $res{'anum'});
                 my $itemlink = LJ::item_link($juser, $itemid, $anum);
                 $itemid = $itemid * 256 + $anum;
-                $$body .= " p?><?p Now that you've posted, you can: p?><ul>" .
-                    "<li><a href=\"$itemlink\">View the entry</a></li>" .
-                    "<li><a href=\"/editjournal.bml?journal=$juser&itemid=$itemid\">Edit the entry</a></li>" . 
-                    "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">Add the entry to your memories</a></li>" .
+                $$body .= " p?><?p $ML{'.success.links'} p?><ul>" .
+                    "<li><a href=\"$itemlink\">$ML{'.success.links.view'}</a></li>" .
+                    "<li><a href=\"/editjournal.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.edit'}</a></li>" . 
+                    "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">$ML{'.success.links.memories'}</a></li>" .
                     "</ul>";
             }
             return;
@@ -243,7 +243,7 @@
     my $auth;
     {
         if ($remote) { # so lynx won't show this
-            $auth .= "<tr valign='top' id='remotelogin' style='display: $remotelogin_display'><th>Poster:</th><td>";
+            $auth .= "<tr valign='top' id='remotelogin' style='display: $remotelogin_display'><th>$ML{'.auth.poster'}</th><td>";
             $auth .= BML::ml(".loggedinas", {'user' => $remote->{'user'}, 'altget' => "?altlogin=1" });
             $auth .= "</td></tr>\n";
         }

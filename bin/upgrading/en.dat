@@ -238,15 +238,15 @@ p?>
 
 /community/join.bml.label.sure=You sure?
 
+/community/join.bml.reqsubmitted.body=Your request to join has been submitted to the maintainers:
+
+/community/join.bml.reqsubmitted.title=Join Request Submitted
+
 /community/join.bml.request.body=The [[comm]] community does not have open membership.  Please verify that you wish to join this community by clicking below.
 
 /community/join.bml.request.reason=<i>Optionally</i>, enter a reason you would like to join this community:
 
 /community/join.bml.request.title=Request to Join
-
-/community/join.bml.reqsubmitted.body=Your request to join has been submitted to the maintainers:
-
-/community/join.bml.reqsubmitted.title=Join Request Submitted
 
 /community/join.bml.success=Success
 
@@ -272,9 +272,9 @@ p?>
 
 /community/manage.bml.commlist.actinfo=Info
 
-/community/manage.bml.commlist.actions=<b>Actions</b>
-
 /community/manage.bml.commlist.actinvites=Invitations
+
+/community/manage.bml.commlist.actions=<b>Actions</b>
 
 /community/manage.bml.commlist.actmembers=<b>[<a href='[[link]]'>Members</a>]</b>
 
@@ -561,6 +561,8 @@ p?>
 
 /community/settings.bml.button.createcommunity=Create Community
 
+/community/settings.bml.error.alreadycomm=Account is already a community.
+
 /community/settings.bml.error.badpassword=Invalid community password
 
 /community/settings.bml.error.hasentries=This account already has entries and cannot be converted.
@@ -572,8 +574,6 @@ p?>
 /community/settings.bml.error.notcomm=Not a community account.
 
 /community/settings.bml.error.notfound=Community account not found.
-
-/community/settings.bml.error.alreadycomm=Account is already a community.
 
 /community/settings.bml.error.samenames=Maintainer account and community account cannot be the same.
 
@@ -1378,6 +1378,8 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 
 /editinfo.bml.zip.usonly=5 digit ZIP code; US residents only
 
+/editjournal.bml.auth.poster=Poster:
+
 /editjournal.bml.btn.proceed=Proceed...
 
 /editjournal.bml.certainday=Certain Day:
@@ -1389,6 +1391,12 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 /editjournal.bml.recententries=most recent entries
 
 /editjournal.bml.recententry=Most recent entry
+
+/editjournal.bml.success.delete=Journal entry was deleted.
+
+/editjournal.bml.success.deletespam=Additionally, the entry was marked as spam.  Thank you for your report.
+
+/editjournal.bml.success.head=Success
 
 /editjournal.bml.title=Edit Journal Entries
 
@@ -1485,8 +1493,6 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.btn.save=Save Settings
 
-/editpics.bml.label.comment=Comment:
-
 /editpics.bml.curpics=Current Pictures
 
 /editpics.bml.curpics.desc=Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, use the form at the bottom of the page.
@@ -1526,6 +1532,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.kilobytes=KB
 
+/editpics.bml.label.comment=Comment:
+
 /editpics.bml.label.default=Default:
 
 /editpics.bml.label.delete=Delete:
@@ -1555,9 +1563,9 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.uploaddesc=Use the form below to upload a new picture.
 
-/editpics.bml.uploadheader=Upload a New Picture
-
 /editpics.bml.uploaddesc.fb=Upload a thumbnail of an image hosted on your <a [[aopts]]>[[sitename]]</a> account as a new user picture.
+
+/editpics.bml.uploadheader=Upload a New Picture
 
 /editpics.bml.uploadheader.fb=Upload a New Picture From Fotobilder
 
@@ -2219,11 +2227,11 @@ The site team
 
 /manage/index.bml.customization.modify.about=Modify your journal's display properties
 
-/manage/index.bml.customization.moodtheme.header=Mood Themes
-
 /manage/index.bml.customization.moodtheme.editor=Create and edit your custom mood themes
 
 /manage/index.bml.customization.moodtheme.editor.header=Mood Theme Editor
+
+/manage/index.bml.customization.moodtheme.header=Mood Themes
 
 /manage/index.bml.customization.moodtheme.set=Select which mood theme set your journal will use
 
@@ -3175,9 +3183,9 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkread.bml.anonuser=<i>(Anonymous)</i>
 
-/talkread.bml.button.post=Post Comment
-
 /talkread.bml.button.more=More Options...
+
+/talkread.bml.button.post=Post Comment
 
 /talkread.bml.confirm.action=Are you sure you wish to delete the selected comments?
 
@@ -3192,6 +3200,8 @@ Please either clear the user textbox or select the relevant posting mode and try
 /talkread.bml.nosubject=(no subject)
 
 /talkread.bml.posted=Comment Posted Successfully
+
+/talkread.bml.qr.spellcheck=Check spelling and preview
 
 /talkread.bml.replysuspended=<b>(Reply from suspended user)</b>
 
@@ -3212,8 +3222,6 @@ Please either clear the user textbox or select the relevant posting mode and try
 /talkread.bml.talkmulti.unscreen=Unscreen
 
 /talkread.bml.title=Read Comments
-
-/talkread.bml.qr.spellcheck=Check spelling and preview
 
 /talkscreen.bml.error.login=You must be logged in to work with screened comments.
 
@@ -3472,6 +3480,8 @@ This could be because: <ol>
 
 /update.bml.altpost=Journal to post in:
 
+/update.bml.auth.poster=Poster:
+
 /update.bml.btn.preview=Preview
 
 /update.bml.btn.update=Update Journal
@@ -3561,6 +3571,14 @@ This could be because: <ol>
 /update.bml.spellchecked=Your spell-checked post:
 
 /update.bml.subject=<b>Subject:</b> <i>(optional, for use on longer entries)</i>
+
+/update.bml.success.links=Now that you've posted, you can:
+
+/update.bml.success.links.edit=Edit the entry
+
+/update.bml.success.links.memories=Add the entry to your memories
+
+/update.bml.success.links.view=View the entry
 
 /update.bml.timeformat=24 hour time
 
@@ -3803,9 +3821,15 @@ crumb.birthdays=Birthdays
 
 crumb.changepass=Change Password
 
+crumb.comminvites=Community Invitations
+
 crumb.commmembers=Community Membership
 
+crumb.commpending=Pending Memberships
+
 crumb.commsearch=Community Search
+
+crumb.commsentinvites=Sent Invitations
 
 crumb.community=Community Center
 
@@ -3918,6 +3942,8 @@ crumb.textmessage=Send Text Message
 crumb.themes=Theme Previews
 
 crumb.todo=Todo List
+
+crumb.transfercomm=Transfer Community
 
 crumb.unsubscribe=Unsubscribe
 
@@ -4035,6 +4061,8 @@ Enjoy!
 [[siteroot]]/
 .
 
+email.newacct.subject=Welcome to [[sitename]]
+
 email.newacct2.body|notes=This string replaces email.newacct.body.  You may refer to the old string while translating if you wish.
 email.newacct2.body<<
 Congratulations, you have a new [[sitename]] account!
@@ -4066,7 +4094,75 @@ Enjoy!
 [[siteroot]]/
 .
 
-email.newacct.subject=Welcome to [[sitename]]
+entryform.backdated=Entry is Backdated:
+
+entryform.comment.screening=Screen Comments:
+
+entryform.comment.settings=Comment Settings:
+
+entryform.comment.settings.default=Default
+
+entryform.comment.settings.nocomments=Disabled
+
+entryform.comment.settings.noemail=Don't E-mail
+
+entryform.date=Date:
+
+entryform.date.24hournote=(24 hour time)
+
+entryform.delete=Delete Entry
+
+entryform.delete.confirm=Are you sure you want to delete this entry?
+
+entryform.deletespam=Delete and Mark as Spam
+
+entryform.deletespam.confirm=Are you sure you want to delete this entry and mark it as spam?
+
+entryform.entry=Entry:
+
+entryform.format=Text Formatting:
+
+entryform.format.auto=Auto
+
+entryform.format.preformatted=None
+
+entryform.htmlokay.norich=(HTML okay; by default, newlines will be auto-formatted to <tt>&lt;br&gt;</tt>)
+
+entryform.htmlokay.rich=(HTML okay; by default, newlines will be auto-formatted to <tt>&lt;br&gt;</tt> - or, use the <a [[opts]]>rich text</a> mode.)
+
+entryform.htmlokay.rte_nosupport=rte_nosupport=(Sorry, your browser does not currently support the rich text environment.)
+
+entryform.mood=Mood:
+
+entryform.mood.noneother=None, or other:
+
+entryform.music=Music:
+
+entryform.nojstime.note=<b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.
+
+entryform.opt.defpic=(default)
+
+entryform.options=Options:
+
+entryform.postto=Post to:
+
+entryform.preview=Preview
+
+entryform.save=Save Entry
+
+entryform.security=Security:
+
+entryform.spellcheck=Spell check
+
+entryform.spellcheck.noerrors=No spelling errors found
+
+entryform.spellchecked=Spell checked entry:
+
+entryform.subject=Subject:
+
+entryform.update=Update Journal
+
+entryform.userpics=User Picture Icon:
 
 Error|notes=typically used inside an H1 tag to announce an error.
 Error=Error
