@@ -97,7 +97,7 @@ if ($cmd eq "queries") {
                  $t->{'Command'} eq "Connect");
         my $cmd = $t->{'Info'};
         $cmd =~ s/\n/ /g;
-        print "$t->{'Time'}\t($t->{'Id'})\t$cmd\n";
+        print "$t->{'Time'}\t($t->{'Id'})\t$cmd\n" unless $opt_err;
     }
     exit;
 } elsif ($cmd) {
@@ -144,7 +144,7 @@ my $check = sub
     $sth = $db->prepare("SHOW PROCESSLIST");
     $sth->execute;
     while ($sth->fetchrow_hashref) { $mcount++; }
-    print "  Conn: $mcount\n";
+    print "  Conn: $mcount\n" unless $opt_err;
 
     $sth = $db->prepare("SHOW MASTER LOGS");
     $sth->execute;
