@@ -10,9 +10,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
 
 $maint{'synsuck'} = sub
 {
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbh = LJ::get_db_writer();
     my $sth;
 
     my $verbose = $LJ::LJMAINT_VERBOSE;
@@ -110,7 +108,7 @@ $maint{'synsuck'} = sub
 
         # delete existing items older than the age which can show on a
         # friends view.
-        my $su = LJ::load_userid($dbs, $userid);
+        my $su = LJ::load_userid($userid);
         my $udbh = LJ::get_cluster_master($su);
         if ($udbh) {
             my $secs = ($LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14)+0;  # 2 week default.
@@ -120,7 +118,7 @@ $maint{'synsuck'} = sub
             die $udbh->errstr if $udbh->err;
             while (my ($jitemid, $anum) = $sth->fetchrow_array) {
                 print "DELETE itemid: $jitemid, anum: $anum... \n" if $verbose;
-                if (LJ::delete_item2($dbh, $udbh, $userid, $jitemid, 0, $anum)) {
+                if (LJ::delete_item2($udbh, $userid, $jitemid, 0, $anum)) {
                     print "success.\n" if $verbose;
                 } else {
                     print "fail.\n" if $verbose;
@@ -247,12 +245,11 @@ $maint{'synsuck'} = sub
         }
 
         # update syndicated account's userinfo if necessary
-        LJ::load_user_props($dbs, $su, "url", "urlname");
+        LJ::load_user_props($su, "url", "urlname");
         {
             my $title = $rss->channel('title');
             if ($title && $title ne $su->{'name'}) {
-                $dbh->do("UPDATE user SET name=? WHERE userid=?", undef,
-                         $title, $su->{'userid'});
+                LJ::update_user($su, { name => $title });
                 LJ::set_userprop($su, "urlname", $title);
             }
 
@@ -275,8 +272,7 @@ $maint{'synsuck'} = sub
                     } else {
                         $udbh->do("DELETE FROM userbio WHERE userid=?", undef, $su->{'userid'});
                     }
-                    $dbh->do("UPDATE user SET has_bio=? WHERE userid=?", undef,
-                             ($des ? "Y" : "N"), $su->{'userid'});
+                    LJ::update_user($su, { has_bio => ($des ? "Y" : "N") });
                 }
             }
         }
