@@ -1,5 +1,8 @@
 <?_code
 {
+    use strict;
+    use vars qw(%GET);
+    
     my $req = shift;
     my $r = $req->{'r'};
 
@@ -31,6 +34,7 @@
     BML::suppress_content();
 
     # print top
+    $r->notes( codepath => "bml.exportcomments" );
     $r->content_type("text/xml; charset=utf-8");
     $r->send_http_header();
     $r->print("<?xml version=\"1.0\" encoding='utf-8'?>\n<livejournal>\n");
@@ -123,9 +127,14 @@
             $ret .= " posterid='$data->{posterid}'" if $data->{posterid};
             $ret .= " state='$data->{state}'" if $data->{state} ne 'A';
             $ret .= " parentid='$data->{parenttalkid}'" if $data->{parenttalkid};
-            $ret .= $data->{state} eq 'D' ? " />\n" : ">\n";
-            $ret .= "<subject>$subject</subject>\n" if $subject;
-            $ret .= "<body>$body</body>\n<date>$date</date>\n</comment>\n" if $body;
+            if ($data->{state} eq 'D') {
+                $ret .= " />\n";
+            } else {
+                $ret .= ">\n";
+                $ret .= "<subject>$subject</subject>\n" if $subject;
+                $ret .= "<body>$body</body>\n" if $body;
+                $ret .= "<date>$date</date>\n</comment>\n";
+            }
             $r->print($ret);
         }
         $r->print("</comments>\n");
