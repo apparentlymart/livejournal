@@ -41,7 +41,7 @@ while ($loop) {
         my $get = LJ::Blob::get($u, "userpic", $fmt, $picid);
         die "Re-fetch didn't match" unless $get eq $image;
 
-        $db->do("DELETE FROM userpicblob2 WHERE picid=$picid");
+        $db->do("DELETE FROM userpicblob2 WHERE userid=$uid AND picid=$picid");
 
         $done++;
         printf " Moved $picid.$fmt ($done/$total = %.2f%%)\n", ($done / $total * 100);
