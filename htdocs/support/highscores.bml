@@ -39,6 +39,20 @@ The following people have helped other users in the support area:
      @rows = sort { $b->{points} <=> $a->{points} } @rows;
  }
 
+ my $page = $GET{page}+0;
+ my $shown = 100 * ($page - 1) - 1;
+ my $rank = 0;
+ my $lastpoints = 0;
+ my $buildup = 0;
+ foreach (@rows[0..$shown]) {
+     if ($_->{'points'} != $lastpoints) {
+         $lastpoints = $_->{'points'};
+         $rank += (1 + $buildup);
+         $buildup = 0;
+     } else {
+         $buildup++;
+     }
+ }
  my $total = scalar(@rows);
 
  my %items = BML::paging(\@rows, $GET{'page'}, 100);
@@ -47,9 +61,6 @@ The following people have helped other users in the support area:
 
  my $ret = $navbar;
  $ret .= "<table>";
- my $rank = 0;
- my $lastpoints = 0;
- my $buildup = 0;
  my $count = 0;
  foreach (@rows)
  {
