@@ -270,6 +270,7 @@ BODY<=
  my $icon = LJ::Talk::show_image($pics, $subjecticon); 
 
  my $insertid;
+ my $dtalkid;
  my $md5_body = md5_hex($FORM{'body'});
  
  ### check for duplicate entry (double submission)
@@ -629,9 +630,11 @@ BODY<=
 
      }
  }
+
+ $dtalkid = $clustered ? $insertid * 256 + $item->{'anum'} : $insertid;
  
  # Yeah, we're done.
- my $commentlink = "<a href='talkread.bml?${jargent}itemid=$ditemid&amp;view=$insertid#t$insertid'>here</a>";
+ my $commentlink = "<a href='talkread.bml?${jargent}itemid=$ditemid&amp;view=$dtalkid#t$dtalkid'>here</a>";
  $ret .= "(=H1 Success H1=)(=P Your comment has been added.  You can view it $commentlink. P=)";
 
  if ($didlogin) {
