@@ -909,6 +909,7 @@ register_tabledrop("hintfriendsview");
 register_tabledrop("hintlastnview");
 register_tabledrop("batchdelete");
 register_tabledrop("ftpusers");
+register_tabledrop("ipban");
 
 register_tablecreate("portal", <<'EOC');
 CREATE TABLE portal (
@@ -1407,13 +1408,6 @@ CREATE TABLE sysban (
    what      VARCHAR(20) NOT NULL,
    value     VARCHAR(80),
    note      VARCHAR(255)
-)
-EOC
-
-register_tablecreate("ipban", <<'EOC');
-CREATE TABLE ipban (
-   ip        CHAR(15),
-   bandate   DATETIME
 )
 EOC
 
