@@ -892,7 +892,7 @@ if ($u->{'journaltitle'}) {
         $chopped = 1;
     }
     LJ::load_userids_multiple([ map { $_ => \$u{$_} } @ids ]);
-    my @accesslist = sort grep { $u->{statusvis} eq 'V' } values %u;
+    my @accesslist = sort { $a->{user} cmp $b->{user} } grep { $_->{statusvis} eq 'V' } values %u;
 
     if (my $vcount = @accesslist) {
         $count = $vcount if $count < $CHOP_POINT;
