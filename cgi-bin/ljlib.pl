@@ -8514,6 +8514,8 @@ sub alloc_user_counter
     } elsif ($dom eq "B") {
         $newmax = $u->selectrow_array("SELECT MAX(blobid) FROM userblob WHERE journalid=?",
                                       undef, $uid);
+    } else {
+        die "No user counter initializer defined for area '$dom'.\n";
     }
     $newmax += 0;
     $dbh->do("INSERT IGNORE INTO usercounter (journalid, area, max) VALUES (?,?,?)",
