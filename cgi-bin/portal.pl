@@ -976,7 +976,7 @@ $box{'randuser'} =
 
             my $picid = $r->{'defaultpicid'};
             if ($picid && ! $box->{'args'}->{'hidepic'}) {
-                $$b .= "<img src=\"$LJ::SITEROOT/userpic/$picid\" width=$pic{$picid}->{'width'} height=$pic{$picid}->{'height'}><br>";
+                $$b .= "<img src=\"$LJ::USERPIC_ROOT/$picid/$r->{'userid'}\" width=$pic{$picid}->{'width'} height=$pic{$picid}->{'height'}><br>";
             }
             $$b .= "<?ljuser $r->{'user'} ljuser?>";
             unless ($box->{'args'}->{'hidename'}) {

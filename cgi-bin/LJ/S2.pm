@@ -806,7 +806,7 @@ sub Image_userpic
     my $p = $u->{'_userpics'}->{$picid};
     return {
         '_type' => "Image",
-        'url' => "$LJ::SITEROOT/userpic/$picid/$u->{'userid'}",
+        'url' => "$LJ::USERPIC_ROOT/$picid/$u->{'userid'}",
         'width' => $p->[0],
         'height' => $p->[1],
     };

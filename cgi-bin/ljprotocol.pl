@@ -165,7 +165,7 @@ sub login
         $res->{'pickws'} = [ map { $_->[0] } @$pickws ];
         if ($req->{'getpickwurls'}) {
             $res->{'pickwurls'} = [ map {
-                "$LJ::SITEROOT/userpic/$_->[1]/$u->{'userid'}"
+                "$LJ::USERPIC_ROOT/$_->[1]/$u->{'userid'}"
             } @$pickws ];
         }
         if ($ver >= 1) {

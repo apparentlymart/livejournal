@@ -61,7 +61,7 @@ body<=
      my $picid = $u->{'defaultpicid'};
      LJ::load_userpics($dbs, \%pic, [ $picid ]);
      $ret .= "<a href=\"/allpics.bml?user=$u->{'user'}\">";
-     $ret .= "<img align='baseline' src=\"/userpic/$picid\" width='$pic{$picid}->{'width'}' ".
+     $ret .= "<img align='baseline' src=\"$LJ::USERPIC_ROOT/$picid/$u->{'userid'}\" width='$pic{$picid}->{'width'}' ".
          "height='$pic{$picid}->{'height'}' align=\"absmiddle\" hspace='3' border='0' />";
      $ret .= "</a>";
  }
@@ -176,7 +176,7 @@ body<=
          my $picid = $up->{'defaultpicid'};
          $header = "<table><tr valign=\"bottom\">";
          if ($picid) { 
-             $header .= "<td><img src=\"/userpic/$picid\" width=\"$userpics{$picid}->{'width'}\" height=\"$userpics{$picid}->{'height'}\" hspace=\"3\"></td>";
+             $header .= "<td><img src=\"$LJ::USERPIC_ROOT/$picid/$up->{'userid'}\" width=\"$userpics{$picid}->{'width'}\" height=\"$userpics{$picid}->{'height'}\" hspace=\"3\"></td>";
          }
          $header .= "<td>" . LJ::ljuser($up->{'user'}, { 'full' => 1 }) . " - $up->{'name'}</td></tr></table>\n";
      }

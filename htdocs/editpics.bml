@@ -180,7 +180,7 @@
              
      }
      $body .= "<tr valign='middle'>";
-     $body .= "<td align='center'><img src='/userpic/$pid' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
+     $body .= "<td align='center'><img src='$LJ::USERPIC_ROOT/$pid/$u->{'userid'}' width='$pic->{'width'}' height='$pic->{'height'}'></td>";
      $body .= "<td>";
 
      $body .= "<table>";

@@ -280,7 +280,7 @@ body<=
      {
          my $picid = $u->{'defaultpicid'};
          LJ::load_userpics($dbs, \%userpics, [ $picid ]);	 
-         $ret .= "<IMG SRC=\"/userpic/$picid\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'}>";
+         $ret .= "<IMG SRC=\"$LJ::USERPIC_ROOT/$picid/$u->{'userid'}\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'}>";
      } else
      {
          $ret .= "<I>($ML{'.userpic.none'})</I>";

@@ -352,7 +352,7 @@ body<=
          my $updateago = LJ::ago_text($rec->{'secondsold'});
          my $img;
          if ($picid) {
-             $img = "<IMG SRC=\"/userpic/$picid\" ALT=\"$_->{'user'}\" WIDTH=$pic{$picid}->{'width'} HEIGHT=$pic{$picid}->{'height'} BORDER=0><BR>";
+             $img = "<IMG SRC=\"$LJ::USERPIC_ROOT/$picid/$rec->{'userid'}\" ALT=\"$_->{'user'}\" WIDTH=$pic{$picid}->{'width'} HEIGHT=$pic{$picid}->{'height'} BORDER=0><BR>";
          }
          $ret .= "<TD><A HREF=\"/users/$rec->{'user'}/\"><B>$img$rec->{'user'}</B></A> ";
 
