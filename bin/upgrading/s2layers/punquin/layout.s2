@@ -215,7 +215,7 @@ function print_sidebar(Page p) {
     var string website_name = $p.journal.website_name ? $p.journal.website_name : $*text_website_default_name;
     var string website;
     if ($p.journal.website_url != "") {
-        $website = """<a href="$p.journal.website_url">&gt; $website_name</a><br />""";
+        $website = """&gt; <a href="$p.journal.website_url">$website_name</a><br />""";
     }
 
     var string links;
@@ -258,7 +258,7 @@ function print_gotop (Page p)
     "<table width='150' class='standard' cellpadding='5' cellspacing='0'>\n";
     "<tr valign='top'><td align='left'>\n";
     $p->lay_sidebar_navigation();
-    "<br /><a href='#top'>&gt; $*text_gotop</a><br>\n</td></tr></table>\n<!-- End Small Sidebar -->";
+    "<br />&gt; <a href='#top'>$*text_gotop</a><br>\n</td></tr></table>\n<!-- End Small Sidebar -->";
 }
 
 function Page::print () 
@@ -406,13 +406,13 @@ function RecentPage::lay_sidebar_navigation () {
     var int total = size $.entries;
     var string nav = "";
     if ($.nav.backward_url != "") {
-        $nav = """<a href="$.nav.backward_url">&gt; previous $total entries</a>""";
+        $nav = """&gt; <a href="$.nav.backward_url">previous $total entries</a>""";
     }
     if ($.nav.forward_url != "" and $.nav.backward_url != "") {
         $nav = "$nav<br />";
     }
     if ($.nav.forward_url != "") {
-        $nav = """$nav<a href="$.nav.forward_url">&gt; next $total entries</a>""";
+        $nav = """${nav}&gt; <a href="$.nav.forward_url">next $total entries</a>""";
     }
     print $nav;
 }
@@ -445,7 +445,7 @@ function YearPage::print_year_links ()
         if ($y.displayed) {
             "&gt; $y.year<br />";
         } else {
-            "<a href=\"$y.url\">&gt; $y.year</a><br />";
+            "&gt; <a href=\"$y.url\">$y.year</a><br />";
         }
     }
 }
