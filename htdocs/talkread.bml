@@ -469,7 +469,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
                                      "screen" => $ML{'.talkmulti.screen'},
                                      "delete" => $ML{'.talkmulti.delete'});
              $ret .= " " . LJ::html_submit('', $ML{'.talkmulti.submit'},
-                                    { "onClick" => "return (document.multiform.mode.value != \"delete\") " .
+                                    { "onclick" => "return (document.multiform.mode.value != \"delete\") " .
                                                    "|| confirm(\"" . LJ::ejs($ML{'.confirm.action'}) . "\");" });
              $ret .= "</p>";
          }
