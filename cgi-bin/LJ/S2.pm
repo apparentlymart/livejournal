@@ -1054,8 +1054,8 @@ sub Friend
     my ($u) = @_;
     my $o = UserLite($u);
     $o->{'_type'} = "Friend";
-    $o->{'bgcolor'} = S2::Builtin::S2::Color__Color($u->{'bgcolor'});
-    $o->{'fgcolor'} = S2::Builtin::S2::Color__Color($u->{'fgcolor'});
+    $o->{'bgcolor'} = S2::Builtin::LJ::Color__Color($u->{'bgcolor'});
+    $o->{'fgcolor'} = S2::Builtin::LJ::Color__Color($u->{'fgcolor'});
     return $o;
 }
 
