@@ -368,7 +368,7 @@ sub file_request
     my $email = $o->{'reqtype'} eq "email" ? $o->{'reqemail'} : "";
     unless ($email) {
         if ($o->{'reqtype'} eq "user") {
-            my $u = LJ::load_userid($dbh, $o->{'requserid'});
+            my $u = LJ::load_userid($o->{'requserid'});
             $email = $u->{'email'};
         }
     }
@@ -466,9 +466,9 @@ sub append_request
     while (my ($email, $userid, $user) = $sth->fetchrow_array) {
         next if $re->{'posterid'} == $userid;
         next if ($re->{'type'} eq "screened" &&
-                 ! can_read_screened($dbh, $sp, LJ::make_remote($user, $userid)));
+                 ! can_read_screened($sp, LJ::make_remote($user, $userid)));
         next if ($re->{'type'} eq "internal" &&
-                 ! can_read_internal($dbh, $sp, LJ::make_remote($user, $userid)));
+                 ! can_read_internal($sp, LJ::make_remote($user, $userid)));
         push @to_notify, $email;
     }
     
