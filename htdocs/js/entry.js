@@ -110,7 +110,9 @@ function pageload (dotime) {
 
     var remotelogin = document.getElementById('remotelogin');
     if (! remotelogin) return false;
-    remotelogin.onclick = altlogin;
+    var remotelogin_content = document.getElementById('remotelogin_content');
+    if (! remotelogin_content) return false;
+    remotelogin_content.onclick = altlogin;
 
     f = document.updateForm;
     if (! f) return false;

@@ -128,7 +128,7 @@
                         ($enabled_rte && ! $spellcheck_html && ! $preview);
 
     $$bodyopts .= "onunload=\"save_entry();\" " if $richtext;
-    if ($did_post && ! $did_spellcheck && !$showform && !$enabled_rte && !$preview ) {
+    if ($did_post && !$did_spellcheck && !$showform && !$enabled_rte && !$preview ) {
 
         # what's our authentication scheme for subsequent protocol actions?
         my $flags = {};
@@ -243,9 +243,9 @@
     my $auth;
     {
         if ($remote) { # so lynx won't show this
-            $auth .= "<tr valign='top' id='remotelogin' style='display: $remotelogin_display'><th>$ML{'.auth.poster'}</th><td>";
+            $auth .= "<tr valign='top' id='remotelogin' style='display: $remotelogin_display'><th>$ML{'.auth.poster'}</th><td><span id='remotelogin_content'>";
             $auth .= BML::ml(".loggedinas", {'user' => $remote->{'user'}, 'altget' => "?altlogin=1" });
-            $auth .= "</td></tr>\n";
+            $auth .= "</span></td></tr>\n";
         }
 
         # table with username/password fields
