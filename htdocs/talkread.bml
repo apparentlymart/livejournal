@@ -422,7 +422,7 @@ body<=
      my @pics_to_load;
 
      my %temp;
-     LJ::load_userids_multiple($dbs, [ map { $_, $temp{$_} } keys %users_to_load ]);;
+     LJ::load_userids_multiple($dbs, [ map { $_, \$temp{$_} } keys %users_to_load ]);;
      foreach (values %temp) {
          $user{$_->{'user'}} = $_;
          push @pics_to_load, $_->{'defaultpicid'} if $_->{'defaultpicid'};
