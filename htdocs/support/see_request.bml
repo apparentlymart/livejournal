@@ -303,8 +303,7 @@ LJ::run_hooks("support_see_request_html", {
      
      foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> $faqcat{$b}->{'catorder'} } keys %faqcat)
      {
-         $ret .= "<option value=0>[ " . LJ::ehtml($faqcat{$faqcat}->{'faqcatname'}) . " ]\n";
-         $ret .= "<ul>\n";
+         $ret .= "<option value=0>[ " . LJ::ehtml($faqcat{$faqcat}->{'faqcatname'}) . " ]</option>\n";
          foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
          {
              next unless ($faqq{$faqid}->{'question'});
@@ -315,9 +314,8 @@ LJ::run_hooks("support_see_request_html", {
              if (length($q) > 50) {
                  $q = substr($q, 0, 50) . "...";
              }
-             $ret .= "<option value=$faqid>$q\n";
+             $ret .= "<option value=$faqid>$q</option>\n";
          }
-         $ret .= "</ul>\n";
      }
      $ret .= "</select></td></tr>\n";
  }
