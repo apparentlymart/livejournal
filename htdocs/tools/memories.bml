@@ -223,12 +223,12 @@
  } else {
      $body .= "<ul>";
      foreach my $row (@sortedrows) {
-         my $noun = $row->{'count'}==1 ? $ML{'.entry'} : $ML{'.entries'};
+         my $noun = BML::ml(".plur_entry", {'num' => $row->{'count'}});
          my $ue_keyword = LJ::eurl($row->{'keyword'});
          my $keyword = $row->{'keyword'};
          LJ::text_out(\$keyword);
          if ($keyword eq "*") { $keyword = $ML{'.uncategorized'}; }
-         $body .= "<li><b><a href=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</a></b>: $row->{'count'} $noun\n</li>";
+         $body .= "<li><b><a href=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</a></b>: $noun\n</li>";
      }
      $body .= "</ul>";
  }

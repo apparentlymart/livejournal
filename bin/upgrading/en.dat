@@ -2791,9 +2791,7 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /tools/memories.bml.edit=edit
 
-/tools/memories.bml.entries=entries
-
-/tools/memories.bml.entry=entry
+/tools/memories.bml.plur_entry=[[num]] [[?num|entry|entries]]
 
 /tools/memories.bml.error.noentries.body<<
 This could be because: <ol>

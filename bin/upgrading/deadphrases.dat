@@ -131,3 +131,6 @@ general /userinfo.bml.openmembership.body
 general /userinfo.bml.posthere
 general /userinfo.bml.rpmembership.body
 general /userinfo.bml.syn.lastnew
+
+general /tools/memories.bml.entry
+general /tools/memories.bml.entries
