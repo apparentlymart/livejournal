@@ -14,7 +14,7 @@ body<=
 
     my @errors = ();
 
-    unless (LJ::did_post()) { push @errors, "<?requirepost?>"; }
+    unless (LJ::did_post() && LJ::check_referer('/support/submit.bml')) { push @errors, "<?requirepost?>"; }
 
     my $u;
     my $user;
