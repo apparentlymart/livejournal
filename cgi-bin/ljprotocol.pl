@@ -1194,22 +1194,46 @@ sub do_request
 
         my $qevent = $dbh->quote($event);
 	$event = "";
-	$dbh->do("INSERT INTO logtext (itemid, subject, event) VALUES ($itemid, $qsubject, $qevent)");
-	$dbh->do("INSERT INTO logsubject (itemid, subject) VALUES ($itemid, $qsubject)");
-	
-	## update sync table
-	$dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) SELECT ownerid, logtime, 'L', itemid, 'create' FROM log WHERE itemid=$itemid");
-
-	if ($uselogsec) {
-	    $dbh->do("INSERT INTO logsec (ownerid, itemid, allowmask) VALUES ($qownerid, $itemid, $qallowmask)");
+	$dbh->do("INSERT INTO logtext (itemid, subject, event) ".
+		 "VALUES ($itemid, $qsubject, $qevent)");
+	if ($dbh->err) {
+	    $res->{'success'} = "FAIL";
+	    $res->{'errmsg'} = "Database error [lti]: " . $dbh->errstr;
+	    &LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+	    return;
 	}
 
-        if ($dbh->err) {
-	  $res->{'success'} = "FAIL";
-	  $res->{'errmsg'} = "Database error [ch]: " . $dbh->errstr;
-	  return;
-        }
+	# this is to speed month view and other places that don't need full text.
+	$dbh->do("INSERT INTO logsubject (itemid, subject) VALUES ($itemid, $qsubject)");
+	if ($dbh->err) {
+	    $res->{'success'} = "FAIL";
+	    $res->{'errmsg'} = "Database error [lsi]: " . $dbh->errstr;
+	    &LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+	    return;
+	}
+	
+	## update sync table
+	$dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) ".
+		 "SELECT ownerid, logtime, 'L', itemid, 'create' FROM log WHERE itemid=$itemid");
+	if ($dbh->err) {
+	    $res->{'success'} = "FAIL";
+	    $res->{'errmsg'} = "Database error [sur]: " . $dbh->errstr;
+	    &LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+	    return;
+	}
 
+	# keep track of custom security stuff in other table.
+	if ($uselogsec) {
+	    $dbh->do("INSERT INTO logsec (ownerid, itemid, allowmask) VALUES ($qownerid, $itemid, $qallowmask)");
+	    if ($dbh->err) {
+		$res->{'success'} = "FAIL";
+		$res->{'errmsg'} = "Database error [lsec]: " . $dbh->errstr;
+		&LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+		return;
+	    }
+	}
+
+	# meta-data
 	if (%props) {
 	    my $propinsert = "";
 	    foreach my $propid (keys %props) {
@@ -1221,7 +1245,15 @@ sub do_request
 		my $qvalue = $dbh->quote($props{$propid});
 		$propinsert .= "($itemid, $propid, $qvalue)";
 	    }
-	    if ($propinsert) { $dbh->do($propinsert); }
+	    if ($propinsert) { 
+		$dbh->do($propinsert); 
+		if ($dbh->err) {
+		    $res->{'success'} = "FAIL";
+		    $res->{'errmsg'} = "Database error [propins]: " . $dbh->errstr;
+		    &LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+		    return;
+		}
+	    }
 	}
         
         $dbh->do("UPDATE user SET timeupdate=NOW(), lastitemid=$itemid WHERE userid=$qownerid");
@@ -1229,18 +1261,15 @@ sub do_request
 	if ($track eq "yes") {
 	    my $quserid = $userid+0;
 	    my $qip = $dbh->quote($ENV{'REMOTE_ADDR'});
-	    $dbh->do("INSERT INTO tracking (userid, acttime, ip, actdes, associd) VALUES ($quserid, NOW(), $qip, 'post', $itemid)");
+	    $dbh->do("INSERT INTO tracking (userid, acttime, ip, actdes, associd) ".
+		     "VALUES ($quserid, NOW(), $qip, 'post', $itemid)");
 	}
-
-        if ($dbh->err) {
-	  $res->{'success'} = "FAIL";
-	  $res->{'errmsg'} = "(report this) Database error (hfv): " . $dbh->errstr;
-	  return;
-        }
 
 	unless ($req->{'prop_opt_backdated'}) {
 	    ## update lastn hints table
-	    &LJ::query_buffer_add($dbh, "hintlastnview", "INSERT INTO hintlastnview (userid, itemid) VALUES ($qownerid, $itemid)");
+	    &LJ::query_buffer_add($dbh, "hintlastnview", 
+				  "INSERT INTO hintlastnview (userid, itemid) ".
+				  "VALUES ($qownerid, $itemid)");
 	}
 	    
         if ($dbh->err) {
@@ -1251,7 +1280,8 @@ sub do_request
 
 	#### do the ICQ notifications
 	if (0 || $user eq "test") {
-	    # $sth = $dbh->prepare("SELECT u.user, u.icq FROM friends f, user u WHERE f.user=u.user AND f.friend=$quser AND u.icq <> ''");
+	    # $sth = $dbh->prepare("SELECT u.user, u.icq FROM friends f, user u WHERE
+	    # f.user=u.user AND f.friend=$quser AND u.icq <> ''");
 	    # $sth->execute;
 	    while (my $f = $sth->fetchrow_hashref) 
 	    {
