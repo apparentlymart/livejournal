@@ -274,7 +274,7 @@ sub load_user_lang
     my ($u) = @_;
     return if $u->{'lang'};
 
-    LJ::load_user_props(LJ::get_dbs(), $u, "browselang") unless $u->{'browselang'};
+    LJ::load_user_props($u, "browselang") unless $u->{'browselang'};
     $u->{'lang'} ||= $u->{'browselang'} || $LJ::DEFAULT_LANG || 'en';
 }
 
