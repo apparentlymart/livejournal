@@ -556,7 +556,18 @@ elsif ($sclust > 0)
     # unset readonly and move to new cluster in one update
     $dbh->do("UPDATE user SET clusterid=$dclust, caps=caps&~(1<<$readonly_bit) ".
              "WHERE userid=$userid");
-    
+    print "Moved.\n";
+
+    # delete from source cluster
+    if ($opt_del) {
+        print "Deleting from source cluster...\n";
+        foreach my $table (sort keys %$pri_key) {
+            my $pri = $pri_key->{$table};
+            while ($dbo->do("DELETE FROM $table WHERE $pri=$userid LIMIT 500") > 0) {
+                print "  deleted from $table\n";
+            }
+        }
+    }
 }
 
 sub deletefrom0_logitem
