@@ -193,7 +193,8 @@ sub get_friend_items
     };
     
     my $loop = 1;
-    my $lastmax = $LJ::EndOfTime - time() + 3600*24*14;  # don't load stuff older than 2 weeks 
+    my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14;  # 2 week default.
+    my $lastmax = $LJ::EndOfTime - time() + $max_age;
     my $itemsleft = $getitems;
     my $fr;
 
