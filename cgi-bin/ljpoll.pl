@@ -842,15 +842,13 @@ sub show_poll
                         $ret .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif' align='absmiddle' height='14' width='7' /> ";
                         $ret .= "<b>$count</b> ($percent%)</td></tr>";
                     } else {
-                        $ret .= "<p>$item</p><br />";
-                        $ret .= "<nobr><img src='$LJ::IMGPREFIX/poll/leftbar.gif' align='absmiddle' height='14' width='7'>";
+                        $ret .= "<p>$item<br />";
+                        $ret .= "<span style='white-space: nowrap'><img src='$LJ::IMGPREFIX/poll/leftbar.gif' align='absmiddle' height='14' width='7'>";
                         $ret .= "<img src='$LJ::IMGPREFIX/poll/mainbar.gif' align='absmiddle' height='14' width='$width' alt='$count ($percent%)' />";
                         $ret .= "<img src='$LJ::IMGPREFIX/poll/rightbar.gif' align='absmiddle' height='14' width='7' /> ";
-                        $ret .= "<b>$count</b> ($percent%)</nobr>";
+                        $ret .= "<b>$count</b> ($percent%)</span></p>";
                     }
-                        
                 }
-
             }
 
             if ($do_table) {
