@@ -66,20 +66,24 @@ $maint{'genstats'} = sub
 	    $month += 1;
 	    my $date = sprintf("%04d-%02d-%02d", $year, $month, $day);
 	    my $qdate = $dbr->quote($date);
-	    $sth = $dbr->prepare("SELECT COUNT(*) FROM stats WHERE statcat='postsbyday' AND statkey=$qdate");
-	    $sth->execute;
-	    my ($exist) = $sth->fetchrow_array;
+	    my $exist = $dbr->selectrow_array("SELECT COUNT(*) FROM stats WHERE statcat='postsbyday' AND statkey=$qdate");
 	    if ($exist) {
 		print "exists.\n";
-	    } else {
-		$sth = $dbr->prepare("SELECT COUNT(*) FROM log WHERE year=$year AND month=$month AND day=$day");
-		$sth->execute;
-		my ($count) = $sth->fetchrow_array;
-		print "$date = $count entries\n";
-		$count += 0;
-		$dbh->do("REPLACE INTO stats (statcat, statkey, statval) VALUES ('postsbyday', $qdate, $count)");	    
+		next;
+	    } 
+
+	    my $total = 0;
+	    $total += $dbr->selectrow_array("SELECT COUNT(*) FROM log WHERE year=$year ".
+					    "AND month=$month AND day=$day");
+	    foreach my $c (@LJ::CLUSTERS) {
+		my $dbcr = LJ::get_cluster_reader($c);
+		$total += $dbcr->selectrow_array("SELECT COUNT(*) FROM log2 WHERE year=$year ".
+						 "AND month=$month AND day=$day");
 	    }
 	    
+	    print "$date = $total entries\n";
+	    $dbh->do("REPLACE INTO stats (statcat, statkey, statval) ".
+		     "VALUES ('postsbyday', $qdate, $total)");
 	}
     }
 
