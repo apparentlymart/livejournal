@@ -75,6 +75,9 @@ close(AUTOGEN);
 
 autogen_core();
 
+mkdir $output_dir, 0755 unless -d $output_dir;
+chdir $output_dir or die "Couldn't chdir to $output_dir\n";
+
 my $cssparam;
 if (-e "$docraw_dir/build/style.css") {
     $cssparam = "--stringparam html.stylesheet style.css";
@@ -82,11 +85,9 @@ if (-e "$docraw_dir/build/style.css") {
         and die "Error copying stylesheet.\n";
 }
 
-mkdir $output_dir, 0755 unless -d $output_dir;
-chdir $output_dir or die "Couldn't chdir to $output_dir\n";
 system("xsltproc --nonet --catalogs $cssparam ".
        "$docraw_dir/build/ljdocs2html.xsl $docraw_dir/s2/lj/index.xml")
-    and die "Error generating HTML.\n";
+    and die "Error generating HTML.  (no xsltproc?)\n";
 
 
 sub autogen_core
