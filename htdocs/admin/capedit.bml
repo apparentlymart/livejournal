@@ -37,16 +37,30 @@
          return $ret;
      }
 
-     my $newcaps = 0;
+     my @cap_add = ();
+     my @cap_del = ();
+     my $newcaps = $u->{caps};
      foreach my $n (sort { $a <=> $b } keys %LJ::CAP) {
-         next unless $FORM{"class_$n"};
-         $newcaps |= (1 << $n);
+         if ($FORM{"class_$n"}) {
+             push @cap_add, $n;
+             $newcaps |= (1 << $n);
+         } else {
+             push @cap_del, $n;
+             $newcaps &= ~(1 << $n);
+         }
      }
-     LJ::update_user($u, { caps => $newcaps });
-     $u->{'caps'} = $newcaps;  # so user object is correct in memory
 
-     # re-evaluate userpics for activation
-     LJ::activate_userpics($u);
+     # note which caps were changed and log $logmsg to statushistory
+     my $add_txt = join(",", @cap_add);
+     my $del_txt = join(",", @cap_del);
+     LJ::statushistory_add($u->{'userid'}, $remote->{'userid'},
+                           "capedit", "add: $add_txt, del: $del_txt\n");
+
+     LJ::modify_caps($u, \@cap_add, \@cap_del)
+         or return"<b>Error:</b> Unable to modify caps.";
+
+     # $u->{caps} is now updated in memory for later in this request
+     $u->{caps} = $newcaps;
 
      $ret .= "Saved.";
      $mode = "viewuser";
