@@ -124,6 +124,35 @@ $maint{'synsuck'} = sub
             print "WARNING: syndicated user not on a cluster.  can't delete old stuff.\n";
         }
         
+        # determine if link tags are good or not, where good means
+        # "likely to be a unique per item".  some feeds have the same
+        # <link> element for each item, which isn't good.
+        my $good_links = 0;
+        {
+            my %link_seen;
+            foreach my $it (@items) {
+                next unless $it->{'link'};
+                $link_seen{$it->{'link'}} = 1;
+            }
+            $good_links = 1 if scalar(keys %link_seen) > 1;
+        }
+
+        # if the links are good, load all the URLs for syndicated
+        # items we already have on the server.  then, if we have one
+        # already later and see it's changed, we'll do an editevent
+        # instead of a new post.
+        my %existing_item = ();
+        if ($good_links && $udbh) {
+            LJ::load_props($dbh, "log");
+            my $p = LJ::get_prop("log", "syn_link");
+            my $sth = $udbh->prepare("SELECT jitemid, value FROM logprop2 WHERE ".
+                                     "journalid=? AND propid=? LIMIT 1000");
+            $sth->execute($su->{'userid'}, $p->{'id'});
+            while (my ($itemid, $link) = $sth->fetchrow_array) {
+                $existing_item{$link} = $itemid;
+            }
+        }
+
         # post these items
         my $newcount = 0;
         my $errorflag = 0;
@@ -146,6 +175,8 @@ $maint{'synsuck'} = sub
                 $htmllink = "<p class='ljsyndicationlink'>" .
                     "<a href='$it->{'link'}'>$it->{'link'}</a></p>";
             }
+
+            my $command = "postevent";
             my $req = {
                 'username' => $user,
                 'ver' => 1,
@@ -156,6 +187,9 @@ $maint{'synsuck'} = sub
                 'day' => $now[3],
                 'hour' => $now[2],
                 'min' => $now[1],
+                'props' => {
+                    'syn_link' => $it->{'link'},
+                },
             };
             my $flags = {
                 'nopassword' => 1,
@@ -163,11 +197,32 @@ $maint{'synsuck'} = sub
 
             # if the post contains html linebreaks, assume it's preformatted.
             if ($it->{'description'} =~ /<(p|br)\b/i) {
-                $req->{'props'} = { 'opt_preformatted' => 1 };
+                $req->{'props'}->{'opt_preformatted'} = 1;
+            }
+
+            # do an editevent if we've seen this item before
+            my $old_itemid = $existing_item{$it->{'link'}};
+            if ($it->{'link'} && $old_itemid) {
+                $newcount--; # cancel increment above
+                $command = "editevent";
+                $req->{'itemid'} = $old_itemid;
+                
+                # the editevent requires us to resend the date info, which
+                # we have to go fetch first, to see when we first syndicated
+                # the item:
+                my $origtime = $udbh->selectrow_array("SELECT eventtime FROM log2 WHERE ".
+                                                      "journalid=? AND jitemid=?", undef,
+                                                      $su->{'userid'}, $old_itemid);
+                $origtime =~ /(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/;
+                $req->{'year'} = $1;
+                $req->{'mon'} = $2;
+                $req->{'day'} = $3;
+                $req->{'hour'} = $4;
+                $req->{'min'} = $5;
             }
 
             my $err;
-            my $res = LJ::Protocol::do_request($dbs, "postevent", $req, \$err, $flags);
+            my $res = LJ::Protocol::do_request($dbs, $command, $req, \$err, $flags);
             if ($res && ! $err) {
                 sleep 1; # so 20 items in a row don't get the same logtime second value, so they sort correctly
             } else {

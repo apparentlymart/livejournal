@@ -434,6 +434,8 @@ INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorde
 UPDATE logproplist SET datatype='char',des='A keyword that should align to a defined picture',prettyname='Picture Keyword',scope='general',sortorder='30' WHERE name='picture_keyword';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('num', 'Number of times this post has been edited.', 'revnum', 'Revision number', 'general', '99');
 UPDATE logproplist SET datatype='num',des='Number of times this post has been edited.',prettyname='Revision number',scope='general',sortorder='99' WHERE name='revnum';
+INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('char', 'Original URL of syndication item', 'syn_link', 'Syndication item link URL', 'general', '99');
+UPDATE logproplist SET datatype='char',des='Original URL of syndication item',prettyname='Syndication item link URL',scope='general',sortorder='99' WHERE name='syn_link';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('bool', 'True if text has 8-bit data that\'s not in UTF-8', 'unknown8bit', 'Unknown 8-bit text', 'general', '99');
 UPDATE logproplist SET datatype='bool',des='True if text has 8-bit data that\'s not in UTF-8',prettyname='Unknown 8-bit text',scope='general',sortorder='99' WHERE name='unknown8bit';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('View paid accounts that are soon about to expire.', '1', 'accountsexpiring', 'Accounts - Expiring', 'general');
