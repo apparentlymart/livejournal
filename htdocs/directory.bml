@@ -358,16 +358,9 @@ body<=
          if ($picid) {
              $img = "<IMG SRC=\"$LJ::USERPIC_ROOT/$picid/$rec->{'userid'}\" ALT=\"$_->{'user'}\" WIDTH=$pic{$picid}->{'width'} HEIGHT=$pic{$picid}->{'height'} BORDER=0><BR>";
          }
-         $ret .= "<TD><A HREF=\"/users/$rec->{'user'}/\"><B>$img$rec->{'user'}</B></A> ";
-
-         $ret .= "<A HREF=\"/userinfo.bml?user=$rec->{'user'}\">";
-         if ($rec->{'journaltype'} eq "C") {
-             $ret .= "<IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/community.gif\" WIDTH=16 HEIGHT=16 ALIGN=ABSMIDDLE>";
-         } else {
-             $ret .= "<IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE>";
-         }
-         $ret .= "</A> ";
-
+         $ret .= "<TD>";
+         $ret .= $img;
+         $ret .= LJ::ljuser($rec->{'user'});
          $ret .= "<BR><FONT SIZE=-1><B>$Ml{'.update'} </B> $updateago</FONT></TD>\n";
      }
      $ret .= "</TR></TABLE>\n";
