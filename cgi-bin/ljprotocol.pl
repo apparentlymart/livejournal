@@ -257,11 +257,16 @@ sub getdaycounts
 
     my $u = $flags->{'u'};    
     my $ownerid = $flags->{'ownerid'};
-    my $dbr = $dbs->{'reader'};
     
     my $res = {};
+    my ($db, $table, $ownercol) = ($dbs->{'reader'}, "log", "ownerid");
+    if ($u->{'clusterid'}) {
+	$db = LJ::get_cluster_reader($u);
+	($table, $ownercol) = ("log2", "journalid");
+    }
 
-    my $sth = $dbr->prepare("SELECT year, month, day, COUNT(*) AS 'count' FROM log WHERE ownerid=$ownerid GROUP BY 1, 2, 3");
+    my $sth = $db->prepare("SELECT year, month, day, COUNT(*) AS 'count' ".
+			   "FROM $table WHERE $ownercol=$ownerid GROUP BY 1, 2, 3");
     $sth->execute;
     while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
 	my $date = sprintf("%04d-%02d-%02d", $y, $m, $d);
@@ -1500,6 +1505,7 @@ sub authenticate
 	my $quser = $dbr->quote($username);
 	my $sth = $dbr->prepare("SELECT user, userid, journaltype, name, ".
 				"password, status, statusvis, caps, ".
+				"clusterid, dversion, ".
 				"track FROM user WHERE user=$quser");
 	$sth->execute;
 	$u = $sth->fetchrow_hashref;
