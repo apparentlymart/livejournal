@@ -50,7 +50,9 @@ sub init_remote
     return unless $remote;
     LJ::load_user_privs($remote, 
                         qw(supportclose supporthelp 
-                           supportdelete supportread));
+                           supportdelete supportread
+                           supportviewinternal supportmakeinternal
+                           supportmovetouch supportviewscreened));
 }
 
 # given all the categories, maps a catkey into a cat

@@ -3,12 +3,17 @@ title=>Support Requests
 body<=
 
 <?_code
- 
  my ($ret, $sth);
+ my $r = Apache->request;
 
  my $remote = LJ::get_remote();
  LJ::Support::init_remote($remote);
 
+ if (!$remote->{'_priv'} && 
+     $r->header_in("Referer") eq "$LJ::SITEROOT/support/") 
+ { 
+    return $ML{'.interim'}; 
+ }
  my $cats = LJ::Support::load_cats();
 
  my $filtercat = $FORM{'cat'};

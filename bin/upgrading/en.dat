@@ -1966,6 +1966,8 @@ that area. p?>
 
 /support/faqbrowse.bml.title_num=FAQ Question #[[num]]
 
+/support/help.bml.interim=The support queue is intended for use by people with support privileges.
+
 /support/see_overrides.bml.error.noprivs=Only users with the supportviewinternal or supporthelp privilege can view another user's overrides.
 
 /support/see_overrides.bml.error.nos1=This user is not using S1.
@@ -2223,6 +2225,8 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /tools/emailmanage.bml.address.current.title=Current Address
 
+/tools/emailmanage.bml.address.old.none=None
+
 /tools/emailmanage.bml.address.old.text<<
 The following is a list of email addresses that were used with your account,
 and the time they were deactivated as the primary email address. Check the ones
@@ -2230,8 +2234,6 @@ you wish to delete.
 .
 
 /tools/emailmanage.bml.address.old.title=Previous Addresses
-
-/tools/emailmanage.bml.address.old.none=None
 
 /tools/emailmanage.bml.delete_selected=Delete Selected
 
