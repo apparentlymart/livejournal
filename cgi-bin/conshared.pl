@@ -160,7 +160,7 @@ sub community
     unless ($target_id) {
         $error = 1;
         push @$out, [ "error", "Invalid user \"$target_user\" to add/remove" ];
-    } elsif ($target->{'jouranltype'} ne 'P') {
+    } elsif ($target->{'journaltype'} ne 'P') {
         $error = 1;
         push @$out, [ "error", "Cannot add community/syndicated account to community." ];
     }
