@@ -26,12 +26,11 @@ sub DayPage
         $p->{'head_content'} .= LJ::robot_meta_tags();
     }
 
-    my %FORM = ();
-    LJ::decode_url_string($opts->{'args'}, \%FORM);
+    my $get = $opts->{'getargs'};
 
-    my $month = $FORM{'month'};
-    my $day = $FORM{'day'};
-    my $year = $FORM{'year'};
+    my $month = $get->{'month'};
+    my $day = $get->{'day'};
+    my $year = $get->{'year'};
     my @errors = ();
 
     if ($opts->{'pathextra'} =~ m!^/(\d\d\d\d)/(\d\d)/(\d\d)\b!) {

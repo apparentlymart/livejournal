@@ -47,12 +47,11 @@ sub FriendsPage
     }
     $opts->{'headers'}->{'Last-Modified'} = LJ::time_to_http($lastmod);
 
-    my %FORM = ();
-    LJ::decode_url_string($opts->{'args'}, \%FORM);
+    my $get = $opts->{'getargs'};
 
     my $ret;
 
-    if ($FORM{'mode'} eq "live") {
+    if ($get->{'mode'} eq "live") {
         $ret .= "<html><head><title>${user}'s friends: live!</title></head>\n";
         $ret .= "<frameset rows=\"100%,0%\" border=0>\n";
         $ret .= "  <frame name=livetop src=\"friends?mode=framed\">\n";
@@ -76,7 +75,7 @@ sub FriendsPage
     if ($itemshow < 1) { $itemshow = 20; }
     elsif ($itemshow > 50) { $itemshow = 50; }
     
-    my $skip = $FORM{'skip'}+0;
+    my $skip = $get->{'skip'}+0;
     my $maxskip = ($LJ::MAX_SCROLLBACK_FRIENDS || 1000) - $itemshow;
     if ($skip > $maxskip) { $skip = $maxskip; }
     if ($skip < 0) { $skip = 0; }
@@ -87,8 +86,8 @@ sub FriendsPage
     my $group;
     my $common_filter = 1;
 
-    if (defined $FORM{'filter'} && $remote && $remote->{'user'} eq $user) {
-        $filter = $FORM{'filter'}; 
+    if (defined $get->{'filter'} && $remote && $remote->{'user'} eq $user) {
+        $filter = $get->{'filter'}; 
         $common_filter = 0;
     } else {
         if ($opts->{'pathextra'}) {
@@ -105,7 +104,7 @@ sub FriendsPage
         }
     }
 
-    if ($FORM{'mode'} eq "livecond") 
+    if ($get->{'mode'} eq "livecond") 
     {
         ## load the itemids
         my @items = LJ::get_friend_items({
@@ -121,10 +120,10 @@ sub FriendsPage
 
         $ret .= "time = " . scalar(time()) . "<br />";
         $opts->{'headers'}->{'Refresh'} = "30;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&lastitemid=$first";
-        if ($FORM{'lastitemid'} == $first) {
+        if ($get->{'lastitemid'} == $first) {
             $ret .= "nothing new!";
         } else {
-            if ($FORM{'lastitemid'}) {
+            if ($get->{'lastitemid'}) {
                 $ret .= "<b>New stuff!</b>\n";
                 $ret .= "<script language=\"JavaScript\">\n";
                 $ret .= "window.parent.livetop.location.reload(true);\n";	    
@@ -149,7 +148,7 @@ sub FriendsPage
         'common_filter' => $common_filter,
         'owners' => \%owners,
         'idsbycluster' => \%idsbycluster,
-        'showtypes' => $FORM{'show'},
+        'showtypes' => $get->{'show'},
         'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
         'dateformat' => 'S2',
     });
@@ -216,7 +215,7 @@ sub FriendsPage
             
         my $subject = $logtext->{$datakey}->[0];
         my $text = $logtext->{$datakey}->[1];
-        if ($FORM{'nohtml'}) {
+        if ($get->{'nohtml'}) {
             # quote all non-LJ tags
             $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
             $text    =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
@@ -354,14 +353,14 @@ sub FriendsPage
     # $filter is now set according to it but we don't want it to show in the links.
     # $incfilter may be true even if $filter is 0: user may use filter=0 to turn
     # off the default group
-    my $linkfilter = $FORM{'filter'} + 0;
-    my $incfilter = defined $FORM{'filter'};
+    my $linkfilter = $get->{'filter'} + 0;
+    my $incfilter = defined $get->{'filter'};
 
     # if we've skipped down, then we can skip back up
     if ($skip) {
         my %linkvars;
         $linkvars{'filter'} = $linkfilter if $incfilter;
-        $linkvars{'show'} = $FORM{'show'} if $FORM{'show'} =~ /^\w+$/;
+        $linkvars{'show'} = $get->{'show'} if $get->{'show'} =~ /^\w+$/;
         my $newskip = $skip - $itemshow;
         if ($newskip > 0) { $linkvars{'skip'} = $newskip; }
         else { $newskip = 0; }
@@ -376,7 +375,7 @@ sub FriendsPage
     unless ($eventnum != $itemshow || $skip == $maxskip) {
         my %linkvars;
         $linkvars{'filter'} = $linkfilter if $incfilter;
-        $linkvars{'show'} = $FORM{'show'} if $FORM{'show'} =~ /^\w+$/;
+        $linkvars{'show'} = $get->{'show'} if $get->{'show'} =~ /^\w+$/;
         my $newskip = $skip + $itemshow;
         $linkvars{'skip'} = $newskip;
         $nav->{'backward_url'} = LJ::make_link($base, \%linkvars);
@@ -386,7 +385,7 @@ sub FriendsPage
 
     $p->{'nav'} = $nav;
 
-    if ($FORM{'mode'} eq "framed") {
+    if ($get->{'mode'} eq "framed") {
         $p->{'head_content'} .= "<base target='_top' />";
     }
 

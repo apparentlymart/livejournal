@@ -553,8 +553,7 @@ sub create_view_lastn
 
     foreach ("name", "url", "urlname", "journaltitle") { LJ::text_out(\$u->{$_}); }
 
-    my %FORM = ();
-    LJ::decode_url_string($opts->{'args'}, \%FORM);
+    my $get = $opts->{'getargs'};
 
     if ($opts->{'pathextra'}) {
         $opts->{'badargs'} = 1;
@@ -584,7 +583,7 @@ sub create_view_lastn
     $lastn_page{'events'} = "";
 
     # if user has requested, or a skip back link has been followed, don't index or follow
-    if ($u->{'opt_blockrobots'} || $FORM{'skip'}) {
+    if ($u->{'opt_blockrobots'} || $get->{'skip'}) {
         $lastn_page{'head'} = LJ::robot_meta_tags()
     }
     if ($LJ::UNICODE) {
@@ -604,14 +603,14 @@ sub create_view_lastn
     if ($itemshow < 1) { $itemshow = 20; }
     if ($itemshow > 50) { $itemshow = 50; }
 
-    my $skip = $FORM{'skip'}+0;
+    my $skip = $get->{'skip'}+0;
     my $maxskip = $LJ::MAX_HINTS_LASTN-$itemshow;
     if ($skip < 0) { $skip = 0; }
     if ($skip > $maxskip) { $skip = $maxskip; }
 
     # do they want to 
     my $viewall = 0;
-    if ($FORM{'viewall'} && LJ::check_priv($remote, "viewall")) {
+    if ($get->{'viewall'} && LJ::check_priv($remote, "viewall")) {
         LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
                               "viewall", "lastn: $user");
         $viewall = 1;
@@ -699,7 +698,7 @@ sub create_view_lastn
 
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
-        if ($FORM{'nohtml'}) {
+        if ($get->{'nohtml'}) {
             # quote all non-LJ tags
             $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
             $event   =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
@@ -936,10 +935,9 @@ sub create_view_friends
 
     $$ret = "";
 
-    my %FORM = ();
-    LJ::decode_url_string($opts->{'args'}, \%FORM);
+    my $get = $opts->{'getargs'};
 
-    if ($FORM{'mode'} eq "live") {
+    if ($get->{'mode'} eq "live") {
         $$ret .= "<html><head><title>${user}'s friends: live!</title></head>\n";
         $$ret .= "<frameset rows=\"100%,0%\" border=0>\n";
         $$ret .= "  <frame name=livetop src=\"friends?mode=framed\">\n";
@@ -991,7 +989,7 @@ sub create_view_friends
     if ($itemshow < 1) { $itemshow = 20; }
     if ($itemshow > 50) { $itemshow = 50; }
 
-    my $skip = $FORM{'skip'}+0;
+    my $skip = $get->{'skip'}+0;
     my $maxskip = ($LJ::MAX_SCROLLBACK_FRIENDS || 1000) - $itemshow;
     if ($skip > $maxskip) { $skip = $maxskip; }
     if ($skip < 0) { $skip = 0; }
@@ -1002,8 +1000,8 @@ sub create_view_friends
     my $group;
     my $common_filter = 1;
 
-    if (defined $FORM{'filter'} && $remote && $remote->{'user'} eq $user) {
-        $filter = $FORM{'filter'}; 
+    if (defined $get->{'filter'} && $remote && $remote->{'user'} eq $user) {
+        $filter = $get->{'filter'}; 
         $common_filter = 0;
     } else {
         if ($opts->{'pathextra'}) {
@@ -1021,7 +1019,7 @@ sub create_view_friends
     }
 
 
-    if ($FORM{'mode'} eq "livecond") 
+    if ($get->{'mode'} eq "livecond") 
     {
         ## load the itemids
         my @items = LJ::get_friend_items({
@@ -1037,10 +1035,10 @@ sub create_view_friends
 
         $$ret .= "time = " . scalar(time()) . "<br />";
         $opts->{'headers'}->{'Refresh'} = "30;URL=$LJ::SITEROOT/users/$user/friends?mode=livecond&lastitemid=$first";
-        if ($FORM{'lastitemid'} == $first) {
+        if ($get->{'lastitemid'} == $first) {
             $$ret .= "nothing new!";
         } else {
-            if ($FORM{'lastitemid'}) {
+            if ($get->{'lastitemid'}) {
                 $$ret .= "<b>New stuff!</b>\n";
                 $$ret .= "<script language=\"JavaScript\">\n";
                 $$ret .= "window.parent.livetop.location.reload(true);\n";	    
@@ -1065,7 +1063,7 @@ sub create_view_friends
         'common_filter' => $common_filter,
         'owners' => \%owners,
         'idsbycluster' => \%idsbycluster,
-        'showtypes' => $FORM{'show'},
+        'showtypes' => $get->{'show'},
         'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
     });
 
@@ -1094,7 +1092,7 @@ sub create_view_friends
           "username" => $user,
         });
 
-        $$ret .= "<base target='_top'>" if ($FORM{'mode'} eq "framed");
+        $$ret .= "<base target='_top'>" if ($get->{'mode'} eq "framed");
         $$ret .= LJ::fill_var_props($vars, 'FRIENDS_PAGE', \%friends_page);
         return 1;
     }
@@ -1142,7 +1140,7 @@ sub create_view_friends
             
         my $subject = $logtext->{$datakey}->[0];
         my $event = $logtext->{$datakey}->[1];
-        if ($FORM{'nohtml'}) {
+        if ($get->{'nohtml'}) {
             # quote all non-LJ tags
             $subject =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
             $event   =~ s{<(?!/?lj)(.*?)>} {&lt;$1&gt;}gi;
@@ -1330,8 +1328,8 @@ sub create_view_friends
     # $filter is now set according to it but we don't want it to show in the links.
     # $incfilter may be true even if $filter is 0: user may use filter=0 to turn
     # off the default group
-    my $linkfilter = $FORM{'filter'} + 0;
-    my $incfilter = defined $FORM{'filter'};
+    my $linkfilter = $get->{'filter'} + 0;
+    my $incfilter = defined $get->{'filter'};
 
     # if we've skipped down, then we can skip back up
     if ($skip) {
@@ -1339,7 +1337,7 @@ sub create_view_friends
         my %linkvars;
 
         $linkvars{'filter'} = $linkfilter if $incfilter;
-        $linkvars{'show'} = $FORM{'show'} if $FORM{'show'} =~ /^\w+$/;
+        $linkvars{'show'} = $get->{'show'} if $get->{'show'} =~ /^\w+$/;
 
         my $newskip = $skip - $itemshow;
         if ($newskip > 0) { $linkvars{'skip'} = $newskip; }
@@ -1360,7 +1358,7 @@ sub create_view_friends
         my %linkvars;
 
         $linkvars{'filter'} = $linkfilter if $incfilter;
-        $linkvars{'show'} = $FORM{'show'} if $FORM{'show'} =~ /^\w+$/;
+        $linkvars{'show'} = $get->{'show'} if $get->{'show'} =~ /^\w+$/;
 
         my $newskip = $skip + $itemshow;
         $linkvars{'skip'} = $newskip;
@@ -1383,7 +1381,7 @@ sub create_view_friends
             LJ::fill_var_props($vars, 'FRIENDS_SKIP_LINKS', \%skiplinks);
     }
     
-    $$ret .= "<base target='_top' />" if ($FORM{'mode'} eq "framed");
+    $$ret .= "<base target='_top' />" if ($get->{'mode'} eq "framed");
     $$ret .= LJ::fill_var_props($vars, 'FRIENDS_PAGE', \%friends_page);
 
     return 1;
@@ -1404,8 +1402,7 @@ sub create_view_calendar
 
     foreach ("name", "url", "urlname", "journaltitle") { LJ::text_out(\$u->{$_}); }
 
-    my %FORM = ();
-    LJ::decode_url_string($opts->{'args'}, \%FORM);
+    my $get = $opts->{'getargs'};
 
     my %calendar_page = ();
     $calendar_page{'name'} = LJ::ehtml($u->{'name'});
@@ -1466,7 +1463,7 @@ sub create_view_calendar
     if ($vars->{'CALENDAR_SORT_MODE'} eq "forward") { @allyears = reverse @allyears; }
 
     my @years = ();
-    my $dispyear = $FORM{'year'};  # old form was /users/<user>/calendar?year=1999
+    my $dispyear = $get->{'year'};  # old form was /users/<user>/calendar?year=1999
 
     # but the new form is purtier:  */calendar/2001
     # but the NEWER form is purtier:  */2001
@@ -1663,12 +1660,11 @@ sub create_view_day
 
     my $initpagedates = 0;
 
-    my %FORM = ();
-    LJ::decode_url_string($opts->{'args'}, \%FORM);
+    my $get = $opts->{'getargs'};
 
-    my $month = $FORM{'month'};
-    my $day = $FORM{'day'};
-    my $year = $FORM{'year'};
+    my $month = $get->{'month'};
+    my $day = $get->{'day'};
+    my $year = $get->{'year'};
     my @errors = ();
 
     if ($opts->{'pathextra'} =~ m!^(?:/day)?/(\d\d\d\d)/(\d\d)/(\d\d)\b!) {

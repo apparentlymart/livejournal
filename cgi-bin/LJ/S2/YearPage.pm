@@ -27,13 +27,12 @@ sub YearPage
         $p->{'head_content'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
     }
 
-    my %FORM = ();
-    LJ::decode_url_string($opts->{'args'}, \%FORM);
+    my $get = $opts->{'getargs'};
 
     my $count = LJ::S2::get_journal_day_counts($p);
     my @years = sort { $a <=> $b } keys %$count;
     my $maxyear = @years ? $years[-1] : undef;
-    my $year = $FORM{'year'};  # old form was /users/<user>/calendar?year=1999
+    my $year = $get->{'year'};  # old form was /users/<user>/calendar?year=1999
 
     # but the new form is purtier:  */calendar/2001
     if (! $year && $opts->{'pathextra'} =~ m!^/(\d\d\d\d)/?\b!) {
