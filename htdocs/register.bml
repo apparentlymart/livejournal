@@ -14,7 +14,7 @@ body<=
  my $u;
 
  #### new way
- if ($qs =~ /^(\d+)[;\.](.+)$/)
+ if ($qs =~ /^(\d+)\.(.+)$/)
  {
      my ($aaid, $auth) = ($1, $2);
      my $aa = LJ::is_valid_authaction($aaid, $auth);
