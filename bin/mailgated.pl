@@ -364,7 +364,8 @@ sub process
 
     # stop more spam, based on body text checks
     my $tent = LJ::Emailpost::get_entity($entity);
-    return dequeue("Can't find text entity") unless $tent;
+    $tent = LJ::Emailpost::get_entity($entity, { type => 'html' }) unless $tent;
+    return dequeue("Can't find text or html entity") unless $tent;
     my $body = $tent->bodyhandle->as_string;
     $body = LJ::trim($body);
 

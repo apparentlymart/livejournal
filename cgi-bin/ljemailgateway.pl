@@ -83,6 +83,7 @@ sub process {
     # Get various email parts.
     my $content_type = $head->get('Content-type:');
     my $tent = get_entity($entity);
+    $tent = LJ::Emailpost::get_entity($entity, { type => 'html' }) unless $tent;
     return $err->("Unable to find any text content in your mail", { sendmail => 1 }) unless $tent;
     $subject = $head->get('Subject:');
     $body = $tent->bodyhandle->as_string;
@@ -340,6 +341,7 @@ sub get_entity
     my $mime_type = $head->mime_type;
 
     return $entity if $type eq 'text' && $mime_type eq "text/plain";
+    return $entity if $type eq 'html' && $mime_type eq "text/html";
     my @entities;
 
     # Only bother looking in messages that advertise attachments
@@ -348,7 +350,8 @@ sub get_entity
         for (my $i=0; $i<$partcount; $i++) {
             my $alte = $entity->parts($i);
 
-            return $alte if $alte->mime_type eq "text/plain" && $type eq 'text';
+            return $alte if $type eq 'text' && $alte->mime_type eq "text/plain";
+            return $alte if $type eq 'html' && $alte->mime_type eq "text/html";
             push @entities, $alte if $type eq 'all';
 
             if ($type eq 'image' &&
