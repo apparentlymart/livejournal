@@ -93,8 +93,8 @@ $maint{'genstats'} = sub
 		    }
 		}
 		
-		my $paidfeatures = LJ::LJcom::acct_string($rec->{'caps'});
-		$account{$paidfeatures}++;
+		my $capnameshort = LJ::name_caps_short($rec->{'caps'});
+		$account{$capnameshort}++;
 		
 		unless ($rec->{'datereg'} eq $nowdate) {
 		    $newbyday{$rec->{'datereg'}}++;

@@ -664,6 +664,21 @@ sub name_caps
 }
 
 # <LJFUNC>
+# name: LJ::name_caps_short
+# des: Given a user's capability class bit mask, returns a
+#      site-specific short string code.
+# args: caps
+# des-caps: 16 bit capability bitmask
+# </LJFUNC>
+sub name_caps_short
+{
+    return undef unless LJ::are_hooks("name_caps_short");
+    my $caps = shift;
+    my @r = LJ::run_hooks("name_caps_short", $caps);
+    return $r[0]->[0];
+}
+
+# <LJFUNC>
 # name: LJ::get_cap
 # des: Given a user object or capability class bit mask and a capability/limit name,
 #      returns the maximum value allowed for given user or class, considering 

@@ -127,22 +127,6 @@ P=)
  }
  $ret .= "</UL> P=)\n";
 
- # most active users
-# $ret .= "(=H1 Most Active Users H1=)(=P Here are the most active users, both overall, and in the past week: P=)\n";
-# $ret .= "<CENTER><P><TABLE WIDTH=500><TR BGCOLOR=#C0C0FF><TH ALIGN=LEFT>Overall</TH><TH ALIGN=LEFT>Past Week</TH></TR><TR VALIGN=TOP>\n";
-# $ret .= "<TD>\n";
-# foreach my $key (sort { $stat{'active_overall'}->{$b} <=> $stat{'active_overall'}->{$a} } keys %{$stat{'active_overall'}})
-# {
-#     $ret .= "<A HREF=\"/users/$key\">$key</A> - $stat{'active_overall'}->{$key}<BR>\n";
-# }
-
-# $ret .= "</TD><TD>\n";
-# foreach my $key (sort { $stat{'active_week'}->{$b} <=> $stat{'active_week'}->{$a} } keys %{$stat{'active_week'}})
-# {
-#     $ret .= "<A HREF=\"/users/$key\">$key</A> - $stat{'active_week'}->{$key}<BR>\n";
-# }
-# $ret .= "</TD></TR></TABLE></CENTER>\n";
- 
  # ages
  $ret .= "(=H1 Age Distribution H1=)(=P The following shows the age distribution of LiveJournal users: P=)\n";
 
@@ -199,10 +183,6 @@ P=)
 
  $ret .= "(=H2 New accounts -- last 60 days H2=)(=P How fast are we growing? P=)";
  $ret .= "<P><CENTER><IMG SRC=\"stats/newbyday.png\" WIDTH=520 HEIGHT=350></CENTER>";
-
-# $ret .= "(=H2 Paid accounts -- last 60 days H2=)(=P Are we making any money? P=)";
-# $ret .= "<P><CENTER><IMG SRC=\"stats/paidbyday.png\" WIDTH=520 HEIGHT=350></CENTER>";
- 
 
  return $ret;
 
