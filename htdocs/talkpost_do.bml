@@ -176,6 +176,10 @@ BODY<=
      $ret .= "<form method=post>\n";
      # change mode:
      delete $FORM{'submitpreview'}; $FORM{'submitpost'} = 1;
+     if ($cookie_auth) {
+	 $FORM{'usertype'} = "cookieuser";
+	 delete $FORM{'userpost'};
+     }
      foreach (keys %FORM) {
 	 $ret .= "<input type=hidden name=\"$_\" value=\"" . &ehtml($FORM{$_}) . "\">\n";
      }
