@@ -37,7 +37,9 @@ sub sock_to_host # (host)
     my $host = shift;
     my $now = time();
     my ($ip, $port) = $host =~ /(.*):(.*)/;
-    return undef if $host_dead{$host} > $now || $host_dead{$ip} > $now;
+    return undef if 
+         $host_dead{$host} && $host_dead{$host} > $now || 
+         $host_dead{$ip} && $host_dead{$ip} > $now;
     return $cache_sock{$host} if $cache_sock{$host} && $cache_sock{$host}->connected;
     my $sock = IO::Socket::INET->new(Proto => "tcp",
                                      PeerAddr => $host,
@@ -120,7 +122,7 @@ sub _set {
         $flags |= 1;
     }
     my $len = length($val);
-    $exptime = int($exptime)+0;
+    $exptime = int($exptime || 0);
     my $cmd = "$cmdname $key $flags $exptime $len\r\n$val\r\n";
     $sock->print($cmd);
     $sock->flush;
