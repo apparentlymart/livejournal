@@ -183,7 +183,7 @@ body<=
            "<div align='center' style='margin-top: 20px;'><img src='$LJ::USERPIC_ROOT/$picid/$u->{'userid'}' width='$sx' height='$sy' alt='userpic'></div>\n\n" .
            "<?p " . BML::ml('.success.editpics', { 'editlink' => "$LJ::SITEROOT/editpics.bml?authas=$authas" }) . " p?>\n" .
            "<?p " . BML::ml('.success.upload', { 'uploadlink' => "$LJ::SITEROOT/uploadpic.bml?authas=$authas",
-                                                 'journallink' => LJ::journal_base($u) }) . " p?>\n\n";
+                                                 'journallink' => LJ::journal_base($u) . "/" }) . " p?>\n\n";
 } 
 _code?>
 
