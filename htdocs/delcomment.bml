@@ -63,6 +63,7 @@ body<=
     # can ban if can manage and the comment is by someone else and not anon
     my $can_ban = $can_manage && $tp->{'posterid'} 
                   && $remote && $remote->{'userid'} != $tp->{'posterid'}; 
+    my $can_delthread = $can_manage;
 
 
     ### perform actions
@@ -72,7 +73,7 @@ body<=
             if $POST{spam};
 
         # delete entire thread? or just the one comment?
-        if ($POST{delthread}) {
+        if ($POST{delthread} && $can_delthread) {
             # delete entire thread ...
             LJ::Talk::delete_thread($u, $tp->{'itemid'}, $tpid);
         } else {
@@ -124,8 +125,10 @@ body<=
         $ret .= "<label for='spam'>$ML{'.confirm.spam'}</label></div>";
     }
 
-    $ret .= "<div>" . LJ::html_check({name => 'delthread', id => 'delthread'});
-    $ret .= "<label for='delthread'>$ML{'.confirm.delthread'}</label></div>";
+    if ($can_delthread) {
+        $ret .= "<div>" . LJ::html_check({name => 'delthread', id => 'delthread'});
+        $ret .= "<label for='delthread'>$ML{'.confirm.delthread'}</label></div>";
+    }
 
     $ret .= " standout?>";
 
