@@ -77,7 +77,7 @@ sub DayPage
 
     # load the log items
     my $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
-    my $sth = $dbcr->prepare("SELECT jitemid AS itemid, posterid, security, replycount, DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
+    my $sth = $dbcr->prepare("SELECT jitemid AS itemid, posterid, security, DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
                              "FROM log2 " .
                              "WHERE journalid=$u->{'userid'} AND year=$year AND month=$month AND day=$day $secwhere " . 
                              "ORDER BY eventtime, logtime LIMIT 200");
@@ -108,9 +108,10 @@ sub DayPage
   ENTRY:
     foreach my $item (@items)
     {
-        my ($posterid, $itemid, $security, $alldatepart, $replycount, $anum) = 
-            map { $item->{$_} } qw(posterid itemid security alldatepart replycount anum);
+        my ($posterid, $itemid, $security, $alldatepart, $anum) = 
+            map { $item->{$_} } qw(posterid itemid security alldatepart anum);
 
+        my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
         my $text = $logtext->{$itemid}->[1];
         if ($get->{'nohtml'}) {

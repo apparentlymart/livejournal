@@ -1098,12 +1098,13 @@ sub create_view_lastn
   ENTRY:
     foreach my $item (@items) 
     {
-        my ($posterid, $itemid, $security, $alldatepart, $replycount) = 
-            map { $item->{$_} } qw(posterid itemid security alldatepart replycount);
+        my ($posterid, $itemid, $security, $alldatepart) = 
+            map { $item->{$_} } qw(posterid itemid security alldatepart);
 
         my $pu = $posteru{$posterid};
         next ENTRY if $pu && $pu->{'statusvis'} eq 'S' && ! $viewall;
 
+        my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
         if ($get->{'nohtml'}) {
@@ -1538,8 +1539,8 @@ sub create_view_friends
   ENTRY:
     foreach my $item (@items) 
     {
-        my ($friendid, $posterid, $itemid, $security, $alldatepart, $replycount) = 
-            map { $item->{$_} } qw(ownerid posterid itemid security alldatepart replycount);
+        my ($friendid, $posterid, $itemid, $security, $alldatepart) = 
+            map { $item->{$_} } qw(ownerid posterid itemid security alldatepart);
 
         my $pu = $friends{$posterid} || $aposter{$posterid};
         next ENTRY if $pu && $pu->{'statusvis'} eq 'S';
@@ -1551,6 +1552,7 @@ sub create_view_friends
         
         my $datakey = "$friendid $itemid";
             
+        my $replycount = $logprops{$datakey}->{'replycount'};
         my $subject = $logtext->{$datakey}->[0];
         my $event = $logtext->{$datakey}->[1];
         if ($get->{'nohtml'}) {
@@ -2136,7 +2138,7 @@ sub create_view_day
 
     # load the log items
     my $dateformat = "%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H";
-    $sth = $logdb->prepare("SELECT jitemid AS itemid, posterid, security, replycount, ".
+    $sth = $logdb->prepare("SELECT jitemid AS itemid, posterid, security ".
                            "       DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum " .
                            "FROM log2 " .
                            "WHERE journalid=? AND year=? AND month=? AND day=? $secwhere " .
@@ -2159,11 +2161,12 @@ sub create_view_day
   ENTRY:
     foreach my $item (@items)
     {
-        my ($itemid, $posterid, $security, $replycount, $alldatepart, $anum) = 
-            map { $item->{$_} } qw(itemid posterid security replycount alldatepart anum);
+        my ($itemid, $posterid, $security, $alldatepart, $anum) = 
+            map { $item->{$_} } qw(itemid posterid security alldatepart anum);
 
         next ENTRY if $posteru{$posterid} && $posteru{$posterid}->{'statusvis'} eq 'S' && ! $viewall;
 
+        my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
 

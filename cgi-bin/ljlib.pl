@@ -323,7 +323,7 @@ sub get_cached_friend_items
     my @items;
     while (my ($c, $its) = each %to_load) {
         my $udbr = LJ::get_cluster_reader($c);
-        my $sql = ("SELECT jitemid AS 'itemid', posterid, security, allowmask, replycount, journalid AS 'ownerid', rlogtime, ".
+        my $sql = ("SELECT jitemid AS 'itemid', posterid, security, allowmask, journalid AS 'ownerid', rlogtime, ".
                    "DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
                    "FROM log2 WHERE " . join(" OR ", map { "(journalid=$_->[0] AND jitemid=$_->[1])" } @$its));
         my $sth = $udbr->prepare($sql);
@@ -447,6 +447,138 @@ sub get_log2_row
     LJ::MemCache::set($memkey, $row);
     
     return $item;
+}
+
+# get 2 weeks worth of recent items, in rlogtime order,
+# using memcache
+# accepts $u or ($jid, $clusterid) + $notafter - max value for rlogtime
+# returns hash keyed by $jitemid, fields:
+# posterid, eventtime, rlogtime,
+# security, allowmask, journalid, jitemid, anum.
+
+sub get_log2_recent_log
+{
+    my ($u, $cid, $notafter) = @_;
+    my $jid = LJ::want_userid($u);
+    $cid ||= $u->{'clusterid'} if ref $u;
+
+    my $DATAVER = "1"; # 1 char
+
+    my $memkey = [$jid, "log2lt:$jid"];
+    my $lockkey = $memkey->[1];
+    my ($rows, $ret);
+
+    $rows = LJ::MemCache::get($memkey);
+    $ret = [];
+
+    my $rows_decode = sub {
+        return 0
+            unless $rows && substr($rows, 0, 1) eq $DATAVER;
+        my $n = (length($rows) - 1 )/20;
+        for (my $i=0; $i<$n; $i++) {
+            my ($posterid, $eventtime, $rlogtime, $allowmask, $ditemid) =
+                unpack("NNNNN", substr($rows, $i*20+1, 20));
+            next if $notafter and $rlogtime > $notafter;
+            $eventtime = LJ::mysql_time($eventtime, 1);
+            my $security = $allowmask == 0 ? 'private' :
+                ($allowmask == 2**31 ? 'public' : 'usemask');
+            my ($jitemid, $anum) = ($ditemid >> 8, $ditemid % 256);
+            my $item = {};
+            @$item{'posterid','eventtime','rlogtime','allowmask','ditemid',
+                   'security','journalid', 'jitemid', 'anum'} =
+                       ($posterid, $eventtime, $rlogtime, $allowmask,
+                        $ditemid, $security, $jid, $jitemid, $anum);
+            $item->{'ownerid'} = $jid;
+            $item->{'itemid'} = $jitemid;
+            push @$ret, $item;
+        }
+        return 1;
+    };
+
+    return $ret
+        if $rows_decode->();
+
+    my $db = LJ::get_cluster_master($cid);
+
+    my $lock = $db->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
+    return undef unless $lock;
+
+    $rows = LJ::MemCache::get($memkey);
+    if ($rows_decode->()) {
+        $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+        return $ret;
+    }
+
+    my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14; # 2 weeks default
+    
+    my $sql = "SELECT jitemid, posterid, eventtime, rlogtime, " .
+        "security, allowmask, anum FROM log2 " .
+        "USE INDEX (rlogtime) WHERE journalid=? AND " .
+        "$LJ::EndOfTime - UNIX_TIMESTAMP() >= rlogtime - $max_age ORDER BY journalid, rlogtime";
+    
+    my $sth = $db->prepare($sql);
+    $sth->execute($jid);
+    
+    while (my $item = $sth->fetchrow_hashref) {
+        $item->{'ownerid'} = $item->{'journalid'} = $jid;
+        $item->{'itemid'} = $item->{'jitemid'};
+        push @$ret, $item;
+
+        my ($sec, $ditemid, $eventtime, $logtime);
+        $sec = $item->{'allowmask'};
+        $sec = 0 if $item->{'security'} eq 'private';
+        $sec = 2**31 if $item->{'security'} eq 'public';
+        $ditemid = $item->{'jitemid'}*256 + $item->{'anum'};
+        $eventtime = LJ::mysqldate_to_time($item->{'eventtime'}, 1);
+
+        $rows .= pack("NNNNN", 
+                      $item->{'posterid'},
+                      $eventtime,
+                      $item->{'rlogtime'},
+                      $sec,
+                      $ditemid);
+    }
+
+    $rows = $DATAVER . $rows;
+    LJ::MemCache::set($memkey, $rows);
+
+    $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+    return $ret;
+}
+
+sub get_log2_recent_user
+{
+    my $opts = shift;
+    my $ret = [];
+
+    my $log = LJ::get_log2_recent_log($opts->{'userid'}, $opts->{'clusterid'}, $opts->{'notafter'});
+
+    my $left = $opts->{'itemshow'};
+    my $notafter = $opts->{'notafter'};
+    
+    foreach my $item (@$log) {
+        last unless $left;
+        last if $notafter and $item->{'rlogtime'} > $notafter;
+        next unless $opts->{'remote'} || $item->{'security'} eq 'public';
+        next if $item->{'security'} eq 'private' 
+            and $item->{'journalid'} != $opts->{'remote'}->{'userid'};
+        if($item->{'security'} eq 'usemask') {
+            next unless 
+                ($item->{'journalid'} == $opts->{'remote'}->{'userid'})
+                or
+                ($item->{'allowmask'} & $opts->{'mask'});
+        }
+        
+        # date conversion
+        if ($opts->{'dateformat'} eq "S2") {
+            $item->{'alldatepart'} = LJ::alldatepart_s2($item->{'eventtime'});
+        } else {
+            $item->{'alldatepart'} = LJ::alldatepart_s1($item->{'eventtime'});
+        }
+        push @$ret, $item;
+    }
+
+    return @$ret;
 }
 
 # <LJFUNC>
@@ -655,19 +787,16 @@ sub get_friend_items
         # load the next recent updating friend's recent items
         my $friendid = $fr->[0];
 
-        my @newitems = LJ::get_recent_items({
-            'clustersource' => 'slave',
+        my @newitems = LJ::get_log2_recent_user({
             'clusterid' => $fr->[2],
             'userid' => $friendid,
             'remote' => $remote,
             'itemshow' => $itemsleft,
-            'skip' => 0,
-            'gmask_from' => $gmask_from,
-            'friendsview' => 1,
+            'mask' => $gmask_from->{$friendid},
             'notafter' => $lastmax,
             'dateformat' => $opts->{'dateformat'},
         });
-
+        
         # stamp each with clusterid if from cluster, so ljviews and other
         # callers will know which items are old (no/0 clusterid) and which
         # are new
@@ -758,7 +887,6 @@ sub get_friend_items
 #          -- itemid (the jitemid)
 #          -- posterid
 #          -- security
-#          -- replycount
 #          -- alldatepart (in S1 or S2 fmt, depending on 'dateformat' req key)
 #          -- ownerid (if in 'friendsview' mode)
 #          -- rlogtime (if in 'friendsview' mode)
@@ -857,7 +985,7 @@ sub get_recent_items
         $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
     }
 
-    $sql = ("SELECT jitemid AS 'itemid', posterid, security, replycount, $extra_sql ".
+    $sql = ("SELECT jitemid AS 'itemid', posterid, security, $extra_sql ".
             "DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
             "FROM log2 USE INDEX ($sort_key) WHERE journalid=$userid AND $sort_key <= $notafter $secwhere ".
             "ORDER BY journalid, $sort_key ".
@@ -2799,6 +2927,7 @@ sub get_posts_raw
     my %cids;      # cid => 1
     my $needtext;  # text needed:  $cid => $id => 1
     my $needprop;  # props needed: $cid => $id => 1
+    my $needrc;    # replycounts needed: $cid => $id => 1
     my @mem_keys;
 
     # if we're loading entries for a friends page,
@@ -2832,6 +2961,8 @@ sub get_posts_raw
         unless ($opts->{text_only}) {
             $needprop->{$cid}{$id} = 1;
             push @mem_keys, [$jid,"logprop:$id"];
+            $needrc->{$cid}{$id} = 1;
+            push @mem_keys, [$jid,"rc:$id"];
         }
     }
 
@@ -2849,20 +2980,25 @@ sub get_posts_raw
         } elsif ($type eq "logprop" && ref $v eq "HASH") {
             delete $needprop->{$cid}{$id};
             $ret->{prop}{$id} = $v;
+        } elsif ($type eq "rc") {
+            delete $needrc->{$cid}{$id};
+            $ret->{prop}{'replycount'} = $v;
         }
     }
     
     # we may be done already.
     return $ret if $opts->{memcache_only};
-    return $ret unless values %$needtext or values %$needprop;
+    return $ret unless values %$needtext or values %$needprop 
+        or values %$needrc;
 
     # otherwise, hit the database.
     foreach my $cid (keys %cids) {
         # for each cluster, get the text/props we need from it.
         my $cneedtext = $needtext->{$cid} || {};
         my $cneedprop = $needprop->{$cid} || {};
+        my $cneedrc   = $needrc->{$cid} || {};
 
-        next unless %$cneedtext or %$cneedprop;
+        next unless %$cneedtext or %$cneedprop or %$cneedrc;
 
         my $make_in = sub {
             my @in;
@@ -2911,6 +3047,25 @@ sub get_posts_raw
             }
         };
 
+        my $fetchrc = sub {
+            my $db = shift;
+            return unless %$cneedrc;
+            my $in = $make_in->(keys %$cneedrc);
+            $sth = $db->prepare("SELECT journalid, jitemid, replycount FROM log2 WHERE $in");
+            $sth->execute;
+            my %gotid;
+            while (my ($jid, $jitemid, $rc) = $sth->fetchrow_array) {
+                my $id = "$jid:$jitemid";
+                $ret->{prop}{$id}{'replycount'} = $rc;
+                $gotid{$id} = 1;
+            }
+            foreach my $id (keys %gotid) {
+                my ($jid, $jitemid) = map { $_ + 0 } split(/:/, $id);
+                LJ::MemCache::add([$jid, "rc:$id"], $ret->{prop}{$id}{'replycount'});
+                delete $cneedrc->{$id};
+            }
+        };
+
         my $dberr = sub {
             die "Couldn't connect to database" if $single_user;
             next;
@@ -2922,17 +3077,20 @@ sub get_posts_raw
             $dbcm ||= LJ::get_cluster_master($cid) or $dberr->();
             $fetchtext->($dbcm) if %$cneedtext;
             $fetchprop->($dbcm) if %$cneedprop;
+            $fetchrc->($dbcm) if %$cneedrc;
         } else {
             $dbcr ||= LJ::get_cluster_reader($cid);
             if ($dbcr) {
                 $fetchtext->($dbcr) if %$cneedtext;
                 $fetchprop->($dbcr) if %$cneedprop;
+                $fetchrc->($dbcr) if %$cneedrc;
             }
             # if we still need some data, switch to the master.
             if (%$cneedtext or %$cneedprop) {
                 $dbcm ||= LJ::get_cluster_master($cid) or $dberr->();
                 $fetchtext->($dbcm);
                 $fetchprop->($dbcm);
+                $fetchrc->($dbcm);
             }
         }
 
@@ -5267,6 +5425,38 @@ sub mysql_time
 }
 
 # gets date in MySQL format, produces s2dateformat
+# s1 dateformat is: 
+# "%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H"
+# sample string:
+# Tue Tuesday Sep September 03 2003 9 09 30 30 30th AM 22 9 09 9 09
+# Thu Thursday Oct October 03 2003 10 10 2 02 2nd AM 33 9 09 9 09
+
+sub alldatepart_s1 
+{
+    my $time = shift;
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday) =
+        gmtime(LJ::mysqldate_to_time($time, 1));
+    my $ret = "";
+
+    $ret .= LJ::Lang::day_short($wday+1) . " " .
+      LJ::Lang::day_long($wday+1) . " " .
+      LJ::Lang::month_short($mon+1) . " " .
+      LJ::Lang::month_long($mon+1) . " " .
+      sprintf("%02d %04d %d %02d %d %02d %d%s ",
+              $year % 100, $year + 1900, $mon+1, $mon+1,
+              $mday, $mday, $mday, LJ::Lang::day_ord($mday));
+    $ret .= $hour < 12 ? "AM " : "PM ";
+    $ret .= sprintf("%02d %d %02d %d %02d", $min, 
+                    ($hour+11)%12 + 1,
+                    ($hour+ 11)%12 +1,
+                    $hour,
+                    $hour);
+
+    return $ret;
+}
+              
+
+# gets date in MySQL format, produces s2dateformat
 # s2 dateformat is: yyyy mm dd hh mm ss day_of_week
 sub alldatepart_s2 
 {
@@ -5496,22 +5686,38 @@ sub load_log_props2
     my $userid = want_userid($uuserid);
     return unless ref $hashref eq "HASH";
     
-    my %need;
+    my %needprops;
+    my %needrc;
+    my %rc;
     my @memkeys;
     foreach (@$listref) {
         my $id = $_+0;
-        $need{$id} = 1;
-        push @memkeys, [$userid,"logprop:$userid:$id"];
+        $needprops{$id} = 1;
+        $needrc{$id} = 1;
+        push @memkeys, [$userid, "logprop:$userid:$id"];
+        push @memkeys, [$userid, "rc:$userid:$id"];
     }
-    return unless %need;
+    return unless %needprops || %needrc;
 
     my $mem = LJ::MemCache::get_multi(@memkeys) || {};
     while (my ($k, $v) = each %$mem) {
-        next unless $k =~ /(\d+):(\d+)/ && ref $v eq "HASH";
-        delete $need{$2};
-        $hashref->{$2} = $v;
+        next unless $k =~ /(\w+):(\d+):(\d+)/;
+        if ($1 eq 'logprop') {
+            next unless ref $v eq "HASH";
+            delete $needprops{$3};
+            $hashref->{$3} = $v;
+        }
+        if ($1 eq 'rc') {
+            delete $needrc{$3};
+            $rc{$3} = $v;
+        }
     }
-    return unless %need;
+
+    foreach (keys %rc) {
+        $hashref->{$_}{'replycount'} = $rc{$_};
+    }
+
+    return unless %needprops || %needrc;
 
     unless ($db) {
         my $u = LJ::load_userid($userid);
@@ -5519,17 +5725,33 @@ sub load_log_props2
         return unless $db;
     }
 
-    LJ::load_props("log");
-    my $in = join(",", keys %need);
-    my $sth = $db->prepare("SELECT jitemid, propid, value FROM logprop2 ".
-                           "WHERE journalid=? AND jitemid IN ($in)");
-    $sth->execute($userid);
-    while (my ($jitemid, $propid, $value) = $sth->fetchrow_array) {
-        $hashref->{$jitemid}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+    if (%needprops) {
+        LJ::load_props("log");
+        my $in = join(",", keys %needprops);
+        my $sth = $db->prepare("SELECT jitemid, propid, value FROM logprop2 ".
+                                 "WHERE journalid=? AND jitemid IN ($in)");
+        $sth->execute($userid);
+        while (my ($jitemid, $propid, $value) = $sth->fetchrow_array) {
+            $hashref->{$jitemid}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+        }
+        foreach my $id (keys %needprops) {
+            LJ::MemCache::set([$userid,"logprop:$userid:$id"], $hashref->{$id} || {});
+          }
     }
-    foreach my $id (keys %need) {
-        LJ::MemCache::set([$userid,"logprop:$userid:$id"], $hashref->{$id} || {});
-    }
+
+    if (%needrc) {
+        my $in = join(",", keys %needrc);
+        my $sth = $db->prepare("SELECT jitemid, replycount FROM logprop2 WHERE journalid=? AND jitemid IN ($in)");
+        $sth->execute($userid);
+        while (my ($jitemid, $rc) = $sth->fetchrow_array) {
+            $hashref->{$jitemid}->{'replycount'} = $rc;
+        }
+        foreach my $id (keys %needrc) {
+            LJ::MemCache::add([$userid, "rc:$userid:$id"], $hashref->{$id}->{'replycount'});
+        }
+    }                  
+        
+
 }
 
 # <LJFUNC>
@@ -5774,8 +5996,10 @@ sub delete_entry
     my $and;
     if (defined $anum) { $and = "AND anum=" . ($anum+0); }
 
+    my $dc = LJ::log2_do($dbcm, $jid, undef, "DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
     LJ::MemCache::delete([$jid, "log2:$jid:$jitemid"]);
     LJ::MemCache::decr([$jid, "log2ct:$jid"]);
+
     my $dc = $dbcm->do("DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
     # if this is running the second time (started by the cmd buffer),
     # the log2 row will already be gone and we shouldn't check for it.
@@ -5884,6 +6108,71 @@ sub talk2_do {
 
     LJ::MemCache::delete($memkey, 0) if int($ret);
     return $ret;
+}
+
+# log2_do
+# see comments for talk2_do
+
+sub log2_do {
+    my ($db, $uid, $errref, $sql, @args) = @_;
+    return undef unless $uid =~ /^\d+$/;
+
+    my $memkey = [$uid, "log2lt:$uid"];
+    my $lockkey = $memkey->[1];
+
+    $db->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
+    my $ret = $db->do($sql, undef, @args);
+    if (ref $errref) { $$errref = $db->errstr; }
+    $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+
+    LJ::MemCache::delete($memkey, 0) if int($ret);
+    return $ret;
+}
+
+# replycount_do
+# input: $u, $jitemid, $action, $value
+# action is one of: "init", "incr", "decr"
+# $value is amount to incr/decr, 1 by default
+
+sub replycount_do {
+    my ($u, $jitemid, $action, $value) = @_;
+    $value = 1 unless defined $value;
+    my $uid = $u->{'userid'};
+    my $memkey = [$uid, "rc:$uid:$jitemid"];
+
+    # "init" is easiest and needs no lock (called before the entry is live)
+    if ($action eq 'init') {
+        LJ::MemCache::set($memkey, "0   ");
+        return;
+    }
+
+    my $db = LJ::get_cluster_master($u);
+    my $lockkey = $memkey->[1];
+    $db->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
+
+    my $ret;
+
+    if ($action eq 'decr') {
+        $ret = LJ::MemCache::decr($memkey, $value);
+        $db->do("UPDATE log2 SET replycount=replycount-$value WHERE journalid=$uid AND jitemid=$jitemid");
+    }
+
+    if ($action eq 'incr') {
+        $ret = LJ::MemCache::incr($memkey, $value);
+        $db->do("UPDATE log2 SET replycount=replycount+$value WHERE journalid=$uid AND jitemid=$jitemid");
+    }
+
+    unless (defined $ret) {
+        my $rc = $db->selectrow_array("SELECT replycount FROM log2 WHERE journalid=$uid AND jitemid=$jitemid");
+        if (defined $rc) {
+            $rc = sprintf("%-4d", $rc);
+            LJ::MemCache::set($memkey, $rc);
+        }
+    }
+
+    $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+
+    return;
 }
 
 # <LJFUNC>

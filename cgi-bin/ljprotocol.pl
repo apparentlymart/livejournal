@@ -808,12 +808,15 @@ sub postevent
     my $itemid = LJ::alloc_user_counter($uowner, "L", 1);
     return $fail->($err,501,"No itemid could be generated.") unless $itemid;
 
-    $dbcm->do("INSERT INTO log2 (journalid, jitemid, posterid, eventtime, logtime, security, ".
+    LJ::replycount_do($uowner, $itemid, "init");
+
+    my $dberr;
+    LJ::log2_do($dbcm, $ownerid, \$dberr, "INSERT INTO log2 (journalid, jitemid, posterid, eventtime, logtime, security, ".
               "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
               "VALUES ($ownerid, $itemid, $posterid, $qeventtime, FROM_UNIXTIME($now), $qsecurity, $qallowmask, ".
               "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
               "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
-    return $fail->($err,501,$dbcm->errstr) if $dbcm->err;
+    return $fail->($err,501,$dberr) if $dberr;
 
     LJ::MemCache::incr([$ownerid, "log2ct:$ownerid"]);
 
@@ -1152,7 +1155,7 @@ sub editevent
         }
         
         my $qsecurity = $dbh->quote($security);
-        $dbcm->do("UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
+        LJ::log2_do($dbcm, $ownerid, undef, "UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
                   "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
                   "security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid ".
                   "AND jitemid=$itemid");
@@ -1221,12 +1224,12 @@ sub editevent
     # rlogtime to $EndOfTime if they're turning backdate on.
     if ($req->{'props'}->{'opt_backdated'} eq "1" &&
         $oldevent->{'rlogtime'} != $LJ::EndOfTime) {
-        $dbcm->do("UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
+        LJ::log2_do($dbcm, $ownerid, undef, "UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
                   "journalid=$ownerid AND jitemid=$itemid");
     }
     if ($req->{'props'}->{'opt_backdated'} eq "0" &&
         $oldevent->{'rlogtime'} == $LJ::EndOfTime) {
-        $dbcm->do("UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
+        LJ::log2_do($dbcm, $ownerid, undef, "UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
                   "WHERE journalid=$ownerid AND jitemid=$itemid");
     }
 
@@ -1824,6 +1827,7 @@ sub editfriendgroups
             foreach my $id (@batch) {
                 LJ::MemCache::delete([$userid, "log2:$userid:$id"]);
             }
+            LJ::MemCache::delete([$userid, "log2lt:$userid"]);
         }
 
         # remove the friend group, unless we just added it this transaction

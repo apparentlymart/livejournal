@@ -227,7 +227,7 @@ sub EntryPage_entry
         return;
     }
     
-    my $replycount = $entry->{'replycount'};
+    my $replycount = $entry->{'props'}->{'replycount'};
     my $nc = "";
     $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 

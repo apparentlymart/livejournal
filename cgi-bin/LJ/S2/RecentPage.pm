@@ -95,9 +95,10 @@ sub RecentPage
   ENTRY:
     foreach my $item (@items) 
     {
-        my ($posterid, $itemid, $security, $alldatepart, $replycount) = 
-            map { $item->{$_} } qw(posterid itemid security alldatepart replycount);
+        my ($posterid, $itemid, $security, $alldatepart) = 
+            map { $item->{$_} } qw(posterid itemid security alldatepart);
 
+        my $replycount = $logprops{$itemid}->{'replycount'};
         my $subject = $logtext->{$itemid}->[0];
         my $text = $logtext->{$itemid}->[1];
         if ($get->{'nohtml'}) {

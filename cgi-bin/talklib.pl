@@ -313,7 +313,7 @@ sub screen_comment {
                                "AND nodetype='L' AND nodeid=$itemid ".
                                "AND state NOT IN ('S','D')");
     if ($updated > 0) {
-        $dbcm->do("UPDATE log2 SET replycount=replycount-$updated WHERE journalid=$userid AND jitemid=$itemid");
+        LJ::replycount_do($u, $itemid, "decr", $updated);
         LJ::set_logprop($u, $itemid, { 'hasscreened' => 1 });
     }
 
@@ -338,8 +338,7 @@ sub unscreen_comment {
                                "AND nodetype='L' AND nodeid=$itemid ".
                                "AND state='S'");
     if ($updated > 0) {
-        $dbcm->do("UPDATE log2 SET replycount=replycount+$updated WHERE journalid=$userid AND jitemid=$itemid");
-        
+        LJ::replycount_do($u, $itemid, "incr", $updated);
         my $hasscreened = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 " .
                                                  "WHERE journalid=$userid AND nodeid=$itemid AND nodetype='L' AND state='S'");
         LJ::set_logprop($u, $itemid, { 'hasscreened' => 0 }) unless $hasscreened;
@@ -1371,8 +1370,7 @@ sub enter_comment {
     
     # update the "replycount" summary field of the log table
     if ($comment->{state} eq 'A') {
-        $dbcm->do("UPDATE log2 SET replycount=replycount+1 WHERE ".
-                  "journalid=$journalu->{'userid'} AND jitemid=$itemid");
+        LJ::replycount_do($journalu, $itemid, "incr");
     }
 
     # update the "hasscreened" property of the log item if needed

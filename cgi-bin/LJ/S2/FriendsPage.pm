@@ -203,15 +203,16 @@ sub FriendsPage
   ENTRY:
     foreach my $item (@items) 
     {
-        my ($friendid, $posterid, $itemid, $security, $alldatepart, $replycount) = 
-            map { $item->{$_} } qw(ownerid posterid itemid security alldatepart replycount);
+        my ($friendid, $posterid, $itemid, $security, $alldatepart) = 
+            map { $item->{$_} } qw(ownerid posterid itemid security alldatepart);
 
         my $fr = $friends{$friendid};
         $p->{'friends'}->{$fr->{'user'}} ||= Friend($fr);
 
         my $clusterid = $item->{'clusterid'}+0;
         my $datakey = "$friendid $itemid";
-            
+
+        my $replycount = $logprops{$datakey}->{'replycount'};    
         my $subject = $logtext->{$datakey}->[0];
         my $text = $logtext->{$datakey}->[1];
         if ($get->{'nohtml'}) {
