@@ -106,6 +106,7 @@ foreach my $job (@LJ::QBUFFERD_ISOLATE, "_others_") {
         next;
     } else {
         # child.
+        $0 .= " [$job]";
         $my_job = $job;
         $working = 1;
         last;  
