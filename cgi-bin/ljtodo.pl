@@ -28,20 +28,13 @@ sub get_permissions
             $perm->{'edit'} = 1;
         } else {
             # TAG:FR:ljtodo:get_friends_in_group
-            $sth = $dbh->prepare("SELECT fg.groupname FROM friends f, friendgroup fg " .
-                                 "WHERE f.userid=$u->{'userid'} AND " .
-                                       "f.friendid=$remote->{'userid'} AND " .
-                                       "fg.userid=$u->{'userid'} AND " .
-                                       "f.groupmask & (1 << fg.groupnum) AND " .
-                                       "fg.groupname like 'priv-todo-%'");
-            $sth->execute;
-            while (my ($priv) = $sth->fetchrow_array) {
-                if ($priv =~ /^priv-todo-(.+)/) {
-                    $perm->{$1} = 1;
-                }
+            foreach my $priv (qw(add edit delete)) {
+                my $group = LJ::get_friend_group($u, { name => "priv-todo-$priv" });
+                next unless $group;
+                my $mask = 1 << $group->{groupnum};
+                my $friends = LJ::get_friends($u, $mask);
+                $perm->{$priv} = 1 if $friends->{$remote->{userid}};
             }
-            ## check to see if user allows it
-            
         }
     }
         
