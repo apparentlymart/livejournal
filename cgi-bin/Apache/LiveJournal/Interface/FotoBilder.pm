@@ -58,7 +58,7 @@ sub get_user_info
     $r->print("userid: $u->{'userid'}\n");
 
     $r->print("can_upload: " . (can_upload($u)) . "\n");
-    $r->print("gallery_visible: 1\n"); # future toggle
+    $r->print("gallery_enabled: 1\n"); # future toggle
     my $quota      = LJ::get_cap($u, 'disk_quota') << 10;
     my $fbusage    = LJ::Blob::get_disk_usage($u, 'picpix_quota') >> 10;
     my $totalusage = LJ::Blob::get_disk_usage($u) >> 10;
