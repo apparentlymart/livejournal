@@ -405,7 +405,7 @@ sub get_friend_items
     my ($cache_max_update, $cache_new_update);
     my $fvcache;
     if ($LJ::FV_CACHING && $remote && $remote->{'userid'} == $userid && 
-        LJ::get_cap($remote, "betatest") &&  # <---- temporary!
+        ($LJ::FV_CACHING == 2 || LJ::get_cap($remote, "betatest")) && # <-- temporary
         $opts->{'common_filter'} && ! $opts->{'friendsoffriends'}) 
     {
         $could_cache = 1;  # so we save later, if enough new stuff
