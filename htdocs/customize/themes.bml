@@ -61,7 +61,9 @@ body<=
         S2::set_output($out_straight);
         S2::set_output_safe($out_straight);
         $ret .= "<?h1 $name h1?>";
+        $ret .= "<div class='postheading'>";
         eval { S2::run_code($ctx, "print_theme_preview()"); };
+        $ret .= "</div>";
 
     }
     $cleaner->eof if $cleaner;  # flush any remaining text/tag not yet spit out
