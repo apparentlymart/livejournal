@@ -159,10 +159,13 @@ sub RecentPage
         
         my $userlite_poster = $userlite_journal;
         my $userpic = $p->{'journal'}->{'default_pic'};
+        my $pu = $u;
         if ($u->{'userid'} != $posterid) {
             $userlite_poster = $apu_lite{$posterid} or die "No apu_lite for posterid=$posterid";
-            $userpic = Image_userpic($apu{$posterid}, 0, $logprops{$itemid}->{'picture_keyword'});
+            $pu = $apu{$posterid};
         }
+        $userpic = Image_userpic($pu, 0, $logprops{$itemid}->{'picture_keyword'})
+            if $logprops{$itemid}->{'picture_keyword'};
 
         my $entry = $lastentry = Entry($u, {
             'subject' => $subject,
