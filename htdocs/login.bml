@@ -237,6 +237,7 @@
 
             my $u = LJ::load_user($user);
             push @errors, "$ML{'error.username_notfound'}" unless $u;
+            push @errors, "$ML{'error.purged.text'}" if $u->{'statusvis'} eq "X";
             if (LJ::get_cap($u, "readonly")) {
                 $body = LJ::bad_input("The database is temporarily in read-only mode, so creating new login sessions is temporarily down.  Please try again later.");
                 return;
