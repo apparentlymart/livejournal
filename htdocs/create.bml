@@ -401,48 +401,7 @@ body<=
  return "$ML{'error.unknownmode'}: <b>$mode</b>";
 
 _code?>
-
 <=body
-head<=
-<style media='screen' type='text/css'>
-.formitem {
-    color: #343434;
-    font-size: 1em;
-}
-
-.formnumber {
-    font-weight: bold;
-    margin-top: 1.8em;
-    font-size: .9em;
-}
-
-.formitemName {
-    font-weight: bold;
-    font-size: .9em;
-    margin-top: 1.8em;
-}
-
-.formitemDesc {
-    margin-top: .4em;
-    margin-bottom: .4em;
-  color: #505050;
-}
-
-.formitemNote {
-  color: #da6320;
-    font-size: .9em;
-    margin-top: .4em;
-    margin-bottom: .4em;
-}
-
-.formitemFlag {
-  color: #CE0000;
-    font-size: .9em;
-    margin-top: .4em;
-    margin-bottom: .4em;
-}
-</style>
-<=head
 page?><?_c <LJDEP>
 link: htdocs/legal/privacy.bml
 post: htdocs/create.bml, htdocs/editinfo.bml
