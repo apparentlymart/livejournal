@@ -703,7 +703,7 @@ sub journal_content
     elsif ($opts->{'badfriendgroup'})
     {
         # give a real 404 to the journal owner
-        if ($remote->{'user'} eq $user) {
+        if ($remote && $remote->{'user'} eq $user) {
             $status = "404 Friend group does not exist";
             $html = "<h1>Not Found</h1>" .
                     "<p>The friend group you are trying to access does not exist.</p>";
