@@ -1398,16 +1398,6 @@ The site team
 
 /lostinfo_do.bml.username_mailed.title=Username mailed!
 
-/modify.bml.btn.proceed=Proceed...
-
-/modify.bml.lostinfo.head=Forget something?
-
-/modify.bml.lostinfo.text=If you forgot your username or password, <a href="lostinfo.bml">recover it here!</a>.
-
-/modify.bml.modify.head=Modify Your Journal
-
-/modify.bml.modify.text=Enter your username and password to modify options that affect the appearance your journal. If you'd like to add a new journal entry, you want to go <A HREF="/update.bml">here</A>.
-
 /modify.bml.title=Modify Journal
 
 /modify_do.bml.availablestyles.head=Available Styles
@@ -1503,8 +1493,6 @@ The site team
 /modify_do.bml.success.head=Success
 
 /modify_do.bml.success.text=Your journal settings have been updated.  You can view your journal <A HREF="[[url]]">here</A>.
-
-/modify_do.bml.title=Modify Journal
 
 /setlang.bml.select=Select your preferred language:
 
