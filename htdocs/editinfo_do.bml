@@ -449,6 +449,7 @@ BODY<=
 	 $dbh->do("INSERT INTO infohistory (userid, what, oldvalue, timechange, other) VALUES ($u->{'userid'}, 'email', $oldemail, NOW(), $oldstatus)");
      }
      
+     $FORM{'url'} =~ s/\s+$//; $FORM{'url'} =~ s/^\s+//;
      if ($FORM{'url'}) {
 	 unless ($FORM{'url'} =~ /^https?:\/\//) {
 	     $FORM{'url'} =~ s/^http\W*//;
