@@ -2,7 +2,7 @@
 # Wrapper around MemCachedClient
 
 use lib "$ENV{'LJHOME'}/cgi-bin";
-use MemCachedClient;
+use Cache::Memcached;
 
 package LJ::MemCache;
 
@@ -19,7 +19,7 @@ package LJ::MemCache;
 my $memc;  # memcache object
 
 sub init {
-    $memc = new MemCachedClient;
+    $memc = new Cache::Memcached;
     trigger_bucket_reconstruct();
 }
 
