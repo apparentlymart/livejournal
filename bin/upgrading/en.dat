@@ -3580,6 +3580,8 @@ This could be because: <ol>
 
 /update.bml.preview.text=This is how the entry will look when posted. Using the form below, you can edit the entry further, or you can submit it as is.
 
+/update.bml.rowarn=<b>Warning:</b> Your account is currently in [[a_open]]read-only mode[[a_close]]. Due to this maintenance you may be unable to post to your journal at this time.
+
 /update.bml.security.custom=Custom...
 
 /update.bml.security.friends=Friends
