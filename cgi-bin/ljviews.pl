@@ -574,18 +574,6 @@ sub create_view_lastn
     $lastn_page{'urlfriends'} = "$journalbase/friends";
     $lastn_page{'urlcalendar'} = "$journalbase/calendar";
 
-    my %userpics;
-    if ($u->{'defaultpicid'}) {
-        my $picid = $u->{'defaultpicid'};
-        LJ::load_userpics($dbs, \%userpics, [ $picid ]);
-        $lastn_page{'userpic'} = 
-            LJ::fill_var_props($vars, 'LASTN_USERPIC', {
-                "src" => "$LJ::USERPIC_ROOT/$picid/$u->{'userid'}",
-                "width" => $userpics{$picid}->{'width'},
-                "height" => $userpics{$picid}->{'height'},
-            });
-    }
-
     if ($u->{'url'} =~ m!^https?://!) {
         $lastn_page{'website'} =
             LJ::fill_var_props($vars, 'LASTN_WEBSITE', {
@@ -672,8 +660,40 @@ sub create_view_lastn
     my $eventnum = 0;
 
     my %posteru = ();  # map posterids to u objects
-    LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} }
-@items], [$u]);
+    LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } 
+                                     @items], [$u]);
+
+    # pre load things in a batch (like userpics) to minimize db calls
+    my %userpics;
+    my @userpic_load;
+    push @userpic_load, $u->{'defaultpicid'} if $u->{'defaultpicid'};
+    foreach my $item (@items) {
+        next if $item->{'posterid'} == $u->{'userid'};
+        my $itemid = $item->{'itemid'};
+        my $pu = $posteru{$item->{'posterid'}};
+
+        my $picid;
+        if ($logprops{$itemid}->{'picture_keyword'}) {
+            $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
+                                           "WHERE m.userid=? AND m.kwid=k.kwid AND k.keyword=?",
+                                           undef, $item->{'posterid'}, $logprops{$itemid}->{'picture_keyword'});
+        }
+        $picid ||= $pu->{'defaultpicid'};
+        $item->{'_picid'} = $picid;
+        push @userpic_load, $picid if ($picid && ! grep { $_ eq $picid } @userpic_load);
+    }
+    LJ::load_userpics($dbs, \%userpics, \@userpic_load);
+
+    if (my $picid = $u->{'defaultpicid'}) {
+        $lastn_page{'userpic'} = 
+            LJ::fill_var_props($vars, 'LASTN_USERPIC', {
+                "src" => "$LJ::USERPIC_ROOT/$picid/$u->{'userid'}",
+                "width" => $userpics{$picid}->{'width'},
+                "height" => $userpics{$picid}->{'height'},
+            });
+    }
+
+    # spit out the S1
 
   ENTRY:
     foreach my $item (@items) 
@@ -787,24 +807,12 @@ sub create_view_lastn
             $lastn_altposter{'poster'} = $poster;
             $lastn_altposter{'owner'} = $user;
             
-            my $picid = 0;
-            my $picuserid = $posterid;
-            if ($logprops{$itemid}->{'picture_keyword'}) {
-                my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k ".
-                                        "WHERE m.userid=? AND m.kwid=k.kwid AND k.keyword=?");
-                $sth->execute($posterid, $logprops{$itemid}->{'picture_keyword'});
-                $picid = $sth->fetchrow_array;
-            } 
-            $picid ||= $pu->{'defaultpicid'};
-
-            if ($picid) 
-            {
-                my $pic = {};
-                LJ::load_userpics($dbs, $pic, [ $picid ]);
+            if (my $picid = $item->{'_picid'}) {
+                my $pic = $userpics{$picid};
                 $lastn_altposter{'pic'} = LJ::fill_var_props($vars, 'LASTN_ALTPOSTER_PIC', {
-                    "src" => "$LJ::USERPIC_ROOT/$picid/$picuserid",
-                    "width" => $pic->{$picid}->{'width'},
-                    "height" => $pic->{$picid}->{'height'},
+                    "src" => "$LJ::USERPIC_ROOT/$picid/$pic->{'userid'}",
+                    "width" => $pic->{'width'},
+                    "height" => $pic->{'height'},
                 });
             }
             $lastn_event{'altposter'} = 
