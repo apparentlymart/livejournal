@@ -54,7 +54,8 @@ The following people have helped other users in the support area:
      }
      my $s = $_->{'points'} > 1 ? "s" : "";
      
-     $ret .= "<tr><td align=right>$rank.</td><td>$change</td><td>(=LJUSER $_->{'user'} LJUSER=) - $_->{'name'}</td><td><b>$_->{'points'} point$s</b></td></tr>\n";
+     my $name = ehtml($_->{'name'});
+     $ret .= "<tr><td align=right>$rank.</td><td>$change</td><td>(=LJUSER $_->{'user'} LJUSER=) - $name</td><td><b>$_->{'points'} point$s</b></td></tr>\n";
  }
  $ret .= "</table>";
  $ret .= "<p>$total total supporting users.";
