@@ -1185,7 +1185,14 @@ sub interface_content
     $r->header_out("Content-length", $length);
     $r->send_http_header;
     foreach (sort keys %out) {
-        $r->print($_, "\n", $out{$_}, "\n");
+        my $key = $_;
+        my $val = $out{$_};
+        $key =~ y/\r\n//d;
+        $val =~ y/\r\n//d;
+        $r->print($key, "\n", $val, "\n");
+        if ($key ne $_ || $val ne $out{$_}) {
+            print STDERR "Stripped spurious newline in $FORM{mode} protocol request for $FORM{user}: $_ => $out{$_}\n";
+        }
     }
 
     return OK;
