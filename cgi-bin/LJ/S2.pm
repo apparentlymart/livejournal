@@ -83,6 +83,8 @@ sub make_journal
         $page = EntryPage($u, $remote, $opts);
     }
 
+    return if $opts->{'handler_return'};
+
     s2_run($r, $ctx, $run_opts, $entry, $page);
     
     if (ref $opts->{'errors'} eq "ARRAY" && @{$opts->{'errors'}}) {

@@ -3194,7 +3194,7 @@ sub make_journal
         ${$opts->{'handle_with_bml_ref'}} = 1;
         return;
     }
-    if ($stylesys == 2 && $view eq "item") {
+    if ($stylesys == 2 && $view eq "item" && ! $opts->{'s2id'}) {
         ${$opts->{'handle_with_bml_ref'}} = 1;
         return;
     }
