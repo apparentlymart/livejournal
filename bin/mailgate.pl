@@ -73,7 +73,14 @@ $body =~ s/\s+$//;
 if ($body =~ /I send you this file in order to have your advice/ ||
     $body =~ /^Content-Type: application\/octet-stream/ ||
     $body =~ /^(Please see|See) the attached file for details\.?$/ ||
-    $subject =~ /^(Undelive|Mail System Error - |ScanMail Message: |\+\s*SPAM|Norton AntiVirus)/)
+    $subject =~ /^(Undelive|Mail System Error - |ScanMail Message: |\+\s*SPAM|Norton AntiVirus)/ ||
+    ($subject eq "failure notice" && $body =~ /\.(scr|pif)\"/) ||
+    ($subject =~ /^Mail delivery failed/ && $body =~ /\.(scr|pif)\"/) ||
+    $subject =~ /\[BOUNCED SPAM\]/ ||
+    $subject =~ /^Symantec AVF / ||
+    $subject =~ /Attachment block message/ ||
+    $subject =~ /Use this patch immediately/
+    )
 {
     $parser->filer->purge;
     exit 0;
