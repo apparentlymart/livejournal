@@ -87,7 +87,11 @@
         if ($do_login) {
 
             my $u = LJ::load_user($user);
-            unless ($u) { push @errors, "$ML{'error.username_notfound'}"; }
+            my $login_error;
+            unless ($u) {
+                push @errors, "$ML{'error.username_notfound'}";
+                $login_error = "$ML{'.error.noaccount'}";
+            }
             if (LJ::get_cap($u, "readonly")) {
                 $body = LJ::bad_input("The database is temporarily in read-only mode, so creating new login sessions is temporarily down.  Please try again later.");
                 return;
@@ -101,11 +105,13 @@
                     return;
                 } else {
                     push @errors, "$ML{'error.badpassword'}"; 
+                    $login_error = "$ML{'.error.forgotpass'}";
                 }
             }
         
             if (@errors) {
                 $body = LJ::bad_input(@errors);
+                $body .= $login_error;
                 return;
             }
         

@@ -1626,7 +1626,11 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /login.bml.bindip.yes=Yes (safer)
 
+/login.bml.error.forgotpass=Have you forgotten your password?  Recover it from the <a href='/lostinfo.bml'>lost password page</a>.
+
 /login.bml.error.mustenterusername=You must <a href='/login.bml'>enter a username</a>.
+
+/login.bml.error.noaccount=Don't have an account?  <a href='/create.bml'>Create one here</a>!
 
 /login.bml.expire.btn.neverexpire=Change expiration mode to NEVER
 
