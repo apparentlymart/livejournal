@@ -187,7 +187,7 @@ BODY<=
      my $recent = "";
      if (! $LJ::USE_RECENT_TABLES) {
 	 $db = $dbcr;
-     } elsif ($item->{'secondsold'} > $LJ::RECENT_DAYS*86400) {
+     } elsif ($item->{'secondsold'} < $LJ::RECENT_DAYS*86400) {
 	 $db = $dbcr;
 	 $recent = "recent_";
      }
