@@ -229,7 +229,8 @@ sub checkfriends
 	$lastupdate = "0000-00-00 00:00:00";
     }
 
-    my $sql = "SELECT MAX(u.timeupdate) FROM userusage u, friends f WHERE u.userid=f.friendid AND f.userid=$u->{'userid'}";
+    my $sql = "SELECT MAX(u.timeupdate) FROM userusage u, friends f ".
+	      "WHERE u.userid=f.friendid AND f.userid=$u->{'userid'}";
     if ($req->{'mask'} and $req->{'mask'} !~ /\D/) {
 	$sql .= " AND f.groupmask & $req->{mask} > 0";
     }
@@ -475,7 +476,11 @@ sub postevent
 	$clustered = 1;
     }
 
-    $dbcm->do("INSERT INTO $table ($ownercol, posterid, eventtime, logtime, security, allowmask, replycount, year, month, day, revttime, rlogtime) VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, 0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-UNIX_TIMESTAMP($qeventtime), $rlogtime)");
+    $dbcm->do("INSERT INTO $table ($ownercol, posterid, eventtime, logtime, security, ".
+	      "allowmask, replycount, year, month, day, revttime, rlogtime) ".
+	      "VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, ".
+	      "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
+	      "UNIX_TIMESTAMP($qeventtime), $rlogtime)");
     return fail($err,501,$dbcm->errstr) if $dbcm->err;
 
     my $itemid = $dbcm->{'mysql_insertid'};
@@ -588,7 +593,8 @@ sub postevent
 		return fail($err,501,"logsec2:$msg");
 	    }
 	} else {
-	    $dbh->do("INSERT INTO logsec (ownerid, itemid, allowmask) VALUES ($qownerid, $itemid, $qallowmask)");
+	    $dbh->do("INSERT INTO logsec (ownerid, itemid, allowmask) ".
+		     "VALUES ($qownerid, $itemid, $qallowmask)");
 	    if ($dbh->err) {
 		my $msg = $dbh->errstr;
 		LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
@@ -687,9 +693,18 @@ sub editevent
     my $oldevent;
     if ($clustered)
     {
-	$oldevent = $dbcm->selectrow_hashref("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, l.logtime, l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, MD5(lt.event) AS 'md5event', l.rlogtime FROM log2 l, logtext2 lt WHERE l.journalid=$ownerid AND lt.journalid=$ownerid AND l.jitemid=$qitemid AND lt.jitemid=$qitemid");
+	$oldevent = $dbcm->selectrow_hashref
+	    ("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, l.logtime, ".
+	     "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, ".
+	     "MD5(lt.event) AS 'md5event', l.rlogtime FROM log2 l, logtext2 lt ".
+	     "WHERE l.journalid=$ownerid AND lt.journalid=$ownerid ".
+	     "AND l.jitemid=$qitemid AND lt.jitemid=$qitemid");
     } else {
-	$oldevent = $dbcm->selectrow_hashref("SELECT l.ownerid, l.posterid, l.eventtime, l.logtime, l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, MD5(lt.event) AS 'md5event', l.rlogtime FROM log l, logtext lt WHERE l.itemid=$qitemid AND lt.itemid=$qitemid");
+	$oldevent = $dbcm->selectrow_hashref
+	    ("SELECT l.ownerid, l.posterid, l.eventtime, l.logtime, ".
+	     "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, lt.subject, ".
+	     "MD5(lt.event) AS 'md5event', l.rlogtime FROM log l, logtext lt ".
+	     "WHERE l.itemid=$qitemid AND lt.itemid=$qitemid");
     }
 
     ### make sure this user is allowed to edit this entry
@@ -719,9 +734,11 @@ sub editevent
     ## update sync table (before we actually do it!  in case updates
     ## partially fail below)
     if ($clustered) {
-	$dbcm->do("REPLACE INTO syncupdates2 (userid, atime, nodetype, nodeid, atype) VALUES ($ownerid, NOW(), 'L', $qitemid, 'update')");
+	$dbcm->do("REPLACE INTO syncupdates2 (userid, atime, nodetype, nodeid, atype) ".
+		  "VALUES ($ownerid, NOW(), 'L', $qitemid, 'update')");
     } else {
-	$dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) VALUES ($ownerid, NOW(), 'L', $qitemid, 'update')");
+	$dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) ".
+		 "VALUES ($ownerid, NOW(), 'L', $qitemid, 'update')");
     }
     
     # simple logic for deleting an entry
@@ -774,7 +791,8 @@ sub editevent
     my $qevent = $dbh->quote($event);
     $event = "";
 	    
-    my $eventtime = sprintf("%04d-%02d-%02d %02d:%02d", $req->{'year'}, $req->{'mon'}, $req->{'day'}, $req->{'hour'}, $req->{'min'});
+    my $eventtime = sprintf("%04d-%02d-%02d %02d:%02d", 
+			    map { $req->{$_} } qw(year mon day hour mon));
     my $qeventtime = $dbh->quote($eventtime);
     
     my $qallowmask = $req->{'allowmask'}+0;
@@ -797,9 +815,14 @@ sub editevent
     {
 	my $qsecurity = $dbh->quote($security);
 	if ($clustered) {
-	    $dbcm->do("UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid AND jitemid=$qitemid");
+	    $dbcm->do("UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
+		      "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
+		      "security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid ".
+		      "AND jitemid=$qitemid");
 	} else {
-	    $dbh->do("UPDATE log SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, security=$qsecurity, allowmask=$qallowmask WHERE itemid=$qitemid");
+	    $dbh->do("UPDATE log SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
+		     "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
+		     "security=$qsecurity, allowmask=$qallowmask WHERE itemid=$qitemid");
 	}
     }
     
@@ -815,9 +838,11 @@ sub editevent
 	} else {
 	    my $qsecurity = $dbh->quote($security);
 	    if ($clustered) {
-		$dbcm->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) VALUES ($ownerid, $qitemid, $qallowmask)");		    
+		$dbcm->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) ".
+			  "VALUES ($ownerid, $qitemid, $qallowmask)");		    
 	    } else {
-		$dbh->do("REPLACE INTO logsec (ownerid, itemid, allowmask) VALUES ($ownerid, $qitemid, $qallowmask)");
+		$dbh->do("REPLACE INTO logsec (ownerid, itemid, allowmask) ".
+			 "VALUES ($ownerid, $qitemid, $qallowmask)");
 	    }
 	}
 	return fail($err,501,$dbcm->errstr) if $dbcm->err;
@@ -832,16 +857,20 @@ sub editevent
 	if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
 	foreach my $pfx (@prefix) {
 	    if ($clustered) {
-		$dbcm->do("UPDATE ${pfx}logtext2 SET event=$qevent, subject=$qsubject WHERE journalid=$ownerid AND jitemid=$qitemid");
+		$dbcm->do("UPDATE ${pfx}logtext2 SET event=$qevent, subject=$qsubject ".
+			  "WHERE journalid=$ownerid AND jitemid=$qitemid");
 	    } else {
-		$dbh->do("UPDATE ${pfx}logtext SET event=$qevent, subject=$qsubject WHERE itemid=$qitemid");
+		$dbh->do("UPDATE ${pfx}logtext SET event=$qevent, subject=$qsubject ".
+			 "WHERE itemid=$qitemid");
 	    }
 	    return fail($err,501,$dbcm->errstr) if $dbcm->err;
 	}
 	if ($clustered) {
-	    $dbcm->do("REPLACE INTO logsubject2 (journalid, jitemid, subject) VALUES ($ownerid, $qitemid, $qsubject)");
+	    $dbcm->do("REPLACE INTO logsubject2 (journalid, jitemid, subject) ".
+		      "VALUES ($ownerid, $qitemid, $qsubject)");
 	} else {
-	    $dbh->do("REPLACE INTO logsubject (itemid, subject) VALUES ($qitemid, $qsubject)");
+	    $dbh->do("REPLACE INTO logsubject (itemid, subject) ".
+		     "VALUES ($qitemid, $qsubject)");
 	}
 
 	# update disk usage
@@ -1242,14 +1271,16 @@ sub editfriends
 	    my $gmask = $fa->{'groupmask'};
 	    if (! $gmask && $curfriend{$aname}) {
 		# if no group mask sent, use the existing one if this is an existing friend
-		my $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$userid AND friendid=$friendid");
+		my $sth = $dbh->prepare("SELECT groupmask FROM friends ".
+					"WHERE userid=$userid AND friendid=$friendid");
 		$sth->execute;
 		$gmask = $sth->fetchrow_array;
 	    }
 	    # force bit 0 on.
 	    $gmask |= 1;
 		    
-	    $sth = $dbh->prepare("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES ($userid, $friendid, $qfg, $qbg, $gmask)");
+	    $sth = $dbh->prepare("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) ".
+				 "VALUES ($userid, $friendid, $qfg, $qbg, $gmask)");
 	    $sth->execute;
 	    return fail($err,501,$dbh->errstr) if $dbh->err;
 	    
@@ -1307,7 +1338,8 @@ sub editfriendgroups
 	
 	my $friendid = LJ::get_userid($dbs, $friend);
 	if ($friendid) {
-	    $sth = $dbh->prepare("UPDATE friends SET groupmask=$mask WHERE userid=$userid AND friendid=$friendid");
+	    $sth = $dbh->prepare("UPDATE friends SET groupmask=$mask ".
+				 "WHERE userid=$userid AND friendid=$friendid");
 	    $sth->execute;
 	}	
     }
@@ -1372,8 +1404,10 @@ sub editfriendgroups
 		@batch = splice(@posts_to_clean, 0, 20); 
 	    }
 	    my $in = join(",", @batch);
-	    $dbh->do("UPDATE log SET allowmask=allowmask & ~(1 << $bit) WHERE itemid IN ($in) AND security='usemask'");
-	    $dbh->do("UPDATE logsec SET allowmask=allowmask & ~(1 << $bit) WHERE ownerid=$userid AND itemid IN ($in)");
+	    $dbh->do("UPDATE log SET allowmask=allowmask & ~(1 << $bit) ".
+		     "WHERE itemid IN ($in) AND security='usemask'");
+	    $dbh->do("UPDATE logsec SET allowmask=allowmask & ~(1 << $bit) ".
+		     "WHERE ownerid=$userid AND itemid IN ($in)");
 	}
 	
 	# remove the friend group, unless we just added it this transaction
@@ -1400,7 +1434,8 @@ sub list_friends
     }
 
     my $limit = $limitnum ? "LIMIT $limitnum" : "";
-    my $sth = $dbr->prepare("SELECT u.user AS 'friend', u.name, u.journaltype, f.fgcolor, f.bgcolor, f.groupmask FROM user u, friends f WHERE $where AND u.statusvis='V' ORDER BY u.user $limit");
+    my $sth = $dbr->prepare("SELECT u.user AS 'friend', u.name, u.journaltype, f.fgcolor, f.bgcolor, f.groupmask ".
+			    "FROM user u, friends f WHERE $where AND u.statusvis='V' ORDER BY u.user $limit");
     $sth->execute;
     my @friends;
     push @friends, $_ while $_ = $sth->fetchrow_hashref;
@@ -1564,7 +1599,9 @@ sub list_usejournals
     my $res = [];
 
     my $dbr = $dbs->{'reader'};
-    my $sth = $dbr->prepare("SELECT u.user FROM useridmap u, logaccess la WHERE la.ownerid=u.userid AND la.posterid=$u->{'userid'} ORDER BY u.user");
+    my $sth = $dbr->prepare("SELECT u.user FROM useridmap u, logaccess la ".
+			    "WHERE la.ownerid=u.userid AND ".
+			    "la.posterid=$u->{'userid'} ORDER BY u.user");
     $sth->execute;
     while (my $u = $sth->fetchrow_array) {
 	push @$res, $u;
