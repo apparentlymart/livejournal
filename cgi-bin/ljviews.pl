@@ -1421,17 +1421,14 @@ sub create_view_friends
             $group =~ s!/$!!;
             if ($group) { $group = LJ::durl($group); $common_filter = 0;}
         }
-        $group ||= "Default View";
-        my $grp = LJ::get_friend_group($u, { 'name' => $group });
+        my $grp = LJ::get_friend_group($u, { 'name' => $group || "Default View" });
         my $bit = $grp->{'groupnum'};
         my $public = $grp->{'is_public'};
-        if ($bit) {
-            if ($public || ($remote && $remote->{'user'} eq $user)) {
-                $filter = (1 << $bit); 
-            } else {
-                $opts->{'badfriendgroup'} = 1;
-                return 1;
-            }
+        if ($bit && ($public || ($remote && $remote->{'user'} eq $user))) {
+            $filter = (1 << $bit); 
+        } elsif ($group) {
+            $opts->{'badfriendgroup'} = 1;
+            return 1;
         }
     }
 
