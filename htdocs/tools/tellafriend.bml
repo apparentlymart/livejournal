@@ -40,7 +40,7 @@
  {
      my $email = $FORM{'toemail'};
      my @errors;
-     &check_email($email, \@errors);
+     LJ::check_email($email, \@errors);
      push @errors, "<?requirepost?>" unless LJ::did_post();
      if (@errors) {
          $title = "Error";

@@ -94,7 +94,7 @@ body<=
         return LJ::bad_input($ML{'.bounce.notauth'})
             unless LJ::Support::can_bounce($sp, $remote);
 
-        # check given emails using BMLCodeBlock::check_email
+        # check given emails using LJ::check_email
         my @form_emails = split(/\s*,\s*/, $FORM{'bounce_email'});
 
         return LJ::bad_input($ML{'.bounce.toomany'})
@@ -110,7 +110,7 @@ body<=
                 $email = $eu->{'email'} if $eu;
             }
 
-            check_email($email, \@email_errors);
+            LJ::check_email($email, \@email_errors);
             @email_errors = map { "<strong>$email:</strong> $_" } @email_errors;
             return LJ::bad_input(@email_errors) if @email_errors;
 

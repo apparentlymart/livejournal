@@ -601,7 +601,7 @@ body<=
         }
 
         unless (@errors) {
-            &check_email($POST{'email'}, \@errors);
+            LJ::check_email($POST{'email'}, \@errors);
         }
 
         # text messaging

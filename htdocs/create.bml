@@ -192,7 +192,7 @@ body<=
      # check the email address
      {
          my @email_errors;
-         check_email($email, \@email_errors);
+         LJ::check_email($email, \@email_errors);
          if ($LJ::USER_EMAIL and $email =~ /\@\Q$LJ::USER_DOMAIN\E$/i) {
              push @email_errors, BML::ml(".error.email.lj_domain",
                                          {domain => $LJ::USER_DOMAIN});

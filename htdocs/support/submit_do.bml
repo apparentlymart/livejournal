@@ -47,7 +47,7 @@ body<=
         $req{'reqtype'} = "email";
         $req{'reqemail'} = $POST{'email'};
      
-        check_email($POST{'email'}, \@errors);
+        LJ::check_email($POST{'email'}, \@errors);
     }
 
     $req{'reqname'} = $POST{'reqname'};

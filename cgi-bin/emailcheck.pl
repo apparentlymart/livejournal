@@ -3,6 +3,8 @@
 # Function to reject bogus email addresses
 #
 
+package LJ;
+
 sub check_email 
 {
     my ($email, $errors) = @_;
