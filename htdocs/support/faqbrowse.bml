@@ -39,8 +39,8 @@ body<=
  {
      # it'd be better to load them in a batch, but this works for now:
      if ($altlang) {
-         $question = LJ::Lang::get_text($curlang, $mld->{'dmid'}, "$faqid.1question");
-         $answer = LJ::Lang::get_text($curlang, $mld->{'dmid'}, "$faqid.2answer");
+         $question = LJ::Lang::get_text($curlang, "$faqid.1question", $mld->{'dmid'});
+         $answer   = LJ::Lang::get_text($curlang, "$faqid.2answer",   $mld->{'dmid'});
      }
 
      my $q = "";

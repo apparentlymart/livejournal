@@ -281,42 +281,43 @@ sub set_text
     return 1;
 }
 
-sub _get_cache
+sub load_user_lang
 {
-    return $TXT_CACHE;
+    my ($u) = @_;
+    return if $u->{'lang'};
+
+    LJ::load_user_props(LJ::get_dbs(), $u, "browselang") unless $u->{'browselang'};
+    $u->{'lang'} ||= $u->{'browselang'} || $LJ::DEFAULT_LANG || 'en';
 }
 
 sub get_text
 {
-    my ($lang, $dmid, $code) = @_;
-    load_lang_struct() unless $LS_CACHED;
-    my $l = $LN_CODE{$lang};
-    return unless $l;
-    $dmid += 0;
+    my ($lang, $code, $dmid, $vars) = @_;
+    $dmid ||= 1;   # defaults to 1, "general"
 
-    my $dbr = LJ::get_dbh("slave", "master");
-    my $text = $dbr->selectrow_array("SELECT t.text FROM ml_text t, ml_latest l, ml_items i WHERE t.dmid=$dmid ".
-                                     "AND t.txtid=l.txtid AND l.dmid=$dmid AND l.lnid=$l->{'lnid'} AND l.itid=i.itid ".
-                                     "AND i.dmid=$dmid AND i.itcode=" . $dbr->quote($code));
+    load_lang_struct() unless $LS_CACHED;
+
+    my $text = $TXT_CACHE->get("$lang$;$dmid$;$code");
+
+    if (not defined $text) {
+        my $l = $LN_CODE{$lang} or return "?lang?";
+        my $dbr = LJ::get_dbh("slave", "master");
+        my $qcode = $dbr->quote($code);
+        my $qdmid = $dmid + 0;
+        $text = $dbr->selectrow_array("SELECT t.text".
+                                      "  FROM ml_text t, ml_latest l, ml_items i".
+                                      " WHERE t.dmid=$qdmid AND t.txtid=l.txtid".
+                                      "   AND l.dmid=$qdmid AND l.lnid=$l->{lnid} AND l.itid=i.itid".
+                                      "   AND i.dmid=$qdmid AND i.itcode=$qcode");
+        $TXT_CACHE->set("$lang$;$qdmid$;$code", $text) if defined $text;
+    }
+
+    if ($vars) {
+        $text =~ s/\[\[(.+?)\]\]/$vars->{$1}/g;
+    }
+
     return $text;
 }
 
-sub get_text_bml 
-{
-    my ($lang, $code) = @_;
-    load_lang_struct() unless $LS_CACHED;
-    my $l = $LN_CODE{$lang};
-    return "?lang?" unless $l;
-
-    my $text = $TXT_CACHE->get("$lang-$code");
-    return $text if defined $text;
-    
-    my $dbr = LJ::get_dbh("slave", "master");
-    $text = $dbr->selectrow_array("SELECT t.text FROM ml_text t, ml_latest l, ml_items i WHERE t.dmid=1 ".
-                                  "AND t.txtid=l.txtid AND l.dmid=1 AND l.lnid=$l->{'lnid'} AND l.itid=i.itid ".
-                                  "AND i.dmid=1 AND i.itcode=" . $dbr->quote($code));
-    $TXT_CACHE->set("$lang-$code", $text);
-    return $text;
-}
-
+   
 1;

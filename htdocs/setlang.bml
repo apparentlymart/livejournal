@@ -50,7 +50,7 @@ body<=
      my $checked = $code eq $curr ? "checked='checked'" : "";
      my $item = "langname.$code";
      my $namethislang = BML::ml($item);
-     my $namenative = LJ::Lang::get_text_bml($l->{'lncode'}, $item);
+     my $namenative = LJ::Lang::get_text($l->{'lncode'}, $item);
      $ret .= "<p><input type='radio' $checked name='lang' value='$code' id='sel$code'> <label for='sel$code'>$namenative";
      $ret .= " ($namethislang)" if $namethislang ne $namenative;
      $ret .= "</label></p>\n";

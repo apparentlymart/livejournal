@@ -70,7 +70,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljtodo.pl";
 require "$ENV{'LJHOME'}/cgi-bin/directorylib.pl";
 
 # register BML multi-language hook
-BML::register_ml_getter(\&LJ::Lang::get_text_bml);
+BML::register_ml_getter(\&LJ::Lang::get_text);
 
 # open a db connection to force DBI to autoload its driver code before
 # apache forks
