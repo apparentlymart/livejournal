@@ -88,6 +88,7 @@ sub error_message
              "307" => "Selected journal no longer exists.",
              "308" => "Account is locked and cannot be used.",
              "309" => "Account is marked as a memorial.",
+             "310" => "Access temporarily disabled.",
 
              # Limit errors
              "402" => "Your IP address is temporarily banned for exceeding the login failure rate.",
@@ -1323,6 +1324,13 @@ sub getevents
 
     # can't pull events from deleted/suspended journal
     return fail($err,307) unless $uowner->{'statusvis'} eq "V";
+
+    my $reject_code = $LJ::DISABLE_PROTOCOL{getevents};
+    if (ref $reject_code eq "CODE") {
+        my $r = eval { Apache->request };
+        my $errmsg = $reject_code->($req, $flags, $r);
+        if ($errmsg) { return fail($err, "310", $errmsg); }
+    }
 
     # if this is on, we sort things different (logtime vs. posttime)
     # to avoid timezone issues
