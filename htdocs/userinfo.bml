@@ -533,7 +533,7 @@
                  my $status = $f->{'statusvis'};
                  my $frlink = "<a href='/userinfo.bml?user=$f->{'user'}'>$f->{'user'}</a>";
                  $frlink = "<strike>$frlink</strike>" if $status =~ /[DXS]/;
-                 $frlink = "<b>$frlink</b>" if $remote_friendid{$f->{'userid'}};
+                 $frlink = "<b>$frlink</b>" if $remote_friendid{$f->{'userid'}} && $remote->{'userid'} != $u->{'userid'};
                  $body .= $frlink;
                  $body .= ", ";
              }
