@@ -32,13 +32,28 @@ BODY<=
  my $page = int($FORM{'page'}) || 1;
  my $thread = int($FORM{'thread'}) || 0;
 
- $sth = $dbh->prepare("SELECT l.replycount, l.ownerid, l.posterid, lt.event, l.eventtime, lt.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold' FROM log l, logtext lt WHERE lt.itemid=l.itemid AND l.itemid=$qitemid");
- $sth->execute;
- my $item = $sth->fetchrow_hashref;
+ my $item;
+ my @dbl = ($dbh);
+ if ($dbs->{'has_slave'}) { unshift @dbl, $dbr; }
+ foreach my $db (@dbl) {
+     $sth = $db->prepare("SELECT replycount, ownerid, posterid, eventtime, security, allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(logtime) AS 'secondsold' FROM log WHERE itemid=$qitemid");
+     $sth->execute;
+     $item = $sth->fetchrow_hashref;
+     last if $item;
+ }
  unless ($item) {
      return "(=H1 Error H1=)(=P No such entry. (itemid = $itemid) P=)";
  }
-
+ 
+ # load the text of the item we just loaded (didn't join above so
+ # we could use slaves (no logtext on slaves))
+ {
+     my $lt = LJ::get_logtext($dbs, $itemid);
+     my $v = $lt->{$itemid};
+     $item->{'subject'} = $v->[0];
+     $item->{'event'} = $v->[1];
+ }
+ 
  ### load users
  $sth = $dbr->prepare("SELECT * FROM user WHERE userid IN ($item->{'ownerid'}, $item->{'posterid'})");
  $sth->execute;
