@@ -73,6 +73,10 @@ BODY<=
 				  ], [ $u ]);
  LJ::load_user_props($dbs, $up, "opt_showtopicstuff");
 
+ # check suspended
+ return "(=H1 Suspended H1=)(=P This journal/poster is suspended. P=)"
+ if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S");
+
  my $remote = LJ::get_remote($dbs);
 
  ####  Check security before viewing this post

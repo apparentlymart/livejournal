@@ -128,6 +128,11 @@ BODY<=
 				  $item->{'posterid'} => \$up,
 				  $parpost->{'posterid'} => \$ur,
 				  ], [ $u ]);
+
+ # check suspended
+ return "(=H1 Suspended H1=)(=P This journal/poster is suspended. P=)"
+ if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S");
+
  LJ::load_user_props($dbs, $u,  
 		     "opt_showtopicstuff", "opt_notalkicons", 
 		     "opt_logcommentips");
