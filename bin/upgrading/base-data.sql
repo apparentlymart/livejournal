@@ -412,6 +412,8 @@ REPLACE INTO codes (code, item, sortorder, type) VALUES ('th', 'Thueringen', '0'
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('vi', 'Victoria', '0', 'stateau');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('wa', 'Western Australia', '0', 'stateau');
 REPLACE INTO codes (code, item, sortorder, type) VALUES ('yt', 'Yukon Territory', '0', 'stateca');
+INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('num', 'Unix time of the last change to number of comments to this post.', 'commentalter', 'Comments altered', 'general', '99');
+UPDATE logproplist SET datatype='num',des='Unix time of the last change to number of comments to this post.',prettyname='Comments altered',scope='general',sortorder='99' WHERE name='commentalter';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('char', 'Your current mood.', 'current_mood', 'Current Mood', 'general', '5');
 UPDATE logproplist SET datatype='char',des='Your current mood.',prettyname='Current Mood',scope='general',sortorder='5' WHERE name='current_mood';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('num', 'Your current mood ID number, if known.', 'current_moodid', 'Current Mood ID#', 'general', '6');
@@ -430,12 +432,10 @@ INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorde
 UPDATE logproplist SET datatype='bool',des='Turn on if post contains HTML and shouldn\'t be formatted',prettyname='Don\'t Auto-Format',scope='general',sortorder='20' WHERE name='opt_preformatted';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('char', 'A keyword that should align to a defined picture', 'picture_keyword', 'Picture Keyword', 'general', '30');
 UPDATE logproplist SET datatype='char',des='A keyword that should align to a defined picture',prettyname='Picture Keyword',scope='general',sortorder='30' WHERE name='picture_keyword';
-INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('bool', 'True if text has 8-bit data that\'s not in UTF-8', 'unknown8bit', 'Unknown 8-bit text', 'general', '99');
-UPDATE logproplist SET datatype='bool',des='True if text has 8-bit data that\'s not in UTF-8',prettyname='Unknown 8-bit text',scope='general',sortorder='99' WHERE name='unknown8bit';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('num', 'Number of times this post has been edited.', 'revnum', 'Revision number', 'general', '99');
 UPDATE logproplist SET datatype='num',des='Number of times this post has been edited.',prettyname='Revision number',scope='general',sortorder='99' WHERE name='revnum';
-INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('num', 'Unix time of the last change to number of comments to this post.', 'commentalter', 'Comments altered', 'general', '99');
-UPDATE logproplist SET datatype='num',des='Unix time of the last change to number of comments to this post.',prettyname='Comments altered',scope='general',sortorder='99' WHERE name='commentalter';
+INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('bool', 'True if text has 8-bit data that\'s not in UTF-8', 'unknown8bit', 'Unknown 8-bit text', 'general', '99');
+UPDATE logproplist SET datatype='bool',des='True if text has 8-bit data that\'s not in UTF-8',prettyname='Unknown 8-bit text',scope='general',sortorder='99' WHERE name='unknown8bit';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('View paid accounts that are soon about to expire.', '1', 'accountsexpiring', 'Accounts - Expiring', 'general');
 UPDATE priv_list SET des='View paid accounts that are soon about to expire.',is_public='1',privname='Accounts - Expiring',scope='general' WHERE privcode='accountsexpiring';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows a user to grant or revoke privileges to/from other users. arg=Unique privcode that the user has access to grant/deny for, or "all" for all privileges.', '0', 'admin', 'Administer priviledges', 'general');
@@ -500,6 +500,8 @@ INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES 
 UPDATE priv_list SET des='Grants a user the ability to read screened answers on support requests. arg=Unique support category where user has permission to read screened answers.',is_public='1',privname='Support - See Screened Answers',scope='general' WHERE privcode='supportviewscreened';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Suspend or unsuspend user accounts: used by abuse team', '0', 'suspend', 'Suspend accounts', 'general');
 UPDATE priv_list SET des='Suspend or unsuspend user accounts: used by abuse team',is_public='0',privname='Suspend accounts',scope='general' WHERE privcode='suspend';
+INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows editing settings of syndicated journal that shouldn\'t be editable by users.', '0', 'syn_edit', 'Edit Syndicated Settings', 'general');
+UPDATE priv_list SET des='Allows editing settings of syndicated journal that shouldn\'t be editable by users.',is_public='0',privname='Edit Syndicated Settings',scope='general' WHERE privcode='syn_edit';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows a user to add/approve/deny new topics within a category. arg=Unique category number that the user has access in, or "all" for all categories.', '1', 'topicaddtopic', 'Topic Dir - Add Topics', 'general');
 UPDATE priv_list SET des='Allows a user to add/approve/deny new topics within a category. arg=Unique category number that the user has access in, or "all" for all categories.',is_public='1',privname='Topic Dir - Add Topics',scope='general' WHERE privcode='topicaddtopic';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('This privilege allows user to have all access to administrative functions of the topic directory, or in essence lets them be "the manager" of the topic directory. They can then create/edit topics, create/edit topic categories, etc.', '1', 'topicmanager', 'Topic Dir - Manager', 'general');
@@ -510,8 +512,6 @@ INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES 
 UPDATE priv_list SET des='Allows a user to edit site text in a given language. arg=Unique language code, optionally appended by |domainid.domaincode',is_public='1',privname='Translate/Update Text',scope='general' WHERE privcode='translate';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows abuse staff to view an entry even if protected.  Must explictily enter this mode, and then it\'s audited, to prevent people from abusing this mode.', '0', 'viewall', 'View All Entries', 'general');
 UPDATE priv_list SET des='Allows abuse staff to view an entry even if protected.  Must explictily enter this mode, and then it\'s audited, to prevent people from abusing this mode.',is_public='0',privname='View All Entries',scope='general' WHERE privcode='viewall';
-INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows editing settings of syndicated journal that shouldn\'t be editable by users.', '0', 'syn_edit', 'Edit Syndicated Settings', 'general');
-UPDATE priv_list SET des='Allows editing settings of syndicated journal that shouldn\'t be editable by users.',is_public='0',privname='Edit Syndicated Settings',scope='general' WHERE privcode='syn_edit';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when wrong username/password is used.', 'failed_login');
 UPDATE ratelist SET des='Logged when wrong username/password is used.',name='failed_login' WHERE rlid=NULL;
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('??', 'zips', 'FIPS');
@@ -942,6 +942,8 @@ INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope
 UPDATE userproplist SET datatype='char',des='2 letter country code',indexed='1',prettyname='Country',scope='general' WHERE name='country';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('bool', 'Used for large communities to prevent loading and displaying the complete list of members', '0', 'dont_load_members', 'Don\'t load membership information', 'general');
 UPDATE userproplist SET datatype='bool',des='Used for large communities to prevent loading and displaying the complete list of members',indexed='0',prettyname='Don\'t load membership information',scope='general' WHERE name='dont_load_members';
+INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'On each postevent, the dupsig is checked and updated to prevent accidental duplicate posts', '0', 'dupsig_post', 'Duplicate signature for last post', 'general');
+UPDATE userproplist SET datatype='char',des='On each postevent, the dupsig is checked and updated to prevent accidental duplicate posts',indexed='0',prettyname='Duplicate signature for last post',scope='general' WHERE name='dupsig_post';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'M: male, F: female, U: unspecified', '1', 'gender', 'Gender', 'general');
 UPDATE userproplist SET datatype='char',des='M: male, F: female, U: unspecified',indexed='1',prettyname='Gender',scope='general' WHERE name='gender';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'How the user heard about LiveJournal', '0', 'howhear', 'How heard about LiveJouranl', 'general');
@@ -1014,5 +1016,3 @@ INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope
 UPDATE userproplist SET datatype='char',des='Yahoo ID',indexed='1',prettyname='Yahoo ID',scope='general' WHERE name='yahoo';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', '5 digit zip code (if in US)', '1', 'zip', 'ZIP code', 'general');
 UPDATE userproplist SET datatype='char',des='5 digit zip code (if in US)',indexed='1',prettyname='ZIP code',scope='general' WHERE name='zip';
-INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'On each postevent, the dupsig is checked and updated to prevent accidental duplicate posts', '0', 'dupsig_post', 'Duplicate signature for last post', 'general');
-UPDATE userproplist SET datatype='char',des='On each postevent, the dupsig is checked and updated to prevent accidental duplicate posts',indexed='0',prettyname='Duplicate signature for last post',scope='general' WHERE name='dupsig_post';
