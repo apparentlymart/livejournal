@@ -11,11 +11,9 @@
 | Dormando |
 +----------+
 
-* Update MRTG config.
 * Netsaint on mayor.
 * Write new netsaint modules (warning if slaves are too far behind, 
   using an updated db_check script, etc.)
-* debian-ish start/stop scripts for ljrpcd
 
 +----------------+
 | Awaiting merge |
