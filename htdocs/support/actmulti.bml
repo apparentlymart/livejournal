@@ -1,0 +1,55 @@
+<?page
+title=>Support Request Management
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%POST);
+    
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
+
+    my $spcatid = $POST{spcatid};
+    my $cat = LJ::Support::load_cats($spcatid);
+    return "<?h1 Error h1?><?p That category doesn't exist. p?>" unless $cat;
+
+    # get ids of requests
+    my @ids = map { $_+0 } grep { $POST{"check_$_"} } split(':', $POST{ids});
+    return "<?h1 Error h1?><?p No request ids were provided to act on. p?>" unless @ids;
+
+    # just to be sane, limit it to 1000 requests
+    @ids = splice @ids, 0, 1000 if scalar @ids > 1000;
+
+    # what action are they trying to take?
+    if ($POST{'action:close'}) {
+        my $can_close = 0;
+        $can_close = 1 if LJ::check_priv($remote, 'supportclose', $cat->{catkey});
+        $can_close = 1 if $cat->{public_read} && LJ::check_priv($remote, 'supportclose', '');
+        return "<?h1 Error h1?><?p You don't have access to close requests in that category. p?>" unless $can_close;
+
+        # now close all of these requests
+        my $dbh = LJ::get_db_writer();
+        my $in = join ',', @ids;
+        $dbh->do("UPDATE support SET state='closed', timeclosed=UNIX_TIMESTAMP() " .
+                 "WHERE spid IN ($in) AND spcatid = ?", undef, $spcatid);
+        
+        # and now insert a log comment for all of these... note that we're not using
+        # LJ::Support::append_request because that'd require us to load a bunch of requests
+        # and then do a bunch of individual queries, and that sucks.
+        my @stmts;
+        foreach (@ids) {
+            push @stmts, "($_, UNIX_TIMESTAMP(), 'internal', $remote->{userid}, " .
+                         "'(Request closed as part of mass closure.)')";
+        }
+        my $sql = "INSERT INTO supportlog (spid, timelogged, type, userid, message) VALUES ";
+        $sql .= join ',', @stmts;
+        $dbh->do($sql);
+        
+        # return redirection back? or success message otherwise
+        return BML::redirect($POST{ret}) if $POST{ret};
+        return "<?h1 Success h1?><?p The requests you have specified have been closed. p?>";
+    }
+}
+_code?>
+<=body
+page?>

@@ -1,4 +1,43 @@
 <?page
+head<=
+<style type='text/css'>
+.green {
+    background-color: #d0eed0;
+}
+.yellow {
+    background-color: #eeeed0;
+}
+.red {
+    background-color: #eed0d0;
+}
+.clicked {
+    background-color: #d0d0ee;
+}
+</style>
+
+<script type='text/javascript'>
+<!--
+
+function doClick(spid) {
+    var row = document.getElementById('r' + spid);
+    if (!row) {
+        // maybe they do not have a new enough browser?
+        return;
+    }
+    var check = document.getElementById('check_' + spid);
+    check.checked = !check.checked;
+    if (check.checked) {
+        row.className = 'clicked';
+    } else {
+        var hid = document.getElementById('c' + spid);
+        row.className = hid.value;
+    }
+    return true;
+}
+
+// -->
+</script>
+<=head
 title=>Support Requests
 body<=
 
@@ -9,6 +48,7 @@ body<=
  LJ::set_active_crumb('supporthelp');
 
  my ($ret, $sth);
+ my $dbr = LJ::get_db_reader();
  my $r = Apache->request;
 
  my $remote = LJ::get_remote();
@@ -20,77 +60,111 @@ body<=
 
  my $cats = LJ::Support::load_cats();
 
+ my $state = $FORM{'state'};
+ $state = 'open' unless $state =~ /^(?:open|closed|green|youreplied)$/;
+
  my $filtercat = $FORM{'cat'};
  $filtercat = "" unless ($filtercat =~ /^[\w\-]+$/);
- my $filterwhere;
+ my $fcat = LJ::Support::get_cat_by_key($cats, $filtercat);
+ my $can_read = LJ::Support::can_read_cat($fcat, $remote);
 
- if ($filtercat eq "_nonpublic") {
-     $filterwhere = " AND s.spcatid IN (0";
-     foreach my $cat (values %$cats) {
-         if (! $cat->{'public_read'} && LJ::Support::can_read_cat($cat, $remote)) {
-             $filterwhere .= ", $cat->{'spcatid'}";
-         }
-     }
-     $filterwhere .= ")";
- } elsif ($filtercat eq "_nonprivate") {
-     $filterwhere = " AND s.spcatid IN (0";
-     foreach my $cat (values %$cats) {
-         if ($cat->{'public_read'}) {
-             $filterwhere .= ", $cat->{'spcatid'}";
-         }
-     }
-     $filterwhere .= ")";
- } else {
-     my $fcat = LJ::Support::get_cat_by_key($cats, $filtercat);
-     if (LJ::Support::can_read_cat($fcat, $remote)) {
-         $filterwhere = " AND s.spcatid=$fcat->{'spcatid'}";
-     } else {
-         $filtercat = "";
-     }
+ # determine if user can close stuff
+ my $can_close = 0;
+ if ($remote && $state =~ /(?:green|open)/ && $filtercat) {
+     $can_close = 1 if LJ::check_priv($remote, 'supportclose', $filtercat);        # private cats/only this cat
+     $can_close = 1 if $fcat->{public_read} && LJ::check_priv($remote, 'supportclose', ''); # public cats
  }
 
- my $total_open;
- my $dbr = LJ::get_db_reader();
  my $append;
- if ($FORM{'state'} eq "closed")
- {
-     $ret .= "<?h1 Recently Closed Support Requests h1?><?p Below are all support requests that have been recently closed.  To return to the open requests, <a href=\"./help.bml?cat=$filtercat\">click here</a>. p?>";
-     $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='closed' AND s.timeclosed>UNIX_TIMESTAMP()-(3600*24) $filterwhere");
- }
- elsif ($FORM{'state'} eq "youreplied") 
- {
-     unless ($remote) {
-         return "<?h1 Error h1?><?p You must be logged in to filter on requests that you've replied to. p?>";
-     }
+ if ($state eq "closed") {
+     $ret .= "<?h1 Recently Closed Support Requests h1?><?p Below are all support requests " .
+             "that have been recently closed.  To return to the open requests, " .
+             "<a href=\"./help.bml?cat=$filtercat\">click here</a>. p?>";
+ } elsif ($state eq "youreplied") {
+     return "<?h1 Error h1?><?p You must be logged in to filter on requests that you've replied to. p?>"
+        unless $remote;
      $ret .= "<?h1 Requests you replied to h1?><?p This shows all open requests you've replied to. p?>";
-     $sth = $dbr->prepare("SELECT s.* FROM support s, supportlog sl
-                           WHERE s.spid=sl.spid AND sl.userid=$remote->{'userid'} $filterwhere
-                           AND (s.state='open' OR (s.state='closed' AND s.timeclosed>UNIX_TIMESTAMP()-(3600*24)))");
- }
- else 
- {
-     $ret .= "<?h1 Open Support Requests h1?><?p Below are all support requests that are open (they just came in and haven't been touched yet) or answered (either awaiting to be closed by the person needing help, or the person requested they still need help).  The <a href=\"./help.bml?state=closed&amp;cat=$filtercat\">closed reports</a> are also available.  If you help somebody out and they confirm you helped them, you get the number of points indicated in the status column.  These points will show up on your userinfo page. p?>";
-
+ } elsif ($state eq 'open')  {
+     $ret .= "<?h1 Open Support Requests h1?><?p Below are all support requests that are open " .
+             "(they just came in and haven't been touched yet) or answered (either awaiting to be " .
+             "closed by the person needing help, or the person requested they still need help).  " .
+             "The <a href=\"./help.bml?state=closed&amp;cat=$filtercat\">closed reports</a> are also " .
+             "available.  If you help somebody out and they confirm you helped them, you get the number " .
+             "of points indicated in the status column.  These points will show up on your userinfo page. p?>";
      $append = 1;
-     $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='open' $filterwhere");
  }
-
- $sth->execute;
- 
- # For the You Replied filter, we might be getting some rows multiple times (when
- # multiple log rows exist for $remote), which is still better than using DISTINCT
- # in the query which uses a temporary table, so ensure uniqueness here.
 
  my @support_log;
- my %spids_seen;
+     
+ # if we have a cat to filter to and we have abstracts for it
  my $rct = 0;
- while (my $sprow = $sth->fetchrow_hashref) {
-    next if $spids_seen{$sprow->{'spid'}};
-    $spids_seen{$sprow->{'spid'}} = 1;
-    push @support_log, $sprow;
-    $rct++;
+ my $abstracts = 0;
+ if ($filtercat && $LJ::SUPPORT_ABSTRACTS{$filtercat} && $fcat && $can_read && $state ne 'youreplied') {
+     # yes, we should show abstracts for this category, so do so
+     if ($state eq "closed") {
+         $sth = $dbr->prepare("SELECT s.*, sl.message FROM support s, supportlog sl " .
+                              "WHERE s.state='closed' AND s.spid = sl.spid AND sl.type = 'req' " .
+                              "AND s.timeclosed > (UNIX_TIMESTAMP() - (3600*24)) " .
+                              "AND s.spcatid = ?");
+     } else { # triggers on green, open
+         $sth = $dbr->prepare("SELECT s.*, sl.message FROM support s, supportlog sl " .
+                              "WHERE s.state='open' AND s.spid = sl.spid AND sl.type = 'req' " .
+                              "AND s.spcatid = ?");
+     }
+     $sth->execute($fcat->{spcatid});
+     push @support_log, $_ while $_ = $sth->fetchrow_hashref();
+     $rct = scalar(@support_log);
+     $abstracts = 1;
+ } else {
+     my $filterwhere;
+
+     if ($filtercat eq "_nonpublic") {
+         $filterwhere = " AND s.spcatid IN (0";
+         foreach my $cat (values %$cats) {
+             $filterwhere .= ", $cat->{'spcatid'}"
+                 if !$cat->{'public_read'} && LJ::Support::can_read_cat($cat, $remote);
+         }
+         $filterwhere .= ")";
+     } elsif ($filtercat eq "_nonprivate") {
+         $filterwhere = " AND s.spcatid IN (0";
+         foreach my $cat (values %$cats) {
+             $filterwhere .= ", $cat->{'spcatid'}" if $cat->{public_read};
+         }
+         $filterwhere .= ")";
+     } else {
+         if ($can_read) {
+             $filterwhere = " AND s.spcatid=$fcat->{'spcatid'}";
+         } else {
+             $filtercat = "";
+         }
+     }
+
+     my $dbr = LJ::get_db_reader();
+     if ($state eq "closed") {
+         $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='closed' AND " .
+                              "s.timeclosed>UNIX_TIMESTAMP()-(3600*24) $filterwhere");
+     } elsif ($state eq "youreplied") {
+         $sth = $dbr->prepare("SELECT s.* FROM support s, supportlog sl " .
+                              "WHERE s.spid=sl.spid AND sl.userid=$remote->{'userid'} $filterwhere " .
+                              "AND (s.state='open' OR (s.state='closed' AND s.timeclosed>UNIX_TIMESTAMP()-(3600*24)))");
+     } else { # triggers on green, open
+         $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='open' $filterwhere");
+     }
+     $sth->execute;
+
+     # For the You Replied filter, we might be getting some rows multiple times (when
+     # multiple log rows exist for $remote), which is still better than using DISTINCT
+     # in the query which uses a temporary table, so ensure uniqueness here.
+     my %spids_seen;
+     while (my $sprow = $sth->fetchrow_hashref) {
+         next if $spids_seen{$sprow->{'spid'}};
+         $spids_seen{$sprow->{'spid'}} = 1;
+         push @support_log, $sprow;
+         $rct++;
+     }
  }
- $ret .= "<p>[<b>$rct</b> total open requests]</p>" if ($append);
+
+ $ret .= "<p>[<b>$rct</b> total open requests]</p>" if $append;
  @support_log = sort { $b->{timecreate} <=> $a->{timecreate} } @support_log;
 
  # filter line:
@@ -105,7 +179,7 @@ body<=
      }
      while (@states) {
          my ($skey, $sname) = splice(@states, 0, 2);
-         my $sel = $FORM{'state'} eq $skey ? " selected='selected'" : "";
+         my $sel = $state eq $skey ? " selected='selected'" : "";
          $ret .= "<option value=\"$skey\"$sel>$sname</option>";
      }
  }
@@ -128,9 +202,13 @@ body<=
  $ret .= "</select>\n";
  $ret .= "<input type=submit value=\"Filter\" /></form>";
  # /filter line
- 
 
+ # mass closing table
+ $ret .= "<form method='post' action='/support/actmulti.bml'>" if $can_close;
+
+ # start the rest of the table
  $ret .= "<p><table cellpadding='4' cellspacing='1' border='1' bgcolor='#ffffff'><tr bgcolor='#d0d0d0'>\n";
+ $ret .= "<td>&nbsp;<b>X</b></td>\n" if $can_close;
  $ret .= "<td><b>ID#</b></td>\n";
  $ret .= "<td><b>Summary</b></td>\n";
  $ret .= "<td><b>Problem Area</b></td>\n";
@@ -144,21 +222,21 @@ body<=
      next unless (LJ::Support::can_read($sp, $remote));
 
      my $status = "open";
-     my $barbg = "bgcolor='#d0eed0'";
+     my $barbg = "green";
      if ($sp->{'timeclosed'}) {
          $status = "closed";
-         $barbg = "bgcolor='#eed0d0'";
+         $barbg = "red";
      }
      elsif ($sp->{'timelasthelp'} > $sp->{'timetouched'}+5) {
          $status = "answered<br />awaiting close";
-         $barbg = "bgcolor='#eeeed0'";
+         $barbg = "yellow";
      }
      elsif ($sp->{'timelasthelp'} && $sp->{'timetouched'} > $sp->{'timelasthelp'}+5) {
          $status = "answered<br /><b>still needs help</b>";
-         $barbg = "bgcolor='#d0eed0'";
+         $barbg = "green";
      }
 
-     next if ($FORM{'state'} eq "green" && $barbg ne "bgcolor='#d0eed0'");
+     next if $state eq "green" && $barbg ne "green";
 
      # fix up the subject if needed
      eval {
@@ -175,6 +253,15 @@ body<=
          }
      };
 
+     # fix up the message if we have one
+     if (length $sp->{message} > 100) {
+        $sp->{message} = substr($sp->{message}, 0, 100) . "...";
+     } else {
+        $sp->{message} .= " <b>&#x00b6;</b>";
+     }
+     my $des = $abstracts ? "<br /><i>$sp->{message}</i>" : '';
+
+     # other content for this request
      my $summary = LJ::ehtml($sp->{'subject'});
      my $secold = time() - $sp->{'timecreate'};
      my $age = LJ::ago_text($secold);
@@ -187,9 +274,21 @@ body<=
          $status .= ")";
      }
 
-     $ret .= "<tr valign='top' $barbg>\n";
-     $ret .= "<td><b><a href=\"see_request.bml?id=$sp->{'spid'}\">$sp->{'spid'}</a></b></td>\n";
-     $ret .= "<td><b>$summary</b></td>\n";
+     my ($style, $js) = ("class='$barbg'", '');
+     if ($can_close) {
+        $js = "id='r$sp->{spid}' onClick='doClick($sp->{spid});'"; 
+     }
+     
+     # generate the HTML for this row
+     $ret .= "<tr valign='top' $style $js>\n";
+     if ($can_close) {
+         $ret .= "<td>" . LJ::html_check({ name => "check_$sp->{spid}", id => "check_$sp->{spid}",
+                                           onClick => "doClick($sp->{spid});", }) . 
+                 "<input type='hidden' name='c$sp->{spid}' id='c$sp->{spid}' value='$barbg' /></td>\n";
+     }
+     $ret .= "<td><b><a href=\"see_request.bml?id=$sp->{'spid'}\" " .
+             "onClick='return doClick($sp->{spid});'>$sp->{'spid'}</a></b></td>";
+     $ret .= "<td><b>$summary</b>$des</td>\n";
      $ret .= "<td>$probarea</td>\n";
      $ret .= "<td nowrap='nowrap'><font size='-1'>$age</font></td>\n";
      $ret .= "<td nowrap='nowrap'><font size='-1'>$status</font></td>\n";
@@ -197,6 +296,16 @@ body<=
 
  }
  $ret .= "</table>\n";
+
+ # mass close button
+ if ($can_close) {
+     $ret .= LJ::html_hidden('ids', join(':', map { $_->{spid} } @support_log),
+                             'spcatid', $fcat->{spcatid},
+                             'ret', "/support/help.bml?state=$state&cat=$filtercat");
+     $ret .= "<br />" . LJ::html_submit('action:close', 'Close Marked Requests', {
+                            onClick => 'return confirm("Are you sure you want to close the marked requests?");' }) if $rct;
+     $ret .= "</form>";
+ }
 
  return $ret;
 
