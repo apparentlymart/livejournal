@@ -124,8 +124,17 @@ sub delete_by_id {
                        (LJ::get_cluster_master($u), '2') :
                        (LJ::get_db_writer(), '');
 
-    # delete actual memory
+    # if dversion 5, verify the ids
     my $in = join ',', map { $_+0 } @$memids;
+    if ($u->{dversion} == 5) {
+        $memids = $db->selectcol_arrayref("SELECT memid FROM memorable WHERE userid = ? AND memid IN ($in)",
+                                          undef, $u->{userid});
+        return undef if $db->err;
+        return 1 unless @{$memids || []}; # if we got nothing, pretend success
+        $in = join ',', map { $_+0 } @$memids;
+    }
+
+    # delete actual memory
     $db->do("DELETE FROM memorable$table WHERE userid = ? AND memid IN ($in)", undef, $u->{userid});
     return undef if $db->err;
 
@@ -232,7 +241,9 @@ sub update_memory {
     return unless $u && $memid && %{$upd || {}};
 
     # get database handle
-    my $db = $u->{dversion} > 5 ? LJ::get_cluster_master($u) : LJ::get_db_writer();
+    my ($db, $table) = $u->{dversion} > 5 ?
+                       (LJ::get_cluster_master($u), '2') :
+                       (LJ::get_db_writer(), '');
     return undef unless $db;
 
     # construct update lines... only valid things we can update are des and security
@@ -244,15 +255,8 @@ sub update_memory {
     my $updstr = join ',', @updates;
 
     # now perform update
-    if ($u->{dversion} > 5) {
-        # new clustered memories
-        $db->do("UPDATE memorable2 SET $updstr WHERE userid = ? AND memid = ?",
-                undef, $u->{userid}, $memid);
-    } else {
-        # old global memories
-        $db->do("UPDATE memorable SET $updstr WHERE userid = ? AND memid = ?",
-                undef, $u->{userid}, $memid);
-    }
+    $db->do("UPDATE memorable$table SET $updstr WHERE userid = ? AND memid = ?",
+            undef, $u->{userid}, $memid);
     return undef if $db->err;
     return 1;
 }
@@ -471,11 +475,10 @@ sub get_keywords {
             $use_reader = 1;
             $dbcm = LJ::get_cluster_reader($u);
         }
-        my $ids = $dbcm->selectcol_arrayref('SELECT mk.kwid FROM memorable2 m, memkeyword2 mk ' .
-                                            'WHERE mk.memid = m.memid AND m.userid = ?', undef, $u->{userid});
-        my %uniqids = ( map { $_ => 1 } @{$ids || []} );
-        if (%uniqids) {
-            my $in = join(",", keys %uniqids);
+        my $ids = $dbcm->selectcol_arrayref('SELECT DISTINCT kwid FROM memkeyword2 WHERE userid = ?',
+                                            undef, $u->{userid});
+        if (@{$ids || []}) {
+            my $in = join ",", @$ids;
             my $rows = $dbcm->selectall_arrayref('SELECT kwid, keyword FROM userkeywords ' .
                                                  "WHERE userid = ? AND kwid IN ($in)", undef, $u->{userid});
             $ret->{$_->[0]} = $_->[1] foreach @{$rows || []};
