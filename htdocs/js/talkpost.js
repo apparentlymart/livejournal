@@ -74,7 +74,7 @@ if (document.getElementById) {
             handleRadios(0);
         };
     username.onkeydown = username.onchange = function () {
-        if (radio_user)
+        if (radio_user && username.value != "")
             radio_user.checked = true;
         handleRadios(2);  // update the form
     }
