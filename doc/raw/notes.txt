@@ -1,6 +1,9 @@
 Debian packages:
    psgml
    jade
+   docbook
+   docbook-dsssl
+   docbook-dsssl-doc
    docbook-xml
    sp  (contains nsgmls)
 
