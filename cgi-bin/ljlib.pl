@@ -2713,6 +2713,7 @@ sub get_remote
     my $sess_db;
     my $sess;
     my $get_sess = sub {
+        return undef unless $sess_db;
         $sess = $sess_db->selectrow_hashref("SELECT * FROM sessions ".
                                             "WHERE userid=? AND sessid=? AND auth=?",
                                             undef, $u->{'userid'}, $sessid, $auth);
@@ -2725,6 +2726,11 @@ sub get_remote
         $sess_db = LJ::get_cluster_master($u);
         $get_sess->();
         LJ::MemCache::set($memkey, $sess) if $sess;
+    }
+    # try slave
+    unless ($sess) {
+        $sess_db = LJ::get_cluster_reader($u);
+        $get_sess->();
     }
     return $no_remote->("Session bogus") unless $sess;
     return $no_remote->("Invalid auth") unless $sess->{'auth'} eq $auth;
@@ -3504,10 +3510,17 @@ sub make_journal
     if ($u->{'useoverrides'} eq "Y" || $u->{'themeid'} == 0) {
         $s1uc = LJ::MemCache::get($s1uc_memkey);
         unless ($s1uc) {
-            my $dbcr = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($u) : LJ::get_cluster_reader($u);
-            $s1uc = $dbcr->selectrow_hashref("SELECT * FROM s1usercache WHERE userid=?",
-                                             undef, $u->{'userid'});
-            LJ::MemCache::set($s1uc_memkey, $s1uc) if $s1uc;
+            my $db;
+            my $setmem = 1;
+            if (@LJ::MEMCACHE_SERVERS) { 
+                $db = LJ::get_cluster_master($u);
+            } else {
+                $db = LJ::get_cluster_reader($u);
+                $setmem = 0;
+            }
+            $s1uc = $db->selectrow_hashref("SELECT * FROM s1usercache WHERE userid=?",
+                                           undef, $u->{'userid'});
+            LJ::MemCache::set($s1uc_memkey, $s1uc) if $s1uc && $setmem;
         }
     }
 
