@@ -413,12 +413,16 @@ sub append_request
     my $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
     
     my $qspcatid = $sp->{'spcatid'}+0;
-    $sth = $dbh->prepare("SELECT u.email FROM supportnotify sn, user u WHERE ".
+    $sth = $dbh->prepare("SELECT u.email, u.userid, u.user ".
+                         "FROM supportnotify sn, user u WHERE ".
                          "sn.userid=u.userid AND sn.spcatid=$qspcatid ".
                          "AND sn.level IN ('all')");
     $sth->execute;
     my @to_notify;
-    while (my ($email) = $sth->fetchrow_array) {
+    while (my ($email, $userid, $user) = $sth->fetchrow_array) {
+        next if $re->{'posterid'} == $userid;
+        next if ($re->{'type'} eq "internal" &&
+                 ! can_read_internal($dbh, $sp, LJ::make_remote($user, $userid)));
         push @to_notify, $email;
     }
     
