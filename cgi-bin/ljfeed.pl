@@ -205,6 +205,8 @@ sub make_feed
             eventtime  => $it->{alldatepart},  # ugly: this is of a different format than the other two times.
             modtime    => $logprops{$itemid}->{revtime} || $createtime,
             comments   => ($logprops{$itemid}->{'opt_nocomments'} == 0),
+            music      => LJ::exml($logprops{$itemid}->{'current_music'}),
+            mood       => LJ::exml(LJ::mood_name($logprops{$itemid}->{'current_moodid'}+0)),
         };
         push @cleanitems, $cleanitem;
     }
@@ -224,8 +226,8 @@ sub create_view_rss
 
     # header
     $ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
-    $ret .= LJ::run_hook("bot_director", "<!-- ", " -->");
-    $ret .= "<rss version='2.0'>\n";
+    $ret .= LJ::run_hook("bot_director", "<!-- ", " -->") . "\n";
+    $ret .= "<rss version='2.0' xmlns:lj='http://www.livejournal.org/rss/lj/1.0/'>\n";
 
     # channel attributes
     $ret .= "<channel>\n";
@@ -272,6 +274,8 @@ sub create_view_rss
             $ret .= "  <comments>$journalinfo->{link}$ditemid.html</comments>\n";
         }
         # TODO: add author field with posterid's email address, respect communities
+        $ret .= "  <lj:music>$it->{music}</lj:music>\n" if $it->{music};
+        $ret .= "  <lj:mood>$it->{mood}</lj:mood>\n" if $it->{mood};
         $ret .= "</item>\n";
     }
 
