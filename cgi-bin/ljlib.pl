@@ -1421,8 +1421,7 @@ sub name_caps
 {
     return undef unless LJ::are_hooks("name_caps");
     my $caps = shift;
-    my @r = LJ::run_hooks("name_caps", $caps);
-    return $r[0]->[0];
+    return LJ::run_hook("name_caps", $caps);
 }
 
 # <LJFUNC>
@@ -1436,8 +1435,7 @@ sub name_caps_short
 {
     return undef unless LJ::are_hooks("name_caps_short");
     my $caps = shift;
-    my @r = LJ::run_hooks("name_caps_short", $caps);
-    return $r[0]->[0];
+    return LJ::run_hook("name_caps_short", $caps);
 }
 
 # <LJFUNC>
@@ -1553,6 +1551,21 @@ sub run_hooks
         push @ret, [ $hook->(@args) ];
     }
     return @ret;
+}
+
+# <LJFUNC>
+# name: LJ::run_hook
+# des: Runs single site-specific hook of the given name.
+# returns: return value from hook
+# args: hookname, args*
+# des-args: Arguments to be passed to hook.
+# </LJFUNC>
+sub run_hook
+{
+    my ($hookname, @args) = @_;
+    return undef unless @{$LJ::HOOKS{$hookname}};
+    return $LJ::HOOKS{$hookname}->[0]->(@args);
+    return undef;
 }
 
 # <LJFUNC>
@@ -5172,9 +5185,7 @@ sub is_utf8 {
     my $text = shift;
 
     if (LJ::are_hooks("is_utf8")) {
-        my @r = LJ::run_hooks("is_utf8", $text);
-        return 0 if grep { ! $_->[0] } @r;
-        return 1;
+        return LJ::run_hook("is_utf8", $text);
     }
     else {
         $text =~ m/^([\x00-\x7f]|[\xc2-\xdf][\x80-\xbf]|\xe0[\xa0-\xbf][\x80-\xbf]|[\xe1-\xef][\x80-\xbf][\x80-\xbf]|\xf0[\x90-\xbf][\x80-\xbf][\x80-\xbf]|[\xf1-\xf7][\x80-\xbf][\x80-\xbf][\x80-\xbf])*(.*)/;
