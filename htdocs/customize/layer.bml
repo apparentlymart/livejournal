@@ -241,15 +241,26 @@
             my ($length, $maxlength);
             if ($type eq "int") { ($length, $maxlength) = (7, 5); }
             if ($type eq "string") { 
-                ($length, $maxlength) = ($prop->{'length'} || 30,
-                                         $prop->{'maxlength'} || 60);
-            }
-            $body .= LJ::html_text({ 'name' => "${name}_value",
+                my ($rows, $cols) = ($prop->{'rows'} + 0,
+                                     $prop->{'cols'} + 0);
+                if ($rows > 0 && $cols > 0) {
+                    $body .= LJ::html_textarea({ 'name' => "${name}_value",
+                                     'disabled' => ! $can_use,
+                                     'value' => $override,
+                                     'onchange' => "checkOverride('$name');",
+                                     'rows' => $rows,
+                                     'cols' => $cols });
+                } else {
+                    ($length, $maxlength) = ($prop->{'length'} || 30,
+                                             $prop->{'maxlength'} || 60);
+                     $body .= LJ::html_text({ 'name' => "${name}_value",
                                      'disabled' => ! $can_use,
                                      'value' => $override,
                                      'onchange' => "checkOverride('$name');",
                                      'maxlength' => $maxlength,
                                      'size' => $length });
+                }
+            }
         } elsif ($type eq "Color") {
             $body .= LJ::html_color({ 'name' => "${name}_value",
                                       'disabled' => ! $can_use,
