@@ -262,6 +262,7 @@ body<=
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'langcode',
                               'selected' => $langcode, },
+                            0 => $ML{'.s2.customize.language.default'},
                             @langs);
     $ret .= " <input type='submit' name='save:langcode' value='$ML{'.change'}'>";
     $ret .= "</blockquote>";

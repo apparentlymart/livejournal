@@ -887,6 +887,8 @@ p?>
 
 /customize/index.bml.s2.customize.language.custom=(Custom)
 
+/customize/index.bml.s2.customize.language.default=(Default)
+
 /customize/index.bml.s2.customize.language.header=Language
 
 /customize/index.bml.s2.customize.settings=If you want to customize your journal further, here you can tweak individual settings to get it looking exactly how you want.
