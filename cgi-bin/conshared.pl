@@ -130,8 +130,10 @@ sub community
     return 0 if ($error);
 
     my ($com_user, $action, $target_user) = ($args->[1], $args->[2], $args->[3]);
-    my $com_id = LJ::get_userid($dbh, $com_user);
-    my $target_id = LJ::get_userid($dbh, $target_user);
+    my $comm = LJ::load_user($com_user);
+    my $com_id = $comm->{'userid'};
+    my $target = LJ::load_user($target_user);
+    my $target_id = $target->{'userid'};
 
     my $ci;
     
@@ -177,15 +179,20 @@ sub community
     
     return 0 if ($error);    
     
-    my $dbs = LJ::make_dbs_from_arg($dbh);
     if ($action eq "add") 
     {
-        LJ::add_friend($dbs, $com_id, $target_id);
-        push @$out, [ "info", "User \"$target_user\" is now a member of \"$com_user\"." ];
+        my $attr = ['member'];
+        push @$attr, 'post' if $ci->{'postlevel'} eq "members";
+        my $res = LJ::comm_member_request($comm, $target, $attr);
+        unless ($res) {
+            push @$out, [ 'error', "Could not add user." ];
+            return 0;
+        }
+
+        push @$out, [ "info", "User \"$target_user\" has been mailed and will be added to \"$com_user\" pending their approval." ];
         
-        if ($ci->{'postlevel'} eq "members") {
-            LJ::set_rel($com_id, $target_id, 'P');
-            push @$out, [ "info", "User \"$target_user\" can now post in \"$com_user\"." ];
+        if ($ci->{'postlevel'}) {
+            push @$out, [ "info", "User \"$target_user\" will be allowed to post to \"$com_user\" once they are added." ];
         } 
     }
         
