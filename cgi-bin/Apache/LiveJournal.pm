@@ -44,8 +44,9 @@ sub trans
 {
     my $r = shift;
     my $uri = $r->uri;
-    my $host = $r->header_in("Host");
+    return DECLINED if $uri =~ /\.bml$/; # not dirs, but most.
 
+    my $host = $r->header_in("Host");
     LJ::start_request();
 
     my $redir = sub {
@@ -143,6 +144,10 @@ sub trans
         return $redir->($new, HTTP_MOVED_PERMANENTLY);
     }
 
+    # confirm
+    if ($uri =~ m!^/confirm/(\w+\.\w+)!) {
+        return $redir->("$LJ::SITEROOT/register.bml?$1");
+    }
 
     return FORBIDDEN if $uri =~ m!^/userpics!;
     return DECLINED;
