@@ -908,7 +908,7 @@ sub entry_form {
     $out .= "<p><?inerr Error: inerr?><br />$errors->{'entry'}</p>" if $errors->{'entry'};
     
     ### Event Text Area:
-    $out .= "<p><b>Entry:</b><br />" unless $opts->{'richtext_on'};
+    $out .= "<p><b>Entry:</b></p>" unless $opts->{'richtext_on'};
     if ($opts->{'richtext_on'}) {
         my $jevent = $opts->{'event'};
         
@@ -1106,12 +1106,16 @@ MOODS
         
         # Backdate Entry
         $out .= "<tr id='backdate_row'><th><label for='prop_opt_backdated'>Entry is backdated:</label></th><td>";
-        $out .= LJ::html_check({ 'type' => "check", 'id' => "prop_opt_backdated", 'name' => "prop_opt_backdated", "value" => $opts->{'prop_opt_backdated'},});
+        $out .= LJ::html_check({ 'type' => "check", 'id' => "prop_opt_backdated", 'name' => "prop_opt_backdated", "value" => 1, 'checked' => $opts->{'prop_opt_backdated'},});
         $out .= "</td></tr>";
         
         # Comment Settings
+        my $comment_settings_selected = $opts->{'prop_opt_noemail'} ? "noemail" : 
+                                        $opts->{'prop_opt_nocomments'} ? "nocomments" : "";
+        $comment_settings_selected  ||= $opts->{'comment_settings'};
+
         $out .= "<tr valign='top' id='comment_settings_row'><th style='white-space: nowrap'>Comment Settings:</th><td>";
-        $out .= LJ::html_select({ 'name' => "comment_settings", 'selected' => $opts->{'comment_settings'}},
+        $out .= LJ::html_select({ 'name' => "comment_settings", 'selected' => $comment_settings_selected },
                                 "", "Default", "noemail", "Don't Email", "nocomments", "Disabled");
         $out .= "</td></tr>";
     
@@ -1218,16 +1222,17 @@ PREVIEW
             }
             $out .= LJ::html_submit('action:update', "Update Journal", { 'onclick' => $onclick, });
         } else {
-            $out .= LJ::html_submit('action:save',"Save Entry", {}) . "&nbsp;";
+            $out .= LJ::html_submit('action:save',"Save Entry",
+                                    { 'disabled' => $opts->{'disabled_save'} }) . "&nbsp;";
             $out .= LJ::html_submit('action:delete',"Delete Entry", {
                 'disabled' => $opts->{'disabled_delete'},
                 'onclick' => "return confirm('" . LJ::ejs("Do you want to delete this entry?") . "')" });
             
             if (!$opts->{'disabled_spamdelete'}) {
-                $out .= "<br/><br/><center>";
+                $out .= "<div style='text-align: center'>";
                 $out .= LJ::html_submit('action:deletespam', "Delete and Mark as Spam", {
                     'onclick' => "return confirm('" . LJ::ejs("Do you want to delete and mark as spam?") . "')" });
-                $out .= "</center>";
+                $out .= "</div>";
             }
         }
         $out .= "</div>";
@@ -1272,16 +1277,21 @@ sub entry_form_decode
     my ($year, $mon, $day) = split( /\D/, $date);
     $req->{'year'} = $year; $req->{'mon'} = $mon; $req->{'day'} = $day;
 
+    foreach ( "year", "mon", "day" ) {
+        $req->{$_} = $POST->{$_} if $POST->{$_} ne "";
+    }
+
+    $req->{"prop_opt_preformatted"} = $POST->{'event_format'} eq "preformatted" ? 1 : 0;
     # copy some things from %POST
     foreach (qw(subject hour min
                 prop_picture_keyword prop_current_moodid
                 prop_current_mood prop_current_music
-                prop_opt_screening)) {
+                prop_opt_screening prop_opt_noemail
+                prop_opt_preformatted prop_opt_nocomments )) {
         $req->{$_} = $POST->{$_};
     }
 
     $req->{"prop_opt_$POST->{'comment_settings'}"} = 1 if $POST->{'comment_settings'} ne "";
-    $req->{"prop_opt_preformatted"} = $POST->{'event_format'} eq "preformatted" ? 1 : 0;
     $req->{'prop_opt_backdated'} = $POST->{'prop_opt_backdated'} ? 1 : 0;
     
     # Convert the rich text editor output back to parsable lj tags.

@@ -178,6 +178,7 @@ body<=
                 'spellcheck_html' => $spellcheck_html,
                 'richtext' => 0,
                 'mood' => $res{'events_1_'},
+                'disabled_save' => $disabled_save,
                 'disabled_delete' => $disabled_delete,
                 'disabled_spamdelete' => $disabled_spamdelete,
             };

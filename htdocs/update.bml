@@ -245,7 +245,6 @@
         if ($remote) { # so lynx won't show this
             $auth .= "<tr valign='top' id='remotelogin' style='display: $remotelogin_display'><th>Poster:</th><td>";
             $auth .= BML::ml(".loggedinas", {'user' => $remote->{'user'}, 'altget' => "?altlogin=1" });
-            #$auth .= LJ::ljuser($remote) . " <span style='font-size: .9em;'>[<a href='?altlogin=1'>Switch?</a>]</span>";
             $auth .= "</td></tr>\n";
         }
 
