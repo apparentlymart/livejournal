@@ -583,7 +583,12 @@ sub clean
         elsif ($type eq "C") {
             # by default, ditch comments
             if ($keepcomments) {
-                $newdata .= $token->[1];
+                my $com = $token->[1];
+                $com =~ s/^<!--\s*//;
+                $com =~ s/\s*--!>$//;
+                $com =~ s/<!--//;
+                $com =~ s/-->//;
+                $newdata .= "<!-- $com -->";
             }
         }
         elsif ($type eq "PI") {
