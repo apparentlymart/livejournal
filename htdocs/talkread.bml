@@ -408,7 +408,7 @@ sub recurse_post
 		
 
 	if ($post->{'state'} eq "D") {
-	    $$ret .= "<P><A NAME=\"t$tid\"><TABLE><TR>";
+	    $$ret .= "<P><A NAME=\"t$tid\"></A><TABLE><TR>";
 	    $$ret .= "<TD><IMG SRC=\"$LJ::IMGPREFIX/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
 	    $$ret .= "<TD><B>(Deleted post)</B></TD></TR></TABLE>\n";
 	} elsif ($userpost && $user{$userpost}->{'statusvis'} eq "S") {
