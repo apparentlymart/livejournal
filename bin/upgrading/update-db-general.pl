@@ -7,6 +7,7 @@ mark_clustered("useridmap", "userbio", "syncupdates2", "cmdbuffer", "dudata",
                "talk2", "talkprop2", "talktext2", "talkleft",
                "userpicblob2", "events",
                "s2style", "s2info", "s2source", "s2compiled",
+               "ratelog", "loginstall"
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -1472,7 +1473,52 @@ CREATE TABLE synitem
 )
 EOC
 
+register_tablecreate("ratelist", <<'EOC');
+CREATE TABLE ratelist
+(
+ rlid TINYINT UNSIGNED NOT NULL AUTO_INCREMENT,
+ name  varchar(50) not null,
+ des varchar(255) not null,
+ PRIMARY KEY (rlid),
+ UNIQUE KEY (name)
+ )
+EOC
 
+register_tablecreate("ratelog", <<'EOC');
+CREATE TABLE ratelog
+(
+ userid   INT UNSIGNED NOT NULL,
+ rlid  TINYINT UNSIGNED NOT NULL,
+ evttime  INT UNSIGNED NOT NULL,
+ ip       INT UNSIGNED NOT NULL,
+ index (userid, rlid, evttime),
+ quantity SMALLINT UNSIGNED NOT NULL
+ )
+EOC
+
+register_tablecreate("rateabuse", <<'EOC');
+CREATE TABLE rateabuse
+(
+ rlid     TINYINT UNSIGNED NOT NULL,
+ userid   INT UNSIGNED NOT NULL,
+ evttime  INT UNSIGNED NOT NULL,
+ ip       INT UNSIGNED NOT NULL,
+ enum     ENUM('soft','hard') NOT NULL,
+ index (rlid, evttime),
+ index (userid),
+ index (ip)
+ )
+EOC
+
+register_tablecreate("loginstall", <<'EOC');
+CREATE TABLE loginstall
+(
+ userid   INT UNSIGNED NOT NULL,
+ ip       INT UNSIGNED NOT NULL,
+ time     INT UNSIGNED NOT NULL,
+ UNIQUE (userid, ip)
+ )
+EOC
 
 ### changes
 

@@ -1808,7 +1808,7 @@ sub load_mood_theme
 #      comments, and users, respectively.
 # args: dbarg, table*
 # des-table: a list of tables' proplists to load.  can be one of
-#            "log", "talk", or "user".
+#            "log", "talk", "user", or "rate"
 # </LJFUNC>
 sub load_props
 {
@@ -1820,19 +1820,21 @@ sub load_props
 
     my %keyname = qw(log  propid
                      talk tpropid
-                     user upropid);
+                     user upropid
+                     rate rlid
+                     );
 
     foreach my $t (@tables) {
         next unless defined $keyname{$t};
         next if (defined $LJ::CACHE_PROP{$t});
-        my $sth = $dbr->prepare("SELECT * FROM ${t}proplist");
+        my $tablename = $t eq "rate" ? "ratelist" : "${t}proplist";
+        my $sth = $dbr->prepare("SELECT * FROM $tablename");
         $sth->execute;
         while (my $p = $sth->fetchrow_hashref) {
             $p->{'id'} = $p->{$keyname{$t}};
             $LJ::CACHE_PROP{$t}->{$p->{'name'}} = $p;
             $LJ::CACHE_PROPID{$t}->{$p->{'id'}} = $p;
         }
-        $sth->finish;
     }
 }
 
@@ -5518,6 +5520,97 @@ sub set_interests
                          "VALUES ($userid, $intid)");
             }
         }
+    }
+    return 1;
+}
+
+# returns 1 if action is permitted.  0 if above rate or fail.
+# action isn't logged on fail.
+#
+# opts keys:
+#   -- "limit_by_ip" => "1.2.3.4"  (when used for checking rate)
+#   -- 
+sub rate_log
+{
+    my ($u, $ratename, $count, $opts) = @_;
+    my $rateperiod = LJ::get_cap($u, "rateperiod-$ratename");
+    return 1 unless $rateperiod;
+
+    my $dbu = LJ::get_cluster_master($u);
+    return 0 unless $dbu;
+    
+    my $rp = LJ::get_prop("rate", $ratename);
+    unless ($rp) {
+        LJ::load_props(LJ::get_dbs(), "rate");
+        $rp = LJ::get_prop("rate", $ratename);
+    }
+    return 0 unless $rp;
+    
+    my $now = time();
+    my $beforeperiod = $now - $rateperiod;
+    
+    # delete inapplicable stuff (or some of it)
+    $dbu->do("DELETE FROM ratelog WHERE userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
+             "AND evttime < $beforeperiod LIMIT 1000");
+    
+    # check rate.  (okay per period)
+    my $opp = LJ::get_cap($u, "rateallowed-$ratename");
+    return 1 unless $opp;
+    my $udbr = LJ::get_cluster_reader($u);
+    my $ip = $udbr->quote($opts->{'limit_by_ip'} || "0.0.0.0");
+    my $sum = $udbr->selectrow_array("SELECT COUNT(quantity) FROM ratelog WHERE ".
+                                     "userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
+                                     "AND ip=INET_ATON($ip) ".
+                                     "AND evttime > $beforeperiod");
+
+    # would this transaction go over the limit?
+    if ($sum + $count > $opp) {
+        # TODO: optionally log to rateabuse, unless caller is doing it themselves
+        # somehow, like with the "loginstall" table.
+        return 0;
+    }
+
+    # log current
+    $count = $count + 0;
+    $dbu->do("INSERT INTO ratelog (userid, rlid, evttime, ip, quantity) VALUES ".
+             "($u->{'userid'}, $rp->{'id'}, $now, INET_ATON($ip), $count)");
+    return 1;
+}
+
+sub login_ip_banned
+{
+    my $u = shift;
+    return 0 unless $u && $u->{'clusterid'};
+
+    my $ip = Apache->request->connection->remote_ip;
+    my $udbr;
+    my $rateperiod = LJ::get_cap($u, "rateperiod-failed_login");
+    if ($rateperiod && ($udbr = LJ::get_cluster_reader($u))) {
+        my $bantime = $udbr->selectrow_array("SELECT time FROM loginstall WHERE ".
+                                             "userid=$u->{'userid'} AND ip=INET_ATON(?)",
+                                             undef, $ip);
+        Apache->request("bantime = $bantime");
+        if ($bantime && $bantime > time() - $rateperiod) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+sub handle_bad_login
+{
+    my $u = shift;
+    return 1 unless $u && $u->{'clusterid'};
+
+    my $ip = Apache->request->connection->remote_ip;
+    # an IP address is permitted such a rate of failures
+    # until it's banned for a period of time.
+    my $udbh;
+    if (! LJ::rate_log($u, "failed_login", 1, { 'limit_by_ip' => $ip }) &&
+        ($udbh = LJ::get_cluster_master($u)))
+    {
+        $udbh->do("REPLACE INTO loginstall (userid, ip, time) VALUES ".
+                  "(?,INET_ATON(?),UNIX_TIMESTAMP())", undef, $u->{'userid'}, $ip);
     }
     return 1;
 }

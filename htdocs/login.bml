@@ -65,10 +65,16 @@
  my $u = LJ::load_user($dbs, $FORM{'user'});
  unless ($u) { push @errors, "$ML{'error.username_notfound'}"; }
 
+ if (LJ::login_ip_banned($u)) {
+     $body = LJ::bad_input("Your IP address is temporarily banned for exceeding the login failure rate.");
+     return;
+ }
+
  unless (LJ::auth_okay($u, $password, $hpassword)) {
      push @errors, "$ML{'error.badpassword'}"; 
+     LJ::handle_bad_login($u);
  }
- 
+
  if (@errors) {
      $body = LJ::bad_input(@errors);
      return;
