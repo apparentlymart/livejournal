@@ -360,7 +360,7 @@ body<=
             $ret .= LJ::html_text({ 'name' => "add_$_", 'size' => '10', 'maxlength' => '15' }) . "</td>";
             foreach my $key (@attribs) {
                 $ret .= "<td align='center'>";
-                if ($key eq 'member') {
+                if ($key eq 'member' || $key eq 'post') {
                     $ret .= LJ::html_check({ name => "add_${_}_$key", selected => 1, });
                 } else {
                     $ret .= LJ::html_check({ name => "add_${_}_$key" });

@@ -144,7 +144,8 @@ sub accept_comm_invite {
     LJ::decode_url_string($argstr, $args);
 
     # valid invite.  let's accept it as far as the community listing us goes.
-    LJ::join_community($u, $cu) if $args->{member};
+    # 0, 0 means don't add comm to user's friends list, and don't auto-add P edge.
+    LJ::join_community($u, $cu, 0, 0) if $args->{member};
     
     # now grant necessary abilities
     my %edgelist = (
@@ -268,27 +269,35 @@ sub leave_community {
 # <LJFUNC>
 # name: LJ::join_community
 # des: Makes a user join a community.  Takes care of all reluser and friend stuff.
-# args: uuserid, ucommid, friend?
+# args: uuserid, ucommid, friend?, noauto?
 # des-uuserid: a userid or u object of the user doing the joining
 # des-ucommid: a userid or u object of the community being joined
 # des-friend: 1 to add this comm to user's friends list, else not
+# des-noauto: if defined, 1 adds P edge, 0 does not; else, base on community postlevel
 # returns: 1 if success, undef if error of some sort (ucommid not a comm, uuserid already in
 #   comm, db error, etc)
 # </LJFUNC>
 sub join_community {
-    my ($uuid, $ucid, $friend) = @_;
+    my ($uuid, $ucid, $friend, $canpost) = @_;
     my $u = LJ::want_user($uuid);
     my $cu = LJ::want_user($ucid);
-    my $crow = LJ::get_community_row($cu);
     $friend = $friend ? 1 : 0;
-    return LJ::error('comm_not_found') unless $u && $cu && ref $crow;
-   
-    # friend comm -> user
+    return LJ::error('comm_not_found') unless $u && $cu;
     return LJ::error('comm_not_comm') unless $cu->{journaltype} eq 'C';
+
+    # friend comm -> user
     LJ::add_friend($cu->{userid}, $u->{userid});
 
-    # add edges that effect this relationship
-    LJ::set_rel($cu->{userid}, $u->{userid}, 'P') if $crow->{postlevel} eq 'members';
+    # add edges that effect this relationship... if the user sent a fourth
+    # argument, use that as a bool.  else, load commrow and use the postlevel.
+    my $addpostacc = 0;
+    if (defined $canpost) {
+        $addpostacc = $canpost ? 1 : 0;
+    } else {
+        my $crow = LJ::get_community_row($cu);
+        $addpostacc = $crow->{postlevel} eq 'members' ? 1 : 0;
+    }
+    LJ::set_rel($cu->{userid}, $u->{userid}, 'P') if $addpostacc;
 
     # friend user -> comm?
     return 1 unless $friend;
