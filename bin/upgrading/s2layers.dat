@@ -41,6 +41,5 @@ tabularindent/themes    theme+          tabularindent/layout
 sturdygesture/layout    layout          core1
 sturdygesture/themes    theme+          sturdygesture/layout
 
-# includes
-s2layers-ljcom.dat      INCLUDE
+# include local file
 s2layers-local.dat      INCLUDE
