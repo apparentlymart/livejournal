@@ -160,7 +160,11 @@ sub community
     unless ($target_id) {
         $error = 1;
         push @$out, [ "error", "Invalid user \"$target_user\" to add/remove" ];
+    } elsif ($target->{'jouranltype'} ne 'P') {
+        $error = 1;
+        push @$out, [ "error", "Cannot add community/syndicated account to community." ];
     }
+
     if ($target_id && $target_id==$com_id) {
         $error = 1;
         push @$out, [ "error", "Target user can't be shared journal user." ];
