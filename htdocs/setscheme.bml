@@ -54,11 +54,15 @@ body<=
     $scheme = $LJ::SCHEMES[0]->{'scheme'} unless $scheme;
 
     foreach my $sh (@LJ::SCHEMES) {
-        my $sel = ($scheme eq $sh->{'scheme'}) ? " checked='checked'" : '';
-        $ret .= "<input type='radio' name='scheme' value='$sh->{'scheme'}'$sel />$sh->{'title'}<br />";
+        $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'scheme',
+                                 'value' => $sh->{'scheme'},
+                                 'id' => "scheme-$sh->{'scheme'}",
+                                 'selected' => $scheme eq $sh->{'scheme'} });
+
+        $ret .= "<label for='scheme-$sh->{'scheme'}'>$sh->{'title'}</label><br />";
     }
     
-    $ret .= "</p><p><input type='submit' value='$ML{'.switch'}' /></p>";
+    $ret .= "</p><p>" . LJ::html_submit($ML{'.switch'}) . "</p>";
     $ret .= "</form>";
     
     
