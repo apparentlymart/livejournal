@@ -9,6 +9,9 @@ p?>
 
 <?_code
 
+ use strict;
+ use vars qw(%GET);
+
  my $curlang = BML::get_language();
  my $deflang = BML::get_language_default();
  my $altlang = $curlang ne $deflang;
@@ -19,9 +22,8 @@ p?>
      $altlang = 0 unless $mll && $mld;
  }
 
- my $dbr = LJ::get_db_reader();
- my %faqcat;
- my %faqq;
+ my $dbr = LJ::get_db_reader(); my $sth;
+ my %faqcat; my %faqq;
  my $ret = "";
  if ($altlang) {
      my $sql = "SELECT fc.faqcat, t.text AS 'faqcatname', fc.catorder FROM faqcat fc, ".
@@ -59,6 +61,7 @@ p?>
  foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> 
                                 $faqcat{$b}->{'catorder'} } keys %faqcat)
  {
+     next if $GET{'cat'} && $GET{'cat'} ne $faqcat;
      $ret .= "<?h2 ";
      $ret .= LJ::ehtml($faqcat{$faqcat}->{'faqcatname'});
      $ret .= " (<a href=\"faqbrowse.bml?faqcat=$faqcat\">";
