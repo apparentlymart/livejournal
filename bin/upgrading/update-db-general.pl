@@ -1275,7 +1275,7 @@ CREATE TABLE subs (
   INDEX (etype, ejournalid, eiarg),
   subtime     DATETIME NOT NULL,
   exptime     DATETIME NOT NULL,
-  INDEX (exptime)
+  INDEX (exptime),
   ntype      CHAR(1) NOT NULL
 )
 EOC
