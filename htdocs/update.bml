@@ -19,6 +19,12 @@
  my $remote = LJ::get_remote($dbs);
  LJ::load_remote($dbs, $remote);
 
+ if (LJ::get_cap($remote, "readonly")) {
+     $title = "Read-only mode";
+     $body = $LJ::MSG_READONLY_USER;
+     return;
+ }
+
  my $mode = $FORM{'mode'} || "";  # full will be default, once portal is in.
 
  my $spellcheck_html;
