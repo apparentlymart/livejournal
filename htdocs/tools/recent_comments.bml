@@ -81,6 +81,11 @@ body<=
     $ret .= "<?p " . (%talkids ? "Last $count comments posted in " : "No comments have been posted in ") . LJ::ljuser($u) . " p?>";
 
     @recv = sort { $b->{datepost} cmp $a->{datepost} } @recv;
+    my @recv_talkids = map { $_->{'jtalkid'} } @recv;
+
+    my %props;
+    LJ::load_talk_props2($u->{'userid'}, \@recv_talkids, \%props);
+
     my $us = LJ::load_userids(keys %need_userid);
 
     # setup the parameter to get_logtext2multi
@@ -98,6 +103,8 @@ body<=
     $ret .= "<table style='width: 100%' cellpadding='5' cellspacing='0'>";
     foreach my $r ( @recv) {
 	next unless $r->{nodetype} eq "L";
+
+        $r->{'props'} = $props{$r->{'jtalkid'}};
 
         my $lrow = $logrow{"$u->{userid} $r->{nodeid}"} ||= LJ::get_log2_row($u, $r->{'nodeid'});
         my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
@@ -164,7 +171,7 @@ body<=
         }
 
         my $comment = $comment_text->{$r->{jtalkid}}[1];
-        LJ::CleanHTML::clean_comment(\$comment, $r->{preformat});
+        LJ::CleanHTML::clean_comment(\$comment, $r->{'props'}->{'opt_preformatted'});
         $ret .= "$comment<br /><br />";
 
         $ret .= "(<a href='$talkurl'>Comment Link</a>) " unless $r->{state} eq "D" || $lrow->{ditemid} == undef;
