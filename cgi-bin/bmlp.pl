@@ -7,7 +7,7 @@
 use Compress::Zlib;
 use Digest::MD5;
 
-$VERSION="1.2.1";
+my $VERSION="1.2.1";
 
 sub webdie { print "Content-type: text/html\n\n$_[0];\n"; exit; }
 
@@ -19,10 +19,12 @@ require 'bml_client.pl';
 
 srand;
 
-$SERVE_MAX = 50;
-$SERVE_COUNT = 0;
-$HUP_COUNT = 0;
-$SERVING = 0;
+my $SERVE_MAX = 50;
+my $SERVE_COUNT = 0;
+my $HUP_COUNT = 0;
+my $SERVING = 0;
+my (%FileModTime, %Config, %FileBlockData, %FileBlockFlags);
+my ($time_a, $time_b);
 
 &reset_caches;
 $SIG{'HUP'} = sub {
@@ -239,7 +241,9 @@ sub handle_request
 			$BMLEnv{'DefaultScheme'};
 
 	if ($BMLEnv{'VarInitScript'}) {
-	    &load_look_from_initscript($BMLEnv{'VarInitScript'});
+	    foreach my $is (split(/\s*,\s*/, $BMLEnv{'VarInitScript'})) {
+		&load_look_from_initscript($is);
+	    }
 	}
 	&load_look("", "global");
 	&load_look($BMLSCHEME, "generic");
