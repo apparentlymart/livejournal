@@ -48,6 +48,10 @@ body<=
  my $mode = $POST{'mode'};
  my $code = $POST{'code'} || $GET{'code'};
 
+ if ($LJ::USE_SSL && ! $LJ::IS_SSL && $FORM{'ssl'} ne "no") {
+     return BML::redirect("$LJ::SSLROOT/create.bml");
+ }
+
  # with no mode, decide which screen the user sees first, based
  # on whether or not this LJ installation lets in free users
  if ($mode eq "") {
@@ -98,7 +102,8 @@ body<=
      my $v;
 
      $ret .= "<form method=\"post\" action=\"create.bml\">\n";
-     $ret .= "<input type=\"hidden\" name=\"mode\" value=\"codesubmit\">\n";
+     $ret .= LJ::html_hidden(mode => 'codesubmit',
+                             ssl => $FORM{'ssl'});
 
      $ret .= "<?h1 $ML{'.useacctcodes.welcome'} h1?><?p $ML{'.useacctcodes.entercode'} p?>";
 
@@ -384,7 +389,8 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      $ret .= "<?p $ML{'.create.text'} p?>";
      $ret .= "<form action=\"create.bml\" method=\"post\">\n";
      $ret .= LJ::html_hidden(mode => 'submit',
-                             code => $code);
+                             code => $code,
+                             ssl => $FORM{'ssl'});
 
      $ret .= "<ol>";
 
