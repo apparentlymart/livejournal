@@ -14,7 +14,17 @@
 
       <varlistentry>
         <term><literal role="variable">$LJ::SITENAME</literal></term>
-        <listitem><para>The name of the site.  (example: "LiveJournal")</para></listitem>
+        <listitem><para>The name of the site.  (example: "LiveJournal.com")</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::SITENAMESHORT</literal></term>
+        <listitem><para>The shortened name of the site.  (example: "LiveJournal")</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::SITENAMEABBREV</literal></term>
+        <listitem><para>The abbreviated name of the site.  (example: "LJ")</para></listitem>
       </varlistentry>
 
       <varlistentry>
