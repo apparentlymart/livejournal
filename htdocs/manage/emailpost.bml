@@ -13,6 +13,9 @@ body<=
     my $u = LJ::get_remote();
     return $ML{'error.noremote'} unless $u;
 
+    return "Sorry, updating your journal via email is not available for your account type."
+        unless LJ::get_cap($u, "emailpost");
+
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
     if ($POST{userid} == $u->{userid}) {
