@@ -298,16 +298,16 @@ body<=
                     <?p If you attach multiple images, you can change the way they
                     appear in your journal via the <b>lj-imglayout</b> header.<br /><br />
                     By default, multiple images will be placed in a vertical layout:<br />
-                    <img src='$LJ::IMGPREFIX/imageplaceholder2.png' width='35' height='35'><br />
-                    <img src='$LJ::IMGPREFIX/imageplaceholder2.png' width='35' height='35'><br />
-                    <img src='$LJ::IMGPREFIX/imageplaceholder2.png' width='35' height='35'><br />
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'><br />
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'><br />
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'><br />
                     <br />
 
                     Currently, the only other option is "horizontal". p?>
                     <span style='white-space: nowrap;'>
-                    <img src='$LJ::IMGPREFIX/imageplaceholder2.png' width='35' height='35'> &nbsp;
-                    <img src='$LJ::IMGPREFIX/imageplaceholder2.png' width='35' height='35'> &nbsp;
-                    <img src='$LJ::IMGPREFIX/imageplaceholder2.png' width='35' height='35'>
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'> 
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'> 
+                    <img src='$LJ::IMGPREFIX/imageplaceholder3.png' width='35' height='35'>
                     </span>
                     <br /><br />
                     <?emailex
