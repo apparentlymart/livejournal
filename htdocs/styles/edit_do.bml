@@ -94,18 +94,22 @@ body<=
  if ($FORM{'mode'} eq "choosestyle")
  {
      $ret .= "<?h1 Edit which style? h1?><?p You own the following styles.  Choose which one you want to modify.  p?>\n";
-     $ret .= "<FORM METHOD=POST><INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\"><INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"$hpassword\"><INPUT TYPE=HIDDEN NAME=mode VALUE=\"editstyle\">\n";
-     $ret .= "<?standout <CENTER>Pick a style:<BR><SELECT SIZE=10 NAME=styleid>";
+     $ret .= "<form method='post'>";
+     $ret .= LJ::html_hidden('user', $user);
+     $ret .= LJ::html_hidden('hpassword', $hpassword);
+     $ret .= LJ::html_hidden('mode', 'editstyle');
+     $ret .= "<?standout <center>Pick a style:<br /><select size='10' name='styleid'>";
      $sth = $dbh->prepare("SELECT styleid, type, styledes FROM style WHERE user=$quser ORDER BY type, styledes");
      $sth->execute;
      while ($sty = $sth->fetchrow_hashref)
      {
-         $ret .= "<OPTION VALUE=$sty->{'styleid'}>" . BML::eall($sty->{'type'});
-         $ret .= "($sty->{'styleid'}): " . BML::eall($sty->{'styledes'}) . "\n";
+         $ret .= "<option value='$sty->{'styleid'}'>" . BML::eall($sty->{'type'});
+         $ret .= "($sty->{'styleid'}): " . BML::eall($sty->{'styledes'}) . "</option>\n";
      }
-     $ret .= "</SELECT><BR>";
-     $ret .= "Action: <SELECT NAME=ide><OPTION VALUE=v2>Edit in Easy Mode<OPTION VALUE=v1>Edit in Raw Mode (Old)<OPTION VALUE=delete>Delete this style!</SELECT><FONT SIZE=1><BR><BR></FONT>";
-     $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Proceed\"></CENTER> standout?>\n";
+     $ret .= "</select><br />";
+     $ret .= "Action: <select name='ide'><option value='v2'>Edit in Easy Mode</option><option value='v1'>Edit in Raw Mode (Old)</option><option value='delete'>Delete this style!</option></select><font size='1'><br /><br /></font>";
+     $ret .= "<input type='submit' value=\"Proceed\"></center> standout?>\n";
+     $ret .= "</form>";
      return $ret;
  }
  
@@ -262,6 +266,7 @@ if ($ide eq "v2") {
 $ret .= "</UL>";
 }
 
+$ret .= "</form>";
 return $ret;
 }
 
