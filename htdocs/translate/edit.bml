@@ -6,7 +6,7 @@
 <frameset cols="200,*">
   <frameset rows="200,*">
     <frame name="search" src="searchform.bml?lang=(=_CODE return $FORM{'lang'}; _CODE=)">
-    <frame name="res" src="about:blank">
+    <frame name="res" src="search.bml?lang=(=_CODE return $FORM{'lang'}; _CODE=)&amp;stale=1%2B&amp;search%3Asev=1">
   </frameset>
   <frame name="main" src="welcome.bml">
 </frameset>

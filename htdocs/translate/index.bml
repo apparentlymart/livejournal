@@ -20,7 +20,7 @@ BODY<=
      next unless exists $lang{$lnid};
      $lang{$lnid}->{'_total'} += $ct;
      $lang{$lnid}->{'_good'} += (1-$stale) * $ct;
-     $lang{$lnid}->{'percent'} = 100 * ($lang{$lnid}->{'_good'}||1) / $lang{$lnid}->{'_total'};
+     $lang{$lnid}->{'percent'} = 100 * $lang{$lnid}->{'_good'} / ($lang{$lnid}->{'_total'}||1);
  }
 
  my $sortcol = exists $lang{'1'}->{$FORM{'s'}} ? $FORM{'s'} : "lnname";

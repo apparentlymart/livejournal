@@ -218,16 +218,18 @@ sub set_text
     my $itid = get_itemid($dbs, $dmid, $itcode, { 'notes' => $opts->{'notes'}});
     return set_error("Couldn't allocate itid.") unless $itid;
 
-    my $txtid;
-
-    # TODO: make it either check if existing text matches and use that txtid,
-    # or make a new txtid
-    my $userid = $opts->{'userid'} + 0;
-    my $qtext = $dbh->quote($text);
-    $dbh->do("INSERT INTO ml_text (dmid, txtid, lnid, itid, text, userid) ".
-             "VALUES ($dmid, NULL, $lnid, $itid, $qtext, $userid)");
-    return set_error("Error inserting ml_text: ".$dbh->err) if $dbh->err;
-    $txtid = $dbh->{'mysql_insertid'};
+    my $txtid = 0;
+    if (defined $text) {
+        my $userid = $opts->{'userid'} + 0;
+        my $qtext = $dbh->quote($text);
+        $dbh->do("INSERT INTO ml_text (dmid, txtid, lnid, itid, text, userid) ".
+                 "VALUES ($dmid, NULL, $lnid, $itid, $qtext, $userid)");
+        return set_error("Error inserting ml_text: ".$dbh->err) if $dbh->err;
+        $txtid = $dbh->{'mysql_insertid'};
+    }
+    if ($opts->{'txtid'}) {
+        $txtid = $opts->{'txtid'}+0;
+    }
 
     my $staleness = $opts->{'staleness'}+0;
     $dbh->do("REPLACE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) ".
@@ -235,7 +237,7 @@ sub set_text
     return set_error("Error inserting ml_latest: ".$dbh->err) if $dbh->err;
 
     # set descendants to use this mapping
-    if ($opts->{'childenlatest'}) {
+    if ($opts->{'childrenlatest'}) {
         my $vals;
         my $rec = sub {
             my $l = shift;
@@ -251,6 +253,7 @@ sub set_text
         $rec->($l, $rec);
         $dbh->do("INSERT IGNORE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) ".
                  "VALUES $vals") if $vals;
+        print "VALS: $vals\n";
     }
     
     # Todo: stale-ify child languages one layer down if severity

@@ -174,7 +174,8 @@ sub makeusable
             $out->("$l->{'lncode'} -- $cl->{'lncode'}");
 
             my %need;
-            $sth = $dbh->prepare("SELECT dmid, itid, txtid FROM ml_latest WHERE lnid=$l->{'lnid'}");
+            # push downwards everything that has some valid text in some language (< 4)
+            $sth = $dbh->prepare("SELECT dmid, itid, txtid FROM ml_latest WHERE lnid=$l->{'lnid'} AND staleness < 4");
             $sth->execute;
             while (my ($dmid, $itid, $txtid) = $sth->fetchrow_array) {
                 $need{"$dmid:$itid"} = $txtid;
@@ -394,7 +395,7 @@ sub newitems
     $out->(sprintf("%d found", scalar keys %e_general));
     foreach my $it (keys %{$items{'general'}}) {
         next if exists $e_general{$it};
-        my $res = LJ::Lang::set_text($dbh, 1, "en", $it, "[no text: $it]");
+        my $res = LJ::Lang::set_text($dbh, 1, "en", $it, undef, { 'staleness' => 4 });
         $out->("Adding general: $it ... $res");
     }
 
@@ -414,7 +415,7 @@ sub newitems
         foreach my $it (keys %{$items{'local'}}) {
             next if exists $e_general{$it};
             next if exists $e_local{$it};
-            my $res = LJ::Lang::set_text($dbh, 1, $ll->{'lncode'}, $it, "[no text: $it]");
+            my $res = LJ::Lang::set_text($dbh, 1, $ll->{'lncode'}, $it, undef, { 'staleness' => 4 });
             $out->("Adding local: $it ... $res");
         }
     }

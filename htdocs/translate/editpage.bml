@@ -16,6 +16,8 @@
  my $remote = LJ::get_remote($dbs);
  my $can_edit = (LJ::check_priv($dbs, $remote, "translate", "*") ||
                  LJ::check_priv($dbs, $remote, "translate", $l->{'lncode'}));
+ my $can_delete = LJ::check_priv($dbs, $remote, "translate", "[itemdelete]");
+ my $can_rename = LJ::check_priv($dbs, $remote, "translate", "[itemrename]");
 
  my $mode = {
      '' => 'view', 
@@ -34,6 +36,7 @@
          last if @load >= $MAX_EDIT;
          push @load, { 'dmid' => $1, 'itid'=> $2 };
      }
+
      return "Nothing to show." unless @load;
      
      $ret .= "<form method='post'>";
@@ -67,9 +70,12 @@
                                           map { "(dmid=$_->[0] AND txtid=$_->[1])" } 
                                           map { [ split(/-/, $_) ] } keys %ml_text));
      $sth->execute; 
-     return $dbr->errstr if $dbr->err;
      while ($_ = $sth->fetchrow_hashref) {
          $ml_text{"$_->{'dmid'}-$_->{'txtid'}"} = $_;
+     }
+
+     if ($can_delete) {
+         $ret .= "<p style='font-size:9pt'><b>To delete an item:</b> edit text to be \"XXDELXX\"</p>";
      }
 
      # show all editing items
@@ -79,10 +85,10 @@
          my ($dmid, $itid) = ($i->{'dmid'}, $i->{'itid'});
          my $ituq = "$dmid-$itid";
          my $it = $ml_items{$ituq};
-         next unless $it;
+         my $lat = $ml_latest{$ituq}->{$l->{'lnid'}};
+         next unless $it and $lat;
          $ict++;
 
-         my $lat = $ml_latest{$ituq}->{$l->{'lnid'}};
          my $plat;
          if ($lp && defined $ml_latest{$ituq}->{$lp->{'lnid'}}) {
              $plat = $ml_latest{$ituq}->{$lp->{'lnid'}};
@@ -95,7 +101,8 @@
                                  );
          
          # top bar
-         $ret .= "<table bgcolor='#c0c0c0' width='100%'><tr><td><b>Code:</b> $it->{'itcode'}</td>";
+         $ret .= "<table bgcolor='#c0c0c0' width='100%'><tr><td><b>Code:</b> $it->{'itcode'}";
+         $ret .= "</td>";
          $ret .= "<td align='right'><b><a target='_new' href='help-severity.bml'>Sev</a>:</b> $lat->{'staleness'}</td>";
          $ret .= "</tr></table>";
 
@@ -126,7 +133,7 @@
          
          $ret .= "<dt><b>$l->{'lnname'}</b>:</b></dt><dd>";
          my $disabled = "disabled='disabled'";
-         if ($lat->{'staleness'} == 3) {
+         if ($lat->{'staleness'} >= 3) {
              $disabled = "";
              $ret .= LJ::html_hidden("ed_$ict", "1");
          } else {
@@ -140,10 +147,14 @@
          $ret .= "</dd>\n";
          $ret .= "</dl>";
      }
-     
-     $ret .= LJ::html_hidden("ict", $ict);
-     my $disabled = $can_edit ? "" : "disabled='disabled'";
-     $ret .= "<table width='100%' bgcolor='#e0e0e0'><tr><td align='center'><input type='submit' $disabled value='Save' /></td></tr></table>";
+
+     if ($ict) {
+         $ret .= LJ::html_hidden("ict", $ict);
+         my $disabled = $can_edit ? "" : "disabled='disabled'";
+         $ret .= "<table width='100%' bgcolor='#e0e0e0'><tr><td align='center'><input type='submit' $disabled value='Save' /></td></tr></table>";
+     } else {
+         $ret .= "No items to show.  (since been deleted, perhaps?)";
+     }
      $ret .= "</form>";
      
      return $ret;
@@ -186,11 +197,8 @@
          if ($lp) {
              $plat = $dbh->selectrow_hashref("SELECT * FROM ml_latest WHERE lnid=$lp->{'lnid'} ".
                                              "AND dmid=$dom AND itid=$itid");
-             unless ($plat) {
-                 push @errors, "No parent mapping for $itcode";
-                 next;
-             }
-             unless ($plat->{'txtid'} == $oldptxtid) {
+             my $ptid = $plat ? $plat->{'txtid'} : 0;
+             unless ($ptid == $oldptxtid) {
                  push @errors, "The source text of item '$itcode' changed while you were editing, so your edit has been ignored.";
                  next;
              }
@@ -199,6 +207,17 @@
          # did they type anything?
          my $text = $FORM{"newtext_$i"};
          next unless $text =~ /\S/;
+
+         # delete
+         if ($text eq "XXDELXX") {
+             if ($can_delete) {
+                 $dbh->do("DELETE FROM ml_latest WHERE dmid=$dom AND itid=$itid");
+                 push @info, "Deleted: '$itcode'";
+             } else {
+                 push @errors, "You don't have access to delete items.";
+             }
+             next;
+         }
          
          # did anything even change, though?
          my $oldtext = $dbr->selectrow_array("SELECT text FROM ml_text WHERE dmid=$dom AND txtid=$lat->{'txtid'}");
@@ -208,29 +227,20 @@
          }
 
          # keep old txtid if text didn't change.
-         my $new_txtid = $lat->{'txtid'};
-
-         # something changed, so allocate new text for it
-         if ($oldtext ne $text) {
-             $text = $dbh->quote($text);
-             $dbh->do("INSERT INTO ml_text (dmid, lnid, itid, text, userid) ".
-                      "VALUES ($dom, $l->{'lnid'}, $itid, $text, $remote->{'userid'})");
-             if ($dbh->err) {
-                 push @errors, "DB error saving '$itcode': " . $dbh->err;
-                 next;
-             }
-             $new_txtid = $dbh->{'mysql_insertid'};
-             unless ($new_txtid) {
-                 push @errors, "Couldn't allocate a txtid saving '$itcode'";
-                 next;
-             }
+         my $opts = {};
+         if ($oldtext eq $text) { 
+             $opts->{'txtid'} = $lat->{'txtid'}; 
+             $text = undef; 
          }
-         
-         $dbh->do("UPDATE ml_latest SET txtid=$new_txtid, chgtime=NOW(), staleness=0 ".
-                  "WHERE lnid=$l->{'lnid'} AND dmid=$dom AND itid=$itid");
-         if ($dbh->err) {
-             push @errors, "DB error saving '$itcode': " . $dbh->err;
-             next;
+
+         # if setting text for first time, push down to children langs
+         if ($lat->{'staleness'} == 4) {
+             $opts->{'childrenlatest'} = 1;
+         }
+
+         my $res = LJ::Lang::set_text($dbs, $dom, $l->{'lncode'}, $itcode, $text, $opts);
+         unless ($res) { 
+             push @errors, LJ::Lang::last_error();
          } else {
              push @info, "Saved: $itcode";
          }
