@@ -344,5 +344,261 @@ sub unscreen_comment {
     return;
 }
 
+# LJ::Talk::load_comments($u, $remote, $nodetype, $nodeid, $opts)
+#
+# nodetype: "L" (for log) ... nothing else has been used
+# noteid: the jitemid for log.
+# opts keys:
+#   thread -- jtalkid to thread from ($init->{'thread'} or $GET{'thread'} >> 8)
+#   page -- $GET{'page'}
+#   view -- $GET{'view'} (picks page containing view's ditemid)
+#   up -- [optional] hashref of user object who posted the thing being replied to
+#         only used to make things visible which would otherwise be screened?
+#   out_error -- set by us if there's an error code:
+#        nodb:  database unavailable
+#        noposts:  no posts to load
+#   out_pages:  number of pages
+#   out_page:  page number being viewed
+#   out_itemfirst:  first comment number on page (1-based, not db numbers)
+#   out_itemlast:  last comment number on page (1-based, not db numbers)
+#   out_pagesize:  size of each page
+#
+#   userpicref -- hashref to load userpics into, or undef to
+#                 not load them.
+#   userref -- hashref to load users into, keyed by userid
+#
+# returns:
+#   array of hashrefs containing keys:
+#      - talkid (jtalkid)
+#      - posterid (or zero for anon)
+#      - userpost (string, or blank if anon)
+#      - datepost (mysql format)
+#      - parenttalkid (or zero for top-level)
+#      - state ("A"=approved, "S"=screened, "D"=deleted stub)
+#      - userpic number
+#      - picid   (if userpicref AND userref were given)
+#      - _loaded => 1 (if fully loaded, subject & body)
+#      - subject
+#      - body
+#      - props => { propname => value, ... }
+#      - children => [ hashrefs like these ]
+#
+#      also present, but don't rely on:
+#      - _show => {0|1}, if item is to be ideally shown (0 if deleted or screened)
+#        unknown items will never be _loaded
+sub load_comments
+{
+    my ($u, $remote, $nodetype, $nodeid, $opts) = @_;
+
+    my $dbs = LJ::get_dbs();
+    my $n = $u->{'clusterid'};
+    my $db = LJ::get_dbh("cluster${n}lite", "cluster${n}slave", "cluster$n");
+    my $dbcr = LJ::get_cluster_reader($u);
+    unless ($db) {
+        $opts->{'out_error'} = "nodb";
+        return;
+    }
+
+    my $sth;
+    $sth = $db->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, u.user AS 'userpost', ".
+                        "t.datepost, t.parenttalkid, t.state ".
+                        "FROM talk2 t ".
+                        "LEFT JOIN useridmap u ON u.userid=t.posterid ".
+                        "WHERE t.journalid=? AND t.nodetype=? ".
+                        "AND t.nodeid=?");
+    $sth->execute($u->{'userid'}, $nodetype, $nodeid);
+
+    my %users_to_load;
+    my @posts_to_load;
+    my %posts;          # talkid -> talk2 row hashref (mutated as above)
+    my %children;       # talkid -> [ childenids+ ]
+
+    my $uposterid = $opts->{'up'} ? $opts->{'up'}->{'userid'} : 0;
+
+    my $post_count = 0;
+    {
+        $posts{$_->{'talkid'}} = $_ while $_ = $sth->fetchrow_hashref;
+        my %showable_children;  # $id -> $count
+
+        foreach my $post (sort { $b->{'talkid'} <=> $a->{'talkid'} } values %posts) {
+            # see if we should ideally show it or not.  even if it's 
+            # zero, we'll still show it if a child of it 
+            my $should_show = 1; 
+            $should_show = 0 if
+                $post->{'state'} eq "D" ||
+                ($post->{'state'} eq "S" && ! ($remote && ($remote->{'userid'} == $u->{'userid'} ||
+                                                           $remote->{'userid'} == $uposterid ||
+                                                           $remote->{'userid'} == $post->{'posterid'})));
+            $post->{'_show'} = $should_show;
+            $post_count += $should_show;
+
+            # make any post top-level if it says it has a parent but it isn't 
+            # loaded yet which means either a) row in database is gone, or b)
+            # somebody maliciously/accidentally made their parent be a future
+            # post, which could result in an infinite loop, which we don't want.
+            $post->{'parenttalkid'} = 0 
+                if $post->{'parenttalkid'} && ! $posts{$post->{'parenttalkid'}};
+
+            $post->{'children'} = [ map { $posts{$_} } @{$children{$post->{'talkid'}} || []} ];
+
+            # increment the parent post's number of showable children,
+            # which is our showability plus all those of our children
+            # which were already computed, since we're working new to old
+            # and children are always newer.
+            # then, if we or our children are showable, add us to the child list
+            my $sum = $should_show + $showable_children{$post->{'talkid'}};
+            if ($sum) {
+                $showable_children{$post->{'parenttalkid'}} += $sum;
+                unshift @{$children{$post->{'parenttalkid'}}}, $post->{'talkid'};
+            }
+        }
+    }
+
+    # with a wrong thread number, silently default to the whole page
+    my $thread = $opts->{'thread'}+0;
+    $thread = 0 unless $posts{$thread};
+
+    unless ($children{$thread}) {
+        $opts->{'out_error'} = "noposts";
+        return;
+    }
+
+    my $page_size = $LJ::TALK_PAGE_SIZE || 25;
+    my $threading_point = $LJ::TALK_THREAD_POINT || 50;
+
+    # we let the page size initially get bigger than normal for awhile,
+    # but if it passes threading_point, then everything's in page_size
+    # chunks:
+    $page_size = $threading_point if $post_count < $threading_point;
+    
+    my $top_replies = $thread ? 1 : scalar(@{$children{$thread}});
+    my $pages = int($top_replies / $page_size);
+    if ($top_replies % $page_size) { $pages++; }
+    
+    my @top_replies = $thread ? ($thread) : @{$children{$thread}};
+    my $page_from_view = 0;
+    if ($opts->{'view'} && !$opts->{'page'}) {
+        # find top-level comment that this comment is under
+        my $viewid = $opts->{'view'} >> 8;
+        while ($posts{$viewid} && $posts{$viewid}->{'parenttalkid'}) {
+            $viewid = $posts{$viewid}->{'parenttalkid'};
+        }
+        for (my $ti = 0; $ti < @top_replies; ++$ti) {
+            if ($posts{$top_replies[$ti]}->{'talkid'} == $viewid) {
+                $page_from_view = int($ti/$page_size)+1;
+                last;
+            }
+        }
+    }
+    my $page = int($opts->{'page'}) || $page_from_view || 1;
+    $page = $page < 1 ? 1 : $page > $pages ? $pages : $page;
+    
+    my $itemfirst = $page_size * ($page-1) + 1;
+    my $itemlast = $page==$pages ? $top_replies : ($page_size * $page);
+    
+    @top_replies = @top_replies[$itemfirst-1 .. $itemlast-1];
+    
+    push @posts_to_load, @top_replies;
+    
+    # mark child posts of the top-level to load, deeper
+    # and deeper until we've hit the page size.  if too many loaded,
+    # just mark that we'll load the subjects;
+    my @check_for_children = @posts_to_load;
+    my @subjects_to_load;
+    while (@check_for_children) {
+        my $cfc = shift @check_for_children;
+        next unless defined $children{$cfc};
+        foreach my $child (@{$children{$cfc}}) {
+            if (@posts_to_load < $page_size) {
+                push @posts_to_load, $child;
+            } else {
+                push @subjects_to_load, $child;
+            }
+            push @check_for_children, $child;
+        }
+    }
+
+    $opts->{'out_pages'} = $pages;
+    $opts->{'out_page'} = $page;
+    $opts->{'out_itemfirst'} = $itemfirst;
+    $opts->{'out_itemlast'} = $itemlast;
+    $opts->{'out_pagesize'} = $page_size;
+    
+    # load text of posts
+    my ($posts_loaded, $subjects_loaded);
+    $posts_loaded = LJ::get_talktext2($u, @posts_to_load);
+    $subjects_loaded = LJ::get_talktext2($u, {'onlysubjects'=>1}, @subjects_to_load) if @subjects_to_load;
+    foreach my $talkid (@posts_to_load) {
+        next unless $posts{$talkid}->{'_show'};
+        $posts{$talkid}->{'_loaded'} = 1;
+        $posts{$talkid}->{'subject'} = $posts_loaded->{$talkid}->[0];
+        $posts{$talkid}->{'body'} = $posts_loaded->{$talkid}->[1];
+        $users_to_load{$posts{$talkid}->{'posterid'}} = 1;
+    }
+    foreach my $talkid (@subjects_to_load) {
+        next unless $posts{$talkid}->{'_show'};
+        $posts{$talkid}->{'subject'} = $subjects_loaded->{$talkid}->[0];
+    }
+
+    # load meta-data
+    LJ::load_props($dbs, "talk");
+    {
+        my %props;
+        LJ::load_talk_props2($dbcr, $u->{'userid'}, \@posts_to_load, \%props);
+        foreach (keys %props) {
+            next unless $posts{$_}->{'_show'};
+            $posts{$_}->{'props'} = $props{$_};
+        }
+    }
+
+    if ($LJ::UNICODE) {
+        foreach (@posts_to_load) {
+            if ($posts{$_}->{'unknown8bit'}) {
+                LJ::item_toutf8($dbs, $u, \$posts{$_}->{'subject'},
+                                \$posts{$_}->{'body'},
+                                {});
+              }
+        }
+    }
+
+    # optionally load users
+    if (ref($opts->{'userref'}) eq "HASH") {
+        my %userpics = ();
+        delete $users_to_load{0};
+        if (%users_to_load) {
+            LJ::load_userids_multiple($dbs, [ map { $_, \$opts->{'userref'}->{$_} } 
+                                              keys %users_to_load ]);;
+        }
+
+        # optionally load userpics
+        if (ref($opts->{'userpicref'}) eq "HASH") {
+            my %user_kw2id; # userid -> kw -> picid
+            my $dbr = $dbs->{'reader'};
+            my %load_pic;
+            foreach my $talkid (@posts_to_load) {
+                my $post = $posts{$talkid};
+                my $kw;
+                if ($post->{'props'} && $post->{'props'}->{'picture_keyword'}) {
+                    $kw = $post->{'props'}->{'picture_keyword'};
+                }
+                my $id;
+                if ($kw) {
+                    $id = $user_kw2id{$post->{'posterid'}}->{$kw} ||
+                        $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
+                                              "WHERE k.kwid=m.kwid AND m.userid=? AND k.keyword=?",
+                                              undef, $post->{'posterid'}, $kw);
+                }
+                my $pu = $opts->{'userref'}->{$post->{'posterid'}};
+                $id ||= $pu->{'defaultpicid'} if $pu;
+                $post->{'picid'} = $id;
+                $load_pic{$id} = 1 if $id;
+            }
+            
+            LJ::load_userpics($dbs, $opts->{'userpicref'}, [ keys %load_pic ]);
+        }
+    }
+    
+    return map { $posts{$_} } @top_replies;
+}
 
 1;
