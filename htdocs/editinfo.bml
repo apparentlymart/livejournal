@@ -8,22 +8,22 @@ BODY<=
 Enter your username and password to modify your personal information.
 P=)
 
-<FORM ACTION="editinfo_do.bml" METHOD="POST">
-
+<form action="editinfo_do.bml" method="POST">
 (=STANDOUT
-<TABLE>
+<table>
 (=_CODE
  return LJ::auth_fields(\%FORM);
  _CODE=)
-<TR><TD COLSPAN=2 ALIGN=CENTER>
-<INPUT TYPE="SUBMIT" VALUE="Proceed...">
-</TD></TR>
-</TABLE>
+<tr><td colspan='2' align='center'>
+<input type="submit" value="Proceed...">
+</td></tr>
+</table>
 STANDOUT=)
+</form>
 
 (=H1 Forget something? H1=)
 (=P
-If you forgot your username or password, <A HREF="lostinfo.bml">recover it here!</A>.
+If you forgot your username or password, <a href="lostinfo.bml">recover it here!</a>.
 P=)
 
 <=BODY
