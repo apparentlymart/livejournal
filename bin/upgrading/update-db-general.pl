@@ -445,10 +445,9 @@ EOC
 
 register_tablecreate("randomuserset", <<'EOC');
 CREATE TABLE randomuserset (
-  userid int(10) unsigned NOT NULL default '0',
-  timeupdate datetime NOT NULL default '0000-00-00 00:00:00',
-  PRIMARY KEY  (userid),
-  KEY (timeupdate)
+  rid INT UNSIGNED NOT NULL AUTO_INCREMENT,			    
+  userid INT UNSIGNED NOT NULL,
+  PRIMARY KEY  (rid)
 ) 
 EOC
 
@@ -1222,6 +1221,12 @@ register_alter(sub {
 	do_alter("priv_list",
 		 "ALTER TABLE priv_list ".
 		 "ADD is_public ENUM('1', '0') DEFAULT '1' NOT NULL");
+    }
+
+    if (column_type("randomuserset", "timeupdate") ne "") {
+	do_alter("randomuserset",
+		 "ALTER TABLE randomuserset DROP PRIMARY KEY, DROP timeupdate, ".
+		 "ADD rid INT UNSIGNED NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (rid)");
     }
 
 });

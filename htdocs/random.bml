@@ -3,15 +3,19 @@
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
- 
- $sth = $dbr->prepare("SELECT userid FROM randomuserset ORDER BY RAND() LIMIT 1");
- $sth->execute;
- my ($userid) = $sth->fetchrow_array;
- 
- my $user = LJ::get_username($dbs, $userid);
- 
- print "Location: $LJ::SITEROOT/users/$user/\n\n";
- 
+
+ my $max = $dbr->selectrow_array("SELECT statval FROM stats WHERE statcat='userinfo' AND statkey='updated_last1'");
+ if ($max) {
+     my $rand = int(rand($max))+1;
+     my $user = $dbr->selectrow_array("SELECT u.user FROM randomuserset r, useridmap u WHERE r.userid=u.userid AND r.rid=$rand");
+     if ($user) {
+	 print "Location: $LJ::SITEROOT/users/$user/\n\n";
+	 return;
+     }
+ }
+
+ # something went wrong, redirect them back to top of site... *shrug*
+ print "Location: $LJ::SITEROOT/\n\n";
  return;
 
 _CODE=)(=_INFO
