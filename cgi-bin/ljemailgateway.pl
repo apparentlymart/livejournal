@@ -139,9 +139,13 @@ sub process {
         return $err->($gpg_errcodes{$gpgcode}) unless $gpgcode eq 'good';
     }
 
-    $body =~ s/^[\-_]{2,}\s*\r?\n.*//ms; # trim sigs
+    $body =~ s/^(?:\- )?[\-_]{2,}\s*\r?\n.*//ms; # trim sigs
     $body =~ s/ \n/ /g if lc($format) eq 'flowed'; # respect flowed text
-   
+
+    # Strip pgp clearsigning
+    $body =~ s/^\s*-----BEGIN PGP SIGNED MESSAGE-----.+?\n\n//s;
+    $body =~ s/-----BEGIN PGP SIGNATURE-----.+//s;
+
     my $req = {
         'usejournal' => $journal,
         'ver' => 1,
