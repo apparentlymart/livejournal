@@ -531,7 +531,7 @@
         $ret .= "<form method='post' action='$LJ::SITEROOT/update.bml' style='display: inline'>\n";
         my $code = make_code($poll);
         $ret .= LJ::html_hidden('mode', 'full', 'event', $code) . "\n";
-        $ret .= LJ::html_submit('from_pollcreator', undef, { 'raw' => "value='Post Poll &rarr;'" }) . "\n";
+        $ret .= LJ::html_submit('showform', undef, { 'raw' => "value='Post Poll &rarr;'" }) . "\n";
         $ret .= "</form>\n";
 
         # preview code or ... preview
