@@ -383,7 +383,6 @@ sub journal_content
 
     $r->content_type($opts->{'contenttype'});
     $r->header_out("Cache-Control", "private, proxy-revalidate");
-    $r->header_out("Vary", "Accept-Encoding, Cookie");
     $r->header_out("Content-length", length($html));
     $r->send_http_header();
     $r->print($html) unless $r->header_only;
