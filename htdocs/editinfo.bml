@@ -308,7 +308,7 @@ body<=
         # allow_contactshow
         $ret .= "<tr valign=middle><td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'allow_contactshow', 'id' => 'allow_contactshow',
-                                 'selected' => $u->{'allow_contactshow'} eq 'Y' });
+                                 'selected' => $u->{'allow_contactshow'} ne 'N' });
         $ret .= "</td><td><b><label for='allow_contactshow'>$ML{'.allowshowcontact.title'}</label></b></td></tr>\n";
         $ret .= "<tr><td>&nbsp;</td><td>$ML{'.allowshowcontact.about'}";
         
