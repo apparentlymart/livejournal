@@ -804,7 +804,7 @@ sub talkform {
     # ( ) LiveJournal user:
     $ret .= "<tr valign='middle'>";
     $ret .= "<td>&nbsp;</td>";
-    $ret .= "<td align=middle><input type='radio' name='usertype' value='user' id='talkpostfromlj' $checked />";
+    $ret .= "<td align='center'><input type='radio' name='usertype' value='user' id='talkpostfromlj' $checked />";
     $ret .= "</td><td align='left'><b><label for='talkpostfromlj'>$BML::ML{'.opt.ljuser'}</label></b> ";
     $ret .= $BML::ML{'.opt.willscreenfriend'} if $journalu->{'opt_whoscreened'} eq 'F';
     $ret .= $BML::ML{'.opt.willscreen'} if $journalu->{'opt_whoscreened'} eq 'A';
