@@ -1745,7 +1745,7 @@ sub mail_comments {
                                            'Type' => 'multipart/alternative',
                                            'Message-Id' => $this_msgid,
                                            'In-Reply-To:' => $par_msgid,
-                                           'References' => "$par_msgid $top_msgid",
+                                           'References' => "$top_msgid $par_msgid",
                                            );
                 $msg->add('X-LJ-JOURNAL' => $journalu->{'user'}); # for mail filters
 
@@ -1813,7 +1813,7 @@ sub mail_comments {
                                    'Type' => 'multipart/alternative',
                                    'Message-Id' => $this_msgid,
                                    'In-Reply-To:' => $par_msgid,
-                                   'References' => "$par_msgid $top_msgid",
+                                   'References' => "$top_msgid $par_msgid",
                                    );
         $msg->add('X-LJ-JOURNAL' => $journalu->{'user'}); # for mail filters
 
@@ -1890,7 +1890,7 @@ sub mail_comments {
                                   'Type' => 'multipart/alternative',
                                   'Message-Id' => $this_msgid,
                                   'In-Reply-To:' => $par_msgid,
-                                  'References' => "$par_msgid $top_msgid",
+                                  'References' => "$top_msgid $par_msgid",
                                   );
         $msg->add('X-LJ-JOURNAL' => $journalu->{'user'}); # for mail filters
 
