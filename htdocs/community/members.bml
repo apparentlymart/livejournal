@@ -49,6 +49,9 @@ body<=
 
     # saving a form submission
     if ($POST{'action:update'}) {
+        # validate form auth
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidform'} p?>"
+            unless LJ::check_form_auth();
 
         my @userids = split(',', $POST{'ids'});
         my @saveattribs = split(',', $POST{'attribs'});
@@ -362,6 +365,7 @@ body<=
     $ret .= " " . BML::ml('.settings', { 'link' => "settings.bml?comm=$cname"}) . " p?>";
 
     $ret .= "<form method='post' action='members.bml?comm=$cname'>";
+    $ret .= LJ::form_auth();
 
     # jump to user
     if ($items{'pages'} > 1) {
