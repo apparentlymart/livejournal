@@ -932,9 +932,9 @@ sub editevent
 	    }
 	    my $qvalue = $dbh->quote($val);
 	    if ($clustered) {
-		$propinsert .= "($qitemid, $p->{'id'}, $qvalue)";
-	    } else {
 		$propinsert .= "($ownerid, $qitemid, $p->{'id'}, $qvalue)";
+	    } else {
+		$propinsert .= "($qitemid, $p->{'id'}, $qvalue)";
 	    }
 	}
 	if ($propinsert) { $dbh->do($propinsert); }
@@ -956,7 +956,7 @@ sub editevent
     if ($req->{'props'}->{'opt_backdated'} eq "1" && 
 	$oldevent->{'rlogtime'} != $LJ::EndOfTime) {
 	if ($clustered) {
-	    $dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime WHERE".
+	    $dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime WHERE ".
 		     "itemid=$qitemid");
 	} else {
 	    $dbcm->do("UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
