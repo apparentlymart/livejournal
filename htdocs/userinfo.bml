@@ -617,22 +617,23 @@
 ## journal comments
  {
      my ($com_post, $com_got);
-     $com_post = "<b>Posted:</b> ";
-     if ($u->{'clusterid'}) {
-	 if ($LJ::DISABLED{'show-talkleft'}) {
-	     # for a period of time during conversion, this number would be totally whack.
-	     # this code & check can & will die in time.	 
-	     $com_post = "";
+     unless ($LJ::DISABLED{'show-talkleft'}) {
+	 $com_post = "<b>Posted:</b> ";
+	 if (@LJ::CLUSTERS) {
+	     $com_post .= comma($dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft ".
+						       "WHERE userid=$userid"));
 	 } else {
-	     $com_post .= comma($dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft WHERE userid=$userid")) . " - ";
+	     $com_post .= comma($dbr->selectrow_array("SELECT COUNT(*) FROM talk ".
+						      "WHERE posterid=$userid"));
 	 }
-     } else {
-	 $com_post .= comma($dbr->selectrow_array("SELECT COUNT(*) FROM talk WHERE posterid=$userid")) . " - ";
+	 $com_post .= " - ";
      }
      if ($u->{'clusterid'}) {
-	 $com_got = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 WHERE journalid=$userid");
+	 $com_got = $dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 ".
+					   "WHERE journalid=$userid");
      } else {
-	 $com_got = $dbr->selectrow_array("SELECT COUNT(*) FROM talk WHERE journalid=$userid");
+	 $com_got = $dbr->selectrow_array("SELECT COUNT(*) FROM talk ".
+					  "WHERE journalid=$userid");
      }
      $body .= "<tr><td align='right'><b>Comments:</b></td><td colspan='2'>$com_post" .
 	 "<b>Received:</b> " . comma($com_got) . "</td></tr>";
@@ -642,8 +643,12 @@
 ### shared journal access
 ###
 {
-    my $posthere = $dbr->selectcol_arrayref("SELECT u.user FROM logaccess l, user u WHERE u.userid=l.posterid AND l.ownerid=$u->{'userid'} AND u.statusvis='V'");
-    my $canpost = $dbr->selectcol_arrayref("SELECT u.user FROM logaccess l, user u WHERE u.userid=l.ownerid AND l.posterid=$u->{'userid'} AND u.statusvis='V'");
+    my $posthere = $dbr->selectcol_arrayref("SELECT u.user FROM logaccess l, user u ".
+					    "WHERE u.userid=l.posterid AND l.ownerid=$u->{'userid'} ".
+					    "AND u.statusvis='V'");
+    my $canpost = $dbr->selectcol_arrayref("SELECT u.user FROM logaccess l, user u ".
+					   "WHERE u.userid=l.ownerid AND l.posterid=$u->{'userid'} ".
+					   "AND u.statusvis='V'");
 
     if (@$posthere || @$canpost) {
 	$body .= "<tr valign='top'><td align='right'><b>Shared Journal Access:</b></td><td colspan='2'>";
