@@ -73,8 +73,16 @@ my %ljconfig =
                 'desc' => "If set, the main page of the site loads the specified journal, not the default index page. ".
                           "Use this if you're running a news site where there's only one journal, or one journal is dominant.",
             },
+            'tos_check' => {
+                'desc' => "If set, the account creation dialog shows a checkbox, asking users if they agree to the site's Terms of Service, ".
+                          "and won't allow them to create an account if they refuse. This depends on a few files being located in the proper directories, ".
+                          "namely <filename>tos.bml</filename> and <filename>tos-mini.bml</filename> under <filename><envar>\$LJHOME</envar>/htdocs/legal/</filename>. ".
+                          "The account creation dialog can also check for new instances of the Terms of Service if the Terms of Service text is located in a ".
+                          "CVS managed include file (<filename><envar>\$LJHOME</envar>/htdocs/inc/legal-tos</filename>), ".
+                          "and if the include file includes the following line at the top: <programlisting><![CDATA[<!-- \$Revision\$ -->]]></programlisting>",
+            },
             'coppa_check' => {
-                'desc' => "If set, the creation dialog shows a checkbox, asking users if they're under 13 years old and won't let them create a journal if they check it.",
+                'desc' => "If set, the account creation dialog shows a checkbox, asking users if they're under 13 years old and won't let them create an account if they check it.",
             },
         },
 
@@ -280,7 +288,7 @@ my %ljconfig =
                 'example' => "(
    { scheme => 'bluewhite', title => 'Blue White' },
    { scheme => 'lynx', title => 'Lynx' },
-   { scheme => 'opalcat', title => 'Opcalcat' },
+   { scheme => 'opalcat', title => 'Opalcat' },
 );",
             },
             'force_empty_friends' => {

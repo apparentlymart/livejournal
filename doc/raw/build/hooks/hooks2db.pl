@@ -260,7 +260,7 @@ $hooks{'validate_get_remote'} = {
     source => ["cgi-bin/ljlib.pl"],
 };
 
-$hooks{'badpassword'} = {
+$hooks{'bad_password'} = {
     desc => "Check the given password, and either return a string explaining why ".
             "the password is bad, or undef if the password is ok.",
     args => [
@@ -292,6 +292,31 @@ $hooks{'name_caps_short'} = {
         },
     ],
     source => ["cgi-bin/ljlib.pl"],
+};
+
+$hooks{'login_add_opts'} = {
+    desc => "Appends options to the cookie value.  Each option should be short, and preceeded by a period.",
+    args => [
+        {
+            'desc' => "",
+            'name' => '%args',
+            'keys' => [
+                {
+                    'desc' => "User object",
+                    'name' => "u",
+                },
+                {
+                    'desc' => "Login form elements",
+                    'name' => "form",
+                },
+                {
+                    'desc' => "Hash reference of options to append to login cookie",
+                    'name' => "opts",
+                },
+            ],
+        },
+    ],
+    source => ["htdocs/login.bml"],
 };
 
 sub hooks
