@@ -1298,10 +1298,6 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/editgroups.bml.ingroup.not=Not in group:
 
-/friends/editgroups.bml.login.header=Login First
-
-/friends/editgroups.bml.login.text=To edit your custom friends groups, you must first <a href="/login.bml?ret=1">log in</a>.
-
 /friends/editgroups.bml.prompt.newname=Enter the name for the new custom friends group:
 
 /friends/editgroups.bml.prompt.rename=Rename this custom friends group to:

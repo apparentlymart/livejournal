@@ -1591,7 +1591,7 @@ sub editfriends
         my $deluser = LJ::canonical_username($_);
         next DELETEFRIEND unless ($curfriend{$deluser});
 
-        my $friendid = LJ::get_userid($dbh, $deluser);
+        my $friendid = LJ::get_userid($deluser);
         $dbh->do("DELETE FROM friends WHERE userid=? AND friendid=?", undef,
                  $userid, $friendid);
         $did_deletes = 1;
@@ -1600,6 +1600,15 @@ sub editfriends
 
     my $error_flag = 0;
     my $friends_added = 0;
+    my $fail = sub {
+        # don't forget to invalidate friends view cache on error
+        LJ::invalidate_friends_view_cache($u) if $did_deletes || $friends_added;
+
+        return fail($err, $_[0], $_[1]);
+    };
+
+    # non-'P'erson accounts can't add friends
+    return $fail->(104, "Journal type cannot add friends");
 
     # perform the adds
   ADDFRIEND:
@@ -1618,13 +1627,13 @@ sub editfriends
         $friend_count++ unless $curfriend{$aname};
 
         my $maxfriends = LJ::get_cap($u, "maxfriends");
-        return fail($err,104,"Exceeded $maxfriends friends limit (now: $friend_count)")
+        return $fail->(104, "Exceeded $maxfriends friends limit (now: $friend_count)")
             if ($friend_count > $maxfriends);
 
         my $fg = $fa->{'fgcolor'} || "#000000";
         my $bg = $fa->{'bgcolor'} || "#FFFFFF";
         if ($fg !~ /^\#[0-9A-F]{6,6}$/i || $bg !~ /^\#[0-9A-F]{6,6}$/i) {
-            return fail($err,203,"Invalid color values");
+            return $fail->(203, "Invalid color values");
         }
 
         my $row = LJ::load_user($aname);
@@ -1636,12 +1645,12 @@ sub editfriends
             $error_flag = 1;
         } elsif ($row->{'journaltype'} eq "Y" && 
                  ! LJ::get_cap($u, "synd_befriend")) {
-            return fail($err,401);
+            return $fail->(401);
         } elsif ($row->{'journaltype'} eq "Y" && 
                  ! LJ::can_add_syndicated($u, $row)) {
-            return fail($err,403);
+            return $fail->(403);
         } elsif ($row->{'journaltype'} eq "R") {
-            return fail($err,154);
+            return $fail->(154);
         } elsif ($row->{'statusvis'} ne "V") {
             $error_flag = 1;
         } else {
@@ -1673,16 +1682,17 @@ sub editfriends
             $sth = $dbh->prepare("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) ".
                                  "VALUES ($userid, $friendid, $qfg, $qbg, $gmask)");
             $sth->execute;
-            return fail($err,501,$dbh->errstr) if $dbh->err;
+            return $fail->(501,$dbh->errstr) if $dbh->err;
 
         }
     }
+
+    return $fail->(104) if $error_flag;
 
     # invalidate friends view cache (kinda lazy.... a better solution later
     # would be to only delete the matching packed items)
     LJ::invalidate_friends_view_cache($u) if $did_deletes || $friends_added;
 
-    return fail($err,104) if $error_flag;
     return $res;
 }
 

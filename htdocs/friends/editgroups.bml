@@ -1,32 +1,47 @@
 <?_code
 {
+    use strict;
+    use vars qw(%GET %POST $title $body);
+
     $title = $ML{'.title'};
     $body = "";
+
+    my $err = sub {
+        $title = "Error";
+        $body = LJ::bad_input(@_);
+        return;
+    };
 
     # these are only used by the client-side for JS to play with.
     # we delete them because they may contain embedded NULLs, which
     # text_in won't like.
-    delete $FORM{'list_in'};
-    delete $FORM{'list_out'};
+    delete $POST{'list_in'};
+    delete $POST{'list_out'};
     
-    unless (LJ::text_in(\%FORM)) {
+    unless (LJ::text_in(\%POST)) {
         $body = "<?badinput?>";
         return;
     }
     
     my $remote = LJ::get_remote();
-    unless ($remote) {
-        $body = "<?h1 $ML{'.login.header'} h1?><?p $ML{'.login.text'} p?>";
-        return;
-    }
+    return $err->($ML{'error.noremote'})
+        unless $remote;
+
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return $err->($ML{'error.invalidauth'})
+        unless $u;
+
+    # extra arguments for get requests
+    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
     
-    if ($FORM{'mode'} eq "save") {
+    if ($POST{'mode'} eq "save") {
         my %res;
-        $FORM{'mode'} = "editfriendgroups";
-        $FORM{'user'} = $remote->{'user'};
-        $FORM{'ver'} = $LJ::PROTOCOL_VER;
-        LJ::do_request(\%FORM, \%res, {
-            'userid' => $remote->{'userid'},
+        $POST{'mode'} = "editfriendgroups";
+        $POST{'user'} = $u->{'user'};
+        $POST{'ver'} = $LJ::PROTOCOL_VER;
+        LJ::do_request(\%POST, \%res, {
+            'u' => $u,
             'noauth' => 1, 
         });
         
@@ -40,17 +55,21 @@
     
     my %res;
     LJ::do_request({ 'mode' => 'getfriends',
-                     'user' => $remote->{'user'}, 
+                     'user' => $u->{'user'}, 
                      'ver'  => $LJ::PROTOCOL_VER,
-                     'includegroups' => 1,
-                 },
-                   \%res, { 'userid' => $remote->{'userid'},
+                     'includegroups' => 1 },
+                   \%res, { 'u' => $u,
                             'noauth' => 1, });
     my @num_used;
     my @num_free;
 
+    # authas switcher form
+    $body .= "<form class='postheading' method='get' action='editgroups.bml'>\n";
+    $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+    $body .= "</form>\n\n";
+
     $body .= "<?h1 $ML{'.title'} h1?><?p $ML{'.text'} p?><?p $ML{'.text.sec'} p?><p>";
-    $body .= "<form method='post' name='fg' action='editgroups.bml'>";
+    $body .= "<form method='post' name='fg' action='editgroups.bml$getextra'>";
     $body .= "<input type='hidden' name='mode' value='save' />";
     for (my $i=1; $i<=30; $i++) {
         my $sort = 255;

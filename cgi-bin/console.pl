@@ -725,60 +725,46 @@ sub change_journal_type
 {
     my ($dbh, $remote, $args, $out) = @_;
 
+    my $err = sub { push @$out, [ "error", $_[0] ]; 0; };
+    my $inf = sub { push @$out, [ "info",  $_[0] ]; 1; };
+
     my $user = $args->[1];
     my $type = $args->[2];
 
-    my $quser = $dbh->quote($user);
-    my $sth = $dbh->prepare("SELECT userid, user, journaltype FROM user WHERE user=$quser");
-    $sth->execute;
-    my $u = $sth->fetchrow_hashref;
-    
-    unless ($u) {
-        push @$out, [ "error", "User doesn't exist." ];
-        return 0;
-    }
+    return $err->("Type argument must be 'person' or 'shared'")
+        unless $type eq "person" || $type eq "shared";
 
-    unless ($remote->{'priv'}->{'changejournaltype'} ||
-            $u->{'userid'} == $remote->{'userid'}) 
-    {
-        push @$out, [ "error", "$remote->{'user'}, you are not authorized to use this command." ];
-        return 0;
-    }
+    my $u = LJ::load_user($user);
+    return $err->("User doesn't exist.")
+        unless $u;
 
-    unless ($u->{'journaltype'} eq "C") {
-        push @$out, [ "error", "$u->{'user'} is not a community, so can't change type." ];
-        return 0;
-    }
+    return $err->("$remote->{'user'}, you are not authorized to use this command.")
+        unless $remote->{'priv'}->{'changejournaltype'} ||
+               LJ::can_manage($remote, $u);
 
-    unless ($type eq "person" || $type eq "shared") {
-        push @$out, [ "error", "type argument must be 'person' or 'shared'" ];
-        return 0;
-    }
+    return $err->("$u->{'user'} is not a community, so can't change type.")
+        unless $u->{'journaltype'} eq "C";
 
-    my $quserid = $u->{'userid'}+0;
-    $dbh->do("DELETE FROM community WHERE userid=$quserid");
+    $dbh->do("DELETE FROM community WHERE userid=?", undef, $u->{'userid'});
+
+    # if we're changing a non-person account to a person account,
+    # we need to ditch all its friend-ofs so that old users befriending
+    # that account (in order to watch it), don't give the account maintainer
+    # access to read the old reader's friends-only posts.  (which they'd now
+    # be able to do, since journaltype=='P'.
+    $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $u->{'userid'});
     
     if ($type eq "person") {
         LJ::update_user($u, { journaltype => 'P' });
-        LJ::clear_rel($quserid, '*', 'P'); # post
-        LJ::clear_rel($quserid, '*', 'A'); # admin
-        LJ::clear_rel($quserid, '*', 'M'); # moderate
-
-        # if we're changing a non-person account to a person account,
-        # we need to ditch all its friend-ofs so that old users befriending
-        # that account (in order to watch it), don't give the account maintainer
-        # access to read the old reader's friends-only posts.  (which they'd now
-        # be able to do, since journaltype=='P'.
-        if ($u->{'journaltype'} ne "P") {
-            $dbh->do("DELETE FROM friends WHERE friendid=$quserid");
-        }
+        LJ::clear_rel($u->{'userid'}, '*', 'P'); # post
+        LJ::clear_rel($u->{'userid'}, '*', 'A'); # admin
+        LJ::clear_rel($u->{'userid'}, '*', 'M'); # moderate
 
     } elsif ($type eq "shared") {
         LJ::update_user($u, { journaltype => 'S' });
     }
 
-    push @$out, [ "info", "User: $u->{'user'} converted." ];
-    return 1;
+    return $inf->("User: $u->{'user'} converted.");
 }
 
 sub foreach_entry

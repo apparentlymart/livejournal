@@ -37,6 +37,9 @@ general /editjournal.bml.lostinfo.text
 
 general /editjournal_do.bml.error.mustlogin
 
+general /friends/editgroups.bml.login.header
+general /friends/editgroups.bml.login.text
+
 general /interests.bml.findsim.account.notallowed
 general /interests.bml.findsim.account.notloggedin
 general /interests.bml.findsim.btn.find
