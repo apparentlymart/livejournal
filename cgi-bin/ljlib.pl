@@ -7581,7 +7581,8 @@ sub nodb {
 }
 
 sub isdb { return ref $_[0] && (ref $_[0] eq "DBI::db" || 
-                                ref $_[0] eq "DBIx::StateKeeper"); }
+                                ref $_[0] eq "DBIx::StateKeeper" ||
+                                ref $_[0] eq "Apache::DBI::db"); }
 
 # LJ::S1::get_public_styles lives here in ljlib.pl so that 
 # cron jobs can call LJ::load_user_props without including
