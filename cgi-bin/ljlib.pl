@@ -2736,7 +2736,7 @@ sub get_remote
     return $no_remote->() unless $sess;
     return $no_remote->() if $sess->{'timeexpire'} < $sess->{'now'};
     return $no_remote->() if ($sess->{'ipfixed'} && 
-                              $sess->{'ipfixed'} ne BML::get_remote_ip());
+                              $sess->{'ipfixed'} ne LJ::get_remote_ip());
 
     # renew short session
     my $short_session = 60*60*24;
