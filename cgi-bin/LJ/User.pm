@@ -14,6 +14,8 @@ use strict;
 
 package LJ::User;
 use Carp;
+use lib "$ENV{'LJHOME'}/cgi-bin";
+use LJ::MemCache;
 
 sub readonly {
     my $u = shift;
@@ -236,6 +238,70 @@ sub kill_session {
         $LJ::CACHE_REMOTE->{userid} == $u->{userid};
 
     return 1;
+}
+
+# all reads/writes to talk2 must be done inside a lock, so there's
+# no race conditions between reading from db and putting in memcache.
+# can't do a db write in between those 2 steps.  the talk2 -> memcache
+# is elsewhere (talklib.pl), but this $dbh->do wrapper is provided
+# here because non-talklib things modify the talk2 table, and it's
+# nice to centralize the locking rules.
+#
+# return value is return of $dbh->do.  $errref scalar ref is optional, and
+# if set, gets value of $dbh->errstr
+#
+# write:  (LJ::talk2_do)
+#   GET_LOCK
+#    update/insert into talk2
+#   RELEASE_LOCK
+#    delete memcache
+#
+# read:   (LJ::Talk::get_talk_data)
+#   try memcache
+#   GET_LOCk
+#     read db
+#     update memcache
+#   RELEASE_LOCK
+
+sub talk2_do {
+    my ($u, $nodetype, $nodeid, $errref, $sql, @args) = @_;
+    return undef unless $nodetype =~ /^\w$/;
+    return undef unless $nodeid =~ /^\d+$/;
+    return undef unless $u->writer;
+
+    my $dbcm = $u->{_dbcm};
+
+    my $memkey = [$u->{'userid'}, "talk2:$u->{'userid'}:$nodetype:$nodeid"];
+    my $lockkey = $memkey->[1];
+
+    $dbcm->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
+    my $ret = $u->do($sql, undef, @args);
+    $$errref = $u->errstr if $u->err;
+    $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+
+    LJ::MemCache::delete($memkey, 0) if int($ret);
+    return $ret;
+}
+
+# log2_do
+# see comments for talk2_do
+
+sub log2_do {
+    my ($u, $errref, $sql, @args) = @_;
+    return undef unless $u->writer;
+
+    my $dbcm = $u->{_dbcm};
+
+    my $memkey = [$u->{'userid'}, "log2lt:$u->{'userid'}"];
+    my $lockkey = $memkey->[1];
+
+    $dbcm->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
+    my $ret = $u->do($sql, undef, @args);
+    $$errref = $u->errstr if $u->err;
+    $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+
+    LJ::MemCache::delete($memkey, 0) if int($ret);
+    return $ret;
 }
 
 1;

@@ -498,41 +498,42 @@ sub freeze_comments {
     $u = LJ::want_user($u);
     $nodeid += 0;
     $unfreeze = $unfreeze ? 1 : 0;
-    return undef unless $u && $nodetype =~ /^\w$/ && $nodeid && @$ids;
+    return undef unless LJ::isu($u) && $nodetype =~ /^\w$/ && $nodeid && @$ids;
 
     # get database and quote things
-    my $dbcm = LJ::get_cluster_master($u);
+    return undef unless $u->writer;
     my $quserid = $u->{userid}+0;
-    my $qnodetype = $dbcm->quote($nodetype);
+    my $qnodetype = $u->quote($nodetype);
     my $qnodeid = $nodeid+0;
-    return undef unless $dbcm;
 
     # now perform action    
     my $in = join(',', map { $_+0 } @$ids);
     my $newstate = $unfreeze ? 'A' : 'F';
-    LJ::talk2_do($dbcm, $u->{userid}, $nodetype, $nodeid, undef, 
-                 "UPDATE talk2 SET state = '$newstate' " .
-                 "WHERE journalid = $quserid AND nodetype = $qnodetype " .
-                 "AND nodeid = $qnodeid AND jtalkid IN ($in)");
-    return undef if $dbcm->err;
+    my $res = $u->talk2_do($nodetype, $nodeid, undef,
+                           "UPDATE talk2 SET state = '$newstate' " .
+                           "WHERE journalid = $quserid AND nodetype = $qnodetype " .
+                           "AND nodeid = $qnodeid AND jtalkid IN ($in)");
+    return undef unless $res;
     return 1;
 }
 
 sub screen_comment {
     my $u = shift;
+    return undef unless LJ::isu($u);
     my $itemid = shift(@_) + 0;
-    my $dbcm = LJ::get_cluster_master($u);
 
     my $in = join (',', map { $_+0 } @_);
     return unless $in;
 
     my $userid = $u->{'userid'} + 0;
 
-    my $updated = LJ::talk2_do($dbcm, $userid, "L", $itemid, undef,
+    my $updated = $u->talk2_do("L", $itemid, undef,
                                "UPDATE talk2 SET state='S' ".
                                "WHERE journalid=$userid AND jtalkid IN ($in) ".
                                "AND nodetype='L' AND nodeid=$itemid ".
                                "AND state NOT IN ('S','D')");
+    return undef unless $updated;
+
     if ($updated > 0) {
         LJ::replycount_do($u, $itemid, "decr", $updated);
         LJ::set_logprop($u, $itemid, { 'hasscreened' => 1 });
@@ -544,8 +545,8 @@ sub screen_comment {
 
 sub unscreen_comment {
     my $u = shift;
+    return undef unless LJ::isu($u);
     my $itemid = shift(@_) + 0;
-    my $dbcm = LJ::get_cluster_master($u);
 
     my $in = join (',', map { $_+0 } @_);
     return unless $in;
@@ -553,13 +554,16 @@ sub unscreen_comment {
     my $userid = $u->{'userid'} + 0;
     my $prop = LJ::get_prop("log", "hasscreened");
 
-    my $updated = LJ::talk2_do($dbcm, $userid, "L", $itemid, undef,
+    my $updated = $u->talk2_do("L", $itemid, undef,
                                "UPDATE talk2 SET state='A' ".
                                "WHERE journalid=$userid AND jtalkid IN ($in) ".
                                "AND nodetype='L' AND nodeid=$itemid ".
                                "AND state='S'");
+    return undef unless $updated;
+
     if ($updated > 0) {
         LJ::replycount_do($u, $itemid, "incr", $updated);
+        my $dbcm = LJ::get_cluster_master($u);
         my $hasscreened = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 " .
                                                  "WHERE journalid=$userid AND nodeid=$itemid AND nodetype='L' AND state='S'");
         LJ::set_logprop($u, $itemid, { 'hasscreened' => 0 }) unless $hasscreened;
@@ -1956,17 +1960,18 @@ sub enter_comment {
         return 0;
     };
 
+    return $err->("Error", "Invalid user object passed.")
+        unless LJ::isu($journalu);
+
     my $jtalkid = LJ::alloc_user_counter($journalu, "T");
     return $err->("Database Error", "Could not generate a talkid necessary to post this comment.")
         unless $jtalkid; 
-
-    my $dbcm = LJ::get_cluster_master($journalu);
 
     # insert the comment
     my $posterid = $comment->{u} ? $comment->{u}{userid} : 0;
     
     my $errstr;
-    LJ::talk2_do($dbcm, $journalu->{userid}, "L", $itemid, \$errstr,
+    $journalu->talk2_do("L", $itemid, \$errstr,
                  "INSERT INTO talk2 ".
                  "(journalid, jtalkid, nodetype, nodeid, parenttalkid, posterid, datepost, state) ".
                  "VALUES (?,?,'L',?,?,?,NOW(),?)",

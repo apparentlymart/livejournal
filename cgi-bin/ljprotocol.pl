@@ -586,12 +586,14 @@ sub postevent
     my $u = $flags->{'u'};
     my $ownerid = $flags->{'ownerid'}+0;
     my $uowner = $flags->{'u_owner'} || $u;
+    # Make sure we have a real user object here
+    $uowner = LJ::want_user($uowner) unless LJ::isu($uowner);
     my $clusterid = $uowner->{'clusterid'};
 
     my $dbh = LJ::get_db_writer();
     my $dbcm = LJ::get_cluster_master($uowner);
 
-    return fail($err,306) unless $dbh && $dbcm;
+    return fail($err,306) unless $dbh && $dbcm && $uowner->writer;
     return fail($err,200) unless $req->{'event'} =~ /\S/;
 
     ### make sure community, shared, or news journals don't post
@@ -868,11 +870,11 @@ sub postevent
     my $verb = $LJ::NEW_ENTRY_CLEANUP_HACK ? 'REPLACE' : 'INSERT';
 
     my $dberr;
-    LJ::log2_do($dbcm, $ownerid, \$dberr, "INSERT INTO log2 (journalid, jitemid, posterid, eventtime, logtime, security, ".
-              "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
-              "VALUES ($ownerid, $jitemid, $posterid, $qeventtime, FROM_UNIXTIME($now), $qsecurity, $qallowmask, ".
-              "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
-              "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
+    $uowner->log2_do(\$dberr, "INSERT INTO log2 (journalid, jitemid, posterid, eventtime, logtime, security, ".
+                     "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
+                     "VALUES ($ownerid, $jitemid, $posterid, $qeventtime, FROM_UNIXTIME($now), $qsecurity, $qallowmask, ".
+                     "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
+                     "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     return $fail->($err,501,$dberr) if $dberr;
 
     LJ::MemCache::incr([$ownerid, "log2ct:$ownerid"]);
@@ -1035,6 +1037,8 @@ sub editevent
     my $u = $flags->{'u'};
     my $ownerid = $flags->{'ownerid'};
     my $uowner = $flags->{'u_owner'} || $u;
+    # Make sure we have a user object here
+    $uowner = LJ::want_user($uowner) unless LJ::isu($uowner);
     my $clusterid = $uowner->{'clusterid'};
     my $posterid = $u->{'userid'};
     my $qallowmask = $req->{'allowmask'}+0;
@@ -1191,12 +1195,14 @@ sub editevent
             } 
         }
         
-        my $qsecurity = $dbcm->quote($security);
-        LJ::log2_do($dbcm, $ownerid, undef, "UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
-                  "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
-                  "security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid ".
-                  "AND jitemid=$itemid");
-          
+        my $qsecurity = $uowner->quote($security);
+        my $dberr;
+        $uowner->log2_do(\$dberr, "UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
+                         "UNIX_TIMESTAMP($qeventtime), year=$qyear, month=$qmonth, day=$qday, ".
+                         "security=$qsecurity, allowmask=$qallowmask WHERE journalid=$ownerid ".
+                         "AND jitemid=$itemid");
+        return fail($err,501,$dberr) if $dberr;
+
         # update memcached
         my $sec = $qallowmask;
         $sec = 0 if $security eq 'private';
@@ -1260,13 +1266,17 @@ sub editevent
     # rlogtime to $EndOfTime if they're turning backdate on.
     if ($req->{'props'}->{'opt_backdated'} eq "1" &&
         $oldevent->{'rlogtime'} != $LJ::EndOfTime) {
-        LJ::log2_do($dbcm, $ownerid, undef, "UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
-                  "journalid=$ownerid AND jitemid=$itemid");
+        my $dberr;
+        $uowner->log2_do(undef, "UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
+                         "journalid=$ownerid AND jitemid=$itemid");
+        return fail($err,501,$dberr) if $dberr;
     }
     if ($req->{'props'}->{'opt_backdated'} eq "0" &&
         $oldevent->{'rlogtime'} == $LJ::EndOfTime) {
-        LJ::log2_do($dbcm, $ownerid, undef, "UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
-                  "WHERE journalid=$ownerid AND jitemid=$itemid");
+        my $dberr;
+        $uowner->log2_do(\$dberr, "UPDATE log2 SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
+                         "WHERE journalid=$ownerid AND jitemid=$itemid");
+        return fail($err,501,$dberr) if $dberr;
     }
     return fail($err,501,$dbcm->errstr) if $dbcm->err;
 

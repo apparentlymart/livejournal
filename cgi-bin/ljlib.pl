@@ -7213,13 +7213,11 @@ sub delete_entry
     my $u = ref $uuserid ? $uuserid : LJ::load_userid($jid);
     $jitemid += 0;
 
-    my $dbcm = LJ::get_cluster_master($u);
-    return 0 unless $dbcm;
-
     my $and;
     if (defined $anum) { $and = "AND anum=" . ($anum+0); }
 
-    my $dc = LJ::log2_do($dbcm, $jid, undef, "DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
+    my $dc = $u->log2_do(undef, "DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
+    return 0 unless $dc;
     LJ::MemCache::delete([$jid, "log2:$jid:$jitemid"]);
     LJ::MemCache::decr([$jid, "log2ct:$jid"]);
     LJ::memcache_kill($jid, "dayct");
@@ -7334,67 +7332,6 @@ sub blocking_report {
     }
 }
 
-
-# all reads/writes to talk2 must be done inside a lock, so there's
-# no race conditions between reading from db and putting in memcache.
-# can't do a db write in between those 2 steps.  the talk2 -> memcache
-# is elsewhere (talklib.pl), but this $dbh->do wrapper is provided
-# here because non-talklib things modify the talk2 table, and it's
-# nice to centralize the locking rules.
-#
-# return value is return of $dbh->do.  $errref scalar ref is optional, and
-# if set, gets value of $dbh->errstr
-#
-# write:  (LJ::talk2_do)
-#   GET_LOCK
-#    update/insert into talk2
-#   RELEASE_LOCK
-#    delete memcache
-#
-# read:   (LJ::Talk::get_talk_data)
-#   try memcache
-#   GET_LOCk
-#     read db
-#     update memcache
-#   RELEASE_LOCK
-
-sub talk2_do {
-    my ($dbcm, $uid, $nodetype, $nodeid, $errref, $sql, @args) = @_;
-    return undef unless $nodetype =~ /^\w$/;
-    return undef unless $nodeid =~ /^\d+$/;
-    return undef unless $uid =~ /^\d+$/;
-
-    my $memkey = [$uid, "talk2:$uid:$nodetype:$nodeid"];
-    my $lockkey = $memkey->[1];
-
-    $dbcm->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
-    my $ret = $dbcm->do($sql, undef, @args);
-    if (ref $errref) { $$errref = $dbcm->errstr; }
-    $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
-
-    LJ::MemCache::delete($memkey, 0) if int($ret);
-    return $ret;
-}
-
-# log2_do
-# see comments for talk2_do
-
-sub log2_do {
-    my ($db, $uid, $errref, $sql, @args) = @_;
-    return undef unless $uid =~ /^\d+$/;
-
-    my $memkey = [$uid, "log2lt:$uid"];
-    my $lockkey = $memkey->[1];
-
-    $db->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
-    my $ret = $db->do($sql, undef, @args);
-    if (ref $errref) { $$errref = $db->errstr; }
-    $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
-
-    LJ::MemCache::delete($memkey, 0) if int($ret);
-    return $ret;
-}
-
 # <LJFUNC>
 # name: LJ::friends_do
 # des: Runs given sql, then deletes the given userid's friends from memcache
@@ -7488,8 +7425,9 @@ sub delete_comments {
     return 1 unless $in;
     my $where = "WHERE journalid=$jid AND jtalkid IN ($in)";
 
-    my $num = LJ::talk2_do($u, $jid, $nodetype, $nodeid, undef,
+    my $num = $u->talk2_do($nodetype, $nodeid, undef,
                            "UPDATE talk2 SET state='D' $where");
+    return 0 unless $num;
     $num = 0 if $num == -1;
 
     if ($num > 0) {
