@@ -120,7 +120,6 @@ CREATE TABLE faq (
   answer text,
   sortorder int(11) default NULL,
   faqcat varchar(20) default NULL,
-  uses int(11) NOT NULL default '0',
   lastmodtime datetime default NULL,
   lastmoduserid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (faqid)

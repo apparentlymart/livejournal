@@ -30,8 +30,6 @@ BODY<=
      my $lastmodwho;
      $lastmodwho = LJ::get_username($dbs, $lastmoduserid);
      
-     $dbh->do("UPDATE faq SET uses=uses+1 WHERE faqid=$id");
-     
      &main::note_mod_time($unixmodtime);
      
      $q = LJ::ehtml($question);
