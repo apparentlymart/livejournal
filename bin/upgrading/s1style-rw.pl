@@ -74,7 +74,7 @@ sub s1styles_write
         }
         
         my $formatdata = $s->{'formatdata'};
-        $formatdata =~ s/\n\./\n\.\./;
+        $formatdata =~ s/\n\./\n\.\./g;
         print F "\n$formatdata\n.\n\n";
     }
     close F;
