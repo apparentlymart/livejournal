@@ -139,9 +139,7 @@ sub make_journal
     }
 
     # unload layers that aren't public
-    my $pub = get_public_layers();
-    my @unload = grep { ! $pub->{$_} } @{$ctx->[S2::LAYERLIST]};
-    S2::unregister_layer($_) foreach (@unload);
+    LJ::S2::cleanup_layers($ctx);
 
     return $ret;
 }
@@ -554,9 +552,7 @@ sub s2_context
         my $ourtime = LJ::time_to_http($modtime);
         if ($ims eq $ourtime) {
             # 304 return; unload non-public layers
-            my $pub = get_public_layers();
-            S2::unregister_layer($_) foreach grep { ! $pub->{$_} } @layers;
-
+            LJ::S2::cleanup_layers(@layers);
             $r->status_line("304 Not Modified");
             $r->send_http_header();
             return undef;
@@ -578,8 +574,7 @@ sub s2_context
     }
 
     # failure to generate context; unload our non-public layers
-    my $pub = get_public_layers();
-    S2::unregister_layer($_) foreach grep { ! $pub->{$_} } @layers;
+    LJ::S2::cleanup_layers(@layers);
 
     my $err = $@;
     $r->content_type("text/html");
@@ -587,6 +582,14 @@ sub s2_context
     $r->print("<b>Error preparing to run:</b> $err");
     return undef;
 
+}
+
+# parameter is either a single context, or just a bunch of layerids
+# will then unregister the non-public layers
+sub cleanup_layers {
+    my $pub = get_public_layers();
+    my @unload = ref $_[0] ? S2::get_layers($_[0]) : @_;
+    S2::unregister_layer($_) foreach grep { ! $pub->{$_} } @unload;
 }
 
 sub clone_layer
