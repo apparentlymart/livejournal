@@ -14,6 +14,8 @@
     $TEMP = "$HOME/temp";
     $VAR = "$HOME/var";
 
+    $NODB_MSG ||= "Database temporarily unavailable.  Try again shortly.";
+
     $SITEROOT ||= "http://www.$DOMAIN:8011";
     $IMGPREFIX ||= "$SITEROOT/img";    
 
