@@ -3099,6 +3099,9 @@ sub make_journal
     $basevars = "";
     $overrides = "";
 
+    # what charset we put in the HTML
+    $opts->{'saycharset'} ||= "utf-8";
+
     # instruct some function to make this specific view type
     return unless (defined $LJ::viewinfo{$view}->{'creator'});
     my $ret = "";

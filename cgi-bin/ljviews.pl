@@ -74,7 +74,7 @@ sub create_view_lastn
         $lastn_page{'head'} = "<meta name=\"robots\" content=\"noindex,nofollow\">\n";
     }
     if ($LJ::UNICODE) {
-        $lastn_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+        $lastn_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'">';
     }
     $lastn_page{'head'} .= 
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'LASTN_HEAD'};
@@ -424,7 +424,7 @@ sub create_view_friends
     ## people might not want to be indexed)
     $friends_page{'head'} = "<meta name=\"robots\" content=\"noindex\">\n";
     if ($LJ::UNICODE) {
-        $friends_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+        $friends_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'">';
     }
     $friends_page{'head'} .= 
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'FRIENDS_HEAD'};
@@ -823,7 +823,7 @@ sub create_view_calendar
         $calendar_page{'head'} = "<meta name=\"robots\" content=\"noindex\">\n";
     }
     if ($LJ::UNICODE) {
-        $calendar_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+        $calendar_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'">';
     }
     $calendar_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
@@ -1040,7 +1040,7 @@ sub create_view_day
         $day_page{'head'} = "<meta name=\"robots\" content=\"noindex\">\n";
     }
     if ($LJ::UNICODE) {
-        $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+        $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'">';
     }
     $day_page{'head'} .= 
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};
@@ -1307,7 +1307,7 @@ sub create_view_rss
         'itemids' => \@itemids,
     });
 
-    $opts->{'contenttype'} = 'text/xml; charset=utf-8';
+    $opts->{'contenttype'} = 'text/xml; charset='.$opts->{'saycharset'};
 
     my $logtext = LJ::get_logtext($dbs, @itemids);
 
@@ -1317,7 +1317,7 @@ sub create_view_rss
         $clink = "$LJ::SITEROOT/community/$user/";
     }
 
-    $$ret .= "<?xml version='1.0' encoding='utf-8' ?>\n";
+    $$ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
     $$ret .= "<!DOCTYPE rss PUBLIC \"-//Netscape Communications//DTD RSS 0.91//EN\"\n";
     $$ret .= "             \"http://my.netscape.com/publish/formats/rss-0.91.dtd\">\n";
     $$ret .= "<rss version='0.91'>\n";

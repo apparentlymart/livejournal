@@ -22,7 +22,7 @@ while(LJ::start_request() &&
     
     if ($LJ::UNICODE && $FORM{'charset'}) {
         $charset = $FORM{'charset'};
-        unless (Unicode::MapUTF8::utf8_supported_charset($charset)) {
+        if ($charset ne "utf-8" && ! Unicode::MapUTF8::utf8_supported_charset($charset)) {
             print "Content-Type: text/html\n";
             my $errmsg = "<b>Error: charset $charset is not supported.</b>";
             print "Content-length: " . length($errmsg) . "\n\n";
@@ -58,6 +58,7 @@ while(LJ::start_request() &&
 				   "vhost" => "customview",
 				   "nooverride" => $nooverride,
 				   "styleid" => $styleid,
+                                   "saycharset" => $charset,
 			       })
 		|| "<b>[$LJ::SITENAME: Bad username, styleid, or style definition]</b>");
     
