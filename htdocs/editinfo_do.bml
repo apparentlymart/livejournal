@@ -387,6 +387,9 @@ BODY<=
 	($FORM{'year'} < 1890 || $FORM{'year'} > $this_year)) { push @errors, "Invalid birthday year."; }
      if ($FORM{'month'} && ($FORM{'month'} < 1 || $FORM{'month'} > 12)) { push @errors, "Invalid birthday month.  Enter a month from 1-12.  (Jan-Dec)"; }
      if ($FORM{'day'} && ($FORM{'day'} < 1 || $FORM{'day'} > 31)) { push @errors, "Invalid birthday day.  Enter a day from 1-31."; }
+     if (@errors == 0 && $FORM{'day'} > LJ::days_in_month($FORM{'month'}, $FORM{'year'})) {
+	 push @errors, "Invalid day for that month.";
+     }
 
      if ($FORM{'country'} ne "US" && $FORM{'zip'})
      {

@@ -4881,9 +4881,10 @@ sub ehtml
 # name: LJ::days_in_month
 # class: time
 # des: Figures out the number of days in a month.
-# args: month, year
+# args: month, year?
 # des-month: Month
-# des-year: Year
+# des-year: Year.  Necessary for February.  If undefined or zero, function
+#           will return 29.
 # returns: Number of days in that month in that year.
 # </LJFUNC>
 sub days_in_month
@@ -4891,6 +4892,7 @@ sub days_in_month
     my ($month, $year) = @_;
     if ($month == 2)
     {
+	return 29 unless $year;  # assume largest
         if ($year % 4 == 0)
         {
 	  # years divisible by 400 are leap years
