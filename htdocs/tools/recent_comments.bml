@@ -199,7 +199,7 @@ body<=
         $ret .= "<?h1 Latest Posted h1?><?p Last $count comments " . LJ::ljuser($u) . " has posted. p?>";
         my %jcount;  # jid -> ct
         $ret .= "<table style='text-align: left'>";
-        $ret .= "<tr><th>Time</th><th>Location</th><th></th></tr>";
+        $ret .= "<tr><th>Time</th><th>Location</th></tr>";
         @posted = sort { $b->{datepost} cmp $a->{datepost} } @posted;
 
         foreach my $r (@posted) {
@@ -225,7 +225,7 @@ body<=
             }
 
             my $links = "[<a href='$talkurl'>Comment</a>] [<a href='$logurl'>Entry</a>]\n";
-            $ret .= "<tr><td>$hr_ago</td><td>" . LJ::ljuser($ju->{user}) . ":</td><td>$subject</td></tr>";
+            $ret .= "<tr><td>$hr_ago</td><td>" . LJ::ljuser($ju->{user}) . ": $subject</td></tr>";
         }
         $ret .= "</table>";
     }
