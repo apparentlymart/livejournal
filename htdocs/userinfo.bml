@@ -619,7 +619,7 @@
      my ($com_post, $com_got);
      unless ($LJ::DISABLED{'show-talkleft'}) {
 	 $com_post = "<b>Posted:</b> ";
-	 if (@LJ::CLUSTERS) {
+	 if ($u->{'clusterid'}) {
 	     $com_post .= comma($dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft ".
 						       "WHERE userid=$userid"));
 	 } else {
