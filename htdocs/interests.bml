@@ -80,7 +80,16 @@ BODY<=
     
      my $intid_in = join(", ", @intids);
      $ret .= "(=H1 Similar Users H1=)(=P The following are the most related users to $FORM{'user'}. P=)";
-     $sth = $dbh->prepare("SELECT u.user, COUNT(*) AS 'count' FROM user u, userinterests ui WHERE u.userid=ui.userid AND u.statusvis='V' AND ui.intid IN ($intid_in) GROUP BY 1 ORDER BY 2 DESC, 1 ASC LIMIT 100");
+
+     # what database to hit?
+     my $dbdir = LJ::get_dbh($LJ::DIR_DB_HOST);     
+     my $pfx = $LJ::DIR_DB ? "$LJ::DIR_DB." : "";
+     
+     $sth = $dbdir->prepare("SELECT u.user, COUNT(*) AS 'count' ".
+			    "FROM ${pfx}user u, ${pfx}userinterests ui ".
+			    "WHERE u.userid=ui.userid AND u.statusvis='V' ".
+			    "AND ui.intid IN ($intid_in) ".
+			    "GROUP BY 1 ORDER BY 2 DESC, 1 ASC LIMIT 100");
      $sth->execute;
      $ret .= "<P><TABLE CELLPADDING=3><TR VALIGN=BOTTOM><TD><B>#</B></TD><TD><B>User</B></TD><TD><B>Similiar<BR>Interests</B></TD><TD><B>Percent Match</B></TD></TR>\n";
      my $total = @intids;
