@@ -391,6 +391,20 @@ function poofAt (pos) {
     fade();
 }
 
+function getTarget (ev) {
+    var target;
+    if (ev.target)
+        target = ev.target;
+    else if (ev.srcElement)
+        target = ev.srcElement;
+
+    // Safari bug:
+    if (target && target.nodeType == 3)
+        target = target.parentNode;
+
+    return target;
+}
+
 function updateLink (ae, resObj, clickTarget) {
     ae.href = resObj.newurl;
 
@@ -426,7 +440,7 @@ function createModerationFunction (ae, dItemid) {
             return stopEvent(e);
         tsInProg[dItemid] = 1;
 
-        var clickTarget = e.target;
+        var clickTarget = getTarget(e);
         var clickPos = getEventPos(e);
 
         var de = document.createElement("img");
@@ -498,6 +512,9 @@ function setup_ajax () {
 }
 
 if (document.getElementById && getXTR()) {
-    window.onload = setup_ajax;
+    if (window.attachEvent)
+        window.attachEvent('onload', setup_ajax);
+    if (window.addEventListener)
+        window.addEventListener('load', setup_ajax, false);
 }
 
