@@ -393,29 +393,13 @@ sub get_recent_items
 		"LIMIT $skip,$itemshow");
     }
 
-    # this whole @need_update stuff is unnecessary if the web-server
-    # was stopped during the upgrade from the old code to the new
-    # non-hint code, but it might not have been, and some log
-    # rows might have an rlogtime == 0, which needs fixing.
-    my @need_update;
-
     $sth = $logdb->prepare($sql);
     $sth->execute;
     if ($logdb->err) { die $logdb->errstr; }
     while (my $li = $sth->fetchrow_hashref) {
 	push @items, $li;
 	push @{$opts->{'itemids'}}, $li->{'itemid'};
-
-	# cleanup hack; see above.
-	push @need_update, $li->{'itemid'}
-	    if ($opts->{'friendsview'} && $clusterid==0 && $li->{'rlogtime'} == 0);
     }
-
-    if (@need_update) {
-	$dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime-UNIX_TIMESTAMP(logtime) ".
-		 "WHERE itemid IN (" . join(",",@need_update) . ")");
-    }
-    
     return @items;
 }
 
@@ -1137,14 +1121,16 @@ sub get_urls
 # <LJFUNC>
 # name: LJ::record_meme
 # des: Records a URL reference from a journal entry to the meme table.
-# args: dbarg, url, posterid, itemid
+# args: dbarg, url, posterid, itemid, journalid?
 # des-url: URL to log
 # des-posterid: Userid of person posting
 # des-itemid: Itemid URL appears in
+# des-journalid: Optional, journal id of item, if item is clustered.  Otherwise
+#                this should be zero or undef.
 # </LJFUNC>
 sub record_meme
 {
-    my ($dbarg, $url, $posterid, $itemid) = @_;
+    my ($dbarg, $url, $posterid, $itemid, $jid) = @_;
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
 
@@ -1158,9 +1144,10 @@ sub record_meme
     my $qurl = $dbh->quote($url);
     $posterid += 0;
     $itemid += 0;
+    $jid += 0;
     LJ::query_buffer_add($dbs, "meme",
-			 "REPLACE INTO meme (url, posterid, itemid) " .
-			 "VALUES ($qurl, $posterid, $itemid)");
+			 "REPLACE INTO meme (url, posterid, journalid, itemid) " .
+			 "VALUES ($qurl, $posterid, $jid, $itemid)");
 }
 
 # <LJFUNC>
@@ -3116,6 +3103,13 @@ sub get_cluster_reader
 		       "cluster${id}");
 }
 
+sub get_cluster_master
+{
+    my $arg = shift;
+    my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
+    return LJ::get_dbh("cluster${id}");
+}
+
 # <LJFUNC>
 # name: LJ::make_dbs
 # des: Makes a $dbs structure from a master db
@@ -4041,6 +4035,23 @@ sub delete_item
     foreach my $t (qw(talk talktext talkprop)) {
 	$deleter->($t, "talkid", @talkids);
     }
+}
+
+####
+### delete a clustered log item and all its associated data
+##  if $quick is specified, that means items are being deleted en-masse
+#
+sub delete_item2
+{
+    my ($dbcm, $journalid, $jitemid, $quick, $deleter) = @_;
+    my $sth;
+		
+    $journalid += 0;
+    $jitemid += 0;
+
+    $dbcm->do("DELETE FROM log2 WHERE journalid=$journalid AND jitemid=$jitemid");
+
+    # FIXME: TODO: make log of this deletion, do the rest of the deletions async
 }
 
 1;

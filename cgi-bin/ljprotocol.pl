@@ -366,6 +366,7 @@ sub postevent
 
     my $u = $flags->{'u'};    
     my $ownerid = $flags->{'ownerid'};
+    my $uowner = $flags->{'u_owner'} || $u;
     my $dbr = $dbs->{'reader'};
     my $dbh = $dbs->{'dbh'};
 
@@ -458,10 +459,19 @@ sub postevent
 	$rlogtime .= "-UNIX_TIMESTAMP()";
     }
 
-    $dbh->do("INSERT INTO log (ownerid, posterid, eventtime, logtime, security, allowmask, replycount, year, month, day, revttime, rlogtime) VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, 0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-UNIX_TIMESTAMP($qeventtime), $rlogtime)");
-    return fail($err,501,$dbh->errstr) if $dbh->err;
+    my $dbcm = $dbh;
+    my ($table, $ownercol) = ("log", "ownerid");
+    my $clustered = 0;
+    if ($uowner->{'clusterid'}) {
+	$dbcm = LJ::get_cluster_master($uowner);
+	($table, $ownercol) = ("log2", "journalid");
+	$clustered = 1;
+    }
 
-    my $itemid = $dbh->{'mysql_insertid'};
+    $dbcm->do("INSERT INTO $table ($ownercol, posterid, eventtime, logtime, security, allowmask, replycount, year, month, day, revttime, rlogtime) VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, 0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-UNIX_TIMESTAMP($qeventtime), $rlogtime)");
+    return fail($err,501,$dbcm->errstr) if $dbcm->err;
+
+    my $itemid = $dbcm->{'mysql_insertid'};
     return fail($err,501,"No itemid could be generated.") unless $itemid;
     
     ### finish embedding stuff now that we have the itemid
@@ -480,19 +490,51 @@ sub postevent
 	    $req->{'security'} eq "private")
     {
 	foreach my $url (LJ::get_urls($event)) {
-	  LJ::record_meme($dbs, $url, $posterid, $itemid);
+	    my $jid = $clustered ? $ownerid : 0;
+	    LJ::record_meme($dbs, $url, $posterid, $itemid, $jid);
 	}
     }
 
     my $qevent = $dbh->quote($event);
     $event = "";
-    
+
     my @prefix = ("");
     if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
     foreach my $pfx (@prefix) 
     {
-	$dbh->do("INSERT INTO ${pfx}logtext (itemid, subject, event) ".
-		 "VALUES ($itemid, $qsubject, $qevent)");
+	if ($clustered) {
+	    # clustered recents have times now (for purger process.. can't use itemid key prefix)
+	    my ($ec, $ev);
+	    if ($pfx) { ($ec, $ev) = (", logtime", ", NOW()"); }
+	    $dbcm->do("REPLACE INTO ${pfx}logtext2 (journalid, jitemid, subject, event $ec) ".
+		      "VALUES ($ownerid, $itemid, $qsubject, $qevent $ev)");
+	    if ($dbcm->err) {
+		my $msg = $dbcm->errstr;
+		LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
+		return fail($err,501,"logtext:$msg");
+	    }
+	} else {
+	    $dbh->do("INSERT INTO ${pfx}logtext (itemid, subject, event) ".
+		     "VALUES ($itemid, $qsubject, $qevent)");
+	    if ($dbh->err) {
+		my $msg = $dbh->errstr;
+		LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+		return fail($err,501,$msg);
+	    }
+	}
+    }
+    
+    # this is to speed month view and other places that don't need full text.
+    if ($clustered) {
+	$dbcm->do("REPLACE INTO logsubject2 (journalid, jitemid, subject) ".
+		  "VALUES ($ownerid, $itemid, $qsubject)");
+	if ($dbcm->err) {
+	    my $msg = $dbcm->errstr;
+	    LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
+	    return fail($err,501,"logsubject:$msg");
+	}
+    } else {
+	$dbh->do("INSERT INTO logsubject (itemid, subject) VALUES ($itemid, $qsubject)");
 	if ($dbh->err) {
 	    my $msg = $dbh->errstr;
 	    LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
@@ -500,30 +542,43 @@ sub postevent
 	}
     }
     
-    # this is to speed month view and other places that don't need full text.
-    $dbh->do("INSERT INTO logsubject (itemid, subject) VALUES ($itemid, $qsubject)");
-    if ($dbh->err) {
-	my $msg = $dbh->errstr;
-        LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-	return fail($err,501,$msg);
-    }
-    
-    ## update sync table
-    $dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) ".
-	     "SELECT ownerid, logtime, 'L', itemid, 'create' FROM log WHERE itemid=$itemid");
-    if ($dbh->err) {
-	my $msg = $dbh->errstr;
-        LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-	return fail($err,501,$msg);
-    }
-    
-    # keep track of custom security stuff in other table.
-    if ($uselogsec) {
-	$dbh->do("INSERT INTO logsec (ownerid, itemid, allowmask) VALUES ($qownerid, $itemid, $qallowmask)");
+    ## update sync table (selected from log table, so logtime is identical!)
+    if ($clustered) {
+	$dbcm->do("REPLACE INTO syncupdates2 (userid, atime, nodetype, nodeid, atype) ".
+		  "SELECT journalid, logtime, 'L', jitemid, 'create' FROM log2 ".
+		  "WHERE journalid=$ownerid AND jitemid=$itemid");
+	if ($dbcm->err) {
+	    my $msg = $dbcm->errstr;
+	    LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
+	    return fail($err,501,$msg);
+	}
+    } else {
+	$dbh->do("REPLACE INTO syncupdates (userid, atime, nodetype, nodeid, atype) ".
+		 "SELECT ownerid, logtime, 'L', itemid, 'create' FROM log WHERE itemid=$itemid");
 	if ($dbh->err) {
 	    my $msg = $dbh->errstr;
-  	    LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+	    LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
 	    return fail($err,501,$msg);
+	}
+    }
+
+    # keep track of custom security stuff in other table.
+    if ($uselogsec) {
+	if ($clustered) {
+	    $dbcm->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) ".
+		      "VALUES ($qownerid, $itemid, $qallowmask)");
+	    if ($dbcm->err) {
+		my $msg = $dbcm->errstr;
+		LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
+		return fail($err,501,"logsec2:$msg");
+	    }
+	} else {
+	    $dbh->do("INSERT INTO logsec (ownerid, itemid, allowmask) VALUES ($qownerid, $itemid, $qallowmask)");
+	    if ($dbh->err) {
+		my $msg = $dbh->errstr;
+		LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+		return fail($err,501,$msg);
+	    }
 	}
     }
     
@@ -535,20 +590,32 @@ sub postevent
 	    if ($propinsert) {
 		$propinsert .= ", ";
 	    } else {
-		$propinsert = "INSERT INTO logprop (itemid, propid, value) VALUES ";
+		if ($clustered) {
+		    $propinsert = "REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES ";
+		} else {
+		    $propinsert = "INSERT INTO logprop (itemid, propid, value) VALUES ";
+		}
 	    }
 	    my $p = LJ::get_prop("log", $pname);
 	    if ($p) {
 		my $qvalue = $dbh->quote($req->{'props'}->{$pname});
-		$propinsert .= "($itemid, $p->{'id'}, $qvalue)";
+		if ($clustered) {
+		    $propinsert .= "($ownerid, $itemid, $p->{'id'}, $qvalue)";
+		} else {
+		    $propinsert .= "($itemid, $p->{'id'}, $qvalue)";
+		}
 	    }
 	}
 	if ($propinsert) { 
-	    $dbh->do($propinsert); 
-	    if ($dbh->err) {
+	    $dbcm->do($propinsert);   # note: $dbcm may be $dbh
+	    if ($dbcm->err) {
 		my $msg = $dbh->errstr;
-	        LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
-		return fail($err,501,$msg);
+		if ($clustered) {
+		    LJ::delete_item2($dbcm, $ownerid, $itemid);   # roll-back
+		} else {
+		    LJ::delete_item($dbh, $ownerid, $itemid);   # roll-back
+		}
+		return fail($err,501,"logprop2:$msg");
 	    }
 	}
     }
@@ -557,6 +624,10 @@ sub postevent
 	     "WHERE userid=$qownerid");
     
     if ($u->{'track'} eq "yes") {
+	# dear community, relax.  if we get a court order to provide data on somebody,
+	# we're legally required to.  this doesn't enable us to do that.  it enables
+	# us to do it without killing the database and/or servers as we do O(n) scans
+	# over everything and grep the hell out of hundreds of gigs of webserver logs.
 	my $quserid = $u->{'userid'}+0;
 	my $qip = $dbh->quote($ENV{'REMOTE_ADDR'});
 	$dbh->do("INSERT INTO tracking (userid, acttime, ip, actdes, associd) ".
@@ -1484,6 +1555,11 @@ sub check_altusage
     my $info = {};
     if (LJ::can_use_journal($dbs, $u->{'userid'}, $req->{'usejournal'}, $info)) {
 	$flags->{'ownerid'} = $info->{'ownerid'};
+
+	# and the caller will probably need the ownerid's user record,
+	# to figure out the clusterid & dversion
+	$flags->{'u_owner'} = LJ::load_userid($dbs, $flags->{'ownerid'});
+
 	return 1;
     }
 
