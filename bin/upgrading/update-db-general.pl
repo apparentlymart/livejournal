@@ -1376,6 +1376,22 @@ CREATE TABLE fvcache (
 )
 EOC
 
+# what:  ip, email, ljuser, ua, emailnopay
+# emailnopay means don't allow payments from that email
+register_tablecreate("sysban", <<'EOC');
+CREATE TABLE sysban (
+   banid     MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+   PRIMARY KEY (banid),
+   status    ENUM('active','expired') NOT NULL DEFAULT 'active',
+   INDEX     (status),
+   bandate   DATETIME,
+   banuntil  DATETIME,
+   what      VARCHAR(20) NOT NULL,
+   value     VARCHAR(80),
+   note      VARCHAR(255)
+)
+EOC
+
 register_tablecreate("ipban", <<'EOC');
 CREATE TABLE ipban (
    ip        CHAR(15),

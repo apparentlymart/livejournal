@@ -18,17 +18,37 @@ _info?><?page
 title=>Directory Search
 body<=
 
+<?_code
+use vars qw($comm_mode %GET);
+
+$comm_mode = 1 && $GET{'comm'}; # Ensure 'true'
+
+unless ($comm_mode) {
+return <<EOT;
 <?h1 Search Directory h1?>
 <?p
 Fill in criteria below that you'd like to find user journals by.  The results returned are the intersection of all search criteria.  In other words, each restriction means "AND", not "OR".
 p?>
+EOT
+} else {
+return <<EOT;
+<?h1 Search Communities h1?>
+<?p
+Fill in criteria below that you'd like to find communities by.  The results returned are the intersection of all search criteria.  In other words, each restriction means "AND", not "OR".
+p?>
+EOT
+}
+
+_code?>
 
 <?hr?>
 
 <CENTER>
 
 <?_code
- return "<form action='/directory.bml' method='get'>";
+ my $ret = "<form action='/directory.bml' method='get'>";
+ $ret .= "<input type='hidden' name='com_do' value='1' />" if $comm_mode;
+ return $ret;
 _code?>
 
 <table cellpadding='4' cellspacing='0' border='0'>
@@ -73,6 +93,9 @@ Updated in last
 <=form
 crit?>
 
+<?_code
+unless ($comm_mode) {
+return <<EOT;
 <!---- age ----->
 <?crit
 name=>By Age
@@ -83,8 +106,12 @@ Between
 <INPUT NAME="age_max" SIZE=3 MAXLENGTH=3> years old.
 <=form
 crit?>
+EOT
+} return "";
+_code?>
 
-<?_c  DISABLED because of privacy policy.  add later when 'public gender' option
+<?_c  DISABLED because of privacy policy.  add later when 'public gender' option,
+      but only unless $comm_mode
 <!---- gender ----->
 <?crit
 name=>By Gender
@@ -99,24 +126,45 @@ User is: <SELECT NAME="gen_sel">
 crit?>
 _c?>
 
+<?_code
+    my $interest_detail = $comm_mode ?
+                           "Related to <input name='int_like' size='30' />" :
+                           "User likes <input name='int_like' size='30' />";
+
+return <<EOT;
 <!---- interest ----->
 <?crit
 name=>By Interest
 code=>s_int
 form<=
-User likes: <INPUT NAME="int_like" SIZE=30>
+$interest_detail
 <=form
 crit?>
+EOT
+_code?>
 
+<?_code
+    my $has_friend = $comm_mode ? "Has Member" : "Has Friend";
+    my $friend_detail = $comm_mode ?
+                           "<input name='fr_user' size='15' maxlength='15' /> is a member." :
+                           "User lists <input name='fr_user' size='15' maxlength='15' /> as a friend.";
+
+return <<EOT;
 <!---- has friend ----->
 <?crit
-name=>Has Friend
+name=>$has_friend
 code=>s_fr
 form<=
-User lists <INPUT NAME="fr_user" SIZE=15 MAXLENGTH=15> as a friend.
+$friend_detail
 <=form
 crit?>
+EOT
+_code?>
 
+
+<?_code
+unless ($comm_mode) { # Searching 'Watched by' for communities probably has privacy issues
+return <<EOT;
 <!---- friend of ----->
 <?crit
 name=>Friend of
@@ -124,6 +172,9 @@ code=>s_fro
 form<=
 <INPUT NAME="fro_user" SIZE=15 MAXLENGTH=15> lists user as a friend.
 crit?>
+EOT
+} return "";
+_code?>
 
 <?_c  dead for now
 <!---- client used ----->
@@ -156,8 +207,11 @@ form<=
 Output Format:
 </TD><TD>
 <SELECT NAME="opt_format">
-<OPTION VALUE="pics">By Picture
-<OPTION VALUE="simple">Simple
+<?_code
+    return $comm_mode ? "<option value='com' selected='selected'>Community View</option>" : "";
+_code?>
+<option value='pics'>By Picture</option>
+<option value='simple'>Simple</option>
 </SELECT>
 </TD></TR>
 

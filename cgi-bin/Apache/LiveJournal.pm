@@ -150,7 +150,7 @@ sub trans
 
     LJ::start_request();
     foreach (@req_hosts) {
-        return FORBIDDEN if $LJ::IP_BANNED{$_}; 
+        return FORBIDDEN if LJ::sysban_check('ip', $_);
     }
     return FORBIDDEN if LJ::run_hook("forbid_request", $r);
 

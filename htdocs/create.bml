@@ -92,6 +92,11 @@ body<=
      $name =~ s/[\n\r]//g;
      my $email = LJ::trim(lc($FORM{'email'}));
 
+     # reject this email?
+     return LJ::sysban_block(0, "Create user blocked based on email",
+                             { 'new_user' => $user, 'email' => $email, 'name' => $name })
+         if LJ::sysban_check('email', $email);
+
      my $quser = $dbh->quote($user);
      my $qemail = $dbh->quote($email);
      my $qname = $dbh->quote($name);

@@ -2829,10 +2829,6 @@ sub start_request
     # reset BML's cookies
     eval { BML::reset_cookies() };
 
-    # not sure where to put this.  need to load the IP banned table
-    # at some point.
-    LJ::load_banned_ips();
-
     # check the modtime of ljconfig.pl and reload if necessary
     # only do a stat every 10 seconds and then only reload
     # if the file has changed
@@ -2853,16 +2849,100 @@ sub start_request
     return 1;
 }
 
-sub load_banned_ips {
-    return if $LJ::IP_BANNED_LOADED++;
-    my $dbh = LJ::get_db_writer();
-    if ($dbh) {
-        my $sth = $dbh->prepare("SELECT ip FROM ipban");
-        $sth->execute;
-        while (my $ip = $sth->fetchrow_array) {
-            $LJ::IP_BANNED{$ip} = 1;
-        }
+# <LJFUNC>
+# name: LJ::sysban_check
+# des: Given a 'what' and 'value', checks to see if a ban exists
+# args: what, value
+# des-what: The ban type
+# des-value: The value which triggers the ban
+# returns: 1 if a ban exists, 0 otherwise
+# </LJFUNC>
+sub sysban_check {
+    my ($what, $value) = @_;
+
+    # cache if ip ban
+    if ($what eq 'ip') {
+        return $LJ::IP_BANNED{$value} if $LJ::IP_BANNED_LOADED;
+
+        my $dbh = LJ::get_db_writer();
+        return undef unless $dbh;
+
+        # set this now before the query
+        $LJ::IP_BANNED_LOADED++;
+
+        # build cache
+        my $sth = $dbh->prepare("SELECT value FROM sysban " .
+                                "WHERE status='active' AND what='ip' " .
+                                "AND NOW() > bandate " .
+                                "AND (NOW() < banuntil OR banuntil IS NULL)");
+        $sth->execute();
+        return undef $LJ::IP_BANNED_LOADED if $sth->err;
+        $LJ::IP_BANNED{$_}++ while $_ = $sth->fetchrow_array;
+
+        # return value to user
+        return $LJ::IP_BANNED{$value};
     }
+
+    # non-ip bans come straight from the db
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
+
+    return $dbh->selectrow_array("SELECT COUNT(*) FROM sysban " .
+                                 "WHERE status='active' AND what=? AND value=? " .
+                                 "AND NOW() > bandate " .
+                                 "AND (NOW() < banuntil OR banuntil=0 OR banuntil IS NULL)",
+                                 undef, $what, $value);
+}
+
+# <LJFUNC>
+# name: LJ::sysban_note
+# des: Inserts a properly-formatted row into statushistory noting that a ban has been triggered
+# args: userid?, notes, vars
+# des-userid: The userid which triggered the ban, if available
+# des-notes: A very brief description of what triggered the ban
+# des-vars: A hashref of helpful variables to log, keys being variable name and values being values
+# returns: nothing
+# </LJFUNC>
+sub sysban_note
+{
+    my ($userid, $notes, $vars) = @_;
+
+    my $dbs = LJ::get_dbs();
+    $notes .= ":";
+    map { $notes .= " $_=$vars->{$_};" if $vars->{$_} } sort keys %$vars;
+    LJ::statushistory_add($dbs, $userid, 0, 'sysban_trig', $notes);
+    return;
+}
+
+# <LJFUNC>
+# name: LJ::sysban_block
+# des: Notes a sysban in statushistory and returns a fake http error message to the user
+# args: userid?, notes, vars
+# des-userid: The userid which triggered the ban, if available
+# des-notes: A very brief description of what triggered the ban
+# des-vars: A hashref of helpful variables to log, keys being variable name and values being values
+# returns: nothing
+# </LJFUNC>
+sub sysban_block
+{
+    my ($userid, $notes, $vars) = @_;
+
+    LJ::sysban_note($userid, $notes, $vars);
+
+    my $msg = <<'EOM';
+<html>
+<head>
+<title>503 Service Unavailable</title>
+</head>
+<body>
+<h1>503 Service Unavailable</h1>
+The service you have requested is temporarily unavailable.
+</body>
+</html>
+EOM
+
+    BML::http_response(200, $msg);
+    return;
 }
 
 # <LJFUNC>
