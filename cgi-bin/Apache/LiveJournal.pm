@@ -1201,7 +1201,7 @@ sub db_logger
             $LJ::CACHE_DINSERTD_SOCK{$hostport} ||=
             IO::Socket::INET->new(PeerAddr => $hostport,
                                   Proto    => 'tcp',
-                                  Timeout  => 2,
+                                  Timeout  => 1,
                                   );
 
         if ($sock) {
@@ -1372,11 +1372,18 @@ sub db_logger
     }
 
     if (@dinsertd_socks) {
-        my $string = "INSERT $table " . join("&", map { LJ::eurl($_) . "=" . LJ::eurl($var->{$_}) } keys %$var) . "\r\n";
+        $var->{_table} = $table;
+        my $string = "INSERT " . Storable::freeze($var) . "\r\n";
+        my $len = "\x01" . substr(pack("N", length($string) - 2), 1, 3);
+        $string = $len . $string;
+
         foreach my $rec (@dinsertd_socks) {
             my $sock = $rec->[1];
             print $sock $string;
-            my $res = <$sock>;
+            my $rin;
+            my $res;
+            vec($rin, fileno($sock), 1) = 1;
+            $res = <$sock> if select($rin, undef, undef, 0.3);
             delete $LJ::CACHE_DINSERTD_SOCK{$rec->[0]} unless $res =~ /^OK\b/;
         }
     }
