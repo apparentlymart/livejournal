@@ -90,11 +90,10 @@
  $BMLClient::COOKIE{"ljuser"} = $user;
  $BMLClient::COOKIE{"ljhpass"} = "$user:$hpassword";
  
- if ($FORM{'ref'} =~ /\Q$LJ::DOMAIN\E/ && $FORM{'ref'} !~ m!/logout\.bml$!) {
-     print "Location: $FORM{'ref'}\n\n";
-     $body = ""; 
-     BML::finish();
-     return;
+ if ($FORM{'ref'} =~ /\Q$LJ::DOMAIN\E/ && $FORM{'ref'} !~ m!/logout\.bml$! &&
+     $FORM{'ref'} !~ /[\n\r]/) 
+ {
+     return BML::redirect("$FORM{'ref'}");
  }
  
  $body = "(=H1 Logged in! H1=)";

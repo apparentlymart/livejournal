@@ -150,6 +150,12 @@ sub handler
     my $html;
     bml_decode($req, \$bmlsource, \$html, { DO_CODE => $req->{'env'}->{'AllowCode'} });
 
+    # redirect, if set previously
+    if ($req->{'location'}) {
+        $r->header_out(Location => $req->{'location'});
+        return REDIRECT;
+    }
+
     # insert all client (per-user, cookie-set) variables
     if ($req->{'env'}->{'UseBmlSession'}) {
         $html =~ s/%%c\!(\w+)%%/BML::ehtml(BMLClient::get_var($1))/eg;
@@ -797,6 +803,14 @@ sub modified_time
 
 
 package BML;
+
+sub redirect
+{
+    my $url = shift;
+    $Apache::BML::cur_req->{'location'} = $url;
+    finish_suppress_all();
+    return;
+}
 
 sub do_later
 {

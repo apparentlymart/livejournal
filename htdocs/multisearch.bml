@@ -11,10 +11,7 @@
 
      ## magic mode
      if ($FORM{'q'} =~ /^\*(\d+)/) {
-         print "Status: 302 Found\n";
-         print "Location: $LJ::SITEROOT/talkread.bml?itemid=$1\n\n";
-         BML::finish;
-         return;
+         return BML::redirect("$LJ::SITEROOT/talkread.bml?itemid=$1");
      }
 
      my $user = lc($FORM{'q'});
@@ -34,28 +31,16 @@
              $url = "$LJ::SITEROOT/userinfo.bml?user=$user";
          }
 
-         print "Status: 302 Found\n";
-         print "Location: $url\n\n";
-         BML::finish;
-         return;
+         return BML::redirect($url);
      } else {
-         print "Status: 302 Found\n";
-         print "Location: $LJ::SITEROOT/random.bml\n\n";
-         BML::finish;
-
-         $title = "No user";
-         $body = "(=H1 Error H1=)(=P You did not enter a username. P=)";
-         return;
+         return BML::redirect("$LJ::SITEROOT/random.bml");
      }
  }
 
  if ($FORM{'type'} eq "int") {
      my $int = lc($FORM{'q'});
      if ($int) {
-         print "Status: 302 Found\n";
-         print "Location: $LJ::SITEROOT/interests.bml?int=" . LJ::eurl($int) . "\n\n";
-         BML::finish;
-         return;
+         return BML::redirect("$LJ::SITEROOT/interests.bml?int=" . LJ::eurl($int));
      } else {
          $title = "No Interest";
          $body = "(=H1 Error H1=)(=P You did not enter an interest. P=)";
@@ -78,10 +63,7 @@
              $user = "";
          }
          if ($user) {
-             print "Status: 302 Found\n";
-             print "Location: $LJ::SITEROOT/userinfo.bml?user=$user\n\n";
-             BML::finish;
-             return;
+             return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$user");
          } else {
              $title = "No Match";
              $body = "(=H1 Sorry.. H1=)(=P No LiveJournal user is listed as having that email address, or they've chosen to have their address be private. P=)";
@@ -98,10 +80,7 @@
      $sth->execute;
      my ($user, $emailshow) = $sth->fetchrow_array;
      if ($user) {
-         print "Status: 302 Found\n";
-         print "Location: $LJ::SITEROOT/userinfo.bml?user=$user\n\n";
-         BML::finish;
-         return;
+         return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$user");
      } else {
          $title = "No Match";
          $body = "(=H1 Sorry.. H1=)(=P No LiveJournal found matching that search criteria. P=)";
@@ -144,10 +123,8 @@
          }
      }
      ($city, $state, $country) = map { LJ::eurl($_); } ($city, $state, $country);
-     print "Status: 302 Found\n";
-     print "Location: $LJ::SITEROOT/directory.bml?s_loc=1&loc_cn=$country&loc_st=$state&loc_ci=$city&opt_sort=ut&opt_format=pics&opt_pagesize=50\n\n";
-     BML::finish();
-     return;
+     
+     return BML::redirect("$LJ::SITEROOT/directory.bml?s_loc=1&loc_cn=$country&loc_st=$state&loc_ci=$city&opt_sort=ut&opt_format=pics&opt_pagesize=50");
  }
 
  return;

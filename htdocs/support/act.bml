@@ -108,10 +108,7 @@ BODY<=
          $sth->execute;
          my $next = $sth->fetchrow_array;
          if ($next) {
-             print "Status: 302 Found\n";
-             print "Location: $LJ::SITEROOT/support/see_request.bml?id=$next\n\n";
-               BML::finish();
-             return;
+             return BML::redirect("$LJ::SITEROOT/support/see_request.bml?id=$next");
          }
      } 
      

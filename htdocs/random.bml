@@ -9,14 +9,12 @@
      my $rand = int(rand($max))+1;
      my $user = $dbr->selectrow_array("SELECT u.user FROM randomuserset r, useridmap u WHERE r.userid=u.userid AND r.rid=$rand");
      if ($user) {
-         print "Location: $LJ::SITEROOT/users/$user/\n\n";
-         return;
+         return BML::redirect("$LJ::SITEROOT/users/$user/");
      }
  }
 
  # something went wrong, redirect them back to top of site... *shrug*
- print "Location: $LJ::SITEROOT/\n\n";
- return;
+ return BML::redirect("$LJ::SITEROOT/");
 
 _CODE=)(=_INFO
 NOHEADERS=>1

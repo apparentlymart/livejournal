@@ -38,8 +38,7 @@
      }
 
      if ($jumpid) {
-         print "Location: $LJ::SITEROOT/talkread.bml?journal=$u->{'user'}&itemid=$jumpid\n\n";
-         BML::finish();
+         return BML::redirect("$LJ::SITEROOT/talkread.bml?journal=$u->{'user'}&itemid=$jumpid");
      }
  }
  elsif ($itemid) 
@@ -54,8 +53,7 @@
          $body = "There is no journal entry preceeding this one.";
      }
      if ($jumpid) {
-         print "Location: $LJ::SITEROOT/talkread.bml?itemid=$jumpid\n\n";
-         BML::finish();
+         return BML::redirect("$LJ::SITEROOT/talkread.bml?itemid=$jumpid");
      }
  }
 

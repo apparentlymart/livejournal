@@ -1078,6 +1078,14 @@ sub trim
 
 package BML;
 
+sub redirect
+{
+    my $url = shift;
+    print "Location: $url\n\n";
+    finish_suppress_all();
+    return;
+}
+
 sub do_later
 {
     my $subref = shift;

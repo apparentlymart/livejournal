@@ -15,9 +15,7 @@
      }
      my $extra = "?filter=$filter";
 
-     print "Location: $LJ::SITEROOT/users/$user/friends${extra}\n\n";
-     BML::finish();
-     return;
+     return BML::redirect("$LJ::SITEROOT/users/$user/friends${extra}");
  }
 
  my $dbs = LJ::get_dbs();
