@@ -12,6 +12,8 @@ sub new {
     my $self = {};
     $self->{path} = $args->{path};
     $self->{path} =~ s!/$!!;
+    $self->{backup_path} = $args->{backup_path};
+    $self->{backup_path} =~ s!/$!!;
     bless $self, ref $class || $class;
     return $self;
 }
@@ -32,6 +34,13 @@ sub _make_path {
 sub make_path {
     my $self = shift;
     return $self->{path} . '/' . _make_path(@_);
+}
+
+sub make_backup_path {
+    my $self = shift;
+    my $path = $self->{backup_path};
+    return undef unless $path; # if no backup_path, just return undef
+    return $path . '/' . _make_path(@_);
 }
 
 # derived classes will override this.

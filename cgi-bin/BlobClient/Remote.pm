@@ -32,21 +32,23 @@ sub new {
     my ($class, $args) = @_;
     my $self = $class->SUPER::new($args);
 
-    $self->{ua} = LWP::UserAgent->new(agent=>'blobclient');
+    $self->{ua} = LWP::UserAgent->new(agent=>'blobclient', timeout => 4);
 
     bless $self, ref $class || $class;
     return $self;
 }
 
 sub get {
-    my ($self, $cid, $uid, $domain, $fmt, $bid) = @_;
-    my $path = make_path(@_);
-    print STDERR "Blob::Remote requesting $path\n" if DEBUG;
+    my ($self, $cid, $uid, $domain, $fmt, $bid, $use_backup) = @_;
+    my $path = $use_backup ? make_backup_path(@_) : make_path(@_);
+    return undef unless $path; # if no path, we fail
+
+    print STDERR "Blob::Remote requesting $path (backup path? $use_backup)\n" if DEBUG;
     my $req = HTTP::Request->new(GET => $path);
 
     my $res;
     report_blocking_time {
-        $res = $self->{ua}->request($req);
+        eval { $res = $self->{ua}->request($req); };
     } "get", $path, $self->{path};
     return $res->content if $res->is_success;
 
@@ -55,56 +57,97 @@ sub get {
 
     if ($res->code == 500) {
         # server dead.
-        $self->{deaduntil} = time() + DEADTIME;
+        if ($use_backup) {
+            # can't reach backup server, we're really dead
+            $self->{deaduntil} = time() + DEADTIME;
+        } else {
+            # try using a backup
+            return $self->get($cid, $uid, $domain, $fmt, $bid, 1);
+        }
     }
     return undef;
 }
 
 sub get_stream {
-    my ($self, $cid, $uid, $domain, $fmt, $bid, $callback) = @_;
-    my $path = make_path(@_);
+    my ($self, $cid, $uid, $domain, $fmt, $bid, $callback, $use_backup) = @_;
+    my $path = $use_backup ? make_backup_path(@_) : make_path(@_);
+    return undef unless $path; # if no path, we fail
+
     my $req = HTTP::Request->new(GET => $path);
 
     my $res;
     report_blocking_time {
-        $res = $self->{ua}->request($req, $callback, 1024*50);
+        eval { $res = $self->{ua}->request($req, $callback, 1024*50); };
     } "get_stream", $path, $self->{path};
 
-    return $res->is_success;
+    return $res->is_success if $res->is_success;
+
+    # must have failed
+    if ($res->code == 500) {
+        # server dead.
+        if ($use_backup) {
+            # can't reach backup server, we're really dead
+            $self->{deaduntil} = time() + DEADTIME;
+        } else {
+            # try using a backup
+            return $self->get_stream($cid, $uid, $domain, $fmt, $bid, $callback, 1);
+        }
+    }
+    return undef;
 }
 
 sub put {
-    my ($self, $cid, $uid, $domain, $fmt, $bid, $content, $errref) = @_;
-    my $path = make_path(@_);
-    print STDERR "Blob::Remote putting $path with content of length " . length($content) . "\n" if DEBUG;
+    my ($self, $cid, $uid, $domain, $fmt, $bid, $content, $errref, $use_backup) = @_;
+    my $path = $use_backup ? make_backup_path(@_) : make_path(@_);
+    return 0 unless $path; # if no path, we fail
+
     my $req = HTTP::Request->new(PUT => $path);
 
     $req->content($content);
 
     my $res;
     report_blocking_time {
-        $res = $self->{ua}->request($req);
+        eval { $res = $self->{ua}->request($req); };
     } "put", $path, $self->{path};
 
     unless ($res->is_success) {
-        $$errref = "$path: " . $res->status_line if $errref;
-        return 0;
+        if ($use_backup) {
+            # total failure
+            $$errref = "$path: " . $res->status_line if $errref;
+            return 0;
+        } else {
+            # try backup
+            return $self->put($cid, $uid, $domain, $fmt, $bid, $content, $errref, 1);
+        }
     }
     return 1;
 }
 
 sub delete {
-    my ($self, $cid, $uid, $domain, $fmt, $bid) = @_;
-    my $path = make_path(@_);
+    my ($self, $cid, $uid, $domain, $fmt, $bid, $use_backup) = @_;
+    my $path = $use_backup ? make_backup_path(@_) : make_path(@_);
+    return 0 unless $path; # if no path, we fail
+
     my $req = HTTP::Request->new(DELETE => $path);
 
     my $res;
     report_blocking_time {
-        $res = $self->{ua}->request($req);
+        eval { $res = $self->{ua}->request($req); };
     } "delete", $path, $self->{path};
 
     return 1 if $res && $res->code == 404;
-    return 0 unless $res->is_success;
+    unless ($res->is_success) {
+        if ($res->code == 500) {
+            if ($use_backup) {
+                # total failure!
+                return 0;
+            } else {
+                # try again
+                return $self->delete($cid, $uid, $domain, $fmt, $bid, 1);
+            }
+        }
+        return 0;
+    }
     return 1;
 }
 
@@ -116,5 +159,6 @@ sub is_dead {
 
 ### [MG]: Hmmm... no-op?
 sub make_path { my $self = shift; return $self->SUPER::make_path(@_); }
+sub make_backup_path { my $self = shift; return $self->SUPER::make_backup_path(@_); }
 
 1;

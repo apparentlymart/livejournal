@@ -15,7 +15,8 @@ sub get_blobclient {
     my $u = shift;
     my $bcid = $u->{blob_clusterid} or die "No blob_clusterid";
     return $bc_cache{$bcid} ||=
-        _bc_from_path($LJ::BLOBINFO{clusters}->{$bcid});
+        _bc_from_path($LJ::BLOBINFO{clusters}->{$bcid},
+                      $LJ::BLOBINFO{clusters}->{"$bcid-BACKUP"});
 }
 
 # read-only access.  (i.e. direct HTTP connection to NetApp)
@@ -27,14 +28,16 @@ sub get_blobclient_reader {
 
     my $path = $LJ::BLOBINFO{clusters}->{"$bcid-GET"} ||
         $LJ::BLOBINFO{clusters}->{$bcid};
+    my $bpath = $LJ::BLOBINFO{clusters}->{"$bcid-BACKUP"};
     
-    return $bc_reader_cache{$bcid} = _bc_from_path($path);
+    return $bc_reader_cache{$bcid} = _bc_from_path($path, $bpath);
 }
 
 sub _bc_from_path {
-    my $path = shift;
+    my ($path, $bpath) = @_;
     if ($path =~ /^http/) {
-        return BlobClient::Remote->new({ path => $path });
+        $bpath = undef unless $bpath =~ /^http/;
+        return BlobClient::Remote->new({ path => $path, backup_path => $bpath });
     } elsif ($path) {
         return BlobClient::Local->new({ path => $path });
     }
