@@ -512,14 +512,18 @@ sub get_log2_recent_log
     my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14; # 2 weeks default
     
     my $sql = "SELECT jitemid, posterid, eventtime, rlogtime, " .
-        "security, allowmask, anum FROM log2 " .
+        "security, allowmask, anum, replycount FROM log2 " .
         "USE INDEX (rlogtime) WHERE journalid=? AND " .
-        "rlogtime <= ($LJ::EndOfTime - UNIX_TIMESTAMP()) + $max_age ORDER BY journalid, rlogtime";
+        "rlogtime <= ($LJ::EndOfTime - UNIX_TIMESTAMP()) + $max_age";
     
     my $sth = $db->prepare($sql);
     $sth->execute($jid);
-    
-    while (my $item = $sth->fetchrow_hashref) {
+    my @row;
+    push @row, $_ while $_ = $sth->fetchrow_hashref;
+    @row = sort { $a->{'rlogtime'} <=> $b->{'rlogtime'} } @row;
+    my $itemnum = 0;
+
+    foreach my $item (@row) {
         $item->{'ownerid'} = $item->{'journalid'} = $jid;
         $item->{'itemid'} = $item->{'jitemid'};
         push @$ret, $item;
@@ -537,6 +541,10 @@ sub get_log2_recent_log
                       $item->{'rlogtime'},
                       $sec,
                       $ditemid);
+
+        if ($itemnum++ < 50) {
+            LJ::MemCache::add([$jid, "rp:$jid:$item->{'jitemid'}"], $item->{'replycount'});
+        }
     }
 
     $rows = $DATAVER . $rows;
