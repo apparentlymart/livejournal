@@ -186,7 +186,7 @@
      $dumper->Indent(2);
      my $d = $dumper->Dump();
 
-     $ret.= "<pre>$d</pre>";
+     $ret.= "<pre>" . LJ::ehtml($d) . "</pre>";
 
      return;
  };
