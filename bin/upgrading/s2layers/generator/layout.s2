@@ -66,6 +66,11 @@ propgroup colors {
     }
 }
 
+propgroup Fonts {
+    property use font_base;
+    property use font_fallback;
+}
+
 propgroup other {
     property use page_recent_items;
     property use page_friends_items;
@@ -116,11 +121,27 @@ set box_width = 600;
 set show_entrynav_icons = true;
 set page_background_image = "";
 
+set font_base = "Verdana";
+set font_fallback = "sans-serif";
+
 function print_stylesheet () {
     print $*page_background_image ? "body { background-image: url($*page_background_image); }" : "";
 """body, td {
-font-family: verdana, sans-serif;
-font-size: 10pt;
+""";
+if ($*font_base != "" or $*font_fallback != "none") {
+    "font-family: ";
+    if ($*font_base != "") {
+        "\"$*font_base\"";
+        if ($*font_fallback != "none") {
+            ", ";
+        }
+    }
+    if ($*font_fallback != "none") {
+        print $*font_fallback;
+    }
+    ";\n";
+}
+"""font-size: 10pt;
 }
 tt, pre {
 font-family: monospace;
