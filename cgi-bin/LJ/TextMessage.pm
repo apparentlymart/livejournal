@@ -22,7 +22,7 @@ use LWP::UserAgent;
 use strict;
 use vars qw($VERSION $SENDMAIL %providers);
 
-$VERSION = '1.4.1';
+$VERSION = '1.4.4';
 
 # default path to sendmail, if none other specified.  we should probably
 # use something more perl-ish and less unix-specific, but whateva'
@@ -41,7 +41,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
 
     'airtouch' => {
         'name'		=> 'Verizon Wireless (formerly Airtouch)',
-        'notes'		=> '10-digit phone number.  Goes to @airtouchpaging.com',
+        'notes'		=> '10-digit phone number.  Goes to @airtouchpaging.com.  This is ONLY for former Airtouch customers.  Normal Verizon Wireless customers should use the normal Verizon Wireless option.',
         'fromlimit'	=> 20,
         'msglimit'	=> 120,
         'totlimit'	=> 120,
@@ -71,6 +71,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 150,
     },
 
+    'bellmobilityca' => {
+        'name'		=> 'Bell Mobility Canada',
+        'notes'		=> '11-digit phone number (1 + area-code + phone-number).  Goes to @txt.bellmobility.ca',
+        'fromlimit'	=> 20,
+        'msglimit'	=> 120,
+        'totlimit'	=> 120,
+    },
+
     'bellsouthmobility' => {
         'name'		=> 'BellSouth Mobility',
         'notes'		=> 'Enter your 10-digit phone number.  Goes to @blsdcs.net via email.',
@@ -79,12 +87,46 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 160,
     },
 
+    'btcellnet' => {
+        'name'		=> 'BT Cellnet',
+        'notes'		=> 'Input phone number - must be enabled first.  Goes to +44[number]@mmail.co.uk.',
+        'fromlimit'	=> 20,
+        'msglimit'	=> 120,
+        'totlimit'	=> 120,
+    },
+
     'cellularonedobson' => {
         'name'		=> 'CellularOne (Dobson)',
         'notes'		=> 'Enter your 10 digit phone number.  Sent through email gateway @mobile.celloneusa.com.',
         'fromlimit'	=> 20,
         'msglimit'	=> 120,
         'totlimit'	=> 120,
+    },
+
+    'cingular' => 
+    {
+        'name'		=> 'Cingular New England',
+        'notes'		=> 'Enter 8 digit PIN or user name.  Goes to @sbcemail.com',
+        'fromlimit'	=> 20,
+        'msglimit'	=> 160,
+        'totlimit'	=> 160,
+    },
+
+    'cingular-texas' => 
+    {
+        'name'		=> 'Cingular Wireless - (Houston) Texas',
+        'notes'		=> 'Enter phone number.  Goes to @mobile.mycingular.net',
+        'fromlimit'	=> 20,
+        'msglimit'	=> 150,
+        'totlimit'	=> 150,
+    },
+
+    'fidoca' => {
+        'name'		=> 'Fido Canada',
+        'notes'		=> 'Enter your 10-digit phone number.  Message is sent via the email gateway, to 10digits@fido.ca.',
+        'fromlimit'	=> 15,
+        'msglimit'	=> 140,
+        'totlimit'	=> 140,
     },
 
     'imcingular' => 
@@ -96,12 +138,13 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 16000,
     },
 
-    'lycosuk' => {
-        'name'		=> 'Lycos UK (UK wireless networks)',
-        'notes'		=> 'Enter your full phone number.  Messages are sent via the Lycos UK SMS gateway, and end with an additional 30 character from Lycos to help subsidize the service.',
-        'fromlimit'	=> 112,
-        'msglimit'	=> 112,
-        'totlimit'	=> 112,
+    'imcingular-cell' => 
+    {
+        'name'		=> 'Cingular IM Plus/Bellsouth IPS Cellphones',
+        'notes'		=> 'Enter phone number.  Goes to @mobile.mycingular.com',
+        'fromlimit'	=> 100,
+        'msglimit'	=> 16000,
+        'totlimit'	=> 16000,
     },
 
     'metrocall' => {
@@ -120,6 +163,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 120,
     },
 
+    'mtsmobility' => {
+        'name'		=> 'Manitoba Telecom Systems',
+        'notes'		=> '10-digit phone number.  Goes to @text.mtsmobility.com',
+        'fromlimit'	=> 20,
+        'msglimit'	=> 120,
+        'totlimit'	=> 120,
+    },
+
     'nextel' => {
         'name'		=> 'Nextel',
         'notes'		=> '10-digit phone number.  Goes to @messaging.nextel.com',
@@ -129,19 +180,19 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
     },
 
     'pacbell' => {
-        'name'		=> 'Pacific Bell Wireless (Cingular)',
-        'notes'		=> 'Enter your 10 digit phone number.  Sent through web gateway at pacbellpcs.net, almost instant delivery.',
-        'fromlimit'	=> 25,
-        'msglimit'	=> 640,
-        'totlimit'	=> 665,
+        'name'		=> 'Pacific Bell Cingular',
+        'notes'		=> '10-digit phone number.  Goes to @mobile.mycingular.com',
+        'fromlimit'	=> 20,
+        'msglimit'	=> 120,
+        'totlimit'	=> 120,
     },
 
     'pagenet' => {
         'name'		=> 'Pagenet',
-        'notes'		=> '10-digit phone number.  Goes to number@pagenet.net',
-        'fromlimit'	=> 50,
-        'msglimit'	=> 120,
-        'totlimit'	=> 120,
+        'notes'		=> '10-digit phone number (or gateway and pager number separated by a period).  Goes to number@pagenet.net.',
+        'fromlimit'	=> 20,
+        'msglimit'	=> 220,
+        'totlimit'	=> 240,
     },
 
     'pcsrogers' => {
@@ -187,14 +238,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
     'uboot' => {
         'name'		=> 'uBoot',
         'notes'		=> 'Enter your username as the phone number.  See http://www.uboot.com for more details',
-        'fromlimit'	=> 15,
-        'msglimit'	=> 160,
-        'totlimit'	=> 160,
+        'fromlimit'	=> 146,
+        'msglimit'	=> 146,
+        'totlimit'	=> 146,
     },
 
     'vzw' => {
         'name'		=> 'Verizon Wireless',
-        'notes'		=> 'Enter your 10-digit phone number.  Messages are sent via the gateway at http://msg.myvzw.com, usually faster than the email gateway.',
+        'notes'		=> 'Enter your 10-digit phone number.  Messages are sent via email to number@msg.myvzw.com.',
         'fromlimit'	=> 34,
         'msglimit'	=> 104,
         'totlimit'	=> 104,	      
@@ -206,6 +257,23 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'fromlimit'	=> 15,
         'msglimit'	=> 140,
         'totlimit'	=> 140,
+    },
+
+    'voicestream2' => {
+        'name'		=> 'Voicestream',
+        'notes'		=> 'Enter your 10-digit phone number.  Message is sent via the email gateway, since they changed their web gateway and we have not gotten it working with the new one yet.',
+        'fromlimit'	=> 15,
+        'msglimit'	=> 140,
+        'totlimit'	=> 140,
+    },
+
+    'wyndtell' => 
+    {
+        'name'		=> 'WyndTell',
+        'notes'		=> 'Enter username/phone number.  Goes to @wyndtell.com',
+        'fromlimit'	=> 20,
+        'msglimit'	=> 480,
+        'totlimit'	=> 500,
     },
 
 );
@@ -276,7 +344,7 @@ sub send
     elsif ($provider eq "airtouch")
     {
         send_mail($self, { 
-            'to'	=> "$self->{'number'}\@airtouchpaging.com",
+            'to'	=> "$self->{'number'}\@sender.airtouchpaging.com",
             'from'	=> "$msg->{'from'}",
             'body'	=> "$msg->{'message'}",
         });
@@ -310,9 +378,27 @@ sub send
         });
     }
 
+    elsif ($provider eq "bellmobilityca")
+    {
+        send_mail($self, { 
+            'to'	=> "$self->{'number'}\@txt.bellmobility.ca",
+            'from'	=> "$msg->{'from'}",
+            'body'	=> "$msg->{'message'}",
+        });
+    }
+
     elsif ($provider eq "bellsouthmobility")
     {
         send_emailgate($self, $msg, "blsdcs.net");
+    }
+
+    elsif ($provider eq "btcellnet")
+    {
+        send_mail($self, { 
+            'to'	=> "+44".$self->{'number'}."\@mmail.co.uk",
+            'from'	=> "$msg->{'from'}",
+            'body'	=> "$msg->{'message'}",
+        });
     }
 
     elsif ($provider eq "cellularonedobson")
@@ -321,6 +407,33 @@ sub send
             'to'	=> "$self->{'number'}\@mobile.celloneusa.com",
             'from'	=> "$msg->{'from'}",
             'body'	=> $msg->{'message'},
+        });
+    }
+
+    elsif ($provider eq "cingular")
+    {
+        send_mail($self, {
+            'to'	=> "$self->{'number'}\@sbcemail.com",
+            'from'	=> $msg->{'from'},
+            'body'	=> $msg->{'message'},
+        });
+    }
+
+    elsif ($provider eq "cingular-texas")
+    {
+        send_mail($self, {
+            'to'	=> "$self->{'number'}\@mobile.mycingular.net",
+            'from'	=> $msg->{'from'},
+            'body'	=> $msg->{'message'},
+        });
+    }
+
+    elsif ($provider eq "fidoca" )
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@fido.ca",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
         });
     }
 
@@ -333,11 +446,12 @@ sub send
         });
     }
 
-    elsif ($provider eq "lycosuk")
+    elsif ($provider eq "imcingular-cell")
     {
-        post_webform("http://smscgi02-1.lycos.de/uk/cgi-bin/sms/send_uk_sms5.cgi", $errors, {
-            "ren"	=> $self->{'number'},
-            "msg"	=> "Livejournal($msg->{'from'}) $msg->{'message'}",
+        send_mail($self, {
+            'to'	=> "$self->{'number'}\@mobile.mycingular.com",
+            'from'	=> $msg->{'from'},
+            'body'	=> $msg->{'message'},
         });
     }
 
@@ -359,6 +473,15 @@ sub send
         });
     }
 
+    elsif ($provider eq "mtsmobility")
+    {
+        send_mail($self, { 
+            'to'	=> "$self->{'number'}\@text.mtsmobility.com",
+            'from'	=> "$msg->{'from'}",
+            'body'	=> "$msg->{'message'}",
+        });
+    }
+
     elsif ($provider eq "nextel")
     {
         send_emailgate($self, $msg, "messaging.nextel.com");
@@ -366,13 +489,10 @@ sub send
 
     elsif ($provider eq "pacbell")
     {
-        post_webform("http://www.pacbellpcs.net/servlet/cmg.vasp.smlp.ShortMessageLaunchPad?FOO", $errors, {
-            "LANGUAGE"		=> "en",
-            "NETWORK"		=> "smsc1",
-            "DELIVERY_TIME"	=> 0,
-            "SENDER"		=> $msg->{'from'},
-            "RECIPIENT"		=> "1$self->{'number'}", # 11 digit phone number ("1"+number)
-            "SHORT_MESSAGE"	=> $msg->{'message'},
+        send_mail($self, { 
+            'to'	=> "$self->{'number'}\@mobile.mycingular.com",
+            'from'	=> "$msg->{'from'}",
+            'body'	=> "$msg->{'message'}",
         });
     }
 
@@ -432,28 +552,44 @@ sub send
             "page"	=> "Sms",
             "action"	=> "send_sms",
             "nickname"	=> $self->{'number'},
-            "text"	=> $msg->{'message'},
+            "text"	=> "LiveJournal($msg->{'from'}) $msg->{'message'}",
         });
     }
 
     elsif ($provider eq "vzw")  # Verizon Wireless
     {
-        post_webform("http://msg.myvzw.com/servlet/SmsServlet", $errors, { 
-            "min"		=> $self->{'number'},
-            "message"		=> $msg->{'message'},
-            ## from field *MUST* be in the form of an email address or it
-            ## will not be included in the message
-            "senderName"	=> "$msg->{'from'}\@livejournal.com",
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@msg.myvzw.com",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
         });
     }
 
     elsif ($provider eq "voicestream" )
     {
         post_webform("http://www.voicestream.com/messagecenter/".
-		     "default.asp?num=$self->{'number'}", $errors, {
-            "txtNum"     => $self->{'number'},
-            "txtFrom"    => $msg->{'from'},
-            "txtMessage" => $msg->{'message'},
+                     "default.asp?num=$self->{'number'}", $errors, {
+            "txtNum"		=> $self->{'number'},
+            "txtFrom"		=> $msg->{'from'},
+            "txtMessage"	=> $msg->{'message'},
+        });
+    }
+
+    elsif ($provider eq "voicestream2" )
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@voicestream.net",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+        });
+    }
+
+    elsif ($provider eq "wyndtell")
+    {
+        send_mail($self, {
+            'to'	=> "$self->{'number'}\@wyndtell.com",
+            'from'	=> $msg->{'from'},
+            'body'	=> $msg->{'message'},
         });
     }
 
