@@ -356,7 +356,7 @@ if ($FORM{'remoteuser'} eq $user) {
 
          # load all the properties to see which ones are overridable
          my @vars;
-         LJ::load_objects_from_file("$LJ::HTDOCS/vars.dat", \@vars);
+         LJ::load_objects_from_file("vars.dat", \@vars);
          foreach my $v (@vars) {
              my $ov = $v->{'props'}->{'override'}; 
              if ($ov eq "yes" || $ov eq "only" || $capstyles) {

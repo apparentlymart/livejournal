@@ -9,6 +9,12 @@ $verbose = 0;
 sub load_objects_from_file
 {
     my ($file, $oblist) = @_;
+
+    # hard-code these common (er, only) cases
+    if ($file eq "views.dat" || $file eq "vars.dat") {
+        $file = "$LJ::HOME/doc/raw/s1/$file";
+    }
+
     open (FIL, $file);
     load_objects(\*FIL, $oblist);
     close FIL;

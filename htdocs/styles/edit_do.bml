@@ -7,7 +7,7 @@ body<=
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
  my @vars;
- LJ::load_objects_from_file("$LJ::HOME/htdocs/vars.dat", \@vars);
+ LJ::load_objects_from_file("vars.dat", \@vars);
 
  my @errors = ();
  my $user = lc($FORM{'user'});
