@@ -1327,6 +1327,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editjournal_do.bml.opt.noformat=Don't auto-format:
 
+/editjournal_do.bml.opt.spellcheck=Spell check entry before saving
+
 /editjournal_do.bml.other=Other:
 
 /editjournal_do.bml.pickentry.head=Pick an entry to edit
@@ -1342,6 +1344,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 /editjournal_do.bml.save.head=Press to save...
 
 /editjournal_do.bml.save.text=After you're done editing your journal entry, press Save.
+
+/editjournal_do.bml.spellchecked=Your spell-checked post:
 
 /editjournal_do.bml.subject=<B>Subject:</B> <I>(optional, for use on longer entries)</I>
 

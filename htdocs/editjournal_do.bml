@@ -95,8 +95,19 @@ body<=
         ### SAVE EDITS
         ###
 
+        # are we spellchecking before we post?
+        my $spellcheck_html;
+        my $did_spellcheck;
+        if ($LJ::SPELLER && $POST{'do_spellcheck'}) {
+            my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
+                                         'color' => '<?hotcolor?>', };
+            my $event = LJ::ehtml($POST{'event'});
+            $spellcheck_html = $s->check_html(\$event);
+            $did_spellcheck++;
+        }
+
         # they clicked the save or delete button
-        if ($POST{'action:save'} || $POST{'action:delete'}) {
+        if (!$spellcheck_html && ($POST{'action:save'} || $POST{'action:delete'})) {
 
             my %req = (
                        'mode' => 'editevent',
@@ -236,6 +247,9 @@ body<=
         $ret .= "<p>$ML{'.subject'}<br />";
         $ret .= LJ::html_text({ 'name' => 'subject', 'value' => $res{'events_1_subject'},
                                 'size' => '60', 'maxlength' => '255' }) . "\n";
+
+        # spell checked entry
+        $ret .= "<p><b>$ML{'/update.bml.spellchecked'}</b><br />$spellcheck_html</p>" if $spellcheck_html;
         
         # event body
         my $postedby = " (Posted by: " . LJ::ljuser($res{'events_1_poster'}) . ")" if $usejournal;
@@ -243,6 +257,12 @@ body<=
         $ret .= LJ::html_textarea({ 'name' => 'event', 'value' => LJ::durl($res{'events_1_event'}), 'rows' => '12',
                                     'cols' => '60', 'wrap' => 'soft', 'style' => 'width: 99%;' }) . "</p>\n";
 
+        # spell check checkbox
+        if ($LJ::SPELLER) {
+            $ret .= LJ::html_check({ 'name' => 'do_spellcheck', 'id' => 'do_spellcheck' });
+            $ret .= "<label for='do_spellcheck'>$ML{'.opt.spellcheck'}</label>";
+        }
+        
         # security
         $ret .= "<p><b>$ML{'label.security.head'}</b> ";
         my @secs = ("public" => $ML{'label.security.public'}, "friends" => $ML{'label.security.friends'});
