@@ -12,7 +12,11 @@ BODY<=
  }
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
- return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
+
+ # as an exception, we do NOT call LJ::text_in() to check for bad
+ # input, since it may be not in UTF-8 in replies coming from mail
+ # clients. We call it later.
+
 
  $Text::Wrap::columns = 76;
  my $dbs = LJ::get_dbs();
@@ -198,11 +202,21 @@ BODY<=
      push @errors, "Your message was blank.  Please type at least something in the message field.";
  }
 
+ # in case this post comes directly from the user's mail client, it
+ # may have an encoding field for us.
+ if ($FORM{'encoding'}) {
+     $FORM{'body'} = Unicode::MapUTF8::to_utf8({-string=>$FORM{'body'}, -charset=>$FORM{'encoding'}});
+     $FORM{'subject'} = Unicode::MapUTF8::to_utf8({-string=>$FORM{'subject'}, -charset=>$FORM{'encoding'}});
+ }
+ 
+ # now check for UTF-8 correctness, it must hold
+
+ return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
+
  my $unknown8bit = 0;
- if ($FORM{'body'} =~ /[\x80-\xFF]/ || $FORM{'subject'} =~ /[\x80-\xFF]/) {
+ unless (LJ::is_ascii($FORM{'body'}) && LJ::is_ascii($FORM{'subject'})) {
      if ($LJ::UNICODE) {
-         # TODO (avva): validate its UTF-8-ness, complain if not 
-         #              well-formed, or has overlong characters
+         # no need to check if they're well-formed, we did that above
      } else {
          # so rest of site can change chars to ? marks until
          # default user's encoding is set.  (legacy support)
@@ -537,6 +551,7 @@ BODY<=
                  $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$ditemid>";
                  $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$paru->{'user'}\">";
                  $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $paru->{'password'})) . "\">";
+                 $html .= "<input type=hidden name=encoding value=$encoding>" unless $encoding eq "utf-8";
                  my $newsub = $FORM{'subject'};
                  unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
                  $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . LJ::ehtml($newsub) . "\">";
@@ -647,6 +662,8 @@ BODY<=
          $html .= "<INPUT TYPE=HIDDEN NAME=journal VALUE='$u->{'user'}'>" if $clustered;
          $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$ujp->{'user'}\">";
          $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $ujp->{'password'})) . "\">";
+         $html .= "<input type=hidden name=encoding value=$encoding>" unless $encoding eq "utf-8";
+
          my $newsub = $FORM{'subject'};
          unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
          $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . LJ::ehtml($newsub) . "\">";
