@@ -295,3 +295,9 @@ section to other users:
 If you have any questions, join the "lj_dev" community on
 LiveJournal.com and post your questions.  We'd love to help you out.
 
+
+More reading
+------------
+It's recommended that you read the file "CVS.txt" for instructions on
+how to stay up-to-date with the latest LiveJournal code.
+

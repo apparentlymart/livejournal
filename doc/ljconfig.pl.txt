@@ -85,33 +85,6 @@
 	      #},
 	       );
 
-    ## default portal options
-
-    @PORTAL_COLS = qw(main right moz);  # can also include left, if you want.
-    $PORTAL_URI = "/portal/";           # either "/" or "/portal/"    
-
-    $PORTAL_LOGGED_IN = {'main' => [ 
-				     [ 'update', 'mode=full'],
-				     ],
-			 'right' => [ 
-				      [ 'goat', '', ],
-				      [ 'stats', '', ],
-				      [ 'bdays', '', ],
-				      ] };
-    $PORTAL_LOGGED_OUT = {'main' => [ 
-				      [ 'update', 'mode='],
-				      ],
-			  'right' => [ 
-				       [ 'newtolj', '', ],
-				       [ 'login', '', ],
-				       [ 'stats', '', ],
-				       [ 'randuser', '', ],
-				       ],
-			  'moz' => [
-				    [ 'login', '', ],
-				    ],
-			  };
-
     # list of regular expressions matching usernames that people can't have.
     @PROTECTED_USERNAMES = ("^ex_", "^lj_");
     

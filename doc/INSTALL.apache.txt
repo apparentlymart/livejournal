@@ -24,9 +24,6 @@
   AddType text/bml BML 
   Action text/bml /cgi-bin/bmlp.pl
 
-  AddType text/sbml SBML
-  Action text/sbml /cgi-bin/sbmlp.pl
-
   <Location /users> 
       SetHandler cgi-script
   </Location>

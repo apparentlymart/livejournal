@@ -725,6 +725,26 @@ sub get_friend_itemids { return LJ::get_friend_itemids($dbh, @_); }
 
 package LJ;
 
+# the caller is responsible for making sure the username isn't reserved.  this
+# function only ensures that it's a valid username.
+sub create_account
+{
+    my $dbh = shift;
+    my $o = shift;
+
+    my $user = LJ::canonical_username($o->{'user'});
+    unless ($user)  {
+	return 0;
+    }
+    
+    my $quser = $dbh->quote($user);
+    my $qpassword = $dbh->quote($o->{'password'});
+    my $qname = $dbh->quote($o->{'name'});
+
+    $dbh->do("INSERT INTO user (user, name, password) VALUES ($quser, $qname, $qpassword)");
+    return $dbh->err ? 0 : 1;
+}
+
 # returns true if user B is a friend of user A (or if A == B)
 sub is_friend
 {
