@@ -2093,6 +2093,62 @@ a system style, you must first create a new style based on that system style.
 
 /styles/index.bml.title=Custom Styles
 
+/support/append_request.bml.back.requests=Back to the <a href="help.bml">list of open requests</a>.
+
+/support/append_request.bml.back.support=Back to the <a href="/support/">support area</a>.
+
+/support/append_request.bml.bounce.noemail=No email address specified for bounce.
+
+/support/append_request.bml.bounce.notauth=You are not authorized to bounce this request.
+
+/support/append_request.bml.bounce.toomany=You can only send to up to 5 email addresses.  You have specified more than 5.
+
+/support/append_request.bml.bounced.success=<?h1 Bounced h1?><?p The selected support request has been bounced to [[addresslist]] and closed. p?>
+
+/support/append_request.bml.closed.text=This support request has since been closed.
+
+/support/append_request.bml.closed.title=Closed
+
+/support/append_request.bml.internal.approve=To approve an answer, you must select "Internal Comment / Action" and optionally explain why you're approving it.
+
+/support/append_request.bml.internal.changecat=To change a request's category, you must select "Internal Comment / Action" and optionally explain why you're changing it.
+
+/support/append_request.bml.internal.changesum=To change the summary of a request, you must select "Internal Comment / Action" and enter in the new summary.
+
+/support/append_request.bml.internal.touch=To touch a request, you must select "Internal Comment / Action" and explain why you're touching it.
+
+/support/append_request.bml.invalid.blank=Your message was blank.  Please type at least something in the message field.
+
+/support/append_request.bml.invalid.noanswer=Invalid screened response to approve.
+
+/support/append_request.bml.invalid.nocat=That category doesn't seem to exist.
+
+/support/append_request.bml.invalid.noid=This action requires a support request ID.
+
+/support/append_request.bml.invalid.type=Invalid Reply Type.
+
+/support/append_request.bml.logged.text=Your action/comment/response has been recorded.  Thanks.
+
+/support/append_request.bml.logged.title=Success
+
+/support/append_request.bml.login.required=You must <a href="/login.bml">login</a> to help people out.
+
+/support/append_request.bml.successlinks<<
+<ul>
+   <li>Go back to <a href='[[back]]'>Request #[[number]]</a></li>
+   <li>Go back to the <a href='[[open]]'>open support requests</a></li>
+   <li>Go back to the <a href='[[opencat]]'>open support requests in the the same category</a></li>
+   <li>Go to <a href='[[prevopen]]'>previous</a> /
+             <a href='[[nextopen]]'>next</a> open request</li>
+   <li>Go to <a href='[[cprevopen]]'>previous</a> /
+             <a href='[[cnextopen]]'>next</a> open request in the same category</li>
+</ul>
+.
+
+/support/append_request.bml.title=Append Comment/Response
+
+/support/append_request.bml.unknown.request=Unknown support request.
+
 /support/encodings.bml.edit.header=I cannot edit my entries in the web interface!
 
 /support/encodings.bml.edit.text<<
