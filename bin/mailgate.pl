@@ -42,15 +42,19 @@ if ($subject =~ /auto.?(response|reply)/i ||
     $subject =~ /Attachment block message/ ||
     $subject =~ /Use this patch immediately/ ||
     $subject =~ /^YOUR PAYPAL\.COM ACCOUNT EXPIRES/ ||
-    $subject =~ /^don't be late! ([\w\-]{1,15})$/ || 
+    $subject =~ /^don\'t be late! ([\w\-]{1,15})$/ || 
     $subject =~ /^your account ([\w\-]{1,15})$/) 
 {
     exit 0;
 }
 
 # stop more spam, based on body text checks
-my $tent = get_text_entity($entity);
-die "Can't find text entity" unless $tent;
+my $virus_looking = 0;
+my $tent = get_text_entity($entity, \$virus_looking); 
+die "Can't find text entity" unless $tent; 
+
+exit 0 if $virus_looking;
+
 my $body = $tent->bodyhandle->as_string;
 $body =~ s/^\s+//;
 $body =~ s/\s+$//;
@@ -191,9 +195,9 @@ my @errors;
 
 # convert email body to utf-8
 my $content_type = $head->get('Content-type:');
-my $charset = $1 if $content_type =~ /\bcharset=['"]?(\S+?)['"]?[\s\;]/i;
+my $charset = $1 if $content_type =~ /\bcharset=[\'\"]?(\S+?)[\'\"]?[\s\;]/i;
 if (defined($charset) && $charset !~ /^UTF-?8$/i &&
-        Unicode::MapUTF8::utf8_supported_charset($charset)) {
+    Unicode::MapUTF8::utf8_supported_charset($charset)) {
     $body = Unicode::MapUTF8::to_utf8({ -string=>$body, -charset=>$charset });
 }
 
@@ -214,8 +218,15 @@ if (@errors) {
 sub get_text_entity
 {
     my $entity = shift;
+    my $vir_ref = shift;
 
     my $head = $entity->head;
+    my $filename = $head->recommended_filename;
+
+    if ($filename =~ /\.(?:zip|doc|exe|vbs|bat|pif|com|scr)$/i) {
+	$$vir_ref = 1;
+    }
+
     my $mime_type =  $head->mime_type;
     if ($mime_type eq "text/plain") {
         return $entity;
@@ -235,7 +246,7 @@ sub get_text_entity
     if ($mime_type eq "multipart/related") {
         my $partcount = $entity->parts;
         if ($partcount) {
-            return get_text_entity($entity->parts(0));
+            return get_text_entity($entity->parts(0), $vir_ref);
         }
         return undef;
     }
