@@ -27,6 +27,14 @@ body<=
          }
      }
      $filterwhere .= ")";
+ } elsif ($filtercat eq "_nonprivate") {
+     $filterwhere = " AND s.spcatid IN (0";
+     foreach my $cat (values %$cats) {
+         if ($cat->{'public_read'}) {
+             $filterwhere .= ", $cat->{'spcatid'}";
+         }
+     }
+     $filterwhere .= ")";
  } else {
      my $fcat = LJ::Support::get_cat_by_key($cats, $filtercat);
      if (LJ::Support::can_read_cat($dbr, $fcat, $remote)) {
@@ -100,6 +108,8 @@ my $total_open;
  if (LJ::check_priv($dbr, $remote, "supportread")) {
      unshift @filter_cats, { 'catkey' => '_nonpublic',
                              'catname' => '(Non-Public)' };
+     unshift @filter_cats, { 'catkey' => '_nonprivate',
+                             'catname' => '(Non-Private)' };
  }
  foreach my $cat (@filter_cats)
  {
