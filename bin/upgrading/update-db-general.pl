@@ -1125,10 +1125,10 @@ register_alter(sub {
 	do_alter("user",
 		 "ALTER TABLE user ADD ".
 		 "caps SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER user");
-	try_sql("UPDATE user SET caps=16|8 WHERE paidfeatures='on'");
-	try_sql("UPDATE user SET caps=8    WHERE paidfeatures='paid'");
-	try_sql("UPDATE user SET caps=4    WHERE paidfeatures='early'");
-	try_sql("UPDATE user SET caps=2    WHERE paidfeatures='off'");
+	try_sql("UPDATE user SET caps=16|8|2 WHERE paidfeatures='on'");
+	try_sql("UPDATE user SET caps=8|2    WHERE paidfeatures='paid'");
+	try_sql("UPDATE user SET caps=4|2    WHERE paidfeatures='early'");
+	try_sql("UPDATE user SET caps=2      WHERE paidfeatures='off'");
     }
 
     # axe this column (and its two related ones) if it exists.
@@ -1137,7 +1137,7 @@ register_alter(sub {
 	try_sql("REPLACE INTO paiduser (userid, paiduntil, paidreminder) ".
 		"SELECT userid, paiduntil, paidreminder FROM user WHERE paidfeatures='paid'");
 	try_sql("REPLACE INTO paiduser (userid, paiduntil, paidreminder) ".
-		"SELECT userid, '2035-12-01', NULL FROM user WHERE paidfeatures='on'");
+		"SELECT userid, COALESCE(paiduntil,'0000-00-00'), NULL FROM user WHERE paidfeatures='on'");
 	do_alter("user",
 		 "ALTER TABLE user DROP paidfeatures, DROP paiduntil, DROP paidreminder");
     }
