@@ -168,7 +168,7 @@ EOB
     if ($used) {
         $ret .= "<p><table cellpadding='3'>";
         $ret .= "<tr><td></td><td><b>Account</b></td><td><b>Feed</b></td><td><b>Watchers</b></td><td><b>Unit Cost</b></td></tr>\n";
-        foreach my $user (sort { $count{$a} <=> $count{b} } keys %count) {
+        foreach my $user (sort { $count{$a} <=> $count{$b} } keys %count) {
             $ret .= "<tr>";
             $ret .= "<td><input type='checkbox' value='1' name='defriend_$user'></td>";
             $ret .= "<td>" . LJ::ljuser($user)  . "</td>";
