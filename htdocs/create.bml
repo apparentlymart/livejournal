@@ -82,7 +82,8 @@ body<=
  # MODE: submit - try to create an account.  might change mode
  #       if there are errors, we'll populate %errors and 
  #       return to "getinfo" mode below
- if ($mode eq "submit") 
+ SUBMIT:
+ while ($mode eq "submit")  # using while instead of if so we can 'last' out of it
  {
      return "<b>$ML{'Error'}</b>: $ML{'.error.postrequired'}" unless LJ::did_post();
      
@@ -181,6 +182,10 @@ body<=
          return "$ML{'.error.coppa.under13'}";
      }
 
+     if ($LJ::TOS_CHECK && ! $FORM{'agree_tos'}) {
+         $errors{'agree_tos'} = $ML{'.tos.error'};
+     }
+
      # check the email address
      {
          my @email_errors;
@@ -193,9 +198,7 @@ body<=
      }
 
 
-     # Note: goto is evil.  this is the first time I've used it in perl.
-     #       I wish 'last' or 'next' would break out of an if block.
-     goto SUBMITERRORS if %errors;
+     last SUBMIT if %errors;
 
      my $qclusterid = ($LJ::ALLOW_CLUSTER_SELECT
                        ? $FORM{'cluster_id'}
@@ -266,6 +269,20 @@ body<=
      });
 
      my $nu = LJ::load_userid($dbh, $userid);
+
+     if ($LJ::TOS_CHECK) {
+         my $rev;
+         open (TOS, "$LJ::HOME/htdocs/inc/legal-tos");
+         while (! $rev) {
+             my $line = <TOS>;
+             if ($line =~ /\$Revision$/) {
+                 $rev = $1;
+             }
+         }
+         close TOS;
+         LJ::set_userprop($dbh, $nu, "legal_tosagree", join(', ', time(), $rev));
+     }
+
      LJ::make_login_session($nu) unless $remote;
 
      $ret = "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text1", {'email' => $email, 'username' => $user}) ." p?>";
@@ -336,7 +353,15 @@ body<=
      {
          $ret .= "<?h2 $ML{'.aolnotice.head'} h2?><?p ".BML::ml(".aolnotice.text", {'sitename' => $LJ::SITENAME}) ." p?>";
 
-         $ret .= "<?h2 $ML{'.age.head'} h2?><?p $ML{'.age.check.question'} <blockquote><input type=\"checkbox\" value=\"1\" name=\"under13\"> $ML{'.age.check.yes'}</blockquote>  p?>";
+         $ret .= "<?h2 $ML{'.age.head'} h2?><?p $ML{'.age.check.question'} <blockquote><input type=\"checkbox\" value=\"1\" name=\"under13\" /> $ML{'.age.check.yes'}</blockquote>  p?>";
+     }
+
+     if ($LJ::TOS_CHECK)
+     {
+         $ret .= "<?h2 $ML{'.tos.heading'} h2?><?p $ML{'.tos.p1'} p?>";
+         $ret .= $error_msg->('agree_tos', '<p>', '</p>');
+         my $checked = $POST{'agree_tos'} ? "checked='checked'" : "";
+         $ret .= "<center><iframe width='600' height='300' src='/legal/tos-mini.bml' style='border: 1px solid gray;'></iframe><p><input type='checkbox' name='agree_tos' value='1' $checked /><b>$ML{'.tos.haveread'}</b></p></center>";
      }
 
      if ($LJ::ALLOW_CLUSTER_SELECT) {

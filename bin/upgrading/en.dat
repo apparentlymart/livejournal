@@ -529,6 +529,14 @@
 
 /create.bml.title=Create New Journal
 
+/create.bml.tos.error=You must read and agree to the terms of service before creating an account.
+
+/create.bml.tos.haveread=I have read and agree to the Terms of Service.
+
+/create.bml.tos.heading=Terms of Service
+
+/create.bml.tos.p1=Before continuing you must read and agree to the <a href='/legal/tos.bml'>Terms of Service.</a>
+
 /create.bml.useacctcodes.entercode=To create a new account, enter an account creation code:
 
 /create.bml.useacctcodes.welcome=Welcome

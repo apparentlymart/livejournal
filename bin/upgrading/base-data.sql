@@ -900,6 +900,8 @@ INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope
 UPDATE userproplist SET datatype='char',des='Subtitle of Journal',indexed='0',prettyname='Journal Subtitle',scope='general' WHERE name='journalsubtitle';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Base Title of Journal', '0', 'journaltitle', 'Journal Title', 'general');
 UPDATE userproplist SET datatype='char',des='Base Title of Journal',indexed='0',prettyname='Journal Title',scope='general' WHERE name='journaltitle';
+INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Comma separated:  Unix time user agreed to the Terms of Service, revision number', '0', 'legal_tosagree', 'Agreed to Terms of Service', 'general');
+UPDATE userproplist SET datatype='char',des='Comma separated:  Unix time user agreed to the Terms of Service, revision number',indexed='0',prettyname='Agreed to Terms of Service',scope='general' WHERE name='legal_tosagree';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('num', 'Encoding in which to mail comments to the user. Defaults to UTF-8.', '0', 'mailencoding', 'Mail Encoding', 'general');
 UPDATE userproplist SET datatype='num',des='Encoding in which to mail comments to the user. Defaults to UTF-8.',indexed='0',prettyname='Mail Encoding',scope='general' WHERE name='mailencoding';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('bool', '1: This community is moderated', '0', 'moderated', 'Moderation status', 'general');
