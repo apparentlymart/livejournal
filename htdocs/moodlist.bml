@@ -83,7 +83,7 @@ body<=
         my $theme = (grep { $_->{moodthemeid} == $GET{moodtheme} } (@themes, @user_themes))[0];
         if (! $theme) {
             # It isn't theirs, or they aren't logged in, and it isn't public and it actually exists
-            return LJ::bad_input("You only have permission to view system mood themes, or user themes with a ownerid parameter.");
+            return LJ::bad_input("You only have permission to view public mood themes or user themes with an ownerid parameter.");
         } elsif ( defined $GET{mode} && $GET{mode} == 'tree') {
 
             if ($GET{'ownerid'}) {
