@@ -16,22 +16,22 @@ sub change_community_admin
     my $sth;
     my $err = sub { push @$out, [ "error", $_[0] ]; return 0; };
 
+    return $err->("This command takes exactly 2 arguments.  Consult the reference.")
+	unless scalar(@$args) == 3;
+
     my ($comm_name, $newowner_name) = ($args->[1], $args->[2]);
     my $ucomm = LJ::load_user($dbh, $comm_name);
     my $unew  = LJ::load_user($dbh, $newowner_name);
-
-    return $err->("You do not have access to transfer ownership of this community.")
-	unless ($remote->{'privarg'}->{'sharedjournal'}->{$ucomm->{'user'}} ||
-		$remote->{'priv'}->{'communityxfer'} );
-    
-    return $err->("This command takes exactly 2 arguments.  Consult the reference.")
-	unless scalar(@$args) == 3;
 
     return $err->("Given community doesn't exist or isn't a community.")
 	unless ($ucomm && $ucomm->{'journaltype'} eq "C");
 
     return $err->("New owner doesn't exist or isn't a person account.")
 	unless ($unew && $unew->{'journaltype'} eq "P");
+
+    return $err->("You do not have access to transfer ownership of this community.")
+	unless ($remote->{'privarg'}->{'sharedjournal'}->{$ucomm->{'user'}} ||
+		$remote->{'priv'}->{'communityxfer'} );
 
     return $err->("New owner's email address isn't validated.")
 	unless ($unew->{'status'} eq "A");
