@@ -567,10 +567,11 @@ sub delete_talk
     if ($u->{'clusterid'}) 
     {
         my $dbcm = LJ::get_cluster_master($u);
-        my $rid = int($qitemid / 256);
+        my $rid = int($qitemid / 256);  # real post ID
+        my $rtid = int($qtalkid / 256); # realk talk ID
         my $state = $dbcm->selectrow_array("SELECT state FROM talk2 WHERE ".
                                            "journalid=$u->{'userid'} AND ".
-                                           "jtalkid=$qtalkid AND nodetype='L' ".
+                                           "jtalkid=$rtid AND nodetype='L' ".
                                            "AND nodeid=$rid");
         return $err->("No talkid with that number found for that itemid.") 
             unless $state;
