@@ -222,7 +222,8 @@
          $memid = $dbh->{'mysql_insertid'};
      }
      if (@kwid) {
-         my $sql = "INSERT INTO memkeyword (memid, kwid) VALUES ";
+         my $sql = "INSERT IGNORE INTO memkeyword (memid, kwid) VALUES ";
+         # IGNORE exists so no error is logged in mysql replication binlog (bad in 3.23.x)
          $sql .= join(",", map { "($memid,$_)" } @kwid);
          $dbh->do($sql);
      }
