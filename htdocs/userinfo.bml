@@ -29,7 +29,7 @@
  my $MAX_FRIENDS_SHOW = 500;
  my $MAX_FRIENDOF_SHOW = 150;
  my $MAX_FRIENDOF_LOAD = 5000;
-        
+
  my $remote = LJ::get_remote();
  if ($GET{'user'} eq "" && !$remote) {
      $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notloggedin'} p?>";
@@ -229,7 +229,7 @@
          next if $hide_fo{$_};
          push @ids, $_;
      }
-     $friendsof{'clipped'} = @ids > $MAX_FRIENDOF_LOAD;
+     $friendsof{'load_clipped'} = @ids > $MAX_FRIENDOF_LOAD;
 
      my %u;
      LJ::load_userids_multiple([ map { $_ => \$u{$_} } @ids ]);
@@ -684,7 +684,7 @@ if ($u->{'journaltitle'}) {
              }
              $body .= "</td>";
 
-             my $plus = $friendsof{'clipped'} ? "+" : "";
+             my $plus = $friendsof{'load_clipped'} ? "+" : "";
              $body .= "<td colspan='2' valign='top'><b>" . $friendsof{'count'} . "$plus:</b> ";
              my $count = 0;
              foreach (@friend_of) {
@@ -692,18 +692,19 @@ if ($u->{'journaltitle'}) {
                  $frlink = "<b>$frlink</b>" if $remote_friendid{$_->{'userid'}};
                  $body .= "$frlink, ";
                  if (++$count == $MAX_FRIENDOF_SHOW && $GET{'mode'} ne "full") {
+                     $friendsof{'clipped'} = 1;
                      last;
                  }
              }
              chop $body; chop $body;
-             $body .= ", <a href='" . BML::self_link({ 'mode' => 'full' }) . "'>...</a>"
-                 if $friendsof{'clipped'};
+             $body .= ", ..."
+                 if $friendsof{'clipped'} || $friendsof{'load_clipped'};
              $body .= "</td></tr>\n";
          };
          if (@member_of) {
              $label = $ML{'.label.memberof'};
              $body .= "<tr><td align='right' valign='top'><b style='white-space: nowrap;'>$label:</b></td><td colspan='2'>";
-             my $plus = $friendsof{'clipped'} ? "+" : "";
+             my $plus = $friendsof{'load_clipped'} ? "+" : "";
              $body .= "<b>" . $friendsof{'count_m'} . "$plus:</b> ";
              foreach (@member_of) {
                  my $frlink = "<a href='/userinfo.bml?user=$_->{'user'}'>$_->{'user'}</a>";
