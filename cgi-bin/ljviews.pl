@@ -768,7 +768,7 @@ sub create_view_friends
         $skiplinks{'skipforward'} = 
             LJ::fill_var_props($vars, 'FRIENDS_SKIP_FORWARD', {
                 "numitems" => $itemshow,
-                "url" => LJ::make_link("$journalbase/friends", \%linkvars),
+                "url" => LJ::make_link("$journalbase/$opts->{'view'}", \%linkvars),
             });
     }
 
@@ -787,7 +787,7 @@ sub create_view_friends
         $skiplinks{'skipbackward'} = 
             LJ::fill_var_props($vars, 'FRIENDS_SKIP_BACKWARD', {
                 "numitems" => $itemshow,
-                "url" => LJ::make_link("$journalbase/friends", \%linkvars),
+                "url" => LJ::make_link("$journalbase/$opts->{'view'}", \%linkvars),
             });
     }
 
