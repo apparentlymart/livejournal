@@ -8,6 +8,8 @@
 <!ENTITY chInternals 		SYSTEM "../internals.xml">
 <!ENTITY chSite 		SYSTEM "../site.xml">
 <!ENTITY sec-Int-ProgGuide 	SYSTEM "../int/programming-guidelines.xml">
+<!ENTITY chSchema 		SYSTEM "../int/db/schema.xml">
+<!ENTITY chSchemaRef	 	SYSTEM "../int/db/schemaref.gen">
 
 <!ENTITY % entities 		SYSTEM "entities.xml">
 %entities;

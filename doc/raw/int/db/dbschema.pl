@@ -60,23 +60,24 @@ sub dump_xml
 
 
 my %table;
+$sth = $dbr->prepare("SHOW TABLES");
+$sth->execute;
+while (my ($table) = $sth->fetchrow_array) {
+    $table{$table} = {};
+}
+
 $sth = $dbr->prepare("SELECT tablename, public_browsable, des FROM schematables");
 $sth->execute;
 while (my ($name, $public, $des) = $sth->fetchrow_array) {
+    next unless (defined $table{$table});
     $table{$name} = { 'public' => $public, 'des' => $des };
 }
 
 $sth = $dbr->prepare("SELECT tablename, colname, des FROM schemacols");
 $sth->execute;
 while (my ($table, $col, $des) = $sth->fetchrow_array) {
+    next unless (defined $table{$table});
     $coldes{$table}->{$col} = $des;
-}
-
-
-$sth = $dbr->prepare("SHOW TABLES");
-$sth->execute;
-while (my ($table) = $sth->fetchrow_array) {
-    unless (defined $table{$table}) { $table{$table} = {} }
 }
 
 foreach my $table (sort keys %table)

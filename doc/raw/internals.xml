@@ -24,12 +24,6 @@ Info on internals.
 <para>foo</para>
 </sect1>
 
-<sect1>
-<?dbhtml filename="schema.html"?>
- <title>Database Schema</title>
-<para>foo</para>
-</sect1>
-
 &sec-Int-ProgGuide;
 
 </chapter>
