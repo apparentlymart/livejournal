@@ -148,12 +148,6 @@ body<=
              return $ret;
         }
    
-        # revocation of membership implies revocation of posting access    
-        foreach (keys %{$delete{'member'}}) {
-            $delete{'post'}->{$_} = 1;
-            delete $add{'post'}->{$_};
-        }
-
         # perform deletions
         if (%{$delete{'member'}}) {
             my $in = join(',', keys %{$delete{'member'}});
