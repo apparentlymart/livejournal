@@ -8,7 +8,6 @@ use LWP::UserAgent;
 use XML::RSS;
 use HTTP::Status;
 require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
-use Data::Dumper;
 
 $maint{'synsuck'} = sub
 {
