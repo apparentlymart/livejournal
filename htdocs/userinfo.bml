@@ -139,6 +139,7 @@
  if ($u->{'statusvis'} eq "X") {
      $title = $ML{'error.purged.title'};
      $body = "<?h1 $ML{'error.purged.name'} h1?><?p $ML{'error.purged.text'} p?>";
+     BML::set_status(410); # 410 Gone
      return;
  }
 
@@ -153,12 +154,14 @@
          $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " .
                  BML::ml('error.suspended.text', { 'user' => LJ::ljuser($user),
                                                    'sitename' => $LJ::SITENAME }) . " p?>";
+         BML::set_status(403); # 403 Forbidden
          return;
      }
      if ($u->{'statusvis'} eq "D") {
          $title = $ML{'error.deleted.title'};
          $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " .
            BML::ml('error.deleted.text',{'user'=>$user}) . " p?>";
+         BML::set_status(404); # 404 Not Found
          return;
      }
  }
