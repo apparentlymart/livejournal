@@ -7010,40 +7010,30 @@ sub alloc_user_counter
 # $dom: 'S' == style
 sub alloc_global_counter
 {
-    my ($dom, $pre_locked) = @_;
+    my ($dom, $recurse) = @_;
     return undef unless $dom =~ /^[S]$/;
     my $dbh = LJ::get_db_writer();
     return undef unless $dbh;
 
-    my $key = "usercounter-$dom";
-    unless ($pre_locked) {
-        my $r = $dbh->selectrow_array("SELECT GET_LOCK(?, 3)", undef, $key);
-        return undef unless $r;
-    }
     my $newmax;
     my $uid = 0; # userid is not needed, we just use '0'
 
-    my $rs = $dbh->do("UPDATE counter SET max=max+1 WHERE journalid=? AND area=?",
+    my $rs = $dbh->do("UPDATE counter SET max=LAST_INSERT_ID(max+1) WHERE journalid=? AND area=?",
                       undef, $uid, $dom);
     if ($rs > 0) {
-        $newmax = $dbh->selectrow_array("SELECT max FROM counter WHERE journalid=? AND area=?",
-                                         undef, $uid, $dom);
-    } else {
-        if ($dom eq "S") {
-            $newmax = eval {
-                $dbh->selectrow_array("SELECT MAX(styleid) FROM style");
-            };
-        }
-        $newmax++;
-        $dbh->do("INSERT INTO counter (journalid, area, max) VALUES (?,?,?)",
-                 undef, $uid, $dom, $newmax) or return undef;
-    }
-
-    unless ($pre_locked) {
-        $dbh->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $key);
+        $newmax = $dbh->selectrow_array("SELECT LAST_INSERT_ID()");
+        return $newmax;
     }
     
-    return $newmax;
+    return undef if $recurse;
+
+    if ($dom eq "S") {
+        $newmax = $dbh->selectrow_array("SELECT MAX(styleid) FROM style");
+    }
+    $newmax += 0;
+    $dbh->do("INSERT IGNORE INTO counter (journalid, area, max) VALUES (?,?,?)",
+            undef, $uid, $dom, $newmax) or return undef;
+    return LJ::alloc_global_counter($dom, 1);
 }
 
 
