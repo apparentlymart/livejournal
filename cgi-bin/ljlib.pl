@@ -6605,7 +6605,7 @@ sub add_friend
 # args: dbarg?, dbc, etype, ejid, eiarg, duserid, diarg
 # des-dbc: Cluster master of event
 # des-type: One character event type.
-# des-ejid: Journalid event occured in.
+# des-ejid: Journalid event occurred in.
 # des-eiarg: 4 byte numeric argument
 # des-duserid: Event doer's userid
 # des-diarg: Event's 4 byte numeric argument

@@ -215,7 +215,7 @@ STANDOUT<=
 BADCONTENT<=
 <?h1 Error h1?>
 <?p
-One or more errors occured processing your request.  Please go back, correct the 
+One or more errors occurred processing your request.  Please go back, correct the 
 necessary information, and submit your data again.
 p?>
 <=BADCONTENT

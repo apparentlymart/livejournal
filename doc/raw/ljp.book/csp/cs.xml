@@ -97,7 +97,7 @@ Hello Test Account!
       There may be a lot of other stuff in there too. 
       First thing to do is make sure the first lines ends with <quote><literal>200 OK</literal></quote>.
       If the first line does not end with <quote><literal>200 OK</literal></quote>,
-      tell the user that an error occured on the server and that it&apos;s not their fault.
+      tell the user that an error occurred on the server and that it&apos;s not their fault.
       If you see <quote><literal>200 OK</literal></quote> at the end, proceed with parsing the output.
       The format is as follows:
       <programlisting>

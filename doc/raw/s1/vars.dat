@@ -1061,7 +1061,7 @@ Day of the month.  (1-31)
 }
 { eventcount
 .des
-The number of events (journal entries) that occured on that day.
+The number of events (journal entries) that occurred on that day.
 }
 { dayevent
 .des

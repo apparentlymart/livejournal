@@ -1335,7 +1335,7 @@ sub getevents
         # okay, follow me here... see how we add the revttime predicate
         # even if no beforedate key is present?  you're probably saying,
         # that's retarded -- you're saying: "revttime > 0", that's like
-        # saying, "if entry occured at all."  yes yes, but that hints
+        # saying, "if entry occurred at all."  yes yes, but that hints
         # mysql's braindead optimizer to use the right index.
         my $rtime_after = 0;
         my $rtime_what = $is_community ? "rlogtime" : "revttime";
