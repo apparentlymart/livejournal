@@ -295,6 +295,7 @@ body<=
 
  if ($FORM{'submitpreview'}) {
      $ret .= "<?h1 $ML{'.preview.title'} h1?><?p $ML{'.preview'} p?><?hr?>";
+     $ret .= "<div align=\"center\"><b>(<a href=\"talkread.bml?${jarg}itemid=$ditemid\">$ML{'talk.commentsread'}</a>)</b></div>";
 
      my $event = $FORM{'body'};
      my $spellcheck_html;
