@@ -408,6 +408,17 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
   if ( ! $synd && ($u->{'allow_contactshow'} eq "Y" ||
       ($u->{'allow_contactshow'} eq "F" && $remote_isfriend)))
   {
+      $mangleaddress = sub {
+          my $email = shift;
+          my $mret = "<table cellpadding='0' cellspacing='0'><tr><td>";
+          for (my $i = 0; $i < length($email); $i++) {
+              my $letter = substr($email, $i, 1);
+              if ($letter eq "\@") { $letter = "</td><td align='center'><i>\@</i></td><td>"; }
+              $mret .= $letter;
+          }
+          $mret .= "</td></tr></table>";
+          return $mret;
+      };
       unless ($u->{'opt_whatemailshow'} eq "N") {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.email'}</b></td><td colspan='$span'>";
@@ -421,19 +432,11 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
               }
           } 
           foreach my $email (@emails) {
-              if ($u->{'opt_mangleemail'} eq "Y" || $email =~ /\@livejournal\.com$/) {
-                  $body .= "<table cellpadding='0' cellspacing='0'><tr><td>";
-                  for (my $i=0; $i<length($email); $i++) {
-                      my $letter = substr($email, $i, 1);
-                      if ($letter eq "\@") { $letter = "</td><td align='center'><i>\@</i></td><td>"; }
-                      $body .= "$letter";
-                  }
-                  $body .= "</td></tr></table>\n";
-              } else {
-                  $body .= "<a href='mailto:$email'>$email</a><br />";
-              }
+              $body .= ($u->{'opt_mangleemail'} eq "Y" || $email =~ /\@livejournal\.com$/)
+                        ? $mangleaddress->($email)
+                        : "<a href='mailto:$email'>$email</a><br />";
           }
-          $body .= "</td></tr>\n";
+          $body .= "</td></tr>";
       }
       
       foreach my $k (qw(aolim icq yahoo msn jabber)) {
@@ -456,7 +459,8 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
       }
       if ($u->{'msn'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.msnusername'}</nobr></b></td><td colspan='$span'>$u->{'msn'}</td></tr>\n";
+          my $msnname = ($u->{'opt_mangleemail'} eq "Y") ? $mangleaddress->($u->{'msn'}) : $u->{'msn'};
+          $body .= "<tr><td align='right'><b><nobr>$ML{'.label.msnusername'}</nobr></b></td><td colspan='$span'>$msnname</td></tr>\n";
       }
       if ($u->{'jabber'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
