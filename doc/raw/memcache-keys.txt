@@ -16,7 +16,7 @@
 <uid> log2:<uid>:<jitemid> == packed data
 <uid> log2ct:<uid> == rows for user
 <uid> log2lt:<uid> == packed data: array of recent log2 entries in rlogtime order, last 2 weeks by default
-<uid> rc:<uid>:<jitemid> == scalar, the replycount value 
+<uid> rp:<uid>:<jitemid> == scalar, the replycount value 
 
 <picid> userpic.<picid> = [ $w, $h, $uid ]
 

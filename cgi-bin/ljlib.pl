@@ -2962,7 +2962,7 @@ sub get_posts_raw
             $needprop->{$cid}{$id} = 1;
             push @mem_keys, [$jid,"logprop:$id"];
             $needrc->{$cid}{$id} = 1;
-            push @mem_keys, [$jid,"rc:$id"];
+            push @mem_keys, [$jid,"rp:$id"];
         }
     }
 
@@ -3061,7 +3061,7 @@ sub get_posts_raw
             }
             foreach my $id (keys %gotid) {
                 my ($jid, $jitemid) = map { $_ + 0 } split(/:/, $id);
-                LJ::MemCache::add([$jid, "rc:$id"], $ret->{prop}{$id}{'replycount'});
+                LJ::MemCache::add([$jid, "rp:$id"], $ret->{prop}{$id}{'replycount'});
                 delete $cneedrc->{$id};
             }
         };
@@ -5695,7 +5695,7 @@ sub load_log_props2
         $needprops{$id} = 1;
         $needrc{$id} = 1;
         push @memkeys, [$userid, "logprop:$userid:$id"];
-        push @memkeys, [$userid, "rc:$userid:$id"];
+        push @memkeys, [$userid, "rp:$userid:$id"];
     }
     return unless %needprops || %needrc;
 
@@ -5745,7 +5745,7 @@ sub load_log_props2
         $sth->execute($userid);
         while (my ($jitemid, $rc) = $sth->fetchrow_array) {
             $hashref->{$jitemid}->{'replycount'} = $rc;
-            LJ::MemCache::add([$userid, "rc:$userid:$jitemid"], $rc);
+            LJ::MemCache::add([$userid, "rp:$userid:$jitemid"], $rc);
         }
     }                  
         
@@ -6135,7 +6135,7 @@ sub replycount_do {
     my ($u, $jitemid, $action, $value) = @_;
     $value = 1 unless defined $value;
     my $uid = $u->{'userid'};
-    my $memkey = [$uid, "rc:$uid:$jitemid"];
+    my $memkey = [$uid, "rp:$uid:$jitemid"];
 
     # "init" is easiest and needs no lock (called before the entry is live)
     if ($action eq 'init') {
