@@ -784,30 +784,14 @@ sub set_userprop
     my $dbh = $dbs->{'dbh'};
     $userid = $userid->{'userid'} if ref $userid eq "HASH";
 
-    my $p;
-
-    if ($LJ::CACHE_USERPROP{$propname}) {
-        $p = $LJ::CACHE_USERPROP{$propname};
-    } else {
-        my $qpropname = $dbh->quote($propname);
-        $userid += 0;
-        my $propid;
-        my $sth;
-
-        $sth = $dbh->prepare("SELECT upropid, indexed FROM userproplist WHERE name=$qpropname");
-        $sth->execute;
-        $p = $sth->fetchrow_hashref;
-        return unless ($p);
-        $LJ::CACHE_USERPROP{$propname} = $p;
-    }
+    my $p = LJ::get_prop("user", $propname) or return 0;
 
     my $table = $p->{'indexed'} ? "userprop" : "userproplite";
     if (defined $value && $value ne "") {
-        $value = $dbh->quote($value);
         $dbh->do("REPLACE INTO $table (userid, upropid, value) ".
-                 "VALUES ($userid, $p->{'upropid'}, $value)");
+                 "VALUES ($userid, $p->{'id'}, ?)", undef, $value);
     } else {
-        $dbh->do("DELETE FROM $table WHERE userid=$userid AND upropid=$p->{'upropid'}");
+        $dbh->do("DELETE FROM $table WHERE userid=$userid AND upropid=$p->{'id'}");
     }
 }
 
@@ -5439,10 +5423,10 @@ sub set_interests
         ## find existing IDs
         my $sth = $dbr->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
         $sth->execute;
-        while ($_ = $sth->fetchrow_hashref) {
-            push @new_intids, $_->{'intid'};     # - we'll add this later.
-            delete $int_new{$_->{'interest'}};   # - so we don't have to make a new intid for
-                                                 #   this next pass.
+        while (my ($intr, $intid) = $sth->fetchrow_array) {
+            push @new_intids, $intid;       # - we'll add this later.
+            delete $int_new{$intr};         # - so we don't have to make a new intid for
+                                            #   this next pass.
         }
 
         if (@new_intids) {

@@ -249,8 +249,12 @@ sub load_style
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
-    my $styc = $dbr->selectrow_hashref("SELECT * FROM s1stylecache WHERE styleid=?",
-                                      undef, $styleid);
+    my $sth = ($LJ::CACHE_HANDLE{$dbr}->{'load_style'} ||=
+               $dbr->prepare("SELECT * FROM s1stylecache WHERE styleid=?"));
+    $sth->bind_param(1, $styleid);
+    $sth->execute;
+    my $styc = $sth->fetchrow_hashref();
+
     if (! $styc || $styc->{'vars_cleanver'} < $LJ::S1::CLEANER_VERSION) {
         my ($type, $data, $opt_cache) = 
             $dbh->selectrow_array("SELECT type, formatdata, opt_cache FROM style WHERE styleid=?",
