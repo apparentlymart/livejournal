@@ -8,6 +8,25 @@ use strict;
 
 package LJ::S1;
 
+use vars qw(@themecoltypes);
+
+# this used to be in a table, but that was kinda useless
+@themecoltypes = (
+                  [ 'page_back', 'Page background' ],
+                  [ 'page_text', 'Page text' ],
+                  [ 'page_link', 'Page link' ],
+                  [ 'page_vlink', 'Page visited link' ],
+                  [ 'page_alink', 'Page active link' ],
+                  [ 'page_text_em', 'Page emphasized text' ],
+                  [ 'page_text_title', 'Page title' ],
+                  [ 'weak_back', 'Weak accent' ],
+                  [ 'weak_text', 'Text on weak accent' ],
+                  [ 'strong_back', 'Strong accent' ],
+                  [ 'strong_text', 'Text on strong accent' ],
+                  [ 'stronger_back', 'Stronger accent' ],
+                  [ 'stronger_text', 'Text on stronger accent' ],                  
+                  );
+
 # updated everytime new S1 style cleaning rules are added,
 # so cached cleaned versions are invalidated.
 $LJ::S1::CLEANER_VERSION = 3;

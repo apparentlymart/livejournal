@@ -160,11 +160,8 @@ body<=
      $ret .= "<?h1 Color Codes h1?><?p When designing a style, it's always best to avoid hard-coding colors in if possible.  That way, if you get bored of your colors you can change them at one place (the modify journal page) and it'll affect all your styles where you use that color code.  Obviously, if you need to use special images in your style, you may have to hard-code certain colors, but try to use them when you can.  It's your call.  <B>The following color codes can be used in any variable below that contains HTML:</B> p?>";
 
      $ret .= "<CENTER><P><TABLE CELLPADDING=2 BORDER=1 CELLSPACING=1><TR BGCOLOR=#D0D0D0><TD>Code</TD><TD>Description</TD></TR>\n";
-     $sth = $dbh->prepare("SELECT coltype, des FROM themecoltypes ORDER BY sortorder");
-     $sth->execute;
-     while ($_ = $sth->fetchrow_hashref) 
-     {
-         $ret .= "<TR><TD><TT>%%color:<B>$_->{'coltype'}</B>%%</TT></TD><TD>$_->{'des'}</TD></TR>\n";
+     foreach my $col (@LJ::S1::themecoltypes) {
+         $ret .= "<tr><td><tt>%%color:<b>$col->[0]</b>%%</tt></td><td>$col->[1]</td></tr>\n";
      }
      $ret .= "</TABLE></CENTER>\n";
 

@@ -118,21 +118,21 @@ if ($FORM{'remoteuser'} eq $user) {
          ### COLOR THEME OPTIONS
          ###
          $ret .= "<?h2 $ML{'.colortheme.head'} h2?><?p $ML{'.colortheme.about'} p?>\n";
-         $ret .= "<UL>\n";
-         $checked = $u->{'themeid'} != 0 ? "CHECKED" : "";
-         $ret .= "<INPUT TYPE=RADIO VALUE=\"default\" NAME=themetype $checked> <B>$ML{'.colortheme.defaulttheme'}</B>: ";
-         $ret .= "<SELECT NAME=themeid>\n";
+         $ret .= "<div style='margin-left: 30px'>\n";
+         $checked = $u->{'themeid'} != 0 ? "checked='checked'" : "";
+         $ret .= "<input type='radio' value=\"default\" name='themetype' $checked> <b>$ML{'.colortheme.defaulttheme'}</b>: ";
+         $ret .= "<select name='themeid'>\n";
          $sth = $dbr->prepare("SELECT themeid, name FROM themelist ORDER BY name");
          $sth->execute;
          while ($_ = $sth->fetchrow_hashref) {
-             $checked = $u->{'themeid'} == $_->{'themeid'} ? "SELECTED" : "";
-             $ret .= "  <OPTION VALUE=$_->{'themeid'} $checked>$_->{'name'}\n";
+             $checked = $u->{'themeid'} == $_->{'themeid'} ? "selected='selected'" : "";
+             $ret .= "  <option value='$_->{'themeid'}' $checked>$_->{'name'}</option>\n";
          }
-         $ret .= "</SELECT><BR>\n";
-         $checked = $u->{'themeid'} == 0 ? "CHECKED" : "";
-         $ret .= "<INPUT TYPE=RADIO VALUE=\"custom\" NAME=themetype $checked> <B>$ML{'.colortheme.customcolors'}</B>:<P>";
-         $ret .= "<CENTER><TABLE BORDER=1 CELLPADDING=2>\n";
-         $ret .= "<TR VALIGN=TOP BGCOLOR=#D0D0D0><TD ALIGN=RIGHT><B>$ML{'.colortheme.area.head'}</B></TD><TD><B>$ML{'.colortheme.color.head1'}</B><BR><FONT SIZE=-1>$ML{'.colortheme.color.head2'}</FONT></TD></TR>\n";
+         $ret .= "</select><br />\n";
+         $checked = $u->{'themeid'} == 0 ? "checked='checked'" : "";
+         $ret .= "<input type='radio' value=\"custom\" name='themetype' $checked> <b>$ML{'.colortheme.customcolors'}</b>:";
+         $ret .= "<center><table border='1' cellpadding='2'>\n";
+         $ret .= "<tr valign='top' bgcolor='#D0D0D0'><td align='right'><b>$ML{'.colortheme.area.head'}</b></td><td><b>$ML{'.colortheme.color.head1'}</b><br /><font size='-1'>$ML{'.colortheme.color.head2'}</font></td></tr>\n";
          
          # get the user's custom colors
          my %custcolors = ();
@@ -145,14 +145,15 @@ if ($FORM{'remoteuser'} eq $user) {
          $sth->execute;
          $custcolors{$_->{'coltype'}} = $_->{'color'} while ($_ = $sth->fetchrow_hashref);
          
-         $sth = $dbr->prepare("SELECT coltype, des FROM themecoltypes ORDER BY sortorder");
-         $sth->execute;
-         while ($_ = $sth->fetchrow_hashref) {
-             $ret .= "<TR><TD ALIGN=RIGHT>$_->{'des'}</TD><TD><INPUT TYPE=TEXT NAME=\"theme_cust:$_->{'coltype'}\" SIZE=20 MAXLENGTH=30 VALUE=\"" . LJ::ehtml($custcolors{$_->{'coltype'}}) . "\"></TD></TR>\n";
-             
+         my $dig;
+         foreach my $col (@LJ::S1::themecoltypes) {
+             $ret .= "<tr><td align='right'>$col->[1]</td><td><input type='text' name=\"theme_cust:$col->[0]\" size='20' maxlength='30' value=\"" . LJ::ehtml($custcolors{$col->[0]}) . "\"></td></tr>\n";
+             $dig .= $col->[0];
          }
-         $ret .= "</TABLE></CENTER>\n";
-         $ret .= "</UL>\n";
+         $dig = Digest::MD5::md5_hex($dig);
+         $ret .= LJ::html_hidden("themecolors_dig", $dig) unless $u->{'themeid'};
+         $ret .= "</table></center>\n";
+         $ret .= "</div>\n";
      }
 
      ###
@@ -177,7 +178,7 @@ if ($FORM{'remoteuser'} eq $user) {
          }
      }
 
-     $ret .= "<UL><B>$ML{'.moodicons.select'} </B> <SELECT NAME=\"moodthemeid\">";
+     $ret .= "<div style='margin-left: 30px'><b>$ML{'.moodicons.select'} </b> <select name=\"moodthemeid\">";
      foreach my $t (@themes) {
          my $sel = $t->{'moodthemeid'} == $u->{'moodthemeid'} ? "SELECTED" : "";
          $ret .= "<OPTION $sel VALUE=$t->{'moodthemeid'}>" . LJ::ehtml($t->{'name'}) . "\n";
@@ -185,7 +186,7 @@ if ($FORM{'remoteuser'} eq $user) {
      $ret .= "</SELECT> (<A HREF=\"/moodlist.bml\" TARGET=moods>$ML{'.moodicons.preview'}</A>)\n";
      $checked = $u->{'opt_forcemoodtheme'} eq "Y" ? "CHECKED" : "";
      $ret .= "<BR><INPUT TYPE=CHECKBOX $checked NAME=opt_forcemoodtheme> $ML{'.moodicons.opt.forcefriends.about'}";
-     $ret .= "</UL>";
+     $ret .= "</div>";
      
      ###
      ### FRIENDS VIEW OPTIONS
@@ -280,19 +281,20 @@ if ($FORM{'remoteuser'} eq $user) {
      $update{'opt_forcemoodtheme'} = $FORM{'opt_forcemoodtheme'} ? "Y" : "N";
      
      if ($FORM{'themetype'} eq "custom") {
-         $dbh->do("DELETE FROM themecustom WHERE user=$quser");
-         my @coltypes = ();
-         $sth = $dbr->prepare("SELECT coltype FROM themecoltypes");
-         $sth->execute;
-         push @coltypes, $_->{'coltype'} while ($_ = $sth->fetchrow_hashref);
-         foreach my $ct (@coltypes) {
-             my $qct = $dbh->quote($ct);
-             my $qcolor = $dbh->quote($FORM{"theme_cust:$ct"});
-             $dbh->do("INSERT INTO themecustom (user, coltype, color) VALUES ($quser, $qct, $qcolor)");
+         my $dig = Digest::MD5::md5_hex(join(",", map { $FORM{"theme_cust:$_"} }
+                                             map { $_->[0] } @LJ::S1::themecoltypes));
+         if ($dig ne $FORM{'themecolors_dig'}) {
+             foreach my $col (@LJ::S1::themecoltypes) {
+                 next if $FORM{"theme_cust:$col->[0]"} =~ /^\#[a-f0-9]{6,6}$/i;
+                 next unless $FORM{"theme_cust:$col->[0]"} =~ /[^\s\w]/;
+                 delete $FORM{"theme_cust:$col->[0]"};
+             }
+             my $vals = join(",", map { "($quser, '$_', " . $dbh->quote($FORM{"theme_cust:$_"}) . ")" } map { $_->[0] } @LJ::S1::themecoltypes);
+             $dbh->do("DELETE FROM themecustom WHERE user=$quser");
+             $dbh->do("INSERT INTO themecustom (user, coltype, color) VALUES $vals");
+             my $dbcm = LJ::get_cluster_master($u, 1);
+             $dbcm->do("UPDATE s1usercache SET color_stor=NULL WHERE userid=?", undef, $u->{'userid'});
          }
-
-         my $dbcm = LJ::get_cluster_master($u, 1);
-         $dbcm->do("UPDATE s1usercache SET color_stor=NULL WHERE userid=?", undef, $u->{'userid'});
      }
 
      # update 'overrides' table

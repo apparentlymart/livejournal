@@ -709,7 +709,6 @@ REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tab
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Table describing the different interests listed, and the number of users listing each interest.', '0', 'off', NULL, 'interests');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('Table describing users someone has listed as a \"friend\". Also details preferences on the friend item.', '0', 'off', NULL, 'friends');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('The [dbtable[dbinfo]] table keeps track of which databases exist.  This ones keeps track of each database\'s roles and weights.', '0', 'off', NULL, 'dbweights');
-REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('The types of color codes there can be.  Part of the style system, version 1.', '1', 'replace', NULL, 'themecoltypes');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('This holds all the variable-length data for journal entries.', '0', 'off', NULL, 'logtext');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('This table holds all journal entries, although the table name may be confusing (LiveJournal was originally called \"Brad\'s log\").\r\n\r\nActually, this table only stores metadata about journal entries... the actual content is stored in [dbtable[logtext]].', '0', 'off', NULL, 'log');
 REPLACE INTO schematables (des, public_browsable, redist_mode, redist_where, tablename) VALUES ('This table is the documentation for the database tables.', '0', 'replace', NULL, 'schematables');
@@ -739,19 +738,6 @@ INSERT IGNORE INTO talkproplist (datatype, des, name, prettyname, scope) VALUES 
 UPDATE talkproplist SET datatype='char',des='partial filename for subject icon to use',prettyname='Subject Icon',scope='general' WHERE name='subjecticon';
 INSERT IGNORE INTO talkproplist (datatype, des, name, prettyname, scope) VALUES ('bool', 'True if text has 8-bit data that\'s not in UTF-8', 'unknown8bit', 'Unknown 8-bit text', 'general');
 UPDATE talkproplist SET datatype='bool',des='True if text has 8-bit data that\'s not in UTF-8',prettyname='Unknown 8-bit text',scope='general' WHERE name='unknown8bit';
-REPLACE INTO themecoltypes (coltype, des, sortorder) VALUES ('page_alink', 'Page active link', '25');
-REPLACE INTO themecoltypes (coltype, des, sortorder) VALUES ('page_back', 'Page background', '5');
-REPLACE INTO themecoltypes (coltype, des, sortorder) VALUES ('page_link', 'Page link', '15');
-REPLACE INTO themecoltypes (coltype, des, sortorder) VALUES ('page_text', 'Page text', '10');
-REPLACE INTO themecoltypes (coltype, des, sortorder) VALUES ('page_text_em', 'Page emphasized text', '30');
-REPLACE INTO themecoltypes (coltype, des, sortorder) VALUES ('page_text_title', 'Page title', '35');
-REPLACE INTO themecoltypes (coltype, des, sortorder) VALUES ('page_vlink', 'Page visited link', '20');
-REPLACE INTO themecoltypes (coltype, des, sortorder) VALUES ('strong_back', 'Strong accent', '50');
-REPLACE INTO themecoltypes (coltype, des, sortorder) VALUES ('strong_text', 'Text on strong accent', '55');
-REPLACE INTO themecoltypes (coltype, des, sortorder) VALUES ('stronger_back', 'Stronger accent', '60');
-REPLACE INTO themecoltypes (coltype, des, sortorder) VALUES ('stronger_text', 'Text on stronger accent', '65');
-REPLACE INTO themecoltypes (coltype, des, sortorder) VALUES ('weak_back', 'Weak accent', '40');
-REPLACE INTO themecoltypes (coltype, des, sortorder) VALUES ('weak_text', 'Text on weak accent', '45');
 REPLACE INTO themedata (color, coltype, themeid) VALUES ('#000000', 'page_back', '3');
 REPLACE INTO themedata (color, coltype, themeid) VALUES ('#000000', 'page_back', '5');
 REPLACE INTO themedata (color, coltype, themeid) VALUES ('#000000', 'page_text', '1');
@@ -1008,8 +994,6 @@ INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope
 UPDATE userproplist SET datatype='num',des='The style ID# of the S1 style for the recent entries view.',indexed='0',prettyname='Recent View StyleID',scope='general' WHERE name='s1_lastn_style';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('num', 'S2 Styleid to use', '0', 's2_style', 'S2 Style', 'general');
 UPDATE userproplist SET datatype='num',des='S2 Styleid to use',indexed='0',prettyname='S2 Style',scope='general' WHERE name='s2_style';
-INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'BML scheme name', '0', 'schemepref', 'BML Scheme Preference', 'general');
-UPDATE userproplist SET datatype='char',des='BML scheme name',indexed='0',prettyname='BML Scheme Preference',scope='general' WHERE name='schemepref';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Index to speed directory searches.  Only present if opt_infoshow=Y', '1', 'sidx_bdate', 'SearchIndex: Birthdate', 'general');
 UPDATE userproplist SET datatype='char',des='Index to speed directory searches.  Only present if opt_infoshow=Y',indexed='1',prettyname='SearchIndex: Birthdate',scope='general' WHERE name='sidx_bdate';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Index to speed directory searches.  Format %2s-%s-%s (iso country code, state, city).  Only present if opt_infoshow=Y', '1', 'sidx_loc', 'SearchIndex: Location', 'general');

@@ -577,15 +577,6 @@ CREATE TABLE talkproplist (
 ) 
 EOC
 
-register_tablecreate("themecoltypes", <<'EOC');
-CREATE TABLE themecoltypes (
-  coltype varchar(30) NOT NULL default '',
-  des varchar(100) default NULL,
-  sortorder smallint(5) unsigned default NULL,
-  PRIMARY KEY  (coltype)
-) PACK_KEYS=1
-EOC
-
 register_tablecreate("themecustom", <<'EOC');
 CREATE TABLE themecustom (
   user varchar(15) NOT NULL default '',
