@@ -9,6 +9,7 @@ use Apache::File ();
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use Apache::LiveJournal::PalImg;
 use LJ::S2;
+use Apache::LiveJournal::Interface::Blogger;
 
 BEGIN {
     $LJ::OPTMOD_ZLIB = eval "use Compress::Zlib (); 1;";
@@ -336,17 +337,20 @@ sub trans
     }
 
     # protocol support
-    if ($uri =~ m!^/(?:interface(/flat|/xmlrpc|/fotobilder)?)|cgi-bin/log\.cgi!) {
-        my $int = $1 || "/flat";
+    if ($uri =~ m!^/(?:interface/(\w+))|cgi-bin/log\.cgi!) {
+        my $int = $1 || "flat";
         $r->handler("perl-script");
-        if ($int eq "/fotobilder") {
+        if ($int eq "fotobilder") {
             return 403 unless $LJ::FOTOBILDER_IP{$r->connection->remote_ip};
             $r->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
             return OK;
         }
-        $RQ{'interface'} = $int eq "/flat" ? "flat" : "xmlrpc";
-        $r->push_handlers(PerlHandler => \&interface_content);
-        return OK;
+	if ($int eq "flat" || $int eq "xmlrpc" || $int eq "blogger") {
+	    $RQ{'interface'} = $int;
+	    $r->push_handlers(PerlHandler => \&interface_content);
+	    return OK;
+	}
+	return 404;
     }
 
     # customview
@@ -770,6 +774,17 @@ sub interface_content
         my $server = XMLRPC::Transport::HTTP::Apache
             -> on_action(sub { die "Access denied\n" if $_[2] =~ /:|\'/ })
             -> dispatch_to('LJ::XMLRPC')
+            -> handle($r);
+        return OK;
+    }
+
+    if ($RQ{'interface'} eq "blogger") {
+        return 404 unless $LJ::OPTMOD_XMLRPC;
+	my $pkg = "Apache::LiveJournal::Interface::Blogger";
+        my $server = XMLRPC::Transport::HTTP::Apache
+	    -> on_action(sub { die "Access denied\n" if $_[2] =~ /:|\'/ })
+	    -> dispatch_with({ 'blogger' => $pkg })
+	    -> dispatch_to($pkg)
             -> handle($r);
         return OK;
     }
