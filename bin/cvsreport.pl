@@ -2,16 +2,27 @@
 #
 
 use strict;
+use Getopt::Long;
+
+my $help = '';
+my $sync = '';
+my $full = '';
+
+exit 1 unless GetOptions('help' => \$help,
+			 'full' => \$full,
+			 'sync' => \$sync);
+
+if ($help) {
+    die "Usage: cvsreport.pl \n" .
+	"    --help          Get this help\n" .
+	"    --sync          Put files where they need to go.\n" .
+	    "    --full          Show main files not in a CVS repository\n";
+}
 
 unless (-d $ENV{'LJHOME'}) { 
     die "\$LJHOME not set.\n";
 }
 
-if ($ARGV[0] eq "-h" || $ARGV[0] eq "--help") {
-    die "Usage: cvsreport.pl [--sync]\n";
-}
-
-my $sync = $ARGV[0] eq "--sync";
 
 my $maind = $ENV{'LJHOME'};
 my $cvs = "$maind/cvs/livejournal";
@@ -29,7 +40,10 @@ scan_cvs();
 foreach my $file (sort keys %status)
 {
     my $status = $status{$file};
-    if ($sync && $status eq "main -> ??") { next; }
+    if ($status eq "main -> ??") { 
+	next if ($sync);
+	next unless ($full);
+    }
     printf "%-20s %s\n", $status, $file;
     if ($sync) {
 	if ($status eq "main <- cvs") {
