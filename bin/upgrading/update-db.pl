@@ -606,7 +606,7 @@ sub load_table_info
     my $sth = $dbh->prepare("DESCRIBE $table");
     $sth->execute;
     while (my ($Field, $Type) = $sth->fetchrow_array) {
-        $coltype{$table}->{$Field} = $Type;
+        $coltype{$table}->{$Field} = lc($Type);
     }
 
     $sth = $dbh->prepare("SHOW INDEX FROM $table");

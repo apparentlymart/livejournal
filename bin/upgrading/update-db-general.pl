@@ -1825,6 +1825,10 @@ register_alter(sub {
                  "ALTER TABLE s2styles ADD modtime INT UNSIGNED NOT NULL AFTER name");
     }
 
+    if (column_type("acctinvite", "reason") eq "varchar(20)") {
+        do_alter("acctinvite",
+                 "ALTER TABLE acctinvite MODIFY reason VARCHAR(40)");
+    }
 });
 
 1; # return true
