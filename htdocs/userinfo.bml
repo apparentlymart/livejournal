@@ -656,6 +656,50 @@ if ($u->{'journaltitle'}) {
          if (!$friends{'loaded'} || !$friends{'display'}) {
              $body .= "<b>" . $friends{'count'} . ":</b> ";
              $body .= "<a href='/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'> " . ($com ? $ML{'.label.viewmembers'} : $ML{'.label.viewfriends'}) .  " </a>.";
+         } elsif ($u->{'journaltype'} eq 'P' or $u->{'journaltype'} eq 'S') {
+             # personal/shared journals have a special way of showing their friends list, it breaks it down into
+             # three sublists: personal/shared, community/news, syndication
+             my (@pfriends, @cfriends, @yfriends);
+             my $friend_link = sub {
+                 my $f = shift;
+                 my $status = $f->{'statusvis'};
+                 my $frlink = "<a href='/userinfo.bml?user=$f->{'user'}'>$f->{'user'}</a>";
+                 $frlink = "<strike>$frlink</strike>" if $status =~ /[DXS]/;
+                 $frlink = "<b>$frlink</b>" if $remote_friendid{$f->{'userid'}} && $remote->{'userid'} != $u->{'userid'};
+                 return $frlink;
+             };
+             foreach my $f (@friends) {
+                 push @pfriends, $friend_link->($f) if $f->{'journaltype'} eq 'P' or $f->{'journaltype'} eq 'S';
+                 push @cfriends, $friend_link->($f) if $f->{'journaltype'} eq 'C' or $f->{'journaltype'} eq 'N';
+                 push @yfriends, $friend_link->($f) if $f->{'journaltype'} eq 'Y';
+             }
+             my ($pcount, $ccount, $ycount) = (scalar @pfriends, scalar @cfriends, scalar @yfriends);
+             my $pfriends = join ', ', @pfriends;
+             my $yfriends = join ', ', @yfriends;
+             my $cfriends = join ', ', @cfriends;
+
+             # now spit out the HTML
+             $body .= "<table>";
+             if ($pfriends) {
+                 my $text = $ML{'.label.frpeople'};
+                 $body .= "<tr><th style='text-align: right' nowrap valign='top'>" .
+                          "<img src='$LJ::IMGPREFIX/userinfo.gif' title='$text' alt='$text' />" .
+                          "<a href='$LJ::SITEROOT/$dir/$user/friends?show=PS'><b>$pcount</b></a>:</th><td>$pfriends</td>";
+             }
+             if ($cfriends) {
+                 my $text = $ML{'.label.frcommunity'};
+                 $body .= "<tr><th style='text-align: right' nowrap valign='top'>" .
+                          "<img src='$LJ::IMGPREFIX/community.gif' title='$text' alt='$text' />" .
+                          "<a href='$LJ::SITEROOT/$dir/$user/friends?show=CN'><b>$ccount</b></a>:</th><td>$cfriends</td>";
+             }
+             if ($yfriends) {
+                 my $text = $ML{'.label.frsyndication'};
+                 $body .= "<tr><th style='text-align: right' nowrap valign='top'>" .
+                          "<img src='$LJ::IMGPREFIX/syndicated.gif' title='$text' alt='$text' />" .
+                          "<a href='$LJ::SITEROOT/$dir/$user/friends?show=Y'><b>$ycount</b></a>:</th><td>$yfriends<br></td>";
+             }
+             $body .= "</tr></table>";
+             $body .= "<b>" . BML::ml('.label.totalfriends', { numfriends => $friends{'count'} }) . "</b>";
          } else {
              $body .= "<b>" . $friends{'count'} . ":</b> ";
              foreach my $f (@friends) {

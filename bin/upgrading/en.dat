@@ -3343,6 +3343,12 @@ This could be because: <ol>
 
 /userinfo.bml.label.email=Email:
 
+/userinfo.bml.label.frcommunity=Communities
+
+/userinfo.bml.label.frpeople=People
+
+/userinfo.bml.label.frsyndication=Syndication Journals
+
 /userinfo.bml.label.icquin=ICQ UIN:
 
 /userinfo.bml.label.interests=Interests
@@ -3394,6 +3400,8 @@ This could be because: <ol>
 /userinfo.bml.label.textmessage=<nobr>Text<br>Message</nobr>:
 
 /userinfo.bml.label.todo=To-Do List
+
+/userinfo.bml.label.totalfriends=[[numfriends]] total friends
 
 /userinfo.bml.label.user=User:
 
