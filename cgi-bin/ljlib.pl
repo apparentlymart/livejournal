@@ -8569,8 +8569,11 @@ sub alloc_user_counter
         $newmax = $u->selectrow_array("SELECT MAX(kwid) FROM userkeywords WHERE userid=?",
                                       undef, $uid);
     } elsif ($dom eq "P") {
-        $newmax = $u->selectrow_array("SELECT MAX(blobid) FROM userblob WHERE journalid=? AND domain=?",
-                                      undef, $uid, LJ::get_blob_domainid("phonepost"));
+        my $userblobmax = $u->selectrow_array("SELECT MAX(blobid) FROM userblob WHERE journalid=? AND domain=?",
+                                              undef, $uid, LJ::get_blob_domainid("phonepost"));
+        my $ppemax = $u->selectrow_array("SELECT MAX(blobid) FROM phonepostentry WHERE userid=?",
+                                         undef, $uid);
+        $newmax = ($ppemax > $userblobmax) ? $ppemax : $userblobmax;
     } else {
         die "No user counter initializer defined for area '$dom'.\n";
     }
