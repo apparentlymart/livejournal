@@ -15,6 +15,8 @@ body<=
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
+ return BML::redirect("/modify.bml") unless $user ne "";
+
 my $u;
 my $as_remote = 0;
 if ($FORM{'remoteuser'} eq $user) {
@@ -58,6 +60,7 @@ if ($FORM{'remoteuser'} eq $user) {
 
  if ($mode eq "modify")
  {
+     return "Post required." unless LJ::did_post();
      my $ret = "";
      $ret .= "<FORM METHOD=POST>\n";
      $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=domodify>\n";
@@ -247,6 +250,8 @@ if ($FORM{'remoteuser'} eq $user) {
 
  if ($mode eq "domodify")
  {
+     return "Post required." unless LJ::did_post();
+
      my @errors = ();
      my $state = "";
 
