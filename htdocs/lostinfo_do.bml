@@ -61,6 +61,7 @@ BODY<=
      print MAIL "To: $email\n";
      print MAIL "From: $LJ::ADMIN_EMAIL ($LJ::SITENAME)\n";
      print MAIL "Subject: Lost Password\n\n";
+     print MAIL "*** This is an automated email.  You do not need to respond to it. ***\n\n";
      print MAIL "This is your requested password reminder from $LJ::SITENAME.  Below is your username, password, and email address your journal is registered under.\n\n";
      print MAIL "          Username: $u->{'user'}\n";
      print MAIL "          Password: $u->{'password'}\n";
