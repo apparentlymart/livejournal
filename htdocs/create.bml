@@ -224,7 +224,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      }
 
      if ($POST{'under13'} ||
-         $LJ::COPPA_CHECK eq "over" && ! $POST{'over13'}) {
+         ($LJ::COPPA_CHECK && $LJ::COPPA_CHECK ne "under" && ! $POST{'over13'})) {
          return "$ML{'.error.coppa.under13'}";
      }
 
@@ -245,7 +245,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
 
      # Check the turing test answer if it's turned on
      if ($LJ::HUMAN_CHECK{create} && 
-         ! LJ::Captcha::check_code($POST{capid}, $POST{anum}, $POST{answer})) {
+         ! LJ::Captcha::check_code($POST{capid}, $POST{anum}, $POST{answer}, $u)) {
          $errors{'captcha'} = "Invalid answer to previous challenge.  Try another.";
      }
 
@@ -290,7 +290,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
 
          # Mark the turing test for deletion
          if ($LJ::HUMAN_CHECK{create}) {
-             LJ::Captcha::expire( $POST{capid} );
+             LJ::Captcha::expire( $POST{capid}, $POST{anum}, $userid );
          }
 
          LJ::run_hooks("post_create", {
@@ -480,31 +480,33 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      }
 
      if ($LJ::HUMAN_CHECK{create}) {
-         my ( $capid, $anum );
+         my ( $capid, $anum ) = ( $POST{capid}, $POST{anum} );
+         undef $capid if $errors{captcha};
 
          $ret .= "<li><div class='formitem'><div class='formitemName'>Prove that you're a human</div>";
 
          # Visual challenge
-         unless ( $wants_audio ) {
-             ( $capid, $anum ) = LJ::Captcha::get_visual_id();
+         unless ( $wants_audio || $POST{audio_chal} ) {
+             ( $capid, $anum ) = LJ::Captcha::get_visual_id() unless $capid;
 
              $ret .= "<div class='formitemDesc'>Type the letters and numbers you see below, to prove ".
                  "that you're not a spam robot.  If you can't read the text, type \"AUDIO\" and take ".
                  "a sound test instead.</div>";
-             $ret .= "<img src='/captcha/image.bml?capid=$capid&anum=$anum' width='175' height='35' />";
+             $ret .= "<img src='/captcha/image.bml?capid=$capid&amp;anum=$anum' width='175' height='35' />";
          }
 
          # Audio challenge
          else {
-             ( $capid, $anum ) = LJ::Captcha::get_audio_id();
+             ( $capid, $anum ) = LJ::Captcha::get_audio_id() unless $capid;
              
              $ret .= "<div class='formitemDesc'>Type the numbers you hear to prove ".
                  "that you're not a spam robot:</div>";
-             $ret .= "<a href='/captcha/audio.bml?capid=$capid&anum=$anum'>Play the sound</a>";
+             $ret .= "<a href='/captcha/audio.bml?capid=$capid&amp;anum=$anum'>Play the sound</a>";
+             $ret .= LJ::html_hidden(audio_chal => 1);
          }
          
-         $ret .= "<br/><br/>";
-         $ret .= "Answer: <input type='text' name='answer' value='' size='15' />";
+         $ret .= "<br /><br />Answer: ";
+         $ret .= LJ::html_text({ name => 'answer', size => 15, value => $POST{answer} });
          $ret .= LJ::html_hidden( capid => $capid, anum => $anum );
          $ret .= $error_msg->('captcha', '<p class="formitemFlag">', '</p>');
          $ret .= "</div></li>";

@@ -1661,9 +1661,9 @@ register_tablecreate("captchas", <<'EOC');
 CREATE TABLE captchas (
     capid       INT UNSIGNED NOT NULL auto_increment,
     type        enum('image','audio'),
-    issuetime   INT UNSIGNED DEFAULT 0,
+    issuetime   INT UNSIGNED NOT NULL DEFAULT 0,
     answer      CHAR(10),
-    used        TINYINT UNSIGNED DEFAULT 0,
+    userid      INT UNSIGNED NOT NULL DEFAULT 0,
     anum        SMALLINT UNSIGNED NOT NULL,
     INDEX(type,issuetime),
     INDEX(used),

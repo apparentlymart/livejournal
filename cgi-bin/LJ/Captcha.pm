@@ -276,18 +276,19 @@ sub command {
 }
 
 
-### check_code( $capid, $anum, $code ) -> <true value if code is correct>
+### check_code( $capid, $anum, $code, $u ) -> <true value if code is correct>
 sub check_code {
-    my ( $capid, $anum, $code ) = @_;
+    my ( $capid, $anum, $code, $u ) = @_;
 
     my (
         $dbr,                   # Database handle (reader)
         $sql,                   # SQL query
         $answer,                # Challenge answer
+        $userid,                # userid of previous answerer (or 0 if none)
        );
 
     $sql = q{
-        SELECT answer
+        SELECT answer, userid
         FROM captchas
         WHERE
             capid = ?
@@ -295,16 +296,21 @@ sub check_code {
     };
 
     # Fetch the challenge's answer based on id and anum.
-    $dbr = LJ::get_db_reader();
-    ( $answer ) = $dbr->selectrow_array( $sql, undef, $capid, $anum );
+    $dbr = LJ::get_db_writer();
+    ( $answer, $userid ) = $dbr->selectrow_array( $sql, undef, $capid, $anum );
 
+    # if it's already been answered, it must have been answered by the $u
+    # given to this function (double-click protection)
+    return 0 if $userid && ( ! $u || $u->{userid} != $userid );
+
+    # otherwise, just check answer.
     return lc $answer eq lc $code;
 }
 
 
 ### expire( $capid ) -> <true value if code was expired successfully>
 sub expire {
-    my ( $capid ) = @_;
+    my ( $capid, $anum, $userid ) = @_;
 
     my (
         $dbh,                   # Database handle (writer)
@@ -313,13 +319,15 @@ sub expire {
 
     $sql = q{
         UPDATE captchas
-        SET used = 1
-        WHERE capid = ?
+        SET userid = ?
+        WHERE capid = ? AND anum = ? AND userid = 0
     };
 
     # Fetch the challenge's answer based on id and anum.
     $dbh = LJ::get_db_writer();
-    $dbh->do( $sql, undef, $capid ) or return undef;
+    $dbh->do( $sql, undef, $userid, $capid, $anum ) or return undef;
+
+    print STDERR "expire: $capid $anum -> $userid\n";
 
     return 1;
 }
