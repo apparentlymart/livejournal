@@ -5022,20 +5022,30 @@ sub delete_item2
 #       deleted from, immediately. Unlike [func[LJ::delete_item2]], there is
 #       no $quick flag to queue the delete for later, nor is one really
 #       necessary, since deleting from 4 tables won't be too slow.
-# args: dbcm, journalid, jtalkid
+# args: dbcm, journalid, jtalkid, light?
 # des-journalid: Journalid (userid from [dbtable[user]] to delete comment from).
 #                The journal must reside on the $dbcm you provide.
 # des-jtalkid: The jtalkid of the comment.
-# returns: boolean; 1 on success, 0 on failure.# des-dbh: Master database handle.
 # des-dbcm: Cluster master db to delete item from.
-
+# des-light: boolean; if true, only mark entry as deleted, so children will thread.
+# returns: boolean; 1 on success, 0 on failure.# des-dbh: Master database handle.
 # </LJFUNC>
 sub delete_talkitem
 {
-    my ($dbcm, $jid, $jtalkid) = @_;
+    my ($dbcm, $jid, $jtalkid, $light) = @_;
     $jid += 0; $jtalkid += 0;
-    foreach my $t (qw(talk2 talkprop2 talktext2 recent_talktext2)) {
-	$dbcm->do("DELETE FROM $t WHERE journalid=$jid AND jtalkid=$jtalkid");
+
+    my $where = "WHERE journalid=$jid AND jtalkid=$jtalkid";
+    my @delfrom = qw(talkprop2);
+    if ($light) {
+	$dbcm->do("UPDATE talk2 SET state='D' $where");
+	$dbcm->do("UPDATE talktext2 SET subject=NULL, body=NULL $where");	
+    } else {
+	push @delfrom, qw(talk2 talktext2 recent_talktext2);
+    }
+    
+    foreach my $t (@delfrom) {
+	$dbcm->do("DELETE FROM $t $where");
 	return 0 if $dbcm->err;
     }
     LJ::dudata_set($dbcm, $jid, 'T', $jtalkid, 0);
