@@ -1678,6 +1678,7 @@ sub get_authas_user {
     # load user and authenticate
     my $u = LJ::load_user($user);
     return undef unless $u;
+    return undef unless $u->{clusterid};
 
     # does $u have admin access?
     return undef unless LJ::can_manage($remote, $u);
@@ -1761,6 +1762,7 @@ sub get_authas_list {
     return $u->{'user'}, sort map { $_->{'user'} }
                          grep { ! $opts->{'cap'} || LJ::get_cap($_, $opts->{'cap'}) }
                          grep { ! $opts->{'type'} || $opts->{'type'} eq $_->{'journaltype'} }
+                         grep { $_->{clusterid} > 0 }
                          values %users;
 }
 
