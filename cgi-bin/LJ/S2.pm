@@ -83,6 +83,7 @@ sub make_journal
     escape_context_props($ctx->[S2::PROPS]);
     
     $opts->{'ctx'} = $ctx;
+    $LJ::S2::CURR_CTX = $ctx;
 
     $ctx->[S2::PROPS]->{'SITEROOT'} = $LJ::SITEROOT;
     $ctx->[S2::PROPS]->{'PALIMGROOT'} = $LJ::PALIMGROOT;
@@ -184,6 +185,9 @@ sub s2_run
     eval {
         S2::run_code($ctx, $entry, $page);
     };
+    $LJ::S2::CURR_PAGE = undef;
+    $LJ::S2::CURR_CTX  = undef;
+
     if ($@) { 
         my $error = $@;
         $error =~ s/\n/<br \/>\n/g;
@@ -1135,22 +1139,25 @@ sub Page
 
 sub Image
 {
-    my ($url, $w, $h) = @_;
+    my ($url, $w, $h, $alttext) = @_;
     return {
         '_type' => 'Image',
         'url' => $url,
         'width' => $w,
         'height' => $h,
+        'alttext' => $alttext,
     };
 }
 
 sub Image_std
 {
     my $name = shift;
+    my $ctx = $LJ::S2::CURR_CTX or die "No S2 context available ";
+
     unless ($LJ::S2::RES_MADE++) {
         $LJ::S2::RES_CACHE = {
-            'security-protected' => Image("$LJ::IMGPREFIX/icon_protected.gif", 14, 15),
-            'security-private' => Image("$LJ::IMGPREFIX/icon_private.gif", 16, 16),
+            'security-protected' => Image("$LJ::IMGPREFIX/icon_protected.gif", 14, 15, $ctx->[S2::PROPS]->{'text_icon_alt_protected'}),
+            'security-private' => Image("$LJ::IMGPREFIX/icon_private.gif", 16, 16, $ctx->[S2::PROPS]->{'text_icon_alt_private'}),
         };
     }
     return $LJ::S2::RES_CACHE->{$name};
@@ -1171,6 +1178,7 @@ sub Image_userpic
         'url' => "$LJ::USERPIC_ROOT/$picid/$u->{'userid'}",
         'width' => $p->{'width'},
         'height' => $p->{'height'},
+        'alttext' => "",
     };
 }
 

@@ -122,6 +122,7 @@ class Image
     var readonly string url "URL of the image";
     var int width "Width in pixels";
     var int height "Height in pixels";
+    var string alttext "Default alternative text for image";
 
     function builtin set_url (string url)
     "Sets the URL, doing any necessary escaping.";
@@ -1164,6 +1165,17 @@ property string text_website_default_name {
 }
 set text_website_default_name = "My Website";
 
+property string text_icon_alt_protected {
+    des = "Alternative text for icons of protected entries";
+    noui = 1;
+}
+property string text_icon_alt_private {
+    des = "Alternative text for icons of protected entries";
+    noui = 1;
+}
+set text_icon_alt_protected = "[protected post]";
+set text_icon_alt_private = "[private post]";
+
 property bool use_shared_pic {
     des = "Use shared journal user pictures instead of poster's user picture.";
 }
@@ -1294,9 +1306,7 @@ function Image::as_string(string alttext) [fixed] : string {
 }
 
 function Image::as_string() [fixed] : string {
-    return "<img src=\"$.url\" alt=''" +
-        htmlattr("height", $.height) +
-        htmlattr("width", $.width) + " />";
+    return $this->as_string($this.alttext);
 }
 
 function Image::print (string{} opts)
@@ -1312,7 +1322,7 @@ function Image::print (string alttext)
 
 function Image::print
 {
-    print $this->as_string("");
+    print $this->as_string($this.alttext);
 }
 
 function userinfoicon(UserLite user) : Image {
