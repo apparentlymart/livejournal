@@ -4295,6 +4295,8 @@ label.switch.header=Switch Journal
 
 label.switch.workwith=Work with journal:
 
+label.warning=Warning:
+
 langname.en=English
 
 ljlib.pageofpages=Page [[page]] of [[total]]
