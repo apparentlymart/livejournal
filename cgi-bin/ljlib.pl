@@ -1363,7 +1363,7 @@ sub ljuser
     my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
     my $img = $opts->{'imgroot'} || $LJ::IMGPREFIX;
     if ($opts->{'type'} eq "C") {
-        return "<span class='ljuser' style='white-space:nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/community.gif' alt='userinfo' width='16' height='16' style='vertical-align:bottom;border:0;' /></a><a href='$LJ::SITEROOT/users/$user/'><b>$user</b></a></span>";
+        return "<span class='ljuser' style='white-space:nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/community.gif' alt='userinfo' width='16' height='16' style='vertical-align:bottom;border:0;' /></a><a href='$LJ::SITEROOT/community/$user/'><b>$user</b></a></span>";
 
     } else {
         return "<span class='ljuser' style='white-space:nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/userinfo.gif' alt='userinfo' width='17' height='17' style='vertical-align:bottom;border:0;' /></a><a href='$LJ::SITEROOT/users/$user/'><b>$user</b></a></span>";
