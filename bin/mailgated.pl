@@ -112,6 +112,7 @@ if (! $opt->{'foreground'}) {
                         next if /^\./;
                         $count++;
                     }
+                    closedir MDIR;
                     print $c "$count\n";
                 }
             }
