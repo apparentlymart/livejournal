@@ -41,6 +41,10 @@ body<=
         $used += $cost{$user};
         $syn{$user} = $url;
     }
+
+    my $error = sub {
+        return "<?h1 $ML{'Error'} h1?><?p $_[0] p?>";
+    };
     
     # add custom feed
     if ($POST{'action:addcustom'}) {
@@ -48,23 +52,23 @@ body<=
         my $url = $POST{'synurl'};
 
         if ($acct ne "") {
-            return "<?h1 Error h1?><?p Invalid account name. p?>"
+            return $error->("Invalid account name.")
                 unless $acct =~ /^\w{3,15}$/;
             foreach my $re ("^system\$", @LJ::PROTECTED_USERNAMES) {
                 next unless ($acct =~ /$re/);
-                return "<?h1 Error h1?><?p Reserved account name. p?>"
+                return $error->("Reserved account name.");
             }
         }
         if ($url ne "") {
-            return "<?h1 Error h1?><?p Invalid URL p?>" unless
+            return $error->("Invalid URL p?>") unless
                 $url =~ m!^http://(.+?)/!;
             my $hostname = $1;
-            return "You can't add RSS feeds from this site."
+            return $error->("You can't add RSS feeds from $LJ::DOMAIN.")
                 if $hostname =~ /\Q$LJ::DOMAIN\E/i;
-            return "Non-standard port number not allowed" 
+            return $error->("Non-standard port number not allowed")
                 if $hostname =~ /:/;
-            return "IP addresses not allowed" 
-                unless $hostname =~ /\.\w/;
+            return $error->("IP addresses not allowed")
+                unless $hostname =~ /\.[a-z]/i;
         }
 
         my $su;  # account to add
@@ -108,10 +112,10 @@ body<=
                                           "WHERE u.userid=s.userid AND u.user=?",
                                           undef, $acct);
             unless ($su) {
-                return "<?h1 Error h1?><?p No syndicated account exists with that username. p?>";
+                return $error->("No syndicated account exists with that username.");
             }
         } else {
-            return "<?h1 Error h1?><?p You must enter either a syndicated account's username or URL to add a new feed. p?>";
+            return $error->("You must enter either a syndicated account's username or URL to add a new feed.");
         }
         
         unless ($su) { return "unknown error."; }
