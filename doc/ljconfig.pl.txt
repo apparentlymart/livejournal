@@ -1,0 +1,153 @@
+#!/usr/bin/perl
+
+# LiveJournal configuration file.  Copy this out of the documentation
+# directory to cgi-bin/ljconfig.pl and edit as necessary.  The reason
+# it's not in the cgi-bin directory already is to protect it from
+# getting clobbered when you upgrade to the newest LiveJournal code in
+# the future.
+
+# This should be the only file you need to change to get the
+# LiveJournal code to run on your site.  If not, it's considered a bug
+# and you should report it.
+
+{
+    package LJ;
+
+    # human readable name of this site
+    $SITENAME = "Some LiveJournal Site";
+    
+    ## turn $SERVER_DOWN on while you do any maintenance
+    $SERVER_DOWN = 0;
+    $SERVER_DOWN_SUBJECT = "Maintenance";
+    $SERVER_DOWN_MESSAGE = "$SITENAME is down right now while we upgrade.  It should be up in a few minutes.";
+
+    # the base domain of your site.
+    $DOMAIN = "lj.com";
+
+    # regexp to match domains that could load the site.  this default should be fine.
+    $DOMAIN_RE = "(www\.)?\Q$DOMAIN\E(:\\d+)?";
+
+    # this is what gets prepended to all URLs 
+    $SITEROOT = "http://www.$DOMAIN";
+
+    $IMGPREFIX = "$SITEROOT/img";
+  
+    # set this if you're running an FTP server that mirrors your htdocs/files
+    # $FTPPREFIX = "ftp://ftp.$DOMAIN";  
+
+    # path to sendmail and any necessary options
+    $SENDMAIL = "/usr/sbin/sendmail -t";
+
+    # command-line to spell checker, or undefined if you don't want spell checking
+    # $SPELLER = "/usr/local/bin/ispell -a";
+    # $SPELLER = "/usr/local/bin/aspell pipe --sug-mode=fast --ignore-case";
+
+    # where we set the cookies (note the period before the domain)
+    $COOKIE_DOMAIN = ".$DOMAIN";
+    $COOKIE_PATH   = "/";
+
+    # email addresses
+    $ADMIN_EMAIL = "webmaster\@$DOMAIN";
+    $SUPPORT_EMAIL = "support\@$DOMAIN";
+    $BOGUS_EMAIL = "lj_dontreply\@$DOMAIN";
+
+    # Support URLs of the form http://username.yoursite.com/ ? 
+    # If so, what's the part after "username." ?
+    $USER_VHOSTS = 1;
+    $USER_DOMAIN = $DOMAIN;
+  
+    $INTRANET = 0;         # if true, turn off AOL warning, legalese, COPPA stuff, etc
+    $EVERYONE_PAID = 0;    # if true, all new accounts get paid feature access
+    $EVERYONE_VALID = 0;   # if true, new accounts don't need to be validated
+
+    # performance/load related settings.  turn this on if you want to batch all updates
+    # to the database every 10 seconds.  only necessary with high-load sites.
+    $BUFFER_QUERIES = 0;
+
+    # Do paid users get email addresses?  username@$USER_DOMAIN ?
+    # (requires additional mail system configuration)
+    $USER_EMAIL  = 0;
+
+    ## Directory optimizations
+    $DIR_DB = "";   # by default, hit the main database (bad for big sites!)
+
+    # database info.  only the master is necessary.  
+    %DBINFO = (
+	       'master' => {
+		   'host' => '127.0.0.1',
+		   'user' => 'lj',
+		   'pass' => 'ljpass',
+	       },
+	      #'slave1' => {
+	      #	   'host' => '10.0.0.1',
+	      #           'user' => 'ljro',
+	      #	   'pass' => 'ljropass',
+	      #},
+	       );
+
+    ## default portal options
+
+    @PORTAL_COLS = qw(main right moz);  # can also include left, if you want.
+    $PORTAL_URI = "/portal/";           # either "/" or "/portal/"    
+
+    $PORTAL_LOGGED_IN = {'main' => [ 
+				     [ 'update', 'mode=full'],
+				     ],
+			 'right' => [ 
+				      [ 'goat', '', ],
+				      [ 'stats', '', ],
+				      [ 'bdays', '', ],
+				      ] };
+    $PORTAL_LOGGED_OUT = {'main' => [ 
+				      [ 'update', 'mode='],
+				      ],
+			  'right' => [ 
+				       [ 'newtolj', '', ],
+				       [ 'login', '', ],
+				       [ 'stats', '', ],
+				       [ 'randuser', '', ],
+				       ],
+			  'moz' => [
+				    [ 'login', '', ],
+				    ],
+			  };
+
+    # list of regular expressions matching usernames that people can't have.
+    @PROTECTED_USERNAMES = ("^ex_", "^lj_");
+    
+    # HINTS:
+    #   how far you can scroll back on lastn and friends pages.
+    #   big performance implications if you make these too high.
+    #   also, once you lower them, increasing them won't change anything
+    #   until there are new posts numbering the difference you increased 
+    #   it by.
+
+    $MAX_HINTS_LASTN = 100;
+    $MAX_SCROLLBACK_LASTN = 400;
+
+    # Only turn this on if you are using MySQL replication between
+    # multiple databases and have one or more slaves set to not
+    # replicated the logtext and talktext tables.  Turning this on
+    # makes LJ duplicate all logtext & talktext rows into
+    # recent_logtext & recent_talktext which is then replicated.
+    # However, a cron job cleans up that table so it's never too big.
+    # LJ will try the slaves first, then the master.  This is the best
+    # method of scaling your LJ installation, as disk seeks on the
+    # database for journal text is the slowest part.
+    $USE_RECENT_TABLES = 0;
+
+    # turns these from 0 to 1 to disable parts of the site that are
+    # CPU & database intensive.
+    %DISABLED = (
+		 'interests-findsim' => 0,
+		 'directory' => 0,
+		 );
+
+
+    # keep this next line.  it lets you upgrade LiveJournal without
+    # having to change your config file.  if there is a new required
+    # configuration option, the following line will set it:
+    require "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
+}
+
+1;  # return true
