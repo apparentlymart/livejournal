@@ -52,6 +52,8 @@
      $sth->execute;
      if ($dbr->err) { return $error->($dbr->errstr); }
      $u = $sth->fetchrow_hashref;
+
+     $user = $u->{'user'} if $u;
      $userid = $u->{'userid'}+0 if $u;
 
      if ($u && $FORM{'mode'} eq "full") {
