@@ -91,7 +91,7 @@ sub hash_to_array {
     my ($fmtname, $hash) = @_;
     my $fmt = $LJ::MEMCACHE_ARRAYFMT{$fmtname};
     return undef unless $fmt;
-    return undef unless $hash && ref $hash eq "HASH";
+    return undef unless $hash && ref $hash;
     my $ar = [$fmt->[0]];
     my $ct = scalar(@$fmt);
     for (my $i=1; $i<$ct; $i++) {
