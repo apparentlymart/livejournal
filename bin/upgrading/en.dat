@@ -489,7 +489,7 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 
 /friends/add.bml.add.header=Success
 
-/friends/add.bml.add.text=User (=LJUSER [[user]] LJUSER=) was added to your friend list.  You can view your friends page <a href="[[url]]">here</a>.
+/friends/add.bml.add.text=User <?ljuser [[user]] ljuser?> was added to your friend list.  You can view your friends page <a href="[[url]]">here</a>.
 
 /friends/add.bml.add.title=Friend Added!
 
@@ -538,7 +538,7 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/add.bml.remove.header=Success
 
-/friends/add.bml.remove.text=User (=LJUSER [[user]] LJUSER=) was removed from your friend list.  You can view your friends page <a href="[[url]]">here</a>.
+/friends/add.bml.remove.text=User <?ljuser [[user]] ljuser?> was removed from your friend list.  You can view your friends page <a href="[[url]]">here</a>.
 
 /friends/add.bml.remove.title=Friend Removed!
 
@@ -715,8 +715,8 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 /talkread.bml.title=Read Comments
 
 /tools/memadd.bml.add_previous<<
-  (=H1 Add to memories... H1=)
-  (=P To add the journal entry you were just viewing to your "memories", fill out the form below. P=)
+  <?h1 Add to memories... h1?>
+  <?p To add the journal entry you were just viewing to your "memories", fill out the form below. p?>
 .
 
 /tools/memadd.bml.body.added.body=Your list of memorable posts has been updated.
@@ -790,13 +790,13 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 /tools/memories.bml.back=Back
 
 /tools/memories.bml.body.keyword<<
-  (=H1 [[keyword]] H1=)
-  (=P The following is a list of "[[keyword]]" journal entries that user <B>[[user]]</B> found memorable. P=)
+  <?h1 [[keyword]] h1?>
+  <?p The following is a list of "[[keyword]]" journal entries that user <B>[[user]]</B> found memorable. p?>
 .
 
 /tools/memories.bml.body.list_categories<<
-  (=H1 Memorable Posts H1=)
-  (=P The following is a list of categories that user <B>[[user]]</B> has placed memorable journal entries in. P=)
+  <?h1 Memorable Posts h1?>
+  <?p The following is a list of categories that user <B>[[user]]</B> has placed memorable journal entries in. p?>
 .
 
 /tools/memories.bml.body.memorable=The following is a list of uncategorized journal entries that user <B>[[user]]</B> found memorable.
@@ -840,7 +840,7 @@ btn.search=Search
 
 Email=Email
 
-Error|notes=typically used inside an H1 tag to announce an error.
+Error|notes=typically used inside an h1 tag to announce an error.
 Error=Error
 
 error.dberror=A database error occurred:

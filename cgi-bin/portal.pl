@@ -444,8 +444,8 @@ sub box_start
     $$b .= "</MAP>\n";
 
     if ($box->{'pos'} > 1) { $$b .= "<p>"; }
-    $$b .= "<table width=100% bgcolor=(=EMCOLOR=) border=0 cellpadding=1 cellspacing=0>";
-    $$b .= "<tr bgcolor=(=EMCOLOR=)><td bgcolor=(=EMCOLOR=)>";
+    $$b .= "<table width=100% bgcolor=<?emcolor?> border=0 cellpadding=1 cellspacing=0>";
+    $$b .= "<tr bgcolor=<?emcolor?>><td bgcolor=<?emcolor?>>";
     $$b .= "<img align=right width=64 height=16 border=0 src=\"$LJ::IMGPREFIX/knobs.gif\" usemap=\"\#$mapname\"><b>";
 
     $$b .= "&nbsp;";
@@ -640,7 +640,7 @@ $box{'bdays'} =
         {
             my $mon = LJ::Lang::month_short($lang, $bi->[2]);
             my $day = $bi->[3] . LJ::Lang::day_ord($lang, $bi->[3]);
-            $$bd .= "<tr><td nowrap><b>(=LJUSER $bi->[0] LJUSER=)</b></td><td align=right nowrap>$mon $day</td></tr>";
+            $$bd .= "<tr><td nowrap><b><?ljuser $bi->[0] ljuser?></b></td><td align=right nowrap>$mon $day</td></tr>";
         }
         $$bd .= "</table>";
 
@@ -889,7 +889,7 @@ $box{'update'} =
         $$bd .= "<TEXTAREA NAME=\"event\" COLS=50 ROWS=10 WRAP=VIRTUAL>";
         $$bd .= LJ::ehtml($opts->{'form'}->{'event'});
         $$bd .= "</TEXTAREA>";
-        $$bd .= "<BR>(=DE (HTML okay; by default, newlines will be auto-formatted to <TT>&lt;BR&gt;</TT>) DE=)<BR>";
+        $$bd .= "<BR><?de (HTML okay; by default, newlines will be auto-formatted to <TT>&lt;BR&gt;</TT>) de?><BR>";
         $$bd .= "<input type=checkbox name=do_spellcheck value=1 id=\"spellcheck\"> <label for=\"spellcheck\">Spell check entry before posting</label>";
         $$bd .= "</TD></TR><TR><TD ALIGN=CENTER><INPUT TYPE=SUBMIT VALUE=\"Update Journal\"></TD></TR>";
         
@@ -906,7 +906,7 @@ $box{'update'} =
                                     }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
             }
             
-            $$bd .= "<TR><TD NOWRAP><INPUT TYPE=hidden NAME=webversion VALUE=full>(=H2 Optional Settings H2=)";
+            $$bd .= "<TR><TD NOWRAP><INPUT TYPE=hidden NAME=webversion VALUE=full><?h2 Optional Settings h2?>";
             
             if ($res{'access_count'}) {
                 $$bd .= "<P><B>Journal to post in: </B> ";
@@ -971,7 +971,7 @@ $box{'update'} =
         }
         else 
         {
-            $$bd .= "<TR><TD>(=DE For more options, modify this portal box or <A HREF=\"/update.bml\">go here</A>. DE=)</TD></TR>\n";
+            $$bd .= "<TR><TD><?de For more options, modify this portal box or <A HREF=\"/update.bml\">go here</A>. de?></TD></TR>\n";
         }
         
         $$bd .= "</TABLE></FORM>";
@@ -1091,7 +1091,7 @@ $box{'randuser'} =
             if ($picid && ! $box->{'args'}->{'hidepic'}) {
                 $$b .= "<img src=\"$LJ::SITEROOT/userpic/$picid\" width=$pic{$picid}->{'width'} height=$pic{$picid}->{'height'}><br>";
             }
-            $$b .= "(=LJUSER $r->{'user'} LJUSER=)";
+            $$b .= "<?ljuser $r->{'user'} ljuser?>";
             unless ($box->{'args'}->{'hidename'}) {
                 $$b .= "<br>" . LJ::eall($r->{'name'});
             }

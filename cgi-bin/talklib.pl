@@ -103,9 +103,9 @@ sub link_bar
     push @linkele, $mlink->("/go.bml?${jargent}itemid=$itemid&amp;dir=next", "next_entry");
     
     if (@linkele) {
-        $ret .= "(=STANDOUT <table><tr><td valign='middle'>";
+        $ret .= "<?standout <table><tr><td valign='middle'>";
         $ret .= join("&nbsp;&nbsp;", @linkele);
-        $ret .= "</td></tr></table> STANDOUT=)";
+        $ret .= "</td></tr></table> standout?>";
     }
 
     return $ret;
@@ -199,7 +199,7 @@ sub topic_links
         next unless $status eq "on";
         unless ($in_topic) {
             $in_topic = 1;
-            $ret .= "<b>(=_ML talk.readsimilar _ML=)</b><br />";
+            $ret .= "<b><?_ml talk.readsimilar _ml?></b><br />";
         }
         
         # TODO: LJ::Topic doesn't yet support $dbs/$dbarg
@@ -256,7 +256,7 @@ sub check_viewable
     my ($dbs, $remote, $item, $form, $errref) = @_;
     
     my $err = sub {
-        $$errref = "(=H1 (=_ML Error _ML=) H1=)(=P $_[0] P=)";
+        $$errref = "<?h1 <?_ml Error _ml?> h1?><?p $_[0] p?>";
         return 0;
     };
 

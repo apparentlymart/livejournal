@@ -1535,7 +1535,7 @@ sub help_icon
     my $pre = shift;
     my $post = shift;
     return "" unless (defined $LJ::HELPURL{$topic});
-    return "$pre(=HELP $LJ::HELPURL{$topic} HELP=)$post";
+    return "$pre<?help $LJ::HELPURL{$topic} help?>$post";
 }
 
 # <LJFUNC>
@@ -2039,7 +2039,7 @@ sub bad_input
 {
     my @errors = @_;
     my $ret = "";
-    $ret .= "(=BADCONTENT=)\n<ul>\n";
+    $ret .= "<?badcontent?>\n<ul>\n";
     foreach (@errors) {
         $ret .= "<li>$_</li>\n";
     }
