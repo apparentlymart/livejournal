@@ -30,6 +30,7 @@
 | Todo |
 +------+
 
+* rewrite the account expiration logic
 * make BML evaluate full block properties in order defined
   in file, not order used in template.
 * consolidate db_check*.pl into one tool with getopt, move db info
