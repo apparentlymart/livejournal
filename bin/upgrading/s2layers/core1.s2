@@ -1127,8 +1127,9 @@ property bool linklist_support {
 set linklist_support = true;
 
 property bool external_stylesheet {
-    des = "Use External Stylesheet";
-    note = "If true, a stylesheet link element will point to an external file containing the layout's CSS data.";
+    des = "Use linked stylesheet";
+    note = "If true, a stylesheet link element will point to a file containing the layout's CSS data.";
+    noui = 1;
 }
 set external_stylesheet = false;
 
