@@ -1,23 +1,57 @@
 <?_code
 
+ use strict;
+ use vars qw(%FORM);
+
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
  my $remote = LJ::get_remote($dbs);
 
+ my $sth;
+
  $title = "";
  $body = "";
 
  my $user = LJ::canonical_username($FORM{'user'});
+ if ($FORM{'user'} && ! $user) {
+     $body = $ML{'error.malformeduser'};
+     return;
+ }
+
  if ($user eq "" && defined $remote) {
      $user = $remote->{'user'};
  }
 
- my $userid = LJ::get_userid($dbs, $user);
- unless ($userid) {
+ my $u = LJ::load_user($dbs, $user);
+ unless ($u) {
      $title = $ML{'Error'};
      $body = $ML{'error.username_notfound'};
+     return;
+ }
+ my $userid = $u->{'userid'};
+
+ if ($u->{'journaltype'} eq "R") {
+    LJ::load_user_props($dbr, $u, "renamedto");
+    return BML::redirect("/tools/memories.bml?user=$u->{'renamedto'}");
+ }
+
+ if ($u->{'statusvis'} eq "S") {
+     $title = $ML{'error.suspended.title'};
+     $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " . BML::ml('error.suspended.text',{'sitename'=>$LJ::SITENAME,'user'=>$user}) . " p?>";
+     return;
+ }
+
+ if ($u->{'statusvis'} eq "D") {
+     $title = $ML{'error.deleted.title'};
+     $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " . BML::ml('error.deleted.text',{'user'=>$user}) . " p?>";
+     return;
+ }
+
+ if ($u->{'statusvis'} eq "X") {
+     $title = $ML{'error.purged.title'};
+     $body = "<?h1 $ML{'error.purged.name'} h1?><?p $ML{'error.purged.text'} p?>";
      return;
  }
 

@@ -2107,6 +2107,8 @@ error.deleted.title=Deleted Account
 
 error.ipbanned=Your IP address is temporarily banned for exceeding the login failure rate.
 
+error.malformeduser=Malformed username.
+
 error.nobutton=No button pressed?
 
 error.nodb=Database temporarily unavailable.
