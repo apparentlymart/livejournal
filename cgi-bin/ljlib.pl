@@ -46,6 +46,7 @@ if ($LJ::SMTP_SERVER) {
 }
 
 $LJ::DBIRole = new DBI::Role {
+    'timeout' => $LJ::DB_TIMEOUT,
     'sources' => \%LJ::DBINFO,
     'weights_from_db' => $LJ::DBWEIGHTS_FROM_DB,
     'default_db' => "livejournal",

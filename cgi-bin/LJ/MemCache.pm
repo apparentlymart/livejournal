@@ -31,13 +31,14 @@ sub sock_to_host # (host)
 {
     my $host = shift;
     my $now = time();
-    return undef if $host_dead{$host} > $now;
+    my ($ip, $port) = $host =~ /(.*):(.*)/;
+    return undef if $host_dead{$host} > $now || $host_dead{$ip} > $now;
     return $cache_sock{$host} if $cache_sock{$host} && $cache_sock{$host}->connected;
     my $sock = IO::Socket::INET->new(Proto => "tcp",
                                      PeerAddr => $host,
-                                     Timeout => 2);
+                                     Timeout => 1);
     unless ($sock) {
-        $host_dead{$host} = $now + 10 + int(rand(10));
+        $host_dead{$host} = $host_dead{$ip} = $now + 60 + int(rand(10));
         return undef;
     }
     return $cache_sock{$host} = $sock;
