@@ -165,3 +165,5 @@ general /syn/index.bml.add.other.title
 general /syn/index.bml.add.other.text
 general /syn/index.bml.notused
 general /userinfo.bml.syn.cost
+
+general bml.needlogin.body

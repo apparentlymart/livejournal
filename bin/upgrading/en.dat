@@ -3476,7 +3476,7 @@ bml.badinput.body=Your browser sent some text which is not recognised as valid t
 
 bml.badinput.head=Bad Unicode Input
 
-bml.needlogin.body=In order to view this page, you must <a [[aopts]]>log in</a>.
+bml.needlogin.body2=In order to view this page, you must <a href="/login.bml?ret=1">log in</a>.
 
 bml.needlogin.head=Login Required
 

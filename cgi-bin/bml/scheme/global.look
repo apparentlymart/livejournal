@@ -11,7 +11,7 @@ SOERROR=>{DR}<div><b>%%data%%</b></div>
 
 NEEDLOGIN<=
 <?h1 <?_ml bml.needlogin.head _ml?> h1?>
-<?p <?_code return BML::ml('bml.needlogin.body', { 'aopts' => 'href="/login.bml?ret=1"' }); _code?> p?>
+<?p <?_ml bml.needlogin.body2 _ml?> p?>
 <=NEEDLOGIN
 
 BADINPUT<=
