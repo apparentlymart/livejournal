@@ -305,15 +305,16 @@ if ($remote && $user eq $remote->{'user'} &&
              $sth->execute;
              my @pics;
              push @pics, $_ while ($_ = $sth->fetchrow_array);
-             @pics = sort { lc($a) cmp lc($b) } @pics;
 
-             $ret .= "<p><b>".BML::ml(".picture", {'url' => "$LJ::SITEROOT/allpics.bml?user=$user"}) ."</b> <select name='prop_picture_keyword'><option value=''>($ML{'.default'})";
-             foreach (@pics) {
-                 my $sel = $props{'picture_keyword'} eq $_ ? " selected" : "";
-                 $ret .= "<option value='$_'$sel>$_";
+             if (@pics) {
+                 $ret .= "<p><b>".BML::ml(".picture", {'url' => "$LJ::SITEROOT/allpics.bml?user=$user"}) ."</b> ";
+                 $ret .= LJ::html_select({ 'name' => 'prop_picture_keyword',
+                                           'selected' => $props{'picture_keyword'} },
+                                           '', $ML{'.default'},
+                                           map { $_, $_ } sort { lc($a) cmp lc($b) } @pics
+                                         );
+                 $ret .= LJ::help_icon("userpics", " ") . "</p>";
              }
-             $ret .= "</select>";
-             $ret .= LJ::help_icon("userpics", " ");
          }
 
          ### current mood
