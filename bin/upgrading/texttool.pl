@@ -281,8 +281,10 @@ sub poptext
     {
         $out->("$lang", '+');
         my $l = $lang_code{$lang};
-        open (D, "$ENV{'LJHOME'}/bin/upgrading/${lang}.dat")
-            or $out->('x', "Can't find $lang.dat");
+        my $file = "$ENV{'LJHOME'}/bin/upgrading/${lang}.dat";
+        unless (-e $file) { $out->('-'); next; }
+        open (D, $file)
+            or $out->('x', "Can't open $lang.dat");
         my $addcount = 0;
         my $lnum = 0;
         my ($code, $text);
