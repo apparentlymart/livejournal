@@ -483,10 +483,12 @@ sub check_sig {
 
     my ($txt, $txt_f, $txt_e, $sig_e);
     $txt_e = (get_entity($entity))[0];
-    $txt = $txt_e->as_string() if $txt_e;
+    return 'bad' unless $txt_e;
+
     if ($entity->effective_type() eq 'multipart/signed') {
         # attached signature
         $sig_e = (get_entity($entity, { type => 'application/pgp-signature' }))[0];
+        $txt = $txt_e->as_string();
         my $txt_fh;
         ($txt_fh, $txt_f) =
             File::Temp::tempfile('plaintext_XXXXXXXX', DIR => $tmpdir);
