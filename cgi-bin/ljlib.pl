@@ -1,8 +1,9 @@
 #!/usr/bin/perl
 #
 # <LJDEP>
-# lib: DBI::, Digest::MD5, URI::URL, HTML::TokeParser
+# lib: DBI::, Digest::MD5, URI::URL
 # lib: cgi-bin/ljconfig.pl, cgi-bin/ljlang.pl, cgi-bin/ljpoll.pl
+# lib: cgi-bin/cleanhtml.pl
 # link: htdocs/paidaccounts/index.bml, htdocs/users, htdocs/view/index.bml
 # hook: canonicalize_url, name_caps, name_caps_short, post_create
 # hook: validate_get_remote
@@ -18,7 +19,8 @@ use IO::Socket;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl"; 
+require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl"; 
 
 # constants
 $LJ::EndOfTime = 2147483647;
@@ -2770,81 +2772,23 @@ sub send_mail
     close MAIL;
 }
 
-# TODO: make this just call the HTML cleaner.
 # <LJFUNC>
 # name: LJ::strip_bad_code
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class: security
+# des: Removes malicious/annoying HTML.
+# info: This is just a wrapper function around [func[LJ::CleanHTML::clean]].
+# args: textref
+# des-textref: Scalar reference to text to be cleaned.
+# returns: Nothing.
 # </LJFUNC>
 sub strip_bad_code
 {
     my $data = shift;
-    my $newdata;
-    use HTML::TokeParser;
-    my $p = HTML::TokeParser->new($data);
-
-    while (my $token = $p->get_token)
-    {
-	my $type = $token->[0];
-	if ($type eq "S") {
-	    if ($token->[1] eq "script") {
-		$p->unget_token($token);
-		$p->get_tag("/script");
-	    } else {
-		my $tag = $token->[1];
-		my $hash = $token->[2];
-		delete $hash->{'onabort'};
-		delete $hash->{'onblur'};
-		delete $hash->{'onchange'};
-		delete $hash->{'onclick'};
-		delete $hash->{'onerror'};
-		delete $hash->{'onfocus'};
-		delete $hash->{'onload'};
-		delete $hash->{'onmouseout'};
-		delete $hash->{'onmouseover'};
-		delete $hash->{'onreset'};
-		delete $hash->{'onselect'};
-		delete $hash->{'onsubmit'};
-		delete $hash->{'onunload'};
-		if ($tag eq "a") {
-		    if ($hash->{'href'} =~ /^\s*javascript:/) { $hash->{'href'} = "about:"; }
-		} elsif ($tag eq "meta") {
-		    if ($hash->{'content'} =~ /javascript:/) { delete $hash->{'content'}; }
-		} elsif ($tag eq "img") {
-		    if ($hash->{'src'} =~ /javascript:/) { delete $hash->{'src'}; }
-		    if ($hash->{'dynsrc'} =~ /javascript:/) { delete $hash->{'dynsrc'}; }
-		    if ($hash->{'lowsrc'} =~ /javascript:/) { delete $hash->{'lowsrc'}; }
-		}
-		$newdata .= "<" . $tag;
-		my $slashclose = delete $hash->{'/'};
-		foreach (keys %$hash) {
-		    $newdata .= " $_=\"" . LJ::ehtml($hash->{$_}) . "\"";
-		}
-		$newdata .= " /" if $slashclose;
-		$newdata .= ">";
-	    }
-	}
-	elsif ($type eq "E") {
-	    $newdata .= "</" . $token->[1] . ">";
-	}
-	elsif ($type eq "T" || $type eq "D") {
-	    $newdata .= $token->[1];
-	} 
-	elsif ($type eq "C") {
-	    # ignore comments
-	}
-	elsif ($type eq "PI") {
-	    $newdata .= "<?$token->[1]>";
-	}
-	else {
-	    $newdata .= "<!-- OTHER: " . $type . "-->\n";
-	}
-    } # end while
-    $$data = $newdata;
+    LJ::CleanHTML::clean($data, {
+        'eat' => [qw[layer iframe script]],
+        'mode' => 'allow',
+        'keepcomments' => 1, # Allows CSS to work
+    });
 }
 
 # <LJFUNC>

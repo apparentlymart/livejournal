@@ -87,7 +87,8 @@ sub clean
 			$text =~ s/</&lt;/g;
 			$text =~ s/>/&gt;/g;
 		    }
-		    $newdata .= "<nobr><b>( <a href=\"$cut\">$text</a> )</b></nobr>";
+		    my $url = LJ::ehtml($cut);
+		    $newdata .= "<nobr><b>( <a href=\"$url\">$text</a> )</b></nobr>";
 		    last TOKEN;
 		} else {
 		    next; # ignore the tag.
@@ -224,7 +225,9 @@ sub clean
 	    ## want to make sure we delete any comment starts we see until
 	    ## the end, since they could both be used to comment out the 
 	    ## remainder of the page and also to sneak in back HTML/scripting
-	    $token->[1] =~ s/<!--.*//s;
+            ## However, we should keep these when $keepcomments is 1 so we don't
+            ## remove CSS when being called from LJ::strip_bad_code.
+            $token->[1] =~ s/<!--.*//s unless ($keepcomments);
 
 	    $newdata .= $token->[1];
 	} 
