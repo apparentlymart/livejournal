@@ -257,6 +257,7 @@ body<=
      'userpicref' => \%userpics,
      'userref' => \%user,
      'up' => $up,
+     'viewall' => $viewall,
  };
 
  my @comments = LJ::Talk::load_comments($u, $remote, "L", $itemid, $opts);
@@ -331,7 +332,7 @@ body<=
          $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
          my $screenedtext = $ML{'.screenedpost'};
          $ret .= "<td>$screenedtext</td></tr></table>\n";
-     } elsif ($pu && $pu->{'statusvis'} eq "S") {
+     } elsif ($pu && $pu->{'statusvis'} eq "S" && !$viewsome) {
          $ret .= "<p><a name='t$dtid'></a><table><tr>";
          $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
          $ret .= "<td>$ML{'.replysuspended'}";

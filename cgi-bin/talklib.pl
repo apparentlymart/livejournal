@@ -550,6 +550,7 @@ sub load_comments
     my ($u, $remote, $nodetype, $nodeid, $opts) = @_;
 
     my $n = $u->{'clusterid'};
+    my $viewall = $opts->{viewall};
 
     my $posts = get_talk_data($u, $nodetype, $nodeid);  # hashref, talkid -> talk2 row, or undef
     unless ($posts) {
@@ -568,14 +569,15 @@ sub load_comments
 
         foreach my $post (sort { $b->{'talkid'} <=> $a->{'talkid'} } values %$posts) {
             # see if we should ideally show it or not.  even if it's 
-            # zero, we'll still show it if a child of it 
-            my $should_show = 1; 
-            $should_show = 0 if
-                $post->{'state'} eq "D" ||
-                ($post->{'state'} eq "S" && ! ($remote && ($remote->{'userid'} == $u->{'userid'} ||
-                                                           $remote->{'userid'} == $uposterid ||
-                                                           $remote->{'userid'} == $post->{'posterid'} ||
-                                                           LJ::check_rel($u, $remote, 'A') )));
+            # zero, we'll still show it if it has any children (but we won't show content)
+            my $should_show = $post->{'state'} eq 'D' ? 0 : 1; 
+            unless ($viewall) {
+                $should_show = 0 if
+                    $post->{'state'} eq "S" && ! ($remote && ($remote->{'userid'} == $u->{'userid'} ||
+                                                              $remote->{'userid'} == $uposterid ||
+                                                              $remote->{'userid'} == $post->{'posterid'} ||
+                                                              LJ::check_rel($u, $remote, 'A') ));
+            }
             $post->{'_show'} = $should_show;
             $post_count += $should_show;
 

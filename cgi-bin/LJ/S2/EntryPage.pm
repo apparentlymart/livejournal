@@ -16,6 +16,15 @@ sub EntryPage
     $p->{'comment_pages'} = undef;
     $p->{'comments'} = [];
     $p->{'comment_pages'} = undef;
+
+    # setup viewall options
+    my ($viewall, $viewsome) = (0, 0);
+    if ($get->{viewall} && LJ::check_priv($remote, 'canview')) {
+        # we don't log here, as we don't know what entry we're viewing yet.  the logging
+        # is done when we call EntryPage_entry below.
+        $viewall = LJ::check_priv($remote, 'canview', '*');
+        $viewsome = $viewall || LJ::check_priv($remote, 'canview', 'suspended');
+    }
     
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
     return if $opts->{'suspendeduser'};
@@ -57,6 +66,7 @@ sub EntryPage
         'userref' => \%user,
         # user object is cached from call just made in EntryPage_entry
         'up' => LJ::load_user($s2entry->{'poster'}->{'username'}),
+        'viewall' => $viewall,
     };
 
     my $userlite_journal = UserLite($u);
@@ -142,7 +152,7 @@ sub EntryPage
             # FIXME: ideally the load_comments should only return these
             # items if there are children, otherwise they should be hidden entirely
             my $pu = $com->{'posterid'} ? $user{$com->{'posterid'}} : undef;
-            if ($pu && $pu->{'statusvis'} eq "S") {
+            if ($pu && $pu->{'statusvis'} eq "S" && !$viewsome) {
                 $s2com->{'text'} = "";
                 $s2com->{'subject'} = "";
                 $s2com->{'full'} = 0;
