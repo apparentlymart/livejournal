@@ -255,14 +255,14 @@
                                      'rows' => $rows,
                                      'cols' => $cols });
             } else {
-                my ($length, $maxlength) = ($prop->{'length'} || 30,
+                my ($size, $maxlength) = ($prop->{'size'} || 30,
                                             $prop->{'maxlength'} || 255);
                 $body .= LJ::html_text({ 'name' => "${name}_value",
                                      'disabled' => ! $can_use,
                                      'value' => $override,
                                      'onfocus' => "checkOverride('$name');",
                                      'maxlength' => $maxlength,
-                                     'size' => $length });
+                                     'size' => $size });
             }
         } elsif ($type eq "Color") {
             $body .= LJ::html_color({ 'name' => "${name}_value",
