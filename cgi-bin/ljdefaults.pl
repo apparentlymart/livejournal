@@ -44,6 +44,7 @@
     $IMGPREFIX ||= "$SITEROOT/img";
     $STATPREFIX ||= "$SITEROOT/stc";
     $USERPIC_ROOT ||= "$LJ::SITEROOT/userpic";
+    $PALIMGROOT ||= "$LJ::SITEROOT/palimg";
 
     if ($LJ::DB_USERIDMAP ||= "") {
         $LJ::DB_USERIDMAP .= "." unless  $LJ::DB_USERIDMAP =~ /\.$/;

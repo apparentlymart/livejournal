@@ -77,6 +77,7 @@ sub make_journal
     $opts->{'ctx'} = $ctx;
 
     $ctx->[S2::PROPS]->{'SITEROOT'} = $LJ::SITEROOT;
+    $ctx->[S2::PROPS]->{'PALIMGROOT'} = $LJ::PALIMGROOT;
     $ctx->[S2::PROPS]->{'SITENAME'} = $LJ::SITENAME;
     $ctx->[S2::PROPS]->{'SITENAMESHORT'} = $LJ::SITENAMESHORT;
     $ctx->[S2::PROPS]->{'SITENAMEABBREV'} = $LJ::SITENAMEABBREV;
@@ -1863,7 +1864,7 @@ sub palimg_modify
 {
     my ($ctx, $filename, $items) = @_;
     return undef unless $filename =~ /^\w[\w\/\-]*\.(gif|png)$/;
-    my $url = "$LJ::SITEROOT/palimg/$filename";
+    my $url = "$LJ::PALIMGROOT/$filename";
     return $url unless $items && @$items;
     return undef if @$items > 7;
     $url .= "/p";
@@ -1883,7 +1884,7 @@ sub palimg_tint
 {
     my ($ctx, $filename, $bcol, $dcol) = @_;  # bright color, dark color [opt]
     return undef unless $filename =~ /^\w[\w\/\-]*\.(gif|png)$/;
-    my $url = "$LJ::SITEROOT/palimg/$filename";
+    my $url = "$LJ::PALIMGROOT/$filename";
     $url .= "/pt";
     foreach my $col ($bcol, $dcol) {
         next unless $col;
@@ -1897,7 +1898,7 @@ sub palimg_gradient
 {
     my ($ctx, $filename, $start, $end) = @_;
     return undef unless $filename =~ /^\w[\w\/\-]*\.(gif|png)$/;
-    my $url = "$LJ::SITEROOT/palimg/$filename";
+    my $url = "$LJ::PALIMGROOT/$filename";
     $url .= "/pg";
     foreach my $pi ($start, $end) {
         next unless $pi;

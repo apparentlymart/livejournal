@@ -769,7 +769,7 @@ set lang_dayname_short = [ "", "Sun", "Mon",  "Tue", "Wed",
 property string IMGDIR {
     noui = 1;
     doc_flags = "[sys]";
-    des = "The base URL of the current LiveJournal site's image directory, without a trailing slash.  Example: \"http://www.livejourna.com/img\".";
+    des = "The base URL of the current LiveJournal site's image directory, without a trailing slash.  Example: \"http://www.livejournal.com/img\".";
 }
 property builtin string SITENAME {
     noui = 1;
@@ -793,6 +793,12 @@ property builtin string SITEROOT {
     noui = 1;
     doc_flags = "[sys]";
     des = "The base URL of the current LiveJournal site, without a trailing slash.  Example: \"http://www.livejournal.com\".";
+}
+
+property builtin string PALIMGROOT {
+    noui = 1;
+    doc_flags = "[sys]";
+    des = "The base URL of palimg files, without a trailing slash.  Example: \"http://www.livejournal.com/palimg\".";
 }
 
 property int page_recent_items {
