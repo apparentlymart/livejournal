@@ -36,6 +36,7 @@ sub error_message
              "151" => "Banned from journal",
              "152" => "Can't make back-dated entries in non-personal journal.",
              "153" => "Incorrect time value",
+             "154" => "Can't add a redirected account as a friend",
 
              # Client Errors
              "200" => "Missing required argument(s)",
@@ -1532,11 +1533,17 @@ sub editfriends
         }
 
         my $row = LJ::load_user($dbs, $aname);
-        if ($row && $row->{'journaltype'} eq "Y" && ! LJ::get_cap($u, "synd_befriend")) {
-            return fail($err,401);
-        }
 
-        unless ($row && $row->{'statusvis'} eq "V") {
+        # XXX - on some errors we fail out, on others we continue and try adding
+        # any other users in the request. also, error message for redirect should
+        # point the user to the redirected username.
+        if (! $row) {
+            $error_flag = 1;
+        } elsif ($row->{'journaltype'} eq "Y" && ! LJ::get_cap($u, "synd_befriend")) {
+            return fail($err,401);
+        } elsif ($row->{'journaltype'} eq "R") {
+            return fail($err,154);
+        } elsif ($row->{'statusvis'} ne "V") {
             $error_flag = 1;
         } else {
             $friends_added++;
