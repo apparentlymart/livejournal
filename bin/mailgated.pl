@@ -106,23 +106,29 @@ while (1) {
     #  part of the Maildir specification) 
     debug("\tprocess");
     opendir(MDIR, $mailspool) || die "Unable to open mailspool $mailspool: $!\n";
+    my $count = 0;
+    my $MAX_LOOP = 50;
     foreach (readdir(MDIR)) {
         next if /^\./;
         next if $lock eq 'hostname' && ! /\.$hostname\b/;
         process($_);
+	exit 0 if $stop;
+	last if ++$count == $MAX_LOOP;
     }
     closedir MDIR;
 
     $busy = 0;
     debug("\tdone\n");
 
-    exit 0 if $stop;
-    sleep ($opt->{'foreground'} ? 3 : 10);
+    # sleep for a bit if we finished reading the directory
+    sleep ($opt->{'foreground'} ? 3 : 10) unless $count == $MAX_LOOP;
 }
 
 sub stop_daemon
 { 
-    debug("Shutting down...\n");
+    # signal safe since it's not run when in daemon mode:
+    debug("Shutting down...\n");  
+
     exit 0 unless $busy;
     $stop = 1;
 }

@@ -166,7 +166,9 @@ The service you have requested is temporarily unavailable.
 </html>
 EOM
 
-    BML::http_response(200, $msg);
+    # may not run from web context (e.g. mailgated.pl -> supportlib -> ..)
+    eval { BML::http_response(200, $msg); };
+
     return;
 }
 
