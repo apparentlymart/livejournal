@@ -204,9 +204,9 @@ BODY<=
 	 $ret .= LJ::ehtml(LJ::durl($res{"events_1_subject"}));
 	 $ret .= "\" SIZE=60 MAXLENGTH=255>\n";
 	
-	 $ret .= "<P><B>Event:</B><BR><TEXTAREA ROWS=12 COLS=60 WRAP=SOFT NAME=\"event\">";
+	 $ret .= "<p><b>Event:</b><br /><textarea rows='12' cols='60' wrap='soft' name='event' style='width: 99%'>";
 	 $ret .= LJ::ehtml(LJ::durl($res{"events_1_event"}));
- 	 $ret .= "</TEXTAREA>\n";
+ 	 $ret .= "</textarea></p>\n";
 
 	 $ret .= "<p><b>Security Level:</b>";
 	 my @secs = ("public" => "Public", "private" => "Private", 
