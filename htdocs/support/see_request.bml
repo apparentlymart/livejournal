@@ -367,9 +367,11 @@ LJ::run_hooks("support_see_request_html", {
      $ret .= "<tr><td>Touch request:</td><td>";
      $ret .= '<input type="checkbox" name="touch" /> <?de (Use this to re-open the request.) de?>';
      $ret .= "</td></tr>";
-     $ret .= "<tr><td>Change summary:</td><td>";
-     $ret .= '<input type="checkbox" name="changesum" /> <?de (Use this to change the request summary.) de?>';
-     $ret .= "</td></tr>";
+     if (LJ::Support::can_help($dbh, $sp, $remote)) {
+         $ret .= "<tr><td>Change summary:</td><td>";
+         $ret .= '<input type="checkbox" name="changesum" /> <?de (Use this to change the request summary.) de?>';
+         $ret .= "</td></tr>";
+	}
  }
 
  # textarea for their message body
