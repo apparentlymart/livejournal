@@ -139,6 +139,7 @@ $maint{gen_audio_captchas} = sub {
         # Insert the blob
         print "uploading (capid = $capid, anum = $anum)...";
         if ($location eq 'mogile') {
+            LJ::mogclient(); # force load
             die "Requested to store captchas on MogileFS, but it's not loaded.\n"
                 unless $LJ::MogileFS;
             my $fh = $LJ::MogileFS->new_file("captcha:$capid", 'captcha')
@@ -244,6 +245,7 @@ $maint{gen_image_captchas} = sub {
         # Insert the blob
         print "uploading (capid = $capid, anum = $anum)...";
         if ($location eq 'mogile') {
+            LJ::mogclient(); # force load
             die "Requested to store captchas on MogileFS, but it's not loaded.\n"
                 unless $LJ::MogileFS;
             my $fh = $LJ::MogileFS->new_file("captcha:$capid", 'captcha')
@@ -338,6 +340,7 @@ $maint{clean_captchas} = sub {
         my $ext = $type eq 'audio' ? 'wav' : 'png';
 
         if ($location eq 'mogile') {
+            LJ::mogclient(); # force load
             die "Requested to delete captchas from MogileFS, but it's not loaded.\n"
                 unless $LJ::MogileFS;
             $LJ::MogileFS->delete("captcha:$capid")
