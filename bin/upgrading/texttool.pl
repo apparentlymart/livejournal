@@ -21,16 +21,17 @@ GetOptions(
 
 my $mode = shift @ARGV;
 
-help() if $opt_help or not defined $mode or @ARGV;
+help() if $opt_help or not defined $mode;
 
 sub help
 {
-    die "Usage: texttool.pl <commands>
+    die "Usage: texttool.pl <command>
 
 Where 'command' is one of:
-  load         Runs the following three commands in order:
+  load         Runs the following four commands in order:
     popstruct  Populate lang data from text[-local].dat into db
-    poptext    Populate text from en.dat, etc into database
+    poptext    Populate text from en.dat, etc into database.
+               --extra specifies an alternative input file
     copyfaq    If site is translating FAQ, copy FAQ data into trans area
     makeusable Setup internal indexes necessary after loading text
   dumptext     Dump lang text based on text[-local].dat information
@@ -38,6 +39,8 @@ Where 'command' is one of:
   wipedb       Remove all language/text data from database.
   newitems     Search files in htdocs, cgi-bin, & bin and insert
                necessary text item codes in database.
+  remove       takes two extra arguments: domain name and code, and removes
+               that code and its text in all languages
 
                Optionally:
                   --local-lang=..  If given, works on local site files too
@@ -156,7 +159,7 @@ my $out = sub {
     }
 };
 
-my @good = qw(load popstruct poptext dumptext newitems wipedb makeusable copyfaq);
+my @good = qw(load popstruct poptext dumptext newitems wipedb makeusable copyfaq remove);
 
 popstruct() if $mode eq "popstruct" or $mode eq "load";
 poptext() if $mode eq "poptext" or $mode eq "load";
@@ -165,6 +168,7 @@ makeusable() if $mode eq "makeusable" or $mode eq "load";
 dumptext() if $mode eq "dumptext";
 newitems() if $mode eq "newitems";
 wipedb() if $mode eq "wipedb";
+remove(@ARGV) if $mode eq "remove" and scalar(@ARGV) == 2;
 help() unless grep { $mode eq $_ } @good;
 exit 0;
 
@@ -518,3 +522,37 @@ sub newitems
     }
     $out->('-', 'done.');
 }
+
+sub remove {
+    my ($dmcode, $itcode) = @_;
+    my $dmid;
+    $out->("Removing item $itcode from domain $dmcode...", "+");
+    if (exists $dom_code{$dmcode}) {
+        $dmid = $dom_code{$dmcode}->{'dmid'};
+    } else {
+        $out->("x", "Unknown domain code $dmcode.");
+    }
+
+    my $qcode = $dbh->quote($itcode);
+    my $itid = $dbh->selectrow_array("SELECT itid FROM ml_items WHERE dmid=$dmid AND itcode=$qcode");
+    $out->("x", "Unknown item code $itcode.") unless $itid;
+
+    # need to delete everything from: ml_items ml_latest ml_text
+
+    $dbh->do("DELETE FROM ml_items WHERE dmid=$dmid AND itid=$itid");
+
+    my $txtids = "";
+    my $sth = $dbh->prepare("SELECT txtid FROM ml_latest WHERE dmid=$dmid AND itid=$itid");
+    $sth->execute;
+    while (my $txtid = $sth->fetchrow_array) {
+        $txtids .= "," if $txtids;
+        $txtids .= $txtid;
+    }
+    $dbh->do("DELETE FROM ml_latest WHERE dmid=$dmid AND itid=$itid");
+    $dbh->do("DELETE FROM ml_text WHERE dmid=$dmid AND txtid IN ($txtids)");
+    
+    $out->("-","done.");
+}
+
+
+
