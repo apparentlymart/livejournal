@@ -437,7 +437,7 @@ if ($opt_pop)
 
     # convert users from dversion4 (unclustered s1styles)
     if (my $d4 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=4 LIMIT 1")) {
-        system("$ENV{'LJHOME'}/bin/upgrading/d4d5convert-global.pl");
+        system("$ENV{'LJHOME'}/bin/upgrading/d4d5-global.pl");
     }
 
     print "\nThe system user was created with a random password.\nRun \$LJHOME/bin/upgrading/make_system.pl to change its password and grant the necessary privileges."
