@@ -359,7 +359,7 @@ sub unlockStaleUsers () {
         my ( $host, $port, $instance, $userid ) =
             @{$row}{'moverhost','moverport','moverinstance','userid'};
         my $ip = join '.',
-            reverse map { ($host >> $host * 8) & 0xff } 0..3;
+            reverse map { ($host >> $_ * 8) & 0xff } 0..3;
 
         # If the host hasn't been contacted yet, do so now
         if ( !exists $cachedReply{$instance} ) {
@@ -377,6 +377,7 @@ sub unlockStaleUsers () {
 
             # Connection error
             else {
+                debugMsg( "Couldn't open a socket to $ip:$port: $!" );
                 $cachedReply{$instance} = '';
             }
         }
