@@ -344,8 +344,6 @@ function Page::lay_navbar() {
 <h1>$.journal.name</h1>
 <ul>
 """;
-    # FIXME: There's nowhere for me to get the view names from,
-    #       so they're just the internal name for now
     foreach var string v ($.views_order) {
         if ($.view == $v) {
             println "<li class=\"active\">"+lang_viewname($v)+"</li>";
@@ -366,14 +364,39 @@ $userpic
     if (size $this.linklist) {
         println "<div class=\"box\">";
         println "<h2>Links</h2>\n";
-        println "<div style='margin: 0.5em;'>";
         $this->print_linklist();
-        println "</div>";
         println "</div>";
     }
 
     "</td>";
 
+}
+
+function Page::print_linklist() {
+    if (size $.linklist <= 0) {
+        return;
+    }
+    
+    var bool section_open = false;
+    
+    println "<ul>";
+    foreach var UserLink l ($.linklist) {
+        if ($l.title) {
+            if ($l.is_heading) {
+                if ($section_open) {
+                    println "</ul></li>";
+                }
+                println """<li><span style="font-weight: bold;">$l.title</span>\n<ul>""";
+                $section_open = true;
+            } else {
+                println """<li><a href="$l.url">$l.title</a></li>""";
+            }
+        }
+    }    
+    if ($section_open) {
+        println "</ul></li>";
+    }
+    println "</ul>";
 }
 
 function Page::print() {
