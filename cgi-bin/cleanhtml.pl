@@ -599,43 +599,75 @@ sub ExpandLJURL
     my @args = grep { $_ } split(/\//, $_[0]);
     my $mode = shift @args;
 
-    if ($mode eq 'user')
-    {
-        my $url;
-        my $user = shift @args;
-        $user = LJ::canonical_username($user);
-        if ($args[0] eq "profile") {
-            $url = "$LJ::SITEROOT/userinfo.bml?user=$user";
-        } else {
-            $url = "$LJ::SITEROOT/users/$user/";
-            foreach (@args) {
-                $url .= "$_/";
-            }
-        }
-        return $url;
-    }
-    
-    if ($mode eq 'support') 
-    {
-        if ($args[0]) {
-            my $id = $args[0]+0;
-            return "$LJ::SITEROOT/support/see_request.bml?id=$id";
-        } else {
-            return "$LJ::SITEROOT/support/";
-        }
-    }
+    my %modes =
+        (
+         'faq' => sub {
+             my $id = shift()+0;
+             if ($id) {
+                 return "support/faqbrowse.bml?faqid=$id";
+             } else {
+                 return "support/faq.bml";
+             }
+         },
+         'memories' => sub {
+             my $user = shift;
+             if ($user) {
+                 return "memories.bml?user=$user";
+             } else {
+                 return "memories.bml";
+             }
+         },
+         'pubkey' => sub {
+             my $user = shift;
+             if ($user) {
+                 return "pubkey.bml?user=$user";
+             } else {
+                 return "pubkey.bml";
+             }
+         },
+         'support' => sub {
+             my $id = shift()+0;
+             if ($id) {
+                 return "support/see_request.bml?id=$id";
+             } else {
+                 return "support/";
+             }
+         },
+         'todo' => sub {
+             my $user = shift;
+             if ($user) {
+                 return "todo/index.bml?user=$user";
+             } else {
+                 return "todo/index.bml";
+             }
+         },
+         'user' => sub {
+             my $user = shift;
+             return $_[0] eq 'profile' ?
+                 "userinfo.bml?user=$user" :
+                 "users/$user/" . join("", map { "$_/" } @_ );
+         },
+         'userinfo' => sub {
+             my $user = shift;
+             if ($user) {
+                 return "userinfo.bml?user=$user";
+             } else {
+                 return "userinfo.bml";
+             }
+         },
+         'userpics' => sub {
+             my $user = shift;
+             if ($user) {
+                 return "allpics.bml?user=$user";
+             } else {
+                 return "allpics.bml";
+             }
+         },
+        );
 
-    if ($mode eq 'faq') 
-    {
-        if ($args[0]) {
-            my $id = $args[0]+0;
-            return "$LJ::SITEROOT/support/faqbrowse.bml?faqid=$id";
-        } else {
-            return "$LJ::SITEROOT/support/faq.bml";
-        }
-    }
+    my $uri = $modes{$mode}->(@args);
 
-    return "$LJ::SITEROOT/";
+    return "$LJ::SITEROOT/$uri";
 }
 
 my $subject_eat = [qw[head title style layer iframe applet object]];
