@@ -38,15 +38,6 @@ sub trans
 
     LJ::start_request();
 
-    return trans_userpic($r, $1) if $uri =~ m!^/userpic/(\d+)$!;
-
-    if ($uri =~ m!^/(interface(/flat|/xmlrpc)?)|cgi-bin/log\.cgi!) {
-        $RQ{'interface'} = $1 ? ($2 eq "/flat" ? "flat" : ($2 eq "/xmlrpc" ? "xmlrpc" : "")) : "flat";
-        $r->handler("perl-script");
-        $r->push_handlers(PerlHandler => \&interface_content);
-        return OK;
-    }
-
     my $redir = sub {
         my $url = shift;
         $r->content_type("text/html");
@@ -76,6 +67,7 @@ sub trans
         return OK;
     };
 
+    # user domains
     if ($LJ::USER_VHOSTS && 
         $host =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E(:\d+)?$/ &&
         $1 ne "www") 
@@ -89,13 +81,17 @@ sub trans
         return $journal_view->(undef); # undef
     }
 
-    if ($LJ::DOMAIN_PREPEND_WWW &&
+    # let foo.com still work, but redirect to www.foo.com
+    if ($LJ::DOMAIN_PREPEND_WWW && $r->method eq "GET" &&
         $host =~ /^\Q$LJ::DOMAIN\E(:\d+)?$/) 
     {
-        $r->content_type("text/html");
-        $r->header_out(Location => "$LJ::SITEROOT$uri");
-        return REDIRECT;
+        my $url = "$LJ::SITEROOT$uri";
+        $url .= "?" . $r->args if $r->args;
+        return $redir->($url);
     }
+
+    # userpic
+    return trans_userpic($r, $1) if $uri =~ m!^/userpic/(\d+)$!;
 
     # normal (non-domain) journal view
     if ($uri =~ m!
@@ -113,6 +109,22 @@ sub trans
                                 'args' => $4,
                                 'user' => $2, });
     }
+
+    # protocol support
+    if ($uri =~ m!^/(interface(/flat|/xmlrpc)?)|cgi-bin/log\.cgi!) {
+        $RQ{'interface'} = $1 ? ($2 eq "/flat" ? "flat" : ($2 eq "/xmlrpc" ? "xmlrpc" : "")) : "flat";
+        $r->handler("perl-script");
+        $r->push_handlers(PerlHandler => \&interface_content);
+        return OK;
+    }
+
+    # customview
+    if ($uri =~ m!^/customview\.cgi!) {
+        $r->handler("perl-script");
+        $r->push_handlers(PerlHandler => \&customview_content);
+        return OK;
+    }
+
 
     return FORBIDDEN if $uri =~ m!^/userpics!;
     return DECLINED;
@@ -240,7 +252,7 @@ sub content_userpic
     $set_mime->($data);
     $size = length($data);
     $send_headers->();
-    $r->print($data);
+    $r->print($data) unless $r->header_only;
     return OK;
 }
 
@@ -347,10 +359,77 @@ sub journal_content
     $r->header_out("Vary", "Accept-Encoding, Cookie");
     $r->header_out("Content-length", length($html));
     $r->send_http_header();
-    $r->print($html);
-
+    $r->print($html) unless $r->header_only;
     return OK;
+}
 
+sub customview_content
+{
+    my $r = shift;
+    my $dbs = LJ::get_dbs();
+
+    my %FORM = $r->args;
+
+    my $charset = "utf-8";
+    
+    if ($LJ::UNICODE && $FORM{'charset'}) {
+        $charset = $FORM{'charset'};
+        if ($charset ne "utf-8" && ! Unicode::MapUTF8::utf8_supported_charset($charset)) {
+            $r->content_type("text/html");
+            $r->send_http_header();
+            $r->print("<b>Error:</b> requested charset not supported.");
+            return OK;
+        }
+    }    
+    
+    my $ctype = "text/html";
+    if ($FORM{'type'} eq "xml") {
+	$ctype = "text/xml";
+    }
+
+    if ($LJ::UNICODE) {
+        $ctype .= "; charset=$charset";
+    }
+
+    $r->content_type($ctype);
+
+    my $user = $FORM{'username'} || $FORM{'user'};
+    my $styleid = $FORM{'styleid'} + 0;
+    my $nooverride = $FORM{'nooverride'} ? 1 : 0;
+
+    my $remote;
+    if ($FORM{'checkcookies'}) {
+	my $cgi = new CGI;
+	my $criterr = 0;
+	$remote = LJ::get_remote($dbs, \$criterr, $cgi);
+    }
+
+    my $data = (LJ::make_journal($dbs, $user, "", $remote,
+				 { "nocache" => $FORM{'nocache'}, 
+				   "vhost" => "customview",
+				   "nooverride" => $nooverride,
+				   "styleid" => $styleid,
+                                   "saycharset" => $charset,
+			       })
+		|| "<b>[$LJ::SITENAME: Bad username, styleid, or style definition]</b>");
+    
+    if ($FORM{'enc'} eq "js") {
+	$data =~ s/\\/\\\\/g;
+	$data =~ s/\"/\\\"/g;
+	$data =~ s/\n/\\n/g;
+	$data =~ s/\r//g;
+	$data = "document.write(\"$data\")";
+    }
+
+    if ($LJ::UNICODE && $charset ne 'utf-8') {
+        $data = Unicode::MapUTF8::from_utf8({-string=>$data, -charset=>$charset});
+    }
+
+    $r->header_out("Cache-Control", "must-revalidate");
+    $r->header_out("Content-Length", length($data));
+    $r->send_http_header();
+    $r->print($data) unless $r->header_only;
+    return OK;
 }
 
 sub interface_content
