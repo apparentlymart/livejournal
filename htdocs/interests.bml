@@ -142,13 +142,19 @@ BODY<=
 
  if ($FORM{'intid'} || $FORM{'int'}) 
  {
+     my $intcount;
      my $where = $FORM{'intid'} ? "intid=$qintid" : "interest=$qinterest";
-     $sth = $dbr->prepare("SELECT interest, intid FROM interests WHERE $where");
+     $sth = $dbr->prepare("SELECT interest, intid, intcount FROM interests WHERE $where");
      $sth->execute;
-     ($interest, $intid) = $sth->fetchrow_array;
+     ($interest, $intid, $intcount) = $sth->fetchrow_array;
      unless ($interest) { return "(=H1 Error H1=)(=P Interest wasn't found. P=)"; }
      $qintid = $intid+0;
      
+     if ($intcount > 2000) {
+	 # hack, yes.  saves the database, though.
+	 return "(=H1 Many matches H1=)(=P There are $intcount people and/or communities listing this as an interest.  A list won't be shown. P=)";
+     }
+
      my $ret = "";
      my $remote = LJ::get_remote_noauth();
 
@@ -156,7 +162,7 @@ BODY<=
 
      my $list;
      my $count = 0;
-     $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='C' AND u.statusvis='V' ORDER BY u.user");
+     $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='C' AND u.statusvis='V' ORDER BY u.user LIMIT 1000");
      $sth->execute;
      while ($_ = $sth->fetchrow_hashref) {
 	 $count++;
