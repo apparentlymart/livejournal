@@ -69,7 +69,7 @@ body<=
     $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
     $ret .= "</form>\n\n";
 
-    my $getextra = "?authas=$authas" unless $authas = $remote->{'user'};
+    my $getextra = "?authas=$authas" unless $authas eq $remote->{'user'};
     $ret .= "<form method='post' action='accountstatus.bml$getextra'>\n";
 
     $ret .= "<?h1 $ML{'.journalstatus.head'} h1?><?p $ML{'.journalstatus.about'} p?>\n";
