@@ -1591,7 +1591,7 @@ sub init {
             if ($res ne $c_res) {
                 $chrp_err = "invalid";
             } elsif ($c_time < time() - 2*60*60) {
-                $chrp_err = "too_old";
+                $chrp_err = "too_old" if $LJ::REQUIRE_TALKHASH_NOTOLD;
             }
         } else {
             $chrp_err = "missing";
@@ -1603,7 +1603,7 @@ sub init {
                 print STDERR "talkhash error: from $ruser \@ $ip - $chrp_err - $talkurl\n";
             }
             if ($LJ::REQUIRE_TALKHASH) {
-                return $err->("Sorry, form expired.  Press back, copy text, reload form, paste into new form, and re-submit.") 
+                return $err->("Sorry, form expired.  Press back, copy text, reload form, paste into new form, and re-submit.")
                     if $chrp_err eq "too_old";
                 return $err->("Missing parameters");
             }
