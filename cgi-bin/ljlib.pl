@@ -332,8 +332,8 @@ sub get_recent_items
 
     # fetch crap from squid (an experiment)
     if ($LJ::DATACACHE) {
-	my $url = "http://$LJ::DATACACHE/datacache?userid=$userid&sort=$sort_key";
-	unless ($mask || $remoteid == $userid) { $url .= "&notfriend=1"; }
+	my $url = "http://$LJ::DATACACHE/datacache/userid=$userid/sort=$sort_key";
+	unless ($mask || $remoteid == $userid) { $url .= "/notfriend=1"; }
       LJ::debug("url = $url");
 
 	my $ua = new LWP::UserAgent;

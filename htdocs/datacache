@@ -15,9 +15,14 @@ REQUEST:
     my $dbs = LJ::get_dbs();
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
-    
+
+    # for dormando: so he can watch the squid logs (which strip after ?)
+    my $PI = $ENV{'PATH_INFO'};
     my %FORM = ();
-    LJ::get_form_data(\%FORM);
+    foreach (split(m!/!, $ENV{'PATH_INFO'})) {
+	my ($k, $v) = split(/=/, $_);
+	$FORM{$k} = $v;
+    }
     
     print "Content-type: text/plain\n";
     print "Expires: ", LJ::time_to_http(time() + CACHE_TIME), "\n";
