@@ -38,6 +38,42 @@ sub set_dbcm {
     return $u->{'_dbcm'} = shift;
 }
 
+sub begin_work {
+    my $u = shift;
+    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+        or croak "Database handle unavailable";
+
+    my $rv = $dbcm->begin_work;
+    if ($u->{_dberr} = $dbcm->err) {
+        $u->{_dberrstr} = $dbcm->errstr;
+    }
+    return $rv;
+}
+
+sub commit {
+    my $u = shift;
+    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+        or croak "Database handle unavailable";
+
+    my $rv = $dbcm->commit;
+    if ($u->{_dberr} = $dbcm->err) {
+        $u->{_dberrstr} = $dbcm->errstr;
+    }
+    return $rv;
+}
+
+sub rollback {
+    my $u = shift;
+    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+        or croak "Database handle unavailable";
+
+    my $rv = $dbcm->rollback;
+    if ($u->{_dberr} = $dbcm->err) {
+        $u->{_dberrstr} = $dbcm->errstr;
+    }
+    return $rv;
+}
+
 # get an $sth from the writer
 sub prepare {
     my $u = shift;
