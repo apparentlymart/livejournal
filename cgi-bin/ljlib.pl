@@ -109,20 +109,18 @@ sub get_friend_items
 	}
     }
 
-    $sth = $dbr->prepare("SELECT u.userid, uu.timeupdate FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V'");
+    $sth = $dbr->prepare("SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate) FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V' AND uu.timeupdate IS NOT NULL");
     $sth->execute;
 
     my @friends = ();
     while (my ($userid, $update) = $sth->fetchrow_array) {
 	push @friends, [ $userid, $update ];
     }
-    @friends = sort { $b->[1] cmp $a->[1] } @friends;
+    @friends = sort { $a->[1] <=> $b->[1] } @friends;
 
-    my $no_new_count = 0;
     my $loop = 1;
-    my $lastmax = $LJ::EndOfTime;
+    my $lastmax = 0;
     my $itemsleft = $getitems;
-    my $no_new_stop_count = 4;   # see notes below
  
     while ($loop && @friends)
     {
@@ -137,7 +135,7 @@ sub get_friend_items
 	    'skip' => 0,
 	    'gmask_from' => $gmask_from,
 	    'friendsview' => 1,
-	    'lessthan' => $lastmax,
+	    'notafter' => $lastmax,
 	});
 	
 	if (@newitems)
@@ -145,6 +143,7 @@ sub get_friend_items
 	    push @items, @newitems;
 
 	    $opts->{'owners'}->{$friendid} = 1;
+
 	    $itemsleft--; # we'll need at least one less for the next friend
 	    
 	    # sort all the total items by rlogtime (recent at beginning)
@@ -152,23 +151,17 @@ sub get_friend_items
 
 	    # cut the list down to what we need.
 	    @items = splice(@items, 0, $getitems) if (@items > $getitems);
-
-	    # reset the no_new_count.  if we stop loading stuff for so
-	    # many friends in a row, then we consider nothing new for
-	    # rest.  (see, uu.timeupdate is always updated, even on
-	    # private entries and stuff.. we only use it to help us
-	    # make this page quickly.. it's not perfect)
-	    $no_new_count = 0;
 	} 
-	elsif (@items == $getitems) 
-	{
-	    # if we're already full, try 5 more friends (to allow for the
-	    # case that 5 friends in a row have posted nothing but
-	    # private/protected entries... an odd case)
-	    $loop = 0 if (++$no_new_count >= $no_new_stop_count)
-	}
 
-	$lastmax = $items[-1]->{'rlogtime'};
+	if (@items == $getitems) 
+	{
+	    $lastmax = $items[-1]->{'rlogtime'};
+
+	    # stop looping if we know the next friend's newest entry
+	    # is greater (older) than the oldest one we've already
+	    # loaded.
+	    $loop = 0 if (@friends && $friends[0]->[1] > $lastmax);
+	}
     }
 
     # remove skipped ones
@@ -206,8 +199,16 @@ sub get_recent_items
     $sort_key = "rlogtime" if ($opts->{'order'} eq "logtime" ||
 			       $opts->{'friendsview'});
 
-    # less than time
-    my $lessthan = ($opts->{'lessthan'}+0) || $LJ::EndOfTime;
+    # 'notafter':
+    #   the friends view doesn't want to load things that it knows it
+    #   won't be able to use.  if this argument is zero or undefined,
+    #   then we'll load everything less than or equal to 1 second from
+    #   the end of time.  we don't include the last end of time second
+    #   because that's what backdated entries are set to.  (so for one
+    #   second at the end of time we'll have a flashback of all those
+    #   backdated entries... but then the world explodes and everybody
+    #   with 32 bit time_t structs dies)
+    my $notafter = $opts->{'notafter'} + 0 || $LJ::EndOfTime - 1;
 
     my $skip = $opts->{'skip'}+0;
     my $itemshow = $opts->{'itemshow'}+0;
@@ -254,7 +255,7 @@ sub get_recent_items
     my $sql = ("SELECT itemid, posterid, security, replycount, $extra_sql ".
 	       "DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i ".
 	       "%l %h %k %H\") AS 'alldatepart' ".
-	       "FROM log WHERE ownerid=$userid AND $sort_key < $lessthan $secwhere ".
+	       "FROM log WHERE ownerid=$userid AND $sort_key <= $notafter $secwhere ".
 	       "ORDER BY ownerid, $sort_key ".
 	       "LIMIT $skip,$itemshow");
 
@@ -264,6 +265,8 @@ sub get_recent_items
 	push @items, $li;
 	push @{$opts->{'itemids'}}, $li->{'itemid'};
     }
+    
+    my $ct = @items;
 
     return @items;
 }
