@@ -224,6 +224,7 @@ DE<=
 EMCOLOR=>{S}#c0c0c0
 HOTCOLOR=>{S}#ff0000
 EMCOLORLITE=>{S}#e2e2e2
+screenedbarcolor=>{S}#d0d0d0
 
 CHOICE=>{P}<DT><A HREF="%%data2%%"><FONT SIZE="+1"><TT><B>%%data1%%</B></TT></FONT></A><DD><FONT SIZE="2">%%data3%%</FONT>
 

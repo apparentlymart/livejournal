@@ -466,9 +466,6 @@ body<=
      return if ($mark->{$tid});
      $mark->{$tid} = 1;
 
-     my $bgcolor = ($opts->{'depth'} % 2) ? "emcolorlite" : "emcolor";
-     $bgcolor = BML::get_template_def($bgcolor);
-     
      # find child messages (replys to $tid)
     my @childs = sort { $postref->{$a}->{'datepost'} cmp $postref->{$b}->{'datepost'} }
     grep { ($postref->{$_}->{'state'} eq "A" || $postref->{$_}->{'_haschildren'} ||
@@ -477,11 +474,15 @@ body<=
            )}
     @{$opts->{'children'}->{$tid}};
 
-    #$$ret .= "<p>recurse_post($tid): children=(@childs)\n";
-
     return unless ($tid || @childs);
 
     my $post = $postref->{$tid};
+
+     my $bgcolor = ($opts->{'depth'} % 2) ? "emcolorlite" : "emcolor";
+     $bgcolor = BML::get_template_def($bgcolor);
+     if ($post->{'state'} eq "S") {
+         $bgcolor = BML::get_template_def("screenedbarcolor") || $bgcolor;
+     }
 
     # display new or old first?
     if ($opts->{'newfirst'}) { @childs = reverse @childs; }
