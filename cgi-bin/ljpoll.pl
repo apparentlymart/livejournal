@@ -559,13 +559,20 @@ sub show_poll
         $ret .= $q->{'qtext'};
         $ret .= "<p>";
 
-        $sth = $dbr->prepare("SELECT u.user, pr.value FROM useridmap u, pollresult pr, pollsubmission ps " . 
+        my $LIMIT = 2000;
+        $sth = $dbr->prepare("SELECT u.user, pr.value, ps.datesubmit ".
+                             "FROM useridmap u, pollresult pr, pollsubmission ps " . 
                              "WHERE u.userid=pr.userid AND pr.pollid=? AND pollqid=? " . 
-                             "AND ps.pollid=pr.pollid AND ps.userid=pr.userid ORDER BY ps.datesubmit");
+                             "AND ps.pollid=pr.pollid AND ps.userid=pr.userid LIMIT $LIMIT");
         $sth->execute($pollid, $opts->{'qid'});
 
-        while (my ($user, $value) = $sth->fetchrow_array) 
-        {
+        my @res;
+        push @res, $_ while $_ = $sth->fetchrow_hashref;
+        @res = sort { $a->{datesubmit} cmp $b->{datesubmit} } @res;
+        
+        foreach my $res (@res) {
+            my ($user, $value) = ($res->{user}, $res->{value});
+            
             ## some question types need translation; type 'text' doesn't.
             if ($q->{'type'} eq "radio" || $q->{'type'} eq "drop") {
                 $value = $it{$value};
@@ -576,6 +583,11 @@ sub show_poll
 
             LJ::Poll::clean_poll(\$value);
             $ret .= "<p>" . LJ::ljuser($user) . " -- $value</p>\n";
+        }
+
+        # temporary
+        if (@res == $LIMIT) {
+            $ret .= "<p>[... truncated]</p>";
         }
         
         return $ret;
@@ -631,10 +643,12 @@ sub show_poll
 
     ### load all the questions
     my @qs;
-    $sth = $dbr->prepare("SELECT pollqid, type, opts, qtext FROM pollquestion WHERE pollid=? ORDER BY sortorder");
+    $sth = $dbr->prepare("SELECT pollqid, type, opts, qtext, sortorder ".
+                         "FROM pollquestion WHERE pollid=?");
     $sth->execute($pollid);
-    push @qs, $_ while ($_ = $sth->fetchrow_hashref);
-
+    push @qs, $_ while $_ = $sth->fetchrow_hashref;
+    @qs = sort { $a->{sortorder} <=> $b->{sortorder} } @qs;
+    
     ### load all the items
     my %its;
     $sth = $dbr->prepare("SELECT pollqid, pollitid, item FROM pollitem WHERE pollid=? ORDER BY sortorder");
@@ -697,26 +711,28 @@ sub show_poll
             $ret .= "<a href='$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans'>View Answers</a><br />";
 
             ### but, if this is a non-text item, and we're showing results, need to load the answers:
-            $sth = $dbr->prepare("SELECT COUNT(DISTINCT(userid)) FROM pollresult WHERE pollid=? AND pollqid=?");
-            $sth->execute($pollid, $qid);
-            ($usersvoted) = $sth->fetchrow_array;
-
-            $sth = $dbr->prepare("SELECT value, COUNT(*) FROM pollresult WHERE pollid=? AND pollqid=? GROUP BY value");
-            $sth->execute($pollid, $qid);
-            while (my ($val, $count) = $sth->fetchrow_array) {
-                if ($q->{'type'} eq "check") {
-                    foreach (split(/,/,$val)) {
-                        $itvotes{$_} += $count;
+            if ($q->{'type'} ne "text") {
+                $sth = $dbr->prepare("SELECT COUNT(DISTINCT(userid)) FROM pollresult WHERE pollid=? AND pollqid=?");
+                $sth->execute($pollid, $qid);
+                ($usersvoted) = $sth->fetchrow_array;
+                
+                $sth = $dbr->prepare("SELECT value, COUNT(*) FROM pollresult ".
+                                     "WHERE pollid=? AND pollqid=? GROUP BY value");
+                $sth->execute($pollid, $qid);
+                while (my ($val, $count) = $sth->fetchrow_array) {
+                    if ($q->{'type'} eq "check") {
+                        foreach (split(/,/,$val)) {
+                            $itvotes{$_} += $count;
+                        }
+                    } else {
+                        $itvotes{$val} += $count;
                     }
-                } else {
-                    $itvotes{$val} += $count;
+                }
+
+                foreach (values %itvotes) {
+                    $maxitvotes = $_ if ($_ > $maxitvotes);
                 }
             }
-
-            foreach (values %itvotes) {
-                $maxitvotes = $_ if ($_ > $maxitvotes);
-            }
-            
         }
 
         #### text questions are the easy case
