@@ -251,10 +251,13 @@ sub load_layers {
     my %need_db;   # lid => compiled at time
     my @need_memc; # lid, lid, lid, ...
 
-    # initial sweep, anything loaded goes to db
+    # initial sweep, anything loaded for less than 60 seconds is golden
     foreach my $lid (@lids) {
-        if (my $loaded = S2::layer_loaded($lid)) {
-            $need_db{$lid} = $loaded;
+        if (my $loaded = S2::layer_loaded($lid, 60)) {
+            # it's loaded and not more than 60 seconds load, so we just go
+            # with it and assume it's good... if it's been recompiled, we'll
+            # figure it out within the next 60 seconds
+            $maxtime = $loaded if $loaded > $maxtime;
         } else {
             push @need_memc, $lid;
         }
@@ -264,10 +267,9 @@ sub load_layers {
     my $memc = LJ::MemCache::get_multi(map { [ $_, "s2c:$_"] } @need_memc);
     foreach my $lid (@need_memc) {
         if (my $row = $memc->{"s2c:$lid"}) {
+            # load the layer from memcache; memcache data should always be correct
             my ($updtime, $data) = @$row;
-
-            # mark the db as needing to check, then load this layer
-            $need_db{$lid} = $updtime;
+            $maxtime = $updtime if $updtime > $maxtime;
             S2::load_layer($lid, $data, $updtime);
         } else {
             # make it exist, but mark it 0
@@ -275,10 +277,16 @@ sub load_layers {
         }
     }
 
-    my %bycluster; # cluster => [ lid, lid, ... ]
+    # it's possible we don't need to hit the database for anything
     my @from_db = keys %need_db;
+    return $maxtime unless @from_db;
+
+    # figure out who owns what we need
     my $us = LJ::S2::get_layer_owners(@from_db);
     my $sysid = LJ::get_userid('system');
+
+    # break it down by cluster
+    my %bycluster; # cluster => [ lid, lid, ... ]
     foreach my $lid (@from_db) {
         next unless $us->{$lid};
         if ($us->{$lid}->{userid} == $sysid) {
@@ -771,6 +779,7 @@ sub delete_layer
     foreach my $t (qw(s2layers s2compiled s2info s2source s2checker)) {
         $dbh->do("DELETE FROM $t WHERE s2lid=?", undef, $lid);
     }
+    LJ::MemCache::delete([ $lid, "s2c:$lid" ]);
 
     # now delete the mappings for this particular layer
     if ($u) {
@@ -1074,6 +1083,9 @@ sub layer_compile
         $dbcm->do("REPLACE INTO s2compiled2 (userid, s2lid, comptime, compdata) ".
                   "VALUES (?, ?, UNIX_TIMESTAMP(), ?)", undef,
                   $layer->{'userid'}, $lid, $gzipped) or die;
+
+        # delete from memcache; we can't store since we don't know the exact comptime
+        LJ::MemCache::delete([ $lid, "s2c:$lid" ]);
     }
 
     # caller might want the compiled source
