@@ -182,7 +182,7 @@ sub community
     my $dbs = LJ::make_dbs_from_arg($dbh);
     if ($action eq "add") 
     {
-        LJ::add_friend($dbh, $com_id, $target_id);
+        LJ::add_friend($dbs, $com_id, $target_id);
         push @$out, [ "info", "User \"$target_user\" is now a member of \"$com_user\"." ];
         
         if ($ci->{'postlevel'} eq "members") {

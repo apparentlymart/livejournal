@@ -5109,24 +5109,30 @@ sub color_todb
 # <LJFUNC>
 # name: LJ::add_friend
 # des: Simple interface to add a friend edge.
-# args: dbh, userida, useridb, opts?
+# args: dbs, userida, useridb, opts?
 # des-userida: Userid of source user (befriender)
 # des-useridb: Userid of target user (befriendee)
-# des-opts: hashref; 'defaultview' key means add $uderidb to $uderida's Default View friends group
+# des-opts: hashref; 'defaultview' key means add $useridb to $userida's Default View friends group
 # returns: boolean; 1 on success (or already friend), 0 on failure (bogus args)
 # </LJFUNC>
 sub add_friend
 {
-    my ($dbh, $ida, $idb, $opts) = @_;
-    return 0 unless $dbh;
-    return 0 unless $ida =~ /^\d+$/ && $ida;
-    return 0 unless $idb =~ /^\d+$/ && $idb;
+    my ($dbarg, $ida, $idb, $opts) = @_;
+    return 0 unless $dbarg;
+
+    $ida += 0; $idb += 0; 
+    return 0 unless $ida and $idb;
+    
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
     my $black = LJ::color_todb("#000000");
     my $white = LJ::color_todb("#ffffff");
 
     my $groupmask = 1;
     if ($opts->{'defaultview'}) {
-        my $grp = $dbh->selectrow_array("SELECT groupnum FROM friendgroup WHERE userid=? AND groupname='Default View'", undef, $ida);
+        my $grp = $dbr->selectrow_array("SELECT groupnum FROM friendgroup WHERE userid=? AND groupname='Default View'", undef, $ida);
         $groupmask |= (1 << $grp) if $grp;
     }
 

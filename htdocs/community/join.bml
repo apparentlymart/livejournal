@@ -67,12 +67,12 @@
  {
      ### make remote user a friend of the community
      ###
-     LJ::add_friend($dbh, $ci->{'userid'}, $remote->{'userid'});
+     LJ::add_friend($dbs, $ci->{'userid'}, $remote->{'userid'});
      
      ### make community a friend of the remote user
      ###
      if ($FORM{'addfriend'}) { 
-         LJ::add_friend($dbh, $remote->{'userid'}, $ci->{'userid'});
+         LJ::add_friend($dbs, $remote->{'userid'}, $ci->{'userid'}, {'defaultview' => 1});
      }
      
      $body .= "<?h1 $ML{'.success'} h1?><?p ".BML::ml('.label.membernow',{ 'username' => $ci->{'user'}, 'commname'=> $ecname})." p?>";

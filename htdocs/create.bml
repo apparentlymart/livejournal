@@ -242,7 +242,7 @@ body<=
          # if we have initial friends for new accounts, add them.
          foreach my $friend (@LJ::INITIAL_FRIENDS) {
              my $friendid = LJ::get_userid($dbs, $friend);
-             $dbh->do("REPLACE INTO friends (userid, friendid) VALUES ($userid, $friendid)")
+             LJ::add_friend($dbs, $userid, $friendid)
                  if $friendid;
          }
 

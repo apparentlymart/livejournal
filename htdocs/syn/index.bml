@@ -124,7 +124,7 @@ body<=
             if ($used + $cost > $quota) {
                 return "<?h1 Sorry h1?><?p Adding this feed would put you over your syndication account quota. p?><?p [&lt;&lt; <a href='/syn/'>Back</a>] p?>";
             }
-            LJ::add_friend($dbh, $u->{'userid'}, $su->{'userid'}, { 'defaultview' => 1 });
+            LJ::add_friend($dbs, $u->{'userid'}, $su->{'userid'}, { 'defaultview' => 1 });
             $count{$su->{'user'}} = $count;
             $cost{$su->{'user'}} = $cost;
             $syn{$su->{'user'}} = $su->{'synurl'};
@@ -140,7 +140,7 @@ body<=
         my $cost = LJ::syn_cost($count + 1);
         if ($POST{'action:add'} && $POST{"add_$user"}) {
             if ($used + $cost < $quota) {
-                LJ::add_friend($dbh, $u->{'userid'}, $suserid, { 'defaultview' => 1 });
+                LJ::add_friend($dbs, $u->{'userid'}, $suserid, { 'defaultview' => 1 });
                 $count{$user} = $count+1;
                 $cost{$user} = $cost;
                 $syn{$user} = $url;
