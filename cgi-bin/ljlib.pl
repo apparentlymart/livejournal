@@ -37,6 +37,12 @@ require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"
     if -e "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl";
 
+# if this is a dev server, alias LJ::D to Data::Dumper::Dumper
+if ($LJ::IS_DEV_SERVER) {
+    eval "use Data::Dumper ();";
+    *LJ::D = \&Data::Dumper::Dumper;
+}
+
 # determine how we're going to send mail
 $LJ::OPTMOD_NETSMTP = eval "use Net::SMTP (); 1;";
 
