@@ -168,7 +168,7 @@ my $out = sub {
 my @good = qw(load popstruct poptext dumptext newitems wipedb makeusable copyfaq remove);
 
 popstruct() if $mode eq "popstruct" or $mode eq "load";
-poptext() if $mode eq "poptext" or $mode eq "load";
+poptext(@ARGV) if $mode eq "poptext" or $mode eq "load";
 copyfaq() if $mode eq "copyfaq" or $mode eq "load";
 makeusable() if $mode eq "makeusable" or $mode eq "load";
 dumptext(@ARGV) if $mode eq "dumptext";
@@ -290,12 +290,15 @@ sub popstruct
 
 sub poptext
 {
+    my @langs = @_;
+    push @langs, (keys %lang_code) unless @langs;
+
     $out->("Populating text...", '+');
     my %source;  # lang -> file, or "[extra]" when given by --extra= argument
     if ($opt_extra) {
         $source{'[extra]'} = $opt_extra;
     } else {
-        foreach my $lang (keys %lang_code) {
+        foreach my $lang (@langs) {
             my $file = "$ENV{'LJHOME'}/bin/upgrading/${lang}.dat";
             next if $opt_only && $lang ne $opt_only;
             next unless -e $file;
@@ -422,6 +425,37 @@ sub poptext
         $out->("added: $addcount", '-');
     }
     $out->("-", "done.");
+
+    # dead phrase removal
+    $out->("Removing dead phrases...", '+');
+    foreach my $file ("deadphrases.dat", "deadphrases-local.dat") {
+        my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
+        next unless -s $ffile;
+        $out->("File: $file");
+        open (DP, $ffile) or die;
+        while (my $li = <DP>) {
+            $li =~ s/\#.*//;
+            next unless $li =~ /\S/;
+            $li =~ s/\s+$//;
+            my ($dom, $it) = split(/\s+/, $li);
+            next unless exists $dom_code{$dom};
+            my $dmid = $dom_code{$dom}->{'dmid'};
+            
+            my @items;
+            if ($it =~ s/\*$/\%/) {
+                my $sth = $dbh->prepare("SELECT itcode FROM ml_items WHERE dmid=? AND itcode LIKE ?");
+                $sth->execute($dmid, $it);
+                push @items, $_ while $_ = $sth->fetchrow_array;
+            } else {
+                @items = ($it);
+            }
+            foreach (@items) {
+                remove($dom, $_, 1);
+            }
+        }
+        close DP;
+    }
+    $out->('-', "Done.");
 }
 
 sub dumptext
@@ -557,9 +591,8 @@ sub newitems
 }
 
 sub remove {
-    my ($dmcode, $itcode) = @_;
+    my ($dmcode, $itcode, $no_error) = @_;
     my $dmid;
-    $out->("Removing item $itcode from domain $dmcode...", "+");
     if (exists $dom_code{$dmcode}) {
         $dmid = $dom_code{$dmcode}->{'dmid'};
     } else {
@@ -568,7 +601,10 @@ sub remove {
 
     my $qcode = $dbh->quote($itcode);
     my $itid = $dbh->selectrow_array("SELECT itid FROM ml_items WHERE dmid=$dmid AND itcode=$qcode");
+    return if $no_error && !$itid;
     $out->("x", "Unknown item code $itcode.") unless $itid;
+
+    $out->("Removing item $itcode from domain $dmcode ($itid)...", "+");
 
     # need to delete everything from: ml_items ml_latest ml_text
 

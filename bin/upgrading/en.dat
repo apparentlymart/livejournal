@@ -3,83 +3,17 @@
 
 /allpics.bml.default=<u>Default</u>
 
-/allpics.bml.edit2=You may be interested in <a href='[[editlink]]'>editing your picture keywords</a> or <a href='[[uploadlink]]'>uploading a new picture</a>.
-
 /allpics.bml.error.noparam=You need to specify a user parameter.
 
 /allpics.bml.keywords=Keywords:
 
 /allpics.bml.nopics.text.other=This user has not uploaded any user pictures.
 
-/allpics.bml.nopics.text2=You have no pictures uploaded. To upload one, go <a href='[[link]]'>here</a>.
-
 /allpics.bml.nopics.title=No Pictures
 
 /allpics.bml.pics=Here are the user pictures for [[user]].
 
 /allpics.bml.title=User Pictures
-
-/community/create.bml.button.createcommunity=Create Community
-
-/community/create.bml.commsite=Community website
-
-/community/create.bml.error.accountnotfound=Maintainer account not found.
-
-/community/create.bml.error.invalidmpasw=Invalid password for community account.
-
-/community/create.bml.error.invalidpassword=Invalid password for maintainer account.
-
-/community/create.bml.error.maintainertype=Maintainer account must be a person, not another shared account.
-
-/community/create.bml.error.samenames=Maintainer account and community account cannot be the same.
-
-/community/create.bml.label.accforcomm=This is the account that you want to turn into a community.  It must <a href="/create.bml">already be created</a>, but should not already be in use by an individual, because after this, many different people will potentially be able to post in it.
-
-/community/create.bml.label.admconsole=<A HREF="/admin/console/">Admin console</A> - to add or remove people who are able to post</UL>
-
-/community/create.bml.label.anybodycan=<B>All Members</B><BR>Anybody can post immediately once a member.
-
-/community/create.bml.label.closedmemb=<B>Closed Membership</B><BR>You have to approve people's requests to join.
-
-/community/create.bml.label.commacc=Community Account
-
-/community/create.bml.label.commcreated=Your community is now set up.
-
-/community/create.bml.label.comminfo=Community info
-
-/community/create.bml.label.commopts=Community Options
-
-/community/create.bml.label.create=Create Community
-
-/community/create.bml.label.createcomm=From here you can create a community account.  A community is a special type of account that other users can join and post in.  For an example of a community, check out the <a href="/userinfo.bml?user=seattle">Seattle Party Community</a>.
-
-/community/create.bml.label.howoperates=Choose how your community operates.  You can change these later.
-
-/community/create.bml.label.mainaccount=Maintainer Account
-
-/community/create.bml.label.membership=Membership
-
-/community/create.bml.label.mustbereal=This account is the one that runs the community.  This account must be a real person account, not another community account.
-
-/community/create.bml.label.openmemb=<B>Open Membership</B><BR>Anybody can join without getting approved.
-
-/community/create.bml.label.password=Password:
-
-/community/create.bml.label.postaccess=Posting Access
-
-/community/create.bml.label.rellinks=Relevant links:
-
-/community/create.bml.label.selcan=<B>Select Members</B><BR>Only some members are able to post, once they've been given access by the maintainer account.
-
-/community/create.bml.label.username=Username:
-
-/community/create.bml.label.whocanjoin=Who can join your community?
-
-/community/create.bml.label.whocanpost=Who can post to this community?
-
-/community/create.bml.success=Success
-
-/community/create.bml.title=Create Community
 
 /community/index.bml.title=Community Center
 
@@ -91,13 +25,9 @@
 
 /community/join.bml.label.auth=Although you are now listed as a member, this community only allows posting by authorized users.  Contact one of the maintainers if you desire posting access. Below is the list of maintainers for this community: [[admins]]
 
-/community/join.bml.label.authpost=Although you are now listed as a member, this community only allows posting by authorized users.  Contact <a href="/userinfo.bml?user=[[maintainer]]">the community maintainer</a> if you desire posting access.
-
 /community/join.bml.label.banned=The maintainer(s) of this community have banned you from joining.
 
 /community/join.bml.label.closed=This community is closed.  If you're interested in joining it, please contact one of its maintainers. Below is the list of maintainers for this community: [[admins]]
-
-/community/join.bml.label.closedcomm=This community is closed.  If you're interested in joining it, please contact <a href="/userinfo.bml?user=[[maintainer]]">its maintainer</a>.
 
 /community/join.bml.label.commlogged=You're logged in as a shared/community account, not your personal account.
 
@@ -176,8 +106,6 @@
 /community/members.bml.key.post=<b>Posting Access</b>
 
 /community/members.bml.key.preapprove=Unmoderated
-
-/community/members.bml.manage=[<a href='[[link]]'><b>&lt;&lt;</b></a> Manage communities]
 
 /community/members.bml.manage2=Manage communities
 
@@ -425,8 +353,6 @@
 
 /community/settings.bml.label.whocanpost=Who can post to this community?
 
-/community/settings.bml.manage=[<a href='[[link]]'><b>&lt;&lt;</b></a> Manage communities]
-
 /community/settings.bml.manage2=Manage communities
 
 /community/settings.bml.members=[<a href='[[link]]'>Members</a>]
@@ -475,7 +401,7 @@
 
 /create.bml.email.text=For verification and security purposes, we need your email address.  It will never ever, under any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a href="/legal/privacy.bml" TARGET="privacy">privacy policy</a> for more information.
 
-/create.bml.error.coppa.under13=Sorry, due to COPPA restrictions, you cannot use the service until you're 13 years old.  Please come back on your 13th birthday.
+/create.bml.error.coppa.under13=Sorry, due to COPPA restrictions, you cannot use the LiveJournal service until you're 13 years old.  Please come back on your 13th birthday.
 
 /create.bml.error.email.blank=You must provide your email address.
 
@@ -819,16 +745,7 @@ read our <a href="/legal/privacy.bml">privacy policy</a>.
 
 /editinfo.bml.security.visibility.regusers=Registered Users
 
-/editinfo.bml.settings.about=Select your personal privacy options and preferences below.
-
 /editinfo.bml.settings.header=LiveJournal Options
-
-/editinfo.bml.showsubjicons.about<<
-By default, a bunch of icons are shown that people can use when replying to your messages.  
-A lot of users feel these are ugly and a waste of space, so uncheck this box if you'd like to never see them again. <tt>:-)</tt>
-.
-
-/editinfo.bml.showsubjicons.header=Show subject icons
 
 /editinfo.bml.state.other=Or, type other state/province/territory
 
@@ -861,10 +778,6 @@ A lot of users feel these are ugly and a waste of space, so uncheck this box if 
 /editinfo.bml.tm.servprov=Service Provider
 
 /editinfo.bml.tm.title=Text Messaging
-
-/editinfo.bml.topicdir.about=If you check this, other users will be able to easily add your journal entries to the hierarchial <a href="/topics/">topic directory</a>.
-
-/editinfo.bml.topicdir.header=Allow Topic Directory Inclusion (currently disabled)
 
 /editinfo.bml.translatemailto.about<<
 In case you chose to receive message board replies by email, and your email client doesn't handle Unicode (UTF-8) 
@@ -1878,8 +1791,6 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkread.bml.nosubject=(no subject)
 
-/talkread.bml.pageofpages=Page [[page]] of [[total]]
-
 /talkread.bml.replysuspended=<b>(Reply from suspended user)</b>
 
 /talkread.bml.screenedpost=<b>(Screened Post)</b>
@@ -2078,8 +1989,6 @@ This could be because: <ol>
 
 /update.bml.loggingin=Logging in to server...
 
-/update.bml.login.success=Login successful.  Hello, [[name]]!
-
 /update.bml.noneother=None, or other:
 
 /update.bml.note=<b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.
@@ -2136,64 +2045,6 @@ This could be because: <ol>
 
 /update.bml.updating=Updating journal...
 
-/uploadpic.bml.btn.proceed|notes=Enter here a <b>lower-case</b> version of the letter you underlined in ".makedefault". This is the shortcut key for the makedefault option.
-/uploadpic.bml.btn.proceed=Proceed
-
-/uploadpic.bml.error.badurl=The address for the picture to be uploaded does not look correct.  It should start with <b>http://</b>
-
-/uploadpic.bml.error.databasedown=Database temporarily down for maintenance.  Try again in a few minutes.
-
-/uploadpic.bml.error.filetoolarge=Image uploaded is too large.  File size cannot exceed [[maxsize]].
-
-/uploadpic.bml.error.imagetoolarge=The dimensions of your image ([[imagesize]]) exceed maximum size.  Your picture can only be 100x100 pixels large.  Use a image/photo editing program to reduce the image to thumbnail-size.
-
-/uploadpic.bml.error.invalidauth=You could not be authenticated as the specified user.
-
-/uploadpic.bml.error.invalidimage=Invalid image file.
-
-/uploadpic.bml.error.toomanypics|notes=This character is inserted between two numbers to indicate "by" when specifying image dimensions, for example "100x100".
-/uploadpic.bml.error.toomanypics=You are already at your limit of [[maxpics]] pictures.  You cannot upload this picture until you delete <a href='[[editlink]]'>one of your existing ones</a>.
-
-/uploadpic.bml.error.unknownmode=Unknown mode/source.
-
-/uploadpic.bml.error.unsupportedtype=Files of type [[filetype]] are not supported.  You can only upload GIF, PNG or JPG files.  Nearly all image/photo programs can do this conversion for you.
-
-/uploadpic.bml.error.urlerror=An error ocurred while trying to fetch your image.
-
-/uploadpic.bml.fromfile=From <u>F</u>ile:
-
-/uploadpic.bml.fromfile.key=f
-
-/uploadpic.bml.fromurl|notes=Enter here a <b>lower-case</b> version of the letter you underlined in ".fromfile". This is the shortcut key for the fromfile option.
-/uploadpic.bml.fromurl=From U<u>R</u>L:
-
-/uploadpic.bml.fromurl.key=r
-
-/uploadpic.bml.header=Upload a New Picture
-
-/uploadpic.bml.imagesize.by=x
-
-/uploadpic.bml.kilobytes=KB
-
-/uploadpic.bml.makedefault|notes=Enter here a <b>lower-case</b> version of the letter you underlined in ".fromurl". This is the shortcut key for the fromurl option.
-/uploadpic.bml.makedefault=Make this your <u>d</u>efault picture
-
-/uploadpic.bml.makedefault.key=d
-
-/uploadpic.bml.restriction.fileformat=File format must be either PNG, GIF or JPG
-
-/uploadpic.bml.restriction.filesize=File size must be less than 40k
-
-/uploadpic.bml.restriction.imagesize=Image dimensions must be no larger than 100x100 pixels
-
-/uploadpic.bml.success.header=Success
-
-/uploadpic.bml.success.text=Your image has been uploaded.  It looks like this: <p align='center'><img src='[[userpic]]' width='[[xsize]]' height='[[ysize]]'></p>You can <a href='[[editpiclink]]'>edit your picture keywords</a> to be able to use this picture selectively in the future. p?><?p Alternatively, you can <a href='[[uploadpiclink]]'>upload another picture</a> or <a href='[[journallink]]'>view your journal here</a>.
-
-/uploadpic.bml.text=Here you can upload a miniature picture that will be used to represent you through the LiveJournal site, in your journal, and in your friends' journals.  The following restrictions are placed on the file:
-
-/uploadpic.bml.title=Upload Picture
-
 /userinfo.bml.about.comm=About:
 
 /userinfo.bml.about.user=Bio:
@@ -2201,8 +2052,6 @@ This could be because: <ol>
 /userinfo.bml.body.leave= You may <a href="/community/leave.bml?comm=[[commname]]">leave the community</a> at any time.
 
 /userinfo.bml.canpost=[[user]] can post to [[comm]]
-
-/userinfo.bml.closedmembership.body=This is a closed community.  To become a member you must contact <a href="userinfo.bml?user=[[cowner]]">its maintainer</a>.
 
 /userinfo.bml.comminfo.body=Below is information about the "[[commname]]" community on LiveJournal.
 
@@ -2292,8 +2141,6 @@ This could be because: <ol>
 
 /userinfo.bml.label.viewfriends=View Friends
 
-/userinfo.bml.label.viewlabel=View [[label]]
-
 /userinfo.bml.label.viewmembers=View Members
 
 /userinfo.bml.label.website=Website:
@@ -2314,11 +2161,7 @@ This could be because: <ol>
 
 /userinfo.bml.nonexist.name=Unknown user
 
-/userinfo.bml.openmembership.body=This is an open-membership community.  To join, <a href="/community/join.bml?comm=[[username]]">click here</a>.
-
 /userinfo.bml.posthere=[[user]] can post to [[comm]]
-
-/userinfo.bml.rpmembership.body= Although it's open, the setting for this community is that only select users are able to post to it.  To request access, contact <a href="userinfo.bml?user=[[cowner]]">its maintainer</a>.
 
 /userinfo.bml.sendmessage.body=<a href="[[link]]">Send <b>[[user]]</b> a text message</a><br />on his/her cellphone/pager.
 
