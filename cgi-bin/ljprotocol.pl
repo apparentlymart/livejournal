@@ -2254,6 +2254,10 @@ sub authenticate
                                              $req->{'auth_response'},
                                              \$ip_banned);
         }
+        if ($auth_meth eq "cookie") {
+            my $remote = LJ::get_remote();
+            return $remote && $remote->{'user'} eq $username ? 1 : 0;
+        }
     };
 
     unless ($flags->{'nopassword'} ||
