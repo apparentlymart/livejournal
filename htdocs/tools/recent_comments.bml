@@ -197,7 +197,7 @@ body<=
             BML::ml('Actionlink', { 'link'=>"<a href='#received'>Latest Received</a>"}) . "</div>";
         $ret .= "<?h1 Latest Posted h1?><?p Last $count comments " . LJ::ljuser($u) . " has posted. p?>";
         my %jcount;  # jid -> ct
-        $ret .= "<table style='width: 50%; text-align: left'>";
+        $ret .= "<table style='text-align: left'>";
         $ret .= "<tr><th>Time</th><th>Location</th><th></th></tr>";
         @posted = sort { $b->{datepost} cmp $a->{datepost} } @posted;
 
