@@ -57,12 +57,13 @@
 * add bmlp.pl config option to disable BMLSESSION stuff, since we don't
   use it anyway
 * editjournal_do: clean HTML (marquees don't close, etc.)
-* directory: (need to set non-pub userprops on editinfo change)
 * talklib.pl finishing (avva?)
 * store as UTF-8 in database (avva investigating)
 * ehtml current mood/music ?
 * bug: multiple talkread delete: /support/see_request.bml?id=10159
 * perf: don't preload friends in ljprotocol.pl:editfriends, check $sth->rows
+* multisearch.bml doesn't respect 'friends only' AIM/ICQ info on queries
+
 
 +-------------+
 | Cleanliness |
