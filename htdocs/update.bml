@@ -56,7 +56,9 @@
     }
 
     # post their entry unless they want to spellcheck first
-    if (LJ::did_post() && ! $spellcheck_html) {
+    # note: can't just check for did_post() here because poll/create.bml
+    #       posts to this form to fill in the event text
+    if ($POST{'action:update'} && ! $spellcheck_html) {
 
         # what's our authentication scheme for subsequent protocol actions?
         my $flags = {};
@@ -465,7 +467,7 @@
     $$body .= "</table>\n";
 
     # submit button
-    $$body .= "<p align='center' style='margin-top: 0px;'>" . LJ::html_submit(undef, $ML{'.btn.update'}) . "</p>\n";
+    $$body .= "<p align='center' style='margin-top: 0px;'>" . LJ::html_submit('action:update', $ML{'.btn.update'}) . "</p>\n";
 
     $$body .= "</form>";
 
