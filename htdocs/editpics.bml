@@ -43,6 +43,16 @@
  $authlink ||= "?user=$user" if ($FORM{'user'});
 
  $u = LJ::load_user($dbs, $user) unless $u;
+
+ my $dbb;
+ if ($u->{'dversion'} >= 2) {
+     $dbb = LJ::get_cluster_master($u);
+     unless ($dbb) {
+         $title = "Error",
+         $body = "Database temporarily unavailable.";
+         return;
+     }
+ }
  
  ### save mode
 
@@ -80,7 +90,14 @@
      if (@delete) {
          my $id_in = join(", ", @delete);
          $dbh->do("DELETE FROM userpic WHERE picid IN ($id_in)");
-         $dbh->do("DELETE FROM userpicblob WHERE picid IN ($id_in)");
+         if ($dbb) {
+             # clustered blobs
+             $dbb->do("DELETE FROM userpicblob2 WHERE userid=$u->{'userid'} ".
+                      "AND picid IN ($id_in)");
+         } else {
+             # non-clustered blobs
+             $dbh->do("DELETE FROM userpicblob WHERE picid IN ($id_in)");
+         }
      }
 
      if (%picid_of_kwid) {

@@ -147,16 +147,11 @@ BODY<=
  }
 
  # see if it's a duplicate
- $sth = $dbh->prepare("SELECT picid FROM userpic WHERE userid=$userid AND contenttype=$qcontenttype AND md5base64=$qbase64");
- $sth->execute;
- if ($dbh->err) { die $dbh->errstr; }
- if ($sth->rows) {
-     ($picid) = $sth->fetchrow_array;
-     $action = "existed";
- } else {	
-     $picid = 0;	
-     $action = "inserted";	
- }
+ my $picid = 0;
+ $picid = $dbh->selectrow_array("SELECT picid FROM userpic WHERE userid=$userid AND ".
+                                "contenttype=$qcontenttype AND md5base64=$qbase64");
+
+ my $isclust = $u->{'dversion'} >= 2 ? 1 : 0;
  
  ### if picture isn't a duplicate, insert it
  if ($picid == 0) 
@@ -165,16 +160,25 @@ BODY<=
      undef $imagedata;
 
      ### insert the meta-data
-     $sth = $dbh->prepare("INSERT INTO userpic (userid, contenttype, width, height, picdate, md5base64) VALUES ($userid, $qcontenttype, $qsx, $qsy, NOW(), $qbase64)");
+     $sth = $dbh->prepare("INSERT INTO userpic (userid, contenttype, width, height, ".
+                          "picdate, md5base64) VALUES ".
+                          "($userid, $qcontenttype, $qsx, $qsy, NOW(), $qbase64)");
      $sth->execute;
      if ($dbh->err) {  return "<B>Error: </B> " . $dbh->errstr;  }
      $picid = $sth->{'mysql_insertid'};
 
      ### insert the blob
-     $sth = $dbh->prepare("INSERT INTO userpicblob (picid, imagedata) VALUES ($picid, $qimagedata)");
-     $sth->execute;
-     if ($dbh->err) {  return "<B>Error: </B> " . $dbh->errstr;  }
-
+     my $dbb = $dbh;
+     
+     if ($isclust) {
+         $dbb = LJ::get_cluster_master($u);
+         return "<b>Error:</b> Database temporarily unavailable" unless $dbb;
+         $dbb->do("INSERT INTO userpicblob2 (userid, picid, imagedata) ".
+                  "VALUES ($userid, $picid, $qimagedata)");
+     } else {
+         $dbb->do("INSERT INTO userpicblob (picid, imagedata) VALUES ($picid, $qimagedata)");
+     }
+     if ($dbb->err) { return "<B>Error: </B> " . $dbb->errstr; }
  }
  
  if ($FORM{'make_default'}) {
@@ -182,9 +186,6 @@ BODY<=
      if ($dbh->err) { return $dbh->errstr; }
  }
  
- $nowtime = time();
-
-
  return "(=H1 Success H1=)(=P Your image has been uploaded.  It looks like this: <p align='center'><img src='/userpic/$picid' width='$sx' height='$sy'></p>You can <a href=\"editpics.bml$authaslink\">edit your picture keywords</a> to be able to use this picture selectively in the future. P=)(=P You can view your journal <a href='/users/${user}'>here</a>. P=)";
  
 _CODE=)

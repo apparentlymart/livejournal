@@ -8,14 +8,14 @@ BEGIN {
 use strict;
 use FCGI;
 use LJ::Cache;
-use vars qw($dbh $dro);
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 my $CACHE_SIZE = $LJ::USERPIC_CACHE_SIZE || 500;
 
-$dbh = LJ::get_dbh("master");
-$dro = LJ::get_dbh("slave");
+my $dbs = LJ::get_dbs();
+my $dbh = $dbs->{'dbh'};
+my $dro = $dbs->{'reader'};
 
 sub make_dir
 {
@@ -37,15 +37,22 @@ my %reqmeth;
 my $lastconn;
 my $sth;
 
+my $err = sub {
+    my $status = shift;
+    my $msg = shift;
+    my $smsg = $status eq "404" ? "Not Found" : "Server Error";
+    print "Status: $status $smsg\n";
+    print "Content-type: text/html\n\n<b>Error:</b> $msg\n";
+    return 0;
+};
+
  REQUEST:
     while(LJ::start_request() && FCGI::accept() >= 0) 
 {
     if ($ENV{'HTTP_IF_MODIFIED_SINCE'}) {
 	# we can safely do this without checking since we never re-use
 	# picture IDs and don't let the contents get modified
-
 	$ifmodsince++;
-
 	print "Status: 304 Not Modified\n\n";
 	next REQUEST;
     }
@@ -124,10 +131,7 @@ my $sth;
     }
 
     unless ($FORM{'id'} =~ /^\d+$/) {
-	print "Status: 404 Not Found\n";
-	print "Content-type: text/html\n\n";
-	print "<h1>Not Found</h1>The requested image was not found.";
-	print "\n";
+        $err->(404, "The requested image was not found.");
 	next REQUEST;
     }
 
@@ -158,46 +162,48 @@ my $sth;
 
 	## every 10 seconds, revalidate/reconnect our db connections
 	if (($now - $lastconn) > 10) {
-	    $dbh = LJ::get_dbh("master");
-	    $dro = LJ::get_dbh("slave"); 
+            $dbs = LJ::get_dbs();
+	    $dbh = $dbs->{'dbh'};
+	    $dro = $dbs->{'reader'};
 	    $lastconn = $now;
 	}
 
-	my $query = "SELECT p.state, p.contenttype, pb.imagedata, UNIX_TIMESTAMP(p.picdate) AS 'lastmod' FROM userpic p, userpicblob pb WHERE p.picid=pb.picid AND p.picid=$qid";
-	
-	if ($on_disk) {
-	    # then join with userpicblob table is unnecessary; just
-	    # use version on disk (web servers cheap, db servers expensive)
-	    $query = "SELECT p.state, p.contenttype, UNIX_TIMESTAMP(p.picdate) AS 'lastmod' FROM userpic p WHERE p.picid=$qid";
-	}
+        unless ($dro) {
+            $err->(500, "Database temporarily unavailable.");
+            next REQUEST;
+        }
 
-	## try the slave database dirst, we available.
-	if ($LJ::DBINFO{'slavecount'} && defined $dro) {
-	    $sth = $dro->prepare($query);
-	    $sth->execute;
-	    unless ($dbh->err) { 
-		$pic = $sth->fetchrow_hashref;
-		$sth->finish;
-		if (defined $pic) { $from{'slave'}++; }
-	    }
-	}
+	my $query = "SELECT p.state, p.userid, p.contenttype, UNIX_TIMESTAMP(p.picdate) ".
+            "AS 'lastmod', u.clusterid, u.dversion FROM userpic p, user u WHERE ".
+            "p.picid=$qid AND u.userid=p.userid";
+
+        my $imagedata;
+        if (defined $pic) { $imagedata = $pic->{'imagedata'}; }
+        $pic = LJ::dbs_selectrow_hashref($dbs, $query);
 
 	## either we don't have a slave database, or it's not caught up yet. try the master now.
 	if (! defined $pic) {
-	    $sth = $dbh->prepare($query);
-	    $sth->execute;
-	    if ($dbh->err) { print "Content-type: text/plain\n\n" . $dbh->errstr;  }
-	    $pic = $sth->fetchrow_hashref;
-	    $sth->finish;
-	    if (defined $pic) { 
-		$from{'master'}++; 
-	    } else {
-		print "Status: 404 Not Found\n";
-		print "Content-type: text/html\n\nNo userpic by that id.\n"; 
-		next REQUEST;
-	    }
+            $err->(404, "No userpic by that id.");
+            next REQUEST;
 	}
 
+        unless ($pic->{'imagedata'} || $imagedata) 
+        {
+            if ($pic->{'dversion'} >= 2) { 
+                my $dbb = LJ::get_cluster_reader($pic->{'clusterid'});
+                unless ($dbb) {
+                    $err->(500, "Database temporarily unavailable.");
+                    next REQUEST;
+                }
+                $imagedata = $dbb->selectrow_array("SELECT imagedata FROM userpicblob2 WHERE ".
+                                                   "userid=$pic->{'userid'} AND picid=$qid");
+            } else {
+                $imagedata = $dro->selectrow_array("SELECT imagedata FROM userpicblob WHERE ".
+                                                   "picid=$qid");
+            }
+        }
+
+        $pic->{'imagedata'} = $imagedata if $imagedata;
 	if ($pic->{'state'} eq "B") { $pic->{'imagedata'} = "x"; }
 	$pic->{'length'} = length($pic->{'imagedata'});
 	$pic->{'time'} = time();
@@ -219,7 +225,6 @@ my $sth;
 		close ID;
 	    }
 	}
-	$cache->set($qid, $pic) if $cache;
     } else {
 	$hits++;
     }
@@ -232,6 +237,8 @@ my $sth;
 	close ID;
 	$pic->{'length'} = length($pic->{'imagedata'});	    
     }
+
+    $cache->set($qid, $pic) if $cache;
 
     if ($pic && $pic->{'length'})
     {

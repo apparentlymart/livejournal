@@ -5,6 +5,7 @@
 mark_clustered("useridmap", "userbio", "syncupdates2", "cmdbuffer", "dudata",
                "log2", "logtext2", "logsubject2", "logprop2", "logsec2", "recent_logtext2",
                "talk2", "talkprop2", "talktext2", "recent_talktext2", "talkleft",
+               "userpicblob2"
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -877,6 +878,15 @@ CREATE TABLE userpicblob (
   picid int(10) unsigned NOT NULL auto_increment,
   imagedata blob,
   PRIMARY KEY  (picid)
+) 
+EOC
+
+register_tablecreate("userpicblob2", <<'EOC');
+CREATE TABLE userpicblob2 (
+  userid int unsigned not null,
+  picid int unsigned not null,
+  imagedata blob,
+  PRIMARY KEY (userid, picid)
 ) 
 EOC
 

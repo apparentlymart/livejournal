@@ -2036,7 +2036,7 @@ sub create_account
     my $cluster = $LJ::DEFAULT_CLUSTER + 0;
 
     my $sth = $dbh->prepare("INSERT INTO user (user, name, password, clusterid, dversion) ".
-                            "VALUES ($quser, $qname, $qpassword, $cluster, 1)");
+                            "VALUES ($quser, $qname, $qpassword, $cluster, 2)");
     $sth->execute;
     if ($dbh->err) { return 0; }
 

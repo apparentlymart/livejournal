@@ -161,7 +161,7 @@ BODY<=
      # clusterid
      my $qclusterid = ($LJ::ALLOW_CLUSTER_SELECT ? $FORM{'cluster_id'} : 
                        $LJ::DEFAULT_CLUSTER)+0;
-     my $qdversion = $qclusterid ? 1 : 0;
+     my $qdversion = $qclusterid ? 2 : 0;
 
      $qpassword = $dbh->quote($FORM{'password1'});
      my $userid = $u->{'userid'}+0;
@@ -169,7 +169,8 @@ BODY<=
      {
          my $caps   = int($LJ::NEWUSER_CAPS);
          my $status = ($LJ::EVERYONE_VALID ? 'A'  : 'N');
-         $dbh->do("INSERT INTO user (user, email, password, status, caps, name, clusterid, dversion) VALUES ($quser, $qemail, $qpassword, '$status', $caps, $qname, $qclusterid, $qdversion)");
+         $dbh->do("INSERT INTO user (user, email, password, status, caps, name, clusterid, dversion) ".
+                  "VALUES ($quser, $qemail, $qpassword, '$status', $caps, $qname, $qclusterid, $qdversion)");
          if ($dbh->err)
          {
              return "(=H1 Error H1=)(=P There was an error processing your request: <B>" . $dbh->errstr . "</B> P=)";

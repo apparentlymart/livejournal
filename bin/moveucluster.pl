@@ -166,8 +166,21 @@ if ($sclust == 0)
         }
     }
 
+    # move userpics
+    print "Copying over userpics.\n";
+    my @pics = @{$dbh->selectcol_arrayref("SELECT picid FROM userpic WHERE ".
+                                          "userid=$u->{'userid'}")};
+    foreach my $picid (@pics) {
+        print "  picid\#$picid...\n";
+        my $imagedata = $dbh->selectrow_array("SELECT imagedata FROM userpicblob ".
+                                              "WHERE picid=$picid");
+        $imagedata = $dbh->quote($imagedata);
+        $dbch->do("REPLACE INTO userpicblob2 (userid, picid, imagedata) VALUES ".
+                  "($u->{'userid'}, $picid, $imagedata)");
+    }
+
     # before we start deleting, record they've moved servers.
-    $dbh->do("UPDATE user SET dversion=1, clusterid=$dclust WHERE userid=$userid");
+    $dbh->do("UPDATE user SET dversion=2, clusterid=$dclust WHERE userid=$userid");
     $dbh->do("UPDATE userusage SET lastitemid=0 WHERE userid=$userid");
 
     # if everything's good (nothing's died yet), then delete all from source
@@ -189,6 +202,14 @@ if ($sclust == 0)
         if ($separate_cluster) {
             $dbh->do("DELETE FROM userbio WHERE userid=$userid");
         }
+
+        # delete source userpics
+        print "Deleting cluster0 userpics...\n";
+        foreach my $picid (@pics) {
+            print "  picid\#$picid...\n";
+            $dbh->do("DELETE FROM userpicblob WHERE picid=$picid");
+        }
+        
     }
 
     # unset read-only bit (marks the move is complete, also, and not aborted mid-delete)
