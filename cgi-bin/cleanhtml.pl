@@ -250,6 +250,9 @@ sub clean
             my $allow;
             if ($tag eq "lj-raw") {
                 $opencount{$tag}--;
+            }
+            elsif ($tag eq "lj-cut") {
+                # just eat it
             } else {
                 if ($mode eq "allow") {
                     $allow = 1;
