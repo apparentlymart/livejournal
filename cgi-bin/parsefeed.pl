@@ -95,6 +95,12 @@ sub parse_feed
         $item->{'link'} = $_->{'link'} if $_->{'link'};
         $item->{'id'} = $_->{'guid'} if $_->{'guid'};
 
+        my $nsenc = 'http://purl.org/rss/1.0/modules/content/';
+        if ($_->{$nsenc} && ref($_->{$nsenc}) eq "HASH") {
+            # use content:encoded if present and no description
+            $item->{'text'} ||= $_->{$nsenc}->{'encoded'};
+        }
+
         if ($_->{'pubDate'}) {
             my $time = time822_to_time($_->{'pubDate'});
             $item->{'time'} = $time if $time;
