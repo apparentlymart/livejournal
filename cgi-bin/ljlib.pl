@@ -257,7 +257,7 @@ sub get_dbh {
             }
             next ROLE;
         }
-        my $db = LJ::get_dbirole_dbh($role);
+        my $db = LJ::get_dbirole_dbh($opts, $role);
         return $db if $db;
     }
     return undef;
