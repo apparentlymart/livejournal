@@ -78,7 +78,6 @@
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
 BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C
+PAGE=)(=_C <LJDEP>
 link: htdocs/editpics.bml, htdocs/uploadpic.bml
-_C=)
-
+</LJDEP> _C=)

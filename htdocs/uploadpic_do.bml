@@ -173,4 +173,7 @@ BODY<=
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+lib: LWP::UserAgent, Image::Size, CGI::, Digest::MD5
+link: htdocs/editpics.bml
+</LJDEP> _C=)

@@ -493,4 +493,7 @@ _CODE=)
 
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/lostinfo.bml, htdocs/userinfo.bml, htdocs/talkread.bml, htdocs/editinfo.bml
+post: htdocs/talkpost_do.bml
+</LJDEP> _C=)

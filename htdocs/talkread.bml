@@ -526,4 +526,10 @@ return $ret;
 
 _CODE=)
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/userinfo.bml, htdocs/go.bml, htdocs/tools/memadd.bml, htdocs/editjournal_do.bml, htdocs/topics/additem.bml
+link: htdocs/tools/tellafriend.bml, htdocs/talkpost.bml, htdocs/talkread.bml, htdocs/delcomment.bml
+img: htdocs/img/btn_prev.gif, htdocs/img/memadd.gif, htdocs/img/btn_edit.gif, htdocs/img/topic_add.gif, htdocs/img/btn_tellafriend.gif
+img: htdocs/img/btn_next.gif, htdocs/img/dot.gif, htdocs/img/delcomment.gif
+</LJDEP> _C=)
+

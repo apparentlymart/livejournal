@@ -155,4 +155,8 @@
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
 BODY=>(=_CODE return $body; _CODE=)
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/talkread.bml, htdocs/allpics.bml, htdocs/userinfo.bml, htdocs/random.bml
+link: htdocs/interests.bml, htdocs/directorysearch.bml, htdocs/directory.bml
+</LJDEP> _C=)
+

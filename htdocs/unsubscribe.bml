@@ -53,4 +53,7 @@ BODY<=
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+post: htdocs/unsubscribe.bml
+link: htdocs/editinfo.bml
+</LJDEP> _C=)

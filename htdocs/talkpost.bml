@@ -399,7 +399,10 @@ BODY<=
 
 _CODE=)
 
-
-
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+post: htdocs/talkpost_do.bml
+img: htdocs/img/topic_add.gif, htdocs/img/btn_tellfriend.gif, htdocs/img/btn_next.gif
+link: htdocs/talkread.bml, htdocs/allpics.bml, htdocs/create.bml
+</LJDEP> _C=)
+

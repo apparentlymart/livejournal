@@ -24,4 +24,8 @@ If you forgot your username or password, <a href="lostinfo.bml">recover it here!
 P=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+post: htdocs/modify_do.bml
+link: htdocs/update.bml, htdocs/lostinfo.bml
+</LJDEP> _C=)
+

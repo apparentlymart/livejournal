@@ -69,4 +69,6 @@ BODY<=
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/login.bml, htdocs/editinfo.bml, htdocs/modify.bml, htdocs/update.bml
+</LJDEP> _C=)

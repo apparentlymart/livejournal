@@ -103,8 +103,7 @@ BODY<=
      print MAIL "From: $LJ::ADMIN_EMAIL ($LJ::SITENAME)\n";
      print MAIL "Subject: Lost Username\n\n";
      print MAIL "This is your requested username reminder from $LJ::SITENAME.  Below are the usernames you have registered for the email address $email:\n\n";
-     foreach my $ru (@users)
-     {
+     foreach my $ru (@users) {
 	 print MAIL "          $ru\n";
      }
 
@@ -119,8 +118,7 @@ BODY<=
 
 _CODE=)
 
-
-
-
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+</LJDEP> _C=)
+

@@ -366,4 +366,8 @@ BODY<=
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/moodlist.bml, htdocs/developer/index.bml, htdocs/developer/varlist.bml, htdocs/styles/create.bml
+post: htdocs/modify_do.bml
+</LJDEP> _C=)
+

@@ -189,4 +189,7 @@ P=)
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/stats/, htdocs/support/faqbrowse.bml
+img: htdocs/img/bluedot.gif, htdocs/stats/postsbyday.png, htdocs/stats/postsbyweek.png, htdocs/stats/newbyday.png
+</LJDEP> _C=)

@@ -76,4 +76,8 @@ P=)
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+form: htdocs/moodlist.bml
+link: htdocs/modify.bml
+</LJDEP> _C=)
+

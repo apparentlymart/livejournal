@@ -27,6 +27,8 @@ P=)
 </TABLE>
 STANDOUT=)
 
-
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+post: htdocs/uploadpic_do.bml
+</LJDEP> _C=)
+
