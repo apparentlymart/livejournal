@@ -1490,6 +1490,45 @@ that area. p?>
 
 /support/faqbrowse.bml.title=FAQ Question
 
+/talkmulti.bml.deleted.body=The comments have been deleted. You can view the rest of the thread <a href="[[link]]">here</a>.
+
+/talkmulti.bml.deleted.title=Comments deleted
+
+/talkmulti.bml.error.comms_deleted=One of the comments has been deleted since. For security reasons, please go back and try again.
+
+/talkmulti.bml.error.inconsistent_data=The supplied data is inconsistent.
+
+/talkmulti.bml.error.invalid=Invalid parameters specified.
+
+/talkmulti.bml.error.invalid_mode<<
+You have not selected one of the actions. Please go back and choose
+if you would like to screen, unscreen, or delete the comments.
+.
+
+/talkmulti.bml.error.login=You are not logged in.
+
+/talkmulti.bml.error.none_selected=You have not selected any comments.
+
+/talkmulti.bml.error.privs.delete=You do not have permission to delete these comments.
+
+/talkmulti.bml.error.privs.screen=You do not have permission to screen these comments.
+
+/talkmulti.bml.error.privs.unscreen=You do not have permission to unscreen these comments.
+
+/talkmulti.bml.screened.body=The comments have been screened. You can view them <a href="[[link]]">here</a>.
+
+/talkmulti.bml.screened.title=Comments screened
+
+/talkmulti.bml.title.delete=Delete Multiple Comments
+
+/talkmulti.bml.title.screen=Screen Multiple Comments
+
+/talkmulti.bml.title.unscreen=Unscreen Multiple Comments
+
+/talkmulti.bml.unscreened.body=The comments have been unscreened. You can view them <a href="[[link]]">here</a>.
+
+/talkmulti.bml.unscreened.title=Comments unscreened
+
 /talkpost.bml.allowedhtml=Allowed HTML
 
 /talkpost.bml.error.cannotreplynopost=You cannot reply to a non-existent post 
@@ -1641,6 +1680,16 @@ that area. p?>
 /talkread.bml.screenedpost=<b>(Screened Post)</b>
 
 /talkread.bml.subjectdeleted=[deleted]
+
+/talkread.bml.talkmulti.delete=Delete
+
+/talkread.bml.talkmulti.des=<b>Mass action</b> on selected comments:
+
+/talkread.bml.talkmulti.screen=Screen
+
+/talkread.bml.talkmulti.submit=Perform Action
+
+/talkread.bml.talkmulti.unscreen=Unscreen
 
 /talkread.bml.title=Read Comments
 
