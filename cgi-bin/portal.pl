@@ -40,7 +40,9 @@ sub get_box_types
 sub construct_page
 {
     my $opts = shift;
-    my $dbh = $opts->{'dbh'};
+    my $dbs = $opts->{'dbs'};
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
     my $body = $opts->{'body'};
     my $remote = $opts->{'remote'};
     my $puri = $opts->{'puri'};
@@ -51,7 +53,7 @@ sub construct_page
 		  'left' => "width=180",
 		  );
 
-    my $portopts = load_portopts($dbh, $remote);
+    my $portopts = load_portopts($dbs, $remote);
 
     $$body .= "<table border=$opts->{'border'} cellpadding=3 width=100% height=500>\n";
     $$body .= "<tr valign=top>\n";
@@ -78,7 +80,7 @@ sub construct_page
 	    $box->{'pos'} = "$pbox->[$BOX_POS]";
 	    $box->{'uniq'} = "$loc$pbox->[$BOX_POS]";
 
-	    $box{$bname}->{'handler'}->($dbh, $remote, $opts, $box);
+	    $box{$bname}->{'handler'}->($dbs, $remote, $opts, $box);
 	}
 
 	$$body .= "</td>\n";
@@ -94,15 +96,16 @@ sub construct_page
 
 sub load_portopts
 {
-    my $dbh = shift;
+    my $dbs = shift;
     my $remote = shift;
+    my $dbr = $dbs->{'reader'};
 
     my $portopts;
 
     # if user is logged in, see if they've defined their portal box settings:
     if ($remote) 
     {
-	my $sth = $dbh->prepare("SELECT loc, pos, boxname, boxargs FROM portal WHERE userid=$remote->{'userid'} ORDER BY loc, pos");
+	my $sth = $dbr->prepare("SELECT loc, pos, boxname, boxargs FROM portal WHERE userid=$remote->{'userid'} ORDER BY loc, pos");
 	$sth->execute;
 	while (my $row = $sth->fetchrow_hashref)
 	{
@@ -150,7 +153,8 @@ sub count_boxes
 
 sub save_portopts
 {
-    my $dbh = shift;
+    my $dbs = shift;
+    my $dbh = $dbs->{'dbh'};
     my $remote = shift;
     my $portopts = shift;
 
@@ -307,7 +311,7 @@ sub make_box_modify_form
 
 sub modify_box
 {
-    my $dbh = shift;
+    my $dbs = shift;
     my $remote = shift;
     my $portopts = shift;
     my $loc = shift;
@@ -327,7 +331,7 @@ sub modify_box
 	$box->[$BOX_DIRTY] = 1;
     }
 
-    save_portopts($dbh, $remote, $portopts);
+    save_portopts($dbs, $remote, $portopts);
     return $newargs;
 }
 
@@ -372,7 +376,7 @@ sub make_box_link
 # XXXXXXXX DEAD / OLD
 sub make_mozilla_box
 {
-    my $dbh = shift;
+    my $dbs = shift;
     my $remote = shift;
     my $form = shift;
     my $opts = shift;
@@ -386,17 +390,17 @@ sub make_mozilla_box
     $box->{'pos'} = "moz";
     $box->{'loc'} = 1;
     $box->{'uniq'} = "moz1";
-    $box{$bname}->{'handler'}->($dbh, $remote, $opts, $box);
+    $box{$bname}->{'handler'}->($dbs, $remote, $opts, $box);
 }
 
 sub make_mozilla_bar
 {
-    my $dbh = shift;
+    my $dbs = shift;
     my $remote = shift;
     my $form = shift;
     my $opts = shift;
 
-    my $portopts = load_portopts($dbh, $remote);
+    my $portopts = load_portopts($dbs, $remote);
     my $loc = "moz";
     
     foreach my $pbox (@{$portopts->{$loc}})
@@ -415,7 +419,7 @@ sub make_mozilla_bar
 	$box->{'pos'} = "$pbox->[$BOX_POS]";
 	$box->{'uniq'} = "$loc$pbox->[$BOX_POS]";
 	
-	$box{$bname}->{'handler'}->($dbh, $remote, $opts, $box);
+	$box{$bname}->{'handler'}->($dbs, $remote, $opts, $box);
     }
     
     
@@ -475,7 +479,7 @@ $box{'login'} =
     'small' => 1,
     'large' => 0,
     'handler' => sub {
-	my ($dbh, $remote, $opts, $box) = @_;
+	my ($dbs, $remote, $opts, $box) = @_;
 	my $b = $opts->{'body'};
 
 	box_start($b, $box, { 'title' => "Login", 
@@ -506,7 +510,7 @@ $box{'newtolj'} =
     'small' => 1,
     'large' => 0,
     'handler' => sub {
-	my ($dbh, $remote, $opts, $box) = @_;
+	my ($dbs, $remote, $opts, $box) = @_;
 	my $b = $opts->{'body'};
 
 	box_start($b, $box, { 'title' => "About $LJ::SITENAME",
@@ -535,7 +539,8 @@ $box{'stats'} =
     'small' => 1,
     'large' => 0,
     'handler' => sub {
-	my ($dbh, $remote, $opts, $box) = @_;
+	my ($dbs, $remote, $opts, $box) = @_;
+        my $dbr = $dbs->{'reader'};
 	my $b = $opts->{'body'};
 	my $sth;
 	my @stats;
@@ -545,7 +550,7 @@ $box{'stats'} =
 			      'url' => '/stats.bml' });
 
 	my %stat;
-	$sth = $dbh->prepare("SELECT statkey, statval FROM stats WHERE statcat='statbox'");
+	$sth = $dbr->prepare("SELECT statkey, statval FROM stats WHERE statcat='statbox'");
 	$sth->execute;
 	while (my ($k, $v) = $sth->fetchrow_array) {
 	    $stat{$k} = $v;
@@ -583,14 +588,15 @@ $box{'bdays'} =
 		  'default' => 5 },
 		],
     'handler' => sub {
-	my ($dbh, $remote, $opts, $box) = @_;
+	my ($dbs, $remote, $opts, $box) = @_;
+	my $dbr = $dbs->{'reader'};
 	my $bd = $opts->{'body'};
 	my $sth;
 
 	box_start($bd, $box, { 'title' => "Friends' Birthdays",
 			      'url' => '/birthdays.bml' });
 
-	$sth = $dbh->prepare("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0");
+	$sth = $dbr->prepare("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0");
 	$sth->execute;
 
 	# what day is it now?  server time... suck, yeah.
@@ -671,7 +677,7 @@ $box{'lastnview'} =
 		
 		],
     'handler' => sub {
-	my ($dbh, $remote, $opts, $box) = @_;
+	my ($dbs, $remote, $opts, $box) = @_;
 	my $bd = $opts->{'body'};
 	my $sth;
 
@@ -687,13 +693,13 @@ $box{'lastnview'} =
 	    return;
 	}
 
-	my $u = LJ::load_user($dbh, $user);
+	my $u = LJ::load_user($dbs, $user);
 
 	box_start($bd, $box, { 'title' => "$u->{'name'}",
 			      'url' => "$LJ::SITEROOT/users/$user" });
 
 	my @itemids;
-	my @items = LJ::get_recent_items($dbh, {
+	my @items = LJ::get_recent_items($dbs, {
 	    'userid' => $u->{'userid'},
 	    'skip' => 0,
 	    'itemshow' => $items,
@@ -744,7 +750,7 @@ $box{'goat'} =
 		  'maxlength' => 40, },
 		],
     'handler' => sub {
-	my ($dbh, $remote, $opts, $box) = @_;
+	my ($dbs, $remote, $opts, $box) = @_;
 	my $b = $opts->{'body'};
 	my $bo = $opts->{'bodyopts'};
 	my $h = $opts->{'head'};
@@ -831,7 +837,7 @@ $box{'update'} =
 		],
     'handler' => sub 
     {
-	my ($dbh, $remote, $opts, $box) = @_;
+	my ($dbs, $remote, $opts, $box) = @_;
 	my $bd = $opts->{'body'};
 	my $h = $opts->{'head'};
 
@@ -893,7 +899,7 @@ $box{'update'} =
 	    
 	    if (! $opts->{'form'}->{'altlogin'} && $remote)
 	    {
-		LJ::do_request($dbh, { "mode" => "login",
+		LJ::do_request($dbs, { "mode" => "login",
 					"user" => $remote->{'user'},
 					"getpickws" => 1,
 				    }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
@@ -945,7 +951,7 @@ $box{'update'} =
 	    
 	    $$bd .= "<P><B>Current <A HREF=\"/moodlist.bml\">Mood</A>:</B>";
 	    
-	    LJ::load_moods($dbh);
+	    LJ::load_moods($dbs);
 	    my @sel;
 	    foreach my $moodid (sort { $LJ::CACHE_MOODS{$a}->{'name'} cmp  
 					   $LJ::CACHE_MOODS{$b}->{'name'} } keys %LJ::CACHE_MOODS)
@@ -1029,7 +1035,8 @@ $box{'randuser'} =
 		],
     'handler' => sub 
     {
-	my ($dbh, $remote, $opts, $box) = @_;
+	my ($dbs, $remote, $opts, $box) = @_;
+        my $dbr = $dbs->{'reader'};
 	my $b = $opts->{'body'};
 	my $h = $opts->{'head'};
 
@@ -1039,7 +1046,7 @@ $box{'randuser'} =
 	if ($size eq "small" && $count > 5) { $count = 5; }
 	if ($size eq "large" && $count > 10) { $count = 10; }
 
-	my $max = $dbh->selectrow_array("SELECT statval FROM stats WHERE statcat='userinfo' AND statkey='randomcount'");
+	my $max = $dbr->selectrow_array("SELECT statval FROM stats WHERE statcat='userinfo' AND statkey='randomcount'");
 	$count = $max if ($count > $max);
 	my %ruserid;
 	while (keys %ruserid < $count) {
@@ -1059,11 +1066,11 @@ $box{'randuser'} =
 			     'align' => "center",
 			 });
 
-	my $ruser = $dbh->selectall_hashref("SELECT user, name, defaultpicid FROM user WHERE userid IN (" . join(",", keys %ruserid) . ")");
+	my $ruser = $dbr->selectall_hashref("SELECT user, name, defaultpicid FROM user WHERE userid IN (" . join(",", keys %ruserid) . ")");
 
 	my %pic;
 	unless ($box->{'args'}->{'hidepic'}) {
-	    LJ::load_userpics($dbh, \%pic, [ map { $_->{'defaultpicid'} } @$ruser ]);
+	    LJ::load_userpics($dbs, \%pic, [ map { $_->{'defaultpicid'} } @$ruser ]);
 	}
 
 	if ($size eq "large") {  $$b .= "<table width=100%><tr valign=bottom>"; }

@@ -12,11 +12,11 @@
  my $opts = { 'body' => \$body,
 	      'head' => \$head,
 	      'bodyopts' => \$bodyopts,
-	      'dbh' => $dbh,
+	      'dbs' => $dbs,
 	      'remote' => $remote,
 	  };
  
- LJ::Portal::make_mozilla_box($dbh, $remote, \%FORM, $opts);
+ LJ::Portal::make_mozilla_box($dbs, $remote, \%FORM, $opts);
 
  return "<html><head>$head<title>$title</title><body marginwidth=0 marginheight=0 $bodyopts><base target=_content>$body</body></html>";
 

@@ -442,7 +442,7 @@ sub postevent
 	    unless (LJ::get_cap($u, "makepoll"));
 	
 	my $error = "";
-	@polls = LJ::Poll::parse($dbh, \$event, \$error, {
+	@polls = LJ::Poll::parse($dbs, \$event, \$error, {
 	    'journalid' => $ownerid,
 	    'posterid' => $posterid,
 	});
@@ -513,7 +513,7 @@ sub postevent
 	### not going to check it for now.
 	
 	my $error = "";
-	LJ::Poll::register($dbh, \$event, \$error, $ditemid, @polls);
+	LJ::Poll::register($dbs, \$event, \$error, $ditemid, @polls);
     }
     #### /embedding
     

@@ -10,7 +10,7 @@
 
  my $pollid = ($FORM{'id'} || $FORM{'pollid'})+0;
  
- $sth = $dbh->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=$pollid");
+ $sth = $dbr->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=$pollid");
  $sth->execute;
  my $po = $sth->fetchrow_hashref;
 
@@ -41,7 +41,7 @@
  if (defined $FORM{'poll-submit'})
  {
      my $error;
-     &LJ::Poll::submit($dbh, $remote, \%FORM, \$error);
+     &LJ::Poll::submit($dbs, $remote, \%FORM, \$error);
      if ($error) {
 	 $title = "Error";
 	 $body .= $error;
@@ -64,7 +64,7 @@
 	      'prefill' => 1,
 	  };
  ## itemid 0 means no security is done to check that it's not hijacked:
- $body .= LJ::Poll::show_poll($dbh, 0, $remote, $pollid, $opts);
+ $body .= LJ::Poll::show_poll($dbs, 0, $remote, $pollid, $opts);
 
  return;
 

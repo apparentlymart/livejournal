@@ -14,12 +14,12 @@
  my ($bname, $loc, $pos) = split(/-/, $t);
  $pos += 0;
 
- my $portopts = LJ::Portal::load_portopts($dbh, $remote);
+ my $portopts = LJ::Portal::load_portopts($dbs, $remote);
  
  if ($op eq "x")
  {
      LJ::Portal::delete_box($portopts, $loc, $pos, $bname);
-     LJ::Portal::save_portopts($dbh, $remote, $portopts);
+     LJ::Portal::save_portopts($dbs, $remote, $portopts);
      if ($loc eq "moz") {
 	 print "Location: $LJ::SITEROOT/portal/moz.bml\n\n";
      } else {
@@ -32,7 +32,7 @@
  if ($op eq "u" || $op eq "d")
  {
      LJ::Portal::move_box($portopts, $loc, $pos, $bname, $op);
-     LJ::Portal::save_portopts($dbh, $remote, $portopts);
+     LJ::Portal::save_portopts($dbs, $remote, $portopts);
      if ($loc eq "moz") {
 	 print "Location: $LJ::SITEROOT/portal/moz.bml\n\n";
      } else {
@@ -84,7 +84,7 @@
      my $loc = $FORM{'loc'};
 
      my $pos = LJ::Portal::create_new_box($portopts, $bname, $loc);
-     LJ::Portal::save_portopts($dbh, $remote, $portopts);
+     LJ::Portal::save_portopts($dbs, $remote, $portopts);
      
      my $modform =  LJ::Portal::make_box_modify_form($portopts, $loc, $pos);
      if ($modform) 
@@ -107,7 +107,7 @@
 
  if ($op eq "modbox")
  {
-     my $newargs = &LJ::Portal::modify_box($dbh, $remote, $portopts, $FORM{'loc'}, $FORM{'pos'}, \%FORM);
+     my $newargs = LJ::Portal::modify_box($dbs, $remote, $portopts, $FORM{'loc'}, $FORM{'pos'}, \%FORM);
      if ($FORM{'loc'} eq "moz") {
 	 $op = "mozadd";
      } else {

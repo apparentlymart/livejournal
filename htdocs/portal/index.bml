@@ -11,7 +11,7 @@
 
  #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
- LJ::Portal::construct_page({ 'dbh' => $dbh,
+ LJ::Portal::construct_page({ 'dbs' => $dbs,
 			      'form' => \%FORM,
 			      'remote' => $remote,
 			      'head' => \$head,

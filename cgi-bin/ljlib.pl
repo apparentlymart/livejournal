@@ -3653,19 +3653,12 @@ sub make_graphviz_dot_file
 # </LJFUNC>
 sub expand_embedded
 {
-    my $dbarg = shift;
+    my $dbs = shift;
     my $ditemid = shift;
     my $remote = shift;
     my $eventref = shift;
 
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-    
-    # TODO: This should send $dbs instead of $dbh when that function
-    # is converted. In addition, when that occurs the make_dbs_from_arg
-    # code above can be removed.
-    LJ::Poll::show_polls($dbh, $ditemid, $remote, $eventref);
+    LJ::Poll::show_polls($dbs, $ditemid, $remote, $eventref);
 }
 
 # <LJFUNC>

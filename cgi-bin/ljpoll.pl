@@ -35,7 +35,7 @@ sub contains_new_poll
 
 sub parse
 {
-    my $dbh = shift;
+    my $dbs = shift;
     my $postref = shift;
     my $error = shift;
     my $iteminfo = shift; 
@@ -347,7 +347,8 @@ sub parse
 # note: $itemid is a $ditemid (display itemid, *256 + anum)
 sub register
 {
-    my $dbh = shift;
+    my $dbs = shift;
+    my $dbh = $dbs->{'dbh'};
     my $post = shift;
     my $error = shift;
     my $itemid = shift;
@@ -419,17 +420,18 @@ sub register
 
 sub show_polls
 {
-    my $dbh = shift;
+    my $dbs = shift;
     my $itemid = shift;
     my $remote = shift;
     my $postref = shift;
 
-    $$postref =~ s/<lj-poll-(\d+)>/&show_poll($dbh, $itemid, $remote, $1)/eg;
+    $$postref =~ s/<lj-poll-(\d+)>/&show_poll($dbs, $itemid, $remote, $1)/eg;
 }
 
 sub show_poll
 {
-    my $dbh = shift;
+    my $dbs = shift;
+    my $dbr = $dbs->{'reader'};
     my $itemid = shift;
     my $remote = shift;
     my $pollid = shift;
@@ -439,7 +441,7 @@ sub show_poll
     my $mode = $opts->{'mode'};
     $pollid += 0;
     
-    $sth = $dbh->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=$pollid");
+    $sth = $dbr->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=$pollid");
     $sth->execute;
     my $po = $sth->fetchrow_hashref;
     unless ($po) {
@@ -449,7 +451,7 @@ sub show_poll
     if ($itemid && $po->{'itemid'} != $itemid) {
 	return "<b>[Error: this poll is not attached to this journal entry]</b>"	
     }
-    my ($can_vote, $can_view) = find_security($dbh, $po, $remote);
+    my ($can_vote, $can_view) = find_security($dbs, $po, $remote);
 
     ### prepare our output buffer
     my $ret;
@@ -462,7 +464,7 @@ sub show_poll
 	}
 
 	my $qid = $opts->{'qid'}+0;
-	$sth = $dbh->prepare("SELECT type, qtext FROM pollquestion WHERE pollid=$pollid AND pollqid=$qid");
+	$sth = $dbr->prepare("SELECT type, qtext FROM pollquestion WHERE pollid=$pollid AND pollqid=$qid");
 	$sth->execute;
 	my $q = $sth->fetchrow_hashref;
 	unless ($q) {
@@ -470,7 +472,7 @@ sub show_poll
 	}
 
 	my %it;
-	$sth = $dbh->prepare("SELECT pollitid, item FROM pollitem WHERE pollid=$pollid AND pollqid=$qid");
+	$sth = $dbr->prepare("SELECT pollitid, item FROM pollitem WHERE pollid=$pollid AND pollqid=$qid");
 	$sth->execute;
 	while (my ($itid, $item) = $sth->fetchrow_array) {
 	    $it{$itid} = $item;
@@ -480,7 +482,7 @@ sub show_poll
 	$ret .= $q->{'qtext'};
 	$ret .= "<p>";
 
-	$sth = $dbh->prepare("SELECT u.user, pr.value FROM user u, pollresult pr, pollsubmission ps WHERE u.userid=pr.userid AND pr.pollid=$pollid AND pollqid=$qid AND ps.pollid=$pollid AND ps.userid=pr.userid ORDER BY ps.datesubmit");
+	$sth = $dbr->prepare("SELECT u.user, pr.value FROM user u, pollresult pr, pollsubmission ps WHERE u.userid=pr.userid AND pr.pollid=$pollid AND pollqid=$qid AND ps.pollid=$pollid AND ps.userid=pr.userid ORDER BY ps.datesubmit");
 	$sth->execute;
 
 	while (my ($user, $value) = $sth->fetchrow_array) 
@@ -510,7 +512,7 @@ sub show_poll
 	
 	if ($remote)
 	{
-	    $sth = $dbh->prepare("SELECT pollid FROM pollsubmission WHERE pollid=$pollid AND userid=$remote->{'userid'}");
+	    $sth = $dbr->prepare("SELECT pollid FROM pollsubmission WHERE pollid=$pollid AND userid=$remote->{'userid'}");
 	    $sth->execute;
 	    my ($cast) = $sth->fetchrow_array;
 	    if ($cast) { $mode = "results"; }
@@ -526,7 +528,7 @@ sub show_poll
     my $do_form = ($mode eq "enter" && $can_vote);
     my %preval;
     if ($do_form) {
-	$sth = $dbh->prepare("SELECT pollqid, value FROM pollresult WHERE pollid=$pollid AND userid=$remote->{'userid'}");
+	$sth = $dbr->prepare("SELECT pollqid, value FROM pollresult WHERE pollid=$pollid AND userid=$remote->{'userid'}");
 	$sth->execute;
 	while (my ($qid, $value) = $sth->fetchrow_array) {
 	    $preval{$qid} = $value;
@@ -549,14 +551,14 @@ sub show_poll
 
     ### load all the questions
     my @qs;
-    $sth = $dbh->prepare("SELECT pollqid, type, opts, qtext FROM pollquestion WHERE pollid=$pollid ORDER BY sortorder");
+    $sth = $dbr->prepare("SELECT pollqid, type, opts, qtext FROM pollquestion WHERE pollid=$pollid ORDER BY sortorder");
     $sth->execute;
     push @qs, $_ while ($_ = $sth->fetchrow_hashref);
     $sth->finish;
 
     ### load all the items
     my %its;
-    $sth = $dbh->prepare("SELECT pollqid, pollitid, item FROM pollitem WHERE pollid=$pollid ORDER BY sortorder");
+    $sth = $dbr->prepare("SELECT pollqid, pollitid, item FROM pollitem WHERE pollid=$pollid ORDER BY sortorder");
     $sth->execute;
     while (my ($qid, $itid, $item) = $sth->fetchrow_array) {
 	push @{$its{$qid}}, [ $itid, $item ];
@@ -582,7 +584,7 @@ sub show_poll
 		push @{$its{$qid}}, [ $at, $at ];  # note: fake itemid, doesn't matter, but needed to be unique
 	    }
 
-	    $sth = $dbh->prepare("SELECT COUNT(*), AVG(value), STDDEV(value) FROM pollresult WHERE pollid=$pollid AND pollqid=$qid");
+	    $sth = $dbr->prepare("SELECT COUNT(*), AVG(value), STDDEV(value) FROM pollresult WHERE pollid=$pollid AND pollqid=$qid");
 	    $sth->execute;
 	    ($valcount, $valmean, $valstddev) = $sth->fetchrow_array;
 	    
@@ -597,7 +599,7 @@ sub show_poll
 		$mid = int(($valcount+1)/2);
 		my $skip = $mid-1;
 		my $sql = "SELECT value FROM pollresult WHERE pollid=$pollid AND pollqid=$qid ORDER BY value+0 LIMIT $skip,$fetch";
-		$sth = $dbh->prepare($sql);
+		$sth = $dbr->prepare($sql);
 		$sth->execute;
 		while (my ($v) = $sth->fetchrow_array) {
 		    $valmedian += $v;
@@ -616,11 +618,11 @@ sub show_poll
 	    $ret .= "<a href=\"$LJ::SITEROOT/poll/?id=$pollid&amp;qid=$qid&amp;mode=ans\">View Answers</a><br>";
 
 	    ### but, if this is a non-text item, and we're showing results, need to load the answers:
-	    $sth = $dbh->prepare("SELECT COUNT(DISTINCT(userid)) FROM pollresult WHERE pollid=$pollid AND pollqid=$qid");
+	    $sth = $dbr->prepare("SELECT COUNT(DISTINCT(userid)) FROM pollresult WHERE pollid=$pollid AND pollqid=$qid");
 	    $sth->execute;
 	    ($usersvoted) = $sth->fetchrow_array;
 
-	    $sth = $dbh->prepare("SELECT value, COUNT(*) FROM pollresult WHERE pollid=$pollid AND pollqid=$qid GROUP BY value");
+	    $sth = $dbr->prepare("SELECT value, COUNT(*) FROM pollresult WHERE pollid=$pollid AND pollqid=$qid GROUP BY value");
 	    $sth->execute;
 	    while (my ($val, $count) = $sth->fetchrow_array) {
 		if ($q->{'type'} eq "check") {
@@ -777,7 +779,8 @@ sub show_poll
 
 sub find_security
 {
-    my $dbh = shift;
+    my $dbs = shift;
+    my $dbr = $dbs->{'reader'};
     my $po = shift;
     my $remote = shift;
     my $sth;
@@ -791,9 +794,7 @@ sub find_security
     if (($po->{'whoview'} eq "friends" || 
 	 $po->{'whovote'} eq "friends") && $remote)
     {
-	$sth = $dbh->prepare("SELECT COUNT(*) FROM friends WHERE userid=$po->{'journalid'} AND friendid=$remote->{'userid'}");
-	$sth->execute;
-	($is_friend) = $sth->fetchrow_array;
+        $is_friend = LJ::is_friend($dbs, $po->{'journalid'}, $remote->{'userid'});
     }
 
     my %sec;
@@ -810,11 +811,11 @@ sub find_security
 	$sec{'vote'} = 1;
     }
 
-    if (LJ::is_banned($dbh, $remote, $po->{'journalid'})) {
+    if (LJ::is_banned($dbs, $remote, $po->{'journalid'})) {
 	$sec{'vote'} = 0;
     }
     
-    if (LJ::is_banned($dbh, $remote, $po->{'posterid'})) {
+    if (LJ::is_banned($dbs, $remote, $po->{'posterid'})) {
 	$sec{'vote'} = 0;
     }
     
@@ -823,7 +824,9 @@ sub find_security
 
 sub submit
 {
-    my $dbh = shift;
+    my $dbs = shift;
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
     my $remote = shift;
     my $form = shift;
     my $error = shift;
@@ -835,7 +838,7 @@ sub submit
     }
 
     my $pollid = $form->{'pollid'}+0;
-    $sth = $dbh->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=$pollid");
+    $sth = $dbr->prepare("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name FROM poll WHERE pollid=$pollid");
     $sth->execute;
     my $po = $sth->fetchrow_hashref;
     unless ($po) {
@@ -843,7 +846,7 @@ sub submit
 	return 0;	
     }
     
-    my ($can_vote, undef) = find_security($dbh, $po, $remote);
+    my ($can_vote, undef) = find_security($dbs, $po, $remote);
 
     unless ($can_vote) {
 	$$error = "Sorry, you don't have permission to vote in this particular poll.";
@@ -852,7 +855,7 @@ sub submit
 
     ### load all the questions
     my @qs;
-    $sth = $dbh->prepare("SELECT pollqid, type, opts, qtext FROM pollquestion WHERE pollid=$pollid");
+    $sth = $dbr->prepare("SELECT pollqid, type, opts, qtext FROM pollquestion WHERE pollid=$pollid");
     $sth->execute;
     push @qs, $_ while ($_ = $sth->fetchrow_hashref);
     $sth->finish;
