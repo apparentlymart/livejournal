@@ -4590,32 +4590,6 @@ sub trim
     return $a;
 }
 
-# returns true if $formref->{'password'} matches cleartext password or if
-# $formref->{'hpassword'} is the hash of the cleartext password
-# DEPRECTED: should use LJ::auth_okay
-# <LJFUNC>
-# name: LJ::valid_password
-# class:
-# des:
-# info:
-# args:
-# des-:
-# returns:
-# </LJFUNC>
-sub valid_password
-{
-    my ($clearpass, $formref) = @_;
-    if ($formref->{'password'} && $formref->{'password'} eq $clearpass)
-    {
-        return 1;
-    }
-    if ($formref->{'hpassword'} && lc($formref->{'hpassword'}) eq &hash_password($clearpass))
-    {
-        return 1;
-    }
-    return 0;
-}
-
 # <LJFUNC>
 # name: LJ::delete_user
 # class:
