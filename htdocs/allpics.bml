@@ -3,15 +3,13 @@
  use strict;
  use vars qw(%GET $title $body $head);
 
- $title = "";
+ $title = "$ML{'.title'}";
  $body = "";
  $head = "";
  
  my $user = LJ::canonical_username($GET{'user'});
  my $remote = LJ::get_remote();
  my $u = ! $user || $remote && $remote->{'user'} eq $user ? $remote : LJ::load_user($user);
- 
- $title = $ML{'.title'};
 
  unless ($u) {
      $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noparam'} p?>";
@@ -46,7 +44,11 @@
      return;
  }
 
- my $can_manage = LJ::can_manage($remote, $u->{'userid'});
+ my ($can_manage, $getextra);
+ if ($remote) {
+     $can_manage = LJ::can_manage($remote, $u->{'userid'});
+     $getextra = $can_manage && $remote->{'user'} ne $u->{'user'} ? "?authas=$user" : '';
+ }
 
  #### show pictures
 
@@ -68,8 +70,8 @@
          $body .= "<?h1 $ML{'.current'} h1?><?p ";
          $body .= BML::ml('.pics', {'user'=> LJ::ljuser($u)});
          if ($can_manage) {
-             $body .= ' ' . BML::ml('.edit2', { 'editlink' => "$LJ::SITEROOT/editpics.bml?authas=$user",
-                                              'uploadlink' => "$LJ::SITEROOT/uploadpic.bml?authas=$user" });
+             $body .= ' ' . BML::ml('.edit2', { 'editlink' => "$LJ::SITEROOT/editpics.bml$getextra",
+                                                'uploadlink' => "$LJ::SITEROOT/editpics.bml$getextra#upload" });
          }
          $body .= " p?><div style='margin-left: 50px;'><table cellpadding='5' border='0' cellspacing='1'>";
              
@@ -77,7 +79,7 @@
 
      ### Keywords
      my $eh_keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}||[]});
-     $eh_keywords = LJ::eall($eh_keywords);
+     $eh_keywords = LJ::ehtml($eh_keywords);
 
      if ($piccount % 2 == 1) {
          $body .= "<tr valign='middle'>";
@@ -115,7 +117,7 @@
  } else {
      if ($can_manage) {
          $body = "<?h1 $ML{'.nopics.title'} h1?><?p ";
-         $body .= BML::ml('.nopics.text2', { 'link' => "$LJ::SITEROOT/uploadpic.bml?authas=$user" }) . " p?>";
+         $body .= BML::ml('.nopics.text2', { 'link' => "$LJ::SITEROOT/editpics.bml$getextra#upload" }) . " p?>";
      } else {
          $body = "<?h1 $ML{'.nopics.title'} h1?><?p $ML{'.nopics.text.other'} p?>";
      }
@@ -128,5 +130,5 @@ title=><?_code return $title; _code?>
 head=><?_code return $head; _code?>
 body=><?_code return $body; _code?>
 page?><?_c <LJDEP>
-link: htdocs/editpics.bml, htdocs/uploadpic.bml
+link: htdocs/editpics.bml
 </LJDEP> _c?>

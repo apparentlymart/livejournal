@@ -380,6 +380,7 @@
     }
 
     # let users upload more pics
+    $body .= "<a name='upload' />";
     $body .= "<?h1 $ML{'.uploadheader'} h1?>\n";
     $body .= "<?p Use the form below to upload a new picture. p?>\n\n";
     
