@@ -257,7 +257,7 @@ sub LJ::Stats::num_blocks {
 # get low/high ids for a BETWEEN query based on page number
 sub LJ::Stats::get_block_bounds {
     my $block = shift;
-    return (0, $LJ::Stats::BLOC_SIZE) unless $block;
+    return (0, $LJ::Stats::BLOCK_SIZE) unless $block;
 
     return (($block-1) * $LJ::STATS_BLOCK_SIZE, $block * $LJ::STATS_BLOCK_SIZE+1);
 }
