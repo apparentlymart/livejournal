@@ -2166,6 +2166,8 @@ sub load_user_props
     ## user reference
     my $uid = $u->{'userid'}+0;
     $uid = LJ::get_userid($u->{'user'}) unless $uid;
+    
+    $opts->{'cache'} = 0 unless $LJ::DEV_CACHE_PROPS;
 
     my $mem = {};
     if ($opts->{'cache'}) {
