@@ -69,8 +69,6 @@
      $user = $authasu->{user};
      $userid = $authasu->{userid};
      $authasarg = "authas=$authasu->{user}&";
- } else {
-     $authasu = $remote;
  }
 
  my %filters = ("all" => $ML{'.filter.all'},
