@@ -51,6 +51,8 @@ sub replace   { $memc->replace(@_);   }
 sub set       { $memc->set(@_);       }
 sub get       { $memc->get(@_);       }
 sub get_multi { $memc->get_multi(@_); }
+sub incr      { $memc->incr(@_);      }
+sub decr      { $memc->decr(@_);      }
 
 sub array_to_hash {
     my ($fmtname, $ar) = @_;
