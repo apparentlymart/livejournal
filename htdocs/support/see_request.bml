@@ -152,13 +152,16 @@ body<=
      }
 
      my $message = $le->{'message'};
+     my %url;
+     my $urlN = 0;
+
+     $message =~ s!https?://[\w\-\.\/\?\%\+\=\~\:\#\;\@\&]+!$url{++$urlN} = &wrap_link($&); ":URL:$urlN"!eg;
      $message = LJ::eall($message);
      $message =~ s/^\s+//;
      $message =~ s/\s+$//;
      $message =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
      $message =~ s/\n/<BR>\n/g;
-     $message =~ s!http://(([a-z0-9A-Z_\-\.\/\?\%\+\=\~\:\#])|(&amp;))+!&wrap_link($&);!eg;
-
+     $message =~ s/:URL:(\d+)/$url{$1}/eg;
 
      if ($le->{'type'} eq "req") {
          $ret .= "<P><B>Original Request:</B><BR><TABLE BGCOLOR=#000000 WIDTH=100%><TR><TD><TABLE BGCOLOR=#FFFFFF WIDTH=100%><TR><TD>\n";
@@ -359,8 +362,7 @@ body<=
  
  sub wrap_link
  {
-     my $url = shift;
-     $url =~ s/\&amp;/\&/g;
+     my $url = FB::eall(shift);
      return "<a href=\"$url\">$url</a>";
  }
  
