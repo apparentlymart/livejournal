@@ -4882,7 +4882,7 @@ sub update_user
         return 0 if $dbh->err;
     }
     if (@LJ::MEMCACHE_SERVERS) {
-        my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, $uid);
+        my $u = _load_user_raw($dbh, "userid", $uid);
         LJ::memcache_set_u($u);
     }
     return 1;
@@ -4944,14 +4944,61 @@ sub load_userids_multiple
     }
 
     if (%need && ! $memcache_only) {
-        my $in = join(", ", map { $_+0 } keys %need);
         my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
-        ($sth = $db->prepare("SELECT * FROM user WHERE userid IN ($in)"))->execute;
-        while (my $u = $sth->fetchrow_hashref) {
+        _load_user_raw($db, "userid", [ keys %need ], sub {
+            my $u = shift;
             LJ::memcache_set_u($u);
-            $satisfy->($u); 
+            $satisfy->($u);
+        });
+    }
+}
+
+# des-db:  $dbh/$dbr
+# des-key:  either "userid" or "user"  (the WHERE part)
+# des-vals: value or arrayref of values for key to match on
+# des-hoook: optional code ref to run for each $u
+# returns: last $u found
+sub _load_user_raw
+{
+    my ($db, $key, $vals, $hook) = @_;
+    $hook ||= sub {};
+    $vals = [ $vals ] unless ref $vals eq "ARRAY";
+    
+    my $use_isam;
+    unless ($LJ::CACHE_NO_ISAM{user} || scalar(@$vals) > 10) {
+        $db->do("HANDLER user OPEN");
+        if ($db->err) {
+            $LJ::CACHE_NO_ISAM{user} = 1;
+        } else {
+            $use_isam = 1;
         }
     }
+
+    my $last;
+
+    if ($use_isam) {
+        $key = "PRIMARY" if $key eq "userid";
+        foreach my $v (@$vals) {
+            my $sth = $db->prepare("HANDLER user READ `$key` = (?) LIMIT 1");
+            $sth->execute($v);
+            my $u = $sth->fetchrow_hashref;
+            if ($u) {
+                $hook->($u);
+                $last = $u;
+            }
+        }
+        $db->do("HANDLER user close");
+    } else {
+        my $in = join(", ", map { $db->quote($_) } @$vals);
+        my $sth = $db->prepare("SELECT * FROM user WHERE $key IN ($in)");
+        $sth->execute;
+        while (my $u = $sth->fetchrow_hashref) {
+            $hook->($u);
+            $last = $u;
+        }
+    }
+
+    return $last;
 }
 
 # <LJFUNC>
@@ -4982,7 +5029,7 @@ sub load_user
     my $get_user = sub {
         my $use_dbh = shift;
         my $db = $use_dbh ? LJ::get_db_writer() : LJ::get_db_reader();
-        my $u = $db->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
+        my $u = _load_user_raw($db, "user", $user);
         return $u unless $u && $use_dbh;
 
         # set caches since we got a u from the master
@@ -5075,7 +5122,7 @@ sub load_userid
     my $get_user = sub {
         my $use_dbh = shift;
         my $db = $use_dbh ? LJ::get_db_writer() : LJ::get_db_reader();
-        my $u = $db->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, $userid);
+        my $u = _load_user_raw($db, "userid", $userid);
         return $u unless $u && $use_dbh;
 
         # set caches since we got a u from the master
