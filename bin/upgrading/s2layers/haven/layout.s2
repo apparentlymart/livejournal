@@ -684,8 +684,14 @@ h2
     margin: 0;
     border-right: 1px solid $*content_border;
     border-left: 1px solid $*content_border;
+    border-bottom: 1px solid $*content_bgcolor;
     padding: .5em;
 }
+
+html>body .entry .text, html>body .calendar_month .calendar, html>body .month_day .posts, html>body .comment_page .comments, html>body .replyto .text {
+  border-bottom-width: 0;
+}
+
 .entry .subject, .calendar_month .header, .month_day .header, .comment_page .header, .replyto .subject
 {
     border-bottom: 1px solid $*content_border;
