@@ -348,7 +348,8 @@ sub clean
                 } else {
                     $match = $utf_longchar . '|[^&\s\x80-\xff]|(&\#?\w{1,7};)';
                 }
-                $token->[1] =~ s/(($match){$wordlength})\B/$1<wbr>/go;
+                my $onechar = qr/$match/o;
+                $token->[1] =~ s/(($onechar){$wordlength})\B/$1<wbr>/g;
             } 
 
             if ($auto_format) {
