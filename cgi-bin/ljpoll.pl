@@ -712,23 +712,19 @@ sub show_poll
 
             ### but, if this is a non-text item, and we're showing results, need to load the answers:
             if ($q->{'type'} ne "text") {
-                $sth = $dbr->prepare("SELECT COUNT(DISTINCT(userid)) FROM pollresult WHERE pollid=? AND pollqid=?");
+                $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid=? AND pollqid=?");
                 $sth->execute($pollid, $qid);
-                ($usersvoted) = $sth->fetchrow_array;
-                
-                $sth = $dbr->prepare("SELECT value, COUNT(*) FROM pollresult ".
-                                     "WHERE pollid=? AND pollqid=? GROUP BY value");
-                $sth->execute($pollid, $qid);
-                while (my ($val, $count) = $sth->fetchrow_array) {
+                while (my $val = $sth->fetchrow_array) {
+                    $usersvoted++;
                     if ($q->{'type'} eq "check") {
                         foreach (split(/,/,$val)) {
-                            $itvotes{$_} += $count;
+                            $itvotes{$_}++;
                         }
                     } else {
-                        $itvotes{$val} += $count;
+                        $itvotes{$val}++;
                     }
                 }
-
+                
                 foreach (values %itvotes) {
                     $maxitvotes = $_ if ($_ > $maxitvotes);
                 }
