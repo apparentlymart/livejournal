@@ -4023,6 +4023,8 @@ error.malformeduser=Malformed username.
 
 error.nobutton=No button pressed?
 
+error.nocommlogin=Logging in as a community has been disabled.
+
 error.nodb=Database temporarily unavailable.
 
 error.nodbmaintenance=This part of the database is temporarily down for maintenance.  Try again in a few minutes.
