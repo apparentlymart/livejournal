@@ -129,7 +129,7 @@ my $move_user = sub {
             push @vars, $_ foreach @$row;
         }
         my $bind = join ',', @bind;
-        $u->do("REPLACE INTO friendgroup2 (userid, groupnum, groupname, sortorder, is_public) " .
+        $u->do("INSERT INTO friendgroup2 (userid, groupnum, groupname, sortorder, is_public) " .
                "VALUES $bind", undef, @vars);
         die "error in friend group update: " . $u->errstr . "\n" if $u->err;
     }
@@ -177,6 +177,8 @@ my $move_user = sub {
     while (my $row = $sth->fetchrow_hashref()) {
         # got a row, good
         my $newid = LJ::alloc_user_counter($u, 'R');
+        die "Error: unable to allocate type 'R' counter for $u->{user}($u->{userid})\n"
+            unless $newid;
         $bindings{$row->{memid}} = $newid;
 
         # push data
@@ -210,6 +212,8 @@ my $move_user = sub {
     while (my ($kwid, $keyword) = each %kwidmap) {
         # reallocate counter
         my $newkwid = LJ::alloc_user_counter($u, 'K');
+        die "Error: unable to allocate type 'K' counter for $u->{user}($u->{userid})\n"
+            unless $newkwid;
         $mappings{$kwid} = $newkwid;
 
         # push data
