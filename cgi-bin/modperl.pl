@@ -55,6 +55,7 @@ PerlInitHandler Apache::LiveJournal
 PerlInitHandler Apache::SendStats
 PerlFixupHandler Apache::CompressClientFixup
 PerlCleanupHandler Apache::SendStats
+PerlChildInitHandler Apache::SendStats
 DirectoryIndex index.html index.bml
 });
 

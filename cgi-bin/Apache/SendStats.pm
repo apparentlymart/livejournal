@@ -18,11 +18,14 @@ sub handler
     return OK if $r->main;
     return OK unless $LJ::HAVE_INLINE;
 
-    my $cleanup = ($r && $r->current_callback() eq "PerlCleanupHandler");
+    my $callback = $r->current_callback() if $r;
+    my $cleanup = $callback eq "PerlCleanupHandler";
+    my $childinit = $callback eq "PerlChildInitHandler";
 
     my ($free, $active) = count_servers();
 
     $free += $cleanup;
+    $free += $childinit;
     $active -= $cleanup if $active;
     if ($LJ::FREECHILDREN_BCAST && 
         $LJ::FREECHILDREN_BCAST =~ /^(\S+):(\d+)$/) {
