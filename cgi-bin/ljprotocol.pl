@@ -1402,7 +1402,7 @@ sub fail
 {
     my $err = shift;
     my $code = shift;
-    $$err = $code;
+    $$err = $code if (ref $err eq "SCALAR");
     return undef;
 }
 

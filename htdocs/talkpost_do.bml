@@ -278,7 +278,7 @@ BODY<=
 	 $picid ||= $up->{'defaultpicid'};
 	 if ($picid) {
 	     my %pics;
-	     &load_userpics(\%pics, [ $picid ]);
+	     LJ::load_userpics($dbs, \%pics, [ $picid ]);
 	     $whopic = "<IMG SRC=\"$LJ::SITEROOT/userpic/$picid\" ALIGN=ABSMIDDLE WIDTH=$pics{$picid}->{'width'} HEIGHT=$pics{$picid}->{'height'} HSPACE=1 VSPACE=2> ";
 	 }
      }
