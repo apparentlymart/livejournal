@@ -69,7 +69,7 @@ sub construct_page
 	    next unless (ref $box{$bname}->{'handler'} eq "CODE");
 
 	    my $args = {};
-	    &LJ::decode_url_string(\$bargs, $args);
+	    LJ::decode_url_string(\$bargs, $args);
 
 	    my $box = $box{$bname};
 	    $box->{'key'} = $bname;  # so we don't have to set it explicitly
@@ -263,7 +263,7 @@ sub make_box_modify_form
     my $box = $portopts->{$loc}->[$pos-1];
 
     my $curargs = {};
-    &LJ::decode_url_string(\$box->[$BOX_ARGS], $curargs);
+    LJ::decode_url_string(\$box->[$BOX_ARGS], $curargs);
     
     my $ret = "";
 
@@ -276,17 +276,17 @@ sub make_box_modify_form
 	$ret .= "<p><b>$opt->{'name'}:</b> ";
 	my $key = $opt->{'key'};
 	if ($opt->{'type'} eq "select") {
-	    $ret .= &LJ::html_select({ 'name' => "arg_$key",
+	    $ret .= LJ::html_select({ 'name' => "arg_$key",
 				       'selected' => $curargs->{$key}, },
 				     @{$opt->{'values'}});
 	}
 	if ($opt->{'type'} eq "check") {
-	    $ret .= &LJ::html_check({ 'name' => "arg_$key",
+	    $ret .= LJ::html_check({ 'name' => "arg_$key",
 				      'selected' => $curargs->{$key}, 
 				      'value' => 1 });
 	}
 	if ($opt->{'type'} eq "text") {
-	    $ret .= &LJ::html_text({ 'name' => "arg_$key",
+	    $ret .= LJ::html_text({ 'name' => "arg_$key",
 				     'maxlength' => $opt->{'maxlength'}, 
 				     'size' => $opt->{'size'}, 
 				     'value' => $curargs->{$key} });
@@ -322,7 +322,7 @@ sub modify_box
     foreach my $opt (@{$box{$box->[$BOX_NAME]}->{'opts'}})
     {
 	if ($newargs) { $newargs .= "&"; }
-	$newargs .= &LJ::eurl($opt->{'key'}) . "=" . &LJ::eurl($form->{"arg_$opt->{'key'}"});
+	$newargs .= LJ::eurl($opt->{'key'}) . "=" . LJ::eurl($form->{"arg_$opt->{'key'}"});
 	$box->[$BOX_ARGS] = $newargs;
 	$box->[$BOX_DIRTY] = 1;
     }
@@ -340,7 +340,7 @@ sub create_new_box
 	# if non-zero or non-blank default, remember it
 	if ($opt->{'default'}) {
 	    $defargs .= "&" if ($defargs);
-	    $defargs .= &LJ::eurl($opt->{'key'}) . "=" .  &LJ::eurl($opt->{'default'});
+	    $defargs .= LJ::eurl($opt->{'key'}) . "=" .  LJ::eurl($opt->{'default'});
 	}
     }
     
@@ -406,7 +406,7 @@ sub make_mozilla_bar
 	next unless (ref $box{$bname}->{'handler'} eq "CODE");
 	
 	my $args = {};
-	&LJ::decode_url_string(\$bargs, $args);
+	LJ::decode_url_string(\$bargs, $args);
 	
 	my $box = $box{$bname};
 	$box->{'key'} = $bname;  # so we don't have to set it explicitly
@@ -632,7 +632,7 @@ $box{'bdays'} =
 	foreach my $bi (@bdays) 
 	{
 	    my $mon = LJ::Lang::month_short($lang, $bi->[2]);
-	    my $day = $bi->[3] . &LJ::Lang::day_ord($lang, $bi->[3]);
+	    my $day = $bi->[3] . LJ::Lang::day_ord($lang, $bi->[3]);
 	    $$bd .= "<tr><td nowrap><b>(=LJUSER $bi->[0] LJUSER=)</b></td><td align=right nowrap>$mon $day</td></tr>";
 	}
 	$$bd .= "</table>";
@@ -686,12 +686,12 @@ $box{'lastnview'} =
 	    return;
 	}
 
-	my $u = &LJ::load_user($dbh, $user);
+	my $u = LJ::load_user($dbh, $user);
 
 	box_start($bd, $box, { 'title' => "$u->{'name'}",
 			      'url' => "$LJ::SITEROOT/users/$user" });
 	
-	my @itemids = &LJ::get_recent_itemids($dbh, {
+	my @itemids = LJ::get_recent_itemids($dbh, {
 	    'userid' => $u->{'userid'},
 	    'view' => 'lastn',
 	    'skip' => 0,
@@ -887,11 +887,11 @@ $box{'update'} =
 	$$bd .= "<noscript><p style=\"font-size: 0.85em;\"><b>Note:</b> The time/date above is from our server.  Correct them for your timezone before posting.</p></noscript>";
 	
 	$$bd .= "<TABLE><TR><TD><B>Subject:</B> <I>(optional)</I><BR>";
-	$$bd .= "<INPUT NAME=\"subject\" SIZE=50 MAXLENGTH=100 VALUE=\"" . &LJ::ehtml($opts->{'form'}->{'subject'}) . "\"><br>";
+	$$bd .= "<INPUT NAME=\"subject\" SIZE=50 MAXLENGTH=100 VALUE=\"" . LJ::ehtml($opts->{'form'}->{'subject'}) . "\"><br>";
 	
 	$$bd .= "<B>Event:</B><BR>";
 	$$bd .= "<TEXTAREA NAME=\"event\" COLS=50 ROWS=10 WRAP=VIRTUAL>";
-	$$bd .= &LJ::ehtml($opts->{'form'}->{'event'});
+	$$bd .= LJ::ehtml($opts->{'form'}->{'event'});
 	$$bd .= "</TEXTAREA>";
 	$$bd .= "<BR>(=DE (HTML okay; by default, newlines will be auto-formatted to <TT>&lt;BR&gt;</TT>) DE=)<BR>";
 	$$bd .= "<input type=checkbox name=do_spellcheck value=1 id=\"spellcheck\"> <label for=\"spellcheck\">Spell check entry before posting</label>";
@@ -903,7 +903,7 @@ $box{'update'} =
 	    
 	    if (! $opts->{'form'}->{'altlogin'} && $remote)
 	    {
-		&LJ::do_request($dbh, { "mode" => "login",
+		LJ::do_request($dbh, { "mode" => "login",
 					"user" => $remote->{'user'},
 					"getpickws" => 1,
 				    }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
@@ -917,19 +917,21 @@ $box{'update'} =
 		for (my $i=1; $i<=$res{'access_count'}; $i++) {
 		    push @access, $res{"access_$i"};
 		}
-		$$bd .= &LJ::html_select({ 'name' => 'usejournal', 'selected' => $opts->{'form'}->{'usejournal'}, },
+		$$bd .= LJ::html_select({ 'name' => 'usejournal', 'selected' => $opts->{'form'}->{'usejournal'}, },
 				    "", "($remote->{'user'}) -- default", map { $_, $_ } @access);
 	    }
 	    
 	    $$bd .= "<P><B>Security Level:</B> ";
-	    $$bd .= &LJ::html_select({ 'name' => 'security', 'selected' => $opts->{'form'}->{'security'}, },
+	    $$bd .= LJ::html_select({ 'name' => 'security', 'selected' => $opts->{'form'}->{'security'}, },
 				"public", "Public",
 				"private", "Private",
 				"friends", "Friends");
-	    $$bd .= " (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=24 HELP=)";
+	    $$bd .= LJ::help_icon("security", " ");
 	    my $checked;
 	    $checked = $opts->{'form'}->{'prop_opt_preformatted'} ? "CHECKED" : "";
-	    $$bd .= "<P> <B>Don't auto-format:</B><INPUT TYPE=CHECKBOX NAME=\"prop_opt_preformatted\" VALUE=1 $checked> (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=26 HELP=) &nbsp; ";
+	    $$bd .= "<P> <B>Don't auto-format:</B><INPUT TYPE=CHECKBOX NAME=\"prop_opt_preformatted\" VALUE=1 $checked>";
+	    $$bd .= LJ::help_icon("noautoformat", " ");
+	    $$bd .= " &nbsp; ";
 	    $checked = $opts->{'form'}->{'prop_opt_nocomments'} ? "CHECKED" : "";
 	    $$bd .= "<B>Disallow Comments:</B><INPUT TYPE=CHECKBOX NAME=\"prop_opt_nocomments\" VALUE=1 $checked>";
 	    
@@ -943,17 +945,17 @@ $box{'update'} =
 		    push @pics, $res{"pickw_$i"};
 		}
 		@pics = sort { lc($a) cmp lc($b) } @pics;
-		$$bd .= &LJ::html_select({'name' => 'prop_picture_keyword', 
+		$$bd .= LJ::html_select({'name' => 'prop_picture_keyword', 
 				     'selected' => $opts->{'form'}->{'prop_picture_keyword'}, },
 				    ("", "(default)", map { ($_, $_) } @pics));
-		$$bd .= " (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=46 HELP=)";
+		$$bd .= LJ::help_icon("userpics", " ");
 	    } else {
 		$$bd .= "<P><B>$res{'errmsg'}</B>";
 	    }
 	    
 	    $$bd .= "<P><B>Current <A HREF=\"/moodlist.bml\">Mood</A>:</B>";
 	    
-	    &LJ::load_moods($dbh);
+	    LJ::load_moods($dbh);
 	    my @sel;
 	    foreach my $moodid (sort { $LJ::CACHE_MOODS{$a}->{'name'} cmp  
 					   $LJ::CACHE_MOODS{$b}->{'name'} } keys %LJ::CACHE_MOODS)
@@ -961,12 +963,12 @@ $box{'update'} =
 		push @sel, $moodid, $LJ::CACHE_MOODS{$moodid}->{'name'};
 	    }
 	    
-	    $$bd .= &LJ::html_select({'name' => 'prop_current_moodid',
+	    $$bd .= LJ::html_select({'name' => 'prop_current_moodid',
 				     'selected' => $opts->{'form'}->{'prop_current_moodid'}, },
 				    ("", "None, or other:", @sel));
 	    
-	    $$bd .= "Other: <INPUT NAME=\"prop_current_mood\" SIZE=15 MAXLENGTH=30 VALUE=\"" . &LJ::ehtml($opts->{'form'}->{'prop_current_mood'}) . "\">";
-	    $$bd .= "<P><B>Current Music:</B> <INPUT NAME=\"prop_current_music\" SIZE=40 MAXLENGTH=60 VALUE=\"" . &LJ::ehtml($opts->{'form'}->{'prop_current_music'}) . "\">";
+	    $$bd .= "Other: <INPUT NAME=\"prop_current_mood\" SIZE=15 MAXLENGTH=30 VALUE=\"" . LJ::ehtml($opts->{'form'}->{'prop_current_mood'}) . "\">";
+	    $$bd .= "<P><B>Current Music:</B> <INPUT NAME=\"prop_current_music\" SIZE=40 MAXLENGTH=60 VALUE=\"" . LJ::ehtml($opts->{'form'}->{'prop_current_music'}) . "\">";
 	    $$bd .= "</TD></TR><TR><TD ALIGN=CENTER><INPUT TYPE=SUBMIT VALUE=\"Update Journal\"></td></tr>";
 	    
 	}
@@ -1069,7 +1071,7 @@ $box{'randuser'} =
 	
 	my %pic;
 	unless ($box->{'args'}->{'hidepic'}) {
-	    &LJ::load_userpics($dbh, \%pic, [ map { $_->{'defaultpicid'} } @$ruser ]);
+	    LJ::load_userpics($dbh, \%pic, [ map { $_->{'defaultpicid'} } @$ruser ]);
 	}
 
 	if ($size eq "large") {  $$b .= "<table width=100%><tr valign=bottom>"; }
@@ -1086,7 +1088,7 @@ $box{'randuser'} =
 	    }
 	    $$b .= "(=LJUSER $r->{'user'} LJUSER=)";
 	    unless ($box->{'args'}->{'hidename'}) {
-		$$b .= "<br>" . &LJ::escapeall($r->{'name'});
+		$$b .= "<br>" . LJ::escapeall($r->{'name'});
 	    }
 
 	    if ($size eq "large") {  $$b .= "</td>"; }

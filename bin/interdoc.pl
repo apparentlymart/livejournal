@@ -27,6 +27,7 @@
 #     mailto -- mailto link
 #     post   -- form with method=POST
 #     prog   -- program that's run
+#     hook   -- LJ hook name
 #
 
 use strict;

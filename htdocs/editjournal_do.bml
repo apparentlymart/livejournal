@@ -214,7 +214,7 @@ BODY<=
 	     $ret .= "<OPTION VALUE=\"$mode\" $checked>$modes{$mode}\n";
 	 }
 	 
-	 $ret .= "</SELECT> (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=24 HELP=)";
+	 $ret .= "</SELECT> " . LJ::help_icon("security");
 	 if ($curmode eq "custom") {
 	     my $mask = $res{"events_1_allowmask"}+0;
 	     $ret .= "<INPUT TYPE=HIDDEN NAME=\"custommask\" VALUE=$mask>";
@@ -223,7 +223,8 @@ BODY<=
 	 ### don't auto-format
 	 {
 	     my $check = $props{'opt_preformatted'} ? "CHECKED" : "";
-	     $ret .= "<P><B>Don't auto-format:</B> <INPUT TYPE=CHECKBOX NAME=\"prop_opt_preformatted\" VALUE=1 $check> (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=26 HELP=)";
+	     $ret .= "<P><B>Don't auto-format:</B> <INPUT TYPE=CHECKBOX NAME=\"prop_opt_preformatted\" VALUE=1 $check>";
+	     $ret .= LJ::help_icon("noautoformat", " ");
 	 }
 
 	 ### don't allow comments
@@ -252,7 +253,8 @@ BODY<=
 		 my $sel = $props{'picture_keyword'} eq $_ ? " SELECTED" : "";
 		 $ret .= "<OPTION VALUE=\"$_\"$sel>$_";
 	     }
-	     $ret .= "</SELECT> (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=46 HELP=)";
+	     $ret .= "</SELECT>";
+	     $ret .= LJ::help_icon("userpics", " ");
 	 }
 
 	 ### current mood

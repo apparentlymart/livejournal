@@ -341,7 +341,8 @@ BODY<=
  }
  
  $ret .= "<TR><TD ALIGN=RIGHT>&nbsp;</TD><td colspan=4>";
- $ret .= "Don't auto-format: <input type=checkbox value=1 name=\"prop_opt_preformatted\"> (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=26 HELP=)";
+ $ret .= "Don't auto-format: <input type=checkbox value=1 name=\"prop_opt_preformatted\">";
+ $ret .= LJ::help_icon("noautoformat", " ");
  
  my %res;
  if ($remote) {
@@ -360,7 +361,7 @@ BODY<=
      $ret .= LJ::html_select({'name' => 'prop_picture_keyword', 
 			   'selected' => $FORM{'prop_picture_keyword'}, },
 			  ("", "(default)", map { ($_, $_) } @pics));
-     $ret .= " (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=46 HELP=)";
+     $ret .= LJ::help_icon("userpics", " ");
  }
  $ret .= "</td></tr>\n";
 
@@ -373,11 +374,11 @@ BODY<=
 
  if ($u->{'opt_logcommentips'} eq "A") {
      $ret .= "<br><B>Notice!</b> This user has turned on the option that logs your IP address when posting.";
-     $ret .= " (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=66 HELP=)";
+     $ret .= LJ::help_icon("iplogging", " ");
  }
  if ($u->{'opt_logcommentips'} eq "S") {
      $ret .= "<br><B>Notice!</b> This user has turned on the option that logs IP addresses of anonymous posters.";
-     $ret .= " (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=66 HELP=)";
+     $ret .= LJ::help_icon("iplogging", " ");
  }
 
 

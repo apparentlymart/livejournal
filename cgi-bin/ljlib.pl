@@ -583,6 +583,21 @@ sub get_query_string
 
 package LJ;
 
+sub help_icon
+{
+    my $topic = shift;
+    my $pre = shift;
+    my $post = shift;
+    return "" unless (defined $LJ::HELPURL{$topic});
+    return "$pre(=HELP $LJ::HELPURL{$topic} HELP=)$post";
+}
+
+sub are_hooks
+{
+    my $hookname = shift;
+    return defined $LJ::HOOKS{$hookname};
+}
+
 sub run_hooks
 {
     my $hookname = shift;

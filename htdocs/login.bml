@@ -4,46 +4,56 @@ BODY<=
 
 (=H1 Login H1=)
 (=P
-To login to LiveJournal, enter your username and password below.  <B>New Users:</B> Go <a href="/create.bml">create an account</a>: it's free, simple, causes less cavities than leading brands, and guaranteed to make you more attractive to the opposite sex. P=)
+To login to (=SITENAME=), enter your username and password below.  <b>New Users:</b> To create an account, <a href="/create.bml">go here</a>. 
+P=)
 (=P You may also specify when your login expires.  By default your login will expire when you close your browser, which is best on public computers.  However, if you're the only user of your computer and nobody else has access to it, you may choose to remain logged in forever.
 P=)
 
-<FORM ACTION="login_do.bml" METHOD="POST">
+<form action="login_do.bml" method="post">
 
 (=STANDOUT
-<TABLE CELLPADDING=3>
-<TR><TD>Username:</TD><TD><INPUT TYPE="TEXT" NAME="user" SIZE="15" MAXLENGTH="15"></TD></TR>
-<TR><TD VALIGN=TOP>Password:</TD><TD><INPUT TYPE="password" NAME="password" SIZE="15" MAXLENGTH="30"><BR><A HREF="/lostinfo.bml"><FONT FACE="Arial,Helvetica" SIZE=1>Forget?</FONT></A></TD></TR>
-<TR VALIGN=TOP><TD>Expiration:</TD><TD>
-<INPUT TYPE="radio" NAME="expire" VALUE="close" CHECKED id="close"> <LABEL FOR="close">When browser closes</LABEL><BR>
-<INPUT TYPE="radio" NAME="expire" VALUE="never" id="never"> <LABEL FOR="never">Never</LABEL>
+<table cellpadding="3">
+<tr><td>Username:</td><td><INPUT TYPE="TEXT" NAME="user" SIZE="15" MAXLENGTH="15"></td></tr>
+<tr><td VALIGN=TOP>Password:</td><td><input type="password" name="password" size="15" maxlength="30"><br /><a href="/lostinfo.bml"><font face="Arial,Helvetica" size="1">Forget?</font></a></td></tr>
+<tr valign="top"><td>Expiration:</td><td>
+<input type="radio" name="expire" value="close" checked id="close"> <label for="close">When browser closes</label><br />
+<input type="radio" name="expire" value="never" id="never"> <label for="never">Never</label>
 (=_CODE
  if ($FORM{'ret'} && $ENV{'HTTP_REFERER'}) {
-     my $eh_ref = &BMLUtil::ehtml($ENV{'HTTP_REFERER'});
-     return "<INPUT TYPE=hidden NAME=ref VALUE=\"$eh_ref\">\n";
+     my $eh_ref = LJ::ehtml($ENV{'HTTP_REFERER'});
+     return "<input type=\"hidden\" NAME=\"ref\" value=\"$eh_ref\">\n";
  }
  return "";
 _CODE=)
-</TD></TR>
-<TR><TD></TD><TD ALIGN=LEFT><INPUT TYPE="SUBMIT" VALUE="Login...">
-</TD></TR>
-<TR><TD>Other Options:</TD><TD nowrap>
-<input type=checkbox name=notfast> Don't use fast servers (=HELP /support/faqbrowse.bml?faqid=74 HELP=)
-</TD></TR>
-
-</TABLE>
+</td></tr>
+<tr><td></td><td align="left"><input type="submit" value="Login...">
+</td></tr>
+(=_CODE
+ my $ret;
+ if (LJ::are_hooks("login_formopts")) {
+     $ret .= "<tr><td>Other Options:</td><td nowrap>\n";
+     LJ::run_hooks("login_formopts", { 'ret' => \$ret });
+     $ret .= "</td></tr>\n";
+ }
+ return $ret;
+_CODE=)
+</table>
 STANDOUT=)
-</FORM>
+</form>
 
 (=H1 Why login? H1=)
 (=P
 There are some of the main benefits of logging in:
-<UL>
-<LI>You won't have to enter your username/password anywhere on the site anymore.
-<LI>You'll be able to view "protected" journal entries from your friends that give you access to read them.
-<LI>A lot of features are only visible or accessible when you're logged in.
-</UL>
+<ul>
+<li>You won't have to enter your username/password anywhere on the site anymore.</li>
+<li>You'll be able to view "protected" journal entries from your friends that give you access to read them.</li>
+<li>A lot of features are only visible or accessible when you're logged in.</li>
+</ul>
 P=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/create.bml, htdocs/lostinfo.bml
+hook: login_formopts
+post: htdocs/login_do.bml
+</LJDEP> _C=)

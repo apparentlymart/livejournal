@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# -*-perl-*-
 
 # LiveJournal configuration file.  Copy this out of the documentation
 # directory to cgi-bin/ljconfig.pl and edit as necessary.  The reason
@@ -116,10 +117,25 @@
 		 'directory' => 0,
 		 );
 
+    
+
     # require new free acounts to be referred by an existing user?
     # NOTE: new and mostly ljcom-specific.  some features
     # unimplemented in the livejournal-only tree.
     $USE_ACCT_CODES = 0;
+
+    # if you define these, little help bubbles appear next to common
+    # widgets to the URL you define:
+    %HELPURL = (
+		#"security" => 
+		#"http://www.livejournal.com/support/faqbrowse.bml?faqid=24",
+		#"noautoformat" => 
+		#"http://www.livejournal.com/support/faqbrowse.bml?faqid=26",
+		#"userpics" =>
+		#"http://www.livejournal.com/support/faqbrowse.bml?faqid=46",
+		#"iplogging" =>
+		#"http://www.livejournal.com/support/faqbrowse.bml?faqid=66",
+		);
 
     # keep this next line.  it lets you upgrade LiveJournal without
     # having to change your config file.  if there is a new required

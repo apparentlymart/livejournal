@@ -222,10 +222,12 @@
 				  "public", "Public",
 				  "private", "Private",
 				  "friends", "Friends");
-	 $body .= " (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=24 HELP=)";
+	 $body .= LJ::help_icon("security", " ");
 	 my $checked;
 	 $checked = $FORM{'prop_opt_preformatted'} ? "CHECKED" : "";
-	 $body .= "<P> <B>Don't auto-format:</B><INPUT TYPE=CHECKBOX NAME=\"prop_opt_preformatted\" VALUE=1 $checked> (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=26 HELP=) &nbsp; ";
+	 $body .= "<P> <B>Don't auto-format:</B><INPUT TYPE=CHECKBOX NAME=\"prop_opt_preformatted\" VALUE=1 $checked>";
+	 $body .= LJ::help_icon("noautoformat", " ", " ");
+	 $body .= "&nbsp; ";
 	 $checked = $FORM{'prop_opt_nocomments'} ? "CHECKED" : "";
 	 $body .= "<B>Disallow Comments:</B><INPUT TYPE=CHECKBOX NAME=\"prop_opt_nocomments\" VALUE=1 $checked>";
 
@@ -242,7 +244,7 @@
 	     $body .= LJ::html_select({'name' => 'prop_picture_keyword', 
 				       'selected' => $FORM{'prop_picture_keyword'}, },
 				      ("", "(default)", map { ($_, $_) } @pics));
-	     $body .= " (=HELP $LJ::SITEROOT/support/faqbrowse.bml?faqid=46 HELP=)";
+	     $body .= LJ::help_icon("userpics", " ");
 	 }
 
 	 $body .= "<P><B>Current <A HREF=\"/moodlist.bml\">Mood</A>:</B>";
