@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use Apache::Constants qw(:common);
 
-if ($LJ::HAVE_INLINE && $LJ::SUICIDE) {
+if ($LJ::HAVE_INLINE && ($LJ::SUICIDE_LOAD || $LJ::SUICIDE)) {
     eval {
         Inline->init();
     };
