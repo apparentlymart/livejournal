@@ -158,7 +158,7 @@ body<=
 
         $ret .= "<p><table cellpadding='3'><tr valign='bottom'><td><b>#</b></td><td width='250'><b>$ML{'User'}</b></td><td><b>$ML{'.findsim_do.magic'}</b></td></tr>";
         my $count;
-        foreach my $uid (@matches) 
+        foreach my $uid (@matches)
         {
             $count++;
             $ret .= "<tr><td>$count</td><td>";
@@ -402,11 +402,11 @@ body<=
             push @ul, [ $iuser, $iname ];
         }
         @ul = sort { $a->[0] cmp $b->[0] } @ul;
-        
+
         my $list;
         foreach (@ul) {
             LJ::text_out(\$_->[1]);
-            $list .= "<li>" . LJ::ljuser($_->[0]) . " - " . LJ::ehtml($_->[1]) . "</li>";
+            $list .= "<li>" . LJ::ljuser($_->[0], { 'type' => 'P' }) . " - " . LJ::ehtml($_->[1]) . "</li>";
         }
 
         my $matchcount = BML::ml(@ul == 1 ? ".match" : ".matches", { 'count' => scalar(@ul) });
