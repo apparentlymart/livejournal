@@ -1,6 +1,5 @@
 (=_CODE
-
- use LJ::SpellCheck;
+#No BML:cache
 
  my $SELF = "/update.bml";
  

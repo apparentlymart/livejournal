@@ -3,7 +3,7 @@ TITLE=>Read Comments
 BODY<=
 
 (=_CODE
-#line 6
+#BML:cache
 
  use strict;
  use vars qw($head %FORM);

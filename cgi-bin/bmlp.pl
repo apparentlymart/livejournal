@@ -420,9 +420,10 @@ sub handle_request
 
 sub eval_code
 {
+    %CodeBlockOptions = ();
     my $ret = (eval("{\n package BMLCodeBlock; \n $_[0]\n }\n"))[0];
     if ($@) { return "<B>[Error: $@]</B>"; }
-    
+    return $ret if $CodeBlockOptions{'raw'};
     my $newhtml;
     &bml_decode(\$ret, \$newhtml, {});  # no opts on purpose: _CODE can't return _CODE
     return $newhtml;
@@ -1042,6 +1043,12 @@ sub trim
 }
 
 package BML;
+
+sub noparse
+{
+    $main::CodeBlockOpts{'raw'} = 1;
+    return $_[0];
+}
 
 sub decide_language
 {

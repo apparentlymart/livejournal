@@ -7,15 +7,17 @@ use strict;
 use Apache::Constants qw(:common REDIRECT);
 use Apache::File ();
 use Apache::URI;
-use CGI;
-use Data::Dumper;
+use CGI;                  # unused, but pre-loaded.
+use Digest::MD5;
 
-use vars qw($config);     # loaded once
+use vars qw($config @confdirs);   # loaded once
 use vars qw($cur_req);    # current request hash
 use vars qw($ML_GETTER);  # normally undef
 use vars qw(%HOOK);
 use vars qw(%Lang);       # iso639-2 2-letter lang code -> BML lang code
 use vars qw(%FileModTime %FileBlockData %FileBlockFlags);
+use vars qw(%CodeBlockCache);
+use vars qw(%CodeBlockOpts);
 
 # load BML Config
 {
@@ -48,16 +50,15 @@ sub handler
   
     my $modtime = (stat _)[9];
 
-    my $fh;
-    unless ($fh = Apache::File->new($file)) {
+    unless (open F, $file) {
         $r->log_error("Couldn't open $file for reading: $!");
         return SERVER_ERROR;
     }
 
     ### read the data to mangle
-    my $bmlsource = "";
-    while (<$fh>) { $bmlsource .= $_; }
-    $fh->close();
+    my $bmlsource;
+    { local $/ = undef; $bmlsource = <F>; }
+    close F;
 
     # create new request
     my $req = $cur_req = {
@@ -68,17 +69,13 @@ sub handler
 
     # setup env
     my $uri = $r->uri;
-    foreach my $dir (sort { $config->{$a}->{'_size'} <=>
-                            $config->{$b}->{'_size'} } keys %$config)
+    foreach (@confdirs)
     {
-        next unless $uri =~ /^$dir/;
-        foreach (keys %{$config->{$dir}}) {
-            $req->{'env'}->{$_} = $config->{$dir}->{$_};
+        next unless $uri =~ /^$_/;
+        foreach my $k (keys %{$config->{$_}}) {
+            $req->{'env'}->{$k} = $config->{$_}->{$k};
         }
     }
-
-    # clear the package which code will run in
-    reset_codeblock();
 
     # setup cookies
     *BMLCodeBlock::COOKIE = *BML::COOKIE;
@@ -196,6 +193,10 @@ sub handler
     
     $r->send_http_header();
     $r->print($html) unless $req->{'env'}->{'NoContent'} || $r->header_only;
+
+    # clear the code package for next request if necessary
+    $r->register_cleanup(\&reset_codeblock) if $req->{'didcode'};
+
     return OK;
 }
 
@@ -241,7 +242,9 @@ sub load_config
     $cfg->close;
 
     grep { $config->{$_}->{'_size'} = length($_);  } keys %$config;
-    
+    @confdirs = sort { $config->{$a}->{'_size'} <=>
+                       $config->{$b}->{'_size'} } keys %$config;
+
     return OK;
 }
 
@@ -318,9 +321,27 @@ sub bml_block
         return inline_error("_CODE block failed to execute by permission settings")
             unless $option_ref->{'DO_CODE'};
 
-        my $ret = (eval("{\n package BMLCodeBlock; no strict; \n $data\n }\n"))[0];
+        $req->{'didcode'} = 1;
+        %CodeBlockOpts = ();
+
+        # create the anon sub
+        my ($csub, $pop_cache);
+        if ($data =~ /^\#BML:cache/) {
+            my $md5 = Digest::MD5::md5_hex($data);
+            $csub = $CodeBlockCache{$md5};
+            $pop_cache = $md5 unless $csub;
+        }
+        $csub ||= (eval("sub {\n package BMLCodeBlock; no strict; \n $data\n }"))[0];
         if ($@) { return "<B>[Error: $@]</B>"; }
-    
+        $CodeBlockCache{$pop_cache} = $csub if $pop_cache;
+
+        # and try to run it (wrapped in eval to catch run-time errors)
+        #my $ret = (eval { $csub->(); })[0];
+        my $ret = $csub->();
+        if ($@) { return "<B>[Error: $@]</B>"; }
+        
+        return $ret if $CodeBlockOpts{'raw'} or $ret eq "";
+
         my $newhtml;
         bml_decode($req, \$ret, \$newhtml, {});  # no opts on purpose: _CODE can't return _CODE
         return $newhtml;
@@ -472,22 +493,25 @@ sub bml_block
             $element{$k} = $decoded;
         }
     }
+
+    my $template = $req->{'blockdata'}->{$realtype};
+
+    return $template if $blockflags =~ /S/;
+
+    my $expanded = $template;
+    $expanded = parsein($expanded, \%element) unless $preparsed;
     
-    my $expanded = parsein($req->{'blockdata'}->{$realtype}, \%element);
-    
-    if ($blockflags =~ /S/) {  # static (don't expand)
-        return $expanded;
-    } else {
-        my $out;
-        push @{$req->{'BlockStack'}}, "";
-        my $opts = { %{$option_ref} };
-        if ($preparsed) {
-            $opts->{'DO_CODE'} = $req->{'env'}->{'AllowTemplateCode'};
-        }
-        bml_decode($req, \$expanded, \$out, $opts);
-        pop @{$req->{'BlockStack'}};
-        return $out;
+    my $out;
+    push @{$req->{'BlockStack'}}, "";
+    my $opts = { %{$option_ref} };
+    if ($preparsed) {
+        $opts->{'DO_CODE'} = $req->{'env'}->{'AllowTemplateCode'};
     }
+    bml_decode($req, \$expanded, \$out, $opts);
+    pop @{$req->{'BlockStack'}};
+    $expanded = $out;
+    $expanded = parsein($expanded, \%element) if $preparsed;
+    return $expanded;    
 }
 
 ######## bml_decode
@@ -782,6 +806,12 @@ sub modified_time
 
 
 package BML;
+
+sub noparse
+{
+    $Apache::BML::CodeBlockOpts{'raw'} = 1;
+    return $_[0];
+}
 
 sub decide_language
 {
