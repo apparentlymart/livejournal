@@ -217,6 +217,13 @@ body<=
         $ret .= "<span style='color: red; font-weight: bold;'>" .
                 "(unable to connect to cluster, some data temporarily unavailable)</span><br />";
     }
+
+    if ($u->readonly) {
+        $ret .= "<span style='color: red; font-weight: bold;'>" .
+            "(this user is currently in read-only mode)</span><br />";
+    }
+
+
     if ($u->{'userid'}) {
         $ret .= "username: <?ljuserf $u->{'user'} ljuserf?>";
         $ret .= "<br />style: ";
