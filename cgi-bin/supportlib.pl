@@ -192,24 +192,28 @@ sub can_append
 sub is_locked
 {
     my $sp = shift;
-    my $props = LJ::Support::load_props($sp->{spid});
+    my $spid = ref $sp ? $sp->{spid} : $sp+0;
+    return undef unless $spid;
+    my $props = LJ::Support::load_props($spid);
     return $props->{locked} ? 1 : 0;
 }
 
 sub lock
 {
     my $sp = shift;
-    return unless $sp->{spid};
+    my $spid = ref $sp ? $sp->{spid} : $sp+0;
+    return undef unless $spid;
     my $dbh = LJ::get_db_writer();
-    $dbh->do("REPLACE INTO supportprop (spid, prop, value) VALUES (?, 'locked', 1)", undef, $sp->{spid});
+    $dbh->do("REPLACE INTO supportprop (spid, prop, value) VALUES (?, 'locked', 1)", undef, $spid);
 }
 
 sub unlock
 {
     my $sp = shift;
-    return unless $sp->{spid};
+    my $spid = ref $sp ? $sp->{spid} : $sp+0;
+    return undef unless $spid;
     my $dbh = LJ::get_db_writer();
-    $dbh->do("DELETE FROM supportprop WHERE spid = ? AND prop = 'locked'", undef, $sp->{spid});
+    $dbh->do("DELETE FROM supportprop WHERE spid = ? AND prop = 'locked'", undef, $spid);
 }
 
 # privilege policy:
@@ -595,6 +599,9 @@ sub set_points
 sub touch_request
 {
     my ($spid) = @_;
+
+    # no touching if the request is locked
+    return 0 if LJ::Support::is_locked($spid);
 
     my $dbh = LJ::get_db_writer();
 
