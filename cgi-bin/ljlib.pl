@@ -5109,21 +5109,30 @@ sub color_todb
 # <LJFUNC>
 # name: LJ::add_friend
 # des: Simple interface to add a friend edge.
-# args: dbh, userida, useridb
+# args: dbh, userida, useridb, opts?
 # des-userida: Userid of source user (befriender)
 # des-useridb: Userid of target user (befriendee)
+# des-opts: hashref; 'defaultview' key means add $uderidb to $uderida's Default View friends group
 # returns: boolean; 1 on success (or already friend), 0 on failure (bogus args)
 # </LJFUNC>
 sub add_friend
 {
-    my ($dbh, $ida, $idb) = @_;
+    my ($dbh, $ida, $idb, $opts) = @_;
     return 0 unless $dbh;
     return 0 unless $ida =~ /^\d+$/ && $ida;
     return 0 unless $idb =~ /^\d+$/ && $idb;
     my $black = LJ::color_todb("#000000");
     my $white = LJ::color_todb("#ffffff");
+
+    my $groupmask = 1;
+    if ($opts->{'defaultview'}) {
+        my $grp = $dbh->selectrow_array("SELECT groupnum FROM friendgroup WHERE userid=? AND groupname='Default View'", undef, $ida);
+        $groupmask |= (1 << $grp) if $grp;
+    }
+
     $dbh->do("INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) ".
-             "VALUES ($ida, $idb, $black, $white, 1)");
+             "VALUES ($ida, $idb, $black, $white, $groupmask)");
+
     return 1;
 }
 
