@@ -28,6 +28,10 @@ BODY<=
  
  $sortorder = $FORM{'sortorder'}+0 || 50;
 
+ unless (LJ::did_post()) {
+     return "<b>Error:</b> requires post.";
+ }
+
  if ($id)
  {
      &remote_has_priv($remote, "faqedit", \%ac_edit);
