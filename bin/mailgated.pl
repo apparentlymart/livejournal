@@ -136,7 +136,7 @@ while (1) {
     foreach (@new_messages, @retry_messages) {
         my $lock;
         if (get_pcount($_) % 20 == 0) {  # only retry every 20th iteration
-            if ($locktype eq lc('ddlockd')) {
+            if (lc($locktype) eq 'ddlockd') {
                 $lock = LJ::locker()->trylock("mailgated-$_");
                 next unless $lock;
             }
