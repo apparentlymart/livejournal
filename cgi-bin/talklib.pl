@@ -789,11 +789,6 @@ sub talkform {
         return;
     };
     
-#id'tal;ksdrsdf'  " . $checkif-($whocheck eq "anonymous") .
-#my $checkif = sub { return (shift) ? "checked='checked'" : ""; };
-#my $whocheck = sub { return $ARGV[0]; };
-#print $checkif->($whocheck->());
-
     # from registered user or anonymous?
     $ret .= "<table>\n";
     if ($journalu->{'opt_whocanreply'} eq "all") {
