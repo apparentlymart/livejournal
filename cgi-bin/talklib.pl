@@ -1570,6 +1570,7 @@ sub mail_comments {
                                    'To' => $entryu->{'email'},
                                    'Subject' => ($headersubject || "Reply to your post..."),
                                    'Type' => 'multipart/alternative');
+        $msg->add('X-LJ-JOURNAL' => $journalu->{'user'}); # for mail filters
 
         my $quote = $parentcomment ? $parentcomment : $item->{'event'};
 
