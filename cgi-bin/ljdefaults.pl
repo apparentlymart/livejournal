@@ -159,6 +159,10 @@
 
     # maximum FOAF friends to return (so the server doesn't get overloaded)
     $MAX_FOAF_FRIENDS ||= 1000;
+
+    # whether to proactively delete any comments associated with an entry when we assign
+    # a new jitemid (see the big comment above LJ::Protocol::new_entry_cleanup_hack)
+    $NEW_ENTRY_CLEANUP_HACK ||= 0;
 }
 
 # no dependencies.

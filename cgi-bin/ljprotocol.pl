@@ -838,15 +838,19 @@ sub postevent
         return $fail->($err,405);
     }
     
-    my $itemid = LJ::alloc_user_counter($uowner, "L");
-    return $fail->($err,501,"No itemid could be generated.") unless $itemid;
+    my $jitemid = LJ::alloc_user_counter($uowner, "L");
+    return $fail->($err,501,"No itemid could be generated.") unless $jitemid;
 
-    LJ::replycount_do($uowner, $itemid, "init");
+    LJ::replycount_do($uowner, $jitemid, "init");
+
+    # remove comments and logprops on new entry ... see comment by this sub for clarification
+    LJ::Protocol::new_entry_cleanup_hack($dbcm, $u, $jitemid) if $LJ::NEW_ENTRY_CLEANUP_HACK;
+    my $verb = $LJ::NEW_ENTRY_CLEANUP_HACK ? 'REPLACE' : 'INSERT';
 
     my $dberr;
     LJ::log2_do($dbcm, $ownerid, \$dberr, "INSERT INTO log2 (journalid, jitemid, posterid, eventtime, logtime, security, ".
               "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
-              "VALUES ($ownerid, $itemid, $posterid, $qeventtime, FROM_UNIXTIME($now), $qsecurity, $qallowmask, ".
+              "VALUES ($ownerid, $jitemid, $posterid, $qeventtime, FROM_UNIXTIME($now), $qsecurity, $qallowmask, ".
               "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
               "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     return $fail->($err,501,$dberr) if $dberr;
@@ -859,7 +863,7 @@ sub postevent
         my %set_userprop;
         
         # keep track of itemid/anum for later potential duplicates
-        $set_userprop{"dupsig_post"} = "$dupsig:$itemid:$anum";
+        $set_userprop{"dupsig_post"} = "$dupsig:$jitemid:$anum";
 
         # record the eventtime of the last update (for own journals only)
         $set_userprop{"newesteventtime"} = $eventtime
@@ -871,7 +875,7 @@ sub postevent
     # end duplicate locking section
     $release->();
 
-    my $ditemid = $itemid * 256 + $anum;
+    my $ditemid = $jitemid * 256 + $anum;
 
     ### finish embedding stuff now that we have the itemid
     {
@@ -895,26 +899,26 @@ sub postevent
 
     # record journal's disk usage
     my $bytes = length($event) + length($req->{'subject'});
-    LJ::dudata_set($dbcm, $ownerid, 'L', $itemid, $bytes);
+    LJ::dudata_set($dbcm, $ownerid, 'L', $jitemid, $bytes);
 
-    $dbcm->do("INSERT INTO logtext2 (journalid, jitemid, subject, event) ".
-              "VALUES ($ownerid, $itemid, ?, ?)", undef, $req->{'subject'}, 
+    $dbcm->do("$verb INTO logtext2 (journalid, jitemid, subject, event) ".
+              "VALUES ($ownerid, $jitemid, ?, ?)", undef, $req->{'subject'}, 
               LJ::text_compress($event));
     if ($dbcm->err) {
         my $msg = $dbcm->errstr;
-        LJ::delete_entry($uowner, $itemid);   # roll-back
+        LJ::delete_entry($uowner, $jitemid);   # roll-back
         return fail($err,501,"logtext:$msg");
     }
-    LJ::MemCache::set([$ownerid,"logtext:$clusterid:$ownerid:$itemid"],
+    LJ::MemCache::set([$ownerid,"logtext:$clusterid:$ownerid:$jitemid"],
                       [ $req->{'subject'}, $event ]);
 
     # keep track of custom security stuff in other table.
     if ($uselogsec) {
         $dbcm->do("INSERT INTO logsec2 (journalid, jitemid, allowmask) ".
-                  "VALUES ($ownerid, $itemid, $qallowmask)");
+                  "VALUES ($ownerid, $jitemid, $qallowmask)");
         if ($dbcm->err) {
             my $msg = $dbcm->errstr;
-            LJ::delete_entry($uowner, $itemid);   # roll-back
+            LJ::delete_entry($uowner, $jitemid);   # roll-back
             return fail($err,501,"logsec2:$msg");
         }
     }
@@ -931,15 +935,15 @@ sub postevent
             $propset->{$pname} = $req->{'props'}->{$pname};
         }
         my %logprops;
-        LJ::set_logprop($uowner, $itemid, $propset, \%logprops) if %$propset;
+        LJ::set_logprop($uowner, $jitemid, $propset, \%logprops) if %$propset;
 
         # if set_logprop modified props above, we can set the memcache key
         # to be the hashref of modified props, since this is a new post
-        LJ::MemCache::set([$uowner->{'userid'}, "logprop:$uowner->{'userid'}:$itemid"],
+        LJ::MemCache::set([$uowner->{'userid'}, "logprop:$uowner->{'userid'}:$jitemid"],
                           \%logprops) if %logprops;
     }
 
-    $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$itemid ".
+    $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$jitemid ".
              "WHERE userid=$ownerid");
     LJ::MemCache::set([$ownerid, "tu:$ownerid"], pack("N", time()), 30*60);
 
@@ -978,7 +982,7 @@ sub postevent
 
     # run local site-specific actions
     LJ::run_hooks("postpost", {
-        'itemid' => $itemid,
+        'itemid' => $jitemid,
         'anum' => $anum,
         'journal' => $uowner,
         'poster' => $u,
@@ -992,7 +996,7 @@ sub postevent
     # cluster tracking
     LJ::mark_user_active($u, 'post');
 
-    $res->{'itemid'} = $itemid;  # by request of mart
+    $res->{'itemid'} = $jitemid;  # by request of mart
     $res->{'anum'} = $anum;
     return $res;
 }
@@ -2298,6 +2302,43 @@ sub fail
     $code .= ":$des" if $des;
     $$err = $code if (ref $err eq "SCALAR");
     return undef;
+}
+
+# PROBLEM: a while back we used auto_increment fields in our tables so that we could have
+# automatically incremented itemids and such.  this was eventually phased out in favor of
+# the more portably alloc_user_counter function which uses the 'counter' table.  when the
+# counter table has no data, it finds the highest id already in use in the database and adds
+# one to it.
+#
+# a problem came about when users who last posted before alloc_user_counter went
+# and deleted all their entries and posted anew.  alloc_user_counter would find no entries,
+# this no ids, and thus assign id 1, thinking it's all clean and new.  but, id 1 had been
+# used previously, and now has comments attached to it.
+#
+# the comments would happen because there was an old bug that wouldn't delete comments when
+# an entry was deleted.  this has since been fixed.  so this all combines to make this
+# a necessity, at least until no buggy data exist anymore!
+#
+# this code here removes any comments that happen to exist for the id we're now using.
+sub new_entry_cleanup_hack {
+    my ($dbcm, $u, $jitemid) = @_;
+
+    # sanitize input
+    $jitemid += 0;
+    return unless $jitemid;
+    my $ownerid = LJ::want_userid($u);
+    return unless $ownerid;
+
+    # delete logprops
+    $dbcm->do("DELETE FROM logprop2 WHERE journalid=$ownerid AND jitemid=$jitemid");
+
+    # delete comments
+    my $ids = LJ::Talk::get_talk_data($u, 'L', $jitemid);
+    return unless %$ids;
+    my $list = join ',', map { $_+0 } keys %$ids;
+    $dbcm->do("DELETE FROM talk2 WHERE journalid=$ownerid AND jtalkid IN ($list)");
+    $dbcm->do("DELETE FROM talktext2 WHERE journalid=$ownerid AND jtalkid IN ($list)");
+    $dbcm->do("DELETE FROM talkprop2 WHERE journalid=$ownerid AND jtalkid IN ($list)");
 }
 
 #### Old interface (flat key/values) -- wrapper aruond LJ::Protocol
