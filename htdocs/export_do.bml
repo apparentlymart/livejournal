@@ -18,7 +18,7 @@ _INFO=)(=_CODE
         my $year = $FORM{'year'}+0;
         my $month = $FORM{'month'}+0;
 
-        if (scalar(@errors)==0 && ! LJ::valid_password($u->{'password'}, \%FORM)) { 
+        if (scalar(@errors)==0 && ! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) { 
             push @errors, "Incorrect password."; 
         }
 

@@ -30,7 +30,7 @@ BODY<=
  my $u = LJ::load_user($dbs, $user);
  unless ($u) { push @errors, "Unknown user."; }
 
- if (! LJ::valid_password($u->{'password'}, \%FORM)) { push @errors, "Invalid password."; }
+ if (! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) { push @errors, "Invalid password."; }
  
  return LJ::bad_input(@errors) if @errors;
 

@@ -28,7 +28,7 @@ BODY<=
      push @errors, "Your account type doesn't permit you to make styles.";
  }
 
- if (! LJ::valid_password($u->{'password'}, \%FORM)) { push @errors, "Invalid password."; }
+ if (! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) { push @errors, "Invalid password."; }
 
  unless ($FORM{'type'}) { push @errors, "You didn't select a style type."; }
  if ($FORM{'type'} && !defined $LJ::viewinfo{$FORM{'type'}}) { push @errors, "Invalid style type."; }

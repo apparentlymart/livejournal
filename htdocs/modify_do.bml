@@ -26,7 +26,7 @@ BODY<=
                      "s1_day_style", "s1_friends_style",
                      );
 
- if (scalar(@errors)==0 && ! LJ::valid_password($u->{'password'}, \%FORM)) { push @errors, "Incorrect password."; }
+ if (scalar(@errors)==0 && ! LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) { push @errors, "Incorrect password."; }
 
  return LJ::bad_input(@errors) if @errors;
 

@@ -32,7 +32,7 @@ BODY<=
      unless ($req{'requserid'}) {
          $u = LJ::load_user($dbs, $user);
          push @errors, "Invalid username" unless $u;
-         if (LJ::valid_password($u->{'password'}, \%FORM)) {
+         if (LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) {
              $req{'requserid'} = $u->{'userid'};
          }
      }

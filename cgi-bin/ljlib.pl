@@ -2028,7 +2028,8 @@ sub auth_okay
         return $LJ::AUTH_CHECK->($user, $try, $type);
     }
 
-    ## LJ default authorization:
+    ## LJ default authorization:   
+    return 0 unless $actual;
     return 1 if ($md5 && lc($md5) eq LJ::hash_password($actual));
     return 1 if ($clear eq $actual);
     return 0;
