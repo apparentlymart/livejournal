@@ -3,6 +3,7 @@
 layerinfo type = "layout";
 layerinfo name = "Tabular Indent";
 layerinfo redist_uniq = "tabularindent/layout";
+layerinfo previews = "tabularindent/tabularindent.jpg";
 
 property bool show_entry_userpic { 
     des = "Show the userpic on the journal entries?";
