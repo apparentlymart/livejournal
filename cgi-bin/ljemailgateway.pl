@@ -42,7 +42,7 @@ sub process {
     my @froms = Mail::Address->parse($head->get('From:'));
     return unless @froms;
     my $from = $froms[0]->address;
-    my $addrlist = LJ::get_allowed_senders($u);
+    my $addrlist = LJ::Emailpost::get_allowed_senders($u);
     my $err_addr;
     foreach (keys %$addrlist) {
         if (lc($from) eq lc &&
