@@ -173,7 +173,7 @@ function css_fontspec(string base, string fallback)
 
 function print_stylesheet ()
 {
-    var string bgimg = $*page_background_image ? "url($*page_background_image)" : "none";
+    var string bgimg = clean_url($*page_background_image) != "" ? "url($*page_background_image)" : "none";
 """
 body {
 background: $*body_bgcolor $bgimg;

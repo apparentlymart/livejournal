@@ -129,7 +129,7 @@ propgroup text {
 
 function print_stylesheet ()
 {
-    print $*page_background_image ? "body { background-image: url($*page_background_image); }" : "";
+    print clean_url($*page_background_image) != "" ? "body { background-image: url($*page_background_image); }" : "";
     var string font;
     if ($*font_base) {
         $font = "\"$*font_base\"";
