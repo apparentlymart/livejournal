@@ -523,6 +523,8 @@ sub moveUser {
                "phoneposttrans" => "phonepostentry", # FIXME: ljcom
                "modblob" => "modlog",
                "sessions_data" => "sessions",
+               "memkeyword2" => "memorable2",
+               "userpicmap2" => "userpic2",
                );
 
     # all tables we could be moving.  we need to sort them in
@@ -629,7 +631,10 @@ sub moveUser {
             }
 
             # no need to continue with tables that don't have any data
-            next unless $expected_rows;
+            unless ($expected_rows) {
+                $was_empty{$table} = 1;
+                next;
+            }
 
             $expected_remain = $expected_rows;
         }
