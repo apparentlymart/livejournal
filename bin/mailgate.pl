@@ -11,6 +11,9 @@ use Unicode::MapUTF8 ();
 use File::Temp ();
 use File::Path ();
 
+# require configuration stuff (so we have %LJ::DEBUG, mostly)
+require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+
 cleanup();
 my $tmpdir = File::Temp::tempdir("ljmailgate_" . 'X' x 20, DIR=>'/tmp', CLEANUP=>1);
 my $parser = new MIME::Parser;
@@ -51,9 +54,9 @@ if ($subject =~ /auto.?(response|reply)/i ||
 # stop more spam, based on body text checks
 my $virus_looking = 0;
 my $tent = get_text_entity($entity, \$virus_looking); 
-die "Can't find text entity" unless $tent; 
-
 exit 0 if $virus_looking;
+
+die "Can't find text entity" unless $tent; 
 
 my $body = $tent->bodyhandle->as_string;
 $body =~ s/^\s+//;
@@ -221,11 +224,20 @@ sub get_text_entity
     my $vir_ref = shift;
 
     my $head = $entity->head;
-    my $filename = $head->recommended_filename;
 
-    if ($filename =~ /\.(?:zip|doc|exe|vbs|bat|pif|com|scr)$/i) {
-	$$vir_ref = 1;
-    }
+    my $check_vir = sub {
+        my $filename = shift;
+        return unless $filename;
+        if ($filename =~ /\.(?:zip|doc|exe|vbs|bat|pif|com|scr)$/i) {
+            $$vir_ref = 1;
+        }
+        if ($LJ::DEBUG{'mailgate-virus'} &&
+                open (FL, ">>$ENV{'LJHOME'}/mailgate-filenames.log")) {
+            print FL "filename: [$filename] vir: $$vir_ref\n";
+            close FL;
+        }
+    };
+    $check_vir->($head->recommended_filename);
 
     my $mime_type =  $head->mime_type;
     if ($mime_type eq "text/plain") {
@@ -236,11 +248,16 @@ sub get_text_entity
         $mime_type eq "multipart/mixed" ||
         $mime_type eq "multipart/signed") {
         my $partcount = $entity->parts;
+        my $ret = undef;
         for (my $i=0; $i<$partcount; $i++) {
             my $alte = $entity->parts($i);
-            return $alte if ($alte->mime_type eq "text/plain");
+
+            my $alth = $alte->head;
+            $check_vir->($alth->recommended_filename);
+
+            $ret ||= $alte if $alte->mime_type eq "text/plain";
         }
-        return undef;
+        return $ret;
     }
 
     if ($mime_type eq "multipart/related") {
