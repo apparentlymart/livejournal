@@ -52,7 +52,9 @@ Apache->httpd_conf(qq{
 </IfModule>
 
 PerlInitHandler Apache::LiveJournal
+PerlInitHandler Apache::SendStats
 PerlFixupHandler Apache::CompressClientFixup
+PerlCleanupHandler Apache::SendStats
 DirectoryIndex index.html index.bml
 });
 
