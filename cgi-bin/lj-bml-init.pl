@@ -57,7 +57,7 @@ use LJ::TagGenerator ':html4';
 use Digest::MD5 qw(md5_hex); # TODO: don't import
 use MIME::Words;
 use LWP::UserAgent ();
-
+use Storable;
 use Image::Size ();
 Image::Size::imgsize("GIF89a"); 
 Image::Size::imgsize("\x89PNG\x0d\x0a\x1a\x0a");
