@@ -3035,7 +3035,8 @@ sub make_journal
             <p>Instead, please use <nobr><a href=\"$url\">$url</a></nobr></p>
         };
     };
-    if ($LJ::USER_VHOSTS && $opts->{'vhost'} eq "users" && ! LJ::get_cap($u, "userdomain")) {
+    if ($LJ::USER_VHOSTS && $opts->{'vhost'} eq "users" && $u->{'journaltype'} ne 'R' &&
+        ! LJ::get_cap($u, "userdomain")) {
         return $notice->("URLs like <nobr><b>http://<i>username</i>.$LJ::USER_DOMAIN/" .
                          "</b></nobr> are not available for this user's account type.");
     }
