@@ -139,6 +139,18 @@
          $body .= "<dt><b><a href=\"$dayview_url\">$day$ord</a></b></dt>";
          $body .= "<dd><table cellpadding=2>";
      }
+
+     # we need to convert the subject to UTF-8 if it's a pre-Unicode entry
+     # loading all the props for all the posts and checking 'unknown8bit' 
+     # is too long. The heuristic "if it's not UTF-8, convert it" works
+     # well here.
+     if ($LJ::UNICODE && !LJ::is_utf8($subject)) {
+         my $error;
+         my $subj = LJ::text_convert($dbs, $subject, $u, \$error);
+         $subject = $subj unless $error;
+         LJ::text_out(\$subject);
+     }
+
      unless ($subject ne "") { $subject = "(no subject)"; }
      my $h = substr($eventtime, 11, 2);
      my $m = substr($eventtime, 14, 2);
