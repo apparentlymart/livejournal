@@ -1590,7 +1590,7 @@ sub init {
             my $res = Digest::MD5::md5_hex($secret . $chal);
             if ($res ne $c_res) {
                 $chrp_err = "invalid";
-            } elsif ($c_time < time() - 60*60) {
+            } elsif ($c_time < time() - 2*60*60) {
                 $chrp_err = "too_old";
             }
         } else {
@@ -1602,9 +1602,18 @@ sub init {
                 my $ruser = $remote ? $remote->{user} : "[nonuser]";
                 print STDERR "talkhash error: from $ruser \@ $ip - $chrp_err - $talkurl\n";
             }
+            if ($LJ::REQUIRE_TALKHASH) {
+                return $err->("Sorry, form expired.  Press back, copy text, reload form, paste into new form, and re-submit.") 
+                    if $chrp_err eq "too_old";
+                return $err->("Missing parameters");
+            }
         }
     }
 
+    # anti-spam rate limiting 
+    return $err->("You've hit the \"probably a spambot\" rate limit.") 
+        unless check_rate($remote);
+    
     # check that user can even view this post, which is required
     # to reply to it
     ####  Check security before viewing this post
@@ -1880,6 +1889,86 @@ sub make_preview {
 
     $ret .= "</form></div>";
     return $ret;
+}
+
+# more anti-spammer rate limiting.
+sub check_rate {
+    my $remote = shift;
+
+    # we require memcache to do rate limiting efficiently
+    return 1 unless @LJ::MEMCACHE_SERVERS;
+
+    my $ip = LJ::get_remote_ip();
+    my $now = time();
+    my @watch;
+
+    # registered human (or human-impersonating robot)
+    push @watch, ["talklog:$remote->{userid}", $LJ::RATE_COMMENT_AUTH ||
+                  [ [200,3600], [20,60] ],
+                  ] if $remote;
+
+    # anonymous (robot or human)
+    push @watch, ["talklog:$ip", $LJ::RATE_COMMENT_ANON ||
+                  [ [300,3600], [200,1800], [150,900], [15,60] ]
+                  ] unless $remote;
+
+    my $too_fast = 0;
+
+  WATCH:
+    foreach my $watch (@watch) {
+        my ($key, $rates) = ($watch->[0], $watch->[1]);
+        my $max_period = $rates->[0]->[1];
+        
+        my $log = LJ::MemCache::get($key);
+        my $DATAVER = "1";
+        
+        # parse the old log
+        my @times;
+        if (length($log) % 4 == 1 && substr($log,0,1) eq $DATAVER) {
+            my $ct = (length($log)-1) / 4;
+            for (my $i=0; $i<$ct; $i++) {
+                my $time = unpack("N", substr($log,$i*4+1,4));
+                push @times, $time if $time > $now - $max_period;
+            }
+        }
+        
+        # add this event
+        push @times, $now;
+        
+        # check rates
+        foreach my $rate (@$rates) {
+            my ($allowed, $period) = ($rate->[0], $rate->[1]);
+            my $events = scalar grep { $_ > $now-$period } @times;
+            if ($events > $allowed) {
+                $too_fast = 1;
+                
+                if ($LJ::DEBUG_TALK_RATE && 
+                    LJ::MemCache::add("warn:$key", 1, 600)) {
+                    LJ::send_mail({
+                        'to' => $LJ::DEBUG_TALK_RATE,
+                        'from' => $LJ::ADMIN_EMAIL,
+                        'fromname' => $LJ::SITENAME,
+                        'charset' => 'utf-8',
+                        'subject' => "talk spam: $key",
+                        'body' => "talk spam from $key:\n\n    $events comments > $allowed allowed / $period secs",
+                    });
+                }
+
+                return 0 if $LJ::ANTI_TALKSPAM;
+                last WATCH;
+            }
+        }
+        
+        # build the new log
+        my $newlog = $DATAVER;
+        foreach (@times) {
+            $newlog .= pack("N", $_);
+        }
+        
+        LJ::MemCache::set($key, $newlog, $max_period);
+    }
+
+    return 1;
 }
 
 1;
