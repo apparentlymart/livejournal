@@ -1,15 +1,18 @@
 <?page
-title=><?_ml .title _ml?>
 body<=
 
 <?_code
 #BML:cache:talkread
 
  use strict;
- use vars qw($r_head %FORM %ML);
+ use vars qw($r_head $r_title %FORM %ML);
 
+ # make refs to both title and head, that work in cached or non-cached contexts
+ # $_[0] is the BML $req object, $_[1] is a pre-request scratch area.
  $r_head = "";
+ $r_title = "";
  my $head = $_[1] ? \$_[1]->{'head'} : \$r_head;
+ my $title = $_[1] ? \$_[1]->{'title'} : \$r_title;
 
  my $PAGE_SIZE = 25;
  my $THREADING_POINT = 50;
@@ -152,6 +155,13 @@ if ($uri =~ m!/(\d+)\.html$!) {
  LJ::CleanHTML::clean_event(\$event, $logprops{$itemid}->{'opt_preformatted'});
  BML::ebml(\$event);
 
+ # make the title
+{
+    my $subject = $item->{'subject'} || substr($item->{'event'}, 0, 40);
+    LJ::CleanHTML::clean_subject_all(\$subject);
+    $$title = "$u->{'user'}: $subject";
+}
+
  $ret .= "<p>";
  $ret .= "<table><tr valign='middle'>";
 
@@ -188,8 +198,6 @@ if ($uri =~ m!/(\d+)\.html$!) {
                                                   'userlink' => LJ::ljuser($up->{'user'}),
                                                   'commlink' => "<?ljcomm $u->{'user'} ljcomm?>" });
  }
-
- BML::note_mod_time(LJ::mysqldate_to_time($item->{'eventtime'}));
 
  my $etime = $item->{'eventtime'};
  $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!LJ::date_to_view_links($u, $&)!e;
@@ -316,7 +324,6 @@ if ($uri =~ m!/(\d+)\.html$!) {
  my $post_count = 0;
  while (my $post = $sth->fetchrow_hashref) {
      $post_count++ unless ($post->{'state'} eq "D");
-     BML::note_mod_time(LJ::mysqldate_to_time($post->{'datepost'}));
      $posts{$post->{'talkid'}} = $post;
      push @{$children{$post->{'parenttalkid'}}}, $post->{'talkid'};
  }
@@ -739,6 +746,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
 _code?>
 <=body
+title=><?_code return $_[1] ? $_[1]->{'title'} : $r_title _code?>
 head=><?_code return $_[1] ? $_[1]->{'head'} : $r_head _code?>
 page?><?_c <LJDEP>
 link: htdocs/talkpost.bml, htdocs/talkread.bml, htdocs/delcomment.bml
