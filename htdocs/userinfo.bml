@@ -503,7 +503,7 @@
      $body .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/$dir/$user/friends'>$label</a>:</b></td><td colspan='$span'>";
      if (!$verbosefriends || $res_fr{'friend_count'} > 500) {
          $body .= "<b>" . $res_fr{'friend_count'} . ":</b> ";
-         $body .= "<a href='$LJ::DIRURI?s_fro=1&amp;fro_user=$u->{'user'}'>" . BML::ml('.label.viewlabel',{'label'=>$label}) . "</a>.";
+         $body .= "<a href='/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'>" . BML::ml('.label.viewlabel',{'label'=>$label}) . "</a>.";
      } elsif ($res_fr{'friend_count'}) {
          $body .= "<b>" . $res_fr{'friend_count'} . ":</b> ";
          my $count = 0;
