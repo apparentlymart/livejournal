@@ -1012,6 +1012,11 @@ sub editevent
         } else {
             LJ::delete_item($dbh, $ownerid, $req->{'itemid'});
         }
+
+        # clear their duplicate protection, so they can later repost
+        # what they just deleted.  (or something... probably rare.)
+        LJ::set_userprop($dbs, $u, "dupsig_post", undef);
+        
         my $res = { 'itemid' => $qitemid,
                     'anum' => $oldevent->{'anum'} };
         return $res;
