@@ -52,6 +52,10 @@ sub make_journal
         return;
     }
 
+    my $lang = 'en';
+    LJ::run_hook('set_s2bml_lang', $ctx, \$lang);
+    eval { BML::set_language($lang, \&LJ::Lang::get_text); }
+
     # let layouts disable EntryPage / ReplyPage, using the BML version
     # instead.
     if ($ctx->[S2::PROPS]->{'view_entry_disabled'} && ($view eq "entry" || $view eq "reply")) {

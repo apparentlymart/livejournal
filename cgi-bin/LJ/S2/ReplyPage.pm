@@ -118,7 +118,9 @@ sub ReplyForm__print
     my $txt_spell = "Spell check entry before posting";
     my $txt_willscreen = "(will be screened)";
     my $txt_allowedhtml = "Allowed HTML:";
-    my %ML;
+
+    # once we clean out talkpost.bml, this will need to be changed.
+    BML::set_language_scope('/talkpost.bml');
 
     my $pics = LJ::Talk::get_subjecticons();
 
@@ -146,7 +148,7 @@ sub ReplyForm__print
     } elsif ($u->{'opt_whocanreply'} eq "reg") {
         $ret .= "<tr valign='middle'>";
         $ret .= "<td align='right'>$txt_from</td><td align='middle'>(  )</td>";
-        $ret .= "<td align='left' colspan='3'><font color='#c0c0c0'><b>$txt_anon</b></font>$ML{'.opt.noanonpost'}</td>";
+        $ret .= "<td align='left' colspan='3'><font color='#c0c0c0'><b>$txt_anon</b></font>$BML::ML{'.opt.noanonpost'}</td>";
         $ret .= "</tr>\n";
     } else {
         $ret .= "<tr valign='middle'>";
@@ -189,8 +191,8 @@ sub ReplyForm__print
     $ret .= "<td>&nbsp;</td>";
     $ret .= "<td align=middle><input type='radio' name='usertype' value='user' id='talkpostfromlj' $checked />";
     $ret .= "</td><td align='left'><b><label for='talkpostfromlj'>$txt_ljuser</label></b> ";
-    $ret .= $ML{'.opt.willscreenfriend'} if $u->{'opt_whoscreened'} eq 'F';
-    $ret .= $ML{'.opt.willscreen'} if $u->{'opt_whoscreened'} eq 'A';
+    $ret .= $BML::ML{'.opt.willscreenfriend'} if $u->{'opt_whoscreened'} eq 'F';
+    $ret .= $BML::ML{'.opt.willscreen'} if $u->{'opt_whoscreened'} eq 'A';
     $ret .= "</tr>\n";
 
     # Username: [    ] Password: [    ]  Login? [ ]
@@ -312,7 +314,7 @@ sub ReplyForm__print
     # Some JavaScript to help the UI out
 
     $ret .= "<script type='text/javascript' language='JavaScript'>\n";
-    $ret .= "var usermismatchtext = \"" . LJ::ejs($ML{'.usermismatch'}) . "\";\n";
+    $ret .= "var usermismatchtext = \"" . LJ::ejs($BML::ML{'.usermismatch'}) . "\";\n";
     $ret .= "</script><script type='text/javascript' language='JavaScript' src='$LJ::SITEROOT/js/talkpost.js'></script>";
     $ret .= "</form>\n";    
     
