@@ -14,7 +14,7 @@
 	
  my $remote = &get_remote;
 
- my ($sth);
+ my $sth;
  my %countries = ();
  my %states = ();
  &load_codes({ "country" => \%countries, "state" => \%states });
@@ -40,6 +40,7 @@
      return "";
  }
 
+ my $remote_isfriend = LJ::is_friend($dbh, $u, $remote);
  my $com = $u->{'journaltype'} eq "C" ? 1 : 0;
  my $dir = "users";
  
@@ -216,7 +217,7 @@
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
      $body .= "<TR VALIGN=TOP><TD ALIGN=RIGHT><B><NOBR>Text<BR>Message</NOBR>:</B></TD><TD COLSPAN=$span><A HREF=\"/tools/textmessage.bml?user=$u->{'user'}\">Send <B>$u->{'user'}</B> a text message</A><BR>on $pronoun cellphone/pager.</TD></TR>";
  }
-
+ 
  if ($u->{'url'}) {
      my $url = &BMLUtil::ehtml($u->{'url'});
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
@@ -276,7 +277,9 @@
       }
   }
  
-  if ($u->{'allow_contactshow'} eq "Y") {
+  if ($u->{'allow_contactshow'} eq "Y" ||
+      $u->{'allow_contactshow'} eq "F" && $remote_isfriend)
+  {
       unless ($u->{'opt_whatemailshow'} eq "N") {
 	  my $span = ($narrow_left-- >= 0) ? 1 : 2;
 	  $body .= "<TR VALIGN=TOP><TD ALIGN=RIGHT><B>Email:</B></TD><TD COLSPAN=$span>";

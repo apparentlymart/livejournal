@@ -202,9 +202,9 @@ BODY<=
 		 my $info = LJ::TextMessage::provider_info($p);
 		 push @opts, ($p, $info->{'name'});
 	     }
-	     $ret .= &html_select({ 'name' => 'txtmsg_provider',
-				    'selected' => $tminfo->{'provider'}, },
-				  @opts);
+	     $ret .= LJ::html_select({ 'name' => 'txtmsg_provider',
+				       'selected' => $tminfo->{'provider'}, },
+				     @opts);
 	 }
 	 
 	 $ret .= " (<A HREF=\"/tools/textmessage.bml?mode=details\">details</A>)</TD></TR>";
@@ -247,24 +247,34 @@ BODY<=
      {
 	 $ret .= "<I>(no image uploaded)</I>";
      }
-     $ret .= "</CENTER><P>To delete this picture, or upload a new one, <A HREF=\"uploadpic.bml\" TARGET=_blank>go here</A>. P=)\n";
+     $ret .= "</CENTER><P>To delete this picture, or upload a new one, <A HREF=\"/uploadpic.bml\" TARGET=_blank>go here</A>. P=)\n";
 
 
      ### Permission Settings
      $ret .= "(=H1 LiveJournal Options H1=)(=P Select below your personal privacy options and preferences. P=)";
      $ret .= "<P><TABLE>\n";
 
-     my $checked;
-     $checked = $u->{'allow_infoshow'} eq "Y" ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_infoshow $checked></TD><TD><B>Be listed in the LiveJournal Directory</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>You should keep this option enabled.  This allows you to be included in the really cool \"regional journal directory\", where people can find other people's journals that are in a specific area.</TD></TR>\n";
+     unless ($LJ::DISABLED{'directory'}) {
+	 my $checked;
+	 $checked = $u->{'allow_infoshow'} eq "Y" ? "CHECKED" : "";
+	 $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_infoshow $checked></TD><TD><B>Be listed in the LiveJournal Directory</B></TD></TR>\n";
+	 $ret .= "<TR><TD>&nbsp;</TD><TD>You should keep this option enabled.  This allows you to be included in the really cool \"regional journal directory\", where people can find other people's journals that are in a specific area.</TD></TR>\n";
+     }
 
-     $checked = $u->{'allow_contactshow'} eq "Y" ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_contactshow $checked></TD><TD><B>Show your contact information on your LiveJournal</B></TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT>&nbsp;</TD><TD><B>Show your contact information on your LiveJournal?</B></TD></TR>\n";
      $ret .= "<TR><TD>&nbsp;</TD><TD>You should keep this option enabled.  This lets other people be able to contact you by showing your email address, ICQ number, and AOL Instant Messanger screenname all on your LiveJournal.";
 
      {
-	 $ret .= "<P><B>Email address to be displayed:</B><UL>";
+	 $ret .= "<p><b>Visible to:</b> ";
+	 $ret .= LJ::html_select({ 'name' => 'allow_contactshow',
+				   'selected' => $u->{'allow_contactshow'} || "Y",
+			       }, 
+				 "N" => "Nobody",
+				 "Y" => "Everybody",
+				 "F" => "Friends only",
+				 );
+
+	 $ret .= "<p><b>If visible, email address to be displayed:</b><ul>";
 
 	 my $cur = $u->{'opt_whatemailshow'} || "B";
 	 my @vals = ($LJ::USER_EMAIL 
@@ -281,7 +291,7 @@ BODY<=
 	 }
 	 $ret .= "</SELECT>";
 	 
-	 $ret .= "</UL>If you checked the above option, you may also choose to hide your email address (while still showing other contact information)";
+	 $ret .= "</ul>If you checked the above option, you may also choose to hide your email address (while still showing other contact information)";
          $ret .= ($LJ::USER_EMAIL
                   ? ", only show your livejournal email address (<A HREF=\"$LJ::SITEROOT/paidaccounts/\">paid accounts</A> only), or to show them both."
                   : ".");
@@ -294,8 +304,8 @@ BODY<=
      $ret .= "<TR><TD>&nbsp;</TD><TD>If you have the above option selected and are afraid spam-robots will find your email address on LiveJournal, select this option and your email address will be modified so your email address won't be found by email-collecting robots.</TD></TR>\n";
 
      $checked = $u->{'opt_blockrobots'} ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_blockrobots VALUE=1 $checked></TD><TD><B>Block Robots/Spiders from Indexing your journal</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>If you check this option, LiveJournal's <TT>robots.txt</TT> option will be updated so search engines are told to not index your journal contents.</TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_blockrobots VALUE=1 $checked></TD><TD><B>Block Robots/Spiders from indexing your journal</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>If you check this option, robots will be told to go away.  Not all robots respect the rules, but the popular search sites' robots do.</TD></TR>\n";
 
      $checked = $u->{'allow_getljnews'} eq "Y" ? "CHECKED" : "";
      $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_getljnews $checked></TD><TD><B>Send me LiveJournal news.</B></TD></TR>\n";
@@ -304,10 +314,6 @@ BODY<=
      $checked = $u->{'opt_bdaymail'} ? "CHECKED" : "";
      $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_bdaymail $checked></TD><TD><B>Send me birthday reminders.</B></TD></TR>\n";
      $ret .= "<TR><TD>&nbsp;</TD><TD>If you want to get email reminding you of birthdays for your friends on LiveJournal, click this box.</TD></TR>\n";
-
-#     $checked = $u->{'allow_getpromos'} eq "Y" ? "CHECKED" : "";
-#     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_getpromos $checked></TD><TD><B>Send me special promotions.</B></TD></TR>\n";
-#     $ret .= "<TR><TD>&nbsp;</TD><TD>To tell you the truth, we don't really have any special promotions in mind.  But one day if we ever need to make money to support this site, we'd probably have to sell out to marketing people and they'd want to know who wants to receive offers over email.  So check this if you like getting promotional mail; if not, don't.</TD></TR>\n";
 
      $checked = $u->{'opt_showtalklinks'} eq "Y" ? "CHECKED" : "";
      $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_showtalklinks $checked></TD><TD><B>Enable message boards.</B></TD></TR>\n";
@@ -478,10 +484,8 @@ BODY<=
 		   'email' => $FORM{'email'},
 		   'status' => ($email_changed && $u->{'status'} eq "A") ? "T" : $u->{'status'},
 		   'has_bio' => $has_bio,
-		   'allow_infoshow' => $FORM{'allow_infoshow'} ? "Y" : "N",
-		   'allow_contactshow' => $FORM{'allow_contactshow'} ? "Y" : "N",
+		   'allow_contactshow' => $FORM{'allow_contactshow'} =~ /^[YNF]$/ ? $FORM{'allow_contactshow'} : "N",
 		   'allow_getljnews' => $FORM{'allow_getljnews'} ? "Y" : "N",
-#		   'allow_getpromos' => $FORM{'allow_getpromos'} ? "Y" : "N",
 		   'opt_showtalklinks' => $FORM{'opt_showtalklinks'} ? "Y" : "N",
 		   'opt_gettalkemail' => $FORM{'opt_gettalkemail'} ? "Y" : "N",
 		   'opt_htmlemail' => $FORM{'opt_htmlemail'} ? "Y" : "N",
@@ -489,6 +493,10 @@ BODY<=
 		   'opt_whocanreply' => $FORM{'opt_whocanreply'},
 		   'txtmsg_status' => $txtmsg_status,
 		   );
+
+     unless ($LJ::DISABLED{'directory'}) {
+	 $update{'allow_infoshow'} = $FORM{'allow_infoshow'} ? "Y" : "N";
+     }
      
      # update 'user' table
      my $sets = "";
@@ -710,4 +718,9 @@ BODY<=
 _CODE=)
 
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+lib: LJ::TextMessage, cgi-bin/ljlib.pl, cgi-bin/ljlang.pl
+link: htdocs/legal/privacy.bml, htdocs/support/faqbrowse.bml, htdocs/tools/textmessage.bml, htdocs/uploadpic.bml
+link: htdocs/paidaccounts/index.bml, htdocs/topics/index.bml, htdocs/users, htdocs/userinfo.vml
+img: htdocs/userpic
+</LJDEP> _C=)
