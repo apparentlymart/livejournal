@@ -518,13 +518,13 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 /friends/add.bml.error1.header=Login First
 
 /friends/add.bml.error1.text<<
-To add a user to your friends list you must first go and <A HREF=\"/login.bml?ret=1\">log in</A>.  If you don't
-already have an account you can <a href=\"/create.bml\">create one</a> to track your friend's journals. 
+To add a user to your friends list you must first go and <A HREF="/login.bml?ret=1">log in</A>.  If you don't
+already have an account you can <a href="/create.bml">create one</a> to track your friend's journals. 
 .
 
 /friends/add.bml.error1.title=Add Friend
 
-/friends/add.bml.error2.text=Invalid or missing username given.  To add a friend, go to the <A HREF=\"/friends/edit.bml\">edit friends</A> page.
+/friends/add.bml.error2.text=Invalid or missing username given.  To add a friend, go to the <A HREF="/friends/edit.bml">edit friends</A> page.
 
 /friends/add.bml.error3.text=You already have <b>[[user]]</b> listed as a friend.  However, you can modify the colors you've chosen to represent him/her.
 
