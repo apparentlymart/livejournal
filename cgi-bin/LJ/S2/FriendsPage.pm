@@ -284,7 +284,7 @@ sub FriendsPage
             'text' => $text,
             'dateparts' => $alldatepart,
             'security' => $security,
-            'props' => $logprops{$itemid},
+            'props' => $logprops{$datakey},
             'itemid' => $ditemid,
             'journal' => $userlite_journal,
             'poster' => $userlite_poster,
