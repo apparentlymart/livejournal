@@ -125,6 +125,12 @@ sub get_dom
     return $DM_UNIQ{$dmcode};
 }
 
+sub get_domains
+{
+    load_lang_struct() unless $LS_CACHED;
+    return values %DM_ID;
+}
+
 sub load_lang_struct
 {
     return 1 if $LS_CACHED;
@@ -137,8 +143,10 @@ sub load_lang_struct
     $sth = $dbr->prepare("SELECT dmid, type, args FROM ml_domains");
     $sth->execute;
     while (my ($dmid, $type, $args) = $sth->fetchrow_array) {
-        $DM_UNIQ{"$type/$args"} = $DM_ID{$dmid} = { 
+        my $uniq = $args ? "$type/$args" : $type;
+        $DM_UNIQ{$uniq} = $DM_ID{$dmid} = { 
             'type' => $type, 'args' => $args, 'dmid' => $dmid,
+            'uniq' => $uniq,
         };
     }
 

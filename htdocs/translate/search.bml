@@ -8,17 +8,41 @@
  my $dbr = $dbs->{'reader'};
  my $sth;
  
- my $what = ">= 1";
- if ($FORM{'stale'} =~ /^(\d+)(\+?)$/) {
-     $what = ($2 ? ">=" : "=") . $1;
+ my $sql;
+
+ if ($FORM{'search:sev'}) {
+     my $what = ">= 1";
+     if ($FORM{'stale'} =~ /^(\d+)(\+?)$/) {
+         $what = ($2 ? ">=" : "=") . $1;
+     }
+     $sql = "SELECT i.dmid, i.itid, i.itcode FROM ml_items i, ml_latest l WHERE l.lnid=$l->{'lnid'} AND l.staleness $what AND l.dmid=i.dmid AND l.itid=i.itid ORDER BY i.dmid, i.itcode";
  }
- 
+
+ return "Bogus or unimplemented query type." unless $sql;
+
  my $ret;
- $sth = $dbr->prepare("SELECT i.dmid, i.itcode, l.staleness FROM ml_items i, ml_latest l WHERE l.lnid=$l->{'lnid'} AND l.staleness $what AND l.dmid=i.dmid AND l.itid=i.itid");
+ $sth = $dbr->prepare($sql);
  $sth->execute;
- while (my ($dmid, $itcode, $st) = $sth->fetchrow_array) {
-     $ret .= "$dmid:$itcode ($st)<br />\n";
+ my $page = 0;
+ my @page = ();
+ my $addlink = sub {
+     return unless @page;
+     $page++;
+     my $link = "editpage.bml?lang=$lang&amp;items=" . LJ::eurl(join(",",map{"$_->[0]:$_->[1]"}@page));
+     $ret .= "<b><a target='main' href='$link'>Page $page</a></b><br /><span style='font-size:8pt'>\n";
+     $ret .= "$page[0]->[2]<br />\n";
+     $ret .= "$page[-1]->[2]<br /></span>\n";
+     @page = ();
+ };
+ while (my ($dmid, $itid, $itcode) = $sth->fetchrow_array) {
+     push @page, [ $dmid, $itid, $itcode ];
+     $addlink->() if @page >= 2;
  }
+ $addlink->();
+ 
+ if ($page == 0) { $ret .= "<i>(No matches)</i>"; }
+ 
+
  return $ret;
 
 _CODE=)

@@ -3260,6 +3260,27 @@ sub html_text
 }
 
 # <LJFUNC>
+# name: LJ::html_hidden
+# class: component
+# des: Makes the HTML for a hidden form element
+# args: name, val
+# des-name: Name of form element (will be HTML escaped)
+# des-val: Value of form element (will be HTML escaped)
+# returns: HTML
+# </LJFUNC>
+sub html_hidden
+{
+    my $ret;
+    while (@_) {
+        my $name = shift;
+        my $val = shift;
+        $ret .= "<input type='hidden' name='" . LJ::ehtml($name) . "' value='" .
+            LJ::ehtml($val) . "' />\n";
+    }
+    return $ret;
+}
+
+# <LJFUNC>
 # name: LJ::canonical_username
 # des:
 # info:

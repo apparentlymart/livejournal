@@ -1,0 +1,154 @@
+(=_CODE
+#line 2
+ my $lang = $FORM{'lang'};
+ my $l = LJ::Lang::get_lang($lang);
+ return "<b>Invalid language</b>" unless $l;
+ my $lp = $l->{'parentlnid'} ? LJ::Lang::get_lang_id($l->{'parentlnid'}) : undef;
+
+ my $dbs = LJ::get_dbs;
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+ my ($sth, $ret);
+
+ my $mode = { 
+     '' => 'view', 
+     'save' => 'save',
+ }->{$FORM{'mode'}};
+ return "bogus mode" unless $mode;
+
+ my $MAX_EDIT = 100;
+
+ if ($mode eq "view")
+ {
+     my @load;
+     foreach (split /,/, $FORM{'items'}) 
+     {
+         next unless /^(\d+):(\d+)$/;
+         last if @load >= $MAX_EDIT;
+         push @load, { 'dmid' => $1, 'itid'=> $2 };
+     }
+     return "Nothing to show." unless @load;
+     
+     $ret .= "<form method='post'>";
+     $ret .= LJ::html_hidden('lang', $lang);
+     $ret .= LJ::html_hidden('mode', "save");
+
+     # load item info
+     my %ml_items;
+     my $itwhere = join(" OR ", map { "(dmid=$_->{'dmid'} AND itid=$_->{'itid'})" } @load);
+     $sth = $dbr->prepare("SELECT dmid, itid, itcode, notes FROM ml_items WHERE $itwhere");
+     $sth->execute;
+     while (my ($dmid, $itid, $itcode, $notes) = $sth->fetchrow_array) {
+         $ml_items{"$dmid-$itid"} = { 'itcode' => $itcode, 'notes' => $notes };
+     }
+     
+     # getting latest mappings for this lang and parent
+     my %ml_text;
+     my %ml_latest;
+     $sth = $dbr->prepare("SELECT lnid, dmid, itid, txtid, chgtime, staleness FROM ml_latest ".
+                          "WHERE ($itwhere) AND lnid IN ($l->{'lnid'}, $l->{'parentlnid'})");
+     $sth->execute;
+     return $dbr->errstr if $dbr->err;
+     while ($_ = $sth->fetchrow_hashref) {
+         $ml_latest{"$_->{'dmid'}-$_->{'itid'}"}->{$_->{'lnid'}} = $_;
+         $ml_text{"$_->{'dmid'}-$_->{'txtid'}"} = undef;  # mark to load later
+     }
+
+     # load text
+     $sth = $dbr->prepare("SELECT dmid, txtid, lnid, itid, text FROM ml_text ".
+                          "WHERE " . join(" OR ", 
+                                          map { "(dmid=$_->[0] AND txtid=$_->[1])" } 
+                                          map { [ split(/-/, $_) ] } keys %ml_text));
+     $sth->execute; 
+     return $dbr->errstr if $dbr->err;
+     while ($_ = $sth->fetchrow_hashref) {
+         $ml_text{"$_->{'dmid'}-$_->{'txtid'}"} = $_;
+     }
+
+     # show all editing items
+     my $ict = 0;
+     foreach my $i (@load) 
+     {
+         my ($dmid, $itid) = ($i->{'dmid'}, $i->{'itid'});
+         my $ituq = "$dmid-$itid";
+         my $it = $ml_items{$ituq};
+         next unless $it;
+         $ict++;
+
+         my $lat = $ml_latest{$ituq}->{$l->{'lnid'}};
+         my $plat;
+         if ($lp && defined $ml_latest{$ituq}->{$lp->{'lnid'}}) {
+             $plat = $ml_latest{$ituq}->{$lp->{'lnid'}};
+         }
+
+         $ret .= LJ::html_hidden("dom_$ict", $dmid,
+                                 "itid_$ict", $itid,
+                                 "oldtxtid_$ict", $lat->{'txtid'},
+                                 "oldptxtid_$ict", $plat ? $plat->{'txtid'} : 0,
+                                 );
+         
+         # top bar
+         $ret .= "<table bgcolor='#c0c0c0' width='100%'><tr><td><b>Code:</b> $it->{'itcode'}</td>";
+         $ret .= "<td align='right'><b><a target='_new' href='help-severity.bml'>Sev</a>:</b> $lat->{'staleness'}</td>";
+         $ret .= "</tr></table>";
+
+         $ret .= "<dl>";
+         if ($it->{'notes'}) {
+             $ret .= "<dt><b>Notes:</b></dt><dd>$it->{'notes'}</dd>";
+         }
+
+         my $show_edit = 0;
+         my $use_textarea = 0;
+
+         if ($plat) {
+             $ret .= "<dt><b>$lp->{'lnname'}:</b></dt>";
+             my $t = $ml_text{"$plat->{'dmid'}-$plat->{'txtid'}"}->{'text'};
+             $t = LJ::ehtml($t);
+             $t =~ s/\n/<br \/>/g;
+             $ret .= "<dd>$t</dd>";
+         }
+
+         my $curtext;
+         if ($lat->{'staleness'} < 3) {
+             # if wrong language, why populate it with stuff they'll just have to delete?
+             $curtext = LJ::ehtml($ml_text{"$lat->{'dmid'}-$lat->{'txtid'}"}->{'text'});
+             if ($curtext =~ /\n/) { $use_textarea = 1; }
+         }
+         
+         $ret .= "<dt><b>$l->{'lnname'}</b>:</b></dt><dd>";
+         my $disabled = "disabled='disabled'";
+         if ($lat->{'staleness'} == 3) {
+             $disabled = "";
+             $ret .= LJ::html_hidden("ed_$ict", "1");
+         } else {
+             $ret .= "<input name='ed_$ict' type='checkbox' value='1' id='ed_$ict' onClick='a=document.getElementById(\"newtext_1\"); a.disabled=!this.checked; if (this.checked) a.focus();' /><label for='ed_$ict'>Edit Text</label><br />";
+         }
+         if ($use_textarea) {
+             $ret .= "<textarea name='newtext_$ict' id='newtext_$ict' $disabled wrap='soft' rows='10' cols='40'>$curtext</textarea>";
+         } else {
+             $ret .= "<input name='newtext_$ict' id='newtext_$ict' $disabled size='40' value='$curtext'/>";
+         }
+         $ret .= "</dd>\n";
+         $ret .= "</dl>";
+     }
+     
+     $ret .= LJ::html_hidden("ict", $ict);
+     $ret .= "<table width='100%' bgcolor='#e0e0e0'><tr><td align='center'><input type='submit' value='Save'></td></tr></table>";
+     $ret .= "</form>";
+     
+     return $ret;
+ }
+
+ if ($mode eq "save")
+ {
+     my $num = $FORM{'ict'}+0;
+     $num = $MAX_EDIT if $num > $MAX_EDIT;
+     for (my $i=1; $i<=$num; $i++)
+     {
+         next unless $FORM{"ed_$i"};
+         $ret .= "<p>would have saved $i.</p>";
+     }
+     return $ret;
+ }
+
+_CODE=)
