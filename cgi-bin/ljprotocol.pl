@@ -1287,14 +1287,14 @@ sub getevents
 
         my $LIMIT = 300;
         if ($clustered) {
-            $sql = "SELECT jitemid, eventtime, security, allowmask, anum ".
+            $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid ".
                 "FROM log2 l, syncupdates2 s ".
                 "WHERE s.userid=$ownerid AND l.journalid=$ownerid ".
                 "AND s.atime>='$date' AND s.nodetype='L' AND s.nodeid=l.jitemid ".
                 "AND s.nodeid=l.jitemid ORDER BY s.atime LIMIT $LIMIT";
         } else {
             $use_master = 1;
-            $sql = "SELECT itemid, eventtime, security, allowmask ".
+            $sql = "SELECT itemid, eventtime, security, allowmask, posterid ".
                 "FROM log l, syncupdates s WHERE s.userid=$ownerid ".
                 "AND s.atime>='$date' AND s.nodetype='L' AND s.nodeid=l.itemid ".
                 "AND s.nodeid=l.itemid ORDER BY s.atime LIMIT $LIMIT";
@@ -1308,10 +1308,10 @@ sub getevents
     # common SQL template:
     unless ($sql) {
         if ($clustered) {
-            $sql = "SELECT jitemid, eventtime, security, allowmask, anum ".
+            $sql = "SELECT jitemid, eventtime, security, allowmask, anum, posterid ".
                    "FROM log2 WHERE journalid=$ownerid $where $orderby $limit";
         } else {
-            $sql = "SELECT itemid, eventtime, security, allowmask ".
+            $sql = "SELECT itemid, eventtime, security, allowmask, posterid ".
                       "FROM log WHERE ownerid=$ownerid $where $orderby $limit";
         }
     }
@@ -1332,7 +1332,7 @@ sub getevents
     my $events = $res->{'events'} = [];
     my %evt_from_itemid;
 
-    while (my ($itemid, $eventtime, $sec, $mask, $anum) = $sth->fetchrow_array)
+    while (my ($itemid, $eventtime, $sec, $mask, $anum, $jposterid) = $sth->fetchrow_array)
     {
         $count++;
         my $evt = {};
@@ -1347,6 +1347,7 @@ sub getevents
             $evt->{'allowmask'} = $mask if $sec eq "usemask";
         }
         $evt->{'anum'} = $anum if $clustered;
+        $evt->{'poster'} = LJ::get_username($dbs, $jposterid) if $jposterid != $ownerid;
         push @$events, $evt;
     }
 
@@ -2634,7 +2635,7 @@ sub getevents
     my $pct = 0;
     foreach my $evt (@{$rs->{'events'}}) {
         $ect++;
-        foreach my $f (qw(itemid eventtime security allowmask subject anum)) {
+        foreach my $f (qw(itemid eventtime security allowmask subject anum poster)) {
             if (defined $evt->{$f}) {
                 $res->{"events_${ect}_$f"} = $evt->{$f};
             }

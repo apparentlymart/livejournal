@@ -493,6 +493,10 @@ If <TT>security</TT> is <B><TT>usemask</TT></B> then this is defined with the 32
 .des
 The subject of the journal entry.  This won't be returned if "prefersubjects" is set, instead the subjects will show up as the events.
 }
+{ events_<I>n</I>_poster
+.des
+If the poster of this event is different from the <B><TT>user</TT></B> value sent above, then this key will be included and will specify the username of the poster of this event.  If this key is not present, then it is safe to assume that the poster of this event is none other than <B><TT>user</TT></B>.
+}
 { prop_count
 .des
 The number of event properties being returned (meta-data about journal entries).  Note that this will not even be returned if you set <TT>noprops</TT> to true.

@@ -147,6 +147,10 @@ The subject of the journal entry. This won't be returned if "prefersubjects" is 
 The  event text itself. This value is first truncated if the truncate variable is set, and then it is URL-encoded (alphanumerics stay the same, weird symbols to %hh, and spaces to + signs, just like URLs or post request). This allows posts with line breaks to come back on one line.
 </des></scalar></key>
 
+<key name="poster" count="opt"><scalar><des>
+If the poster of this event is different from the <emphasis>user</emphasis> value sent above, then this key will be included and will specify the username of the poster of this event. If this key is not present, then it is safe to assume that the poster of this event is none other than <emphasis>user</emphasis>.
+</des></scalar></key>
+
 <key name="props" count="opt"><struct count="0more"><des>
 Properties and their values for the item being returned.
 </des></struct></key>
