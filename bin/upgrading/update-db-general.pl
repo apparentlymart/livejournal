@@ -1609,7 +1609,7 @@ post_create("comminterests",
 
                 my $BLOCK = 1_000;
 
-                my @ids = @{ $dbh->selectcol_arrayref("SELECT userid FROM community") };
+                my @ids = @{ $dbh->selectcol_arrayref("SELECT userid FROM community") || [] };
                 my $total = @ids;
 
                 while (@ids) {
