@@ -136,7 +136,8 @@ body<=
      my $u = LJ::load_user($dbs, $user);
      my $second_submit = 0;
      if ($u) {
-         if ($u->{'password'} eq $FORM{'password1'}) {
+         if ($u->{'password'} eq $FORM{'password1'} &&
+             $u->{'email'} eq $FORM{'email'}) {
              # oh, they double-clicked the submit button 
              $second_submit = 1;
          } else {
