@@ -207,9 +207,9 @@ sub DayPage
         if (++$nxmonth > 12) { ++$nxyear; $nxmonth=1; }
     }
     
-    $p->{'prev_url'} = "$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d", $pdyear, $pdmonth, $pdday); 
+    $p->{'prev_url'} = "$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d/", $pdyear, $pdmonth, $pdday); 
     $p->{'prev_date'} = Date($pdyear, $pdmonth, $pdday);
-    $p->{'next_url'} = "$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d", $nxyear, $nxmonth, $nxday); 
+    $p->{'next_url'} = "$u->{'_journalbase'}/" . sprintf("%04d/%02d/%02d/", $nxyear, $nxmonth, $nxday); 
     $p->{'next_date'} = Date($nxyear, $nxmonth, $nxday);
 
     return $p;
