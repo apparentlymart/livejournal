@@ -9,28 +9,32 @@ P=)
 
 (=_CODE
 
- &connect_db;
+ my $dbs = LJ::get_dbs();
+ my $dbr = $dbs->{'reader'};
 
  my %faqcat;
  my %faqq;
  my $ret = "";
- $sth = $dbh->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat WHERE faqcat<>'int-abuse'");
+ $sth = $dbr->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat ".
+		      "WHERE faqcat<>'int-abuse'");
  $sth->execute;
- while ($_ = $sth->fetchrow_hashref)
- {
+ while ($_ = $sth->fetchrow_hashref) {
      $faqcat{$_->{'faqcat'}} = $_;
  }
  
- $sth = $dbh->prepare("SELECT faqid, question, sortorder, faqcat, lastmodtime FROM faq WHERE faqcat<>'int-abuse'");
+ $sth = $dbr->prepare("SELECT faqid, question, sortorder, faqcat, lastmodtime ".
+		      "FROM faq WHERE faqcat<>'int-abuse'");
  $sth->execute;
- while ($_ = $sth->fetchrow_hashref)
- {
+ while ($_ = $sth->fetchrow_hashref) {
      $faqq{$_->{'faqid'}} = $_;
  }
 
- foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> $faqcat{$b}->{'catorder'} } keys %faqcat)
+ foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> 
+				$faqcat{$b}->{'catorder'} } keys %faqcat)
  {
-     $ret .= "(=H2 " . &BMLUtil::ehtml($faqcat{$faqcat}->{'faqcatname'}) . " H2=)\n";
+     $ret .= "(=H2 <a href=\"faqbrowse.bml?faqcat=$faqcat\">";
+     $ret .= BMLUtil::ehtml($faqcat{$faqcat}->{'faqcatname'});
+     $ret .= "</a> H2=)\n";
      $ret .= "<UL>\n";
      foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
      {

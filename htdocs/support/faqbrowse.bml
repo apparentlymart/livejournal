@@ -4,55 +4,57 @@ BODY<=
 
 (=_CODE
 
-my $id = $FORM{'faqid'} + 0;
-my $ret = "";
+ my $id = $FORM{'faqid'} + 0;
+ my $ret = "";
+ 
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+ 
+ my $where = "faqid=$id";
+ if ($FORM{'faqcat'}) {
+     $where = "faqcat=" . $dbh->quote($FORM{'faqcat'});
+ }
+ 
+ my $sth = $dbr->prepare("SELECT question, answer, lastmoduserid, ".
+			 "DATE_FORMAT(lastmodtime, '%Y-%m-%d'), ".
+			 "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
+			 "WHERE $where");
+ $sth->execute;
+ my ($question, $answer, $unixmodtime, $lastmoduserid);
+ while (($question, $answer, $lastmoduserid, $lastmodtime, $unixmodtime) =
+	$sth->fetchrow_array)
+ {
+     my $q = "";
+     my $a = "";
+     my $lastmodwho;
+     my $lastmodtime;
+     
+     $lastmodwho = LJ::get_username($dbs, $lastmoduserid);
+     
+     $dbh->do("UPDATE faq SET uses=uses+1 WHERE faqid=$id");
+     
+     &main::note_mod_time($unixmodtime);
+     
+     $q = &BMLUtil::ehtml($question);
+     $q =~ s/^\s+//; $q =~ s/\s+$//;
+     $q =~ s/\n/<BR>/g;
+     
+     $a = &BMLUtil::ehtml($answer);
+     $a =~ s/^\s+//; $a =~ s/\s+$//;
+     $a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
+     $a =~ s/\n/<BR>/g;
+     
+     $a =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=]+!<a href="$&">$&</a>!g;
 
-my $dbs = LJ::get_dbs();
-my $dbh = $dbs->{'dbh'};
-my $dbr = $dbs->{'reader'};
+     $ret .= "(=H1 $q H1=)<blockquote>$a</blockquote>";
 
-my $q = "";
-my $a = "";
-my $lastmodwho;
-my $lastmodtime;
+     if ($lastmodwho) {
+	 $ret .= "<p align=\"right\"><b>Last Updated:</b><br />$lastmodwho, $lastmodtime</p>";
+     }
+ }
 
-if ($id)
-{
-    my $sth = $dbr->prepare("SELECT question, answer, lastmoduserid, ".
-			    "DATE_FORMAT(lastmodtime, '%Y-%m-%d'), ".
-			    "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
-			    "WHERE faqid=$id");
-    $sth->execute;
-    my ($question, $answer, $unixmodtime, $lastmoduserid);
-    ($question, $answer, $lastmoduserid, $lastmodtime, $unixmodtime) =
-	$sth->fetchrow_array;
-    
-    $lastmodwho = LJ::get_username($dbs, $lastmoduserid);
-
-    $dbh->do("UPDATE faq SET uses=uses+1 WHERE faqid=$id");
-    
-    &main::note_mod_time($unixmodtime);
-    
-    $q = &BMLUtil::ehtml($question);
-    $q =~ s/^\s+//; $q =~ s/\s+$//;
-    $q =~ s/\n/<BR>/g;
-    
-    $a = &BMLUtil::ehtml($answer);
-    $a =~ s/^\s+//; $a =~ s/\s+$//;
-    $a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
-    $a =~ s/\n/<BR>/g;
-    
-    $a =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=]+!<a href="$&">$&</a>!g;
-}
-
-$ret .= "(=H1 $q H1=)<p>$a";
-
-if ($lastmodwho)
-{
-    $ret .= "<p align=\"right\"><b>Last Updated:</b><br />$lastmodwho, $lastmodtime</p>";
-}
-
-return $ret;
+ return $ret;
 
 _CODE=)
 
