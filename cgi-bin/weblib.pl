@@ -718,7 +718,7 @@ sub create_qr_div {
     $qrhtml .= "<div id='qrdiv' name='qrdiv' style='display:none;'>";
     $qrhtml .= "<table style='border: 1px solid black'>";
     $qrhtml .= "<tr valign='center'>";
-    $qrhtml .= "<td align='right'><b>".BML::ml('/talkpost.bml.opt.from')."</b></td><td>";
+    $qrhtml .= "<td align='right'><b>".BML::ml('/talkpost.bml.opt.from')."</b></td><td align='left'>";
     $qrhtml .= LJ::ljuser($remote->{'user'});
     $qrhtml .= "</td><td align='center'>";
 
@@ -754,7 +754,7 @@ sub create_qr_div {
 
     $qrhtml .= "<tr><td align='right'>";
     $qrhtml .= "<b>".BML::ml('/talkpost.bml.opt.subject')."</b></td>";
-    $qrhtml .= "<td colspan='2'>";
+    $qrhtml .= "<td colspan='2' align='left'>";
     $qrhtml .= "<input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value='' />";
     $qrhtml .= "</td></tr>";
 
@@ -766,7 +766,7 @@ sub create_qr_div {
     $qrhtml .= "</td></tr>";
 
     $qrhtml .= "<tr><td>&nbsp;</td>";
-    $qrhtml .= "<td colspan='3'>";
+    $qrhtml .= "<td colspan='3' align='left'>";
 
     $qrhtml .= LJ::html_submit('submitpost', BML::ml('/talkread.bml.button.post'),
                                { "id" => "submitpost",
