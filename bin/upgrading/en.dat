@@ -131,6 +131,8 @@
 
 /community/leave.bml.title=Leave Community
 
+/community/manage.bml.commlist.actinfo=Info
+
 /community/manage.bml.commlist.actions=<b>Actions</b>
 
 /community/manage.bml.commlist.actmembers=<b>[<a href='[[link]]'>Members</a>]</b>

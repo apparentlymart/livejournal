@@ -64,6 +64,8 @@ body<=
                 'link'=>"<a href='/community/settings.bml?comm=$user'>$ML{'.commlist.actsettings2'}</a>"}) . "&nbsp;&nbsp;";
             $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='/community/members.bml?comm=$user'>$ML{'.commlist.actmembers2'}</a>"}) . "&nbsp;&nbsp;";
+            $ret .= BML::ml('Actionlink', {
+                'link'=>"<a href='/editinfo.bml?authas=$user'>$ML{'.commlist.actinfo'}</a>"}) . "&nbsp;&nbsp;";
         }
         if ($mods{$id}) {
             my $num = $modcount{$id} || "0"; # relying on this to be <b>-wrapped
