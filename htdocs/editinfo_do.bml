@@ -707,6 +707,6 @@ _CODE=)
 PAGE=)(=_C <LJDEP>
 lib: LJ::TextMessage, cgi-bin/ljlib.pl, cgi-bin/ljlang.pl
 link: htdocs/legal/privacy.bml, htdocs/support/faqbrowse.bml, htdocs/tools/textmessage.bml, htdocs/uploadpic.bml
-link: htdocs/paidaccounts/index.bml, htdocs/topics/index.bml, htdocs/users, htdocs/userinfo.vml
+link: htdocs/paidaccounts/index.bml, htdocs/topics/index.bml, htdocs/users, htdocs/userinfo.bml
 img: htdocs/userpic
 </LJDEP> _C=)
