@@ -4675,10 +4675,7 @@ sub hash_password
 sub can_use_journal
 {
     my ($dbarg, $posterid, $reqownername, $res) = @_;
-
     my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
 
     my $qposterid = $posterid+0;
 
@@ -4690,21 +4687,19 @@ sub can_use_journal
     }
     my $ownerid = $uowner->{'userid'};
 
+    # the 'ownerid' necessity came first, way back when.  but then
+    # with clusters, everything needed to know more, like the
+    # journal's dversion and clusterid, so now it also returns the
+    # user row.
+    $res->{'ownerid'} = $ownerid;
+    $res->{'u_owner'} = $uowner;
+
     ## check if user has access
     my $sql = "SELECT COUNT(*) FROM logaccess WHERE ownerid=$ownerid AND posterid=$qposterid";
-    if ($dbr->selectrow_array($sql) || $dbh->selectrow_array($sql))
-    {
-        # the 'ownerid' necessity came first, way back when.  but then
-        # with clusters, everything needed to know more, like the
-        # journal's dversion and clusterid, so now it also returns the
-        # user row.
-        $res->{'ownerid'} = $ownerid;
-        $res->{'u_owner'} = $uowner;
-        return 1;
-    } else {
-        $res->{'errmsg'} = "You do not have access to post to this journal.";
-        return 0;
-    }
+    return 1 if dbs_selectrow_array($dbs, $sql);
+
+    $res->{'errmsg'} = "You do not have access to post to this journal.";
+    return 0;
 }
 
 # <LJFUNC>

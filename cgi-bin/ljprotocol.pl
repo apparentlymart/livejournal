@@ -800,6 +800,11 @@ sub editevent
 {
     my ($dbs, $req, $err, $flags) = @_;
     return undef unless authenticate($dbs, $req, $err, $flags);
+
+    # we check later that user owns entry they're modifying, so all
+    # we care about for check_altusage is that the target journal
+    # exists, and we want it to setup some data in $flags.
+    $flags->{'ignorecanuse'} = 1;
     return undef unless check_altusage($dbs, $req, $err, $flags);
 
     my $u = $flags->{'u'};
@@ -1922,11 +1927,11 @@ sub check_altusage
 
     # otherwise, check logaccess table:
     my $info = {};
-    if (LJ::can_use_journal($dbs, $u->{'userid'}, $req->{'usejournal'}, $info)) {
-        $flags->{'ownerid'} = $info->{'ownerid'};
-        $flags->{'u_owner'} = $info->{'u_owner'};
-        return 1;
-    }
+    my $canuse = LJ::can_use_journal($dbs, $u->{'userid'}, $req->{'usejournal'}, $info);
+    $flags->{'ownerid'} = $info->{'ownerid'};
+    $flags->{'u_owner'} = $info->{'u_owner'};
+
+    return 1 if $canuse || $flags->{'ignorecanuse'};
 
     # not allowed to access it
     return fail($err,300);
