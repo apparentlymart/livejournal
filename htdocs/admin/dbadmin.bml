@@ -1,12 +1,12 @@
 <html>
-<head><title>DB Admin - (=SITENAME=)</title>
+<head><title>DB Admin - <?sitename?></title>
 <style>
     p, td { font-size: 9pt; font-family: sans-serif; }
     input { font-size: 8pt; font-family: sans-serif; }
 </style>
 </head>
 <body bgcolor='#000000' text='#ffffff' link='#eeeeee' vlink='#eeeeee'>
-(=_CODE
+<?_code
 
  use strict;
  use vars qw(%FORM);
@@ -168,6 +168,6 @@
 
  return $ret;
 
-_CODE=)
+_code?>
 </body>
 </html>

@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  my $dbh = LJ::get_dbh("master");
  my $format = $FORM{'format'} || "html";
@@ -125,4 +125,4 @@
      return $ret;
  }
 
-_CODE=)
+_code?>

@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -56,6 +56,6 @@ FORM
  $ret .= "</table>";
  return $ret;
 
-_CODE=)(=_C <LJDEP>
-</LJDEP> _C=)
+_code?><?_c <LJDEP>
+</LJDEP> _c?>
 
