@@ -99,23 +99,27 @@ my $move_user = sub {
 
     # get a handle for every user to revalidate our connection?
     my ($dbh, $dbcm) = $get_db_handles->($u->{clusterid});
-    return 0 unless $dbh && $dbcm;
+    return 0 unless $dbh;
 
-    # assign this dbcm to the user
-    $u->set_dbcm($dbcm)
-        or die "unable to set database for $u->{user}: dbcm=$dbcm\n";
+    if ($dbcm) {
+        # assign this dbcm to the user
+        $u->set_dbcm($dbcm)
+            or die "unable to set database for $u->{user}: dbcm=$dbcm\n";
+    }
 
     # verify dversion hasn't changed on us (done by another job?)
     my $dversion = $dbh->selectrow_array("SELECT dversion FROM user WHERE userid = $u->{userid}");
     return 1 unless $dversion == 5;
 
     # ignore expunged users
-    if ($u->{'statusvis'} eq "X") {
+    if ($u->{'statusvis'} eq "X" || $u->{'clusterid'} == 0) {
         LJ::update_user($u, { dversion => 6 })
             or die "error updating dversion";
         $u->{dversion} = 6; # update local copy in memory
         return 1;
     }
+
+    return 0 unless $dbcm;
 
     # step 1: get all friend groups and move those.  safe to just grab with no limit because
     # there are limits to how many friend groups you can have (30).
@@ -129,9 +133,10 @@ my $move_user = sub {
             push @vars, $_ foreach @$row;
         }
         my $bind = join ',', @bind;
-        $u->do("INSERT INTO friendgroup2 (userid, groupnum, groupname, sortorder, is_public) " .
-               "VALUES $bind", undef, @vars);
-        die "error in friend group update: " . $u->errstr . "\n" if $u->err;
+        eval {
+            $u->do("INSERT INTO friendgroup2 (userid, groupnum, groupname, sortorder, is_public) " .
+                   "VALUES $bind", undef, @vars);
+        };
     }
 
     # general purpose flusher for use below

@@ -100,23 +100,27 @@ my $move_user = sub {
 
     # get a handle for every user to revalidate our connection?
     my ($dbh, $dbcm) = $get_db_handles->($u->{clusterid});
-    return 0 unless $dbh && $dbcm;
+    return 0 unless $dbh;
 
     # assign this dbcm to the user
-    $u->set_dbcm($dbcm)
-        or die "unable to set database for $u->{user}: dbcm=$dbcm\n";
+    if ($dbcm) {
+        $u->set_dbcm($dbcm)
+            or die "unable to set database for $u->{user}: dbcm=$dbcm\n";
+    }
 
     # verify dversion hasn't changed on us (done by another job?)
     my $dversion = $dbh->selectrow_array("SELECT dversion FROM user WHERE userid = $u->{userid}");
     return 1 unless $dversion == 6;
 
     # ignore expunged users
-    if ($u->{'statusvis'} eq "X") {
+    if ($u->{'statusvis'} eq "X" || $u->{'clusterid'} == 0) {
         LJ::update_user($u, { dversion => 7 })
             or die "error updating dversion";
         $u->{dversion} = 7; # update local copy in memory
         return 1;
     }
+
+    return 0 unless $dbcm;
 
     # step 0.5: delete all the bogus userblob rows for this user
     # This is due to the auto_increment for the blobid overflowing
