@@ -91,7 +91,13 @@ body<=
  }
 
  ## bounce request to email
- if ($type eq 'bounce' && $FORM{'bounce_email'}) {
+ if ($type eq 'bounce') {
+
+     return LJ::bad_input("No email address specified for bounce.")
+         unless $FORM{'bounce_email'};
+
+     return LJ::bad_input("You are not authorized to bounce this request")
+         unless LJ::Support::can_bounce($sp, $remote);
 
      # check email using BMLCodeBlock::check_email
      my @email_errors;
@@ -102,7 +108,7 @@ body<=
      my $splid = LJ::Support::append_request($sp, {
          'body' => "(Bouncing mail to '$FORM{'bounce_email'}' and closing)\n\n" . $FORM{'body'},
          'posterid' => $remote ? $remote->{'userid'} : 0,
-         'type' => $type,
+         'type' => 'internal',
      });
 
      # bounce original request to email

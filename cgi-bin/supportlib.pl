@@ -142,6 +142,17 @@ sub can_read_cat
             LJ::check_priv($remote, "supportread", $cat->{'catkey'}));
 }
 
+sub can_bounce
+{
+    my ($sp, $remote) = @_;
+    if ($sp->{_cat}->{'public_read'}) {
+        if (LJ::check_priv($remote, "supportclose", "")) { return 1; }
+    }
+    my $catkey = $sp->{_cat}->{'catkey'};
+    if (LJ::check_priv($remote, "supportclose", $catkey)) { return 1; }
+    return 0;
+}
+
 sub can_close
 {
     my ($sp, $remote, $auth) = @_;
@@ -277,8 +288,7 @@ sub get_answer_types
     if (can_help($sp, $remote)) {
         push @ans_type, ("screened" => "Screened Response", 
                          "answer" => "Answer",                         
-                         "comment" => "Comment or Question",
-                         "bounce" => "Bounce to Email & Close");
+                         "comment" => "Comment or Question");
     } elsif ($sp->{_cat}->{'allow_screened'}) {
         push @ans_type, ("screened" => "Screened Response");
     }
@@ -287,6 +297,10 @@ sub get_answer_types
         ! $sp->{_cat}->{'public_help'})
     {
         push @ans_type, ("internal" => "Internal Comment / Action");
+    }
+
+    if (can_bounce($sp, $remote)) {
+        push @ans_type, ("bounce" => "Bounce to Email & Close");
     }
 
     return @ans_type;
