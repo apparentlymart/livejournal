@@ -209,6 +209,14 @@ sub get_blob_domainid
     die "Unknown blob domain: $name";
 }
 
+sub locker {
+    return $LJ::LOCKER_OBJ ||=
+	new DDLockClient (
+			  servers => [ @LJ::LOCK_SERVERS ],
+			  lockdir => $LJ::LOCKDIR || "$LJ::HOME/locks",
+			  );
+}
+
 # <LJFUNC>
 # name: LJ::get_dbh
 # class: db
@@ -3977,6 +3985,7 @@ sub start_request
             };
             $LJ::IMGPREFIX_BAK = $LJ::IMGPREFIX;
             $LJ::STATPREFIX_BAK = $LJ::STATPREFIX;
+            $LJ::LOCKER_OBJ = undef;
             $LJ::DBIRole->set_sources(\%LJ::DBINFO);
             LJ::MemCache::reload_conf();
             if ($modtime > $now - 60) {

@@ -6,7 +6,6 @@
 # </LJDEP>
 
 use strict;
-use Fcntl ':flock'; 
 use vars qw(%maint $VERBOSE);
 
 unless (-d $ENV{'LJHOME'}) {
@@ -17,7 +16,6 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 my %maintinfo;
 my $MAINT = "$LJ::HOME/bin/maint";
-my $LOCKDIR = "$LJ::HOME/temp";
 
 load_tasks();
 
@@ -94,42 +92,22 @@ sub run_task
         return;
     }
 
-    my $lock_file = "$LOCKDIR/mainttask-$task";
-    if (-e $lock_file) {
-        open(LOCK, $lock_file);
-        my $line = <LOCK>;
-        if ($line =~ /(\d+)/) {
-            my $start = $1;
-            my $age = time() - $start;
-            if ($age > 60*5) {
-                print "Stale ljmaint lock file?  Existing for $age seconds: $lock_file\n";
-                exit 1;
-            }
-        }
-        close LOCK;
+    my $opts = $maintinfo{$task}{opts} || {};
+    my $lock = undef;
+    unless ($opts->{no_locking} ||
+	    ($lock = LJ::locker->trylock("mainttask-$task"))
+	    ) {
+        print "Task '$task' already running.  Quitting.\n" if $VERBOSE >= 1;
+	exit 0;
     }
 
-    open (LOCK, ">$lock_file") or die "Couldn't write lock file: $lock_file: $!";
-    if (flock (LOCK, LOCK_EX|LOCK_NB)) {
-        seek(LOCK, 0, 0);  # go to beginning of file
-        select(LOCK);
-        $| = 1;
-        select(STDOUT);
-        print LOCK ("Started at: " . time() . " (" . scalar(localtime()) . ")\n");
-        require "$MAINT/$maintinfo{$task}->{'source'}";
-        $LJ::LJMAINT_VERBOSE = $VERBOSE;
-        eval {
-            $maint{$task}->(@args);
-        };
-		if ( $@ ) {
-			print STDERR "ERROR> task $task died: $@\n\n";
-		}
-        unlink $lock_file;
-        flock(LOCK, LOCK_UN);
-        close LOCK;
-
-    } else {
-        print "Task '$task' already running.  Quitting.\n" if ($VERBOSE >= 1);
+    require "$MAINT/$maintinfo{$task}->{'source'}";
+    $LJ::LJMAINT_VERBOSE = $VERBOSE;
+    eval {
+	$maint{$task}->(@args);
+    };
+    if ( $@ ) {
+	print STDERR "ERROR> task $task died: $@\n\n";
     }
 }
 

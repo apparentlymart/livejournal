@@ -2,7 +2,7 @@
 #
 
 use strict;
-use vars qw(%maint);
+use vars qw(%maint %maintinfo);
 use lib "$ENV{'LJHOME'}/cgi-bin";  # extra XML::Encoding files in cgi-bin/XML/*
 use LWP::UserAgent;
 use XML::RSS;
@@ -11,6 +11,7 @@ require "ljprotocol.pl";
 require "parsefeed.pl";
 require "cleanhtml.pl";
 
+$maintinfo{'synsuck'}{opts}{no_locking} = 1;
 $maint{'synsuck'} = sub
 {
     my $verbose = $LJ::LJMAINT_VERBOSE;
