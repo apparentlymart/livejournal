@@ -340,27 +340,62 @@ sub resolve_plural {
 sub plural_form {
     my ($lang, $count) = @_;
     return plural_form_en($count) if $lang =~ /^en/;
-    return plural_form_ru($count) if $lang =~ /^ru/;
-    return plural_form_fr($count) if $lang =~ /^fr/;
+    return plural_form_ru($count) if $lang =~ /^ru/ || $lang =~ /^uk/;
+    return plural_form_fr($count) if $lang =~ /^fr/ || $lang =~ /^pt_BR/;
+    return plural_form_lt($count) if $lang =~ /^lt/;
+    return plural_form_singular() if $lang =~ /^hu/ || $lang =~ /^ja/ || $lang =~ /^tr/;
+    return plural_form_lv($count) if $lang =~ /^lv/;
     return plural_form_en($count);  # default
 }
 
+# English, Danish, German, Norwegian, Swedish, Estonian, Finnish, Greek, Hebrew, Italian, Portugese, Spanish, Esperanto
 sub plural_form_en {
     my ($count) = shift;
     return 0 if $count == 1;
     return 1;
 }
 
+# French, Brazilian Portuguese
 sub plural_form_fr {
     my ($count) = shift;
     return 1 if $count > 1;
     return 0;
 }
 
+# Croatian, Czech, Russian, Slovak, Ukrainian
 sub plural_form_ru {
     my ($count) = shift;
     return 0 if ($count%10 == 1 and $count%100 != 11);
     return 1 if ($count%10 >= 2 and $count%10 <= 4 and ($count%100 < 10 or $count%100>=20));
+    return 2;
+}
+
+# Polish
+sub plural_form_pl {
+    my ($count) = shift;
+    return 0 if($count == 1);
+    return 1 if($count%10 >= 2 && $count%10 <= 4 && ($count%100 < 10 || $count%100 >= 20));
+    return 2;
+}
+
+# Lithuanian
+sub plural_form_lt {
+    my ($count) = shift;
+    return 0 if($count%10 == 1 && $count%100 != 11);
+    return 1 if ($count%10 >= 2 && ($count%100 < 10 || $count%100 >= 20));
+    return 2;
+}
+
+# Hungarian, Japanese, Korean (not supported), Turkish
+sub plural_form_singular {
+    return 0;
+}
+
+# Latvian
+sub plural_form_lv {
+    my ($count) = shift;
+    return 0 if($count%10 == 1 && $count%100 != 11);
+    return 1 if($count != 0);
     return 2;
 }
 
