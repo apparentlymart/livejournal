@@ -142,6 +142,7 @@ sub worker
 
         $busy = 1;
         cleanup();
+        LJ::start_request();
 
         # Get list of files to process.
         # If a file simply exists in the mailspool, it needs attention.
@@ -190,6 +191,7 @@ sub worker
 
         $busy = 0;
         debug("\tdone\n");
+        LJ::end_request();
 
         # sleep for a bit if we finished reading the directory
         sleep ($opt->{'foreground'} ? 3 : 10);
