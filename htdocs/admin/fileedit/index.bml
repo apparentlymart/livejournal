@@ -38,7 +38,7 @@
          return 1;
      }
 
-     open (FILE, ">$INC_DIR/$file") or return 0;
+     open (FILE, ">$INC_DIR/$filename") or return 0;
      print FILE $content;
      close FILE;
      return 1;
