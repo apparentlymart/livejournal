@@ -18,8 +18,9 @@ REQUEST:
     # XML-RPC interface
     if ($ENV{'PATH_INFO'} eq "/xmlrpc") {
 	my $server = XMLRPC::Transport::HTTP::CGI
+            -> on_action(sub { die "Access denied\n" if $_[2] =~ /:|\'/ })
 	    -> dispatch_to('LJ::XMLRPC')
-		-> handle;
+            -> handle;
 	next REQUEST;
     }
 
