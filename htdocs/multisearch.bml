@@ -27,6 +27,7 @@
              $url = "$LJ::SITEROOT/allpics.bml?user=$user";
          } else {
              $url = "$LJ::SITEROOT/userinfo.bml?user=$user";
+             $url .= "&mode=full" if $what eq 'full';
          }
 
          return BML::redirect($url);
