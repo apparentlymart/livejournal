@@ -1,21 +1,21 @@
 <?_code
 {
  use strict;
- use vars qw($title $body %GET);
+ use vars qw($title $body %GET %POST);
 
  $title = "Error";
  $body = "No parameters given";
 
  # S2 Redirector
- if ($GET{'redir_type'} eq "monthview") {
-     my $user = LJ::canonical_username($GET{'redir_user'});
+ if ($POST{'redir_type'} eq "monthview") {
+     my $user = LJ::canonical_username($POST{'redir_user'});
      my $vhost;
-     $vhost = $GET{'redir_vhost'} if $GET{'redir_vhost'} =~ /users|tilde|community|front|other/;
+     $vhost = $POST{'redir_vhost'} if $POST{'redir_vhost'}=~/users|tilde|community|front|other/;
      if ($vhost eq "other") {
          # FIXME: lookup their domain alias, and make vhost be "other:domain.com";
      }
      my $base = LJ::journal_base($user, $vhost);
-     return "Bogus redir_key" unless $GET{'redir_key'} =~ /^(\d\d\d\d)(\d\d)$/;
+     return "Bogus redir_key" unless $POST{'redir_key'} =~/^(\d\d\d\d)(\d\d)$/;
      my ($year, $month) = ($1, $2);
      return BML::redirect("$base/$year/$month/");
  }
