@@ -65,6 +65,7 @@ sub error_message
              "402" => "Your IP address is temporarily banned for exceeding the login failure rate.",
              "403" => "This would push you over your syndication quota.",
              "404" => "Cannot post",
+             "405" => "Post frequency limit.",
 
              # Server Errors
              "500" => "Internal server error",
@@ -609,7 +610,7 @@ sub postevent
         });
         return fail($err,103,$error) if $error;
     }
-
+    
     my $qownerid = $ownerid+0;
     my $qposterid = $posterid+0;
 
@@ -680,6 +681,12 @@ sub postevent
         $rlogtime =~ s/\?/\'$udbh_now\'/;  # replace parameter above with current time
 
         $getlock->(); return $res if $res_done;
+
+        # do rate-checking
+        if (! LJ::rate_log($u, "post", 1)) {
+            return fail($err,405);
+        }
+
         $dbcm->do("INSERT INTO log2 (journalid, posterid, eventtime, logtime, security, ".
                   "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
                   "VALUES ($qownerid, $qposterid, $qeventtime, '$udbh_now', $qsecurity, $qallowmask, ".

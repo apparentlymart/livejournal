@@ -517,7 +517,9 @@ UPDATE priv_list SET des='Allows a user to edit site text in a given language. a
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows abuse staff to view an entry even if protected.  Must explictily enter this mode, and then it\'s audited, to prevent people from abusing this mode.', '0', 'viewall', 'View All Entries', 'general');
 UPDATE priv_list SET des='Allows abuse staff to view an entry even if protected.  Must explictily enter this mode, and then it\'s audited, to prevent people from abusing this mode.',is_public='0',privname='View All Entries',scope='general' WHERE privcode='viewall';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when wrong username/password is used.', 'failed_login');
+INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged whenever user posts (to any journal)', 'post');
 UPDATE ratelist SET des='Logged when wrong username/password is used.',name='failed_login' WHERE rlid=NULL;
+UPDATE ratelist SET des='Logged whenever user posts (to any journal)',name='post' WHERE rlid=NULL;
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('??', 'zips', 'FIPS');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('??', 'zips', 'alloc');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('FIPS', '??', 'zips');
