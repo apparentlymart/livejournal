@@ -5,7 +5,7 @@
  my @errors = ();
  my $user = LJ::canonical_username($FORM{'user'});
  my $password = $FORM{'password'};
- my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+ my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -40,27 +40,15 @@
  
  my $etime = 0;
  if ($FORM{'expire'} eq "never") { $etime = time()+60*60*24*60; }
- &BMLClient::set_cookie("ljuser", $user, $etime, $LJ::COOKIE_PATH);
- &BMLClient::set_cookie("ljhpass", "$user:$hpassword", $etime, $LJ::COOKIE_PATH);
- &BMLClient::set_cookie("ljuser", $user, $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
- &BMLClient::set_cookie("ljhpass", "$user:$hpassword", $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+ BMLClient::set_cookie("ljuser", $user, $etime, $LJ::COOKIE_PATH);
+ BMLClient::set_cookie("ljhpass", "$user:$hpassword", $etime, $LJ::COOKIE_PATH);
+ BMLClient::set_cookie("ljuser", $user, $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+ BMLClient::set_cookie("ljhpass", "$user:$hpassword", $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
 
- if ($FORM{'notfast'}) 
- {
-     my $site_domain = $SITEROOT;
-     $site_domain =~ s,^\w+://,,;
-     $site_domain =~ s,(:\d+)?/.*,,;
-
-     foreach my $dom ($LJ::DOMAIN, $LJ::COOKIE_DOMAIN, $site_domain)
-     {
-	 &BMLClient::set_cookie("ljfastserver", "", undef, $LJ::COOKIE_PATH, $dom);
-     }
- }
- elsif ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid")
- {
-     &BMLClient::set_cookie("ljfastserver", "1", $etime, $LJ::COOKIE_PATH);
-     &BMLClient::set_cookie("ljfastserver", "1", $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
- }
+ LJ::run_hooks("post_login", {
+     "u" => $u,
+     "form" => \%FORM,
+ });
 	
  $BMLClient::COOKIE{"ljuser"} = $user;
  $BMLClient::COOKIE{"ljhpass"} = "$user:$hpassword";
@@ -68,7 +56,7 @@
  if ($FORM{'ref'} =~ /\Q$LJ::DOMAIN\E/ && $FORM{'ref'} !~ m!/logout\.bml$!) {
      print "Location: $FORM{'ref'}\n\n";
      $body = ""; 
-     &BML::finish();
+     BML::finish();
      return "";
  }
  
