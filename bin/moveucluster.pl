@@ -481,7 +481,7 @@ sub movefrom0_talkitem
         ($table, $db) = ("talkleft", $dbch) if $userid == $item->{'posterid'};
         $replace_into->($db, $table, "(userid, posttime, journalid, nodetype, ".
                         "nodeid, jtalkid, publicitem)", 50,
-                        $userid, $item->{'datepostunix'}, $userid,
+                        $item->{'posterid'}, $item->{'datepostunix'}, $userid,
                         'L', $jitemid, $jtalkid, $pub);
     }
 }
