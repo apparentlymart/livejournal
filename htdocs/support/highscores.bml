@@ -27,6 +27,8 @@ The following people have helped other users in the support area:
          $rank{$userid}->{'last'} = $rank;
      }
  }
+ return "<blockquote>Support high score data is not available.</blockquote>"
+    unless %rank;
 
  $sth = $dbr->prepare("SELECT u.userid, u.user, u.name, sp.totpoints AS 'points', sp.lastupdate ".
                       "FROM user u, supportpointsum sp WHERE u.userid=sp.userid");

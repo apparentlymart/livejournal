@@ -428,7 +428,7 @@ $maint{'genstats_size'} = sub {
 $maint{'genstats_weekly'} = sub
 {
     LJ::Stats::register_stat
-        ({ 'type' => "clustered",
+        ({ 'type' => "global",
            'jobname' => "supportrank",
            'statname' => "supportrank",
            'handler' =>
