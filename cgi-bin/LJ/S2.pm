@@ -567,6 +567,7 @@ sub escape_context_props
             } else {
                 $obj->{$k} =~ s/</&lt;/g;
                 $obj->{$k} =~ s/>/&gt;/g;
+                $obj->{$k} =~ s!\n!<br/>!g;
             }
         }
     } elsif (ref $obj eq "ARRAY") {
@@ -576,6 +577,7 @@ sub escape_context_props
             } else {
                 s/</&lt;/g;
                 s/>/&gt;/g;
+                s!\n!<br/>!g;
             }
         }
     }
