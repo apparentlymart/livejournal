@@ -438,6 +438,8 @@ INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorde
 UPDATE logproplist SET datatype='num',des='Unix time of the last edit',prettyname='Revision time',scope='general',sortorder='99' WHERE name='revtime';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('char', 'Original URL of syndication item', 'syn_link', 'Syndication item link URL', 'general', '99');
 UPDATE logproplist SET datatype='char',des='Original URL of syndication item',prettyname='Syndication item link URL',scope='general',sortorder='99' WHERE name='syn_link';
+INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('char', 'Unique id of syndication item', 'syn_id', 'Syndicated item id', 'general', '99');
+UPDATE logproplist SET datatype='char',des='Unique id of syndication item',prettyname='Syndicated item id',scope='general',sortorder='99' WHERE name='syn_id';
 INSERT IGNORE INTO logproplist (datatype, des, name, prettyname, scope, sortorder) VALUES ('bool', 'True if text has 8-bit data that\'s not in UTF-8', 'unknown8bit', 'Unknown 8-bit text', 'general', '99');
 UPDATE logproplist SET datatype='bool',des='True if text has 8-bit data that\'s not in UTF-8',prettyname='Unknown 8-bit text',scope='general',sortorder='99' WHERE name='unknown8bit';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows a user to view paid accounts that are going to expire soon', '1', 'accountsexpiring', 'Accounts - Expiring', 'general');

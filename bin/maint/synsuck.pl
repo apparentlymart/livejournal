@@ -8,6 +8,7 @@ use LWP::UserAgent;
 use XML::RSS;
 use HTTP::Status;
 require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
+require "$ENV{'LJHOME'}/cgi-bin/parsefeed.pl";
 
 $maint{'synsuck'} = sub
 {
@@ -102,28 +103,24 @@ $maint{'synsuck'} = sub
         }
 
         # parsing time...
-        my $rss = new XML::RSS;
-        eval {
-            $rss->parse($content);
-        };
-        if ($@) {
+        my ($feed, $error) = LJ::ParseFeed::parse_feed($content);
+        if ($error) {
             # parse error!
-            print "Parse error!\n" if $verbose;
+            print "Parse error! $error\n" if $verbose;
             $delay->(3*60, "parseerror");
-            my $err = $@;
-            $err =~ s! at /.*!!;
-            $err =~ s/^\n//; # cleanup of newline at the beggining of the line
-            LJ::set_userprop($userid, "rssparseerror", $err);
+            $error =~ s! at /.*!!;
+            $error =~ s/^\n//; # cleanup of newline at the beggining of the line
+            LJ::set_userprop($userid, "rssparseerror", $error);
             return;
         }
 
         # another sanity check
-        unless (ref $rss->{'items'} eq "ARRAY") {
+        unless (ref $feed->{'items'} eq "ARRAY") {
             $delay->(3*60, "noitems");
             return;
         }
 
-        my @items = reverse @{$rss->{'items'}};
+        my @items = reverse @{$feed->{'items'}};
 
         # take most recent 20
         splice(@items, 0, @items-20) if @items > 20;
@@ -154,28 +151,33 @@ $maint{'synsuck'} = sub
         # determine if link tags are good or not, where good means
         # "likely to be a unique per item".  some feeds have the same
         # <link> element for each item, which isn't good.
-        my $good_links = 0;
+        # if we have unique ids, we don't compare link tags
+
+        my ($compare_links, $have_ids) = 0;
         {
             my %link_seen;
             foreach my $it (@items) {
+                $have_ids = 1 if $it->{'id'};
                 next unless $it->{'link'};
                 $link_seen{$it->{'link'}} = 1;
             }
-            $good_links = 1 if scalar(keys %link_seen) == scalar(@items);
+            $compare_links = 1 if !$have_ids and $feed->{'type'} eq 'rss' and
+                scalar(keys %link_seen) == scalar(@items);
         }
 
-        # if the links are good, load all the URLs for syndicated
+        # if we have unique links/ids, load them for syndicated
         # items we already have on the server.  then, if we have one
         # already later and see it's changed, we'll do an editevent
         # instead of a new post.
         my %existing_item = ();
-        if ($good_links) {
-            my $p = LJ::get_prop("log", "syn_link");
+        if ($have_ids || $compare_links) {
+            my $p = $have_ids ? LJ::get_prop("log", "syn_id") :
+                LJ::get_prop("log", "syn_link");
             my $sth = $udbh->prepare("SELECT jitemid, value FROM logprop2 WHERE ".
                                      "journalid=? AND propid=? LIMIT 1000");
             $sth->execute($su->{'userid'}, $p->{'id'});
-            while (my ($itemid, $link) = $sth->fetchrow_array) {
-                $existing_item{$link} = $itemid;
+            while (my ($itemid, $id) = $sth->fetchrow_array) {
+                $existing_item{$id} = $itemid;
             }
         }
 
@@ -188,7 +190,7 @@ $maint{'synsuck'} = sub
             # we don't want perl knowing that and fucking stuff up
             # for us behind our back in random places all over
             # http://zilla.livejournal.org/show_bug.cgi?id=1037
-            foreach my $attr (qw(title description link)) {
+            foreach my $attr (qw(subject text link)) {
                 $it->{$attr} = pack('C*', unpack('C*', $it->{$attr}));
             }
 
@@ -200,60 +202,80 @@ $maint{'synsuck'} = sub
                      undef, $userid, $dig);
 
             $newcount++;
-            print "[$$] $dig - $it->{'title'}\n" if $verbose;
-            $it->{'description'} =~ s/^\s+//;
-            $it->{'description'} =~ s/\s+$//;
+            print "[$$] $dig - $it->{'subject'}\n" if $verbose;
+            $it->{'text'} =~ s/^\s+//;
+            $it->{'text'} =~ s/\s+$//;
             
-            my @now = localtime();
             my $htmllink;
             if (defined $it->{'link'}) {
                 $htmllink = "<p class='ljsyndicationlink'>" .
                     "<a href='$it->{'link'}'>$it->{'link'}</a></p>";
             }
 
+            # $own_time==1 means we took the time from the feed rather than localtime
+            my ($own_time, $year, $mon, $day, $hour, $min);
+
+            if ($it->{'time'} && 
+                $it->{'time'} =~ m!^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)!) {
+                $own_time = 1;
+                ($year, $mon, $day, $hour, $min) = ($1,$2,$3,$4,$5);
+            } else {
+                $own_time = 0;
+                my @now = localtime();
+                ($year, $mon, $day, $hour, $min) = 
+                    ($now[5]+1900, $now[4]+1, $now[3], $now[2], $now[1]);
+            }
+
             my $command = "postevent";
             my $req = {
                 'username' => $user,
                 'ver' => 1,
-                'subject' => $it->{'title'},
-                'event' => "$htmllink$it->{'description'}",
-                'year' => $now[5]+1900,
-                'mon' => $now[4]+1,
-                'day' => $now[3],
-                'hour' => $now[2],
-                'min' => $now[1],
+                'subject' => $it->{'subject'},
+                'event' => "$htmllink$it->{'text'}",
+                'year' => $year,
+                'mon' => $mon,
+                'day' => $day,
+                'hour' => $hour,
+                'min' => $min,
                 'props' => {
                     'syn_link' => $it->{'link'},
                 },
             };
+            $req->{'props'}->{'syn_id'} = $it->{'id'} 
+                if $it->{'id'};
+
             my $flags = {
                 'nopassword' => 1,
             };
 
             # if the post contains html linebreaks, assume it's preformatted.
-            if ($it->{'description'} =~ /<(p|br)\b/i) {
+            if ($it->{'text'} =~ /<(p|br)\b/i) {
                 $req->{'props'}->{'opt_preformatted'} = 1;
             }
 
             # do an editevent if we've seen this item before
-            my $old_itemid = $existing_item{$it->{'link'}};
-            if ($it->{'link'} && $old_itemid) {
+            my $id = $have_ids ? $it->{'id'} : $it->{'link'};
+            my $old_itemid = $existing_item{$id};
+            if ($id && $old_itemid) {
                 $newcount--; # cancel increment above
                 $command = "editevent";
                 $req->{'itemid'} = $old_itemid;
                 
                 # the editevent requires us to resend the date info, which
-                # we have to go fetch first, to see when we first syndicated
-                # the item:
-                my $origtime = $udbh->selectrow_array("SELECT eventtime FROM log2 WHERE ".
-                                                      "journalid=? AND jitemid=?", undef,
-                                                      $su->{'userid'}, $old_itemid);
-                $origtime =~ /(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/;
-                $req->{'year'} = $1;
-                $req->{'mon'} = $2;
-                $req->{'day'} = $3;
-                $req->{'hour'} = $4;
-                $req->{'min'} = $5;
+                # we have to go fetch first, in case the feed doesn't have it
+                
+                unless($own_time) {
+                    my $origtime = 
+                        $udbh->selectrow_array("SELECT eventtime FROM log2 WHERE ".
+                                               "journalid=? AND jitemid=?", undef,
+                                               $su->{'userid'}, $old_itemid);
+                    $origtime =~ /(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d)/;
+                    $req->{'year'} = $1;
+                    $req->{'mon'} = $2;
+                    $req->{'day'} = $3;
+                    $req->{'hour'} = $4;
+                    $req->{'min'} = $5;
+                }
             }
 
             my $err;
@@ -279,7 +301,7 @@ $maint{'synsuck'} = sub
         # update syndicated account's userinfo if necessary
         LJ::load_user_props($su, "url", "urlname");
         {
-            my $title = $rss->channel('title');
+            my $title = $feed->{'title'};
             $title = $su->{'user'} unless LJ::is_utf8($title);
             $title =~ s/[\n\r]//g;
             if ($title && $title ne $su->{'name'}) {
@@ -287,12 +309,12 @@ $maint{'synsuck'} = sub
                 LJ::set_userprop($su, "urlname", $title);
             }
 
-            my $link = $rss->channel('link');
+            my $link = $feed->{'link'};
             if ($link && $link ne $su->{'url'}) {
                 LJ::set_userprop($su, "url", $link);
             }
 
-            my $des = $rss->channel('description');
+            my $des = $feed->{'description'};
             if ($des) {
                 my $bio;
                 if ($su->{'has_bio'} eq "Y") {
