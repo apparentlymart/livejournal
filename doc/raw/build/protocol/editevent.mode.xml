@@ -38,9 +38,16 @@ Specifies who can read this post. Valid values are <emphasis>public</emphasis> (
 Relevant when security is usemask. A 32-bit unsigned integer representing which of the user's groups of friends are allowed to view this post. Turn bit 0 on to allow any defined friend to read it. Otherwise, turn bit 1-30 on for every friend group that should be allowed to read it. Bit 31 is reserved.
 </des></scalar></key>
 
-<key name="props" count="opt"><struct count="0more"><des>
-Properties and their values for the item being returned.
-</des></struct></key>
+<key name="props" count="opt">
+  <des>
+  Set arbitrary (but restricted) meta-data properties to this log item. See <link id="ljp.csp.proplist" /> 
+  for the documentation of the keys and value data types.
+  </des>
+  <list count="1">
+    <des>The following 'struct' should have property names as the keys, and the values should be a scalar data type.</des>
+    <struct count="0more"/>
+  </list>
+</key>
 
 <key name="usejournal" count="opt"><scalar><des>
 If editing a shared journal entry, include this key and the username you wish to edit the entry in. By default, you edit the entry as if it were in user "user"'s journal, as specified above.

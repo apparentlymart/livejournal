@@ -46,67 +46,68 @@
 </xsl:template>
 
 <xsl:template match="struct">
-<listitem><para>
-<emphasis>[struct]</emphasis>
-<xsl:call-template name="count"/>
-Containing keys:
-  <itemizedlist>
-  <xsl:for-each select="*">
+  <listitem><para>
+  <emphasis>[struct]</emphasis>
+  <xsl:call-template name="count"/>
+  <xsl:for-each select="des">
      <xsl:apply-templates select="."/>
   </xsl:for-each>
-  </itemizedlist>
-</para></listitem>
+  </para><para>
+  Containing keys:
+    <itemizedlist>
+    <xsl:for-each select="*">
+      <xsl:apply-templates select="."/>
+    </xsl:for-each>
+    </itemizedlist>
+  </para></listitem>
 </xsl:template>
 
 <xsl:template match="scalar">
-<listitem><para>
-<emphasis>[scalar]</emphasis>
-<xsl:call-template name="count">
-  <xsl:with-param name="count" select="count"/>
-</xsl:call-template>
-    <xsl:for-each select="*">
-      <xsl:apply-templates select="."/>
-    </xsl:for-each>
-
-</para></listitem>
+  <listitem><para>
+  <emphasis>[scalar]</emphasis>
+  <xsl:call-template name="count"/>
+  <xsl:for-each select="*">
+    <xsl:apply-templates select="."/>
+  </xsl:for-each>
+  </para></listitem>
 </xsl:template>
 
 <xsl:template match="key">
-<listitem><para>
-<emphasis role="bold"><xsl:value-of select="@name"/></emphasis>:
-  <itemizedlist>
-  <xsl:value-of select="des"/>
-<xsl:call-template name="count">
-  <xsl:with-param name="count" select="count"/>
-</xsl:call-template>
+  <listitem><para>
+  <emphasis role="bold"><xsl:value-of select="@name"/></emphasis>
+    <xsl:call-template name="count"/>:    
+    <xsl:for-each select="des">
+      <xsl:apply-templates select="."/>
+    </xsl:for-each>
+    <itemizedlist>
     <xsl:for-each select="*">
       <xsl:apply-templates select="."/>
     </xsl:for-each>
-  </itemizedlist>
-</para></listitem>
+    </itemizedlist>
+  </para></listitem>
 </xsl:template>
 
 <xsl:template match="list">
-<listitem><para>
-<emphasis>[list]</emphasis> 
-<xsl:call-template name="count"/>
-  <xsl:value-of select="des"/>
-  Containing items:
-  <itemizedlist>
-  <xsl:for-each select="scalar|struct|list">
-     <xsl:apply-templates select="."/>
-  </xsl:for-each>
-  </itemizedlist>
-</para></listitem>
+  <listitem><para>
+  <emphasis>[list]</emphasis> 
+  <xsl:call-template name="count"/>
+    <xsl:value-of select="des"/>
+    Containing items:
+    <itemizedlist>
+    <xsl:for-each select="scalar|struct|list">
+      <xsl:apply-templates select="."/>
+    </xsl:for-each>
+    </itemizedlist>
+  </para></listitem>
 </xsl:template>
 
 <xsl:template name="count">
-    <xsl:choose>
-      <xsl:when test="@count='1'">(required)</xsl:when>
-      <xsl:when test="@count='opt'">(optional)</xsl:when>
-      <xsl:when test="@count='1more'">(required; multiple allowed)</xsl:when>
-      <xsl:when test="@count='0more'">(optional; multiple allowed)</xsl:when>
-    </xsl:choose>
+  <xsl:choose>
+    <xsl:when test="@count='1'">(required)</xsl:when>
+    <xsl:when test="@count='opt'">(optional)</xsl:when>
+    <xsl:when test="@count='1more'">(required; multiple allowed)</xsl:when>
+    <xsl:when test="@count='0more'">(optional; multiple allowed)</xsl:when>
+  </xsl:choose>
 </xsl:template>
 
 </xsl:stylesheet>

@@ -49,9 +49,15 @@ The current 1- or 2-digit hour from 0 to 23 (from the user's local timezone).
 The current 1- or 2-digit minute (from the user's local timezone).
 </des></scalar></key>
 
-<key name="props" count="0more"><scalar><des>
-Set an arbitrary (but restricted) meta-data property to this log item. See <link id="ljp.csp.proplist" /> on properties for the discussion of them and the list of valid names. You may send zero or more keys like this, one for each property you're setting.
-</des></scalar>
+<key name="props" count="opt">
+  <des>
+  Set arbitrary (but restricted) meta-data properties to this log item. See <link id="ljp.csp.proplist" /> 
+  for the documentation of the keys and value data types.
+  </des>
+  <list count="1">
+    <des>The following 'struct' should have property names as the keys, and the values should be a scalar data type.</des>
+    <struct count="0more"/>
+  </list>
 </key>
 
 <key name="usejournal" count="opt">
