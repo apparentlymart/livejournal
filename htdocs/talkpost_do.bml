@@ -4,6 +4,9 @@ BODY<=
 
 (=_CODE
 
+ use strict;
+ use vars qw(%FORM);
+
  foreach my $re (@LJ::TALKSPAM) {
      return if ($FORM{'body'} =~ /$re/);
  }
@@ -14,6 +17,8 @@ BODY<=
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
+ my $sth;
+
  my $remote = LJ::get_remote($dbs);
 
  my $init = LJ::Talk::init($dbs, \%FORM);
@@ -21,8 +26,15 @@ BODY<=
  return "Error: couldn't determine journal from arguments." unless $u;
  return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
- my $pics = LJ::Talk::get_subjecticons;
+ my $pics = LJ::Talk::get_subjecticons();
  my $clustered = $init->{'clustered'};
+
+ my ($dbcs, $dbcm, $dbcr) = ($dbs, $dbh, $dbr);
+ if ($clustered) {
+     $dbcs = LJ::get_cluster_set($u);
+     $dbcm = $dbcs->{'dbh'};
+     $dbcr = $dbcs->{'reader'};
+ }
 
  my $jarg = $clustered ? "journal=$u->{'user'}&" : "";
  my $jargent = $clustered ? "journal=$u->{'user'}&amp;" : "";
@@ -30,7 +42,7 @@ BODY<=
  my $ret = "";
  my @errors = ();
 
- my $DEBUG = 0;
+ my ($DEBUG, $debug) = (0, "");  # flag, data
 
  # start quoting shit to insert
  my $itemid = $init->{'itemid'}+0;
@@ -176,7 +188,7 @@ BODY<=
      push @errors, "Your message was blank.  Please type at least something in the message field.";
  }
 
- my $unknown_8bit = 0;
+ my $unknown8bit = 0;
  if ($FORM{'body'} =~ /[\x80-\xFF]/ || $FORM{'subject'} =~ /[\x80-\xFF]/) {
      if ($LJ::UNICODE) {
 	 # TODO (avva): validate its UTF-8-ness, complain if not 
@@ -237,7 +249,6 @@ BODY<=
  my $qpartid = $dbh->quote($FORM{'parenttalkid'});
  my $qsubject = $dbh->quote($FORM{'subject'});
  my $subjecticon = ($FORM{'subjecticon'} eq "none" || $FORM{'subjecticon'} eq "") ? "" : LJ::trim(lc($FORM{'subjecticon'}));
- my $qsubjecticon = $dbh->quote($subjecticon);
  my $qbody = $dbh->quote($FORM{'body'});
  my $datepost = LJ::mysql_time();
  my $qdatepost = $dbh->quote($datepost);
@@ -248,20 +259,41 @@ BODY<=
  
  ### check for duplicate entry (double submission)
  my $posterid = $up ? $up->{'userid'} : 0;
- $sth = $dbh->prepare("SELECT t.talkid FROM talk t, talktext tt WHERE t.talkid=tt.talkid AND t.journalid=$u->{'userid'} AND t.nodetype='L' AND t.nodeid=$itemid AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' AND t.parenttalkid=$qpartid");
- $sth->execute;
- ($insertid) = $sth->fetchrow_array;
+ if ($clustered) 
+ {
+     $insertid = $dbcm->selectrow_array
+	 (
+	  "SELECT t.jtalkid FROM talk2 t, talktext2 tt WHERE ".
+	  "t.journalid=$u->{'userid'} AND tt.journalid=tt.$u->{'userid'} ".
+	  "AND t.jtalkid=tt.jtalkid ".
+	  "AND AND t.nodetype='L' AND t.nodeid=$itemid ".
+	  "AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' ".
+	  "AND t.parenttalkid=$qpartid"
+	  );
+ } else {
+     $insertid = $dbh->selectrow_array
+	 (
+	  "SELECT t.talkid FROM talk t, talktext tt WHERE t.talkid=tt.talkid ".
+	  "AND t.journalid=$u->{'userid'} AND t.nodetype='L' AND t.nodeid=$itemid ".
+	  "AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' ".
+	  "AND t.parenttalkid=$qpartid"
+	  );
+ }
  
  # they don't have a duplicate...
  unless ($insertid)
  {
      # insert the comment
-     $sth = $dbh->prepare("INSERT INTO talk (nodetype, nodeid, parenttalkid, journalid, posterid, datepost) VALUES ('L', $itemid, $qpartid, $u->{'userid'}, $posterid, NOW())");
+     my $table = $clustered ? "talk2" : "talk";
+     $sth = $dbcm->prepare("INSERT INTO $table (nodetype, nodeid, parenttalkid, ".
+			   "journalid, posterid, datepost) ".
+			   "VALUES ('L', $itemid, $qpartid, ".
+			   "$u->{'userid'}, $posterid, NOW())");
      $sth->execute;
      
      # uh oh?  is there an error?  show them if there is.
-     if ($dbh->err) {
-         return "<H2>Database Error</H2>There was an error posting your comment to the database.  Please report this to <B>$LJ::SUPPORT_EMAIL</B>.  The error is: <B>" . $dbh->errstr . "</B>";
+     if ($dbcm->err) {
+         return "<h2>Database Error</h2>There was an error posting your comment to the database.  Please report this to <b>$LJ::SUPPORT_EMAIL</b>.  The error is: <b>" . $dbcm->errstr . "</b>";
      }
      
      # what's the tid of the newly inserted message?
@@ -270,61 +302,93 @@ BODY<=
      my @prefix = ("");
      if ($LJ::USE_RECENT_TABLES) { push @prefix, "recent_"; }
      foreach my $pfx (@prefix) {
-         $sth = $dbh->prepare("INSERT INTO ${pfx}talktext (talkid, subject, body) VALUES ($insertid, $qsubject, $qbody)");
-         $sth->execute;
+	 if ($clustered) {
+	     if ($pfx) {
+		 $dbcm->do("INSERT INTO recent_talktext2 (journalid, jtalkid, subject, body, datepost) ".
+			   "VALUES ($u->{'userid'}, $insertid, $qsubject, $qbody, NOW())");
+	     } else {
+		 $dbcm->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
+			   "VALUES ($u->{'userid'}, $insertid, $qsubject, $qbody)");
+	     }
+	     die $dbcm->errstr if $dbcm->err;
+	 } else {
+	     $dbh->do("INSERT INTO ${pfx}talktext (talkid, subject, body) ".
+		      "VALUES ($insertid, $qsubject, $qbody)");
+	 }
      }
 
+     my %talkprop;   # propname -> value
+
      # meta-data
-     if ($unknown8bit) {
-         $dbh->do("INSERT INTO talkprop (talkid, tpropid, value) ".
-		  "SELECT $insertid, tpropid, '1' ".
-		  "FROM talkproplist WHERE name='unknown8bit'");
-     }
-     if ($subjecticon) {
-         $sth = $dbh->prepare("INSERT INTO talkprop (talkid, tpropid, value) SELECT $insertid, tpropid, $qsubjecticon FROM talkproplist WHERE name='subjecticon'");
-         $sth->execute;
-     }
-     if ($FORM{'prop_picture_keyword'}) {
-         my $qprop = $dbh->quote($FORM{'prop_picture_keyword'});
-         $sth = $dbh->prepare("INSERT INTO talkprop (talkid, tpropid, value) SELECT $insertid, tpropid, $qprop FROM talkproplist WHERE name='picture_keyword'");
-         $sth->execute;
-     }
-     if ($FORM{'prop_opt_preformatted'}) {
-         my $qprop = $dbh->quote($FORM{'prop_opt_preformatted'});
-         $sth = $dbh->prepare("INSERT INTO talkprop (talkid, tpropid, value) SELECT $insertid, tpropid, $qprop FROM talkproplist WHERE name='opt_preformatted'");
-         $sth->execute;
-     }
+     $talkprop{'unknownbit'} = 1 if $unknown8bit;
+     $talkprop{'subjecticon'} = $subjecticon;
+     $talkprop{'picture_keyword'} = $FORM{'prop_picture_keyword'};
+     $talkprop{'opt_preformatted'} = $FORM{'prop_opt_preformatted'} ? 1 : 0;
      if ($u->{'opt_logcommentips'} eq "A" || 
          ($u->{'opt_logcommentips'} eq "S" && $FORM{'usertype'} ne "user")) 
      {
          my $ip = $ENV{'REMOTE_ADDR'};
          if ($ENV{'HTTP_X_FORWARDED_FOR'}) { $ip = "$ENV{'HTTP_X_FORWARDED_FOR'}, via $ip"; }
-         my $qprop = $dbh->quote($ip);
-         $sth = $dbh->prepare("INSERT INTO talkprop (talkid, tpropid, value) SELECT $insertid, tpropid, $qprop FROM talkproplist WHERE name='poster_ip'");
-         $sth->execute;
+	 $talkprop{'poster_ip'} = $ip;
+
      }
 
-     # update the "replycount" field of the log table (redudant? yes. -> optimization)
-     LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");
+     # remove blank/0 values (defaults)
+     foreach (keys %talkprop) { delete $talkprop{$_} unless $talkprop{$_}; }
+
+     LJ::load_props($dbs, "talk");
+     if (%talkprop) {
+	 my $values;
+	 foreach (keys %talkprop) {
+	     my $p = LJ::get_prop("talk", $_);
+	     next unless $p;
+	     my $tpropid = $p->{'tpropid'};
+	     my $qv = $dbh->quote($talkprop{$_});
+	     if ($clustered) {
+		 $values .= "($u->{'userid'}, $insertid, $tpropid, $qv),";
+	     } else {
+		 $values .= "($insertid, $tpropid, $qv),";
+	     }
+	 }
+	 if ($values) {
+	     chop $values;
+	     if ($clustered) {
+		 $dbcm->do("INSERT INTO talkprop2 (journalid, jtalkid, tpropid, values) ".
+			   "VALUES $values");
+	     } else {
+		 $dbcm->do("INSERT INTO talkprop (talkid, tpropid, values) ".
+			   "VALUES $values");
+	     }
+	 }
+     }
+     
+     # update the "replycount" summary field of the log table
+     if ($clustered) {
+	 LJ::cmd_buffer_add($dbcm, $u->{'userid'}, "increplycount", { 'itemid' => $itemid });
+     } else {
+	 LJ::query_buffer_add($dbh, "log", "UPDATE log SET replycount=replycount+1 WHERE itemid=$itemid");	 
+     }
      
      # send some emails
      my $who = $up->{'name'} || "Somebody";
      my $whouser = $up->{'user'} ? " ($up->{'user'})" : "";
-     my $whouserhtml = $up->{'user'} ? " (<A HREF=\"$LJ::SITEROOT/userinfo.bml?user=$up->{'user'}\">$up->{'user'}</A>)" : "";
+     my $whouserhtml = $up->{'user'} ? " (<a href=\"$LJ::SITEROOT/userinfo.bml?user=$up->{'user'}\">$up->{'user'}</a>)" : "";
      my $whopic;
      if ($up->{'defaultpicid'} || $FORM{'prop_picture_keyword'}) {
          my $picid;
          if ($FORM{'prop_picture_keyword'}) {
              my $qkw = $dbr->quote($FORM{'prop_picture_keyword'});
-             my $sth = $dbr->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid AND k.keyword=$qkw");
-             $sth->execute;
-             ($picid) = $sth->fetchrow_array;
+             my $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
+					       "WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid ".
+					       "AND k.keyword=$qkw");
          }
          $picid ||= $up->{'defaultpicid'};
          if ($picid) {
              my %pics;
              LJ::load_userpics($dbs, \%pics, [ $picid ]);
-             $whopic = "<IMG SRC=\"$LJ::SITEROOT/userpic/$picid\" ALIGN=ABSMIDDLE WIDTH=$pics{$picid}->{'width'} HEIGHT=$pics{$picid}->{'height'} HSPACE=1 VSPACE=2> ";
+             $whopic = "<img src=\"$LJ::SITEROOT/userpic/$picid\" align='absmiddle' ".
+		 "width='$pics{$picid}->{'width'}' height='$pics{$picid}->{'height'}' ".
+		 "hspace='1' vspace='2'> ";
          }
      }
 
@@ -335,13 +399,21 @@ BODY<=
 
      if ($FORM{'parenttalkid'}) 
      {  
-         $sth = $dbh->prepare("SELECT t.posterid, tt.body FROM talk t, talktext tt WHERE t.talkid=$qpartid AND tt.talkid=$qpartid");
+	 if ($clustered) {
+	     $sth = $dbcm->prepare("SELECT t.posterid, tt.body FROM talk2 t, talktext2 tt ".
+				   "WHERE t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
+				   "AND t.jtalkid=$qpartid AND tt.jtalkid=$qpartid");
+	 } else {
+	     $sth = $dbh->prepare("SELECT t.posterid, tt.body FROM talk t, talktext tt ".
+				  "WHERE t.talkid=$qpartid AND tt.talkid=$qpartid");
+	 }
          $sth->execute;
          my ($paruserid, $parbody) = $sth->fetchrow_array;
          $parentcomment = $parbody;
          if ($paruserid) {
              my $qparuserid = $dbr->quote($paruserid);
-             $sth = $dbr->prepare("SELECT user, email, opt_htmlemail, password, status, opt_gettalkemail FROM user WHERE userid=$qparuserid");
+             $sth = $dbr->prepare("SELECT user, email, opt_htmlemail, password, status, ".
+				  "opt_gettalkemail FROM user WHERE userid=$qparuserid");
              $sth->execute;
              my $paru = $sth->fetchrow_hashref;
              

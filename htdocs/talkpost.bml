@@ -4,6 +4,9 @@ BODY<=
 
 (=_CODE
 
+ use strict;
+ use vars qw($head %FORM);
+
  $head = "";  # not local, used to build <link> tags
 
  return LJ::server_down_html() if $LJ::SERVER_DOWN;
@@ -14,7 +17,7 @@ BODY<=
  my ($sth, $sql);
  my $errtxt;
 
- my $pics = LJ::Talk::get_subjecticons;
+ my $pics = LJ::Talk::get_subjecticons();
  my $init = LJ::Talk::init($dbs, \%FORM);
  my $u = $init->{'journalu'};
  
@@ -61,7 +64,7 @@ BODY<=
      }
      ($sth = $dbcr->prepare($sql))->execute;
      while (my ($tid, $value) = $sth->fetchrow_array) {
-	 my $prop = $LJ::CACHE_PROPID{'talk'}->{$tid};
+	 my $p = $LJ::CACHE_PROPID{'talk'}->{$tid};
 	 $parpost->{$p->{'name'}} = $value;
      }
      
@@ -98,7 +101,9 @@ BODY<=
 				  $item->{'posterid'} => \$up,
 				  $parpost->{'posterid'} => \$ur,
 				  ], [ $u ]);
- LJ::load_user_props($dbs, $u,  "opt_showtopicstuff", "opt_notalkicons", "opt_logcommentips");
+ LJ::load_user_props($dbs, $u,  
+		     "opt_showtopicstuff", "opt_notalkicons", 
+		     "opt_logcommentips");
 
  my $remote = LJ::get_remote($dbs);
 
@@ -114,7 +119,7 @@ BODY<=
  ####  Check security before viewing this post
  return $errtxt unless LJ::Talk::check_viewable($dbs, $remote, $item, \%FORM, \$errtxt);
  
- $event = $FORM{'replyto'} eq "" ? $item->{'event'} : $parpost->{'body'};
+ my $event = $FORM{'replyto'} eq "" ? $item->{'event'} : $parpost->{'body'};
  my $preformatted = $FORM{'replyto'} eq "" ? $logprops{$itemid}->{'opt_preformatted'} : $parpost->{'opt_preformatted'};
 
  LJ::expand_embedded($dbs, $itemid, $remote, \$event);
@@ -131,6 +136,8 @@ BODY<=
 				    "WHERE m.userid=$ur->{'userid'} AND ".
 				    "m.kwid=k.kwid AND k.keyword=$qkw");
  }
+
+ my %userpics;
  if ($picid) {
      LJ::load_userpics($dbs, \%userpics, [ $picid ]);
      my $alt = $ur->{'name'};
@@ -235,9 +242,12 @@ BODY<=
 
  $ret .= "<form method='post' action='talkpost_do.bml'>";
  # hidden values
- $parent = int($FORM{'replyto'}+0);
+ my $parent = int($FORM{'replyto'}+0);
  $ret .= "<input type='hidden' name='parenttalkid' value='$parent'>\n";
  $ret .= "<input type='hidden' name='itemid' value='$itemid'>\n";
+ if ($clustered) {
+     $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n";
+ }
 
  # from registered user or anonymous?
  $ret .= "<table>\n";
@@ -284,7 +294,7 @@ BODY<=
  $ret .= "Username:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='18' id='username'> ";
  $ret .= "Password:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13'> <label for='logincheck'>Login?&nbsp;</label><input type='checkbox' name='do_login' id='logincheck'></td></tr>\n";
  
- $basesubject = "";
+ my $basesubject = "";
  if ($FORM{'replyto'}) {
      $basesubject = $parpost->{'subject'};
      $basesubject =~ s/^Re:\s*//i;
@@ -335,8 +345,8 @@ BODY<=
      $ret .= "</td></tr>\n";
  }
  
- $ret .= "<TR><TD ALIGN=RIGHT>&nbsp;</TD><td colspan=4>";
- $ret .= "Don't auto-format: <input type=checkbox value=1 name='prop_opt_preformatted'>";
+ $ret .= "<tr><td align='right'>&nbsp;</td><td colspan='4'>";
+ $ret .= "Don't auto-format: <input type='checkbox' value='1' name='prop_opt_preformatted'>";
  $ret .= LJ::help_icon("noautoformat", " ");
  
  my %res;
