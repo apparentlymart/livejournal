@@ -52,9 +52,9 @@ if ($help) {
          );
 }
 
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljdb.pl";
 
-my $dbh = LJ::get_dbh("master");
+my $dbh = LJ::DB::dbh_by_role("master");
 die "Can't get master db handle\n" unless $dbh;
 
 my %dbinfo;  # dbid -> hashref
@@ -101,7 +101,7 @@ my $check_master_status = sub {
     my $dbid = shift;
     my $d = $dbinfo{$dbid};
     die "Bogus DB: $dbid" unless $d;
-    my $db = $LJ::DBIRole->get_dbh_conn($d->{'rootfdsn'});
+    my $db = LJ::DB::root_dbh_by_name($d->{name});
     next unless $db;
 
     my ($masterfile, $masterpos) = $db->selectrow_array("SHOW MASTER STATUS");
@@ -125,7 +125,7 @@ my $check = sub {
 	$roles = join(", ", sort keys %drole);
     }
 
-    my $db = $LJ::DBIRole->get_dbh_conn($d->{'rootfdsn'});
+    my $db = LJ::DB::root_dbh_by_name($d->{name});
     unless ($db) {
 	printf("%4d %-15s %4s %16s  %14s  ($roles)\n",
 	       $dbid,
@@ -151,13 +151,15 @@ my $check = sub {
 	$pcount_busy++ if $r->{'State'};
     }
 
-    $sth = $db->prepare("SHOW MASTER LOGS");
-    $sth->execute;
     my @master_logs;
     my $log_count = 0;
-    while (my ($log) = $sth->fetchrow_array) {
-	push @master_logs, $log;
-	$log_count++;
+    if ($master_status{$dbid} && $master_status{$dbid}->[1]) {
+	$sth = $db->prepare("SHOW MASTER LOGS");
+	$sth->execute;
+	while (my ($log) = $sth->fetchrow_array) {
+	    push @master_logs, $log;
+	    $log_count++;
+	}
     }
 
     my $ss = $db->selectrow_hashref("show slave status");
@@ -275,7 +277,8 @@ sub check_report {
 		      keys %dbinfo) {
 	my $d = $dbinfo{$dbid};
 	die "Bogus DB: $dbid" unless $d;
-	my $db = $LJ::DBIRole->get_dbh_conn($d->{'rootfdsn'});
+	my $db = LJ::DB::root_dbh_by_name($d->{name});
+
 	unless ($db) {
 	    print "$d->{name}\t?\t?\t?\n";
 	    next;
@@ -308,7 +311,8 @@ sub rate_report {
 	foreach my $dbid (sorted_dbids()) {
 	    my $d = $dbinfo{$dbid};
 	    die "Bogus DB: $dbid" unless $d;
-	    my $db = $LJ::DBIRole->get_dbh_conn($d->{'rootfdsn'});
+	    my $db = LJ::DB::root_dbh_by_name($d->{name});
+
 	    next unless $db;
 	    my (undef, $qs) = $db->selectrow_array("SHOW STATUS LIKE 'Questions'");
 	    my $now = Time::HiRes::time();
