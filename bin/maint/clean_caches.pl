@@ -26,7 +26,7 @@ $maint{'clean_caches'} = sub
         $sth->execute;
         if ($dbh->err) { print $dbh->errstr; }
         print "    deleted ", $sth->rows, "\n";
-    } while ($sth->rows);
+    } while ($sth->rows && ! $sth->err);
 
     ## clean the recent_* tables now (3 week cache on the slave dbs)
     return unless ($LJ::USE_RECENT_TABLES);
