@@ -3220,6 +3220,18 @@ sub activate_userpics
     return;
 }
 
+# for efficiency, we store the userpic structures
+# in memcache in a packed format.
+#
+# memory format:
+# [
+#   version number of format,
+#   "packed string", which expands to an array of {width=>..., ...}
+#   "packed string", which expands to { 'kw1' => id, 'kw2' => id, ...}
+# ]
+
+$LJ::STOREPICVERSION = 1;
+
 sub get_userpic_info
 {
     my $uuid = shift;
@@ -3228,32 +3240,64 @@ sub get_userpic_info
     return $LJ::CACHE_USERPIC_INFO{$userid} if $LJ::CACHE_USERPIC_INFO{$userid};
     
     my $memkey = [$userid,"upicinf:$userid"];
-    my $info = LJ::MemCache::get($memkey);
-    
+    my ($info, $minfo);
+
+    if ($minfo = LJ::MemCache::get($memkey)) {
+        # the pre-versioned memcache data was a two-element hash.
+        # since then, we use an array and include a version number.
+        if (ref $minfo eq 'HASH' ||
+            $minfo->[0] != $LJ::STOREPICVERSION) {
+            # old data in the cache.  delete.
+            LJ::MemCache::delete($memkey);
+        } else {
+            my @picsflat = unpack "(NNCCA)*", $minfo->[1];
+            while (scalar @picsflat > 0) {
+                my $pic = {};
+                ($pic->{userid}, $pic->{picid},
+                 $pic->{width}, $pic->{height},
+                 $pic->{state}) = splice(@picsflat, 0, 5);
+                $info->{pic}{$pic->{picid}} = $pic;
+            }
+
+            my %mpickws = unpack "(Z*N)*", $minfo->[2];
+            foreach my $kw (keys %mpickws) {
+                my $id = int($mpickws{$kw});
+                $info->{kw}{$kw} = $info->{pic}{$id} if $info;
+            }
+        }
+    }
+
     unless ($info) {
         $info = {
             'pic' => {},
             'kw' => {},
         };
+        $minfo = [ $LJ::STOREPICVERSION, "", "" ]; # see structure above
         
         my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
         my $sth = $db->prepare("SELECT picid, width, height, state, userid ".
                                "FROM userpic WHERE userid=?");
         $sth->execute($userid);
-        while ($_ = $sth->fetchrow_hashref) {
-            $info->{'pic'}->{$_->{'picid'}} = $_;
+        my @pics;
+        while (my $pic = $sth->fetchrow_hashref) {
+            push @pics, $pic;
+            $info->{'pic'}->{$pic->{'picid'}} = $pic;
         }
+        $minfo->[1] = pack "(NNCCA)*", map { ($_->{userid}, $_->{picid},
+                                 $_->{width}, $_->{height}, $_->{state}) } @pics;
         
         $sth = $db->prepare("SELECT k.keyword, m.picid FROM userpicmap m, keywords k ".
                             "WHERE m.userid=? AND m.kwid=k.kwid");
         $sth->execute($userid);
+        my %minfokw;
         while (my ($kw, $id) = $sth->fetchrow_array) {
             next unless $info->{'pic'}->{$id};
             next if $kw =~ /[\n\r\0]/;  # used to be a bug that allowed these to get in.
             $info->{'kw'}->{$kw} = $info->{'pic'}->{$id};
+            $minfokw{$kw} = int($id);
         }
-
-        LJ::MemCache::add($memkey, $info);
+        $minfo->[2] = pack "(Z*N)*", %minfokw;
+        LJ::MemCache::add($memkey, $minfo);
     }
 
     foreach (values %{$info->{'pic'}}) {
