@@ -162,7 +162,7 @@ body<=
      $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=<?emcolor?>>$ML{'.webpagename.title'}</TD><TD><INPUT NAME=urlname VALUE=\"$htmlu{'urlname'}\" SIZE=40> ($ML{'.optional'})</TD></TR>\n";
 
      # chat thingies
-     foreach my $p (["aolim", "AOL IM", 16], ["icq", "ICQ \#", 12], 
+     foreach my $p (["aolim", "AOL IM", 28], ["icq", "ICQ \#", 12], 
                     ["yahoo", "Yahoo! ID", 33], ["msn", "MSN Messenger", 60],
                     ["jabber", "Jabber Address", 60])
      {
