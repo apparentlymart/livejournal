@@ -11,11 +11,13 @@ my $opt_destdel = 0;
 my $opt_useslow = 0;
 my $opt_slowalloc = 0;
 my $opt_verbose = 1;
+my $opt_movemaster = 0;
 exit 1 unless GetOptions('delete' => \$opt_del,
                          'destdelete' => \$opt_destdel,
                          'useslow' => \$opt_useslow, # use slow db role for read
                          'slowalloc' => \$opt_slowalloc, # see note below
 			 'verbose=i' => \$opt_verbose,
+			 'movemaster|mm' => \$opt_movemaster,
                          );
 my $optv = $opt_verbose;
 
@@ -23,6 +25,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 my $dbh = LJ::get_dbh("master");
 die "No master db available.\n" unless $dbh;
+$dbh->do("SET wait_timeout=28800");
 
 my $dbr = $dbh;
 if ($opt_useslow) {
@@ -66,7 +69,8 @@ if ($sclust == $dclust) {
 # original cluster db handle.
 my $dbo;
 if ($sclust) {
-    $dbo = LJ::get_cluster_master($u);
+    $dbo = $opt_movemaster ? LJ::get_dbh("cluster$u->{clusterid}movemaster") :
+	LJ::get_cluster_master($u);
     die "Can't get source cluster handle.\n" unless $dbo;
     $dbo->{'RaiseError'} = 1;
     $dbo->do("SET wait_timeout=28800");
@@ -360,8 +364,9 @@ elsif ($sclust > 0)
 {
     print "Moving away from cluster $sclust\n" if $optv;
     while (my $cmd = $dbo->selectrow_array("SELECT cmd FROM cmdbuffer WHERE journalid=$userid")) {
+	my $dbcm = LJ::get_cluster_master($sclust);
         print "Flushing cmdbuffer for cmd: $cmd\n" if $optv > 1;
-        LJ::cmd_buffer_flush($dbh, $dbo, $cmd, $userid)
+        LJ::cmd_buffer_flush($dbh, $dbcm, $cmd, $userid);
     }
 
     my $pri_key = {
@@ -432,6 +437,7 @@ elsif ($sclust > 0)
         }
         print "  flushing write to $table\n" if $optv > 1;
         $dbch->do("REPLACE INTO $table $cols VALUES $vals");
+	die $dbh->errstr if $dbch->err;
         delete $pendreplace{$dest};
         return 1;
     };
@@ -443,8 +449,8 @@ elsif ($sclust > 0)
         push @{$pendreplace{$dest}->{'values'}}, \@values;
         $pendreplace{$dest}->{'bytes'} += $new_bytes;
         $pendreplace{$dest}->{'recs'}++;
-        if ($pendreplace{$dest}->{'bytes'} > 1024*10 ||
-            $pendreplace{$dest}->{'recs'} > 200) { $flush->($dest); }
+        if ($pendreplace{$dest}->{'bytes'} > 1024*500 ||
+            $pendreplace{$dest}->{'recs'} > 500) { $flush->($dest); }
     };
 
     # manual moving
@@ -544,7 +550,7 @@ elsif ($sclust > 0)
     # talkleft table.  
     {
         # no primary key... delete all of target first.
-        while ($dbch->do("DELETE FROM talkleft WHERE userid=$userid LIMIT 500") > 0) {
+        while ($dbch->do("DELETE FROM talkleft WHERE userid=$userid LIMIT 1000") > 0) {
             print "  deleted from talkleft\n" if $optv > 1;
         }
 
