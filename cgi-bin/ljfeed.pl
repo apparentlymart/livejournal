@@ -273,8 +273,8 @@ sub create_view_atom
     $ret .= "<feed version='0.3' xmlns='http://purl.org/atom/ns#'>\n";
 
     # attributes
-    $ret .= "<title>$journalinfo->{title}</title>\n";
-    $ret .= "<tagline>$journalinfo->{subtitle}</tagline>\n";
+    $ret .= "<title mode='escaped'>$journalinfo->{title}</title>\n";
+    $ret .= "<tagline mode='escaped'>$journalinfo->{subtitle}</tagline>\n";
     $ret .= "<link rel='alternate' type='text/html' href='$journalinfo->{link}' />\n";
 
     # output individual item blocks
@@ -285,7 +285,7 @@ sub create_view_atom
         my $ditemid = $it->{ditemid};
 
         $ret .= "  <entry>\n";
-        $ret .= "    <title>$it->{subject}</title>\n"; # include empty tag if we don't have a subject.
+        $ret .= "    <title mode='escaped'>$it->{subject}</title>\n"; # include empty tag if we don't have a subject.
         $ret .= "    <id>urn:lj:$LJ::DOMAIN:atom1:$journalinfo->{u}{user}:$ditemid</id>\n";
         $ret .= "    <link rel='alternate' type='text/html' href='$journalinfo->{link}$ditemid.html' />\n";
         $ret .= "    <created>" . LJ::time_to_w3c($it->{createtime}, 'Z') . "</created>\n"
