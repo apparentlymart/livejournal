@@ -104,9 +104,9 @@
 
     $body .= "<p><textarea rows='40' cols='60' wrap='off'>";
 
-    if ($FORM{'as'} eq "") {
+    if ($GET{'as'} eq "") {
         $body .= "layerinfo type = user;\n\n";
-    } elsif ($FORM{'as'} eq "theme") {
+    } elsif ($GET{'as'} eq "theme") {
         $body .= "layerinfo type = theme;\nlayerinfo name = \"\";\n\n";
     }
 
@@ -134,8 +134,8 @@
         $val = $existing unless $had_override;
         if (ref $val eq "HASH") { $val = $val->{'as_string'}; }
 
-        next if $FORM{'as'} eq "" && ! $had_override;
-        next if $FORM{'as'} eq "theme" && $type ne "Color";
+        next if $GET{'as'} eq "" && ! $had_override;
+        next if $GET{'as'} eq "theme" && $type ne "Color";
 
         if ($prop->{'type'} eq "int") {
             $val = int($val);
