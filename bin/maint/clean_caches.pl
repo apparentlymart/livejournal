@@ -53,10 +53,10 @@ $maint{'clean_caches'} = sub
         my $cols = join(",", qw(userid posttime journalid nodetype
                                 nodeid jtalkid publicitem));
 
-        $sth = $dbh->prepare("SELECT $cols FROM talkleft_xfp WHERE userid=?");
-        $sth->execute($userid);
+        my $s = $dbh->prepare("SELECT $cols FROM talkleft_xfp WHERE userid=?");
+        $s->execute($userid);
         my @insert_vals;
-        while (my @curr_vals = $sth->fetchrow_array) {
+        while (my @curr_vals = $s->fetchrow_array) {
             push @insert_vals, ("(" . 
                                 join(",", map { $dbcm->quote($_) } @curr_vals) .
                                 ")");
