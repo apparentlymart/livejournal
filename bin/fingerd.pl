@@ -35,7 +35,8 @@ socket(FH, PF_INET, SOCK_STREAM, $proto) || die $!;
 $port ||= 79;
 my $localaddr = inet_aton($bindhost);
 my $sin = sockaddr_in($port, $localaddr);
-
+setsockopt (FH,SOL_SOCKET,SO_REUSEADDR,1) or
+    die "setsockopt() failed: $!\n";
 bind (FH, $sin) || die $!;
 
 listen(FH, 10);
@@ -86,7 +87,6 @@ You can make queries in the following form:
 	delete $u->{'has_bio'};
 
 	$u->{'accttype'} = LJ::name_caps($u->{'caps'});
-	delete $u->{'caps'};
 
 	if ($u->{'allow_infoshow'} eq "Y") {
   	    LJ::load_user_props($dbr, $u, "opt_whatemailshow",
@@ -105,6 +105,7 @@ You can make queries in the following form:
 	    if ($u->{'email'}) { $u->{'email'} .= ", "; }
 	    $u->{'email'} .= "$user\@$LJ::USER_DOMAIN";
 	}
+
 	if ($u->{'opt_whatemailshow'} eq "N") {
 	    delete $u->{'email'};
 	} 
@@ -115,6 +116,8 @@ You can make queries in the following form:
 	    if (length($_) > $max) { $max = length($_); }
 	}
 	$max++;
+
+	delete $u->{'caps'};
 
 	print CL "\nUserinfo for $user...\n\n";
 	foreach my $k (sort keys %$u) {
