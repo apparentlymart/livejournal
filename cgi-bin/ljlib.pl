@@ -436,12 +436,6 @@ sub get_friend_items
     # remove skipped ones
     splice(@items, 0, $skip) if $skip;
 
-    # TODO: KILL! this knows nothing about clusters.
-    # return the itemids for them if they wanted them
-    if (ref $opts->{'itemids'} eq "ARRAY") {
-        @{$opts->{'itemids'}} = map { $_->{'itemid'} } @items;
-    }
-
     # return the itemids grouped by clusters, if callers wants it.
     if (ref $opts->{'idsbycluster'} eq "HASH") {
         foreach (@items) {

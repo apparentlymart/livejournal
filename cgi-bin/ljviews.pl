@@ -653,27 +653,10 @@ sub create_view_friends
     my $sth;
     my $user = $u->{'user'};
 
-    # fill in all remote details if present (caps, especially)
-    $remote = LJ::load_userid($dbs, $remote->{'userid'}) if $remote;
-
-    # see how often the remote user can reload this page.  there're
-    # two methos to this. "friendsviewupdate" which just sends a "not
-    # modified" header after a quick check here, and the "fvbo" cookie
-    # (friends view back off) which is meant to have a longer delay,
-    # and gets handled by apache and mod_rewrite instead of this
-    # codepath.  first check is for the cookie.  
+    # see how often the remote user can reload this page.  
+    # "friendsviewupdate" time determines what granularity time
+    # increments by for checking for new updates
     my $nowtime = time();
-    my $backofftime = LJ::get_cap_min($remote, "cookiebackoff");
-
-    # If there is a non-zero value returned, we're setting the back off:
-    if ($backofftime)  {
-        # Note: You can't set a short-expiration cookie reliably with
-        # IE since it doesn't use the server's Date:, only the
-        # client's, which is so often inaccurate.  so we're not going
-        # to use this code, but it'll stay here if people want to try.
-        my @cookies = LJ::make_cookie("fvbo", $user, ($nowtime+$backofftime), $LJ::COOKIE_PATH);
-        $opts->{'headers'}->{'Set-Cookie'} = \@cookies;
-    }
 
     # update delay specified by "friendsviewupdate"
     my $newinterval = LJ::get_cap_min($remote, "friendsviewupdate") || 1;
@@ -817,7 +800,6 @@ sub create_view_friends
     }
     
     ## load the itemids 
-    my @itemids;  #DIE
     my %idsbycluster;
     my @items = LJ::get_friend_items($dbs, {
         'userid' => $u->{'userid'},
@@ -826,7 +808,6 @@ sub create_view_friends
         'skip' => $skip,
         'filter' => $filter,
         'owners' => \%owners,
-        'itemids' => \@itemids,  #DIE
         'idsbycluster' => \%idsbycluster,
         'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
     });
