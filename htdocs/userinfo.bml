@@ -493,7 +493,8 @@ if ($u->{'journaltitle'}) {
       }
       if ($u->{'jabber'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b>$ML{'.label.jabber'}</b></td><td colspan='$span'>$u->{'jabber'}</td></tr>\n";
+          my $jabber = $mangleaddress->($u->{'jabber'});
+          $body .= "<tr><td align='right'><b>$ML{'.label.jabber'}</b></td><td colspan='$span'>$jabber</td></tr>\n";
       }
   }
 
