@@ -238,7 +238,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
          LJ::CleanHTML::clean_subject(\$current{'Music'});
      }
 
-     $ret .= "<ul>"; # using <ul> for intenting isn't proper, but this will all go away in s2 anyway.
+     $ret .= "<div style='margin-left: 30px'>";
 
      if (%current) 
      {
@@ -272,7 +272,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
      }
 
      $ret .= $event;
-     $ret .= "</ul>";
+     $ret .= "</div>";
  }
 
 

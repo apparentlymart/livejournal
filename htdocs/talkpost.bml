@@ -263,7 +263,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
      LJ::CleanHTML::clean_subject(\$current{'Music'});
  }
  
- $ret .= "<UL>";
+ $ret .= "<div style='margin-left: 30px'>";
  
  ### currents
  if (! $init->{'replyto'} && %current) 
@@ -304,7 +304,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
  }
  
  $ret .= $event;
- $ret .= "</ul>";
+ $ret .= "</div>";
  
  $ret .= "<br clear='all' /><hr size='2' align='center' />";	
 
