@@ -60,7 +60,8 @@ $LJ::PROTOCOL_VER = ($LJ::UNICODE ? "1" : "0");
 #    1: clustered, not pics (unsupported)
 #    2: clustered
 #    3: weekuserusage populated
-$LJ::MAX_DVERSION = 3; 
+#    4: userproplite2 clustered, and cldversion on userproplist table
+$LJ::MAX_DVERSION = 4;
 
 # constants
 use constant ENDOFTIME => 2147483647;
