@@ -87,6 +87,7 @@ sub execute
 {
     my ($dbh, $remote, $args, $outlist) = @_;
     
+    $args->[0] = lc $args->[0];
     my $cmd = $cmd{$args->[0]};
     unless ($cmd) {
         push @$outlist, [ "error", "Unknown command '$args->[0]'" ];
