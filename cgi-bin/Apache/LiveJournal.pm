@@ -1193,8 +1193,6 @@ sub db_logger
                                   Timeout  => 2,
                                   );
 
-        print STDERR "sock for $hostport = $sock\n";
-
         if ($sock) {
             delete $LJ::CACHE_DINSERTD_DEAD{$hostport};
             push @dinsertd_socks, [ $hostport, $sock ];
@@ -1299,7 +1297,6 @@ sub db_logger
             my $url = LJ::eurl("CREATE TABLE IF NOT EXISTS [tablename] $sql");
             print $sock "SET_NOTE lj_create_table $url\r\n";
             my $res = <$sock>;
-            $r->log_error("res: $res");
         }
     }
 
