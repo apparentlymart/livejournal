@@ -126,7 +126,7 @@ sub generate_session
     my $sess = {};
     $opts->{'exptype'} = "short" unless $opts->{'exptype'} eq "long";
     $sess->{'auth'} = LJ::rand_chars(10);
-    my $expsec = $opts->{'exptype'} eq "short" ? 60*60*24 : 60*60*24*7;
+    my $expsec = $opts->{'exptype'} eq "short" ? 60*60*24*1.5 : 60*60*24*60;
     my $id = LJ::alloc_user_counter($u, 'S');
     return undef unless $id;
     $u->do("REPLACE INTO sessions (userid, sessid, auth, exptype, ".
