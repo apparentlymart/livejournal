@@ -1617,9 +1617,10 @@ sub editfriends
         return fail($err, $_[0], $_[1]);
     };
 
-    # non-'P'erson accounts can't add friends
+    # only people, shared journals, and owned syn feeds can add friends
     return $fail->(104, "Journal type cannot add friends")
-        unless $u->{'journaltype'} eq 'P' || $u->{'journaltype'} eq 'S';
+        unless ($u->{'journaltype'} eq 'P' || $u->{'journaltype'} eq 'S' ||
+                ($u->{'journaltype'} eq "Y" && $u->{'password'}));
 
     # perform the adds
   ADDFRIEND:
