@@ -132,6 +132,9 @@ BODY<=
 	 $errors{'email'} = "No spaces allowed in email address.  If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>\@aol.com</b>"; 
      }
  
+     $FORM{'password1'} = LJ::trim($FORM{'password1'});
+     $FORM{'password2'} = LJ::trim($FORM{'password2'});
+
      if ($FORM{'password1'} ne $FORM{'password2'}) { 
 	 $errors{'password'} = "Passwords do not match."; 
      }
