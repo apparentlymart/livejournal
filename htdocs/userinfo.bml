@@ -101,10 +101,14 @@
  {
      my @props = qw(opt_whatemailshow country state city zip renamedto
                     journaltitle journalsubtitle public_key
-                    url urlname opt_hidefriendofs dont_load_members no_mail_alias);
+                    url urlname opt_hidefriendofs dont_load_members);
      unless ($com || $synd) { push @props, qw(aolim icq yahoo msn gender jabber); }
      if ($synd) { push @props, qw(rssparseerror); }
      if ($u->{'statusvis'} eq 'V') { push @props, qw(opt_blockrobots); }
+     LJ::run_hooks('userinfo_local_props', {
+         'u' => $u,
+         'props' => \@props,
+     });
      LJ::load_user_props($u, @props);
  }
 
