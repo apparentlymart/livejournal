@@ -62,13 +62,12 @@
      while (my $mem = $sth->fetchrow_hashref)
      {
 	 my $eh_des = LJ::ehtml($mem->{'des'});
-	 my $eventtime = substr($mem->{'eventtime'}, 0, 10);
 	 my $edit = "";
 	 my $jargent = $mem->{'user'} ? "journal=$mem->{'user'}&amp;" : "";
 	 if ($remote && $remote->{'user'} eq $user) {
 	     $edit = " [<a href=\"/tools/memadd.bml?${jargent}itemid=$mem->{'jitemid'}\">edit</a>]";
 	 }
-	 $body .= "<p><li><a href=\"/talkread.bml?${jargent}itemid=$mem->{'jitemid'}\"><b>$eh_des</b></a>$edit<br /><font size='-1'><b>$mem->{'user'}</b> \@ $eventtime</font></li>";
+	 $body .= "<p><li><a href=\"/talkread.bml?${jargent}itemid=$mem->{'jitemid'}\"><b>$eh_des</b></a>$edit<br /><font size='-1'><b>$mem->{'user'}</b></font></li>";
      }
      $body .= "</ul>";
      return;

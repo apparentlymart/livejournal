@@ -89,7 +89,8 @@
      else 
      {
 	 my $user = LJ::get_username($dbs, $log->{'ownerid'});
-	 $des = "$user: " . ($log->{'subject'} || $log->{'eventtime'});
+	 my $dt = substr($log->{'eventtime'}, 0, 10);
+	 $des = "$dt: $user: $log->{'subject'}";
      }
 
      $des = LJ::ehtml($des);
