@@ -4713,7 +4713,7 @@ sub activate_userpics
             my $sth;
             if ($u->{'dversion'} > 6) {
                 $sth = $dbcr->prepare("SELECT k.keyword, m.picid FROM userkeywords k, userpicmap2 m ".
-                                      "WHERE k.keyword IN ($keywords_in) AND k.kwid=m.kwid AND k.userid=m.userid" .
+                                      "WHERE k.keyword IN ($keywords_in) AND k.kwid=m.kwid AND k.userid=m.userid " .
                                       "AND k.userid=?");
             } else {
                 $sth = $dbh->prepare("SELECT k.keyword, m.picid FROM keywords k, userpicmap m " .
