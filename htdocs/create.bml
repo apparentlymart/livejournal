@@ -481,7 +481,11 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
 
      if ($LJ::HUMAN_CHECK{create}) {
          my ( $capid, $anum ) = ( $POST{capid}, $POST{anum} );
-         undef $capid if $errors{captcha};
+         my $answer = $POST{answer};
+         if ( $errors{captcha} || $wants_audio ) {
+             undef $capid;
+             undef $answer;
+         }
 
          $ret .= "<li><div class='formitem'><div class='formitemName'>Prove that you're a human</div>";
 
@@ -506,7 +510,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
          }
          
          $ret .= "<br /><br />Answer: ";
-         $ret .= LJ::html_text({ name => 'answer', size => 15, value => $POST{answer} });
+         $ret .= LJ::html_text({ name => 'answer', size => 15, value => $answer });
          $ret .= LJ::html_hidden( capid => $capid, anum => $anum );
          $ret .= $error_msg->('captcha', '<p class="formitemFlag">', '</p>');
          $ret .= "</div></li>";
