@@ -244,8 +244,9 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      }
 
      # Check the turing test answer if it's turned on
-     if ($LJ::HUMAN_CHECK{create} && LJ::Captcha::check_code($POST{capid}, $POST{anum}, $POST{answer})) {
-         $errors{'captcha'} = "Invalid answer.";
+     if ($LJ::HUMAN_CHECK{create} && 
+         ! LJ::Captcha::check_code($POST{capid}, $POST{anum}, $POST{answer})) {
+         $errors{'captcha'} = "Invalid answer to previous challenge.  Try another.";
      }
 
      last SUBMIT if %errors;
@@ -376,10 +377,14 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      my $ret;
      my $v;
 
+     if (%errors) {
+         $ret .= "<div class='formitemFlag'>See errors below.</div>";
+     }
+
      $ret .= "<?p $ML{'.create.text'} p?>";
      $ret .= "<form action=\"create.bml\" method=\"post\">\n";
-     $ret .= "<input type=\"hidden\" name=\"mode\" value=\"submit\">\n";
-     $ret .= "<input type=\"hidden\" name=\"code\" value=\"" . LJ::ehtml($code) . "\">\n";     
+     $ret .= LJ::html_hidden(mode => 'submit',
+                             code => $code);
 
      $ret .= "<ol>";
 
@@ -404,9 +409,12 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.password.input.head1'}</div>";
      $ret .= $error_msg->('password', '<p class="formitemFlag">', '</p>');
      $ret .= "<div class='formitemDesc'>$ML{'.password.text'}</div>";
-     $ret .= LJ::html_text({'name' => 'password1', 'size' => 30, 'maxlength' => 31, 'type' => "password",});
+     my $pass_value = $errors{'password'} ? "" : $POST{'password1'};
+     $ret .= LJ::html_text({'name' => 'password1', 'size' => 30, 'maxlength' => 31, 'type' => "password",
+                            value => $pass_value, });
      $ret .= "<div class='formitemDesc'>$ML{'.password.input.head2'}</div>";
-     $ret .= LJ::html_text({'name' => 'password2', 'size' => 30, 'maxlength' => 31, 'type' => "password",});
+     $ret .= LJ::html_text({'name' => 'password2', 'size' => 30, 'maxlength' => 31, 'type' => "password",
+                            value => $pass_value, });
      $ret .= "</div></li>";
 
      if (@LJ::INITIAL_OPTIONAL_FRIENDS) {
@@ -414,10 +422,9 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
          $ret .= "<div class='formitemDesc'>$ML{'.initialfriends'}</div>";
          $ret .= "<div>";
          foreach my $friend (@LJ::INITIAL_OPTIONAL_FRIENDS) {
-             my @checked = LJ::did_post() && !$POST{"initial_optional_friend_$friend"} ? ('checked' => 'checked') : ();
              $ret .= LJ::html_check({'name' => "initial_optional_friend_$friend", 
                                      'value' => 1, 
-                                     @checked,
+                                     'selected' => $POST{"initial_optional_friend_$friend"},
                                      'id' => "optfriend_$friend",
                                  });
              $ret .= "<label for='optfriend_$friend'>" .
@@ -430,12 +437,16 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      {
          if ($LJ::COPPA_CHECK eq "under") {
              $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.age.head'}</div>";
-             $ret .= "<div class='formitemDesc'>$ML{'.age.check.question'}</div>";
-             $ret .= "<div><input type=\"checkbox\" value=\"1\" name=\"under13\" id='under13' /> <label for='under13'>$ML{'.age.check.yes'}</label>";
+             $ret .= "<div class='formitemDesc'>$ML{'.age.check.question'}</div><div>";
+             $ret .= LJ::html_check({ name => under13, id => under13, value => 1,
+                                      selected => $POST{under13} });
+             $ret .= "<label for='under13'>$ML{'.age.check.yes'}</label>";
          } elsif ($LJ::COPPA_CHECK) {
              $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.age.head'}</div>";
-             $ret .= "<div class='formitemDesc'>$ML{'.age.check2.question'}</div>";
-             $ret .= "<div><input type=\"checkbox\" value=\"1\" name=\"over13\" id='over13' /> <label for='over13'>$ML{'.age.check2.yes'}</label>";
+             $ret .= "<div class='formitemDesc'>$ML{'.age.check2.question'}</div><div>";
+             $ret .= LJ::html_check({ name => over13, id => over13, value => 1,
+                                      selected => $POST{over13} });
+             $ret .= "<label for='over13'>$ML{'.age.check2.yes'}</label>";
          }
          $ret .= "</div></div></li>";
      }
@@ -469,7 +480,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
      }
 
      if ($LJ::HUMAN_CHECK{create}) {
-		 my ( $capid, $anum );
+         my ( $capid, $anum );
 
          $ret .= "<li><div class='formitem'><div class='formitemName'>Prove that you're a human</div>";
 
@@ -486,15 +497,16 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && $POST{answer} =~ m{audio}i
          # Audio challenge
          else {
              ( $capid, $anum ) = LJ::Captcha::get_audio_id();
-
+             
              $ret .= "<div class='formitemDesc'>Type the numbers you hear to prove ".
                  "that you're not a spam robot:</div>";
              $ret .= "<a href='/captcha/audio.bml?capid=$capid&anum=$anum'>Play the sound</a>";
          }
-
+         
          $ret .= "<br/><br/>";
          $ret .= "Answer: <input type='text' name='answer' value='' size='15' />";
-		 $ret .= LJ::html_hidden( capid => $capid, anum => $anum );
+         $ret .= LJ::html_hidden( capid => $capid, anum => $anum );
+         $ret .= $error_msg->('captcha', '<p class="formitemFlag">', '</p>');
          $ret .= "</div></li>";
      }
 
