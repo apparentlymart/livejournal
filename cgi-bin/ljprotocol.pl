@@ -419,6 +419,11 @@ sub postevent
     }
     #### /embedding
     
+    ### extract links for meme tracking
+    foreach my $url (LJ::get_urls($event)) {
+        LJ::record_meme($dbs, $url, $posterid, $itemid);
+    }
+
     my $qevent = $dbh->quote($event);
     $event = "";
     

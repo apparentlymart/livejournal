@@ -1034,6 +1034,17 @@ CREATE TABLE acctcode
 )
 EOC
 
+register_tablecreate("meme", <<'EOC');
+CREATE TABLE meme (
+  url       VARCHAR(150) NOT NULL,
+  posterid  INT UNSIGNED NOT NULL,
+  UNIQUE (url, posterid),
+  ts        TIMESTAMP,
+  itemid    INT UNSIGNED NOT NULL,
+  INDEX (ts)
+)
+EOC
+
 ### changes
 
 register_alter(sub {

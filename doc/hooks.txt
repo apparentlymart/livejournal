@@ -30,5 +30,9 @@
   userid
   code    -- auth code, if in use
 
+* canonicalize_url(\$url)
+
+  cleans up a URL into its canonical form.
+
 
 

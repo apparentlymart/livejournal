@@ -12,6 +12,7 @@ use DBI;
 use Digest::MD5 qw(md5_hex);
 use Text::Wrap;
 use MIME::Lite;
+use HTML::LinkExtor;
 
 ########################
 # CONSTANTS
@@ -582,6 +583,50 @@ sub get_query_string
 
 
 package LJ;
+
+# <LJFUNC>
+# name: LJ::get_urls
+# des: Returns a list of all referenced URLs from a string
+# args: text
+# des-text: Text to extra URLs from
+# returns: list of URLs
+# </LJFUNC>
+sub get_urls
+{
+    my $text = shift;
+    my @urls;
+    my $p = HTML::LinkExtor->new(sub { 
+	my ($tag, %attr) = @_;
+	return if ($tag eq "img");
+	push @urls, values %attr;
+    });
+    $p->parse($text);
+    return @urls;
+}
+
+# <LJFUNC>
+# name: LJ::record_meme
+# des: Records a URL reference in a journal entry.
+# args: dbarg, url, posterid, itemid
+# des-url: URL to log
+# des-posterid: Userid of person posting
+# des-itemid: Itemid URL appears in
+# </LJFUNC>
+sub record_meme
+{
+    my ($dbarg, $url, $posterid, $itemid) = @_;
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+
+    $url =~ s!/$!!;  # strip / at end
+    LJ::run_hooks("canonicalize_url", \$url);
+    
+    my $qurl = $dbh->quote($url);
+    $posterid += 0;
+    $itemid += 0;
+    $dbh->do("REPLACE INTO meme (url, posterid, itemid) " .
+	     "VALUES ($qurl, $posterid, $itemid)");
+}
 
 # <LJFUNC>
 # name: LJ::name_caps
