@@ -690,7 +690,7 @@ sub talkform {
     BML::set_language_scope('/talkpost.bml');
 
     if ($parpost->{'state'} eq "S") {
-        $ret .= "<br /><?p $BML::ML{'.warnscreened'} p?>";
+        $ret .= "<div class='ljwarnscreened'>$BML::ML{'.warnscreened'}</div>";
     }
     $ret .= "<form method='post' action='$LJ::SITEROOT/talkpost_do.bml' id='postform'>";
 
