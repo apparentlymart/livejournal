@@ -2764,13 +2764,21 @@ sub get_remote
     my $u = LJ::load_user($dbs, $user);
     return $no_remote->("User doesn't exist") unless $u;
 
-    my $udbr = LJ::get_cluster_reader($u, 1);
-    return undef unless $udbr;  # shouldn't happen.
-
-    my $sess = $udbr->selectrow_hashref(qq{
-        SELECT *, UNIX_TIMESTAMP() AS 'now' FROM sessions 
-            WHERE userid=? AND sessid=? AND auth=? 
-        }, undef, $u->{'userid'}, $sessid, $auth);
+    my $sess_db = LJ::get_cluster_reader($u, 1);
+    my $sess;
+    my $get_sess = sub {
+        $sess = $sess_db->selectrow_hashref(qq{
+            SELECT *, UNIX_TIMESTAMP() AS 'now' FROM sessions 
+                WHERE userid=? AND sessid=? AND auth=? 
+            }, undef, $u->{'userid'}, $sessid, $auth);
+    };
+    $get_sess->();
+    unless ($sess) {
+        # maybe the slave is just lagged.  we'll try again from the
+        # master.
+        $sess_db = LJ::get_cluster_master($u, 1);
+        $get_sess->();
+    }
     return $no_remote->("Session bogus") unless $sess;
     return $no_remote->("Session old") if $sess->{'timeexpire'} < $sess->{'now'};
     if ($sess->{'ipfixed'}) {
