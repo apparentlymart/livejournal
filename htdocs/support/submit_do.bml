@@ -59,11 +59,8 @@ body<=
     $req{'uniq'} = $r->notes('uniq');
 
     # insert diagnostic information
-    if ($LJ::SUPPORT_DIAGNOSTICS{'track_useragent'}) {
-        $req{'body'} = $POST{'message'} . "\n";
-        $req{'body'} .= "-------------------------------------------\n";
-        $req{'body'} .= "Diagnostics: " . BML::get_client_header('User-Agent');
-    }
+    $req{useragent} = BML::get_client_header('User-Agent') 
+        if $LJ::SUPPORT_DIAGNOSTICS{track_useragent};
 
     return LJ::bad_input(@errors) if @errors;
     my $spid = LJ::Support::file_request(\@errors, \%req);

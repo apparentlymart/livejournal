@@ -318,6 +318,9 @@ body<=
         $message =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
         $message =~ s/\n/<br \/>\n/g;
         $message = LJ::auto_linkify($message);
+
+        # insert support diagnostics from props
+        $message .= "<?hr?><strong>Diagnostics:</strong> $props->{useragent}" if $props->{useragent};
         
         # special case: original request
         if ($le->{'type'} eq "req") {

@@ -434,8 +434,14 @@ sub file_request
     }
 
     # save meta-data for this request
-    $dbh->do("INSERT INTO supportprop (spid, prop, value) VALUES (?, 'uniq', ?)",
-             undef, $spid, $o->{'uniq'});
+    my @data;
+    my $add_data = sub {
+        my $q = $dbh->quote($_[1]);
+        return unless $q && $q ne 'NULL';
+        push @data, "($spid, '$_[0]', $q)";
+    };
+    $add_data->($_, $o->{$_}) foreach qw(uniq useragent);
+    $dbh->do("INSERT INTO supportprop (spid, prop, value) VALUES " . join(',', @data));
         
     $sth = $dbh->prepare("INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) VALUES (NULL, $spid, UNIX_TIMESTAMP(), 'req', 0, $qrequserid, $qbody)");
     $sth->execute;
