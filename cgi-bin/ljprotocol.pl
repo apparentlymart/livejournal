@@ -1418,8 +1418,14 @@ sub syncitems
     return undef unless check_altusage($dbs, $req, $err, $flags);
     
     my $ownerid = $flags->{'ownerid'};
+    my $uowner = $flags->{'u_owner'} || $flags->{'u'};
     my $dbr = $dbs->{'reader'};
     my ($date, $sth);
+
+    # cluster differences
+    my ($db, $table) = ($dbr, "syncupdates");
+    ($db, $table) = (LJ::get_cluster_reader($uowner), "syncupdates2")
+	if $uowner->{'clusterid'};
 
     ## have a valid date?
     $date = $req->{'lastsync'};
@@ -1432,16 +1438,14 @@ sub syncitems
 
     my $LIMIT = 500;
 
-    $sth = $dbr->prepare("SELECT COUNT(*) FROM syncupdates WHERE ".
-			 "userid=$ownerid AND atime >= '$date'");
-    $sth->execute;
-    my ($sync_count) = $sth->fetchrow_array;
+    my $total = $db->selectrow_array("SELECT COUNT(*) FROM $table WHERE ".
+				     "userid=$ownerid AND atime >= '$date'");
 	
-    $sth = $dbr->prepare("SELECT atime, nodetype, nodeid, atype FROM ".
-			 "syncupdates WHERE userid=$ownerid AND ".
-			 "atime >= '$date' ORDER BY atime LIMIT $LIMIT");
+    $sth = $db->prepare("SELECT atime, nodetype, nodeid, atype FROM ".
+			"$table WHERE userid=$ownerid AND ".
+			"atime >= '$date' ORDER BY atime LIMIT $LIMIT");
     $sth->execute;
-    return fail($err,501,$dbr->errstr) if $dbr->err;
+    return fail($err,501,$db->errstr) if $db->err;
 
     my $res = {};
     my $list = $res->{'syncitems'} = [];
@@ -1454,7 +1458,7 @@ sub syncitems
 		   };
     }
     $res->{'count'} = $ct;
-    $res->{'total'} = $sync_count;
+    $res->{'total'} = $total;
     return $res;
 }
 
