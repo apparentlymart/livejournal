@@ -132,7 +132,7 @@ sub deletefrom0_logitem
     }
 
     $dbh->do("DELETE FROM logsec WHERE ownerid=$userid AND itemid=$itemid");
-    foreach my $table (qw(logprop logtext log)) {
+    foreach my $table (qw(logprop logtext logsubject log)) {
 	$dbh->do("DELETE FROM $table WHERE itemid=$itemid");
     }
 }
@@ -167,13 +167,21 @@ sub movefrom0_logitem
 
     $dbch->do("REPLACE INTO logtext2 (journalid, jitemid, subject, event) VALUES (" . join(",", $userid, $jitemid, map { $dbh->quote($itemtext->{$_}) } qw(subject event)) . ")");
 
+    $dbch->do("REPLACE INTO logsubject2 (journalid, jitemid, subject) VALUES (" . 
+	      join(",", $userid, 
+		   $jitemid, 
+		   $dbh->quote($itemtext->{'subject'}) . ")"));
+
+    # add disk usage info!  (this wasn't in cluster0 anywhere)
+    my $bytes = length($itemtext->{'event'}) + length($itemtext->{'subject'});
+    $dbch->do("REPLACE INTO dudata (userid, area, areaid, bytes) VALUES ($userid, 'L', $jitemid, $bytes)");
+
     # is it in recent_?
     if ($recentpoint && $item->{'logtime'} gt $recentpoint) {
 	$dbch->do("REPLACE INTO recent_logtext2 (journalid, jitemid, logtime, subject, event) ".
 		  "VALUES (" . join(",", $userid, $jitemid, $dbh->quote($item->{'logtime'}), 
 				    map { $dbh->quote($itemtext->{$_}) } qw(subject event)) . ")");
     }
-
 
     # add the logsec item, if necessary:
     if ($item->{'security'} ne "public") {
@@ -239,6 +247,10 @@ sub movefrom0_talkitem
 
     $dbch->do("REPLACE INTO talktext2 (journalid, jtalkid, subject, body) VALUES (" . 
 	      join(",", $userid, $jtalkid, map { $dbh->quote($itemtext->{$_}) } qw(subject body)) . ")");
+
+    # add disk usage info!  (this wasn't in cluster0 anywhere)
+    my $bytes = length($itemtext->{'body'}) + length($itemtext->{'subject'});
+    $dbch->do("REPLACE INTO dudata (userid, area, areaid, bytes) VALUES ($userid, 'T', $jtalkid, $bytes)");
 
     # is it in recent_?
     if ($recentpoint && $item->{'datepost'} gt $recentpoint) {
