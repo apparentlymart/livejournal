@@ -118,6 +118,13 @@ sub selectrow_array {
     return $dbcm->selectrow_array(@_);
 }
 
+sub selectrow_hashref {
+    my $u = shift;
+    my $dbcm = $u->{'_dbcm'} ||= LJ::get_cluster_master($u)
+        or croak "Database handle unavailable";
+    return $dbcm->selectrow_hashref(@_);
+}
+
 sub err {
     my $u = shift;
     return $u->{_dberr};
@@ -140,8 +147,14 @@ sub quote {
 
 sub mysql_insertid {
     my $u = shift;
-
-    return $u->{_mysql_insertid};
+    if ($u->isa("LJ::User")) {
+        return $u->{_mysql_insertid};
+    } elsif (LJ::isdb($u)) {
+        my $db = $u;
+        return $db->{'mysql_insertid'};
+    } else {
+        die "Unknown object '$u' being passed to LJ::User::mysql_insertid.";
+    }
 }
 
 # <LJFUNC>

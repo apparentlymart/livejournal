@@ -1574,7 +1574,7 @@ sub set_userprop
             my $db = $action{$table}->{'db'} ||= (
                 $table !~ m{userprop(lite2|blob)}
                     ? LJ::get_db_writer()
-                    : LJ::get_cluster_master($u) );
+                    : $u->writer );
             return 0 unless $db;
         }
         $value = $hash->{$propname};
@@ -4010,11 +4010,13 @@ sub get_remote
 
     if ($sess_length &&
         $sess->{'timeexpire'} - $now < $sess_length/2) {
-        my $udbh = LJ::get_cluster_master($u);
-        if ($udbh) {
-            my $future = $now + $sess_length;
-            $udbh->do("UPDATE sessions SET timeexpire=$future WHERE ".
-                      "userid=$u->{'userid'} AND sessid=$sess->{'sessid'}");
+        my $future = $now + $sess_length;
+
+        if ($u->writer &&
+            $u->do("UPDATE sessions SET timeexpire=? ".
+                   "WHERE userid=? AND sessid=?",
+                   undef, $future, $u->{userid}, $sess->{sessid})) {
+
             LJ::MemCache::delete($memkey);
 
             # Update their ljsession cookie as well
@@ -7256,36 +7258,37 @@ sub replycount_do {
     # "init" is easiest and needs no lock (called before the entry is live)
     if ($action eq 'init') {
         LJ::MemCache::set($memkey, "0   ");
-        return;
+        return 1;
     }
 
-    my $db = LJ::get_cluster_master($u);
+    return 0 unless $u->writer;
+
     my $lockkey = $memkey->[1];
-    $db->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
+    $u->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
 
     my $ret;
 
     if ($action eq 'decr') {
         $ret = LJ::MemCache::decr($memkey, $value);
-        $db->do("UPDATE log2 SET replycount=replycount-$value WHERE journalid=$uid AND jitemid=$jitemid");
+        $u->do("UPDATE log2 SET replycount=replycount-$value WHERE journalid=$uid AND jitemid=$jitemid");
     }
 
     if ($action eq 'incr') {
         $ret = LJ::MemCache::incr($memkey, $value);
-        $db->do("UPDATE log2 SET replycount=replycount+$value WHERE journalid=$uid AND jitemid=$jitemid");
+        $u->do("UPDATE log2 SET replycount=replycount+$value WHERE journalid=$uid AND jitemid=$jitemid");
     }
 
-    unless (defined $ret) {
-        my $rc = $db->selectrow_array("SELECT replycount FROM log2 WHERE journalid=$uid AND jitemid=$jitemid");
+    if (@LJ::MEMCACHE_SERVERS && ! defined $ret) {
+        my $rc = $u->selectrow_array("SELECT replycount FROM log2 WHERE journalid=$uid AND jitemid=$jitemid");
         if (defined $rc) {
             $rc = sprintf("%-4d", $rc);
             LJ::MemCache::set($memkey, $rc);
         }
     }
 
-    $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+    $u->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
 
-    return;
+    return 1;
 }
 
 # <LJFUNC>
@@ -7842,8 +7845,7 @@ sub rate_log
     my $rateperiod = LJ::get_cap($u, "rateperiod-$ratename");
     return 1 unless $rateperiod;
 
-    my $dbu = LJ::get_cluster_master($u);
-    return 0 unless $dbu;
+    return 0 unless $u->writer;
 
     my $rp = LJ::get_prop("rate", $ratename);
     return 0 unless $rp;
@@ -7852,8 +7854,8 @@ sub rate_log
     my $beforeperiod = $now - $rateperiod;
 
     # delete inapplicable stuff (or some of it)
-    $dbu->do("DELETE FROM ratelog WHERE userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
-             "AND evttime < $beforeperiod LIMIT 1000");
+    $u->do("DELETE FROM ratelog WHERE userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
+           "AND evttime < $beforeperiod LIMIT 1000");
 
     # check rate.  (okay per period)
     my $opp = LJ::get_cap($u, "rateallowed-$ratename");
@@ -7874,8 +7876,8 @@ sub rate_log
 
     # log current
     $count = $count + 0;
-    $dbu->do("INSERT INTO ratelog (userid, rlid, evttime, ip, quantity) VALUES ".
-             "($u->{'userid'}, $rp->{'id'}, $now, INET_ATON($ip), $count)");
+    $u->do("INSERT INTO ratelog (userid, rlid, evttime, ip, quantity) VALUES ".
+           "($u->{'userid'}, $rp->{'id'}, $now, INET_ATON($ip), $count)");
     return 1;
 }
 

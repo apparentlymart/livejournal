@@ -1772,7 +1772,7 @@ sub editfriendgroups
     my $u = $flags->{'u'};
     my $userid = $u->{'userid'};
     my ($db, $fgtable, $bmax, $cmax) = $u->{dversion} > 5 ?
-                         (LJ::get_cluster_master($u), 'friendgroup2', LJ::BMAX_GRPNAME2, LJ::CMAX_GRPNAME2) :
+                         ($u->writer, 'friendgroup2', LJ::BMAX_GRPNAME2, LJ::CMAX_GRPNAME2) :
                          (LJ::get_db_writer(), 'friendgroup', LJ::BMAX_GRPNAME, LJ::CMAX_GRPNAME);
     my $sth;
 
@@ -1909,9 +1909,8 @@ sub editfriendgroups
 
         # remove the friend group, unless we just added it this transaction
         unless ($added{$bit}) {
-            $sth = $db->prepare("DELETE FROM $fgtable WHERE ".
-                                "userid=$userid AND groupnum=$bit");
-            $sth->execute;
+            $db->do("DELETE FROM $fgtable WHERE ".
+                    "userid=$userid AND groupnum=$bit");
         }
     }
 

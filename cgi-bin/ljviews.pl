@@ -351,7 +351,7 @@ sub get_s1style_writer {
         return LJ::get_db_writer();
     }
 
-    return LJ::get_cluster_master($u);
+    return $u->writer;
 }
 
 sub get_s1style_reader {
@@ -522,7 +522,8 @@ sub create_style {
         my $db = LJ::S1::get_s1style_writer($u);
         $db->do("INSERT INTO s1style (styleid,userid,$cols) VALUES (?,?,$bind)",
                 undef, $styleid, $u->{'userid'}, @vals);
-        my $insertid = $db->{'mysql_insertid'};
+        my $insertid = LJ::User::mysql_insertid($db);
+        die "Couldn't allocate insertid for s1style for userid $u->{userid}" unless $insertid;
 
         $dbh->do("INSERT INTO s1stylemap (styleid, userid) VALUES (?,?)", undef, $insertid, $u->{'userid'});
         return $insertid;
