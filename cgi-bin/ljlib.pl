@@ -4019,6 +4019,8 @@ sub journal_base
         return "$LJ::SITEROOT/~$user";
     } elsif ($vhost eq "community") {
         return "$LJ::SITEROOT/community/$user";
+    } elsif ($vhost eq "front") {
+        return $LJ::SITEROOT;
     } elsif ($vhost =~ /^other:(.+)/) {
         return "http://$1";
     } else {

@@ -192,6 +192,19 @@ sub trans
     # userpic
     return userpic_trans($r, $1) if $uri =~ m!^/userpic/(\d+)$!;
 
+    # front page journal
+    if ($LJ::FRONTPAGE_JOURNAL && $uri =~ m!^/(\w+)?(.*)$! &&
+        ($1 eq "" || defined $LJ::viewinfo{$1}))
+    {
+        my ($mode, $pe) = ($1, $2);
+        return DECLINED if $pe =~ m!\.bml|\.html$!;
+        return $journal_view->({'vhost' => 'front',
+                                'mode' => $mode,
+                                'args' => $args,
+                                'pathextra' => $pe,
+                                'user' => $LJ::FRONTPAGE_JOURNAL, });
+    }
+
     # normal (non-domain) journal view
     if ($uri =~ m!
         ^/(users\/|community\/|\~)  # users/community/tilde

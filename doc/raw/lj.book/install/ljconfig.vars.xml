@@ -63,6 +63,14 @@
         </listitem>
       </varlistentry>
 
+      <varlistentry>
+        <term><literal role="variable">$LJ::FRONTPAGE_JOURNAL</literal></term>
+        <listitem><para>Optional.  If set, the main page of the site loads the specified journal,
+            not index.bml.  Use this if you're running a news site where there's only one journal,
+            or one journal is dominant.
+          </para></listitem>
+      </varlistentry>
+
     </variablelist>
     <variablelist>
       <title>Database Related</title>
