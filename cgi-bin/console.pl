@@ -1062,12 +1062,12 @@ sub reset_password
     return $err->("This command takes exactly 2 arguments") unless @$args == 3;
 
     return $err->("$remote->{'user'}, you are not authorized to use this command.")
-        unless ($remote->{'priv'}->{'reset_password'});
+        unless $remote->{'priv'}->{'reset_password'};
 
     my $user = $args->[1];
     my $u = LJ::load_user($user);
 
-    return $err->("Invalid user $user") unless ($u);
+    return $err->("Invalid user $user") unless $u;
 
     my $newpass = LJ::rand_chars(8);
     my $oldpass = $dbh->quote(Digest::MD5::md5_hex($u->{'password'} . "change"));
@@ -1081,7 +1081,7 @@ sub reset_password
 
     my $body = "The password for your $LJ::SITENAME account '$u->{'user'}' has been reset to:\n\n";
     $body .= "     $newpass\n\n";
-    $body .= "Please change it immediately by going to: $LJ::SITEROOT/changepassword.bml\n\n";
+    $body .= "Please change it immediately by going to:\n$LJ::SITEROOT/changepassword.bml\n\n";
     $body .= "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
 
     LJ::send_mail({
