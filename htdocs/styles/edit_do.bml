@@ -318,7 +318,8 @@ if ($FORM{'mode'} eq "savechanges")
      my $viewtype = $sth->fetchrow_arrayref->[0];
 
      # all good
-     return "(=H1 Success H1=)(=P Style has been updated. P=)";
+     return "(=H1 Success H1=)(=P Style has been updated.  You can view it ".
+	 "<a href=\"/customview.cgi?user=$user&styleid=$qstyleid\">here</a>. P=)";
  }
 
  return "<B>Error:</B> Unknown mode ($FORM{'mode'}).";
