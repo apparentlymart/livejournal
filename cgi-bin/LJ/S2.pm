@@ -1119,6 +1119,15 @@ sub DateTime__time_format
     return $$c->($this);
 }
 
+sub Entry__plain_subject
+{
+    my ($ctx, $this) = @_;
+    return $this->{'_subject_plain'} if defined $this->{'_subject_plain'};
+    $this->{'_subject_plain'} = $this->{'subject'};
+    LJ::CleanHTML::clean_subject_all(\$this->{'_subject_plain'});
+    return $this->{'_subject_plain'};
+}
+
 sub YearMonth__month_format
 {
     my ($ctx, $this, $fmt) = @_;

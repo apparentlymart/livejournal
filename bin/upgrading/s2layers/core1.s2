@@ -219,6 +219,8 @@ class Entry
     var string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
 
     function print_metadata ();
+    function builtin plain_subject () : string
+        "Return entry's subject as plain text, with all HTML removed.";
 }
 
 ### Userinfo
