@@ -60,6 +60,8 @@ body<=
     use strict;
     use vars qw(%FORM);
 
+    LJ::set_dynamic_crumb('Request #' . ($FORM{'id'}+0), 'supporthelp');
+
     my $spid = $FORM{'id'}+0;
     my $sp = LJ::Support::load_request($spid);
     my $props = LJ::Support::load_props($spid);

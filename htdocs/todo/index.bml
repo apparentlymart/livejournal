@@ -3,6 +3,8 @@
  $title = "";
  $body = "";
 
+ LJ::set_active_crumb('todo');
+
  use strict;
  use vars qw($title $body %FORM);
 

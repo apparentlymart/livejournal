@@ -1,6 +1,11 @@
 <?page
 title=><?_ml .title _ml?>
-body=><?_code return $ML{'.main'}; _code?>
+body<=
+<?_code
+    LJ::set_active_crumb('community');
+    return $ML{'.main'};
+_code?>
+<=body
 page?><?_c <LJDEP>
 # NONE
 </LJDEP> _c?>

@@ -3,6 +3,8 @@
     use strict;
     use vars qw(%GET %POST $title $body);
 
+    LJ::set_active_crumb('layerbrowse');
+
     # start of content
     $body = BML::ml("Backlink", {
         'link' => './',

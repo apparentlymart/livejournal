@@ -9,6 +9,8 @@ p?>
 
 <?_code
 
+ LJ::set_active_crumb('popfaqs');
+
  my $dbr = LJ::get_db_reader();
  $sth = $dbr->prepare("SELECT f.faqid, f.question, s.statval AS 'uses'".
                       "FROM faq f, stats s WHERE f.faqcat<>'int-abuse' AND s.statcat='popfaq' ".

@@ -475,6 +475,12 @@ sub set_active_crumb
     return undef;
 }
 
+sub set_dynamic_crumb
+{
+    my ($title, $parent) = @_;
+    $LJ::ACTIVE_CRUMB = [ $title, $parent ];
+}
+
 sub get_parent_crumb
 {
     my $thiscrumb = LJ::get_crumb(LJ::get_active_crumb());
@@ -492,14 +498,21 @@ sub get_crumb_path
     my @list;
     while ($cur) {
         # get crumb, fix it up, and then put it on the list
-        my $crumb = LJ::get_crumb($cur);
-        last unless $crumb;
-        last if $cur eq $crumb->[2];
-        push @$crumb, $cur;
-        push @list, $crumb;
+        if (ref $cur) {
+            # dynamic crumb
+            push @list, [ $cur->[0], '', $cur->[1], 'dynamic' ];
+            $cur = $cur->[1];
+        } else {   
+            # just a regular crumb
+            my $crumb = LJ::get_crumb($cur);
+            last unless $crumb;
+            last if $cur eq $crumb->[2];
+            $crumb->[3] = $cur;
+            push @list, $crumb;
 
-        # now get the next one we're going after
-        $cur = $crumb->[2]; # parent of this crumb
+            # now get the next one we're going after
+            $cur = $crumb->[2]; # parent of this crumb
+        }
     }
     return @list;
 }

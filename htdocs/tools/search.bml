@@ -6,6 +6,8 @@ body<=
     use strict;
     use vars qw(%GET %ML);
 
+    LJ::set_active_crumb('feedstersearch');
+
     if ($LJ::DISABLED{'feedster_search'}) {
         return LJ::bad_input('Feedster search is currently disabled');
     }

@@ -6,6 +6,8 @@ body<=
     use strict;
     use vars qw(%GET %POST);
 
+    LJ::set_active_crumb('themes');
+
     my $ret;
     my $dbr = LJ::get_db_reader();
 

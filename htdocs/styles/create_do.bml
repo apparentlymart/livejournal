@@ -7,6 +7,8 @@ body<=
     use strict;
     use vars qw(%GET %POST);
 
+    LJ::set_active_crumb('createstyle');
+
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
     return BML::redirect("create.bml") unless LJ::did_post();
 

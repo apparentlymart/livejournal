@@ -7,6 +7,8 @@ body<=
     use strict;
     use vars qw(%GET %POST);
 
+    LJ::set_active_crumb('editstyle');
+
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     # authenticate user

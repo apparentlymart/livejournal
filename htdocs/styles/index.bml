@@ -2,6 +2,10 @@
 title=><?_ml .title _ml?>
 body<=
 
+<?_code
+    return LJ::set_active_crumb('styles');
+_code?>
+
 <?h1 <?_ml .about.header _ml?> h1?>
 <?_ml .about _ml?>
 <dl>

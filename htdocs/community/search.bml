@@ -45,6 +45,7 @@ form<=
 <?_code
 {
     use strict;
+    LJ::set_active_crumb('commsearch');
 
     my %countries = ();
     LJ::load_codes({ "country" => \%countries });

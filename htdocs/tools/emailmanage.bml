@@ -7,6 +7,8 @@ body<=
     use strict;
     use vars qw(%GET %POST);
 
+    LJ::set_active_crumb('emailmanage');
+
     my $dbh = LJ::get_db_writer();
     
     my $remote = LJ::get_remote();

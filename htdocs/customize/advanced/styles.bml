@@ -3,6 +3,8 @@
     use strict;
     use vars qw(%GET %POST $title $body);
 
+    LJ::set_active_crumb('yourstyles');
+
     # used for error messages
     my $err = sub {
         $title = "Error";

@@ -126,6 +126,9 @@ body<=
      $$body .= BML::ml('.backfaqcat',{'faqcat'=>$backfaqcat,}) . "<br />" if $backfaqcat && $faqid;
      $$body .= "$ML{'.backfaq'}<br />$ML{'.backsupport'}";
 
+     # we're dynamic, set title as crumb title
+     LJ::set_dynamic_crumb($_[1]->{'title'}, 'faq');
+
      return $_[1]->{'body'};
 }
 _code?>

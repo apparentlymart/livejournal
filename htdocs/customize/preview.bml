@@ -6,6 +6,8 @@ body<=
     use strict;
     use vars qw(%GET %POST);
 
+    LJ::set_active_crumb('preview');
+
     my $ret;
     my $remote = LJ::get_remote();
     my $journal = LJ::canonical_username($GET{'journal'});

@@ -3,6 +3,8 @@
     use strict;
     use vars qw(%GET %POST $title $body);
 
+    LJ::set_active_crumb('yourlayers');
+
     # for error reporting
     my $err = sub {
         $title = "Error";

@@ -1,4 +1,6 @@
 <?_code
+
+ LJ::set_active_crumb('supportact');
  
  my $cmd = BML::get_query_string();
  if ($cmd =~ /^(\w+);(\d+);(\w{15})(?:;(\d+))?$/) {

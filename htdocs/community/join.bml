@@ -1,5 +1,7 @@
 <?_code
 
+ LJ::set_active_crumb('joincomm');
+
  $title = $ML{'.title'};
  $body = "";
  

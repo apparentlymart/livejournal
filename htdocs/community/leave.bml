@@ -1,5 +1,7 @@
 <?_code
 
+ LJ::set_active_crumb('leavecomm');
+
  $title = $ML{'.title'};
  $body = "";
 

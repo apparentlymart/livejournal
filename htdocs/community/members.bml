@@ -6,6 +6,8 @@ body<=
     use strict;
     use vars qw(%GET %POST);
 
+    LJ::set_active_crumb('commmembers');
+
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     # always have links at top
