@@ -19,17 +19,18 @@
      $body .= "(=H1 Who linked this? H1=)(=P The following journal entries link to:<blockquote><a href='$eurl'><b>$eurl</b></a></blockquote>P=)";
 
      $body .= "<table>";
-     $body .= "<tr align='left'><td width='100'><b>User</b></td><td><b>Subject of Post</b></td></tr>\n";
+     $body .= "<tr align='left'><td width='100'><b>User</b></td><td><b>Post Link</b></td></tr>\n";
 
-     $sth = $dbr->prepare("SELECT u.user, m.itemid, ls.subject FROM useridmap u, meme m, logsubject ls WHERE u.userid=m.posterid AND m.url=$qurl AND ls.itemid=m.itemid LIMIT $qskip,500");
+     $sth = $dbr->prepare("SELECT u.user, m.itemid FROM meme m LEFT JOIN useridmap u ON m.journalid=u.userid WHERE m.url=$qurl LIMIT $qskip,500");
      $sth->execute;
      my $count = 0;
-     while (my ($user, $itemid, $subject) = $sth->fetchrow_array)
+     while (my ($journal, $itemid) = $sth->fetchrow_array)
      {
-         $body .= "<tr align='left'><td>(=LJUSER $user LJUSER=)</td>";
-         LJ::CleanHTML::clean_subject_all(\$subject);
-         my $esub = LJ::escapeall($subject) || "(no subject)";
-         $body .= "<td><a href='$LJ::SITEROOT/talkread.bml?itemid=$itemid'>$esub</a></td>";
+         $body .= "<tr align='left'><td>";
+	 $body .= "(=LJUSER $journal LJUSER=)" if $journal;
+	 $body .= "</td>";
+	 my $jarg = $journal ? "journal=$journal&amp;" : "";
+         $body .= "<td><a href='$LJ::SITEROOT/talkread.bml?${jarg}itemid=$itemid'>post</a></td>";
          $body .= "</tr>";
          $count++;
      }
