@@ -583,6 +583,13 @@ sub get_query_string
 
 package LJ;
 
+# <LJFUNC>
+# name: LJ::name_caps
+# des: Given a user's capability class bit mask, returns a
+#      site-specific string representing the capability class name.
+# args: caps
+# des-caps: 16 bit capability bitmask
+# </LJFUNC>
 sub name_caps
 {
     return undef unless LJ::are_hooks("name_caps");
@@ -591,10 +598,20 @@ sub name_caps
     return $r[0]->[0];
 }
 
+# <LJFUNC>
+# name: LJ::get_cap
+# des: Given a user object or capability class bit mask and a capability/limit name,
+#      returns the maximum value allowed for given user or class, considering 
+#      all the limits in each class the user is a part of.
+# args: u_cap, capname
+# des-u_cap: 16 bit capability bitmask or a user object from which the
+#            bitmask could be obtained
+# des-capname: the name of a limit, defined in doc/capabilities.txt
+# </LJFUNC>
 sub get_cap
 {
     my $caps = shift;   # capability bitmask (16 bits), or user object
-    my $cname = shift;  # capability name
+    my $cname = shift;  # capability limit name
     if (ref $caps eq "HASH") { $caps = $caps->{'caps'}; }
     my $max = undef;
     foreach my $bit (keys %LJ::CAP) {
@@ -606,6 +623,14 @@ sub get_cap
     return $max;
 }
 
+# <LJFUNC>
+# name: LJ::get_cap_min
+# des: Just like [func[LJ::get_cap]], but returns the minimum value.
+# args: u_cap, capname
+# des-u_cap: 16 bit capability bitmask or a user object from which the
+#            bitmask could be obtained
+# des-capname: the name of a limit, defined in doc/capabilities.txt
+# </LJFUNC>
 sub get_cap_min
 {
     my $caps = shift;   # capability bitmask (16 bits), or user object
@@ -621,6 +646,17 @@ sub get_cap_min
     return $min;
 }
 
+# <LJFUNC>
+# name: LJ::help_icon
+# des: Returns BML to show a help link/icon given a help topic, or nothing
+#      if the site hasn't defined a URL for that topic.  Optional arguments
+#      include HTML/BML to place before and after the link/icon, should it
+#      be returned.
+# args: topic, pre?, post?
+# des-topic: Help topic key.  See doc/ljconfig.pl.txt for examples.
+# des-pre: HTML/BML to place before the help icon.
+# des-post: HTML/BML to place after the help icon.
+# </LJFUNC>
 sub help_icon
 {
     my $topic = shift;
@@ -630,12 +666,28 @@ sub help_icon
     return "$pre(=HELP $LJ::HELPURL{$topic} HELP=)$post";
 }
 
+# <LJFUNC>
+# name: LJ::are_hooks
+# des: Returns true if the site has one or more hooks installed for
+#      the given hookname.
+# args: hookname
+# des-hookname: Name of hook. See doc/hooks.txt.
+# </LJFUNC>
 sub are_hooks
 {
     my $hookname = shift;
     return defined $LJ::HOOKS{$hookname};
 }
 
+# <LJFUNC>
+# name: LJ::run_hooks
+# des: Runs all the site-specific hooks of the given name.
+# returns: list of arrayrefs, one for each hook ran, their
+#          contents being their own return values.
+# args: hookname, args*
+# des-hookname: Name of hook. See doc/hooks.txt.
+# des-args: Arguments to be passed to hook.
+# </LJFUNC>
 sub run_hooks
 {
     my $hookname = shift;
@@ -647,6 +699,14 @@ sub run_hooks
     return @ret;
 }
 
+# <LJFUNC>
+# name: LJ::register_hook
+# des: Installs a site-specific hook.  Installing multiple hooks per hookname
+#      is valid.  They're run later in the order they're registered.
+# args: hookname, subref
+# des-hookname: Name of hook. See doc/hooks.txt.
+# des-subref: Subroutine reference to run later.
+# </LJFUNC>
 sub register_hook
 {
     my $hookname = shift;
@@ -654,6 +714,15 @@ sub register_hook
     push @{$LJ::HOOKS{$hookname}}, $subref;
 }
 
+# <LJFUNC>
+# name: LJ::acid_encode
+# des: Given a decimal number, returns base 30 encoding
+#      using an alphabet of letters & numbers that are
+#      not easily mistaken for each other.
+# returns: Base 30 encoding, alwyas 7 characters long.
+# args: number
+# des-number: Number to encode in base 30.
+# </LJFUNC>
 sub acid_encode
 {
     my $num = shift;
@@ -667,6 +736,14 @@ sub acid_encode
     return ("a"x(7-length($acid)) . $acid);
 }
 
+# <LJFUNC>
+# name: LJ::acid_decode
+# des: Given an acid encoding from [func[LJ::acid_encode]], 
+#      returns the original decimal number.
+# returns: Integer.
+# args: acid
+# des-acid: base 30 number from [func[LJ::acid_encode]].
+# </LJFUNC>
 sub acid_decode
 {
     my $acid = shift;
@@ -683,6 +760,16 @@ sub acid_decode
     return $num;    
 }
 
+# <LJFUNC>
+# name: LJ::acct_code_generate
+# des: Creates an invitation code from an optional userid
+#      for use by anybody.
+# returns: Account/Invite code.
+# args: dbarg, userid?
+# des-dbarg: a master db handle, or a master/slave dbset
+# des-userid: Userid to make the invitation code from,
+#             else the code will be from userid 0 (system)
+# </LJFUNC>
 sub acct_code_generate
 {
     my $dbarg = shift;
@@ -701,6 +788,15 @@ sub acct_code_generate
     return acct_code_encode($acid, $auth);
 }
 
+# <LJFUNC>
+# name: LJ::acct_code_encode
+# des: Given an account ID integer and a 5 digit auth code, returns
+#      a 12 digit account code.
+# returns: 12 digit account code.
+# args: acid, auth
+# des-acid: account ID, a 4 byte unsigned integer
+# des-auth: 5 random characters from base 30 alphabet.
+# </LJFUNC>
 sub acct_code_encode
 {
     my $acid = shift;
@@ -708,12 +804,31 @@ sub acct_code_encode
     return lc($auth) . acid_encode($acid);
 }
 
+# <LJFUNC>
+# name: LJ::acct_code_decode
+# des: Breaks an account code down into its two parts
+# returns: list of (account ID, auth code)
+# args: code
+# des-code: 12 digit account code
+# </LJFUNC>
 sub acct_code_decode
 {
     my $code = shift;
     return (acid_decode(substr($code, 5, 7)), lc(substr($code, 0, 5)));
 }
 
+# <LJFUNC>
+# name: LJ::acct_code_check
+# des: Checks the validity of a given account code
+# returns: boolean; 0 on failure, 1 on validity. sets $$err on failure.
+# args: dbarg, code, err?, userid?
+# des-dbarg: a master db handle, or a master/slave dbset
+# des-code: account code to check
+# des-err: optional scalar ref to put error message into on failure
+# des-userid: optional userid which is allowed in the rcptid field,
+#             to allow for htdocs/create.bml case when people double
+#             click the submit button.
+# </LJFUNC>
 sub acct_code_check
 {
     my $dbarg = shift;
@@ -747,6 +862,13 @@ sub acct_code_check
     return 1;
 }
 
+# <LJFUNC>
+# name: LJ::load_mood_theme
+# des: Loads and caches a mood theme, or returns immediately if already loaded.
+# args: dbarg, themeid
+# des-dbarg: a master db handle, or a master/slave dbset
+# des-themeid: the mood theme ID to load
+# </LJFUNC>
 sub load_mood_theme
 {
     my $dbarg = shift;
