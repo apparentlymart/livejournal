@@ -506,6 +506,8 @@ INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES 
 UPDATE priv_list SET des='Allows a user to edit site text in a given language. arg=Unique language code, optionally appended by |domainid.domaincode',is_public='1',privname='Translate/Update Text',scope='general' WHERE privcode='translate';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows abuse staff to view an entry even if protected.  Must explictily enter this mode, and then it\'s audited, to prevent people from abusing this mode.', '0', 'viewall', 'View All Entries', 'general');
 UPDATE priv_list SET des='Allows abuse staff to view an entry even if protected.  Must explictily enter this mode, and then it\'s audited, to prevent people from abusing this mode.',is_public='0',privname='View All Entries',scope='general' WHERE privcode='viewall';
+INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows editing settings of syndicated journal that shouldn\'t be editable by users.', '0', 'syn_edit', 'Edit Syndicated Settings', 'general');
+UPDATE priv_list SET des='Allows editing settings of syndicated journal that shouldn\'t be editable by users.',is_public='0',privname='Edit Syndicated Settings',scope='general' WHERE privcode='syn_edit';
 INSERT IGNORE INTO ratelist (des, name) VALUES ('Logged when wrong username/password is used.', 'failed_login');
 UPDATE ratelist SET des='Logged when wrong username/password is used.',name='failed_login' WHERE rlid=NULL;
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('??', 'zips', 'FIPS');

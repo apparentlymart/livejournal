@@ -667,6 +667,17 @@ $cmd{'reset_email'} = {
                ],
     };
 
+$cmd{'syn_editurl'} = {
+    'handler' => \&syn_editurl,
+    'privs' => [qw(syn_edit)],
+    'des' => "Changes the syndication URL for a syndicated account.",
+    'argsummary' => '<username> <newurl>',
+    'args' => [
+               'username' => "The username of the syndicated journal.",
+               'newurl' => "The new URL to syndicate the journal from.",
+               ],
+    };
+
 sub conhelp 
 {
     my ($dbh, $remote, $args, $out) = @_;
@@ -1075,6 +1086,31 @@ sub reset_email
     LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, "reset_email", $reason);
 
     push @$out, [ '', "Address reset." ];
+    return 1;
+}
+
+sub syn_editurl
+{
+    my ($dbh, $remote, $args, $out) = @_;
+    my $err = sub { push @$out, [ "error", $_[0] ]; 0; };
+
+    return $err->("This command has 2 arguments") unless @$args == 3;
+
+    return $err->("You are not authorized to use this command.")
+        unless ($remote && $remote->{'priv'}->{'syn_edit'});
+
+    my $user = $args->[1];
+    my $newurl = $args->[2];
+    my $u = LJ::load_user($dbh, $user);
+
+    return $err->("Invalid user $user") unless $u;
+    return $err->("Not a syndicated account") unless $u->{'journaltype'} eq 'Y';
+    return $err->("Invalid URL") unless $newurl =~ m!^http://(.+?)/!;
+
+    $dbh->do("UPDATE syndicated SET synurl=? WHERE userid=?", undef,
+             $newurl, $u->{'userid'});
+
+    push @$out, [ '', "URL for account $user changed to $newurl ." ];
     return 1;
 }
 
