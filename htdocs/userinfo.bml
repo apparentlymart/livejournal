@@ -154,8 +154,7 @@
  $userid = $u->{'userid'};
 
  if ($u->{'has_bio'} eq "Y") {
-     my $db = $dbcr || $dbr;
-     $sth = $db->prepare("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
+     $sth = $dbcr->prepare("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
      $sth->execute;
      $_ = $sth->fetchrow_hashref;
      $u->{'bio'} = $_->{'bio'};
