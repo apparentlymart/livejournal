@@ -93,9 +93,14 @@ BODY<=
 
  ####  Check security before viewing this post
  unless (LJ::can_view($dbs, $remote, $item)) {
-     return "(=H1 Error H1=)(=P You must be logged in to view this protected entry. P=)"
-	 unless (defined $remote);
-     return "(=H1 Error H1=)(=P You are not authorized to view this protected entry. P=)";
+     if ($FORM{'viewall'} && LJ::check_priv($dbs, $remote, "viewall")) {
+         LJ::statushistory_add($dbs, $item->{'posterid'}, $remote->{'userid'}, 
+			       "viewall", "itemid = $itemid");
+     } else {
+	 return "(=H1 Error H1=)(=P You must be logged in to view this protected entry. P=)"
+	     unless (defined $remote);
+	 return "(=H1 Error H1=)(=P You are not authorized to view this protected entry. P=)";
+     }
  }
 
  $event = $FORM{'replyto'} eq "" ? $item->{'event'} : $parpost->{'body'};

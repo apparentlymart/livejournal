@@ -81,9 +81,18 @@ sub create_view_lastn
     if ($skip < 0) { $skip = 0; }
     if ($skip > $maxskip) { $skip = $maxskip; }
 
+    # do they want to 
+    my $viewall = 0;
+    if ($FORM{'viewall'} && LJ::check_priv($dbs, $remote, "viewall")) {
+        LJ::statushistory_add($dbs, $u->{'userid'}, $remote->{'userid'}, 
+			      "viewall", "lastn: $user");
+	$viewall = 1;
+    }
+
     ## load the itemids
     my @itemids;
     my @items = LJ::get_recent_items($dbs, {
+	'viewall' => $viewall,
 	'userid' => $u->{'userid'},
 	'remote' => $remote,
 	'itemshow' => $itemshow,
