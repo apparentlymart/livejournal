@@ -9,7 +9,7 @@
 
     my $remote = LJ::get_remote();
     my $dispuser = $remote ? $remote->{'user'} : $user;
-
+    my $styu = LJ::load_user($user);
     my $styles;
     if ($user eq 'system') {
         $styles = LJ::S1::get_public_styles();
@@ -28,7 +28,9 @@
     foreach my $sty (sort { $a->{'type'} cmp $b->{'type'} || $a->{'styledes'} cmp $b->{'styledes'} }
                      values %$styles) {
 
-        next STY unless $sty->{'is_public'} eq "Y";
+        next STY unless $sty->{is_public} eq 'Y' ||      # public is always visible
+                        LJ::u_equals($remote, $styu) ||  # yours are visible to you
+                        LJ::can_manage($remote, $styu);  # you can view things you manage
 
         if ($last ne $LJ::viewinfo{$sty->{'type'}}->{'des'}) {
             $last = $LJ::viewinfo{$sty->{'type'}}->{'des'};
