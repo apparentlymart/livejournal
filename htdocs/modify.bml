@@ -242,6 +242,9 @@ body<=
             LJ::set_userprop($u, $uprop, $uprop{$uprop});
         }
 
+        # Explicitly set S1 stylesys
+        LJ::set_userprop($u, 'stylesys', 1);
+
         # tell the user all is well
         return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text", {'url' => LJ::journal_base($u)})." p?>";
     }
