@@ -1798,7 +1798,7 @@ sub make_preview {
     $ret .= "<br /><input type='submit' value='$BML::ML{'/talkpost_do.bml.preview.submit'}' />\n";
     $ret .= "<input type='submit' name='submitpreview' value='$BML::ML{'talk.btn.preview'}' />\n";
     if ($LJ::SPELLER) {
-        $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>$BML::ML{'/talkpost_do.bml.opt.spellcheck'}</label>";
+        $ret .= "<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>$BML::ML{'talk.spellcheck'}</label>";
     }
     $ret .= "<p>";
     $ret .= "$BML::ML{'/talkpost.bml.opt.noautoformat'} ".

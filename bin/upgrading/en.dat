@@ -2217,8 +2217,6 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkpost_do.bml.opt.preview=Preview
 
-/talkpost_do.bml.opt.spellcheck=Spell check entry before posting
-
 /talkpost_do.bml.preview=This is how your comment will look when posted. Using the form below, you can edit your comment further, or you can submit it as is.
 
 /talkpost_do.bml.preview.subject=<b>Subject: </b>
