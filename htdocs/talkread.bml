@@ -403,8 +403,6 @@ if ($uri =~ m!/(\d+)\.html$!) {
              }
              $ret .= "</td></tr><tr><td>";
 
-             ## escape BML block codes.  so <?tag ... tag?> turns into (&#0061; ... tag?>
-             $post->{'body'} =~ s/\(=/\(&\#0061\;/g;
              LJ::CleanHTML::clean_comment(\$post->{'body'}, $post->{'props'}->{'opt_preformatted'});
              BML::ebml(\$post->{'body'});
              $ret .= $post->{'body'};

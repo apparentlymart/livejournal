@@ -5209,9 +5209,6 @@ sub eall
     $a =~ s/</&lt;/g;
     $a =~ s/>/&gt;/g;
 
-    ### and escape BML
-    $a =~ s/\(=(\w)/\(= $1/g;  # remove this eventually (old syntax)
-    $a =~ s/(\w)=\)/$1 =\)/g;  # remove this eventually (old syntax)
     return $a;
 }
 
