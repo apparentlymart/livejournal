@@ -263,35 +263,8 @@ sub make_journal
     return LJ::make_journal($dbh, @_);
 }
 
-sub load_codes
-{
-    my ($req) = $_[0];
-    &connect_db();
-    foreach my $type (keys %{$req})
-    {
-	unless ($LJ::CACHE_CODES{$type})
-	{
-	    $LJ::CACHE_CODES{$type} = [];
-	    my $qtype = $dbh->quote($type);
-	    my $sth = $dbh->prepare("SELECT code, item FROM codes WHERE type=$qtype ORDER BY sortorder");
-	    $sth->execute;
-	    while (my ($code, $item) = $sth->fetchrow_array)
-	    {
-		push @{$LJ::CACHE_CODES{$type}}, [ $code, $item ];
-	    }
-	}
-
-	foreach my $it (@{$LJ::CACHE_CODES{$type}})
-	{
-	    if (ref $req->{$type} eq "HASH") {
-		$req->{$type}->{$it->[0]} = $it->[1];
-	    } elsif (ref $req->{$type} eq "ARRAY") {
-		push @{$req->{$type}}, { 'code' => $it->[0], 'item' => $it->[1] };
-	    }
-	}
-    }
-}
-
+## DEPRECATED:
+sub load_codes {  &connect_db(); LJ::load_codes($dbh, @_); }
 sub get_userid { return &LJ::get_userid($dbh, @_); }
 sub get_username { return &LJ::get_username($dbh, @_); }
 sub load_userpics { return &LJ::load_userpics($dbh, @_); }
@@ -697,6 +670,36 @@ sub make_text_link { return LJ::make_text_link(@_); }
 sub get_friend_itemids { return LJ::get_friend_itemids($dbh, @_); }
 
 package LJ;
+
+sub load_codes
+{
+    my $dbh = shift;
+    my $req = shift;
+
+    foreach my $type (keys %{$req})
+    {
+	unless ($LJ::CACHE_CODES{$type})
+	{
+	    $LJ::CACHE_CODES{$type} = [];
+	    my $qtype = $dbh->quote($type);
+	    my $sth = $dbh->prepare("SELECT code, item FROM codes WHERE type=$qtype ORDER BY sortorder");
+	    $sth->execute;
+	    while (my ($code, $item) = $sth->fetchrow_array)
+	    {
+		push @{$LJ::CACHE_CODES{$type}}, [ $code, $item ];
+	    }
+	}
+
+	foreach my $it (@{$LJ::CACHE_CODES{$type}})
+	{
+	    if (ref $req->{$type} eq "HASH") {
+		$req->{$type}->{$it->[0]} = $it->[1];
+	    } elsif (ref $req->{$type} eq "ARRAY") {
+		push @{$req->{$type}}, { 'code' => $it->[0], 'item' => $it->[1] };
+	    }
+	}
+    }
+}
 
 sub img
 {

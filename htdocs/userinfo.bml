@@ -6,31 +6,31 @@
 
  if ($LJ::SERVER_DOWN) {
      $title = "Sorry";
-     $body = &server_down_html();
+     $body = LJ::server_down_html();
      return "";
  }
 
- &connect_db;
+ my $dbr = LJ::get_dbh("slave");
 	
- my $remote = &get_remote;
+ my $remote = LJ::get_remote($dbr);
 
  my $sth;
  my %countries = ();
  my %states = ();
- &load_codes({ "country" => \%countries, "state" => \%states });
+ LJ::load_codes($dbr, { "country" => \%countries, "state" => \%states });
 
  my $user = lc($FORM{'user'});
  $user =~ s/[^\w]//g;
- my $quser = $dbh->quote($user);
+ my $quser = $dbr->quote($user);
 
  my $userid = $FORM{'userid'};
  $userid += 0;
 
  {
      my $where = $userid ? "userid=$userid" : "user=$quser";
-     $sth = $dbh->prepare("SELECT userid, user, statusvis, paidfeatures, has_bio, name, defaultpicid, txtmsg_status, allow_infoshow, bdate, allow_contactshow, opt_mangleemail, email, paiduntil, timecreate, timeupdate, journaltype, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) AS 'secondsold' FROM user WHERE $where");
+     $sth = $dbr->prepare("SELECT userid, user, statusvis, paidfeatures, has_bio, name, defaultpicid, txtmsg_status, allow_infoshow, bdate, allow_contactshow, opt_mangleemail, email, paiduntil, timecreate, timeupdate, journaltype, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) AS 'secondsold' FROM user WHERE $where");
      $sth->execute;
-     if ($dbh->err) { return $dbh->errstr; }
+     if ($dbr->err) { return $dbr->errstr; }
  }
  my $u = $sth->fetchrow_hashref;
 
@@ -40,7 +40,7 @@
      return "";
  }
 
- my $remote_isfriend = LJ::is_friend($dbh, $u, $remote);
+ my $remote_isfriend = LJ::is_friend($dbr, $u, $remote);
  my $com = $u->{'journaltype'} eq "C" ? 1 : 0;
  my $dir = "users";
  
@@ -49,7 +49,7 @@
      my @props = qw(opt_whatemailshow opt_blockrobots country state city zip 
 		    url urlname opt_hidefriendofs);
      unless ($com) { push @props, qw(aolim icq yahoo msn gender jabber); }
-     &load_user_props($u, @props);
+     LJ::load_user_props($dbr, $u, @props);
  }
 
  if ($u->{'opt_blockrobots'}) {
@@ -77,17 +77,17 @@
  if ($u->{'gender'} eq "F") { $pronoun = "her"; }
  
  $user = $u->{'user'};
- $quser = $dbh->quote($user);
+ $quser = $dbr->quote($user);
  $userid = $u->{'userid'};
 
  if ($u->{'has_bio'} eq "Y") {
-     $sth = $dbh->prepare("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
+     $sth = $dbr->prepare("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
      $sth->execute;
      $_ = $sth->fetchrow_hashref;
      $u->{'bio'} = $_->{'bio'};
  }
 
- $sth = $dbh->prepare("SELECT i.interest, i.intcount, i.intid FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$u->{'userid'}");
+ $sth = $dbr->prepare("SELECT i.interest, i.intcount, i.intid FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$u->{'userid'}");
  $sth->execute;
  my %interests = ();
  while ($_ = $sth->fetchrow_hashref) {
@@ -95,7 +95,7 @@
  }
 
  if ($remote && $remote->{'userid'} != $userid) {
-     $sth = $dbh->prepare("SELECT i.interest FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$remote->{'userid'}");
+     $sth = $dbr->prepare("SELECT i.interest FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$remote->{'userid'}");
      $sth->execute;
      while (my ($int) = $sth->fetchrow_array) {
 	 if (defined $interests{$int}) {
@@ -105,7 +105,7 @@
  }
 
  my %res_fr;
- &LJ::do_request($dbh, 
+ &LJ::do_request($dbr, 
 		 { 'mode' => 'getfriends',
 		   'includefriendof' => '1',
 		   'user' => $u->{'user'}, }, 
@@ -120,7 +120,7 @@
  my $ci;
  if ($com)
  {
-     $sth = $dbh->prepare("SELECT ownerid, membership, postlevel FROM community WHERE userid=$u->{'userid'}");
+     $sth = $dbr->prepare("SELECT ownerid, membership, postlevel FROM community WHERE userid=$u->{'userid'}");
      $sth->execute;
      $ci = $sth->fetchrow_hashref;
  }
@@ -199,7 +199,7 @@
  if ($u->{'defaultpicid'}) {
      my $picid = $u->{'defaultpicid'};
      my %pic;
-     &load_userpics(\%pic, [ $picid ]);
+     LJ::load_userpics($dbr, \%pic, [ $picid ]);
      $body .= "<A HREF=\"/allpics.bml?user=$user\"><IMG SRC=\"/userpic/$picid\" WIDTH=$pic{$picid}->{'width'} HEIGHT=$pic{$picid}->{'height'} VSPACE=3 BORDER=0></A>";
  } else {
      $body .= "&nbsp;";
@@ -357,7 +357,7 @@
 
  ### memories
  {
-     $sth = $dbh->prepare("SELECT COUNT(*) FROM memorable WHERE userid=$userid");
+     $sth = $dbr->prepare("SELECT COUNT(*) FROM memorable WHERE userid=$userid");
      $sth->execute;
      my ($memcount) = $sth->fetchrow_array;
      if ($memcount) {
@@ -518,7 +518,7 @@
 
  {
      $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B><A HREF=\"$LJ::SITEROOT/download/\">Clients</A> used:</B></TD><TD COLSPAN=2>";
-     $sth = $dbh->prepare("SELECT DISTINCT c.client FROM clients c, clientusage cu ".
+     $sth = $dbr->prepare("SELECT DISTINCT c.client FROM clients c, clientusage cu ".
 			  "WHERE cu.userid=$userid AND cu.clientid=c.clientid ORDER BY c.client");
      $sth->execute;
      my $lastclient = "";
@@ -538,13 +538,13 @@
      $body .= "</TD></TR>";
  }
      
- $sth = $dbh->prepare("SELECT COUNT(*) AS 'count' FROM log WHERE ownerid=$userid");
+ $sth = $dbr->prepare("SELECT COUNT(*) AS 'count' FROM log WHERE ownerid=$userid");
  $sth->execute;
  $row = $sth->fetchrow_hashref;
  $row->{'count'} += 0;
  $body .= "<TR><TD ALIGN=RIGHT NOWRAP><B>Journal entries:</B></TD><TD COLSPAN=2>" . &comma($row->{'count'}) . "</TD></TR>";
 
- $sth = $dbh->prepare("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
+ $sth = $dbr->prepare("SELECT SUM(points) AS 'points' FROM supportpoints WHERE userid=$userid");
  $sth->execute;
  $row = $sth->fetchrow_hashref;
  $row->{'points'} += 0;
@@ -563,11 +563,11 @@
 ##
 ## journal comments
 
-$sth = $dbh->prepare("SELECT COUNT(*) AS 'count' FROM talk WHERE posterid=$userid");
+$sth = $dbr->prepare("SELECT COUNT(*) AS 'count' FROM talk WHERE posterid=$userid");
 $sth->execute;
 $row = $sth->fetchrow_hashref;
 my $com_post = $row->{'count'} + 0;
-$sth = $dbh->prepare("SELECT COUNT(*) AS 'count' FROM talk WHERE journalid=$userid");
+$sth = $dbr->prepare("SELECT COUNT(*) AS 'count' FROM talk WHERE journalid=$userid");
 $sth->execute;
 $row = $sth->fetchrow_hashref;
 my $com_got = $row->{'count'} + 0;
@@ -580,7 +580,7 @@ $body .= "<TR><TD ALIGN=RIGHT><B>Comments:</B></TD><TD COLSPAN=2><B>Posted:</B> 
 ### shared journal access
 ###
 
-$sth = $dbh->prepare("SELECT uo.user AS 'owner', up.user AS 'poster' FROM logaccess l, user uo, user up WHERE l.ownerid=uo.userid AND l.posterid=up.userid AND (l.ownerid=$u->{'userid'} OR l.posterid=$u->{'userid'})");
+$sth = $dbr->prepare("SELECT uo.user AS 'owner', up.user AS 'poster' FROM logaccess l, useridmap uo, useridmap up WHERE l.ownerid=uo.userid AND l.posterid=up.userid AND (l.ownerid=$u->{'userid'} OR l.posterid=$u->{'userid'})");
 $sth->execute;
 my $shcount = 0;
 while ($_ = $sth->fetchrow_hashref)
