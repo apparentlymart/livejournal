@@ -102,9 +102,13 @@
         $layerinfo->{$id}->{'source_viewable'} : undef;
 
     # do they have access?
-    return $err->("You are not authorized to view this layer.") 
+    my $isadmin = not defined $pub->{$id} &&                       # public styles are pulled from the system
+                  (LJ::check_priv($remote, 'canview', 'styles') || # account, so we don't want to check privileges
+                   LJ::check_priv($remote, 'canview', '*'));       # in case they're private styles
+    return $err->("You are not authorized to view this layer.")
         unless defined $pub->{$id} || $srcview == 1 ||
-               LJ::can_manage($remote, $layer->{'userid'});
+               LJ::can_manage($remote, $layer->{'userid'}) ||
+               $isadmin;
     
     my $rv = S2::load_layers_from_db($dbr, $id);
     my $s2info = S2::get_layer_all($id);
@@ -137,7 +141,8 @@
     }
     if (defined $pub->{$id} && (! defined $srcview || $srcview != 0) ||
             $srcview == 1 ||
-            LJ::can_manage($remote, $layer->{'userid'})) {
+            LJ::can_manage($remote, $layer->{'userid'}) ||
+            $isadmin) {
 
         $body .= "[<a href=\"layersource.bml?id=$id\">Download</a>]\n";
         $body .= "[<a href=\"layersource.bml?id=$id&fmt=html\">View as HTML</a>]\n";

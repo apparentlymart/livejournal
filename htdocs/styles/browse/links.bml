@@ -17,6 +17,10 @@
         $styles = LJ::S1::get_user_styles($user);
     }
 
+    my $admin = $remote &&
+                (LJ::check_priv($remote, 'canview', 'styles') ||
+                 LJ::check_priv($remote, 'canview', '*'));
+
     my ($dday,$dmon,$dyear) = (localtime(time))[3..5];
     $dyear+=1900; $dmon++;
     my %extra = ( 'day' => "&amp;month=$dmon&amp;day=$dday&amp;year=$dyear" );
@@ -30,7 +34,8 @@
 
         next STY unless $sty->{is_public} eq 'Y' ||      # public is always visible
                         LJ::u_equals($remote, $styu) ||  # yours are visible to you
-                        LJ::can_manage($remote, $styu);  # you can view things you manage
+                        LJ::can_manage($remote, $styu) ||# you can view things you manage
+                        $admin;                          # you have appropriate canview
 
         if ($last ne $LJ::viewinfo{$sty->{'type'}}->{'des'}) {
             $last = $LJ::viewinfo{$sty->{'type'}}->{'des'};

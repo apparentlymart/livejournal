@@ -26,10 +26,14 @@
         $layerinfo->{$id}->{'source_viewable'} : undef;
 
     # authorized to view this layer?
+    my $isadmin = not defined $pub->{$id} &&                       # public styles are pulled from the system 
+                  (LJ::check_priv($remote, 'canview', 'styles') || # account, so we don't want to check privileges
+                   LJ::check_priv($remote, 'canview', '*'));       # in case they're private styles
     return $err->("You are not authorized to view this layer.")
         unless defined $pub->{$id} && (! defined $srcview || $srcview != 0) ||
                $srcview == 1 ||
-               LJ::can_manage($remote, $lay->{'userid'});
+               LJ::can_manage($remote, $lay->{'userid'}) ||
+               $isadmin;
 
     my $s2code = $dbr->selectrow_array("SELECT s2code FROM s2source WHERE s2lid=?", undef, $id);
 

@@ -25,6 +25,16 @@
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
+
+    # if we don't have a u, maybe they're an admin and can view stuff anyway?
+    my $noactions = 0;
+    if ($GET{user} && (LJ::check_priv($remote, 'canview', 'styles') ||
+                       LJ::check_priv($remote, 'canview', '*'))) {
+        return $err->('This privilege cannot be used on the system account.')
+            if $GET{user} eq 'system';
+        $u = LJ::load_user($GET{user});
+        $noactions = 1; # don't let admins change anything
+    }    
     return $err->('You could not be authenticated as the specified user.')
         unless $u;
 
@@ -49,7 +59,7 @@
     ### perform actions ###
 
     # create
-    if ($POST{'action:create'}) {
+    if ($POST{'action:create'} && !$noactions) {
         return $err->("You have reached your maximum number of allowed layers") 
             if keys %$ulay >= LJ::get_cap($u, 's2layersmax');
 
@@ -93,7 +103,7 @@
     }
 
     # delete
-    if ($POST{'action:del'}) {
+    if ($POST{'action:del'} && !$noactions) {
         my $id = $POST{'id'}+0;
         my $lay = LJ::S2::load_layer($id);
         return $err->("The specified layer does not exist")
@@ -128,9 +138,11 @@
     }
 
     # authas switcher form
-    $body .= "<form method='get' action='layers.bml'>\n";
-    $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
-    $body .= "</form>\n\n";
+    unless ($noactions) {
+        $body .= "<form method='get' action='layers.bml'>\n";
+        $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+        $body .= "</form>\n\n";
+    }
 
     # show list of layers
     $body .= "<?h1 Your Layers h1?>\n";
@@ -152,12 +164,12 @@
             my $name = LJ::ehtml($lay->{'name'}) || "<i>(none)</i>";
             $body .= "<tr><td><a href='layerbrowse.bml?id=$lid'>$lid</a></td><td>$lay->{'type'}</td><td>$name</td><td>";
             $body .= "<form method='post' style='display:inline' action='layeredit.bml?id=$lid'>";
-            $body .= LJ::html_submit('action:edit', 'Edit...');
+            $body .= LJ::html_submit('action:edit', 'Edit...', { disabled => $noactions });
             $body .= "</form>";
 
             $body .= "<form method='post' style='display:inline' action='layers.bml?authas=$authas'>";
             $body .= LJ::html_hidden('id', $lid);
-            $body .= LJ::html_submit('action:del', 'Delete...');
+            $body .= LJ::html_submit('action:del', 'Delete...', { disabled => $noactions });
             $body .= "</form>";
             $body .= "</td></tr>\n"
         }
@@ -165,6 +177,9 @@
     } else {
         $body .= "<?p <i>None</i> p?>\n\n";
     }
+
+    # jump out if we're just viewing
+    return if $noactions;
 
     # create layer
     $body .= "<?h1 Create Layer h1?>\n";
