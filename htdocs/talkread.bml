@@ -474,7 +474,7 @@ sub recurse_post
 		if ($post->{'poster_ip'} && $remote && $remote->{'user'} eq $up->{'user'}) {
 		    $$ret .= "(from $post->{'poster_ip'})";
 		}
-		$$ret .= " (<font size=\"-1\"><a href=\"$SELF?itemid=$itemid&thread=$tid#t$tid\">link</a>) ";
+		$$ret .= " <font size=\"-1\">(<a href=\"$SELF?itemid=$itemid&thread=$tid#t$tid\">link</a>)</font> ";
 		
 		if ($remote && ($remote->{'user'} eq $userpost ||
 				$remote->{'user'} eq $u->{'user'}))
