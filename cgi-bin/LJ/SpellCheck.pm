@@ -48,11 +48,17 @@ sub check_html {
     
     my $iread = new FileHandle;
     my $iwrite = new FileHandle;
+    my $ierr = new FileHandle;
     my $pid;
+
+    # work-around for mod_perl
+    my $tie_stdin = tied *STDIN;
+    untie *STDIN if $tie_stdin;
 
     $iwrite->autoflush(1);
 
     $pid = open2($iread, $iwrite, $self->{'command'}) || die "spell process failed";
+    die "Couldn't find spell checker\n" unless $pid;
     my $banner = <$iread>;
     die "banner=$banner\n" unless ($banner =~ /^@\(\#\)/);
     print $iwrite "!\n";
@@ -103,6 +109,9 @@ sub check_html {
     $iwrite->close;
  
     $pid = waitpid($pid, 0);
+
+    # return mod_perl to previous state, though not necessary?
+    tie *STDIN, $tie_stdin if $tie_stdin;
 
     return (($mscnt || $other_bad) ? "$output<p><b>Suggestions:</b><table cellpadding=3 border=0>$footnotes</table>" : "");
 }
