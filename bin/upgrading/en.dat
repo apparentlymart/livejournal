@@ -270,6 +270,8 @@ p?>
 
 /community/leave.bml.title=Leave Community
 
+/community/manage.bml.error.badaccounttype=You must be logged in as a regular user account in order to access this page.
+
 /community/manage.bml.commlist.actinfo=Info
 
 /community/manage.bml.commlist.actinvites=Invitations

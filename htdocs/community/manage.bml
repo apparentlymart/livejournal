@@ -19,6 +19,9 @@ body<=
     return "<?needlogin?>";
  }
 
+ return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.badaccounttype'} p?>"
+    unless $remote->{journaltype} eq 'P';
+
  $ret .= "<?h1 $ML{'.commlist.header'} h1?><?p $ML{'.commlist.text'} p?>";
  $ret .= "<div style='margin: 15px 0 15px 40px'>";
 
