@@ -320,7 +320,7 @@ sub parse
         }
 
         ##### append stuff to the right place
-        if ($append)
+        if (length($append))
         {
             if ($iopen) {
                 $iopts{'item'} .= $append;
