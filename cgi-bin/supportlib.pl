@@ -205,6 +205,8 @@ sub load_request
     $sth->execute;
     my $sp = $sth->fetchrow_hashref;
 
+    return undef unless $sp;
+
     # load the category the support requst is in
     $sth = $dbh->prepare("SELECT * FROM supportcat WHERE spcatid=$sp->{'spcatid'}");
     $sth->execute;
