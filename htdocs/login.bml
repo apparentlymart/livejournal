@@ -86,7 +86,7 @@
             
             my $banned = 0;
         
-            unless (LJ::auth_okay($u, $password, undef, undef, \$banned)) {
+            if ($u && ! LJ::auth_okay($u, $password, undef, undef, \$banned)) {
                 if ($banned) {
                     $body = LJ::bad_input("Your IP address is temporarily banned for exceeding the login failure rate.");
                     return;
