@@ -109,6 +109,7 @@ sub create_view_lastn
 
     ## load the itemids
     my @itemids;
+    my $err;
     my @items = LJ::get_recent_items($dbs, {
         'clusterid' => $u->{'clusterid'},
         'clustersource' => 'slave',
@@ -119,7 +120,14 @@ sub create_view_lastn
         'skip' => $skip,
         'itemids' => \@itemids,
         'order' => $u->{'journaltype'} eq "C" ? "logtime" : "",
+        'err' => \$err,
     });
+
+    if ($err) {
+        $opts->{'errcode'} = $err;
+        $$ret = "";
+        return 0;
+    }
     
     ### load the log properties
     my %logprops = ();
