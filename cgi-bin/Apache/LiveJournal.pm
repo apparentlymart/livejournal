@@ -110,14 +110,14 @@ sub totally_down_content
 
     if ($uri =~ m!^/interface/flat! || $uri =~ m!^/cgi-bin/log\.cg!) {
         $r->content_type("text/plain");
-	$r->send_http_header();
+    $r->send_http_header();
         $r->print("success\nFAIL\nerrmsg\n$LJ::SERVER_DOWN_MESSAGE");
         return OK;
     }
 
     if ($uri =~ m!^/customview.cgi!) {
         $r->content_type("text/html");
-	$r->send_http_header();
+    $r->send_http_header();
         $r->print("<!-- $LJ::SERVER_DOWN_MESSAGE -->");
         return OK;
     }
@@ -431,14 +431,14 @@ sub trans
             $r->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
             return OK;
         }
-	if ($int eq "flat" || $int eq "xmlrpc" || $int eq "blogger" ||
+    if ($int eq "flat" || $int eq "xmlrpc" || $int eq "blogger" ||
             $int eq "atomapi") {
-	    $RQ{'interface'} = $int;
-	    $RQ{'is_ssl'} = $is_ssl;
-	    $r->push_handlers(PerlHandler => \&interface_content);
-	    return OK;
-	}
-	return 404;
+        $RQ{'interface'} = $int;
+        $RQ{'is_ssl'} = $is_ssl;
+        $r->push_handlers(PerlHandler => \&interface_content);
+        return OK;
+    }
+    return 404;
     }
 
     # customview
@@ -670,7 +670,7 @@ sub journal_content
     }
 
     # handle HTTP digest authentication
-    if ($GET{'auth'} eq 'digest' || 
+    if ($GET{'auth'} eq 'digest' ||
         $r->header_in("Authorization") =~ /^Digest/) {
         my $res = LJ::auth_digest($r);
         unless ($res) {
@@ -703,10 +703,10 @@ sub journal_content
     my %headers = ();
     my $opts = {
         'r' => $r,
-	'headers' => \%headers,
-	'args' => $RQ{'args'},
+    'headers' => \%headers,
+    'args' => $RQ{'args'},
         'getargs' => \%GET,
-	'vhost' => $RQ{'vhost'},
+    'vhost' => $RQ{'vhost'},
         'pathextra' => $RQ{'pathextra'},
         'header' => {
             'If-Modified-Since' => $r->header_in("If-Modified-Since"),
@@ -876,7 +876,7 @@ sub customview_content
 
     my $ctype = "text/html";
     if ($FORM{'type'} eq "xml") {
-	$ctype = "text/xml";
+    $ctype = "text/xml";
     }
 
     if ($LJ::UNICODE) {
@@ -891,28 +891,28 @@ sub customview_content
 
     my $remote;
     if ($FORM{'checkcookies'}) {
-	my $criterr = 0;
-	$remote = LJ::get_remote(undef, \$criterr);
+    my $criterr = 0;
+    $remote = LJ::get_remote(undef, \$criterr);
     }
 
     my $data = (LJ::make_journal($user, "", $remote,
-				 { "nocache" => $FORM{'nocache'},
-				   "vhost" => "customview",
-				   "nooverride" => $nooverride,
-				   "styleid" => $styleid,
+                 { "nocache" => $FORM{'nocache'},
+                   "vhost" => "customview",
+                   "nooverride" => $nooverride,
+                   "styleid" => $styleid,
                                    "saycharset" => $charset,
                                    "args" => scalar $r->args,
                                    "getargs" => \%FORM,
                                    "r" => $r,
-			       })
-		|| "<b>[$LJ::SITENAME: Bad username, styleid, or style definition]</b>");
+                   })
+        || "<b>[$LJ::SITENAME: Bad username, styleid, or style definition]</b>");
 
     if ($FORM{'enc'} eq "js") {
-	$data =~ s/\\/\\\\/g;
-	$data =~ s/\"/\\\"/g;
-	$data =~ s/\n/\\n/g;
-	$data =~ s/\r//g;
-	$data = "document.write(\"$data\")";
+    $data =~ s/\\/\\\\/g;
+    $data =~ s/\"/\\\"/g;
+    $data =~ s/\n/\\n/g;
+    $data =~ s/\r//g;
+    $data = "document.write(\"$data\")";
     }
 
     if ($LJ::UNICODE && $charset ne 'utf-8') {
@@ -942,17 +942,17 @@ sub interface_content
 
     if ($RQ{'interface'} eq "blogger") {
         return 404 unless $LJ::OPTMOD_XMLRPC;
-	my $pkg = "Apache::LiveJournal::Interface::Blogger";
+    my $pkg = "Apache::LiveJournal::Interface::Blogger";
         my $server = XMLRPC::Transport::HTTP::Apache
-	    -> on_action(sub { die "Access denied\n" if $_[2] =~ /:|\'/ })
-	    -> dispatch_with({ 'blogger' => $pkg })
-	    -> dispatch_to($pkg)
+        -> on_action(sub { die "Access denied\n" if $_[2] =~ /:|\'/ })
+        -> dispatch_with({ 'blogger' => $pkg })
+        -> dispatch_to($pkg)
             -> handle($r);
         return OK;
     }
 
     if ($RQ{'interface'} eq "atomapi") {
-        # the interface package will set up all headers and 
+        # the interface package will set up all headers and
         # print everything
         Apache::LiveJournal::Interface::AtomAPI::handle($r);
         return OK;
