@@ -117,14 +117,14 @@ body<=
                  $res{"events_${i}_eventtime"} . "</B>";
 
              if ($res{"events_${i}_subject"}) {
-                 $ret .= "; <I>" . $res{"events_${i}_subject"} . "</I>";
+                 $ret .= "; <I>" . BML::ebml($res{"events_${i}_subject"}) . "</I>";
              }
              $ret .= "<BR>\n";
              my $event = LJ::durl($res{"events_${i}_event"});
              unless ($props{$res{"events_${i}_itemid"}}->{'opt_preformatted'}) {
                  $event =~ s/\n/<BR>\n/g;
              }
-             $ret .= $event;
+             $ret .= BML::ebml($event);
          }
          
          $ret .= "<?h1 Press to continue... h1?><?p After you select an item to edit or delete, press the Edit button below. p?><?standout <INPUT TYPE=SUBMIT VALUE=\"Edit Selected Entry\"> standout?></FORM>\n";
@@ -244,11 +244,11 @@ body<=
 
          $ret .= "<P><B>Subject:</B> <I>(optional, for use on longer entries)</I><BR>";
          $ret .= "<INPUT NAME=\"subject\" VALUE=\"";
-         $ret .= LJ::ehtml($res{"events_1_subject"});
+         $ret .= LJ::eall($res{"events_1_subject"});
          $ret .= "\" SIZE=60 MAXLENGTH=255>\n";
         
          $ret .= "<p><b>Event:</b><br /><textarea rows='12' cols='60' wrap='soft' name='event' style='width: 99%'>";
-         $ret .= LJ::ehtml(LJ::durl($res{"events_1_event"}));
+         $ret .= LJ::eall(LJ::durl($res{"events_1_event"}));
           $ret .= "</textarea></p>\n";
 
          $ret .= "<p><b>Security Level:</b>";

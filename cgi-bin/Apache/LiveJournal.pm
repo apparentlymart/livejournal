@@ -508,6 +508,7 @@ sub customview_content
 				   "nooverride" => $nooverride,
 				   "styleid" => $styleid,
                                    "saycharset" => $charset,
+                                   "args" => scalar $r->args,
 			       })
 		|| "<b>[$LJ::SITENAME: Bad username, styleid, or style definition]</b>");
     
