@@ -185,35 +185,6 @@ sub trans
             return redir($r, $url);
         }
 
-        # can't show BML on user domains... redirect them
-        if ($opts->{'vhost'} eq "users" && ($opts->{'mode'} eq "item" || 
-                                            $opts->{'mode'} eq "month")) {
-            my $base = "$LJ::SITEROOT/users/$opts->{'user'}";
-            $base = "$LJ::SITEROOT/community/$opts->{'user'}" if $u && $u->{'journaltype'} eq "C";
-            return redir($r, "$base$uri$args_wq");
-        }
-
-        if ($opts->{'mode'} eq "item") {
-            $r->handler("perl-script");
-            $r->push_handlers(PerlHandler => \&Apache::BML::handler);
-            my $filename = "$LJ::HOME/htdocs/talkread.bml";
-            if ($args =~ /^(?:(?:mode=reply)|(?:replyto=\d+))\b/) {
-                $filename = "$LJ::HOME/htdocs/talkpost.bml";
-            }
-            $r->notes("_journal" => $opts->{'user'});
-            $r->notes("bml_filename" => $filename);
-            return OK;
-        }
-
-        if ($opts->{'mode'} eq "month") {
-            $r->handler("perl-script");
-            $r->push_handlers(PerlHandler => \&Apache::BML::handler);
-            my $filename = "$LJ::HOME/htdocs/view/index.bml";
-            $r->notes("_journal" => $opts->{'user'});
-            $r->notes("bml_filename" => $filename);
-            return OK;
-        }
-
         $r->handler("perl-script");
         $r->push_handlers(PerlHandler => \&journal_content);
         return OK;
@@ -568,6 +539,12 @@ sub journal_content
         return OK;
     }
 
+    # LJ::make_journal() will set this flag if the user's
+    # style system is unable to handle the requested
+    # view (S1 can't do EntryPage or MonthPage), in which
+    # case it's our job to invoke the legacy BML page.
+    my $handle_with_bml = 0;
+
     my %headers = ();
     my $opts = {
         'r' => $r,
@@ -579,6 +556,7 @@ sub journal_content
         'header' => {
             'If-Modified-Since' => $r->header_in("If-Modified-Since"),
         },
+        'handle_with_bml_ref' => \$handle_with_bml,
     };
 
     my $user = $RQ{'user'};
@@ -587,6 +565,37 @@ sub journal_content
 
     return redir($r, $opts->{'redir'}) if $opts->{'redir'};
     return $opts->{'handler_return'} if defined $opts->{'handler_return'};
+
+    # if LJ::make_journal() indicated it can't handle the request:
+    if ($handle_with_bml) {
+        my $args = $r->args;
+        my $args_wq = $args ? "?$args" : "";
+
+        # can't show BML on user domains... redirect them
+        if ($RQ{'vhost'} eq "users" && ($RQ{'mode'} eq "item" || $RQ{'mode'} eq "month")) {
+            my $u = LJ::load_user($dbs, $RQ{'user'});
+            my $base = "$LJ::SITEROOT/users/$RQ{'user'}";
+            $base = "$LJ::SITEROOT/community/$RQ{'user'}" if $u && $u->{'journaltype'} eq "C";
+            return redir($r, "$base$uri$args_wq");
+        }
+
+        if ($RQ{'mode'} eq "item") {
+            my $filename = "$LJ::HOME/htdocs/talkread.bml";
+            if ($args =~ /^(?:(?:mode=reply)|(?:replyto=\d+))\b/) {
+                $filename = "$LJ::HOME/htdocs/talkpost.bml";
+            }
+            $r->notes("_journal" => $RQ{'user'});
+            $r->notes("bml_filename" => $filename);
+            return Apache::BML::handler($r);
+        }
+
+        if ($RQ{'mode'} eq "month") {
+            my $filename = "$LJ::HOME/htdocs/view/index.bml";
+            $r->notes("_journal" => $RQ{'user'});
+            $r->notes("bml_filename" => $filename);
+            return Apache::BML::handler($r);
+        }
+    }
 
     my $status = $opts->{'status'} || "200 OK";
     unless ($opts->{'contenttype'}) {

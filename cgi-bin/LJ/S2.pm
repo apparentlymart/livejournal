@@ -14,6 +14,7 @@ use LJ::S2::RecentPage;
 use LJ::S2::YearPage;
 use LJ::S2::DayPage;
 use LJ::S2::FriendsPage;
+use LJ::S2::MonthPage;
 
 package LJ::S2;
 
@@ -56,6 +57,7 @@ sub make_journal
     $ctx->[S2::PROPS]->{'SITEROOT'} = $LJ::SITEROOT;
     $ctx->[S2::PROPS]->{'SITENAME'} = $LJ::SITENAME;
     $ctx->[S2::PROPS]->{'IMGDIR'} = $LJ::IMGPREFIX;
+
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
 
     $u->{'_journalbase'} = LJ::journal_base($u->{'user'}, $opts->{'vhost'});
@@ -72,6 +74,9 @@ sub make_journal
     } elsif ($view eq "friends" || $view eq "friendsfriends") {
         $entry = "FriendsPage::print()";
         $page = FriendsPage($u, $remote, $opts);
+    } elsif ($view eq "month") {
+        $entry = "MonthPage::print()";
+        $page = MonthPage($u, $remote, $opts);
     }
 
     s2_run($r, $ctx, $run_opts, $entry, $page);
@@ -1273,6 +1278,12 @@ sub YearMonth__month_format
     eval $code;
     return $$c->($this);
 }
+
+sub Image__set_url {
+    my ($ctx, $img, $newurl) = @_;
+    $img->{'url'} = LJ::eurl($newurl);
+}
+
 
 
 1;

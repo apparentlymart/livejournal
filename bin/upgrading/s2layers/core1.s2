@@ -98,13 +98,15 @@ class DateTime extends Date
     "Returns time formatted as indicated by \$fmt, or normal if blank.";
 }
 
-
 class Image
 "Generic HTML image handler"
 {
-    var string url "URL of the image";
+    var readonly string url "URL of the image";
     var int width "Width in pixels";
     var int height "Height in pixels";
+
+    function builtin set_url (string url)
+    "Sets the URL, doing any necessary escaping.";
 
     function print ()
     "Print an HTML tag for this Image";
@@ -127,8 +129,8 @@ class Image
 class Link
 "A link or a button"
 {
-    var string url "URL which the link points to";
-    var string caption "The caption for the link";
+    var readonly string url "URL which the link points to";
+    var readonly string caption "The caption for the link";
     var Image icon 
     "A suggestion from the server as to which icon to use. layouts/users can override this of course. 
     alt text works similarly to [member[Link.caption]].";
@@ -153,10 +155,10 @@ class ItemRange
   var int from_subitem "The index of the first subitem in this range.";
   var int to_subitem "The index of the last subitem in this range.";
   var int total_subitems "The number of subitems.";
-  var string url_next "URL for the 'next' link.  Blank if there isn't a next URL."; 
-  var string url_prev "URL for the 'previous' link.  Blank if there isn't a previous URL.";
-  var string url_first "URL for the 'first' link.  Blank if already on the first page.";
-  var string url_last "URL for the 'last' link.  Blank if already on the last page.";
+  var readonly string url_next "URL for the 'next' link.  Blank if there isn't a next URL."; 
+  var readonly string url_prev "URL for the 'previous' link.  Blank if there isn't a previous URL.";
+  var readonly string url_first "URL for the 'first' link.  Blank if already on the first page.";
+  var readonly string url_last "URL for the 'last' link.  Blank if already on the last page.";
   function builtin url_of(int n) : string "Returns the URL to use to link to the nth item";
 
   function print () "Prints the item range links";
@@ -168,8 +170,8 @@ class ItemRange
 class CommentInfo
 "Information about comments attached to something"
 {
-    var string read_url "URL pointer to the 'Read Comments' view.";
-    var string post_url "URL pointer to the 'Post Comments' view.";
+    var readonly string read_url "URL pointer to the 'Read Comments' view.";
+    var readonly string post_url "URL pointer to the 'Post Comments' view.";
     var int count "Current number of comments available to be read by the viewer.";
     var bool screened "Set to true if there are screened comments and remote user can unscreen them.";
     var bool enabled "Set to false if comments disabled journal-wide or just on this item.";
@@ -185,9 +187,9 @@ class CommentInfo
 class UserLite
 "A 'lite' userinfo structure which only requires a single, simple db query to build"
 {
-    var string username "Canonical Username, ex: johnqpub";
-    var string name "User's formatted name, ex: John Q. Public";
-    var string journal_type "Type of account: P (personal), C (community), Y (syndicated), S (shared), etc";
+    var readonly string username "Canonical Username, ex: johnqpub";
+    var readonly string name "User's formatted name, ex: John Q. Public";
+    var readonly string journal_type "Type of account: P (personal), C (community), Y (syndicated), S (shared), etc";
 
     function base_url () : string "Returns URL of user's journal.";
     function as_string() : string;
@@ -197,17 +199,17 @@ class UserLite
 class Entry
 "A journal entry"
 {
-    var string subject "Entry subject";
-    var string text "Entry text. (Will be blank on some viewtypes, like 'month' view)";
+    var readonly string subject "Entry subject";
+    var readonly string text "Entry text. (Will be blank on some viewtypes, like 'month' view)";
     var DateTime time "The user specificed time of this entry";
 
-    var string security "The security level of the entry ('private', 'protected'), or blank if public.";
+    var readonly string security "The security level of the entry ('private', 'protected'), or blank if public.";
     var Image security_icon "A little icon which should be displayed somewhere on an entry to represent the security setting";
 
     var UserLite poster "Author of the journal entry";
     var UserLite journal "Journal the entry has been posted to";
 
-    var string{} metadata "Post metadata. Keys: 'music', 'mood'";
+    var readonly string{} metadata "Post metadata. Keys: 'music', 'mood'";
     var Image mood_icon "Mood icon, or null.";
     var CommentInfo comments "Comment information on this entry";
 
@@ -216,7 +218,7 @@ class Entry
     var Image userpic "The userpic selected to relate to this entry";
     var Link{} links "Hash of links that the server suggests be linked from this entry, eg to edit an entry if a user is viewing their own journal.";
     var int itemid "Server stored ID number for this entry";
-    var string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
+    var readonly string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
 
     function print_metadata ();
     function builtin plain_subject () : string
@@ -236,8 +238,26 @@ class User extends UserLite
 "A more information-rich userinfo structure"
 {
     var Image default_pic "Information about default userpic";
-    var string website_url "URL pointer to user's website";
-    var string website_name "'pretty' name of user's website";
+    var readonly string website_url "URL pointer to user's website";
+    var readonly string website_name "'pretty' name of user's website";
+}
+
+### Other
+
+class Redirector
+"A redirector makes either a GET URL which redirects to a pretty URL or an HTML form which posts to a URL that redirects to a pretty URL.  This class exists because it's often desirable to use a form to end up at a URL, instead of doing a GET request.  It's also used in cases where finding the previous or next URL would incur database overhead which would be wasteful, considering most people don't click previous/next links.  Instead, the system will give you a Redirector object which has a URL that'll do the lookup for you later, followed by a redirect."
+
+{
+    var readonly string user;
+    var readonly string vhost;
+    var readonly string type;
+    var readonly string url;
+    
+    function start_form() "Starts an inline HTML form, then calls [method[Redirector.print_hiddens()]].  You can also make it yourself, using [member[Redirectory.url]], if you need special form attributes.";
+    function print_hiddens() "Prints the necessary hidden elements for a form.  Called automatically by [method[Redirector.start_form()]].";
+    function end_form() "Prints a form close tag.";
+    
+    function builtin get_url(string redir_key) "Returns a GET URL, given a redir_key";
 }
 
 ### Pages
@@ -245,26 +265,26 @@ class User extends UserLite
 class Page
 "Base template for all views"
 {
-    var string view "The view type (recent, friends, archive, month, day, entry)";
+    var readonly string view "The view type (recent, friends, archive, month, day, entry)";
     var User journal "User whose journal is being viewed";
-    var string journal_type "Journal type, ex: 'P' (personal), 'C' (community), etc.";
-    var string base_url "The base URL of the journal being viewed.";
-    var string{} view_url
+    var readonly string journal_type "Journal type, ex: 'P' (personal), 'C' (community), etc.";
+    var readonly string base_url "The base URL of the journal being viewed.";
+    var readonly string{} view_url
     "Links to top-level views where id equals the name of the view being linked to. 
     (if one of views == \$.view, already looking at that view)";
 
-    var string[] views_order "An array of view identifiers which can be used to order the views hash.";
-    var string head_content 
+    var readonly string[] views_order "An array of view identifiers which can be used to order the views hash.";
+    var readonly string head_content 
     "Extra tags supplied by the server to go in the <head> section of the output HTML document. Layouts 
     should include this in the head section if they are writing HTML.";
  
-    var string stylesheet_url 
+    var readonly string stylesheet_url 
     "The URL to use in a link element for the server-supported external stylesheet to put stuff in it)";
     
-    var string global_title 
+    var readonly string global_title 
     "A title selected by the user for their whole journal.";
 
-    var string global_subtitle 
+    var readonly string global_subtitle 
     "A sub-title selected by the user for their whole journal.";
 
     function print
@@ -302,10 +322,10 @@ class RecentNav {
 
     # version 1 attributes:
     var int skip            "Indicates how many entries are being skipped back.";
-    var string forward_url  "URL to go forward in time, or blank if furthest forward.";
+    var readonly string forward_url  "URL to go forward in time, or blank if furthest forward.";
     var int forward_skip    "Number of items we'd be skipping going forward.";
     var int forward_count   "Number of items we'd be potentially seeing going forward.";
-    var string backward_url "URL to go backward in time, or blank if furthest back server will allow.";
+    var readonly string backward_url "URL to go backward in time, or blank if furthest back server will allow.";
     var int backward_skip   "Number of items we'd be skipping going back more.";
     var int backward_count  "Number of items we'd be potentially seeing going backward.";
 }
@@ -325,7 +345,7 @@ class FriendsPage extends RecentPage
     var Friend{} friends
     "A mapping from friend username to color association information.  There will only be keys for friends whose entries are in the entries array.";
 
-    var string friends_title
+    var readonly string friends_title
     "A user-selected title for their friends page.";
 }
 
@@ -334,8 +354,8 @@ class DayPage extends Page
 {
     var Date prev_date "Previous day";
     var Date next_date "Next day";
-    var string prev_url "URL to previous day";
-    var string next_url "URL to next day";
+    var readonly string prev_url "URL to previous day";
+    var readonly string next_url "URL to next day";
     var bool has_entries "True if there are entries on the specified day";
     var Entry[] entries "Array of entries available to be seen by the viewer of the page";
     var Date date "Date of the current day";
@@ -347,7 +367,7 @@ class YearYear
 "Information on how to link to a year in the year archive"
 {
     var int year "Number of the year, eg 2001.";
-    var string url "URL to link to for this year.";
+    var readonly string url "URL to link to for this year.";
     var bool displayed "If this is the year currently being displayed, this will be true.";
 }
 
@@ -361,7 +381,7 @@ class YearDay
     # var bool is_today "True if the day represents the current day.";
 
     var int num_entries "Number of entries made on this day";
-    var string url "A URL to view the day, if there are entries, else blank.";
+    var readonly string url "A URL to view the day, if there are entries, else blank.";
 }
 
 class YearWeek
@@ -382,7 +402,7 @@ class YearMonth
     var int month "The number of the month";
     var int year "The number of the year";
     var YearWeek[] weeks "An array of the weeks of the month (for ease of building a row-per-week calendar)";
-    var string url "A url to link to in order to view this month.";
+    var readonly string url "A url to link to in order to view this month.";
 
     function builtin month_format () : string
     "Returns month formatted long (February 1980)";
@@ -407,23 +427,32 @@ class YearPage extends Page
 class MonthDay extends YearDay
 "Summaries of posts by given day"
 {
+    var bool has_entries "True if there are entries on this day.";
     var Entry[] entries "Only populated on the month view. Entry text not present.";
 
     function print_subjectlist 
     "Print a list of entry summaries including subjects";
 }
 
+class MonthEntryInfo
+{
+    var Date date "Date of month, with day of zero.";
+    var readonly string url "URL for the month view";
+    var readonly string redir_key "The 'redir_key' parameter for \$*REDIR_URL";
+}
+
 class MonthPage extends Page 
 "A page which contains a list of posts made in that month"
 {
-    var MonthDay[] days "The days of the month containing entries.";
-    var Link prev "A link to the previous month";
-    var Link next "A link to the next month";
-
-    function builtin print_navform()
-    "Print out a form which can be used to select a month and year.";
+    var Date date "Date of this month, with day of zero.";
+    var MonthDay[] days "One entry for each day of the month.";
+    var MonthEntryInfo[] months "Other months this journal has entries.";
+    var Date prev_date "Date of previous month, with day of zero, or null if none.";
+    var Date next_date "Date of next month, with day of zero, or null if none.";
+    var readonly string prev_url "URL of previous month, or empty string if none.";
+    var readonly string next_url "URL of next month, or empty string if none.";
+    var Redirector redir "Necessary to make a form which POSTs to a redirector";
 }
-
 
 ##[ Built-in Functions ]
 
@@ -611,12 +640,17 @@ property string page_day_sortorder {
     des = "Order of entries shown on a Day page";
     values = "forward|Least recent first|reverse|Most recent first";
 }
-property string page_archiveyear_sortorder {
+property string page_year_sortorder {
     des = "Order of months shown on the year archive page";
     values = "forward|Least recent first|reverse|Most recent first";
 }
 set page_day_sortorder = "forward";
-set page_archiveyear_sortorder = "forward";
+set page_year_sortorder = "forward";
+
+property bool page_month_textsubjects {
+    des = "If set, subjects will be provided in plain text only, with HTML removed.";
+}
+set page_month_textsubjects = true;
 
 property string text_meta_music {
     des = "Text for 'Current Music'";
@@ -747,6 +781,10 @@ property string text_permalink {
 }
 set text_permalink = "Link";
 
+property string text_month_screened_comments {
+    des = "Text to indicate there are screened comments.";
+}
+set text_month_screened_comments = "w/ Screened";
 
 property string font_base {
     des = "Preferred Font";
@@ -900,11 +938,11 @@ function userinfoicon(UserLite user) : Image {
 #    $uimage.attributes{"border"} = "0";
 
     if ($user.journal_type == "C") {
-        $uimage.url = "$*IMGDIR/community.gif";
+        $uimage->set_url("$*IMGDIR/community.gif");
     } elseif ($user.journal_type == "N") {
-        $uimage.url = "$*IMGDIR/newsinfo.gif";
+        $uimage->set_url("$*IMGDIR/newsinfo.gif");
     } else {
-        $uimage.url = "$*IMGDIR/userinfo.gif";
+        $uimage->set_url("$*IMGDIR/userinfo.gif");
     }
     return $uimage;
 }
@@ -1151,18 +1189,35 @@ function YearWeek::print() {
    "</tr>";
 }
 
+function MonthPage::view_title : string {
+    return $.date->date_format($*lang_fmt_month_long);
+}
+
 function MonthPage::print_body {
-    "<div class=\"monthnav\">";
-    $.prev->print_button();
-    $this->print_navform();
-    $.next->print_button();
-    "</div>\n<dl>";
+    "<form method='post' action='$.redir.url'><center>";
+    $.redir->print_hiddens();
+    if ($.prev_url != "") { "[<a href='$.prev_url'>&lt;&lt;&lt;</a>]\n"; }
+    if (size $.months > 1) {
+        "<select name='redir_key'>\n";
+        foreach var MonthEntryInfo mei ($.months) {
+            var string sel;
+            if ($mei.date.year == $.date.year and $mei.date.month == $.date.month) {
+                $sel = " selected='selected'";
+            }
+            "<option value='$mei.redir_key'$sel>" + $mei.date->date_format($*lang_fmt_month_long) + "</option>";
+        }
+        "</select>\n<input type='submit' value='View' />";
+    }
+    if ($.next_url != "") { "\n[<a href='$.next_url'>&gt;&gt;&gt;</a>]\n"; }
+    "</center></form>\n<dl>";
     foreach var MonthDay d ($.days) {
-        "<dt><a href=\"$d.url\">";
-        print lang_ordinal($d.day);
-        "</a></dt>\n<dd>";
-        $d->print_subjectlist();
-        "</dd>\n";
+        if ($d.has_entries) {
+            "<dt><a href=\"$d.url\"><b>";
+            print lang_ordinal($d.day);
+            "</b></a></dt>\n<dd>";
+            $d->print_subjectlist();
+            "</dd>\n";
+        }
     }
     "</dl>\n";
 }
@@ -1171,16 +1226,22 @@ function MonthDay::print_subjectlist() {
     "<table>\n";
     foreach var Entry e ($.entries) {
         "<tr><td>";
-        print $e.time->date_format("short");
+        print $e.time->time_format("short");
         "</td><td>";
         if ($e.poster.username != $e.journal.username) {
             $e.poster->print();
         }
         "</td><td>";
         if ($e.subject != "") {
-            "<a href=\"$e.permalink_url\">"+striphtml($e.subject)+"</a>";
+            "<a href=\"$e.permalink_url\">$e.subject</a>";
         } else {
             "<a href=\"$e.permalink_url\" style=\"font-style: italic;\">($*text_nosubject)</a>";
+        }
+        if ($e.comments.count > 0) {
+            " - " + get_plural_phrase($e.comments.count, "text_read_comments");
+        }
+        if ($e.comments.screened) {
+            " <b>$*text_month_screened_comments</b>";
         }
         "</td></tr>\n";
     }
@@ -1252,6 +1313,21 @@ function Link::as_string() : string {
     return """<a href="$.url">$.caption)</a>""";
 }
 
+# Redirector
 
-
+function Redirector::start_form ()
+{
+    "<form method='post' action='$.url' style='display: inline'>";
+    $this->print_hiddens();
+}
+function Redirector::print_hiddens ()
+{
+    "<input type='hidden' name='redir_user' value='$.user' />\n";
+    "<input type='hidden' name='redir_vhost' value='$.vhost' />\n";
+    "<input type='hidden' name='redir_type' value='$.type' />\n";
+}
+function Redirector::end_form ()
+{
+    "</form>";
+}
 

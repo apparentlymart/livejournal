@@ -1,5 +1,5 @@
 <?_code
-
+{
  use strict;
  use vars qw(%FORM $title $body);
 
@@ -10,8 +10,22 @@
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
- my $itemid = $FORM{'itemid'}+0;
+ # S2 Redirector
+ if ($FORM{'redir_type'} eq "monthview") {
+     my $user = LJ::canonical_username($FORM{'redir_user'});
+     my $vhost;
+     $vhost = $FORM{'redir_vhost'} if $FORM{'redir_vhost'} =~ /users|tilde|community|front|other/;
+     if ($vhost eq "other") {
+         # FIXME: lookup their domain alias, and make vhost be "other:domain.com";
+     }
+     my $base = LJ::journal_base($user, $vhost);
+     return "Bogus redir_key" unless $FORM{'redir_key'} =~ /^(\d\d\d\d)(\d\d)$/;
+     my ($year, $month) = ($1, $2);
+     return BML::redirect("$base/$year/$month/");
+ }
 
+ # prev/next talkread links
+ my $itemid = $FORM{'itemid'}+0;
  if ($FORM{'journal'} && $itemid) 
  {
      my $journal = $FORM{'journal'};
@@ -41,24 +55,9 @@
          return BML::redirect(LJ::journal_base($u) . "/$jumpid.html");
      }
  }
- elsif ($itemid) 
- {
-     my $jumpid = 0;
-     $title = "No Entry";
-     if ($FORM{'dir'} eq "next") {
-         $jumpid =  LJ::get_itemid_after($dbs, $itemid);
-         $body = "There is no journal entry following this one.";
-     } elsif ($FORM{'dir'} eq "prev") {
-         $jumpid = LJ::get_itemid_before($dbs, $itemid);
-         $body = "There is no journal entry preceeding this one.";
-     }
-     if ($jumpid) {
-         return BML::redirect("$LJ::SITEROOT/talkread.bml?itemid=$jumpid");
-     }
- }
 
  return;
-
+}
 _code?><?page
 title=><?_code return $title; _code?>
 body=><?_code return $body; _code?>

@@ -3110,7 +3110,7 @@ sub make_journal
         $styleid = $opts->{'styleid'}+0;
     } else {
         $view ||= "lastn";    # default view when none specified explicitly in URLs
-        if ($LJ::viewinfo{$view})  {
+        if ($LJ::viewinfo{$view} || $view eq "month" || $view eq "item")  {
             $styleid = -1;    # to get past the return, then checked later for -1 and fixed, once user is loaded.
         } else {
             $opts->{'badargs'} = 1;
@@ -3169,6 +3169,16 @@ sub make_journal
                 'view' => $view,
             });
         }
+    }
+
+    # signal to LiveJournal.pm that we can't handle this
+    if ($stylesys == 1 && ($view eq "item" || $view eq "month")) {
+        ${$opts->{'handle_with_bml_ref'}} = 1;
+        return;
+    }
+    if ($stylesys == 2 && $view eq "item") {
+        ${$opts->{'handle_with_bml_ref'}} = 1;
+        return;
     }
 
     if ($r) {

@@ -27,8 +27,6 @@ sub DayPage
         return 1;
     }
 
-    LJ::load_user_props($dbs, $remote, "opt_nctalklinks");
-
     if ($u->{'opt_blockrobots'}) {
         $p->{'head_content'} = "<meta name=\"robots\" content=\"noindex\" />\n";
     }
