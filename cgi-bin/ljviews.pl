@@ -71,7 +71,6 @@ sub create_view_lastn
     $events = \$lastn_page{'events'};
     
     my $quser = $dbh->quote($user);
-    my $qremoteid = $dbh->quote($remote->{'userid'});
     
     my $itemshow = $vars->{'LASTN_OPT_ITEMS'} + 0;
     if ($itemshow < 1) { $itemshow = 20; }
@@ -86,7 +85,7 @@ sub create_view_lastn
     my @itemids;
     my @items = LJ::get_recent_items($dbs, {
 	'userid' => $u->{'userid'},
-	'remoteid' => $remote->{'userid'},
+	'remote' => $remote,
 	'itemshow' => $itemshow,
 	'skip' => $skip,
 	'itemids' => \@itemids,
@@ -402,7 +401,6 @@ sub create_view_friends
     $friends_page{'events'} = "";
 
     my $quser = $dbr->quote($user);
-    my $qremoteid = $dbr->quote($remote->{'userid'});
 
     my $itemshow = $vars->{'FRIENDS_OPT_ITEMS'} + 0;
     if ($itemshow < 1) { $itemshow = 20; }
@@ -440,7 +438,7 @@ sub create_view_friends
 	## load the itemids
 	my @items = LJ::get_friend_items($dbs, {
 	    'userid' => $u->{'userid'},
-	    'remoteid' => $remote->{'userid'},
+	    'remote' => $remote,
 	    'itemshow' => 1,
 	    'skip' => 0,
 	    'filter' => $filter,
@@ -469,7 +467,7 @@ sub create_view_friends
     my @itemids;
     my @items = LJ::get_friend_items($dbs, {
         'userid' => $u->{'userid'},
-        'remoteid' => $remote->{'userid'},
+        'remote' => $remote,
         'itemshow' => $itemshow,
         'skip' => $skip,
 	'filter' => $filter,
@@ -995,7 +993,11 @@ sub create_view_day
 
     my $initpagedates = 0;
     my $quser = $dbr->quote($user);
-    my $qremoteid = $remote->{'userid'}+0;
+
+    LJ::load_remote($dbs, $remote);
+    my $qremoteid = 0;
+    $qremoteid = ($remote->{'userid'}+0) 
+	if ($remote && $remote->{'journaltype'} eq "P");
 
     my %FORM = ();
     LJ::get_form_data(\%FORM);

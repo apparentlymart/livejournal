@@ -78,7 +78,15 @@ sub get_friend_items
     my $sth;
 
     my $userid = $opts->{'userid'}+0;
-    my $remoteid = $opts->{'remoteid'}+0;
+
+    # 'remote' opt takes precendence, then 'remoteid'    
+    my $remote = $opts->{'remote'};
+    LJ::load_remote($dbs, $remote);
+    my $remoteid = $remote ? $remote->{'userid'} : 0;
+    if ($remoteid == 0 && $opts->{'remoteid'}) {
+	$remoteid = $opts->{'remoteid'} + 0;
+	$remote = LJ::load_userid($dbs, $remoteid);
+    }
 
     my @items = ();
     my $itemshow = $opts->{'itemshow'}+0;
@@ -91,9 +99,10 @@ sub get_friend_items
     # sanity check:
     $skip = 0 if ($skip < 0);
 
-    ### what do your friends think of remote viewer?  what security level?
+    # what do your friends think of remote viewer?  what security level?
+    # but only if the remote viewer is a person, not a community/shared journal.
     my $gmask_from = {};
-    if ($remoteid) {
+    if ($remote && $remote->{'journaltype'} eq "P") {
 	$sth = $dbr->prepare("SELECT ff.userid, ff.groupmask FROM friends fu, friends ff WHERE fu.userid=$userid AND fu.friendid=ff.userid AND ff.friendid=$remoteid");
 	$sth->execute;
 	while (my ($friendid, $mask) = $sth->fetchrow_array) { 
@@ -130,7 +139,7 @@ sub get_friend_items
 
 	my @newitems = LJ::get_recent_items($dbs, {
 	    'userid' => $friendid,
-	    'remoteid' => $remoteid,
+	    'remote' => $remote,
 	    'itemshow' => $itemsleft,
 	    'skip' => 0,
 	    'gmask_from' => $gmask_from,
@@ -190,7 +199,15 @@ sub get_recent_items
     my @items = ();		# what we'll return
 
     my $userid = $opts->{'userid'}+0;
-    my $remid = $opts->{'remoteid'}+0;
+    
+    # 'remote' opt takes precendence, then 'remoteid'
+    my $remote = $opts->{'remote'};
+    LJ::load_remote($dbs, $remote);
+    my $remoteid = $remote ? $remote->{'userid'} : 0;
+    if ($remoteid == 0 && $opts->{'remoteid'}) {
+	$remoteid = $opts->{'remoteid'} + 0;
+	$remote = LJ::load_userid($dbs, $remoteid);
+    }
 
     my $max_hints = $LJ::MAX_HINTS_LASTN;  # temporary
     my $sort_key = "revttime";
@@ -224,9 +241,10 @@ sub get_recent_items
     my $gmask_from = $opts->{'gmask_from'};
     unless (ref $gmask_from eq "HASH") {
 	$gmask_from = {};
-	if ($remid) {
+	if ($remote && $remote->{'journaltype'} eq "P") {
 	    ## then we need to load the group mask for this friend
-	    $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE userid=$userid AND friendid=$remid");
+	    $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE userid=$userid ".
+				 "AND friendid=$remoteid");
 	    $sth->execute;
 	    my ($mask) = $sth->fetchrow_array;
 	    $gmask_from->{$userid} = $mask;
@@ -236,7 +254,7 @@ sub get_recent_items
     # decide what level of security the remote user can see
     my $secwhere = "";
     my $mask = $gmask_from->{$userid} + 0;
-    if ($userid == $remid) {
+    if ($userid == $remoteid) {
 	# no extra where restrictions... user can see all their own stuff
     } elsif ($mask) {
 	# can see public or things with them in the mask
@@ -1724,6 +1742,42 @@ sub get_remote
 }
 
 # <LJFUNC>
+# name: LJ::load_remote
+# des: Given a partial remote user hashref (from [func[LJ::get_remote]]),
+#      loads in the rest, unless it's already loaded.
+# args: dbarg, remote
+# des-remote: Hashref containing 'user' and 'userid' keys at least.  This
+#             hashref will be populated with the rest of the 'user' table
+#             data.  If undef, does nothing.
+# </LJFUNC>
+sub load_remote
+{
+    my $dbarg = shift;
+    my $dbs = LJ::get_dbs();
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
+    my $remote = shift;
+    return unless $remote;
+    
+    # if all three of these are loaded, this hashref is probably full.
+    # (don't want to just test for 2 keys, since keys like '_priv' and
+    # _privloaded might be present)
+    return if (defined $remote->{'email'} && 
+	       defined $remote->{'caps'} &&
+	       defined $remote->{'status'});
+    
+    # try to load this remote user's record
+    my $ru = LJ::load_userid($dbs, $remote->{'userid'});
+    return unless $ru;
+
+    # merge user record (so we preserve underscore key data structures)
+    foreach my $k (keys %$ru) {
+	$remote->{$k} = $ru->{$k};
+    }
+}
+
+# <LJFUNC>
 # name: LJ::get_remote_noauth
 # des: returns who the remote user says they are, but doesn't check
 #      their login token.  disadvantage: insecure, only use when
@@ -2584,6 +2638,7 @@ sub load_userid
 {
     my $dbarg = shift;
     my $userid = shift;
+    return undef unless $userid;
 
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
