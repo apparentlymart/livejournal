@@ -24,6 +24,7 @@ use LJ::MemCache;
 use Time::Local ();
 use Storable ();
 use Compress::Zlib ();
+use SafeAgent;
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";

@@ -236,24 +236,13 @@
                 # already loaded from multipart parse earlier
                 
             } elsif ($POST{'src'} eq "url") {
-                
-                my $ua = new LWP::UserAgent;
-                my $req = HTTP::Request->new('GET', $POST{'urlpic'});
-                
-                my $size = 0;
-                $POST{'userpic'} = "";
-                my $res = $ua->simple_request($req, sub { 
-                    my($data, $response, $protocol) = @_;
-                    $size += length($data);
-                    $POST{'userpic'} .= $data;
-                    die if ($size > $MAX_UPLOAD);
-                }, 10_000);
-                return $err->(BML::ml(".error.urlerror")) if $res->is_error();
-                
+                my $sua = new SafeAgent;
+                $POST{userpic} = $sua->fetch($POST{urlpic}, $MAX_UPLOAD, 10);
+                return $err->($ML{'.error.urlerror'}) unless $POST{userpic};
             }
             
             if (length($POST{'userpic'}) > $MAX_UPLOAD) {
-                return $err->(BML::ml($ML{'.error.filetoolarge'}, 
+                return $err->(BML::ml('.error.filetoolarge',
                                       { 'maxsize' => int($MAX_UPLOAD / 1024) .
                                             $ML{'.kilobytes'} }));
             }
