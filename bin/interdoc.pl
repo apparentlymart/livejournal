@@ -6,30 +6,36 @@
 # as an example, and because otherwise this script would parse itself
 # and start at the wrong place.  So, here's this file's dependency
 # data:
-
+#
 # <LJDEP>
 # lib: Getopt::Long
 # </LJDEP>
-
+#
 # This file parses files for lines containing <LJDEP> then starts
 # looking for dependency declarations on subsequent lines until
 # </LJDEP> is found.  Note that leading junk is ignored.  The
 # dependencies are of the form:
-
+#
 #    type: item, item, item
-
-# Where type is one of "lib", "link", "form", "img".  lib is
-# libraries.  link is an http GET links.  form is a POST submission
-# targets.  img is an image.  There can be multiple declaration lines
-# with the same type.  The results are just appended.  Perl modules
-# should be delcared as Foo::Bar, but other files that are in the LJ
-# doc tree are should be relative from $LJHOME, like htdocs/file.bml
+#
+# Where type is one of:
+#
+#     file   -- data file
+#     form   -- form with method=GET
+#     lib    -- perl module or library (append :: if ! /::/)
+#     link   -- web link
+#     mailto -- mailto link
+#     post   -- form with method=POST
+#     prog   -- program that's run
+#
 
 use strict;
 use Getopt::Long;
 
-my $warn = 0;
-GetOptions('warn' => \$warn);
+my $opt_warn = 0;
+my $opt_types = 0;
+GetOptions('warn' => \$opt_warn,
+	   'types' => \$opt_types);
 
 unless (-d $ENV{'LJHOME'}) {
     die "\$LJHOME not set.\n";
@@ -46,6 +52,7 @@ sub find
     while (@dirs)
     {
 	my $dir = shift @dirs;
+	next if ($dir eq "htdocs/img");
 
 	opendir (D, $dir);
 	my @files = sort { $a cmp $b } readdir(D);
@@ -98,18 +105,20 @@ sub check_file
 	    }
 	}
     }
+    close (F);
 
-    if (delete $deps{'_found'})
-    {
+    if (delete $deps{'_found'}) {
 	foreach my $t (keys %deps) {
 	    foreach my $v (@{$deps{$t}}) {
-		print join("\t", $file, $t, $v), "\n";
+		if ($opt_types) {
+		    print "$t\n";
+		} else {
+		    print join("\t", $file, $t, $v), "\n";
+		}
 	    }
 	}
-    }
-    else 
-    {
-	if ($warn) {
+    } else {
+	if ($opt_warn) {
 	    print STDERR "No dep info: $file\n";
 	}
     }
