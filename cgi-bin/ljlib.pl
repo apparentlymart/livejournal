@@ -6000,7 +6000,6 @@ sub delete_entry
     LJ::MemCache::delete([$jid, "log2:$jid:$jitemid"]);
     LJ::MemCache::decr([$jid, "log2ct:$jid"]);
 
-    my $dc = $dbcm->do("DELETE FROM log2 WHERE journalid=$jid AND jitemid=$jitemid $and");
     # if this is running the second time (started by the cmd buffer),
     # the log2 row will already be gone and we shouldn't check for it.
     if ($quick) {
