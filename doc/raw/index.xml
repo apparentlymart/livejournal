@@ -5,13 +5,16 @@
 ]>
 <set id="index" status="prelim">
 <setinfo>
-  <title>LiveJournal</title>
-  <subtitle>The Complete Documentation</subtitle>
-  <edition>LiveJournal Documentation Set Version 1.0</edition>
+  <title>LiveJournal Server</title>
+  <subtitle>Technical Info</subtitle>
+<!-- Commented out because the resultant HTML is ugly.  Fix that, 
+     then uncomment this.  ~Brad  -->    
+<!-- 
   <authorgroup>
     &author.jproulx;
     &author.bradfitz;
   </authorgroup>
+-->
   <abstract>
     <para>
       This documentation intends to cover everything related to

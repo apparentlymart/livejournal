@@ -15,12 +15,10 @@
     Login to MySQL as the root MySQL user and create the database that will hold the LiveJournal data:
   </para>
   <para>
-    <screen>
-      <prompt>$</prompt> <userinput>mysql -uroot -p</userinput>
-      <prompt>mysql></prompt> <userinput>CREATE DATABASE livejournal;</userinput>
-      <prompt>mysql></prompt> <userinput>GRANT ALL PRIVILEGES ON livejournal.* TO </userinput>
-      <prompt>     ></prompt> <userinput>lj@'127.0.0.1' IDENTIFIED BY 'ljpass';</userinput>
-    </screen>
+    <screen><prompt>$</prompt> <userinput>mysql -uroot -p</userinput>
+<prompt>mysql></prompt> <userinput>CREATE DATABASE livejournal;</userinput>
+<prompt>mysql></prompt> <userinput>GRANT ALL PRIVILEGES ON livejournal.* TO </userinput>
+<prompt>     ></prompt> <userinput>lj@'127.0.0.1' IDENTIFIED BY 'ljpass';</userinput></screen>
   </para>
   <para>
     You can set your MySQL environment in your <filename>ljconfig.pl</filename>, as detailed in: <xref linkend="lj.install.ljconfig" />.
@@ -36,10 +34,8 @@
     Assuming your LJHOME directory is /home/lj, all you have to do is run:
   </para>
   <para>
-    <screen>
-      <prompt>$</prompt> <userinput>cd <replaceable>/home/lj</replaceable></userinput>
-      <prompt>$</prompt> <userinput>bin/upgrading/update-db.pl --runsql --populate</userinput>
-    </screen>
+    <screen><prompt>$</prompt> <userinput>cd <replaceable>/home/lj</replaceable></userinput>
+<prompt>$</prompt> <userinput>bin/upgrading/update-db.pl --runsql --populate</userinput></screen>
   </para>
   <para>
     That'll bring your database schema up-to-date and populate it with any look-up data it needs.

@@ -19,9 +19,7 @@
     If you are unfamilar with installing modules, the simplest method is to enter the following command from a root shell prompt:
   </para>
   <para>
-    <screen>
-      <prompt>#</prompt> <userinput>perl -MCPAN -e shell</userinput>
-    </screen>
+    <screen><prompt>#</prompt> <userinput>perl -MCPAN -e shell</userinput></screen>
   </para>
   <para>
     Once the Perl interpreter has loaded (and been configured), you can install modules by issuing the command <literal>install MODULENAME</literal>.
@@ -70,14 +68,12 @@
     If you're using Debian this should get everything:
   </para>
   <para>
-    <screen>
-      <prompt>#</prompt> <userinput>apt-get install libwww-perl libmime-perl libmime-lite-perl \
-                  libsoap-lite-perl libgd-perl liburi-perl \
-                  libimage-size-perl libdbd-mysql-perl libdbi-perl \
-                  libnet-perl libdigest-md5-perl libgd-graph-perl \
-                  libgd-text-perl libcompress-zlib-perl \
-	   libunicode-maputf8-perl libproc-process-perl libapache-mod-perl</userinput>
-    </screen>
+    <screen><prompt>#</prompt> <userinput>apt-get install libwww-perl libmime-perl libmime-lite-perl \
+  libsoap-lite-perl libgd-perl liburi-perl \
+  libimage-size-perl libdbd-mysql-perl libdbi-perl \
+  libnet-perl libdigest-md5-perl libgd-graph-perl \
+  libgd-text-perl libcompress-zlib-perl \
+  libunicode-maputf8-perl libproc-process-perl libapache-mod-perl</userinput></screen>
   </para>
   <note>
     <title>Windows Install</title>

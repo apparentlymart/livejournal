@@ -4,7 +4,7 @@
     Each <literal>$LJ::</literal> variable is explained below.  There are two types: user-configurable ones and those that are automatically set and interesting only to people extending the LiveJournal code.
   </para>
 
-  <section>
+  <section id='lj.install.ljconfig.vars.user'>
     <title>User-configurable</title>
     <para>
       New installations will probably want to set these variables.  Some are automatically set by <literal>ljdefaults.pl</literal> based on your other settings, but it wouldn't hurt to specify them all explicitly.
@@ -13,12 +13,12 @@
 
       <varlistentry>
         <term><literal role="variable">$LJ::SITENAME</literal></term>
-        <listitem><para>The name of the site.</para></listitem>
+        <listitem><para>The name of the site.  (example: "LiveJournal")</para></listitem>
       </varlistentry>
 
       <varlistentry>
         <term><literal role="variable">$LJ::DOMAIN</literal></term>
-        <listitem><para>The minimal domain of the site, excluding the "www." prefix if applicable. (example: foo.com)</para></listitem>
+        <listitem><para>The minimal domain of the site, excluding the "www." prefix if applicable. (example: "foo.com")</para></listitem>
       </varlistentry>
 
       <varlistentry>
@@ -33,7 +33,13 @@
 
       <varlistentry>
         <term><literal role="variable">$LJ::SERVER_NAME</literal></term>
-        <listitem><para>Optional.  If using db-based web logging, this field is stored in the database in the server column, so you can see later how well each server performed.</para></listitem>
+        <listitem><para>Optional.  If using db-based web logging, this field is stored in the database in the server column, so you can see later how well each server performed.</para>
+          <para>
+            To share the same ljconfig.pl on each host (say, over NFS), you can put something like this in your <literal>ljconfig.pl</literal>:
+            It's kinda ugly, but it works.
+          </para>
+          <programlisting>chomp($SERVER_NAME = `hostname`);</programlisting>
+        </listitem>
       </varlistentry>
 
 
@@ -62,8 +68,8 @@
 
     </variablelist>
   </section>
-   
-  <section>
+    
+  <section id='lj.install.ljconfig.vars.auto'>
     <title>Auto-configured</title>
     <para>
       These <literal>$LJ::</literal> settings are automatically set in
