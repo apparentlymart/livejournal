@@ -18,7 +18,7 @@ if (-e $pidfile) {
     chomp ($pid = <PID>);
     close PID;
     my $processes = Proc::ProcessTable->new()->table;
-    if (grep { $_->cmndline =~ /qbufferd/ } @$processes) {
+    if (grep { $_->cmndline =~ /qbufferd/ && $_->pid != $$ } @$processes) {
         exit;
     }
 }
