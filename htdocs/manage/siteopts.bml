@@ -1,0 +1,217 @@
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST $title $body);
+
+    $title = "$ML{'.title'}";
+    $body = "";
+
+    # error handling closures
+    my $redir = sub { BML::redirect("siteopts.bml"); };
+
+    # thumb schemes have thumbnails
+    # text schemes are in a drop-down
+    my @thumb_schemes;
+    my @text_schemes;
+    foreach (@LJ::SCHEMES) {
+        if (ref $_->{'thumb'} eq 'ARRAY') {
+            push @thumb_schemes, $_;
+        } else {
+            push @text_schemes, $_;
+        }
+    }
+
+    # saving changes
+    if (LJ::did_post()) {
+
+        my $remote = LJ::get_remote();
+
+        # was a scheme change posted?
+        my $scheme;
+        if ($POST{'action:setscheme'}) {
+            foreach (@text_schemes) {
+                $scheme = $_->{'scheme'} if $POST{'scheme'} eq $_->{'scheme'};
+            }
+        } else {
+            foreach (@thumb_schemes) {
+                $scheme = $_->{'scheme'} if $POST{"action:setscheme:$_->{'scheme'}.x"};
+            }
+        }
+
+        # set scheme
+        if ($scheme) {
+            my $cval = $scheme;
+
+            # don't set cookie for default scheme
+            if ($scheme eq $LJ::SCHEMES[0]->{'scheme'}) {
+                $cval = '';
+                delete $COOKIE{'BMLschemepref'};
+            }
+
+            # logged in?
+            if ($remote) {
+                # set a userprop to remember their schemepref
+                LJ::set_userprop($remote, 'schemepref', $cval);
+
+                # cookie expires when session expires
+                if ($remote->{'_session'}->{'exptype'} eq 'long') {
+                    $cval = [ $scheme, $remote->{'_session'}->{'timeexpire'} ];
+                }
+            }
+
+            # set cookie
+            $COOKIE{'BMLschemepref'} = $cval if $cval;
+
+            # redirect to refresh cookie settings
+            return $redir->();
+        }
+
+        # set language
+        if ($POST{'action:setlang'} && $POST{'lang'}) {
+            my $l = LJ::Lang::get_lang($POST{'lang'});
+            return $redir->() unless $l;
+
+            # default cookie value to set
+            my $cval = $l->{'lncode'} . "/" . time();
+
+            # if logged in, change userprop and make cookie expiration
+            # the same as their login expiration
+            my $remote = LJ::get_remote();
+            if ($remote) {
+                LJ::set_userprop($remote, "browselang", $l->{'lncode'});
+
+                if ($remote->{'_session'}->{'exptype'} eq 'long') {
+                    $cval = [ $cval, $remote->{'_session'}->{'timeexpire'} ];
+                }
+            }
+
+            # set cookie
+            $COOKIE{'langpref'} = $cval;
+
+            # set language through BML so it will apply immediately
+            BML::set_language($l->{'lncode'});
+        }
+    }
+
+    # preferences page output
+
+    # wrapper box to to keep tables from scrolling horizontally
+    $body .= "<table><tr><td>";
+
+    # scheme selector
+    $body .= "<?h1 $ML{'.head.scheme'} h1?>";
+    $body .= "<form method='post' action='siteopts.bml'>";
+        
+    my $scheme = $BML::COOKIE{'BMLschemepref'};
+    $scheme = $LJ::SCHEMES[0]->{'scheme'} unless $scheme;
+
+    if (@thumb_schemes) {
+        $body .= "<div class='postheading' width='100%'>";
+        foreach my $sh (@thumb_schemes) {
+            my $th = $sh->{'thumb'};
+            $body .= "&nbsp;<input type='image' ";
+            $body .= "name='action:setscheme:$sh->{'scheme'}' ";
+            $body .= "src='$LJ::IMGPREFIX/$th->[0]'";
+            $body .= " width='$th->[1]'" if $th->[1];
+            $body .= " height='$th->[2]'" if $th->[2];
+            
+            if ($sh->{'scheme'} eq '$scheme') {
+                $body .= "style='border: solid 2px blue;' ";
+            } else {
+                $body .= "style='border: solid 1px black;' ";
+            }
+            
+            $body .= " alt='$sh->{'title'}' title='$sh->{'title'}'/>";
+        }
+        $body .= "</div>";
+    }
+
+    if (@text_schemes) {
+
+        my $ct = 0;
+        my $cols = 3;
+        my $width = int(100 / $cols +.5) . "%";
+        my $switch = @text_schemes / $cols;
+
+        $body .= "<table border='0' width='100%' cellpadding='2'>";
+        $body .= "<tr valign='top' align='left'>";
+
+        foreach my $sh (@text_schemes) {
+
+            if ($ct == 0) {
+                $body .= "<td width='$width' align='left'>";
+            }
+
+            $body .= "<p>" . 
+                LJ::html_check({ 'type' => 'radio', 'name' => 'scheme',
+                                 'value' => $sh->{'scheme'},
+                                 'id' => "scheme-$sh->{'scheme'}",
+                                 'selected' => $scheme eq $sh->{'scheme'} });
+
+            $body .= "<label for='scheme-$sh->{'scheme'}'>$sh->{'title'}</label></p>";
+            
+            if (++$ct >= $switch) {
+                $body .= "</td>";
+                $ct = 0;
+            }
+        }
+
+        $body .= "</tr><tr><td colspan='$cols' align='left'>";
+        $body .= LJ::html_submit('action:setscheme', $ML{'.btn.scheme'});
+
+        $body .= "</td></tr></table>";
+    }
+
+    $body .= "</form>";
+
+    # language selector
+    $body .= "<?h1 $ML{'.head.lang'} h1?>";
+    $body .= "<form method='post' action='siteopts.bml'>";
+
+    my $ct = 0;
+    my $cols = 3;
+    my $width = int(100 / $cols +.5) . "%";
+    my $switch = @LJ::LANGS / $cols;
+    my $curr = BML::get_language();
+
+    $body .= "<table border='0' width='100%' cellpadding='2'>";
+    $body .= "<tr valign='top' align='left'>";
+    
+    foreach my $code (@LJ::LANGS) {
+        my $l = LJ::Lang::get_lang($code);
+        my $item = "langname.$code";
+        my $namethislang = BML::ml($item);
+        my $namenative = LJ::Lang::get_text($l->{'lncode'}, $item);
+
+        if ($ct == 0) {
+            $body .= "<td width='$width' align='left'>";
+        }
+
+        $body .= "<p>" . LJ::html_check({ 'type' => 'radio', 'name' => 'lang',
+                                          'value' => $code, 'id' => "sel_$code",
+                                          'selected' => $code eq $curr });
+
+        $body .= " <label for='sel_$code'>$namenative";
+        $body .= " ($namethislang)" if $namethislang ne $namenative;
+        $body .= "</label></p>\n";
+        
+        if (++$ct >= $switch) {
+            $body .= "</td>";
+            $ct = 0;
+        }
+    }
+
+    $body .= "<tr><td colspan='$cols' align='left'>";
+    $body .= LJ::html_submit('action:setlang', $ML{'.btn.lang'});
+    
+    $body .= "</td></tr>";
+    $body .= "</table></form>";
+
+    $body .= "</td></tr></table>";
+
+    return;
+}
+_code?><?page
+title=><?_code return $title; _code?>
+body=><?_code return $body; _code?>
+page?>
