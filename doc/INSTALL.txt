@@ -107,6 +107,14 @@ Now, install the following modules:
 	Proc::ProcessTable
 	SOAP::Lite
 
+If you're using Debian this should get everything:
+
+# apt-get install libwww-perl libfcgi-perl libmime-lite-perl \
+                  libsoap-lite-perl libgd-perl liburi-perl \
+                  libimage-size-perl libdbd-mysql-perl libdbi-perl \
+                  libnet-perl libdigest-md5-perl libgd-graph-perl \
+                  libgd-text-perl libcompress-zlib-perl
+
 NOTE: there used to be three custom LJ:: modules that needed
 installing.  We no longer install those in the system.  Instead LJ
 uses them right out of ~lj/cgi-bin/LJ/*.  If you have those old LJ
