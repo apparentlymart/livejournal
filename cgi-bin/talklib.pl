@@ -1115,11 +1115,12 @@ sub format_text_mail {
 
     my $text = "";
     if (LJ::u_equals($targetu, $comment->{u})) {
-        $who = "$targetu->{'name'} ($targetu->{'user'})";
-        $text .= "You left a comment in a post by $who.  ";
-        if ($parent->{'ispost'}) {
+        if ($parent->{ispost}) {
+            $who = "$parent->{u}{name} ($parent->{u}{user})";
+            $text .= "You left a comment in a post by $who.  ";
             $text .= "The entry you replied to was:";
         } else {
+            $text .= "You left a comment in reply to another comment.  ";
             $text .= "The comment you replied to was:";
         }
     } elsif (LJ::u_equals($targetu, $item->{entryu})) {
@@ -1190,13 +1191,14 @@ sub format_html_mail {
     my $intro;
     my $cleanbody = $parent->{body};
     if (LJ::u_equals($targetu, $comment->{u})) {
-        $who = "$targetu->{'name'} ($targetu->{'user'})";
         if ($parent->{ispost}) {
+            $who = "$parent->{u}{name} " .
+                "(<a href=\"$LJ::SITEROOT/userinfo.bml?user=$parent->{u}{user}\">$parent->{u}{user}</a>)";
             $intro = "You replied to <a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> in which $who said:";
             LJ::CleanHTML::clean_event(\$cleanbody, {preformatted => $parent->{preformat}});
         } else {
             $intro = "You replied to a comment somebody left in ";
-            $intro .= "<a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a> by $who.  ";
+            $intro .= "<a href=\"$talkurl\">a $LJ::SITENAMESHORT post</a>.  ";
             $intro .= "The comment you replied to was:";
             LJ::CleanHTML::clean_comment(\$cleanbody, $parent->{preformat});
         }
