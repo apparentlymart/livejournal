@@ -148,25 +148,31 @@ sub get_visual_data
         $valid,                 # Are the capid/anum valid?
         $data,                  # The PNG data
         $u,                     # System user
+        $location,              # Location of the file (mogile/blob)
        );
 
     $dbr = LJ::get_db_reader();
     $sql = q{
-        SELECT COUNT(*)
+        SELECT capid, location
         FROM captchas
         WHERE
             capid = ?
             AND anum = ?
     };
 
-    ( $valid ) = $dbr->selectrow_array( $sql, undef, $capid, $anum );
+    ( $valid, $location ) = $dbr->selectrow_array( $sql, undef, $capid, $anum );
     return undef unless $valid;
 
-    $u = LJ::load_user( "system" )
-        or die "Couldn't load the system user.";
+    if ($location eq 'mogile') {
+        die "MogileFS object not loaded.\n" unless $LJ::MogileFS;
+        $data = ${$LJ::MogileFS->get_file_data("captcha:$capid")};
+    } else {
+        $u = LJ::load_user( "system" )
+            or die "Couldn't load the system user.";
 
-    $data = LJ::Blob::get( $u, 'captcha_image', 'png', $capid )
-          or die "Failed to fetch captcha_image $capid from media server";
+        $data = LJ::Blob::get( $u, 'captcha_image', 'png', $capid )
+              or die "Failed to fetch captcha_image $capid from media server";
+    }
     return $data;
 }
 
@@ -181,28 +187,33 @@ sub get_audio_data
         $dbr,                   # Database handle (reader)
         $sql,                   # SQL statement
         $valid,                 # Are the capid/anum valid?
-        $err,                   # Error message for Blob::get()
         $data,                  # The PNG data
         $u,                     # System user
+        $location,              # Location of the file (mogile/blob)
        );
 
     $dbr = LJ::get_db_reader();
     $sql = q{
-        SELECT COUNT(*)
+        SELECT capid, location
         FROM captchas
         WHERE
             capid = ?
             AND anum = ?
     };
 
-    ( $valid ) = $dbr->selectrow_array( $sql, undef, $capid, $anum );
+    ( $valid, $location ) = $dbr->selectrow_array( $sql, undef, $capid, $anum );
     return undef unless $valid;
 
-    $u = LJ::load_user( "system" )
-        or die "Couldn't load the system user.";
+    if ($location eq 'mogile') {
+        die "MogileFS object not loaded.\n" unless $LJ::MogileFS;
+        $data = ${$LJ::MogileFS->get_file_data("captcha:$capid")};
+    } else {
+        $u = LJ::load_user( "system" )
+            or die "Couldn't load the system user.";
 
-    $data = LJ::Blob::get( $u, 'captcha_audio', 'wav', $capid )
-          or die "Failed to fetch captcha_audio $capid from media server";
+        $data = LJ::Blob::get( $u, 'captcha_audio', 'wav', $capid )
+              or die "Failed to fetch captcha_audio $capid from media server";
+    }
     return $data;
 }
 

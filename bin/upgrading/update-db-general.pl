@@ -2279,6 +2279,11 @@ register_alter(sub {
                  "NOT NULL AFTER posttime");
     }
 
+    if (column_type("captchas", "location") eq '') {
+        do_alter("captchas", "ALTER TABLE captchas " .
+                 "ADD location ENUM('blob','mogile') DEFAULT NULL AFTER type");
+    }
+
 });
 
 1; # return true

@@ -124,10 +124,13 @@ $maint{gen_audio_captchas} = sub {
 
     # Prepare insert statement
     $sql = q{
-        INSERT INTO captchas( type, answer, anum )
-        VALUES ( 'audio', ?, ? )
+        INSERT INTO captchas( type, location, answer, anum )
+        VALUES ( 'audio', ?, ?, ? )
     };
     $sth = $dbh->prepare( $sql ) or die "prepare: $sql: ", $dbh->errstr;
+
+    # target location
+    my $location = $LJ::CAPTCHA_MOGILEFS ? 'mogile' : 'blob';
 
     # Generate the challenges
     for ( my $i = 0; $i < $make; $i++ ) {
@@ -139,14 +142,24 @@ $maint{gen_audio_captchas} = sub {
         # Insert the captcha into the DB
         print "inserting (code = $code)...";
         $anum = int( rand 65_535 );
-        $sth->execute( $code, $anum )
-            or die "insert: $sql ($code, $anum): ", $sth->errstr;
+        $sth->execute( $location, $code, $anum )
+            or die "insert: $sql ($location, $code, $anum): ", $sth->errstr;
         $capid = $dbh->{mysql_insertid};
 
         # Insert the blob
         print "uploading (capid = $capid, anum = $anum)...";
-        LJ::Blob::put( $u, 'captcha_audio', 'wav', $capid, $data, \$err )
-              or die "Error uploading to media server: $err";
+        if ($location eq 'mogile') {
+            die "Requested to store captchas on MogileFS, but it's not loaded.\n"
+                unless $LJ::MogileFS;
+            my $fh = $LJ::MogileFS->new_file("captcha:$capid", 'captcha')
+                or die "Unable to contact MogileFS server for storage.\n";
+            $fh->print($data);
+            $fh->close
+                or die "Unable to save captcha to MogileFS server: $@\n";
+        } else {
+            LJ::Blob::put( $u, 'captcha_audio', 'wav', $capid, $data, \$err )
+                  or die "Error uploading to media server: $err";
+        }
         print "done.\n";
     }
 
@@ -207,11 +220,14 @@ $maint{gen_image_captchas} = sub {
 
     # Prepare insert statement
     $sql = q{
-        INSERT INTO captchas( type, answer, anum )
-        VALUES ( 'image', ?, ? )
+        INSERT INTO captchas( type, location, answer, anum )
+        VALUES ( 'image', ?, ?, ? )
     };
     $dbh = LJ::get_db_writer() or die "Failed to get_db_writer()";
     $sth = $dbh->prepare( $sql ) or die "prepare: $sql: ", $dbh->errstr;
+
+    # target location
+    my $location = $LJ::CAPTCHA_MOGILEFS ? 'mogile' : 'blob';
 
     # Generate the challenges
     for ( my $i = 0; $i < $need; $i++ ) {
@@ -222,14 +238,24 @@ $maint{gen_image_captchas} = sub {
         # Insert the captcha into the DB
         print "inserting (code = $code)...";
         $anum = int( rand 65_535 );
-        $sth->execute( $code, $anum )
-            or die "insert: $sql ($code, $anum): ", $sth->errstr;
+        $sth->execute( $location, $code, $anum )
+            or die "insert: $sql ($location, $code, $anum): ", $sth->errstr;
         $capid = $dbh->{mysql_insertid};
 
         # Insert the blob
         print "uploading (capid = $capid, anum = $anum)...";
-        LJ::Blob::put( $u, 'captcha_image', 'png', $capid, $png, \$err )
-              or die "Error uploading to media server: $err";
+        if ($location eq 'mogile') {
+            die "Requested to store captchas on MogileFS, but it's not loaded.\n"
+                unless $LJ::MogileFS;
+            my $fh = $LJ::MogileFS->new_file("captcha:$capid", 'captcha')
+                or die "Unable to contact MogileFS server for storage.\n";
+            $fh->print($png);
+            $fh->close
+                or die "Unable to save captcha to MogileFS server: $@\n";
+        } else {
+            LJ::Blob::put( $u, 'captcha_image', 'png', $capid, $png, \$err )
+                  or die "Error uploading to media server: $err";
+        }
         print "done.\n";
     }
 
@@ -253,7 +279,7 @@ $maint{clean_captchas} = sub {
     # Find captchas to delete
     $sql = q{
         SELECT
-            capid, type
+            capid, type, location
         FROM captchas
         WHERE
 	    ( issuetime <> 0 AND issuetime < ? )
@@ -286,13 +312,21 @@ $maint{clean_captchas} = sub {
 
     # Now delete each one from the DB and the media server
     foreach my $captcha ( @$expired ) {
-        my ( $capid, $type ) = @$captcha;
-        print "Deleting captcha $capid ($type)\n";
+        my ( $capid, $type, $location ) = @$captcha;
+        $location ||= 'blob';
+        print "Deleting captcha $capid ($type, $location)\n";
         my $ext = $type eq 'audio' ? 'wav' : 'png';
 
-        LJ::Blob::delete( $u, "captcha_$type", $ext, $capid, \$err )
-              or die "Failed to delete $type file from media server for ".
-                  "capid = $capid: $err";
+        if ($location eq 'mogile') {
+            die "Requested to delete captchas from MogileFS, but it's not loaded.\n"
+                unless $LJ::MogileFS;
+            $LJ::MogileFS->delete("captcha:$capid")
+                or die "Unable to delete captcha from MogileFS server for capid = $capid.\n";
+        } else {
+            LJ::Blob::delete( $u, "captcha_$type", $ext, $capid, \$err )
+                  or die "Failed to delete $type file from media server for ".
+                      "capid = $capid: $err";
+        }
         $sth->execute( $capid )
             or die "execute: $sql ($capid): ", $sth->errstr;
         $count++;
