@@ -325,8 +325,7 @@
 
     # spell check checkbox
     if ($LJ::SPELLER) {
-        $$body .= "<br />" . LJ::html_check({ 'name' => 'do_spellcheck', 'id' => 'do_spellcheck',
-                                              'selected' => $POST{'do_spellcheck'} });
+        $$body .= "<br />" . LJ::html_check({ 'name' => 'do_spellcheck', 'id' => 'do_spellcheck' });
         $$body .= "<label for='do_spellcheck'>$ML{'.opt.spellcheck'}</label>";
     }
     $$body .= "</p></td></tr><tr><td>";
