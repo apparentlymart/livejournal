@@ -1813,7 +1813,7 @@ register_alter(sub {
     }
     
     # convert 'all' arguments to '*'
-    unless (check_dbnote("privcode_all_to_*")) {
+    if (table_relevant("priv_map") && !check_dbnote("privcode_all_to_*")) {
 
         # arg isn't keyed, but this table is only a couple thousand rows
         do_sql("UPDATE priv_map SET arg='*' WHERE arg='all'");
