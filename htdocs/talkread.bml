@@ -83,8 +83,8 @@ BODY<=
  LJ::expand_embedded($dbs, $itemid, $remote, \$event);
  $event = BML::ebml(LJ::CleanHTML::clean_event(\$event, $logprops{$itemid}->{'opt_preformatted'}));
  
- $ret .= "<P>";
- $ret .= "<TABLE><TR VALIGN=MIDDLE>";
+ $ret .= "<p>";
+ $ret .= "<table><tr valign='middle'>";
 
  my $picid = $up->{'defaultpicid'};
  if ($logprops{$itemid}->{'picture_keyword'}) {
@@ -100,46 +100,46 @@ BODY<=
 	 $alt .= ": $logprops{$itemid}->{'picture_keyword'}";
      }
      $alt = LJ::ehtml($alt);
-     $ret .= "<TD><IMG SRC=\"/userpic/$picid\" WIDTH=$userpics{$picid}->{'width'} HEIGHT=$userpics{$picid}->{'height'} ALIGN=ABSMIDDLE HSPACE=3 TITLE=\"$alt\" ALT=\"\"></TD>";
+     $ret .= "<td><img src='/userpic/$picid' width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'}' align='absmiddle' hspace='3' title='$alt' alt=''></td>";
  }
  
  my $extra = "";
  if ($up->{'user'} ne $u->{'user'}) {
-     $extra = " </B>(posting in (=LJUSER $u->{'user'} LJUSER=))<B>";
+     $extra = " </b>(posting in (=LJUSER $u->{'user'} LJUSER=))<b>";
  }
- $ret .= "<TD>";
- $ret .= "<A HREF=\"/userinfo.bml?user=$up->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>";
- $ret .= "<B><A HREF=\"$LJ::SITEROOT/users/$up->{'user'}/\">" . BML::eall($up->{'name'}) . "</A> ";
+  $ret .= "<td>";
+ $ret .= "<a href='/userinfo.bml?user=$up->{'user'}'><img border='0' src='$LJ::IMGPREFIX/userinfo.gif' width='17' height='17' align='absmiddle'></a>";
+ $ret .= "<b><a href='$LJ::SITEROOT/users/$up->{'user'}/'>" . &BML::eall($up->{'name'}) . "</a> ";
 
- $ret .= "$extra said...</B>";
+ $ret .= "$extra said...</b>";
 
  my $etime = $item->{'eventtime'};
  $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!LJ::date_to_view_links($u, $&)!e;
- $ret .= "<BR><FONT SIZE=-1>@ $etime</FONT>";
- $ret .= "</TD></TR></TABLE>";
+ $ret .= "<br /><font size='-1'>@ $etime</font>";
+ $ret .= "</td></tr></table>";
 
  ## standout bar
  {
      my @linkele;
-     push @linkele, "<A HREF=\"/go.bml?itemid=$itemid&amp;dir=prev\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_prev.gif\" WIDTH=22 HEIGHT=20 ALT=\"Previous Entry\" TITLE=\"Previous Entry\" BORDER=0></A>";
+     push @linkele, "<a href='/go.bml?itemid=$itemid&dir=prev'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_prev.gif' width='22' height='20' alt='Previous Entry' title='Previous Entry' border='0'></a>";
      $ret .= "<link href='/go.bml?itemid=$itemid&amp;dir=prev' rel='Previous'>\n";     
      
-     push @linkele, "<A HREF=\"/tools/memadd.bml?itemid=$itemid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/memadd.gif\" WIDTH=22 HEIGHT=20 ALT=\"Add to memories!\" title=\"Add to memories!\" BORDER=0></A>";
+     push @linkele, "<a href='/tools/memadd.bml?itemid=$itemid'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/memadd.gif' width='22' height='20' alt='Add to memories!' title='Add to memories!' border='0'></a>";
 
      if (defined $remote && ($remote->{'user'} eq $u->{'user'} ||
 			     $remote->{'user'} eq $up->{'user'} ||
 			     LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
      {
-	 push @linkele, "<A HREF=\"/editjournal_do.bml?itemid=$itemid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_edit.gif\" WIDTH=22 HEIGHT=20 ALT=\"Edit Entry\" title=\"Edit Entry\" BORDER=0></A>";	     
+	 push @linkele, "<a href='/editjournal_do.bml?itemid=$itemid'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_edit.gif' width='22' height='20' alt='Edit Entry' title='Edit Entry' border='0'></a>";
      }
 
      if ($up->{'opt_showtopicstuff'} ne "N") {
-	 push @linkele, "<A HREF=\"/topics/additem.bml?itemid=$itemid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/topic_add.gif\" WIDTH=22 HEIGHT=20 title=\"Add to Topic Directory\" ALT=\"Add to Topic Directory\" BORDER=0></A>";
+	 push @linkele, "<a href='/topics/additem.bml?itemid=$itemid'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/topic_add.gif' width='22' height='20' title='Add to Topic Directory' alt='Add to Topic Directory' border='0'></a>";
      }
 
-     push @linkele, "<A HREF=\"/tools/tellafriend.bml?itemid=$itemid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_tellfriend.gif\" WIDTH=22 HEIGHT=20 ALT=\"Tell a Friend!\" title=\"Tell a Friend!\" BORDER=0></A>";
+     push @linkele, "<a href='/tools/tellafriend.bml?itemid=$itemid'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_tellfriend.gif' width='22' height='20' alt='Tell a Friend!' title='Tell a Friend!' border='0'></a>";
 
-     push @linkele, "<A HREF=\"/go.bml?itemid=$itemid&amp;dir=next\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_next.gif\" WIDTH=22 HEIGHT=20 ALT=\"Next Entry\" TITLE=\"Next Entry\" BORDER=0></A>";	
+     push @linkele, "<a href='/go.bml?itemid=$itemid&dir=next'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_next.gif' width='22' height='20' alt='Next Entry' title='Next Entry' border='0'></a>";	
      $ret .= "<link href='/go.bml?itemid=$itemid&amp;dir=next' rel='Next'>\n";
 
      if (@linkele) {
@@ -162,7 +162,7 @@ BODY<=
   	     LJ::load_mood_theme($dbs, $theme);
 	     my %pic;
 	     if (LJ::get_mood_picture($theme, $mid, \%pic)) {
-		 $current{'Mood'} = "<IMG SRC=\"$pic{'pic'}\" ALIGN=ABSMIDDLE WIDTH=$pic{'w'} HEIGHT=$pic{'h'} VSPACE=1> $LJ::CACHE_MOODS{$mid}->{'name'}";
+		 $current{'Mood'} = "<img src='$pic{'pic'}' align='absmiddle' width='$pic{'w'}' height='$pic{'h'}' vspace='1'> $LJ::CACHE_MOODS{$mid}->{'name'}";
 	     } else {
 		 $current{'Mood'} = $LJ::CACHE_MOODS{$mid}->{'name'};
 	     }
@@ -172,7 +172,7 @@ BODY<=
 	 $current{'Music'} = $logprops{$itemid}->{'current_music'};
      }
 
-     $ret .= "<UL>";
+     $ret .= "<ul>"; # using <ul> for intenting isn't proper, but this will all go away in s2 anyway.
 
      ### currents
      if (%current) {
@@ -185,17 +185,17 @@ BODY<=
 
      ###
      if ($item->{'subject'}) {
-	my $subject = $item->{'subject'};
-	LJ::CleanHTML::clean_subject(\$subject);
-	 $ret .= "<FONT FACE=\"Arial,Helvetica\" size=+1><I><B>$subject</B></I></FONT><BR>\n";
+	 my $subject = $item->{'subject'};
+       LJ::CleanHTML::clean_subject(\$subject);
+	 $ret .= "<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n";
      }
 
      $ret .= $event;
-     $ret .= "</UL>";
+     $ret .= "</ul>";
  }
 
 
- $ret .= "<BR CLEAR=ALL><HR WIDTH=100% SIZE=2 ALIGN=CENTER>";
+ $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' />";
  ### is this in a topic?
  {
      my $cache = {};
@@ -208,14 +208,14 @@ BODY<=
 	 next unless ($mape->{'status'} eq "on");
 	 unless ($in_topic) {
 	     $in_topic = 1;
-	     $ret .= "<B>Read similar journal entries:</B><BR>";
+	     $ret .= "<b>Read similar journal entries:</b><br />";
 	 }
 	 
 	 # TODO: LJ::Topic isn't yet $dbs/$dbarg aware
 	 my @hier = LJ::Topic::get_hierarchy($dbh, { 'topid' => $mape->{'tptopid'} });
-	 $ret .= "<B>";
-	 $ret .= join(" : ", map { "<A HREF=\"$_->{'url'}\">$_->{'name'}</A>"; } @hier);
-	 $ret .= "</B><BR><hr>";
+	 $ret .= "<b>";
+	 $ret .= join(" : ", map { "<a href='$_->{'url'}'>$_->{'name'}</a>"; } @hier);
+	 $ret .= "</b><br /><hr />";
 	 
      }
  }
@@ -341,45 +341,41 @@ BODY<=
  ########## make the navcrap
  my $navcrap;
  if ($pages > 1) {
-     $navcrap .= "(=STANDOUT <CENTER><FONT FACE=\"Arial,Helvetica\" SIZE=-1><B>";
-     $navcrap .= "Page $page of $pages<BR>";
-     my $left = "<B>&lt;&lt;</B>";
-     if ($page > 1) { $left = "<A HREF=\"" . LJ::self_link(\%FORM, { 'page' => $page-1 }) . "\">$left</A>"; }
-     my $right = "<B>&gt;&gt;</B>";
-     if ($page < $pages) { $right = "<A HREF=\"" . LJ::self_link(\%FORM, { 'page' => $page+1 }) . "\">$right</A>"; }
+     $navcrap .= "(=STANDOUT <center><font face='Arial,Helvetica' size='-1'><b>";
+     $navcrap .= "Page $page of $pages<br />";
+     my $left = "<b>&lt;&lt;</b>";
+     if ($page > 1) { $left = "<a href='" . LJ::self_link(\%FORM, { 'page' => $page-1 }) . "'>$left</a>"; }
+     my $right = "<b>&gt;&gt;</b>";
+     if ($page < $pages) { $right = "<a href='" . LJ::self_link(\%FORM, { 'page' => $page+1 }) . "'>$right</a>"; }
      $navcrap .= $left . " ";
      for (my $i=1; $i<=$pages; $i++) {
 	 my $link = "[$i]";
-	 if ($i != $page) { $link = "<A HREF=\"" . LJ::self_link(\%FORM, { 'page' => $i }) . "\">$link</A>"; }
-	 else { $link = "<FONT SIZE=+1><B>$link</B></FONT>"; }
+	 if ($i != $page) { $link = "<a href='" . LJ::self_link(\%FORM, { 'page' => $i }) . "'>$link</a>"; }
+	 else { $link = "<font size='+1'><b>$link</b></font>"; }
 	 $navcrap .= "$link ";
      }
      $navcrap .= "$right";
-     $navcrap .= "</FONT></CENTER> STANDOUT=)\n";
+     $navcrap .= "</font></center> STANDOUT=)\n";
  }
  ####### end navcrap
 
  if ($navcrap) {
-     $ret .= $navcrap . "<P>";
+     $ret .= "<p>$navcrap</p>";
  }
 
- $ret .= "<CENTER><B><A HREF=\"talkpost.bml?itemid=$itemid\">(Post a new comment)</A></B></CENTER>";
- $ret .= "(=H1 Responses.... H1=)<P>";
+ unless ($logprops{$itemid}->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N") {
+     $ret .= "<center><b><a href='talkpost.bml?itemid=$itemid'>(Post a new comment)</a></b></center>";
 
- unless (%posts) 
- {
-     $ret .= "<I>No replies</I>";
- }
- else 
- {
-     &recurse_post(\%posts, \$ret, $thread, {}, { "newfirst" => 0, 
-						  "children" => \%children,  
-					      });
-
-     $ret .= "<p><hr><CENTER><B><A HREF=\"talkpost.bml?itemid=$itemid\">(Post a new comment)</A></B></CENTER>";
-
+     if ($post_count > 0) 
+     {
+	 &recurse_post(\%posts, \$ret, $thread, {}, { "newfirst" => 0, 
+						      "children" => \%children,  
+						  });
+	 $ret .= "<p><hr /><center><b><a href='talkpost.bml?itemid=$itemid'>(Post a new comment)</a></b></center></p>";
+     }
+	 
      if ($navcrap) {
-	 $ret .= "<p>" . $navcrap;
+	 $ret .= "<p>$navcrap</p>";
      }
  }
 
@@ -408,19 +404,19 @@ sub recurse_post
 
     if ($tid) 
     {
-	my $datepost = "<FONT SIZE=-1>" . substr($post->{'datepost'}, 0, 16) . "</FONT>";
+	my $datepost = "<font size='-1'>" . substr($post->{'datepost'}, 0, 16) . "</font>";
 	my $userpost = $post->{'userpost'};
-	my $user = "<I>(Anonymous)</I>";
+	my $user = "<i>(Anonymous)</i>";
 		
 
 	if ($post->{'state'} eq "D") {
-	    $$ret .= "<P><A NAME=\"t$tid\"></A><TABLE><TR>";
-	    $$ret .= "<TD><IMG SRC=\"$LJ::IMGPREFIX/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
-	    $$ret .= "<TD><B>(Deleted post)</B></TD></TR></TABLE>\n";
+	    $$ret .= "<p><a name='t$tid'></a><table><tr>";
+	    $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
+	    $$ret .= "<td><b>(Deleted post)</b></td></tr></table>\n";
 	} elsif ($userpost && $user{$userpost}->{'statusvis'} eq "S") {
-	    $$ret .= "<P><A NAME=\"t$tid\"></A><TABLE><TR>";
-	    $$ret .= "<TD><IMG SRC=\"$LJ::IMGPREFIX/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
-	    $$ret .= "<TD><B>(Reply from suspended user)</B></TD></TR></TABLE>\n";
+	    $$ret .= "<p><a name='t$tid'></a><table><tr>";
+	    $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
+	    $$ret .= "<td><b>(Reply from suspended user)</b></td></tr></table>\n";
 	} else {
 	    if ($userpost) {
 		$user = "(=LJUSER $userpost LJUSER=)";
@@ -428,9 +424,9 @@ sub recurse_post
 	    my $icon = &show_image($post->{'subjecticon'});
 
 	    if ($post->{'_loaded'}) {
-		$$ret .= "<P><A NAME=\"t$tid\"></A><TABLE WIDTH=100%><TR>";
-		$$ret .= "<TD ROWSPAN=2><IMG SRC=\"$LJ::IMGPREFIX/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
-		$$ret .= "<TD BGCOLOR=$bgcolor WIDTH=100%>";
+		$$ret .= "<p><a name='t$tid'></a><table width='100%'><tr>";
+		$$ret .= "<td rowspan='2'><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
+		$$ret .= "<td bgcolor='$bgcolor' width='100%'>";
 		if ($userpost) {
 		    my $picid = $user{$userpost}->{'defaultpicid'};
 		    my $pickw = $post->{'picture_keyword'};
@@ -455,53 +451,53 @@ sub recurse_post
 			}
 			$alt = LJ::ehtml($alt);
 
-			$$ret .= "<IMG ALIGN=LEFT HSPACE=3 SRC=\"/userpic/$picid\"";
-			$$ret .= " WIDTH=$userpics{$picid}->{'width'}";
-			$$ret .= " TITLE=\"$alt\" ALT=\"\"";
-			$$ret .= " HEIGHT=$userpics{$picid}->{'height'}>";
+			$$ret .= "<img align='left' hspace='3' src='/userpic/$picid'";
+			$$ret .= " width='$userpics{$picid}->{'width'}'";
+			$$ret .= " title='$alt' ALT='";
+			$$ret .= " height='$userpics{$picid}->{'height'}'>";
 		    }
 		}
 		
 		my $cleansubject = $post->{'subject'};
 		LJ::CleanHTML::clean_subject(\$cleansubject);
 
-		$$ret .= "<FONT SIZE=+1 FACE=\"Arial,Helvetica\"><B>$cleansubject</B></FONT> $icon";
-		$$ret .= "<BR>$user\n";
-		$$ret .= "<BR>$datepost\n";
+		$$ret .= "<font size='+1' face='Arial,Helvetica'><b>$cleansubject</b></font> $icon";
+		$$ret .= "<br />$user\n";
+		$$ret .= "<br />$datepost\n";
 		if ($post->{'poster_ip'} && $remote && $remote->{'user'} eq $up->{'user'}) {
 		    $$ret .= "(from $post->{'poster_ip'})";
 		}
-		$$ret .= " <font size=\"-1\">(<a href=\"$SELF?itemid=$itemid&amp;thread=$tid#t$tid\">link</a>)</font> ";
+		$$ret .= " <font size='-1'>(<a href='$SELF?itemid=$itemid&amp;thread=$tid#t$tid'>link</a>)</font> ";
 		
 		if ($remote && ($remote->{'user'} eq $userpost ||
 				$remote->{'user'} eq $u->{'user'} ||
 			        LJ::check_priv($dbs, $remote, "sharedjournal", $u->{'user'})))
 		{
-		    $$ret .= "<A HREF=\"delcomment.bml?id=$tid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/delcomment.gif\" WIDTH=22 HEIGHT=20 TITLE=\"Click to delete\" ALT=\"Delete\" BORDER=0></A>";
+		    $$ret .= "<a href='delcomment.bml?id=$tid'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/delcomment.gif' width='22' height='20' title='Click to delete' alt='Delete' border='0'></a>";
 		}
 	    
-		$$ret .= "</TD></TR>";
-		$$ret .= "<TR><TD>\n";
+		$$ret .= "</td></tr>";
+		$$ret .= "<tr><td>\n";
 		
 		## escape BML block codes.  so (=TAG ... TAG=) turns into (&#0061; ... TAG=)
 		$post->{'body'} =~ s/\(=/\(&\#0061\;/g;
 		LJ::CleanHTML::clean_comment(\$post->{'body'}, $post->{'opt_preformatted'});
 		$$ret .= $post->{'body'};
 		
-		$$ret .= "<P><FONT SIZE=-2>";
+		$$ret .= "<p><font size='-2'>";
 		if ($post->{'parenttalkid'} != 0 && $post_count >= $PAGE_SIZE) {
-		    $$ret .= "<A HREF=\"$SELF?itemid=$itemid&amp;thread=$post->{'parenttalkid'}\">(Parent)</A> ";
+		    $$ret .= "<a href='$SELF?itemid=$itemid&amp;thread=$post->{'parenttalkid'}'>(Parent)</a> ";
 		}
 		if (defined $opts->{'children'}->{$tid} && $post_count >= $PAGE_SIZE) {
-		    $$ret .= "<A HREF=\"$SELF?itemid=$itemid&amp;thread=$tid\">(Thread)</A> ";
+		    $$ret .= "<a href='$SELF?itemid=$itemid&amp;thread=$tid'>(Thread)</a> ";
 		}
-		$$ret .= "<A HREF=\"/talkpost.bml?replyto=$tid\">(Reply to this)</A></FONT>";
-		$$ret .= "</TD></TR></TABLE>\n";  # close colored table
+		$$ret .= "<a href='/talkpost.bml?replyto=$tid'>(Reply to this)</a></font>";
+		$$ret .= "</td></tr></table>\n";  # close colored table
 	    } else {
 		# link to message
-		$$ret .= "<A NAME=\"t$tid\"></A><TABLE><TR>";
-		$$ret .= "<TD><IMG SRC=\"$LJ::IMGPREFIX/dot.gif\" HEIGHT=1 WIDTH=" . ($opts->{'depth'} * 25) . "></TD>";
-		$$ret .= "<TD><a href=\"$SELF?itemid=$itemid&amp;thread=$tid\">" . BML::eall($post->{'subject'} || "(no subject)") . "</A> - $user, <i>$post->{'datepost'}</i></TD></TR></TABLE>\n";
+		$$ret .= "<a name='t$tid'></a><table><tr>";
+		$$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
+		$$ret .= "<td><a href='$SELF?itemid=$itemid&amp;thread=$tid'>" . BML::eall($post->{'subject'} || "(no subject)") . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
 	    }
 	}
     }
