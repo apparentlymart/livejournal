@@ -71,7 +71,9 @@ $body =~ s/^\s+//;
 $body =~ s/\s+$//;
 
 ### spam
-if ($body =~ /I send you this file in order to have your advice/) {
+if ($body =~ /I send you this file in order to have your advice/ ||
+    $body =~ /^Content-Type: application\/octet-stream/)
+{
     $parser->filer->purge;
     exit 0;
 }
