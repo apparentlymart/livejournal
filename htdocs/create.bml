@@ -236,7 +236,7 @@ BODY<=
      $ret .= "(=P Your LiveJournal will be available at: P=)(=STANDOUT <FONT SIZE=+1 FACe=Arial><B><A HREF=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</A></B></FONT> STANDOUT=)";
      $ret .= "(=P Now, please take the time to fill in some information about yourself.  It's mostly optional, but it lets us get an idea of who's using LiveJournal. P=)";
      
-     $ret .= "<CENTER><FORM METHOD=POST ACTION=\"/editinfo_do.bml\">";
+     $ret .= "<center><form method='post' action=\"/editinfo.bml\">";
      $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">\n";
      $ret .= "<INPUT TYPE=HIDDEN NAME=hpassword VALUE=\"" . LJ::hash_password($FORM{'password1'}) . "\">\n";
      $ret .= "<INPUT TYPE=SUBMIT VALUE=\"Enter Personal Information ---&gt;\">\n";
@@ -331,7 +331,7 @@ _CODE=)
 <=BODY
 PAGE=)(=_C <LJDEP>
 link: htdocs/legal/privacy.bml
-post: htdocs/create.bml, htdocs/editinfo_do.bml
+post: htdocs/create.bml, htdocs/editinfo.bml
 file: htdocs/inc/account-codes, htdocs/inc/email-welcome
 hook: post_create
 </LJDEP> _C=)
