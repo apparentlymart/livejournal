@@ -17,7 +17,7 @@
 
  unless ($pollid) {
      $title = "Polls";
-     $body .= "This is the address to participate in a poll.  You've stumbled onto an address which does nothing right now.  If you're like, you can <a href=\"create.bml\">create a new poll</a>.";
+     $body .= "This is the address to participate in a poll.  You've stumbled onto an address which does nothing right now.  If you'd like, you can <a href=\"create.bml\">create a new poll</a>.";
      return;
  }
 
