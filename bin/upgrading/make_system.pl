@@ -27,17 +27,27 @@ unless (LJ::create_account($dbh, { 'user' => 'system',
     my $qp = $dbh->quote($pass);
     $dbh->do("UPDATE user SET password=$qp WHERE user='system'");
 }
-print "Done.\n\n";
 
-my $u = LJ::load_userid($dbh, 1);
-
-unless ($u && $u->{'user'} eq "system")
-{
-    my $user = $u ? $u->{'user'} : "(nobody)";
-    print "WARNING:  your system account is not userid 1.  userid \#1 is $user.\n";
-    print "          $user will have full privileges, not 'system'\n";
-    print "\n";
+my $u = LJ::load_user($dbh, "system");
+unless ($u) {
+    print "ERROR: can't find newly-created system account.\n";
+    exit 1;
 }
 
+print "Giving 'system' account 'admin' priv on all areas...\n";
+if (LJ::check_priv($dbh, $u, "admin", "all")) {
+    print "Already has it.\n";
+} else {
+    my $sth = $dbh->prepare("INSERT INTO priv_map (userid, prlid, arg) ".
+			    "SELECT $u->{'userid'}, prlid, 'all' ".
+			    "FROM priv_list WHERE privcode='admin'");
+    $sth->execute;
+    if ($dbh->err || $sth->rows == 0) {
+	print "Couldn't grant system account admin privs\n";
+	exit 1;
+    }
+}
+
+print "Done.\n\n";
 
 
