@@ -1,0 +1,22 @@
+      user:<usernam> == $u, 30 min
+<uid> userid:<uid>   == $u, 30 min
+<uid> uprop:<uid>:<propid> == scalar, 30 minutes
+<uid> sess:<uid>:<sessid> == sessions row hashref
+
+<uid> talkprop:<uid>:<jtalkid> == { propname => $value, ... }
+<uid> talksubject:<cid>:<uid>:<jtalkid> == scalar
+<uid> talkbody:<cid>:<uid>:<jtalkid> == scalar
+
+<uid> logtext:<cid>:<uid>:<jitemid> == [ subject, text ]
+<uid> logprop:<uid>:<jtalkid> == { propname => $value, ... }
+
+<picid> userpic.<picid> = [ $w, $h, $uid ]
+
+<uid> s1uc:<uid> == s1usercache row hashref
+<styleid> s1styc:<styleid> == s1stylecache row hashref, 30 minutes
+
+<uid> checkfriends:<uid>:<mask> == scalar maxupdate, expires after refresh interval
+<uid> frgmask:<uid>:<uid_friend>  -- scalar numeric mask, 15 minutes
+
+
+
