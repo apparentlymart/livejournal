@@ -115,7 +115,7 @@ if ($user) {
         print "Getting userids...\n";
         my $limit = $one ? 'LIMIT 1' : '';
         my $userids = $dbcm->selectcol_arrayref
-            ("SELECT DISTINCT userid FROM phonepostentry WHERE location <> 'mogile' OR location IS NULL $limit");
+            ("SELECT DISTINCT userid FROM phonepostentry WHERE (location='blob' OR location IS NULL) $limit");
         my $total = scalar(@$userids);
 
         # iterate over userids
