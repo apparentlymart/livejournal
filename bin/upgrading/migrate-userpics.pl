@@ -15,12 +15,14 @@ use IPC::Open3;
 # aren't in mogile right now, and put them there
 
 # determine 
-my ($picker, $one, $ignoreempty, $dryrun, $user);
+my ($picker, $one, $ignoreempty, $dryrun, $user, $verify, $verbose);
 my $rv = GetOptions("picker=s"     => \$picker,
                     "ignore-empty" => \$ignoreempty,
                     "one"          => \$one,
                     "dry-run"      => \$dryrun,
-                    "user=s"       => \$user);
+                    "user=s"       => \$user,
+                    "verify"       => \$verify,
+                    "verbose"      => \$verbose,);
 unless ($rv) {
     die <<ERRMSG;
 This script supports the following command line arguments:
@@ -35,6 +37,10 @@ This script supports the following command line arguments:
         Only move one user.  (But it moves all their pictures.)
         This is used for testing.
 
+    --verify
+        If specified, this option will reload the userpic from
+        MogileFS and make sure it's been stored successfully.
+
     --dry-run
         If on, do not update the database.  This mode will put the
         userpic in MogileFS and give you paths to examine the picture
@@ -44,6 +50,9 @@ This script supports the following command line arguments:
     --ignore-empty
         Normally if we encounter a 0 byte userpic we die.  This
         makes it so that we just warn instead.
+
+    --verbose
+        Be very chatty.
 ERRMSG
 }
 die "Options --user and --picker cannot be combined.\n"
@@ -95,8 +104,11 @@ if ($picker) {
     
 } else {
     # now iterate over the clusters to pick
+    my $ctotal = scalar(@LJ::CLUSTERS);
+    my $ccount = 0;
     foreach my $cid (sort { $a <=> $b } @LJ::CLUSTERS) {
         # status report
+        $ccount++;
         print "\nChecking cluster $cid...\n\n";
 
         # get a handle
@@ -106,11 +118,17 @@ if ($picker) {
         my $limit = $one ? 'LIMIT 1' : '';
         my $userids = $dbcm->selectcol_arrayref
             ("SELECT DISTINCT userid FROM userpic2 WHERE location <> 'mogile' OR location IS NULL $limit");
+        my $total = scalar(@$userids);
+
+        # now load these users
+        my $us = LJ::load_userids(@$userids);
 
         # iterate over userids
-        foreach my $userid (@$userids) {
+        my $count = 0;
+        foreach my $u (values %$us) {
             # move this userpic
-            handle_userid($userid, $dbcm);
+            my $extra = sprintf("[%6.2f%%, $ccount of $ctotal] ", (++$count/$total*100));
+            handle_userid($u, $dbcm, $extra);
         }
 
         # don't hit up more clusters
@@ -128,9 +146,9 @@ print "Updater terminating.\n";
 # move of a user's pictures, and 2 meaning the user isn't ready for moving
 # (dversion < 7, etc)
 sub handle_userid {
-    my ($userid, $dbcm) = @_;
+    my ($u, $dbcm, $extra) = @_;
     
-    my $u = LJ::load_userid($userid);
+    # get a handle if we weren't given one
     $dbcm ||= get_db_handle($u->{clusterid});
 
     # get all their photos that aren't in mogile already
@@ -139,22 +157,28 @@ sub handle_userid {
          undef, $u->{userid});
     return unless @$picids;
 
+    # print that we're doing this user
+    print "$extra$u->{user}($u->{userid})\n";
+
     # now we have a userid and picids, get the photos from the blob server
     foreach my $row (@$picids) {
         my ($picid, $fmt) = @$row;
-        print "$u->{user}($u->{userid}): starting move for picid=$picid\n";
+        print "\tstarting move for picid $picid\n"
+            if $verbose;
         my $format = { G => 'gif', J => 'jpg', P => 'png' }->{$fmt};
         my $data = LJ::Blob::get($u, "userpic", $format, $picid);
 
         # get length
         my $len = length($data);
         if ($ignoreempty && !$len) {
-            print "\twarning: empty userpic.\n\n";
+            print "\twarning: empty userpic.\n\n"
+                if $verbose;
             next;
         }
         die "Error: data from blob empty ($u->{user}, 'userpic', $format, $picid)\n"
             unless $len;
-        print "\tdata length = $len bytes, uploading to MogileFS...\n";
+        print "\tdata length = $len bytes, uploading to MogileFS...\n"
+            if $verbose;
 
         # get filehandle to Mogile and put the file there
         my $fh = $LJ::MogileFS->new_file($u->mogfs_userpic_key($picid), 'userpics')
@@ -164,23 +188,29 @@ sub handle_userid {
             or die "Unable to save file to MogileFS: $@\n";
 
         # extra verification
-        my $data2 = $LJ::MogileFS->get_file_data($u->mogfs_userpic_key($picid));
-        print "\tverified length = " . length($$data2) . " bytes...\n";
+        if ($verify) {
+            my $data2 = $LJ::MogileFS->get_file_data($u->mogfs_userpic_key($picid));
+            print "\tverified length = " . length($$data2) . " bytes...\n"
+                if $verbose;
+            die "\tERROR: picture NOT stored successfully, content mismatch\n"
+                unless $$data2 eq $data;
+        }
 
         # done moving this picture
         unless ($dryrun) {
-            print "\tupdating database for this picture...\n";
+            print "\tupdating database for this picture...\n"
+                if $verbose;
             $dbcm->do("UPDATE userpic2 SET location = 'mogile' WHERE userid = ? AND picid = ?",
-                      undef, $userid, $picid);
+                      undef, $u->{userid}, $picid);
         }
 
         # get the paths so the user can verify if they want
-        my @paths = $LJ::MogileFS->get_paths($u->mogfs_userpic_key($picid), 1);
-        print "\tverify mogile path: $_\n" foreach @paths;
-        print "\tverify site url: $LJ::SITEROOT/userpic/$picid/$u->{userid}\n";
-
-        # update complete
-        print "\tpicture update complete.\n\n";
+        if ($verbose) {
+            my @paths = $LJ::MogileFS->get_paths($u->mogfs_userpic_key($picid), 1);
+            print "\tverify mogile path: $_\n" foreach @paths;
+            print "\tverify site url: $LJ::SITEROOT/userpic/$picid/$u->{userid}\n";
+            print "\tpicture update complete.\n\n";
+        }
     }
 }
 
