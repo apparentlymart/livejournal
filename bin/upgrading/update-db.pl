@@ -105,6 +105,38 @@ foreach my $s (@alters)
 if ($opt_pop)
 {
     $| = 1;
+    
+    print "Populating public system styles (S1):\n";
+    require "$ENV{'LJHOME'}/bin/upgrading/s1style-rw.pl";
+    my $ss = s1styles_read();
+    foreach my $uniq (sort keys %$ss) {
+        print "  $uniq: ";
+        my $s = $ss->{$uniq};
+        my $existing = $dbh->selectrow_array(q{
+            SELECT styleid FROM style WHERE
+                user='system' AND type=? AND styledes=?
+            }, undef, $s->{'type'}, $s->{'styledes'});
+
+        # update
+        if ($existing) {
+            $dbh->do(qq{ UPDATE style SET formatdata=?, is_embedded=?,
+                         is_colorfree=?, lastupdate=? WHERE styleid=$existing },
+                     undef, map { $s->{$_} } qw(formatdata is_embedded is_colorfree lastupdate));
+            die $dbh->errstr if $dbh->err;
+            print "updated \#$existing\n";
+            next;
+        }
+                
+        # insert new
+        $dbh->do(q{ INSERT INTO style (user, styledes, type, formatdata, 
+                                       is_public, is_embedded, is_colorfree, 
+                                       lastupdate) VALUES ('system',?,?,?,'Y',?,?,?) },
+                 undef, map { $s->{$_} } qw(styledes type formatdata is_embedded
+                                            is_colorfree lastupdate));
+        die $dbh->errstr if $dbh->err;
+        print "added\n";
+    }
+    
     foreach my $file ("base-data.sql", "base-data-local.sql") {
         my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
         next unless -e $ffile;
