@@ -1,5 +1,10 @@
 #!/usr/bin/perl
 #
+# <LJDEP>
+# lib: cgi-bin/conmoodtheme.pl, cgi-bin/contopic.pl
+# lib: cgi-bin/conban.pl. cgi-bin/conshared.pl
+# lib: cgi-bin/consuspend.pl, cgi-bin/confaq.pl
+# </LJDEP>
 
 package ljcon;
 
@@ -416,16 +421,16 @@ sub finduser
     if ($crit eq "email")
     {
 	my $qemail = $dbh->quote($data);
-	my $sth = $dbh->prepare("SELECT userid, user, email FROM user WHERE email=$qemail");
-	$sth->execute;
-	my $u = $sth->fetchrow_hashref;
-	
-	if ($u) {
-	    push @$out, [ "info", "User: $u->{'user'} ($u->{'userid'}), email: $u->{'email'}" ];
-	} else {
+        my $sth = $dbh->prepare("SELECT userid, user, email FROM user ".
+				"WHERE email=$qemail");
+        $sth->execute;
+	if (! $sth->rows) {
 	    push @$out, [ "error", "No matches." ];
 	}
-	
+	while (my $u = $sth->fetchrow_hashref) {        
+            push @$out, [ "info", "User: $u->{'user'} ".
+			  "($u->{'userid'}), email: $u->{'email'}" ];
+	}
 	return 1;
     }
 
