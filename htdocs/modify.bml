@@ -234,16 +234,6 @@ body<=
             $ret .= "</div>\n\n";
         }
 
-        $ret .= "<?h1 $ML{'.journalstatus.head'} h1?><?p $ML{'.journalstatus.about'} p?>";
-        my %statvis = ("V" => "$ML{'.journalstatus.select.activated'}", "D" => "$ML{'.journalstatus.select.deleted'}");
-        if ($u->{'statusvis'} eq "S") {
-            %statvis = ("S" => "$ML{'.journalstatus.select.suspended'}");
-        }
-        $ret .= "<div style='margin-left: 30px'>$ML{'.journalstatus.select.head'}\n";
-        $ret .= LJ::html_select({ 'name' => 'statusvis', 'selected' => $u->{'statusvis'} },
-                                map { $_, $statvis{$_} } reverse sort keys %statvis);
-        $ret .= "</div>\n\n";
-
         ### ending submit block
         $ret .= "<?h1 $ML{'.done.head'} h1?><?p $ML{'.done.text'} p?>\n";
         $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.done.btn.savechanges'}) . " standout?>\n";
@@ -251,7 +241,6 @@ body<=
 
         return $ret;
     }
-
 
     # if a POST, update their info
     if (LJ::did_post()) {
@@ -398,15 +387,6 @@ body<=
         my $sets = "";
         foreach (keys %update) {
             $sets .= "$_=" . $dbh->quote($update{$_}) . ",";
-        }
-
-        ### change their visiblilty (deletion) status if they changed it
-        if ($u->{'statusvis'} ne "S" && 
-            ($u->{'statusvis'} ne $POST{'statusvis'}) &&
-            ($POST{'statusvis'} eq "D" || $POST{'statusvis'} eq "V"))
-        {
-            my $qstatvis = $dbh->quote($POST{'statusvis'});
-            $sets .= "statusvis=$qstatvis,statusvisdate=NOW(),";
         }
         chop $sets;
 

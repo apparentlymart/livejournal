@@ -1,4 +1,16 @@
 ;; -*- coding: utf-8 -*-
+/accountstatus.bml.journalstatus.about=If you want to delete or undelete your journal, this is where you do it.  Once you delete your journal you have 30 days to undelete it, just in case you change your mind.  After 30 days, the journal will be permanently deleted and there will be no way to recover it.
+
+/accountstatus.bml.journalstatus.head=Journal Activation Status
+
+/accountstatus.bml.journalstatus.select.activated=Activated
+
+/accountstatus.bml.journalstatus.select.deleted=Deleted
+
+/accountstatus.bml.journalstatus.select.head=Status:
+
+/accountstatus.bml.journalstatus.select.suspended=Suspended
+
 /allpics.bml.current=Current Pictures
 
 /allpics.bml.default=<u>Default</u>

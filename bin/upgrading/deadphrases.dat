@@ -38,6 +38,12 @@ general /editjournal.bml.lostinfo.text
 general /editjournal_do.bml.error.mustlogin
 
 general /modify.bml.btn.proceed
+general /modify.bml.journalstatus.about
+general /modify.bml.journalstatus.head
+general /modify.bml.journalstatus.select.activated
+general /modify.bml.journalstatus.select.deleted
+general /modify.bml.journalstatus.select.head
+general /modify.bml.journalstatus.select.suspended
 general /modify.bml.lostinfo.head
 general /modify.bml.lostinfo.text
 general /modify.bml.modify.head
