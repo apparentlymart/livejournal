@@ -1541,9 +1541,9 @@ sub init {
 
     my ($bl, $cl) = LJ::text_length($form->{'body'});
     if ($cl > LJ::CMAX_COMMENT) {
-        $err->(BML::ml("$SC.error.manychars", {'current'=>$cl, 'limit'=>$LJ::CMAX_COMMENT}));
+        $err->(BML::ml("$SC.error.manychars", {'current'=>$cl, 'limit'=>LJ::CMAX_COMMENT}));
     } elsif ($bl > LJ::BMAX_COMMENT) {
-        $err->(BML::ml("$SC.error.manybytes", {'current'=>$bl, 'limit'=>$LJ::BMAX_COMMENT}));
+        $err->(BML::ml("$SC.error.manybytes", {'current'=>$bl, 'limit'=>LJ::BMAX_COMMENT}));
     }
     # the Subject can be silently shortened, no need to reject the whole comment
     $form->{'subject'} = LJ::text_trim($form->{'subject'}, 100, 100);
