@@ -235,13 +235,6 @@ body<=
 
     # browsing mode
 
-    # columns of our table, excluding username
-    my @attribs = ('member', 'post');
-    LJ::load_user_props($c, 'moderated');
-    push @attribs, ('preapprove', 'moderate')
-        if $c->{'moderated'};
-    push @attribs, 'admin';
-
     # now get lists of: members, admins, able to post, moderators
     my %users = ();
 
@@ -264,12 +257,23 @@ body<=
                             "WHERE r.targetid = u.userid AND r.userid=? AND r.type IN ('A','P','M','N')");
     $sth->execute($cid);
 
+    my %count;
     while (my ($id, $type, $user) = $sth->fetchrow_array) {
         $users{$id}->{'userid'} = $id;
         $users{$id}->{'name'} = $user;
         my $key = {'A'=>'admin','P'=>'post','M'=>'moderate','N'=>'preapprove'}->{$type};
         $users{$id}->{$key} = 1;
+        $count{$type}++;
     }
+
+    # columns of our table, excluding username
+    my @attribs = ('member', 'post');
+    LJ::load_user_props($c, 'moderated');
+    push @attribs, ('preapprove')
+        if $c->{'moderated'} || $count{'N'};
+    push @attribs, ('moderate')
+        if $c->{'moderated'} || $count{'M'};
+    push @attribs, 'admin';
 
     # sorting method;
     my $method = $GET{'sort'};
