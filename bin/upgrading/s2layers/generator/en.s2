@@ -6,3 +6,4 @@ layerinfo redist_uniq = "generator/en";
         
 set text_meta_music = "music";
 set text_meta_mood = "mood";
+set text_permalink = "link";

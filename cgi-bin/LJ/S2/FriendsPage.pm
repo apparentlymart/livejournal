@@ -269,7 +269,8 @@ sub FriendsPage
         my $nc;
         $nc .= "&nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
-        my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs$nc";
+        my $permalink = "$LJ::SITEROOT/talkread.bml?$itemargs";
+        my $readurl = "$permalink$nc";
         my $comments = CommentInfo({
             'read_url' => $readurl,
             'post_url' => "$LJ::SITEROOT/talkpost.bml?$itemargs",
@@ -291,6 +292,7 @@ sub FriendsPage
             'new_day' => 0,  # TODO: implement? is ugly on friends pages when timezones bounce around
             'end_day' => 0,  # TODO: implement? is ugly on friends pages when timezones bounce around
             'userpic' => undef,
+            'permalink_url' => $permalink,
         });
 
         if ($picid) { 

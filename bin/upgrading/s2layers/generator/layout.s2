@@ -37,7 +37,6 @@ set weak_back = "#aaaaaa";
 property Color weak_text { des = "Text color for the bar below entries"; }
 set weak_text = "#000000";
 
-
 set text_post_comment = "post comment";
 set text_post_comment_friends = "post comment";
 
@@ -186,9 +185,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
 <table width="600" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="$*stronger_back" align="center">
-<table width="100%" cellpadding="5" cellspacing="0"
-border="0"
-summary="">
+<table width="100%" cellpadding="5" cellspacing="0" border="0" summary="">
 <tr align='left'>
 <td class="caption">""";
     
@@ -240,10 +237,17 @@ summary="">
 """
 $e.text
 </td>
-</tr>""";
+</tr>
+<tr bgcolor="$*weak_back"><td align='left' class='comments'>
+<a href="$e.permalink_url">$*text_permalink</a>
+</td><td align='right' class='comments'>
+""";
+
     $e.comments->print();
 
-"""</table>
+"""
+</td></tr>
+</table>
 </td>
 </tr>
 </table><p>
@@ -323,13 +327,12 @@ summary="">
 
 function CommentInfo::print ()
 {
-    """<tr><td align="right" colspan="2" width="100%" bgcolor="$*weak_back" class="comments">""";
+    if (not $.enabled) { return; }
     if ($.count > 0 or $.screened) {
         "<b>"; $this->print_readlink(); "</b>";
         "|";
     }
     $this->print_postlink();
-    "</td></tr>";
 }
 
 function ArchiveYearPage::print_year_links ()

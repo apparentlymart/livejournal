@@ -166,7 +166,8 @@ sub DayPage
         my $nc;
         $nc = "&nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
 
-        my $readurl = "$LJ::SITEROOT/talkread.bml?$itemargs$nc";
+        my $permalink = "$LJ::SITEROOT/talkread.bml?$itemargs";
+        my $readurl = "$permalink$nc";
         my $comments = CommentInfo({
             'read_url' => $readurl,
             'post_url' => "$LJ::SITEROOT/talkpost.bml?$itemargs",
@@ -193,6 +194,7 @@ sub DayPage
             'poster' => $userlite_poster,
             'comments' => $comments,
             'userpic' => $userpic,
+            'permalink_url' => $permalink,
         });
 
         push @{$p->{'entries'}}, $entry;

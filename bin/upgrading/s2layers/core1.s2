@@ -726,6 +726,13 @@ property string text_noentries_day {
 }
 set text_noentries_day = "There were no entries on this day.";
 
+property string text_permalink {
+    des = "Text for a entry's permanent link";
+    maxlength = 50;
+    size = 20;
+}
+set text_permalink = "Link";
+
 
 property string font_base {
     des = "Preferred Font";
