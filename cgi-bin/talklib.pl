@@ -1217,7 +1217,7 @@ sub mail_comments {
             $parent->{u} = undef;
             $parent->{body} = $parentcomment;
             $parent->{ispost} = 0;
-            $parent->{preformat} = $comment->{preformat}
+            $parent->{preformat} = $comment->{preformat};
         } else {
             $parent->{u} = $entryu;
             $parent->{body} = $item->{'event'},
