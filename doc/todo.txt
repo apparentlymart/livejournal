@@ -46,6 +46,11 @@ ANYBODY:
 | bradfitz |
 +----------+
 
+* version checking in login protocol mode:
+   -- each client string:  versionid|version|security|noteline
+   -- new protocol login req opt: "checklevel" = { all | none | securityonly }
+   -- priv for client authors to update db
+
 misc:
 developers/doc link wrong
 new talk view mode
