@@ -284,8 +284,9 @@ sub get_recent_items
     # decide what level of security the remote user can see
     my $secwhere = "";
     my $mask = $gmask_from->{$userid} + 0;
-    if ($userid == $remoteid) {
+    if ($userid == $remoteid || $opts->{'viewall'}) {
 	# no extra where restrictions... user can see all their own stuff
+	# alternatively, if 'viewall' opt flag is set, security is off.
     } elsif ($mask) {
 	# can see public or things with them in the mask
 	$secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $mask != 0))";
