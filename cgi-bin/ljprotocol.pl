@@ -305,6 +305,27 @@ sub common_event_validation
 	return fail($err,203,"Invalid minute value.");
     }
 
+    # setup non-user meta-data.  it's important we define this here to
+    # 0.  if it's not defined at all, then an editevent where a user
+    # removes random 8bit data won't remove the metadata.  not that
+    # that matters much.  but having this here won't hurt.  false
+    # meta-data isn't saved anyway.  so the only point of this next
+    # line is making the metadata be deleted on edit.
+    $req->{'props'}->{'unknown8bit'} = 0;
+
+    # non-ASCII?
+    if ($req->{'event'} =~ /[\x80-\xFF]/ || $req->{'subject'} =~ /[\x80-\xFF]/)
+    {
+	if ($LJ::UNICODE) {
+	    # TODO (avva): validate its UTF-8-ness, complain if not 
+	    #              well-formed, or has overlong characters
+	} else {
+	    # so rest of site can change chars to ? marks until
+	    # default user's encoding is set.  (legacy support)
+	    $req->{'props'}->{'unknown8bit'} = 1;
+	}
+    }
+    
     ## handle meta-data (properties)
     LJ::load_props($dbs, "log");
     foreach my $pname (keys %{$req->{'props'}}) 
@@ -368,7 +389,7 @@ sub postevent
     } else {
 	$event =~ s/\r//g;
     }
-    
+
     return undef 
 	unless common_event_validation($dbs, $req, $err, $flags);
     
