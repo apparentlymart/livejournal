@@ -189,7 +189,7 @@
             } else {
                 $ju = $remote;                             # posting as remote
             };
-            $$body .= "<?p ".BML::ml(".update.success", { 'uri' => LJ::journal_base($ju) }) ." p?>";
+            $$body .= "<?p ".BML::ml(".update.success", { 'uri' => LJ::journal_base($ju) . "/" }) ." p?>";
 
             # any messages from the server?
             if ($login_message) {
