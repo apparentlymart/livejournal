@@ -3,7 +3,8 @@
     use strict;
     use vars qw(%GET %POST $title $body);
 
-    $title = "$ML{'.title'}";
+    # set $title later because we may be changing languages
+    $title = "";
     $body = "";
 
     # error handling closures
@@ -92,6 +93,9 @@
             BML::set_language($l->{'lncode'});
         }
     }
+
+    # set title now that we have the correct language
+    $title = $ML{'.title'};
 
     # preferences page output
 
