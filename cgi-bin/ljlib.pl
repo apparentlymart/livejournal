@@ -2990,7 +2990,7 @@ sub get_posts_raw
             $ret->{prop}{$id} = $v;
         } elsif ($type eq "rp") {
             delete $needrc->{$cid}{$id};
-            $ret->{prop}{'replycount'} = $v;
+            $ret->{prop}{'replycount'} = int($v); # remove possible spaces
         }
     }
     
@@ -5717,7 +5717,7 @@ sub load_log_props2
         }
         if ($1 eq 'rp') {
             delete $needrc{$3};
-            $rc{$3} = $v;
+            $rc{$3} = int($v);  # change possible "0   " (true) to "0" (false)
         }
     }
 
