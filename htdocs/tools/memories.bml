@@ -116,22 +116,11 @@
      }
 
      # delete them!
-     my $dbh = LJ::get_db_writer();
-     my $memin = join(",", @to_delete);
-     $dbh->do("DELETE FROM memorable WHERE userid=? AND memid IN ($memin)", undef, $authasu->{userid});
-     LJ::MemCache::delete([$authasu->{userid}, "memct:$authasu->{userid}"]);
-     if ($dbh->err) {
-         $title = $ML{'Error'};
-         $body = "<?h1 $ML{'Error'} h1?><?p ";
-         $body .= BML::ml('.delete.error.dberror', { error => $dbh->errstr }) . " p?>";
-         return;
-     } else {
-         $title = $ML{'.delete.deleted.title'};
-         $body = "<?h1 $ML{'.delete.deleted.head'} h1?><?p ";
-         $body .= BML::ml('.delete.deleted.text', { aopts => "href='./memories.bml?user=$authasu->{user}'" }) . " p?>";
-         return;
-     }
-         
+     LJ::Memories::delete_by_id($authasu, \@to_delete);
+     $title = $ML{'.delete.deleted.title'};
+     $body = "<?h1 $ML{'.delete.deleted.head'} h1?><?p ";
+     $body .= BML::ml('.delete.deleted.text', { aopts => "href='./memories.bml?user=$authasu->{user}'" }) . " p?>";
+     return; 
  }
 
  my %filters = ("all" => $ML{'.filter.all'},
@@ -158,12 +147,12 @@
                                      $a->{'des'}   cmp $b->{'des'}   } @_;
                             });
 
- my $secwhere = "AND m.security='public'";
+ my $securities = ['public'];
  if ($authasu) {
      if ($is_owner) {
-         $secwhere = "";
+         $securities = [];
      } elsif ($authasu->{'journaltype'} eq 'P' and LJ::is_friend($userid, $authasu->{'userid'})) {
-         $secwhere = "AND m.security IN ('public', 'friends')";
+         $securities = ['public', 'friends'];
      }
  }
 
@@ -193,45 +182,33 @@
      $body .= "</form>\n";
      $body .= "<a href=\"/tools/memories.bml?user=$user$authasarge\">&lt;&lt; $ML{'.back'}</a>";
 
-     my $extrawhere = "";
-     if ($filter eq "own" || $filter eq "other") {
-         my $op = $filter eq "own" ? "=" : "<>";
-         $extrawhere = "AND m.journalid $op $userid";
-     }
-
      my $key_id;
      foreach (keys %$kwmap) {
          $key_id = $_ if $kwmap->{$_} eq $GET{keyword};
      }
-     $sth = $dbr->prepare("SELECT m.memid, u.user, m.journalid, m.jitemid, m.des, m.security ".
-                          "FROM memorable m, memkeyword mk ".
-                          "LEFT JOIN useridmap u ON m.journalid=u.userid ".
-                          "WHERE mk.memid=m.memid AND mk.kwid=? ".
-                          "AND m.userid=$userid $secwhere $extrawhere");
-     $sth->execute($key_id);
-
-     my @memories;
-     while (my $mem = $sth->fetchrow_hashref) {
-         push @memories, $mem;
-     }
-     @memories = $sortfunc{$sort}->( @memories );
+     my $memoryhash = LJ::Memories::get_by_keyword($u, $key_id, 
+             { security => $securities, filter => $filter }) || {};
+     my @jids = map { $_->{journalid} } values %$memoryhash;
+     my $us = LJ::load_userids(@jids);
+     my @memories = $sortfunc{$sort}->( values %$memoryhash );
     
      $body .= "<form method='post' action='./memories.bml?user=$user$authasarge'>\n"
          if $is_owner && $GET{multidelete};
      $body .= "<ul>\n";
      foreach my $mem (@memories) {
+         my $user = $us->{$mem->{journalid}}{user};
          my $eh_des = LJ::ehtml($mem->{'des'});
          LJ::text_out(\$eh_des);
 
          my ($entrylink, $editlink);
-         if ($mem->{user}) {
-             my $itemid = int($mem->{'jitemid'} / 256);
-             my $anum = $mem->{'jitemid'} % 256;
-             $entrylink = LJ::item_link($mem->{user}, $itemid, $anum);
-             $editlink = "/tools/memadd.bml?journal=$mem->{user}&amp;itemid=$mem->{jitemid}$authasarge";
+         if ($user) {
+             my $itemid = int($mem->{'ditemid'} / 256);
+             my $anum = $mem->{'ditemid'} % 256;
+             $entrylink = LJ::item_link($user, $itemid, $anum);
+             $editlink = "/tools/memadd.bml?journal=$user&amp;itemid=$mem->{ditemid}$authasarge";
          } else {
-             $entrylink = "/talkread.bml?itemid=$mem->{jitemid}";
-             $editlink = "/tools/memadd.bml?itemid=$mem->{jitemid}$authasarge";
+             $entrylink = "/talkread.bml?itemid=$mem->{ditemid}";
+             $editlink = "/tools/memadd.bml?itemid=$mem->{ditemid}$authasarge";
          }
 
          my $edit = "";
@@ -246,7 +223,7 @@
             'friends' => "<?securityprotected?>",
             'private' => "<?securityprivate?>",
          );
-         $body .= "<p><li>$delete <a href=\"$entrylink\"><b>$eh_des</b></a> $edit $icons{$mem->{security}}<br /><font size='-1'><b>$mem->{'user'}</b></font></li>";
+         $body .= "<p><li>$delete <a href=\"$entrylink\"><b>$eh_des</b></a> $edit $icons{$mem->{security}}<br /><font size='-1'><b>$user</b></font></li>";
      }
      $body .= "</ul>";
      if ($is_owner && $GET{multidelete}) {
@@ -260,24 +237,10 @@
  $title = $ML{'.title.memorable'};
  $body .= BML::ml(".body.list_categories", { 'user' => $user });
 
- if ($filter eq "all") {
-     $sth = $dbr->prepare("SELECT mk.kwid, COUNT(*) AS 'count' " .
-                          "FROM memorable m, memkeyword mk " .
-                          "WHERE mk.memid=m.memid AND m.userid=$userid $secwhere " .
-                          "GROUP BY mk.kwid");
-
- } else {
-     my $op = $filter eq "own" ? "=" : "<>";
-     $sth = $dbr->prepare("SELECT mk.kwid, COUNT(*) AS 'count' " .
-                          "FROM memorable m, memkeyword mk " .
-                          "WHERE mk.memid=m.memid AND m.userid=$userid $secwhere " .
-                          "AND m.journalid $op $userid GROUP BY mk.kwid");
- }
- $sth->execute;
+ my $rows = LJ::Memories::get_keyword_counts($u, { security => $securities, filter => $filter });
  my @sortedrows;
- while (my ($id,$c) = $sth->fetchrow_array) {
-    push @sortedrows, { 'keyword' => $kwmap->{$id}, 'count' => $c };
- }
+ push @sortedrows, { keyword => $kwmap->{$_}, count => $rows->{$_} }
+    foreach keys %{$rows || {}};
  @sortedrows = sort { $a->{'keyword'} cmp $b->{'keyword'} } @sortedrows;
 
  $body .= "<form method='get' action='memories.bml'>";

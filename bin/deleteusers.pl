@@ -110,6 +110,11 @@ foreach my $du (@delusers)
     $runsql->($user, "DELETE FROM friends WHERE userid=$uid");
     $runsql->($user, "DELETE FROM friends WHERE friendid=$uid");
     $runsql->($user, "DELETE FROM friendgroup WHERE userid=$uid");
+    $runsql->($dbcm, $user, "DELETE FROM friendgroup2 WHERE userid=$uid");
+    $runsql->($user, "DELETE FROM memorable WHERE userid=$uid");
+    $runsql->($dbcm, $user, "DELETE FROM memorable2 WHERE userid=$uid");
+    $runsql->($dbcm, $user, "DELETE FROM userkeywords WHERE userid=$uid");
+    $runsql->($dbcm, $user, "DELETE FROM memkeyword2 WHERE userid=$uid");
     $runsql->($user, "DELETE FROM userbio WHERE userid=$uid");
     $runsql->($dbcm, $user, "DELETE FROM userbio WHERE userid=$uid");
     $runsql->($user, "DELETE FROM userinterests WHERE userid=$uid");

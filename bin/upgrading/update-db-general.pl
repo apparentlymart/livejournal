@@ -1798,6 +1798,53 @@ CREATE TABLE invitesent (
 )
 EOC
 
+# memorable2 -- clustered memories
+register_tablecreate("memorable2", <<'EOC');
+CREATE TABLE memorable2 (
+    userid      INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    memid       INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    journalid   INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    ditemid     INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    des         VARCHAR(150) DEFAULT NULL,
+    security    ENUM('public','friends','private') NOT NULL DEFAULT 'public',
+    PRIMARY KEY (userid, journalid, ditemid),
+    UNIQUE KEY  (userid, memid)
+)
+EOC
+
+# memkeyword2 -- clustered memory keyword map
+register_tablecreate("memkeyword2", <<'EOC');
+CREATE TABLE memkeyword2 (
+    userid      INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    memid       INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    kwid        INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    PRIMARY KEY (userid, memid, kwid),
+    KEY         (userid, kwid)
+)
+EOC
+
+# userkeywords -- clustered keywords
+register_tablecreate("userkeywords", <<'EOC');
+CREATE TABLE userkeywords (
+    userid      INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    kwid        INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    keyword     VARCHAR(80) BINARY NOT NULL,
+    PRIMARY KEY (userid, kwid),
+    UNIQUE KEY  (userid, keyword)
+)
+EOC
+
+# friendgroup2 -- clustered friend groups
+register_tablecreate("friendgroup2", <<'EOC');
+CREATE TABLE friendgroup2 (
+    userid      INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    groupnum    TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+    groupname   VARCHAR(90) NOT NULL DEFAULT '',
+    sortorder   TINYINT(3) UNSIGNED NOT NULL DEFAULT '50',
+    is_public   ENUM('0','1') NOT NULL DEFAULT '0',
+    PRIMARY KEY (userid, groupnum)
+)
+EOC
 
 # NOTE: new table declarations go here
 

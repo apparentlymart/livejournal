@@ -1156,9 +1156,8 @@ sub friend
             }
             my $gmask = 0;
             if ($group ne "") {
-                my $qgroup = $dbh->quote($group);
-                my $num = $dbh->selectrow_array("SELECT groupnum FROM friendgroup ".
-						"WHERE userid=$quserid AND groupname=$qgroup");
+                my $group = LJ::get_friend_group($remote->{userid}, { name => $group });
+                my $num = $group ? $group->{groupnum}+0 : 0;
                 if ($num) {
                     $gmask = 1 << $num;
                 } else {

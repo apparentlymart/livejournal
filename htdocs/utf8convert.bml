@@ -404,20 +404,18 @@
         my $valid = 1;
         
         $ret .= "<?p Keywords used in memories: p?><?p ";
-        my $sth = $dbh->prepare("SELECT DISTINCT k.keyword FROM keywords k, memkeyword mk, memorable m ".
-                                "WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=$u->{'userid'}");
-        $sth->execute;
-        while (my ($kw) = $sth->fetchrow_array) {
+        my $kwds = LJ::Memories::get_keywords($u);
+        foreach my $kw (values %{$kwds || {}}) {
             $valid = 0 unless LJ::is_utf8($kw);
             convert(\$kw, $encid);
             $ret .= $kw . ' ';
         }
         $ret .= " p?>";
         $ret .= "<?p Sample of memory decriptions: p?><?p ";
-        $sth = $dbh->prepare("SELECT des FROM memorable WHERE userid=$u->{'userid'}");
-        $sth->execute;
+        my $memories = LJ::Memories::get_by_user($u);
         my $limit = 15;
-        while (my ($des) = $sth->fetchrow_array) {
+        foreach my $memory (values %{$memories || {}}) {
+            my $des = $memory->{des};
             $valid = 0 unless LJ::is_utf8($des);
             convert(\$des, $encid);
             $ret .= $des . "<br />" if --$limit >= 0;
@@ -677,21 +675,22 @@
         my $changed = 0;
         my $userid = $u->{'userid'};
         
-        my $sth = $dbh->prepare("SELECT DISTINCT k.keyword, k.kwid ".
-                                "FROM keywords k, memkeyword mk, memorable m ".
-                                "WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=$u->{'userid'}");
-        $sth->execute;
-        my %kwds;
-        while (my ($keyword, $kwid) = $sth->fetchrow_array) {
-            $kwds{$keyword} = $kwid;
-        }
+        my $keywords = LJ::Memories::get_keywords($u);
+        my %kwds = ( map { $keywords->{$_} => $_ } keys %{$keywords || {}} );
         foreach my $keyword (keys %kwds) {
             next if LJ::is_utf8($keyword);
             $changed = 1;
             my $kw = $keyword;
             convert(\$kw, $encid);
-            my $newid = LJ::get_keyword_id($kw);
-            $dbh->do("UPDATE memkeyword SET kwid=$newid WHERE kwid=$kwds{$keyword}");
+            my $newid = LJ::get_keyword_id($u, $kw);
+
+            # not an API because this is the only place this happens, and it's very rare
+            if ($u->{dversion} > 5) {
+                $dbcm->do("UPDATE memkeyword2 SET kwid = ? WHERE userid = ? kwid = ?",
+                          undef, $newid, $u->{userid}, $kwds{$keyword});
+            } else {
+                $dbh->do("UPDATE memkeyword SET kwid=$newid WHERE kwid=$kwds{$keyword}");
+            }
         }
         if ($changed) {
             $message .= "<?p Converted memory keywords. p?>";
@@ -699,13 +698,13 @@
         
         # now the memory descriptions
         $changed = 0;
-        $sth = $dbh->prepare("SELECT memid, des FROM memorable WHERE userid=$u->{'userid'}");
-        $sth->execute;
-        while (my ($memid, $des) = $sth->fetchrow_array) {
+        my $memories = LJ::Memories::get_by_user($u);
+        foreach my $memory (values %{$memories || {}}) {
+            my $des = $memory->{des};
             next if LJ::is_utf8($des);
             $changed = 1;
             convert(\$des, $encid);
-            $dbh->do("UPDATE memorable SET des=? WHERE memid=$memid", undef, $des);
+            LJ::Memories::update_memory($u, $memid, { des => $des });
         }
         if ($changed) {
             $message .= "<?p Converted memory descriptions. p?>";

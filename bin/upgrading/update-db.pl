@@ -500,6 +500,11 @@ if ($opt_pop)
         system("$ENV{'LJHOME'}/bin/upgrading/d4d5-global.pl");
     }
 
+    # convert users from dversion5 (unclustered memories and friend groups)
+    if (my $d5 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=5 LIMIT 1")) {
+        system("$ENV{'LJHOME'}/bin/upgrading/d5d6-mkf.pl");
+    }
+
     print "\nThe system user was created with a random password.\nRun \$LJHOME/bin/upgrading/make_system.pl to change its password and grant the necessary privileges."
         if $made_system;
     print "\nRemember to also run:\n  bin/upgrading/texttool.pl load\n\n";

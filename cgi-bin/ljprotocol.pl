@@ -174,6 +174,7 @@ sub login
 
     ## return their friend groups
     $res->{'friendgroups'} = list_friendgroups($u);
+    return fail($err, 502, "Error loading friend groups") unless $res->{'friendgroups'};
     if ($ver >= 1) {
         foreach (@{$res->{'friendgroups'}}) {
             LJ::text_out(\$_->{'name'});
@@ -272,9 +273,10 @@ sub getfriendgroups
     my $u = $flags->{'u'};
     my $res = {};
     $res->{'friendgroups'} = list_friendgroups($u);
+    return fail($err, 502, "Error loading friend groups") unless $res->{'friendgroups'};
     if ($req->{'ver'} >= 1) {
-        foreach (@{$res->{'friendgroups'}}) {
-	    LJ::text_out(\$_->{'name'});
+        foreach (@{$res->{'friendgroups'} || []}) {
+            LJ::text_out(\$_->{'name'});
         }
     }
     return $res;
@@ -289,8 +291,9 @@ sub getfriends
     my $res = {};
     if ($req->{'includegroups'}) {
         $res->{'friendgroups'} = list_friendgroups($u);
+        return fail($err, 502, "Error loading friend groups") unless $res->{'friendgroups'};
         if ($req->{'ver'} >= 1) {
-            foreach (@{$res->{'friendgroups'}}) {
+            foreach (@{$res->{'friendgroups'} || []}) {
                 LJ::text_out(\$_->{'name'});
             }
         }
@@ -1729,10 +1732,12 @@ sub editfriendgroups
 
     my $u = $flags->{'u'};
     my $userid = $u->{'userid'};
-    my $dbh = LJ::get_db_writer();
+    my ($db, $fgtable, $bmax, $cmax) = $u->{dversion} > 5 ?
+                         (LJ::get_cluster_master($u), 'friendgroup2', LJ::BMAX_GRPNAME2, LJ::CMAX_GRPNAME2) :
+                         (LJ::get_db_writer(), 'friendgroup', LJ::BMAX_GRPNAME, LJ::CMAX_GRPNAME);
     my $sth;
 
-    return fail($err,306) unless $dbh;
+    return fail($err,306) unless $db;
 
     my $res = {};
 
@@ -1747,9 +1752,8 @@ sub editfriendgroups
     # Keep track of what bits are already set, so we can know later
     # whether to INSERT or UPDATE.
     my %bitset;
-    $sth = $dbh->prepare("SELECT groupnum FROM friendgroup WHERE userid=$userid");
-    $sth->execute;
-    while (my ($bit) = $sth->fetchrow_array) {
+    my $groups = LJ::get_friend_group($userid);
+    foreach my $bit (keys %{$groups || {}}) {
         $bitset{$bit} = 1;
     }
 
@@ -1781,7 +1785,7 @@ sub editfriendgroups
         $bit += 0;
         next unless ($bit >= 1 && $bit <= 30);
         my $sa = $req->{'set'}->{$bit};
-        my $name = LJ::text_trim($sa->{'name'}, LJ::BMAX_GRPNAME, LJ::CMAX_GRPNAME);
+        my $name = LJ::text_trim($sa->{'name'}, $bmax, $cmax);
 
         # can't end with a slash
         $name =~ s!/$!!;        
@@ -1792,9 +1796,9 @@ sub editfriendgroups
             next;
         }
 
-        my $qname = $dbh->quote($name);
+        my $qname = $db->quote($name);
         my $qsort = defined $sa->{'sort'} ? ($sa->{'sort'}+0) : 50;
-        my $qpublic = $dbh->quote(defined $sa->{'public'} ? ($sa->{'public'}+0) : 0);
+        my $qpublic = $db->quote(defined $sa->{'public'} ? ($sa->{'public'}+0) : 0);
 
         if ($bitset{$bit}) {
             # so update it
@@ -1802,12 +1806,12 @@ sub editfriendgroups
             if (defined $sa->{'public'}) {
                 $sets .= ", is_public=$qpublic";
             }
-            $dbh->do("UPDATE friendgroup SET groupname=$qname, sortorder=$qsort ".
-                     "$sets WHERE userid=$userid AND groupnum=$bit");
+            $db->do("UPDATE $fgtable SET groupname=$qname, sortorder=$qsort ".
+                    "$sets WHERE userid=$userid AND groupnum=$bit");
         } else {
-            $dbh->do("REPLACE INTO friendgroup (userid, groupnum, ".
-                     "groupname, sortorder, is_public) VALUES ".
-                     "($userid, $bit, $qname, $qsort, $qpublic)");
+            $db->do("REPLACE INTO $fgtable (userid, groupnum, ".
+                    "groupname, sortorder, is_public) VALUES ".
+                    "($userid, $bit, $qname, $qsort, $qpublic)");
         }
         $added{$bit} = 1;
     }
@@ -1824,6 +1828,7 @@ sub editfriendgroups
     }
 
     # remove the bits for deleted groups from all friends groupmasks
+    my $dbh = LJ::get_db_writer();
     if ($delete_mask) {
         # TAG:FR:protocol:editfriendgroups_removemasks
         $dbh->do("UPDATE friends".
@@ -1862,8 +1867,8 @@ sub editfriendgroups
 
         # remove the friend group, unless we just added it this transaction
         unless ($added{$bit}) {
-            $sth = $dbh->prepare("DELETE FROM friendgroup WHERE ".
-                                 "userid=$userid AND groupnum=$bit");
+            $sth = $db->prepare("DELETE FROM $fgtable WHERE ".
+                                "userid=$userid AND groupnum=$bit");
             $sth->execute;
         }
     }
@@ -2144,20 +2149,20 @@ sub list_friendgroups
 {
     my $u = shift;
 
-    my $res = [];
-    my $dbr = LJ::get_db_reader();
+    # get the groups for this user, return undef if error
+    my $groups = LJ::get_friend_group($u);
+    return undef unless $groups;
 
-    my $sth = $dbr->prepare("SELECT groupnum, groupname, sortorder, is_public ".
-                            "FROM friendgroup WHERE userid=?");
-    $sth->execute($u->{'userid'});
-    while (my ($gid, $name, $sort, $public) = $sth->fetchrow_array) {
-        push @$res, { 'id' => $gid,
-                      'name' => $name,
-                      'sortorder' => $sort,
-                      'public' => $public };
-    }
-    @$res = sort { $a->{sortorder} <=> $b->{sortorder} } @$res;
-    return $res;
+    # we got all of the groups, so put them into an arrayref sorted by the
+    # group sortorder; also note that the map is used to construct a new hashref
+    # out of the old group hashref so that we have all of the field names converted
+    # to a format our callers can recognize
+    my @res = map { { id => $_->{groupnum},      name => $_->{groupname},
+                      public => $_->{is_public}, sortorder => $_->{sortorder}, } }
+              sort { $a->{sortorder} <=> $b->{sortorder} }
+              values %$groups;
+
+    return \@res;
 }
 
 sub list_usejournals

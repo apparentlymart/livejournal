@@ -29,9 +29,6 @@
  return $err->($ML{'error.invalidauth'})
      unless $memoryu;
 
- # memcache key for later
- my $memkey = [$memoryu->{userid}, "memct:$memoryu->{userid}"];
-
  my %secopts = ( 'public' => $ML{'label.security.public'},
                  'friends' => $ML{'label.security.friends'},
                  'private' => $ML{'label.security.private'}, );
@@ -115,11 +112,9 @@
  }
 
  # check to see if it already is memorable (thus we're editing, not adding);
- $sth = $dbr->prepare("SELECT memid, des, security FROM memorable WHERE ".
-                      "userid=? AND journalid=? AND jitemid=?");
- $sth->execute($memoryu->{userid}, $oldstyle ? 0 : $jid, $dbitemid);
- my $memory = $sth->fetchrow_hashref;
+ my $memory = LJ::Memories::get_by_ditemid($memoryu, $jid, $ditemid);
 
+ # get keywords user has used
  my $exist_kw = LJ::Memories::get_keywords($memoryu);
  unless ($exist_kw) {
      $body = "Error fetching existing keywords.";
@@ -137,9 +132,8 @@
      if (defined $memory) {
          $title = $ML{'.title.edit_memory'};
          $des = $memory->{'des'};
-         $sth = $dbr->prepare("SELECT kwid FROM memkeyword WHERE memid=?");
-         $sth->execute($memory->{memid});
-         while (my $kwid = $sth->fetchrow_array) {
+         my $kwids = LJ::Memories::get_keywordids($memoryu, $memory->{memid}) || [];
+         foreach my $kwid (@$kwids) {
              my $kw = $exist_kw->{$kwid};
              next if ($kw eq "*");
              if ($keywords) { $keywords .= ", "; }
@@ -148,11 +142,8 @@
          }
          if (!$log || ($jid && $log->{'anum'} != $anum))
          {
-             my $dbh = LJ::get_db_writer();
-             $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
-             $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
+             LJ::Memories::delete_by_id($memoryu, $memory->{memid});
              LJ::Memories::updated_keywords($memoryu);
-             LJ::MemCache::delete($memkey);
              $title = $ML{'Error'};
              $body = $ML{'.error.entry_deleted'};
              return;
@@ -206,7 +197,7 @@
      $body .= "<br /><small>$ML{'.description.text'}</small></td></tr>";
 
      $body .= "<tr><th align='right' valign='top'>$ML{'.keywords'}</th><td>";
-     $body .= LJ::html_text({name => 'keywords', maxlength => LJ::CMAX_KEYWORD, size => 40});
+     $body .= LJ::html_text({name => 'keywords', maxlength => LJ::CMAX_KEYWORD, size => 40, value => $keywords});
      $body .= "<br /><small>$ML{'.keywords.text'}</small><br />";
 
      if (@all_keywords) {
@@ -244,10 +235,8 @@
      if (! $POST{'des'}) {
          # then we're deleting.
          if (defined $memory) {
-             $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
-             $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
+             LJ::Memories::delete_by_id($memoryu, $memory->{memid});
              LJ::Memories::updated_keywords($memoryu);
-             LJ::MemCache::delete($memkey);
              $title = $ML{'.title.deleted'};
              $body = "<?h1 $ML{'.error.deleted.title'} h1?><?p " . 
                      BML::ml(".error.deleted.body", { 'desc' => $memory->{'des'} }) .
@@ -289,7 +278,7 @@
              return;
          }
 
-         my $kwid = LJ::get_keyword_id($kw);
+         my $kwid = LJ::get_keyword_id($memoryu, $kw);
          $needflush = 1 unless defined $exist_kw->{$kwid};
          push @kwid, $kwid;
      }
@@ -303,29 +292,15 @@
      my $des = LJ::text_trim($POST{'des'}, LJ::BMAX_MEMORY, LJ::CMAX_MEMORY);
      my $sec = $POST{'security'};
 
-     ## this is easiest... just delete it, then add it again.
-     my $memid;
-     if (defined $memory) {
-         $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
-         $memid = $memory->{'memid'};
-         $sth = $dbh->prepare("UPDATE memorable SET des=?, security=? WHERE memid=?");
-         $sth->execute($des, $sec, $memid);
-     } 
-     else 
-     {
-         $sth = $dbh->prepare("INSERT INTO memorable (memid, userid, journalid, jitemid, des, security) ".
-                              "VALUES (NULL, ?, ?, ?, ?, ?)");
-         $sth->execute($memoryu->{userid}, $jid, $dbitemid, $des, $sec);
-         $memid = $dbh->{'mysql_insertid'};
-         LJ::MemCache::delete($memkey);
-     }
-     if (@kwid) {
-         my $sql = "INSERT IGNORE INTO memkeyword (memid, kwid) VALUES ";
-         # IGNORE exists so no error is logged in mysql replication binlog (bad in 3.23.x)
-         $sql .= join(",", map { "($memid,$_)" } @kwid);
-         $dbh->do($sql);
-     }
-
+     # handle edits by deleting the old memory and recreating
+     LJ::Memories::delete_by_id($memoryu, $memory->{memid})
+         if defined $memory;
+     LJ::Memories::create($memoryu, { 
+                              journalid => $jid,
+                              ditemid => $dbitemid,
+                              des => $des,
+                              security => $sec,
+                          }, \@kwid);
      LJ::Memories::updated_keywords($memoryu) if $needflush;
 
      $title = $ML{'.title.added'};

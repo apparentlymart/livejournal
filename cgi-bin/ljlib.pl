@@ -43,7 +43,9 @@ do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
                     "userproplite2", "links", "s1overrides", "s1style",
                     "s1stylecache", "userblob", "userpropblob",
                     "clustertrack2", "captcha_session", "reluser2",
-                    "tempanonips", "inviterecv", "invitesent",);
+                    "tempanonips", "inviterecv", "invitesent",
+                    "memorable2", "memkeyword2", "userkeywords",
+                    "friendgroup2",);
 
 # keep track of what db locks we have out
 %LJ::LOCK_OUT = (); # {global|user} => caller_with_lock
@@ -78,7 +80,8 @@ $LJ::PROTOCOL_VER = ($LJ::UNICODE ? "1" : "0");
 #    3: weekuserusage populated  (Note: this table's now gone)
 #    4: userproplite2 clustered, and cldversion on userproplist table
 #    5: overrides clustered, and style clustered
-$LJ::MAX_DVERSION = 5;
+#    6: clustered memories, friend groups, and keywords (for memories)
+$LJ::MAX_DVERSION = 6;
 
 # constants
 use constant ENDOFTIME => 2147483647;
@@ -102,6 +105,8 @@ use constant BMAX_PROP    => 255;   # logprop[2]/talkprop[2]/userproplite (not u
 use constant CMAX_PROP    => 100;
 use constant BMAX_GRPNAME => 60;
 use constant CMAX_GRPNAME => 30;
+use constant BMAX_GRPNAME2 => 90; # introduced in dversion6, when we widened the groupname column
+use constant CMAX_GRPNAME2 => 40; # but we have to keep the old GRPNAME around while dversion5 exists
 use constant BMAX_EVENT   => 65535;
 use constant CMAX_EVENT   => 65535;
 use constant BMAX_INTEREST => 100;
@@ -668,8 +673,9 @@ sub get_log2_recent_user
 # </LJFUNC>
 sub get_friend_group {
     my ($uuid, $opt) = @_;
-    my $uid = want_userid($uuid);
-    return undef unless $uid;
+    my $u = LJ::want_user($uuid);
+    return undef unless $u;
+    my $uid = $u->{userid};
 
     # data version number
     my $ver = 1;
@@ -716,9 +722,11 @@ sub get_friend_group {
 
     # check database
     $fg = [$ver];
-    my $dbh = LJ::get_db_writer();
-    my $sth = $dbh->prepare("SELECT userid, groupnum, groupname, sortorder, is_public " .
-                            "FROM friendgroup WHERE userid=?");
+    my ($db, $fgtable) = $u->{dversion} > 5 ?
+                         (LJ::get_cluster_def_reader($u), 'friendgroup2') : # if dversion is 6+, use definitive reader
+                         (LJ::get_db_writer(), 'friendgroup');              # else, use regular db writer
+    my $sth = $db->prepare("SELECT userid, groupnum, groupname, sortorder, is_public " .
+                           "FROM $fgtable WHERE userid=?");
     $sth->execute($uid);
     my @row;
     push @$fg, [ @row ] while @row = $sth->fetchrow_array;
@@ -6276,31 +6284,61 @@ sub alldatepart_s2
 # <LJFUNC>
 # name: LJ::get_keyword_id
 # class:
-# des:
-# info:
-# args:
-# des-:
-# returns:
+# des: Get the id for a keyword.
+# args: uuid?, keyword
+# des-uuid: User object or userid to use.  Pass this only if you want to use the userkeywords
+#   clustered table!  If you do not pass user information, the keywords table on the global
+#   will be used.
+# des-keyword: A string keyword to get the id of.
+# returns: Returns a kwid into keywords or userkeywords, depending on if you passed a user or
+#   not.  If the keyword doesn't exist, it is automatically created for you.
 # </LJFUNC>
 sub get_keyword_id
 {
     &nodb;
+
+    # see if we got a user? if so we use userkeywords on a cluster
+    my $u;
+    if (@_ == 2) {
+        $u = shift;
+        $u = LJ::want_user($u);
+        return undef unless $u;
+    }
+
+    # setup the keyword for use
     my $kw = shift;
     unless ($kw =~ /\S/) { return 0; }
     $kw = LJ::text_trim($kw, LJ::BMAX_KEYWORD, LJ::CMAX_KEYWORD);
 
-    my $dbh = LJ::get_db_writer();
-    my $qkw = $dbh->quote($kw);
+    # get the keyword and insert it if necessary
+    my $kwid;
+    if ($u && $u->{dversion} > 5) {
+        # new style userkeywords -- but only if the user has the right dversion
+        my $dbcm = LJ::get_cluster_master($u);
+        return undef unless $dbcm;
 
-    # Making this a $dbr could cause problems due to the insertion of
-    # data based on the results of this query. Leave as a $dbh.
-    my $sth = $dbh->prepare("SELECT kwid FROM keywords WHERE keyword=$qkw");
-    $sth->execute;
-    my ($kwid) = $sth->fetchrow_array;
-    unless ($kwid) {
-        $sth = $dbh->prepare("INSERT INTO keywords (kwid, keyword) VALUES (NULL, $qkw)");
-        $sth->execute;
-        $kwid = $dbh->{'mysql_insertid'};
+        $kwid = $dbcm->selectrow_array('SELECT kwid FROM userkeywords WHERE userid = ? AND keyword = ?',
+                                       undef, $u->{userid}, $kw) + 0;
+        unless ($kwid) {
+            # create a new keyword
+            $kwid = LJ::alloc_user_counter($u, 'K');
+            return undef unless $kwid;
+            $dbcm->do("INSERT INTO userkeywords (userid, kwid, keyword) VALUES (?, ?, ?)",
+                      undef, $u->{userid}, $kwid, $kw);
+            return undef if $dbcm->err;
+        }
+    } else {
+        # old style global
+        my $dbh = LJ::get_db_writer();
+        my $qkw = $dbh->quote($kw);
+
+        # Making this a $dbr could cause problems due to the insertion of
+        # data based on the results of this query. Leave as a $dbh.
+        $kwid = $dbh->selectrow_array("SELECT kwid FROM keywords WHERE keyword=$qkw");
+        unless ($kwid) {
+            $dbh->do("INSERT INTO keywords (kwid, keyword) VALUES (NULL, $qkw)");
+            $kwid = $dbh->{'mysql_insertid'};
+        }
     }
     return $kwid;
 }
@@ -6798,13 +6836,7 @@ sub delete_entry
     }
     LJ::dudata_set($dbcm, $jid, 'L', $jitemid, 0);
 
-    # delete stuff from meta cluster
-    my $aitemid = $jitemid * 256 + $anum;
-    my $dbh = LJ::get_db_writer();
-    foreach my $t (qw(memorable)) {
-        $dbh->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$aitemid");
-    }
-
+    # delete all comments
     LJ::delete_all_comments($u, 'L', $jitemid);
 
     return 1;
@@ -7141,7 +7173,8 @@ sub add_friend
     my $groupmask = 1;
     if ($opts->{'defaultview'}) {
         # TAG:FR:ljlib:add_friend_getdefviewmask
-        my $grp = $dbh->selectrow_array("SELECT groupnum FROM friendgroup WHERE userid=? AND groupname='Default View'", undef, $ida);
+        my $group = LJ::get_friend_group($ida, { name => 'Default View' });
+        my $grp = $group ? $group->{groupnum}+0 : 0;
         $groupmask |= (1 << $grp) if $grp;
     }
 
@@ -8307,11 +8340,12 @@ sub clear_rel
     return 1;
 }
 
-# $dom: 'L' == log, 'T' == talk, 'M' == modlog, 'B' == blob (userpic, etc), 'S' == session
+# $dom: 'L' == log, 'T' == talk, 'M' == modlog, 'B' == blob (userpic, etc), 'S' == session,
+#       'R' == memory (remembrance), 'K' == keyword id
 sub alloc_user_counter
 {
     my ($u, $dom, $recurse) = @_;
-    return undef unless $dom =~ /^[LTMBS]$/;
+    return undef unless $dom =~ /^[LTMBSRK]$/;
     my $dbcm = LJ::get_cluster_master($u);
     return undef unless $dbcm;
 
@@ -8350,7 +8384,13 @@ sub alloc_user_counter
         $newmax = $dbcm->selectrow_array("SELECT MAX(modid) FROM modlog WHERE journalid=?",
                 undef, $uid);
     } elsif ($dom eq "S") {
-         $newmax = $dbcm->selectrow_array("SELECT MAX(sessid) FROM sessions WHERE userid=?",
+        $newmax = $dbcm->selectrow_array("SELECT MAX(sessid) FROM sessions WHERE userid=?",
+                undef, $uid);
+    } elsif ($dom eq "R") {
+        $newmax = $dbcm->selectrow_array("SELECT MAX(memid) FROM memorable2 WHERE userid=?",
+                undef, $uid);
+    } elsif ($dom eq "K") {
+        $newmax = $dbcm->selectrow_array("SELECT MAX(kwid) FROM userkeywords WHERE userid=?",
                 undef, $uid);
     }
     $newmax += 0;

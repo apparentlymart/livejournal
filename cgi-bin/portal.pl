@@ -1106,21 +1106,19 @@ $box{'memories'} =
                               'url' => '/tools/memories.bml', });
 
         my $userid = $remote->{'userid'};
-        my $sth = $dbr->prepare("SELECT k.keyword, COUNT(*) AS 'count' FROM memorable m, memkeyword mk, keywords k ".
-                                "WHERE mk.memid=m.memid AND mk.kwid=k.kwid AND m.userid=$userid ".
-                                "GROUP BY k.keyword ORDER BY k.keyword");
-        $sth->execute;
+        my $kws = LJ::Memories::get_keywords($remote);
+        my $kwcs = LJ::Memories::get_keyword_counts($remote);
         my $rows = 0;
-        while (my $row = $sth->fetchrow_hashref)
+        foreach my $id (sort { $kwcs->{$a} <=> $kwcs->{$b} } keys %{$kwcs || {}})
         {
             $$b .= "<ul>" if ++$rows == 1;
-            my $noun = $row->{'count'} == 1 ? BML::ml('portal.memories.entrynoun') : BML::ml('portal.memories.entriesnoun');
-            my $ue_keyword = LJ::eurl($row->{'keyword'});
-            my $keyword = $row->{'keyword'};
+            my $noun = $kwcs->{$id} == 1 ? BML::ml('portal.memories.entrynoun') : BML::ml('portal.memories.entriesnoun');
+            my $ue_keyword = LJ::eurl($kws->{$id});
+            my $keyword = $kws->{$id};
             LJ::text_out(\$keyword);
             if ($keyword eq "*") { $keyword = BML::ml('/tools/memories.bml.uncategorized'); }
             $$b .= "<li><b><a href=\"/tools/memories.bml?user=$remote->{'user'}&amp;keyword=$ue_keyword&amp;filter=all\">";
-            $$b .= "$keyword</a></b>: $row->{'count'} $noun</li>\n";
+            $$b .= "$keyword</a></b>: $kwcs->{$id} $noun</li>\n";
         }
         unless ($rows) {
             $$b .= "<?h1 <?_ml /tools/memories.bml.error.noentries.title _ml?> h1?>";

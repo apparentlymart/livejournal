@@ -1438,8 +1438,8 @@ sub create_view_friends
             if ($group) { $group = LJ::durl($group); $common_filter = 0;}
         }
         my $grp = LJ::get_friend_group($u, { 'name' => $group || "Default View" });
-        my $bit = $grp->{'groupnum'};
-        my $public = $grp->{'is_public'};
+        my $bit = $grp ? $grp->{'groupnum'} : 0;
+        my $public = $grp ? $grp->{'is_public'} : 0;
         if ($bit && ($public || ($remote && $remote->{'user'} eq $user))) {
             $filter = (1 << $bit); 
         } elsif ($group) {
