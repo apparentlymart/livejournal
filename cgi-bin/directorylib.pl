@@ -92,17 +92,11 @@ sub do_search
     ########## time to build us some huge SQL statement.  yee haw.
 
     my $orderby;
-
-    ## the ones with '2' at the end are always needed, even when cached.  the first ones are
-    ## only needed when getting the data for the first time.
-    my ($extrawhere, $extrawhere2);
-    my ($extrafrom, $extrafrom2);
-
     my %only_one_copy = qw(community c user u userusage uu);
 
     ## keep track of what table aliases we've used
     my %alias_used;
-    $alias_used{'u'} = "?";     # never used anymore?
+    $alias_used{'u'} = "?";     # only used by dbr, not dbdir
     $alias_used{'c'} = "?";     # might be used later, if opt_format eq "com"
     $alias_used{'uu'} = "?";    # might be used later, if opt_sort is by time
 
@@ -178,8 +172,6 @@ sub do_search
     } elsif ($req->{'opt_sort'} eq "name") {
         $orderby = "ORDER BY u.name";
     }
-
-    my $all_fields = "u.userid, u.user, u.journaltype, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(u.timeupdate) AS 'secondsold' $fields";
 
     # delete reserved table aliases the didn't end up being used
     foreach (keys %alias_used) {
@@ -263,9 +255,25 @@ sub do_search
     @ids = @ids[($info->{'first'}-1)..($info->{'last'}-1)];
 
     my $in = join(",", grep { $_+0; } @ids);
-    my $fsql = "SELECT $all_fields FROM $fromwhat WHERE u.userid IN ($in) $extrawhere2";
+
+    $alias_used{'u'} = "user";
+    $alias_used{'uu'} = "userusage";
+    my ($fromwhat, $joinwhere);
+    if ($req->{'opt_format'} eq "com") {
+	$fromwhat .= ", community c";
+	$joinwhere .= " AND c.userid=u.userid";
+    }
+    my $fsql = "SELECT u.userid, u.user, u.journaltype, ".
+	"UNIX_TIMESTAMP()-UNIX_TIMESTAMP(uu.timeupdate) AS 'secondsold' ".
+	$fields . " FROM user u, userusage uu $fromwhat ".
+	"WHERE u.userid IN ($in) AND uu.userid=u.userid $joinwhere";
     $sth = $dbr->prepare($fsql);
     $sth->execute;
+
+    if ($dbr->err) {
+	$info->{'errmsg'} = "[getdata] ".$dbr->errstr;
+	return 0;
+    }
 
     my %u;
     while ($_ = $sth->fetchrow_hashref) {
