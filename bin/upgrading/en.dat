@@ -1089,6 +1089,10 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 
 /editjournal.bml.certainday=Certain Day:
 
+/editjournal.bml.desc=Please use the form below to find the entry you would like to edit.
+
+/editjournal.bml.in=In community:
+
 /editjournal.bml.recententries=most recent entries
 
 /editjournal.bml.recententry=Most recent entry
@@ -1172,9 +1176,15 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.btn.proceed=Proceed
 
+/editpics.bml.curpics=Current Pictures
+
+/editpics.bml.curpics.desc=Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, use the form at the bottom of the page.
+
 /editpics.bml.error.badurl=The address for the picture to be uploaded does not look correct.  It should start with <b>http://</b>
 
 /editpics.bml.error.filetoolarge=Image uploaded is too large.  File size cannot exceed [[maxsize]].
+
+/editpics.bml.error.keywords=You used the keyword "[[ekw]]" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.
 
 /editpics.bml.error.imagetoolarge=The dimensions of your image ([[imagesize]]) exceed maximum size.  Your picture can only be 100x100 pixels large.  Use a image/photo editing program to reduce the image to thumbnail-size.
 
@@ -1197,20 +1207,38 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 /editpics.bml.fromurl.key=r
 
 /editpics.bml.imagesize.by|notes=This character is inserted between two numbers to indicate "by" when specifying image dimensions, for example "100x100".
+
 /editpics.bml.imagesize.by=x
 
 /editpics.bml.kilobytes=KB
 
+/editpics.bml.label.delete=Delete:
+
+/editpics.bml.label.default=Default:
+
+/editpics.bml.label.keywords=Keywords:
+
 /editpics.bml.makedefault=Make this your <u>d</u>efault picture
 
 /editpics.bml.makedefault.key|notes=Enter here a <b>lower-case</b> version of the letter you underlined in ".makedefault". This is the shortcut key for the makedefault option.
+
 /editpics.bml.makedefault.key=d
+
+/editpics.bml.nodefault=No Default Picture
+
+/editpics.bml.nopics=No Pictures
+
+/editpics.bml.noneupload=You have no pictures uploaded.  Please upload one using the form below.
 
 /editpics.bml.restriction.fileformat=File format must be either PNG, GIF or JPG
 
 /editpics.bml.restriction.filesize=File size must be less than 40k
 
 /editpics.bml.restriction.imagesize=Image dimensions must be no larger than 100x100 pixels
+
+/editpics.bml.title=Edit User Pictures
+
+/editpics.bml.uploaddesc=Use the form below to upload a new picture.
 
 /editpics.bml.uploadheader=Upload a New Picture
 

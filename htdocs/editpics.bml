@@ -3,7 +3,7 @@
     use strict;
     use vars qw(%GET %POST $title $body @errors);
 
-    $title = "Edit User Pictures";
+    $title = $ML{'.title'};
     $body = "";
     @errors = ();
 
@@ -93,9 +93,7 @@
                     
                     if ($picid_of_kwid{$kwid}) {
                         my $ekw = LJ::ehtml($kw);
-                        push @errors, "You used the keyword \"$ekw\" for multiple pictures. " .
-                            "One was randomly chosen, but likely not the one you wanted. " .
-                            "You may want to go back and fix that.";
+                        push @errors, BML::ml(".error.keywords", {'ekw' => $ekw});
                     }
                     $picid_of_kwid{$kwid} = $pic->{'picid'};
                 }
@@ -370,7 +368,7 @@
 
         if ($piccount++ == 0) {
 
-            $body .= "<?h1 Current Pictures h1?><?p Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, use the form at the bottom of the page. p?>";
+            $body .= "<?h1 $ML{'.curpics'} h1?><?p $ML{'.curpics.desc'} p?>";
 
             $body .= "<form method='post' action='editpics.bml$getextra'>";
             $body .= "<table cellpadding='5' border='0' cellspacing='1' " .
@@ -384,12 +382,12 @@
         my ($dis, $distxt);
         
         {            
-            $body .= "<tr><td align='right'><b><label for='$pid-def'>Default:</label></b></td><td> ";
+            $body .= "<tr><td align='right'><b><label for='$pid-def'>$ML{'.label.default'}</label></b></td><td> ";
             $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'defaultpic', 'value' => $pid, 
                                       'selected' => $u->{'defaultpicid'} == $pid,
                                       'disabled' => $pic->{'state'} eq 'I' });
 
-            $body .= "&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>Delete:</label></b> ";
+            $body .= "&nbsp;&nbsp;&nbsp;<b><label for='$pid-del'>$ML{'.label.delete'}</label></b> ";
             $body .= LJ::html_check({ 'type' => 'checkbox', 'name' => "delete_$pid",
                                       'id' => "$pid-del", 'value' => 1 });
 
@@ -405,7 +403,7 @@
             $keywords = join(", ", sort { lc($a) cmp lc($b) } @{$keywords{$pic->{'picid'}}})
                 if $keywords{$pid};
 
-            $body .= "<tr><td align='right'><b><label for='$pid-key'>Keywords:</label></b></td><td> ";
+            $body .= "<tr><td align='right'><b><label for='$pid-key'>$ML{'.label.keywords'}</label></b></td><td> ";
             $body .= LJ::html_text({ 'name' => "kw_$pid", 'id' => "$pid-key",
                                      'size' => '30', 'value' => $keywords,
                                      'disabled' => $pic->{'state'} eq 'I' });
@@ -417,7 +415,7 @@
     }
 
     if ($piccount) {
-        $body .= "<tr><td></td><td align=left>&nbsp;<b><label for='nodefpic'>No Default Picture</label></b>&nbsp;";
+        $body .= "<tr><td></td><td align=left>&nbsp;<b><label for='nodefpic'>$ML{'.nodefault'}</label></b>&nbsp;";
         $body .= LJ::html_check({ 'name' => 'defaultpic', 
                                   'value' => 0,
                                   'type' => 'radio',
@@ -430,13 +428,13 @@
         $body .= "</form>";
 
     } else {
-        $body .= "<?h1 No Pictures h1?><?p You have no pictures uploaded.  Please upload one using the form below. p?>";
+        $body .= "<?h1 $ML{'.nopics'} h1?><?p $ML{'.noneupload'} p?>";
     }
 
     # let users upload more pics
     $body .= "<a name='upload'></a>";
     $body .= "<?h1 $ML{'.uploadheader'} h1?>\n";
-    $body .= "<?p Use the form below to upload a new picture. p?>\n\n";
+    $body .= "<?p $ML{'.uploaddesc'} p?>\n\n";
     
     $body .= "<ul>\n";
     foreach (qw(filesize imagesize fileformat)) {

@@ -23,7 +23,7 @@ body<=
     
     # header
     $ret .= "<?h1 $ML{'.title'} h1?>\n";
-    $ret .= "<?p Please use the form below to find the entry you would like to edit. p?>\n";
+    $ret .= "<?p $ML{'.desc'} p?>\n";
 
     # edit form
     $ret .= "<form action='editjournal_do.bml$getextra' method='post'>\n";
@@ -56,7 +56,7 @@ body<=
     $ret .= "</td></tr>\n";
 
     # use journal
-    $ret .= "<tr valign=\"top\"><td align='right'>In community:</td>\n<td>\n";
+    $ret .= "<tr valign=\"top\"><td align='right'>$ML{'.in'}</td>\n<td>\n";
     $ret .= LJ::html_text({ 'name' => 'usejournal', 'size' => '20', 'maxlength' => '15', 'value' => $GET{'usejournal'} }) . " ";
     $ret .= " (optional)</td></tr>";
 
