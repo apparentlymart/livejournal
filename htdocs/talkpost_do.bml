@@ -513,7 +513,7 @@ BODY<=
                      $headersubject = Unicode::MapUTF8::from_utf8({-string=>$textsubject, -charset=>$encoding}); 
                  }
 
-                 if ($headersubject) {
+                 if (!LJ::is_ascii($headersubject)) {
                      $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
                  }
 
@@ -620,7 +620,7 @@ BODY<=
              $headersubject = Unicode::MapUTF8::from_utf8({-string=>$textsubject, -charset=>$encoding}); 
          }
 
-         if ($headersubject) {
+         if (!LJ::is_ascii($headersubject)) {
              $headersubject = MIME::Words::encode_mimeword($headersubject, 'B', $encoding);
          }
 
