@@ -46,7 +46,7 @@ body<=
             }
             my $idlist = join ',', map { $_+0 } @ids;
             my $winners = $dbr->selectall_arrayref('SELECT sp.spid, u.user, sp.points FROM useridmap u, supportpoints sp ' .
-                                                   'WHERE u.userid = sp.userid AND sp.spid IN (?)', undef, $idlist);
+                                                   "WHERE u.userid = sp.userid AND sp.spid IN ($idlist)");
             my %points;
             $points{$_->[0]+0} = [ $_->[1], $_->[2]+0 ] foreach @{$winners || []};
             

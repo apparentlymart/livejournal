@@ -179,8 +179,10 @@ body<=
             # supporthelp can link to previous requests
             $ret .= $sp->{reqtype} eq 'user' ? 
                     "$ename <a href=\"history.bml?user=$u->{user}\">$u->{name}</a>" :
-                    "$ename";                    
-            $ret .= " (<a href=\"history.bml?email=" . LJ::eurl($email) . "\">$visemail</a>)";
+                    "$ename";
+            $ret .= $owner_mode ?
+                    " (<a href=\"history.bml?email=" . LJ::eurl($email) . "\">$visemail</a>)" :
+                    " ($visemail)";
         } else {
             # default view
             $ret .= "$ename ($visemail)";
