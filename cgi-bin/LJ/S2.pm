@@ -1056,7 +1056,7 @@ sub get_url
     my $user = ref $obj ? $obj->{'username'} : $obj;
     $view = "info" if $view eq "userinfo";
     $view = "" if $view eq "recent";
-    return "$LJ::SITEROOT/$user/$view";
+    return "$LJ::SITEROOT/users/$user/$view";
 }
 
 sub rand
