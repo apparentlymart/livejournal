@@ -90,7 +90,7 @@
  
  ### load user props.  some don't apply to communities
  {
-     my @props = qw(opt_whatemailshow opt_blockrobots country state city zip 
+     my @props = qw(opt_whatemailshow opt_blockrobots country state city zip renamedto
                     url urlname opt_hidefriendofs dont_load_members);
      unless ($com) { push @props, qw(aolim icq yahoo msn gender jabber); }
      LJ::load_user_props($dbr, $u, @props);
@@ -99,6 +99,10 @@
  if ($u->{'opt_blockrobots'}) {
      $head .= "<meta name=\"robots\" content=\"noindex\">\n";
  }
+
+if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
+    return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{'renamedto'}");
+}
 
   my %friends = ('load'=>1, 'loaded'=>0, 'display'=>1, 'count'=>0);
   my %friendsof = ('load'=>1, 'loaded'=>0, 'display'=>1, 'count'=>0);

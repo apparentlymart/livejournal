@@ -37,6 +37,16 @@ body<=
  return $ML{'error.nodb'} unless $dbcr && $dbr;
  return $LJ::MSG_READONLY_USER unless $dbcm && $dbh;
 
+ # redirect if account was renamed
+ if ($u->{'journaltype'} eq "R") {
+     LJ::load_user_props($dbs, $u, "renamedto");
+     if ($u->{'clusterid'} && $u->{'renamedto'} ne "") {
+         my $id = $FORM{'itemid'}+0;
+         return BML::redirect("$LJ::SITEROOT/talkpost.bml?journal=$u->{'renamedto'}&itemid=$id");
+     }
+ }
+
+
  my $ret = "";
 
  my $parpost;

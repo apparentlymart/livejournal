@@ -3313,6 +3313,10 @@ sub make_journal
         return $errmsg;
     }   
 
+    if ($opts->{'redir'}) {
+        return undef;
+    }
+
     # remove bad stuff
     unless ($opts->{'trusted_html'}) {
         LJ::strip_bad_code(\$ret);

@@ -440,6 +440,10 @@ sub journal_content
     my $html = LJ::make_journal($dbs, $user, $RQ{'mode'},
                                 $remote, $opts);
 
+    if ($opts->{'redir'}) {
+        return redir($r, $opts->{'redir'});
+    }
+
     my $status = $opts->{'status'} || "200 OK";
     unless ($opts->{'contenttype'}) {
         $opts->{'contenttype'} = "text/html";
