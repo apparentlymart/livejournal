@@ -438,13 +438,14 @@ sub journal_content
 
     if ($opts->{'badargs'}) 
     {
-	$status = "404 Not Found";
-	$html = "<H1>Not Found</H1>Unknown page or arguments.";
+        # No special information to give to the user, so just let
+        # Apache handle the 404
+        return 404;
     }
     elsif ($opts->{'baduser'}) 
     {
 	$status = "404 Unknown User";
-	$html = "<H1>Unknown User</H1>There is no user <b>$user</b> at $LJ::SITENAME.";
+	$html = "<h1>Unknown User</h1><p>There is no user <b>$user</b> at $LJ::SITENAME.</p>";
     }
 
     unless ($html) {
