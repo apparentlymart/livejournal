@@ -46,7 +46,7 @@
             my $typedes = " ($lay->{'type'}" . (! $is_child ? ": <b>$lid</b>" : '') . ")";
 
             # show link to detailed view
-            $body .= "<li><a href='layerbrowse.bml?id=$lay->{'uniq'}'>$layerinfo{$lid}->{'name'}";
+            $body .= "<li><a href='layerbrowse.bml?id=$lay->{'uniq'}'>" . LJ::ehtml($layerinfo{$lid}->{'name'});
             $body .= "</a>$typedes</li>";
 
             # done unless there are children to recurse through
@@ -155,7 +155,7 @@
 
     # sets
     if (my $set = $s2info->{'set'}) {
-        $body .= "<?h1 Properties set h1?>";
+        $body .= "<?h1 Properties Set h1?>";
         $body .= "<table class='postheading' style='margin-bottom: 10px' border='1' cellpadding='2'>";
         foreach my $k (sort keys %$set) {
             my $v = $set->{$k};
@@ -168,10 +168,9 @@
             } elsif (ref $v eq "ARRAY") {
                 $v = "<i>List:</i> (" . join(", ", @$v) . ")";
             }
-            $body .= "<tr><td><b>$k</b></td><td>$v</td></tr>\n";
+            $body .= "<tr><td><b>$k</b></td><td>" . LJ::ehtml($v) . "</td></tr>\n";
         }
         $body .= "</table>";
-
     }
 
     # global functions
@@ -185,7 +184,7 @@
                 $rt = "[class[$rt]]";
             }
             $xlink->(\$rt);
-            my $ds = $gb->{$fname}->{'docstring'};
+            my $ds = LJ::ehtml($gb->{$fname}->{'docstring'});
             $xlink->(\$ds);
             
             my $args = $gb->{$fname}->{'args'};
@@ -229,7 +228,7 @@
         # classes
         foreach my $cname (sort { lc($a) cmp lc($b) } keys %$class) {
             $body .= "<a name='class.$cname'><?h1 $cname Class h1?></a>";
-            my $ds = $class->{$cname}->{'docstring'};
+            my $ds = LJ::ehtml($class->{$cname}->{'docstring'});
             if ($class->{$cname}->{'parent'}) {
                 $ds = "Child class of [class[$class->{$cname}->{'parent'}]].  $ds";
             }
@@ -262,7 +261,7 @@
                 $type =~ s/(\w+)/defined $class->{$1} ? "[class[$1]]" : $1/eg;
                 $xlink->(\$type);
 
-                my $ds = $var{$_}->{'docstring'};
+                my $ds = LJ::ehtml($var{$_}->{'docstring'});
                 $xlink->(\$ds);
 
                 if ($var{$_}->{'readonly'}) {
@@ -280,7 +279,7 @@
                     $rt = "[class[$rt]]";
                 }
                 $xlink->(\$rt);
-                my $ds = $func{$_}->{'docstring'};
+                my $ds = LJ::ehtml($func{$_}->{'docstring'});
                 $xlink->(\$ds);
 
                 my $args = $_;
@@ -290,7 +289,6 @@
             }
             $body .= "</table>" if %func;
         }
-
     }
     
     return;
