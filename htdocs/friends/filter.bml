@@ -57,7 +57,7 @@
  }
 
  $body .= "<input type='submit' value=\"$ML{'.submit'}\"> <input type='reset' value=\"$ML{'.reset'}\"></div>";
- $body .= "<?p $ML{'.editgroups'} p?>";
+ $body .= "<?p " . BML::ml('.editgroups', { 'link' => "<a href='editgroups.bml'>$ML{'/friends/editgroups.bml.title'}</a>" }) . " p?>";
  $body .= "</form>";
 
  return;

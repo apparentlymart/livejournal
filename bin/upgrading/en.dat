@@ -1385,7 +1385,7 @@ then be accessible to the new group.
 
 /friends/edit_do.bml.yourfriends.text=You have the following friends currently defined:
 
-/friends/filter.bml.editgroups=If you want to edit your friends groups, <a href="editgroups.bml">go here</a>.
+/friends/filter.bml.editgroups=If you want to edit your friends groups, go to the [[link]] page.
 
 /friends/filter.bml.error.nogroups=You cannot filter your friends list because you must first <a href="/friends/editgroups.bml">setup your friend groups</a>.
 
