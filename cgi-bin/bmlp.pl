@@ -6,8 +6,37 @@
 
 use Compress::Zlib;
 use Digest::MD5;
+use Getopt::Long;
 
 my $VERSION="1.2.1";
+
+my $opt_code = 0;
+exit 1 unless GetOptions('code' => \$opt_code);
+
+# bmlp.pl --code <filename> 
+#    prints _CODE sections of given filename as valid
+#    perl which can be validated through perl -c
+if ($opt_code) {
+    if (scalar(@ARGV) != 1) {
+        print STDERR "bmlp.pl takes exactly one filename argument after --code.\n";
+        exit 1;
+    }
+    open IN, $ARGV[0] or die "couldn't open $ARGV[0]\n";
+    my $bmlsource = "";
+    while (<IN>) { $bmlsource .= $_; }
+    close IN;
+    print "package BMLCodeBlock;\n\n";
+    
+    # if we were to use bml_decode, we'd have to load definition files,
+    # parse all block options, etc. etc. For practical purposes a simple
+    # regexp sweep is sufficient. Note that we're using the fact that
+    # _CODE blocks can't be nested.
+    
+    while ($bmlsource =~ m/\(=_CODE(.*?)_CODE=\)/gs) {
+        print "sub {\n$1};\n\n";
+    }
+    exit 0;
+}
 
 sub webdie { print "Content-type: text/html\n\n$_[0];\n"; exit; }
 
