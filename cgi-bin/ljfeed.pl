@@ -198,7 +198,7 @@ sub make_feed
             createtime => $createtime,
             eventtime  => $it->{alldatepart},  # ugly: this is of a different format than the other two times.
             modtime    => $logprops{$itemid}->{revtime} || $createtime,
-            comments   => ($logprops{$itemid}->{'opt_nocomments'} != 0),
+            comments   => ($logprops{$itemid}->{'opt_nocomments'} == 0),
         };
         push @cleanitems, $cleanitem;
     }
