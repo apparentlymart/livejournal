@@ -129,6 +129,7 @@
          if ($plat) {
              $ret .= "<dt><b>$lp->{'lnname'}:</b></dt>";
              my $t = $ml_text{"$plat->{'dmid'}-$plat->{'txtid'}"}->{'text'};
+             if ($t =~ /\n/) { $use_textarea = 1; }
              $t = LJ::eall($t);
              $t =~ s/\n( *)/"<br \/>" . "&nbsp;"x length($1)/eg;
              $ret .= "<dd>$t</dd>";
