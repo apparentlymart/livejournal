@@ -385,7 +385,7 @@ sub check_sig {
     return 'no_key' unless $key;
 
     # Create work directory.
-    my $tmpdir = File::Temp::tempdir("ljmailgate_" . 'X' x 20, DIR=>'/tmp');
+    my $tmpdir = File::Temp::tempdir("ljmailgate_" . 'X' x 20, DIR=>$main::workdir);
     return 'bad_tmpdir' unless chdir($tmpdir);
 
     # Pull in user's key, add to keyring.
