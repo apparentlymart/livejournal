@@ -2164,6 +2164,9 @@ sub create_view_day
     push @items, $_ while $_ = $sth->fetchrow_hashref;
     my @itemids = map { $_->{'itemid'} } @items;
 
+    # load 'opt_ljcut_disable_day' prop for $remote.
+    LJ::load_user_props($remote, "opt_ljcut_disable_day");
+
     ### load the log properties
     my %logprops = ();
     LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
@@ -2212,7 +2215,8 @@ sub create_view_day
         $day_event{'itemargs'} = $itemargs;
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-                                               'cuturl' => LJ::item_link($u, $itemid, $anum), });
+                                              'cuturl' => LJ::item_link($u, $itemid, $anum),
+                                              'ljcut_disable' => $remote->{'opt_ljcut_disable_day'}, });
         LJ::expand_embedded($u, $ditemid, $remote, \$event);
         $day_event{'event'} = $event;
 

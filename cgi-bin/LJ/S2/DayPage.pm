@@ -88,6 +88,9 @@ sub DayPage
     my @items;
     push @items, $_ while $_ = $sth->fetchrow_hashref;
     my @itemids = map { $_->{'itemid'} } @items;
+
+    # load 'opt_ljcut_disable_day' prop for $remote.
+    LJ::load_user_props($remote, "opt_ljcut_disable_day");
     
     ### load the log properties
     my %logprops = ();
@@ -134,7 +137,8 @@ sub DayPage
         my $ditemid = $itemid*256 + $anum;
 
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-                                               'cuturl' => LJ::item_link($u, $itemid, $anum), });
+                                               'cuturl' => LJ::item_link($u, $itemid, $anum),
+					       'ljcut_disable' => $remote->{'opt_ljcut_disable_day'}, });
         LJ::expand_embedded($u, $ditemid, $remote, \$text);
 
         my $nc = "";
