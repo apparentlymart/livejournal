@@ -178,7 +178,7 @@ body<=
          if ($picid) { 
              $header .= "<td><img src=\"$LJ::USERPIC_ROOT/$picid/$up->{'userid'}\" width=\"$userpics{$picid}->{'width'}\" height=\"$userpics{$picid}->{'height'}\" hspace=\"3\"></td>";
          }
-         $header .= "<td>" . LJ::ljuser($up->{'user'}, { 'full' => 1 }) . " - $up->{'name'}</td></tr></table>\n";
+         $header .= "<td>" . LJ::ljuser($up->{'user'}, { 'full' => 1 }) . " - " . LJ::eall($up->{'name'}) . "</td></tr></table>\n";
      }
 
      my $what = "Answer";
