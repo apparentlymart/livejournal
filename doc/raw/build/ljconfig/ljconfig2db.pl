@@ -125,7 +125,7 @@ my %ljconfig =
                 'example' => '"/usr/local/bin/aspell pipe --sug-mode=fast --ignore-case"',
             },
             'smtp_server' => {
-                'desc' => "This the recommended system to use for email. This requires the perl Net::SMTP module to work properly.",
+                'desc' => "This the recommended system to use for sending email. This requires the perl Net::SMTP module to work properly.",
                 'example' => "10.2.0.1",
             },
         },

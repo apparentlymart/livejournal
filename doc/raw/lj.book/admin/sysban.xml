@@ -1,0 +1,55 @@
+<chapter id="lj.admin.sysban">
+  <title>Banning Users</title>
+  <para>The LiveJournal <quote>sysban</quote> mechanism provides the means for generic bans on
+    site functionality given a block type and value.  The type is what
+    is being checked (IP address, email address, etc) and the value is the value which
+    causes the block to activate.  (<literal>10.0.0.10</literal>, for example)</para>
+  <para>A tool is available to create and modify bans: <filename><envar>$LJHOME</envar>/htdocs/admin/sysban.bml</filename>.
+    This tool requires the <varname>sysban</varname> privilege.</para>
+  <variablelist>
+    <para>There are three <literal>statushistory</literal> types tied to the sysban tool:</para>
+    <varlistentry>
+      <term><varname>sysban_add</varname></term>
+      <listitem><simpara>Logs the creation of new bans</simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><varname>sysban_mod</varname></term>
+      <listitem><simpara>Logs the modification of bans</simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><varname>sysban_trig</varname></term>
+      <listitem><simpara>Logs when bans are triggered</simpara></listitem>
+    </varlistentry>
+  </variablelist>
+  <para>The most notable of the three is the <varname>sysban_trig</varname> type.  The data it
+    logs varies depending on the type of ban and the information
+    available when it was triggered.  If a userid is available, it
+    will be logged and the notes column will contain a short description
+    of what caused the trigger along with a number of variables that
+    may be useful in investigation of the situation.</para>
+  <para>Below are the ban types that exist as of now. More can and will be added
+    as necessary:</para>
+  <variablelist>
+    <title>General</title>
+    <varlistentry>
+      <term><varname>ip</varname></term>
+      <listitem><simpara>Blocked from site if IP address matches</simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><varname>email</varname></term>
+      <listitem><para>Blocked if email matches.<variablelist>
+        <varlistentry>
+          <term><filename>/create.bml</filename></term>
+          <listitem><simpara>Return a fake <quote>503 Service Unavailable</quote> message to a user
+          who tries to create a new account with the given email address.</simpara></listitem>
+        </varlistentry>
+      </variablelist></para></listitem>
+    </varlistentry>
+  </variablelist>
+</chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "chapter")
+End:
+-->

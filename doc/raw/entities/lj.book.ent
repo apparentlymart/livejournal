@@ -48,6 +48,7 @@
 <!ENTITY lj.admin.privs.ref               SYSTEM "../lj.book/admin/privs.ref.gen.xml">
 <!ENTITY lj.admin.console                 SYSTEM "../lj.book/admin/console.xml">
 <!ENTITY lj.admin.console.ref             SYSTEM "../lj.book/admin/console.ref.gen.xml">
+<!ENTITY lj.admin.sysban                  SYSTEM "../lj.book/admin/sysban.xml">
 
 <!-- Features -->
 
