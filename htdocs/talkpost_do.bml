@@ -56,7 +56,7 @@ BODY<=
  if ($FORM{'usertype'} eq "cookieuser") {
      push @errors, "Your login cookie seems to have disappeared?"
          unless ($remote && $remote->{'user'} eq $FORM{'cookieuser'});
-     return LJ::bad_input(@errors);
+     return LJ::bad_input(@errors) if @errors;
      
      $cookie_auth = 1;
      $FORM{'userpost'} = $remote->{'user'};
