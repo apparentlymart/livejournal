@@ -677,16 +677,16 @@ body<=
                                                                        "children" => \%children,
                                                                    });
 
-         $ret .= "<p><hr /><center><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></center></p>";
+         $ret .= "<hr /><p style='margin-top: 2px;' align='center'><b>$readlink(<a href='talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></p>";
 
          if ($showmultiform) {
-             $ret .= $ML{'.talkmulti.des'} . " ";
+             $ret .= "<p>$ML{'.talkmulti.des'} ";
              $ret .= LJ::html_select({'name' => 'mode' },
                                      "" => "",
                                      "unscreen" => $ML{'.talkmulti.unscreen'},
                                      "screen" => $ML{'.talkmulti.screen'},
                                      "delete" => $ML{'.talkmulti.delete'});
-             $ret .= " " . LJ::html_submit('', $ML{'.talkmulti.submit'});
+             $ret .= " " . LJ::html_submit('', $ML{'.talkmulti.submit'}) . "</p>";
          }
          $ret .= "</form>";
 
