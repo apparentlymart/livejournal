@@ -446,7 +446,6 @@ sub userpic_trans
     # we can safely do this without checking since we never re-use
     # picture IDs and don't let the contents get modified
     return HTTP_NOT_MODIFIED if $r->header_in('If-Modified-Since');
-    return HTTP_NOT_MODIFIED if $r->header_in('If-None-Match') eq "$picid-$userid";
 
     $RQ{'picid'} = $picid;
     $RQ{'pic-userid'} = $userid;
@@ -508,10 +507,8 @@ sub userpic_content
     my $send_headers = sub {
         $r->content_type($mime);
         $r->header_out("Content-length", $size);
-        $r->header_out("Expires", LJ::time_to_http(time()+3000000));
         $r->header_out("Cache-Control", "no-transform");
         $r->header_out("Last-Modified", LJ::time_to_http($lastmod));
-        $r->header_out("ETag", "$picid-$userid");
         $r->send_http_header();
     };
 
