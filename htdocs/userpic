@@ -5,6 +5,7 @@ BEGIN {
     unshift @INC, "$ENV{'LJHOME'}/cgi-bin";
 }
 
+use strict;
 use FCGI;
 use LJ::Cache;
 use vars qw($dbh $dro);
@@ -34,6 +35,7 @@ my $timestart = time();
 my %from;
 my %reqmeth;
 my $lastconn;
+my $sth;
 
  REQUEST:
     while(LJ::start_request() && FCGI::accept() >= 0) 
@@ -49,7 +51,7 @@ my $lastconn;
     }
 
     my $now = time();
-    %FORM = ();
+    my %FORM = ();
     LJ::get_form_data(\%FORM, "GET");
     if ($ENV{'PATH_INFO'} =~ /^\/(\w+)$/) {
 	$FORM{'id'} = $1;
@@ -130,7 +132,7 @@ my $lastconn;
     }
 
     my $qid = $FORM{'id'} + 0;
-    my $pic = $cache->get($qid) if $cache;
+    my $pic = $cache ? $cache->get($qid) : undef;
 
     my $cache_file;
     my $on_disk;
