@@ -131,10 +131,13 @@ BODY<=
  }
 
  $ret .= "<td>";
- $ret .= BML::ml("talk.somebodywrote", { 'realname' => BML::eall($up->{'name'}),
-                                         'userlink' => LJ::ljuser($up->{'user'}) });
- if ($up->{'user'} ne $u->{'user'}) {
-     $ret .= " in (=LJCOMM $u->{'user'} LJCOMM=),";
+ if ($up->{'user'} eq $u->{'user'}) {
+     $ret .= BML::ml("talk.somebodywrote", { 'realname' => BML::eall($up->{'name'}),
+                                             'userlink' => LJ::ljuser($up->{'user'}) });
+ } else {
+     $ret .= BML::ml("talk.somebodywrote_comm", { 'realname' => BML::eall($up->{'name'}),
+                                                  'userlink' => LJ::ljuser($up->{'user'}),
+                                                  'commlink' => "(=LJCOMM $u->{'user'} LJCOMM=)" });
  }
 
  my $etime = $item->{'eventtime'};

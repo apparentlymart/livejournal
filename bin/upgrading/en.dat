@@ -37,6 +37,8 @@ talk.replytothis=Reply to this
 
 talk.somebodywrote=[[realname]] ([[userlink]]) wrote,
 
+talk.somebodywrote_comm=[[realname]] ([[userlink]]) wrote in [[commlink]],
+
 talk.threadlink=Thread
 
 Username=Username
