@@ -215,8 +215,7 @@ body<=
     $ret .= "<tr valign='top'><td align='right'><b>$LJ::SITENAMESHORT:</b></td><td>";
     if ($clusterdown) {
         $ret .= "<span style='color: red; font-weight: bold;'>" .
-                "(unable to connect to cluster, some data temporarily unavailable)</span><br />"
-            if $clusterdown;
+                "(unable to connect to cluster, some data temporarily unavailable)</span><br />";
     }
     if ($u->{'userid'}) {
         $ret .= "username: <?ljuserf $u->{'user'} ljuserf?>";
