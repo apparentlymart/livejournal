@@ -93,17 +93,38 @@ sub run_task
         print "Unknown task '$task'\n";
         return;
     }
-    open (LOCK, ">$LOCKDIR/mainttask-$task");
+
+    my $lock_file = "$LOCKDIR/mainttask-$task";
+    if (-e $lock_file) {
+        open(LOCK, $lock_file);
+        my $line = <LOCK>;
+        if ($line =~ /(\d+)/) {
+            my $start = $1;
+            my $age = time() - $start;
+            if ($age > 60*5) {
+                print "Stale ljmaint lock file?  Existing for $age seconds: $lock_file\n";
+                exit 1;
+            }
+        }
+        close LOCK;
+    }
+
+    open (LOCK, ">$lock_file") or die "Couldn't write lock file: $lock_file: $!";
     if (flock (LOCK, LOCK_EX|LOCK_NB)) {
+        seek(LOCK, 0, 0);  # go to beginning of file
+        select(LOCK);
+        $| = 1;
+        select(STDOUT);
+        print LOCK ("Started at: " . time() . " (" . scalar(localtime()) . ")\n");
         require "$MAINT/$maintinfo{$task}->{'source'}";
         $LJ::LJMAINT_VERBOSE = $VERBOSE;
-        &{ $maint{$task} }(@args);
+        $maint{$task}->(@args);
+        unlink $lock_file;
+        flock(LOCK, LOCK_UN);
+        close LOCK;
     } else {
         print "Task '$task' already running.  Quitting.\n" if ($VERBOSE >= 1);
     }
-    unlink "$LOCKDIR/mainttask-$task";
-    flock(LOCK, LOCK_UN);
-    close LOCK;
 }
 
 sub load_tasks
