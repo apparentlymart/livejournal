@@ -330,7 +330,7 @@ body<=
                                  'user' => LJ::ljuser($POST{'fromuser'}),
                                }) if ($POST{'fromuser'} ne "" && $POST{'fromuser'} ne $u->{'user'});
         $ret .= " p?>";
-        LJ::memcache_kill($remote, "intids");
+        LJ::memcache_kill($u, "intids");
         return $ret;
     }
 
