@@ -123,6 +123,9 @@ body<=
             characters and numbers, and needs to be at least 4
             characters long." unless $pin =~ /^([a-z0-9]){4,20}$/i or $pin eq '';
 
+        push @errors, "This PIN is invalid.  You should change it to something that does <b>NOT</b>
+            have anything to do with your $LJ::SITENAMESHORT account." if $pin eq $u->{password} or $pin eq $u->{user};
+
         # Check email, add flags if needed.
         my %allowed;
         my $addrcount = 0;
@@ -144,7 +147,7 @@ body<=
         my $ret;
         $ret .= "<?h1 Success h1?>";
         $ret .= "<?p Your email gateway settings have been saved. p?>";
-        $ret .= "<?p Click <a href='?mode=help'>here</a> for information on how to use this feature. p?>";
+        $ret .= "<?p Click <a href='emailpost.bml?mode=help'>here</a> for information on how to use this feature. p?>";
         if ($LJ::HELPURL{emailpost}) {
             $ret .= "<?h1 Instructions h1?>";
             $ret .= "<?p FIXME: link to helpurl p?>";
@@ -160,7 +163,7 @@ body<=
     
     my $ret;
     $ret .= "<?p If you'd like to be able to update your journal via email, please fill out the following fields. 
-        For more help using this feature, check out the <a href='?mode=help'>instructions</a>. p?>";
+        For more help using this feature, check out the <a href='emailpost.bml?mode=help'>instructions</a>. p?>";
 
     unless (LJ::get_cap($u, 'emailpost')) {
         $ret .= "Sorry, updating your journal via email is not available for your account type.";
