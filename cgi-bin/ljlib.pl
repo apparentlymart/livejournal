@@ -2847,7 +2847,10 @@ sub start_request
         if ($modtime > $LJ::CACHE_CONFIG_MODTIME) {
             # reload config and update cached modtime
             $LJ::CACHE_CONFIG_MODTIME = $modtime;
-            eval { do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"; };
+            eval { 
+                do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"; 
+                do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl"; 
+            };
         }
         $LJ::CACHE_CONFIG_MODTIME_LASTCHECK = $now;
     }
