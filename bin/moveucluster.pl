@@ -92,8 +92,44 @@ my $stmsg = sub {
     print $msg;
 };
 
+my %bufcols = ();  # table -> scalar "(foo, anothercol, lastcol)" or undef or ""
+my %bufrows = ();  # table -> [ []+ ]
 
-if ($sclust == 0) 
+my $flush_buffer = sub {
+    my $table = shift;
+    return unless exists $bufcols{$table};
+    my $sql = "REPLACE INTO $table $bufcols{$table} VALUES ";
+    $sql .= join(", ",
+                 map { my $r = $_;
+                       "(" . join(", ",
+                                  map { $dbch->quote($_) } @$r) . ")" }
+                 @{$bufrows{$table}});
+    $dbch->do($sql);
+    delete $bufrows{$table};
+    delete $bufcols{$table};
+};
+
+my $flush_all = sub {
+    foreach (keys %bufcols) {
+        $flush_buffer->($_);
+    }
+};
+
+my $replace_into = sub {
+    my ($table, $cols, $max, @vals) = @_;
+    if (exists $bufcols{$table} && $bufcols{$table} ne $cols) {
+        $flush_buffer->($table);
+    }
+    $bufcols{$table} = $cols;
+    push @{$bufrows{$table}}, [ @vals ];
+
+    if (scalar @{$bufrows{$table}} > $max) {
+        $flush_buffer->($table);
+    }
+};
+
+
+if ($sclust == 0)
 {
     # do bio stuff
     {
@@ -125,6 +161,8 @@ if ($sclust == 0)
         my $timeremain = int($totaltime - $elapsed);
         $stmsg->(sprintf "$user: copy $done/$todo (%.2f%%) +${elapsed}s -${timeremain}s\n", 100*$percent);
     }
+
+    $flush_all->();
 
     # update their memories.  in particular, any memories of their own
     # posts need to to be updated from the (0, globalid) to
@@ -197,7 +235,7 @@ if ($sclust == 0)
             my $timeremain = int($totaltime - $elapsed);
             $stmsg->(sprintf "$user: delete $done/$todo (%.2f%%) +${elapsed}s -${timeremain}s\n", 100*$percent);
         }
-        
+
         # delete bio from source, if necessary
         if ($separate_cluster) {
             $dbh->do("DELETE FROM userbio WHERE userid=$userid");
@@ -209,7 +247,6 @@ if ($sclust == 0)
             print "  picid\#$picid...\n";
             $dbh->do("DELETE FROM userpicblob WHERE picid=$picid");
         }
-        
     }
 
     # unset read-only bit (marks the move is complete, also, and not aborted mid-delete)
@@ -244,7 +281,7 @@ sub deletefrom0_logitem
 sub movefrom0_logitem
 {
     my $itemid = shift;
-    
+
     my $item = $dbh->selectrow_hashref("SELECT * FROM log WHERE itemid=$itemid");
     my $itemtext = $dbh->selectrow_hashref("SELECT subject, event FROM logtext WHERE itemid=$itemid");
     return 1 unless $item && $itemtext;   # however that could happen.
@@ -267,48 +304,52 @@ sub movefrom0_logitem
     $item->{'anum'} = int(rand(256));
 
     # copy item over:
-    $dbch->do("REPLACE INTO log2 (journalid, jitemid, posterid, eventtime, logtime, compressed, security, allowmask, replycount, year, month, day, rlogtime, revttime, anum) VALUES (" . join(",", map { $dbh->quote($item->{$_}) } qw(ownerid jitemid posterid eventtime logtime compressed security allowmask replycount year month day rlogtime revttime anum)) . ")");
+    $replace_into->("log2", "(journalid, jitemid, posterid, eventtime, logtime, ".
+                    "compressed, security, allowmask, replycount, year, month, day, ".
+                    "rlogtime, revttime, anum)",
+                    50, map { $item->{$_} } qw(ownerid jitemid posterid eventtime
+                                               logtime compressed security allowmask replycount
+                                               year month day rlogtime revttime anum));
 
-    $dbch->do("REPLACE INTO logtext2 (journalid, jitemid, subject, event) VALUES (" . join(",", $userid, $jitemid, map { $dbh->quote($itemtext->{$_}) } qw(subject event)) . ")");
+    $replace_into->("logtext2", "(journalid, jitemid, subject, event)", 10,
+                    $userid, $jitemid, map { $itemtext->{$_} } qw(subject event));
 
-    $dbch->do("REPLACE INTO logsubject2 (journalid, jitemid, subject) VALUES (" . 
-              join(",", $userid, 
-                   $jitemid, 
-                   $dbh->quote($itemtext->{'subject'}) . ")"));
+    $replace_into->("logsubject2", "(journalid, jitemid, subject)", 50,
+                    $userid, $jitemid, $itemtext->{'subject'});
 
     # add disk usage info!  (this wasn't in cluster0 anywhere)
     my $bytes = length($itemtext->{'event'}) + length($itemtext->{'subject'});
-    $dbch->do("REPLACE INTO dudata (userid, area, areaid, bytes) VALUES ($userid, 'L', $jitemid, $bytes)");
+    $replace_into->("dudata", "(userid, area, areaid, bytes)", 50, $userid, 'L', $jitemid, $bytes);
 
     # is it in recent_?
     if ($recentpoint && $item->{'logtime'} gt $recentpoint) {
-        $dbch->do("REPLACE INTO recent_logtext2 (journalid, jitemid, logtime, subject, event) ".
-                  "VALUES (" . join(",", $userid, $jitemid, $dbh->quote($item->{'logtime'}), 
-                                    map { $dbh->quote($itemtext->{$_}) } qw(subject event)) . ")");
+        $replace_into->("recent_logtext2", "(journalid, jitemid, logtime, subject, event)", 10,
+                        $userid, $jitemid, $item->{'logtime'}, map { $itemtext->{$_} } qw(subject event));
     }
 
     # add the logsec item, if necessary:
     if ($item->{'security'} ne "public") {
-        $dbch->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) VALUES (" . join(",", map { $dbh->quote($item->{$_}) } qw(ownerid jitemid allowmask)) . ")");
+        $replace_into->("logsec2", "(journalid, jitemid, allowmask)", 50,
+                        map { $item->{$_} } qw(ownerid jitemid allowmask));
     }
 
     # copy its logprop over:
     my $logprops = $dbh->selectall_arrayref("SELECT propid, value FROM logprop WHERE itemid=$itemid");
-    if ($logprops && @$logprops) {
-        my $values = join(",", 
-                          map { "(" . join(",", $userid, $jitemid, 
-                                           map { $dbh->quote($_) } @$_ ) . ")" } 
-                          grep { $_->[1] } @$logprops); 
-        $dbch->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) VALUES $values")
-            if $values;
+    if ($logprops) {
+        foreach (@$logprops) {
+            next unless $_->[1];
+            $replace_into->("logprop2", "(journalid, jitemid, propid, value)", 50,
+                            $userid, $jitemid, @$_);
+        }
     }
-    
+
     # copy its syncitems over
     my $syncs = $dbh->selectrow_arrayref("SELECT atime, atype FROM syncupdates WHERE userid=$userid ".
                                          "AND nodetype='L' AND nodeid=$itemid");
     if ($syncs) {
-        $dbch->do("REPLACE INTO syncupdates2 (userid, atime, nodetype, nodeid) VALUES ".
-                  "($userid, '$syncs->[0]', 'L', $jitemid)");
+        $replace_into->("syncupdates2", "(userid, atime, nodetype, nodeid)", 50,
+                         $userid, $syncs->[0], 'L', $jitemid);
+
     }
 
     # copy its talk shit over:
@@ -350,37 +391,37 @@ sub movefrom0_talkitem
     }
     $newtalkids->{$talkid} = $jtalkid;
     $dbh->{'RaiseError'} = 1;
-    
-    # copy item over:
-    $dbch->do("REPLACE INTO talk2 (journalid, jtalkid, parenttalkid, nodeid, nodetype, posterid, datepost, state) ".
-             "VALUES (" . join(",", $userid, $jtalkid,
-                               $newtalkids->{$item->{'parenttalkid'}},
-                               $jitemid, "'L'",
-                               map { $dbh->quote($item->{$_}) } qw(posterid datepost state)) . ")");
 
-    $dbch->do("REPLACE INTO talktext2 (journalid, jtalkid, subject, body) VALUES (" . 
-              join(",", $userid, $jtalkid, map { $dbh->quote($itemtext->{$_}) } qw(subject body)) . ")");
+    # copy item over:
+    $replace_into->("talk2", "(journalid, jtalkid, parenttalkid, nodeid, ".
+                    "nodetype, posterid, datepost, state)", 50,
+                    $userid, $jtalkid, $newtalkids->{$item->{'parenttalkid'}},
+                    $jitemid, 'L',  map { $item->{$_} } qw(posterid datepost state));
+
+
+    $replace_into->("talktext2", "(journalid, jtalkid, subject, body)",
+                    20, $userid, $jtalkid, map { $itemtext->{$_} } qw(subject body));
 
     # add disk usage info!  (this wasn't in cluster0 anywhere)
     my $bytes = length($itemtext->{'body'}) + length($itemtext->{'subject'});
-    $dbch->do("REPLACE INTO dudata (userid, area, areaid, bytes) VALUES ($userid, 'T', $jtalkid, $bytes)");
+    $replace_into->("dudata", "(userid, area, areaid, bytes)", 50,
+                    $userid, 'T', $jtalkid, $bytes);
 
     # is it in recent_?
     if ($recentpoint && $item->{'datepost'} gt $recentpoint) {
-        $dbch->do("REPLACE INTO recent_talktext2 (journalid, jtalkid, datepost, subject, body) ".
-                  "VALUES (" . join(",", $userid, $jtalkid, $dbh->quote($item->{'datepost'}), 
-                                    map { $dbh->quote($itemtext->{$_}) } qw(subject body)) . ")");
+        $replace_into->("recent_talktext2", "(journalid, jtalkid, datepost, subject, body)",
+                        20, $userid, $jtalkid, $item->{'datepost'}, 
+                        map { $itemtext->{$_} } qw(subject body));
     }
 
     # copy its logprop over:
     my $props = $dbh->selectall_arrayref("SELECT tpropid, value FROM talkprop WHERE talkid=$talkid");
-    if ($props && @$props) {
-        my $values = join(",", 
-                          map { "(" . join(",", $userid, $jtalkid, 
-                                           map { $dbh->quote($_) } @$_ ) . ")" } 
-                          grep { $_->[1] } @$props); 
-        $dbch->do("REPLACE INTO talkprop2 (journalid, jtalkid, tpropid, value) VALUES $values")
-            if $values;
+    if ($props) {
+        foreach (@$props) {
+            next unless $_->[1];
+            $replace_into->("talkprop2", "(journalid, jtalkid, tpropid, value)", 50,
+                            $userid, $jtalkid, @$_);
+        }
     }
 
     # note that poster commented here
@@ -395,7 +436,6 @@ sub movefrom0_talkitem
                 "UNIX_TIMESTAMP('$item->{'datepost'}'), $userid, 'L', $jitemid, $jtalkid, '$pub')");
     }
 }
-    
 
 
 1; # return true;
