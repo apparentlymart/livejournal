@@ -4806,22 +4806,26 @@ sub get_cluster_reader
 # <LJFUNC>
 # name: LJ::get_cluster_def_reader
 # class: db
-# des: Returns a definitive cluster reader for a given user.
+# des: Returns a definitive cluster reader for a given user, used
+#      when the caller wants the master handle, but will only
+#      use it to read.
 # args: uarg
 # des-uarg: Either a clusterid scalar or a user object.
 # returns: DB handle.  Or undef if definitive reader is unavailable.
 # </LJFUNC>
 sub get_cluster_def_reader
 {
-    # this sub is currently just a placeholder
-    # for future functionality.
-    return LJ::get_cluster_master(@_);
+    my @dbh_opts = scalar(@_) == 2 ? (shift @_) : ();
+    my $arg = shift;
+    my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
+    return LJ::get_dbh(@dbh_opts, LJ::master_role($id));
 }
 
 # <LJFUNC>
 # name: LJ::get_cluster_master
 # class: db
-# des: Returns a cluster master for a given user.
+# des: Returns a cluster master for a given user, used when the caller
+#      might use it to do a write (insert/delete/update/etc...)
 # args: uarg
 # des-uarg: Either a clusterid scalar or a user object.
 # returns: DB handle.  Or undef if master is unavailable.
@@ -4831,13 +4835,20 @@ sub get_cluster_master
     my @dbh_opts = scalar(@_) == 2 ? (shift @_) : ();
     my $arg = shift;
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
+    return undef if $LJ::READONLY_CLUSTER{$id};
+    return LJ::get_dbh(@dbh_opts, LJ::master_role($id));
+}
+
+# returns the DBI::Role role name of a cluster master given a clusterid
+sub master_role {
+    my $id = shift;
     my $role = "cluster${id}";
     if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$id}) {
         $ab = lc($ab);
         # master-master cluster
         $role = "cluster${id}${ab}" if $ab eq "a" || $ab eq "b";
     }
-    return LJ::get_dbh(@dbh_opts, $role);
+    return $role;
 }
 
 # <LJFUNC>
