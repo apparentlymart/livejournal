@@ -266,8 +266,6 @@ sub get_recent_items
 	push @{$opts->{'itemids'}}, $li->{'itemid'};
     }
     
-    my $ct = @items;
-
     return @items;
 }
 
