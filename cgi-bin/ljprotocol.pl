@@ -525,8 +525,7 @@ sub postevent
     if ($clustered)
     {
 	my $bytes = length($event) + length($req->{'subject'});
-	$dbcm->do("REPLACE INTO dudata (userid, area, areaid, bytes) ".
-		  "VALUES ($ownerid, 'L', $itemid, $bytes)");
+	LJ::dudata_set($dbcm, $ownerid, 'L', $itemid, $bytes);
     }    
 
     my $qevent = $dbh->quote($event);
@@ -807,6 +806,7 @@ sub editevent
 	$event =~ s/\r//g;
     }
     my $qevent = $dbh->quote($event);
+    my $bytes = length($event) + length($req->{'subject'});
     $event = "";
 	    
     my $eventtime = sprintf("%04d-%02d-%02d %02d:%02d", 
@@ -893,9 +893,7 @@ sub editevent
 
 	# update disk usage
 	if ($clustered) {
-	    my $bytes = length($event) + length($req->{'subject'});
-	    $dbcm->do("REPLACE INTO dudata (userid, area, areaid, bytes) ".
-		      "VALUES ($ownerid, 'L', $qitemid, $bytes)");
+	    LJ::dudata_set($dbcm, $ownerid, 'L', $qitemid, $bytes);
 	}
 
 	return fail($err,501,$dbcm->errstr) if $dbcm->err;

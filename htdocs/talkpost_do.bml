@@ -334,6 +334,12 @@ BODY<=
 	 }
      }
 
+     # dudata
+     if ($clustered) {
+	 my $bytes = length($FORM{'subject'}) + length($FORM{'body'});
+	 LJ::dudata_set($dbcm, $u->{'userid'}, 'T', $insertid, $bytes);
+     }
+
      my %talkprop;   # propname -> value
 
 

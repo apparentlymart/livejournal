@@ -4940,6 +4940,7 @@ sub delete_item2
     foreach my $t (qw(logtext2 recent_logtext2 logprop2 logsec2 logsubject2)) {
 	$dbcm->do("DELETE FROM $t WHERE journalid=$jid AND jitemid=$jitemid");
     }
+    LJ::dudata_set($dbcm, $jid, 'L', $jitemid, 0);
 
     # delete stuff from meta cluster
     my $aitemid = $jitemid * 256 + $anum;
@@ -4950,7 +4951,7 @@ sub delete_item2
     # delete comments
     my ($t, $loop) = (undef, 1);
     while ($loop && 
-	   ($t = $dbcm->selectall_arrayref("SELECT jtalkid FROM talk2 WHERE ".
+	   ($t = $dbcm->selectcol_arrayref("SELECT jtalkid FROM talk2 WHERE ".
 					   "nodetype='L' AND journalid=$jid ".
 					   "AND nodeid=$jitemid LIMIT 50"))
 	   && $t && @$t)
@@ -4966,7 +4967,8 @@ sub delete_item2
 # <LJFUNC>
 # name: LJ::delete_talkitem
 # des: Deletes a comment and associated metadata.
-# info: The tables talk2, talkprop2, talktext2, and recent_talktext2 are all 
+# info: The tables [dbtable[talk2]], [dbtabke[talkprop2]], [dbtable[talktext2]], 
+#       [dbtable[recent_talktext2]], and [dbtable[dudata]] are all 
 #       deleted from, immediately. Unlike [func[LJ::delete_item2]], there is
 #       no $quick flag to queue the delete for later, nor is one really
 #       necessary, since deleting from 4 tables won't be too slow.
@@ -4986,6 +4988,8 @@ sub delete_talkitem
 	$dbcm->do("DELETE FROM $t WHERE journalid=$jid AND jtalkid=$jtalkid");
 	return 0 if $dbcm->err;
     }
+    LJ::dudata_set($dbcm, $jid, 'T', $jtalkid, 0);
+    return 0 if $dbcm->err;
     return 1;
 }
 
@@ -5028,6 +5032,32 @@ sub alldateparts_to_hash
 	    '24h' => $dateparts[15],
 	    '24hh' => $dateparts[16],
 	    );
+}
+
+# <LJFUNC>
+# name: LJ::dudata_set
+# class: logging
+# des: Record or delete disk usage data for a journal
+# args: dbcm, journalid, area, areaid, bytes
+# journalid: Journal userid to record space for.
+# area: One character: "L" for log, "T" for talk, "B" for bio, "P" for pic.
+# areaid: Unique ID within $area, or '0' if area has no ids (like bio)
+# bytes: Number of bytes item takes up.  Or 0 to delete record.
+# returns: 1.
+# </LJFUNC>
+sub dudata_set
+{
+    my ($dbcm, $journalid, $area, $areaid, $bytes) = @_;
+    $bytes += 0; $areaid += 0; $journalid += 0;
+    $area = $dbcm->quote($area);
+    if ($bytes) {
+	$dbcm->do("REPLACE INTO dudata (userid, area, areaid, bytes) ".
+		  "VALUES ($journalid, $area, $areaid, $bytes)");
+    } else {
+	$dbcm->do("DELETE FROM dudata WHERE userid=$journalid AND ".
+		  "area=$area AND areaid=$areaid");
+    }
+    return 1;
 }
 
 1;
