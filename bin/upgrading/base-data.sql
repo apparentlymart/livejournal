@@ -931,6 +931,8 @@ INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope
 UPDATE userproplist SET datatype='bool',des='Used for large communities to prevent loading and displaying the complete list of members',indexed='0',prettyname='Don\'t load membership information',scope='general' WHERE name='dont_load_members';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'On each postevent, the dupsig is checked and updated to prevent accidental duplicate posts', '0', 'dupsig_post', 'Duplicate signature for last post', 'general');
 UPDATE userproplist SET datatype='char',des='On each postevent, the dupsig is checked and updated to prevent accidental duplicate posts',indexed='0',prettyname='Duplicate signature for last post',scope='general' WHERE name='dupsig_post';
+INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Base Title of Friends Page', '0', 'friendspagetitle', 'Friends Page Title', 'general');
+UPDATE userproplist SET datatype='char',des='Base Title of Friends Page',indexed='0',prettyname='Friends Page Title',scope='general' WHERE name='friendspagetitle';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'M: male, F: female, U: unspecified', '1', 'gender', 'Gender', 'general');
 UPDATE userproplist SET datatype='char',des='M: male, F: female, U: unspecified',indexed='1',prettyname='Gender',scope='general' WHERE name='gender';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'How the user heard about LiveJournal', '0', 'howhear', 'How heard about LiveJouranl', 'general');
@@ -941,6 +943,10 @@ INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope
 UPDATE userproplist SET datatype='char',des='Jabber address (username@server)',indexed='1',prettyname='Jabber Address',scope='general' WHERE name='jabber';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Domain which will load user\'s journal', '0', 'journaldomain', 'Domain Alias', 'general');
 UPDATE userproplist SET datatype='char',des='Domain which will load user\'s journal',indexed='0',prettyname='Domain Alias',scope='general' WHERE name='journaldomain';
+INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Subtitle of Journal', '0', 'journalsubtitle', 'Journal Subtitle', 'general');
+UPDATE userproplist SET datatype='char',des='Subtitle of Journal',indexed='0',prettyname='Journal Subtitle',scope='general' WHERE name='journalsubtitle';
+INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Base Title of Journal', '0', 'journaltitle', 'Journal Title', 'general');
+UPDATE userproplist SET datatype='char',des='Base Title of Journal',indexed='0',prettyname='Journal Title',scope='general' WHERE name='journaltitle';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('num', 'Encoding in which to mail comments to the user. Defaults to UTF-8.', '0', 'mailencoding', 'Mail Encoding', 'general');
 UPDATE userproplist SET datatype='num',des='Encoding in which to mail comments to the user. Defaults to UTF-8.',indexed='0',prettyname='Mail Encoding',scope='general' WHERE name='mailencoding';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'MSN Username', '1', 'msn', 'MSN Username', 'general');

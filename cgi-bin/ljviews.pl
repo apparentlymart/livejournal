@@ -552,7 +552,7 @@ sub create_view_lastn
         return 1;
     }
 
-    foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
+    foreach ("name", "url", "urlname", "journaltitle") { LJ::text_out(\$u->{$_}); }
 
     my %FORM = ();
     LJ::decode_url_string($opts->{'args'}, \%FORM);
@@ -566,6 +566,8 @@ sub create_view_lastn
     $lastn_page{'name'} = LJ::ehtml($u->{'name'});
     $lastn_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
     $lastn_page{'username'} = $user;
+    $lastn_page{'title'} = LJ::ehtml($u->{'journaltitle'} ||
+                           $lastn_page{'name'} . $lastn_page{'name-\'s'} . " Journal");
     $lastn_page{'numitems'} = $vars->{'LASTN_OPT_ITEMS'} || 20;
 
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
@@ -949,12 +951,14 @@ sub create_view_friends
         return 1;
     }
 
-    foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
+    foreach ("name", "url", "urlname", "friendspagetitle") { LJ::text_out(\$u->{$_}); }
 
     my %friends_page = ();
     $friends_page{'name'} = LJ::ehtml($u->{'name'});
     $friends_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
     $friends_page{'username'} = $user;
+    $friends_page{'title'} = LJ::ehtml($u->{'friendspagetitle'} ||
+                             $friends_page{'name'} . $friends_page{'name-\'s'} . " Friends");
     $friends_page{'numitems'} = $vars->{'FRIENDS_OPT_ITEMS'} || 20;
 
     ## never have spiders index friends pages (change too much, and some 
@@ -1394,7 +1398,7 @@ sub create_view_calendar
         return 1;
     }
 
-    foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
+    foreach ("name", "url", "urlname", "journaltitle") { LJ::text_out(\$u->{$_}); }
 
     my %FORM = ();
     LJ::decode_url_string($opts->{'args'}, \%FORM);
@@ -1403,6 +1407,8 @@ sub create_view_calendar
     $calendar_page{'name'} = LJ::ehtml($u->{'name'});
     $calendar_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
     $calendar_page{'username'} = $user;
+    $calendar_page{'title'} = LJ::ehtml($u->{'journaltitle'} ||
+                              $calendar_page{'name'} . $calendar_page{'name-\'s'} . " Journal");
     if ($u->{'opt_blockrobots'}) {
         $calendar_page{'head'} = "<meta name=\"robots\" content=\"noindex\">\n";
     }
@@ -1621,7 +1627,7 @@ sub create_view_day
         return 1;
     }
 
-    foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
+    foreach ("name", "url", "urlname", "journaltitle") { LJ::text_out(\$u->{$_}); }
 
     my %day_page = ();
     $day_page{'username'} = $user;
@@ -1635,6 +1641,8 @@ sub create_view_day
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};
     $day_page{'name'} = LJ::ehtml($u->{'name'});
     $day_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
+    $day_page{'title'} = LJ::ehtml($u->{'journaltitle'} ||
+                         $day_page{'name'} . $day_page{'name-\'s'} . " Journal");
 
     if ($u->{'url'} =~ m!^https?://!) {
         $day_page{'website'} =
@@ -1906,7 +1914,6 @@ sub create_view_rss
     my $logdb = LJ::get_cluster_reader($u);
     LJ::load_props($dbs, "log", "user");
     LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
-    LJ::load_user_props($dbs, $u, 'opt_whatemailshow', 'no_mail_alias');
     $logtext = LJ::get_logtext2($u, @itemids);
 
     # some data used throughout the channel

@@ -343,6 +343,11 @@ events that occur on a new day, [var[LASTN_NEW_DAY]] variables are inserted as w
 The system username of the current user, useful in creating links to other
 views of your journal, like to the calendar view.
 }
+{ title
+.des
+The base title of the user's journal, which is normally used in the HTML
+title tags and also sometimes in a page heading.
+}
 { range
 .des
 Text that describes the range of items being displayed.  Will be equal
@@ -362,6 +367,12 @@ specified by the [var[LASTN_OPT_ITEMS]] variable.
 { userpic
 .des
 An IMG tag showing your uploaded picture, if any.  See [var[LASTN_USERPIC]].
+}
+{ title
+.des
+The base title of the user's journal, which is normally used in the HTML
+title tags and headings alongside something which indicates that this is
+a calendar view.
 }
 { website
 .des
@@ -1118,6 +1129,11 @@ The HTML for the [view[day]] view, after somebody clicks a day on the [view[cale
 .des
 The username of the user.
 }
+{ title
+.des
+The base title of the user's journal, which is normally used in the HTML
+title tags and headings, alongside a reference to the date being viewed.
+}
 { name
 .des
 The name of the user whose journal it is.
@@ -1670,6 +1686,11 @@ If friends are defined, this is equal to the [var[FRIENDS_EVENTS]] variable, els
 .des
 The system username of the current user, useful in creating links to other
 views of your journal, like to the calendar view.
+}
+{ title
+.des
+A title the user has chosen for their friends page. Normally used in the HTML
+title tags and also sometimes in a page heading.
 }
 { range
 .des

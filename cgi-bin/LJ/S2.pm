@@ -921,7 +921,8 @@ sub Page
             'friends' => "$base_url/friends",
         },
         'views_order' => [ 'recent', 'archive', 'friends', 'userinfo' ],
-        'global_title' => '',
+        'global_title' =>  LJ::ehtml($u->{'journaltitle'} || $u->{'name'}),
+        'global_subtitle' => LJ::ehtml($u->{'journalsubtitle'}),
         'head_content' => '',
     };
     return $p;

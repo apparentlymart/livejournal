@@ -13,6 +13,7 @@ sub FriendsPage
     $p->{'view'} = "friends";
     $p->{'entries'} = [];
     $p->{'friends'} = {};
+    $p->{'friends_title'} = LJ::ehtml($u->{'friendspagetitle'});
 
     my $dbs = LJ::get_dbs();
     my $dbh = $dbs->{'dbh'};

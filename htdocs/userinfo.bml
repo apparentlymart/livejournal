@@ -101,6 +101,7 @@
  ### load user props.  some don't apply to communities
  {
      my @props = qw(opt_whatemailshow opt_blockrobots country state city zip renamedto
+                    journaltitle journalsubtitle
                     url urlname opt_hidefriendofs dont_load_members no_mail_alias);
      unless ($com || $synd) { push @props, qw(aolim icq yahoo msn gender jabber); }
      if ($synd) { push @props, qw(rssparseerror); }
@@ -269,9 +270,7 @@
      }
  }
 
- my $border = 0;
- if ($u->{'user'} eq "test" && 0) { $border = 1; }
- $body .= "<table cellpadding='5' width='100%' border='$border'>";
+ $body .= "<table cellpadding='5' width='100%' border='0'>";
  {
      my $hook_extra;
      LJ::run_hooks("userinfo_html_by_user", {
@@ -298,11 +297,26 @@
 
  $body .= "</tr>\n";
 
+ ## journal title
+if ($u->{'journaltitle'}) {
+    my $span = ($narrow_left-- >= 0) ? 1 : 2;
+    $body .= "<tr valign='top'><td align='right'></td><td colspan='$span'>";
+    $body .= "<span style='font-size: 1.2em'><b>" . LJ::ehtml($u->{'journaltitle'}) . "</b>";
+    if ($u->{'journalsubtitle'}) {
+        $body .= "<br /><i>" . LJ::ehtml($u->{'journalsubtitle'}) . "</i>";
+    }
+    $body .= "</span></td></tr>\n";
+}
+
+
  ### name or 'syndicated from'
- $narrow_left--;
  unless ($synd) {
-     $body .= "<tr><td align='right'><b>$ML{'.label.name'}</b></td><td>$u->{'name'}</td></tr>\n";
+     unless ($u->{'name'} eq $u->{'journaltitle'}) {
+         $narrow_left--;
+         $body .= "<tr><td align='right'><b>$ML{'.label.name'}</b></td><td>$u->{'name'}</td></tr>\n";
+     }
  } else {
+     $narrow_left--;
      my $link;
      if (my $url = $u->{'url'}) {
          $link="<a href='" . LJ::ehtml($url) . "'>$u->{'name'}</a>";

@@ -52,7 +52,7 @@ body<=
                      "opt_notalkicons", "opt_logcommentips",
                      "howhear", "opt_bdaymail", "opt_hidefriendofs",
                      "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
-                     "opt_whoscreened"
+                     "opt_whoscreened", "journaltitle", "journalsubtitle", "friendspagetitle"
                      );
 
  my %saved = (); # to store values before they undergo normalisation
@@ -282,9 +282,26 @@ body<=
 
 
      ### Permission Settings
-     $ret .= "<?h1 $ML{'.settings.header'} h1?><?p $ML{'.settings.about'} p?>";
-     $ret .= "<P><TABLE>\n";
+     $ret .= "<?h1 $ML{'.settings.header'} h1?>";
 
+     ### display options
+     $ret .= "<?p Use the options below to control the naming of your journal and friends view pages. p?>\n";
+     $ret .= "<table style='margin: 7px 5px'>\n";
+
+     $ret .= "<tr><td width='50'>&nbsp;</td><td><b>Journal Title:</b></td>";
+     $ret .= "<td>" . LJ::html_text( { name => 'journaltitle', value => $u->{'journaltitle'}, size => 30, maxlength => 80 }) . " </td></tr>";
+     $ret .= "<tr><td width='50'>&nbsp;</td><td><b>Journal Subtitle: </b></td>";
+     $ret .= "<td>" . LJ::html_text( { name => 'journalsubtitle', value => $u->{'journalsubtitle'}, size => 30, maxlength => 80 }) . " </td></tr>";
+     $ret .= "<tr><td width='50'>&nbsp;</td><td colspan='2'><i>Optionally</i>, enter a title and subtitle for your journal. (no HTML).</td></tr>\n";
+
+     $ret .= "<tr><td width='50'>&nbsp;</td><td><b>Friends Page Title:</b></td>";
+     $ret .= "<td>" .  LJ::html_text( { name => 'friendspagetitle', value => $u->{'friendspagetitle'}, size => 30, maxlength => 80 }) . "</td></tr>";
+     $ret .= "<tr><td width='50'>&nbsp;</td><td colspan='2'><i>Optionally</i>, enter a title for your friends view pages. (no HTML)</td></tr>\n";
+     $ret .= "</table>\n";
+
+     ### privacy options
+     $ret .= "<?h2 Privacy Options h2?><?p Select below your personal privacy options and preferences. p?>\n";
+     $ret .= "<P><TABLE>\n";
      my $checked;
      $checked = $u->{'allow_infoshow'} eq "Y" ? "CHECKED" : "";
      $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_infoshow $checked></TD><TD><B>$ML{'.allowshowinfo.title'}</B></TD></TR>\n";
@@ -385,9 +402,6 @@ body<=
      $ret .= "</table>\n";
 
      if ($LJ::UNICODE) {
-         $ret .= "<?h2 $ML{'.encoding.header'} h2?><?p $ML{'.encoding.about'} p?><table>\n";
-         $ret .= "<tr><td width='50'>&nbsp;</td><td><p><b>$ML{'.autotranslate.header'}</b>";
-         
          my (%old_encnames, %mail_encnames, %encodings);
          LJ::load_codes($dbs, { "encoding" => \%encodings } );
          LJ::load_codes($dbs, { "encname" => \%old_encnames } );
@@ -399,11 +413,14 @@ body<=
              delete $old_encnames{$id} if lc($encodings{$id}) eq 'utf-8';
          }
 
-         $ret .= LJ::html_select({'name'=>'oldenc', 'selected'=>$u->{'oldenc'}}, %old_encnames);
-         $ret .= "</p><p>$ML{'.autotranslate.about'}</p></td></tr>";
-         $ret .= "<tr><td>&nbsp;</td><td><p><b>$ML{'.translatemailto.header'}</b>";
-         $ret .= LJ::html_select({'name'=>'mailencoding', 'selected'=>$u->{'mailencoding'}}, %mail_encnames);
-         $ret .= "</p><p>$ML{'.translatemailto.about'}</p></td></tr>";
+         $ret .= "<?h2 $ML{'.encoding.header'} h2?><?p $ML{'.encoding.about'} p?>\n";
+         $ret .= "<table style='margin: 7px 5px'>\n";
+         $ret .= "<tr><td width='50'>&nbsp;</td><td><b>$ML{'.autotranslate.header'}</b></td>";
+         $ret .= "<td>" . LJ::html_select({'name'=>'oldenc', 'selected'=>$u->{'oldenc'}}, %old_encnames) . "</td></tr>\n";
+         $ret .= "<tr><td width='50'>&nbsp;</td><td colspan='2'>" . $ML{'.autotranslate.about'} . "</td></tr>";
+         $ret .= "<tr><td width='50'>&nbsp;</td><td><b>$ML{'.translatemailto.header'}</b></td>";
+         $ret .= "<td>" . LJ::html_select({'name'=>'mailencoding', 'selected'=>$u->{'mailencoding'}}, %mail_encnames) . "</td></tr>\n";
+         $ret .= "<tr><td width='50'>&nbsp;</td><td colspan='2'>$ML{'.translatemailto.about'}</td></tr>";
          $ret .= "</table>\n";
      }
 
@@ -573,6 +590,11 @@ body<=
 
      ### change any of the userprops ?
      {
+         # journal / friends titles
+         $FORM{'journaltitle'} = LJ::text_trim($FORM{'journaltitle'}, 0, 80) if $FORM{'journaltitle'};
+         $FORM{'journalsubtitle'} = LJ::text_trim($FORM{'journalsubtitle'}, 0, 80) if $FORM{'journalsubtitle'};
+         $FORM{'friendspagetitle'} = LJ::text_trim($FORM{'friendspagetitle'}, 0, 80) if $FORM{'friendspagetitle'};
+
          $FORM{'opt_blockrobots'} = $FORM{'opt_blockrobots'} ? 1 : 0;
          $FORM{'opt_bdaymail'} = $FORM{'opt_bdaymail'} ? 1 : 0;
          $FORM{'opt_hidefriendofs'} = $FORM{'opt_hidefriendofs'} ? 1 : 0;
@@ -615,7 +637,7 @@ body<=
                        "opt_notalkicons", "opt_logcommentips",
                        "opt_bdaymail", "opt_hidefriendofs",
                        "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
-                       "opt_whoscreened",
+                       "opt_whoscreened", "journaltitle", "journalsubtitle", "friendspagetitle",
                        );	
 
          # this is only done once, then never appears again.

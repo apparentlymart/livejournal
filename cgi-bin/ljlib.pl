@@ -113,7 +113,7 @@ use constant CMAX_INTEREST => 50;
                  "friends" => {
                      "creator" => \&LJ::S1::create_view_friends,
                      "des" => "Friends View",
-                     "owner_props" => ["opt_usesharedpic"],
+                     "owner_props" => ["opt_usesharedpic", "friendspagetitle"],
                  },
                  "friendsfriends" => {
                      "creator" => \&LJ::S1::create_view_friends,
@@ -124,6 +124,7 @@ use constant CMAX_INTEREST => 50;
                      "creator" => \&LJ::S1::create_view_rss,
                      "des" => "RSS View (XML)",
                      "nostyle" => 1,
+                     "owner_props" => ["opt_whatemailshow", "no_mail_alias"],
                  },
                  "res" => {
                      "des" => "S2-specific resources (stylesheet)",
@@ -3133,7 +3134,8 @@ sub make_journal
     my $s1prop = "s1_${eff_view}_style";
 
     my @needed_props = ("stylesys", "s2_style", "url", "urlname", $s1prop, "opt_nctalklinks",
-                        "renamedto",  "opt_blockrobots", "opt_usesharedpic");
+                        "renamedto",  "opt_blockrobots", "opt_usesharedpic",
+                        "journaltitle", "journalsubtitle");
 
     # preload props the view creation code will need later (combine two selects)
     if (ref $LJ::viewinfo{$eff_view}->{'owner_props'} eq "ARRAY") {

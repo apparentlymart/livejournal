@@ -5,6 +5,7 @@ general /userinfo.bml.label.viewlabel
 general /userinfo.bml.syn.lastnew
 general /editinfo.bml.allowshowcontact.email.reason
 general /editinfo.bml.allowshocontact.email.if_domainaddy
+general /editinfo.bml.settings.about
 
 general /userinfo.bml.openmembership.body
 general /userinfo.bml.rpmembership.body
