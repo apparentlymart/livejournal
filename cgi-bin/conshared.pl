@@ -211,7 +211,7 @@ sub community
 
         push @$out, [ "info", "User \"$target_user\" has been mailed and will be added to \"$com_user\" pending their approval." ];
         
-        if ($ci->{'postlevel'}) {
+        if ($ci->{'postlevel'} eq "members") {
             push @$out, [ "info", "User \"$target_user\" will be allowed to post to \"$com_user\" once they are added." ];
         } 
     }
