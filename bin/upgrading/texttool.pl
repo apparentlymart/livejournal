@@ -9,10 +9,12 @@ use Getopt::Long;
 
 my $opt_help = 0;
 my $opt_local_lang;
+my $opt_extra;
 exit 1 unless
 GetOptions(
            "help" => \$opt_help,
            "local-lang=s" => \$opt_local_lang,
+           "extra=s" => \$opt_extra,
            );
 
 my $mode = shift @ARGV;
@@ -277,21 +279,50 @@ sub popstruct
 sub poptext
 {
     $out->("Populating text...", '+');
-    foreach my $lang (keys %lang_code)
+    my %source;  # lang -> file, or "[extra]" when given by --extra= argument
+    if ($opt_extra) {
+        $source{'[extra]'} = $opt_extra;
+    } else {
+        foreach my $lang (keys %lang_code) {
+            my $file = "$ENV{'LJHOME'}/bin/upgrading/${lang}.dat";
+            next unless -e $file;
+            $source{$lang} = $file;            
+        }
+    }
+    foreach my $source (keys %source)
     {
-        $out->("$lang", '+');
-        my $l = $lang_code{$lang};
-        my $file = "$ENV{'LJHOME'}/bin/upgrading/${lang}.dat";
-        unless (-e $file) { $out->('-'); next; }
+        $out->("$source", '+');
+        my $file = $source{$source};
         open (D, $file)
-            or $out->('x', "Can't open $lang.dat");
+            or $out->('x', "Can't open $source data file");
+
+        # fixed language in *.dat files, but in extra files
+        # it switches as it goes.
+        my $l;
+        if ($source ne "[extra]") { $l = $lang_code{$source}; }
+
+        my $bml_prefix = "";
+
         my $addcount = 0;
         my $lnum = 0;
         my ($code, $text);
         my %metadata;
         while (my $line = <D>) {
             $lnum++;
-            if ($line =~ /^(\S+?)=(.*)/) {
+            if ($line =~ /^==(LANG|BML):\s*(\S+)/) {
+                $out->('x', "Bogus directives in non-extra file.")
+                    if $source ne "[extra]";
+                my ($what, $val) = ($1, $2);
+                if ($what eq "LANG") {
+                    $l = $lang_code{$val};
+                    $out->('x', 'Bogus ==LANG switch to: $what') unless $l;
+                    $bml_prefix = "";
+                } elsif ($what eq "BML") {
+                    $out->('x', 'Bogus ==BML switch to: $what') 
+                        unless $val =~ m!^/.+\.bml$!;
+                    $bml_prefix = $val;
+                }
+            } elsif ($line =~ /^(\S+?)=(.*)/) {
                 ($code, $text) = ($1, $2);
             } elsif ($line =~ /^(\S+?)\<\<\s*$/) {
                 ($code, $text) = ($1, "");
@@ -305,7 +336,13 @@ sub poptext
                 # comment line
                 next;
             } elsif ($line =~ /\S/) {
-                $out->('x', "$lang.dat:$lnum: Bogus format.");
+                $out->('x', "$source:$lnum: Bogus format.");
+            }
+
+            if ($code =~ m!^\.!) {
+                $out->('x', "Can't use code with leading dot: $code")
+                    unless $bml_prefix;
+                $code = "$bml_prefix$code";
             }
 
             if ($code =~ /\|(.+)/) {
@@ -315,6 +352,9 @@ sub poptext
 
             next unless $code ne "";
 
+            $out->('x', 'No language defined!') unless $l;
+
+
             my $qcode = $dbh->quote($code);
             my $exists = $dbh->selectrow_array("SELECT COUNT(*) FROM ml_latest l, ml_items i ".
                                                "WHERE l.dmid=1 AND i.dmid AND i.itcode=$qcode AND ".
@@ -322,7 +362,7 @@ sub poptext
             if (! $exists) {
                 $addcount++;
                 my $staleness = $metadata{'staleness'}+0;
-                my $res = LJ::Lang::set_text($dbh, 1, $lang, $code, $text,
+                my $res = LJ::Lang::set_text($dbh, 1, $l->{'lncode'}, $code, $text,
                                              { 'staleness' => $staleness,
                                                'notes' => $metadata{'notes'}, });
                 unless ($res) {
