@@ -3234,7 +3234,7 @@ sub make_journal
 
     return "<h1>Error</h1>Journal has been deleted.  If you are <B>$user</B>, you have a period of 30 days to decide to undelete your journal." if ($u->{'statusvis'} eq "D");
     return "<h1>Error</h1>This journal has been suspended." if ($u->{'statusvis'} eq "S");
-    return "<h1>Error</h1>This journal has been deleted and purged.  This username will be available shortly." if ($u->{'statusvis'} eq "X");
+    return "<h1>Error</h1>This journal has been deleted and purged." if ($u->{'statusvis'} eq "X");
 
     my %vars = ();
     # load the base style
