@@ -76,7 +76,7 @@ body<=
  if ($state eq "closed") {
      $ret .= "<?h1 Recently Closed Support Requests h1?><?p Below are all support requests " .
              "that have been recently closed.  To return to the open requests, " .
-             "<a href=\"./help.bml?cat=$filtercat\">click here</a>. p?>";
+             "<a href=\"$LJ::SITEROOT/support/help.bml?cat=$filtercat\">click here</a>. p?>";
  } elsif ($state eq "youreplied") {
      return "<?h1 Error h1?><?p You must be logged in to filter on requests that you've replied to. p?>"
         unless $remote;
@@ -85,7 +85,7 @@ body<=
      $ret .= "<?h1 Open Support Requests h1?><?p Below are all support requests that are open " .
              "(they just came in and haven't been touched yet) or answered (either awaiting to be " .
              "closed by the person needing help, or the person requested they still need help).  " .
-             "The <a href=\"./help.bml?state=closed&amp;cat=$filtercat\">closed reports</a> are also " .
+             "The <a href=\"$LJ::SITEROOT/support/help.bml?state=closed&amp;cat=$filtercat\">closed reports</a> are also " .
              "available.  If you help somebody out and they confirm you helped them, you get the number " .
              "of points indicated in the status column.  These points will show up on your userinfo page. p?>";
      $append = 1;
@@ -287,7 +287,7 @@ body<=
                  "<input type='hidden' name='c$sp->{spid}' id='c$sp->{spid}' value='$barbg' /></td>\n";
          $js = "onclick='return doClick($sp->{spid});'";
      }
-     $ret .= "<td><b><a href=\"see_request.bml?id=$sp->{'spid'}\" $js>$sp->{'spid'}</a></b></td>";
+     $ret .= "<td><b><a href=\"$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}\" $js>$sp->{'spid'}</a></b></td>";
      $ret .= "<td><b>$summary</b>$des</td>\n";
      $ret .= "<td>$probarea</td>\n";
      $ret .= "<td nowrap='nowrap'><font size='-1'>$age</font></td>\n";
@@ -313,7 +313,7 @@ body<=
 _code?>
 
 <?hr?>
-<p>Back to the <a href="./">support area</a>.</p>
+<p>Back to the <a href="<?siteroot?>/support/">support area</a>.</p>
 
 <=body
 page?><?_c <LJDEP>
