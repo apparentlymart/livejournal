@@ -1349,7 +1349,7 @@ is_public: Y
 is_embedded: N
 is_colorfree: Y
 opt_cache: N
-lastupdate: 2003-04-15 21:58:21
+lastupdate: 2004-12-06 18:04:07
 
 CALENDAR_YEAR_DISPLAYED=> %%yyyy%%
 
@@ -1385,7 +1385,7 @@ CALENDAR_PAGE<=
      %%userpic%%
     </TD>
     <TD BGCOLOR="%%color:page_back%%">
-     <B>LiveJournal Calendar for %%name%%.</B><BR>
+     <B>%%title%%</B><BR>
      <TABLE BORDER="0">
       <TR><TD>View:</TD><TD><A HREF="%%urllastn%%">Personal Journal</A>.</TD></TR>
       <TR><TD>View:</TD><TD><A HREF="%%urlfriends%%">Friends</A>.</TD></TR>
@@ -1404,7 +1404,7 @@ CALENDAR_PAGE<=
      %%userpic%%
      </TD>
      <TD BGCOLOR="%%color:page_back%%">
-      <B>LiveJournal Calendar for %%name%%.</B><BR>
+      <B>%%title%%</B><BR>
       <TABLE BORDER="0">
        <TR><TD>View:</TD><TD><A HREF="%%cons:siteroot%%/userinfo.bml?user=%%username%%">User Info</A>.</TD></TR>
        <TR><TD>View:</TD><TD><A HREF="%%urllastn%%">Personal Journal</A>.</TD></TR>
@@ -3043,7 +3043,7 @@ is_public: Y
 is_embedded: N
 is_colorfree: Y
 opt_cache: N
-lastupdate: 2003-04-15 22:07:06
+lastupdate: 2004-12-06 18:04:07
 
 DAY_TALK_LINKS<=
 <TR>
@@ -3171,7 +3171,7 @@ DAY_PAGE<=
      %%userpic%%
     </TD>
     <TD BGCOLOR="%%color:page_back%%">
-     <B>LiveJournal for %%name%%.</B><BR>
+     <B>%%title%%</B><BR>
      <TABLE BORDER="0">
       <TR><TD>View:</TD><TD><A HREF="%%urllastn%%">Personal Journal</A>.</TD></TR>
       <TR><TD>View:</TD><TD><A HREF="%%urlfriends%%">Friends</A>.</TD></TR>
@@ -3201,7 +3201,7 @@ DAY_PAGE<=
      %%userpic%%
      </TD>
      <TD BGCOLOR="%%color:page_back%%">
-      <B>LiveJournal for %%name%%.</B><BR>
+      <B>%%title%%</B><BR>
       <TABLE BORDER="0">
        <TR><TD>View:</TD><TD><A HREF="%%cons:siteroot%%/userinfo.bml?user=%%username%%">User Info</A>.</TD></TR>
       <TR><TD>View:</TD><TD><A HREF="%%urlfriends%%">Friends</A>.</TD></TR>
@@ -5140,7 +5140,7 @@ is_public: Y
 is_embedded: N
 is_colorfree: Y
 opt_cache: N
-lastupdate: 2003-04-15 22:24:33
+lastupdate: 2004-12-06 18:04:07
 
 FRIENDS_RANGE_HISTORY=>You're looking at %%numitems%% entries, after skipping %%skip%% newer ones.
 
@@ -5242,7 +5242,7 @@ FRIENDS_PAGE<=
      %%userpic%%
     </TD>
     <TD BGCOLOR="%%color:page_back%%">
-     <B>Friends LiveJournal for %%name%%.</B><BR>
+     <B>%%title%%</B><BR>
      <TABLE BORDER="0">
       <TR><TD>View:</TD><TD><A HREF="%%urllastn%%">Personal Journal</A>.</TD></TR>
       <TR><TD>View:</TD><TD><A HREF="%%urlcalendar%%">Calendar</A>.</TD></TR>
@@ -5261,7 +5261,7 @@ FRIENDS_PAGE<=
      %%userpic%%
      </TD>
      <TD BGCOLOR="%%color:page_back%%">
-      <B>Friends LiveJournal for %%name%%.</B><BR>
+      <B>%%title%%</B><BR>
       <TABLE BORDER="0">
        <TR><TD>View:</TD><TD><A HREF="%%cons:siteroot%%/userinfo.bml?user=%%username%%">User Info</A>.</TD></TR>
        <TR><TD>View:</TD><TD><A HREF="%%urllastn%%">Personal Journal</A>.</TD></TR>
@@ -7180,7 +7180,7 @@ is_public: Y
 is_embedded: N
 is_colorfree: Y
 opt_cache: N
-lastupdate: 2003-04-15 22:31:48
+lastupdate: 2004-12-06 18:04:07
 
 LASTN_EVENT_PROTECTED<=
 <DIV ALIGN="right">
@@ -7247,7 +7247,7 @@ LASTN_PAGE<=
      %%userpic%%
     </TD>
     <TD BGCOLOR="%%color:page_back%%">
-     <B>LiveJournal for %%name%%.</B><BR>
+     <B>%%title%%</B><BR>
      <TABLE BORDER="0">
       <TR><TD>View:</TD><TD><A HREF="%%cons:siteroot%%/userinfo.bml?user=%%username%%">User Info</A>.</TD></TR>
       <TR><TD>View:</TD><TD><A HREF="%%urlfriends%%">Friends</A>.</TD></TR>
@@ -7269,7 +7269,7 @@ LASTN_PAGE<=
      %%userpic%%
      </TD>
      <TD BGCOLOR="%%color:page_back%%">
-      <B>LiveJournal for %%name%%.</B><BR>
+      <B>%%title%%</B><BR>
       <TABLE BORDER="0">
        <TR><TD>View:</TD><TD><A HREF="%%cons:siteroot%%/userinfo.bml?user=%%username%%">User Info</A>.</TD></TR>
       <TR><TD>View:</TD><TD><A HREF="%%urlfriends%%">Friends</A>.</TD></TR>
