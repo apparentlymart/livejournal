@@ -57,6 +57,25 @@
  $sth->execute;
  my $log = $sth->fetchrow_hashref;
 
+ # if the entry is pre-UTF-8 conversion, the
+ # subject may need conversion into UTF-8
+ if ($LJ::UNICODE) {
+     my %props = ();
+     if($journal) {
+         LJ::load_props($dbs, "log");
+         LJ::load_log_props2($dbcr, $log->{'ownerid'}, [ $itemid ], \%props);
+     } else {
+         LJ::load_log_props($dbr, [ $itemid ], \%props);
+     }
+     if ($props{$itemid}->{'unknown8bit'}) {
+         my $u = LJ::load_userid($dbs, $log->{'ownerid'});
+         my ($error, $subj);
+         $subj = LJ::text_convert($dbs, $log->{'subject'}, $u, \$error);
+         $log->{'subject'} = $subj unless $error;
+     }
+     LJ::text_out(\$log->{'subject'});
+ }
+
  # check to see if it already is memorable (thus we're editing, not adding);
  $sth = $dbr->prepare("SELECT memid, des, security FROM memorable WHERE ".
                       "userid=$remote->{'userid'} AND journalid=$jid AND jitemid=$ditemid");
