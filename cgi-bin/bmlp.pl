@@ -127,6 +127,8 @@ sub handle_request
     %BMLClient::COOKIE = ();
     &BMLClient::reset();
     @BlockStack = ("");
+    %IncludeOpen = ();
+    @IncludeStack = ();
 
     unless (&load_cfg()) {
 	print "Content-type: text/html\n\n";
@@ -553,25 +555,37 @@ sub bml_block
     if ($type eq "_INCLUDE") 
     {
 	my $code = 0;
-	if ($element{'CODE'}) { $code = 1; }
-	if ($element{'FILE'} =~ /[a-zA-Z0-9-_\.]{1,255}/) {
-	    my $isource = "";
-	    my $file = $BMLEnv{'IncludePath'} . "/" . $element{'FILE'};
-	    open (INCFILE, $file) || return &inline_error("Could not open include file.");
-	    while (<INCFILE>) { 
-		$isource .= $_;
+	$code = 1 if ($element{'CODE'});
+	foreach my $sec (qw(CODE BML)) {
+	    next unless $element{$sec};
+	    if (@IncludeStack && ! $IncludeStack[-1]->{$sec}) {
+		return &inline_error("Sub-include can't turn on $sec if parent include's $sec was off");
 	    }
-	    close INCFILE;
-	    if ($element{'BML'}) {
-		my $newhtml;
-		&bml_decode(\$isource, \$newhtml, { DO_CODE => $code });
-		return $newhtml;
-	    } else {
-		return $isource;
-	    }
-	} else {
+	}
+	unless ($element{'FILE'} =~ /^[a-zA-Z0-9-_\.]{1,255}$/) {
 	    return &inline_error("Invalid characters in include file name: $element{'FILE'} (code=$code)");
 	}
+
+	if ($IncludeOpen{$element{'FILE'}}++) {
+	    return &inline_error("Recursion detected in includes");
+	}
+	push @IncludeStack, \%element;
+	my $isource = "";
+	my $file = $BMLEnv{'IncludePath'} . "/" . $element{'FILE'};
+	open (INCFILE, $file) || return &inline_error("Could not open include file.");
+	while (<INCFILE>) { 
+	    $isource .= $_;
+	}
+	close INCFILE;
+	
+	if ($element{'BML'}) {
+	    my $newhtml;
+	    &bml_decode(\$isource, \$newhtml, { DO_CODE => $code });
+	    $isource = $newhtml;
+	} 
+	$IncludeOpen{$element{'FILE'}}--;
+	pop @IncludeStack;
+	return $isource;
     }
     
     if ($type eq "_COMMENT" || $type eq "_C") {
