@@ -55,6 +55,13 @@ $LJ::DBIRole = new DBI::Role {
 # used uniformly by server code which uses the protocol.
 $LJ::PROTOCOL_VER = ($LJ::UNICODE ? "1" : "0");
 
+# user.dversion values:
+#    0: unclustered  (unsupported)
+#    1: clustered, not pics (unsupported)
+#    2: clustered
+#    3: weekuserusage populated
+$LJ::MAX_DVERSION = 3; 
+
 # constants
 use constant ENDOFTIME => 2147483647;
 $LJ::EndOfTime = 2147483647;  # for string interpolation
@@ -358,11 +365,22 @@ sub set_cached_friend_items
 
 # <LJFUNC>
 # name: LJ::get_friend_items
-# des:
-# info:
-# args:
-# des-:
-# returns:
+# des: Return friend items for a given user, filter, and period.
+# args: dbarg, opts
+# des-opts: Hashref of options:
+#           - userid
+#           - remoteid
+#           - itemshow
+#           - skip
+#           - filter  (opt) defaults to all
+#           - owners  (opt) hashref to set found userid keys to value 1
+#           - idsbycluster (opt) hashref to set clusterid key to [ [ journalid, itemid ]+ ]
+#           - dateformat:  either "S2" for S2 code, or anything else for S1
+#           - common_filter:  set true if this is the default view
+#           - friendsoffriends: load friends of friends, not just friends
+#           - u: hashref of journal loading friends of
+#           - showtypes: /[PYC]/
+# returns: Array of item hashrefs containing the same elements 
 # </LJFUNC>
 sub get_friend_items
 {
@@ -390,7 +408,6 @@ sub get_friend_items
     my $skip = $opts->{'skip'}+0;
     my $getitems = $itemshow + $skip;
 
-    my $owners_ref = (ref $opts->{'owners'} eq "HASH") ? $opts->{'owners'} : {};
     my $filter = $opts->{'filter'}+0;
 
     my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14;  # 2 week default.
@@ -622,12 +639,8 @@ sub get_friend_items
     # return the itemids grouped by clusters, if callers wants it.
     if (ref $opts->{'idsbycluster'} eq "HASH") {
         foreach (@items) {
-            if ($_->{'clusterid'}) {
-                push @{$opts->{'idsbycluster'}->{$_->{'clusterid'}}},
-                [ $_->{'ownerid'}, $_->{'itemid'} ];
-            } else {
-                push @{$opts->{'idsbycluster'}->{'0'}}, $_->{'itemid'};
-            }
+            push @{$opts->{'idsbycluster'}->{$_->{'clusterid'}}},
+            [ $_->{'ownerid'}, $_->{'itemid'} ];
         }
     }
 
@@ -637,11 +650,34 @@ sub get_friend_items
 # <LJFUNC>
 # name: LJ::get_recent_items
 # class:
-# des:
+# des: Returns journal entries for a given account.
 # info:
-# args:
-# des-:
-# returns:
+# args: dbarg, opts
+# des-opts: Hashref of options with keys:
+#           -- err: scalar ref to return error code/msg in
+#           -- userid
+#           -- remote: remote user's $u
+#           -- remoteid: id of remote user
+#           -- clusterid: clusterid of userid
+#           -- clustersource: if value 'slave', uses replicated databases
+#           -- order: if 'logtime', sorts by logtime, not eventtime
+#           -- friendsview: if true, sorts by logtime, not eventtime
+#           -- notafter: upper bound inclusive for rlogtime/revttime (depending on sort mode),
+#              defaults to no limit
+#           -- skip: items to skip
+#           -- itemshow: items to show
+#           -- gmask_from: optional hashref of group masks { userid -> gmask } for remote
+#           -- viewall: if set, no security is used.
+#           -- dateformat: if "S2", uses S2's 'alldatepart' format.
+#           -- itemids: optional arrayref onto which itemids should be pushed
+# returns: array of hashrefs containing keys:
+#          -- itemid (the jitemid)
+#          -- posterid
+#          -- security
+#          -- replycount
+#          -- alldatepart (in S1 or S2 fmt, depending on 'dateformat' req key)
+#          -- ownerid (if in 'friendsview' mode)
+#          -- rlogtime (if in 'friendsview' mode)
 # </LJFUNC>
 sub get_recent_items
 {
