@@ -39,15 +39,18 @@ body<=
  my %pending = ();
  if (%show) {
     my $in = join(',', keys %show);
-    my $sth = $dbr->prepare("SELECT u.userid, u.clusterid, u.user, u.name, c.membership FROM user u, community c ".
-                            "WHERE u.userid IN ($in) AND u.userid=c.userid ".
-                            "AND u.statusvis<>'D' AND u.statusvis<>'X'");
+    my $us = LJ::load_userids(keys %show);
+
+    my $sth = $dbr->prepare("SELECT userid, membership FROM community ".
+                            "WHERE userid IN ($in)");
     $sth->execute;
     my $udbr;
-    while (my ($uid, $clusterid, $user, $name, $membership) = $sth->fetchrow_array) {
-        $names{$uid} = [ $user, $name, -1 ];
+    while (my ($uid, $membership) = $sth->fetchrow_array) {
+	my $cu = $us->{$uid};
+	next unless $cu && $cu->{statusvis} eq "V";
+        $names{$uid} = [ $cu->{user}, $cu->{name}, -1 ];
         if ($mods{$uid}) {
-            $udbr = LJ::get_cluster_reader($clusterid);
+            $udbr = LJ::get_cluster_reader($cu);
             my $sql = "SELECT COUNT(*) FROM modlog WHERE journalid=$uid";
             $modcount{$uid} = $names{$uid}[2] = $udbr->selectrow_array($sql) || 0;
         }
