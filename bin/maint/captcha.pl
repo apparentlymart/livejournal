@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use vars qw(%maint);
+use vars qw(%maint %maintinfo);
 
 use LJ::Captcha qw{};
 use LJ::Blob    qw{};
@@ -54,6 +54,7 @@ sub gencode ($) {
 #####################################################################
 ### M A I N T E N A N C E   T A S K S
 #####################################################################
+$maintinfo{gen_audio_captchas}{opts}{no_locking} = 1;
 $maint{gen_audio_captchas} = sub {
     my (
         $u,                     # Fake user record for Blob::put
@@ -156,7 +157,7 @@ $maint{gen_audio_captchas} = sub {
     return 1;
 };
 
-
+$maintinfo{gen_image_captchas}{opts}{no_locking} = 1;
 $maint{gen_image_captchas} = sub {
     my (
         $u,                     # Fake user record for Blob::put
