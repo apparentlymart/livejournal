@@ -18,6 +18,7 @@ sub handler
     # Available functions for this interface.
     my $interface = {
         'checksession'  => \&checksession,
+        'get_user_info' => \&get_user_info,
         'makechals'     => \&makechals,
         'set_quota'     => \&set_quota,
         'user_exists'   => \&user_exists,
@@ -36,14 +37,21 @@ sub handler
 
 # Is there a current LJ session?
 # If so, return info.
-sub checksession
+sub get_user_info
 {
     my ($r, $POST) = @_;
     BML::reset_cookies();
     $LJ::_XFER_REMOTE_IP = $POST->{'remote_ip'};
 
-    # try to get a $u from the passed uid, falling back to the ljsession cookie
-    my $u = $POST->{uid} ? LJ::load_userid($POST->{'uid'}) : LJ::get_remote();
+    # try to get a $u from the passed uid or user, falling back to the ljsession cookie
+    my $u;
+    if ($POST->{uid}) {
+        $u = LJ::load_userid($POST->{uid});
+    } elsif ($POST->{user}) {
+        $u = LJ::load_user($POST->{user});
+    } else {
+        $u = LJ::get_remote();
+    }
     return OK unless $u && $u->{'journaltype'} eq 'P';
 
     $r->print("user: $u->{'user'}\n");
@@ -60,6 +68,10 @@ sub checksession
     $r->print("totalusage: $totalusage\n");
     return OK;
 }
+
+# get_user_info above used to be called 'checksession', maintain
+# an alias for compatibility
+sub checksession { get_user_info(@_); }
 
 # Pregenerate a list of challenge/responses.
 sub makechals
