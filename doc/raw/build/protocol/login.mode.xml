@@ -73,7 +73,7 @@ The user's full name.  Often, clients use this to change the top-level window's 
 A message that <emphasis>should</emphasis> be displayed in a dialog box (or to the screen in a console application).  The message is rarely present but when used notifies the user of software updates they've requested to hear about, problems with their account (if mail is bouncing to them, we'd like them to give us a current email address), etc.  To test this if you're developing a client, use the user account <literal role="username">test</literal> with the password <literal>test</literal> and a message will always be returned.
 </des></scalar></key>
           
-<key name="friendgrounds" count="1">
+<key name="friendgroups" count="1">
 &friendGroups;
 </key>
 
