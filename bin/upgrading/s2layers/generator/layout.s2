@@ -44,9 +44,6 @@ property use text_read_comments;
 property use text_post_comment_friends;
 property use text_read_comments_friends;
 
-set text_post_comment = "post comment";
-set text_post_comment_friends = "post comment";
-
 function print_stylesheet () {
     " /// stylesheeet!!!\n";
 }
