@@ -1132,8 +1132,8 @@ INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope
 UPDATE userproplist SET des='Maxium picture width to be shown in journal before being linkitized.  0: for no max',prettyname='Max Picture Width',indexed='1',scope='general',datatype='' WHERE name='opt_maxpicwidth';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('opt_maxwordlength', '1', 'Max Word Length', '', 'Maxium word length before forced word breaks.  0: for no max', 'general');
 UPDATE userproplist SET des='Maxium word length before forced word breaks.  0: for no max',prettyname='Max Word Length',indexed='1',scope='general',datatype='' WHERE name='opt_maxwordlength';
-INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('opt_nctalklinks', '', 'Show number of comments in URL', 'bool', 'Show number of comments in URL', 'general');
-UPDATE userproplist SET des='Show number of comments in URL',prettyname='Show number of comments in URL',indexed='',scope='general',datatype='bool' WHERE name='opt_nctalklinks';
+INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('opt_nctalklinks', '0', 'Show number of comments in URL', 'bool', 'Show number of comments in URL', 'general');
+UPDATE userproplist SET des='Show number of comments in URL',prettyname='Show number of comments in URL',indexed='0',scope='general',datatype='bool' WHERE name='opt_nctalklinks';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('opt_notalkicons', '1', 'No Forum Icons', 'bool', '1: no forum icons shown, 0: default, show them', 'general');
 UPDATE userproplist SET des='1: no forum icons shown, 0: default, show them',prettyname='No Forum Icons',indexed='1',scope='general',datatype='bool' WHERE name='opt_notalkicons';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('opt_showtopicstuff', '1', 'Topic Directory Integration', 'char', 'Y: include links to topic directory, N: don\'t.', 'general');
