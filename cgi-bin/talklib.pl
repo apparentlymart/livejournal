@@ -939,14 +939,15 @@ sub format_html_mail {
     LJ::CleanHTML::clean_comment(\$cleanbody, $comment->{preformat});
     my $pics = LJ::Talk::get_subjecticons();
     my $icon = LJ::Talk::show_image($pics, $comment->{subjecticon}); 
+
+    my $heading;
     if ($comment->{subject}) {
-        # this needs to be one string so blockquote handles it properly.
-        $html .= blockquote("<b>Subject:</b> " .
-                            LJ::ehtml($comment->{subject}) .
-                            "$icon<br/><p>$cleanbody</p>");
-    } else {
-        $html .= blockquote("$icon<br/><p>$cleanbody</p>");
+        $heading = "<b>Subject:</b> " . LJ::ehtml($comment->{subject});
     }
+    $heading .= $icon;
+    $heading .= "<br />" if $heading;
+    # this needs to be one string so blockquote handles it properly.
+    $html .= blockquote("$heading$cleanbody");
 
     if ($comment->{state} eq 'S') {
         $html .= "<p>This comment was screened.  You must respond to it or unscreen it before others can see it.</p>\n";
@@ -962,9 +963,9 @@ sub format_html_mail {
     $html .= "<li><a href=\"$LJ::SITEROOT/delcomment.bml?journal=$item->{journalu}{user}&talkid=$dtalkid\">Delete the comment</a></li>";
     $html .= "</ul></p>";
 
-    my $want_form = 0;
+    my $want_form = 1;  # this should probably be a preference, or maybe just always off.
     if ($want_form) {
-        $html .= "You can also reply here:\n";
+        $html .= "If your mail client supports it, you can also reply here:\n";
         $html .= "<blockquote><form method='post' target='ljreply' action=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
 
         $html .= LJ::html_hidden(
