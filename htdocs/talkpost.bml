@@ -219,7 +219,7 @@ BODY<=
  $ret .= $event;
  $ret .= "</UL>";
  
- $ret .= "<BR CLEAR=ALL><HR WIDTH=100% SIZE=2 ALIGN=CENTER>";	
+ $ret .= "<BR CLEAR=ALL><HR SIZE=2 ALIGN=CENTER>";	
  ### is this in a topic?
  if ($FORM{'replyto'} eq "")
  {
@@ -314,7 +314,7 @@ BODY<=
      # spit out a pretty table of all the possible subjecticons
      # icons defined in &load_subjecticon sub
      $ret .= "<TR VALIGN=MIDDLE><TD>&nbsp;</TD><TD ALIGN=LEFT COLSPAN=4>\n";
-     $ret .= "<TABLE BORDER=0 CELLSPACING=3 CELLPADDING=0>\n";
+     $ret .= "<table border='0' cellspacing='3' cellpadding='0'>\n";
      
      # @subjecticon_types is defined by &load_subjecticon... using this instead
      # of @{keys %subjecticon} to preserve ordering.
@@ -370,7 +370,7 @@ BODY<=
  $ret .= "</td></tr>\n";
 
  # textarea for their message body
- $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT>Message:</TD><TD COLSPAN=4><TEXTAREA CLASS=textbox ROWS=10 COLS=50 WRAP=VIRTUAL NAME=\"body\"></TEXTAREA>";
+ $ret .= "<tr valign='top'><td align='right'>Message:</td><td colspan='4'><textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' style='width: 99%'></textarea>";
  $ret .= "<br><INPUT TYPE=SUBMIT NAME=submitpost VALUE=\"Post Comment\">\n";
 
  ## preview stuff
