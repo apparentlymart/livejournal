@@ -40,11 +40,13 @@
 <!-- Style Systems -->
 
 <!ENTITY ljp.styles.index                       SYSTEM "../ljp.book/styles/index.xml">
+<!ENTITY ljp.styles.compare                     SYSTEM "../ljp.book/styles/compare.xml">
 
 <!-- S1 -->
 <!ENTITY ljp.styles.s1                          SYSTEM "../ljp.book/styles/s1/index.xml">
 <!ENTITY ljp.styles.s1.history                  SYSTEM "../ljp.book/styles/s1/history.xml">
 <!ENTITY ljp.styles.s1.design                   SYSTEM "../ljp.book/styles/s1/design.xml">
+<!ENTITY ljp.styles.s1.ref.gen                  SYSTEM "../ljp.book/styles/s1/ref.gen.xml">
 
 <!-- S2-->
 <!ENTITY ljp.styles.s2                          SYSTEM "../ljp.book/styles/s2/index.xml">
