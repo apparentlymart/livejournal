@@ -7,17 +7,20 @@ use Getopt::Long;
 my $help = '';
 my $sync = '';
 my $full = '';
+my $diff = '';
 
 exit 1 unless GetOptions('help' => \$help,
 			 'full' => \$full,
-			 'sync' => \$sync);
+			 'sync' => \$sync,
+			 'diff' => \$diff);
 
 if ($help) {
     die "Usage: cvsreport.pl [opts] [files]\n" .
 	"    --help          Get this help\n" .
 	"    --sync          Put files where they need to go.\n" .
 	"                    All files, unless you specify which ones.\n".
-	"    --full          Show main files not in a CVS repository\n";
+	"    --full          Show main files not in a CVS repository\n".
+	"    --diff          Show diffs of changed files.\n";
 }
 
 unless (-d $ENV{'LJHOME'}) { 
@@ -47,22 +50,39 @@ foreach my $file (@files)
 	next if ($sync);
 	next unless ($full);
     }
-    $status ||= "-"x20;
-    printf "%-20s %s\n", $status, $file;
-    if ($sync) {
-	my ($sdir, $ddir);
-	if ($status eq "main <- cvs") {
-	    ($sdir, $ddir) = ($cvs, $maind);
-	} elsif ($status eq "main <- local") {
-	    ($sdir, $ddir) = ($cvslocal, $maind);
-	} elsif ($status eq "main -> local") {
-	    ($sdir, $ddir) = ($maind, $cvslocal);
-	} elsif ($status eq "main -> cvs") {
-	    ($sdir, $ddir) = ($maind, $cvs);
-	} 
-	if ($sdir && $ddir) {
-	    unless (install($sdir, $ddir, $file)) { print "   Error: $!\n"; }
-	}
+    my $showstatus = $status || ("-"x20);
+
+    my ($sdir, $ddir);
+    if ($status eq "main <- cvs") {
+	($sdir, $ddir) = ($cvs, $maind);
+    } elsif ($status eq "main <- local") {
+	($sdir, $ddir) = ($cvslocal, $maind);
+    } elsif ($status eq "main -> local") {
+	($sdir, $ddir) = ($maind, $cvslocal);
+    } elsif ($status eq "main -> cvs") {
+	($sdir, $ddir) = ($maind, $cvs);
+    } 
+    
+    my $the_diff = "";
+    if ($diff && $status ne "main -> ??" && $sdir && $ddir) {
+	$the_diff = `diff -u $ddir/$file $sdir/$file`;
+	unless ($the_diff)
+	{
+	    # no real change (just touched/copied?), so copy
+	    # cvs one on top to fix times up.
+	    if ($ddir ne $maind) {
+		($sdir, $ddir) = ($ddir, $sdir);
+	    }
+	    install($sdir, $ddir, $file);
+	    next;
+	}    
+    }
+
+    printf "%-20s %s\n", $showstatus, $file;
+    print $the_diff;
+    
+    if ($sync && $sdir && $ddir) {
+	unless (install($sdir, $ddir, $file)) { print "   Error: $!\n"; }
     }
 }
 
