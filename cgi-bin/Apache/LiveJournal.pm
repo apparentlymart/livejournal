@@ -636,16 +636,19 @@ sub userpic_content
         $u = LJ::load_userid( $userid );
         return NOT_FOUND unless $u && $u->{'statusvis'} !~ /[XS]/ && $pic->{state} ne 'X';
 
-        # Now ask the blob lib for the path to send to the reproxy
-        $fmt = $MimeTypeMap{ $pic->{contenttype} };
-        $path = LJ::Blob::get_rel_path( $root, $u, "userpic", $fmt, $picid );
+        # sometimes we don't want to reproxy userpics
+        unless ($LJ::USERPIC_REPROXY_DISABLE{$u->{clusterid}}) {
+            # Now ask the blob lib for the path to send to the reproxy
+            $fmt = $MimeTypeMap{ $pic->{contenttype} };
+            $path = LJ::Blob::get_rel_path( $root, $u, "userpic", $fmt, $picid );
+    
+            # Set the headers and finish the request
+            $mime = $pic->{contenttype};
+            $r->header_out( 'X-REPROXY-FILE', $path );
+            $send_headers->();
 
-        # Set the headers and finish the request
-        $mime = $pic->{contenttype};
-        $r->header_out( 'X-REPROXY-FILE', $path );
-        $send_headers->();
-
-        return OK;
+            return OK;
+        }
     }
 
     # try to get it from disk if in disk-cache mode
