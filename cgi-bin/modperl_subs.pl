@@ -11,19 +11,22 @@ use Apache;
 use Apache::LiveJournal;
 use Apache::CompressClientFixup;
 use Apache::BML;
-use LJ::SpellCheck;
-use LJ::TextMessage;
-use LJ::Blob;
-use LJ::Captcha;
+use Apache::SendStats;
+use Apache::DebateSuicide;
+
 use Digest::MD5;
 use MIME::Words;
 use Text::Wrap ();
 use LWP::UserAgent ();
 use Storable;
-use Image::Size ();
-use Apache::SendStats;
-use Apache::DebateSuicide;
 use Time::HiRes ();
+use Image::Size ();
+
+use LJ::SpellCheck;
+use LJ::TextMessage;
+use LJ::Blob;
+use LJ::Captcha;
+use SafeAgent;
 
 # Try to load GTop library
 BEGIN { $LJ::HAVE_GTOP = eval "use GTop (); 1;" }
