@@ -11,6 +11,7 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/?$!) {
     $FORM{'y'} =  $1;
     $FORM{'m'} = $2 + 0;
 }
+$r->notes("codepath" => "bml.view.index");
 
  my $view = $FORM{'type'};
  my $user = $FORM{'user'};
