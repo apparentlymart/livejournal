@@ -181,11 +181,14 @@ sub create_view_lastn
 	    ) 
 	{
 	    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
+	    my $readurl = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
 	    $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
 		'itemid' => $ditemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$ditemid",
+		'urlread' => $readurl,
+		'messagecount' => $replycount,
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'LASTN_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid",
+		    'urlread' => $readurl,
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount == 1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
@@ -660,14 +663,16 @@ sub create_view_friends
 	    ! $logprops{$datakey}->{'opt_nocomments'}
 	    ) {
 	    my $jarg = $clusterid ? "journal=$friend&" : "";
-
+	    my $readurl = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
 	    $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
 		'itemid' => $ditemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$ditemid",
+		'urlread' => $readurl,
+		'messagecount' => $replycount,
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'FRIENDS_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid",
+		    'urlread' => $readurl,
 		    'messagecount' => $replycount,
-		    'mc-plural-s' => $replycount==1 ? "" : "s",
+		    'mc-plural-s' => $replycount == 1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
 		    'mc-plural-ies' => $replycount == 1 ? "y" : "ies",
 		}) : "",
@@ -1150,14 +1155,16 @@ sub create_view_day
 	    ! $logprops{$itemid}->{'opt_nocomments'}
 	    ) {
 	    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
-
+	    my $readurl = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
 	    $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
 		'itemid' => $ditemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$ditemid",
+		'urlread' => $readurl,
+		'messagecount' => $replycount,
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'DAY_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid",
+		    'urlread' => $readurl,
 		    'messagecount' => $replycount,
-		    'mc-plural-s' => $replycount==1 ? "" : "s",
+		    'mc-plural-s' => $replycount == 1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
 		    'mc-plural-ies' => $replycount == 1 ? "y" : "ies",
 		}) : "",

@@ -2127,7 +2127,15 @@ If there are existing comments for this event, then the value of [var[LASTN_TALK
 }
 { urlpost
 .des
-The URL you need to use in your &lt;A HREF=...&gt; tag to link to the "leave a comment" page.
+The URL you need to use in your &lt;a href=...&gt; tag to link to the "leave a comment" page.
+}
+{ urlread
+.des
+The URL to use in your &lt;a href=...&gt; tag to link to the "read comments" page.
+}
+{ messagecount
+.des
+The number of replies, or zero.
 }
 { itemid
 .des
@@ -2185,7 +2193,15 @@ If there are existing comments for this event, then the value of [var[DAY_TALK_R
 }
 { urlpost
 .des
-The URL you need to use in your &lt;A HREF=...&gt; tag to link to the "leave a comment" page.
+The URL you need to use in your &lt;a href=...&gt; tag to link to the "leave a comment" page.
+}
+{ urlread
+.des
+The URL to use in your &lt;a href=...&gt; tag to link to the "read comments" page.
+}
+{ messagecount
+.des
+The number of replies, or zero.
 }
 { itemid
 .des
@@ -2244,6 +2260,14 @@ If there are existing comments for this event, then the value of [var[FRIENDS_TA
 { urlpost
 .des
 The URL you need to use in your &lt;A HREF=...&gt; tag to link to the "leave a comment" page.
+}
+{ urlread
+.des
+The URL to use in your &lt;a href=...&gt; tag to link to the "read comments" page.
+}
+{ messagecount
+.des
+The number of replies, or zero.
 }
 { itemid
 .des
