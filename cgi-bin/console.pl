@@ -143,6 +143,149 @@ my $usage = sub {
     return $fail->($out, "usage: $cmdname $cmd{$cmdname}{argsummary}");
 };
 
+$cmd{'priv'} =
+   {
+    des        => 'Grant or revoke user privileges.',
+    privs      => [qw(admin)],
+    argsummary => '<action> <privs> <usernames>',
+    args       => [
+                   action    => "'grant', 'revoke', or 'revoke_all' to revoke all args for a given priv",
+                   privs     => "Comma-delimited list of priv names or priv:arg pairs",
+                   usernames => "Comma-delimited list of usernames",
+                  ],
+    handler => sub {
+        my ($dbh, $remote, $args, $out) = @_;
+
+        return $fail->($out, "Not logged in.") unless $remote;
+
+        # check usage, parse out some basic information.
+        my $is_grant;           # 1 if granting, 0 if revoking
+        my $is_revoke_all;      # 1 if action is revoke_all
+        my @privs;              # ([privcode,arg], ...)
+        my @usernames;          # (username, ...)
+        {
+            my $myname    = shift @$args;
+            my $action    = shift @$args    or return $usage->($out, $myname);
+            my $privstr   = shift @$args    or return $usage->($out, $myname);
+            my $userstr   = shift @$args    or return $usage->($out, $myname);
+            not @$args                      or return $usage->($out, $myname);
+            $action =~ /^(grant|revoke|revoke_all)$/
+                                            or return $usage->($out, $myname);
+
+            $is_grant      = ($action eq "grant");
+            $is_revoke_all = ($action eq "revoke_all");
+
+            @privs     = map {[split /:/, $_, 2]} (split /,\s*/, $privstr);
+            @usernames = split /,\s*/, $userstr;
+
+            # To reduce likelihood that someone will do 'priv revoke foo'
+            # intending to remove 'foo:*' and accidentally only remove 'foo:'
+            if ($action eq "revoke" and grep {not defined $_->[1]} @privs) {
+                $fail->($out, q{Empty arguments must be explicitly specified when using 'revoke'});
+                $fail->($out, q{For example, use 'revoke foo:', not 'revoke foo', to revoke the 'foo' priv with empty argument.});
+                return 0;
+            }
+            if ($action eq "revoke_all" and grep {defined $_->[1]} @privs) {
+                return $fail->($out, q{Do not explicitly specify priv arguments when using revoke_all.});
+            }
+        }
+
+        # get the userids, fail if any of them are invalid
+        my %userids = ();       # username => userid
+        foreach my $username (@usernames) {
+            $userids{$username} = LJ::get_userid($dbh, $username)
+              or return $fail->($out, "No such username '$username'");
+        }
+
+        # get mapping of priv codes to priv ids, fail if any are invalid
+        my %prlids;             # privcode => prlid
+        {
+            my @privcodes = map {$_->[0]} @privs;
+            my $privcode_list = join ",", (map {$dbh->quote($_)} @privcodes);
+            my $sql = ("SELECT privcode, prlid".
+                       "  FROM priv_list".
+                       " WHERE privcode IN ($privcode_list)");
+            my $rows = $dbh->selectall_arrayref($sql)
+              or return $fail->($out, "Couldn't load prlids?!");
+            %prlids = map {@$_} @$rows;
+
+            foreach my $privcode (@privcodes) {
+                exists $prlids{$privcode}
+                  or return $fail->($out, "No such priv '$privcode'");
+            }
+        }
+
+        # check to make sure remote user has appropriate admin privs
+        {
+            my $admin = $remote->{privarg}{admin}
+              or return $fail->($out, "Couldn't load admin privs?!");
+            foreach my $pair (@privs) {
+                my ($priv, $arg) = @$pair;
+                unless ($admin->{all} or $admin->{$priv}
+                        or ($arg and $admin->{"$priv/$arg"})) {
+                    return $fail->($out,
+                                   "You don't have permission to grant priv ".
+                                   ($arg ? "$priv:$arg" : $priv));
+                }
+            }
+        }
+
+        my $result = 1;
+
+        # revoke a priv with all args - just do it in one big DELETE
+        if ($is_revoke_all) {
+            my $sql = sprintf('DELETE FROM priv_map WHERE userid IN (%s) AND prlid IN (%s)',
+                              join(',', values %userids),
+                              join(',', values %prlids));
+            if ($dbh->do($sql)) {
+                $success->($out, sprintf("Denying: %s with all args to %s",
+                                         join(',', keys %prlids),
+                                         join(',', keys %userids)));
+                foreach my $userid (values %userids) {
+                    foreach my $privname (keys %prlids) {
+                        LJ::statushistory_add($dbh, $userid, $remote->{userid},
+                                              'privdel',
+                                              qq{Denying: "$privname" with all args});
+                    }
+                }
+            } else {
+                $result = $fail->($out, "DB failure");
+            }
+            return $result;
+        }
+
+        # the normal case: add/remove each combination of userid and privid/arg
+        my $sql = ($is_grant
+                   ? "INSERT INTO priv_map (userid,prlid,arg) VALUES (?,?,?)"
+                   : "DELETE FROM priv_map WHERE userid=? AND prlid=? AND arg=?");
+        my $sth = $dbh->prepare($sql)
+          or return $fail->($out, "Couldn't prepare priv_map sth?!");
+
+        foreach my $pair (@privs) {
+            my ($privcode, $arg) = @$pair;
+            my $prlid = $prlids{$privcode};
+            $arg ||= "";   # since it might be undef
+
+            foreach my $username (@usernames) {
+                my $userid = $userids{$username};
+                my $desc = sprintf(qq{%s: "%s" with arg "%s"},
+                                   $is_grant ? "Granting" : "Denying",
+                                   $privcode, $arg);
+
+                if ($sth->execute($userid, $prlid, $arg)) {
+                    $success->($out, "$desc to $username");
+                    LJ::statushistory_add($dbh, $userid, $remote->{userid},
+                                          $is_grant ? "privadd" : "privdel",
+                                          $desc);
+                } else {
+                    $result = $fail->($out, "DB failure: $desc to $username: " . $sth->errstr);
+                }
+            }
+        }
+        return $result;
+    },
+};
+
 $cmd{'gencodes'} = {
     des => 'Generate invite codes.',
     privs => [qw(gencodes)],
