@@ -1509,6 +1509,41 @@ CREATE TABLE counter (
 )
 EOC
 
+# community interests
+register_tablecreate("comminterests", <<'EOC');
+CREATE TABLE comminterests (
+  userid int(10) unsigned NOT NULL default '0',
+  intid int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (userid,intid),
+  KEY (intid)
+) 
+EOC
+
+post_create("comminterests",
+            "code" => sub {
+                my $dbh = shift;
+                print "# Populating community interests...\n";
+
+                my $BLOCK = 1_000;
+
+                my @ids = @{ $dbh->selectcol_arrayref("SELECT userid FROM community") };
+                my $total = @ids;
+
+                while (@ids) {
+                    my @set = grep { $_ } splice(@ids, 0, $BLOCK);
+
+                    printf ("# community interests status: (%0.1f%%)\n",
+                            ((($total - @ids) / $total) * 100)) if $total > $BLOCK;
+
+                    local $" = ",";
+                    do_sql("INSERT IGNORE INTO comminterests (userid, intid) ".
+                           "SELECT userid, intid FROM userinterests " .
+                           "WHERE userid IN (@set)");
+                }
+
+                print "# Finished converting community interests.\n";
+            },
+            );
 
 ### changes
 
