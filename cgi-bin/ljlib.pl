@@ -15,6 +15,7 @@ use strict;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use DBI;
 use DBI::Role;
+use DBIx::StateKeeper;
 use Digest::MD5 ();
 use MIME::Lite ();
 use HTTP::Date ();
@@ -196,7 +197,23 @@ sub get_dbh {
         }
         warn $errmsg;
     }
-    $LJ::DBIRole->get_dbh(@_);
+
+    foreach my $role (@_) {
+        if (my $mapping = $LJ::WRAPPED_DB_ROLE{$role}) {
+            return $LJ::REQ_DBIX_KEEPER{$role} if $LJ::REQ_DBIX_KEEPER{$role};
+            my ($canl_role, $dbname) = @$mapping;
+            my $tracker = 
+                $LJ::REQ_DBIX_TRACKER{$canl_role} ||=
+                DBIx::StateTracker->new($LJ::DBIRole->get_dbh({unshared=>1},$canl_role), "");
+            if ($tracker) {
+                my $keeper = DBIx::StateKeeper->new($tracker, $dbname);
+                $LJ::REQ_DBIX_KEEPER{$role} = $keeper;
+                return $keeper;
+            }
+        }
+        my $db = $LJ::DBIRole->get_dbh($role);
+        return $db if $db;
+    }
 }
 
 # <LJFUNC>
@@ -3147,8 +3164,9 @@ sub start_request
     %LJ::REQ_CACHE_USER_NAME = ();    # users by name
     %LJ::REQ_CACHE_USER_ID = ();      # users by id
     %LJ::REQ_CACHE_REL = ();          # relations from LJ::check_rel()
-    %LJ::REQ_CACHE_DBS = ();          # clusterid -> LJ::DBSet
     %LJ::S1::REQ_CACHE_STYLEMAP = (); # styleid -> uid mappings
+    %LJ::REQ_DBIX_TRACKER = ();       # canonical dbrole -> DBIx::StateTracker
+    %LJ::REQ_DBIX_KEEPER = ();        # dbrole -> DBIx::StateKeeper
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
