@@ -163,10 +163,11 @@ sub FriendsPage
 
     my %friends = ();
     unless ($opts->{'view'} eq "friendsfriends") {
-        $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, f.fgcolor, f.bgcolor, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=$u->{'userid'} AND f.friendid IN ($ownersin)");
+        $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, f.fgcolor, f.bgcolor, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc, u.journaltype FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=$u->{'userid'} AND f.friendid IN ($ownersin)");
     } else {
-        $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc FROM user u WHERE u.userid IN ($ownersin)");}
-
+        $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc, u.journaltype FROM user u WHERE u.userid IN ($ownersin)");
+    }
+    
 
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
