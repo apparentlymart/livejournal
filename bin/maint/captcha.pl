@@ -51,6 +51,7 @@ sub gencode ($) {
 }
 
 
+
 #####################################################################
 ### M A I N T E N A N C E   T A S K S
 #####################################################################
@@ -58,9 +59,7 @@ $maintinfo{gen_audio_captchas}{opts}{locking} = "per_host";
 $maint{gen_audio_captchas} = sub {
     my (
         $u,                     # Fake user record for Blob::put
-        $sql,                   # SQL queries
         $dbh,                   # Database handle (writer)
-        $sth,                   # Statement handle
         $count,                 # Count of currently-extant audio challenges
         $need,                  # How many we need to still create
         $make,                  # how many we're actually going to create this round
@@ -79,15 +78,14 @@ $maint{gen_audio_captchas} = sub {
     $dbh->do("SET wait_timeout=28800");
 
     # Count how many challenges there are currently
-    $sql = q{
+    $count = $dbh->selectrow_array(q{
         SELECT COUNT(*)
         FROM captchas
         WHERE
             type = 'audio'
             AND issuetime = 0
-    };
+    });
 
-    $count = $dbh->selectrow_array( $sql );
 
     my $MaxItems = $LJ::CAPTCHA_AUDIO_PREGEN || 500;
 
@@ -122,29 +120,21 @@ $maint{gen_audio_captchas} = sub {
         or die "Couldn't load the system user.";
     $tmpdir = tempdir( "audio_captchas_XXXXXX", CLEANUP => 0 );
 
-    # Prepare insert statement
-    $sql = q{
-        INSERT INTO captchas( type, location, answer, anum )
-        VALUES ( 'audio', ?, ?, ? )
-    };
-    $sth = $dbh->prepare( $sql ) or die "prepare: $sql: ", $dbh->errstr;
-
     # target location
     my $location = $LJ::CAPTCHA_MOGILEFS ? 'mogile' : 'blob';
 
     # Generate the challenges
     for ( my $i = 0; $i < $make; $i++ ) {
-        print "Generating audio $i...";        
+        print "Generating audio $i...";
         ( $wav, $code ) = LJ::Captcha::generate_audio( $tmpdir );
         $data = readfile( $wav );
         unlink $wav or die "unlink: $wav: $!";
 
-        # Insert the captcha into the DB
-        print "inserting (code = $code)...";
+        # Generate the capid + anum
+        print "generating new capid/anum...";
+        $capid = LJ::alloc_global_counter( 'C' );
+        die "Couldn't allocate capid" unless $capid;
         $anum = int( rand 65_535 );
-        $sth->execute( $location, $code, $anum )
-            or die "insert: $sql ($location, $code, $anum): ", $sth->errstr;
-        $capid = $dbh->{mysql_insertid};
 
         # Insert the blob
         print "uploading (capid = $capid, anum = $anum)...";
@@ -160,6 +150,26 @@ $maint{gen_audio_captchas} = sub {
             LJ::Blob::put( $u, 'captcha_audio', 'wav', $capid, $data, \$err )
                   or die "Error uploading to media server: $err";
         }
+
+        # Insert the captcha into the DB. If it fails for some reason, delete
+        # the just-uploaded file from the media storage system too.
+        print "inserting (code = $code)...";
+        my $rval = eval {
+            $dbh->do(q{
+                INSERT INTO captchas( capid, type, location, answer, anum )
+                VALUES ( ?, 'audio', ?, ?, ? )
+            }, undef, $capid, $location, $code, $anum);
+        };
+        if ( !$rval || $@ ) {
+            my $err = $@ || $dbh->errstr;
+            if ( $location eq 'mogile' ) {
+                $LJ::MogileFS->delete( "captcha:$capid" );
+            } else {
+                LJ::Blob::delete( $u, 'captcha_audio', 'wav', $capid );
+            }
+            die "audio captcha insert error on ($capid, $location, $code, $anum): $err";
+        }
+
         print "done.\n";
     }
 
@@ -174,9 +184,7 @@ $maintinfo{gen_image_captchas}{opts}{locking} = "per_host";
 $maint{gen_image_captchas} = sub {
     my (
         $u,                     # Fake user record for Blob::put
-        $sql,                   # SQL queries
         $dbh,                   # Database handle (writer)
-        $sth,                   # Statement handle
         $count,                 # Count of currently-extant audio challenges
         $need,                  # How many we need to still create
         $code,                  # The generated challenge code
@@ -192,15 +200,13 @@ $maint{gen_image_captchas} = sub {
     $dbh->do("SET wait_timeout=28800");
 
     # Count how many challenges there are currently
-    $sql = q{
+    $count = $dbh->selectrow_array(q{
         SELECT COUNT(*)
         FROM captchas
         WHERE
             type = 'image'
             AND issuetime = 0
-    };
-
-    $count = $dbh->selectrow_array( $sql );
+    });
 
     my $MaxItems = $LJ::CAPTCHA_IMAGE_PREGEN || 1000;
 
@@ -218,13 +224,7 @@ $maint{gen_image_captchas} = sub {
     $u = LJ::load_user( "system" )
         or die "Couldn't load the system user.";
 
-    # Prepare insert statement
-    $sql = q{
-        INSERT INTO captchas( type, location, answer, anum )
-        VALUES ( 'image', ?, ?, ? )
-    };
     $dbh = LJ::get_db_writer() or die "Failed to get_db_writer()";
-    $sth = $dbh->prepare( $sql ) or die "prepare: $sql: ", $dbh->errstr;
 
     # target location
     my $location = $LJ::CAPTCHA_MOGILEFS ? 'mogile' : 'blob';
@@ -235,12 +235,11 @@ $maint{gen_image_captchas} = sub {
         $code = gencode( 7 );
         ( $png ) = LJ::Captcha::generate_visual( $code );
 
-        # Insert the captcha into the DB
-        print "inserting (code = $code)...";
+        # Generate the capid + anum
+        print "generating new capid/anum...";
+        $capid = LJ::alloc_global_counter( 'C' );
+        die "Couldn't allocate capid" unless $capid;
         $anum = int( rand 65_535 );
-        $sth->execute( $location, $code, $anum )
-            or die "insert: $sql ($location, $code, $anum): ", $sth->errstr;
-        $capid = $dbh->{mysql_insertid};
 
         # Insert the blob
         print "uploading (capid = $capid, anum = $anum)...";
@@ -256,6 +255,26 @@ $maint{gen_image_captchas} = sub {
             LJ::Blob::put( $u, 'captcha_image', 'png', $capid, $png, \$err )
                   or die "Error uploading to media server: $err";
         }
+
+        # Insert the captcha into the DB. If it fails for some reason, delete
+        # the just-uploaded file from the media storage system too.
+        print "inserting (code = $code)...";
+        my $rval = eval {
+            $dbh->do(q{
+                INSERT INTO captchas( capid, type, location, answer, anum )
+                VALUES ( ?, 'image', ?, ?, ? )
+            }, undef, $capid, $location, $code, $anum);
+        };
+        if ( !$rval || $@ ) {
+            my $err = $@ || $dbh->errstr;
+            if ( $location eq 'mogile' ) {
+                $LJ::MogileFS->delete( "captcha:$capid" );
+            } else {
+                LJ::Blob::delete( $u, 'captcha_image', 'png', $capid );
+            }
+            die "image captcha insert error on ($capid, $location, $code, $anum): $err";
+        }
+
         print "done.\n";
     }
 
@@ -282,17 +301,18 @@ $maint{clean_captchas} = sub {
             capid, type, location
         FROM captchas
         WHERE
-	    ( issuetime <> 0 AND issuetime < ? )
-	    OR
+        ( issuetime <> 0 AND issuetime < ? )
+        OR
             ( userid > 0
-	      AND ( issuetime <> 0 AND issuetime < ? )
-	      )
+          AND ( issuetime <> 0 AND issuetime < ? )
+          )
         LIMIT 2500
     };
-    $dbh = LJ::get_db_writer();
+    $dbh = LJ::get_db_writer()
+        or die "No master DB handle";
     $expired = $dbh->selectall_arrayref( $sql, undef,
-					 time() - $ExpireThresNoUser,
-					 time() - $ExpireThresUser );
+                     time() - $ExpireThresNoUser,
+                     time() - $ExpireThresUser );
     die "selectall_arrayref: $sql: ", $dbh->errstr if $dbh->err;
 
     if ( @$expired ) {
