@@ -1,0 +1,33 @@
+<VirtualHost www.lj.com>
+  RewriteEngine on
+  RewriteLogLevel 0
+  RewriteRule ^/~([a-z0-9_]+)(/?.*)$ /users/$1$2 [L,PT,NS]
+
+  RewriteCond %{REQUEST_URI} !\.bml
+  RewriteRule ^/community/([a-z0-9_]+)(/?.*)$ /users/$1$2 [L,PT,NS]
+
+  RewriteCond %{HTTP_HOST} ^([a-z0-9_\-]+)\.lj\.com$ [NC]
+  RewriteCond %1 !^www$ [NC]
+  RewriteRule ^(.+) %{HTTP_HOST}$1  [C]
+  RewriteRule ^([a-z0-9_\-]+)\.lj\.com(.+)  /users/$1$2  [L,PT,NS]
+
+  RewriteRule ^/confirm/([a-z0-9]+\.[a-z0-9]+) http://www.lj.com/register.bml?$1 [L,R]
+
+  ServerAdmin webmaster@lj.com
+  DocumentRoot /home/lj/htdocs 
+  ServerName www.lj.com
+  ServerAlias lj.com *.lj.com
+
+  DirectoryIndex index.html index.bml
+  ScriptAlias /cgi-bin/ /home/lj/cgi-bin/
+ 
+  AddType text/bml BML 
+  Action text/bml /cgi-bin/bmlp.pl
+
+  AddType text/sbml SBML
+  Action text/sbml /cgi-bin/sbmlp.pl
+
+  <Location /users> 
+      SetHandler cgi-script
+  </Location>
+</VirtualHost>
