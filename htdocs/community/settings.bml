@@ -99,7 +99,10 @@ body<=
 
         LJ::set_userprop($cu, 'nonmember_posting', $nonmembers);
         LJ::set_userprop($cu, 'moderated', $moderated);
- 
+
+        my $nummod = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser WHERE userid=$cu->{'userid'} AND type='M'");
+        LJ::set_rel($cu->{'userid'}, $remote->{'userid'}, 'M') unless $nummod;
+
         $ret .= "<?h1 $ML{'.success'} h1?>";
         if ($mode eq 'create') {
            $ret .= "<?p $ML{'.label.commcreated'} p?>";
@@ -132,8 +135,8 @@ body<=
     $cname = LJ::canonical_username($GET{'comm'});
     $c = LJ::load_user($cname);
     unless ($c) {
-       $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notfound'} p?>";
-       return $ret;
+       # if no community was specified, redirect to manage.bml
+       return BML::redirect("$LJ::SITEROOT/community/manage.bml");
     } 
     unless ($c->{'journaltype'} eq 'C') {
        $ret = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notcomm'} p?>";
