@@ -24,6 +24,7 @@ body<=
         return "<?h1 $ML{'.invalid.submission'} h1?><?p $ML{'.user.nomatch'} p?>";
     }
 
+    # TAG:FR:bml_syn:1
     my $sth = $dbh->prepare("SELECT s.userid, us.user, s.synurl, COUNT(*) ".
                             "FROM useridmap us, syndicated s, friends fa, friends fb ".
                             "WHERE fa.userid=? AND fa.friendid=s.userid AND us.userid=s.userid ".
@@ -35,6 +36,7 @@ body<=
     my %syn;
     while (my ($suserid, $user, $url, $count) = $sth->fetchrow_array) {
         if ($POST{'action:remove'} && $POST{"defriend_$user"}) {
+            # TAG:FR:bml_syn:remove_feed
             LJ::friends_do($u, "DELETE FROM friends WHERE userid=? AND friendid=?",
                            $u->{'userid'}, $suserid);
             next;
@@ -125,6 +127,7 @@ body<=
         return $error->($ML{'.error.unknown'}) unless $su;
         unless ($cost{$su->{'user'}}) 
         {
+            # TAG:FR:bml_syn:count_friendofs
             my $count = $dbh->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=?", undef,
                                               $su->{'userid'});
             $count = $count + 1;

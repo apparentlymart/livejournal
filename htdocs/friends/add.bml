@@ -86,6 +86,7 @@
  }
 
  # check to see if user is already a friend.
+ # TAG:fr:bml_friends_add:check_is_friend
  my $dbr = LJ::get_db_reader();
  $sth = $dbr->prepare("SELECT * FROM friends WHERE userid=$remote->{'userid'} AND friendid=$userid");
  $sth->execute;

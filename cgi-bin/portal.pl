@@ -589,6 +589,7 @@ $box{'bdays'} =
         box_start($bd, $box, { 'title' => BML::ml('portal.bdays.portaltitle'),
                               'url' => '/birthdays.bml' });
 
+        # TAG:FR:portal:get_bdays
         $sth = $dbr->prepare("SELECT u.user, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0");
         $sth->execute;
 

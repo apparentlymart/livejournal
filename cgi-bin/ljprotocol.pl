@@ -290,6 +290,7 @@ sub getfriends
             }
         }
     }
+    # TAG:FR:protocol:getfriends_of
     if ($req->{'includefriendof'}) {
         $res->{'friendofs'} = list_friends($u, {
             'limit' => $req->{'friendoflimit'},
@@ -299,6 +300,7 @@ sub getfriends
             foreach(@{$res->{'friendofs'}}) { LJ::text_out(\$_->{'fullname'}) };
         }
     }
+    # TAG:FR:protocol:getfriends
     $res->{'friends'} = list_friends($u, {
         'limit' => $req->{'friendlimit'},
         'includebdays' => $req->{'includebdays'},
@@ -316,6 +318,8 @@ sub friendof
     return fail($req,502) unless LJ::get_db_reader();
     my $u = $flags->{'u'};
     my $res = {};
+
+    # TAG:FR:protocol:getfriends_of2 (same as TAG:FR:protocol:getfriends_of)
     $res->{'friendofs'} = list_friends($u, {
         'friendof' => 1,
         'limit' => $req->{'friendoflimit'},
@@ -360,6 +364,7 @@ sub checkfriends
     my $memkey = [$u->{'userid'},"checkfriends:$u->{userid}:$mask"];
     my $update = LJ::MemCache::get($memkey);
     unless ($update) {
+        # TAG:FR:protocol:checkfriends (wants reading list of mask, not "friends")
         my $fr = LJ::get_friends($u, $mask);
         unless ($fr && %$fr) {
             $res->{'new'} = 0;
@@ -1591,6 +1596,7 @@ sub editfriends
     ## first, figure out who the current friends are to save us work later
     my %curfriend;
     my $friend_count = 0;
+    # TAG:FR:protocol:editfriends1
     $sth = $dbh->prepare("SELECT u.user FROM useridmap u, friends f ".
                          "WHERE u.userid=f.friendid AND f.userid=$userid");
     $sth->execute;
@@ -1609,6 +1615,7 @@ sub editfriends
         next DELETEFRIEND unless ($curfriend{$deluser});
 
         my $friendid = LJ::get_userid($deluser);
+        # TAG:FR:protocol:editfriends2_del
         $dbh->do("DELETE FROM friends WHERE userid=? AND friendid=?", undef,
                  $userid, $friendid);
         $did_deletes = 1;
@@ -1688,6 +1695,7 @@ sub editfriends
             my $gmask = $fa->{'groupmask'};
             if (! $gmask && $curfriend{$aname}) {
                 # if no group mask sent, use the existing one if this is an existing friend
+                # TAG:FR:protocol:editfriends3_getmask
                 my $sth = $dbh->prepare("SELECT groupmask FROM friends ".
                                         "WHERE userid=$userid AND friendid=$friendid");
                 $sth->execute;
@@ -1696,6 +1704,7 @@ sub editfriends
             # force bit 0 on.
             $gmask |= 1;
 
+            # TAG:FR:protocol:editfriends4_addeditfriend
             $sth = $dbh->prepare("REPLACE INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) ".
                                  "VALUES ($userid, $friendid, $qfg, $qbg, $gmask)");
             $sth->execute;
@@ -1815,6 +1824,7 @@ sub editfriendgroups
 
     # remove the bits for deleted groups from all friends groupmasks
     if ($delete_mask) {
+        # TAG:FR:protocol:editfriendgroups_removemasks
         $dbh->do("UPDATE friends".
                  "   SET groupmask = groupmask & ~$delete_mask".
                  " WHERE userid = $userid");
@@ -1858,6 +1868,7 @@ sub editfriendgroups
     }
 
     ## change friends' masks
+    # TAG:FR:protocol:editfriendgroups_changemasks
     foreach my $friend (keys %{$req->{'groupmasks'}})
     {
         my $mask = int($req->{'groupmasks'}->{$friend}) | 1;
@@ -1879,6 +1890,7 @@ sub list_friends
     my ($u, $opts) = @_;
     my $dbr = LJ::get_db_reader();
 
+    # TAG:FR:protocol:list_friends
     my $limitnum = $opts->{'limit'}+0;
     my $where = "u.userid=f.friendid AND f.userid=$u->{'userid'}";
     if ($opts->{'friendof'}) {

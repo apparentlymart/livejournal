@@ -746,6 +746,7 @@ sub change_journal_type
 
     $dbh->do("DELETE FROM community WHERE userid=?", undef, $u->{'userid'});
 
+    # TAG:FR:console:change_journal_type:getfriendofs
     # if we're changing a non-person account to a person account,
     # we need to ditch all its friend-ofs so that old users befriending
     # that account (in order to watch it), don't give the account maintainer
@@ -753,6 +754,7 @@ sub change_journal_type
     # be able to do, since journaltype=='P'.
     my $ids = $dbh->selectcol_arrayref("SELECT userid FROM friends WHERE friendid=?",
                                        undef, $u->{'userid'});
+    # TAG:FR:console:change_journal_type:deletefriendofs
     $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $u->{'userid'});
     LJ::memcache_kill($_, "friends") foreach @$ids;
     
@@ -869,7 +871,9 @@ sub friend
 
     if ($command eq "list") 
     {
-        my $sth = $dbh->prepare("SELECT u.user, u.name, u.statusvis, u.journaltype FROM user u, friends f WHERE u.userid=f.friendid AND f.userid=$quserid ORDER BY u.user");
+        # TAG:FR:console:friend:getfriends
+        my $sth = $dbh->prepare("SELECT u.user, u.name, u.statusvis, u.journaltype FROM user u, friends f ".
+                                "WHERE u.userid=f.friendid AND f.userid=$quserid ORDER BY u.user");
         $sth->execute;
         push @$out, [ "", sprintf("%-15s S T  Name", "User") ];
         push @$out, [ "", "-"x58 ];

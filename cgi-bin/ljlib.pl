@@ -269,6 +269,7 @@ sub get_newids
 
 sub get_groupmask
 {
+    # TAG:FR:ljlib:get_groupmask
     my ($journal, $remote) = @_;
     return 0 unless $journal && $remote;
     my $jid = want_userid($journal);
@@ -607,6 +608,7 @@ sub get_friend_group {
 #                   values = hashrefs of 'friends' columns and their values
 # </LJFUNC>
 sub get_friends {
+    # TAG:FR:ljlib:get_friends
     my ($uuid, $mask, $memcache_only) = @_;
     my $userid = LJ::want_userid($uuid);
     return undef unless $userid;
@@ -982,6 +984,7 @@ sub get_friend_items
         return undef if $fr_loaded;
 
         # load all user's friends
+        # TAG:FR:ljlib:old_friendsfriends_getitems
         my %f;
         my $sth = $dbr->prepare(qq{
             SELECT f.friendid, f.groupmask, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate),
@@ -1011,6 +1014,7 @@ sub get_friend_items
                 $extra = "AND u.journaltype IN (".join (',', @in).")" if @in;
             }
 
+            # TAG:FR:ljlib:old_friendsfriends_getitems2
             my $sth = $dbr->prepare(qq{
                 SELECT u.*, UNIX_TIMESTAMP(uu.timeupdate) AS timeupdate
                 FROM friends f, userusage uu, user u WHERE f.userid=? AND
@@ -2994,6 +2998,7 @@ sub new_account_cluster
 sub is_friend
 {
     &nodb;
+    # TAG:FR:ljlib:is_friend   (trusted, not just reading.  check all callers to see what they mean)
     my $ua = shift;
     my $ub = shift;
 
@@ -3077,6 +3082,7 @@ sub can_view
     # so we have to load the user
     return 0 unless $remote->{'journaltype'} eq 'P';
 
+    # TAG:FR:ljlib:can_view  (turn off bit 0 for just watching?  hmm.)
     my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE ".
                                       "userid=$userid AND friendid=$remoteid");
     my $allowed = (int($gmask) & int($item->{'allowmask'}));
@@ -4775,6 +4781,7 @@ sub make_graphviz_dot_file
     $ret .= "  node [fontsize=10, color=lightgray, style=filled]\n";
     $ret .= "  \"$user\" [color=yellow, style=filled]\n";
 
+    # TAG:FR:ljlib:make_graphviz_dot_file1
     my @friends = ();
     $sth = $dbr->prepare("SELECT friendid FROM friends WHERE userid=$u->{'userid'} AND userid<>friendid");
     $sth->execute;
@@ -4782,6 +4789,7 @@ sub make_graphviz_dot_file
         push @friends, $_->{'friendid'};
     }
 
+    # TAG:FR:ljlib:make_graphviz_dot_file2
     my $friendsin = join(", ", map { $dbr->quote($_); } ($u->{'userid'}, @friends));
     my $sql = "SELECT uu.user, uf.user AS 'friend' FROM friends f, user uu, user uf WHERE f.userid=uu.userid AND f.friendid=uf.userid AND f.userid<>f.friendid AND uu.statusvis='V' AND uf.statusvis='V' AND (f.friendid=$u->{'userid'} OR (f.userid IN ($friendsin) AND f.friendid IN ($friendsin)))";
     $sth = $dbr->prepare($sql);
@@ -5889,7 +5897,7 @@ sub can_add_syndicated
 
     my $used;
 
-    # see where we're
+    # TAG:FR:ljlib:can_add_syndicated1
     my $dbh = LJ::get_dbh("master");
     my $sth = $dbh->prepare("SELECT s.userid, COUNT(*) FROM syndicated s, friends fa, friends fb ".
                             "WHERE fa.userid=? AND fa.friendid=s.userid  ".
@@ -5902,6 +5910,7 @@ sub can_add_syndicated
         return 0 if $used > $quota;
     }
     
+    # TAG:FR:ljlib:can_add_syndicated2
     # they're under quota so far.  would this account push them over?
     my $ct = $dbh->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=?", undef,
                                    $su->{'userid'});
@@ -6608,10 +6617,12 @@ sub add_friend
 
     my $groupmask = 1;
     if ($opts->{'defaultview'}) {
+        # TAG:FR:ljlib:add_friend_getdefviewmask
         my $grp = $dbh->selectrow_array("SELECT groupnum FROM friendgroup WHERE userid=? AND groupname='Default View'", undef, $ida);
         $groupmask |= (1 << $grp) if $grp;
     }
 
+    # TAG:FR:ljlib:add_friend
     LJ::friends_do($ida,
                    "INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) " .
                    "VALUES (?,?,?,?,?)", $ida, $idb, $black, $white, $groupmask);

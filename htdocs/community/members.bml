@@ -151,6 +151,7 @@ body<=
         # perform deletions
         if (%{$delete{'member'}}) {
             my $in = join(',', keys %{$delete{'member'}});
+            # TAG:FR:bml_comm_members:del_members
             LJ::friends_do($cid, "DELETE FROM friends WHERE userid=? AND friendid IN ($in)", $cid);
         }
         if (%{$delete{'admin'}}) {
@@ -173,6 +174,7 @@ body<=
         # perform additions
         if (%{$add{'member'}}) {
             my $in = join(',', map { "($cid, $_)" } keys %{$add{'member'}});
+            # TAG:FR:bml_comm_members:add_members
             LJ::friends_do($cid, "REPLACE INTO friends (userid,friendid) VALUES $in");
         }
         if (%{$add{'admin'}}) {
@@ -216,6 +218,7 @@ body<=
     my $dbr = LJ::get_db_reader();
 
     # get community members
+    # TAG:FR:bml_comm_members:get_members
     my $sth = $dbr->prepare("SELECT u.userid, u.user FROM useridmap u, friends f " .
                             "WHERE u.userid=f.friendid AND f.userid=?");
     $sth->execute($cid);

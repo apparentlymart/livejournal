@@ -188,6 +188,7 @@
  }
 
  my @friends;
+ # TAG:FR:userinfo:loadfriends
  if ($friends{'load'}) {
      my $limit = $MAX_FRIENDS_SHOW + 1;
      my $sth = $dbr->prepare("SELECT u.userid, u.user, u.journaltype, u.statusvis ".
@@ -199,12 +200,14 @@
      $friends{'count'} = scalar @friends;
      $friends{'loaded'} = 1;
      if ($friends{'count'} > $MAX_FRIENDS_SHOW) {
+         # TAG:FR:userinfo:countfriends
          $friends{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE userid=$u->{'userid'}");
      }
  }
 
  my (@friend_of, @member_of);
 
+ # TAG:FR:userinfo:loadfriendofs
  if ($friendsof{'load'}) {
      my $limit = $MAX_FRIENDOF_LOAD + 1;
      my $sth = $dbr->prepare("SELECT u.userid, u.user, u.journaltype ".
@@ -226,7 +229,9 @@
      $friendsof{'loaded'} = 1;
      if ($friendsof{'count'} + $friendsof{'count_m'} > $MAX_FRIENDOF_LOAD) {
          # data is incomplete, count separately
+         # TAG:FR:userinfo:countfriendofs
          $friendsof{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends f, user u WHERE f.friendid=$u->{'userid'} AND f.userid=u.userid AND u.journaltype='P' AND u.statusvis='V'");
+         # TAG:FR:userinfo:countmemberofs
          $friendsof{'count_m'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends f, user u WHERE f.friendid=$u->{'userid'} AND f.userid=u.userid AND u.journaltype<>'P' AND u.statusvis='V'");
          $friendsof{'clipped'} = 1;
      }
@@ -234,6 +239,7 @@
 
  $u->{'name'} = LJ::ehtml($u->{'name'});
 
+ # TAG:FR:userinfo:remotefriends
  # who does the remote user list as a friend?
  my %remote_friendid;
  if ($remote && $friends{'loaded'}) {

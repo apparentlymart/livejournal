@@ -27,6 +27,7 @@ sub get_permissions
             $perm->{'delete'} = 1;
             $perm->{'edit'} = 1;
         } else {
+            # TAG:FR:ljtodo:get_friends_in_group
             $sth = $dbh->prepare("SELECT fg.groupname FROM friends f, friendgroup fg WHERE f.userid=$u->{'userid'} and f.friendid=$remote->{'userid'} and fg.userid=$u->{'userid'} and fg.groupname like 'priv-todo-%'");
             $sth->execute;
             while (my ($priv) = $sth->fetchrow_array) {
