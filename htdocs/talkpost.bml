@@ -131,8 +131,10 @@ BODY<=
      $extra = " </B>(posting in (=LJUSER $u->{'user'} LJUSER=))<B>";
  }
  $ret .= "<TD>";
- $ret .= "<A HREF=\"/userinfo.bml?user=$ur->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>";
- $ret .= "<B><A HREF=\"$LJ::SITEROOT/users/$ur->{'user'}/\">" . &ehtml($ur->{'name'}) . "</A> ";
+ if ($ur && $ur->{'user'} ne "") {
+     $ret .= "<A HREF=\"/userinfo.bml?user=$ur->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>";
+     $ret .= "<B><A HREF=\"$LJ::SITEROOT/users/$ur->{'user'}/\">" . &ehtml($ur->{'name'}) . "</A> ";
+ }
  $ret .= "$extra says...</B>";
  if ($FORM{'replyto'} eq "") {
      my $etime = $item->{'eventtime'};
