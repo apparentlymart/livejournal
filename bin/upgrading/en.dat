@@ -2774,11 +2774,11 @@ This could be because: <ol>
 
 /update.bml.full=Full Update Page
 
-/update.bml.htmlokay.rte_nosupport=(Sorry, your browser does not currently support the rich text environment.)
-
 /update.bml.htmlokay.norich=(HTML okay; by default, newlines will be auto-formatted to <tt>&lt;br&gt;</tt>)
 
 /update.bml.htmlokay.rich=(HTML okay; by default, newlines will be auto-formatted to <tt>&lt;br&gt;</tt> - or, use the <a [[opts]]>rich text</a> mode.)
+
+/update.bml.htmlokay.rte_nosupport=(Sorry, your browser does not currently support the rich text environment.)
 
 /update.bml.localtime=Local time:
 
