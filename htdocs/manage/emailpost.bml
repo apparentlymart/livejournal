@@ -22,6 +22,7 @@ body<=
         my $pin = $POST{pin};
 
         # needs $ML{'.error.pin'}
+        $pin =~ s/\s+//g;
         push @errors, "Your PIN is currently limited to alphabet
             characters and numbers, and needs to be at least 4
             characters long." unless $pin =~ /^([a-z0-9]){4,20}$/i;
@@ -30,6 +31,7 @@ body<=
         foreach (split(/\0/, $addresses)) {
             s/\s+//g;
             next unless $_;
+            next if length > 80;
             push @errors, "Invalid email address: " . LJ::ehtml($_) unless /\@/;
             push @allow_from, $_;
         }

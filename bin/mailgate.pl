@@ -69,6 +69,10 @@ if (@to == 1 && $to[0]->address =~ /^(\S+?)\@\Q$LJ::EMAIL_POST_DOMAIN\E$/i) {
     # unresolved:  where to temporarily store messages before they're approved?
     # perhaps the modblob table?  perhaps a column it can be used to determine
     # whethere it's a moderated community post vs. an un-acked phone post.
+    require "$ENV{LJHOME}/cgi-bin/ljemailgateway.pl";
+    LJ::Emailpost::process($user, $subject, $body,
+            (Mail::Address->parse($head->get('From:')))[0]->address);
+
     $parser->filer->purge;
     exit 0;
 }

@@ -136,6 +136,10 @@ $caps_general{'friendspopwithfriends'} = {
     type => 'boolean',
     desc => "Can use <quote>Popular with Friends</quote> tool",
 };
+$caps_general{'emailpost'} = {
+    type => 'boolean',
+    desc => "User has ability to post via an email gateway.",
+};
 
 sub dump_caps
 {
