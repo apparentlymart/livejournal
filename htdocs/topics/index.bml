@@ -1,5 +1,13 @@
 (=_CODE
 
+ ### NOTE: this code needs to use APIs, not fatty joins on the master assuming all data is in
+ ###       on place.  with clusters, log+logtext joins are impossible.
+ {
+     $title = "Sorry";
+     $body = "The topic directory is currently down until it is revised to use the new database format.";
+     return;
+ }
+
  $TRUNCATE_SIZE = 200;
  $SELF = "/topics/";
  
@@ -52,7 +60,7 @@
 	 $body .= "<FONT FACE=\"Arial,Helvetica\" SIZE=-1><B>$dlinks</B></FONT><P>";
      }
 
-     $sth = $dbh->prepare("SELECT COUNT(*) AS 'count' FROM topic_map tm, log l WHERE tm.itemid=l.itemid AND tm.tptopid=$topid AND tm.status='on' AND l.security='public'");
+     $sth = $dbh->prepare("SELECT COUNT(*) AS 'count' FROM topic_map WHERE tptopid=$topid AND status='on'");
      $sth->execute;
      my ($count) = $sth->fetchrow_array;
 

@@ -3,6 +3,8 @@ TITLE=>Add to Topic
 BODY<=
 (=_CODE
 
+ return "The topic directory is currently down until it is revised to use the new database format.";
+
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
