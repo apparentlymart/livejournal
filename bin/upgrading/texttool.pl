@@ -227,7 +227,8 @@ sub copyfaq
     $out->("Copying FAQ...", '+');
 
     my %existing;
-    $sth = $dbh->prepare("SELECT i.itcode FROM ml_items, ml_latest WHERE l.lnid=$ll->{'lnid'} AND dmid=$domid AND l.itid=i.itid AND i.dmid=$domid");
+    $sth = $dbh->prepare("SELECT i.itcode FROM ml_items i, ml_latest l ".
+                         "WHERE l.lnid=$ll->{'lnid'} AND l.dmid=$domid AND l.itid=i.itid AND i.dmid=$domid");
     $sth->execute;
     $existing{$_} = 1 while $_ = $sth->fetchrow_array;
 
