@@ -198,3 +198,6 @@ general /create.bml.age.check.yes
 general /create.bml.age.check2.question
 general /create.bml.age.check2.yes
 general /create.bml.age.head
+
+general /community/members.bml.reinvited
+general /community/membres.bml.success.invited

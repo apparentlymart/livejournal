@@ -227,7 +227,9 @@ body<=
                 } else {
                     if (LJ::send_comm_invite($u, $c, $remote, [ 'member' ])) {
                         # if it succeeded, push the reinvited information
-                        push @msgs, BML::ml('.reinvited', { user => LJ::ljuser($u, { type => 'P' }) });
+                        push @msgs, BML::ml('.reinvited2',
+                            { user => LJ::ljuser($u, { type => 'P' }),
+                              aopts => "href='$LJ::SITEROOT/manage/invites.bml'" });
                     }
                 }
             }
@@ -262,7 +264,10 @@ body<=
             $ret .= "</ul>";
         }
         if (@invited) {
-            $ret .= "<?p $ML{'.success.invited'} p?><ul>";
+            $ret .= "<?p ";
+            $ret .= BML::ml('.success.invited2',
+                            { aopts => "href='$LJ::SITEROOT/manage/invites.bml'" });
+            $ret .= " p?><ul>";
             foreach my $row (@invited) {
                 $ret .= "<li>" . LJ::ljuser($row->[0], { type => 'P' }) . ": ";
                 $ret .= "$ML{\"/manage/invites.bml.label.$_\"}, " foreach @{$row->[1] || []};

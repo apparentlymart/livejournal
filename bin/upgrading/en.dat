@@ -381,7 +381,7 @@ p?>
 
 /community/members.bml.prevlink=<i>(Previous page...)</i>
 
-/community/members.bml.reinvited=[[user]] has been reinvited to join this community.
+/community/members.bml.reinvited2=[[user]] has been reinvited to join this community.  They will need to accept the invite from the <a [[aopts]]>Community Invitation Page</a>.
 
 /community/members.bml.settings=[<a href='[[link]]'>Settings</a>]
 
@@ -391,7 +391,7 @@ p?>
 
 /community/members.bml.success.header=Success
 
-/community/members.bml.success.invited=The following users have been successfully invited to this community with the listed privileges:
+/community/members.bml.success.invited2=The following users have been successfully invited to this community with the listed privileges.  They will need to accept the invite from the <a [[aopts]]>Community Invitation Page</a> before they can become a member of the community.
 
 /community/members.bml.success.message2=The following changes have been made:
 
