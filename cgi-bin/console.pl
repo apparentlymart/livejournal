@@ -8,6 +8,8 @@
 # </LJDEP>
 
 package LJ::Con;
+use strict;
+use vars qw(%cmd);
 
 sub parse_line
 {
@@ -397,9 +399,11 @@ $cmd{'deletetalk'} = {
     'handler' => \&delete_talk,
     'privs' => [qw(deletetalk)],
     'des' => "Delete a comment.",
-    'argsummary' => '<itemid> <talkid>',
+    'argsummary' => '<user> <itemid> <talkid>',
     'args' => [
+	       'user' => "The username of the journal comment is in.",
 	       'itemid' => "The itemid of the post to have a comment deleted from it.",
+	       # note: the ditemid, actually, but that's too internals-ish?
 	       'talkid' => "The talkid of the comment to be deleted.",
 	       ],
     };
@@ -431,46 +435,55 @@ sub delete_talk
 {
     my ($dbh, $remote, $args, $out) = @_;
 
-    unless ($remote->{'priv'}->{'deletetalk'}) {
-	push @$out, [ "error", "You do not have the required privlidge to do this command." ];
-	return 0;
+    my $err = sub { push @$out, [ "error", $_[0] ]; 0; };
+    my $inf = sub { push @$out, [ "info",  $_[0] ]; 1; };
+
+    return $err->("You do not have the required privlidge to use this command.")
+	unless $remote->{'priv'}->{'deletetalk'};
+    return $err->("This command has 3 arguments") unless @$args == 4;
+
+    my $user = LJ::canonical_username($args->[1]);
+    return $err->("First argument must be a username.")	unless $user;
+
+    my $u = LJ::load_user($dbh, $user);
+    return $err->("User '$user' not found.") unless $u;
+
+    my $qitemid = $args->[2]+0;
+    return $err->("Second argument must be a positive integer (the itemid).")
+	unless $qitemid;
+
+    my $qtalkid = $args->[3]+0;
+    return $err->("Third argument must be a positive integer (the talkid).")
+	unless $qtalkid;
+
+    if ($u->{'clusterid'}) 
+    {
+	my $dbcm = LJ::get_cluster_master($u);
+	my $rid = int($qitemid / 256);
+	my $state = $dbcm->selectrow_array("SELECT state FROM talk2 WHERE ".
+					   "journalid=$u->{'userid'} AND ".
+					   "jtalkid=$qtalkid AND nodetype='L' ".
+					   "AND nodeid=$rid");
+	return $err->("No talkid with that number found for that itemid.") 
+	    unless $state;
+	return $inf->("Talkid $qtalkid is already deleted.") 
+	    if $state eq "D";
+	
+	return $inf->("Success.") 
+	    if LJ::delete_talkitem($dbcm, $u->{'userid'}, $qtalkid, "light");
+	return $err->("Error deleting.");
     }
 
-    my $qitemid = $args->[1]+0;
-    unless ($qitemid > 0) {
-	push @$out, [ "error", "First argument must be a positive integer (the itemid)." ];
-        return 0;
-    }
+    my $state = $dbh->selectrow_array("SELECT state FROM talk WHERE ".
+				      "talkid=$qtalkid AND nodetype='L' ".
+				      "AND nodeid=$qitemid");
 
-    my $qtalkid = $args->[2]+0;
-    unless ($qtalkid > 0) {
-	push @$out, [ "error", "Second argument must be a positive integer (the talkid)." ];
-        return 0;
-    }
+    return $err->("No talkid with that number found for that itemid.") unless $state;
+    return $inf->("Talkid $qtalkid is already deleted.") if $state eq "D";
 
-    my $sth;
-    $sth = $dbh->prepare("SELECT state FROM talk WHERE talkid=$qtalkid AND nodetype='L' AND nodeid=$qitemid");
-    $sth->execute;
-    my ($state) = $sth->fetchrow_array;
-
-    unless ($state) {
-	push @$out, [ "error", "No talkid with that number found for that itemid." ];
-	return 0;
-    }
-
-    if ($state eq "D") {
-	push @$out, [ "info", "talkid $qtalkid is already deleted" ];
-	return 1;
-    }
-    
-    $sth = $dbh->do("UPDATE talk SET state='D' WHERE talkid=$qtalkid");
-    if ($dbh->err) { 
-	push @$out, [ "error", $dbh->errstr ];
-	return 0;
-    } else { 
-	push @$out, [ "info", "talkid $qtalkid state changed to deleted" ];
-	return 1;
-    }
+    $dbh->do("UPDATE talk SET state='D' WHERE talkid=$qtalkid");
+    return $err->($dbh->errstr) if $dbh->err;
+    return $inf->("talkid $qtalkid state changed to deleted");
 }
 
 sub change_journal_type
