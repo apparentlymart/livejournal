@@ -18,6 +18,12 @@ package LJ::Cache;
 
 use strict;
 use vars qw($VERSION);
+use constant PREVKEY => 0;
+use constant VALUE => 1;
+use constant NEXTKEY => 2;
+use constant BYTES => 3;
+use constant INSTIME => 4;
+
 $VERSION = '1.0';
 
 sub new {
@@ -34,8 +40,8 @@ sub walk_items {
     my $iter = $self->{'head'};
     while ($iter) {
         my $it = $self->{'items'}->{$iter};
-        $code->($iter, $it->[3], $it->[4]);
-        $iter = $it->[2];
+        $code->($iter, $it->[BYTES], $it->[INSTIME]);
+        $iter = $it->[NEXTKEY];
     }
 }
 
@@ -64,7 +70,7 @@ sub get_byte_count {
 sub get_max_age {
     my $self = shift;
     return undef unless $self->{'tail'};
-    return $self->{'items'}->{$self->{'tail'}}->[4];
+    return $self->{'items'}->{$self->{'tail'}}->[INSTIME];
 }
 
 sub validate_list
@@ -94,28 +100,28 @@ sub validate_list
 	unless (defined $item) {
 	    die "$source: item '$iter' isn't in items\n";
 	}
-	my $prevtext = $item->[0] || "--";
-	my $nexttext = $item->[2] || "--";
-	print "  #$count ($iter): [$prevtext, $item->[1], $nexttext]\n";
+	my $prevtext = $item->[PREVKEY] || "--";
+	my $nexttext = $item->[NEXTKEY] || "--";
+	print "  #$count ($iter): [$prevtext, $item->[VALUE], $nexttext]\n";
 	if ($count == 1 && defined($item->[0])) {
 	    die "$source: Head element shouldn't have previous pointer!\n";
 	}
-	if ($count == $self->{'size'} && defined($item->[2])) {
+	if ($count == $self->{'size'} && defined($item->[NEXTKEY])) {
 	    die "$source: Last element shouldn't have next pointer!\n";
 	}
-	if (defined $last && ! defined $item->[0]) {
+	if (defined $last && ! defined $item->[PREVKEY]) {
 	    die "$source: defined \$last but not defined previous pointer.\n";
 	}
-	if (! defined $last && defined $item->[0]) {
+	if (! defined $last && defined $item->[PREVKEY]) {
 	    die "$source: not defined \$last but previous pointer defined.\n";
 	}
-	if (defined $item->[0] && defined $last && $item->[0] ne $last)
+	if (defined $item->[PREVKEY] && defined $last && $item->[PREVKEY] ne $last)
 	{
 	    die "$source: Previous pointer is wrong.\n";
 	}
 
 	$last = $iter;
-	$iter = defined $item->[2] ? $item->[2] : undef;
+	$iter = defined $item->[NEXTKEY] ? $item->[NEXTKEY] : undef;
 	$count++;
     }
 }
@@ -128,15 +134,15 @@ sub drop_tail
     my $to_die = $self->{'tail'};
 
     ## set the tail to the item before the one dying.
-    $self->{'tail'} = $self->{'items'}->{$to_die}->[0];
+    $self->{'tail'} = $self->{'items'}->{$to_die}->[PREVKEY];
 
     ## adjust the forward pointer on the tail to be undef
     if (defined $self->{'tail'}) {
-	undef $self->{'items'}->{$self->{'tail'}}->[2];
+	undef $self->{'items'}->{$self->{'tail'}}->[NEXTKEY];
     }
 
     ## kill the item
-    my $bytes = $self->{'items'}->{$to_die}->[3];
+    my $bytes = $self->{'items'}->{$to_die}->[BYTES];
     delete $self->{'items'}->{$to_die};
 
     ## shrink the overall size
@@ -152,8 +158,8 @@ sub print_list {
     my $iter = $self->{'head'};
     while (defined $iter) { #$count <= $self->{'size'}) {
 	my $item = $self->{'items'}->{$iter};
-	print "$count: $iter = $item->[1]\n";
-	$iter = $item->[2];
+	print "$count: $iter = $item->[VALUE]\n";
+	$iter = $item->[NEXTKEY];
  	$count++;
     }
 }
@@ -169,26 +175,26 @@ sub get {
 	unless ($self->{'head'} eq $key)
 	{
 	    if ($self->{'tail'} eq $key) {
-		$self->{'tail'} = $item->[0];
+		$self->{'tail'} = $item->[PREVKEY];
 	    }
 	    # remove this element from the linked list.
-	    my $next = $item->[2];
-	    my $prev = $item->[0];
-	    if (defined $next) { $self->{'items'}->{$next}->[0] = $prev; }
-	    if (defined $prev) { $self->{'items'}->{$prev}->[2] = $next; }
+	    my $next = $item->[NEXTKEY];
+	    my $prev = $item->[PREVKEY];
+	    if (defined $next) { $self->{'items'}->{$next}->[PREVKEY] = $prev; }
+	    if (defined $prev) { $self->{'items'}->{$prev}->[NEXTKEY] = $next; }
 	    
 	    # make current head point backwards to this item
-	    $self->{'items'}->{$self->{'head'}}->[0] = $key;
+	    $self->{'items'}->{$self->{'head'}}->[PREVKEY] = $key;
 	    
 	    # make this item point forwards to current head, and backwards nowhere
-	    $item->[2] = $self->{'head'};
-	    undef $item->[0];
+	    $item->[NEXTKEY] = $self->{'head'};
+	    undef $item->[PREVKEY];
 	    
 	    # make this the new head
 	    $self->{'head'} = $key;
 	}
 	
-	return $item->[1];
+	return $item->[VALUE];
     }
     return undef;
 }
@@ -208,17 +214,22 @@ sub set {
     if (exists $self->{'items'}->{$key}) {
 	# update the value
 	my $item = $self->{'items'}->{$key};
-	$item->[1] = $value;
-        my $bytedelta = $bytes - $item->[3];
+	$item->[VALUE] = $value;
+        my $bytedelta = $bytes - $item->[BYTES];
         $self->{'bytes'} += $bytedelta;
-        $item->[3] = $bytes;
+        $item->[BYTES] = $bytes;
     }
     else {
 	# stick it at the end, for now
-	$self->{'items'}->{$key} = [undef, $value, undef, $bytes, time() ];
+	my $it = $self->{'items'}->{$key} = [];
+        $it->[PREVKEY] = undef;
+        $it->[NEXTKEY] = undef;
+        $it->[VALUE] = $value;
+        $it->[BYTES] = $bytes;
+        $it->[INSTIME] = time();
 	if ($self->{'size'}) {
-	    $self->{'items'}->{$self->{'tail'}}->[2] = $key;
-	    $self->{'items'}->{$key}->[0] = $self->{'tail'};
+	    $self->{'items'}->{$self->{'tail'}}->[NEXTKEY] = $key;
+	    $self->{'items'}->{$key}->[PREVKEY] = $self->{'tail'};
 	} else {
 	    $self->{'head'} = $key;
 	}
