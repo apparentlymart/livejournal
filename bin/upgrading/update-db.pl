@@ -102,7 +102,7 @@ if ($opt_pop)
     while (my $q = <BD>)
     {
         chomp $q;  # remove newline
-        next unless ($q =~ /^(REPLACE|INSERT) INTO (\w+).+;/);
+        next unless ($q =~ /^(REPLACE|INSERT) (IGNORE )?INTO (\w+).+;/);
         chop $q;  # remove semicolon
         my $type = $1;
         my $table = $2;
