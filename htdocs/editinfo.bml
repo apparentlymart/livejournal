@@ -323,7 +323,7 @@ body<=
 
          $ret .= "<p><b>$ML{'.allowshowcontact.email'}</b><ul>";
 
-         my $cur = $u->{'opt_whatemailshow'} || "B";
+         my $cur = $u->{'opt_whatemailshow'} || "N";
          my @vals = ( ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail"))
                      ? ("B" => BML::ml(".allowshowcontact.email.both", { 'domain' => $LJ::USER_DOMAIN}),
                         "A" => BML::ml(".allowshowcontact.email.actual_only"),

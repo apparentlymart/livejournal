@@ -69,12 +69,15 @@
      LJ::text_out(\$u->{'name'}) if $u;
      if ($u && ($FORM{'mode'} eq "full" || $u->{'journaltype'} eq "Y")) {
          $sth = $dbr->prepare("SELECT timeupdate, timecreate, ".
+                              "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timecheck) ".
+                              "AS 'secondscheck', ".
                               "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
                               "AS 'secondsold' FROM userusage ".
                               "WHERE userid=$userid");
          $sth->execute;
          ($u->{'timeupdate'}, 
           $u->{'timecreate'},
+          $u->{'secondscheck'},
           $u->{'secondsold'}) = $sth->fetchrow_array;
      }
  }
@@ -431,8 +434,11 @@ if ($u->{'journaltitle'}) {
           $mret .= "</td></tr></table>";
           return $mret;
       };
+
+      my $hide_after = LJ::get_cap($u, "hide_email_after");
       unless ($u->{'opt_whatemailshow'} eq "N" ||
-              $u->{'opt_whatemailshow'} eq "L" && $u->{'no_mail_alias'}) {
+              $u->{'opt_whatemailshow'} eq "L" && $u->{'no_mail_alias'} ||
+              $hide_after && $u->{'secondscheck'} > $hide_after * 86400) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.email'}</b></td><td colspan='$span'>";
           my @emails = ($u->{'email'});

@@ -99,6 +99,7 @@
                       'mod_queue' => 50,
                       'mod_queue_per_poster' => 1,
                       'weblogscom' => 0,
+                      'hide_email_after' => 0,
                       );
         foreach my $k (keys %defcap) {
             next if (defined $LJ::CAP_DEF{$k});
