@@ -29,7 +29,7 @@ sub error_message
              # User Errors
              "100" => "Invalid username",
              "101" => "Invalid password",
-             "102" => "Can't use custom security on shared/community journals.",
+             "102" => "Can't use custom/private security on shared/community journals.",
              "103" => "Poll error",
              "104" => "Error adding one or more friends",
              "150" => "Can't post as non-user",
@@ -577,10 +577,11 @@ sub postevent
 
     my $qsecurity = $dbh->quote($security);
     
-    ### make sure user can't post with "custom security" on shared journals
+    ### make sure user can't post with "custom/private security" on shared journals
     return fail($err,102)
-        if ($req->{'security'} eq "usemask" &&
-            $qallowmask != 1 && ($ownerid != $posterid));
+        if ($ownerid != $posterid && # community post
+            ($req->{'security'} eq "private" ||
+            ($req->{'security'} eq "usemask" && $qallowmask != 1 )));
 
     # make sure this user isn't banned from posting here (if
     # this is a community journal)
@@ -877,6 +878,7 @@ sub editevent
     my $posterid = $u->{'userid'};
     my $dbr = $dbs->{'reader'};
     my $dbh = $dbs->{'dbh'};
+    my $qallowmask = $req->{'allowmask'}+0;
     my $sth;
 
     my $qitemid = $req->{'itemid'}+0;
@@ -894,6 +896,11 @@ sub editevent
     }
     return fail($err,306) unless $dbcm;
 
+    ### make sure user can't change a post to "custom/private security" on shared journals
+    return fail($err,102)
+        if ($ownerid != $posterid && # community post
+            ($req->{'security'} eq "private" ||
+            ($req->{'security'} eq "usemask" && $qallowmask != 1 )));
     # fetch the old entry from master database so we know what we
     # really have to update later.  usually people just edit one part,
     # not every field in every table.  reads are quicker than writes,

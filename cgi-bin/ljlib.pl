@@ -1579,6 +1579,11 @@ register_setter("newpost_minsecurity", sub {
         $$err = "Illegal value.  Must be 'public', 'friends', or 'private'";
         return 0;
     }
+    # Don't let commmunities be private
+    if ($u->{'journaltype'} eq "C" && $value eq "private") {
+        $$err = "newpost_minsecurity cannot be private for communities";
+        return 0;
+    }
     $value = "" if $value eq "public";
     LJ::set_userprop($dba, $u->{'userid'}, "newpost_minsecurity", $value);
     return 1;
