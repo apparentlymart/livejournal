@@ -74,6 +74,7 @@
                'textmessage' => ['Send Text Message', '/tools/textmessage.bml', 'home'],
                'themes' => ['Theme Previews', '/customize/themes.bml', 'customize'],
                'todo' => ['Todo List', '/todo', 'home'],
+               'transfercomm' => ['Transfer Community', '/community/transfer.bml', 'managecommunity'],
                'unsubscribe' => ['Unsubscribe', '/unsubscribe.bml', 'home'],
                'update' => ['Update Journal', '/update.bml', 'home'],
                'utf8convert' => ['UTF-8 Converter', '/utf8convert.bml', 'manage'],

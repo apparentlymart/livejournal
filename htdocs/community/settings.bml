@@ -76,6 +76,11 @@ body<=
          
          $errors{'username'} = $ML{'.error.hasentries'} if $count;
      }
+
+     # if it's already a community, don't let them turn it into a community
+     if ($mode eq 'create' && !%errors && $cu->{journaltype} eq 'C') {
+         $errors{'username'} = $ML{'.error.alreadycomm'};
+     }
   
      # if we found errors, we'll redisplay the form below.  otherwise,
      # proceed.
