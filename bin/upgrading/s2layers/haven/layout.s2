@@ -546,10 +546,20 @@ function print_stylesheet ()
     var string body_font_family    = css_font_family($*main_font,    $*main_font_fallback);
     var string sidebar_font_family = css_font_family($*sidebar_font, $*sidebar_font_fallback);
     var string content_font_family = css_font_family($*content_font, $*content_font_fallback);
+    var string body_background = "";
+    if ($*page_background_image != "") {
+        $body_background = """
+    background-image: url("$*page_background_image");
+    background-repeat: $*page_background_repeat;
+    background-position: $*page_background_position;
+    background-attachment: $*page_background_scrolling;
+        """;
+    }
     print """
 body 
 {
     background-color: $*page_bgcolor;
+    $body_background
     color: $*page_fgcolor;
     $body_font_family;
     font-size: 100%;
@@ -1164,7 +1174,7 @@ function Page::print()
 
     if ($*title_position == "top" or $*title_position == "both") { println $title_bar; print "<br />"; }
 
-    println """<table cellspacing="0" cellpadding="5" width="90%" align="center"><tr>""";
+    println """<table cellspacing="0" cellpadding="5" width="$*content_width" align="center"><tr>""";
     if ($*sidebar_position == "left") { println """<td valign="top" id="sidebar">"""; print_sidebar(); println "</td>"; }
     println """<td valign="top">"""; $this->print_body(); "</td>";
     if ($*sidebar_position == "right") { println """<td valign="top" id="sidebar">"""; print_sidebar(); println "</td>"; }
