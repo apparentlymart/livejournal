@@ -111,7 +111,6 @@ LOAD_PAGE_INFO<=
 				'uri' => '/create.bml', },
 			      { 'name' => 'Update',
 				'uri' => '/update.bml', 
-				'extra' => '/update.bml?mode=full',
 #				'children' => [
 #					       { 'name' => 'Full Update',
 #						 'uri' => '/update.bml?mode=full', }
