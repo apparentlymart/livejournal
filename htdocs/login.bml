@@ -28,6 +28,12 @@
             $do_login = 1;
         }
 
+        # can only change if logged in
+        if ($do_change && not defined $remote) {
+            $do_logout = 1;
+            $do_change = 0;
+        }
+
         if ($do_logout || $do_login) {
             LJ::kill_session($remote);
             foreach (qw(ljsession langpref permlogin)) {
