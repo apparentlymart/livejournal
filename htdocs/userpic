@@ -58,7 +58,7 @@ my $lastconn;
     }
     $reqmeth{$ENV{'REQUEST_METHOD'}}++;
 
-    if ($FORM{'id'} eq "info") {
+    if ($FORM{'id'} =~ /^info/) {
 	print "Content-type: text/html\n\n<h1>userpic stats</h1>";
 	print "<PRE>";
 	my $pid = $$;
@@ -149,6 +149,12 @@ my $lastconn;
     {
 	$misses++;
 	my $query = "SELECT p.state, p.contenttype, pb.imagedata, UNIX_TIMESTAMP(p.picdate) AS 'lastmod' FROM userpic p, userpicblob pb WHERE p.picid=pb.picid AND p.picid=$qid";
+	
+	if ($on_disk) {
+	    # then join with userpicblob table is unnecessary; just
+	    # use version on disk (web servers cheap, db servers expensive)
+	    $query = "SELECT p.state, p.contenttype, UNIX_TIMESTAMP(p.picdate) AS 'lastmod' FROM userpic p WHERE p.picid=$qid";
+	}
 
 	## try the slave database dirst, we available.
 	if ($LJ::DBINFO{'slavecount'} && defined $dro) {
@@ -202,6 +208,15 @@ my $lastconn;
 
     if ($pic)
     {
+	unless ($pic->{'imagedata'}) {
+	    open (ID, $cache_file);
+	    while (<ID>) {
+		$pic->{'imagedata'} .= $_;
+	    }
+	    close ID;
+	    $pic->{'length'} = length($pic->{'imagedata'});	    
+	}
+
 	print "Content-type: $pic->{'contenttype'}\n";
 	print "Content-length: $pic->{'length'}\n";
 	print "Cache-Control: no-transform\n";
@@ -209,13 +224,7 @@ my $lastconn;
 	print "Last-Modified: ", &http_date($pic->{'lastmod'}), "\n";
 	print "\n";
 	unless ($ENV{'REQUEST_METHOD'} eq "HEAD") {
-	    if ($pic->{'imagedata'}) {
-		print $pic->{'imagedata'};
-	    } else {
-		open (ID, $cache_file);
-		while (<ID>) { print; }
-		close ID;
-	    }
+	    print $pic->{'imagedata'};
 	}
 	delete $pic->{'imagedata'}; 
     } else {
