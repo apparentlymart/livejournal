@@ -853,7 +853,7 @@ sub get_style_layers
 
         my $sth = $db->prepare($qry);
         $sth->execute(@args);
-	die "ERROR: " . $db->errstr if $db->err;
+        die "ERROR: " . $sth->errstr if $sth->err;
         while (my ($type, $s2lid) = $sth->fetchrow_array) {
             $stylay{$type} = $s2lid;
         }
