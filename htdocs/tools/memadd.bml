@@ -33,6 +33,11 @@
                  'friends' => $ML{'label.security.friends'},
                  'private' => $ML{'label.security.private'}, );
 
+ if ($memoryu->{'journaltype'} eq "C") {
+     $secopts{'private'} = $ML{'label.security.maintainers'};
+     $secopts{'friends'} = $ML{'label.security.members'};
+ }
+
  my $sth;
  my $journal = $GET{'journal'};
  my $ditemid = $GET{'itemid'}+0;
@@ -217,7 +222,11 @@
      $body .= "<tr><th align='right' valign='top'>$ML{'.security'}</th><td>";
      $body .= LJ::html_select({name => 'security', selected => defined $memory ? $memory->{'security'} : undef},
                               map { ($_, $secopts{$_}) } qw(public friends private));
-     $body .= "<br /><small>$ML{'.whocansee'}</small></td></tr><tr><th></th><td>";
+     if ($memoryu->{'journaltype'} eq "C") {
+         $body .= "<br /><small>$ML{'.whocansee.comm'}</small></td></tr><tr><th></th><td>\n";
+     } else {
+         $body .= "<br /><small>$ML{'.whocansee'}</small></td></tr><tr><th></th><td>\n";
+     }
      $body .= LJ::html_submit(undef, $ML{'.form.submit'});
      $body .= LJ::html_submit(undef, $ML{'.form.reset'}, {type => 'reset'}) if defined $memory;
      $body .= "</td></tr></table></form>";

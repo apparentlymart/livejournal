@@ -117,7 +117,8 @@
 
  my $secwhere = "AND m.security='public'";
  if ($authasu) {
-     if ($authasu->{userid} == $userid) {
+     if ($authasu->{userid} == $userid ||
+         $u->{'journaltype'} eq "C" && LJ::check_rel($u, $remote, 'A')) {
          $secwhere = "";
      } elsif ($authasu->{'journaltype'} eq 'P' and LJ::is_friend($userid, $authasu->{'userid'})) {
          $secwhere = "AND m.security IN ('public', 'friends')";

@@ -2862,6 +2862,11 @@ To delete a memory, you can edit it and remove the description, but you didn't a
   Everybody, only people you list as a friend, or just you?
 .
 
+/tools/memadd.bml.whocansee.comm<<
+  Who can see that you've marked this post as memorable?
+  Everybody, only members of the community, or only maintainers of the community?
+.
+
 /tools/memories.bml.back=Back
 
 /tools/memories.bml.body.keyword<<
@@ -3527,6 +3532,10 @@ label.security.custom=Custom...
 label.security.friends=Friends
 
 label.security.head=Security Level:
+
+label.security.maintainers=Maintainers
+
+label.security.members=Members
 
 label.security.private=Private
 
