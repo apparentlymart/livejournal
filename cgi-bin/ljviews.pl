@@ -753,7 +753,7 @@ sub create_view_friends
     if ($skip) {
         $skip_f = 1;
         my %linkvars;
-        if ($filter) { $linkvars{'filter'} = $filter; }
+        if (defined $filter) { $linkvars{'filter'} = $filter; }
 
         my $newskip = $skip - $itemshow;
         if ($newskip > 0) { $linkvars{'skip'} = $newskip; }
@@ -772,7 +772,7 @@ sub create_view_friends
     unless ($eventnum != $itemshow || $skip == $maxskip) {
         $skip_b = 1;
         my %linkvars;
-        if ($filter) { $linkvars{'filter'} = $filter; }
+        if (defined $filter) { $linkvars{'filter'} = $filter; }
 
         my $newskip = $skip + $itemshow;
         $linkvars{'skip'} = $newskip;
