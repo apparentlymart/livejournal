@@ -931,6 +931,8 @@ REPLACE INTO themelist VALUES ('8', 'Foresty Nature Kinda');
 REPLACE INTO themelist VALUES ('9', 'Supernova');
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('aolim', '1', 'AOL Instant Messanger', 'char', 'AOL IM ScreenName', 'general');
 UPDATE userproplist SET des='AOL IM ScreenName',prettyname='AOL Instant Messanger',indexed='1',scope='general',datatype='char' WHERE name='aolim';
+INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('browselang', '1', 'Language to browse with', 'char', 'LJ lang code in ml_langs', 'general');
+UPDATE userproplist SET des='LJ lang code in ml_langs',prettyname='Language to browse with',indexed='1',scope='general',datatype='char' WHERE name='browselang';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('city', '1', 'City', 'char', 'City lived in.', 'general');
 UPDATE userproplist SET des='City lived in.',prettyname='City',indexed='1',scope='general',datatype='char' WHERE name='city';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('country', '1', 'Country', 'char', '2 letter country code', 'general');

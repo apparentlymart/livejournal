@@ -4,7 +4,11 @@
  my $l = LJ::Lang::get_lang($FORM{'lang'});
  return unless $l;
  if (LJ::did_post()) {
-     BMLClient::set_cookie("langpref", $l->{'lncode'} . "/" . time(), 0);
+     my $etime = 0;
+     if ($BMLClient::COOKIE{'permlogin'}) {
+         $etime = time()+60*60*24*60;
+     }
+     BML::set_cookie("langpref", $l->{'lncode'} . "/" . time(), $etime);
      BML::set_language($l->{'lncode'});
  }
  return;
@@ -19,6 +23,13 @@ BODY<=
      my $l = LJ::Lang::get_lang($FORM{'lang'});
      unless ($l) {
 	 return "Undefined language. ($FORM{'lang'})";
+     }
+     if (LJ::did_post()) {
+         my $dbs = LJ::get_dbs();
+         my $remote = LJ::get_remote($dbs);
+         if ($remote) {
+             LJ::set_userprop($dbs, $remote->{'userid'}, "browselang", $l->{'lncode'});
+         }
      }
  }
 
