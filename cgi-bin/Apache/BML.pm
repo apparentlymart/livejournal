@@ -231,9 +231,10 @@ sub handler
             if $req->{'env'}->{'Static'};
         $r->header_out("Cache-Control", "private, proxy-revalidate");
         $r->header_out("ETag", Digest::MD5::md5_hex($html));
+
+	$r->send_http_header();
     }
     
-    $r->send_http_header();
     $r->print($html) unless $req->{'env'}->{'NoContent'} || $r->header_only;
 
     # clear the code package for next request if necessary
@@ -1009,7 +1010,7 @@ sub suppress_content
 
 sub finish
 {
-    $Apache::BML::cur_req->{'env'}->{'stop_flag'} = 1;
+    $Apache::BML::cur_req->{'stop_flag'} = 1;
 }
 
 sub set_content_type
