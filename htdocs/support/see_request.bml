@@ -306,6 +306,7 @@ body<=
         'email' => $email,
         'sp' => $sp,
         'retref' => \$ret,
+        'remote' => $remote,
     });
 
     my %userpics;  # id -> {..}
