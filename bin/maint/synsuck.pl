@@ -7,8 +7,9 @@ use lib "$ENV{'LJHOME'}/cgi-bin";  # extra XML::Encoding files in cgi-bin/XML/*
 use LWP::UserAgent;
 use XML::RSS;
 use HTTP::Status;
-require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
-require "$ENV{'LJHOME'}/cgi-bin/parsefeed.pl";
+require "ljprotocol.pl";
+require "parsefeed.pl";
+require "cleanhtml.pl";
 
 $maint{'synsuck'} = sub
 {
@@ -214,6 +215,15 @@ $maint{'synsuck'} = sub
                     "<a href='$it->{'link'}'>$it->{'link'}</a></p>";
             }
 
+            # rewrite relative URLs to absolute URLs, but only invoke the HTML parser
+            # if we see there's some image or link tag, to save us some work if it's
+            # unnecessary (the common case)
+            if ($it->{'text'} =~ /<(?:img|a)\b/i) {
+                # TODO: support XML Base?  http://www.w3.org/TR/xmlbase/
+                my $base_href = $it->{'link'} || $synurl;
+                LJ::CleanHTML::resolve_relative_urls(\$it->{'text'}, $base_href);
+            }
+
             # $own_time==1 means we took the time from the feed rather than localtime
             my ($own_time, $year, $mon, $day, $hour, $min);
 
@@ -251,7 +261,7 @@ $maint{'synsuck'} = sub
             };
 
             # if the post contains html linebreaks, assume it's preformatted.
-            if ($it->{'text'} =~ /<(p|br)\b/i) {
+            if ($it->{'text'} =~ /<(?:p|br)\b/i) {
                 $req->{'props'}->{'opt_preformatted'} = 1;
             }
 

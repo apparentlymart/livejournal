@@ -9,6 +9,7 @@ require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
 use strict;
 use HTML::TokeParser ();
+use URI ();
 
 #     LJ::CleanHTML::clean(\$u->{'bio'}, { 
 #	 'wordlength' => 100, # maximum length of an unbroken "word"
@@ -441,6 +442,95 @@ sub clean
     1 while $newdata =~ s/<script\b//ig;
 
     $$data = $newdata;
+    return undef;
+}
+
+
+# takes a reference to HTML and a base URL, and modifies HTML in place to use absolute URLs from the given base
+sub resolve_relative_urls
+{
+    my ($data, $base) = @_;
+    my $p = HTML::TokeParser->new($data);
+
+    # where we look for relative URLs
+    my $rel_source = {
+        'a' => { 
+            'href' => 1,
+        },
+        'img' => { 
+            'src' => 1,
+        },
+    };
+
+    my $global_did_mod = 0;
+    my $base_uri = undef;  # until needed
+    my $newdata = "";
+
+  TOKEN:
+    while (my $token = $p->get_token)
+    {
+        my $type = $token->[0];
+
+        if ($type eq "S")     # start tag
+        {
+            my $tag = $token->[1];
+            my $hash  = $token->[2]; # attribute hashref
+            my $attrs = $token->[3]; # attribute names, in original order
+
+            my $did_mod = 0;
+            # see if this is a tag that could contain relative URLs we fix up.
+            if (my $relats = $rel_source->{$tag}) {
+                while (my $k = each %$relats) {
+                    next unless defined $hash->{$k} && $hash->{$k} !~ /^[a-z]+:/;
+                    my $rel_url = $hash->{$k};
+                    $global_did_mod = $did_mod = 1;
+
+                    $base_uri ||= URI->new($base);
+                    $hash->{$k} = URI->new_abs($rel_url, $base_uri)->as_string;
+                }
+            }
+
+            # if no change was necessary
+            unless ($did_mod) {
+                $newdata .= $token->[4];
+                next TOKEN;
+            }
+            
+            # otherwise, rebuild the opening tag
+
+            # for tags like <name/>, pretend it's <name> and reinsert the slash later
+            my $slashclose = 0;   # If set to 1, use XML-style empty tag marker
+            $slashclose = 1 if $tag =~ s!/$!!;
+            $slashclose = 1 if delete $hash->{'/'};
+
+            # spit it back out
+            $newdata .= "<$tag";
+            # output attributes in original order
+            foreach (@$attrs) {
+                $newdata .= " $_=\"" . LJ::ehtml($hash->{$_}) . "\""
+                    if exists $hash->{$_};
+            }
+            $newdata .= " /" if $slashclose;
+            $newdata .= ">"; 
+        }
+        elsif ($type eq "E") {
+            $newdata .= $token->[2];
+        }
+        elsif ($type eq "D") {
+            $newdata .= $token->[1];
+        }
+        elsif ($type eq "T") {
+            $newdata .= $token->[1];
+        } 
+        elsif ($type eq "C") {
+            $newdata .= $token->[1];
+        }
+        elsif ($type eq "PI") {
+            $newdata .= $token->[2];
+        }
+    } # end while
+
+    $$data = $newdata if $global_did_mod;
     return undef;
 }
 
