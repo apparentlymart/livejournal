@@ -480,6 +480,18 @@ p?>
 
 /create.bml.btn.create=Create Journal
 
+/create.bml.captcha.answer=Answer: 
+
+/create.bml.captcha.audiodesc=Type the numbers you hear to prove that you're not a spam robot:
+
+/create.bml.captcha.desc=Type the letters and numbers you see below, to prove that you're not a spam robot.  If you can't read the text, type "AUDIO" and take a sound test instead.
+
+/create.bml.captcha.invalid=Invalid answer to previous challenge.  Try another.
+
+/create.bml.captcha.play=Play the sound
+
+/create.bml.captcha.prove=Prove that you're a human
+
 /create.bml.clusterselect.cluster=Cluster:
 
 /create.bml.clusterselect.clusternum=Cluster [[number]]
