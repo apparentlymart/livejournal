@@ -394,13 +394,23 @@ BODY<=
 
      if ($LJ::UNICODE) {
          $ret .= "(=H2 $ML{'.encoding.header'} H2=)(=P $ML{'.encoding.about'} P=)<table>\n";
-         LJ::load_codes($dbs, { "encname" => \%LJ::CACHE_ENCNAMES } )
-             unless %LJ::CACHE_ENCNAMES;
          $ret .= "<tr><td width='50'>&nbsp;</td><td><p><b>$ML{'.autotranslate.header'}</b>";
-         $ret .= LJ::html_select({'name'=>'oldenc', 'selected'=>$u->{'oldenc'}}, %LJ::CACHE_ENCNAMES);
+         
+         my (%old_encnames, %mail_encnames, %encodings);
+         LJ::load_codes($dbs, { "encoding" => \%encodings } );
+         LJ::load_codes($dbs, { "encname" => \%old_encnames } );
+         %mail_encnames = %old_encnames;
+
+         # which encodings to show? For now, we just delete utf-8 from the old encodings
+         # list because it doesn't make sense there.
+         foreach my $id (keys %encodings) {
+             delete $old_encnames{$id} if lc($encodings{$id}) eq 'utf-8';
+         }
+
+         $ret .= LJ::html_select({'name'=>'oldenc', 'selected'=>$u->{'oldenc'}}, %old_encnames);
          $ret .= "</p><p>$ML{'.autotranslate.about'}</p></td></tr>";
          $ret .= "<tr><td>&nbsp;</td><td><p><b>$ML{'.translatemailto.header'}</b>";
-         $ret .= LJ::html_select({'name'=>'mailencoding', 'selected'=>$u->{'mailencoding'}}, %LJ::CACHE_ENCNAMES);
+         $ret .= LJ::html_select({'name'=>'mailencoding', 'selected'=>$u->{'mailencoding'}}, %mail_encnames);
          $ret .= "</p><p>$ML{'.translatemailto.about'}</p></td></tr>";
          $ret .= "</table>\n";
      }

@@ -1342,7 +1342,23 @@ sub getevents
             return fail($err,208,"Cannot display non-Unicode posts unless default encoding has been selected")
                 if $error;
         }
- 
+
+        if ($LJ::UNICODE && $req->{'ver'} < 1 && !$evt->{'props'}->{'unknown8bit'}) {
+            unless ( LJ::is_ascii($t->[0]) && 
+                     LJ::is_ascii($t->[1]) &&
+                     LJ::is_ascii(join(' ', values %{$evt->{'props'}}) )) {
+                # we want to fail the client that wants to get this entry
+                # but we make an exception for selecttype=day, in order to allow at least
+                # viewing the daily summary
+
+                if ($req->{'selecttype'} eq 'day') {
+                    $t->[0] = $t->[1] = '(cannot be shown)';
+                } else {
+                    return fail($err,207,"Cannot display/edit a Unicode post with a non-Unicode client");
+                }
+            }
+        }
+
         if ($t->[0]) {
             $t->[0] =~ s/[\r\n]/ /g;
             $evt->{'subject'} = $t->[0];
