@@ -1105,8 +1105,8 @@ MOODS
         $out .= "<td style='text-align: center' id='column_two_td'><table style='text-align: left; display: inline' id='column_two_table'>";
         
         # Backdate Entry
-        $out .= "<tr id='backdate_row'><th><label for='prop_opt_backdate'>Entry is backdated:</label></th><td>";
-        $out .= LJ::html_check({ 'type' => "check", 'id' => "prop_opt_backdate", 'name' => "prop_opt_backdate", "value" => $opts->{'prop_opt_backdate'},});
+        $out .= "<tr id='backdate_row'><th><label for='prop_opt_backdated'>Entry is backdated:</label></th><td>";
+        $out .= LJ::html_check({ 'type' => "check", 'id' => "prop_opt_backdated", 'name' => "prop_opt_backdated", "value" => $opts->{'prop_opt_backdated'},});
         $out .= "</td></tr>";
         
         # Comment Settings
