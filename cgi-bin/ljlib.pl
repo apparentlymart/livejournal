@@ -3915,7 +3915,7 @@ sub cmd_buffer_flush
                 # user, title, url
                 my ($dbh, $db, $c) = @_;
                 my $a = $c->{'args'};
-                my $unixtime = LJ::mysql_time($c->{'instime'});
+                my $unixtime = LJ::mysqldate_to_time($c->{'instime'});
                 # if more than 6 hours old (qbufferd not running?)
                 return if $unixtime < time() - 60*60*6;
                 eval {
