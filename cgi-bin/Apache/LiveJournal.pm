@@ -239,7 +239,7 @@ sub trans
             $r->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
             return OK;
         }
-        $RQ{'interface'} = $1 eq "/flat" ? "flat" : "xmlrpc";
+        $RQ{'interface'} = $int eq "/flat" ? "flat" : "xmlrpc";
         $r->push_handlers(PerlHandler => \&interface_content);
         return OK;
     }
