@@ -244,9 +244,9 @@ body<=
          $ret .= "</table>\n";
 
          $ret .= "<p>$ML{'.subject'}<br />";
-         $ret .= "<input name='subject' value='";
+         $ret .= "<input name='subject' value=\"";
          $ret .= LJ::eall($res{"events_1_subject"});
-         $ret .= "' size='60' maxlength='255'>\n";
+         $ret .= "\" size='60' maxlength='255'>\n";
         
          $ret .= "<p><b>$ML{'.event'}</b><br /><textarea rows='12' cols='60' wrap='soft' name='event' style='width: 99%'>";
          $ret .= LJ::eall(LJ::durl($res{"events_1_event"}));
