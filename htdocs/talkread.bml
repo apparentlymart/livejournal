@@ -724,7 +724,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
      if ($post_count > 0)
      {
-         $ret .= "<form style='display: inline' method='post' action='/talkmulti.bml'>";
+         $ret .= "<form style='display: inline' method='post' action='/talkmulti.bml' name='multiform'>";
          $ret .= LJ::html_hidden("ditemid", $ditemid);
          $ret .= LJ::html_hidden("journal", $u->{'user'});
 
@@ -741,7 +741,10 @@ if ($uri =~ m!/(\d+)\.html$!) {
                                      "unscreen" => $ML{'.talkmulti.unscreen'},
                                      "screen" => $ML{'.talkmulti.screen'},
                                      "delete" => $ML{'.talkmulti.delete'});
-             $ret .= " " . LJ::html_submit('', $ML{'.talkmulti.submit'}) . "</p>";
+             $ret .= " " . LJ::html_submit('', $ML{'.talkmulti.submit'},
+                                    { "onClick" => "return (document.multiform.mode.value != \"delete\") " .
+                                                   "|| confirm(\"" . LJ::ejs($ML{'.confirm.action'}) . "\");" });
+             $ret .= "</p>";
          }
          $ret .= "</form>";
 

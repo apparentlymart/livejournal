@@ -214,17 +214,21 @@ sub html_hidden
 # name: html_submit
 # class: component
 # des: Makes the HTML for a submit button
-# args: name, val
+# args: name, val, opts?
 # des-name: Name of form element (will be HTML escaped)
 # des-val: Value of form element, and label of button (will be HTML escaped)
+# des-opts: Optional hashref of additional tag attributes
 # returns: HTML
 # </WCMFUNC>
 sub html_submit
 {
-    my ($name, $val) = @_;
+    my ($name, $val, $opts) = @_;
+    my $eopts;
+    if ($opts && ref $opts eq 'HASH') {
+        $eopts .= "$_='" . ehtml($opts->{$_}) . "' " foreach (keys %$opts);
+    }
     return "<input type='submit' name=\"" . ehtml($name) . "\" value=\"" .
-        ehtml($val) . "\" />";
-
+        ehtml($val) . "\" $eopts/>";
 }
 
 1;

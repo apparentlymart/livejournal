@@ -1669,6 +1669,8 @@ if you would like to screen, unscreen, or delete the comments.
 
 /talkread.bml.anonuser=<i>(Anonymous)</i>
 
+/talkread.bml.confirm.action=Are you sure you wish to delete the selected comments?
+
 /talkread.bml.deletedpost=<b>(Deleted post)</b>
 
 /talkread.bml.deleteduser=<i>(Deleted user: [[username]])</i>

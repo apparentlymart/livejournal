@@ -4818,6 +4818,22 @@ sub ehtml
     return $a;
 }
 
+# <LJFUNC>
+# name: LJ::ejs
+# class: text
+# des: Escapes a string value before it can be put in JavaScript.
+# args: string
+# des-string: string to be escaped
+# returns: string escaped.
+# </LJFUNC>
+sub ejs
+{
+    my $a = $_[0];
+    $a =~ s/[\"\'\\]/\\$&/g;
+    $a =~ s/\n/\\n/gs;
+    return $a;
+}
+
 
 # <LJFUNC>
 # name: LJ::eall
