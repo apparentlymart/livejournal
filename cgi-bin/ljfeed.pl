@@ -40,7 +40,7 @@ sub make_feed
     my $user = $u->{'user'};
 
     if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
-        $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) . "/rss";
+        $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) . "/data/rss";
         return undef;
     }
 
