@@ -2105,8 +2105,7 @@ sub debug
 #      if one is defined, so LiveJournal installations can be based
 #      off an LDAP server, for example.
 # returns: boolean; 1 if authentication succeeded, 0 on failure
-# args: user_u, clear, md5, actual?, ip_banned?
-# des-user_u: Either the user name or a user object.
+# args: u, clear, md5, actual?, ip_banned?
 # des-clear: Clear text password the client is sending. (need this or md5)
 # des-md5: MD5 of the password the client is sending. (need this or clear).
 #          If this value instead of clear, clear can be anything, as md5
@@ -2119,24 +2118,15 @@ sub debug
 # </LJFUNC>
 sub auth_okay
 {
-    my $user = shift;
+    my $u = shift;
     my $clear = shift;
     my $md5 = shift;
     my $actual = shift;
     my $ip_banned = shift;
+    return 0 unless ref $u eq "HASH";
 
-    my $u;
-
-    # first argument can be a user object instead of a string, in
-    # which case the actual password (last argument) is got from the
-    # user object.
-    if (ref $user eq "HASH") {
-        $u = $user;
-        $actual = $user->{'password'};
-        $user = $user->{'user'};
-    } else {
-        $u = LJ::load_user($u);
-    }
+    $actual ||= $u->{'password'};
+    my $user = $u->{'user'};
     
     # set the IP banned flag, if it was provided.
     my $fake_scalar;
