@@ -553,6 +553,10 @@ sub s2_context
         my $ims = $r->header_in("If-Modified-Since");
         my $ourtime = LJ::time_to_http($modtime);
         if ($ims eq $ourtime) {
+            # 304 return; unload non-public layers
+            my $pub = get_public_layers();
+            S2::unregister_layer($_) foreach grep { ! $pub->{$_} } @layers;
+
             $r->status_line("304 Not Modified");
             $r->send_http_header();
             return undef;
@@ -572,6 +576,10 @@ sub s2_context
         eval { S2::run_code($ctx, "prop_init()"); };
         return $ctx unless $@;
     }
+
+    # failure to generate context; unload our non-public layers
+    my $pub = get_public_layers();
+    S2::unregister_layer($_) foreach grep { ! $pub->{$_} } @layers;
 
     my $err = $@;
     $r->content_type("text/html");
