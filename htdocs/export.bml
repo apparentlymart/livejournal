@@ -35,13 +35,24 @@ p?>
     <OPTION VALUE="xml">XML
     </SELECT><BR>
     <INPUT TYPE=CHECKBOX NAME="header" CHECKED> Header<BR>
-    XML Encoding: <select name="encoding">
-<option value="" selected='1'>(optional)</option>
-<option value="utf-8">utf-8</option>
-<option value="iso-8859-1">iso-8859-1</option>
-<option value="windows-1252">windows-1252</option>
-<option value="windows-1251">windows-1251</option>
-</select>
+    Encoding: (=_CODE
+ my $ret = "";
+ if ($LJ::UNICODE) {
+     my (%encodings, %encnames);
+     my $dbs = LJ::get_dbs();
+     LJ::load_codes($dbs, { "encoding" => \%encodings } );
+     LJ::load_codes($dbs, { "encname" => \%encnames } );
+     my $selected = 0;
+     foreach my $id (keys %encodings) {
+         $selected = $id if lc($encodings{$id}) eq 'utf-8';
+         delete $encnames{$id} if lc($encodings{$id}) eq 'none';
+     }
+     $ret .= LJ::html_select({'name'=>'encid', 'selected'=>$selected}, %encnames);
+ } else {
+     $ret .= "<input type='text' name='encoding' size='15' maxlength='15' value='iso-8859-1'/>";
+ }
+ return $ret . "<br />";
+_CODE=)
 
 </TD></TR>
 <TR><TD COLSPAN=2><HR></TD></TR>
@@ -54,6 +65,7 @@ p?>
   <INPUT TYPE=CHECKBOX NAME="field_event" CHECKED> <B>Event</B><BR>
   <INPUT TYPE=CHECKBOX NAME="field_security" CHECKED> Security Level<BR>
   <INPUT TYPE=CHECKBOX NAME="field_allowmask" CHECKED> Allow Mask<BR>
+  <input type='checkbox' name='field_currents' checked> Current Mood & Music<br />
 </TD></TR>
 
 <TR><TD></TD><TD><INPUT TYPE="SUBMIT" VALUE="Proceed..."></TD></TR>

@@ -196,13 +196,13 @@ body<=
      if ($info{'pages'} > 1) {
          $navcrap .= "<BR>Page $info{'page'} of $info{'pages'} shown (records $info{'first'}-$info{'last'})<BR>";
          my $left = "<B>&lt;&lt;</B>";
-         if ($info{'page'} > 1) { $left = "<A HREF=\"" . BML::self_link(\%FORM, { 'page' => $info{'page'}-1 }) . "\">$left</A>"; }
+         if ($info{'page'} > 1) { $left = "<A HREF=\"" . BML::self_link({ 'page' => $info{'page'}-1 }) . "\">$left</A>"; }
          my $right = "<B>&gt;&gt;</B>";
-         if ($info{'page'} < $info{'pages'}) { $right = "<A HREF=\"" . BML::self_link(\%FORM, { 'page' => $info{'page'}+1 }) . "\">$right</A>"; }
+         if ($info{'page'} < $info{'pages'}) { $right = "<A HREF=\"" . BML::self_link({ 'page' => $info{'page'}+1 }) . "\">$right</A>"; }
          $navcrap .= $left . " ";
          for (my $i=1; $i<=$info{'pages'}; $i++) {
              my $link = "[$i]";
-             if ($i != $info{'page'}) { $link = "<A HREF=\"" . BML::self_link(\%FORM, { 'page' => $i }) . "\">$link</A>"; }
+             if ($i != $info{'page'}) { $link = "<A HREF=\"" . BML::self_link({ 'page' => $i }) . "\">$link</A>"; }
              else { $link = "<FONT SIZE=+1><B>$link</B></FONT>"; }
              $navcrap .= "$link ";
          }

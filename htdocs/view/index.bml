@@ -69,8 +69,8 @@
      my @prev = ($year, $month-1);
      if ($prev[1] < 1) { @prev = ($year-1, 12); }
      
-     my $next = "<a href=\"" . BML::self_link(\%FORM, { 'y' => $next[0], 'm' => $next[1] }) . "\"><img src=\"$LJ::IMGPREFIX/btn_next.gif\" width=22 height=20 border=0></a>";
-     my $prev = "<a href=\"" . BML::self_link(\%FORM, { 'y' => $prev[0], 'm' => $prev[1] }) . "\"><img src=\"$LJ::IMGPREFIX/btn_prev.gif\" width=22 height=20 border=0></a>";
+     my $next = "<a href=\"" . BML::self_link({ 'y' => $next[0], 'm' => $next[1] }) . "\"><img src=\"$LJ::IMGPREFIX/btn_next.gif\" width=22 height=20 border=0></a>";
+     my $prev = "<a href=\"" . BML::self_link({ 'y' => $prev[0], 'm' => $prev[1] }) . "\"><img src=\"$LJ::IMGPREFIX/btn_prev.gif\" width=22 height=20 border=0></a>";
 
      $body .= "<?standout ";
      $body .= "<form method=get><input type=hidden name=type value=month><input type=hidden name=user value=$u->{'user'}>";

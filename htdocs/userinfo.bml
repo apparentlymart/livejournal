@@ -530,7 +530,7 @@
                  if $remote_friend{$_};
              $body .= "$frlink, ";
              if (++$count == 150 && $FORM{'mode'} ne "full") {
-                 $body .= "<a href=\"" . BML::self_link(\%FORM, { 'mode' => 'full' }) . "\">...</a>";
+                 $body .= "<a href=\"" . BML::self_link({ 'mode' => 'full' }) . "\">...</a>";
                  last;
              }
          }
