@@ -1147,16 +1147,22 @@ sub editevent
 
     if ($eventtime ne $oldevent->{'eventtime'} ||
         $security ne $oldevent->{'security'} ||
+        (!$curprops{opt_backdated} && $req->{props}{opt_backdated}) ||
         $qallowmask != $oldevent->{'allowmask'})
     {
         # are they changing their most recent post?
-        if ($eventtime ne $oldevent->{'eventtime'} &&
-            $u->{'userid'} == $uowner->{'userid'}) 
-        {
-            LJ::load_user_props($dbh, $u, "newesteventtime");
-            if ($u->{'newesteventtime'} eq $oldevent->{'eventtime'}) {
+        LJ::load_user_props($dbh, $u, "newesteventtime");
+        if ($u->{userid} == $uowner->{userid} &&
+            $u->{newesteventtime} eq $oldevent->{eventtime}) {
+            # did they change the time?
+            if ($eventtime ne $oldevent->{eventtime}) {
+                # the newesteventtime is this event's new time.
                 LJ::set_userprop($u, "newesteventtime", $eventtime);
-            }
+            } elsif (!$curprops{opt_backdated} && $req->{props}{opt_backdated}) {
+                # otherwise, if they set the backdated flag,
+                # then we no longer know the newesteventtime.
+                LJ::set_userprop($u, "newesteventtime", undef);
+            } 
         }
         
         my $qsecurity = $dbh->quote($security);
