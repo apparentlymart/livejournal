@@ -1648,7 +1648,7 @@ function YearPage::print_month(YearMonth m) {
        border-collapse: collapse; border: 1px solid;" border="1">\n
        <tr><th colspan="7" style="text-align: center; border: 1px solid;">""";
     print $m->month_format();
-    """</th></tr>\n""";
+    """</th></tr>\n<tr>\n""";
     foreach var int d (weekdays()) {
         "<th>"+$*lang_dayname_short[$d]+"</th>\n";
     }
@@ -1931,9 +1931,9 @@ function EntryPage::print_body
     var Entry e = $.entry;
     """<div class="entry" id="entry$e.itemid">\n""";
 
-    "<table>";
+    "<table><tr valign='middle'>";
     if (defined $e.userpic) { 
-        print "<tr valign='middle'><td>$e.userpic</td>"; 
+        print "<td>$e.userpic</td>"; 
     }
     print "<td>"+lang_user_wrote($e.poster);
     print "<br />"+lang_at_datetime($e.time);
@@ -1981,9 +1981,9 @@ function ReplyPage::print_body
         return; 
     }
 
-    "<table>";
+    "<table><tr valign='middle'>";
         if (defined $.replyto.userpic) { 
-            print "<tr valign='middle'><td>$.replyto.userpic</td>"; 
+            print "<td>$.replyto.userpic</td>"; 
         }
     print "<td>"+lang_user_wrote($.replyto.poster);
     print "<br />"+lang_at_datetime($.replyto.time);
