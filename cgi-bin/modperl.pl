@@ -7,7 +7,7 @@ use Apache;
 
 # setup httpd.conf things for the user:
 Apache->httpd_conf("DocumentRoot $LJ::HTDOCS")
-    if $LJ::ADMIN_EMAIL;
+    if $LJ::HTDOCS;
 Apache->httpd_conf("ServerAdmin $LJ::ADMIN_EMAIL")
     if $LJ::ADMIN_EMAIL;
 
