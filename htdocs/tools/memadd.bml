@@ -5,7 +5,7 @@
 
  my $dbr = LJ::get_db_reader();
 
- $title = $ML{'title'};
+ $title = $ML{'.title'};
  $body = "";
 
  my $err = sub {
@@ -181,7 +181,7 @@
      LJ::text_out(\$des);
      LJ::text_out(\$keywords);
 
-     $body .= $ML{'add_previous'};
+     $body .= $ML{'.add_previous'};
 
      my $getextra = "?";
      $getextra .= "authas=$authas&" if $authas ne $remote->{'user'};
@@ -214,7 +214,7 @@
 
 
      $body .= "</TD></TR>\n";
-     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Security:</B></TD><TD><SELECT name=security>";
+     $body .= "<tr><td align='right' valign='top'><b>$ML{'.security'}</b></td><td><select name=security>";
      foreach my $sec ("public", "friends", "private") {
          my $sel = (defined $memory && $memory->{'security'} eq $sec) ? "SELECTED" : "";
          $body .= "<OPTION VALUE=\"$sec\" $sel>$secopts{$sec}\n";

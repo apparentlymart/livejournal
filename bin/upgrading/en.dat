@@ -2227,6 +2227,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /tools/memadd.bml.multiple_selections=Hold down 'Control' while clicking keywords to select multiple ones.
 
+/tools/memadd.bml.security=Security:
+
 /tools/memadd.bml.security.friendsonly=Friends Only
 
 /tools/memadd.bml.security.private=Private
