@@ -21,6 +21,7 @@ require 'ljconfig.pl';
 # pre-load common libraries so we don't have to load them in BML files (slow)
 package BMLCodeBlock;
 use LJ::TagGenerator ':html4';
+use Digest::MD5 qw(md5_hex);
 require 'supportlib.pl';
 require 'ljlib.pl';
 require 'ljprotocol.pl';
