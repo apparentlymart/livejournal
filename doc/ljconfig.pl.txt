@@ -186,7 +186,7 @@
     $MSG_NO_POST    = "Due to hardware maintenance, you cannot post at this time.  Watch the news page for updates.";
     $MSG_NO_COMMENT = "Due to hardware maintenance, you cannot leave comments at this time.  Watch the news " .
                       "page for updates.";
-
+    #$MSG_DB_UNAVAILABLE = "Sorry, database temporarily unavailable.  Please see <a href='...'>...</a> for status updates.";
 
     ###
     ### Language / Scheme support

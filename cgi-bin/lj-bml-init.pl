@@ -25,7 +25,8 @@ BML::register_hook("startup", sub {
 BML::register_hook("codeerror", sub {
     my $msg = shift;
     if ($msg =~ /Can\'t call method.*on an undefined value/) {
-        return "Sorry, database temporarily unavailable.";
+        return $LJ::MSG_DB_UNAVAILABLE ||
+               "Sorry, database temporarily unavailable.";
     }
     chomp $msg;
     $msg .= " \@ $LJ::SERVER_NAME" if $LJ::SERVER_NAME;
