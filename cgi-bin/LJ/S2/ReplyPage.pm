@@ -55,7 +55,6 @@ sub ReplyPage
             LJ::item_toutf8($u, \$parpost->{'subject'}, \$parpost->{'body'}, {});
         }
 
-        $parpost->{'subject'} = LJ::ehtml($parpost->{'subject'});
         LJ::CleanHTML::clean_comment(\$parpost->{'body'}, 
                                      $parpost->{'props'}->{'opt_preformatted'});        
         
@@ -74,7 +73,7 @@ sub ReplyPage
         my $dtalkid = $re_talkid * 256 + $entry->{'anum'};
         $replyto = {
             '_type' => 'EntryLite',
-            'subject' => $parpost->{'subject'},
+            'subject' => LJ::ehtml($parpost->{'subject'}),
             'text' => $parpost->{'body'},
             'userpic' => $comment_userpic,
             'poster' => $s2poster,
