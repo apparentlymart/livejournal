@@ -17,6 +17,20 @@ use vars qw(%HOOK);
 use vars qw(%Lang);       # iso639-2 2-letter lang code -> BML lang code
 use vars qw(%FileModTime %FileBlockData %FileBlockFlags);
 
+# load BML Config
+{
+    my $conf_file = $ENV{'BMLConfig'};
+    $conf_file =~ s/\$(\w+)/$ENV{$1}/g;
+    load_config($conf_file);
+
+    my $err;
+    foreach my $is (split(/\s*,\s*/, $config->{'/'}->{'VarInitScript'})) {
+        unless (load_look_from_initscript($is, \$err)) {
+            die "Error running VarInitScript ($is): $err\n";                
+        }
+    }
+}
+
 sub handler
 {
     my $r = shift;
@@ -31,17 +45,7 @@ sub handler
         $r->log_error("File permissions deny access: $file");
         return FORBIDDEN;
     }
-    
-    unless ($config) {
-        my $conf_file = $r->server_root_relative($r->dir_config("BMLConfig"));
-        unless (-e $conf_file) {
-            $r->log_error("Couldn't open BMLConf file: $conf_file");
-            return FORBIDDEN;
-        }
-        my $ret = load_config($r, $conf_file);
-        return $ret unless $ret == OK;
-    }
-   
+  
     my $modtime = (stat _)[9];
 
     my $fh;
@@ -113,15 +117,20 @@ sub handler
         $ideal_scheme ||
         $req->{'env'}->{'DefaultScheme'};
 
-    if ($req->{'env'}->{'VarInitScript'}) {
-        my $err;
-        foreach my $is (split(/\s*,\s*/, $req->{'env'}->{'VarInitScript'})) {
-            last unless load_look_from_initscript($req, $is, \$err);
+    if ($req->{'env'}->{'VarInitScript'}) 
+    {
+        my $file = "VARINIT";
+        my @expandconstants;
+        foreach my $k (keys %{$FileBlockData{$file}}) {
+            $req->{'blockdata'}->{$k} = $FileBlockData{$file}->{$k};
+            $req->{'blockflags'}->{$k} = $FileBlockFlags{$file}->{$k};
+            if ($req->{'blockflags'}->{$k} =~ /s/) { push @expandconstants, $k; }
         }
-        return report_error($r, "<b>Error loading VarInitScript:</b><br />\n$err")
-            if $err;
+        foreach my $k (@expandconstants) {
+            $req->{'blockdata'}->{$k} =~ s/\(=([A-Z0-9\_]+?)=\)/$req->{'blockdata'}->{$1}/g;
+        }
     }
-    
+
     if ($HOOK{'startup'}) {
         eval {
             $HOOK{'startup'}->();
@@ -204,16 +213,14 @@ sub report_error
 
 sub load_config
 {
-    my $r = shift;
     my $conf_file = shift;
 
     my ($currentpath, $var, $val);
 
     my $cfg = Apache::File->new($conf_file);
-    unless ($cfg) {
-        $r->log_error("Couldn't open BML config ($conf_file) for reading: $!");
-        return SERVER_ERROR;
-    }
+
+    die "Couldn't open BML config ($conf_file) for reading: $!"
+        unless $cfg;
 
     $config = {};
     while (my $line = <$cfg>)
@@ -600,51 +607,31 @@ sub trim
 
 sub load_look_from_initscript
 {
-    my ($req, $file, $errref) = @_;
+    my ($file, $errref) = @_;
     my $dummy;
     $errref ||= \$dummy;
 
-    my $modtime;
-    if ($req->{'env'}->{'CacheUntilHUP'} && $FileModTime{$file}) {
-        $modtime = $FileModTime{$file};
-    } else {
-        $modtime = (stat($file))[9];
-    }
+    my $modtime = (stat($file))[9];
     unless ($modtime) {
         $$errref = "Can't find VarInitScript: $file";
         return 0;
     }
 
-    note_mod_time($req, $modtime);
-    if ($modtime > $FileModTime{$file})
-    {
-        unless (open (F, $file)) {
-            $$errref = "Couldn't open $file";
-            return 0;
-        }
-        my $init = join('', <F>);
-        close F;
-
-        $req->{'varinit_file'} = $file;
-        my $ret = eval $init;
-
-        if ($@) {
-            $$errref = $@;
-            return 0;
-        }
-        $FileModTime{$file} = $modtime;
-    } 
-    
-    my @expandconstants;
-    foreach my $k (keys %{$FileBlockData{$file}}) {
-        $req->{'blockdata'}->{$k} = $FileBlockData{$file}->{$k};
-        $req->{'blockflags'}->{$k} = $FileBlockFlags{$file}->{$k};
-        if ($req->{'blockflags'}->{$k} =~ /s/) { push @expandconstants, $k; }
+    note_mod_time(undef, $modtime);
+    unless (open (F, $file)) {
+        $$errref = "Couldn't open $file";
+        return 0;
     }
-    foreach my $k (@expandconstants) {
-        $req->{'blockdata'}->{$k} =~ s/\(=([A-Z0-9\_]+?)=\)/$req->{'blockdata'}->{$1}/g;
-    }
+    my $init = join('', <F>);
+    close F;
     
+    my $ret = eval $init;
+    
+    if ($@) {
+        $$errref = $@;
+        return 0;
+    }
+
     return 1;
 }
 
@@ -768,8 +755,14 @@ sub note_file_mod_time
 sub note_mod_time
 {
     my ($req, $mod_time) = @_;
-    if ($mod_time > $req->{'most_recent_mod'}) { 
-        $req->{'most_recent_mod'} = $mod_time; 
+    if ($req) {
+        if ($mod_time > $req->{'most_recent_mod'}) { 
+            $req->{'most_recent_mod'} = $mod_time; 
+        }
+    } else {
+        if ($mod_time > $config->{'/'}->{'base_recent_mod'}) { 
+            $config->{'/'}->{'base_recent_mod'} = $mod_time; 
+        }
     }
 }
 
@@ -873,9 +866,8 @@ sub register_block
     my ($type, $flags, $def) = @_;
     $type = uc($type);
 
-    my $file = $Apache::BML::cur_req->{'varinit_file'};
-    $Apache::BML::FileBlockData{$file}->{$type} = $def;
-    $Apache::BML::FileBlockFlags{$file}->{$type} = $flags;
+    $Apache::BML::FileBlockData{"VARINIT"}->{$type} = $def;
+    $Apache::BML::FileBlockFlags{"VARINIT"}->{$type} = $flags;
     return 1;
 }
 
