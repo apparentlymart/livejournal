@@ -7505,8 +7505,8 @@ sub mark_user_active {
     return 0 unless $uid && $u->{clusterid};
 
     # Update the clustertrack table, but not if we've done it for this
-    # user the past 5 hours.
-    if (LJ::MemCache::add("rate:tracked:$uid", 1, 3600*5)) {
+    # user in the last hour
+    if (LJ::MemCache::add("rate:tracked:$uid", 1, 3600)) {
         my $dbcm = LJ::get_cluster_master($u);
         return 0 unless $dbcm;
         $dbcm->do("REPLACE INTO clustertrack2 SET ".
