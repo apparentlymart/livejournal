@@ -1485,8 +1485,9 @@ sub run_hooks
 
 # <LJFUNC>
 # name: LJ::register_hook
-# des: Installs a site-specific hook.  Installing multiple hooks per hookname
-#      is valid.  They're run later in the order they're registered.
+# des: Installs a site-specific hook.
+# info: Installing multiple hooks per hookname is valid.  
+#       They're run later in the order they're registered.
 # args: hookname, subref
 # des-subref: Subroutine reference to run later.
 # </LJFUNC>
@@ -3448,11 +3449,10 @@ sub get_dbs
 # <LJFUNC>
 # name: LJ::get_cluster_reader
 # class: db
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Returns a cluster slave for a user, or cluster master if no slaves exist.
+# args: uarg
+# des-uarg: Either a userid scalar or a user object.
+# returns: DB handle.  Or undef if all dbs are unavailable.
 # </LJFUNC>
 sub get_cluster_reader
 {
@@ -3465,11 +3465,10 @@ sub get_cluster_reader
 # <LJFUNC>
 # name: LJ::get_cluster_master
 # class: db
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Returns a cluster master for a given user.
+# args: uarg
+# des-uarg: Either a userid scalar or a user object.
+# returns: DB handle.  Or undef if master is unavailable.
 # </LJFUNC>
 sub get_cluster_master
 {
@@ -3481,11 +3480,10 @@ sub get_cluster_master
 # <LJFUNC>
 # name: LJ::get_cluster_set
 # class: db
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Returns a dbset structure for a user's db clusters.
+# args: uarg
+# des-uarg: Either a userid scalar or a user object.
+# returns: dbset.
 # </LJFUNC>
 sub get_cluster_set
 {
@@ -3520,17 +3518,16 @@ sub make_dbs
     return $dbs;
 }
 
-# converts a single argument to a dbs.  the argument is either a 
-# dbset already, or it's a master handle, in which case we need
-# to make it into a dbset with no slave.
 # <LJFUNC>
 # name: LJ::make_dbs_from_arg
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class: db
+# des: Convert unknown arg to a dbset.
+# info: Functions use this to let their callers use either db handles
+#       or dbsets.  If argument is a single handle, turns it into a
+#       dbset.  If already a dbset, just returns it unchanged.
+# args: something
+# des-something: Either a db handle or a dbset.
+# returns: A dbset.
 # </LJFUNC>
 sub make_dbs_from_arg
 {
@@ -3545,16 +3542,13 @@ sub make_dbs_from_arg
 }
 
  
-## turns a date (yyyy-mm-dd) into links to year calendar, month view, and day view, given
-## also a user object (hashref)
 # <LJFUNC>
 # name: LJ::date_to_view_links
 # class: component
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Returns HTML of date with links to user's journal.
+# args: u, date 
+# des-date: date in yyyy-mm-dd form.
+# returns: HTML with yyy, mm, and dd all links to respective views.
 # </LJFUNC>
 sub date_to_view_links
 {
@@ -3678,18 +3672,20 @@ sub expand_embedded
 
 # <LJFUNC>
 # name: LJ::make_remote
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Returns a minimal user structure ($remote-like) from
+#      a username and userid.
+# args: user, userid
+# des-user: Username.
+# des-userid: User ID.
+# returns: hashref with 'user' and 'userid' keys, or undef if
+#          either argument was bogus (so caller can pass
+#          untrusted input)
 # </LJFUNC>
 sub make_remote
 {
-    my $user = shift;
+    my $user = LJ::canonical_username(shift);
     my $userid = shift;
-    if ($userid && $userid =~ /^\d+$/) {
+    if ($user && $userid && $userid =~ /^\d+$/) {
 	return { 'user' => $user,
 		 'userid' => $userid, };
     }
@@ -3697,43 +3693,16 @@ sub make_remote
 }
 
 # <LJFUNC>
-# name: LJ::escapeall
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
-# </LJFUNC>
-sub escapeall
-{
-    my $a = $_[0];
-
-    ### escape HTML
-    $a =~ s/\&/&amp;/g;
-    $a =~ s/\"/&quot;/g;
-    $a =~ s/</&lt;/g;
-    $a =~ s/>/&gt;/g;
-
-    ### and escape BML
-    $a =~ s/\(=/\(&\#0061;/g;
-    $a =~ s/=\)/&\#0061;\)/g;
-    return $a;
-}
-
-# load a few users at once, their userids given in the keys of $map
-# listref (not hashref: can't have dups).  values of $map listref are
-# scalar refs to put result in.  $have is an optional listref of user
-# object caller already has, but is too lazy to sort by themselves.
-
-# <LJFUNC>
 # name: LJ::load_userids_multiple
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Loads a number of users at once, efficiently.
+# info: loads a few users at once, their userids given in the keys of $map
+#       listref (not hashref: can't have dups).  values of $map listref are
+#       scalar refs to put result in.  $have is an optional listref of user
+#       object caller already has, but is too lazy to sort by themselves.
+# args: dbarg, map, have
+# des-map: Arrayref of pairs (userid, destination scalarref)
+# des-have: Arrayref of user objects caller already has
+# returns: Nothing.
 # </LJFUNC>
 sub load_userids_multiple
 {
@@ -3773,15 +3742,13 @@ sub load_userids_multiple
     }
 }
 
-# $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
 # <LJFUNC>
 # name: LJ::load_user
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Loads a user record given a username.
+# info: From the [dbarg[user]] table.
+# args: dbarg, user
+# des-user: Username of user to load.
+# returns: Hashref with keys being columns of [dbtable[user]] table.
 # </LJFUNC>
 sub load_user
 {
@@ -3833,12 +3800,11 @@ sub load_user
 
 # <LJFUNC>
 # name: LJ::load_userid
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Loads a user record given a userid.
+# info: From the [dbarg[user]] table.
+# args: dbarg, userid
+# des-userid: Userid of user to load.
+# returns: Hashref with keys being columns of [dbtable[user]] table.
 # </LJFUNC>
 sub load_userid
 {
@@ -3851,11 +3817,7 @@ sub load_userid
     my $dbr = $dbs->{'reader'};
 		
     my $quserid = $dbr->quote($userid);
-    my $sth = $dbr->prepare("SELECT * FROM user WHERE userid=$quserid");
-    $sth->execute;
-    my $u = $sth->fetchrow_hashref;
-    $sth->finish;
-    return $u;
+    return LJ::dbs_selectrow_hashref($dbs, "SELECT * FROM user WHERE userid=$quserid");
 }
 
 # <LJFUNC>
@@ -4216,15 +4178,16 @@ sub remote_has_priv
     return $match;
 }
 
-## get a userid from a username (returns 0 if invalid user)
 # <LJFUNC>
 # name: LJ::get_userid
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Returns a userid given a username.
+# info: Results cached in memory.  On miss, does DB call.  Not advised
+#       to use this many times in a row... only once or twice perhaps
+#       per request.  Tons of serialized db requests, even when small,
+#       are slow.  Opposite of [func[LJ::get_username]].
+# args: dbarg, user
+# des-user: Username whose userid to look up.
+# returns: Userid, or 0 if invalid user.
 # </LJFUNC>
 sub get_userid
 {
@@ -4260,16 +4223,16 @@ sub get_userid
     return ($userid+0);
 }
 
-## get a username from a userid (returns undef if invalid user)
-# $dbarg can be either a $dbh (master) or a $dbs (db set, master & slave hashref)
 # <LJFUNC>
 # name: LJ::get_username
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# des: Returns a username given a userid.
+# info: Results cached in memory.  On miss, does DB call.  Not advised
+#       to use this many times in a row... only once or twice perhaps
+#       per request.  Tons of serialized db requests, even when small,
+#       are slow.  Opposite of [func[LJ::get_userid]].
+# args: dbarg, user
+# des-user: Username whose userid to look up.
+# returns: Userid, or 0 if invalid user.
 # </LJFUNC>
 sub get_username
 {
@@ -4482,6 +4445,7 @@ sub get_keyword_id
 
 # <LJFUNC>
 # name: LJ::trim
+# class: text
 # des: Removes whitespace from left and right side of a string.
 # args: string
 # des-string: string to be trimmed
@@ -4797,6 +4761,7 @@ sub load_talk_props2
 
 # <LJFUNC>
 # name: LJ::eurl
+# class: text
 # des: Escapes a value before it can be put in a URL.  See also [func[LJ::durl]].
 # args: string
 # des-string: string to be escaped
@@ -4812,6 +4777,7 @@ sub eurl
 
 # <LJFUNC>
 # name: LJ::durl
+# class: text
 # des: Decodes a value that's URL-escaped.  See also [func[LJ::eurl]].
 # args: string
 # des-string: string to be decoded
@@ -4827,6 +4793,7 @@ sub durl
 
 # <LJFUNC>
 # name: LJ::exml
+# class: text
 # des: Escapes a value before it can be put in XML.
 # args: string
 # des-string: string to be escaped
@@ -4860,6 +4827,31 @@ sub ehtml
     $a =~ s/</&lt;/g;
     $a =~ s/>/&gt;/g;
     return $a;	
+}
+
+
+# <LJFUNC>
+# name: LJ::eall
+# class: text
+# des: Escapes HTML and BML.
+# args: text
+# des-text: Text to escape.
+# returns: Escaped text.
+# </LJFUNC>
+sub eall
+{
+    my $a = shift;
+
+    ### escape HTML
+    $a =~ s/\&/&amp;/g;
+    $a =~ s/\"/&quot;/g;
+    $a =~ s/</&lt;/g;
+    $a =~ s/>/&gt;/g;
+
+    ### and escape BML
+    $a =~ s/\(=/\(&\#0061;/g;
+    $a =~ s/=\)/&\#0061;\)/g;
+    return $a;
 }
 
 # <LJFUNC>
@@ -5042,6 +5034,7 @@ sub delete_talkitem
 
 # <LJFUNC>
 # name: LJ::alldateparts_to_hash
+# class: s1
 # des: Given a date/time format from MySQL, breaks it into a hash.
 # info: This is used by S1.
 # args: alldatepart

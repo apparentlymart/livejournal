@@ -644,7 +644,7 @@ sub show_poll
 	    my ($size, $max) = split(m!/!, $q->{'opts'});
 	    if ($mode eq "enter") {
 		if ($do_form) {
-		    my $pval = LJ::escapeall($preval{$qid});
+		    my $pval = LJ::eall($preval{$qid});
 		    $ret .= "<input type=text size=$size maxlength=$max name=\"pollq-$qid\" value=\"$pval\">";
 		} else {
 		    $ret .= "[" . ("&nbsp;"x$size) . "]";

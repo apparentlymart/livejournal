@@ -1080,7 +1080,7 @@ $box{'randuser'} =
 	    }
 	    $$b .= "(=LJUSER $r->{'user'} LJUSER=)";
 	    unless ($box->{'args'}->{'hidename'}) {
-		$$b .= "<br>" . LJ::escapeall($r->{'name'});
+		$$b .= "<br>" . LJ::eall($r->{'name'});
 	    }
 
 	    if ($size eq "large") {  $$b .= "</td>"; }
