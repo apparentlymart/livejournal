@@ -183,14 +183,16 @@ sub s2_run
 sub get_public_layers
 {
     my $sysid = shift;  # optional system userid (usually not used)
+    $LJ::CACHED_PUBLIC_LAYERS ||= LJ::MemCache::get("s2publayers")
+        unless $LJ::LESS_CACHING;
     return $LJ::CACHED_PUBLIC_LAYERS if $LJ::CACHED_PUBLIC_LAYERS;
 
-    my $dbr = LJ::get_db_reader();
-    $sysid ||= LJ::get_userid($dbr, "system");
+    $sysid ||= LJ::get_userid("system");
     my $layers = get_layers_of_user($sysid, "is_system");
 
     return $layers if $LJ::LESS_CACHING;
     $LJ::CACHED_PUBLIC_LAYERS = $layers if $layers;
+    LJ::MemCache::set("s2publayers", $layers, 60*10) if $layers;
     return $LJ::CACHED_PUBLIC_LAYERS;
 }
 
@@ -302,8 +304,6 @@ sub s2_context
     my $styleid = shift;
     my $opts = shift;
 
-    my $dbr = LJ::get_db_reader();
-
     my %style = get_style($styleid);
 
     my @layers;
@@ -311,6 +311,11 @@ sub s2_context
         push @layers, $style{$_} if $style{$_};
     }
 
+    # TODO: memcache this.  only make core S2 (which uses the DB) load
+    # when we can't get all the s2compiled stuff from memcache.
+    # compare s2styles.modtime with s2compiled.comptime to see if memcache
+    # version is accurate or not.
+    my $dbr = LJ::get_db_reader();
     my $modtime = S2::load_layers_from_db($dbr, @layers);
 
     # check that all critical layers loaded okay from the database, otherwise
