@@ -1121,7 +1121,7 @@ sub db_logger
             $$,
             ($endcpu->user - $startcpu->user) / $cpufreq,
             ($endcpu->sys - $startcpu->sys) / $cpufreq,
-            ($endcpu->total - $startcpu->total) / $cputfreq,
+            ($endcpu->total - $startcpu->total) / $cpufreq,
             $endmem->vsize - $startmem->vsize,
             $endmem->share - $startmem->share,
             $endmem->rss - $startmem->rss,
