@@ -1,5 +1,5 @@
 <?page
-title=>Edit Journal Entry
+title=><?_ML .title _ML?>
 body<=
 
 <?_code
@@ -45,7 +45,7 @@ body<=
      $jump_to_item = 1;
      my $remote = LJ::get_remote($dbs);
      unless ($remote) {
-         return "<?h1 Error h1?><?p You have to be logged in to directly edit a journal entry of yours. p?>";
+         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.mustlogin'} p?>";
      }
      $user = $FORM{'user'} = $remote->{'user'};
      $userid = $remote->{'userid'};
@@ -91,15 +91,15 @@ body<=
  
      if ($res{'success'} eq "OK")
      {
-         $ret .= "<?h1 Pick an entry to edit.. h1?><?p Select which item you want to edit and press the edit button at the bottom of the page. p?>\n";
-         $ret .= "<FORM METHOD=POST ACTION=\"editjournal_do.bml\">\n";
-         $ret .= "<INPUT TYPE=HIDDEN NAME=\"mode\" VALUE=\"getevents\">\n";
-         $ret .= "<INPUT TYPE=HIDDEN NAME=\"selecttype\" VALUE=\"one\">\n";
-         $ret .= "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"$user\">\n";
-         $ret .= "<INPUT TYPE=HIDDEN NAME=\"hpassword\" VALUE=\"$hpassword\">\n";
+         $ret .= "<?h1 $ML{'.pickentry.head'} h1?><?p $ML{'.pickentry.text'} p?>\n";
+         $ret .= "<form method='post' action='editjournal_do.bml'>\n";
+         $ret .= "<input type='hidden' name='mode' value='getevents'>\n";
+         $ret .= "<input type='hidden' name='selecttype' value='one'>\n";
+         $ret .= "<input type='hidden' name='user' value='$user'>\n";
+         $ret .= "<input type='hidden' name='hpassword' value='$hpassword'>\n";
 
          $clustered = 1 if defined $res{"events_1_anum"};
-         $ret .= "<INPUT TYPE=HIDDEN NAME=\"clustered\" VALUE=\"$clustered\">\n";	 
+         $ret .= "<input type='hidden' name='clustered' value='$clustered'>\n";	 
 
          my %props = ();
          for (my $i=1; $i<=$res{'prop_count'}; $i++) {
@@ -113,21 +113,21 @@ body<=
                  $res{"events_${i}_itemid"} * 256 + $res{"events_${i}_anum"} : 
                  $res{"events_${i}_itemid"};
 
-             $ret .= "<HR><INPUT TYPE=RADIO NAME=\"itemid\" VALUE=\"$ditemid\"> <B>" .
-                 $res{"events_${i}_eventtime"} . "</B>";
+             $ret .= "<hr><input type=radio name='itemid' value='$ditemid'> <b>" .
+                 $res{"events_${i}_eventtime"} . "</b>";
 
              if ($res{"events_${i}_subject"}) {
-                 $ret .= "; <I>" . BML::ebml($res{"events_${i}_subject"}) . "</I>";
+                 $ret .= "; <i>" . BML::ebml($res{"events_${i}_subject"}) . "</i>";
              }
-             $ret .= "<BR>\n";
+             $ret .= "<br />\n";
              my $event = LJ::durl($res{"events_${i}_event"});
              unless ($props{$res{"events_${i}_itemid"}}->{'opt_preformatted'}) {
-                 $event =~ s/\n/<BR>\n/g;
+                 $event =~ s!\n!<br />\n!g;
              }
              $ret .= BML::ebml($event);
          }
          
-         $ret .= "<?h1 Press to continue... h1?><?p After you select an item to edit or delete, press the Edit button below. p?><?standout <INPUT TYPE=SUBMIT VALUE=\"Edit Selected Entry\"> standout?></FORM>\n";
+         $ret .= "<?h1 $ML{'.continue.head'} h1?><?p $ML{'.continue.text'} p?><?standout <input type='submit' value='$ML{'.btn.edit'}'> standout?></form>\n";
          
          unless ($just_last) 
          {
@@ -140,8 +140,8 @@ body<=
      }
      else
      {
-         $ret .= "<?h1 Error h1?>\n";
-         $ret .= "<?p There was an error getting the journal entries to edit: <UL><LI><B><?_eh $res{'errmsg'} _eh?></B></UL> p?>";
+         $ret .= "<?h1 $ML{'Error'} h1?>\n";
+         $ret .= "<?p $ML{'.error.getting'} <ul><li><b><?_eh $res{'errmsg'} _eh?></b></li></ul> p?>";
          return $ret;
      }
  }
@@ -200,7 +200,7 @@ body<=
          $userid = LJ::get_userid($dbs, $user);
          my $count = $res{'events_count'};
          unless ($count) {
-             return "<?h1 Error h1?><?p Could not find selected journal entry. p?>";
+             return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.nofind'} p?>";
          }
 
          my $gfg;
@@ -220,45 +220,45 @@ body<=
              $res{'events_1_itemid'} * 256 + $res{'events_1_anum'} : 
              $res{'events_1_itemid'};
 
-         $ret .= "<?h1 Edit Journal Entry h1?><?p Edit the fields of your journal entry you'd like to modify and press the save button at the bottom of the page.  To delete the entry, just delete all the text and press save... the entry will be deleted. p?>\n";
-         $ret .= "<FORM METHOD=POST ACTION=\"editjournal_do.bml\">\n";
-         $ret .= "<INPUT TYPE=HIDDEN NAME=\"mode\" VALUE=\"editevent\">\n";
-         $ret .= "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"$user\">\n";
-         $ret .= "<INPUT TYPE=HIDDEN NAME=\"hpassword\" VALUE=\"$hpassword\">\n";
-         $ret .= "<INPUT TYPE=HIDDEN NAME=\"itemid\" VALUE=\"$ditemid\">\n";
+         $ret .= "<?h1 $ML{'.title'} h1?><?p $ML{'.edit.text'} p?>\n";
+         $ret .= "<form method='post' action='editjournal_do.bml'>\n";
+         $ret .= "<input type='hidden' name='mode' value='editevent'>\n";
+         $ret .= "<input type='hidden' name='user' value='$user'>\n";
+         $ret .= "<input type='hidden' name='hpassword' value='$hpassword'>\n";
+         $ret .= "<input type='hidden' name='itemid' value='$ditemid'>\n";
          $ret .= "<input type='hidden' name='clustered' value='$clustered'>\n";  # for link later
          if ($FORM{'usejournal'}) {
-             $ret .= "<INPUT TYPE=HIDDEN NAME=\"usejournal\" VALUE=\"$FORM{'usejournal'}\">\n";
+             $ret .= "<input type='hidden' name='usejournal' value='$FORM{'usejournal'}'>\n";
          }
 
          my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
 
-         $ret .= "<TABLE>\n";
-         $ret .= "<TR><TD ALIGN=RIGHT>Date:<BR><I>(yyyy-mm-dd)</I></TD><TD><INPUT NAME=year SIZE=5 MAXLENGTH=4 VALUE=$year>-";
-         $ret .= "<INPUT NAME=mon SIZE=3 MAXLENGTH=2 VALUE=$mon>-";
-         $ret .= "<INPUT NAME=day SIZE=3 MAXLENGTH=2 VALUE=$mday></TD>\n";
+         $ret .= "<table>\n";
+         $ret .= "<tr><td align='right'>$ML{'.date'}<br /><i>(yyyy-mm-dd)</i></td><td><input name='year' size='5' maxlength='4' value='$year'>-";
+         $ret .= "<input name='mon' size='3' maxlength='2' value='$mon'>-";
+         $ret .= "<input name='day' size='3' maxlength='2' value='$mday'></td>\n";
          
-         $ret .= "<TD ALIGN=RIGHT>Local time:<BR><I>(24 hour time)</I></TD><TD>";
-         $ret .= "<INPUT NAME=hour SIZE=3 MAXLENGTH=2 VALUE=$hour>:";
-         $ret .= "<INPUT NAME=min SIZE=3 MAXLENGTH=2 VALUE=$min></TD></TR>\n";
-         $ret .= "</TABLE>\n";
+         $ret .= "<td align='right'>$ML{'.localtime'}<br /><i>($ML{'.timeformat'})</i></td><td>";
+         $ret .= "<input name='hour' size='3' maxlength='2' value='$hour'>:";
+         $ret .= "<input name='min' size='3' maxlength='2' value='$min'></td></tr>\n";
+         $ret .= "</table>\n";
 
-         $ret .= "<P><B>Subject:</B> <I>(optional, for use on longer entries)</I><BR>";
-         $ret .= "<INPUT NAME=\"subject\" VALUE=\"";
+         $ret .= "<p>$ML{'.subject'}<br />";
+         $ret .= "<input name='subject' value='";
          $ret .= LJ::eall($res{"events_1_subject"});
-         $ret .= "\" SIZE=60 MAXLENGTH=255>\n";
+         $ret .= "' size='60' maxlength='255'>\n";
         
-         $ret .= "<p><b>Event:</b><br /><textarea rows='12' cols='60' wrap='soft' name='event' style='width: 99%'>";
+         $ret .= "<p><b>$ML{'.event'}</b><br /><textarea rows='12' cols='60' wrap='soft' name='event' style='width: 99%'>";
          $ret .= LJ::eall(LJ::durl($res{"events_1_event"}));
-          $ret .= "</textarea></p>\n";
+         $ret .= "</textarea></p>\n";
 
-         $ret .= "<p><b>Security Level:</b>";
-         my @secs = ("public" => "Public", "private" => "Private", 
-                     "friends" => "Friends");
+         $ret .= "<p><b>$ML{'label.security.head'}</b>";
+         my @secs = ("public" => $ML{'label.security.public'}, "private" => $ML{'label.security.private'}, 
+                     "friends" => $ML{'label.security.friends'});
          
          my $raw;
          if ($gfg && @{$gfg->{'friendgroups'}}) {
-             push @secs, ("custom", "Custom...");
+             push @secs, ("custom", $ML{'label.security.custom'});
              $raw = "onChange=\"document.getElementById('custom_boxes').style.display = (this.selectedIndex == 3) ? 'block' : 'none';\"";
          }
          
@@ -280,7 +280,7 @@ body<=
              foreach my $fg (@{$gfg->{'friendgroups'}}) {
                  my $selected;
                  if ($curmask+0 & 1<<$fg->{'id'}) {
-                     $selected = "checked=\"checked\"";
+                     $selected = "checked='checked'";
                  }
                  $ret .= "<input type='checkbox' name='custom_bit_$fg->{'id'}' value='1' $selected> ";
                  $ret .= LJ::ehtml($fg->{'name'}) . "<br />\n";
@@ -290,27 +290,28 @@ body<=
 
          ### don't auto-format
          {
-             my $check = $props{'opt_preformatted'} ? "CHECKED" : "";
-             $ret .= "<P><B>Don't auto-format:</B> <INPUT TYPE=CHECKBOX NAME=\"prop_opt_preformatted\" VALUE=1 $check>";
+             my $check = $props{'opt_preformatted'} ? "checked" : "";
+             $ret .= "<p><b>$ML{'.opt.noformat'}</b> <input type='checkbox' name='prop_opt_preformatted' value='1' $check>";
              $ret .= LJ::help_icon("noautoformat", " ");
          }
 
          ### don't allow comments
          {
-             my $check = $props{'opt_nocomments'} ? "CHECKED" : "";
-             $ret .= "&nbsp;<B>Disallow Comments:</B> <INPUT TYPE=CHECKBOX NAME=\"prop_opt_nocomments\" VALUE=1 $check>";
+             my $check = $props{'opt_nocomments'} ? "checked" : "";
+             $ret .= "&nbsp;<b>$ML{'.opt.nocomments'}</b> <input type='checkbox' name='prop_opt_nocomments' VALUE='1' $check>";
          }
 
          ### don't email the poster
          {
              my $check = $props{'opt_noemail'} ? "checked" : "";
-             $ret .= "&nbsp;<b>Don't email Comments:</b> <input type=\"checkbox\" name=\"prop_opt_noemail\" value=\"1\" $check>";
+             $ret .= "&nbsp;<b>$ML{'.opt.noemail'}</b> <input type='checkbox' name='prop_opt_noemail' value='1' $check>";
          }
 
          ### backdating
          {
              my $check = $props{'opt_backdated'} ? "CHECKED" : "";
-             $ret .= "<P><B>Backdate Entry:</B> <INPUT TYPE=CHECKBOX NAME=\"prop_opt_backdated\" VALUE=1 $check> (will only show on calendar)";
+             $ret .= "<p><b>$ML{'.opt.backdate'}</b> <input type='checkbox' name='prop_opt_backdated' value='1' $check> $ML{'.opt.backdate.about'}";
+
          }
 
          
@@ -322,42 +323,42 @@ body<=
              push @pics, $_ while ($_ = $sth->fetchrow_array);
              @pics = sort { lc($a) cmp lc($b) } @pics;
 
-             $ret .= "<P><B>Picture to use:</B> <SELECT NAME=\"prop_picture_keyword\"><OPTION VALUE=\"\">(default)";
+             $ret .= "<p><b>".BML::ml(".picture", {'url' => "$LJ::SITEROOT/allpics.bml?user=$user"}) ."</b> <select name='prop_picture_keyword'><option value=''>($ML{'.default'})";
              foreach (@pics) {
-                 my $sel = $props{'picture_keyword'} eq $_ ? " SELECTED" : "";
-                 $ret .= "<OPTION VALUE=\"$_\"$sel>$_";
+                 my $sel = $props{'picture_keyword'} eq $_ ? " selected" : "";
+                 $ret .= "<option value='$_'$sel>$_";
              }
-             $ret .= "</SELECT>";
+             $ret .= "</select>";
              $ret .= LJ::help_icon("userpics", " ");
          }
 
          ### current mood
          {
-             $ret .= "<P><B>Current <A HREF=\"/moodlist.bml\">Mood</A>:</B><SELECT NAME=\"prop_current_moodid\"><OPTION VALUE=\"\">None, or other:";
+             $ret .= "<p><b>$ML{'.currmood'}</b><select name='prop_current_moodid'><option value=''>$ML{'.noneother'}";
 
              my $match = 0;
              my $sth = $dbr->prepare("SELECT moodid, mood FROM moods ORDER BY mood");
              $sth->execute;
              while ($_ = $sth->fetchrow_hashref) {
                  my $sel = ($props{'current_mood'} eq $_->{'mood'} || 
-                            $props{'current_moodid'} == $_->{'moodid'}) ? " SELECTED" : "";
+                            $props{'current_moodid'} == $_->{'moodid'}) ? " selected" : "";
                  if ($sel) { $match = 1; }
-                 $ret .= "<OPTION VALUE=$_->{'moodid'}$sel>$_->{'mood'}\n";
+                 $ret .= "<option value='$_->{'moodid'}'$sel>$_->{'mood'}\n";
              }
-             $ret .= "</SELECT>";
+             $ret .= "</select>";
              my $other_mood = $match==0 ? $props{'current_mood'} : "";
              $other_mood = LJ::ehtml($other_mood);
-             $ret .= "Other: <INPUT NAME=\"prop_current_mood\" VALUE=\"$other_mood\" SIZE=15 MAXLENGTH=30>";
+             $ret .= "$ML{'.other'} <input name='prop_current_mood' value='$other_mood' size='15' maxlength='30'>";
          }	     
 
          ## current music
          {
              my $music = LJ::ehtml($props{'current_music'});
-             $ret .= "<P><B>Current Music:</B> <INPUT NAME=\"prop_current_music\" VALUE=\"$music\" SIZE=40 MAXLENGTH=60>";
+             $ret .= "<p><b>$ML{'.currmusic'}</b> <input name='prop_current_music' value='$music' size='40' maxlength='60'>";
          }
 
 
-         $ret .= "<?h1 Press to save... h1?><?p After you're done editing your journal entry, press Save. p?><?standout <INPUT TYPE=SUBMIT VALUE=\"Save Journal Entry\"> standout?></FORM>\n";
+         $ret .= "<?h1 $ML{'.save.head'} h1?><?p $ML{'.save.text'} p?><?standout <input type='submit' value='$ML{'.btn.save'}'> standout?></form>\n";
          
          return $ret;
      }
@@ -370,28 +371,27 @@ body<=
              my $jargent = defined $res{'anum'} ? "journal=$journal&amp;" : "";
              my $ditemid = defined $res{'anum'} ? ($itemid * 256 + $res{'anum'}) : $itemid;
              if ($FORM{'event'} =~ /\S/) {
-                 return "<?h1 Success h1?><?p Journal entry was modified.  You may view it ".
-                     "<a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">here</a>. p?>";
+                 return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.edit", {'url' => "$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid"}) ." p?>";
              } else {
-                 return "<?h1 Success h1?><?p Journal entry was deleted. p?>";
+                 return "<?h1 $ML{'.success.head'} h1?><?p $ML{'.success.delete'} p?>";
              }
          }
          else
          {
-             return "<?h1 Error h1?><?p An error occured modifying your journal: <UL><LI><B>$res{'errmsg'}</B></UL> p?>";
+             return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.modify'} <ul><li><b>$res{'errmsg'}</b></li></ul> p?>";
          }
      }
      else
      {
-         $ret .= "<?h1 Error h1?>\n";
+         $ret .= "<?h1 $ML{'Error'} h1?>\n";
          $ret .= "<?p You shouldn't get here.. p?>";
          return $ret;
      }
  }
  else
  {
-     $ret .= "<?h1 Error h1?>\n";
-     $ret .= "<?p There was an error getting the journal entry to edit: <UL><LI><B><?_eh $res{'errmsg'} _eh?></B></UL> p?>";
+     $ret .= "<?h1 $ML{'Error'} h1?>\n";
+     $ret .= "<?p $ML{'.error.getting'} <ul><li><b><?_eh $res{'errmsg'} _eh?></b></li></ul> p?>";
      return $ret;
  }
 

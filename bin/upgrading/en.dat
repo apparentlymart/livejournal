@@ -611,6 +611,90 @@ throughout the LiveJournal site and in your journal and in your friends' journal
 
 /editinfo.bml.zip.usonly=5 digit ZIP code; US residents only
 
+/editjournal.bml.btn.proceed=Proceed...
+
+/editjournal.bml.certainday=Certain Day:
+
+/editjournal.bml.enterlogin=Enter your username and password to modify or delete your past journal entries.
+
+/editjournal.bml.lostinfo.head=Forget something?
+
+/editjournal.bml.lostinfo.text=If you forgot your username or password, <a href="lostinfo.bml">recover it here</a>.
+
+/editjournal.bml.recententries=most recent entries
+
+/editjournal.bml.recententry=Most recent entry
+
+/editjournal.bml.title=Edit Journal Entries
+
+/editjournal.bml.viewwhat=View What Entries:
+
+/editjournal_do.bml.btn.edit=Edit Selected Entry
+
+/editjournal_do.bml.btn.save=Save Journal Entry
+
+/editjournal_do.bml.continue.head=Press to continue...
+
+/editjournal_do.bml.continue.text=After you select an item to edit or delete, press the Edit button below.
+
+/editjournal_do.bml.currmood=Current <A HREF="/moodlist.bml">Mood</A>:
+
+/editjournal_do.bml.currmusic=Current Music:
+
+/editjournal_do.bml.date=Date:
+
+/editjournal_do.bml.default=default
+
+/editjournal_do.bml.edit.text=Edit the fields of your journal entry you'd like to modify and press the save button at the bottom of the page.  To delete the entry, just delete all the text and press save... the entry will be deleted.
+
+/editjournal_do.bml.error.getting=There was an error getting the journal entries to edit:
+
+/editjournal_do.bml.error.modify=An error occured modifying your journal:
+
+/editjournal_do.bml.error.mustlogin=You have to be logged in to directly edit a journal entry of yours.
+
+/editjournal_do.bml.error.nofind=Could not find selected journal entry.
+
+/editjournal_do.bml.event=Event:
+
+/editjournal_do.bml.localtime=Local time:
+
+/editjournal_do.bml.noneother=None, or other:
+
+/editjournal_do.bml.opt.backdate=Backdate Entry:
+
+/editjournal_do.bml.opt.backdate.about=won't show on friends view
+
+/editjournal_do.bml.opt.nocomments=Disallow Comments:
+
+/editjournal_do.bml.opt.noemail=Don't email Comments:
+
+/editjournal_do.bml.opt.noformat=Don't auto-format:
+
+/editjournal_do.bml.other=Other:
+
+/editjournal_do.bml.pickentry.head=Pick an entry to edit
+
+/editjournal_do.bml.pickentry.text=Select which item you want to edit and press the edit button at the bottom of the page.
+
+/editjournal_do.bml.picture=<a href="[[url]]">Picture</a> to use:
+
+/editjournal_do.bml.save.head=Press to save...
+
+/editjournal_do.bml.save.text=After you're done editing your journal entry, press Save.
+
+/editjournal_do.bml.subject=<B>Subject:</B> <I>(optional, for use on longer entries)</I>
+
+/editjournal_do.bml.success.delete=Journal entry was deleted.
+
+/editjournal_do.bml.success.edit=Journal entry was modified.  You may view it <a href="[[url]]">here</a>.
+
+/editjournal_do.bml.success.head=Success
+
+/editjournal_do.bml.timeformat=24 hour time
+
+/editjournal_do.bml.title=Edit Journal Entries
+
 /friends/add.bml.add.header=Success
 
 /friends/add.bml.add.text=User <?ljuser [[user]] ljuser?> was added to your friend list.  You can view your friends page <a href="[[url]]">here</a>.
@@ -1226,6 +1310,12 @@ To delete a memory, you can edit it and remove the description, but you didn't a
   Enter zero to five keywords or categories so you can find it back later.
 .
 
+/tools/memadd.bml.login.enterinfo=Enter username and password of the account you wish to save the memory into.
+
+/tools/memadd.bml.login.forgot.header=Forget something?
+
+/tools/memadd.bml.login.forgot.recover=If you forgot your username or password, <a href='lostinfo.bml'>recover it here!</a>.
+
 /tools/memadd.bml.multiple_selections=Hold down 'Control' while clicking keywords to select multiple ones.
 
 /tools/memadd.bml.security.friendsonly=Friends Only
@@ -1432,6 +1522,16 @@ error.usernamelong=Username is too long, 15 character max.
 error.username_notfound=Username not found.
 
 Help=Help
+
+label.security.custom=Custom...
+
+label.security.friends=Friends
+
+label.security.head=Security Level:
+
+label.security.private=Private
+
+label.security.public=Public
 
 label.switch.button=Switch
 

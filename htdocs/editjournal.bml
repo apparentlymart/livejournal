@@ -1,48 +1,42 @@
 <?page
-title=>Edit Journal Entries
+title=><?_ML .title _ML?>
 
 body<=
 
-<?h1 Edit Journal Entries h1?>
-<?p
-Enter your username and password to modify or delete your past journal entries.
-p?>
+<?h1 <?_ML .title _ML?> h1?> <?p <?_ML .enterlogin _ML?> p?>
 
-<FORM ACTION="editjournal_do.bml" METHOD="POST">
-<INPUT TYPE=HIDDEN NAME=metamode VALUE="choose_editrange">
+<form action="editjournal_do.bml" method="post">
+<input type="hidden" name="metamode" value="choose_editrange">
 
 <?standout
-<TABLE>
+<table>
 <?_code
  return LJ::auth_fields(\%FORM);
  _code?>
-<TR VALIGN=TOP><TD>View What Entries:</TD>
-<TD>
-       <INPUT TYPE=RADIO NAME="selecttype" VALUE="last" CHECKED> Most recent entry<BR>
-       <INPUT TYPE=RADIO NAME="selecttype" VALUE="lastn"> <INPUT NAME="howmany" SIZE=3 MAXLENGTH=2 VALUE="20"> most recent entries<BR>
-       <INPUT TYPE=RADIO NAME="selecttype" VALUE="day"> Certain Day: 
+<tr valign="top"><td><?_ML .viewwhat _ML?></td>
+<td>
+       <input type="radio" name="selecttype" value="last" checked> <?_ML .recententry _ML?><br />
+       <input type="radio" name="selecttype" value="lastn"> <input name="howmany" size="3" maxlength="2" value="20"> <?_ML .recententries _ML?><br />
+       <input type="radio" name="selecttype" value="day"> <?_ML .certainday _ML?> 
 <?_code
 
 my $ret="";
 my (undef,undef,undef,$mday,$mon,$year,undef,undef,undef) = localtime(time);
 $year+=1900;
 $mon=sprintf("%02d", $mon+1); $mday=sprintf("%02d", $mday); $min=sprintf("%02d", $min);
-$ret .= "<INPUT NAME=year SIZE=5 MAXLENGTH=4 VALUE=$year>-";
-$ret .= "<INPUT NAME=month SIZE=3 MAXLENGTH=2 VALUE=$mon>-";
-$ret .= "<INPUT NAME=day SIZE=3 MAXLENGTH=2 VALUE=$mday>\n";
+$ret .= "<input name='year' size='5' maxlength='4' value='$year'>-";
+$ret .= "<input name='month' size='3' maxlength='2' value='$mon'>-";
+$ret .= "<input name='day' size='3' maxlength='2' value='$mday'>\n";
 return $ret;
 
 _code?>
 
-</TD></TR>
-<TR><TD></TD><TD><INPUT TYPE="SUBMIT" VALUE="Proceed..."></TD></TR>
-</TABLE>
+</td></tr>
+<tr><td></td><td><input type="submit" value="<?_ML .btn.proceed _ML?>"></td></tr>
+</table>
 standout?>
 
-<?h1 Forget something? h1?>
-<?p
-If you forgot your username or password, <A HREF="lostinfo.bml">recover it here!</A>.
-p?>
+<?h1 <?_ML .lostinfo.head _ML?> h1?> <?p <?_ML .lostinfo.text _ML?> p?>
 
 <=body
 page?><?_c <LJDEP>

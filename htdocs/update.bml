@@ -255,14 +255,14 @@
                                       map { $_, $_ } @{$res->{'usejournals'}});
          }
 
-         $$body .= "<p><b>$ML{'.security.head'}</b> ";
-         my @secs = ("public", $ML{'.security.public'},
-                     "private", $ML{'.security.private'},
-                     "friends", $ML{'.security.friends'});
+         $$body .= "<p><b>$ML{'label.security.head'}</b> ";
+         my @secs = ("public", $ML{'label.security.public'},
+                     "private", $ML{'label.security.private'},
+                     "friends", $ML{'label.security.friends'});
 
          my $raw;
          if (@{$res->{'friendgroups'}}) {
-             push @secs, ("custom", $ML{'.security.custom'});
+             push @secs, ("custom", $ML{'label.security.custom'});
              $raw = "onChange=\"document.getElementById('custom_boxes').style.display = (this.selectedIndex == 3) ? 'block' : 'none';\"";
          }
          $$body .= LJ::html_select({ 'name' => 'security', 

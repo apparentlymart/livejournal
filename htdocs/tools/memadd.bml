@@ -25,9 +25,9 @@
      return;
  }
 
- my %secopts = ( 'public' => $ML{'.security.public'},
-                 'friends' => $ML{'.security.friendsonly'},
-                 'private' => $ML{'.security.private'}, );
+ my %secopts = ( 'public' => $ML{'label.security.public'},
+                 'friends' => $ML{'label.security.friends'},
+                 'private' => $ML{'label.security.private'}, );
 
  my $sth;
  my $journal = $FORM{'journal'};
