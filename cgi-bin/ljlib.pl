@@ -3163,7 +3163,16 @@ sub make_journal
     $opts->{'view'} = $view;
 
     # call the view creator w/ the buffer to fill and the construction variables
-    &{$LJ::viewinfo{$view}->{'creator'}}($dbs, \$ret, $u, \%vars, $remote, $opts);
+    my $res = $LJ::viewinfo{$view}->{'creator'}->($dbs, \$ret, $u, \%vars, $remote, $opts);
+
+    unless ($res) {
+        my $errcode = $opts->{'errcode'};
+        my $errmsg = {
+            'nodb' => 'Database temporarily unavailable during maintenance.',
+        }->{$errcode};
+        return "<!-- $errmsg -->" if ($opts->{'vhost'} eq "customview");
+        return $errmsg;
+    }   
 
     # remove bad stuff
     unless ($opts->{'trusted_html'}) {

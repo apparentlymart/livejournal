@@ -868,6 +868,12 @@ sub create_view_calendar
         $sql = "SELECT year, month, day, DAYOFWEEK(CONCAT(year, \"-\", month, \"-\", day)) AS 'dayweek', COUNT(*) AS 'count' FROM log WHERE ownerid=$quserid GROUP BY year, month, day, dayweek";
     }
 
+    unless ($db) {
+        $opts->{'errcode'} = "nodb";
+        $$ret = "";
+        return 0;
+    }
+
     my $sth = $db->prepare($sql);
     $sth->execute;
 
@@ -1126,6 +1132,11 @@ sub create_view_day
     my $logdb;
     if ($u->{'clusterid'}) { 
         $logdb = LJ::get_cluster_reader($u);
+        unless ($logdb) {
+            $opts->{'errcode'} = "nodb";
+            $$ret = "";
+            return 0;
+        }
         $sth = $logdb->prepare("SELECT jitemid FROM log2 WHERE journalid=$u->{'userid'} ".
                                "AND year=$year AND month=$month AND day=$day $secwhere ".
                                "ORDER BY eventtime LIMIT 200");
