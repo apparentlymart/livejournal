@@ -1046,12 +1046,6 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /friends/add.bml.remove.title=Friend Removed!
 
-/friends/edit.bml.btn.proceed=Proceed...
-
-/friends/edit.bml.edit.head=Edit Your Friends
-
-/friends/edit.bml.edit.text=Enter your username and password to modify your friends.  To use this, you must already have your own LiveJournal account.  You can make your own LiveJournal from the <a href="/create.bml">create journal page</a>.  Once you have defined your fellow LiveJournal-using friends, you'll be able to easily keep track of what they're all doing, as they're doing it.
-
 /friends/edit.bml.title=Edit Friends
 
 /friends/editgroups.bml.btn.ge.del=Delete
