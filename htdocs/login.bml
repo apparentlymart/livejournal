@@ -228,7 +228,12 @@
             LJ::MemCache::delete($memkey);
         }
 
-        if ($do_login) {
+        if ($do_login) 
+        {
+            LJ::kill_session($remote);
+            undef $remote;
+            undef $cursess;
+            LJ::set_remote(undef);
 
             my $u = LJ::load_user($user);
             push @errors, "$ML{'error.username_notfound'}" unless $u;
