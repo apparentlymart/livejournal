@@ -46,7 +46,7 @@ body<=
  my $catkey = $sp->{_cat}->{'catkey'};
 
  unless (LJ::Support::can_read($dbh, $sp, $remote, $auth)) {
-     return "<?h1 Error h1?><?p You don't have <b>supportread</b> priv on topic <b>$catkey</b>. p?>";
+     return "<?h1 Error h1?><?p You don't have the necessary privilege to view this request. p?>";
  }
 
  if (LJ::Support::can_close($dbh, $sp, $remote, $auth)) {
