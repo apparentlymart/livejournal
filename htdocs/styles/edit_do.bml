@@ -136,13 +136,16 @@ BODY<=
      $ret .= "<TABLE BORDER=1 CELLSPACING=1 CELLPADDING=2>\n";
      $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style View Type:</B></TD><TD><I>$LJ::viewinfo{$sty->{'type'}}->{'des'}</I> -- <B>$sty->{'type'}</B></TD></TR>\n";
      $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style ID Number:</B></TD><TD><B>$sty->{'styleid'}</B>";
-     if ($sty->{'type'} eq "lastn"  || $sty->{'type'} eq "calendar" || 
-         $sty->{'type'} eq "search" || $sty->{'type'} eq "friends")
-     {
-	 my $extravars = "";
-	 if ($sty->{'opt_cache'} eq "Y") { $extravars .= "&nocache=1"; }
-         $ret .= " <A TARGET=preview HREF=\"/customview.cgi?username=$user&styleid=$sty->{'styleid'}$extravars\">[Preview Current Style]</A> (must save below to see your changes, keep this window open and reload it whenever you save)";
+
+     my $extravars = "";
+     if ($sty->{'type'} eq "day") {
+	 $sth = $dbh->prepare("SELECT year, month, day FROM log l, user u WHERE u.lastitemid=l.itemid AND u.user=$quser");
+	 $sth->execute;
+	 my ($yr, $mo, $da) = $sth->fetchrow_array;
+	 if ($yr) { $extravars .= "&year=$yr&month=$mo&day=$da"; }
      }
+     if ($sty->{'opt_cache'} eq "Y") { $extravars .= "&nocache=1"; }
+     $ret .= " <A TARGET=preview HREF=\"/customview.cgi?username=$user&styleid=$sty->{'styleid'}$extravars\">[Preview Current Style]</A> (must save below to see your changes, keep this window open and reload it whenever you save)";
      $ret .= "</TD></TR>\n";
      
      $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style Description:</B></TD><TD><INPUT NAME=styledes SIZE=50 MAXLENGTH=50 VALUE=\"" . &BMLUtil::escapeall($sty->{'styledes'}) . "\"></TD></TR>";
