@@ -567,7 +567,7 @@ sub create_view_lastn
     $lastn_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
     $lastn_page{'username'} = $user;
     $lastn_page{'title'} = LJ::ehtml($u->{'journaltitle'} ||
-                           $lastn_page{'name'} . $lastn_page{'name-\'s'} . " Journal");
+                                     $u->{'name'} . $lastn_page{'name-\'s'} . " Journal");
     $lastn_page{'numitems'} = $vars->{'LASTN_OPT_ITEMS'} || 20;
 
     my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
@@ -960,7 +960,7 @@ sub create_view_friends
     $friends_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
     $friends_page{'username'} = $user;
     $friends_page{'title'} = LJ::ehtml($u->{'friendspagetitle'} ||
-                             $friends_page{'name'} . $friends_page{'name-\'s'} . " Friends");
+                                       $u->{'name'} . $friends_page{'name-\'s'} . " Friends");
     $friends_page{'numitems'} = $vars->{'FRIENDS_OPT_ITEMS'} || 20;
 
     ## never have spiders index friends pages (change too much, and some 
@@ -1417,7 +1417,7 @@ sub create_view_calendar
     $calendar_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
     $calendar_page{'username'} = $user;
     $calendar_page{'title'} = LJ::ehtml($u->{'journaltitle'} ||
-                              $calendar_page{'name'} . $calendar_page{'name-\'s'} . " Journal");
+                                        $u->{'name'} . $calendar_page{'name-\'s'} . " Journal");
     if ($u->{'opt_blockrobots'}) {
         $calendar_page{'head'} = "<meta name=\"robots\" content=\"noindex\" />\n";
     }
@@ -1653,7 +1653,7 @@ sub create_view_day
     $day_page{'name'} = LJ::ehtml($u->{'name'});
     $day_page{'name-\'s'} = ($u->{'name'} =~ /s$/i) ? "'" : "'s";
     $day_page{'title'} = LJ::ehtml($u->{'journaltitle'} ||
-                         $day_page{'name'} . $day_page{'name-\'s'} . " Journal");
+                                   $u->{'name'} . $day_page{'name-\'s'} . " Journal");
 
     if ($u->{'url'} =~ m!^https?://!) {
         $day_page{'website'} =
