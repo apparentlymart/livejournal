@@ -5668,6 +5668,47 @@ sub clear_rel
     return;
 }
 
+# $dom: 'L' == log, 'T' == talk
+sub alloc_user_counter
+{
+    my ($u, $dom, $pre_locked) = @_;
+    return undef unless $dom =~ /^[LT]$/;
+    my $dbcm = LJ::get_cluster_master($u);
+    return undef unless $dbcm;
+
+    my $uid = $u->{'userid'}+0;
+    my $key = "usercounter-$uid-$dom";
+    unless ($pre_locked) {
+        my $r = $dbcm->selectrow_array("SELECT GET_LOCK(?, 3)", undef, $key);
+        return undef unless $r;
+    }
+    my $newmax;
+
+    my $rs = $dbcm->do("UPDATE counter SET max=max+1 WHERE journalid=? AND area=?",
+                       undef, $uid, $dom);
+    if ($rs > 0) {
+        $newmax = $dbcm->selectrow_array("SELECT max FROM counter WHERE journalid=? AND area=?",
+                                         undef, $uid, $dom);
+    } else {
+        if ($dom eq "L") {
+            $newmax = $dbcm->selectrow_array("SELECT MAX(jitemid) FROM log2 WHERE journalid=?",
+                                            undef, $uid);
+        } elsif ($dom eq "T") {
+            $newmax = $dbcm->selectrow_array("SELECT MAX(jtalkid) FROM talk2 WHERE journalid=?",
+                                            undef, $uid);
+        }
+        $newmax++;
+        $dbcm->do("INSERT INTO counter (journalid, area, max) VALUES (?,?,?)",
+                  undef, $uid, $dom, $newmax) or return undef;
+    }
+
+    unless ($pre_locked) {
+        $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $key);
+    }
+    
+    return $newmax;
+}
+
 # given a unix time, returns;
 #   ($week, $ubefore)
 # week: weeks from first sunday to the next sunday after given time

@@ -7,7 +7,7 @@ mark_clustered("useridmap", "userbio", "cmdbuffer", "dudata",
                "talk2", "talkprop2", "talktext2", "talkleft",
                "userpicblob2", "events",
                "ratelog", "loginstall", "sessions", "sessions_data",
-               "fvcache", "s1usercache", "modlog", "modblob",
+               "fvcache", "s1usercache", "modlog", "modblob", "counter",
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -122,7 +122,7 @@ CREATE TABLE faq (
   lastmodtime datetime default NULL,
   lastmoduserid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (faqid)
-) PACK_KEYS=1
+)
 EOC
 
 register_tablecreate("faqcat", <<'EOC');
@@ -131,7 +131,7 @@ CREATE TABLE faqcat (
   faqcatname varchar(100) default NULL,
   catorder int(11) default '50',
   PRIMARY KEY  (faqcat)
-) PACK_KEYS=1
+)
 EOC
 
 register_tablecreate("faquses", <<'EOC');
@@ -268,7 +268,7 @@ CREATE TABLE news_sent (
   KEY (newsnum),
   KEY (user),
   KEY (email)
-) PACK_KEYS=1
+)
 EOC
 
 register_tablecreate("noderefs", <<'EOC');
@@ -766,7 +766,7 @@ EOC
 register_tablecreate("log2", <<'EOC');
 CREATE TABLE log2 (
   journalid INT UNSIGNED NOT NULL default '0',
-  jitemid MEDIUMINT UNSIGNED NOT NULL auto_increment,
+  jitemid MEDIUMINT UNSIGNED NOT NULL,
   PRIMARY KEY  (journalid, jitemid),
   posterid int(10) unsigned NOT NULL default '0',
   eventtime datetime default NULL,
@@ -820,7 +820,7 @@ EOC
 register_tablecreate("talk2", <<'EOC');
 CREATE TABLE talk2 (
   journalid INT UNSIGNED NOT NULL,  
-  jtalkid MEDIUMINT UNSIGNED NOT NULL auto_increment,
+  jtalkid MEDIUMINT UNSIGNED NOT NULL,
   nodetype CHAR(1) NOT NULL DEFAULT '',
   nodeid INT UNSIGNED NOT NULL default '0',
   parenttalkid MEDIUMINT UNSIGNED NOT NULL,
@@ -1185,7 +1185,7 @@ CREATE TABLE ml_items
    itcode  VARCHAR(80) NOT NULL,
    UNIQUE  (dmid, itcode),
    notes   MEDIUMTEXT
-)
+) TYPE=MYISAM
 EOC
 
 register_tablecreate("ml_langs", <<'EOC');
@@ -1244,7 +1244,7 @@ CREATE TABLE ml_text
    INDEX (lnid, dmid, itid),
    text    TEXT NOT NULL,
    userid  INT UNSIGNED NOT NULL
-)
+) TYPE=MYISAM
 EOC
 
 register_tablecreate("domains", <<'EOC');
@@ -1465,6 +1465,17 @@ CREATE TABLE modblob (
   request_stor    MEDIUMBLOB
 )
 EOC
+
+# user counters
+register_tablecreate("counter", <<'EOC');
+CREATE TABLE counter (
+  journalid  INT UNSIGNED NOT NULL,
+  area       CHAR(1) NOT NULL,
+  PRIMARY KEY (journalid, area),
+  max        MEDIUMINT UNSIGNED NOT NULL,
+)
+EOC
+
 
 ### changes
 

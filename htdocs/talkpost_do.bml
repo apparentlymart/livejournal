@@ -356,7 +356,6 @@ body<=
     my $qdatepost = $dbh->quote($datepost);
     my $icon = LJ::Talk::show_image($pics, $subjecticon); 
 
-    my $insertid;
     my $dtalkid;
     my $md5_body = md5_hex($FORM{'body'});
     
@@ -375,9 +374,11 @@ body<=
           $unscreened = 1;
       }
     
-    ### check for duplicate entry (double submission)
+    # check for duplicate entry (double submission)
+    # Note:  we don't do it inside a locked section like ljprotocol.pl's postevent,
+    # so it's not perfect, but it works pretty well.
     my $posterid = $up ? $up->{'userid'} : 0;
-    $insertid = $dbcm->selectrow_array
+    my $jtalkid = $dbcm->selectrow_array
         (
          "SELECT t.jtalkid FROM talk2 t, talktext2 tt WHERE ".
          "t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
@@ -388,29 +389,27 @@ body<=
          "AND t.parenttalkid=$qpartid"
          );
 
-    $dtalkid = $insertid * 256 + $item->{'anum'};
+    $dtalkid = $jtalkid * 256 + $item->{'anum'};
     my $threadurl = $talkargs->("thread=$dtalkid");
 
     # they don't have a duplicate...
-    unless ($insertid)
+    unless ($jtalkid)
     {
+        $jtalkid = LJ::alloc_user_counter($u, "T"); # grepnote: does GET_LOCK
+        return "<h2>Database Error</h2>Could not generate a talkid necessary to post this comment."
+            unless $jtalkid; 
+
         # insert the comment
-        my $now = $dbcm->selectrow_array("SELECT NOW()");
-        $sth = $dbcm->prepare("INSERT INTO talk2 (nodetype, nodeid, parenttalkid, ".
-                              "journalid, posterid, datepost, state) ".
-                              "VALUES ('L', $itemid, $qpartid, ".
-                              "$u->{'userid'}, $posterid, '$now', '$state')");
-        $sth->execute;
+        $dbcm->do("INSERT INTO talk2 (journalid, jtalkid, nodetype, nodeid, parenttalkid, posterid, datepost, state) ".
+                  "VALUES (?,?,'L',?, ?,?,NOW(),?)", undef,
+                  $u->{'userid'}, $jtalkid, $itemid, $qpartid, $posterid, $state);
         
         # uh oh?  is there an error?  show them if there is.
         if ($dbcm->err) {
-            return "<h2>Database Error</h2>There was an error posting your comment to the database.  Please report this to <b>$LJ::SUPPORT_EMAIL</b>.  The error is: <b>" . $dbcm->errstr . "</b>";
+            return "<h2>Database Error</h2>There was an error posting your comment to the database.  Please report this.  The error is: <b>" . $dbcm->errstr . "</b>";
         }
         
-        # what's the tid of the newly inserted message?
-        $insertid = $sth->{'mysql_insertid'};
-
-        $dtalkid = $insertid * 256 + $item->{'anum'};
+        $dtalkid = $jtalkid * 256 + $item->{'anum'};
         $threadurl = $talkargs->("thread=$dtalkid");
 
         # add to poster's talkleft table, or the xfer place
@@ -427,12 +426,12 @@ body<=
             }
             my $pub  = $item->{'security'} eq "public" ? 1 : 0;
             $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
-                    "nodeid, jtalkid, publicitem) VALUES ($posterid, UNIX_TIMESTAMP('$now'), ".
-                    "$u->{'userid'}, 'L', $init->{'itemid'}, $insertid, '$pub')");
+                    "nodeid, jtalkid, publicitem) VALUES ($posterid, UNIX_TIMESTAMP(), ".
+                    "$u->{'userid'}, 'L', $init->{'itemid'}, $jtalkid, '$pub')");
         }
 
         $dbcm->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
-                  "VALUES ($u->{'userid'}, $insertid, $qsubject, $qbody)");
+                  "VALUES ($u->{'userid'}, $jtalkid, $qsubject, $qbody)");
         die $dbcm->errstr if $dbcm->err;
 
         # dudata
@@ -476,7 +475,7 @@ body<=
                 next unless $p;
                 my $tpropid = $p->{'tpropid'};
                 my $qv = $dbh->quote($talkprop{$_});
-                $values .= "($u->{'userid'}, $insertid, $tpropid, $qv),";
+                $values .= "($u->{'userid'}, $jtalkid, $tpropid, $qv),";
             }
             if ($values) {
                 chop $values;
@@ -626,11 +625,11 @@ body<=
                     $html .= "You can also reply <a href=\"" . $talkargs->("replyto=$dtalkid") . "\">at the webpage</a>, or here:";
                     $html .= "<blockquote><form method='post' target='ljreply' action=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
                     $html .= "<input type='hidden' name='usertype' value='user' />";
-                    $html .= "<input type='hidden' name='parenttalkid' value='$insertid' />";
+                    $html .= "<input type='hidden' name='parenttalkid' value='$jtalkid' />";
                     $html .= "<input type='hidden' name='journal' value='$u->{'user'}' />";
                     $html .= "<input type='hidden' name='itemid' value='$ditemid' />";
                     $html .= "<input type='hidden' name='userpost' value=\"$paru->{'user'}\" />";
-                    $html .= "<input type='hidden' name='ecphash' value=\"" . LJ::ehtml(ecphash($itemid, $insertid, $paru->{'password'})) . "\" />";
+                    $html .= "<input type='hidden' name='ecphash' value=\"" . LJ::ehtml(ecphash($itemid, $jtalkid, $paru->{'password'})) . "\" />";
                     $html .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
                     my $newsub = $FORM{'subject'};
                     unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
@@ -752,11 +751,11 @@ body<=
 
             $html .= "<blockquote><form method='post' target='ljreply' action=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
             $html .= "<input type='hidden' name='usertype' value='user' />";
-            $html .= "<input type='hidden' name='parenttalkid' value='$insertid' />";
+            $html .= "<input type='hidden' name='parenttalkid' value='$jtalkid' />";
             $html .= "<input type='hidden' name='itemid' value='$ditemid' />";
             $html .= "<input type='hidden' name='journal' value='$u->{'user'}' />";
             $html .= "<input type='hidden' name='userpost' value=\"$ujp->{'user'}\" />";
-            $html .= "<input type='hidden' name='ecphash' value=\"" . LJ::ehtml(ecphash($itemid, $insertid, $ujp->{'password'})) . "\" />";
+            $html .= "<input type='hidden' name='ecphash' value=\"" . LJ::ehtml(ecphash($itemid, $jtalkid, $ujp->{'password'})) . "\" />";
             $html .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
 
             my $newsub = $FORM{'subject'};

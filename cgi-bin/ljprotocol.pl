@@ -647,16 +647,15 @@ sub postevent
     # the hints table to not insert into.
     my $rlogtime = "$LJ::EndOfTime";
     unless ($req->{'props'}->{"opt_backdated"}) {
-        $rlogtime .= "-UNIX_TIMESTAMP(?)";
+        $rlogtime .= "-UNIX_TIMESTAMP()";
     }
 
     my $dbcm = $dbh;
     my $anum  = int(rand(256));
-    my $udbh_now;  # current time on the master user db
 
     my $dupsig = Digest::MD5::md5_hex(join('', map { $req->{$_} } 
                                            qw(subject event usejournal security allowmask)));
-    my $lock_key = "post-$posterid-$dupsig";
+    my $lock_key = "post-$ownerid";
 
     # release our duplicate lock
     my $release = sub {  $dbcm->do("SELECT RELEASE_LOCK(?)", undef, $lock_key); };
@@ -761,10 +760,11 @@ sub postevent
     # the old last item which is marked for deletion:
     # NOTE: cmd_buffer_flush uses GET_LOCK!  So we can't lock until after this.
     #       (but it'd be kinda silly to lock before this, anyway)
+    # Update 24-Apr-03: with LJ::alloc_user_counter(), no numbers are ever re-used,
+    #         so this can really go away.  before a user has data in their counter
+    #         table, though, it is possible, so we'll keep it for now.  remove
+    #         in a couple months.
     LJ::cmd_buffer_flush($dbh, $dbcm, "delitem", $ownerid);
-    
-    $udbh_now = $dbcm->selectrow_array("SELECT NOW()");
-    $rlogtime =~ s/\?/\'$udbh_now\'/;  # replace parameter above with current time
     
     $getlock->(); return $res if $res_done;
     
@@ -773,15 +773,15 @@ sub postevent
         return $fail->($err,405);
     }
     
-    $dbcm->do("INSERT INTO log2 (journalid, posterid, eventtime, logtime, security, ".
+    my $itemid = LJ::alloc_user_counter($uowner, "L", 1);
+    return $fail->($err,501,"No itemid could be generated.") unless $itemid;
+
+    $dbcm->do("INSERT INTO log2 (journalid, jitemid, posterid, eventtime, logtime, security, ".
               "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
-              "VALUES ($ownerid, $posterid, $qeventtime, '$udbh_now', $qsecurity, $qallowmask, ".
+              "VALUES ($ownerid, $itemid, $posterid, $qeventtime, NOW(), $qsecurity, $qallowmask, ".
               "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
               "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     return $fail->($err,501,$dbcm->errstr) if $dbcm->err;
-
-    my $itemid = $dbcm->{'mysql_insertid'};
-    return $fail->($err,501,"No itemid could be generated.") unless $itemid;
 
     # set userprops.  FIXME: this should be moved to user clusters
     {
