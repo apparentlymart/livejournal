@@ -110,6 +110,7 @@ sub make_journal
 
     return if $opts->{'suspendeduser'};
     return if $opts->{'handler_return'};
+    return $page if ref $page ne 'HASH';
 
     s2_run($r, $ctx, $opts, $entry, $page);
     
