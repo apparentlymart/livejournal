@@ -107,7 +107,10 @@ $body .= "<dl>\n";
 	 if ($lday) { $body .= "</table></dd>"; }
 	 $lday = $day;
 	 my $ord = LJ::Lang::day_ord("EN", $day);
-	 $body .= "<dt><b>$day$ord</b></dt><dd><table cellpadding=2>";
+	 my $dayview_url = sprintf("$LJ::SITROOT/users/$u->{'user'}/day/%04d/%02d/%02d/",
+				   $year, $month, $day);
+	 $body .= "<dt><b><a href=\"$dayview_url\">$day$ord</a></b></dt>";
+	 $body .= "<dd><table cellpadding=2>";
      }
      unless ($subject ne "") { $subject = "(no subject)"; }
      my $h = substr($eventtime, 11, 2);
