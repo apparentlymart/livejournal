@@ -1147,7 +1147,7 @@ sub create_view_day
     if ($remote) {
         if ($remote->{'userid'} == $u->{'userid'}) {
             $secwhere = "";   # see everything
-        } else {
+        } elsif ($remote->{'journaltype'} eq 'P') {
             my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
             $secwhere = "AND (security='public' OR (security='usemask' AND allowmask & $gmask))"
                 if $gmask;

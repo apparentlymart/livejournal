@@ -2261,6 +2261,11 @@ sub can_view
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbr = $dbs->{'reader'};
 
+    # if it's usemask, we have to refuse non-personal journals,
+    # so we have to load the user
+    LJ::load_remote($dbs, $remote);
+    return 0 unless $remote->{'journaltype'} eq 'P';
+
     my $sth = $dbr->prepare("SELECT groupmask FROM friends WHERE ".
                             "userid=$userid AND friendid=$remoteid");
     $sth->execute;
