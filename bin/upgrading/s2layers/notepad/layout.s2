@@ -63,9 +63,13 @@ propgroup presentation {
   property use page_recent_items;
   property use page_friends_items;
   property use view_entry_disabled;
+  property string page_background_image {
+      des = "URL to an image to be used for the page background";
+  }
 }
 set show_entry_userpic = false;
 set view_entry_disabled = false;
+set page_background_image = "";
 
 propgroup text {
   property use text_post_comment;
@@ -89,7 +93,9 @@ function Page::lay_bottom_navigation() { }
 
 function print_stylesheet ()
 {
+    var string backgroundurl = $*page_background_image ? "background-image: url($*page_background_image);" : "";
     """body {
+    $backgroundurl
     background-color: $*body_bgcolor;
 }
 td,body,p,div {
@@ -127,7 +133,8 @@ a:hover {
 function Page::print()
 {
     var string title = $this->title();
-    """
+    """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
  <head>
   <title>$title</title>
@@ -136,45 +143,69 @@ function Page::print()
  </head>
  <body>
   <table width="70%" border="0" cellpadding="0" cellspacing="0">
-   <tr height="18">
+   <tr>
     <td colspan="2">
      <table border="0" cellpadding="0" cellspacing="0">
       <tr>
-       <td width="30"><img src="$*imguri/spacer.gif" width="30" height="10"></td>
-       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="$.base_url/">Journal</a></td>
-       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="$.base_url/friends">Friends</a></td>
-       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="$.base_url/calendar">Archive</a></td>
-       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="$.base_url/info">User Info</a></td>
-       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="$*SITEROOT/tools/memories.bml?user=$.journal.username">memories</a></td>
+       <td width="30"><img src="$*imguri/spacer.gif" width="30" height="10" alt='' /></td>
+       <td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
+         <a href="$.base_url/">Journal</a>
+       </td>
+       <td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
+         <a href="$.base_url/friends">Friends</a>
+       </td>
+       <td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
+         <a href="$.base_url/calendar">Archive</a>
+       </td>
+       <td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
+         <a href="$.base_url/info">User Info</a>
+       </td>
+       <td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
+         <a href="$*SITEROOT/tools/memories.bml?user=$.journal.username">memories</a>
+       </td>
       </tr>
      </table>
     </td>
    </tr>
-   <tr height="38">
-    <td width="80" height="38" background="$*imguri/top-left.jpg"><img src="$*imguri/spacer.gif" width="80" height="10"></td>
-    <td height="38" background="$*imguri/middle.jpg"><img src="$*imguri/spacer.gif" width="10" height="10"></td>
-    <td width="10" height="38" background="$*imguri/top-right.jpg"><img src="$*imguri/spacer.gif" width="10" height="10"></td>
+   <tr>
+    <td width="80" height="38" style="background-image: url($*imguri/top-left.jpg)">
+      <img src="$*imguri/spacer.gif" width="80" height="10" alt='' />
+    </td>
+    <td height="38" style="background-image: url($*imguri/middle.jpg)">
+      <img src="$*imguri/spacer.gif" width="10" height="10" alt='' />
+    </td>
+    <td width="10" height="38" style="background-image: url($*imguri/top-right.jpg)">
+      <img src="$*imguri/spacer.gif" width="10" height="10" alt='' />
+    </td>
    </tr>
    <tr>
-    <td width="80" height="38" background="$*imguri/side-left.jpg">
+    <td width="80" height="38" style="background-image: url($*imguri/side-left.jpg)">
      &nbsp;
     </td>
-    <td width="100%" height="38" background="$*imguri/middle.jpg">
+    <td width="100%" height="38" style="background-image: url($*imguri/middle.jpg)">
      <h1>$title</h1>
-     <p align="center"><img src="$*imguri/hr.gif" width="345" height="23"></p>
+     <p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>
     """;
+
     $this->print_body();
-    "<p align='center'><font size='+1'>"; $this->lay_bottom_navigation(); "</font></p>";
+
+    "<p style='text-align: center; font-size: 115%'>"; $this->lay_bottom_navigation(); "</p>";
     """
     </td>
-    <td width="8" height="38" background="$*imguri/side-right.jpg">
+    <td width="8" height="38" style="background-image: url($*imguri/side-right.jpg)">
      &nbsp;
     </td>
    </tr>
-   <tr height="12">
-    <td width="80" height="12" background="$*imguri/bottom-left.jpg"><img src="$*imguri/spacer.gif" width="70" height="12"></td>
-    <td height="12" background="$*imguri/bottom-line.jpg"><img src="$*imguri/spacer.gif" width="10" height="12"></td>
-    <td width="8" height="12" background="$*imguri/bottom-right.jpg"><img src="$*imguri/spacer.gif" width="8" height="12"></td>
+   <tr>
+    <td width="80" height="12" style="background-image: url($*imguri/bottom-left.jpg)">
+      <img src="$*imguri/spacer.gif" width="70" height="12" alt='' />
+    </td>
+    <td height="12" style="background-image: url($*imguri/bottom-line.jpg)">
+      <img src="$*imguri/spacer.gif" width="10" height="12" alt='' />
+    </td>
+    <td width="8" height="12" style="background-image: url($*imguri/bottom-right.jpg)">
+      <img src="$*imguri/spacer.gif" width="8" height="12" alt='' />
+    </td>
    </tr>
   </table>
  </body>
@@ -203,19 +234,10 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         "</td>";
     }
     """<td valign="top" width='100%'><font size="+1">"""; print $e.time->date_format("med"); " "; print $e.time->time_format();
-    if ($e.subject != "") { " <span style='color: $*subject_color'>$e.subject</span>"; }
-    "</font>";
+    if ($e.subject) { " <span style='color: $*subject_color'>$e.subject</span>"; }
+    " $e.security_icon</font>";
 
-    print "<div style='text-align: center'>";
-    var Link link;
-    $link = $e->get_link("nav_prev"); " $link";
-    $link = $e->get_link("edit_entry"); " $link";
-    $link = $e->get_link("mem_add"); " $link";
-    $link = $e->get_link("tell_friend"); " $link";
-    $link = $e->get_link("nav_next"); " $link";
-    print "</div>";
-
-    if (not $hide_text) 
+    if (not $hide_text)
     {
         print "<p>$e.text</p>";
         if (size $e.metadata) {
@@ -230,7 +252,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
                 }
                 if ($k == "mood" and defined $e.mood_icon) {
                     var Image i = $e.mood_icon;
-                    $val = "<img src='$i.url' width='$i.width' height='$i.height' align='absmiddle' alt='[mood icon]' /> $val";
+                    $val = "<img src='$i.url' width='$i.width' height='$i.height' align='absmiddle' alt='' /> $val";
                 }
                 "<strong>$key:</strong> $val<br />";
             }
@@ -238,14 +260,28 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         }
     }
     $e.comments->print();
-    """</td></tr>""";
-    """<tr><td colspan="2"><p align="center"><img src="$*imguri/hr.gif" width="345" height="23"></p>""";
-    "</td></tr></table>\n";
+
+    var Link link;
+    if ($p.view == "entry") { $link = $e->get_link("nav_prev"); " $link"; }
+    $link = $e->get_link("edit_entry"); " $link";
+    $link = $e->get_link("mem_add"); " $link";
+    $link = $e->get_link("tell_friend"); " $link";
+    if ($p.view == "entry") { $link = $e->get_link("nav_next"); " $link"; }
+
+    """</td></tr><tr><td colspan="2"></td></tr></table>""";
+    """<p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>""";
 }
 
 function Page::print_entry (Entry e) 
 {
     print_entry($this, $e, null Color, null Color, false);
+}
+
+function RecentPage::print_body ()
+{
+    foreach var Entry e ($.entries) {
+        $this->print_entry($e);
+    }
 }
 
 function FriendsPage::print_entry (Entry e) {
@@ -271,13 +307,11 @@ function RecentPage::lay_bottom_navigation ()
 function CommentInfo::print()
 {   
     if (not $.enabled) { return; }
-    "<p>";
-     if ($.count > 0 or $.screened)
-     {
-         $this->print_readlink(); " - ";
-     }
-     $this->print_postlink();
-     "</p>";
+    if ($.count > 0 or $.screened)
+    {
+        $this->print_readlink(); " - ";
+    }
+    $this->print_postlink();
 }
 
 function YearPage::lay_bottom_navigation ()
@@ -353,7 +387,7 @@ function YearWeek::print()
 
 function DayPage::lay_bottom_navigation()
 {
-    if (not $.has_entries) { "<img src='$*imguri/hr.gif' /><br />"; }
+    if (not $.has_entries) { "<img src='$*imguri/hr.gif' alt='' /><br />"; }
     print "<a href='$.prev_url'>Back a Day</a> - <a href='$.next_url'>Forward a Day</a>";
 }
 
@@ -454,7 +488,7 @@ function ReplyPage::print_body ()
     }
     "<table border='0'><tr>";
     "<td valign='top' width='100' align='center'>";
-    print defined $.replyto.userpic ? "<img src='$.replyto.userpic.url' /><br />" : "";
+    print defined $.replyto.userpic ? "<img src='$.replyto.userpic.url' alt='' /><br />" : "";
     print defined $.replyto.poster ? $.replyto.poster->as_string() : "<i>(Anonymous)</i>";
     "</td>";
 
@@ -466,7 +500,7 @@ function ReplyPage::print_body ()
 
     "<a href='$.entry.permalink_url'>Read Comments</a>";
     """</td></tr>""";
-    """<tr><td colspan="2"><p align="center"><img src="$*imguri/hr.gif" width="345" height="23"></p>""";
+    """<tr><td colspan="2"><p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>""";
     "</td></tr></table>\n";
     print "<h2>Reply</h2>";
     $.form->print();
@@ -477,35 +511,51 @@ function print_theme_preview ()
     """
 <div style="color: $*text_color; background-color: $*body_bgcolor">
   <table width="70%" border="0" cellpadding="0" cellspacing="0">
-   <tr height="18">
+   <tr>
     <td colspan="2">
      <table border="0" cellpadding="0" cellspacing="0">
       <tr>
-       <td width="30"><img src="$*imguri/spacer.gif" width="30" height="10"></td>
-       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="#" style="color: $*link_color">Tab</a></td>
-       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="#" style="color: $*link_color">Tab</a></td>
-       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="#" style="color: $*link_color">Tab</a></td>
-       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="#" style="color: $*link_color">Tab</a></td>
-       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="#" style="color: $*link_color">Tab</a></td>
+       <td width="30"><img src="$*imguri/spacer.gif" width="30" height="10" alt='' /></td>
+       <td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
+         <a href="#" style="color: $*link_color">Tab</a>
+       </td>
+       <td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
+         <a href="#" style="color: $*link_color">Tab</a>
+       </td>
+       <td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
+         <a href="#" style="color: $*link_color">Tab</a>
+       </td>
+       <td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
+         <a href="#" style="color: $*link_color">Tab</a>
+       </td>
+       <td width="120" height="18" style="background-image: url($*imguri/tab.jpg)">&nbsp;&nbsp;
+         <a href="#" style="color: $*link_color">Tab</a>
+       </td>
       </tr>
      </table>
     </td>
    </tr>
-   <tr height="38">
-    <td width="80" height="38" background="$*imguri/top-left.jpg"><img src="$*imguri/spacer.gif" width="80" height="10"></td>
-    <td height="38" background="$*imguri/middle.jpg"><img src="$*imguri/spacer.gif" width="10" height="10"></td>
-    <td width="10" height="38" background="$*imguri/top-right.jpg"><img src="$*imguri/spacer.gif" width="10" height="10"></td>
+   <tr>
+    <td width="80" height="38" style="background-image: url($*imguri/top-left.jpg)">
+      <img src="$*imguri/spacer.gif" width="80" height="10" />
+    </td>
+    <td height="38" style="background-image: url($*imguri/middle.jpg)">
+      <img src="$*imguri/spacer.gif" width="10" height="10" />
+    </td>
+    <td width="10" height="38" style="background-image: url($*imguri/top-right.jpg)">
+      <img src="$*imguri/spacer.gif" width="10" height="10" />
+    </td>
    </tr>
    <tr>
-    <td width="80" height="38" background="$*imguri/side-left.jpg">
+    <td width="80" height="38" style="background-image: url($*imguri/side-left.jpg)">
      &nbsp;
     </td>
-    <td width="100%" height="38" background="$*imguri/middle.jpg">
+    <td width="100%" height="38" style="background-image: url($*imguri/middle.jpg)">
      <h1>John Doe</h1>
      <p align="center"><img src="$*imguri/hr.gif" width="345" height="23"></p>
     <p align='center'>
       <table border='0'><tr><td valign="top">
-        <font size="+1">Dec. 16th, 2002 06:39 pm <span style='color: $*subject_color'>Neque porro quisquam est qui dolorem ipsum quia dolor sit amet&hellip;</span></font>
+        <h1>Dec. 16th, 2002 06:39 pm <span style='color: $*subject_color'>Neque porro quisquam est qui dolorem ipsum quia dolor sit amet&hellip;</span></h1>
         <p>
 Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
 Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
@@ -519,14 +569,20 @@ Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adi
       </table>
     </p>
     </td>
-    <td width="8" height="38" background="$*imguri/side-right.jpg">
+    <td width="8" height="38" style="background-image: url($*imguri/side-right.jpg)">
      &nbsp;
     </td>
    </tr>
-   <tr height="12">
-    <td width="80" height="12" background="$*imguri/bottom-left.jpg"><img src="$*imguri/spacer.gif" width="70" height="12"></td>
-    <td height="12" background="$*imguri/bottom-line.jpg"><img src="$*imguri/spacer.gif" width="10" height="12"></td>
-    <td width="8" height="12" background="$*imguri/bottom-right.jpg"><img src="$*imguri/spacer.gif" width="8" height="12"></td>
+   <tr>
+    <td width="80" height="12" style="background-image: url($*imguri/bottom-left.jpg)">
+     <img src="$*imguri/spacer.gif" width="70" height="12" alt='' />
+    </td>
+    <td height="12" style="background-image: url($*imguri/bottom-line.jpg)">
+      <img src="$*imguri/spacer.gif" width="10" height="12" alt='' />
+    </td>
+    <td width="8" height="12" style="background-image: url($*imguri/bottom-right.jpg)">
+      <img src="$*imguri/spacer.gif" width="8" height="12" alt='' />
+    </td>
    </tr>
   </table>
 </div>
