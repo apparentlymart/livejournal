@@ -3007,10 +3007,8 @@ sub start_request
 
 sub end_request
 {
-    if ($LJ::DISCONNECT_DBS) {
-        $LJ::DBIRole->disconnect_all();
-        LJ::MemCache::disconnect_all();
-    }
+    $LJ::DBIRole->disconnect_all() if $LJ::DISCONNECT_DBS;
+    LJ::MemCache::disconnect_all() if $LJ::DISCONNECT_MEMCACHE;
 }
 
 # <LJFUNC>
