@@ -187,6 +187,7 @@ BEGIN {
     use IO::Socket      qw{};
     use Data::Dumper    qw{Dumper};
     use Carp            qw{croak confess};
+    use Time::HiRes     qw{gettimeofday tv_interval};
 
     use fields (
         'clients',              # Connected client objects
@@ -461,6 +462,8 @@ sub addJobs {
 sub prelockSomeUsers {
     my JobServer $self = shift;
 
+    my $start = [gettimeofday()];
+
     my (
         $jobcount,              # Number of jobs queued for a cluster
         $rate,                  # Rate for the cluster in question
@@ -471,22 +474,36 @@ sub prelockSomeUsers {
         $jobs,                  # Job queue per cluster
        );
 
+    # Twiddle some database bits out in magic voodoo land
+    LJ::start_request();
+
+    # Set the scaling factor -- this is a command-line setting that affects how
+    # deep the queue is locked per source cluster.
     $scale = $self->{config}{lockScale};
-    $clients = scalar keys %{$self->{clients}};
 
     # Iterate over all the queues we have by cluster
   CLUSTER: foreach my $clusterid ( keys %{$self->{jobs}} ) {
         $rate = $self->getClusterRateLimit( $clusterid );
         $target = $rate * $scale;
 
+        # Now iterate partway into the queue of jobs for the cluster, locking
+        # some users if there are some that need locking
         $jobs = $self->{jobs}{ $clusterid };
       JOB: for ( my $i = 0; $i <= $target; $i++ ) {
+
+            # If there are fewer jobs than the target number to be locked, skip
+            # to the next cluster
             next CLUSTER if $i > $#$jobs;
+
+            # Skip jobs that're already prelocked, or try to lock. If locking
+            # fails, assume there's some database problems and don't try to
+            # prelock any more until next time.
             next JOB if $jobs->[$i]->isPrelocked;
-            $jobs->[$i]->prelock;
+            $jobs->[$i]->prelock or last CLUSTER;
         }
     }
 
+    $self->debugMsg( 4, "Prelock time: %0.5fs", tv_interval($start) );
     return $lockcount;
 }
 
@@ -1045,7 +1062,7 @@ BEGIN {
 
 
 ### Class globals
-our ( $ReadOnlyCapBit, $LockUserSql, $Dbh );
+our ( $ReadOnlyCapBit );
 
 INIT {
     # Find the readonly cap class, complain if not found
@@ -1065,35 +1082,10 @@ INIT {
     die "Cannot mark user readonly without a ReadOnlyCapBit. Check %LJ::CAP"
         unless $ReadOnlyCapBit;
 
-    # SQL used to create the source cluster id for users being moved.
-    $LockUserSql = qq{
-        UPDATE user
-        SET caps = caps | (1<<$ReadOnlyCapBit)
-        WHERE userid = ?
-    };
-
-    # Database handle -- instantiated on demand by getDbh()
-    $Dbh = undef;
-
 }
 
 
-### (CLASS) METHOD: getDbh( undef )
-### Fetch a database handle for marking users read-only.
-sub getDbh {
-    my JobServer::Job $class = shift;
-
-    unless ( $Dbh && $Dbh->ping ) {
-        # Connect to the database
-        $Dbh = LJ::get_dbh( {raw=>1}, "master" )
-            or die "Can't get a master dbh: ", $DBI::errstr;
-    }
-
-    return $Dbh;
-}
-
-
-### (CONSTRUCTOR) METHOD: new( [$userid, $srcclusterid, $dstclusterid, $prelocked )
+### (CONSTRUCTOR) METHOD: new( [$userid, $srcclusterid, $dstclusterid )
 ### Create and return a new JobServer::Job object.
 sub new {
     my JobServer::Job $self = shift;
@@ -1161,32 +1153,18 @@ sub stringify {
 sub prelock {
     my JobServer::Job $self = shift;
 
-    my $sth = $self->getUserLockCursor;
+    my $rval = LJ::update_user( $self->{userid},
+                                {raw => "caps = caps | (1<<$ReadOnlyCapBit)"} );
 
-    if ( $sth->execute($self->{userid}) ) {
+    if ( $rval ) {
         $self->{prelocktime} = time;
         $self->{server}->debugMsg( 4, q{Prelocked user %d}, $self->{userid} );
     } else {
         $self->{server}->logMsg( 'warn', q{Couldn't prelock user %d: %s},
-                                 $self->{userid}, $sth->errstr );
+                                 $self->{userid}, $DBI::errstr );
     }
 
     return $self->{prelocktime};
-}
-
-
-### METHOD: getUserLockCursor( undef )
-sub getUserLockCursor {
-    my JobServer::Job $self = shift;
-
-    # Prepare the handle and return it
-    my $dbh = $self->getDbh;
-    my $sth = $dbh->prepare( $LockUserSql )
-        or die sprintf( 'prepare: %s: %s',
-                        $LockUserSql,
-                        $dbh->errstr );
-
-    return $sth;
 }
 
 
@@ -1727,6 +1705,7 @@ sub cmd_lock {
     my JobServer::Client $self = shift;
     my $userid = shift;
 
+    # Fetch the job for the requested user if possible
     my $job = $self->{server}->getJobForUser( $userid )
         or return $self->error( "No such user '$userid'." );
 
@@ -1735,8 +1714,13 @@ sub cmd_lock {
                         $userid, $job->secondsSinceLock );
     }
 
+    # Try to lock the user
     my $time = $job->prelock;
-    return "User $userid locked at: $time (". scalar localtime($time) .")";
+    if ( $time ) {
+        return "User $userid locked at: $time (". scalar localtime($time) .")";
+    } else {
+        return $self->error( "Prelocking of user $userid failed." );
+    }
 }
 
 
@@ -1765,6 +1749,7 @@ sub cmd_shutdown {
     my $strself = sprintf( '%s:%d',
                            $self->{sock}->peerhost,
                            $self->{sock}->peerport );
+
     my $msg = $self->{server}->shutdown( $strself );
     $self->write( "$msg\r\n" );
     $self->close;
