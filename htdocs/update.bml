@@ -64,11 +64,6 @@
      my %res;
      my $flags = {};
 
-     if ($FORM{'user'} eq "" && $remote) {
-         $FORM{'user'} = $remote->{'user'};
-         $flags->{'nopassword'} = 1;
-     }
-
      # first, login
      $FORM{'mode'} = "login";
      if ($FORM{'webversion'} eq "full") {
