@@ -851,8 +851,8 @@ sub db_logger
     my @now = localtime($now);
     my $table = sprintf("access%04d%02d%02d%02d", $now[5]+1900,
                         $now[4]+1, $now[3], $now[2]);
-    
-    unless ($LJ::CACHED_LOG_CREATE{"$dbl-$table"}) {
+
+    unless ($LJ::CACHED_LOG_CREATE{"$table"}++) {
         $dbl->do("CREATE TABLE IF NOT EXISTS $table (".
                  "whn TIMESTAMP(14) NOT NULL,".
                  "server VARCHAR(30),".
@@ -872,7 +872,6 @@ sub db_logger
                  "clientver VARCHAR(100),".
                  "secs TINYINT UNSIGNED,".
                  "ref VARCHAR(200))");
-        $LJ::CACHED_LOG_CREATE{"$dbl-$table"} = 1;
     }
 
     my $var = {
