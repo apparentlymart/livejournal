@@ -349,7 +349,7 @@ $maint{'genstats'} = sub
 $maint{'genstats_size'} = sub {
 
     LJ::Stats::register_stat
-        ({ 'type' => "clustered",
+        ({ 'type' => "global",
            'jobname' => "size-accounts",
            'statname' => "size",
            'handler' =>
@@ -357,7 +357,9 @@ $maint{'genstats_size'} = sub {
                    my $db = shift;
                    return undef unless $db;
 
-                   my $size = $db->selectrow_array("SELECT COUNT(*) FROM userusage");
+                   # not that this isn't a total of current accounts (some rows may have 
+                   # been deleted), but rather a total of accounts ever created
+                   my $size = $db->selectrow_array("SELECT MAX(userid) FROM user");
                    return { 'accounts' => $size };
                },
          });
