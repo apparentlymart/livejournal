@@ -1812,14 +1812,16 @@ sub list_friends
     }
 
     my $bday = $opts->{'includebdays'} ? "u.bdate, u.allow_infoshow," : ""; 
-    my $limit = $limitnum ? "LIMIT $limitnum" : "";
+    my $orderlimit = $limitnum ? "ORDER BY u.user LIMIT $limitnum" : "";
     my $sth = $dbr->prepare("SELECT u.user AS 'friend', $bday u.name,".
                             "u.journaltype, u.statusvis, f.fgcolor, f.bgcolor, f.groupmask ".
-                            "FROM user u, friends f WHERE $where ORDER BY u.user $limit");
+                            "FROM user u, friends f WHERE $where $orderlimit");
     $sth->execute;
     my @friends;
     push @friends, $_ while $_ = $sth->fetchrow_hashref;
-    $sth->finish;
+    unless ($orderlimit) {
+        @friends = sort { $a->{'friend'} cmp $b->{'friend'} } @friends;
+    }
 
     my $res = [];
     foreach my $f (@friends)
