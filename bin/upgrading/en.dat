@@ -3296,7 +3296,7 @@ send you an authorization URL.  After visiting it, come back here.
 <?p To add the journal entry you were just viewing to your "memories", fill out the form below. p?>
 .
 
-/tools/memadd.bml.body.added.body=Your list of memorable posts has been updated.
+/tools/memadd.bml.body.added.body2=Your list of memorable posts has been updated.  You may return to <a [[aopts]]>the entry</a> just added.
 
 /tools/memadd.bml.body.added.header=Success
 

@@ -304,7 +304,12 @@
      LJ::Memories::updated_keywords($memoryu) if $needflush;
 
      $title = $ML{'.title.added'};
-     $body = "<?h1 $ML{'.body.added.header'} h1?><?p $ML{'.body.added.body'} p?>";
+     $body = "<?h1 $ML{'.body.added.header'} h1?><?p ";
+
+     my $backlink = LJ::item_link($GET{'journal'}, $itemid, $anum);
+     $body .= BML::ml('.body.added.body2', {'aopts' => "href='$backlink'"});
+     $body .= " p?>";
+
      return;
  }
 
