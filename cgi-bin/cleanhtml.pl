@@ -342,7 +342,7 @@ sub clean
                     {
                         if ($opts->{'tablecheck'}) {
                             if (($tag eq 'td' || $tag eq 'th') && ! $opencount{'tr'}) { $allow = 0; }
-                            elsif ($tag =~ /(?:tr|tbody|thead|tfoot)/ && ! $opencount{'table'}) { $allow = 0; }
+                            elsif ($tag =~ /^(?:tr|tbody|thead|tfoot)$/ && ! $opencount{'table'}) { $allow = 0; }
                         }
 
                         if ($allow) { $newdata .= "<$tag"; }
