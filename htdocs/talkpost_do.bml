@@ -93,8 +93,9 @@ BODY<=
 		 push @errors, "You can't post as a shared or community account.  Shared accounts represent groups of people, not individual people.";
 	     }
 
-	     unless ($cookie_auth || LJ::auth_okay($up, $FORM{'password'}))
-	     { 
+	     unless ($cookie_auth || 
+		     LJ::auth_okay($up, $FORM{'password'}, $FORM{'hpassword'}))
+	     {
 		 push @errors, "Incorrect password given for the LiveJournal username you specified.  You can recover your password <A HREF=\"/lostinfo.bml\">here</A> if you've forgotten it.";
 	     }
 	 } else {
