@@ -1944,9 +1944,18 @@ sub get_cap
 {
     my $caps = shift;   # capability bitmask (16 bits), or user object
     my $cname = shift;  # capability limit name
+    my $u = ref $caps ? $caps : undef;
     if (! defined $caps) { $caps = 0; }
-    elsif (ref $caps eq "HASH") { $caps = $caps->{'caps'}; }
+    elsif ($u) { $caps = $u->{'caps'}; }
     my $max = undef;
+
+    # allow a way for admins to force-set the read-only cap
+    # to lower writes on a cluster.
+    if ($cname eq "readonly" && $u &&
+        $LJ::READONLY_CLUSTER{$u->{clusterid}} &&
+        ! LJ::get_cap($u, "avoid_readonly")) {
+        return 1;
+    }
 
     foreach my $bit (keys %LJ::CAP) {
         next unless ($caps & (1 << $bit));
@@ -4638,11 +4647,6 @@ sub get_cluster_master
     my $arg = shift;
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
     my $role = "cluster${id}";
-
-    return undef
-        if ($LJ::READONLY_CLUSTER{$id} &&
-            ! (ref $arg && LJ::get_cap($arg, "avoid_readonly")));
-
     return LJ::get_dbh($role);
 }
 
