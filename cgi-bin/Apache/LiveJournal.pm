@@ -158,23 +158,26 @@ sub trans
     if ($LJ::UNIQ_COOKIES) {
 
         # if cookie exists, check for sysban
-        my $uniq;
-        if (Apache->header_in("Cookie") =~ /ljuniq\s*=\s*([a-zA-Z0-9]+)/) {
-            my $uniq = $1;
+        my ($uniq, $uniq_time);
+        if (Apache->header_in("Cookie") =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15}):(\d+)/) {
+            ($uniq, $uniq_time) = ($1, $2);
             $r->notes("uniq" => $uniq);
             return FORBIDDEN if LJ::sysban_check('uniq', $uniq);
+        }
 
-        # if no cookie, create one
-        } else {
-            my $uniq = LJ::rand_chars(15);
+        # if no cookie, create one.  if older than a day, revalidate
+        my $now = time();
+        my $DAY = 3600*24;
+        if (! $uniq || $now - $uniq_time > $DAY) {
+            $uniq ||= LJ::rand_chars(15);
             $r->notes("uniq" => $uniq);
 
             # set uniq cookies for all cookie_domains
             my @domains = ref $LJ::COOKIE_DOMAIN ? @$LJ::COOKIE_DOMAIN : ($LJ::COOKIE_DOMAIN);
             foreach my $dom (@domains) {
                 $r->header_out("Set-Cookie" =>
-                               "ljuniq=$uniq; " .
-                               "expires=" . LJ::time_to_cookie(time() + 60*60*24*365) . "; " .
+                               "ljuniq=$uniq:$now; " .
+                               "expires=" . LJ::time_to_cookie($now + $DAY*60) . "; " .
                                "domain=$dom; path=/");
             }
         }
