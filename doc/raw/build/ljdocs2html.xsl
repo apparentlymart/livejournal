@@ -115,6 +115,18 @@
   <xsl:copy-of select="$link"/>
 </xsl:template>
 
+<xsl:template match="guibutton">
+  <span class="guibutton">
+  <xsl:call-template name="inline.charseq"/>
+  </span>
+</xsl:template>
+
+<xsl:template match="guilabel">
+  <span class="guilabel">
+  <xsl:call-template name="inline.charseq"/>
+  </span>
+</xsl:template>
+
 <l:i18n xmlns:l="http://docbook.sourceforge.net/xmlns/l10n/1.0">
   <l:l10n language="en">
     <l:context name="xref">

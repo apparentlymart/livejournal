@@ -24,6 +24,7 @@
 
 <!-- LJ Specific Pages / Notes -->
 
+<!ENTITY s2.quickstart             SYSTEM "quickstart.xml">
 <!ENTITY s2.s2onlj                 SYSTEM "s2onlj.xml">
 <!ENTITY s2.faq.extra              SYSTEM "faq.xml">
 <!ENTITY s2.siteapi                SYSTEM "siteapi.xml">

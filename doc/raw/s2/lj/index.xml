@@ -8,6 +8,7 @@
   <chapter id='&s2.idroot;intro'>
     &s2.preface;
   </chapter>
+  &s2.quickstart;
   <chapter id='&s2.idroot;overview'>
     &s2.overview;
   </chapter>
