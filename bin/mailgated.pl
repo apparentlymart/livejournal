@@ -10,12 +10,18 @@ use Getopt::Long;
 use Sys::Hostname;
 use POSIX 'setsid';
 use Proc::ProcessTable;
+use MIME::Parser;
+use Mail::Address;
+use Unicode::MapUTF8 ();
+use File::Temp ();
+use File::Path ();
+
 require "$ENV{LJHOME}/cgi-bin/ljconfig.pl";
 
 # listener globals
 use vars qw($s $c $pid $opt $no_listen);
 # worker globals
-use vars qw($mailspool $workdir $maxloop
+use vars qw($mailspool $mailspool_new $workdir $maxloop
             $hostname $busy $stop $locktype);
 $opt = {};
 GetOptions $opt, qw/foreground workdir=s lock=s maxloop=s/;
@@ -24,6 +30,8 @@ $SIG{CHLD} = 'IGNORE';
 
 # mailspool should match the MTA delivery location.
 $mailspool = $LJ::MAILSPOOL || "$ENV{'LJHOME'}/mail";
+$mailspool_new = "$mailspool/new";
+
 $hostname = $1 if hostname() =~ /^([\w-]+)/;
 
 # setup defaults
@@ -34,7 +42,7 @@ $workdir = $opt->{'workdir'} || "$mailspool/tmp";
 $maxloop = $opt->{'maxloop'} || 100;
 
 # sanity checks
-die "Invalid mailspool: $mailspool\n" unless -d "$mailspool/new";
+die "Invalid mailspool: $mailspool\n" unless -d $mailspool_new;
 die "Don't run me as root!\n" unless $<;
 die "Unable to read mailspool: $mailspool\n" unless -r $mailspool;
 
@@ -114,8 +122,8 @@ if (! $opt->{'foreground'}) {
             }
 
             if (/queuesize/) {
-                if (! opendir(MDIR, $mailspool)) {
-                    print $c "Unable to open mailspool $mailspool: $!\n";
+                if (! opendir(MDIR, $mailspool_new)) {
+                    print $c "Unable to open mailspool $mailspool_new: $!\n";
                 } else {
                     my $count = 0;
                     foreach (readdir(MDIR)) {
@@ -153,20 +161,12 @@ if (! $opt->{'foreground'}) {
 
 sub worker
 {
-
-    use MIME::Parser;
-    use Mail::Address;
-    use Unicode::MapUTF8 ();
-    use File::Temp ();
-    use File::Path ();
-
     require "$ENV{'LJHOME'}/cgi-bin/ljemailgateway.pl";
     require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
     require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
     require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
     $| = 1;
 
-    my $spool = $mailspool . '/new';
     while (! $stop) {
         debug("Starting loop:");
 
@@ -177,7 +177,7 @@ sub worker
         # Get list of files to process.
         # If a file simply exists in the mailspool, it needs attention.
         debug("\tprocess");
-        opendir(MDIR, $spool) || die "Unable to open mailspool $spool: $!\n";
+        opendir(MDIR, $mailspool_new) || die "Unable to open mailspool $mailspool_new: $!\n";
         my @all_files = readdir(MDIR);
         closedir MDIR;
 
@@ -205,20 +205,20 @@ sub worker
         rand_array(\@new_messages, $maxloop - (scalar @retry_messages));
 
         # do the work
-        foreach (@new_messages, @retry_messages) {
+        foreach my $file (@new_messages, @retry_messages) {
             my $lock;
-            if (get_pcount($_) % 20 == 0) {  # only retry every 20th iteration
+            if (get_pcount($file) % 20 == 0) {  # only retry every 20th iteration
                 if (lc($locktype) eq 'ddlockd') {
-                    $lock = LJ::locker()->trylock("mailgated-$_");
+                    $lock = LJ::locker()->trylock("mailgated-$file");
                     next unless $lock;
                 }
-                eval { process($_); };
+                eval { process($file); };
                 if ($@) {
                     debug("\t\t$@");
-                    set_pcount($_);
+                    set_pcount($file);
                 }
             } else {
-                set_pcount($_);
+                set_pcount($file);
             }
         }
 
@@ -266,13 +266,16 @@ sub set_pcount
     my $name = $file;
     $name =~ s/:\d+$//;
     $name = $name . ":" . $attempt;
-    rename "$mailspool/$file", "$mailspool/$name";
+    rename "$mailspool_new/$file", "$mailspool_new/$name";
     return 0;
 }
 
 # return the number of times we've seen this
 # message in the queue
-sub get_pcount { return $1 if shift() =~ /:(\d+)$/ || 0; }
+sub get_pcount {
+    return 0 unless shift() =~ /:(\d+)$/;
+    return $1;
+}
 
 # Either an unrecoverable error, or a total success.  ;)
 # Regardless, we're done with this message.
@@ -283,7 +286,7 @@ sub dequeue
 {
     my $msg = shift;
     debug("\t\t dequeued: $msg") if $msg;
-    unlink("$mailspool/$last_file") || debug("\t\t Can't unlink $last_file!");
+    unlink("$mailspool_new/$last_file") || debug("\t\t Can't unlink $last_file!");
     File::Path::rmtree($last_tempdir);
     return 0;
 }
@@ -328,7 +331,7 @@ sub process
 
     # Close the message as quickly as possible, in case
     # we need to change status mid process.
-    open(MESSAGE, "$mailspool/$file") || debug("\t\t Can't open file: $!") && return;
+    open(MESSAGE, "$mailspool_new/$file") || debug("\t\t Can't open file: $!") && return;
     my $entity;
     eval { $entity = $parser->parse(\*MESSAGE) };
     close MESSAGE;
