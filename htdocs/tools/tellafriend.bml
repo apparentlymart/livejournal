@@ -3,8 +3,6 @@
  $title = "Tell a Friend!";
  $body = "";
 
- require 'ljlib.pl';
- require 'emailcheck.pl';
  &connect_db();
  my $remote = &get_remote();
  my ($sth);
@@ -19,7 +17,7 @@
  my $u = $sth->fetchrow_hashref;
  $u->{'emailpref'} = $u->{'email'};
  if ($LJ::USER_EMAIL && ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid")) {
-     $u->{'emailpref'} = $u->{'user'} . '@livejournal.com';
+     $u->{'emailpref'} = $u->{'user'} . '@' . $LJ::USER_DOMAIN;
  }
  
  unless ($u->{'status'} eq "A") {
@@ -126,4 +124,7 @@
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
 BODY=>(=_CODE return $body; _CODE=)
-PAGE=)
+PAGE=)(=_C <LJDEP>
+ib: cgi-bin/emailcheck.pl
+link: htdocs/login.bml, htdocs/lostinfo.bml, htdocs/users
+</LJDEP> _C=)

@@ -201,4 +201,7 @@ BODY<=
  return $body;
 _CODE=)
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/login.bml
+post: htdocs/tools/memadd.bml
+</LJDEP> _C=)

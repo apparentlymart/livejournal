@@ -129,4 +129,7 @@ $ret .= "</FORM></UL>";
 
 _CODE=)
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+lib: LJ::TextMessage
+link: htdocs/login.bml, htdocs/support/faqbrowse.bml
+</LJDEP> _C=)

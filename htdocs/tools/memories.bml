@@ -125,4 +125,6 @@ BODY<=
  return $body . "<P>" . $debug;
 _CODE=)
 <=BODY
-PAGE=)
+PAGE=)(=_C <LJDEP>
+link: htdocs/tools/memories.bml, htdocs/tools/memadd.bml, htdocs/talkread.bml
+</LJDEP> _C=)
