@@ -1812,17 +1812,16 @@ sub editfriendgroups
             } else {
                 @batch = splice(@posts_to_clean, 0, 20);
             }
-            if (@LJ::MEMCACHE_SERVERS) {
-                foreach my $id (@batch) {
-                    LJ::MemCache::delete([$userid, "log2:$userid:$id"]);
-                }
-            }
 
             my $in = join(",", @batch);
             $dbcm->do("UPDATE log2 SET allowmask=allowmask & ~(1 << $bit) ".
                       "WHERE journalid=$userid AND jitemid IN ($in) AND security='usemask'");
             $dbcm->do("UPDATE logsec2 SET allowmask=allowmask & ~(1 << $bit) ".
                       "WHERE journalid=$userid AND jitemid IN ($in)");
+
+            foreach my $id (@batch) {
+                LJ::MemCache::delete([$userid, "log2:$userid:$id"]);
+            }
         }
 
         # remove the friend group, unless we just added it this transaction
