@@ -766,7 +766,7 @@ sub get_pic_from_picid {
 
         # some users report blank userpics after upload.  probably
         # a race where it's not in the slaves yet?
-        if (my $dbcm = LJ::get_db_cluster_master($u)) {
+        if (my $dbcm = LJ::get_cluster_master($u)) {
             $rec = $dbcm->selectrow_hashref($query);
             return $rec if $rec;
         }
