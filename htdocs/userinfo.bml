@@ -527,8 +527,9 @@ if ($u->{'journaltitle'}) {
           return $active && (time() - $active) > $hide_after * 86400;
       };
 
+      my $useremail_cap = LJ::get_cap($u, 'useremail');
       unless ($u->{'opt_whatemailshow'} eq "N" ||
-              $u->{'opt_whatemailshow'} eq "L" && $u->{'no_mail_alias'} ||
+              $u->{'opt_whatemailshow'} eq "L" && ($u->{'no_mail_alias'} || ! $useremail_cap || ! $LJ::USER_EMAIL) ||
               $hide_contactinfo->()) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.email'}</b></td><td colspan='$span'>";
@@ -536,11 +537,12 @@ if ($u->{'journaltitle'}) {
           if ($u->{'opt_whatemailshow'} eq "L") {
               @emails = ();
           }
-          if ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail")) {
+          if ($LJ::USER_EMAIL && $useremail_cap) {
+              
               unless ($u->{'opt_whatemailshow'} eq "A" || $u->{'no_mail_alias'}) {
                   push @emails, "$u->{'user'}\@$LJ::USER_DOMAIN";
               }
-          } 
+          }
           foreach my $email (@emails) {
               $body .= ($u->{'opt_mangleemail'} eq "Y" || $email =~ /\@livejournal\.com$/)
                         ? $mangleaddress->($email)
