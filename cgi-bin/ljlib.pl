@@ -2889,7 +2889,7 @@ sub strip_bad_code
 {
     my $data = shift;
     LJ::CleanHTML::clean($data, {
-        'eat' => [qw[layer iframe script]],
+        'eat' => [qw[layer iframe script object embed]],
         'mode' => 'allow',
         'keepcomments' => 1, # Allows CSS to work
     });
