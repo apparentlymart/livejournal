@@ -115,7 +115,7 @@
             $body .= " width='$th->[1]'" if $th->[1];
             $body .= " height='$th->[2]'" if $th->[2];
             
-            if ($sh->{'scheme'} eq '$scheme') {
+            if ($sh->{'scheme'} eq $scheme) {
                 $body .= "style='border: solid 2px blue;' ";
             } else {
                 $body .= "style='border: solid 1px black;' ";
