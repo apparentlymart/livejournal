@@ -1136,7 +1136,7 @@ sub can_delete_journal_item {
 # returns: an array of usernames
 # args: u, opts?
 # des-opts: Optional hashref.  keys are:
-#           - type: 'P' to only return users of journaltype 'P'
+#           - type: a scalar journaltype to require, or an arrayref of types
 #           - cap:  cap to filter users on
 # </LJFUNC>
 sub get_authas_list {
@@ -1145,9 +1145,6 @@ sub get_authas_list {
     # used to accept a user type, now accept an opts hash
     $opts = { 'type' => $opts } unless ref $opts;
 
-    # only one valid type right now
-    $opts->{'type'} = 'P' if $opts->{'type'};
-
     my $ids = LJ::load_rel_target($u, 'A');
     return undef unless $ids;
 
@@ -1155,10 +1152,27 @@ sub get_authas_list {
     my %users;
     LJ::load_userids_multiple([ map { $_, \$users{$_} } @$ids ], [$u]);
 
-    return $u->{'user'}, sort map { $_->{'user'} }
-                         grep { ! $opts->{'cap'} || LJ::get_cap($_, $opts->{'cap'}) }
-                         grep { ! $opts->{'type'} || $opts->{'type'} eq $_->{'journaltype'} }
-                         values %users;
+    my @ret = ($u->{'user'}); # list of usernames to return
+    foreach my $authu (sort { $a->{'user'} cmp $b->{'user'} } values %users) {
+
+        # check for valid type
+        if ($opts->{'type'}) {
+            if (ref $opts->{'type'} eq 'ARRAY') {
+                next unless grep { $_ eq $authu->{'journaltype'} } @{$opts->{'type'}};
+            } else {
+                next unless $authu->{'journaltype'} eq $opts->{'type'};
+            }
+        }
+
+        # check for cap
+        if ($opts->{'cap'}) {
+            next unless LJ::get_cap($authu, $opts->{'cap'});
+        }
+
+        push @ret, $authu->{'user'};
+    }
+
+    return @ret;
 }
 
 # <LJFUNC>

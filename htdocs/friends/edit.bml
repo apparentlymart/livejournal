@@ -26,7 +26,7 @@ body<=
     return BML::redirect("$LJ::SITEROOT/community/members.bml?comm=$u->{'user'}")
         if $u->{'journaltype'} eq 'C';
     return LJ::bad_input("Cannot modify friends of a this journal type.")
-        unless $u->{'journaltype'} eq 'P';
+        unless $u->{'journaltype'} eq 'P' || $u->{'journaltype'} eq 'S';
 
     my $ret;
 
@@ -37,7 +37,7 @@ body<=
         $ret .= "<form action='edit.bml' method='get'>\n";
         $ret .= LJ::make_authas_select($remote,
                                        { 'authas' => $GET{'authas'},
-                                         'type' => 'P' });
+                                         'type' => ['P', 'S'] });
         $ret .= "</form>\n\n";
 
         $ret .= "<form method='post' name='editFriends' action='edit.bml?authas=$authas'>\n";
