@@ -549,7 +549,8 @@ sub editevent
 		 ));
 
 	## editing:
-	return fail($err,303);
+	return fail($err,303)
+	    if ($req->{'event'} !~ /\S/);
     }
 
     ## update sync table (before we actually do it!  in case updates
