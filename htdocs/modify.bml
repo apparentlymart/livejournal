@@ -7,18 +7,14 @@ body<=
 <?_ml .modify.text _ml?>
 p?>
 
-<form action="modify_do.bml" method="post">
-
 <?standout
-<table>
+<form action="modify_do.bml" method="post"><table>
 <?_code
  return LJ::auth_fields(\%FORM);
  _code?>
-<tr><td colspan='2' align='center'><input type="submit" value="<?_ml .btn.proceed _ml?>"></td></tr>
-</table>
+<tr><td colspan='2' align='center'><input type="submit" value="<?_ml .btn.proceed _ml?>" /></td></tr>
+</table></form>
 standout?>
-
-</form>
 
 <?h1 <?_ml lostinfo.head _ml?> h1?>
 <?p
