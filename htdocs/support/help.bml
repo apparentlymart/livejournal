@@ -53,7 +53,7 @@ body<=
  {
      $ret .= "<?h1 Recently Closed Support Requests h1?><?p Below are all support requests that have been recently closed.  To return to the open requests, <a href=\"./help.bml?cat=$filtercat\">click here</a>. p?>";
      
-     $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='closed' AND s.timeclosed>UNIX_TIMESTAMP()-(3600*24) $filterwhere ORDER BY timecreate DESC");
+     $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='closed' AND s.timeclosed>UNIX_TIMESTAMP()-(3600*24) $filterwhere");
 
  }
  elsif ($FORM{'state'} eq "youreplied") 
@@ -64,7 +64,7 @@ body<=
          return "<?h1 Error h1?><?p You must be logged in to filter on requests that you've replied to. p?>";
      }
      
-     $sth = $dbr->prepare("SELECT DISTINCT s.* FROM support s, supportlog sl WHERE s.spid=sl.spid AND s.state='open' AND sl.userid=$remote->{'userid'} $filterwhere GROUP BY s.spid ORDER BY timecreate DESC");
+     $sth = $dbr->prepare("SELECT DISTINCT s.* FROM support s, supportlog sl WHERE s.spid=sl.spid AND s.state='open' AND sl.userid=$remote->{'userid'} $filterwhere");
      
  }
  else 
@@ -77,10 +77,13 @@ body<=
      }
      $ret .= "<p>[<b>$total_count</b> total open requests]";
 
-     $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='open' $filterwhere ORDER BY timecreate DESC");
+     $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='open' $filterwhere");
  }
- $sth->execute;
 
+ $sth->execute;
+ my @support_log;
+ push @support_log, $_ while $_ = $sth->fetchrow_hashref;
+ @support_log = sort { $b->{timecreate} <=> $a->{timecreate} } @support_log;
 
  # filter line:
  $ret .= "<form method='get' action='help.bml'>Show only ";
@@ -127,7 +130,7 @@ body<=
  $ret .= "<td><b>Status</b></td>\n";
  $ret .= "</tr>";
 
- while (my $sp = $sth->fetchrow_hashref)
+ foreach my $sp (@support_log)
  {
      LJ::Support::fill_request_with_cat($sp, $cats);
      next unless (LJ::Support::can_read($sp, $remote));

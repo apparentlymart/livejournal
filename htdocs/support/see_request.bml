@@ -247,20 +247,12 @@ body<=
         'retref' => \$ret,
     });
 
-    my %userinfo;
-    my $dbr = LJ::get_db_reader();
-    $sth = $dbr->prepare("SELECT DISTINCT u.userid, u.user, u.name, u.defaultpicid, u.statusvis " .
-                         "FROM supportlog s, user u WHERE s.spid=? AND u.userid=s.userid");
-    $sth->execute($spid);
-    $userinfo{$_->{'userid'}} = $_ while ($_ = $sth->fetchrow_hashref);
-
-    my %userpics;
-    my @pics = map { $userinfo{$_}->{'defaultpicid'} } keys %userinfo;
-    LJ::load_userpics(\%userpics, \@pics);
+    my %userpics;  # id -> {..}
 
     my @screened;
 
     ### reply loop
+    my $dbr = LJ::get_db_reader();
     $sth = $dbr->prepare("SELECT splid, timelogged, UNIX_TIMESTAMP()-timelogged AS 'age', type, faqid, userid, message " . 
                          "FROM supportlog WHERE spid=? ORDER BY timelogged");
     $sth->execute($spid);
@@ -297,8 +289,9 @@ body<=
         # reply header
         my $header = "";
         if ($le->{'userid'} && LJ::Support::can_see_helper($sp, $remote)) {
-            my $up = $userinfo{$le->{'userid'}};
+            my $up = LJ::load_userid($le->{'userid'});
             my $picid = $up->{'defaultpicid'};
+            $userpics{$picid} or LJ::load_userpics(\%userpics, [ $picid ]);
             $header = "<table style='margin-top: 15px;'><tr valign='bottom'>";
             if ($picid && $up->{'statusvis'} ne 'S') {
                 $header .= "<td><img src='$LJ::USERPIC_ROOT/$picid/$up->{'userid'}' width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'}' hspace='3' alt='$up->{'user'}'/></td>";
@@ -480,7 +473,7 @@ body<=
             $ret .= "<td>Approve Screened Response:<br />";
             $ret .= LJ::html_select({ 'name' => 'approveans' },
                                     ('', ''),
-                                    map { $_->{'splid'}, "\#$_->{'splid'} ($userinfo{$_->{'userid'}}->{'user'})" }
+                                    map { $_->{'splid'}, "\#$_->{'splid'} (" . LJ::get_username($_->{'userid'}) . ")" }
                                     @screened);
             $ret .= LJ::html_select({ 'name' => 'approveas' },
                                     ("answer" => "as answer", "comment" => "as comment",));
