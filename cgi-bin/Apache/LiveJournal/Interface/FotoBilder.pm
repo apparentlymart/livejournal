@@ -41,12 +41,12 @@ sub checksession
     my ($r, $POST) = @_;
     BML::reset_cookies();
     $LJ::_XFER_REMOTE_IP = $POST->{'remote_ip'};
-    my $remote = LJ::get_remote();
-    return OK unless $remote;
 
-    $r->print("user: $remote->{'user'}\n");
-    my $u = LJ::load_user($remote->{'user'});
-    return OK unless $u->{'journaltype'} eq 'P';
+    # try to get a $u from the passed uid, falling back to the ljsession cookie
+    my $u = $POST->{uid} ? LJ::load_userid($POST->{'uid'}) : LJ::get_remote();
+    return OK unless $u && $u->{'journaltype'} eq 'P';
+
+    $r->print("user: $u->{'user'}\n");
     $r->print("userid: $u->{'userid'}\n");
 
     $r->print("can_upload: " . (can_upload($u)) . "\n");
