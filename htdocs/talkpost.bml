@@ -339,7 +339,8 @@ if ($new_url) {
  if ($parpost->{'state'} eq "S") {
      $ret .= "<br /><?p $ML{'.warnscreened'} p?>";
  }
- $ret .= "<form method='post' action='/talkpost_do.bml'>";
+ $ret .= "<form method='post' action='/talkpost_do.bml' id='postform'>";
+
  # hidden values
  my $parent = int($init->{'replyto'}+0);
  $ret .= "<input type='hidden' name='parenttalkid' value='$parent'>\n";
@@ -376,7 +377,7 @@ if ($new_url) {
      $ret .= "</tr>\n";
  }
 
- my $checked = "checked='1'";
+ my $checked = "checked='checked'";
  if ($remote) {
      $ret .= "<tr valign='middle'>";
      $ret .= "<td align='right'>&nbsp;</td>";
@@ -386,7 +387,7 @@ if ($new_url) {
      } else {
          $ret .= "<td align='middle'><input type='radio' name='usertype' value='cookieuser' id='talkpostfromremote' $checked></td>";
          $ret .= "<td align='left'><label for='talkpostfromremote'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</label>\n";
-         $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}'>\n";
+         $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}' id='cookieuser'>\n";
          if ($u->{'opt_whoscreened'} eq 'A' ||
              ($u->{'opt_whoscreened'} eq 'F' &&
               !LJ::is_friend($dbs, $u, $remote))) {
@@ -399,18 +400,18 @@ if ($new_url) {
  }
 
  # ( ) LiveJournal user:
- $ret .= "<tr valign=middle>";
+ $ret .= "<tr valign='middle'>";
  $ret .= "<td>&nbsp;</td>";
  $ret .= "<td align=middle><input type='radio' name='usertype' value='user' id='talkpostfromlj' $checked>";
- $ret .= "</td><td align=left><b><label for='talkpostfromlj'>$ML{'.opt.ljuser'}</label></b> ";
+ $ret .= "</td><td align='left'><b><label for='talkpostfromlj'>$ML{'.opt.ljuser'}</label></b> ";
  $ret .= $ML{'.opt.willscreenfriend'} if $u->{'opt_whoscreened'} eq 'F';
  $ret .= $ML{'.opt.willscreen'} if $u->{'opt_whoscreened'} eq 'A';
  $ret .= "</tr>\n";
 
  # Username: [    ] Password: [    ]  Login? [ ]
- $ret .= "<tr valign='middle' align='left'><td></td><td></td><td>";
+ $ret .= "<tr valign='middle' align='left'><td colspan='2'></td><td>";
  $ret .= "$ML{'Username'}:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='15' id='username'> ";
- $ret .= "$ML{'Password'}:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13'> <label for='logincheck'>$ML{'.loginq'}&nbsp;</label><input type='checkbox' name='do_login' id='logincheck'></td></tr>\n";
+ $ret .= "$ML{'Password'}:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13' id='password'> <label for='logincheck'>$ML{'.loginq'}&nbsp;</label><input type='checkbox' name='do_login' id='logincheck'></td></tr>\n";
  
  my $basesubject = "";
  if ($init->{'replyto'}) {
@@ -437,14 +438,14 @@ if ($new_url) {
          
          # go through and make radio button/icon image rows.
          foreach (@{$pics->{'lists'}->{$type}}) {
-             $input .= "<td valign='middle' align='middle'><input type='radio' name='subjecticon' value='$_->{'id'}' id='talki_$_->{'id'}'></TD>\n";
+             $input .= "<td valign='middle' align='middle'><input type='radio' name='subjecticon' value='$_->{'id'}' id='talki_$_->{'id'}'></td>\n";
              $img .= "<td valign='middle' align='middle'><label for='talki_$_->{'id'}'>" . LJ::Talk::show_image($pics, $_->{'id'}) . "</label></td>\n";
          }
          $ret .= "<tr>";
          
          # make an option if they don't want an image
          if ($type eq $pics->{'types'}->[0]) { 
-             $ret .= "<td rowspan='4' valign='middle' align='middle'><input type='radio' name='subjecticon' value='none' checked='1' id='talki_none'><br /><label for='talki_none'><i>$ML{'.opt.noimage'}</i></label></td><td rowspan='4'>&nbsp;</td>\n"; 
+             $ret .= "<td rowspan='5' valign='middle' align='middle'><input type='radio' name='subjecticon' value='none' checked='1' id='talki_none'><br /><label for='talki_none'><i>$ML{'.opt.noimage'}</i></label></td><td rowspan='5'>&nbsp;</td>\n"; 
          }
          
          # then splice in the icon & radio button rows...
@@ -489,7 +490,7 @@ if ($new_url) {
 
  # textarea for their message body
  $ret .= "<tr valign='top'><td align='right'>$ML{'.opt.message'}</td><td colspan='4'>";
- $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' style='width: 99%'></textarea>";
+ $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext' style='width: 99%'></textarea>";
  $ret .= "<br /><input type='submit' name='submitpost' value='$ML{'.opt.submit'}'>\n";
 
  ## preview stuff
@@ -516,6 +517,12 @@ if ($new_url) {
 
 
  $ret .= "</td></tr></table>\n";
+
+ # Some JavaScript to help the UI out
+
+ $ret .= "<script type='text/javascript' language='JavaScript'>\n";
+ $ret .= "var usermismatchtext = \"" . LJ::ejs($ML{'.usermismatch'}) . "\";\n";
+ $ret .= "</script><script type='text/javascript' language='JavaScript' src='/js/talkpost.js'></script>";
  $ret .= "</form>\n";
 
  return $ret;
