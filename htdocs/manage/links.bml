@@ -15,6 +15,8 @@ body<=
     return LJ::bad_input($ML{'error.invalidauth'})
         unless $u;
 
+    my $getextra = $u->{'userid'} == $remote->{'userid'} ? '' : "?authas=$u->{'user'}";
+
     # need stylesys prop for error checking
     LJ::load_user_props($u, "stylesys");
 
@@ -27,7 +29,6 @@ body<=
 
     # require S2
     unless ($u->{'stylesys'} == 2) {
-        my $getextra = $u->{'userid'} == $remote->{'userid'} ? '' : "?authas=$u->{'user'}";
         my $link = "<a href=\"$LJ::SITEROOT/customize/$getextra\">$ML{'/customize/index.bml.title'}</a>";
         $ret .= "<?h1 $ML{'.error.s2required.header'} h1?><?p " . BML::ml('.error.s2required',{'link'=>$link}) . " p?>"; 
         return $ret;
@@ -54,7 +55,7 @@ body<=
     $ret .= "<li>$ML{'.about.heading'}</li></ul>";
 
     # link modify form
-    $ret .= "<form method='post' action='links.bml' style='margin-top: 1.5em;'>";
+    $ret .= "<form method='post' action='links.bml$getextra' style='margin-top: 1.5em;'>";
     $ret .= LJ::Links::make_modify_form($u, $linkobj, \%POST);
     $ret .= "</form>";
 
