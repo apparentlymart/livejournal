@@ -209,7 +209,7 @@ sub get_dbh {
             my ($canl_role, $dbname) = @$mapping;
             my $tracker = 
                 $LJ::REQ_DBIX_TRACKER{$canl_role} ||=
-                DBIx::StateTracker->new($LJ::DBIRole->get_dbh({unshared=>1},$canl_role), "");
+                DBIx::StateTracker->new(sub { $LJ::DBIRole->get_dbh({unshared=>1},$canl_role) });
             if ($tracker) {
                 my $keeper = DBIx::StateKeeper->new($tracker, $dbname);
                 $LJ::REQ_DBIX_KEEPER{$role} = $keeper;
@@ -3442,7 +3442,17 @@ sub start_request
 
 sub end_request
 {
-    $LJ::DBIRole->disconnect_all() if $LJ::DISCONNECT_DBS;
+    if ($LJ::DISCONNECT_DBS) {
+        # clear cached handles
+        $LJ::DBIRole->disconnect_all();
+
+        # and cached trackers/keepers to partitioned dbs
+        while (my ($role, $tk) = each %LJ::REQ_DBIX_TRACKER) {
+            $tk->disconnect;
+        }
+        %LJ::REQ_DBIX_TRACKER = ();
+        %LJ::REQ_DBIX_KEEPER = ();
+    }
     LJ::MemCache::disconnect_all() if $LJ::DISCONNECT_MEMCACHE;
 }
 
