@@ -4859,6 +4859,11 @@ sub get_cluster_reader
     my $arg = shift;
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
     my @roles = ("cluster${id}slave", "cluster${id}");
+    if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$id}) {
+        $ab = lc($ab);
+        # master-master cluster
+        @roles = ("cluster${id}${ab}") if $ab eq "a" || $ab eq "b";
+    }
     return LJ::get_dbh(@roles);
 }
 
@@ -4875,6 +4880,11 @@ sub get_cluster_master
     my $arg = shift;
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
     my $role = "cluster${id}";
+    if (my $ab = $LJ::CLUSTER_PAIR_ACTIVE{$id}) {
+        $ab = lc($ab);
+        # master-master cluster
+        $role = "cluster${id}${ab}" if $ab eq "a" || $ab eq "b";
+    }
     return LJ::get_dbh($role);
 }
 
@@ -7722,12 +7732,21 @@ sub alloc_user_counter
 
     my $newmax;
     my $uid = $u->{'userid'}+0;
-    my $rs = $dbcm->do("UPDATE counter SET max=LAST_INSERT_ID(max+1) WHERE journalid=? AND area=?",
-                       undef, $uid, $dom);
+    my $memkey = [$uid, "auc:$uid:$dom"];
+
+    # in a master-master DB cluster we need to be careful that in
+    # an automatic failover case where one cluster is slightly behind
+    # that the same counter ID isn't handed out twice.  use memcache
+    # as a sanity check to record/check latest number handed out.
+    my $memmax = int(LJ::MemCache::get($memkey) || 0);
+
+    my $rs = $dbcm->do("UPDATE counter SET max=LAST_INSERT_ID(GREATEST(max,$memmax)+1) ".
+                       "WHERE journalid=? AND area=?", undef, $uid, $dom);
     if ($rs > 0) {
         $newmax = $dbcm->selectrow_array("SELECT LAST_INSERT_ID()");
+        LJ::MemCache::set($memkey, $newmax);
         return $newmax;
-    }   
+    }
 
     if ($recurse) {
         # We shouldn't ever get here if all is right with the world.
@@ -7748,7 +7767,7 @@ sub alloc_user_counter
     $newmax += 0;
     $dbcm->do("INSERT IGNORE INTO counter (journalid, area, max) VALUES (?,?,?)",
                 undef, $uid, $dom, $newmax) or return undef;
-            
+
     # The 2nd invocation of the alloc_user_counter sub should do the
     # intended incrementing.
     return LJ::alloc_user_counter($u, $dom, 1);
