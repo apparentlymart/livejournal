@@ -1023,8 +1023,11 @@ RTE
         }
         # Text Formatting
         unless ($opts->{'richtext_on'}) {
+            my $format_selected = $opts->{'prop_opt_preformatted'} ? "preformatted" : "";
+            $format_selected ||= $opts->{'event_format'};
+
             $out .= "<tr valign='top'><th><label for='format'>Text Formatting:</label></th><td>";
-            $out .= LJ::html_select({ 'name' => "event_format", 'id' => "event_format", 'selected' => $opts->{"event_format"}, },
+            $out .= LJ::html_select({ 'name' => "event_format", 'id' => "event_format", 'selected' => $format_selected, },
                                     "auto", "Auto", "preformatted", "None");
             $out .= "</td></tr>";
         }
@@ -1106,7 +1109,7 @@ MOODS
         
         # Backdate Entry
         $out .= "<tr id='backdate_row'><th><label for='prop_opt_backdated'>Entry is backdated:</label></th><td>";
-        $out .= LJ::html_check({ 'type' => "check", 'id' => "prop_opt_backdated", 'name' => "prop_opt_backdated", "value" => 1, 'checked' => $opts->{'prop_opt_backdated'},});
+        $out .= LJ::html_check({ 'type' => "check", 'id' => "prop_opt_backdated", 'name' => "prop_opt_backdated", "value" => 1, 'selected' => $opts->{'prop_opt_backdate'},});
         $out .= "</td></tr>";
         
         # Comment Settings
@@ -1281,7 +1284,6 @@ sub entry_form_decode
         $req->{$_} = $POST->{$_} if $POST->{$_} ne "";
     }
 
-    $req->{"prop_opt_preformatted"} = $POST->{'event_format'} eq "preformatted" ? 1 : 0;
     # copy some things from %POST
     foreach (qw(subject hour min
                 prop_picture_keyword prop_current_moodid
@@ -1291,6 +1293,7 @@ sub entry_form_decode
         $req->{$_} = $POST->{$_};
     }
 
+    $req->{"prop_opt_preformatted"} ||= $POST->{'event_format'} eq "preformatted" ? 1 : 0;
     $req->{"prop_opt_$POST->{'comment_settings'}"} = 1 if $POST->{'comment_settings'} ne "";
     $req->{'prop_opt_backdated'} = $POST->{'prop_opt_backdated'} ? 1 : 0;
     
