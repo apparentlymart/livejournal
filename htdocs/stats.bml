@@ -160,9 +160,9 @@ P=)
  {
      $ret .= "<TR VALIGN=TOP><TD><FONT SIZE=+1><B>$stat{'clientname'}->{$cn}</B></FONT></TD><TD><B>$cn</B><BR>\n";
      $ret .= "<FONT SIZE=-1>\n";
-     foreach my $c (sort grep { /^$cn\// } keys %{$stat{'client'}}) {
+     foreach my $c (sort grep { /^\Q$cn\E\// } keys %{$stat{'client'}}) {
 	 my $count = $stat{'client'}->{$c};
-	 $c =~ s/^$cn\///;
+	 $c =~ s/^\Q$cn\E\///;
 	 $ret .= "$c ($count), ";
      }
      chop $ret; chop $ret;  # remove trailing ", "
