@@ -2158,6 +2158,17 @@ register_setter("stylesys", sub {
     return 1;
 });
 
+register_setter("maximagesize", sub {
+    my ($dba, $u, $remote, $key, $value, $err) = @_;
+    unless ($value =~ m/^(\d+)[x,|](\d+)$/) {
+        $$err = "Illegal value.  Must be width,height.";
+        return 0;
+    }
+    $value = "$1|$2";
+    LJ::set_userprop($u, "opt_imagelinks", $value);
+    return 1;
+});
+
 
 # <LJFUNC>
 # name: LJ::make_auth_code

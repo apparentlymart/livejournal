@@ -75,6 +75,13 @@ $img{'tellfriend'} = {
     'alt' => 'Tell a Friend!',
 };
 
+$img{'placeholder'} = {
+    'src' => '/imageplaceholder.png',
+    'width' => 48,
+    'height' => 48,
+    'alt' => 'Image',
+};
+
 # load the site-local version, if it's around.
 if (-e "$LJ::HOME/cgi-bin/imageconf-local.pl") {
     require "$LJ::HOME/cgi-bin/imageconf-local.pl";

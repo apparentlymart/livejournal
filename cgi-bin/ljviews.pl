@@ -1524,7 +1524,13 @@ sub create_view_friends
 
     # load 'opt_stylemine' prop for $remote.  don't need to load opt_nctalklinks
     # because that was already faked in LJ::make_journal previously
-    LJ::load_user_props($remote, "opt_stylemine");
+    LJ::load_user_props($remote, "opt_stylemine", "opt_imagelinks");
+
+    # load options for image links
+    my ($maximgwidth, $maximgheight) = (undef, undef);
+    ($maximgwidth, $maximgheight) = ($1, $2)
+        if ($remote && $remote->{'userid'} == $u->{'userid'} &&
+            $remote->{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/);
   
     my %friends_events = ();
     my $events = \$friends_events{'events'};
@@ -1605,7 +1611,9 @@ sub create_view_friends
                                       $remote->{'userid'} != $friendid;
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
-                                              'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine) });
+                                              'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine), 
+                                              'maximgwidth' => $maximgwidth,
+                                              'maximgheight' => $maximgheight, });
         LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$event);
         $friends_event{'event'} = $event;
         

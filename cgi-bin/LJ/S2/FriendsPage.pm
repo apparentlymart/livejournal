@@ -63,7 +63,13 @@ sub FriendsPage
         return 1;
     }
 
-    LJ::load_user_props($remote, "opt_nctalklinks", "opt_stylemine");
+    LJ::load_user_props($remote, "opt_nctalklinks", "opt_stylemine", "opt_imagelinks");
+
+    # load options for image links
+    my ($maximgwidth, $maximgheight) = (undef, undef);
+    ($maximgwidth, $maximgheight) = ($1, $2)
+        if ($remote && $remote->{'userid'} == $u->{'userid'} &&
+            $remote->{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/);
 
     ## never have spiders index friends pages (change too much, and some 
     ## people might not want to be indexed)
@@ -230,7 +236,9 @@ sub FriendsPage
                                       $remote->{'userid'} != $friendid;
 
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
-                                             'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine) });
+                                             'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}, $stylemine), 
+                                             'maximgwidth' => $maximgwidth,
+                                             'maximgheight' => $maximgheight, });
         LJ::expand_embedded($friends{$friendid}, $ditemid, $remote, \$text);
 
         my $userlite_poster = $get_lite->($posterid);

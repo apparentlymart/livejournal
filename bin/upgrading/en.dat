@@ -938,6 +938,18 @@ If you uncheck it, LiveJournal will only send text emails.
 
 /editinfo.bml.htmlemail.header=Send HTML Emails
 
+/editinfo.bml.imagelinks.header=Use image placeholders on your friends page
+
+/editinfo.bml.imagelinks.about=Placeholders are useful if you are browsing at work or over a slow connection, replacing inline images with links.  What size images do you want placeholders to be used for?
+
+/editinfo.bml.imagelinks.size.custom=Custom: use placeholders for images larger than [[width]]x[[height]]
+
+/editinfo.bml.imagelinks.size.all=Use placeholders for all images
+
+/editinfo.bml.imagelinks.size.small=Use placeholders for medium images (over [[width]]x[[height]])
+
+/editinfo.bml.imagelinks.size.medium=Use placeholders for large images (over [[width]]x[[height]])
+
 /editinfo.bml.int.about<<
 If you want other people to be able to search the directory and find you by interest, 
 list below everything you're interested in, separated by commas.  

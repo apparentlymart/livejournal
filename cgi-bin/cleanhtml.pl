@@ -291,17 +291,18 @@ sub clean
                 if ($tag eq "img") 
                 {
                     my $img_bad = 0;
-                    if ($opts->{'maximgwidth'} &&
+                    if (defined $opts->{'maximgwidth'} &&
                         (! defined $hash->{'width'} ||
                          $hash->{'width'} > $opts->{'maximgwidth'})) { $img_bad = 1; }
-                    if ($opts->{'maximgheight'} &&
+                    if (defined $opts->{'maximgheight'} &&
                         (! defined $hash->{'height'} ||
                          $hash->{'height'} > $opts->{'maximgheight'})) { $img_bad = 1; }
 
                     $hash->{src} = canonical_url($hash->{src}, 1);
 
                     if ($img_bad) {
-                        $newdata .= "<a href=\"$hash->{'src'}\"><b>(Image Link)</b></a>";
+                        $newdata .= "<a class=\"ljimgplaceholder\" href=\"$hash->{'src'}\">" .
+                                    LJ::img('placeholder') . '</a>';
                         $alt_output = 1;
                     }
                 }
@@ -685,6 +686,8 @@ sub clean_event
         'remove' => $event_remove,
         'autoclose' => \@comment_close,
         'cleancss' => 1,
+        'maximgwidth' => $opts->{'maximgwidth'},
+        'maximgheight' => $opts->{'maximgheight'},
     });
 }
 

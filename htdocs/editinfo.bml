@@ -42,6 +42,7 @@ _code?>
                         "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                         "opt_whoscreened", "journaltitle", "journalsubtitle", 
                         "friendspagetitle", "opt_weblogscom", "opt_stylemine",
+                        "opt_imagelinks"
                         );
 
     # to store values before they undergo normalisation
@@ -396,6 +397,26 @@ _code?>
         $ret .= "</td><td><b><label for='opt_bdaymail'>$ML{'.bdayreminders.header'}</label></b></td></tr>\n";
         $ret .= "<tr><td>&nbsp;</td><td>$ML{'.bdayreminders.about'}</td></tr>\n";
 
+        # opt_imagelinks
+        my ($maxwidth, $maxheight) = (0, 0);
+        ($maxwidth, $maxheight) = ($1, $2)
+            if ($u->{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/);
+        my $is_stock = {'320|240' => 1, '640|480' => 1, '0|0' => 1, '' => 1}->{$u->{'opt_imagelinks'}};
+        my $extra = $is_stock ? '' : BML::ml('.imagelinks.size.custom',
+                                             {'width' => $maxwidth, 'height' => $maxheight});
+        $ret .= "<tr valign='middle'><td>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_imagelinks_on', 'id' => 'opt_imagelinks_on',
+                                 'selected' => $u->{'opt_imagelinks'} });
+        $ret .= "</td><td><b><label for='opt_imagelinks_on'>$ML{'.imagelinks.header'}</label></b></td></tr>\n";
+        $ret .= "<tr><td>&nbsp;</td><td>$ML{'.imagelinks.about'}</td></tr>\n";
+        $ret .= "<tr><td>&nbsp;</td><td>";
+        $ret .= LJ::html_select({'name' => 'opt_imagelinks', 'selected' => $u->{'opt_imagelinks'}},
+                                '0|0', BML::ml('.imagelinks.size.all'),
+                                '320|240', BML::ml('.imagelinks.size.small', {'width' => 320, 'height' => 240}),
+                                '640|480', BML::ml('.imagelinks.size.medium', {'width' => 640, 'height' => 480}),
+                                $extra ? ("$maxwidth|$maxheight", $extra) : ());
+        $ret .= "</td></tr>\n";
+
         # opt_showtalklinks
         $ret .= "<tr valign='middle'><td>";
         $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_showtalklinks', 'id' => 'opt_showtalklinks',
@@ -693,6 +714,8 @@ _code?>
                 $POST{'opt_logcommentips'} ne "S" &&
                 $POST{'opt_logcommentips'} ne "A") { $POST{'opt_logcommentips'} = "N"; }
             $POST{'opt_whoscreened'} = "N" unless $POST{'opt_whoscreened'} =~ m/^(N|R|F|A)$/;
+            $POST{'opt_imagelinks'} = 0 unless $POST{'opt_imagelinks_on'} &&
+                                               $POST{'opt_imagelinks'} =~ m/^(\d+)\|(\d+)$/;
 
             # for the directory.
             $POST{'sidx_bdate'} = "";
@@ -727,7 +750,7 @@ _code?>
                           "opt_bdaymail", "opt_hidefriendofs",
                           "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                           "opt_whoscreened", "journaltitle", "journalsubtitle", "friendspagetitle",
-                          "opt_stylemine",
+                          "opt_stylemine", "opt_imagelinks",
                           );
 
             # weblogs.com requires a special cap
