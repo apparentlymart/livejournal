@@ -412,7 +412,7 @@ sub clean
                  ! $opencount{'pre'} &&
                  ! $opencount{'lj-raw'};
             
-            if ($auto_format && ! $opencount{'a'}) {
+            if ($auto_format && ! $opencount{'a'} && ! $opencount{'textarea'}) {
                 my $match = sub {
                     my $str = shift;
                     if ($str =~ /^(.*?)(&(#39|quot|lt|gt)(;.*)?)$/) {
@@ -439,12 +439,13 @@ sub clean
                 $token->[1] =~ s/\[COME\]/-->/g;
             }
 
-            # put <wbr> tags into long words, except inside <pre>.
-            if ($wordlength && !$opencount{'pre'}) {
+            # put <wbr> tags into long words, except inside <pre> and <textarea>.
+            if ($wordlength && !$opencount{'pre'} && !$opencount{'textarea'}) {
                 $token->[1] =~ s/\S{$wordlength,}/break_word($&,$wordlength)/eg;                
             } 
 
-            if ($auto_format) {
+            # auto-format things, unless we're in a textarea, when it doesn't make sense
+            if ($auto_format && !$opencount{'textarea'}) {
                 $token->[1] =~ s/\r?\n/<br \/>/g;
                 if (! $opencount{'a'}) {
                     $token->[1] =~ s/&url(\d+);(.*?)&urlend;/<a href=\"$url{$1}\">$2<\/a>/g;
