@@ -1300,6 +1300,12 @@ sub http_to_time {
     return HTTP::Date::str2time($string);
 }
 
+sub mysqldate_to_time {
+    my $string = shift;
+    return undef unless $string =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d)(?::(\d\d))?)?$/;
+    return Time::Local::timelocal($6, $5, $4, $3, $2-1, $1);
+}
+
 # <LJFUNC>
 # class: time
 # name: LJ::time_to_http
