@@ -236,7 +236,7 @@ sub handler
         $r->header_out("Last-Modified", $modtime_http)
             if $req->{'env'}->{'Static'};
         $r->header_out("Cache-Control", "private, proxy-revalidate");
-        $r->header_out("ETag", Digest::MD5::md5_hex($html));
+        $r->header_out("ETag", '"' . Digest::MD5::md5_hex($html) . '"');
 
 	$r->send_http_header();
     }
