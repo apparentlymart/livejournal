@@ -25,13 +25,13 @@ my $optv = $opt_verbose;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
-my $dbh = LJ::get_dbh("master");
+my $dbh = LJ::get_dbh({raw=>1}, "master");
 die "No master db available.\n" unless $dbh;
 $dbh->do("SET wait_timeout=28800");
 
 my $dbr = $dbh;
 if ($opt_useslow) {
-    $dbr = LJ::get_dbh("slow");
+    $dbr = LJ::get_dbh({raw=>1}, "slow");
     unless ($dbr) { die "Can't get slow db from which to read.\n"; }
 }
 
@@ -53,7 +53,7 @@ die "Non-existent user $user.\n" unless $u;
 
 die "Can't move back to legacy cluster 0\n" unless $dclust;
 
-my $dbch = LJ::get_dbh("cluster$dclust");
+my $dbch = LJ::get_dbh({raw=>1}, "cluster$dclust");
 die "Undefined or down cluster \#$dclust\n" unless $dbch;
 $dbch->do("SET wait_timeout=28800");
 
@@ -71,7 +71,7 @@ if ($sclust == $dclust) {
 # original cluster db handle.
 my $dbo;
 if ($sclust) {
-    $dbo = $opt_movemaster ? LJ::get_dbh("cluster$u->{clusterid}movemaster") :
+    $dbo = $opt_movemaster ? LJ::get_dbh({raw=>1}, "cluster$u->{clusterid}movemaster") :
 	LJ::get_cluster_master($u);
     die "Can't get source cluster handle.\n" unless $dbo;
     $dbo->{'RaiseError'} = 1;
@@ -369,7 +369,7 @@ if ($sclust == 0)
         $dbh->do("UPDATE clustermove SET sdeleted='0', timedone=UNIX_TIMESTAMP() ".
                  "WHERE cmid=?", undef, $cmid);
     }
-
+    exit 0;
 } 
 elsif ($sclust > 0) 
 {
@@ -626,6 +626,7 @@ elsif ($sclust > 0)
     }
     $dbh->do("UPDATE clustermove SET sdeleted=?, timedone=UNIX_TIMESTAMP() ".
              "WHERE cmid=?", undef, $opt_del ? 1 : 0, $cmid);
+    exit 0;
 }
 
 sub deletefrom0_logitem

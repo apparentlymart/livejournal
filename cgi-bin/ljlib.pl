@@ -188,6 +188,10 @@ sub use_diff_db {
 # returns:
 # </LJFUNC>
 sub get_dbh {
+    my $opts = ref $_[0] eq "HASH" ? shift : {};
+    # supported options:
+    #    'raw':  don't return a DBIx::StateKeeper object
+
     if ($LJ::DEBUG{'get_dbh'} && $_[0] ne "logs") {
         my $errmsg = "get_dbh(@_) at \n";
         my $i = 0;
@@ -198,8 +202,9 @@ sub get_dbh {
         warn $errmsg;
     }
 
+    my $mapping;
     foreach my $role (@_) {
-        if (my $mapping = $LJ::WRAPPED_DB_ROLE{$role}) {
+        if (($mapping = $LJ::WRAPPED_DB_ROLE{$role}) && ! $opts->{raw}) {
             return $LJ::REQ_DBIX_KEEPER{$role} if $LJ::REQ_DBIX_KEEPER{$role};
             my ($canl_role, $dbname) = @$mapping;
             my $tracker = 
