@@ -20,7 +20,8 @@ BODY<=
  my $pics = LJ::Talk::get_subjecticons();
  my $init = LJ::Talk::init($dbs, \%FORM);
  my $u = $init->{'journalu'};
- 
+
+ return "(=H1 Error H1=)(=P $init->{'error'} P=)" if $init->{'error'}; 
  return "Error: couldn't determine journal from arguments." unless $u;
  return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 

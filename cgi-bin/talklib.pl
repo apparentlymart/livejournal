@@ -130,6 +130,8 @@ sub init
     if ($journal) {
 	# they specified a journal argument, which indicates new style.
 	$ju = LJ::load_user($dbs, $journal);
+	return { 'error' => "No such journal" } unless $ju;
+	return { 'error' => "Bogus arguments" } unless $ju->{'clusterid'};
 	$init->{'clustered'} = 1;
 	foreach (qw(itemid replyto)) {
 	    next unless $init->{$_};
@@ -149,6 +151,7 @@ sub init
 		$init->{'itemid'} = $newinfo->[1];
 	    } else {
 		my $jid = LJ::dbs_selectrow_array($dbs, "SELECT ownerid FROM log WHERE itemid=$itemid");
+		return { 'error' => "No such entry" } unless $jid;
 		$ju = LJ::load_userid($dbs, $jid);
 	    }
 	} elsif ($form->{'replyto'}) {
@@ -160,6 +163,7 @@ sub init
 	    } else {
 		# guess it's on cluster 0, so find out what journal.
 		my $jid = LJ::dbs_selectrow_array($dbs, "SELECT journalid FROM talk WHERE talkid=$replyto");
+		return { 'error' => "No such entry" } unless $jid;
 		$ju = LJ::load_userid($dbs, $jid);
 	    }
 	}
