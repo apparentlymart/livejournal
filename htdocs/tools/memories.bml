@@ -108,7 +108,7 @@
      $body .= "<LI><B><A HREF=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</A></B>: $row->{'count'} $noun\n";
  }
  unless ($rows) {
-     $body .= "<P><I>No memories found.</I>  This could be because 1) the user hasn't defined any memorable events, 2) the user's memorable events are protected and you don't have access to view them, or 3) the user doesn't have any memories that match you filter criteria.";
+     $body .= "<P><I>No memories found.</I>  This could be because 1) the user hasn't defined any memorable events, 2) the user's memorable events are protected and you don't have access to view them, or 3) the user doesn't have any memories that match your filter criteria.";
  } else {
      $body .= "</UL>";
 }
