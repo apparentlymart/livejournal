@@ -10,9 +10,7 @@ body<=
  my @filters = LJ::Dir::validate(\%FORM, \@errors);
  return LJ::bad_input(@errors) if @errors;
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbr = LJ::get_db_reader();
 
  # the common case (small installations), people want the directory
  # to just work.  so we'll support that by default.  but on big sites,
@@ -29,7 +27,7 @@ body<=
 
  if (BML::get_query_string() eq "")
  {
-     LJ::load_codes($dbs, { state => \%state, country => \%country  });
+     LJ::load_codes({ state => \%state, country => \%country  });
      $ret = "";
      $ret .= "<?h1 Browse Journals by US State h1?><?p Click a US state below to read journals from that state, or click a country name below the map to read journals from that country. p?>\n";
      $ret .= "<form action='get' name=\"stateForm\"><p align='center'>";
@@ -139,9 +137,9 @@ body<=
      return $ret;
  }
 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
- unless (LJ::check_priv($dbs, $remote, "betatest", "directory") ||
+ unless (LJ::check_priv($remote, "betatest", "directory") ||
          LJ::get_cap($remote, "directory") ||
          (@filters == 1 && $filters[0] eq "int" && $FORM{'opt_format'} eq "simple"))
  {
@@ -237,7 +235,7 @@ body<=
  unless ($info{'count'}) { return $ret; }
 
  if ($FORM{'opt_sort'} eq "loc") {
-     LJ::load_codes($dbs, { state => \%state, country => \%country  });
+     LJ::load_codes({ state => \%state, country => \%country  });
  }
 
  if ($FORM{'opt_format'} eq "simple") 
@@ -313,7 +311,7 @@ body<=
 
      my %pic;
      my @picids = map { $_->{'defaultpicid'} } @matches;
-     LJ::load_userpics($dbs, \%pic, \@picids);
+     LJ::load_userpics(\%pic, \@picids);
 
      my $count = 0;
      my $pos = 0;

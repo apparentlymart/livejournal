@@ -4,18 +4,17 @@
     use strict;
     use vars qw(%POST %GET);
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
+    my $dbh = LJ::get_db_writer();
     my $remote = LJ::get_remote($dbh);
 
     return "<b>Error:</b> You don't have the sysban priv."
-        unless LJ::check_priv($dbs, $remote, "sysban");
+        unless LJ::check_priv($remote, "sysban");
 
     ######################################################
 
     # does the user have privs for everything?
     my $priv_all = 0;
-    $priv_all = 1 if LJ::check_priv($dbs, $remote, "sysban", "*");
+    $priv_all = 1 if LJ::check_priv($remote, "sysban", "*");
 
     my $ret;
 
@@ -30,7 +29,7 @@
 
         return BML::ml('backlink', { 'link' => 'sysban.bml', 'text' => 'Back' }) . " " .
             "<p>You do not have the required priv to modify this type of ban.</p>"
-            unless $priv_all || LJ::check_priv($dbs, $remote, "sysban", $ban->{'what'});
+            unless $priv_all || LJ::check_priv($remote, "sysban", $ban->{'what'});
 
         return BML::redirect("sysban.bml") if ! $ban->{'banid'} || $ban->{'status'} eq 'expired';
 
@@ -101,7 +100,7 @@
             my $msg;
             map { $msg .= " " if $msg;
                   $msg .= "$_=$ban->{$_};" }  qw(banid status bandate banuntil what value note);
-            LJ::statushistory_add($dbs, 0, $remote->{'userid'}, 'sysban_mod', $msg);
+            LJ::statushistory_add(0, $remote->{'userid'}, 'sysban_mod', $msg);
 
             # out of edit mode if we expired this ban
             return BML::redirect("sysban.bml") if $ban->{'status'} eq 'expired';
@@ -153,7 +152,7 @@
 
         return BML::ml('backlink', { 'link' => 'sysban.bml', 'text' => 'Back' }) . " " .
             "<p>You do not have the required priv to create this type of ban.</p>"
-            unless $priv_all || LJ::check_priv($dbs, $remote, "sysban", $POST{'create_what'});
+            unless $priv_all || LJ::check_priv($remote, "sysban", $POST{'create_what'});
 
         my $banuntil = "NULL";
         unless ($POST{'create_bandays'} == 0) {
@@ -171,7 +170,7 @@
         }
 
         # log in statushistory
-        LJ::statushistory_add($dbs, 0, $remote->{'userid'}, 'sysban_add',
+        LJ::statushistory_add(0, $remote->{'userid'}, 'sysban_add',
                               "banid=$dbh->{'mysql_insertid'}; status=active; " .
                               "bandate=" . LJ::mysql_time() . "; banuntil=$banuntil; " .
                               "what=$POST{'create_what'}; value=$POST{'create_value'}; " .
@@ -235,7 +234,7 @@
     while (my $ban = $sth->fetchrow_hashref) {
 
         # check_priv is cached, this shouldn't be bad
-        next unless $priv_all || LJ::check_priv($dbs, $remote, "sysban", $ban->{'what'});
+        next unless $priv_all || LJ::check_priv($remote, "sysban", $ban->{'what'});
 
         $ret .= "<tr>";
         foreach (@cols) {

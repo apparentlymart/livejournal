@@ -3,11 +3,8 @@
  use strict;
  use vars qw(%FORM $head $title $body);
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
- my $remote = LJ::get_remote($dbs);
+ my $dbr = LJ::get_db_reader();
+ my $remote = LJ::get_remote();
 
  my $sth;
 
@@ -25,7 +22,7 @@
      $user = $remote->{'user'};
  }
 
- my $u = LJ::load_user($dbs, $user);
+ my $u = LJ::load_user($user);
  unless ($u) {
      $title = $ML{'Error'};
      $body = $ML{'error.username_notfound'};
@@ -34,11 +31,11 @@
  my $userid = $u->{'userid'};
 
  if ($u->{'journaltype'} eq "R") {
-    LJ::load_user_props($dbr, $u, "renamedto");
+    LJ::load_user_props($u, "renamedto");
     return BML::redirect("/tools/memories.bml?user=$u->{'renamedto'}");
  }
 
- LJ::load_user_props($dbs, $u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
+ LJ::load_user_props($u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
  unless ($u->{'statusvis'} eq 'V' && ! $u->{'opt_blockrobots'}) {
      $head = LJ::robot_meta_tags();
  }
@@ -71,14 +68,14 @@
  if ($remote) {
      if ($remote->{'userid'} == $userid) {
          $secwhere = "";
-     } elsif (LJ::is_friend($dbs, $userid, $remote->{'userid'})) {
+     } elsif (LJ::is_friend($userid, $remote->{'userid'})) {
          $secwhere = "AND m.security IN ('public', 'friends')";
      }
  }
 
  if ($FORM{'keyword'}) 
  {
-     my $qkw = $dbh->quote($FORM{'keyword'});
+     my $qkw = $dbr->quote($FORM{'keyword'});
      if ($FORM{'keyword'} eq "*") {
          $title = $ML{'.title.memorable'};
          $body .= "<?h1 $ML{'.title.memorable'} h1?><?p " . BML::ml(".body.memorable", { 'user' => $user }) . " p?>";

@@ -3,11 +3,9 @@
  use strict;
  use vars qw(%FORM $title $body);
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbr = LJ::get_db_reader();
 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  $title = $ML{'title'};
  $body = "";
@@ -34,7 +32,7 @@
  my $itemid = $FORM{'itemid'}+0;
  my $ditemid = $itemid;
 
- my $ju = LJ::load_user($dbs, $journal);
+ my $ju = LJ::load_user($journal);
  unless ($ju) {
      $title = $ML{'Error'};
      $body = $ML{'error.nojournal'};
@@ -51,12 +49,11 @@
  # subject may need conversion into UTF-8
  if ($LJ::UNICODE) {
      my %props = ();
-     LJ::load_props($dbs, "log");
      LJ::load_log_props2($dbcr, $log->{'ownerid'}, [ $itemid ], \%props);
      if ($props{$itemid}->{'unknown8bit'}) {
-         my $u = LJ::load_userid($dbs, $log->{'ownerid'});
+         my $u = LJ::load_userid($log->{'ownerid'});
          my ($error, $subj);
-         $subj = LJ::text_convert($dbs, $log->{'subject'}, $u, \$error);
+         $subj = LJ::text_convert($log->{'subject'}, $u, \$error);
          $log->{'subject'} = $subj unless $error;
      }
      LJ::text_out(\$log->{'subject'});
@@ -94,6 +91,7 @@
          }
          if (!$log || ($jid && $log->{'anum'} != $anum))
          {
+             my $dbh = LJ::get_db_writer();
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
              $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
              $title = $ML{'Error'};
@@ -110,7 +108,7 @@
      }
      else 
      {
-         my $user = LJ::get_username($dbs, $log->{'ownerid'});
+         my $user = LJ::get_username($log->{'ownerid'});
          my $dt = substr($log->{'eventtime'}, 0, 10);
          $des = "$dt: $user: $log->{'subject'}";
      }
@@ -158,12 +156,15 @@
      if (defined $memory) { $body .= "<INPUT type=reset value=\"$ML{'.form.reset'}\">"; }
      $body .= "</td></tr>";
      $body .= "</TABLE>";
+     $body .= "</form>";
 
      return;
  }
 
  if ($FORM{'mode'} eq "save") 
  {
+     my $dbh = LJ::get_db_writer();
+
      if (! $FORM{'des'}) {
          # then we're deleting.
          if (defined $memory) {
@@ -209,7 +210,7 @@
              return;
          }
 
-         my $kwid = LJ::get_keyword_id($dbs, $kw);
+         my $kwid = LJ::get_keyword_id($kw);
          push @kwid, $kwid;
      }
 
