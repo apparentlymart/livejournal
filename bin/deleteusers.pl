@@ -9,19 +9,16 @@ $dbh->{'RaiseError'} = 1;
 $dbh->{'PrintError'} = 1;
 my $sth;
 
-$sth = $dbh->prepare("SELECT userid, clusterid, user, statusvisdate FROM user WHERE statusvis='D' AND statusvisdate < DATE_SUB(NOW(), INTERVAL 35 DAY) ORDER BY statusvisdate");
+$sth = $dbh->prepare("SELECT userid FROM user WHERE statusvis='D' AND statusvisdate < DATE_SUB(NOW(), INTERVAL 35 DAY) ORDER BY statusvisdate");
 $sth->execute;
 my @delusers;
-my $czero = 0;
-while (my $du = $sth->fetchrow_hashref) {
-    if ($du->{'clusterid'}) {
-	push @delusers, $du;
-    } else {
-	$czero++;
-    }
+while (my $duid = $sth->fetchrow_array) {
+    push @delusers, $duid;
 }
 print "Users to delete: ", scalar(@delusers), "\n";
-print "Cluster 0: $czero (can't delete)\n" if $czero;
+
+# Get hashref mapping {userid => $u} for all users to be deleted
+my $user = LJ::load_userids(@delusers);
 
 LJ::load_props($dbh, "talk");
 my $p_delposter = LJ::get_prop("talk", "deleted_poster");
@@ -33,6 +30,10 @@ my $pause = sub {
     if (time() - $lastbreak > 3) { print "pause.\n"; sleep(1); $lastbreak = time(); }
 };
 
+# FIXME: This will soon need to be changed to use methods of the $u
+#    object rather than global LJ:: functions, but this should work
+#    for now.
+
 my $runsql = sub {
     my $db = $dbh;
     if (ref $_[0]) { $db = shift; }
@@ -42,11 +43,19 @@ my $runsql = sub {
     $db->do($sql);
 };
 
-foreach my $du (@delusers)
+my $czero = 0;
+
+foreach my $uid (@delusers)
 {
-    my $uid = $du->{'userid'};
+    my $du = $user->{$uid};
     my $user = $du->{'user'};
-    print "$du->{'user'} ($du->{'userid'}) @ $du->{'statusvisdate'} (cluster $du->{'clusterid'})...\n";
+    print "$du->{'user'} ($du->{'userid'}) @ $du->{'statusvisdate'}";
+    if ($du->{clusterid} == 0) {
+        print " (on clusterid 0; skipping)\n";
+        $czero++;
+        next;
+    }
+    print " (cluster $du->{'clusterid'})...\n";
     $pause->();
 
     # get a db handle for the cluster master.
@@ -141,4 +150,7 @@ foreach my $du (@delusers)
 
 }
 
-
+if ($czero) {
+    print "\nWARNING: There are $czero users on cluster zero pending deletion.\n";
+    print "  These users must be upgraded before they can be expunged with this tool.\n";
+}
