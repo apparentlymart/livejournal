@@ -1313,7 +1313,7 @@ QQ
 
     # textarea for their message body
     $ret .= "<tr valign='top'><td align='right'>$BML::ML{'.opt.message'}</td><td colspan='4' style='width: 90%'>";
-    $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext' style='width: 100%'>$form->{body}</textarea>";
+    $ret .= "<textarea class='textbox' rows='10' cols='75' wrap='soft' name='body' id='commenttext'>$form->{body}</textarea>";
 
     # Display captcha challenge if over rate limits.
     if ($opts->{do_captcha} &&
