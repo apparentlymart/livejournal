@@ -301,8 +301,8 @@ sub load_layers {
         # if we're talking about cluster 0, the global, pass it off to the old
         # function which already knows how to handle that
         unless ($cid) {
-            my $dbh = LJ::get_db_writer();
-            S2::load_layers_from_db($dbh, @{$bycluster{$cid}});
+            my $dbr = LJ::S2::get_s2_reader();
+            S2::load_layers_from_db($dbr, @{$bycluster{$cid}});
             next;
         }
 
