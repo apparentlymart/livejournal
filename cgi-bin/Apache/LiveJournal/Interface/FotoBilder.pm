@@ -19,6 +19,7 @@ sub run_method
         'set_quota'          => \&set_quota,
         'user_exists'        => \&user_exists,
         'get_auth_challenge' => \&get_auth_challenge,
+        'get_groups'         => \&get_groups,
     };
     return undef unless $interface->{$cmd};
 
