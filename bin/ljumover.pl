@@ -709,7 +709,7 @@ sub new {
 
         userThreads       => {},
         activeThreads     => {},
-        fakeMoveddUsers   => {},
+        fakeMovedUsers    => {},
 
         debugFunction     => undef,
         messageFunction   => undef,
