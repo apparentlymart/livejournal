@@ -707,6 +707,7 @@ sub postevent
                                                "WHERE journalid=$qownerid AND posterid=$qposterid");
             return fail($err, 408) if $modcount >= LJ::get_cap($uowner, "mod_queue_per_poster");
 
+            $req->{'_moderate'}->{'authcode'} = LJ::make_auth_code(15);
             my $fr = $dbcm->quote(Storable::freeze($req));
             return fail($err, 409) if length($fr) > 200_000;
 
