@@ -1344,6 +1344,10 @@ sub can_manage {
     return 1;
 }
 
+sub can_delete_journal_item {
+    return LJ::can_manage(@_);
+}
+
 # <LJFUNC>
 # name: LJ::get_authas_list
 # des: Get a list of usernames a given user can authenticate as
