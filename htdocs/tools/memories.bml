@@ -85,6 +85,18 @@
  my $sort = ($GET{'sortby'} || 'memid');
  unless (defined $sorts{$sort}) { $sort = 'memid'; }
 
+ # keys must be the same as those of %sorts
+ my %sortfunc = ('memid' => sub {
+                              sort { $a->{'memid'} <=> $b->{'memid'} } @_;
+                            },
+                 'des'   => sub {
+                              sort { $a->{'des'}   cmp $b->{'des'}   } @_;
+                            },
+                 'user'  => sub {
+                              sort { $a->{'user'}  cmp $b->{'user'} ||
+                                     $a->{'des'}   cmp $b->{'des'}   } @_;
+                            });
+
  my $secwhere = "AND m.security='public'";
  if ($authasu) {
      if ($authasu->{userid} == $userid) {
@@ -135,7 +147,7 @@
      while (my $mem = $sth->fetchrow_hashref) {
          push @memories, $mem;
      }
-     @memories = sort { $a->{$sort} cmp $b->{$sort} } @memories;
+     @memories = $sortfunc{$sort}->( @memories );
     
      $body .= "<ul>\n";
      foreach my $mem (@memories) {
