@@ -31,6 +31,10 @@
       <term>userpic_inactive</term>
       <listitem><simpara>Explains why a userpic may be inactive for, and how to make the userpic active again</simpara></listitem>
     </varlistentry>
+    <varlistentry>
+      <term>textmessaging_about</term>
+      <listitem><simpara>Explains what the text messaging feature is and how it works</simpara></listitem>
+    </varlistentry>
   </variablelist>
 </section>
 <!--
