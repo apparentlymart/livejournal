@@ -22,7 +22,7 @@
 
     # does this community even exist?
     unless ($cu) {
-        $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.label.infoerror'} p?>";
+        $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.label.infoerror'} p?>";
         return;
     }
 
@@ -34,8 +34,9 @@
         LJ::leave_community($remote, $cu, $FORM{removefriend});
 
         # success message
-        $body .= "<?h1 $ML{'.success'} h1?><?p " . BML::ml('.label.removed', 
-        { commuser => $cu->{user}, commname => $ecname }) . " p?>";
+        $body .= "<?h1 $ML{'.success'} h1?><?p " .
+                 BML::ml('.label.removed', { commuser => $cu->{user}, commname => $ecname }) .
+                 " p?>";
     } else {
         # show a confirmation form
         $body .= "<?h1 $ML{'.sure'} h1?><?p " . BML::ml('.label.buttontoleave', { commname => $ecname }) . " p?>";
