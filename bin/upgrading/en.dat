@@ -2373,6 +2373,8 @@ This could be because: <ol>
 
 /userinfo.bml.sendmessage.body=<a href="[[link]]">Send <b>[[user]]</b> a text message</a><br />on his/her cellphone/pager.
 
+/userinfo.bml.syn.cost=Syndication Cost
+
 /userinfo.bml.syn.last.never=Never
 
 /userinfo.bml.syn.lastcheck=Last checked:

@@ -3702,6 +3702,7 @@ sub make_journal
 sub syn_cost
 {
     my $watchers = shift;
+    return 1 if $watchers < 1;
     return 1/(log($watchers)/log(5)+1);
 }
 
