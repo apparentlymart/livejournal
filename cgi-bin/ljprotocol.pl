@@ -1455,6 +1455,11 @@ sub getevents
 	my %props = ();
         LJ::load_log_props2($dbcr, $ownerid, \@itemids, \%props);
 	foreach my $itemid (keys %props) {
+            # 'replycount' is a pseudo-prop, don't send it.
+            # FIXME: this goes away after we restructure APIs and
+            # replycounts cease being transferred in props
+            delete $props{$itemid}->{'replycount'};
+
 	    my $evt = $evt_from_itemid{$itemid};
 	    $evt->{'props'} = {};
 	    foreach my $name (keys %{$props{$itemid}}) {
