@@ -415,6 +415,13 @@ elsif ($sclust > 0)
 
         # no primary key... move up by posttime
         'talkleft' => 'userid',
+
+        # s1 styles
+        's1style' => 'userid',
+        's1overrides' => 'userid',
+
+        # link lists
+        'links' => 'journalid',
     };
 
     my @existing_data;
@@ -464,16 +471,25 @@ elsif ($sclust > 0)
             $pendreplace{$dest}->{'recs'} > 500) { $flush->($dest); }
     };
 
+    my @styleids = ();
+
     # manual moving
     foreach my $table (qw(loginstall ratelog sessions userproplite2
                           sessions_data userbio userpicblob2
-                          s1usercache modlog modblob counter)) {
+                          s1usercache modlog modblob counter
+                          s1style s1overrides links)) {
 	next if $table =~ /^mod/ && $u->{journaltype} eq "P";
         print "  moving $table ...\n" if $optv > 1;
         my @cols;
         my $sth = $dbo->prepare("DESCRIBE $table");
         $sth->execute;
-        while ($_ = $sth->fetchrow_hashref) { push @cols, $_->{'Field'}; }
+        my $styleidcolnum = -1;
+        my $colnum = 0;
+        while ($_ = $sth->fetchrow_hashref) {
+            push @cols, $_->{'Field'};
+            $styleidcolnum = $colnum if $_->{'Field'} eq 'styleid';
+            $colnum++;
+        }
         my $cols = join(',', @cols);
         my $dest = "$table:($cols)";
         my $pri = $pri_key->{$table};
@@ -481,6 +497,9 @@ elsif ($sclust > 0)
         $sth->execute;
         while (my @vals = $sth->fetchrow_array) {
             $write->($dest, @vals);
+            if ($styleidcolnum > -1 && $table eq 's1style') {
+                push @styleids, $vals[$styleidcolnum];
+            }
         }
     }
 
@@ -594,6 +613,14 @@ elsif ($sclust > 0)
             my $pri = $pri_key->{$table};
             while ($dbo->do("DELETE FROM $table WHERE $pri=$userid LIMIT 500") > 0) {
                 print "  deleted from $table\n" if $optv;
+            }
+        }
+
+        # s1stylecache table
+        if (@styleids) {
+            my $styleids_in = join(",", map { $dbo->quote($_) } @styleids);
+            if ($dbo->do("DELETE FROM s1stylecache WHERE styleid IN ($styleids_in)") > 0) {
+                print "  deleted from s1stylecache\n" if $optv; 
             }
         }
     }
