@@ -151,9 +151,10 @@ body<=
          'to' => join(", ", @emails),
          'from' => $sp->{'reqemail'},
          'fromname' => $sp->{'reqname'},
+         'headers' => { 'X-Bounced-By' => $remote->{'user'} },
          'subject' => "$sp->{'subject'} (support request #$sp->{'spid'})",
-             'body' => "$message\n\n$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}",
-         });
+         'body' => "$message\n\n$LJ::SITEROOT/support/see_request.bml?id=$sp->{'spid'}",
+     });
 
      # close request, nobody gets credited
      $dbh->do("UPDATE support SET state='closed', timeclosed=UNIX_TIMESTAMP() WHERE spid=?",

@@ -3434,6 +3434,10 @@ sub send_mail
         $msg->attr("content-type.charset" => $opt->{'charset'});        
     }
 
+    if ($opt->{'headers'}) {
+        $msg->add(%{$opt->{'headers'}});
+    }
+
     return eval { $msg->send; 1; }
 }
 
