@@ -56,7 +56,7 @@ BODY<=
 
  my $cookie_auth;
  if ($FORM{'usertype'} eq "cookieuser") {
-     return LJ::badinput("Your login cookie seems to have disappeared?") 
+     return LJ::bad_input("Your login cookie seems to have disappeared?") 
 	 unless ($remote && $remote->{'user'} eq $FORM{'cookieuser'});
      
      $cookie_auth = 1;
