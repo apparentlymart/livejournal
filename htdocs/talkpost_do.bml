@@ -1,5 +1,5 @@
 <?page
-title=><?_ml .title _ml?>
+title=><?_code return $FORM{'submitpreview'} ? $ML{'.title.preview'} : $ML{'.title'}; _code?>
 body<=
 
 <?_code
@@ -19,7 +19,7 @@ body<=
     # normally require POST.  if an ecphash is specified, we'll let
     # them through since they're coming from a comment page and
     # validate the hash later.
-    return "POST required." unless LJ::did_post() || $FORM{'ecphash'};
+    return "<?requirepost?>" unless LJ::did_post() || $FORM{'ecphash'};
 
     # as an exception, we do NOT call LJ::text_in() to check for bad
     # input, since it may be not in UTF-8 in replies coming from mail
