@@ -56,8 +56,9 @@
             $cursess->{'ipfixed'} = $bindip;
             $cursess->{'exptype'} = $len;
 
-            my $oldcookie = $COOKIE{'ljsession'};
-            $COOKIE{'ljsession'} = [ $oldcookie, $etime ];
+            $COOKIE{'ljsession'} = [ $COOKIE{'ljsession'}, $etime ];
+            $COOKIE{'langpref'} = [ $COOKIE{'langpref'}, $etime ];
+            $COOKIE{'permlogin'} = [ $POST{'expire'} eq "never", $etime ];
 
             my $udbh = LJ::get_cluster_master($remote, 1);
             $udbh->do("UPDATE sessions SET timeexpire=UNIX_TIMESTAMP()+$session_secs, ".
