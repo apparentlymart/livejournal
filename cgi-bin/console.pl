@@ -507,8 +507,8 @@ $cmd{'finduser'} = {
     'des' => "Find a user by a criteria.",
     'argsummary' => '<criteria> <data>',
     'args' => [
-               'criteria' => "Currently the only known criterias are 'email' or 'user'",
-               'data' => "The thing you know about the user, either their username or their email address.",
+               'criteria' => "Currently the only known criterias are 'email', 'userid', or 'user'",
+               'data' => "The thing you know about the user, either their username, userid, or their email address.",
                ],
     };
 
