@@ -166,7 +166,6 @@ CREATE TABLE friends (
   groupmask int(10) unsigned NOT NULL default '1',
   showbydefault enum('1','0') NOT NULL default '1',
   PRIMARY KEY  (userid,friendid),
-  KEY (userid),
   KEY (friendid)
 ) 
 EOC
