@@ -21,43 +21,17 @@ my $PORT = 5151;
 my $PIDFILE = "$ENV{'LJHOME'}/var/dbselectd.pid";
 
 # temporary:
-%LJ::DBINFO = ();
-%LJ::DBINFO = (
-	       'master' => {
-		   'host' => '10.0.0.2',
-		   'user' => 'lj',
-		   'pass' => 'ljpass',  
-		   'role' => { 
-		       'txt' => 0.2,
-		       'hints' => 1,
-		   },
-	       },
-	       'kenny' => {
-		   'host' => '10.0.0.1',
-		   'user' => 'ljro',
-		   'pass' => 'ljropass',
-		   'role' => { 
-		       'txt' => 0.4,
-		       'hints' => 3,
-		       'slave' => 1,
-		   },
-	       },
-	       'marklar' => {
-		   'host' => '10.0.0.15',
-		   'user' => 'ljro',
-		   'pass' => 'ljropass',
-		   'role' => { 
-		       'txt' => 0.4,
-		       'hints' => 2,
-		       'slave' => 1,
-		   },
-	       },
-	       );
-
+my $DBINFO_FILE = "$ENV{'LJHOME'}/var/tempdbinfo.pl";
 my $opt_foreground = 0;
 GetOptions("foreground" => \$opt_foreground);
 
 my $pid;
+
+# statistics on known databases
+my %db_lastcheck;
+my %db_conncount;
+my $conf_modtime = 0;
+my $conf_stattime = 0;
 
 # Buffers.
 my %inbuffer = ();
@@ -65,16 +39,171 @@ my %outbuffer = ();
 my %cmd = ();
 my %clientinfo = ();
 
+sub connect_to
+{
+    my $svr = shift;
+    my $dbh;
+    
+    if (ref $LJ::DBCACHE{$svr}) 
+    {
+        $dbh = $LJ::DBCACHE{$svr};
+
+	# make sure connection is still good.
+	my $sth = $dbh->prepare("SELECT CONNECTION_ID()");  # mysql specific
+	$sth->execute;
+	my ($id) = $sth->fetchrow_array;
+	if ($id) { return $dbh; }
+	undef $dbh;
+	undef $LJ::DBCACHE{$svr};
+    }
+
+    $dbh = DBI->connect("DBI:mysql:livejournal:$LJ::DBINFO{$svr}->{'host'}", 
+			$LJ::DBINFO{$svr}->{'user'},
+			$LJ::DBINFO{$svr}->{'pass'},
+			{
+			    PrintError => 0,
+			});
+    if ($dbh) 
+    {
+	$LJ::DBCACHE{$svr} = $dbh;
+	return $dbh;
+    }
+
+    return undef;
+}
+
+sub db_can
+{
+    my $svr = shift;
+    my $cap = shift;
+    return $LJ::DBINFO{$svr}->{'role'}->{$cap};
+}
+
+sub check_server
+{
+    my $svr = shift;
+    delete $db_conncount{$svr};
+    delete $db_lastcheck{$svr};
+
+    my $dbh = connect_to($svr);
+    return unless (defined $dbh);
+
+    my $sth = $dbh->prepare("SHOW PROCESSLIST");
+    $sth->execute;
+    my $ct = 0;
+    while (my $r = $sth->fetchrow_hashref)
+    {
+	# weight busy connections more than idle ones.
+	if ($r->{'State'}) { $ct += 2; }
+	else { $ct += 1; }
+    }
+    $db_conncount{$svr} = $ct;
+    $db_lastcheck{$svr} = time();
+}
+
+sub connection_load
+{
+    my $svr = shift;
+    my $time = time();
+    if (! defined $db_lastcheck{$svr} || 
+	$time - $db_lastcheck{$svr} > 10) 
+    {
+	check_server($svr);
+    }
+    return $db_conncount{$svr};
+}
+
+sub server_power
+{
+    my $svr = shift;
+    my $cap = shift;
+
+    my $weight = $LJ::DBINFO{$svr}->{'role'}->{$cap} || 1;
+    my $connections = connection_load($svr);
+    if (defined $connections) {
+	$connections ||= 1;
+    } else {
+	return 0;
+    }
+    return ($weight / $connections);
+}
+
+sub use_what
+{
+    my $c = shift;
+    my $cap = shift;
+
+    ## reload the DB info file if it's been more than 5 seconds since 
+    ## its last stat time and if it's changed since what we remember.
+    my $time = time();
+    if ($conf_stattime + 5 < $time)
+    {
+	my $modtime = (stat($DBINFO_FILE))[9];
+	if ($modtime > $conf_modtime) {
+	    delete $INC{$DBINFO_FILE};
+	    require $DBINFO_FILE;
+	    $conf_modtime = $modtime;
+	    $conf_stattime = $time;
+	}
+    }
+    
+    my %cand = ();  # candidates
+
+    # best candidate is one the client is already connected to
+    foreach my $svr (keys %{$c->{'has'}}) {
+	if (db_can($svr, $cap)) {
+	    $cand{$svr} = 1;   
+	}
+    }
+   
+    # if not connected to anything suitable, then:
+    unless (%cand)
+    {
+	# every db with that capability is a good candidate
+	foreach my $svr (keys %LJ::DBINFO) {
+	    if (db_can($svr, $cap)) { 
+		$cand{$svr} = 1;
+	    }
+	}
+    }
+
+    my @cands = keys %cand;
+    
+    # sort valid candidates by server's connections
+    @cands = sort { server_power($b, $cap) <=> server_power($a, $cap) } @cands;
+
+    # use the one with the highest score:
+    #return $cands[0];
+    return join(",",@cands);
+}
+
 sub handle 
 {
     my $select = shift;
     my $client = shift;
-    my $cmd = shift;
+    my $line = shift;
     my $c = ($clientinfo{$client} ||= {});
+    my $out = \$outbuffer{$client};
     
-    $c->{'sum'} += int($cmd);
-    $outbuffer{$client} = "clients=$client, sum=$c->{'sum'}\n";
+    $line =~ s/^(\S*)\s*//;
+    my $cmd = $1;
 
+    if ($cmd eq "HAVE") {
+	foreach (split(/,/, $line)) {
+	    $c->{'has'}->{$_} = 1;
+	}
+	$$out = "OK\n";
+	return;
+    }
+
+    if ($cmd eq "NEED") {
+	my $cap = $line;
+	my $use = use_what($c, $cap);
+	$$out = "USE $use\n";
+	return;
+    }
+
+    $$out = "unknown command.\n";
 }
 
 # Server crap is below.
