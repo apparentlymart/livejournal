@@ -24,7 +24,7 @@ $SIG{CHLD} = 'IGNORE';
 
 # mailspool should match the MTA delivery location.
 $mailspool = $LJ::MAILSPOOL || "$ENV{'LJHOME'}/mail";
-$hostname = $1 if hostname() =~ /^(\w+)/;
+$hostname = $1 if hostname() =~ /^([\w-]+)/;
 
 # setup defaults
 $locktype = $opt->{'lock'}   || $LJ::MAILLOCK;
@@ -108,6 +108,7 @@ if (! $opt->{'foreground'}) {
 
             if (/(?:stop|quit)/) {
                 kill 15, $pid;
+                unlink "$mailspool/tmp/mailgated-$hostname.pid";
                 print $c "ok\n";
                 exit 0;
             }
@@ -165,7 +166,7 @@ sub worker
     require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
     $| = 1;
 
-    $mailspool .= '/new';
+    my $spool = $mailspool . '/new';
     while (! $stop) {
         debug("Starting loop:");
 
@@ -176,7 +177,7 @@ sub worker
         # Get list of files to process.
         # If a file simply exists in the mailspool, it needs attention.
         debug("\tprocess");
-        opendir(MDIR, $mailspool) || die "Unable to open mailspool $mailspool: $!\n";
+        opendir(MDIR, $spool) || die "Unable to open mailspool $spool: $!\n";
         my @all_files = readdir(MDIR);
         closedir MDIR;
 
