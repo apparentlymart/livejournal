@@ -13,6 +13,7 @@ my $opt_slowalloc = 0;
 my $opt_verbose = 1;
 my $opt_movemaster = 0;
 my $opt_prelocked = 0;
+my $opt_expungedel = 0;
 exit 1 unless GetOptions('delete' => \$opt_del,
                          'destdelete' => \$opt_destdel,
                          'useslow' => \$opt_useslow, # use slow db role for read
@@ -20,6 +21,7 @@ exit 1 unless GetOptions('delete' => \$opt_del,
 			 'verbose=i' => \$opt_verbose,
 			 'movemaster|mm' => \$opt_movemaster,
                          'prelocked' => \$opt_prelocked,
+			 'expungedel' => \$opt_expungedel,
                          );
 my $optv = $opt_verbose;
 
@@ -102,6 +104,19 @@ if ($opt_prelocked) {
     if (($u->{'caps'}+0) & (1 << $readonly_bit)) {
         die "User '$user' is already in the process of being moved? (cap bit $readonly_bit set)\n";
     }
+}
+
+if ($opt_expungedel && $u->{'statusvis'} eq "D" &&
+    LJ::mysqldate_to_time($u->{'statusvisdate'}) < time() - 86400*31) {
+
+    print "Expunging user '$u->{'user'}'\n";
+    $dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart, timedone) ".
+	     "VALUES (?,?,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP())", undef, 
+	     $userid, $sclust, 0);
+    LJ::update_user($userid, { clusterid => 0,
+                               statusvis => 'X',
+			       raw => "caps=caps&~(1<<$readonly_bit), statusvisdate=NOW()" });
+    exit 0;
 }
 
 print "Moving '$u->{'user'}' from cluster $sclust to $dclust\n" if $optv >= 1;
