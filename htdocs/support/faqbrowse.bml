@@ -1,3 +1,5 @@
+<?page
+body<=
 <?_code
 {
     use strict;
@@ -61,6 +63,7 @@
 
     my $count = 0;
     my $dbh;
+    my $backfaqcat;
     while (my ($faqid, $question, $answer, $faqcat, $lastmoduserid, 
                $lastmodtime, $unixmodtime) = $sth->fetchrow_array)
     {
@@ -95,7 +98,7 @@
         $$body .= "<?h1";
         if ($faqcat) {
             $$body .= " <a style='text-decoration: none;' " .
-                      "href='faqbrowse.bml?faqid=$faqid'>&bull;</a>";
+                      "href='faqbrowse.bml?faqid=$faqid'>&#x00bb;</a>";
         }
         $$body .= " $q h1?><div class='postheading' style='margin-left: 20px;'>$a</div>";
 
@@ -110,6 +113,7 @@
         }
 
         $count++;
+        $backfaqcat = $faqcat;
      }
 
      # nothing found?
@@ -117,17 +121,16 @@
          $$title = $ML{'Error'};
          $$body .= "<p><b>$ML{'.error.nofaq'}</b></p>\n";
      }
+     
+     $$body .= "<?hr?>";
+     $$body .= BML::ml('.backfaqcat',{'faqcat'=>$backfaqcat,}) . "<br />" if $backfaqcat && $faqid;
+     $$body .= "$ML{'.backfaq'}<br />$ML{'.backsupport'}";
 
-     return;
+     return $_[1]->{'body'};
 }
 _code?>
-
-<?page
-title=><?_code return $_[1]->{'title'}; _code?>
-body<=
-<?_code return $_[1]->{'body'}; _code?>
-<?hr?><?_ml .backfaq _ml?><br /><?_ml .backsupport _ml?>
 <=body
+title=><?_code return $_[1]->{'title'}; _code?>
 page?><?_c <LJDEP>
 link: htdocs/support/index.bml, htdocs/support/faq.bml
 </LJDEP> _c?>
