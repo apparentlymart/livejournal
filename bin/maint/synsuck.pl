@@ -150,7 +150,7 @@ $maint{'synsuck'} = sub
             };
 
             # if the post contains html linebreaks, assume it's preformatted.
-            if ($it->{'description'} =~ /<(p|br)\b/) {
+            if ($it->{'description'} =~ /<(p|br)\b/i) {
                 $req->{'props'} = { 'opt_preformatted' => 1 };
             }
 
