@@ -8,4 +8,6 @@ i18nc/ru1               i18nc           core1
 i18nc/ja1               i18nc           core1
 
 generator/layout        layout          core1
+generator/en            i18n            generator/layout
+
 

@@ -53,6 +53,25 @@ function Page::print ()
 {
     var string title = $this->title();
 
+    var string userpic;
+    var Image up_img = $.journal.default_pic;
+    if ($.view == "recent" and defined $up_img) {
+        $userpic = """<td><table cellpadding="2" bgcolor="$*page_back" cellspacing="0" border="0" summary="">
+<tr><td bgcolor="$*stronger_back" align="center"><img border="0" src="$up_img.url" height="$up_img.height" width="$up_img.width" alt=""></td></tr>
+</table></td>
+""";
+    }
+    var string website;
+    if ($.journal.website_url != "") {
+        $website = """<tr><td class="meta">[</td>
+<td class="meta" align="right"><b>website</b></td>
+<td class="meta" align="center">|</td>
+<td class="meta"><a href="$.journal.website_url">$.journal.website_name</a></td>
+<td class="meta">]</td></tr>""";
+    }
+    
+    
+
 """
 <!doctype HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head>
@@ -113,26 +132,26 @@ cellpadding="0"
 border="0"
 summary="" style="margin-left: auto; margin-right: auto;">
 <tr>
-%%userpic%%
+$userpic
 <td>
-<div align="center"><b>%%name%%</b></div><p>
+<div align="center"><b>$.journal.name</b></div><p>
 <table cellspacing="0"
 cellpadding="0"
 border="0"
 summary="">
-%%website%%
+$website
 <tr>
 <td class="meta">[</td>
 <td class="meta" align="right"><b>userinfo</b></td>
 <td class="meta" align="center">|</td>
-<td class="meta"><a href="$*SITEROOT/userinfo.bml?user=%%username%%">livejournal userinfo</a></td>
+<td class="meta"><a href="$.view_url{"userinfo"}">livejournal userinfo</a></td>
 <td class="meta">]</td>
 </tr>
 <tr>
 <td class="meta">[</td>
 <td class="meta" align="right"><b>calendar</b></td>
 <td class="meta" align="center">|</td>
-<td class="meta"><a href="%%urlcalendar%%">livejournal calendar</a></td>
+<td class="meta"><a href="$.view_url{"calendar"}">livejournal calendar</a></td>
 <td class="meta">]</td>
 </tr>
 </table>
@@ -187,7 +206,23 @@ summary="">
         $e.poster.username != $e.journal.username) {
         "[altposter]";
     }
-"""%%currents%%
+
+    if (size $e.metadata) {
+        """<table cellspacing="0" cellpadding="0" border="0" summary="">""";
+        foreach var string k ($e.metadata) {
+            var string text = $k;
+            var string val = $e.metadata{$k};
+            if ($k == "music" and defined $e.mood_icon) {
+                var Image i = $e.mood_icon;
+                $val = "<img src='$i.url' width='$i.width' height='$i.height' align='absmiddle'> $val";
+            }
+            """<tr><td class="meta">[</td><td class="meta" align="right"><b>$text</b></td>""";
+            """<td class="meta" align="center">|</td><td class="meta">$val</td><td class="meta">]</td></tr>""";
+        }
+        """</table><p>""";
+    }
+
+"""
 $e.text
 </td>
 </tr>""";

@@ -247,7 +247,7 @@ class Page
     var User journal "User whose journal is being viewed";
     var string journal_type "Journal type, ex: 'P' (personal), 'C' (community), etc.";
     var string base_url "The base URL of the journal being viewed.";
-    var Link{} views 
+    var string{} view_url
     "Links to top-level views where id equals the name of the view being linked to. 
     (if one of views == \$.view, already looking at that view)";
 
@@ -597,6 +597,16 @@ property string page_calendar_sortorder {
 }
 set page_day_sortorder = "forward";
 set page_calendar_sortorder = "forward";
+
+property string text_meta_music {
+    des = "Text for 'Current Music'";
+}
+set text_meta_music = "Current Music";
+
+property string text_meta_mood {
+    des = "Text for 'Current Mood'";
+}
+set text_meta_mood = "Current Mood";
 
 property string text_post_comment {
     des = "Link text to leave a comment.";

@@ -1,0 +1,8 @@
+# -*-s2-*-
+
+layerinfo type = "i18n";
+layerinfo name = "English";
+layerinfo redist_uniq = "generator/en";
+        
+set text_meta_music = "music";
+set text_meta_mood = "mood";

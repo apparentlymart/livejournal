@@ -11,6 +11,7 @@
     $DEFAULT_STYLE ||= { 
         'core' => 'core1',
         'layout' => 'generator/layout',
+        'i18n' => 'generator/en',
     };
 
     $HOME = $ENV{'LJHOME'};

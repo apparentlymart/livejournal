@@ -1697,7 +1697,7 @@ sub load_mood_theme
     my $themeid = shift;
     return if ($LJ::CACHE_MOOD_THEME{$themeid});
 
-    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbs = $dbarg ? make_dbs_from_arg($dbarg) : LJ::get_dbs();
     my $dbr = $dbs->{'reader'};
 
     $themeid += 0;

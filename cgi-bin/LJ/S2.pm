@@ -599,6 +599,7 @@ sub Entry
     my $e = {
         '_type' => 'Entry',
         'links' => {}, # TODO: finish
+        'metadata' => {},
     };
     foreach (qw(subject text journal poster new_day end_day comments 
                 userpic permalink_url itemid)) {
@@ -615,6 +616,22 @@ sub Entry
     } elsif ($arg->{'security'} eq "private") {
         $e->{'security'} = "private";
         $e->{'security_icon'} = Image_std("security-private");
+    }
+
+    my $p = $arg->{'props'};
+    if ($p->{'current_music'}) {
+        $e->{'metadata'}->{'music'} = LJ::ehtml($p->{'current_music'});
+    }
+    if (my $mid = $p->{'current_moodid'}) {
+        my $theme = $u->{'moodthemeid'};
+        LJ::load_mood_theme(undef, $theme);
+        my %pic;
+        $e->{'mood_icon'} = Image($pic{'pic'}, $pic{'w'}, $pic{'h'})
+            if LJ::get_mood_picture($theme, $mid, \%pic);
+        $e->{'metadata'}->{'mood'} = $LJ::CACHE_MOODS{$mid}->{'name'};
+    }
+    if ($p->{'current_mood'}) {
+        $e->{'metadata'}->{'mood'} = LJ::ehtml($p->{'current_mood'});
     }
 
     return $e;
@@ -639,8 +656,9 @@ sub Page
         'journal' => User($u),
         'journal_type' => $u->{'journaltype'},
         'base_url' => $base_url,
-        'views' => {
+        'view_url' => {
             'lastn' => "$base_url/",
+            'userinfo' => "$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}",
             'calendar' => "$base_url/calendar",
             'friends' => "$base_url/friends",
         },
@@ -828,7 +846,7 @@ sub RecentPage
             'text' => $text,
             'dateparts' => $alldatepart,
             'security' => $security,
-            'props' => \%logprops,
+            'props' => $logprops{$itemid},
             'itemid' => $ditemid,
             'journal' => $userlite_journal,
             'poster' => $userlite_poster,
@@ -836,7 +854,6 @@ sub RecentPage
             'new_day' => $new_day,
             'end_day' => 0,   # if true, set later
             'userpic' => $userpic,
-
         });
 
         push @{$p->{'entries'}}, $entry;
@@ -864,15 +881,15 @@ sub RecentPage
     # page, then there are more (unless there are exactly the number shown 
     # on the page, but who cares about that)
     unless ($itemnum != $itemshow) {
-        $p->{'backward_count'} = $itemshow;
+        $nav->{'backward_count'} = $itemshow;
         if ($skip == $maxskip) {
             my $date_slashes = $lastdate;  # "yyyy mm dd";
             $date_slashes =~ s! !/!g;
-            $p->{'backward_url'} = "$p->{'base_url'}/day/$date_slashes";
+            $nav->{'backward_url'} = "$p->{'base_url'}/day/$date_slashes";
         } else {
             my $newskip = $skip + $itemshow;
-            $p->{'backward_url'} = "$p->{'base_url'}/?skip=$newskip";
-            $p->{'backward_skip'} = $newskip;
+            $nav->{'backward_url'} = "$p->{'base_url'}/?skip=$newskip";
+            $nav->{'backward_skip'} = $newskip;
         }
     }
 
