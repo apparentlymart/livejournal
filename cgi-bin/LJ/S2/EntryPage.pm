@@ -97,7 +97,7 @@ sub EntryPage
             my $par_url;
             if ($com->{'parenttalkid'}) {
                 my $dparent = ($com->{'parenttalkid'} << 8) + $entry->{'anum'};
-                $par_url = LJ::Talk::talkargs($permalink, "thread=$dparent", $stylemine);
+                $par_url = LJ::Talk::talkargs($permalink, "thread=$dparent#t$dparent", $stylemine);
             }
 
             my $poster;
@@ -159,7 +159,7 @@ sub EntryPage
             }
 
             if (@{$com->{'children'}}) {
-                $s2com->{'thread_url'} = LJ::Talk::talkargs($permalink, "thread=$dtalkid", $stylemine);
+                $s2com->{'thread_url'} = LJ::Talk::talkargs($permalink, "thread=$dtalkid#t$dtalkid", $stylemine);
             }                    
 
             # add the poster_ip metadata if remote user has 

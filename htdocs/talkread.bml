@@ -195,55 +195,51 @@ body<=
                               'remote' => $remote, 'itemid' => $ditemid, });
 
  ## dump the log entry, unless we're browsing a thread.
- unless ($thread)
- {
-     my %current;
-     if ($props->{'current_mood'} || $props->{'current_moodid'}) {
-         $current{'Mood'} = LJ::current_mood_str($up->{'moodthemeid'},
-                                                 $props->{'current_moodid'},
-                                                 $props->{'current_mood'});
-     }
-     if ($props->{'current_music'}) {
-         $current{'Music'} = LJ::current_music_str($props->{'current_music'});
-     }
-
-     $ret .= "<div style='margin-left: 30px'>";
-
-     if (%current) 
-     {
-         $ret .= "<table border=0>\n";
-         foreach (sort keys %current) {
-             my $curkey = "talk.curname_" . $_;
-             my $curname = BML::ml($curkey);
-             $curname = "<b>Current $_:</b>" unless $curname;
-             $ret .= "<tr><td align=right>$curname</td><td>$current{$_}</td></tr>\n";
-         }
-         $ret .= "</table><p>\n";
-     }
-
-     ### security indicator
-     my $sec = "";
-     if ($item->{'security'} eq "private") {
-         $sec = "<?securityprivate?>";
-     } elsif ($item->{'security'} eq "usemask") {
-         $sec = "<?securityprotected?>";
-     }
-
-     $sec .= "<br />\n" unless $sec eq "" or $item->{'subject'};
-     $ret .= $sec;
-
-     ###
-     if ($item->{'subject'}) {
-         my $subject = $item->{'subject'};
-         LJ::CleanHTML::clean_subject(\$subject);
-         BML::ebml(\$subject);
-         $ret .= "<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n";
-     }
-
-     $ret .= $event;
-     $ret .= "</div>";
+ my %current;
+ if ($props->{'current_mood'} || $props->{'current_moodid'}) {
+     $current{'Mood'} = LJ::current_mood_str($up->{'moodthemeid'},
+                                             $props->{'current_moodid'},
+                                             $props->{'current_mood'});
+ }
+ if ($props->{'current_music'}) {
+     $current{'Music'} = LJ::current_music_str($props->{'current_music'});
  }
 
+ $ret .= "<div style='margin-left: 30px'>";
+
+ if (%current) 
+ {
+     $ret .= "<table border=0>\n";
+     foreach (sort keys %current) {
+         my $curkey = "talk.curname_" . $_;
+         my $curname = BML::ml($curkey);
+         $curname = "<b>Current $_:</b>" unless $curname;
+         $ret .= "<tr><td align=right>$curname</td><td>$current{$_}</td></tr>\n";
+     }
+     $ret .= "</table><p>\n";
+ }
+
+ ### security indicator
+ my $sec = "";
+ if ($item->{'security'} eq "private") {
+     $sec = "<?securityprivate?>";
+ } elsif ($item->{'security'} eq "usemask") {
+     $sec = "<?securityprotected?>";
+ }
+
+ $sec .= "<br />\n" unless $sec eq "" or $item->{'subject'};
+ $ret .= $sec;
+
+ ###
+ if ($item->{'subject'}) {
+     my $subject = $item->{'subject'};
+     LJ::CleanHTML::clean_subject(\$subject);
+     BML::ebml(\$subject);
+     $ret .= "<font face='Arial,Helvetica' size='+1'><i><b>$subject</b></i></font><br />\n";
+ }
+
+ $ret .= $event;
+ $ret .= "</div>";
 
  $ret .= "<br clear='all' /><hr width='100%' size='2' align='center' />";
 
@@ -265,22 +261,31 @@ body<=
 
  ########## make the navcrap
  my $navcrap;
+ $navcrap .= "<a name='comments'></a>";
  if ($pages > 1) {
-     $navcrap .= "<div align='center' style='font-weight: bold'>";
-     $navcrap .= BML::ml('ljlib.pageofpages',{'page'=>$page, 'total'=>$pages}) . "<br />";
+     $navcrap .= "<table style='font-weight: bold'>";
+     $navcrap .= "<tr><td align='center' colspan='3'>";
+     $navcrap .= BML::ml('ljlib.pageofpages',{'page'=>$page, 'total'=>$pages});
+     $navcrap .= "</td></tr>";
      my $left = "&lt;&lt;";
-     if ($page > 1) { $left = "<a href='" . BML::self_link({ 'page' => $page-1 }) . "'>$left</a>"; }
+     if ($page > 1) { $left = "<a href='" . BML::self_link({ 'page' => $page-1 }) . "#comments'>$left</a>"; }
+
      my $right = "&gt;&gt;";
-     if ($page < $pages) { $right = "<a href='" . BML::self_link({ 'page' => $page+1 }) . "'>$right</a>"; }
-     $navcrap .= "<span style='font-size: 85%'>$left ";
+     if ($page < $pages) { $right = "<a href='" . BML::self_link({ 'page' => $page+1 }) . "#comments'>$right</a>"; }
+
+     $navcrap .= "<tr><td style='font-size: 85%' align='center'>$left</td><td style='font-size: 85%' align='center'>";
+
      for (my $i=1; $i<=$pages; $i++) {
          my $link = "[$i]";
-         if ($i != $page) { $link = "<a href='" . BML::self_link({ 'page' => $i }) . "'>$link</a>"; }
+         if ($i != $page) { $link = "<a href='" . BML::self_link({ 'page' => $i }) . "#comments'>$link</a>"; }
          else { $link = "<span style='font-size: 130%; font-weight: bolder'>$link</span>"; }
          $navcrap .= "$link ";
+         if ($i == 11)  { $navcrap .= "<br />"; }
+         elsif ($i > 10 && $i % 10 == 0) { $navcrap .= "<br />"; }
      }
-     $navcrap .= "$right";
-     $navcrap .= "</span></div>\n";
+
+     $navcrap .= "</td><td style='font-size: 85%' align='center'>$right</td></tr>";
+     $navcrap .= "</table>\n";
      $navcrap = BML::fill_template("standout", { 'DATA' => $navcrap });
  }
  ####### end navcrap
@@ -393,10 +398,10 @@ body<=
              
              if ($post->{'parenttalkid'} != 0) {
                  my $dpid = $post->{'parenttalkid'} * 256 + $init->{'anum'};
-                 $ret .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine) . "'>$T{'parent'}</a>) ";
+                 $ret .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid#t$dpid", $stylemine) . "'>$T{'parent'}</a>) ";
              }
              if ($post->{'children'} && @{$post->{'children'}}) {
-                 my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine);
+                 my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid#t$dtid", $stylemine);
                  $ret .= "(<a href='$url'>$T{'thread'}</a>)";
              }
              $ret .= "</font></p>";
@@ -406,7 +411,7 @@ body<=
 
              $ret .= "<a name='t$dtid'></a><table><tr>";
              $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-             $ret .= "<td><a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine) . "'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
+             $ret .= "<td><a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid#t$dtid", $stylemine) . "'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
          }
      }
      
@@ -423,7 +428,7 @@ body<=
      my $readlink;
      if ($dthread && $pages == 1) {
          my $readurl = LJ::Talk::talkargs($talkurl, $stylemine);
-         $readlink = "(<a href='$readurl'>$T{'readcomments'}</a>) - ";
+         $readlink = "(<a href='$readurl#comments'>$T{'readcomments'}</a>) - ";
      }
 
      my $posturl = LJ::Talk::talkargs($talkurl, "mode=reply", $stylemine);

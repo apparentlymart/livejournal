@@ -1763,16 +1763,31 @@ function EntryPage::print_comment_partial (Comment c) {
 
 function ItemRange::print() {
     if ($.all_subitems_displayed) { return; }
-    print "<table align='center' border='1' cellpadding='3'><tr><td align='center'><b>" +
-        lang_page_of_pages($.current, $.total) + "</b><br />";
+    print "<a name='comments'></a><table align='center' border='0' cellpadding='3'>";
+    print "<tr><td align='center' colspan='3'><b>" +
+        lang_page_of_pages($.current, $.total) + "</b>";
+    print "</td></tr>";
+    var string url_prev = $this->url_of($.current - 1);
+    if ($.current != 1) {
+        print "<tr><td align='center'><a href='$url_prev#comments'>&lt;&lt;</a></td>";
+    } else {
+        print "<tr><td align='center'>&lt;&lt;</td>";
+    }
+    print "<td align='center'>";
     foreach var int i (1..$.total) {
         if ($i == $.current) { "<b>[$i]</b> "; }
-        else { 
+        else {
             var string url_of = $this->url_of($i);
-            "<a href='$url_of'><b>[$i]</b></a> ";
+            "<a href='$url_of#comments'><b>[$i]</b></a> ";
         }
     }
-    print "</td></tr></table>";
+    var string url_next = $this->url_of($.current + 1);
+    if ($.current != $.total) {
+        print "<td align='center'><a href='$url_next#comments'>&gt;&gt;</a></td>";
+    } else {
+        print "<td align='center'>&gt;&gt;</td>";
+    }
+    print "</tr></table>";
 }
 
 function EntryPage::print_body 
