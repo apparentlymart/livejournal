@@ -511,7 +511,7 @@ sub postevent
     return undef unless check_altusage($dbs, $req, $err, $flags);
 
     my $u = $flags->{'u'};
-    my $ownerid = $flags->{'ownerid'};
+    my $ownerid = $flags->{'ownerid'}+0;
     my $uowner = $flags->{'u_owner'} || $u;
     my $dbr = $dbs->{'reader'};
     my $dbh = $dbs->{'dbh'};
@@ -556,7 +556,7 @@ sub postevent
         unless common_event_validation($dbs, $req, $err, $flags);
 
     ### allow for posting to journals that aren't yours (if you have permission)
-    my $posterid = $u->{'userid'};
+    my $posterid = $u->{'userid'}+0;
 
     # make the proper date format
     my $eventtime = sprintf("%04d-%02d-%02d %02d:%02d",
@@ -639,9 +639,6 @@ sub postevent
         return fail($err,103,$error) if $error;
     }
     
-    my $qownerid = $ownerid+0;
-    my $qposterid = $posterid+0;
-
     # by default we record the true reverse time that the item was entered.
     # however, if backdate is on, we put the reverse time at the end of time
     # (which makes it equivalent to 1969, but get_recent_items will never load
@@ -659,7 +656,7 @@ sub postevent
 
     my $dupsig = Digest::MD5::md5_hex(join('', map { $req->{$_} } 
                                            qw(subject event usejournal security allowmask)));
-    my $lock_key = "post-$qposterid-$dupsig";
+    my $lock_key = "post-$posterid-$dupsig";
 
     # release our duplicate lock
     my $release = sub {  $dbcm->do("SELECT RELEASE_LOCK(?)", undef, $lock_key); };
@@ -696,15 +693,15 @@ sub postevent
     if ($uowner->{'journaltype'} eq 'C' && $uowner->{'moderated'} && !$flags->{'nomod'}) {
         # don't moderate admins, moderators & pre-approved users
         my $relcount = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
-                                             "WHERE userid=$qownerid AND targetid=$qposterid ".
+                                             "WHERE userid=$ownerid AND targetid=$posterid ".
                                              "AND type IN ('A','M','N')");
         unless ($relcount) {
             # moderation queue full?
-            my $modcount = $dbcm->selectrow_array("SELECT COUNT(*) FROM modlog WHERE journalid=$qownerid");
+            my $modcount = $dbcm->selectrow_array("SELECT COUNT(*) FROM modlog WHERE journalid=$ownerid");
             return fail($err, 407) if $modcount >= LJ::get_cap($uowner, "mod_queue");
 
             $modcount = $dbcm->selectrow_array("SELECT COUNT(*) FROM modlog ".
-                                               "WHERE journalid=$qownerid AND posterid=$qposterid");
+                                               "WHERE journalid=$ownerid AND posterid=$posterid");
             return fail($err, 408) if $modcount >= LJ::get_cap($uowner, "mod_queue_per_poster");
 
             $req->{'_moderate'}->{'authcode'} = LJ::make_auth_code(15);
@@ -715,15 +712,15 @@ sub postevent
 
             # store
             $dbcm->do("INSERT INTO modlog (journalid, posterid, subject, logtime) ".
-                      "VALUES ($qownerid, $qposterid, ?, NOW())", undef,
+                      "VALUES ($ownerid, $posterid, ?, NOW())", undef,
                       LJ::text_trim($req->{'subject'}, 30, 0));
             my $modid = $dbcm->{'mysql_insertid'};
             return fail($err, 501) unless $modid;
 
             $dbcm->do("INSERT INTO modblob (journalid, modid, request_stor) ".
-                      "VALUES ($qownerid, $modid, $fr)");
+                      "VALUES ($ownerid, $modid, $fr)");
             if ($dbcm->err) {
-                $dbcm->do("DELETE FROM modlog WHERE journalid=$qownerid AND modid=$modid");
+                $dbcm->do("DELETE FROM modlog WHERE journalid=$ownerid AND modid=$modid");
                 return fail($err, 501);
             }
 
@@ -778,7 +775,7 @@ sub postevent
     
     $dbcm->do("INSERT INTO log2 (journalid, posterid, eventtime, logtime, security, ".
               "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
-              "VALUES ($qownerid, $qposterid, $qeventtime, '$udbh_now', $qsecurity, $qallowmask, ".
+              "VALUES ($ownerid, $posterid, $qeventtime, '$udbh_now', $qsecurity, $qallowmask, ".
               "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
               "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     return $fail->($err,501,$dbcm->errstr) if $dbcm->err;
@@ -840,7 +837,7 @@ sub postevent
     # keep track of custom security stuff in other table.
     if ($uselogsec) {
         $dbcm->do("REPLACE INTO logsec2 (journalid, jitemid, allowmask) ".
-                  "VALUES ($qownerid, $itemid, $qallowmask)");
+                  "VALUES ($ownerid, $itemid, $qallowmask)");
         if ($dbcm->err) {
             my $msg = $dbcm->errstr;
             LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
@@ -876,7 +873,7 @@ sub postevent
     }
 
     $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$itemid ".
-             "WHERE userid=$qownerid");
+             "WHERE userid=$ownerid");
 
     # update user update table (on which friends views rely)
     # NOTE: as of Mar-25-2003, we don't actually use this yet.  we might
