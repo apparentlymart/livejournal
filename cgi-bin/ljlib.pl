@@ -2091,16 +2091,14 @@ sub create_account
     }
 
     my $quser = $dbr->quote($user);
-    my $qpassword = $dbr->quote($o->{'password'});
-    my $qname = $dbr->quote($o->{'name'});
     my $cluster = LJ::new_account_cluster();
 
-    my $sth = $dbh->prepare("INSERT INTO user (user, name, password, clusterid, dversion) ".
-                            "VALUES ($quser, $qname, $qpassword, $cluster, 2)");
-    $sth->execute;
-    if ($dbh->err) { return 0; }
-
-    my $userid = $sth->{'mysql_insertid'};
+    $dbh->do("INSERT INTO user (user, name, password, clusterid, dversion, caps) ".
+             "VALUES ($quser, ?, ?, ?, 2, ?)", undef,
+             $o->{'name'}, $o->{'password'}, $cluster, $LJ::NEWUSER_CAPS);
+    return 0 if $dbh->err;
+    
+    my $userid = $dbh->{'mysql_insertid'};
     $dbh->do("INSERT INTO useridmap (userid, user) VALUES ($userid, $quser)");
     $dbh->do("INSERT INTO userusage (userid, timecreate) VALUES ($userid, NOW())");
 
