@@ -5,7 +5,11 @@ use strict;
 use Fcntl ':flock'; 
 use vars qw(%maint $VERBOSE);
 
-require '/home/lj/cgi-bin/ljlib.pl';
+unless (-d $ENV{'LJHOME'}) {
+    die "\$LJHOME not set.\n";
+}
+
+require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 my %maintinfo;
 my $MAINT = "$LJ::HOME/bin/maint";
@@ -42,32 +46,59 @@ if (@ARGV)
 	else { $VERBOSE = $1; }
 	shift @ARGV;
     }
-    
-    foreach my $task (@ARGV)
+
+    my @targv;
+    my $hit_colon = 0;
+    foreach my $arg (@ARGV)
     {
-	print "Running task '$task':\n\n" if ($VERBOSE >= 1);
-	unless ($maintinfo{$task}) {
-	    print "Unknown task '$task'\n";
+        if ($arg eq ';') {
+	    $hit_colon = 1;
+            run_task(@targv);
+            @targv = ();
 	    next;
+        } 
+	push @targv, $arg;
+    }
+
+    if ($hit_colon) {
+	# new behavior: task1 arg1 arg2 ; task2 arg arg2 
+	run_task(@targv);	
+    } else {
+	# old behavior: task1 task2 task3  (no args, ever)
+	foreach my $task (@targv) {
+	    run_task($task);
 	}
-	open (LOCK, ">$LOCKDIR/mainttask-$task");
-	if (flock (LOCK, LOCK_EX|LOCK_NB)) {
-	    require "$MAINT/$maintinfo{$task}->{'source'}";
-	    &{ $maint{$task} };
-	} else {
-	    print "Task '$task' already running.  Quitting.\n" if ($VERBOSE >= 1);
-	}
-	unlink "$LOCKDIR/mainttask-$task";
-	flock(LOCK, LOCK_UN);
-	close LOCK;
     }
 }
 else
 {
     print "Available tasks: \n";
     foreach (sort keys %maintinfo) {
-	print "  $_ - $maintinfo{$_}->{'des'}\n";
+        print "  $_ - $maintinfo{$_}->{'des'}\n";
     }
+}
+
+sub run_task
+{
+    my $task = shift;
+    return unless ($task);
+    my @args = @_;
+
+    print "Running task '$task':\n\n" if ($VERBOSE >= 1);
+    unless ($maintinfo{$task}) {
+        print "Unknown task '$task'\n";
+        return;
+    }
+    open (LOCK, ">$LOCKDIR/mainttask-$task");
+    if (flock (LOCK, LOCK_EX|LOCK_NB)) {
+        require "$MAINT/$maintinfo{$task}->{'source'}";
+	&{ $maint{$task} }(@args);
+    } else {
+        print "Task '$task' already running.  Quitting.\n" if ($VERBOSE >= 1);
+    }
+    unlink "$LOCKDIR/mainttask-$task";
+    flock(LOCK, LOCK_UN);
+    close LOCK;
 }
 
 sub load_tasks
