@@ -6,9 +6,12 @@ use strict;
 use Apache::Constants qw(:common);
 use Digest::SHA1;
 use MIME::Base64;
-use XML::Atom::Entry;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 require 'parsefeed.pl';
+
+BEGIN {
+    $LJ::OPTMOD_XMLATOM = eval "use XML::Atom::Entry; 1;";
+};
 
 sub respond {
     my ($r, $status, $body, $type) = @_;
@@ -39,7 +42,7 @@ sub respond {
     } else {
         $out = <<HTML;
 <html><head><title>$status $msgs{$status}</title></head><body>
-<h1>$msgs{$status}</h1><p>$body</p>
+<h1>$msgs{$status}</h1><hr /><p>$body</p>
 </body></html>
 HTML
     }
@@ -287,6 +290,9 @@ sub handle_feed {
 # prints the response.
 sub handle {
     my $r = shift;
+
+    return respond($r, 404, "This server does not support the Atom API.")
+        unless $LJ::OPTMOD_XMLATOM;
 
     # break the uri down: /interface/atom/<verb>[/<number>]
     my ( $action, $param, $oldparam ) = ( $1, $2, $3 )
