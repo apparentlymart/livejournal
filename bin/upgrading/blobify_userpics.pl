@@ -38,7 +38,7 @@ while ($loop) {
         die "Error putting file: $u->{'user'}/$picid\n" unless $rv;
 
         # extra paranoid!
-        my $get = LJ::Blob::get($u, "userpic", $fmt, $picid, $image);
+        my $get = LJ::Blob::get($u, "userpic", $fmt, $picid);
         die "Re-fetch didn't match" unless $get eq $image;
 
         $db->do("DELETE FROM userpicblob2 WHERE picid=$picid");
