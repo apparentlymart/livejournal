@@ -4,7 +4,7 @@
 package Apache::BML;
 
 use strict;
-use Apache::Constants qw(:common REDIRECT);
+use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED);
 use Apache::File ();
 use Apache::URI;
 use Digest::MD5;
@@ -199,6 +199,11 @@ sub handler
         return REDIRECT;
     }
 
+    # see if we can save some bandwidth (though we already killed a bunch of CPU)
+    my $etag = '"' . Digest::MD5::md5_hex($html) . '"';
+    my $ifnonematch = $r->header_in("If-None-Match");
+    return HTTP_NOT_MODIFIED if defined $ifnonematch && $etag eq $ifnonematch;
+
     # insert all client (per-user, cookie-set) variables
     if ($req->{'env'}->{'UseBmlSession'}) {
         $html =~ s/%%c\!(\w+)%%/BML::ehtml(BML::get_var($1))/eg;
@@ -236,7 +241,7 @@ sub handler
         $r->header_out("Last-Modified", $modtime_http)
             if $req->{'env'}->{'Static'};
         $r->header_out("Cache-Control", "private, proxy-revalidate");
-        $r->header_out("ETag", '"' . Digest::MD5::md5_hex($html) . '"');
+        $r->header_out("ETag", $etag);
 
 	$r->send_http_header();
     }
