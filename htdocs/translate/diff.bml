@@ -65,9 +65,16 @@
     }
 
     my ($was_file, $then_file);
-    do { $was_file = tmpnam() } until sysopen(FH, $was_file, O_RDWR|O_CREAT|O_EXCL);
+    my $tries = 0;
+
+    $tries = 0;
+    do { $was_file = tmpnam(); $tries++; } until sysopen(FH, $was_file, O_RDWR|O_CREAT|O_EXCL) || $tries > 5;
+    return "Error creating temp file" if $tries > 5;
     print FH $was_alt; close FH;
-    do { $then_file = tmpnam() } until sysopen(FH, $then_file, O_RDWR|O_CREAT|O_EXCL);
+
+    $tries = 0;
+    do { $then_file = tmpnam(); $tries++; } until sysopen(FH, $then_file, O_RDWR|O_CREAT|O_EXCL) || $tries > 5;
+    return "Error creating temp file" if $tries > 5;
     print FH $then_alt; close FH;
 
     my @words = split(/\n/, $was_alt);
