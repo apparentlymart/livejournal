@@ -55,6 +55,12 @@
 
  if ($mode eq "update")
  {
+     unless (LJ::did_post()) {
+         $$title = "Error";
+         $$body = "<?requirepost?>";
+         return;
+     }
+     
      my %res;
      my $flags = {};
 
