@@ -1257,12 +1257,17 @@ sub set_userprop
     foreach $propname (keys %$hash) {
         my $p = LJ::get_prop("user", $propname) or next;
         my $table = $p->{'indexed'} ? "userprop" : "userproplite";
-        if ($p->{'cldversion'} && $u->{'dversion'} >= $p->{'cldversion'}) {
+        if ( $p->{is_blob} ) {
+            $table = 'userpropblob';
+        }
+        elsif ($p->{'cldversion'} && $u->{'dversion'} >= $p->{'cldversion'}) {
             $table = "userproplite2";
         }
         unless ($memonly) {
-            my $db = $action{$table}->{'db'} ||= ($table ne "userproplite2" ? LJ::get_db_writer() : 
-                                                  LJ::get_cluster_master($u));
+            my $db = $action{$table}->{'db'} ||= (
+                $table !~ m{userprop(lite2|blob)}
+                    ? LJ::get_db_writer()
+                    : LJ::get_cluster_master($u) );
             return 0 unless $db;
         }
         $value = $hash->{$propname};
@@ -2595,6 +2600,7 @@ sub load_user_props
         $loadfrom{'userprop'} = 1;
         $loadfrom{'userproplite'} = 1;
         $loadfrom{'userproplite2'} = 1;
+        $loadfrom{'userpropblob'} = 1;
     } else {
         # case 2: load only certain things
         foreach (@props) {
@@ -2607,7 +2613,10 @@ sub load_user_props
             }
             push @needwrite, [ $p->{'id'}, $_ ];
             my $source = $p->{'indexed'} ? "userprop" : "userproplite";
-            if ($p->{'cldversion'} && $u->{'dversion'} >= $p->{'cldversion'}) {
+            if ( $p->{is_blob} ) {
+                $source = "userpropblob"; # clustered blob
+            }
+            elsif ($p->{'cldversion'} && $u->{'dversion'} >= $p->{'cldversion'}) {
                 $source = "userproplite2";  # clustered
             }
             push @{$loadfrom{$source}}, $p->{'id'};
@@ -2617,12 +2626,12 @@ sub load_user_props
     foreach my $table (keys %loadfrom) {
         my $db;
         if ($use_master) {
-            $db = $table eq "userproplite2" ? 
+            $db = ($table =~ m{userprop(lite2|blob)}) ? 
                 LJ::get_cluster_master($u) : 
                 LJ::get_db_writer();
         }
         unless ($db) {
-            $db = $table eq "userproplite2" ? 
+            $db = ($table =~ m{userprop(lite2|blob)}) ?
                 LJ::get_cluster_reader($u) : 
                 LJ::get_db_reader();
             $used_slave = 1;
