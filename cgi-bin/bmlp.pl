@@ -481,24 +481,26 @@ sub bml_block
 
     # load in the properties defined in the data
     my %element = ();
+    my @elements = ();
     if ($blockflags =~ /F/ || $type eq "_INFO" || $type eq "_INCLUDE")
     {
-	&load_elements(\%element, $data);
+	&load_elements(\%element, $data, { 'declorder' => \@elements });
     } 
     elsif ($blockflags =~ /P/)
     {
 	my @itm = split(/\s*\|\s*/, $data);
 	my $ct = 0;
-	foreach (@itm)
-	{
+	foreach (@itm) {
 	    $ct++;
 	    $element{"DATA$ct"} = $_;
+	    push @elements, "DATA$ct";
 	}
     }
     else
     {
 	# single argument block (goes into DATA element)
 	$element{'DATA'} = $data;
+	push @elements, 'DATA';
     }
     
     # multi-linguality stuff
@@ -622,7 +624,7 @@ sub bml_block
 	if ($preparsed) {
 	    ## does block request pre-parsing of elements?
 	    ## this is required for blocks with _CODE and AllowCode set to 0
-	    foreach my $k (keys %element) {
+	    foreach my $k (@elements) {
 		my $decoded;
 		&bml_decode(\$element{$k}, \$decoded, $option_ref);
 		$element{$k} = $decoded;
@@ -848,7 +850,8 @@ sub load_cfg
 # given a block of data, loads elements found into 
 sub load_elements
 {
-    my ($hashref, $data) = @_;
+    my ($hashref, $data, $opts) = @_;
+    my $ol = $opts->{'declorder'};
     my @data = split(/\n/, $data);
     my $curitem = "";
     my $depth;
@@ -859,6 +862,7 @@ sub load_elements
 	if ($curitem eq "" && /^([A-Z0-9\_\/]+)=>(.*)/)
 	{
 	    $hashref->{$1} = $2;
+	    push @$ol, $1;
 	}
 	elsif (/^([A-Z0-9\_\/]+)<=\s*$/)
 	{
@@ -867,6 +871,7 @@ sub load_elements
 		$curitem = $1;
 		$depth = 1;
 		$hashref->{$curitem} = "";
+		push @$ol, $curitem;
 	    }
 	    else
 	    {

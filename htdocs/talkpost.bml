@@ -4,6 +4,8 @@ BODY<=
 
 (=_CODE
 
+ $head = "";  # not local, used to build <link> tags
+
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -148,7 +150,7 @@ BODY<=
      my @linkele;
      
      push @linkele, "<A HREF=\"/go.bml?itemid=$itemid&amp;dir=prev\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_prev.gif\" WIDTH=22 HEIGHT=20 ALT=\"Previous Entry\" TITLE=\"Previous Entry\" BORDER=0></A>";
-     $ret .= "<link href='/go.bml?itemid=$itemid&amp;dir=prev' rel='Previous'>\n";
+     $head .= "<link href='/go.bml?itemid=$itemid&amp;dir=prev' rel='Previous'>\n";
      
      push @linkele, "<A HREF=\"/tools/memadd.bml?itemid=$itemid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/memadd.gif\" WIDTH=22 HEIGHT=20 ALT=\"Add to memories!\" title=\"Add to memories!\" BORDER=0></A>";
      
@@ -166,7 +168,7 @@ BODY<=
      push @linkele, "<A HREF=\"/tools/tellafriend.bml?itemid=$itemid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_tellfriend.gif\" WIDTH=22 HEIGHT=20 ALT=\"Tell a Friend!\" title=\"Tell a Friend!\" BORDER=0></A>";
 
      push @linkele, "<A HREF=\"/go.bml?itemid=$itemid&amp;dir=next\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_next.gif\" WIDTH=22 HEIGHT=20 ALT=\"Next Entry\" TITLE=\"Next Entry\" BORDER=0></A>";
-     $ret .= "<link href='/go.bml?itemid=$itemid&amp;dir=next' rel='Next'>\n";
+     $head .= "<link href='/go.bml?itemid=$itemid&amp;dir=next' rel='Next'>\n";
      
      if (@linkele) {
 	 $ret .= "(=STANDOUT ";
@@ -400,6 +402,7 @@ BODY<=
 _CODE=)
 
 <=BODY
+HEAD=>(=_CODE return $head _CODE=)
 PAGE=)(=_C <LJDEP>
 post: htdocs/talkpost_do.bml
 img: htdocs/img/topic_add.gif, htdocs/img/btn_tellfriend.gif, htdocs/img/btn_next.gif

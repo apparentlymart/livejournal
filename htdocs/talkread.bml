@@ -5,6 +5,8 @@ BODY<=
 (=_CODE
 #line 6
 
+ $head = "";  # not local.  used for making link elements
+
  my $PAGE_SIZE = 25;
  my $THREADING_POINT = 50;
 
@@ -122,7 +124,7 @@ BODY<=
  {
      my @linkele;
      push @linkele, "<a href='/go.bml?itemid=$itemid&dir=prev'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_prev.gif' width='22' height='20' alt='Previous Entry' title='Previous Entry' border='0'></a>";
-     $ret .= "<link href='/go.bml?itemid=$itemid&amp;dir=prev' rel='Previous'>\n";     
+     $head .= "<link href='/go.bml?itemid=$itemid&amp;dir=prev' rel='Previous'>\n";     
      
      push @linkele, "<a href='/tools/memadd.bml?itemid=$itemid'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/memadd.gif' width='22' height='20' alt='Add to memories!' title='Add to memories!' border='0'></a>";
 
@@ -140,7 +142,7 @@ BODY<=
      push @linkele, "<a href='/tools/tellafriend.bml?itemid=$itemid'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_tellfriend.gif' width='22' height='20' alt='Tell a Friend!' title='Tell a Friend!' border='0'></a>";
 
      push @linkele, "<a href='/go.bml?itemid=$itemid&dir=next'><img align='absmiddle' hspace='2' vspace='2' src='$LJ::IMGPREFIX/btn_next.gif' width='22' height='20' alt='Next Entry' title='Next Entry' border='0'></a>";	
-     $ret .= "<link href='/go.bml?itemid=$itemid&amp;dir=next' rel='Next'>\n";
+     $head .= "<link href='/go.bml?itemid=$itemid&amp;dir=next' rel='Next'>\n";
 
      if (@linkele) {
 	 $ret .="(=STANDOUT ";
@@ -522,6 +524,7 @@ return $ret;
 
 _CODE=)
 <=BODY
+HEAD=>(=_CODE return $head _CODE=)
 PAGE=)(=_C <LJDEP>
 link: htdocs/userinfo.bml, htdocs/go.bml, htdocs/tools/memadd.bml, htdocs/editjournal_do.bml, htdocs/topics/additem.bml
 link: htdocs/tools/tellafriend.bml, htdocs/talkpost.bml, htdocs/talkread.bml, htdocs/delcomment.bml
