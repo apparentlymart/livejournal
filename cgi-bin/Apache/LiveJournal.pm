@@ -663,9 +663,13 @@ sub userpic_content
              $r->header_in('X-Proxy-Capabilities') =~ m{\breproxy-file\b}i )
         {
             my $memkey = [$picid, "mogp.up.$picid"];
+
+            my $zone = $r->header_in('X-MogileFS-Explicit-Zone') || undef;
+            $memkey->[1] .= ".$zone" if $zone;
+            
             my $paths = LJ::MemCache::get($memkey);
             unless ($paths) {
-                my @paths = LJ::mogclient()->get_paths( $key, 1 );
+                my @paths = LJ::mogclient()->get_paths( $key, 1, $zone );
                 $paths = \@paths;
                 LJ::MemCache::add($memkey, $paths, 3600) if @paths;
             }
