@@ -100,11 +100,23 @@
          my $eh_des = LJ::ehtml($mem->{'des'});
          LJ::text_out(\$eh_des);
          my $edit = "";
-         my $jargent = $mem->{'user'} ? "journal=$mem->{'user'}&amp;" : "";
-         if ($remote && $remote->{'user'} eq $user) {
-             $edit = " [<a href=\"/tools/memadd.bml?${jargent}itemid=$mem->{'jitemid'}\">$ML{'.edit'}</a>]";
+
+         my ($entrylink, $editlink);
+         if ($mem->{user}) {
+             my $itemid = int($mem->{'jitemid'} / 256);
+             my $anum = $mem->{'jitemid'} % 256;
+             $entrylink = LJ::item_link($mem->{user}, $itemid, $anum);
+             $editlink = "/tools/memadd.bml?journal=$mem->{user}&amp;itemid=$mem->{jitemid}";
+         } else {
+             $entrylink = "/talkread.bml?itemid=$mem->{jitemid}";
+             $editlink = "/tools/memadd.bml?itemid=$mem->{jitemid}";
          }
-         $body .= "<p><li><a href=\"/talkread.bml?${jargent}itemid=$mem->{'jitemid'}\"><b>$eh_des</b></a>$edit<br /><font size='-1'><b>$mem->{'user'}</b></font></li>";
+
+         if ($remote && $remote->{'user'} eq $user) {
+             $edit = " [<a href=\"$editlink\">$ML{'.edit'}</a>]";
+         }
+
+         $body .= "<p><li><a href=\"$entrylink\"><b>$eh_des</b></a>$edit<br /><font size='-1'><b>$mem->{'user'}</b></font></li>";
      }
      $body .= "</ul>";
      return;

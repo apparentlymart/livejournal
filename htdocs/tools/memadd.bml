@@ -29,21 +29,62 @@
 
  my $sth;
  my $journal = $FORM{'journal'};
- my $itemid = $FORM{'itemid'}+0;
- my $ditemid = $itemid;
+ my $ditemid = $FORM{'itemid'}+0;
 
- my $ju = LJ::load_user($journal);
- unless ($ju) {
+ # OK.  the memories schema is weird and stores *display* itemids in the database.
+ # additionally, we distringuish precluster itemids because they're stored without a userid.
+ # it's too late to fix it in the db, so we just work around it--
+ # all new memories still get userid+ditemid because we can't change the ditemid/itemid problem,
+ # but old-style itemids get fixed up to userid+ditemid.
+
+ # *however*, when editing old itemids we need to keep around
+ # the old-style ditemid so we can still edit it.
+
+ # to keep this all sorted out, we fixup variables like this:
+ #   - itemid -- real, new-style itemid
+ #   - ditemid -- display itemid (with anum)
+ #   - dbitemid -- itemid that is in the database;
+ #                 usually same as ditemid, but different for old-style itemids.
+
+ my $dbitemid = $ditemid;
+ my $itemid;
+ my $oldstyle = 0;
+ my $ju;
+ my $jid;
+
+ my $anum;
+
+ if ($journal) {
+     $ju = LJ::load_user($journal);
+     $jid = $ju->{'userid'};
+     $anum = $ditemid % 256;
+     $itemid = int($ditemid / 256);
+ } else {
+     # old-style item url?
+     my $newids = LJ::get_newids('L', $ditemid);
+     if ($newids) {
+         ($jid,  $itemid) = @$newids;
+         $ju = LJ::load_userid($jid);
+         $oldstyle = 1;
+     }
+ }
+
+ unless ($ju && $itemid) {
      $title = $ML{'Error'};
      $body = $ML{'error.nojournal'};
      return;
  }
- my $anum = $itemid % 256;
- $itemid = int($itemid / 256);
- my $jid = $ju->{'userid'};
+
  my $dbcr = LJ::get_cluster_reader($ju);
 
  my $log = $dbcr->selectrow_hashref("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, ls.subject, l.security, l.allowmask, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(l.logtime) AS 'secondsold', l.anum FROM log2 l, logtext2 ls WHERE ls.journalid=$jid AND l.journalid=$jid AND ls.jitemid=l.jitemid AND l.jitemid=$itemid");
+
+ unless ($journal) {
+     # this was an old-style itemid,
+     # and it should always point at the right entry.
+     $anum = $log->{anum};
+     $ditemid = $itemid<<8 + $anum;
+ }
 
  # if the entry is pre-UTF-8 conversion, the
  # subject may need conversion into UTF-8
@@ -61,8 +102,8 @@
 
  # check to see if it already is memorable (thus we're editing, not adding);
  $sth = $dbr->prepare("SELECT memid, des, security FROM memorable WHERE ".
-                      "userid=$remote->{'userid'} AND journalid=$jid AND jitemid=$ditemid");
- $sth->execute;
+                      "userid=? AND journalid=? AND jitemid=?");
+ $sth->execute($remote->{userid}, $oldstyle ? 0 : $jid, $dbitemid);
  my $memory = $sth->fetchrow_hashref;
  
  if ($FORM{'mode'} eq "") 
@@ -120,8 +161,9 @@
 
      $body .= $ML{'add_previous'};
      $body .= "<form method='post' action='memadd.bml'>";
-     $body .= "<input type='hidden' name='itemid' value='$ditemid'>";
-     $body .= "<input type='hidden' name='journal' value='$ju->{'user'}'>";
+     # we still need to pass the messed-up values to ourself, so we can edit them.
+     $body .= "<input type='hidden' name='itemid' value='$dbitemid'>";
+     $body .= "<input type='hidden' name='journal' value='$ju->{'user'}'>" unless $oldstyle;
      $body .= "<input type=hidden name=mode value=\"save\">";
      $body .= "<TABLE cellpadding=4>";
 
@@ -240,7 +282,7 @@
      else 
      {
          $sth = $dbh->prepare("INSERT INTO memorable (memid, userid, journalid, jitemid, des, security) ".
-                              "VALUES (NULL, $remote->{'userid'}, $jid, $ditemid, $qdes, $qsec)");
+                              "VALUES (NULL, $remote->{'userid'}, $jid, $dbitemid, $qdes, $qsec)");
          $sth->execute;
          $memid = $dbh->{'mysql_insertid'};
      }
