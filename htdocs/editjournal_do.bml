@@ -315,20 +315,8 @@ BODY<=
      {
 	 if ($res{'success'} eq "OK")
 	 {
-	     my $uri = "/users/$user/";
-	     if ($FORM{'usejournal'}) {
-		 my $quj = $dbr->quote($FORM{'usejournal'});
-		 my $sth = $dbr->prepare("SELECT journaltype FROM user WHERE user=$quj");
-		 $sth->execute;
-		 my ($type) = $sth->fetchrow_array;
-		 if ($type eq "C") {
-		     $uri = "/community/$FORM{'usejournal'}/";
-		 } else {
-		     $uri = "/users/$FORM{'usejournal'}/";
-		 }	 
-		 
-	     }
-	     return "(=H1 Success H1=)(=P Your journal was modified.  You may view it <A HREF=\"$LJ::SITEROOT$uri\">here</A>. P=)";
+	     my $itemid = $FORM{'itemid'}+0;
+	     return "(=H1 Success H1=)(=P Journal entry was modified.  You may view it <a href=\"$LJ::SITEROOT/talkread.bml?itemid=$itemid\">here</a>. P=)";
 	 }
 	 else
 	 {
