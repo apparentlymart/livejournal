@@ -4,6 +4,8 @@
 # lib: cgi-bin/ljlib.pl, cgi-bin/ljconfig.pl, cgi-bin/ljlang.pl, cgi-bin/cleanhtml.pl
 # </LJDEP>
 
+use strict;
+
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
@@ -79,7 +81,7 @@ sub create_view_lastn
     $lastn_page{'head'} .= 
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'LASTN_HEAD'};
 
-    $events = \$lastn_page{'events'};
+    my $events = \$lastn_page{'events'};
     
     my $quser = $dbh->quote($user);
     
@@ -348,6 +350,7 @@ sub create_view_friends
     my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
+    my $sth;
     my $user = $u->{'user'};
     my $env = $opts->{'env'};
 
@@ -470,9 +473,8 @@ sub create_view_friends
         }
         $group ||= "Default View";
         my $qgroup = $dbr->quote($group);
-        $sth = $dbr->prepare("SELECT groupnum FROM friendgroup WHERE userid=$u->{'userid'} AND groupname=$qgroup");
-        $sth->execute;
-        my ($bit) = $sth->fetchrow_array;
+        my $bit = $dbr->selectrow_array("SELECT groupnum FROM friendgroup WHERE ".
+                                        "userid=$u->{'userid'} AND groupname=$qgroup");
         if ($bit) { $filter = (1 << $bit); }
     }
 
@@ -546,8 +548,6 @@ sub create_view_friends
         return 1;
     }
 
-    $friendsin = join(", ", map { $dbr->quote($_) } keys %friends);
-    
     ### load the log properties
     my %logprops = ();  # key is "$owneridOrZero $[j]itemid"
     LJ::load_props($dbs, "log");
@@ -924,14 +924,14 @@ sub create_view_calendar
 
           # go backwards from first day
           my $dayweek = $dayweek{$year}->{$month}->{$firstday};
-          for ($i=$firstday-1; $i>0; $i--)
+          for (my $i=$firstday-1; $i>0; $i--)
           {
               if (--$dayweek < 1) { $dayweek = 7; }
               $dayweek{$year}->{$month}->{$i} = $dayweek;
           }
           # go forwards from first day
           $dayweek = $dayweek{$year}->{$month}->{$firstday};
-          for ($i=$firstday+1; $i<=$daysinmonth; $i++)
+          for (my $i=$firstday+1; $i<=$daysinmonth; $i++)
           {
               if (++$dayweek > 7) { $dayweek = 1; }
               $dayweek{$year}->{$month}->{$i} = $dayweek;
@@ -1001,10 +1001,10 @@ sub create_view_calendar
           {
               if ($dayweek{$year}->{$month}->{$daysinmonth} != 7)
               {
-                $spaces = 7 - $dayweek{$year}->{$month}->{$daysinmonth};
-                $calendar_week{'emptydays_end'} = 
-                    LJ::fill_var_props($vars, 'CALENDAR_EMPTY_DAYS', 
-                                { 'numempty' => $spaces });
+                  my $spaces = 7 - $dayweek{$year}->{$month}->{$daysinmonth};
+                  $calendar_week{'emptydays_end'} = 
+                      LJ::fill_var_props($vars, 'CALENDAR_EMPTY_DAYS', 
+                                         { 'numempty' => $spaces });
               }
               $$weeks .= LJ::fill_var_props($vars, 'CALENDAR_WEEK', \%calendar_week);
           }
@@ -1027,6 +1027,7 @@ sub create_view_day
     my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
+    my $sth;
 
     my $user = $u->{'user'};
 
@@ -1098,7 +1099,6 @@ sub create_view_day
 
     my %talkcount = ();
     my @itemids = ();
-    my $quser = $dbr->quote($user);
 
     my $optDESC = $vars->{'DAY_SORT_MODE'} eq "reverse" ? "DESC" : "";
 
