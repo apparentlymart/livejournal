@@ -128,7 +128,6 @@
                         ($enabled_rte && ! $spellcheck_html && ! $preview);
 
     $$bodyopts .= "onunload=\"save_entry();\" " if $richtext;
-
     if ($did_post && ! $did_spellcheck && !$showform && !$enabled_rte && !$preview ) {
 
         # what's our authentication scheme for subsequent protocol actions?
@@ -231,7 +230,7 @@
                 $itemid = $itemid * 256 + $anum;
                 $$body .= " p?><?p Now that you've posted, you can: p?><ul>" .
                     "<li><a href=\"$itemlink\">View the entry</a></li>" .
-                    "<li><a href=\"/editjournal_do.bml?journal=$juser&itemid=$itemid\">Edit the entry</a></li>" . 
+                    "<li><a href=\"/editjournal.bml?journal=$juser&itemid=$itemid\">Edit the entry</a></li>" . 
                     "<li><a href=\"/tools/memadd.bml?journal=$juser&itemid=$itemid\">Add the entry to your memories</a></li>" .
                     "</ul>";
             }

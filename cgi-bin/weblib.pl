@@ -998,13 +998,13 @@ RTE
             my @secs = ("public", BML::ml('label.security.public'), "private", BML::ml('label.security.private'),
                         "friends", BML::ml('label.security.friends'));
             
-            my @opts;
+            my @secopts;
             if ($res && ref $res->{'friendgroups'} eq 'ARRAY' && scalar @{$res->{'friendgroups'}}) {
                 push @secs, ("custom", BML::ml('label.security.custom'));
-                push @opts, ("onchange" => "customboxes()");
+                push @secopts, ("onchange" => "customboxes()");
             }
             
-            $out .= "<tr valign='top'><th>Security:</th><td>" . LJ::html_select({ 'id' => "Security", 'name' => 'security', 'selected' => $opts->{'security'}, @opts }, @secs);
+            $out .= "<tr valign='top'><th>Security:</th><td>" . LJ::html_select({ 'id' => "Security", 'name' => 'security', 'selected' => $opts->{'security'}, @secopts }, @secs);
             $out .= LJ::help_icon("security", " ");
             
             # if custom security groups available, show them in a hideable div
@@ -1014,7 +1014,7 @@ RTE
                 foreach my $fg (@{$res->{'friendgroups'}}) {
                     $out .= LJ::html_check({ 'name' => "custom_bit_$fg->{'id'}",
                                              'id' => "custom_bit_$fg->{'id'}",
-                                             'selected' => $opts->{"custom_bit_$fg->{'id'}"}, });
+                                             'selected' => $opts->{"custom_bit_$fg->{'id'}"} || $opts->{'security_mask'}+0 & 1 << $fg->{'id'} }) . " ";
                     $out .= "<label for='custom_bit_$fg->{'id'}'>" . LJ::ehtml($fg->{'name'}) . "</label><br />";
                 }
                 $out .= "</div>";

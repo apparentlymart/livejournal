@@ -99,12 +99,13 @@ body<=
             # are we spellchecking before we post?
             my $spellcheck_html;
             my $did_spellcheck;
-            if ($LJ::SPELLER && $POST{'do_spellcheck'}) {
+            if ($LJ::SPELLER && $POST{'action:spellcheck'}) {
+                $did_spellcheck++;
                 my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
                                              'color' => '<?hotcolor?>', };
                 my $event = LJ::ehtml($POST{'event'});
                 $spellcheck_html = $s->check_html(\$event);
-                $did_spellcheck++;
+                $spellcheck_html = "<?inerr No spelling errors found inerr?>" unless $spellcheck_html ne "";
             }
             
             # they clicked the save or delete button
@@ -146,6 +147,12 @@ body<=
             ### SHOW EDIT FORM
             ###
             
+            my $curmask = $res{'events_1_allowmask'};
+            my $cursec = $POST{'security'} || $res{'events_1_security'};
+            if ($cursec eq 'usemask') {
+                $cursec = $curmask == 1 ? "friends" : "custom";
+            }
+
             my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
             my $auth = "<tr><th>Poster:</th><td>";
             $auth .= $usejournal ? LJ::ljuser($res{'events_1_poster'}) . " in community " . LJ::ljuser($usejournal) :
@@ -156,7 +163,7 @@ body<=
             
             $ret .= "<form method='post' action='editjournal.bml$getextra' id='updateForm' name='updateForm'>";
             $ret .= LJ::html_hidden('itemid', $ditemid,'mode','edit') . "\n";
-            
+
             my $entry = {
                 'mode' => "edit",
                 'auth_as_remote' => 1,
@@ -164,6 +171,8 @@ body<=
                 'event' => $res{'events_1_event'},
                 'datetime' => "$year-$mon-$mday $hour:$min",
                 'usejournal' => $usejournal,
+                'security' => $cursec,
+                'security_mask' => $curmask,
                 'auth' => $auth,
                 'remote' => $remote,
                 'spellcheck_html' => $spellcheck_html,
