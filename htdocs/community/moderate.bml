@@ -151,6 +151,9 @@ body<=
     my $comm = $saved_comm || ($mode eq 'action' ? $POST{'comm'} : $GET{'comm'});
     my $modid = $saved_modid || ($mode eq 'action' ? $POST{'modid'} : $GET{'modid'});
     $modid += 0;
+
+    # redirect to community/manage if a GET request with no arg
+    return BML::redirect("manage.bml") unless $comm;
     
     my $c = LJ::load_user($comm);
     unless ($c) {
