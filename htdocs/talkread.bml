@@ -15,9 +15,7 @@ body<=
 
  return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
- $$head .= $LJ::COMMON_CODE{'quickreply'};
 
- $$bodyopts .= 'onload="restore_entry();" onunload="save_entry();"';
 
  my $pics = LJ::Talk::get_subjecticons();
 
@@ -115,6 +113,13 @@ body<=
  LJ::text_out(\$u->{'name'});
 
  my $remote = LJ::get_remote();
+
+ # See if we should add QR head JS code
+ LJ::load_user_props($remote, "opt_no_quickreply");
+ if ($remote && !$remote->{'opt_no_quickreply'}) {
+     $$head .= $LJ::COMMON_CODE{'quickreply'};
+     $$bodyopts .= 'onload="restore_entry();" onunload="save_entry();"';
+ }
 
  # set viewall/viewsome
  my $viewall = 0;

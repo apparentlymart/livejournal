@@ -615,114 +615,114 @@ sub create_qr_div {
     my $qrhtml;
 
     LJ::load_user_props($remote, "opt_no_quickreply");
-    if (!$remote->{'opt_no_quickreply'}) {
-        my $basepath = LJ::journal_base($u) . "/$ditemid.html?replyto=";
-        $qrhtml .= LJ::html_hidden({'name' => 'replyto', 'id' => 'replyto', 'value' => ''},
-                                {'name' => 'parenttalkid', 'id' => 'parenttalkid', 'value' => ''},
-                                {'name' => 'itemid', 'id' => 'itemid', 'value' => $ditemid},
-                                {'name' => 'usertype', 'id' => 'usertype', 'value' => 'cookieuser'},
-                                {'name' => 'userpost', 'id' => 'userpost', 'value' => $remote->{'user'}},
-                                {'name' => 'qr', 'id' => 'qr', 'value' => '1'},
-                                {'name' => 'cookieuser', 'id' => 'cookieuser', 'value' => $remote->{'user'}},
-                                {'name' => 'dtid', 'id' => 'dtid', 'value' => ''},
-                                {'name' => 'basepath', 'id' => 'basepath', 'value' => $basepath},
-                                {'name' => 'stylemine', 'id' => 'stylemine', 'value' => $stylemine},
-                                {'name' => 'saved_subject', 'id' => 'saved_subject'},
-                                {'name' => 'saved_body', 'id' => 'saved_body'},
-                                {'name' => 'saved_spell', 'id' => 'saved_spell'},
-                                {'name' => 'saved_upic', 'id' => 'saved_upic'},
-                                {'name' => 'saved_dtid', 'id' => 'saved_dtid'},
-                                {'name' => 'saved_ptid', 'id' => 'saved_ptid'},
-                                {'name' => 'viewing_thread', 'id' => 'viewing_thread', 'value' => $viewing_thread},
-                                );
+    return undef if $remote->{'opt_no_quickreply'};
 
-        # rate limiting challenge
-        {
-            my ($time, $secret) = LJ::get_secret();
-            my $rchars = LJ::rand_chars(20);
-            my $chal = $ditemid . "-$u->{userid}-$time-$rchars";
-            my $res = Digest::MD5::md5_hex($secret . $chal);
-            $qrhtml .= LJ::html_hidden("chrp1", "$chal-$res");
-        }
+    my $basepath = LJ::journal_base($u) . "/$ditemid.html?replyto=";
+    $qrhtml .= LJ::html_hidden({'name' => 'replyto', 'id' => 'replyto', 'value' => ''},
+                               {'name' => 'parenttalkid', 'id' => 'parenttalkid', 'value' => ''},
+                               {'name' => 'itemid', 'id' => 'itemid', 'value' => $ditemid},
+                               {'name' => 'usertype', 'id' => 'usertype', 'value' => 'cookieuser'},
+                               {'name' => 'userpost', 'id' => 'userpost', 'value' => $remote->{'user'}},
+                               {'name' => 'qr', 'id' => 'qr', 'value' => '1'},
+                               {'name' => 'cookieuser', 'id' => 'cookieuser', 'value' => $remote->{'user'}},
+                               {'name' => 'dtid', 'id' => 'dtid', 'value' => ''},
+                               {'name' => 'basepath', 'id' => 'basepath', 'value' => $basepath},
+                               {'name' => 'stylemine', 'id' => 'stylemine', 'value' => $stylemine},
+                               {'name' => 'saved_subject', 'id' => 'saved_subject'},
+                               {'name' => 'saved_body', 'id' => 'saved_body'},
+                               {'name' => 'saved_spell', 'id' => 'saved_spell'},
+                               {'name' => 'saved_upic', 'id' => 'saved_upic'},
+                               {'name' => 'saved_dtid', 'id' => 'saved_dtid'},
+                               {'name' => 'saved_ptid', 'id' => 'saved_ptid'},
+                               {'name' => 'viewing_thread', 'id' => 'viewing_thread', 'value' => $viewing_thread},
+                               );
 
-        # Start making the div itself
-        $qrhtml .= "<div id='qrdiv' name='qrdiv' style='display:none;'>";
-        $qrhtml .= "<table style='border: 1px solid black'>";
-        $qrhtml .= "<tr valign='center'>";
-        $qrhtml .= "<td align='right'><b>".BML::ml('/talkpost.bml.opt.from')."</b></td><td>";
-        $qrhtml .= LJ::ljuser($remote->{'user'});
-        $qrhtml .= "</td><td align='center'>";
-
-        # Userpic selector
-        {
-            my %res;
-            LJ::do_request({ "mode" => "login",
-                             "ver" => ($LJ::UNICODE ? "1" : "0"),
-                             "user" => $remote->{'user'},
-                             "getpickws" => 1, },
-                           \%res, { "noauth" => 1, "userid" => $remote->{'userid'}}
-                           );
-
-            if ($res{'pickw_count'}) {
-                $qrhtml .= BML::ml('/talkpost.bml.label.picturetouse',{'username'=>$remote->{'user'}});
-                my @pics;
-                for (my $i=1; $i<=$res{'pickw_count'}; $i++) {
-                    push @pics, $res{"pickw_$i"};
-                }
-                @pics = sort { lc($a) cmp lc($b) } @pics;
-                $qrhtml .= LJ::html_select({'name' => 'prop_picture_keyword',
-                                         'selected' => $userpic, 'id' => 'prop_picture_keyword' },
-                                        ("", BML::ml('/talkpost.bml.opt.defpic'), map { ($_, $_) } @pics));
-
-                $qrhtml .= ' ' . BML::fill_template('help', { 'DATA' => $LJ::HELPURL{'userpics'} } )
-                    if defined $LJ::HELPURL{'userpics'};
-            }
-        }
-
-        $qrhtml .= "</td></tr>";
-
-        $qrhtml .= "<tr><td align='right'>";
-        $qrhtml .= "<b>".BML::ml('/talkpost.bml.opt.subject')."</b></td>";
-        $qrhtml .= "<td colspan='2'>";
-        $qrhtml .= "<input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value='' />";
-        $qrhtml .= "</td></tr>";
-
-        $qrhtml .= "<tr valign='top'>";
-        $qrhtml .= "<td align='right'><b>".BML::ml('/talkpost.bml.opt.message')."</b></td>";
-        $qrhtml .= "<td colspan='3' style='width: 90%'>";
-
-        $qrhtml .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='body' style='width: 99%'></textarea>";
-        $qrhtml .= "</td></tr>";
-
-        $qrhtml .= "<tr><td>&nbsp;</td>";
-        $qrhtml .= "<td colspan='3'>";
-
-        $qrhtml .= LJ::html_submit('submitpost', BML::ml('/talkread.bml.button.post'),
-                                { "id" => "submitpost",
-                                  "raw" => "onclick='if (checkLength()) {submitform();}'"
-                                  });
-
-        $qrhtml .= "&nbsp;" . LJ::html_submit('submitmoreopts', BML::ml('/talkread.bml.button.more'),
-                                           { "id" => "submitmoreopts",
-                                             "raw" => "onclick='if (moreopts()) {submitform();}'"
-                                             });
-        if ($LJ::SPELLER) {
-            $qrhtml .= "&nbsp;<input type='checkbox' name='do_spellcheck' value='1' id='do_spellcheck' /> <label for='do_spellcheck'>";
-            $qrhtml .= BML::ml('/talkread.bml.qr.spellcheck');
-            $qrhtml .= "</label>";
-        }
-
-        LJ::load_user_props($u, 'opt_logcommentips');
-        if ($u->{'opt_logcommentips'} eq 'A') {
-            $qrhtml .= '<br />';
-            $qrhtml .= BML::fill_template('de', { 'DATA' => BML::ml('/talkpost.bml.logyourip') } );
-            $qrhtml .= ' ' . BML::fill_template('help', { 'DATA' => $LJ::HELPURL{'iplogging'} } )
-                if defined $LJ::HELPURL{'iplogging'};
-        }
-
-        $qrhtml .= "</td></tr></table>";
-        $qrhtml .= "</div>";
+    # rate limiting challenge
+    {
+        my ($time, $secret) = LJ::get_secret();
+        my $rchars = LJ::rand_chars(20);
+        my $chal = $ditemid . "-$u->{userid}-$time-$rchars";
+        my $res = Digest::MD5::md5_hex($secret . $chal);
+        $qrhtml .= LJ::html_hidden("chrp1", "$chal-$res");
     }
+
+    # Start making the div itself
+    $qrhtml .= "<div id='qrdiv' name='qrdiv' style='display:none;'>";
+    $qrhtml .= "<table style='border: 1px solid black'>";
+    $qrhtml .= "<tr valign='center'>";
+    $qrhtml .= "<td align='right'><b>".BML::ml('/talkpost.bml.opt.from')."</b></td><td>";
+    $qrhtml .= LJ::ljuser($remote->{'user'});
+    $qrhtml .= "</td><td align='center'>";
+
+    # Userpic selector
+    {
+        my %res;
+        LJ::do_request({ "mode" => "login",
+                         "ver" => ($LJ::UNICODE ? "1" : "0"),
+                         "user" => $remote->{'user'},
+                         "getpickws" => 1, },
+                       \%res, { "noauth" => 1, "userid" => $remote->{'userid'}}
+                       );
+
+        if ($res{'pickw_count'}) {
+            $qrhtml .= BML::ml('/talkpost.bml.label.picturetouse',{'username'=>$remote->{'user'}});
+            my @pics;
+            for (my $i=1; $i<=$res{'pickw_count'}; $i++) {
+                push @pics, $res{"pickw_$i"};
+            }
+            @pics = sort { lc($a) cmp lc($b) } @pics;
+            $qrhtml .= LJ::html_select({'name' => 'prop_picture_keyword',
+                                        'selected' => $userpic, 'id' => 'prop_picture_keyword' },
+                                       ("", BML::ml('/talkpost.bml.opt.defpic'), map { ($_, $_) } @pics));
+
+            $qrhtml .= ' ' . BML::fill_template('help', { 'DATA' => $LJ::HELPURL{'userpics'} } )
+                if defined $LJ::HELPURL{'userpics'};
+        }
+    }
+
+    $qrhtml .= "</td></tr>";
+
+    $qrhtml .= "<tr><td align='right'>";
+    $qrhtml .= "<b>".BML::ml('/talkpost.bml.opt.subject')."</b></td>";
+    $qrhtml .= "<td colspan='2'>";
+    $qrhtml .= "<input class='textbox' type='text' size='50' maxlength='100' name='subject' id='subject' value='' />";
+    $qrhtml .= "</td></tr>";
+
+    $qrhtml .= "<tr valign='top'>";
+    $qrhtml .= "<td align='right'><b>".BML::ml('/talkpost.bml.opt.message')."</b></td>";
+    $qrhtml .= "<td colspan='3' style='width: 90%'>";
+
+    $qrhtml .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='body' style='width: 99%'></textarea>";
+    $qrhtml .= "</td></tr>";
+
+    $qrhtml .= "<tr><td>&nbsp;</td>";
+    $qrhtml .= "<td colspan='3'>";
+
+    $qrhtml .= LJ::html_submit('submitpost', BML::ml('/talkread.bml.button.post'),
+                               { "id" => "submitpost",
+                                 "raw" => "onclick='if (checkLength()) {submitform();}'"
+                                 });
+
+    $qrhtml .= "&nbsp;" . LJ::html_submit('submitmoreopts', BML::ml('/talkread.bml.button.more'),
+                                          { "id" => "submitmoreopts",
+                                            "raw" => "onclick='if (moreopts()) {submitform();}'"
+                                            });
+    if ($LJ::SPELLER) {
+        $qrhtml .= "&nbsp;<input type='checkbox' name='do_spellcheck' value='1' id='do_spellcheck' /> <label for='do_spellcheck'>";
+        $qrhtml .= BML::ml('/talkread.bml.qr.spellcheck');
+        $qrhtml .= "</label>";
+    }
+
+    LJ::load_user_props($u, 'opt_logcommentips');
+    if ($u->{'opt_logcommentips'} eq 'A') {
+        $qrhtml .= '<br />';
+        $qrhtml .= BML::fill_template('de', { 'DATA' => BML::ml('/talkpost.bml.logyourip') } );
+        $qrhtml .= ' ' . BML::fill_template('help', { 'DATA' => $LJ::HELPURL{'iplogging'} } )
+            if defined $LJ::HELPURL{'iplogging'};
+    }
+
+    $qrhtml .= "</td></tr></table>";
+    $qrhtml .= "</div>";
 
     my $ret;
     $ret = "<script language='JavaScript'>\n";
@@ -754,15 +754,20 @@ sub make_qr_link
 
     return undef unless defined $dtid && $linktext && $replyurl;
 
-    my $pid = int($dtid / 256);
+    my $remote = LJ::get_remote();
+    LJ::load_user_props($remote, "opt_no_quickreply");
+    unless ($remote->{'opt_no_quickreply'}) {
+        my $pid = int($dtid / 256);
 
-    $basesubject =~ s/^(Re:\s*)*//i;
-    $basesubject = "Re: $basesubject" if $basesubject;
-    $basesubject = LJ::ejs($basesubject);
-    my $onclick = "return quickreply('$dtid', $pid, '$basesubject')";
-    $onclick = LJ::ehtml($onclick);
-
-    return "<a onclick='$onclick' href='$replyurl' >$linktext</a>";
+        $basesubject =~ s/^(Re:\s*)*//i;
+        $basesubject = "Re: $basesubject" if $basesubject;
+        $basesubject = LJ::ejs($basesubject);
+        my $onclick = "return quickreply('$dtid', $pid, '$basesubject')";
+        $onclick = LJ::ehtml($onclick);
+        return "<a onclick='$onclick' href='$replyurl' >$linktext</a>";
+    } else { # QR Disabled
+        return "<a href='$replyurl' >$linktext</a>";
+    }
 }
 
 # <LJFUNC>
