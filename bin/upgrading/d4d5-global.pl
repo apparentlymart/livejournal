@@ -57,7 +57,7 @@ my $move_user = sub {
 
     if (@LJ::CLUSTERS > 1) {
         push @map, ['s1stylecache' => 's1stylecache',
-                    qw(user override) ];
+                    qw(styleid cleandate type opt_cache vars_stor vars_cleanver) ];
     }
     
     # user 'system' is a spacial case.  if we encounter this user we'll swap $dbcm
