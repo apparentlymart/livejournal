@@ -6,6 +6,7 @@ use vars qw(%maint);
 use lib "$ENV{'LJHOME'}/cgi-bin";  # extra XML::Encoding files in cgi-bin/XML/*
 use LWP::UserAgent;
 use XML::RSS;
+use HTTP::Status;
 require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
 use Data::Dumper;
 
@@ -52,9 +53,22 @@ $maint{'synsuck'} = sub
             $content .= $_[0];
         }, 4096);
         if ($too_big) { $delay->(60, "toobig"); next; }
+       
+        if ($res->is_error()) {
+            # http error
+            print "HTTP error!\n" if $verbose;
+
+            # overload parseerror here because it's already there -- we'll
+            # never have both an http error and a parse error on the
+            # same request
+            $delay->(3*60, "parseerror");
+            
+            LJ::set_userprop($userid, "rssparseerror", $res->status_line());
+            next;
+        }
         
         # check if not modified
-        if ($res->status_line() =~ /^304/) {
+        if ($res->code() == RC_NOT_MODIFIED) {
             print "  not modified.\n" if $verbose;
             $delay->($readers ? 60 : 24*60, "notmodified");
             next;

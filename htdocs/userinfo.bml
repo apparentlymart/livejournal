@@ -351,7 +351,7 @@ if ($u->{'journaltitle'}) {
      $body .= " ($status)" if $status;
 
      if ($synd->{'laststatus'} eq "parseerror") {
-        $body .= "<br />$ML{'.syn.parseerror'} $u->{'rssparseerror'}";
+        $body .= "<br />$ML{'.syn.parseerror'} " . LJ::ehtml($u->{'rssparseerror'});
      }
 
      $body .= "<br />$ML{'.syn.nextcheck'} $synd->{'checknext'}";
