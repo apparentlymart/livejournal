@@ -1115,12 +1115,13 @@ sub db_logger
         my $endcpu = $GTop->cpu                 or last STATS;
         my $startmem = $r->pnotes( 'gtop_mem' ) or last STATS;
         my $endmem = $GTop->proc_mem( $$ )      or last STATS;
+        my $cpufreq = $endcpu->freq             or last STATS;
 
         @$var{qw{pid cpu_user cpu_sys cpu_total mem_vsize mem_share mem_rss}} = (
             $$,
-            $endcpu->user - $startcpu->user,
-            $endcpu->sys - $startcpu->sys,
-            $endcpu->total - $startcpu->total,
+            ($endcpu->user - $startcpu->user) / $cpufreq,
+            ($endcpu->sys - $startcpu->sys) / $cpufreq,
+            ($endcpu->total - $startcpu->total) / $cputfreq,
             $endmem->vsize - $startmem->vsize,
             $endmem->share - $startmem->share,
             $endmem->rss - $startmem->rss,
