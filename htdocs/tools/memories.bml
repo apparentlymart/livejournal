@@ -1,7 +1,7 @@
 <?_code
 
  use strict;
- use vars qw(%GET $head $title $body);
+ use vars qw(%POST %GET $head $title $body);
 
  LJ::set_active_crumb('memories');
 
@@ -26,17 +26,19 @@
  my $authasu = LJ::get_authas_user(LJ::canonical_username($GET{'authas'}) || $user);
  my $authasarg;
  my $authasarge;
- if ($authasu) {
-     $body .= "<form method='get' action='memories.bml'>\n";
-     $body .= LJ::make_authas_select($remote, { 'authas' => $authasu->{user} }) . "\n";
-     $body .= LJ::html_hidden(keyword => $GET{keyword}) if $GET{keyword};
-     $body .= "</form>\n\n";
+ unless (LJ::did_post()) {
+     if ($authasu) {
+         $body .= "<form method='get' action='memories.bml'>\n";
+         $body .= LJ::make_authas_select($remote, { 'authas' => $authasu->{user} }) . "\n";
+         $body .= LJ::html_hidden(keyword => $GET{keyword}) if $GET{keyword};
+         $body .= "</form>\n\n";
 
-     $user ||= $authasu->{user};
-     $authasarg = "&authas=$authasu->{user}";
-     $authasarge = "&amp;authas=$authasu->{user}";
- } else {
-     $authasu = $remote;
+         $user ||= $authasu->{user};
+         $authasarg = "&authas=$authasu->{user}";
+         $authasarge = "&amp;authas=$authasu->{user}";
+     } else {
+         $authasu = $remote;
+     }
  }
 
  # Now, whose memories page do we actually want to see?
@@ -60,6 +62,10 @@
                          : $ML{'error.username_notfound'};
      return;
  }
+
+ # owner if you've authed as them or you administrate them
+ my $is_owner = $authasu && $user eq $authasu->{user} ||
+                $u->{journaltype} eq 'C' && LJ::check_rel($u, $remote, 'A');
 
  my $userid = $u->{'userid'};
 
@@ -91,6 +97,42 @@
      return;
  }
 
+ if (LJ::did_post()) {
+     unless ($is_owner) {
+         $title = $ML{'Error'};
+         $body = "<?p $ML{'error.invalidauth'} p?>\n";
+         return;
+     }
+
+     my @to_delete = ();
+     foreach (keys %POST) {
+         push @to_delete, $1 if /^select_mem_(\d+)$/;
+     }
+
+     unless (@to_delete) {
+         $title = $ML{'Error'};
+         $body = "<?p $ML{'.delete.error.noneselected'} p?>";
+         return;
+     }
+
+     # delete them!
+     my $dbh = LJ::get_db_writer();
+     my $memin = join(",", @to_delete);
+     $dbh->do("DELETE FROM memorable WHERE userid=? AND memid IN ($memin)", undef, $authasu->{userid});
+     if ($dbh->err) {
+         $title = $ML{'Error'};
+         $body = "<?h1 $ML{'Error'} h1?><?p ";
+         $body .= BML::ml('.delete.error.dberror', { error => $dbh->errstr }) . " p?>";
+         return;
+     } else {
+         $title = $ML{'.delete.deleted.title'};
+         $body = "<?h1 $ML{'.delete.deleted.head'} h1?><?p ";
+         $body .= BML::ml('.delete.deleted.text', { aopts => "href='./memories.bml?user=$authasu->{user}'" }) . " p?>";
+         return;
+     }
+         
+ }
+
  my %filters = ("all" => $ML{'.filter.all'},
                 "own" => BML::ml(".filter.own", { 'user' => $user }),
                 "other" => $ML{'.filter.other'});
@@ -117,8 +159,7 @@
 
  my $secwhere = "AND m.security='public'";
  if ($authasu) {
-     if ($authasu->{userid} == $userid ||
-         $u->{'journaltype'} eq "C" && LJ::check_rel($u, $remote, 'A')) {
+     if ($is_owner) {
          $secwhere = "";
      } elsif ($authasu->{'journaltype'} eq 'P' and LJ::is_friend($userid, $authasu->{'userid'})) {
          $secwhere = "AND m.security IN ('public', 'friends')";
@@ -174,6 +215,7 @@
      }
      @memories = $sortfunc{$sort}->( @memories );
     
+     $body .= "<form method='post' action='./memories.bml?user=$user$authasarge'>\n" if $is_owner;
      $body .= "<ul>\n";
      foreach my $mem (@memories) {
          my $eh_des = LJ::ehtml($mem->{'des'});
@@ -191,17 +233,24 @@
          }
 
          my $edit = "";
-         if ($authasu && $authasu->{user} eq $user) {
+         my $delete = "";
+         if ($is_owner) {
              $edit = " [<a href=\"$editlink\">$ML{'.edit'}</a>]";
+             $delete = LJ::html_check({ type => 'check', name => "select_mem_$mem->{memid}", value => 1 })
          }
 
          my %icons = (
             'friends' => "<?securityprotected?>",
             'private' => "<?securityprivate?>",
          );
-         $body .= "<p><li><a href=\"$entrylink\"><b>$eh_des</b></a> $edit $icons{$mem->{security}}<br /><font size='-1'><b>$mem->{'user'}</b></font></li>";
+         $body .= "<p><li>$delete <a href=\"$entrylink\"><b>$eh_des</b></a> $edit $icons{$mem->{security}}<br /><font size='-1'><b>$mem->{'user'}</b></font></li>";
      }
      $body .= "</ul>";
+     if ($is_owner) {
+         $body .= LJ::html_submit(undef, $ML{'.delete'}, 
+                                  { onclick => "return confirm('" . LJ::ejs($ML{'.delete.confirm'}) . "')" });
+         $body .= "</form>\n";
+     }
      return;
  }
 

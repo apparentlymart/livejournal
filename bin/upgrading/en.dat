@@ -2930,6 +2930,20 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /tools/memories.bml.body.memorable=The following is a list of uncategorized journal entries that user <B>[[user]]</B> found memorable.
 
+/tools/memories.bml.delete=Delete Selected
+
+/tools/memories.bml.delete.confirm=You are about to delete one or more memories.  Are you sure you want to do this?
+
+/tools/memories.bml.delete.deleted.title=Memories Deleted
+
+/tools/memories.bml.delete.deleted.head=Success
+
+/tools/memories.bml.delete.deleted.text=The selected memories have been deleted.  You may return to your <a [[aopts]]>list of memorable posts</a>.
+
+/tools/memories.bml.delete.error.noneselected=You did not select any memories to delete.
+
+/tools/memories.bml.delete.error.dberror=There was a database error while deleting your memories.  The error is [[error]].  Please try again.
+
 /tools/memories.bml.edit=edit
 
 /tools/memories.bml.error.noentries.body<<
