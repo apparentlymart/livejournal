@@ -3,363 +3,442 @@ title=><?_ML .title _ML?>
 body<=
 
 <?_code
+{
+    use strict;
+    use vars qw(%GET %POST);
 
- use strict;
- use vars qw(%FORM %GET);
+    return LJ::server_down_html() if $LJ::SERVER_DOWN;
+    return "<?badinput?>" unless LJ::text_in(\%POST);
 
- my $ret = "";
- return LJ::server_down_html() if ($LJ::SERVER_DOWN);
- return "<?badinput?>" unless LJ::text_in(\%FORM);
+    # some definitions:
+    # - $remote    = remote user
+    # - $u         = authas user (remote has permission to be this person)
+    # - $usejournal = alternate journal we are working with
+    #   - if we have $usejournal, then we also have $usejournal_u
+    #     which is a user object for the $usejournal user
 
- my $remote = LJ::get_remote();
- return LJ::bad_input("You must be logged in to use this tool.")
-     unless $remote;
+    # only verify that they are logged in for now
+    my $remote = LJ::get_remote();
+    return LJ::bad_input($ML{'error.noremote'})
+        unless $remote;
 
- my $authas = $GET{'authas'} || $GET{'journal'} || $remote->{'user'};
- my $u = LJ::get_authas_user($authas);
- return LJ::bad_input("You could not be authenticated as the specified user.")
-     unless $u;
+    # are they asking to be authed as someone else?
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input("You could not be authenticated as the specified user.")
+        unless $u;
+    return LJ::bad_input("You must be authenticated as a person.")
+        unless $u->{'journaltype'} eq 'P';
 
- # needed so it can be passed into LJ::do_request() later
- $FORM{'user'} = $authas;
+    # are we modify a community post?
+    my $usejournal = $GET{'usejournal'} || $POST{'usejournal'} || $GET{'journal'};
+    undef $usejournal if $usejournal eq $u->{'user'}; # ignore if it's the user
 
- my %res;
- my $just_last = 0;
- my $jump_to_item = 0;
+    # user object for community if we're modifying one
+    my $usejournal_u;
+    if ($usejournal) {
+        $usejournal_u = LJ::load_user($usejournal);
+        return LJ::bad_input("The community you selected does not exist.")
+            unless $usejournal_u;
+    }
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
- my $ret;
+    # extra get arguments
+    my $getextra;
+    $getextra .= "authas=$authas&" if $authas ne $u->{'user'};
+    $getextra .= "usejournal=$usejournal&" if $usejournal;
+    chop $getextra;
+    $getextra = "?$getextra" if $getextra;
 
- # we always come in with ditemid, translate it here into real itemid,
- # and back into ditemid using anum returned by the protocol whenever
- # we make a form to refer to ourselves.  --avva
- $FORM{'itemid'} = int($FORM{'itemid'} / 256) if $FORM{'itemid'};
+    ###
+    ### HAVE AN ITEMID TO EDIT
+    ###
 
- # add protocol version if we have Unicode support.
- # it'll thus automatically be used in all get_request() calls.
-
- $FORM{'ver'} = $LJ::PROTOCOL_VER;
-
- #### determine their mode
-
- if ($FORM{'mode'} eq "" && $FORM{'itemid'}) 
- {
-     $jump_to_item = 1;
-
-     $FORM{'mode'} = "getevents";
-     $FORM{'selecttype'} = "one";
-     
-     LJ::do_request(\%FORM, \%res, { "noauth" => 1, 'u' => $u});
- }
-
- if ($FORM{'metamode'} eq "choose_editrange") 
- {
-     $FORM{'mode'} = "getevents";
-     if ($FORM{'selecttype'} eq "last") 
-     {
-         $FORM{'selecttype'} = "lastn";
-         $FORM{'howmany'} = 1;
-         $just_last = 1;
-     }
-     LJ::do_request(\%FORM, \%res, { "noauth" => 1, 'u' => $u } );
- 
-     if ($res{'success'} eq "OK")
-     {
-         $ret .= "<?h1 $ML{'.pickentry.head'} h1?><?p $ML{'.pickentry.text'} p?>\n";
-         $ret .= "<form method='post' action='editjournal_do.bml?authas=$authas'>\n";
-         $ret .= "<input type='hidden' name='mode' value='getevents'>\n";
-         $ret .= "<input type='hidden' name='selecttype' value='one'>\n";
-
-         my %props = ();
-         for (my $i=1; $i<=$res{'prop_count'}; $i++) {
-             $props{$res{"prop_${i}_itemid"}}->{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
-         }
-         
-         my $count = $res{'events_count'};
-         for (my $i=1; $i<=$count; $i++)
-         {
-             my $ditemid = defined $res{"events_${i}_anum"} ? 
-                 $res{"events_${i}_itemid"} * 256 + $res{"events_${i}_anum"} : 
-                 $res{"events_${i}_itemid"};
-
-             $ret .= "<hr><input type=radio name='itemid' id='itemid-$ditemid' value='$ditemid' /> <b>" .
-                 "<label for='itemid-$ditemid'>" . $res{"events_${i}_eventtime"} . "</b>";
-
-             if ($res{"events_${i}_subject"}) {
-                 $ret .= "; <i>" . BML::ebml($res{"events_${i}_subject"}) . "</i>";
-             }
-             $ret .= "<br />\n";
-
-             my $event = BML::ebml(LJ::durl($res{"events_${i}_event"}));
-             LJ::CleanHTML::clean_event(\$event,
-                                        $props{$res{"events_${i}_itemid"}}->{'opt_preformatted'});
-             $ret .= $event;
-         }
-         
-         $ret .= "<div style='margin-top: 20px'><?h1 $ML{'.continue.head'} h1?><?p $ML{'.continue.text'} p?></div>\n";
-         $ret .= "<?standout <input type='submit' value='$ML{'.btn.edit'}'> standout?></form>\n";
-         
-         unless ($just_last) 
-         {
-             # unless they just want to edit the last entry, let them pick which one.
-             return $ret;
-         } else {
-             # set stuff up so we can go on and edit the entry
-             $ret = "";  # clear the buffer we were adding to, but aren't going to show.
-         }
-     }
-     else
-     {
-         $ret .= "<?h1 $ML{'Error'} h1?>\n";
-         $ret .= "<?p $ML{'.error.getting'} <ul><li><b><?_eh $res{'errmsg'} _eh?></b></li></ul> p?>";
-         return $ret;
-     }
- }
-
- ######  an entry was selected to edit
-
- # if $just_last is set, we've already loaded it.
- unless ($just_last || $jump_to_item)
- {
-     if ($FORM{'mode'} eq "editevent") {
-
-         ## must explicitly set this.  protocol makes a distinction between not defined
-         ## and set to zero.  browsers won't send value (undefined) if unchecked.
-
-         $FORM{"prop_opt_preformatted"} = $FORM{"prop_opt_preformatted"} ? 1 : 0;
-         $FORM{"prop_opt_nocomments"} = $FORM{"prop_opt_nocomments"} ? 1 : 0;
-         $FORM{"prop_opt_backdated"} = $FORM{"prop_opt_backdated"} ? 1 : 0;
-         $FORM{"prop_opt_noemail"} = $FORM{"prop_opt_noemail"} ? 1 : 0;
-
-         ## see if an "other" mood they typed in has an equivalent moodid
-         if ($FORM{'prop_current_mood'} ne "") 
-         {
-             $FORM{'prop_current_moodid'} = ""; # so it gets deleted
-             my $qmood = $dbr->quote(lc($FORM{'prop_current_mood'}));
-             my $sth = $dbr->prepare("SELECT moodid FROM moods WHERE mood=$qmood");
-             $sth->execute;
-             my ($moodid) = $sth->fetchrow_array;
-             if ($moodid) {
-                 delete $FORM{'prop_current_mood'};
-                 $FORM{'prop_current_moodid'} = $moodid;
-             }
-         }
-
-         my $sec = "public";
-         my $amask = 0;
-         if ($FORM{'security'} eq "private") { $sec = "private"; }
-         if ($FORM{'security'} eq "friends") { $sec = "usemask"; $amask = 1; }
-         if ($FORM{'security'} eq "custom") { 
-             $sec = "usemask"; 
-             foreach my $bit (1..30) {
-                 next unless $FORM{"custom_bit_$bit"};
-                 $amask |= (1 << $bit);
-             }
-         }
-         $FORM{'security'} = $sec;
-         $FORM{'allowmask'} = $amask;
-     }
-
-     LJ::do_request(\%FORM, \%res, { 'noauth' => 1, 'u' => $u });
- }
- 
- if ($res{'success'} eq "OK")
- {
-     if ($FORM{'mode'} eq "getevents")
-     {
-         my $count = $res{'events_count'};
-         unless ($count) {
-             return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.nofind'} p?>";
-         }
-
-         my $gfg;
-         $gfg = LJ::Protocol::do_request("getfriendgroups", {
-             'username' => $u->{'user'},
-             'ver' => $LJ::PROTOCOL_VER,
-         }, undef, {
-             'noauth' => 1,
-             'u' => $u,
-         });
-         
-         my %props = ();
-         for (my $i=1; $i<=$res{'prop_count'}; $i++) {
-             $props{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
-         }
-
-         my $ditemid = defined $res{'events_1_anum'} ? 
-             $res{'events_1_itemid'} * 256 + $res{'events_1_anum'} : 
-             $res{'events_1_itemid'};
-
-         $ret .= "<?h1 $ML{'.title'} h1?><?p $ML{'.edit.text'} p?>\n";
-         $ret .= "<form method='post' action='editjournal_do.bml?authas=$authas'>\n";
-         $ret .= "<input type='hidden' name='mode' value='editevent'>\n";
-         $ret .= "<input type='hidden' name='itemid' value='$ditemid'>\n";
-
-         my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
-
-         $ret .= "<table>\n";
-         $ret .= "<tr><td align='right'>$ML{'.date'}<br /><i>(yyyy-mm-dd)</i></td><td><input name='year' size='5' maxlength='4' value='$year'>-";
-         $ret .= "<input name='mon' size='3' maxlength='2' value='$mon'>-";
-         $ret .= "<input name='day' size='3' maxlength='2' value='$mday'></td>\n";
-         
-         $ret .= "<td align='right'>$ML{'.localtime'}<br /><i>($ML{'.timeformat'})</i></td><td>";
-         $ret .= "<input name='hour' size='3' maxlength='2' value='$hour'>:";
-         $ret .= "<input name='min' size='3' maxlength='2' value='$min'></td></tr>\n";
-         $ret .= "</table>\n";
-
-         $ret .= "<p>$ML{'.subject'}<br />";
-         $ret .= "<input name='subject' value=\"";
-         $ret .= LJ::eall($res{"events_1_subject"});
-         $ret .= "\" size='60' maxlength='255'>\n";
+    if ($GET{'itemid'} || $POST{'itemid'}) {
         
-         $ret .= "<p><b>$ML{'.event'}</b><br /><textarea rows='12' cols='60' wrap='soft' name='event' style='width: 99%'>";
-         $ret .= LJ::eall(LJ::durl($res{"events_1_event"}));
-         $ret .= "</textarea></p>\n";
+        # the 'itemid' form element is really an 'itemid'
+        my $ditemid = $GET{'itemid'} || $POST{'itemid'};
+        my $itemid = $ditemid >> 8;
 
-         $ret .= "<p><b>$ML{'label.security.head'}</b> ";
-         my @secs = ("public" => $ML{'label.security.public'}, "private" => $ML{'label.security.private'}, 
-                     "friends" => $ML{'label.security.friends'});
-         
-         my $raw;
-         if ($gfg && @{$gfg->{'friendgroups'}}) {
-             push @secs, ("custom", $ML{'label.security.custom'});
-             $raw = "onChange=\"document.getElementById('custom_boxes').style.display = (this.selectedIndex == 3) ? 'block' : 'none';\"";
-         }
-         
-         my $curmask = $res{'events_1_allowmask'};
-         my $cursec = $res{'events_1_security'};
-         if ($cursec eq 'usemask') {
-             $cursec = $curmask == 1 ? "friends" : "custom";
-         }
-         $ret .= LJ::html_select({ 'name' => 'security',
-                                   'selected' => $cursec,
-                                   'raw' => $raw,
-                               }, @secs) . " ";
+        # do getevents request
+        my %res = ();
+        LJ::do_request({ 'mode' => 'getevents',
+                         'selecttype' => 'one',
+                         'ver' => $LJ::PROTOCOL_VER,
+                         'user' => $u->{'user'},
+                         'usejournal' => $usejournal,
+                         'itemid' => $itemid },
+                       \%res,
+                       { "noauth" => 1,
+                         'u' => $u }
+                       );
 
-         $ret .= LJ::help_icon("security");
+        # does the requested entry exist?
+        return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.nofind'} p?>"
+            unless $res{'events_count'};
 
-         if ($gfg && @{$gfg->{'friendgroups'}}) {
-             my $display = $cursec eq "custom" ? "block" : "none";
-             $ret .= "<blockquote id='custom_boxes' style='display: $display'>";
-             foreach my $fg (@{$gfg->{'friendgroups'}}) {
-                 my $selected;
-                 if ($curmask+0 & 1<<$fg->{'id'}) {
-                     $selected = "checked='checked'";
-                 }
-                 $ret .= "<input type='checkbox' name='custom_bit_$fg->{'id'}' value='1' $selected> ";
-                 $ret .= LJ::ehtml($fg->{'name'}) . "<br />\n";
-             }
-             $ret .= "</blockquote>";
-         }
+        # are we authorized to edit other peoples' posts in this community?
+        my $disabled_save = 0;
+        my $disabled_delete = 0;
+        if ($usejournal && $res{'events_1_poster'} ne $u->{'user'}) {
+            $disabled_delete = ! LJ::can_delete_journal_item($u, $usejournal_u);
+            $disabled_save++;
+        }
 
-         ### don't auto-format
-         {
-             my $check = $props{'opt_preformatted'} ? "checked" : "";
-             $ret .= "<p><b>$ML{'.opt.noformat'}</b> <input type='checkbox' name='prop_opt_preformatted' value='1' $check>";
-             $ret .= LJ::help_icon("noautoformat", " ");
-         }
+        ###
+        ### SAVE EDITS
+        ###
 
-         ### don't allow comments
-         {
-             my $check = $props{'opt_nocomments'} ? "checked" : "";
-             $ret .= "&nbsp;<b>$ML{'.opt.nocomments'}</b> <input type='checkbox' name='prop_opt_nocomments' VALUE='1' $check>";
-         }
+        # they clicked the save or delete button
+        if ($POST{'action:save'} || $POST{'action:delete'}) {
 
-         ### don't email the poster
-         {
-             my $check = $props{'opt_noemail'} ? "checked" : "";
-             $ret .= "&nbsp;<b>$ML{'.opt.noemail'}</b> <input type='checkbox' name='prop_opt_noemail' value='1' $check>";
-         }
+            my %req = (
+                       'mode' => 'editevent',
+                       'ver' => $LJ::PROTOCOL_VER,
+                       'user' => $u->{'user'},
+                       'usejournal' => $usejournal,
+                       'itemid' => $itemid,
+                       );
 
-         ### backdating
-         {
-             my $check = $props{'opt_backdated'} ? "CHECKED" : "";
-             $ret .= "<p><b>$ML{'.opt.backdate'}</b> <input type='checkbox' name='prop_opt_backdated' value='1' $check> $ML{'.opt.backdate.about'}";
+            # copy some things from %POST
+            foreach (qw(event subject year mon day hour min
+                        prop_picture_keyword prop_current_moodid
+                        prop_current_mood prop_current_music)) {
+                $req{$_} = $POST{$_};
+            }
 
-         }
+            # deleting the event? protocol wants blank event body
+            $req{'event'} = '' if $POST{'action:delete'};
 
-         
-         ### picture to use
-         {
-             my $sth = $dbr->prepare("SELECT k.keyword FROM userpicmap m, keywords k WHERE m.userid=? AND m.kwid=k.kwid");
-             $sth->execute($u->{'userid'});
-             my @pics;
-             push @pics, $_ while ($_ = $sth->fetchrow_array);
+            # copy some opts, but make sure they are 1 : 0 explicitly
+            foreach (qw(preformatted nocomments backdated noemail)) {
+                $req{"prop_opt_$_"} = $POST{"prop_opt_$_"} ? 1 : 0;
+            }
 
-             if (@pics) {
-                 $ret .= "<p><b>".BML::ml(".picture", {'url' => "$LJ::SITEROOT/allpics.bml?user=$u->{'user'}"}) ."</b> ";
-                 $ret .= LJ::html_select({ 'name' => 'prop_picture_keyword',
-                                           'selected' => $props{'picture_keyword'} },
-                                           '', $ML{'.default'},
-                                           map { $_, $_ } sort { lc($a) cmp lc($b) } @pics
-                                         );
-                 $ret .= LJ::help_icon("userpics", " ") . "</p>";
-             }
-         }
+            ### see if an "other" mood they typed in has an equivalent moodid
+            if ($POST{'prop_current_mood'}) {
+                LJ::load_moods();
+                foreach (keys %LJ::CACHE_MOODS) {
+                    next unless $LJ::CACHE_MOODS{$_}->{'name'} eq $POST{'prop_current_mood'};
 
-         ### current mood
-         {
-             $ret .= "<p><b>$ML{'.currmood'}</b> <select name='prop_current_moodid'><option value=''>$ML{'.noneother'}";
+                    $req{'prop_current_moodid'} = $_;
+                    last;
+                }
+            }
+            
+            # security
+            my $sec = "public";
+            my $amask = 0;
+            if ($POST{'security'} eq "private") { $sec = "private"; }
+            if ($POST{'security'} eq "friends") { $sec = "usemask"; $amask = 1; }
+            if ($POST{'security'} eq "custom") { 
+                $sec = "usemask"; 
+                foreach my $bit (1..30) {
+                    next unless $POST{"custom_bit_$bit"};
+                    $amask |= (1 << $bit);
+                }
+            }
+            $req{'security'} = $sec;
+            $req{'allowmask'} = $amask;
 
-             my $match = 0;
-             my $sth = $dbr->prepare("SELECT moodid, mood FROM moods ORDER BY mood");
-             $sth->execute;
-             while ($_ = $sth->fetchrow_hashref) {
-                 my $sel = ($props{'current_mood'} eq $_->{'mood'} || 
-                            $props{'current_moodid'} == $_->{'moodid'}) ? " selected" : "";
-                 if ($sel) { $match = 1; }
-                 $ret .= "<option value='$_->{'moodid'}'$sel>$_->{'mood'}\n";
-             }
-             $ret .= "</select> ";
-             my $other_mood = $match==0 ? $props{'current_mood'} : "";
-             $other_mood = LJ::ehtml($other_mood);
-             $ret .= "$ML{'.other'} <input name='prop_current_mood' value='$other_mood' size='15' maxlength='30'>";
-         }	     
+            # do editevent request
+            LJ::do_request(\%req, \%res, { 'noauth' => 1, 'u' => $u });
 
-         ## current music
-         {
-             my $music = LJ::ehtml($props{'current_music'});
-             $ret .= "<p><b>$ML{'.currmusic'}</b> <input name='prop_current_music' value='$music' size='40' maxlength='60'>";
-         }
+            # check response
+            unless ($res{'success'} eq "OK") {
+                return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.modify'} <ul><li><b>$res{'errmsg'}</b></li></ul> p?>";
+            }
+
+            # deleted
+            unless ($req{'event'}) {
+                return "<?h1 $ML{'.success.head'} h1?><?p $ML{'.success.delete'} p?>";
+            }
+
+            # modified
+            return "<?h1 $ML{'.success.head'} h1?><?p " .
+                BML::ml(".success.edit", {'url' => LJ::item_link($usejournal ? $usejournal_u : $u,
+                                                                 $itemid, $res{'anum'}) }) ." p?>";
+        }
 
 
-         $ret .= "<?h1 $ML{'.save.head'} h1?><?p $ML{'.save.text'} p?><?standout <input type='submit' value='$ML{'.btn.save'}'> standout?></form>\n";
-         
-         return $ret;
-     }
-     elsif ($FORM{'mode'} eq "editevent")
-     {
-         if ($res{'success'} eq "OK")
-         {
-             my $itemid = $FORM{'itemid'}+0;
-             my $readurl = LJ::item_link($u, $itemid, $res{'anum'});
-             if ($FORM{'event'} =~ /\S/) {
-                 return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.edit", {'url' => $readurl}) ." p?>";
-             } else {
-                 return "<?h1 $ML{'.success.head'} h1?><?p $ML{'.success.delete'} p?>";
-             }
-         }
-         else
-         {
-             return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.modify'} <ul><li><b>$res{'errmsg'}</b></li></ul> p?>";
-         }
-     }
-     else
-     {
-         $ret .= "<?h1 $ML{'Error'} h1?>\n";
-         $ret .= "<?p You shouldn't get here.. p?>";
-         return $ret;
-     }
- }
- else
- {
-     $ret .= "<?h1 $ML{'Error'} h1?>\n";
-     $ret .= "<?p $ML{'.error.getting'} <ul><li><b><?_eh $res{'errmsg'} _eh?></b></li></ul> p?>";
-     return $ret;
- }
+        ###
+        ### SHOW EDIT FORM
+        ###
 
+        # get friend groups unless community
+        my $gfg;
+        $gfg = LJ::Protocol::do_request("getfriendgroups", {
+            'username' => $u->{'user'},
+            'ver' => $LJ::PROTOCOL_VER,
+        }, undef, {
+            'noauth' => 1,
+            'u' => $u
+        }) unless $usejournal;
+
+        # use standard props hash
+        my %props = ();
+        for (my $i = 1; $i <= $res{'prop_count'}; $i++) {
+            $props{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
+        }
+
+        # start edit form
+        my $ret;
+        $ret .= "<?h1 $ML{'.title'} h1?>\n";
+
+        $ret .= "<?p Edit the fields of your journal entry you'd like to modify and press the save button at the bottom of the page. Alternately, you can press the delete button to delete the entry. p?>\n";
+
+        $ret .= "<form method='post' action='editjournal_do.bml$getextra'>\n";
+        $ret .= LJ::html_hidden('itemid', $ditemid) . "\n";
+
+        # table of date/time info
+        my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
+
+        $ret .= "<table>\n";
+        $ret .= "<tr><td align='right'>$ML{'.date'}<br /><i>(yyyy-mm-dd)</i></td>";
+        $ret .= "<td>" . LJ::html_text({ 'name' => 'year', 'value' => $year, 'size' => '5', 'maxlength' => '4' }) . "-";
+        $ret .= LJ::html_text({ 'name' => 'mon', 'value' => $mon, 'size' => '3', 'maxlength' => '2' }) . "-";
+        $ret .= LJ::html_text({ 'name' => 'day', 'value' => $mday, 'size' => '3', 'maxlength' => '2' }) . "</td>\n";
+            
+        $ret .= "<td align='right'>$ML{'.localtime'}<br /><i>($ML{'.timeformat'})</i></td><td>";
+        $ret .= LJ::html_text({ 'name' => 'hour', 'value' => $hour, 'size' => '3', 'maxlength' => '2' }) . ":";
+        $ret .= LJ::html_text({ 'name' => 'min', 'value' => $min, 'size' => '3', 'maxlength' => '2' }) . "</td></tr>\n";
+        $ret .= "</table>\n";
+
+        # subject
+        $ret .= "<p>$ML{'.subject'}<br />";
+        $ret .= LJ::html_text({ 'name' => 'subject', 'value' => $res{'events_1_subject'},
+                                'size' => '60', 'maxlength' => '255' }) . "\n";
+        
+        # event body
+        my $postedby = " (Posted by: " . LJ::ljuser($res{'events_1_poster'}) . ")" if $usejournal;
+        $ret .= "<p><b>$ML{'.event'}</b>$postedby<br />";
+        $ret .= LJ::html_textarea({ 'name' => 'event', 'value' => LJ::durl($res{'events_1_event'}), 'rows' => '12',
+                                    'cols' => '60', 'wrap' => 'soft', 'style' => 'width: 99%;' }) . "</p>\n";
+
+        # security
+        $ret .= "<p><b>$ML{'label.security.head'}</b> ";
+        my @secs = ("public" => $ML{'label.security.public'}, "private" => $ML{'label.security.private'}, 
+                    "friends" => $ML{'label.security.friends'});
+        
+        # custom friend groups - wont' happen if $usejournal
+        my @opts;
+        if ($gfg && @{$gfg->{'friendgroups'}}) {
+            push @secs, ("custom", $ML{'label.security.custom'});
+            push @opts, ("onchange" => "document.getElementById('custom_boxes').style.display = (this.selectedIndex == 3) ? 'block' : 'none';");
+        }
+        
+        # selected mark
+        my $curmask = $res{'events_1_allowmask'};
+        my $cursec = $res{'events_1_security'};
+        if ($cursec eq 'usemask') {
+            $cursec = $curmask == 1 ? "friends" : "custom";
+        }
+
+        # show drop-down
+        $ret .= LJ::html_select({ 'name' => 'security','selected' => $cursec, @opts }, @secs);
+        $ret .= LJ::help_icon("security", ' ') . "\n";
+        
+        # pop-in friend groups
+        if ($gfg && @{$gfg->{'friendgroups'}}) {
+            my $display = $cursec eq "custom" ? "block" : "none";
+            $ret .= "<div id='custom_boxes' style='margin: 10px 0 10px 30px; display: $display;'>";
+            foreach my $fg (@{$gfg->{'friendgroups'}}) {
+
+                $ret .= LJ::html_check({ 'type' => 'check',
+                                         'name' => "custom_bit_$fg->{'id'}",
+                                         'id' => "custom_bit_$fg->{'id'}",
+                                         'selected' => $curmask+0 & 1 << $fg->{'id'} }) . " ";
+                $ret .= "<label for='custom_bit_$fg->{'id'}'>" . LJ::ehtml($fg->{'name'}) . "</label><br />";
+            }
+            $ret .= "</div>\n";
+        }
+
+        ### opt_ checkboxes
+        my $prop_check = sub {
+            my $prop = shift;
+            my $prop_ml = shift || $prop;
+
+            return "<b><label for='prop_opt_$prop'>" . $ML{".opt.$prop_ml"} . "</label></b> " .
+                   LJ::html_check({ 'type' => 'check',
+                                    'name' => "prop_opt_$prop",
+                                    'id' => "prop_opt_$prop",
+                                    'selected' => $props{"opt_$prop"} });
+        };
+
+        # backdating
+        $ret .= "<p>" . $prop_check->('backdated', 'backdate');
+
+        # don't auto-format
+        $ret .= $prop_check->('preformatted', 'noformat') . LJ::help_icon("noautoformat", " ") . "</p>\n";
+
+        # don't allow comments
+        $ret .= "<p>" . $prop_check->('nocomments');
+
+        # don't email the poster
+        $ret .= $prop_check->('noemail') . "\n";
+
+        # picture to use
+        {
+            # this is the only place we need a dbr
+            my $dbr = LJ::get_db_reader();
+            my $pics = $dbr->selectcol_arrayref("SELECT k.keyword FROM userpicmap m, keywords k " .
+                                                "WHERE m.userid=? AND m.kwid=k.kwid",
+                                                undef, $u->{'userid'});
+
+            if (@$pics) {
+                $ret .= "<p><b>".BML::ml(".picture", { 'url' => "$LJ::SITEROOT/allpics.bml?user=$u->{'user'}" }) ."</b> ";
+                $ret .= LJ::html_select({ 'name' => 'prop_picture_keyword',
+                                          'selected' => $props{'picture_keyword'} },
+                                          '', $ML{'.default'},
+                                          map { $_, $_ } sort { lc($a) cmp lc($b) } @$pics
+                                       );
+                $ret .= LJ::help_icon("userpics", " ") . "</p>\n";
+            }
+        }
+
+        # current mood
+        {
+            my @moodlist = ('', $ML{'.noneother'});
+            my $sel;
+
+            LJ::load_moods();
+            foreach (sort { $LJ::CACHE_MOODS{$a}->{'name'} cmp $LJ::CACHE_MOODS{$b}->{'name'} } keys %LJ::CACHE_MOODS) {
+                push @moodlist, ($_, $LJ::CACHE_MOODS{$_}->{'name'});
+
+                if ($props{'current_mood'} eq $LJ::CACHE_MOODS{$_}->{'name'} ||
+                    $props{'current_moodid'} == $_) {
+                    $sel = $_;
+                }
+            }
+
+            $ret .= "<p><b>$ML{'.currmood'}</b>";
+            $ret .= LJ::html_select({ 'name' => 'prop_current_moodid',
+                                      'selected' => $sel },
+                                      @moodlist);
+            $ret .= " $ML{'.other'} " . LJ::html_text({ 'name' => 'prop_current_mood',
+                                                        'value' => $sel ? '' : $props{'current_mood'},
+                                                        'size' => '15', 'maxlength' => '30' });
+        }	     
+
+        ## current music
+        $ret .= "<p><b>$ML{'.currmusic'}</b> ";
+        $ret .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $props{'current_music'},
+                                'size' => '40', 'maxlength' => '60' }) . "</p>\n";
+
+        $ret .= "<?h1 $ML{'.save.head'} h1?><?p $ML{'.save.text'} p?>\n";
+        $ret .= "<?standout ";
+        $ret .= LJ::html_submit('action:save', $ML{'.btn.save'},
+                                { 'disabled' => $disabled_save }) . " ";
+        $ret .= LJ::html_submit('action:delete', "Delete Entry",
+                                { 'disabled' => $disabled_delete });
+        $ret .= " standout?></form>\n";
+        
+        return $ret;
+    }
+
+
+    ###
+    ### NO ITEMID - SELECT ENTRY TO EDIT
+    ### 
+
+    ### already authenticated from above
+
+    return BML::redirect("$LJ::SITEROOT/editjournal.bml")
+        unless LJ::did_post();
+
+    my %res;
+    my %req = (
+               'mode' => 'getevents',
+               'ver'  => $LJ::PROTOCOL_VER,
+               'user' => $u->{'user'},
+               'usejournal' => $usejournal,
+               'noprops' => 1,
+               );
+
+    # last 1
+    if ($POST{'selecttype'} eq "last") {
+        $req{'selecttype'} = 'lastn';
+        $req{'howmany'} = 1;
+
+    # last n
+    } elsif ($POST{'selecttype'} eq 'lastn') {
+        $req{'selecttype'} = 'lastn';
+        $req{'howmany'} = $POST{'howmany'};
+
+    # day
+    } elsif ($POST{'selecttype'} eq 'day') {
+        $req{'selecttype'} = 'day';
+        $req{$_} = $POST{$_} foreach qw(year month day);
+    }
+
+    # do getevents request
+    LJ::do_request(\%req, \%res, { 'noauth' => 1, 'u' => $u });
+
+    # check response
+    unless ($res{'success'} eq "OK") {
+        return "<?h1 $ML{'Error'} h1?>\n" .
+               "<?p $ML{'.error.getting'} <ul><li><b><?_eh $res{'errmsg'} _eh?></b></li></ul> p?>";
+    }
+
+    # only one item returned?  go directly to edit it
+    if ($res{'events_count'} == 1) {
+        my $ditemid = $res{'events_1_itemid'} << 8;
+        my $ditemid_get = $getextra ? "$getextra&itemid=$ditemid" : "?itemid=$ditemid";
+        return BML::redirect("$LJ::SITEROOT/editjournal_do.bml$ditemid_get");
+    }
+
+    # how many results did we get?
+    my $ev_count = $res{'events_count'};
+    unless ($ev_count) { 
+        if ($req{'selecttype'} eq 'lastn') {
+            return "<?h1 No Entries Found h1?>\n" .
+                   "<?p The selected journal has no entries. p?>\n";
+        }
+
+        return "<?h1 No Entries Found h1?>\n" .
+               "<?p No entries match the criteria you specified. Please go back and adjust your search. p?>\n";
+    }
+
+    ### display results
+    my $ret;
+    $ret .= "<?h1 $ML{'.pickentry.head'} h1?><?p $ML{'.pickentry.text'} p?>\n";
+    $ret .= "<form method='post' action='editjournal_do.bml$getextra'>\n";
+
+    my %props = ();
+    for (my $i=1; $i<=$res{'prop_count'}; $i++) {
+        $props{$res{"prop_${i}_itemid"}}->{$res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
+    }
+
+    for (my $i=1; $i<=$ev_count; $i++) {
+        my $itemid = $res{"events_${i}_itemid"};
+        my $ditemid = $itemid * 256 + $res{"events_${i}_anum"};
+        
+        $ret .= "<?hr?><table><tr valign='top'><td align='middle'>";
+        $ret .= LJ::html_check({ 'type' => 'radio', 'value' => $ditemid,
+                                 'name' => 'itemid', 'id' => "itemid-$ditemid" });
+        $ret .= "</td><td>";
+
+        $ret .= " <label for='itemid-$ditemid'>" . $res{"events_${i}_eventtime"} . "</label></b>";
+        $ret .= " (Posted by: " . LJ::ljuser($res{"events_${i}_poster"}) . ")" if $usejournal;
+
+        if ($res{"events_${i}_subject"}) {
+            $ret .= "; <i>" . BML::ebml($res{"events_${i}_subject"}) . "</i>";
+        }
+        $ret .= "<br />\n";
+            
+        my $event = BML::ebml(LJ::durl($res{"events_${i}_event"}));
+        LJ::CleanHTML::clean_event(\$event,
+                                   $props{$itemid}->{'opt_preformatted'});
+        $ret .= $event;
+        $ret .= "</td></tr></table>\n";
+    }
+        
+    $ret .= "<?hr?><div style='margin-top: 20px;'><?h1 $ML{'.continue.head'} h1?></div>";
+    $ret .= "<?p $ML{'.continue.text'} p?>\n";
+    $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.btn.edit'}) . " standout?></form>\n";
+        
+    return $ret;
+
+}
 _code?>
 
 <=body
