@@ -134,8 +134,10 @@ BODY<=
  if ($ur && $ur->{'user'} ne "") {
      $ret .= "<A HREF=\"/userinfo.bml?user=$ur->{'user'}\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>";
      $ret .= "<B><A HREF=\"$LJ::SITEROOT/users/$ur->{'user'}/\">" . &ehtml($ur->{'name'}) . "</A> ";
+ } else {
+     $ret .= "<B>Someone";
  }
- $ret .= "$extra says...</B>";
+ $ret .= "$extra said...</B>";
  if ($FORM{'replyto'} eq "") {
      my $etime = $item->{'eventtime'};
      $etime =~ s!(\d\d\d\d)-(\d\d)-(\d\d)!&LJ::date_to_view_links($u, $&)!e;
@@ -154,7 +156,8 @@ BODY<=
      push @linkele, "<A HREF=\"/tools/memadd.bml?itemid=$itemid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/memadd.gif\" WIDTH=22 HEIGHT=20 ALT=\"Add to memories!\" title=\"Add to memories!\" BORDER=0></A>";
      
      if (defined $remote && ($remote->{'user'} eq $u->{'user'} ||
-			     $remote->{'user'} eq $up->{'user'}) ) 
+			     $remote->{'user'} eq $up->{'user'} || 
+			     LJ::check_priv($dbh, $remote, "sharedjournal", $u->{'user'})))
      {
 	 push @linkele, "<A HREF=\"/editjournal_do.bml?itemid=$itemid\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_edit.gif\" WIDTH=22 HEIGHT=20 ALT=\"Edit Entry\" title=\"Edit Entry\" BORDER=0></A>";	     
      }
