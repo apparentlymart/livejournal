@@ -8,8 +8,10 @@ use Getopt::Long;
 
 my $opt_del = 0;
 my $opt_useslow = 0;
+my $opt_slowalloc = 0;
 exit 1 unless GetOptions('delete' => \$opt_del,
                          'useslow' => \$opt_useslow, # use slow db role for read
+                         'slowalloc' => \$opt_slowalloc, # see note below
                          );
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
@@ -164,16 +166,13 @@ my $replace_into = sub {
     }
 };
 
-# assume never tried to move this user before.  however, we find crap
+# assume never tried to move this user before.  however, if reported crap
 # in the oldids table, we'll revert to slow alloc_id functionality,
 # where we do a round-trip to $dbh for everything and see if every id
 # has been remapped already.  otherwise we do it in perl and batch
 # updates to the oldids table, which is the common/fast case.
-my $first_move = 1;
-if ($dbh->selectrow_array("SELECT oldid FROM oldids WHERE userid=$userid LIMIT 1")) {
-    $first_move = 0;
-}
-print "first move: $first_move\n";
+my $first_move = ! $opt_slowalloc;
+
 my %alloc_data;
 my %alloc_arealast;
 my $alloc_id = sub {
