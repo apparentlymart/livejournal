@@ -114,7 +114,7 @@
      my @props = qw(opt_whatemailshow country state city zip renamedto
                     journaltitle journalsubtitle public_key
                     url urlname opt_hidefriendofs dont_load_members
-                    opt_showmutualfriends);
+                    opt_showmutualfriends fb_num_pubpics);
      unless ($com || $synd) { push @props, qw(aolim icq yahoo msn gender jabber); }
      if ($synd) { push @props, qw(rssparseerror); }
      if ($u->{'statusvis'} eq 'V') { push @props, qw(opt_blockrobots); }
@@ -607,6 +607,16 @@ if ($u->{'journaltitle'}) {
          my $noun_name = $memcount == 1 ? '.memories.entry' : '.memories.entries';
          my $count = BML::ml($noun_name, {'count'=>$memcount});
          $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.memories'}</b></td><td colspan='$span'><a href='/tools/memories.bml?user=$user'>$count</a></td></tr>\n";
+     }
+ }
+
+ ### Fotobilder gallery count
+ {
+     if (LJ::get_cap($u, 'fb_account') && LJ::get_cap($u, 'fb_can_upload')) {
+         my $span = ($narrow_left-- >= 0) ? 1 : 2;
+         my $count = BML::ml('.fbpictures', {'count' => $u->{'fb_num_pubpics'}});
+
+         $body .= "<tr><td align='right' valign='top'><b>$ML{'.label.fbpictures'}</b></td><td colspan='$span'><a href='$LJ::FB_SITEROOT/$user/'>$count</a></td></tr>\n";
      }
  }
 

@@ -143,6 +143,8 @@ sub set_quota
                            undef, LJ::get_blob_domainid('fotobilder'),
                            $used, $u->{'userid'});
 
+    LJ::set_userprop($u, "fb_num_pubpics", $POST->{'pub_pics'});
+
     return {
         status => ($result ? 1 : 0),
     };

@@ -3580,6 +3580,8 @@ This could be because: <ol>
 
 /userinfo.bml.error.notloggedin=If you wish to view your own user profile, you need to <a href='/login.bml?ret=1'>login</a>.
 
+/userinfo.bml.fbpictures=[[count]] [[?count|picture|pictures]]
+
 /userinfo.bml.friendof.comm=Watched by:
 
 /userinfo.bml.friendof.hidden=(hidden)
@@ -3615,6 +3617,8 @@ This could be because: <ol>
 /userinfo.bml.label.dateupdated=Date updated:
 
 /userinfo.bml.label.email=Email:
+
+/userinfo.bml.label.fbpictures=Pictures:
 
 /userinfo.bml.label.frcommunity=Communities
 
