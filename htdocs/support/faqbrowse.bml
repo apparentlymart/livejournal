@@ -21,15 +21,13 @@ BODY<=
 			 "UNIX_TIMESTAMP(lastmodtime) FROM faq ".
 			 "WHERE $where");
  $sth->execute;
- my ($question, $answer, $unixmodtime, $lastmoduserid);
+ my ($question, $answer, $unixmodtime, $lastmoduserid, $lastmodtime);
  while (($question, $answer, $lastmoduserid, $lastmodtime, $unixmodtime) =
 	$sth->fetchrow_array)
  {
      my $q = "";
      my $a = "";
      my $lastmodwho;
-     my $lastmodtime;
-     
      $lastmodwho = LJ::get_username($dbs, $lastmoduserid);
      
      $dbh->do("UPDATE faq SET uses=uses+1 WHERE faqid=$id");

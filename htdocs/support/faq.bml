@@ -32,9 +32,11 @@ P=)
  foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> 
 				$faqcat{$b}->{'catorder'} } keys %faqcat)
  {
-     $ret .= "(=H2 <a href=\"faqbrowse.bml?faqcat=$faqcat\">";
+     $ret .= "(=H2 ";
      $ret .= BMLUtil::ehtml($faqcat{$faqcat}->{'faqcatname'});
-     $ret .= "</a> H2=)\n";
+     $ret .= " (<a href=\"faqbrowse.bml?faqcat=$faqcat\">";
+     $ret .= "view all";
+     $ret .= "</a>) H2=)\n";
      $ret .= "<UL>\n";
      foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
      {
