@@ -60,4 +60,8 @@ includefile:<name> == text of BML include file
 <intid> introw:<intid> -- arrayref of [ $intid, $interest, $intcount ]
 <uid>   intids:<uid>   -- arrayref of intids for this userid
 
+<uid> rel:<uid>:<targetid>:<rel> == [{0|1}, as_of_time]
+<uid> relmodu:<uid>:<rel> == as_of_time, updated when rel edges of uid change
+<targetid> relmodt:<targetid>:<rel> == as_of_time, updated when rel edges of targetid change=======
+
 <uid>   memct:<uid>    -- number of memories user has

@@ -171,28 +171,20 @@ body<=
              return $ret;
         }
    
-        # perform deletions
+        # delete members
         if (%{$delete{'member'}}) {
             my $in = join(',', keys %{$delete{'member'}});
             # TAG:FR:bml_comm_members:del_members
             LJ::friends_do($cid, "DELETE FROM friends WHERE userid=? AND friendid IN ($in)", $cid);
         }
-        if (%{$delete{'admin'}}) {
-            my $in = join(',', keys %{$delete{'admin'}});
-            $dbh->do("DELETE FROM reluser WHERE userid=$cid AND type='A' AND targetid IN ($in)");
-        }
-        if (%{$delete{'post'}}) {
-            my $in = join(',', keys %{$delete{'post'}});
-            $dbh->do("DELETE FROM reluser WHERE userid=$cid AND type='P' AND targetid IN ($in)");
-        }
-        if (%{$delete{'moderate'}}) {
-            my $in = join(',', keys %{$delete{'moderate'}}); 
-            $dbh->do("DELETE FROM reluser WHERE userid=$cid AND type='M' AND targetid IN ($in)");
-        }
-        if (%{$delete{'preapprove'}}) {
-            my $in = join(',', keys %{$delete{'preapprove'}}); 
-            $dbh->do("DELETE FROM reluser WHERE userid=$cid AND type='N' AND targetid IN ($in)");
-        }
+
+        # delete other rel edges
+        LJ::clear_rel_multi(
+                            (map { [$cid, $_, 'A'] } keys %{$delete{admin}      || {}}),
+                            (map { [$cid, $_, 'P'] } keys %{$delete{post}       || {}}),
+                            (map { [$cid, $_, 'M'] } keys %{$delete{moderate}   || {}}),
+                            (map { [$cid, $_, 'N'] } keys %{$delete{preapprove} || {}}),
+                            );
 
         # perform additions
         my @msgs;
@@ -211,22 +203,13 @@ body<=
                 }
             }
         }
-        if (%{$add{'admin'}}) {
-            my $in = join(',', map { "($cid, $_, 'A')" } keys %{$add{'admin'}});
-            $dbh->do("REPLACE INTO reluser (userid,targetid,type) VALUES $in");
-        }
-        if (%{$add{'post'}}) {
-            my $in = join(',', map { "($cid, $_, 'P')" } keys %{$add{'post'}});
-            $dbh->do("REPLACE INTO reluser (userid,targetid,type) VALUES $in");
-        }
-        if (%{$add{'moderate'}}) {
-            my $in = join(',', map { "($cid, $_, 'M')" } keys %{$add{'moderate'}});
-            $dbh->do("REPLACE INTO reluser (userid,targetid,type) VALUES $in");
-        }
-        if (%{$add{'preapprove'}}) {
-            my $in = join(',', map { "($cid, $_, 'N')" } keys %{$add{'preapprove'}});
-            $dbh->do("REPLACE INTO reluser (userid,targetid,type) VALUES $in");
-        }
+
+        # set rels in db/memcache
+        LJ::set_rel_multi( (map { [$cid, $_, 'A'] } keys %{$add{admin}      || {}}),
+                           (map { [$cid, $_, 'P'] } keys %{$add{post}       || {}}),
+                           (map { [$cid, $_, 'M'] } keys %{$add{moderate}   || {}}),
+                           (map { [$cid, $_, 'N'] } keys %{$add{preapprove} || {}}),
+                           );
 
         $ret .= "<?h1 $ML{'.success.header'} h1?><?p $ML{'.success.message'} p?>";
         if (@msgs) {

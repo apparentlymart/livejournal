@@ -46,8 +46,7 @@ body<=
         push @rels, 'N' if $arg->{'preapprove'};
 
         if (@rels) {
-            my $sets = join(", ", map { "($aa->{'userid'}, $targetid, '$_')" } @rels);
-            $dbh->do("REPLACE INTO reluser (userid, targetid, type) VALUES $sets");
+            LJ::set_rel_multi( map { [$aa->{userid}, $targetid, $_] } @rels );
         }
 
         # mark this authaction as used

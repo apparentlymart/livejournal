@@ -7886,6 +7886,77 @@ sub load_rel_target
 }
 
 # <LJFUNC>
+# name: LJ::_get_rel_memcache
+# des: Helper function: returns memcached value for a given (userid, targetid, type) triple, if valid
+# args: userid, targetid, type
+# arg-userid: source userid, nonzero
+# arg-targetid: target userid, nonzero
+# arg-type: type (reluser) or typeid (rel2) of the relationship
+# returns: undef on failure, 0 or 1 depending on edge existence
+# </LJFUNC>
+sub _get_rel_memcache {
+    return undef unless @LJ::MEMCACHE_SERVERS;
+    return undef if $LJ::DISABLED{memcache_reluser};
+
+    my ($userid, $targetid, $type) = @_;
+    return undef unless $userid && $targetid && defined $type;
+
+    # memcache keys
+    my $relkey  = [$userid,   "rel:$userid:$targetid:$type"]; # rel $uid->$targetid edge
+    my $modukey = [$userid,   "relmodu:$userid:$type"      ]; # rel modtime for uid
+    my $modtkey = [$targetid, "relmodt:$targetid:$type"    ]; # rel modtime for targetid
+
+    # do a get_multi since $relkey and $modukey are both hashed on $userid
+    my $memc = LJ::MemCache::get_multi($relkey, $modukey);
+    return undef unless $memc && ref $memc eq 'HASH';
+
+    # [{0|1}, modtime]
+    my $rel = $memc->{$relkey->[1]};
+    return undef unless $rel && ref $rel eq 'ARRAY';
+
+    # check rel modtime for $userid
+    my $relmodu = $memc->{$modukey->[1]};
+    return undef if ! $relmodu || $relmodu > $rel->[1];
+
+    # check rel modtime for $targetid
+    my $relmodt = LJ::MemCache::get($modtkey);
+    return undef if ! $relmodt || $relmodt > $rel->[1];
+
+    # return memcache value if it's up-to-date
+    return $rel->[0] ? 1 : 0;
+}
+
+# <LJFUNC>
+# name: LJ::_set_rel_memcache
+# des: Helper function: sets memcache values for a given (userid, targetid, type) triple
+# args: userid, targetid, type
+# arg-userid: source userid, nonzero
+# arg-targetid: target userid, nonzero
+# arg-type: type (reluser) or typeid (rel2) of the relationship
+# returns: 1 on success, undef on failure
+# </LJFUNC>
+sub _set_rel_memcache {
+    return 1 unless @LJ::MEMCACHE_SERVERS;
+
+    my ($userid, $targetid, $type, $val) = @_;
+    return undef unless $userid && $targetid && defined $type;
+    $val = $val ? 1 : 0;
+
+    # memcache keys
+    my $relkey  = [$userid,   "rel:$userid:$targetid:$type"]; # rel $uid->$targetid edge
+    my $modukey = [$userid,   "relmodu:$userid:$type"      ]; # rel modtime for uid
+    my $modtkey = [$targetid, "relmodt:$targetid:$type"    ]; # rel modtime for targetid
+
+    my $now = time();
+    my $exp = $now + 3600*6; # 6 hour
+    LJ::MemCache::set($relkey, [$val, $now], $exp);
+    LJ::MemCache::set($modukey, $now, $exp);
+    LJ::MemCache::set($modtkey, $now, $exp);
+
+    return 1;
+}
+
+# <LJFUNC>
 # name: LJ::check_rel
 # des: Checks whether two users are in a specified relationship to each other.
 # args: db?, userid, targetid, type
@@ -7898,30 +7969,45 @@ sub check_rel
 {
     my $db = isdb($_[0]) ? shift : undef;
     my ($userid, $targetid, $type) = @_;
-    return undef unless $type and $userid and $targetid;
+    return undef unless $type && $userid && $targetid;
+
     my $u = LJ::want_user($userid);
     $userid = LJ::want_userid($userid);
     $targetid = LJ::want_userid($targetid);
-    my $typeid = LJ::get_reluser_id($type)+0;
 
-    my $key = "$userid-$targetid-$type";
+    my $typeid = LJ::get_reluser_id($type)+0;
+    my $eff_type = $typeid || $type;
+
+    my $key = "$userid-$targetid-$eff_type";
     return $LJ::REQ_CACHE_REL{$key} if defined $LJ::REQ_CACHE_REL{$key};
 
-    my $res;
+    # did we get something from memcache?
+    my $memval = LJ::_get_rel_memcache($userid, $targetid, $eff_type);
+    return $memval if defined $memval;
+
+    # are we working on reluser or reluser2?
+    my $table;
     if ($typeid) {
         # clustered reluser2 table
         $db = LJ::get_cluster_reader($u);
-        $res = $db->selectrow_array("SELECT COUNT(*) FROM reluser2 ".
-                                    "WHERE userid=$userid AND type=? ".
-                                    "AND targetid=$targetid", undef, $typeid);
+        $table = "reluser2";
     } else {
         # non-clustered reluser table
         $db ||= LJ::get_db_reader();
-        $res = $db->selectrow_array("SELECT COUNT(*) FROM reluser ".
-                                    "WHERE userid=$userid AND type=? ".
-                                    "AND targetid=$targetid", undef, $type);
+        $table = "reluser";
     }
-    return $LJ::REQ_CACHE_REL{$key} = ($res ? 1 : 0);
+
+    # get data from db, force result to be {0|1}
+    my $dbval = $db->selectrow_array("SELECT COUNT(*) FROM $table ".
+                                     "WHERE userid=? AND targetid=? AND type=? ",
+                                     undef, $userid, $targetid, $eff_type)
+        ? 1 : 0;
+
+    # set in memcache
+    LJ::_set_rel_memcache($userid, $targetid, $eff_type, $dbval);
+
+    # return and set request cache
+    return $LJ::REQ_CACHE_REL{$key} = $dbval;
 }
 
 # <LJFUNC>
@@ -7931,30 +8017,197 @@ sub check_rel
 # arg-userid: source userid, or a user hash
 # arg-targetid: target userid, or a user hash
 # arg-type: type of the relationship
+# returns: 1 if set succeeded, otherwise undef
 # </LJFUNC>
 sub set_rel
 {
     &nodb;
     my ($userid, $targetid, $type) = @_;
     return undef unless $type and $userid and $targetid;
+
     my $u = LJ::want_user($userid);
     $userid = LJ::want_userid($userid);
     $targetid = LJ::want_userid($targetid);
-    my $typeid = LJ::get_reluser_id($type)+0;
 
+    my $typeid = LJ::get_reluser_id($type)+0;
+    my $eff_type = $typeid || $type;
+
+    # working on reluser or reluser2?
+    my ($db, $table);
     if ($typeid) {
         # clustered reluser2 table
-        my $dbcm = LJ::get_cluster_master($u);
-        $dbcm->do("REPLACE INTO reluser2 (userid,targetid,type) ".
-                  "VALUES ($userid,$targetid,?)", undef, $typeid);
+        $db = LJ::get_cluster_master($u);
+        $table = "reluser2";
     } else {
         # non-clustered reluser global table
-        my $dbh = LJ::get_db_writer();
-        $dbh->do("REPLACE INTO reluser (userid,targetid,type) ".
-                 "VALUES ($userid,$targetid,?)", undef, $type);
+        $db = LJ::get_db_writer();
+        $table = "reluser";
     }
-    return;
+    return undef unless $db;
+
+    # set in database
+    $db->do("REPLACE INTO $table (userid, targetid, type) VALUES (?, ?, ?)",
+            undef, $userid, $targetid, $eff_type);
+    return undef if $db->err;
+
+    # set in memcache
+    LJ::_set_rel_memcache($userid, $targetid, $eff_type, 1);
+
+    return 1;
 }
+
+# <LJFUNC>
+# name: LJ::set_rel_multi
+# des: Sets relationship edges for lists of user tuples.
+# args: @edges
+# arg-edges: array of arrayrefs of edges to set: [userid, targetid, type]
+#            Where: 
+#               userid: source userid, or a user hash
+#               targetid: target userid, or a user hash
+#               type: type of the relationship
+# returns: 1 if all sets succeeded, otherwise undef
+# </LJFUNC>
+sub set_rel_multi {
+    return _mod_rel_multi({ mode => 'set', edges => \@_ });
+}
+
+# <LJFUNC>
+# name: LJ::clear_rel_multi
+# des: Clear relationship edges for lists of user tuples.
+# args: @edges
+# arg-edges: array of arrayrefs of edges to clear: [userid, targetid, type]
+#            Where: 
+#               userid: source userid, or a user hash
+#               targetid: target userid, or a user hash
+#               type: type of the relationship
+# returns: 1 if all clears succeeded, otherwise undef
+# </LJFUNC>
+sub clear_rel_multi {
+    return _mod_rel_multi({ mode => 'clear', edges => \@_ });
+}
+
+# <LJFUNC>
+# name: LJ::_mod_rel_multi
+# des: Sets/Clears relationship edges for lists of user tuples.
+# args: $opts
+# arg-opts: keys: mode  => {clear|set}
+#                 edges =>  array of arrayrefs of edges to set: [userid, targetid, type]
+#                    Where: 
+#                       userid: source userid, or a user hash
+#                       targetid: target userid, or a user hash
+#                       type: type of the relationship
+# returns: 1 if all updates succeeded, otherwise undef
+# </LJFUNC>
+sub _mod_rel_multi
+{
+    my $opts = shift;
+    return undef unless @{$opts->{edges}};
+
+    my $mode = $opts->{mode} eq 'clear' ? 'clear' : 'set';
+    my $memval = $mode eq 'set' ? 1 : 0;
+
+    my @reluser  = (); # [userid, targetid, type]
+    my @reluser2 = ();
+    foreach my $edge (@{$opts->{edges}}) {
+        my ($userid, $targetid, $type) = @$edge;
+        $userid = LJ::want_userid($userid);
+        $targetid = LJ::want_userid($targetid);
+        next unless $type && $userid && $targetid;
+
+        my $typeid = LJ::get_reluser_id($type)+0;
+        my $eff_type = $typeid || $type;
+
+        # working on reluser or reluser2?
+        push @{$typeid ? \@reluser2 : \@reluser}, [$userid, $targetid, $eff_type];
+    }
+
+    # now group reluser2 edges by clusterid
+    my %reluser2 = (); # cid => [userid, targetid, type]
+    my $users = LJ::load_userids(map { $_->[0] } @reluser2);
+    foreach (@reluser2) {
+        my $cid = $users->{$_->[0]}->{clusterid} or next;
+        push @{$reluser2{$cid}}, $_;
+    }
+    @reluser2 = ();
+
+    # try to get all required cluster masters before we start doing database updates
+    my %cache_dbcm = ();
+    foreach my $cid (keys %reluser2) {
+        next unless @{$reluser2{$cid}};
+
+        # return undef immediately if we won't be able to do all the updates
+        $cache_dbcm{$cid} = LJ::get_cluster_master($cid)
+            or return undef;
+    }
+
+    # if any error occurs with a cluster, we'll skip over that cluster and continue
+    # trying to process others since we've likely already done some amount of db 
+    # updates already, but we'll return undef to signify that everything did not
+    # go smoothly
+    my $ret = 1;
+
+    # do clustered reluser2 updates
+    foreach my $cid (keys %cache_dbcm) {
+        # array of arrayrefs: [userid, targetid, type]
+        my @edges = @{$reluser2{$cid}};
+
+        # set in database, then in memcache.  keep the two atomic per clusterid
+        my $dbcm = $cache_dbcm{$cid};
+
+        my @vals = map { @$_ } @edges;
+
+        if ($mode eq 'set') {
+            my $bind = join(",", map { "(?,?,?)" } @edges);
+            $dbcm->do("REPLACE INTO reluser2 (userid, targetid, type) VALUES $bind",
+                      undef, @vals);
+        }
+
+        if ($mode eq 'clear') {
+            my $where = join(" OR ", map { "(userid=? AND targetid=? AND type=?)" } @edges);
+            $dbcm->do("DELETE FROM reluser2 WHERE $where", undef, @vals);
+        }
+
+        # don't update memcache if db update failed for this cluster
+        if ($dbcm->err) {
+            $ret = undef;
+            next;
+        }
+
+        # updates to this cluster succeeded, set memcache
+        LJ::_set_rel_memcache(@$_, $memval) foreach @edges;
+    }
+
+    # do global reluser updates
+    if (@reluser) {
+
+        # nothing to do after this block but return, so we can
+        # immediately return undef from here if there's a problem
+        my $dbh = LJ::get_db_writer()
+            or return undef;
+
+        my @vals = map { @$_ } @reluser; 
+
+        if ($mode eq 'set') {
+            my $bind = join(",", map { "(?,?,?)" } @reluser);
+            $dbh->do("REPLACE INTO reluser (userid, targetid, type) VALUES $bind",
+                     undef, @vals);
+        }
+
+        if ($mode eq 'clear') {
+            my $where = join(" OR ", map { "userid=? AND targetid=? AND type=?" } @reluser);
+            $dbh->do("DELETE FROM reluser WHERE $where", undef, @vals);
+        }
+
+        # don't update memcache if db update failed for this cluster
+        return undef if $dbh->err;
+
+        # $_ = [userid, targetid, type] for each iteration
+        LJ::_set_rel_memcache(@$_, $memval) foreach @reluser;
+    }
+
+    return $ret;
+}
+
 
 # <LJFUNC>
 # name: LJ::clear_rel
@@ -7967,34 +8220,60 @@ sub set_rel
 # arg-userid: source userid, or a user hash, or '*'
 # arg-targetid: target userid, or a user hash, or '*'
 # arg-type: type of the relationship
+# returns: 1 if clear succeeded, otherwise undef
 # </LJFUNC>
 sub clear_rel
 {
     &nodb;
     my ($userid, $targetid, $type) = @_;
-    return undef unless $type and $userid or $targetid;
     return undef if $userid eq '*' and $targetid eq '*';
 
     my $u = LJ::want_user($userid);
     $userid = LJ::want_userid($userid) unless $userid eq '*';
     $targetid = LJ::want_userid($targetid) unless $targetid eq '*';
+    return undef unless $type && $userid && $targetid;
+
     my $typeid = LJ::get_reluser_id($type)+0;
 
     if ($typeid) {
         # clustered reluser2 table
-        my $dbcm = LJ::get_cluster_master($u);
-        my $sql = "DELETE FROM reluser2 WHERE " . ($userid ne '*' ? "userid=$userid AND " : "") .
-                  ($targetid ne '*' ? "targetid=$targetid AND " : "") . "type=$typeid";
-        $dbcm->do($sql);
+        my $dbcm = LJ::get_cluster_master($u)
+            or return undef;
+
+        $dbcm->do("DELETE FROM reluser2 WHERE " . ($userid ne '*' ? "userid=$userid AND " : "") .
+                  ($targetid ne '*' ? "targetid=$targetid AND " : "") . "type=$typeid");
+
+        return undef if $dbcm->err;
     } else {
         # non-clustered global reluser table
-        my $dbh = LJ::get_db_writer();
+        my $dbh = LJ::get_db_writer()
+            or return undef;
+
         my $qtype = $dbh->quote($type);
-        my $sql = "DELETE FROM reluser WHERE " . ($userid ne '*' ? "userid=$userid AND " : "") .
-                  ($targetid ne '*' ? "targetid=$targetid AND " : "") . "type=$qtype";
-        $dbh->do($sql);
+        $dbh->do("DELETE FROM reluser WHERE " . ($userid ne '*' ? "userid=$userid AND " : "") .
+                 ($targetid ne '*' ? "targetid=$targetid AND " : "") . "type=$qtype");
+
+        return undef if $dbh->err;
     }
-    return;
+
+    # if one of userid or targetid are '*', then we need to note the modtime
+    # of the reluser edge from the specified id (the one that's not '*')
+    # so that subsequent gets on rel:userid:targetid:type will know to ignore
+    # what they got from memcache
+    my $eff_type = $typeid || $type;
+    if ($userid eq '*') {
+        LJ::MemCache::set([$targetid, "relmodt:$targetid:$eff_type"], time());
+    } elsif ($targetid eq '*') {
+        LJ::MemCache::set([$userid, "relmodu:$userid:$eff_type"], time());
+
+    # if neither userid nor targetid are '*', then just call _set_rel_memcache
+    # to update the rel:userid:targetid:type memcache key as well as the 
+    # userid and targetid modtime keys
+    } else {
+        LJ::_set_rel_memcache($userid, $targetid, $eff_type, 0);
+    }
+
+    return 1;
 }
 
 # $dom: 'L' == log, 'T' == talk, 'M' == modlog, 'B' == blob (userpic, etc), 'S' == session
