@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 #
 
+use strict;
 package LJ::Lang;
 
 my %day_short = ('EN' => [qw[Sun Mon Tue Wed Thu Fri Sat]],
@@ -75,6 +76,121 @@ sub time_format
         }
     }
     return "";
+}
+
+#### ml_ stuff:
+my $LS_CACHED = 0;
+my %DM_ID = ();     # id -> { type, args, dmid, langs => { => 1, => 0, => 1 } }
+my %DM_UNIQ = ();   # "$type/$args" => ^^^
+my %LN_ID = ();     # id -> { ..., ..., 'children' => [ $ids, .. ] }
+my %LN_CODE = ();   # $code -> ^^^^
+
+sub get_dmid
+{
+    my $dmcode = shift;
+    load_lang_struct() unless $LS_CACHED;
+    my $d = $DM_UNIQ{$dmcode};
+    return $d ? $d->{'dmid'} : undef;
+}
+
+sub load_lang_struct
+{
+    return 1 if $LS_CACHED;
+    my $dbr = LJ::get_dbh("slave", "master");
+    return 0 unless $dbr;
+    my $sth;
+
+    $sth = $dbr->prepare("SELECT dmid, type, args FROM ml_domains");
+    $sth->execute;
+    while (my ($dmid, $type, $args) = $sth->fetchrow_array) {
+        $DM_UNIQ{"$type/$args"} = $DM_ID{$dmid} = { 
+            'type' => $type, 'args' => $args, 'dmid' => $dmid,
+        };
+    }
+
+    $sth = $dbr->prepare("SELECT lnid, lncode, lnname, parenttype, parentlnid FROM ml_langs");
+    $sth->execute;
+    while (my ($id, $code, $name, $ptype, $pid) = $sth->fetchrow_array) {
+        $LN_ID{$id} = $LN_CODE{$code} = {
+            'lnid' => $id,
+            'lncode' => $code,
+            'lnname' => $name,
+            'parenttype' => $ptype,
+            'parentlnid' => $pid,
+        };
+    }
+    foreach (values %LN_CODE) {
+        next unless $_->{'parentlnid'};
+        push @{$LN_ID{$_->{'parentlnid'}}->{'children'}}, $_->{'lnid'};
+    }
+    
+    $sth = $dbr->prepare("SELECT lnid, dmid, dmmaster FROM ml_langdomains");
+    $sth->execute;
+    while (my ($lnid, $dmid, $dmmaster) = $sth->fetchrow_array) {
+        $DM_ID{$dmid}->{'langs'}->{$dmid} = $dmmaster;
+    }
+    
+    $LS_CACHED = 1;
+}
+
+sub get_itemid
+{
+    my ($dbarg, $dmid, $itcode, $create) = @_;
+    load_lang_struct() unless $LS_CACHED;
+
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
+    $dmid += 0;
+    my $qcode = $dbh->quote($itcode);
+    my $itid = $dbr->selectrow_array("SELECT itid FROM ml_items WHERE dmid=$dmid AND itcode=$qcode");
+    return $itid if defined $itid;
+    $dbh->do("INSERT INTO ml_items (dmid, itid, itcode) VALUES ($dmid, NULL, $qcode)");
+    if ($dbh->err) {
+        return $dbh->selectrow_array("SELECT itid FROM ml_items WHERE dmid=$dmid AND itcode=$qcode");
+    }
+    return $dbh->{'mysql_insertid'};
+}
+
+sub set_text
+{
+    my ($dbarg, $dmid, $lncode, $itcode, $text, $opts) = @_;
+    load_lang_struct() unless $LS_CACHED;
+
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+
+    my $l = $LN_CODE{$lncode} or return 0;
+    my $lnid = $l->{'lnid'};
+    $dmid += 0;
+
+    # is this domain/language request even possible?
+    return 0 unless
+        exists $DM_ID{$dmid} and
+        exists $DM_ID{$dmid}->{'langs'}->{$lnid};
+
+    my $itid = get_itemid($dbs, $dmid, $itcode, 1);
+    return 0 unless $itid;
+
+    my $txtid;
+
+    # TODO: make it either check if existing text matches and use that txtid,
+    # or make a new txtid
+    my $userid = $opts->{'userid'} + 0;
+    my $qtext = $dbh->quote($text);
+    $dbh->do("INSERT INTO ml_text (dmid, txtid, lnid, itid, text, userid) ".
+             "VALUES ($dmid, NULL, $lnid, $itid, $qtext, $userid)");
+    return 0 if $dbh->err;
+    $txtid = $dbh->{'mysql_insertid'};
+
+    $dbh->do("REPLACE INTO ml_latest (lnid, dmid, itid, chgtime, staleness) ".
+             "VALUES ($lnid, $dmid, $itid, NOW(), 0)");
+    return 0 if $dbh->err;
+    
+    # Todo: stale-ify child languages one layer down if severity
+    return 1;
 }
 
 1;
