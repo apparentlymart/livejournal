@@ -83,7 +83,7 @@ crit?>
 name=><?_ml .label.byinterest _ml?>
 code=>s_int
 form<=
-<?_ml .userlikes _ml?> <INPUT NAME="int_like" SIZE=30>
+Community interest: <input name="int_like" size='30' />
 <=form
 crit?>
 

@@ -348,9 +348,11 @@ sub search_int
         return;
     }
 
+    my $UI_TABLE = $req->{'com_do'} ? "comminterests" : "userinterests";
+
     return {
         'tables' => {
-            'ui' => 'userinterests',
+            'ui' => $UI_TABLE,
         },
         'conds' => [ "{ui}.intid=$intid" ],
         'userid' => "{ui}.userid",

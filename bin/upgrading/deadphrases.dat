@@ -15,6 +15,7 @@ general /community/manage.bml.actsettings
 general /community/members.bml.manage
 
 general /community/search.bml.contasmember
+general /community/search.bml.userlikes
 
 general /community/settings.bml.manage
 

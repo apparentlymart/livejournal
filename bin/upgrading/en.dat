@@ -398,8 +398,6 @@ p?>
 
 /community/search.bml.title=Community Search
 
-/community/search.bml.userlikes=User likes:
-
 /community/settings.bml.button.changecommunity=Update Settings
 
 /community/settings.bml.button.createcommunity=Create Community
