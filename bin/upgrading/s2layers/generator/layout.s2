@@ -32,7 +32,7 @@ set stronger_back = "#000000";
 property Color stronger_text { des = "Text color for the bar above entries"; }
 set stronger_text = "#ffffff";
 
-property Color weak_back { des = "Text color for the bar below entries"; }
+property Color weak_back { des = "Background color for the bar below entries"; }
 set weak_back = "#aaaaaa";
 
 property Color weak_text { des = "Text color for the bar below entries"; }
