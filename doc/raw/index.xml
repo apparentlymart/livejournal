@@ -14,11 +14,13 @@
   </authorgroup>
   <abstract>
     <para>
-      This is the complete documentation of LiveJournal, which spans three books. Each book has been tailored to a specific audience, so most likely you will only need to reference one book.
+      This documentation intends to cover everything related to
+      installing, administrating, and programming the LiveJournal
+      Server software.
     </para>
   </abstract>
   <copyright>
-    <year>2001</year>
+    <year>2002</year>
     <holder>LiveJournal.com</holder>
   </copyright>
 </setinfo>

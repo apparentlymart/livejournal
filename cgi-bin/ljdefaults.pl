@@ -11,8 +11,6 @@
     $HOME = $ENV{'LJHOME'};
     $HTDOCS = "$HOME/htdocs";
     $BIN = "$HOME/bin";
-    $TEMP = "$HOME/temp";
-    $VAR = "$HOME/var";
 
     $NODB_MSG ||= "Database temporarily unavailable.  Try again shortly.";
 

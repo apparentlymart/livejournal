@@ -1,53 +1,96 @@
-  <section id="lj.install.ljconfig.vars">
-    <title><literal>$LJ::</literal> Variables</title>
+<section id="lj.install.ljconfig.vars">
+  <title><literal>$LJ::</literal> Variables</title>
+  <para>
+    Each <literal>$LJ::</literal> variable is explained below.  There are two types: user-configurable ones and those that are automatically set and interesting only to people extending the LiveJournal code.
+  </para>
+
+  <section>
+    <title>User-configurable</title>
     <para>
-      Each <literal>$LJ::</literal> variable is explained below:
+      New installations will probably want to set these variables.  Some are automatically set by <literal>ljdefaults.pl</literal> based on your other settings, but it wouldn't hurt to specify them all explicitly.
     </para>
-    <variablelist>     
+    <variablelist>
 
       <varlistentry>
-        <term><literal role="variable">$LJ::HOME</literal></term>
-        <listitem><para>This should be set to the top level directory which you have LiveJournal installed in.</para></listitem>
+        <term><literal role="variable">$LJ::SITENAME</literal></term>
+        <listitem><para>The name of the site.</para></listitem>
       </varlistentry>
 
       <varlistentry>
-        <term><literal role="variable">$LJ::HTDOCS</literal></term>
-        <listitem><para>This should be set to the htdocs directory from where you're serving <filename>.bml</filename> pages.</para></listitem>
+        <term><literal role="variable">$LJ::DOMAIN</literal></term>
+        <listitem><para>The minimal domain of the site, excluding the "www." prefix if applicable. (example: foo.com)</para></listitem>
       </varlistentry>
+
+      <varlistentry>
+        <term><literal
+        role="variable">$LJ::DOMAIN_WEB</literal></term>
+        <listitem><para>Optional.  If defined and different from
+        <literal>$LJ::DOMAIN</literal>, any GET requests to
+        <literal>$LJ::DOMAIN</literal> will be redirected to
+        <literal>$LJ::DOMAIN_WEB</literal>.  (example:
+        www.foo.com)</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::SERVER_NAME</literal></term>
+        <listitem><para>Optional.  If using db-based web logging, this field is stored in the database in the server column, so you can see later how well each server performed.</para></listitem>
+      </varlistentry>
+
 
       <varlistentry>
         <term><literal role="variable">$LJ::DBINFO</literal></term>
         <listitem><para><literal role="variable">%DBINFO</literal> is a hash that contains the necessary information to connect to your database, as well as the configuration for multiple database clusters, if your installation supports them. For example:
           <programlisting>
           <![CDATA[
-          %DBINFO = (
-           'master' => {  # master must be named 'master'
-               'host' => "localhost",
-               'port' => 3306,
-               'user' => 'lj',
-               'pass' => 'ljpass',
-               'role' => {
-                   'cluster1' => 1,
-               },
-           },
-           # example of a TCP-based DB connection
-           #'somehostname' => {
-           #    'host' => "somehost",
-           #    'port' => 1234,
-           #    'user' => 'username',
-           #    'pass' => 'password',
-           #},
-           # example of a UNIX domain-socket DB connection
-           #'otherhost' => {
-           #    'sock' => "$LJ::HOME/var/mysqld.sock",
-           #    'user' => 'username',
-           #    'pass' => 'password',
-           #},
-           );
-           ]]>
-           </programlisting>
+   %DBINFO = (
+     # master must be named 'master'L
+     'master' => { 
+        'host' => "localhost",
+        'port' => 3306,
+        # or, leave out host/port and use a socket to connect:
+        #'sock' => "/var/run/mysqld.sock"; 
+        'user' => 'lj',
+        'pass' => 'ljpass',
+        'role' => {
+            'cluster1' => 1,
+        }, },
+   );
+ ]]></programlisting>
+ That's the basic configuration for an installation with only one database server.  (FIXME: add link to new section on configuring a site with many database servers)
         </para></listitem>
       </varlistentry>
 
     </variablelist>
   </section>
+   
+  <section>
+    <title>Auto-configured</title>
+    <para>
+      These <literal>$LJ::</literal> settings are automatically set in
+      <literal>ljdefaults.pl</literal>.  They're only documented here
+      for people interested in extending LiveJournal.  Or, you can define
+      them in <literal>ljconfig.pl</literal> ahead of time so you can
+      use them in definitions of future variables.
+    </para>
+
+    <variablelist>
+      <varlistentry>
+        <term><literal role="variable">$LJ::HOME</literal></term>
+        <listitem><para><literal>ljdefaults.pl</literal> sets this to the same value as <literal>$ENV{'LJHOME'}</literal>.  You don't have to set it.</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::HTDOCS</literal></term>
+        <listitem><para>Also set by <literal>ljdefaults.pl</literal>, this points to the <literal>htdocs</literal> directory under <literal>$LJ::HOME</literal>.  You don't have to set it.</para></listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><literal role="variable">$LJ::BIN</literal></term>
+        <listitem><para>Also set by <literal>ljdefaults.pl</literal>, this points to the <literal>bin</literal> directory under <literal>$LJ::HOME</literal>.  You don't have to set it.</para></listitem>
+      </varlistentry>
+
+    </variablelist>
+
+  </section>
+
+</section>
