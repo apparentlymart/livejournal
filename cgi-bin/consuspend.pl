@@ -32,7 +32,7 @@ sub suspend
         return 0;
     }
 
-    my $u = LJ::load_user($dbh, $user);
+    my $u = LJ::load_user($user);
     my $status = ($cmd eq "unsuspend") ? "V" : "S";
     unless ($u) {
         push @$out, [ "error", "Invalid user." ];
@@ -44,9 +44,9 @@ sub suspend
         return 0;
     }
 
-    LJ::update_user($userid, { statusvis => $status, raw => 'statusvisdate=NOW()' });
+    LJ::update_user($u->{'userid'}, { statusvis => $status, raw => 'statusvisdate=NOW()' });
 
-    LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, $cmd, $reason);
+    LJ::statushistory_add($dbh, $u->{'userid'}, $remote->{'userid'}, $cmd, $reason);
 
     push @$out, [ "info", "User ${cmd}ed." ];
 
