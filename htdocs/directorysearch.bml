@@ -23,13 +23,9 @@ body<=
 Fill in criteria below that you'd like to find user journals by.  The results returned are the intersection of all search criteria.  In other words, each restriction means "AND", not "OR".
 p?>
 
-<?hr?>
+<center>
 
-<CENTER>
-
-<?_code
- return "<form action='/directory.bml' method='get'>";
-_code?>
+<form style='margin-top: 1.5em' action='/directory.bml' method='get'>
 
 <table cellpadding='4' cellspacing='0' border='0'>
 
@@ -50,8 +46,8 @@ form<=
 
 _code?>
 </td></tr>
-<tr><td align='right'>State/Province:</td><td align='left'><input name="loc_st"></td></tr>
-<tr><td align='right'>City:</td><td align='left'><input name="loc_ci"></td></tr>
+<tr><td align='right'>State/Province:</td><td align='left'><input name="loc_st" /></td></tr>
+<tr><td align='right'>City:</td><td align='left'><input name="loc_ci" /></td></tr>
 </table>
 
 <=form
@@ -78,8 +74,8 @@ name=>By Age
 code=>s_age
 form<=
 Between 
-<INPUT NAME="age_min" SIZE=3 MAXLENGTH=3> and 
-<INPUT NAME="age_max" SIZE=3 MAXLENGTH=3> years old.
+<input name="age_min" size='3' maxlength='3' /> and 
+<input name="age_max" size='3' maxlength='3' /> years old.
 <=form
 crit?>
 
@@ -89,11 +85,11 @@ crit?>
 name=>By Gender
 code=>s_gen
 form<=
-User is: <SELECT NAME="gen_sel">
-<OPTION VALUE="" SELECTED>
-<OPTION VALUE="M">Male
-<OPTION VALUE="F">Female
-</SELECT>
+User is: <select name="gen_sel">
+<option></option>
+<option value="M">Male</option>
+<option value="F">Female</option>
+</select>
 <=form
 crit?>
 _c?>
@@ -103,7 +99,7 @@ _c?>
 name=>By Interest
 code=>s_int
 form<=
-User likes: <INPUT NAME="int_like" SIZE=30>
+User likes: <input name="int_like" size='30' />
 <=form
 crit?>
 
@@ -112,7 +108,7 @@ crit?>
 name=>Has Friend
 code=>s_fr
 form<=
-User lists <INPUT NAME="fr_user" SIZE=15 MAXLENGTH=15> as a friend.
+User lists <input name="fr_user" size='15' maxlength='15' /> as a friend.
 <=form
 crit?>
 
@@ -121,7 +117,8 @@ crit?>
 name=>Friend of
 code=>s_fro
 form<=
-<INPUT NAME="fro_user" SIZE=15 MAXLENGTH=15> lists user as a friend.
+<input name="fro_user" size='15' maxlength='15' /> lists user as a friend.
+<=form
 crit?>
 
 <?_c  dead for now
@@ -130,7 +127,8 @@ crit?>
 name=>Client Usage
 code=>s_client
 form<=
-Has used update client named: <INPUT NAME="client_match" SIZE=20>
+Has used update client named: <input name="client_match" SIZE='20' />
+<=form
 crit?>
 _c?>
 
@@ -139,7 +137,7 @@ _c?>
 <?bar
 name=>Other Criteria
 form<=
-<INPUT TYPE=CHECKBOX NAME="s_withpic" VALUE=1> Only users with pictures
+<input type='checkbox' name="s_withpic" value='1' /> Only users with pictures
 <=form
 bar?>
 _c?>
@@ -149,54 +147,54 @@ _c?>
 name=>Display Options
 form<=
 
-<TABLE>
-<TR>
-<TD ALIGN=RIGHT>
+<table>
+<tr>
+<td align='right'>
 Output Format:
-</TD><TD>
-<SELECT NAME="opt_format">
-<OPTION VALUE="pics">By Picture
-<OPTION VALUE="simple">Simple
-</SELECT>
-</TD></TR>
+</td><td>
+<select name="opt_format">
+<option value="pics">By Picture</option>
+<option value="simple">Simple</option>
+</select>
+</td></tr>
 
-<TR>
-<TD ALIGN=RIGHT>
+<tr>
+<td align='right'>
 Sorting Method:
-</TD><TD>
-<SELECT NAME="opt_sort">
-<OPTION VALUE="ut" SELECTED>Update Time
-<OPTION VALUE="user">User Name
-<OPTION VALUE="loc">Location
-</SELECT>
-</TD></TR>
+</td><td>
+<select name="opt_sort">
+<option value="ut">Update Time</option>
+<option value="user">User Name</option>
+<option value="loc">Location</option>
+</select>
+</td></tr>
 
-<TR>
-<TD ALIGN=RIGHT>
+<tr>
+<td align='right'>
 Records per page:
-</TD><TD>
-<SELECT NAME="opt_pagesize">
-<OPTION VALUE="25">25
-<OPTION VALUE="50">50
-<OPTION VALUE="100" SELECTED>100
-<OPTION VALUE="200">200
-</SELECT>
-</TD></TR>
+</td><td>
+<select name="opt_pagesize">
+<option value="25">25</option>
+<option value="50">50</option>
+<option value="100" selected='selected'>100</option>
+<option value="200">200</option>
+</select>
+</td></tr>
 
-</TABLE>
+</table>
 <=form
 bar?>
 
 <!--- submit --->
-<TR BGCOLOR=<?emcolor?>><TD COLSPAN=2 ALIGN=CENTER>
-  <INPUT TYPE=SUBMIT VALUE="Search!">
-  <INPUT TYPE=RESET VALUE="Clear Form">
-</TD></TR>
+<tr bgcolor='<?emcolor?>'><td colspan='2' align='center'>
+  <input type='submit' value="Search!" />
+  <input type='reset' value="Clear Form" />
+</td></tr>
 
-</TABLE>
-</FORM>
+</table>
+</form>
 
-</CENTER>
+</center>
 
 <=body
 page?><?_c <LJDEP>

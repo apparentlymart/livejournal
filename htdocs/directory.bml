@@ -160,8 +160,8 @@ body<=
  if ($info{'searching'}) {
      my ($uri, $args) = (BML::get_uri(), BML::get_query_string());
      $uri .= '?' . $args if $args;
-     $head .= "<meta http-equiv='Refresh' content='3;URL=$LJ::SITEROOT$uri' />\n";
-     return "<center><b>$ML{'.search.title'}<img src='$LJ::IMGPREFIX/searchingdots.gif' alt='...' width='18' height='12' /></b><p>$ML{'.search.monkey'}</center>";
+     $head .= "<meta http-equiv='Refresh' content='3;URL=" . LJ::ehtml($LJ::SITEROOT . $uri) . "' />\n";
+     return "<center><b>$ML{'.search.title'}<img src='$LJ::IMGPREFIX/searchingdots.gif' alt='...' width='18' height='12' /></b><p>$ML{'.search.monkey'}</p></center>";
  }
 
  if ($POST{'s_com'} || $GET{'s_com'}) {
