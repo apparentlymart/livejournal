@@ -105,6 +105,7 @@ body<=
  my $ret = "";
 
  my $props = $item->{'props'};
+ my $nocomments = $u->{'opt_showtalklinks'} eq "N" ? 1 : $props->{'opt_nocomments'};
 
  ### load users
  my ($up);  # $up = user posted journal item
@@ -114,9 +115,10 @@ body<=
 
  my $remote = LJ::get_remote();
 
- # See if we should add QR head JS code
+ # See if we should inject QuickReply javascript
  LJ::load_user_props($remote, "opt_no_quickreply");
- if ($remote && !$remote->{'opt_no_quickreply'}) {
+ 
+ if (($remote && !$remote->{'opt_no_quickreply'}) && !$nocomments) {
      $$head .= $LJ::COMMON_CODE{'quickreply'};
      $$bodyopts .= 'onload="restore_entry();" onunload="save_entry();"';
  }
@@ -480,7 +482,7 @@ body<=
      } 
  };
 
- unless ($props->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N")
+ unless ($nocomments)
  {
      $ret .= "$navcrap" if $navcrap;
      my $readlink;
