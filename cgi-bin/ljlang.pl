@@ -1,7 +1,13 @@
 #!/usr/bin/perl
 #
 
+BEGIN {
+    unshift @INC, "$ENV{'LJHOME'}/cgi-bin";
+}
+
 use strict;
+use LJ::Cache;
+
 package LJ::Lang;
 
 my %day_short = ('EN' => [qw[Sun Mon Tue Wed Thu Fri Sat]],
@@ -84,6 +90,19 @@ my %DM_ID = ();     # id -> { type, args, dmid, langs => { => 1, => 0, => 1 } }
 my %DM_UNIQ = ();   # "$type/$args" => ^^^
 my %LN_ID = ();     # id -> { ..., ..., 'children' => [ $ids, .. ] }
 my %LN_CODE = ();   # $code -> ^^^^
+my $LAST_ERROR;
+my $TXT_CACHE;      # LJ::Cache for text
+
+sub last_error
+{
+    return $LAST_ERROR;
+}
+
+sub set_error
+{
+    $LAST_ERROR = $_[0];
+    return 0;
+}
 
 sub get_dmid
 {
@@ -99,6 +118,8 @@ sub load_lang_struct
     my $dbr = LJ::get_dbh("slave", "master");
     return 0 unless $dbr;
     my $sth;
+
+    $TXT_CACHE = new LJ::Cache { 'maxsize' => $LJ::LANG_CACHE_SIZE || 2000 };
 
     $sth = $dbr->prepare("SELECT dmid, type, args FROM ml_domains");
     $sth->execute;
@@ -127,7 +148,7 @@ sub load_lang_struct
     $sth = $dbr->prepare("SELECT lnid, dmid, dmmaster FROM ml_langdomains");
     $sth->execute;
     while (my ($lnid, $dmid, $dmmaster) = $sth->fetchrow_array) {
-        $DM_ID{$dmid}->{'langs'}->{$dmid} = $dmmaster;
+        $DM_ID{$dmid}->{'langs'}->{$lnid} = $dmmaster;
     }
     
     $LS_CACHED = 1;
@@ -162,17 +183,18 @@ sub set_text
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
-    my $l = $LN_CODE{$lncode} or return 0;
+    my $l = $LN_CODE{$lncode} or return set_error("Language not defined.");
     my $lnid = $l->{'lnid'};
     $dmid += 0;
 
     # is this domain/language request even possible?
-    return 0 unless
-        exists $DM_ID{$dmid} and
-        exists $DM_ID{$dmid}->{'langs'}->{$lnid};
+    return set_error("Bogus domain") 
+        unless exists $DM_ID{$dmid};
+    return set_error("Bogus lang for that domain") 
+        unless exists $DM_ID{$dmid}->{'langs'}->{$lnid};
 
     my $itid = get_itemid($dbs, $dmid, $itcode, 1);
-    return 0 unless $itid;
+    return set_error("Couldn't allocate itid.") unless $itid;
 
     my $txtid;
 
@@ -182,15 +204,38 @@ sub set_text
     my $qtext = $dbh->quote($text);
     $dbh->do("INSERT INTO ml_text (dmid, txtid, lnid, itid, text, userid) ".
              "VALUES ($dmid, NULL, $lnid, $itid, $qtext, $userid)");
-    return 0 if $dbh->err;
+    return set_error("Error inserting ml_text: ".$dbh->err) if $dbh->err;
     $txtid = $dbh->{'mysql_insertid'};
 
     $dbh->do("REPLACE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) ".
              "VALUES ($lnid, $dmid, $itid, $txtid, NOW(), 0)");
-    return 0 if $dbh->err;
+    return set_error("Error inserting ml_latest: ".$dbh->err) if $dbh->err;
     
     # Todo: stale-ify child languages one layer down if severity
     return 1;
+}
+
+sub _get_cache
+{
+    return $TXT_CACHE;
+}
+
+sub get_text_bml 
+{
+    my ($lang, $code) = @_;
+    load_lang_struct() unless $LS_CACHED;
+    my $l = $LN_CODE{$lang};
+    return unless $l;
+
+    my $text = $TXT_CACHE->get("$lang-$code");
+    return $text if defined $text;
+    
+    my $dbr = LJ::get_dbh("slave", "master");
+    $text = $dbr->selectrow_array("SELECT t.text FROM ml_text t, ml_latest l, ml_items i WHERE t.dmid=1 ".
+                                  "AND t.txtid=l.txtid AND l.dmid=1 AND l.lnid=$l->{'lnid'} AND l.itid=i.itid ".
+                                  "AND i.dmid=1 AND i.itcode=" . $dbr->quote($code));
+    $TXT_CACHE->set("$lang-$code", $text);
+    return $text;
 }
 
 1;

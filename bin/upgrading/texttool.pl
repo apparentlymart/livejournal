@@ -208,9 +208,11 @@ sub poptext
                                                "WHERE l.dmid=1 AND i.dmid AND i.itcode=$qcode AND ".
                                                "i.itid=l.itid AND l.lnid=$l->{'lnid'}");
             if (! $exists) {
-                print " adding: $code = ";
+                print " adding: $code\n";
                 my $res = LJ::Lang::set_text($dbh, 1, $lang, $code, $text);
-                print "$res\n";
+                unless ($res) {
+                    die "  ERROR: " . LJ::Lang::last_error() . "\n";
+                }
             }
         }
         close D;
