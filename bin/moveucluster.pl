@@ -248,7 +248,7 @@ sub singleMove {
     my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
 
     my $opts = parseOpts("");  # gets command-line opts
-    my $rv = eval { moveUser($dbh, $u, $dclust, $opts); };
+    my $rv = eval { moveUser($dbh, $u, $dclust, undef, $opts); };
 
     if ($rv) {
         print "Moved '$user' to cluster $dclust.\n";
