@@ -133,11 +133,11 @@ my %ljconfig =
         'optimizations' => {
             'name' => "Optimization",
             'max_hints_lastn' => {
-                'desc' => "Sets how many entries a user can have on their <tt>LASTN</tt> page. A higher value can majorly affect the speed of the installation.",
+                'desc' => "Sets how many entries a user can have on their <literal>LASTN</literal> page. A higher value can majorly affect the speed of the installation.",
                 'default' => "100",
             },
             'max_scrollback_friends' => {
-                'desc' => "Sets how far back someone can go on a user's <tt>FRIENDS</tt> page. A higher value can majorly affect the speed of the installation.",
+                'desc' => "Sets how far back someone can go on a user's <literal>FRIENDS</literal> page. A higher value can majorly affect the speed of the installation.",
                 'default' => "1000",
             },
             'use_recent_tables' => {
@@ -163,7 +163,7 @@ my %ljconfig =
         'syndication' => {
             'name' => "Syndicated Account Options",
             'syn_lastn_s1' => {
-                'desc' => "When set to an appropriate <tt>LASTN</tt> style, all syndicated accounts on this installation will use this style.",
+                'desc' => "When set to an appropriate <literal>LASTN</literal> style, all syndicated accounts on this installation will use this style.",
             },
             'synd_cluster' => {
                 'desc' => "Syndicated accounts tend to have more database traffic than normal accounts, so its a good idea to set up a seperate cluster for them.".
@@ -208,7 +208,7 @@ my %ljconfig =
                 'desc' => "Used as a contact method for people to report problems with the LiveJournal installation.",
             },
             'bogus_email' => {
-                'desc' => "Used for automated notices like comment replies and general support request messages. It should be encouraged <i>not</i> to reply to this address.",
+                'desc' => "Used for automated notices like comment replies and general support request messages. It should be encouraged <emphasis>not</emphasis> to reply to this address.",
             },
         },
 
@@ -460,7 +460,8 @@ for my $type ( keys %ljconfig )
             print "      <varlistentry id='ljconfig.$var'>\n";
             print "        <term><varname role='ljconfig.variable'>" . $vartype . "LJ::" . uc($var) . "</varname></term>\n";
             my $des = %ljconfig->{$type}->{$list}->{$var}->{'desc'};
-            cleanse(\$des);
+            $des =~ s/&(?!(?:[a-zA-Z0-9]+|#\d+);)/&amp;/g;
+            xlinkify(\$des);
             print "        <listitem><simpara>$des</simpara>\n";
             if (%ljconfig->{$type}->{$list}->{$var}->{'example'})
             {
