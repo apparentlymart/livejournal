@@ -1,0 +1,20 @@
+#-*-s2-*-
+
+layerinfo "type" = "theme";
+layerinfo "name" = "Mint Chocolate Chip";
+layerinfo "redist_uniq" = "generator/mintchoc";
+layerinfo "author_name" = "Andrea Hartmann";
+layerinfo "author_email" = "mullenkamp@livejournal.com";
+
+set entry_back  = "#ddffee";
+set entry_text  = "#330000";
+set page_link   = "#993333";
+set page_vlink  = "#663333";
+set page_alink  = "#000000";
+set page_back   = "#ccffdd";
+set strong_text = "#663333";
+set stronger_back = "#663333";
+set stronger_text = "#ccffdd";
+set weak_back   = "#88ffdd";
+set weak_text   = "#663333";
+
