@@ -8,13 +8,12 @@ BODY<=
 This feature lets you download your entire journal to a custom format for backup purposes.
 P=)
 
-<FORM ACTION="export_do.bml" METHOD="POST">
+<form action="export_do.bml" method="post">
 
 (=STANDOUT
 <TABLE>
 (=_CODE
- require 'ljlib.pl'; 
- return &auth_fields();
+ return LJ::auth_fields(\%FORM);
  _CODE=)
 <TR VALIGN=TOP><TD>Export what:</TD>
 <TD>

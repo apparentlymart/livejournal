@@ -14,8 +14,7 @@ P=)
 (=STANDOUT
 <TABLE>
 (=_CODE
- require 'ljlib.pl'; 
- return &auth_fields();
+ return LJ::auth_fields(\%FORM);
  _CODE=)
 <TR VALIGN=TOP><TD>View What Entries:</TD>
 <TD>

@@ -5,23 +5,21 @@ BODY<=
 
 (=H1 Edit a Style H1=)
 (=P
-After you <a href="/styles/create.bml"><B>create a style</B></a>, you can edit it here.  To read more about the style system, go <A HREF="/developer/styles.bml">here</A>.
+After you <a href="/styles/create.bml"><b>create a style</b></a>, you can edit it here.  To read more about the style system, go <a href="/developer/styles.bml">here</a>.
 P=)
 
-<FORM ACTION="edit_do.bml" METHOD="POST">
+<form action="edit_do.bml" method="post">
 
 (=STANDOUT
-<TABLE>
+<table>
 (=_CODE
- require 'ljlib.pl'; 
- return &auth_fields();
+ return LJ::auth_fields(\%FORM);
  _CODE=)
-</TR>
-<TR><TD></TD><TD ALIGN=CENTER><INPUT TYPE="SUBMIT" VALUE="Proceed..."><BR><FONT SIZE=-1>Only press <B>Proceed</B> <I>once</I>!!</FONT></TD></TR>
-</TABLE>
+<tr><td></td><td align="center"><input type="submit" value="Proceed..."></td></tr>
+</table>
 STANDOUT=)
 
-</FORM>
+</form>
 
 <=BODY
 PAGE=)

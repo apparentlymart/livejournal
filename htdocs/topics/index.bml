@@ -206,7 +206,7 @@ my @list;
 push @list, $_ while ($_ = $sth->fetchrow_hashref);
 
 if ($cat->{'topicsort'} eq "alpha") {
-    @list = sort { &ljtopic::no_prefix($a->{'topname'}) cmp &ljtopic::no_prefix($b->{'topname'}) } @list;
+    @list = sort { LJ::Topic::no_prefix($a->{'topname'}) cmp LJ::Topic::no_prefix($b->{'topname'}) } @list;
 }
 
 

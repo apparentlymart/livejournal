@@ -3,13 +3,13 @@ TITLE=>Add to topic directory
 BODY<=
 (=_CODE
 
- require 'ljlib.pl';
- require 'topiclib.pl';
- &connect_db();
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
  my ($ret, $sth);
 
  my $catid = $FORM{'catid'}+0;
- my @hier = ljtopic::get_hierarchy($dbh, { 'catid' => $catid });
+ my @hier = LJ::Topic::get_hierarchy($dbh, { 'catid' => $catid });
  my $itemid = $FORM{'itemid'}+0;
  my $catdepth = join(":", map { $_->{'name'} } @hier);
  $catdepth ||= "Top Level";
@@ -45,7 +45,7 @@ BODY<=
  push @list, $_ while ($_ = $sth->fetchrow_hashref);
  
  if ($cat->{'topicsort'} eq "alpha") {
-     @list = sort { &ljtopic::no_prefix($a->{'topname'}) cmp &ljtopic::no_prefix($b->{'topname'}) } @list;
+     @list = sort { LJ::Topic::no_prefix($a->{'topname'}) cmp LJ::Topic::no_prefix($b->{'topname'}) } @list;
  }
  
  $ret .= "<UL>\n";

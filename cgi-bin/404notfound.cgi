@@ -8,10 +8,10 @@
 #
 
 use FCGI;
-require 'ljlib.pl';
+require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 my %redir;
-open (REDIR, "redirect.dat");
+open (REDIR, "$ENV{'LJHOME'}/cgi-bin/redirect.dat");
 while (<REDIR>) {
     next unless (/^(\S+)\s+(\S+)/);
     my ($src, $dest) = ($1, $2);
@@ -39,7 +39,10 @@ $SIG{'TERM'} = sub {
 	FCGI::accept() >= 0)
 {
     $SERVING = 1;
-    &connect_db;
+
+    my $dbs = LJ::get_dbs();
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
 
     my $req_path = $ENV{'REQUEST_URI'};
 
@@ -49,7 +52,7 @@ $SIG{'TERM'} = sub {
     {
 	print "Status: 200 OK\n";
 	print "Content-type: text/plain\n\n";
-	print &LJ::make_graphviz_dot_file($dbh, $1);
+	print LJ::make_graphviz_dot_file($dbh, $1);
 	next REQUEST;	
     }
 
@@ -77,7 +80,7 @@ $SIG{'TERM'} = sub {
     print "Cache-Control: private, proxy-revalidate\n";
     print "Status: 404 Not Found\n";
     print "\n";
-    print "<H1>Not Found</H1>The requested URL ", &ehtml($ENV{'REQUEST_URI'}),
+    print "<H1>Not Found</H1>The requested URL ", LJ::ehtml($ENV{'REQUEST_URI'}),
           " was not found on this server.\n";
     next REQUEST;
 }

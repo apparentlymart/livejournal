@@ -232,7 +232,8 @@ $maint{'genstats'} = sub
 
 $maint{'genstats_weekly'} = sub
 {
-    &connect_db();
+    my $dbh = LJ::get_dbh("master");
+
     my ($sth);
     my %supportrank;
 
@@ -288,7 +289,8 @@ $maint{'build_randomuserset'} = sub
     ## note that if a user changes their privacy setting to not be in the database, it'll take
     ## up to 24 hours for them to be removed from the random.bml listing, but that's acceptable.
 
-    &connect_db();
+    my $dbh = LJ::get_dbh("master");
+
     print "-I- Building randomuserset.\n";
     $dbh->do("REPLACE INTO randomuserset (userid, timeupdate) SELECT uu.userid, uu.timeupdate FROM userusage uu, user u WHERE u.userid=uu.userid AND u.allow_infoshow='Y' AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 1 DAY)");
     $dbh->do("DELETE FROM randomuserset WHERE timeupdate < DATE_SUB(NOW(), INTERVAL 1 DAY)");

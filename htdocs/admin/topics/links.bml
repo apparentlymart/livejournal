@@ -1,8 +1,9 @@
 (=_CODE
 
- require 'ljlib.pl';
- &connect_db();
- 
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
  my $user = $FORM{'user'};
 
  my $sth = $dbh->prepare("SELECT styleid, user, styledes, type, is_embedded, is_colorfree FROM style WHERE is_public='Y' ORDER BY user");

@@ -13,8 +13,7 @@ P=)
 (=STANDOUT
 <TABLE>
 (=_CODE
- require 'ljlib.pl'; 
- return &auth_fields();
+ return LJ::auth_fields(\%FORM);
  _CODE=)
 <TR><TD COLSPAN=2 ALIGN=CENTER>
 <INPUT TYPE="SUBMIT" VALUE="Proceed...">

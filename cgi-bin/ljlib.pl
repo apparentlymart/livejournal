@@ -113,36 +113,6 @@ sub register_authaction
     }
 }
 
-sub auth_fields
-{
-    my $opts = shift;
-    my $remote = LJ::get_remote_noauth();
-    my $ret = "";
-    if (!$FORM{'altlogin'} && !$opts->{'user'} && $remote->{'user'}) {
-	my $hpass;
-	if ($BMLClient::COOKIE{"ljhpass"} =~ /^$remote->{'user'}:(.+)/) {
-	    $hpass = $1;
-	}
-	my $alturl = $ENV{'REQUEST_URI'};
-	$alturl .= ($alturl =~ /\?/) ? "&amp;" : "?";
-	$alturl .= "altlogin=1";
-
-	$ret .= "<tr><td colspan=\"2\" align=\"left\">You are currently logged in as <B>$remote->{'user'}</B>.<BR>If this is not you, <a href=\"$alturl\">click here</a>.\n";
-	$ret .= "<input type=\"hidden\" name=\"user\" value=\"$remote->{'user'}\">\n";
-	$ret .= "<input type=\"hidden\" name=\"hpassword\" value=\"$hpass\"><br />&nbsp;\n";
-	$ret .= "</td></tr>\n";
-    } else {
-	$ret .= "<tr><td>Username:</td><td align=\"left\"><input type=\"text\" name=\"user\" size=\"15\" maxlength=\"15\" value=\"";
-	my $user = $opts->{'user'};
-	unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
-	$ret .= BMLUtil::escapeall($user) unless ($FORM{'altlogin'});
-	$ret .= "\"></td></tr>\n";
-	$ret .= "<tr><td>Password:</td><td align=\"left\">\n";
-	$ret .= "<input type=\"password\" name=\"password\" size=\"15\" maxlength=\"30\" value=\"" . LJ::ehtml($opts->{'password'}) . "\">";
-	$ret .= "</td></tr>\n";
-    }
-    return $ret;
-}
 
 
 sub remap_event_links
@@ -345,6 +315,38 @@ sub html_datetime
 }
 
 package LJ;
+
+sub auth_fields
+{
+    my $form = shift;
+    my $opts = shift;
+    my $remote = LJ::get_remote_noauth();
+    my $ret = "";
+    if (!$form->{'altlogin'} && !$opts->{'user'} && $remote->{'user'}) {
+	my $hpass;
+	if ($BMLClient::COOKIE{"ljhpass"} =~ /^$remote->{'user'}:(.+)/) {
+	    $hpass = $1;
+	}
+	my $alturl = $ENV{'REQUEST_URI'};
+	$alturl .= ($alturl =~ /\?/) ? "&amp;" : "?";
+	$alturl .= "altlogin=1";
+
+	$ret .= "<tr align='left'><td colspan=\"2\" align=\"left\">You are currently logged in as <B>$remote->{'user'}</B>.<BR>If this is not you, <a href=\"$alturl\">click here</a>.\n";
+	$ret .= "<input type=\"hidden\" name=\"user\" value=\"$remote->{'user'}\">\n";
+	$ret .= "<input type=\"hidden\" name=\"hpassword\" value=\"$hpass\"><br />&nbsp;\n";
+	$ret .= "</td></tr>\n";
+    } else {
+	$ret .= "<tr align='left'><td>Username:</td><td align=\"left\"><input type=\"text\" name=\"user\" size=\"15\" maxlength=\"15\" value=\"";
+	my $user = $opts->{'user'};
+	unless ($user || $ENV{'QUERY_STRING'} =~ /=/) { $user=$ENV{'QUERY_STRING'}; }
+	$ret .= BMLUtil::escapeall($user) unless ($form->{'altlogin'});
+	$ret .= "\"></td></tr>\n";
+	$ret .= "<tr><td>Password:</td><td align=\"left\">\n";
+	$ret .= "<input type=\"password\" name=\"password\" size=\"15\" maxlength=\"30\" value=\"" . LJ::ehtml($opts->{'password'}) . "\">";
+	$ret .= "</td></tr>\n";
+    }
+    return $ret;
+}
 
 sub self_link
 {

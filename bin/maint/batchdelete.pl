@@ -3,7 +3,7 @@
 
 $maint{'db_batchdelete'} = sub
 {
-    &connect_db();
+    my $dbh = LJ::get_dbh("master");
     my @ids;
 
     # there used to be many tables here, but it's been 'simplified' to this.

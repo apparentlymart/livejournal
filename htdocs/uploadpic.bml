@@ -18,7 +18,7 @@ P=)
 (=STANDOUT
 <TABLE>
 (=_CODE
- return &auth_fields();
+ return LJ::auth_fields(\%FORM);
  _CODE=)
 <TR><TD><INPUT TYPE=RADIO NAME="src" VALUE="file" CHECKED> From File:</TD><td align="left"><input type="file" name="userpic"></TD></TR>
 <TR><TD><INPUT TYPE=RADIO NAME="src" VALUE="url"> From URL:</TD><td align="left"><input name="urlpic" size="40"></TD></TR>

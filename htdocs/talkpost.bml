@@ -232,8 +232,8 @@ BODY<=
 	     $ret .= "<B>Read similar journal entries:</B><BR>";
 	 }
 	 
-	 # TODO: ljtopic doesn't yet support $dbs/$dbarg
-	 my @hier = ljtopic::get_hierarchy($dbh, { 'topid' => $mape->{'tptopid'} });
+	 # TODO: LJ::Topic doesn't yet support $dbs/$dbarg
+	 my @hier = LJ::Topic::get_hierarchy($dbh, { 'topid' => $mape->{'tptopid'} });
 	 $ret .= "<B>";
 	 $ret .= join(" : ", map { "<A HREF=\"$_->{'url'}\">$_->{'name'}</A>"; } @hier);
 	 $ret .= "</B><BR>";

@@ -5,7 +5,9 @@
 
  if ($FORM{'mode'} eq "create") 
  {
-     &connect_db();
+     my $dbs = LJ::get_dbs();
+     my $dbh = $dbs->{'dbh'};
+     my $dbr = $dbs->{'reader'};
 
      my $sth;
      my @errors = ();

@@ -58,11 +58,11 @@ sub stop_qbufferd
     exit;
 }
 
-&connect_db();
 $running = 1;
 while (1)
 {
-    &connect_db();
+    my $dbh = LJ::get_dbh("master");
+
     $sth = $dbh->prepare("SELECT tablename, count(*) FROM querybuffer GROUP BY 1");
     $sth->execute;
     my @tables;
@@ -72,7 +72,7 @@ while (1)
     $sth->finish;
     
     foreach my $table (@tables) {
-	my $count = &LJ::query_buffer_flush($dbh, $table);
+	my $count = LJ::query_buffer_flush($dbh, $table);
     }
     sleep $DELAY;
 };

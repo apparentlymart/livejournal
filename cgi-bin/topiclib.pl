@@ -1,9 +1,7 @@
 #!/usr/bin/perl
 #
 
-package ljtopic;
-
-require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+package LJ::Topic;
 
 sub no_prefix
 {

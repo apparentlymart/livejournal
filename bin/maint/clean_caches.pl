@@ -3,7 +3,8 @@
 
 $maint{'clean_caches'} = sub 
 {
-    &connect_db();    
+    my $dbh = LJ::get_dbh("master");
+
     print "-I- Cleaning authactions.\n";
     $dbh->do("DELETE FROM authactions WHERE datecreate < DATE_SUB(NOW(), INTERVAL 30 DAY)");
 

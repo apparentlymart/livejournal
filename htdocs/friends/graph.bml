@@ -3,14 +3,15 @@ NOCACHE=>1
 _INFO=)
 (=_CODE
 
- require 'ljlib.pl';
- &connect_db;
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
  
- my $user = lc($FORM{'user'});
- my $u = LJ::load_user($dbh, $user);
+ my $u = LJ::load_user($dbh, $FORM{'user'});
  unless ($u) {
      return "(=H1 Unknown user H1=)(=P No user with that username.  Sorry. P=)";
  }
+ my $user = $u->{'user'};
 
  my $ret = ""; 
  $ret .= "User: <B>$user</B> (<A HREF=\"/userinfo.bml?user=$user\">user info</A>)<BR><I>If image doesn't load, press reload.</I><P>";
