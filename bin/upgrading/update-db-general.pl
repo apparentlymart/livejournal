@@ -1174,8 +1174,7 @@ CREATE TABLE userupdate
    userid   INT UNSIGNED NOT NULL,
    groupbit TINYINT UNSIGNED NOT NULL,
    PRIMARY KEY (userid, groupbit),
-   timeupdate DATETIME NOT NULL,
-   INDEX (timeupdate)
+   timeupdate DATETIME NOT NULL
 )
 EOC
 
