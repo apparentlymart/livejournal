@@ -164,7 +164,7 @@ body<=
      $dbh->do("UPDATE user SET defaultpicid=$picid WHERE userid=$userid");
      if ($dbh->err) { return $dbh->errstr; }
  }
- return "<?h1 Success h1?><?p Your image has been uploaded.  It looks like this: <p align='center'><img src='/userpic/$picid' width='$sx' height='$sy'></p>You can <a href=\"editpics.bml$authaslink\">edit your picture keywords</a> to be able to use this picture selectively in the future. p?><?p You can view your journal <a href='/users/${user}'>here</a>. p?>";
+ return "<?h1 Success h1?><?p Your image has been uploaded.  It looks like this: <p align='center'><img src='$LJ::USERPIC_ROOT/$picid/$userid' width='$sx' height='$sy'></p>You can <a href=\"editpics.bml$authaslink\">edit your picture keywords</a> to be able to use this picture selectively in the future. p?><?p You can view your journal <a href='/users/${user}'>here</a>. p?>";
  
 _code?>
 
