@@ -182,7 +182,9 @@ sub scan_main
 	opendir (MD, $fulldir) or die "Can't open $fulldir.";
 	while (my $file = readdir(MD)) {
 	    if (-d "$fulldir/$file") {
-		unless ($file eq "." || $file eq "..") {
+		unless ($file eq "." || $file eq ".." ||
+			"$dir/$file" eq "htdocs/userpics")
+		{
 		    unshift @dirs, "$dir/$file";
 		}
 	    } elsif (-f "$fulldir/$file") {
