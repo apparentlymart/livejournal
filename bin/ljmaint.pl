@@ -95,9 +95,9 @@ sub run_task
     my $opts = $maintinfo{$task}{opts} || {};
     my $lock = undef;
     unless ($opts->{no_locking} ||
-	    ($lock = LJ::locker->trylock("mainttask-$task"))
+	    ($lock = LJ::locker()->trylock("mainttask-$task"))
 	    ) {
-        print "Task '$task' already running.  Quitting.\n" if $VERBOSE >= 1;
+        print "Task '$task' already running ($DDLockClient::Error).  Quitting.\n" if $VERBOSE >= 1;
 	exit 0;
     }
 
