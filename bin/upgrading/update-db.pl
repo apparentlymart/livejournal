@@ -485,6 +485,41 @@ if ($opt_pop)
         }
     }
 
+    # create/update the MogileFS database if we use it
+    if (defined $LJ::MOGILEFS_CONFIG{hosts}) {
+        # create an admin MogileFS object
+        my $mgd = MogileFS::Admin->new(hosts => $LJ::MOGILEFS_CONFIG{hosts})
+            or die "Error: Unable to initalize MogileFS connection.\n";
+        my $exists = $mgd->get_domains();
+        print "Verifying MogileFS configuration...\n";
+
+        # verify domain exists?
+        my $domain = $LJ::MOGILEFS_CONFIG{domain};
+        unless (defined $exists->{$domain}) {
+            print "\tCreating domain $domain...\n";
+            $mgd->create_domain($domain)
+                or die "Error: Unable to create domain.\n";
+            $exists->{$domain} = {};
+        }
+
+        # now start verifying classes
+        foreach my $class (keys %{$LJ::MOGILEFS_CONFIG{classes} || {}}) {
+            if ($exists->{$domain}->{$class}) {
+                if ($exists->{$domain}->{$class} != $LJ::MOGILEFS_CONFIG{classes}->{$class}) {
+                    # update the mindevcount since it's changed
+                    print "\tUpdating class $class...\n";
+                    $mgd->update_class($domain, $class, $LJ::MOGILEFS_CONFIG{classes}->{$class})
+                        or die "Error: Unable to update class.\n";
+                }
+            } else {
+                # create it
+                print "\tCreating class $class...\n";
+                $mgd->create_class($domain, $class, $LJ::MOGILEFS_CONFIG{classes}->{$class})
+                    or die "Error: Unable to create class.\n";
+            }
+        }
+    }
+
     # convert users from dversion2 (no weekuserusage)
     if (my $d2 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=2 LIMIT 1")) {
         $dbh->do("UPDATE user SET dversion=3 WHERE dversion=2");

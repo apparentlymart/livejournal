@@ -467,6 +467,17 @@
     # If you want to change the limit on how many bans a user can make, uncomment
     # the following line.  Default is 5000.
     #$MAX_BANS = 5000;
+
+    # If you are using MogileFS on your site for userpics or other purposes, you
+    # will need to define the following hash and complete the information in it.
+    #%MOGILEFS_CONFIG = (
+    #    hosts => [ 'localhost:6001' ],
+    #    root => '/mnt/mogdata',
+    #    classes => {
+    #        'your_class' => 3,  # define any special MogileFS classes you need
+    #    },
+    #);
+    
 }
 
 1;  # return true
