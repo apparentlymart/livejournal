@@ -4,6 +4,9 @@ body<=
 
 <?_code 
 {
+    use strict;
+    use vars qw(%POST);
+
     my $dbh = LJ::get_db_writer();
     my $u = LJ::get_remote();
 
@@ -87,7 +90,7 @@ body<=
                 # MAYBE: see if it actually points to a valid syndication file
                 # naah, too much work here.  just let synsuck.pl detect its
                 # bogosity and delete it.
-                my $id = LJ::create_account($dbh, {
+                my $id = LJ::create_account({
                     'user' => $acct,
                     'name' => $acct,
                     'password' => '',
@@ -101,7 +104,7 @@ body<=
                 $dbh->do("INSERT INTO syndicated (userid, synurl, checknext) VALUES (?,?,NOW())",
                          undef, $id, $url);
 
-                LJ::statushistory_add($dbh, $u->{'userid'}, $id, "synd_create", "acct: $acct");
+                LJ::statushistory_add($u->{'userid'}, $id, "synd_create", "acct: $acct");
 
                 $su = $dbh->selectrow_hashref("SELECT u.user, s.* FROM syndicated s, useridmap u ".
                                               "WHERE s.userid=? AND s.userid=u.userid",
@@ -136,11 +139,44 @@ body<=
         }
     }
 
-    # find popular feeds the user isn't currently watching
+    # get 100 most popular feeds from memcache
+    my $popsyn = LJ::MemCache::get("popsyn");
+
+    # nothing in memcache, build an object from db
+    # then populate memcache
+    unless ($popsyn) {
+        $popsyn = [];
+
+        my $sth = $dbh->prepare("SELECT userid, synurl, numreaders FROM syndicated " .
+                                "ORDER BY numreaders DESC LIMIT 100");
+        $sth->execute();
+        while (my @row = $sth->fetchrow_array) {
+            push @$popsyn, [ @row ];
+        }
+
+        # load u objects so we can get usernames
+        my %users;
+        LJ::load_userids_multiple([ map { $_, \$users{$_} } map { $_->[0] } @$popsyn ], [$u]);
+        unshift @$_, $users{$_->[0]}->{'user'} foreach @$popsyn;
+
+        # format is: [ user, userid, synurl, numreaders ]
+
+        # set in memcache
+        my $expire = time() + 3600; # 1 hour
+        LJ::MemCache::set("popsyn", $popsyn, $expire);        
+    }
+
+    # load user's friends so we can strip feeds they already watch
+    my $friends = LJ::get_friends($u);
+
+    # populate @pop and add users they've chosen to add
     my @pop;
-    $sth = $dbh->prepare("SELECT s.userid, su.user, s.synurl, count(*) FROM syndicated s, useridmap su, friends fa LEFT JOIN friends fu ON fu.userid=? AND fu.friendid=s.userid WHERE fu.userid IS NULL AND s.userid=su.userid and fa.friendid=s.userid AND s.lastnew > DATE_SUB(NOW(), INTERVAL 14 DAY) GROUP BY 1, 2, 3 ORDER BY 4 DESC LIMIT 20");
-    $sth->execute($u->{'userid'});
-    while (my ($suserid, $user, $url, $count) = $sth->fetchrow_array) {
+    foreach (@$popsyn) {
+        my ($user, $suserid, $url, $count) = @$_;
+
+        # skip feeds they already watch
+        next if $friends->{$suserid};
+
         my $cost = LJ::syn_cost($count + 1);
         if ($POST{'action:add'} && $POST{"add_$user"}) {
             if ($used + $cost < $quota) {
@@ -150,13 +186,17 @@ body<=
                 $syn{$user} = $url;
                 $used += $cost;
             } else {
-                return "<?h1 Sorry h1?><?p Watching " . LJ::ljuser($user) . " would put you over your syndication account quota. p?><?p [&lt;&lt; <a href='/syn/'>Back</a>] p?>";
+                return "<?h1 Sorry h1?><?p Watching " . LJ::ljuser($user) . 
+                       " would put you over your syndication account quota. p?>" .
+                       "<?p [&lt;&lt; <a href='/syn/'>Back</a>] p?>";
             }
         } else {
             push @pop, [ $user, $url, $count ];
+            last if @pop >= 20;
         }
     }
 
+    # intro paragraph
     my $ret = <<EOB;
 <?h1 Using <?sitename?> for syndication h1?>
 <?p
@@ -168,14 +208,14 @@ p?>
 EOB
 #' 
 
-    $ret .= sprintf("<?h1 Your quota h1?><?p You're using <b>%0.03f</b> of your allowed <b>%.03f</b> units. p?>",
-                    $used, $quota);
+    $ret .= sprintf("<?h1 Your quota h1?><?p You're using <b>%0.03f</b> " .
+                    "of your allowed <b>%.03f</b> units. p?>", $used, $quota);
 
     $ret .= "<form method='post' action='./'>"; 
     $ret .= LJ::html_hidden("userid", $u->{'userid'});
 
     if ($used) {
-        $ret .= "<p><table cellpadding='3'>";
+        $ret .= "<p><table cellpadding='3' style='margin-bottom: 10px;'>";
         $ret .= "<tr><td></td><td><b>Account</b></td><td><b>Feed</b></td><td><b>Watchers</b></td><td><b>Unit Cost</b></td></tr>\n";
         foreach my $user (sort { $count{$a} <=> $count{$b} } keys %count) {
             $ret .= "<tr>";
@@ -187,13 +227,15 @@ EOB
             $ret .= "</td>";
             $ret .= "</tr>";
         }
-        $ret .= "</table>";
+        $ret .= "<tr><td align='left' colspan='4'>";
         $ret .= "<input type='submit' name='action:remove' value='Remove Selected'>";
+        $ret .= "</td></tr>";
+        $ret .= "</table>";
     }
 
     if (@pop) {
         $ret .= "<?h1 Add Popular Feed h1?><?p The following are some popular feeds you're not currently watching: p?>";
-        $ret .= "<p><table cellpadding='3'>";
+        $ret .= "<p><table cellpadding='3' style='margin-bottom: 10px;'>";
         $ret .= "<tr><td></td><td><b>Account</b></td><td><b>Feed</b></td><td><b>Watchers</b></td><td><b>Unit Cost</b></td></tr>\n";
         foreach (@pop) {
             my ($user, $url, $count) = @$_;
@@ -207,8 +249,10 @@ EOB
             $ret .= "</td>";
             $ret .= "</tr>";
         }
-        $ret .= "</table>";
+        $ret .= "<tr><td align='left' colspan='4'>";
         $ret .= "<input type='submit' name='action:add' value='Add Selected'>";        
+        $ret .= "</td></tr>";
+        $ret .= "</table>";
     }
 
     $ret .= "<?h1 Add Other Feed h1?><?p Add a feed to your friends list.  Enter either the account name, the feed URL, or both, if you're creating a new feed.    p?>";

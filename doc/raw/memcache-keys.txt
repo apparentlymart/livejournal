@@ -34,6 +34,8 @@
 <uid> fgrp:<uid> == friendgroup rows for a given user
 <uid> friends:<uid> == packed friends rows for a user
 <uid> tu:<uid> == unixtime when user last updated
+      popsyn == 100 most read syndicated accounts [user, userid, synurl, numreaders], 1 hour
+
 
 <uid> upicinfo:<uid> == packed data
 
