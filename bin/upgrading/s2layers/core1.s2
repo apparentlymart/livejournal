@@ -12,12 +12,14 @@ layerinfo "author_email" = "webmaster@livejournal.com";
 ##[ S2 core classes ]
 
 class int
+"An integer number.  This isn't really a class, as suggested by its lower-case name.  Parameters of type int pass by value, unlike all variables of real object types, which pass by reference.  Instead, this is just a pseudo-class which provides convenience methods on instances of integers.  The other pseudo-class is [class[string]]."
 {
     function builtin zeropad(int digits) : string
-    "Return the int as a string with at least \$digits characters long, left-padded with zeroes.";
+    "Return the integer as a string formatted at least \$digits characters long, left-padded with zeroes.";
 }
 
 class string
+"A series of characters.  This isn't really a class, as suggested by its lower-case name.  Parameters of type string pass by value, unlike all variables of real object types, which pass by reference.  Instead, this is just a pseudo-class which provides convenience methods on instances of strings.  The other pseudo-class is [class[int]]."
 {
     function builtin substr(int start, int length) : string
     "Returns up to \$length characters from string, skipping \$start characters from the beginning.";
@@ -48,7 +50,7 @@ class string
 }
 
 class Color
-"Represent a color"
+"Represents a color."
 {
   var readonly int r "Red value, 0-255.";
   var readonly int g "Green value, 0-255.";
@@ -83,6 +85,7 @@ class Color
 ##[ site-core classes ]
 
 class Date
+"Represents a date."
 {
     var int year "Year; 4 digits.";
     var int month "Month; 1-12.";
@@ -92,27 +95,28 @@ class Date
     "Returns the day of the week this date falls on, from Sunday=1 to Saturday=7";
 
     function builtin date_format () : string
-    "Returns date formatted as normal.";
+    "Returns date formatted as normal.  // SeeAlso: siteapi.core1.dateformats";
 
     function builtin date_format (string fmt) : string
-    "Returns date formatted as indicated by \$fmt.  One of: short, med, long, med_day, long_day.  Or a custom format.  Default is 'short'.";
+    "Returns date formatted as indicated by \$fmt.  One of: short, med, long, med_day, long_day.  Or a custom format.  Default is 'short'. // SeeAlso: siteapi.core1.dateformats";
 }
 
 class DateTime extends Date
+"Represents both a date and time."
 {
     var int hour "Hour; 0-23.";
     var int min "Minute; 0-59.";
     var int sec "Second; 0-59.";
 
     function builtin time_format () : string
-    "Returns time formatted as normal.";
+    "Returns time formatted as normal.  // SeeAlso: siteapi.core1.dateformats";
 
     function builtin time_format (string fmt) : string
-    "Returns time formatted as indicated by \$fmt, or normal if blank.";
+    "Returns time formatted as indicated by \$fmt, or normal if blank.  // SeeAlso: siteapi.core1.dateformats";
 }
 
 class Image
-"Generic HTML image handler"
+"Represents an image."
 {
     var readonly string url "URL of the image";
     var int width "Width in pixels";
@@ -143,7 +147,7 @@ class Image
 }
 
 class Link
-"A link or a button"
+"A link or button"
 {
     var readonly string url "URL which the link points to";
     var readonly string caption "The caption for the link";
@@ -184,7 +188,7 @@ class ItemRange
 ### LJ Specific Classes
 
 class CommentInfo
-"Information about comments attached to something"
+"Information about comments attached to something."
 {
     var readonly string read_url "URL pointer to the 'Read Comments' view.";
     var readonly string post_url "URL pointer to the 'Post Comments' view.";
@@ -201,7 +205,7 @@ class CommentInfo
 }
 
 class UserLite
-"A 'lite' userinfo structure which only requires a single, simple db query to build"
+"A 'lite' version of a [class[User]] which the system often has more readily-available than a full version."
 {
     var readonly string username "Canonical Username, ex: johnqpub";
     var readonly string name "User's formatted name, ex: John Q. Public";
@@ -227,7 +231,7 @@ class EntryLite
     var readonly string{} metadata "Post metadata. Keys: 'music', 'mood'";
 
     var readonly string permalink_url "A URL at which this specific entry can be viewed, for linking purposes.";
-    var int depth "Depth of entry.  Top-level journal entries are depth zero.  Top-level comments are depth 1.  Each layer of sub-comments increases by 1.";
+    var int depth "Visual depth of entry.  Top-level journal entries are always depth zero.  Comments have a depth greater than or equal to one, depending on where the thread is rooted at.";
 }
 
 class Entry extends EntryLite
@@ -252,7 +256,7 @@ class Entry extends EntryLite
 }
 
 class Comment extends EntryLite
-"A comment"
+"A comment to a journal entry, or to another comment."
 {
     var Image subject_icon "Subject icon, or null.";
     var int talkid "Server stored ID number for this comment.";
@@ -355,7 +359,9 @@ class Page
 
 }
 
-class RecentNav {
+class RecentNav 
+"Navigation position within a [class[RecentPage]] or [class[FriendsPage]] and URLs to move about."
+{
     var int version        "Currently version 1.  A new method of navigation has been frequently discussed, so this is planning for the future";
 
     # version 1 attributes:
@@ -423,7 +429,7 @@ class YearDay
 }
 
 class YearWeek
-"Represents a 'week' on the year archive"
+"Represents a week on the [class[YearMonth]] on the [class[YearPage]]."
 {
     var int pre_empty "How many days at the start of the week are blank? (From previous month)";
     var int post_empty "How many days at the end of the week are blank? (From next month)";
@@ -434,7 +440,7 @@ class YearWeek
 }
 
 class YearMonth 
-"A month on the calendar page"
+"A month on the [class[YearPage]]."
 {
     var bool has_entries "If this is false, you probably don't want to display this month.";
     var int month "The number of the month";
@@ -443,13 +449,13 @@ class YearMonth
     var readonly string url "A url to link to in order to view this month.";
 
     function builtin month_format () : string
-    "Returns month formatted long (February 1980)";
+    "Returns month formatted long (February 1980)  // SeeAlso: siteapi.core1.dateformats";
     function builtin month_format (string fmt) : string
-    "Returns time formatted as indicated by \$fmt, or long if blank .";
+    "Returns time formatted as indicated by \$fmt, or 'long' if blank.  // SeeAlso: siteapi.core1.dateformats";
 }
 
 class YearPage extends Page 
-"Entire calendar page for a single year"
+"Entire calendar page for a single year."
 {
     var int year "The year being viewed";
     var YearYear[] years "Information for linking to other years";
@@ -463,20 +469,21 @@ class YearPage extends Page
 }
 
 class MonthDay extends YearDay
-"Summaries of posts by given day"
+"Summaries of posts on a given day on the [class[MonthPage]]."
 {
     var bool has_entries "True if there are entries on this day.";
-    var Entry[] entries "Only populated on the month view. Entry text not present.";
+    var Entry[] entries "Only populated on the month view.  Entry text not present.";
 
     function print_subjectlist 
     "Print a list of entry summaries including subjects";
 }
 
 class MonthEntryInfo
+"A month the user has journal entries, along with information to link to it."
 {
     var Date date "Date of month, with day of zero.";
-    var readonly string url "URL for the month view";
-    var readonly string redir_key "The 'redir_key' parameter for \$*REDIR_URL";
+    var readonly string url "URL for the [class[MonthPage]] month view.";
+    var readonly string redir_key "The 'redir_key' parameter for a [class[Redirector]] instance.";
 }
 
 class MonthPage extends Page 
@@ -493,6 +500,7 @@ class MonthPage extends Page
 }
 
 class EntryPage extends Page
+"A page with a single journal entry and associated comments."
 {
     var Entry entry "Journal entry being viewed";
     var ItemRange comment_pages "Represents what comment page is being displayed.";
@@ -506,6 +514,7 @@ class EntryPage extends Page
 }
 
 class ReplyPage extends Page
+"A page to reply to a journal entry or comment"
 {
     var Entry entry "The journal entry for this talk page";
     var EntryLite source "The object which is being replied to, either the entry or a comment";
@@ -669,24 +678,42 @@ set lang_dayname_short = [ "", "Sun", "Mon",  "Tue", "Wed",
 
 property string IMGDIR {
     noui = 1;
-    des = "A URL which can be safely prepended onto a path starting with / where sitewide image resources can be found.";
+    doc_flags = "[sys]";
+    des = "The base URL of the current LiveJournal site's image directory, without a trailing slash.  Example: \"http://www.livejourna.com/img\".";
 }
 property string SITENAME {
     noui = 1;
-    des = "Actual name of the host site.";
+    doc_flags = "[sys]";
+    des = "Name of the current LiveJournal site.  Example: \"LiveJournal.com\".";
 }
+
+property string SITENAMESHORT {
+    noui = 1;
+    doc_flags = "[sys]";
+    des = "Shorter name of the current LiveJournal site.  Example: \"LiveJournal\".";
+}
+
+property string SITENAMEABBREV {
+    noui = 1;
+    doc_flags = "[sys]";
+    des = "Abbreviation of the current LiveJournal site.  Example: \"LJ\".";
+}
+
 property string SITEROOT {
     noui = 1;
-    des = "Site URL which can be safely prepended onto paths starting with /";
+    doc_flags = "[sys]";
+    des = "The base URL of the current LiveJournal site, without a trailing slash.  Example: \"http://www.livejournal.com\".";
 }
 
 property int page_recent_items {
     des = "Number of journal entries to show on recent entry page";
+    doc_flags = "[construct]";
     min = 1;
     max = 50;
 }
 property int page_friends_items {
     des = "Number of journal entries to show on friends page";
+    doc_flags = "[construct]";
     min = 5;
     max = 50;
 }
@@ -861,7 +888,9 @@ property string font_fallback {
 set font_fallback = "none"; # Default in core is to let the browser handle it.
 
 property string reg_firstdayofweek {
-    des = "Calendar weeks start on";
+    des = "The day of the week the calendar weeks starts on.";
+    doc = "The day of the week the calendar weeks starts on.  Either 'sunday' or 'monday'.";
+    doc_flags = "[construct]";
     values = "sunday|Sunday|monday|Monday";
 }
 set reg_firstdayofweek = "sunday";
@@ -891,6 +920,8 @@ set color_comment_bar = "#d0d0ff";
 
 property string comment_userpic_style {
    des = "Userpic display style for comments";
+   doc = "Userpic display style for comments.  Either '' for full, 'small' for small, or 'off' for none.";
+   doc_flags = "[construct]";
    values = "|Full|small|Small|off|Off";  
 }
 set comment_userpic_style = "";

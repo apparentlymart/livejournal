@@ -115,6 +115,21 @@ sub autogen_core
         $$r =~ s/\[method\[(.+?)\]\]/<link linkend=\"&s2.idroot;core$cv.meth.$1\">$1<\/link>/g;
         $$r =~ s/\[function\[(.+?)\]\]/<link linkend=\"&s2.idroot;core$cv.func.$1\">$1<\/link>/g;
         $$r =~ s/\[member\[(.+?)\]\]/<link linkend=\"&s2.idroot;core$cv.member.$1\">$1<\/link>/g;
+
+        my @parts = split(/\s*\/\/\s*/, $$r);
+        if (@parts > 1) {
+            $$r = shift @parts;
+            my $see_also;
+            foreach my $p (@parts) {
+                if ($p =~ /^SeeAlso:\s*(.+)/) {
+                    my $ids = $1;
+                    my $str = "  (See also: " . join(', ',
+                                                     map { "<xref linkend='$_' />"; }
+                                                     split(/\s*\,\s*/, $ids)) . ")";
+                    $$r .= $str;
+                }
+            }
+        }
     };
 
     my $xlink_args = sub {

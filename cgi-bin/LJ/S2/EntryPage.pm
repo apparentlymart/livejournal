@@ -167,6 +167,8 @@ sub EntryPage
     $p->{'comments'} = [];
     $convert_comments->($convert_comments, $p->{'comments'}, \@comments, 1);
 
+    $p->{'viewing_thread'} = $GET{'thread'} ? 1 : 0;
+
     $p->{'comment_pages'} = ItemRange({
         'all_subitems_displayed' => ($copts->{'out_pages'} == 1),
         'current' => $copts->{'out_page'},

@@ -66,6 +66,8 @@ sub make_journal
 
     $ctx->[S2::PROPS]->{'SITEROOT'} = $LJ::SITEROOT;
     $ctx->[S2::PROPS]->{'SITENAME'} = $LJ::SITENAME;
+    $ctx->[S2::PROPS]->{'SITENAMESHORT'} = $LJ::SITENAMESHORT;
+    $ctx->[S2::PROPS]->{'SITENAMEABBREV'} = $LJ::SITENAMEABBREV;
     $ctx->[S2::PROPS]->{'IMGDIR'} = $LJ::IMGPREFIX;
 
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
