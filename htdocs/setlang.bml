@@ -3,8 +3,10 @@
  return unless $FORM{'lang'};
  my $l = LJ::Lang::get_lang($FORM{'lang'});
  return unless $l;
- BMLClient::set_cookie("langpref", $l->{'lncode'} . "/" . time(), 0);
- BML::set_language($l->{'lncode'});
+ if (LJ::did_post()) {
+     BMLClient::set_cookie("langpref", $l->{'lncode'} . "/" . time(), 0);
+     BML::set_language($l->{'lncode'});
+ }
  return;
 
 _CODE=)(=PAGE
@@ -21,7 +23,7 @@ BODY<=
  }
 
  my $def = BML::get_language_default();
- my $curr = BML::get_language();
+ my $curr = $FORM{'lang'} || BML::get_language();
  my $ret;
  $ret .= "(=_ML .select _ML=)<form method='post'>";
 

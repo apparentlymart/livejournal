@@ -321,15 +321,11 @@ sub handle_request
         ## begin the multi-lang stuff
 
         # clean
-        foreach (qw(setlang uselang)) {
-            delete $GETVARS{$_} unless $GETVARS{$_} =~ /^\w{2,10}$/;
-        }
+        delete $GETVARS{'uselang'} unless $GETVARS{'uselang'} =~ /^\w{2,10}$/;
 
         # have they explictly specified their language?
-        $REQ_LANG = $GETVARS{'setlang'} || $GETVARS{'uselang'};
-        if ($GETVARS{'setlang'}) {
-            BMLClient::set_cookie("langpref", $GETVARS{'setlang'} . "/" . time(), 0);
-        }
+        $REQ_LANG = $GETVARS{'uselang'};
+
         if (! $REQ_LANG && $BMLClient::COOKIE{'langpref'} =~ m!^(\w{2,10})/(\d+)$!) {
             $REQ_LANG = $1;
             # make sure the document says it was changed at least as new as when
