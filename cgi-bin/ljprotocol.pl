@@ -1898,52 +1898,74 @@ sub editfriendgroups
 sub list_friends
 {
     my ($u, $opts) = @_;
-    my $dbr = LJ::get_db_reader();
+
+    my %hide_fo;  # userid -> 1
+    if ($LJ::HIDE_FRIENDOF_VIA_BAN) {
+        if (my $list = LJ::load_rel_user($u, 'B')) {
+            $hide_fo{$_} = 1 foreach @$list;
+        }
+    }
 
     # TAG:FR:protocol:list_friends
-    my $limitnum = $opts->{'limit'}+0;
-    my $where = "u.userid=f.friendid AND f.userid=$u->{'userid'}";
-    if ($opts->{'friendof'}) {
-        $where = "u.userid=f.userid AND f.friendid=$u->{'userid'} AND u.statusvis='V'";
+    my $sql;
+    unless ($opts->{'friendof'}) {
+        $sql = "SELECT friendid, fgcolor, bgcolor, groupmask FROM friends WHERE userid=?";
+    } else {
+        $sql = "SELECT userid FROM friends WHERE friendid=?";
     }
 
-    my $bday = $opts->{'includebdays'} ? "u.bdate, u.allow_infoshow," : ""; 
-    my $orderlimit = $limitnum ? "ORDER BY u.user LIMIT $limitnum" : "";
-    my $sth = $dbr->prepare("SELECT u.user AS 'friend', $bday u.name,".
-                            "u.journaltype, u.statusvis, f.fgcolor, f.bgcolor, f.groupmask ".
-                            "FROM user u, friends f WHERE $where $orderlimit");
-    $sth->execute;
-    my @friends;
-    push @friends, $_ while $_ = $sth->fetchrow_hashref;
-    unless ($orderlimit) {
-        @friends = sort { $a->{'friend'} cmp $b->{'friend'} } @friends;
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare($sql);
+    $sth->execute($u->{'userid'});
+
+    my @frow;
+    while (my @row = $sth->fetchrow_array) {
+        next if $hide_fo{$row[0]};
+        push @frow, [ @row ];
     }
+
+    my $us = LJ::load_userids(map { $_->[0] } @frow);
+    my $limitnum = $opts->{'limit'}+0;
 
     my $res = [];
-    foreach my $f (@friends)
+    foreach my $f (sort { $us->{$a->[0]}{'user'} cmp $us->{$b->[0]}{'user'} }
+                   grep { $us->{$_->[0]} } @frow)  
     {
-        my $r =  { 'username' => $f->{'friend'},
-                   'fullname' => $f->{'name'},
-               };
-        $r->{'birthday'} = $f->{'bdate'} 
-            unless $f->{'allow_infoshow'} ne 'Y' || !$f->{'bdate'} 
-                || $f->{'bdate'} eq '0000-00-00';
+        my $u = $us->{$f->[0]};
+        next if $opts->{'friendof'} && $u->{'statusvis'} ne 'V';
 
-        $r->{'fgcolor'} = LJ::color_fromdb($f->{'fgcolor'});
-        $r->{'bgcolor'} = LJ::color_fromdb($f->{'bgcolor'});
-        if (! $opts->{'friendof'} && $f->{'groupmask'} != 1) {
-            $r->{"groupmask"} = $f->{'groupmask'};
+        my $r = {
+            'username' => $u->{'user'},
+            'fullname' => $u->{'name'},
+        };
+
+        if ($opts->{'includebdays'} &&
+            $u->{'bdate'} &&
+            $u->{'bdate'} ne "0000-00-00" &&
+            $u->{'allow_infoshow'} eq 'Y') 
+        {
+            $r->{'birthday'} = $f->{'bdate'};            
         }
-        if ($f->{'journaltype'} eq "C") {
-            $r->{"type"} = "community";
+
+        unless ($opts->{'friendof'}) {
+            $r->{'fgcolor'} = LJ::color_fromdb($f->[1]);
+            $r->{'bgcolor'} = LJ::color_fromdb($f->[2]);
+            $r->{"groupmask"} = $f->[3] if $f->[3] != 1;
+        } else {
+            $r->{'fgcolor'} = "#000000";
+            $r->{'bgcolor'} = "#ffffff";
         }
+
+        $r->{"type"} = "community" if $u->{'journaltype'} eq "C";
         $r->{"status"} = {
             'D' => "deleted",
             'S' => "suspended",
             'X' => "purged",
-        }->{$f->{'statusvis'}} if $f->{'statusvis'} ne 'V';
+        }->{$u->{'statusvis'}} if $u->{'statusvis'} ne 'V';
 
         push @$res, $r;
+        # won't happen for zero limit (which means no limit)
+        last if @$res == $limitnum;
     }
     return $res;
 }
