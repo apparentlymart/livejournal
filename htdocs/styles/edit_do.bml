@@ -94,7 +94,7 @@ body<=
 
         LJ::S1::delete_style($styleid);
         return "<?h1 Deleted h1?><?p The style has been deleted. You can view your current list of styles " .
-               "<a href='edit.bml$getextra'>here</a> p?>";
+               "<a href='edit.bml$getextra'>here</a>. p?>";
     }
 
     # editing a style
@@ -107,7 +107,12 @@ body<=
         $ret .= "<tr><td bgcolor='#d0d0d0'><b>Style View Type:</b></td><td><i>$LJ::viewinfo{$style->{'type'}}->{'des'}</i> -- <b>$style->{'type'}</b></td></tr>\n";
         $ret .= "<tr><td bgcolor='#d0d0d0'><b>Style ID Number:</b></td><td><b>$style->{'styleid'}</b>";
 
-        my $extravars = "&nocache=1" if $style->{'opt_cache'} eq "Y";
+        my $extravars = "&amp;nocache=1" if $style->{'opt_cache'} eq "Y";
+        if ($style->{'type'} eq 'day') {
+            my ($curmday, $curmon, $curyear) = (localtime(time))[3..5]; 
+            $extravars .= sprintf("&amp;day=%02d&amp;month=%02d&amp;year=%04d",
+                                  $curmday, $curmon+1, $curyear+1900);
+        }
         $ret .= " <a target='preview' href=\"$LJ::SITEROOT/customview.cgi?username=$u->{'user'}&amp;styleid=$styleid$extravars\">[Preview Current Style]</a> (must save below to see your changes, keep this window open and reload it whenever you save)";
         $ret .= "</td></tr>\n";
         
@@ -281,9 +286,16 @@ body<=
                                'styledes' => $POST{'styledes'},
                                map { $_->{'code'} => $POST{$_->{'code'}} ? "Y" : "N" } @style_opts });
 
+        my $extravars;
+        if ($style->{'type'} eq 'day') {
+            my ($curmday, $curmon, $curyear) = (localtime(time))[3..5]; 
+            $extravars = sprintf("&amp;day=%02d&amp;month=%02d&amp;year=%04d",
+                                 $curmday, $curmon+1, $curyear+1900);
+        }
         # all good
-        return "<?h1 Success h1?><?p Style has been updated.  You can view it ".
-            "<a target=preview href=\"/customview.cgi?user=$u->{'user'}&amp;styleid=$styleid\">here</a>. p?>";
+        return "<?h1 Success h1?><?p Style has been updated.  You can view it " .
+            "<a target='preview' href=\"$LJ::SITEROOT/customview.cgi?user=$u->{'user'}" .
+            "&amp;styleid=$styleid$extravars\">here</a>. p?>";
     }
 
     # this should never happen
