@@ -214,9 +214,14 @@ sub EntryPage
         };
         $recurse->($recurse, $p->{'comments'});
         chop $js; chop $js;  # remove final ",\n".  stupid javascript.
-        $js .= "\n};\n</script>\n";
+        $js .= "\n};\n" .
+            "var LJVAR;\n".
+            "if (!LJVAR) LJVAR = new Object();\n".
+            "LJVAR.imgprefix = \"$LJ::IMGPREFIX\";\n".
+            "</script>\n";
         $p->{'head_content'} .= $js;
         $p->{'head_content'} .= "<script src='$LJ::SITEROOT/js/commentmanage.js'></script>\n";
+        
     }
 
 

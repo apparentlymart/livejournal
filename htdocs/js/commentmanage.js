@@ -1,3 +1,6 @@
+var LJVAR;
+if (! LJVAR) LJVAR = new Object();
+
 // called by S2:
 function setStyle (did, attr, val) {
     if (! document.getElementById) return;
@@ -417,7 +420,7 @@ function createModerationFunction (ae, dItemid) {
         de.style.position = "absolute";
         de.width = 17;
         de.height = 17;
-        de.src = "http://brad.lj/temp/hourglass/hourglass.gif";
+        de.src = LJVAR.imgprefix + "/hourglass.gif";
         de.style.top = (clickPos[1] - 8) + "px";
         de.style.left = (clickPos[0] - 8) + "px";
         document.body.appendChild(de);
@@ -484,3 +487,4 @@ function setup_ajax () {
 if (document.getElementById && getXTR()) {
     window.onload = setup_ajax;
 }
+
