@@ -41,7 +41,7 @@
         $style = LJ::S2::load_style($u->{'s2_style'});
         return $err->("Style not found.") unless $style && $style->{'userid'} == $u->{'userid'};
         $layer = LJ::S2::load_layer($dbh, $style->{'layer'}->{'user'});
-        $save_arg = "w=user";
+        $save_arg = "w=user&journal=$journal";
         $save_redir = "/customize/?journal=$journal";
     }
 

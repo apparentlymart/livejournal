@@ -183,8 +183,8 @@ body<=
     $ret .= "<?h2 Change Individual Settings h2?><?p If you want to customize your journal further, here you can tweak individual settings to get it looking exactly how you want... p?>";
     $ret .= "<blockquote>";
     if ($style{'user'}) {
-        $ret .= "<input type='submit' name='action:deluser' value='Remove Customizations'>\n";
         $ret .= "<input type='submit' name='action:edituser' value='Edit Customizations...'>\n";
+        $ret .= "<input type='submit' name='action:deluser' value='Remove Customizations'>\n";
     } else {
         $ret .= "<input type='submit' name='action:edituser' value='Customize...'>\n";
     }
