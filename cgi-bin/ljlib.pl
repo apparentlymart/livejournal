@@ -4422,13 +4422,11 @@ sub cmd_buffer_flush
         },
         # ping weblogs.com with updates?  takes a $u argument
         'weblogscom' => {
+            'too_old' => 60*60*2,  # 2 hours old = qbufferd not running?
             'run' => sub {
                 # user, title, url
                 my ($dbh, $db, $c) = @_;
                 my $a = $c->{'args'};
-                my $unixtime = LJ::mysqldate_to_time($c->{'instime'});
-                # if more than 6 hours old (qbufferd not running?)
-                return if $unixtime < time() - 60*60*6;
                 eval {
                     eval "use XMLRPC::Lite;";
                     XMLRPC::Lite
@@ -4444,15 +4442,19 @@ sub cmd_buffer_flush
     };
 
     my $code;
+    my $too_old = 0;   # 0 = never too old
 
     # is it a built-in command?
     if ($cmds->{$cmd}) {
         $code = $cmds->{$cmd}->{$mode};
-
+        $too_old = $cmds->{$cmd}->{"too_old"};
+        
     # otherwise it might be a site-local command
     } else {
         $code = $LJ::HOOKS{"cmdbuf:$cmd:$mode"}->[0]
             if $LJ::HOOKS{"cmdbuf:$cmd:$mode"};
+        $too_old = $LJ::HOOKS{"cmdbuf:$cmd:too_old"}->[0]->()
+            if $LJ::HOOKS{"cmdbuf:$cmd:too_old"};
     }
 
     return 0 unless $code;
@@ -4471,14 +4473,29 @@ sub cmd_buffer_flush
         $where .= " AND journalid=" . $dbh->quote($userid);
     }
 
-    my $LIMIT = 50;
+    my $LIMIT = 500;
 
     while ($loop &&
-           ($clist = $db->selectcol_arrayref("SELECT cbid FROM cmdbuffer ".
+           ($clist = $db->selectall_arrayref("SELECT cbid, UNIX_TIMESTAMP() - UNIX_TIMESTAMP(instime) ".
+                                             "FROM cmdbuffer ".
                                              "WHERE $where ORDER BY cbid LIMIT $LIMIT")) &&
            $clist && @$clist)
     {
-        foreach my $cbid (@$clist) {
+        my @too_old;
+        my @cbids;
+        foreach my $citem (@$clist) {
+            if ($too_old && $citem->[1] > $too_old) {
+                push @too_old, $citem->[0];
+            } else {
+                push @cbids, $citem->[0];
+            }
+        }
+        if (@too_old) {
+            local $" = ",";
+            $db->do("DELETE FROM cmdbuffer WHERE cbid IN (@too_old)");
+        }
+
+        foreach my $cbid (@cbids) {
             my $got_lock = $db->selectrow_array("SELECT GET_LOCK('cbid-$cbid',10)");
             return 0 unless $got_lock;
             # sadly, we have to do another query here to verify the job hasn't been
