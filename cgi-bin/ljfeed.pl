@@ -218,6 +218,7 @@ sub create_view_rss
 
     # header
     $ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
+    $ret .= LJ::run_hook("bot_director", "<!-- ", " -->");
     $ret .= "<rss version='2.0'>\n";
 
     # channel attributes
@@ -291,6 +292,7 @@ sub create_view_atom
 
     # prolog line
     $ret .= "<?xml version='1.0' encoding='$opts->{'saycharset'}' ?>\n";
+    $ret .= LJ::run_hook("bot_director", "<!-- ", " -->");
 
     # AtomAPI interface
     my $api = "$LJ::SITEROOT/interface/atomapi/$journalinfo->{'u'}->{'user'}";
@@ -373,6 +375,7 @@ sub create_view_foaf {
 
     # create bare foaf document, for now
     $ret = "<?xml version='1.0'?>\n";
+    $ret .= LJ::run_hook("bot_director", "<!-- ", " -->");
     $ret .= "<rdf:RDF\n";
     $ret .= "   xml:lang=\"en\"\n";
     $ret .= "   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n";

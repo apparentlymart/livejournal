@@ -9,6 +9,12 @@
  $head = "";
  $windowtitle = "";
 
+ # Deal with bots
+ my $sep  = "**";
+ my $pre  = "<!-- \n" . ($sep x 40 . "\n") x 2 . "$sep\n" x 10 . $sep;
+ my $post = "\n" . "$sep\n" x 10 . ($sep x 40 . "\n") x 2 . " -->";
+ $body .= LJ::run_hook("bot_director", $pre, $post);
+
  if ($LJ::SERVER_DOWN) {
      $title = $ML{'Sorry'};
      $body = LJ::server_down_html();
