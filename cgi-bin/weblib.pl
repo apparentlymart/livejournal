@@ -666,7 +666,9 @@ sub create_qr_div {
                 $qrhtml .= LJ::html_select({'name' => 'prop_picture_keyword',
                                          'selected' => $userpic, },
                                         ("", BML::ml('/talkpost.bml.opt.defpic'), map { ($_, $_) } @pics));
-            $qrhtml .= LJ::help_icon("userpics", " ");
+
+                $qrhtml .= ' ' . BML::fill_template('help', { 'DATA' => $LJ::HELPURL{'userpics'} } )
+                    if defined $LJ::HELPURL{'userpics'};
             }
         }
 
@@ -682,7 +684,7 @@ sub create_qr_div {
         $qrhtml .= "<td align='right'><b>".BML::ml('/talkpost.bml.opt.message')."</b></td>";
         $qrhtml .= "<td colspan='3' style='width: 90%'>";
 
-        $qrhtml .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='body' style='width: 100%'></textarea>";
+        $qrhtml .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='body' style='width: 99%'></textarea>";
         $qrhtml .= "</td></tr>";
 
         $qrhtml .= "<tr><td>&nbsp;</td>";
@@ -701,6 +703,14 @@ sub create_qr_div {
             $qrhtml .= "&nbsp;<input type='checkbox' name='do_spellcheck' value='1' id='spellcheck' /> <label for='spellcheck'>";
             $qrhtml .= BML::ml('/talkread.bml.qr.spellcheck');
             $qrhtml .= "</label>";
+        }
+
+        LJ::load_user_props($u, 'opt_logcommentips');
+        if ($u->{'opt_logcommentips'} eq 'A') {
+            $qrhtml .= '<br />';
+            $qrhtml .= BML::fill_template('de', { 'DATA' => BML::ml('/talkpost.bml.logyourip') } );
+            $qrhtml .= ' ' . BML::fill_template('help', { 'DATA' => $LJ::HELPURL{'iplogging'} } )
+                if defined $LJ::HELPURL{'iplogging'};
         }
 
         $qrhtml .= "</td></tr></table>";
