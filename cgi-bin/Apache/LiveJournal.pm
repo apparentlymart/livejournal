@@ -147,6 +147,28 @@ sub trans
     # a trace to get the LJ cookies in the echo)
     return FORBIDDEN if $r->method_number == M_TRACE;
 
+    LJ::start_request();
+    LJ::procnotify_check();
+
+    my $is_ssl = LJ::run_hook("ssl_check", {
+        r => $r,
+    });
+
+    # only allow certain pages over SSL
+    if ($is_ssl) {
+        if ($uri =~ m!^/interface/!) {
+            # handled later
+        } elsif ($LJ::SSLDOCS && $uri !~ m!(\.\.|\%|\.\/)!) {
+            my $file = "$LJ::SSLDOCS/$uri";
+            return 404 unless -e $file;
+            if (-d _) { $file .= "/index.bml"; }
+            $file =~ s!/{2,}!/!g;
+            $r->filename($file);
+            return OK;
+        }
+        return FORBIDDEN;
+    }
+
     # let foo.com still work, but redirect to www.foo.com
     if ($LJ::DOMAIN_WEB && $r->method eq "GET" &&
         $host eq $LJ::DOMAIN && $LJ::DOMAIN_WEB ne $LJ::DOMAIN)
@@ -155,9 +177,6 @@ sub trans
         $url .= "?" . $args if $args;
         return redir($r, $url);
     }
-
-    LJ::start_request();
-    LJ::procnotify_check();
 
     # handle uniq cookies
     if ($LJ::UNIQ_COOKIES) {
@@ -407,6 +426,7 @@ sub trans
         }
 	if ($int eq "flat" || $int eq "xmlrpc" || $int eq "blogger") {
 	    $RQ{'interface'} = $int;
+	    $RQ{'is_ssl'} = $is_ssl;
 	    $r->push_handlers(PerlHandler => \&interface_content);
 	    return OK;
 	}
