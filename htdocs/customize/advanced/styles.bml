@@ -23,11 +23,17 @@
     return $err->('Your account type does not permit you to modify S2 styles')
         unless LJ::get_cap($u, 's2styles');
 
+    # extra arguments for get requests
+    my $getextra = $authas ne $remote->{'user'} ? "?authas=$authas" : '';
+    my $getextra_amp = "&authas=$authas" if $getextra;
+
     # style id to edit, if we have one
     # if we have this we're assumed to be in 'edit' mode
     my $id = $GET{'id'}+0;
 
     my $dbh = LJ::get_db_writer();
+
+    # variables declared here, but only filled in if $id
     my ($core, $layout);      # scalars
     my ($pub, $ulay, $style); # hashrefs
 
@@ -38,7 +44,7 @@
         'text' => 'Advanced Customization',
     }) . "\n";
     $body .= BML::ml("actionlink", {
-        'link' => "<a href='layers.bml?authas=$authas'>Your Layers</a>",
+        'link' => "<a href='layers.bml$getextra'>Your Layers</a>",
     }) . "\n";
 
     # edit mode
@@ -58,7 +64,7 @@
             # save to db and update user object
             LJ::set_userprop($u, "stylesys", '2');
             LJ::set_userprop($u, "s2_style", $id);
-            return BML::redirect("styles.bml?authas=$authas");
+            return BML::redirect("styles.bml$getextra");
         }
 
         # get public layers
@@ -67,7 +73,20 @@
         # get user layers
         $ulay = LJ::S2::get_layers_of_user($u);
 
-        # core lid
+        # find effective layerids being used
+        my %eff_layer = ();
+        my @other_layers = ();
+        foreach (qw(i18nc layout theme i18n user)) {
+            my $lid = $POST{$_} eq "_other" ? $POST{"other_$_"} : $POST{$_};
+            next unless $lid;
+            $eff_layer{$_} = $lid;
+
+            unless ($ulay->{$eff_layer{$_}} || $pub->{$eff_layer{$_}}) {
+                push @other_layers, $lid;
+            }
+        }
+
+        # core lid (can't use user core layer)
         $POST{'core'} ||= $POST{'core_hidden'};
         $core = defined $POST{'core'} ? $POST{'core'} : $style->{'layer'}->{'core'};
         unless ($core) { # default to highest numbered core
@@ -79,28 +98,28 @@
         }
 
         # layout lid
-        $layout = defined $POST{'layout'} ? $POST{'layout'} : $style->{'layer'}->{'layout'};
+        $layout = $POST{'action:change'} ? $eff_layer{'layout'} : $style->{'layer'}->{'layout'};
 
         # if we're changing core, clear everything
         if ($POST{'core'} && $style->{'layer'}->{'core'} &&
             $POST{'core'} != $style->{'layer'}->{'core'}) {
             foreach (qw(i18nc layout theme i18n user)) {
-                delete $POST{$_};
+                delete $eff_layer{$_};
             }
             undef $layout;
         }
 
         # if we're changing layout, clear everything below
-        if ($POST{'layout'} && $style->{'layer'}->{'layout'} &&
-            $POST{'layout'} != $style->{'layer'}->{'layout'}) {
+        if ($eff_layer{'layout'} && $style->{'layer'}->{'layout'} &&
+            $eff_layer{'layout'} != $style->{'layer'}->{'layout'}) {
             foreach (qw(theme i18n user)) {
-                delete $POST{$_};
+                delete $eff_layer{$_};
             }
         }
 
         # set up start of output
         $title = "Edit Style";
-        $body .= "<br />" . BML::ml('backlink', { 'text' => 'Your Styles', 'link' => "styles.bml?authas=$authas" }) . "\n";
+        $body .= "<br />" . BML::ml('backlink', { 'text' => 'Your Styles', 'link' => "styles.bml$getextra" }) . "\n";
 
         ### process edit actions
 
@@ -108,10 +127,10 @@
         if ($POST{'action:delete'}) {
             LJ::S2::delete_user_style($u, $id);
             undef $id; # don't show form below
-            return BML::redirect("styles.bml?authas=$authas");
+            return BML::redirect("styles.bml$getextra");
         }
 
-        # change changes
+        # save changes
         if ($POST{'action:change'} || $POST{'action:savechanges'}) {
 
             # are they renaming their style?
@@ -126,34 +145,72 @@
                 $style->{'name'} = $POST{'stylename'};
             }
 
+            # load layer info of any "other" layers
+            my %other_info = ();
+            if (@other_layers) {
+                LJ::S2::load_layer_info(\%other_info, \@other_layers);
+                foreach (@other_layers) {
+                    return $err->("Layer not found: $_") unless exists $other_info{$_};
+                    return $err->("Layer not public: $_") unless $other_info{$_}->{'is_public'};
+                }
+            }
+            
             # error check layer modifications
-            my $baseid = sub {
-                my $id = shift;
-                my $layer = $ulay->{$id} || $pub->{$id};
-                return undef unless $layer;
-                return $layer->{'b2lid'};
+            my $get_layername = sub {
+                my $lid = shift;
+
+                my $name;
+                $name = $pub->{$lid}->{'name'} if $pub->{$lid};
+                $name ||= $ulay->{$lid}->{'name'} if $ulay->{$lid};
+                $name ||= "#$lid";
+
+                return $name;
             };
 
             # check layer hierarchy
-            foreach (qw(i18nc layout)) {
-                next if ! $POST{$_} || $baseid->($POST{$_}) == $core;
-                return $err->("Layer hierarchy mismatch: $_");
+            my $error_check = sub {
+                my ($type, $parentid) = @_;
+
+                my $lid = $eff_layer{$type};
+                next if ! $lid;
+
+                my $layer = $ulay->{$lid} || $pub->{$lid} || LJ::S2::load_layer($lid);
+                my $parentname = $get_layername->($parentid);
+                my $layername = $get_layername->($lid);
+
+                # is valid layer type?
+                return "Invalid layer type: <i>$layername</i> is not a $type layer"
+                    if $layer->{'type'} ne $type;
+
+                # is a child?
+                return "Layer hierarchy mismatch: <i>$layername</i> is not a child $type layer of <i>$parentname</i>"
+                    unless $layer->{'b2lid'} == $parentid;
+
+                return undef;
+            };
+
+            # check child layers of core
+            foreach my $type (qw(i18nc layout)) {
+                my $errmsg = $error_check->($type, $core);
+                return $err->($errmsg) if $errmsg;
             }
 
             # don't check sub-layout layers if there's no layout
             if ($layout) {
-                foreach (qw(theme i18n user)) {
-                    next if ! $POST{$_} || $baseid->($POST{$_}) == $layout;
-                    return $err->("Layer hierarchy mismatch: $_");
+
+                # check child layers of selected layout
+                foreach my $type (qw(theme i18n user)) {
+                    my $errmsg = $error_check->($type, $layout);
+                    return $err->($errmsg) if $errmsg;
                 }
             }
 
             # save in database
             LJ::S2::set_style_layers($u, $style->{'styleid'}, 
-                                     map { $_, $POST{$_} } qw(core i18nc layout i18n theme user));
+                                     map { $_, $eff_layer{$_} } qw(core i18nc layout i18n theme user));
 
             # redirect if they clicked the bottom button
-            return BML::redirect("styles.bml?authas=$authas") if $POST{'action:savechanges'};
+            return BML::redirect("styles.bml$getextra") if $POST{'action:savechanges'};
         }
 
     # no style id, process actions for non-edit mode
@@ -172,7 +229,7 @@
             my $styleid = LJ::S2::create_style($u, $POST{'stylename'});
             return $err->('Style not created: Database error') unless $styleid;
 
-            return BML::redirect("styles.bml?authas=$authas&id=$styleid");
+            return BML::redirect("styles.bml?id=$styleid$getextra_amp");
         }
 
         # load style currently in use
@@ -191,11 +248,12 @@
         # show style listing
         $body .= "<table class='postheading' style='margin-left: 40px'>\n";
         if (%$ustyle) {
+            my $journalbase = LJ::journal_base($u);
             foreach my $styleid (sort { $ustyle->{$a} cmp $ustyle->{$b} || $a <=> $b} keys %$ustyle) {
-                $body .= "<tr><td><form style='display:inline' method='post' action='styles.bml?authas=$authas&id=$styleid'>";
+                $body .= "<tr><td><form style='display:inline' method='post' action='styles.bml?id=$styleid$getextra_amp'>";
                 my @b = $styleid == $u->{'s2_style'} ? "<b>" : "</b>";
                 $body .= $b[0] . LJ::ehtml($ustyle->{$styleid});
-                $body .= " (<a href='" . LJ::journal_base($u) . "/?s2id=$styleid'>\#$styleid</a>)$b[1] ";
+                $body .= " (<a href='$journalbase/?s2id=$styleid'>\#$styleid</a>)$b[1] ";
                 $body .= "</td><td>";
                 $body .= LJ::html_submit('action:edit', 'Edit') . " ";
                 $body .= LJ::html_submit('action:delete', 'Delete', 
@@ -212,8 +270,9 @@
 
     ### show create / edit form
 
-    my $extra = $id ? "&id=$id" : '';
-    $body .= "<form class='postheading' method='post' action='styles.bml?authas=$authas$extra'>";
+    my $extra = $id ? "?id=$id" : '';
+    $extra .= $extra ? $getextra_amp : $getextra;
+    $body .= "<form class='postheading' name='styleForm' method='post' action='styles.bml$extra'>";
 
     # create a new style, or change the name of the style currently being edited
     # note: this little bit of code appears whether there is an id passed or not.
@@ -230,6 +289,8 @@
     # if no id to edit, we're finished
     $body .= "</form>\n", return unless $id;
 
+    # from here on we have $pub, $ulay, and $style filled in
+
     # sub to take a layer type, core, and parent layout
     # and return a list of options to feed to LJ::html_select()
     my $layerselect = sub {
@@ -240,9 +301,13 @@
         # returns html_select to caller
         my $html_select = sub {
             my $dis = scalar(@opts) > 2 ? 0 : 1;
-            
-            return [ LJ::html_select({ 'name' => $type, 
-                                       'selected' => defined $POST{$type} ? $POST{$type} : $style->{'layer'}->{$type},
+
+            my $lid = $POST{'action:change'} ? $POST{$type} : $style->{'layer'}->{$type};
+            $lid = $POST{"other_$type"} if $lid eq "_other";
+            my $sel = ($lid && ! $pub->{$lid} && ! $ulay->{$lid}) ? "_other" : $lid;
+            return [ LJ::html_select({ 'name' => $type, 'id' => "select_$type",
+                                       'onChange' => "showOther('$type')",
+                                       'selected' => $sel,
                                        'disabled' => $dis }, @opts), { 'disabled' => $dis, } ];
         };
 
@@ -269,10 +334,30 @@
         # if we didn't push anything above, remove dividing line
         pop @opts, pop @opts unless scalar(@opts) > $startsize;
 
+        # add option for other layerids
+        push @opts, ('_other', 'Other ...');
+
         # add blank option to beginning of list
         unshift @opts, ('', @opts ? '' : ' ');
 
         return $html_select->();
+    };
+
+    my $layerother = sub {
+        my $name = shift;
+
+        my $olid = $POST{'action:change'} ? $POST{"other_$name"} : $style->{'layer'}->{$name};
+        my $disp = 'none';
+        my $val;
+        if ($olid && ! $pub->{$olid} && ! $ulay->{$olid}) {
+            $disp = 'inline';
+            $val = $olid;
+        }
+
+        return "<div id='layer_$name' style='margin-left: 5px; display: $disp;'>Layerid: " .
+            LJ::html_text({ 'name' => "other_$name", 'id' => "other_$name",
+                            'size' => 6, 'value' => $val }) .
+            "</div>";
     };
 
     ### core version
@@ -294,12 +379,14 @@
     # i18nc
     $body .= "<tr><td>Language (i18nc): </td><td>";
     $body .= $layerselect->('i18nc', $core)->[0];
+    $body .= $layerother->('i18nc');
     $body .= "</td></tr>\n";
 
     # layout
     $body .= "<tr><td>Layout: </td><td>";
     my $layoutsel = $layerselect->('layout', $core);
     $body .= $layoutsel->[0];
+    $body .= $layerother->('layout');
     my $dis = $layoutsel->[1]->{'disabled'} ? { 'disabled' => 'disabled' } : undef;
     $body .= " " . LJ::html_submit("action:change", "Change", $dis) . " </td></tr>\n";
     $body .= "</table>\n";
@@ -312,11 +399,14 @@
     # theme
     $body .= "<table style='margin: 10px 0 0 80px'>\n";
     $body .= "<tr><td>Language (i18n): </td><td>";
-    $body .= $layerselect->('i18n', $layout)->[0] . "</td></tr>\n";
+    $body .= $layerselect->('i18n', $layout)->[0];
+    $body .= $layerother->('i18n') . "</td></tr>\n";
     $body .= "<tr><td>Theme: </td><td>";
-    $body .= $layerselect->('theme', $layout)->[0] . "</td></tr>\n";
+    $body .= $layerselect->('theme', $layout)->[0];
+    $body .= $layerother->('theme') . "</td></tr>\n";
     $body .= "<tr><td>User: </td><td>";
-    $body .= $layerselect->('user', $layout)->[0] . "</td></tr>\n";
+    $body .= $layerselect->('user', $layout)->[0];
+    $body .= $layerother->('user') . "</td></tr>\n";
     $body .= "<tr><td>&nbsp;</td><td>";
     $body .= LJ::html_submit('action:savechanges', 'Save Changes') . "</td></tr>\n";
     $body .= "</table>\n";
@@ -328,6 +418,33 @@
 }
 _code?><?page
 title=><?_code return $title; _code?>
+head<=
+<script language="JavaScript">
+    function showOther (name) {
+        if (! document.getElementById) return false;
+        var box = document.getElementById("other_" + name);
+        var list = document.getElementById("select_" + name);
+        var div = document.getElementById("layer_" + name);
+        if (div && box) {
+            div.style.display =
+                (list.value == "_other" && box.value != '' || list.value == "_other")
+                ? "inline" : "none";
+        }
+        return false;
+    }
+    function pageload () {
+        if (!document.getElementById) return false;
+
+        var layers = new Array('i18nc', 'layout', 'i18n', 'theme', 'user');
+        for (var i=0; i<layers.length; i++) {
+            showOther(layers[i]);
+        }
+
+        return false;
+    }
+</script>
+<=head
 body=><?_code return $body; _code?>
+bodyopts=>onLoad="pageload();"
 page?>
     
