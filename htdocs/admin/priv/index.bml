@@ -101,6 +101,7 @@
 		     if ($userid && $privid) {
 			 my $qarg = $dbh->quote($FORM{'arg'});
 			 $dbh->do("INSERT INTO priv_map (prmid, userid, prlid, arg) VALUES (NULL, $userid, $privid, $qarg)");
+			 LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, "privadd", "Granting: \"$privcode\" with arg \"$FORM{'arg'}\"");
 			 $ret .= "Privilege added.<br />\n";
 		     }
 		     else {
