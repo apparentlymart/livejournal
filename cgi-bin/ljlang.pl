@@ -315,7 +315,7 @@ sub get_text
     }
 
     if ($vars) {
-        $text =~ s/\[\[(.+?)\]\]/$vars->{$1}/g;
+        $text =~ s/\[\[([^\[]+?)\]\]/$vars->{$1}/g;
     }
 
     return $text;
