@@ -596,12 +596,13 @@ sub postevent
     # the hints table to not insert into.
     my $rlogtime = "$LJ::EndOfTime";
     unless ($req->{'props'}->{"opt_backdated"}) {
-        $rlogtime .= "-UNIX_TIMESTAMP()";
+        $rlogtime .= "-UNIX_TIMESTAMP(?)";
     }
 
     my $dbcm = $dbh;
     my $clustered = 0;
     my $anum  = int(rand(256));
+    my $udbh_now;  # current time on the master user db
 
     if ($uowner->{'clusterid'}) {
         $dbcm = LJ::get_cluster_master($uowner);
@@ -615,12 +616,16 @@ sub postevent
         # the old last item which is marked for deletion:
         LJ::cmd_buffer_flush($dbh, $dbcm, "delitem", $ownerid);
 
+        $udbh_now = $dbcm->selectrow_array("SELECT NOW()");
+        $rlogtime =~ s/\?/\'$udbh_now\'/;  # replace parameter above with current time
+
         $dbcm->do("INSERT INTO log2 (journalid, posterid, eventtime, logtime, security, ".
                   "allowmask, replycount, year, month, day, revttime, rlogtime, anum) ".
-                  "VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, ".
+                  "VALUES ($qownerid, $qposterid, $qeventtime, '$udbh_now', $qsecurity, $qallowmask, ".
                   "0, $req->{'year'}, $req->{'mon'}, $req->{'day'}, $LJ::EndOfTime-".
                   "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     } else {
+        $rlogtime =~ s/\?//;  # kill the parameter, which we don't use in this case.
         $dbcm->do("INSERT INTO log (ownerid, posterid, eventtime, logtime, security, ".
                   "allowmask, replycount, year, month, day, revttime, rlogtime) ".
                   "VALUES ($qownerid, $qposterid, $qeventtime, NOW(), $qsecurity, $qallowmask, ".
@@ -713,8 +718,7 @@ sub postevent
     ## update sync table (selected from log table, so logtime is identical!)
     if ($clustered) {
         $dbcm->do("REPLACE INTO syncupdates2 (userid, atime, nodetype, nodeid, atype) ".
-                  "SELECT journalid, logtime, 'L', jitemid, 'create' FROM log2 ".
-                  "WHERE journalid=$ownerid AND jitemid=$itemid");
+                  "VALUES ($ownerid, '$udbh_now', 'L', $itemid, 'create')");
         if ($dbcm->err) {
             my $msg = $dbcm->errstr;
             LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
