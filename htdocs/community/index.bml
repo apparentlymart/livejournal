@@ -1,15 +1,15 @@
-(=PAGE
-TITLE=>(=_ML .title _ML=)
+<?page
+TITLE=><?_ml .title _ml?>
 BODY<=
 
-(=_INCLUDE
+<?_include
 BML=>1
 CODE=>0
 FILE=>community
-_INCLUDE=)
+_include?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 # NONE
-</LJDEP> _C=)
+</LJDEP> _c?>
 

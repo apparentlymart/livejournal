@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = $ML{'.title'};
  $body = "";
@@ -11,7 +11,7 @@
  ###
  my $remote = LJ::get_remote($dbs);
  unless ($remote) {
-     $body = "(=H1 $ML{'Sorry'}.. H1=)(=P $ML{'.label.loginfirst'} P=)";
+     $body = "<?h1 $ML{'Sorry'}.. h1?><?p $ML{'.label.loginfirst'} p?>";
      return;
  }
 
@@ -30,7 +30,7 @@
  ### does this community even exit?
  ###
  unless ($ci) {
-     $body .= "(=H1 $ML{'Error'} H1=)(=P $ML{'.label.errorcomminfo'} P=)";
+     $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.label.errorcomminfo'} p?>";
      return;
  }
 
@@ -39,7 +39,7 @@
 
  ### can members join this community even?
  unless ($ci->{'membership'} eq "open") {
-     $body .= "(=H1 $ML{'Sorry'}... H1=)(=P $ML{'.label.closedcomm'} P=)";
+     $body .= "<?h1 $ML{'Sorry'}... h1?><?p $ML{'.label.closedcomm'} p?>";
      return;
  }
 
@@ -47,13 +47,13 @@
  ### or something)
  LJ::load_remote($dbs, $remote);
  unless ($remote->{'journaltype'} eq "P") {
-     $body .= "(=H1 $ML{'Error'} H1=)(=P $ML{'.label.commlogged'} P=)";
+     $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.label.commlogged'} p?>";
      return;
  }
  
  ## ensure this user isn't banned
  if (LJ::is_banned($dbs, $remote, $ci->{'userid'})) {
-     $body .= "(=H1 $ML{'Sorry'} H1=)(=P $ML{'.label.banned'} P=)";
+     $body .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.label.banned'} p?>";
      return;
  }
 
@@ -69,35 +69,35 @@
          LJ::add_friend($dbh, $remote->{'userid'}, $ci->{'userid'});
      }
      
-     $body .= "(=H1 $ML{'.success'} H1=)(=P ".BML::ml('.label.membernow',{ 'username' => $ci->{'user'}, 'commname'=> $ecname})." P=)";
+     $body .= "<?h1 $ML{'.success'} h1?><?p ".BML::ml('.label.membernow',{ 'username' => $ci->{'user'}, 'commname'=> $ecname})." p?>";
      
      ### if community permits it, give remote user access to post in this community
      if ($ci->{'postlevel'} eq "members") {
          $dbh->do("INSERT INTO logaccess (ownerid, posterid) VALUES ($ci->{'userid'}, $remote->{'userid'})");
-         $body .= "(=P $ML{'.label.allowposting'} P=)";
+         $body .= "<?p $ML{'.label.allowposting'} p?>";
      } else {
-         $body .= "(=P ".BML::ml('.label.authpost',{'maintainer'=>$cowner})." P=)";
+         $body .= "<?p ".BML::ml('.label.authpost',{'maintainer'=>$cowner})." p?>";
      }
      return;
      
  } else {
                                                                                                  
-     $body .= "(=H1 $ML{'.label.sure'} H1=)(=P ".BML::ml('.label.expls',{'maintainer'=>$ecname});
+     $body .= "<?h1 $ML{'.label.sure'} h1?><?p ".BML::ml('.label.expls',{'maintainer'=>$ecname});
      $body .= "<form method='post' action='join.bml'>";
      $body .= "<input type='hidden' name='cuserid' value='$ci->{'userid'}' />";
      $body .= "<input type='hidden' name='confirm' value='1' /><center>";
      $body .= "<input type='checkbox' name='addfriend' checked>".BML::ml('.label.addtofriends',{'maintainer'=>$ecname});
-     $body .= "<br><input type='submit' value=$ML{'.button.join'} /></center></form> P=)";
+     $body .= "<br><input type='submit' value=$ML{'.button.join'} /></center></form> p?>";
      return;
  }
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/userinfo.bml
 post: htdocs/community/join.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 

@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = $ML{'.title'};
  $body = "";
@@ -58,42 +58,42 @@
      my $qcuser = $dbh->quote($cu->{'user'});
      $dbh->do("REPLACE INTO priv_map (prmid, userid, prlid, arg) SELECT NULL, $mu->{'userid'}, prlid, $qcuser FROM priv_list WHERE privcode='sharedjournal'");
 
-     $body .= "(=H1 $ML{'.success'} H1=)(=P $ML{'.label.commcreated'} P=)";
-     $body .= "(=P $ML{'.label.rellinks'} <UL><LI><A HREF=\"$LJ::SITEROOT/community/$cu->{'user'}/\">$ML{'.commsite'}<LI><A HREF=\"/userinfo.bml?user=$cu->{'user'}\">$ML{'.label.comminfo'}</A><LI>$ML{'.label.admconsole'} P=)";
+     $body .= "<?h1 $ML{'.success'} h1?><?p $ML{'.label.commcreated'} p?>";
+     $body .= "<?p $ML{'.label.rellinks'} <UL><LI><A HREF=\"$LJ::SITEROOT/community/$cu->{'user'}/\">$ML{'.commsite'}<LI><A HREF=\"/userinfo.bml?user=$cu->{'user'}\">$ML{'.label.comminfo'}</A><LI>$ML{'.label.admconsole'} p?>";
 
      return;
  }
 
- $body .= "(=H1 $ML{'.label.create'} H1=)(=P $ML{'.label.createcomm'} P=)";
+ $body .= "<?h1 $ML{'.label.create'} h1?><?p $ML{'.label.createcomm'} p?>";
 
  $body .= "<FORM METHOD=POST><input type=hidden name=mode value=create>";
- $body .= "(=H2 $ML{'.label.mainaccount'} H2=)(=P $ML{'.label.mustbereal'} P=)";
+ $body .= "<?h2 $ML{'.label.mainaccount'} h2?><?p $ML{'.label.mustbereal'} p?>";
  $body .= "<UL>$ML{'.label.username'} <INPUT NAME=\"muser\" SIZE=15 MAXLENGTH=15> $ML{'.label.password'} <INPUT NAME=\"mpassword\" TYPE=PASSWORD></UL>";
 
- $body .= "(=H2 $ML{'.label.commacc'} H2=)(=P $ML{'.label.accforcomm'}  P=)";
+ $body .= "<?h2 $ML{'.label.commacc'} h2?><?p $ML{'.label.accforcomm'}  p?>";
  $body .= "<UL>$ML{'.label.username'} <INPUT NAME=\"cuser\" SIZE=15 MAXLENGTH=15> $ML{'.label.password'} <INPUT NAME=\"cpassword\" TYPE=PASSWORD></UL>";
 
- $body .= "(=H1 $ML{'.label.commopts'} H1=)(=P $ML{'.label.howoperates'} P=)";
- $body .= "(=H2 $ML{'.label.membership'} H2=)(=P $ML{'.label.whocanjoin'} <UL>";
+ $body .= "<?h1 $ML{'.label.commopts'} h1?><?p $ML{'.label.howoperates'} p?>";
+ $body .= "<?h2 $ML{'.label.membership'} h2?><?p $ML{'.label.whocanjoin'} <UL>";
  $body .= "<INPUT TYPE=radio name=\"membership\" VALUE=\"open\" CHECKED> $ML{'.label.openmemb'}";
  $body .= "<P><INPUT TYPE=radio name=\"membership\" VALUE=\"closed\"> $ML{'.label.closedmemb'}";
- $body .= "</UL> P=)";
+ $body .= "</UL> p?>";
 
- $body .= "(=H2 $ML{'.label.postaccess'} H2=)(=P $ML{'.label.whocanpost'} <UL>";
+ $body .= "<?h2 $ML{'.label.postaccess'} h2?><?p $ML{'.label.whocanpost'} <UL>";
  $body .= "<INPUT TYPE=radio name=\"postlevel\" VALUE=\"members\" CHECKED> $ML{'.label.anybodycan'}";
  $body .= "<P><INPUT TYPE=radio name=\"postlevel\" VALUE=\"select\"> $ML{'.label.selcan'}";
- $body .= "</UL> P=)";
+ $body .= "</UL> p?>";
 
  $body .= "<center><input type=submit value=\"$ML{'.button.createcommunity'}\"></center></form>";
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 link: htdocs/users, htdocs/userinfo.bml, htdocs/admin/console/index.bml
 link: htdocs/create.bml
 post: htdocs/community/create.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 

@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = $ML{'.title'};
  $body = "";
@@ -11,7 +11,7 @@
  ###
  my $remote = LJ::get_remote($dbh);
  unless ($remote) {
-     $body = "(=H1 $ML{'Sorry'}.. H1=)(=P $ML{'.label.logoutfirst'} P=)";
+     $body = "<?h1 $ML{'Sorry'}.. h1?><?p $ML{'.label.logoutfirst'} p?>";
      return;
  }
 
@@ -27,7 +27,7 @@
  ### does this community even exit?
  ###
  unless ($ci) {
-     $body .= "(=H1 $ML{'Error'} H1=)(=P $ML{'.label.infoerror'} P=)";
+     $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.label.infoerror'} p?>";
      return;
  }
  
@@ -37,28 +37,28 @@
      ###
      $dbh->do("DELETE FROM friends WHERE userid=$ci->{'userid'} AND friendid=$remote->{'userid'}");
      
-     $body .= "(=H1 $ML{'.success'} H1=)(=P ".BML::ml('.label.removed',{'commuser'=>$ci->{'user'},'commname'=>$ci->{'name'}})." P=)";
+     $body .= "<?h1 $ML{'.success'} h1?><?p ".BML::ml('.label.removed',{'commuser'=>$ci->{'user'},'commname'=>$ci->{'name'}})." p?>";
 
      $dbh->do("DELETE FROM logaccess WHERE ownerid=$ci->{'userid'} AND posterid=$remote->{'userid'}");
      
  }   
  else 
  {
-     $body .= "(=H1 $ML{'.sure'} H1=)(=P ".BML::ml('.label.buttontoleave',{'commname'=>$ci->{'name'}});
+     $body .= "<?h1 $ML{'.sure'} h1?><?p ".BML::ml('.label.buttontoleave',{'commname'=>$ci->{'name'}});
      $body .= '<form method="post" action="leave.bml">';
      $body .= "<input type=\"hidden\" name=\"cuserid\" value=\"$ci->{'userid'}\" />";
      $body .= '<input type="hidden" name="confirm" value="1" /><center>';
-     $body .= '<input type="submit" value='.$ML{'.button.leave'}.' /></center></form> P=)';
+     $body .= '<input type="submit" value='.$ML{'.button.leave'}.' /></center></form> p?>';
      return;
  }
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/userinfo.bml
 post: htdocs/community/leave.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 
