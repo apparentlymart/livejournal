@@ -50,7 +50,7 @@ $maint{'synsuck'} = sub
         # check if not modified
         if ($res->status_line() =~ /^304/) {
             print "  not modified.\n";
-            $delay->(60, "notmodified");
+            $delay->($readers ? 60 : 24*60, "notmodified");
             next;
         }
 
@@ -290,9 +290,10 @@ $maint{'synsuck'} = sub
         if ($newcount || ! defined $readers) {
             $readers = $dbh->selectrow_array("SELECT COUNT(*) FROM friends WHERE ".
                                              "friendid=?", undef, $userid);
-            # if readers are gone, don't check for a whole day
-            $int = 60*24 unless $readers;
         }
+
+        # if readers are gone, don't check for a whole day
+        $int = 60*24 unless $readers;
  
         $dbh->do("UPDATE syndicated SET checknext=DATE_ADD(NOW(), INTERVAL $int MINUTE), ".
                  "lastcheck=NOW(), lastmod=?, etag=?, laststatus=?, numreaders=? $updatenew ".
