@@ -18,6 +18,8 @@ general /talkread.bml.pageofpages
 
 general /editinfo.bml.topicdir.header
 general /editinfo.bml.topicdir.about
+general /editinfo.bml.showsubjicons.header
+general /editinfo.bml.showsubjicons.about
 
 general /community/create.bml.*
 

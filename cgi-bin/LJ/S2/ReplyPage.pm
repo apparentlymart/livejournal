@@ -209,7 +209,6 @@ sub ReplyForm__print
     $ret .= "<tr valign='top'><td align='right'>$txt_subject</td><td colspan='4'><input class='textbox' type='text' size='50' maxlength='100' name='subject' value=\"" . LJ::ehtml($par_subject) . "\" />";
 
     # Subject Icon toggle button
-    unless ($u->{'opt_notalkicons'})
     {
         $ret .= "<input type='hidden' id='subjectIconField' name='subjecticon' value='none'>\n";
         $ret .= "<script type='text/javascript' langauage='Javascript'>\n";

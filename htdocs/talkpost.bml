@@ -139,7 +139,7 @@ body<=
         if $parpost->{'state'} eq "S" 
         and not LJ::Talk::can_unscreen($dbs, $remote, $u, $up, $ur->{'user'});
 
-    LJ::load_user_props($dbs, $u, "opt_notalkicons", "opt_logcommentips", "opt_whoscreened");
+    LJ::load_user_props($dbs, $u, "opt_logcommentips", "opt_whoscreened");
 
     # don't allow anonymous comments on syndicated items
     if ($u->{'journaltype'} eq "Y" && $u->{'opt_whocanreply'} eq "all") {
@@ -405,7 +405,6 @@ body<=
     $ret .= "<tr valign='top'><td align='right'>$ML{'.opt.subject'}</td><td colspan='4'><input class='textbox' type='text' size='50' maxlength='100' name='subject' value=\"$basesubject\" />\n";
 
     # Subject Icon toggle button
-    unless ($u->{'opt_notalkicons'})
     {
         $ret .= "<input type='hidden' id='subjectIconField' name='subjecticon' value='none'>\n";
         $ret .= "<script type='text/javascript' langauage='Javascript'>\n";

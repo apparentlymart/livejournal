@@ -49,7 +49,7 @@ body<=
                      "country", "state", "city",
                      "zip", "icq", "aolim", "yahoo", "msn", "url",
                      "urlname", "gender", "jabber", "opt_blockrobots",
-                     "opt_notalkicons", "opt_logcommentips",
+                     "opt_logcommentips",
                      "howhear", "opt_bdaymail", "opt_hidefriendofs",
                      "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                      "opt_whoscreened", "journaltitle", "journalsubtitle", 
@@ -401,10 +401,6 @@ body<=
      $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_htmlemail $checked></TD><TD><B>$ML{'.htmlemail.header'}</B></TD></TR>\n";
      $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.htmlemail.about'}</TD></TR>\n";
 
-     $checked = $u->{'opt_notalkicons'} ? "" : "CHECKED";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX VALUE=1 NAME=opt_talkicons $checked></TD><TD><B>$ML{'.showsubjicons.header'}</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>$ML{'.showsubjicons.about'}</TD></TR>\n";
-
      $ret .= "</TABLE></TD></TR>\n";
 
      $ret .= "</table>\n";
@@ -606,7 +602,6 @@ body<=
          $FORM{'opt_blockrobots'} = $FORM{'opt_blockrobots'} ? 1 : 0;
          $FORM{'opt_bdaymail'} = $FORM{'opt_bdaymail'} ? 1 : 0;
          $FORM{'opt_hidefriendofs'} = $FORM{'opt_hidefriendofs'} ? 1 : 0;
-         $FORM{'opt_notalkicons'} = $FORM{'opt_talkicons'} ? 0 : 1;   # (negated)
          $FORM{'opt_nctalklinks'} = $FORM{'opt_nctalklinks'} ? 1 : 0;
          $FORM{'opt_weblogscom'} = $FORM{'opt_weblogscom'} ? 1 : 0;
          if ($FORM{'opt_logcommentips'} ne "N" && 
@@ -643,7 +638,7 @@ body<=
                        "country", "state", "city", "zip", "icq",
                        "aolim", "yahoo", "msn", "url", "urlname",
                        "gender", "jabber", "opt_blockrobots",
-                       "opt_notalkicons", "opt_logcommentips",
+                       "opt_logcommentips",
                        "opt_bdaymail", "opt_hidefriendofs",
                        "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                        "opt_whoscreened", "journaltitle", "journalsubtitle", "friendspagetitle",
