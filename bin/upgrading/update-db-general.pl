@@ -8,6 +8,7 @@ mark_clustered("useridmap", "userbio", "cmdbuffer", "dudata",
                "userpicblob2", "events",
                "ratelog", "loginstall", "sessions", "sessions_data",
                "fvcache", "s1usercache", "modlog", "modblob", "counter",
+               "userproplite2",
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -704,16 +705,6 @@ CREATE TABLE userpicmap (
 ) 
 EOC
 
-register_tablecreate("userprop", <<'EOC');
-CREATE TABLE userprop (
-  userid int(10) unsigned NOT NULL default '0',
-  upropid smallint(5) unsigned NOT NULL default '0',
-  value varchar(60) default NULL,
-  PRIMARY KEY  (userid,upropid),
-  KEY (upropid,value)
-) 
-EOC
-
 register_tablecreate("userproplist", <<'EOC');
 CREATE TABLE userproplist (
   upropid smallint(5) unsigned NOT NULL auto_increment,
@@ -727,8 +718,31 @@ CREATE TABLE userproplist (
 ) 
 EOC
 
+# global, indexed
+register_tablecreate("userprop", <<'EOC');
+CREATE TABLE userprop (
+  userid int(10) unsigned NOT NULL default '0',
+  upropid smallint(5) unsigned NOT NULL default '0',
+  value varchar(60) default NULL,
+  PRIMARY KEY  (userid,upropid),
+  KEY (upropid,value)
+) 
+EOC
+
+# global, not indexed
 register_tablecreate("userproplite", <<'EOC');
 CREATE TABLE userproplite (
+  userid int(10) unsigned NOT NULL default '0',
+  upropid smallint(5) unsigned NOT NULL default '0',
+  value varchar(255) default NULL,
+  PRIMARY KEY  (userid,upropid),
+  KEY (upropid)
+) 
+EOC
+
+# clustered, not indexed
+register_tablecreate("userproplite2", <<'EOC');
+CREATE TABLE userproplite2 (
   userid int(10) unsigned NOT NULL default '0',
   upropid smallint(5) unsigned NOT NULL default '0',
   value varchar(255) default NULL,
@@ -1787,6 +1801,11 @@ register_alter(sub {
     unless (column_type("weekuserusage", "uafter")) {
         do_sql("DROP TABLE weekuserusage");
         create_table("weekuserusage");
+    }
+
+    unless (column_type("userproplist", "cldversion")) {
+        do_alter("userproplist",
+                 "ALTER TABLE userproplist ADD cldversion TINYINT UNSIGNED NOT NULL AFTER indexed");
     }
 
 });

@@ -374,6 +374,7 @@ elsif ($sclust > 0)
         'sessions_data' => 'userid',
         'userbio' => 'userid',
         'userpicblob2' => 'userid',
+        'userproplite2' => 'userid',
         's1usercache' => 'userid',
         'modlog' => 'journalid',
         'modblob' => 'journalid',
@@ -443,7 +444,7 @@ elsif ($sclust > 0)
     };
 
     # manual moving
-    foreach my $table (qw(fvcache loginstall ratelog sessions 
+    foreach my $table (qw(fvcache loginstall ratelog sessions userproplite2
                           sessions_data userbio userpicblob2
                           s1usercache modlog modblob counter)) {
         print "  moving $table ...\n";

@@ -365,9 +365,14 @@ if ($opt_pop)
         }
     }
 
-    # convert users from dversion2
+    # convert users from dversion2 (no weekuserusage)
     if (my $d2 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=2")) {
         system("$ENV{'LJHOME'}/bin/upgrading/pop-weekuu.pl");
+    }
+
+    # convert users from dversion3 (unclustered props)
+    if (my $d3 = $dbh->selectrow_array("SELECT userid FROM user WHERE dversion=3")) {
+        system("$ENV{'LJHOME'}/bin/upgrading/pop-clusterprops.pl");
     }
 
     print "\nThe system user was created with a random password.\nRun \$LJHOME/bin/upgrading/make_system.pl to change its password and grant the necessary privileges."

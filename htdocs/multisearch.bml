@@ -3,9 +3,7 @@
  $title = "";
  $body = "";
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbr = LJ::get_db_reader();
 
  if ($FORM{'type'} eq "user") {
 
@@ -55,20 +53,19 @@
          $body = "<?h1 Error h1?><?p You did not enter an email address. p?>";
          return;
      } else {
-         my $qemail = $dbr->quote($email);
-         my $sth = $dbr->prepare("SELECT u.user, up.value FROM user u, userproplist upl, userprop up WHERE u.journaltype='P' AND u.statusvis='V' AND u.allow_contactshow='Y' AND u.email=$qemail AND u.userid=up.userid AND up.upropid=upl.upropid AND upl.name='opt_whatemailshow' ORDER BY u.userid");
-         $sth->execute;
-         my ($user, $emailshow) = $sth->fetchrow_array;
-         unless ($emailshow eq "A" || $emailshow eq "B") {
-             $user = "";
+         my $sth = $dbr->prepare("SELECT * FROM user u WHERE u.journaltype='P' AND u.statusvis='V' ".
+                                 "AND u.allow_contactshow='Y' AND u.email=? LIMIT 1");
+         $sth->execute($email);
+         my $u = $sth->fetchrow_hashref;
+         if ($u) {
+             LJ::load_user_props($u, "opt_whatemailshow");
+             if ($u->{'opt_whatemailshow'} eq "A" || $u->{'opt_whatemailshow'} eq "B") {
+                 return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}");
+             }
          }
-         if ($user) {
-             return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$user");
-         } else {
-             $title = "No Match";
-             $body = "<?h1 Sorry.. h1?><?p No LiveJournal user is listed as having that email address, or they've chosen to have their address be private. p?>";
-             return;
-         }
+         $title = "No Match";
+         $body = "<?h1 Sorry.. h1?><?p No LiveJournal user is listed as having that email address, or they've chosen to have their address be private. p?>";
+         return;
      }
  }
 
@@ -78,7 +75,11 @@
      my $val = $FORM{'q'};
      my $qval = $dbr->quote($val);
      my $qtype = $dbr->quote($FORM{'type'});
-     my $sth = $dbr->prepare("SELECT u.user FROM user u, userproplist upl, userprop up WHERE u.journaltype='P' AND u.statusvis='V' AND u.allow_contactshow='Y' AND u.userid=up.userid AND up.upropid=upl.upropid AND upl.name=$qtype AND up.value=$qval ORDER BY u.userid");
+     my $sth = $dbr->prepare("SELECT u.user FROM user u, userproplist upl, userprop up ".
+                             "WHERE u.journaltype='P' AND u.statusvis='V' ".
+                             "AND u.allow_contactshow='Y' AND u.userid=up.userid ".
+                             "AND up.upropid=upl.upropid AND upl.name=$qtype AND up.value=$qval ".
+                             "ORDER BY u.userid LIMIT 1");
      $sth->execute;
      my ($user, $emailshow) = $sth->fetchrow_array;
      if ($user) {

@@ -819,9 +819,10 @@ sub set_userprop
     foreach $propname (keys %$hash) {
         my $p = LJ::get_prop("user", $propname) or next;
         my $table = $p->{'indexed'} ? "userprop" : "userproplite";
-
-        # TODO: finish support for userprop2
-        my $db = $action{$table}->{'db'} ||= ($table ne "userprop2" ? LJ::get_db_writer() : 
+        if ($p->{'cldversion'} && $u->{'dversion'} >= $p->{'cldversion'}) {
+            $table = "userproplite2";
+        }
+        my $db = $action{$table}->{'db'} ||= ($table ne "userproplite2" ? LJ::get_db_writer() : 
                                               LJ::get_cluster_master($u));
         return 0 unless $db;
         $value = $hash->{$propname};
@@ -2154,30 +2155,37 @@ sub load_user_props
     ## user reference
     my $uid = $u->{'userid'}+0;
     $uid = LJ::get_userid($u->{'user'}) unless $uid;
-    my $dbr = LJ::get_db_reader();
 
     my %loadfrom;
     unless (@props) {
         # case 1: load all props for a given user.
         $loadfrom{'userprop'} = 1;
         $loadfrom{'userproplite'} = 1;
+        $loadfrom{'userproplite2'} = 1;
     } else {
         # case 2: load only certain things
         foreach (@props) {
+            next if exists $u->{$_};
             my $p = LJ::get_prop("user", $_);
             next unless $p;
             my $source = $p->{'indexed'} ? "userprop" : "userproplite";
-            next if exists $u->{$_};
+            if ($p->{'cldversion'} && $u->{'dversion'} >= $p->{'cldversion'}) {
+                $source = "userproplite2";  # clustered
+            }
             push @{$loadfrom{$source}}, $p->{'id'};
         }
     }
 
     foreach my $table (keys %loadfrom) {
+        my $db = $table eq "userproplite2" ? 
+            LJ::get_cluster_reader($u) : 
+            LJ::get_db_reader();
+
         $sql = "SELECT upropid, value FROM $table WHERE userid=$uid";
         if (ref $loadfrom{$table}) {
             $sql .= " AND upropid IN (" . join(",", @{$loadfrom{$table}}) . ")";
         }
-        $sth = $dbr->prepare($sql);
+        $sth = $db->prepare($sql);
         $sth->execute;
         while (my ($id, $v) = $sth->fetchrow_array) {
             $u->{$LJ::CACHE_PROPID{'user'}->{$id}->{'name'}} = $v;
@@ -2191,12 +2199,13 @@ sub load_user_props
     # to map them
     unless ($LJ::CACHED_S1IDMAP) {
 	foreach my $v (qw(lastn friends calendar day)) {
-	    my $k = "s1_${v}_style";
-	    next unless $LJ::USERPROP_DEF{$k} =~ m!^$v/(.+)$!;
-	    my $id = $dbr->selectrow_array("SELECT styleid FROM style WHERE ".
-					   "user='system' AND type='$v' AND styledes=".
-					   $dbr->quote($1));
-	    $LJ::USERPROP_DEF{$k} = $id+0;
+            my $k = "s1_${v}_style";
+            next unless $LJ::USERPROP_DEF{$k} =~ m!^$v/(.+)$!;
+            my $dbr = LJ::get_db_reader();
+            my $id = $dbr->selectrow_array("SELECT styleid FROM style WHERE ".
+                                           "user='system' AND type='$v' AND styledes=".
+                                           $dbr->quote($1));
+            $LJ::USERPROP_DEF{$k} = $id+0;
 	}
 	$LJ::CACHED_S1IDMAP = 1;
     }

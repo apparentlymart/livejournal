@@ -572,7 +572,7 @@ CALENDAR_WEEK<=
 Style: calendar/Generator
 is_embedded: N
 is_colorfree: Y
-lastupdate: 2003-04-17 15:34:56
+lastupdate: 2003-04-15 21:52:06
 
 CALENDAR_YEAR_DISPLAYED=><b>%%yyyy%%</b>&nbsp;
 
@@ -694,7 +694,7 @@ summary="">
 <td class="meta">[</td>
 <td class="meta" align="right"><b>calendar</b></td>
 <td class="meta" align="center">|</td>
-<td class="meta"><a href="%%cons:siteroot%%/users/%%username%%/calendar/">livejournal calendar</a></td>
+<td class="meta"><a href="%%urlcalendar%%">livejournal calendar</a></td>
 <td class="meta">]</td>
 </tr>
 </table>
