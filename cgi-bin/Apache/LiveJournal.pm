@@ -135,6 +135,17 @@ sub totally_down_content
     return OK;
 }
 
+sub blocked_bot
+{
+    my $r = shift;
+
+    $r->status_line("403 Denied");
+    $r->content_type("text/html");
+    $r->send_http_header();
+    $r->print("<h1>$LJ::BLOCKED_BOT_SUBJECT</h1>$LJ::BLOCKED_BOT_MESSAGE");
+    return OK;
+}
+
 sub trans
 {
     my $r = shift;
@@ -204,7 +215,11 @@ sub trans
         if (Apache->header_in("Cookie") =~ /\bljuniq\s*=\s*([a-zA-Z0-9]{15}):(\d+)/) {
             ($uniq, $uniq_time) = ($1, $2);
             $r->notes("uniq" => $uniq);
-            return FORBIDDEN if LJ::sysban_check('uniq', $uniq);
+            if (LJ::sysban_check('uniq', $uniq) && $r->uri ne $LJ::BLOCKED_BOT_URI) {
+                $r->handler("perl-script");
+                $r->push_handlers(PerlHandler => \&blocked_bot );
+                return OK;
+            };
         }
 
         # if no cookie, create one.  if older than a day, revalidate
@@ -226,9 +241,17 @@ sub trans
 
     # check for sysbans on ip address
     foreach my $ip (@req_hosts) {
-        return FORBIDDEN if LJ::sysban_check('ip', $ip);
+        if (LJ::sysban_check('ip', $ip) && $r->uri ne $LJ::BLOCKED_BOT_URI) {
+            $r->handler("perl-script");
+            $r->push_handlers(PerlHandler => \&blocked_bot );
+            return OK;
+        }
     }
-    return FORBIDDEN if LJ::run_hook("forbid_request", $r);
+    if (LJ::run_hook("forbid_request", $r) && $r->uri ne $LJ::BLOCKED_BOT_URI) {
+        $r->handler("perl-script");
+        $r->push_handlers(PerlHandler => \&blocked_bot );
+        return OK;
+    }
 
     my %GET = $r->args;
 
