@@ -135,6 +135,17 @@ CREATE TABLE faqcat (
 ) PACK_KEYS=1
 EOC
 
+register_tablecreate("faquses", <<'EOC');
+CREATE TABLE faquses (
+  faqid MEDIUMINT UNSIGNED NOT NULL,
+  userid INT UNSIGNED NOT NULL,
+  dateview DATETIME NOT NULL,
+  PRIMARY KEY (userid, faqid),
+  KEY (faqid),
+  KEY (dateview)
+) 
+EOC
+
 register_tablecreate("friendgroup", <<'EOC');
 CREATE TABLE friendgroup (
   userid int(10) unsigned NOT NULL default '0',

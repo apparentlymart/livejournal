@@ -10,6 +10,8 @@ BODY<=
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
+
+ my $remote = LJ::get_remote($dbs);
  
  my $where = "faqid=$id";
  if ($FORM{'faqcat'}) {
@@ -30,6 +32,9 @@ BODY<=
      my $lastmodwho;
      $lastmodwho = LJ::get_username($dbs, $lastmoduserid);
      
+     $dbh->do("REPLACE INTO faquses (faqid, userid, dateview) ".
+	      "VALUES ($id, $remote->{'userid'}, NOW())") if $remote;
+
      &main::note_mod_time($unixmodtime);
      
      $q = LJ::ehtml($question);
