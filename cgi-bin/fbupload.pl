@@ -98,7 +98,7 @@ sub do_upload
         'X-FB-User'                    => $u->{'user'},
         'X-FB-Auth'                    => make_auth( $chal, $u->{'password'} ),
         ':X-FB-UploadPic.Gallery._size'=> 1,
-        'X-FB-UploadPic.PicSec'        => $opts->{'imgsec'},
+        'X-FB-UploadPic.PicSec'        => $opts->{'imgsec'} || 255,
         'X-FB-UploadPic.Gallery.0.GalName' => uri_escape( $opts->{'galname'} ),
         'X-FB-UploadPic.Gallery.0.GalSec'  => 255
     );

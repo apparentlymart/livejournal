@@ -119,7 +119,7 @@ sub process {
         return $err->(
             "Unable to find XML content in PictureMail message.",
             { sendmail => 1 }
-          ) unless $tent;
+          ) unless $xml_string;
 
         HTML::Entities::decode_entities( $xml_string );
         my $xml = eval { XML::Simple::XMLin( $xml_string ); };
@@ -326,7 +326,7 @@ sub process {
 
     # if they specified a imgsecurity header but it isn't valid, default
     # to private.  Otherwise, set to what they specified.
-    $lj_headers{'imgsecurity'} ||= $u->{'emailpost_imgsecurity'};
+    $lj_headers{'imgsecurity'} ||= $u->{'emailpost_imgsecurity'} || 'public';
     if ($lj_headers{'imgsecurity'} &&
         $lj_headers{'imgsecurity'} !~ /^(private|regusers|friends|public)$/) {
         $lj_headers{'imgsecurity'} = 0;
@@ -401,6 +401,9 @@ sub process {
         $body .= "\n";
         $body .= "($fb_upload_errstr)";
     }
+
+    # Fotobilder server error.  Retry.
+    return $err->( $fb_upload_errstr, { retry => 1 } ) if $fb_upload == 500;
 
     # build lj entry
     my $req = {
