@@ -72,59 +72,59 @@ use warnings qw{all};
 ###############################################################################
 BEGIN {
 
-	# Turn STDOUT buffering off
-	$| = 1;
+    # Turn STDOUT buffering off
+    $| = 1;
 
-	# Versioning stuff and custom includes
-	use vars qw{$VERSION $RCSID};
-	$VERSION	= do { my @r = (q$Revision$ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-	$RCSID		= q$Id$;
+    # Versioning stuff and custom includes
+    use vars qw{$VERSION $RCSID};
+    $VERSION    = do { my @r = (q$Revision$ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+    $RCSID      = q$Id$;
 
-	# Define some constants
-	use constant TRUE	=> 1;
-	use constant FALSE	=> 0;
+    # Define some constants
+    use constant TRUE   => 1;
+    use constant FALSE  => 0;
 
     use lib "$ENV{LJHOME}/cgi-bin";
     require "ljlib.pl";
 
-	# Modules
+    # Modules
     use Carp                qw{croak confess};
-	use Getopt::Long		qw{GetOptions};
-	use Pod::Usage			qw{pod2usage};
+    use Getopt::Long        qw{GetOptions};
+    use Pod::Usage          qw{pod2usage};
 
     Getopt::Long::Configure( 'bundling' );
 }
 
 
 ###############################################################################
-###	C O N F I G U R A T I O N   G L O B A L S
+### C O N F I G U R A T I O N   G L O B A L S
 ###############################################################################
 
 ### Main body
 MAIN: {
-	my (
-		$debugLevel,			# Debugging level to set in server
-		$helpFlag,				# User requested help?
-		$daemonFlag,            # Background after starting?
+    my (
+        $debugLevel,            # Debugging level to set in server
+        $helpFlag,              # User requested help?
+        $daemonFlag,            # Background after starting?
         $defaultRate,           # Default src cluster rate cmdline setting
-		$server,                # JobServer object
-		%config,                # JobServer configuration
-		$port,                  # Port to listen on
-		$host,                  # Address to listen on
-	   );
+        $server,                # JobServer object
+        %config,                # JobServer configuration
+        $port,                  # Port to listen on
+        $host,                  # Address to listen on
+       );
 
-	# Print the program header and read in command line options
-	GetOptions(
-		'D|daemon'		  => \$daemonFlag,
-		'H|host=s'		  => \$host,
-		'd|debug+'		  => \$debugLevel,
-		'h|help'		  => \$helpFlag,
-		'p|port=i'		  => \$port,
+    # Print the program header and read in command line options
+    GetOptions(
+        'D|daemon'        => \$daemonFlag,
+        'H|host=s'        => \$host,
+        'd|debug+'        => \$debugLevel,
+        'h|help'          => \$helpFlag,
+        'p|port=i'        => \$port,
         'r|defaultrate=i' => \$defaultRate,
-	   ) or abortWithUsage();
+       ) or abortWithUsage();
 
-	# If the -h flag was given, just show the usage and quit
-	helpMode() and exit if $helpFlag;
+    # If the -h flag was given, just show the usage and quit
+    helpMode() and exit if $helpFlag;
 
     # Build the configuration hash
     $config{host} = $host if $host;
@@ -134,7 +134,7 @@ MAIN: {
     $config{defaultRate} = $defaultRate if $defaultRate;
 
     # Create a new daemon object
-	$server = new JobServer ( %config );
+    $server = new JobServer ( %config );
 
     # Add a simple log handler until I get the telnet one working
     my $tmplogger = sub {
@@ -144,32 +144,32 @@ MAIN: {
     $server->addLogHandler( 'tmplogger' => $tmplogger );
 
     # Start the server
-	$server->start();
+    $server->start();
 }
 
 
 ### FUNCTION: helpMode()
 ### Exit normally after printing the usage message
 sub helpMode {
-	pod2usage( -verbose => 1, -exitval => 0 );
+    pod2usage( -verbose => 1, -exitval => 0 );
 }
 
 
 ### FUNCTION: abortWithUsage( $message )
 ### Abort the program showing usage message.
 sub abortWithUsage {
-	my $msg = @_ ? join('', @_) : "";
+    my $msg = @_ ? join('', @_) : "";
 
-	if ( $msg ) {
-		pod2usage( -verbose => 1, -exitval => 1, -message => "$msg" );
-	} else {
-		pod2usage( -verbose => 1, -exitval => 1 );
-	}
+    if ( $msg ) {
+        pod2usage( -verbose => 1, -exitval => 1, -message => "$msg" );
+    } else {
+        pod2usage( -verbose => 1, -exitval => 1 );
+    }
 }
 
 
 #####################################################################
-###	D A E M O N   C L A S S
+### D A E M O N   C L A S S
 #####################################################################
 package JobServer;
 
@@ -181,15 +181,15 @@ BEGIN {
     use fields (
         'clients',              # Connected client objects
         'config',               # Configuration hash
-		'listener',				# The listener socket
+        'listener',             # The listener socket
         'handlers',             # Client event handlers
         'jobs',                 # Mover jobs
-		'totaljobs',			# Count of jobs processed
+        'totaljobs',            # Count of jobs processed
         'assignments',          # Jobs that have been assigned
         'users',                # Users in the queue
-		'ratelimits',			# Hash of source cluster rates
-		'jobcounts',			# Counts per cluster of running jobs
-		'dbh',					# Database handle
+        'ratelimits',           # Hash of source cluster rates
+        'jobcounts',            # Counts per cluster of running jobs
+        'dbh',                  # Database handle
        );
 
     use base qw{fields};
@@ -278,7 +278,7 @@ sub new {
     };                          # merge
 
     # The listener socket; gets set by start()
-	$self->{listener}    =  undef;
+    $self->{listener}    =  undef;
 
     # CODE refs for handling various events. Keyed by event name, each subhash
     # contains registrations for event callbacks. Each subhash is keyed by the
@@ -323,10 +323,10 @@ sub start {
     $self->{listener} = $listener;
     $self->daemonize if $self->{config}{daemon};
 
-	# I don't understand this design -- the Client class is where the event loop
-	# is? Weird. Thanks to SPUD, though, for the example code.
-	JobServer::Client->OtherFds( $listener->fileno => sub {$self->createClient} );
- 	JobServer::Client->EventLoop();
+    # I don't understand this design -- the Client class is where the event loop
+    # is? Weird. Thanks to SPUD, though, for the example code.
+    JobServer::Client->OtherFds( $listener->fileno => sub {$self->createClient} );
+    JobServer::Client->EventLoop();
 
     return 1;
 }
@@ -337,7 +337,7 @@ sub start {
 ### Listener socket readable callback. Accepts a new client socket and wraps a
 ### JobServer::Client around it.
 sub createClient {
-	my JobServer $self = shift;
+    my JobServer $self = shift;
 
     my (
         $csock,                 # Client socket
@@ -347,7 +347,7 @@ sub createClient {
 
     # Get the client socket and set it nonblocking
     $csock = $self->{listener}->accept or return;
-	$csock->blocking(0);
+    $csock->blocking(0);
     $fd = fileno( $csock );
 
     $self->logMsg( 'info', 'Client %d connect: %s:%d',
@@ -356,7 +356,7 @@ sub createClient {
     # Wrap a client object around it, tell it to watch for input, and send the
     # greeting.
     $client = JobServer::Client->new( $self, $csock );
-	$client->watch_read( 1 );
+    $client->watch_read( 1 );
     $client->write( "READY\r\n" );
 
     return $self->{clients}{$fd} = $client;
@@ -385,7 +385,7 @@ sub disconnectClient {
                    $fd, $csock->peerhost, $csock->peerport );
 
     # Remove any event handlers registered for the client
-	$self->removeAllHandlers( $fd );
+    $self->removeAllHandlers( $fd );
 
     # Re-queue any job that was assigned to the client
     if ( $requeue && ($retask = delete $self->{assignments}{$fd}) ) {
@@ -579,27 +579,27 @@ sub unmarkUserReadonly {
 ### Shut the server down.
 sub shutdown {
     my JobServer $self = shift;
-	my $agent = shift;
+    my $agent = shift;
 
     # Stop incoming connections (:TODO: remove it from Danga::Socket?)
-	$self->{listener}->close;
+    $self->{listener}->close;
 
-	# Clear jobs so no more get handed out while clients are closing
-	$self->{jobs} = {};
-	$self->{users} = {};
-	$self->logMsg( 'notice', "Server shutdown by $agent" );
+    # Clear jobs so no more get handed out while clients are closing
+    $self->{jobs} = {};
+    $self->{users} = {};
+    $self->logMsg( 'notice', "Server shutdown by $agent" );
 
-	# Close the db connection
-	$self->{dbh}->disconnect;
+    # Close the db connection
+    $self->{dbh}->disconnect;
 
-	# Drop all clients
-	foreach my $client ( @{$self->{clients}} ) {
-		$client->write( "SERVER SHUTDOWN\r\n" );
-		$self->disconnectClient( $client );
-		$client->close;
-	}
+    # Drop all clients
+    foreach my $client ( @{$self->{clients}} ) {
+        $client->write( "SERVER SHUTDOWN\r\n" );
+        $self->disconnectClient( $client );
+        $client->close;
+    }
 
-	exit;
+    exit;
 }
 
 
@@ -607,15 +607,15 @@ sub shutdown {
 ### Remove all event callbacks for the specified I<key>. Returns the number of
 ### handlers removed.
 sub removeAllHandlers {
-	my JobServer $self = shift;
+    my JobServer $self = shift;
 
-	my $count = 0;
-	foreach my $type ( keys %{$self->{handlers}} ) {
-		my $method = sprintf 'remove%sHandler', uc $type;
-		$count++ if $self->$method();
-	}
+    my $count = 0;
+    foreach my $type ( keys %{$self->{handlers}} ) {
+        my $method = sprintf 'remove%sHandler', uc $type;
+        $count++ if $self->$method();
+    }
 
-	return $count;
+    return $count;
 }
 
 
@@ -665,7 +665,7 @@ sub removeDebugHandler {
 
 
 #####################################################################
-###	' P R O T E C T E D '   M E T H O D S
+### ' P R O T E C T E D '   M E T H O D S
 #####################################################################
 
 
@@ -674,10 +674,10 @@ sub removeDebugHandler {
 sub daemonize {
     my JobServer $self = shift;
 
-	$self->stubbornFork( 5 ) && exit 0;
+    $self->stubbornFork( 5 ) && exit 0;
 
-	# Become session leader to detach from controlling tty
-	POSIX::setsid() or croak "Couldn't become session leader: $!";
+    # Become session leader to detach from controlling tty
+    POSIX::setsid() or croak "Couldn't become session leader: $!";
 
     # Fork again, ignore hangup to avoid reacquiring a controlling tty
     {
@@ -685,45 +685,45 @@ sub daemonize {
         $self->stubbornFork( 5 ) && exit 0;
     }
 
-	# Change working dir to the filesystem root, clear the umask
-	chdir "/";
-	umask 0;
+    # Change working dir to the filesystem root, clear the umask
+    chdir "/";
+    umask 0;
 
-	# Close standard file descriptors and reopen them to /dev/null
-	close STDIN && open STDIN, "</dev/null";
-	close STDOUT && open STDOUT, "+>&STDIN";
-	close STDERR && open STDERR, "+>&STDIN";
+    # Close standard file descriptors and reopen them to /dev/null
+    close STDIN && open STDIN, "</dev/null";
+    close STDOUT && open STDOUT, "+>&STDIN";
+    close STDERR && open STDERR, "+>&STDIN";
 }
 
 
 ### METHOD: stubbornFork( $maxTries )
-###	Attempt to fork through errors
+### Attempt to fork through errors
 sub stubbornFork {
     my JobServer $self = shift;
-	my $maxTries = shift || 5;
+    my $maxTries = shift || 5;
 
-	my(
-	   $pid,
-	   $tries,
-	  );
+    my(
+       $pid,
+       $tries,
+      );
 
-	$tries = 0;
+    $tries = 0;
   FORK: while ( $tries <= $maxTries ) {
-		if (( $pid = fork )) {
-			return $pid;
-		} elsif ( defined $pid ) {
-			return 0;
-		} elsif ( $! =~ m{no more process} ) {
-			sleep 5;
-			next FORK;
-		} else {
-			die "Cannot fork: $!";
-		}
-	} continue {
-		$tries++;
-	}
+        if (( $pid = fork )) {
+            return $pid;
+        } elsif ( defined $pid ) {
+            return 0;
+        } elsif ( $! =~ m{no more process} ) {
+            sleep 5;
+            next FORK;
+        } else {
+            die "Cannot fork: $!";
+        }
+    } continue {
+        $tries++;
+    }
 
-	die "Failed to fork after $tries tries: $!";
+    die "Failed to fork after $tries tries: $!";
 }
 
 
@@ -732,19 +732,19 @@ sub stubbornFork {
 ### defined, call each of them at the specified level with the given printf
 ### C<$format> and C<@args>.
 sub debugMsg {
-	my JobServer $self = shift or confess "Not a function";
-	my $level = shift;
-	my $debugLevel = $self->{config}{debugLevel};
-	return unless $level && $debugLevel >= abs $level;
+    my JobServer $self = shift or confess "Not a function";
+    my $level = shift;
+    my $debugLevel = $self->{config}{debugLevel};
+    return unless $level && $debugLevel >= abs $level;
     return unless %{$self->{handlers}{log}} || %{$self->{handlers}{debug}};
 
     my $message = shift;
     $message =~ s{[\r\n]+$}{};
 
-	if ( $debugLevel > 1 ) {
-		my $caller = caller;
-		$message = "<$caller> $message";
-	}
+    if ( $debugLevel > 1 ) {
+        my $caller = caller;
+        $message = "<$caller> $message";
+    }
 
     # :TODO: Add handlers code
     for my $func ( values %{$self->{handlers}{debug}} ) { $func->( $message, @_ ) }
@@ -756,31 +756,31 @@ sub debugMsg {
 ### Call any log handlers that have been defined at the specified level with the
 ### given printf C<$format> and C<@args>.
 sub logMsg {
-	my $self = shift or confess "Not a function.";
+    my $self = shift or confess "Not a function.";
     return () unless %{$self->{handlers}{log}};
 
-	my (
-		@args,
-		$level,
-		$objectName,
-		$format,
-	   );
+    my (
+        @args,
+        $level,
+        $objectName,
+        $format,
+       );
 
-	# Massage the format a bit to include the object it's coming from.
-	$level = shift;
-	$objectName = ref $self;
-	$format = sprintf( '%s: %s', $objectName, shift() );
+    # Massage the format a bit to include the object it's coming from.
+    $level = shift;
+    $objectName = ref $self;
+    $format = sprintf( '%s: %s', $objectName, shift() );
     $format =~ s{[\r\n]+$}{};
 
-	# Turn any references or undefined values in the arglist into dumped strings
-	@args = map {
+    # Turn any references or undefined values in the arglist into dumped strings
+    @args = map {
         defined $_ ?
             (ref $_ ? Data::Dumper->Dumpxs([$_], [ref $_]) : $_) :
             '(undef)'
         } @_;
 
-	# Call the logging callback
-	for my $func ( values %{$self->{handlers}{log}} ) {
+    # Call the logging callback
+    for my $func ( values %{$self->{handlers}{log}} ) {
         $func->( $level, $format, @args );
     }
 }
@@ -789,7 +789,7 @@ sub logMsg {
 
 
 #####################################################################
-###	C L I E N T   B A S E   C L A S S
+### C L I E N T   B A S E   C L A S S
 #####################################################################
 package JobServer::Client;
 
@@ -798,7 +798,7 @@ package JobServer::Client;
 BEGIN {
     use Carp qw{croak confess};
     use base qw{Danga::Socket};
-	use fields qw{server cmd_buf state};
+    use fields qw{server cmd_buf state};
 }
 
 
@@ -920,19 +920,19 @@ sub event_read {
 
 
 sub sock {
-	my JobServer::Client $self = shift;
-	return $self->{sock};
+    my JobServer::Client $self = shift;
+    return $self->{sock};
 }
 
 
 sub event_err {
-	my JobServer::Client $self = shift;
-	$self->close;
+    my JobServer::Client $self = shift;
+    $self->close;
 }
 
 sub event_hup {
-	my JobServer::Client $self = shift;
-	$self->close;
+    my JobServer::Client $self = shift;
+    $self->close;
 }
 
 
@@ -950,7 +950,7 @@ sub logMsg {
 
 # Command dispatcher
 sub processLine {
-	my JobServer::Client $self = shift;
+    my JobServer::Client $self = shift;
     my $line = shift or return undef;
 
     my (
@@ -962,7 +962,7 @@ sub processLine {
         $method,                # Command method to call
        );
 
-	# Split the line into command and argument string
+    # Split the line into command and argument string
     ( $cmd, $args ) = split /\s+/, $line, 2;
     $args ||= '';
 
@@ -970,8 +970,8 @@ sub processLine {
     $self->debugMsg( 4, "Matching '%s' against command table pattern %s",
                      $cmd, $CommandPattern );
 
-	# If it's a command in the command table, dispatch to the appropriate
-	# command handler after parsing any arguments.
+    # If it's a command in the command table, dispatch to the appropriate
+    # command handler after parsing any arguments.
     if ( $cmd =~ $CommandPattern ) {
         $method = "cmd_$1";
         $argpat = $CommandTable{ $1 }{args};
@@ -1024,13 +1024,13 @@ sub error {
 
 
 #####################################################################
-###	C O M M A N D   M E T H O D S
+### C O M M A N D   M E T H O D S
 #####################################################################
 
 ### METHOD: cmd_get_job( undef )
 ### Command handler for the C<get_job> command.
 sub cmd_get_job {
-	my JobServer::Client $self = shift;
+    my JobServer::Client $self = shift;
 
     my $job = $self->{server}->getJob( $self )
         or return "IDLE";
@@ -1042,7 +1042,7 @@ sub cmd_get_job {
 ### METHOD: cmd_add_jobs( $argstring )
 ### Command handler for the C<add_job> command.
 sub cmd_add_jobs {
-	my JobServer::Client $self = shift;
+    my JobServer::Client $self = shift;
     my $argstring = shift or return;
 
     # Turn the argument into an array of arrays
@@ -1059,35 +1059,35 @@ sub cmd_add_jobs {
 ### METHOD: cmd_source_counts( undef )
 ### Command handler for the C<source_counts> command.
 sub cmd_source_counts {
-	my JobServer::Client $self = shift;
+    my JobServer::Client $self = shift;
     return $self->error( "Unimplemented command." );
 }
 
 ### METHOD: cmd_stop_moves( undef )
 ### Command handler for the C<stop_moves> command.
 sub cmd_stop_moves {
-	my JobServer::Client $self = shift;
+    my JobServer::Client $self = shift;
     return $self->error( "Unimplemented command." );
 }
 
 ### METHOD: cmd_is_moving( undef )
 ### Command handler for the C<is_moving> command.
 sub cmd_is_moving {
-	my JobServer::Client $self = shift;
+    my JobServer::Client $self = shift;
     return $self->error( "Unimplemented command." );
 }
 
 ### METHOD: cmd_check_instance( undef )
 ### Command handler for the C<check_instance> command.
 sub cmd_check_instance {
-	my JobServer::Client $self = shift;
+    my JobServer::Client $self = shift;
     return $self->error( "Unimplemented command." );
 }
 
 ### METHOD: cmd_list_jobs( undef )
 ### Command handler for the C<list_jobs> command.
 sub cmd_list_jobs {
-	my JobServer::Client $self = shift;
+    my JobServer::Client $self = shift;
     return $self->error( "Unimplemented command." );
 }
 
@@ -1095,7 +1095,7 @@ sub cmd_list_jobs {
 ### METHOD: cmd_set_rate( undef )
 ### Command handler for the C<set_rate> command.
 sub cmd_set_rate {
-	my JobServer::Client $self = shift;
+    my JobServer::Client $self = shift;
     return $self->error( "Unimplemented command." );
 }
 
@@ -1103,14 +1103,14 @@ sub cmd_set_rate {
 ### METHOD: cmd_finish( undef )
 ### Command handler for the C<finish> command.
 sub cmd_finish {
-	my JobServer::Client $self = shift;
+    my JobServer::Client $self = shift;
     return $self->error( "Unimplemented command." );
 }
 
 ### METHOD: cmd_help( undef )
 ### Command handler for the C<help> command.
 sub cmd_help {
-	my JobServer::Client $self = shift;
+    my JobServer::Client $self = shift;
     return $self->error( "Unimplemented command." );
 }
 
@@ -1132,9 +1132,9 @@ sub cmd_quit {
 sub cmd_shutdown {
     my JobServer::Client $self = shift;
 
-	my $strself = sprintf( '%s:%d',
-						   $self->{sock}->peerhost,
-						   $self->{sock}->peeraddr );
+    my $strself = sprintf( '%s:%d',
+                           $self->{sock}->peerhost,
+                           $self->{sock}->peeraddr );
     my $msg = $self->{server}->shutdown( $strself );
     $self->write( "$msg\r\n" );
     $self->close;
@@ -1143,3 +1143,8 @@ sub cmd_shutdown {
 }
 
 
+# Local Variables:
+# mode: perl
+# c-basic-indent: 4
+# indent-tabs-mode: nil
+# End:
