@@ -2390,6 +2390,12 @@ register_alter(sub {
                 "itid MEDIUMINT UNSIGNED NOT NULL DEFAULT 0");
     }
 
+    if (column_type("ml_text", "txtid") =~ /auto_increment/) {
+        do_alter("ml_text",
+                "ALTER TABLE ml_text MODIFY COLUMN " .
+                "txtid MEDIUMINT UNSIGNED NOT NULL DEFAULT 0");
+    }
+
     unless (column_type("syndicated", "oldest_ourdate")) {
         do_alter("syndicated",
 		 "ALTER TABLE syndicated ADD oldest_ourdate DATETIME AFTER lastnew");
