@@ -38,7 +38,7 @@
 
     # show the top 10 spam reports by IP
     my $mode = $GET{mode} || $POST{mode};
-    $mode = '' unless $mode =~ /^top10ip|top10user|tlast10|view|delposterid|delip|delbyposterid|delbyip|last(\d+)hr$/;
+    $mode = '' unless $mode =~ /^(?:top10ip|top10user|tlast10|view|delposterid|delip|delbyposterid|delbyip|last(\d+)hr)$/;
     $mode = '' if $mode =~ /^del/ && !LJ::did_post();
 
     my $dbr = LJ::get_db_reader();
