@@ -56,6 +56,7 @@
         $ret .= "<b>Compiler Output</b><br />\n";
 
         my $error;
+        $POST{'s2code'} =~ s/\r//g;  # just in case
         unless (LJ::S2::layer_compile($lay, \$error, { 's2ref' => \$POST{'s2code'} })) {
 
             $error =~ s/LJ::S2,.+//s;
