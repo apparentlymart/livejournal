@@ -59,24 +59,25 @@ body<=
         my %uprop;
 
         # journal domains
-        if (exists $POST{'journaldomain'} && 
-            $u->{'journaldomain'} ne $POST{'journaldomain'}) 
+        my $dom_cap = LJ::get_cap($u, 'userdomain');
+        if ((exists $POST{'journaldomain'} && $u->{'journaldomain'} ne $POST{'journaldomain'}) || 
+            (! $dom_cap && $POST{'journaldomain_del'})) 
         {
             $POST{'journaldomain'} =~ s!^(http://)?(www\.)?!!;
             my $dom = lc($POST{'journaldomain'});
-            if ($dom) {
-                $dbh->do("INSERT INTO domains VALUES (?, ?)", undef, $dom, $u->{'userid'});
-            } else {
+            if (($dom_cap && ! $dom) || (! $dom_cap && $POST{'journaldomain_del'})) {
                 $dbh->do("DELETE FROM domains WHERE userid=?", undef, $u->{'userid'});
-            }
-            if ($dbh->err) {
-                my $otherid = $dbh->selectrow_array("SELECT userid FROM domains WHERE domain=?",
-                                                    undef, $dom);
-                return LJ::bad_input($ML{'.error.dupdomainalias'}) if $otherid != $u->{'userid'};
-            }
-            if ($u->{'journaldomain'}) {
-                $dbh->do("DELETE FROM domains WHERE userid=? AND domain <> ?",
-                         undef, $u->{'userid'}, $dom);
+            } else {
+                $dbh->do("INSERT INTO domains VALUES (?, ?)", undef, $dom, $u->{'userid'});
+                if ($dbh->err) {
+                    my $otherid = $dbh->selectrow_array("SELECT userid FROM domains WHERE domain=?",
+                                                        undef, $dom);
+                    return LJ::bad_input($ML{'.error.dupdomainalias'}) if $otherid != $u->{'userid'};
+                }
+                if ($u->{'journaldomain'}) {
+                    $dbh->do("DELETE FROM domains WHERE userid=? AND domain <> ?",
+                             undef, $u->{'userid'}, $dom);
+                }
             }
 
             # set journaldomain prop if it's been changed
@@ -435,13 +436,20 @@ body<=
     ###
     ### JOURNAL DOMAIN OPTIONS
     ###
-        
-    if ($LJ::OTHER_VHOSTS && LJ::get_cap($u, "userdomain")) {
+
+    my $has_cap = LJ::get_cap($u, 'userdomain');
+    my $has_dom = $u->{journaldomain} ? 1 : 0;
+    if ($LJ::OTHER_VHOSTS && ($has_cap || $has_dom)) {
         $ret .= "<?h2 $ML{'.domainalias.head'} h2?><?p $ML{'.domainalias.about'} p?>\n";
-        $ret .= "<div style='margin: 20px 0 20px 30px'>$ML{'.domainalias.domainname'} ";
+
+        $ret .= "<div style='margin: 20px 0 20px 30px'>";
+        $ret .= "<table><tr><td align='left'><b>$ML{'.domainalias.domainname'}</b></td><td>";
         $ret .= LJ::html_text({ 'name' => 'journaldomain', 'size' => '30',
-                                'maxlength' => '80', 'value' => $u->{'journaldomain'} });
-        $ret .= " $ML{'.domainalias.example'}\n";
+                                'maxlength' => '80', 'value' => $u->{'journaldomain'},
+                                'disabled' => ! $has_cap });
+        $ret .= LJ::html_submit('journaldomain_del' => "Remove") unless $has_cap;
+        $ret .= "</td></tr>";
+        $ret .= "<tr><td>&nbsp;</td><td>$ML{'.domainalias.example'}</td></tr></table>";
         $ret .= "<?p " . BML::ml(".domainalias.helptext", {'sitename' => $LJ::SITENAME})." p?></div>\n\n";
     }
 
