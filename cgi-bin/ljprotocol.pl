@@ -839,6 +839,19 @@ sub editevent
              "MD5(lt.event) AS 'md5event', l.rlogtime, l.anum FROM log2 l, logtext2 lt ".
              "WHERE l.journalid=$ownerid AND lt.journalid=$ownerid ".
              "AND l.jitemid=$qitemid AND lt.jitemid=$qitemid");
+
+	# a few times, logtext2 has been empty, with log2 existing,
+	# and then the post is undeletable since the join matches
+	# nothing.  this is a ugly hack work-around, but without using
+	# transactions to guarantee we never bomb out between log2 and
+	# logtext2 insertion, this is the price we way.
+	unless ($oldevent) {
+	    $oldevent = $dbcm->selectrow_hashref
+		("SELECT l.journalid AS 'ownerid', l.posterid, l.eventtime, l.logtime, ".
+		 "l.compressed, l.security, l.allowmask, l.year, l.month, l.day, ".
+		 "l.rlogtime, l.anum FROM log2 l WHERE l.journalid=$ownerid AND l.jitemid=$qitemid");
+	}
+
     } else {
         $oldevent = $dbcm->selectrow_hashref
             ("SELECT l.ownerid, l.posterid, l.eventtime, l.logtime, ".
