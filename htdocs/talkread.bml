@@ -53,10 +53,22 @@ body<=
  foreach (keys %T) { $T{$_} = $ML{$T{$_}}; }
 
  my $init = LJ::Talk::init(\%GET);
- return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
 
  my $u = $init->{'journalu'};
  return $ML{'talk.error.nojournal'} unless $u;
+
+ my $ditemid = $init->{'ditemid'}+0;
+
+ # redirect if account was renamed
+ if ($u->{'journaltype'} eq "R") {
+     LJ::load_user_props($u, "renamedto");
+     if ($u->{'renamedto'} ne "") {
+         return BML::redirect(LJ::journal_base($u->{'renamedto'}) . "/$ditemid.html");
+     }
+ }
+
+ # now check for init->error, since we know the account wasn't renamed
+ return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
 
  LJ::load_user_props($u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
  if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
@@ -82,21 +94,11 @@ body<=
      return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
  }
 
- my $ditemid = $init->{'ditemid'}+0;
  my $jarg = "journal=$u->{'user'}&";
  my $jargent ="journal=$u->{'user'}&amp;";
-
  my $talkurl = LJ::journal_base($u) . "/$ditemid.html";
 
  my $ret = "";
-
- # redirect if account was renamed
- if ($u->{'journaltype'} eq "R") {
-     LJ::load_user_props($u, "renamedto");
-     if ($u->{'renamedto'} ne "") {
-         return BML::redirect($talkurl);
-     }
- }
 
  my $props = $item->{'props'};
 
