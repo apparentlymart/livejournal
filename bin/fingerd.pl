@@ -67,7 +67,7 @@ You can make queries in the following form:
 	# userinfo!
 	my $user = $1;
 	my $quser = $dbh->quote($user);
-	my $sth = $dbh->prepare("SELECT user, has_bio, paidfeatures, userid, name, email, bdate, timeupdate, lastitemid, allow_infoshow FROM user WHERE user=$quser");
+	my $sth = $dbh->prepare("SELECT user, has_bio, paidfeatures, userid, name, email, bdate, allow_infoshow FROM user WHERE user=$quser");
 	$sth->execute;
 	my $u = $sth->fetchrow_hashref;
 	unless ($u) {

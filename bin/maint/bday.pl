@@ -11,12 +11,13 @@ $maint{'bdaymail'} = sub
     my $sth;
     
     # get everybody whose birthday is today.
-    $sth = $dbh->prepare("SELECT userid, user, name, email ".
-			 "FROM user WHERE bdate IS NOT NULL AND status='A' AND ".
-			 "statusvis='V' AND bdate <> '0000-00-00' AND ".
-			 "MONTH(NOW())=MONTH(bdate) AND DAYOFMONTH(NOW())=DAYOFMONTH(bdate) ".
-			 "AND timeupdate > DATE_SUB(NOW(), INTERVAL 1 MONTH) AND ".
-			 "journaltype='P'");
+    $sth = $dbh->prepare("SELECT u.userid, u.user, u.name, u.email ".
+			 "FROM user u, usersage uu WHERE u.userid=uu.userid AND ".
+			 "u.bdate IS NOT NULL AND u.status='A' AND ".
+			 "u.statusvis='V' AND u.bdate <> '0000-00-00' AND ".
+			 "MONTH(NOW())=MONTH(u.bdate) AND DAYOFMONTH(NOW())=DAYOFMONTH(u.bdate) ".
+			 "AND uu.timeupdate > DATE_SUB(NOW(), INTERVAL 1 MONTH) AND ".
+			 "u.journaltype='P'");
     $sth->execute;
     my @bdays; push @bdays, $_ while ($_ = $sth->fetchrow_hashref);
     $sth->finish;
@@ -47,12 +48,12 @@ $maint{'bdaymail'} = sub
 
 	# and now, tell people that list them as friends.
 	$sth = $dbh->prepare("SELECT u.user, u.name, u.email ".
-			     "FROM user u, friends f, userprop up, userproplist upl ".
+			     "FROM user u, friends f, userprop up, userproplist upl, userusage uu ".
 			     "WHERE f.friendid=$userid AND f.userid=u.userid AND ".
-			     "up.userid=u.userid AND upl.upropid=up.upropid AND ".
+			     "up.userid=u.userid AND upl.upropid=up.upropid AND uu.userid=u.userid AND".
 			     "upl.name='opt_bdaymail' AND up.value='1' AND ".
 			     "u.journaltype='P' AND u.status='A' AND u.statusvis='V' AND ".
-			     "u.timeupdate>DATE_SUB(NOW(), INTERVAL 1 MONTH) AND ".
+			     "uu.timeupdate>DATE_SUB(NOW(), INTERVAL 1 MONTH) AND ".
 			     "u.userid <> $userid");
 	$sth->execute;
 	if ($dbh->err) { die $dbh->errstr; }

@@ -12,7 +12,9 @@ $maint{'genstats'} = sub
 				  states gender clients ); }
     my %do = map { $_, 1, } @which;
     
-    &connect_db();
+    my $dbs = LJ::get_dbs();
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
     my $sth;
 
     my %account;
@@ -29,7 +31,7 @@ $maint{'genstats'} = sub
     if ($do{'usage'})
     {
 	print "-I- Getting usage by day in last month...\n";
-	$sth = $dbh->prepare("SELECT UNIX_TIMESTAMP(), DATE_FORMAT(NOW(), '%Y-%m-%d')");
+	$sth = $dbr->prepare("SELECT UNIX_TIMESTAMP(), DATE_FORMAT(NOW(), '%Y-%m-%d')");
 	$sth->execute;
 	($nowtime, $nowdate) = $sth->fetchrow_array;
 	
@@ -38,14 +40,14 @@ $maint{'genstats'} = sub
 	for (my $days_back = 30; $days_back > 0; $days_back--) {
 	    print "  going back $days_back days... ";
 	    $time = $nowtime - 86400*$days_back;
-	    $dbh->do("SET \@d=DATE_FORMAT(FROM_UNIXTIME($time), \"%Y-%m-%d\")");
-	    $sth = $dbh->prepare("SELECT COUNT(*) FROM stats WHERE statcat='postsbyday' AND statkey=\@d");
+	    $dbr->do("SET \@d=DATE_FORMAT(FROM_UNIXTIME($time), \"%Y-%m-%d\")");
+	    $sth = $dbr->prepare("SELECT COUNT(*) FROM stats WHERE statcat='postsbyday' AND statkey=\@d");
 	    $sth->execute;
 	    my ($exist) = $sth->fetchrow_array;
 	    if ($exist) {
 		print "exists.\n";
 	    } else {
-		$sth = $dbh->prepare("SELECT \@d, COUNT(*) FROM log WHERE year=YEAR(\@d) AND month=MONTH(\@d) AND day=DAYOFMONTH(\@d)");
+		$sth = $dbr->prepare("SELECT \@d, COUNT(*) FROM log WHERE year=YEAR(\@d) AND month=MONTH(\@d) AND day=DAYOFMONTH(\@d)");
 		$sth->execute;
 		my ($date, $count) = $sth->fetchrow_array;
 		print "$date = $count entries\n";
@@ -67,7 +69,7 @@ $maint{'genstats'} = sub
 
 	my $now = time();
 	my $count;
-	$sth = $dbh->prepare("SELECT COUNT(*) FROM user");
+	$sth = $dbr->prepare("SELECT COUNT(*) FROM user");
 	$sth->execute;
 	my ($usertotal) = $sth->fetchrow_array;
 	my $pagesize = 1000;
@@ -79,7 +81,7 @@ $maint{'genstats'} = sub
 	    my $first = $skip+1;
 	    my $last = $skip+$pagesize;
 	    print "  getting records $first-$last...\n";
-	    $sth = $dbh->prepare("SELECT DATE_FORMAT(timecreate, '%Y-%m-%d') AS 'datereg', user, paidfeatures, FLOOR((TO_DAYS(NOW())-TO_DAYS(bdate))/365.25) AS 'age', UNIX_TIMESTAMP(timeupdate) AS 'timeupdate', status, allow_getljnews, allow_getpromos FROM user LIMIT $skip,$pagesize");
+	    $sth = $dbr->prepare("SELECT DATE_FORMAT(uu.timecreate, '%Y-%m-%d') AS 'datereg', u.user, u.paidfeatures, FLOOR((TO_DAYS(NOW())-TO_DAYS(u.bdate))/365.25) AS 'age', UNIX_TIMESTAMP(uu.timeupdate) AS 'timeupdate', u.status, u.allow_getljnews, u.allow_getpromos FROM user u, userusage uu WHERE u.userid=uu.userid LIMIT $skip,$pagesize");
 	    $sth->execute;
 	    while (my $rec = $sth->fetchrow_hashref)
 	    {
@@ -125,7 +127,7 @@ $maint{'genstats'} = sub
 	$to_pop{'county'} = \%country;
 
 	print "-I- Countries.\n";
-	$sth = $dbh->prepare("SELECT value, COUNT(*) AS 'count' FROM userprop WHERE upropid=3 AND value<>'' GROUP BY 1 ORDER BY 2");
+	$sth = $dbr->prepare("SELECT value, COUNT(*) AS 'count' FROM userprop WHERE upropid=3 AND value<>'' GROUP BY 1 ORDER BY 2");
 	$sth->execute;
 	while ($_ = $sth->fetchrow_hashref) {
 	    $country{$_->{'value'}} = $_->{'count'};
@@ -137,7 +139,7 @@ $maint{'genstats'} = sub
 	$to_pop{'stateus'} = \%stateus;
 
 	print "-I- US States.\n";
-	$sth = $dbh->prepare("SELECT ua.value, COUNT(*) AS 'count' FROM userprop ua, userprop ub WHERE ua.userid=ub.userid AND ua.upropid=4 and ub.upropid=3 and ub.value='US' AND ub.value<>'' GROUP BY 1 ORDER BY 2");
+	$sth = $dbr->prepare("SELECT ua.value, COUNT(*) AS 'count' FROM userprop ua, userprop ub WHERE ua.userid=ub.userid AND ua.upropid=4 and ub.upropid=3 and ub.value='US' AND ub.value<>'' GROUP BY 1 ORDER BY 2");
 	$sth->execute;
 	while ($_ = $sth->fetchrow_hashref) {
 	    $stateus{$_->{'value'}} = $_->{'count'};
@@ -149,7 +151,7 @@ $maint{'genstats'} = sub
 	$to_pop{'gender'} = \%gender;
 
 	print "-I- Gender.\n";
-	$sth = $dbh->prepare("SELECT up.value, COUNT(*) AS 'count' FROM userprop up, userproplist upl WHERE up.upropid=upl.upropid AND upl.name='gender' GROUP BY 1");
+	$sth = $dbr->prepare("SELECT up.value, COUNT(*) AS 'count' FROM userprop up, userproplist upl WHERE up.upropid=upl.upropid AND upl.name='gender' GROUP BY 1");
 	$sth->execute;
 	while ($_ = $sth->fetchrow_hashref) {
 	    $gender{$_->{'value'}} = $_->{'count'};
@@ -176,7 +178,7 @@ $maint{'genstats'} = sub
     if ($do{'clients'})
     {
 	print "-I- Clients.\n";
-	$sth = $dbh->prepare("SELECT c.client, COUNT(*) AS 'count' FROM clients c, clientusage cu ".
+	$sth = $dbr->prepare("SELECT c.client, COUNT(*) AS 'count' FROM clients c, clientusage cu ".
 			     "WHERE c.clientid=cu.clientid AND cu.lastlogin > ".
 			     "DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY 1 ORDER BY 2");
 	$sth->execute;
