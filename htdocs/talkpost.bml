@@ -306,7 +306,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
  $ret .= $event;
  $ret .= "</ul>";
  
- $ret .= "<br clear='all'><hr size='2' align='center' />";	
+ $ret .= "<br clear='all' /><hr size='2' align='center' />";	
 
  my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
 my $readurl = "/talkread.bml?${jarg}itemid=$ditemid";
@@ -314,7 +314,7 @@ if ($new_url) {
     $readurl = "$ditemid.html";
 }
 
- $ret .= "<center><b>(<a href=\"$readurl\">$ML{'talk.commentsread'}</a>)</b></center>";
+ $ret .= "<p align='center' class='lesstop'><b>(<a href=\"$readurl\">$ML{'talk.commentsread'}</a>)</b></p>";
  
  # can a comment even be made?
  if ($logprops{$itemid}->{'opt_nocomments'}) {
@@ -348,7 +348,7 @@ if ($new_url) {
  }
 
  # from registered user or anonymous?
- $ret .= "<table>\n";
+ $ret .= "<table class='postheading'>\n";
  if ($u->{'opt_whocanreply'} eq "all") {
      $ret .= "<tr valign='middle'>";
      $ret .= "<td align='right'>$ML{'.opt.from'}</td>";

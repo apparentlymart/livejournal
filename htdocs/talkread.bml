@@ -14,8 +14,8 @@ body<=
  my $head = $_[1] ? \$_[1]->{'head'} : \$r_head;
  my $title = $_[1] ? \$_[1]->{'title'} : \$r_title;
 
- my $PAGE_SIZE = 25;
- my $THREADING_POINT = 50;
+ my $PAGE_SIZE = $LJ::TALK_PAGE_SIZE || 25;
+ my $THREADING_POINT = $LJ::TALK_THREAD_POINT || 50;
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
@@ -482,7 +482,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
  ########## make the navcrap
  my $navcrap;
  if ($pages > 1) {
-     $navcrap .= "<center><font face='Arial,Helvetica' size='-1'><b>";
+     $navcrap .= "<div align='center'><font face='Arial,Helvetica' size='-1'><b>";
      $navcrap .= BML::ml('.pageofpages',{'page'=>$page, 'total'=>$pages}) . "<br />";
      my $left = "<b>&lt;&lt;</b>";
      if ($page > 1) { $left = "<a href='" . BML::self_link({ 'page' => $page-1 }) . "'>$left</a>"; }
@@ -496,7 +496,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
          $navcrap .= "$link ";
      }
      $navcrap .= "$right";
-     $navcrap .= "</font></center>\n";
+     $navcrap .= "</font></div>\n";
      $navcrap = BML::fill_template("standout", { 'DATA' => $navcrap });
  }
  ####### end navcrap
@@ -569,7 +569,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
             my $icon = LJ::Talk::show_image($pics, $post->{'subjecticon'});
 
             if ($post->{'_loaded'}) {
-                $$ret .= "<p><a name='t$dtid'></a><table width='100%'><tr>";
+                $$ret .= "<a name='t$dtid'></a><table width='100%' class='talk-comment'><tr>";
                 $$ret .= "<td rowspan='2'><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
                 $$ret .= "<td bgcolor='$bgcolor' width='100%'>";
                 if ($userpost) {
@@ -650,7 +650,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
                 BML::ebml(\$post->{'body'});
                 $$ret .= $post->{'body'};
 
-                $$ret .= "<p><font size='-2'>";
+                $$ret .= "<p style='margin: 0.7em 0 0.2em 0'><font size='-2'>";
                 my $replyurl = $clustered ? $talkargs->("replyto=$dtid") :
                     "$LJ::SITEROOT/talkpost.bml?${jargent}replyto=$dtid";
                 $$ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
@@ -663,7 +663,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
                     my $url = $talkargs->("thread=$dtid");
                     $$ret .= "(<a href='$url'>$T{'thread'}</a>)";
                 }
-                $$ret .= "</font>";
+                $$ret .= "</font></p>";
                 $$ret .= "</td></tr></table>\n";  # close colored table
             } else {
                 # link to message
@@ -705,7 +705,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  unless ($logprops{$itemid}->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N")
  {
-     $ret .= "<p>$navcrap</p>" if $navcrap;
+     $ret .= "$navcrap" if $navcrap;
      my $readlink;
      if ($FORM{'thread'} && $pages == 1) {
          my $readurl = LJ::journal_base($u) . "/$ditemid.html";
@@ -715,7 +715,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
      my $posturl = "$LJ::SITEROOT/talkpost.bml?${jargent}itemid=$ditemid";
      $posturl = "$ditemid.html?mode=reply" if $new_url;
 
-     $ret .= "<center><b>$readlink(<a href='$posturl'>$T{'postcomments'}</a>)</b></center>";
+     $ret .= "<p align='center' class='lesstop'><b>$readlink(<a href='$posturl'>$T{'postcomments'}</a>)</b></p>";
 
      if ($post_count > 0)
      {
@@ -727,7 +727,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
                                                                        "children" => \%children,
                                                                    });
 
-         $ret .= "<hr /><p style='margin-top: 2px;' align='center'><b>$readlink(<a href='$posturl'>$T{'postcomments'}</a>)</b></p>";
+         $ret .= "<hr /><p class='lesstop' align='center'><b>$readlink(<a href='$posturl'>$T{'postcomments'}</a>)</b></p>";
 
          if ($showmultiform && $multiform_selects) {
              $ret .= "<p>$ML{'.talkmulti.des'} ";

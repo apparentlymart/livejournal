@@ -112,19 +112,19 @@ body<=
          $htmlu{$v} = BML::eall($u->{$v});
      }
 
-     $ret .= "<P><TABLE WIDTH=100%>\n";
+     $ret .= "<table width='100%'>\n";
 
      # name
-     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=<?emcolor?>>$ML{'.name.title'}</TD>";
+     $ret .= "<tr><td align='right' bgcolor='<?emcolor?>'>$ML{'.name.title'}</td>";
      if(LJ::text_in($saved{'name'})) {
-         $ret .= "<TD><INPUT NAME=name VALUE=\"$htmlu{'name'}\" MAXLENGTH=50></TD></TR>\n";
+         $ret .= "<td><input name='name' value=\"$htmlu{'name'}\" maxlength='50' /></td></tr>\n";
      } else {
          $ret .= "<input type='hidden' name='name_absent' value='yes' />";
          $ret .= "<td><?inerr $ML{'.error.invalidname'} inerr?></td></tr>\n";
      }
 
      # birthday
-     $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=<?emcolor?>>$ML{'.bday.title'}</TD><TD>";
+     $ret .= "<tr><td align='right' bgcolor='<?emcolor?>'>$ML{'.bday.title'}</td><td>";
      my %bdpart;
      if ($u->{'bdate'} =~ /^(\d\d\d\d)-(\d\d)-(\d\d)$/)
      {
@@ -132,13 +132,13 @@ body<=
          if ($bdpart{'year'} eq "0000") { $bdpart{'year'} = ""; }
          if ($bdpart{'day'} eq "00") { $bdpart{'day'} = ""; }
      }
-     $ret .= "<SELECT NAME=\"month\"><OPTION VALUE=\"\">";
+     $ret .= "<select name=\"month\"><option value=\"\"></option>";
      for (my $i=1; $i<=12; $i++) {
          my $sel = $bdpart{'month'} == $i ? " SELECTED" : "";
-         $ret .= "<OPTION VALUE=$i$sel>" . LJ::Lang::month_long("EN", $i) . "\n";
+         $ret .= "<option value='$i$sel'>" . LJ::Lang::month_long("EN", $i) . "</option>\n";
      }
-     $ret .= "</SELECT> ";
-     $ret .= "<INPUT SIZE=3 MAXLENGTH=2 NAME=day VALUE=\"$bdpart{'day'}\">, <INPUT SIZE=5 MAXLENGTH=4 NAME=year VALUE=\"$bdpart{'year'}\"> ($ML{'.bday.year.opt'})";
+     $ret .= "</select> ";
+     $ret .= "<input size='3' maxlength='2' name='day' value=\"$bdpart{'day'}\" />, <INPUT SIZE=5 MAXLENGTH=4 NAME=year VALUE=\"$bdpart{'year'}\"> ($ML{'.bday.year.opt'})";
 
      $ret .= "</TD></TR>\n";
 
