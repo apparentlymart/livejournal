@@ -980,14 +980,14 @@ property string text_nosubject {
 set text_nosubject = "(no subject)";
 
 property string text_noentries_recent {
-    des = "Text do display when there are no entries on the recent or friends views";
+    des = "Text to display when there are no entries on the recent or friends views";
     maxlength = 255;
     size = 50;
 }
 set text_noentries_recent = "There are no entries to display.";
 
 property string text_noentries_day {
-    des = "Text do display when there are no entries on the day view";
+    des = "Text to display when there are no entries on the day view";
     maxlength = 255;
     size = 50;
 }
