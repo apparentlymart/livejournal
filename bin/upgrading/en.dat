@@ -654,7 +654,7 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /interests.bml.add.added.text=The interest has been added to your list.
 
-/interests.bml.add.btn.text=Add [interest]]
+/interests.bml.add.btn.text=Add [[interest]]
 
 /interests.bml.add.confirm.head=Confirm
 
