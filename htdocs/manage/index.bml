@@ -20,14 +20,24 @@ body<=
 <?h1 <?_ml .customization.header _ml?> h1?>
 <?p  <?_ml .customization        _ml?>  p?>
 <dl>
-  <dt><a href="/customize/"><?_ml .customization.customize _ml?></a></dt>
-  <dd><?_ml .customization.customize.about _ml?></dd>
-  <dt><a href="/customize/advanced/"><?_ml .customization.advanced _ml?></a></dt>
-  <dd><?_ml .customization.advanced.about _ml?></dd>
-  <dt><a href="./links.bml"><?_ml .customization.links _ml?></a></dt>
-  <dd><?_ml .customization.links.about _ml?></dd>
-  <dt><a href="/modify.bml"><?_ml /modify.bml.title _ml?></a></dt>
-  <dd><?_ml .customization.modify.about _ml?></dd>
+   <dt><?_ml .customization.s1.header _ml?></dt>
+   <dd>
+      <dl>
+         <dt><a href="/modify.bml"><?_ml /modify.bml.title _ml?></a></dt>
+         <dd><?_ml .customization.modify.about _ml?></dd>
+      </dl>
+   </dd>
+   <dt><?_ml .customization.s2.header _ml?></dt>
+   <dd>
+      <dl>
+         <dt><a href="/customize/"><?_ml .customization.customize _ml?></a></dt>
+         <dd><?_ml .customization.customize.about _ml?></dd>
+         <dt><a href="/customize/advanced/"><?_ml .customization.advanced _ml?></a></dt>
+         <dd><?_ml .customization.advanced.about _ml?></dd>
+         <dt><a href="./links.bml"><?_ml .customization.links _ml?></a></dt>
+         <dd><?_ml .customization.links.about _ml?></dd>
+      </dl>
+   </dd>
 </dl>
 
 <?h1 <?_ml .entries.header _ml?> h1?>

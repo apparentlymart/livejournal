@@ -1733,6 +1733,10 @@ The site team
 
 /manage/index.bml.customization.modify.about=Modify your journal's display properties
 
+/manage/index.bml.customization.s1.header=S1 Style System
+
+/manage/index.bml.customization.s2.header=S2 Style System
+
 /manage/index.bml.entries=Work with entries you have made in your account's journal:
 
 /manage/index.bml.entries.edit.about=Edit and delete entries in your journal
