@@ -1071,11 +1071,11 @@ sub editevent
     if ($req->{'props'}->{'opt_backdated'} eq "1" &&
         $oldevent->{'rlogtime'} != $LJ::EndOfTime) {
         if ($clustered) {
-            $dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime WHERE ".
-                     "itemid=$qitemid");
-        } else {
             $dbcm->do("UPDATE log2 SET rlogtime=$LJ::EndOfTime WHERE ".
                       "journalid=$ownerid AND jitemid=$qitemid");
+        } else {
+            $dbh->do("UPDATE log SET rlogtime=$LJ::EndOfTime WHERE ".
+                     "itemid=$qitemid");
         }
     }
     if ($req->{'props'}->{'opt_backdated'} eq "0" &&
