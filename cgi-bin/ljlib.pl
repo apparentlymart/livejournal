@@ -1911,6 +1911,7 @@ sub get_authas_list {
                          grep { ! $opts->{'cap'} || LJ::get_cap($_, $opts->{'cap'}) }
                          grep { ! $opts->{'type'} || $opts->{'type'} eq $_->{'journaltype'} }
                          grep { $_->{clusterid} > 0 }
+                         grep { $_->{statusvis} !~ /[XS]/ }
                          values %users;
 }
 
