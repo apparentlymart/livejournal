@@ -2810,6 +2810,7 @@ sub start_request
     $LJ::CACHE_REMOTE = undef;
     $LJ::CACHED_REMOTE = 0;
     %LJ::REQ_CACHE_REL = ();  # relations from LJ::check_rel()
+    %LJ::REQ_CACHE_DBS = ();  # clusterid -> LJ::DBSet
 
     # we use this to fake out get_remote's perception of what
     # the client's remote IP is, when we transfer cookies between
@@ -3421,6 +3422,8 @@ sub decode_url_string
 # </LJFUNC>
 sub get_dbs
 {
+    return $LJ::REQ_CACHE_DBS{0} if $LJ::REQ_CACHE_DBS{0};
+
     my $dbh = LJ::get_dbh("master");
     my $dbr = LJ::get_dbh("slave");
 
@@ -3431,7 +3434,7 @@ sub get_dbs
     # master doing 1 of the 3 configured slave roles
     $dbr = undef if $LJ::DBIRole->same_cached_handle("slave", "master");
 
-    return make_dbs($dbh, $dbr);
+    return $LJ::REQ_CACHE_DBS{0} = make_dbs($dbh, $dbr);
 }
 
 sub get_db_reader {
@@ -3496,6 +3499,7 @@ sub get_cluster_set
 {
     my $arg = shift;
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
+    return $LJ::REQ_CACHE_DBS{$id} if $LJ::REQ_CACHE_DBS{$id};
     my $dbs = {};
     $dbs->{'dbh'} = LJ::get_dbh("cluster${id}");
     $dbs->{'dbr'} = LJ::get_dbh("cluster${id}slave");
@@ -3506,7 +3510,8 @@ sub get_cluster_set
 
     $dbs->{'has_slave'} = defined $dbs->{'dbr'};
     $dbs->{'reader'} = $dbs->{'has_slave'} ? $dbs->{'dbr'} : $dbs->{'dbh'};
-    return $dbs;
+    bless $dbs, "LJ::DBSet";
+    return $LJ::REQ_CACHE_DBS{$id} = $dbs;
 }
 
 # <LJFUNC>
@@ -3527,6 +3532,7 @@ sub make_dbs
     $dbs->{'dbr'} = $dbr;
     $dbs->{'has_slave'} = defined $dbr ? 1 : 0;
     $dbs->{'reader'} = defined $dbr ? $dbr : $dbh;
+    bless $dbs, "LJ::DBSet";
     return $dbs;
 }
 
@@ -3545,7 +3551,7 @@ sub make_dbs_from_arg
 {
     my $dbarg = shift;
     my $dbs;
-    if (ref($dbarg) eq "HASH") {
+    if (ref($dbarg) eq "HASH" || ref($dbarg) eq "LJ::DBSet") {
         $dbs = $dbarg;
     } else {
         $dbs = LJ::make_dbs($dbarg, undef);
