@@ -1,5 +1,4 @@
 <?_code
-#BML:cache:update
 {
     use strict;
     use vars qw(%GET %POST %ML);

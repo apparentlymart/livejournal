@@ -1,7 +1,6 @@
 <?page
 body<=
 <?_code
-#BML:cache:talkread
 
  use strict;
  use vars qw($r_head $r_title %GET %ML);
