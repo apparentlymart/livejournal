@@ -34,13 +34,12 @@ body<=
  my %modcount;
  if ($mods) { foreach (@$mods) { $mods{$_} = $show{$_} = 1; } }
 
+ my %names = ();
  if (%show) {
     my $in = join(',', keys %show);
-    my %names = ();
- 
     my $sth = $dbr->prepare("SELECT u.userid, u.clusterid, u.user, u.name FROM user u, community c ".
                             "WHERE u.userid IN ($in) AND u.userid=c.userid ".
-                            "AND u.statusvis='V'");
+                            "AND u.statusvis<>'D' AND u.statusvis<>'X'");
     $sth->execute;
     my $udbr;
     while (my ($uid, $clusterid, $user, $name) = $sth->fetchrow_array) {
@@ -50,7 +49,10 @@ body<=
             $modcount{$uid} = $udbr->selectrow_array("SELECT COUNT(*) FROM modlog WHERE journalid=$uid") || 0;
         }
     }
+ }
 
+ # deleted and expunged communities won't show up in this
+ if (%names) {
     $ret .= "<table cellpadding='5'><tr><td>$ML{'.commlist.username'}</td>" .
        "<td>$ML{'.commlist.title'}</td><td>$ML{'.commlist.actions'}</td></tr>";
     foreach my $id (sort { $names{$a}->[1] cmp $names{$b}->[1] } keys %names) {
