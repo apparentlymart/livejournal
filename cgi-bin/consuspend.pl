@@ -255,8 +255,33 @@ sub finduser
         return 0;
     }
 
-    my $crit = $args->[1];
-    my $data = $args->[2];
+    my ($crit, $data);
+    if (scalar(@$args) == 2) {
+        # new form; we can auto-detect emails easy enough
+        $data = $args->[1];
+        if ($data =~ /@/) {
+            $crit = 'email';
+        } else {
+            $crit = 'user';
+        }
+    } else {
+        # old format...but new variation
+        $crit = $args->[1];
+        $data = $args->[2];
+
+        # if they gave us a username and want to search by email, instead find
+        # all users with that email address
+        if ($crit eq 'email' && $data !~ /@/) {
+            my $u = LJ::load_user($data);
+            unless ($u) {
+                push @$out, [ "error", "User doesn't exist." ];
+                return 0;
+            }
+
+            $data = $u->{email};
+        }
+    }
+
     my $qd = $dbh->quote($data);
 
     my $where;
