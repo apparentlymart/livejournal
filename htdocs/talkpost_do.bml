@@ -322,7 +322,7 @@ BODY<=
 	 my $pub  = $item->{'security'} eq "public" ? 1 : 0;
 	 $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
 		 "nodeid, jtalkid, publicitem) VALUES ($posterid, UNIX_TIMESTAMP('$now'), ".
-		 "$u->{'userid'}, 'L', $init->{'itemid'}, $insertid, $pub)");
+		 "$u->{'userid'}, 'L', $init->{'itemid'}, $insertid, '$pub')");
      }
 
      my @prefix = ("");

@@ -357,7 +357,7 @@ sub movefrom0_talkitem
 	}
 	$db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
 		"nodeid, jtalkid, publicitem) VALUES ($item->{'posterid'}, ".
-		"UNIX_TIMESTAMP('$item->{'datepost'}'), $userid, 'L', $jitemid, $jtalkid, $pub)");
+		"UNIX_TIMESTAMP('$item->{'datepost'}'), $userid, 'L', $jitemid, $jtalkid, '$pub')");
     }
 }
     
