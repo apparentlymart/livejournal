@@ -1406,14 +1406,14 @@ EOC
 register_tablecreate("sessions", <<'EOC'); # user cluster
 CREATE TABLE sessions (
    userid     MEDIUMINT UNSIGNED NOT NULL,
-   sessid     MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+   sessid     MEDIUMINT UNSIGNED NOT NULL,
    PRIMARY KEY (userid, sessid),
    auth       CHAR(10) NOT NULL,
    exptype    ENUM('short','long') NOT NULL,  # browser closed or "infinite"
    timecreate INT UNSIGNED NOT NULL,
    timeexpire INT UNSIGNED NOT NULL,
    ipfixed    CHAR(15)  # if null, not fixed at IP.
-) TYPE=MYISAM
+)
 EOC
 
 register_tablecreate("sessions_data", <<'EOC');  # user cluster

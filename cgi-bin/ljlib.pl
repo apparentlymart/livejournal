@@ -7249,10 +7249,12 @@ sub generate_session
     $opts->{'exptype'} = "short" unless $opts->{'exptype'} eq "long";
     $sess->{'auth'} = LJ::rand_chars(10);
     my $expsec = $opts->{'exptype'} eq "short" ? 60*60*24 : 60*60*24*7;
-    $udbh->do("INSERT INTO sessions (userid, sessid, auth, exptype, ".
-              "timecreate, timeexpire, ipfixed) VALUES (?,NULL,?,?,UNIX_TIMESTAMP(),".
+    my $id = LJ::alloc_user_counter($u, 'S');
+    return undef unless $id;
+    $udbh->do("REPLACE INTO sessions (userid, sessid, auth, exptype, ".
+              "timecreate, timeexpire, ipfixed) VALUES (?,?,?,?,UNIX_TIMESTAMP(),".
               "UNIX_TIMESTAMP()+$expsec,?)", undef,
-              $u->{'userid'}, $sess->{'auth'}, $opts->{'exptype'}, $opts->{'ipfixed'});
+              $u->{'userid'}, $id, $sess->{'auth'}, $opts->{'exptype'}, $opts->{'ipfixed'});
     return undef if $udbh->err;
     $sess->{'sessid'} = $udbh->{'mysql_insertid'};
     $sess->{'userid'} = $u->{'userid'};
@@ -7431,16 +7433,17 @@ sub clear_rel
     return;
 }
 
-# $dom: 'L' == log, 'T' == talk, 'M' == modlog, 'B' == blob (userpic, etc)
+# $dom: 'L' == log, 'T' == talk, 'M' == modlog, 'B' == blob (userpic, etc), 'S' == session
 sub alloc_user_counter
 {
     my ($u, $dom, $recurse) = @_;
-    return undef unless $dom =~ /^[LTMB]$/;
+    return undef unless $dom =~ /^[LTMBS]$/;
     my $dbcm = LJ::get_cluster_master($u);
     return undef unless $dbcm;
 
     my $newmax;
     my $uid = $u->{'userid'}+0;
+    return undef unless $uid;
     my $memkey = [$uid, "auc:$uid:$dom"];
 
     # in a master-master DB cluster we need to be careful that in
@@ -7471,6 +7474,9 @@ sub alloc_user_counter
                 undef, $uid);
     } elsif ($dom eq "M") {
         $newmax = $dbcm->selectrow_array("SELECT MAX(modid) FROM modlog WHERE journalid=?",
+                undef, $uid);
+    } elsif ($dom eq "S") {
+         $newmax = $dbcm->selectrow_array("SELECT MAX(sessid) FROM session WHERE userid=?",
                 undef, $uid);
     }
     $newmax += 0;
