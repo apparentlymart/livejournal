@@ -1635,6 +1635,22 @@ register_alter(sub {
                  "ALTER IGNORE TABLE supportcat ADD scope ENUM('general', 'local') ".
                  "NOT NULL DEFAULT 'general', ADD UNIQUE (catkey)");
     }
+
+    # change themedata. key to being unique, if it's not already
+    {
+        my $sth = $dbh->prepare("SHOW INDEX FROM themedata");
+        $sth->execute;
+        my $found = 0;
+        while (my $i = $sth->fetchrow_hashref) {
+            $found = 1 if $i->{'Key_name'} eq "thuniq";
+        }
+        unless ($found) {
+            do_alter("themedata", "ALTER IGNORE TABLE themedata ".
+                     "DROP KEY themeid, MODIFY coltype VARCHAR(30) NOT NULL, ".
+                     "ADD UNIQUE `thuniq` (themeid, coltype)");
+        }
+    }
+
 });
 
 
