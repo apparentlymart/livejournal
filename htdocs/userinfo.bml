@@ -112,7 +112,7 @@
 
  if ($u->{'statusvis'} eq "S") {
      $title = $ML{'error.suspended.title'};
-     $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " . BML::ml('error.suspended.text',{'sitename'=>$LJ::SITENAME,'username'=>$user}) . " p?>";
+     $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " . BML::ml('error.suspended.text',{'sitename'=>$LJ::SITENAME,'user'=>$user}) . " p?>";
      return;
  }
  if ($u->{'statusvis'} eq "D") {
