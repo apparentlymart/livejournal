@@ -29,6 +29,9 @@
  return $err->($ML{'error.invalidauth'})
      unless $memoryu;
 
+ # memcache key for later
+ my $memkey = [$memoryu->{userid}, "memct:$memoryu->{userid}"];
+
  my %secopts = ( 'public' => $ML{'label.security.public'},
                  'friends' => $ML{'label.security.friends'},
                  'private' => $ML{'label.security.private'}, );
@@ -149,7 +152,7 @@
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
              $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
              LJ::Memories::updated_keywords($memoryu);
-             LJ::MemCache::delete([$memoryu->{userid}, "memct:$memoryu->{userid}"]);
+             LJ::MemCache::delete($memkey);
              $title = $ML{'Error'};
              $body = $ML{'.error.entry_deleted'};
              return;
@@ -244,7 +247,7 @@
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
              $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
              LJ::Memories::updated_keywords($memoryu);
-             LJ::MemCache::delete([$memoryu->{userid}, "memct:$memoryu->{userid}"]);
+             LJ::MemCache::delete($memkey);
              $title = $ML{'.title.deleted'};
              $body = "<?h1 $ML{'.error.deleted.title'} h1?><?p " . 
                      BML::ml(".error.deleted.body", { 'desc' => $memory->{'des'} }) .
@@ -314,7 +317,7 @@
                               "VALUES (NULL, ?, ?, ?, ?, ?)");
          $sth->execute($memoryu->{userid}, $jid, $dbitemid, $des, $sec);
          $memid = $dbh->{'mysql_insertid'};
-         LJ::MemCache::delete([$memoryu->{userid}, "memct:$memoryu->{userid}"]);
+         LJ::MemCache::delete($memkey);
      }
      if (@kwid) {
          my $sql = "INSERT IGNORE INTO memkeyword (memid, kwid) VALUES ";
