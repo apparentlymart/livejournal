@@ -386,15 +386,15 @@ body<=
              $ret .= $post->{'body'};
 
              $ret .= "<p style='margin: 0.7em 0 0.2em 0'><font size='-2'>";
-             my $replyurl = LJ::Talk::talkargs("replyto=$dtid", $stylemine);
+             my $replyurl = LJ::Talk::talkargs($talkurl, "replyto=$dtid", $stylemine);
              $ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
              
              if ($post->{'parenttalkid'} != 0) {
                  my $dpid = $post->{'parenttalkid'} * 256 + $init->{'anum'};
-                 $ret .= "(<a href='" . LJ::Talk::talkargs("thread=$dpid", $stylemine) . "'>$T{'parent'}</a>) ";
+                 $ret .= "(<a href='" . LJ::Talk::talkargs($talkurl, "thread=$dpid", $stylemine) . "'>$T{'parent'}</a>) ";
              }
              if ($post->{'children'} && @{$post->{'children'}}) {
-                 my $url = LJ::Talk::talkargs("thread=$dtid", $stylemine);
+                 my $url = LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine);
                  $ret .= "(<a href='$url'>$T{'thread'}</a>)";
              }
              $ret .= "</font></p>";
@@ -404,7 +404,7 @@ body<=
 
              $ret .= "<a name='t$dtid'></a><table><tr>";
              $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-             $ret .= "<td><a href='" . LJ::Talk::talkargs("thread=$dtid", $stylemine) . "'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
+             $ret .= "<td><a href='" . LJ::Talk::talkargs($talkurl, "thread=$dtid", $stylemine) . "'>" . LJ::ehtml($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
          }
      }
      
