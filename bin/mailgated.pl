@@ -5,159 +5,201 @@
 # </LJDEP>
 
 use strict;
-use vars qw($opt $mailspool $pidfile $workdir $maxloop
-            $pid $hostname $busy $stop $locktype);
-
+use IO::Socket;
 use Getopt::Long;
 use Sys::Hostname;
-use MIME::Parser;
-use Mail::Address;
-use Unicode::MapUTF8 ();
-use File::Temp ();
-use File::Path ();
 use POSIX 'setsid';
-require "$ENV{'LJHOME'}/cgi-bin/ljemailgateway.pl";
-require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
+use Proc::ProcessTable;
+
+# listener globals
+use vars qw($s $c $pid $opt $no_listen);
+# worker globals
+use vars qw($mailspool $workdir $maxloop
+            $hostname $busy $stop $locktype);
+$opt = {};
+GetOptions $opt, qw/foreground workdir=s lock=s maxloop=s/;
+$SIG{$_} = \&stop_daemon foreach qw/INT TERM/;
 
 # mailspool should match the MTA delivery location.
 $mailspool = $LJ::MAILSPOOL || "$ENV{'LJHOME'}/mail";
-
 $hostname = $1 if hostname() =~ /^(\w+)/;
-$SIG{$_} = \&stop_daemon foreach qw/INT TERM/;
-$| = 1;
-
-$opt = {};
-GetOptions $opt, qw/stop foreground workdir pidfile lock=s maxloop/;
 
 # setup defaults
 $locktype = $opt->{'lock'}   || "hostname";
-die "Invalid lock mechanism specified."
+die "Invalid lock mechanism specified.\n"
     unless $locktype =~ /hostname|none|ddlockd/i;
 $workdir = $opt->{'workdir'} || "$mailspool/tmp";
-$pidfile = $opt->{'pidfile'} || "/var/run/mailgated.pid";
 $maxloop = $opt->{'maxloop'} || 100;
 
 # Maildir expected.
 die "Invalid mailspool: $mailspool\n" unless -d "$mailspool/new";
 $mailspool .= '/new';
 
-if (-e $pidfile) {
-    open (PID, $pidfile);
-    chomp ($pid = <PID>);
-    close PID;
-}
-
-# shutdown existing daemon?
-if ($opt->{'stop'}) {
-    if (kill 15, $pid) {
-        print "Shutting down mailgated.";
-    } else {
-        print "Mailgated not running?\n";
-        exit 0;
-    }
-
-    # display something while we're waiting for a 
-    # busy mailgate to shutdown
-    while (kill 0, $pid) { sleep 1 && print '.'; }
-    print "\n";
-    exit 0;
-}
-
-die "Mailgated already running?\n" . 
-    "(delete $pidfile or run with --stop if this isn't the case.)\n"
-    if ($pid && kill 0, $pid);
-
-# daemonize.
-if (!$opt->{'foreground'}) {
+# daemonize - 'nolisten' is essentially the same as foreground, 
+# without the debugging to STDERR.
+if (! $opt->{'foreground'}) {
     fork && exit 0;
     POSIX::setsid() || die "Unable to become session leader: $!\n";
-
-    $pid = fork;
-    die "Couldn't fork.\n" unless defined $pid;
     umask 0;
     chdir('/');
 
-    if ($pid != 0) {  # we are the parent
-        unless (open (PID, ">$pidfile")) {
-            kill 15, $pid;
-            die "Couldn't write PID file.  Exiting.\n";
-        }
-        print PID $pid, "\n";
-        close PID;
-        print "mailgate started with pid: $pid\n";
+    $pid = fork;
+    die "Couldn't fork.\n" unless defined $pid;
+
+    unless ($pid) {
+        close STDIN  && open STDIN, "</dev/null";
+        close STDOUT && open STDOUT, "+>&STDIN";
+        close STDERR && open STDERR, "+>&STDIN";
+        worker();
         exit 0;
     }
 
-    # we're the child from here on out.
-    close STDIN  && open STDIN, "</dev/null";
-    close STDOUT && open STDOUT, "+>&STDIN";
-    close STDERR && open STDERR, "+>&STDIN";
+    print "mailgate started with pid: $pid\n";
+
+    $s = IO::Socket::INET->new(
+            Type      => SOCK_STREAM,
+            ReuseAddr => 1,
+            Listen    => 2,
+            LocalPort => 15000,
+            );
+    unless ($s) {
+        kill 9, $pid;
+        die "Unable to start listener: $!\n";
+    }
+    while ($c = $s->accept()) {
+        while (<$c>) {
+            # remote commands
+
+            if (/(?:restart|reload)/i) {
+                debug("Restarting mailgated...");
+
+                # shutdown existing worker
+                # wait for it to completely exit
+                kill 15, $pid;
+                wait;
+
+                # fork, exec with fill script + original args
+                # only load the worker, no new listener
+                my $newpid = fork;
+                unless ($newpid) {
+                    worker();
+                    exit 0;
+                }
+
+                # remember the new child pid for
+                # future restarts
+                $pid = $newpid;
+                print $c "ok\n";
+            }
+
+            if (/stop/) {
+                kill 15, $pid;
+                print $c "ok\n";
+                exit 0;
+            }
+
+            if (/status/) {
+                my $t = new Proc::ProcessTable;
+                my $state;
+
+                foreach my $p ( @{$t->table} ){
+                    $state = $p->state if $p->pid == $pid;
+                }
+
+                print $c "mailgate ";
+                print $c ($state eq 'defunct') ? "down" : "running";
+                print $c "\n";
+            }
+
+            print $c "pong\n" if /ping/i;
+        }
+    }
+    # shouldn't reach this
+    close $s;
+    exit 0;
+} else {
+    worker();
+    exit 0;
 }
 
-while (1) {
-    debug("Starting loop:");
-    
-    $busy = 1;
-    cleanup();
+sub worker
+{
+    eval qw{
+        use MIME::Parser;
+        use Mail::Address;
+        use Unicode::MapUTF8 ();
+        use File::Temp ();
+        use File::Path ();
+    };
+    require "$ENV{'LJHOME'}/cgi-bin/ljemailgateway.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+    require "$ENV{'LJHOME'}/cgi-bin/sysban.pl";
+    $| = 1;
 
-    # Get list of files to process.
-    # If a file simply exists in the mailspool, it needs attention.
-    debug("\tprocess");
-    opendir(MDIR, $mailspool) || die "Unable to open mailspool $mailspool: $!\n";
-    my @all_files = readdir(MDIR);
-    closedir MDIR;
+    while (1) {
+        debug("Starting loop:");
 
-    # Separate new messages from retries.
-    # Hostname as part of the filename is Maildir specification -
-    # use 'hostname' locking to be safe across NFS.
-    my (@new_messages, @retry_messages);
-    foreach (@all_files) {
-        next if /^\./;
-        next if $locktype eq 'hostname' && ! /\.$hostname\b/;
-        if (get_pcount($_) == 0) { # new message
-            push @new_messages, $_;
-        } else {                   # message retry
-            push @retry_messages, $_;
-        }
-    }
+        $busy = 1;
+        cleanup();
 
-    # Make sure at least half of our processesing
-    # queue is made up of new messages.
-    # Randomize, so if we're running multiple mailgated
-    # processess, they'll be more likely to be working on
-    # different messages.
-    rand_array(\@retry_messages, int($maxloop / 2)); # half queue max
-    # fill the rest of the queue with new messages.
-    rand_array(\@new_messages, $maxloop - (scalar @retry_messages));
+        # Get list of files to process.
+        # If a file simply exists in the mailspool, it needs attention.
+        debug("\tprocess");
+        opendir(MDIR, $mailspool) || die "Unable to open mailspool $mailspool: $!\n";
+        my @all_files = readdir(MDIR);
+        closedir MDIR;
 
-    # do the work
-    foreach (@new_messages, @retry_messages) {
-        my $lock;
-        if (get_pcount($_) % 20 == 0) {  # only retry every 20th iteration
-            if (lc($locktype) eq 'ddlockd') {
-                $lock = LJ::locker()->trylock("mailgated-$_");
-                next unless $lock;
+        # Separate new messages from retries.
+        # Hostname as part of the filename is Maildir specification -
+        # use 'hostname' locking to be safe across NFS.
+        my (@new_messages, @retry_messages);
+        foreach (@all_files) {
+            next if /^\./;
+            next if $locktype eq 'hostname' && ! /\.$hostname\b/;
+            if (get_pcount($_) == 0) { # new message
+                push @new_messages, $_;
+            } else {                   # message retry
+                push @retry_messages, $_;
             }
-            process($_);
-        } else {
-            set_pcount($_);
         }
-	exit 0 if $stop;
+
+        # Make sure at least half of our processesing
+        # queue is made up of new messages.
+        # Randomize, so if we're running multiple mailgated
+        # processess, they'll be more likely to be working on
+        # different messages.
+        rand_array(\@retry_messages, int($maxloop / 2)); # half queue max
+        # fill the rest of the queue with new messages.
+        rand_array(\@new_messages, $maxloop - (scalar @retry_messages));
+
+        # do the work
+        foreach (@new_messages, @retry_messages) {
+            my $lock;
+            if (get_pcount($_) % 20 == 0) {  # only retry every 20th iteration
+                if (lc($locktype) eq 'ddlockd') {
+                    $lock = LJ::locker()->trylock("mailgated-$_");
+                    next unless $lock;
+                }
+                process($_);
+            } else {
+                set_pcount($_);
+            }
+            exit 0 if $stop;
+        }
+
+        $busy = 0;
+        debug("\tdone\n");
+
+        # sleep for a bit if we finished reading the directory
+        sleep ($opt->{'foreground'} ? 3 : 10);
     }
-
-    $busy = 0;
-    debug("\tdone\n");
-
-    # sleep for a bit if we finished reading the directory
-    sleep ($opt->{'foreground'} ? 3 : 10);
 }
 
 sub stop_daemon
 { 
     # signal safe since it's not run when in daemon mode:
-    debug("Shutting down...\n");  
+    debug("Shutting down...\n");
 
     exit 0 unless $busy;
     $stop = 1;
