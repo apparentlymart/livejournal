@@ -405,10 +405,10 @@ body<=
     {
         $ret .= "<?standout <b>Important Notes:</b>";
         $ret .= "<ul>";
-        $ret .= "<li>Before answering somebody's question, read the <b><a href='$LJ::SITEROOT/doc/find?guide=support'>support guide</a></b>.";
-        $ret .= "<li>Do <b>NOT</b> answer people if you're not sure of your answer.  Don't answer if your solution is just a guess.  Only answer if you really know what you're talking about ... guessing only makes other people in the support area think you might be right and spread the misinformation further, until it's accepted as truth.";
+        $ret .= "<li>Before answering somebody's question, read the <b><a href='$LJ::SITEROOT/doc/guide/support.bml'>support guide</a></b>.</li>";
+        $ret .= "<li>Do <b>NOT</b> answer people if you're not sure of your answer.  Don't answer if your solution is just a guess.  Only answer if you really know what you're talking about ... guessing only makes other people in the support area think you might be right and spread the misinformation further, until it's accepted as truth.</li>";
         if ($LJ::LJDOTCOM) {
-            $ret .= "<li>Never recommend asking someone else, or somewhere else.  That qualifies as not knowing the answer.  If a support request is open for a day or two, one of the support leaders will find out the answer and reply, and likely post about it in <?ljuser lj_support ljuser?> so all the support people will know the answer in the future.";
+            $ret .= "<li>Never recommend asking someone else, or somewhere else.  That qualifies as not knowing the answer.  If a support request is open for a day or two, one of the support leaders will find out the answer and reply, and likely post about it in <?ljuser lj_support ljuser?> so all the support people will know the answer in the future.</li>";
         }
         $ret .= "</ul>Thanks! standout?>\n";
     }
