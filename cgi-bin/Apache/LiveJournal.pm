@@ -55,9 +55,13 @@ sub handler
     }
 
     $r->set_handlers(PerlTransHandler => [ \&trans ]);
-    $r->set_handlers(PerlCleanupHandler => [ sub { %RQ = () },
-                                             "Apache::LiveJournal::db_logger",
-                                             "LJ::end_request", ]);
+
+    # um, this was set_handlers before, but that stopped working.  if
+    # somebody could please expain to me the bizarre interactions
+    # between push_handlers and set_handlers, i'd be ecstatic.
+    $r->push_handlers(PerlCleanupHandler => sub { %RQ = () });
+    $r->push_handlers(PerlCleanupHandler => "Apache::LiveJournal::db_logger");
+    $r->push_handlers(PerlCleanupHandler => "LJ::end_request");
 
     # if we're behind a lite mod_proxy front-end, we need to trick future handlers
     # into thinking they know the real remote IP address.  problem is, it's complicated
