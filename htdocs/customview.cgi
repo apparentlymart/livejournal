@@ -37,7 +37,6 @@ while(LJ::start_request() &&
 
     my $data = (LJ::make_journal($dbs, $user, "", $remote,
 				 { "nocache" => $FORM{'nocache'}, 
-				   "contesttheme" => $FORM{'contesttheme'},
 				   "vhost" => "customview",
 				   "nooverride" => $nooverride,
 				   "styleid" => $styleid,
