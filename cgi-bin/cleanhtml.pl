@@ -180,12 +180,12 @@ sub clean
                     }
 
                     if ($attr eq 'style' && $opts->{'cleancss'}) {
-                        my $attr = $hash->{$attr};
+                        my $value = $hash->{$attr};
                         # css2 spec, section 4.1.3
                         # position === p\osition  :(
-                        $attr =~ s/\\//g;
+                        $value =~ s/\\//g;
                         foreach my $css (qw(absolute relative fixed)) {
-                            if ($hash->{$attr} =~ /$css/i) {
+                            if ($value =~ /$css/i) {
                                 delete $hash->{$attr};
                                 last;
                             }
