@@ -19,7 +19,6 @@ use Digest::MD5 ();
 use Text::Wrap ();
 use MIME::Lite ();
 use HTTP::Date ();
-use IO::Socket ();
 use Unicode::MapUTF8 ();
 use LJ::S2;
 use Time::Local ();
