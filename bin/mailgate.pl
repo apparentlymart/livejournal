@@ -154,6 +154,39 @@ if ($toarg =~ /^(\d+)z(.+)$/)
     exit 0;
 }
 
+# Now see if we want to ignore this particular post and bounce it back with
+# the contents from a file.  Check $LJ::DENY_REQUEST_FROM_EMAIL first.  Note
+# that this will only bounce initial comments; if a user replies to an email
+# from a request that's open, it'll be accepted above.
+my $file = $LJ::DENY_REQUEST_FROM_EMAIL{$to};
+my $full = "$ENV{'LJHOME'}/$file";
+if ($file && -e $full) {
+    # okay, open file to bounce with
+    open FILE, "<$full";
+    my $lines = join("", <FILE>);
+    close FILE;
+
+    # construct mail to send to user
+    my $email = <<EMAIL_END;
+$lines
+
+Your original message:
+
+$body
+EMAIL_END
+
+    # send the message
+    LJ::send_mail({
+        'to' => $from,
+        'from' => $LJ::BOGUS_EMAIL,
+        'subject' => "Your Email to $to",
+        'body' => $email,
+    });
+
+    # all done
+    exit 0;
+}
+
 
 # make a new post.
 my @errors;

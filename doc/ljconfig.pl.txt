@@ -426,6 +426,15 @@
     #                                  ],
     #                    };
 
+    # Setup support email address to not accept new emails.  Basically if an
+    # address is specified below, any user who emails it out of the blue will
+    # be sent back a copy of the specified file along with their email.  Users
+    # will still be allowed to respond to emails from the support system, but
+    # they can't open a request by emailing the address.
+    #%DENY_REQUEST_FROM_EMAIL = (
+    #    "abuse\@$DOMAIN" => "htdocs/inc/bounce-abuse",
+    #);
+
 }
 
 1;  # return true
