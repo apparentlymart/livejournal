@@ -11,9 +11,9 @@ p?>
 
 <?_code
 
- my $dbr = LJ::get_dbh("slave", "master");
+ my $dbr = LJ::get_db_reader();
  my ($ret, $sth);
- 
+
  # get langs
  $sth = $dbr->prepare("SELECT lnid, lncode, lnname, lastupdate FROM ml_langs");
  $sth->execute;
@@ -33,8 +33,7 @@ p?>
 
  # get people with privs
  $sth = $dbr->prepare("SELECT pm.arg, u.user FROM useridmap u, priv_list pl, priv_map pm ".
-                      "WHERE pm.userid=u.userid AND pm.prlid=pl.prlid AND pl.privcode='translate' ".
-                      "ORDER BY u.user");
+                      "WHERE pm.userid=u.userid AND pm.prlid=pl.prlid AND pl.privcode='translate'");
  $sth->execute;
  my %team;
  while (my ($arg, $user) = $sth->fetchrow_array) {
@@ -43,7 +42,7 @@ p?>
 
  $ret .= "<p><table cellpadding='5' border='1'>";
  $ret .= "<tr><th>Language</th><th>Community</th><th>Users with privs</th></tr>";
- 
+
  foreach my $l (sort { $a->{'lncode'} cmp $b->{'lncode'} } values %lang)
  {
      $ret .= "<tr valign='top' align='left'><td><b>$l->{'lnname'}</b></td>";
@@ -51,7 +50,8 @@ p?>
      $ret .= "<?ljcomm $l->{'community'} ljcomm?>" if $l->{'community'};
      $ret .= "</td><td>";
      if ($team{$l->{'lncode'}}) {
-         $ret .= join(", ", map { LJ::ljuser($_) } @{$team{$l->{'lncode'}}});
+         $ret .= join(", ", map { LJ::ljuser($_) }
+                      sort @{$team{$l->{'lncode'}}});
      }
      $ret .= "</td></tr>\n";
  }

@@ -1,11 +1,12 @@
 <?_code
 
- my $dbh = LJ::get_dbh("master");
  my $format = $FORM{'format'} || "html";
 
- my $remote = LJ::get_remote($dbh);
+ my $remote = LJ::get_remote();
  return"<b>Error:</b> You don't have access to administer databases."
- unless (LJ::check_priv($dbh, $remote, "siteadmin", "mysqlstatus"));
+ unless (LJ::check_priv($remote, "siteadmin", "mysqlstatus"));
+
+ my $dbh = LJ::get_db_writer();
 
  if ($format eq "text") {
      BML::set_content_type("text/plain");
