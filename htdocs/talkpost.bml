@@ -112,7 +112,7 @@ body<=
         return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
     }
 
-    my %logprops = %{$item->{'logprops'}};
+    my $props = $item->{'props'};
 
     my $ditemid = $init->{'ditemid'};
 
@@ -146,7 +146,7 @@ body<=
     return $errtxt unless LJ::Talk::check_viewable($dbs, $remote, $item, \%FORM, \$errtxt);
     
     my $event = $FORM{'replyto'} eq "" ? $item->{'event'} : $parpost->{'body'};
-    my $preformatted = $FORM{'replyto'} eq "" ? $logprops{$itemid}->{'opt_preformatted'} : $parpost->{'opt_preformatted'};
+    my $preformatted = $FORM{'replyto'} eq "" ? $props->{'opt_preformatted'} : $parpost->{'opt_preformatted'};
 
     LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
     LJ::CleanHTML::clean_event(\$event, $preformatted);
@@ -154,7 +154,7 @@ body<=
 
     $ret .= "<table><tr valign='middle'>";
     my $picid;
-    my $pickw = $init->{'replyto'} ? $parpost->{'picture_keyword'} : $logprops{$itemid}->{'picture_keyword'};
+    my $pickw = $init->{'replyto'} ? $parpost->{'picture_keyword'} : $props->{'picture_keyword'};
 
     if ($pickw) {
         my $qkw = $dbr->quote($pickw);
@@ -215,13 +215,13 @@ body<=
     }
     
     my %current;
-    if ($logprops{$itemid}->{'current_mood'} || 
-        $logprops{$itemid}->{'current_moodid'}) 
+    if ($props->{'current_mood'} || 
+        $props->{'current_moodid'}) 
     {
         LJ::load_moods($dbs);
-          $current{'Mood'} = $logprops{$itemid}->{'current_mood'};
+          $current{'Mood'} = $props->{'current_mood'};
           LJ::CleanHTML::clean_subject(\$current{'Mood'});
-          my $mid = $logprops{$itemid}->{'current_moodid'};
+          my $mid = $props->{'current_moodid'};
           if ($mid) {
               my $theme = $up->{'moodthemeid'};
               LJ::load_mood_theme($dbs, $theme);
@@ -235,8 +235,8 @@ body<=
               }
           }
       }
-    if ($logprops{$itemid}->{'current_music'}) {
-        $current{'Music'} = $logprops{$itemid}->{'current_music'};
+    if ($props->{'current_music'}) {
+        $current{'Music'} = $props->{'current_music'};
         LJ::CleanHTML::clean_subject(\$current{'Music'});
     }
     
@@ -294,7 +294,7 @@ body<=
     $ret .= "<p align='center' class='lesstop'><b>(<a href=\"$readurl\">$ML{'talk.commentsread'}</a>)</b></p>";
     
     # can a comment even be made?
-    if ($logprops{$itemid}->{'opt_nocomments'}) {
+    if ($props->{'opt_nocomments'}) {
         $ret .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.error.nocommentspost'} p?>";
         return $ret;
     }

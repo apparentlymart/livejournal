@@ -67,7 +67,7 @@ body<=
         return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
     }
 
-    my %logprops = %{$item->{'logprops'}};
+    my $iprops = $item->{'props'};
     my $ditemid = $init->{'ditemid'}+0;
 
     my $talkurl = LJ::journal_base($u) . "/$ditemid.html";
@@ -193,7 +193,7 @@ body<=
         push @errors, $ML{'.error.noanon'};
     }
 
-    if ($logprops{$itemid}->{'opt_nocomments'}) {
+    if ($iprops->{'opt_nocomments'}) {
         push @errors, $ML{'.error.nocomments'};
     }
 
@@ -641,7 +641,7 @@ body<=
 
         # send mail to journal owner
         if ($ujp->{'opt_gettalkemail'} eq "Y" &&
-            !$logprops{$itemid}->{'opt_noemail'} &&
+            !$iprops->{'opt_noemail'} &&
             $userpost ne $ujp->{'user'} &&
             $ujp->{'email'} ne $parentmailed &&
             $ujp->{'status'} eq "A") 
@@ -711,7 +711,7 @@ body<=
             } else {
                 $html .= "<table><tr valign='top'><td>$whopic</td><td width='100%'><b>$who</b>$whouserhtml replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which you said:</td></tr></table>\n";
                 my $clean = $item->{'event'};
-                LJ::CleanHTML::clean_event(\$clean, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'}});
+                LJ::CleanHTML::clean_event(\$clean, { 'preformatted' => $iprops->{'opt_preformatted'}});
                 $html .= &blockquote($clean);
             }
             $html .= "\n\nTheir reply was:\n\n";
