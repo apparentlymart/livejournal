@@ -27,7 +27,6 @@ use Storable ();
 use Compress::Zlib ();
 use IO::Socket::INET qw{};
 use DDLockClient ();
-use MogileFS;
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
@@ -70,16 +69,6 @@ $LJ::DBIRole = new DBI::Role {
     'time_check' => 60,
     'time_report' => \&dbtime_callback,
 };
-
-# create our MogileFS object
-if (%LJ::MOGILEFS_CONFIG && $LJ::MOGILEFS_CONFIG{hosts}) {
-    $LJ::MogileFS = new MogileFS (
-                                  domain => $LJ::MOGILEFS_CONFIG{domain},
-                                  root   => $LJ::MOGILEFS_CONFIG{root},
-                                  hosts  => $LJ::MOGILEFS_CONFIG{hosts},
-                                  )
-        or die "Could not initialize MogileFS";
-}
 
 LJ::MemCache::init();
 
@@ -241,6 +230,24 @@ sub locker {
 			  servers => [ @LJ::LOCK_SERVERS ],
 			  lockdir => $LJ::LOCKDIR || "$LJ::HOME/locks",
 			  );
+}
+
+sub mogclient {
+    return $LJ::MogileFS if $LJ::MogileFS;
+
+    if (%LJ::MOGILEFS_CONFIG && $LJ::MOGILEFS_CONFIG{hosts}) {
+        eval "use MogileFS;";
+        die "Couldn't load MogileFS: $@" if $@;
+
+        $LJ::MogileFS = new MogileFS (
+                                      domain => $LJ::MOGILEFS_CONFIG{domain},
+                                      root   => $LJ::MOGILEFS_CONFIG{root},
+                                      hosts  => $LJ::MOGILEFS_CONFIG{hosts},
+                                      )
+            or die "Could not initialize MogileFS";
+    }
+
+    return $LJ::MogileFS;
 }
 
 # <LJFUNC>
@@ -4186,8 +4193,8 @@ sub start_request
                 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
 
                 # reload MogileFS config
-                if ($LJ::MogileFS) {
-                    $LJ::MogileFS->reload
+                if (LJ::mogclient()) {
+                    LJ::mogclient()->reload
                         ( domain => $LJ::MOGILEFS_CONFIG{domain},
                           root   => $LJ::MOGILEFS_CONFIG{root},
                           hosts  => $LJ::MOGILEFS_CONFIG{hosts}, );

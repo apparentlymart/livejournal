@@ -665,7 +665,7 @@ sub userpic_content
             my $memkey = [$picid, "mogp.up.$picid"];
             my $paths = LJ::MemCache::get($memkey);
             unless ($paths) {
-                my @paths = $LJ::MogileFS->get_paths( $key, 1 );
+                my @paths = LJ::mogclient()->get_paths( $key, 1 );
                 $paths = \@paths;
                 LJ::MemCache::add($memkey, $paths, 3600) if @paths;
             }
@@ -684,7 +684,7 @@ sub userpic_content
         }
 
         else {
-            my $data = $LJ::MogileFS->get_file_data( $key );
+            my $data = LJ::mogclient()->get_file_data( $key );
             return NOT_FOUND unless $data;
             $size = length $$data;
             $send_headers->();

@@ -166,13 +166,13 @@ sub get_visual_data
     return undef unless $valid;
 
     if ($location eq 'mogile') {
-        die "MogileFS object not loaded.\n" unless $LJ::MogileFS;
+        die "MogileFS object not loaded.\n" unless LJ::mogclient();
         if ($want_paths) {
             # return path(s) to the content if they want
-            my @paths = $LJ::MogileFS->get_paths("captcha:$capid");
+            my @paths = LJ::mogclient()->get_paths("captcha:$capid");
             return \@paths;
         } else {
-            $data = ${$LJ::MogileFS->get_file_data("captcha:$capid")};
+            $data = ${LJ::mogclient()->get_file_data("captcha:$capid")};
         }
     } else {
         $u = LJ::load_user( "system" )
@@ -215,13 +215,13 @@ sub get_audio_data
     return undef unless $valid;
 
     if ($location eq 'mogile') {
-        die "MogileFS object not loaded.\n" unless $LJ::MogileFS;
+        die "MogileFS object not loaded.\n" unless LJ::mogclient();
         if ($want_paths) {
             # return path(s) to the content if they want
-            my @paths = $LJ::MogileFS->get_paths("captcha:$capid");
+            my @paths = LJ::mogclient()->get_paths("captcha:$capid");
             return \@paths;
         } else {
-            $data = ${$LJ::MogileFS->get_file_data("captcha:$capid")};
+            $data = ${LJ::mogclient()->get_file_data("captcha:$capid")};
         }
     } else {
         $u = LJ::load_user( "system" )

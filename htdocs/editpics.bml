@@ -211,7 +211,7 @@
                     # and only after deleting the image do we delete the metadata.
                     if ($locations{$picid} eq 'mogile') {
                         $deleted = 1
-                            if $LJ::MogileFS->delete($u->mogfs_userpic_key($picid));
+                            if LJ::mogclient()->delete($u->mogfs_userpic_key($picid));
                     } elsif ($LJ::USERPIC_BLOBSERVER &&
                         LJ::Blob::delete($u, "userpic", $fmt, $picid)) {
                         $deleted = 1;
@@ -244,7 +244,7 @@
                     if (! $deleted) {
                         my $present;
                         if ($locations{$picid} eq 'mogile') {
-                            my $blob = $LJ::MogileFS->get_file_data($u->mogfs_userpic_key($picid));
+                            my $blob = LJ::mogclient()->get_file_data($u->mogfs_userpic_key($picid));
                             $present = length($blob) ? 1 : 0;
                         } elsif ($LJ::USERPIC_BLOBSERVER) {
                             my $blob = LJ::Blob::get($u, "userpic", $fmt, $picid);
@@ -478,7 +478,7 @@
 
                 ### insert the blob
                 if ($target eq 'mogile' && !$dberr) {
-                    my $fh = $LJ::MogileFS->new_file($u->mogfs_userpic_key($picid), 'userpics');
+                    my $fh = LJ::mogclient()->new_file($u->mogfs_userpic_key($picid), 'userpics');
                     if (defined $fh) {
                         $fh->print($POST{'userpic'});
                         my $rv = $fh->close;

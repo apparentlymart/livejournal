@@ -127,6 +127,12 @@ foreach my $c (@LJ::CLUSTERS) {
     $err->("Couldn't get db handle for cluster \#$c");
 }
 
+if (%LJ::MOGILEFS_CONFIG && $LJ::MOGILEFS_CONFIG{hosts}) {
+    print "[Checking MogileFS client.]\n";
+    my $mog = LJ::mogclient();
+    die "Couldn't create mogilefs client." unless $mog;
+}
+
 print "All good.\n";
 print "NOTE: checkconfig.pl doesn't check everything yet\n";
 

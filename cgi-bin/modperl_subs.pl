@@ -27,6 +27,7 @@ use LJ::TextMessage;
 use LJ::Blob;
 use LJ::Captcha;
 use SafeAgent;
+use MogileFS qw(+preload);
 
 # Try to load GTop library
 BEGIN { $LJ::HAVE_GTOP = eval "use GTop (); 1;" }
