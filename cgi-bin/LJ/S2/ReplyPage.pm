@@ -211,7 +211,7 @@ sub ReplyForm__print
     # Subject Icon toggle button
     {
         $ret .= "<input type='hidden' id='subjectIconField' name='subjecticon' value='none'>\n";
-        $ret .= "<script type='text/javascript' langauage='Javascript'>\n";
+        $ret .= "<script type='text/javascript' language='Javascript'>\n";
         $ret .= "<!--\n";
         $ret .= "document.write(\"";
         $ret .=  LJ::Talk::show_none_image("id='subjectIconImage' style='cursor:hand' align='absmiddle' ".
