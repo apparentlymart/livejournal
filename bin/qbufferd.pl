@@ -153,6 +153,7 @@ while(not $working) {
             $jobs{$child} = $job;
         } else {
             # child.
+            $0 .= " [$job]";
             $my_job = $job;
             $working = 1; # go work
         }
