@@ -275,7 +275,8 @@ body<=
          open (TOS, "$LJ::HOME/htdocs/inc/legal-tos");
          while (! $rev) {
              my $line = <TOS>;
-             if ($line =~ /\$Revision$/) {
+             my $rcstag = "Revision";
+             if ($line =~ /\$$rcstag:\s*(\S+)\s*\$/) {
                  $rev = $1;
              }
          }
