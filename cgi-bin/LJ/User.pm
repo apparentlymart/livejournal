@@ -268,7 +268,7 @@ sub mogfs_userpic_key {
     my $pic = shift or croak "missing required arg: userpic";
 
     my $picid = ref $pic ? $pic->{picid} : $pic+0;
-    return "userpic:$self->{userid}:$picid";
+    return "up:$self->{userid}:$picid";
 }
 
 # all reads/writes to talk2 must be done inside a lock, so there's
