@@ -457,6 +457,8 @@ BODY<=
          }
      }
 
+     $FORM{'name'} =~ s/[\n\r]//g;
+
      my $has_bio = ($FORM{'bio'} =~ /\S/) ? "Y" : "N";
      my $txtmsg_status = $FORM{'use_txtmsg'} ? "on" : "off";
      # setup what we're gonna update in the user table:

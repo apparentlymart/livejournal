@@ -89,6 +89,7 @@ BODY<=
      
      my $user = LJ::canonical_username($FORM{'user'});
      my $name = $FORM{'name'};
+     $name =~ s/[\n\r]//g;
      my $email = LJ::trim(lc($FORM{'email'}));
 
      $connect_db->();
