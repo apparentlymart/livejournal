@@ -21,6 +21,7 @@
  my $extrawhere = $FORM{'comm'} ? "AND u.user=$qcomm" : "AND c.userid=$cuserid";
  my $ci = $dbr->selectrow_hashref("SELECT u.user, u.userid, u.name, c.membership, c.postlevel ".
                                   "FROM user u, community c WHERE u.userid=c.userid $extrawhere");
+ my $ecname = LJ::ehtml($ci->{'name'});
 
  ### does this community even exist?
  ###
@@ -41,7 +42,7 @@
                         $remote->{'userid'}, $ci->{'userid'});
      }
      
-     $body .= "<?h1 $ML{'.success'} h1?><?p ".BML::ml('.label.removed',{'commuser'=>$ci->{'user'},'commname'=>$ci->{'name'}})." p?>";
+     $body .= "<?h1 $ML{'.success'} h1?><?p ".BML::ml('.label.removed',{'commuser'=>$ci->{'user'},'commname'=>$ecname})." p?>";
 
      LJ::clear_rel($ci, $remote, 'P');
      LJ::clear_rel($ci, $remote, 'N');
@@ -49,7 +50,7 @@
  }   
  else 
  {
-     $body .= "<?h1 $ML{'.sure'} h1?><?p " . BML::ml('.label.buttontoleave', {'commname' => $ci->{'name'}}) . " p?>";
+     $body .= "<?h1 $ML{'.sure'} h1?><?p " . BML::ml('.label.buttontoleave', {'commname' => $ecname}) . " p?>";
      $body .= '<form method="post" action="leave.bml">';
      $body .= LJ::html_hidden("cuserid", $ci->{'userid'}, "confirm", 1) . "<p align='center'>";
      $body .= LJ::html_check({ name => 'removefriend', 'selected' => 1, value => 1 }) . " ";
