@@ -1647,7 +1647,7 @@ sub auth_okay
     }
     
     ## LJ default authorization:
-    return 1 if ($md5 && $md5 eq LJ::hash_password($actual));
+    return 1 if ($md5 && lc($md5) eq LJ::hash_password($actual));
     return 1 if ($clear eq $actual);
     return 0;
 }
