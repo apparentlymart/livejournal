@@ -3159,7 +3159,7 @@ sub html_datetime
     my $ret;
     my $name = $opts->{'name'};
     my $disabled = $opts->{'disabled'} ? "DISABLED" : "";
-    if ($opts->{'default'} =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d):(\d\d))/) {
+    if ($opts->{'default'} =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d):(\d\d))?/) {
         ($yyyy, $mm, $dd, $hh, $nn, $ss) = ($1 > 0 ? $1 : "",
                                             $2+0,
                                             $3 > 0 ? $3+0 : "",
