@@ -1886,7 +1886,7 @@ sub login_message
     }
     unless ($LJ::EVERYONE_VALID)
     {
-        if ($u->{'status'} eq "N") { $res->{'message'} = "You are currently not validated.  You may continue to use LiveJournal, but please validate your email address for continued use.  See the instructions that were mailed to you when you created your journal, or see $LJ::SITEROOT/support/ for more information."; }
+        if ($u->{'status'} eq "N") { $res->{'message'} = "You are currently not validated.  You may continue to use $LJ::SITENAME, but please validate your email address for continued use.  See the instructions that were mailed to you when you created your journal, or see $LJ::SITEROOT/support/ for more information."; }
         if ($u->{'status'} eq "T") { $res->{'message'} = "You need to validate your new email address.  Your old one was good, but since you've changed it, you need to re-validate the new one.  Visit the support area for more information."; }
     }
     
