@@ -92,21 +92,24 @@ my $stmsg = sub {
     print $msg;
 };
 
-my %bufcols = ();  # table -> scalar "(foo, anothercol, lastcol)" or undef or ""
-my %bufrows = ();  # table -> [ []+ ]
+my %bufcols = ();  # db|table -> scalar "(foo, anothercol, lastcol)" or undef or ""
+my %bufrows = ();  # db|table -> [ []+ ]
+my %bufdbmap = (); # scalar(DBI hashref) -> DBI hashref
 
 my $flush_buffer = sub {
-    my $table = shift;
-    return unless exists $bufcols{$table};
-    my $sql = "REPLACE INTO $table $bufcols{$table} VALUES ";
+    my $dbandtable = shift;
+    my ($db, $table) = split(/\|/, $dbandtable);
+    $db = $bufdbmap{$db};
+    return unless exists $bufcols{$dbandtable};
+    my $sql = "REPLACE INTO $table $bufcols{$dbandtable} VALUES ";
     $sql .= join(", ",
                  map { my $r = $_;
                        "(" . join(", ",
-                                  map { $dbch->quote($_) } @$r) . ")" }
-                 @{$bufrows{$table}});
-    $dbch->do($sql);
-    delete $bufrows{$table};
-    delete $bufcols{$table};
+                                  map { $db->quote($_) } @$r) . ")" }
+                 @{$bufrows{$dbandtable}});
+    $db->do($sql);
+    delete $bufrows{$dbandtable};
+    delete $bufcols{$dbandtable};
 };
 
 my $flush_all = sub {
@@ -116,15 +119,18 @@ my $flush_all = sub {
 };
 
 my $replace_into = sub {
+    my $db = ref $_[0] ? shift : $dbch;  # optional first arg
     my ($table, $cols, $max, @vals) = @_;
-    if (exists $bufcols{$table} && $bufcols{$table} ne $cols) {
-        $flush_buffer->($table);
+    my $dbandtable = scalar($db) . "|$table";
+    $bufdbmap{$db} = $db;
+    if (exists $bufcols{$dbandtable} && $bufcols{$dbandtable} ne $cols) {
+        $flush_buffer->($dbandtable);
     }
-    $bufcols{$table} = $cols;
-    push @{$bufrows{$table}}, [ @vals ];
+    $bufcols{$dbandtable} = $cols;
+    push @{$bufrows{$dbandtable}}, [ @vals ];
 
-    if (scalar @{$bufrows{$table}} > $max) {
-        $flush_buffer->($table);
+    if (scalar @{$bufrows{$dbandtable}} > $max) {
+        $flush_buffer->($dbandtable);
     }
 };
 
@@ -426,16 +432,12 @@ sub movefrom0_talkitem
     # note that poster commented here
     if ($item->{'posterid'}) {
         my $pub = $logitem->{'security'} eq "public" ? 1 : 0;
-        if ($userid == $item->{'posterid'}) {
-            $replace_into->("talkleft", "(userid, posttime, journalid, nodetype, ".
-                            "nodeid, jtalkid, publicitem)", 50,
-                            $userid, $item->{'datepostunix'}, $userid,
-                            'L', $jitemid, $jtalkid, $pub);
-        } else {
-            $dbh->do("INSERT INTO talkleft_xfp (userid, posttime, journalid, nodetype, ".
-                     "nodeid, jtalkid, publicitem) VALUES ($item->{'posterid'}, ".
-                     "UNIX_TIMESTAMP('$item->{'datepost'}'), $userid, 'L', $jitemid, $jtalkid, '$pub')");
-        }
+        my ($table, $db) = ("talkleft_xfp", $dbh);
+        ($table, $db) = ("talkleft", $dbch) if $userid == $item->{'posterid'};
+        $replace_into->($db, $table, "(userid, posttime, journalid, nodetype, ".
+                        "nodeid, jtalkid, publicitem)", 50,
+                        $userid, $item->{'datepostunix'}, $userid,
+                        'L', $jitemid, $jtalkid, $pub);
     }
 }
 
