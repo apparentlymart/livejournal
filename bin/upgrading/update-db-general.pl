@@ -1903,6 +1903,13 @@ CREATE TABLE friendgroup2 (
 )
 EOC
 
+register_tablecreate("readonly_user", <<'EOC');
+CREATE TABLE readonly_user (
+    userid      INT(10) UNSIGNED NOT NULL DEFAULT '0',
+    PRIMARY KEY (userid)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 

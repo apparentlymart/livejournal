@@ -1412,10 +1412,20 @@ sub optString {
 sub prelock {
     my JobServer::Job $self = shift;
 
+    my $dbh = LJ::get_db_writer()
+        or return 0;
+
+    # both before and after updating a user's read-only flag we add the
+    # user to the 'readonly_user' table, which is just an index onto
+    # users who /might/ be in read-only.  another cronjob can periodically
+    # clean those and make sure nobody is stranded in readonly, without
+    # resorting to a full tablescan of the user table.
+    $dbh->do("INSERT IGNORE INTO readonly_user SET userid=?", undef, $self->{userid});
     my $rval = LJ::update_user( $self->{userid},
                                 {raw => "caps = caps | (1<<$ReadOnlyCapBit)"} );
 
     if ( $rval ) {
+        $dbh->do("INSERT IGNORE INTO readonly_user SET userid=?", undef, $self->{userid});
         $self->setPrelocktime;
         $self->{options}{prelocked} = 1;
         $self->{server}->debugMsg( 4, q{Prelocked user %d}, $self->{userid} );
@@ -2050,7 +2060,7 @@ sub cmd_is_moving {
 
     if ( $job ) {
         $self->debugMsg( 3, "is_moving: Got a job for userid $userid" );
-        $msg = $job->fetchtime;
+        $msg = "1";
     } else {
         $self->debugMsg( 3, "is_moving: No job for userid $userid" );
         $msg = "0";
@@ -2058,7 +2068,6 @@ sub cmd_is_moving {
 
     return $self->okayResponse( $msg );
 }
-
 
 ### METHOD: cmd_list_jobs( undef )
 ### Command handler for the C<list_jobs> command.
