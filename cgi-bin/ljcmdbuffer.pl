@@ -219,7 +219,10 @@ sub _dirty {
 
     if ($what eq 'friends') {
         eval {
-            eval "use XMLRPC::Lite();";
+            eval {
+                use RPC::XML;
+                use RPC::XML::Client;
+            };
 
             my $u = LJ::load_userid($c->{journalid});
             my %req = ( user => $u->{user} );
@@ -227,10 +230,12 @@ sub _dirty {
             # fill in groups info
             LJ::fill_groups_xmlrpc($u, \%req);
 
-            XMLRPC::Lite
-                ->new( proxy => "$LJ::FB_SITEROOT/interface/xmlrpc",
-                       timeout => 5 )
-                ->call('FB.XMLRPC.groups_push', \%req);
+            my $res = RPC::XML::Client
+                ->new("$LJ::FB_SITEROOT/interface/xmlrpc")
+                ->send_request('FB.XMLRPC.groups_push',
+                               # FIXME: don't be lazy with the smart_encode
+                               # FIXME: log useful errors from outcome
+                               RPC::XML::smart_encode(\%req));
         };
     }
     

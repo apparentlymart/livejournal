@@ -40,6 +40,10 @@ my %modules = (
                    'deb' => 'libproc-process-perl',
                    'opt' => "Better reliability for starting daemons necessary for high-traffic installations.",
                },
+               "RPC::XML" => {
+                   'deb' => 'librpc-xml-perl',
+                   'opt' => 'Required for outgoing XMLRPC support',
+               },
                "SOAP::Lite" => {
                    'deb' => 'libsoap-lite-perl',
                    'opt' => 'Required for XML-RPC support.',
