@@ -78,7 +78,7 @@ sub make_journal
     
     if (ref $opts->{'errors'} eq "ARRAY" && @{$opts->{'errors'}}) {
         return join('', 
-                    "Errors occured processing this page:<ul>" .
+                    "Errors occured processing this page:<ul>",
                     map { "<li>$_</li>" } @{$opts->{'errors'}},
                     "</ul>");
     }
