@@ -182,7 +182,6 @@
      $body .= LJ::html_hidden(itemid => $GET{itemid});
      $body .= "</form>\n\n";
 
-     $des = LJ::ehtml($des);
      $keywords = LJ::ehtml($keywords);
      LJ::text_out(\$des);
      LJ::text_out(\$keywords);
