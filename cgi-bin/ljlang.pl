@@ -273,7 +273,7 @@ sub get_text
 {
     my ($lang, $code, $dmid, $vars) = @_;
     $dmid = int($dmid || 1);
-    $lang ||= $LJ::DEFAULT_LANGUAGE || "en";
+    $lang ||= $LJ::DEFAULT_LANG;
     load_lang_struct() unless $LS_CACHED;
     my $cache_key = "ml.${lang}.${dmid}.${code}";
     
