@@ -159,7 +159,9 @@
  # do they have the viewall priv?
  # there are no entries on this page, so we just check if they have any viewall, so viewsome
  # applies here too.  we can't see info they've hidden anyway, but we can see the page.
+ my $viewall = 0;
  if ($GET{'viewall'} && LJ::check_priv($remote, "canview")) {
+   $viewall = LJ::check_priv($remote, 'canview', '*');
    LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
                          "viewall", "userinfo: $u->{'user'}, statusvis: $u->{'statusvis'}");
  } else {
@@ -198,7 +200,8 @@
  }
 
  if ($u->{'opt_hidefriendofs'} && ! $remote_isowner) {
-     $friendsof{'load'} = 0;
+     # at this point, load should be on if viewall is on
+     $friendsof{'load'} = $viewall;
  }
 
  my @friends;
@@ -445,7 +448,7 @@ if ($u->{'journaltitle'}) {
  }
 
 
-  if ( ! $synd && $u->{'allow_infoshow'} eq "Y") {
+  if ( ! $synd && ($u->{'allow_infoshow'} eq "Y" || $viewall)) {
       if ($u->{'city'} || $u->{'state'} || $u->{'country'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr><td align='right'><b>$ML{'.label.location'}</b></td><td colspan='$span'>";
@@ -493,7 +496,7 @@ if ($u->{'journaltitle'}) {
   }
 
   if ( ! $synd && ($u->{'allow_contactshow'} eq "Y" ||
-      ($u->{'allow_contactshow'} eq "F" && $remote_isfriend)))
+      ($u->{'allow_contactshow'} eq "F" && $remote_isfriend) || $viewall))
   {
       my $mangleaddress = sub {
           my $email = shift;
@@ -729,7 +732,7 @@ if ($u->{'journaltitle'}) {
  # lists the people you don't also list as friends.  you can hide your friend of list, and leave just
  # your mutual friends list showing, or you can not split them and have both be hidden.
  unless ($synd) {
-     if ($friendsof{'loaded'} && $friendsof{'display'}) {
+     if ($friendsof{'loaded'} && ($friendsof{'display'} || $viewall)) {
          my $label;
          if (@mutual) {
              $label = $ML{'.label.mutual'};
