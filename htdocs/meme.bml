@@ -1,0 +1,32 @@
+(=_CODE
+
+ $title = "Meme Tracker";
+ $body = "";
+ 
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
+ $body .= "(=H1 Top 40 $LJ::SITENAME Memes H1=)\n";
+ $body .= "(=P The following 40 URLs are the most popular referenced URLs in the past week: P=)(=HR=)";
+
+ my $sth;
+ $sth = $dbr->prepare("SELECT url, count(*) FROM meme GROUP BY 1 ORDER BY 2 DESC LIMIT 40");
+ $sth->execute;
+
+ $body .= "<table>\n";
+ my $i = 1;
+ while (my ($url, $ct) = $sth->fetchrow_array)
+ {
+     my $eurl = LJ::ehtml($url);
+     $body  .= "<tr><td><b>$ct</b></td><td><a href='$eurl'>$eurl</a></td></tr>\n";
+ }
+ $body .= "</table>";
+ $sth->finish;
+ return "";
+ 
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)
