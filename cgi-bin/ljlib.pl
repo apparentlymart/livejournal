@@ -1483,9 +1483,13 @@ sub set_userprop
             return 0 if $dbh->err;
 
             # put data in cluster
+            $pvalue ||= '';
             $dbcm->do("REPLACE INTO userproplite2 VALUES (?, ?, ?)",
-                      undef, $userid, $propid, $pvalue || '');
+                      undef, $userid, $propid, $pvalue);
             return 0 if $dbcm->err;
+
+            # set memcache
+            LJ::MemCache::set([$userid,"uprop:$userid:$propid"], $pvalue, $expire);
         }
     }
 
