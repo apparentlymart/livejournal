@@ -1,9 +1,12 @@
 #!/usr/bin/perl
 #
 
+use strict;
+
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 
 my $dbr = LJ::get_dbh("slave");
+my $sth;
 
 sub magic_links
 {
@@ -58,8 +61,9 @@ sub dump_xml
     print "</dbschema>\n";
 }
 
-
 my %table;
+my %coldes;
+
 $sth = $dbr->prepare("SHOW TABLES");
 $sth->execute;
 while (my ($table) = $sth->fetchrow_array) {
@@ -69,7 +73,7 @@ while (my ($table) = $sth->fetchrow_array) {
 $sth = $dbr->prepare("SELECT tablename, public_browsable, des FROM schematables");
 $sth->execute;
 while (my ($name, $public, $des) = $sth->fetchrow_array) {
-    next unless (defined $table{$table});
+    next unless (defined $table{$name});
     $table{$name} = { 'public' => $public, 'des' => $des };
 }
 
