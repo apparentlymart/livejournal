@@ -143,8 +143,8 @@ body<=
          $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='closed' AND " .
                               "s.timeclosed>UNIX_TIMESTAMP()-(3600*24) $filterwhere");
      } elsif ($state eq "youreplied") {
-         $sth = $dbr->prepare("SELECT s.* FROM support s, supportlog sl " .
-                              "WHERE s.spid=sl.spid AND sl.userid=$remote->{'userid'} $filterwhere " .
+         $sth = $dbr->prepare("SELECT s.* FROM support s, support_youreplied yr " .
+                              "WHERE yr.userid=$remote->{'userid'} AND s.spid=yr.spid $filterwhere " .
                               "AND (s.state='open' OR (s.state='closed' AND s.timeclosed>UNIX_TIMESTAMP()-(3600*24)))");
      } else { # triggers on green, open
          $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='open' $filterwhere");

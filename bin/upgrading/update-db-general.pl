@@ -1930,6 +1930,14 @@ CREATE TABLE underage (
 )
 EOC
 
+register_tablecreate("support_youreplied", <<'EOC');
+CREATE TABLE support_youreplied (
+    userid  INT UNSIGNED NOT NULL,
+    spid    INT UNSIGNED NOT NULL,
+    PRIMARY KEY (userid, spid)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 

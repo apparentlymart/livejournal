@@ -490,9 +490,9 @@ sub file_request
     };
     $add_data->($_, $o->{$_}) foreach qw(uniq useragent);
     $dbh->do("INSERT INTO supportprop (spid, prop, value) VALUES " . join(',', @data));
-        
-    $sth = $dbh->prepare("INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) VALUES (NULL, $spid, UNIX_TIMESTAMP(), 'req', 0, $qrequserid, $qbody)");
-    $sth->execute;
+
+    $dbh->do("INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) ".
+             "VALUES (NULL, $spid, UNIX_TIMESTAMP(), 'req', 0, $qrequserid, $qbody)");
 
     my $body;
     my $miniauth = mini_auth({ 'authcode' => $authcode });
@@ -578,6 +578,26 @@ sub append_request
     my $sql = "INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) VALUES (NULL, $spid, UNIX_TIMESTAMP(), $qtype, $qfaqid, $quserid, $qmessage)";
     $dbh->do($sql);
     my $splid = $dbh->{'mysql_insertid'};
+
+    if ($posterid) {
+        # add to our index of recently replied to support requests per-user.
+        $dbh->do("INSERT IGNORE INTO support_youreplied (userid, spid) VALUES (?, ?)", undef,
+                 $posterid, $spid);
+        die $dbh->errstr if $dbh->err;
+
+        # and also lazily clean out old stuff:
+        $sth = $dbh->prepare("SELECT s.spid FROM support s, support_youreplied yr ".
+                             "WHERE yr.userid=? AND yr.spid=s.spid AND s.state='closed' ".
+                             "AND s.timeclosed < UNIX_TIMESTAMP() - 3600*72");
+        $sth->execute($posterid);
+        my @to_del;
+        push @to_del, $_ while ($_) = $sth->fetchrow_array;
+        if (@to_del) {
+            my $in = join(", ", map { $_ + 0 } @to_del);
+            $dbh->do("DELETE FROM support_youreplied WHERE userid=? AND spid IN ($in)",
+                     undef, $posterid);
+        }
+    }
 
     # attempt to buffer job to send email (but don't care if it fails)
     LJ::do_to_cluster(sub {
