@@ -96,11 +96,6 @@ sub shared
         push @$out, [ "error", "Target user can't be shared journal user." ];
     }
     
-    if (LJ::check_rel($shared_id, $target_id, 'P')) {
-        $error = 1;
-        push @$out, [ "error", "User \"$target->{'user'}\" already has posting access to this shared journal." ];
-    }
-
     unless (LJ::check_rel($shared_id, $remote, 'A') ||
             $remote->{'privarg'}->{'sharedjournal'}->{'*'}) 
     {
@@ -111,6 +106,10 @@ sub shared
     return 0 if ($error);    
     
     if ($action eq "add") {
+        if (LJ::check_rel($shared_id, $target_id, 'P')) {
+            push @$out, [ "error", "User \"$target->{'user'}\" already has posting access to this shared journal." ];
+            return 0;
+        }
         # don't send request if the admin is giving themselves posting access
         if ($target->{'user'} eq $remote->{'user'}) {
             LJ::set_rel($shared, $target, 'P');
