@@ -14,6 +14,7 @@ use Digest::MD5 qw(md5_hex);
 use Text::Wrap;
 use MIME::Lite;
 use HTTP::Date qw();
+use IO::Socket;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
@@ -482,6 +483,55 @@ sub register_authaction
 		 'authcode' => $authcode,
 	     };
     }
+}
+
+# <LJFUNC>
+# name: LJ::send_statserv
+# des: Sends a line to the statistics server.
+# returns: Nothing.
+# args: cachename, ip, type, url
+# des-cachename: The name to cache this client under. This is can be the
+#                logged in username, the value of a guest cookie, or
+#                simply "ip" to indicate a cookie-less client.
+# des-ip: The dotted quad representing the client's IP address.
+# des-type: What type of client this is. "user", "guest" or "ip".
+# des-url: An optional URL of what the client hit.
+# </LJFUNC>
+sub send_statserv {
+    my $user = shift;
+    my $ip = shift;
+    my $type = shift;
+    my $url = shift || "";
+
+    return unless ($LJ::STATSERV);
+    # If we don't already have a socket defined, do the startup work.
+    unless ($LJ::UDP_SOCKET) {
+        my $sock = IO::Socket::INET->new(Proto => 'udp') 
+                   or print STDERR "Can't create socket: $!\n";        
+        my $ipaddr = IO::Socket::inet_aton($LJ::STATSERV);
+        my $portaddr = IO::Socket::sockaddr_in($LJ::STATSERV_PORT, $ipaddr);
+        $LJ::UDP_SOCKET = $sock;
+        $LJ::UDP_STATSERV = $portaddr;
+    }
+
+    # If we end up with a weird cachename, declare hatred for the
+    # IP it came from.
+    unless ($user =~ m/\w+/) { $user = "ip"; $type = "ip"; }
+    unless (length($user) < 50) { $user = "ip"; $type = "ip"; }
+
+    my $msg = "cmd: $user : $ip : $type";
+    if ($url) { $msg .= " : $url"; }
+
+    # This really needs to sound some kind of alarm. If a user can
+    # figure out how to execute this code, they can attack the site
+    # freely.
+    if (length($msg) > 450) {
+        print STDERR "statserv message $msg is too long!\n";
+    }
+
+    $LJ::UDP_SOCKET->send($msg, 0, $LJ::UDP_STATSERV)
+                     or print STDERR "Can't send to statserv: $!\n";
+    
 }
 
 # <LJFUNC>

@@ -11,6 +11,7 @@ my $opt_fix = 0;
 my $opt_ex = 0;
 my $opt_start = 0;
 my $opt_stop = 0;
+my $opt_err = 0;
 my @opt_run;
 exit 1 unless GetOptions('help' => \$help,
 			 'flushhosts' => \$opt_fh,
@@ -19,6 +20,7 @@ exit 1 unless GetOptions('help' => \$help,
 			 'fix' => \$opt_fix,
 			 'run=s' => \@opt_run,
 			 'exampleconf' => \$opt_ex,
+                         'onlyerrors' => \$opt_err,
 			 );
 
 unless (-d $ENV{'LJHOME'}) { 
@@ -34,6 +36,7 @@ if ($help) {
 	 "    --stop          Stop replication.\n".
 	 "    --start         Start replication.\n".
 	 "    --run <sql>     Run arbitrary SQL.\n".
+         "    --onlyerrors    Will be silent unless there are errors.\n".
 	 "\n".
 	 "Commands\n".
 	 "   (none)           Shows replication status.\n".
@@ -98,11 +101,11 @@ if ($cmd eq "queries") {
 my @errors = ();
 
 $| = 1;
-print "Connecting to master... ";
+print "Connecting to master... " unless $opt_err;
 
 my $mdb = DBI->connect("DBI:mysql:mysql:$master->{'ip'}",
 		       $master->{'user'}, $master->{'pass'});
-print "done.\n";
+print "done.\n" unless $opt_err;
 
 unless ($mdb) {
     print "error!\n";
@@ -119,7 +122,7 @@ my $log_count = 0;
 while (my ($log) = $sth->fetchrow_array) {
     push @master_logs, $log;
     $log_count++;
-    print "Log: $log ($log_count)\n";
+    print "Log: $log ($log_count)\n" unless $opt_err;
 }
 $sth->finish;
 
@@ -127,17 +130,17 @@ $sth = $mdb->prepare("SHOW MASTER STATUS");
 $sth->execute;
 my ($masterfile, $masterpos) = $sth->fetchrow_array;
 $sth->finish;
-printf "Master in $masterfile at $masterpos\n";
+printf "Master in $masterfile at $masterpos\n" unless $opt_err;
 
 my $minlog = "";
 
 foreach my $skey (keys %$slaves)
 {
     my $s = $slaves->{$skey};
-    printf "%-20s", $skey;
+    printf "%-20s", $skey unless $opt_err;
 
     if ($s->{'dead'}) {
-	print "dead, skipping.\n";
+	print "dead, skipping.\n" unless $opt_err;
 	push @errors, "$skey is dead.";
 	next;
     }
@@ -222,7 +225,7 @@ foreach my $skey (keys %$slaves)
 
     printf ("is in %s at %10d [%10d] c=%d\n", $s->{'logfile'}, 
 	    $s->{'pos'}, $s->{'pos'} - $masterpos,
-	    $ccount);
+	    $ccount) unless $opt_err;
     $dbh->disconnect();
 
     if ($minlog eq "" || $s->{'logfile'} lt $minlog) { 
@@ -232,15 +235,18 @@ foreach my $skey (keys %$slaves)
 
 check_errors();
 
-print "All slaves running.\n";
-print "Minlog: $minlog\n";
+unless ($opt_err) {
+    print "All slaves running.\n";
+    print "Minlog: $minlog\n";
+}
 
 if ($log_count >= 2 && $master_logs[0] lt $minlog)
 {
     my $sql = "PURGE MASTER LOGS TO " . $mdb->quote($minlog);
-    print $sql, "\n";
+    print $sql, "\n" unless ($opt_err);
     $mdb->do($sql);
 }
+
 $mdb->disconnect;
 
 
