@@ -116,7 +116,7 @@ sub YearMonth {
         }
     };
 
-    my $day_of_week = LJ::day_of_week($year, 1, 1);
+    my $day_of_week = LJ::day_of_week($year, $month, 1);
 
     my $daysinmonth = LJ::days_in_month($month, $year);
 
