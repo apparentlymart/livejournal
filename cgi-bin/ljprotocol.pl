@@ -1885,6 +1885,7 @@ sub editfriendgroups
         $dbh->do("UPDATE friends SET groupmask=$mask ".
                  "WHERE userid=$userid AND friendid=?",
                  undef, LJ::get_userid($dbh, $friend));
+        LJ::MemCache::set([$userid, "frgmask:$userid:$friend"], $mask);
     }
 
     # invalidate memcache of friends/groups
