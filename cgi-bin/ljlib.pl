@@ -4152,7 +4152,7 @@ sub cmd_buffer_flush
             'run' => sub {
                 my ($dbh, $db, $c) = @_;
                 my $a = $c->{'args'};
-                LJ::delete_item2($dbh, $db, $c->{'journalid'}, $a->{'itemid'},
+                LJ::delete_item2($db, $c->{'journalid'}, $a->{'itemid'},
                                  0, $a->{'anum'});
             },
         },
