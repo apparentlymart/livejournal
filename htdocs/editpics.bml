@@ -313,6 +313,8 @@
             LJ::MemCache::delete($memkey);
             $memkey = [$u->{'userid'},"upiccom:$u->{'userid'}"];
             LJ::MemCache::delete($memkey);
+            $memkey = [$u->{'userid'},"upicurl:$u->{'userid'}"];
+            LJ::MemCache::delete($memkey);
         }
 
         ### no post, so we'll parse the multipart data

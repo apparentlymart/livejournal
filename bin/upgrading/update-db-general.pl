@@ -2268,6 +2268,10 @@ register_alter(sub {
         do_alter("counter", "ALTER TABLE counter MODIFY max INT UNSIGNED NOT NULL DEFAULT 0");
     }
 
+    if (column_type("userpic2", "url") eq '') {
+        do_alter("userpic2", "ALTER TABLE userpic2 " .
+                 "ADD url VARCHAR(255) default NULL AFTER location");
+    }
 
 });
 

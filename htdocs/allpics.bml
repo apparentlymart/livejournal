@@ -67,7 +67,7 @@
 
     #### show pictures
 
-    my $info = LJ::get_userpic_info($u, {'load_comments' => 1});
+    my $info = LJ::get_userpic_info($u, {'load_comments' => 1, 'load_urls' => 1});
 
     my %keywords = ();
     while (my ($kw, $pic) = each %{$info->{'kw'}}) {
@@ -112,8 +112,16 @@
             $body .= "<tr valign='middle'>";
         }
 
-        $body .= "<td align='center'><img src='$LJ::USERPIC_ROOT/$pic->{'picid'}/$u->{'userid'}' ";
-        $body .= "width='$pic->{'width'}' height='$pic->{'height'}' alt='$eh_keywords' /></td><td>";
+        $body .= "<td align='center'>";
+
+        my ($apre, $apost);
+        if ($pic->{'url'}) {
+            $apre = "<a href='$pic->{'url'}'>";
+            $apost = "</a>";
+        }
+
+        $body .= "$apre<img src='$LJ::USERPIC_ROOT/$pic->{'picid'}/$u->{'userid'}' ";
+        $body .= "width='$pic->{'width'}' height='$pic->{'height'}' alt='$eh_keywords' border='0'/>$apost</td><td>";
 
         if ($u->{'defaultpicid'} == $pic->{'picid'}) {
             $body .= "$ML{'.default'}<br />";

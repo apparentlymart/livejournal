@@ -4568,11 +4568,19 @@ sub get_userpic_info
     my ($uuid, $opts) = @_;
     return undef unless $uuid;
     my $userid = LJ::want_userid($uuid);
+    my $u = LJ::want_user($uuid); # This should almost always be in memory already
 
-    # in the process cache, cool!
-    return $LJ::CACHE_USERPIC_INFO{$userid} if $LJ::CACHE_USERPIC_INFO{$userid};
+    # in the cache, cool, well unless it doesn't have comments or urls
+    # and we need them
+    if (my $cachedata = $LJ::CACHE_USERPIC_INFO{$userid}) {
+        my $good = 1;
+        if ($u->{'dversion'} > 6) {
+            $good = 0 if $opts->{'load_comments'} && ! $cachedata->{'_has_comments'};
+            $good = 0 if $opts->{'load_urls'} && ! $cachedata->{'_has_urls'};
+        }
+        return $cachedata if $good;
+    }
 
-    my $u = LJ::want_user($uuid);
     my $VERSION_PICINFO = 3;
 
     my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
@@ -4581,6 +4589,7 @@ sub get_userpic_info
     if ($minfo = LJ::MemCache::get($memkey)) {
         # the pre-versioned memcache data was a two-element hash.
         # since then, we use an array and include a version number.
+
         if (ref $minfo eq 'HASH' ||
             $minfo->[0] != $VERSION_PICINFO) {
             # old data in the cache.  delete.
@@ -4596,7 +4605,7 @@ sub get_userpic_info
                 ($pic->{picid},
                  $pic->{width}, $pic->{height},
                  $pic->{state}) = unpack "NCCA", substr($picstr, 0, 7, '');
-                $info->{pic}{$pic->{picid}} = $pic;
+                $info->{pic}->{$pic->{picid}} = $pic;
             }
 
             my ($pos, $nulpos);
@@ -4605,25 +4614,58 @@ sub get_userpic_info
                 my $kw = substr($kwstr, $pos, $nulpos-$pos);
                 my $id = unpack("N", substr($kwstr, $nulpos+1, 4));
                 $pos = $nulpos + 5; # skip NUL + 4 bytes.
-                $info->{kw}{$kw} = $info->{pic}{$id} if $info;
+                $info->{kw}->{$kw} = $info->{pic}->{$id} if $info;
             }
         }
 
-        my $commemkey = [$u->{'userid'}, "upiccom:$u->{'userid'}"];
-        my $comminfo = LJ::MemCache::get($commemkey);
-        if ($u->{'dversion'} > 6 && $opts->{'load_comments'} && $comminfo) {
-            my ($pos, $nulpos);
-            $pos = $nulpos = 0;
-            while (($nulpos = index($comminfo, "\0", $pos)) > 0) {
-                my $comment = substr($comminfo, $pos, $nulpos-$pos);
-                my $id = unpack("N", substr($comminfo, $nulpos+1, 4));
-                $pos = $nulpos + 5; # skip NUL + 4 bytes.
-                $info->{'comment'}{$comment} = $id;
+        if ($u->{'dversion'} > 6) {
+
+            # Load picture comments
+            if ($opts->{'load_comments'}) {
+                my $commemkey = [$u->{'userid'}, "upiccom:$u->{'userid'}"];
+                my $comminfo = LJ::MemCache::get($commemkey);
+
+                if ($comminfo) {
+                    my ($pos, $nulpos);
+                    $pos = $nulpos = 0;
+                    while (($nulpos = index($comminfo, "\0", $pos)) > 0) {
+                        my $comment = substr($comminfo, $pos, $nulpos-$pos);
+                        my $id = unpack("N", substr($comminfo, $nulpos+1, 4));
+                        $pos = $nulpos + 5; # skip NUL + 4 bytes.
+                        $info->{'comment'}->{$comment} = $id;
+                    }
+                    $info->{'_has_comments'} = 1;
+                } else { # Requested to load comments, but they aren't in memcache
+                         # so force a db load
+                    undef $info;
+                }
+            }
+
+            # Load picture urls
+            if ($opts->{'load_urls'} && $info) {
+                my $urlmemkey = [$u->{'userid'}, "upicurl:$u->{'userid'}"];
+                my $urlinfo = LJ::MemCache::get($urlmemkey);
+
+                if ($urlinfo) {
+                    my ($pos, $nulpos);
+                    $pos = $nulpos = 0;
+                    while (($nulpos = index($urlinfo, "\0", $pos)) > 0) {
+                        my $url = substr($urlinfo, $pos, $nulpos-$pos);
+                        my $id = unpack("N", substr($urlinfo, $nulpos+1, 4));
+                        $pos = $nulpos + 5; # skip NUL + 4 bytes.
+                        $info->{'pic'}->{$id}->{'url'} = $url;
+                    }
+                    $info->{'_has_urls'} = 1;
+                } else { # Requested to load urls, but they aren't in memcache
+                         # so force a db load
+                    undef $info;
+                }
             }
         }
     }
 
     my %minfocom; # need this in this scope
+    my %minfourl;
     unless ($info) {
         $info = {
             'pic' => {},
@@ -4635,7 +4677,7 @@ sub get_userpic_info
         my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
 
         if ($u->{'dversion'} > 6) {
-            $sth = $dbcr->prepare("SELECT picid, width, height, state, userid, comment ".
+            $sth = $dbcr->prepare("SELECT picid, width, height, state, userid, comment, url ".
                                   "FROM userpic2 WHERE userid=?");
         } else {
             $sth = $db->prepare("SELECT picid, width, height, state, userid ".
@@ -4647,8 +4689,13 @@ sub get_userpic_info
             next if $pic->{state} eq 'X'; # no expunged pics in list
             push @pics, $pic;
             $info->{'pic'}->{$pic->{'picid'}} = $pic;
-            $minfocom{$pic->{'comment'}} = int($pic->{'picid'}) if $u->{'dversion'} > 6 && $opts->{'load_comments'};
+            $minfocom{$pic->{'comment'}} = int($pic->{'picid'}) if $u->{'dversion'} > 6
+                && $opts->{'load_comments'} && $pic->{'comment'};
+            $minfourl{$pic->{'url'}} = int($pic->{'picid'}) if $u->{'dversion'} > 6
+                && $opts->{'load_urls'} && $pic->{'url'};
         }
+
+
         $picstr = join('', map { pack("NCCA", $_->{picid},
                                  $_->{width}, $_->{height}, $_->{state}) } @pics);
 
@@ -4669,15 +4716,30 @@ sub get_userpic_info
         }
         $kwstr = join('', map { pack("Z*N", $_, $minfokw{$_}) } keys %minfokw);
 
+        $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
         $minfo = [ $VERSION_PICINFO, $picstr, $kwstr ];
-        LJ::MemCache::add($memkey, $minfo);
+        LJ::MemCache::set($memkey, $minfo);
 
-        if ($u->{'dversion'} > 6 && $opts->{'load_comments'}) {
-            $info->{'comment'} = \%minfocom;
-            my $commentstr = join('', map { pack("Z*N", $_, $minfocom{$_}) } keys %minfocom);
+        if ($u->{'dversion'} > 6) {
 
-            my $memkey = [$u->{'userid'}, "upiccom:$u->{'userid'}"];
-            LJ::MemCache::add($memkey, $commentstr);
+            if ($opts->{'load_comments'}) {
+                $info->{'comment'} = \%minfocom;
+                my $commentstr = join('', map { pack("Z*N", $_, $minfocom{$_}) } keys %minfocom);
+
+                my $memkey = [$u->{'userid'}, "upiccom:$u->{'userid'}"];
+                LJ::MemCache::set($memkey, $commentstr);
+
+                $info->{'_has_comments'} = 1;
+            }
+
+            if ($opts->{'load_urls'}) {
+                my $urlstr = join('', map { pack("Z*N", $_, $minfourl{$_}) } keys %minfourl);
+
+                my $memkey = [$u->{'userid'}, "upicurl:$u->{'userid'}"];
+                LJ::MemCache::set($memkey, $urlstr);
+
+                $info->{'_has_urls'} = 1;
+            }
         }
     }
 
