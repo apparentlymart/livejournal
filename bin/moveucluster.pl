@@ -117,14 +117,7 @@ if ($sclust == 0)
 
     # moving time, journal item at a time, and everything recursively under it
     foreach my $itemid (@itemids) {
-	eval {
-	    movefrom0_logitem($itemid);
-	};
-	if ($@) {
-	    print "Caught an error: $@\n";
-	    # TODO: unset readonly.
-	    exit 0;
-	}
+	movefrom0_logitem($itemid);
 	$done++;
 	my $percent = $done/$todo;
 	my $elapsed = time() - $stime;
