@@ -57,6 +57,9 @@ sub decr      { $memc->decr(@_);      }
 
 sub _get_sock { $memc->get_sock(@_);   }
 
+sub run_command { $memc->run_command(@_); }
+
+
 sub array_to_hash {
     my ($fmtname, $ar) = @_;
     my $fmt = $LJ::MEMCACHE_ARRAYFMT{$fmtname};
