@@ -211,7 +211,7 @@ sub clean
 	    }
 	    if ($wordlength) {
 		# this treats normal characters and &entities; as single characters
-		$token->[1] =~ s/(([^&\s]|(&.{1,7};)){$wordlength})\B/$1<wbr>/g;
+		$token->[1] =~ s/(([^&\s]|(&\#?\w{1,7};)){$wordlength})\B/$1<wbr>/g;
 	    } 
 	    if ($addbreaks) {
 		$token->[1] =~ s/\n/<br>/g;
