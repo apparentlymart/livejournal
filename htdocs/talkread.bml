@@ -315,7 +315,7 @@ body<=
          $ret .= "<p><a name='t$dtid'></a><table><tr>";
          $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
          $ret .= "<td>$ML{'.deletedpost'}</td></tr></table>\n";
-     } elsif ($post->{'state'} eq "S" && ! $post->{'_loaded'}) {
+     } elsif ($post->{'state'} eq "S" && !$post->{'_loaded'} && !$post->{'_show'}) {
          $ret .= "<p><a name='t$dtid'></a><table><tr>";
          $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
          my $screenedtext = $ML{'.screenedpost'};
