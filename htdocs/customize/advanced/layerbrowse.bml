@@ -166,9 +166,11 @@
                     $v = "[unknown object type]";
                 }
             } elsif (ref $v eq "ARRAY") {
-                $v = "<i>List:</i> (" . join(", ", @$v) . ")";
+                $v = "<i>List:</i> (" . join(", ", map { LJ::ehtml($_) } @$v) . ")";
+            } else {
+                $v = LJ::ehtml($v);
             }
-            $body .= "<tr><td><b>$k</b></td><td>" . LJ::ehtml($v) . "</td></tr>\n";
+            $body .= "<tr><td><b>$k</b></td><td>$v</td></tr>\n";
         }
         $body .= "</table>";
     }
