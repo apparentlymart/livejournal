@@ -164,7 +164,7 @@ sub handle_request
     $BMLCodeBlock::FCGI = $fcgi_req;
     %blockdata = ();
     %blockflags = ();
-    $CONTENT_TYPE = "text/html";
+    $CONTENT_TYPE = $DEFAULT_CONTENT_TYPE || "text/html";
     %BMLml::ml_used = ();
     $FORM_READ = 0;
     $REQ_LANG = "";
@@ -1208,6 +1208,11 @@ sub finish
 sub set_content_type
 {
     $main::CONTENT_TYPE = $_[0] if $_[0];
+}
+
+sub set_default_content_type
+{
+    $main::DEFAULT_CONTENT_TYPE = $_[0];
 }
 
 sub eall

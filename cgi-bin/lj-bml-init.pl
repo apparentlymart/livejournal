@@ -20,6 +20,10 @@ BML::register_block("SUPPORT_EMAIL", "S", $LJ::SUPPORT_EMAIL);
 
 BML::register_hook("startup", sub { LJ::start_request() });
 
+if ($LJ::UNICODE) {
+    BML::set_default_content_type("text/html; charset=utf-8");
+}
+
 # pre-load common libraries so we don't have to load them in BML files (slow)
 package BMLCodeBlock;
 use LJ::TextMessage;
