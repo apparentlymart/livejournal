@@ -31,6 +31,8 @@ sub set_underage {
     my $u = LJ::load_user($args->[1]);
     return $err->("Invalid user.")
         unless $u;
+    return $err->("Account is not a person type account.")
+        unless $u->{journaltype} eq 'P';
 
     return $err->("Second argument must be 'on' or 'off'.")
         unless $args->[2] =~ /^(?:on|off)$/;
