@@ -29,6 +29,25 @@
   RewriteLog /home/lj/logs/rewrite.log
   RewriteLogLevel 0
 
+  # Optional: Fast use of a local userpic cache.   
+  # If you want this to be enabled, you must first create LJHOME/htdocs/userpics/
+  # contents of userpics never change, let's not even stat file.
+  RewriteCond %{REQUEST_URI} ^/userpic/[0-9]+$
+  RewriteCond %{HTTP:If-Modified-Since} . [OR]
+  RewriteCond %{HTTP:If-None-Match} .
+  RewriteRule . . [L,R=304]
+ 
+  # don't allow direct access to cache
+  RewriteRule ^/userpics/ . [L,F,NS]
+ 
+  # serve from cache first, if it exists.
+  RewriteCond %{REQUEST_URI} ^/userpic/([0-9]*)([0-9][0-9])([0-9][0-9][0-9])$
+  RewriteCond /home/lj/htdocs/userpics/%3/%2/%1%2%3 -s
+  RewriteRule ^/userpic/([0-9]*)([0-9][0-9])([0-9][0-9][0-9])$ /userpics/$3/$2/$1$2$3 [PT,L]
+
+  MIMEMagicFile /home/lj/cgi-bin/userpicmagic.txt
+
+  # End userpic stuff.
   RewriteCond %{HTTP_HOST} ^(www\.)?ljsite\.com(:[0-9]+)?$ [NC]
   RewriteRule ^/~([a-z0-9_]+)(/?.*)$ /users/$1$2 [L,PT,NS]
 
@@ -62,6 +81,12 @@
   <Location /cgi-bin/404notfound.cgi>
     SetHandler fastcgi-script
   </Location>
+  # This Directory directive goes with the userpic stuff done above.
+  # contents never change, let's tell browser to not bug us as much.
+  <Directory /home/lj/htdocs/userpics>
+    ExpiresActive on                  
+    ExpiresDefault "access plus 30 days"
+  </Directory>
   <Location /userpic>
     SetHandler fastcgi-script
   </Location>
