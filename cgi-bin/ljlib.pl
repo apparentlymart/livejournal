@@ -6634,4 +6634,43 @@ sub error
 # to be called as &nodb; (so this function sees caller's @_)
 sub nodb { shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db"; }
 
+
+# LJ::S1::get_public_styles lives here in ljlib.pl so that 
+# cron jobs can call LJ::load_user_props without including
+# ljviews.pl
+
+package LJ::S1;
+
+sub get_public_styles {
+
+    # now try memcache
+    my $memkey = "s1pubstyc";
+    my $pubstyc = LJ::MemCache::get($memkey);
+    return $pubstyc if $pubstyc;
+
+    # not cached, build from db
+    my $sysid = LJ::get_userid("system");
+
+    # first try new table
+    my $dbh = LJ::get_db_writer();
+    my $sth = $dbh->prepare("SELECT * FROM s1style WHERE userid=?");
+    $sth->execute($sysid);
+    $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
+
+    # fall back to old table
+    unless ($pubstyc) {
+        $sth = $dbh->prepare("SELECT * FROM style WHERE user='system' AND is_public='Y'");
+        $sth->execute();
+        $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
+    }
+    return undef unless $pubstyc;
+
+    # set in memcache
+    my $expire = time() + 60*30; # 30 minutes
+    LJ::MemCache::set($memkey, $pubstyc);
+
+    return $pubstyc;
+}
+
+
 1;

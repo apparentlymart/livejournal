@@ -334,36 +334,12 @@ sub load_style
     return $ret;
 }
 
-sub get_public_styles {
-
-    # now try memcache
-    my $memkey = "s1pubstyc";
-    my $pubstyc = LJ::MemCache::get($memkey);
-    return $pubstyc if $pubstyc;
-
-    # not cached, build from db
-    my $sysid = LJ::get_userid("system");
-
-    # first try new table
-    my $dbh = LJ::get_db_writer();
-    my $sth = $dbh->prepare("SELECT * FROM s1style WHERE userid=?");
-    $sth->execute($sysid);
-    $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
-
-    # fall back to old table
-    unless ($pubstyc) {
-        $sth = $dbh->prepare("SELECT * FROM style WHERE user='system' AND is_public='Y'");
-        $sth->execute();
-        $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
-    }
-    return undef unless $pubstyc;
-
-    # set in memcache
-    my $expire = time() + 60*30; # 30 minutes
-    LJ::MemCache::set($memkey, $pubstyc);
-
-    return $pubstyc;
-}
+# LJ::S1::get_public_styles
+#
+# LJ::load_user_props calls LJ::S1::get_public_styles and since
+# a lot of cron jobs call LJ::load_user_props, we've moved
+# LJ::S1::get_public_styles to ljlib so that it can be used
+# without including ljviews.pl
 
 sub get_s1style_writer {
     my $u = shift;
