@@ -3,6 +3,7 @@
 
 use strict;
 use vars qw($dbh %maint);
+use lib "$ENV{'LJHOME'}/cgi-bin";  # extra XML::Encoding files in cgi-bin/XML/*
 use LWP::UserAgent;
 use XML::RSS;
 require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
@@ -57,17 +58,28 @@ $maint{'synsuck'} = sub
         # 
         # Blogger doesn't produce valid XML, since they don't handle encodings
         # correctly.  So if we see they have no encoding (which is UTF-8 implictly)
-        # but it's not valid UTF-8, say it's ISO-8859-1, which won't 
+        # but it's not valid UTF-8, say it's Windows-1252, which won't 
         # cause XML::Parser to barf... but there will probably be some bogus characters.
         # better than nothing I guess.  (personally, I'd prefer to leave it broken
         # and have people bitch at Blogger, but jwz wouldn't stop bugging me)
-        # Why not Windows-1252?  XML::Parser doesn't include it.
+        # XML::Parser doesn't include Windows-1252, but we put it in cgi-bin/XML/* for it
+        # to find.
         my $encoding;
         if ($content =~ /<\?xml.+?>/ && $& =~ /encoding=([\"\'])(.+?)\1/) {
             $encoding = lc($2);
         }
         if (! $encoding && ! LJ::is_utf8($content)) {
-            $content =~ s/\?>/ encoding='iso-8859-1' \?>/;
+            $content =~ s/\?>/ encoding='windows-1252' \?>/;
+        }
+        
+        # WARNING: another hack...
+        # People produce what they think is iso-8859-1, but they include
+        # Windows-style smart quotes.  Check for invalid iso-8859-1 and correct.
+        if ($encoding =~ /^iso-8859-1$/i && $content =~ /[\x80-\x9F]/) {
+            # They claimed they were iso-8859-1, but they are lying.
+            # Assume it was Windows-1252.
+            print "Invalid ISO-8859-1; assuming Windows-1252...\n";
+            $content =~ s/encoding=([\"\'])(.+?)\1/encoding='windows-1252'/;
         }
 
         # parsing time...
