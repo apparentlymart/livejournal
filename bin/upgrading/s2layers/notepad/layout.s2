@@ -306,3 +306,64 @@ function DayPage::print_body()
         foreach var Entry e ($.entries) { $this->print_entry($e); }
     }
 }
+
+function print_theme_preview ()
+{
+    """
+<div style="color: $*text_color; background-color: $*body_bgcolor">
+  <table width="70%" border="0" cellpadding="0" cellspacing="0">
+   <tr height="18">
+    <td colspan="2">
+     <table border="0" cellpadding="0" cellspacing="0">
+      <tr>
+       <td width="30"><img src="$*imguri/spacer.gif" width="30" height="10"></td>
+       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="#" style="color: $*link_color">Tab</a></td>
+       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="#" style="color: $*link_color">Tab</a></td>
+       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="#" style="color: $*link_color">Tab</a></td>
+       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="#" style="color: $*link_color">Tab</a></td>
+       <td width="120" height="18" background="$*imguri/tab.jpg">&nbsp;&nbsp;<a href="#" style="color: $*link_color">Tab</a></td>
+      </tr>
+     </table>
+    </td>
+   </tr>
+   <tr height="38">
+    <td width="80" height="38" background="$*imguri/top-left.jpg"><img src="$*imguri/spacer.gif" width="80" height="10"></td>
+    <td height="38" background="$*imguri/middle.jpg"><img src="$*imguri/spacer.gif" width="10" height="10"></td>
+    <td width="10" height="38" background="$*imguri/top-right.jpg"><img src="$*imguri/spacer.gif" width="10" height="10"></td>
+   </tr>
+   <tr>
+    <td width="80" height="38" background="$*imguri/side-left.jpg">
+     &nbsp;
+    </td>
+    <td width="100%" height="38" background="$*imguri/middle.jpg">
+     <h1>John Doe</h1>
+     <p align="center"><img src="$*imguri/hr.gif" width="345" height="23"></p>
+    <p align='center'>
+      <table border='0'><tr><td valign="top">
+        <font size="+1">Dec. 16th, 2002 06:39 pm <span style='color: $*subject_color'>Neque porro quisquam est qui dolorem ipsum quia dolor sit amet&hellip;</span></font>
+        <p>
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit
+        </p>
+        <p><a href="#" style="color: $*vlink_color; font-weight: bold">2 Comments</a> | <a href="#" style="color: $*link_color">Leave a comment</a></p></td></tr>
+        <tr><td colspan="2"><p align="center"><img src="$*imguri/hr.gif" width="345" height="23"></p></td></tr>
+      </table>
+    </p>
+    </td>
+    <td width="8" height="38" background="$*imguri/side-right.jpg">
+     &nbsp;
+    </td>
+   </tr>
+   <tr height="12">
+    <td width="80" height="12" background="$*imguri/bottom-left.jpg"><img src="$*imguri/spacer.gif" width="70" height="12"></td>
+    <td height="12" background="$*imguri/bottom-line.jpg"><img src="$*imguri/spacer.gif" width="10" height="12"></td>
+    <td width="8" height="12" background="$*imguri/bottom-right.jpg"><img src="$*imguri/spacer.gif" width="8" height="12"></td>
+   </tr>
+  </table>
+</div>
+    """;
+}
