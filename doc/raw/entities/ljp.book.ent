@@ -55,6 +55,7 @@
 
 <!ENTITY ljp.dbschema.index                     SYSTEM "../ljp.book/db/index.xml">
 <!ENTITY ljp.dbschema.ref                       SYSTEM "../ljp.book/db/schema.gen.xml">
+<!ENTITY ljp.dbschema.reluser                   SYSTEM "../ljp.book/db/reluser.xml">
 
 <!-- Application Programming Interface -->
 

@@ -8,8 +8,15 @@
       This is the complete database layout (schema) documentation.
     </para>
   </partintro>
+  &ljp.dbschema.reluser;  
   <reference id="ljp.dbschema.ref">
     <title>Database Schema Browser</title>
     &ljp.dbschema.ref;
   </reference>
 </part>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("../index.xml" "book" "part")
+End:
+-->

@@ -1,0 +1,49 @@
+<chapter id="ljp.dbschema.reluser.ref">
+  <title>Relationships between users</title>
+  <subtitle>The <database class="table">reluser</database> Table</subtitle>
+  <para>
+    The <database class="table">reluser</database> table is used to track special relationships
+    between accounts, such as community maintainers/moderators and their communities, which communities
+    a user is allowed to post to, and which users are banned from commenting in specific journals.
+    These relationships are defined as a single character in the database:
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term>A</term>
+      <listitem><simpara><database class="field">targetid</database> can
+        administrate <database class="field">userid</database> as a community maintainer
+      </simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>B</term>
+      <listitem><simpara><database class="field">targetid</database> is
+        banned in <database class="field">userid</database>, either in comments, or from
+        posting, if <database class="field">userid</database> is a shared or community account
+      </simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>P</term>
+      <listitem><simpara><database class="field">targetid</database> can
+        post to <database class="field">userid</database>
+      </simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>M</term>
+      <listitem><simpara><database class="field">targetid</database> can
+        moderate the community <database class="field">userid</database>
+      </simpara></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>N</term>
+      <listitem><simpara><database class="field">targetid</database> is preapproved
+        to post in <database class="field">userid</database> without moderation
+      </simpara></listitem>
+    </varlistentry>
+  </variablelist>
+</chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "part" "chapter")
+End:
+-->
