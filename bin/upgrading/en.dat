@@ -528,6 +528,8 @@ p?>
 
 /create.bml.error.postrequired=POST required.
 
+/create.bml.error.seebelow=See errors below.
+
 /create.bml.error.username.blank=Please supply a name or handle/alias.
 
 /create.bml.error.username.inuse=Username already in use; please select a different one.
