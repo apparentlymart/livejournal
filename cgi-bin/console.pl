@@ -283,6 +283,28 @@ $cmd{'deletetalk'} = {
 	       ],
     };
 
+$cmd{'faqcat'} = {
+    'def' => 'confaq.pl',
+    'privs' => [qw(faqcat)],
+    'des' => 'Tool for managing FAQ categories.',
+    'argsummary' => '<command> <commandargs>',
+    'args' => [
+	       'command' => <<DES,
+One of: list, delete, add, move.  'list' shows all the defined FAQ
+categories, including their catkey, name, and sortorder.  Also, it
+shows all the distinct catkeys that are in use by FAQ.  'add' creates
+or modifies a FAQ category.  'delete' removes a FAQ category (but not
+the questions that are in it). 'move' moves a FAQ category up or down
+in the list.
+DES
+	       'commandargs' => <<DES,
+'add' takes 3 arguments: a catkey, a catname, and a sort order field.
+'delete' takes one argument: the catkey value.  'move' takes two
+arguments: the catkey and either the word "up" or "down".
+DES
+	       ],
+    };
+
 
 sub delete_talk
 {
