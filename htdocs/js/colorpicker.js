@@ -148,7 +148,7 @@ function _updatebrightnessgrad(p) {
     gradclr = _hex(fbc.r)+
               _hex(fbc.g)+
               _hex(fbc.b);
-    var newgradurl = "/palimg/colorpicker/longgrad.gif/pg00000000fe"+gradclr.toLowerCase();
+    var newgradurl = "/palimg/colorpicker/longgrad.gif/pg00000000ff"+gradclr.toLowerCase();
     var oldgradurl = grad.src;
     if (oldgradurl != newgradurl) {
         grad.src = newgradurl;
