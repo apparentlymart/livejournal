@@ -190,8 +190,8 @@ body<=
                 $ret .= LJ::mood_name($mood->{'parent'}) . "</label>";
                 $ret .= ": " . LJ::html_check({ type => 'check', name => "$mood->{id}inherit",
                                                 id => "$mood->{id}inherit",
-                                                onchange => "enable($mood->{id}, $mood->{parent})",
-                                                checked  => $inherited });
+                                                onclick => "enable($mood->{id}, $mood->{parent})",
+                                                selected  => $inherited });
                 $ret .= "</td></tr>\n";
             }
             $ret .= "<tr><td>URL: </td><td>";
@@ -313,6 +313,7 @@ body<=
             }
 
             # The fun part of figuring out what needs to be changed in the db
+            my (@repl_values, @repl_bind, @del_values, @del_bind);
             foreach my $key (keys %POST) {
                 # A key that is fully numeric signifies an actual mood theme.
                 # We then build off this id number to get other information needed
@@ -325,25 +326,42 @@ body<=
                     my $mname = LJ::mood_name($mid);
 
                     if (($POST{$mid.'check'} ne 'checked') && (!$picurl || $width == 0 || $height == 0)) { # Delete this picture
-                        my $p = $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid=$themeid AND moodid=$mid");
-                        return "<?h1 $ML{'Error'} h1?><?p There was an error updating this moodtheme. p?>" unless $p;
+                        push @del_values, $mid;
+                        push @del_bind, ("?");
                         next;
                     }
 
                     if ($POST{$mid.'check'} eq 'checked') { # Inherited, thus don't represent it in the db
-                        my $d = $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid=$themeid AND moodid=$mid");
-                        return "<?h1 $ML{'Error'} h1?><?p There was an error creating this moodtheme. p?>" unless $d;
+                        push @del_values, ($themeid, $mid);
+                        push @del_bind, ("(moodthemeid=? AND moodid=?)");
+
                         $ret .= "$mname($mid) was deleted and will now be represented by its parent.<br />\n";
                     } else { # Not inherited, it is different than its parent or it is actually a parent
-                        my $qpicurl = $dbh->quote($picurl);
-                        my $i = $dbh->do("REPLACE INTO moodthemedata (moodthemeid, moodid, picurl, width, height) VALUES ($themeid, $mid, $qpicurl, $width, $height)");
-                        return "<?h1 $ML{'Error'} h1?><?p There was an error updating this moodtheme. p?>" unless $i;
-                        $ret .= "$mname($mid) is set to $picurl.<br />\n";
+                        if ($picurl) {
+                            push @repl_values, ($themeid, $mid, $picurl, $width, $height);
+                            push @repl_bind, ("(?, ?, ?, ?, ?)");
+                            $ret .= "$mname($mid) is set to $picurl.<br />\n";
+                        }
                     }
                 }
             }
+
+            if (@del_values) {
+                my $bind = join(",", @del_bind);
+                my $p = $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid=? AND moodid IN($bind)",
+                                 undef, $themeid, @del_values);
+                return "<?h1 $ML{'Error'} h1?><?p There was an error updating this moodtheme. p?>" unless $p;
+            }
+
+            my $bind = join(",", @repl_bind);
+            my $i = $dbh->do("REPLACE INTO moodthemedata (moodthemeid, moodid, " .
+                             "picurl, width, height) VALUES $bind", undef, @repl_values);
+            return "<?h1 $ML{'Error'} h1?><?p There was an error updating this moodtheme. p?>" unless $i;
+
             # Kill any memcache data about this moodtheme
             LJ::MemCache::delete([$themeid, "moodthemedata:$themeid"]);
+
+            delete $LJ::CACHE_MOOD_THEME{$themeid};
 
            $ret .= "<br />Changes have been successfully saved.<br /><br />\n";
            return BML::redirect($self_uri);
