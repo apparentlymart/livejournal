@@ -334,6 +334,9 @@ my %ljconfig =
 	    'dynamic_ljuser' => {
                  'desc' => "Boolean variable that defines whether the user-types of users is looked up when [func[LJ::ljuser]] is called. This is not recommended unless the site is using memcached.",
             },
+            'hide_friendof_via_ban' => {
+                'desc' => "Allows a user to hide usernames from appearing on their 'friend-of' list via use of the 'ban' mechanism.",
+            },
         },
 
         'portal' => {
