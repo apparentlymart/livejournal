@@ -1011,6 +1011,10 @@ sub record_meme
     $url =~ s!/$!!;  # strip / at end
     LJ::run_hooks("canonicalize_url", \$url);
     
+    # canonicalize_url hook might just erase it, so
+    # we don't want to record it.
+    return unless $url;
+
     my $qurl = $dbh->quote($url);
     $posterid += 0;
     $itemid += 0;
