@@ -5095,6 +5095,24 @@ sub u_equals {
     return $u1 && $u2 && $u1->{'userid'} == $u2->{'userid'};
 }
 
+# <LJFUNC>
+# name: LJ::get_cluster_description
+# des: Get descriptive text for a cluster id.
+# args: clusterid, bold?
+# des-clusterid: id of cluster to get description of
+# des-bold: 1 == bold cluster name and subcluster id, else don't
+# returns: string representing the cluster description
+# </LJFUNC>
+sub get_cluster_description {
+    my ($cid, $dobold) = @_;
+    $cid += 0;
+    my $text = LJ::run_hook('cluster_description', $cid, $dobold ? 1 : 0);
+    return $text if $text;
+
+    # default behavior just returns clusterid
+    return $cid;
+}
+
 sub memcache_get_u
 {
     my @keys = @_;
