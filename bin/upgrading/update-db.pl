@@ -63,6 +63,7 @@ my %table_create;   # $table -> $create_sql
 my %table_drop;     # $table -> 1
 my %post_create;    # $table -> [ [ $action, $what ]* ]
 my %coltype;        # $table -> { $col -> $type }
+my %indexname;      # $table -> "INDEX"|"UNIQUE" . ":" . "col1-col2-col3" -> "PRIMARY" | index_name
 my @alters;
 my %clustered_table; # $table -> 1
 
@@ -393,7 +394,7 @@ sub do_alter
     do_sql($sql);
 
     # columns will have changed, so clear cache:
-    clear_table_columns($table);
+    clear_table_info($table);
 }
 
 sub create_table
@@ -484,23 +485,44 @@ sub register_alter
     push @alters, $sub;
 }
 
-sub clear_table_columns
+sub clear_table_info
 {
     my $table = shift;
     delete $coltype{$table};
+    delete $indexname{$table};
 }
 
-sub load_table_columns
+sub load_table_info
 {
     my $table = shift;
 
-    clear_table_columns($table);
+    clear_table_info($table);
     my $sth = $dbh->prepare("DESCRIBE $table");
     $sth->execute;
-    while (my ($Field, $Type) = $sth->fetchrow_array)
-    {
+    while (my ($Field, $Type) = $sth->fetchrow_array) {
         $coltype{$table}->{$Field} = $Type;
     }
+
+    $sth = $dbh->prepare("SHOW INDEX FROM $table");
+    $sth->execute;
+    my %idx_type;  # name -> "UNIQUE"|"INDEX"
+    my %idx_parts; # name -> []
+    while (my $ir = $sth->fetchrow_hashref) {
+        $idx_type{$ir->{'Key_name'}} = $ir->{'Non_unique'} ? "INDEX" : "UNIQUE";
+        push @{$idx_parts{$ir->{'Key_name'}}}, $ir->{'Column_name'};
+    }
+    
+    foreach my $idx (keys %idx_type) {
+        my $val = "$idx_type{$idx}:" . join("-", @{$idx_parts{$idx}});
+        $indexname{$table}->{$val} = $idx;
+    }
+}
+
+sub index_name
+{
+    my ($table, $idx) = @_;  # idx form is:  INDEX:col1-col2-col3
+    load_table_info($table) unless $indexname{$table};
+    return $indexname{$table}->{$idx} || "";
 }
 
 sub table_relevant
@@ -514,7 +536,7 @@ sub table_relevant
 sub column_type
 {
     my ($table, $col) = @_;
-    load_table_columns($table) unless $coltype{$table};
+    load_table_info($table) unless $coltype{$table};
     my $type = $coltype{$table}->{$col};
     $type ||= "";
     return $type;
