@@ -48,9 +48,9 @@ BODY<=
  $req{'subject'} = $FORM{'subject'};
  $req{'spcatid'} = $FORM{'spcatid'};
 
- my $spid = LJ::Support::file_request($dbh, \@errors, \%req);
-
  return LJ::bad_input(@errors) if @errors;
+
+ my $spid = LJ::Support::file_request($dbh, \@errors, \%req);
  
  $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
  
