@@ -3124,6 +3124,9 @@ sub load_style_fast
         if ($dbs->{'has_slave'}) {
             unshift @h, $dbr;
         }
+        if (my $s_db = LJ::get_dbh("s1styles")) {
+            unshift @h, $s_db;
+        }       
         my ($data, $type, $cache);
         my $sth;
         foreach my $db (@h)
@@ -3259,7 +3262,8 @@ sub make_journal
     my $overrides = "";
     if ($opts->{'nooverride'}==0 && $u->{'useoverrides'} eq "Y")
     {
-        my $sth = $dbr->prepare("SELECT override FROM overrides WHERE user=$quser");
+        my $db = LJ::get_dbh("s1styles") || $dbr;
+        my $sth = $db->prepare("SELECT override FROM overrides WHERE user=$quser");
         $sth->execute;
         ($overrides) = $sth->fetchrow_array;
     }
