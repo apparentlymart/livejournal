@@ -209,7 +209,8 @@
             my $MAX_UPLOAD = 40960;
 
             my $error;
-            BML::parse_multipart(\%POST, \$error, $MAX_UPLOAD);
+            # Add some slop to account for the size of the form headers etc.
+            BML::parse_multipart(\%POST, \$error, $MAX_UPLOAD + 2048);
 
             # was there an error parsing the multipart form?
             if ($error) {
@@ -220,7 +221,7 @@
                                               { 'maxsize' => int($MAX_UPLOAD / 1024) .
                                                     $ML{'.kilobytes'} }));
                     }
-                    $error = BML::ml("BML.parse_multipart.$1");
+                    $error = BML::ml("BML.parse_multipart.$code");
                 }
                 return $err->($error) if $error;
             }
@@ -249,12 +250,12 @@
                 }, 10_000);
                 return $err->(BML::ml(".error.urlerror")) if $res->is_error();
                 
-                if (length($POST{'userpic'}) > $MAX_UPLOAD) {
-                    return $err->(BML::ml($ML{'.error.filetoolarge'}, 
-                                          { 'maxsize' => int($MAX_UPLOAD / 1024) .
-                                                $ML{'.kilobytes'} }));
-                }
-                
+            }
+            
+            if (length($POST{'userpic'}) > $MAX_UPLOAD) {
+                return $err->(BML::ml($ML{'.error.filetoolarge'}, 
+                                      { 'maxsize' => int($MAX_UPLOAD / 1024) .
+                                            $ML{'.kilobytes'} }));
             }
             
             my ($sx, $sy, $filetype) = Image::Size::imgsize(\$POST{'userpic'});
