@@ -1156,7 +1156,7 @@ sub talkform {
     if (!$remote) {
         $ret .= "<tr valign='middle' align='left'><td colspan='2'></td><td><span style='font-size: 8pt; font-style: italic;'>";
         $ret .= BML::ml('.noaccount', {'aopts' => "href='$LJ::SITEROOT/create.bml'"});
-        $ret .= "</font></td></tr>\n";
+        $ret .= "</span></td></tr>\n";
     }
 
     my $basesubject = $form->{subject} || "";
