@@ -714,7 +714,7 @@ if ($u->{'journaltitle'}) {
      return "";
  }
 
- {
+ unless ($LJ::DISABLED{'userinfo_clientusage'}) {
      $body .= "<tr><td align='right' valign='top'><b>" . BML::ml('.label.clientsused',{'siteroot'=>$LJ::SITEROOT}) . "</b></td><td colspan='2'>";
      $sth = $dbr->prepare("SELECT DISTINCT c.client FROM clients c, clientusage cu ".
                           "WHERE cu.userid=$userid AND cu.clientid=c.clientid ORDER BY c.client");
