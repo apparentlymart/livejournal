@@ -53,6 +53,24 @@ $maint{'synsuck'} = sub
             next;
         }
 
+        # WARNING: blatant XML spec violation ahead... 
+        # 
+        # Blogger doesn't produce valid XML, since they don't handle encodings
+        # correctly.  So if we see they have no encoding (which is UTF-8 implictly)
+        # but it's not valid UTF-8, say it's ISO-8859-1, which won't 
+        # cause XML::Parser to barf... but there will probably be some bogus characters.
+        # better than nothing I guess.  (personally, I'd prefer to leave it broken
+        # and have people bitch at Blogger, but jwz wouldn't stop bugging me)
+        # Why not Windows-1252?  XML::Parser doesn't include it.
+        my $encoding;
+        if ($content =~ /<\?xml.+?>/ && $& =~ /encoding=([\"\'])(.+?)\1/) {
+            $encoding = lc($2);
+        }
+        if (! $encoding && ! LJ::is_utf8($content)) {
+            $content =~ s/\?>/ encoding='iso-8859-1' \?>/;
+        }
+
+        # parsing time...
         my $rss = new XML::RSS;
         eval {
             $rss->parse($content);
@@ -140,6 +158,33 @@ $maint{'synsuck'} = sub
         if ($errorflag) {
             $delay->(30, "posterror");
             next;
+        }
+
+        # update syndicated account's userinfo if necessary
+        LJ::load_user_props($dbs, $su, "url", "urlname");
+        {
+            my $title = $rss->channel('title');
+            if ($title && $title ne $su->{'name'}) {
+                $dbh->do("UPDATE user SET name=? WHERE userid=?", undef,
+                         $title, $su->{'userid'});
+                LJ::set_userprop($dbh, $su, "urlname", $title);
+            }
+
+            my $link = $rss->channel('link');
+            if ($link && $link ne $su->{'url'}) {
+                LJ::set_userprop($dbh, $su, "url", $link);
+            }
+
+            my $des = $rss->channel('description');
+            if ($des && $udbh) {
+                my $bio = $udbh->selectrow_array("SELECT bio FROM userbio WHERE userid=?", undef,
+                                                 $su->{'userid'});
+                if ($bio ne $des && $bio !~ /\[LJ:KEEP\]/) {
+                    $udbh->do("REPLACE INTO userbio (userid, bio) VALUES (?,?)", undef,
+                              $su->{'userid'}, $des);
+                    die $udbh->errstr if $udbh->err;
+                }
+            }
         }
 
         my $r_lastmod = LJ::http_to_time($res->header('Last-Modified'));
