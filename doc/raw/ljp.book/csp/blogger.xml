@@ -1,0 +1,36 @@
+<chapter id="ljp.csp.blogger">
+  <title>Supporting the Blogger API</title>
+  <para>
+    Like LiveJournal, the weblog service <ulink url="http://www.blogger.com/">Blogger</ulink> provides a programmatic interface that's been built with <ulink url="http://www.xmlrpc">XML-RPC</ulink>. To allow our users to make use of popular Blogger-compatible tools (Radio, Blogbuddy, w.bloggar, TextRouter), we've added internal support for their API. However, <ulink url="http://www.blogger.com/developers/api/1_docs/">the Blogger API</ulink> is currently labeled as <quote>experimental and alpha</quote>, and will not be developed further.<footnote><simpara>Blogger: <quote>We are working along with others in the blogging industry to produce a new, more robust API. You can view the current state of <ulink url="http://www.intertwingly.net/wiki/pie/RoadMap">the Echo Project here</ulink>.</quote></simpara></footnote>
+  </para>
+  <para>
+    The Blogger interface address for a LiveJournal installation is <ulink url="/interface/blogger/" />.
+  </para>
+  <itemizedlist>
+    <title>Supported Methods</title>
+    <para>LiveJournal supports the following Blogger API methods (methods are linked to relevant documentation):</para>
+    <listitem><simpara><ulink url="http://www.blogger.com/developers/api/1_docs/xmlrpc_newPost.html">blogger.newPost</ulink></simpara></listitem>
+    <listitem><simpara><ulink url="http://www.blogger.com/developers/api/1_docs/xmlrpc_editPost.html">blogger.editPost</ulink></simpara></listitem>
+    <listitem><simpara><ulink url="http://groups.yahoo.com/group/bloggerDev/message/147">blogger.deletePost</ulink></simpara></listitem>
+    <listitem><simpara><ulink url="http://www.blogger.com/developers/api/1_docs/xmlrpc_getUsersBlogs.html">blogger.getUsersBlogs</ulink></simpara></listitem>
+    <listitem><simpara><ulink url="http://groups.yahoo.com/group/bloggerDev/message/225">blogger.getRecentPosts</ulink></simpara></listitem>
+    <listitem><simpara><ulink url="http://groups.yahoo.com/group/bloggerDev/message/296">blogger.getPost</ulink></simpara></listitem>
+    <listitem><simpara><ulink url="http://www.blogger.com/developers/api/1_docs/xmlrpc_getUserInfo.html">blogger.getUserInfo</ulink></simpara></listitem>
+  </itemizedlist>
+  <itemizedlist>
+    <title>Notes</title>
+    <listitem><simpara>LiveJournal makes no use of the <parameter>appkey</parameter> parameter.</simpara></listitem>
+    <listitem><simpara>The Blogger API does not support the use of post titles (subjects). To set a title for your post
+        include the title wrapped in &lt;title&gt; tags in your post body.</simpara></listitem>
+    <listitem><simpara>LiveJournal specific meta data (current mood and music) are supported by including a line consisting of <parameter>lj-<replaceable>metadatakey</replaceable>: metadata</parameter> in the post body (e.g. <parameter>lj-mood: happy</parameter>).</simpara></listitem>
+    <listitem><simpara>The <parameter>publish</parameter> parameter is always set true.</simpara></listitem>
+    <listitem><simpara>blogger.getUserInfo will return the account's name for both <parameter>firstname</parameter> and <parameter>lastname</parameter>.</simpara></listitem>
+    <listitem><simpara>Due to the differences between Blogger's and LiveJournal's template systems, the <methodname>blogger.getTemplate</methodname> and <methodname>blogger.setTemplate</methodname> methods are not supported.</simpara></listitem>
+  </itemizedlist>
+</chapter>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("index.xml" "book" "part")
+End:
+-->

@@ -2,22 +2,24 @@
   <title>Client/Server Protocol</title>
   <partintro>
     <para>
-      This client/server protocol is the aspect of LiveJournal that makes it a little more unique than other journal systems.
+      Currently there are a few types of interfaces available to the LiveJournal
+      protocol: the older "flat" interface, the custom XML-RPC interface, and a modified version of the Blogger API.
+      The XMLRPC interface is probably easiest to use, because there are quite a few XML-RPC
+      resources available to developers in just about any programming language. If
+      you're in a situation that requires you to write your own interface wrapper,
+      then the flat interface is probably best to use.
     </para>
-    <para>
-      Currently there are two types of interfaces available to the LiveJournal protocol, the older "flat" interface, or the XML-RPC interface.
-      The XMLRPC interface is probably easiest to use, because there are quite a few XML-RPC resources available to developers in just about any programming language.
-      If you're in a situation that requires you to write your own interface wrapper, then the flat interface is probably best to use.
-    </para>
-    <note>
+    <tip>
       <para>
-        Internally, both interfaces are just wrappers around the same APIs.  Don't worry too much about which one you use, as they accomplish the same thing.
+        Internally, all interfaces are just wrappers around the same functions.  Don't
+        worry too much about which one you use, as they accomplish the same thing.
       </para>
-    </note>
+    </tip>
   </partintro>
   &ljp.csp.guide;
   &ljp.csp.flat.index;
   &ljp.csp.xml-rpc.index;
+  &ljp.csp.blogger;
   &ljp.csp.versions;
   &ljp.csp.proplist;
   &ljp.csp.appx.faq;
