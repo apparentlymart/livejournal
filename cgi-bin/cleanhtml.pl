@@ -50,6 +50,15 @@ my $onechar;
     $onechar = qr/$match/o;
 }
 
+# Some browsers, such as Internet Explorer, have decided to alllow
+# certain HTML tags to be an alias of another.  This has manifested
+# itself into a problem, as these aliases act in the browser in the
+# same manner as the original tag, but are not treated the same by
+# the HTML cleaner.
+# 'alias' => 'real'
+my %tag_substitute = (
+                      'image' => 'img',
+                      );
 
 # <LJFUNC>
 # name: LJ::CleanHTML::clean
@@ -127,6 +136,9 @@ sub clean
     while (my $token = $p->get_token)
     {
         my $type = $token->[0];
+
+        # See if this tag should be treated as an alias
+        $token->[1] = $tag_substitute{$token->[1]} if defined $tag_substitute{$token->[1]};
 
         if ($type eq "S")     # start tag
         {
