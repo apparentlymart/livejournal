@@ -21,7 +21,9 @@ BODY<=
  $FORM{'password'} = $query->param('password');
  $FORM{'hpassword'} = $query->param('hpassword');
  $FORM{'make_default'} = $query->param('make_default');
+ $FORM{'authas'} = $query->param('authas');
 
+ my $u;
  my $user;
  my @errors = ();
 
@@ -29,32 +31,21 @@ BODY<=
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
 
- my $remote;
+ my $remote = LJ::get_remote($dbs);
 
- my $authas = $query->param('authas');
- if ($authas) {
-     $remote = LJ::get_remote($dbs);
-     return LJ::bad_input("No longer logged in?") unless $remote;
+ my $err;
+ my $user = LJ::get_effective_user($dbs, {
+     'form' => \%FORM,
+     'out_u' => \$u,
+     'remote' => $remote,
+     'out_err' => \$err,
+ });
+ return LJ::bad_input($err) if $err;
 
-     if ($authas eq "(remote)") {
-	 $user = $remote->{'user'};
-     } else {
-	 return LJ::bad_input("Not admin of selected community")
-	     unless LJ::check_priv($dbs, $remote, "sharedjournal", $authas);
-	 $user = $authas;
-     }
- } else {
-     $user = $FORM{'user'};
- }
-
- my $u = LJ::load_user($dbs, $user);
+ $u ||= LJ::load_user($dbs, $user);
  return LJ::bad_input("Invalid username") unless $u;
 
  my $userid = $u->{'userid'}+0;
-
- if (! $authas && ! LJ::valid_password($u->{'password'}, \%FORM)) { 
-     push @errors, "Incorrect password."; 
- }
 
  if ($FORM{'src'} eq "url" && $FORM{'urlpic'} !~ /^http:\/\//) {
      push @errors, "The address for the picture to be uploaded does not look correct.  It should start with <b>http://</b>";
@@ -64,7 +55,7 @@ BODY<=
 
  # now we're authenticated
  my $authaslink;
- $authaslink = "?authas=$authas" if ($authas =~ /^\w/);
+ $authaslink = "?authas=$FORM{'authas'}" if ($FORM{'authas'} =~ /^\w/);
  $authaslink ||= "?user=$user" if $FORM{'user'};
 
  my $ret = "";

@@ -615,6 +615,8 @@ sub get_effective_user
     my $refu = $opts->{'out_u'};
     my $referr = $opts->{'out_err'};
     my $remote = $opts->{'remote'};
+    
+    $$referr = "";
 
     # presence of 'altlogin' means user is probably logged in but
     # wants to act as somebody else, so ignore their cookie and just
