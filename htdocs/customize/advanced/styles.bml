@@ -153,8 +153,10 @@
                 $POST{'stylename'} ne $style->{'name'}) {
 
                 # update db
+                my $styleid = $style->{'styleid'};
                 $dbh->do("UPDATE s2styles SET name=? WHERE styleid=? AND userid=?",
-                         undef, $POST{'stylename'}, $style->{'styleid'}, $u->{'userid'});
+                         undef, $POST{'stylename'}, $styleid, $u->{'userid'});
+                LJ::MemCache::delete([$styleid, "s2s:$styleid"]);
 
                 # update style object
                 $style->{'name'} = $POST{'stylename'};

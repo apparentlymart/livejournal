@@ -558,10 +558,15 @@ sub load_style
     my $id = shift;
     return undef unless $id;
 
-    $db ||= LJ::S2::get_s2_reader();
-    my $style = $db->selectrow_hashref("SELECT styleid, userid, name, modtime ".
-                                       "FROM s2styles WHERE styleid=?",
-                                       undef, $id);
+    my $memkey = [$id, "s2s:$id"];
+    my $style = LJ::MemCache::get($memkey);
+    unless ($style) {
+        $db ||= LJ::S2::get_s2_reader();
+        $style = $db->selectrow_hashref("SELECT styleid, userid, name, modtime ".
+                                        "FROM s2styles WHERE styleid=?",
+                                        undef, $id);
+        LJ::MemCache::add($memkey, $style, 3600);
+    }
     return undef unless $style;
 
     my $u = LJ::load_userid($style->{userid})
@@ -725,6 +730,7 @@ sub set_style_layers_raw {
 
     # delete memcache key
     LJ::MemCache::delete([$styleid, "s2sl:$styleid"]);
+    LJ::MemCache::delete([$styleid, "s2s:$styleid"]);
 
     return 1;
 }

@@ -1,4 +1,4 @@
-<uid> userid:<uid>   == $u, 30 min
+<uid> userid:<uid>   == $u, 30 min  (in arrayref packed form)
       uidof:<user>   == userid
 <uid> uprop:<uid>:<propid> == scalar, 30 minutes
 <uid> sess:<uid>:<sessid> == sessions row hashref
@@ -35,6 +35,7 @@
 <styleid> s1stylemap: <styleid> == userid who owns the given styleid
 
 <styleid> s2sl:<styleid> == hashref of s2stylelayers { type => s2lid }
+<styleid> s2s:<styleid> == hashref of s2styles row
           s2publayers == memoize LJ::S2::get_public_layers for 10 mins          
 
 <uid> checkfriends:<uid>:<mask> == scalar maxupdate, expires after refresh interval
