@@ -267,7 +267,7 @@ if ($opt_pop)
                     push @vals, "$pv|$w|$h";
                 }
                 $dbh->do("REPLACE INTO s2info (s2lid, infokey, value) VALUES (?,?,?)",
-                         undef, $id, '_previews', join(",", @vals));
+                         undef, $id, '_previews', join(",", @vals)) if @vals;
             }
             
             if ($opt_compiletodisk) {
