@@ -88,9 +88,7 @@
      return;
  }
 
- if ($u->{'clusterid'}) {
-     $dbcr = LJ::get_cluster_reader($u);
- }
+ $dbcr = LJ::get_cluster_reader($u);
 
  my $remote_isowner = $remote && $remote->{'user'} eq $u->{'user'};
  my $remote_isfriend = LJ::is_friend($dbr, $u, $remote);
@@ -713,13 +711,7 @@ if ($u->{'journaltitle'}) {
 
  # count journal entries
  {
-     my $count;
-     
-     if ($u->{'clusterid'}) {
-         $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM log2 WHERE journalid=$userid");
-     } else {
-         $count = $dbr->selectrow_array("SELECT COUNT(*) FROM log WHERE ownerid=$userid"); 
-     }
+     my $count = $dbcr->selectrow_array("SELECT COUNT(*) FROM log2 WHERE journalid=$userid");
      $body .= "<tr><td align='right' nowrap='nowrap'><b>$ML{'.label.journalentrs'}</b></td><td colspan='2'>" .
          &comma($count) . "</td></tr>";
  }
@@ -742,22 +734,12 @@ if ($u->{'journaltitle'}) {
  {
      my ($com_post, $com_got);
      unless ($LJ::DISABLED{'show-talkleft'}) {
-         if ($u->{'clusterid'}) {
-             $com_post = comma($dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft ".
-                                                       "WHERE userid=$userid"));
-         } else {
-             $com_post = comma($dbr->selectrow_array("SELECT COUNT(*) FROM talk ".
-                                                      "WHERE posterid=$userid"));
-         }
+         $com_post = comma($dbcr->selectrow_array("SELECT COUNT(*) FROM talkleft ".
+                                                  "WHERE userid=$userid"));
          $com_post = BML::ml('.label.composted', {'num'=>$com_post});
      }
-     if ($u->{'clusterid'}) {
-         $com_got = comma($dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 ".
-                                                 "WHERE journalid=$userid"));
-     } else {
-         $com_got = comma($dbr->selectrow_array("SELECT COUNT(*) FROM talk ".
-                                                "WHERE journalid=$userid"));
-     }
+     $com_got = comma($dbcr->selectrow_array("SELECT COUNT(*) FROM talk2 ".
+                                             "WHERE journalid=$userid"));
      $com_got = BML::ml('.label.comreceived', {'num'=>$com_got});
      $body .= "<tr><td align='right'><b>$ML{'.label.comments'}</b></td><td colspan='2'>$com_post" .
          $com_got . "</td></tr>";
