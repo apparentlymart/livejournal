@@ -66,6 +66,7 @@
 
      $ret .= "<form method=post><p>";
      $ret .= "<tt>enter commands:</tt><br>";
+     $ret .= LJ::html_hidden('remoteuser', $remote->{'user'}) if $remote;
      $ret .= "<textarea name=commands rows=3 cols=60 wrap=off></textarea> ";
      $ret .= "<input type=submit value=\"execute\"></form>\n";
 
