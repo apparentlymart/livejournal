@@ -3307,6 +3307,17 @@ sub get_dbh
 
     my $now = time();
 
+    # if non-master request and we haven't yet hit the master to get
+    # the dbinfo, do that first.  (normal code path is something
+    # calls LJ::start_request(), then gets master, then gets other)
+    # but this path happens also.
+    if ($role ne "master" && $LJ::DBWEIGHTS_FROM_DB &&
+	! $LJ::DBINFO{'_fromdb'}) 
+    {
+	$LJ::NEED_DBWEIGHTS = 1;
+	LJ::get_dbh("master");
+    }
+
     # otherwise, see if we have a role -> full DSN mapping already
     my ($fdsn, $dbh);
     if ($role eq "master") { 
@@ -3465,7 +3476,7 @@ sub _reload_weights
 			    "WHERE i.dbid=w.dbid");
     $sth->execute;
     
-    my %dbinfo;
+    my %dbinfo = ('_fromdb' => 1);
     while (my $r = $sth->fetchrow_hashref) {
 	my $name = $r->{'masterid'} ? $r->{'name'} : "master";
 	$dbinfo{$name}->{'_fdsn'} = $r->{'fdsn'};
