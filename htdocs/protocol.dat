@@ -66,6 +66,10 @@ Send something for this key if you want to get a list/tree of web jump menus to 
 .des
 If your client supports picture keywords and you want to receive that list, send something for this key, like "1", and you'll receieve the list of picture keywords the user has defined.
 }
+{ getpickwurls
+.des
+If your client supports picture keywords and can also display the pictures somehow, send something for this key, like "1", and you'll receieve the list of picture keyword URLs that correspond to the picture keywords.  You must send getpickws for this option to even matter.
+}
 .response
 { name
 .des
@@ -130,6 +134,14 @@ The number of picture keywords about to be returned.  Picture keywords are used 
 { pickw_<I>n</I>
 .des
 The <I>n</I>th picture keyword, where <I>n</I> is between 1 and <tt>pickw_count</tt>.  If a user selects one of these, send it as postevent/editevent meta-data with the key "picture_keyword" (which of course you have to prefix with "prop_" when sending)
+}
+{ pickwurl_count
+.des
+The number of picture URLs being returned, if you sent the 'getpickwurls' key.  This number will always be the same as pickw_count.
+}
+{ pickwurl_<i>n</i>
+.des
+The URL of the <i>n</i>th picture.  It corresponds with the <i>n</i>th picture keyword returned in the other list.  Note that the content behind these URLs can <u>never</u> change, so if your client downloads these to display, just cache them locally and never hit the servers again to re-download them or to even check if they've been modified.
 }
 { fastserver
 .des

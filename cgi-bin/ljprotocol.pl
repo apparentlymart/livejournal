@@ -118,7 +118,13 @@ sub login
 
     ### picture keywords, if they asked for them.
     if ($req->{'getpickws'}) {
-	$res->{'pickws'} = list_pickws($dbs, $u);
+	my $pickws = list_pickws($dbs, $u);
+	$res->{'pickws'} = [ map { $_->[0] } @$pickws ];
+	if ($req->{'getpickwurls'}) {
+	    $res->{'pickwurls'} = [ map {
+		"$LJ::SITEROOT/userpic/$_->[1]"
+	    } @$pickws ];
+	}
     }
 
     ## return client menu tree, if requested
@@ -913,6 +919,8 @@ sub getevents
     return undef unless check_altusage($dbs, $req, $err, $flags);
 
     my $u = $flags->{'u'};    
+    my $uowner = $flags->{'u_owner'} || $u;
+
     my $dbr = $dbs->{'reader'};
     my $dbh = $dbs->{'dbh'};
     my $sth;
@@ -1571,15 +1579,14 @@ sub list_pickws
     my $dbr = $dbs->{'reader'};
     my $res = [];
 
-    my $sth = $dbr->prepare("SELECT k.keyword FROM userpicmap m, keywords k ".
+    my $sth = $dbr->prepare("SELECT k.keyword, m.picid FROM userpicmap m, keywords k ".
 			    "WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid ".
 			    "ORDER BY k.keyword");
     $sth->execute;
-    while ($_ = $sth->fetchrow_array) {
-	s/[\n\r\0]//g;  # used to be a bug that allowed these characters to get in.
-	push @$res, $_;
+    while (my ($kw, $id) = $sth->fetchrow_array) {
+	$kw =~ s/[\n\r\0]//g;  # used to be a bug that allowed these characters to get in.
+	push @$res, [ $kw, $id ];
     }
-    $sth->finish;
     return $res;
 }
 
@@ -1810,19 +1817,22 @@ sub login
     # friend groups
     populate_friend_groups($res, $rs->{'friendgroups'});
     
+    my $flatten = sub {
+	my ($prefix, $listref) = @_;
+	my $ct = 0;
+	foreach (@$listref) {
+	    $ct++;
+	    $res->{"${prefix}_$ct"} = $_;
+	}
+	$res->{"${prefix}_count"} = $ct;
+    };
+
     ### picture keywords
-    if (defined $req->{"getpickws"}) 
-    {
-	my $pickw_count = 0;
-	foreach (@{$rs->{'pickws'}}) {
-	    $pickw_count++;
-	    $res->{"pickw_${pickw_count}"} = $_;
-	}
-	if ($pickw_count) {
-	    $res->{"pickw_count"} = $pickw_count;
-	}
-    }
-    
+    $flatten->("pickw", $rs->{'pickws'})
+	if defined $req->{"getpickws"};
+    $flatten->("pickwurl", $rs->{'pickwurls'})
+	if defined $req->{"getpickwurls"};
+
     ### report new moods that this client hasn't heard of, if they care
     if (defined $req->{"getmoods"}) {
 	my $mood_count = 0;	
