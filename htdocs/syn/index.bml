@@ -129,7 +129,7 @@ body<=
 
     # find popular feeds the user isn't currently watching
     my @pop;
-    $sth = $dbh->prepare("SELECT s.userid, su.user, s.synurl, count(*) FROM syndicated s, useridmap su, friends fa LEFT JOIN friends fu ON fu.userid=? AND fu.friendid=s.userid WHERE fu.userid IS NULL AND s.userid=su.userid and fa.friendid=s.userid AND s.lastcheck > DATE_SUB(NOW(), INTERVAL 5 DAY) GROUP BY 1, 2, 3 ORDER BY 4 DESC LIMIT 20");
+    $sth = $dbh->prepare("SELECT s.userid, su.user, s.synurl, count(*) FROM syndicated s, useridmap su, friends fa LEFT JOIN friends fu ON fu.userid=? AND fu.friendid=s.userid WHERE fu.userid IS NULL AND s.userid=su.userid and fa.friendid=s.userid AND s.lastnew > DATE_SUB(NOW(), INTERVAL 14 DAY) GROUP BY 1, 2, 3 ORDER BY 4 DESC LIMIT 20");
     $sth->execute($u->{'userid'});
     while (my ($suserid, $user, $url, $count) = $sth->fetchrow_array) {
         my $cost = LJ::syn_cost($count + 1);

@@ -25,8 +25,10 @@ $maint{'synsuck'} = sub
     {
         my $delay = sub {
             my $minutes = shift;
-            $dbh->do("UPDATE syndicated SET checknext=DATE_ADD(NOW(), ".
-                     "INTERVAL $minutes MINUTE) WHERE userid=$userid");
+            my $status = shift;
+            $dbh->do("UPDATE syndicated SET lastcheck=NOW(), checknext=DATE_ADD(NOW(), ".
+                     "INTERVAL ? MINUTE), laststatus=? WHERE userid=?",
+                     undef, $minutes, $status, $userid);
         };
 
         print "Synsuck: $user ($synurl)\n";
@@ -42,12 +44,12 @@ $maint{'synsuck'} = sub
             if (length($content) > 1024*150) { $too_big = 1; return; }
             $content .= $_[0];
         }, 4096);
-        if ($too_big) { $delay->(60); next; }
+        if ($too_big) { $delay->(60, "toobig"); next; }
 
         # check if not modified
         if ($res->status_line() =~ /^304/) {
             print "  not modified.\n";
-            $delay->(60);
+            $delay->(60, "notmodified");
             next;
         }
 
@@ -58,12 +60,12 @@ $maint{'synsuck'} = sub
         if ($@) {
             # parse error!
             print "Parse error!\n";
-            $delay->(3*60);
+            $delay->(3*60, "parseerror");
             next;
         }
 
         # another sanity check
-        unless (ref $rss->{'items'} eq "ARRAY") { $delay->(3*60); next; }
+        unless (ref $rss->{'items'} eq "ARRAY") { $delay->(3*60, "noitems"); next; }
 
         my @items = reverse @{$rss->{'items'}};
 
@@ -136,7 +138,7 @@ $maint{'synsuck'} = sub
 
         # bail out if errors, and try again shortly
         if ($errorflag) {
-            $delay->(30);
+            $delay->(30, "posterror");
             next;
         }
 
@@ -146,11 +148,12 @@ $maint{'synsuck'} = sub
         # decide when to poll next (in minutes). 
         # FIXME: this is super lame.  (use hints in RSS file!)
         my $int = $newcount ? 30 : 60;
+        my $status = $newcount ? "ok" : "nonew";
+        my $updatenew = $newcount ? ", lastnew=NOW()" : "";
  
         $dbh->do("UPDATE syndicated SET checknext=DATE_ADD(NOW(), INTERVAL $int MINUTE), ".
-                 "lastcheck=NOW(), lastmod=?, etag=? WHERE userid=$userid", undef,
-                 $r_lastmod, $r_etag);
-
+                 "lastcheck=NOW(), lastmod=?, etag=?, laststatus=? $updatenew ".
+                 "WHERE userid=$userid", undef, $r_lastmod, $r_etag, $status);
     }
 };
 

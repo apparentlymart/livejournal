@@ -1833,6 +1833,11 @@ register_alter(sub {
         do_alter("user", "ALTER TABLE user MODIFY journaltype CHAR(1) NOT NULL DEFAULT 'P'");
     }
 
+    unless (column_type("syndicated", "laststatus")) {
+        do_alter("syndicated",
+                 "ALTER TABLE syndicated ADD laststatus VARCHAR(80), ADD lastnew DATETIME");
+    }
+
     # change themedata. key to being unique, if it's not already
     {
         my $sth = $dbh->prepare("SHOW INDEX FROM themedata");

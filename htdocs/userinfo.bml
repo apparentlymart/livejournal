@@ -320,6 +320,26 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
               "<img src='$LJ::IMGPREFIX/xml.gif' width='36' height='14' align='absmiddle' border='0'></a>";
      $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.syndicatedfrom'}</b></td>\n".
               "<td>$link $icon</td></tr>\n";
+
+     # syndication status
+     $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.syndicatedstatus'}</b></td><td>\n";
+     $body .= "$ML{'.syn.lastcheck'} ";
+     $body .= $synd->{'lastcheck'} || $ML{'.syn.last.never'};
+     my $status = {
+         'parseerror' => "Parse error",
+         'notmodified' => "Not Modified",
+         'toobig' => "Too big",
+         'posterror' => "Posting error",
+         'ok' => "",     # no status line necessary
+         'nonew' => "",  # no status line necessary
+     }->{$synd->{'laststatus'}};
+     $body .= " ($status)" if $status;
+     $body .= "<br />$ML{'.syn.lastnew'} ";
+     $body .= $synd->{'lastnew'} || $ML{'.syn.last.never'};
+
+     $body .= "<br />$ML{'.syn.nextcheck'} $synd->{'checknext'}";
+     $body .= "</td></tr>\n";
+     
  }
 
  ## text message
