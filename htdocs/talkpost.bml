@@ -417,14 +417,14 @@ body<=
          
          # go through and make radio button/icon image rows.
          foreach (@{$pics->{'lists'}->{$type}}) {
-             $input .= "<td valign='middle' align='middle'><input type='radio' name='subjecticon' value='$_->{'id'}'></TD>\n";
-             $img .= "<td valign='middle' align='middle'>" . LJ::Talk::show_image($pics, $_->{'id'}) . "</td>\n";
+             $input .= "<td valign='middle' align='middle'><input type='radio' name='subjecticon' value='$_->{'id'}' id='talki_$_->{'id'}'></TD>\n";
+             $img .= "<td valign='middle' align='middle'><label for='talki_$_->{'id'}'>" . LJ::Talk::show_image($pics, $_->{'id'}) . "</label></td>\n";
          }
          $ret .= "<tr>";
          
          # make an option if they don't want an image
          if ($type eq $pics->{'types'}->[0]) { 
-             $ret .= "<td rowspan='5' valign='middle' align='middle'><input type='radio' name='subjecticon' value='none' checked='1'><br /><i>$ML{'.opt.noimage'}</i></td><td rowspan='5'>&nbsp;</td>\n"; 
+             $ret .= "<td rowspan='4' valign='middle' align='middle'><input type='radio' name='subjecticon' value='none' checked='1' id='talki_none'><br /><label for='talki_none'><i>$ML{'.opt.noimage'}</i></label></td><td rowspan='4'>&nbsp;</td>\n"; 
          }
          
          # then splice in the icon & radio button rows...
@@ -433,7 +433,7 @@ body<=
          
          # do a HR between different $types.
          unless ($type eq $pics->{'types'}->[-1]) {
-             $ret .= "<tr><td colspan='" . scalar(@{$pics->{'lists'}->{$type}}) . "' valign='middle' align='middle'><hr size='1'></td></tr>\n"; 
+             #$ret .= "<tr><td colspan='" . scalar(@{$pics->{'lists'}->{$type}}) . "' valign='middle' align='middle'><hr size='1'></td></tr>\n"; 
          }
      }
      # end that table, foo!
