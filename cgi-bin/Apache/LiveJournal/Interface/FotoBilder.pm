@@ -46,6 +46,7 @@ sub checksession
 
     $r->print("user: $remote->{'user'}\n");
     my $u = LJ::load_user($remote->{'user'});
+    return OK unless $u->{'journaltype'} eq 'P';
     $r->print("userid: $u->{'userid'}\n");
 
     $r->print("can_upload: " . (can_upload($u)) . "\n");
