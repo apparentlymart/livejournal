@@ -119,22 +119,22 @@ sub editPost {
 sub getUsersBlogs {
     shift;
     my ($appkey, $user, $password) = @_;
-    
+
     my $u = LJ::load_user($user) or die "Invalid login\n";
     die "Invalid login\n" unless LJ::auth_okay($u, $password);
 
-    my $dbr = LJ::get_db_reader() or die "Database temporarily unavailable\n";
-    my $sth = $dbr->prepare("SELECT u.* FROM user u, reluser ru ".
-                            "WHERE ru.userid=u.userid AND ru.type='P' AND ".
-                            "u.statusvis='V' AND ".
-                            "ru.targetid=?");
+    my $ids = LJ::load_rel_target($u, 'P');
+    my $us = LJ::load_userids(@$ids);
     my @list = ($u);
-    $sth->execute($u->{'userid'});
-    push @list, $_ while $_ = $sth->fetchrow_hashref;
+    foreach (sort { $a->{user} cmp $b->{user} } values %$us) {
+        next unless $_->{'statusvis'} eq "V";
+        push @list, $_;
+    }
+
     return [ map { {
         'url' => LJ::journal_base($_) . "/",
         'blogid' => $_->{'user'},
-        'blogName' => $_->{'name'}, 
+        'blogName' => $_->{'name'},
     } } @list ];
 }
 

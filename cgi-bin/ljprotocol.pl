@@ -2109,14 +2109,11 @@ sub list_usejournals
 
     my @res;
 
-    my $dbr = LJ::get_db_reader();
-    my $sth = $dbr->prepare("SELECT u.user FROM user u, reluser ru ".
-                            "WHERE ru.userid=u.userid AND ru.type='P' AND ".
-                            "u.statusvis='V' AND ".
-                            "ru.targetid=?");
-    $sth->execute($u->{'userid'});
-    while (my $u = $sth->fetchrow_array) {
-        push @res, $u;
+    my $ids = LJ::load_rel_target($u, 'P');
+    my $us = LJ::load_userids(@$ids);
+    foreach (values %$us) {
+        next unless $_->{'statusvis'} eq "V";
+        push @res, $_->{user};
     }
     @res = sort @res;
     return \@res;
