@@ -133,7 +133,7 @@ ins {
 
     $ret .= $setmode->("");
     while ($pos < @words) {
-        my $word = $words[$pos];
+        my $word = LJ::ehtml($words[$pos]);
         $word =~ s/\*NEWLINE\*/<br>\n/g;
         $ret .= "$word ";
         $pos++;

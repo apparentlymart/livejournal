@@ -1,9 +1,11 @@
 <html>
 <head><title>Search Form</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body marginwidth='0' marginheight='0'>
 <form target='res' action='search.bml' method='get'>
 <input type='hidden' name='lang' value='<?_code $FORM{'lang'} _code?>'>
+<input type='hidden' name='search' value='sev'>
 
 [<a href="./" target='_top'>&lt;-- Back</a>]
 <?_code
@@ -23,8 +25,13 @@ _code?>
 <option value="3">3</option>
 <option value="3+">3+</option>
 <option value="4">4</option>
-</select><input type='submit' name='search:sev' value='Search'/>
+</select><input type='submit' value='Search'/>
 </p>
+</form>
+
+<form target='res' action='search.bml' method='get'>
+<input type='hidden' name='lang' value='<?_code $FORM{'lang'} _code?>'>
+<input type='hidden' name='search' value='txt'>
 
 <p>Search 
 <?_code
@@ -43,7 +50,7 @@ _code?>
                          sort { $a->{'dmid'} <=> $b->{'dmid'} } LJ::Lang::get_domains());
  return $ret;
 _code?>
-    <br />Text: <input name='searchtext' size='15'><input type='submit' name='search:txt' value='Search'>
+    <br />Text: <input name='searchtext' size='15'><input type='submit' value='Search'>
 </p>
 
 

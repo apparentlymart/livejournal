@@ -115,7 +115,7 @@
 
          my $difflink;
          if ($lat->{'staleness'}) {
-             $difflink = "(<a target='_new' href='diff.bml?it=$i->{'dmid'}:$i->{'itid'}&lang=$lp->{'lncode'}'>diff</a>)";
+             $difflink = "($plat->{'chgtime'}, <a target='_new' href='diff.bml?it=$i->{'dmid'}:$i->{'itid'}&lang=$lp->{'lncode'}'>diff</a>)";
          }
 
          $ret .= "$it->{'itcode'} $difflink</td>";
@@ -136,6 +136,7 @@
              $ret .= "<dt><b>$lp->{'lnname'}:</b></dt>";
              my $t = $ml_text{"$plat->{'dmid'}-$plat->{'txtid'}"}->{'text'};
              if ($t =~ /\n/) { $use_textarea = 1; }
+             if (length($t) > 255) { $use_textarea = 1; }
              $t = LJ::eall($t);
              $t =~ s/\n( *)/"<br \/>" . "&nbsp;"x length($1)/eg;
              $ret .= "<dd>$t</dd>";
@@ -143,6 +144,7 @@
 
          my $curtext = LJ::eall($ml_text{"$lat->{'dmid'}-$lat->{'txtid'}"}->{'text'});
          if ($curtext =~ /\n/) { $use_textarea = 1; }
+         if (length($curtext) > 255) { $use_textarea = 1; }
          if ($lat->{'staleness'} >= 3) {
              # if wrong language, why populate it with stuff they'll just have to delete?
              $curtext = "";
