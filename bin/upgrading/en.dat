@@ -31,6 +31,59 @@
 
 /allpics.bml.title=User Pictures
 
+/changepassword.bml.btn.proceed=Proceed
+
+/changepassword.bml.changepassword.header=Change Password
+
+/changepassword.bml.changepassword.instructions=Fill out the form below to change your password.  
+
+/changepassword.bml.email.body<<
+Your password has been changed at [[sitename]].
+
+To retrieve it in the future, visit:
+
+  [[siteroot]]/lostinfo.bml
+
+Regards,
+[[sitename]] Team
+
+[[siteroot]]
+.
+
+/changepassword.bml.email.subject=Change of Password
+
+/changepassword.bml.error.badcheck=Bad new password: [[error]]
+
+/changepassword.bml.error.badnewpassword=Your new passwords do not match.  Retype both again... you made a typo on one of them.
+
+/changepassword.bml.error.badoldpassword=Your old password is not correct.
+
+/changepassword.bml.error.blankpassword=Your new password cannot be blank.
+
+/changepassword.bml.error.changetestaccount=Cannot change the test account's password.
+
+/changepassword.bml.error.characterlimit=Passwords are limited to a maximum of 30 characters.
+
+/changepassword.bml.error.invaliduser=Invalid user <B>[[user]]</B>.  This user does not exist.  Are you sure you typed it correctly?
+
+/changepassword.bml.error.mustenterusername=You must enter your username.
+
+/changepassword.bml.error.nonascii=Passwords are restricted to ASCII symbols. Please choose a password that does not use non-ASCII symbols.
+
+/changepassword.bml.error.notvalidated=You cannot change your password if your current email address has not been validated.
+
+/changepassword.bml.newpassword=New Password:
+
+/changepassword.bml.newpasswordagain=New Password (again):
+
+/changepassword.bml.oldpassword=Old Password:
+
+/changepassword.bml.proceed.instructions=Press the button below and your password will be changed. You will receive an email as well, noting the password change.
+
+/changepassword.bml.success.text=Your password has been changed and email has been sent to you with a reminder message.
+
+/changepassword.bml.title=Change Password
+
 /community/index.bml.title=Community Center
 
 /community/join.bml.button.join=Join Community
@@ -2115,9 +2168,9 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /tools/memadd.bml.title.added=Added
 
-/tools/memadd.bml.title.deleted=Deleted
-
 /tools/memadd.bml.title.add_memory=Add Memorable Entry
+
+/tools/memadd.bml.title.deleted=Deleted
 
 /tools/memadd.bml.title.edit_memory=Edit Memorable Entry
 
