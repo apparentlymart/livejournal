@@ -174,7 +174,8 @@ sub clean
             {
                 my $alt_output = 0;
 
-                my $hash = $token->[2];
+                my $hash  = $token->[2];
+                my $attrs = $token->[3]; # attribute names, in original order
                 
                 $slashclose = 1 if delete $hash->{'/'};
 
@@ -287,9 +288,14 @@ sub clean
 
                         if ($allow) { $newdata .= "<$tag"; }
                         else { $newdata .= "&lt;$tag"; }
-                        foreach (keys %$hash) {
-                            $newdata .= " $_=\"" . LJ::ehtml($hash->{$_}) . "\"";
+
+                        # output attributes in original order, but only those
+                        # that are allowed (by still being in %$hash after cleaning)
+                        foreach (@$attrs) {
+                            $newdata .= " $_=\"" . LJ::ehtml($hash->{$_}) . "\""
+                                if exists $hash->{$_};
                         }
+
                         if ($slashclose) {
                             $newdata .= " /";
                             $opencount{$tag}--;
