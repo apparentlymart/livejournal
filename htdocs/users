@@ -196,6 +196,7 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
     } else {
 	print "Content-type: text/html\n";
 	print "Cache-Control: private, proxy-revalidate\n";
+	print "Vary: Accept-Encoding, Cookie\n";
 	if ($ENV{'HTTP_ACCEPT_ENCODING'} =~ /gzip/) {
 	    my $gzip = Compress::Zlib::memGzip($html);
 	    print "Content-Encoding: gzip\n";
