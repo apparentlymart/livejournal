@@ -118,23 +118,52 @@ sub get_friend_items
 	}
     }
 
-    $sth = $dbr->prepare("SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate) FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V' AND uu.timeupdate IS NOT NULL");
-    $sth->execute;
+    my @friends_buffer = ();
+    my $total_loaded = 0;
+    my $buffer_unit = $getitems;  # nice guess: 1 entry per friend.
 
-    my @friends = ();
-    while (my ($userid, $update) = $sth->fetchrow_array) {
-	push @friends, [ $userid, $update ];
-    }
-    @friends = sort { $a->[1] <=> $b->[1] } @friends;
+    my $get_next_friend = sub 
+    {
+	# return one if we already have some loaded.
+	if (@friends_buffer) {
+	    return $friends_buffer[0];
+	}
 
+	# load another batch if we just started or
+	# if we just finished a batch.
+	if ($total_loaded % $buffer_unit == 0) 
+	{
+	    my $sth = $dbr->prepare("SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate) FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V' AND uu.timeupdate IS NOT NULL ORDER BY 2 LIMIT $total_loaded, $buffer_unit");
+	    $sth->execute;
+
+	    while (my ($userid, $update) = $sth->fetchrow_array) {
+		push @friends_buffer, [ $userid, $update ];
+		$total_loaded++;
+	    }
+
+	    # return one if we just found some fine, else we're all
+	    # out and there's nobody else to load.
+	    if (@friends_buffer) {
+		return $friends_buffer[0];
+	    } else {
+		return undef;
+	    }
+	}
+
+	# otherwise we must've run out.
+	return undef;
+    };
+    
     my $loop = 1;
     my $lastmax = 0;
     my $itemsleft = $getitems;
- 
-    while ($loop && @friends)
+    my $fr;
+
+    while ($loop && ($fr = $get_next_friend->()))
     {
+	shift @friends_buffer;
+
 	# load the next recent updating friend's recent items
-	my $fr = shift @friends;
 	my $friendid = $fr->[0];
 
 	my @newitems = LJ::get_recent_items($dbs, {
@@ -169,7 +198,8 @@ sub get_friend_items
 	    # stop looping if we know the next friend's newest entry
 	    # is greater (older) than the oldest one we've already
 	    # loaded.
-	    $loop = 0 if (@friends && $friends[0]->[1] > $lastmax);
+	    my $nextfr = $get_next_friend->();
+	    $loop = 0 if ($nextfr && $nextfr->[1] > $lastmax);
 	}
     }
 
