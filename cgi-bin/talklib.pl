@@ -1229,10 +1229,10 @@ sub enter_comment {
             $table = "talkleft_xfp";
         }
         my $pub  = $item->{'security'} eq "public" ? 1 : 0;
-        $db->do("INSERT INTO ? (userid, posttime, journalid, nodetype, ".
+        $db->do("INSERT INTO $table (userid, posttime, journalid, nodetype, ".
                 "nodeid, jtalkid, publicitem) VALUES (?, UNIX_TIMESTAMP(), ".
                 "?, 'L', ?, ?, ?)", undef,
-                $table, $posterid, $journalu->{userid}, $itemid, $jtalkid, $pub);
+                $posterid, $journalu->{userid}, $itemid, $jtalkid, $pub);
     }
 
     $dbcm->do("INSERT INTO talktext2 (journalid, jtalkid, subject, body) ".
