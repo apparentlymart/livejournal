@@ -372,9 +372,9 @@ sub file_request
 
     $body = "Your $LJ::SITENAME support request regarding \"$o->{'subject'}\" has been filed and will be answered as soon as possible.  Your request tracking number is $spid.\n\n";
     $body .= "You can track your request's progress or add information here:\n\n  ";
-    $body .= LJ::make_text_link($urlauth, $email);
+    $body .= $urlauth;
     $body .= "\n\nIf you figure out the problem before somebody gets back to you, please cancel your request by clicking this:\n\n  ";
-    $body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$authcode", $email);
+    $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$authcode";
    
     unless ($scat->{'no_autoreply'})
     {
@@ -400,7 +400,6 @@ sub file_request
     $body .= "Category: $scat->{'catname'}\n";
     $body .= "Subject:  $o->{'subject'}\n\n";
     $body .= "You can track its progress or add information here:\n\n";
-    # Since we're only sending one mass-addressed e-mail here, we shouldn't use make_text_link (which applies to only one address)
     $body .= $url;
     $body .= "\n\nIf you do not wish to receive notifications of incoming support requests, you may may change your notification settings here:\n\n";
     $body .= "$LJ::SITEROOT/support/changenotify.bml";
@@ -466,7 +465,6 @@ sub append_request
     $body = "A follow-up to the request regarding \"$sp->{'subject'}\" has ";
     $body .= "been submitted.  You can track its progress or add ";
     $body .= "information here:\n\n  ";
-    # Since we're only sending one mass-addressed e-mail here, we shouldn't use make_text_link (which applies to only one address)
     $body .= $url;
     $body .= "\n\n" . "="x70 . "\n\n";
     $body .= $message;
@@ -528,38 +526,31 @@ sub mail_response_to_user
         ($faqname) = $sth->fetchrow_array;
         if ($faqname) {
             $body .= "FAQ QUESTION: " . $faqname . "\n";
-            $body .= LJ::make_text_link("$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid", $email);
+            $body .= "$LJ::SITEROOT/support/faqbrowse.bml?faqid=$faqid";
             $body .= "\n\n";
         }
     }
-
-    # Need to escape HTML for AOL's crappy client.
-    if ($email =~ /\@aol\.com$/i) {
-        $res->{'message'} =~ s/\&/&amp;/g;
-        $res->{'message'} =~ s/</&lt;/g;
-        $res->{'message'} =~ s/>/&gt;/g;
-    } 
 
     $body .= $res->{'message'};
     $body .= "\n\n" . "="x70 . "\n";
     $body .= "Did this answer your question?  If so, please CLOSE THIS SUPPORT REQUEST\n";
     $body .= "so we can help other people by going here:\n";
     if ($type eq "answer") {
-        $body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'};$splid", $email);
+        $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'};$splid";
     } else {
-        $body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'}", $email);
+        $body .= "$LJ::SITEROOT/support/act.bml?close;$spid;$sp->{'authcode'}";
     }
     
     if ($type eq "answer")
     {
         $body .= "\n\nIf this wasn't helpful, you need to go to the following address to prevent\n";
         $body .= "this request from being closed in 7 days.  Click here:\n";
-        $body .= LJ::make_text_link("$LJ::SITEROOT/support/act.bml?touch;$spid;$sp->{'authcode'}", $email);
+        $body .= "$LJ::SITEROOT/support/act.bml?touch;$spid;$sp->{'authcode'}";
     }
     
     my $miniauth = mini_auth($sp);
     $body .= "\n\nTo read all the comments or add more, go here:\n";
-    $body .= LJ::make_text_link("$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth", $email);
+    $body .= "$LJ::SITEROOT/support/see_request.bml?id=$spid&auth=$miniauth";
     
     $body .= "\n";
     

@@ -2652,30 +2652,6 @@ sub get_logtext2multi
 }
 
 # <LJFUNC>
-# name: LJ::make_text_link
-# des: The most pathetic function of them all.  AOL's shitty mail
-#      reader interprets all incoming mail as HTML formatted, even if
-#      the content type says otherwise.  And AOL users are all too often
-#      confused by a a URL that isn't clickable, so to make it easier on
-#      them (*sigh*) this function takes a URL and an email address, and
-#      if the address is @aol.com, then this function wraps the URL in
-#      an anchor tag to its own address.  I'm sorry.
-# returns: the same URL, or the URL wrapped in an anchor tag for AOLers
-# args: url, email
-# des-url: URL to return or wrap.
-# des-email: Email address this is going to.  If it's @aol.com, the URL
-#            will be wrapped.
-# </LJFUNC>
-sub make_text_link
-{
-    my ($url, $email) = @_;
-    if ($email =~ /\@aol\.com$/i) {
-        return "<a href=\"$url\">$url</a>";
-    }
-    return $url;
-}
-
-# <LJFUNC>
 # name: LJ::get_remote
 # des: authenticates the user at the remote end based on their cookies
 #      and returns a hashref representing them
