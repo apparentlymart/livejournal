@@ -1011,11 +1011,11 @@ RTE
                 push @secopts, ("onchange" => "customboxes()");
             }
             
-            $out .= "<tr valign='top'><th>" . BML::ml('entryform.security') . "</th><td>";
+            $out .= "<tr valign='top'><th>" . LJ::help_icon("security", "", " ") . BML::ml('entryform.security') . "</th><td>";
             $out .= LJ::html_select({ 'id' => "Security", 'name' => 'security', 
+
                                       'selected' => $opts->{'security'}, 
                                       'tabindex' => $tabindex->(), @secopts }, @secs);
-            $out .= LJ::help_icon("security", " ");
             
             # if custom security groups available, show them in a hideable div
             if ($res && ref $res->{'friendgroups'} eq 'ARRAY' && scalar @{$res->{'friendgroups'}}) {
@@ -1125,7 +1125,7 @@ MOODS
         $out .= "<tr id='backdate_row'><th><label for='prop_opt_backdated'>" . BML::ml('entryform.backdated') . "</label></th><td>";
         $out .= LJ::html_check({ 'type' => "check", 'id' => "prop_opt_backdated", 
                                  'name' => "prop_opt_backdated", "value" => 1, 
-                                 'selected' => $opts->{'prop_opt_backdate'},
+                                 'selected' => $opts->{'prop_opt_backdated'},
                                  'tabindex' => $tabindex->() });
         $out .= "</td></tr>";
         
@@ -1141,13 +1141,12 @@ MOODS
         $out .= "</td></tr>";
     
         # Comment Screening settings
-        $out .= "<tr id='comment_screen_settings_row'><th>" . BML::ml('entryform.comment.screening') . "</th><td>";
+        $out .= "<tr id='comment_screen_settings_row'><th>" . LJ::help_icon("screening", "", " ") . BML::ml('entryform.comment.screening') . "</th><td>";
         my @levels = ('', BML::ml('label.screening.default'), 'N', BML::ml('label.screening.none'),
                       'R', BML::ml('label.screening.anonymous'), 'F', BML::ml('label.screening.nonfriends'),
                       'A', BML::ml('label.screening.all'));
         $out .= LJ::html_select({ 'name' => 'prop_opt_screening', 'selected' => $opts->{'prop_opt_screening'},
                                   'tabindex' => $tabindex->() }, @levels);
-        $out .= LJ::help_icon('screening', ' ');
         $out .= "</td></tr>";
     
         my $userpic_preview = "";
@@ -1181,7 +1180,7 @@ if (document.getElementById) {
 //--></script>
 USERPICS
             $out .= "<tr id='userpic_list_row' valign='top'>";
-            $out .= "<th>" . LJ::help_icon("userpics", " ") . BML::ml('entryform.userpics') . "</th><td>";
+            $out .= "<th>" . LJ::help_icon("userpics", "", " ") . BML::ml('entryform.userpics') . "</th><td>";
             $out .= LJ::html_select({'name' => 'prop_picture_keyword', 'id' => 'prop_picture_keyword',
                                      'selected' => $opts->{'prop_picture_keyword'}, 'onchange' => "userpic_preview()",
                                      'tabindex' => $tabindex->() },

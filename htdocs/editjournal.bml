@@ -146,30 +146,42 @@ body<=
             ###
             ### SHOW EDIT FORM
             ###
-            
+
+            my $auth = "<tr><th>$ML{'.auth.poster'}</th><td>";
+            $auth   .= $usejournal ? LJ::ljuser($res{'events_1_poster'}) . " in community " . LJ::ljuser($usejournal) :
+                                   LJ::ljuser($remote);
+            $auth   .= "</td></tr>";
+
+
+            my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
+            my $datetime; my $date = LJ::html_datetime_decode({ 'name' => "date_ymd", }, \%POST);
+            if ($date ne "0000-00-00 00:00:00") {
+                my ($date, $time) = split( / /, $date);
+                $datetime = "$date $POST{'hour'}:$POST{'min'}";
+            } else {
+                $datetime = "$year-$mon-$mday $hour:$min";
+            }
+
+            my $subject = $POST{'subject'} || $res{'events_1_subject'};
+            my $event   = $POST{'event'}   || $res{'events_1_event'};
+
             my $curmask = $res{'events_1_allowmask'};
-            my $cursec = $POST{'security'} || $res{'events_1_security'};
+            my $cursec  = $res{'events_1_security'} || $POST{'security'};
             if ($cursec eq 'usemask') {
                 $cursec = $curmask == 1 ? "friends" : "custom";
             }
 
-            my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
-            my $auth = "<tr><th>$ML{'.auth.poster'}</th><td>";
-            $auth .= $usejournal ? LJ::ljuser($res{'events_1_poster'}) . " in community " . LJ::ljuser($usejournal) :
-                                   LJ::ljuser($remote);
-            $auth .= "</td></tr>";
             # start edit form
             my $ret; my $js;
-            
             $ret .= "<div style='width: 100%'><form method='post' action='editjournal.bml$getextra' id='updateForm' name='updateForm'>";
-            $ret .= LJ::html_hidden('itemid', $ditemid,'mode','edit') . "\n";
+            $ret .= LJ::html_hidden('itemid', $ditemid,'mode','edit','edited',1) . "\n";
 
             my $entry = {
                 'mode' => "edit",
                 'auth_as_remote' => 1,
-                'subject' => $res{'events_1_subject'},
-                'event' => $res{'events_1_event'},
-                'datetime' => "$year-$mon-$mday $hour:$min",
+                'subject' => $subject,
+                'event' => $event,
+                'datetime' => $datetime,
                 'usejournal' => $usejournal,
                 'security' => $cursec,
                 'security_mask' => $curmask,
@@ -182,17 +194,16 @@ body<=
                 'disabled_delete' => $disabled_delete,
                 'disabled_spamdelete' => $disabled_spamdelete,
             };
-            $ret .= "<pre>";
             for (my $i = 1; $i <= $res{'prop_count'}; $i++) {
-                $entry->{"prop_" . $res{"prop_${i}_name"}} = $POST{"prop_" . $res{"prop_${i}_name"}} || $res{"prop_${i}_value"};
+                $entry->{"prop_" . $res{"prop_${i}_name"}} = $res{"prop_${i}_value"};
             }
-            my $onload = "shift_contents(); ";
+            foreach ( keys %POST ) { $entry->{$_} = %POST->{$_}; }
 
-            $ret .= "</pre>";
+            my $onload = "shift_contents(); ";
             $ret .= LJ::entry_form($entry, \$$head, \$onload);
             $ret .= "</form></div>";
 
-            $$bodyopts .= "onload=\"$onload\" onresize=\"shift_contents();\" ";
+            $$bodyopts .= "onload='$onload' onresize='shift_contents();' ";
             
             return $ret;
         }
