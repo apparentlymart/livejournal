@@ -60,7 +60,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
  my $init = LJ::Talk::init(\%GET);
  my $u = $init->{'journalu'};
 
- LJ::load_user_props($dbr, $u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
+ LJ::load_user_props($u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
  if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
      $$head = LJ::robot_meta_tags();
  }
@@ -105,7 +105,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  # redirect if account was renamed
  if ($u->{'journaltype'} eq "R") {
-     LJ::load_user_props($dbr, $u, "renamedto");
+     LJ::load_user_props($u, "renamedto");
      if ($u->{'renamedto'} ne "") {
          my $id = $GET{'itemid'}+0;
          return BML::redirect(LJ::journal_base($u) . "/$id.html");
@@ -136,12 +136,12 @@ if ($uri =~ m!/(\d+)\.html$!) {
  my $showmultiform = $remote &&
     ($remote->{'user'} eq $u->{'user'} ||
      $remote->{'user'} eq $up->{'user'} ||
-     LJ::check_rel($dbr, $u, $remote, 'A'));
+     LJ::check_rel($u, $remote, 'A'));
  my $multiform_selects = 0;  # are there select boxes?  don't show form if not.
 
  my $event = $item->{'event'};
 
- LJ::expand_embedded($dbr, $ditemid, $remote, \$event);
+ LJ::expand_embedded($ditemid, $remote, \$event);
  LJ::CleanHTML::clean_event(\$event, $props->{'opt_preformatted'});
  BML::ebml(\$event);
 
@@ -171,7 +171,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  my %userpics;
  if ($picid) {
-     LJ::load_userpics($dbr, \%userpics, [ $picid ]);
+     LJ::load_userpics(\%userpics, [ $picid ]);
      my $alt = $up->{'name'};
      if ($props->{'picture_keyword'}) {
          $alt .= ": $props->{'picture_keyword'}";
