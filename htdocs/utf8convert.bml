@@ -1,7 +1,7 @@
 <?_code
 {
     use strict;
-    use vars qw(%FORM %GET $title $body);
+    use vars qw(%POST %GET $title $body);
 
     $title = "UTF-8 Conversion Page";
     $body = "";
@@ -80,9 +80,9 @@
         unless %LJ::CACHE_ENCODINGS;
 
     # check arguments. There are three: mode, area, encid
-    my $mode = $FORM{'mode'};
-    my $area = $FORM{'area'};
-    my $encid = $FORM{'encid'} + 0;
+    my $mode = $POST{'mode'} || $GET{'mode'};
+    my $area = $POST{'area'} || $GET{'area'};
+    my $encid = ($POST{'encid'} || $GET{'encid'}) + 0;
 
     # authas switcher form
     $body .= "<form method='get' action='utf8convert.bml'>\n";
@@ -130,7 +130,7 @@
         $body .= "<?h1 Browse h1?><?p You are browsing the area <br /><b>$areas{$area}->{'des'}</b>: p?>";
         my $browse = $areas{$area}->{'browse'};
         my ($valid, $disp) = $browse->($u, $encid);
-        if ($valid && !defined($FORM{'forceview'})) {
+        if ($valid && !defined($GET{'forceview'})) {
             $body .= "<?h1 No unconverted information h1?><?p There is no information in this area that is not valid UTF-8. Nothing needs to be done here. p?>";
             $body .= "<?p You can <b><a href=\"utf8convert.bml$getextra\">return to the area list</a></b> or <b><a href=\"utf8convert.bml?mode=browse&area=$area&encid=$encid&forceview=1$getextra_amp\">force the information to be shown anyway</a></b>. p?>";
         } else {

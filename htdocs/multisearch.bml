@@ -1,18 +1,23 @@
 <?_code
 
+ use strict;
+ use vars qw(%GET %POST $title $body $arg);
+
  $title = "";
  $body = "";
+ my $type = $POST{'type'} || $GET{'type'};
+ my $q = $POST{'q'} || $GET{'q'};
 
  my $dbr = LJ::get_db_reader();
 
- if ($FORM{'type'} eq "user") {
+ if ($type eq "user") {
 
      ## magic mode
-     if ($FORM{'q'} =~ /^\*(\d+)/) {
+     if ($q =~ /^\*(\d+)/) {
          return BML::redirect("$LJ::SITEROOT/talkread.bml?itemid=$1");
      }
 
-     my $user = lc($FORM{'q'});
+     my $user = lc($q);
      
      my $what;
      if ($user =~ s!/(\w+)!!) {
@@ -36,8 +41,8 @@
      }
  }
 
- if ($FORM{'type'} eq "int") {
-     my $int = lc($FORM{'q'});
+ if ($type eq "int") {
+     my $int = lc($q);
      if ($int) {
          return BML::redirect("$LJ::SITEROOT/interests.bml?int=" . LJ::eurl($int));
      } else {
@@ -47,8 +52,8 @@
      }
  }
 
- if ($FORM{'type'} eq "email") {
-     my $email = lc($FORM{'q'});
+ if ($type eq "email") {
+     my $email = lc($q);
      unless ($email) {
          $title = "No Address";
          $body = "<?h1 Error h1?><?p You did not enter an email address. p?>";
@@ -70,12 +75,12 @@
      }
  }
 
- if ($FORM{'type'} eq "aolim" || $FORM{'type'} eq "icq" ||
-     $FORM{'type'} eq "yahoo" || $FORM{'type'} eq "msn" ||
-     $FORM{'type'} eq "jabber") {
-     my $val = $FORM{'q'};
-     my $qval = $dbr->quote($val);
-     my $qtype = $dbr->quote($FORM{'type'});
+ if ($type eq "aolim" || $type eq "icq" ||
+     $type eq "yahoo" || $type eq "msn" ||
+     $type eq "jabber") {
+
+     my $qval = $dbr->quote($q);
+     my $qtype = $dbr->quote($type);
      my $sth = $dbr->prepare("SELECT u.user FROM user u, userproplist upl, userprop up ".
                              "WHERE u.journaltype='P' AND u.statusvis='V' ".
                              "AND u.allow_contactshow='Y' AND u.userid=up.userid ".
@@ -93,9 +98,9 @@
      
  }
 
- if ($FORM{'type'} eq "region") {
-     $FORM{'q'} =~ s/^\s+//; $FORM{'q'} =~ s/\s+$//;
-     my @parts = split(/\s*,\s*/, $FORM{'q'});
+ if ($type eq "region") {
+     $q =~ s/^\s+//; $q =~ s/\s+$//;
+     my @parts = split(/\s*,\s*/, $q);
      if (@parts==0 || @parts>3) {
          $title = "Format Error";
          $body .= "<?h1 Search by Region h1?><?p You can search by region in one of the following formats: <ul><li>Country<li>City *<li>City, State *<li>State, Country<li>City, State, Country</ul>Notes:<ul><li>* searching for only a city or a city and state defaults to assuming the country is the United States.<li>Country can either be the country's full name, or its two letter country code</ul>If you want to do a different type of search, check out the <a href=\"/directorysearch.bml\">directory search</a>. p?>";

@@ -1,11 +1,13 @@
 <?_code # -*- mode: bml -*- 
 {
     use strict;
-    use vars qw($body %FORM %POST);
+    use vars qw($body %POST %GET);
 
     $body = "";
 
     my $u = LJ::get_remote();
+    my $user = $POST{'user'} || $GET{'user'};
+    my $sessid = $POST{'sessid'} || $GET{'sessid'};
 
     unless ($u) {
         $body = "$ML{'.loggedout.already'}";
@@ -23,8 +25,8 @@
     }
 
     if ($u->{'_session'} && 
-        $FORM{'user'} eq $u->{'user'} &&
-        $FORM{'sessid'} == $u->{'_session'}->{'sessid'})
+        $user eq $u->{'user'} &&
+        $sessid == $u->{'_session'}->{'sessid'})
     {
         LJ::kill_session($u);
         LJ::set_remote(undef);

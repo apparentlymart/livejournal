@@ -6,9 +6,9 @@
  my $dbr = LJ::get_db_reader();
  my $sth;
 
- if ($FORM{'url'}) {
-     my $url = $FORM{'url'};
-     my $skip = $FORM{'skip'};
+ if ($GET{'url'}) {
+     my $url = $GET{'url'};
+     my $skip = $GET{'skip'};
      my $qskip = $skip+0;
      my $qurl = $dbr->quote($url);
      my $eurl = LJ::ehtml($url);

@@ -5,15 +5,16 @@ body<=
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
- return "<?badinput?>" unless LJ::text_in(\%FORM);
+ return "<?badinput?>" unless LJ::text_in(\%POST);
  
- my $mode = $FORM{'mode'};
+ my $mode = $POST{'mode'};
+ my $code = $POST{'code'} || $GET{'code'};
 
  # with no mode, decide which screen the user sees first, based
  # on whether or not this LJ installation lets in free users
  if ($mode eq "") {
      $mode = $LJ::USE_ACCT_CODES ? 
-         ($FORM{'code'} ? "codesubmit" : "entercode")
+         ($code ? "codesubmit" : "entercode")
              : "getinfo"; 
  }
  
@@ -33,11 +34,10 @@ body<=
  # mode if it's invalid
  if ($LJ::USE_ACCT_CODES && ($mode eq "codesubmit" || $mode eq "submit"))
  {
-     my $code = $FORM{'code'};
      my $error;
      my $userid = 0;  # acceptable userid for double-click protection
      if ($mode eq "submit") {
-         my $u = LJ::load_user($FORM{'user'});
+         my $u = LJ::load_user($POST{'user'});
          $userid = $u->{'userid'};
      }
      $errors{'code'} = $error
@@ -60,7 +60,7 @@ body<=
 
      $ret .= "<?h1 $ML{'.useacctcodes.welcome'} h1?><?p $ML{'.useacctcodes.entercode'} p?>";
 
-     $v = LJ::ehtml($FORM{'code'});
+     $v = LJ::ehtml($code);
      $ret .= "<?standout Code: <input type=\"text\" name=\"code\" value=\"$v\" size=\"13\" maxlength=\"12\"> <input type=\"submit\" value=\"$ML{'.btn.proceed'}\">";
      $ret .= $error_msg->('code', '<br>');     
      $ret .= " standout?>";
@@ -83,8 +83,8 @@ body<=
  {
      return "<b>$ML{'Error'}</b>: $ML{'.error.postrequired'}" unless LJ::did_post();
      
-     my $user = LJ::canonical_username($FORM{'user'});
-     my $email = LJ::trim(lc($FORM{'email'}));
+     my $user = LJ::canonical_username($POST{'user'});
+     my $email = LJ::trim(lc($POST{'email'}));
 
      # reject this email?
      return LJ::sysban_block(0, "Create user blocked based on email",
@@ -98,10 +98,10 @@ body<=
      if (length($user) > 15) { 
          $errors{'username'} = "$ML{'error.usernamelong'}";
      }
-     if ($FORM{'user'} && ! $user) { 
+     if ($POST{'user'} && ! $user) { 
          $errors{'username'} = "$ML{'error.usernameinvalid'}";
      }
-     unless ($FORM{'user'}) { 
+     unless ($POST{'user'}) { 
          $errors{'username'} = "$ML{'.error.username.mustenter'}"; 
      }
      foreach my $re ("^system\$", @LJ::PROTECTED_USERNAMES) {
@@ -131,11 +131,11 @@ body<=
      if ($u) {
          my $in_use = 1;
 
-         if ($u->{'email'} eq $FORM{'email'}) {
+         if ($u->{'email'} eq $POST{'email'}) {
              if (LJ::login_ip_banned($u)) {
                  # brute-force possible going on
              } else {
-                 if ($u->{'password'} eq $FORM{'password1'}) {
+                 if ($u->{'password'} eq $POST{'password1'}) {
                      # oh, they double-clicked the submit button 
                      $second_submit = 1;
                      $in_use = 0;
@@ -150,35 +150,35 @@ body<=
          }
      }
  
-     $FORM{'password1'} = LJ::trim($FORM{'password1'});
-     $FORM{'password2'} = LJ::trim($FORM{'password2'});
+     $POST{'password1'} = LJ::trim($POST{'password1'});
+     $POST{'password2'} = LJ::trim($POST{'password2'});
 
-     if ($FORM{'password1'} ne $FORM{'password2'}) { 
+     if ($POST{'password1'} ne $POST{'password2'}) { 
          $errors{'password'} = "$ML{'.error.password.nomatch'}"; 
      } else {
          my @checkpass = LJ::run_hooks("bad_password", 
                                        { 'user' => $user, 'name' => $user, 
-                                         'email' => $email, 'password' => $FORM{'password1'} });
+                                         'email' => $email, 'password' => $POST{'password1'} });
          if (@checkpass && $checkpass[0]->[0]) {
              $errors{'password'} = "Bad password: $checkpass[0]->[0]";
          }
      }
-     if (! $FORM{'password1'}) { 
+     if (! $POST{'password1'}) { 
          $errors{'password'} = "$ML{'.error.password.blank'}";
-     } elsif (length $FORM{'password1'} > 30) {
+     } elsif (length $POST{'password1'} > 30) {
          $errors{'password'} = "$ML{'password.max30'}";
      }
 
-     unless (LJ::is_ascii($FORM{'password1'})) {
+     unless (LJ::is_ascii($POST{'password1'})) {
          $errors{'password'} = "$ML{'.error.password.asciionly'}";
      }
 
-     if ($FORM{'under13'} ||
-         $LJ::COPPA_CHECK eq "over" && ! $FORM{'over13'}) {
+     if ($POST{'under13'} ||
+         $LJ::COPPA_CHECK eq "over" && ! $POST{'over13'}) {
          return "$ML{'.error.coppa.under13'}";
      }
 
-     if ($LJ::TOS_CHECK && ! $FORM{'agree_tos'}) {
+     if ($LJ::TOS_CHECK && ! $POST{'agree_tos'}) {
          $errors{'agree_tos'} = $ML{'.tos.error'};
      }
 
@@ -197,11 +197,11 @@ body<=
      last SUBMIT if %errors;
 
      my $qclusterid = ($LJ::ALLOW_CLUSTER_SELECT
-                       ? $FORM{'cluster_id'}
+                       ? $POST{'cluster_id'}
                        : LJ::new_account_cluster()) + 0;
      die "Cluster 0 not supported" unless $qclusterid;
 
-     $qpassword = $dbh->quote($FORM{'password1'});
+     $qpassword = $dbh->quote($POST{'password1'});
      my $userid = $u->{'userid'}+0;
      unless ($second_submit)
      {
@@ -218,7 +218,7 @@ body<=
 
          # if we're using account codes on this site, mark the code as used
          if ($LJ::USE_ACCT_CODES) {
-             my ($acid, $auth) = LJ::acct_code_decode($FORM{'code'});
+             my ($acid, $auth) = LJ::acct_code_decode($code);
              $dbh->do("UPDATE acctcode SET rcptid=$userid WHERE acid=$acid");
              if ($dbh->err) { return $dbh->errstr; }
          }
@@ -230,13 +230,13 @@ body<=
          }
          foreach my $friend (@LJ::INITIAL_OPTIONAL_FRIENDS) {
              my $friendid = LJ::get_userid($friend);
-             LJ::add_friend($userid, $friendid) if $friendid and $FORM{"initial_optional_friend_$friend"};
+             LJ::add_friend($userid, $friendid) if $friendid and $POST{"initial_optional_friend_$friend"};
          }
 
          LJ::run_hooks("post_create", {
              'userid' => $userid,
              'user' => $user,
-             'code' => $FORM{'code'},
+             'code' => $code,
          });
      }
      
@@ -249,7 +249,7 @@ body<=
          "email" => $email,
          "regurl" => "$LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}",
          "username" => $user,
-         "password" => $FORM{'password1'},
+         "password" => $POST{'password1'},
          "sitename" => $LJ::SITENAME,
          "siteroot" => $LJ::SITEROOT,
          "admin_email" => $LJ::ADMIN_EMAIL,
@@ -307,7 +307,7 @@ body<=
      $ret .= "<?p $ML{'.create.text'} p?>";
      $ret .= "<form action=\"create.bml\" method=\"post\">\n";
      $ret .= "<input type=\"hidden\" name=\"mode\" value=\"submit\">\n";
-     $ret .= "<input type=\"hidden\" name=\"code\" value=\"" . LJ::ehtml($FORM{'code'}) . "\">\n";     
+     $ret .= "<input type=\"hidden\" name=\"code\" value=\"" . LJ::ehtml($code) . "\">\n";     
 
      $ret .= "<ol>";
 
@@ -342,7 +342,7 @@ body<=
          $ret .= "<div class='formitemDesc'>$ML{'.initialfriends'}</div>";
          $ret .= "<div class='formitemNote'>";
          foreach my $friend (@LJ::INITIAL_OPTIONAL_FRIENDS) {
-             $ret .= LJ::did_post() && !$FORM{"initial_optional_friend_$friend"} ? 
+             $ret .= LJ::did_post() && !$POST{"initial_optional_friend_$friend"} ? 
                      LJ::html_check({'name' => "initial_optional_friend_$friend", 'value' => 1, }) :
                      LJ::html_check({'name' => "initial_optional_friend_$friend", 'value' => 1, 'checked' => "checked", });
              $ret .= LJ::ljuser($friend) . " " . $ML{".initial.friend.$friend"} . "<br />";

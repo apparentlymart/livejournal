@@ -14,21 +14,21 @@
           
         my @errors = ();
         
-        my $year = $FORM{'year'}+0;
-        my $month = $FORM{'month'}+0;
+        my $year = $POST{'year'}+0;
+        my $month = $POST{'month'}+0;
 
         my $dbcr = LJ::get_cluster_reader($u);
         push @errors, "Database temporarily unavailable.  Try again later." unless $dbcr;
 
         my $encoding;
 
-        if ($FORM{'encid'}) {
+        if ($POST{'encid'}) {
             my %encodings;
             LJ::load_codes({ "encoding" => \%encodings } );
-            $encoding = $encodings{$FORM{'encid'}};
+            $encoding = $encodings{$POST{'encid'}};
         }
 
-        $encoding ||= $FORM{'encoding'};
+        $encoding ||= $POST{'encoding'};
         $encoding ||= $LJ::UNICODE ? 'utf-8' : 'iso-8859-1';
 
         if ($LJ::UNICODE && lc($encoding) ne "utf-8" && 
@@ -50,27 +50,27 @@
 
         my @fields;
         foreach my $f (qw(itemid eventtime logtime subject event security allowmask)) {
-            if ($FORM{"field_${f}"}) {
+            if ($POST{"field_${f}"}) {
                 push @fields, $f;
             }	    
         }
 
-        if ($FORM{'field_currents'}) {
+        if ($POST{'field_currents'}) {
             push @fields, ("current_music", "current_mood");
             $opts->{'currents'} = 1;
         }
 
         #### do file-format specific initialization
        
-        if ($FORM{'format'} eq "csv") {
+        if ($POST{'format'} eq "csv") {
             $opts->{'format'} = "csv";
             $r->content_type("text/plain");
             $r->send_http_header();
-            if ($FORM{'header'}) {
+            if ($POST{'header'}) {
                 $r->print(join(",",@fields) . "\n");
             }	    
         }
-        if ($FORM{'format'} eq "xml") {
+        if ($POST{'format'} eq "xml") {
             $opts->{'format'} = "xml";
             my $lenc = lc($encoding);
             $r->content_type("text/xml; charset=$lenc");
@@ -82,7 +82,7 @@
         $opts->{'fields'} = \@fields;
         $opts->{'encoding'} = $encoding;
         $opts->{'notranslation'} = 1
-            if $FORM{'notranslation'};
+            if $POST{'notranslation'};
 
         $sth = $dbcr->prepare("SELECT jitemid, anum, eventtime, logtime, security, allowmask FROM log2 ".
                               "WHERE journalid=$u->{'userid'} AND year=$year AND month=$month");

@@ -141,7 +141,7 @@ body<=
 
  unless (LJ::check_priv($remote, "betatest", "directory") ||
          LJ::get_cap($remote, "directory") ||
-         (@filters == 1 && $filters[0] eq "int" && $FORM{'opt_format'} eq "simple"))
+         (@filters == 1 && $filters[0] eq "int" && $GET{'opt_format'} eq "simple"))
  {
      return $ML{'.error.accounttype'};
  }
@@ -160,7 +160,7 @@ body<=
          "Hundreds of trained monkeys are currently running about finding your search results.  Please stand by.</center>";
  }
 
- if ($FORM{'s_com'}) {
+ if ($POST{'s_com'} || $GET{'s_com'}) {
      $ret .= "<a href=\"/community/search.bml\">&lt;&lt; New Query</a><p>\n";
  } else {
      $ret .= "<a href=\"/directorysearch.bml\">&lt;&lt; New Query</a><p>\n";
@@ -195,9 +195,9 @@ body<=
      $ret .= "<B>Search results limited to $info{'count'} results.  Please refine your query.</B>";
  }
 
- if ($count_preds == 1 && $FORM{'int_like'}) {
+ if ($count_preds == 1 && $GET{'int_like'}) {
      my $intid = $dbr->selectrow_array("SELECT intid FROM interests WHERE interest=?",
-                                       undef, $FORM{'int_like'});
+                                       undef, $GET{'int_like'});
      LJ::run_hooks("interests_bml", {
          'intid' => $intid,
          'int' => $interest,
@@ -234,13 +234,13 @@ body<=
 
  unless ($info{'count'}) { return $ret; }
 
- if ($FORM{'opt_sort'} eq "loc") {
+ if ($GET{'opt_sort'} eq "loc") {
      LJ::load_codes({ state => \%state, country => \%country  });
  }
 
- if ($FORM{'opt_format'} eq "simple") 
+ if ($GET{'opt_format'} eq "simple") 
  {
-     my $showloc = $FORM{'opt_sort'} eq "loc" ? 1 : 0;
+     my $showloc = $GET{'opt_sort'} eq "loc" ? 1 : 0;
      my %last = ();
      $ret .= "<ul>\n";
      foreach my $rec (@matches) 
@@ -276,7 +276,7 @@ body<=
      $ret .= "</ul>\n";
  }
 
- if ($FORM{'opt_format'} eq "com") 
+ if ($GET{'opt_format'} eq "com") 
  {
      $ret .= "<TABLE CELLSPACING=3>\n";
      $ret .= "<TR><TD>&nbsp;</TD><TD><B>User</B></TD><TD><B>Community Name</B></TD><TD><B>Open</B></TD><TD><B>Post</B></TD></TR>\n";
@@ -304,9 +304,9 @@ body<=
      $ret .= "</TABLE>\n";
  }
 
- if ($FORM{'opt_format'} eq "pics")
+ if ($GET{'opt_format'} eq "pics")
  {
-     my $showloc = $FORM{'opt_sort'} eq "loc" ? 1 : 0;
+     my $showloc = $GET{'opt_sort'} eq "loc" ? 1 : 0;
      my %last = ();
 
      my %pic;

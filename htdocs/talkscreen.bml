@@ -7,7 +7,10 @@ body<=
 <?_code
 
  my $ret = "";
- my $mode = $FORM{'mode'};
+ my $mode = $POST{'mode'} || $GET{'mode'};
+ my $talkid = $POST{'talkid'} || $GET{'talkid'};
+ my $journal = $POST{'journal'} || $GET{'journal'};
+ my $confirm = $POST{'confirm'} || $GET{'confirm'};
 
  my $remote = LJ::get_remote();
 
@@ -15,13 +18,13 @@ body<=
      return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.login'} p?>";
  }
 
- my $qtalkid = $FORM{'talkid'}+0;
+ my $qtalkid = $talkid+0;
  my $dtalkid = $qtalkid;   # display talkid, for use in URL later
 
  # we need to find out: $u, $up (poster of the entry this is a comment to),
  # userpost (username of this comment's author). Then we can check permissions.
 
- my $u = LJ::load_user($FORM{'journal'});
+ my $u = LJ::load_user($journal);
  return "<?h1 $ML{'Error'} h1?><?p $ML{'.talk.error.bogusargs'} p?>" unless $u;
  my $dbcm = LJ::get_cluster_master($u);
  return "<?h1 $ML{'Error'} h1?><?p $ML{'error.nodb'} p?>" unless $dbcm;
@@ -65,11 +68,11 @@ body<=
  if ($mode eq 'screen') {
      return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.privs.screen'} p?>"
          unless $can_screen;
-     unless ($FORM{'confirm'} eq 'Y' && LJ::did_post()) {
+     unless ($confirm eq 'Y' && LJ::did_post()) {
          $ret .= "<?h1 $ML{'.screen.sure.title'} h1?><?p $ML{'.screen.sure.body'} p?>";
          $ret .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
          $ret .= "<input type='hidden' name='mode' value='screen' />\n";
-         $ret .= "<input type='hidden' name='talkid' value='$FORM{'talkid'}' />\n";
+         $ret .= "<input type='hidden' name='talkid' value='$talkid' />\n";
          $ret .= "<input type='hidden' name='journal' value='$u->{'user'}' />\n";
          $ret .= "<input type='hidden' name='confirm' value='Y' />\n";
          $ret .= "<input type='submit' value='$ML{'.screen.doit'}' />";
@@ -86,11 +89,11 @@ body<=
  if ($mode eq 'unscreen') {
      return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.privs.unscreen'} p?>"
          unless $can_unscreen;
-     unless ($FORM{'confirm'} eq 'Y' && LJ::did_post()) {
+     unless ($confirm eq 'Y' && LJ::did_post()) {
          $ret .= "<?h1 $ML{'.unscreen.sure.title'} h1?><?p $ML{'.unscreen.sure.body'} p?>";
          $ret .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
          $ret .= "<input type='hidden' name='mode' value='unscreen' />\n";
-         $ret .= "<input type='hidden' name='talkid' value='$FORM{'talkid'}' />\n";
+         $ret .= "<input type='hidden' name='talkid' value='$talkid' />\n";
          $ret .= "<input type='hidden' name='journal' value='$u->{'user'}' />\n";
          $ret .= "<input type='hidden' name='confirm' value='Y' />\n";
          $ret .= "<input type='submit' value='$ML{'.unscreen.doit'}' />";
