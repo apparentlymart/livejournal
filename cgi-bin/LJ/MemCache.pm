@@ -47,7 +47,7 @@ sub get_sock # (key)
 {
     return undef unless @LJ::MEMCACHE_SERVERS;
     my $key = shift;
-    $key = ref $key eq "ARRAY" ? $key->[1] : $key;
+    $key = ref $key eq "ARRAY" ? $key->[0] : $key;
     my $hv = hashfunc($key);
 
     unless (@buckets) {
@@ -77,9 +77,17 @@ sub disconnect_all
     %cache_sock = ();
 }
 
+sub delete {
+    my $key = shift;
+    set($key, "", 1);  # no value, and expires at the beginning of time
+    # FIXME: ideally this should send the cache server a real "delete" command
+    # so the server can ignore sets for 'n' seconds thereafter, to mitigate
+    # race conditions
+}
+
 sub set {
     return 0 unless @LJ::MEMCACHE_SERVERS;
-    my ($key, $val) = @_;
+    my ($key, $val, $exptime) = @_;
     my $sock = get_sock($key);
     return 0 unless $sock;
     my $flags;
@@ -89,8 +97,9 @@ sub set {
         $flags .= "S";
     }
     my $len = length($val);
+    $exptime = int($exptime)+0;
     $flags ||= "-";
-    my $cmd = "set $key $flags 0 $len $val\n";
+    my $cmd = "set $key $flags $exptime $len $val\n";
     $sock->print($cmd);
     $sock->flush;
     my $line = <$sock>;

@@ -343,15 +343,20 @@ sub checkfriends
         return $res;
     }
 
-    my $sql = "SELECT MAX(u.timeupdate) FROM userusage u, friends f ".
-              "WHERE u.userid=f.friendid AND f.userid=$u->{'userid'}";
+    my $mask;
     if ($req->{'mask'} and $req->{'mask'} !~ /\D/) {
-        $sql .= " AND f.groupmask & $req->{mask} > 0";
+        $mask = $req->{'mask'};
     }
 
-    $sth = $dbr->prepare($sql);
-    $sth->execute;
-    my ($update) = $sth->fetchrow_array;
+    my $memkey = [$u->{'userid'},"checkfriends:$u->{userid}:$mask"];
+    my $update = LJ::MemCache::get($memkey);
+    unless ($update) {
+        my $sql = "SELECT MAX(u.timeupdate) FROM userusage u, friends f ".
+            "WHERE u.userid=f.friendid AND f.userid=$u->{'userid'}";
+        $sql .= " AND f.groupmask & $mask > 0" if $mask;
+        $update = $dbr->selectrow_array($sql);
+        LJ::MemCache::set($memkey,$update,time()+$interval) if $update;
+    }
     $update ||= "0000-00-00 00:00:00";
 
     if ($req->{'lastupdate'} && $update gt $lastupdate) {
@@ -361,7 +366,6 @@ sub checkfriends
     }
 
     $res->{'lastupdate'} = $update;
-
     return $res;
 }
 
@@ -940,6 +944,7 @@ sub editevent
     my $u = $flags->{'u'};
     my $ownerid = $flags->{'ownerid'};
     my $uowner = $flags->{'u_owner'} || $u;
+    my $clusterid = $uowner->{'clusterid'};
     my $posterid = $u->{'userid'};
     my $dbh = LJ::get_db_writer();
     my $qallowmask = $req->{'allowmask'}+0;
@@ -1128,6 +1133,8 @@ sub editevent
 
         $dbcm->do("UPDATE logtext2 SET event=$qevent, subject=$qsubject ".
                   "WHERE journalid=$ownerid AND jitemid=$qitemid");
+
+        LJ::MemCache::delete([$ownerid,"logtext:$clusterid:$ownerid:$qitemid"]);
 
         # update disk usage
         LJ::dudata_set($dbcm, $ownerid, 'L', $qitemid, $bytes);

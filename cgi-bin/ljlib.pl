@@ -2533,36 +2533,48 @@ sub get_logtext2
     my $lt = {};
     return $lt unless $clusterid;
 
-    my $dbh = LJ::get_dbh("cluster$clusterid");
-    my $dbr = $opts->{'usemaster'} ? undef : LJ::get_dbh("cluster${clusterid}slave");
-
     # keep track of itemids we still need to load.
     my %need;
-    foreach (@_) { $need{$_+0} = 1; }
-
-    # always consider hitting the master database, but if a slave is
-    # available, hit that first.
-    my @sources = ([$dbh, "logtext2"]);
-    if ($dbr) {
-        unshift @sources, [ $dbr, "logtext2" ];
+    my @mem_keys;
+    foreach my $id (@_) { 
+        $id += 0;
+        $need{$id} = 1;
+        push @mem_keys, [$journalid,"logtext:$clusterid:$journalid:$id"];
     }
+
+    # pass 0: memory, avoiding databases
+    unless ($opts->{'usemaster'}) {
+        my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
+        while (my ($k, $v) = each %$mem) {
+            next unless $v;
+            $k =~ /:(\d+):(\d+):(\d+)/;
+            delete $need{$3};
+            $lt->{$3} = $v;
+        }
+    }
+
+    return $lt unless %need;
 
     my $snag_what = "subject, event";
     $snag_what = "NULL, IF(LENGTH(subject), subject, event)"
         if $opts->{'prefersubjects'};
 
-    while (@sources && %need)
-    {
-        my $s = shift @sources;
-        my ($db, $table) = ($s->[0], $s->[1]);
+    # pass 1 (slave) and pass 2 (master)
+    foreach my $pass (1, 2) {
+        next unless %need;
+        next if $pass == 1 && $opts->{'usemaster'};
+        my $db = $pass == 1 ? LJ::get_cluster_reader($clusterid) :
+            LJ::get_cluster_master($clusterid);
         next unless $db;
+        
         my $jitemid_in = join(", ", keys %need);
-
-        my $sth = $db->prepare("SELECT jitemid, $snag_what FROM $table ".
+        my $sth = $db->prepare("SELECT jitemid, $snag_what FROM logtext2 ".
                                "WHERE journalid=$journalid AND jitemid IN ($jitemid_in)");
         $sth->execute;
         while (my ($id, $subject, $event) = $sth->fetchrow_array) {
-            $lt->{$id} = [ $subject, $event ];
+            my $val = [ $subject, $event ];
+            $lt->{$id} = $val;
+            LJ::MemCache::set([$journalid,"logtext:$clusterid:$journalid:$id"], $val);
             delete $need{$id};
         }
     }
@@ -2592,29 +2604,21 @@ sub get_talktext2
     my $lt = {};
     return $lt unless $clusterid;
 
-    my $dbh = LJ::get_dbh("cluster$clusterid");
-    my $dbr = $opts->{'usemaster'} ? undef : LJ::get_dbh("cluster${clusterid}slave");
-
     # keep track of itemids we still need to load.
     my %need;
     foreach (@_) { $need{$_+0} = 1; }
 
-    # always consider hitting the master database, but if a slave is
-    # available, hit that first.
-    my @sources = ([$dbh, "talktext2"]);
-    if ($dbr) {
-        unshift @sources, [ $dbr, "talktext2" ];
-    }
-
     my $bodycol = $opts->{'onlysubjects'} ? "" : ", body";
 
-    while (@sources && %need)
-    {
-        my $s = shift @sources;
-        my ($db, $table) = ($s->[0], $s->[1]);
-        my $in = join(", ", keys %need);
-
-        my $sth = $db->prepare("SELECT jtalkid, subject $bodycol FROM $table ".
+    # pass 1 (slave) and pass 2 (master)
+    foreach my $pass (1, 2) {
+        next unless %need;
+        Apache->log_error("ljlib, pass: $pass");
+        my $db = $pass == 1 ? LJ::get_cluster_reader($clusterid) :
+            LJ::get_cluster_master($clusterid);
+        next unless $db;
+        my $in = join(",", keys %need);
+        my $sth = $db->prepare("SELECT jtalkid, subject $bodycol FROM talktext2 ".
                                "WHERE journalid=$journalid AND jtalkid IN ($in)");
         $sth->execute;
         while (my ($id, $subject, $body) = $sth->fetchrow_array) {
@@ -2645,12 +2649,23 @@ sub get_logtext2multi
 
     # keep track of itemids we still need to load per cluster
     my %need;
+    my @mem_keys;
     foreach my $c (keys %$idsbyc) {
         foreach (@{$idsbyc->{$c}}) {
             if ($c) {
                 $need{$c}->{"$_->[0] $_->[1]"} = 1;
+                push @mem_keys, [$_->[0],"logtext:$c:$_->[0]:$_->[1]"];
             }
         }
+    }
+
+    # pass 0: memory, avoiding databases
+    my $mem = LJ::MemCache::get_multi(@mem_keys) || {};
+    while (my ($k, $v) = each %$mem) {
+        next unless $v;
+        $k =~ /:(\d+):(\d+):(\d+)/;
+        delete $need{$1}->{"$2 $3"};
+        $lt->{"$2 $3"} = $v;
     }
 
     # pass 1: slave (trying recent), pass 2: master
@@ -2676,11 +2691,12 @@ sub get_logtext2multi
             $sth->execute;
             while (my ($jid, $jitemid, $subject, $event) = $sth->fetchrow_array) {
                 delete $need{$c}->{"$jid $jitemid"};
-                $lt->{"$jid $jitemid"} = [ $subject, $event ];
+                my $val = [ $subject, $event ];
+                $lt->{"$jid $jitemid"} = $val;
+                LJ::MemCache::set([$jid,"logtext:$c:$jid:$jitemid"], $val);
             }
         }
     }
-
     return $lt;
 }
 
