@@ -158,7 +158,7 @@ MAIN: {
             my ( $level, $msg ) = @_;
             print STDERR "[$level] $msg\n";
         };
-        $server->addHandler( 'log' => $tmplogger );
+        $server->addHandler( 'log', 'verboselogger', $tmplogger );
     }
 
     # Start the server
@@ -971,6 +971,12 @@ sub addHandler {
     my JobServer $self = shift;
     my ( $type, $key, $code ) = @_;
 
+    confess "No such event type '$type'"
+        unless exists $self->{handlers}{$type};
+    confess "$type handler for '$key' is a ",
+        (ref $code ? "simple scalar '$code'" : ref $code),
+        ", not a CODE ref." unless ref $code eq 'CODE';
+
     $self->{handlers}{$type}{ $key } = $code;
 }
 
@@ -1261,6 +1267,7 @@ BEGIN {
         'prelocktime',          # Epoch time of prelock, 0 if not prelocked
         'fetchtime',            # Time the job was given to a mover, 0 if unassigned
         'finishtime',           # Epoch time of server finish authorization
+        'options',              # Job options passed between populator and mover
        );
 }
 
@@ -1300,13 +1307,29 @@ sub new {
     # Split instance vars from a string with a colon in the second or later
     # position
     if ( index($_[0], ':') > 0 ) {
-        @{$self}{qw{userid srcclusterid dstclusterid}} =
-            split /:/, $_[0], 3;
+        my ( $idtuple, $options ) = split /\s+/, $_[0], 2;
+
+        # Split '<uid>:<scid>:<dcid>' into members
+        @{$self}{qw{userid srcclusterid dstclusterid}} = split /:/, $idtuple, 3;
+
+        # Split '<k>=<v> <k2>=<v2>' into a hashref
+        if ( $options ) {
+            $self->{options} = {
+                map { split /=/, $_, 2 } split(/\s+/, $options)
+               };
+        } else {
+            $self->{options} = {};
+        }
     }
 
     # Allow list arguments as well
     else {
-        @{$self}{qw{userid srcclusterid dstclusterid}} = @_;
+        # First 3 args are id members
+        @{$self}{qw{userid srcclusterid dstclusterid}} =
+            splice( @_, 0, 3 );
+
+        # Any remaining are assumed to be pairs in an options hash
+        $self->{options} = { @_ };
     }
 
     $self->{server} = $server;
@@ -1349,9 +1372,18 @@ sub dstclusterid {
 ### Return a scalar containing the stringified representation of the job.
 sub stringify {
     my JobServer::Job $self = shift;
-    return sprintf( '%d:%d:%d %0.1f',
+    return sprintf( '%d:%d:%d %0.1f %s',
                     @{$self}{'userid', 'srcclusterid', 'dstclusterid'},
-                    $self->secondsSinceLock );
+                    $self->secondsSinceLock, $self->optString );
+}
+
+
+### METHOD: optString( undef )
+### Return the job's options as a string.
+sub optString {
+    my JobServer::Job $self = shift;
+    my $opts = $self->{options};
+    return join( " ", map { "$_=$opts->{$_}" } keys %$opts );
 }
 
 
@@ -1512,13 +1544,21 @@ BEGIN {
 }
 
 
-our ( $Tuple, %CommandTable, $CommandPattern );
+our ( $Tuple, $JobOption, $JobSpec, %CommandTable, $CommandPattern );
 
 INIT {
 
-    # Pattern for matching job-spec tuples of the form:
+    # Pattern for matching job id tuples of the form:
     #   <userid>:<srcclusterid>:<dstclusterid>
     $Tuple = qr{\d+:\d+:\d+};
+
+    # Pattern for matching one job-spec option which is a moveucluster option
+    # key-value pair in the form:
+    #   <optioname>=<optval>
+    $JobOption = qr{\s+\w+=\w+};
+
+    # Pattern for matching a whole job-spec
+    $JobSpec = qr{$Tuple$JobOption*};
 
     # Commands the server understands. Each entry should be paired with a method
     # called cmd_<command_name>. The 'args' element contains a regexp for
@@ -1540,8 +1580,8 @@ INIT {
 
         add_jobs  => {
             help => "add one or more new jobs",
-            form => "<userid>:<srcclusterid>:<dstclusterid>[, ...]",
-            args => qr{^((?:$Tuple\s*,\s*)*$Tuple)$},
+            form => "<userid>:<srcclusterid>:<dstclusterid> <options>[, ...]",
+            args => qr{^((?:$JobSpec\s*,\s*)*$JobSpec)$},
         },
 
         source_counts => {
@@ -1914,11 +1954,9 @@ sub cmd_get_job {
     my $job = $self->{server}->getJob( $self );
 
     if ( $job ) {
-        $self->{state} = 
-            sprintf( 'got job %d:%d:%d %0.2f',
-                     @$job,
-                     $job->secondsSinceLock );
-        return $self->okayResponse( "JOB ". $job->stringify );
+        my $jobString = $job->stringify;
+        $self->{state} = sprintf( 'got job %s', $jobString );
+        return $self->okayResponse( "JOB ". $jobString );
     } else {
         $self->{state} = 'idle (no jobs)';
         return $self->okayResponse( "IDLE" );
