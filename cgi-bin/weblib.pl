@@ -913,8 +913,8 @@ sub entry_form {
         my $jevent = $opts->{'event'};
         
         # manually typed tags
-        #$jevent =~ s/<lj user=['"]?(\w{1,15})['"]?\s?\/?>/&lt;lj user="$1" \/&gt;/ig;
-        #$jevent =~ s/<(\/)?lj-cut(.*?)(?: \/)?>/&lt;$1lj-cut$2&gt;/ig;
+        $jevent =~ s/<lj user=['"]?(\w{1,15})['"]?\s?\/?>/&lt;lj user="$1" \/&gt;/ig;
+        $jevent =~ s/<(\/)?lj-cut(.*?)(?: \/)?>/&lt;$1lj-cut$2&gt;/ig;
         
         $jevent = LJ::ejs($jevent);
         my $rte_nosupport = LJ::ejs(BML::fill_template("de", { DATA => BML::ml('entryform.htmlokay.rte_nosupport') }));
