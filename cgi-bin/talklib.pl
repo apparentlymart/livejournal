@@ -1250,9 +1250,15 @@ sub format_text_mail {
     $text .= indent($comment->{body});
     $text .= "\n\n";
 
+    my $can_unscreen = $comment->{state} eq 'S' && 
+                       LJ::Talk::can_unscreen($targetu, $item->{journalu}, $item->{entryu},
+                                              $comment->{u} ? $comment->{u}{user} : undef);
+
     if ($comment->{state} eq 'S') {
-        $text .= "This comment was screened.  You must respond to it ".
-                 "or unscreen it before others can see it.\n\n";
+        $text .= "This comment was screened.  ";
+        $text .= $can_unscreen ? 
+                 "You must respond to it or unscreen it before others can see it.\n\n" :
+                 "Someone else must unscreen it before you can reply to it.\n\n";
     }
 
     my $opts = "";
@@ -1263,7 +1269,7 @@ sub format_text_mail {
     $opts .= "    $talkurl\n";
     $opts .= "  - Reply to the comment:\n";
     $opts .= "    " . LJ::Talk::talkargs($talkurl, "replyto=$dtalkid") . "\n";
-    if ($comment->{state} eq 'S') {
+    if ($can_unscreen) {
         $opts .= "  - Unscreen the comment:\n";
         $opts .= "    $LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\n";
     }
@@ -1361,15 +1367,22 @@ sub format_html_mail {
     # this needs to be one string so blockquote handles it properly.
     $html .= blockquote("$heading$cleanbody");
 
+    my $can_unscreen = $comment->{state} eq 'S' && 
+                       LJ::Talk::can_unscreen($targetu, $item->{journalu}, $item->{entryu},
+                                              $comment->{u} ? $comment->{u}{user} : undef);
+
     if ($comment->{state} eq 'S') {
-        $html .= "<p>This comment was screened.  You must respond to it or unscreen it before others can see it.</p>\n";
+        $html .= "<p>This comment was screened.  ";
+        $html .= $can_unscreen ? 
+                 "You must respond to it or unscreen it before others can see it.</p>\n" :
+                 "Someone else must unscreen it before you can reply to it.</p>\n";
     }
 
     $html .= "<p>From here, you can:\n";
     $html .= "<ul><li><a href=\"$threadurl\">View the thread</a> starting from this comment</li>\n";
     $html .= "<li><a href=\"$talkurl\">View all comments</a> to this entry</li>\n";
     $html .= "<li><a href=\"" . LJ::Talk::talkargs($talkurl, "replyto=$dtalkid") . "\">Reply</a> at the webpage</li>\n";
-    if ($comment->{state} eq 'S') {
+    if ($can_unscreen) {
         $html .= "<li><a href=\"$LJ::SITEROOT/talkscreen.bml?mode=unscreen&journal=$item->{journalu}{user}&talkid=$dtalkid\">Unscreen the comment</a></li>";
     }
     if (LJ::Talk::can_delete($targetu, $item->{journalu}, $item->{entryu}, 
@@ -1378,7 +1391,7 @@ sub format_html_mail {
     }
     $html .= "</ul></p>";
 
-    my $want_form = 1;  # this should probably be a preference, or maybe just always off.
+    my $want_form = $can_unscreen;  # this should probably be a preference, or maybe just always off.
     if ($want_form) {
         $html .= "If your mail client supports it, you can also reply here:\n";
         $html .= "<blockquote><form method='post' target='ljreply' action=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
