@@ -72,7 +72,9 @@
      }
  }
 
- if ($FORM{'type'} eq "aolim" || $FORM{'type'} eq "icq") {
+ if ($FORM{'type'} eq "aolim" || $FORM{'type'} eq "icq" ||
+     $FORM{'type'} eq "yahoo" || $FORM{'type'} eq "msn" ||
+     $FORM{'type'} eq "jabber") {
      my $val = $FORM{'q'};
      my $qval = $dbr->quote($val);
      my $qtype = $dbr->quote($FORM{'type'});
