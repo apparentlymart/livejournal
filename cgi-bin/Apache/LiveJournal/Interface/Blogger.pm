@@ -1,5 +1,6 @@
 # Blogger API wrapper for LJ
 
+use strict;
 package LJ::Util;
 
 sub blogger_deserialize {
@@ -97,6 +98,7 @@ sub editPost {
         'itemid' => $itemid,
     };
 
+    my $err;
     my $res = LJ::Protocol::do_request("editevent", $req, \$err);
     
     if ($err) {
@@ -147,6 +149,7 @@ sub getRecentPosts {
         'howmany' => $numposts,
     };
 
+    my $err;
     my $res = LJ::Protocol::do_request("getevents", $req, \$err);
     
     if ($err) {
@@ -179,6 +182,7 @@ sub getPost {
         'itemid' => $itemid,
     };
 
+    my $err;
     my $res = LJ::Protocol::do_request("getevents", $req, \$err);
     
     if ($err) {
