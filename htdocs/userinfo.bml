@@ -273,7 +273,7 @@
 
          $label = LJ::ehtml("$label");
 
-         push @linkele, "<a href='/update.bml?mode=full&usejournal=$user'><img src='$LJ::IMGPREFIX/btn_edit.gif' width='22' height='20' alt='$label' title='$label' align='middle' b\order='0' /></a>";
+         push @linkele, "<a href='/update.bml?mode=full&usejournal=$user'><img src='$LJ::IMGPREFIX/btn_edit.gif' width='22' height='20' alt='$label' title='$label' align='middle' border='0' /></a>";
      }
 
      $label = $ML{'.label.todo'};
