@@ -112,20 +112,19 @@ sub is_poster
 sub can_see_helper
 {
     my ($sp, $remote) = @_;
-    my $see = 1;
     if ($sp->{_cat}->{'hide_helpers'}) { 
-        $see = 0; 
         if (can_help($sp, $remote)) {
-            $see = 1;
+            return 1;
         }
         if (LJ::check_priv($remote, "supportviewinternal", $sp->{_cat}->{'catkey'})) {
-            $see = 1;
+            return 1;
         }
         if (LJ::check_priv($remote, "supportviewscreened", $sp->{_cat}->{'catkey'})) {
-            $see = 1;
+            return 1;
         }
+        return 0;
     }
-    return $see;
+    return 1;
 }
 
 sub can_read
