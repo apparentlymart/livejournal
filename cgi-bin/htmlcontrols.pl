@@ -84,7 +84,7 @@ sub html_select
     my $did_sel = 0;
     while (my ($value, $text) = splice(@items, 0, 2)) {
         my $sel = "";
-        if ($value eq $opts->{'selected'} && ! $did_sel++) { $sel = " selected"; }
+        if ($value eq $opts->{'selected'} && ! $did_sel++) { $sel = " selected='selected'"; }
         $ret .= "<option value=\"$value\"$sel>$text</option>";
     }
     $ret .= "</select>";
