@@ -606,6 +606,34 @@ sub moveUser {
         my $cols = $ti->{cols};
         my $pripos = $ti->{pripos};
 
+        # if we're going to be doing a verify operation later anyway, let's do it
+        # now, so we can use the knowledge of rows per table to hint our $batch_size
+        my $expected_rows = undef;
+        my $expected_remain = undef;  # expected rows remaining (unread)
+        my $verifykey = $ti->{verifykey};
+        my %pre;
+
+        if ($opts->{verify} && $verifykey) {
+            $expected_rows = 0;
+            if ($table eq "dudata" || $table eq "ratelog") {
+                $expected_rows = $dbo->selectrow_array("SELECT COUNT(*) FROM $table WHERE $idxcol=$userid");
+            } else {
+                my $sth;
+                $sth = $dbo->prepare("SELECT $verifykey FROM $table WHERE $idxcol=$userid");
+                $sth->execute;
+                while (my @ar = $sth->fetchrow_array) {
+                    $_ = join(",",@ar);
+                    $pre{$_} = 1;
+                    $expected_rows++;
+                }
+            }
+
+            # no need to continue with tables that don't have any data
+            next unless $expected_rows;
+
+            $expected_remain = $expected_rows;
+        }
+
         eval { $dbo->do("HANDLER $table OPEN"); };
         if ($@) {
             die "This mover currently only works on MySQL 4.x and above.\n".
@@ -677,24 +705,32 @@ sub moveUser {
             };
         }
 
+        # calculate the biggest batch size that can reasonably fit in memory
+        my $max_batch = 10000;
+        $max_batch = 1000 if $table eq "logtext2" || $table eq "talktext2";
+
         while (! $hit_otheruser && ($ct == $batch_size || ! $did_start)) {
             my $qry;
             if ($did_start) {
                 # once we've done the initial big read, we want to walk slowly, because
                 # a LIMIT of 1000 will read 1000 rows, regardless, which may be 995
                 # seeks into somebody else's journal that we don't care about.
-                $batch_size = 25;
+                # on the other hand, if we did a --verify check above, we have a good
+                # idea what to expect still, so we'll use that instead of just 25 rows.
+                $batch_size = $expected_remain > 0 ? $expected_remain + 1 : 25;
+                if ($batch_size > $max_batch) { $batch_size = $max_batch; }
+                $expected_remain -= $batch_size;
+
                 $qry = "HANDLER $table READ `$idx` NEXT LIMIT $batch_size";
             } else {
                 # when we're first starting out, though, let's LIMIT as high as possible,
                 # since MySQL (with InnoDB only?) will only return rows matching the primary key,
-                # so we'll try as big as possible, except for text tables, where the blobs
-                # could be 64k or so, in which case we protect the size of our initial read.
+                # so we'll try as big as possible.  but not with myisam -- need to start
+                # small there too, unless we have a guess at the number of rows remaining.
 
-                my $src_is_innodb = 0;  # FIXME: detect this?  but first verify HANDLER differences
+                my $src_is_innodb = 0;  # FIXME: detect this.  but first verify HANDLER differences.
                 if ($src_is_innodb) {
-                    $batch_size = 10000;
-                    $batch_size = 1000 if $table eq "logtext2" || $table eq "talktext2";
+                    $batch_size = $max_batch;
                 } else {
                     # MyISAM's HANDLER behavior seems to be different.
                     # it always returns batch_size, so we keep it
@@ -702,10 +738,16 @@ sub moveUser {
                     # (where InnoDB differs and stops when primary key
                     # doesn't match)
                     $batch_size = 25;
-                    if ($table eq "clustertrack2" || $table eq "userbio" || $table eq "s1usercache") {
+                    if ($table eq "clustertrack2" || $table eq "userbio" ||
+                        $table eq "s1usercache" || $table eq "s1overrides") {
                         # we know these only have 1 row, so 2 will be enough to show
                         # in one pass that we're done.
                         $batch_size = 2;
+                    } elsif (defined $expected_rows) {
+                        # if we know how many rows remain, let's try to use that (+1 to stop it)
+                        $batch_size = $expected_rows + 1;
+                        if ($batch_size > $max_batch) { $batch_size = $max_batch; }
+                        $expected_remain -= $batch_size;
                     }
                 }
 
@@ -732,31 +774,21 @@ sub moveUser {
 
         $dbo->do("HANDLER $table CLOSE");
 
-        # verify the important tables
-        if ($table =~ /^(talk|log)(2|text2)$/) {
+        # verify the important tables, even if --verify is off.
+        if (! $opts->{verify} && $table =~ /^(talk|log)(2|text2)$/) {
             my $dblcheck = $dbo->selectrow_array("SELECT COUNT(*) FROM $table WHERE $idxcol=$userid");
             die "# Expecting: $dblcheck, but got $tct\n" unless $dblcheck == $tct;
         }
 
-        my $verifykey = $ti->{verifykey};
         if ($opts->{verify} && $verifykey) {
             if ($table eq "dudata" || $table eq "ratelog") {
                 print "# Verifying $table on size\n";
-                my $pre = $dbo->selectrow_array("SELECT COUNT(*) FROM $table WHERE $idxcol=$userid");
                 my $post = $dbch->selectrow_array("SELECT COUNT(*) FROM $table WHERE $idxcol=$userid");
-                die "Moved sized is smaller" if $post < $pre;
+                die "Moved sized is smaller" if $post < $expected_rows;
             } else {
                 print "# Verifying $table on key $verifykey\n";
-                my %pre;
                 my %post;
                 my $sth;
-
-                $sth = $dbo->prepare("SELECT $verifykey FROM $table WHERE $idxcol=$userid");
-                $sth->execute;
-                while (my @ar = $sth->fetchrow_array) {
-                    $_ = join(",",@ar);
-                    $pre{$_} = 1;
-                }
 
                 $sth = $dbch->prepare("SELECT $verifykey FROM $table WHERE $idxcol=$userid");
                 $sth->execute;
