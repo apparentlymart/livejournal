@@ -149,6 +149,7 @@
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
              $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
              LJ::Memories::updated_keywords($memoryu);
+             LJ::MemCache::delete([$memoryu->{userid}, "memct:$memoryu->{userid}"]);
              $title = $ML{'Error'};
              $body = $ML{'.error.entry_deleted'};
              return;
@@ -243,6 +244,7 @@
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
              $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
              LJ::Memories::updated_keywords($memoryu);
+             LJ::MemCache::delete([$memoryu->{userid}, "memct:$memoryu->{userid}"]);
              $title = $ML{'.title.deleted'};
              $body = "<?h1 $ML{'.error.deleted.title'} h1?><?p " . 
                      BML::ml(".error.deleted.body", { 'desc' => $memory->{'des'} }) .
@@ -312,6 +314,7 @@
                               "VALUES (NULL, ?, ?, ?, ?, ?)");
          $sth->execute($memoryu->{userid}, $jid, $dbitemid, $des, $sec);
          $memid = $dbh->{'mysql_insertid'};
+         LJ::MemCache::delete([$memoryu->{userid}, "memct:$memoryu->{userid}"]);
      }
      if (@kwid) {
          my $sql = "INSERT IGNORE INTO memkeyword (memid, kwid) VALUES ";

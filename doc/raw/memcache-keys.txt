@@ -59,3 +59,5 @@ includefile:<name> == text of BML include file
 
 <intid> introw:<intid> -- arrayref of [ $intid, $interest, $intcount ]
 <uid>   intids:<uid>   -- arrayref of intids for this userid
+
+<uid>   memct:<uid>    -- number of memories user has

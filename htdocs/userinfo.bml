@@ -601,7 +601,11 @@ if ($u->{'journaltitle'}) {
 
  ### memories
  {
-     my $memcount = $dbr->selectrow_array("SELECT COUNT(*) FROM memorable WHERE userid=$userid");
+     my $memcount = LJ::MemCache::get([$userid, "memct:$userid"]);
+     unless (defined $memcount) {
+         $memcount = $dbr->selectrow_array("SELECT COUNT(*) FROM memorable WHERE userid=$userid");
+         LJ::MemCache::set([$userid, "memct:$userid"], $memcount+0, 12*3600);
+     }
      if ($memcount) {
          my $span = ($narrow_left-- > 0) ? 1 : 2;
          my $noun_name = $memcount == 1 ? '.memories.entry' : '.memories.entries';

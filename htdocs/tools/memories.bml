@@ -119,6 +119,7 @@
      my $dbh = LJ::get_db_writer();
      my $memin = join(",", @to_delete);
      $dbh->do("DELETE FROM memorable WHERE userid=? AND memid IN ($memin)", undef, $authasu->{userid});
+     LJ::MemCache::delete([$authasu->{userid}, "memct:$authasu->{userid}"]);
      if ($dbh->err) {
          $title = $ML{'Error'};
          $body = "<?h1 $ML{'Error'} h1?><?p ";
