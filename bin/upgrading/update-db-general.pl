@@ -1751,8 +1751,8 @@ EOC
 #    calctime = time()
 register_tablecreate("partialstats", <<'EOC');
 CREATE TABLE partialstats (
-    jobname  VARCHAR(50),
-    clusterid MEDIUMINT,
+    jobname  VARCHAR(50) NOT NULL,
+    clusterid MEDIUMINT NOT NULL DEFAULT 0,
     calctime  INT(10) UNSIGNED,
     PRIMARY KEY (jobname, clusterid)
 )
@@ -1765,9 +1765,9 @@ EOC
 #    value = '500'
 register_tablecreate("partialstatsdata", <<'EOC');
 CREATE TABLE partialstatsdata (
-    statname  VARCHAR(50),
-    arg       VARCHAR(50),
-    clusterid INT(10) UNSIGNED,
+    statname  VARCHAR(50) NOT NULL,
+    arg       VARCHAR(50) NOT NULL,
+    clusterid INT(10) UNSIGNED NOT NULL DEFAULT 0,
     value     INT(11),
     PRIMARY KEY (statname, arg, clusterid)
 )
