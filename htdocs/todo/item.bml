@@ -147,7 +147,11 @@
          
          $dbh->do("DELETE FROM todokeyword WHERE todoid=$todoid");
          if (@kwid) {
-             my $sql = "INSERT INTO todokeyword (todoid, kwid) VALUES ";
+             my $sql = "INSERT IGNORE INTO todokeyword (todoid, kwid) VALUES ";
+             # why IGNORE above?  with mysql 3.23.x replication, a
+             # partial insert (some in, some dup -> fail) causes all
+             # slaves _not_ replicating that table to stop.  fucked
+             # up, huh?  so with IGNORE no error is generated.
              $sql .= join(",", map { "($todoid,$_)" } @kwid);
              $dbh->do($sql);
          }
