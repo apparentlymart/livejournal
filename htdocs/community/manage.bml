@@ -8,12 +8,10 @@ body<=
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbr = LJ::get_db_reader();
 
  my $ret;
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  unless ($remote) {
     $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.noremote'} p?>";
@@ -26,12 +24,12 @@ body<=
  my %show;
 
  # what communities does remote 
- my $cids = LJ::load_rel_target($dbs, $remote, 'A');
+ my $cids = LJ::load_rel_target($remote, 'A');
  my %admin;
  if ($cids) { foreach (@$cids) { $admin{$_} = $show{$_} = 1; } }
 
  # keep track of what communities remote moderates
- my $mods = LJ::load_rel_target($dbs, $remote, 'M');
+ my $mods = LJ::load_rel_target($remote, 'M');
  my %mods; 
  my %modcount;
  if ($mods) { foreach (@$mods) { $mods{$_} = $show{$_} = 1; } }

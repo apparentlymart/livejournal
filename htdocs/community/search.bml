@@ -43,16 +43,16 @@ form<=
 <table>
 <tr><td align='right'><?_ml .label.country _ml?></td><td>
 <?_code
+{
+    use strict;
 
- my $dbs = LJ::get_dbs();
- LJ::load_codes($dbs, { "country" => \%countries });
- my $ret;
- $ret = LJ::html_select({ 'name' => 'loc_cn',  },
-                        '', '',
-                        map { $_, $countries{$_} } 
-                        ("US", sort { $countries{$a} cmp $countries{$b} } keys %countries));
- return $ret; 
- 
+    my %countries = ();
+    LJ::load_codes({ "country" => \%countries });
+    return LJ::html_select({ 'name' => 'loc_cn',  },
+                           '', '',
+                           map { $_, $countries{$_} } 
+                           ("US", sort { $countries{$a} cmp $countries{$b} } keys %countries));
+} 
 _code?>
 </td></tr>
 <tr><td align='right'><?_ml .label.stateprovince _ml?></td><td><input name="loc_st" /></td></tr>
@@ -95,7 +95,6 @@ Contains user <input name="fr_user" size='15' maxlength='15' /> as a member.
 <=form
 crit?>
 
-<!----- other ------>
 <?bar
 name=><?_ml .label.othercriteria _ml?>
 form<=

@@ -1,13 +1,14 @@
 <?_code
 
+ use strict;
+
  $title = "Schema Browser";
  $body = "";
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbh = LJ::get_db_writer();
+ my $sth;
 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  my $can_doc = 0;
  if (LJ::remote_has_priv($remote, "schemadoc")) { $can_doc = 1; }
@@ -43,7 +44,7 @@
          if ($table{$table}->{'public'}) {
              $body .= " (<a href=\"./?mode=viewdata&amp;table=$table\">data</a>)";
          }
-         $body .= "</td><td>$des</td></tr>\n";b
+         $body .= "</td><td>$des</td></tr>\n";
      }
      $body .= "</table>\n";
      return;
