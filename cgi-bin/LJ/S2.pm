@@ -308,12 +308,12 @@ sub load_layers {
     return $maxtime unless @to_load;
 
     # get the dbh and start loading these
-    my $dbh = LJ::get_db_writer();
-    die "Failure getting master database handle in LJ::S2::load_layers\n"
-        unless $dbh;
+    my $dbr = LJ::S2::get_s2_reader();
+    die "Failure getting S2 database handle in LJ::S2::load_layers\n"
+        unless $dbr;
 
     my $where = join(' OR ', map { "s2lid=$_" } @to_load);
-    my $sth = $dbh->prepare("SELECT s2lid, compdata, comptime FROM s2compiled WHERE $where");
+    my $sth = $dbr->prepare("SELECT s2lid, compdata, comptime FROM s2compiled WHERE $where");
     $sth->execute;
     while (my ($id, $comp, $comptime) = $sth->fetchrow_array) {
         S2::load_layer($id, $comp, $comptime);
