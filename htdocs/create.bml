@@ -471,6 +471,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
 
      LJ::run_hooks("create.bml_opts", {
          post => \%POST,
+         get => \%GET,
          ret => \$ret,
      });
          
