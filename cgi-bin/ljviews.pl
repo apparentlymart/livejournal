@@ -1343,12 +1343,13 @@ sub create_view_friends
     $$ret = "";
 
     my $get = $opts->{'getargs'};
+    my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
 
     if ($get->{'mode'} eq "live") {
         $$ret .= "<html><head><title>${user}'s friends: live!</title></head>\n";
         $$ret .= "<frameset rows=\"100%,0%\" border=0>\n";
-        $$ret .= "  <frame name=livetop src=\"friends?mode=framed\">\n";
-        $$ret .= "  <frame name=livebottom src=\"friends?mode=livecond&amp;lastitemid=0\">\n";
+        $$ret .= "  <frame name=livetop src=\"$journalbase/friends?mode=framed\">\n";
+        $$ret .= "  <frame name=livebottom src=\"$journalbase/friends?mode=livecond&amp;lastitemid=0\">\n";
         $$ret .= "</frameset></html>\n";
         return 1;
     }
@@ -1384,8 +1385,6 @@ sub create_view_friends
                 "name" => LJ::ehtml($u->{'urlname'} || "My Website"),
             });
     }
-
-    my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
 
     $friends_page{'urlcalendar'} = "$journalbase/calendar";
     $friends_page{'urllastn'} = "$journalbase/";
