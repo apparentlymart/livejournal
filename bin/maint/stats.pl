@@ -13,9 +13,8 @@ $maint{'genstats'} = sub
                                   pop_interests meme pop_faq); }
     my %do = map { $_, 1, } @which;
     
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbh = LJ::get_db_writer(); 
+    my $dbr = LJ::get_db_reader();
     my $sth;
 
     my %account;
@@ -29,8 +28,6 @@ $maint{'genstats'} = sub
     my ($nowtime, $time, $nowdate);
 
     my %to_pop;
-
-    LJ::load_props($dbs, "user");
 
     if ($do{'pop_faq'}) {
         $sth = $dbr->prepare("SELECT faqid, COUNT(*) FROM faquses WHERE ".
@@ -75,8 +72,7 @@ $maint{'genstats'} = sub
             } 
 
             my $total = 0;
-            $total += $dbr->selectrow_array("SELECT COUNT(*) FROM log WHERE year=$year ".
-                                            "AND month=$month AND day=$day");
+            # livejournal.log was removed (clustered). Removing query.
             foreach my $c (@LJ::CLUSTERS) {
                 my $dbcr = LJ::get_cluster_reader($c);
                 $total += $dbcr->selectrow_array("SELECT COUNT(*) FROM log2 WHERE year=$year ".
@@ -148,54 +144,61 @@ $maint{'genstats'} = sub
             }
         }
     }
+    # All of the below uses clustered tables.  Make one large loop
+    # to prevent having 4 smaller loops.
+    foreach my $c (@LJ::CLUSTERS) {
+    	die "Can't get cluster $c db handle."
+            unless my $dbcr = LJ::get_cluster_reader($c);
+    	print "-I- Getting userprop stats on cluster $c.\n";
+	
+	my $upc = LJ::get_prop("user", "country");
+    	die "Can't find country userprop.  Database populated?\n" unless $upc;
 
-    my $upc = LJ::get_prop("user", "country");
-    die "Can't find country userprop.  Database populated?\n" unless $upc;
+    	if ($do{'countries'})
+    	{
+        	$to_pop{'country'} = \%country;
 
-    if ($do{'countries'})
-    {
-        $to_pop{'country'} = \%country;
-
-        print "-I- Countries.\n";
-        $sth = $dbr->prepare("SELECT value, COUNT(*) AS 'count' FROM userprop ".
+        	print "-I- Countries.\n";
+        	$sth = $dbcr->prepare("SELECT value, COUNT(*) AS 'count' FROM userproplite2 ".
                              "WHERE upropid=$upc->{'id'} AND value<>'' GROUP BY 1 ORDER BY 2");
-        $sth->execute;
-        while ($_ = $sth->fetchrow_hashref) {
-            $country{$_->{'value'}} = $_->{'count'};
-        }
+        	$sth->execute;
+        	while ($_ = $sth->fetchrow_hashref) {
+            		$country{$_->{'value'}} += $_->{'count'};
+		}
+    	}
+
+    	if ($do{'states'}) 
+    	{
+        	$to_pop{'stateus'} = \%stateus;
+
+        	my $ups = LJ::get_prop("user", "state");
+        	die "Can't find state userprop.  Database populated?\n" unless $ups;
+
+        	print "-I- US States.\n";
+        	$sth = $dbcr->prepare("SELECT ua.value, COUNT(*) AS 'count' FROM userproplite2 ua, userproplite2 ub WHERE ua.userid=ub.userid AND ua.upropid=$ups->{'id'} and ub.upropid=$upc->{'id'} and ub.value='US' AND ub.value<>'' GROUP BY 1 ORDER BY 2");
+        	$sth->execute;
+        	while ($_ = $sth->fetchrow_hashref) {
+            		$stateus{$_->{'value'}} += $_->{'count'};
+        	}
+    	}
+
+    	if ($do{'gender'}) 
+    	{
+        	$to_pop{'gender'} = \%gender;
+
+        	my $upg = LJ::get_prop("user", "gender");
+        	die "Can't find gender userprop.  Database populated?\n" unless $upg;
+
+        	print "-I- Gender.\n";
+        	$sth = $dbcr->prepare("SELECT value, COUNT(*) AS 'count' ".
+                             "FROM userproplite2 WHERE upropid=$upg->{'id'} GROUP BY 1");
+        	$sth->execute;
+        	while ($_ = $sth->fetchrow_hashref) {
+            		$gender{$_->{'value'}} += $_->{'count'};
+        	}
+    	}
     }
-
-    if ($do{'states'}) 
-    {
-        $to_pop{'stateus'} = \%stateus;
-
-        my $ups = LJ::get_prop("user", "state");
-        die "Can't find state userprop.  Database populated?\n" unless $ups;
-
-        print "-I- US States.\n";
-        $sth = $dbr->prepare("SELECT ua.value, COUNT(*) AS 'count' FROM userprop ua, userprop ub WHERE ua.userid=ub.userid AND ua.upropid=$ups->{'id'} and ub.upropid=$upc->{'id'} and ub.value='US' AND ub.value<>'' GROUP BY 1 ORDER BY 2");
-        $sth->execute;
-        while ($_ = $sth->fetchrow_hashref) {
-            $stateus{$_->{'value'}} = $_->{'count'};
-        }
-    }
-
-    if ($do{'gender'}) 
-    {
-        $to_pop{'gender'} = \%gender;
-
-        my $upg = LJ::get_prop("user", "gender");
-        die "Can't find gender userprop.  Database populated?\n" unless $upg;
-
-        print "-I- Gender.\n";
-        $sth = $dbr->prepare("SELECT value, COUNT(*) AS 'count' ".
-                             "FROM userprop WHERE upropid=$upg->{'id'} GROUP BY 1");
-        $sth->execute;
-        while ($_ = $sth->fetchrow_hashref) {
-            $gender{$_->{'value'}} = $_->{'count'};
-        }
-    }
-
+    
     if ($do{'pop_interests'})
     {
         $to_pop{'pop_interests'} = \%pop_interests;
