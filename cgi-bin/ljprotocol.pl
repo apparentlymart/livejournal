@@ -1062,7 +1062,7 @@ sub editfriendgroups
     foreach my $bit (keys %{$req->{'set'}})
     {
 	$bit += 0;
-	next unless ($bit >=1 && $bit <= 30);
+	next unless ($bit >= 1 && $bit <= 30);
 	my $sa = $req->{'set'}->{$bit};
 	my $name = $sa->{'name'};
 
@@ -1782,6 +1782,7 @@ sub editfriendgroups
 
     foreach (keys %$req) {
 	if (/^efg_set_(\d+)_name$/) {
+	    next unless ($req->{$_} ne "");
 	    my $n = $1;
 	    my $fs = { 
 		'name' => $req->{"efg_set_${n}_name"},

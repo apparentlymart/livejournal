@@ -35,7 +35,7 @@
 			'includegroups' => 1,
 		    },
 		\%res, { 'userid' => $remote->{'userid'},
-			   'noauth' => 1, });
+			 'noauth' => 1, });
  my @num_used;
  my @num_free;
 
@@ -49,7 +49,7 @@
      my $name = "";
      if ($res{"frgrp_${i}_name"}) {
 	 $sort = $res{"frgrp_${i}_sortorder"}+0;
-	 $name = &ehtml($res{"frgrp_${i}_name"});
+	 $name = LJ::ehtml($res{"frgrp_${i}_name"});
 	 push @num_used, $i;
      } else {
 	 push @num_free, $i;
@@ -230,6 +230,7 @@
      // mark it to be deleted later
      var gnum = item.value;
      document.fg["efg_delete_"+gnum].value = "1";
+     document.fg["efg_set_"+gnum+"_name"].value = "";
 
      // as per the protocol documentation, unset bit on all friends
      var i;
