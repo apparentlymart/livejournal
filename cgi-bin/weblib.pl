@@ -924,7 +924,7 @@ sub entry_form {
         $jevent = LJ::ejs($jevent);
         my $rte_nosupport = LJ::ejs(BML::fill_template("de", { DATA => BML::ml('entryform.htmlokay.rte_nosupport') }));
         
-        $out .= LJ::html_hidden('rich', '1') . "\n";
+        $out .= LJ::html_hidden('richtext', '1') . "\n";
         $out .= LJ::html_hidden('saved_entry', '') . "\n";
         
         $out .= <<RTE;
@@ -952,6 +952,7 @@ RTE
                                 'wrap' => 'soft', 'tabindex' => $tabindex->() });
 
     $out .= '</noscript>' if $opts->{'richtext_on'};
+    $out .= LJ::html_hidden('prop_opt_preformatted', '1') if $opts->{'richtext_on'};
 
     my $jrich = LJ::ejs(BML::fill_template("de", {
         DATA => BML::ml("entryform.htmlokay.rich", { 'opts' => 'href="#" onClick="enable_rte()"' })
