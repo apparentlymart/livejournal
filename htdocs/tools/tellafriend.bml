@@ -42,6 +42,7 @@
      my $email = $FORM{'toemail'};
      my @errors;
      &check_email($email, \@errors);
+     push @errors, "(=REQUIREPOST=)" unless LJ::did_post();
      return LJ::bad_input(@errors) if @errors;
 
      LJ::send_mail({
