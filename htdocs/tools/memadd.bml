@@ -14,6 +14,8 @@
      return;
  };
 
+ $POST{'oldkeywords'} = [ split('\0', $POST{'oldkeywords'}) ];
+
  unless (LJ::text_in(\%POST)) {
      return $err->("Invalid UTF-8 Input");
  }
@@ -26,8 +28,6 @@
  my $memoryu = LJ::get_authas_user($authas);
  return $err->($ML{'error.invalidauth'})
      unless $memoryu;
-
- $POST{'oldkeywords'} = [ split('\0', $POST{'oldkeywords'}) ];
 
  my %secopts = ( 'public' => $ML{'label.security.public'},
                  'friends' => $ML{'label.security.friends'},
