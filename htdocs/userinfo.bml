@@ -73,7 +73,7 @@
  }
 
  if ($u->{'clusterid'}) {
-     $dbcr = LJ::get_dbh("cluster$u->{'clusterid'}slave");
+     $dbcr = LJ::get_cluster_reader($u);
  }
 
  my $remote_isfriend = LJ::is_friend($dbr, $u, $remote);

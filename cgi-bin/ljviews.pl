@@ -14,6 +14,11 @@ sub create_view_lastn
     my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
+    my $dbcr;
+
+    if ($u->{'clusterid'}) {
+	$dbcr = LJ::get_dbh("cluster$u->{'clusterid'}slave");
+    }
     
     my $user = $u->{'user'};
 
@@ -92,6 +97,8 @@ sub create_view_lastn
     ## load the itemids
     my @itemids;
     my @items = LJ::get_recent_items($dbs, {
+	'clusterid' => $u->{'clusterid'},
+	'clustersource' => 'slave',
 	'viewall' => $viewall,
 	'userid' => $u->{'userid'},
 	'remote' => $remote,
@@ -103,10 +110,16 @@ sub create_view_lastn
     
     ### load the log properties
     my %logprops = ();
-    LJ::load_log_props($dbs, \@itemids, \%logprops);
+    my $logtext;
+    if ($u->{'clusterid'}) {
+	LJ::load_props($dbs, "log");
+	LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
+	$logtext = LJ::get_logtext2($u, @itemids);
+    } else {
+	LJ::load_log_props($dbs, \@itemids, \%logprops);
+	$logtext = LJ::get_logtext($dbs, @itemids);
+    }
     LJ::load_moods($dbs);
-
-    my $logtext = LJ::get_logtext($dbs, @itemids);
 
     my $lastday = -1;
     my $lastmonth = -1;
@@ -185,12 +198,15 @@ sub create_view_lastn
 
 	if ($u->{'opt_showtalklinks'} eq "Y" && 
 	    ! $logprops{$itemid}->{'opt_nocomments'}
-	    ) {
+	    ) 
+	{
+	    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
+	    
 	    $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
 		'itemid' => $itemid,
-		'urlpost' => "$LJ::SITEROOT/talkpost.bml?itemid=$itemid",
+		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$itemid",
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'LASTN_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?itemid=$itemid&amp;nc=$replycount",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$itemid&amp;nc=$replycount",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount == 1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",

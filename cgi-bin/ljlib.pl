@@ -196,7 +196,6 @@ sub get_friend_items
     my $lastmax = $LJ::EndOfTime - time() + 3600*24*14;  # don't load stuff older than 2 weeks 
     my $itemsleft = $getitems;
     my $fr;
-    my $must_fill_bares;  # if we ever got a bare response from get_recent_items
 
     while ($loop && ($fr = $get_next_friend->()))
     {
@@ -204,7 +203,6 @@ sub get_friend_items
 
 	# load the next recent updating friend's recent items
 	my $friendid = $fr->[0];
-	my $bare = 0;
 
 	my @newitems = LJ::get_recent_items($dbs, {
 	    'userid' => $friendid,
@@ -214,14 +212,11 @@ sub get_friend_items
 	    'gmask_from' => $gmask_from,
 	    'friendsview' => 1,
 	    'notafter' => $lastmax,
-	    'bareflag' => \$bare,
 	});
 	
 	if (@newitems)
 	{
 	    push @items, @newitems;
-
-	    $must_fill_bares = 1 if $bare;
 
 	    $opts->{'owners'}->{$friendid} = 1;
 
@@ -254,43 +249,7 @@ sub get_friend_items
 	@{$opts->{'itemids'}} = map { $_->{'itemid'} } @items;
     }
     
-    fill_bares($dbs, @items) if $must_fill_bares;
-
     return @items;
-}
-
-# given a dbs and list of half-loaded items (from dbcache), load the rest of their info:
-sub fill_bares
-{
-    my $dbs = shift;
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    my @items = @_;
-
-    my @bare = map { $_->{'itemid'} } @items;
-    my $pass = 1;  # 1=slave, 2=master
-    while (@bare && $pass <= 2) {
-	my $dbu = $pass==1 ? $dbr : $dbh;
-	my $itemids = join(", ", @bare);
-	my $sth = $dbh->prepare("SELECT itemid, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart' FROM log WHERE itemid IN ($itemids)");
-	$sth->execute;
-	my %res;
-	while (my ($itemid, $rcount, $alldate) = $sth->fetchrow_array) {
-	    $res{$itemid} = [ $rcount, $alldate ];
-	}
-	@bare = ();
-	foreach my $h (@items) {
-	    my $itemid = $h->{'itemid'};
-	    if ($res{$itemid}) {
-		$h->{'replycount'} = $res{$itemid}->[0];
-		$h->{'alldatepart'} = $res{$itemid}->[1];
-	    } else {
-		push @bare, $itemid;  # load from master
-	    }
-	}
-	$pass++;  # use master next, or quit.
-    }
 }
 
 sub get_recent_items
@@ -318,6 +277,14 @@ sub get_recent_items
 
     my $max_hints = $LJ::MAX_HINTS_LASTN;  # temporary
     my $sort_key = "revttime";
+
+    my $clusterid = $opts->{'clusterid'}+0;
+    my $logdb = $dbr;
+
+    if ($clusterid) {
+	my $source = $opts->{'clustersource'} eq "slave" ? "slave" : "";
+	$logdb = LJ::get_dbh("cluster${clusterid}$source");
+    }
 
     # community/friend views need to post by log time, not event time
     $sort_key = "rlogtime" if ($opts->{'order'} eq "logtime" ||
@@ -361,65 +328,6 @@ sub get_recent_items
     # what mask can the remote user see?
     my $mask = $gmask_from->{$userid} + 0;
 
-    # fetch crap from squid (an experiment)
-    if ($LJ::DATACACHE) {
-	my $url = "http://$LJ::DATACACHE/datacache/userid=$userid/sort=$sort_key";
-	unless ($mask || $remoteid == $userid) { $url .= "/notfriend=1"; }
-      LJ::debug("url = $url");
-
-	my $ua = new LWP::UserAgent;
-	$ua->proxy('http', $LJ::DATACACHE_PROXY)
-	    if $LJ::DATACACHE_PROXY;
-	my $req = HTTP::Request->new('GET', $url);
-	my $res = $ua->request($req);
-	
-	if ($res->is_success) {
-	  LJ::debug("snagged it");
-
-            my @lines = split(/\n/, $res->content);
-	    shift @lines;  # kill the comment/status line
-	    my $skipcount = 0;
-	    while (@lines) {
-		my $line = shift @lines;
-		my $h;
-		($h->{'itemid'},
-		 $h->{'security'},
-		 $h->{'allowmask'},
-		 $h->{'ownerid'},
-		 $h->{'posterid'},
-		 $h->{'rlogtime'}) = split(/\t/, $line);
-		last unless $h->{'itemid'};
-		
-		next if ($h->{'security'} eq "private" &&
-			 $h->{'posterid'} != $remoteid);
-		
-		next if ($h->{'security'} eq "usemask" && 
-			 ! (($h->{'allowmask'}+0) & $mask));
-		
-		if ($skipcount < $skip) {
-		    $skipcount++;
-		    next;
-		}
-		    
-		push @items, $h;
-		push @{$opts->{'itemids'}}, $h->{'itemid'};
-		last if (@items >= $itemshow);
-	    }
-
-	    if ($opts->{'friendview'}) {
-		# flag for caller to load time/replycounts
-		my $r = $opts->{'bareflag'};
-		if (ref $r eq "SCALAR") { $$r = 1; }
-	    } else {
-		fill_bares($dbs, @items);
-	    }
-	
-	    return @items;
-	} else {
-	    LJ::debug("failed: " . $res->error_as_HTML);
-	}
-    }
-
     # decide what level of security the remote user can see
     my $secwhere = "";
     if ($userid == $remoteid || $opts->{'viewall'}) {
@@ -436,15 +344,31 @@ sub get_recent_items
     # because LJ::get_friend_items needs rlogtime for sorting.
     my $extra_sql;
     if ($opts->{'friendsview'}) {
-	$extra_sql .= "ownerid, rlogtime, ";
+	if ($clusterid) {
+	    $extra_sql .= "ownerid, rlogtime, ";
+	} else {
+	    $extra_sql .= "journalid AS 'ownerid', rlogtime, ";
+	}
     }
 
-    my $sql = ("SELECT itemid, posterid, security, replycount, $extra_sql ".
-	       "DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i ".
-	       "%l %h %k %H\") AS 'alldatepart' ".
-	       "FROM log WHERE ownerid=$userid AND $sort_key <= $notafter $secwhere ".
-	       "ORDER BY ownerid, $sort_key ".
-	       "LIMIT $skip,$itemshow");
+    my $sql;
+
+    if ($clusterid) {
+	$sql = ("SELECT jitemid AS 'itemid', posterid, security, replycount, $extra_sql ".
+		"DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i ".
+		"%l %h %k %H\") AS 'alldatepart' ".
+		"FROM log2 WHERE journalid=$userid AND $sort_key <= $notafter $secwhere ".
+		"ORDER BY journalid, $sort_key ".
+		"LIMIT $skip,$itemshow");
+    } else {
+	# old tables ("cluster 0")
+	$sql = ("SELECT itemid, posterid, security, replycount, $extra_sql ".
+		"DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i ".
+		"%l %h %k %H\") AS 'alldatepart' ".
+		"FROM log WHERE ownerid=$userid AND $sort_key <= $notafter $secwhere ".
+		"ORDER BY ownerid, $sort_key ".
+		"LIMIT $skip,$itemshow");
+    }
 
     # this whole @need_update stuff is unnecessary if the web-server
     # was stopped during the upgrade from the old code to the new
@@ -452,15 +376,16 @@ sub get_recent_items
     # rows might have an rlogtime == 0, which needs fixing.
     my @need_update;
 
-    $sth = $dbr->prepare($sql);
+    $sth = $logdb->prepare($sql);
     $sth->execute;
+    if ($logdb->err) { die $logdb->errstr; }
     while (my $li = $sth->fetchrow_hashref) {
 	push @items, $li;
 	push @{$opts->{'itemids'}}, $li->{'itemid'};
 
 	# cleanup hack; see above.
 	push @need_update, $li->{'itemid'}
-	    if ($opts->{'friendsview'} && $li->{'rlogtime'} == 0);
+	    if ($opts->{'friendsview'} && $clusterid==0 && $li->{'rlogtime'} == 0);
     }
 
     if (@need_update) {
@@ -1603,6 +1528,7 @@ sub load_props
 	while (my $p = $sth->fetchrow_hashref) {
 	    $p->{'id'} = $p->{$keyname{$t}};
 	    $LJ::CACHE_PROP{$t}->{$p->{'name'}} = $p;
+	    $LJ::CACHE_PROPID{$t}->{$p->{'id'}} = $p;
 	}
 	$sth->finish;
     }
@@ -2106,6 +2032,57 @@ sub get_logtext
 
 	my $sth = $db->prepare("SELECT itemid, subject, event FROM $table ".
 			       "WHERE itemid IN ($itemid_in)");
+	$sth->execute;
+	while (my ($id, $subject, $event) = $sth->fetchrow_array) {
+	    $lt->{$id} = [ $subject, $event ];
+	    delete $need{$id};
+	}
+    }
+    return $lt;
+}
+
+# <LJFUNC>
+# name: LJ::get_logtext2
+# des: Efficiently retrieves a large number of journal entry text, trying first
+#      slave database servers for recent items, then the master in 
+#      cases of old items the slaves have already disposed of.  See also:
+#      [func[LJ::get_talktext2]].
+# args: u, jitemid*
+# returns: hashref with keys being jitemids, values being [ $subject, $body ]
+# des-itemid: List of jitemids to retrieve the subject & text for.
+# </LJFUNC>
+sub get_logtext2
+{
+    my $u = shift;
+    my $clusterid = $u->{'clusterid'};
+    my $journalid = $u->{'userid'}+0;
+
+    # return structure.
+    my $lt = {};
+    return $lt unless $clusterid;
+
+    my $dbh = LJ::get_dbh("cluster$clusterid");
+    my $dbr = LJ::get_dbh("cluster${clusterid}slave");
+
+    # keep track of itemids we still need to load.
+    my %need;
+    foreach (@_) { $need{$_+0} = 1; }
+
+    # always consider hitting the master database, but if a slave is 
+    # available, hit that first.
+    my @sources = ([$dbh, "logtext2"]);
+    if ($dbr) { 
+	unshift @sources, [ $dbr, $LJ::USE_RECENT_TABLES ? "recent_logtext2" : "logtext2" ];
+    }
+    
+    while (@sources && %need)
+    {
+	my $s = shift @sources;
+	my ($db, $table) = ($s->[0], $s->[1]);
+	my $jitemid_in = join(", ", keys %need);
+
+	my $sth = $db->prepare("SELECT jitemid, subject, event FROM $table ".
+			       "WHERE journalid=$journalid AND jitemid IN ($jitemid_in)");
 	$sth->execute;
 	while (my ($id, $subject, $event) = $sth->fetchrow_array) {
 	    $lt->{$id} = [ $subject, $event ];
@@ -3041,6 +3018,14 @@ sub get_dbs
     return make_dbs($dbh, $dbr);
 }
 
+sub get_cluster_reader
+{
+    my $arg = shift;
+    my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
+    return LJ::get_dbh("cluster${id}slave",
+		       "cluster${id}");
+}
+
 # <LJFUNC>
 # name: LJ::make_dbs
 # des: Makes a $dbs structure from a master db
@@ -3728,7 +3713,23 @@ sub load_log_props
     while ($_ = $sth->fetchrow_hashref) {
 	$hashref->{$_->{'itemid'}}->{$_->{'name'}} = $_->{'value'};
     }
-    $sth->finish;
+}
+
+# Note: requires caller to first call LJ::load_props($dbs, "log")
+sub load_log_props2
+{
+    my ($db, $journalid, $listref, $hashref) = @_;
+
+    my $jitemin = join(", ", map { $_+0; } @$listref);
+    return unless $jitemin;
+    return unless ref $hashref eq "HASH";
+    return unless defined $LJ::CACHE_PROPID{'log'};
+
+    my $sth = $db->prepare("SELECT jitemid, propid, value FROM logprop2 WHERE journalid=$journalid AND jitemid IN ($jitemin)");
+    $sth->execute;
+    while (my ($jitemid, $propid, $value) = $sth->fetchrow_array) {
+	$hashref->{$jitemid}->{$LJ::CACHE_PROPID{'log'}->{$propid}->{'name'}} = $value;
+    }
 }
 
 sub load_talk_props
