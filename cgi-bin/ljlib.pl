@@ -4522,7 +4522,7 @@ sub make_journal
             }
 
             # style=mine passed in GET?
-            if ($geta->{'style'} eq 'mine') {
+            if ($remote && $geta->{'style'} eq 'mine') {
 
                 # get remote props and decide what style remote uses
                 LJ::load_user_props($remote, "stylesys", "s2_style");
