@@ -685,7 +685,7 @@ my $talkargs = sub {
                  $html .= &blockquote("<TT><B>Subject:</B> $cleansubject</TT> $icon<P>$cleanbody");
 
                  $html .= "You can <a href=\"$threadurl\">view the thread</a> starting from this comment, or <a href=\"$talkurl\">view all comments</a> to this entry.<br />";
-                 $html .= "You can also reply <a href=\"" . $talkargs->("mode=reply") . "\">at the webpage</a>, or here:";
+                 $html .= "You can also reply <a href=\"" . $talkargs->("replyto=$dtalkid") . "\">at the webpage</a>, or here:";
                  $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
                  $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
                  $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
