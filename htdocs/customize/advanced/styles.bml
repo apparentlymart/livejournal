@@ -3,6 +3,8 @@
     use strict;
     use vars qw(%GET %POST $title $body);
 
+    my $dbs = LJ::get_dbs();
+
     # start of output
     $title = "Styles";
     $body = BML::ml("Backlink", {
@@ -34,15 +36,28 @@
     # edit mode
     if ($id) {
 
+        # load style
+        $style = LJ::S2::load_style($id);
+        return $err->('Style not found') unless $style;
+
+        # check that they own the style
+        return $err->("You do not own this style.")
+            unless $style->{'userid'} == $remote->{'userid'};
+
+        # use selected style
+        if ($POST{'action:usestyle'}) {
+
+            # save to db and update user object
+            LJ::set_userprop($dbs, $remote, "stylesys", '2');
+            LJ::set_userprop($dbs, $remote, "s2_style", $id);
+            return BML::redirect('styles.bml');
+        }
+
         # get public layers
         $pub = LJ::S2::get_public_layers();
 
         # get user layers
         $ulay = LJ::S2::get_layers_of_user($remote);
-
-        # load style
-        $style = LJ::S2::load_style($id);
-        return $err->('Style not found') unless $style;
 
         # core lid
         $POST{'core'} ||= $POST{'core_hidden'};
@@ -54,7 +69,6 @@
             # update in POST to keep things in sync
             $POST{'core'} = $core;
         }
-
 
         # layout lid
         $layout = defined $POST{'layout'} ? $POST{'layout'} : $style->{'layer'}->{'layout'};
@@ -79,10 +93,6 @@
         $body .= "<br />" . BML::ml('backlink', { 'text' => 'Your Styles', 'link' => 'styles.bml' }) . "\n";
 
         ### process edit actions
-
-        # check that they own style and that it exists
-        return $err->("You cannot edit other people's styles.")
-            unless $style->{'userid'} == $remote->{'userid'};
 
         # delete
         if ($POST{'action:delete'}) {
@@ -138,6 +148,8 @@
             return BML::redirect("styles.bml?id=$styleid");
         }
 
+        # load style currently in use
+        LJ::load_user_props($dbs, $remote, 's2_style');
 
         # set up page header
         $title = "Your Styles";
@@ -147,12 +159,15 @@
         $body .= "<table class='postheading' style='margin-left: 40px'>\n";
         if (%$ustyle) {
             foreach (sort { $ustyle->{$a} cmp $ustyle->{$b} || $a <=> $b} keys %$ustyle) {
-                $body .= "<tr><td>" . LJ::ehtml($ustyle->{$_});
+                $body .= "<tr><td><form style='display:inline' method='post' action='styles.bml?id=$_'>";
+                $body .= LJ::html_check({ 'type' => 'radio', 'selected' => $_ == $remote->{'s2_style'} }) . " ";
+                $body .= LJ::ehtml($ustyle->{$_});
                 $body .= " (<a href='" . LJ::journal_base($remote) . "/?s2id=$_'>\#$_</a>) </td>";
-                $body .= "<td><form style='display:inline' method='post' action='styles.bml?id=$_'>";
+                $body .= "<td>";
                 $body .= LJ::html_submit('action:edit', 'Edit') . " ";
                 $body .= LJ::html_submit('action:delete', 'Delete', 
-                                         { 'onclick' => "return confirm('Are you sure you want to delete style \#$_?')" });
+                                         { 'onclick' => "return confirm('Are you sure you want to delete style \#$_?')" }) . " ";
+                $body .= LJ::html_submit('action:usestyle', 'Use', { 'disabled' => $_ == $remote->{'s2_style'} }),
                 $body .= "</form></td></tr>\n";
             }
         } else {
