@@ -167,7 +167,8 @@ sub get_keyword_counts {
 
     # get all of the user's memories that fit the filtering
     my $memories = LJ::Memories::get_by_user($u, { %{$opts || {}}, notext => 1 });
-    return undef unless $memories;
+    return undef unless defined $memories; # error case
+    return {} unless %$memories; # just no memories case
     my @memids = map { $_+0 } keys %$memories;
 
     # now let's get the keywords these memories use
