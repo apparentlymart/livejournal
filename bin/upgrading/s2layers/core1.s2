@@ -594,6 +594,10 @@ function builtin weekdays() : int[]
 
 ##[ properties ]
 
+propgroup colors = "Colors";
+propgroup other = "Other";
+propgroup text = "Text";
+
 property string lang_current {
         noui = 1;
         des = "Current language code.  So layouts can change date/time formats more safely if they want.";
@@ -691,25 +695,25 @@ property string IMGDIR {
     doc_flags = "[sys]";
     des = "The base URL of the current LiveJournal site's image directory, without a trailing slash.  Example: \"http://www.livejourna.com/img\".";
 }
-property string SITENAME {
+property builtin string SITENAME {
     noui = 1;
     doc_flags = "[sys]";
     des = "Name of the current LiveJournal site.  Example: \"LiveJournal.com\".";
 }
 
-property string SITENAMESHORT {
+property builtin string SITENAMESHORT {
     noui = 1;
     doc_flags = "[sys]";
     des = "Shorter name of the current LiveJournal site.  Example: \"LiveJournal\".";
 }
 
-property string SITENAMEABBREV {
+property builtin string SITENAMEABBREV {
     noui = 1;
     doc_flags = "[sys]";
     des = "Abbreviation of the current LiveJournal site.  Example: \"LJ\".";
 }
 
-property string SITEROOT {
+property builtin string SITEROOT {
     noui = 1;
     doc_flags = "[sys]";
     des = "The base URL of the current LiveJournal site, without a trailing slash.  Example: \"http://www.livejournal.com\".";
@@ -964,7 +968,7 @@ property string text_reply_back {
 set text_reply_back = "Read Comments";
 
 property bool view_entry_disabled {
-    des = "Set to true in a layout to fall-back to the system-provided single entry view and comment system.";
+    des = "Enable to fall back to the system-provided single entry view and comment system.";
 }
 set view_entry_disabled = false;
 

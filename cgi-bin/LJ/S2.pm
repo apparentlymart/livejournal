@@ -247,13 +247,31 @@ sub get_layers_of_user
     return \%layers;
 }
 
+# if verify, the $u->{'s2_style'} key is deleted if style isn't found
 sub get_style
 {
-    my $styleid = shift;
+    my ($arg, $verify) = @_;
+
+    my ($styleid, $u);
+    if (ref $arg) {
+        $u = $arg;
+        $styleid = $u->{'s2_style'} + 0;
+    } else {
+        $styleid = $arg + 0;
+    }
 
     my %style;
     my $have_style = 0;
 
+    if ($verify && $styleid) {
+        my $dbs = LJ::get_dbs();
+        my $style = LJ::dbs_selectrow_hashref($dbs, "SELECT * FROM s2styles WHERE styleid=$styleid");
+        if (! $style && $u) {
+            delete $u->{'s2_style'};
+            $styleid = 0;
+        }
+    }
+    
     if ($styleid) {
         my $dbr = LJ::get_db_reader();
         my $sth = $dbr->prepare("SELECT type, s2lid FROM s2stylelayers ".

@@ -1,7 +1,7 @@
 <?_code # -*-bml-*-
 {
     use strict;
-    use vars qw(%POST %GET $title $body);
+    use vars qw(%POST %GET $title $body $js);
 
     my $dbs = LJ::get_dbs();
     my $dbh = $dbs->{'dbh'};
@@ -23,6 +23,7 @@
 
     $body = "";
     $title = "Customize";
+    $js = "";
 
     my $err = sub {
         $title = "Error";
@@ -117,13 +118,64 @@
 
     $body .= "<form method='post' action='layer.bml?$save_arg'>";
     $body .= LJ::html_hidden("userid", $u->{'userid'});
+
+    my %prop;  # name -> hashref, deleted when added to a category
+    my @propnames;
+    foreach my $prop (S2::get_properties($lyr_layout->{'s2lid'})) {
+        unless (ref $prop) {
+            $prop = S2::get_property($lyr_core->{'s2lid'}, $prop);
+            next unless ref $prop;
+        }
+        $prop{$prop->{'name'}} = $prop;
+        push @propnames, $prop->{'name'};
+    }
     
-    foreach my $prop (S2::get_properties($lyr_layout->{'s2lid'}))
-    {
-        $prop = S2::get_property($lyr_core->{'s2lid'}, $prop)
-            unless ref $prop;
-        next unless ref $prop;
-        next if $prop->{'noui'};
+    my @groups = S2::get_property_groups($lyr_layout->{'s2lid'});
+    my $misc_group;
+    my %groupprops;  # gname -> [ propname ]
+    my %propgroup;   # pname -> gname;
+
+    foreach my $gname (@groups) {
+        if ($gname eq "misc" || $gname eq "other") { $misc_group = $gname; }
+        foreach my $pname (S2::get_property_group_props($lyr_layout->{'s2lid'}, $gname)) {
+            my $prop = $prop{$pname};
+            next if ! $prop || $propgroup{$pname};
+            $propgroup{$pname} = $gname;
+            push @{$groupprops{$gname}}, $pname;
+        }
+    }
+    # put unsorted props into an existing or new unsorted/misc group
+    if (@groups) {
+        my @unsorted;
+        foreach my $pname (@propnames) {
+            my $prop = $prop{$pname};
+            next if ! $prop || $propgroup{$pname};
+            push @unsorted, $pname;
+        }
+        if (@unsorted) {
+            unless ($misc_group) {
+                $misc_group = "misc";
+                push @groups, "misc";
+            }
+            push @{$groupprops{$misc_group}}, @unsorted;
+        }
+    }
+
+    my $group_name = sub {
+        my $gname = shift;
+        foreach my $lid ($lid_i18n, $lyr_layout->{'s2lid'}, $lid_i18nc, $lyr_core->{'s2lid'}) {
+            next unless $lid;
+            my $name = S2::get_property_group_name($lid, $gname);
+            return LJ::ehtml($name) if $name;
+        }
+        return "Misc" if $gname eq "misc";
+        return $gname;
+    };
+
+    my $output_prop = sub {
+        my $name = shift;
+        my $prop = $prop{$name};
+        return if ! $prop || $prop->{'noui'};
 
         my $name = $prop->{'name'};
         my $type = $prop->{'type'};
@@ -206,8 +258,41 @@
 
         $body .= "</blockquote>";
         $body .= " p?>";
-    }
+        
+    };
 
+    if (@groups) {
+        $body .= "<div id='propgroupstab'>";
+        my $num = 0;
+        foreach my $gname (@groups) {
+            my $name = $group_name->($gname);
+            $num++;
+            my $class = $num == 1 ? "propgrouptabsel" : "propgrouptab";
+            $js .= "propgroups[$num] = \"$gname\";\n";
+            $body .= "<span class='$class' id='pgroup_tab_$gname'><a href='#pgroup$gname' onclick=\"return showPropGroup('$gname')\">$name</a></span>\n";
+        }
+        $body .= "</div>";
+        $body .= "<div id='propgroupsbody'>";
+   
+
+        foreach my $gname (@groups) {
+            $body .= "<a name='pgroup$gname'></a>\n";
+            $body .= "<div id='pgroup_body_$gname'>\n";
+            foreach my $pname (@{$groupprops{$gname}}) {
+                $output_prop->($pname);
+            }
+            $body .= "</div>";
+        }
+        $body .= "</div>\n";
+
+        $body .= "<script language='JavaScript'>showPropGroup('$groups[0]');</script>\n";
+
+    } else {
+        foreach my $pname (@propnames) {
+            $output_prop->($pname);
+        }
+    }
+    
     $body .= "<?h1 Finished? h1?><?p When done, click the save button below. p?><center>";
     $body .= LJ::html_submit('action:save', "Save");
     $body .= "</center>";
@@ -221,7 +306,69 @@ _code?><?page
 title=><?_code return $title; _code?>
 body=><?_code return $body; _code?>
 head<=
-<script language="JavaScript"></script>
+<script language="JavaScript">
+    var propgroups = new Array();
+    function showPropGroup (name) {
+        if (! document.getElementById) { return true; }
+        for (var i=0; i<propgroups.length; i++) {
+            var gname = propgroups[i];
+            var tab = document.getElementById("pgroup_tab_" + gname);
+            if (tab && tab.setAttribute) {
+                tab.setAttribute("class", (gname == name) ? "propgrouptabsel" : "propgrouptab");
+            }
+            var div = document.getElementById("pgroup_body_" + gname);
+            if (div) {
+                div.style.display = (gname == name) ? "block" : "none";
+            }
+        }
+        return false;
+    }
+<?_code return $js; _code?>
+</script>
 <script language="JavaScript" src="/js/colorpicker.js"></script>
+
+<style type='text/css'>
+ #propgroupstab {
+    font-size: 1.2em;
+    font-weight: bold;
+    font-decoration: none;
+    border-bottom: 2px solid black;
+    margin: 0; padding: 0;
+ }
+ #propgroupsbody {
+    border-left: 2px solid black;
+    border-right: 2px solid black;
+    border-bottom: 2px solid black;
+    margin: 0; padding: 0.5em;
+ }
+
+ span.propgrouptabsel, span.propgrouptab {
+   margin: 0 0.2em 0 0.8em;
+   padding: 0.25em;
+   border-top: 2px solid black;
+   border-left: 2px solid black;
+   border-right: 2px solid black;
+}
+
+ span.propgrouptab {
+   background: #ddd;
+   color: black;
+ }
+ span.propgrouptab a {
+    text-decoration: none;
+    color: black;
+ } 
+
+ span.propgrouptabsel {
+   color: #ddd;
+   background: black;
+ }
+ span.propgrouptabsel a {
+    text-decoration: none;
+    color: #ddd;
+ } 
+
+</style>
+
 <=head
 page?>
