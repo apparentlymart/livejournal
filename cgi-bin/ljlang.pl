@@ -234,10 +234,12 @@ sub set_text
         # Strip bad characters
         $text =~ s/\r//;
         my $qtext = $dbh->quote($text);
+        LJ::get_lock( $dbh, 'global', 'ml_text_txtid' ) || return 0;
         $txtid = $dbh->selectrow_array("SELECT MAX(txtid)+1 FROM ml_text WHERE dmid=?", undef, $dmid);
         $txtid ||= 1;
         $dbh->do("INSERT INTO ml_text (dmid, txtid, lnid, itid, text, userid) ".
                  "VALUES ($dmid, $txtid, $lnid, $itid, $qtext, $userid)");
+        LJ::release_lock( $dbh, 'global', 'ml_text_txtid' );
         return set_error("Error inserting ml_text: ".$dbh->errstr) if $dbh->err;
     }
     if ($opts->{'txtid'}) {
