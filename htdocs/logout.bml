@@ -17,6 +17,8 @@
         LJ::kill_session($u);     # destroys the current cookie
         LJ::kill_all_sessions($u);
         LJ::set_remote(undef);
+        delete $COOKIE{'BMLschemepref'};
+        BML::set_scheme(undef);
         $body = $ML{'.loggedout.killedall'};
         return;
     }
@@ -27,6 +29,8 @@
     {
         LJ::kill_session($u);
         LJ::set_remote(undef);
+        delete $COOKIE{'BMLschemepref'};
+        BML::set_scheme(undef);
         $body = "$ML{'.loggedout.success'}";
         return;
     }

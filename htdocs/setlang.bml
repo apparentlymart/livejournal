@@ -1,71 +1,74 @@
 <?_code
+{
+    use strict;
+    use vars qw(%FORM);
 
- return unless $FORM{'lang'};
- my $l = LJ::Lang::get_lang($FORM{'lang'});
- return unless $l;
- if (LJ::did_post()) {
-     my $etime = 0;
-     if ($BML::COOKIE{'permlogin'}) {
-         $etime = time()+60*60*24*60;
-     }
-     BML::set_cookie("langpref", $l->{'lncode'} . "/" . time(), $etime);
-     BML::set_language($l->{'lncode'});
- }
- return;
+    return unless $FORM{'lang'};
+    my $l = LJ::Lang::get_lang($FORM{'lang'});
+    return unless $l;
 
+    if (LJ::did_post()) {
+        my $dbs = LJ::get_dbs();
+        my $remote = LJ::get_remote($dbs);
+
+        my $cval = $l->{'lncode'};
+        if ($remote) {
+            LJ::set_userprop($dbs, $remote->{'userid'}, "browselang", $l->{'lncode'});
+
+            if ($remote->{'_session'}->{'exptype'} eq 'long') {
+                $cval = [ $l->{'lncode'}, $remote->{'_session'}->{'timeexpire'} ];
+            }
+        }
+
+        $COOKIE{'langpref'} = $cval;
+        BML::set_language($l->{'lncode'});
+    }
+
+    return;
+}
 _code?><?page
 title=><?_ml .title _ml?>
 body<=
 
 <?_code
+{
+    use strict;
+    use vars qw(%FORM);
 
- if ($FORM{'lang'}) {
-     my $l = LJ::Lang::get_lang($FORM{'lang'});
-     unless ($l) {
-	 return "Undefined language. ($FORM{'lang'})";
-     }
-     if (LJ::did_post()) {
-         my $dbs = LJ::get_dbs();
-         my $remote = LJ::get_remote($dbs);
-         if ($remote) {
-             LJ::set_userprop($dbs, $remote->{'userid'}, "browselang", $l->{'lncode'});
-         }
-     }
- }
+    my $curr = BML::get_language();
+    my $ret;
 
- my $def = BML::get_language_default();
- my $curr = $FORM{'lang'} || BML::get_language();
- my $ret;
- $ret .= "<?_ml .select _ml?><form method='post'>";
+    $ret .= "<?_ml .select _ml?><form method='post'>";
 
- my @q = ("en");
- @q = @LJ::LANGS if @LJ::LANGS;
+    my @langs = ("en");
+    @langs = @LJ::LANGS if @LJ::LANGS;
 
- $ret .= "<table cellpadding='10'><tr valign='top' align='left'><td>";
- my $ct = 0;
- my $switch = @q / 2;
- 
- foreach my $code (@q) {
-     my $l = LJ::Lang::get_lang($code);
-     my $checked = $code eq $curr ? "checked='checked'" : "";
-     my $item = "langname.$code";
-     my $namethislang = BML::ml($item);
-     my $namenative = LJ::Lang::get_text($l->{'lncode'}, $item);
-     $ret .= "<p><input type='radio' $checked name='lang' value='$code' id='sel$code'> <label for='sel$code'>$namenative";
-     $ret .= " ($namethislang)" if $namethislang ne $namenative;
-     $ret .= "</label></p>\n";
-     
-     if ($switch && ++$ct >= $switch) {
-         $ret .= "</td><td>"; $switch = 0;
-     }
- }
+    $ret .= "<table cellpadding='10'><tr valign='top' align='left'><td>";
+    my $ct = 0;
+    my $switch = @langs / 2;
+    
+    foreach my $code (@langs) {
+        my $l = LJ::Lang::get_lang($code);
+        my $checked = $code eq $curr ? "checked='checked'" : "";
+        my $item = "langname.$code";
+        my $namethislang = BML::ml($item);
+        my $namenative = LJ::Lang::get_text($l->{'lncode'}, $item);
+        $ret .= "<p><input type='radio' $checked name='lang' value='$code' id='sel$code'> <label for='sel$code'>$namenative";
+        $ret .= " ($namethislang)" if $namethislang ne $namenative;
+        $ret .= "</label></p>\n";
+        
+        if ($switch && ++$ct >= $switch) {
+            $ret .= "</td><td>"; $switch = 0;
+        }
+    }
+    
+    $ret .= "</td></tr></table>";
+    
+    $ret .= "<p><input type='submit' value='<?_ml .switch _ml?>'></p></form>";
 
- $ret .= "</td></tr></table>";
- 
- $ret .= "<p><input type='submit' value='<?_ml .switch _ml?>'></p></form>";
- return $ret;
+    return $ret;
 
-
+}
 _code?>
 
 <=body

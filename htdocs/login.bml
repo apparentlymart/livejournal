@@ -36,7 +36,7 @@
 
         if ($do_logout || $do_login) {
             LJ::kill_session($remote);
-            foreach (qw(ljsession langpref permlogin)) {
+            foreach (qw(ljsession langpref)) {
                 delete $COOKIE{$_};
             }
             undef $remote;
@@ -64,7 +64,7 @@
 
             $COOKIE{'ljsession'} = [ $COOKIE{'ljsession'}, $etime, 1 ]; # 1 => HttpOnly
             $COOKIE{'langpref'} = [ $COOKIE{'langpref'}, $etime ];
-            $COOKIE{'permlogin'} = [ $POST{'expire'} eq "never", $etime ];
+            $COOKIE{'BMLschemepref'} = [ $COOKIE{'BMLschemepref'}, $etime ];
 
             my $udbh = LJ::get_cluster_master($remote, 1);
             $udbh->do("UPDATE sessions SET timeexpire=UNIX_TIMESTAMP()+$session_secs, ".
@@ -95,7 +95,7 @@
                 return;
             }
         
-            LJ::load_user_props($dbs, $u, "browselang");
+            LJ::load_user_props($dbs, $u, "browselang", "schemepref");
             my $bl = LJ::Lang::get_lang($u->{'browselang'});
             
             my $bindip;
@@ -122,13 +122,17 @@
             my $sopts = @sopts ? ":" . join('', map { ".$_" } @sopts) : "";
 
             $COOKIE{'ljsession'} = [  "ws:$u->{'user'}:$sess->{'sessid'}:$sess->{'auth'}$sopts", $etime, 1 ]; # 1 => HttpOnly
+
+            # restore default scheme
+            $COOKIE{'BMLschemepref'} = [ $u->{'schemepref'}, $etime ];
+            BML::set_scheme($u->{'schemepref'});
             
             # kill the old-style cookies:
-            delete $COOKIE{'ljuser'};
-            delete $COOKIE{'ljhpass'};
+            foreach (qw(ljuser ljhpass permlogin)) {
+                delete $COOKIE{$_} if $COOKIE{$_};
+            }
             
             eval { Apache->request->notes('ljuser' => $user); };
-            $COOKIE{'permlogin'} = [ $POST{'expire'} eq "never", $etime ];
             if ($bl) {
                 $COOKIE{'langpref'} = [ $bl->{'lncode'} . "/" . time(), $etime ];
                 BML::set_language($bl->{'lncode'});

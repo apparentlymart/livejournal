@@ -1,4 +1,16 @@
 ;; -*- coding: utf-8 -*-
+/setscheme.bml.title=Set Scheme Preference
+
+/setscheme.bml.noschemes=No schemes are available for selection.
+
+/setscheme.bml.select=Select your preferred scheme:
+
+/setscheme.bml.default=Default
+
+/setscheme.bml.switch=Switch
+
+/setscheme.bml.current=Current Scheme Preference
+
 /allpics.bml.current=Current Pictures
 
 /allpics.bml.default=<u>Default</u>

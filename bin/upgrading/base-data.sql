@@ -1008,6 +1008,8 @@ INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope
 UPDATE userproplist SET datatype='num',des='The style ID# of the S1 style for the recent entries view.',indexed='0',prettyname='Recent View StyleID',scope='general' WHERE name='s1_lastn_style';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('num', 'S2 Styleid to use', '0', 's2_style', 'S2 Style', 'general');
 UPDATE userproplist SET datatype='num',des='S2 Styleid to use',indexed='0',prettyname='S2 Style',scope='general' WHERE name='s2_style';
+INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'BML scheme name', '0', 'schemepref', 'BML Scheme Preference', 'general');
+UPDATE userproplist SET datatype='char',des='BML scheme name',indexed='0',prettyname='BML Scheme Preference',scope='general' WHERE name='schemepref';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Index to speed directory searches.  Only present if opt_infoshow=Y', '1', 'sidx_bdate', 'SearchIndex: Birthdate', 'general');
 UPDATE userproplist SET datatype='char',des='Index to speed directory searches.  Only present if opt_infoshow=Y',indexed='1',prettyname='SearchIndex: Birthdate',scope='general' WHERE name='sidx_bdate';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Index to speed directory searches.  Format %2s-%s-%s (iso country code, state, city).  Only present if opt_infoshow=Y', '1', 'sidx_loc', 'SearchIndex: Location', 'general');
