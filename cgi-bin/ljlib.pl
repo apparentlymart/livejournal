@@ -3368,6 +3368,10 @@ sub make_journal
         push @needed_props, @{$LJ::viewinfo{$eff_view}->{'owner_props'}};
     }
 
+    if ($eff_view eq "reply") {
+        push @needed_props, "opt_logcommentips";
+    }
+
     LJ::load_user_props($u, @needed_props);
 
     # if the remote is the user to be viewed, make sure the $remote

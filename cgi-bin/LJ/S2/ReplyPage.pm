@@ -299,11 +299,11 @@ sub ReplyForm__print
     }
 
     if ($u->{'opt_logcommentips'} eq "A") {
-        $ret .= "<br />$ML{'.logyourip'}";
+        $ret .= "<br /><b>Notice!</b> This user has turned on the option that logs your IP address when posting.";
         $ret .= LJ::help_icon("iplogging", " ");
     }
     if ($u->{'opt_logcommentips'} eq "S") {
-        $ret .= "<br />$ML{'.loganonip'}";
+        $ret .= "<br /><b>Notice!</b> This user has turned on the option that logs IP addresses of anonymous posters.";
         $ret .= LJ::help_icon("iplogging", " ");
     }
 
