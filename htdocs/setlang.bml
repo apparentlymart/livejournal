@@ -20,7 +20,7 @@
             }
         }
 
-        $COOKIE{'langpref'} = $cval;
+        $COOKIE{'langpref'} = $cval . "/" . time();
         BML::set_language($l->{'lncode'});
     }
 
