@@ -56,10 +56,6 @@ sub handler
 
     $r->set_handlers(PerlTransHandler => [ \&trans ]);
 
-    # um, this was set_handlers before, but that stopped working.  if
-    # somebody could please expain to me the bizarre interactions
-    # between push_handlers and set_handlers, i'd be ecstatic.
-
     # only perform this once in case of internal redirects
     if ($r->is_initial_req) {
         $r->push_handlers(PerlCleanupHandler => sub { %RQ = () });
