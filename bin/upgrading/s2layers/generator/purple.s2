@@ -12,7 +12,6 @@ set page_link   = "#ffffff";
 set page_vlink  = "#330033";
 set page_alink  = "#ffccff";
 set page_back   = "#bb55ee";
-set strong_text = "#000000";
 set stronger_back = "#660099";
 set stronger_text = "#f5eeff";
 set weak_back   = "#bb88dd";

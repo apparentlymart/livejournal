@@ -23,9 +23,6 @@ set page_alink = "#00ffff";
 property Color page_back { des = "Page background color (and around userpics)"; }
 set page_back = "#2d4f89";
 
-property Color strong_text { des = "Text on strong surrounding color (where needed)"; }
-set strong_text = "#000000";
-
 property Color stronger_back { des = "Background color for the bar above entries"; }
 set stronger_back = "#000000";
 
