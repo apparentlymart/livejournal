@@ -1258,7 +1258,7 @@ function UserLite::base_url() [fixed] : string {
 function UserLite::as_string() [fixed] : string {
     var Image uiimg = userinfoicon($this);
     var string dir = $.journal_type == "C" ? "community" : "users";
-    return "<span class='ljuser' style='white-space:nowrap;'><a href='$*SITEROOT/userinfo.bml?user=$.username'><img src='$uiimg.url' alt='userinfo' width='$uiimg.width' height='$uiimg.height' style='vertical-align:bottom;border:0;' /></a><a href='$*SITEROOT/$dir/$.username/'><b>$.username</b></a></span>";
+    return "<span class='ljuser' style='white-space:nowrap;'><a href='$*SITEROOT/userinfo.bml?user=$.username'><img src='$uiimg.url' alt='[info]' width='$uiimg.width' height='$uiimg.height' style='vertical-align:bottom;border:0;' /></a><a href='$*SITEROOT/$dir/$.username/'><b>$.username</b></a></span>";
 }
 
 function UserLite::print() {

@@ -1971,10 +1971,10 @@ sub ljuser
     if ($LJ::DYNAMIC_LJUSER && ref $user ne 'HASH') {
         # Try to automatically pick the user type, but still
         # make something if we can't (user doesn't exist?)
-        $user = LJ::load_user($user);
+        $user = LJ::load_user($user) || $user;
 
         # Traverse the renames to the final journal
-        while ($user and $user->{'journaltype'} eq 'R') {
+        while (ref $user and $user->{'journaltype'} eq 'R') {
             LJ::load_user_props($user, 'renamedto');
             last unless length $user->{'renamedto'};
             $user = LJ::load_user($user->{'renamedto'});
@@ -1988,12 +1988,12 @@ sub ljuser
     }
     my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
     my $img = $opts->{'imgroot'} || $LJ::IMGPREFIX;
-    my $strike = $opts->{'del'} ? ' style="text-decoration: line-through underline;"' : '';
+    my $strike = $opts->{'del'} ? ' text-decoration: line-through;' : '';
     my $make_tag = sub {
         my ($fil, $dir, $x, $y) = @_;
         $y ||= $x;  # make square if only one dimension given
 
-        return "<span class='ljuser' style='white-space: nowrap;'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$LJ::SITEROOT/$dir/$user/'$strike><b>$user</b></a></span>";
+        return "<span class='ljuser' style='white-space: nowrap;$strike'><a href='$LJ::SITEROOT/userinfo.bml?user=$user$andfull'><img src='$img/$fil' alt='[info]' width='$x' height='$y' style='vertical-align: bottom; border: 0;' /></a><a href='$LJ::SITEROOT/$dir/$user/'><b>$user</b></a></span>";
     };
 
     if ($opts->{'type'} eq 'C') {
