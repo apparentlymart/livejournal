@@ -66,7 +66,7 @@ sub FriendsPage
         return 1;
     }
 
-    LJ::load_user_props($dbr, $remote, "opt_nctalklinks");
+    LJ::load_user_props($remote, "opt_nctalklinks");
 
     ## never have spiders index friends pages (change too much, and some 
     ## people might not want to be indexed)
@@ -162,7 +162,6 @@ sub FriendsPage
     } else {
         $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc, u.journaltype FROM user u WHERE u.userid IN ($ownersin)");
     }
-    
 
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
@@ -189,7 +188,7 @@ sub FriendsPage
             next if $friends{$item->{'posterid'}};
             push @posterids, $item->{'posterid'};
         }
-        LJ::load_userids_multiple($dbr, [ map { $_ => \$posters{$_} } @posterids ])
+        LJ::load_userids_multiple([ map { $_ => \$posters{$_} } @posterids ])
             if @posterids;
     }
 
@@ -237,7 +236,7 @@ sub FriendsPage
 
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}), });
-        LJ::expand_embedded($dbr, $ditemid, $remote, \$text);
+        LJ::expand_embedded($ditemid, $remote, \$text);
 
         my $userlite_poster = $get_lite->($posterid);
         my $userlite_journal = $get_lite->($friendid);
@@ -279,7 +278,7 @@ sub FriendsPage
             'post_url' => $posturl,
             'count' => $replycount,
             'enabled' => ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" && ! $logprops{$datakey}->{'opt_nocomments'}) ? 1 : 0,
-            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbr, $u, $remote, 'A'))) ? 1 : 0,
+            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($u, $remote, 'A'))) ? 1 : 0,
         });
 
         my $moodthemeid = $u->{'opt_forcemoodtheme'} eq 'Y' ?
@@ -331,7 +330,7 @@ sub FriendsPage
     # load the pictures that were referenced, then retroactively populate
     # the userpic fields of the Entries above
     my %userpics;
-    LJ::load_userpics($dbr, \%userpics, [ keys %objs_of_picid ]);
+    LJ::load_userpics(\%userpics, [ keys %objs_of_picid ]);
     foreach my $picid (keys %userpics) {
         my $up = Image("$LJ::USERPIC_ROOT/$picid/$userpics{$picid}->{'userid'}",
                        $userpics{$picid}->{'width'},
