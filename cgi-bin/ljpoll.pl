@@ -559,7 +559,7 @@ sub show_poll
         $ret .= $q->{'qtext'};
         $ret .= "<p>";
 
-        $sth = $dbr->prepare("SELECT u.user, pr.value FROM user u, pollresult pr, pollsubmission ps " . 
+        $sth = $dbr->prepare("SELECT u.user, pr.value FROM useridmap u, pollresult pr, pollsubmission ps " . 
                              "WHERE u.userid=pr.userid AND pr.pollid=? AND pollqid=? " . 
                              "AND ps.pollid=pr.pollid AND ps.userid=pr.userid ORDER BY ps.datesubmit");
         $sth->execute($pollid, $opts->{'qid'});
