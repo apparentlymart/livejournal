@@ -48,8 +48,8 @@
      if ($int) {
          return BML::redirect("$LJ::SITEROOT/interests.bml?int=" . LJ::eurl($int));
      } else {
-         $title = "No Interest";
-         $body = "<?h1 Error h1?><?p You did not enter an interest. p?>";
+         $title = $ML{'.nointerest.title'};
+         $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.nointerest.text'} p?>";
          return;
      }
  }
@@ -57,8 +57,8 @@
  if ($type eq "email") {
      my $email = lc($q);
      unless ($email) {
-         $title = "No Address";
-         $body = "<?h1 Error h1?><?p You did not enter an email address. p?>";
+         $title = $ML{'.noaddress.title'};
+         $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.noaddress.text'} p?>";
          return;
      } else {
          my $sth = $dbr->prepare("SELECT * FROM user u WHERE u.journaltype='P' AND u.statusvis='V' ".
@@ -75,8 +75,8 @@
                  }
              }
          }
-         $title = "No Match";
-         $body = "<?h1 Sorry.. h1?><?p No LiveJournal user is listed as having that email address, or they've chosen to have their address be private. p?>";
+         $title = $ML{'.nomatch.title'};
+         $body = "<?h1 $ML{'Sorry'} h1?><?p $ML{'.nomatch.text'} p?>";
          return;
      }
  }
@@ -104,8 +104,8 @@
              return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}");
          }
      } else {
-         $title = "No Match";
-         $body = "<?h1 Sorry.. h1?><?p No LiveJournal found matching that search criteria. p?>";
+         $title = $ML{'.nomatch.title'};
+         $body = "<?h1 $ML{'Sorry'} h1?><?p $ML{'.nomatch.text'} p?>";
          return;
      }
      
@@ -115,8 +115,8 @@
      $q =~ s/^\s+//; $q =~ s/\s+$//;
      my @parts = split(/\s*,\s*/, $q);
      if (@parts==0 || @parts>3) {
-         $title = "Format Error";
-         $body .= "<?h1 Search by Region h1?><?p You can search by region in one of the following formats: <ul><li>Country<li>City *<li>City, State *<li>State, Country<li>City, State, Country</ul>Notes:<ul><li>* searching for only a city or a city and state defaults to assuming the country is the United States.<li>Country can either be the country's full name, or its two letter country code</ul>If you want to do a different type of search, check out the <a href=\"/directorysearch.bml\">directory search</a>. p?>";
+         $title = $ML{'.formaterror'};
+         $body .= "<?h1 $ML{'.region.head'} h1?><?p $ML{'.region.text'} p?>";
          return;
      }
      

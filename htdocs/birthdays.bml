@@ -5,16 +5,16 @@
 
  LJ::set_active_crumb('birthdays');
 
- $title = "Birthdays";
+ $title = $ML{'.title'};
  $body = "";
 
  my $remote = LJ::get_remote();
  unless ($remote) {
-     $body .= "<?h1 Login first... h1?><?p To use this feature, you must first <a href=\"/login.bml?ret=1\">login</a>. p?>";
+     $body .= "<?needlogin?>";
      return;
  }
 
- $body .= "Below are the birthdays for everybody that you list as a friend.";
+ $body .= $ML{'.description'};
  my $lastmon = 0;
 
  my $dbr = LJ::get_db_reader();
@@ -39,7 +39,7 @@
      my $day = sprintf("%2s", $bday->{'day'});
      $day =~ s/ /&nbsp;/;
      my $name = LJ::ehtml($bday->{'name'});
-     $body .= "<b><tt>$day</tt></b>: <?ljuser $bday->{'user'} ljuser?> - $name<br />\n";
+     $body .= "<b><tt>$day</tt></b>: " . LJ::ljuser($bday->{'user'}) . " - $name<br />\n";
      
  }
 
