@@ -4,6 +4,7 @@
 $maint{'clean_caches'} = sub 
 {
     my $dbh = LJ::get_dbh("master");
+    my $sth;
 
     print "-I- Cleaning authactions.\n";
     $dbh->do("DELETE FROM authactions WHERE datecreate < DATE_SUB(NOW(), INTERVAL 30 DAY)");
@@ -15,10 +16,17 @@ $maint{'clean_caches'} = sub
     my $pfx = $LJ::DIR_DB ? "$LJ::DIR_DB." : "";
     $dbh->do("DELETE FROM ${pfx}dirsearchres2 WHERE dateins < DATE_SUB(NOW(), INTERVAL 30 MINUTE)");
 
+    print "-I- Cleaning meme.\n";
+    do {
+	$sth = $dbh->prepare("DELETE FROM meme WHERE ts < DATE_SUB(NOW(), INTERVAL 7 DAY) LIMIT 250");
+	$sth->execute;
+	if ($dbh->err) { print $dbh->errstr; }
+	print "    deleted ", $sth->rows, "\n";
+    } while ($sth->rows);
+
     ## clean the recent_* tables now (3 week cache on the slave dbs)
     return unless ($LJ::USE_RECENT_TABLES);
 
-    my $sth;
     my $maxid;
 
     print "-I- Cleaning recent_logtext.\n";    
@@ -32,7 +40,7 @@ $maint{'clean_caches'} = sub
 	my $rows;
 	do
 	{
-	    my $sth = $dbh->prepare("DELETE FROM recent_logtext WHERE itemid < $maxid LIMIT 500");
+	    $sth = $dbh->prepare("DELETE FROM recent_logtext WHERE itemid < $maxid LIMIT 500");
 	    $sth->execute;
 	    $rows = $sth->rows;
 	    print "-I-    - deleted $rows rows\n";
@@ -51,7 +59,7 @@ $maint{'clean_caches'} = sub
 	my $rows;
 	do
 	{
-	    my $sth = $dbh->prepare("DELETE FROM recent_talktext WHERE talkid < $maxid LIMIT 500");
+	    $sth = $dbh->prepare("DELETE FROM recent_talktext WHERE talkid < $maxid LIMIT 500");
 	    $sth->execute;
 	    $rows = $sth->rows;
 	    print "-I-    - deleted $rows rows\n";
