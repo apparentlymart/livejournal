@@ -71,6 +71,16 @@ $LJ::DBIRole = new DBI::Role {
     'time_report' => \&dbtime_callback,
 };
 
+# create our MogileFS object
+if (%LJ::MOGILEFS_CONFIG) {
+    $LJ::MogileFS = new MogileFS (
+                                  domain => $LJ::MOGILEFS_CONFIG{domain},
+                                  root   => $LJ::MOGILEFS_CONFIG{root},
+                                  hosts  => $LJ::MOGILEFS_CONFIG{hosts},
+                                  )
+        or die "Could not initialize MogileFS";
+}
+
 LJ::MemCache::init();
 
 # $LJ::PROTOCOL_VER is the version of the client-server protocol
@@ -4094,6 +4104,14 @@ sub start_request
             eval {
                 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
                 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
+
+                # reload MogileFS config
+                if ($LJ::MogileFS) {
+                    $LJ::MogileFS->reload
+                        ( domain => $LJ::MOGILEFS_CONFIG{domain},
+                          root   => $LJ::MOGILEFS_CONFIG{root},
+                          hosts  => $LJ::MOGILEFS_CONFIG{hosts}, );
+                }
             };
             $LJ::IMGPREFIX_BAK = $LJ::IMGPREFIX;
             $LJ::STATPREFIX_BAK = $LJ::STATPREFIX;
