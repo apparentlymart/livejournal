@@ -1522,6 +1522,42 @@ sub is_friend
 }
 
 # <LJFUNC>
+# name: LJ::is_banned
+# des: Checks to see if a user is banned from a journal.
+# returns: boolean; 1 iff user B is banned from journal A
+# args: dbarg, user, journal
+# des-user: User hashref or userid.
+# des-user: Journal hashref or userid.
+# </LJFUNC>
+sub is_banned
+{
+    my $dbarg = shift;
+    my $u = shift;
+    my $j = shift;
+    
+    my $uid = (ref $u ? $u->{'userid'} : $u)+0;
+    my $jid = (ref $j ? $j->{'userid'} : $j)+0;
+
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
+    my $dbh = $dbs->{'dbh'};
+    my $dbr = $dbs->{'reader'};
+		
+    return 1 unless $uid;
+    return 1 unless $jid;
+
+    # for speed: common case is non-community posting and replies
+    # in own journal.  avoid db hit.
+    return 0 if ($uid == $jid);
+
+    my $sth = $dbr->prepare("SELECT COUNT(*) FROM ban WHERE ".
+			    "userid=$jid AND banneduserid=$uid");
+    $sth->execute;
+    my $is_banned = $sth->fetchrow_array;
+    $sth->finish;
+    return $is_banned;
+}
+
+# <LJFUNC>
 # name: LJ::can_view
 # des: Checks to see if the remote user can view a given journal entry.
 #      <b>Note:</b> This is meant for use on single entries at a time,

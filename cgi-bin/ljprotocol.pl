@@ -24,6 +24,7 @@ sub error_message
 	     "103" => "Poll error",
 	     "104" => "Error adding one or more friends",
 	     "150" => "Can't post as non-user",
+	     "151" => "Banned from journal",
 
 	     # Client Errors
 	     "200" => "Missing required argument(s)",
@@ -404,6 +405,11 @@ sub postevent
 	});
 	return fail($err,103,$error) if $error;
     }
+
+    # make sure this user isn't banned from posting here (if 
+    # this is a community journal)
+    return fail($err,151) if
+        LJ::is_banned($dbs, $posterid, $ownerid);
     
     my $qownerid = $ownerid+0;
     my $qposterid = $posterid+0;

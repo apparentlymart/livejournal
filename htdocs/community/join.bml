@@ -20,30 +20,35 @@
  my $cuserid = $FORM{'cuserid'}+0;
  $sth = $dbh->prepare("SELECT u.user, u.name, c.ownerid, c.membership, c.postlevel FROM user u, community c WHERE u.userid=c.userid AND c.userid=$cuserid");
  $sth->execute;
- my $ci = $sth->fetchrow_hashref();
+ my $ci = $sth->fetchrow_hashref;
 
  ### does this community even exit?
  ###
  unless ($ci) {
      $body .= "(=H1 Error H1=)(=P The specified community ID is not valid, or is not a community. P=)";
-     return "";
+     return;
  }
 
  ### can members join this community even?
  unless ($ci->{'membership'} eq "open") {
      $body .= "(=H1 Sorry... H1=)(=P This community is closed.  If you're interested in joining it, please contact <A HREF=\"/userinfo.bml?userid=$ci->{'ownerid'}\">its maintainer</A>. P=)";
-     return "";
+     return;
  }
 
- ### make sure a community doesn't join a community (that's confusing or something)
- $sth = $dbh->prepare("SELECT journaltype FROM user WHERE userid=$remote->{'userid'}");
- $sth->execute;
- my $u = $sth->fetchrow_hashref;
- unless ($u->{'journaltype'} eq "P") {
+ ### make sure a community doesn't join a community (that's confusing
+ ### or something)
+ LJ::load_remote($dbs, $remote);
+ unless ($remote->{'journaltype'} eq "P") {
      $body .= "(=H1 Error H1=)(=P You're logged in as a shared/community account, not your personal account. P=)";
-     return "";
+     return;
  }
  
+ ## ensure this user isn't banned
+ if (LJ::is_banned($dbs, $remote, $cuserid)) {
+     $body .= "(=H1 Sorry H1=)(=P The maintainer(s) of this community has banned you from joining. P=)";
+     return;
+ }
+
  if ($FORM{'confirm'}) 
  {
      ### make remote user a friend of the community

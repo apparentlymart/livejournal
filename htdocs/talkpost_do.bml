@@ -79,12 +79,7 @@ BODY<=
 	 if ($up) 
 	 {
 	     ### see if the user is banned from posting here
-	     my $quid = $u->{'userid'}+0;
-	     my $qupid = $up->{'userid'}+0;
-	     my $sth = $dbr->prepare("SELECT COUNT(*) AS 'banned' FROM ban WHERE userid=$quid AND banneduserid=$qupid");
-	     $sth->execute;
-	     my ($banned) = $sth->fetchrow_array;
-	     if ($banned) {
+	     if (LJ::is_banned($dbr, $up, $u)) {
 		 push @errors, "You are not allowed to post in this user's journal.";
 	     }
 
