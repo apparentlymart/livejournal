@@ -67,6 +67,9 @@ sub error_message
              "404" => "Cannot post",
              "405" => "Post frequency limit.",
              "406" => "Client is making repeated requests.  Perhaps it's broken?",
+             "407" => "Moderation queue full",
+             "408" => "Maximum queued posts for this community+poster combination reached.",
+             "409" => "Post too large.",
              
              # Server Errors
              "500" => "Internal server error",
@@ -563,7 +566,7 @@ sub postevent
 
     # load userprops all at once
     my @poster_props = qw(newesteventtime dupsig_post);
-    my @owner_props = qw(newpost_minsecurity);
+    my @owner_props = qw(newpost_minsecurity moderated);
     LJ::load_user_props($dbs, $u, @poster_props, @owner_props);
     if ($uowner->{'userid'} == $u->{'userid'}) {
         $uowner->{$_} = $u->{$_} foreach (@owner_props);
@@ -686,6 +689,64 @@ sub postevent
     $dbcm = LJ::get_cluster_master($uowner);
     return fail($err,306) unless $dbcm;
 
+    # if posting to a moderated community, store and bail out here
+    if ($uowner->{'journaltype'} eq 'C' && $uowner->{'moderated'} && !$flags->{'nomod'}) {
+        # don't moderate admins, moderators & pre-approved users
+        my $relcount = $dbcm->selectrow_array("SELECT COUNT(*) FROM reluser ".
+                                              "WHERE userid=$qownerid AND targetid=$qposterid ".
+                                              "AND type IN ('A','M','N')");
+        unless ($relcount) {
+            # moderation queue full?
+            my $modcount = $dbcm->selectrow_array("SELECT COUNT(*) FROM modlog WHERE journalid=$qownerid");
+            return fail($err, 407) if $modcount >= LJ::get_cap($uowner, "mod_queue");
+
+            $modcount = $dbcm->selectrow_array("SELECT COUNT(*) FROM modlog ".
+                                               "WHERE journalid=$qownerid AND posterid=$qposterid");
+            return fail($err, 408) if $modcount >= LJ::get_cap($uowner, "mod_queue_per_poster");
+
+            my $fr = $dbcm->quote(Storable::freeze($req));
+            return fail($err, 409) if length($fr) > 200_000;
+
+            # store
+            $dbcm->do("INSERT INTO modlog (journalid, posterid, subject, logtime) ".
+                      "VALUES ($qownerid, $qposterid, ?, NOW())", undef,
+                      LJ::text_trim($req->{'subject'}, 30, 0));
+            my $modid = $dbcm->{'mysql_insertid'};
+            return fail($err, 501) unless $modid;
+
+            $dbcm->do("INSERT INTO modblob (journalid, modid, request_stor) ".
+                      "VALUES ($qownerid, $modid, $fr)");
+            if ($dbcm->err) {
+                $dbcm->do("DELETE FROM modlog WHERE journalid=$qownerid AND modid=$modid");
+                return fail($err, 501);
+            }
+
+            # alert moderator(s)
+            my $mods = LJ::load_rel_user($dbs, $ownerid, 'M') || [];
+            if (@$mods) {
+                my $in = join(", ", map { $_+0 } @$mods );
+                my $emails = $dbr->selectcol_arrayref("SELECT email FROM user WHERE userid IN ($in) AND status='A'");
+                my $to = join(",", @$emails) if $emails;
+                if ($to) {
+                    my $body = "There has been a new submission into the community '$uowner->{'user'}' which you moderate.  To accept or reject the submission, please go to this address:\n\n" .
+                        "   $LJ::SITEROOT/community/moderate.bml?comm=$uowner->{'user'}\n\nRegards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
+                    LJ::send_mail({
+                        'to' => $to, 
+                        'from' => $LJ::ADMIN_EMAIL,
+                        'charset' => 'utf-8',
+                        'subject' => "Moderated submission notification",
+                        'body' => $body,
+                    });
+                }
+            }
+
+            my $msg = translate($u, "modpost", undef);
+            return { 'message' => $msg };
+        }
+    } # /moderated comms
+
+    # posting:
+
     # before we get going here, we want to make sure to purge this user's
     # delitem cmd buffer, otherwise we could have a race and that might
     # wake up later and delete this item which is replacing in the database
@@ -701,7 +762,7 @@ sub postevent
     
     # do rate-checking
     if ($u->{'journaltype'} ne "Y" && ! LJ::rate_log($u, "post", 1)) {
-        return fail($err,405);
+        return $fail->($err,405);
     }
     
     $dbcm->do("INSERT INTO log2 (journalid, posterid, eventtime, logtime, security, ".
@@ -2572,6 +2633,7 @@ sub postevent
         return 0;
     }
 
+    $res->{'message'} = $rs->{'message'} if $rs->{'message'};
     $res->{'success'} = "OK";
     $res->{'itemid'} = $rs->{'itemid'};
     $res->{'anum'} = $rs->{'anum'} if defined $rs->{'anum'};
