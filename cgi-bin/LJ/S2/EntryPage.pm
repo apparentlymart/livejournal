@@ -91,6 +91,20 @@ sub EntryPage
                 $par_url = "$jbase/$ditemid.html?thread=$dparent";
             }
 
+            my $poster;
+            if ($com->{'posterid'}) {
+                if ($user{$com->{'posterid'}}) {
+                    $poster = UserLite($user{$com->{'posterid'}});
+                } else {
+                    $poster = {
+                        '_type' => 'UserLite',
+                        'username' => $com->{'userpost'},
+                        'name' => $com->{'userpost'},  # we don't have this, so fake it
+                        'journal_type' => 'P',         # fake too, but only people can post, so correct
+                    };
+                }
+            }
+
             my $s2com = {
                 '_type' => 'Comment',
                 'journal' => $userlite_journal,
@@ -99,7 +113,7 @@ sub EntryPage
                 },
                 'permalink_url' => "$permalink?thread=$dtalkid#t$dtalkid",
                 'reply_url' => "$permalink?replyto=$dtalkid",
-                'poster' => $com->{'posterid'} ? UserLite($user{$com->{'posterid'}}) : undef,
+                'poster' => $poster,
                 'replies' => [],
                 'subject' => LJ::ehtml($com->{'subject'}),
                 'subject_icon' => $subject_icon,
