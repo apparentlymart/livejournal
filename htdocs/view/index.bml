@@ -29,17 +29,18 @@
  }
 
  my $remote = LJ::get_remote($dbs);
- my $gmask = 0;
  my $is_owner = 0;
 
- if ($remote && $remote->{'userid'} == $u->{'userid'}) {
-     $is_owner = 1;
- }
-
- if ($remote && ! $is_owner) {
-     $sth = $dbh->prepare("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
-     $sth->execute;
-     ($gmask) = $sth->fetchrow_array;
+ my $secwhere = "AND l.security='public'";
+ if ($remote) {
+     if ($remote->{'userid'} == $u->{'userid'}) {
+	 $secwhere = "";   # see everything
+	 $is_owner = 1;
+     } else {
+	 my $gmask = $dbr->selectrow_array("SELECT groupmask FROM friends WHERE userid=$u->{'userid'} AND friendid=$remote->{'userid'}");
+	 $secwhere = "AND (l.security='public' OR (l.security='usemask' AND l.allowmask & $gmask))"
+	     if $gmask;
+     }
  }
  
  my $year = $FORM{'y'}+0;
@@ -89,20 +90,26 @@
  $body .= "<dl>\n";
  my $lday = 0;
 
- if ($is_person) {
-     $sth = $dbr->prepare("SELECT l.itemid, l.day, ls.subject, l.eventtime, NULL, l.replycount, l.security, l.allowmask FROM log l, logsubject ls WHERE l.ownerid=$u->{'userid'} AND l.year=$year AND l.month=$month AND l.itemid=ls.itemid ORDER BY l.eventtime");
+ # yay for repeating nearly-identical code 4 times!
+ if ($u->{'clusterid'}) 
+ {
+     my $db = LJ::get_cluster_reader($u);
+     if ($is_person) {
+	 $sth = $db->prepare("SELECT l.jitemid, l.day, ls.subject, l.eventtime, NULL, l.replycount, l.security, l.allowmask FROM log2 l, logsubject2 ls WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid $secwhere ORDER BY l.eventtime");
+     } else {
+	 $sth = $db->prepare("SELECT l.jitemid, l.day, ls.subject, l.eventtime, u.user, l.replycount, l.security, l.allowmask FROM log l, logsubject ls, useridmap u WHERE l.journalid=$u->{'userid'} AND ls.journalid=$u->{'userid'} AND l.year=$year AND l.month=$month AND l.jitemid=ls.jitemid AND l.posterid=u.userid $secwhere ORDER BY l.eventtime");
+     }
  } else {
-     $sth = $dbr->prepare("SELECT l.itemid, l.day, ls.subject, l.eventtime, u.user, l.replycount, l.security, l.allowmask FROM log l, logsubject ls, user u WHERE l.ownerid=$u->{'userid'} AND l.year=$year AND l.month=$month AND l.itemid=ls.itemid AND l.posterid=u.userid ORDER BY l.eventtime");
+     if ($is_person) {
+	 $sth = $dbr->prepare("SELECT l.itemid, l.day, ls.subject, l.eventtime, NULL, l.replycount, l.security, l.allowmask FROM log l, logsubject ls WHERE l.ownerid=$u->{'userid'} AND l.year=$year AND l.month=$month AND l.itemid=ls.itemid $secwhere ORDER BY l.eventtime");
+     } else {
+	 $sth = $dbr->prepare("SELECT l.itemid, l.day, ls.subject, l.eventtime, u.user, l.replycount, l.security, l.allowmask FROM log l, logsubject ls, useridmap u WHERE l.ownerid=$u->{'userid'} AND l.year=$year AND l.month=$month AND l.itemid=ls.itemid AND l.posterid=u.userid $secwhere ORDER BY l.eventtime");
+     }
  }
 
  $sth->execute;
  while (my ($itemid, $day, $subject, $eventtime, $poster, $replycount, $security, $allowmask) = $sth->fetchrow_array)
  {
-     if (! $is_owner) {
-	 if ($security eq "private") { next; }
-	 if ($security eq "usemask" && ! (int($gmask) & int($allowmask))) { next; }
-     }
-
      if ($day != $lday) {
 	 if ($lday) { $body .= "</table></dd>"; }
 	 $lday = $day;
@@ -132,7 +139,8 @@
 
      LJ::CleanHTML::clean_subject_all(\$subject);
 
-     $body .= "<td><a href=\"/talkread.bml?itemid=$itemid\">$subject</a>$sec$rep</td></tr>\n";
+     my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
+     $body .= "<td><a href=\"/talkread.bml?${jarg}itemid=$itemid\">$subject</a>$sec$rep</td></tr>\n";
  }
  if ($lday) { $body .= "</table></dd>\n"; }
  $body .= "</dl>";
