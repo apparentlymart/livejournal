@@ -345,7 +345,7 @@ body<=
  # Username: [    ] Password: [    ]  Login? [ ]
  $ret .= "<tr valign='middle' align='left'><td></td><td></td><td>";
  $ret .= "$ML{'Username'}:&nbsp;<input class='textbox' name='userpost' size='13' maxlength='18' id='username'> ";
- $ret .= "$ML{'Password'}:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13'> <label for='logincheck'>Login?&nbsp;</label><input type='checkbox' name='do_login' id='logincheck'></td></tr>\n";
+ $ret .= "$ML{'Password'}:&nbsp;<input class='textbox' name='password' type='password' maxlength='30' size='13'> <label for='logincheck'>$ML{'.loginq'}&nbsp;</label><input type='checkbox' name='do_login' id='logincheck'></td></tr>\n";
  
  my $basesubject = "";
  if ($init->{'replyto'}) {
@@ -409,7 +409,7 @@ body<=
                         }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });
  }
  if ($res{'pickw_count'}) {
-     $ret .= " <a href='/allpics.bml?user=$remote->{'user'}'>Picture</a> to use: ";
+     $ret .= BML::ml('.label.picturetouse',{'username'=>$remote->{'user'}});
      my @pics;
      for (my $i=1; $i<=$res{'pickw_count'}; $i++) {
          push @pics, $res{"pickw_$i"};
