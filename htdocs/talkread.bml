@@ -92,7 +92,6 @@ body<=
  my %logprops = %{$item->{'logprops'}};
 
  my $ditemid = $init->{'ditemid'}+0;
- my $page = int($FORM{'page'}) || 1;
  my $thread = $init->{'thread'};
 
  ### load users
@@ -305,6 +304,9 @@ body<=
  my $top_replies = $thread ? 1 : scalar(@{$children{$thread}});
  my $pages = int($top_replies / $PAGE_SIZE);
  if ($top_replies % $PAGE_SIZE) { $pages++; }
+
+ my $page = int($FORM{'page'}) || 1;
+ $page = $page < 1 ? 1 : $page > $pages ? $pages : $page;
 
  my @top_replies = $thread ? ($thread) : sort { $posts{$a}->{'datepost'} cmp $posts{$b}->{'datepost'} } @{$children{$thread}};
  foreach (@top_replies) {  $posts{$_}->{'_hide'} = 1; }
