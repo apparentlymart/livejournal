@@ -187,7 +187,7 @@
             $body .= '<tr><td>' .  ($state eq 'open' ? $dellink->("del$by", "$_->[0]:$_->[$x]", 'Close') : '') . '</td><td>' .
                      "<strong>$spamlocation in:</strong> " . LJ::ljuser($u2) . '<br />' .
                      '<strong>Report Time:</strong> ' . LJ::mysql_time($_->[0]) . '<br />' .
-                     "<strong>$spamlocation Time:</strong> " . LJ::mysql_time($_->[5]) . '<br />' .
+                     "<strong>$spamlocation Time:</strong> " . ($_->[5] ? LJ::mysql_time($_->[5]) : 'not recorded') . '<br />' .
                      '<strong>Subject:</strong> ' . LJ::ehtml($_->[2] || 'no subject') . '<br />' .
                      '<strong>Body:</strong> ' . LJ::ehtml($comment_body || 'no body') . '<br />' .
                      '</td></tr><tr><td>&nbsp;</td></tr>';
