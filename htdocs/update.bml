@@ -163,7 +163,7 @@
         my ($min,$hour,$mday,$mon,$year);
 
         # preserve times from form if spellchecking
-        if ($did_spellcheck) {
+        if ($did_spellcheck || $preview) {
             $$bodyopts .= "onload=\"pageload(0);\" "; # js fill-in off
 
             $year = $POST{'year'};
