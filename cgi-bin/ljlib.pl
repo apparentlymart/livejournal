@@ -483,10 +483,12 @@ sub get_log2_recent_user
         next if $item->{'security'} eq 'private' 
             and $item->{'journalid'} != $opts->{'remote'}->{'userid'};
         if ($item->{'security'} eq 'usemask') {
-            next unless 
-                ($item->{'journalid'} == $opts->{'remote'}->{'userid'})
-                or
-                ($item->{'allowmask'}+0 & $opts->{'mask'}+0);
+            my $permit = ($item->{'journalid'} == $opts->{'remote'}->{'userid'});
+            unless ($permit) {
+                my $mask = LJ::get_groupmask($item->{'journalid'}, $opts->{'remote'}->{'userid'});
+                $permit = $item->{'allowmask'}+0 & $mask+0;
+            }
+            next unless $permit;
         }
         
         # date conversion
@@ -808,18 +810,7 @@ sub get_friend_items
     my $lastmax_cutoff = 0; # if nonzero, never search for entries with rlogtime higher than this (set when cache in use)
 
     # sanity check:
-    $skip = 0 if ($skip < 0);
-
-    # what do your friends think of remote viewer?  what security level?
-    # but only if the remote viewer is a person, not a community/shared journal.
-    my $gmask_from = {};
-    if ($remote && $remote->{'journaltype'} eq "P") {
-        $sth = $dbr->prepare("SELECT ff.userid, ff.groupmask FROM friends fu, friends ff WHERE fu.userid=$userid AND fu.friendid=ff.userid AND ff.friendid=$remoteid");
-        $sth->execute;
-        while (my ($friendid, $mask) = $sth->fetchrow_array) {
-            $gmask_from->{$friendid} = $mask;
-        }
-    }
+    $skip = 0 if $skip < 0;
 
     # given a hash of friends rows, strip out rows with invalid journaltype
     my $filter_journaltypes = sub {
@@ -1043,7 +1034,6 @@ sub get_friend_items
             'userid' => $friendid,
             'remote' => $remote,
             'itemshow' => $itemsleft,
-            'mask' => $gmask_from->{$friendid},
             'notafter' => $lastmax,
             'dateformat' => $opts->{'dateformat'},
             'update' => $LJ::EndOfTime - $fr->[1], # reverse back to normal
@@ -1120,7 +1110,6 @@ sub get_friend_items
 #              defaults to no limit
 #           -- skip: items to skip
 #           -- itemshow: items to show
-#           -- gmask_from: optional hashref of group masks { userid -> gmask } for remote
 #           -- viewall: if set, no security is used.
 #           -- dateformat: if "S2", uses S2's 'alldatepart' format.
 #           -- itemids: optional arrayref onto which itemids should be pushed
@@ -1188,20 +1177,10 @@ sub get_recent_items
     if ($skip > $maxskip) { $skip = $maxskip; }
     my $itemload = $itemshow + $skip;
 
-    # get_friend_items will give us this data structure all at once so
-    # we don't have to load each friendof mask one by one, but for
-    # a single lastn view, it's okay to just do it once.
-    my $gmask_from = $opts->{'gmask_from'};
-    unless (ref $gmask_from eq "HASH") {
-        $gmask_from = {};
-        if ($remote && $remote->{'journaltype'} eq "P" && $remoteid != $userid) {
-            ## then we need to load the group mask for this friend
-            $gmask_from->{$userid} = LJ::get_groupmask($userid, $remoteid);
-        }
+    my $mask = 0;
+    if ($remote && $remote->{'journaltype'} eq "P" && $remoteid != $userid) {
+        $mask = LJ::get_groupmask($userid, $remoteid);
     }
-
-    # what mask can the remote user see?
-    my $mask = $gmask_from->{$userid} + 0;
 
     # decide what level of security the remote user can see
     my $secwhere = "";
