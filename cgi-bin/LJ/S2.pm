@@ -1827,6 +1827,13 @@ sub set_handler
             if ($domexp && $class =~ /^\w+$/) {
                 $S2::pout->("setAttr($domexp, 'class', '$class');\n");
             }
+        } elsif ($cmd eq "set_image") {
+            my $domexp = $get_domexp->();
+            my $url = shift @args;
+            if ($url =~ m!^http://! && $url !~ /[\'\"\n\r]/) {
+                $url = LJ::eurl($url);
+                $S2::pout->("setAttr($domexp, 'src', \"$url\");\n");
+            }
         }
     }
     $S2::pout->("} </script>\n");
