@@ -81,7 +81,7 @@ $dbh->do("UPDATE user SET caps=caps|(1<<$readonly_bit) WHERE userid=$userid");
 # wait a bit for writes to stop if journal is somewhat active (last week update)
 my $secidle = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
                                     "FROM userusage WHERE userid=$userid");
-sleep(3) if $secidle > 86400*7;
+sleep(3) unless $secidle > 86400*7;
 
 my $last = time();
 my $stmsg = sub {
