@@ -375,10 +375,12 @@ if ($remote && $user eq $remote->{'user'} &&
          {
              my $itemid = $FORM{'itemid'}+0;
              my $journal = LJ::canonical_username($FORM{'usejournal'} || $FORM{'user'});
-             my $jargent = defined $res{'anum'} ? "journal=$journal&amp;" : "";
              my $ditemid = defined $res{'anum'} ? ($itemid * 256 + $res{'anum'}) : $itemid;
+             my $ju = LJ::load_user($dbs, $journal);
+             my $readurl = defined $res{'anum'} ?  LJ::journal_base($ju) . "/$ditemid.html" : 
+                 "$LJ::SITEROOT/talkread.bml?itemid=$ditemid";
              if ($FORM{'event'} =~ /\S/) {
-                 return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.edit", {'url' => "$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid"}) ." p?>";
+                 return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.edit", {'url' => $readurl}) ." p?>";
              } else {
                  return "<?h1 $ML{'.success.head'} h1?><?p $ML{'.success.delete'} p?>";
              }

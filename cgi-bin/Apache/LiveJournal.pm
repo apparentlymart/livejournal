@@ -127,6 +127,8 @@ sub totally_down_content
 sub trans
 {
     my $r = shift;
+    return DECLINED if $r->main;  # don't deal with subrequests
+
     my $uri = $r->uri;
     my $args = $r->args;
     my $args_wq = $args ? "?$args" : "";
@@ -179,7 +181,7 @@ sub trans
             $r->handler("perl-script");
             $r->push_handlers(PerlHandler => \&Apache::BML::handler);
             my $filename = "$LJ::HOME/htdocs/talkread.bml";
-            if ($args eq "mode=reply") {
+            if ($args =~ /^(?:(?:mode=reply)|(?:replyto=\d+))\b/) {
                 $filename = "$LJ::HOME/htdocs/talkpost.bml";
             }
             $r->notes("_journal" => $opts->{'user'});
@@ -201,6 +203,59 @@ sub trans
         return OK;
     };
 
+    my $determine_view = sub {
+        my ($user, $vhost, $uuri) = @_;
+        my $mode = undef;
+        my $pe;
+
+        if ($uuri =~ m!^/(\d+)\.html$!) {
+            $mode = "item";
+        } elsif ($uuri =~ m!^/(\d\d\d\d)(?:/(\d\d)(?:/(\d\d))?)?(/?)$!) {
+            my ($year, $mon, $day, $slash) = ($1, $2, $3, $4);
+            unless ($slash) {
+                return redir($r, "http://$host$hostport$uri/");
+            }
+
+            # the S1 ljviews code looks at $opts->{'pathextra'}, because
+            # that's how it used to do it, when the pathextra was /day[/yyyy/mm/dd]
+            $pe = $uuri;
+            
+            if (defined $day) {
+                $mode = "day";
+            } elsif (defined $mon) {
+                $mode = "month";
+            } else {
+                $mode = "calendar";
+            }
+
+        } elsif ($uuri =~ m!
+                 /([a-z\_]+)?           # optional /<viewname>
+                 (.*)                   # path extra: /FriendGroup, for example
+                 !x && ($1 eq "" || defined $LJ::viewinfo{$1}))
+        {
+            ($mode, $pe) = ($1, $2);
+            $mode ||= "" unless length $pe;  # if no pathextra, then imply 'lastn'
+
+            # redirect old-style URLs to new versions:
+            if ($mode =~ /day|calendar/ && $pe =~ m!^/\d\d\d\d!) {
+                my $newuri = $uri;
+                $newuri =~ s!$mode/(\d\d\d\d)!$1!;
+                return redir($r, "http://$host$hostport$newuri");
+            }
+
+        } elsif (($vhost eq "users" || $vhost =~ /^other:/) &&
+                 $uuri eq "/robots.txt") {
+            $mode = "robots_txt";
+        }
+
+        return undef unless defined $mode;
+        return $journal_view->({'vhost' => $vhost,
+                                'mode' => $mode,
+                                'args' => $args,
+                                'pathextra' => $pe,
+                                'user' => $user });
+    };
+
     # user domains
     if ($LJ::USER_VHOSTS && 
         $host =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/ &&
@@ -208,38 +263,9 @@ sub trans
     {
         my $user = $1;
         my $mode;
-
-        # numbers only URLs
-        if ($uri =~ m!^/(\d\d\d\d)(?:/(\d\d)(?:/(\d\d)(?:/(\d+))?)?)?/?$!) {
-            my ($year, $mon, $day, $item) = ($1, $2, $3, $4);
-            if (defined $item) {
-                $mode = "item";
-            } elsif (defined $day) {
-                $mode = "day";
-            } elsif (defined $mon) {
-                $mode = "month";
-            } elsif (defined $year) {
-                $mode = "calendar";
-            }
-
-            return $journal_view->({'vhost' => 'users',
-                                    'mode' => $mode,
-                                    'pathextra' => $uri,
-                                    'args' => $args,
-                                    'user' => $user,
-                                    'year' => $year, 'mon' => $mon, 'day' => $day,
-                                    'item' => $item,  });
-        }
-        
-        # traditional URL format
-        return $journal_view->({'vhost' => 'users',
-                                'mode' => $1,
-                                'pathextra' => $2,
-                                'args' => $args,
-                                'user' => $user, })
-            if $uri =~ m!^/(\w+)?(.*)!;
-
-        return $journal_view->(undef);
+        my $view = $determine_view->($user, "users", $uri);
+        return $view if defined $view;
+        return 404;
     }
 
     # custom used-specified domains
@@ -255,66 +281,42 @@ sub trans
             SELECT u.user FROM useridmap u, domains d WHERE
             u.userid=d.userid AND d.domain=$checkhost
         });
-        return $journal_view->({'vhost' => "other:$host$hostport",
-                                'mode' => $1,
-                                'pathextra' => $2,
-                                'args' => $args,
-                                'user' => $user, })
-            if $user && $uri =~ m!^/(\w*)(.*)!;
-        return $journal_view->(undef);
+        return 404 unless $user;
+
+        my $view = $determine_view->($user, "other:$host$hostport", $uri);
+        return $view if defined $view;
+        return 404;
     }
 
     # userpic
     return userpic_trans($r, $1, $2) if $uri =~ m!^/userpic/(\d+)(?:/(\d+))?$!;
 
     # front page journal
-    if ($LJ::FRONTPAGE_JOURNAL && $uri =~ m!^/(\w+)?(.*)$! &&
-        ($1 eq "" || defined $LJ::viewinfo{$1}))
-    {
-        my ($mode, $pe) = ($1, $2);
-        return DECLINED if $pe =~ m!\.bml|\.html$!;
-        return $journal_view->({'vhost' => 'front',
-                                'mode' => $mode,
-                                'args' => $args,
-                                'pathextra' => $pe,
-                                'user' => $LJ::FRONTPAGE_JOURNAL, });
+    if ($LJ::FRONTPAGE_JOURNAL) {
+        my $view = $determine_view->($LJ::FRONTPAGE_JOURNAL, "front", $uri);
+        return $view if defined $view;
     }
 
     # normal (non-domain) journal view
     if ($uri =~ m!
         ^/(users\/|community\/|\~)  # users/community/tilde
         (\w{1,15})                  # mandatory username
-        (?:/([a-z\_]+)?)?                # optional /<viewname>
-        (.*)?                       # path extra: /FriendGroup, for example
-        !x && ($3 eq "" || defined $LJ::viewinfo{$3}))
+        (.*)?                       # rest
+        !x)
     {
-        my ($part1, $user, $mode, $pe) = ($1, $2, $3, $4);
-        my ($year, $mon, $day, $item);
-        if ($mode eq "" && $pe =~ m!^(\d\d\d\d)(?:/(\d\d)(?:/(\d\d)(?:/(\d+))?)?)?/?$!) {
-            $pe = "/$pe";
-            ($year, $mon, $day, $item) = ($1, $2, $3, $4);
-            if (defined $item) {
-                $mode = "item";
-            } elsif (defined $day) {
-                $mode = "day";
-            } elsif (defined $mon) {
-                $mode = "month";
-            } elsif (defined $year) {
-                $mode = "calendar";
-            }
+        my ($part1, $user, $rest) = ($1, $2, $3);
+        unless (length $rest) {
+            # FIXME: redirect to add slash
+            # but for now, let it work:
+            $rest = "/" unless length $rest;
         }
-
+        
         my $vhost = { 'users/' => '', 'community/' => 'community',
                       '~' => 'tilde' }->{$part1};
-        return DECLINED if $vhost eq "community" && $uri =~ m!\.bml|\.html$!;
-        return $journal_view->({'vhost' => $vhost,
-                                'mode' => $mode,
-                                'args' => $args,
-                                'pathextra' => $pe,
-                                'user' => $user,
-                                'year' => $year, 'mon' => $mon, 'day' => $day,
-                                'item' => $item,
-                            });
+
+        my $view = $determine_view->($user, $vhost, $rest);
+        return $view if defined $view;
+        return DECLINED;
     }
 
     # protocol support
@@ -524,10 +526,9 @@ sub journal_content
 
     my $dbs = LJ::get_dbs();
 
-    if ($RQ{'vhost'} eq "users" && 
-        $uri eq "/robots.txt") 
+    if ($RQ{'mode'} eq "robots_txt")
     {
-        my $u = { 'user' => $RQ{'user'} };
+        my $u = LJ::load_user($dbs, $RQ{'user'});
         LJ::load_user_props($dbs, $u, "opt_blockrobots");
         $r->content_type("text/plain");
         $r->send_http_header();

@@ -22,10 +22,13 @@ body<=
  my $r = Apache->request;
 
 my $uri = BML::get_uri();
-my ($urly, $urlm, $urld, $itemid);
-if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
-    ($urly, $urlm, $urld, $itemid) = ($1, $2, $3, $4);
-    $FORM{'itemid'} = $itemid;
+my $itemid;
+my $new_url;
+
+if ($uri =~ m!/(\d+)\.html$!) {
+    $new_url = 1;
+    $itemid = $1;
+    $FORM{'itemid'} = $itemid unless $FORM{'replyto'};
     $FORM{'journal'} = $r->notes("_journal");
     BML::set_language_scope("/talkpost.bml");
 }
@@ -307,8 +310,13 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
  
  $ret .= "<br clear='all'><hr size='2' align='center' />";	
 
- my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
- $ret .= "<center><b>(<a href=\"/talkread.bml?${jarg}itemid=$ditemid\">$ML{'talk.commentsread'}</a>)</b></center>";
+ my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
+my $readurl = "/talkread.bml?${jarg}itemid=$ditemid";
+if ($new_url) {
+    $readurl = "$ditemid.html";
+}
+
+ $ret .= "<center><b>(<a href=\"$readurl\">$ML{'talk.commentsread'}</a>)</b></center>";
  
  # can a comment even be made?
  if ($logprops{$itemid}->{'opt_nocomments'}) {

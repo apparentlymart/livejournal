@@ -183,8 +183,7 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/?$!) {
 
      my $itemurl;
      if ($u->{'clusterid'}) {
-         $itemurl = ("$LJ::SITEROOT/users/$u->{'user'}/" .
-                     sprintf("%04d/%02d/%02d/%d", $year, $month, $day, $itemid));
+         $itemurl = "$LJ::SITEROOT/users/$u->{'user'}/$itemid.html";
      } else {
          $itemurl = "$LJ::SITEROOT/talkread.bml?itemid=$itemid";
      }

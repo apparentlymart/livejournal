@@ -74,6 +74,17 @@ body<=
  my %logprops = %{$item->{'logprops'}};
  my $ditemid = $init->{'ditemid'}+0;
 
+ my $talkurl = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
+ if ($clustered) {
+     $talkurl = LJ::journal_base($u) . "/$ditemid.html";
+ }
+
+my $talkargs = sub {
+    my $args = shift;
+    my $sep = ($talkurl =~ /\?/) ? "&" : "?";
+    return "$talkurl$sep$args";
+};
+
  ### load users
  my $ujp;                 # poster of item 
  LJ::load_userids_multiple($dbs, [
@@ -301,7 +312,7 @@ body<=
 
  if ($FORM{'submitpreview'}) {
      $ret .= "<?h1 $ML{'.preview.title'} h1?><?p $ML{'.preview'} p?><?hr?>";
-     $ret .= "<div align=\"center\"><b>(<a href=\"talkread.bml?${jarg}itemid=$ditemid\">$ML{'talk.commentsread'}</a>)</b></div>";
+     $ret .= "<div align=\"center\"><b>(<a href=\"$talkurl\">$ML{'talk.commentsread'}</a>)</b></div>";
 
      my $event = $FORM{'body'};
      my $spellcheck_html;
@@ -402,6 +413,7 @@ body<=
  }
 
  $dtalkid = $clustered ? $insertid * 256 + $item->{'anum'} : $insertid;
+ my $threadurl = $talkargs->("thread=$dtalkid");
 
  # they don't have a duplicate...
  unless ($insertid)
@@ -424,6 +436,7 @@ body<=
      $insertid = $sth->{'mysql_insertid'};
 
      $dtalkid = $clustered ? $insertid * 256 + $item->{'anum'} : $insertid;
+     $threadurl = $talkargs->("thread=$dtalkid");
 
      # add to poster's talkleft table, or the xfer place
      if ($posterid && $clustered) {
@@ -642,11 +655,11 @@ body<=
                  $text .= "\n\nTheir reply was:\n\n";
                  $text .= &indent("Subject: $cleansubject\n\n$FORM{'body'}");
                  $text .= "\n\nYou can view the discussion here:\n\n";
-                 $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid&thread=$dtalkid\n\n";
+                 $text .= "     $threadurl\n\n";
                  $text .= "You can reply to the comment directly here:\n\n";
-                 $text .= "     $LJ::SITEROOT/talkpost.bml?${jarg}replyto=$dtalkid\n\n";
+                 $text .= "     " . $talkargs->("replyto=$dtalkid") . "\n\n";
                  $text .= "Or you can view all comments to the entry on this page:\n\n";
-                 $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid\n\n";
+                 $text .= "     $talkurl\n\n";
                  $text .= "-- $LJ::SITENAME\n\n";
 
                  if ($LJ::UNICODE && $encoding ne "UTF-8") {
@@ -661,7 +674,7 @@ body<=
 
                  my $html = "";
                  $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\"></head><BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
-                 $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your $LJ::SITENAMESHORT comment</A> in which you said:</TD></TR></TABLE>\n\n";
+                 $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$talkurl\">your $LJ::SITENAMESHORT comment</A> in which you said:</TD></TR></TABLE>\n\n";
                  my $htmlbody = $parentcomment;
                  LJ::CleanHTML::clean_comment(\$htmlbody, $parentpreformatted);
                  $html .= &blockquote($htmlbody);
@@ -671,8 +684,8 @@ body<=
                  LJ::CleanHTML::clean_comment(\$cleanbody, $FORM{'prop_opt_preformatted'});
                  $html .= &blockquote("<TT><B>Subject:</B> $cleansubject</TT> $icon<P>$cleanbody");
 
-                 $html .= "You can <a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid&amp;thread=$dtalkid\">view the thread</a> starting from this comment, or <a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">view all comments</a> to this entry.<br />";
-                 $html .= "You can also reply <a href=\"$LJ::SITEROOT/talkpost.bml?${jargent}replyto=$dtalkid\">at the webpage</a>, or here:";
+                 $html .= "You can <a href=\"$threadurl\">view the thread</a> starting from this comment, or <a href=\"$talkurl\">view all comments</a> to this entry.<br />";
+                 $html .= "You can also reply <a href=\"" . $talkargs->("mode=reply") . "\">at the webpage</a>, or here:";
                  $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
                  $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
                  $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
@@ -758,11 +771,11 @@ body<=
          $text .= "\n\nTheir reply was:\n\n";
          $text .= &indent("Subject: $textsubject\n\n$FORM{'body'}");
          $text .= "\n\nYou can view the discussion here:\n\n";
-         $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid&thread=$dtalkid\n\n";
+         $text .= "     $threadurl\n\n";
          $text .= "You can reply to the comment directly here:\n\n";
-         $text .= "     $LJ::SITEROOT/talkpost.bml?${jarg}replyto=$dtalkid\n\n";
+         $text .= "     " . $talkargs->("replyto=$dtalkid") . "\n\n";
          $text .= "Or you can view all comments to the entry on this page:\n\n";
-         $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid\n\n";
+         $text .= "     $talkurl\n\n";
          $text .= "-- $LJ::SITENAME\n\n";
          $text .= "(if you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options)\n";
 
@@ -780,12 +793,12 @@ body<=
          my $html = "";
          $html .= "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=$encoding\"></head><BODY BGCOLOR=#EFEFFF TEXT=#000000 LINK=#0000FF VLINK=#A000C0>";
          if ($parentcomment)  {
-             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your $LJ::SITENAMESHORT post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
+             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to another comment somebody left in <A HREF=\"$talkurl\">your $LJ::SITENAMESHORT post</A>.  The comment they replied to was:</TD></TR></TABLE>\n";
              my $cleancom = $parentcomment;
              LJ::CleanHTML::clean_comment(\$cleancom, $parentpreformatted);
              $html .= &blockquote($cleancom);
          } else {
-             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">your $LJ::SITENAMESHORT post</A> in which you said:</TD></TR></TABLE>\n";
+             $html .= "<TABLE><TR VALIGN=TOP><TD>$whopic</TD><TD WIDTH=100%><B>$who</B>$whouserhtml replied to <A HREF=\"$talkurl\">your $LJ::SITENAMESHORT post</A> in which you said:</TD></TR></TABLE>\n";
              my $clean = $item->{'event'};
              LJ::CleanHTML::clean_event(\$clean, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'}});
              $html .= &blockquote($clean);
@@ -796,8 +809,8 @@ body<=
          $html .= &blockquote("<TT><B>Subject: </B> $textsubject</TT> $icon<HR>$clean");
 
          # begin form
-         $html .= "You can <a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid&amp;thread=$dtalkid\">view the thread</a> starting from this comment, or <a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">view all comments</a> to this entry.<br />";
-         $html .= "You can also reply <a href=\"$LJ::SITEROOT/talkpost.bml?${jargent}replyto=$dtalkid\">at the webpage</a>, or here:";
+         $html .= "You can <a href=\"$threadurl\">view the thread</a> starting from this comment, or <a href=\"$talkurl\">view all comments</a> to this entry.<br />";
+         $html .= "You can also reply <a href=\"" . $talkargs->("replyto=$dtalkid") . "\">at the webpage</a>, or here:";
 
          $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
          $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
@@ -848,7 +861,7 @@ body<=
  }
 
  # Yeah, we're done.
- my $commentlink = "talkread.bml?${jargent}itemid=$ditemid&amp;view=$dtalkid#t$dtalkid";
+ my $commentlink = $talkargs->("view=$dtalkid#t$dtalkid");
 
  $ret .= "<?h1 $ML{'.success.title'} h1?>";
  if ($state eq 'A') {

@@ -710,8 +710,6 @@ sub create_view_lastn
             });
         }
 
-        my $dateslash = join('/', map { $lastn_date_format{$_} } qw(yyyy mm dd));
-
         my $ditemid = $u->{'clusterid'} ? ($itemid * 256 + $item->{'anum'}) : $itemid;
         my $itemargs = $u->{'clusterid'} ? "journal=$user&amp;itemid=$ditemid" : "itemid=$ditemid";
         $lastn_event{'itemargs'} = $itemargs;
@@ -727,8 +725,8 @@ sub create_view_lastn
         {
             my ($readurl, $posturl);
             if ($u->{'clusterid'}) {
-                $readurl = "$journalbase/$dateslash/$ditemid";
-                $posturl = "$journalbase/$dateslash/$ditemid?mode=reply";
+                $readurl = "$journalbase/$ditemid.html";
+                $posturl = "$journalbase/$ditemid.html?mode=reply";
                 if ($replycount && $remote && $remote->{'opt_nctalklinks'}) {
                     $readurl .= "?nc=$replycount";
                 }
@@ -1173,7 +1171,6 @@ sub create_view_friends
             });
         }
 
-        my $dateslash = "$friends_date_format{yyyy}/$friends_date_format{mm}/$friends_date_format{dd}";
         my $ditemid = $clusterid ? ($itemid * 256 + $item->{'anum'}) : $itemid;
         my $itemargs = $clusterid ? "journal=$friend&amp;itemid=$ditemid" : "itemid=$ditemid";
         $friends_event{'itemargs'} = $itemargs;
@@ -1252,8 +1249,8 @@ sub create_view_friends
             my ($readurl, $posturl);
 
             if ($clusterid) {
-                $posturl = "$LJ::SITEROOT/users/$friend/$dateslash/$ditemid?mode=reply";
-                $readurl = "$LJ::SITEROOT/users/$friend/$dateslash/$ditemid";
+                $posturl = "$LJ::SITEROOT/users/$friend/$ditemid.html?mode=reply";
+                $readurl = "$LJ::SITEROOT/users/$friend/$ditemid.html";
                 $readurl .= "?nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
             } else {
                 $itemargs .= "&amp;nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
@@ -1692,8 +1689,6 @@ sub create_view_day
         return 0;
     }
 
-    my $dateslash = sprintf("%04d/%02d/%02d", $year, $month, $day);
-
     my @itemids = ();
 
     my $optDESC = $vars->{'DAY_SORT_MODE'} eq "reverse" ? "DESC" : "";
@@ -1803,8 +1798,8 @@ sub create_view_day
         {
             my ($readurl, $posturl);
             if ($u->{'clusterid'}) {
-                $posturl = "$journalbase/$dateslash/$ditemid?mode=reply";
-                $readurl = "$journalbase/$dateslash/$ditemid";
+                $posturl = "$journalbase/$ditemid.html?mode=reply";
+                $readurl = "$journalbase/$ditemid.html";
                 if ($replycount && $remote && $remote->{'opt_nctalklinks'}) {
                     $readurl .= "?nc=$replycount";
                 }

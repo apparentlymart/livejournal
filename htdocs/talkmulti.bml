@@ -43,7 +43,7 @@
 
     my $jid = $u->{'userid'};
     my $ditemid = $POST{'ditemid'}+0;
-    my $commentlink = "talkread.bml?journal=$u->{'user'}&amp;itemid=$ditemid";
+    my $commentlink = LJ::journal_base($u) . "/$ditemid.html";
     my $itemid = $ditemid >> 8;
     my $log = $dbcm->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=?",
                                        undef, $jid, $itemid);

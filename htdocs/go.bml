@@ -38,7 +38,7 @@
      }
 
      if ($jumpid) {
-         return BML::redirect("$LJ::SITEROOT/talkread.bml?journal=$u->{'user'}&itemid=$jumpid");
+         return BML::redirect(LJ::journal_base($u) . "/$jumpid.html");
      }
  }
  elsif ($itemid) 

@@ -2214,6 +2214,9 @@ sub create_account
     my $cluster = defined $o->{'cluster'} ? $o->{'cluster'} : LJ::new_account_cluster();
     my $caps = $o->{'caps'} || $LJ::NEWUSER_CAPS;
 
+    # new non-clustered accounts aren't supported anymore
+    return 0 unless $cluster;
+
     $dbh->do("INSERT INTO user (user, name, password, clusterid, dversion, caps) ".
              "VALUES ($quser, ?, ?, ?, 2, ?)", undef,
              $o->{'name'}, $o->{'password'}, $cluster, $caps);
@@ -3980,17 +3983,32 @@ sub query_buffer_flush
 # info: The tricky thing is that users with underscores in their usernames
 #       can't have some_user.site.com as a hostname, so that's changed into
 #       some-user.site.com.
-# args: user, vhost?
-# des-user: Username of user whose URL to make.
+# args: uuser, vhost?
+# des-uuser: User hashref or username of user whose URL to make.
 # des-vhost: What type of URL.  Acceptable options are "users", to make a
 #            http://user.site.com/ URL; "tilde" to make http://site.com/~user/;
 #            "community" for http://site.com/community/user; or the default
-#            will be http://site.com/users/user
+#            will be http://site.com/users/user.  If unspecifed and uuser
+#            is a user hashref, then the best/preferred vhost will be chosen.
 # returns: scalar; a URL.
 # </LJFUNC>
 sub journal_base
 {
     my ($user, $vhost) = @_;
+    if (ref $user eq "HASH") {
+        my $u = $user;
+        $user = $u->{'user'};
+        unless (defined $vhost) {
+            if ($LJ::FRONTPAGE_JOURNAL eq $user) {
+                $vhost = "front";
+            } elsif ($u->{'journaltype'} eq "P") {
+                $vhost = "";
+            } elsif ($u->{'journaltype'} eq "C") {
+                $vhost = "community";
+            }
+
+        }
+    }
     if ($vhost eq "users") {
         my $he_user = $user;
         $he_user =~ s/_/-/g;
@@ -4007,6 +4025,7 @@ sub journal_base
         return "$LJ::SITEROOT/users/$user";
     }
 }
+
 
 # loads all of the given privs for a given user into a hashref
 # inside the user record ($u->{_privs}->{$priv}->{$arg} = 1)

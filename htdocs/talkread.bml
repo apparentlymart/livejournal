@@ -47,9 +47,12 @@ body<=
  my $r = Apache->request;
 
 my $uri = BML::get_uri();
-my ($urly, $urlm, $urld, $itemid);
-if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
-    ($urly, $urlm, $urld, $itemid) = ($1, $2, $3, $4);
+my $itemid;
+my $new_url;
+
+if ($uri =~ m!/(\d+)\.html$!) {
+    $new_url = 1;
+    $itemid = $1;
     $FORM{'itemid'} = $itemid;
     $FORM{'journal'} = $r->notes("_journal");
     BML::set_language_scope("/talkread.bml");
@@ -64,6 +67,8 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
  return $ML{'talk.error.nojournal'} unless $u;
 
  my $clustered = $init->{'clustered'};
+ my $ditemid = $init->{'ditemid'}+0;
+ my $thread = $init->{'thread'};
 
  my ($dbcs, $dbcm, $dbcr) = ($dbs, $dbh, $dbr);
  if ($clustered) {
@@ -75,7 +80,18 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
  my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
  my $jargent = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
 
- my $SELF = "/talkread.bml";
+ my $talkurl = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
+ if ($clustered) {
+     $talkurl = LJ::journal_base($u) . "/$ditemid.html";
+ }
+
+ my $talkargs = sub {
+     my $args = shift;
+     my $sep = ($talkurl =~ /\?/) ? "&" : "?";
+     return "$talkurl$sep$args";
+ };
+ 
+
  my $ret = "";
 
  $itemid = $init->{'itemid'}+0;
@@ -85,7 +101,7 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
      LJ::load_user_props($dbs, $u, "renamedto");
      if ($u->{'clusterid'} && $u->{'renamedto'} ne "") {
          my $id = $FORM{'itemid'}+0;
-         return BML::redirect("$LJ::SITEROOT/talkread.bml?journal=$u->{'renamedto'}&itemid=$id");
+         return BML::redirect(LJ::journal_base($u) . "/$id.html");
      }
  }
 
@@ -101,9 +117,6 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
  }
 
  my %logprops = %{$item->{'logprops'}};
-
- my $ditemid = $init->{'ditemid'}+0;
- my $thread = $init->{'thread'};
 
  ### load users
  my ($up);  # $up = user posted journal item
@@ -517,18 +530,15 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
         }
 
         my $canviewscr = LJ::Talk::can_view_screened($dbs, $remote, $u, $up, $userpost);
-        my $shouldviewscr = exists $FORM{'showscreened'} && $FORM{'showscreened'};
 
         if ($post->{'state'} eq "D") {
             $$ret .= "<p><a name='t$dtid'></a><table><tr>";
             $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
             $$ret .= "<td>$ML{'.deletedpost'}</td></tr></table>\n";
-        } elsif ($post->{'state'} eq "S" && !($canviewscr && $shouldviewscr)) {
+        } elsif ($post->{'state'} eq "S" && !$canviewscr) {
             $$ret .= "<p><a name='t$dtid'></a><table><tr>";
             $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
             my $screenedtext = $ML{'.screenedpost'};
-            $screenedtext = "<a href='" . BML::self_link({'showscreened'=>'1'}) . "'>$screenedtext</a>"
-                if $canviewscr;
             $$ret .= "<td>$screenedtext</td></tr></table>\n";
         } elsif ($userpost && $user{$userpost}->{'statusvis'} eq "S") {
             $$ret .= "<p><a name='t$dtid'></a><table><tr>";
@@ -594,11 +604,11 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
                     $$ret .= BML::ml('.fromip', {'ip'=>$post->{'poster_ip'}});
                 }
 
-                $$ret .= " <font size='-1'>(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid#t$dtid'>$T{'link'}</a>)</font> ";
+                $$ret .= " <font size='-1'>(<a href='" . $talkargs->("thread=$dtid#t$dtid") . "'>$T{'link'}</a>)</font> ";
 
                 if (LJ::Talk::can_delete($dbs, $remote, $u, $up, $userpost))
                 {
-                    $$ret .= "<a href='delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
+                    $$ret .= "<a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
                 }
 
                 if ($post->{'state'} eq 'A' && 
@@ -627,14 +637,17 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
                 $$ret .= $post->{'body'};
 
                 $$ret .= "<p><font size='-2'>";
-                $$ret .= "(<a href='$LJ::SITEROOT/talkpost.bml?${jargent}replyto=$dtid'>$T{'replythis'}</a>) ";
+                my $replyurl = $clustered ? $talkargs->("replyto=$dtid") :
+                    "$LJ::SITEROOT/talkpost.bml?${jargent}replyto=$dtid";
+                $$ret .= "(<a href='$replyurl'>$T{'replythis'}</a>) ";
 
                 if ($post->{'parenttalkid'} != 0) {
                     my $dpid =  $clustered ? ($post->{'parenttalkid'} * 256 + $init->{'anum'}) : $post->{'parenttalkid'};
-                    $$ret .= "(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dpid'>$T{'parent'}</a>) ";
+                    $$ret .= "(<a href='" . $talkargs->("thread=$dpid") . "'>$T{'parent'}</a>) ";
                 }
                 if (defined $opts->{'children'}->{$tid}) {
-                    $$ret .= "(<a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid'>$T{'thread'}</a>)";
+                    my $url = $talkargs->("thread=$dtid");
+                    $$ret .= "(<a href='$url'>$T{'thread'}</a>)";
                 }
                 $$ret .= "</font>";
                 $$ret .= "</td></tr></table>\n";  # close colored table
@@ -655,7 +668,7 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
 
                 $$ret .= "<a name='t$dtid'></a><table><tr>";
                 $$ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
-                $$ret .= "<td><a href='$SELF?${jargent}itemid=$ditemid&amp;thread=$dtid'>" . BML::eall($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
+                $$ret .= "<td><a href='" . $talkargs->("thread=$dtid") . "'>" . BML::eall($post->{'subject'} || $T{'nosubject'}) . "</a> - $user, <i>$post->{'datepost'}</i></td></tr></table>\n";
             }
         }
     }
@@ -681,9 +694,14 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
      $ret .= "<p>$navcrap</p>" if $navcrap;
      my $readlink;
      if ($FORM{'thread'} && $pages == 1) {
-         $readlink = "(<a href='talkread.bml?${jargent}itemid=$ditemid'>$T{'readcomments'}</a>) - ";
+         my $readurl = LJ::journal_base($u) . "/$ditemid.html";
+         $readlink = "(<a href='$readurl'>$T{'readcomments'}</a>) - ";
      }
-     $ret .= "<center><b>$readlink(<a href='$LJ::SITEROOT/talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></center>";
+
+     my $posturl = "$LJ::SITEROOT/talkpost.bml?${jargent}itemid=$ditemid";
+     $posturl = "$ditemid.html?mode=reply" if $new_url;
+
+     $ret .= "<center><b>$readlink(<a href='$posturl'>$T{'postcomments'}</a>)</b></center>";
 
      if ($post_count > 0)
      {
@@ -695,7 +713,7 @@ if ($uri =~ m!/(\d\d\d\d)/(\d\d)/(\d\d)/(\d+)$!) {
                                                                        "children" => \%children,
                                                                    });
 
-         $ret .= "<hr /><p style='margin-top: 2px;' align='center'><b>$readlink(<a href='$LJ::SITEROOT/talkpost.bml?${jargent}itemid=$ditemid'>$T{'postcomments'}</a>)</b></p>";
+         $ret .= "<hr /><p style='margin-top: 2px;' align='center'><b>$readlink(<a href='$posturl'>$T{'postcomments'}</a>)</b></p>";
 
          if ($showmultiform && $multiform_selects) {
              $ret .= "<p>$ML{'.talkmulti.des'} ";
