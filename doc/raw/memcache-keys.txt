@@ -36,7 +36,9 @@
 <uid> tu:<uid> == unixtime when user last updated
       popsyn == 100 most read syndicated accounts [user, userid, synurl, numreaders], 1 hour
 
-
 <uid> upicinfo:<uid> == packed data
+
+      rate_eperr:<email_address> == rate limiting errors sent via email for email gateway
+      rate:tracked:<userid> == cluster tracking on login, posts, and comments
 
 ml.<lang>.<dmid>.<code>

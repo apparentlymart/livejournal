@@ -7469,6 +7469,31 @@ sub alloc_global_counter
 }
 
 
+# Populate the clustertrack table, 5 hr expiration.
+
+# <LJFUNC>
+# name: LJ::make_user_active
+# des:  Record user activity per cluster to
+#       make per-activity cluster stats easier.
+# args: userobj, type
+# arg-userid: source userobj ref
+# arg-type: currently unused
+# </LJFUNC>
+sub mark_user_active {
+    my ($u, $type) = @_;  # not currently using type
+    my $uid = $u->{userid};
+    return 0 unless $uid;
+
+    if (LJ::MemCache::add("rate:tracked:$uid", 1, 3600*5)) {
+        my $dbh = LJ::get_db_writer();
+        return 0 unless $dbh;
+        my $sth = $dbh->prepare("REPLACE INTO clustertrack SET
+                                userid=?, timeactive=NOW(), clusterid=?");
+        $sth->execute($uid, $u->{clusterid}) || return 0;
+    }
+    return 1;
+}
+
 # given a unix time, returns;
 #   ($week, $ubefore)
 # week: week number (week 0 is first 3 days of unix time)
@@ -7566,6 +7591,8 @@ sub make_login_session
         "expiretime" => $etime,
     });
 
+    LJ::mark_user_active($u, 'login');
+
     return 1;
 }
 
@@ -7647,6 +7674,5 @@ sub get_public_styles {
 
     return $pubstyc;
 }
-
 
 1;

@@ -975,6 +975,9 @@ sub postevent
         'props' => $req->{'props'},
     });
 
+    # cluster tracking
+    LJ::mark_user_active($u, 'post');
+
     $res->{'itemid'} = $itemid;  # by request of mart
     $res->{'anum'} = $anum;
     return $res;

@@ -1734,6 +1734,9 @@ sub post_comment {
     # the caller wants to know the comment's talkid.
     $comment->{talkid} = $jtalkid;
 
+    # cluster tracking
+    LJ::mark_user_active($comment->{u}, 'comment');
+
     return 1;
 }
 

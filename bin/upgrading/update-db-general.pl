@@ -1609,6 +1609,17 @@ post_create("comminterests",
             },
             );
 
+# tracking where users are active
+register_tablecreate("clustertrack", <<'EOC'); # global
+CREATE TABLE clustertrack (
+    userid INT UNSIGNED NOT NULL,
+    PRIMARY KEY (userid),
+    timeactive DATE NOT NULL,
+    clusterid TINYINT UNSIGNED,
+    INDEX (timeactive, clusterid)
+)
+EOC
+
 ### changes
 
 register_alter(sub {
