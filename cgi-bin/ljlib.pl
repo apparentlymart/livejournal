@@ -3301,7 +3301,7 @@ sub get_dbh
     # otherwise, see if we have a role -> full DSN mapping already
     my ($fdsn, $dbh);
     if ($role eq "master") { 
-	$fdsn = _get_dbh_fdsn($LJ::DBINFO{'master'});
+	$fdsn = _make_dbh_fdsn($LJ::DBINFO{'master'});
     } else {
 	if ($LJ::DBCACHE{$role}) {
 	    $fdsn = $LJ::DBCACHE{$role};
@@ -3310,11 +3310,9 @@ sub get_dbh
 		# and while we're at it, clean up any connections we have
 		# that are too idle.
 		undef $fdsn;
-		my @idle;
+		
 		foreach (keys %LJ::DB_USED_AT) {
-		    push @idle, $_ if ($LJ::DB_USED_AT{$_} < $now - 60);
-		}
-		foreach (@idle) {
+		    next if $LJ::DB_USED_AT{$_} > $now - 60;
 		    delete $LJ::DB_USED_AT{$_};
 		    delete $LJ::DBCACHE{$_};
 		}
@@ -3349,11 +3347,11 @@ sub get_dbh
 	    $t += $applicable[$i]->[1];
 	    last if $t > $rand;
 	}
-	my $fdsn = _get_dbh_fdsn($applicable[$i]->[0]);
+	my $fdsn = _make_dbh_fdsn($applicable[$i]->[0]);
 	$dbh = _get_dbh_conn($fdsn);
 	if ($dbh) {
 	    $LJ::DBCACHE{$role} = $fdsn;
-	    $LJ::DBCACHE_UNTIL{$role} = $now + 20;
+	    $LJ::DBCACHE_UNTIL{$role} = $now + 20 + int(rand(10));
 	    return $dbh;
 	}
        
@@ -3366,13 +3364,12 @@ sub get_dbh
     return get_dbh(@roles);
 }
 
-sub _get_dbh_fdsn
+sub _make_dbh_fdsn
 {
     my $db = shift;   # hashref with DSN info, from ljconfig.pl's %LJ::DBINFO
+    return $db->{'_fdsn'} if $db->{'_fdsn'};  # already made?
+
     my $fdsn = "DBI:mysql";  # join("|",$dsn,$user,$pass) (because no refs as hash keys)
-
-    return $db->{'_fdsn'} if $db->{'_fdsn'};
-
     $db->{'dbname'} ||= "livejournal";
     $fdsn .= ":$db->{'dbname'}:";
     if ($db->{'host'}) {
