@@ -29,9 +29,6 @@
                LJ::html_submit('submit', $text) .
                "</form>";
     };
-    my $makereportform = sub {
-        # make 
-    };
     
     # login check
     my $remote = LJ::get_remote();
@@ -86,7 +83,7 @@
         $title = "Spam Reports - Last 10$extratitle";
         @headers = ('Posted By', 'Posted In', 'Report Time');
         my $res = $dbr->selectall_arrayref('SELECT posterid, ip, journalid, reporttime FROM spamreports ' .
-                                           "WHERE $extrawhere ORDER BY reporttime DESC LIMIT 10");
+                                           "WHERE state = 'open' AND $extrawhere ORDER BY reporttime DESC LIMIT 10");
         foreach (@$res) {
             my $u2 = LJ::load_userid($_->[2]);
             if ($_->[0] > 0) {
