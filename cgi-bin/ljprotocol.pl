@@ -1612,9 +1612,6 @@ sub editfriends
     my $error_flag = 0;
     my $friends_added = 0;
     my $fail = sub {
-        # don't forget to invalidate friends view cache on error
-        LJ::invalidate_friends_view_cache($u) if $did_deletes || $friends_added;
-
         return fail($err, $_[0], $_[1]);
     };
 
@@ -1700,10 +1697,6 @@ sub editfriends
     }
 
     return $fail->(104) if $error_flag;
-
-    # invalidate friends view cache (kinda lazy.... a better solution later
-    # would be to only delete the matching packed items)
-    LJ::invalidate_friends_view_cache($u) if $did_deletes || $friends_added;
 
     return $res;
 }
