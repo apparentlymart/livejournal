@@ -988,12 +988,16 @@ INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope
 UPDATE userproplist SET datatype='num',des='The style ID# of the S1 style for the friends view page.',indexed='0',prettyname='Friends View StyleID',scope='general' WHERE name='s1_friends_style';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('num', 'The style ID# of the S1 style for the recent entries view.', '0', 's1_lastn_style', 'Recent View StyleID', 'general');
 UPDATE userproplist SET datatype='num',des='The style ID# of the S1 style for the recent entries view.',indexed='0',prettyname='Recent View StyleID',scope='general' WHERE name='s1_lastn_style';
+INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('num', 'S2 Styleid to use', '0', 's2_style', 'S2 Style', 'general');
+UPDATE userproplist SET datatype='num',des='S2 Styleid to use',indexed='0',prettyname='S2 Style',scope='general' WHERE name='s2_style';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Index to speed directory searches.  Only present if opt_infoshow=Y', '1', 'sidx_bdate', 'SearchIndex: Birthdate', 'general');
 UPDATE userproplist SET datatype='char',des='Index to speed directory searches.  Only present if opt_infoshow=Y',indexed='1',prettyname='SearchIndex: Birthdate',scope='general' WHERE name='sidx_bdate';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Index to speed directory searches.  Format %2s-%s-%s (iso country code, state, city).  Only present if opt_infoshow=Y', '1', 'sidx_loc', 'SearchIndex: Location', 'general');
 UPDATE userproplist SET datatype='char',des='Index to speed directory searches.  Format %2s-%s-%s (iso country code, state, city).  Only present if opt_infoshow=Y',indexed='1',prettyname='SearchIndex: Location',scope='general' WHERE name='sidx_loc';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', '2 letter state code, or full state name', '1', 'state', 'State', 'general');
 UPDATE userproplist SET datatype='char',des='2 letter state code, or full state name',indexed='1',prettyname='State',scope='general' WHERE name='state';
+INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('num', '\'1\' for S2 or \'2\' for S2.  Undefined means site default.', '0', 'stylesys', 'Style System to use', 'general');
+UPDATE userproplist SET datatype='num',des='\'1\' for S2 or \'2\' for S2.  Undefined means site default.',indexed='0',prettyname='Style System to use',scope='general' WHERE name='stylesys';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'URL of website', '0', 'url', 'Website Address', 'general');
 UPDATE userproplist SET datatype='char',des='URL of website',indexed='0',prettyname='Website Address',scope='general' WHERE name='url';
 INSERT IGNORE INTO userproplist (datatype, des, indexed, name, prettyname, scope) VALUES ('char', 'Name of website', '0', 'urlname', 'Website Name', 'general');

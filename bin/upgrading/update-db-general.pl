@@ -6,7 +6,6 @@ mark_clustered("useridmap", "userbio", "syncupdates2", "cmdbuffer", "dudata",
                "log2", "logtext2", "logsubject2", "logprop2", "logsec2",
                "talk2", "talkprop2", "talktext2", "talkleft",
                "userpicblob2", "events",
-               "s2style", "s2info", "s2source", "s2compiled",
                "ratelog", "loginstall", "sessions", "sessions_data",
                );
 
@@ -1306,16 +1305,6 @@ CREATE TABLE s2layers
 )
 EOC
 
-register_tablecreate("s2style", <<'EOC'); # clustered
-CREATE TABLE s2style
-(
-    userid INT UNSIGNED NOT NULL,
-    type ENUM('core','i18nc','layout','theme','i18n','user') NOT NULL,
-    UNIQUE (userid, type),
-    s2lid INT UNSIGNED NOT NULL
-)
-EOC
-
 register_tablecreate("s2info", <<'EOC'); # clustered
 CREATE TABLE s2info
 (
@@ -1335,6 +1324,15 @@ CREATE TABLE s2source
 )
 EOC
 
+register_tablecreate("s2checker", <<'EOC'); # clustered
+CREATE TABLE s2checker
+(
+   s2lid INT UNSIGNED NOT NULL,
+   PRIMARY KEY (s2lid),
+   checker MEDIUMBLOB
+)
+EOC
+
 register_tablecreate("s2compiled", <<'EOC'); # clustered
 CREATE TABLE s2compiled
 (
@@ -1344,6 +1342,28 @@ CREATE TABLE s2compiled
    compdata MEDIUMBLOB
 )
 EOC
+
+register_tablecreate("s2styles", <<'EOC'); # clustered
+CREATE TABLE s2styles
+(
+   styleid INT UNSIGNED NOT NULL AUTO_INCREMENT,
+   PRIMARY KEY (styleid),
+   userid  INT UNSIGNED NOT NULL,
+   name    VARCHAR(255),
+   INDEX (userid)
+)
+EOC
+
+register_tablecreate("s2stylelayers", <<'EOC'); # clustered
+CREATE TABLE s2stylelayers
+(
+    styleid INT UNSIGNED NOT NULL,
+    type ENUM('core','i18nc','layout','theme','i18n','user') NOT NULL,
+    UNIQUE (styleid, type),
+    s2lid INT UNSIGNED NOT NULL
+)
+EOC
+
 
 register_tablecreate("ml_domains", <<'EOC');
 CREATE TABLE ml_domains
