@@ -11,6 +11,7 @@ body<=
     unless ($u) {
         return "<?h1 Login Required h1?><?p To manage your syndicated accounts, first <a href=\"/login.bml?ret=1\">login</a>. p?>";
     }
+    return "Suspended account" if $u->{'statusvis'} eq "S";
 
     my $quota = LJ::get_cap($u, "synd_quota");
     unless ($quota) {
