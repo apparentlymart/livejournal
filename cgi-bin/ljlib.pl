@@ -2964,7 +2964,23 @@ sub start_request
     # reset BML's cookies
     eval { BML::reset_cookies() };
 
+    # not sure where to put this.  need to load the IP banned table
+    # at some point.
+    LJ::load_banned_ips();
+
     return 1;
+}
+
+sub load_banned_ips {
+    return if $LJ::IP_BANNED_LOADED++;
+    my $dbh = LJ::get_db_writer();
+    if ($dbh) {
+        my $sth = $dbh->prepare("SELECT ip FROM ipban");
+        $sth->execute;
+        while (my $ip = $sth->fetchrow_array) {
+            $LJ::IP_BANNED{$ip} = 1;
+        }
+    }
 }
 
 # <LJFUNC>
@@ -5107,6 +5123,16 @@ sub procnotify_callback
         # this looks backwards, but the cache hash names are just odd:
         delete $LJ::CACHE_USERNAME{$arg->{'userid'}};
         delete $LJ::CACHE_USERID{$arg->{'user'}};
+        return;
+    }
+
+    if ($cmd eq "ban_ip") {
+        $LJ::IP_BANNED{$arg->{'ip'}} = 1;
+        return;
+    }
+
+    if ($cmd eq "unban_ip") {
+        delete $LJ::IP_BANNED{$arg->{'ip'}};
         return;
     }
 }

@@ -1577,6 +1577,14 @@ CREATE TABLE fvcache (
 )
 EOC
 
+register_tablecreate("ipban", <<'EOC');
+CREATE TABLE ipban (
+   ip        CHAR(15),
+   bandate   DATETIME
+)
+EOC
+                   
+
 ### changes
 
 register_alter(sub {

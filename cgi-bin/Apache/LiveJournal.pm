@@ -38,6 +38,8 @@ while (<REDIR>) {
 }
 close REDIR;
 
+my @req_hosts;  # client IP, and/or all proxies, real or claimed
+
 # init handler (PostReadRequest)
 sub handler
 {
@@ -58,12 +60,14 @@ sub handler
     # by the fact that mod_proxy did nothing, requiring mod_proxy_add_forward, then
     # decided to do X-Forwarded-For, then did X-Forwarded-Host, so we have to deal
     # with all permutations of versions, hence all the ugliness:
+    @req_hosts = ($r->connection->remote_ip);
     if (my $forward = $r->header_in('X-Forwarded-For'))
     {
         my (@hosts, %seen);
         foreach (split(/\s*,\s*/, $forward)) {
             next if $seen{$_}++;
             push @hosts, $_;
+            push @req_hosts, $_;
         }
         if (@hosts) {
             my $real = pop @hosts;
@@ -139,6 +143,9 @@ sub trans
     }
 
     LJ::start_request();
+    foreach (@req_hosts) {
+        return FORBIDDEN if $LJ::IP_BANNED{$_}; 
+    }
 
     my $journal_view = sub { 
         my $opts = shift;
