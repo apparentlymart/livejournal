@@ -89,9 +89,13 @@
 
 /community/join.bml.label.allowposting=This community allows posting by all members, so you now have access to post in it.  If you already have a LiveJournal client open on your computer you'll have to log out and log back in for this journal to show up in your list of journals you can post to.
 
+/community/join.bml.label.auth=Although you are now listed as a member, this community only allows posting by authorized users.  Contact one of the maintainers if you desire posting access. Below is the list of maintainers for this community: [[admins]]
+
 /community/join.bml.label.authpost=Although you are now listed as a member, this community only allows posting by authorized users.  Contact <a href="/userinfo.bml?user=[[maintainer]]">the community maintainer</a> if you desire posting access.
 
 /community/join.bml.label.banned=The maintainer(s) of this community has banned you from joining.
+
+/community/join.bml.label.closed=This community is closed.  If you're interested in joining it, please contact one of its maintainers. Below is the list of maintainers for this community: [[admins]]
 
 /community/join.bml.label.closedcomm=This community is closed.  If you're interested in joining it, please contact <a href="/userinfo.bml?user=[[maintainer]]">its maintainer</a>.
 
@@ -126,6 +130,62 @@
 /community/leave.bml.sure=You sure?
 
 /community/leave.bml.title=Leave Community
+
+/community/manage.bml.commlist.actions=<b>Actions</b>
+
+/community/manage.bml.commlist.actmembers=<b>[<a href='[[link]]'>Members</a>]</b>
+
+/community/manage.bml.commlist.actsettings=<b>[<a href='[[link]]'>Settings</a>]</b>
+
+/community/manage.bml.commlist.header=Your communities
+
+/community/manage.bml.commlist.none=<i>You are not managing any communities.</i>
+
+/community/manage.bml.commlist.text=Here are the communities that you manage or co-manage:
+
+/community/manage.bml.commlist.title=<b>Title</b>
+
+/community/manage.bml.commlist.username=<b>Username</b>
+
+/community/manage.bml.create.header=Create a community
+
+/community/manage.bml.create.text=You can also <a href='[[link]]'><b>create a new community</b></a>.
+
+/community/manage.bml.title=Community Management
+
+/community/members.bml.error.noaccess=Only community maintainers are able to edit membership lists. You are not a maintainer of community [[comm]].
+
+/community/members.bml.error.nocomm=Community not found.
+
+/community/members.bml.key.admin=<b>Administrates</b>
+
+/community/members.bml.key.member=<b>Member</b>
+
+/community/members.bml.key.moderate=<b>Moderates</b>
+
+/community/members.bml.key.name=<b>Name</b>
+
+/community/members.bml.key.post=<b>Able to post</b>
+
+/community/members.bml.manage=[<a href='[[link]]'><b>&lt;&lt;</b></a> Manage communities]
+
+/community/members.bml.name=<b>Community name:</b> [[name]]
+
+/community/members.bml.nextlink=<i>(Next page...)</i>
+
+/community/members.bml.prevlink=<i>(Previous page...)</i>
+
+/community/members.bml.settings=[<a href='[[link]]'>Settings</a>]
+
+/community/members.bml.success.header=Success
+
+/community/members.bml.success.message=Your changes have been successfully saved.
+
+/community/members.bml.success.return=<a href='[[link]]'>Return to the list</a>
+
+/community/members.bml.title=Community Members
+
+/community/members.bml.update=Update settings
 
 /community/search.bml.button.clear=Clear Form
 
@@ -186,6 +246,90 @@
 /community/search.bml.title=Community Search
 
 /community/search.bml.userlikes=User likes:
+
+/community/settings.bml.button.changecommunity=Update Settings
+
+/community/settings.bml.button.createcommunity=Create Community
+
+/community/settings.bml.error.badpassword=Invalid community password
+
+/community/settings.bml.error.maintainertype=Maintainer account must be a person, not another shared account.
+
+/community/settings.bml.error.noaccess=Only community maintainers are able to edit community settings. You are not a maintainer of community [[comm]].
+
+/community/settings.bml.error.notcomm=Not a community account.
+
+/community/settings.bml.error.notfound=Community account not found.
+
+/community/settings.bml.error.samenames=Maintainer account and community account cannot be the same.
+
+/community/settings.bml.label.admconsole=<a href='/admin/console/'>Admin console</a> - to add/remove people that are able to post
+
+/community/settings.bml.label.anybodycan=<b>All Members</b><br />Anybody can post immediately, once they're a member.
+
+/community/settings.bml.label.changeheader=Change Community Settings
+
+/community/settings.bml.label.changetext=Here you can change the settings for the community you own or maintain.
+
+/community/settings.bml.label.closedmemb=<b>Closed Membership</b><br />You have to approve people's requests to join.
+
+/community/settings.bml.label.commchanged=Your community settings have been changed.
+
+/community/settings.bml.label.commcreate=This is the account that you want to turn into a community.  It must <a href="/create.bml">already be created</a>, but should not already be in use by an individual because after this tons of different people will be able to potentially post in it.
+
+/community/settings.bml.label.commcreated=Your community is now set up.
+
+/community/settings.bml.label.commheader=Community Account
+
+/community/settings.bml.label.comminfo=Community info
+
+/community/settings.bml.label.commopts=Community Options
+
+/community/settings.bml.label.commsite=Community website
+
+/community/settings.bml.label.createheader=Create Community
+
+/community/settings.bml.label.createtext=From here you can create a community account.  A community is a special type of account that other users can join, and post in.  For example of a community, check out the <a href="/userinfo.bml?user=seattle">Seattle Party Community</a>.
+
+/community/settings.bml.label.howoperates=Choose how your community operates.  You can change these later.
+
+/community/settings.bml.label.membership=Membership
+
+/community/settings.bml.label.nmcan=<b>Non-Members Can Post</b><br />Users can post to this community without having to join it.
+
+/community/settings.bml.label.nmcant=<b>Non-Members Cannot Post</b><br />Users have to join this community in order to post in it.
+
+/community/settings.bml.label.nmheader=Non-Member Posting
+
+/community/settings.bml.label.nmtext=Can users post to this community without having to join it?
+
+/community/settings.bml.label.openmemb=<b>Open Membership</b><br />Anybody can join without getting approved.
+
+/community/settings.bml.label.password=Password:
+
+/community/settings.bml.label.postaccess=Posting Access
+
+/community/settings.bml.label.rellinks=Relevant links:
+
+/community/settings.bml.label.selcan=<b>Select Members</b><br />Only some members are able to post, once they've been given access by the maintainer account..
+
+/community/settings.bml.label.username=Username:
+
+/community/settings.bml.label.whocanjoin=Who can join your community?
+
+/community/settings.bml.label.whocanpost=Who can post to this community?
+
+/community/settings.bml.manage=[<a href='[[link]]'><b>&lt;&lt;</b></a> Manage communities]
+
+/community/settings.bml.members=[<a href='[[link]]'>Members</a>]
+
+/community/settings.bml.name=<b>Community name:</b> [[name]]
+
+/community/settings.bml.success=Success
+
+/community/settings.bml.title.create=Create Community
+
+/community/settings.bml.title.modify=Community Settings
 
 /create.bml.age.check.question=Are you under 13 years of age?
 
@@ -1774,6 +1918,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.label.yahooid=Yahoo! ID:
 
+/userinfo.bml.membership.body=To join this community, <a href="/community/join.bml?comm=[[commname]]">click here</a>.
+
 /userinfo.bml.memories.entries=[[count]] entries
 
 /userinfo.bml.memories.entry=[[count]] entry
@@ -1873,6 +2019,8 @@ error.nodbmaintenance=This part of the database is temporarily down for maintena
 error.noentry=No such journal entry.
 
 error.nojournal=Unknown Journal
+
+error.noremote=You have to <a href="/login.bml">login</a> in order to use this page.
 
 error.procrequest=There was an error processing your request:
 

@@ -612,7 +612,6 @@ REPLACE INTO schemacols (colname, des, tablename) VALUES ('norm', 'The normal we
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('oldvalue', 'The old value of the item.', 'infohistory');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('other', 'Optional note space.', 'infohistory');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('ownerid', 'The [dbtable[user]] userid of the journal the entry is posted in.', 'log');
-REPLACE INTO schemacols (colname, des, tablename) VALUES ('ownerid', 'The userid of the [dbtable[user]] who primarily owns the community.  (many people can have equal privs)', 'community');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('payid', 'The payment ID from [dbtable[payments]].', 'acctpay');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('pop1990', 'Population in 1990.', 'zips');
 REPLACE INTO schemacols (colname, des, tablename) VALUES ('posterid', 'The [dbtable[user]] userid of the person that posted the entry.', 'log');

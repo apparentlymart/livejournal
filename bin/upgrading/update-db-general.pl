@@ -1908,6 +1908,12 @@ register_alter(sub {
                  "ADD numreaders MEDIUMINT, ADD INDEX (numreaders)");
     }
 
+    if (column_type("community", "ownerid"))
+    {
+        do_alter("community",
+                 "ALTER TABLE community DROP ownerid");
+    }
+
 });
 
 1; # return true

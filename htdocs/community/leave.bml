@@ -20,7 +20,7 @@
  my $cuserid = $FORM{'cuserid'}+0;
  my $qcomm = $dbh->quote($FORM{'comm'});
  my $extrawhere = $FORM{'comm'} ? "AND u.user=$qcomm" : "AND c.userid=$cuserid";
- $sth = $dbh->prepare("SELECT u.user, u.userid, u.name, c.ownerid, c.membership, c.postlevel FROM user u, community c WHERE u.userid=c.userid $extrawhere");
+ $sth = $dbh->prepare("SELECT u.user, u.userid, u.name, c.membership, c.postlevel FROM user u, community c WHERE u.userid=c.userid $extrawhere");
  $sth->execute;
  my $ci = $sth->fetchrow_hashref();
 

@@ -205,34 +205,10 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
      }
  }
  
- my $ci;
- if ($com)
- {
-     $sth = $dbr->prepare("SELECT ownerid, membership, postlevel FROM community WHERE userid=$u->{'userid'}");
-     $sth->execute;
-     $ci = $sth->fetchrow_hashref;
- }
-
  if ($com) {
      $body .= "<?h1 $ML{'.comminfo.name'} h1?><?p " . BML::ml('.comminfo.body',{'commname'=>$u->{'name'}}) . " ";
-     if ($ci) {
-         my $cowner;
-         if ($ci->{'membership'} eq "closed" || 
-             $ci->{'postlevel'} eq "select")  {
-             # fetch the community owner's username
-             $cowner = LJ::get_username($dbs, $ci->{'ownerid'});
-         }
-     
-         if ($ci->{'membership'} eq "open") {
-             $body .= BML::ml('.openmembership.body',{'username'=>$u->{'user'}});
-             if ($ci->{'postlevel'} eq "select") {
-                 $body .= BML::ml('.rpmembership.body',{'cowner'=>$cowner});
-             }
-         } elsif ($ci->{'membership'} eq "closed") {
-             $body .= BML::ml('.closedmembership.body',{'cowner'=>$cowner});
-         }
-        $body .= BML::ml('.body.leave',{'commname'=>$u->{'user'}});
-     }
+     $body .= BML::ml('.membership.body',{'commname'=>$u->{'user'}});
+     $body .= BML::ml('.body.leave',{'commname'=>$u->{'user'}});
      $body .= " p?>";
  } elsif ($synd) {
      $body .= "<?h1 $ML{'.syndinfo.name'} h1?><?p " . BML::ml('.syndinfo.body',{'addtofriends'=>"$LJ::SITEROOT/friends/add.bml?user=$u->{'user'}"}) . " p?>";

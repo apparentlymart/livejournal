@@ -20,7 +20,7 @@
  my $cuserid = $FORM{'cuserid'}+0;
  my $qcomm = $dbh->quote($FORM{'comm'});
  my $extrawhere = $FORM{'comm'} ? "AND u.user=$qcomm" : "AND c.userid=$cuserid";
- $sth = $dbh->prepare("SELECT u.user, u.userid, u.name, c.ownerid, c.membership, c.postlevel FROM user u, community c WHERE u.userid=c.userid $extrawhere");
+ $sth = $dbh->prepare("SELECT u.user, u.userid, u.name, c.membership, c.postlevel FROM user u, community c WHERE u.userid=c.userid $extrawhere");
  $sth->execute;
  my $ci = $sth->fetchrow_hashref;
 
@@ -34,20 +34,24 @@
      return;
  }
 
- # get the community's owner username for nice links.
- my $cowner = LJ::get_username($dbs, $ci->{'ownerid'});
+ $cuserid = $ci->{'userid'};
+
+ # get the list of maintainers and their usernames
+ my $admins = $dbh->selectcol_arrayref("SELECT u.user FROM user u, reluser r WHERE r.userid=$cuserid AND r.targetid=u.userid AND r.type='A' ORDER BY u.user") || [];
+ my $list = "<ul>";
+ foreach(@$admins) { $list .= "<li><?ljuser $_ ljuser?></li>"};
+ $list .= "</ul>";
 
  ### can members join this community even?
  unless ($ci->{'membership'} eq "open") {
-     $body .= "<?h1 $ML{'Sorry'}... h1?><?p " . 
-         BML::ml('.label.closedcomm',{'maintainer'=>$cowner}) . 
+     $body .= "<?h1 $ML{'Sorry'} h1?><?p " . 
+         BML::ml('.label.closed',{'admins'=>$list}) . 
          " p?>";
      return;
  }
 
  ### make sure a community doesn't join a community (that's confusing
  ### or something)
- LJ::load_remote($dbs, $remote);
  unless ($remote->{'journaltype'} eq "P") {
      $body .= "<?h1 $ML{'Error'} h1?><?p $ML{'.label.commlogged'} p?>";
      return;
@@ -78,7 +82,7 @@
          LJ::set_rel($dbs, $ci, $remote, 'P');
          $body .= "<?p $ML{'.label.allowposting'} p?>";
      } else {
-         $body .= "<?p ".BML::ml('.label.authpost',{'maintainer'=>$cowner})." p?>";
+         $body .= "<?p ".BML::ml('.label.auth',{'admins'=>$list})." p?>";
      }
      return;
      

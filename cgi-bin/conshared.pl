@@ -31,8 +31,7 @@ sub change_community_admin
         unless ($unew && $unew->{'journaltype'} eq "P");
 
     return $err->("You do not have access to transfer ownership of this community.")
-        unless (LJ::check_rel($dbs, $ucomm, $remote, 'A') ||
-                $remote->{'priv'}->{'communityxfer'} );
+        unless $remote->{'priv'}->{'communityxfer'};
 
     return $err->("New owner's email address isn't validated.")
         unless ($unew->{'status'} eq "A");
@@ -40,15 +39,13 @@ sub change_community_admin
     my $commid = $ucomm->{'userid'};
     my $newid = $unew->{'userid'};
 
-    my $oldid = $dbh->selectrow_array("SELECT ownerid FROM community WHERE userid=$commid");
-    my $uold = LJ::load_userid($dbh, $oldid);
-
-    # remove old maintainer's power over it
+    # remove old maintainers' power over it
     LJ::clear_rel($dbs, $ucomm, '*', 'A');
-    $dbh->do("UPDATE community SET ownerid=$newid WHERE userid=$commid");
+
+    # add a new sole maintainer
     LJ::set_rel($dbs, $ucomm, $newid, 'A');
 
-    # so old maintainer can't regain access:
+    # so old maintainers can't regain access:
     $dbh->do("DELETE FROM infohistory WHERE userid=$commid");
 
     # change password & email of community to new maintainer's password
@@ -57,10 +54,7 @@ sub change_community_admin
     $dbh->do("UPDATE user SET password=$qpass, email=$qemail WHERE userid=$commid");
 
     ## log to status history
-    if ($uold) {
-        LJ::statushistory_add($dbh, $oldid, $remote->{'userid'}, "communityxfer", "Control of '$ucomm->{'user'}'($commid) taken away.");
-    }
-    LJ::statushistory_add($dbh, $commid, $remote->{'userid'}, "communityxfer", "Changed maintainer from '$uold->{'user'}'($oldid) to '$unew->{'user'}'($newid)");
+    LJ::statushistory_add($dbh, $commid, $remote->{'userid'}, "communityxfer", "Changed maintainer to '$unew->{'user'}'($newid)");
     LJ::statushistory_add($dbh, $newid, $remote->{'userid'}, "communityxfer", "Control of '$ucomm->{'user'}'($commid) given.");
 
     push @$out, [ "info", "Transfered ownership of \"$ucomm->{'user'}\"." ];
@@ -153,7 +147,7 @@ sub community
     } 
     else 
     {
-        $sth = $dbh->prepare("SELECT userid, ownerid, membership, postlevel FROM community WHERE userid=$com_id");
+        $sth = $dbh->prepare("SELECT userid, membership, postlevel FROM community WHERE userid=$com_id");
         $sth->execute;
         $ci = $sth->fetchrow_hashref;
         

@@ -161,7 +161,7 @@ sub do_search
     } elsif ($req->{'opt_format'} eq "simple") {
         $fields .= ", u.name";
     } elsif ($req->{'opt_format'} eq "com") {
-        $fields .= ", u.name, c.ownerid, c.membership, c.postlevel";
+        $fields .= ", u.name, c.membership, c.postlevel";
         $alias_used{'c'} = "community";
         $useridcol{"c.userid"} = 1;
     }

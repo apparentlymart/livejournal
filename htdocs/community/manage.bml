@@ -1,0 +1,61 @@
+<?page
+title=><?_ml .title _ml?>
+body<=
+<?_code
+
+ use strict;
+ use vars qw(%GET %POST);
+
+ return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
+ my $ret;
+ my $remote = LJ::get_remote($dbs);
+
+ unless ($remote) {
+    $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.noremote'} p?>";
+    return $ret;
+ }
+
+ $ret .= "<?h1 $ML{'.commlist.header'} h1?><?p $ML{'.commlist.text'} p?>";
+ $ret .= "<ul>";
+
+ my $cids = LJ::load_rel_target($dbs, $remote, 'A');
+
+ if ($cids && @$cids) {
+    my $in = join(',', @$cids);
+    my %names = ();
+ 
+    my $sth = $dbr->prepare("SELECT user, name FROM user WHERE userid IN ($in)") || [];
+    $sth->execute;
+    while (my ($user, $name) = $sth->fetchrow_array) {
+       $names{$user} = $name;
+    }
+    $ret .= "<table cellpadding='5'><tr><td>$ML{'.commlist.username'}</td>" .
+       "<td>$ML{'.commlist.title'}</td><td>$ML{'.commlist.actions'}</td></tr>";
+    foreach (sort keys %names) {
+       $ret .= "<tr><td><?ljcomm $_ ljcomm?></td><td>" . LJ::eall($names{$_}) . 
+          "</td><td>" . BML::ml('.commlist.actsettings',{'link'=>"/community/settings.bml?comm=$_"}) .
+          "&nbsp;&nbsp;&nbsp;" . BML::ml('.commlist.actmembers',{'link'=>"/community/members.bml?comm=$_"}) .
+          "</td></tr>";
+    }
+    $ret .= "</table>";
+ } else {
+    $ret .= "$ML{'.commlist.none'}";
+ }
+
+ $ret .= "</ul>";
+
+ $ret .= "<?h1 $ML{'.create.header'} h1?>";
+ $ret .= "<?p " . BML::ml('.create.text', {'link'=>'/community/settings.bml?mode=create'}) . " p?>";
+
+ return $ret;
+
+_code?>
+
+<=body
+page?>
+    

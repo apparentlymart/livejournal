@@ -6,4 +6,11 @@ general /userinfo.bml.syn.lastnew
 general /editinfo.bml.allowshowcontact.email.reason
 general /editinfo.bml.allowshocontact.email.if_domainaddy
 
+general /userinfo.bml.openmembership.body
+general /userinfo.bml.rpmembership.body
+general /userinfo.bml.closedmembership.body
 
+general /community/join.bml.label.closedcomm
+general /community/join.bml.label.authpost
+
+general /talkread.bml.pageofpages

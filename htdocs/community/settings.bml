@@ -1,0 +1,201 @@
+<?page
+title<=
+<?_code
+ if ($GET{'mode'} eq 'create') {
+    return $ML{'.title.create'};
+ }
+ else {
+    return $ML{'.title.modify'};
+ }
+_code?>
+<=title
+body<=
+<?_code
+
+ use strict;
+ use vars qw(%GET %POST);
+
+ my $ret = "";
+ my %errors;
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
+
+ my $remote = LJ::get_remote();
+
+ $ret .= BML::ml('.manage', {'link'=>'/community/manage.bml'});
+
+ unless ($remote) {
+    $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'error.noremote'} p?>";
+    return $ret;
+ }
+
+ unless ($remote->{'journaltype'} eq 'P') {
+    $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.maintainertype'} p?>";
+    return $ret;
+ }
+
+ my $mode = "modify";
+ $mode = "create" if $GET{'mode'} eq 'create';
+ $mode = "update" if $POST{'mode'} eq 'update';
+
+ if ($mode eq "update") 
+ {
+     my $sth;
+     my $cuser = LJ::canonical_username($POST{'cuser'});
+     my $cu = LJ::load_user($dbs, $cuser);
+     
+     unless ($cu) {
+         $errors{'username'} = $ML{'.error.notfound'};
+     }
+
+     if ($cu && $cu->{'userid'} == $remote->{'userid'}) {
+         $errors{'username'} = $ML{'.error.samenames'};
+     }
+
+     # if we're changing rather than creating, check that we can
+     if ($POST{'oldmode'} eq 'modify' && !LJ::check_rel($dbs, $cu, $remote, 'A')) {
+        $errors{'username'} = BML::ml('.error.noaccess', {'comm'=>$cuser});
+     }
+
+     # if we're creating, community password must match
+     if ($POST{'oldmode'} eq 'create' && $cu && !LJ::auth_okay($cu, $POST{'cpassword'})) {
+         $errors{'password'} = $ML{'.error.badpassword'};
+     }
+
+     if (%errors) {
+        $mode = $POST{'oldmode'}; # go back to the form and display errors
+     } else { # do the work
+        my $cid = $cu->{'userid'};
+        my $qmembership = $dbh->quote($POST{'membership'} eq "open" ? "open" : "closed");
+        my $qpostlevel = $dbh->quote($POST{'postlevel'} eq "members" ? "members" : "select");
+
+        $dbh->do("UPDATE user SET journaltype='C' WHERE userid=$cid");
+        if ($POST{'oldmode'} eq 'create') {
+           $dbh->do("REPLACE INTO community (userid, membership, postlevel) VALUES ($cid, $qmembership, $qpostlevel)");
+           LJ::set_rel($dbs, $cu, $remote, 'A');
+        } else {
+           $dbh->do("UPDATE community SET membership=$qmembership, postlevel=$qpostlevel WHERE userid=$cid");
+        }
+
+        my $nonmembers = $POST{'nonmember_posting'} + 0;
+
+        LJ::set_userprop($dbs, $cu->{'userid'}, 'nonmember_posting', $nonmembers);
+ 
+        $ret .= "<?h1 $ML{'.success'} h1?>";
+        if ($POST{'oldmode'} eq 'create') {
+           $ret .= "<?p $ML{'.label.commcreated'} p?>";
+        } else {
+           $ret .= "<?p $ML{'.label.commchanged'} p?>";
+        }
+
+        $ret .= "<?p $ML{'.label.rellinks'} <ul><li><a href='$LJ::SITEROOT/community/$cu->{'user'}/'>$ML{'.label.commsite'}</li><li><a href='/userinfo.bml?user=$cu->{'user'}'>$ML{'.label.comminfo'}</a></li><li>$ML{'.label.admconsole'}</li></ul> p?>";
+
+        return $ret;
+     }
+ }
+
+ # we're either creating a new community or modifying settings of an existing one
+ # based on whether $mode is 'create' or 'modify'. Most of the page is the same in
+ # either case, and additionally we must preload existing settings when modifying.
+
+ my ($cname, $c);
+
+ $cname = $POST{'cuser'}; # if we're falling through with errors when creating
+ 
+ my %info = (
+    'membership'=>$POST{'membership'} || 'open',
+    'postlevel'=>$POST{'postlevel'} || 'members',
+    'nonmember_posting'=>$POST{'nonmember_posting'} || 0,
+ );
+
+ if ($mode eq 'modify') {
+    $cname = LJ::canonical_username($GET{'comm'});
+    $c = LJ::load_user($dbs, $cname);
+    unless ($c) {
+       $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notfound'} p?>";
+       return $ret;
+    } 
+    unless ($c->{'journaltype'} eq 'C') {
+       $ret = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notcomm'} p?>";
+       return $ret;
+    } 
+    ($info{'membership'},$info{'postlevel'}) = 
+       LJ::dbs_selectrow_array($dbs, "SELECT membership,postlevel FROM community WHERE userid=$c->{'userid'}");
+    LJ::load_user_props($dbs, $c, "nonmember_posting");
+    $info{'nonmember_posting'} = $c->{'nonmember_posting'} ? 1 : 0;
+ }
+
+ $ret .= "<form method='post'><input type='hidden' name='mode' value='update'>";
+ $ret .= "<input type='hidden' name='oldmode' value='$mode'>";
+
+ if ($mode eq 'modify') {
+    $ret .= "<?h1 $ML{'.label.changeheader'} h1?><?p $ML{'.label.changetext'} p?>";
+ } else {
+    $ret .= "<?h1 $ML{'.label.createheader'} h1?><?p $ML{'.label.createtext'} p?>";
+ }
+
+
+ if ($mode eq 'create') {
+    $ret .= "<?h2 $ML{'.label.commheader'} h2?>" .
+       ($mode eq 'modify' ? "<?p $ML{'.label.commchange'} p?>" : "<?p $ML{'.label.commcreate'} p?>");
+    $ret .= "<?standout ";
+    $ret .= "$ML{'.label.username'}<br />";
+    $ret .= "<input name='cuser' size='15' maxlength='15' value='$cname'> ";
+    $ret .= "<br /><?inerr $errors{'username'} inerr?><br />";
+    $ret .= "$ML{'.label.password'}<br /><input name='cpassword' type='password'>";
+    $ret .= "<br /><?inerr $errors{'password'} inerr?>";
+    $ret .= " standout?>";
+ } else {
+    $ret .= LJ::html_hidden('cuser', $cname);
+    $ret .= "<?p " . BML::ml('.name',{'name'=>"<?ljcomm $cname ljcomm?>"});
+    $ret .= " " . BML::ml('.members',{'link'=>"/community/members.bml?comm=$cname"}) . " p?>";
+ }
+
+ $ret .= "<?h1 $ML{'.label.commopts'} h1?><?p $ML{'.label.howoperates'} p?>";
+ $ret .= "<?h2 $ML{'.label.membership'} h2?><?p $ML{'.label.whocanjoin'} <UL>";
+
+ my ($optopen,$optclosed);
+
+ if ($info{'membership'} eq 'open') {
+    ($optopen,$optclosed)=(" checked","");
+ } else {
+    ($optopen,$optclosed)=("", " checked");
+ }
+
+ $ret .= "<input type='radio' id='memopen' name='membership' value='open'$optopen><label for='memopen'> $ML{'.label.openmemb'}</label>";
+ $ret .= "<p><input type='radio' id='memclosed' name='membership' value='closed'$optclosed><label for='memclosed'> $ML{'.label.closedmemb'}</label>";
+ $ret .= "</ul> p?>";
+
+ if ($info{'postlevel'} eq 'members') {
+    ($optopen,$optclosed)=(" checked","");
+ } else {
+    ($optopen,$optclosed)=("", " checked");
+ }
+
+ $ret .= "<?h2 $ML{'.label.postaccess'} h2?><?p $ML{'.label.whocanpost'} <ul>";
+ $ret .= "<input type='radio' id='postopen' name='postlevel' value='members'$optopen><label for='postopen'> $ML{'.label.anybodycan'}</label>";
+ $ret .= "<p><input type='radio' id='postclosed' name='postlevel' value='select'$optclosed><label for='postclosed'> $ML{'.label.selcan'}</label>";
+ $ret .= "</ul> p?>";
+
+ if ($info{'nonmember_posting'}) {
+    ($optopen,$optclosed)=(" checked","");
+ } else {
+    ($optopen,$optclosed)=("", " checked");
+ }
+
+ $ret .= "<?h2 $ML{'.label.nmheader'} h2?><?p $ML{'.label.nmtext'} <ul>";
+ $ret .= "<input type='radio' id='nonopen' name='nonmember_posting' value='0'$optclosed><label for='nonopen'> $ML{'.label.nmcant'}</label>";
+ $ret .= "<p><input type='radio' id='nonclosed' name='nonmember_posting' value='1'$optopen><label for='nonclosed'> $ML{'.label.nmcan'}</label>";
+ $ret .= "</ul> p?>";
+
+ $ret .= "<center><input type=submit value='" .
+    ($mode eq 'create' ? "$ML{'.button.createcommunity'}" : "$ML{'.button.changecommunity'}") .
+    "'></center></form>";
+
+ return $ret;
+
+_code?>
+
+<=body
+page?>
