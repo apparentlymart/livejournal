@@ -1590,6 +1590,14 @@ sub editfriendgroups
 
 
     ## do deletions ('delete' array)
+
+    my ($dbcm, $dbcr, $clustered);
+    if ($u->{'clusterid'}) {
+        $dbcm = LJ::get_cluster_master($u);
+        $dbcr = LJ::get_cluster_reader($u);
+        $clustered = 1;
+    }
+
     foreach my $bit (@{$req->{'delete'}})
     {
         $bit += 0;
@@ -1600,7 +1608,11 @@ sub editfriendgroups
 
         # remove all posts from allowing that group:
         my @posts_to_clean = ();
-        $sth = $dbr->prepare("SELECT itemid FROM logsec WHERE ownerid=$userid AND allowmask & (1 << $bit)");
+        if ($clustered) {
+            $sth = $dbcr->prepare("SELECT jitemid FROM logsec2 WHERE journalid=$userid AND allowmask & (1 << $bit)");
+        } else {
+            $sth = $dbr->prepare("SELECT itemid FROM logsec WHERE ownerid=$userid AND allowmask & (1 << $bit)");
+        }
         $sth->execute;
         while (my ($id) = $sth->fetchrow_array) { push @posts_to_clean, $id; }
         while (@posts_to_clean) {
@@ -1612,10 +1624,18 @@ sub editfriendgroups
                 @batch = splice(@posts_to_clean, 0, 20);
             }
             my $in = join(",", @batch);
-            $dbh->do("UPDATE log SET allowmask=allowmask & ~(1 << $bit) ".
-                     "WHERE itemid IN ($in) AND security='usemask'");
-            $dbh->do("UPDATE logsec SET allowmask=allowmask & ~(1 << $bit) ".
-                     "WHERE ownerid=$userid AND itemid IN ($in)");
+            if ($clustered) {
+                $dbcm->do("UPDATE log2 SET allowmask=allowmask & ~(1 << $bit) ".
+                         "WHERE journalid=$userid AND jitemid IN ($in) AND security='usemask'");
+                $dbcm->do("UPDATE logsec2 SET allowmask=allowmask & ~(1 << $bit) ".
+                         "WHERE journalid=$userid AND jitemid IN ($in)");
+            } else {
+                $dbh->do("UPDATE log SET allowmask=allowmask & ~(1 << $bit) ".
+                         "WHERE itemid IN ($in) AND security='usemask'");
+                $dbh->do("UPDATE logsec SET allowmask=allowmask & ~(1 << $bit) ".
+                         "WHERE ownerid=$userid AND itemid IN ($in)");
+            }
+
         }
 
         # remove the friend group, unless we just added it this transaction
