@@ -368,12 +368,6 @@ specified by the [var[LASTN_OPT_ITEMS]] variable.
 .des
 An IMG tag showing your uploaded picture, if any.  See [var[LASTN_USERPIC]].
 }
-{ title
-.des
-The base title of the user's journal, which is normally used in the HTML
-title tags and headings alongside something which indicates that this is
-a calendar view.
-}
 { website
 .des
 If the user has specified their website, this block is filled with the contents of [var[LASTN_WEBSITE]].
