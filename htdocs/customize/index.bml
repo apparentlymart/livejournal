@@ -126,7 +126,7 @@ body<=
     }
 
     # choose style system
-    $ret .= "<form method='post' action='./'>";
+    $ret .= "<form method='post' action='./?journal=$u->{'user'}'>";
     $ret .= "<?h1 Choose style system h1?><?p Do you want to use the old style system, or the new one? p?>";
     $ret .= "<blockquote>";
     $ret .= LJ::html_select({ 'name' => 'stylesys', 'selected' => $u->{'stylesys'} },
