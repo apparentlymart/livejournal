@@ -546,7 +546,7 @@ sub get_friend_group {
 sub get_friends {
     my ($uuid, $mask, $memcache_only) = @_;
     my $userid = LJ::want_userid($uuid);
-    return unless $userid;
+    return undef unless $userid;
 
     # memcache data version
     my $ver = 1;
@@ -589,7 +589,7 @@ sub get_friends {
         # got from memcache, return
         return \%friends;
     }
-    return if $memcache_only;
+    return {} if $memcache_only; # no friends
 
     # nothing from memcache, select all rows from the
     # database and insert those into memcache
@@ -778,7 +778,7 @@ sub get_friend_items
         return undef if $fr_loaded;
 
         # get all friends for this user and groupmask
-        my $friends = LJ::get_friends($userid, $filter);
+        my $friends = LJ::get_friends($userid, $filter) || {};
         my %friends_u;
 
         # strip out rows with invalid journal types
@@ -813,8 +813,21 @@ sub get_friend_items
         return undef if $fr_loaded;
 
         # get journal's friends
-        my $friends = LJ::get_friends($userid, $filter);
+        my $friends = LJ::get_friends($userid) || {};
+        return undef unless %$friends;
+
         my %friends_u;
+
+        # fill %allfriends with all friendids and cut $friends
+        # down to only include those that match $filter
+        my %allfriends = ();
+        foreach my $fid (keys %$friends) {
+            $allfriends{$fid}++;
+
+            # delete from friends if it doesn't match the filter
+            next unless $filter && ! ($friends->{$fid}->{'groupmask'}+0 & $filter+0);
+            delete $friends->{$fid};
+        }
 
         # strip out invalid friend journaltypes
         $filter_journaltypes->($friends, \%friends_u, "memcache_only");
@@ -827,11 +840,11 @@ sub get_friend_items
         my %ffriends = ();
         foreach my $fid (sort { $f_tu->{$b} <=> $f_tu->{$a} } keys %$friends) {
             last if $ffct > 50;
-            my $ff = LJ::get_friends($fid, undef, "memcache_only");
+            my $ff = LJ::get_friends($fid, undef, "memcache_only") || {};
             my $ct = 0;
-            foreach my $ffid (keys %$ff) {
+            while (my $ffid = each %$ff) {
                 last if $ct > 100;
-                next if $friends->{$ffid} || $ffid == $userid;
+                next if $allfriends{$ffid} || $ffid == $userid;
                 $ffriends{$ffid} = $ff->{$ffid};
                 $ct++;
             }

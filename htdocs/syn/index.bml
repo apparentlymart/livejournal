@@ -167,7 +167,7 @@ body<=
     }
 
     # load user's friends so we can strip feeds they already watch
-    my $friends = LJ::get_friends($u);
+    my $friends = LJ::get_friends($u) || {};
 
     # populate @pop and add users they've chosen to add
     my @pop;
