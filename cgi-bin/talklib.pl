@@ -1308,7 +1308,7 @@ sub format_html_mail {
             $intro .= "The comment you replied to was:";
             LJ::CleanHTML::clean_comment(\$cleanbody, $parent->{preformat});
         }
-    } elsif (LJ::u_equals($targetu, $item->{u})) {
+    } elsif (LJ::u_equals($targetu, $item->{entryu})) {
         if ($parent->{ispost}) {
             $intro = "$who replied to <a href=\"$talkurl\">your $LJ::SITENAMESHORT post</a> in which you said:";
             LJ::CleanHTML::clean_event(\$cleanbody, {preformatted => $parent->{preformat}});
