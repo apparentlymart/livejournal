@@ -9,9 +9,11 @@ use MIME::Parser;
 use Mail::Address;
 use Unicode::MapUTF8 ();
 use File::Temp ();
+use File::Path ();
 
+cleanup();
+my $tmpdir = File::Temp::tempdir("ljmailgate_" . 'X' x 20, DIR=>'/tmp', CLEANUP=>1);
 my $parser = new MIME::Parser;
-my $tmpdir = File::Temp::tempdir("ljmailgate_" . 'X' x 20, DIR=>'/tmp', CLEANUP=>1 );
 $parser->output_dir($tmpdir);
 
 # Don't leave /tmp files around for any reason.
@@ -210,5 +212,25 @@ sub get_text_entity
     $entity->dump_skeleton(\*STDERR);
     
     return undef;
+}
+
+# Remove prior run /tmp dirs.
+# File::Temp::tempdir's CLEANUP *should* do this for us,
+# however it appears to be randomly unreliable.
+sub cleanup
+{
+    my $now = time();
+    opendir TMP,  '/tmp' or return 0;
+    my $limit = 0;
+    foreach (readdir(TMP)) {
+        next unless /^ljmailgate_/;
+        next if $limit >= 50;
+        $limit++;
+        my $modtime = (stat("/tmp/$_"))[9];
+        File::Path::rmtree("/tmp/$_") if $now - $modtime > 3600;
+    }
+    closedir TMP;
+    exit;
+    return 1;
 }
 
