@@ -148,6 +148,7 @@
  }
 
  unless (@tdids) {
+     $body .= "</form>";
      return;
  }
 
