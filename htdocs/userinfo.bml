@@ -1,8 +1,9 @@
 <?_code
 #line 2
  use strict;
- use vars qw($title $windowtitle $body $head %GET);
+ use vars qw($title $windowtitle $body $head $bml_okay %GET);
  
+ $bml_okay = 1;
  $title = $ML{'.title'};
  $body = "";
  $head = "";
@@ -242,21 +243,37 @@
          $remote_friendid{$_} = 1 while $_ = $sth->fetchrow_array;
      }
  }
+
+ # BML helpers.  we do BML by hand in this page, so we don't force BML
+ # to evaluate this huge page looking for non-existent BML.  this
+ # makes it quicker, and prevents us from having to clean out BML in
+ # the HTML cleaner too.
+ my $h1 = sub {
+     return BML::fill_template("h1", { DATA => $_[0] });
+ };
+ my $p = sub {
+     return BML::fill_template("p", { DATA => $_[0] });
+ };
  
  if ($com) {
-     $body .= "<?h1 $ML{'.comminfo.name'} h1?><?p " . BML::ml('.comminfo.body',{'commname'=>$u->{'name'}}) . " ";
+     $body .= $h1->($ML{'.comminfo.name'});
+     my $pt = BML::ml('.comminfo.body',{'commname'=>$u->{'name'}}) . " ";
      my $userinfo_join_community;
      LJ::run_hooks("userinfo_join_community", {
          'u' => $u,
          'ret' => \$userinfo_join_community,
      });
-     $body .= $userinfo_join_community ? $userinfo_join_community : BML::ml('.membership.body',{'commname'=>$u->{'user'}});
-     $body .= BML::ml('.body.leave',{'commname'=>$u->{'user'}});
-     $body .= " p?>";
+     $pt .= $userinfo_join_community ? $userinfo_join_community : BML::ml('.membership.body',{'commname'=>$u->{'user'}});
+     $pt .= BML::ml('.body.leave',{'commname'=>$u->{'user'}});
+     $body .= $p->($pt);
  } elsif ($synd) {
-     $body .= "<?h1 $ML{'.syndinfo.name'} h1?><?p " . BML::ml('.syndinfo.body',{'addtofriends'=>"$LJ::SITEROOT/friends/add.bml?user=$u->{'user'}"}) . " p?>";
+     $body .= $h1->($ML{'.syndinfo.name'}) . $p->(BML::ml('.syndinfo.body', {
+         'addtofriends' => "$LJ::SITEROOT/friends/add.bml?user=$u->{'user'}",
+     }));
  } else {
-     $body .= "<?h1 $ML{'.userinfo.name'} h1?><?p " . BML::ml('.userinfo.body',{'username'=>$u->{'name'},'siteroot'=>$LJ::SITEROOT}) . " p?>";
+     $body .= $h1->($ML{'.userinfo.name'}) . $p->(BML::ml('.userinfo.body', {
+         'username' => $u->{'name'}, 'siteroot'=>$LJ::SITEROOT,
+     }));
  }
 
  ## standout bar
@@ -291,9 +308,9 @@
      }
 
      if (@linkele) {
-         $body .="<?standout ";
-         $body .= join("&nbsp;&nbsp;", @linkele);
-         $body .= " standout?>";
+         $body .= BML::fill_template("standout", { 
+             DATA => join("&nbsp;&nbsp;", @linkele),
+         });
      }
  }
 
@@ -702,6 +719,7 @@ if ($u->{'journaltitle'}) {
  unless ($synd || $GET{'mode'} eq "full") {  # Synd accts are always full, but their full ends early (see below)
      $body .= "</table>\n";
      $body .= "<p align='center'><i><a href='/userinfo.bml?user=$u->{'user'}&amp;mode=full'>$ML{'.label.moredetails'}</a></i></p>";
+     $bml_okay = 0;
      return;
  }
  
@@ -744,6 +762,7 @@ if ($u->{'journaltitle'}) {
 
  if ($synd) { # The rest of the rows are not useful to synd accts
      $body .= "</table>\n";
+     $bml_okay = 0;
      return "";
  }
 
@@ -855,12 +874,13 @@ $body .= "</table>\n";
 # removed until we run graphviz locally
 # $body .= "<p><a href=\"/friends/graph.bml?user=$user\"><b>Graph of friends</b></a></p>";
 
+$bml_okay = 0;
 return;
 
 _code?><?page
 windowtitle=><?_code return $windowtitle; _code?>
 title=><?_code return $title; _code?>
-body=><?_code return $body; _code?>
+body=><?_code return $bml_okay ? $body : BML::noparse($body); _code?>
 head=><?_code return $head; _code?>
 page?><?_c <LJDEP>
 lib: cgi-bin/ljlib.pl, cgi-bin/cleanhtml.pl
