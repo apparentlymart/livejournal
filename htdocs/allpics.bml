@@ -28,20 +28,20 @@
  if ($u->{'statusvis'} eq "S") {
      $title = $ML{'error.suspended.title'};
      $body = "<?h1 $ML{'error.suspended.name'} h1?><?p " .
-             BML::ml('error.suspended.text', { 'user' => LJ::ljuser($user) }) . " p?>";
+             BML::ml('error.suspended.text', { 'user' => LJ::ljuser($u) }) . " p?>";
      return;
  }
  if ($u->{'statusvis'} eq "D") {
      $title = $ML{'error.deleted.title'};
      $body = "<?h1 $ML{'error.deleted.name'} h1?><?p " .
-             BML::ml('error.deleted.text', { 'user' => LJ::ljuser($user) }) . 
+             BML::ml('error.deleted.text', { 'user' => LJ::ljuser($u) }) . 
             " p?>";
      return;
  }
  if ($u->{'statusvis'} eq "X") {
      $title = $ML{'error.purged.title'};
      $body = "<?h1 $ML{'error.purged.name'} h1?><?p " .
-             BML::ml('error.purged.text', { 'user' => LJ::ljuser($user) }) . 
+             BML::ml('error.purged.text', { 'user' => LJ::ljuser($u) }) . 
             " p?>";
      return;
  }
@@ -66,7 +66,7 @@
  {
      if ($piccount++ == 0) {
          $body .= "<?h1 $ML{'.current'} h1?><?p ";
-         $body .= BML::ml('.pics', {'user'=> LJ::ljuser($user)});
+         $body .= BML::ml('.pics', {'user'=> LJ::ljuser($u)});
          if ($can_manage) {
              $body .= ' ' . BML::ml('.edit2', { 'editlink' => "$LJ::SITEROOT/editpics.bml?authas=$user",
                                               'uploadlink' => "$LJ::SITEROOT/uploadpic.bml?authas=$user" });
