@@ -94,38 +94,26 @@ foreach my $s (@alters)
 
 if ($opt_pop)
 {
-    print "Populating database with base data:\n";
     $| = 1;
-    open (BD, "$ENV{'LJHOME'}/bin/upgrading/base-data.sql")
-        or die ("Can't open base-data.sql file");
-    my $lasttable = "";
-    while (my $q = <BD>)
-    {
-        chomp $q;  # remove newline
-        next unless ($q =~ /^(REPLACE|INSERT) (IGNORE )?INTO (\w+).+;/);
-        chop $q;  # remove semicolon
-        my $type = $1;
-        my $table = $2;
-        if ($table ne $lasttable) {
-            if ($lasttable) { print "\n"; }
-            print "  $table ";
-            $lasttable = $table;
-        }
-        $dbh->do($q);
-        if ($dbh->err) {
-            if ($type eq "REPLACE") {
+    foreach my $file ("base-data.sql", "base-data-local.sql") {
+        my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
+        next unless -e $ffile;
+        print "Populating database with $file:\n";
+        open (BD, $ffile) or die "Can't open $file file";
+        while (my $q = <BD>)
+        {
+            chomp $q;  # remove newline
+            next unless ($q =~ /^(REPLACE|INSERT|UPDATE)/);
+            chop $q;  # remove semicolon
+            $dbh->do($q);
+            if ($dbh->err) {
+                print "$q\n";
                 die "#  ERROR: " . $dbh->errstr . "\n";
             }
-            if ($type eq "INSERT") {
-                print "x";
-            }
-        } else {
-            print ".";
         }
-        
+        close (BD);
     }
-    print "\n";
-    close (BD);
+    print "Done populating.\n";
 }
 
 
