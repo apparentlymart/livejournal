@@ -1896,38 +1896,41 @@ sub load_user_props
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
+    my ($sql, $sth);
+
+    LJ::load_props($dbs, "user");
 
     ## user reference
     my ($uref, @props) = @_;
+    return unless ref $uref eq "HASH";  # example: undefined $remote
     my $uid = $uref->{'userid'}+0;
-    unless ($uid) {
-        $uid = LJ::get_userid($dbarg, $uref->{'user'});
+    $uid = LJ::get_userid($dbarg, $uref->{'user'}) unless $uid;
+
+    my %loadfrom;
+    unless (@props) {
+        # case 1: load all props for a given user.
+        $loadfrom{'userprop'} = 1;
+        $loadfrom{'userproplite'} = 1;
+    } else {
+        # case 2: load only certain things
+        foreach (@props) {
+            my $p = LJ::get_prop("user", $_);
+            next unless $p;
+            my $source = $p->{'indexed'} ? "userprop" : "userproplite";
+            push @{$loadfrom{$source}}, $p->{'id'};
+        }
     }
 
-    my $propname_where;
-    if (@props) {
-        $propname_where = "AND upl.name IN (" . join(",", map { $dbh->quote($_) } @props) . ")";
-    }
-
-    my ($sql, $sth);
-
-    # FIXME: right now we read userprops from both tables (indexed and
-    # lite).  we always have to do this for cases when we're loading
-    # all props, but when loading a subset, we might be able to
-    # eliminate one query or the other if we cache somewhere the
-    # userproplist and which props are in which table.  For now,
-    # though, this works:
-
-    foreach my $table (qw(userprop userproplite))
-    {
-        $sql = "SELECT upl.name, up.value FROM $table up, userproplist upl ".
-            "WHERE up.userid=$uid AND up.upropid=upl.upropid $propname_where";
+    foreach my $table (keys %loadfrom) {
+        $sql = "SELECT upropid, value FROM $table WHERE userid=$uid";
+        if (ref $loadfrom{$table}) {
+            $sql .= " AND upropid IN (" . join(",", @{$loadfrom{$table}}) . ")";
+        }
         $sth = $dbr->prepare($sql);
         $sth->execute;
-        while ($_ = $sth->fetchrow_hashref) {
-            $uref->{$_->{'name'}} = $_->{'value'};
+        while (my ($id, $v) = $sth->fetchrow_array) {
+            $uref->{$LJ::CACHE_PROPID{'user'}->{$id}->{'name'}} = $v;
         }
-        $sth->finish;
     }
 
     # Add defaults to user object.
