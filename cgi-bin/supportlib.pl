@@ -458,7 +458,7 @@ sub mail_response_to_user
     }
 
     # Need to escape HTML for AOL's crappy client.
-    if ($email =~ /\@aol.com$/i) {
+    if ($email =~ /\@aol\.com$/i) {
 	$res->{'message'} =~ s/\&/&amp;/g;
 	$res->{'message'} =~ s/</&lt;/g;
 	$res->{'message'} =~ s/>/&gt;/g;
