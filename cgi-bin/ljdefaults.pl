@@ -7,6 +7,7 @@
 
 {
     package LJ;
+    use Sys::Hostname ();
 
     $DEFAULT_STYLE ||= { 
         'core' => 'core1',
@@ -22,6 +23,8 @@
     $HTDOCS = "$HOME/htdocs";
     $BIN = "$HOME/bin";
 
+    $SERVER_NAME ||= Sys::Hostname::hostname();
+    
     $UNICODE = 1 unless defined $UNICODE;
 
     @LANGS = ("en") unless @LANGS;

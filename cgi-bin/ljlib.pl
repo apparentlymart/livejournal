@@ -51,6 +51,8 @@ $LJ::DBIRole = new DBI::Role {
     'weights_from_db' => $LJ::DBWEIGHTS_FROM_DB,
     'default_db' => "livejournal",
     'messages_to' => \&procnotify_callback,
+    'time_check' => 60,
+    'time_report' => \&dbtime_callback,
 };
 
 # $LJ::PROTOCOL_VER is the version of the client-server protocol
@@ -5525,6 +5527,16 @@ sub procnotify_check
         }
     }
     $LJ::CACHE_PROCNOTIFY_MAX = $max;
+}
+
+sub dbtime_callback {
+    my ($dsn, $dbtime, $time) = @_;
+    my $diff = abs($dbtime - $time);
+    if ($diff > 2) {
+        $dsn =~ /host=([^:\;\|]*)/;
+        my $db = $1;
+        print STDERR "Clock skew of $diff seconds between web($LJ::SERVER_NAME) and db($db)\n";
+    }
 }
 
 # <LJFUNC>
