@@ -16,13 +16,14 @@ use Digest::MD5;
 # aren't in mogile right now, and put them there
 
 # determine 
-my ($one, $besteffort, $dryrun, $user, $verify, $verbose, $clusters);
+my ($one, $besteffort, $dryrun, $user, $verify, $verbose, $clusters, $purge);
 my $rv = GetOptions("best-effort"  => \$besteffort,
                     "one"          => \$one,
                     "dry-run"      => \$dryrun,
                     "user=s"       => \$user,
                     "verify"       => \$verify,
                     "verbose"      => \$verbose,
+                    "purge-old"    => \$purge,
                     "clusters=s"   => \$clusters,);
 unless ($rv) {
     die <<ERRMSG;
@@ -54,6 +55,11 @@ This script supports the following command line arguments:
         mismatch, connection failure, etc) the script will die to
         make sure everything goes well.  With this flag, we don't
         die and instead just print to standard error.
+
+    --purge-old
+        Sometimes we run into data that is for users that have since
+        moved to a different cluster.  Normally we ignore it, but
+        with this option, we'll clean that data up as we find it.
 
     --verbose
         Be very chatty.
@@ -148,11 +154,7 @@ sub handle_userid {
     die "ERROR: Unable to load userid $userid\n"
         unless $u;
 
-    # if a user has been moved to another cluster, but the source data from
-    # userpic2 wasn't deleted, we need to ignore the user
-    return unless $u->{clusterid} == $cid;
-
-    # get a handle if we weren't given one
+    # get a handle
     my $dbcm = get_db_handle($u->{clusterid});
 
     # get all their photos that aren't in mogile already
@@ -163,6 +165,28 @@ sub handle_userid {
 
     # print that we're doing this user
     print "$extra$u->{user}($u->{userid})\n";
+
+    # if a user has been moved to another cluster, but the source data from
+    # userpic2 wasn't deleted, we need to ignore the user or purge their data
+    if ($u->{clusterid} != $cid) {
+        return unless $purge;
+
+        # if we get here, the user has indicated they want data purged, get handle
+        my $to_purge_dbcm = get_db_handle($cid);
+
+        # delete the old data
+        if ($dryrun) {
+            print "\tnotice: need to delete userpic2 rows.\n\n"
+                if $verbose;
+        } else {
+            my $ct = $to_purge_dbcm->do("DELETE FROM userpic2 WHERE userid = ?", undef, $u->{userid});
+            print "\tnotice: purged $ct old rows.\n\n"
+                if $verbose;
+        }
+
+        # nothing else to do here
+        return;
+    }
 
     # now we have a userid and picids, get the photos from the blob server
     foreach my $row (@$picids) {
