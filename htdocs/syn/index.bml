@@ -51,7 +51,7 @@ body<=
             return "<?h1 Error h1?><?p Invalid account name. p?>"
                 unless $acct =~ /^\w{3,15}$/;
             foreach my $re ("^system\$", @LJ::PROTECTED_USERNAMES) {
-                next unless ($user =~ /$re/);
+                next unless ($acct =~ /$re/);
                 return "<?h1 Error h1?><?p Reserved account name. p?>"
             }
         }
