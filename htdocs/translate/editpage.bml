@@ -248,6 +248,7 @@
          if ($oldtext eq $text) { 
              $opts->{'txtid'} = $lat->{'txtid'}; 
              $text = undef; 
+             $sev = 0;
          }
 
          # if setting text for first time, push down to children langs

@@ -266,7 +266,7 @@ sub set_text
         my $in = join(",", @{$l->{'children'}});
         my $newstale = $opts->{'changeseverity'} == 2 ? 2 : 1;
         $dbh->do("UPDATE ml_latest SET staleness=$newstale WHERE lnid IN ($in) AND ".
-                 "dmid=$dmid AND itid=$itid AND staleness < $newstale");
+                 "dmid=$dmid AND itid=$itid AND txtid<>$txtid AND staleness < $newstale");
     }
 
     return 1;

@@ -328,9 +328,9 @@ sub handle_request
         # have they explictly specified their language?
         $REQ_LANG = $GETVARS{'setlang'} || $GETVARS{'uselang'};
         if ($GETVARS{'setlang'}) {
-            BMLClient::set_cookie("bmllangpref", $GETVARS{'setlang'} . "/" . time(), 0);
+            BMLClient::set_cookie("langpref", $GETVARS{'setlang'} . "/" . time(), 0);
         }
-        if (! $REQ_LANG && $BMLClient::COOKIE{'bmllangpref'} =~ m!^(\w{2,10})/(\d+)$!) {
+        if (! $REQ_LANG && $BMLClient::COOKIE{'langpref'} =~ m!^(\w{2,10})/(\d+)$!) {
             $REQ_LANG = $1;
             # make sure the document says it was changed at least as new as when
             # the user last set their current language, else their browser might

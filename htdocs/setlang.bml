@@ -1,0 +1,44 @@
+(=_CODE
+
+ return unless $FORM{'lang'};
+ my $l = LJ::Lang::get_lang($FORM{'lang'});
+ return unless $l;
+ BMLClient::set_cookie("langpref", $l->{'lncode'}, 0);
+ BML::set_language($l->{'lncode'});
+ return;
+
+_CODE=)(=PAGE
+TITLE=>(=_ML .title _ML=)
+BODY<=
+
+(=_CODE
+
+ if ($FORM{'lang'}) {
+
+     my $l = LJ::Lang::get_lang($FORM{'lang'});
+     unless ($l) {
+	 return "Undefined language. ($FORM{'lang'})";
+     }
+     return "Set to $l->{'lnname'}";
+
+ } 
+ else
+ {
+     $ret .= "Select language: <form method='post'>";
+
+     my @q = ("en_LJ", "English",
+	      "de", "German");
+
+     while (@q) {
+	 my ($code, $name) = splice(@q, 0, 2);
+	 $ret .= "<p><input type=radio name=lang value=$code> $name</p>\n";
+     }
+
+     $ret .= "<p><input type=submit value='Switch'></p></form>";
+     return $ret;
+ }
+
+_CODE=)
+
+<=BODY
+PAGE=)
