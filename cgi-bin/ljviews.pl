@@ -821,6 +821,10 @@ sub fvp_transform
             my $user = LJ::canonical_username($ret);
             $ret = LJ::ljuser($user);
         }
+        elsif ($trans eq 'userurl') {
+            my $u = LJ::load_user($ret);
+            $ret = LJ::journal_base($u) if $u;
+        }
     }
     return $ret;
 }

@@ -702,7 +702,7 @@ summary="">
 <td class="meta">[</td>
 <td class="meta" align="right"><b>calendar</b></td>
 <td class="meta" align="center">|</td>
-<td class="meta"><a href="%%urlcalendar%%">livejournal calendar</a></td>
+<td class="meta"><a href="%%userurl:username%%/calendar">livejournal calendar</a></td>
 <td class="meta">]</td>
 </tr>
 </table>
@@ -842,7 +842,7 @@ CALENDAR_PAGE<=
  </head>
  <body>
   <h1>%%title%% - Calendar</h1>
-  <p class="Navigation">(<a href="%%urllastn%%">Latest&nbsp;entries</a>) (<span class="Active">Calendar</span>) (<a href="%%urlfriends%%">Friends</a>) %%website%% (<a href="%%urllastn%%info">User&nbsp;info</a>)<br>%%yearlinks%%</p>
+  <p class="Navigation">(<a href="%%urllastn%%">Latest&nbsp;entries</a>) (<span class="Active">Calendar</span>) (<a href="%%urlfriends%%">Friends</a>) %%website%% (<a href="%%userurl:username%%/info">User&nbsp;info</a>)<br>%%yearlinks%%</p>
 %%months%%
  </body>
 </html>
@@ -1275,7 +1275,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 	<tr>
 	<td class="links">
 	<a href="%%urllastn%%">recent posts</a><br>
-	<a href="%%cons:siteroot%%/users/%%username%%/info">my userinfo</a><br>
+	<a href="%%userurl:username%%/info">my userinfo</a><br>
 	<a href="%%urlfriends%%">my friends</a><br>
 	%%website%%</td>
 	</tr>
@@ -2507,7 +2507,7 @@ DAY_PAGE<=
  </head>
  <body>
   <h1>%%title%% - Day</h1>
-  <p class="Navigation">(<a href="%%urllastn%%">Latest&nbsp;entries</a>) (<a href="%%urlcalendar%%">Calendar</a>) (<a href="%%urlfriends%%">Friends</a>) %%website%% (<a href="%%urllastn%%info">User&nbsp;info</a>)<br>Navigate: (<a href="%%prevday_url%%">Previous&nbsp;day</a>&nbsp;|&nbsp;<a href="%%nextday_url%%">Next&nbsp;day</a>)</p>
+  <p class="Navigation">(<a href="%%urllastn%%">Latest&nbsp;entries</a>) (<a href="%%urlcalendar%%">Calendar</a>) (<a href="%%urlfriends%%">Friends</a>) %%website%% (<a href="%%userurl:username%%/info">User&nbsp;info</a>)<br>Navigate: (<a href="%%prevday_url%%">Previous&nbsp;day</a>&nbsp;|&nbsp;<a href="%%nextday_url%%">Next&nbsp;day</a>)</p>
 
   <h2>%%daylong%%, %%monlong%% %%d%%, %%yyyy%%</h2>
 %%events%%
@@ -2764,7 +2764,7 @@ A:active { color: %%color:page_alink%% ; }
 <A HREF="%%prevday_url%%">&lt;&lt; previous day</A>
 </FONT></TD>
 <TD ALIGN=CENTER WIDTH=33%><FONT FACE="Verdana,Arial,Helvetica" SIZE="1">
-[<A HREF="/users/%%username%%/calendar">calendar</A>]
+[<A HREF="%%userurl:username%%/calendar">calendar</A>]
 </FONT></TD>
 <TD WIDTH=33% ALIGN=RIGHT><FONT FACE="Verdana,Arial,Helvetica" SIZE="1">
 <A HREF="%%nextday_url%%">next day &gt;&gt;</A>
@@ -2999,7 +2999,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 	<td class="links">
 	<a href="%%urllastn%%">recent posts</a><br>
 	<a href="%%urlfriends%%">my friends</a><br>
-	<a href="%%cons:siteroot%%/users/%%username%%/info">my userinfo</a><br>
+	<a href="%%userurl:username%%/info">my userinfo</a><br>
 	<a href="%%urlcalendar%%">my calendar</a>
         %%website%%</td>
 	</tr>
@@ -3117,7 +3117,7 @@ DAY_NOEVENTS=>No journal entries for this day.
 
 DAY_EVENTS=>%%events%%
 
-DAY_TALK_READLINK=><A HREF="%%urlread%%">Read %%messagecount%%</A> or
+DAY_TALK_READLINK=><A HREF="%%urlread%%">Read %%messagecount%%</A> or 
 
 DAY_SORT_MODE=>forward
 
@@ -3538,12 +3538,12 @@ FRIENDS_RANGE_HISTORY=>Below are <B>%%numitems%%</B> friends' journal entries, a
 
 FRIENDS_ALTPOSTER<=
 </A><BR>
-<A STYLE="text-decoration:none" HREF="%%cons:siteroot%%/users/%%poster%%/"><FONT SIZE=-1 FACE="Arial,Helvetica" COLOR=%%fgcolor%%>[ %%poster%% ]</FONT></A><A HREF="%%cons:siteroot%%/users/%%owner%%/" STYLE="text-decoration:none">
+<A STYLE="text-decoration:none" HREF="%%userurl:poster%%/"><FONT SIZE=-1 FACE="Arial,Helvetica" COLOR=%%fgcolor%%>[ %%poster%% ]</FONT></A><A HREF="%%userurl:owner%%/" STYLE="text-decoration:none">
 <=FRIENDS_ALTPOSTER
 
 FRIENDS_EVENT_PROTECTED<=
 <TR><TD BGCOLOR=%%bgcolor%% style="text-align: center;">
-  <A HREF="%%cons:siteroot%%/users/%%user%%/" STYLE="text-decoration:none">
+  <A HREF="%%userurl:user%%/" STYLE="text-decoration:none">
     <FONT COLOR=%%fgcolor%%><B>%%user%%</B>%%altposter%%%%friendpic%%</A>
 </TD>
 <TD><I>%%datetime%%</I><BR>
@@ -3556,7 +3556,7 @@ FRIENDS_RANGE_MOSTRECENT=>Below are the most recent <B>%%numitems%%</B> friends'
 
 FRIENDS_EVENT_PRIVATE<=
 <TR><TD BGCOLOR=%%bgcolor%% style="text-align: center;">
-  <A HREF="%%cons:siteroot%%/users/%%user%%/" STYLE="text-decoration:none">
+  <A HREF="%%userurl:user%%/" STYLE="text-decoration:none">
     <FONT COLOR=%%fgcolor%%><B>%%user%%</B>%%altposter%%%%friendpic%%</A>
 </TD>
 <TD><I>%%datetime%%</I><BR>
@@ -3629,7 +3629,7 @@ FRIENDS_SKIP_FORWARD=><A HREF="%%url%%">Next %%numitems%% &gt;&gt;</A>
 
 FRIENDS_EVENT<=
 <TR><TD BGCOLOR="%%bgcolor%%" style="text-align: center;">
-  <A HREF="%%cons:siteroot%%/users/%%user%%/" STYLE="text-decoration:none">
+  <A HREF="%%userurl:user%%/" STYLE="text-decoration:none">
     <FONT COLOR=%%fgcolor%%><B>%%user%%</B>%%altposter%%%%friendpic%%</A>
 </TD>
 <TD><I>%%datetime%%</I></TD>
@@ -3692,7 +3692,7 @@ lastupdate: 2003-04-15 22:20:03
 
 FRIENDS_RANGE_HISTORY=>
 
-FRIENDS_ALTPOSTER=> - (<a href="%%cons:siteroot%%/users/%%poster%%">%%poster%%</a>)
+FRIENDS_ALTPOSTER=> - (<a href="%%userurl:poster%%/">%%poster%%</a>)
 
 FRIENDS_EVENT_PROTECTED<=
 <table cellspacing=0 class="entries">
@@ -3702,7 +3702,7 @@ FRIENDS_EVENT_PROTECTED<=
    <table cellspacing=0 style="float:right">
     <tr>
      <td>&nbsp;</td>
-     <td class="altposter"><a href="%%cons:siteroot%%/users/%%user%%/">%%user%%</a>%%altposter%%</td>
+     <td class="altposter"><a href="%%userurl:user%%/">%%user%%</a>%%altposter%%</td>
     </tr>
    </table>
   </td>
@@ -3739,7 +3739,7 @@ FRIENDS_EVENT_PRIVATE<=
    <table cellspacing=0 style="float:right">
     <tr>
      <td>&nbsp;</td>
-     <td class="altposter"><a href="%%cons:siteroot%%/users/%%user%%/">%%user%%</a>%%altposter%%</td>
+     <td class="altposter"><a href="%%userurl:user%%/">%%user%%</a>%%altposter%%</td>
     </tr>
    </table>
   </td>
@@ -3929,7 +3929,7 @@ FRIENDS_EVENT<=
    <table cellspacing=0 style="float:right;">
     <tr>
      <td>&nbsp;</td>
-     <td class="altposter"><a href="%%cons:siteroot%%/users/%%user%%/">%%user%%</a>%%altposter%%</td>
+     <td class="altposter"><a href="%%userurl:user%%/">%%user%%</a>%%altposter%%</td>
     </tr>
    </table>
   </td>
@@ -4018,7 +4018,7 @@ lastupdate: 2003-04-15 22:20:36
 FRIENDS_RANGE_HISTORY=>%%skip%% entries back
 
 FRIENDS_ALTPOSTER<=
-<br>[<a class="index" href="%%cons:siteroot%%/users/%%poster%%/"><font color="%%fgcolor%%">%%poster%%</font></a>]
+<br>[<a class="index" href="%%userurl:poster%%/"><font color="%%fgcolor%%">%%poster%%</font></a>]
 
 <=FRIENDS_ALTPOSTER
 
@@ -4044,7 +4044,7 @@ summary="">
 border="0"
 summary="">
 <tr align='left'><td bgcolor="%%bgcolor%%" align="center">
-<a class="index" href="%%cons:siteroot%%/users/%%user%%/">
+<a class="index" href="%%userurl:user%%/">
 %%friendpic%%
 <font color="%%fgcolor%%">%%user%%</font></a>%%altposter%%
 </td></tr></table>
@@ -4085,7 +4085,7 @@ summary="">
 border="0"
 summary="">
 <tr align='left'><td bgcolor="%%bgcolor%%" align="center">
-<a class="index" href="%%cons:siteroot%%/users/%%user%%/">
+<a class="index" href="%%userurl:user%%/">
 %%friendpic%%
 <font color="%%fgcolor%%">%%user%%</font>%%altposter%%
 </a>
@@ -4288,7 +4288,7 @@ summary="">
 border="0"
 summary="">
 <tr align='left'><td bgcolor="%%bgcolor%%" align="center">
-<a class="index" href="%%cons:siteroot%%/users/%%user%%/">
+<a class="index" href="%%userurl:user%%/">
 %%friendpic%%
 <font color="%%fgcolor%%">%%user%%</font></a>%%altposter%%
 </td></tr></table>
@@ -4388,13 +4388,13 @@ lastupdate: 2003-04-15 22:21:10
 
 FRIENDS_RANGE_HISTORY=>(<span class="Active"><a href="./friends">Latest&nbsp;friends</a> - %%skip%%</span>)
 
-FRIENDS_ALTPOSTER=></a></div><div><a href="%%cons:siteroot%%/users/%%poster%%/"><small>(%%poster%%)</small>
+FRIENDS_ALTPOSTER=></a></div><div><a href="%%userurl:poster%%/"><small>(%%poster%%)</small>
 
 FRIENDS_EVENT_PROTECTED<=
   <div class="H3Holder">
    <div class="Picture" style="background-color: %%bgcolor%%;">
-    <div><a href="%%cons:siteroot%%/users/%%user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
-    <div>%%friendpic%%<a href="%%cons:siteroot%%/users/%%user%%/">%%altposter%%</a></div>
+    <div><a href="%%userurl:user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
+    <div>%%friendpic%%<a href="%%userurl:user%%/">%%altposter%%</a></div>
    </div>
    <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_protected.gif" style="width: 14px; height: 15px; margin: 0.2em; vertical-align: bottom;" alt="Protected"></h3>
    <p>%%event%%</p>
@@ -4409,8 +4409,8 @@ FRIENDS_RANGE_MOSTRECENT=>(<span class="Active">Latest&nbsp;friends</span>)
 FRIENDS_EVENT_PRIVATE<=
   <div class="H3Holder">
    <div class="Picture" style="background-color: %%bgcolor%%;">
-    <div><a href="%%cons:siteroot%%/users/%%user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
-    <div>%%friendpic%%<a href="%%cons:siteroot%%/users/%%user%%/">%%altposter%%</a></div>
+    <div><a href="%%userurl:user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
+    <div>%%friendpic%%<a href="%%userurl:user%%/">%%altposter%%</a></div>
    </div>
    <h3><span>%%datetime%%%%subject%%</span> <img src="%%cons:img%%/icon_private.gif" style="width: 16px; height: 16px; margin: 2px; vertical-align: bottom;" alt="Private"></h3>
    <p>%%event%%</p>
@@ -4455,7 +4455,7 @@ FRIENDS_PAGE<=
  </head>
  <body>
   <h1>%%title%%</h1>
-  <p class="Navigation">(<a href="%%urllastn%%">Latest&nbsp;entries</a>) (<a href="%%urlcalendar%%">Calendar</a>) %%range%% %%website%% (<a href="%%urllastn%%info">User&nbsp;info</a>)<br>%%skiplinks%%</p>
+  <p class="Navigation">(<a href="%%urllastn%%">Latest&nbsp;entries</a>) (<a href="%%urlcalendar%%">Calendar</a>) %%range%% %%website%% (<a href="%%userurl:username%%/info">User&nbsp;info</a>)<br>%%skiplinks%%</p>
 %%events%%
   <p class="Bottom">%%skiplinks%%</p>
  </body>
@@ -4471,8 +4471,8 @@ FRIENDS_SKIP_FORWARD=><a href="%%url%%">Next&nbsp;%%numitems%%&nbsp;friends</a>
 FRIENDS_EVENT<=
   <div class="H3Holder">
    <div class="Picture" style="background-color: %%bgcolor%%;">
-    <div><a href="%%cons:siteroot%%/users/%%user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
-    <div>%%friendpic%%<a href="%%cons:siteroot%%/users/%%user%%/">%%altposter%%</a></div>
+    <div><a href="%%userurl:user%%/" style="color: %%fgcolor%%;"><small>%%user%%</small></a></div>
+    <div>%%friendpic%%<a href="%%userurl:user%%/">%%altposter%%</a></div>
    </div>
    <h3><span>%%datetime%%%%subject%%</span></h3>
    <p>%%event%%</p>
@@ -4525,10 +4525,10 @@ lastupdate: 2003-04-15 22:21:51
 
 FRIENDS_RANGE_HISTORY=>
 
-FRIENDS_ALTPOSTER=><br>[ <A HREF="%%cons:siteroot%%/users/%%poster%%/">%%poster%%</A> ]
+FRIENDS_ALTPOSTER=><br>[ <A HREF="%%userurl:poster%%/">%%poster%%</A> ]
 
 FRIENDS_EVENT_PROTECTED<=
-<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"> 
+<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%userurl:user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_protected.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Protected"> 
 <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
 %%event%%
 %%currents%%
@@ -4539,7 +4539,7 @@ FRIENDS_EVENT_PROTECTED<=
 FRIENDS_RANGE_MOSTRECENT=>
 
 FRIENDS_EVENT_PRIVATE<=
-<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Private"> 
+<TABLE BORDER="0"><TR><TD VALIGN="top"><CENTER>%%friendpic%%<A HREF="%%userurl:user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top"><IMG SRC="%%cons:img%%/icon_private.gif" WIDTH=14 HEIGHT=15 VSPACE=2 HSPACE=2 ALT="Private"> 
 <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
 %%event%%
 %%currents%%
@@ -4624,7 +4624,7 @@ FRIENDS_NOFRIENDS<=
 FRIENDS_SKIP_FORWARD=><A HREF="%%url%%">Forward A Page</A>
 
 FRIENDS_EVENT<=
-<TABLE BORDER="0"><TR><TD VALIGN="top" width=100><CENTER>%%friendpic%%<A HREF="%%cons:siteroot%%/users/%%user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top">
+<TABLE BORDER="0"><TR><TD VALIGN="top" width=100><CENTER>%%friendpic%%<A HREF="%%userurl:user%%/">%%user%%</A>%%altposter%%</CENTER></TD><TD VALIGN="top">
 <FONT SIZE="+1">%%datetime%%%%subject%%</FONT><BR><BR>
 %%event%%
 %%currents%%
@@ -4674,14 +4674,14 @@ FRIENDS_RANGE_HISTORY=>below are <B>%%numitems%%</B> friends' journal entries, a
 
 FRIENDS_ALTPOSTER<=
 </A><BR>
-<A STYLE="text-decoration:none" HREF="%%cons:siteroot%%/users/%%poster%%/"><FONT SIZE=-1 FACE="Arial,Helvetica" COLOR=%%fgcolor%%>[ %%poster%% ]</FONT></A><A HREF="%%cons:siteroot%%/users/%%owner%%/" STYLE="text-decoration:none">
+<A STYLE="text-decoration:none" HREF="%%userurl:poster%%/"><FONT SIZE=-1 FACE="Arial,Helvetica" COLOR=%%fgcolor%%>[ %%poster%% ]</FONT></A><A HREF="%%userurl:owner%%/" STYLE="text-decoration:none">
 <=FRIENDS_ALTPOSTER
 
 FRIENDS_EVENT_PROTECTED<=
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 <TR><TD VALIGN=TOP ALIGN="MIDDLE" BGCOLOR="%%bgcolor%%" WIDTH=100>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2" COLOR=%%fgcolor%%>
-<A HREF="%%cons:siteroot%%/users/%%user%%/"><FONT COLOR=%%fgcolor%%><B>%%user%%</B></FONT></A><BR><A HREF="%%cons:siteroot%%/users/%%user%%/">%%altposter%%%%friendpic%%</A>
+<A HREF="%%userurl:user%%/"><FONT COLOR=%%fgcolor%%><B>%%user%%</B></FONT></A><BR><A HREF="%%userurl:user%%/">%%altposter%%%%friendpic%%</A>
 </FONT>
 </TD><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
@@ -4704,7 +4704,7 @@ FRIENDS_EVENT_PRIVATE<=
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 <TR><TD VALIGN=TOP ALIGN="MIDDLE" BGCOLOR="%%bgcolor%%" WIDTH=100>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2" COLOR=%%fgcolor%%>
-<A HREF="%%cons:siteroot%%/users/%%user%%/"><FONT COLOR=%%fgcolor%%><B>%%user%%</B></FONT></A><BR><A HREF="%%cons:siteroot%%/users/%%user%%/">%%altposter%%%%friendpic%%</A>
+<A HREF="%%userurl:user%%/"><FONT COLOR=%%fgcolor%%><B>%%user%%</B></FONT></A><BR><A HREF="%%userurl:user%%/">%%altposter%%%%friendpic%%</A>
 </FONT>
 </TD><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
@@ -4817,7 +4817,7 @@ FRIENDS_EVENT<=
 <TABLE BORDER="0" CELLPADDING="2" CELLSPACING="0">
 <TR><TD VALIGN=TOP ALIGN="MIDDLE" BGCOLOR="%%bgcolor%%" WIDTH=100>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2" COLOR="%%fgcolor%%">
-<A HREF="%%cons:siteroot%%/users/%%user%%/"><FONT COLOR="%%fgcolor%%"><B>%%user%%</B></FONT></A><BR><A HREF="%%cons:siteroot%%/users/%%user%%/">%%altposter%%%%friendpic%%</A>
+<A HREF="%%userurl:user%%/"><FONT COLOR="%%fgcolor%%"><B>%%user%%</B></FONT></A><BR><A HREF="%%userurl:user%%/">%%altposter%%%%friendpic%%</A>
 </FONT>
 </TD><TD VALIGN=TOP>
 <FONT FACE="Verdana,Arial,Helvetica" SIZE="2">
@@ -4898,7 +4898,7 @@ FRIENDS_RANGE_MOSTRECENT=>%%numitems%% most recent entries
 FRIENDS_EVENT_PRIVATE<=
 <br>
 <table>
-<tr>%%friendpic%%<td><font class="date"><b>User:</b></font></td><td><font class="date"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%"><img src="%%cons:img%%/userinfo.gif" border="0" height="17" width="17" align="absmiddle"></a><a href="%%cons:siteroot%%/users/%%user%%/"><b>%%user%%</b></a>%%altposter%%</font></td></tr>
+<tr>%%friendpic%%<td><font class="date"><b>User:</b></font></td><td><font class="date"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%"><img src="%%cons:img%%/userinfo.gif" border="0" height="17" width="17" align="absmiddle"></a><a href="%%userurl:user%%/"><b>%%user%%</b></a>%%altposter%%</font></td></tr>
 <tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
 <tr><td><font class="date"><b>Subject:</b></font></td><td><font class="date">%%subject%%<font class="date"></td></tr>
 <tr><td><font class="date"><b>Security:</b></font></td><td><font class="date">Private</font></td></tr>
@@ -5032,7 +5032,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 	
 	<tr>
 	<td class="links">
-	<a href="%%cons:siteroot%%/users/%%username%%/info">my userinfo</a><br>
+	<a href="%%userurl:username%%/info">my userinfo</a><br>
 	<a href="%%urllastn%%">my journal</a><br>
 	<a href="%%urlcalendar%%">my calendar</a>
         %%website%%</td>
@@ -5086,7 +5086,7 @@ FRIENDS_SKIP_FORWARD=><a href="%%url%%">forward %%lc:numitems%% entries</a>
 FRIENDS_EVENT<=
 <br>
 <table>
-<tr>%%friendpic%%<td><font class="date"><b>User:</b></font></td><td><font class="date"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%"><img src="%%cons:img%%/userinfo.gif" border="0" height="17" width="17" align="absmiddle"></a><a href="%%cons:siteroot%%/users/%%user%%/"><b>%%user%%</b></a>%%altposter%%</font></td></tr>
+<tr>%%friendpic%%<td><font class="date"><b>User:</b></font></td><td><font class="date"><a href="%%cons:siteroot%%/userinfo.bml?user=%%user%%"><img src="%%cons:img%%/userinfo.gif" border="0" height="17" width="17" align="absmiddle"></a><a href="%%userurl:user%%/"><b>%%user%%</b></a>%%altposter%%</font></td></tr>
 <tr><td><font class="date"><b>Date:</b></font></td><td><font class="date">%%datetime%%</font></td></tr>
 <tr><td><font class="date"><b>Subject:</b></font></td><td><font class="date">%%subject%%<font class="date"></td></tr>
 <tr><td><font class="date"><b>Security:</b></font></td><td><font class="date">Public</font></td></tr>
@@ -5144,7 +5144,7 @@ lastupdate: 2003-04-15 22:24:33
 
 FRIENDS_RANGE_HISTORY=>You're looking at %%numitems%% entries, after skipping %%skip%% newer ones.
 
-FRIENDS_ALTPOSTER=><TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Posted by:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%"><A HREF="%%cons:siteroot%%/users/%%poster%%">%%poster%%</A>.</FONT></TD></TR>
+FRIENDS_ALTPOSTER=><TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Posted by:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%"><A HREF="%%userurl:poster%%/">%%poster%%</A>.</FONT></TD></TR>
 
 FRIENDS_EVENT_PROTECTED<=
 <DIV ALIGN="right">
@@ -5154,7 +5154,7 @@ FRIENDS_EVENT_PROTECTED<=
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
 <TD WIDTH="100" VALIGN="top" BGCOLOR="%%bgcolor%%" ALIGN="center">
-<A HREF="%%cons:siteroot%%/users/%%user%%/">%%friendpic%%</A>
+<A HREF="%%userurl:user%%/">%%friendpic%%</A>
 <BR><FONT COLOR="%%fgcolor%%">%%user%%</FONT>
 </TD>
 <TD VALIGN="top">
@@ -5191,7 +5191,7 @@ FRIENDS_EVENT_PRIVATE<=
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
 <TD WIDTH="100" VALIGN="top" BGCOLOR="%%bgcolor%%" ALIGN="center">
-<A HREF="%%cons:siteroot%%/users/%%user%%/">%%friendpic%%</A>
+<A HREF="%%userurl:user%%/">%%friendpic%%</A>
 <BR><FONT COLOR="%%fgcolor%%">%%user%%</FONT>
 </TD>
 <TD VALIGN="top">
@@ -5300,7 +5300,7 @@ FRIENDS_EVENT<=
 <TABLE BORDER="0" WIDTH="100%">
 <TR>
 <TD WIDTH="100" VALIGN="top" BGCOLOR="%%bgcolor%%" ALIGN="center">
-<A HREF="%%cons:siteroot%%/users/%%user%%/">%%friendpic%%</A>
+<A HREF="%%userurl:user%%/">%%friendpic%%</A>
 <BR><FONT COLOR="%%fgcolor%%">%%user%%</FONT>
 </TD>
 <TD VALIGN="top">
@@ -5786,7 +5786,7 @@ LASTN_EVENT_PRIVATE<=
 <TD><DIV STYLE="text-align:left">%%subject%% %%event%% %%currents%%</DIV>%%talklinks%%</TD></TR>
 <=LASTN_EVENT_PRIVATE
 
-LASTN_ALTPOSTER=><BR>[<A HREF="%%cons:siteroot%%/users/%%poster%%/">%%poster%%</A>]%%pic%%
+LASTN_ALTPOSTER=><BR>[<A HREF="%%userurl:poster%%/">%%poster%%</A>]%%pic%%
 
 LASTN_OPT_ITEMS=>20
 
@@ -6083,7 +6083,7 @@ LASTN_ALTPOSTER<=
    <table cellspacing=0 cellpadding=10 style="width:100%;margin:0">
     <tr>
      <td style="width:80%">&nbsp;</td>
-     <td class="altposter"><a href="%%cons:siteroot%%/users/%%poster%%">%%poster%%</a></td>
+     <td class="altposter"><a href="%%userurl:poster%%/">%%poster%%</a></td>
     </tr>
    </table>
 <=LASTN_ALTPOSTER
@@ -6396,7 +6396,7 @@ summary="">
 border="0"
 summary="">
 <tr><td bgcolor="%%color:page_back%%" align="center">
-<a class="index" href="%%cons:siteroot%%/users/%%poster%%/">
+<a class="index" href="%%userurl:poster%%/">
 %%pic%%
 <span style="color:%%color:page_link%%">%%poster%%</span></a>
 </td></tr></table>
@@ -6509,7 +6509,7 @@ LASTN_PAGE<=
  </head>
  <body>
   <h1>%%title%%</h1>
-  <p class="Navigation">(<span class="Active">%%range%%</span>) (<a href="%%urlcalendar%%">Calendar</a>) (<a href="%%urlfriends%%">Friends</a>) %%website%% (<a href="%%cons:siteroot%%/users/%%username%%/info">User&nbsp;info</a>)<br>%%skiplinks%%</p>
+  <p class="Navigation">(<span class="Active">%%range%%</span>) (<a href="%%urlcalendar%%">Calendar</a>) (<a href="%%urlfriends%%">Friends</a>) %%website%% (<a href="%%userurl:username%%/info">User&nbsp;info</a>)<br>%%skiplinks%%</p>
 %%events%%
   <p class="Bottom">%%skiplinks%%</p>
  </body>
@@ -6554,9 +6554,9 @@ LASTN_EVENT_PRIVATE<=
 
 LASTN_ALTPOSTER<=
    <div class="Picture">
-    <!-- <div><a href="%%cons:siteroot%%/users/%%owner%%/"><small>%%owner%%</small></a></div> -->
-    <div><a href="%%cons:siteroot%%/users/%%poster%%/">%%pic%%</a></div>
-    <div><a href="%%cons:siteroot%%/users/%%poster%%/"><small>(%%poster%%)</small></a></div>
+    <!-- <div><a href="%%userurl:owner%%/"><small>%%owner%%</small></a></div> -->
+    <div><a href="%%userurl:poster%%/">%%pic%%</a></div>
+    <div><a href="%%userurl:poster%%/"><small>(%%poster%%)</small></a></div>
    </div>
 <=LASTN_ALTPOSTER
 
@@ -6703,7 +6703,7 @@ HEIGHT="23"></CENTER></P>
 
 LASTN_CURRENTS=><BR>%%currents%%
 
-LASTN_ALTPOSTER=>(<a href="%%cons:siteroot%%/users/%%poster%%">%%poster%%</a>)
+LASTN_ALTPOSTER=>(<a href="%%userurl:poster%%/">%%poster%%</a>)
 
 LASTN_OPT_ITEMS=>10
 
@@ -6895,7 +6895,7 @@ ALT="Private">
 LASTN_ALTPOSTER<=
 <td valign="top" style="text-align: center;">
 <font size="2" color="%%color:page_link%%" face="Verdana,Arial,Helvetica">
-<a href="/users/%%poster%%/">%%pic%%
+<a href="%%userurl:poster%%/">%%pic%%
 <b>%%poster%%</b></a></font>
 </td>
 <=LASTN_ALTPOSTER
@@ -7069,7 +7069,7 @@ p.links { font-family: verdana, arial; font-size:10px; color:#666666; line-heigh
 	
 	<tr>
 	<td class="links">
-	<a href="%%cons:siteroot%%/users/%%username%%/info">my userinfo</a><br>
+	<a href="%%userurl:username%%/info">my userinfo</a><br>
 	<a href="%%urlfriends%%">my friends</a><br>
 	<a href="%%urlcalendar%%">my calendar</a>
         %%website%%</td>
@@ -7349,7 +7349,7 @@ LASTN_EVENT_PRIVATE<=
 <BR>
 <=LASTN_EVENT_PRIVATE
 
-LASTN_ALTPOSTER=><TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Posted by:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%"><A HREF="%%cons:siteroot%%/users/%%poster%%">%%poster%%</A>.</FONT></TD></TR>
+LASTN_ALTPOSTER=><TR><TD ALIGN="right"><FONT COLOR="%%color:weak_text%%">Posted by:</FONT></TD><TD><FONT COLOR="%%color:weak_text%%"><A HREF="%%userurl:poster%%/">%%poster%%</A>.</FONT></TD></TR>
 
 LASTN_OPT_ITEMS=>20
 
@@ -7494,7 +7494,7 @@ LASTN_EVENT_PRIVATE=>
 
 LASTN_CURRENTS=><br />%%currents%%
 
-LASTN_ALTPOSTER=><a href="%%cons:siteroot%%/users/%%poster%%/">%%pic%%%%poster%%</a>
+LASTN_ALTPOSTER=><a href="%%userurl:poster%%/">%%pic%%%%poster%%</a>
 
 LASTN_OPT_ITEMS=>25
 

@@ -60,6 +60,8 @@ body<=
           'des' => "Transform the variable as if it were surrounded by &lt;lj user=%%variable%%&gt;.  ex: %%ljuser:username%%" },
         { 'trans' => 'ljcomm',
           'des' => "Transform the variable as if it were surrounded by &lt;lj comm=%%variable%%&gt;.  ex: %%ljcomm:username%%" },
+        { 'trans' => 'userurl',
+          'des' => 'Takes in a username and transforms it into a link to their journal.' },
     );
     
     # construct ide and mode variables
