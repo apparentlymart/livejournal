@@ -1957,6 +1957,7 @@ sub list_friends
         }
 
         $r->{"type"} = "community" if $u->{'journaltype'} eq "C";
+        $r->{"type"} = "syndicated" if $u->{'journaltype'} eq "Y";
         $r->{"status"} = {
             'D' => "deleted",
             'S' => "suspended",

@@ -347,7 +347,7 @@ If the group mask is not "1" (just bit 0 set), then this variable is returned wi
 }
 { friend_<I>n</I>_type
 .des
-The account type of this friend, if it's not a personal account.  Currently the only possible value is "community", which means you're monitoring this community on your friends list.  (but it does not imply that you're a member of the community)
+The account type of this friend, if it's not a personal account.  Currently the only possible values are "community" and "syndicated", which means you're monitoring this community/syndicated feed on your friends list.  (Note that it does not imply that you're a member of the community if the type is community, just that you monitor it.)
 }
 { friend_<I>n</I>_status
 .des

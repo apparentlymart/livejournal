@@ -9,8 +9,8 @@ The username of the friend.
 The full name of the friend.
 </des></scalar></key>
 
-<key name="journaltype" count="1"><scalar><des>
-The type of journal the friend item is.
+<key name="type" count="opt"><scalar><des>
+The type of journal the friend item is.  This is present only if the journal is a community or syndicated feed, and in those cases it will be set to "community" or "syndicated" as necessary.
 </des></scalar></key>
 
 <key name="fgcolor" count="1"><scalar><des>
