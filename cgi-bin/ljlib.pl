@@ -31,6 +31,8 @@ require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
 
+eval { require "$ENV{'LJHOME'}/cgi-bin/ljlib-local.pl"; };
+
 # determine how we're going to send mail
 $LJ::OPTMOD_NETSMTP = eval "use Net::SMTP (); 1;";
 if ($LJ::SMTP_SERVER) {

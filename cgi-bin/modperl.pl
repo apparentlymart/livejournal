@@ -4,8 +4,9 @@
 use strict;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use Apache;
-
-require 'ljconfig.pl';
+use Apache::LiveJournal;
+use Apache::CompressClientFixup;
+use Apache::BML;
 
 # setup httpd.conf things for the user:
 Apache->httpd_conf("DocumentRoot $LJ::HTDOCS")
