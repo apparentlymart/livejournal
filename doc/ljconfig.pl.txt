@@ -29,24 +29,24 @@
     $SITENAME = "Some LiveJournal Site";
     $SITENAMESHORT = "YourSite";
     $SITENAMEABBREV = "YS";
-    
+
     # the base domain of your site.
     # CHANGE THIS
-    $DOMAIN = "ljsite.com"; 
+    $DOMAIN = "ljsite.com";
 
-    # this is what gets prepended to all URLs 
+    # this is what gets prepended to all URLs
     $SITEROOT = "http://www.$DOMAIN";
 
     # prefix for images
     $IMGPREFIX = "$SITEROOT/img";
-    
+
     # set this if you're running an FTP server that mirrors your htdocs/files
-    #$FTPPREFIX = "ftp://ftp.$DOMAIN";  
+    #$FTPPREFIX = "ftp://ftp.$DOMAIN";
 
     # where we set the cookies (note the period before the domain)
     # can be one value or an array ref (to accomodate certain old
     # broken browsers)
-    $COOKIE_DOMAIN = ["", ".$DOMAIN"]; 
+    $COOKIE_DOMAIN = ["", ".$DOMAIN"];
     $COOKIE_PATH   = "/";
 
     # email addresses
@@ -88,7 +88,7 @@
     #             );
 
     # require new free acounts to be referred by an existing user?
-    # NOTE: mostly ljcom-specific.  some features unimplemented in 
+    # NOTE: mostly ljcom-specific.  some features unimplemented in
     # the livejournal-only tree.
     #$USE_ACCT_CODES = 1;
 
@@ -101,7 +101,7 @@
     ###
 
     # on a larger installation, it's useful to have multiple qbufferd.pl
-    # processes, one for each command type.  this is unecessary on a 
+    # processes, one for each command type.  this is unecessary on a
     # small installation.  you can also specify a delay between runs.
     #@QBUFFERD_ISOLATE = ('weblogscom', 'ljcom_newpost');
     #$QBUFFERD_DELAY   = 10;
@@ -132,7 +132,7 @@
     #   how far you can scroll back on lastn and friends pages.
     #   big performance implications if you make these too high.
     #   also, once you lower them, increasing them won't change anything
-    #   until there are new posts numbering the difference you increased 
+    #   until there are new posts numbering the difference you increased
     #   it by.
     $MAX_HINTS_LASTN = 100;
     $MAX_SCROLLBACK_LASTN = 400;
@@ -141,7 +141,7 @@
     # (requires additional mail system configuration)
     #$USER_EMAIL  = 1;
 
-    # Support URLs of the form http://username.yoursite.com/ ? 
+    # Support URLs of the form http://username.yoursite.com/ ?
     # If so, what's the part after "username." ?
     #$USER_VHOSTS = 1;
     #$USER_DOMAIN = $DOMAIN;
@@ -178,9 +178,9 @@
     $MSG_NO_COMMENT = "Due to hardware maintenance, you cannot leave comments at this time.  Watch the news " .
                       "page for updates.";
 
-  
+
     ###
-    ### Lanaguage / Scheme support
+    ### Language / Scheme support
     ###
 
     # schemes available to users.
@@ -205,7 +205,7 @@
     ### Database Configuration
     ###
 
-    # database info.  only the master is necessary.  
+    # database info.  only the master is necessary.
     # you should probably CHANGE THIS
     %DBINFO = (
                'master' => {  # master must be named 'master'
@@ -239,7 +239,7 @@
     #$DONT_LOG_IMAGES = 1;
 
     # directory optimizations
-    $DIR_DB_HOST = "master";  # DB role to use when connecting to directory DB   
+    $DIR_DB_HOST = "master";  # DB role to use when connecting to directory DB
     $DIR_DB = "";             # by default, hit the main database (bad for big sites!)
     #$DIRECTORY_SEPARATE = 1; # don't let the directory use master databases
 
@@ -247,7 +247,7 @@
     @CLUSTERS = (1);    # eg: (1, 2, 3) (for scalability)
 
     # can users choose which cluster they're assigned to?  leave this off.
-    $ALLOW_CLUSTER_SELECT = 0; 
+    $ALLOW_CLUSTER_SELECT = 0;
 
     # which cluster(s) get new users?
     # if it's an arrayref, choose one of the listed clusters at random.
@@ -348,25 +348,25 @@
             'useremail' => 1,
         },
         # a capability class with a name of "_moveinprogress" is required
-        # if you want to be able to move users between clusters with the 
+        # if you want to be able to move users between clusters with the
         # provided tool.  further, this class must define 'readonly' => 1
-            '5' => { 
+            '5' => {
             '_name' => '_moveinprogress',
             'readonly' => 1,
         },
        );
 
-    # default capability class mask for new users: 
+    # default capability class mask for new users:
     # (16 bit unsigned int ... each bit is capability class flag)
     $NEWUSER_CAPS = 2;
 
 
     ### S1 style options
 
-    $SYN_LASTN_S1 = 1;      # lastn style to use for syndication accounts 
+    $SYN_LASTN_S1 = 1;      # lastn style to use for syndication accounts
     $DONT_TOUCH_STYLES = 0; # don't touch existing styles
 
-    $DEFAULT_STYLE = { 
+    $DEFAULT_STYLE = {
         'core' => 'core1',
         'layout' => 'generator/layout',
         'i18n' => 'generator/en',
@@ -387,13 +387,13 @@
     # need to override them, here's the format:
 
     #@PORTAL_COLS = qw(main right moz);  # can also include left, if you want.
-    #$PORTAL_URI = "/portal/";           # either "/" or "/portal/"    
+    #$PORTAL_URI = "/portal/";           # either "/" or "/portal/"
 
     #$PORTAL_LOGGED_IN ||= {'main'   => [
-    #                                    [ 'newtolj', ''], 
+    #                                    [ 'newtolj', ''],
     #                                    [ 'update', 'mode=full'],
     #                                    ],
-    #                       'right' => [ 
+    #                       'right' => [
     #                                    [ 'goat', '', ],
     #                                    [ 'stats', '', ],
     #                                    [ 'bdays', '', ],
@@ -401,11 +401,11 @@
     #                                    [ 'popfaq', '', ],
     #                                    ] };
 
-    #$PORTAL_LOGGED_OUT ||= {'main'  => [ 
+    #$PORTAL_LOGGED_OUT ||= {'main'  => [
     #                                     [ 'newtolj', ''],
     #                                     [ 'update', 'mode='],
     #                                     ],
-    #                        'right' => [ 
+    #                        'right' => [
     #                                     [ 'goat', '', ],
     #                                     [ 'login', '', ],
     #                                     [ 'stats', '', ],
