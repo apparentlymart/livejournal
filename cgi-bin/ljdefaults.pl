@@ -28,10 +28,11 @@
     $COOKIE_PATH   ||= "/";
 
     ## default portal options
-    @PORTAL_COLS = qw(main right moz);  # can also include left, if you want.
-    $PORTAL_URI = "/portal/";           # either "/" or "/portal/"    
+    @PORTAL_COLS = qw(main right moz) unless (@PORTAL_COLS);
 
-    $PORTAL_LOGGED_IN = {'main' => [ 
+    $PORTAL_URI ||= "/portal/";           # either "/" or "/portal/"    
+
+    $PORTAL_LOGGED_IN ||= {'main' => [ 
 				     [ 'update', 'mode=full'],
 				     ],
 			 'right' => [ 
@@ -39,7 +40,7 @@
 				      [ 'stats', '', ],
 				      [ 'bdays', '', ],
 				      ] };
-    $PORTAL_LOGGED_OUT = {'main' => [ 
+    $PORTAL_LOGGED_OUT ||= {'main' => [ 
 				      [ 'update', 'mode='],
 				      ],
 			  'right' => [ 
@@ -57,7 +58,7 @@
     $MAX_HINTS_LASTN ||= 100;
     $MAX_SCROLLBACK_LASTN ||= 400;
 
-    # set default capability limits if the user hasn't.
+    # set default capability limits if the site maintainer hasn't.
     {
 	my %defcap = (
 		      'checkfriends' => 1,
@@ -79,6 +80,20 @@
 	foreach my $k (keys %defcap) {
 	    next if (defined $LJ::CAP_DEF{$k});
 	    $LJ::CAP_DEF{$k} = $defcap{$k};	    
+	}
+    }
+
+    # set default userprop limits if site maintainer hasn't
+    {
+	my %defuser = (
+		       's1_lastn_style' => 1,
+		       's1_friends_style' => 6,
+		       's1_calendar_style' => 2,
+		       's1_day_style' => 5,
+		       );
+	foreach my $k (keys %defuser) {
+	    next if (defined $LJ::USERPROP_DEF{$k});
+	    $LJ::USERPROP_DEF{$k} = $defcap{$k};	    
 	}
     }
 }

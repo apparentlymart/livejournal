@@ -1351,6 +1351,18 @@ sub load_user_props
 	}
 	$sth->finish;
     }
+
+    # Add defaults to user object.
+
+    # If this was called with no @props, then the function tried
+    # to load all metadata.  but we don't know what's missing, so
+    # try to apply all defaults.
+    unless (@props) { @props = keys %LJ::USERPROP_DEF; }
+
+    foreach my $prop (@props) {
+	next if (defined $uref->{$prop});
+	$uref->{$prop} = $LJ::USERPROP_DEF{$prop};
+    }
 }
 
 # <LJFUNC>
