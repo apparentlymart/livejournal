@@ -10,8 +10,7 @@
     <note>
       <para>This will bring up either your <literal>$EDITOR</literal>,
         or <literal>vi</literal>.  If you want to set your editor
-        explicitly, do: <screen><prompt>$</prompt>
-        <command>EDITOR=pico crontab -e</command></screen>
+        explicitly, do: <screen><prompt>$</prompt> <command>EDITOR=pico crontab -e</command></screen>
       </para>
     </note>
     <caution>
