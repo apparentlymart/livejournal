@@ -238,14 +238,31 @@ sub finduser
         return 0;
     }
 
-    my $sth = $dbh->prepare("SELECT * FROM user WHERE $where");
-    $sth->execute;
-    if (! $sth->rows) {
-        push @$out, [ "error", "No matches." ];
+    my $userids = $dbh->selectcol_arrayref("SELECT userid FROM user WHERE $where");
+    if ($dbh->err) {
+        push @$out, [ "error", "Error in database query: " . $dbh->errstr ];
+        return 0;
     }
-    while (my $u = $sth->fetchrow_hashref) {        
+    unless ($userids && @$userids) {
+        push @$out, [ "error", "No matches." ];
+        return 0;
+    }
+
+    my $us = LJ::load_userids(@$userids);
+    foreach my $u (sort { $a->{userid} <=> $b->{userid} } values %$us) {
         push @$out, [ "info", "User: $u->{'user'} ".
                       "($u->{'userid'}), journaltype: $u->{'journaltype'}, statusvis: $u->{'statusvis'}, email: ($u->{'status'}) $u->{'email'}" ];
+        if ($u->underage) {
+            my $reason;
+            if ($u->underage_status eq 'M') {
+                $reason = "manual set (see statushistory type set_underage)";
+            } elsif ($u->underage_status eq 'Y') {
+                $reason = "provided birthdate";
+            } elsif ($u->underage_status eq 'O') {
+                $reason = "unique cookie";
+            }
+            push @$out, [ "info", "  User is marked underage due to $reason." ];
+        }
         foreach (LJ::run_hooks("finduser_extrainfo", { 'dbh' => $dbh, 'u' => $u })) {
             next unless $_->[0];
             foreach (split(/\n/, $_->[0])) {

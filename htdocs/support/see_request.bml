@@ -277,6 +277,7 @@ body<=
             $ret .= "<strong>yes because of ";
             $ret .= "birthday" if $u->underage_status eq 'Y';
             $ret .= "unique cookie" if $u->underage_status eq 'O';
+            $ret .= "manual set" if $u->underage_status eq 'M';
             $ret .= "</strong>";
         } else {
             $ret .= "<strong>no";
@@ -284,6 +285,7 @@ body<=
                 $ret .= "; was by ";
                 $ret .= "birthday" if $u->underage_status eq 'Y';
                 $ret .= "unique cookie" if $u->underage_status eq 'O';
+                $ret .= "manual set" if $u->underage_status eq 'M';
             }
             $ret .= "</strong>";
         }
