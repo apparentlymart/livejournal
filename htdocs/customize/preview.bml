@@ -26,7 +26,7 @@ body<=
         }
         foreach (split(/\,/, $l->{'_previews'})) {
             my ($img, $w, $h) = split(/\|/, $_);
-            $ret .= "<p style='margin-left: 20px'><img src=\"/img/s2preview/$img\" width=\"$w\" height=\"$h\"></p>";
+            $ret .= "<p style='margin-left: 20px'><img src=\"$LJ::IMGPREFIX/s2preview/$img\" width=\"$w\" height=\"$h\"></p>";
         }
     }
 
