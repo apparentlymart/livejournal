@@ -4,7 +4,7 @@
 package Apache::LiveJournal;
 
 use strict;
-use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED);
+use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED HTTP_MOVED_PERMANENTLY);
 use Apache::File ();
 use CGI;
 use XMLRPC::Transport::HTTP;
