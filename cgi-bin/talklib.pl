@@ -1018,7 +1018,7 @@ sub talkform {
     $ret .= "<textarea class='textbox' rows='10' cols='50' wrap='soft' name='body' id='commenttext' style='width: 100%'>$form->{body}</textarea>";
 
     # Display captcha challenge if anon and over rate limits.
-    if ($form->{'usertype'} eq "anonymous" && ! $remote && $opts->{do_captcha} && $LJ::HUMAN_CHECK{anonpost}) {
+    if ($form->{'usertype'} eq "anonymous" && $opts->{do_captcha} && $LJ::HUMAN_CHECK{anonpost}) {
         my ($wants_audio, $captcha_sess, $captcha_chal);
         $wants_audio = 1 if $LJ::HUMAN_CHECK{anonpost} && lc($form->{answer}) eq 'audio';
 
@@ -2182,7 +2182,7 @@ sub make_preview {
 
 # more anti-spammer rate limiting.
 sub check_rate {
-    my $remote = shift;
+    my ($remote, $anon) = @_;
 
     # we require memcache to do rate limiting efficiently
     return 1 unless @LJ::MEMCACHE_SERVERS;
@@ -2194,12 +2194,12 @@ sub check_rate {
     # registered human (or human-impersonating robot)
     push @watch, ["talklog:$remote->{userid}", $LJ::RATE_COMMENT_AUTH ||
                   [ [200,3600], [20,60] ],
-                  ] if $remote;
+                  ] if $remote && !$anon;
 
     # anonymous (robot or human)
     push @watch, ["talklog:$ip", $LJ::RATE_COMMENT_ANON ||
                   [ [300,3600], [200,1800], [150,900], [15,60] ]
-                  ] unless $remote;
+                  ] if $anon;  # remote doesn't matter
 
     my $too_fast = 0;
 

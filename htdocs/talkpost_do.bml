@@ -53,8 +53,7 @@ body<=
     my $do_captcha = 0;
     $do_captcha = 1 if $LJ::HUMAN_CHECK{anonpost} &&
                        $POST{'usertype'} eq 'anonymous' &&
-                       ! $remote &&
-                       ! LJ::Talk::Post::check_rate();
+                       ! LJ::Talk::Post::check_rate(undef, 'anonymous');
 
     ## init.  this handles all the error-checking, as well.
     my @errors;
