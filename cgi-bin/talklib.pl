@@ -603,7 +603,7 @@ sub get_talk_data
         $dbcm->do("LOCK TABLES log2 WRITE, talk2 READ");
         my $ct = $dbcm->selectrow_array("SELECT COUNT(*) FROM talk2 WHERE ".
                                         "journalid=? AND nodetype='L' AND nodeid=? ".
-                                        "AND state='A'", undef, $u->{'userid'}, $nodeid);
+                                        "AND state IN ('A','F')", undef, $u->{'userid'}, $nodeid);
         $dbcm->do("UPDATE log2 SET replycount=? WHERE journalid=? AND jitemid=?",
                   undef, int($ct), $u->{'userid'}, $nodeid);
         print STDERR "Fixing replycount for $u->{'userid'}/$nodeid from $rp_count to $ct\n"
@@ -630,7 +630,9 @@ sub get_talk_data
                 datepost => LJ::mysql_time($time),
                 parenttalkid => $par,
             };
-            $rp_ourcount++ if $state eq "A";
+
+            # comments are counted if they're 'A'pproved or 'F'rozen
+            $rp_ourcount++ if $state eq "A" || $state eq "F";
         }
         $fixup_rp->();
         return $ret;
