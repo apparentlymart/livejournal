@@ -37,7 +37,9 @@ BODY<=
 		     "zip", "icq", "aolim", "yahoo", "msn", "url",
 		     "urlname", "gender", "jabber", "opt_blockrobots",
 		     "opt_notalkicons", "opt_logcommentips",
-		     "howhear", "opt_bdaymail", "opt_hidefriendofs");
+		     "howhear", "opt_bdaymail", "opt_hidefriendofs",
+		     "sidx_bdate", "sidx_loc",
+		     );
 
  my $user = $u->{'user'};
  my $quser = $dbr->quote($user);
@@ -496,13 +498,38 @@ BODY<=
 	     $FORM{'opt_logcommentips'} ne "S" && 
 	     $FORM{'opt_logcommentips'} ne "A") { $FORM{'opt_logcommentips'} = "N"; }
 	 $FORM{'state'} = $state;
+
+	 # for the directory.
+	 $FORM{'sidx_bdate'} = "";
+	 $FORM{'sidx_loc'} = "";	 
+	 if ($update{'allow_infoshow'} eq 'Y') {
+	     if ($FORM{'year'}) {
+		 $FORM{'sidx_bdate'} = sprintf("%04d-%02d-%02d", map { $FORM{$_} }
+					       qw(year month day));
+	     }
+
+	     if ($FORM{'country'}) {
+		 my $state;
+		 if ($FORM{'country'} eq "US") {
+		     $state = $FORM{'statedrop'};
+		 } else {
+		     $state = $FORM{'stateother'};
+		 }
+		 $FORM{'sidx_loc'} = sprintf("%2s-%s-%s",
+					     $FORM{'country'},
+					     $state,
+					     $FORM{'city'});
+	     }
+	 }
+
 	 my @uprops = (
-		       "opt_whatemailshow",
-		       "opt_showtopicstuff",
-		       "country", "state", "city", "zip",
-		       "icq", "aolim", "yahoo", "msn", "url", "urlname", "gender", "jabber",
-		       "opt_blockrobots", "opt_notalkicons",
-		       "opt_logcommentips", "opt_bdaymail", "opt_hidefriendofs"
+		       "opt_whatemailshow", "opt_showtopicstuff",
+		       "country", "state", "city", "zip", "icq",
+		       "aolim", "yahoo", "msn", "url", "urlname",
+		       "gender", "jabber", "opt_blockrobots",
+		       "opt_notalkicons", "opt_logcommentips",
+		       "opt_bdaymail", "opt_hidefriendofs",
+		       "sidx_bdate", "sidx_loc",
 		       );	
 
 	 # this is only done once, then never appears again.

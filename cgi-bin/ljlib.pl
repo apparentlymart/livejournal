@@ -365,9 +365,12 @@ sub set_userprop
     }
 
     my $table = $p->{'indexed'} ? "userprop" : "userproplite";
-    $value = $dbh->quote($value);
-
-    $dbh->do("REPLACE INTO $table (userid, upropid, value) VALUES ($userid, $p->{'upropid'}, $value)");
+    if (defined $value && $value ne "") {
+	$value = $dbh->quote($value);
+	$dbh->do("REPLACE INTO $table (userid, upropid, value) VALUES ($userid, $p->{'upropid'}, $value)");
+    } else {
+	$dbh->do("DELETE FROM $table WHERE userid=$userid AND upropid=$p->{'upropid'}");
+    }
 }
 
 sub register_authaction
