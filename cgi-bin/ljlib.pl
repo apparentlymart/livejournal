@@ -716,6 +716,23 @@ sub register_hook
 }
 
 # <LJFUNC>
+# name: LJ::make_auth_code
+# des: Makes a random string of characters of a given length.
+# returns: string of random characters, from an alphabet of 30
+#          letters & numbers which aren't easily confused.
+# args: length
+# des-length: length of auth code to return
+# </LJFUNC>
+sub make_auth_code
+{
+    my $length = shift;
+    my $digits = "abcdefghjkmnpqrstvwxyz23456789";
+    my $auth;
+    for (1..$length) { $auth .= substr($digits, int(rand(30)), 1); }
+    return $auth;
+}
+
+# <LJFUNC>
 # name: LJ::acid_encode
 # des: Given a decimal number, returns base 30 encoding
 #      using an alphabet of letters & numbers that are
@@ -777,9 +794,7 @@ sub acct_code_generate
 
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
-    my $digits = "abcdefghjkmnpqrstvwxyz23456789";
-    my $auth = "";
-    for (1..5) { $auth .= substr($digits, int(rand(30)), 1); }
+    my $auth = LJ::make_auth_code(5);
     $userid = int($userid);
     $dbh->do("INSERT INTO acctcode (acid, userid, rcptid, auth) ".
 	     "VALUES (NULL, $userid, 0, \"$auth\")");
@@ -1229,8 +1244,15 @@ sub is_friend
     return $is_friend;
 }
 
-# returns true if $remote user can see the given $item ('log' row).
-# not for use with many entries at once...  just one.
+# <LJFUNC>
+# name: LJ::can_view
+# des: Checks to see if the remote user can view a given journal entry.
+#      <b>Note:</b> This is meant for use on single entries at a time,
+#      not for calling many times on every entry in a journal.
+# returns: boolean; 1 if remote user can see item
+# args: dbarg, remote, item
+# des-item: Hashref from the 'log' table.
+# </LJFUNC>
 sub can_view
 {
     my $dbarg = shift;
@@ -1268,9 +1290,16 @@ sub can_view
     return $allowed ? 1 : 0;  # no need to return matching mask
 }
 
-
-# args: ($dbs, @talkids)
-# return: hashref with keys being talkids, values being [ $subject, $body ]
+# <LJFUNC>
+# name: LJ::get_talktext
+# des: Efficiently retrieves a large number of comments, trying first
+#      slave database servers for recent items, then the master in 
+#      cases of old items the slaves have already disposed of.  See also:
+#      [func[LJ::get_logtext]].
+# args: dbs, talkid*
+# returns: hashref with keys being talkids, values being [ $subject, $body ]
+# des-talkid: List of talkids to retrieve the subject & text for.
+# </LJFUNC>
 sub get_talktext
 {
     my $dbs = shift;
@@ -1311,8 +1340,16 @@ sub get_talktext
 
 }
 
-# args: ($dbs, @itemids)
-# return: hashref with keys being itemids, values being [ $subject, $text ]
+# <LJFUNC>
+# name: LJ::get_logtext
+# des: Efficiently retrieves a large number of journal entry text, trying first
+#      slave database servers for recent items, then the master in 
+#      cases of old items the slaves have already disposed of.  See also:
+#      [func[LJ::get_talktext]].
+# args: dbs, itemid*
+# returns: hashref with keys being itemids, values being [ $subject, $body ]
+# des-itemid: List of itemids to retrieve the subject & text for.
+# </LJFUNC>
 sub get_logtext
 {
     my $dbs = shift;
@@ -1352,33 +1389,41 @@ sub get_logtext
     return $lt;
 }
 
-sub make_auth_code
-{
-    my $length = shift;
-    my $vchars = "abcdefghijklmnopqrstuvwxyz0123456789";
-    srand();
-    my $authcode = "";
-    for (1..$length) {
-	$authcode .= substr($vchars, int(rand()*36), 1);
-    }
-    return $authcode;
-}
-
-## for stupid AOL mail client, wraps a plain-text URL in an anchor tag since AOL
-## incorrectly renders regular text as HTML.  fucking AOL.  die.
+# <LJFUNC>
+# name: LJ::make_text_link
+# des: The most pathetic function of them all.  AOL's shitty mail
+#      reader interprets all incoming mail as HTML formatted, even if
+#      the content type says otherwise.  And AOL users are all too often
+#      confused by a a URL that isn't clickable, so to make it easier on
+#      them (*sigh*) this function takes a URL and an email address, and
+#      if the address is @aol.com, then this function wraps the URL in
+#      an anchor tag to its own address.  I'm sorry.
+# returns: the same URL, or the URL wrapped in an anchor tag for AOLers
+# args: url, email
+# des-url: URL to return or wrap.
+# des-email: Email address this is going to.  If it's @aol.com, the URL
+#            will be wrapped.
+# </LJFUNC>
 sub make_text_link
 {
     my ($url, $email) = @_;
     if ($email =~ /\@aol\.com$/i) {
-	return "<A HREF=\"$url\">$url</A>";
+	return "<a href=\"$url\">$url</a>";
     }
     return $url;
 }
 
-## authenticates the user at the remote end and returns a hashref containing:
-##    user, userid
-## or returns undef if no logged-in remote or errors.
-## optional argument is arrayref to push errors
+# <LJFUNC>
+# name: LJ::get_remote
+# des: authenticates the user at the remote end based on their cookies 
+#      and returns a hashref representing them
+# returns: hashref containing 'user' and 'userid' if valid user, else
+#          undef.
+# args: dbarg, errors?, cgi?
+# des-errors: <b>FIXME:</b> no longer used. use undef or nothing.
+# des-cgi: Optional CGI.pm reference if using in a script which
+#          already uses CGI.pm.
+# </LJFUNC>
 sub get_remote
 {
     my $dbarg = shift;	
@@ -1419,10 +1464,14 @@ sub get_remote
 	     'userid' => $userid, };
 }
 
-# this is like get_remote, but it only returns who they say they are,
-# not who they really are.  so if they're faking out their cookies,
-# they'll fake this out.  but this is fast.
-#
+# <LJFUNC>
+# name: LJ::get_remote_noauth
+# des: returns who the remote user says they are, but doesn't check
+#      their login token.  disadvantage: insecure, only use when
+#      you're not doing anything critical.  advantage:  faster.
+# returns: hashref containing only key 'user', not 'userid' like
+#          [func[LJ::get_remote]].
+# </LJFUNC>
 sub get_remote_noauth
 {
     ### are they logged in?
@@ -1434,24 +1483,46 @@ sub get_remote_noauth
     return { 'user' => $remuser, };
 }
 
-
+# <LJFUNC>
+# name: LJ::did_post
+# des: When web pages using cookie authentication, you can't just trust that
+#      the remote user wants to do the action they're requesting.  It's way too
+#      easy for people to force other people into making GET requests to
+#      a server.  What if a user requested http://server/delete_all_journal.bml
+#      and that URL checked the remote user and immediately deleted the whole
+#      journal.  Now anybody has to do is embed that address in an image
+#      tag and a lot of people's journals will be deleted without them knowing.
+#      Cookies should only show pages which make no action.  When an action is
+#      being made, check that it's a POST request.
+# returns: true if REQUEST_METHOD == "POST"
+# </LJFUNC>
 sub did_post
 {
     return ($ENV{'REQUEST_METHOD'} eq "POST");
 }
 
-# called from a HUP signal handler, so intentionally very very simple
-# so we don't core dump on a system without reentrant libraries.
+# <LJFUNC>
+# name: LJ::clear_caches
+# des: This function is called from a HUP signal handler and is intentionally
+#      very very simple (1 line) so we don't core dump on a system without
+#      reentrant libraries.  It just sets a flag to clear the caches at the
+#      beginning of the next request (see [func[LJ::handle_caches]]).  
+#      There should be no need to ever call this function directly.
+# </LJFUNC>
 sub clear_caches
 {
     $LJ::CLEAR_CACHES = 1;
 }
 
-# handle_caches
-# clears caches, if the CLEAR_CACHES flag is set from an earlier HUP signal.
-# always returns trues, so you can use it in a conjunction of statements
-# in a while loop around the application like:
-#        while (LJ::handle_caches() && FCGI::accept())
+# <LJFUNC>
+# name: LJ::handle_caches
+# des: clears caches if the CLEAR_CACHES flag is set from an earlier
+#      HUP signal that called [func[LJ::clear_caches]], otherwise
+#      does nothing.
+# returns: true (always) so you can use it in a conjunction of
+#          statements in a while loop around the application like:
+#          while (LJ::handle_caches() && FCGI::accept())
+# </LJFUNC>
 sub handle_caches
 {
     return 1 unless ($LJ::CLEAR_CACHES);
@@ -2960,7 +3031,13 @@ sub load_talk_props
     $sth->finish;
 }
 
-
+# <LJFUNC>
+# name: LJ::eurl
+# des: Escapes a value before it can be put in a URL.
+# args: string
+# des-string: string to be escaped
+# returns: string escaped
+# </LJFUNC>
 sub eurl
 {
     my $a = $_[0];
@@ -2969,7 +3046,13 @@ sub eurl
     return $a;
 }
 
-### escape stuff so it can be used in XML attributes or elements
+# <LJFUNC>
+# name: LJ::exml
+# des: Escapes a value before it can be put in XML.
+# args: string
+# des-string: string to be escaped
+# returns: string escaped.
+# </LJFUNC>
 sub exml
 {
     my $a = shift;
@@ -2981,6 +3064,13 @@ sub exml
     return $a;
 }
 
+# <LJFUNC>
+# name: LJ::ehtml
+# des: Escapes a value before it can be put in HTML.
+# args: string
+# des-string: string to be escaped
+# returns: string escaped.
+# </LJFUNC>
 sub ehtml
 {
     my $a = $_[0];
@@ -2991,6 +3081,14 @@ sub ehtml
     return $a;	
 }
 
+# <LJFUNC>
+# name: LJ::days_in_month
+# des: Figures out the number of days in a month.
+# args: month, year
+# des-month: Month
+# des-year: Year
+# returns: Number of days in that month in that year.
+# </LJFUNC>
 sub days_in_month
 {
     my ($month, $year) = @_;
