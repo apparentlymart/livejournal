@@ -88,7 +88,7 @@ BODY<=
      $aa = &register_authaction($userid, "validateemail", $email);
  }
 
- open (REM, "/home/lj/htdocs/inc/email-welcome") || return "Error: couldn't open email-welcome template";
+ open (REM, "$LJ::HOME/htdocs/inc/email-welcome") || return "Error: couldn't open email-welcome template";
  my $etemp;
  while (<REM>) {
      $etemp .= $_;
