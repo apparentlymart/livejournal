@@ -366,9 +366,9 @@ body<=
             $sth->execute($intid);
             push @uids, $_ while $_ = $sth->fetchrow_array;
             my $us = LJ::load_userids(@uids);
-            my $count = @uids;
             my @cl = grep { $_->{statusvis} eq "V" } values %$us;
             @cl = sort { $a->{user} cmp $b->{user} } @cl;
+            my $count = @cl;
 
             my $list;
             foreach (@cl) {
@@ -397,10 +397,10 @@ body<=
         $sth = $dbr->prepare("SELECT userid FROM userinterests WHERE intid=? LIMIT $LIMIT");
         $sth->execute($intid);
         push @uids, $_ while $_ = $sth->fetchrow_array;
-        my $count = @uids;
         my $us = LJ::load_userids(@uids);
         my @ul = grep { $_->{statusvis} eq "V" && $_->{journaltype} ne "C" } values %$us;
         @ul = sort { $a->{user} cmp $b->{user} } @ul;
+        my $count = @ul;
 
         my $list;
         foreach (@ul) {
