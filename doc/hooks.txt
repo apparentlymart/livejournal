@@ -1,10 +1,6 @@
-* userinfo_html_by_user(\%args)
+* canonicalize_url(\$url)
 
-  on userinfo.bml page, extra HTML to show next to username & id
-
-  arg keys:
-    ret
-    u
+  cleans up a URL into its canonical form.
 
 * login_formopts(\%args)
 
@@ -13,6 +9,22 @@
   arg keys:
     ret
 
+* modify_login_menu(\%args)
+
+  modifies or resets entirely the web menu data structure that is sent
+  to the client.  see cgi-bin/ljprotocol.pl for the format.
+
+  arg keys:
+    menu
+    u
+    dbs
+    user
+
+* name_caps($caps)
+* name_caps_short($caps)
+
+  Return the long name and short code for the given capability class
+  bits, respectively.
 
 * post_login(\%args)
 
@@ -44,21 +56,13 @@
     userid
     cde    -- auth code, if in use
 
-* canonicalize_url(\$url)
+* userinfo_html_by_user(\%args)
 
-  cleans up a URL into its canonical form.
-
-
-* modify_login_menu(\%args)
-
-  modifies or resets entirely the web menu data structure that is sent
-  to the client.  see cgi-bin/ljprotocol.pl for the format.
+  on userinfo.bml page, extra HTML to show next to username & id
 
   arg keys:
-    menu
+    ret
     u
-    dbs
-    user
 
 * userinfo_rows(\%args)
 
@@ -69,10 +73,3 @@
     dbs
     u
     remote
-
-* name_caps($caps)
-* name_caps_short($caps)
-
-  Return the long name and short code for the given capability class
-  bits, respectively.
-
