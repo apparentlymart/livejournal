@@ -175,7 +175,9 @@ body<=
 
  $ret .= "Below are all $info{'allwhat'} that ";
 
- ### remove consequtive "are"s
+  my $count_preds = @{$info{'english'}};
+
+ ### remove consecutive "are"s
  my $last_are = 0;
  foreach (@{$info{'english'}}) {
      if (/^are /) {
@@ -195,6 +197,16 @@ body<=
 
  if ($info{'overflow'}) {
      $ret .= "<B>Search results limited to $info{'count'} results.  Please refine your query.</B>";
+ }
+
+ if ($count_preds == 1 && $FORM{'int_like'}) {
+     my $intid = $dbr->selectrow_array("SELECT intid FROM interests WHERE interest=?",
+                                       undef, $FORM{'int_like'});
+     LJ::run_hooks("interests_bml", {
+         'intid' => $intid,
+         'int' => $interest,
+         'ret' => \$ret,
+     }) if $intid;
  }
 
  ########## make the navcrap

@@ -227,7 +227,12 @@ body<=
          $ret .= "</ul></p>";
      }
 
-
+     ### hook
+     LJ::run_hooks("interests_bml", {
+         'intid' => $qintid,
+         'int' => $interest,
+         'ret' => \$ret,
+     });
 
      ##### users
 
