@@ -243,7 +243,7 @@ body<=
         my $what = "Answer";
         if ($le->{'type'} eq "internal") { $what = "Internal Comment"; }
         elsif ($le->{'type'} eq "comment") { $what = "Comment"; }
-        elsif ($le->{'type'} eq "screened") { $what = "Screened Answer"; }
+        elsif ($le->{'type'} eq "screened") { $what = "Screened Response"; }
 
         $header .= "<span style='font-size: 0.9em;'><b>$what</b> (\#$le->{'splid'})</span><br />";
         my $timehelped = LJ::time_to_http($le->{'timelogged'});
@@ -397,7 +397,7 @@ body<=
         $ret .= "</td>";
 
         if (@screened && LJ::Support::can_help($dbh, $sp, $remote)) {
-            $ret .= "<td>Approve Screened Answer:<br />";
+            $ret .= "<td>Approve Screened Response:<br />";
             $ret .= LJ::html_select({ 'name' => 'approveans' },
                                     ('', ''),
                                     map { $_->{'splid'}, "\#$_->{'splid'} ($userinfo{$_->{'userid'}}->{'user'})" }
@@ -409,10 +409,17 @@ body<=
         $ret .= "</tr></table>\n";
 
         $ret .= "</td></tr>\n";
-        $ret .= "<tr><td>Touch request:</td><td>";
-        $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'touch' });
-        $ret .= "<?de (Use this to re-open the request.) de?>\n";
-        $ret .= "</td></tr>\n";
+        if ($sp->{'timelasthelp'} > ($sp->{'timetouched'}+5)) {
+            $ret .= "<tr><td align='right'>Put in Queue:</td><td>";
+            $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'touch' });
+            $ret .= "<?de (Use this to re-open the request.) de?>\n";
+            $ret .= "</td></tr>\n";
+        } elsif ($sp->{'timelasthelp'} && $sp->{'timetouched'} > $sp->{'timelasthelp'}+5) {
+            $ret .= "<tr><td align='right'>Take out of Queue:</td><td>";
+            $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'untouch' });
+            $ret .= "<?de (Use this to remove the &quot;still needs help&quot; message.) de?>\n";
+            $ret .= "</td></tr>\n";
+        }
         if (LJ::Support::can_help($dbh, $sp, $remote)) {
             $ret .= "<tr><td>Change summary:</td><td>";
             $ret .= LJ::html_check({ 'type' => 'checkbox', 'name' => 'changesum' });

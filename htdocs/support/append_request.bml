@@ -62,7 +62,7 @@ body<=
                        "/ Action\" and explain why you're changing it.");
  }
 
- if ($FORM{'touch'} &&
+ if (($FORM{'touch'} || $FORM{'untouch'}) &&
      ($type ne "internal" || ! LJ::Support::can_perform_actions($dbh, $sp, $remote)))
  {
      return LJ::bad_input("To touch this request, you must select \"Internal Comment ".
@@ -81,10 +81,14 @@ body<=
      return LJ::bad_input("Your message was blank.  Please type at least something in the message field.");
  }
 
- ## touch request
+ ## touch/untouch request
  if ($FORM{'touch'}) {
      $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
-     $status .= "Touching support request\n\n";
+     $status .= "(Inserting request into queue)\n\n";
+ }
+ if ($FORM{'untouch'}) {
+     $dbh->do("UPDATE support SET timelasthelp=UNIX_TIMESTAMP() WHERE spid=$spid");
+     $status .= "(Removing request from queue)\n\n";
  }
 
  if (LJ::Support::is_poster($sp, $remote, $FORM{'auth'})) 
@@ -110,7 +114,7 @@ body<=
      my $splid = $FORM{'approveans'}+0;
      my $res = LJ::Support::load_response($dbh, $splid);
      if ($res->{'spid'} == $spid && $res->{'type'} eq "screened") {
-         return LJ::bad_input('Invalid type to approve screened entry as.')
+         return LJ::bad_input('Invalid type to approve screened response as.')
             if (($FORM{'approveas'} ne 'answer') && ($FORM{'approveas'} ne 'comment'));
          # approve
          my $qtype = $dbh->quote($FORM{'approveas'});
@@ -118,7 +122,7 @@ body<=
          $status .= "(Approving $FORM{'approveas'} \#$splid)\n\n";
          LJ::Support::mail_response_to_user($dbh, $sp, $splid);
      } else {
-         return LJ::bad_input("Invalid screened entry to approve.");
+         return LJ::bad_input("Invalid screened response to approve.");
      }
  }
 
