@@ -116,11 +116,15 @@ sub process {
             unless Unicode::MapUTF8::utf8_supported_charset($charset);
         $body = Unicode::MapUTF8::to_utf8({-string=>$body, -charset=>$charset});
         # check subject for rfc-1521 junk 
-        if ($subject =~ /^=\?/) {
+        if ($subject =~ /^=\?(utf-8)?/i) {
             my @subj_data;
             @subj_data = MIME::Words::decode_mimewords($subject);
             if (scalar(@subj_data)) {
-                $subject = Unicode::MapUTF8::to_utf8({-string=>$subj_data[0][0], -charset=>$subj_data[0][1]});
+                if (! $1) {
+                    $subject = Unicode::MapUTF8::to_utf8({-string=>$subj_data[0][0], -charset=>$subj_data[0][1]});
+                } else {
+                    $subject = $subj_data[0][0];
+                }
             }
         }
     }
