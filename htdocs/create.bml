@@ -235,6 +235,10 @@ body<=
              my $friendid = LJ::get_userid($friend);
              LJ::add_friend($userid, $friendid) if $friendid;
          }
+         foreach my $friend (@LJ::INITIAL_OPTIONAL_FRIENDS) {
+             my $friendid = LJ::get_userid($friend);
+             LJ::add_friend($userid, $friendid) if $friendid and $FORM{"initial_optional_friend_$friend"};
+         }
 
          LJ::run_hooks("post_create", {
              'userid' => $userid,
@@ -351,6 +355,16 @@ body<=
      $ret .= $error_msg->('password', '<br>', '');
      $ret .= " standout?>";
 
+     if (@LJ::INITIAL_OPTIONAL_FRIENDS) {
+         $ret .= "<?h2 $ML{'.initialfriends.heading'} h2?><?p $ML{'.initialfriends'} p?><?standout ";
+         foreach my $friend (@LJ::INITIAL_OPTIONAL_FRIENDS) {
+             $ret .= LJ::did_post() && !$FORM{"initial_optional_friend_$friend"} ? 
+                     LJ::html_check({'name' => "initial_optional_friend_$friend", 'value' => 1, }) :
+                     LJ::html_check({'name' => "initial_optional_friend_$friend", 'value' => 1, 'checked' => "checked", });
+             $ret .= LJ::ljuser($friend) . " " . $ML{".initial.friend.$friend"} . "<br />";
+         }
+         $ret .= " standout?>";
+     }
      if ($LJ::COPPA_CHECK)
      {
          $ret .= "<?h2 $ML{'.aolnotice.head'} h2?><?p ".BML::ml(".aolnotice.text", {'sitename' => $LJ::SITENAME}) ." p?>";

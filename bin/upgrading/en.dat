@@ -530,6 +530,10 @@ p?>
 
 /create.bml.error.username.reserved=Sorry, that is a reserved username.
 
+/create.bml.initialfriends=Add these journals to your friends list to be kept up to date on site news and information.
+
+/create.bml.initialfriends.heading=Starter Friends
+
 /create.bml.name.head=Your Name
 
 /create.bml.name.input.head=Name:
