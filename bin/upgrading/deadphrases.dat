@@ -99,6 +99,8 @@ general /setscheme.bml.title
 
 general /support/faqbrowse.bml.title
 
+general /talkpost.bml.label.picturetouse
+
 general /talkpost_do.bml.opt.spellcheck
 
 general /talkread.bml.pageofpages
