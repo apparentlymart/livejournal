@@ -242,7 +242,6 @@ body<=
             my $display = $cursec eq "custom" ? "block" : "none";
             $ret .= "<div id='custom_boxes' style='margin: 10px 0 10px 30px; display: $display;'>";
             foreach my $fg (@{$gfg->{'friendgroups'}}) {
-
                 $ret .= LJ::html_check({ 'type' => 'check',
                                          'name' => "custom_bit_$fg->{'id'}",
                                          'id' => "custom_bit_$fg->{'id'}",
@@ -265,13 +264,13 @@ body<=
         };
 
         # backdating
-        $ret .= "<p>" . $prop_check->('backdated', 'backdate');
+        $ret .= "<p>" . $prop_check->('backdated', 'backdate') . " ";
 
         # don't auto-format
         $ret .= $prop_check->('preformatted', 'noformat') . LJ::help_icon("noautoformat", " ") . "</p>\n";
 
         # don't allow comments
-        $ret .= "<p>" . $prop_check->('nocomments');
+        $ret .= "<p>" . $prop_check->('nocomments') . " ";
 
         # don't email the poster
         $ret .= $prop_check->('noemail') . "\n";
@@ -312,8 +311,7 @@ body<=
 
             $ret .= "<p><b>$ML{'.currmood'}</b>";
             $ret .= LJ::html_select({ 'name' => 'prop_current_moodid',
-                                      'selected' => $sel },
-                                      @moodlist);
+                                      'selected' => $sel }, @moodlist);
             $ret .= " $ML{'.other'} " . LJ::html_text({ 'name' => 'prop_current_mood',
                                                         'value' => $sel ? '' : $props{'current_mood'},
                                                         'size' => '15', 'maxlength' => '30' });
