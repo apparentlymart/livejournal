@@ -1954,6 +1954,20 @@ CREATE TABLE support_youreplied (
 )
 EOC
 
+register_tablecreate("support_answers", <<'EOC');
+CREATE TABLE support_answers (
+    ansid INT UNSIGNED NOT NULL,
+    spcatid INT UNSIGNED NOT NULL,
+    lastmodtime INT UNSIGNED NOT NULL,
+    lastmoduserid INT UNSIGNED NOT NULL,
+    subject VARCHAR(255),
+    body TEXT,
+
+    PRIMARY KEY (ansid),
+    KEY         (spcatid)
+)
+EOC
+
 # NOTE: new table declarations go here
 
 

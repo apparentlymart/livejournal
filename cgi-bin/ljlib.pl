@@ -8697,7 +8697,7 @@ sub alloc_user_counter
     return LJ::alloc_user_counter($u, $dom, 1);
 }
 
-# $dom: 'S' == style, 'P' == userpic, 'C' == captcha
+# $dom: 'S' == style, 'P' == userpic, 'C' == captcha, 'A' == stock support answer
 sub alloc_global_counter
 {
     my ($dom, $recurse) = @_;
@@ -8723,6 +8723,8 @@ sub alloc_global_counter
         $newmax = $dbh->selectrow_array("SELECT MAX(picid) FROM userpic");
     } elsif ($dom eq "C") {
         $newmax = $dbh->selectrow_array("SELECT MAX(capid) FROM captchas");
+    } elsif ($dom eq "A") {
+        $newmax = $dbh->selectrow_array("SELECT MAX(ansid) FROM support_answers");
     } else {
         die "No alloc_global_counter initalizer for domain '$dom'";
     }
