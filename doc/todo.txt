@@ -112,6 +112,8 @@ HIGH PRIORITY:
 
 MISC:
 
+* BML::500_on_die option: make BML send a 500 server error on any
+  _CODE block failure
 * Syndicating channels:
      http://www.livejournal.com/talkread.bml?itemid=14311193
 * /fz/ joins on logtext (requires master) 
