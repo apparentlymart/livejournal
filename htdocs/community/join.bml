@@ -55,6 +55,10 @@
      ###
      $dbh->do("INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES ($cuserid, $remote->{'userid'}, '#000000', '#ffffff', 1)");
      
+     ### make community a friend of the remote user
+     ###
+     $dbh->do("INSERT INTO friends (userid, friendid, fgcolor, bgcolor, groupmask) VALUES ($remote->{'userid'}, $cuserid, '#000000', '#ffffff', 1)");
+     
      $body .= "(=H1 Success H1=)(=P You are now a member of the <A HREF=\"/userinfo.bml?user=$ci->{'user'}\">$ci->{'name'} Community</A> P=)";
      
      ### if community permits it, give remote user access to post in this community
