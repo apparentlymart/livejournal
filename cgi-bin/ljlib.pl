@@ -2137,6 +2137,7 @@ sub load_user_props
     
     my $mem = {};
     my $use_master = 0;
+    my $used_slave = 0;  # set later if we ended up using a slave
 
     if (@LJ::MEMCACHE_SERVERS) {
         my @keys;
@@ -2190,7 +2191,7 @@ sub load_user_props
             $db = $table eq "userproplite2" ? 
                 LJ::get_cluster_reader($u) : 
                 LJ::get_db_reader();
-            $opts->{'cache'} = 0;
+            $used_slave = 1;
         }
         $sql = "SELECT upropid, value FROM $table WHERE userid=$uid";
         if (ref $loadfrom{$table}) {
@@ -2233,7 +2234,7 @@ sub load_user_props
         $u->{$prop} = $LJ::USERPROP_DEF{$prop};
     }
 
-    if ($opts->{'cache'}) {
+    unless ($used_slave) {
         my $expire = time() + 3600*6;
         foreach my $wr (@needwrite) {
             my ($id, $name) = ($wr->[0], $wr->[1]);
