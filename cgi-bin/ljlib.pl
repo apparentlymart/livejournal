@@ -705,6 +705,7 @@ sub get_friends {
     my $sth = $dbh->prepare("SELECT friendid, fgcolor, bgcolor, groupmask, showbydefault " .
                             "FROM friends WHERE userid=?");
     $sth->execute($userid);
+    die $dbh->errstr if $dbh->err;
     while (my @row = $sth->fetchrow_array) {
 
         # convert color columns to hex
