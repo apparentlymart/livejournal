@@ -142,7 +142,7 @@ $.head_content
 <font face="verdana,arial,helvetica" size="2">
 $links
 $website
-<a href="$*SITEROOT/users/$.journal.username/info">&gt; profile</a><br />
+&gt;<a href="$*SITEROOT/users/$.journal.username/info"> profile</a><br />
     """;
     $this->lay_sidebar_navigation();
     """
