@@ -554,7 +554,7 @@ sub show_poll
     }
 
     # see if we have a hook for alternate poll contents
-    my $ret = LJ::run_hook('alternate_show_poll_html', $po, $mode, \@qs, \%its);
+    my $ret = LJ::run_hook('alternate_show_poll_html', $po, $mode, \@qs);
     return $ret if $ret;
 
     ### view answers to a particular question in a poll
@@ -637,7 +637,8 @@ sub show_poll
         $ret .= "<i>$po->{'name'}</i>";
     }
     $ret .= "<br />Open to: <b>$po->{'whovote'}</b>, results viewable to: <b>$po->{'whoview'}</b>";
-    $ret .= LJ::run_hook('extra_poll_description', $po, $mode, \@qs, \%its);
+    my $text = LJ::run_hook('extra_poll_description', $po, \@qs);
+    $ret .= "<br />$text" if $text;
 
     ## go through all questions, adding to buffer to return
     foreach my $q (@qs)
