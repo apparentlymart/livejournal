@@ -1483,6 +1483,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 
 /editpics.bml.btn.save=Save Settings
 
+/editpics.bml.label.comment=Comment:
+
 /editpics.bml.curpics=Current Pictures
 
 /editpics.bml.curpics.desc=Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, use the form at the bottom of the page.
@@ -1496,6 +1498,8 @@ bottom of the page. Alternately, you can press the delete button to delete the e
 /editpics.bml.error.invalidimage=Invalid image file.
 
 /editpics.bml.error.keywords=You used the keyword "[[ekw]]" for multiple pictures.  One was randomly chosen, but likely not the one you wanted.  You may want to go back and fix that.
+
+/editpics.bml.error.toomanykeywords=The [[?numwords|keyword|keywords]] "[[words]]" [[?numwords|has|have]] not been saved as [[?numwords|its|their]] user picture icon already has [[max]] keywords.
 
 /editpics.bml.error.toomanypics2=You are already at your limit of [[maxpics]] pictures.  You cannot upload this picture until you delete one of your existing ones.
 

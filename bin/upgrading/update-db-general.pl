@@ -699,6 +699,15 @@ CREATE TABLE userpic (
 )
 EOC
 
+register_tablecreate("userpic_comment", <<'EOC');
+CREATE TABLE userpic_comment (
+  userid int unsigned NOT NULL default '0',
+  picid int unsigned NOT NULL default '0',
+  comment varchar(255) BINARY NOT NULL default '',
+  PRIMARY KEY (userid, picid)
+)
+EOC
+
 register_tablecreate("userpicblob2", <<'EOC');
 CREATE TABLE userpicblob2 (
   userid int unsigned not null,
@@ -2223,7 +2232,7 @@ register_alter(sub {
                  "ADD multihomed ENUM('1', '0') NOT NULL DEFAULT '0' AFTER cldversion");
     }
     
-    if (index_name("moodthemedata", "INDEX:moodthemeid")) {
+    unless (index_name("moodthemedata", "KEY:moodthemeid")) {
         do_alter("moodthemedata", "ALTER IGNORE TABLE moodthemedata DROP KEY moodthemeid");
     }
 

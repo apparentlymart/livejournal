@@ -67,12 +67,18 @@
 
     #### show pictures
 
-    my $info = LJ::get_userpic_info($u);
+    my $info = LJ::get_userpic_info($u, {'load_comments' => 1});
 
     my %keywords = ();
     while (my ($kw, $pic) = each %{$info->{'kw'}}) {
         LJ::text_out(\$kw);
         push @{$keywords{$pic->{'picid'}}}, $kw;
+    }
+
+    my %comments = ();
+    while (my ($comment, $pic) = each %{$info->{'comment'}}) {
+        LJ::text_out(\$comment);
+        $comments{$pic} = $comment;
     }
 
     my $piccount = 0;
@@ -118,7 +124,20 @@
         }
 
         if ($eh_keywords) {
-            $body .= "<b>$ML{'.keywords'}</b> $eh_keywords\n";
+            $body .= "<b>$ML{'.keywords'}</b> $eh_keywords<br />";
+        }
+
+        # Comments
+        my $eh_comments = $comments{$pic->{'picid'}};
+        if ($eh_comments) {
+            LJ::CleanHTML::clean(\$eh_comments, {
+                'wordlength' => 40,
+                'addbreaks' => 0,
+                'tablecheck' => 1,
+                'mode' => 'deny',
+            });
+
+            $body .= "$eh_comments\n";
         }
 
         $body .= "</td>";

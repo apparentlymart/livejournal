@@ -45,7 +45,7 @@ do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
                     "clustertrack2", "captcha_session", "reluser2",
                     "tempanonips", "inviterecv", "invitesent",
                     "memorable2", "memkeyword2", "userkeywords",
-                    "friendgroup2",);
+                    "friendgroup2", "userpic_comment",);
 
 # keep track of what db locks we have out
 %LJ::LOCK_OUT = (); # {global|user} => caller_with_lock
@@ -111,6 +111,8 @@ use constant BMAX_EVENT   => 65535;
 use constant CMAX_EVENT   => 65535;
 use constant BMAX_INTEREST => 100;
 use constant CMAX_INTEREST => 50;
+use constant BMAX_UPI_COMMENT => 255;
+use constant CMAX_UPI_COMMENT => 120;
 
 # declare views (calls into ljviews.pl)
 @LJ::views = qw(lastn friends calendar day);
@@ -4368,6 +4370,13 @@ sub activate_userpics
     return 1;
 }
 
+# <LJFUNC>
+# name: LJ::get_userpic_info
+# des: Given a user gets their user picture info
+# args: u, opts (optional)
+# des-u: user object or userid
+# des-u: hash of options, 'load_comments'
+# returns: hash of userpicture information
 # for efficiency, we store the userpic structures
 # in memcache in a packed format.
 #
@@ -4378,10 +4387,11 @@ sub activate_userpics
 #   "packed string", which expands to an array of {width=>..., ...}
 #   "packed string", which expands to { 'kw1' => id, 'kw2' => id, ...}
 # ]
+# </LJFUNC>
 
 sub get_userpic_info
 {
-    my $uuid = shift;
+    my ($uuid, $opts) = @_;
     return undef unless $uuid;
     my $userid = want_userid($uuid);
     return $LJ::CACHE_USERPIC_INFO{$userid} if $LJ::CACHE_USERPIC_INFO{$userid};
@@ -4463,7 +4473,58 @@ sub get_userpic_info
         $LJ::CACHE_USERPIC_SIZE{$_->{'picid'}} = [ $_->{'width'}, $_->{'height'}, $_->{'userid'} ];
     }
 
+
+    if ($opts->{'load_comments'}) {
+        my $comments = LJ::get_pic_comments($uuid);
+        $info->{'comment'} = $comments;
+    }
+
     return $LJ::CACHE_USERPIC_INFO{$userid} = $info;
+}
+
+# <LJFUNC>
+# name: LJ::get_pic_comments
+# des: Given a user gets their user picture comments
+#      and sets them in memcache
+# args: u, force (optional)
+# des-u: user object or userid
+# des-force: grab data from db only
+# returns: undef on db error or hash-ref of comments
+# </LJFUNC>
+sub get_pic_comments
+{
+    my ($u, $force) = shift;
+    $u = LJ::want_user($u);
+    return undef unless $u;
+
+    my $memkey = [$u->{'userid'}, "upiccom:$u->{'userid'}"];
+    my (%minfocom, $pos, $nulpos);
+    my $minfo = LJ::MemCache::get($memkey);
+
+    if (!$force && $minfo) {
+        $pos = $nulpos = 0;
+        while (($nulpos = index($minfo, "\0", $pos)) > 0) {
+            my $comment = substr($minfo, $pos, $nulpos-$pos);
+            my $id = unpack("N", substr($minfo, $nulpos+1, 4));
+            $pos = $nulpos + 5; # skip NUL + 4 bytes.
+            $minfocom{$comment} = $id;
+        }
+    } else {
+        my $dbcm = LJ::get_cluster_master($u);
+        return undef unless $dbcm;
+
+        my $sth = $dbcm->prepare("SELECT comment, picid FROM userpic_comment WHERE userid=?");
+        $sth->execute($u->{'userid'});
+
+        while (my ($comment, $id) = $sth->fetchrow_array) {
+            $minfocom{$comment} = int($id);
+        }
+        my $commentstr = join('', map { pack("Z*N", $_, $minfocom{$_}) } keys %minfocom);
+
+        LJ::MemCache::add($memkey, $commentstr);
+    }
+
+    return \%minfocom;
 }
 
 # <LJFUNC>
