@@ -205,6 +205,13 @@ sub login
     $res->{'fullname'} = $u->{'name'};
     LJ::text_out(\$res->{'fullname'}) if $ver >= 1;
 
+    if ($req->{'clientversion'} =~ /^\S+\/\S+$/) {
+        eval {
+            my $r = Apache->request;            
+            $r->notes("clientver", $req->{'clientversion'});
+        };
+    }
+
     ## update or add to clientusage table
     if ($req->{'clientversion'} =~ /^\S+\/\S+$/ && 
         ! $LJ::DISABLED{'clientversionlog'})

@@ -831,6 +831,7 @@ sub db_logger
                  "ctype VARCHAR(30),".
                  "bytes MEDIUMINT UNSIGNED NOT NULL,".
                  "browser VARCHAR(100),".
+                 "clientver VARCHAR(100),".
                  "secs TINYINT UNSIGNED,".
                  "ref VARCHAR(200))");
         $LJ::CACHED_LOG_CREATE{"$dbl-$table"} = 1;
@@ -844,6 +845,7 @@ sub db_logger
         'codepath' => $rl->notes('codepath'),
         'anonsess' => $rl->notes('anonsess'),
         'langpref' => $rl->notes('langpref'),
+        'clientver' => $rl->notes('clientver'),
         'method' => $r->method,
         'uri' => $uri,
         'args' => scalar $r->args,
@@ -858,6 +860,8 @@ sub db_logger
     my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
     $dbl->do("INSERT $delayed INTO $table (" . join(',', keys %$var) . ") ".
              "VALUES (" . join(',', map { $dbl->quote($var->{$_}) } keys %$var) . ")");
+
+    $dbl->disconnect if $LJ::DISCONNECT_DB_LOG;
 }
 
 package LJ::Protocol;
