@@ -1391,7 +1391,9 @@ register_alter(sub {
     if (column_type("user", "clusterid") eq "") {
 	do_alter("user", "ALTER TABLE user ".
 		 "ADD clusterid TINYINT UNSIGNED NOT NULL AFTER caps, ".
-		 "ADD INDEX idxcluster (clusterid)");
+		 "ADD dversion TINYINT UNSIGNED NOT NULL AFTER clusterid, ".
+		 "ADD INDEX idxcluster (clusterid), ".
+		 "ADD INDEX idxversion (dversion)");
     }
 
     
