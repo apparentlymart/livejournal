@@ -33,6 +33,10 @@
 * "unpay" console command
 * postevent dup locking
 * rate limiting (bradfitz)
+* journal titles vs. names:
+    http://www.livejournal.com/talkread.bml?itemid=14018511
+* need a community admin page where the primary community
+  admin can give/remove 'sharedjournal' privs to secondary admins
 * RELEASE!  new tarball.
   * [X] add "scope enum('general','local')" to all prop tables
     -- change SQL exporter to recognize only general
