@@ -173,7 +173,11 @@ sub use_what
     my @cands = keys %cand;
     
     # sort valid candidates by server's connections
-    @cands = sort { server_power($b, $cap) <=> server_power($a, $cap) } @cands;
+    my %power;
+    foreach (@cands) {
+	$power{$_} = server_power($_, $cap);
+    }
+    @cands = sort { $power{$b} <=> $power{$a} } @cands;
 
     # use the one with the highest score:
     my $use = $cands[0];
@@ -212,6 +216,16 @@ sub handle
 	my $use = use_what($c, $cap);
 	$$out = "USE $use\n";
 	return;
+    }
+
+    if ($cmd eq "STATS") {
+	my $svr = $line;
+	$$out = "Stats follow:\n";
+	foreach my $s (keys %LJ::DBINFO) {
+	    $$out .= "STATS $s = " . connection_load($s) . "\n";
+	}
+	$$out .= "End.\n";
+	return;	
     }
 
     $$out = "unknown command.\n";
