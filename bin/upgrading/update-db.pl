@@ -14,6 +14,7 @@ my $opt_skip = "";
 my $opt_help = 0;
 my $cluster = 0;   # by default, upgrade master.
 my $opt_listtables;
+my $opt_forcebuild = 0;
 exit 1 unless
 GetOptions("runsql" => \$opt_sql,
            "drop" => \$opt_drop,
@@ -23,6 +24,7 @@ GetOptions("runsql" => \$opt_sql,
            "skip=s" => \$opt_skip,
            "help" => \$opt_help,
            "listtables" => \$opt_listtables,
+           "forcebuild|fb" => \$opt_forcebuild,
            );
 
 if ($opt_help) {
@@ -109,6 +111,7 @@ foreach my $s (@alters)
 
 if ($opt_pop)
 {
+    # S1
     print "Populating public system styles (S1):\n";
     require "$ENV{'LJHOME'}/bin/upgrading/s1style-rw.pl";
     my $ss = s1styles_read();
@@ -143,7 +146,105 @@ if ($opt_pop)
         die $dbh->errstr if $dbh->err;
         print "added\n";
     }
+
+    # S2
+    print "Populating public system styles (S2):\n";
+    {
+        my $LD = "s2layers"; # layers dir
+
+        # get the system account
+        my $su = LJ::load_user($dbh, "system");
+        unless ($su) {
+            die "No system user found.  Run \$LJHOME/bin/upgrading/make-system.pl\n";
+        }
+        my $sysid = $su->{'userid'};
     
+        # find existing re-distributed layers that are in the database
+        # and their styleids.
+        my $existing = LJ::get_public_layers($sysid);
+
+        chdir "$ENV{'LJHOME'}/bin/upgrading" or die;
+        my %layer;    # maps redist_uniq -> { 'type', 'parent' (uniq), 'id' (s2lid) }
+        foreach my $file ("s2layers.dat", "s2layers-local.dat")
+        {
+            next unless -e $file;
+            open (SL, $file) or die;
+            while (<SL>)
+            {
+                s/\#.*//; s/^\s+//; s/\s+$//;
+                next unless /\S/;
+                my ($base, $type, $parent) = split;
+                
+                if ($type ne "core" && ! defined $layer{$parent}) {
+                    die "'$base' references unknown parent '$parent'\n";
+                }
+                
+                my $s2source;
+                open (L, "$LD/$base.s2") or die "Can't open file: $base.s2\n";
+                while (<L>) { $s2source .= $_; }
+                close L;
+                
+                my $id = $existing->{$base} ? $existing->{$base}->{'s2lid'} : 0;
+                unless ($id) {
+                    my $parentid = 0;
+                    $parentid = $layer{$parent}->{'id'} unless $type eq "core";
+                    # allocate a new one.
+                    $dbh->do("INSERT INTO s2layers (s2lid, b2lid, userid, type) ".
+                             "VALUES (NULL, $parentid, $sysid, ?)", undef, $type);
+                    die $dbh->errstr if $dbh->err;
+                    $id = $dbh->{'mysql_insertid'};
+                    if ($id) {
+                        $dbh->do("INSERT INTO s2info (s2lid, infokey, value) VALUES (?,'redist_uniq',?)",
+                                 undef, $id, $base);
+                    }
+                }
+                die "Can't generate ID for '$base'" unless $id;
+
+                $layer{$base} = {
+                    'type' => $type,
+                    'parent' => $parent,
+                    'id' => $id,
+                };
+                
+                my $parid = $layer{$parent}->{'id'};
+                print "$base($id) is $type";
+                if ($parid) { print ", parent = $parent($parid)"; };
+                print "\n";
+                
+                # see if source changed
+                my $md5_source = Digest::MD5::md5_hex($s2source);
+                my $md5_exist = $dbh->selectrow_array("SELECT MD5(s2code) FROM s2source WHERE s2lid=?", undef, $id);
+                
+                # skip compilation if source is unchanged and parent wasn't rebuilt.
+                next if $md5_source eq $md5_exist && ! $layer{$parent}->{'built'} && ! $opt_forcebuild;
+
+                # we're going to go ahead and build it.
+                $layer{$base}->{'built'} = 1;
+
+                # compile!
+                my $lay = {
+                    's2lid' => $id,
+                    'userid' => $sysid,
+                    'b2lid' => $parid,
+                    'type' => $type,
+                };
+                my $error = "";
+                die $error unless LJ::layer_compile($lay, \$error, { 
+                    's2ref' => \$s2source, 
+                    'redist_uniq' => $base,
+                });
+
+                # put raw S2 in database.
+                $dbh->do("REPLACE INTO s2source (s2lid, s2code) ".
+                         "VALUES ($id, ?)", undef, $s2source);
+                die $dbh->errstr if $dbh->err;            
+                
+            }
+            close SL;
+        }
+    }
+    
+    # base data
     foreach my $file ("base-data.sql", "base-data-local.sql") {
         my $ffile = "$ENV{'LJHOME'}/bin/upgrading/$file";
         next unless -e $ffile;

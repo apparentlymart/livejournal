@@ -42,6 +42,9 @@ my %modules = (
                    'opt' => 'Required for XML-RPC support.',
                },
                "Unicode::MapUTF8" => { 'deb' => 'libunicode-maputf8-perl', },
+               "Storable" => {
+                   'deb' => 'libstorable-perl',
+               },
                );
 
 my @debs;

@@ -21,6 +21,7 @@ use MIME::Lite ();
 use HTTP::Date ();
 use IO::Socket ();
 use Unicode::MapUTF8 ();
+use LJ::S2;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
@@ -3550,6 +3551,14 @@ sub get_dbs
     $dbr = undef if $LJ::DBIRole->same_cached_handle("slave", "master");
 
     return make_dbs($dbh, $dbr);
+}
+
+sub get_db_reader {
+    return LJ::get_dbh("slave", "master");
+}
+
+sub get_db_writer {
+    return LJ::get_dbh("master");
 }
 
 # <LJFUNC>
