@@ -287,7 +287,7 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'name'		=> 'Voicestream',
         'notes'		=> 'Enter your 10-digit phone number.  Message is sent via the email gateway, since they changed their web gateway and we have not gotten it working with the new one yet.',
         'fromlimit'	=> 15,
-        'msglimit'	=> 140,
+        'msglimit'	=> 123,
         'totlimit'	=> 140,
     },
 
@@ -652,7 +652,7 @@ sub send
         send_mail($self, {
             'to'        => "$self->{'number'}\@voicestream.net",
             'from'      => "$msg->{'from'}",
-            'body'      => "$msg->{'message'}",
+            'body'      => "$msg->{'from'}: $msg->{'message'}",
         });
     }
 
