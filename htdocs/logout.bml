@@ -46,7 +46,7 @@
     }
 
     $body .= "<form action='logout.bml' method='post'>";
-    $body .= LJ::html_hidden('ret', LJ::ehtml($GET{'ret'})) if $GET{'ret'};
+    $body .= LJ::html_hidden('ret', $GET{'ret'}) if $GET{'ret'};
     $body .= LJ::html_hidden("user", $u->{'user'},
                              "sessid", $u->{'_session'}->{'sessid'});
     $body .= "<?h1 $ML{'.logout.head'} h1?><?p $ML{'.logout.text'} ";

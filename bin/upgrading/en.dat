@@ -3450,6 +3450,8 @@ error.deleted.text=This journal has been deleted.  If you are [[user]], you have
 
 error.deleted.title=Deleted Account
 
+error.expiredchal=Login window expired.  Please try again.
+
 error.invalidauth=You could not be authenticated as the specified user.
 
 error.ipbanned=Your IP address is temporarily banned for exceeding the login failure rate.

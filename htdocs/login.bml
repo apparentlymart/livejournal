@@ -155,7 +155,7 @@
 
         # Save offsite redirect uri between POSTs
         my $redir = $GET{'ret'} || $POST{'ret'};
-        $body .= "<input type='hidden' name='ret' value='$redir' />" if $redir && $redir != 1;
+        $body .= LJ::html_hidden('ret', $redir) if $redir && $redir != 1;
         
         $body .= "</form>\n";
 
@@ -254,9 +254,9 @@
 
             if ($u && ! $ok) {
                 if ($chal_opts->{'expired'}) {
-                    push @errors, "Challenge expired.  Please try again.";
+                    push @errors, $ML{'error.expiredchal'};
                 } else {
-                    push @errors, "$ML{'error.badpassword'}";
+                    push @errors, $ML{'error.badpassword'};
                 }
             }
 
