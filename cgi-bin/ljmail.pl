@@ -5,12 +5,12 @@ use strict;
 
 require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 
+package LJ;
+
 use MIME::Lite ();
 use Text::Wrap ();
 use Time::HiRes ('gettimeofday', 'tv_interval');
 use IO::Socket::INET ();
-
-package LJ;
 
 # determine how we're going to send mail
 $LJ::OPTMOD_NETSMTP = eval "use Net::SMTP (); 1;";
