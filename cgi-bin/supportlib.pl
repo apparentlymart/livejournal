@@ -274,7 +274,7 @@ sub get_answer_types
                          "answer" => "Answer",                         
                          "comment" => "Comment or Question");
     } elsif ($sp->{_cat}->{'allow_screened'}) {
-        push @ans_type, ("screened" => "Screened Answer");
+        push @ans_type, ("screened" => "Screened Response");
     }
 
     if (can_make_internal($dbh, $sp, $remote) &&
@@ -526,7 +526,7 @@ sub mail_response_to_user
     my $type = $res->{'type'};
 
     # don't mail internal comments (user shouldn't see) or 
-    # screened answers (have to wait for somebody to approve it first)
+    # screened responses (have to wait for somebody to approve it first)
     return if ($type eq "internal" || $type eq "screened");
 
     # the only way it can be zero is if it's a reply to an email, so it's
