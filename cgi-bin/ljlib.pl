@@ -3368,6 +3368,111 @@ sub challenge_check_login
     }
 }
 
+# create externally mapped user.
+# return uid of LJ user on success, undef on error.
+# opts = {
+#     extuser or extuserid (or both, but one is required.),
+#     caps
+# }
+# opts also can contain any additional options that create_account takes. (caps?)
+sub create_extuser
+{
+    my ($type, $opts) = @_;
+    return undef unless $type && $LJ::EXTERNAL_NAMESPACE{$type}->{id};
+    return undef unless ref $opts &&
+        ($opts->{extuser} || defined $opts->{extuserid});
+
+    my $uid;
+    my $dbh = LJ::get_db_writer();
+    return undef unless $dbh;
+
+    # make sure a mapping for this user doesn't already exist.
+    $uid = LJ::get_extuser_uid( $type, $opts, 'force' );
+    return $uid if $uid;
+
+    # increment ext_ counter until we successfully create an LJ account.
+    # hard cap it at 10 tries. (arbitrary, but we really shouldn't have *any*
+    # failures here, let alone 10 in a row.)
+    for (1..10) {
+        my $extuser = 'ext_' . LJ::alloc_global_counter( 'E' );
+        $uid =
+          LJ::create_account(
+            { caps => $opts->{caps}, user => $extuser, name => $extuser } );
+        last if $uid;
+        select undef, undef, undef, .10;  # lets not thrash over this.
+    }
+    return undef unless $uid;
+
+    # add extuser mapping.
+    my $sql = "INSERT INTO extuser SET userid=?, siteid=?";
+    my @bind = ($uid, $LJ::EXTERNAL_NAMESPACE{$type}->{id});
+
+    if ($opts->{extuser}) {
+        $sql .= ", extuser=?";
+        push @bind, $opts->{extuser};
+    }
+
+    if ($opts->{extuserid}) {
+        $sql .= ", extuserid=? ";
+        push @bind, $opts->{extuserid}+0;
+    }
+
+    $dbh->do($sql, undef, @bind) or return undef;
+    return $uid;
+}
+
+# given an extuserid or extuser, return the LJ uid.
+# return undef if there is no mapping.
+sub get_extuser_uid
+{
+    my ($type, $opts, $force) = @_;
+    return undef unless $type && $LJ::EXTERNAL_NAMESPACE{$type}->{id};
+    return undef unless ref $opts &&
+        ($opts->{extuser} || defined $opts->{extuserid});
+
+    my $dbh = $force ? LJ::get_db_writer() : LJ::get_db_reader();
+    return undef unless $dbh;
+
+    my $sql = "SELECT userid FROM extuser WHERE siteid=?";
+    my @bind = ($LJ::EXTERNAL_NAMESPACE{$type}->{id});
+
+    if ($opts->{extuser}) {
+        $sql .= " AND extuser=?";
+        push @bind, $opts->{extuser};
+    }
+
+    if ($opts->{extuserid}) {
+        $sql .= $opts->{extuser} ? ' OR ' : ' AND ';
+        $sql .= "extuserid=?";
+        push @bind, $opts->{extuserid}+0;
+    }
+
+    return $dbh->selectrow_array($sql, undef, @bind);
+}
+
+# given a LJ userid/u, return a hashref of:
+# type, extuser, extuserid
+# returns undef if user isn't an externally mapped account.
+sub get_extuser_map
+{
+    my $uid = LJ::want_userid(shift);
+    return undef unless $uid;
+
+    my $dbr = LJ::get_db_reader();
+    return undef unless $dbr;
+
+    my $sql = "SELECT * FROM extuser WHERE userid=?";
+    my $ret = $dbr->selectrow_hashref($sql, undef, $uid);
+    return undef unless $ret;
+
+    my $type = 'unknown';
+    foreach ( keys %LJ::EXTERNAL_NAMESPACE ) {
+        $type = $_ if $LJ::EXTERNAL_NAMESPACE{$_}->{id} == $ret->{siteid};
+    }
+
+    $ret->{type} = $type;
+    return $ret;
+}
 
 # <LJFUNC>
 # name: LJ::create_account
@@ -8720,11 +8825,12 @@ sub alloc_user_counter
     return LJ::alloc_user_counter($u, $dom, 1);
 }
 
-# $dom: 'S' == style, 'P' == userpic, 'C' == captcha, 'A' == stock support answer
+# $dom: 'S' == style, 'P' == userpic, 'A' == stock support answer
+#       'C' == captcha, 'E' == external user
 sub alloc_global_counter
 {
     my ($dom, $recurse) = @_;
-    return undef unless $dom =~ /^[SPCA]$/;
+    return undef unless $dom =~ /^[SPCEA]$/;
     my $dbh = LJ::get_db_writer();
     return undef unless $dbh;
 
@@ -8740,12 +8846,17 @@ sub alloc_global_counter
 
     return undef if $recurse;
 
+    # no prior counter rows - initialize one.
     if ($dom eq "S") {
         $newmax = $dbh->selectrow_array("SELECT MAX(styleid) FROM s1stylemap");
     } elsif ($dom eq "P") {
         $newmax = $dbh->selectrow_array("SELECT MAX(picid) FROM userpic");
     } elsif ($dom eq "C") {
         $newmax = $dbh->selectrow_array("SELECT MAX(capid) FROM captchas");
+    } elsif ($dom eq "E") {
+        # if there is no extuser counter row, start making extuser names at
+        # 'ext_1'  - ( the 0 here is incremented after the recurse )
+        $newmax = 0; 
     } elsif ($dom eq "A") {
         $newmax = $dbh->selectrow_array("SELECT MAX(ansid) FROM support_answers");
     } else {

@@ -123,6 +123,12 @@ sub underage_status {
     return $u->{underage_status};
 }
 
+# returns a true value if user has a reserved 'ext' name.
+sub external {
+    my $u = shift;
+    return $u->{user} =~ /^ext_/;
+}
+
 # this is for debugging/special uses where you need to instruct
 # a user object on what database handle to use.  returns the
 # handle that you gave it.
