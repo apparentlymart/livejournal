@@ -5602,7 +5602,7 @@ sub rate_log
     my $rateperiod = LJ::get_cap($u, "rateperiod-$ratename");
     return 1 unless $rateperiod;
 
-    my $dbu = LJ::get_cluster_master($u);
+    my $dbu = LJ::get_cluster_master($u, 1);
     return 0 unless $dbu;
     
     my $rp = LJ::get_prop("rate", $ratename);
@@ -5622,7 +5622,7 @@ sub rate_log
     # check rate.  (okay per period)
     my $opp = LJ::get_cap($u, "rateallowed-$ratename");
     return 1 unless $opp;
-    my $udbr = LJ::get_cluster_reader($u);
+    my $udbr = LJ::get_cluster_reader($u, 1);
     my $ip = $udbr->quote($opts->{'limit_by_ip'} || "0.0.0.0");
     my $sum = $udbr->selectrow_array("SELECT COUNT(quantity) FROM ratelog WHERE ".
                                      "userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
@@ -5651,20 +5651,20 @@ sub get_remote_ip
     eval {
         $ip = Apache->request->connection->remote_ip;
     };
-    return $ip;
+    return $ip || $ENV{'FAKE_IP'};
 }
 
 sub login_ip_banned
 {
     my $u = shift;
-    return 0 unless $u && $u->{'clusterid'};
+    return 0 unless $u;
 
     my $ip;
     return 0 unless ($ip = LJ::get_remote_ip());
 
     my $udbr;
     my $rateperiod = LJ::get_cap($u, "rateperiod-failed_login");
-    if ($rateperiod && ($udbr = LJ::get_cluster_reader($u))) {
+    if ($rateperiod && ($udbr = LJ::get_cluster_reader($u, 1))) {
         my $bantime = $udbr->selectrow_array("SELECT time FROM loginstall WHERE ".
                                              "userid=$u->{'userid'} AND ip=INET_ATON(?)",
                                              undef, $ip);
@@ -5678,7 +5678,7 @@ sub login_ip_banned
 sub handle_bad_login
 {
     my $u = shift;
-    return 1 unless $u && $u->{'clusterid'};
+    return 1 unless $u;
 
     my $ip;
     return 1 unless ($ip = LJ::get_remote_ip());
@@ -5686,7 +5686,7 @@ sub handle_bad_login
     # until it's banned for a period of time.
     my $udbh;
     if (! LJ::rate_log($u, "failed_login", 1, { 'limit_by_ip' => $ip }) &&
-        ($udbh = LJ::get_cluster_master($u)))
+        ($udbh = LJ::get_cluster_master($u, 1)))
     {
         $udbh->do("REPLACE INTO loginstall (userid, ip, time) VALUES ".
                   "(?,INET_ATON(?),UNIX_TIMESTAMP())", undef, $u->{'userid'}, $ip);
