@@ -85,6 +85,7 @@ propgroup other {
                             "nav_next" => "Next Entry"};
 
     property use use_shared_pic;
+    property use linklist_support;
 }
 
 
@@ -361,7 +362,7 @@ $userpic
         $this->lay_page_nav();
     }
 
-    if (size $this.linklist) {
+    if (size $this.linklist > 0 and $*linklist_support) {
         println "<div class=\"box\">";
         println "<h2>Links</h2>\n";
         $this->print_linklist();

@@ -135,6 +135,7 @@ propgroup presentation {
   property string page_background_image {
       des = "URL to an image to be used for the page background";
   }
+  property use linklist_support;
 }
 set opt_navbar_pos = "left";
 set opt_daylines_style = "dashed";
@@ -142,6 +143,7 @@ set opt_margin_size = "50px";
 set view_entry_disabled = false;
 set show_entrynav_icons = true;
 set page_background_image = "";
+set linklist_support = false;
 
 propgroup text {
   property use text_post_comment;
@@ -393,6 +395,8 @@ function MonthPage::lay_viewspec_heading() : string {
 
 function Page::print_linklist() {
     if (size $.linklist <= 0) {
+        return;
+    } elseif (not $*linklist_support) {
         return;
     }
     

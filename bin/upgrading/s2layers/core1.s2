@@ -1093,6 +1093,12 @@ property string comment_userpic_style {
 }
 set comment_userpic_style = "";
 
+property bool linklist_support {
+    des = "Link List Support";
+    note = "If you've created a list of links that you would like to include in this layout, change this option to 'yes'.";
+}
+set linklist_support = false;
+
 ###[ global function implementations ]
 
 function lang_map_plural (int n) : int {
@@ -1322,6 +1328,8 @@ function Page::print_body() {
 
 function Page::print_linklist() {
     if (size $.linklist <= 0) {
+        return;
+    } elseif (not $*linklist_support) {
         return;
     }
 

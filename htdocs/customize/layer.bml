@@ -205,9 +205,10 @@
 
         if (ref $override eq "HASH") { $override = $override->{'as_string'}; }
 
-        $body .= "<?h1 $prop->{'des'} h1?>";
+        $body .= "<?h1 " . LJ::eall($prop->{'des'}) . " h1?>";
         $body .= "<?p ";
         $body .= LJ::eall($prop->{'note'}) if $prop->{'note'};
+        $body .= " <?help $LJ::HELPURL{$name} help?>" if $LJ::HELPURL{$name};
         $body .= "<blockquote>";
         $body .= "<dl><dt>" . LJ::html_check({ 'type' => 'radio', 'name' => "${name}_action",
                                                'value' => 'keep', 'id' => "${name}_keep",

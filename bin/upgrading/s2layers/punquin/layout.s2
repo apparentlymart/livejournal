@@ -98,6 +98,7 @@ propgroup presentation {
   property string page_background_image {
       des = "URL to an image to be used for the page background";
   }
+  property use linklist_support;
 }
 set font_base = "Verdana, Arial, Helvetica";
 set font_fallback = "sans-serif";
@@ -108,6 +109,7 @@ set page_friends_items = 20;
 set view_entry_disabled = false;
 set show_entrynav_icons = true;
 set page_background_image = "";
+set linklist_support = false;
 
 propgroup text {
   property string text_gotop {
@@ -240,7 +242,7 @@ function print_sidebar(Page p) {
     "</p>"; if($userpic != "") { "<div style='text-align:center'>$userpic</div>"; }
 
     # Link List
-    if (size $p.linklist) {
+    if (size $p.linklist > 0 and $*linklist_support) {
         if (not $p.linklist[0].is_heading) {
             "<b>Links</b><br />";
         }
