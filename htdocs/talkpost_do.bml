@@ -101,9 +101,6 @@ body<=
     my $wasscreened = ($parent->{state} eq 'S');
     my $err;
 
-    $comment->{'subject'} =~ s/^Re:\s*//i;
-    $comment->{'subject'} = "Re: $comment->{'subject'}" if $comment->{'subject'};
-
     unless (LJ::Talk::Post::post_comment($entryu, $journalu,
                                          $comment, $parent, $item, \$err)) {
         return $err;

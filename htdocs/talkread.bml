@@ -69,6 +69,11 @@ body<=
 
    function submitform()
    {
+        var subject = document.getElementById('subject');
+        if (subject.value == 'Re: ' || subject.value == 'Re:') {
+            subject.value = '';
+        }
+
         var multi_form = document.getElementById('multiform');
         multi_form.submit();
    }
