@@ -6,9 +6,15 @@
     return "no user" unless $FORM{'user'};
 
     my $dbr = LJ::get_db_reader();
-    my $u =  LJ::load_user($dbr, $FORM{'user'});
+    my $u =  LJ::load_user($FORM{'user'});
     return "no user" unless $u;
 
-    return $dbr->selectrow_array("SELECT timeupdate FROM userusage WHERE userid=?", undef, $u->{'userid'});
+    my $tu = $dbr->selectrow_array("SELECT timeupdate FROM userusage WHERE userid=?", 
+                                   undef, $u->{'userid'});
+    
+    BML::want_last_modified(1);
+    BML::note_mod_time(LJ::mysqldate_to_time($tu));
+
+    return $tu;
 }
 _code?>
