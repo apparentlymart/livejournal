@@ -1110,3 +1110,5 @@ INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope
 UPDATE userproplist SET des='Yahoo ID',prettyname='Yahoo ID',indexed='1',scope='general',datatype='char' WHERE name='yahoo';
 INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('zip', '1', 'ZIP code', 'char', '5 digit zip code (if in US)', 'general');
 UPDATE userproplist SET des='5 digit zip code (if in US)',prettyname='ZIP code',indexed='1',scope='general',datatype='char' WHERE name='zip';
+INSERT IGNORE INTO userproplist (name, indexed, prettyname, datatype, des, scope) VALUES ('dont_load_members', '0', 'Don\'t load membership information', 'bool', 'Used for large communities to prevent loading and displaying the complete list of members', 'general');
+UPDATE userproplist SET des='Used for large communities to prevent loading and displaying the complete list of members',prettyname='Don\'t load membership information',indexed='0',scope='general',datatype='bool' WHERE name='dont_load_members';

@@ -91,7 +91,7 @@
  ### load user props.  some don't apply to communities
  {
      my @props = qw(opt_whatemailshow opt_blockrobots country state city zip 
-                    url urlname opt_hidefriendofs);
+                    url urlname opt_hidefriendofs dont_load_members);
      unless ($com) { push @props, qw(aolim icq yahoo msn gender jabber); }
      LJ::load_user_props($dbr, $u, @props);
  }
@@ -100,15 +100,19 @@
      $head .= "<meta name=\"robots\" content=\"noindex\">\n";
  }
 
- my $verbosefriends = 1; # Display whole list (1), or just a count (0)?
+  my %friends = ('load'=>1, 'loaded'=>0, 'display'=>1, 'count'=>0);
+  my %friendsof = ('load'=>1, 'loaded'=>0, 'display'=>1, 'count'=>0);
+
  if ($com) {
      $title = $ML{'.title.communityinfo'};
      $dir = "community";
  } elsif ($synd) {
      $title = $ML{'.title.syndicated'};
      $u->{'opt_whatemailshow'} = "N";  # don't show email
-     $verbosefriends = 0;
+     $friends{'load'} = $friends{'display'} = 0;
  }
+
+ $friends{'load'} = $friendsof{'load'} = 0 if $com && $u->{'dont_load_members'};
 
  if ($u->{'statusvis'} eq "S") {
      $title = $ML{'error.suspended.title'};
@@ -157,25 +161,34 @@
  }
 
  my %res_fr;
- my $incfriendof = 1;
  if ($u->{'opt_hidefriendofs'} && ! $remote_isowner) {
-     $incfriendof = 0; 
+     $friendsof{'load'} = 0;
  }
- LJ::do_request($dbr, 
-                { 'mode' => 'getfriends',
-                  'ver' => $LJ::PROTOCOL_VER,
-                  'includefriendof' => $incfriendof,
-                  'user' => $u->{'user'}, }, 
-                \%res_fr,
-                { 'userid' => $u->{'userid'},
-                  'noauth' => 1,
-              }); 
+
+ if ($friends{'load'} || $friendsof{'load'}) {
+     LJ::do_request($dbr, 
+                    { 'mode' => 'getfriends',
+                      'ver' => $LJ::PROTOCOL_VER,
+                      'includefriendof' => $friendsof{'load'},
+                      'user' => $u->{'user'}, }, 
+                    \%res_fr,
+                    { 'userid' => $u->{'userid'},
+                      'noauth' => 1,
+                  }); 
+     ($friends{'loaded'}, $friends{'count'}) = (1, $res_fr{'friend_count'})
+         if $friends{'load'};
+     ($friendsof{'loaded'}, $friendsof{'count'}) = (1, $res_fr{'friendof_count'})
+         if $friendsof{'load'};
+ } else {
+     $friends{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE userid=$u->{'userid'}");
+     $friendsof{'count'} = $dbr->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=$u->{'userid'}");
+ };
 
  $u->{'name'} = LJ::ehtml($u->{'name'});
 
  # who does the remote user list as a friend?
  my %remote_friend;
- if ($remote && $verbosefriends) {
+ if ($remote && $friends{'loaded'}) {
      my $error;
      my $rs = LJ::Protocol::do_request($dbs, "getfriends",
                                        { 'ver' => $LJ::PROTOCOL_VER,
@@ -501,24 +514,27 @@
      my $label = $com ? $ML{'.friends.comm'} : $ML{'.friends.user'};
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
      $body .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/$dir/$user/friends'>$label</a>:</b></td><td colspan='$span'>";
-     if (!$verbosefriends || $res_fr{'friend_count'} > 500) {
-         $body .= "<b>" . $res_fr{'friend_count'} . ":</b> ";
-         $body .= "<a href='/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'>" . BML::ml('.label.viewlabel',{'label'=>$label}) . "</a>.";
-     } elsif ($res_fr{'friend_count'}) {
-         $body .= "<b>" . $res_fr{'friend_count'} . ":</b> ";
-         my $count = 0;
-         for (my $i=1; $i<=$res_fr{'friend_count'}; $i++) {
-             my $fr = $res_fr{"friend_${i}_user"};
-             my $status = $res_fr{"friend_${i}_status"};
-             my $frlink = "<a href='/userinfo.bml?user=$fr'>$fr</a>";
-             $frlink = "<strike>$frlink</strike>"
-                 if ($status && ($status eq 'deleted' || $status eq 'purged' || $status eq 'suspended'));
-             $frlink = "<b>$frlink</b>"
-                 if $remote_friend{$fr} and $remote->{'userid'} != $u->{'userid'};
-             $body .= $frlink;
-             $body .= ", ";
+
+     $friends{'display'} = 0 if $friends{'count'} > 500;
+     if ($friends{'count'}) {
+         if (!$friends{'loaded'} || !$friends{'display'}) {
+             $body .= "<b>" . $friends{'display'} . ":</b> ";
+             $body .= "<a href='/directory.bml?s_fro=1&amp;fro_user=$u->{'user'}'>" . BML::ml('.label.viewlabel',{'label'=>$label}) . "</a>.";
+         } else {
+             $body .= "<b>" . $res_fr{'friend_count'} . ":</b> ";
+             for (my $i=1; $i<=$res_fr{'friend_count'}; $i++) {
+                 my $fr = $res_fr{"friend_${i}_user"};
+                 my $status = $res_fr{"friend_${i}_status"};
+                 my $frlink = "<a href='/userinfo.bml?user=$fr'>$fr</a>";
+                 $frlink = "<strike>$frlink</strike>"
+                     if ($status && ($status eq 'deleted' || $status eq 'purged' || $status eq 'suspended'));
+                 $frlink = "<b>$frlink</b>"
+                     if $remote_friend{$fr} and $remote->{'userid'} != $u->{'userid'};
+                 $body .= $frlink;
+                 $body .= ", ";
+             }
+             chop $body; chop $body;
          }
-         chop $body; chop $body;
      } else {
          $body .= $ML{'.label.nofriends'};
      }
@@ -529,55 +545,57 @@
  ## friend of
  ##
  unless ($synd) {
-     my @friend_of;
-     my @member_of;
-     my $label;
-     for (my $i=1; $i<=$res_fr{'friendof_count'}; $i++) {
-         my $fr = $res_fr{"friendof_${i}_user"};
-         if ($res_fr{"friendof_${i}_type"} eq "community") {
-             push @member_of, $fr;
-         } else {
-             push @friend_of, $fr;
-         }
-     }
-     if (@friend_of && ($remote_isowner || ! $u->{'opt_hidefriendofs'})) {
-         $label = $com ? $ML{'.friendof.comm'} : $ML{'.friendof.user'};
-         $body .= "<tr><td align='right' valign='top'><b><nobr>$label:</nobr></b>";
-         if ($u->{'opt_hidefriendofs'}) {
-             $body  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
-         }
-         $body .= "</td>";
-         $body .= "<td colspan='2' valign='top'><b>" . scalar(@friend_of) . ":</b> ";
-         my $count = 0;
-         foreach (@friend_of) {
-             my $frlink = "<a href=\"/userinfo.bml?user=$_\">$_</a>";
-             $frlink = "<b>$frlink</b>"
-                 if $remote_friend{$_};
-             $body .= "$frlink, ";
-             if (++$count == 150 && $FORM{'mode'} ne "full") {
-                 $body .= "<a href='" . BML::self_link({ 'mode' => 'full' }) . "'>...</a>";
-                 last;
+     if ($friendsof{'loaded'} && $friendsof{'display'}) {
+         my @friend_of;
+         my @member_of;
+         my $label;
+         for (my $i=1; $i<=$res_fr{'friendof_count'}; $i++) {
+             my $fr = $res_fr{"friendof_${i}_user"};
+             if ($res_fr{"friendof_${i}_type"} eq "community") {
+                 push @member_of, $fr;
+             } else {
+                 push @friend_of, $fr;
              }
          }
-         chop $body; chop $body;
-         $body .= "</td></tr>\n";
-     };
-     if (@member_of) {
-         $label = $ML{'.label.memberof'};
-         $body .= "<tr><td align='right' valign='top'><b><nobr>$label:</nobr></b></td><td colspan='2'>";
-         $body .= "<b>" . scalar(@member_of) . ":</b> ";
-         foreach (@member_of) {
-             my $frlink = "<a href='/userinfo.bml?user=$_'>$_</a>";
-             $frlink = "<b>$frlink</b>"
-                 if $remote_friend{$_} && $remote->{'userid'} != $u->{'userid'};
-             $body .= "$frlink, ";
-         }
-         chop $body; chop $body;
-         $body .= "</td></tr>\n";
-     };
+         if (@friend_of) {
+             $label = $com ? $ML{'.friendof.comm'} : $ML{'.friendof.user'};
+             $body .= "<tr><td align='right' valign='top'><b><nobr>$label:</nobr></b>";
+             if ($u->{'opt_hidefriendofs'}) {
+                 $body  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
+             }
+             $body .= "</td>";
+             $body .= "<td colspan='2' valign='top'><b>" . scalar(@friend_of) . ":</b> ";
+             my $count = 0;
+                 foreach (@friend_of) {
+                 my $frlink = "<a href=\"/userinfo.bml?user=$_\">$_</a>";
+                 $frlink = "<b>$frlink</b>"
+                     if $remote_friend{$_};
+                 $body .= "$frlink, ";
+                 if (++$count == 150 && $FORM{'mode'} ne "full") {
+                     $body .= "<a href='" . BML::self_link({ 'mode' => 'full' }) . "'>...</a>";
+                    last;
+                 }
+             }
+             chop $body; chop $body;
+             $body .= "</td></tr>\n";
+         };
+         if (@member_of) {
+             $label = $ML{'.label.memberof'};
+             $body .= "<tr><td align='right' valign='top'><b><nobr>$label:</nobr></b></td><td colspan='2'>";
+             $body .= "<b>" . scalar(@member_of) . ":</b> ";
+             foreach (@member_of) {
+                 my $frlink = "<a href='/userinfo.bml?user=$_'>$_</a>";
+                 $frlink = "<b>$frlink</b>"
+                     if $remote_friend{$_} && $remote->{'userid'} != $u->{'userid'};
+                 $body .= "$frlink, ";
+             }
+             chop $body; chop $body;
+             $body .= "</td></tr>\n";
+         };
+     }
  } else {  # Syndication journals are special
      $body .= "<tr><td align='right' valign='top'><b><nobr>$ML{'.friendof.syndreadcount'}:</nobr></b></td>";
-     $body .= "<td colspan='2'><i>$res_fr{'friendof_count'}</i></td></tr>\n";
+     $body .= "<td colspan='2'><i>$friendsof{'count'}</i></td></tr>\n";
  }
 
  ## extra rows generated by hooks
