@@ -115,7 +115,7 @@ sub trans
     {
         my $vhost = { 'users/' => '', 'community/' => 'community',
                       '~' => 'tilde' }->{$1};
-        return DECLINED if $vhost eq "community" && $uri =~ m!\.bml!;
+        return DECLINED if $vhost eq "community" && $uri =~ m!\.bml|\.html$!;
         return $journal_view->({'vhost' => $vhost,
                                 'mode' => $3,
                                 'args' => $4,

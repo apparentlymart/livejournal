@@ -440,9 +440,7 @@ sub bml_block
         my $isource = "";
         my $file = $req->{'env'}->{'IncludePath'} . "/" . $element{'FILE'};
         open (INCFILE, $file) || return inline_error("Could not open include file.");
-        while (<INCFILE>) { 
-            $isource .= $_;
-        }
+        { local $/ = undef; $isource = <INCFILE>; }
         close INCFILE;
         
         if ($element{'BML'}) {
