@@ -427,7 +427,7 @@ sub get_interests
         my $dbh = LJ::get_db_writer();
         my $sth = $dbh->prepare("SELECT intid FROM $uitable WHERE userid=?");
         $sth->execute($uid);
-        push @$ids, $_ while $_ = $sth->fetchrow_array;
+        push @$ids, $_ while ($_) = $sth->fetchrow_array;
         LJ::MemCache::add($mk_ids, $ids, 3600*12);
     }
     return $ids if $opts->{'justids'};
