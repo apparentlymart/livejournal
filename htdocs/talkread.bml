@@ -344,7 +344,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
          $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
          my $screenedtext = $ML{'.screenedpost'};
          $ret .= "<td>$screenedtext</td></tr></table>\n";
-     } elsif ($userpost && $user{$userpost}->{'statusvis'} eq "S") {
+     } elsif ($pu && $pu->{'statusvis'} eq "S") {
          $ret .= "<p><a name='t$dtid'></a><table><tr>";
          $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
          $ret .= "<td>$ML{'.replysuspended'}";

@@ -107,6 +107,18 @@ sub EntryPage
                 'parent_url' => $par_url,
             };
 
+            # don't show info from suspended users
+            # FIXME: ideally the load_comments should only return these
+            # items if there are children, otherwise they should be hidden entirely
+            my $pu = $com->{'posterid'} ? $user{$com->{'posterid'}} : undef;
+            if ($pu && $pu->{'statusvis'} eq "S") {
+                $s2com->{'text'} = "";
+                $s2com->{'subject'} = "";
+                $s2com->{'full'} = 0;
+                $s2com->{'subject_icon'} = undef;
+                $s2com->{'userpic'} = undef;
+            }
+
             $s2com->{'thread_url'} = "$permalink?thread=$dtalkid" if @{$com->{'children'}};
 
             # add the poster_ip metadata if remote user has 
