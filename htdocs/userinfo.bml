@@ -210,10 +210,14 @@
 
  # who does the remote user list as a friend?
  my %remote_friendid;
- if ($remote && $friends{'loaded'} && $remote->{'userid'} != $u->{'userid'}) {
-     my $sth = $dbr->prepare("SELECT friendid FROM friends WHERE userid=? LIMIT $MAX_FRIENDS_SHOW");
-     $sth->execute($remote->{'userid'});
-     $remote_friendid{$_} = 1 while $_ = $sth->fetchrow_array;
+ if ($remote && $friends{'loaded'}) {
+     if ($remote->{'userid'} == $u->{'userid'}) {
+         foreach (@friends) { $remote_friendid{$_->{'userid'}} = 1; }
+     } else {
+         my $sth = $dbr->prepare("SELECT friendid FROM friends WHERE userid=? LIMIT $MAX_FRIENDS_SHOW");
+         $sth->execute($remote->{'userid'});
+         $remote_friendid{$_} = 1 while $_ = $sth->fetchrow_array;
+     }
  }
  
  if ($com) {
