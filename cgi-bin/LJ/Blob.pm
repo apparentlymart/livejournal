@@ -109,7 +109,7 @@ sub delete {
 }
 
 sub get_disk_usage {
-    my ($u, $domain) = shift;
+    my ($u, $domain) = @_;
     my $dbcr = LJ::get_cluster_reader($u);
     return $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
                                   "WHERE journalid=? AND domain=?", undef,
