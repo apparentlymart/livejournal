@@ -174,7 +174,7 @@ BODY<=
      
      if ($isclust) {
          $dbb = LJ::get_cluster_master($u);
-         return "<b>Error:</b> Database temporarily unavailable" unless $dbb;
+         return "<b>Error:</b> Database temporarily down for maintenance.  Try again in a few minutes." unless $dbb;
          $dbb->do("INSERT INTO userpicblob2 (userid, picid, imagedata) ".
                   "VALUES ($userid, $picid, $qimagedata)");
      } else {
