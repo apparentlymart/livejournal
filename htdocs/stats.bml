@@ -85,12 +85,14 @@ P=)
      }
  }
  $ret .= "</ul> P=)\n";
- 
- $ret .= "(=H1 Receiving News/Advertising H1=)\n";
- $ret .= "(=P This information says how many users of the ones with validated email addresses subscribe to the LiveJournal news that we send out, and how many people say they wouldn't mind getting advertisement/promotions sent to them by email. <UL>";
- $ret .= "<LI><B>Users getting LiveJournal news: </B> $allow_getljnews\n";
- $ret .= "<LI><B>Users getting promotions by mail: </B> $allow_getpromos\n";
- $ret .= "</UL> P=)\n";
+
+ unless ($LJ::DISABLED{'stats-newsadv'}) {
+     $ret .= "(=H1 Receiving News/Advertising H1=)\n";
+     $ret .= "(=P This information says how many users of the ones with validated email addresses subscribe to the LiveJournal news that we send out, and how many people say they wouldn't mind getting advertisement/promotions sent to them by email. <UL>";
+     $ret .= "<LI><B>Users getting LiveJournal news: </B> $allow_getljnews\n";
+     $ret .= "<LI><B>Users getting promotions by mail: </B> $allow_getpromos\n";
+     $ret .= "</UL> P=)\n";
+ }
 
  unless ($LJ::DISABLED{'stats-recentupdates'}) 
  { 
