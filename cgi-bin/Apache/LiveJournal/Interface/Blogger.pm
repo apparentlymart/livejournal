@@ -64,6 +64,7 @@ sub newPost {
         'event' => $event->{'event'},
         'subject' => $event->{'subject'},
         'props' => $event->{'props'},
+        'tz'    => 'guess',
     };
 
     my $res = LJ::Protocol::do_request("postevent", $req, \$err);
