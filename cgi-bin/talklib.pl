@@ -1060,14 +1060,26 @@ sub talkform {
     }
 
     # post and preview buttons
+    my $limit = LJ::CMAX_COMMENT; # javascript String.length uses characters
     $ret .= <<LOGIN;
     <br />
     <script language="JavaScript" type='text/javascript'> 
         <!--
+        function checkLength() {
+            if (!document.getElementById) return true;
+            var textbox = document.getElementById('commenttext');
+            if (!textbox) return true;
+            if (textbox.value.length > $limit) {
+                alert('Sorry, but your comment of ' + textbox.value.length + ' characters exceeds the maximum character length of $limit.  Please try shortening it and then post again.');
+                return false;
+            }
+            return true;
+        }
+        
         if (document.getElementById && document.getElementById('postform')) {
-            document.write("<input name='submitpost' onclick='return sendForm(\\"postform\\", \\"username\\")' type='submit' value='$BML::ML{'.opt.submit'}' />");
+            document.write("<input name='submitpost' onclick='return checkLength() && sendForm(\\"postform\\", \\"username\\")' type='submit' value='$BML::ML{'.opt.submit'}' />");
             document.write("&nbsp;");
-            document.write("<input name='submitpreview' onclick='return sendForm(\\"postform\\", \\"username\\")' type='submit' value='$BML::ML{'talk.btn.preview'}' />");
+            document.write("<input name='submitpreview' onclick='return checkLength() && sendForm(\\"postform\\", \\"username\\")' type='submit' value='$BML::ML{'talk.btn.preview'}' />");
         } else {
             document.write("<input type='submit' name='submitpost' value='$BML::ML{'.opt.submit'}' />");
             document.write("&nbsp;");
