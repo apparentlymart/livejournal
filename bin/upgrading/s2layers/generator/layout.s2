@@ -89,6 +89,7 @@ propgroup presentation {
         des = "URL to an image to be used for the page background";
     }
     property use external_stylesheet;
+    property use linklist_support;
 }
 
 propgroup text {
@@ -182,6 +183,63 @@ function Page::lay_top_userpic () {
 }
 function FriendsPage::lay_top_userpic () { }
 
+function Page::print_linklist() {
+    if (size $.linklist <= 0) {
+        return;
+    }
+    
+    println """
+<p>
+<table width='$*box_width' cellpadding='2' cellspacing='0'
+border='0'
+summary=''>
+<tr><td bgcolor='$*stronger_back' align='center'>
+<table width='100%' cellpadding='3' cellspacing='0'
+border='0'
+summary=''>
+<tr class='caption'>
+<td class='caption' align='left'><b>Links</b></td>
+</tr></table>
+<table width='100%' cellpadding='3' cellspacing='0'
+border='0'
+summary=''>
+<tr class='shadowed'>
+<td align='center'>
+<table cellspacing='5'
+cellpadding='0'
+border='0'
+summary=''>
+""";
+    var bool section_open = false;
+    if (not $.linklist[0].is_heading) {
+        println """<tr><td class="meta">[</td><td class="meta" align="right"><b>Links:</b></td><td class="meta" align="center">|</td><td class="meta">""";
+        $section_open = true;
+    }
+    foreach var UserLink l ($.linklist) {
+        if ($l.title) {
+            if ($l.is_heading) {
+                if ($section_open) {
+                    println """</td><td class="meta">]</td></tr>""";
+                }
+                println """<tr><td class="meta">[</td><td class="meta" align="right"><b>$l.title</b></td><td class="meta" align="center">|</td><td class="meta">""";
+                $section_open = true;
+            } else {
+                println """<a href="$l.url">$l.title</a> """;
+            }
+        }
+    }
+    println """</td><td class="meta">]</td></tr>""";
+
+"</table>
+</td>
+</tr>
+</table>
+</td>
+</tr></table>
+</p>
+";
+}
+
 function Page::print ()
 {
     var string title = $this->title();
@@ -268,6 +326,13 @@ $website
 </tr></table>
 </td></tr>
 </table>
+
+""";
+if (size $.linklist > 0 and $*linklist_support) {
+$this->print_linklist();
+}
+"""
+
 <p>
 """;
     $this->print_body();
