@@ -1,108 +1,193 @@
-<?page
-title=><?_ml .title _ml?>
-body<=
 <?_code
+{
+    use strict;
+    use vars qw (%GET);
+
     LJ::set_active_crumb('manage');
+
+    my $remote = LJ::get_remote();
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    
+    if ($u) {
+        LJ::load_user_props($u, "stylesys");
+        $u->{'stylesys'} ||= 1;
+    }
+
+    $BMLCodeBlock::u = $u;
+    $BMLCodeBlock::authas = "?authas=$authas";
     return;
-_code?>
-<?p <?_ml .about _ml?> p?>
-<?_code return LJ::get_remote() ? "" : "<?p <?de $ML{'.login'} de?> p?>"; _code?>
-
-<?h1 <?_ml .information.header _ml?> h1?>
-<?p  <?_ml .information        _ml?>  p?>
-<dl>
-  <dt><a href="/editinfo.bml"><?_ml /editinfo.bml.title _ml?></a></dt>
-  <dd><?_ml .information.editinfo.about _ml?></dd>
-  <dt><a href="/accountstatus.bml"><?_ml .information.status _ml?></a></dt>
-  <dd><?_ml .information.status.about _ml?></dd>
-  <dt><a href="/changepassword.bml"><?_ml .information.changepass _ml?></a></dt>
-  <dd><?_ml .information.changepass.about _ml?></dd>
-  <dt><a href="./siteopts.bml"><?_ml /manage/siteopts.bml.title _ml?></a></dt>
-  <dd><?_ml .information.siteopts.about _ml?></dd>
-  <dt><a href="./emailpost.bml"><?_ml .information.emailpost _ml?></a></dt>
-  <dd><?_ml .information.emailpost.about _ml?></dd>
-  <dt><a href="./pubkey.bml">PGP/GPG public key</a></dt>
-  <dd>Upload your public key</dd>
-  <dt><a href="/manage/invites.bml"><?_ml /manage/invites.bml.title _ml?></a></dt>
-  <dd><?_ml .communities.invites.about _ml?></dd>
-</dl>
-
-<?h1 <?_ml .customization.header _ml?> h1?>
-<?p  <?_ml .customization        _ml?>  p?>
-<dl>
-   <dt><?_ml .customization.s1.header _ml?></dt>
-   <dd>
-      <dl>
-         <dt><a href="/modify.bml"><?_ml /modify.bml.title _ml?></a></dt>
-         <dd><?_ml .customization.modify.about _ml?></dd>
-      </dl>
-   </dd>
-   <dt><?_ml .customization.s2.header _ml?></dt>
-   <dd>
-      <dl>
-         <dt><a href="/customize/"><?_ml .customization.customize _ml?></a></dt>
-         <dd><?_ml .customization.customize.about _ml?></dd>
-         <dt><a href="/customize/advanced/"><?_ml .customization.advanced _ml?></a></dt>
-         <dd><?_ml .customization.advanced.about _ml?></dd>
-         <dt><a href="./links.bml"><?_ml .customization.links _ml?></a></dt>
-         <dd><?_ml .customization.links.about _ml?></dd>
-      </dl>
-   </dd>
-   <dt><?_ml .customization.moodtheme.header _ml?></dt>
-    <dd>
-       <dl>
-          <dt><a href="/modify.bml"><?_ml .customization.moodtheme.set.header _ml?></a></dt>
-          <dd><?_ml .customization.moodtheme.set _ml?></dd>
-          <dt><a href="./moodthemes.bml"><?_ml .customization.moodtheme.editor.header _ml?></a></dt>
-          <dd><?_ml .customization.moodtheme.editor _ml?></dd>
-       </dl>
-    </dd>
-</dl>
-
-<?h1 <?_ml .entries.header _ml?> h1?>
-<?p  <?_ml .entries        _ml?>  p?>
-<dl>
-  <dt><a href="/editjournal.bml"><?_ml /editjournal.bml.title _ml?></a></dt>
-  <dd><?_ml .entries.edit.about _ml?></dd>
-  <dt><a href="/tools/memories.bml"><?_ml /tools/memories.bml.title.memorable _ml?></a></dt>
-  <dd><?_ml .entries.memories.about _ml?></dd>
-</dl>
-
-<?h1 <?_ml .userpictures.header _ml?> h1?>
-<?p  <?_ml .userpictures        _ml?>  p?>
-<dl>
-  <dt><a href="/editpics.bml"><?_ml .userpictures.edit.about _ml?></a></dt>
-</dl>
-
-<?h1 <?_ml .friends.header _ml?> h1?>
-<?p  <?_ml .friends        _ml?>  p?>
-<dl>
-  <dt><a href="/friends/edit.bml"><?_ml /friends/edit.bml.title _ml?></a></dt>
-  <dd><?_ml .friends.edit.about _ml?></dd>
-  <dt><a href="/friends/editgroups.bml"><?_ml /friends/editgroups.bml.title _ml?></a></dt>
-  <dd><?_ml .friends.groups.about _ml?></dd>
-  <dt><a href="/friends/filter.bml"><?_ml .friends.filter _ml?></a></dt>
-  <dd><?_ml .friends.filter.about _ml?></dd>
-</dl>
-
-<?h1 <?_ml .communities.header _ml?> h1?>
-<?p  <?_ml .communities        _ml?>  p?>
-<dl>
-  <dt><a href="/community/create.bml"><?_ml /community/create.bml.title _ml?></a></dt>
-  <dd><?_ml .communities.create.about _ml?></dd>
-  <dt><a href="/community/manage.bml"><?_ml /community/manage.bml.title _ml?></a></dt>
-  <dd><?_ml .communities.manage.about _ml?></dd>
-</dl>
-
-<=body
-head<=
-<style type='text/css'>
-dl, dd {
-    margin-left: 30px;
 }
-dt {
-    font-weight: bold;
+_code?>
+
+<?_info
+localblocks<=
+
+block<=
+{F}<?h2 %%header%% h2?>
+<div style="margin-left: 2em">%%about%%
+<ul style="padding-left: 2em; font-weight: bold">
+%%list%%
+</ul></div>
+<=block
+
+authas=>{s}<?_code return $BMLCodeBlock::authas if ref $BMLCodeBlock::u; _code?>
+
+<=localblocks
+_info?>
+
+<?page
+head<=
+<style type="text/css">
+#ExtraInfo
+{
+  float: right;
+  width: 20em;
+  border: 2px solid <?emcolor?>;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  padding-right: 1em;
+  padding-left: 1em;
+  color: #333;
+}
+#ExtraInfo ul {
+  padding-left: 1em;
 }
 </style>
 <=head
+title=><?_ml .title _ml?>
+body<=
+<?_code
+{
+    use strict;
+    use vars qw (%GET);
+
+    my $ret;
+
+    my $remote = LJ::get_remote();
+    return $ML{'.login'} unless $remote;
+
+    my $u = $BMLCodeBlock::u;
+    return LJ::bad_input("You could not be authenticated as the specified user.")
+        unless $u;
+
+
+    $ret .= "</a><form action='/manage/index.bml' method='get'>\n";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+    $ret .= "</form>\n\n";
+
+    my $status = $u->{'status'} eq "A" ? "Validated" : "Not Validated";
+
+    $ret .= "<?h1 Your Account: h1?><div style='margin-left: 2em;'>";
+    $ret .= "<table width='50%'>";
+    $ret .= "<tr><th align='left'>User:</th><td>" . LJ::ljuser($u) . "</td></tr>";
+    $ret .= "<tr><th align='left'>Name:</th><td>$u->{'name'}</td></tr>";
+    $ret .= "<tr><th align='left'>E-mail Address:</th><td>$u->{'email'} (<em>$status</em>)</td></tr>";
+    $ret .= "</table></div>";
+
+    return $ret;
+    
+}
+_code?>
+
+<table style="width: 100%; clear: both">
+<tr valign="top"><td style="width: 50%">
+<?block
+header=><?_ml .information.header _ml?>
+about=><?_ml .information _ml?>
+list<=
+<li><a href="/editinfo.bml<?authas?>" title="<?_ml .information.editinfo.about _ml?>"><?_ml /editinfo.bml.title _ml?></a></li>
+<li><a href="/accountstatus.bml<?authas?>" title="<?_ml .information.status.about _ml?>"><?_ml .information.status _ml?></a></li>
+<li><a href="/changepassword.bml" title="<?_ml .information.changepass.about _ml?>"><?_ml .information.changepass _ml?></a></li>
+<li><a href="./siteopts.bml" title="<?_ml .information.siteopts.about _ml?>"><?_ml /manage/siteopts.bml.title _ml?></a></li>
+<li><a href="./emailpost.bml" title="<?_ml .information.emailpost.about _ml?>"><?_ml .information.emailpost _ml?></a></li>
+<li><a href="./pubkey.bml" title="Upload your public key">PGP/GPG public key</a></li>
+<li><a href="/manage/invites.bml" title="<?_ml .communities.invites.about _ml?>"><?_ml /manage/invites.bml.title _ml?></a></li>
+<=list
+block?>
+
+<?block
+header=><?_ml .customization.header _ml?>
+about=><?_ml .customization _ml?>
+list<=
+
+<?_code
+{
+    my $u = $BMLCodeBlock::u;
+    my $authas = ref $u ? "?authas=$u->{user}" : "";
+    my $customization;
+    if ($u->{'stylesys'} == 1) {
+        $customization .= "<li><a href='/modify.bml$authas'>$ML{'/modify.bml.title'}</a></li>";
+    } else {
+        $customization .= "<li><a href='/customize/index.bml$authas' title='$ML{'.customization.customize.about'}'><?_ml .customization.customize _ml?></a></li>";
+        $customization .= "<li><a href='/customize/advanced/index.bml$authas' title='$ML{'.customization.advanced.about'}'><?_ml .customization.advanced _ml?></a></li>";
+        $customization .= "<li><a href='./links.bml$authas' title='$ML{'.customization.links.about'}'><?_ml .customization.links _ml?></a></li>";
+    }
+    return $customization;
+}
+_code?>
+<li><a href="/modify.bml<?authas?>" title="<?_ml .customization.moodtheme.set _ml?>"><?_ml .customization.moodtheme.set.header _ml?></a></li>
+<li><a href="./moodthemes.bml<?authas?>" title="<?_ml .customization.moodtheme.editor _ml?>"><?_ml .customization.moodtheme.editor.header _ml?></a></li> 
+<=list
+block?>
+
+<?block
+header=><?_ml .entries.header _ml?>
+about=><?_ml .entries        _ml?>
+list<=
+<li><a href="/editjournal.bml" title="<?_ml .entries.edit.about _ml?>"><?_ml /editjournal.bml.title _ml?></a></li>
+<li><a href="/tools/memories.bml<?authas?>" title="<?_ml .entries.memories.about _ml?>"><?_ml /tools/memories.bml.title.memorable _ml?></a></li>
+<=list
+block?>
+
+</td><td>
+
+<?_code 
+{
+    my $u = $BMLCodeBlock::u; my $ret;
+    LJ::run_hook('control_panel_column', $u, \$ret); 
+    return $ret;
+}
+_code?>
+
+<?block
+header=><?_ml .userpictures.header _ml?>
+about=><?_ml .userpictures        _ml?>
+list<=
+<li><a href="/editpics.bml<?authas?>"><?_ml .userpictures.edit.about _ml?></a></li>
+<=list
+block?>
+
+<?block
+header=><?_ml .friends.header _ml?>
+about=><?_ml .friends        _ml?>
+list<=
+<li><a href="/friends/edit.bml" title="<?_ml .friends.edit.about _ml?>"><?_ml /friends/edit.bml.title _ml?></a></li>
+<li><a href="/friends/editgroups.bml" title="<?_ml .friends.groups.about _ml?>"><?_ml /friends/editgroups.bml.title _ml?></a></li>
+<li><a href="/friends/filter.bml" title="<?_ml .friends.filter.about _ml?>"><?_ml .friends.filter _ml?></a></li>
+<=list
+block?>
+
+<?block
+header=><?_ml .communities.header _ml?>
+about=><?_ml .communities        _ml?>
+list<=
+<li><a href="/community/create.bml" title="<?_ml .communities.create.about _ml?>"><?_ml /community/create.bml.title _ml?></a></li>
+<li><a href="/community/manage.bml" title="<?_ml .communities.manage.about _ml?>"><?_ml /community/manage.bml.title _ml?></a></li>
+<=list
+block?>
+</tr></table>
+<=body
+pretitle<=
+<?_code
+{
+    use strict;
+    my $u = $BMLCodeBlock::u; my $ret;
+    
+    # user switcher
+    LJ::run_hook('control_panel_extra_info', $u, \$ret) if $u;
+    return $ret;
+}
+_code?>
+<=pretitle
 page?>
