@@ -12,12 +12,14 @@ my $opt_local_lang;
 my $opt_extra;
 my $opt_only;
 my $opt_override;
+my $opt_verbose;
 exit 1 unless
 GetOptions(
            "help" => \$opt_help,
            "local-lang=s" => \$opt_local_lang,
            "extra=s" => \$opt_extra,
-           "override|v" => \$opt_override,
+           "override|r" => \$opt_override,
+           "verbose" => \$opt_verbose,
            "only=s" => \$opt_only,
            );
 
@@ -409,7 +411,7 @@ sub poptext
                 my $res = LJ::Lang::set_text($dbh, 1, $l->{'lncode'}, $code, $text,
                                              { 'staleness' => $staleness,
                                                'notes' => $metadata{'notes'}, });
-                $out->("set: $code");
+                $out->("set: $code") if $opt_verbose;
                 unless ($res) {
                     $out->('x', "ERROR: " . LJ::Lang::last_error());
                 }
