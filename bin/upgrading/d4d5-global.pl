@@ -48,7 +48,7 @@ my $move_user = sub {
                 qw(styleid userid styledes type formatdata is_public 
                    is_embedded is_colorfree opt_cache has_ads lastupdate) ],
                ['overrides' => 's1overrides',
-                qw(styleid cleandate type opt_cache vars_stor vars_cleanver) ]
+                qw(userid override) ]
                );
 
     # in moving, s1stylecache gets special cased because its
