@@ -62,6 +62,7 @@ propgroup presentation {
   }
   property use page_recent_items;
   property use page_friends_items;
+  property use use_shared_pic;
   property use view_entry_disabled;
   property string page_background_image {
       des = "URL to an image to be used for the page background";

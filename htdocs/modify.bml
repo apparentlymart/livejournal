@@ -27,7 +27,6 @@ body<=
 
     ### user is now authenticated ###
 
-    my $dbh;
     my $dbr = LJ::get_db_reader();
     my $sth;
 
@@ -36,211 +35,7 @@ body<=
     LJ::load_user_props($u, "opt_usesharedpic",
                         "s1_lastn_style", "s1_calendar_style",
                         "s1_day_style", "s1_friends_style",
-                        "stylesys",
-                        "journaldomain",
-                        );
-
-    # not submitting a post, show edit form
-    unless (LJ::did_post()) {
-        my $ret;
-
-        # user switcher
-        $ret .= "<form action='modify.bml' method='get'>\n";
-        $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
-        $ret .= "</form>\n\n";
-
-        ### journal style
-        $ret .= "<?h1 $ML{'.journaloptions.head'} h1?>\n<?p $ML{'.journaloptions.about'} p?>\n\n";
-
-        ###
-        ### LAYOUT OPTIONS
-        ###
-
-        $ret .= "<form method='post' action='modify.bml?authas=$authas'>\n";
-
-        unless ($u->{'stylesys'} == 2) 
-        {
-            my $and = $capstyles ? "" : "<?_ml .pagelayoutstyle.warning _ml?>";
-            $ret .= "<?h2 $ML{'.pagelayoutstyle.head'} h2?><?p $ML{'.pagelayoutstyle.about'}  $and p?>\n";
-            $ret .= "<table style='margin-left: 30px; margin-bottom: 20px;'>\n";
-            $ret .= "<tr bgcolor='#d0d0d0'><td></td><td>$ML{'.availablestyles.head'}</td></tr>\n";
-            my %styles = ();
-
-            $sth = $dbr->prepare("SELECT styleid, styledes, user, type ".
-                                 "FROM style WHERE (user='system' AND is_public='Y') ".
-                                 "OR user=? ORDER BY styledes");
-            $sth->execute($u->{'user'});
-            push @{$styles{$_->{'type'}}}, $_ while ($_ = $sth->fetchrow_hashref);
-            
-            foreach my $view (@LJ::views)
-            {
-                $ret .= "<tr><td bgcolor='#d0d0d0'>$LJ::viewinfo{$view}->{'des'}</td><td>";
-
-                my @list = map { $_->{'styleid'}, $_->{'styledes'} }
-                           grep { $_->{'user'} eq 'system' } @{$styles{$view} || []};
-
-                my $exist_user_style = 0;
-                foreach (grep { $_->{'user'} ne "system" } @{$styles{$view} || []}) {
-                    if (!$exist_user_style) {
-                        $exist_user_style = 1;
-                        push @list, ('', "--- $ML{'.availablestyles.userstyles'} ---");
-                    }
-                    push @list, ($_->{'styleid'}, $_->{'styledes'});
-                }
-
-                $ret .= LJ::html_select({ 'name' => "s1_${view}_style",
-                                          'selected' => $u->{"s1_${view}_style"} }, @list);
-
-                $ret .= "</td></tr>\n";
-            }
-            $ret .= "</table>\n\n";
-            
-            ###
-            ### COLOR THEME OPTIONS
-            ###
-            $ret .= "<?h2 $ML{'.colortheme.head'} h2?><?p $ML{'.colortheme.about'} p?>\n";
-            $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>\n";
-
-            $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'themetype', 
-                                     'value' => 'default', 'selected' => $u->{'themeid'} > 0 });
-            $ret .= "<b>$ML{'.colortheme.defaulttheme'}</b>: ";
-
-            my @list;
-            $sth = $dbr->prepare("SELECT themeid, name FROM themelist ORDER BY name");
-            $sth->execute;
-            while ($_ = $sth->fetchrow_hashref) {
-                push @list, ($_->{'themeid'}, $_->{'name'});
-            }
-            $ret .= LJ::html_select({ 'name' => 'themeid', 'selected' => $u->{'themeid'} }, @list) . "<br />\n";
-            $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'themetype',
-                                     'value' => 'custom', 'selected' => $u->{'themeid'} == 0 }) . "\n";
-            $ret .= "<b>$ML{'.colortheme.customcolors'}</b>:";
-
-            $ret .= "<table border='1' align='center' cellpadding='2'>\n";
-            $ret .= "<tr valign='top' bgcolor='#d0d0d0'><td align='right'><b>$ML{'.colortheme.area.head'}</b></td><td><b>$ML{'.colortheme.color.head1'}</b><br /><font size='-1'>$ML{'.colortheme.color.head2'}</font></td></tr>\n";
-            
-            # get the user's custom colors
-            my %custcolors = ();
-
-            if ($u->{'themeid'} == 0) {
-                my $dbcr = LJ::get_cluster_reader($u);
-                my $stor = $dbcr->selectrow_array("SELECT color_stor FROM s1usercache WHERE userid=?",
-                                                  undef, $u->{'userid'});
-                if ($stor) {
-                    %custcolors = %{ Storable::thaw($stor) };
-                } else {
-                    # ancient table.
-                    $sth = $dbr->prepare("SELECT coltype, color FROM themecustom WHERE user=?");
-                    $sth->execute($u->{'user'});
-                    $custcolors{$_->{'coltype'}} = $_->{'color'} while $_ = $sth->fetchrow_hashref;
-                }
-            } else {
-                $sth = $dbr->prepare("SELECT coltype, color FROM themedata WHERE themeid=?");
-                $sth->execute($u->{'themeid'});
-                $custcolors{$_->{'coltype'}} = $_->{'color'} while $_ = $sth->fetchrow_hashref;
-            }
-            
-            my $dig;
-            foreach my $col (@LJ::S1::themecoltypes) {
-                $ret .= "<tr><td align='right'>$col->[1]</td><td>";
-                $ret .= LJ::html_text({ 'name' => "theme_cust:$col->[0]", 'size' => '20',
-                                        'maxlength' => '30', 'value' => $custcolors{$col->[0]} });
-                $ret .= "</td></tr>\n";
-                $dig .= $col->[0];
-            }
-            $dig = Digest::MD5::md5_hex($dig);
-            $ret .= LJ::html_hidden("themecolors_dig", $dig) unless $u->{'themeid'};
-            
-            $ret .= "</table></div>\n\n";
-        }
-
-        ###
-        ### MOOD THEME OPTIONS
-        ###
-        $ret .= "<?h2 $ML{'.moodicons.head'} h2?><?p $ML{'.moodicons.about'} p?>\n";
-
-        $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y'");
-        $sth->execute;
-        my @themes = ({ 'moodthemeid' => 0, 'name' => '(None)' });
-        push @themes, $_ while ($_ = $sth->fetchrow_hashref);
-
-        ### user's private themes
-        {	
-            my @theme_user;
-            $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE ownerid=? AND is_public='N'");
-            $sth->execute($u->{'userid'});
-            push @theme_user, $_ while ($_ = $sth->fetchrow_hashref);
-            if (@theme_user) {
-                push @themes, { 'moodthemeid' => 0, 'name' => "--- $ML{'.moodicons.personal'} ---" };
-                push @themes, @theme_user;
-            }
-        }
-
-        $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'><b>$ML{'.moodicons.select'} </b>\n";
-        $ret .= LJ::html_select({ 'name' => 'moodthemeid', 'selected' => $u->{'moodthemeid'} },
-                                map { $_->{'moodthemeid'}, $_->{'name'} } @themes) . "\n";
-
-        $ret .= "(<a href='$LJ::SITEROOT/moodlist.bml' target='moods'>$ML{'.moodicons.preview'}</a>)\n";
-        $ret .= "<br />" . LJ::html_check({ 'type' => 'check', 'name' => 'opt_forcemoodtheme',
-                                            'selected' => $u->{'opt_forcemoodtheme'} eq 'Y' }) . "\n";
-        $ret .= "$ML{'.moodicons.opt.forcefriends.about'}</div>\n\n";
-        
-        ###
-        ### FRIENDS VIEW OPTIONS
-        ###
-        $ret .= "<?h2 $ML{'.friends.head'} h2?><?p $ML{'.friends.about'} p?>";
-        $ret .= "<table style='margin-left: 30px; margin-bottom: 20px;' cellspacing='0'>\n";
-
-        $ret .= "<tr valign='middle'><td>";
-        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_usesharedpic', 'selected' => $u->{'opt_usesharedpic'} });
-        $ret .= "</td><td><b>$ML{'.friends.opt.usesharedpic.head'}</b></td></tr>\n";
-        $ret .= "<tr><td>&nbsp;</td><td>$ML{'.friends.opt.usesharedpic.about'}</td></tr>\n";
-        
-        $ret .= "</table>\n\n";
-
-        ###
-        ### JOURNAL DOMAIN OPTIONS
-        ###
-        if ($LJ::OTHER_VHOSTS && LJ::get_cap($u, "userdomain")) {
-            $ret .= "<?h2 $ML{'.domainalias.head'} h2?><?p $ML{'.domainalias.about'} p?>\n";
-            $ret .= "<div style='margin: 20px 0 20px 30px'>$ML{'.domainalias.domainname'} ";
-            $ret .= LJ::html_text({ 'name' => 'journaldomain', 'size' => '30',
-                                    'maxlength' => '80', 'value' => $u->{'journaldomain'} });
-            $ret .= " $ML{'.domainalias.example'}\n";
-            $ret .= "<?p " . BML::ml(".domainalias.helptext", {'sitename' => $LJ::SITENAME})." p?></div>\n\n";
-        }
-
-
-        ###
-        ### STYLE OVERRIDES
-        ###
-        unless ($u->{'stylesys'} == 2) {
-
-            # first, load the overrides if they use 'em:
-            my $overrides = "";
-            if ($u->{'useoverrides'} eq "Y") {
-                $dbh ||= LJ::get_db_writer();
-                $overrides = $dbh->selectrow_array("SELECT override FROM overrides WHERE user=?", undef, $u->{'user'});
-                LJ::text_out(\$overrides);
-            }
-
-            $ret .= "<div style='margin-bottom: 20px'>\n";
-            $ret .= "<?h1 $ML{'.overrides.head'} h1?><?p $ML{'.overrides.about'} p?>\n";
-            $ret .= "<?p <font size='+1'><b>$ML{'.overrides.warning'}</b></font> p?>\n";
-            $ret .= "<?p $ML{'.overrides.note'} p?>\n";
-            $ret .= "<?standout <b>$ML{'.overrides.box.head'}</b><br />";
-            $ret .= LJ::html_textarea({ 'name' => 'overrides', 'cols' => '60', 'rows' => '15',
-                                        'wrap' => 'off', 'value' => $overrides }) . " standout?>";
-            $ret .= "</div>\n\n";
-        }
-
-        ### ending submit block
-        $ret .= "<?h1 $ML{'.done.head'} h1?><?p $ML{'.done.text'} p?>\n";
-        $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.done.btn.savechanges'}) . " standout?>\n";
-        $ret .= "</form>\n";
-
-        return $ret;
-    }
+                        "stylesys", "journaldomain");
 
     # if a POST, update their info
     if (LJ::did_post()) {
@@ -252,179 +47,15 @@ body<=
             return "<?h1 $ML{'error'} h1?><?p $ML{'error.dberror'} <b>@_[0]</b> p?>";
         };
 
-        $dbh ||= LJ::get_db_writer();
+        my $dbh = LJ::get_db_writer();
 
         # setup what we're gonna update in the user table:
         my %update = ();
 
-        # validate moodthemeid
-        # mood theme, make sure they're allowed to use it
-        my $moodthemeid = $POST{'moodthemeid'}+0;
-        if ($moodthemeid) {
-            my ($mownerid, $mpublic) = $dbr->selectrow_array("SELECT ownerid, is_public FROM moodthemes ".
-                                                             "WHERE moodthemeid=?", undef, $moodthemeid);
-            $moodthemeid = 0 unless $mpublic eq 'Y' || $mownerid == $u->{'userid'};
-        }
-        $update{'moodthemeid'} = $moodthemeid;
-
-        # color themes
-        $update{'themeid'} = $POST{'themetype'} eq "custom" ? 0 : $POST{'themeid'};
-        $update{'opt_forcemoodtheme'} = $POST{'opt_forcemoodtheme'} ? "Y" : "N";
-        
-        if ($POST{'themetype'} eq "custom") {
-            my $dig = Digest::MD5::md5_hex(join(",", map { $POST{"theme_cust:$_"} }
-                                                map { $_->[0] } @LJ::S1::themecoltypes));
-            if ($dig ne $POST{'themecolors_dig'}) {
-                my %cols;
-                foreach my $col (@LJ::S1::themecoltypes) {
-                    my $val = $POST{"theme_cust:$col->[0]"};
-                    next if length($val) > 20;
-                    next unless ($val =~ /^\#[a-f0-9]{6,6}$/i ||
-                                 $val !~ /[^\s\w]/);
-                    $cols{$col->[0]} = $val;
-                }
-
-                my $dbcm = LJ::get_cluster_master($u, 1);
-                $dbcm->do("INSERT IGNORE INTO s1usercache (userid) VALUES (?)", undef, $u->{'userid'});
-                $dbcm->do("UPDATE s1usercache SET color_stor=? WHERE userid=?", undef, 
-                          Storable::freeze(\%cols), $u->{'userid'});
-                LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
-
-                $dbh->do("DELETE FROM themecustom WHERE user=?", undef, $u->{'user'})
-                    if $dbh->selectrow_array("SELECT user FROM themecustom ".
-                                             "WHERE user=? LIMIT 1", undef, $u->{'user'});
-            }
-        }
-
-        # update 'overrides' table
-        if ($POST{'overrides'} !~ /\S/) 
-        {
-            $dbh->do("DELETE FROM overrides WHERE user=?", undef, $u->{'user'});
-            $update{'useoverrides'} = "N";
-
-        } else {
-
-            my $oldoverrides = "";
-            if ($u->{'useoverrides'} eq "Y") {
-                $oldoverrides = $dbh->selectrow_array("SELECT override FROM overrides WHERE user=?",
-                                                      undef, $u->{'user'});
-            }
-
-            # This allows users to keep their current illegal overrides,
-            # but they may not create new ones nor edit the ones they already have.
-            # They may only delete or keep illegal overrides.
-            my %overrides = ();
-            my %newoverrides = ();
-            LJ::parse_vars(\$oldoverrides,\%overrides);
-            LJ::parse_vars(\$POST{'overrides'},\%newoverrides);
-            
-            # head overrides should only have valid head elements in them
-            foreach my $a (qw(GLOBAL LASTN FRIENDS CALENDAR DAY)) {
-                my $sec = "${a}_HEAD";
-                next unless $newoverrides{$sec} ne $overrides{$sec};
-
-                my $testtag = sub {
-                    my $tag = lc(shift);
-                    return "<$tag" if ($tag eq "title" || $tag eq "base" ||
-                                       $tag eq "style" || $tag eq "link" ||
-                                       $tag eq "meta" || $tag  eq "xx");
-                    return "<xx-$tag";
-                };
-                $newoverrides{$sec} =~ s/\<(\w+)/$testtag->($1)/eig;
-                $newoverrides{$sec} =~ s/\<\/head/\<\/xx-head/ig;
-            }
-
-            # load all the properties to see which ones are overridable
-            my @vars;
-            LJ::load_objects_from_file("vars.dat", \@vars);
-            foreach my $v (@vars) {
-                my $ov = $v->{'props'}->{'override'}; 
-                if ($ov eq "yes" || $ov eq "only" || $capstyles) {
-                    my $name = $v->{'name'};
-                    if (defined $newoverrides{$name}) {
-                        $overrides{$name} = $newoverrides{$name};
-                    }
-                }
-            }
-            
-            # make the new override code we'll put in the database
-            my $overr='';
-            foreach (keys %overrides) {
-                if ($newoverrides{$_}) {
-                    if ($overrides{$_} =~ /\n/) {
-                        $overr .= "$_<=\n".$overrides{$_}."\n<=$_\n\n";
-                    } else {
-                        $overr .= "$_=>".$overrides{$_}."\n\n";
-                    }
-                }
-            }
-            
-            # no value, delete overrides
-            if ($overr !~ /\S/) {
-
-                $dbh->do("DELETE FROM overrides WHERE user=?", undef, $u->{'user'});
-                $update{'useoverrides'} = "N";
-
-            # have a value, update overrides
-            } else {
-
-                $dbh->do("REPLACE INTO overrides SET user=?, override=?",
-                         undef, $u->{'user'}, $overr);
-                $update{'useoverrides'} = "Y";
-
-                my $dbcm = LJ::get_cluster_master($u, 1);
-                $dbcm->do("UPDATE s1usercache SET override_stor=NULL WHERE userid=?",
-                          undef, $u->{'userid'});
-                LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
-                return $dberr->($dbcm->errstr) if $dbcm->err;
-            }
-        }
-
-        # did an error occurr above?
-        return $dberr->($dbh->errstr) if $dbh->err;
-
-        # update 'user' table
-        my $sets = "";
-        foreach (keys %update) {
-            $sets .= "$_=" . $dbh->quote($update{$_}) . ",";
-        }
-        chop $sets;
-
-        LJ::update_user($u, { raw => $sets });
-
         # what userprops we'll be setting.
         my %uprop;
-        $uprop{'opt_usesharedpic'} = $POST{'opt_usesharedpic'} ? "1" : "0";
 
-        # set all the styles
-        {
-            my @picked = ();
-            foreach my $view (@LJ::views) {
-                my $sid = $POST{"s1_${view}_style"}+0;
-                if ($sid) {
-                    $uprop{"s1_${view}_style"} = $sid;
-                    push @picked, $sid;
-                }
-            }
-
-            unless ($capstyles) {
-
-                # verify they haven't forged the style numbers
-                my $in = join(",", 0, @picked);
-                
-                $sth = $dbr->prepare("SELECT COUNT(*) FROM style WHERE ".
-                                     "((user='system' AND is_public='Y') OR user=?) ".
-                                     "AND styleid IN ($in)");
-                $sth->execute($u->{'user'});
-                return $dberr->($dbr->errstr) if $dbr->err;
-
-                my ($count) = $sth->fetchrow_array;
-                if ($count != scalar(@picked)) {
-                    return LJ::bad_input($ML{'.error.stylenotavailable'});
-                }
-            }
-        }
-
+        # journal domains
         if (exists $POST{'journaldomain'} && 
             $u->{'journaldomain'} ne $POST{'journaldomain'}) 
         {
@@ -444,10 +75,186 @@ body<=
                 $dbh->do("DELETE FROM domains WHERE userid=? AND domain <> ?",
                          undef, $u->{'userid'}, $dom);
             }
-            $uprop{'journaldomain'} = $dom;
+
+            # set journaldomain prop if it's been changed
+            $uprop{'journaldomain'} = $dom
+                unless $POST{'journaldomain'} eq $u->{'journaldomain'};
         }
 
-        ### change any of the userprops ?
+        # validate moodthemeid
+        # mood theme, make sure they're allowed to use it
+        my $moodthemeid = $POST{'moodthemeid'}+0;
+        if ($moodthemeid) {
+            my ($mownerid, $mpublic) = $dbr->selectrow_array("SELECT ownerid, is_public FROM moodthemes ".
+                                                             "WHERE moodthemeid=?", undef, $moodthemeid);
+            $moodthemeid = 0 unless $mpublic eq 'Y' || $mownerid == $u->{'userid'};
+        }
+        $update{'moodthemeid'} = $moodthemeid;
+        $update{'opt_forcemoodtheme'} = $POST{'opt_forcemoodtheme'} ? "Y" : "N";
+        
+
+        # all of these options should only be processed for S1 users
+        if ($u->{'stylesys'} == 1) {
+
+            # color themes
+            $update{'themeid'} = $POST{'themetype'} eq "custom" ? 0 : $POST{'themeid'};
+        
+            if ($POST{'themetype'} eq "custom") {
+                my $dig = Digest::MD5::md5_hex(join(",", map { $POST{"theme_cust:$_"} }
+                                                    map { $_->[0] } @LJ::S1::themecoltypes));
+                if ($dig ne $POST{'themecolors_dig'}) {
+                    my %cols;
+                    foreach my $col (@LJ::S1::themecoltypes) {
+                        my $val = $POST{"theme_cust:$col->[0]"};
+                        next if length($val) > 20;
+                        next unless ($val =~ /^\#[a-f0-9]{6,6}$/i ||
+                                     $val !~ /[^\s\w]/);
+                        $cols{$col->[0]} = $val;
+                    }
+
+                    my $dbcm = LJ::get_cluster_master($u, 1);
+                    $dbcm->do("INSERT IGNORE INTO s1usercache (userid) VALUES (?)", undef, $u->{'userid'});
+                    $dbcm->do("UPDATE s1usercache SET color_stor=? WHERE userid=?", undef, 
+                              Storable::freeze(\%cols), $u->{'userid'});
+                    LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
+
+                    $dbh->do("DELETE FROM themecustom WHERE user=?", undef, $u->{'user'})
+                        if $dbh->selectrow_array("SELECT user FROM themecustom ".
+                                                 "WHERE user=? LIMIT 1", undef, $u->{'user'});
+                }
+            }
+
+            # update 'overrides' table
+            if ($POST{'overrides'} !~ /\S/) 
+            {
+                $dbh->do("DELETE FROM overrides WHERE user=?", undef, $u->{'user'});
+                $update{'useoverrides'} = "N";
+
+            } else {
+
+                my $oldoverrides = "";
+                if ($u->{'useoverrides'} eq "Y") {
+                    $oldoverrides = $dbh->selectrow_array("SELECT override FROM overrides WHERE user=?",
+                                                          undef, $u->{'user'});
+                }
+
+                # This allows users to keep their current illegal overrides,
+                # but they may not create new ones nor edit the ones they already have.
+                # They may only delete or keep illegal overrides.
+                my %overrides = ();
+                my %newoverrides = ();
+                LJ::parse_vars(\$oldoverrides,\%overrides);
+                LJ::parse_vars(\$POST{'overrides'},\%newoverrides);
+            
+                # head overrides should only have valid head elements in them
+                foreach my $a (qw(GLOBAL LASTN FRIENDS CALENDAR DAY)) {
+                    my $sec = "${a}_HEAD";
+                    next unless $newoverrides{$sec} ne $overrides{$sec};
+
+                    my $testtag = sub {
+                        my $tag = lc(shift);
+                        return "<$tag" if ($tag eq "title" || $tag eq "base" ||
+                                           $tag eq "style" || $tag eq "link" ||
+                                           $tag eq "meta" || $tag  eq "xx");
+                        return "<xx-$tag";
+                    };
+                    $newoverrides{$sec} =~ s/\<(\w+)/$testtag->($1)/eig;
+                    $newoverrides{$sec} =~ s/\<\/head/\<\/xx-head/ig;
+                }
+
+                # load all the properties to see which ones are overridable
+                my @vars;
+                LJ::load_objects_from_file("vars.dat", \@vars);
+                foreach my $v (@vars) {
+                    my $ov = $v->{'props'}->{'override'}; 
+                    if ($ov eq "yes" || $ov eq "only" || $capstyles) {
+                        my $name = $v->{'name'};
+                        if (defined $newoverrides{$name}) {
+                            $overrides{$name} = $newoverrides{$name};
+                        }
+                    }
+                }
+            
+                # make the new override code we'll put in the database
+                my $overr='';
+                foreach (keys %overrides) {
+                    if ($newoverrides{$_}) {
+                        if ($overrides{$_} =~ /\n/) {
+                            $overr .= "$_<=\n".$overrides{$_}."\n<=$_\n\n";
+                        } else {
+                            $overr .= "$_=>".$overrides{$_}."\n\n";
+                        }
+                    }
+                }
+            
+                # no value, delete overrides
+                if ($overr !~ /\S/) {
+                    
+                    $dbh->do("DELETE FROM overrides WHERE user=?", undef, $u->{'user'});
+                    $update{'useoverrides'} = "N";
+
+                # have a value, update overrides
+                } else {
+
+                    $dbh->do("REPLACE INTO overrides SET user=?, override=?",
+                             undef, $u->{'user'}, $overr);
+                    $update{'useoverrides'} = "Y";
+
+                    my $dbcm = LJ::get_cluster_master($u, 1);
+                    $dbcm->do("UPDATE s1usercache SET override_stor=NULL WHERE userid=?",
+                              undef, $u->{'userid'});
+                    LJ::MemCache::delete([$u->{'userid'}, "s1uc:$u->{'userid'}"]);
+                    return $dberr->($dbcm->errstr) if $dbcm->err;
+                }
+            }
+
+            # did an error occurr above?
+            return $dberr->($dbh->errstr) if $dbh->err;
+
+            # friends view shared pic option for s1
+            $uprop{'opt_usesharedpic'} = $POST{'opt_usesharedpic'} ? "1" : "0";
+
+            # set all the styles
+            {
+                my @picked = ();
+                foreach my $view (@LJ::views) {
+                    my $sid = $POST{"s1_${view}_style"}+0;
+                    if ($sid) {
+                        $uprop{"s1_${view}_style"} = $sid;
+                        push @picked, $sid;
+                    }
+                }
+
+                unless ($capstyles) {
+
+                    # verify they haven't forged the style numbers
+                    my $in = join(",", 0, @picked);
+                
+                    $sth = $dbr->prepare("SELECT COUNT(*) FROM style WHERE ".
+                                         "((user='system' AND is_public='Y') OR user=?) ".
+                                         "AND styleid IN ($in)");
+                    $sth->execute($u->{'user'});
+                    return $dberr->($dbr->errstr) if $dbr->err;
+
+                    my ($count) = $sth->fetchrow_array;
+                    if ($count != scalar(@picked)) {
+                        return LJ::bad_input($ML{'.error.stylenotavailable'});
+                    }
+                }
+            }
+        }
+
+
+        # update 'user' table
+        my $sets = "";
+        foreach (keys %update) {
+            $sets .= "$_=" . $dbh->quote($update{$_}) . ",";
+        }
+        chop $sets;
+
+        LJ::update_user($u, { raw => $sets });
+
+        # change any of the userprops ?
         foreach my $uprop (keys %uprop) {
             next if $POST{$uprop} eq $u->{$uprop};
             LJ::set_userprop($u, $uprop, $uprop{$uprop});
@@ -457,8 +264,209 @@ body<=
         return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text", {'url' => LJ::journal_base($u)})." p?>";
     }
 
-    # should never happen
-    return "$ML{'error.unknownmode'}";
+    # not submitting a post, show edit form
+    my $ret;
+
+    # user switcher
+    $ret .= "<form action='modify.bml' method='get'>\n";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+    $ret .= "</form>\n\n";
+
+    ### journal style
+    $ret .= "<?h1 $ML{'.journaloptions.head'} h1?>\n<?p $ML{'.journaloptions.about'} p?>\n\n";
+
+    ###
+    ### LAYOUT OPTIONS
+    ###
+
+    $ret .= "<form method='post' action='modify.bml?authas=$authas'>\n";
+
+    # using S1, need to take style input
+    if ($u->{'stylesys'} == 1)
+    {
+        my $and = $capstyles ? "" : "<?_ml .pagelayoutstyle.warning _ml?>";
+        $ret .= "<?h2 $ML{'.pagelayoutstyle.head'} h2?><?p $ML{'.pagelayoutstyle.about'}  $and p?>\n";
+        $ret .= "<table style='margin-left: 30px; margin-bottom: 20px;'>\n";
+        $ret .= "<tr bgcolor='#d0d0d0'><td></td><td>$ML{'.availablestyles.head'}</td></tr>\n";
+        my %styles = ();
+
+        $sth = $dbr->prepare("SELECT styleid, styledes, user, type ".
+                             "FROM style WHERE (user='system' AND is_public='Y') ".
+                             "OR user=? ORDER BY styledes");
+        $sth->execute($u->{'user'});
+        push @{$styles{$_->{'type'}}}, $_ while ($_ = $sth->fetchrow_hashref);
+            
+        foreach my $view (@LJ::views)
+        {
+            $ret .= "<tr><td bgcolor='#d0d0d0'>$LJ::viewinfo{$view}->{'des'}</td><td>";
+            
+            my @list = map { $_->{'styleid'}, $_->{'styledes'} }
+            grep { $_->{'user'} eq 'system' } @{$styles{$view} || []};
+
+            my $exist_user_style = 0;
+            foreach (grep { $_->{'user'} ne "system" } @{$styles{$view} || []}) {
+                if (!$exist_user_style) {
+                    $exist_user_style = 1;
+                    push @list, ('', "--- $ML{'.availablestyles.userstyles'} ---");
+                }
+                push @list, ($_->{'styleid'}, $_->{'styledes'});
+            }
+
+            $ret .= LJ::html_select({ 'name' => "s1_${view}_style",
+                                      'selected' => $u->{"s1_${view}_style"} }, @list);
+
+            $ret .= "</td></tr>\n";
+        }
+        $ret .= "</table>\n\n";
+            
+        ###
+        ### COLOR THEME OPTIONS
+        ###
+
+        $ret .= "<?h2 $ML{'.colortheme.head'} h2?><?p $ML{'.colortheme.about'} p?>\n";
+        $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'>\n";
+
+        $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'themetype', 
+                                 'value' => 'default', 'selected' => $u->{'themeid'} > 0 });
+        $ret .= "<b>$ML{'.colortheme.defaulttheme'}</b>: ";
+
+        my @list;
+        $sth = $dbr->prepare("SELECT themeid, name FROM themelist ORDER BY name");
+        $sth->execute;
+        while ($_ = $sth->fetchrow_hashref) {
+            push @list, ($_->{'themeid'}, $_->{'name'});
+        }
+        $ret .= LJ::html_select({ 'name' => 'themeid', 'selected' => $u->{'themeid'} }, @list) . "<br />\n";
+        $ret .= LJ::html_check({ 'type' => 'radio', 'name' => 'themetype',
+                                 'value' => 'custom', 'selected' => $u->{'themeid'} == 0 }) . "\n";
+        $ret .= "<b>$ML{'.colortheme.customcolors'}</b>:";
+        
+        $ret .= "<table border='1' align='center' cellpadding='2'>\n";
+        $ret .= "<tr valign='top' bgcolor='#d0d0d0'><td align='right'><b>$ML{'.colortheme.area.head'}</b></td><td><b>$ML{'.colortheme.color.head1'}</b><br /><font size='-1'>$ML{'.colortheme.color.head2'}</font></td></tr>\n";
+            
+        # get the user's custom colors
+        my %custcolors = ();
+
+        if ($u->{'themeid'} == 0) {
+            my $dbcr = LJ::get_cluster_reader($u);
+            my $stor = $dbcr->selectrow_array("SELECT color_stor FROM s1usercache WHERE userid=?",
+                                              undef, $u->{'userid'});
+            if ($stor) {
+                %custcolors = %{ Storable::thaw($stor) };
+            } else {
+                # ancient table.
+                $sth = $dbr->prepare("SELECT coltype, color FROM themecustom WHERE user=?");
+                $sth->execute($u->{'user'});
+                $custcolors{$_->{'coltype'}} = $_->{'color'} while $_ = $sth->fetchrow_hashref;
+            }
+        } else {
+            $sth = $dbr->prepare("SELECT coltype, color FROM themedata WHERE themeid=?");
+            $sth->execute($u->{'themeid'});
+            $custcolors{$_->{'coltype'}} = $_->{'color'} while $_ = $sth->fetchrow_hashref;
+        }
+            
+        my $dig;
+        foreach my $col (@LJ::S1::themecoltypes) {
+            $ret .= "<tr><td align='right'>$col->[1]</td><td>";
+            $ret .= LJ::html_text({ 'name' => "theme_cust:$col->[0]", 'size' => '20',
+                                    'maxlength' => '30', 'value' => $custcolors{$col->[0]} });
+            $ret .= "</td></tr>\n";
+            $dig .= $col->[0];
+        }
+        $dig = Digest::MD5::md5_hex($dig);
+        $ret .= LJ::html_hidden("themecolors_dig", $dig) unless $u->{'themeid'};
+            
+        $ret .= "</table></div>\n\n";
+        
+        ###
+        ### FRIENDS VIEW OPTIONS
+        ###
+
+        $ret .= "<?h2 $ML{'.friends.head'} h2?><?p $ML{'.friends.about'} p?>";
+        $ret .= "<table style='margin-left: 30px; margin-bottom: 20px;' cellspacing='0'>\n";
+
+        $ret .= "<tr valign='middle'><td>";
+        $ret .= LJ::html_check({ 'type' => 'check', 'name' => 'opt_usesharedpic', 'selected' => $u->{'opt_usesharedpic'} });
+        $ret .= "</td><td><b>$ML{'.friends.opt.usesharedpic.head'}</b></td></tr>\n";
+        $ret .= "<tr><td>&nbsp;</td><td>$ML{'.friends.opt.usesharedpic.about'}</td></tr>\n";
+
+        $ret .= "</table>\n\n";
+            
+        ###
+        ### STYLE OVERRIDES
+        ###
+
+        # first, load the overrides if they use 'em:
+        my $overrides = "";
+        if ($u->{'useoverrides'} eq "Y") {
+            my $dbh = LJ::get_db_writer();
+            $overrides = $dbh->selectrow_array("SELECT override FROM overrides WHERE user=?", undef, $u->{'user'});
+            LJ::text_out(\$overrides);
+        }
+
+        $ret .= "<div style='margin-bottom: 20px'>\n";
+        $ret .= "<?h1 $ML{'.overrides.head'} h1?><?p $ML{'.overrides.about'} p?>\n";
+        $ret .= "<?p <font size='+1'><b>$ML{'.overrides.warning'}</b></font> p?>\n";
+        $ret .= "<?p $ML{'.overrides.note'} p?>\n";
+        $ret .= "<?standout <b>$ML{'.overrides.box.head'}</b><br />";
+        $ret .= LJ::html_textarea({ 'name' => 'overrides', 'cols' => '60', 'rows' => '15',
+                                    'wrap' => 'off', 'value' => $overrides }) . " standout?>";
+        $ret .= "</div>\n\n";
+    }
+
+    ###
+    ### MOOD THEME OPTIONS
+    ###
+
+    $ret .= "<?h2 $ML{'.moodicons.head'} h2?><?p $ML{'.moodicons.about'} p?>\n";
+
+    $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE is_public='Y'");
+    $sth->execute;
+    my @themes = ({ 'moodthemeid' => 0, 'name' => '(None)' });
+    push @themes, $_ while ($_ = $sth->fetchrow_hashref);
+
+    ### user's private themes
+    {	
+        my @theme_user;
+        $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE ownerid=? AND is_public='N'");
+        $sth->execute($u->{'userid'});
+        push @theme_user, $_ while ($_ = $sth->fetchrow_hashref);
+        if (@theme_user) {
+            push @themes, { 'moodthemeid' => 0, 'name' => "--- $ML{'.moodicons.personal'} ---" };
+            push @themes, @theme_user;
+        }
+    }
+
+    $ret .= "<div style='margin-left: 30px; margin-bottom: 20px;'><b>$ML{'.moodicons.select'} </b>\n";
+    $ret .= LJ::html_select({ 'name' => 'moodthemeid', 'selected' => $u->{'moodthemeid'} },
+                              map { $_->{'moodthemeid'}, $_->{'name'} } @themes) . "\n";
+
+    $ret .= "(<a href='$LJ::SITEROOT/moodlist.bml' target='moods'>$ML{'.moodicons.preview'}</a>)\n";
+    $ret .= "<br />" . LJ::html_check({ 'type' => 'check', 'name' => 'opt_forcemoodtheme',
+                                        'id' => 'opt_forcemoodtheme',
+                                        'selected' => $u->{'opt_forcemoodtheme'} eq 'Y' }) . "\n";
+    $ret .= "<label for='opt_forcemoodtheme'>$ML{'.moodicons.opt.forcefriends.about'}</label></div>\n\n";
+
+    ###
+    ### JOURNAL DOMAIN OPTIONS
+    ###
+        
+    if ($LJ::OTHER_VHOSTS && LJ::get_cap($u, "userdomain")) {
+        $ret .= "<?h2 $ML{'.domainalias.head'} h2?><?p $ML{'.domainalias.about'} p?>\n";
+        $ret .= "<div style='margin: 20px 0 20px 30px'>$ML{'.domainalias.domainname'} ";
+        $ret .= LJ::html_text({ 'name' => 'journaldomain', 'size' => '30',
+                                'maxlength' => '80', 'value' => $u->{'journaldomain'} });
+        $ret .= " $ML{'.domainalias.example'}\n";
+        $ret .= "<?p " . BML::ml(".domainalias.helptext", {'sitename' => $LJ::SITENAME})." p?></div>\n\n";
+    }
+
+    ### ending submit block
+    $ret .= "<?h1 $ML{'.done.head'} h1?><?p $ML{'.done.text'} p?>\n";
+    $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.done.btn.savechanges'}) . " standout?>\n";
+    $ret .= "</form>\n";
+
+    return $ret;
+
 }
 _code?>
 

@@ -249,7 +249,9 @@ sub FriendsPage
         my $picid = 0;
         {
             $picid = $friends{$friendid}->{'defaultpicid'};  # this could be the shared journal pic
-            if ($friendid != $posterid && ! $u->{'opt_usesharedpic'}) {
+            if ($friendid != $posterid &&
+                ! S2::get_property_value($opts->{'ctx'}, "use_shared_pic")) {
+
                 $picid = $po->{'defaultpicid'};
             }
             if ($logprops{$datakey}->{'picture_keyword'} && 

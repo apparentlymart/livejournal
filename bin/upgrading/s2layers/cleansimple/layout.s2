@@ -128,6 +128,7 @@ propgroup presentation {
       values = "0|None|5px|Tiny|25px|Small|50px|Medium|75px|Large|100px|Extra Large";
   }
   property use view_entry_disabled;
+  property use use_shared_pic;
   property bool show_entrynav_icons {
     des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
   }

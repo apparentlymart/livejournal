@@ -1045,7 +1045,10 @@ property string text_reply_nocomments {
 }
 set text_reply_nocomments = "Comments have been disabled for this post.";
 
-
+property bool use_shared_pic {
+    des = "Use shared journal user pictures instead of poster's user picture.";
+}
+set use_shared_pic = false;
 
 property bool view_entry_disabled {
     des = "Enable to use the old comment page instead of the newer style specific view";

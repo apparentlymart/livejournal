@@ -83,6 +83,8 @@ propgroup Other {
                             "tell_friend" => "Tell a Friend",
                             "nav_prev" => "Previous Entry",
                             "nav_next" => "Next Entry"};
+
+    property use use_shared_pic;
 }
 
 
