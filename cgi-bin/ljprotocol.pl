@@ -695,9 +695,9 @@ sub postevent
     # if posting to a moderated community, store and bail out here
     if ($uowner->{'journaltype'} eq 'C' && $uowner->{'moderated'} && !$flags->{'nomod'}) {
         # don't moderate admins, moderators & pre-approved users
-        my $relcount = $dbcm->selectrow_array("SELECT COUNT(*) FROM reluser ".
-                                              "WHERE userid=$qownerid AND targetid=$qposterid ".
-                                              "AND type IN ('A','M','N')");
+        my $relcount = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser ".
+                                             "WHERE userid=$qownerid AND targetid=$qposterid ".
+                                             "AND type IN ('A','M','N')");
         unless ($relcount) {
             # moderation queue full?
             my $modcount = $dbcm->selectrow_array("SELECT COUNT(*) FROM modlog WHERE journalid=$qownerid");
