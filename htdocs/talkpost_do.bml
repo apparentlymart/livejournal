@@ -386,6 +386,7 @@ body<=
           "t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
           "AND t.jtalkid=tt.jtalkid ".
           "AND t.nodetype='L' AND t.nodeid=$itemid ".
+          "AND t.datepost > DATE_SUB(NOW(), INTERVAL 10 MINUTE) ".
           "AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' ".
           "AND t.parenttalkid=$qpartid"
           );
@@ -394,6 +395,7 @@ body<=
          (
           "SELECT t.talkid FROM talk t, talktext tt WHERE t.talkid=tt.talkid ".
           "AND t.journalid=$u->{'userid'} AND t.nodetype='L' AND t.nodeid=$itemid ".
+          "AND t.datepost > DATE_SUB(NOW(), INTERVAL 10 MINUTE) ".
           "AND t.posterid=$posterid AND tt.subject=$qsubject AND MD5(tt.body)='$md5_body' ".
           "AND t.parenttalkid=$qpartid"
           );
