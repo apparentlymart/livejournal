@@ -596,7 +596,7 @@ $box{'bdays'} =
         box_start($bd, $box, { 'title' => "Friends' Birthdays",
                               'url' => '/birthdays.bml' });
 
-        $sth = $dbr->prepare("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0");
+        $sth = $dbr->prepare("SELECT u.user, u.name, MONTH(bdate) AS 'month', DAYOFMONTH(bdate) AS 'day' FROM friends f, user u WHERE f.userid=$remote->{'userid'} AND f.friendid=u.userid AND u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND MONTH(bdate) != 0 AND DAYOFMONTH(bdate) != 0");
         $sth->execute;
 
         # what day is it now?  server time... suck, yeah.
