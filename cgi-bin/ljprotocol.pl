@@ -57,7 +57,7 @@ sub error_message
              "304" => "Can't delete post in this community journal",
              "305" => "Action forbidden; account is suspended.",
              "306" => "This journal is temporarily in read-only mode.  Try again in a couple minutes.",
-             "307" => "Selected shared journal no longer exists.",
+             "307" => "Selected journal no longer exists.",
 
              # Limit errors
              "401" => "Your account type doesn't permit adding syndicated accounts as friends.",
