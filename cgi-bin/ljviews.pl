@@ -2139,7 +2139,7 @@ sub create_view_day
 
     # load the log items
     my $dateformat = "%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H";
-    $sth = $logdb->prepare("SELECT jitemid AS itemid, posterid, security ".
+    $sth = $logdb->prepare("SELECT jitemid AS itemid, posterid, security, ".
                            "       DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum " .
                            "FROM log2 " .
                            "WHERE journalid=? AND year=? AND month=? AND day=? $secwhere " .
