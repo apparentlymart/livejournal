@@ -18,8 +18,11 @@ PerlInitHandler +Apache::LiveJournal
 DirectoryIndex index.html index.bml
 
 # BML support:
-PerlSetEnv BMLConfig \$LJHOME/cgi-bin/bmlp.cfg
+PerlSetVar BMLDomain lj-$LJ::DOMAIN
 PerlModule Apache::BML
+<Perl>
+  Apache::BML::load_config("lj-$LJ::DOMAIN", "$LJ::HOME/cgi-bin/bmlp.cfg");
+</Perl>
 <Files ~ "\\.bml\$">
   SetHandler perl-script
   PerlHandler Apache::BML
