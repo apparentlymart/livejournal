@@ -88,8 +88,11 @@ sub handler
     %BMLCodeBlock::GET = ();
     %BMLCodeBlock::POST = ();
     %BMLCodeBlock::FORM = ();  # old, combines both.
-    foreach my $id ([ [ $r->args    ] => [ \%BMLCodeBlock::GET,  \%BMLCodeBlock::FORM ] ],
-                    [ [ $r->content ] => [ \%BMLCodeBlock::POST, \%BMLCodeBlock::FORM ] ])
+    my %input_target = ( GET  => [ \%BMLCodeBlock::GET  ],
+                         POST => [ \%BMLCodeBlock::POST ], );
+    push @{$input_target{$r->method}}, \%BMLCodeBlock::FORM;
+    foreach my $id ([ [ $r->args    ] => $input_target{'GET'}  ],
+                    [ [ $r->content ] => $input_target{'POST'} ])
     {
         while (my ($k, $v) = splice @{$id->[0]}, 0, 2) {
             foreach my $dest (@{$id->[1]}) {
