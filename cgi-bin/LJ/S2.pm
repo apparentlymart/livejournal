@@ -552,7 +552,7 @@ sub layer_compile
         $lid = $layer->{'s2lid'}+0;
     } else {
         $lid = $layer+0;
-        $layer = LJ::load_layer($dbh, $lid) or return 0;
+        $layer = LJ::S2::load_layer($dbh, $lid) or return 0;
     }
     return 0 unless $lid;
     
@@ -664,8 +664,8 @@ sub get_layer_checker
     return $checker if $checker;
 
     # no cached checker (or bogus), so we have to [re]compile to get it
-    my $parlay = LJ::load_layer($dbh, $parid);
-    return undef unless LJ::layer_compile($parlay);
+    my $parlay = LJ::S2::load_layer($dbh, $parid);
+    return undef unless LJ::S2::layer_compile($parlay);
     return $get_cached->();
 }
 
@@ -724,7 +724,7 @@ sub get_layout_themes_select
     my $last_uid;
     foreach my $t (get_layout_themes(@_)) {
         if ($last_uid && $t->{'userid'} != $last_uid) {
-            push @sel, 0, '';  # divider between system & user
+            push @sel, 0, '---';  # divider between system & user
         }
         $last_uid = $t->{'userid'};
         push @sel, $t->{'s2lid'}, $t->{'name'};
@@ -1071,6 +1071,12 @@ sub ehtml
     return LJ::ehtml($text);
 }
 
+sub eurl
+{
+    my ($ctx, $text) = @_;
+    return LJ::eurl($text);
+}
+
 # escape tags only
 sub etags {
     my ($ctx, $text) = @_;
@@ -1141,6 +1147,14 @@ sub weekdays
 {
     my ($ctx) = @_;
     return [ 1..7 ];  # FIXME: make this conditionally monday first: [ 2..7, 1 ]
+}
+
+sub zeropad
+{
+    my ($ctx, $num, $digits) = @_;
+    $num += 0;
+    $digits += 0;
+    return sprintf("%0${digits}d", $num);
 }
 
 sub Date__day_of_week

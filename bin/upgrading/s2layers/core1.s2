@@ -81,8 +81,11 @@ class Date
     function builtin day_of_week() : int
     "Returns the day of the week this date falls on, from Sunday=1 to Saturday=7";
 
+    function builtin date_format () : string
+    "Returns date formatted as normal.";
+
     function builtin date_format (string fmt) : string
-    "Returns date formatted as indicated by \$fmt.  One of: short, med, long, med_day, long_day.  Or a custom format.  Default is 'short'.  TODO: document %% vars.";
+    "Returns date formatted as indicated by \$fmt.  One of: short, med, long, med_day, long_day.  Or a custom format.  Default is 'short'.";
 }
 
 class DateTime extends Date
@@ -120,6 +123,9 @@ class Image
 
     function as_string () : string
     "Return the HTML tag for this image";
+
+    function as_string (string alttext) : string
+    "Return an HTML tag for this Image with given alttext";
 
     function as_string (string{} opts) : string
     "Return the HTML for an image, Supported keys are 'href' to create a link to the image source
@@ -892,22 +898,27 @@ function lang_viewname(string viewid) : string
 
 function Image::as_string(string{} opts) : string {
     var string img = "";
-    if ($opts{"href"} != "") { $img = $img + "<a href=\"$opts{"href"}\" $opts{"a_attr"}>"; }
+    if ($opts{"href"} != "") { $img = $img + "<a href=\"" + eurl($opts{"href"}) + "\" $opts{"a_attr"}>"; }
     $img = $img + $this->as_string();
     if ($opts{"href"} != "") { $img = $img + "</a>"; }
 
     return $img;
 }
 
-function Image::as_string() : string {
+function Image::as_string(string alttext) : string {
     var string img = """<img src="$.url" """;
-#    var string ealt = ehtml($.alt);
     $img = $img + htmlattr("height", $.height); 
     $img = $img + htmlattr("width", $.width);
-#    $img = $img + " alt=\"" + ehtml($.alt) + "\""; 
-#    foreach var string attr ($.attributes) {
-#        $img = $img + htmlattr($attr, $.attributes{$attr});
-#    }
+    if ($alttext != "") { $img = $img + htmlattr("alt", $alttext); }
+    $img = $img + " />";
+
+    return $img;
+}
+
+function Image::as_string() : string {
+    var string img = """<img src="$.url" """;
+    $img = $img + htmlattr("height", $.height); 
+    $img = $img + htmlattr("width", $.width);
     $img = $img + " />";
 
     return $img;
@@ -920,8 +931,7 @@ function Image::print (string{} opts)
 
 function Image::print (string alttext)
 {
-    # TODO: use alttext
-    print $this->as_string();
+    print $this->as_string($alttext);
 }
 
 function Image::print
