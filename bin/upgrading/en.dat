@@ -1834,6 +1834,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.error.malfname=Malformed username.
 
+/userinfo.bml.error.notloggedin=If you wish to view your own user profile, you need to <a href='/login.bml?ret=1'>login</a>.
+
 /userinfo.bml.friendof.comm=Watched by
 
 /userinfo.bml.friendof.hidden=(hidden)

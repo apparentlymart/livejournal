@@ -16,6 +16,10 @@
  my $dbcr;
         
  my $remote = LJ::get_remote($dbr);
+ if ($FORM{'user'} eq "" && !$remote) {
+     $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notloggedin'} p?>";
+     return;
+ }
 
  my $sth;
  my %countries = ();
@@ -101,9 +105,10 @@
      $head .= "<meta name=\"robots\" content=\"noindex\">\n";
  }
 
-if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
-    return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{'renamedto'}");
-}
+ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
+     my $extra = $FORM{'mode'} eq 'full' ? "&mode=full" : '';
+     return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{'renamedto'}$extra");
+ }
 
   my %friends = ('load'=>1, 'loaded'=>0, 'display'=>1, 'count'=>0);
   my %friendsof = ('load'=>1, 'loaded'=>0, 'display'=>1, 'count'=>0);
