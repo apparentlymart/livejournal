@@ -466,7 +466,7 @@ BODY<=
  }
  
  # Yeah, we're done.
- $ret .= "(=H1 Success H1=)(=P Your comment has been added.  You can view it <A HREF=\"talkread.bml?itemid=$FORM{'itemid'}&view=$insertid\">here</A>. P=)";
+ $ret .= "(=H1 Success H1=)(=P Your comment has been added.  You can view it <A HREF=\"talkread.bml?itemid=$FORM{'itemid'}&view=$insertid#t$insertid\">here</A>. P=)";
 
  if ($DEBUG) {
      $ret .= "<P>" . $debug;
