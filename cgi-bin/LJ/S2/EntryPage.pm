@@ -29,6 +29,7 @@ sub EntryPage
     my $itemid = $entry->{'itemid'};
     my $ditemid = $entry->{'itemid'} * 256 + $entry->{'anum'};
     my $permalink = LJ::journal_base($u) . "/$ditemid.html";
+    my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
 
     if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
         $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) .
@@ -91,7 +92,6 @@ sub EntryPage
                                          $pic->{'width'}, $pic->{'height'});
             }
 
-            my $stylemine = $get->{'style'} eq "mine" ? "style=mine" : "";
             my $reply_url = LJ::Talk::talkargs($permalink, "replyto=$dtalkid", $stylemine);
 
             my $par_url;
@@ -187,7 +187,8 @@ sub EntryPage
         'to_subitem' => $copts->{'out_itemlast'},
         'total' => $copts->{'out_pages'},
         'total_subitems' => $copts->{'out_items'},
-        '_url_of' => sub { return "$permalink?page=" . int($_[0]); },
+        '_url_of' => sub { return "$permalink?page=" . int($_[0]) .
+                               ($stylemine ? "&$stylemine" : ''); },
     });
 
     return $p;
