@@ -1,5 +1,5 @@
 <?page
-title=>Set public key
+title=><?_ml .title _ml?>
 body<=
 <?_code
 {
@@ -8,15 +8,12 @@ body<=
 
     LJ::set_active_crumb('setpgpkey');
 
-    return "This site is not configured with PGP support." unless $LJ::USE_PGP;
+    return $ML{'.error.notconfigured'} unless $LJ::USE_PGP;
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     my $u = LJ::get_remote();
-    unless ($u) {
-        my $ret = '<?h1 Please log in! h1?>';
-        $ret .= "<?p $ML{'error.noremote'} p?>";
-        return $ret;
-    }
+    return "<?needlogin?>"
+        unless $u;
 
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
@@ -24,7 +21,7 @@ body<=
     if ($POST{userid} == $u->{userid}) {
         my @errors;
         my $key = $POST{key};
-        push(@errors, "That doesn't appear to be a valid PGP/GPG key.")
+        push(@errors, $ML{'.error.invalidkey'})
             if $key !~ /BEGIN PGP PUBLIC/ && length($key) != 0;
         return LJ::bad_input(@errors) if @errors;
 
@@ -32,8 +29,8 @@ body<=
         LJ::set_userprop($u, 'public_key', $key);
 
         my $ret;
-        $ret .= "<?h1 Success h1?>";
-        $ret .= "<?p Your public key been saved. You may view it <a href='/pubkey.bml'>here</a>. p?>";
+        $ret .= "<?h1 $ML{'.successhead'} h1?>";
+        $ret .= "<?p " . BML::ml('.successtext', { aopts => "href='/pubkey.bml'" }) . " p?>";
 
         if ($LJ::HELPURL{publickey}) {
             $ret .= "<?h1 Instructions h1?>";
@@ -46,18 +43,26 @@ body<=
     LJ::load_user_props($u, qw(public_key));
     
     my $ret;
-    $ret .= "<?p Publishing your public key allows others to view it via your <a href='/userinfo.bml'>userinfo</a> page,
-        and you can post to the email gateway with signed messages.  See instructions <a href='emailpost.bml?mode=help#pgp'>here</a>. p?>";
-    $ret .= "<?p Don't know what a public key is?  Need help exporting your key?
-        Read more about <a href='http://www.pgp.com/'>PGP</a> and <a href='http://www.gnupg.org'>GPG</a>. p?>";
+    $ret .= "<?p ";
+    $ret .= BML::ml('.info', {
+        aoptsinfo => "href='/userinfo.bml'",
+        aoptshelp => "href='emailpost.bml?mode=help\#pgp'",
+    });
+    $ret .= " p?>";
+    $ret .= "<?p ";
+    $ret .= BML::ml('.whatis', {
+        aoptspgp => "href='http://www.pgp.com/'",
+        aoptsgpg => "href='http://www.gnupg.org/'",
+    });
+    $ret .= " p?>";
 
-    $ret .= "<?h1 PGP/GPG key <img src='/img/key.gif' height='16' width='16'> h1?>";
+    $ret .= "<?h1 $ML{'.header'} <img src='/img/key.gif' height='16' width='16'> h1?>";
     $ret .= "<form method='post' action='pubkey.bml'>\n";
-    $ret .= "<?p Paste your key in its entirety (ascii armored format) into the below field: p?>\n";
+    $ret .= "<?p $ML{'.pastekey'} p?>\n";
     $ret .= LJ::html_hidden(userid => $u->{userid});
     $ret .= LJ::html_textarea({name=>'key', value=>$u->{public_key}, rows=>20, cols=>70 });
     $ret .= "<br /><br /><?standout ";
-    $ret .= LJ::html_submit($ML{'/manage/phonepost.bml.save'});
+    $ret .= LJ::html_submit($ML{'.save'});
     $ret .= " standout?>";
     $ret .= "</form>";
     return $ret;

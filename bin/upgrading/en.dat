@@ -552,8 +552,6 @@ p?>
 
 /create.bml.error.email.nospaces=No spaces allowed in email address.  If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>@aol.com</b>
 
-/create.bml.errors.label=Please note the following problems and resubmit:
-
 /create.bml.error.password.asciionly=You can only use ASCII symbols in the password.
 
 /create.bml.error.password.blank=You must enter a password.
@@ -571,6 +569,8 @@ p?>
 /create.bml.error.username.mustenter=You must enter a username.
 
 /create.bml.error.username.reserved=Sorry, that is a reserved username.
+
+/create.bml.errors.label=Please note the following problems and resubmit:
 
 /create.bml.initialfriends=Add these journals to your friends list to be kept up to date on site news and information.
 
@@ -2063,6 +2063,26 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /manage/links.bml.title=Links List
 
+/manage/pubkey.bml.error.invalidkey=That doesn't appear to be a valid PGP/GPG key.
+
+/manage/pubkey.bml.error.notconfigured=This site is not configured with PGP support.
+
+/manage/pubkey.bml.header=PGP/GPG key
+
+/manage/pubkey.bml.info=Publishing your public key allows others to view it via your <a [[aoptsinfo]]>userinfo</a> page, and you can post to the email gateway with signed messages.  See instructions <a [[aoptshelp]]>here</a>.
+
+/manage/pubkey.bml.pastekey=Paste your key in its entirety (ascii armored format) into the below field:
+
+/manage/pubkey.bml.save=Save
+
+/manage/pubkey.bml.successhead=Success
+
+/manage/pubkey.bml.successtext=Your public key been saved. You may view it <a [[aopts]]>here</a>.
+
+/manage/pubkey.bml.title=Set Public Key
+
+/manage/pubkey.bml.whatis=Don't know what a public key is? Need help exporting your key? Read more about <a [[aoptspgp]]>PGP</a> and <a [[aoptsgpg]]>GPG</a>.
+
 /manage/siteopts.bml.btn.lang=Switch Language
 
 /manage/siteopts.bml.btn.scheme=Switch Scheme
@@ -2205,6 +2225,22 @@ If you want to do a different type of search, check out the <a href='/directorys
 .
 
 /multisearch.bml.region.head=Search by Region
+
+/pubkey.bml.error.notconfigured=This site is not configured with PGP support.
+
+/pubkey.bml.error.nousername=No username specified.
+
+/pubkey.bml.info.desc=Don't know what a public key is?  Read more about <a [[aoptspgp]]>PGP</a> and <a [[aoptsgpg]]>GPG</a>.
+
+/pubkey.bml.info.head=Information
+
+/pubkey.bml.info.upload=Want to upload your key?  Click <a [[aopts]]>here</a>.
+
+/pubkey.bml.label=Public key for [[user]]:
+
+/pubkey.bml.nokey=[[user]] has not uploaded a public key yet.
+
+/pubkey.bml.title=View Public Key
 
 /register.bml.ask.body=Click the button below to have <?sitename?> send a validation email to <b>[[email]]</b>.
 
@@ -3294,13 +3330,13 @@ bml.needlogin.body=In order to view this page, you must <a [[aopts]]>log in</a>.
 
 bml.needlogin.head=Login Required
 
-bml.requirepost=As a security precaution, the page you're viewing requires a POST request, not a GET. If you're trying to submit this form legitimately, please contact us.
-
 BML.parse_multipart.parse=Error parsing upload
 
 BML.parse_multipart.toolarge=Upload too large
 
 BML.parse_multipart.unknowntype=Unknown content type
+
+bml.requirepost=As a security precaution, the page you're viewing requires a POST request, not a GET. If you're trying to submit this form legitimately, please contact us.
 
 btn.search=Search
 

@@ -1,5 +1,5 @@
 <?page
-title=>View public key
+title=><?_ml .title _ml?>
 head<=
 
 <style type="text/css">
@@ -20,26 +20,34 @@ body<=
     use strict;
     use vars qw(%GET $user $u $ret);
 
-    return "This site is not configured with PGP support." unless $LJ::USE_PGP;
+    return $ML{'.error.notconfigured'} unless $LJ::USE_PGP;
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
     $user = LJ::canonical_username($GET{user});
     $u = $user ? LJ::load_user($user) : LJ::get_remote();
-    return "No username specified." unless $user || $u;
+    return $ML{'.error.nousername'} unless $user || $u;
 
     LJ::load_user_props($u, 'public_key');
    
     if ($u->{public_key}) {
-        $ret .= '<?p Public key for ' . LJ::ljuser($u->{user}) . ': p?>';
+        $ret .= '<?p ' . BML::ml('.label', { user => LJ::ljuser($u->{user})}) . ' p?>';
         $ret .= '<table border=0><tr><td class=key><pre>';
         $ret .= LJ::ehtml($u->{public_key});
         $ret .= '</pre></td></tr></table>';
     } else {
-        $ret .= '<?p ' . LJ::ljuser($u->{user}) . ' has not uploaded a public key yet. p?>';
+        $ret .= '<?p ' . BML::ml('.nokey', { user => LJ::ljuser($u->{user})}) . ' p?>';
     }
-    $ret .= '<br /><?h1 Information h1?>';
-    $ret .= "<?p Don't know what a public key is?  Read more about <a href='http://www.pgp.com/'>PGP</a> and <a href='http://www.gnupg.org'>GPG</a>. p?>";
-    $ret .= "<?p Want to upload your key?  Click <a href='/manage/pubkey.bml'>here</a>. p?>";
+    $ret .= "<br /><?h1 $ML{'.info.head'} h1?>";
+    $ret .= "<?p ";
+    $ret .= BML::ml('.info.desc', {
+        aoptspgp => 'href="http://www.pgp.com/"',
+        aoptsgpg => 'href="http://www.gnupg.org/"',
+    });
+    $ret .= " p?> <?p ";
+    $ret .= BML::ml('.info.upload', {
+        aopts => 'href="/manage/pubkey.bml"',
+    });
+    $ret .= " p?>";
     return $ret;
 
 } _code?>
