@@ -10,7 +10,8 @@
  
     my $sql;
 
-    if ($FORM{'search:sev'}) {
+    if ($FORM{'search:sev'}) 
+    {
         my $what = ">= 1";
         if ($FORM{'stale'} =~ /^(\d+)(\+?)$/) {
             $what = ($2 ? ">=" : "=") . $1;
@@ -18,7 +19,13 @@
         $sql = "SELECT i.dmid, i.itid, i.itcode FROM ml_items i, ml_latest l WHERE l.lnid=$l->{'lnid'} AND l.staleness $what AND l.dmid=i.dmid AND l.itid=i.itid ORDER BY i.dmid, i.itcode";
     }
     
-    if ($FORM{'search:txt'}) {
+    if ($FORM{'search:txt'}) 
+    {
+        my $remote = LJ::get_remote($dbs);
+        return "This search type is restricted to $l->{'lnname'} translators." unless
+            (LJ::check_priv($dbs, $remote, "translate", "*") ||
+             LJ::check_priv($dbs, $remote, "translate", $l->{'lncode'}));
+
         my $qtext = $dbr->quote($FORM{'searchtext'});
         my $dmid = $FORM{'searchdomain'}+0;
         my $dmidwhere = $dmid ? "AND i.dmid=$dmid" : "";
