@@ -243,13 +243,23 @@ sub do_request
 	    $res->{'fastserver'} = "1";
 	}
 	
-	#### update or add to logins table
-	if (0) { 	#### FIXME: TEMP: this is disabled for now. (2001-03-01)
+	## update or add to clientusage table
+	##
+	if ($req->{'clientversion'} =~ /^\S+\/\S+$/) 
+	{
 	    my $qclient = $dbh->quote($req->{'clientversion'});
-	    $sth = $dbh->prepare("UPDATE logins SET lastlogin=NOW() WHERE user=$quser AND client=$qclient");
+	    my $cu_sql = "REPLACE INTO clientusage (userid, clientid, lastlogin) " .
+		"SELECT $userid, clientid, NOW() FROM clients WHERE client=$qclient";
+	    $sth = $dbh->prepare($cu_sql);
 	    $sth->execute;
 	    unless ($sth->rows) {
-		$dbh->do("INSERT INTO logins (user, client, timelogin, lastlogin) VALUES ($quser, $qclient, NOW(), NOW())");
+		# only way this can be 0 is if client doesn't exist in clients table, so
+		# we need to add a new row there, to get a new clientid for this new client:
+		$dbh->do("INSERT INTO clients (client) VALUES ($qclient)");
+		
+		# and now we can do the query from before and it should work:
+		$sth = $dbh->prepare($cu_sql);
+		$sth->execute;
 	    }
 	}
 
