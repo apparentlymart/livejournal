@@ -1699,7 +1699,7 @@ function Link::print_button() [fixed] {
 function Link::as_string() [fixed] : string {
     if ($.url == "") { return ""; }
     var string ealt = ehtml($.caption);
-    return """<a href="$.url"><img border='0' width="$.icon.width" height="$.icon.height" alt="$ealt" src="$.icon.url" /></a>""";
+    return """<a href="$.url"><img border='0' width="$.icon.width" height="$.icon.height" alt="$ealt" title="$ealt" src="$.icon.url" /></a>""";
 }
 
 # Redirector
