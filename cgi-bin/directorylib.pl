@@ -70,9 +70,6 @@ sub do_search
     @{$users} = ();
     %{$info} = ();
 
-    # load some stuff we'll need for searchers probably
-    LJ::load_props($dbr, "user");
-
     my @crits;
     foreach my $f (sort keys %filters)
     {
@@ -285,7 +282,7 @@ sub do_search
     my $fsql = "SELECT u.userid, u.user, u.journaltype, ".
 	"UNIX_TIMESTAMP()-UNIX_TIMESTAMP(uu.timeupdate) AS 'secondsold' ".
 	$fields . " FROM user u, userusage uu $fromwhat ".
-	"WHERE u.userid IN ($in) AND uu.userid=u.userid $joinwhere";
+	"WHERE u.userid IN ($in) AND u.statusvis='V' AND uu.userid=u.userid $joinwhere";
     $sth = $dbr->prepare($fsql);
     $sth->execute;
 
@@ -300,7 +297,7 @@ sub do_search
     }
 
     foreach my $id (@ids) {
-        push @$users, $u{$id};
+        push @$users, $u{$id} if $u{$id};
     }
 
     return 1;
