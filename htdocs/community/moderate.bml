@@ -28,7 +28,6 @@ body<=
             $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notfound'} p?>";
             return $ret;
         }
-        my $dbcr = LJ::get_cluster_reader($c);
         my $dbcm = LJ::get_cluster_master($c);
         
         unless (LJ::check_rel($c, $remote, 'M')) {
@@ -158,7 +157,7 @@ body<=
         $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notfound'} p?>";
         return $ret;
     }
-    my $dbcr = LJ::get_cluster_reader($c);
+    my $dbcm = LJ::get_cluster_master($c);
     
     unless (LJ::check_rel($c, $remote, 'M')) {
         $ret .= "<?h1 $ML{'Error'} h1?><?p " . 
@@ -169,7 +168,7 @@ body<=
     if ($mode eq 'action' && $POST{'action:approve'}) {
         my ($posterid, $frreq);
         if ($modid) {
-            ($posterid, $frreq) = $dbcr->selectrow_array("SELECT l.posterid, b.request_stor FROM modlog l, modblob b WHERE l.journalid=$c->{'userid'} AND l.modid=$modid AND l.journalid=b.journalid AND l.modid=b.modid");
+            ($posterid, $frreq) = $dbcm->selectrow_array("SELECT l.posterid, b.request_stor FROM modlog l, modblob b WHERE l.journalid=$c->{'userid'} AND l.modid=$modid AND l.journalid=b.journalid AND l.modid=b.modid");
         }
         unless ($posterid) {
             $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noentry'} p?>";
@@ -194,7 +193,7 @@ body<=
     if ($mode eq 'action' && $POST{'action:reject'}) {
         my ($posterid, $frreq);
         if ($modid) {
-            ($posterid, $frreq) = $dbcr->selectrow_array("SELECT l.posterid, b.request_stor FROM modlog l, modblob b WHERE l.journalid=$c->{'userid'} AND l.modid=$modid AND l.journalid=b.journalid AND l.modid=b.modid");
+            ($posterid, $frreq) = $dbcm->selectrow_array("SELECT l.posterid, b.request_stor FROM modlog l, modblob b WHERE l.journalid=$c->{'userid'} AND l.modid=$modid AND l.journalid=b.journalid AND l.modid=b.modid");
         }
         unless ($posterid) {
             $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noentry'} p?>";
@@ -225,7 +224,7 @@ body<=
             BML::ml('.browse.text', {'link'=>"<?ljcomm $comm ljcomm?>"}) . " p?>";
         $ret .= "<div style='margin: 10px 0 10px 40px'>";
         my @entries;
-        my $sth = $dbcr->prepare("SELECT * FROM modlog WHERE journalid=$c->{'userid'}");
+        my $sth = $dbcm->prepare("SELECT * FROM modlog WHERE journalid=$c->{'userid'}");
         $sth->execute;
         while ($_ = $sth->fetchrow_hashref) {
             push @entries, $_;
@@ -260,7 +259,7 @@ body<=
         
     } else {
         # view an entry
-        my $frozen = $dbcr->selectrow_array("SELECT request_stor FROM modblob WHERE journalid=$c->{'userid'} AND modid=$modid");
+        my $frozen = $dbcm->selectrow_array("SELECT request_stor FROM modblob WHERE journalid=$c->{'userid'} AND modid=$modid");
         unless ($frozen) {
             $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noentry'} p?>";
             return $ret;
