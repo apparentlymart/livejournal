@@ -1,0 +1,83 @@
+(=_INFO
+NOCACHE=>1
+_INFO=)(=PAGE
+TITLE=>(=_CODE return $FORM{'id'} ? "Edit FAQ Item #$FORM{'id'}" : "Add to FAQ"; _CODE=)
+BODY<=
+
+<CENTER>
+<A HREF="./"><B>(Back to FAQ Index)</B></A>
+</CENTER>
+<P>
+
+(=_CODE
+
+ require 'ljlib.pl';
+ &connect_db;
+
+ my $remote = &get_remote();
+ my %ac_edit;
+ my %ac_add;
+
+ $id = $FORM{'id'} + 0;
+ $ret = "";
+  
+ $qq = $dbh->quote($FORM{'q'});
+ $qa = $dbh->quote($FORM{'a'});
+ $qfaqcat = $dbh->quote($FORM{'faqcat'});
+ 
+ $quser = $dbh->quote($ENV{'REMOTE_USER'});
+ 
+ $sortorder = $FORM{'sortorder'}+0 || 50;
+
+ if ($id)
+ {
+     &remote_has_priv($remote, "faqedit", \%ac_edit);
+     my $sth = $dbh->prepare("SELECT faqcat FROM faq WHERE faqid=$id");
+     $sth->execute;
+     my ($faqcat) = $sth->fetchrow_array;
+
+     unless ($ac_edit{'all'} || $ac_edit{$faqcat}) {
+	 if (%ac_edit) {
+	     return "<B>Error: </B> You do not have access to edit a FAQ question in the \"$faqcat\" category.";
+	 } else {
+	     return "<B>Error: </B> You do not have access to edit the FAQ.";
+	 }
+     }
+ }
+ else 
+ {
+     &remote_has_priv($remote, "faqadd", \%ac_add);
+     unless ($ac_add{'all'} || $ac_add{$FORM{'faqcat'}}) {
+	 return "<B>Error: </B> You do not have access to add FAQ questions in this category";
+     }     
+ }
+ 
+ unless ($id)
+ {
+     unless ($FORM{'faqcat'})
+     {
+	 return "<B>Error: </B> You did not select a FAQ category.";
+     }
+     $dbh->do("INSERT INTO faq (faqid, question, answer, faqcat, sortorder, lastmoduserid, lastmodtime) VALUES (NULL, $qq, $qa, $qfaqcat, $sortorder, $remote->{'userid'}, NOW())");
+     $ret .= $dbh->errstr || "Added FAQ item.  All good.";
+ }
+ else
+ {
+     if ($FORM{'q'} =~ /\S/)
+     {
+	 $dbh->do("UPDATE faq SET question=$qq, answer=$qa, faqcat=$qfaqcat, lastmoduserid=$remote->{'userid'}, lastmodtime=NOW(), sortorder=$sortorder WHERE faqid=$id");
+	 $ret .= "Updated FAQ item.  All good.  faqid is <B>$id</B>";
+     }
+     else
+     {
+	 $dbh->do("DELETE FROM faq WHERE faqid=$id");
+	 $ret .= "FAQ item deleted.";
+     }
+ }
+ 
+ return $ret;
+ 
+_CODE=)
+
+<=BODY
+PAGE=)

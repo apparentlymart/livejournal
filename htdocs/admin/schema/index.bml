@@ -1,0 +1,265 @@
+(=_CODE
+
+ $title = "Schema Browser";
+ $body = "";
+
+ require 'ljlib.pl';
+ &connect_db();
+
+ my $remote = &get_remote();
+
+ my $can_doc = 0;
+ if (&remote_has_priv($remote, "schemadoc")) { $can_doc = 1; }
+
+ sub magic_links
+ {
+     my $des = shift;
+     $$des =~ s!table\[(\w+?)\]!<a href="./?mode=viewtable&table=$1">$1</a>!g;
+ }
+
+ if ($FORM{'mode'} eq "") 
+ {
+     my %table;
+     $sth = $dbh->prepare("SELECT tablename, public_browsable, des FROM schematables");
+     $sth->execute;
+     while (my ($name, $public, $des) = $sth->fetchrow_array) {
+	 $table{$name} = { 'public' => $public, 'des' => $des };
+     }
+
+     $body .= "(=H1 Tables H1=)(=P Click a table for more information. P=)<p><table cellpadding=4><tr bgcolor=(=EMCOLOR=)><td><b>Table</b></td><td><b>Description</b></td></tr>\n";
+     $sth = $dbh->prepare("SHOW TABLES");
+     $sth->execute;
+     while (my ($table) = $sth->fetchrow_array) {
+	 my $des = $table{$table}->{'des'} || "<i>no description, yet</i>";
+	 $body .= "<tr valign=top><td nowrap><b><a href=\"./?mode=viewtable&table=$table\">$table</a></b>";
+	 if ($table{$table}->{'public'}) {
+	     $body .= " (<a href=\"./?mode=viewdata&table=$table\">data</a>)";
+	 }
+	 $body .= "</td><td>$des</td></tr>\n";b
+     }
+     $body .= "</table>\n";
+     return "";
+ }
+
+ if ($FORM{'mode'} eq "viewtable") 
+ {
+     my $table = $FORM{'table'};
+     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return ""; }
+     my $qtable = $dbh->quote($table);
+
+     $sth = $dbh->prepare("SELECT des, public_browsable FROM schematables WHERE tablename=$qtable");
+     $sth->execute;
+     my ($tabledes, $browsable) = $sth->fetchrow_array;
+
+     $body .= "<a href=\"./\">&lt;&lt; Tables</a>";
+     if ($browsable) {
+	 $body .= " | <a href=\"./?mode=viewdata&table=$table\">View Data</a>";
+     }
+     if ($can_doc) {
+	 $body .= " | <a href=\"./?mode=doc&table=$table\">Edit Documentation</a>";
+     }
+     $body .= "(=H1 Table: $table H1=)(=P ";
+
+     
+     if ($tabledes) {
+	 &magic_links(\$tabledes);
+	 $body .= $tabledes;
+     } else {
+	 $body .= "Below are the columns and descriptions for the <b>$table</b> table.";
+     }
+     $body .= " P=)<p>\n";
+
+     my %coldes;
+     $sth = $dbh->prepare("SELECT colname, des FROM schemacols WHERE tablename=$qtable");
+     $sth->execute;
+     while (my ($col, $des) = $sth->fetchrow_array) { $coldes{$col} = $des; }
+
+     $sth = $dbh->prepare("DESCRIBE $table");
+     $sth->execute;
+     $body .= "<table cellpadding=3><tr bgcolor=(=EMCOLOR=)>";
+     $body .= "<td><b>Key?</b></td>";
+     $body .= "<td><b>Column</b></td>";
+     $body .= "<td><b>Type</b></td>";
+     $body .= "<td><b>Null</b></td>";
+     $body .= "<td><b>Default</b></td>";
+     $body .= "<td><b>Description</b></td>";
+     $body .= "</tr>\n";
+     while (my $row = $sth->fetchrow_hashref)
+     {
+	 my $name = $row->{'Field'};
+	 my $type = $row->{'Type'};
+	 my $key = $row->{'Key'};
+	 my $null = $row->{'Null'};
+	 my $def = $row->{'Default'};
+	 my $des = &BML::eall($coldes{$name});
+
+	 &magic_links(\$des);
+
+	 $type =~ s/int\(\d+\)/int/g;
+
+	 $body .= "<tr valign=top>";
+	 $body .= "<td align=center>$key</td>";
+	 $body .= "<td><b>$name</b></td>";
+	 $body .= "<td>$type</td>";
+	 $body .= "<td align=center>$null</td>";
+	 $body .= "<td align=center>$def</td>";
+	 $body .= "<td>$des</td>";
+	 $body .= "</tr>\n";
+     }
+     $body .= "</table>\n";
+     return "";	 
+ }
+
+ if ($FORM{'mode'} eq "viewdata") {
+     my $table = $FORM{'table'};
+     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return ""; }
+
+     my $MAX_ROWS = 100;
+
+     $body .= "<a href=\"./\">&lt;&lt; Tables</a><br><a href=\"./?mode=viewtable&table=$table\">&lt;&lt; Table: $table</a>(=H1 Data: $table H1=)(=P Below are the rows in the <b>$table</b> table.  If the table has more than $MAX_ROWS records, only the top $MAX_ROWS are shown.  P=)<p>\n";
+
+     $sth = $dbh->prepare("SELECT tablename, public_browsable, des FROM schematables WHERE tablename='$table'");
+     $sth->execute;
+     my ($tablename, $public, $des) = $sth->fetchrow_array;
+     unless ($public) { $body .= "This table's data is not public.\n"; return ""; }
+
+     $sth = $dbh->prepare("SELECT * FROM $table LIMIT $MAX_ROWS");
+     $sth->execute;
+     $body .= "<table cellpadding=3><tr bgcolor=(=EMCOLOR=)>";
+     foreach my $col (@{$sth->{'NAME'}}) {
+	 $body .= "<td><b>$col</b></td>\n";
+     }
+     $body .= "</tr>\n";
+
+     while (my $row = $sth->fetchrow_arrayref) {
+	 $body .= "<tr valign=top>\n";
+	 foreach my $val (@$row) {
+	     $body .= "<td>$val</td>\n";
+	 }
+	 $body .= "</tr>\n";
+     }
+     $body .= "</table>\n";
+     return "";
+ }
+
+ # show form to enter documentation
+ if ($FORM{'mode'} eq "doc") 
+ {
+     unless ($can_doc) { $body .= "You don't have permissions to document the schema."; return ""; }
+     my $table = $FORM{'table'};
+     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return ""; }
+
+     $body .= "<a href=\"./\">&lt;&lt; Tables</a>(=H1 Document Table: $table H1=)";
+
+     my $qtable = $dbh->quote($table);
+     my $sth;
+
+     $sth = $dbh->prepare("SELECT des FROM schematables WHERE tablename=$qtable");
+     $sth->execute;
+     my ($tabledes) = $sth->fetchrow_array;
+
+     my %coldes;
+     $sth = $dbh->prepare("SELECT colname, des FROM schemacols WHERE tablename=$qtable");
+     $sth->execute;
+     while (my ($col, $des) = $sth->fetchrow_array) { $coldes{$col} = $des; }
+
+     $body .= "<form method=post action=\"./\">\n";
+     $body .= "<input type=hidden name=table value=\"$table\">\n";
+     $body .= "<input type=hidden name=mode value=\"docsave\">\n";
+     $body .= "<p><b>Description:</b><br><textarea name=\"table-des\" rows=10 cols=40 wrap=soft>";
+     $body .= &BML::eall($tabledes) . "</textarea>";
+
+     $sth = $dbh->prepare("DESCRIBE $table");
+     $sth->execute;
+     $body .= "<p><table cellpadding=3><tr bgcolor=(=EMCOLOR=)>";
+     $body .= "<td><b>Column</b></td>";
+     $body .= "<td><b>Type</b></td>";
+     $body .= "<td><b>Description</b></td>";
+     $body .= "</tr>\n";
+     while (my $row = $sth->fetchrow_hashref)
+     {
+	 my $name = $row->{'Field'};
+	 my $type = $row->{'Type'};
+	 $type =~ s/int\(\d+\)/int/g;
+
+	 $body .= "<tr valign=top>";
+	 $body .= "<td><b>$name</b></td>";
+	 $body .= "<td>$type</td>";
+	 $body .= "<td><input name=\"col-$name\" size=60 maxlength=255 value=\"" . &BML::eall($coldes{$name}) . "\"></td>";
+	 $body .= "</tr>\n";
+     }
+     $body .= "</table>\n";
+     $body .= "<p><input type=submit value=\"Save Changes\"></form>";
+     return "";	 
+ }
+
+ # save documentation
+ if ($FORM{'mode'} eq "docsave") 
+ {
+     unless ($can_doc) { $body .= "You don't have permissions to document the schema."; return ""; }
+     my $table = $FORM{'table'};
+     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return ""; }
+
+     $body .= "<a href=\"./\">&lt;&lt; Tables</a>(=H1 Document Table: $table H1=)";
+
+     my $qtable = $dbh->quote($table);
+     my $sth;
+
+     $sth = $dbh->prepare("SELECT tablename, des FROM schematables WHERE tablename=$qtable");
+     $sth->execute;
+     my ($tablename, $tabledes) = $sth->fetchrow_array;
+     my $qdes = $dbh->quote($FORM{'table-des'});
+     if ($tablename) {
+	 # row exists, update.
+	 $dbh->do("UPDATE schematables SET des=$qdes WHERE tablename=$qtable");
+     } else {
+	 # no row exists, so insert
+	 $dbh->do("INSERT INTO schematables (tablename, public_browsable, des) VALUES ($qtable, '0', $qdes)");
+     }
+     if ($dbh->err) { $body .= $dbh->errstr; return ""; }
+
+     my %olddes;
+     my %newdes;
+
+     ### load old descriptions
+     $sth = $dbh->prepare("SELECT colname, des FROM schemacols WHERE tablename=$qtable");
+     $sth->execute;
+     while (my ($col, $des) = $sth->fetchrow_array) { $olddes{$col} = $des;  }
+
+     ### check new descriptions (only for valid columns)
+     $sth = $dbh->prepare("DESCRIBE $table");
+     $sth->execute;
+     if ($dbh->err) { $body .= $dbh->errstr; return ""; }
+     while (my $row = $sth->fetchrow_hashref)
+     {
+	 my $name = $row->{'Field'};
+	 my $type = $row->{'Type'};
+
+	 if ($FORM{"col-$name"} ne $olddes{$name}) {
+	     $newdes{$name} = $FORM{"col-$name"};
+	 }
+     }
+     if (%newdes) {
+	 my $sql = "REPLACE INTO schemacols (tablename, colname, des) VALUES ";
+	 foreach my $col (keys %newdes) {
+	     my $qcol = $dbh->quote($col);
+	     my $qdes = $dbh->quote($newdes{$col});
+	     $sql .= "($qtable, $qcol, $qdes),";
+	 }
+	 chop $sql;
+	 $dbh->do($sql);
+	 if ($dbh->err) { $body .= "[3] ($sql)<p>" . $dbh->errstr; return ""; }
+     }
+
+     $body .= "(=H1 Success H1=)(=P Documentation saved. <a href=\"./?mode=viewtable&table=$table\">View</a>. P=)";
+
+     return "";	 
+ }
+
+
+ return "";
+
+_CODE=)(=PAGE
+TITLE=>(=_CODE return $title; _CODE=)
+BODY=>(=_CODE return $body; _CODE=)
+PAGE=)

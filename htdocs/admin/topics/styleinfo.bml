@@ -1,0 +1,38 @@
+(=_CODE
+
+ require 'ljlib.pl';
+ &connect_db();
+ 
+ my $styleid = $FORM{'styleid'}+0;
+
+ my $sth = $dbh->prepare("SELECT * FROM style WHERE is_public='Y' AND styleid=$styleid");
+ $sth->execute;
+ my $sty = $sth->fetchrow_hashref;
+ my $ret = "";
+
+ $ret .= "<H1>Style Info</H1>\n";
+
+ $ret .= "<DL>\n";
+ $ret .= "<DT><B>Author</B><DD><A TARGET=_top HREF=\"http://www.livejournal.com/userinfo.bml?user=$sty->{'user'}\">$sty->{'user'}</A>\n";
+ $ret .= "<DT><B>Style Description</B><DD>$sty->{'styledes'}<BR>\n";
+ $ret .= "<DT><B>Last Updated</B><DD>$sty->{'lastupdate'}<BR>\n";
+ $ret .= "<DT><B>View Type</B><DD>$sty->{'type'}<BR>\n";
+ $ret .= "<DT><B>Embeddable?</B><DD>$sty->{'is_embedded'}<BR>\n";
+ $ret .= "<DT><B>Color-free? (only uses color themes, not fixed colors)</B><DD>$sty->{'is_colorfree'}<BR>\n";
+ $ret .= "</DL>";
+
+ my %vars;
+ &parse_vars(\$sty->{'formatdata'}, \%vars);
+
+ $ret .= "<H1>Style Variables</H1>\n";
+
+ foreach my $v (sort keys %vars) {
+     $ret .= "<H2>$v</H2>\n";
+     my $val = &ehtml($vars{$v});
+     $val =~ s/\n/<BR>\n/g;
+     $ret .= $val;     
+ }
+
+ return $ret; 
+
+_CODE=)

@@ -1,0 +1,98 @@
+(=_INFO
+NOCACHE=>1
+_INFO=)(=PAGE
+TITLE=>(=_CODE return $FORM{'id'} ? "Edit FAQ Item #$FORM{'id'}" : "Add to FAQ"; _CODE=)
+BODY<=
+
+<CENTER>
+<A HREF="./"><B>(Back to FAQ Index)</B></A>
+</CENTER>
+
+
+<FORM ACTION="faqedit_do.bml" METHOD=POST>
+(=_CODE
+ 
+ $id = $FORM{'id'} + 0;
+ $ret = "";
+ 
+ require 'ljlib.pl';
+ &connect_db;
+
+ my $remote = &get_remote();
+ my %ac_edit;
+ my %ac_add;
+ &remote_has_priv($remote, "faqadd", \%ac_add);
+
+ if ($id)
+ {
+     &remote_has_priv($remote, "faqedit", \%ac_edit);
+     my $sth = $dbh->prepare("SELECT question, answer, faqcat, sortorder FROM faq WHERE faqid=$id");
+     $sth->execute;
+     ($question, $answer, $faqcat, $sortorder) = $sth->fetchrow_array;
+     
+     $q = &BMLUtil::ehtml($question);
+     $a = &BMLUtil::ehtml($answer);
+
+     unless ($ac_edit{'all'} || $ac_edit{$faqcat}) {
+	 if (%ac_edit) {
+	     return "<B>Error: </B> You do not have access to edit a FAQ question in the \"$faqcat\" category.";
+	 } else {
+	     return "<B>Error: </B> You do not have access to edit the FAQ.";
+	 }
+     }
+ }
+ else 
+ {
+     unless (%ac_add) {
+	 return "<B>Error: </B> You do not have access to add to the FAQ.";
+     }
+ }
+
+
+ $sortorder += 0;
+ $sortorder ||= 50;
+ 
+ $ret .= "<INPUT TYPE=HIDDEN NAME=id VALUE=$id>\n";
+ $ret .= "<P>Category: <SELECT NAME=\"faqcat\"><OPTION VALUE=\"\">\n";
+ 
+ my $sth = $dbh->prepare("SELECT faqcat, faqcatname FROM faqcat ORDER BY catorder");
+ $sth->execute;
+ while (($fc, $fcname) = $sth->fetchrow_array)
+ {
+     if ($id) {
+	 next unless ($ac_add{'all'} || $ac_add{$fc} || ($fc eq $faqcat));
+     } else {
+	 next unless ($ac_add{'all'} || $ac_add{$fc});
+     }
+     $selected = ($fc eq $faqcat) ? " SELECTED" : "";
+     $ret .= "<OPTION VALUE=\"$fc\"$selected>" . &BMLUtil::ehtml($fcname) . "\n";
+ }
+ 
+ $ret .= "</SELECT>";
+ $ret .= "SortOrder (1-100): <INPUT NAME=sortorder SIZE=5 MAXLENGTH=4 VALUE=$sortorder>";
+ $ret .= "<BR><FONT SIZE=-1>(sort order is how to sort within the category.  categories themselves are also sorted.)</FONT>";
+ 
+ $ret .= "<P><B>Question:</B> (as brief as possible, do not span multiple lines)<BR><TEXTAREA NAME=\"q\" ROWS=3 COLS=70 WRAP=SOFT>$q</TEXTAREA><BR><FONT SIZE=-1>(erase question to delete FAQ entry)</FONT>\n";
+ $ret .= "<P><B>Answer:</B> (long as you want, give URLs to links, not HTML)<BR><TEXTAREA NAME=\"a\" ROWS=15 COLS=70 WRAP=SOFT>$a</TEXTAREA>\n";
+
+ $ret .= "<P><INPUT TYPE=SUBMIT VALUE=\"Add/Edit FAQ Item\">";
+ return $ret;
+ 
+ _CODE=)
+
+</FORM>
+
+<=BODY
+PAGE=)
+
+
+
+
+
+
+
+
+
+
+
+

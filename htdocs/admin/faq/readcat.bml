@@ -1,0 +1,64 @@
+(=_INFO
+NOCACHE=>1
+_INFO=)(=PAGE
+TITLE=>Read FAQ
+BODY<=
+
+<CENTER>
+<A HREF="./"><B>(Back to FAQ Index)</B></A>
+</CENTER>
+
+
+(=_CODE
+
+ require 'ljlib.pl';
+ &connect_db;
+
+ $ret = "";
+
+ my $qfaqcat = $dbh->quote($FORM{'faqcat'});
+
+ my %faqcat;
+ my %faqq;
+ $sth = $dbh->prepare("SELECT faqcat, faqcatname, catorder FROM faqcat WHERE faqcat=$qfaqcat");
+ $sth->execute;
+ while ($_ = $sth->fetchrow_hashref)
+ {
+     $faqcat{$_->{'faqcat'}} = $_;
+ }
+ 
+ $sth = $dbh->prepare("SELECT faqid, question, sortorder, faqcat, answer, lastmodtime FROM faq WHERE faqcat=$qfaqcat");
+ $sth->execute;
+ while ($_ = $sth->fetchrow_hashref)
+ {
+     $faqq{$_->{'faqid'}} = $_;
+ }
+
+ foreach my $faqcat (sort { $faqcat{$a}->{'catorder'} <=> $faqcat{$b}->{'catorder'} } keys %faqcat)
+ {
+     $ret .= "<H2>" . &BMLUtil::ehtml($faqcat{$faqcat}->{'faqcatname'}) . "</H2>\n";
+     $ret .= "<UL>\n";
+     foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
+     {
+	 next unless ($faqq{$faqid}->{'question'});
+	 &main::note_mod_time($faqq{$faqid}->{'lastmodtime'}); 
+	 my $q = &BMLUtil::ehtml($faqq{$faqid}->{'question'});
+	 $q =~ s/^\s+//; $q =~ s/\s+$//;
+	 $q =~ s/\n/<BR>/g;
+	 my $a = &BMLUtil::ehtml($faqq{$faqid}->{'answer'});
+	 $a =~ s/^\s+//; $a =~ s/\s+$//;
+	 $a =~ s/\n( +)/"\n" . "&nbsp;&nbsp;"x length($1)/eg;
+	 $a =~ s/\n/<BR>/g;
+	 $a =~ s!http://[a-z0-9A-Z_\-\.\/\?\%\+\=]+!<A HREF="$&">$&</A>!g;
+	 $ret .= "<P><TABLE BGCOLOR=#C0C0C0><TR><TD><B>$q</B></TD></TR></TABLE>$a";
+
+     }
+     $ret .= "</UL>\n";
+ }
+
+ return $ret;
+
+_CODE=)
+
+<=BODY
+PAGE=)

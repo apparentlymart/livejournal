@@ -1,0 +1,98 @@
+(=_CODE
+
+ require 'ljlib.pl';
+ &connect_db();
+ my ($ret, $sth);
+
+ my $DEF_ROW = 30;
+ my $DEF_COL = 80;
+
+ my $remote = &get_remote();
+ my %files = ();
+ my $INC_DIR = "/home/lj/htdocs/inc";
+
+ unless (&remote_has_priv($remote, "fileedit", \%files)) {
+     return "You don't have access to edit any files, or you're not logged in.";
+ }
+
+ if ($files{'all'}) 
+ {
+     # if user has access to edit all files, find what those files are!
+     delete $files{'all'};
+     opendir (DIR, $INC_DIR);
+     while (my $file = readdir(DIR)) {
+	 $files{$file} = 1;
+     }
+     closedir (DIR);
+ }
+
+ ## get rid of files that don't match our safe pattern
+ {
+     my @del;
+     foreach my $k (keys %files) {
+	 next if ($k =~ /^[a-zA-Z0-9-\_]{1,80}$/);
+	 push @del, $k;
+     }
+     foreach my $k (@del) { delete $files{$k}; }
+ }
+
+ my $mode = $FORM{'mode'};
+ unless ($mode) {
+     $mode = $FORM{'file'} ? "edit" : "pick";
+ }
+
+ if ($mode eq "pick")
+ {
+     $ret .= "<FORM METHOD=GET>\n";
+     $ret .= "Pick file to edit: <SELECT NAME=\"file\">";
+     foreach my $file (sort keys %files) {
+	 $ret .= "<OPTION VALUE=\"$file\">$file\n";
+     }
+     $ret .= "</SELECT> <INPUT TYPE=SUBMIT VALUE=\"load...\"><BR>";
+     $ret .= "Wordwrap? <INPUT TYPE=CHECKBOX VALUE=1 NAME=w> ";
+     $ret .= "Rows: <INPUT SIZE=3 NAME=r VALUE=$DEF_ROW> ";
+     $ret .= "Cols: <INPUT SIZE=3 NAME=c VALUE=$DEF_COL> ";
+     $ret .= "</FORM>";
+     return $ret;
+ }
+
+ my $file = $FORM{'file'};
+ unless ($files{$file}) {
+     return "<B>ERROR!</B> you don't have access to this document.";
+ }
+
+ if ($mode eq "edit") 
+ {
+     $ret .= "<B>Editing:</B> <tt>$file</tt><P>";
+     my $contents;
+     open (FILE, "$INC_DIR/$file") or return "<B>Error:</B> Couldn't open file";
+     while (<FILE>) { $contents .= $_; }
+     close FILE;
+     
+     my $r = ($FORM{'r'}+0) || $DEF_ROW;
+     my $c = ($FORM{'c'}+0) || $DEF_COL;
+     my $wrap = $FORM{'w'} ? "SOFT" : "OFF";
+
+     $ret .= "<FORM METHOD=POST>\n";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=\"save\">";
+     $ret .= "<INPUT TYPE=HIDDEN NAME=file VALUE=\"$file\">";
+     $ret .= "<TEXTAREA ROWS=$r COLS=$c WRAP=$wrap NAME=contents>";
+     $ret .= &BML::eall($contents);
+     $ret .= "</TEXTAREA><P><INPUT TYPE=SUBMIT VALUE=\"Save\"> (no undo.. are you sure?)";
+     $ret .= "</FORM>\n";
+     return $ret;
+ }
+
+ if ($mode eq "save") 
+ {
+     $ret .= "<B>Saving:</B> <tt>$file</tt><p>";
+     open (FILE, ">$INC_DIR/$file") or return "<B>Error:</B> Couldn't open $file";
+     print FILE $FORM{'contents'};
+     close FILE;
+     $ret .= "saved.";
+     return $ret;
+ }
+
+ return "unknown mode";
+
+_CODE=)
