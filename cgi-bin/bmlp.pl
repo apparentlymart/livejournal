@@ -175,6 +175,7 @@ sub handle_request
     @BlockStack = ("");
     %IncludeOpen = ();
     @IncludeStack = ();
+    @DO_LATER = ();
 
     unless (&load_cfg()) {
         print "Content-type: text/html\n\n";
@@ -484,6 +485,11 @@ sub handle_request
         }
         
         &BMLClient::save();
+
+        # run all the blocking code now that we've sent the page away
+        close STDOUT;
+        close STDERR;
+        foreach (@DO_LATER) { $_->(); }
 
         my $duration = time() - $starttime;
         my $fastcgi_wait = $time_b - $time_a;
@@ -1124,6 +1130,14 @@ sub trim
 }
 
 package BML;
+
+sub do_later
+{
+    my $subref = shift;
+    return 0 unless ref $subref eq "CODE";
+    push @main::DO_LATER, $subref;
+    return 1;
+}
 
 sub register_block_setup
 {
