@@ -864,7 +864,7 @@ sub getevents
     $sth->finish;
     
     if ($drop_temp_table) {
-	$dbh->do("DROP TABLE $drop_temp_table");
+	$dbh->do("DROP TABLE IF EXISTS $drop_temp_table");
     }
     
     unless ($req->{'noprops'}) 
