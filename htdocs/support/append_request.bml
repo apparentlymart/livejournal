@@ -79,14 +79,6 @@ body<=
      return LJ::bad_input("Your message was blank.  Please type at least something in the message field.");
  }
 
-## change summary
-if ($FORM{'changesum'}) {
-    $FORM{'body'} =~ s/[\n\r]//g;
-    my $qnewsub = $dbh->quote($FORM{'body'});
-    $dbh->do("UPDATE support SET subject=$qnewsub WHERE spid=$spid");
-    $FORM{'body'} = "Changing subject from \"$sp->{'subject'}\" to \"$FORM{'body'}\"";
-}
-
  ## touch request
  if ($FORM{'touch'}) {
      $dbh->do("UPDATE support SET state='open', timetouched=UNIX_TIMESTAMP(), timeclosed=0 WHERE spid=$spid");
@@ -116,6 +108,14 @@ if ($FORM{'changesum'}) {
      } else {
          return LJ::bad_input("Invalid screened entry to approve.");
      }
+ }
+
+ ## change summary
+ if ($FORM{'changesum'}) {
+     $FORM{'body'} =~ s/[\n\r]//g;
+     my $qnewsub = $dbh->quote($FORM{'body'});
+     $dbh->do("UPDATE support SET subject=$qnewsub WHERE spid=$spid");
+     $FORM{'body'} = "Changing subject from \"$sp->{'subject'}\" to \"$FORM{'body'}\"";
  }
 
  my $splid = LJ::Support::append_request($dbh, $sp, {
