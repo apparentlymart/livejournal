@@ -46,7 +46,8 @@
  
  ### load user props.  some don't apply to communities
  {
-     my @props = qw(opt_whatemailshow opt_blockrobots country state city zip url urlname);
+     my @props = qw(opt_whatemailshow opt_blockrobots country state city zip 
+		    url urlname opt_hidefriendofs);
      unless ($com) { push @props, qw(aolim icq yahoo msn gender jabber); }
      &load_user_props($u, @props);
  }
@@ -431,7 +432,7 @@
 	     push @friend_of, $fr;
 	 }
      }
-     if (@friend_of) {
+     if (@friend_of && ! $u->{'opt_hidefriendofs'}) {
 	 $label = $com ? "Watched by" : "Friend of";
 	 $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B><nobr>$label:</nobr></B></TD><TD COLSPAN=2>";
 	 $body .= "<B>" . scalar(@friend_of) . ":</B> ";

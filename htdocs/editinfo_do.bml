@@ -34,7 +34,7 @@ BODY<=
 		  "country", "state", "city", "zip",
 		  "icq", "aolim", "yahoo", "msn", "url", "urlname", "gender", "jabber",
 		  "opt_blockrobots", "opt_notalkicons",
-		  "opt_logcommentips", "howhear", "opt_bdaymail"
+		  "opt_logcommentips", "howhear", "opt_bdaymail", "opt_hidefriendofs"
 		  );
 
  if ($u->{'has_bio'}) {
@@ -310,11 +310,15 @@ BODY<=
      $ret .= "<TR><TD>&nbsp;</TD><TD>If you want to know when we add some cool new feature to LiveJournal, check this box.  The emails you get will be pretty rare, no more than once or twice a month usually.  Your email address will not be visible to other users, and you can turn this off at anytime.</TD></TR>\n";
 
      $checked = $u->{'opt_bdaymail'} ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_bdaymail $checked></TD><TD><B>Send me birthday reminders.</B></TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_bdaymail $checked></TD><TD><B>Send me birthday reminders</B></TD></TR>\n";
      $ret .= "<TR><TD>&nbsp;</TD><TD>If you want to get email reminding you of birthdays for your friends on LiveJournal, click this box.</TD></TR>\n";
 
+     $checked = $u->{'opt_hidefriendofs'} ? "CHECKED" : "";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_hidefriendofs $checked></TD><TD><B>Hide \"Friend of\" list</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>If you check this, the list of people that list you as a friend is hidden on your profile page.</TD></TR>\n";
+
      $checked = $u->{'opt_showtalklinks'} eq "Y" ? "CHECKED" : "";
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_showtalklinks $checked></TD><TD><B>Enable message boards.</B></TD></TR>\n";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_showtalklinks $checked></TD><TD><B>Enable message boards</B></TD></TR>\n";
      $ret .= "<TR><TD>&nbsp;</TD><TD>Check this if you want people to be able to reply to journal entries you post.  (the journal style you select must also support this)\n";
 
      $ret .= "<P><B>Who can reply to your entries?</B> ";
@@ -516,6 +520,7 @@ BODY<=
 	 $FORM{'opt_showtopicstuff'} = $FORM{'opt_showtopicstuff'} ? "Y" : "N";
 	 $FORM{'opt_blockrobots'} = $FORM{'opt_blockrobots'} ? 1 : 0;
 	 $FORM{'opt_bdaymail'} = $FORM{'opt_bdaymail'} ? 1 : 0;
+	 $FORM{'opt_hidefriendofs'} = $FORM{'opt_hidefriendofs'} ? 1 : 0;
 	 $FORM{'opt_notalkicons'} = $FORM{'opt_talkicons'} ? 0 : 1;   # (negated)
 	 if ($FORM{'opt_logcommentips'} ne "N" && 
 	     $FORM{'opt_logcommentips'} ne "S" && 
@@ -527,7 +532,7 @@ BODY<=
 		       "country", "state", "city", "zip",
 		       "icq", "aolim", "yahoo", "msn", "url", "urlname", "gender", "jabber",
 		       "opt_blockrobots", "opt_notalkicons",
-		       "opt_logcommentips", "opt_bdaymail"
+		       "opt_logcommentips", "opt_bdaymail", "opt_hidefriendofs"
 		       );	
 
 	 # this is only done once, then never appears again.
