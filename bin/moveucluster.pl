@@ -12,12 +12,14 @@ my $opt_useslow = 0;
 my $opt_slowalloc = 0;
 my $opt_verbose = 1;
 my $opt_movemaster = 0;
+my $opt_prelocked = 0;
 exit 1 unless GetOptions('delete' => \$opt_del,
                          'destdelete' => \$opt_destdel,
                          'useslow' => \$opt_useslow, # use slow db role for read
                          'slowalloc' => \$opt_slowalloc, # see note below
 			 'verbose=i' => \$opt_verbose,
 			 'movemaster|mm' => \$opt_movemaster,
+                         'prelocked' => \$opt_prelocked,
                          );
 my $optv = $opt_verbose;
 
@@ -92,8 +94,14 @@ unless (defined $readonly_bit) {
 }
 
 # make sure a move isn't already in progress
-if (($u->{'caps'}+0) & (1 << $readonly_bit)) {
-    die "User '$user' is already in the process of being moved? (cap bit $readonly_bit set)\n";
+if ($opt_prelocked) {
+    unless (($u->{'caps'}+0) & (1 << $readonly_bit)) {
+        die "User '$user' should have been prelocked.\n";
+    }   
+} else {
+    if (($u->{'caps'}+0) & (1 << $readonly_bit)) {
+        die "User '$user' is already in the process of being moved? (cap bit $readonly_bit set)\n";
+    }
 }
 
 print "Moving '$u->{'user'}' from cluster $sclust to $dclust\n" if $optv >= 1;
@@ -104,15 +112,18 @@ $dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart) ".
 my $cmid = $dbh->{'mysql_insertid'};
 
 # set readonly cap bit on user
-LJ::update_user($userid, { raw => "caps=caps|(1<<$readonly_bit)" });
+LJ::update_user($userid, { raw => "caps=caps|(1<<$readonly_bit)" })
+    unless $opt_prelocked;
 $dbh->do("SELECT RELEASE_LOCK('moveucluster-$user')");
 
+unless ($opt_prelocked) {
 # wait a bit for writes to stop if journal is somewhat active (last week update)
-my $secidle = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
-                                    "FROM userusage WHERE userid=$userid");
-if ($secidle) {
-    sleep(2) unless $secidle > 86400*7;
-    sleep(1) unless $secidle > 86400;
+    my $secidle = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
+                                        "FROM userusage WHERE userid=$userid");
+    if ($secidle) {
+        sleep(2) unless $secidle > 86400*7;
+        sleep(1) unless $secidle > 86400;
+    }
 }
 
 # make sure slow is caught up:
