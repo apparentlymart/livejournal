@@ -53,14 +53,16 @@ sub check_email
     }
 
     # Catch misspellings of hotmail.com
-    if ($domain =~ /^(otmail|hotmial|hotmil|hotamail|hotmaul|hoatmail|hatmail)\.(cm|co|com|cmo|om)$/)
+    if ($domain =~ /^(otmail|hotmial|hotmil|hotamail|hotmaul|hoatmail|hatmail|htomail)\.(cm|co|com|cmo|om)$/ or
+        $domain =~ /^hotmail\.(cm|co|om|cmo)$/)
     {
         return $reject->("bad_hotmail_spelling",
                          "You gave $email as your email address.  Are you sure you didn't mean hotmail.com?");
     }
 
     # Catch misspellings of aol.com
-    elsif ($domain =~ /^(ol|aoll)\.(cm|co|com|cmo|om)$/)
+    elsif ($domain =~ /^(ol|aoll)\.(cm|co|com|cmo|om)$/ or
+           $domain =~ /^aol\.(cm|co|om|cmo)$/)
     {
         return $reject->("bad_aol_spelling",
                          "You gave $email as your email address.  Are you sure you didn't mean aol.com?");
