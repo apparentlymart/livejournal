@@ -414,6 +414,7 @@ CREATE TABLE priv_list (
   privcode varchar(20) NOT NULL default '',
   privname varchar(40) default NULL,
   des varchar(255) default NULL,
+  is_public ENUM('1', '0') DEFAULT '1' NOT NULL,
   PRIMARY KEY  (prlid),
   UNIQUE KEY privcode (privcode)
 ) 
@@ -1192,6 +1193,12 @@ register_alter(sub {
 		 "MODIFY statval INT UNSIGNED NOT NULL, ". 
 		 "DROP INDEX statcat");
     } 
+
+    if (column_type("priv_list", "is_public") eq "") {
+	do_alter("priv_list",
+		 "ALTER TABLE priv_list ".
+		 "ADD is_public ENUM('1', '0') DEFAULT '1' NOT NULL");
+    }
    
 });
 
