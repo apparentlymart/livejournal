@@ -151,6 +151,9 @@ use constant CMAX_UPI_COMMENT => 120;
                  "res" => {
                      "des" => "S2-specific resources (stylesheet)",
                  },
+                 "pics" => {
+                     "des" => "FotoBilder pics (root gallery)",
+                 },
                  "info" => {
                      # just a redirect to userinfo.bml for now.
                      # in S2, will be a real view.
