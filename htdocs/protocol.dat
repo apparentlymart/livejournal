@@ -214,7 +214,12 @@ Set an arbitrary (but restricted) meta-data property to this log item.  See the 
 
 { friendof
 .des
-Returns a list of what other LiveJournal users list this user as their friend.
+Returns a list of which other LiveJournal users list this user as their friend.
+.request
+{ friendoflimit
+.des
+<i>(Optional)</i> If set to a numeric value greater than zero, this mode will only return the number of results indicated. Useful only for building pretty lists for display which might have a button to view the full list nearby.
+}
 .response
 { friendof_count
 .des
@@ -245,15 +250,19 @@ The account type of this user, if it's not a personal account.  Currently the on
 
 { getfriends
 .des
-Returns a list of what other LiveJournal users this user lists as their friend.
+Returns a list of which other LiveJournal users this user lists as their friend.
 .request
 { includefriendof
 .des
-<I>(Optional)</I> If set to <TT>1</TT>, you will also get back the info from the "friendof" mode.  Some clients show friends and friendof data in separate tabs/panes.  If you're always going to load both, then use this flag (as opposed to a tabbed dialog approach, where the user may not go to the second tab and thus would not need to load the friendof data.)
+<I>(Optional)</I> If set to <TT>1</TT>, you will also get back the info from the "friendof" mode.  Some clients show friends and friendof data in separate tabs/panes.  If you're always going to load both, then use this flag (as opposed to a tabbed dialog approach, where the user may not go to the second tab and thus would not need to load the friendof data.) friendof request variables can be used.
 }
 { includegroups
 .des
 <I>(Optional)</I> If set to <TT>1</TT>, you will also get back the info from the "getfriendgroups" mode.  See above for the reason why this would be useful.
+}
+{ friendlimit
+.des
+<i>(Optional)</i> If set to a numeric value greater than zero, this mode will only return the number of results indicated. Useful only for building pretty lists for display which might have a button to view the full list nearby.
 }
 .response
 { friend_count
