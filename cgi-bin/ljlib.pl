@@ -231,7 +231,7 @@ sub get_dbh {
             # DBIx::StateTracker::new will die if it can't connect to the database,
             # so it's wrapper in an eval
             eval {
-                $tracker = 
+                $tracker =
                     $LJ::REQ_DBIX_TRACKER{$canl_role} ||=
                     DBIx::StateTracker->new(sub { $LJ::DBIRole->get_dbh({unshared=>1},
                                                                         $canl_role) });
@@ -291,7 +291,7 @@ sub get_groupmask
 #
 # returns a row from log2, trying memcache
 # accepts $u + $jitemid
-# returns hash with: posterid, eventtime, logtime, 
+# returns hash with: posterid, eventtime, logtime,
 # security, allowmask, journalid, jitemid, anum.
 
 sub get_log2_row
@@ -315,7 +315,7 @@ sub get_log2_row
 
         return $item;
     }
-    
+
     my $db = LJ::get_cluster_master($u);
     my $sql = "SELECT posterid, eventtime, logtime, security, allowmask, " .
               "anum FROM log2 WHERE journalid=? AND jitemid=?";
@@ -333,10 +333,10 @@ sub get_log2_row
     $eventtime = LJ::mysqldate_to_time($item->{'eventtime'}, 1);
     $logtime = LJ::mysqldate_to_time($item->{'logtime'}, 1);
 
-    $row = pack("NNNNN", $item->{'posterid'}, $eventtime, $logtime, $sec, 
+    $row = pack("NNNNN", $item->{'posterid'}, $eventtime, $logtime, $sec,
                 $item->{'ditemid'});
     LJ::MemCache::set($memkey, $row);
-    
+
     return $item;
 }
 
@@ -400,9 +400,9 @@ sub get_log2_recent_log
 
     my $db = LJ::get_cluster_master($cid);
     # if we use slave or didn't get some data, don't store in memcache
-    my $dont_store = 0; 
+    my $dont_store = 0;
     unless ($db) {
-        $db = LJ::get_cluster_reader($cid); 
+        $db = LJ::get_cluster_reader($cid);
         $dont_store = 1;
         return undef unless $db;
     }
@@ -432,19 +432,19 @@ sub get_log2_recent_log
             if defined $tu;
         # TODO: update userprop if necessary
     }
-    
+
     # if we didn't get tu, don't bother to memcache
     $dont_store = 1 unless defined $tu;
 
     # get reliable log2lt data from the db
-    
+
     my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14; # 2 weeks default
-    
+
     my $sql = "SELECT jitemid, posterid, eventtime, rlogtime, " .
         "security, allowmask, anum, replycount FROM log2 " .
         "USE INDEX (rlogtime) WHERE journalid=? AND " .
         "rlogtime <= ($LJ::EndOfTime - UNIX_TIMESTAMP()) + $max_age";
-    
+
     my $sth = $db->prepare($sql);
     $sth->execute($jid);
     my @row;
@@ -464,7 +464,7 @@ sub get_log2_recent_log
         $ditemid = $item->{'jitemid'}*256 + $item->{'anum'};
         $eventtime = LJ::mysqldate_to_time($item->{'eventtime'}, 1);
 
-        $rows .= pack("NNNNN", 
+        $rows .= pack("NNNNN",
                       $item->{'posterid'},
                       $eventtime,
                       $item->{'rlogtime'},
@@ -499,7 +499,7 @@ sub get_log2_recent_user
         last unless $left;
         last if $notafter and $item->{'rlogtime'} > $notafter;
         next unless $remote || $item->{'security'} eq 'public';
-        next if $item->{'security'} eq 'private' 
+        next if $item->{'security'} eq 'private'
             and $item->{'journalid'} != $remote->{'userid'};
         if ($item->{'security'} eq 'usemask') {
             next unless $remote->{'journaltype'} eq "P";
@@ -510,7 +510,7 @@ sub get_log2_recent_user
             }
             next unless $permit;
         }
-        
+
         # date conversion
         if ($opts->{'dateformat'} eq "S2") {
             $item->{'alldatepart'} = LJ::alldatepart_s2($item->{'eventtime'});
@@ -750,10 +750,10 @@ sub get_timeupdate_multi {
 # each of format [ year, month, day, count ] for all days with
 # non-zero count.  examples:
 #  [ [ 2003, 6, 5, 3 ], [ 2003, 6, 8, 4 ], ... ]
-# 
+#
 sub get_daycounts
 {
-    my ($u, $remote, $not_memcache) = @_;  
+    my ($u, $remote, $not_memcache) = @_;
     # NOTE: $remote not yet used.  one of the oldest LJ shortcomings is that
     # it's public how many entries users have per-day, even if the entries
     # are protected.  we'll be fixing that with a new table, but first
@@ -767,7 +767,7 @@ sub get_daycounts
         my $list = LJ::MemCache::get($memkey);
         return $list if $list;
     }
-    
+
     my $dbcm = LJ::get_cluster_master($u) or return undef;
     my $sth = $dbcm->prepare("SELECT year, month, day, COUNT(*) ".
                              "FROM log2 WHERE journalid=? GROUP BY 1, 2, 3");
@@ -799,11 +799,11 @@ sub get_daycounts
 #           - friendsoffriends: load friends of friends, not just friends
 #           - u: hashref of journal loading friends of
 #           - showtypes: /[PYC]/
-# returns: Array of item hashrefs containing the same elements 
+# returns: Array of item hashrefs containing the same elements
 # </LJFUNC>
 sub get_friend_items
 {
-    &nodb; 
+    &nodb;
     my $opts = shift;
 
     my $dbr = LJ::get_db_reader();
@@ -847,7 +847,7 @@ sub get_friend_items
         foreach my $fid (keys %$friends_u) {
             my $fu = $friends_u->{$fid};
             if ($fu->{'statusvis'} ne "V" ||
-                ($opts->{'showtypes'} && 
+                ($opts->{'showtypes'} &&
                  index(uc($opts->{'showtypes'}), $fu->{journaltype}) == -1))
             {
                 delete $friends_u->{$fid};
@@ -1000,7 +1000,7 @@ sub get_friend_items
             $f{$id} = { 'userid' => $id, 'timeupdate' => $time, 'jt' => $jt,
                         'relevant' => ($filter && !($mask & $filter)) ? 0 : 1 , };
         }
-            
+
         # load some friends of friends (most 20 queries)
         my %ff;
         my $fct = 0;
@@ -1041,7 +1041,7 @@ sub get_friend_items
         $fr_loaded = 1;
 
         return @friends_buffer ? $friends_buffer[0] : undef;
-        
+
     } if $opts->{'friendsoffriends'} && ! @LJ::MEMCACHE_SERVERS;
 
     my $loop = 1;
@@ -1067,7 +1067,7 @@ sub get_friend_items
             'dateformat' => $opts->{'dateformat'},
             'update' => $LJ::EndOfTime - $fr->[1], # reverse back to normal
         });
-        
+
         # stamp each with clusterid if from cluster, so ljviews and other
         # callers will know which items are old (no/0 clusterid) and which
         # are new
@@ -1399,7 +1399,7 @@ sub statushistory_add
 {
     &nodb;
     my $dbh = LJ::get_db_writer();
-    
+
     my $userid = shift;
     $userid = LJ::want_userid($userid) + 0;
 
@@ -1737,7 +1737,7 @@ sub get_mood_picture
     LJ::load_moods() unless $LJ::CACHED_MOODS;
     do
     {
-        if ($LJ::CACHE_MOOD_THEME{$themeid} && 
+        if ($LJ::CACHE_MOOD_THEME{$themeid} &&
             $LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}) {
             %{$ref} = %{$LJ::CACHE_MOOD_THEME{$themeid}->{$moodid}};
             if ($ref->{'pic'} =~ m!^/!) {
@@ -1747,7 +1747,7 @@ sub get_mood_picture
             $ref->{'moodid'} = $moodid;
             return 1;
         } else {
-            $moodid = (defined $LJ::CACHE_MOODS{$moodid} ? 
+            $moodid = (defined $LJ::CACHE_MOODS{$moodid} ?
                        $LJ::CACHE_MOODS{$moodid}->{'parent'} : 0);
         }
     }
@@ -1802,7 +1802,7 @@ sub mysqldate_to_time {
     return undef unless $string =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d)(?::(\d\d))?)?$/;
     return $gmt ?
         Time::Local::timegm($6, $5, $4, $3, $2-1, $1) :
-        Time::Local::timelocal($6, $5, $4, $3, $2-1, $1);        
+        Time::Local::timelocal($6, $5, $4, $3, $2-1, $1);
 }
 
 # <LJFUNC>
@@ -1837,7 +1837,7 @@ sub time_to_cookie {
     my @day = qw{Sunday Monday Tuesday Wednesday Thursday Friday Saturday};
     my @month = qw{Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec};
 
-    return sprintf("$day[$wday], %02d-$month[$mon]-%04d %02d:%02d:%02d GMT", 
+    return sprintf("$day[$wday], %02d-$month[$mon]-%04d %02d:%02d:%02d GMT",
                    $mday, $year, $hour, $min, $sec);
 }
 
@@ -2267,8 +2267,8 @@ sub acct_code_generate
     my $num_rows = $dbh->do($sql) or return undef;
 
     if ($quantity == 1) {
-	my $acid = $dbh->{'mysql_insertid'} or return undef;
-	return acct_code_encode($acid, $authcodes[0]);
+        my $acid = $dbh->{'mysql_insertid'} or return undef;
+        return acct_code_encode($acid, $authcodes[0]);
     } else {
         return $num_rows;
     }
@@ -2331,7 +2331,7 @@ sub acct_code_check
     my ($acid, $auth) = acct_code_decode($code);
 
     my $ac = $dbh->selectrow_hashref("SELECT userid, rcptid, auth ".
-                                     "FROM acctcode WHERE acid=?", 
+                                     "FROM acctcode WHERE acid=?",
                                      undef, $acid);
 
     unless ($ac && $ac->{'auth'} eq $auth) {
@@ -2567,13 +2567,13 @@ sub load_user_props
     foreach my $table (keys %loadfrom) {
         my $db;
         if ($use_master) {
-            $db = ($table =~ m{userprop(lite2|blob)}) ? 
-                LJ::get_cluster_master($u) : 
+            $db = ($table =~ m{userprop(lite2|blob)}) ?
+                LJ::get_cluster_master($u) :
                 LJ::get_db_writer();
         }
         unless ($db) {
             $db = ($table =~ m{userprop(lite2|blob)}) ?
-                LJ::get_cluster_reader($u) : 
+                LJ::get_cluster_reader($u) :
                 LJ::get_db_reader();
             $used_slave = 1;
         }
@@ -2590,7 +2590,7 @@ sub load_user_props
 
     # Add defaults to user object.
 
-    # defaults for S1 style IDs in config file are magic: really 
+    # defaults for S1 style IDs in config file are magic: really
     # uniq strings representing style IDs, so on first use, we need
     # to map them
     unless ($LJ::CACHED_S1IDMAP) {
@@ -2603,7 +2603,7 @@ sub load_user_props
             $LJ::USERPROP_DEF{$k} = $_->{'styleid'};
         }
 
-	$LJ::CACHED_S1IDMAP = 1;
+        $LJ::CACHED_S1IDMAP = 1;
     }
 
     # If this was called with no @props, then the function tried
@@ -2680,7 +2680,7 @@ sub auth_okay
 
     $actual ||= $u->{'password'};
     my $user = $u->{'user'};
-    
+
     # set the IP banned flag, if it was provided.
     my $fake_scalar;
     my $ref = ref $ip_banned ? $ip_banned : \$fake_scalar;
@@ -2704,7 +2704,7 @@ sub auth_okay
         return $good || $bad_login->();
     }
 
-    ## LJ default authorization:   
+    ## LJ default authorization:
     return $bad_login->() unless $actual;
     return 1 if ($md5 && lc($md5) eq LJ::hash_password($actual));
     return 1 if ($clear eq $actual);
@@ -2717,7 +2717,7 @@ sub auth_okay
 # 1/0 according to whether auth succeeded. If succeeded, also
 # calls LJ::set_remote() to set up internal LJ auth.
 # this routine should be called whenever it's clear the client
-# wants/the server demands digest auth, and if it returns 1, 
+# wants/the server demands digest auth, and if it returns 1,
 # things proceed as usual; if it returns 0, the caller should
 # $r->send_http_header(), output an auth error message in HTTP
 # data and return to apache.
@@ -2731,14 +2731,14 @@ sub auth_digest {
     my $decline = sub {
         my $stale = shift;
 
-        my $nonce = LJ::challenge_generate(180); # 3 mins timeout 
+        my $nonce = LJ::challenge_generate(180); # 3 mins timeout
         my $authline = "Digest realm=\"lj\", nonce=\"$nonce\", algorithm=MD5, qop=\"auth\"";
         $authline .= ", stale=\"true\"" if $stale;
         $r->header_out("WWW-Authenticate", $authline);
         $r->status_line("401 Authentication required");
         return 0;
     };
-    
+
     unless ($r->header_in("Authorization")) {
         return $decline->(0);
     }
@@ -2761,7 +2761,7 @@ sub auth_digest {
             $attrs{$attr} = $value;
         }
     }
-    
+
     # sanity checks
     unless ($authname eq 'Digest' && $attrs{'qop'} eq 'auth' &&
             $attrs{'realm'} eq 'lj' && $attrs{'algorithm'} eq 'MD5') {
@@ -2800,7 +2800,7 @@ sub auth_digest {
     return $decline->(0) unless $u->{'password'};
 
     # recalculate the hash and compare to response
-    
+
     my $a1src="$u->{'user'}:lj:$u->{'password'}";
     my $a1 = Digest::MD5::md5_hex($a1src);
     my $a2src = $r->method . ":$attrs{'uri'}";
@@ -2808,7 +2808,7 @@ sub auth_digest {
     my $hashsrc = "$a1:$attrs{'nonce'}:$attrs{'nc'}:$attrs{'cnonce'}:$attrs{'qop'}:$a2";
     my $hash = Digest::MD5::md5_hex($hashsrc);
 
-    return $decline->(0) 
+    return $decline->(0)
         unless $hash eq $attrs{'response'};
 
     # set the remote
@@ -2835,7 +2835,7 @@ sub challenge_generate
 
 # Return challenge info.
 # This could grow later - for now just return the rand chars used.
-sub get_challenge_attributes 
+sub get_challenge_attributes
 {
     return (split /:/, shift)[4];
 }
@@ -2862,7 +2862,7 @@ sub challenge_check {
         unless Digest::MD5::md5_hex($chalbare . $secret) eq $chalsig;
 
     $expired = 1
-        unless (not $valid) or time() - ($stime + $s_age) < $goodfor; 
+        unless (not $valid) or time() - ($stime + $s_age) < $goodfor;
 
     # Check for token dups
     if ($valid && !$expired) {
@@ -2876,7 +2876,7 @@ sub challenge_check {
             my $dbh = LJ::get_db_writer();
             my $rv = $dbh->do("SELECT GET_LOCK(?,5)", undef, $chal);
             if ($rv) {
-                $count = $dbh->selectrow_array("SELECT count FROM challenges WHERE challenge=?", 
+                $count = $dbh->selectrow_array("SELECT count FROM challenges WHERE challenge=?",
                                                undef, $chal);
                 if ($count) {
                     $dbh->do("UPDATE challenges SET count=count+1 WHERE challenge=?",
@@ -2900,7 +2900,7 @@ sub challenge_check {
         $opts->{'valid'} = $valid;
         $opts->{'count'} = $count;
     }
-    
+
     return ($valid && !$expired && ($count==1));
 }
 
@@ -3126,7 +3126,7 @@ sub get_logtext2
     # keep track of itemids we still need to load.
     my %need;
     my @mem_keys;
-    foreach (@_) { 
+    foreach (@_) {
         my $id = $_+0;
         $need{$id} = 1;
         push @mem_keys, [$journalid,"logtext:$clusterid:$journalid:$id"];
@@ -3152,7 +3152,7 @@ sub get_logtext2
         my $db = $pass == 1 ? LJ::get_cluster_reader($clusterid) :
             LJ::get_cluster_master($clusterid);
         next unless $db;
-        
+
         my $jitemid_in = join(", ", keys %need);
         my $sth = $db->prepare("SELECT jitemid, subject, event FROM logtext2 ".
                                "WHERE journalid=$journalid AND jitemid IN ($jitemid_in)");
@@ -3217,7 +3217,7 @@ sub get_talktext2
         }
     }
     return $lt unless %need;
-    
+
     my $bodycol = $opts->{'onlysubjects'} ? "" : ", body";
 
     # pass 1 (slave) and pass 2 (master)
@@ -3284,7 +3284,7 @@ sub _get_posts_raw_wrapper {
         }
     }
     my $rawposts = LJ::get_posts_raw($opts, @postids);
-    
+
     # add replycounts fields to props
     if ($type eq "prop") {
         while (my ($k, $v) = each %{$rawposts->{"replycount"}||{}}) {
@@ -3390,10 +3390,10 @@ sub get_posts_raw
             $ret->{replycount}{$id} = int($v); # remove possible spaces
         }
     }
-    
+
     # we may be done already.
     return $ret if $opts->{memcache_only};
-    return $ret unless values %$needtext or values %$needprop 
+    return $ret unless values %$needtext or values %$needprop
         or values %$needrc;
 
     # otherwise, hit the database.
@@ -3517,7 +3517,7 @@ sub get_posts
     # XXX this function is incomplete.  it should also HTML clean, etc.
     # XXX we need to load users when we have unknown8bit data, but that
     # XXX means we have to load users.
-    
+
 
     while (my ($id, $rp) = each %$rawposts) {
         if ($LJ::UNICODE && $rp->{props}{unknown8bit}) {
@@ -3583,10 +3583,10 @@ sub get_remote
     my $sessdata;
 
     # do they have any sort of session cookie?
-    return $no_remote->("No session") 
+    return $no_remote->("No session")
         unless ($sessdata = $cookie->('ljsession'));
 
-    
+
     my ($authtype, $user, $sessid, $auth, $_sopts) = split(/:/, $sessdata);
     $sopts = $_sopts;
 
@@ -3624,7 +3624,7 @@ sub get_remote
     return $no_remote->("Session old") if $sess->{'timeexpire'} < $now;
     if ($sess->{'ipfixed'} && ! $opts->{'ignore_ip'}) {
         my $remote_ip = $LJ::_XFER_REMOTE_IP || LJ::get_remote_ip();
-        return $no_remote->("Session wrong IP") 
+        return $no_remote->("Session wrong IP")
             if $sess->{'ipfixed'} ne $remote_ip;
     }
 
@@ -3633,8 +3633,8 @@ sub get_remote
         'short' => 60*60*24*1.5,
         'long' => 60*60*24*60,
     }->{$sess->{'exptype'}};
-    
-    if ($sess_length && 
+
+    if ($sess_length &&
         $sess->{'timeexpire'} - $now < $sess_length/2) {
         my $udbh = LJ::get_cluster_master($u);
         if ($udbh) {
@@ -3786,9 +3786,9 @@ sub start_request
         if ($modtime > $LJ::CACHE_CONFIG_MODTIME) {
             # reload config and update cached modtime
             $LJ::CACHE_CONFIG_MODTIME = $modtime;
-            eval { 
-                do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl"; 
-                do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl"; 
+            eval {
+                do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+                do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
             };
             $LJ::IMGPREFIX_BAK = $LJ::IMGPREFIX;
             $LJ::STATPREFIX_BAK = $LJ::STATPREFIX;
@@ -3935,8 +3935,8 @@ sub modify_caps {
     }
 
     # run hooks for modified bits
-    my $res = LJ::run_hook("modify_caps", 
-                           { 'u' => $u, 
+    my $res = LJ::run_hook("modify_caps",
+                           { 'u' => $u,
                              'newcaps' => $newcaps,
                              'oldcaps' => $u->{'caps'},
                              'cap_on_req'  => { map { $_ => 1 } @$cap_add },
@@ -3997,7 +3997,7 @@ sub activate_userpics
         } else {
             push @active, $picid;
         }
-    }  
+    }
 
     # inactivate previously activated userpics
     if (@active > $allow) {
@@ -4012,7 +4012,7 @@ sub activate_userpics
         # query all pickws in logprop2 with jitemid > that value
         my %count_kw = ();
         my $propid = LJ::get_prop("log", "picture_keyword")->{'id'};
-        my $sth = $dbcr->prepare("SELECT value, COUNT(*) FROM logprop2 " . 
+        my $sth = $dbcr->prepare("SELECT value, COUNT(*) FROM logprop2 " .
                                  "WHERE journalid=? AND jitemid > ? AND propid=?" .
                                  "GROUP BY value");
         $sth->execute($userid, $jitemid, $propid);
@@ -4027,7 +4027,7 @@ sub activate_userpics
         my %count_picid = ();
         if ($keywords_in) {
             my $sth = $dbh->prepare("SELECT k.keyword, m.picid FROM keywords k, userpicmap m " .
-                                    "WHERE k.keyword IN ($keywords_in) AND k.kwid=m.kwid " . 
+                                    "WHERE k.keyword IN ($keywords_in) AND k.kwid=m.kwid " .
                                     "AND m.userid=?");
             $sth->execute($userid);
             while (my ($keyword, $picid) = $sth->fetchrow_array) {
@@ -4037,12 +4037,12 @@ sub activate_userpics
         }
 
         # we're only going to ban the least used, excluding the user's default
-        my @ban = (grep { $_ != $u->{'defaultpicid'} } 
+        my @ban = (grep { $_ != $u->{'defaultpicid'} }
                    sort { $count_picid{$a} <=> $count_picid{$b} } @active);
 
         @ban = splice(@ban, 0, $to_ban) if @ban > $to_ban;
         my $ban_in = join(",", map { $dbh->quote($_) } @ban);
-        $dbh->do("UPDATE userpic SET state='I' WHERE userid=? AND picid IN ($ban_in)", 
+        $dbh->do("UPDATE userpic SET state='I' WHERE userid=? AND picid IN ($ban_in)",
                  undef, $userid) if $ban_in;
     }
 
@@ -4084,7 +4084,7 @@ sub get_userpic_info
     return undef unless $uuid;
     my $userid = want_userid($uuid);
     return $LJ::CACHE_USERPIC_INFO{$userid} if $LJ::CACHE_USERPIC_INFO{$userid};
-    
+
     my $VERSION_PICINFO = 3;
 
     my $memkey = [$userid,"upicinf:$userid"];
@@ -4128,7 +4128,7 @@ sub get_userpic_info
             'kw' => {},
         };
         my ($picstr, $kwstr);
-        
+
         my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
         my $sth = $db->prepare("SELECT picid, width, height, state, userid ".
                                "FROM userpic WHERE userid=?");
@@ -4140,7 +4140,7 @@ sub get_userpic_info
         }
         $picstr = join('', map { pack("NCCA", $_->{picid},
                                  $_->{width}, $_->{height}, $_->{state}) } @pics);
-        
+
         $sth = $db->prepare("SELECT k.keyword, m.picid FROM userpicmap m, keywords k ".
                             "WHERE m.userid=? AND m.kwid=k.kwid");
         $sth->execute($userid);
@@ -4160,7 +4160,7 @@ sub get_userpic_info
     foreach (values %{$info->{'pic'}}) {
         $LJ::CACHE_USERPIC_SIZE{$_->{'picid'}} = [ $_->{'width'}, $_->{'height'}, $_->{'userid'} ];
     }
-    
+
     return $LJ::CACHE_USERPIC_INFO{$userid} = $info;
 }
 
@@ -4205,7 +4205,7 @@ sub get_timezone {
 
     # we currently don't support timezones,
     # but when we do this will be the function to modify.
-    
+
     my $offset;
 
     my $dbcm = LJ::get_cluster_master($u);
@@ -4231,7 +4231,7 @@ sub get_timezone {
 
     # until we store real timezones, the timezone is always faked.
     $$fakedref = 1 if $fakedref;
-    
+
     return 1;
 }
 
@@ -4288,7 +4288,7 @@ sub make_journal
         return LJ::server_down_html();
     }
 
-    # S1 style hashref.  won't be loaded now necessarily, 
+    # S1 style hashref.  won't be loaded now necessarily,
     # only if via customview.
     my $style;
 
@@ -4302,7 +4302,7 @@ sub make_journal
         $style = LJ::S1::load_style($styleid, \$view);
     } else {
         $view ||= "lastn";    # default view when none specified explicitly in URLs
-        if ($LJ::viewinfo{$view} || $view eq "month" || 
+        if ($LJ::viewinfo{$view} || $view eq "month" ||
             $view eq "entry" || $view eq "reply")  {
             $styleid = -1;    # to get past the return, then checked later for -1 and fixed, once user is loaded.
         } else {
@@ -4427,14 +4427,14 @@ sub make_journal
     if ($r) {
         $r->notes('journalid' => $u->{'userid'});
     }
-    
+
     my $notice = sub {
         my $msg = shift;
         my $status = shift;
 
         my $url = "$LJ::SITEROOT/users/$user/";
         $opts->{'status'} = $status if $status;
-        
+
         return qq{
             <h1>Notice</h1>
             <p>$msg</p>
@@ -4445,7 +4445,7 @@ sub make_journal
         my $msg = shift;
         my $status = shift;
         $opts->{'status'} = $status if $status;
-        
+
         return qq{
             <h1>Error</h1>
             <p>$msg</p>
@@ -4503,7 +4503,7 @@ sub make_journal
         unless ($s1uc) {
             my $db;
             my $setmem = 1;
-            if (@LJ::MEMCACHE_SERVERS) { 
+            if (@LJ::MEMCACHE_SERVERS) {
                 $db = LJ::get_cluster_master($u);
             } else {
                 $db = LJ::get_cluster_reader($u);
@@ -4522,7 +4522,7 @@ sub make_journal
         $dbcm->do("INSERT IGNORE INTO s1usercache (userid) VALUES (?)", undef, $u->{'userid'});
         $s1uc = {};
     }
-    
+
     # conditionally rebuild parts of our cache that are missing
     my %update;
 
@@ -4535,7 +4535,7 @@ sub make_journal
         $update{'override_stor'} = LJ::CleanHTML::clean_s1_style($overrides);
         $update{'override_cleanver'} = $LJ::S1::CLEANER_VERSION;
     }
-    
+
     # is the color cache here if it's a custom user theme?
     if ($u->{'themeid'} == 0 && ! $s1uc->{'color_stor'}) {
         my $col = {};
@@ -4569,7 +4569,7 @@ sub make_journal
         LJ::S1::load_style($styleid, $viewref);
 
     my %vars = ();
-    
+
     # apply the style
     foreach (keys %$style) {
         $vars{$_} = $style->{$_};
@@ -4589,7 +4589,7 @@ sub make_journal
     foreach (keys %$cols) {
         $vars{"color-$_"} = $cols->{$_};
     }
-        
+
     # instruct some function to make this specific view type
     return unless defined $LJ::viewinfo{$view}->{'creator'};
     my $ret = "";
@@ -4611,7 +4611,7 @@ sub make_journal
             'nosyn' => '404 Not Found',
         }->{$errcode} || '500 Server Error';
         return $errmsg;
-    }   
+    }
 
     if ($opts->{'redir'}) {
         return undef;
@@ -4872,7 +4872,7 @@ sub update_user
     return 1 unless @sets;
     my $dbh = LJ::get_db_writer();
     return 0 unless $dbh;
-    { 
+    {
         local $" = ",";
         $dbh->do("UPDATE user SET @sets WHERE userid=?", undef,
                  @bindparams, $uid);
@@ -4933,7 +4933,7 @@ sub load_userids_multiple
             $satisfy->($u);
         }
     }
-    
+
     if (%need) {
         foreach (LJ::memcache_get_u(map { [$_,"userid:$_"] } keys %need)) {
             $satisfy->($_);
@@ -4960,7 +4960,7 @@ sub _load_user_raw
     my ($db, $key, $vals, $hook) = @_;
     $hook ||= sub {};
     $vals = [ $vals ] unless ref $vals eq "ARRAY";
-    
+
     my $use_isam;
     unless ($LJ::CACHE_NO_ISAM{user} || scalar(@$vals) > 10) {
         $db->do("HANDLER user OPEN");
@@ -5015,7 +5015,7 @@ sub load_user
 
     $user = LJ::canonical_username($user);
     return undef unless length $user;
-    
+
     my $set_req_cache = sub {
         my $u = shift;
         $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
@@ -5054,7 +5054,7 @@ sub load_user
     # if user doesn't exist in the LJ database, it's possible we're using
     # an external authentication source and we should create the account
     # implicitly.
-    if (ref $LJ::AUTH_EXISTS eq "CODE" && 
+    if (ref $LJ::AUTH_EXISTS eq "CODE" &&
         $LJ::AUTH_EXISTS->($user))
     {
         if (LJ::create_account({
@@ -5121,7 +5121,7 @@ sub load_userid
     &nodb;
     my ($userid, $force) = @_;
     return undef unless $userid;
-     
+
     my $set_req_cache = sub {
         my $u = shift;
         $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u;
@@ -5324,7 +5324,7 @@ sub cmd_buffer_flush
         $too_old = $cmds->{$cmd}->{"too_old"};
         $arg_format = $cmds->{$cmd}->{"arg_format"} if
             defined $cmds->{$cmd}->{"arg_format"};
-        
+
     # otherwise it might be a site-local command
     } else {
         $code = $LJ::HOOKS{"cmdbuf:$cmd:$mode"}->[0]
@@ -5511,7 +5511,7 @@ sub check_priv
     return 0 unless $u;
 
     if (! $u->{'_privloaded'}->{$priv}) {
-	LJ::load_user_privs($u, $priv);
+        LJ::load_user_privs($u, $priv);
     }
 
     if (defined $arg) {
@@ -5728,13 +5728,13 @@ sub mysql_time
 }
 
 # gets date in MySQL format, produces s2dateformat
-# s1 dateformat is: 
+# s1 dateformat is:
 # "%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H"
 # sample string:
 # Tue Tuesday Sep September 03 2003 9 09 30 30 30th AM 22 9 09 9 09
 # Thu Thursday Oct October 03 2003 10 10 2 02 2nd AM 33 9 09 9 09
 
-sub alldatepart_s1 
+sub alldatepart_s1
 {
     my $time = shift;
     my ($sec,$min,$hour,$mday,$mon,$year,$wday) =
@@ -5749,7 +5749,7 @@ sub alldatepart_s1
               $year % 100, $year + 1900, $mon+1, $mon+1,
               $mday, $mday, $mday, LJ::Lang::day_ord($mday));
     $ret .= $hour < 12 ? "AM " : "PM ";
-    $ret .= sprintf("%02d %d %02d %d %02d", $min, 
+    $ret .= sprintf("%02d %d %02d %d %02d", $min,
                     ($hour+11)%12 + 1,
                     ($hour+ 11)%12 +1,
                     $hour,
@@ -5757,26 +5757,26 @@ sub alldatepart_s1
 
     return $ret;
 }
-              
+
 
 # gets date in MySQL format, produces s2dateformat
 # s2 dateformat is: yyyy mm dd hh mm ss day_of_week
-sub alldatepart_s2 
+sub alldatepart_s2
 {
     my $time = shift;
     my ($sec,$min,$hour,$mday,$mon,$year,$wday) =
         gmtime(LJ::mysqldate_to_time($time, 1));
-    return 
+    return
         sprintf("%04d %02d %02d %02d %02d %02d %01d",
-                $year+1900, 
-                $mon+1, 
-                $mday, 
-                $hour, 
-                $min, 
-                $sec, 
+                $year+1900,
+                $mon+1,
+                $mday,
+                $hour,
+                $min,
+                $sec,
                 $wday);
 }
-                                                                                
+
 
 # <LJFUNC>
 # name: LJ::get_keyword_id
@@ -5896,7 +5896,7 @@ sub can_use_journal
     ## check if user has access
     return 1 if LJ::check_rel($ownerid, $posterid, 'P');
 
-    # let's check if this community is allowing post access to non-members 
+    # let's check if this community is allowing post access to non-members
     LJ::load_user_props($uowner, "nonmember_posting");
     if ($uowner->{'nonmember_posting'}) {
         my $dbr = LJ::get_db_reader() or die "nodb";
@@ -5932,7 +5932,7 @@ sub can_add_syndicated
         $used += LJ::syn_cost($ct);
         return 0 if $used > $quota;
     }
-    
+
     # TAG:FR:ljlib:can_add_syndicated2
     # they're under quota so far.  would this account push them over?
     my $ct = $dbh->selectrow_array("SELECT COUNT(*) FROM friends WHERE friendid=?", undef,
@@ -5965,7 +5965,7 @@ sub set_logprop
             $del_ids .= $prop->{'id'};
         }
     }
-    
+
     $dbcm->do("REPLACE INTO logprop2 (journalid, jitemid, propid, value) ".
               "VALUES $ins_values") if $ins_values;
     $dbcm->do("DELETE FROM logprop2 WHERE journalid=? AND jitemid=? ".
@@ -5990,7 +5990,7 @@ sub load_log_props2
     my ($uuserid, $listref, $hashref) = @_;
     my $userid = want_userid($uuserid);
     return unless ref $hashref eq "HASH";
-    
+
     my %needprops;
     my %needrc;
     my %rc;
@@ -6052,8 +6052,8 @@ sub load_log_props2
             $hashref->{$jitemid}->{'replycount'} = $rc;
             LJ::MemCache::add([$userid, "rp:$userid:$jitemid"], $rc);
         }
-    }                  
-        
+    }
+
 
 }
 
@@ -6068,7 +6068,7 @@ sub load_log_props2
 # </LJFUNC>
 sub load_log_props2multi
 {
-    &nodb;    
+    &nodb;
     my ($ids, $props) = @_;
     _get_posts_raw_wrapper($ids, "prop", $props);
 }
@@ -6382,7 +6382,7 @@ sub delete_all_comments {
         $loop = 0 unless @$t == $chunk_size;
     }
     return 1;
-    
+
 }
 
 # <LJFUNC>
@@ -6408,7 +6408,7 @@ sub memcache_kill {
 # here because non-talklib things modify the talk2 table, and it's
 # nice to centralize the locking rules.
 #
-# return value is return of $dbh->do.  $errref scalar ref is optional, and 
+# return value is return of $dbh->do.  $errref scalar ref is optional, and
 # if set, gets value of $dbh->errstr
 #
 # write:  (LJ::talk2_do)
@@ -6628,12 +6628,12 @@ sub color_todb
 # </LJFUNC>
 sub add_friend
 {
-    &nodb;    
+    &nodb;
     my ($ida, $idb, $opts) = @_;
 
-    $ida += 0; $idb += 0; 
+    $ida += 0; $idb += 0;
     return 0 unless $ida and $idb;
-    
+
     my $dbh = LJ::get_db_writer();
 
     my $black = LJ::color_todb("#000000");
@@ -6668,7 +6668,7 @@ sub add_friend
 # </LJFUNC>
 sub event_register
 {
-    &nodb;    
+    &nodb;
     my ($dbc, $etype, $ejid, $eiarg, $duserid, $diarg) = @_;
     my $dbr = LJ::get_db_reader();
 
@@ -6731,7 +6731,7 @@ sub procnotify_callback
     my ($cmd, $argstring) = @_;
     my $arg = {};
     LJ::decode_url_string($argstring, $arg);
-    
+
     if ($cmd eq "rename_user") {
         # this looks backwards, but the cache hash names are just odd:
         delete $LJ::CACHE_USERNAME{$arg->{'userid'}};
@@ -6879,8 +6879,8 @@ sub text_in
 # args: dbs?, text, u, error
 # des-text: old possibly non-ASCII text to convert
 # des-u: user hashref of the journal's owner
-# des-error: ref to a scalar variable which is set to 1 on error 
-#            (when user has no default encoding defined, but 
+# des-error: ref to a scalar variable which is set to 1 on error
+#            (when user has no default encoding defined, but
 #            text needs to be translated)
 # returns: converted text or undef on error
 # </LJFUNC>
@@ -6923,7 +6923,7 @@ sub text_convert
 # returns: a list of two values, (byte_length, char_length).
 # </LJFUNC>
 
-sub text_length 
+sub text_length
 {
     my $text = shift;
     my $bl = length($text);
@@ -6961,7 +6961,7 @@ sub text_trim
     my $utf_char = "([\x00-\x7f]|[\xc0-\xdf].|[\xe0-\xef]..|[\xf0-\xf7]...)";
 
     while ($text =~ m/$utf_char/gco) {
-	last unless $char_max;
+    last unless $char_max;
         last if $cur + length($1) > $byte_max and $byte_max;
         $cur += length($1);
         $char_max--;
@@ -7019,7 +7019,7 @@ sub text_uncompress
     if (substr($$tref,0,2) eq "\037\213") {
         $$tref = Compress::Zlib::memGunzip($$tref);
     }
-    
+
     return $ref ? undef : $$tref;
 }
 
@@ -7045,7 +7045,7 @@ sub item_toutf8
         my $error = 0;
         my $res = LJ::text_convert($$rtext, $u, \$error);
         if ($error) {
-	    LJ::text_out($rtext);
+            LJ::text_out($rtext);
         } else {
             $$rtext = $res;
         };
@@ -7065,7 +7065,7 @@ sub item_toutf8
 #
 # opts keys:
 #   -- "limit_by_ip" => "1.2.3.4"  (when used for checking rate)
-#   -- 
+#   --
 sub rate_log
 {
     my ($u, $ratename, $count, $opts) = @_;
@@ -7074,17 +7074,17 @@ sub rate_log
 
     my $dbu = LJ::get_cluster_master($u);
     return 0 unless $dbu;
-    
+
     my $rp = LJ::get_prop("rate", $ratename);
     return 0 unless $rp;
-    
+
     my $now = time();
     my $beforeperiod = $now - $rateperiod;
-    
+
     # delete inapplicable stuff (or some of it)
     $dbu->do("DELETE FROM ratelog WHERE userid=$u->{'userid'} AND rlid=$rp->{'id'} ".
              "AND evttime < $beforeperiod LIMIT 1000");
-    
+
     # check rate.  (okay per period)
     my $opp = LJ::get_cap($u, "rateallowed-$ratename");
     return 1 unless $opp;
@@ -7165,7 +7165,7 @@ sub md5_struct
     my ($st, $md5) = @_;
     $md5 ||= Digest::MD5->new;
     unless (ref $st) {
-        # later Digest::MD5s die while trying to 
+        # later Digest::MD5s die while trying to
         # get at the bytes of an invalid utf-8 string.
         # this really shouldn't come up, but when it
         # does, we clear the utf8 flag on the string and retry.
@@ -7180,7 +7180,7 @@ sub md5_struct
     if (ref $st eq "HASH") {
         foreach (sort keys %$st) {
             md5_struct($_, $md5);
-            md5_struct($st->{$_}, $md5);           
+            md5_struct($st->{$_}, $md5);
         }
         return $md5;
     }
@@ -7229,7 +7229,7 @@ sub get_secret
         LJ::MemCache::set($memkey, $secret) if $secret;
         return $want_new ? ($time, $secret) : $secret;
     }
-    
+
     # return if they specified an explicit time they wanted.
     # (calling with no args means generate a new one if secret
     # doesn't exist)
@@ -7237,7 +7237,7 @@ sub get_secret
 
     # don't generate new times that don't fall in our granularity
     return undef if $time % 3600;
-    
+
     $secret = LJ::rand_chars(32);
     $dbh->do("INSERT IGNORE INTO secrets SET stime=?, secret=?",
              undef, $time, $secret);
@@ -7284,7 +7284,7 @@ sub kill_all_sessions
     return 0 unless $u;
     my $udbh = LJ::get_cluster_master($u);
     my $sessions = $udbh->selectcol_arrayref("SELECT sessid FROM sessions WHERE ".
-					     "userid=$u->{'userid'}");
+                                             "userid=$u->{'userid'}");
     LJ::kill_sessions($udbh, $u->{'userid'}, @$sessions) if @$sessions;
 }
 
@@ -7373,7 +7373,7 @@ sub check_rel
     my $db = isdb($_[0]) ? shift : undef;
     my ($userid, $targetid, $type) = @_;
     return undef unless $type and $userid and $targetid;
-    $userid = LJ::want_userid($userid); 
+    $userid = LJ::want_userid($userid);
     $targetid = LJ::want_userid($targetid);
 
     my $key = "$userid-$targetid-$type";
@@ -7394,7 +7394,7 @@ sub check_rel
 # arg-targetid: target userid, or a user hash
 # arg-type: type of the relationship
 # </LJFUNC>
-sub set_rel 
+sub set_rel
 {
     &nodb;
     my ($userid, $targetid, $type) = @_;
@@ -7412,15 +7412,15 @@ sub set_rel
 # name: LJ::clear_rel
 # des: Deletes a relationship between two users or all relationships of a particular type
 #      for one user, on either side of the relationship. One of userid,targetid -- bit not
-#      both -- may be '*'. In that case, if, say, userid is '*', then all relationship 
-#      edges with target equal to targetid and of the specified type are deleted. 
+#      both -- may be '*'. In that case, if, say, userid is '*', then all relationship
+#      edges with target equal to targetid and of the specified type are deleted.
 #      If both userid and targetid are numbers, just one edge is deleted.
 # args: dbs?, userid, targetid, type
 # arg-userid: source userid, or a user hash, or '*'
 # arg-targetid: target userid, or a user hash, or '*'
 # arg-type: type of the relationship
 # </LJFUNC>
-sub clear_rel 
+sub clear_rel
 {
     &nodb;
     my ($userid, $targetid, $type) = @_;
@@ -7606,13 +7606,13 @@ sub make_login_session
         BML::set_cookie("langpref", $bl->{'lncode'} . "/" . time(), 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
         BML::set_language($bl->{'lncode'});
     }
-    
+
     # restore default scheme
     if ($u->{'schemepref'} ne "") {
       BML::set_cookie("BMLschemepref", $u->{'schemepref'}, 0, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
       BML::set_scheme($u->{'schemepref'});
     }
-    
+
     LJ::run_hooks("post_login", {
         "u" => $u,
         "form" => {},
@@ -7679,7 +7679,7 @@ sub load_include {
         # we handle, so first if memcache...
         my $val = LJ::MemCache::get("includefile:$file");
         return $val if $val;
-   
+
         # straight database hit
         my $dbh = LJ::get_db_writer();
         $val = $dbh->selectrow_array("SELECT inctext FROM includetext ".
@@ -7733,13 +7733,13 @@ sub error
 }
 
 # to be called as &nodb; (so this function sees caller's @_)
-sub nodb { 
-    shift @_ if 
+sub nodb {
+    shift @_ if
         ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db" ||
         ref $_[0] eq "DBIx::StateKeeper" || ref $_[0] eq "Apache::DBI::db";
 }
 
-sub isdb { return ref $_[0] && (ref $_[0] eq "DBI::db" || 
+sub isdb { return ref $_[0] && (ref $_[0] eq "DBI::db" ||
                                 ref $_[0] eq "DBIx::StateKeeper" ||
                                 ref $_[0] eq "Apache::DBI::db"); }
 
@@ -7753,7 +7753,7 @@ sub AUTOLOAD {
     croak "Undefined subroutine: $AUTOLOAD";
 }
 
-# LJ::S1::get_public_styles lives here in ljlib.pl so that 
+# LJ::S1::get_public_styles lives here in ljlib.pl so that
 # cron jobs can call LJ::load_user_props without including
 # ljviews.pl
 
