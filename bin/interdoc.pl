@@ -8,7 +8,7 @@
 # data:
 
 # <LJDEP>
-# lib: File::Find, Getopt::Long
+# lib: Getopt::Long
 # </LJDEP>
 
 # This file parses files for lines containing <LJDEP> then starts
@@ -26,7 +26,6 @@
 # doc tree are should be relative from $LJHOME, like htdocs/file.bml
 
 use strict;
-use File::Find ();
 use Getopt::Long;
 
 my $warn = 0;
@@ -37,15 +36,34 @@ unless (-d $ENV{'LJHOME'}) {
 }
 chdir $ENV{'LJHOME'} or die "Can't cd to $ENV{'LJOME'}\n";
 
-File::Find::find({ 
-    'wanted' => \&wanted,
-    'no_chdir' => 1,
-    'preprocess' => sub { return grep { $_ ne "img"; } sort { $a cmp $b } @_; },
-}, qw(bin cgi-bin htdocs));
+find(qw(bin cgi-bin htdocs));
 
 exit;
 
-sub wanted {
+sub find
+{
+    my @dirs = @_;
+    while (@dirs)
+    {
+	my $dir = shift @dirs;
+
+	opendir (D, $dir);
+	my @files = sort { $a cmp $b } readdir(D);
+	close D;
+
+	foreach my $f (@files) {
+	    next if ($f eq "." || $f eq "..");
+	    my $full = "$dir/$f";
+	    if (-d $full) { find($full); }
+	    elsif (-f $full) { check_file($full); }
+	}
+    }
+
+}
+
+sub check_file 
+{
+    $_ = shift;
     next unless (-f);
     next if (/\.(gif|jpg|png|class|jar|zip|exe)$/);
     next if (/~$/);
