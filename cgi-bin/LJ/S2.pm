@@ -1186,7 +1186,7 @@ sub UserLink
     return {
         '_type' => 'UserLink',
         'is_heading' => $link->{'url'} ? 0 : 1,
-        'url' => LJ::eurl($link->{'url'}),
+        'url' => LJ::etags($link->{'url'}),
         'title' => LJ::ehtml($link->{'title'}),
         'children' => $link->{'children'} || [], # TODO: implement parent-child relationships
     };

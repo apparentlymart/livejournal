@@ -5319,6 +5319,22 @@ sub ehtml
 *eall = \&ehtml;  # old BML syntax required eall to also escape BML.  not anymore.
 
 # <LJFUNC>
+# name: LJ::etags
+# class: text
+# des: Escapes < and > from a string
+# args: string
+# des-string: string to be escaped
+# returns: string escaped.
+# </LJFUNC>
+sub etags
+{
+    my $a = $_[0];
+    $a =~ s/</&lt;/g;
+    $a =~ s/>/&gt;/g;
+    return $a;
+}
+
+# <LJFUNC>
 # name: LJ::ejs
 # class: text
 # des: Escapes a string value before it can be put in JavaScript.
