@@ -9,9 +9,7 @@ body<=
     
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
     
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my ($sth, $sql);
     my $errtxt;
 
@@ -31,7 +29,7 @@ body<=
         BML::set_language_scope("/talkpost.bml");
     }
 
-    my $init = LJ::Talk::init($dbs, \%FORM);
+    my $init = LJ::Talk::init(\%FORM);
     my $u = $init->{'journalu'};
 
     $r->notes("journalid" => $u->{'userid'});
@@ -46,11 +44,11 @@ body<=
     my $dbcr = $dbcs->{'reader'};
 
     return $ML{'error.nodb'} unless $dbcr && $dbr;
-    return $LJ::MSG_READONLY_USER unless $dbcm && $dbh;
+    return $LJ::MSG_READONLY_USER if $LJ::CLUSTER_DOWN{0} || ! $dbcm;
 
     # redirect if account was renamed
     if ($u->{'journaltype'} eq "R") {
-        LJ::load_user_props($dbs, $u, "renamedto");
+        LJ::load_user_props($dbr, $u, "renamedto");
           if ($u->{'renamedto'} ne "") {
               my $id = $FORM{'itemid'}+0;
               return BML::redirect("$LJ::SITEROOT/talkpost.bml?journal=$u->{'renamedto'}&itemid=$id");
@@ -87,11 +85,10 @@ body<=
         
         ### load the talk properties
         
-        LJ::load_props($dbs, "talk");
         LJ::load_talk_props2($dbcr, $u->{'userid'}, [ $init->{'replyto'} ], {$init->{'replyto'} => $parpost}); 
 
         if($LJ::UNICODE && $parpost->{'unknown8bit'}) {
-            LJ::item_toutf8($dbs, $u, \$parpost->{'subject'}, \$parpost->{'body'}, {});
+            LJ::item_toutf8($u, \$parpost->{'subject'}, \$parpost->{'body'}, {});
           }
 
         $init->{'itemid'} = $parpost->{'itemid'};
@@ -101,7 +98,7 @@ body<=
     my $itemid = $init->{'itemid'};
 
     ## load the journal item
-    my $item = LJ::Talk::get_journal_item($dbs, $dbcs, $u, $itemid);
+    my $item = LJ::Talk::get_journal_item($u, $itemid);
 
     if ($init->{'oldurl'} && $item) {
         $init->{'anum'} = $item->{'anum'};
@@ -119,16 +116,16 @@ body<=
     $parpost ||= $item;  # if there's no parent post, remote is reply to top-level item
 
     my ($up, $ur);  # $up = user posted journal item; $ur = user remote is replying to
-    LJ::load_userids_multiple($dbs, [
+    LJ::load_userids_multiple([
                                      $item->{'posterid'} => \$up,
                                      $parpost->{'posterid'} => \$ur,
                                      ], [ $u ]);
 
-    my $remote = LJ::get_remote($dbs);
+    my $remote = LJ::get_remote();
 
     my @user_props = ("opt_notalkicons", "opt_logcommentips", "opt_whoscreened");
     push @user_props, "opt_blockrobots" if $u->{'statusvis'} eq 'V';
-    LJ::load_user_props($dbs, $u, @user_props);
+    LJ::load_user_props($dbr, $u, @user_props);
     if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
         $head = LJ::robot_meta_tags();
     }
@@ -144,7 +141,7 @@ body<=
     # checked screened post
     return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.noreply_screened'} p?>"
         if $parpost->{'state'} eq "S" 
-        and not LJ::Talk::can_unscreen($dbs, $remote, $u, $up, $ur->{'user'});
+        and not LJ::Talk::can_unscreen($dbr, $remote, $u, $up, $ur->{'user'});
 
     # don't allow anonymous comments on syndicated items
     if ($u->{'journaltype'} eq "Y" && $u->{'opt_whocanreply'} eq "all") {
@@ -152,12 +149,12 @@ body<=
     }
 
     ####  Check security before viewing this post
-    return $errtxt unless LJ::Talk::check_viewable($dbs, $remote, $item, \%FORM, \$errtxt);
+    return $errtxt unless LJ::Talk::check_viewable($remote, $item, \%FORM, \$errtxt);
     
     my $event = $FORM{'replyto'} eq "" ? $item->{'event'} : $parpost->{'body'};
     my $preformatted = $FORM{'replyto'} eq "" ? $props->{'opt_preformatted'} : $parpost->{'opt_preformatted'};
 
-    LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
+    LJ::expand_embedded($dbr, $ditemid, $remote, \$event);
     LJ::CleanHTML::clean_event(\$event, $preformatted);
     BML::ebml(\$event);
 
@@ -176,7 +173,7 @@ body<=
 
     my %userpics;
     if ($picid) {
-        LJ::load_userpics($dbs, \%userpics, [ $picid ]);
+        LJ::load_userpics($dbr, \%userpics, [ $picid ]);
           my $alt = $ur->{'name'};
           if ($pickw) {
               $alt .= ": $pickw";
@@ -219,21 +216,21 @@ body<=
     $ret .= "</td></tr></table>";
 
     unless ($init->{'replyto'}) {
-        $ret .= LJ::Talk::link_bar($dbs, { 'u' => $u, 'up' => $up, 'headref' => \$head,
-                                           'remote' => $remote, 'itemid' => $ditemid, });
+        $ret .= LJ::Talk::link_bar({ 'u' => $u, 'up' => $up, 'headref' => \$head,
+                                     'remote' => $remote, 'itemid' => $ditemid, });
     }
     
     my %current;
     if ($props->{'current_mood'} || 
         $props->{'current_moodid'}) 
     {
-        LJ::load_moods($dbs);
+        LJ::load_moods();
           $current{'Mood'} = $props->{'current_mood'};
           LJ::CleanHTML::clean_subject(\$current{'Mood'});
           my $mid = $props->{'current_moodid'};
           if ($mid) {
               my $theme = $up->{'moodthemeid'};
-              LJ::load_mood_theme($dbs, $theme);
+              LJ::load_mood_theme($theme);
               my %pic;
               my $name = defined $LJ::CACHE_MOODS{$mid} ? $LJ::CACHE_MOODS{$mid}->{'name'} : '';
               if (LJ::get_mood_picture($theme, $mid, \%pic)) {
@@ -293,7 +290,7 @@ body<=
     $ret .= "</div>";
     
     $ret .= "<br clear='all' /><hr size='2' align='center' />";	
-
+    
     my $jarg = "journal=$u->{'user'}&amp;";
     my $readurl = "/talkread.bml?${jarg}itemid=$ditemid";
     if ($new_url) {
@@ -364,7 +361,7 @@ body<=
     if ($remote) {
         $ret .= "<tr valign='middle'>";
         $ret .= "<td align='right'>&nbsp;</td>";
-        if (LJ::is_banned($dbs, $remote, $u)) {
+        if (LJ::is_banned($dbr, $remote, $u)) {
             $ret .= "<td align='middle'>( )</td>";
             $ret .= "<td align='left'><font color='#c0c0c0'>" . BML::ml(".opt.loggedin", {'username'=>"<i>$remote->{'user'}</i>"}) . "</font>" . BML::ml(".opt.bannedfrom", {'journal'=>$u->{'user'}}) . "</td>";
         } else {
@@ -373,7 +370,7 @@ body<=
             $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}' id='cookieuser' />\n";
             if ($u->{'opt_whoscreened'} eq 'A' ||
                 ($u->{'opt_whoscreened'} eq 'F' &&
-                 !LJ::is_friend($dbs, $u, $remote))) {
+                 !LJ::is_friend($dbr, $u, $remote))) {
                 $ret .= " " . $ML{'.opt.willscreen'};
             }
             $ret .= "</td>";
@@ -467,7 +464,7 @@ body<=
     
     my %res;
     if ($remote) {
-        LJ::do_request($dbs, { "mode" => "login",
+        LJ::do_request($dbr, { "mode" => "login",
                                "ver" => ($LJ::UNICODE ? "1" : "0"),
                                "user" => $remote->{'user'},
                                "getpickws" => 1,

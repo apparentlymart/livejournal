@@ -15,9 +15,7 @@ sub MonthPage
 
     my $ctx = $opts->{'ctx'};
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my $dbcr = LJ::get_cluster_reader($u);
 
     my $user = $u->{'user'};
@@ -79,14 +77,13 @@ sub MonthPage
 
     # load the log properties
     my %logprops = ();
-    LJ::load_props($dbs, "log");
     LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
 
     my (%pu, %pu_lite);  # poster users; UserLite objects
     foreach (@items) {
         $pu{$_->{'posterid'}} = undef;
     }
-    LJ::load_userids_multiple($dbs, [map { $_, \$pu{$_} } keys %pu], [$u]);
+    LJ::load_userids_multiple($dbr, [map { $_, \$pu{$_} } keys %pu], [$u]);
     $pu_lite{$_} = UserLite($pu{$_}) foreach keys %pu;
 
     my %day_entries;  # <day> -> [ Entry+ ]
@@ -108,7 +105,7 @@ sub MonthPage
 
 	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
             my $text;
-	    LJ::item_toutf8($dbs, $u, \$subject, \$text, $logprops{$itemid});
+	    LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
 	}
 
         if ($opt_text_subjects) {
@@ -130,7 +127,7 @@ sub MonthPage
             'post_url' => $posturl,
             'count' => $replycount,
             'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0,
-            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbs, $u, $remote, 'A'))) ? 1 : 0,
+            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbr, $u, $remote, 'A'))) ? 1 : 0,
         });
         
         my $userlite_poster = $userlite_journal;

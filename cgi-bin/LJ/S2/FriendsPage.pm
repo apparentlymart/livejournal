@@ -15,9 +15,7 @@ sub FriendsPage
     $p->{'friends'} = {};
     $p->{'friends_title'} = LJ::ehtml($u->{'friendspagetitle'});
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my $sth;
     my $user = $u->{'user'};
 
@@ -68,7 +66,7 @@ sub FriendsPage
         return 1;
     }
 
-    LJ::load_user_props($dbs, $remote, "opt_nctalklinks");
+    LJ::load_user_props($dbr, $remote, "opt_nctalklinks");
 
     ## never have spiders index friends pages (change too much, and some 
     ## people might not want to be indexed)
@@ -110,7 +108,7 @@ sub FriendsPage
     if ($FORM{'mode'} eq "livecond") 
     {
         ## load the itemids
-        my @items = LJ::get_friend_items($dbs, {
+        my @items = LJ::get_friend_items({
             'u' => $u,
             'userid' => $u->{'userid'},
             'remote' => $remote,
@@ -141,7 +139,7 @@ sub FriendsPage
     
     ## load the itemids 
     my %idsbycluster;
-    my @items = LJ::get_friend_items($dbs, {
+    my @items = LJ::get_friend_items({
         'u' => $u,
         'userid' => $u->{'userid'},
         'remote' => $remote,
@@ -178,12 +176,11 @@ sub FriendsPage
 
     ### load the log properties
     my %logprops = ();  # key is "$owneridOrZero $[j]itemid"
-    LJ::load_props($dbs, "log");
-    LJ::load_log_props2multi($dbs, \%idsbycluster, \%logprops);
-    LJ::load_moods($dbs);
+    LJ::load_log_props2multi(\%idsbycluster, \%logprops);
+    LJ::load_moods();
 
     # load the text of the entries
-    my $logtext = LJ::get_logtext2multi($dbs, \%idsbycluster);
+    my $logtext = LJ::get_logtext2multi(\%idsbycluster);
   
     my %posters;
     {
@@ -192,7 +189,7 @@ sub FriendsPage
             next if $friends{$item->{'posterid'}};
             push @posterids, $item->{'posterid'};
         }
-        LJ::load_userids_multiple($dbs, [ map { $_ => \$posters{$_} } @posterids ])
+        LJ::load_userids_multiple($dbr, [ map { $_ => \$posters{$_} } @posterids ])
             if @posterids;
     }
 
@@ -227,7 +224,7 @@ sub FriendsPage
         }
 
         if ($LJ::UNICODE && $logprops{$datakey}->{'unknown8bit'}) {
-            LJ::item_toutf8($dbs, $friends{$friendid}, \$subject, \$text, $logprops{$datakey});
+            LJ::item_toutf8($friends{$friendid}, \$subject, \$text, $logprops{$datakey});
         }
 
         my ($friend, $poster);
@@ -240,7 +237,7 @@ sub FriendsPage
 
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}), });
-        LJ::expand_embedded($dbs, $ditemid, $remote, \$text);
+        LJ::expand_embedded($dbr, $ditemid, $remote, \$text);
 
         my $userlite_poster = $get_lite->($posterid);
         my $userlite_journal = $get_lite->($friendid);
@@ -282,7 +279,7 @@ sub FriendsPage
             'post_url' => $posturl,
             'count' => $replycount,
             'enabled' => ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" && ! $logprops{$datakey}->{'opt_nocomments'}) ? 1 : 0,
-            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbs, $u, $remote, 'A'))) ? 1 : 0,
+            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbr, $u, $remote, 'A'))) ? 1 : 0,
         });
 
         my $moodthemeid = $u->{'opt_forcemoodtheme'} eq 'Y' ?
@@ -334,7 +331,7 @@ sub FriendsPage
     # load the pictures that were referenced, then retroactively populate
     # the userpic fields of the Entries above
     my %userpics;
-    LJ::load_userpics($dbs, \%userpics, [ keys %objs_of_picid ]);
+    LJ::load_userpics($dbr, \%userpics, [ keys %objs_of_picid ]);
     foreach my $picid (keys %userpics) {
         my $up = Image("$LJ::USERPIC_ROOT/$picid/$userpics{$picid}->{'userid'}",
                        $userpics{$picid}->{'width'},

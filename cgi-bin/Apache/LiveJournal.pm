@@ -515,12 +515,10 @@ sub journal_content
 
     my %GET = $r->args;
 
-    my $dbs = LJ::get_dbs();
-
     if ($RQ{'mode'} eq "robots_txt")
     {
-        my $u = LJ::load_user($dbs, $RQ{'user'});
-        LJ::load_user_props($dbs, $u, "opt_blockrobots");
+        my $u = LJ::load_user($RQ{'user'});
+        LJ::load_user_props(undef, $u, "opt_blockrobots");
         $r->content_type("text/plain");
         $r->send_http_header();
         $r->print("User-Agent: *\n");
@@ -531,7 +529,7 @@ sub journal_content
     }
 
     my $criterr = 0;
-    my $remote = LJ::get_remote($dbs, \$criterr);
+    my $remote = LJ::get_remote(undef, \$criterr);
 
     # check for faked cookies here, since this is pretty central.
     if ($criterr) {
@@ -563,8 +561,7 @@ sub journal_content
     };
 
     my $user = $RQ{'user'};
-    my $html = LJ::make_journal($dbs, $user, $RQ{'mode'},
-                                $remote, $opts);
+    my $html = LJ::make_journal($user, $RQ{'mode'}, $remote, $opts);
 
     return redir($r, $opts->{'redir'}) if $opts->{'redir'};
     return $opts->{'handler_return'} if defined $opts->{'handler_return'};
@@ -579,7 +576,7 @@ sub journal_content
                                         $RQ{'mode'} eq "reply" || 
                                         $RQ{'mode'} eq "month")) 
         {
-            my $u = LJ::load_user($dbs, $RQ{'user'});
+            my $u = LJ::load_user($RQ{'user'});
             my $base = "$LJ::SITEROOT/users/$RQ{'user'}";
             $base = "$LJ::SITEROOT/community/$RQ{'user'}" if $u && $u->{'journaltype'} eq "C";
             return redir($r, "$base$uri$args_wq");

@@ -12,13 +12,6 @@ sub YearPage
     $p->{'_type'} = "YearPage";
     $p->{'view'} = "archive";
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-    my $dbcr;
-    if ($u->{'clusterid'}) {
-        $dbcr = LJ::get_cluster_reader($u);
-    }
     my $user = $u->{'user'};
 
     if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {

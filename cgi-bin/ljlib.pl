@@ -205,17 +205,11 @@ sub get_dbh {
 # </LJFUNC>
 sub get_newids
 {
-    my $dbarg = shift;
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
     my $sth;
-
-    my $area = $dbh->quote(shift);
-    my $oldid = $dbh->quote(shift);
-    my $db = LJ::get_dbh("oldids") || $dbr;
+    my $db = LJ::get_dbh("oldids") || LJ::get_db_reader();
     return $db->selectrow_arrayref("SELECT userid, newid FROM oldids ".
-                                   "WHERE area=$area AND oldid=$oldid");
+                                   "WHERE area=? AND oldid=?", undef,
+                                   $_[0], $_[1]);
 }
 
 # <LJFUNC>
@@ -366,7 +360,7 @@ sub set_cached_friend_items
 # <LJFUNC>
 # name: LJ::get_friend_items
 # des: Return friend items for a given user, filter, and period.
-# args: dbarg, opts
+# args: dbarg?, opts
 # des-opts: Hashref of options:
 #           - userid
 #           - remoteid
@@ -384,12 +378,10 @@ sub set_cached_friend_items
 # </LJFUNC>
 sub get_friend_items
 {
-    my $dbarg = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db"; 
     my $opts = shift;
 
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my $sth;
 
     my $userid = $opts->{'userid'}+0;
@@ -400,7 +392,7 @@ sub get_friend_items
     my $remoteid = $remote ? $remote->{'userid'} : 0;
     if ($remoteid == 0 && $opts->{'remoteid'}) {
         $remoteid = $opts->{'remoteid'} + 0;
-        $remote = LJ::load_userid($dbs, $remoteid);
+        $remote = LJ::load_userid($dbr, $remoteid);
     }
 
     my @items = ();
@@ -513,7 +505,7 @@ sub get_friend_items
         {
             # load all user's friends
             my %f;
-            my $sth = $dbh->prepare(qq{
+            my $sth = $dbr->prepare(qq{
                 SELECT f.friendid, f.groupmask, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate),
                 u.journaltype FROM friends f, userusage uu, user u
                 WHERE f.userid=$userid AND f.friendid=uu.userid AND u.userid=f.friendid
@@ -539,7 +531,7 @@ sub get_friend_items
                     if ($opts->{'showtypes'} =~ /C/) { push @in, "'C','S','N'"; }
                     $extra = "AND u.journaltype IN (".join (',', @in).")" if @in;
                 }
-                my $sth = $dbh->prepare(qq{
+                my $sth = $dbr->prepare(qq{
                     SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid 
                     FROM friends f, userusage uu, user u WHERE f.userid=$fid AND
                          f.friendid=uu.userid AND f.friendid=u.userid AND u.statusvis='V' $extra
@@ -571,8 +563,8 @@ sub get_friend_items
         # load the next recent updating friend's recent items
         my $friendid = $fr->[0];
 
-        my @newitems = LJ::get_recent_items($dbs, {
-            'clustersource' => 'slave',  # no effect for cluster 0
+        my @newitems = LJ::get_recent_items({
+            'clustersource' => 'slave',
             'clusterid' => $fr->[2],
             'userid' => $friendid,
             'remote' => $remote,
@@ -681,12 +673,10 @@ sub get_friend_items
 # </LJFUNC>
 sub get_recent_items
 {
-    my $dbarg = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $opts = shift;
 
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my $sth;
 
     my @items = ();             # what we'll return
@@ -699,21 +689,17 @@ sub get_recent_items
     my $remoteid = $remote ? $remote->{'userid'} : 0;
     if ($remoteid == 0 && $opts->{'remoteid'}) {
         $remoteid = $opts->{'remoteid'} + 0;
-        $remote = LJ::load_userid($dbs, $remoteid);
+        $remote = LJ::load_userid($dbr, $remoteid);
     }
 
     my $max_hints = $LJ::MAX_HINTS_LASTN;  # temporary
     my $sort_key = "revttime";
 
     my $clusterid = $opts->{'clusterid'}+0;
-    my $logdb = $dbr;
-
-    if ($clusterid) {
-        my @sources = ("cluster$clusterid");
-        unshift @sources, ("cluster${clusterid}lite", "cluster${clusterid}slave")
-            if $opts->{'clustersource'} eq "slave";
-        $logdb = LJ::get_dbh(@sources);
-    }
+    my @sources = ("cluster$clusterid");
+    unshift @sources, ("cluster${clusterid}lite", "cluster${clusterid}slave")
+        if $opts->{'clustersource'} eq "slave";
+    my $logdb = LJ::get_dbh(@sources);
 
     # community/friend views need to post by log time, not event time
     $sort_key = "rlogtime" if ($opts->{'order'} eq "logtime" ||
@@ -948,7 +934,7 @@ sub make_cookie
 # des: Adds a row to a user's statushistory
 # info: See the [dbtable[statushistory]] table.
 # returns: boolean; 1 on success, 0 on failure
-# args: dbarg, userid, adminid, shtype, notes?
+# args: dbarg?, userid, adminid, shtype, notes?
 # des-userid: The user getting acted on.
 # des-adminid: The site admin doing the action.
 # des-shtype: The status history type code.
@@ -956,10 +942,9 @@ sub make_cookie
 # </LJFUNC>
 sub statushistory_add
 {
-    my $dbarg = shift;
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my $dbh = LJ::get_db_writer();
+    
     my $userid = shift;  $userid += 0;
     my $actid  = shift;  $actid  += 0;
 
@@ -1976,21 +1961,17 @@ sub acct_code_check
 # <LJFUNC>
 # name: LJ::load_mood_theme
 # des: Loads and caches a mood theme, or returns immediately if already loaded.
-# args: dbarg, themeid
+# args: dbarg?, themeid
 # des-themeid: the mood theme ID to load
 # </LJFUNC>
 sub load_mood_theme
 {
-    my $dbarg = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $themeid = shift;
-    return if ($LJ::CACHE_MOOD_THEME{$themeid});
-
-    my $dbs = $dbarg ? make_dbs_from_arg($dbarg) : LJ::get_dbs();
-    my $dbr = $dbs->{'reader'};
-
-    $themeid += 0;
-    my $sth = $dbr->prepare("SELECT moodid, picurl, width, height FROM moodthemedata WHERE moodthemeid=$themeid");
-    $sth->execute;
+    return if $LJ::CACHE_MOOD_THEME{$themeid};
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare("SELECT moodid, picurl, width, height FROM moodthemedata WHERE moodthemeid=?");
+    $sth->execute($themeid);
     while (my ($id, $pic, $w, $h) = $sth->fetchrow_array) {
         $LJ::CACHE_MOOD_THEME{$themeid}->{$id} = { 'pic' => $pic, 'w' => $w, 'h' => $h };
     }
@@ -2050,8 +2031,7 @@ sub get_prop
     my $table = shift;
     my $name = shift;
     unless (defined $LJ::CACHE_PROP{$table}) {
-        my $dbs = LJ::get_dbs() or return undef;
-        LJ::load_props($dbs, $table);
+        LJ::load_props($table);
         return undef unless $LJ::CACHE_PROP{$table};
     }
     return $LJ::CACHE_PROP{$table}->{$name};
@@ -2158,6 +2138,7 @@ sub img
 sub load_user_props
 {
     my $dbarg = shift;
+    $dbarg ||= LJ::get_db_reader();
 
     my $dbs = make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
@@ -2655,7 +2636,8 @@ sub get_talktext2
 # </LJFUNC>
 sub get_logtext2multi
 {
-    my ($dbs, $idsbyc) = @_;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
+    my $idsbyc = shift;
     my $sth;
 
     # return structure.
@@ -2663,23 +2645,11 @@ sub get_logtext2multi
 
     # keep track of itemids we still need to load per cluster
     my %need;
-    my @needold;
     foreach my $c (keys %$idsbyc) {
         foreach (@{$idsbyc->{$c}}) {
             if ($c) {
                 $need{$c}->{"$_->[0] $_->[1]"} = 1;
-            } else {
-                push @needold, $_+0;
             }
-        }
-    }
-
-    # don't handle non-cluster stuff ourselves
-    if (@needold)
-    {
-        my $olt = LJ::get_logtext($dbs, @needold);
-        foreach (keys %$olt) {
-            $lt->{"0 $_"} = $olt->{$_};
         }
     }
 
@@ -2720,7 +2690,7 @@ sub get_logtext2multi
 #      and returns a hashref representing them
 # returns: hashref containing 'user' and 'userid' if valid user, else
 #          undef.
-# args: dbarg, criterr?, cgi?
+# args: dbarg?, criterr?, cgi?
 # des-criterr: scalar ref to set critical error flag.  if set, caller
 #              should stop processing whatever it's doing and complain
 #              about an invalid login with a link to the logout page.
@@ -2736,12 +2706,10 @@ sub get_remote
     return $LJ::CACHE_REMOTE if $LJ::CACHED_REMOTE;
 
     unless ($dbarg) {
-        $dbarg = LJ::get_dbs();
+        $dbarg = LJ::get_db_reader();
     }
 
     my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
 
     $$criterr = 0;
 
@@ -2787,7 +2755,7 @@ sub get_remote
     # fail unless authtype is 'ws' (more might be added in future)
     return $no_remote->("No ws auth") unless $authtype eq "ws";
 
-    my $u = LJ::load_user($dbs, $user);
+    my $u = LJ::load_user($user);
     return $no_remote->("User doesn't exist") unless $u;
 
     my $sess_db = LJ::get_cluster_reader($u, 1);
@@ -2826,6 +2794,7 @@ sub get_remote
             my $future = $sess->{'now'} + $sess_length;
             $udbh->do("UPDATE sessions SET timeexpire=$future WHERE ".
                       "userid=$u->{'userid'} AND sessid=$sess->{'sessid'}");
+            my $dbh = LJ::get_db_writer();
             $dbh->do("UPDATE userusage SET timecheck=NOW() WHERE userid=?",
                      undef, $u->{'userid'});
         }
@@ -3104,7 +3073,6 @@ sub load_userpics
     my ($dbarg, $upics, $idlist) = @_;
 
     my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
 
     my @load_list;
@@ -3345,11 +3313,8 @@ sub robot_meta_tags
 # </LJFUNC>
 sub make_journal
 {
-    my ($dbarg, $user, $view, $remote, $opts) = @_;
-
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my ($user, $view, $remote, $opts) = @_;
 
     my $r = $opts->{'r'};  # mod_perl $r, or undef
     my $geta = $opts->{'getargs'};
@@ -3372,7 +3337,7 @@ sub make_journal
         # if we have an explicit styleid, we have to load
         # it early so we can learn its type, so we can
         # know which uprops to load for its owner
-        $style = LJ::S1::load_style($dbs, $styleid, \$view);
+        $style = LJ::S1::load_style($styleid, \$view);
     } else {
         $view ||= "lastn";    # default view when none specified explicitly in URLs
         if ($LJ::viewinfo{$view} || $view eq "month" || 
@@ -3384,12 +3349,11 @@ sub make_journal
     }
     return unless $styleid;
 
-    my $quser = $dbh->quote($user);
     my $u;
     if ($opts->{'u'}) {
         $u = $opts->{'u'};
     } else {
-        $u = LJ::load_user($dbs, $user);
+        $u = LJ::load_user($user);
     }
 
     unless ($u) {
@@ -3409,7 +3373,7 @@ sub make_journal
         push @needed_props, @{$LJ::viewinfo{$eff_view}->{'owner_props'}};
     }
 
-    LJ::load_user_props($dbs, $u, @needed_props);
+    LJ::load_user_props(undef,, $u, @needed_props);
 
     # if the remote is the user to be viewed, make sure the $remote
     # hashref has the value of $u's opt_nctalklinks (though with
@@ -3518,6 +3482,7 @@ sub make_journal
     if ($u->{'useoverrides'} eq "Y" && (! $s1uc->{'override_stor'} ||
                                         $s1uc->{'override_cleanver'} < $LJ::S1::CLEANER_VERSION)) {
         $dbcm ||= LJ::get_cluster_master($u, 1);
+        my $dbh = LJ::get_db_writer();
         my $overrides = $dbh->selectrow_array("SELECT override FROM overrides WHERE user=?",
                                               undef, $u->{'user'});
         $update{'override_stor'} = LJ::CleanHTML::clean_s1_style($overrides);
@@ -3527,6 +3492,7 @@ sub make_journal
     # is the color cache here if it's a custom user theme?
     if ($u->{'themeid'} == 0 && ! $s1uc->{'color_stor'}) {
         my $col = {};
+        my $dbh = LJ::get_db_writer();
         my $sth = $dbh->prepare("SELECT coltype, color FROM themecustom WHERE user=?");
         $sth->execute($u->{'user'});
         $col->{$_->{'coltype'}} = $_->{'color'} while $_ = $sth->fetchrow_hashref;
@@ -3536,6 +3502,7 @@ sub make_journal
     # save the updates
     if (%update) {
         my $set;
+        my $dbh = LJ::get_db_writer();
         foreach my $k (keys %update) {
             $s1uc->{$k} = $update{$k};
             $set .= ", " if $set;
@@ -3551,7 +3518,7 @@ sub make_journal
     # load the style
     my $viewref = $view eq "" ? \$view : undef;
     $style ||= $LJ::viewinfo{$view}->{'nostyle'} ? {} :
-        LJ::S1::load_style($dbs, $styleid, $viewref);
+        LJ::S1::load_style($styleid, $viewref);
 
     my %vars = ();
     
@@ -3569,7 +3536,7 @@ sub make_journal
     }
 
     # apply the color theme
-    my $cols = $u->{'themeid'} ? LJ::S1::get_themeid($dbs, $u->{'themeid'}) :
+    my $cols = $u->{'themeid'} ? LJ::S1::get_themeid($u->{'themeid'}) :
         Storable::thaw($s1uc->{'color_stor'});
     foreach (keys %$cols) {
         $vars{"color-$_"} = $cols->{$_};
@@ -3580,7 +3547,7 @@ sub make_journal
     my $ret = "";
 
     # call the view creator w/ the buffer to fill and the construction variables
-    my $res = $LJ::viewinfo{$view}->{'creator'}->($dbs, \$ret, $u, \%vars, $remote, $opts);
+    my $res = $LJ::viewinfo{$view}->{'creator'}->(\$ret, $u, \%vars, $remote, $opts);
 
     unless ($res) {
         my $errcode = $opts->{'errcode'};
@@ -3670,6 +3637,15 @@ sub decode_url_string
 # </LJFUNC>
 sub get_dbs
 {
+    if ($LJ::DEBUG{'get_dbs'}) {
+        my $errmsg = "sloppy use of LJ::get_dbs() ?\n";
+        my $i = 0;
+        while (my ($p, $f, $l) = caller($i++)) {
+            next if $i > 3;
+            $errmsg .= "  $p, $f, $l\n";
+        }
+        warn $errmsg;
+    }
     return $LJ::REQ_CACHE_DBS{0} if $LJ::REQ_CACHE_DBS{0};
 
     my $dbh = LJ::get_dbh("master");
@@ -3921,7 +3897,8 @@ sub make_graphviz_dot_file
 # </LJFUNC>
 sub expand_embedded
 {
-    my $dbs = shift;
+    my $dbarg = shift;
+    my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $ditemid = shift;
     my $remote = shift;
     my $eventref = shift;
@@ -3958,18 +3935,17 @@ sub make_remote
 #       listref (not hashref: can't have dups).  values of $map listref are
 #       scalar refs to put result in.  $have is an optional listref of user
 #       object caller already has, but is too lazy to sort by themselves.
-# args: dbarg, map, have
+# args: dbarg?, map, have
 # des-map: Arrayref of pairs (userid, destination scalarref)
 # des-have: Arrayref of user objects caller already has
 # returns: Nothing.
 # </LJFUNC>
 sub load_userids_multiple
 {
-    my ($dbarg, $map, $have) = @_;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my ($map, $have) = @_;
 
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my $sth;
 
     my %need;
@@ -4011,14 +3987,22 @@ sub load_userids_multiple
 # name: LJ::load_user
 # des: Loads a user record given a username.
 # info: From the [dbarg[user]] table.
-# args: dbarg, user, force?
+# args: dbarg?, user, force?
 # des-user: Username of user to load.
 # des-force: if set to true, won't return cached user object
 # returns: Hashref with keys being columns of [dbtable[user]] table.
 # </LJFUNC>
 sub load_user
 {
-    my ($dbarg, $user, $force) = @_;
+    my $db;
+    if (ref $_[0]) {
+        my $dbarg = shift;
+        my $dbs = LJ::make_dbs_from_arg($dbarg);
+        $db = $dbs->{'dbh'};
+    } else {
+        $db = LJ::get_db_reader();
+    }
+    my ($user, $force) = @_;
 
     $user = LJ::canonical_username($user);
     return undef unless length $user;
@@ -4026,12 +4010,8 @@ sub load_user
     return $LJ::REQ_CACHE_USER_NAME{$user} if
         $LJ::REQ_CACHE_USER_NAME{$user} && ! $force;
 
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-    
-    my $sth =  ($LJ::CACHE_HANDLE{$dbr}->{'load_user'} ||=
-                $dbr->prepare("SELECT * FROM user WHERE user=?"));
+    my $sth =  ($LJ::CACHE_HANDLE{$db}->{'load_user'} ||=
+                $db->prepare("SELECT * FROM user WHERE user=?"));
     $sth->bind_param(1, $user);
     $sth->execute;
     my $u = $sth->fetchrow_hashref();
@@ -4040,6 +4020,7 @@ sub load_user
     # an external authentication source and we should create the account
     # implicitly.
     unless ($u) {
+        my $dbh = LJ::get_db_writer();
         if (ref $LJ::AUTH_EXISTS eq "CODE") {
             if ($LJ::AUTH_EXISTS->($user)) {
                 if (LJ::create_account($dbh, {
@@ -4055,7 +4036,7 @@ sub load_user
                     return undef;
                 }
             }
-        } elsif ($dbs->{'has_slave'}) {
+        } else {
             # If the user still doesn't exist, and there isn't an alternate auth code
             # try grabbing it from the master.
             $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
@@ -4078,26 +4059,21 @@ sub load_user
 # </LJFUNC>
 sub load_userid
 {
-    my $dbarg = ref $_[0] ? shift : LJ::get_dbs();
+    my $dbarg = ref $_[0] ? shift : undef;
     my ($userid, $force) = @_;
     return undef unless $userid;
     
     return $LJ::REQ_CACHE_USER_ID{$userid} if
         $LJ::REQ_CACHE_USER_ID{$userid} && ! $force;
 
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
+    my $dbs = LJ::make_dbs_from_arg($dbarg || LJ::get_db_reader());
     my $dbr = $dbs->{'reader'};
+    my $u;
 
-    my $sth = ($LJ::CACHE_HANDLE{$dbr}->{'load_userid'} ||=
-               $dbr->prepare("SELECT * FROM user WHERE userid=?"));
-    $sth->bind_param(1, $userid);
-    $sth->execute;
-    my $u = $sth->fetchrow_hashref();
-
-    if (!$u && $dbs->{'has_slave'}) {
-        $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?",
-                                     undef, $userid);
+    $u = $dbr->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, $userid);
+    if (!$u && ($dbs->{'has_slave'} || !$dbarg)) {
+        my $dbh = $dbarg ? $dbs->{'dbh'} : LJ::get_db_writer();
+        $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE userid=?", undef, $userid);
     }
 
     $LJ::REQ_CACHE_USER_NAME{$u->{'user'}} = $u if $u;
@@ -4116,13 +4092,8 @@ sub load_userid
 # </LJFUNC>
 sub load_moods
 {
-    return if ($LJ::CACHED_MOODS);
-    my $dbarg = shift;
-
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
+    return if $LJ::CACHED_MOODS;
+    my $dbr = LJ::get_db_reader();
     my $sth = $dbr->prepare("SELECT moodid, mood, parentmood FROM moods");
     $sth->execute;
     while (my ($id, $mood, $parent) = $sth->fetchrow_array) {
@@ -4783,7 +4754,6 @@ sub can_add_syndicated
     return 1;
 }
 
-# Note: requires caller to first call LJ::load_props($dbs, "log")
 # <LJFUNC>
 # name: LJ::load_log_props2
 # class:
@@ -4800,7 +4770,7 @@ sub load_log_props2
     my $jitemin = join(", ", map { $_+0; } @$listref);
     return unless $jitemin;
     return unless ref $hashref eq "HASH";
-    return unless defined $LJ::CACHE_PROPID{'log'};
+    LJ::load_props("log");
 
     my $sth = $db->prepare("SELECT jitemid, propid, value FROM logprop2 ".
                            "WHERE journalid=$journalid AND jitemid IN ($jitemin)");
@@ -4810,7 +4780,6 @@ sub load_log_props2
     }
 }
 
-# Note: requires caller to first call LJ::load_props($dbs, "log")
 # <LJFUNC>
 # name: LJ::load_log_props2multi
 # class:
@@ -4822,11 +4791,12 @@ sub load_log_props2
 # </LJFUNC>
 sub load_log_props2multi
 {
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
     # ids by cluster (hashref),  output hashref (keys = "$ownerid $jitemid")
-    my ($dbs, $idsbyc, $hashref) = @_;
+    my ($idsbyc, $hashref) = @_;
     my $sth;
     return unless ref $idsbyc eq "HASH";
-    return unless defined $LJ::CACHE_PROPID{'log'};
+    LJ::load_props("log");
 
     foreach my $c (keys %$idsbyc) {
         my $fattyin = join(" OR ", map {
@@ -5880,7 +5850,7 @@ sub load_rel_target
 # <LJFUNC>
 # name: LJ::check_rel
 # des: Checks whether two users are in a specified relationship to each other.
-# args: dbs, userid, targetid, type
+# args: dbarg?, userid, targetid, type
 # arg-userid: source userid, nonzero; may also be a user hash.
 # arg-targetid: target userid, nonzero; may also be a user hash.
 # arg-type: type of the relationship
@@ -5888,7 +5858,9 @@ sub load_rel_target
 # </LJFUNC>
 sub check_rel
 {
-    my ($dbs, $userid, $targetid, $type) = @_;
+    my $dbarg;
+    $dbarg = shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my ($userid, $targetid, $type) = @_;
     return undef unless $type and $userid and $targetid;
     $userid = LJ::want_userid($userid); 
     $targetid = LJ::want_userid($targetid);
@@ -5896,6 +5868,7 @@ sub check_rel
     my $key = "$userid-$targetid-$type";
     return $LJ::REQ_CACHE_REL{$key} if defined $LJ::REQ_CACHE_REL{$key};
 
+    my $dbs = LJ::make_dbs_from_arg($dbarg || LJ::get_db_reader());
     my $dbh = $dbs->{'dbh'};
     my $qtype = $dbh->quote($type);
 

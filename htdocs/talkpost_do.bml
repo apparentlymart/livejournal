@@ -24,9 +24,9 @@ body<=
     my $dbr = $dbs->{'reader'};
     my $sth;
 
-    my $remote = LJ::get_remote($dbs);
+    my $remote = LJ::get_remote();
 
-    my $init = LJ::Talk::init($dbs, \%FORM);
+    my $init = LJ::Talk::init(\%FORM);
     my $u = $init->{'journalu'};
 
     my $r = Apache->request;

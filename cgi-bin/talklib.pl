@@ -76,7 +76,6 @@ sub show_none_image
 
 sub link_bar
 {
-    my $dbs = shift;
     my $opts = shift;
     my ($u, $up, $remote, $headref, $itemid) = 
         map { $opts->{$_} } qw(u up remote headref itemid);
@@ -105,7 +104,7 @@ sub link_bar
     
     if (defined $remote && ($remote->{'user'} eq $u->{'user'} ||
                             $remote->{'user'} eq $up->{'user'} || 
-                            LJ::check_rel($dbs, $u, $remote, 'A')))
+                            LJ::check_rel($u, $remote, 'A')))
     {
         push @linkele, $mlink->("/editjournal_do.bml?${jargent}itemid=$itemid", "editentry");
     }
@@ -131,7 +130,7 @@ sub link_bar
 
 sub init 
 {
-    my ($dbs, $form) = @_;
+    my ($form) = @_;
     my $init = {};  # structure to return
 
     my $journal = $form->{'journal'};
@@ -147,7 +146,7 @@ sub init
     
     if ($journal) {
         # they specified a journal argument, which indicates new style.
-        $ju = LJ::load_user($dbs, $journal);
+        $ju = LJ::load_user($journal);
         return { 'error' => BML::ml('talk.error.nosuchjournal')} unless $ju;
         return { 'error' => BML::ml('talk.error.bogusargs')} unless $ju->{'clusterid'};
         $init->{'clustered'} = 1;
@@ -164,14 +163,14 @@ sub init
         # look up the itemid and see what user it belongs to.
         if ($form->{'itemid'}) {
             my $itemid = $form->{'itemid'}+0;
-            my $newinfo = LJ::get_newids($dbs, 'L', $itemid);
+            my $newinfo = LJ::get_newids('L', $itemid);
             if ($newinfo) {
-                $ju = LJ::load_userid($dbs, $newinfo->[0]);
+                $ju = LJ::load_userid($newinfo->[0]);
                 $init->{'clustered'} = 1;
                 $init->{'itemid'} = $newinfo->[1];
                 $init->{'oldurl'} = 1;
                 if ($form->{'thread'}) {
-                    my $tinfo = LJ::get_newids($dbs, 'T', $init->{'thread'});
+                    my $tinfo = LJ::get_newids('T', $init->{'thread'});
                     $init->{'thread'} = $tinfo->[1] if $tinfo;
                 }
             } else {
@@ -179,9 +178,9 @@ sub init
             }
         } elsif ($form->{'replyto'}) {
             my $replyto = $form->{'replyto'}+0;
-            my $newinfo = LJ::get_newids($dbs, 'T', $replyto);
+            my $newinfo = LJ::get_newids('T', $replyto);
             if ($newinfo) {
-                $ju = LJ::load_userid($dbs, $newinfo->[0]);
+                $ju = LJ::load_userid($newinfo->[0]);
                 $init->{'replyto'} = $newinfo->[1];
                 $init->{'oldurl'} = 1;
             } else {
@@ -197,10 +196,9 @@ sub init
 # dbs?, dbcs?, $u, $itemid
 sub get_journal_item
 {
-    my $dbs = ref $_[0] eq "LJ::DBSet" ? shift : LJ::get_dbs();
+    my $dbs = ref $_[0] eq "LJ::DBSet" ? shift : undef;
     my $dbcs = ref $_[0] eq "LJ::DBSet" ? shift : undef;
     my ($u, $itemid) = @_;
-    $dbcs ||= LJ::get_cluster_set($u);
 
     my $uid = $u->{'userid'}+0;
     $itemid += 0;
@@ -210,8 +208,16 @@ sub get_journal_item
         "DATE_FORMAT(eventtime, '${s2datefmt}') AS 'alldatepart', ".
         "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(logtime) AS 'secondsold' ".
         "FROM log2 WHERE journalid=$uid AND jitemid=$itemid";
-    my $item = LJ::dbs_selectrow_hashref($dbcs, $sql);
+
+    my $item;
+    my $dbc;
+    foreach my $role ("slave", "master") {
+        next if $item;
+        $dbc = $role eq "slave" ? LJ::get_cluster_reader($u) : LJ::get_cluster_master($u);
+        $item = $dbc->selectrow_hashref($sql);
+    }
     return undef unless $item;
+
     $item->{'itemid'} = $item->{'jitemid'} = $itemid;   # support old & new keys
     $item->{'ownerid'} = $item->{'journalid'};          # support old & news keys
 
@@ -222,12 +228,11 @@ sub get_journal_item
 
     ### load the log properties
     my %logprops = ();
-    LJ::load_props($dbs, "log");
-    LJ::load_log_props2($dbcs->{'reader'}, $u->{'userid'}, [ $itemid ], \%logprops);
+    LJ::load_log_props2($dbc, $u->{'userid'}, [ $itemid ], \%logprops);
     $item->{'props'} = $logprops{$itemid} || {};
 
     if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-        LJ::item_toutf8($dbs, $u, \$item->{'subject'}, \$item->{'event'},
+        LJ::item_toutf8($u, \$item->{'subject'}, \$item->{'event'},
                         $item->{'logprops'}->{$itemid});
     }
     return $item;
@@ -235,17 +240,19 @@ sub get_journal_item
 
 sub check_viewable
 {
-    my ($dbs, $remote, $item, $form, $errref) = @_;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db"; 
+    my ($remote, $item, $form, $errref) = @_;
     
     my $err = sub {
         $$errref = "<?h1 <?_ml Error _ml?> h1?><?p $_[0] p?>";
         return 0;
     };
 
-    unless (LJ::can_view($dbs, $remote, $item)) 
+    my $dbr = LJ::get_db_reader();
+    unless (LJ::can_view($dbr, $remote, $item)) 
     {
-        if ($form->{'viewall'} && LJ::check_priv($dbs, $remote, "viewall")) {
-            LJ::statushistory_add($dbs, $item->{'posterid'}, $remote->{'userid'}, 
+        if ($form->{'viewall'} && LJ::check_priv($dbr, $remote, "viewall")) {
+            LJ::statushistory_add($item->{'posterid'}, $remote->{'userid'}, 
                                   "viewall", "itemid = $item->{'itemid'}");
         } else {
             return $err->(BML::ml('talk.error.mustlogin'))
@@ -258,21 +265,23 @@ sub check_viewable
 }
 
 sub can_delete {
-    my ($dbs, $remote, $u, $up, $userpost) = @_;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db"; 
+    my ($remote, $u, $up, $userpost) = @_;
     return 0 unless $remote;
     return 1 if $remote->{'user'} eq $userpost ||
                 $remote->{'user'} eq $u->{'user'} ||
                 $remote->{'user'} eq $up->{'user'} ||
-                LJ::check_rel($dbs, $u, $remote, 'A');
+                LJ::check_rel($u, $remote, 'A');
     return 0;
 }
 
 sub can_screen {
-    my ($dbs, $remote, $u, $up, $userpost) = @_;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db"; 
+    my ($remote, $u, $up, $userpost) = @_;
     return 0 unless $remote;
     return 1 if $remote->{'user'} eq $u->{'user'} ||
                 $remote->{'user'} eq $up->{'user'} ||
-                LJ::check_rel($dbs, $u, $remote, 'A');
+                LJ::check_rel($u, $remote, 'A');
     return 0;
 }
 
@@ -400,7 +409,7 @@ sub load_comments
 {
     my ($u, $remote, $nodetype, $nodeid, $opts) = @_;
 
-    my $dbs = LJ::get_dbs();
+    my $dbr = LJ::get_db_reader();
     my $n = $u->{'clusterid'};
     my $db = LJ::get_dbh("cluster${n}lite", "cluster${n}slave", "cluster$n");
     my $dbcr = LJ::get_cluster_reader($u);
@@ -552,7 +561,6 @@ sub load_comments
     }
 
     # load meta-data
-    LJ::load_props($dbs, "talk");
     {
         my %props;
         LJ::load_talk_props2($dbcr, $u->{'userid'}, \@posts_to_load, \%props);
@@ -565,7 +573,7 @@ sub load_comments
     if ($LJ::UNICODE) {
         foreach (@posts_to_load) {
             if ($posts{$_}->{'props'}->{'unknown8bit'}) {
-                LJ::item_toutf8($dbs, $u, \$posts{$_}->{'subject'},
+                LJ::item_toutf8($u, \$posts{$_}->{'subject'},
                                 \$posts{$_}->{'body'},
                                 {});
               }
@@ -577,14 +585,13 @@ sub load_comments
         my %userpics = ();
         delete $users_to_load{0};
         if (%users_to_load) {
-            LJ::load_userids_multiple($dbs, [ map { $_, \$opts->{'userref'}->{$_} } 
-                                              keys %users_to_load ]);;
+            LJ::load_userids_multiple([ map { $_, \$opts->{'userref'}->{$_} } 
+                                        keys %users_to_load ]);;
         }
 
         # optionally load userpics
         if (ref($opts->{'userpicref'}) eq "HASH") {
             my %user_kw2id; # userid -> kw -> picid
-            my $dbr = $dbs->{'reader'};
             my %load_pic;
             foreach my $talkid (@posts_to_load) {
                 my $post = $posts{$talkid};
@@ -605,7 +612,7 @@ sub load_comments
                 $load_pic{$id} = 1 if $id;
             }
             
-            LJ::load_userpics($dbs, $opts->{'userpicref'}, [ keys %load_pic ]);
+            LJ::load_userpics($dbr, $opts->{'userpicref'}, [ keys %load_pic ]);
         }
     }
     

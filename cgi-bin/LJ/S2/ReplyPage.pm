@@ -107,7 +107,7 @@ sub ReplyForm__print
     my $remote = $form->{'_remote'};
     my $u = $form->{'_u'};
 
-    my $dbs = LJ::get_dbs();
+    my $dbr = LJ::get_db_reader();
     my $ret;
     $ret .= "<form method='post' action='$LJ::SITEROOT/talkpost_do.bml' id='postform'>\n";
 
@@ -165,7 +165,7 @@ sub ReplyForm__print
     if ($remote) {
         $ret .= "<tr valign='middle'>";
         $ret .= "<td align='right'>&nbsp;</td>";
-        if (LJ::is_banned($dbs, $remote, $u)) {
+        if (LJ::is_banned($dbr, $remote, $u)) {
             $ret .= "<td align='middle'>( )</td>";
             $ret .= "<td align='left'><span class='ljdeem'><b>$txt_loggedin</b> <i>$remote->{'user'}</i></td>";
             # FIXME: add trans "You're banned" string somehow.
@@ -175,7 +175,7 @@ sub ReplyForm__print
             $ret .= "<input type='hidden' name='cookieuser' value='$remote->{'user'}' id='cookieuser' />\n";
             if ($u->{'opt_whoscreened'} eq 'A' ||
                 ($u->{'opt_whoscreened'} eq 'F' &&
-                 !LJ::is_friend($dbs, $u, $remote))) {
+                 !LJ::is_friend($dbr, $u, $remote))) {
                 $ret .= " $txt_willscreen";
             }
             $ret .= "</td>";
@@ -268,7 +268,7 @@ sub ReplyForm__print
     
     my %res;
     if ($remote) {
-        LJ::do_request($dbs, { "mode" => "login",
+        LJ::do_request($dbr, { "mode" => "login",
                                "ver" => ($LJ::UNICODE ? "1" : "0"),
                                "user" => $remote->{'user'},
                                "getpickws" => 1,

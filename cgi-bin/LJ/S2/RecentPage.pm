@@ -10,9 +10,7 @@ sub RecentPage
     $p->{'view'} = "recent";
     $p->{'entries'} = [];
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my $dbcr = LJ::get_cluster_reader($u);
 
     my $user = $u->{'user'};
@@ -23,7 +21,7 @@ sub RecentPage
         return;
     }
 
-    LJ::load_user_props($dbs, $remote, "opt_nctalklinks");
+    LJ::load_user_props($dbr, $remote, "opt_nctalklinks");
 
     my $get = $opts->{'getargs'};
 
@@ -47,8 +45,8 @@ sub RecentPage
 
     # do they want to view all entries, regardless of security?
     my $viewall = 0;
-    if ($get->{'viewall'} && LJ::check_priv($dbs, $remote, "viewall")) {
-        LJ::statushistory_add($dbs, $u->{'userid'}, $remote->{'userid'}, 
+    if ($get->{'viewall'} && LJ::check_priv($dbr, $remote, "viewall")) {
+        LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
                               "viewall", "lastn: $user");
         $viewall = 1;
     }
@@ -56,7 +54,7 @@ sub RecentPage
     ## load the itemids
     my @itemids;
     my $err;
-    my @items = LJ::get_recent_items($dbs, {
+    my @items = LJ::get_recent_items({
         'clusterid' => $u->{'clusterid'},
         'clustersource' => 'slave',
         'viewall' => $viewall,
@@ -76,10 +74,9 @@ sub RecentPage
     ### load the log properties
     my %logprops = ();
     my $logtext;
-    LJ::load_props($dbs, "log");
     LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
     $logtext = LJ::get_logtext2($u, @itemids);
-    LJ::load_moods($dbs);
+    LJ::load_moods();
 
     my $lastdate = "";
     my $itemnum = 0;
@@ -91,7 +88,7 @@ sub RecentPage
         $apu{$_->{'posterid'}} = undef;
     }
     if (%apu) {
-        LJ::load_userids_multiple($dbs, [map { $_, \$apu{$_} } keys %apu], [$u]);
+        LJ::load_userids_multiple($dbr, [map { $_, \$apu{$_} } keys %apu], [$u]);
         $apu_lite{$_} = UserLite($apu{$_}) foreach keys %apu;
     }
 
@@ -110,7 +107,7 @@ sub RecentPage
         next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S';
 
 	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-	    LJ::item_toutf8($dbs, $u, \$subject, \$text, $logprops{$itemid});
+	    LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
 	}
 
         my $date = substr($alldatepart, 0, 10);
@@ -127,7 +124,7 @@ sub RecentPage
         my $ditemid = $itemid * 256 + $item->{'anum'};
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                               'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}), });
-        LJ::expand_embedded($dbs, $ditemid, $remote, \$text);
+        LJ::expand_embedded($dbr, $ditemid, $remote, \$text);
 
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
@@ -142,7 +139,7 @@ sub RecentPage
             'post_url' => $posturl,
             'count' => $replycount,
             'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0,
-            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbs, $u, $remote, 'A'))) ? 1 : 0,
+            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbr, $u, $remote, 'A'))) ? 1 : 0,
         });
         
         my $userlite_poster = $userlite_journal;

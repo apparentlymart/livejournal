@@ -15,9 +15,7 @@ body<=
 
  return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbr = LJ::get_db_reader();
  my ($sth, $sql);
  my $errtxt;
 
@@ -59,10 +57,10 @@ if ($uri =~ m!/(\d+)\.html$!) {
             );
  foreach (keys %T) { $T{$_} = $ML{$T{$_}}; }
 
- my $init = LJ::Talk::init($dbs, \%GET);
+ my $init = LJ::Talk::init(\%GET);
  my $u = $init->{'journalu'};
 
- LJ::load_user_props($dbs, $u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
+ LJ::load_user_props($dbr, $u, "opt_blockrobots") if $u->{'statusvis'} eq 'V';
  if ($u->{'statusvis'} ne 'V' || $u->{'opt_blockrobots'}) {
      $$head = LJ::robot_meta_tags();
  }
@@ -80,7 +78,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
  my $dbcm = $dbcs->{'dbh'};
  my $dbcr = $dbcs->{'reader'};
 
- my $item = LJ::Talk::get_journal_item($dbs, $dbcs, $u, $itemid);
+ my $item = LJ::Talk::get_journal_item($u, $itemid);
 
  if ($init->{'oldurl'} && $item) {
      $init->{'anum'} = $item->{'anum'};
@@ -107,7 +105,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  # redirect if account was renamed
  if ($u->{'journaltype'} eq "R") {
-     LJ::load_user_props($dbs, $u, "renamedto");
+     LJ::load_user_props($dbr, $u, "renamedto");
      if ($u->{'renamedto'} ne "") {
          my $id = $GET{'itemid'}+0;
          return BML::redirect(LJ::journal_base($u) . "/$id.html");
@@ -118,9 +116,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  ### load users
  my ($up);  # $up = user posted journal item
- LJ::load_userids_multiple($dbs, [
-                                  $item->{'posterid'} => \$up,
-                                  ], [ $u ]);
+ LJ::load_userids_multiple([ $item->{'posterid'} => \$up, ], [ $u ]);
 
  LJ::text_out(\$u->{'name'});
 
@@ -132,20 +128,20 @@ if ($uri =~ m!/(\d+)\.html$!) {
  return "<?h1 $ML{'talk.error.deleted.title'} h1?><?p $ML{'talk.error.deleted'} p?>"
     if ($u->{'statusvis'} eq "D");
 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  ####  Check security before viewing this post
- return $errtxt unless LJ::Talk::check_viewable($dbs, $remote, $item, \%GET, \$errtxt);
+ return $errtxt unless LJ::Talk::check_viewable($remote, $item, \%GET, \$errtxt);
 
  my $showmultiform = $remote &&
     ($remote->{'user'} eq $u->{'user'} ||
      $remote->{'user'} eq $up->{'user'} ||
-     LJ::check_rel($dbs, $u, $remote, 'A'));
+     LJ::check_rel($dbr, $u, $remote, 'A'));
  my $multiform_selects = 0;  # are there select boxes?  don't show form if not.
 
  my $event = $item->{'event'};
 
- LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
+ LJ::expand_embedded($dbr, $ditemid, $remote, \$event);
  LJ::CleanHTML::clean_event(\$event, $props->{'opt_preformatted'});
  BML::ebml(\$event);
 
@@ -175,7 +171,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
 
  my %userpics;
  if ($picid) {
-     LJ::load_userpics($dbs, \%userpics, [ $picid ]);
+     LJ::load_userpics($dbr, \%userpics, [ $picid ]);
      my $alt = $up->{'name'};
      if ($props->{'picture_keyword'}) {
          $alt .= ": $props->{'picture_keyword'}";
@@ -203,21 +199,21 @@ if ($uri =~ m!/(\d+)\.html$!) {
  $ret .= "</td></tr></table>";
 
  ## standout bar
- $ret .= LJ::Talk::link_bar($dbs, { 'u' => $u, 'up' => $up, 'headref' => $head,
-                                    'remote' => $remote, 'itemid' => $ditemid, });
+ $ret .= LJ::Talk::link_bar({ 'u' => $u, 'up' => $up, 'headref' => $head,
+                              'remote' => $remote, 'itemid' => $ditemid, });
 
  ## dump the log entry, unless we're browsing a thread.
  unless ($thread)
  {
      my %current;
      if ($props->{'current_mood'} || $props->{'current_moodid'}) {
-         LJ::load_moods($dbs);
+         LJ::load_moods();
          $current{'Mood'} = $props->{'current_mood'};
          LJ::CleanHTML::clean_subject(\$current{'Mood'});
          my $mid = $props->{'current_moodid'};
          if ($mid) {
              my $theme = $up->{'moodthemeid'};
-               LJ::load_mood_theme($dbs, $theme);
+               LJ::load_mood_theme($theme);
              my %pic;
              my $name = defined $LJ::CACHE_MOODS{$mid} ? $LJ::CACHE_MOODS{$mid}->{'name'} : '';
              if (LJ::get_mood_picture($theme, $mid, \%pic)) {
@@ -348,7 +344,7 @@ if ($uri =~ m!/(\d+)\.html$!) {
          $ret .= "<p><a name='t$dtid'></a><table><tr>";
          $ret .= "<td><img src='$LJ::IMGPREFIX/dot.gif' height='1' width='" . ($opts->{'depth'} * 25) . "'></td>";
          $ret .= "<td>$ML{'.replysuspended'}";
-         if (LJ::Talk::can_delete($dbs, $remote, $u, $up, $userpost)) {
+         if (LJ::Talk::can_delete($dbr, $remote, $u, $up, $userpost)) {
              $ret .= " <a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
          }
          $ret .= "</td></tr></table>\n";
@@ -379,24 +375,24 @@ if ($uri =~ m!/(\d+)\.html$!) {
              $ret .= "<br />$datepost\n";
              if ($post->{'props'}->{'poster_ip'} && $remote &&
                  ($remote->{'user'} eq $up->{'user'} ||
-                  LJ::check_rel($dbs, $u, $remote, 'A')))
+                  LJ::check_rel($dbr, $u, $remote, 'A')))
              {
                  $ret .= BML::ml('.fromip', {'ip'=>$post->{'props'}->{'poster_ip'}});
              }
              
              $ret .= " <font size='-1'>(<a href='" . $talkargs->("thread=$dtid#t$dtid") . "'>$T{'link'}</a>)</font> ";
              
-             if (LJ::Talk::can_delete($dbs, $remote, $u, $up, $userpost)) {
+             if (LJ::Talk::can_delete($dbr, $remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/delcomment.bml?${jargent}id=$dtid'>" . LJ::img("btn_del", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
              
              if ($post->{'state'} eq 'A' && 
-                 LJ::Talk::can_screen($dbs, $remote, $u, $up, $userpost)) {
+                 LJ::Talk::can_screen($dbr, $remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/talkscreen.bml?mode=screen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_scr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
              
              if ($post->{'state'} eq 'S' && 
-                 LJ::Talk::can_unscreen($dbs, $remote, $u, $up, $userpost)) {
+                 LJ::Talk::can_unscreen($dbr, $remote, $u, $up, $userpost)) {
                  $ret .= "<a href='/talkscreen.bml?mode=unscreen&amp;${jargent}talkid=$dtid'>" . LJ::img("btn_unscr", "", { 'align' => 'absmiddle', 'hspace' => 2, 'vspace' => }) . "</a>";
              }
 

@@ -9,7 +9,7 @@ sub EntryPage
     my ($u, $remote, $opts) = @_;
 
     my $get = $opts->{'getargs'};
-    my $dbs = LJ::get_dbs();
+    my $dbr = LJ::get_db_reader();
 
     my $p = Page($u, $opts);
     $p->{'_type'} = "EntryPage";
@@ -126,7 +126,7 @@ sub EntryPage
             $s2com->{'metadata'}->{'poster_ip'} = $com->{'props'}->{'poster_ip'} if 
                 ($com->{'props'}->{'poster_ip'} && $remote &&
                  ($remote->{'userid'} == $entry->{'posterid'} ||
-                  LJ::check_rel($dbs, $u, $remote, 'A')));
+                  LJ::check_rel($dbr, $u, $remote, 'A')));
             
             push @$destlist, $s2com;
 
@@ -158,7 +158,7 @@ sub EntryPage_entry
 
     my $r = $opts->{'r'};
     my $uri = $r->uri;
-    my $dbs = LJ::get_dbs();
+    my $dbr = LJ::get_db_reader();
 
     my ($ditemid, $itemid, $anum);
     unless ($uri =~ /(\d+)\.html/) {
@@ -175,7 +175,7 @@ sub EntryPage_entry
         $opts->{'handler_return'} = 404;
         return;
     }
-    unless (LJ::can_view($dbs, $remote, $entry)) {
+    unless (LJ::can_view($dbr, $remote, $entry)) {
         $opts->{'handler_return'} = 403;
         return;
     }
@@ -188,7 +188,7 @@ sub EntryPage_entry
     my $userlite_poster = $userlite_journal;
     my $pu = $u;
     if ($entry->{'posterid'} != $entry->{'ownerid'}) {
-        $pu = LJ::load_userid($dbs, $entry->{'posterid'});
+        $pu = LJ::load_userid($entry->{'posterid'});
         $userlite_poster = UserLite($pu);
     }
 
@@ -207,13 +207,13 @@ sub EntryPage_entry
         'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! 
                       $entry->{'props'}->{'opt_nocomments'}) ? 1 : 0,
         'screened' => ($entry->{'props'}->{'hasscreened'} && 
-                       ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbs, $u, $remote, 'A'))) ? 1 : 0,
+                       ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbr, $u, $remote, 'A'))) ? 1 : 0,
     });
 
     # format it
     LJ::CleanHTML::clean_subject(\$entry->{'subject'});
     LJ::CleanHTML::clean_event(\$entry->{'event'}, $entry->{'props'}->{'opt_preformatted'});
-    LJ::expand_embedded($dbs, $ditemid, $remote, \$entry->{'event'});
+    LJ::expand_embedded($dbr, $ditemid, $remote, \$entry->{'event'});
 
     my $s2entry = Entry($u, {
         'subject' => $entry->{'subject'},

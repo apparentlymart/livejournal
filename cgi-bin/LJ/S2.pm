@@ -879,18 +879,10 @@ sub get_journal_day_counts
     my $u = $s2page->{'_u'};
     my $counts = {};
 
-    my ($db, $sql);
-    if ($u->{'clusterid'}) {
-        $db = LJ::get_cluster_reader($u);
-        $sql = "SELECT year, month, day, COUNT(*) AS 'count' ".
+    my $db = LJ::get_cluster_reader($u);
+    my $sql = "SELECT year, month, day, COUNT(*) AS 'count' ".
             "FROM log2 WHERE journalid=? ".
             "GROUP BY year, month, day";
-    } else {
-        $db = LJ::get_db_reader();
-        $sql = "SELECT year, month, day, COUNT(*) AS 'count' ".
-            "FROM log WHERE ownerid=? ".
-            "GROUP BY year, month, day";
-    }
     
     my $sth = $db->prepare($sql);
     $sth->execute($u->{'userid'});

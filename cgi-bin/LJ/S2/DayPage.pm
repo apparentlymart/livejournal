@@ -13,9 +13,7 @@ sub DayPage
     $p->{'view'} = "day";
     $p->{'entries'} = [];
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my $dbcr = LJ::get_cluster_reader($u);
 
     my $user = $u->{'user'};
@@ -87,10 +85,9 @@ sub DayPage
     ### load the log properties
     my %logprops = ();
     my $logtext;
-    LJ::load_props($dbs, "log");
     LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
     $logtext = LJ::get_logtext2($u, @itemids);
-    LJ::load_moods($dbs);
+    LJ::load_moods();
 
     my (%apu, %apu_lite);  # alt poster users; UserLite objects
     foreach (@items) {
@@ -98,7 +95,7 @@ sub DayPage
         $apu{$_->{'posterid'}} = undef;
     }
     if (%apu) {
-        LJ::load_userids_multiple($dbs, [map { $_, \$apu{$_} } keys %apu], [$u]);
+        LJ::load_userids_multiple($dbr, [map { $_, \$apu{$_} } keys %apu], [$u]);
         $apu_lite{$_} = UserLite($apu{$_}) foreach keys %apu;
     }
 
@@ -117,7 +114,7 @@ sub DayPage
         next ENTRY if $apu{$posterid} && $apu{$posterid}->{'statusvis'} eq 'S';
 
 	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-	    LJ::item_toutf8($dbs, $u, \$subject, \$text, $logprops{$itemid});
+	    LJ::item_toutf8($u, \$subject, \$text, $logprops{$itemid});
 	}
 
         LJ::CleanHTML::clean_subject(\$subject) if $subject;
@@ -126,7 +123,7 @@ sub DayPage
 
         LJ::CleanHTML::clean_event(\$text, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($u, $itemid, $anum), });
-        LJ::expand_embedded($dbs, $ditemid, $remote, \$text);
+        LJ::expand_embedded($dbr, $ditemid, $remote, \$text);
 
         my $nc = "";
         $nc .= "nc=$replycount" if $replycount && $remote && $remote->{'opt_nctalklinks'};
@@ -141,7 +138,7 @@ sub DayPage
             'post_url' => $posturl,
             'count' => $replycount,
             'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! $logprops{$itemid}->{'opt_nocomments'}) ? 1 : 0,
-            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbs, $u, $remote, 'A'))) ? 1 : 0,
+            'screened' => ($logprops{$itemid}->{'hasscreened'} && ($remote->{'user'} eq $u->{'user'}|| LJ::check_rel($dbr, $u, $remote, 'A'))) ? 1 : 0,
         });
         
         my $userlite_poster = $userlite_journal;

@@ -237,15 +237,15 @@ $LJ::S1::PROPS = {
 # name: LJ::S1::get_themeid
 # des: Loads or returns cached version of given color theme data.
 # returns: Hashref with color names as keys
-# args: dbarg, themeid
+# args: dbarg?, themeid
 # des-themeid: S1 themeid.
 # </LJFUNC>
 sub get_themeid
 {
-    my ($dbarg, $themeid) = @_;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my $themeid = @_;
     return $LJ::S1::CACHE_THEMEID{$themeid} if $LJ::S1::CACHE_THEMEID{$themeid};
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbr = $dbs->{'reader'};
+    my $dbr = LJ::get_db_reader();
     my $ret = {};
     my $sth = $dbr->prepare("SELECT coltype, color FROM themedata WHERE themeid=?");
     $sth->execute($themeid);
@@ -256,7 +256,8 @@ sub get_themeid
 # returns: hashref of vars (cleaned)
 sub load_style
 {
-    my ($dbarg, $styleid, $viewref) = @_;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my ($styleid, $viewref) = @_;
     
     my $cch = $LJ::S1::CACHE_STYLE{$styleid};
     if ($cch && $cch->{'cachetime'} > time() - 300) {
@@ -264,17 +265,12 @@ sub load_style
         return $cch->{'style'};
     }
 
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
-    my $sth = ($LJ::CACHE_HANDLE{$dbr}->{'load_style'} ||=
-               $dbr->prepare("SELECT * FROM s1stylecache WHERE styleid=?"));
-    $sth->bind_param(1, $styleid);
-    $sth->execute;
-    my $styc = $sth->fetchrow_hashref();
+    my $dbr = LJ::get_db_reader();
+    my $styc = $dbr->selectrow_hashref("SELECT * FROM s1stylecache WHERE styleid=?",
+                                       undef, $styleid);
 
     if (! $styc || $styc->{'vars_cleanver'} < $LJ::S1::CLEANER_VERSION) {
+        my $dbh = LJ::get_db_writer();
         my ($type, $data, $opt_cache) = 
             $dbh->selectrow_array("SELECT type, formatdata, opt_cache FROM style WHERE styleid=?",
                                   undef, $styleid);
@@ -477,10 +473,8 @@ sub parse_vars
 # </LJFUNC>
 sub prepare_currents
 {
-    my $dbarg = shift;
     my $args = shift;
 
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $datakey = $args->{'datakey'} || $args->{'itemid'}; # new || old
 
     my %currents = ();
@@ -495,7 +489,7 @@ sub prepare_currents
     }
     if ($val = $args->{'props'}->{$datakey}->{'current_moodid'}) {
         my $theme = $args->{'user'}->{'moodthemeid'};
-        LJ::load_mood_theme($dbs, $theme);
+        LJ::load_mood_theme($theme);
         my %pic;
         my $name = defined $LJ::CACHE_MOODS{$val} ? $LJ::CACHE_MOODS{$val}->{'name'} : '';
         if (LJ::get_mood_picture($theme, $val, \%pic)) {
@@ -540,9 +534,8 @@ require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 # the creator for the 'lastn' view:
 sub create_view_lastn
 {
-    my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my ($ret, $u, $vars, $remote, $opts) = @_;
+    my $dbr = LJ::get_db_reader();
     my $dbcr = LJ::get_cluster_reader($u);
 
     my $user = $u->{'user'};
@@ -600,8 +593,6 @@ sub create_view_lastn
 
     my $events = \$lastn_page{'events'};
     
-    my $quser = $dbh->quote($user);
-
     # to show
     my $itemshow = $vars->{'LASTN_OPT_ITEMS'} + 0;
     if ($itemshow < 1) { $itemshow = 20; }
@@ -614,8 +605,8 @@ sub create_view_lastn
 
     # do they want to 
     my $viewall = 0;
-    if ($FORM{'viewall'} && LJ::check_priv($dbs, $remote, "viewall")) {
-        LJ::statushistory_add($dbs, $u->{'userid'}, $remote->{'userid'}, 
+    if ($FORM{'viewall'} && LJ::check_priv($dbr, $remote, "viewall")) {
+        LJ::statushistory_add($u->{'userid'}, $remote->{'userid'}, 
                               "viewall", "lastn: $user");
         $viewall = 1;
     }
@@ -623,7 +614,7 @@ sub create_view_lastn
     ## load the itemids
     my @itemids;
     my $err;
-    my @items = LJ::get_recent_items($dbs, {
+    my @items = LJ::get_recent_items({
         'clusterid' => $u->{'clusterid'},
         'clustersource' => 'slave',
         'viewall' => $viewall,
@@ -646,10 +637,9 @@ sub create_view_lastn
     ### load the log properties
     my %logprops = ();
     my $logtext;
-    LJ::load_props($dbs, "log");
     LJ::load_log_props2($dbcr, $u->{'userid'}, \@itemids, \%logprops);
     $logtext = LJ::get_logtext2($u, @itemids);
-    LJ::load_moods($dbs);
+    LJ::load_moods();
 
     my $lastday = -1;
     my $lastmonth = -1;
@@ -657,8 +647,8 @@ sub create_view_lastn
     my $eventnum = 0;
 
     my %posteru = ();  # map posterids to u objects
-    LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } 
-                                     @items], [$u]);
+    LJ::load_userids_multiple([map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } 
+                               @items], [$u]);
 
     # pre load things in a batch (like userpics) to minimize db calls
     my %userpics;
@@ -679,7 +669,7 @@ sub create_view_lastn
         $item->{'_picid'} = $picid;
         push @userpic_load, $picid if ($picid && ! grep { $_ eq $picid } @userpic_load);
     }
-    LJ::load_userpics($dbs, \%userpics, \@userpic_load);
+    LJ::load_userpics($dbr, \%userpics, \@userpic_load);
 
     if (my $picid = $u->{'defaultpicid'}) {
         $lastn_page{'userpic'} = 
@@ -710,7 +700,7 @@ sub create_view_lastn
         }
 
         if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-            LJ::item_toutf8($dbs, $u, \$subject, \$event, $logprops{$itemid});
+            LJ::item_toutf8($u, \$subject, \$event, $logprops{$itemid});
         }
 
         my %lastn_date_format = LJ::alldateparts_to_hash($alldatepart);
@@ -752,7 +742,7 @@ sub create_view_lastn
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}), });
-        LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
+        LJ::expand_embedded($dbr, $ditemid, $remote, \$event);
         $lastn_event{'event'} = $event;
 
         if ($u->{'opt_showtalklinks'} eq "Y" && 
@@ -768,7 +758,7 @@ sub create_view_lastn
             my $dispreadlink = $replycount || 
                 ($logprops{$itemid}->{'hasscreened'} &&
                  ($remote->{'user'} eq $user
-                  || LJ::check_rel($dbs, $u, $remote, 'A')));
+                  || LJ::check_rel($dbr, $u, $remote, 'A')));
 
             $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
                 'itemid' => $ditemid,
@@ -787,7 +777,7 @@ sub create_view_lastn
         }
 
         ## current stuff
-        LJ::prepare_currents($dbs, {
+        LJ::prepare_currents({
             'props' => \%logprops, 
             'itemid' => $itemid, 
             'vars' => $vars, 
@@ -905,9 +895,8 @@ sub create_view_lastn
 # the creator for the 'friends' view:
 sub create_view_friends
 {
-    my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my ($ret, $u, $vars, $remote, $opts) = @_;
+    my $dbr = LJ::get_db_reader();
     my $sth;
     my $user = $u->{'user'};
 
@@ -992,8 +981,6 @@ sub create_view_friends
 
     $friends_page{'events'} = "";
 
-    my $quser = $dbr->quote($user);
-
     my $itemshow = $vars->{'FRIENDS_OPT_ITEMS'} + 0;
     if ($itemshow < 1) { $itemshow = 20; }
     if ($itemshow > 50) { $itemshow = 50; }
@@ -1031,7 +1018,7 @@ sub create_view_friends
     if ($FORM{'mode'} eq "livecond") 
     {
         ## load the itemids
-        my @items = LJ::get_friend_items($dbs, {
+        my @items = LJ::get_friend_items({
             'u' => $u,
             'userid' => $u->{'userid'},
             'remote' => $remote,
@@ -1062,7 +1049,7 @@ sub create_view_friends
     
     ## load the itemids 
     my %idsbycluster;
-    my @items = LJ::get_friend_items($dbs, {
+    my @items = LJ::get_friend_items({
         'u' => $u,
         'userid' => $u->{'userid'},
         'remote' => $remote,
@@ -1107,24 +1094,23 @@ sub create_view_friends
     }
 
     my %aposter;  # alt-posterid -> u object (if not in friends already)
-    LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$aposter{$_->{'posterid'}} }
-                                     grep { $friends{$_->{'ownerid'}} &&
+    LJ::load_userids_multiple([map { $_->{'posterid'}, \$aposter{$_->{'posterid'}} }
+                               grep { $friends{$_->{'ownerid'}} &&
                                           ! $friends{$_->{'posterid'}} } @items],
                               [ $u, $remote ]);
 
     ### load the log properties
     my %logprops = ();  # key is "$owneridOrZero $[j]itemid"
-    LJ::load_props($dbs, "log");
-    LJ::load_log_props2multi($dbs, \%idsbycluster, \%logprops);
-    LJ::load_moods($dbs);
+    LJ::load_log_props2multi(\%idsbycluster, \%logprops);
+    LJ::load_moods();
 
     # load the pictures for the user
     my %userpics;
     my @picids = map { $friends{$_}->{'defaultpicid'} } keys %friends;
-    LJ::load_userpics($dbs, \%userpics, [ @picids, map { $_->{'defaultpicid'} } values %aposter ]);
+    LJ::load_userpics($dbr, \%userpics, [ @picids, map { $_->{'defaultpicid'} } values %aposter ]);
 
     # load the text of the entries
-    my $logtext = LJ::get_logtext2multi($dbs, \%idsbycluster);
+    my $logtext = LJ::get_logtext2multi(\%idsbycluster);
   
     my %friends_events = ();
     my $events = \$friends_events{'events'};
@@ -1157,7 +1143,7 @@ sub create_view_friends
         }
 
         if ($LJ::UNICODE && $logprops{$datakey}->{'unknown8bit'}) {
-            LJ::item_toutf8($dbs, $friends{$friendid}, \$subject, \$event, $logprops{$datakey});
+            LJ::item_toutf8($friends{$friendid}, \$subject, \$event, $logprops{$datakey});
         }
 
         my ($friend, $poster);
@@ -1201,7 +1187,7 @@ sub create_view_friends
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}), });
-        LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
+        LJ::expand_embedded($dbr, $ditemid, $remote, \$event);
         $friends_event{'event'} = $event;
         
         # do the picture
@@ -1223,7 +1209,7 @@ sub create_view_friends
                 $sth->execute;
                 my $alt_picid = $sth->fetchrow_array;
                 if ($alt_picid) {
-                    LJ::load_userpics($dbs, \%userpics, [ $alt_picid ]);
+                    LJ::load_userpics($dbr, \%userpics, [ $alt_picid ]);
                     $picid = $alt_picid;
                     $picuserid = $posterid;
                 }
@@ -1260,7 +1246,7 @@ sub create_view_friends
             my $dispreadlink = $replycount || 
                 ($logprops{$datakey}->{'hasscreened'} &&
                  ($remote->{'user'} eq $friend
-                  || LJ::check_rel($dbs, $friendid, $remote, 'A')));
+                  || LJ::check_rel($dbr, $friendid, $remote, 'A')));
 
             my ($readurl, $posturl);
             my $journalbase = LJ::journal_base($friends{$friendid});
@@ -1286,7 +1272,7 @@ sub create_view_friends
         }
 
         ## current stuff
-        LJ::prepare_currents($dbs, {
+        LJ::prepare_currents({
             'props' => \%logprops, 
             'datakey' => $datakey, 
             'vars' => $vars, 
@@ -1400,9 +1386,8 @@ sub create_view_friends
 # the creator for the 'calendar' view:
 sub create_view_calendar
 {
-    my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my ($ret, $u, $vars, $remote, $opts) = @_;
+    my $dbr = LJ::get_db_reader();
     
     my $user = $u->{'user'};
 
@@ -1449,8 +1434,7 @@ sub create_view_calendar
 
     my $months = \$calendar_page{'months'};
 
-    my $quser = $dbr->quote($user);
-    my $quserid = $dbr->quote($u->{'userid'});
+    my $quserid = int($u->{'userid'});
     my $maxyear = 0;
 
     my $db = LJ::get_cluster_reader($u);
@@ -1630,9 +1614,8 @@ sub create_view_calendar
 # the creator for the 'day' view:
 sub create_view_day
 {
-    my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my ($ret, $u, $vars, $remote, $opts) = @_;
+    my $dbr = LJ::get_db_reader();
     my $sth;
 
     my $user = $u->{'user'};
@@ -1674,7 +1657,6 @@ sub create_view_day
     $day_page{'urllastn'} = "$journalbase/";
 
     my $initpagedates = 0;
-    my $quser = $dbr->quote($user);
 
     my %FORM = ();
     LJ::decode_url_string($opts->{'args'}, \%FORM);
@@ -1741,13 +1723,12 @@ sub create_view_day
 
     ### load the log properties
     my %logprops = ();
-    LJ::load_props($dbs, "log");
     LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
     my $logtext = LJ::get_logtext2($u, @itemids);
-    LJ::load_moods($dbs);
+    LJ::load_moods();
 
     my %posteru = ();  # map posterids to u objects
-    LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
+    LJ::load_userids_multiple([map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
 
     my $events = "";
 
@@ -1763,7 +1744,7 @@ sub create_view_day
         my $event = $logtext->{$itemid}->[1];
 
 	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-	    LJ::item_toutf8($dbs, $u, \$subject, \$event, $logprops{$itemid});
+	    LJ::item_toutf8($u, \$subject, \$event, $logprops{$itemid});
 	}
 
         my %day_date_format = LJ::alldateparts_to_hash($alldatepart);
@@ -1793,7 +1774,7 @@ sub create_view_day
 
         LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
                                                'cuturl' => LJ::item_link($u, $itemid, $anum), });
-        LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
+        LJ::expand_embedded($dbr, $ditemid, $remote, \$event);
         $day_event{'event'} = $event;
 
         if ($u->{'opt_showtalklinks'} eq "Y" &&
@@ -1808,7 +1789,7 @@ sub create_view_day
             my $dispreadlink = $replycount || 
                 ($logprops{$itemid}->{'hasscreened'} &&
                  ($remote->{'user'} eq $user
-                  || LJ::check_rel($dbs, $u, $remote, 'A')));
+                  || LJ::check_rel($dbr, $u, $remote, 'A')));
             $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
                 'itemid' => $ditemid,
                 'itemargs' => $itemargs,
@@ -1826,7 +1807,7 @@ sub create_view_day
         }
 
         ## current stuff
-        LJ::prepare_currents($dbs, {
+        LJ::prepare_currents({
             'props' => \%logprops, 
             'itemid' => $itemid, 
             'vars' => $vars, 
@@ -1897,9 +1878,8 @@ sub create_view_day
 # the creator for the RSS XML syndication view
 sub create_view_rss
 {
-    my ($dbs, $ret, $u, $vars, $remote, $opts) = @_;
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my ($ret, $u, $vars, $remote, $opts) = @_;
+    my $dbr = LJ::get_db_reader();
 
     # for syndicated accounts, redirect to the syndication URL
     if ($u->{'journaltype'} eq 'Y') {
@@ -1917,7 +1897,7 @@ sub create_view_rss
 
     ## load the itemids
     my @itemids;
-    my @items = LJ::get_recent_items($dbs, {
+    my @items = LJ::get_recent_items({
         'clusterid' => $u->{'clusterid'},
         'clustersource' => 'slave',
         'remote' => $remote,
@@ -1934,7 +1914,6 @@ sub create_view_rss
     my %logprops = ();
     my $logtext;
     my $logdb = LJ::get_cluster_reader($u);
-    LJ::load_props($dbs, "log", "user");
     LJ::load_log_props2($logdb, $u->{'userid'}, \@itemids, \%logprops);
     $logtext = LJ::get_logtext2($u, @itemids);
 
@@ -1979,7 +1958,7 @@ sub create_view_rss
     ### image block, returns info for their current userpic
     if ($u->{'defaultpicid'}) {
         my $pic = {};
-        LJ::load_userpics($dbs, $pic, [$u->{'defaultpicid'}]);
+        LJ::load_userpics($dbr, $pic, [$u->{'defaultpicid'}]);
         $pic = $pic->{$u->{'defaultpicid'}}; # flatten
         
         $$ret .= "  <image>\n";
@@ -1992,7 +1971,7 @@ sub create_view_rss
     }
 
     my %posteru = ();  # map posterids to u objects
-    LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
+    LJ::load_userids_multiple($dbr, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);
 
     # output individual item blocks
 
@@ -2005,7 +1984,7 @@ sub create_view_rss
         next ENTRY if $posteru{$it->{'posterid'}} && $posteru{$it->{'posterid'}}->{'statusvis'} eq 'S';
 
         if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
-            LJ::item_toutf8($dbs, $u, \$logtext->{$itemid}->[0],
+            LJ::item_toutf8($u, \$logtext->{$itemid}->[0],
                             \$logtext->{$itemid}->[1], $logprops{$itemid});
         }
 

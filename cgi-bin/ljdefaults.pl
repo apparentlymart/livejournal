@@ -28,6 +28,7 @@
     $SITENAMEABBREV = "LJ";
 
     $NODB_MSG ||= "Database temporarily unavailable.  Try again shortly.";
+    $MSG_READONLY_USER ||= "Database temporarily in read-only mode during maintenance.";
 
     $SITEROOT ||= "http://www.$DOMAIN:8011";
     $IMGPREFIX ||= "$SITEROOT/img";
