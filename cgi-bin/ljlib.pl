@@ -4638,6 +4638,11 @@ sub get_cluster_master
     my $arg = shift;
     my $id = ref $arg eq "HASH" ? $arg->{'clusterid'} : $arg;
     my $role = "cluster${id}";
+
+    return undef
+        if ($LJ::READONLY_CLUSTER{$id} &&
+            ! (ref $arg && LJ::get_cap($arg, "avoid_readonly")));
+
     return LJ::get_dbh($role);
 }
 
