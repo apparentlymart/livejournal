@@ -7799,13 +7799,18 @@ sub text_trim
 {
     my ($text, $byte_max, $char_max) = @_;
     return $text unless $byte_max or $char_max;
-    if ($char_max == 0 || !$LJ::UNICODE) {
+    if (!$LJ::UNICODE) {
         $byte_max = $char_max if $char_max and $char_max < $byte_max;
         $byte_max = $char_max unless $byte_max;
         return substr($text, 0, $byte_max);
     }
     my $cur = 0;
     my $utf_char = "([\x00-\x7f]|[\xc0-\xdf].|[\xe0-\xef]..|[\xf0-\xf7]...)";
+
+    # if we don't have a character limit, assume it's the same as the byte limit.
+    # we will never have more characters than bytes, but we might have more bytes
+    # than characters, so we can't inherit the other way.
+    $char_max ||= $byte_max;
 
     while ($text =~ m/$utf_char/gco) {
     last unless $char_max;
