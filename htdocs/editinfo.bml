@@ -229,7 +229,7 @@ _code?>
         if (LJ::text_in($saved{'bio'})) {
             $ret .= "<div style='margin-left: 30px; margin-bottom: 20px'>";
             $ret .= LJ::html_textarea({ 'name' => 'bio', 'rows' => '10', 'cols' => '50',
-                                        'wrap' => 'soft', 'value' => $u->{'bio'} }) . "</div>\n";
+                                        'wrap' => 'soft', 'value' => $u->{'bio'}, 'style' => "width: 90%", }) . "</div>\n";
         } else {
             $ret .= LJ::html_hidden('bio_absent', 'yes');
             $ret .= "<?p <?inerr $ML{'.error.invalidbio'} inerr?> p?>\n";
