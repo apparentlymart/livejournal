@@ -111,9 +111,14 @@ sub delete {
 sub get_disk_usage {
     my ($u, $domain) = @_;
     my $dbcr = LJ::get_cluster_reader($u);
-    return $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
-                                  "WHERE journalid=? AND domain=?", undef,
-                                  $u->{userid}, LJ::get_blob_domainid($domain));
+    if ($domain) {
+        return $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
+                                      "WHERE journalid=? AND domain=?", undef,
+                                      $u->{userid}, LJ::get_blob_domainid($domain));
+    } else {
+        return $dbcr->selectrow_array("SELECT SUM(length) FROM userblob ".
+                                      "WHERE journalid=?", undef, $u->{userid});
+    }
 }
 
 1;
