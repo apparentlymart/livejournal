@@ -5299,8 +5299,8 @@ sub procnotify_check
         while (my ($cmd, $args) = $sth->fetchrow_array) {
             LJ::procnotify_callback($cmd, $args);
         }
-        $LJ::CACHE_PROCNOTIFY_MAX = $max;
     }
+    $LJ::CACHE_PROCNOTIFY_MAX = $max;
 }
 
 # <LJFUNC>
