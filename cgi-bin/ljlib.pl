@@ -3731,8 +3731,7 @@ sub get_remote
     };
 
     my $no_remote = sub {
-        $LJ::CACHED_REMOTE = 1;
-        $LJ::CACHE_REMOTE = undef;
+        LJ::set_remote(undef);
         $validate->();
         return undef;
     };
@@ -3805,8 +3804,7 @@ sub get_remote
     # augment hash with session data;
     $u->{'_session'} = $sess;
 
-    $LJ::CACHED_REMOTE = 1;
-    $LJ::CACHE_REMOTE = $u;
+    LJ::set_remote($u);
 
     eval {
         Apache->request->notes("ljuser" => $u->{'user'});
