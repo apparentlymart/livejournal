@@ -238,11 +238,18 @@ body<=
                 $ret .= "<br />overrides: <a href='see_overrides.bml?user=$u->{'user'}'>view</a> ";
             }
         }
+
+        # if the user has siteadmin:users or siteadmin:* show them link to resend validation email?
+        my $extraval = sub {
+            return '' unless LJ::check_priv($remote, 'siteadmin', 'users') ||
+                             LJ::check_priv($remote, 'siteadmin', '*');
+            return " (<a href='$LJ::SITEROOT/register.bml?foruser=$u->{user}'>resend validation email</a>)";
+        };
      
         $ret .= "<br />email validated? ";
         if ($u->{'status'} eq "A") { $ret .= "<b>yes</b>"; }
-        if ($u->{'status'} eq "N") { $ret .= "<b>no</b>"; }
-        if ($u->{'status'} eq "T") { $ret .= "<b>transitioning</b> (used to be validated, but changed email addresses and hasn't reconfirmed)"; }
+        if ($u->{'status'} eq "N") { $ret .= "<b>no</b>" . $extraval->(); }
+        if ($u->{'status'} eq "T") { $ret .= "<b>transitioning</b> (used to be validated, but changed email addresses and hasn't reconfirmed)" . $extraval->(); }
         if ($u->{clusterid}) { $ret .= "<br />cluster: " . LJ::get_cluster_description($u->{clusterid}, 1); }
         $ret .= "<br />data version: <b>$u->{dversion}</b>";
     } else {

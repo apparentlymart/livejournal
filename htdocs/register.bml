@@ -14,6 +14,16 @@ body<=
 
  my $ret;
  my $qs = BML::get_query_string();
+ my $remote = LJ::get_remote();
+ my $foruser = $GET{foruser};
+ my $foru;
+ if ($foruser) {
+    $foru = LJ::load_user($foruser)
+        or return "<?p User does not exist. p?>";
+    return "<?p You do not have access to send email validation requests to other people. p?>"
+        if $foru && !(LJ::check_priv($remote, "siteadmin", "users") ||
+                      LJ::check_priv($remote, "siteadmin", "*"));
+ }
 
  my $show_validate = sub {
     my $user = shift;
@@ -23,15 +33,15 @@ body<=
            LJ::html_submit("action:send", "$ML{'.ask.button'}") .
            "</form>";
  };
- if ($POST{'action:send'}) {
-     my $remote = LJ::get_remote();
-     my $u =  LJ::get_authas_user($POST{'authas'});
+ if ($POST{'action:send'} || $foru) {
+     my $u = $foru ? $foru : LJ::get_authas_user($POST{'authas'});
      return "<?h1 $ML{'Error'} h1?><?p $ML{'error.invalidauth'} p?>" unless $u;
      my $aa = {};
      $aa = LJ::register_authaction($u->{'userid'},
                                   "validateemail", $u->{'email'});
      LJ::send_mail({
          'to' => $u->{'email'},
+         'bcc' => $foru ? $remote->{'email'} : undef,
          'from' => $LJ::ADMIN_EMAIL,
          'charset' => 'utf-8',
          'subject' => $ML{'.email.subject'},
@@ -61,7 +71,6 @@ body<=
          $ret .= "</ul>";
      }
  } else {
-     my $remote = LJ::get_remote();
      return LJ::bad_input("You must be logged in to view this page.") unless $remote;
      my @authas = LJ::get_authas_list($remote);
      my @list;
