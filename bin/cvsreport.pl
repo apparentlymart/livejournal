@@ -41,6 +41,7 @@ scan_cvs();
 my @files = scalar(@ARGV) ? @ARGV : sort keys %status;
 foreach my $file (@files) 
 {
+    next if ($file =~ /~$/);     # ignore emacs files
     my $status = $status{$file};
     if ($status eq "main -> ??") { 
 	next if ($sync);
