@@ -1,6 +1,9 @@
-(=_INFO
-NOHEADERS=>1
-_INFO=)(=_CODE
+(=_CODE
+
+        my $req = shift;
+        my $r = $req->{'r'};
+          
+        my $htmltype = ($LJ::UNICODE ? "text/html; charset=utf-8" : "text/html");
 
         my @errors = ();
         my $user = LJ::canonical_username($FORM{'user'});
@@ -26,11 +29,20 @@ _INFO=)(=_CODE
         $dbcs = LJ::get_cluster_set($u) if $u->{'clusterid'};
         my $dbcr = $dbcs->{'reader'};
         push @errors, "Database temporarily unavailable.  Try again later." unless $dbcr;
+
+        my $encoding = $FORM{'encoding'} || "utf-8";
+        if ($LJ::UNICODE && $encoding ne "utf-8" && 
+            ! Unicode::MapUTF8::utf8_supported_charset($encoding)) {                    
+            push @errors, "Invalid encoding selected.";
+        }
         
         if (@errors) {
-            print "Content-type: text/html\n\n";
             return LJ::bad_input(@errors);
         }
+
+        # from now on, we manage our own output
+        BML::suppress_headers();
+        BML::suppress_content();
 
         ##### figure out what fields we're exporting
 
@@ -46,19 +58,18 @@ _INFO=)(=_CODE
         my $format = "";
         if ($FORM{'format'} eq "csv") {
             $format = "csv";
-            print "Content-type: text/plain\n\n";
-            $| = 1;
+            $r->content_type("text/plain");
+            $r->send_http_header();
             if ($FORM{'header'}) {
-                print join(",",@fields), "\n";
+                $r->print(join(",",@fields) . "\n");
             }	    
         }
         if ($FORM{'format'} eq "xml") {
-            my $encoding = $FORM{'encoding'} ? " encoding='$FORM{'encoding'}'" : "";
             $format = "xml";
-            print "Content-type: text/plain\n\n";
-            $| = 1;
-            print "<?xml version=\"1.0\"$encoding?>\n";
-            print "<livejournal>\n";
+            $r->content_type("text/xml; charset=$encoding");
+            $r->send_http_header();
+            $r->print("<?xml version=\"1.0\" encoding='$encoding'?>\n");
+            $r->print("<livejournal>\n");
         }
 
         if ($u->{'clusterid'}) {
@@ -69,7 +80,7 @@ _INFO=)(=_CODE
                                   "WHERE ownerid=$u->{'userid'} AND year=$year AND month=$month");
         }
         $sth->execute;
-        if ($dbcr->err) { print $dbcr->errstr; return; }
+        if ($dbcr->err) { $r->print($dbcr->errstr); return; }
         my @buffer;
         while ($_ = $sth->fetchrow_hashref) {
             $_->{'ritemid'} = $_->{'jitemid'} || $_->{'itemid'};
@@ -108,7 +119,7 @@ _INFO=)(=_CODE
             
                 my @vals = ();
             if ($format eq "xml") {
-                print "<entry>\n";
+                $r->print("<entry>\n");
             }
 
             foreach my $f (@fields)
@@ -126,19 +137,19 @@ _INFO=)(=_CODE
                 push @vals, $v;
             }
             if ($format eq "csv") {
-                print join(",", @vals), "\n";
+                $r->print(join(",", @vals) . "\n");
             }
             if ($format eq "xml") {
                 foreach my $f (@fields) {
                     my $v = shift @vals;
-                    print "<$f>", $v, "</$f>\n";
+                    $r->print("<$f>" . $v . "</$f>\n");
                 }
-                print "</entry>\n";
+                $r->print("</entry>\n");
             }
         }
         
         if ($format eq "xml") {
-            print "</livejournal>\n";
+            $r->print("</livejournal>\n");
         }
 
         return;
