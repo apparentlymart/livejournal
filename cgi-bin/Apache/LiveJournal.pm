@@ -59,9 +59,13 @@ sub handler
     # um, this was set_handlers before, but that stopped working.  if
     # somebody could please expain to me the bizarre interactions
     # between push_handlers and set_handlers, i'd be ecstatic.
-    $r->push_handlers(PerlCleanupHandler => sub { %RQ = () });
-    $r->push_handlers(PerlCleanupHandler => "Apache::LiveJournal::db_logger");
-    $r->push_handlers(PerlCleanupHandler => "LJ::end_request");
+
+    # only perform this once in case of internal redirects
+    if ($r->is_initial_req) {
+        $r->push_handlers(PerlCleanupHandler => sub { %RQ = () });
+        $r->push_handlers(PerlCleanupHandler => "Apache::LiveJournal::db_logger");
+        $r->push_handlers(PerlCleanupHandler => "LJ::end_request");
+    }
 
     # if we're behind a lite mod_proxy front-end, we need to trick future handlers
     # into thinking they know the real remote IP address.  problem is, it's complicated
@@ -877,15 +881,7 @@ sub db_logger
     my $r = shift;
     my $rl = $r->last;
 
-    # the cleanup handler runs after all subrequests
-    # we only want to do logging once, so we set a flag
-    # saying we've logged and below when we reference
-    # data, we always get it from $r->last so it will be
-    # the actual page served, ignoring internal redirects
-    return if $rl->notes("did_log");
-    $rl->notes("did_log" => 1);
-
-    my $uri = $rl->uri;
+    my $uri = $r->uri;
     my $ctype = $rl->content_type;
 
     return if $ctype =~ m!^image/! and $LJ::DONT_LOG_IMAGES;
@@ -926,7 +922,7 @@ sub db_logger
 
     my $var = {
         'server' => $LJ::SERVER_NAME,
-        'addr' => $rl->connection->remote_ip,
+        'addr' => $r->connection->remote_ip,
         'ljuser' => $rl->notes('ljuser'),
         'journalid' => $rl->notes('journalid'),
         'codepath' => $rl->notes('codepath'),
@@ -934,15 +930,15 @@ sub db_logger
         'langpref' => $rl->notes('langpref'),
         'clientver' => $rl->notes('clientver'),
         'uniq' => $rl->notes('uniq'),
-        'method' => $rl->method,
+        'method' => $r->method,
         'uri' => $uri,
-        'args' => scalar $rl->args,
+        'args' => scalar $r->args,
         'status' => $rl->status,
         'ctype' => $ctype,
         'bytes' => $rl->bytes_sent,
-        'browser' => $rl->header_in("User-Agent"),
-        'secs' => $now - $rl->request_time(),
-        'ref' => $rl->header_in("Referer"),
+        'browser' => $r->header_in("User-Agent"),
+        'secs' => $now - $r->request_time(),
+        'ref' => $r->header_in("Referer"),
     };
 
     my $delayed = $LJ::IMMEDIATE_LOGGING ? "" : "DELAYED";
