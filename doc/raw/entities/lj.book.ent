@@ -20,6 +20,16 @@
 <!ENTITY lj.install.schedule_tasks        SYSTEM "../lj.book/install/schedule_tasks.xml">
 <!ENTITY lj.install.finishing             SYSTEM "../lj.book/install/finishing.xml">
 
+<!-- Customization -->
+
+<!ENTITY lj.customize.index               SYSTEM "../lj.book/customize/index.xml">
+<!ENTITY lj.customize.local_cvs           SYSTEM "../lj.book/customize/local_cvs.xml">
+<!ENTITY lj.customize.images              SYSTEM "../lj.book/customize/images.xml">
+<!ENTITY lj.customize.limits              SYSTEM "../lj.book/customize/limits.xml">
+<!ENTITY lj.customize.layout              SYSTEM "../lj.book/customize/layout.xml">
+<!ENTITY lj.customize.text                SYSTEM "../lj.book/customize/text.xml">
+<!ENTITY lj.customize.tasks               SYSTEM "../lj.book/customize/tasks.xml">
+
 <!-- Administration -->
 
 <!ENTITY lj.admin.index                   SYSTEM "../lj.book/admin/index.xml">

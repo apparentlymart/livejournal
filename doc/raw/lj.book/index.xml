@@ -22,6 +22,7 @@
   </preface>
   &lj.intro.index;
   &lj.install.index;
+  &lj.customize.index;
   &lj.admin.index;
   &lj.features.index;
 </book>
