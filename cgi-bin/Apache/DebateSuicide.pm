@@ -22,6 +22,7 @@ if ($LJ::HAVE_INLINE && ($LJ::SUICIDE_LOAD || $LJ::SUICIDE)) {
 
 use vars qw($gtop);
 
+# oh btw, this is totally linux-specific.  gtop didn't work, so so much for portability.
 sub handler
 {
     my $r = shift;
@@ -32,8 +33,15 @@ sub handler
     return OK unless open (MI, "/proc/meminfo");
     $meminfo = join('', <MI>);
     close MI;
-    return OK unless $meminfo =~ /MemFree:\s+(\d+)\skB/;
-    my $memfree = $1;
+
+    my %meminfo;
+    while ($meminfo =~ m/(\w+):\s*(\d+)\skB/g) {
+        $meminfo{$1} = $2;
+    }
+
+    my $memfree = $meminfo{'MemFree'} + $meminfo{'Cached'};
+    return OK unless $memfree;
+
     my $goodfree = $LJ::SUICIDE_UNDER{$LJ::SERVER_NAME} || $LJ::SUICIDE_UNDER || 150_000;
     return OK if $memfree > $goodfree;
 
