@@ -227,18 +227,20 @@ body<=
  my %posts;
  my %children;
 
- my $need_subjects = 0;  # if set, we load subjects later. (cluster0 only)
-
- # get all talk rows & their subjects.  will load needed body text later.
+ # get all talk rows. will load needed body & subject text later.
  {
      # clustered always gets from a reader (no recent tables exist).
      # otherwise, need to decide if it's safe to get all data from a
      # slave.  if the owning post is newer than $LJ::RECENT_DAYS, then
      # obviously all replies are newer to, and they all exist on a
      # slave.  or, if slaves are full copies, then it's also okay.
+     # for clustered, also try the lite role.
      my $db = $dbcr;
      my $recent = "";
-     if (! $clustered && $LJ::USE_RECENT_TABLES) {
+     if ($clustered) {
+         my $n = $u->{'clusterid'};
+         $db = LJ::get_dbh("cluster${n}lite", "cluster${n}slave", "cluster$n");
+     } elsif ($LJ::USE_RECENT_TABLES) {
          if ($item->{'secondsold'} < $LJ::RECENT_DAYS*86400) {
              $recent = "recent_";
          } else {
@@ -252,14 +254,12 @@ body<=
 
      if ($clustered) {
          $sth = $db->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, u.user AS 'userpost', ".
-                             "t.datepost, t.parenttalkid, tt.subject, t.state ".
-                             "FROM talk2 t, talktext2 tt ".
+                             "t.datepost, t.parenttalkid, t.state ".
+                             "FROM talk2 t ".
                              "LEFT JOIN useridmap u ON u.userid=t.posterid ".
-                             "WHERE t.journalid=$u->{'userid'} AND tt.journalid=$u->{'userid'} ".
-                             "AND t.nodetype='L' AND t.nodeid=$itemid AND ".
-                             "t.jtalkid=tt.jtalkid ORDER BY t.jtalkid");
+                             "WHERE t.journalid=$u->{'userid'} AND t.nodetype='L' ".
+                             "AND t.nodeid=$itemid ORDER BY t.jtalkid");
      } else {
-         $need_subjects = 1;
          $sth = $db->prepare("SELECT t.talkid, t.posterid, u.user AS 'userpost', ".
                              "t.datepost, t.parenttalkid, t.state ".
                              "FROM talk t LEFT JOIN useridmap u ON u.userid=t.posterid ".
@@ -281,19 +281,6 @@ body<=
  # chunks:
  $PAGE_SIZE = $THREADING_POINT if $post_count < $THREADING_POINT;
 
- if ($need_subjects && $post_count > $PAGE_SIZE) {
-     # if we didn't load subjects (for thread links), and we'll need to thread,
-     # then we need to load 'em, otherwise they'll be loaded later by the
-     # full get_talktext load.
-     # FIXME: ideally, we'd only load the stuff that threads, and not
-     #        everything.  we should do that for clusters later.
-     my $tt = LJ::get_talktext($dbs, {'onlysubjects'=>1}, keys %posts);
-     foreach (keys %posts) {
-         $posts{$_}->{'subject'} = $tt->{$_}->[0];
-     }
- }
-
-
  $children{$thread} ||= [];  # strictness doesn't allow treating undef as arrayref
 
  my $top_replies = $thread ? 1 : scalar(@{$children{$thread}});
@@ -310,19 +297,42 @@ body<=
  foreach (@top_replies) {  delete $posts{$_}->{'_hide'} }
 
  push @posts_to_load, @top_replies;
+ my @check_for_children = @posts_to_load;
+
  if (@posts_to_load < $PAGE_SIZE) {
      # then let's show some more!
-     my @check_for_children = @posts_to_load;
      while (@check_for_children && @posts_to_load < $PAGE_SIZE)
      {
          my $cfc = shift @check_for_children;
-         next unless (defined $children{$cfc});
+         next unless defined $children{$cfc};
          foreach my $child (sort { $posts{$a}->{'datepost'} cmp $posts{$b}->{'datepost'} } @{$children{$cfc}}) {
-             last unless (@posts_to_load < $PAGE_SIZE);
+             unless (@posts_to_load < $PAGE_SIZE) {
+                 # if we exit before processing all children, put the post back
+                 # in order to get subjects of children later
+                 unshift @check_for_children, $cfc;
+                 last;
+             }
              push @check_for_children, $child;
              push @posts_to_load, $child;
          }
      }
+ }
+
+ # find all posts where only subjects are needed, for threading. these are all 
+ # the descendants of current @check_for_children, but not its members.
+
+ my (@recurse, @subjects_to_load);
+
+ foreach (@check_for_children) { 
+     next unless defined $children{$_};
+     push @recurse, @{$children{$_}}; 
+ }
+
+ while (@recurse) {
+     my $post = shift @recurse;
+     push @subjects_to_load, $post;
+     next unless defined $children{$post};
+     push @recurse, @{$children{$post}}; 
  }
 
  unless (@posts_to_load) {
@@ -330,17 +340,24 @@ body<=
  }
 
  ### loads more of some of the posts, uses slaves if possible.
- my $posts_loaded;
+ my ($posts_loaded, $subjects_loaded);
  if ($clustered) {
      $posts_loaded = LJ::get_talktext2($u, @posts_to_load);
+     $subjects_loaded = LJ::get_talktext2($u, {'onlysubjects'=>1}, @subjects_to_load)
+         if @subjects_to_load;
  } else {
      $posts_loaded = LJ::get_talktext($dbs, @posts_to_load);
+     $subjects_loaded = LJ::get_talktext($dbs, {'onlysubjects'=>1}, @subjects_to_load)
+         if @subjects_to_load;
  }
  foreach my $talkid (keys %{$posts_loaded}) {
      $posts{$talkid}->{'subject'} = $posts_loaded->{$talkid}->[0];
      $posts{$talkid}->{'body'} = $posts_loaded->{$talkid}->[1];
      $posts{$talkid}->{'_loaded'} = 1;
      $users_to_load{$posts{$talkid}->{'posterid'}} = 1;
+ }
+ foreach my $talkid (keys %{$subjects_loaded}) {
+     $posts{$talkid}->{'subject'} = $subjects_loaded->{$talkid}->[0];
  }
 
  ### load meta-data

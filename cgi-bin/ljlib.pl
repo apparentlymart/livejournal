@@ -496,9 +496,10 @@ sub get_recent_items
     my $logdb = $dbr;
 
     if ($clusterid) {
-        my $source = $opts->{'clustersource'} eq "slave" ? "slave" : "";
-        $logdb = LJ::get_dbh("cluster${clusterid}$source",
-                             "cluster$clusterid");  # might have no slave
+        my @sources = ("cluster$clusterid");
+        unshift @sources, ("cluster${clusterid}lite", "cluster${clusterid}slave")
+            if $opts->{'clustersource'} eq "slave";
+        $logdb = LJ::get_dbh(@sources);
     }
 
     # community/friend views need to post by log time, not event time
@@ -2471,7 +2472,7 @@ sub get_logtext2
 # returns: Hashref with the talkids as keys, values being [ $subject, $event ].
 # args: u, opts?, jtalkids
 # des-opts: A hashref of options. 'usermaster' will force checking of the
-#           master only.
+#           master only. 'onlysubjects' will only retrieve subjects.
 # des-jtalkids: A list of talkids to get text for.
 # </LJFUNC>
 sub get_talktext2
@@ -2500,17 +2501,19 @@ sub get_talktext2
         unshift @sources, [ $dbr, "talktext2" ];
     }
 
+    my $bodycol = $opts->{'onlysubjects'} ? "" : ", body";
+
     while (@sources && %need)
     {
         my $s = shift @sources;
         my ($db, $table) = ($s->[0], $s->[1]);
         my $in = join(", ", keys %need);
 
-        my $sth = $db->prepare("SELECT jtalkid, subject, body FROM $table ".
+        my $sth = $db->prepare("SELECT jtalkid, subject $bodycol FROM $table ".
                                "WHERE journalid=$journalid AND jtalkid IN ($in)");
         $sth->execute;
-        while (my ($id, $subject, $event) = $sth->fetchrow_array) {
-            $lt->{$id} = [ $subject, $event ];
+        while (my ($id, $subject, $body) = $sth->fetchrow_array) {
+            $lt->{$id} = [ $subject, $body ];
             delete $need{$id};
         }
     }
