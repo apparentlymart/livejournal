@@ -42,7 +42,7 @@ _code?>
                         "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                         "opt_whoscreened", "journaltitle", "journalsubtitle", 
                         "friendspagetitle", "opt_weblogscom", "opt_stylemine",
-                        "opt_imagelinks", "opt_getselfemail",
+                        "opt_imagelinks", "opt_getselfemail", "external_foaf_url",
                         );
 
     # to store values before they undergo normalisation
@@ -491,6 +491,18 @@ _code?>
         $ret .= "</td></tr>\n";
         $ret .= "</table>\n\n";
 
+        ### advanced options
+        $ret .= "<?h1 $ML{'.advanced.title'} h1?><?p $ML{'.advanced.about'} p?>\n";
+        $ret .= "<table style='margin: 10px 0 20px 30px;'>\n";
+
+        # external foaf link
+        $ret .= "<tr><td><b>$ML{'.foafurl.title'}</b></td><td>";
+        $ret .= LJ::html_text({ 'name' => 'external_foaf_url', 
+            'value' => $u->{'external_foaf_url'}, 'size' => '40', 'maxlength' => '255' });
+        $ret .= "</td></tr><tr><td colspan='2'>$ML{'.foafurl.about'}</td></tr>";
+
+        # done
+        $ret .= "</table>\n";
 
         ### unicode options
         if ($LJ::UNICODE) {
@@ -757,6 +769,7 @@ _code?>
                           "sidx_bdate", "sidx_loc", "mailencoding", "opt_nctalklinks",
                           "opt_whoscreened", "journaltitle", "journalsubtitle", "friendspagetitle",
                           "opt_stylemine", "opt_imagelinks", "opt_getselfemail",
+                          "external_foaf_url",
                           );
 
             # weblogs.com requires a special cap

@@ -154,6 +154,9 @@
         'application/xml' => 1,         # XHTML 1.1 "may" be this
         'application/xhtml+xml' => 1,   # XHTML 1.1 "should" be this
     ) unless %GZIP_OKAY;
+
+    # maximum FOAF friends to return (so the server doesn't get overloaded)
+    $MAX_FOAF_FRIENDS ||= 1000;
 }
 
 # no dependencies.

@@ -15,6 +15,7 @@ my %modules = (
                "DBI" => { 'deb' => 'libdbi-perl',  },
                "DBD::mysql" => { 'deb' => 'libdbd-mysql-perl', },
                "Digest::MD5" => { 'deb' => 'libdigest-md5-perl', },
+               "Digest::SHA1" => { 'deb' => 'libdigest-sha1-perl', },
                "Image::Size" => { 'deb' => 'libimage-size-perl', },
                "MIME::Lite" => { 'deb' => 'libmime-lite-perl', },
                "MIME::Words" => { 'deb' => 'libmime-perl', },

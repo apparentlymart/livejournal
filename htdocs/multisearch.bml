@@ -7,7 +7,7 @@
  $body = "";
  my $type = $POST{'type'} || $GET{'type'};
  my $q = $POST{'q'} || $GET{'q'};
-
+ my $output = lc($POST{'output'}) || lc($GET{'output'});
  my $dbr = LJ::get_db_reader();
 
  if ($type eq "user") {
@@ -30,6 +30,8 @@
          my $url;
          if ($what eq "pics") {
              $url = "$LJ::SITEROOT/allpics.bml?user=$user";
+         } elsif ($output eq "foaf") {
+             $url = LJ::journal_base($user) . '/data/foaf';
          } else {
              $url = "$LJ::SITEROOT/userinfo.bml?user=$user";
              $url .= "&mode=full" if $what eq 'full';
@@ -66,7 +68,11 @@
          if ($u) {
              LJ::load_user_props($u, "opt_whatemailshow");
              if ($u->{'opt_whatemailshow'} eq "A" || $u->{'opt_whatemailshow'} eq "B") {
-                 return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}");
+                 if ($output eq "foaf") {
+                     return BML::redirect(LJ::journal_base($u) . '/data/foaf');
+                 } else {    
+                     return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}");
+                 }
              }
          }
          $title = "No Match";
@@ -92,7 +98,11 @@
 
      if (@rows) {
          my $u = $rows[0];
-         return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{user}");
+         if ($output eq "foaf") {
+             return BML::redirect(LJ::journal_base($u) . '/data/foaf');
+         } else {
+             return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$u->{'user'}");
+         }
      } else {
          $title = "No Match";
          $body = "<?h1 Sorry.. h1?><?p No LiveJournal found matching that search criteria. p?>";

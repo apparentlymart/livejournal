@@ -18,6 +18,7 @@ use DBI;
 use DBI::Role;
 use DBIx::StateKeeper;
 use Digest::MD5 ();
+use Digest::SHA1 ();
 use HTTP::Date ();
 use LJ::MemCache;
 use Time::Local ();
@@ -613,6 +614,7 @@ sub get_friends {
     my ($uuid, $mask, $memcache_only) = @_;
     my $userid = LJ::want_userid($uuid);
     return undef unless $userid;
+    return undef if $LJ::FORCE_EMPTY_FRIENDS{$userid};
 
     # memcache data version
     my $ver = 1;

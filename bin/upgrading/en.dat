@@ -741,6 +741,10 @@ directory usage, be sure that you are logged in and then try again.
 
 /directory.bml.user=User
 
+/editinfo.bml.advanced.about=Don't worry about this stuff if you don't know what it is.
+
+/editinfo.bml.advanced.title=Advanced Options
+
 /editinfo.bml.allowshowcontact.about<<
 You should keep this option enabled.  This lets other people be able to contact 
 you by showing your email address, ICQ number, and AOL Instant Messenger screenname 
@@ -911,6 +915,10 @@ If yours is not listed, please contact us with information about how your servic
 /editinfo.bml.finished.header=Done?
 
 /editinfo.bml.finished.save_button=Save Changes
+
+/editinfo.bml.foafurl.title=External FOAF URL:
+
+/editinfo.bml.foafurl.about=If you do not want to use the default FOAF page we provide, any URL you enter above will be used as your FOAF resource instead.  We will redirect FOAF requests to the specified URL.
 
 /editinfo.bml.gender.title=Gender
 

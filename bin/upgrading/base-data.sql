@@ -998,3 +998,5 @@ INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, name, prett
 UPDATE userproplist SET cldversion='0',datatype='char',des='Yahoo ID',indexed='1',prettyname='Yahoo ID',scope='general' WHERE name='yahoo';
 INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, name, prettyname, scope) VALUES ('4', 'char', '5 digit zip code (if in US)', '1', 'zip', 'ZIP code', 'general');
 UPDATE userproplist SET cldversion='4',datatype='char',des='5 digit zip code (if in US)',indexed='1',prettyname='ZIP code',scope='general' WHERE name='zip';
+INSERT IGNORE INTO userproplist (cldversion, datatype, des, indexed, name, prettyname, scope) VALUES ('0', 'char', 'Location of External FOAF file', '1', 'external_foaf_url', 'FOAF address', 'general');
+UPDATE userproplist SET cldversion='0',datatype='char',des='Location of External FOAF file',indexed='1',prettyname='FOAF address',scope='general' WHERE name='external_foaf_url';
