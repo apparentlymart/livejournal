@@ -141,7 +141,8 @@
      }
  };
 
- $p->('<form method="post">');
+ $p->('<form method="post" action="dbadmin.bml">');
+ $p->("<input type='hidden' name='view' value='$view'>");
  $p->('<table cellpadding="1" border="0" bgcolor="#606060">');
 
  my $hr = "<b>Host</b> / <a href='dbadmin.bml?view=role'>Role</a>";
