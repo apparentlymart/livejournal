@@ -11,7 +11,10 @@ body<=
         return if ($FORM{'body'} =~ /$re/);
     }
 
-    return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+    return LJ::server_down_html() if $LJ::SERVER_DOWN;
+
+    # require a post
+    return "POST required." unless LJ::did_post();
 
     # as an exception, we do NOT call LJ::text_in() to check for bad
     # input, since it may be not in UTF-8 in replies coming from mail

@@ -166,6 +166,7 @@ sub init
             my $newinfo = LJ::get_newids('L', $itemid);
             if ($newinfo) {
                 $ju = LJ::load_userid($newinfo->[0]);
+                return { 'error' => BML::ml('talk.error.nosuchjournal')} unless $ju;
                 $init->{'clustered'} = 1;
                 $init->{'itemid'} = $newinfo->[1];
                 $init->{'oldurl'} = 1;
@@ -181,6 +182,7 @@ sub init
             my $newinfo = LJ::get_newids('T', $replyto);
             if ($newinfo) {
                 $ju = LJ::load_userid($newinfo->[0]);
+                return { 'error' => BML::ml('talk.error.nosuchjournal')} unless $ju;
                 $init->{'replyto'} = $newinfo->[1];
                 $init->{'oldurl'} = 1;
             } else {
