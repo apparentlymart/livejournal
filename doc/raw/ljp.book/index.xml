@@ -4,12 +4,10 @@
     <subtitle>Goathacking For a Better World</subtitle>
     <abstract>
       <para>
-        This manual covers all topics LiveJournal Programming!
-	    <note>
-	      <para>
-	        This manual is in an EARLY BETA phase. This is by no means complete, and the reader must agree to its initial craziness ;-)
-	      </para>
-	    </note>
+        This book covers all topics LiveJournal Programming!
+        <note><simpara>
+          This book is in an EARLY BETA phase. This is by no means complete, and the reader must agree to its initial craziness ;-)
+        </simpara></note>
       </para>
     </abstract>
     &copyright;
@@ -18,6 +16,13 @@
   &ljp.prog-guide.index;
   &ljp.int.index;
   &ljp.csp.index;
+  &ljp.styles.index;
   &ljp.api.index;
   &ljp.dbschema.index;
 </book>
+<!--
+Local Variables:
+mode:sgml
+sgml-parent-document: ("../index.xml" "set" "book")
+End:
+-->
