@@ -51,6 +51,7 @@ sub make_journal
     }
 
     $u->{'_s2styleid'} = $styleid + 0;
+    $con_opts->{'u'} = $u;
     my $ctx = s2_context($r, $styleid, $con_opts);
     unless ($ctx) {
         $opts->{'handler_return'} = Apache::Constants::OK();
@@ -269,12 +270,33 @@ sub get_layers_of_user
     return \%layers;
 }
 
-# if verify, the $u->{'s2_style'} key is deleted if style isn't found
+
+# get_style:
+#
+# many calling conventions:
+#    get_style($styleid, $verify)
+#    get_style($u,       $verify)
+#    get_style($styleid, $opts)
+#    get_style($u,       $opts)
+#
+# opts may contain keys:
+#   - 'u' -- $u object
+#   - 'verify' --  if verify, the $u->{'s2_style'} key is deleted if style isn't found
 sub get_style
 {
-    my ($arg, $verify) = @_;
+    my ($arg, $opts) = @_;
 
+    my $verify = 0;
     my ($styleid, $u);
+
+    if (ref $opts eq "HASH") {
+	$verify = $opts->{'verify'};
+	$u = $opts->{'u'};
+    } elsif ($opts) {
+	$verify = 1;
+	die "Bogus second arg to LJ::S2::get_style" if ref $opts;
+    }
+
     if (ref $arg) {
         $u = $arg;
         $styleid = $u->{'s2_style'} + 0;
@@ -293,9 +315,11 @@ sub get_style
             $styleid = 0;
         }
     }
-    
+
     if ($styleid) {
-        my $stylay = LJ::S2::get_style_layers($styleid);
+        my $stylay = $u ?
+            LJ::S2::get_style_layers($u, $styleid) :
+            LJ::S2::get_style_layers($styleid);
         while (my ($t, $id) = each %$stylay) { $style{$t} = $id; }
         $have_style = scalar %style;
     }
@@ -317,9 +341,11 @@ sub s2_context
 {
     my $r = shift;
     my $styleid = shift;
-    my $opts = shift;
+    my $opts = shift || {};
 
-    my %style = get_style($styleid);
+    my $u = $opts->{u};
+
+    my %style = $u ? get_style($styleid, { 'u' => $u }) : get_style($styleid);
 
     my @layers;
     foreach (qw(core i18nc layout i18n theme user)) {
@@ -419,14 +445,19 @@ sub clone_layer
 sub create_style
 {
     my ($u, $name, $cloneid) = @_;
-    
+
     my $dbh = LJ::get_db_writer();
+    return 0 unless $dbh && $u->writer;
+
+    my $uid = $u->{userid} + 0
+        or return 0;
+
     my $clone;
     $clone = load_style($cloneid) if $cloneid;
 
     # can't clone somebody else's style
-    return 0 if $clone && $clone->{'userid'} != $u->{'userid'};
-    
+    return 0 if $clone && $clone->{'userid'} != $uid;
+
     # can't create name-less style
     return 0 unless $name =~ /\S/;
 
@@ -436,17 +467,17 @@ sub create_style
     return 0 unless $styleid;
 
     if ($clone) {
-        $clone->{'layer'}->{'user'} = 
+        $clone->{'layer'}->{'user'} =
             LJ::clone_layer($clone->{'layer'}->{'user'});
-        
+
         my $values;
         foreach my $ly ('core','i18nc','layout','theme','i18n','user') {
             next unless $clone->{'layer'}->{$ly};
             $values .= "," if $values;
-            $values .= "($styleid, '$ly', $clone->{'layer'}->{$ly})";
+            $values .= "($uid, $styleid, '$ly', $clone->{'layer'}->{$ly})";
         }
-        $dbh->do("REPLACE INTO s2stylelayers (styleid, type, s2lid) ".
-                 "VALUES $values") if $values;
+        $u->do("REPLACE INTO s2stylelayers2 (userid, styleid, type, s2lid) ".
+               "VALUES $values") if $values;
     }
 
     return $styleid;
@@ -489,6 +520,7 @@ sub delete_user_style
     my ($u, $styleid) = @_;
     return 1 unless $styleid;
     my $dbh = LJ::get_db_writer();
+    return 0 unless $dbh && $u->writer;
 
     my $style = load_style($dbh, $styleid);
     delete_layer($style->{'layer'}->{'user'});
@@ -496,6 +528,8 @@ sub delete_user_style
     foreach my $t (qw(s2styles s2stylelayers)) {
         $dbh->do("DELETE FROM $t WHERE styleid=?", undef, $styleid)
     }
+    $u->do("DELETE FROM s2stylelayers2 WHERE userid=? AND styleid=?", undef,
+           $u->{userid}, $styleid);
 
     return 1;
 }
@@ -512,7 +546,10 @@ sub load_style
                                        undef, $id);
     return undef unless $style;
 
-    $style->{'layer'} = LJ::S2::get_style_layers($id) || {};
+    my $u = LJ::load_userid($style->{userid})
+        or return undef;
+
+    $style->{'layer'} = LJ::S2::get_style_layers($u, $id) || {};
 
     return $style;
 }
@@ -559,6 +596,9 @@ sub delete_layer
             $dbh->do("DELETE FROM s2stylelayers WHERE styleid IN ($in) AND s2lid = ?",
                      undef, $lid);
 
+            $u->do("DELETE FROM s2stylelayers2 WHERE userid=? AND styleid IN ($in) AND s2lid = ?",
+                   undef, $u->{userid}, $lid);
+
             # now clean memcache so this change is immediately visible
             LJ::MemCache::delete([ $_, "s2sl:$_" ]) foreach @ids;
         }
@@ -569,6 +609,7 @@ sub delete_layer
 
 sub get_style_layers
 {
+    my $u = LJ::isu($_[0]) ? shift : undef;
     my ($styleid, $force) = @_;
     return undef unless $styleid;
 
@@ -578,33 +619,89 @@ sub get_style_layers
     $stylay = LJ::MemCache::get($memkey) unless $force;
     return $stylay if $stylay;
 
-    my $db = LJ::get_db_writer();
-    my $sth = $db->prepare("SELECT type, s2lid FROM s2stylelayers " .
-                           "WHERE styleid=?");
-    $sth->execute($styleid);
-    $stylay = {};
-    while (my ($type, $s2lid) = $sth->fetchrow_array) {
-        $stylay->{$type} = $s2lid;
+    unless ($u) {
+        my $sty = LJ::S2::load_style($styleid) or
+	    die "couldn't load styleid $styleid";
+        $u = LJ::load_userd($sty->{userid}) or
+            die "couldn't load userid $sty->{userid} for styleid $styleid";
     }
-    return undef unless %$stylay;
+
+    my %stylay;
+
+    my $fetch = sub {
+        my ($db, $qry, @args) = @_;
+
+        my $sth = $db->prepare($qry);
+        $sth->execute(@args);
+	die "ERROR: " . $db->errstr if $db->err;
+        while (my ($type, $s2lid) = $sth->fetchrow_array) {
+            $stylay{$type} = $s2lid;
+        }
+        return 0 unless %stylay;
+        return 1;
+    };
+
+    unless ($fetch->($u, "SELECT type, s2lid FROM s2stylelayers2 " .
+                     "WHERE userid=? AND styleid=?", $u->{userid}, $styleid)) {
+        my $dbh = LJ::get_db_writer();
+        if ($fetch->($dbh, "SELECT type, s2lid FROM s2stylelayers WHERE styleid=?",
+                     $styleid)) {
+            LJ::S2::set_style_layers_raw($u, $styleid, %stylay);
+        }
+    }
 
     # set in memcache
-    LJ::MemCache::set($memkey, $stylay);
-    
-    return $stylay;
+    LJ::MemCache::set($memkey, \%stylay);
+    return \%stylay;
 }
 
+# the old interfaces.  handles merging with global database data if necessary.
 sub set_style_layers
 {
     my ($u, $styleid, %newlay) = @_;
     my $dbh = LJ::get_db_writer();
+    return 0 unless $dbh && $u->writer;
 
-    return 0 unless $dbh;
-    $dbh->do("REPLACE INTO s2stylelayers (styleid,type,s2lid) VALUES ".
-             join(",", map { sprintf("(%d,%s,%d)", $styleid,
-                                     $dbh->quote($_), $newlay{$_}) }
-                  keys %newlay));
-    return 0 if $dbh->err;
+    my @lay = ('core','i18nc','layout','theme','i18n','user');
+    my %need = map { $_, 1 } @lay;
+    delete $need{$_} foreach keys %newlay;
+    if (%need) {
+        # see if the needed layers are already on the user cluster
+        my ($sth, $t, $lid);
+
+        $sth = $u->prepare("SELECT type FROM s2stylelayers2 WHERE userid=? AND styleid=?");
+        $sth->execute($u->{'userid'}, $styleid);
+        while (($t) = $sth->fetchrow_array) {
+            delete $need{$t};
+        }
+
+        # if we still don't have everything, see if they exist on the
+        # global cluster, and we'll merge them into the %newlay being
+        # posted, so they end up on the user cluster
+        if (%need) {
+            $sth = $dbh->prepare("SELECT type, s2lid FROM s2stylelayers WHERE styleid=?");
+            $sth->execute($styleid);
+            while (($t, $lid) = $sth->fetchrow_array) {
+                $newlay{$t} = $lid;
+            }
+        }
+    }
+
+    set_style_layers_raw($u, $styleid, %newlay);
+}
+
+# just set in user cluster, not merging with global
+sub set_style_layers_raw {
+    my ($u, $styleid, %newlay) = @_;
+    my $dbh = LJ::get_db_writer();
+    return 0 unless $dbh && $u->writer;
+
+    $u->do("REPLACE INTO s2stylelayers2 (userid,styleid,type,s2lid) VALUES ".
+           join(",", map { sprintf("(%d,%d,%s,%d)", $u->{userid}, $styleid,
+                                   $dbh->quote($_), $newlay{$_}) }
+                keys %newlay));
+    return 0 if $u->err;
+
     $dbh->do("UPDATE s2styles SET modtime=UNIX_TIMESTAMP() WHERE styleid=?",
              undef, $styleid);
 

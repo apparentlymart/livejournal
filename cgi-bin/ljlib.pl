@@ -47,7 +47,9 @@ sub END { LJ::end_request(); }
                     "clustertrack2", "captcha_session", "reluser2",
                     "tempanonips", "inviterecv", "invitesent",
                     "memorable2", "memkeyword2", "userkeywords",
-                    "friendgroup2", "userpicmap2", "userpic2");
+                    "friendgroup2", "userpicmap2", "userpic2",
+                    "s2stylelayers2",
+                    );
 
 # keep track of what db locks we have out
 %LJ::LOCK_OUT = (); # {global|user} => caller_with_lock

@@ -1259,6 +1259,17 @@ CREATE TABLE s2stylelayers
 )
 EOC
 
+register_tablecreate("s2stylelayers2", <<'EOC'); # clustered
+CREATE TABLE s2stylelayers2
+(
+    userid  INT UNSIGNED NOT NULL,
+    styleid INT UNSIGNED NOT NULL,
+    type ENUM('core','i18nc','layout','theme','i18n','user') NOT NULL,
+    PRIMARY KEY (userid, styleid, type),
+    s2lid INT UNSIGNED NOT NULL
+)
+EOC
+
 
 register_tablecreate("ml_domains", <<'EOC');
 CREATE TABLE ml_domains
