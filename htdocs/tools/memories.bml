@@ -89,7 +89,7 @@
  if ($authasu) {
      if ($authasu->{userid} == $userid) {
          $secwhere = "";
-     } elsif ($authasu->{'type'} eq 'P' and LJ::is_friend($userid, $authasu->{'userid'})) {
+     } elsif ($authasu->{'journaltype'} eq 'P' and LJ::is_friend($userid, $authasu->{'userid'})) {
          $secwhere = "AND m.security IN ('public', 'friends')";
      }
  }
@@ -141,7 +141,6 @@
      foreach my $mem (@memories) {
          my $eh_des = LJ::ehtml($mem->{'des'});
          LJ::text_out(\$eh_des);
-         my $edit = "";
 
          my ($entrylink, $editlink);
          if ($mem->{user}) {
@@ -154,11 +153,16 @@
              $editlink = "/tools/memadd.bml?${authasarg}itemid=$mem->{jitemid}";
          }
 
+         my $edit = "";
          if ($authasu && $authasu->{user} eq $user) {
              $edit = " [<a href=\"$editlink\">$ML{'.edit'}</a>]";
          }
 
-         $body .= "<p><li><a href=\"$entrylink\"><b>$eh_des</b></a>$edit<br /><font size='-1'><b>$mem->{'user'}</b></font></li>";
+         my %icons = (
+            'friends' => "<?securityprotected?>",
+            'private' => "<?securityprivate?>",
+         );
+         $body .= "<p><li><a href=\"$entrylink\"><b>$eh_des</b></a> $edit $icons{$mem->{security}}<br /><font size='-1'><b>$mem->{'user'}</b></font></li>";
      }
      $body .= "</ul>";
      return;
