@@ -164,7 +164,7 @@ body<=
          ## see if an "other" mood they typed in has an equivalent moodid
          if ($FORM{'prop_current_mood'} ne "") 
          {
-             delete $FORM{'prop_current_moodid'};
+             $FORM{'prop_current_moodid'} = ""; # so it gets deleted
              my $qmood = $dbr->quote(lc($FORM{'prop_current_mood'}));
              my $sth = $dbr->prepare("SELECT moodid FROM moods WHERE mood=$qmood");
              $sth->execute;
