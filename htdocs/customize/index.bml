@@ -72,10 +72,12 @@ body<=
     }
 
     my $implicit_style_create = sub {
-        unless ($u->{'s2_style'}) {
-            $u->{'s2_style'} = LJ::S2::create_style($u, "wizard");
-            LJ::set_userprop($dbh, $u, "s2_style", $u->{'s2_style'});
+        return if $u->{'s2_style'};
+        unless ($u->{'s2_style'} = LJ::S2::create_style($u, "wizard")) {
+            die "ERROR: Failed to create new style.";
         }
+        LJ::S2::set_style_layers($u, $u->{'s2_style'}, %style);
+        LJ::set_userprop($dbh, $u, "s2_style", $u->{'s2_style'});
     };
 
     if ($POST{'save:layout'}) {
