@@ -1358,6 +1358,9 @@ sub syn_merge
     return $err->("Fourth argument must be 'using'.")
         if @$args == 6 && $args->[4] ne 'using';
 
+    return $err->("You are not authorized to use this command.")
+        unless ($remote && $remote->{'priv'}->{'syn_edit'});
+
     my $from_user = LJ::canonical_username($args->[1]);
     my $from_u = LJ::load_user($from_user)
         or return $err->("Invalid user: '$from_user'.");
