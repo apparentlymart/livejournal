@@ -162,9 +162,7 @@ sub init
                     $init->{'thread'} = $tinfo->[1] if $tinfo;
                 }
             } else {
-                my $jid = LJ::dbs_selectrow_array($dbs, "SELECT ownerid FROM log WHERE itemid=$itemid");
-                return { 'error' => BML::ml('talk.error.noentry')} unless $jid;
-                $ju = LJ::load_userid($dbs, $jid);
+                return { 'error' => BML::ml('talk.error.noentry') };
             }
         } elsif ($form->{'replyto'}) {
             my $replyto = $form->{'replyto'}+0;
@@ -174,10 +172,7 @@ sub init
                 $init->{'replyto'} = $newinfo->[1];
                 $init->{'oldurl'} = 1;
             } else {
-                # guess it's on cluster 0, so find out what journal.
-                my $jid = LJ::dbs_selectrow_array($dbs, "SELECT journalid FROM talk WHERE talkid=$replyto");
-                return { 'error' => BML::ml('talk.error.noentry')} unless $jid;
-                $ju = LJ::load_userid($dbs, $jid);
+                return { 'error' => BML::ml('talk.error.noentry') };
             }
         }
     }
