@@ -3162,7 +3162,7 @@ sub make_journal
     my $s1prop = "s1_${eff_view}_style";
 
     my @needed_props = ("stylesys", "s2_style", "url", "urlname", $s1prop, "opt_nctalklinks",
-                        "renamedto",  "opt_blockrobots", "renamedto", "opt_usesharedpic");
+                        "renamedto",  "opt_blockrobots", "opt_usesharedpic");
 
     # preload props the view creation code will need later (combine two selects)
     if (ref $LJ::viewinfo{$eff_view}->{'owner_props'} eq "ARRAY") {
