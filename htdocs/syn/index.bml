@@ -67,14 +67,17 @@ body<=
         }
         if ($url ne "") {
             return $error->($ML{'.invalid.url'})
-                unless $url =~ m!^http://(.+?)/!;
+                unless $url =~ m!^http://(.+?)(?::(\d+))?/!;
             my $hostname = $1;
+            my $port = $2;
             return $error->($ML{'.invalid.cantadd'})
                 if $hostname =~ /\Q$LJ::DOMAIN\E/i;
-            return $error->($ML{'.invalid.port'})
-                if $hostname =~ /:/;
             return $error->($ML{'.invalid.address'})
                 unless $hostname =~ /\.[a-z]/i;
+
+            return $error->($ML{'.invalid.port'})
+                if $port && $port != 80 && $port < 1024;
+            $url =~ s/:80// if $port == 80;
         }
 
         my $su;  # account to add
