@@ -342,9 +342,9 @@ sub alldateparts_to_hash
 sub fill_var_props
 {
     my ($vars, $key, $hashref) = @_;
-    my $data = $vars->{$key};
-    $data =~ s/%%([\w:]+:)?([^\s\[\]\<\>]+?)%%/$1 ? LJ::fvp_transform(lc($1), $vars, $hashref, $2) : $hashref->{$2}/eg;
-    return $data;
+    $_ = $vars->{$key};
+    s/%%([\w:]+:)?([\w\-\']+)%%/$1 ? LJ::fvp_transform(lc($1), $vars, $hashref, $2) : $hashref->{$2}/eg;
+    return $_;
 }
 
 # <LJFUNC>
@@ -365,16 +365,16 @@ sub fvp_transform
     my $ret = $hashref->{$attr};
     while ($transform =~ s/(\w+):$//) {
         my $trans = $1;
-        if ($trans eq "ue") {
+        if ($trans eq "color") {
+            return $vars->{"color-$attr"};
+        }
+        elsif ($trans eq "ue") {
             $ret = LJ::eurl($ret);
         }
-        elsif ($trans eq "color") {
-            $ret = $vars->{"color-$attr"};
-        }
         elsif ($trans eq "cons") {
+            if ($attr eq "img") { return $LJ::IMGPREFIX; }
             if ($attr eq "siteroot") { return $LJ::SITEROOT; }
             if ($attr eq "sitename") { return $LJ::SITENAME; }
-            if ($attr eq "img") { return $LJ::IMGPREFIX; }
         }
         elsif ($trans eq "attr") {
             $ret =~ s/\"/&quot;/g;
