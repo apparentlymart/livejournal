@@ -507,7 +507,8 @@
 
  {
      $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B><A HREF=\"$LJ::SITEROOT/download/\">Clients</A> used:</B></TD><TD COLSPAN=2>";
-     $sth = $dbh->prepare("SELECT DISTINCT client FROM logins WHERE user=$quser ORDER BY client");
+     $sth = $dbh->prepare("SELECT DISTINCT c.client FROM clients c, clientusage cu ".
+			  "WHERE cu.userid=$userid AND cu.clientid=c.clientid ORDER BY c.client");
      $sth->execute;
      my $lastclient = "";
      while ($_ = $sth->fetchrow_hashref) {
