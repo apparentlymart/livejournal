@@ -425,6 +425,9 @@ function builtin eurl (string s) : string
 function builtin ehtml (string s) : string
 "Escapes all HTML tags and entities from the text";
 
+function builtin etags (string s) : string
+"Escapes all HTML tags (but not entities) from text";
+
 function builtin rand (int high) : int
 "Returns a random integer between 1 and \$high, inclusive.";
 
@@ -745,7 +748,7 @@ set font_base = "";   # In core, default is not to care. Layouts will probably s
 
 property string font_fallback {
     des = "Alternative font style";
-    values = "sans-serif|Display in a sans-serif font|serif|Display in a serif font|cursive|Display in a cursive font|monospace|Display in a monospaced font|none|Use whatever font the user has configured in their browser";
+    values = "sans-serif|Sans-serif|serif|Serif|cursive|Cursive|monospace|Monospaced|none|Use browser's default";
     note = "This general style will serve as a fallback if your preferred font is unavailable.";
 }
 set font_fallback = "none"; # Default in core is to let the browser handle it.
