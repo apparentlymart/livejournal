@@ -335,7 +335,7 @@ body<=
          $ret .= "</td></tr></table>\n";
      } else {
          if ($userpost) {
-             $user = LJ::ljuser($userpost);
+             $user = LJ::ljuser($userpost, { type => 'P' });
          }
          my $icon = LJ::Talk::show_image($pics, $post->{'props'}->{'subjecticon'});
 
