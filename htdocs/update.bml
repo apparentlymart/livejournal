@@ -311,5 +311,6 @@ PAGE=)(=_C <LJDEP>
 lib: LJ::SpellCheck
 link: htdocs/users, htdocs/download/index.bml, htdocs/moodlist.bml
 link: htdocs/update.bml, htdocs/lostinfo.bml, htdocs/support/faqbrowse.bml
+link: htdocs/allpics.bml
 post: htdocs/update.bml
 </LJDEP> _C=)
