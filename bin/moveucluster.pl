@@ -614,7 +614,7 @@ sub moveUser {
 
         my $tct = 0;            # total rows read for this table so far.
         my $hit_otheruser = 0;  # bool, set to true when we encounter data from a different userid
-        my $batch_size = 1000;
+        my $batch_size;         # how big of a LIMIT we'll be doing
         my $ct = 0;             # rows read in latest batch
         my $did_start = 0;      # bool, if process has started yet (used to enter loop, and control initial HANDLER commands)
         my $pushed_delete = 0;  # bool, if we've pushed this table on the delete list (once we find it has something)
@@ -678,14 +678,25 @@ sub moveUser {
         }
 
         while (! $hit_otheruser && ($ct == $batch_size || ! $did_start)) {
-            my $qry = "HANDLER $table READ `$idx` NEXT LIMIT $batch_size";
-            unless ($did_start) {
+            my $qry;
+            if ($did_start) {
+                # once we've done the initial big read, we want to walk slowly, because
+                # a LIMIT of 1000 will read 1000 rows, regardless, which may be 995
+                # seeks into somebody else's journal that we don't care about.
+                $batch_size = 25;
+                $qry = "HANDLER $table READ `$idx` NEXT LIMIT $batch_size";
+            } else {
+                # when we're first starting out, though, let's LIMIT as high as possible,
+                # since MySQL will only return rows matching the primary key,
+                # so we'll try as big as possible, except for text tables, where the blobs
+                # could be 64k or so, in which case we protect the size of our initial read.
+                $batch_size = 10000;
+                $batch_size = 1000 if $table eq "logtext2" || $table eq "talktext2";
                 $qry = "HANDLER $table READ `$idx` = ($userid) LIMIT $batch_size";
                 $did_start = 1;
             }
 
             my $sth = $dbo->prepare($qry);
-            $sth->{'mysql_use_result'} = 1;
             $sth->execute;
 
             $ct = 0;
