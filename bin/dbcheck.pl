@@ -88,7 +88,7 @@ if ($cmd eq "queries") {
     my $s = $dbinfo{$name2id{$host}};
     unless ($s) { die "Unknown slave: $host\n"; }
 
-    my $dbh = DBI::Role::_get_dbh_conn($s->{'rootfdsn'});
+    my $dbh = $LJ::DBIRole->get_dbh_conn($s->{'rootfdsn'});
     die "Can't connect to slave: $host\n" unless $dbh;
 
     my $ts = $dbh->selectall_hashref("SHOW FULL PROCESSLIST");
@@ -134,7 +134,7 @@ my $check = sub
     my $d = $dbinfo{$id};
 
     $pr->("$d->{'name'}:\n");
-    my $db = DBI::Role::_get_dbh_conn($d->{'rootfdsn'});
+    my $db = $LJ::DBIRole->get_dbh_conn($d->{'rootfdsn'});
     unless ($db) {
 	push @errors, "Can't connect to $d->{'name'}";
 	return 0;
@@ -182,7 +182,7 @@ my $check = sub
 	    next;
 	}
 
-	my $dbsl = DBI::Role::_get_dbh_conn($s->{'rootfdsn'});
+	my $dbsl = $LJ::DBIRole->get_dbh_conn($s->{'rootfdsn'});
 	unless ($dbsl) {
             $pr->("\n");
             push @errors, "Can't connect to slave: $s->{'name'}";

@@ -14,7 +14,7 @@ package LJ;
 use strict;
 use lib "$ENV{'LJHOME'}/cgi-bin";
 use DBI;
-use DBI::Role qw(get_dbh use_diff_db);
+use DBI::Role;
 use Digest::MD5 ();
 use Text::Wrap ();
 use MIME::Lite ();
@@ -27,7 +27,11 @@ require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 
-DBI::Role::set_sources(\%LJ::DBINFO, $LJ::DBWEIGHTS_FROM_DB);
+$LJ::DBIRole = new DBI::Role {
+    'sources' => \%LJ::DBINFO,
+    'weights_from_db' => $LJ::DBWEIGHTS_FROM_DB,
+    'default_db' => "livejournal",
+};
 
 # $LJ::PROTOCOL_VER is the version of the client-server protocol
 # used uniformly by server code which uses the protocol.
@@ -128,8 +132,6 @@ if ($SIG{'HUP'}) {
     $SIG{'HUP'} = \&LJ::clear_caches;
 }
 
-####### documentation for core LJ functions imported from elsewhere:
-
 # given two db roles, returns true only if the two roles are for sure
 # served by different database servers.  this is useful for, say,
 # the moveusercluster script:  you wouldn't want to select something
@@ -144,6 +146,9 @@ if ($SIG{'HUP'}) {
 # des-:
 # returns:
 # </LJFUNC>
+sub use_diff_db {
+    $LJ::DBIRole->use_diff_db(@_);
+}
 
 # <LJFUNC>
 # name: LJ::get_dbh
@@ -154,8 +159,9 @@ if ($SIG{'HUP'}) {
 # des-:
 # returns:
 # </LJFUNC>
-
-
+sub get_dbh {
+    $LJ::DBIRole->get_dbh(@_);
+}
 
 # <LJFUNC>
 # name: LJ::get_newids
