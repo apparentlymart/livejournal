@@ -67,7 +67,10 @@ BODY<=
 	 return $ret;
      }
    
-     $dbh->do("REPLACE INTO userinterests (userid, intid) VALUES ($remote->{'userid'}, $qintid)");
+     $dbh->do("INSERT INTO userinterests (userid, intid) VALUES ($remote->{'userid'}, $qintid)");
+     unless ($dbh->err) {
+	 $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid=$qintid");
+     }
      
      $ret .= "(=H1 Added! H1=)(=P The interest has been added to your list. P=)";
      return $ret;
