@@ -202,6 +202,63 @@ if ( $0 eq __FILE__ ) { MAIN() }
 
 
 #####################################################################
+### R I N G B U F F E R   C L A S S
+#####################################################################
+package RingBuffer;
+
+BEGIN {
+    use Carp qw{croak confess};
+}
+
+our $DefaultSize = 15;
+
+### (CONSTRUCTOR) METHOD: new( $size )
+### Create a new ring buffer of the specified I<size> and return it.
+sub new {
+    my $proto = shift;
+    my $class = ref $proto || $proto;
+    my $size = shift || $DefaultSize;
+
+    my $self = bless {
+        buffer  => [],
+        size    => $size,
+    }, $class;
+
+    return $self;
+}
+
+
+### METHOD: add( @items )
+### Add the given I<items> to the buffer, shifting off older ones if the number
+### of items in the buffer would exceed its size.
+sub add {
+    my $self = shift or confess "Cannot be used as a function";
+    my @items = @_;
+
+    push @{$self->{buffer}}, @items;
+    splice @{$self->{buffer}}, 0, -$self->{size};
+
+    return scalar @{$self->{buffer}};
+}
+
+
+### METHOD: get( [@indices] )
+### Return the items in the buffer at the specified I<indices>, or all items in
+### the buffer if no I<indices> are given.
+sub get {
+    my $self = shift or confess "Cannot be used as a function";
+
+    if ( @_ ) {
+        croak "Index out of bounds" if grep { $_ >= $self->{size} } @_;
+        return @{$self->{buffer}}[ @_ ];
+    } else {
+        return @{$self->{buffer}};
+    }
+}
+
+
+
+#####################################################################
 ### D A E M O N   C L A S S
 #####################################################################
 package JobServer;
@@ -226,6 +283,7 @@ BEGIN {
         'raterules',            # Rules for building ratelimit table
         'jobcounts',            # Counts per cluster of running jobs
         'starttime',            # Server startup epoch time
+        'recentmoves',          # Ring buffer of recently-completed jobs
        );
 
     use lib "$ENV{LJHOME}/cgi-bin";
@@ -319,6 +377,9 @@ sub new {
     $self->{raterules}   = {};  # User-set rate-limit rules
     $self->{ratelimits}  = {};  # Cached rate limits by srcclusterid
     $self->{jobcounts}   = {};  # Count of jobs by srcclusterid
+
+    # Create a ring buffer to contain the 200 most-recently-completed jobs
+    $self->{recentmoves} = new RingBuffer 200;
 
     # Merge the user-specified configuration with the defaults, with the user's
     # overriding.
@@ -454,6 +515,14 @@ sub clients {
 sub raterules {
     my JobServer $self = shift;
     return %{$self->{raterules}};
+}
+
+
+### METHOD: recentmoves( undef )
+### Get the JobServer::Job objects in the server's "recently-moved" ringbuffer.
+sub recentmoves {
+    my JobServer $self = shift;
+    return $self->{recentmoves}->get;
 }
 
 
@@ -769,9 +838,15 @@ sub unassignJobForClient {
     if (( $job = delete $self->{assignments}{$fdno} )) {
         $src = $job->srcclusterid;
 
-        unless ( $job->isFinished ) {
+        # If the worker asked to finish it, assume it was completed and
+        # ringbuffer it for statistics.
+        if ( $job->isFinished ) {
+            $self->{recentmoves}->add( $job );
+        }
 
-            # If re-queueing of dropped jobs is enabled, requeue it
+        # Otherwise, requeue it if that's enabled
+        else {
+
             if ( $requeue ) {
                 $self->logMsg( 'info', "Re-adding job %s to queue", $job->stringify );
                 $self->{jobs}{ $job->srcclusterid } ||= [];
@@ -1302,7 +1377,9 @@ sub logMsg {
 }
 
 
-### METHOD: formatLogMsg( $level, 
+### METHOD: formatLogMsg( $format, @args )
+### Create and return a message for the given C<sprintf()>-style I<format> and
+### I<args>, dumping any complex datatypes and marking the undefined value.
 sub formatLogMsg {
     my JobServer $self = shift;
     my $format = shift;
@@ -1340,6 +1417,7 @@ BEGIN {
         'userid',               # The userid of the user to move
         'srcclusterid',         # The cluster id of the source cluster
         'dstclusterid',         # Cluster id of the destination cluster
+        'createtime',           # Epoch time of job creation
         'prelocktime',          # Epoch time of prelock, 0 if not prelocked
         'fetchtime',            # Time the job was given to a mover, 0 if unassigned
         'finishtime',           # Epoch time of server finish authorization
@@ -1420,6 +1498,7 @@ sub new {
         unless defined $self->{dstclusterid};
 
     $self->{server} = $server;
+    $self->{createtime} = time;
     $self->{prelocktime} = 0.0;
     $self->{fetchtime} = 0.0;
     $self->{finishtime} = 0.0;
@@ -1465,12 +1544,63 @@ sub stringify {
 }
 
 
+### METHOD: prettyString( undef )
+### Return a less-parseable, but more-readable string representation of the job
+### than C<stringify()> provides.
+sub prettyString {
+    my JobServer::Job $self = shift;
+
+    return sprintf( "User %d %s from %d to %d (%s):\n\t%s",
+                    $self->{userid},
+                    $self->verb,
+                    $self->{srcclusterid},
+                    $self->{dstclusterid},
+                    $self->optString,
+                    $self->timeString,
+                   );
+}
+
+
+### METHOD: verb( undef )
+### Return the correct conjugation of the verb "to move" that would describe the
+### job given its current state.
+sub verb {
+    my JobServer::Job $self = shift;
+
+    return "moved" if $self->{finishtime};
+    return "moving" if $self->{fetchtime};
+    return "to move";
+}
+
+
 ### METHOD: optString( undef )
 ### Return the job's options as a string.
 sub optString {
     my JobServer::Job $self = shift;
     my $opts = $self->{options};
     return join( " ", map { "$_=$opts->{$_}" } keys %$opts );
+}
+
+
+### METHOD: timeString( undef )
+### Return the job's various timestamps (if set).
+sub timeString {
+    my JobServer::Job $self = shift;
+    my @parts = ();
+
+    push @parts, sprintf( '%0.2fs old', $self->age );
+    push @parts, sprintf( 'locked %0.2fs', $self->secondsSinceLock )
+        if $self->{prelocktime};
+    push @parts,
+        sprintf( 'fetched %0.2fs ago (%0.1fs queued)',
+                 $self->secondsSinceFetch,
+                 $self->{fetchtime} - $self->{createtime} )
+            if $self->{fetchtime};
+    push @parts,
+        sprintf( 'finished in %0.2fs', $self->aliveTime )
+            if $self->{finishtime};
+
+    return join ", ", @parts;
 }
 
 
@@ -1606,6 +1736,42 @@ sub secondsSinceFetch {
 sub isFetched {
     my JobServer::Job $self = shift;
     return $self->{fetchtime} != 0;
+}
+
+
+### METHOD: createTime( undef )
+### Return the floating-point epoch time when the job was created.
+sub createTime {
+    my JobServer::Job $self = shift;
+    return $self->{createtime};
+}
+
+
+### METHOD: age( undef )
+### Return the number of floating-point seconds since the job was created.
+sub age {
+    my JobServer::Job $self = shift;
+    return time - $self->{createtime};
+}
+
+
+### METHOD: aliveTime( undef )
+### Return the number of floating-point seconds the job was alive, which is the
+### time between when it was created and when it was finished.
+sub aliveTime {
+    my JobServer::Job $self = shift;
+    return 0 unless $self->{finishtime};
+    return $self->{finishtime} - $self->{createtime};
+}
+
+
+### METHOD: activeTime( undef )
+### Return the number of floating-point seconds the job was active, which is the
+### time between when it was fetched and when it was finished.
+sub activeTime {
+    my JobServer::Job $self = shift;
+    return 0 unless $self->{finishtime} && $self->{fetchtime};
+    return $self->{finishtime} - $self->{fetchtime};
 }
 
 
@@ -1795,6 +1961,10 @@ INIT {
             form => "[<command>]",
             args => qr{^(\w+)?$},
         },
+
+        ### Internal/debugging commands
+        ringbuffer => { args => qr{^$} },
+
        );
 
     # Pattern to match command words
@@ -2026,8 +2196,9 @@ sub multilineResponse {
     my ( $msg, @lines ) = @_;
 
     chomp( @lines );
+    $msg =~ s{:\s*$}{};
 
-    $self->okayResponse( $msg );
+    $self->okayResponse( "$msg:" );
     $self->write( join("\r\n", @lines, "END") . "\r\n" );
 }
 
@@ -2191,8 +2362,48 @@ sub cmd_list_jobs {
 sub cmd_move_stats {
     my JobServer::Client $self = shift;
 
+    my (
+        @jobs,                  # Recently-finished job objects
+        %times,                 # Per-cluster/global time sums
+        %counts,                # Per-cluster job counts
+        $totaltime,
+        $totalcount,
+        @averages,              # Average 'alive' times
+        @stats,                 # Statistic lines
+       );
+
     $self->{state} = 'move_stats';
-    return $self->errorResponse( "Not yet implemented." );
+    @jobs = $self->{server}->recentmoves
+        or return $self->multilineResponse( "Move stats:", "No finished jobs" );
+
+    $totaltime = 0;
+    $totalcount = 0;
+
+    # Build average 'alive' times
+    foreach my $job ( @jobs ) {
+        $times{ $job->srcclusterid } += $job->aliveTime;
+        $totaltime += $job->aliveTime;
+        $counts{ $job->srcclusterid }++;
+        $totalcount++;
+    }
+
+    # Generate averages
+    @averages = map {
+        sprintf( ' c%d: %d @ %0.2fs, %0.2fs avg.',
+                 $_, $counts{$_}, $times{$_},
+                 $times{$_} / $counts{$_} )
+    } sort keys %times;
+    push @averages,
+        sprintf( ' total: %d @ %0.2fs, %0.2fs avg.',
+                 $totalcount, $totaltime,
+                 $totaltime / $totalcount );
+
+    # Return the statistics
+    return $self->multilineResponse(
+        "Move stats:",
+        "Average 'alive' times (create->finish)",
+        @averages,
+       );
 }
 
 
@@ -2202,7 +2413,11 @@ sub cmd_recent_moves {
     my JobServer::Client $self = shift;
 
     $self->{state} = 'recent_moves';
-    return $self->errorResponse( "Not yet implemented." );
+
+    my @jobs = $self->{server}->recentmoves;
+
+    return $self->multilineResponse( "Recent moves",
+                                     map { $_->prettyString } @jobs );
 }
 
 
@@ -2308,7 +2523,7 @@ sub cmd_help {
             "",
             "  $command $cmdinfo->{form}",
             "",
-            $cmdinfo->{help},
+            $cmdinfo->{help} || "(undocumented)",
             "",
             "Pattern:",
             "  $cmdinfo->{args}",
@@ -2317,7 +2532,10 @@ sub cmd_help {
     }
 
     else {
-        my @cmds = map { "  $_" } sort keys %CommandTable;
+        my @cmds = map { "  $_" }
+            grep { exists $CommandTable{$_}{help} }
+            sort keys %CommandTable;
+
         @response = (
             "Available commands:",
             "",
@@ -2379,7 +2597,7 @@ sub cmd_subscribe {
     my JobServer::Client $self = shift;
     my ( $type, $args ) = @_;
 
-    $self->{state} = 'subscribe to %s events';
+    $self->{state} = "subscribe to $type events";
 
     my $msg = $self->{server}->subscribe( $self, $type, $args );
     return $self->okayResponse( $msg );
@@ -2472,6 +2690,21 @@ sub cmd_shutdown {
 
     return 1;
 }
+
+
+### METHOD: cmd_ringbuffer( undef )
+### Command handler for the C<ringbuffer> command. FOR DEBUGGING ONLY.
+sub cmd_ringbuffer {
+    my JobServer::Client $self = shift;
+
+    $self->{state} = 'ringbuffer';
+    my @jobs = $self->{server}->recentmoves;
+
+    return $self->multilineResponse( "Server's ringbuffer:",
+                                     map { $_->prettyString } @jobs );
+}
+
+
 
 
 ### Template for new command handlers:
