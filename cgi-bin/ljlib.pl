@@ -8624,7 +8624,7 @@ sub alloc_global_counter
     return undef if $recurse;
 
     if ($dom eq "S") {
-        $newmax = $dbh->selectrow_array("SELECT MAX(styleid) FROM style");
+        $newmax = $dbh->selectrow_array("SELECT MAX(styleid) FROM s1stylemap");
     } elsif ($dom eq "P") {
         $newmax = $dbh->selectrow_array("SELECT MAX(picid) FROM userpic");
     } elsif ($dom eq "C") {
