@@ -264,6 +264,9 @@ class Page
     var string global_title 
     "A title selected by the user for their whole journal.";
 
+    var string global_subtitle 
+    "A sub-title selected by the user for their whole journal.";
+
     function print
     "The main entry point that LiveJournal calls. Layouts should override this to create HTML that's the
     same for all view types, and use \$this->title, \$this->head and \$this->body to include view-specific
