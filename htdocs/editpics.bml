@@ -42,6 +42,11 @@
     my $dbh = LJ::get_db_writer();
     return $err->($ML{'error.nodb'}) unless $dbh;
     my $sth;
+    
+    # Put $count and $max in larger scope so they can be used in output 
+    my $count = $dbh->selectrow_array("SELECT COUNT(*) FROM userpic " .
+                                      "WHERE userid=?", undef, $u->{'userid'});
+    my $max = LJ::get_cap($u, "userpics");
 
     ### save mode
     if (LJ::did_post()) {
@@ -141,6 +146,9 @@
                         $dbcm->do("DELETE FROM userblob WHERE journalid=? AND blobid=? " .
                                   "AND domain=?", undef, $u->{'userid'}, $picid,
                                   LJ::get_blob_domainid('userpic'));
+
+                        # decrement $count to reflect deletion
+                        $count--;
                     }
                     
                     # if we didn't end up deleting, it's either because of 
@@ -271,9 +279,6 @@
             my $base64 = Digest::MD5::md5_base64($POST{'userpic'});
             
             ## see if they have too many pictures uploaded
-            my $count = $dbh->selectrow_array("SELECT COUNT(*) FROM userpic " .
-                                          "WHERE userid=?", undef, $u->{'userid'});
-            my $max = LJ::get_cap($u, "userpics");
             if ($count >= $max) {
                 return $err->( BML::ml(".error.toomanypics2",
                                        { 'maxpics'  => $max }) .
@@ -316,6 +321,9 @@
                               undef, $u->{'userid'}, $picid, $POST{'userpic'});
                     return $clean_err->($dbcm->errstr) if $dbcm->err;
                 }
+
+                # Not a duplicate, so increment $count
+                $count++;
             }
                 
             # make it their default pic?
@@ -326,7 +334,6 @@
 
             my $memkey = [$u->{'userid'},"upicinf:$u->{'userid'}"];
             LJ::MemCache::delete($memkey);
-
         }
 
         # now fall through to edit page and show the updated userpic info
@@ -361,6 +368,7 @@
         if ($piccount++ == 0) {
 
             $body .= "<?h1 $ML{'.curpics'} h1?><?p $ML{'.curpics.desc'} p?>";
+            $body .= "<?p <strong>". BML::ml('.piclimitstatus', {current => $count, max => $max}) . "</strong> p?>";
 
             $body .= "<form method='post' action='editpics.bml$getextra'>";
             $body .= "<table cellpadding='5' border='0' cellspacing='1' " .
@@ -425,47 +433,51 @@
 
     # let users upload more pics
     $body .= "<a name='upload'></a>";
-    $body .= "<?h1 $ML{'.uploadheader'} h1?>\n";
-    $body .= "<?p $ML{'.uploaddesc'} p?>\n\n";
-    
-    $body .= "<ul>\n";
-    foreach (qw(filesize imagesize fileformat)) {
-        $body .= "<li>" . $ML{".restriction.$_"} . "</li>\n";
+
+    if ($count < $max) {
+        $body .= "<?h1 $ML{'.uploadheader'} h1?>\n";
+        $body .= "<?p $ML{'.uploaddesc'} p?>\n\n";
+        $body .= "<ul>\n";
+        foreach (qw(filesize imagesize fileformat)) {
+            $body .= "<li>" . $ML{".restriction.$_"} . "</li>\n";
+        }
+        $body .= "</ul>\n";
+        
+        # upload form
+        $body .= "<?standout \n";
+        $body .= "<form action='editpics.bml$getextra' method='post' " .
+                 "enctype='multipart/form-data' style='display: inline;'>\n";
+
+        $body .= "<table>\n<tr><td>\n";
+        $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
+                                  'value' => 'file', 'selected' => '1',
+                                  'accesskey' => $ML{'.fromfile.key'} });
+      
+        $body .= "<label for='radio_file'>$ML{'.fromfile'}</label></td>";
+        $body .= "<td align='left'><input type='file' name='userpic' /></td></tr>\n";
+
+        $body .= "<tr><td>";
+        $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'value' => 'url',
+                                  'id' => 'radio_url', 'accesskey' => $ML{'.fromurl.key'} });
+        $body .= "<label for='radio_url'>$ML{'.fromurl'}</label></td><td align='left'>";
+        $body .= LJ::html_text({ 'name' => 'urlpic', 'size' => '40' }) . "</td></tr>\n";
+
+        $body .= "<tr><td>&nbsp;</td><td align='left'>";
+        $body .= LJ::html_check({ 'type' => 'checkbox',
+                                  'name' => 'make_default',
+                                  'id' => 'make_default',
+                                  'selected' => '1', 'value' => '1',
+                                 'accesskey' => $ML{'.makedefault.key'} });
+
+        $body .= "<label for='make_default'>$ML{'.makedefault'}</label></td></tr>\n";
+
+        $body .= "<tr><td>&nbsp;</td><td>" .LJ::html_submit(undef, $ML{'.btn.proceed'}) . "</td></tr>\n";
+        $body .= "</table>\n</form>\n";
+    } else {
+        $body .= "<?standout \n";
+        $body .= BML::ml(".error.toomanypics3", { 'max'  => $max });
     }
-    $body .= "</ul>\n";
-
-    # for standout box
-    $body .= "<?standout \n";
-
-    # upload form
-    $body .= "<form action='editpics.bml$getextra' method='post' " .
-             "enctype='multipart/form-data' style='display: inline;'>\n";
-
-    $body .= "<table>\n<tr><td>\n";
-    $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
-                              'value' => 'file', 'selected' => '1',
-                              'accesskey' => $ML{'.fromfile.key'} });
     
-    $body .= "<label for='radio_file'>$ML{'.fromfile'}</label></td>";
-    $body .= "<td align='left'><input type='file' name='userpic' /></td></tr>\n";
-
-    $body .= "<tr><td>";
-    $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'value' => 'url',
-                              'id' => 'radio_url', 'accesskey' => $ML{'.fromurl.key'} });
-    $body .= "<label for='radio_url'>$ML{'.fromurl'}</label></td><td align='left'>";
-    $body .= LJ::html_text({ 'name' => 'urlpic', 'size' => '40' }) . "</td></tr>\n";
-
-    $body .= "<tr><td>&nbsp;</td><td align='left'>";
-    $body .= LJ::html_check({ 'type' => 'checkbox',
-                              'name' => 'make_default',
-                              'id' => 'make_default',
-                              'selected' => '1', 'value' => '1',
-                              'accesskey' => $ML{'.makedefault.key'} });
-
-    $body .= "<label for='make_default'>$ML{'.makedefault'}</label></td></tr>\n";
-
-    $body .= "<tr><td>&nbsp;</td><td>" .LJ::html_submit(undef, $ML{'.btn.proceed'}) . "</td></tr>\n";
-    $body .= "</table>\n</form>\n";
     $body .= " standout?>\n\n";
 
 
