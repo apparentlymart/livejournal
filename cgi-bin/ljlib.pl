@@ -3678,6 +3678,7 @@ sub send_mail
 
     my $rv = eval { $msg->send && 1; };
     return 1 if $rv;
+    return 0 if $@ =~ /no data in this part/;  # encoding conversion error higher
     return $buffer->($msg);
 
 }
