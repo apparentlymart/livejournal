@@ -1381,9 +1381,11 @@ sub http_to_time {
 }
 
 sub mysqldate_to_time {
-    my $string = shift;
+    my ($string, $gmt) = @_;
     return undef unless $string =~ /^(\d\d\d\d)-(\d\d)-(\d\d)(?: (\d\d):(\d\d)(?::(\d\d))?)?$/;
-    return Time::Local::timelocal($6, $5, $4, $3, $2-1, $1);
+    return $gmt ?
+        Time::Local::timegm($6, $5, $4, $3, $2-1, $1) :
+        Time::Local::timelocal($6, $5, $4, $3, $2-1, $1);        
 }
 
 # <LJFUNC>
@@ -4704,9 +4706,9 @@ sub get_itemid_before2 { return get_itemid_near2(@_, "before"); }
 # </LJFUNC>
 sub mysql_time
 {
-    my $time = shift;
+    my ($time, $gmt) = @_;
     $time ||= time();
-    my @ltime = localtime($time);
+    my @ltime = $gmt ? gmtime($time) : localtime($time);
     return sprintf("%04d-%02d-%02d %02d:%02d:%02d",
                    $ltime[5]+1900,
                    $ltime[4]+1,
