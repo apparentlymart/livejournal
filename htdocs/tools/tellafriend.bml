@@ -10,6 +10,11 @@
  my $remote = LJ::get_remote($dbs);
  my $sth;
 
+ if ($LJ::DISABLED{'tellafriend'}) {
+     $body .= "This feature is disabled.";
+     return;
+ }
+
  unless ($remote) {
      $body .= "(=H1 Sorry... H1=)(=P To use the \"Tell a Friend\" feature, you must first <a href=\"/login.bml?ret=1\">login</a>.  P=)(=P If we didn't require you to login for this, we'd be essentially providing an anonymous email gateway and there'd be tons of people abusing it and harassing each other.  (We tried this on another website once...)  P=)";
      return;
@@ -25,6 +30,12 @@
      $body .= "(=H1 Sorry... H1=)(=P Your current email address ($u->{'email'}) isn't validated, so we can't let you use the \"Tell a Friend\" feature.  To validate your email address, have the confirmation email resent at the <a href=\"/lostinfo.bml\">lost information</a> page, and then follow the instructions in it when you get it. P=)";
      return;
  }
+
+ my $err = sub {
+     $title = "Error";
+     $body = "(=H1 Error H1=)(=P $_[0] P=)";
+     return;
+ };
  
  if ($FORM{'mode'} eq "mail") 
  {
@@ -57,20 +68,42 @@
 
  my ($subject, $msg);
  $subject = "Check this out...";
- if ($FORM{'itemid'} =~ /^\d+$/) {
+ if ($FORM{'itemid'} =~ /^\d+$/) 
+ {
+     my $journal = $FORM{'journal'};
      my $itemid = $FORM{'itemid'}+0;
-     $sth = $dbr->prepare("SELECT u.user, ls.subject FROM user u, log l, logsubject ls WHERE l.itemid=$itemid AND ls.itemid=$itemid AND l.ownerid=u.userid");
+     my $ditemid = $itemid;
+     my $uj;
+
+     if ($journal) {
+	 $itemid = int($itemid / 256);
+	 
+	 $uj = LJ::load_user($dbs, $journal);
+	 return $err->("Unknown journal") unless $uj;
+	 my $db = LJ::get_cluster_reader($uj);
+	 
+	 $sth = $dbr->prepare("SELECT l.posterid, ls.subject FROM log2 l, logsubject2 ls WHERE l.journalid=$uj->{'userid'} AND ls.journalid=$uj->{'userid'} AND l.jitemid=$itemid AND ls.jitemid=$itemid");	 
+     } else {
+	 $sth = $dbr->prepare("SELECT l.posterid, ls.subject FROM log l, logsubject ls WHERE l.itemid=$itemid AND ls.itemid=$itemid");
+	 
+     }
+
      $sth->execute;
-     my ($user, $subject) = $sth->fetchrow_array;
-     my $url = "$LJ::SITEROOT/talkread.bml?itemid=$itemid";
+     my ($posterid, $subject) = $sth->fetchrow_array;
+
+     my $up;
+     LJ::load_userids_multiple($dbs, [ $posterid => \$up ], [ $uj, $u ]);
+
+     my $jarg = $uj ? "journal=$uj->{'user'}&" : "";
+     my $url = "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
 
      if ($user eq $u->{'user'}) {
 	 $msg .= "Hey,\n\nCheck out this journal entry of mine:\n\n";
      } else {
 	 $msg .= "Hey,\n\nCheck this out... I saw this journal entry while reading ${user}'s journal:\n\n";
      }
-     $msg .= "  $subject\n" if ($subject);
-     $msg .= "  $url\n\n";
+     $msg .= " $subject\n" if $subject;
+     $msg .= " $url\n\n";
      $msg .= "I thought you might be interested.\n\n";
  }
 
@@ -105,7 +138,7 @@
  my $subject = "Check it out...";
  $body .= "<tr><td align=right nowrap><b>Subject:</b></td><td><input name=subject size=40 maxlength=60 value=\"" . LJ::ehtml($subject) . "\"></td></tr>\n";
 
- $body .= "<tr><td align=right nowrap valign=top><b>Body:</b></td><td><textarea name=body rows=15 cols=59 wrap=soft>" . LJ::ehtml($msg) . "</textarea></td></tr>\n";
+ $body .= "<tr><td align=right nowrap valign=top><b>Body:</b></td><td><textarea name=body rows=15 cols=67 wrap=soft>" . LJ::ehtml($msg) . "</textarea></td></tr>\n";
  
  $body .= "<tr><td>&nbsp;</td><td><input type=submit value=\"Send email\"></td></tr>\n";
  $body .= "</table>";

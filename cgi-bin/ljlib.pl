@@ -3452,6 +3452,7 @@ sub load_userids_multiple
 
     my $satisfy = sub {
 	my $u = shift;
+	next unless ref $u eq "HASH";
 	foreach (@{$need{$u->{'userid'}}}) {
 	    $$_ = $u;
 	}
