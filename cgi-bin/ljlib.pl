@@ -72,7 +72,7 @@ $LJ::DBIRole = new DBI::Role {
 };
 
 # create our MogileFS object
-if (%LJ::MOGILEFS_CONFIG) {
+if (%LJ::MOGILEFS_CONFIG && $LJ::MOGILEFS_CONFIG{hosts}) {
     $LJ::MogileFS = new MogileFS (
                                   domain => $LJ::MOGILEFS_CONFIG{domain},
                                   root   => $LJ::MOGILEFS_CONFIG{root},
