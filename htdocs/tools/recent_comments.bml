@@ -22,9 +22,6 @@ body<=
     return "Error: can't get DB for user" unless $dbcr;
 
     my $count = LJ::get_cap($u, "tools_recent_comments_display");
-    $ret .= "<?p " . BML::ml('/tools/recent_comments.bml.maxnotshown', 
-                             { 'current' => $count, 'max' => $LJ::TOOLS_RECENT_COMMENTS_MAX }). 
-                                 " p?>" unless $count == $LJ::TOOLS_RECENT_COMMENTS_MAX;
 
     # authas switcher form
     $ret .= "<form method='get' action='/tools/recent_comments.bml'>\n";
@@ -114,6 +111,11 @@ body<=
 
     }
     $ret .= "</table>";
+
+    $ret .= "<?p " . BML::ml('/tools/recent_comments.bml.maxnotshown', 
+                             { 'current' => $count, 'max' => $LJ::TOOLS_RECENT_COMMENTS_MAX }). 
+                                 " p?>" unless $count == $LJ::TOOLS_RECENT_COMMENTS_MAX;
+
 
     if ($u->{journaltype} eq "P") {
         $ret .= "<?h1 Latest Posted h1?><?p Last $count comments " . LJ::ljuser($u) . " has posted. p?>";
