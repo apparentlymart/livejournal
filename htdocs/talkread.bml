@@ -141,7 +141,7 @@ body<=
  my $showmultiform = $remote &&
     ($remote->{'user'} eq $u->{'user'} ||
      $remote->{'user'} eq $up->{'user'} ||
-     LJ::check_rel($u, $remote, 'A'));
+     LJ::can_manage($remote, $u));
  my $multiform_selects = 0;  # are there select boxes?  don't show form if not.
 
  my $event = $item->{'event'};
@@ -373,7 +373,7 @@ body<=
              $ret .= "<br />$datepost\n";
              if ($post->{'props'}->{'poster_ip'} && $remote &&
                  ($remote->{'user'} eq $up->{'user'} ||
-                  LJ::check_rel($u, $remote, 'A')))
+                  LJ::can_manage($remote, $u)))
              {
                  $ret .= BML::ml('.fromip', {'ip'=>$post->{'props'}->{'poster_ip'}});
              }

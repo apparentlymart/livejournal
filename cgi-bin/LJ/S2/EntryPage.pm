@@ -33,7 +33,7 @@ sub EntryPage
     $p->{'multiform_on'} = $remote &&
         ($remote->{'userid'} == $u->{'userid'} ||
          $remote->{'userid'} == $entry->{'posterid'} ||
-         LJ::check_rel($u, $remote, 'A'));
+         LJ::can_manage($remote, $u));
 
     my $itemid = $entry->{'itemid'};
     my $ditemid = $entry->{'itemid'} * 256 + $entry->{'anum'};
@@ -175,7 +175,7 @@ sub EntryPage
             $s2com->{'metadata'}->{'poster_ip'} = $com->{'props'}->{'poster_ip'} if 
                 ($com->{'props'}->{'poster_ip'} && $remote &&
                  ($remote->{'userid'} == $entry->{'posterid'} ||
-                  LJ::check_rel($u, $remote, 'A')));
+                  LJ::can_manage($remote, $u)));
             
             push @$destlist, $s2com;
 
@@ -283,7 +283,7 @@ sub EntryPage_entry
         'enabled' => ($u->{'opt_showtalklinks'} eq "Y" && ! 
                       $entry->{'props'}->{'opt_nocomments'}) ? 1 : 0,
         'screened' => ($entry->{'props'}->{'hasscreened'} && $remote &&
-                       ($remote->{'user'} eq $u->{'user'} || LJ::check_rel($u, $remote, 'A'))) ? 1 : 0,
+                       ($remote->{'user'} eq $u->{'user'} || LJ::can_manage($remote, $u))) ? 1 : 0,
     });
 
     # format it

@@ -96,7 +96,7 @@ sub shared
         push @$out, [ "error", "Target user can't be shared journal user." ];
     }
     
-    unless (LJ::check_rel($shared_id, $remote, 'A') ||
+    unless (LJ::can_manage($remote, $shared_id) ||
             $remote->{'privarg'}->{'sharedjournal'}->{'*'}) 
     {
         $error = 1;
@@ -189,7 +189,7 @@ sub community
     
     # user doesn't need admin priv to remove themselves from community
 
-    unless (LJ::check_rel($com_id, $remote, 'A') ||
+    unless (LJ::can_manage_other($remote, $com_id) ||
             $remote->{'privarg'}->{'sharedjournal'}->{'*'} ||
             ($remote->{'user'} eq $target_user && $action eq "remove")) 
     {

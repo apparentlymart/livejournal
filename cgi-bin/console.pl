@@ -1013,7 +1013,7 @@ sub set
         $u = LJ::load_user($comm);
         return $err->("Community doesn't exist.") unless $u;
         return $err->("You're not an admin of this community.")
-            unless LJ::check_rel($u, $remote, 'A');
+            unless LJ::can_manage_other($remote, $u);
     }
     return $err->("Wrong number of arguments") unless @args == 2;
     my ($k, $v) = @args;

@@ -119,7 +119,7 @@ sub link_bar
     
     if (defined $remote && ($remote->{'user'} eq $u->{'user'} ||
                             $remote->{'user'} eq $up->{'user'} || 
-                            LJ::check_rel($u, $remote, 'A')))
+                            LJ::can_manage($remote, $u)))
     {
         push @linkele, $mlink->("/editjournal_do.bml?${jargent}itemid=$itemid", "editentry");
     }
@@ -287,7 +287,7 @@ sub can_delete {
     return 1 if $remote->{'user'} eq $userpost ||
                 $remote->{'user'} eq (ref $u ? $u->{'user'} : $u) ||
                 $remote->{'user'} eq (ref $up ? $up->{'user'} : $up) ||
-                LJ::check_rel($u, $remote, 'A');
+                LJ::can_manage($remote, $u);
     return 0;
 }
 
@@ -296,7 +296,7 @@ sub can_screen {
     return 0 unless $remote;
     return 1 if $remote->{'user'} eq $u->{'user'} ||
                 $remote->{'user'} eq (ref $up ? $up->{'user'} : $up) ||
-                LJ::check_rel($u, $remote, 'A');
+                LJ::can_manage($remote, $u);
     return 0;
 }
 
@@ -752,7 +752,7 @@ sub load_comments
                     $post->{'state'} eq "S" && ! ($remote && ($remote->{'userid'} == $u->{'userid'} ||
                                                               $remote->{'userid'} == $uposterid ||
                                                               $remote->{'userid'} == $post->{'posterid'} ||
-                                                              LJ::check_rel($u, $remote, 'A') ));
+                                                              LJ::can_manage($remote, $u) ));
             }
             $post->{'_show'} = $should_show;
             $post_count += $should_show;

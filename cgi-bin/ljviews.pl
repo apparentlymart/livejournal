@@ -1194,7 +1194,7 @@ sub create_view_lastn
             my $dispreadlink = $replycount || 
                 ($logprops{$itemid}->{'hasscreened'} &&
                  ($remote->{'user'} eq $user
-                  || LJ::check_rel($u, $remote, 'A')));
+                  || LJ::can_manage($remote, $u)));
 
             $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
                 'itemid' => $ditemid,
@@ -1685,7 +1685,7 @@ sub create_view_friends
             my $dispreadlink = $replycount || 
                 ($logprops{$datakey}->{'hasscreened'} &&
                  ($remote->{'user'} eq $friend
-                  || LJ::check_rel($friendid, $remote, 'A')));
+                  || LJ::can_manage($remote, $friendid)));
 
             my $journalbase = LJ::journal_base($friends{$friendid});
 
@@ -2233,7 +2233,7 @@ sub create_view_day
             my $dispreadlink = $replycount || 
                 ($logprops{$itemid}->{'hasscreened'} &&
                  ($remote->{'user'} eq $user
-                  || LJ::check_rel($u, $remote, 'A')));
+                  || LJ::can_manage($remote, $u)));
             $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
                 'itemid' => $ditemid,
                 'itemargs' => $itemargs,

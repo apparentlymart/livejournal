@@ -86,7 +86,7 @@ sub ban_set_unset
         if (! $j) {
             $error = 1;
             push @$out, [ "error", "Unknown community." ],
-        } elsif (! LJ::check_rel($j, $remote, 'A')) {
+        } elsif (! LJ::can_manage_other($remote, $j)) {
             $error = 1;
             push @$out, [ "error", "Not maintainer of this community." ],
         }

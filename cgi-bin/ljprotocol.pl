@@ -710,7 +710,7 @@ sub postevent
             unless (LJ::get_cap($u, "makepoll")
                     || ($uowner->{'journaltype'} eq "C"
                         && LJ::get_cap($uowner, "makepoll")
-                        && LJ::check_rel($uowner, $u, 'A')));
+                        && LJ::can_manage_other($u, $uowner)));
 
         my $error = "";
         @polls = LJ::Poll::parse(\$event, \$error, {
@@ -1083,7 +1083,7 @@ sub editevent
                 ($ownerid == $u->{'userid'} ||
                  # community account can delete it (ick)
 
-                 LJ::check_rel($ownerid, $posterid, 'A')
+                 LJ::can_manage_other($posterid, $ownerid)
                  # if user is a community maintainer they can delete
                  # it too (good)
                  ));

@@ -1774,7 +1774,7 @@ sub Entry__get_link
         if ($key eq "edit_entry") {
             return undef unless $remote && ($remote->{'user'} eq $journal ||
                                             $remote->{'user'} eq $poster || 
-                                            LJ::check_rel(LJ::load_user($journal), $remote, 'A'));
+                                            LJ::can_manage($remote, LJ::load_user($journal)));
             return {
                 '_type' => "Link",
                 'url' => "$LJ::SITEROOT/editjournal_do.bml?journal=$journal&amp;itemid=$this->{'itemid'}",

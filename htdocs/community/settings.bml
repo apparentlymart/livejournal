@@ -57,7 +57,7 @@ body<=
      }
 
      # if we're changing rather than creating, check that we can
-     if ($mode eq 'modify' && !LJ::check_rel($cu, $remote, 'A')) {
+     if ($mode eq 'modify' && !LJ::can_manage_other($remote, $cu)) {
         $errors{'username'} = BML::ml('.error.noaccess', {'comm'=>$cuser});
      }
 

@@ -1688,13 +1688,33 @@ sub can_manage {
     return undef unless $remote && $u;
 
     # is same user?
-    return 1 if want_userid($remote) == want_userid($u);
+    return 1 if LJ::want_userid($remote) == LJ::want_userid($u);
+
+    # people/syn/rename accounts can only be managed by the one
+    # account
+    $u = LJ::want_user($u);
+    return undef if $u->{journaltype} =~ /^[PYR]$/;
 
     # check for admin access
     return undef unless LJ::check_rel($u, $remote, 'A');
 
     # passed checks, return true
     return 1;
+}
+
+# <LJFUNC>
+# name: LJ::can_manage_other
+# des: Given a user and a target user, will determine if the first user is an
+#      admin for the target user, but not if the two are the same.
+# returns: bool: true if authorized, otherwise fail
+# args: remote, u
+# des-remote: user object or userid of user to try and authenticate
+# des-u: user object or userid of target user
+# </LJFUNC>
+sub can_manage_other {
+    my ($remote, $u) = @_;
+    return 0 if LJ::want_userid($remote) == LJ::want_userid($u);
+    return LJ::can_manage($remote, $u);
 }
 
 sub can_delete_journal_item {
