@@ -1023,6 +1023,50 @@ already have an account you can <a href="/create.bml">create one</a> to track yo
 
 /lostinfo_do.bml.error1.text=You never used that email address with this account or it was never validated.
 
+/lostinfo_do.bml.lostpasswordmail.part1<<
+*** This is an automated email.  You do not need to respond to it. ***
+
+This is your requested password reminder from [[sitename]].
+Below is your username, password, and email address your journal is
+registered under.
+
+          Username: [[username]]
+          Password: [[password]]
+     EMail Address: [[emailadr]]
+.
+
+/lostinfo_do.bml.lostpasswordmail.part2=To validate your email address, go here:
+
+/lostinfo_do.bml.lostpasswordmail.part3<<
+This information was requested on the website from [[remoteip]].
+
+If you didn't request to have this password emailed to you, don't panic.
+After all, you're the one who's seeing this email, and not the other person.
+It's possible that the user who made the request is mistaken and
+believes that he or she controls this username. It's also possible that
+someone made a typo in a username or email address.
+.
+
+/lostinfo_do.bml.lostpasswordmail.part4|notes=Site-local text.  For 'en', it's blank.
+/lostinfo_do.bml.lostpasswordmail.part4=
+
+/lostinfo_do.bml.lostpasswordmail.part5<<
+Useful links:
+
+  Your LiveJournal:
+    [[journalurl]]
+
+  Update your journal online:
+    [[updateurl]]
+
+Regards,
+The site team
+
+[[rooturl]]
+.
+
+/lostinfo_do.bml.lostpasswordmail.subject=Lost Password
+
 /lostinfo_do.bml.password_mailed.text=Success.  Your password has been mailed.
 
 /lostinfo_do.bml.password_mailed.title=Password mailed!

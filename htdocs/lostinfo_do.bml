@@ -52,28 +52,31 @@ body<=
      return LJ::bad_input(@errors) if @errors;
 
      open (MAIL, "|$LJ::SENDMAIL") || die "Couldn't send mail";
+
      print MAIL "To: $email\n";
      print MAIL "From: $LJ::ADMIN_EMAIL ($LJ::SITENAME)\n";
-     print MAIL "Subject: Lost Password\n\n";
-     print MAIL "*** This is an automated email.  You do not need to respond to it. ***\n\n";
-     print MAIL "This is your requested password reminder from $LJ::SITENAME.  Below is your username, password, and email address your journal is registered under.\n\n";
-     print MAIL "          Username: $u->{'user'}\n";
-     print MAIL "          Password: $u->{'password'}\n";
-     print MAIL "     EMail Address: $u->{'email'}\n\n";
-     if ($u->{'status'} ne "A"){
+     print MAIL "Subject: $ML{'.lostpasswordmail.subject'}\n\n";
+
+     print MAIL BML::ml('.lostpasswordmail.part1', {
+                 'sitename' => $LJ::SITENAME,
+                 'username' => $u->{'user'},
+                 'password' => $u->{'password'},
+                 'emailadr' => $u->{'email'}     }) . "\n\n";
+     if ($u->{'status'} ne "A") {
          my $aa = {};
          $aa = LJ::register_authaction($dbs, $u->{'userid'}, "validateemail", $u->{'email'});
-         print MAIL "To confirm your email address, go here:\n\n";
-         print MAIL "    $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";	
+         print MAIL $ML{'.lostpasswordmail.part2'} . "\n\n";
+         print MAIL "    $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";
      }
-     print MAIL "This information was requested on the website from " . BML::get_remote_host() . 
-         " (" . BML::get_remote_ip() . ").\n\n";
-     print MAIL "Useful links:\n\n";
-     print MAIL "  Your LiveJournal:\n";
-     print MAIL "    $LJ::SITEROOT/users/$u->{'user'}/\n\n";
-     print MAIL "  Update your journal online:\n";
-     print MAIL "    $LJ::SITEROOT/update.bml?$u->{'user'}\n\n";
-     print MAIL "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
+     print MAIL BML::ml('.lostpasswordmail.part3', {
+                 'remoteip' => BML::get_remote_host() . " (" . BML::get_remote_ip() . ")" }) . "\n\n";
+     my $mline = $ML{'.lostpasswordmail.part4'};
+     print MAIL $mline . "\n\n" if ($mline ne "");
+     print MAIL BML::ml('.lostpasswordmail.part5', {
+                 'journalurl' => "$LJ::SITEROOT/users/$u->{'user'}/",
+                 'updateurl'  => "$LJ::SITEROOT/update.bml?$u->{'user'}",
+                 'rooturl'    => "$LJ::SITEROOT/" }) . "\n";
+
      close MAIL;
 
      return "<?h1 $ML{'.password_mailed.title'} h1?>\n<?p $ML{'.password_mailed.text'} p?>";
