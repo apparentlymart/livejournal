@@ -1,5 +1,5 @@
 (=_CODE
-#- BML:cache:update
+#BML:cache:update
 
  my $SELF = "/update.bml";
  
