@@ -100,14 +100,14 @@
      $head .= "<meta name=\"robots\" content=\"noindex\">\n";
  }
 
+ my $verbosefriends = 1; # Display whole list (1), or just a count (0)?
  if ($com) {
      $title = $ML{'.title.communityinfo'};
      $dir = "community";
  } elsif ($synd) {
      $title = $ML{'.title.syndicated'};
      $u->{'opt_whatemailshow'} = "N";  # don't show email
-     $u->{'url'} = $synd->{'synurl'};
-     $u->{'urlname'} = $synd->{'synurl'};
+     $verbosefriends=0;
  }
 
  if ($u->{'statusvis'} eq "S") {
@@ -175,7 +175,7 @@
 
  # who does the remote user list as a friend?
  my %remote_friend;
- if ($remote) {
+ if ($remote && $verbosefriends) {
      my $error;
      my $rs = LJ::Protocol::do_request($dbs, "getfriends",
                                        { 'ver' => $LJ::PROTOCOL_VER,
@@ -196,9 +196,7 @@
      $ci = $sth->fetchrow_hashref;
  }
 
- unless ($com) {
-     $body .= "<?h1 $ML{'.userinfo.name'} h1?><?p " . BML::ml('.userinfo.body',{'username'=>$u->{'name'},'siteroot'=>$LJ::SITEROOT}) . " p?>";
- } else {
+ if ($com) {
      $body .= "<?h1 $ML{'.comminfo.name'} h1?><?p " . BML::ml('.comminfo.body',{'commname'=>$u->{'name'}}) . " ";
      if ($ci) {
          my $cowner;
@@ -219,6 +217,10 @@
         $body .= BML::ml('.body.leave',{'commname'=>$u->{'user'}});
      }
      $body .= " p?>";
+ } elsif ($synd) {
+     $body .= "<?h1 $ML{'.syndinfo.name'} h1?><?p " . BML::ml('.syndinfo.body',{'addtofriends'=>"$LJ::SITEROOT/friends/add.bml?user=$u->{'user'}"}) . " p?>";
+ } else {
+     $body .= "<?h1 $ML{'.userinfo.name'} h1?><?p " . BML::ml('.userinfo.body',{'username'=>$u->{'name'},'siteroot'=>$LJ::SITEROOT}) . " p?>";
  }
 
  my $add_friend = 0;
@@ -286,17 +288,30 @@
 
  $body .= "</tr>\n";
 
- ### name
+ ### name or 'syndicated from'
  $narrow_left--;
- $body .= "<tr><td align='right'><b>$ML{'.label.name'}</b></td><td>$u->{'name'}</td></tr>\n";
+ unless ($synd) {
+     $body .= "<tr><td align='right'><b>$ML{'.label.name'}</b></td><td>$u->{'name'}</td></tr>\n";
+ } else {
+     my $link;
+     if (my $url = $u->{'url'}) {
+         $link="<a href='" . LJ::ehtml($url) . "'>$u->{'name'}</a>";
+     } else {
+         $link=$u->{'name'};
+     }
+     my $icon="<a href='" . LJ::ehtml($synd->{'synurl'}) . "'>".
+              "<img src='$LJ::IMGPREFIX/xml.gif' width='36' height='14' align='absmiddle' border='0'></a>";
+     $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.syndicatedfrom'}</b></td>\n".
+              "<td>$link $icon</td></tr>\n";
+ }
 
- ## text mesage
+ ## text message
  if ($u->{'txtmsg_status'} eq "on" && LJ::get_cap($u, "textmessaging")) {
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
      $body .= "<tr valign='top'><td align='right'><b>$ML{'.label.textmessage'}</b></td><td colspan='$span'>" . BML::ml('.sendmessage.body',{'user'=>$u->{'user'}, 'link'=>"/tools/textmessage.bml?user=$u->{'user'}"}) . "</td></tr>";
  }
  
- if ($u->{'url'}) {
+ if ( ! $synd && $u->{'url'}) {
      my $url = LJ::ehtml($u->{'url'});
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
      unless ($url =~ /^https?:\/\//) {
@@ -309,7 +324,7 @@
  }
 
 
-  if ($u->{'allow_infoshow'} eq "Y") {
+  if ( ! $synd && $u->{'allow_infoshow'} eq "Y") {
       if ($u->{'city'} || $u->{'state'} || $u->{'country'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
           $body .= "<tr><td align='right'><b>$ML{'.label.location'}</b></td><td colspan='$span'>";
@@ -355,8 +370,8 @@
       }
   }
  
-  if ($u->{'allow_contactshow'} eq "Y" ||
-      $u->{'allow_contactshow'} eq "F" && $remote_isfriend)
+  if ( ! $synd && ($u->{'allow_contactshow'} eq "Y" ||
+      $u->{'allow_contactshow'} eq "F") && $remote_isfriend)
   {
       unless ($u->{'opt_whatemailshow'} eq "N") {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
@@ -482,11 +497,11 @@
  ##
  ## friends
  ## 
- {
+ unless ($synd) {
      my $label = $com ? $ML{'.friends.comm'} : $ML{'.friends.user'};
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
      $body .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/$dir/$user/friends'>$label</a>:</b></td><td colspan='$span'>";
-     if ($res_fr{'friend_count'} > 500) {
+     if (!$verbosefriends && $res_fr{'friend_count'} > 500) {
          $body .= "<b>" . $res_fr{'friend_count'} . ":</b> ";
          $body .= "<a href='$LJ::DIRURI?s_fro=1&amp;fro_user=$u->{'user'}'>" . BML::ml('.label.viewlabel',{'label'=>$label}) . "</a>.";
      } elsif ($res_fr{'friend_count'}) {
@@ -513,7 +528,7 @@
  ##
  ## friend of
  ##
- {
+ unless ($synd) {
      my @friend_of;
      my @member_of;
      my $label;
@@ -529,7 +544,7 @@
          $label = $com ? $ML{'.friendof.comm'} : $ML{'.friendof.user'};
          $body .= "<tr><td align='right' valign='top'><b><nobr>$label:</nobr></b>";
          if ($u->{'opt_hidefriendofs'}) {
-             $body  .= "<br /><i>(hidden)</i>";
+             $body  .= "<br /><i>$ML{'.friendof.hidden'}</i>";
          }
          $body .= "</td>";
          $body .= "<td colspan='2' valign='top'><b>" . scalar(@friend_of) . ":</b> ";
@@ -560,6 +575,9 @@
          chop $body; chop $body;
          $body .= "</td></tr>\n";
      };
+ } else {  # Syndication journals are special
+     $body .= "<tr><td align='right' valign='top'><b><nobr>$ML{'.friendof.syndreadcount'}:</nobr></b></td>";
+     $body .= "<td colspan='2'><i>$res_fr{'friendof_count'}</i></td></tr>\n";
  }
 
  ## extra rows generated by hooks
@@ -575,7 +593,7 @@
      $body .= "</td></tr>\n";
  }
  
- unless ($FORM{'mode'} eq "full") {
+ unless ($synd || $FORM{'mode'} eq "full") {  # Synd accts are always full, but their full ends early (see below)
      $body .= "</table>\n";
      $body .= "<p><center><i><a href='/userinfo.bml?user=$u->{'user'}&amp;mode=full'>$ML{'.label.moredetails'}</a></i></center>";
      return;
@@ -612,6 +630,11 @@
      $body .= $ML{'.date.never'};
  }
  $body .= "</td></tr>";
+
+ if ($synd) { # The rest of the rows are not useful to synd accts
+     $body .= "</table>\n";
+     return "";
+ }
 
  {
      $body .= "<tr><td align='right' valign='top'><b>" . BML::ml('.label.clientsused',{'siteroot'=>$LJ::SITEROOT}) . "</b></td><td colspan='2'>";
@@ -731,6 +754,6 @@ link: htdocs/community/join.bml, htdocs/community/leave.bml, htdocs/friends/add.
 link: htdocs/tools/memories.bml, htdocs/tools/tellafriend.bml, htdocs/allpics.bml
 link: htdocs/tools/textmessage.bml, htdocs/interests.bml, htdocs/support/faqbrowse.bml, htdocs/download/index.bml
 link: htdocs/support/index.bml
-img: img/btn_addfriend.gif, img/btn_todo.gif, img/btn_memories.gif, img/btn_tellfriend.gif, img/talk/md10_thumbup.gif
+img: img/btn_addfriend.gif, img/btn_todo.gif, img/btn_memories.gif, img/btn_tellfriend.gif, img/talk/md10_thumbup.gif, img/xml.gif
 hook: userinfo_html_by_user, userinfo_rows
 </LJDEP> _c?>

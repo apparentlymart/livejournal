@@ -1550,6 +1550,10 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.friendof.comm=Watched by
 
+/userinfo.bml.friendof.hidden=(hidden)
+
+/userinfo.bml.friendof.syndreadcount=Number of Readers
+
 /userinfo.bml.friendof.user=Friend of
 
 /userinfo.bml.friends.comm=Members
@@ -1600,6 +1604,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.label.supportpoints=Support points
 
+/userinfo.bml.label.syndicatedfrom=Syndicated from:
+
 /userinfo.bml.label.textmessage=<nobr>Text<br>Message</nobr>:
 
 /userinfo.bml.label.todo=To-Do List
@@ -1629,6 +1635,13 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 /userinfo.bml.rpmembership.body= Although it's open, the setting for this community is that only select users are able to post to it.  To request access, contact <a href="userinfo.bml?user=[[cowner]]">its maintainer</a>.
 
 /userinfo.bml.sendmessage.body=<a href="[[link]]">Send <b>[[user]]</b> a text message</a><br />on his/her cellphone/pager.
+
+/userinfo.bml.syndinfo.body<<
+If you would like articles from the syndicated site to appear on your friends page,
+you can <a href="[[addtofriends]]">add this journal to your friends list</a>.
+.
+
+/userinfo.bml.syndinfo.name=Syndication Journal
 
 /userinfo.bml.tellafriend=Tell a Friend!
 
