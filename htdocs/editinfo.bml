@@ -53,7 +53,8 @@ body<=
     }
 
     # load interests
-    $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, userinterests ui " .
+    my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
+    $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, $uitable ui " .
                          "WHERE i.intid=ui.intid AND ui.userid=?");
     $sth->execute($u->{'userid'});
     my %interests = ();
@@ -762,7 +763,7 @@ body<=
             if ($intcount > 150) {
                 return LJ::bad_input(BML::ml(".error.excessive_int", {'intcount' => $intcount}));
             }
-            LJ::set_interests($u->{'userid'}, \%interests, \@ints);
+            LJ::set_interests($u, \%interests, \@ints);
         }
 
         # now unban users they selected to be unbanned

@@ -12,6 +12,8 @@ body<=
 
     my $did_post = LJ::did_post();
 
+    my $table = sub { $_[0]->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests' };
+
     if (!$did_post && $GET{'view'} eq "popular") {
         my $ret = "";
         $ret .= "<?h1 $ML{'.popular.head'} h1?><?p $ML{'.popular.text'} p?>";
@@ -64,7 +66,9 @@ body<=
             return $ret;
         }
 
-        my ($count) = $dbr->selectrow_array("SELECT COUNT(*) FROM userinterests WHERE userid=?", undef, $remote->{'userid'});
+        my $uitable = $table->($remote);
+        my $count = $dbr->selectrow_array("SELECT COUNT(*) FROM $uitable WHERE userid=?",
+                                          undef, $remote->{'userid'});
 
         if ($count >= 150) {
             $ret .= "<?h1 $ML{'.add.toomany.head'} h1?><?p " .BML::ml(".add.toomany.text", {'maxinterests' => "150"}) ." p?>";
@@ -72,9 +76,15 @@ body<=
         }
 
         my $dbh = LJ::get_db_writer();
-        $dbh->do("INSERT INTO userinterests (userid, intid) VALUES (?, ?)", undef, $remote->{'userid'}, $intid);
+        $dbh->do("INSERT INTO $uitable (userid, intid) VALUES (?, ?)",
+                 undef, $remote->{'userid'}, $intid);
         unless ($dbh->err) {
             $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid=?", undef, $intid);
+        }
+
+        # if a community, remove any old rows from userinterests
+        if ($remote->{'journaltype'} eq 'C') {
+            $dbh->do("DELETE FROM userinterests WHERE userid=?", undef, $remote->{'userid'});
         }
 
         $ret .= "<?h1 $ML{'.add.added.head'} h1?><?p $ML{'.add.added.text'} p?>";
@@ -176,8 +186,10 @@ body<=
         my %fromint;
         my %uint;
 
+        my $f_uitable = $table->($fromu);
+
         my $dbr = LJ::get_db_reader();
-        my $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, userinterests ui ".
+        my $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, $f_uitable ui ".
                                 "WHERE i.intid=ui.intid AND ui.userid=?");
         $sth->execute($fromu->{'userid'});
         while ($_ = $sth->fetchrow_hashref) {
@@ -197,14 +209,16 @@ body<=
             $ret .= $ML{'.enmasse.body.you'};
         } else {
             my $in = join (",", map { $fromint{$_} } keys %fromint);
-            my $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, userinterests ui ".
+            my $u_uitable = $table->($u);
+            my $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, $u_uitable ui ".
                                     "WHERE i.intid=ui.intid AND ui.userid=? AND i.intid IN ($in)");
             $sth->execute($u->{'userid'});
             while ($_ = $sth->fetchrow_hashref) {
                 $uint{$_->{'interest'}} = $_->{'intid'};
             }
             if ($altauthas) {
-                $ret .= BML::ml('.enmasse.body.other_authas', { 'user' => LJ::ljuser($fromu), 'target' => LJ::ljuser($u) });
+                $ret .= BML::ml('.enmasse.body.other_authas', { 'user' => LJ::ljuser($fromu),
+                                                                'target' => LJ::ljuser($u) });
             } else {
                 $ret .= BML::ml('.enmasse.body.other', { 'user' => LJ::ljuser($fromu) });
             }
@@ -258,7 +272,8 @@ body<=
         my %uint;
         my $intcount = 0;
         my $dbr = LJ::get_db_reader();
-        my $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, userinterests ui ".
+        my $uitable = $table->($u);
+        my $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, $uitable ui ".
                                 "WHERE i.intid=ui.intid AND ui.userid=?");
         $sth->execute($u->{'userid'});
         while ($_ = $sth->fetchrow_hashref) {
@@ -278,7 +293,8 @@ body<=
         if (@todel) {
             my $intid_in = join(",", @todel);
             my $dbh = LJ::get_db_writer();
-            $dbh->do("DELETE FROM userinterests WHERE userid=? AND intid IN ($intid_in)", undef, $u->{'userid'});
+            $dbh->do("DELETE FROM $uitable WHERE userid=? AND intid IN ($intid_in)",
+                     undef, $u->{'userid'});
             $dbh->do("UPDATE interests SET intcount=intcount-1 WHERE intid IN ($intid_in)");
             $deleted = 1;
         }
@@ -290,12 +306,18 @@ body<=
 
                 my $sqlp = "(?,?)" . (",(?,?)" x (scalar(@toadd) - 1));
                 my @bindvars = map { ($u->{'userid'}, $_) } @toadd;
-                $dbh->do("REPLACE INTO userinterests (userid, intid) VALUES $sqlp", undef, @bindvars);
+                $dbh->do("REPLACE INTO $uitable (userid, intid) VALUES $sqlp", undef, @bindvars);
 
                 my $intid_in = join(",", @toadd);
                 $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid IN ($intid_in)");
                 $added = 1;
             }
+        }
+
+        # if a community, remove any old rows from userinterests
+        if ($u->{'journaltype'} eq 'C') {
+            my $dbh = LJ::get_db_writer();
+            $dbh->do("DELETE FROM userinterests WHERE userid=?", undef, $u->{'userid'});
         }
 
         my $ret = "<?h1 $ML{'.results.header'} h1?><?p ";
@@ -335,35 +357,40 @@ body<=
         my $ret = "";
         my $remote = LJ::get_remote();
 
-        ### communities
-
-        my $list;
-        my $count = 0;
-        unless ($LJ::DISABLED{'interests-community'}) {
-            $sth = $dbr->prepare("SELECT u.user, u.name, u.journaltype FROM user u, userinterests ui
-                              WHERE u.userid=ui.userid AND ui.intid=? AND u.journaltype='C'
-                              AND u.statusvis='V' ORDER BY u.user LIMIT 1000");
-            $sth->execute($intid);
-            while ($_ = $sth->fetchrow_hashref) {
-                $count++;
-                LJ::text_out(\$_->{'name'});
-                $list .= "<li>" . LJ::ljuser($_) . " - " . LJ::ehtml($_->{'name'}) . "</ul>";
-            }
-        }
-
-        my $matchcount;
-        if ($count) {
-            $matchcount = BML::ml($count == 1 ? ".match" : ".matches", {'count' => $count });
-            $ret .= "<?h1 $ML{'.communities.head'} h1?><?p " .BML::ml(".communities.text", {'interest' => $interest}) ." p?>";
-            $ret .= "<p><b>$matchcount</b><ul>$list</ul></p>";
-        }
-
         ### hook
         LJ::run_hooks("interests_bml", {
             'intid' => $intid,
             'int' => $interest,
             'ret' => \$ret,
         });
+
+        ### communities
+
+        unless ($LJ::DISABLED{'interests-community'}) {
+            $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, comminterests ui " .
+                                 "WHERE u.userid=ui.userid AND ui.intid=? " .
+                                 "AND u.statusvis='V' LIMIT 500");
+            $sth->execute($intid);
+            my @cl;
+            while (my ($iuser, $iname) = $sth->fetchrow_array) {
+                push @cl, [ $iuser, $iname ];
+            }
+            @cl = sort { $a->[0] cmp $b->[0] } @cl;
+
+            my $list;
+            foreach (@cl) {
+                LJ::text_out(\$_[1]);
+                $list .= "<li>" . LJ::ljuser($_->[0], { 'type' => 'C' }) . " - " .
+                    LJ::ehtml($_->[1]) . "</li>";
+            }
+
+            if (@cl) {
+                my $matchcount = BML::ml(@cl == 1 ? ".match" : ".matches", {'count' => scalar(@cl) });
+                $ret .= "<?h1 $ML{'.communities.head'} h1?><?p " .
+                    BML::ml(".communities.text", {'interest' => $interest}) ." p?>";
+                $ret .= "<p><b>$matchcount</b><ul>$list</ul></p>";
+            }
+        }
 
         ##### users
 
@@ -373,12 +400,9 @@ body<=
         }
         $ret .= " $ML{'.morestuff'} p?>";
 
-        my $list;
-        my $count = 0;
-
-        $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, userinterests ui
-                              WHERE u.userid=ui.userid AND ui.intid=? AND u.journaltype<>'C'
-                              AND u.statusvis='V' LIMIT 1000");
+        $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, userinterests ui " .
+                             "WHERE u.userid=ui.userid AND ui.intid=? AND u.journaltype<>'C' " .
+                             "AND u.statusvis='V' LIMIT 500");
         $sth->execute($intid);
         my @ul;
         while (my ($iuser, $iname) = $sth->fetchrow_array) {
@@ -386,13 +410,13 @@ body<=
         }
         @ul = sort { $a->[0] cmp $b->[0] } @ul;
         
+        my $list;
         foreach (@ul) {
-            $count++;
             LJ::text_out(\$_->[1]);
             $list .= "<li>" . LJ::ljuser($_->[0]) . " - " . LJ::ehtml($_->[1]) . "</li>";
         }
 
-        $matchcount = BML::ml($count == 1 ? ".match" : ".matches", { 'count' => $count });
+        my $matchcount = BML::ml(@ul == 1 ? ".match" : ".matches", { 'count' => scalar(@ul) });
         $ret .= "<p><b>$matchcount</b><ul>$list</ul></p>";
 
         return $ret;

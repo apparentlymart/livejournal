@@ -5890,7 +5890,7 @@ sub item_toutf8
 # <LJFUNC>
 # name: LJ::set_interests
 # des: Change a user's interests
-# args: dbarg?, userid, old, new
+# args: dbarg?, u, old, new
 # arg-old: hashref of old interests (hasing being interest => intid)
 # arg-new: listref of new interests
 # returns: 1
@@ -5899,7 +5899,11 @@ sub set_interests
 {
     &nodb;    
 
-    my ($userid, $old, $new) = @_;
+    my ($u, $old, $new) = @_;
+
+    $u = ref $u eq 'HASH' ? $u : LJ::load_userid($u);
+    my $userid = $u->{'userid'};
+    return unless $userid;
 
     my $dbh = LJ::get_db_writer();
     my %int_new = ();
@@ -5947,9 +5951,10 @@ sub set_interests
 
         if (@new_intids) {
             my $sql = "";
+            my $uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
             foreach my $newid (@new_intids) {
                 if ($sql) { $sql .= ", "; }
-                else { $sql = "REPLACE INTO userinterests (userid, intid) VALUES "; }
+                else { $sql = "REPLACE INTO $uitable (userid, intid) VALUES "; }
                 $sql .= "($userid, $newid)";
             }
             $dbh->do($sql);
@@ -5984,6 +5989,12 @@ sub set_interests
             }
         }
     }
+
+    ### if journaltype is community, clean their old userinterests from 'userinterests'
+    if ($u->{'journaltype'} eq 'C') {
+        $dbh->do("DELETE FROM userinterests WHERE userid=?", undef, $u->{'userid'});
+    }
+
     return 1;
 }
 

@@ -465,7 +465,9 @@ sub do_sql
 {
     my $sql = shift;
     chomp $sql;
-    print "$sql;\n";
+    my $disp_sql = $sql;
+    $disp_sql =~ s/\bIN \(.+\)/IN (...)/g;
+    print "$disp_sql;\n";
     if ($opt_sql) {
         print "# Running...\n";
         $dbh->do($sql);

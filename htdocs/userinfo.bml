@@ -159,8 +159,10 @@
      LJ::text_out(\$u->{'bio'});
  }
 
- $sth = $dbr->prepare("SELECT i.interest, i.intcount, i.intid FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$u->{'userid'}");
- $sth->execute;
+ my $u_uitable = $u->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
+ $sth = $dbr->prepare("SELECT i.interest, i.intcount, i.intid FROM interests i, $u_uitable ui " .
+                      "WHERE i.intid=ui.intid AND ui.userid=?");
+ $sth->execute($u->{'userid'});
  my %interests = ();
  while ($_ = $sth->fetchrow_hashref) {
      $interests{$_->{'interest'}} = $_;
@@ -168,8 +170,9 @@
 
  my %remote_interest;
  if ($remote && $remote->{'userid'} != $userid) {
-     $sth = $dbr->prepare("SELECT intid FROM userinterests WHERE userid=$remote->{'userid'}");
-     $sth->execute;
+     my $r_uitable = $remote->{'journaltype'} eq 'C' ? 'comminterests' : 'userinterests';
+     $sth = $dbr->prepare("SELECT intid FROM $r_uitable WHERE userid=?");
+     $sth->execute($remote->{'userid'});
      $remote_interest{$_} = 1 while $_ = $sth->fetchrow_array;
  }
 
