@@ -165,9 +165,12 @@
         foreach my $lid ($lid_i18n, $lyr_layout->{'s2lid'}, $lid_i18nc, $lyr_core->{'s2lid'}) {
             next unless $lid;
             my $name = S2::get_property_group_name($lid, $gname);
-            return LJ::ehtml($name) if $name;
+            next unless $name;
+            $name =~ s/_/ /g;
+            return LJ::ehtml($name);
         }
         return "Misc" if $gname eq "misc";
+        $gname =~ s/_/ /g;
         return $gname;
     };
 
