@@ -63,12 +63,12 @@ sub shared
     my ($dbh, $remote, $args, $out) = @_;
     my $error = 0;
 
-    unless (scalar(@$args) == 4) {
+    unless (scalar(@$args) != 3) {
         $error = 1;
         push @$out, [ "error", "This command takes exactly 3 arguments.  Consult the reference." ];
     }
     
-    return 0 if ($error);
+    return 0 if $error;
 
     my ($shared_user, $action, $target_user) = ($args->[1], $args->[2], $args->[3]);
     my $shared = LJ::load_user($shared_user);
@@ -96,7 +96,7 @@ sub shared
         push @$out, [ "error", "Target user can't be shared journal user." ];
     }
     
-    if (LJ::check_rel($shared_id, $target_id, 'A')) {
+    if (LJ::check_rel($shared_id, $target_id, 'P')) {
         $error = 1;
         push @$out, [ "error", "User \"$target->{'user'}\" already has posting access to this shared journal." ];
     }
@@ -111,18 +111,24 @@ sub shared
     return 0 if ($error);    
     
     if ($action eq "add") {
-        my $res = LJ::shared_member_request($shared, $target);
-        unless ($res) {
-            push @$out, [ 'error', "Could not add user." ];
-            return 0;
-        }
-        if ($res->{'datecreate'}) {
-            push @$out, [ 'error', "User \"$target->{'user'}\" already mailed on: $res->{'datecreate'}" ];
-            return 0;
-        }
+        # don't send request if the admin is giving themselves posting access
+        if ($target->{'user'} eq $remote->{'user'}) {
+            LJ::set_rel($shared, $target, 'P');
+            push @$out, [ "info", "User \"$target_user\" has been given posting access to \"$shared_user\"." ];
+        } else {
+            my $res = LJ::shared_member_request($shared, $target);
+            unless ($res) {
+                push @$out, [ 'error', "Could not add user." ];
+                return 0;
+            }
+            if ($res->{'datecreate'}) {
+                push @$out, [ 'error', "User \"$target->{'user'}\" already mailed on: $res->{'datecreate'}" ];
+                return 0;
+            }
 
-        push @$out, [ "info", "User \"$target_user\" has been sent a confirmation email and will be able to post in \"$shared_user\" once they confirm this action." ];
-    } 
+            push @$out, [ "info", "User \"$target_user\" has been sent a confirmation email and will be able to post in \"$shared_user\" once they confirm this action." ];
+        }
+    }
     if ($action eq "remove") {
         LJ::clear_rel($shared_id, $target_id, 'P');
         push @$out, [ "info", "User \"$target_user\" can no longer post in \"$shared_user\"." ];
