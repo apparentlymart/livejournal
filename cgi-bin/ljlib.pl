@@ -2109,10 +2109,12 @@ sub load_user_props
             $db = $table eq "userproplite2" ? 
                 LJ::get_cluster_master($u) : 
                 LJ::get_db_writer();
-        } else {
+        }
+        unless ($db) {
             $db = $table eq "userproplite2" ? 
                 LJ::get_cluster_reader($u) : 
                 LJ::get_db_reader();
+            $opts->{'cache'} = 0;
         }
         $sql = "SELECT upropid, value FROM $table WHERE userid=$uid";
         if (ref $loadfrom{$table}) {
