@@ -38,6 +38,12 @@ body<=
                                        "FROM txtmsg WHERE userid=$u->{'userid'}")
  }
 
+ unless (LJ::get_cap($u, "textmessaging")) {
+     $ret .= "<?h1 Unavailable h1?><?p This user's account type does not permit text messaging. p?>";
+     &add_footer();
+     return $ret;
+ }
+
  unless ($tminfo) {
      $ret .= "<?h1 Unavailable h1?><?p This user has not setup their text messaging ".
          "information at LiveJournal or they've turned it off. p?>";
@@ -45,11 +51,6 @@ body<=
      return $ret;
  }
 
- unless (LJ::get_cap($u, "textmessaging")) {
-     $ret .= "<?h1 Unavailable h1?><?p This user's account type does not permit text messaging. p?>";
-     &add_footer();
-     return $ret;
- }
 
  my $remote;
  if ($tminfo->{'security'} ne "all") {
