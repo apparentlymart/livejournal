@@ -4,7 +4,7 @@ layerinfo "name" = "Variable Flow";
 layerinfo "author_name" = "Martin Atkins";
 layerinfo "des" = "A really simple layout that you can customize like crazy!";
 layerinfo "redist_uniq" = "variableflow/layout";
-layerinfo "previews" = "variableflow/layout.jpg";
+layerinfo "previews" = "variableflow/preview.jpg";
 
 #  Originally known as "Cleanly Shaven"
 #
