@@ -1,12 +1,4 @@
 #!/usr/bin/perl
-#
-# TODO:
-#   -- check CLUSTER_PAIR_ACTIVE a/b status before/after move for both
-#      src/dst and fail if modified.
-#   -- also check READ_ONLY and see if it changed as well.
-#   -- see we use HANDLER, check SHOW STATUS about flushes and
-#      don't commit move if there were any flushes (which resets handlers)
-#
 ##############################################################################
 
 =head1 NAME
@@ -309,7 +301,6 @@ sub moveUser {
     # we don't support "cluster 0" (the really old format)
     die "This mover tool doesn't support moving from cluster 0.\n" unless $sclust;
     die "Can't move back to legacy cluster 0\n" unless $dclust || $opts->{expungedel};
-
     my $is_movemaster;
 
     # the actual master handle, which we delete from if deleting from source
@@ -413,7 +404,42 @@ sub moveUser {
         die "User is not eligible for expunging.\n" if $opts->{expungedel};
     }
 
+
+    # returns state string, with a/b, readonly, and flush states.
+    # string looks like:
+    #   "src(34)=a,dst(42)=b,readonly(34)=0,readonly(42)=0,src_flushes=32
+    # because if:
+    #   src a/b changes:  lose readonly lock?
+    #   dst a/b changes:  suspect.  did one side crash?  was other side caught up?
+    #   read-only changes:  signals maintenance
+    #   flush counts change: causes HANDLER on src to lose state and reset
+    my $stateString = sub {
+        my $post = shift;  # false for before, true for "after", which forces a config reload
+
+        if ($post) {
+            do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
+            do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
+        }
+
+        my @s;
+        push @s, "src($sclust)=" . $LJ::CLUSTER_PAIR_ACTIVE{$sclust};
+        push @s, "dst($dclust)=" . $LJ::CLUSTER_PAIR_ACTIVE{$dclust};
+        push @s, "readonly($sclust)=" . ($LJ::READONLY_CLUSTER{$sclust} ? 1 : 0);
+        push @s, "readonly($dclust)=" . ($LJ::READONLY_CLUSTER{$dclust} ? 1 : 0);
+
+        my $flushes = 0;
+        my $sth = $dbo->prepare("SHOW STATUS LIKE '%flush%'");
+        $sth->execute;
+        while (my $r = $sth->fetchrow_hashref) {
+            $flushes += $r->{Value} if $r->{Variable_name} =~ /^Com_flush|Flush_commands$/;
+        }
+        push @s, "src_flushes=" . $flushes;
+
+        return join(",", @s);
+    };
+
     print "Moving '$u->{'user'}' from cluster $sclust to $dclust\n" if $optv >= 1;
+    my $pre_state = $stateString->();
 
     # mark that we're starting the move
     $dbh->do("INSERT INTO clustermove (userid, sclust, dclust, timestart) ".
@@ -696,6 +722,11 @@ sub moveUser {
     }
 
     print "# Rows done for '$user': $rows\n" if $optv;
+
+    my $post_state = $stateString->("post");
+    if ($post_state ne $pre_state) {
+        die "Move aborted due to state change during move: Before: [$pre_state], After: [$post_state]\n";
+    }
 
     if (! $verify_code || $verify_code->()) {
         # unset readonly and move to new cluster in one update
