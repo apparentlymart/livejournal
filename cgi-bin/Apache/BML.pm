@@ -16,7 +16,7 @@ use vars qw($ML_GETTER);  # normally undef
 use vars qw(%HOOK);
 use vars qw(%Lang);       # iso639-2 2-letter lang code -> BML lang code
 use vars qw(%FileModTime %FileBlockData %FileBlockFlags);
-use vars qw(%CodeBlockCache);
+use vars qw(%CodeBlockMade);
 use vars qw(%CodeBlockOpts);
 
 # load BML Config
@@ -66,8 +66,14 @@ sub handler
     my $req = $cur_req = {
         'r' => $r,
         'BlockStack' => [""],
+        'scratch' => {},        # _CODE blocks can play
     };
+
+    # consider the file's mod time
     note_mod_time($req, $modtime);
+
+    # and all the config files:
+    note_mod_time($req, $config->{'/'}->{'base_mod_time'});
 
     # setup env
     my $uri = $r->uri;
@@ -253,6 +259,11 @@ sub load_config
     return OK;
 }
 
+sub compile
+{
+    eval $_[0];
+}
+
 sub reset_codeblock
 {
     no strict;
@@ -326,10 +337,40 @@ sub bml_block
         return inline_error("_CODE block failed to execute by permission settings")
             unless $option_ref->{'DO_CODE'};
 
-        $req->{'didcode'} = 1;
         %CodeBlockOpts = ();
 
-        my $ret = (eval("{\n package BMLCodeBlock; no strict; \n $data\n }"))[0];
+        my $Package = "BMLCodeBlock";
+        my $need_compile;
+        my $subpack;
+        if ($data =~ /^\#BML:cache(:(\w+))?/) {
+            $subpack = $2 || Digest::MD5::md5_hex($data);
+            $Package = "BML::CodeBlock::$subpack";
+            $need_compile = not $CodeBlockMade{$subpack};
+        } else {
+            $req->{'didcode'} = 1; # only reset this package; not cached ones.
+            $need_compile = 1;
+        }
+
+        if ($need_compile) {
+            compile(join('',
+                         'package ',
+                         $Package,
+                         ';',
+                         "no strict;",
+                         "*ML = *BML::ML;",
+                         "*COOKIE = *BML::COOKIE;",
+                         "*GET = *BMLCodeBlock::GET;",
+                         "*POST = *BMLCodeBlock::POST;",
+                         "*FORM = *BMLCodeBlock::FORM;",
+                         'sub handler {',
+                         $data,
+                         "\n}"));
+            if ($@) { return "<B>[Error: $@]</B>"; }
+            if ($subpack) { $CodeBlockMade{$subpack} = 1; }
+        }
+        
+        my $cv = \&{"$Package\::handler"};
+        my $ret = eval { &{$cv}($req, $req->{'scratch'}) };
         if ($@) { return "<B>[Error: $@]</B>"; }
         
         return $ret if $CodeBlockOpts{'raw'} or $ret eq "";
@@ -380,6 +421,7 @@ sub bml_block
         foreach (split(/\s*\,\s*/, trim($element{'INCLUDE'}))) {
             load_look($req, $req->{'scheme'}, $_);
         }
+        if ($element{'PACKAGE'}) { $req->{'package'} = $element{'PACKAGE'}; }
         if ($element{'NOCACHE'}) { $req->{'env'}->{'NoCache'} = 1; }
         if ($element{'STATIC'}) { $req->{'env'}->{'Static'} = 1; }
         if ($element{'NOHEADERS'}) { $req->{'env'}->{'NoHeaders'} = 1; }

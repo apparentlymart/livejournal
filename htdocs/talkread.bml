@@ -3,12 +3,13 @@ TITLE=>Read Comments
 BODY<=
 
 (=_CODE
-#BML:cache
+#BML:cache:talkread
 
  use strict;
- use vars qw($head %FORM);
+ use vars qw($r_head %FORM);
 
- $head = "";  # not local.  used for making link elements
+ $r_head = "";
+ my $head = $_[1] ? \$_[1]->{'head'} : \$r_head;
 
  my $PAGE_SIZE = 25;
  my $THREADING_POINT = 50;
@@ -146,7 +147,7 @@ BODY<=
  $ret .= "</td></tr></table>";
 
  ## standout bar
- $ret .= LJ::Talk::link_bar($dbs, { 'u' => $u, 'up' => $up, 'headref' => \$head,
+ $ret .= LJ::Talk::link_bar($dbs, { 'u' => $u, 'up' => $up, 'headref' => $head,
                                     'remote' => $remote, 'itemid' => $ditemid, });
 
  ## dump the log entry, unless we're browsing a thread.
@@ -607,7 +608,7 @@ return $ret;
 
 _CODE=)
 <=BODY
-HEAD=>(=_CODE return $head _CODE=)
+HEAD=>(=_CODE return $_[1] ? $_[1]->{'head'} : $r_head _CODE=)
 PAGE=)(=_C <LJDEP>
 link: htdocs/userinfo.bml, htdocs/go.bml, htdocs/tools/memadd.bml, htdocs/editjournal_do.bml, htdocs/topics/additem.bml
 link: htdocs/tools/tellafriend.bml, htdocs/talkpost.bml, htdocs/talkread.bml, htdocs/delcomment.bml
