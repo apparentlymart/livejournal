@@ -2335,6 +2335,15 @@ that area. p?>
 
 /support/see_overrides.bml.title=User Overrides
 
+/support/see_request.bml.validationnag|notes=Do not translate this string! It is meant to be in English by default as it is used in support replies which are English based.  It will be translated on a needed basis.
+
+/support/see_request.bml.validationnag<<
+
+Your e-mail address has not been validated.  You will not have full functionality of your account until you have validated your email address.  You will also not be able to reclaim your account if your account security is ever compromised, or obtain your password if you forget it.
+
+For information on how to validate your email address, consult the documentation of this site.
+.
+
 /syn/index.bml.account=Account:
 
 /syn/index.bml.accounttype.notallowed=Your account type doesn't allow befriending syndicated accounts.
