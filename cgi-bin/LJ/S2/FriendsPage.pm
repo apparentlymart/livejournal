@@ -111,6 +111,7 @@ sub FriendsPage
     {
         ## load the itemids
         my @items = LJ::get_friend_items($dbs, {
+            'u' => $u,
             'userid' => $u->{'userid'},
             'remote' => $remote,
             'itemshow' => 1,
@@ -140,6 +141,7 @@ sub FriendsPage
     ## load the itemids 
     my %idsbycluster;
     my @items = LJ::get_friend_items($dbs, {
+        'u' => $u,
         'userid' => $u->{'userid'},
         'remote' => $remote,
         'itemshow' => $itemshow,

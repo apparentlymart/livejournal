@@ -248,6 +248,102 @@ sub dbs_selectrow_hashref
     return undef;
 }
 
+sub invalidate_friends_view_cache {
+    my $u = shift;
+    next unless $LJ::FV_CACHING;
+    my $udbh = LJ::get_cluster_master($u);
+    $udbh->do("DELETE FROM fvcache WHERE userid=?", undef, $u->{'userid'})
+        if $udbh;
+}
+
+sub get_cached_friend_items
+{
+    my ($u, $packedref, $want, $maskfrom, $opts) = @_;
+    
+    my $packnum = int(length($$packedref) / 8);
+    my $last = $want < $packnum ? $want : $packnum;
+
+    my %to_load;  # clusterid -> [ [journalid, itemid]* ]
+    my %anum;     # userid -> jitemid -> anum
+    for (my $i=0; $i<$last; $i++) {
+        # [3:userid][1:clusterid][3:jitemid][1:anum]
+        my @a = unpack("NN", substr($$packedref, $i*8, 8));
+        my $clusterid = $a[0] & 255;
+        my $userid = $a[0] >> 8;
+        my $anum = $a[1] & 255;
+        my $jitemid = $a[1] >> 8;
+        next unless $clusterid;  # cluster 0 not supported! (yet? no, probably never.)
+        push @{$to_load{$clusterid}}, [ $userid, $jitemid ];
+        $anum{$userid}->{$jitemid} = $anum;
+    }
+
+    my $dateformat = "%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H";
+    if ($opts->{'dateformat'} eq "S2") {
+        $dateformat = "%Y %m %d %H %i %s %w"; # yyyy mm dd hh mm ss day_of_week
+    }
+
+    my @items;
+    while (my ($c, $its) = each %to_load) {
+        my $udbr = LJ::get_cluster_reader($c);
+        my $sql = ("SELECT jitemid AS 'itemid', posterid, security, allowmask, replycount, journalid AS 'ownerid', rlogtime, ".
+                   "DATE_FORMAT(eventtime, \"$dateformat\") AS 'alldatepart', anum ".
+                   "FROM log2 WHERE " . join(" OR ", map { "(journalid=$_->[0] AND jitemid=$_->[1])" } @$its));
+        my $sth = $udbr->prepare($sql);
+        $sth->execute;
+        while (my $li = $sth->fetchrow_hashref) {
+            next unless $anum{$li->{'ownerid'}}->{$li->{'itemid'}} == $li->{'anum'};
+            next if $li->{'security'} eq "private" && $li->{'ownerid'} != $u->{'userid'};
+            next if $li->{'security'} eq "usemask" && (($li->{'allowmask'}+0) & $maskfrom->{$li->{'ownerid'}}) == 0;
+            $li->{'clusterid'} = $c;  # used/set elsewhere
+            $li->{'_fromcache'} = 1;  # so we know what's non-cached later
+            push @items, $li;
+        }
+    }
+
+    return sort { $a->{'rlogtime'} <=> $b->{'rlogtime'} } @items;    
+}
+
+sub set_cached_friend_items
+{
+    my ($u, $moddate, $itemref, $packedref) = @_;
+
+    my $new; # new packed string
+    my %seen; # what items we've added already
+    my $len = 0;  # how many items have been added to string
+    my $uncached = 0;  # how many items were from traditional fetch, not from previous cache
+    foreach my $it (@$itemref) {
+        $new .= pack("NN", ($it->{'ownerid'} << 8) + $it->{'clusterid'},
+                     ($it->{'itemid'} << 8) + $it->{'anum'});
+        
+        my $itemid = ($it->{'itemid'} << 8) + $it->{'anum'};
+        $seen{$it->{'ownerid'}}->{$itemid} = 1;
+        $len++;
+        $uncached++ unless $it->{'_fromcache'};
+    }
+
+    my $i = 0;
+    my $packnum = int(length($$packedref) / 8);
+    while ($i < $packnum && $len < $LJ::MAX_SCROLLBACK_FRIENDS) {
+        my $sec = substr($$packedref, $i*8, 8);
+        $i++;
+
+        my @a = unpack("NN", $sec);
+        my $userid = $a[0] >> 8;
+        my $itemid = $a[1];
+        next if $seen{$userid}->{$itemid};
+        $new .= $sec;
+    }
+
+    my $write_tolerance = 0;  # this could be increased if frequent writes cause too much pain.
+
+    if ($uncached > $write_tolerance) {
+        my $udbh = LJ::get_cluster_master($u);
+        $udbh->do("REPLACE INTO fvcache (userid, maxupdate, items) VALUES (?,?,?)", undef,
+                  $u->{'userid'}, $moddate, $new);
+    }
+}
+
+
 # <LJFUNC>
 # name: LJ::get_friend_items
 # des:
@@ -285,6 +381,9 @@ sub get_friend_items
     my $owners_ref = (ref $opts->{'owners'} eq "HASH") ? $opts->{'owners'} : {};
     my $filter = $opts->{'filter'}+0;
 
+    my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14;  # 2 week default.
+    my $lastmax = $LJ::EndOfTime - time() + $max_age;
+
     # sanity check:
     $skip = 0 if ($skip < 0);
 
@@ -298,6 +397,33 @@ sub get_friend_items
             $gmask_from->{$friendid} = $mask;
         }
     }
+
+    # common case: logged in user viewing their own friends page, without filtering
+    my ($could_cache, $used_cache) = (0, 0);
+    my $cache_changes;  # how many new items were added (later) to what we pulled from the cache
+    my ($cache_max_update, $cache_new_update);
+    my $fvcache;
+    if ($LJ::FV_CACHING && $remote && $remote->{'userid'} == $userid && 
+        LJ::get_cap($remote, "betatest") &&  # <---- temporary!
+        ! $filter && ! $opts->{'friendsoffriends'}) 
+    {
+        $could_cache = 1;  # so we save later, if enough new stuff
+        my $udbr = LJ::get_cluster_reader($opts->{'u'});
+        $fvcache = $udbr->selectrow_arrayref("SELECT maxupdate, items FROM fvcache ".
+                                             "WHERE userid=?", undef, $userid);
+        if ($fvcache) {
+            my $cache_size = length($fvcache->[1]) / 8;
+            if ($cache_size >= $getitems) {
+                $cache_new_update = $cache_max_update = $fvcache->[0];
+                $used_cache = 1;
+                push @items, LJ::get_cached_friend_items($opts->{'u'}, \$fvcache->[1], $getitems, $gmask_from, {
+                    'dateformat' => $opts->{'dateformat'}, 
+                });
+                $lastmax = $items[0]->{'rlogtime'} - 1 if @items;
+            }
+        }
+    }
+
 
     my $filtersql;
     if ($filter) {
@@ -317,11 +443,18 @@ sub get_friend_items
         # if we just finished a batch.
         if ($total_loaded % $buffer_unit == 0)
         {
-            my $sth = $dbr->prepare("SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V' AND uu.timeupdate IS NOT NULL ORDER BY 2 LIMIT $total_loaded, $buffer_unit");
+            my $timeafter = $cache_max_update ? "AND uu.timeupdate > '$cache_max_update' " : "";
+            my $sth = $dbr->prepare("SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid, uu.timeupdate ".
+                                    "FROM friends f, userusage uu, user u ".
+                                    "WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql ".
+                                    "AND u.statusvis='V' ".
+                                    "AND uu.timeupdate IS NOT NULL ".
+                                    $timeafter .
+                                    "ORDER BY 2 LIMIT $total_loaded, $buffer_unit");
             $sth->execute;
 
-            while (my ($userid, $update, $clusterid) = $sth->fetchrow_array) {
-                push @friends_buffer, [ $userid, $update, $clusterid ];
+            while (my ($userid, $update, $clusterid, $timeupdate) = $sth->fetchrow_array) {
+                push @friends_buffer, [ $userid, $update, $clusterid, $timeupdate ];
                 $total_loaded++;
             }
 
@@ -383,9 +516,7 @@ sub get_friend_items
     } if $opts->{'friendsoffriends'};
 
     my $loop = 1;
-    my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14;  # 2 week default.
-    my $lastmax = $LJ::EndOfTime - time() + $max_age;
-    my $itemsleft = $getitems;
+    my $itemsleft = $getitems - @items;  # items might've been filled by common case cache 
     my $fr;
 
     while ($loop && ($fr = $get_next_friend->()))
@@ -419,7 +550,10 @@ sub get_friend_items
         {
             push @items, @newitems;
 
-            $opts->{'owners'}->{$friendid} = 1;
+            # update the time of the fv cache, if we're doing caching
+            if ($could_cache && (! $cache_new_update || $fr->[3] gt $cache_new_update)) {
+                $cache_new_update = $fr->[3];  # the DATETIME timeupdate field for the journal
+            }
 
             $itemsleft--; # we'll need at least one less for the next friend
 
@@ -445,6 +579,11 @@ sub get_friend_items
     # remove skipped ones
     splice(@items, 0, $skip) if $skip;
 
+    # get items
+    foreach (@items) {
+        $opts->{'owners'}->{$_->{'ownerid'}} = 1;
+    }
+
     # return the itemids grouped by clusters, if callers wants it.
     if (ref $opts->{'idsbycluster'} eq "HASH") {
         foreach (@items) {
@@ -456,6 +595,11 @@ sub get_friend_items
             }
         }
     }
+
+    if ($could_cache && $cache_new_update ne $cache_max_update) {
+        LJ::set_cached_friend_items($opts->{'u'}, $cache_new_update,
+                                    \@items, \$fvcache->[1]);
+      }
 
     return @items;
 }

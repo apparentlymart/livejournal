@@ -64,6 +64,7 @@
    
     $MAX_HINTS_LASTN ||= 100;
     $MAX_SCROLLBACK_LASTN ||= 400;
+    $MAX_SCROLLBACK_FRIENDS ||= 1000;
 
     $RECENT_SPAN ||= 14;
 

@@ -7,6 +7,7 @@ mark_clustered("useridmap", "userbio", "syncupdates2", "cmdbuffer", "dudata",
                "talk2", "talkprop2", "talktext2", "talkleft",
                "userpicblob2", "events",
                "ratelog", "loginstall", "sessions", "sessions_data",
+               "fvcache",
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -1565,6 +1566,14 @@ CREATE TABLE sessions_data (
    skey       VARCHAR(30) NOT NULL,
    PRIMARY KEY (userid, sessid, skey),
    sval       VARCHAR(255)
+)
+EOC
+
+register_tablecreate("fvcache", <<'EOC'); # user cluster
+CREATE TABLE fvcache (
+   userid    MEDIUMINT UNSIGNED NOT NULL PRIMARY KEY,
+   maxupdate DATETIME,
+   items     BLOB
 )
 EOC
 

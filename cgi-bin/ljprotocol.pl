@@ -1504,6 +1504,7 @@ sub editfriends
     $sth->finish;
 
     # perform the deletions
+    my $did_deletes = 0;
   DELETEFRIEND:
     foreach (@{$req->{'delete'}})
     {
@@ -1511,9 +1512,9 @@ sub editfriends
         next DELETEFRIEND unless ($curfriend{$deluser});
 
         my $friendid = LJ::get_userid($dbh, $deluser);
-        $sth = $dbh->prepare("DELETE FROM friends ".
-                             "WHERE userid=$userid AND friendid=$friendid");
-        $sth->execute;
+        $dbh->do("DELETE FROM friends WHERE userid=? AND friendid=?", undef,
+                 $userid, $friendid);
+        $did_deletes = 1;
         $friend_count--;
     }
 
@@ -1596,6 +1597,10 @@ sub editfriends
 
         }
     }
+
+    # invalidate friends view cache (kinda lazy.... a better solution later
+    # would be to only delete the matching packed items)
+    LJ::invalidate_friends_view_cache($u) if $did_deletes || $friends_added;
 
     return fail($err,104) if $error_flag;
     return $res;
