@@ -50,16 +50,20 @@ $maint{'clean_caches'} = sub
         }
 
         # cluster is up, do move
-        my $cols = join(",", qw(userid posttime journalid nodetype
-                                nodeid jtalkid publicitem));
+        my @cols = qw(userid posttime journalid nodetype nodeid jtalkid publicitem);
+        my $cols = join(",", @cols);
 
         my $s = $dbh->prepare("SELECT $cols FROM talkleft_xfp WHERE userid=?");
         $s->execute($userid);
         my @insert_vals;
-        while (my @curr_vals = $s->fetchrow_array) {
-            push @insert_vals, ("(" . 
-                                join(",", map { $dbcm->quote($_) } @curr_vals) .
-                                ")");
+        my @delete_vals;
+        while (my $row = $s->fetchrow_hashref) {
+            %$row = map { $_, $dbcm->quote($row->{$_}) } @cols;
+            push @insert_vals, ("(" . join(",", map { $row->{$_} } @cols) . ")");
+            push @delete_vals, ("(journalid=$row->{'journalid'} AND " .
+                                "nodetype=$row->{'nodetype'} AND " .
+                                "nodeid=$row->{'nodeid'} AND " .
+                                "jtalkid=$row->{'jtalkid'})");
         }
 
         print "    moving: $user\n" if $verbose;
@@ -70,7 +74,12 @@ $maint{'clean_caches'} = sub
         }
 
         # no error, delete from _xfp
-        $dbh->do("DELETE FROM talkleft_xfp WHERE userid=?", undef, $userid);
+        $dbh->do("DELETE FROM talkleft_xfp WHERE userid=? AND (" .
+                 join(" OR ", @delete_vals) . ")", undef, $userid);
+        if ($dbh->err) {
+            print "    db error: " . $dbh->errstr . "\n";
+            next;
+        }
 
         $user_ct++;
     }
