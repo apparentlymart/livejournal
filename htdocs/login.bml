@@ -23,7 +23,7 @@
     my $remote = LJ::get_remote();
     my $cursess = $remote ? $remote->{'_session'} : undef;
 
-    if ($remote->readonly) {
+    if ($remote && $remote->readonly) {
         $body = LJ::bad_input("The database is temporarily in read-only mode, so creating new login sessions is temporarily down.  Please try again later.");
         return;
     }
