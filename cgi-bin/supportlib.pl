@@ -428,7 +428,7 @@ sub file_request
     $body .= "Subject:  $o->{'subject'}\n\n";
     $body .= "You can track its progress or add information here:\n\n";
     $body .= $url;
-    $body .= "\n\nIf you do not wish to receive notifications of incoming support requests, you may may change your notification settings here:\n\n";
+    $body .= "\n\nIf you do not wish to receive notifications of incoming support requests, you may change your notification settings here:\n\n";
     $body .= "$LJ::SITEROOT/support/changenotify.bml";
     $body .= "\n\n" . "="x70 . "\n\n";
     $body .= $o->{'body'};
