@@ -100,10 +100,15 @@
              my $arg = $FORM{'arg'};
              if ($privcode) {
                  if ($access{'*'} || $access{$privcode} || $access{"$privcode/$arg"}) {
-                     my $qarg = $dbh->quote($arg);
-                     $dbh->do("INSERT INTO priv_map (prmid, userid, prlid, arg) VALUES (NULL, $userid, $qpriv, $qarg)");
-                     LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, "privadd", "Granting: \"$privcode\" with arg \"$FORM{'arg'}\"");
-                     $ret .= "Privilege <B>$privcode</B> granted.<br />\n";
+                     my $u = LJ::want_user($userid);
+                     if (LJ::check_priv($u, $privcode, $arg)) {
+                         $ret .= "User already has specified priv <b>$privcode $arg</b>.<br />";
+                     } else {
+                         my $qarg = $dbh->quote($arg);
+                         $dbh->do("INSERT INTO priv_map (prmid, userid, prlid, arg) VALUES (NULL, $userid, $qpriv, $qarg)");
+                         LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, "privadd", "Granting: \"$privcode\" with arg \"$FORM{'arg'}\"");
+                         $ret .= "Privilege <B>$privcode</B> granted.<br />\n";
+                     }
                  } else {
                      $ret .= "You don't have access to grant <B>$privcode</B> with argument '$arg'.<br />\n";
                  }
@@ -113,13 +118,17 @@
          }
          if ($FORM{'grantuser'}) {
              my $userid = LJ::get_userid($FORM{'grantuser'});
+             my $u = LJ::load_userid($userid);
              my $privid = $pcode2id{$FORM{'priv'}};
              my $arg = $FORM{'arg'};
              my $qarg = $dbh->quote($arg);
              my $privcode = $priv{$privid}->{'privcode'};
              if ($privcode) {
                  if ($access{'*'} || $access{$privcode} || $access{"$privcode/$arg"}) {
-                     if ($userid && $privid) {
+                     if (LJ::check_priv($u, $privcode, $arg)) {
+                         $ret .= "User already has specified priv <b>$privcode $arg</b>.<br />";
+                     }
+                     elsif ($userid && $privid) {
                          my $qarg = $dbh->quote($FORM{'arg'});
                          $dbh->do("INSERT INTO priv_map (prmid, userid, prlid, arg) VALUES (NULL, $userid, $privid, $qarg)");
                          LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, "privadd", "Granting: \"$privcode\" with arg \"$FORM{'arg'}\"");
