@@ -169,8 +169,8 @@
          $body .= "<td><?ljuser $poster ljuser?></td>";
      }
 
-     LJ::CleanHTML::clean_subject_all(\$subject);
      BML::ebml(\$subject);
+     LJ::CleanHTML::clean_subject_all(\$subject);
 
      my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
      $body .= "<td><a href=\"/talkread.bml?${jarg}itemid=$itemid\">$subject</a>$sec$rep</td></tr>\n";
