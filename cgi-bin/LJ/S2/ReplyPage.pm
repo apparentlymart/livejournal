@@ -212,10 +212,11 @@ sub ReplyForm__print
         $ret .= "<input type='hidden' id='subjectIconField' name='subjecticon' value='none'>\n";
         $ret .= "<script type='text/javascript' language='Javascript'>\n";
         $ret .= "<!--\n";
+        $ret .= "if (document.getElementById) {\n";
         $ret .= "document.write(\"";
-        $ret .=  LJ::Talk::show_none_image("id='subjectIconImage' style='cursor:hand' align='absmiddle' ".
-                                           "onclick='subjectIconListToggle();' ".
-                                           "title='Click to change the subject icon'");
+        $ret .=  LJ::ejs(LJ::Talk::show_none_image("id='subjectIconImage' style='cursor:hand' align='absmiddle' ".
+                                                   "onclick='subjectIconListToggle();' ".
+                                                   "title='Click to change the subject icon'"));
         $ret .="\");\n";
 
 
@@ -252,6 +253,7 @@ sub ReplyForm__print
         # end that table, bar!
         $ret .= "document.write(\"</table></blockquote>\");\n";
 
+        $ret .= "}\n";
         $ret .="//-->\n";
         $ret .= "</script>\n";
     }
