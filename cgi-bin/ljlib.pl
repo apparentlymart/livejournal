@@ -810,17 +810,18 @@ sub get_recent_items
 #       crappy thing about this interface is that it doesn't allow
 #       a batch of userprops to be updated at once, which is the
 #       common thing to do.
-# args: dbarg?, uuserid, propname, value
+# args: dbarg?, uuserid, propname, value, memonly?
 # des-uuserid: The userid of the user or a user hashref.
 # des-propname: The name of the property.  Or a hashref of propname keys and corresponding values.
 # des-value: The value to set to the property.  If undefined or the
 #            empty string, then property is deleted.
+# des-memonly: if true, only writes to memcache, and not to database.
 # </LJFUNC>
 sub set_userprop
 {
     shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
 
-    my ($u, $propname, $value) = @_;
+    my ($u, $propname, $value, $memonly) = @_;
     $u = ref $u ? $u : LJ::load_userid($u);
     my $userid = $u->{'userid'}+0;
 
@@ -834,26 +835,37 @@ sub set_userprop
         if ($p->{'cldversion'} && $u->{'dversion'} >= $p->{'cldversion'}) {
             $table = "userproplite2";
         }
-        my $db = $action{$table}->{'db'} ||= ($table ne "userproplite2" ? LJ::get_db_writer() : 
-                                              LJ::get_cluster_master($u));
-        return 0 unless $db;
+        unless ($memonly) {
+            my $db = $action{$table}->{'db'} ||= ($table ne "userproplite2" ? LJ::get_db_writer() : 
+                                                  LJ::get_cluster_master($u));
+            return 0 unless $db;
+        }
         $value = $hash->{$propname};
         if (defined $value && $value) {
-            push @{$action{$table}->{"replace"}}, "($userid, $p->{'id'}, " . $db->quote($value) . ")";
+            push @{$action{$table}->{"replace"}}, [ $p->{'id'}, $value ];
         } else {
             push @{$action{$table}->{"delete"}}, $p->{'id'};
         }
     }
 
+    my $expire = time()+60*30;
     foreach my $table (keys %action) {
         my $db = $action{$table}->{'db'};
         if (my $list = $action{$table}->{"replace"}) {
-            $list = join(',', @$list);
-            $db->do("REPLACE INTO $table (userid, upropid, value) VALUES $list");
+            if ($db) {
+                my $vals = join(',', map { "($userid,$_->[0]," . $db->quote($_->[1]) . ")" } @$list);
+                $db->do("REPLACE INTO $table (userid, upropid, value) VALUES $vals");
+            }
+            foreach (@$list) {
+                LJ::MemCache::set([$userid,"uprop:$userid:$_->[0]"], $_->[1], $expire) foreach (@$list);
+            }
         }
         if (my $list = $action{$table}->{"delete"}) {
-            $list = join(',', @$list);
-            $db->do("DELETE FROM $table WHERE userid=$userid AND upropid IN ($list)");
+            if ($db) {
+                my $in = join(',', @$list);
+                $db->do("DELETE FROM $table WHERE userid=$userid AND upropid IN ($in)");
+            }
+            LJ::MemCache::set([$userid,"uprop:$userid:$_"], "", $expire) foreach (@$list);
         }
     }
     return 1;
@@ -2021,15 +2033,19 @@ sub img
 # name: LJ::load_user_props
 # des: Given a user hashref, loads the values of the given named properties
 #      into that user hashref.
-# args: dbarg?, u, propname*
+# args: dbarg?, u, opts?, propname*
+# des-opts: hashref of opts.  set key 'cache' to use memcache.
 # des-propname: the name of a property from the userproplist table.
 # </LJFUNC>
 sub load_user_props
 {
     shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
 
-    my ($u, @props) = @_;
+    my $u = shift;
     return unless ref $u eq "HASH";
+
+    my $opts = ref $_[0] ? shift : {};
+    my (@props) = @_;
 
     my ($sql, $sth);
     LJ::load_props("user");
@@ -2037,6 +2053,19 @@ sub load_user_props
     ## user reference
     my $uid = $u->{'userid'}+0;
     $uid = LJ::get_userid($u->{'user'}) unless $uid;
+
+    my $mem = {};
+    if ($opts->{'cache'}) {
+        my @keys;
+        foreach (@props) {
+            next if exists $u->{$_};
+            my $p = LJ::get_prop("user", $_);
+            next unless $p;
+            push @keys, [$uid,"uprop:$uid:$p->{'id'}"];
+        }
+        $mem = LJ::MemCache::get_multi(@keys) || {};
+    }
+    my @needwrite;  # [propid, propname] entries we need to save to memcache later
 
     my %loadfrom;
     unless (@props) {
@@ -2050,6 +2079,11 @@ sub load_user_props
             next if exists $u->{$_};
             my $p = LJ::get_prop("user", $_);
             next unless $p;
+            if (exists $mem->{"uprop:$uid:$p->{'id'}"}) {
+                $u->{$_} = $mem->{"uprop:$uid:$p->{'id'}"};
+                next;
+            }
+            push @needwrite, [ $p->{'id'}, $_ ];
             my $source = $p->{'indexed'} ? "userprop" : "userproplite";
             if ($p->{'cldversion'} && $u->{'dversion'} >= $p->{'cldversion'}) {
                 $source = "userproplite2";  # clustered
@@ -2059,10 +2093,16 @@ sub load_user_props
     }
 
     foreach my $table (keys %loadfrom) {
-        my $db = $table eq "userproplite2" ? 
-            LJ::get_cluster_reader($u) : 
-            LJ::get_db_reader();
-
+        my $db;
+        if ($opts->{'cache'} && @LJ::MEMCACHE_SERVERS) {
+            $db = $table eq "userproplite2" ? 
+                LJ::get_cluster_master($u) : 
+                LJ::get_db_writer();
+        } else {
+            $db = $table eq "userproplite2" ? 
+                LJ::get_cluster_reader($u) : 
+                LJ::get_db_reader();
+        }
         $sql = "SELECT upropid, value FROM $table WHERE userid=$uid";
         if (ref $loadfrom{$table}) {
             $sql .= " AND upropid IN (" . join(",", @{$loadfrom{$table}}) . ")";
@@ -2100,6 +2140,14 @@ sub load_user_props
     foreach my $prop (@props) {
         next if (defined $u->{$prop});
         $u->{$prop} = $LJ::USERPROP_DEF{$prop};
+    }
+
+    if ($opts->{'cache'}) {
+        my $expire = time() + 60*30;
+        foreach my $wr (@needwrite) {
+            my ($id, $name) = ($wr->[0], $wr->[1]);
+            LJ::MemCache::set([$uid,"uprop:$uid:$id"], $u->{$name} || "", $expire);
+        }
     }
 }
 
@@ -3323,7 +3371,7 @@ sub make_journal
         push @needed_props, "opt_logcommentips";
     }
 
-    LJ::load_user_props($u, @needed_props);
+    LJ::load_user_props($u, { 'cache' => 1 }, @needed_props);
 
     # if the remote is the user to be viewed, make sure the $remote
     # hashref has the value of $u's opt_nctalklinks (though with

@@ -725,9 +725,10 @@ body<=
 
             # set userprops
             foreach my $uprop (@uprops) {
-                if ($POST{$uprop} ne $u->{$uprop}) {
-                    LJ::set_userprop($u, $uprop, $POST{$uprop});
-                  }
+                my $eff_val = $POST{$uprop};   # effective value, since 0 isn't stored
+                $eff_val = "" unless $eff_val;
+                my $mem_only = $eff_val eq $u->{$uprop};
+                LJ::set_userprop($u, $uprop, $eff_val, $mem_only);
             }
         }
 

@@ -167,6 +167,7 @@ sub _load_items
 
     my %flags;
     my %val;
+    my %len;   # key -> intended length
 
     my $cmd = "get @_\r\n";
     $sock->print($cmd);
@@ -177,6 +178,7 @@ sub _load_items
         if ($line =~ /^VALUE (\S+) (\d+) (\d+)\r\n$/s) {
             my ($rk, $flags, $len) = ($1, $2, $3);
             $flags{$rk} = $flags if $flags;
+            $len{$rk} = $len;
             my $bytes_read = 0;
             my $buf;
             while (defined($line = $sock->getline)) {
@@ -196,7 +198,7 @@ sub _load_items
         }
         if ($line eq "END\r\n") {
             foreach (@_) {
-                next unless $val{$_};
+                next unless length($val{$_}) == $len{$_};
                 $val{$_} = Storable::thaw($val{$_}) if $flags{$_} & 1;
                 $outref->{$_} = $val{$_};
             }
