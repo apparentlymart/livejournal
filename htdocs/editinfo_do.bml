@@ -254,22 +254,20 @@ BODY<=
      $ret .= "(=H1 LiveJournal Options H1=)(=P Select below your personal privacy options and preferences. P=)";
      $ret .= "<P><TABLE>\n";
 
-     unless ($LJ::DISABLED{'directory'}) {
-	 my $checked;
-	 $checked = $u->{'allow_infoshow'} eq "Y" ? "CHECKED" : "";
-	 $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_infoshow $checked></TD><TD><B>Be listed in the LiveJournal Directory</B></TD></TR>\n";
-	 $ret .= "<TR><TD>&nbsp;</TD><TD>You should keep this option enabled.  This allows you to be included in the really cool \"regional journal directory\", where people can find other people's journals that are in a specific area.</TD></TR>\n";
-     }
+     my $checked;
+     $checked = $u->{'allow_infoshow'} eq "Y" ? "CHECKED" : "";
+     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=allow_infoshow $checked></TD><TD><B>Show location & birthday</B></TD></TR>\n";
+     $ret .= "<TR><TD>&nbsp;</TD><TD>Turn this on if you want your city/state/country and birthday to be visible to other users.</TD></TR>\n";
 
-     $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT>&nbsp;</TD><TD><B>Show your contact information on your LiveJournal?</B></TD></TR>\n";
-     $ret .= "<TR><TD>&nbsp;</TD><TD>You should keep this option enabled.  This lets other people be able to contact you by showing your email address, ICQ number, and AOL Instant Messanger screenname all on your LiveJournal.";
+     $checked = $u->{'allow_infoshow'} ne "N" ? "CHECKED" : "";
+     $ret .= "<tr valign=middle><td width=50 align=right><input type=checkbox name=allow_contactshow $checked></td><td><b>Show your contact information on your LiveJournal?</b></td></tr>\n";
+     $ret .= "<tr><td>&nbsp;</td><td>You should keep this option enabled.  This lets other people be able to contact you by showing your email address, ICQ number, and AOL Instant Messanger screenname all on your LiveJournal.";
 
      {
-	 $ret .= "<p><b>Visible to:</b> ";
-	 $ret .= LJ::html_select({ 'name' => 'allow_contactshow',
-				   'selected' => $u->{'allow_contactshow'} || "Y",
+	 $ret .= "<p><b>Security:</b> ";
+	 $ret .= LJ::html_select({ 'name' => 'contactshow_sec',
+				   'selected' => $u->{'allow_contactshow'},
 			       }, 
-				 "N" => "Nobody",
 				 "Y" => "Everybody",
 				 "F" => "Friends only",
 				 );
@@ -484,7 +482,7 @@ BODY<=
 		   'email' => $FORM{'email'},
 		   'status' => ($email_changed && $u->{'status'} eq "A") ? "T" : $u->{'status'},
 		   'has_bio' => $has_bio,
-		   'allow_contactshow' => $FORM{'allow_contactshow'} =~ /^[YNF]$/ ? $FORM{'allow_contactshow'} : "N",
+		   'allow_infoshow' => $FORM{'allow_infoshow'} ? "Y" : "N",
 		   'allow_getljnews' => $FORM{'allow_getljnews'} ? "Y" : "N",
 		   'opt_showtalklinks' => $FORM{'opt_showtalklinks'} ? "Y" : "N",
 		   'opt_gettalkemail' => $FORM{'opt_gettalkemail'} ? "Y" : "N",
@@ -494,10 +492,13 @@ BODY<=
 		   'txtmsg_status' => $txtmsg_status,
 		   );
 
-     unless ($LJ::DISABLED{'directory'}) {
-	 $update{'allow_infoshow'} = $FORM{'allow_infoshow'} ? "Y" : "N";
+     if ($FORM{'allow_contactshow'}) {
+	 $update{'allow_contactshow'} = "Y";
+	 $update{'allow_contactshow'} = "F" if ($FORM{'contactshow_sec'} eq "F");
+     } else {
+	 $update{'allow_contactshow'} = "N";
      }
-     
+
      # update 'user' table
      my $sets = "";
      foreach (keys %update)
