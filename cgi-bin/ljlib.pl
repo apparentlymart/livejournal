@@ -606,7 +606,7 @@ sub get_urls
 
 # <LJFUNC>
 # name: LJ::record_meme
-# des: Records a URL reference in a journal entry.
+# des: Records a URL reference from a journal entry to the meme table.
 # args: dbarg, url, posterid, itemid
 # des-url: URL to log
 # des-posterid: Userid of person posting
@@ -624,8 +624,9 @@ sub record_meme
     my $qurl = $dbh->quote($url);
     $posterid += 0;
     $itemid += 0;
-    $dbh->do("REPLACE INTO meme (url, posterid, itemid) " .
-	     "VALUES ($qurl, $posterid, $itemid)");
+    LJ::query_buffer_add($dbs, "meme",
+			 "REPLACE INTO meme (url, posterid, itemid) " .
+			 "VALUES ($qurl, $posterid, $itemid)");
 }
 
 # <LJFUNC>
@@ -2351,6 +2352,19 @@ sub load_moods
     $LJ::CACHED_MOODS = 1;
 }
 
+# <LJFUNC>
+# name: LJ::query_buffer_add
+# des: Schedules an insert/update query to be run on a certain table sometime 
+#      in the near future in a batch with a lot of similar updates, or
+#      immediately if the site doesn't provide query buffering.  Returns
+#      nothing (no db error code) since there's the possibility it won't
+#      run immediately anyway.
+# args: dbarg, table, query
+# des-table: Table to modify.
+# des-query: Query that'll update table.  The query <b>must not</b> access
+#            any table other than that one, since the update is done inside
+#            an explicit table lock for performance.
+# </LJFUNC>
 sub query_buffer_add
 {
     my ($dbarg, $table, $query) = @_;
