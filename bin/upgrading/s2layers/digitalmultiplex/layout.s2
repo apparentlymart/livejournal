@@ -504,21 +504,21 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
         defined $e.userpic) and $p.view != "entry") {
         println """<td valign="top"><table cellspacing="0" cellpadding="0" class="full_entry_userpic"><tr><td align="center">""";
         if ($p.view == "friends") {
-            if (defined $e.userpic) {
-                """<img src="$e.userpic.url" width="$e.userpic.width"
-                    style="color: $fgcolor; background: $bgcolor; border: 2px solid $bgcolor;"
-                    height="$e.userpic.height" alt="" align="right" class="frienduserpic" />""";
-            }
             if ($e.poster.username != $e.journal.username) {
                 print $e.poster->as_string() + ", posting in ";
             }
-            print $e.journal->as_string();
+            print $e.journal->as_string() + "<br />";
+            if (defined $e.userpic) {
+                """<img src="$e.userpic.url" width="$e.userpic.width"
+                    style="color: $fgcolor; background: $bgcolor; border: 2px solid $bgcolor;"
+                    height="$e.userpic.height" alt="" align="right" />""";
+            }
         } elseif ($e.poster.username != $e.journal.username) {
+            print $e.poster->as_string() + "<br />";
             if (defined $e.userpic) {
                 """<img src="$e.userpic.url" width="$e.userpic.width"
                    height="$e.userpic.height" alt="" align="right" />""";
             }
-            print $e.poster->as_string();
         } elseif (defined $e.userpic and $p.view != "entry") {
             """<img src="$e.userpic.url" width="$e.userpic.width"
                height="$e.userpic.height" alt="" align="right" />""";
@@ -621,17 +621,14 @@ body {
 }
 h1 {
     font-size: 2.0em;
-    line-height: 1.2em;
 }
 p, td, blockquote { 
     font-size: 1.0em; 
-    line-height: 1.2em; 
 }
 pre, code, kbd, tt {
     font-size: 1.1em; 
     font-family: monospace;
 }
-
 a {
     color: $*main_link_color;
 }
@@ -678,6 +675,7 @@ a:visited {
     width: 100%;
 }
 .full_entry_userpic {
+    font-size: .8em;
     border: 1px solid $*border_color;
     padding: 3px;
 }
@@ -953,8 +951,9 @@ function EntryPage::lay_sidebar_view_userpic() : string {
     $return = $return + $.entry.journal->as_string();
     return $return;
 }
+
 function EntryPage::print_body () {
-    print_entry_full($this, $.entry, null Color, null Color, false);
+    print_entry_full($this, $.entry, null Color, null Color, $.viewing_thread);
     if ($.entry.comments.enabled)
     {
         var string pages;
