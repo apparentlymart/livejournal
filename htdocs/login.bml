@@ -25,6 +25,123 @@
         return;
     }
 
+    my $login_html = sub {
+        if ($remote) {
+            $body .= "<?p " . BML::ml(".login.text3", {'sitename' => $LJ::SITENAME,
+                    'username' => LJ::ljuser($remote)}) . " p?>\n";
+        } else {
+            $body .= "<?p " . BML::ml(".login.text1", {'sitename' => $LJ::SITENAME}) . " p?>\n";
+        }
+        $body .= "<?p $ML{'.login.text2'} p?>\n";
+
+        $body .= "<form action='login.bml' method='post' id='login'>\n";
+
+        my $chal = LJ::challenge_generate(300); # 5 minute auth token
+        $body .= "<input type='hidden' name='chal' id='login_chal' value='$chal' />";
+        $body .= "<input type='hidden' name='response' id='login_response' value='' />";
+
+        my $referer = BML::get_client_header('Referer');
+        if ($GET{'ret'} && $referer) {
+            my $eh_ref = LJ::ehtml($referer);
+            $body .= "<input type='hidden' NAME='ref' value='$eh_ref' />\n";
+        }
+
+        $body .= "<?standout\n";
+        $body .= "<table border=0 cellpadding='3'>\n";
+        if ($remote) {
+            $body .= "<tr><td>$ML{'.login.username'}</td><td><b>$remote->{'user'}</b> <input type='submit' name='action:logout' value='$ML{'.logout.btn'}' /></td></tr>\n";
+        } else {
+            $body .= "<tr><td>$ML{'.login.username'}</td><td><input type='text' value='$user' name='user' size='15' maxlength='15' /></td></tr>\n";
+            $body .= "<tr><td valign='top'>$ML{'.login.password'}</td><td><input type='password' name='password' id='xc_password' size='15' maxlength='30' />";
+            $body .= "<br /><a href='/lostinfo.bml'><font size='1'>$ML{'.login.forget'}</font></a></td></tr>\n";
+            if (@errors) {
+                $body .= "<tr><td colspan='2'>";
+                $body .= "<?soerror $_ soerror?>" foreach @errors;
+                $body .="</td></tr>";
+            }
+        }
+
+        my $checked;
+        my $checkcond = sub {
+            my $cond = shift;
+            $checked = $cond ? " checked='checked'" : "";
+        };
+
+        # expiration
+        my $curexp = $cursess ? $cursess->{'exptype'} : "short";
+        $body .= "<tr valign='top'><td>$ML{'.login.expiration'}</td><td>\n";
+        $checkcond->($curexp eq "short");
+        $body .= "<input type='radio' name='expire' value='close' $checked id='close' /> <label for='close'>$ML{'.login.whenbrowsercloses'}</label><br />\n";
+        $checkcond->($curexp eq "long");
+        $body .= "<input type='radio' name='expire' value='never' $checked id='never' /> <label for='never'>$ML{'.login.never'}</label>\n";
+        $body .= "</td></tr>\n";
+
+        # bind?
+        my $curbind = $cursess && $cursess->{'ipfixed'} ? "yes" : "no";
+        $body .= "<tr valign='top'><td>$ML{'.bindip.label'}</td><td>\n";
+        $checkcond->($curbind eq "yes");
+        $body .= "<input type='radio' name='bindip' value='yes' $checked id='bindyes' /> <label for='bindyes'>$ML{'.bindip.yes'}</label><br />\n";
+        $checkcond->($curbind eq "no");
+        $body .= "<input type='radio' name='bindip' value='no' $checked id='bindipno' /> <label for='bindipno'>$ML{'.bindip.no'}</label>\n";
+        $body .= "</td></tr>\n";
+
+        $body .= "<tr><td></td><td align='left'>";
+        if ($remote) {
+            $body .= "<input name='action:change' type='submit' value='$ML{'.login.btn.changeopts'}' />";
+        } else {
+
+            # FIXME: needs translation 'standard'/'secure' and make the below ML strings.
+            my $insecure;
+            if ( ! $LJ::IS_SSL) {
+                $insecure = "[ <b>Standard</b> | <a href='$LJ::SSLROOT/login.bml'>Secure</a> ]";
+            } else {
+                $insecure = "[ <b>Standard</b> | Secure ]";
+            }
+            my $secure = "[ Standard | <b>Secure</b> ]";
+
+            my $login_btn_text = LJ::ejs($ML{'.login.btn.login'});
+            if (! $LJ::IS_SSL) {
+                $body .= "<script>
+                    document.write(\"<input name='action:login' onclick='sendForm()' type='submit' value='$login_btn_text' />\");";
+            } else {
+                $body .= "<script>
+                    document.write(\"<input name='action:login' type='submit' value='$login_btn_text' />\");";
+            }
+            $body .= "
+                if (document.getElementById('login')) {
+                    document.write(\"&nbsp; <img src='$LJ::SITEROOT/img/icon_protected.gif' width='14' height='15' alt='secure login' align='middle'/>\");
+                    document.write(\"<br />\");
+                    document.write(\"$secure\")
+                } ";
+            $body .= '</script>';
+            $body .= "<noscript><input name='action:login' type='submit' value='$ML{'.login.btn.login'}' /><br />";
+            $body .= $LJ::IS_SSL ? $secure : $insecure;
+            $body .= "</noscript>";
+            $body .= '&nbsp;';
+            $body .= LJ::help_icon('securelogin');
+
+        }
+        $body .= "</td></tr>\n";
+
+        if (! $remote && LJ::are_hooks("login_formopts")) {
+            $body .= "<tr><td>$ML{'.login.otheropts'}</td><td style='white-space: nowrap'>\n";
+            LJ::run_hooks("login_formopts", { 'ret' => \$body });
+            $body .= "</td></tr>\n";
+        }
+        $body .= "</table>\n";
+        $body .= " standout?>\n";
+        $body .= "</form>\n";
+
+        $body .= "<?h1 $ML{'.whylogin.head'} h1?>\n";
+        $body .= "<?p $ML{'.whylogin.text'} p?>\n";
+        $body .= "<ul>\n";
+        $body .= "<li>$ML{'.whylogin.benefit1'}</li>\n";
+        $body .= "<li>$ML{'.whylogin.benefit2'}</li>\n";
+        $body .= "<li>$ML{'.whylogin.benefit3'}</li>\n";
+        $body .= "</ul>\n";
+        return;
+    };
+
     if (LJ::did_post()) {
 
         my $do_change = $POST{'action:change'};
@@ -87,37 +204,36 @@
         if ($do_login) {
 
             my $u = LJ::load_user($user);
-            my $login_error;
-            unless ($u) {
-                push @errors, "$ML{'error.username_notfound'}";
-                $login_error = "$ML{'.error.noaccount'}";
-            }
+            push @errors, "$ML{'error.username_notfound'}" unless $u;
             if (LJ::get_cap($u, "readonly")) {
                 $body = LJ::bad_input("The database is temporarily in read-only mode, so creating new login sessions is temporarily down.  Please try again later.");
                 return;
             }
             
-            my $banned = 0;
-        
-            if ($u && ! LJ::auth_okay($u, $password, undef, undef, \$banned)) {
-                if ($banned) {
-                    $body = LJ::bad_input("Your IP address is temporarily banned for exceeding the login failure rate.");
-                    return;
-                } else {
-                    push @errors, "$ML{'error.badpassword'}"; 
-                    $login_error = "$ML{'.error.forgotpass'}";
-                }
+            my ($banned, $ok);
+            $banned = $ok = 0;
+
+            if ($POST{response}) {
+                $ok = LJ::challenge_check_login($u, $POST{chal}, $POST{response}, \$banned);
+            } else {  # js disabled, fallback to plaintext
+                $ok = LJ::auth_okay($u, $password, undef, undef, \$banned);
             }
-        
-            if (@errors) {
-                $body = LJ::bad_input(@errors);
-                $body .= $login_error;
+
+            if ($banned) {
+                $body = LJ::bad_input("Your IP address is temporarily banned for exceeding the login failure rate.");
                 return;
             }
-        
+
+            push @errors, "$ML{'error.badpassword'}" if $u && ! $ok;
+
+            if (@errors) {
+                $login_html->(@errors);
+                return;
+            }
+
             LJ::load_user_props($u, "browselang", "schemepref");
             my $bl = LJ::Lang::get_lang($u->{'browselang'});
-            
+
             my $bindip;
             if ($POST{'bindip'} eq "yes") {
                 $bindip = BML::get_remote_ip();
@@ -174,81 +290,7 @@
             $remote = $u;
         }
     }
-
-    if ($remote) {
-        $body .= "<?p " . BML::ml(".login.text3", {'sitename' => $LJ::SITENAME,
-                                                   'username' => LJ::ljuser($remote)}) . " p?>\n";
-    } else {
-        $body .= "<?p " . BML::ml(".login.text1", {'sitename' => $LJ::SITENAME}) . " p?>\n";
-    }
-    $body .= "<?p $ML{'.login.text2'} p?>\n";
-        
-    $body .= "<form action='login.bml' method='post'>\n";
-
-    my $referer = BML::get_client_header('Referer');
-    if ($GET{'ret'} && $referer) {
-        my $eh_ref = LJ::ehtml($referer);
-        $body .= "<input type='hidden' NAME='ref' value='$eh_ref' />\n";
-    }
-
-    $body .= "<?standout\n";
-    $body .= "<table cellpadding='3'>\n";
-    if ($remote) {
-        $body .= "<tr><td>$ML{'.login.username'}</td><td><b>$remote->{'user'}</b> <input type='submit' name='action:logout' value='$ML{'.logout.btn'}' /></td></tr>\n";
-    } else {
-        $body .= "<tr><td>$ML{'.login.username'}</td><td><input type='text' name='user' size='15' maxlength='15' /></td></tr>\n";
-        $body .= "<tr><td valign='top'>$ML{'.login.password'}</td><td><input type='password' name='password' size='15' maxlength='30' />";
-        $body .= "<br /><a href='/lostinfo.bml'><font size='1'>$ML{'.login.forget'}</font></a></td></tr>\n";
-    }
-
-    my $checked;
-    my $checkcond = sub {
-        my $cond = shift;
-        $checked = $cond ? " checked='checked'" : "";
-    };
-
-    # expiration
-    my $curexp = $cursess ? $cursess->{'exptype'} : "short";
-    $body .= "<tr valign='top'><td>$ML{'.login.expiration'}</td><td>\n";
-    $checkcond->($curexp eq "short");
-    $body .= "<input type='radio' name='expire' value='close' $checked id='close' /> <label for='close'>$ML{'.login.whenbrowsercloses'}</label><br />\n";
-    $checkcond->($curexp eq "long");
-    $body .= "<input type='radio' name='expire' value='never' $checked id='never' /> <label for='never'>$ML{'.login.never'}</label>\n";
-    $body .= "</td></tr>\n";
-
-    # bind?
-    my $curbind = $cursess && $cursess->{'ipfixed'} ? "yes" : "no";
-    $body .= "<tr valign='top'><td>$ML{'.bindip.label'}</td><td>\n";
-    $checkcond->($curbind eq "yes");
-    $body .= "<input type='radio' name='bindip' value='yes' $checked id='bindyes' /> <label for='bindyes'>$ML{'.bindip.yes'}</label><br />\n";
-    $checkcond->($curbind eq "no");
-    $body .= "<input type='radio' name='bindip' value='no' $checked id='bindipno' /> <label for='bindipno'>$ML{'.bindip.no'}</label>\n";
-    $body .= "</td></tr>\n";
-
-    $body .= "<tr><td></td><td align='left'>";
-    if ($remote) {
-        $body .= "<input name='action:change' type='submit' value='$ML{'.login.btn.changeopts'}' />";
-    } else {
-        $body .= "<input name='action:login' type='submit' value='$ML{'.login.btn.login'}' />";
-    }
-    $body .= "</td></tr>\n";
-   
-    if (! $remote && LJ::are_hooks("login_formopts")) {
-        $body .= "<tr><td>$ML{'.login.otheropts'}</td><td style='white-space: nowrap'>\n";
-        LJ::run_hooks("login_formopts", { 'ret' => \$body });
-        $body .= "</td></tr>\n";
-    }
-    $body .= "</table>\n";
-    $body .= "standout?>\n";
-    $body .= "</form>\n";
-
-    $body .= "<?h1 $ML{'.whylogin.head'} h1?>\n";
-    $body .= "<?p $ML{'.whylogin.text'} p?>\n";
-    $body .= "<ul>\n";
-    $body .= "<li>$ML{'.whylogin.benefit1'}</li>\n";
-    $body .= "<li>$ML{'.whylogin.benefit2'}</li>\n";
-    $body .= "<li>$ML{'.whylogin.benefit3'}</li>\n";
-    $body .= "</ul>\n";
+    $login_html->();
     return;
 } 
  _code?><?_info

@@ -6,7 +6,8 @@ LJUSER=>{DRs}<span class='ljuser' style='white-space:nowrap;'><a href='/userinfo
 LJCOMM=>{DRs}<span class='ljuser' style='white-space:nowrap;'><a href='/userinfo.bml?user=%%data%%'><img src='<?imgprefix?>/community.gif' alt='userinfo' width='16' height='16' style='vertical-align:bottom;border:0;' /></a><a href='/community/%%data%%/'><b>%%data%%</b></a></span>
 LJUSERF=>{DRs}<span class='ljuser' style='white-space:nowrap;'><a href='/userinfo.bml?user=%%data%%&amp;mode=full'><img src='<?imgprefix?>/userinfo.gif' alt='userinfo' width='17' height='17' style='vertical-align:bottom;border:0;' /></a><a href='/users/%%data%%/'><b>%%data%%</b></a></span>
 HELP=>{DR}(<a href="%%data%%"><i>help</i></a>)
-INERR=>{DRp}<font color="#ff0000"><b>%%data%%</b></font>
+INERR=>{DR}<font color="#ff0000"><b>%%data%%</b></font>
+SOERROR=>{DR}<div><b>%%data%%</b></div>
 
 NEEDLOGIN<=
 <?h1 Login Required h1?>
@@ -255,3 +256,28 @@ PAGE<=
 </body>
 </html>
 <=PAGE
+
+CHALRESPJS<=
+<script type="text/javascript" src="/js/md5.js"></script>
+<script language="JavaScript">
+    <!--
+function sendForm ()
+{
+    if (! document.getElementById) return false;
+    var loginform = document.getElementById('login');
+    if (! loginform) return false;
+    var pass_ele = document.getElementById('xc_password');
+    var chal_ele = document.getElementById('login_chal');
+    var resp_ele = document.getElementById('login_response');
+    if (! pass_ele || ! chal_ele || ! resp_ele) return false;
+    var pass = pass_ele.value;
+    var chal = chal_ele.value;
+    var res = MD5(chal + MD5(pass));
+    resp_ele.value = res;
+    pass_ele.value = "";  // dont send clear-text password!
+    loginform.submit();
+    return true;
+}
+// -->
+</script>
+<=CHALRESPJS
