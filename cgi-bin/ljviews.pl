@@ -242,7 +242,7 @@ $LJ::S1::PROPS = {
 # </LJFUNC>
 sub get_themeid
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &LJ::nodb;
     my $themeid = shift;
     return $LJ::S1::CACHE_THEMEID{$themeid} if $LJ::S1::CACHE_THEMEID{$themeid};
     my $dbr = LJ::get_db_reader();
@@ -256,7 +256,7 @@ sub get_themeid
 # returns: hashref of vars (cleaned)
 sub load_style
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &LJ::nodb;
     my ($styleid, $viewref) = @_;
     
     my $cch = $LJ::S1::CACHE_STYLE{$styleid};

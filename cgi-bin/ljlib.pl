@@ -393,7 +393,7 @@ sub get_groupmask
 # </LJFUNC>
 sub get_friend_items
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db"; 
+    &nodb; 
     my $opts = shift;
 
     my $dbr = LJ::get_db_reader();
@@ -688,7 +688,7 @@ sub get_friend_items
 # </LJFUNC>
 sub get_recent_items
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $opts = shift;
 
     my $dbr = LJ::get_db_reader();
@@ -818,7 +818,7 @@ sub get_recent_items
 # </LJFUNC>
 sub set_userprop
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
 
     my ($u, $propname, $value, $memonly) = @_;
     $u = ref $u ? $u : LJ::load_userid($u);
@@ -889,7 +889,7 @@ sub set_userprop
 # </LJFUNC>
 sub register_authaction
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $dbh = LJ::get_db_writer();
 
     my $userid = shift;  $userid += 0;
@@ -973,7 +973,7 @@ sub make_cookie
 # </LJFUNC>
 sub statushistory_add
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $dbh = LJ::get_db_writer();
     
     my $userid = shift;  $userid += 0;
@@ -1426,7 +1426,7 @@ sub make_authas_select {
 # </LJFUNC>
 sub is_valid_authaction
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
 
     # we use the master db to avoid races where authactions could be
     # used multiple times
@@ -1563,7 +1563,7 @@ sub get_urls
 # </LJFUNC>
 sub record_meme
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my ($url, $posterid, $itemid, $jid) = @_;
 
     $url =~ s!/$!!;  # strip / at end
@@ -1873,7 +1873,7 @@ sub acid_decode
 # </LJFUNC>
 sub acct_code_generate
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $userid = int(shift);
     my $quantity = shift || 1;
 
@@ -1935,7 +1935,7 @@ sub acct_code_decode
 # </LJFUNC>
 sub acct_code_check
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $code = shift;
     my $err = shift;     # optional; scalar ref
     my $userid = shift;  # optional; acceptable userid (double-click proof)
@@ -1981,7 +1981,7 @@ sub acct_code_check
 # </LJFUNC>
 sub load_mood_theme
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $themeid = shift;
     return if $LJ::CACHE_MOOD_THEME{$themeid};
     return unless $themeid;
@@ -2065,7 +2065,7 @@ sub get_prop
 # </LJFUNC>
 sub load_codes
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
+    &nodb;    
     my $req = shift;
 
     my $dbr = LJ::get_db_reader();
@@ -2152,7 +2152,7 @@ sub img
 # </LJFUNC>
 sub load_user_props
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
 
     my $u = shift;
     return unless ref $u eq "HASH";
@@ -2401,7 +2401,7 @@ sub auth_okay
 # </LJFUNC>
 sub create_account
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
+    &nodb;    
     my $o = shift;
 
     my $user = LJ::canonical_username($o->{'user'});
@@ -2459,7 +2459,7 @@ sub new_account_cluster
 # </LJFUNC>
 sub is_friend
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $ua = shift;
     my $ub = shift;
 
@@ -2485,7 +2485,7 @@ sub is_friend
 # </LJFUNC>
 sub is_banned
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $u = shift;
     my $j = shift;
 
@@ -2513,7 +2513,7 @@ sub is_banned
 # </LJFUNC>
 sub can_view
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $remote = shift;
     my $item = shift;
 
@@ -2703,7 +2703,7 @@ sub get_talktext2
 # </LJFUNC>
 sub get_logtext2multi
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $idsbyc = shift;
     my $sth;
 
@@ -3162,7 +3162,7 @@ EOM
 # </LJFUNC>
 sub load_userpics
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my ($upics, $idlist) = @_;
 
     my @load_list;
@@ -3423,7 +3423,7 @@ sub robot_meta_tags
 # </LJFUNC>
 sub make_journal
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my ($user, $view, $remote, $opts) = @_;
 
     my $r = $opts->{'r'};  # mod_perl $r, or undef
@@ -4007,7 +4007,7 @@ sub make_graphviz_dot_file
 # </LJFUNC>
 sub expand_embedded
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $ditemid = shift;
     my $remote = shift;
     my $eventref = shift;
@@ -4083,7 +4083,7 @@ sub update_user
 # </LJFUNC>
 sub load_userids_multiple
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my ($map, $have) = @_;
 
     my $sth;
@@ -4480,7 +4480,7 @@ sub journal_base
 # </LJFUNC>
 sub load_user_privs
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $remote = shift;
     my @privs = @_;
     return unless $remote and @privs;
@@ -4522,7 +4522,7 @@ sub load_user_privs
 # </LJFUNC>
 sub check_priv
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my ($u, $priv, $arg) = @_;
     return 0 unless $u;
 
@@ -4760,7 +4760,7 @@ sub mysql_time
 # </LJFUNC>
 sub get_keyword_id
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my $kw = shift;
     unless ($kw =~ /\S/) { return 0; }
     $kw = LJ::text_trim($kw, LJ::BMAX_KEYWORD, LJ::CMAX_KEYWORD);
@@ -4846,7 +4846,7 @@ sub hash_password
 # </LJFUNC>
 sub can_use_journal
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my ($posterid, $reqownername, $res) = @_;
 
     my $qposterid = $posterid+0;
@@ -5006,7 +5006,7 @@ sub load_log_props2
 # </LJFUNC>
 sub load_log_props2multi
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
+    &nodb;    
     # ids by cluster (hashref),  output hashref (keys = "$ownerid $jitemid")
     my ($idsbyc, $hashref) = @_;
     my $sth;
@@ -5396,7 +5396,7 @@ sub color_todb
 # </LJFUNC>
 sub add_friend
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
+    &nodb;    
     my ($ida, $idb, $opts) = @_;
 
     $ida += 0; $idb += 0; 
@@ -5433,7 +5433,7 @@ sub add_friend
 # </LJFUNC>
 sub event_register
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
+    &nodb;    
     my ($dbc, $etype, $ejid, $eiarg, $duserid, $diarg) = @_;
     my $dbr = LJ::get_db_reader();
 
@@ -5637,7 +5637,7 @@ sub text_in
 # </LJFUNC>
 sub text_convert
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my ($text, $u, $error) = @_;
 
     # maybe it's pure ASCII?
@@ -5768,7 +5768,7 @@ sub item_toutf8
 # </LJFUNC>
 sub set_interests
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
+    &nodb;    
 
     my ($userid, $old, $new) = @_;
 
@@ -6159,7 +6159,7 @@ sub check_rel
 # </LJFUNC>
 sub set_rel 
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my ($userid, $targetid, $type) = @_;
     return undef unless $type and $userid and $targetid;
     $userid = LJ::want_userid($userid);
@@ -6186,7 +6186,7 @@ sub set_rel
 # </LJFUNC>
 sub clear_rel 
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &nodb;
     my ($userid, $targetid, $type) = @_;
     return undef unless $type and $userid or $targetid;
     return undef if $userid eq '*' and $targetid eq '*';
@@ -6373,5 +6373,8 @@ sub error
     $LJ::last_error = $err;
     return undef;
 }
+
+# to be called as &nodb; (so this function sees caller's @_)
+sub nodb { shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db"; }
 
 1;

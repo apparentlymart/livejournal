@@ -36,7 +36,7 @@ sub contains_new_poll
 
 sub parse
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &LJ::nodb;
     my $postref = shift;
     my $error = shift;
     my $iteminfo = shift; 
@@ -435,7 +435,7 @@ sub preview {
 # note: $itemid is a $ditemid (display itemid, *256 + anum)
 sub register
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &LJ::nodb;
     my $dbh = LJ::get_db_writer();
     my $post = shift;
     my $error = shift;
@@ -498,7 +498,7 @@ sub register
 
 sub show_polls
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &LJ::nodb;
     my $itemid = shift;
     my $remote = shift;
     my $postref = shift;
@@ -508,7 +508,7 @@ sub show_polls
 
 sub show_poll
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &LJ::nodb;
     my $dbr = LJ::get_db_reader();
     my $itemid = shift;
     my $remote = shift;
@@ -842,7 +842,7 @@ sub show_poll
 
 sub find_security
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &LJ::nodb;
 
     my $po = shift;
     my $remote = shift;
@@ -889,7 +889,7 @@ sub find_security
 
 sub submit
 {
-    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    &LJ::nodb;
     
     my $remote = shift;
     my $form = shift;
