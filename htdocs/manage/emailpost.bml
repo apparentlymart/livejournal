@@ -48,20 +48,20 @@ body<=
         $ret .= '<?h1 Basic usage h1?><br />';
 
         $ret .= '<?h2 PIN in email address h2?>';
-        $ret .= '<div style="margin-left:40px" class="postheading">';
+        $ret .= '<div style="margin-left:40px">';
         $ret .= "To: $user". '<b>+' . $pin . '</b>@' . $LJ::EMAIL_POST_DOMAIN . '<br />';
         $ret .= $from . $subject . $body;
         $ret .= '</div><br />';
         
         $ret .= '<?h2 PIN in subject h2?>';
-        $ret .= '<div style="margin-left:40px" class="postheading">' ;
+        $ret .= '<div style="margin-left:40px">' ;
         $ret .= $to . $from;
         $ret .= "Subject: <b>+$pin</b> Post subject <br /><br />";
         $ret .= $body;
         $ret .= '</div><br />';
 
         $ret .= '<?h2 PIN in body h2?>';
-        $ret .= '<div style="margin-left:40px" class="postheading">';
+        $ret .= '<div style="margin-left:40px">';
         $ret .= $to . $from . $subject;
         $ret .= "<b>+$pin</b> " . $body;
         $ret .= '</div><br /><br />';

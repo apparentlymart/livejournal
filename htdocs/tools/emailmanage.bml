@@ -48,7 +48,7 @@ body<=
     my $ret;
     
     # authas switcher form
-    $ret .= "<form class='postheading' method='get' action='emailmanage.bml'>\n";
+    $ret .= "<form method='get' action='emailmanage.bml'>\n";
     $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
     $ret .= "</form>\n\n";
 

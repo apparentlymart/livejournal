@@ -375,7 +375,7 @@
             
             $ret .= "<?h2 Question #" . ($q + 1) . " - $TYPENAME{$elem->{'type'}} h2?>\n";
             
-            $ret .= "<table class='postheading' border='0' cellspacing='0' cellpadding='0' width='90%'>\n";
+            $ret .= "<table border='0' cellspacing='0' cellpadding='0' width='90%'>\n";
             $ret .= "<tr><td align='left' width='15%'>\n";
             
             # can't move the first element up

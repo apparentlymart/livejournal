@@ -170,7 +170,7 @@
      # already then wants to add it to community c, when u clicks the "add memory"
      # link on p, u gets the "edit entry" page and they need to be able to switch
      # to c.
-     $body .= "<form class='postheading' method='get' action='memadd.bml'>\n";
+     $body .= "<form method='get' action='memadd.bml'>\n";
      $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
      $body .= LJ::html_hidden(journal => $GET{journal}) if $GET{journal};
      $body .= LJ::html_hidden(itemid => $GET{itemid});

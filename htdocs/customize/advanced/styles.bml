@@ -240,14 +240,14 @@
         $title = "Your Styles";
 
         # authas switcher form
-        $body .= "<form class='postheading' method='get' action='styles.bml'>\n";
+        $body .= "<form method='get' action='styles.bml'>\n";
         $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
         $body .= "</form>\n\n";
 
-        $body .= "<div class='postheading'><?h1 Your Styles h1?></div>\n";
+        $body .= "<div><?h1 Your Styles h1?></div>\n";
 
         # show style listing
-        $body .= "<table class='postheading' style='margin-left: 40px'>\n";
+        $body .= "<table style='margin-left: 40px'>\n";
         if (%$ustyle) {
             my $journalbase = LJ::journal_base($u);
             foreach my $styleid (sort { $ustyle->{$a} cmp $ustyle->{$b} || $a <=> $b} keys %$ustyle) {
@@ -273,13 +273,13 @@
 
     my $extra = $id ? "?id=$id" : '';
     $extra .= $extra ? $getextra_amp : $getextra;
-    $body .= "<form class='postheading' name='styleForm' method='post' action='styles.bml$extra'>";
+    $body .= "<form name='styleForm' method='post' action='styles.bml$extra'>";
 
     # create a new style, or change the name of the style currently being edited
     # note: this little bit of code appears whether there is an id passed or not.
     #       the textbox just has a different purpose depending on the context.
     $body .= "<?h1 " . ($id ? "Style Options" : "Create Style") . " h1?>\n";
-    $body .= "<table class='postheading' style='margin-bottom: 10px'>\n";
+    $body .= "<table style='margin-bottom: 10px'>\n";
     $body .= "<tr><td>Name: </td><td>";
     $body .= LJ::html_text({ 'name' => 'stylename', 'size' => '30', 'maxlength' => '255', 
                              'value' => defined $POST{'stylename'} ? $POST{'stylename'} : $style->{'name'} });
@@ -364,7 +364,7 @@
     ### core version
 
     $body .= "<?h1 Style Layers h1?>\n";
-    $body .= "<table class='postheading'>\n";
+    $body .= "<table>\n";
     $body .= "<tr><td>Core Version: </td><td>";
     my $coresel = $layerselect->('core', 0);
     $body .= $coresel->[0];

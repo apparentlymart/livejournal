@@ -64,7 +64,7 @@
     my @num_free;
 
     # authas switcher form
-    $body .= "<form class='postheading' method='get' action='editgroups.bml'>\n";
+    $body .= "<form method='get' action='editgroups.bml'>\n";
     $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
     $body .= "</form>\n\n";
 

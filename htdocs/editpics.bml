@@ -346,7 +346,7 @@
     $title = "Edit User Pictures";
 
     # authas switcher form
-    $body .= "<form class='postheading' method='get' action='editpics.bml'>\n";
+    $body .= "<form method='get' action='editpics.bml'>\n";
     $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
     $body .= "</form>\n\n";
 

@@ -112,7 +112,7 @@
                 'link' => "layers.bml?authas=$authas",
                 'text' => 'Your Layers',
             }) . "\n";
-            $body .= "<form class='postheading' method='post' action='layers.bml?authas=$authas'>";
+            $body .= "<form method='post' action='layers.bml?authas=$authas'>";
             $body .= LJ::html_hidden('action:del', '1', 'id', $id);
               
             $body .= "Are you sure you want to delete $lay->{'type'} layer $name?";
@@ -126,14 +126,14 @@
     }
 
     # authas switcher form
-    $body .= "<form class='postheading' method='get' action='layers.bml'>\n";
+    $body .= "<form method='get' action='layers.bml'>\n";
     $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
     $body .= "</form>\n\n";
 
     # show list of layers
     $body .= "<?h1 Your Layers h1?>\n";
     if (%$ulay) {
-        $body .= "<table style='margin-bottom: 10px' cellpadding='3' border='1' class='postheading'>\n";
+        $body .= "<table style='margin-bottom: 10px' cellpadding='3' border='1'>\n";
         $body .= "<tr><td><b>LayerID</b></td><td><b>Type</b></td><td><b>Name</b></td><td><b>Actions</b></td></tr>\n";
         my $lastbase = 0;
         foreach my $lid (sort { $ulay->{$a}->{'b2lid'} <=> $ulay->{$b}->{'b2lid'} || $a <=> $b } 
@@ -169,7 +169,7 @@
 
     $body .= "<div style='margin-top: 10px;'>\n";
     $body .= "<?h2 Create top-level layer h2?>\n";
-    $body .= "<form class='postheading' method='post' action='layers.bml?authas=$authas'>\n";
+    $body .= "<form method='post' action='layers.bml?authas=$authas'>\n";
     
     $body .= "Type: " . LJ::html_select({ 'name' => 'type' },
                                           "" => "",
@@ -194,7 +194,7 @@
     $body .= "</div>\n\n";
 
     $body .= "<?h2 Create layout-specific layer h2?>\n";
-    $body .= "<form class='postheading' method='post' action='layers.bml?authas=$authas'>\n";
+    $body .= "<form method='post' action='layers.bml?authas=$authas'>\n";
 
     $body .= "Type: " . LJ::html_select({ 'name' => 'type' },
                                         "" => "",

@@ -728,7 +728,7 @@ sub talkform {
     $ret .= "<input type='hidden' name='journal' value='$journalu->{'user'}' />\n";
 
     # from registered user or anonymous?
-    $ret .= "<table class='postheading'>\n";
+    $ret .= "<table>\n";
     if ($journalu->{'opt_whocanreply'} eq "all") {
         $ret .= "<tr valign='middle'>";
         $ret .= "<td align='right'>$BML::ML{'.opt.from'}</td>";

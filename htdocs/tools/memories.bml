@@ -61,7 +61,7 @@
  my $authasu = LJ::get_authas_user($GET{'authas'} || $user);
  my $authasarg;
  if ($authasu) {
-     $body .= "<form class='postheading' method='get' action='memories.bml'>\n";
+     $body .= "<form method='get' action='memories.bml'>\n";
      $body .= LJ::make_authas_select($remote, { 'authas' => $authasu->{user} }) . "\n";
      $body .= LJ::html_hidden(keyword => $GET{keyword}) if $GET{keyword};
      $body .= "</form>\n\n";

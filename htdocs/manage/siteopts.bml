@@ -107,7 +107,7 @@
         $scheme = $LJ::SCHEMES[0]->{'scheme'} unless $scheme;
 
         if (@thumb_schemes) {
-            $body .= "<div class='postheading' width='100%'>";
+            $body .= "<div width='100%'>";
             foreach my $sh (@thumb_schemes) {
                 my $th = $sh->{'thumb'};
                 $body .= "&nbsp;<input type='image' ";
@@ -123,6 +123,7 @@
                 }
             
                 $body .= " alt='$sh->{'title'}' title='$sh->{'title'}'/>";
+                $body .= " $sh->{'title'}";
             }
             $body .= "</div>";
         }
