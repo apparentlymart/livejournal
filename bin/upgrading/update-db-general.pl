@@ -737,7 +737,7 @@ CREATE TABLE userpic2 (
   picdate datetime default NULL,
   md5base64 char(22) NOT NULL default '',
   comment varchar(255) BINARY NOT NULL default '',
-  flags tinyint(1) NOT NULL default 0,
+  flags tinyint(1) unsigned NOT NULL default 0,
   location enum('blob','disk','mogile') default NULL,
   PRIMARY KEY  (userid, picid)
 )
@@ -2256,11 +2256,7 @@ register_alter(sub {
 
     if (column_type("userpic2", "flags") eq '') {
         do_alter("userpic2", "ALTER TABLE userpic2 " .
-                 "ADD flags tinyint(1) NOT NULL default 0 AFTER comment");
-    }
-
-    if (column_type("userpic2", "location") eq '') {
-        do_alter("userpic2", "ALTER TABLE userpic2 " .
+                 "ADD flags tinyint(1) unsigned NOT NULL default 0 AFTER comment, " .
                  "ADD location enum('blob','disk','mogile') default NULL AFTER flags");
     }
 
