@@ -15,8 +15,11 @@ LiveJournal capabilities:
  * checkfriends_interval
    integer; time before clients can call "checkfriends" (use min)
 
+ * findsim
+   boolean; user is able to use the similar interests matching feature
+
  * friendsviewupdate
-   integer: after how many seconds user see new friends view items
+   integer; after how many seconds user see new friends view items
 
  * makepoll
    boolean; can user make a poll
@@ -34,10 +37,10 @@ LiveJournal capabilities:
    boolean; can use text messaging
 
  * todomax
-   integer: maximum number of todo items allowed
+   integer; maximum number of todo items allowed
 
  * todosec
-   boolean: can use make non-public todo items?
+   boolean; can use make non-public todo items?
 
  * userdomain
    boolean; can view journal at http://user.$LJ::DOMAIN/

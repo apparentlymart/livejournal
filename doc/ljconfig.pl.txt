@@ -178,6 +178,7 @@
             'todomax' => 25,
             'todosec' => 0,
             'friendsviewupdate' => 30,
+	    'findsim' => 1,
             );
 
     # capability class limits.
