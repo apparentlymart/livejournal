@@ -15,7 +15,7 @@
      return "";
  }
 
- my $u = LJ::load_user($dbs, $remote->{'userid'});
+ my $u = LJ::load_userid($dbs, $remote->{'userid'});
  $u->{'emailpref'} = $u->{'email'};
  if ($LJ::USER_EMAIL && ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid")) {
      $u->{'emailpref'} = $u->{'user'} . '@' . $LJ::USER_DOMAIN;
