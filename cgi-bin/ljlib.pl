@@ -2988,7 +2988,7 @@ sub get_posts_raw
         } elsif ($type eq "logprop" && ref $v eq "HASH") {
             delete $needprop->{$cid}{$id};
             $ret->{prop}{$id} = $v;
-        } elsif ($type eq "rc") {
+        } elsif ($type eq "rp") {
             delete $needrc->{$cid}{$id};
             $ret->{prop}{'replycount'} = $v;
         }
@@ -5715,7 +5715,7 @@ sub load_log_props2
             delete $needprops{$3};
             $hashref->{$3} = $v;
         }
-        if ($1 eq 'rc') {
+        if ($1 eq 'rp') {
             delete $needrc{$3};
             $rc{$3} = $v;
         }
