@@ -21,6 +21,9 @@ BODY<=
  my $SELF = "/talkread.bml";
  my $ret = "";
 
+ ## fix bug where mail clients don't understand quoted-printable encoding
+ $FORM{'itemid'} =~ s/^3D//;
+
  ### load the log properties
  my %logprops = ();
  &load_log_props([ $FORM{'itemid'} ], \%logprops);
