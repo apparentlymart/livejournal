@@ -90,9 +90,10 @@ ins {
     my $mode;
     my $setmode = sub {
         my $newmode = shift;
-        return if $newmode eq $mode;
+        return " " if $newmode eq $mode;
         my $ret;
         $ret .= "</$mode>" if $mode;
+        $ret .= " ";
         $ret .= "<$newmode>" if $newmode;
         $mode = $newmode;
         return $ret;
@@ -115,23 +116,23 @@ ins {
             $pos++;
             my $word = LJ::ehtml($words[$pos-1]);
             $word =~ s/\*NEWLINE\*/<br>\n/g;
-            $ret .= $setmode->("") . "$word ";
+            $ret .= $setmode->("") . $word;
         }
         if ($dl =~ /^\-/) {
             $pos++;
             my $word = LJ::ehtml($words[$pos-1]);
             $word =~ s/\*NEWLINE\*/<br>\n/g;  
-            $ret .= $setmode->("del") . $word . " ";
+            $ret .= $setmode->("del") . $word;
         }
         if ($dl =~ /^\+(.*)/) {
             my $word = LJ::ehtml($1);
             $word =~ s/\*NEWLINE\*/<br>\n/g;
-            $ret .= $setmode->("ins") . $word . " ";
+            $ret .= $setmode->("ins") . $word;
         }
     }
 
     $ret .= $setmode->("");
-    while ($pos < @words) {  # off by one?  untested.
+    while ($pos < @words) {
         my $word = $words[$pos];
         $word =~ s/\*NEWLINE\*/<br>\n/g;
         $ret .= "$word ";
