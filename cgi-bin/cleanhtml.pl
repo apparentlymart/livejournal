@@ -49,7 +49,7 @@ sub clean
     my $addbreaks = $opts->{'addbreaks'};
     my $keepcomments = $opts->{'keepcomments'};
     my $mode = $opts->{'mode'};
-    my $cut = $opts->{'cuturl'};
+    my $cut = $opts->{'cuturl'} || $opts->{'cutpreview'};
     my $s1var = $opts->{'s1var'};
 
     my %action = ();
@@ -114,7 +114,7 @@ sub clean
                     }
                     my $url = LJ::ehtml($cut);
                     $newdata .= "<b>(&nbsp;<a href=\"$url#cutid$cutcount\">$text</a>&nbsp;)</b>";
-                    $p->get_tag("/lj-cut");
+                    $p->get_tag("/lj-cut") unless $opts->{'cutpreview'}
                 } else {
                     $newdata .= "<a name=\"cutid$cutcount\"></a>";
                     next;
@@ -271,7 +271,9 @@ sub clean
                 $opencount{$tag}--;
             }
             elsif ($tag eq "lj-cut") {
-                # just eat it
+                if ($opts->{'cutpreview'}) {
+                    $newdata .= "<b>&lt;/lj-cut&gt;</b>";
+                }
             } else {
                 if ($mode eq "allow") {
                     $allow = 1;
@@ -493,6 +495,7 @@ sub clean_event
         'wordlength' => 40,
         'addbreaks' => $opts->{'preformatted'} ? 0 : 1,
         'cuturl' => $opts->{'cuturl'},
+        'cutpreview' => $opts->{'cutpreview'},
         'eat' => $event_eat,
         'mode' => 'allow',
         'remove' => $event_remove,
