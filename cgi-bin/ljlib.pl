@@ -4465,6 +4465,14 @@ sub can_use_journal
     my $sql = "SELECT COUNT(*) FROM logaccess WHERE ownerid=$ownerid AND posterid=$qposterid";
     return 1 if dbs_selectrow_array($dbs, $sql);
 
+    # let's check if this is community allowing post access to non-members 
+    LJ::load_user_props($dbs, $uowner, "nonmember_posting");
+    if ($uowner->{'nonmember_posting'}) {
+        my ($membership, $postlevel) = dbs_selectrow_array($dbs, "SELECT membership, postlevel FROM ".
+                                                           "community WHERE userid=$ownerid");
+        return 1 if $membership eq 'open' && $postlevel eq 'members';
+    }
+
     $res->{'errmsg'} = "You do not have access to post to this journal.";
     return 0;
 }
