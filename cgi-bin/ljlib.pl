@@ -2332,6 +2332,7 @@ sub load_user_props
 
     my $u = shift;
     return unless ref $u eq "HASH";
+    return if $u->{'statusvis'} eq "X";
 
     my $opts = ref $_[0] ? shift : {};
     my (@props) = @_;
