@@ -1,0 +1,117 @@
++------------+
+| Dislaimer: |
++------------+
+
+    This is just my (bradfitz) own todo list.  It may not make much
+    sense but at this point it's not supposed to.  It's just notes to
+    myself about what needs to be done.
+
++----------------+
+| Awaiting merge |
++----------------+
+
+* option to strip target= on <a> on friends pages (halkeye)
+* goatctl, cvsreport --init
+
++------+
+| Todo |
++------+
+
+* add "scope enum('general','local')" to all prop tables
+  -- change SQL exporter to recognize only general
+* add hooks to verify people aren't faking their paid user cookie
+* htdocs/userpic: why use LJ::Cache at all if we're using disk now?
+* htdocs/userpic: doesn't clean disk cache yet
+* postevent dup locking
+* rate limiting (bradfitz)
+* deprecate /cgi-bin/log.cgi, make /interface?mode=<...>
+* /fz/ joins on logtext (requires master) 
+* talk* joins on logtext (requires master)
+* "unpay" console command
+* RELEASE!  new tarball.
+* cvsreport:
+   * -c doesn't need to scan maind.. perf.
+   * -s with args doesn't need to scan everything, just args.
+* ljcom: automate username changes (payments and renaming)
+* support: dakus wants to be able to mark requests as "still needs help"
+* LJ::delete_user()
+* require POST for all do actions (use LJ::did_post to check)
+* add bmlp.pl config option to disable BMLSESSION stuff, since we don't
+  use it anyway
+* editjournal_do: clean HTML (marquees don't close, etc.)
+* directory: (need to set non-pub userprops on editinfo change)
+* talklib.pl finishing (avva?)
+* store as UTF-8 in database (avva investigating)
+* ehtml current mood/music ?
+
++-------------+
+| Cleanliness |
++-------------+
+
+* should never need to login as community!
+  -- e.g. uploadpic/editinfo/etc needs to let community admins 
+          select their community to modify while logged in as
+          themselves
+* use LJ::send_mail everywhere, not by hand
+* XHTML compliant everywhere
+* remove *_do.bml pages, merge with main page instead.
+
++----------------+
+| Documentation: |
++----------------+
+
+* LJDEP (halkeye)
+* LJFUNC (bradfitz)
+* internals/system (dormando)
+* BML (avva)
+* guide
+* XML-RPC interface
+* BML
+* INSTALL
+    /inc/ protected
+
++--------+
+| Future |
++--------+
+
+* attach files to posts (good for groupware)
+  -- new cap limits:  canattachfile, filemaxsize (0 for no limit)
+* support system tweaks:
+   - ugly green to blue
+   - allow touching by helpers
+   - allow 5 minute locks
+   - allow full email address to be shown to helpers
+* log merging 
+
++--------------+
+| low priority |
++--------------+
+
+* ability to turn off display of friend ofs / friends / community ofs
+* remove necessity of menu_num arg in populate_web_menu 
+* allowing @livejournal.com on create_do.bml, but not editinfo_do.bml
+* on friends page, altposter posts show community mood theme, not owner's
+* remove directories in BML... make just generic.look -> scheme.look
+
++-----------------+
+| Meeting minutes |
++-----------------+
+* new BML release? get bmlp.pl from livejournal, not bradfitz.com/bml
+* directory rewrite sometime
+* INERR undefined in livejournal?  no, it was.  weird.
+* goatctl: toggle/reset goathack dev environment (idigital)
+* two CVS: use collections (avva)
+* list server ... get working, announce, use.
+  * peer review of patches before mailing brad
+* talkread/post library & abstraction for todo lists
+* todo list maintainership (Mart)
+* new install tarball -- upgrading -- yech:
+  -- need translation stuff done; move text/code apart
+* store as UTF-8 in database (avva investigating)
+* community "member of" friend adding problem
+* poll creator needs to be linked
+* /press/* history.bml, qa.bml (opiummmm)
+* rate limiting
+* talkread screening (avva)
+* image serving / expiration (evan)
+
