@@ -1349,9 +1349,9 @@ sub ljuser
     my $opts = shift;
     my $andfull = $opts->{'full'} ? "&amp;mode=full" : "";
     if ($opts->{'type'} eq "C") {
-        return "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$user$andfull\"><img src=\"$LJ::IMGPREFIX/community.gif\" width=\"16\" height=\"16\" align=\"absmiddle\" border=\"0\"></a><b><a href=\"$LJ::SITEROOT/community/$user/\">$user</a></b>";
+        return "<nobr><a href=\"$LJ::SITEROOT/userinfo.bml?user=$user$andfull\"><img src=\"$LJ::IMGPREFIX/community.gif\" width=\"16\" height=\"16\" align=\"absmiddle\" border=\"0\"></a><b><a href=\"$LJ::SITEROOT/community/$user/\">$user</a></b></nobr>";
     } else {
-        return "<a href=\"$LJ::SITEROOT/userinfo.bml?user=$user$andfull\"><img src=\"$LJ::IMGPREFIX/userinfo.gif\" width=\"17\" height=\"17\" align=\"absmiddle\" border=\"0\"></a><b><a href=\"$LJ::SITEROOT/users/$user/\">$user</a></b>";
+        return "<nobr><a href=\"$LJ::SITEROOT/userinfo.bml?user=$user$andfull\"><img src=\"$LJ::IMGPREFIX/userinfo.gif\" width=\"17\" height=\"17\" align=\"absmiddle\" border=\"0\"></a><b><a href=\"$LJ::SITEROOT/users/$user/\">$user</a></b></nobr>";
     }
 }
 
