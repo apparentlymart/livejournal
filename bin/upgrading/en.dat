@@ -2690,8 +2690,6 @@ that area. p?>
 
 /syn/index.bml.account=Account:
 
-/syn/index.bml.add=Add Feed
-
 /syn/index.bml.add.byurl.text=Add a feed to your friends list by entering the feed URL below.
 
 /syn/index.bml.add.byurl.title=Add Feed by URL

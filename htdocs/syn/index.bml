@@ -188,24 +188,27 @@ body<=
     if (@pop) {
         $ret .= "<?h1 $ML{'.add.pop.title'} h1?><?p $ML{'.add.pop.text'} p?>";
         $ret .= "<p><table cellpadding='3' style='margin-bottom: 10px; width: 80%;'>";
-        $ret .= "<tr><td><b>$ML{'.table.account'}</b></td><td></td><td><b>$ML{'.table.feed'}</b></td>";
+        $ret .= "<tr><td><b>$ML{'.table.account'}</b></td><td><b>$ML{'.table.feed'}</b></td><td></td>";
         $ret .= "<td align='right'><b>$ML{'.table.watchers'}</b></td></tr>";
         foreach (@pop) {
             my ($user, $url, $count) = @$_;
             $ret .= "<tr>";
-            $ret .= "<td><input type='checkbox' value='1' name='add_$user' /> ";
+            $ret .= "<td nowrap='nowrap' valign='top'><input type='checkbox' value='1' name='add_$user' /> ";
             $ret .= LJ::ljuser($user, { 'type' => 'Y' }) . "</td>";
-            $ret .= "<td><a href='$url'>" . LJ::img('xml', '', { border => 0 }) . "</a></td><td>";
+            $ret .= "<td valign='top'>";
             if ($urls{$user}) {
-                $ret .= "$names{$user}<br /><a href='$urls{$user}'>$urls{$user}</a></td>";
+                my $displayurl = $urls{$user};
+                $displayurl = substr($urls{$user}, 0, 50) . "..." if length $displayurl > 60;
+                $ret .= "$names{$user}<br /><a href='$urls{$user}'>$displayurl</a></td>";
             } else {
                 $ret .= "$names{$user}</td>";
             }
-            $ret .= "<td align='right'>$count</td>";
+            $ret .= "<td valign='top'><a href='$url'>" . LJ::img('xml', '', { border => 0 }) . "</a></td>";
+            $ret .= "<td align='right' valign='top'>$count</td>";
             $ret .= "</tr>";
         }
         $ret .= "<tr><td align='left' colspan='4'>";
-        $ret .= "<input type='submit' name='action:add' value='" . LJ::ehtml($ML{'.add'}) . "'>";        
+        $ret .= "<input type='submit' name='action:add' value='" . LJ::ehtml($ML{'.add.selected'}) . "'>";        
         $ret .= "</td></tr>";
         $ret .= "</table>";
     }
