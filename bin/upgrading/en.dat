@@ -1709,8 +1709,6 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.syn.lastcheck=Last checked:
 
-/userinfo.bml.syn.lastnew=Last update:
-
 /userinfo.bml.syn.last.never=Never
 
 /userinfo.bml.syn.nextcheck=Next check:

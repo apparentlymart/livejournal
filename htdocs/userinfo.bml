@@ -57,7 +57,7 @@
      $userid = $u->{'userid'}+0 if $u;
 
      LJ::text_out(\$u->{'name'}) if $u;
-     if ($u && $FORM{'mode'} eq "full") {
+     if ($u && ($FORM{'mode'} eq "full" || $u->{'journaltype'} eq "Y")) {
          $sth = $dbr->prepare("SELECT timeupdate, timecreate, ".
                               "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
                               "AS 'secondsold' FROM userusage ".
@@ -334,8 +334,6 @@ if ($u->{'journaltype'} eq "R" && $u->{'renamedto'}) {
          'nonew' => "",  # no status line necessary
      }->{$synd->{'laststatus'}};
      $body .= " ($status)" if $status;
-     $body .= "<br />$ML{'.syn.lastnew'} ";
-     $body .= $synd->{'lastnew'} || $ML{'.syn.last.never'};
 
      $body .= "<br />$ML{'.syn.nextcheck'} $synd->{'checknext'}";
      $body .= "</td></tr>\n";
