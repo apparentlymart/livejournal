@@ -115,7 +115,7 @@ sub html_check
 {
     my $opts = shift;
 
-    my $disabled = $opts->{'disabled'} ? " disabled" : "";
+    my $disabled = $opts->{'disabled'} ? " disabled='disabled'" : "";
     my $ret;
     if ($opts->{'type'} eq "radio") {
         $ret .= "<input type='radio'";
