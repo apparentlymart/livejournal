@@ -7211,6 +7211,7 @@ sub generate_session
     my $dbh = LJ::get_db_writer();
     $dbh->do("UPDATE userusage SET timecheck=NOW() WHERE userid=?",
              undef, $u->{'userid'});
+    LJ::mark_user_active($u, 'login');
 
     return $sess;
 }
@@ -7469,8 +7470,6 @@ sub alloc_global_counter
 }
 
 
-# Populate the clustertrack table, 5 hr expiration.
-
 # <LJFUNC>
 # name: LJ::make_user_active
 # des:  Record user activity per cluster to
@@ -7484,12 +7483,14 @@ sub mark_user_active {
     my $uid = $u->{userid};
     return 0 unless $uid;
 
+    # Update the clustertrack table, but not if we've done it for this
+    # user the past 5 hours.
     if (LJ::MemCache::add("rate:tracked:$uid", 1, 3600*5)) {
         my $dbh = LJ::get_db_writer();
         return 0 unless $dbh;
-        my $sth = $dbh->prepare("REPLACE INTO clustertrack SET
-                                userid=?, timeactive=NOW(), clusterid=?");
-        $sth->execute($uid, $u->{clusterid}) || return 0;
+        $dbh->do("REPLACE INTO clustertrack SET ".
+                 "userid=?, timeactive=NOW(), clusterid=?", undef,
+                 $uid, $u->{clusterid}) or return 0;
     }
     return 1;
 }
