@@ -36,7 +36,7 @@ function handleRadios(sel) {
 }
 
 function submitHandler() {
-    if (remote && username.value == remote && ! radio_anon.checked) {
+    if (remote && username.value == remote && (! radio_anon || ! radio_anon.checked)) {
         //  Quietly arrange for cookieuser auth instead, to avoid
         // sending cleartext password.
         password.value = "";
@@ -53,8 +53,8 @@ function submitHandler() {
 
 if (document.getElementById) {
 
-    if (radio_anon.checked) handleRadios(0);
-    if (radio_user.checked) handleRadios(2);
+    if (radio_anon && radio_anon.checked) handleRadios(0);
+    if (radio_user && radio_user.checked) handleRadios(2);
 
     if (radio_remote) {
         radio_remote.onclick = function () {
@@ -62,21 +62,24 @@ if (document.getElementById) {
         };
         if (radio_remote.checked) handleRadios(1);
     }
-    radio_user.onclick = function () {
-        handleRadios(2);
-    };
-    radio_anon.onclick = function () {
-        handleRadios(0);
-    };
+    if (radio_user)
+        radio_user.onclick = function () {
+            handleRadios(2);
+        };
+    if (radio_anon)
+        radio_anon.onclick = function () {
+            handleRadios(0);
+        };
     username.onkeydown = username.onchange = function () {
-        radio_user.checked = true;
+        if (radio_user)
+            radio_user.checked = true;
         handleRadios(2);  // update the form
     }
     form.onsubmit = submitHandler;
 
     document.onload = function () {
-        if (radio_anon.checked) handleRadios(0);
-        if (radio_user.checked) handleRadios(2);
+        if (radio_anon && radio_anon.checked) handleRadios(0);
+        if (radio_user && radio_user.checked) handleRadios(2);
         if (radio_remote && radio_remote.checked) handleRadios(1);
     }
 
