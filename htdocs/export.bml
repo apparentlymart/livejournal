@@ -11,7 +11,7 @@ body<=
     LJ::set_active_crumb('export');
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input("You must be logged in to use this tool.")
+    return "<?needlogin?>"
         unless $remote;
 
     my $ret;
