@@ -21,7 +21,7 @@ use HTTP::Date ();
 use LJ::MemCache;
 use Time::Local ();
 use Storable ();
-use Text::Wrap;
+use Text::Wrap ();
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
