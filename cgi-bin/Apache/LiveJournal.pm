@@ -128,7 +128,7 @@ sub trans
                                 'pathextra' => $2,
                                 'args' => $args,
                                 'user' => $user, })
-            if $user && $uri =~ m!/(\w+)(.*)!;
+            if $user && $uri =~ m!^/(\w*)(.*)!;
         return $journal_view->(undef);
     }
 
