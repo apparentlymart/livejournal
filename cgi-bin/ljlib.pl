@@ -3103,17 +3103,28 @@ sub make_journal
         }
     }
 
+    my $notice = sub {
+        my $msg = shift;
+        my $url = "$LJ::SITEROOT/users/$user/";
+        return qq{
+            <h1>Notice</h1>
+            <p>$msg</p>
+            <p>Instead, please use <nobr><a href=\"$url\">$url</a></nobr></p>
+        };
+    };
     if ($LJ::USER_VHOSTS && $opts->{'vhost'} eq "users" && ! LJ::get_cap($u, "userdomain")) {
-        return "<b>Notice</b><br />Addresses like <tt>http://<i>username</i>.$LJ::USER_DOMAIN</tt> aren't enabled for this user's account type.  Instead, visit:<ul><font face=\"Verdana,Arial\"><b><a href=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</a></b></font></ul>";
+        return $notice->("URLs like <nobr><b>http://<i>username</i>.$LJ::USER_DOMAIN/" .
+                         "</b></nobr> are not available for this user's account type.");
     }
     if ($opts->{'vhost'} =~ /^other:/ && ! LJ::get_cap($u, "userdomain")) {
-        return "<b>Notice</b><br />This user's account type doesn't permit domain aliasing.  Instead, visit:<ul><font face=\"Verdana,Arial\"><b><a href=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</a></b></font></ul>";
+        return $notice->("This user's account type doesn't permit domain aliasing.");
     }
     if ($opts->{'vhost'} eq "customview" && ! LJ::get_cap($u, "userdomain")) {
-        return "<b>Notice</b><br />Only users with <A HREF=\"$LJ::SITEROOT/paidaccounts/\">paid accounts</A> can create and embed styles.";
+        return $notice->("This user's account type is not permitted to create and embed styles.");
     }
     if ($opts->{'vhost'} eq "community" && $u->{'journaltype'} ne "C") {
-        return "<b>Notice</b><br />This account isn't a community journal.";
+        $opts->{'badargs'} = 1; # Output a generic 'bad URL' message if available
+        return "<h1>Notice</h1><p>This account isn't a community journal.</p>";
     }
     if ($view eq "friendsfriends" && ! LJ::get_cap($u, "friendsfriendsview")) {
         return "<b>Sorry</b><br />This user's account type doesn't permit showing friends of friends.";
