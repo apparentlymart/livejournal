@@ -704,7 +704,7 @@
             next if LJ::is_utf8($des);
             $changed = 1;
             convert(\$des, $encid);
-            LJ::Memories::update_memory($u, $memid, { des => $des });
+            LJ::Memories::update_memory($u, $memory->{memid}, { des => $des });
         }
         if ($changed) {
             $message .= "<?p Converted memory descriptions. p?>";
