@@ -1,5 +1,5 @@
 <?page
-title=>Create Style
+title=><?_ml .title _ml?>
 body<=
 
 <?_code
@@ -13,20 +13,20 @@ body<=
     return BML::redirect("create.bml") unless LJ::did_post();
 
     my $remote = LJ::get_remote();
-    return LJ::bad_input("You must be logged in to use this tool.")
+    return "<?needlogin?>"
         unless $remote;
 
     my $authas = $GET{'authas'} || $remote->{'user'};
     my $u = LJ::get_authas_user($authas);
-    return LJ::bad_input("You could not be authenticated as the specified user.")
+    return LJ::bad_input($ML{'error.authinvalid'})
         unless $u;
  
     unless (LJ::get_cap($u, "styles")) {
-        return LJ::bad_input("Your account type doesn't permit you to make styles.");
+        return LJ::bad_input($ML{'.error.accounttype'});
     }
 
     # error check submission
-    return LJ::bad_input("You did not select a valid style type.")
+    return LJ::bad_input($ML{'.error.invalidview'})
         unless $POST{'type'} && defined $LJ::viewinfo{$POST{'type'}};
 
     my $view = $POST{'type'};
@@ -36,10 +36,10 @@ body<=
     if ($baseid) {
         my $rec = LJ::S1::get_style($baseid);
 
-        return LJ::bad_input("The style you're trying to make a new style from ($baseid), does not seem to exist.")
+        return LJ::bad_input(BML::ml('.error.stylenotfound',{ 'baseid' => $baseid, }))
             unless $rec && $rec->{'type'} eq $view;
 
-        return LJ::bad_input("The style you're trying to make a new style from ($baseid) is not public so you cannot copy it.")
+        return LJ::bad_input(BML::ml('.error.stylenotpublic',{ 'baseid' => $baseid, }))
             unless $rec->{'is_public'} eq "Y" || $rec->{'user'} eq $u->{'user'};
 
         # they're allowed to base on this style
@@ -61,7 +61,7 @@ body<=
         my $getextra = "?authas=$authas" if $u->{'user'} ne $remote->{'user'};
         return "<div align='center'><form method='post' action='$LJ::SITEROOT/styles/edit_do.bml$getextra'>\n" .
                LJ::html_hidden('mode', 'editstyle', 'styleid', $_[0]) . "\n" .
-               LJ::html_submit(undef, "Edit Style") . "</form></div>\n";
+               LJ::html_submit(undef, $ML{'.editstyle'}) . "</form></div>\n";
     };
 
     if ($oldstyle) {
@@ -71,7 +71,8 @@ body<=
             $new_id = $oldstyle->{'styleid'};
 
         } else {
-            $ret .= "<?h1 Error h1?><?p You already have a style of this type named <b>$des</b>.  If you really want to create a new style of type <b>$view</b>, then go modify your old $view style, change its name, and then come back here to create a new style of this type. p?>";
+            $ret .= "<?h1 $ML{'Error'} h1?>" .
+                "<?p " . BML::ml('.styleexists',{ 'des' => $des, 'view' => $view, }) . " p?>";
 
             $ret .= $editform->($oldstyle->{'styleid'});
             return $ret;
@@ -85,8 +86,7 @@ body<=
                                          'formatdata' => $base });
     }
 
-    $ret .= "<?h1 Success h1?><?p Your style has been created and has been temporarily named <b>$des</b>. ";
-    $ret .= "You can begin editing it by pressing the button below.... p?>\n";
+    $ret .= "<?h1 $ML{'.success.head'} h1?><?p " . BML::ml('.success.text',{ 'des' => $des, }) . " p?>\n";
 
     $ret .= $editform->($new_id);
 

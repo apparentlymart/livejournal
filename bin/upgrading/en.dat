@@ -2410,6 +2410,42 @@ Sincerely,
 
 /register.bml.trans.header=Success
 
+/styles/create.bml.choosebase=Choose base style to start with and edit:
+
+/styles/create.bml.createstyle.head=Create a Style
+
+/styles/create.bml.createstyle.text=From here you can create a new personal-style, useful if you're going to either embed your journal in your homepage or you want to make a public style that everybody can use and you need to work on it here first, rather than in your overrides section.
+
+/styles/create.bml.enterstyleid=Or, enter a non-system public Style ID#:
+
+/styles/create.bml.noneorother=(None, or other below:)
+
+/styles/create.bml.selecttype.head=Select Style Type
+
+/styles/create.bml.selecttype.text=A style only affects one view type.  If you want to create a matching set of styles for your journal, you have to create your style for each view type.
+
+/styles/create.bml.submit=Create Style
+
+/styles/create.bml.title=Create Style
+
+/styles/create_do.bml.editstyle=Edit Style
+
+/styles/create_do.bml.error.accounttype=Your account type doesn't permit you to make styles.
+
+/styles/create_do.bml.error.invalidview=You did not select a valid style type.
+
+/styles/create_do.bml.error.styleexists=You already have a style of this type named <b>[[des]]</b>.  If you really want to create a new style of type <b>[[view]]</b>, then go modify your old [[view]] style, change its name, and then come back here to create a new style of this type.
+
+/styles/create_do.bml.error.stylenotfound=The style you're trying to make a new style from ([[baseid]]) does not seem to exist.
+
+/styles/create_do.bml.error.stylenotpublic=The style you're trying to make a new style from ([[baseid]]) is not public, so you cannot copy it.
+
+/styles/create_do.bml.success.head=Success
+
+/styles/create_do.bml.success.text=Your style has been created and has been temporarily named <b>[[des]]</b>. You can begin editing it by pressing the button below.
+
+/styles/create_do.bml.title=Create Style
+
 /styles/index.bml.about<<
 <p>This section of the site allows you to create, edit and delete
 customised styles. This allows you to control the look of your account to a great extent, 

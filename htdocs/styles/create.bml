@@ -1,5 +1,5 @@
 <?page
-title=>Create Style
+title=><?_ml .title _ml?>
 body<=
 
 <?_code
@@ -27,11 +27,11 @@ body<=
     $ret .= "<form action='create_do.bml$getextra' method='post'>\n";
     
     # main form
-    $ret .= "<?h1 Create a Style h1?>\n";
-    $ret .= "<?p From here you can create a new personal-style, useful if you're going to either <a href='$LJ::SITEROOT/developer/embedding.bml'>embed LiveJournal in your homepage</a> or you want to make a public style that everybody can use and you need to work on it here first, rather than in your overrides section.  Note that only users with <a href='$LJ::SITEROOT/paidaccounts/'>paid accounts</a> can create their own styles. p?>";
+    $ret .= "<?h1 $ML{'.createstyle.head'} h1?>\n";
+    $ret .= "<?p $ML{'.createstyle.text'} p?>";
 
-    $ret .= "<?h1 Select Style Type h1?>\n";
-    $ret .= "<?p A style only affects one <a href='$LJ::SITEROOT/developer/views.bml'>view type</a>.  If you want to create a matching set of styles for your journal, you have to create your style for each view type. p?>\n";
+    $ret .= "<?h1 $ML{'.selecttype.head'} h1?>\n";
+    $ret .= "<?p $ML{'.selecttype.text'} p?>\n";
 
     my $pubstyles = LJ::S1::get_public_styles();
     my %styles;
@@ -40,16 +40,16 @@ body<=
     foreach my $view (@LJ::views) {
         $ret .= "<p>" . LJ::html_check({ 'type' => 'radio', 'name' => 'type', 'id' => "type-$view", 'value' => $view });
         $ret .= "<b><label for='type-$view'>$LJ::viewinfo{$view}->{'des'}</label></b></p>\n";
-        $ret .= "<div style='margin: 10px 0 20px 30px;'>Choose base style to start with and edit:<br />\n";
+        $ret .= "<div style='margin: 10px 0 20px 30px;'>$ML{'.choosebase'}<br />\n";
         $ret .= LJ::html_select({ 'name' => "base_$view" },
-                                '', "(None, or other below:)",
+                                '', $ML{'.noneorother'},
                                 map { $_->{'styleid'}, $_->{'styledes'} }
                                 sort { $a->{'styledes'} cmp $b->{'styledes'} } @{$styles{$view}} );
-        $ret .= "<br />Or, enter a non-system public Style ID#: ";
+        $ret .= "<br />$ML{'.enterstyleid'} ";
         $ret .= LJ::html_text({ 'name' => "basenum_$view", 'size' => '5', 'maxlength' => '10' }) . "</div>\n";
     }
 
-    $ret .= "<?standout " . LJ::html_submit(undef, 'Create Style') . " standout?>\n";
+    $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.submit'}) . " standout?>\n";
     $ret .= "</form>\n";
     
     return $ret;
