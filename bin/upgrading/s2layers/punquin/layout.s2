@@ -219,15 +219,11 @@ function print_sidebar(Page p) {
     }
 
     var string links;
-    $links = $links + ($p.view == "recent" ?
-                       "&gt; $*text_view_recent<br />\n" :
-                       "&gt; <a href='$p.base_url/'>$*text_view_recent</a><br />\n");
-    $links = $links + ($p.view == "friends" ?
-                       "&gt; $*text_view_friends<br />\n" : 
-                       "&gt; <a href='$p.base_url/friends/'>$*text_view_friends</a><br />\n");
-    $links = $links + ($p.view == "calendar" ? 
-                       "&gt; $*text_view_archive<br />\n" : 
-                       "&gt; <a href='$p.base_url/calendar/'>$*text_view_archive</a><br />\n");
+    foreach var string v ($p.views_order) {
+        $links = "$links&gt; " + ($p.view == $v ?
+                           lang_viewname($v) :
+                           "<a href='$p.view_url{$v}'>"+lang_viewname($v)+"</a>") + "<br />\n";
+    }
 
     # Table Wrapper
     "<!-- Begin Main Sidebar -->\n<td valign='top' align='$*sidebar_position'>";
@@ -238,7 +234,7 @@ function print_sidebar(Page p) {
     "<div style='text-align:center'><span style='color: $*title_color'><strong>$title</strong></span></div>\n";
 
     # Links
-    "<p>$links\n$website\n&gt;<a href='$*SITEROOT/users/$p.journal.username/info'> profile</a><br />\n";
+    "<p>$links\n$website\n";
     $p->lay_sidebar_navigation();
 
     # Userpic

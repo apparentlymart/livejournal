@@ -270,17 +270,15 @@ function Page::print () {
     var string website = ($.journal.website_url != "" ? "(<a href='$.journal.website_url'>$website_name</a>)" : "");
 
     var string links;
-    $links = $links + "(" + ($.view == "recent" ? 
-                       "<span class='Active'>Latest&nbsp;Entries</span>" :
-                       "<a href='$.base_url/'>Latest&nbsp;Entries</a>") + ") ";
-    $links = $links + "(" + ($.view == "friends" ? 
-                       "<span class='Active'>Friends</span>" :
-                       "<a href='$.base_url/friends/'>Friends</a>") + ") ";
-    $links = $links + "(" + ($.view == "archive" ? 
-                       "<span class='Active'>Archive</span>" :
-                       "<a href='$.base_url/calendar/'>Archive</a>") + ") ";
+    foreach var string v ($.views_order) {
+        $links = "$links(<span style='white-space: nowrap;'>" + ($.view == $v ?
+                           "<span class='Active'>"+lang_viewname($v)+"</span>" :
+                           "<a href='$.view_url{$v}'>"+lang_viewname($v)+"</a>") + ")</span>\n";
+    }
 
-    """<p class="Navigation">$links $website (<a href='$.base_url/info'>User Info</a>)<br />"""; $this->lay_skip_navigation(); "</p>";
+    """<p class="Navigation">$links $website<br />""";
+    $this->lay_skip_navigation();
+    "</p>";
 
     $this->print_body();
 

@@ -274,10 +274,11 @@ function Page::print ()
         """<td><a href="$.journal.website_url">$website_name</a></td><td class="body">&nbsp;</td>""" :
         "";
     var string links;
-    $links = $links + ($.view == "recent" ? "[$*text_view_recent]" : "[<a href='$.base_url/'>$*text_view_recent</a>]");
-    $links = $links + ($.view == "archive" ? "[$*text_view_archive]" : "[<a href='$.base_url/calendar'>$*text_view_archive</a>]");
-    $links = $links + ($.view == "friends" ? "[$*text_view_friends]" : "[<a href='$.base_url/friends'>$*text_view_friends</a>]");
-
+    foreach var string v ($.views_order) {
+        $links = $links + ($.view == $v ?
+                           "["+lang_viewname($v)+"]" :
+                           "[<a href='$.view_url{$v}'>"+lang_viewname($v)+"</a>]");
+    }
 """
 <html>
   <head>

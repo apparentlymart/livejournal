@@ -99,6 +99,11 @@ propgroup text {
     property use text_read_comments_friends;
     property use text_meta_music;
     property use text_meta_mood;
+
+    property string text_website {
+        des = "The label for the 'website' field";
+        noui = 1;
+    }
 }
 
 # Set default colors
@@ -125,6 +130,15 @@ set page_background_image = "";
 
 set font_base = "Verdana";
 set font_fallback = "sans-serif";
+
+# Customize the view names to be short and lowercase
+# (Sorry translators, you'll have to do these again - keep them short!)
+set text_view_recent = "entries";
+set text_view_friends = "friends";
+set text_view_archive = "archive";
+set text_view_userinfo = "userinfo";
+
+set text_website = "website";
 
 function print_stylesheet () {
     print $*page_background_image ? "body { background-image: url($*page_background_image); }" : "";
@@ -248,16 +262,25 @@ function Page::print ()
     var string website;
     if ($.journal.website_url != "") {
         $website = """<tr><td class="meta">[</td>
-<td class="meta" align="right"><b>website</b></td>
+<td class="meta" align="right"><b>$*text_website</b></td>
 <td class="meta" align="center">|</td>
 <td class="meta" align="left"><a href="$.journal.website_url">$website_name</a></td>
 <td class="meta">]</td></tr>""";
     }
 
     var string links;
-    $links = $links + ($.view == "recent" ? "<b>entries</b>" : "<a class='index' href='$.base_url/'>entries</a>") + "|";
-    $links = $links + ($.view == "friends" ? "<b>friends</b>" : "<a class='index' href='$.base_url/friends'>friends</a>") + "|";
-    $links = $links + ($.view == "archive" ? "<b>archive</b>" : "<a class='index' href='$.base_url/calendar'>archive</a>");
+    var bool firstlink = true;
+    foreach var string v ($.views_order) {
+        if ($firstlink == false) {
+            $links = "$links|";
+        }
+        else {
+            $firstlink = false;
+        }
+        $links = $links + ($.view == $v ?
+                           "<b>"+lang_viewname($v)+"</b>" :
+                           "<a class='index' href='$.view_url{$v}'>"+lang_viewname($v)+"</a>");
+    }
 
 """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">\n<html>\n<head>\n""";
 
@@ -306,14 +329,14 @@ summary="">
 $website
 <tr>
 <td class="meta">[</td>
-<td class="meta" align="right"><b>userinfo</b></td>
+<td class="meta" align="right"><b>"""+lang_viewname("userinfo")+"""</b></td>
 <td class="meta" align="center">|</td>
 <td class="meta" align="left"><a href="$.view_url{"userinfo"}">$sitename_lc userinfo</a></td>
 <td class="meta">]</td>
 </tr>
 <tr>
 <td class="meta">[</td>
-<td class="meta" align="right"><b>archive</b></td>
+<td class="meta" align="right"><b>"""+lang_viewname("archive")+"""</b></td>
 <td class="meta" align="center">|</td>
 <td class="meta" align="left"><a href="$.view_url{"archive"}">journal archive</a></td>
 <td class="meta">]</td>

@@ -146,16 +146,11 @@ function captionbar (Page p) {
     }
 
     var string links;
-    $links = "$links<tr><td>View:</td><td>" + ($p.view == "recent" ? 
-                       $*text_view_recent :
-                       "<a href='$p.base_url/'>$*text_view_recent</a>") + ".</td></tr>\n";
-    $links = "$links<tr><td>View:</td><td>" + ($p.view == "friends" ? 
-                       $*text_view_friends :
-                       "<a href='$p.base_url/friends/'>$*text_view_friends</a>") + ".</td></tr>\n";
-    $links = "$links<tr><td>View:</td><td>" + ($p.view == "archive" ? 
-                       $*text_view_archive :
-                       "<a href='$p.base_url/calendar/'>$*text_view_archive</a>") + ".</td></tr>\n";
-    $links = "$links<tr><td>View:</td><td><a href='" + get_url($p.journal, "userinfo") + "'>$*text_view_userinfo</a>.</td></tr>";
+    foreach var string v ($p.views_order) {
+        $links = "$links<tr><td>View:</td><td>" + ($p.view == $v ?
+                           lang_viewname($v) :
+                           "<a href='$p.view_url{$v}'>"+lang_viewname($v)+"</a>") + ".</td></tr>\n";
+    }
 
     var string captionbar_userpicbox_style = "background-color: $*captionbar_userpicbox_color";
     """
@@ -165,9 +160,7 @@ function captionbar (Page p) {
     <table border='0'>
       $links
       $website
-      <tr><td>View:</td>
-        <td><a href='$*SITEROOT/memories.bml?user=$p.journal.username'>Memories</a>.<br></td>
-      </tr><tr>
+      <tr>
         <td colspan='2'>""";
 
     $p->lay_captionbar_navigation(); 
