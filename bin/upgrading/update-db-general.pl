@@ -1531,6 +1531,16 @@ CREATE TABLE links (
 )
 EOC
 
+# supportprop
+register_tablecreate("supportprop", <<'EOC');
+CREATE TABLE supportprop (
+  spid int(10) unsigned NOT NULL default '0',
+  prop varchar(30) NOT NULL,
+  value varchar(255) NOT NULL,
+  PRIMARY KEY (spid, prop)
+)
+EOC
+
 post_create("comminterests",
             "code" => sub {
                 my $dbh = shift;

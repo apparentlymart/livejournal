@@ -40,6 +40,7 @@ body<=
 
     my $spid = $FORM{'id'}+0;
     my $sp = LJ::Support::load_request($spid);
+    my $props = LJ::Support::load_props($spid);
     my $cats = LJ::Support::load_cats();
     my $remote = LJ::get_remote();
     LJ::Support::init_remote($remote);
@@ -135,9 +136,15 @@ body<=
         if ($sp->{_cat}->{'public_read'}) {
             $visemail =~ s/^.+\@/********\@/; 
         }
-        $ret .= LJ::eall($sp->{'reqname'}) . " ($visemail)";
+        $ret .= LJ::ehtml($sp->{'reqname'}) . " ($visemail)";
     }
     $ret .= "</td></tr>\n";
+
+    # uniq
+    if (LJ::check_priv($remote, 'sysban', 'uniq') || LJ::check_priv($remote, 'sysban', '*')) {
+        my $uniq = $props->{'uniq'} || "<i>none</i>";
+        $ret .= "<tr><td valign='bottom' align='right'><b>Uniq:</b></td><td>$uniq</td></tr>\n";
+    }
 
     # account type
     $ret .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/support/faqbrowse.bml?faqid=38'><span style='white-space: nowrap'>Account type</span></a>:</b></td><td>";
@@ -296,7 +303,7 @@ body<=
             if ($picid) { 
                 $header .= "<td><img src='$LJ::USERPIC_ROOT/$picid/$up->{'userid'}' width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'}' hspace='3' alt='$up->{'user'}'/></td>";
             }
-            $header .= "<td>" . LJ::ljuser($up->{'user'}, { 'full' => 1 }) . " - " . LJ::eall($up->{'name'}) . "</td></tr></table>\n";
+            $header .= "<td>" . LJ::ljuser($up->{'user'}, { 'full' => 1 }) . " - " . LJ::ehtml($up->{'name'}) . "</td></tr></table>\n";
         }
 
         my $what = "Answer";

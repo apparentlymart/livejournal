@@ -4,6 +4,12 @@ body<=
 
 <?_code
 {
+    use strict;
+    use vars qw(%POST);
+
+    my $apache_req = shift;
+    my $r = $apache_req->{'r'};
+
     my @errors = ();
 
     unless (LJ::did_post()) { push @errors, "<?requirepost?>"; }
@@ -14,11 +20,11 @@ body<=
 
     my %req;  # the request we're building to submit
 
-    if ($FORM{'reqtype'} eq "user") 
+    if ($POST{'reqtype'} eq "user") 
     {
         $req{'reqtype'} = "user";
-        $user = LJ::canonical_username($FORM{'user'});
-        if ($FORM{'password'} eq "_REMOTE") {
+        $user = LJ::canonical_username($POST{'user'});
+        if ($POST{'password'} eq "_REMOTE") {
             $remote = LJ::get_remote();
             if ($remote && $remote->{'user'} eq $user) {
                 $u = LJ::load_user($remote->{'user'});
@@ -28,7 +34,7 @@ body<=
         unless ($req{'requserid'}) {
             $u = LJ::load_user($user);
             push @errors, "Invalid username" unless $u;
-            if (LJ::auth_okay($u, $FORM{'password'}, $FORM{'hpassword'})) {
+            if (LJ::auth_okay($u, $POST{'password'}, $POST{'hpassword'})) {
                 $req{'requserid'} = $u->{'userid'};
             } else {
                 push @errors, "Invalid password";
@@ -36,24 +42,25 @@ body<=
         }
         $req{'reqemail'} = $u->{'email'};
     }
-    elsif ($FORM{'reqtype'} eq "email")
+    elsif ($POST{'reqtype'} eq "email")
     {
         $req{'reqtype'} = "email";
-        $req{'reqemail'} = $FORM{'email'};
+        $req{'reqemail'} = $POST{'email'};
      
-        check_email($FORM{'email'}, \@errors);
+        check_email($POST{'email'}, \@errors);
     }
 
-    $req{'reqname'} = $FORM{'reqname'};
-    $req{'body'} = $FORM{'message'};
-    $req{'subject'} = $FORM{'subject'};
-    $req{'spcatid'} = $FORM{'spcatid'};
+    $req{'reqname'} = $POST{'reqname'};
+    $req{'body'} = $POST{'message'};
+    $req{'subject'} = $POST{'subject'};
+    $req{'spcatid'} = $POST{'spcatid'};
+    $req{'uniq'} = $r->notes('uniq');
 
     return LJ::bad_input(@errors) if @errors;
     my $spid = LJ::Support::file_request(\@errors, \%req);
     return LJ::bad_input(@errors) if @errors;
  
-    $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
+    my $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
     
     return "Your $LJ::SITENAMESHORT support request has been filed and will be answered as soon as possible.  Your request tracking number is <B>$spid</B>.  You can track its progress here: <UL><A HREF=\"$url\">$url</A></UL>";    
 }

@@ -240,6 +240,23 @@ sub can_help
     return 0;
 }
 
+sub load_props
+{
+    my $spid = shift;
+    return unless $spid;
+
+    my %props = (); # prop => value
+
+    my $dbr = LJ::get_db_reader();
+    my $sth = $dbr->prepare("SELECT prop, value FROM supportprop WHERE spid=?");
+    $sth->execute($spid);
+    while (my ($prop, $value) = $sth->fetchrow_array) {
+        $props{$prop} = $value;
+    }
+
+    return \%props;
+}
+
 sub load_request
 {
     my $spid = shift;
@@ -372,7 +389,7 @@ sub file_request
         return 0;
     }
     $spid = $dbh->{'mysql_insertid'};
-        
+
     $dbh->do("INSERT INTO duplock (realm, reid, userid, digest, dupid, instime) VALUES ('support', 0, $qrequserid, '$md5', $spid, NOW())");
     $dbh->do("UNLOCK TABLES");
     
@@ -380,6 +397,10 @@ sub file_request
         push @$errors, "<b>Database error:</b> (report this)<br>Didn't get a spid."; 
         return 0;
     }
+
+    # save meta-data for this request
+    $dbh->do("INSERT INTO supportprop (spid, prop, value) VALUES (?, 'uniq', ?)",
+             undef, $spid, $o->{'uniq'});
         
     $sth = $dbh->prepare("INSERT INTO supportlog (splid, spid, timelogged, type, faqid, userid, message) VALUES (NULL, $spid, UNIX_TIMESTAMP(), 'req', 0, $qrequserid, $qbody)");
     $sth->execute;
