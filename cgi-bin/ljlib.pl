@@ -7747,7 +7747,7 @@ sub get_public_styles {
 
     # first try new table
     my $dbh = LJ::get_db_writer();
-    my $sth = $dbh->prepare("SELECT userid, $cols FROM s1style WHERE userid=?");
+    my $sth = $dbh->prepare("SELECT userid, $cols FROM s1style WHERE userid=? AND is_public='Y'");
     $sth->execute($sysid);
     $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
 
