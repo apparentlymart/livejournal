@@ -1,44 +1,43 @@
-# one day, write a tool to remove these during populate.  
-# for now, we'll keep track here.
-
-general uploadpic.error.toolarge
-general /uploadpic_do.bml.error.urlerror
-
-general /userinfo.bml.label.viewlabel
-general /userinfo.bml.syn.lastnew
-general /editinfo.bml.allowshowcontact.email.reason
-general /editinfo.bml.allowshocontact.email.if_domainaddy
-general /editinfo.bml.settings.about
-
-general /userinfo.bml.openmembership.body
-general /userinfo.bml.rpmembership.body
-general /userinfo.bml.closedmembership.body
-
-general /community/join.bml.label.closedcomm
-general /community/join.bml.label.authpost
-
-general /talkread.bml.pageofpages
-
-general /editinfo.bml.topicdir.header
-general /editinfo.bml.topicdir.about
-general /editinfo.bml.showsubjicons.header
-general /editinfo.bml.showsubjicons.about
-
-general /community/create.bml.*
-
-general /update.bml.login.success
-
-general /community/manage.bml.actsettings
-
-general /community/manage.bml.actmembers
-
-general /community/members.bml.manage
-
-general /community/settings.bml.manage
-
-general /community/search.bml.contasmember
+# these get removed if found by texttool.pl
+#
 
 general /allpics.bml.edit
 general /allpics.bml.nopics.text
+
+general /community/create.bml.*
+
+general /community/join.bml.label.authpost
+general /community/join.bml.label.closedcomm
+
+general /community/manage.bml.actmembers
+general /community/manage.bml.actsettings
+
+general /community/members.bml.manage
+
+general /community/search.bml.contasmember
+
+general /community/settings.bml.manage
+
+general /editinfo.bml.allowshowcontact.email.if_domainaddy
+general /editinfo.bml.allowshowcontact.email.reason
+general /editinfo.bml.settings.about
+general /editinfo.bml.showsubjicons.about
+general /editinfo.bml.showsubjicons.header
+general /editinfo.bml.topicdir.about
+general /editinfo.bml.topicdir.header
+
+general /talkread.bml.pageofpages
+
+general /update.bml.login.success
+
+general /uploadpic.bml.success.text
+general /uploadpic_do.bml.error.urlerror
+general uploadpic.error.toolarge
+
+general /userinfo.bml.closedmembership.body
+general /userinfo.bml.label.viewlabel
+general /userinfo.bml.openmembership.body
+general /userinfo.bml.rpmembership.body
+general /userinfo.bml.syn.lastnew
 
 

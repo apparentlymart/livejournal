@@ -2099,9 +2099,13 @@ This could be because: <ol>
 
 /uploadpic.bml.restriction.imagesize=Image dimensions must be no larger than 100x100 pixels
 
+/uploadpic.bml.success.editpics=You can <a href='[[editlink]]'>edit your picture keywords</a> to be able to use this picture selectively in the future.
+
 /uploadpic.bml.success.header=Success
 
-/uploadpic.bml.success.text=<p>Your image has been uploaded.  It looks like this:</p><p align='center'>[[userpic]]</p>You can <a href='[[editpiclink]]'>edit your picture keywords</a> to be able to use this picture selectively in the future. <p>Alternatively, you can <a href='[[uploadpiclink]]'>upload another picture</a> or <a href='[[journallink]]'>view your journal here</a></p>.
+/uploadpic.bml.success.preview=Your image has been uploaded. It looks like this:
+
+/uploadpic.bml.success.upload=Alternatively, you can <a href='[[uploadlink]]'>upload another picture</a> or <a href='[[journallink]]'>view your journal here</a>.
 
 /uploadpic.bml.text=Here you can upload a miniature picture that will be used to represent you through the LiveJournal site, in your journal, and in your friends' journals.  The following restrictions are placed on the file:
 
