@@ -113,6 +113,7 @@ my $move_user = sub {
     # This is lame.
     my $domainid = LJ::get_blob_domainid('userpic');
     $u->do("DELETE FROM userblob WHERE journalid=$u->{userid} AND domain=$domainid AND blobid>=16777216");
+    die "error in delete: " . $u->errstr . "\n" if $u->err;
 
     # step 1: get all user pictures and move those.  safe to just grab with no limit
     # since users can only have a limited number of them
@@ -145,7 +146,7 @@ my $move_user = sub {
         my $bind = join ',', @bind;
         $u->do("REPLACE INTO userpic2 (picid, userid, fmt, width, height, state, picdate, md5base64) " .
                "VALUES $bind", undef, @vars);
-
+        die "error in userpic2 replace: " . $u->errstr . "\n" if $u->err;
 
         # step 1.5: insert missing rows into the userblob table
         my $blobbind = join ',', @blobbind;
@@ -169,6 +170,7 @@ my $move_user = sub {
             my $insertbind = join ',', @insertbind;
             $u->do("INSERT INTO userblob (journalid, domain, blobid, length) " .
                    "VALUES $insertbind", undef, @insertvars);
+            die "error in userblob insert: " . $u->errstr . "\n" if $u->err;
         }
     }
 
@@ -180,8 +182,8 @@ my $move_user = sub {
 
         # insert data into cluster master
         my $bind = join(",", @bind);
-        $dbcm->do("REPLACE INTO $table ($cols) VALUES $bind", undef, @vars);
-        die "error in flush $table: " . $dbcm->errstr . "\n" if $dbcm->err;
+        $u->do("REPLACE INTO $table ($cols) VALUES $bind", undef, @vars);
+        die "error in flush $table: " . $u->errstr . "\n" if $u->err;
 
         # reset values
         @bind = ();

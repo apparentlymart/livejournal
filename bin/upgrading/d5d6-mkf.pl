@@ -120,6 +120,7 @@ my $move_user = sub {
         my $bind = join ',', @bind;
         $u->do("REPLACE INTO friendgroup2 (userid, groupnum, groupname, sortorder, is_public) " .
                "VALUES $bind", undef, @vars);
+        die "error in friend group update: " . $u->errstr . "\n" if $u->err;
     }
 
     # general purpose flusher for use below
@@ -131,7 +132,7 @@ my $move_user = sub {
         # insert data into cluster master
         my $bind = join(",", @bind);
         $u->do("REPLACE INTO $table ($cols) VALUES $bind", undef, @vars);
-        die "error in flush $table: " . $dbcm->errstr . "\n" if $dbcm->err;
+        die "error in flush $table: " . $u->errstr . "\n" if $u->err;
 
         # reset values
         @bind = ();
@@ -146,10 +147,12 @@ my $move_user = sub {
         # yep, so we need to delete stuff, real data first
         foreach my $table (qw(memorable2 memkeyword2 userkeywords)) {
             $u->do("DELETE FROM $table WHERE userid = ?", undef, $u->{userid});
+            die "error in clear: " . $u->errstr . "\n" if $u->err;
         }
 
         # delete counters used (including memcache of such)
         $u->do("DELETE FROM counter WHERE journalid = ? AND area IN ('R', 'K')", undef, $u->{userid});
+        die "error in clear: " . $u->errstr . "\n" if $u->err;
         LJ::MemCache::delete([$u->{userid}, "auc:$u->{userid}:R"]);
         LJ::MemCache::delete([$u->{userid}, "auc:$u->{userid}:K"]);
     }
