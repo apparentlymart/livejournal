@@ -761,7 +761,9 @@ sub change_journal_type
     if ($type eq "person") {
         $dbh->do("UPDATE user SET journaltype='P' WHERE userid=$quserid");
         my $dbs = LJ::make_dbs_from_arg($dbh);
-        LJ::clear_rel($dbs, $quserid, '*', 'P');
+        LJ::clear_rel($dbs, $quserid, '*', 'P'); # post
+        LJ::clear_rel($dbs, $quserid, '*', 'A'); # admin
+        LJ::clear_rel($dbs, $quserid, '*', 'M'); # moderate
 
         # if we're changing a non-person account to a person account,
         # we need to ditch all its friend-ofs so that old users befriending
