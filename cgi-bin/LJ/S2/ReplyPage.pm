@@ -44,8 +44,12 @@ sub ReplyPage
             $parpost = $db->selectrow_hashref($sql);
             last if $parpost;
         }
-        unless ($parpost) {
+        unless ($parpost and $parpost->{'state'} ne 'D') {
             $opts->{'handler_return'} = 404;
+            return;
+        }
+        if ($parpost->{'state'} eq 'S' && !LJ::Talk::can_unscreen($remote, $u, $s2entry->{'poster'}->{'username'}, undef)) {
+            $opts->{'handler_return'} = 403;
             return;
         }
 
