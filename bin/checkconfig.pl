@@ -45,6 +45,10 @@ my %modules = (
                "Storable" => {
                    'deb' => 'libstorable-perl',
                },
+               "XML::RSS" => {
+                   'deb' => 'libxml-rss-perl',
+                   'opt' => 'Required for retrieving RSS off of other sites (syndication).',
+               },
                );
 
 my @debs;

@@ -144,6 +144,11 @@ $maint{'synsuck'} = sub
                 'nopassword' => 1,
             };
 
+            # if the post contains html linebreaks, assume it's preformatted.
+            if ($it->{'description'} =~ /<(p|br)\b/) {
+                $req->{'props'} = { 'opt_preformatted' => 1 };
+            }
+
             my $err;
             my $res = LJ::Protocol::do_request($dbs, "postevent", $req, \$err, $flags);
             if ($res && ! $err) {
