@@ -564,8 +564,8 @@ sub get_recent_items
 #       crappy thing about this interface is that it doesn't allow
 #       a batch of userprops to be updated at once, which is the
 #       common thing to do.
-# args: dbarg, userid, propname, value
-# des-userid: The userid of the user.
+# args: dbarg, uuserid, propname, value
+# des-uuserid: The userid of the user or a user hashref.
 # des-propname: The name of the property.
 # des-value: The value to set to the property.  If undefined or the
 #            empty string, then property is deleted.
@@ -575,6 +575,7 @@ sub set_userprop
     my ($dbarg, $userid, $propname, $value) = @_;
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
+    $userid = $userid->{'userid'} if ref $userid eq "HASH";
 
     my $p;
 

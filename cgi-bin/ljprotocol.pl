@@ -521,7 +521,7 @@ sub postevent
     LJ::load_user_props($dbs, $u, "newesteventtime");
     if ($posterid == $ownerid && $u->{'newesteventtime'} && 
         $eventtime lt $u->{'newesteventtime'} &&!$req->{'props'}->{'opt_backdated'}) {
-        return fail($err, 153, "You're trying to post an entry in the past without the backdate option turned on. Please check your computer's clock or, if you really mean to post in the past, use the backdate option.");
+        return fail($err, 153, "Your most recent journal entry is dated $u->{'newesteventtime'}, but you're trying to post one at $eventtime without the backdate option turned on.  Please check your computer's clock.  Or, if you really mean to post in the past, use the backdate option.");
     }
 
     my $qsubject = $dbh->quote($req->{'subject'});
@@ -874,6 +874,9 @@ sub editevent
              "WHERE l.itemid=$qitemid AND lt.itemid=$qitemid");
     }
 
+    # kill seconds in eventtime, since we don't use it, then we can use 'eq' and such
+    $oldevent->{'eventtime'} =~ s/:00$//;
+
     ### make sure this user is allowed to edit this entry
     return fail($err,302)
         unless ($ownerid == $oldevent->{'ownerid'});
@@ -913,6 +916,15 @@ sub editevent
     # simple logic for deleting an entry
     if ($req->{'event'} !~ /\S/)
     {
+        # if their newesteventtime prop equals the time of the one they're deleting
+        # then delete their newesteventtime.
+        if ($u->{'userid'} == $uowner->{'userid'}) {
+            LJ::load_user_props($dbs, $u, "newesteventtime");
+            if ($u->{'newesteventtime'} eq $oldevent->{'eventtime'}) {
+                LJ::set_userprop($dbs, $u, "newesteventtime", undef);
+            }
+        }
+
         if ($clustered) {
             LJ::delete_item2($dbh, $dbcm, $ownerid, $req->{'itemid'},
                              'quick', $oldevent->{'anum'});
@@ -983,14 +995,20 @@ sub editevent
     my $qmonth = $req->{'mon'}+0;
     my $qday = $req->{'day'}+0;
 
-    if ($qyear != $oldevent->{'year'} ||
-        $qmonth != $oldevent->{'month'} ||
-        $qday != $oldevent->{'day'} ||
-        $eventtime ne $oldevent->{'eventtime'} ||
+    if ($eventtime ne $oldevent->{'eventtime'} ||
         $security ne $oldevent->{'security'} ||
-        $qallowmask != $oldevent->{'allowmask'}
-        )
+        $qallowmask != $oldevent->{'allowmask'})
     {
+        # are they changing their most recent post?
+        if ($eventtime ne $oldevent->{'eventtime'} &&
+            $u->{'userid'} == $uowner->{'userid'}) 
+        {
+            LJ::load_user_props($dbs, $u, "newesteventtime");
+            if ($u->{'newesteventtime'} eq $oldevent->{'eventtime'}) {
+                LJ::set_userprop($dbs, $u, "newesteventtime", $eventtime);
+            }
+        }
+        
         my $qsecurity = $dbh->quote($security);
         if ($clustered) {
             $dbcm->do("UPDATE log2 SET eventtime=$qeventtime, revttime=$LJ::EndOfTime-".
