@@ -30,6 +30,23 @@ sub handler
         return OK;
     }
 
+    if ($cmd eq "makechals") {
+        my $count = int($POST{'count'}) || 1;
+        if ($count > 50) { $count = 50; }
+        my $dbr = LJ::get_dbh("slave", "master");
+        my $u = LJ::load_user($dbr, $POST{'user'});
+        return OK unless $u;
+
+        $r->print("count: $count\n");
+        for (my $i=1; $i<=$count; $i++) {
+            my $chal = LJ::rand_chars(40);
+            my $resp = Digest::MD5::md5_hex($chal . Digest::MD5::md5_hex($u->{'password'}));
+            $r->print("chal_$i: $chal\nresp_$i: $resp\n");
+        }
+        return OK;
+    }
+
+
     return OK;
 }
 
