@@ -73,10 +73,6 @@
     # news site support. if set, that journal loads on the main page.
     #$FRONTPAGE_JOURNAL = "news";
 
-    # performance/load related settings.  turn this on if you want to batch all updates
-    # to the database every 10 seconds.  only necessary with high-load sites.
-    $BUFFER_QUERIES = 0;
-
     # Do paid users get email addresses?  username@$USER_DOMAIN ?
     # (requires additional mail system configuration)
     $USER_EMAIL  = 0;
