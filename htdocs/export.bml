@@ -54,6 +54,8 @@ p?>
  return $ret . "<br />";
 _CODE=)
 
+ <input type=checkbox name="notranslation">Do not translate between encodings<br />
+
 </TD></TR>
 <TR><TD COLSPAN=2><HR></TD></TR>
 <TR VALIGN=TOP><TD>Fields:</TD>
