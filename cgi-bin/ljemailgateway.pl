@@ -274,7 +274,7 @@ sub process {
     # post!
     my $post_error;
     LJ::Protocol::do_request("postevent", $req, \$post_error, { noauth=>1 });
-    return $err->(LJ::Protocol::error_message($post_error)) if $post_error;
+    return $err->(LJ::Protocol::error_message($post_error), { sendmail => 1}) if $post_error;
 
     return "Email post success";
 }
