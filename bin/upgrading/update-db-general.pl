@@ -11,7 +11,7 @@ CREATE TABLE adopt (
   PRIMARY KEY  (adoptid),
   KEY (helperid),
   KEY (newbieid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("adoptlast", <<'EOC');
@@ -20,7 +20,7 @@ CREATE TABLE adoptlast (
   lastassigned datetime NOT NULL default '0000-00-00 00:00:00',
   lastadopted datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (userid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("authactions", <<'EOC');
@@ -32,7 +32,7 @@ CREATE TABLE authactions (
   action varchar(50) default NULL,
   arg1 varchar(255) default NULL,
   PRIMARY KEY  (aaid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("ban", <<'EOC');
@@ -49,7 +49,7 @@ CREATE TABLE batchdelete (
   what char(12) NOT NULL default '',
   itsid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (what,itsid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("clients", <<'EOC');
@@ -58,7 +58,7 @@ CREATE TABLE clients (
   client varchar(40) default NULL,
   PRIMARY KEY  (clientid),
   KEY (client)
-) TYPE=MyISAM
+) 
 EOC
 
 post_create("clients", 
@@ -72,7 +72,7 @@ CREATE TABLE clientusage (
   lastlogin datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (clientid,userid),
   UNIQUE KEY userid (userid,clientid)
-) TYPE=MyISAM
+) 
 EOC
     
 post_create("clientusage", 
@@ -97,7 +97,7 @@ CREATE TABLE community (
   membership enum('open','closed') NOT NULL default 'open',
   postlevel enum('members','select','screened') default NULL,
   PRIMARY KEY  (userid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("dirsearchres2", <<'EOC');
@@ -107,7 +107,7 @@ CREATE TABLE dirsearchres2 (
   userids blob,
   PRIMARY KEY  (qdigest),
   KEY (dateins)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("duplock", <<'EOC');
@@ -119,7 +119,7 @@ CREATE TABLE duplock (
   dupid int(10) unsigned NOT NULL default '0',
   instime datetime NOT NULL default '0000-00-00 00:00:00',
   KEY (realm,reid,userid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("faq", <<'EOC');
@@ -153,7 +153,7 @@ CREATE TABLE friendgroup (
   sortorder tinyint(3) unsigned NOT NULL default '50',
   is_public enum('0','1') NOT NULL default '0',
   PRIMARY KEY  (userid,groupnum)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("friends", <<'EOC');
@@ -167,7 +167,7 @@ CREATE TABLE friends (
   PRIMARY KEY  (userid,friendid),
   KEY (userid),
   KEY (friendid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("hintlastnview", <<'EOC');
@@ -179,7 +179,7 @@ CREATE TABLE hintlastnview (
   UNIQUE KEY uniq (userid,itemid),
   KEY (userid),
   KEY (itemid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("interests", <<'EOC');
@@ -189,7 +189,7 @@ CREATE TABLE interests (
   intcount mediumint(8) unsigned default NULL,
   PRIMARY KEY  (intid),
   KEY (interest)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("keywords", <<'EOC');
@@ -198,7 +198,7 @@ CREATE TABLE keywords (
   keyword varchar(40) binary NOT NULL default '',
   PRIMARY KEY  (kwid),
   UNIQUE KEY kwidx (keyword)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("log", <<'EOC');
@@ -220,7 +220,7 @@ CREATE TABLE log (
   KEY (ownerid,year,month,day),
   KEY (eventtime),
   KEY (logtime)
-) TYPE=MyISAM PACK_KEYS=1
+)  PACK_KEYS=1
 EOC
 
 register_tablecreate("logaccess", <<'EOC');
@@ -230,7 +230,7 @@ CREATE TABLE logaccess (
   KEY (ownerid),
   KEY (posterid),
   PRIMARY KEY  (ownerid,posterid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("logprop", <<'EOC');
@@ -240,7 +240,7 @@ CREATE TABLE logprop (
   value varchar(255) default NULL,
   KEY (itemid),
   PRIMARY KEY  (itemid,propid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("logproplist", <<'EOC');
@@ -253,7 +253,7 @@ CREATE TABLE logproplist (
   des varchar(255) default NULL,
   PRIMARY KEY  (propid),
   UNIQUE KEY name (name)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("logsec", <<'EOC');
@@ -262,7 +262,7 @@ CREATE TABLE logsec (
   itemid int(10) unsigned NOT NULL default '0',
   allowmask int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (ownerid,itemid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("logsubject", <<'EOC');
@@ -270,7 +270,7 @@ CREATE TABLE logsubject (
   itemid int(10) unsigned NOT NULL default '0',
   subject varchar(255) default NULL,
   PRIMARY KEY  (itemid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("logtext", <<'EOC');
@@ -279,7 +279,7 @@ CREATE TABLE logtext (
   subject varchar(255) default NULL,
   event text,
   PRIMARY KEY  (itemid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("memkeyword", <<'EOC');
@@ -287,7 +287,7 @@ CREATE TABLE memkeyword (
   memid int(10) unsigned NOT NULL default '0',
   kwid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (memid,kwid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("memorable", <<'EOC');
@@ -300,7 +300,7 @@ CREATE TABLE memorable (
   PRIMARY KEY  (memid),
   UNIQUE KEY userid (userid,itemid),
   KEY (itemid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("moods", <<'EOC');
@@ -310,7 +310,7 @@ CREATE TABLE moods (
   parentmood int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (moodid),
   UNIQUE KEY mood (mood)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("moodthemedata", <<'EOC');
@@ -322,7 +322,7 @@ CREATE TABLE moodthemedata (
   height tinyint(3) unsigned NOT NULL default '0',
   KEY (moodthemeid),
   PRIMARY KEY  (moodthemeid,moodid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("moodthemes", <<'EOC');
@@ -335,7 +335,7 @@ CREATE TABLE moodthemes (
   PRIMARY KEY  (moodthemeid),
   KEY (is_public),
   KEY (ownerid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("news_sent", <<'EOC');
@@ -359,7 +359,7 @@ CREATE TABLE noderefs (
   urlmd5 varchar(32) NOT NULL default '',
   url varchar(120) NOT NULL default '',
   PRIMARY KEY  (nodetype,nodeid,urlmd5)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("overrides", <<'EOC');
@@ -383,7 +383,7 @@ CREATE TABLE poll (
   KEY (itemid),
   KEY (journalid),
   KEY (posterid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("pollitem", <<'EOC');
@@ -394,7 +394,7 @@ CREATE TABLE pollitem (
   sortorder tinyint(3) unsigned NOT NULL default '0',
   item varchar(255) default NULL,
   PRIMARY KEY  (pollid,pollqid,pollitid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("pollquestion", <<'EOC');
@@ -406,7 +406,7 @@ CREATE TABLE pollquestion (
   opts varchar(20) default NULL,
   qtext text,
   PRIMARY KEY  (pollid,pollqid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("pollresult", <<'EOC');
@@ -417,7 +417,7 @@ CREATE TABLE pollresult (
   value varchar(255) default NULL,
   PRIMARY KEY  (pollid,pollqid,userid),
   KEY (pollid,userid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("pollsubmission", <<'EOC');
@@ -427,7 +427,7 @@ CREATE TABLE pollsubmission (
   datesubmit datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (pollid,userid),
   KEY (userid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("priv_list", <<'EOC');
@@ -438,7 +438,7 @@ CREATE TABLE priv_list (
   des varchar(255) default NULL,
   PRIMARY KEY  (prlid),
   UNIQUE KEY privcode (privcode)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("priv_map", <<'EOC');
@@ -450,7 +450,7 @@ CREATE TABLE priv_map (
   PRIMARY KEY  (prmid),
   KEY (userid),
   KEY (prlid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("querybuffer", <<'EOC');
@@ -461,7 +461,7 @@ CREATE TABLE querybuffer (
   query text NOT NULL,
   PRIMARY KEY  (qbid),
   KEY (tablename)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("randomuserset", <<'EOC');
@@ -470,7 +470,7 @@ CREATE TABLE randomuserset (
   timeupdate datetime NOT NULL default '0000-00-00 00:00:00',
   PRIMARY KEY  (userid),
   KEY (timeupdate)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("schemacols", <<'EOC');
@@ -479,7 +479,7 @@ CREATE TABLE schemacols (
   colname varchar(40) NOT NULL default '',
   des varchar(255) default NULL,
   PRIMARY KEY  (tablename,colname)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("schematables", <<'EOC');
@@ -489,7 +489,7 @@ CREATE TABLE schematables (
   redist_mode enum('off','insert','replace') NOT NULL default 'off',
   des text,
   PRIMARY KEY  (tablename)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("stats", <<'EOC');
@@ -499,7 +499,7 @@ CREATE TABLE stats (
   statval int(10) unsigned default NULL,
   KEY (statcat),
   UNIQUE KEY statcat_2 (statcat,statkey)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("style", <<'EOC');
@@ -518,7 +518,7 @@ CREATE TABLE style (
   PRIMARY KEY  (styleid),
   KEY (user),
   KEY (type)
-) TYPE=MyISAM PACK_KEYS=1
+)  PACK_KEYS=1
 EOC
 
 register_tablecreate("support", <<'EOC');
@@ -537,7 +537,7 @@ CREATE TABLE support (
   timeclosed int(10) unsigned default NULL,
   PRIMARY KEY  (spid),
   KEY (state)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("supportcat", <<'EOC');
@@ -547,7 +547,7 @@ CREATE TABLE supportcat (
   sortorder mediumint(8) unsigned NOT NULL default '0',
   basepoints tinyint(3) unsigned NOT NULL default '1',
   PRIMARY KEY  (spcatid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("supportlog", <<'EOC');
@@ -561,7 +561,7 @@ CREATE TABLE supportlog (
   message text,
   PRIMARY KEY  (splid),
   KEY (spid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("supportnotify", <<'EOC');
@@ -572,7 +572,7 @@ CREATE TABLE supportnotify (
   KEY (spcatid),
   KEY (userid),
   PRIMARY KEY  (spcatid,userid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("supportpoints", <<'EOC');
@@ -582,7 +582,7 @@ CREATE TABLE supportpoints (
   points tinyint(3) unsigned default NULL,
   KEY (spid),
   KEY (userid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("syncupdates", <<'EOC');
@@ -594,7 +594,7 @@ CREATE TABLE syncupdates (
   atype enum('create','update') NOT NULL default 'create',
   PRIMARY KEY  (userid,nodetype,nodeid),
   KEY (userid,atime)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("talk", <<'EOC');
@@ -611,7 +611,7 @@ CREATE TABLE talk (
   KEY (nodetype,nodeid),
   KEY (journalid,state,nodetype),
   KEY (posterid,nodetype)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("talkprop", <<'EOC');
@@ -620,7 +620,7 @@ CREATE TABLE talkprop (
   tpropid tinyint(3) unsigned NOT NULL default '0',
   value varchar(255) default NULL,
   PRIMARY KEY  (talkid,tpropid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("talkproplist", <<'EOC');
@@ -632,7 +632,7 @@ CREATE TABLE talkproplist (
   des varchar(255) default NULL,
   PRIMARY KEY  (tpropid),
   UNIQUE KEY name (name)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("talktext", <<'EOC');
@@ -641,7 +641,7 @@ CREATE TABLE talktext (
   subject varchar(100) default NULL,
   body text,
   PRIMARY KEY  (talkid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("themecoltypes", <<'EOC');
@@ -699,7 +699,7 @@ CREATE TABLE todo (
   KEY (journalid),
   KEY (posterid),
   KEY (ownerid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("tododep", <<'EOC');
@@ -708,7 +708,7 @@ CREATE TABLE tododep (
   depid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (todoid,depid),
   KEY (depid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("todokeyword", <<'EOC');
@@ -716,7 +716,7 @@ CREATE TABLE todokeyword (
   todoid int(10) unsigned NOT NULL default '0',
   kwid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (todoid,kwid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("topic_cats", <<'EOC');
@@ -728,7 +728,7 @@ CREATE TABLE topic_cats (
   topicsort enum('alpha','date') NOT NULL default 'alpha',
   PRIMARY KEY  (tpcatid),
   KEY (parent)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("topic_list", <<'EOC');
@@ -743,7 +743,7 @@ CREATE TABLE topic_list (
   PRIMARY KEY  (tptopid),
   KEY (tpcatid),
   KEY (status)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("topic_map", <<'EOC');
@@ -760,7 +760,7 @@ CREATE TABLE topic_map (
   UNIQUE KEY tptopid_2 (tptopid,itemid),
   KEY (screendate),
   KEY (itemid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("tracking", <<'EOC');
@@ -771,7 +771,7 @@ CREATE TABLE tracking (
   actdes char(10) default NULL,
   associd int(10) unsigned NOT NULL default '0',
   KEY (userid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("txtmsg", <<'EOC');
@@ -781,7 +781,7 @@ CREATE TABLE txtmsg (
   number varchar(60) default NULL,
   security enum('all','reg','friends') NOT NULL default 'all',
   PRIMARY KEY  (userid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("user", <<'EOC');
@@ -794,9 +794,6 @@ CREATE TABLE user (
   statusvis char(1) NOT NULL default 'V',
   statusvisdate datetime default NULL,
   name char(50) default NULL,
-  timecreate datetime default NULL,
-  timeupdate datetime default NULL,
-  timecheck datetime default NULL,
   bdate date default NULL,
   lastn_style int(11) NOT NULL default '1',
   calendar_style int(11) NOT NULL default '2',
@@ -817,7 +814,6 @@ CREATE TABLE user (
   opt_htmlemail enum('Y','N') NOT NULL default 'Y',
   opt_mangleemail char(1) NOT NULL default 'N',
   useoverrides char(1) NOT NULL default 'N',
-  lastitemid int(10) unsigned NOT NULL default '0',
   defaultpicid int(10) unsigned default NULL,
   has_bio enum('Y','N') NOT NULL default 'N',
   paiduntil datetime default NULL,
@@ -833,7 +829,7 @@ CREATE TABLE user (
   KEY (email),
   KEY (status),
   KEY (statusvis)
-) TYPE=MyISAM PACK_KEYS=1
+)  PACK_KEYS=1
 EOC
 
 register_tablecreate("userbio", <<'EOC');
@@ -841,7 +837,7 @@ CREATE TABLE userbio (
   userid int(10) unsigned NOT NULL default '0',
   bio text,
   PRIMARY KEY  (userid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("userinterests", <<'EOC');
@@ -850,7 +846,7 @@ CREATE TABLE userinterests (
   intid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (userid,intid),
   KEY (intid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("userpic", <<'EOC');
@@ -866,7 +862,7 @@ CREATE TABLE userpic (
   PRIMARY KEY  (picid),
   KEY (userid),
   KEY (state)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("userpicblob", <<'EOC');
@@ -874,7 +870,7 @@ CREATE TABLE userpicblob (
   picid int(10) unsigned NOT NULL auto_increment,
   imagedata blob,
   PRIMARY KEY  (picid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("userpicmap", <<'EOC');
@@ -883,7 +879,7 @@ CREATE TABLE userpicmap (
   kwid int(10) unsigned NOT NULL default '0',
   picid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (userid,kwid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("userprop", <<'EOC');
@@ -893,7 +889,7 @@ CREATE TABLE userprop (
   value varchar(60) default NULL,
   PRIMARY KEY  (userid,upropid),
   KEY (upropid,value)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("userproplist", <<'EOC');
@@ -906,7 +902,7 @@ CREATE TABLE userproplist (
   des varchar(255) default NULL,
   PRIMARY KEY  (upropid),
   UNIQUE KEY name (name)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("userproplite", <<'EOC');
@@ -916,7 +912,7 @@ CREATE TABLE userproplite (
   value varchar(255) default NULL,
   PRIMARY KEY  (userid,upropid),
   KEY (upropid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("zip", <<'EOC');
@@ -940,7 +936,7 @@ CREATE TABLE zips (
   lon float(10,7) NOT NULL default '0.0000000',
   lat float(10,7) NOT NULL default '0.0000000',
   PRIMARY KEY  (zip)
-) TYPE=MyISAM
+) 
 EOC
 
 ################# above was a snapshot.  now, changes:
@@ -951,7 +947,7 @@ CREATE TABLE recent_logtext (
   subject varchar(255) default NULL,
   event text,
   PRIMARY KEY  (itemid)
-) TYPE=MyISAM PACK_KEYS=1
+)  PACK_KEYS=1
 EOC
 
 register_tablecreate("recent_talktext", <<'EOC');
@@ -960,7 +956,7 @@ CREATE TABLE recent_talktext (
   subject varchar(100) default NULL,
   body text,
   PRIMARY KEY  (talkid)
-) TYPE=MyISAM PACK_KEYS=1
+)  PACK_KEYS=1
 EOC
 
 register_tabledrop("ibill_codes");
@@ -983,7 +979,7 @@ CREATE TABLE portal (
   boxargs varchar(255) default NULL,
   PRIMARY KEY  (userid,loc,pos),
   KEY boxname (boxname)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("infohistory", <<'EOC');
@@ -994,7 +990,7 @@ CREATE TABLE infohistory (
   oldvalue varchar(255) default NULL,
   other varchar(30) default NULL,
   KEY userid (userid)
-) TYPE=MyISAM
+) 
 EOC
 
 register_tablecreate("useridmap", <<'EOC');
@@ -1003,11 +999,29 @@ CREATE TABLE useridmap (
   user char(15) NOT NULL,
   PRIMARY KEY  (userid),
   UNIQUE KEY user (user)
-) TYPE=MyISAM PACK_KEYS=1
+) PACK_KEYS=1
 EOC
 
 post_create("useridmap",
 	    "sql" => "REPLACE INTO useridmap (userid, user) SELECT userid, user FROM user",
+	    );
+
+register_tablecreate("userusage", <<'EOC');
+CREATE TABLE userusage
+(
+   userid INT UNSIGNED NOT NULL,
+   PRIMARY KEY (userid),
+   timecreate DATETIME NOT NULL,
+   timeupdate DATETIME,
+   timecheck DATETIME,
+   lastitemid INT UNSIGNED NOT NULL DEFAULT '0',
+   INDEX (timeupdate)   
+)
+EOC
+
+post_create("userusage",
+	    "sqltry" => "INSERT IGNORE INTO userusage (userid, timecreate, timeupdate, timecheck, lastitemid) SELECT userid, timecreate, timeupdate, timecheck, lastitemid FROM user",
+	    "sqltry" => "ALTER TABLE user DROP timecreate, DROP timeupdate, DROP timecheck, DROP lastitemid",
 	    );
 
 ### changes
@@ -1076,6 +1090,7 @@ register_alter(sub {
     }
 
 });
+
 
 1; # return true;
 
