@@ -89,8 +89,7 @@ sub user_exists
     return OK;
 }
 
-# Does the user have upload access?
-# This also effects new FB user creation.
+# Does the user have upload access?  (ignoring quota restrictions)
 sub can_upload
 {
     my $u = shift;
