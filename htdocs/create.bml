@@ -258,7 +258,7 @@ body<=
      close MAIL;
 
      $ret = "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text1", {'email' => $email, 'username' => $user}) ." p?>";
-     $ret .= "<?p $ML{'.success.text2'} at: p?><?standout <FONT SIZE=+1 FACe=Arial><B><A HREF=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</A></B></FONT> standout?>";
+     $ret .= "<?p $ML{'.success.text2'} p?><?standout <FONT SIZE=+1 FACe=Arial><B><A HREF=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</A></B></FONT> standout?>";
      $ret .= "<?p $ML{'.success.text3'} p?>";
      
      $ret .= "<center><form method='post' action=\"/editinfo.bml\">";
