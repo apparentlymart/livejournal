@@ -155,7 +155,7 @@ d.close();
 
      $ret .= "<?h1 $ML{'.addfriends.head'} h1?><?p $ML{'.addfriends.text'} p?>\n";
      $ret .= "<script language=\"JavaScript\"><!--\ndocument.write(\"<p><center><input type=button value=\\\"<?_ML .btn.toggle _ML?>\\\" onClick='togglePreview(); return true;'></center></p>\");\n// -->\n</script>\n";
-     $ret .= "<p><center><table cellpadding='4'><tr><td><b>$ML{'.friend'}</b></td><td><b>$ML{'.foregound'}</b></td><td><b>$ML{'.background'}</b></td></tr>\n";
+     $ret .= "<p><center><table cellpadding='4'><tr><td><b>$ML{'.friend'}</b></td><td><b>$ML{'.foreground'}</b></td><td><b>$ML{'.background'}</b></td></tr>\n";
 
      # load the colors
      my @color = ();
