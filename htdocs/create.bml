@@ -160,7 +160,9 @@ body<=
      if ($FORM{'password1'} ne $FORM{'password2'}) { 
          $errors{'password'} = "$ML{'.error.password.nomatch'}"; 
      } else {
-         my @checkpass = LJ::run_hooks("bad_password", $FORM{'password1'});
+         my @checkpass = LJ::run_hooks("bad_password", 
+                                       { 'user' => $user, 'name' => $name, 
+                                         'email' => $email, 'password' => $FORM{'password1'} });
          if (@checkpass && $checkpass[0]->[0]) {
              $errors{'password'} = "Bad password: $checkpass[0]->[0]";
          }
