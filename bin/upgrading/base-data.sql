@@ -470,6 +470,8 @@ INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES 
 UPDATE priv_list SET des='See details about incoming money.',is_public='1',privname='Money - View Detailed Records',scope='general' WHERE privcode='moneyview';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('The mood theme manager can perform any editing on mood themes, including making themes public', '1', 'moodthememanager', 'Mood Themes - Manager', 'general');
 UPDATE priv_list SET des='The mood theme manager can perform any editing on mood themes, including making themes public',is_public='1',privname='Mood Themes - Manager',scope='general' WHERE privcode='moodthememanager';
+INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Delete all validated addresses from an account', '1', 'reset_email', 'Reset User Email Address', 'general');
+UPDATE priv_list SET des='Delete all validated addresses from an account',is_public='1',privname='Reset User Email Address',scope='general' WHERE privcode='reset_email';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Edit the database schema documentation', '1', 'schemadoc', 'Edit Schema Documentation', 'general');
 UPDATE priv_list SET des='Edit the database schema documentation',is_public='1',privname='Edit Schema Documentation',scope='general' WHERE privcode='schemadoc';
 INSERT IGNORE INTO priv_list (des, is_public, privcode, privname, scope) VALUES ('Allows a user to add or remove people\'s access to post in a shared journal. arg=Community/shared journal username that\'s being administrated, or "all" for all journals.', '0', 'sharedjournal', 'Shared Journal - Admin', 'general');

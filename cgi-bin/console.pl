@@ -648,6 +648,19 @@ $cmd{'set'} = {
                ],
     };
 
+ 
+$cmd{'reset_email'} = {
+    'des' => 'Resets the email address for a given account',
+    'privs' => [qw(reset_email)],
+    'handler' => \&reset_email,
+    'argsummary' => '<username> <value> <reason>',
+    'args' => [
+               'username' => "The account to reset the email address for.",
+               'value' => "Email address to set the account to.",
+               'reason' => "Reason for the reset",
+               ],
+    };
+
 sub conhelp 
 {
     my ($dbh, $remote, $args, $out) = @_;
@@ -1012,6 +1025,50 @@ sub set
     return $err->($errmsg) unless $rv;
 
     push @$out, [ '', "User property '$k' set to '$v'." ];
+    return 1;
+}
+
+sub reset_email
+{
+    my ($dbh, $remote, $args, $out) = @_;
+    my $err = sub { push @$out, [ "error", $_[0] ]; 0; };
+    my $inf = sub { push @$out, [ "info",  $_[0] ]; 1; };
+
+    return $err->("This command has 3 arguments") unless @$args == 4;
+
+    return $err->("$remote->{'user'}, you are not authorized to use this command.")
+        unless ($remote->{'priv'}->{'reset_email'});
+
+    my $user = $args->[1];
+    my $userid = LJ::get_userid($dbh, $user);
+
+    return $err->("Invalid user $user") unless ($userid);
+
+    my $email = $args->[2];
+    my $aa = LJ::register_authaction($dbh, $userid, "validateemail", $email);
+
+    $dbh->do("UPDATE user SET email=?, status='T' WHERE userid=?",
+             undef, $email, $userid) or return $err->($dbh->errstr);
+
+    my $body;
+    $body .= "Your email address for $LJ::SITENAME has been reset.  To validate the change, please go to this address:\n\n";
+    $body .= "     $LJ::SITEROOT/confirm/$aa->{'aaid'}.$aa->{'authcode'}\n\n";
+    $body .= "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
+
+    LJ::send_mail({
+        'to' => $email,
+        'from' => $LJ::ADMIN_EMAIL,
+        'subject' => "Email Address Reset",
+        'body' => $body,
+    }) or $inf->("Confirmation email could not be sent.");
+
+    $dbh->do("UPDATE infohistory SET what='emailreset' WHERE userid=? AND what='email'",
+             undef, $userid) or return $err->($dbh->errstr);
+
+    my $reason = $args->[3];
+    LJ::statushistory_add($dbh, $userid, $remote->{'userid'}, "reset_email", $reason);
+
+    push @$out, [ '', "Address reset." ];
     return 1;
 }
 
