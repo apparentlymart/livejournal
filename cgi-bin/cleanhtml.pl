@@ -106,6 +106,13 @@ sub clean
 
     my $cutcount = 0;
 
+    my $total_fail = sub {
+        $$data = "[<b>Error:</b> Irreparable invalid markup in entry.  ".
+            "Owner must fix manually.  Raw contents below.]<br /><br />" .
+            LJ::ehtml($$data);
+        return undef;
+    };
+
   TOKEN:
     while (my $token = $p->get_token)
     {
@@ -114,6 +121,8 @@ sub clean
         if ($type eq "S")     # start tag
         {
             my $tag = $token->[1];
+            return $total_fail->() if $tag =~ /[\"\'=]/;
+
             my $slashclose = 0;   # If set to 1, use XML-style empty tag marker
             
             # for tags like <name/>, pretend it's <name> and reinsert the slash later
@@ -207,7 +216,14 @@ sub clean
 
                 foreach my $attr (keys %$hash)
                 {
-                    delete $hash->{$attr} if $attr =~ /^(on|dynsrc|data)/;
+                    delete $hash->{$attr} if $attr =~ /^(?:on|dynsrc|data)/;
+                    if ($attr =~ /^=/) {
+                        # Cleaner attack:  <p ='>' onmouseover="javascript:alert(document/**/.cookie)" >
+                        # is returned by HTML::Parser as P_tag("='" => "='") Text( onmouseover...)
+                        # which leads to reconstruction of valid HTML.  Clever!
+                        # detect this, and fail.
+                        return $total_fail->();
+                    }
 
                     $hash->{$attr} =~ s/[\t\n]//g;
                     # IE sucks:
