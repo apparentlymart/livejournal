@@ -7314,7 +7314,7 @@ LASTN_SUBJECT=><b>%%subject%%</b>
 LASTN_TALK_READLINK=>%%messagecount%%
 
 LASTN_TALK_LINKS<=
-<a href="%%xe:urlread%%">
+<a href="%%urlread%%">
 <img src="%%cons:img%%/style/webley/jwc%%readlink%%.png" border="0" /></a>
 <=LASTN_TALK_LINKS
 
@@ -7391,7 +7391,7 @@ LASTN_EVENT<=
 <TR>
 <TD COLSPAN=1><IMG SRC="%%cons:img%%/style/webley/ll.png"></TD>
 <TD COLSPAN=1 BACKGROUND="%%cons:img%%/style/webley/bottom.png">&nbsp;</TD>
-<TD COLSPAN=2 BACKGROUND="http://img.livejournal.com/style/webley/jwc.png">%%talklinks%%</TD>
+<TD COLSPAN=2 BACKGROUND="%%cons:img%%/style/webley/jwc.png">%%talklinks%%</TD>
 </TR>
 </TABLE>
 </CENTER><br><br>
