@@ -2354,9 +2354,11 @@ sub authenticate
     return fail($err,505) unless $u->{'clusterid'};
 
     my $r = eval { Apache->request };
+    my $ip;
     if ($r) {
         $r->notes("ljuser" => $u->{'user'}) unless $r->notes("ljuser");
         $r->notes("journalid" => $u->{'userid'}) unless $r->notes("journalid");
+        $ip = $r->connection->remote_ip;
     }
 
     my $ip_banned = 0;
@@ -2386,6 +2388,13 @@ sub authenticate
             return $remote && $remote->{'user'} eq $username ? 1 : 0;
         }
     };
+
+    # predefined allowed auths (no pw required)
+    my $post_wo_auth = $LJ::POST_WITHOUT_AUTH{$ip};
+    $flags->{'noauth'} = 1 if
+        $post_wo_auth &&
+        $post_wo_auth->{ $req->{usejournal} } &&
+        grep { $_ eq $req->{user} } @{ $post_wo_auth->{ $req->{usejournal} } };
 
     unless ($flags->{'nopassword'} ||
             $flags->{'noauth'} ||
