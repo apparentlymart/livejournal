@@ -5,6 +5,7 @@ use strict;
 use lib "$ENV{'LJHOME'}/src/s2";
 use S2;
 use S2::Checker;
+use S2::Color;
 use S2::Compiler;
 use Storable;
 use Apache::Constants ();
@@ -18,7 +19,6 @@ use LJ::S2::FriendsPage;
 use LJ::S2::MonthPage;
 use LJ::S2::EntryPage;
 use LJ::S2::ReplyPage;
-use LJ::Color;
 
 package LJ::S2;
 
@@ -1054,8 +1054,8 @@ sub Friend
     my ($u) = @_;
     my $o = UserLite($u);
     $o->{'_type'} = "Friend";
-    $o->{'bgcolor'} = S2::Builtin::LJ::Color__Color($u->{'bgcolor'});
-    $o->{'fgcolor'} = S2::Builtin::LJ::Color__Color($u->{'fgcolor'});
+    $o->{'bgcolor'} = S2::Builtin::S2::Color__Color($u->{'bgcolor'});
+    $o->{'fgcolor'} = S2::Builtin::S2::Color__Color($u->{'fgcolor'});
     return $o;
 }
 
@@ -1407,7 +1407,7 @@ sub Color__update_hsl
     my ($this, $force) = @_;
     return if $this->{'_hslset'}++;
     ($this->{'_h'}, $this->{'_s'}, $this->{'_l'}) =
-        LJ::Color::rgb_to_hsl($this->{'r'}, $this->{'g'}, $this->{'b'});
+        S2::Color::rgb_to_hsl($this->{'r'}, $this->{'g'}, $this->{'b'});
     $this->{$_} = int($this->{$_} * 255 + 0.5) foreach qw(_h _s _l);
 }
 
@@ -1416,7 +1416,7 @@ sub Color__update_rgb
     my ($this) = @_;
 
     ($this->{'r'}, $this->{'g'}, $this->{'b'}) = 
-        LJ::Color::hsl_to_rgb( map { $this->{$_} / 255 } qw(_h _s _l) );
+        S2::Color::hsl_to_rgb( map { $this->{$_} / 255 } qw(_h _s _l) );
     Color__make_string($this);
 }
 
