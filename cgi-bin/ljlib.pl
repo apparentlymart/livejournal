@@ -1699,10 +1699,10 @@ sub create_account
 # <LJFUNC>
 # name: LJ::is_friend
 # des: Checks to see if a user is a friend of another user.
-# returns: boolean; 1 iff user B is a friend of user A (or if A == B)
+# returns: boolean; 1 if user B is a friend of user A or if A == B
 # args: dbarg, usera, userb
 # des-usera: Source user hashref or userid.
-# des-userb: Destination user hashref or userid.
+# des-userb: Destination user hashref or userid. (can be undef)
 # </LJFUNC>
 sub is_friend
 {
