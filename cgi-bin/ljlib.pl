@@ -7469,7 +7469,7 @@ sub get_secret
     # don't generate new times that don't fall in our granularity
     return undef if $time % 3600;
     
-    my $secret = LJ::rand_chars(32);
+    $secret = LJ::rand_chars(32);
     $dbh->do("INSERT IGNORE INTO secrets SET stime=?, secret=?",
              undef, $time, $secret);
     # check for races:
