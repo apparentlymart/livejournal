@@ -104,7 +104,8 @@ if ($toarg =~ /^(\d+)z(.+)$/)
         or die "Invalid authentication?";
 
     if (LJ::sysban_check('support_email', $from)) {
-        return LJ::sysban_block(0, "Support request blocked based on email", { 'email' => $from });
+        LJ::sysban_block(0, "Support request blocked based on email", { 'email' => $from });
+        exit 0;
     }
 
     # valid.  need to strip out stuff now with authcodes:
