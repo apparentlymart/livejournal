@@ -357,7 +357,7 @@ sub trans
     # user domains
     if ($LJ::USER_VHOSTS &&
         $host =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/ &&
-        $1 ne "www")
+        $1 ne "www" && $LJ::SUBDOMAIN_FUNCTION{$1} ne "normal")
     {
         my $user = $1;
 
