@@ -231,11 +231,11 @@ sub print_report {
         }
         #print Data::Dumper->Dumpxs( [\%top], ['top'] ), "\n";
 
-        # Make an array of sorted buffer objects by hostname
+        # Make an array of sorted buffer objects by worst average time
         @sbuffers =
             map  { $_->[0] }
-            sort { $a->[1] cmp $b->[1] }
-            map  { [$_, $_->host] }
+            sort { $b->[1] <=> $a->[1] }
+            map  { [$_, $_->average_time] }
             @buffers;
 
         # Make an array of sorted buffer objects by worst time
