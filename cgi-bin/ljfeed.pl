@@ -3,7 +3,6 @@
 use strict;
 
 package LJ::Feed;
-use Apache::Constants qw(OK);
 
 my %feedtypes = (
     rss  => \&create_view_rss,
@@ -92,7 +91,7 @@ sub make_feed
     # conjunction with a static request for a file on disk that has been
     # stat()ed in the course of the current request. It is inappropriate and
     # "dangerous" to use it for dynamic content.
-    if ((my $status = $r->meets_conditions) != OK) {
+    if ((my $status = $r->meets_conditions) != Apache::Constants::OK()) {
         $opts->{handler_return} = $status;
         return undef;
     }
