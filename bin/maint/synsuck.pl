@@ -52,7 +52,7 @@ $maint{'synsuck'} = sub
             if (length($content) > 1024*150) { $too_big = 1; return; }
             $content .= $_[0];
         }, 4096);
-        if ($too_big) { $delay->(60, "toobig"); next; }
+        if ($too_big) { $delay->(60, "toobig"); return; }
        
         if ($res->is_error()) {
             # http error
@@ -64,14 +64,14 @@ $maint{'synsuck'} = sub
             $delay->(3*60, "parseerror");
             
             LJ::set_userprop($userid, "rssparseerror", $res->status_line());
-            next;
+            return;
         }
         
         # check if not modified
         if ($res->code() == RC_NOT_MODIFIED) {
             print "  not modified.\n" if $verbose;
             $delay->($readers ? 60 : 24*60, "notmodified");
-            next;
+            return;
         }
 
         # WARNING: blatant XML spec violation ahead... 
@@ -115,11 +115,14 @@ $maint{'synsuck'} = sub
             $err =~ s! at /.*!!;
             $err =~ s/^\n//; # cleanup of newline at the beggining of the line
             LJ::set_userprop($userid, "rssparseerror", $err);
-            next;
+            return;
         }
 
         # another sanity check
-        unless (ref $rss->{'items'} eq "ARRAY") { $delay->(3*60, "noitems"); next; }
+        unless (ref $rss->{'items'} eq "ARRAY") {
+            $delay->(3*60, "noitems");
+            return;
+        }
 
         my @items = reverse @{$rss->{'items'}};
 
@@ -132,7 +135,7 @@ $maint{'synsuck'} = sub
         my $udbh = LJ::get_cluster_master($su);
         unless ($udbh) {
             $delay->(15, "nodb");
-            next;
+            return;
         }
 
         my $secs = ($LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14)+0;  # 2 week default.
@@ -271,7 +274,7 @@ $maint{'synsuck'} = sub
         # bail out if errors, and try again shortly
         if ($errorflag) {
             $delay->(30, "posterror");
-            next;
+            return;
         }
             
         # update syndicated account's userinfo if necessary
