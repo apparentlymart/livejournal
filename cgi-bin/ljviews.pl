@@ -1716,12 +1716,21 @@ sub create_view_rss
                             \$logtext->{$itemid}->[1], $logprops{$itemid});
         }
 
-        my $subject = $logtext->{$itemid}->[0] || 
-            LJ::text_trim($logtext->{$itemid}->[1], 80, 40);
- 
-        # remove HTML crap and encode it:
-        LJ::CleanHTML::clean_subject_all(\$subject);
+        # see if we have a subject
+        my $subject = $logtext->{$itemid}->[0];
+
+        if ($subject ne "") {
+            # strip HTML from subject
+            LJ::CleanHTML::clean_subject_all(\$subject);
+        } else {
+            # if no subject, use logtext with all HTML stripped
+            $subject = $logtext->{$itemid}->[1];
+            LJ::CleanHTML::clean_subject_all(\$subject);
+            $subject = LJ::text_trim($subject, 80, 40);
+        }
+        # if still no subject....
         $subject ||= "(No subject or text)";
+
         $subject = LJ::exml($subject);
 
         my $ditemid = $u->{'clusterid'} ? ($itemid*256 + $it->{'anum'}) : $itemid;
