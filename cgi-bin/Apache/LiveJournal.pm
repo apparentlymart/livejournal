@@ -142,7 +142,9 @@ sub blocked_bot
     $r->status_line("403 Denied");
     $r->content_type("text/html");
     $r->send_http_header();
-    $r->print("<h1>$LJ::BLOCKED_BOT_SUBJECT</h1>$LJ::BLOCKED_BOT_MESSAGE");
+    my $subject = $LJ::BLOCKED_BOT_SUBJECT || "403 Denied";
+    my $message = $LJ::BLOCKED_BOT_MESSAGE || "You don't have permission to view this page.";
+    $r->print("<h1>$subject</h1>$message");
     return OK;
 }
 
