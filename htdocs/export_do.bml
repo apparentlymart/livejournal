@@ -152,6 +152,11 @@
                 if ($opts->{'currents'}) {
                     $e->{'current_music'} = $eprops->{'current_music'};
                     $e->{'current_mood'} = $eprops->{'current_mood'};
+                    if ($eprops->{'current_moodid'}) {
+                        LJ::load_moods($dbs);
+                        my $mood = ($LJ::CACHE_MOODS{$eprops->{'current_moodid'}})->{'name'};
+                        $e->{'current_mood'} = $mood if $mood;
+                    }
                 }
 
                 my $entry = dump_entry($e, $opts);
