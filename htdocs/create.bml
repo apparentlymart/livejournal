@@ -337,8 +337,8 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
              return "<?h1 $ML{'Error'} h1?><?p $ML{'error.procrequest'} <b>" . $dbh->errstr . "</b> p?>";
          }
          $userid = $dbh->{'mysql_insertid'};
-         $dbh->do("REPLACE INTO useridmap (userid, user) VALUES ($userid, $quser)");
-         $dbh->do("REPLACE INTO userusage (userid, timecreate) VALUES ($userid, NOW())");
+         $dbh->do("REPLACE INTO useridmap (userid, user) VALUES (?, ?)", undef, $userid, $user);
+         $dbh->do("REPLACE INTO userusage (userid, timecreate) VALUES (?, NOW())", undef, $userid);
 
          # if we're using account codes on this site, mark the code as used
          if ($code) {
