@@ -136,29 +136,7 @@ sub create_view_lastn
 	my $subject = $logtext->{$itemid}->[0];
 	my $event = $logtext->{$itemid}->[1];
 
-        my @dateparts = split(/ /, $alldatepart);
-        my %lastn_date_format = (
-			   'dayshort' => $dateparts[0],
-			   'daylong' => $dateparts[1],
-			   'monshort' => $dateparts[2],
-			   'monlong' => $dateparts[3],
-			   'yy' => $dateparts[4],
-			   'yyyy' => $dateparts[5],
-			   'm' => $dateparts[6],
-			   'mm' => $dateparts[7],
-			   'd' => $dateparts[8],
-			   'dd' => $dateparts[9],
-			   'dth' => $dateparts[10],
-			   'ap' => substr(lc($dateparts[11]),0,1),
-			   'AP' => substr(uc($dateparts[11]),0,1),
-			   'ampm' => lc($dateparts[11]),
-			   'AMPM' => $dateparts[11],
-			   'min' => $dateparts[12],
-			   '12h' => $dateparts[13],
-			   '12hh' => $dateparts[14],
-			   '24h' => $dateparts[15],
-			   '24hh' => $dateparts[16],
-				 );
+        my %lastn_date_format = LJ::alldateparts_to_hash($alldatepart);
 
         if ($lastday != $lastn_date_format{'d'} ||
 	    $lastmonth != $lastn_date_format{'m'} ||
@@ -586,29 +564,8 @@ sub create_view_friends
 	$poster = LJ::get_username($dbs, $posterid);
 	
 	$eventnum++;
-	my @dateparts = split(/ /, $alldatepart);
-	my %friends_date_format = (
-				   'dayshort' => $dateparts[0],
-				   'daylong' => $dateparts[1],
-				   'monshort' => $dateparts[2],
-				   'monlong' => $dateparts[3],
-				   'yy' => $dateparts[4],
-				   'yyyy' => $dateparts[5],
-				   'm' => $dateparts[6],
-				   'mm' => $dateparts[7],
-				   'd' => $dateparts[8],
-				   'dd' => $dateparts[9],
-				   'dth' => $dateparts[10],
-				   'ap' => substr(lc($dateparts[11]),0,1),
-				   'AP' => substr(uc($dateparts[11]),0,1),
-				   'ampm' => lc($dateparts[11]),
-				   'AMPM' => $dateparts[11],
-				   'min' => $dateparts[12],
-				   '12h' => $dateparts[13],
-				   '12hh' => $dateparts[14],
-				   '24h' => $dateparts[15],
-				   '24hh' => $dateparts[16],
-				   );
+        my %friends_date_format = LJ::alldateparts_to_hash($alldatepart);
+
 	if ($lastday != $friends_date_format{'d'})
 	{
 	    my %friends_new_day = ();
@@ -1161,29 +1118,7 @@ sub create_view_day
 	my $subject = $logtext->{$itemid}->[0];
 	my $event = $logtext->{$itemid}->[1];
 
-        my @dateparts = split(/ /, $alldatepart);
-        my %day_date_format = (
-			 'dayshort' => $dateparts[0],
-			 'daylong' => $dateparts[1],
-			 'monshort' => $dateparts[2],
-			 'monlong' => $dateparts[3],
-			 'yy' => $dateparts[4],
-			 'yyyy' => $dateparts[5],
-			 'm' => $dateparts[6],
-			 'mm' => $dateparts[7],
-			 'd' => $dateparts[8],
-			 'dd' => $dateparts[9],
-			 'dth' => $dateparts[10],
-			 'ap' => substr(lc($dateparts[11]),0,1),
-			 'AP' => substr(uc($dateparts[11]),0,1),
-			 'ampm' => lc($dateparts[11]),
-			 'AMPM' => $dateparts[11],
-			 'min' => $dateparts[12],
-			 '12h' => $dateparts[13],
-			 '12hh' => $dateparts[14],
-			 '24h' => $dateparts[15],
-			 '24hh' => $dateparts[16],
-			 );
+        my %day_date_format = LJ::alldateparts_to_hash($alldatepart);
 
         unless ($initpagedates)
         {

@@ -4989,4 +4989,45 @@ sub delete_talkitem
     return 1;
 }
 
+# <LJFUNC>
+# name: LJ::alldateparts_to_hash
+# des: Given a date/time format from MySQL, breaks it into a hash.
+# info: This is used by S1.
+# args: alldatepart
+# des-alldatepart: The output of the MySQL function
+#                  DATE_FORMAT(sometime, "%a %W %b %M %y %Y %c %m %e %d 
+#                  %D %p %i %l %h %k %H")
+# returns: Hash (whole, not reference), with keys: dayshort, daylong,
+#          monshort, monlong, yy, yyyy, m, mm, d, dd, dth, ap, AP,
+#          ampm, AMPM, min, 12h, 12hh, 24h, 24hh
+
+# </LJFUNC>
+sub alldateparts_to_hash
+{
+    my $alldatepart = shift;
+    my @dateparts = split(/ /, $alldatepart);
+    return (
+	    'dayshort' => $dateparts[0],
+	    'daylong' => $dateparts[1],
+	    'monshort' => $dateparts[2],
+	    'monlong' => $dateparts[3],
+	    'yy' => $dateparts[4],
+	    'yyyy' => $dateparts[5],
+	    'm' => $dateparts[6],
+	    'mm' => $dateparts[7],
+	    'd' => $dateparts[8],
+	    'dd' => $dateparts[9],
+	    'dth' => $dateparts[10],
+	    'ap' => substr(lc($dateparts[11]),0,1),
+	    'AP' => substr(uc($dateparts[11]),0,1),
+	    'ampm' => lc($dateparts[11]),
+	    'AMPM' => $dateparts[11],
+	    'min' => $dateparts[12],
+	    '12h' => $dateparts[13],
+	    '12hh' => $dateparts[14],
+	    '24h' => $dateparts[15],
+	    '24hh' => $dateparts[16],
+	    );
+}
+
 1;
