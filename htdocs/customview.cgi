@@ -18,13 +18,26 @@ while(LJ::start_request() &&
     my %FORM = ();
     LJ::get_form_data(\%FORM);
 
+    my $charset = "utf-8";
+    
+    if ($LJ::UNICODE && $FORM{'charset'}) {
+        $charset = $FORM{'charset'};
+        unless (Unicode::MapUTF8::utf8_supported_charset($charset)) {
+            print "Content-Type: text/html\n";
+            my $errmsg = "<b>Error: charset $charset is not supported.</b>";
+            print "Content-length: " . length($errmsg) . "\n\n";
+            print $errmsg;
+            next;
+        }
+    }    
+    
     my $ctype = "text/html";
     if ($FORM{'type'} eq "xml") {
 	$ctype = "text/xml";
     }
 
     if ($LJ::UNICODE) {
-        $ctype .= "; charset=utf-8";
+        $ctype .= "; charset=$charset";
     }
 
     print "Content-type: $ctype\n";
@@ -54,6 +67,10 @@ while(LJ::start_request() &&
 	$data =~ s/\n/\\n/g;
 	$data =~ s/\r//g;
 	$data = "document.write(\"$data\")";
+    }
+
+    if ($LJ::UNICODE && $charset ne 'utf-8') {
+        $data = Unicode::MapUTF8::from_utf8({-string=>$data, -charset=>$charset});
     }
 
     print "Cache-Control: must-revalidate\n";
