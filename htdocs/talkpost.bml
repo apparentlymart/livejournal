@@ -246,8 +246,14 @@ BODY<=
  
  $ret .= "<CENTER><B><A HREF=\"talkread.bml?itemid=$itemid\">(Read comments)</A></B></CENTER>";
  
+ # can a comment even be made?
  if ($logprops{$itemid}->{'opt_nocomments'}) {
      $ret .= "(=H1 Sorry... H1=)(=P User has disabled comments for this particular post. P=)";
+     &strip_bad_code(\$ret);
+     return $ret;
+ }
+ if ($u->{'opt_showtalklinks'} eq "N") {
+     $ret .= "(=H1 Sorry... H1=)(=P User has disabled comments in their journal. P=)";
      &strip_bad_code(\$ret);
      return $ret;
  }
