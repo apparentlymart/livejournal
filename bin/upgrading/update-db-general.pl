@@ -1798,7 +1798,8 @@ register_alter(sub {
                  "ALTER TABLE community DROP ownerid");
     }
 
-    unless (column_type("weekuserusage", "uafter")) {
+    # if it exists, but it's the old way, just kill it.
+    if (column_type("weekuserusage", "ubefore") && ! column_type("weekuserusage", "uafter")) {
         do_sql("DROP TABLE weekuserusage");
         create_table("weekuserusage");
     }
