@@ -38,6 +38,10 @@ sub forget_dead_hosts { $memc->forget_dead_hosts(); }
 sub disconnect_all    { $memc->disconnect_all();    }
 
 sub delete {
+    # use delete time if specified
+    return $memc->delete(@_) if defined $_[1];
+
+    # else default to 4 seconds:
     # version 1.1.7 vs. 1.1.6
     $memc->delete(@_, 4) || $memc->delete(@_);
 }
