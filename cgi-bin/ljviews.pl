@@ -32,7 +32,7 @@ sub create_view_lastn
     my %FORM = ();
     LJ::decode_url_string($opts->{'args'}, \%FORM);
 
-    if ($opts->{'args'}) {
+    if ($opts->{'pathextra'}) {
         $opts->{'badargs'} = 1;
         return 1;
     }
