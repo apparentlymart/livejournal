@@ -32,6 +32,13 @@ close REDIR;
 sub handler
 {
     my $r = shift;
+
+    if ($LJ::SERVER_TOTALLY_DOWN) {
+        $r->handler("perl-script");
+        $r->set_handlers(PerlHandler => [ \&totally_down_content ]);
+        return OK;
+    }
+
     $r->set_handlers(PerlTransHandler => [ \&trans ]);
     $r->set_handlers(PerlCleanupHandler => [ sub { %RQ = () },
                                              "Apache::LiveJournal::db_logger" ]);
@@ -71,6 +78,36 @@ sub redir
     $r->content_type("text/html");
     $r->header_out(Location => $url);
     return $code || REDIRECT;
+}
+
+sub totally_down_content
+{
+    my $r = shift;
+    my $uri = $r->uri;
+
+    if ($uri =~ m!^/interface/flat! || $uri =~ m!^/cgi-bin/log\.cg!) {
+        $r->content_type("text/plain");
+	$r->send_http_header();
+        $r->print("success\nFAIL\nerrmsg\n$LJ::SERVER_DOWN_MESSAGE");
+        return OK;
+    }
+
+    if ($uri =~ m!^/customview.cgi!) {
+        $r->content_type("text/html");
+	$r->send_http_header();
+        $r->print("<!-- $LJ::SERVER_DOWN_MESSAGE -->");
+        return OK;
+    }
+    
+    # FIXME: ljcom-specific, move to a hook; too lazy now.
+    if ($uri =~ m!^/paidaccounts/pp_notify\.bml!) {
+        $r->status(SERVER_ERROR);
+    }
+
+    $r->content_type("text/html");
+    $r->send_http_header();
+    $r->print("<h1>$LJ::SERVER_DOWN_SUBJECT</h1>$LJ::SERVER_DOWN_MESSAGE");
+    return OK;
 }
 
 sub trans

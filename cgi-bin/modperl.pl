@@ -14,9 +14,19 @@ Apache->httpd_conf("ServerAdmin $LJ::ADMIN_EMAIL")
     if $LJ::ADMIN_EMAIL;
 
 Apache->httpd_conf(qq{
+
+# This interferes with LJ's /~user URI, depending on the module order
+<IfModule mod_userdir.c>
+  UserDir disabled
+</IfModule>
+
 PerlInitHandler +Apache::LiveJournal
 DirectoryIndex index.html index.bml
+});
 
+unless ($LJ::SERVER_TOTALLY_DOWN)
+{
+    Apache->httpd_conf(qq{
 # BML support:
 PerlSetVar BMLDomain lj-$LJ::DOMAIN
 PerlModule Apache::BML
@@ -27,11 +37,7 @@ PerlModule Apache::BML
   SetHandler perl-script
   PerlHandler Apache::BML
 </Files>
-
-# This interferes with LJ's /~user URI, depending on the module order
-<IfModule mod_userdir.c>
-  UserDir disabled
-</IfModule>
 });
+}
 
 1;
