@@ -22,7 +22,7 @@ use LWP::UserAgent;
 use strict;
 use vars qw($VERSION $SENDMAIL %providers);
 
-$VERSION = '1.4.4';
+$VERSION = '1.4.5';
 
 # default path to sendmail, if none other specified.  we should probably
 # use something more perl-ish and less unix-specific, but whateva'
@@ -112,6 +112,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 160,
     },
 
+    'cingular-acs' => {
+        'name'		=> 'Cingular Wireless - digitaledge.acswireless.com',
+        'notes'		=> '10-digit phone number.  Goes to 10digits@digitaledge.acswireless.com.',
+        'fromlimit'	=> 30,
+        'msglimit'	=> 120,
+        'totlimit'	=> 120,
+    },
+
     'cingular-texas' => 
     {
         'name'		=> 'Cingular Wireless - (Houston) Texas',
@@ -173,10 +181,18 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
 
     'nextel' => {
         'name'		=> 'Nextel',
-        'notes'		=> '10-digit phone number.  Goes to @messaging.nextel.com',
+        'notes'		=> '10-digit phone number.  Goes to 10digits@messaging.nextel.com.  Note: do not use dashes in your phone number.',
         'fromlimit'	=> 50,
         'msglimit'	=> 126,
         'totlimit'	=> 126,
+    },
+
+    'ntelos' => {
+        'name'		=> 'NTELOS',
+        'notes'		=> '10-digit phone number.  Goes to 10digits@pcs.ntelos.com.',
+        'fromlimit'	=> 30,
+        'msglimit'	=> 120,
+        'totlimit'	=> 120,
     },
 
     'pacbell' => {
@@ -235,6 +251,14 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
         'totlimit'	=> 97,
     },
 
+    'telus' => {
+        'name'		=> 'Telus Mobility',
+        'notes'		=> '10-digit phone number.  Goes to 10digits@msg.telus.com.',
+        'fromlimit'	=> 30,
+        'msglimit'	=> 120,
+        'totlimit'	=> 120,
+    },
+
     'uboot' => {
         'name'		=> 'uBoot',
         'notes'		=> 'Enter your username as the phone number.  See http://www.uboot.com for more details',
@@ -245,10 +269,10 @@ $SENDMAIL = "/usr/sbin/sendmail -t";
 
     'vzw' => {
         'name'		=> 'Verizon Wireless',
-        'notes'		=> 'Enter your 10-digit phone number.  Messages are sent via email to number@msg.myvzw.com.',
+        'notes'		=> 'Enter your 10-digit phone number.  Messages are sent via email to number@vtext.com.',
         'fromlimit'	=> 34,
-        'msglimit'	=> 104,
-        'totlimit'	=> 104,	      
+        'msglimit'	=> 140,
+        'totlimit'	=> 140,	      
     },
 
     'voicestream' => {
@@ -389,7 +413,12 @@ sub send
 
     elsif ($provider eq "bellsouthmobility")
     {
-        send_emailgate($self, $msg, "blsdcs.net");
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@blsdcs.net",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+            'subject'	=> "LJ",
+        });
     }
 
     elsif ($provider eq "btcellnet")
@@ -416,6 +445,16 @@ sub send
             'to'	=> "$self->{'number'}\@sbcemail.com",
             'from'	=> $msg->{'from'},
             'body'	=> $msg->{'message'},
+        });
+    }
+
+    elsif ($provider eq "cingular-acs")  # Cingular Wireless - digitaledge acswireless
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@digitaledge.acswireless.com",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+            'subject'	=> "LJ",
         });
     }
 
@@ -482,9 +521,24 @@ sub send
         });
     }
 
-    elsif ($provider eq "nextel")
+    elsif ($provider eq "nextel")  # Nextel
     {
-        send_emailgate($self, $msg, "messaging.nextel.com");
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@messaging.nextel.com",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+            'subject'	=> "LJ",
+        });
+    }
+
+    elsif ($provider eq "ntelos")  # NTELOS PCS
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@pcs.ntelos.com",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+            'subject'	=> "LJ",
+        });
     }
 
     elsif ($provider eq "pacbell")
@@ -508,9 +562,10 @@ sub send
     elsif ($provider eq "pcsrogers")
     {
         send_mail($self, { 
-            'to'	=> "$self->{'number'}\@pcs.roger.com",
+            'to'	=> "$self->{'number'}\@pcs.rogers.com",
             'from'	=> "$msg->{'from'}",
             'body'	=> "$msg->{'message'}",
+	    'subject'	=> "LJ",
         });
     }
 
@@ -525,7 +580,12 @@ sub send
 
     elsif ($provider eq "qwest")
     {
-        send_emailgate($self, $msg, "uswestdatamail.com");
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@uswestdatamail.com",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+            'subject'	=> "LJ",
+        });
     }
 
     elsif ($provider eq "skytelalpha")
@@ -537,12 +597,23 @@ sub send
         });
     }
 
-    elsif ($provider eq "sprintpcs")
+    elsif ($provider eq "sprintpcs") # SprintPCS
     {
-        post_webform("http://www.messaging.sprintpcs.com/sms/check_message_syntax.html", [ ], { # no error checking
-            "mobilenum"	=> $self->{'number'},
-            "message"	=> "($msg->{'from'}) $msg->{'message'}",
-            "java"	=> "yes",  # they mean javascript.  dumb asses.
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@messaging.sprintpcs.com",
+            'from'      => "$msg->{'from'}\@livejournal.com",
+            'body'      => "$msg->{'message'}",
+	    'subject'	=> "LJ",
+        });
+    }
+
+    elsif ($provider eq "telus")  # Telus Mobility
+    {
+        send_mail($self, {
+            'to'        => "$self->{'number'}\@msg.telus.com",
+            'from'      => "$msg->{'from'}",
+            'body'      => "$msg->{'message'}",
+            'subject'	=> "LJ",
         });
     }
 
@@ -559,9 +630,10 @@ sub send
     elsif ($provider eq "vzw")  # Verizon Wireless
     {
         send_mail($self, {
-            'to'        => "$self->{'number'}\@msg.myvzw.com",
-            'from'      => "$msg->{'from'}",
+            'to'        => "$self->{'number'}\@vtext.com",
+            'from'      => "$msg->{'from'}\@livejournal.com",
             'body'      => "$msg->{'message'}",
+	    'subject'	=> "LJ",
         });
     }
 
