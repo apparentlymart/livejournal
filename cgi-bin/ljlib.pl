@@ -4714,8 +4714,6 @@ sub can_use_journal
     &nodb;
     my ($posterid, $reqownername, $res) = @_;
 
-    my $qposterid = $posterid+0;
-
     ## find the journal owner's info
     my $uowner = LJ::load_user($reqownername);
     unless ($uowner) {
@@ -4732,16 +4730,19 @@ sub can_use_journal
     $res->{'u_owner'} = $uowner;
 
     ## check if user has access
-    return 1 if LJ::check_rel($ownerid, $qposterid, 'P');
+    return 1 if LJ::check_rel($ownerid, $posterid, 'P');
 
     # let's check if this community is allowing post access to non-members 
-    my $dbr = LJ::get_db_reader();
-    LJ::load_user_props($dbr, $uowner, "nonmember_posting");
+    LJ::load_user_props($uowner, "nonmember_posting");
     if ($uowner->{'nonmember_posting'}) {
+        my $dbr = LJ::get_db_reader() or die "nodb";
         my $postlevel = $dbr->selectrow_array("SELECT postlevel FROM ".
                                               "community WHERE userid=$ownerid");
         return 1 if $postlevel eq 'members';
     }
+
+    # is the poster an admin for this community?
+    return 1 if LJ::can_manage($posterid, $uowner);
 
     $res->{'errmsg'} = "You do not have access to post to this journal.";
     return 0;

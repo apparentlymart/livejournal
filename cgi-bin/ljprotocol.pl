@@ -2104,7 +2104,7 @@ sub check_altusage
 
     # otherwise, check for access:
     my $info = {};
-    my $canuse = LJ::can_use_journal($u->{'userid'}, $req->{'usejournal'}, $info);
+    my $canuse = LJ::can_use_journal($u->{'userid'}, $alt, $info);
     $flags->{'ownerid'} = $info->{'ownerid'};
     $flags->{'u_owner'} = $info->{'u_owner'};
     $r->notes("journalid" => $flags->{'ownerid'}) if $r && !$r->notes("journalid");

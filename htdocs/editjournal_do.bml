@@ -72,6 +72,10 @@ body<=
                          'u' => $u }
                        );
 
+        # was there a protocol error?
+        return "<?h1 $ML{'Error'} h1?><?p $res{'errmsg'} p?>"
+            unless $res{'success'} eq 'OK';
+
         # does the requested entry exist?
         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.nofind'} p?>"
             unless $res{'events_count'};
