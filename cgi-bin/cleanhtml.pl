@@ -109,7 +109,9 @@ sub clean
     my $total_fail = sub {
         $$data = "[<b>Error:</b> Irreparable invalid markup in entry.  ".
             "Owner must fix manually.  Raw contents below.]<br /><br />" .
-            LJ::ehtml($$data);
+            '<div style="width: 95%; overflow: auto">' .
+            LJ::ehtml($$data) .
+            '</div>';
         return undef;
     };
 
