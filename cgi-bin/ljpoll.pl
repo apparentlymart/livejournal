@@ -791,6 +791,12 @@ sub find_security
         return (1, 1);
     }
 
+    ## need to be both a person and with a visible journal to vote
+    LJ::load_remote($dbs, $remote);
+    unless ($remote->{'journaltype'} eq "P" && $remote->{'statusvis'} eq "V") {
+        return (0, 0);
+    }
+
     my $is_friend = 0;
     if (($po->{'whoview'} eq "friends" || 
          $po->{'whovote'} eq "friends") && $remote)
