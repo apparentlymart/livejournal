@@ -47,7 +47,6 @@ P=)
  $used7 = $stat{'userinfo'}->{'updated_last7'}+0;
  $usedlastday = $stat{'userinfo'}->{'updated_last1'}+0;
  $allow_getljnews = $stat{'userinfo'}->{'allow_getljnews'}+0;
- $allow_getpromos = $stat{'userinfo'}->{'allow_getpromos'}+0;
 
  $ret .= "(=H1 Users H1=)\n";
  $ret .= "(=P How many users, and how many of those are active? <UL>";
@@ -88,10 +87,9 @@ P=)
 
  unless ($LJ::DISABLED{'stats-newsadv'}) {
      $ret .= "(=H1 Receiving News/Advertising H1=)\n";
-     $ret .= "(=P This information says how many users of the ones with validated email addresses subscribe to the LiveJournal news that we send out, and how many people say they wouldn't mind getting advertisement/promotions sent to them by email. <UL>";
-     $ret .= "<LI><B>Users getting LiveJournal news: </B> $allow_getljnews\n";
-     $ret .= "<LI><B>Users getting promotions by mail: </B> $allow_getpromos\n";
-     $ret .= "</UL> P=)\n";
+     $ret .= "(=P This information says how many users of the ones with validated email addresses subscribe to the LiveJournal news that we send out. <ul>";
+     $ret .= "<li><b>Users getting LiveJournal news: </b> $allow_getljnews</li>\n";
+     $ret .= "</ul> P=)\n";
  }
 
  unless ($LJ::DISABLED{'stats-recentupdates'}) 

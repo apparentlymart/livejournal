@@ -818,7 +818,6 @@ CREATE TABLE user (
   allow_infoshow char(1) NOT NULL default 'Y',
   allow_contactshow char(1) NOT NULL default 'Y',
   allow_getljnews char(1) NOT NULL default 'N',
-  allow_getpromos char(1) NOT NULL default 'N',
   opt_showtalklinks char(1) NOT NULL default 'Y',
   opt_whocanreply enum('all','reg','friends') NOT NULL default 'all',
   opt_gettalkemail char(1) NOT NULL default 'Y',
