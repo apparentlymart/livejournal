@@ -169,6 +169,7 @@ sub do_request
 	    my $sth = $dbh->prepare("SELECT k.keyword FROM userpicmap m, keywords k WHERE m.userid=$userid AND m.kwid=k.kwid ORDER BY k.keyword");
 	    $sth->execute;
 	    while ($_ = $sth->fetchrow_array) {
+		s/[\n\r\0]//g;  # used to be a bug that allowed these characters to get in.
 		$pickw_count++;
 		$res->{"pickw_${pickw_count}"} = $_;
 	    }
