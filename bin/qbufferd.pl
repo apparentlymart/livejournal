@@ -207,6 +207,8 @@ while (LJ::start_request())
 
             print "  Starting $cmd...\n" if $opt_debug;
             unless ($started{$cmd}++) {
+                # note the $db passed into the start is pretty useless since it's
+                # just the first cluster qbufferd happens to come to
                 LJ::Cmdbuffer::flush($dbh, $db, "$cmd:start");
             }
             LJ::Cmdbuffer::flush($dbh, $db, $cmd);
@@ -231,6 +233,11 @@ while (LJ::start_request())
                 print "Job suicide: $cmd. (size=$size, rpcs=" . ($started{dirty}+0) . ")\n"
                     if $opt_debug;
 
+                # run end hooks before dying
+                foreach my $cmd (keys %started) {
+                    LJ::Cmdbuffer::flush($dbh, undef, "$cmd:finish");
+                }
+
                 exit 0;
             }
         }
@@ -240,7 +247,6 @@ while (LJ::start_request())
     foreach my $cmd (keys %started) {
         LJ::Cmdbuffer::flush($dbh, undef, "$cmd:finish");
     }
-    
 
     print "Sleeping. Job $my_job\n" if $opt_debug;
     my $elapsed = time() - $cycle_start;
