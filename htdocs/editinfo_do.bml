@@ -201,7 +201,7 @@ BODY<=
      # end personal info
      $ret .= "</TABLE>\n";
 
-     ### How heard Settings
+     ### User bio
      $ret .= "(=H1 About You H1=)(=P Here you can enter a little mini-biography about yourself that will show up on your user-info page.... P=)";
      $ret .= "<UL><TEXTAREA NAME=bio ROWS=10 COLS=50 WRAP=SOFT>$htmlu{'bio'}</TEXTAREA></UL>";
 
