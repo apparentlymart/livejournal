@@ -209,7 +209,7 @@ and it is one of the easiest.
 Assuming you've done everything above, all you have to do is:
 
    $ cd /home/lj
-   $ bin/upgrading/update-db.pl --runsql
+   $ bin/upgrading/update-db.pl --runsql --populate
 
 That'll bring your database schema up-to-date and populate it with any
 look-up data it needs.

@@ -8,9 +8,12 @@ use Getopt::Long;
 
 my $opt_sql = 0;
 my $opt_drop = 0;
+my $opt_pop = 0;
 
 GetOptions("runsql" => \$opt_sql,
-	   "drop" => \$opt_drop);
+	   "drop" => \$opt_drop,
+	   "populate" => \$opt_pop,
+	   );
 
 
 ## make sure $LJHOME is set so we can load & run everything
@@ -80,6 +83,42 @@ foreach my $t (keys %table_drop)
 foreach my $s (@alters)
 {
     $s->();
+}
+
+if ($opt_pop)
+{
+    print "Populating database with base data:\n";
+    $| = 1;
+    open (BD, "$ENV{'LJHOME'}/bin/upgrading/base-data.sql")
+	or die ("Can't open base-data.sql file");
+    my $lasttable = "";
+    while (my $q = <BD>)
+    {
+	chomp $q;  # remove newline
+	next unless ($q =~ /^(REPLACE|INSERT) INTO (\w+).+;/);
+	chomp $q;  # remove semicolon
+	my $type = $1;
+	my $table = $2;
+	if ($table ne $lasttable) {
+	    if ($lasttable) { print "\n"; }
+	    print "  $table ";
+	    $lasttable = $table;
+	}
+	$dbh->do($q);
+	if ($dbh->err) {
+	    if ($type eq "REPLACE") {
+		die "#  ERROR: " . $dbh->errstr . "\n";
+	    }
+	    if ($type eq "INSERT") {
+		print "x";
+	    }
+	} else {
+	    print ".";
+	}
+	
+    }
+    print "\n";
+    close (BD);
 }
 
 
