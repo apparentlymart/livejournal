@@ -28,11 +28,10 @@
 
             if ($remote->{'_session'}->{'exptype'} eq 'long') {
                 $cval = [ $FORM{'scheme'}, $remote->{'_session'}->{'timeexpire'} ];
-            };
-
+            }
         }
 
-        $COOKIE{'BMLschemepref'} = $cval;
+        $COOKIE{'BMLschemepref'} = $cval if $cval;
 
         # redirect to refresh cookie settings
         return BML::redirect("$LJ::SITEROOT/setscheme.bml");
