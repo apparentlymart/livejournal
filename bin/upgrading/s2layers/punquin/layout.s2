@@ -142,7 +142,7 @@ $.head_content
 <table width=150 bgcolor="$*main_bgcolor" border="0" cellpadding="5" cellspacing="0">
 <tr valign=top><td align=left>
 <center>
-<font face="verdana,arial,helvetica" size=2 color=%%color:page_text_title%%>
+<font face="verdana,arial,helvetica" size='2' color='$*title_color'>
 <b>$title</b>
 </font>
 </center>
