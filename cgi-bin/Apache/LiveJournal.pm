@@ -83,7 +83,7 @@ sub handler
         }
         $r->header_in('X-Forwarded-For', join(", ", @hosts));
     }
-       
+
     # and now, deal with getting the right Host header
     if ($_ = $r->header_in('X-Host')) {
         $r->header_in('Host', $_);
@@ -120,7 +120,7 @@ sub totally_down_content
         $r->print("<!-- $LJ::SERVER_DOWN_MESSAGE -->");
         return OK;
     }
-    
+
     # FIXME: ljcom-specific, move to a hook; too lazy now.
     if ($uri =~ m!^/paidaccounts/pp_notify\.bml!) {
         $r->status(SERVER_ERROR);
@@ -149,7 +149,7 @@ sub trans
 
     # let foo.com still work, but redirect to www.foo.com
     if ($LJ::DOMAIN_WEB && $r->method eq "GET" &&
-        $host eq $LJ::DOMAIN && $LJ::DOMAIN_WEB ne $LJ::DOMAIN) 
+        $host eq $LJ::DOMAIN && $LJ::DOMAIN_WEB ne $LJ::DOMAIN)
     {
         my $url = "$LJ::SITEROOT$uri";
         $url .= "?" . $args if $args;
@@ -200,7 +200,7 @@ sub trans
         my $ref = $r->header_in("Referer");
         if ($ref && index($ref, $LJ::SITEROOT) != 0) {
             # FIXME: this doesn't anti-squat user domains yet
-            if ($uri !~ m!^/404!) {  
+            if ($uri !~ m!^/404!) {
                 # So hacky!  (see note below)
                 $LJ::SQUAT_URL = "http://$host$uri$args_wq";
             } else {
@@ -215,7 +215,7 @@ sub trans
         }
     }
 
-    my $journal_view = sub { 
+    my $journal_view = sub {
         my $opts = shift;
         $opts ||= {};
 
@@ -230,7 +230,7 @@ sub trans
 
         # redirect communities to /community/<name>
         my $u = LJ::load_user($opts->{'user'});
-        if ($u && $u->{'journaltype'} eq "C" && 
+        if ($u && $u->{'journaltype'} eq "C" &&
             ($opts->{'vhost'} eq "" || $opts->{'vhost'} eq "tilde")) {
             my $newurl = $uri;
             $newurl =~ s!^/(users/|~)\Q$orig_user\E!!;
@@ -278,7 +278,7 @@ sub trans
             # the S1 ljviews code looks at $opts->{'pathextra'}, because
             # that's how it used to do it, when the pathextra was /day[/yyyy/mm/dd]
             $pe = $uuri;
-            
+
             if (defined $day) {
                 $mode = "day";
             } elsif (defined $mon) {
@@ -318,9 +318,9 @@ sub trans
     };
 
     # user domains
-    if ($LJ::USER_VHOSTS && 
+    if ($LJ::USER_VHOSTS &&
         $host =~ /^([\w\-]{1,15})\.\Q$LJ::USER_DOMAIN\E$/ &&
-        $1 ne "www") 
+        $1 ne "www")
     {
         my $user = $1;
 
@@ -384,14 +384,14 @@ sub trans
         return DECLINED unless length($cuser);
 
         my $srest = $rest || '/';
-        
+
         # redirect to canonical username and/or add slash if needed
         return redir($r, "http://$host$hostport/$part1$cuser$srest$args_wq")
             if $cuser ne $user or not $rest;
-        
+
         my $vhost = { 'users/' => '', 'community/' => 'community',
                       '~' => 'tilde' }->{$part1};
-        
+
         my $view = $determine_view->($user, $vhost, $rest);
         return $view if defined $view;
     }
@@ -478,7 +478,7 @@ sub userpic_trans
             push @dirs_make, "$USERPIC{'cache_dir'}/$mod";
             $file = "$USERPIC{'cache_dir'}/$mod/p$picid-$userid";
         }
-        
+
         foreach (@dirs_make) {
             next if -d $_;
             mkdir $_, 0777;
@@ -505,7 +505,7 @@ sub userpic_content
     my $userid = $RQ{'pic-userid'}+0;
 
     # will we try to use disk cache?
-    my $disk_cache = $USERPIC{'use_disk_cache'} && 
+    my $disk_cache = $USERPIC{'use_disk_cache'} &&
         $file eq $RQ{'userpicfile'};
 
     my ($pic, $data, $lastmod);
@@ -582,10 +582,10 @@ sub userpic_content
     if ($need_cache) {
         # make $realfile /userpic-userid, and $file /userpic
         my $realfile = $file;
-        unless ($file =~ s/-\d+$//) { 
-            $realfile .= "-$pic->{'userid'}"; 
+        unless ($file =~ s/-\d+$//) {
+            $realfile .= "-$pic->{'userid'}";
         }
-        
+
         # delete short file on Unix if it exists
         unlink $file if $USERPIC{'symlink'} && -f $file;
 
@@ -686,9 +686,9 @@ sub journal_content
         my $args_wq = $args ? "?$args" : "";
 
         # can't show BML on user domains... redirect them
-        if ($RQ{'vhost'} eq "users" && ($RQ{'mode'} eq "entry" || 
-                                        $RQ{'mode'} eq "reply" || 
-                                        $RQ{'mode'} eq "month")) 
+        if ($RQ{'vhost'} eq "users" && ($RQ{'mode'} eq "entry" ||
+                                        $RQ{'mode'} eq "reply" ||
+                                        $RQ{'mode'} eq "month"))
         {
             my $u = LJ::load_user($RQ{'user'});
             my $base = "$LJ::SITEROOT/users/$RQ{'user'}";
@@ -697,7 +697,7 @@ sub journal_content
         }
 
         if ($RQ{'mode'} eq "entry" || $RQ{'mode'} eq "reply") {
-            my $filename = $RQ{'mode'} eq "entry" ? 
+            my $filename = $RQ{'mode'} eq "entry" ?
                 "$LJ::HOME/htdocs/talkread.bml" :
                 "$LJ::HOME/htdocs/talkpost.bml";
             $r->notes("_journal" => $RQ{'user'});
@@ -724,13 +724,13 @@ sub journal_content
     # display a more meaningful error message.
     my $generate_iejunk = 0;
 
-    if ($opts->{'badargs'}) 
+    if ($opts->{'badargs'})
     {
         # No special information to give to the user, so just let
         # Apache handle the 404
         return 404;
     }
-    elsif ($opts->{'baduser'}) 
+    elsif ($opts->{'baduser'})
     {
         $status = "404 Unknown User";
         $html = "<h1>Unknown User</h1><p>There is no user <b>$user</b> at $LJ::SITENAME.</p>";
@@ -772,7 +772,7 @@ sub journal_content
         $html = "<h1>Error</h1><p>User <b>$user</b> has messed up their journal template definition.</p>";
         $generate_iejunk = 1;
     }
-    
+
     $r->status_line($status);
     foreach my $hname (keys %headers) {
         if (ref($headers{$hname}) && ref($headers{$hname}) eq "ARRAY") {
@@ -808,7 +808,7 @@ sub journal_content
     $r->header_out("Content-length", $length);
     $r->send_http_header();
     $r->print($html) unless $r->header_only;
-    
+
     return OK;
 }
 
@@ -819,7 +819,7 @@ sub customview_content
     my %FORM = $r->args;
 
     my $charset = "utf-8";
-    
+
     if ($LJ::UNICODE && $FORM{'charset'}) {
         $charset = $FORM{'charset'};
         if ($charset ne "utf-8" && ! Unicode::MapUTF8::utf8_supported_charset($charset)) {
@@ -828,8 +828,8 @@ sub customview_content
             $r->print("<b>Error:</b> requested charset not supported.");
             return OK;
         }
-    }    
-    
+    }
+
     my $ctype = "text/html";
     if ($FORM{'type'} eq "xml") {
 	$ctype = "text/xml";
@@ -852,7 +852,7 @@ sub customview_content
     }
 
     my $data = (LJ::make_journal($user, "", $remote,
-				 { "nocache" => $FORM{'nocache'}, 
+				 { "nocache" => $FORM{'nocache'},
 				   "vhost" => "customview",
 				   "nooverride" => $nooverride,
 				   "styleid" => $styleid,
@@ -862,7 +862,7 @@ sub customview_content
                                    "r" => $r,
 			       })
 		|| "<b>[$LJ::SITENAME: Bad username, styleid, or style definition]</b>");
-    
+
     if ($FORM{'enc'} eq "js") {
 	$data =~ s/\\/\\\\/g;
 	$data =~ s/\"/\\\"/g;
@@ -921,7 +921,7 @@ sub interface_content
     my $content;
     $r->read($content, $r->header_in("Content-Length"));
     LJ::decode_url_string($content, \%FORM);
-    
+
     # the protocol needs the remote IP in just one place, where tracking is done.
     $ENV{'_REMOTE_IP'} = $r->connection()->remote_ip();
     LJ::do_request(\%FORM, \%out);
@@ -978,7 +978,7 @@ sub db_logger
                  "ljuser VARCHAR(15),".
                  "journalid INT UNSIGNED,". # userid of what's being looked at
                  "codepath VARCHAR(80),".  # protocol.getevents / s[12].friends / bml.update / bml.friends.index
-                 "anonsess INT UNSIGNED,". 
+                 "anonsess INT UNSIGNED,".
                  "langpref VARCHAR(5),".
                  "uniq VARCHAR(15),".
                  "method VARCHAR(10) NOT NULL,".
@@ -1040,7 +1040,7 @@ sub anti_squatter
                   "</form></body></html>");
         return OK;
     });
-    
+
 }
 
 package LJ::Protocol;
