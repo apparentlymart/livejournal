@@ -2,7 +2,8 @@
 ###       Lynx Scheme - Very simple for text browsers
 ###
 
-h1=>{D}<h2>%%DATA%%</h2>
+h1=>{D}<h1>%%DATA%%</h1>
+h2=>{D}<h2>%%DATA%%</h2>
 
 page<=
 {F}<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"><?_code
@@ -15,7 +16,6 @@ _code?><html>
 </head>
 
 <body>
-<h1>%%TITLE%%</h1>
 
 %%BODY%%
 
