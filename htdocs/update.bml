@@ -262,16 +262,21 @@
                                     'raw' => $raw,
                                 }, @secs);
          $body .= LJ::help_icon("security", " ");
+
+         my $checked;
+
          if (@{$res->{'friendgroups'}}) {
-             $body .= "<blockquote id='custom_boxes' style='display: none'>";
+             my $style = "style='display: none'";
+             if ($FORM{'security'} eq "custom") { $style = ""; }
+             $body .= "<blockquote id='custom_boxes' $style>";
              foreach my $fg (@{$res->{'friendgroups'}}) {
-                 $body .= "<input type='checkbox' name='custom_bit_$fg->{'id'}' value='1'> ";
+                 $checked = $FORM{"custom_bit_$fg->{'id'}"} ? "checked" : "";
+                 $body .= "<input type='checkbox' name='custom_bit_$fg->{'id'}' $checked value='1'> ";
                  $body .= LJ::ehtml($fg->{'name'}) . "<br />";
              }
              $body .= "</blockquote>"
          }
          
-         my $checked;
          $checked = $FORM{'prop_opt_preformatted'} ? "CHECKED" : "";
          $body .= "<P> <B>Don't auto-format:</B><INPUT TYPE=CHECKBOX NAME=\"prop_opt_preformatted\" VALUE=1 $checked>";
          $body .= LJ::help_icon("noautoformat", " ", " ");
