@@ -386,7 +386,7 @@ BODY<=
      if ($FORM{'year'} && $FORM{'year'} >= 100 && 
 	($FORM{'year'} < 1890 || $FORM{'year'} > $this_year)) { push @errors, "Invalid birthday year."; }
      if ($FORM{'month'} && ($FORM{'month'} < 1 || $FORM{'month'} > 12)) { push @errors, "Invalid birthday month.  Enter a month from 1-12.  (Jan-Dec)"; }
-     if ($FORM{'day'} && ($FORM{'day'} < 1 || $FORM{'day'} > 31)) { push @errors, "Invalid birthday day.  Enter a month from 1-31."; }
+     if ($FORM{'day'} && ($FORM{'day'} < 1 || $FORM{'day'} > 31)) { push @errors, "Invalid birthday day.  Enter a day from 1-31."; }
 
      if ($FORM{'country'} ne "US" && $FORM{'zip'})
      {
