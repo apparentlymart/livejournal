@@ -61,10 +61,10 @@ body<=
     # We repopulate what we can via hidden fields - however the objects (journalu & parpost) must be recreated here.
     if (! $init) {
         my ($sth, $parpost);
-        my $dbcm = LJ::get_cluster_master($journalu);
-        return 'No database connection present.  Please go back and try again.' unless $dbcm;
+        my $dbcr = LJ::get_cluster_def_reader($journalu);
+        return 'No database connection present.  Please go back and try again.' unless $dbcr;
 
-        $sth = $dbcm->prepare("SELECT posterid, state FROM talk2 ".
+        $sth = $dbcr->prepare("SELECT posterid, state FROM talk2 ".
                               "WHERE journalid=? AND jtalkid=?");
         $sth->execute($journalu->{userid}, $POST{itemid}+0);
         $parpost = $sth->fetchrow_hashref;

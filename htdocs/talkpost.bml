@@ -33,9 +33,9 @@ body<=
     $r->notes("journalid" => $u->{'userid'});
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
-    my $dbcm = LJ::get_cluster_master($u);
+    my $dbcr = LJ::get_cluster_def_reader($u);
 
-    return $LJ::MSG_READONLY_USER if $LJ::CLUSTER_DOWN{0} || ! $dbcm;
+    return $LJ::MSG_READONLY_USER if $LJ::CLUSTER_DOWN{0} || ! $dbcr;
 
     # redirect if account was renamed
     if ($u->{'journaltype'} eq "R") {
@@ -60,7 +60,7 @@ body<=
             "t.state, l.anum FROM talk2 t, log2 l WHERE l.journalid=$u->{'userid'} AND ".
             "l.jitemid=t.nodeid AND t.journalid=$u->{'userid'} AND t.jtalkid=$qparentid";
         foreach my $pass (1, 2) {
-            my $db = $pass == 1 ? LJ::get_cluster_reader($u) : $dbcm;
+            my $db = $pass == 1 ? LJ::get_cluster_reader($u) : $dbcr;
             $parpost = $db->selectrow_hashref($sql);
             last if $parpost;
         }

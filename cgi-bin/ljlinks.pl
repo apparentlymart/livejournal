@@ -34,7 +34,7 @@ sub load_linkobj
 
     {
         # not in memcache, need to build one from db
-        my $db = $use_master ? LJ::get_cluster_master($u) : LJ::get_cluster_reader($u);
+        my $db = $use_master ? LJ::get_cluster_def_reader($u) : LJ::get_cluster_reader($u);
 
         local $" = ",";
         my $sth = $db->prepare("SELECT ordernum, parentnum, title, url " .

@@ -37,13 +37,13 @@
     return $err->($ML{'talk.error.bogusargs'}) unless $u && $u->{'clusterid'};
     return $err->($LJ::MSG_READONLY_USER) if LJ::get_cap($u, "readonly");
 
-    my $dbcm = LJ::get_cluster_master($u);
+    my $dbcr = LJ::get_cluster_def_reader($u);
 
     my $jid = $u->{'userid'};
     my $ditemid = $POST{'ditemid'}+0;
     my $commentlink = LJ::journal_base($u) . "/$ditemid.html";
     my $itemid = $ditemid >> 8;
-    my $log = $dbcm->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=?",
+    my $log = $dbcr->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=?",
                                        undef, $jid, $itemid);
     return $err->($ML{'.error.inconsistent_data'}) unless $log && $log->{'anum'} == ($ditemid & 255);
     my $up = LJ::load_userid($log->{'posterid'});
@@ -59,7 +59,7 @@
     # filter our talkids down to those that are actually attached to the log2
     # specified.  also, learn the state of all the items.
     my $in = join (',', @talkids);
-    $sth = $dbcm->prepare("SELECT jtalkid, state FROM talk2 ".
+    $sth = $dbcr->prepare("SELECT jtalkid, state FROM talk2 ".
                           "WHERE journalid=? AND jtalkid IN ($in) ".
                           "AND nodetype='L' AND nodeid=?");
     $sth->execute($jid, $itemid);

@@ -1445,7 +1445,7 @@ sub getevents
     }
 
     # whatever selecttype might have wanted us to use the master db.
-    $dbcr = LJ::get_cluster_master($uowner) if $use_master;
+    $dbcr = LJ::get_cluster_def_reader($uowner) if $use_master;
 
     return fail($err,502) unless $dbcr;
 

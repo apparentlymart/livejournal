@@ -41,7 +41,7 @@ sub ReplyPage
             "WHERE journalid=$u->{'userid'} AND jtalkid=$re_talkid ".
             "AND nodetype='L' AND nodeid=$entry->{'jitemid'}";
         foreach my $pass (1, 2) {
-            my $db = $pass == 1 ? LJ::get_cluster_reader($u) : LJ::get_cluster_master($u);
+            my $db = $pass == 1 ? LJ::get_cluster_reader($u) : LJ::get_cluster_def_reader($u);
             $parpost = $db->selectrow_hashref($sql);
             last if $parpost;
         }

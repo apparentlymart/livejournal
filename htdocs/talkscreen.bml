@@ -25,12 +25,12 @@ body<=
 
  my $u = LJ::load_user($journal);
  return "<?h1 $ML{'Error'} h1?><?p $ML{'.talk.error.bogusargs'} p?>" unless $u;
- my $dbcm = LJ::get_cluster_master($u);
- return "<?h1 $ML{'Error'} h1?><?p $ML{'error.nodb'} p?>" unless $dbcm;
+ my $dbcr = LJ::get_cluster_def_reader($u);
+ return "<?h1 $ML{'Error'} h1?><?p $ML{'error.nodb'} p?>" unless $dbcr;
 
  my $post;
  $qtalkid = int($qtalkid / 256);  # get rid of anum
- $post = $dbcm->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, nodeid AS 'itemid', ".
+ $post = $dbcr->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, nodeid AS 'itemid', ".
                                   "parenttalkid, journalid, posterid FROM talk2 ".
                                   "WHERE journalid=$u->{'userid'} AND jtalkid=$qtalkid");
 
@@ -54,7 +54,7 @@ body<=
 
  # $posterid is the userid of the author of the entry, not the comment
  my ($posterid, $anum) = 
-    $dbcm->selectrow_array("SELECT posterid, anum FROM log2 WHERE ".
+    $dbcr->selectrow_array("SELECT posterid, anum FROM log2 WHERE ".
                            "journalid=$u->{'userid'} AND jitemid=$qitemid");
  my $up = LJ::load_userid($posterid);
 

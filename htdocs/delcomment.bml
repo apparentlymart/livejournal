@@ -22,13 +22,13 @@ body<=
 
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
-    my $dbcm = LJ::get_cluster_master($u);
+    my $dbcr = LJ::get_cluster_def_reader($u);
     return "<?h1 $ML{'Error'} h1?><?p $ML{'error.nodb'} p?>"
-        unless $dbcm;
+        unless $dbcr;
 
     # $tp is a hashref of info about this individual talkpost row
     my $tpid = $GET{'id'} >> 8;
-    my $tp = $dbcm->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, " .
+    my $tp = $dbcr->selectrow_hashref("SELECT jtalkid AS 'talkid', nodetype, state, " .
                                       "nodeid AS 'itemid', parenttalkid, journalid, posterid " .
                                       "FROM talk2 ".
                                       "WHERE journalid=? AND jtalkid=?",
@@ -47,7 +47,7 @@ body<=
     $tp->{'userpost'} = LJ::get_username($tp->{'posterid'});
 
     # userid of user who posted journal entry
-    my $jposterid = $dbcm->selectrow_array("SELECT posterid FROM log2 WHERE " .
+    my $jposterid = $dbcr->selectrow_array("SELECT posterid FROM log2 WHERE " .
                                            "journalid=? AND jitemid=?",
                                            undef, $u->{'userid'}, $tp->{'itemid'});
     my $jposter = LJ::load_userid($jposterid);

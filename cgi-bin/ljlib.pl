@@ -352,7 +352,7 @@ sub get_log2_row
         return $item;
     }
 
-    my $db = LJ::get_cluster_master($u);
+    my $db = LJ::get_cluster_def_reader($u);
     my $sql = "SELECT posterid, eventtime, logtime, security, allowmask, " .
               "anum FROM log2 WHERE journalid=? AND jitemid=?";
 
@@ -434,7 +434,7 @@ sub get_log2_recent_log
         if $rows_decode->();
     $rows = "";
 
-    my $db = LJ::get_cluster_master($cid);
+    my $db = LJ::get_cluster_def_reader($cid);
     # if we use slave or didn't get some data, don't store in memcache
     my $dont_store = 0;
     unless ($db) {
@@ -805,8 +805,8 @@ sub get_daycounts
         return $list if $list;
     }
 
-    my $dbcm = LJ::get_cluster_master($u) or return undef;
-    my $sth = $dbcm->prepare("SELECT year, month, day, COUNT(*) ".
+    my $dbcr = LJ::get_cluster_def_reader($u) or return undef;
+    my $sth = $dbcr->prepare("SELECT year, month, day, COUNT(*) ".
                              "FROM log2 WHERE journalid=? GROUP BY 1, 2, 3");
     $sth->execute($uid);
     while (my ($y, $m, $d, $c) = $sth->fetchrow_array) {
@@ -3196,7 +3196,7 @@ sub get_logtext2
         next unless %need;
         next if $pass == 1 && $opts->{'usemaster'};
         my $db = $pass == 1 ? LJ::get_cluster_reader($clusterid) :
-            LJ::get_cluster_master($clusterid);
+            LJ::get_cluster_def_reader($clusterid);
         next unless $db;
 
         my $jitemid_in = join(", ", keys %need);
@@ -3270,7 +3270,7 @@ sub get_talktext2
     foreach my $pass (1, 2) {
         next unless %need;
         my $db = $pass == 1 ? LJ::get_cluster_reader($clusterid) :
-            LJ::get_cluster_master($clusterid);
+            LJ::get_cluster_def_reader($clusterid);
         next unless $db;
         my $in = join(",", keys %need);
         my $sth = $db->prepare("SELECT jtalkid, subject $bodycol FROM talktext2 ".
@@ -3655,7 +3655,7 @@ sub get_remote
     $sess = LJ::MemCache::get($memkey);
     # try master
     unless ($sess) {
-        $sess_db = LJ::get_cluster_master($u);
+        $sess_db = LJ::get_cluster_def_reader($u);
         $get_sess->();
         LJ::MemCache::set($memkey, $sess) if $sess;
     }
@@ -4254,15 +4254,15 @@ sub get_timezone {
 
     my $offset;
 
-    my $dbcm = LJ::get_cluster_master($u);
-    return 0 unless $dbcm;
+    my $dbcr = LJ::get_cluster_def_reader($u);
+    return 0 unless $dbcr;
 
     # we guess their current timezone's offset
     # by comparing the gmtime of their last post
     # with the time they specified on that post.
 
     # grab the times on the last post.
-    if (my $last_row = $dbcm->selectrow_hashref(
+    if (my $last_row = $dbcr->selectrow_hashref(
                         "SELECT rlogtime, eventtime ".
                         "FROM log2 WHERE journalid=? ".
                         "ORDER BY rlogtime LIMIT 1",
@@ -4556,7 +4556,7 @@ sub make_journal
             my $db;
             my $setmem = 1;
             if (@LJ::MEMCACHE_SERVERS) {
-                $db = LJ::get_cluster_master($u);
+                $db = LJ::get_cluster_def_reader($u);
             } else {
                 $db = LJ::get_cluster_reader($u);
                 $setmem = 0;
@@ -4762,6 +4762,21 @@ sub get_cluster_reader
         @roles = ("cluster${id}${ab}") if $ab eq "a" || $ab eq "b";
     }
     return LJ::get_dbh(@roles);
+}
+
+# <LJFUNC>
+# name: LJ::get_cluster_def_reader
+# class: db
+# des: Returns a definitive cluster reader for a given user.
+# args: uarg
+# des-uarg: Either a clusterid scalar or a user object.
+# returns: DB handle.  Or undef if definitive reader is unavailable.
+# </LJFUNC>
+sub get_cluster_def_reader
+{
+    # this sub is currently just a placeholder
+    # for future functionality.
+    return LJ::get_cluster_master(@_);
 }
 
 # <LJFUNC>
@@ -5264,7 +5279,7 @@ sub get_bio {
 
     # not in memcache, fall back to disk
     my $db = @LJ::MEMCACHE_SERVERS || $force ?
-      LJ::get_cluster_master($u) : LJ::get_cluster_reader($u);
+      LJ::get_cluster_def_reader($u) : LJ::get_cluster_reader($u);
     $bio = $db->selectrow_array("SELECT bio FROM userbio WHERE userid=?",
                                 undef, $u->{'userid'});
 
@@ -6143,7 +6158,7 @@ sub load_log_props2
 
     unless ($db) {
         my $u = LJ::load_userid($userid);
-        $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($u) :  LJ::get_cluster_reader($u);
+        $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_def_reader($u) :  LJ::get_cluster_reader($u);
         return unless $db;
     }
 
@@ -6228,7 +6243,7 @@ sub load_talk_props2
 
     if (!$db || @LJ::MEMCACHE_SERVERS) {
         $u ||= LJ::load_userid($userid);
-        $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($u) :  LJ::get_cluster_reader($u);
+        $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_def_reader($u) :  LJ::get_cluster_reader($u);
         return $hashref unless $db;
     }
 

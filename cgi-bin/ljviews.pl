@@ -364,7 +364,7 @@ sub get_s1style_reader {
         return @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
     }
 
-    return @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($u) : LJ::get_cluster_reader($u);
+    return @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_def_reader($u) : LJ::get_cluster_reader($u);
 }
 
 # takes either $u object or userid
@@ -631,7 +631,7 @@ sub get_overrides {
 
     # new clustered table
     if ($u->{'dversion'} >= 5) {
-        my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_master($u) : LJ::get_cluster_reader($u);
+        my $db = @LJ::MEMCACHE_SERVERS ? LJ::get_cluster_def_reader($u) : LJ::get_cluster_reader($u);
         $overr = $db->selectrow_array("SELECT override FROM s1overrides WHERE userid=?", undef, $u->{'userid'});
 
     # old global table

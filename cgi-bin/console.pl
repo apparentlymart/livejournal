@@ -720,12 +720,12 @@ sub delete_talk
     return $err->("Third argument must be a positive integer (the talkid).")
         unless $qtalkid;
 
-    my $dbcm = LJ::get_cluster_master($u);
-    return $err->("DB unavailable") unless $dbcm;
+    my $dbcr = LJ::get_cluster_def_reader($u);
+    return $err->("DB unavailable") unless $dbcr;
 
     my $rid = int($qitemid / 256);  # real post ID
     my $rtid = int($qtalkid / 256); # realk talk ID
-    my $state = $dbcm->selectrow_array("SELECT state FROM talk2 WHERE ".
+    my $state = $dbcr->selectrow_array("SELECT state FROM talk2 WHERE ".
                                        "journalid=$u->{'userid'} AND ".
                                        "jtalkid=$rtid AND nodetype='L' ".
                                        "AND nodeid=$rid");

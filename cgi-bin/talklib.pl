@@ -464,28 +464,28 @@ sub get_talk_data
     
     return $memcache_decode->() if $memcache_good->();
 
-    my $dbcm = LJ::get_cluster_master($u);
-    return undef unless $dbcm;
+    my $dbcr = LJ::get_cluster_def_reader($u);
+    return undef unless $dbcr;
 
-    my $lock = $dbcm->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
+    my $lock = $dbcr->selectrow_array("SELECT GET_LOCK(?,10)", undef, $lockkey);
     return undef unless $lock;
 
     # it's quite likely (for a popular post) that the memcache was 
     # already populated while we were waiting for the lock
     $packed = LJ::MemCache::get($memkey);
     if ($memcache_good->()) {
-        $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+        $dbcr->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
         $memcache_decode->();
         return $ret;
     }
 
     my $memval = $DATAVER;
-    my $sth = $dbcm->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, ".
+    my $sth = $dbcr->prepare("SELECT t.jtalkid AS 'talkid', t.posterid, ".
                              "t.datepost, t.parenttalkid, t.state ".
                              "FROM talk2 t ".
                              "WHERE t.journalid=? AND t.nodetype=? AND t.nodeid=?");
     $sth->execute($u->{'userid'}, $nodetype, $nodeid);
-    die $dbcm->errstr if $dbcm->err;
+    die $dbcr->errstr if $dbcr->err;
     while (my $r = $sth->fetchrow_hashref) {
         $ret->{$r->{'talkid'}} = $r;
         $memval .= pack("NNNN", 
@@ -496,7 +496,7 @@ sub get_talk_data
         $rp_ourcount++ if $r->{'state'} eq "A";
     }
     LJ::MemCache::set($memkey, $memval);
-    $dbcm->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
+    $dbcr->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
 
     $fixup_rp->();
 
@@ -1157,21 +1157,21 @@ sub mark_comment_as_spam {
     $jtalkid += 0;
     return 0 unless $journalu && $jtalkid;
 
-    my $dbcm = LJ::get_cluster_master($journalu);
+    my $dbcr = LJ::get_cluster_def_reader($journalu);
     my $dbh = LJ::get_db_writer();
 
     # step 1: get info we need
     my $sql = 'SELECT tt.subject, tt.body, t.posterid FROM talk2 t, talktext2 tt ' .
               'WHERE t.journalid=? AND t.jtalkid=? AND tt.journalid=t.journalid AND tt.jtalkid=t.jtalkid';
-    my ($subject, $body, $posterid) = $dbcm->selectrow_array($sql, undef, $journalu->{userid}, $jtalkid);
-    return 0 if $dbcm->err;
+    my ($subject, $body, $posterid) = $dbcr->selectrow_array($sql, undef, $journalu->{userid}, $jtalkid);
+    return 0 if $dbcr->err;
 
     # step 2: get ip if anon
     my $ip;
     unless ($posterid) {
-        $ip = $dbcm->selectrow_array('SELECT ip FROM tempanonips WHERE journalid=? AND jtalkid=?',
+        $ip = $dbcr->selectrow_array('SELECT ip FROM tempanonips WHERE journalid=? AND jtalkid=?',
                                       undef, $journalu->{userid}, $jtalkid);
-        return 0 if $dbcm->err;
+        return 0 if $dbcr->err;
 
         # we want to fail out if we have no IP address and this is anonymous, because otherwise
         # we have a completely useless spam report.  pretend we were successful, too.
@@ -1196,10 +1196,10 @@ sub get_replycount {
     my $count = LJ::MemCache::get($memkey);
     return $count if $count;
 
-    my $dbcm = LJ::get_cluster_master($ju);
-    return unless $dbcm;
+    my $dbcr = LJ::get_cluster_def_reader($ju);
+    return unless $dbcr;
 
-    $count = $dbcm->selectrow_array("SELECT replycount FROM log2 WHERE " .
+    $count = $dbcr->selectrow_array("SELECT replycount FROM log2 WHERE " .
                                     "journalid=? AND jitemid=?", undef,
                                     $ju->{'userid'}, $jitemid);
     LJ::MemCache::add($memkey, $count);
@@ -1451,9 +1451,9 @@ sub mail_comments {
 
     # if a response to another comment, send a mail to the parent commenter.
     if ($parent->{talkid}) {  
-        my $dbcm = LJ::get_cluster_master($journalu);
+        my $dbcr = LJ::get_cluster_def_reader($journalu);
         # FIXME: remove this query:
-        my $sth = $dbcm->prepare("SELECT t.posterid, tt.body FROM talk2 t, talktext2 tt ".
+        my $sth = $dbcr->prepare("SELECT t.posterid, tt.body FROM talk2 t, talktext2 tt ".
                                  "WHERE t.journalid=? AND tt.journalid=? ".
                                  "AND   t.jtalkid=?   AND tt.jtalkid=?");
         $sth->execute($journalu->{userid}, $journalu->{userid}, $parent->{talkid}, $parent->{talkid});
@@ -1462,7 +1462,7 @@ sub mail_comments {
         $parentcomment = $parbody;
 
         my %props = ($parent->{talkid} => {});
-        LJ::load_talk_props2($dbcm, $journalu->{'userid'}, [$parent->{talkid}], \%props);
+        LJ::load_talk_props2($dbcr, $journalu->{'userid'}, [$parent->{talkid}], \%props);
         $parent->{preformat} = $props{$parent->{talkid}}->{'opt_preformatted'};
 
         # convert to UTF-8 if necessary
@@ -1855,8 +1855,8 @@ sub init {
     my $r = Apache->request;
     $r->notes("journalid" => $journalu->{'userid'});
 
-    my $dbcm = LJ::get_cluster_master($journalu);
-    return $bmlerr->('error.nodb') unless $dbcm;
+    my $dbcr = LJ::get_cluster_def_reader($journalu);
+    return $bmlerr->('error.nodb') unless $dbcr;
 
     my $itemid = $init->{'itemid'}+0;
 
@@ -2030,7 +2030,7 @@ sub init {
     my $partid = $form->{'parenttalkid'}+0;
 
     if ($partid) {
-        $sth = $dbcm->prepare("SELECT posterid, state FROM talk2 ".
+        $sth = $dbcr->prepare("SELECT posterid, state FROM talk2 ".
                               "WHERE journalid=? AND jtalkid=?");
         $sth->execute($journalu->{userid}, $partid);
         $parpost = $sth->fetchrow_hashref;
