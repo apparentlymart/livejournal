@@ -506,7 +506,7 @@
         # so we can feed it into LJ::Poll::preview()
         my $err;
         my $stdpoll = (LJ::Poll::parse(\$code, \$err, {}))[0];
-        return "<b>[Error parsing poll: $$err]</b>\n" if $err;
+        return "<b>[Error parsing poll: $err]</b>\n" if $err;
 
         # display poll preview
         $ret .= "<?h1 Options h1?>\n";
