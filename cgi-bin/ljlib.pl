@@ -224,7 +224,10 @@ sub get_dbh {
     #    'raw':  don't return a DBIx::StateKeeper object
 
     unless (exists $opts->{'max_repl_lag'}) {
-	$opts->{'max_repl_lag'} = $LJ::MAX_REPL_LAG || 100_000;
+	# for slave or cluster<n>slave roles, don't allow lag
+	if ($_[0] =~ /slave$/) {
+	    $opts->{'max_repl_lag'} = $LJ::MAX_REPL_LAG || 100_000;
+	}
     }
 
     if ($LJ::DEBUG{'get_dbh'} && $_[0] ne "logs") {
