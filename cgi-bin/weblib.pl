@@ -881,9 +881,9 @@ sub entry_form {
         {
             my ($year, $mon, $mday, $hour, $min) = split( /\D/, $opts->{'datetime'});
             # date entry boxes / formatting note
-            my $datetime = LJ::html_datetime({ 'name' => "date_ymd", 'notime' => 1, 'default' => "$year-$mon-$mday"}) . "&nbsp;" x 5;
-            $datetime .=   LJ::html_text({ size => 2, maxlength => 2, value => $hour, name => "hour", tabindex => $tabindex->() }) . ":"; 
-            $datetime .=   LJ::html_text({ size => 2, maxlength => 2, value => $min, name => "min", tabindex => $tabindex->() });
+            my $datetime = LJ::html_datetime({ 'name' => "date_ymd", 'notime' => 1, 'default' => "$year-$mon-$mday", 'disabled' => $opts->{'disabled_save'}}) . "&nbsp;" x 5;
+            $datetime .=   LJ::html_text({ size => 2, maxlength => 2, value => $hour, name => "hour", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} }) . ":"; 
+            $datetime .=   LJ::html_text({ size => 2, maxlength => 2, value => $min, name => "min", tabindex => $tabindex->(), disabled => $opts->{'disabled_save'} });
             
             $out .= "<tr valign='top'><th>" . BML::ml('entryform.date') . "</th>";
             $out .= "<td id='datetime_box' nowrap='nowrap'>$datetime <?de " . BML::ml('entryform.date.24hournote') . " de?>";
@@ -893,7 +893,7 @@ sub entry_form {
         ### Subject
         $out .= "<tr valign='top'><th>" . BML::ml('entryform.subject') . "</th><td>";
         $out .= LJ::html_text({ 'name' => 'subject', 'value' => $opts->{'subject'},
-                                'size' => '60', 'maxlength' => '100', 'tabindex' => $tabindex->() }) . "\n";
+                                'size' => '60', 'maxlength' => '100', 'tabindex' => $tabindex->(), 'disabled' => $opts->{'disabled_save'} }) . "\n";
         $out .= "</td></tr>";
         $out .= "</table></td>";
     }
@@ -949,7 +949,8 @@ RTE
     }
     $out .= LJ::html_textarea({ 'name' => 'event', 'value' => $opts->{'event'},
                                 'rows' => '20', 'cols' => '50', 'style' => 'width: 100%', 
-                                'wrap' => 'soft', 'tabindex' => $tabindex->() });
+                                'wrap' => 'soft', 'tabindex' => $tabindex->(),
+                                'disabled' => $opts->{'disabled_save'}});
 
     $out .= '</noscript>' if $opts->{'richtext_on'};
     $out .= LJ::html_hidden('prop_opt_preformatted', '1') if $opts->{'richtext_on'};
@@ -959,7 +960,7 @@ RTE
     }));
     my $jnorich = LJ::ejs(BML::fill_template("de", { DATA => BML::ml('entryform.htmlokay.norich') }));
 
-    unless ($opts->{'richtext_on'} || ($opts->{'did_spellcheck'} && $opts->{'richtext_on'})) {
+    unless ($opts->{'richtext_on'} || $opts->{'disabled_save'} || ($opts->{'did_spellcheck'} && $opts->{'richtext_on'})) {
         $out .= <<RTE;
         <script language='JavaScript' type='text/javascript'>
             <!--
@@ -991,87 +992,88 @@ RTE
         });
     }
    
-    ### Options
-    $out .= "<b>" . BML::ml('entryform.options') . "</b><br />";
-    $out .= "<table style='width: 100%' id='Options'><tr valign='top'>";
-
-    ### Options Column 1
-    {
-        $out .= "<td style='border-right: 1px dashed #999; text-align: center; width: 50%' id='column_one_td'>";
-        $out .= "<table style='text-align: left' id='column_one_table'>";
-
-        # Security
-        {
-            my @secs = ("public", BML::ml('label.security.public'), "private", BML::ml('label.security.private'),
-                        "friends", BML::ml('label.security.friends'));
-            
-            my @secopts;
-            if ($res && ref $res->{'friendgroups'} eq 'ARRAY' && scalar @{$res->{'friendgroups'}}) {
-                push @secs, ("custom", BML::ml('label.security.custom'));
-                push @secopts, ("onchange" => "customboxes()");
-            }
-            
-            $out .= "<tr valign='top'><th>" . LJ::help_icon("security", "", " ") . BML::ml('entryform.security') . "</th><td>";
-            $out .= LJ::html_select({ 'id' => "Security", 'name' => 'security', 
-
-                                      'selected' => $opts->{'security'}, 
-                                      'tabindex' => $tabindex->(), @secopts }, @secs);
-            
-            # if custom security groups available, show them in a hideable div
-            if ($res && ref $res->{'friendgroups'} eq 'ARRAY' && scalar @{$res->{'friendgroups'}}) {
-                my $display = $opts->{'security'} eq "custom" ? "block" : "none";
-                $out .= "<div id='custom_boxes' style='display: $display;'>";
-                foreach my $fg (@{$res->{'friendgroups'}}) {
-                    $out .= LJ::html_check({ 'name' => "custom_bit_$fg->{'id'}",
-                                             'id' => "custom_bit_$fg->{'id'}",
-                                             'selected' => $opts->{"custom_bit_$fg->{'id'}"} || $opts->{'security_mask'}+0 & 1 << $fg->{'id'} }) . " ";
-                    $out .= "<label for='custom_bit_$fg->{'id'}'>" . LJ::ehtml($fg->{'name'}) . "</label><br />";
-                }
-                $out .= "</div>";
-            }
-            $out .= "</td></tr>";
-        }
-        # Text Formatting
-        unless ($opts->{'richtext_on'}) {
-            my $format_selected = $opts->{'prop_opt_preformatted'} ? "preformatted" : "";
-            $format_selected ||= $opts->{'event_format'};
-
-            $out .= "<tr valign='top'><th><label for='event_format'>" . BML::ml('entryform.format') . "</label></th><td>";
-            $out .= LJ::html_select({ 'name' => "event_format", 'id' => "event_format", 
-                                      'selected' => $format_selected, 'tabindex' => $tabindex->() },
-                                    "auto", BML::ml('entryform.format.auto'), "preformatted", BML::ml('entryform.format.preformatted'));
-            $out .= "</td></tr>";
-        }
-        # Current Music
-        $out .= "<tr><th>" . BML::ml('entryform.music') . "</th><td>";
-        $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $opts->{'prop_current_music'},
-                                'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->() }) . "</td></tr>\n";
-    
-        # Current Mood
-        {
-            my @moodlist = ('', BML::ml('entryform.noneother'));
-            my $sel;
-            
-            my $moods = LJ::get_moods();
+    if (!$opts->{'disabled_save'}) {
+        ### Options
+        $out .= "<b>" . BML::ml('entryform.options') . "</b><br />";
+        $out .= "<table style='width: 100%' id='Options'><tr valign='top'>";
         
-            foreach (sort { $moods->{$a}->{'name'} cmp $moods->{$b}->{'name'} } keys %$moods) {
-                push @moodlist, ($_, $moods->{$_}->{'name'});
-                
-                if ($opts->{'prop_current_mood'} eq $moods->{$_}->{'name'} ||
-                    $opts->{'prop_current_moodid'} == $_) {
-                    $sel = $_;
-                }
-            }
+        ### Options Column 1
+        {
+            $out .= "<td style='border-right: 1px dashed #999; text-align: center; width: 50%' id='column_one_td'>";
+                $out .= "<table style='text-align: left' id='column_one_table'>";
             
-            if ($remote) {
-                LJ::load_mood_theme($remote->{'moodthemeid'});
-                foreach my $mood (keys %$moods) {
-                    if (LJ::get_mood_picture($remote->{'moodthemeid'}, $moods->{$mood}->{id}, \ my %pic)) {
-                        $moodlist .= "    moods[" . $moods->{$mood}->{id} . "] = \"" . $moods->{$mood}->{name} . "\";\n";
-                        $moodpics .= "    moodpics[" . $moods->{$mood}->{id} . "] = \"" . $pic{pic} . "\";\n";
+            # Security
+            {
+                my @secs = ("public", BML::ml('label.security.public'), "private", BML::ml('label.security.private'),
+                            "friends", BML::ml('label.security.friends'));
+                
+                my @secopts;
+                if ($res && ref $res->{'friendgroups'} eq 'ARRAY' && scalar @{$res->{'friendgroups'}} && !$opts->{'usejournal'}) {
+                    push @secs, ("custom", BML::ml('label.security.custom'));
+                    push @secopts, ("onchange" => "customboxes()");
+                }
+                
+                $out .= "<tr valign='top'><th>" . LJ::help_icon("security", "", " ") . BML::ml('entryform.security') . "</th><td>";
+                $out .= LJ::html_select({ 'id' => "Security", 'name' => 'security', 
+                                          
+                                          'selected' => $opts->{'security'}, 
+                                          'tabindex' => $tabindex->(), @secopts }, @secs);
+                
+                # if custom security groups available, show them in a hideable div
+                if ($res && ref $res->{'friendgroups'} eq 'ARRAY' && scalar @{$res->{'friendgroups'}}) {
+                    my $display = $opts->{'security'} eq "custom" ? "block" : "none";
+                    $out .= "<div id='custom_boxes' style='display: $display;'>";
+                    foreach my $fg (@{$res->{'friendgroups'}}) {
+                        $out .= LJ::html_check({ 'name' => "custom_bit_$fg->{'id'}",
+                                                 'id' => "custom_bit_$fg->{'id'}",
+                                                 'selected' => $opts->{"custom_bit_$fg->{'id'}"} || $opts->{'security_mask'}+0 & 1 << $fg->{'id'} }) . " ";
+                        $out .= "<label for='custom_bit_$fg->{'id'}'>" . LJ::ehtml($fg->{'name'}) . "</label><br />";
+                    }
+                    $out .= "</div>";
+                }
+                $out .= "</td></tr>";
+            }
+            # Text Formatting
+            unless ($opts->{'richtext_on'}) {
+                my $format_selected = $opts->{'prop_opt_preformatted'} ? "preformatted" : "";
+                $format_selected ||= $opts->{'event_format'};
+                
+                $out .= "<tr valign='top'><th><label for='event_format'>" . BML::ml('entryform.format') . "</label></th><td>";
+                $out .= LJ::html_select({ 'name' => "event_format", 'id' => "event_format", 
+                                          'selected' => $format_selected, 'tabindex' => $tabindex->() },
+                                        "auto", BML::ml('entryform.format.auto'), "preformatted", BML::ml('entryform.format.preformatted'));
+                $out .= "</td></tr>";
+            }
+            # Current Music
+            $out .= "<tr><th>" . BML::ml('entryform.music') . "</th><td>";
+            $out .= LJ::html_text({ 'name' => 'prop_current_music', 'value' => $opts->{'prop_current_music'},
+                                    'size' => '35', 'maxlength' => '60', 'tabindex' => $tabindex->() }) . "</td></tr>\n";
+            
+            # Current Mood
+            {
+                my @moodlist = ('', BML::ml('entryform.noneother'));
+                my $sel;
+                
+                my $moods = LJ::get_moods();
+                
+                foreach (sort { $moods->{$a}->{'name'} cmp $moods->{$b}->{'name'} } keys %$moods) {
+                    push @moodlist, ($_, $moods->{$_}->{'name'});
+                    
+                    if ($opts->{'prop_current_mood'} eq $moods->{$_}->{'name'} ||
+                        $opts->{'prop_current_moodid'} == $_) {
+                        $sel = $_;
                     }
                 }
-                $$onload .= " mood_preview();";
+                
+                if ($remote) {
+                    LJ::load_mood_theme($remote->{'moodthemeid'});
+                      foreach my $mood (keys %$moods) {
+                          if (LJ::get_mood_picture($remote->{'moodthemeid'}, $moods->{$mood}->{id}, \ my %pic)) {
+                              $moodlist .= "    moods[" . $moods->{$mood}->{id} . "] = \"" . $moods->{$mood}->{name} . "\";\n";
+                              $moodpics .= "    moodpics[" . $moods->{$mood}->{id} . "] = \"" . $pic{pic} . "\";\n";
+                          }
+                      }
+                      $$onload .= " mood_preview();";
                 $$head .= <<MOODS;
 <script type="text/javascript" language="JavaScript"><!--
 if (document.getElementById) {
@@ -1100,67 +1102,67 @@ if (document.getElementById) {
 }
 //--></script>
 MOODS
+                }
+                
+                $out .= "<tr valign='top'><th>" . BML::ml('entryform.mood') . "</th><td>";
+                $out .= LJ::html_select({ 'name' => 'prop_current_moodid', 'id' => 'prop_current_moodid',
+                                          'selected' => $sel, 'onchange' => "mood_preview()", 
+                                          'tabindex' => $tabindex->() }, @moodlist);
+                $out .= " " . LJ::html_text({ 'name' => 'prop_current_mood', 'id' => 'prop_current_mood',
+                                              'value' => $opts->{'prop_current_mood'}, 'onchange' => "mood_preview()",
+                                              'size' => '15', 'maxlength' => '30',
+                                              'tabindex' => $tabindex->() });
+                my $mood_preview = LJ::ejs("<p id='mood_preview'><img src='' alt='' id='mood_image_preview' /> <span id='mood_text_preview'></span></p>");
+                $out .= "<script type='text/javascript' language='JavaScript'>\n<!--\ndocument.write(\"$mood_preview\");\n//-->\n</script>" if $remote;
+                $out .= "</td></tr>";
             }
-            
-            $out .= "<tr valign='top'><th>" . BML::ml('entryform.mood') . "</th><td>";
-            $out .= LJ::html_select({ 'name' => 'prop_current_moodid', 'id' => 'prop_current_moodid',
-                                      'selected' => $sel, 'onchange' => "mood_preview()", 
-                                      'tabindex' => $tabindex->() }, @moodlist);
-            $out .= " " . LJ::html_text({ 'name' => 'prop_current_mood', 'id' => 'prop_current_mood',
-                                          'value' => $opts->{'prop_current_mood'}, 'onchange' => "mood_preview()",
-                                          'size' => '15', 'maxlength' => '30',
-                                          'tabindex' => $tabindex->() });
-            my $mood_preview = LJ::ejs("<p id='mood_preview'><img src='' alt='' id='mood_image_preview' /> <span id='mood_text_preview'></span></p>");
-            $out .= "<script type='text/javascript' language='JavaScript'>\n<!--\ndocument.write(\"$mood_preview\");\n//-->\n</script>" if $remote;
-            $out .= "</td></tr>";
+            $out .= "</table></td>";
         }
-        $out .= "</table></td>";
-    }
-    ### Options Column 2
-    {
-        $out .= "<td style='text-align: center' id='column_two_td'>";
-        $out .= "<table style='text-align: left;' id='column_two_table'>";
-        
-        # Backdate Entry
-        $out .= "<tr id='backdate_row'><th><label for='prop_opt_backdated'>" . BML::ml('entryform.backdated') . "</label></th><td>";
-        $out .= LJ::html_check({ 'type' => "check", 'id' => "prop_opt_backdated", 
-                                 'name' => "prop_opt_backdated", "value" => 1, 
-                                 'selected' => $opts->{'prop_opt_backdated'},
-                                 'tabindex' => $tabindex->() });
-        $out .= "</td></tr>";
-        
-        # Comment Settings
-        my $comment_settings_selected = $opts->{'prop_opt_noemail'} ? "noemail" : 
-                                        $opts->{'prop_opt_nocomments'} ? "nocomments" : "";
-        $comment_settings_selected  ||= $opts->{'comment_settings'};
-
-        $out .= "<tr valign='top' id='comment_settings_row'><th style='white-space: nowrap'>" . BML::ml('entryform.comment.settings') . "</th><td>";
+        ### Options Column 2
+        {
+            $out .= "<td style='text-align: center' id='column_two_td'>";
+            $out .= "<table style='text-align: left;' id='column_two_table'>";
+            
+            # Backdate Entry
+            $out .= "<tr id='backdate_row'><th><label for='prop_opt_backdated'>" . BML::ml('entryform.backdated') . "</label></th><td>";
+            $out .= LJ::html_check({ 'type' => "check", 'id' => "prop_opt_backdated", 
+                                     'name' => "prop_opt_backdated", "value" => 1, 
+                                     'selected' => $opts->{'prop_opt_backdated'},
+                                     'tabindex' => $tabindex->() });
+            $out .= "</td></tr>";
+            
+            # Comment Settings
+            my $comment_settings_selected = $opts->{'prop_opt_noemail'} ? "noemail" : 
+                $opts->{'prop_opt_nocomments'} ? "nocomments" : "";
+            $comment_settings_selected  ||= $opts->{'comment_settings'};
+            
+            $out .= "<tr valign='top' id='comment_settings_row'><th style='white-space: nowrap'>" . BML::ml('entryform.comment.settings') . "</th><td>";
         $out .= LJ::html_select({ 'name' => "comment_settings", 'selected' => $comment_settings_selected,
                                   'tabindex' => $tabindex->() },
                                 "", BML::ml('entryform.comment.settings.default'), "noemail", BML::ml('entryform.comment.settings.noemail'), "nocomments", BML::ml('entryform.comment.settings.nocomments'));
-        $out .= "</td></tr>";
-    
-        # Comment Screening settings
-        $out .= "<tr id='comment_screen_settings_row'><th>" . LJ::help_icon("screening", "", " ") . BML::ml('entryform.comment.screening') . "</th><td>";
-        my @levels = ('', BML::ml('label.screening.default'), 'N', BML::ml('label.screening.none'),
-                      'R', BML::ml('label.screening.anonymous'), 'F', BML::ml('label.screening.nonfriends'),
-                      'A', BML::ml('label.screening.all'));
-        $out .= LJ::html_select({ 'name' => 'prop_opt_screening', 'selected' => $opts->{'prop_opt_screening'},
-                                  'tabindex' => $tabindex->() }, @levels);
-        $out .= "</td></tr>";
-    
-        my $userpic_preview = "";
-        # User Picture
-        if ($res && ref $res->{'pickws'} eq 'ARRAY' && scalar @{$res->{'pickws'}} > 0) {
-            my @pickws = map { ($_, $_) } @{$res->{'pickws'}};
-            my $num = 0;
-            $userpics .= "    userpics[$num] = \"$res->{'defaultpicurl'}\";\n";
-            foreach (@{$res->{'pickwurls'}}) {
-                $num++; 
-                $userpics .= "    userpics[$num] = \"$_\";\n";
-            }
-            $$onload .= " userpic_preview();";
-            $$head .= <<USERPICS;
+            $out .= "</td></tr>";
+            
+            # Comment Screening settings
+            $out .= "<tr id='comment_screen_settings_row'><th>" . LJ::help_icon("screening", "", " ") . BML::ml('entryform.comment.screening') . "</th><td>";
+            my @levels = ('', BML::ml('label.screening.default'), 'N', BML::ml('label.screening.none'),
+                          'R', BML::ml('label.screening.anonymous'), 'F', BML::ml('label.screening.nonfriends'),
+                          'A', BML::ml('label.screening.all'));
+            $out .= LJ::html_select({ 'name' => 'prop_opt_screening', 'selected' => $opts->{'prop_opt_screening'},
+                                      'tabindex' => $tabindex->() }, @levels);
+            $out .= "</td></tr>";
+            
+            my $userpic_preview = "";
+            # User Picture
+            if ($res && ref $res->{'pickws'} eq 'ARRAY' && scalar @{$res->{'pickws'}} > 0) {
+                my @pickws = map { ($_, $_) } @{$res->{'pickws'}};
+                my $num = 0;
+                $userpics .= "    userpics[$num] = \"$res->{'defaultpicurl'}\";\n";
+                foreach (@{$res->{'pickwurls'}}) {
+                    $num++; 
+                    $userpics .= "    userpics[$num] = \"$_\";\n";
+                }
+                $$onload .= " userpic_preview();";
+                $$head .= <<USERPICS;
 <script type="text/javascript" language="JavaScript"><!--
 if (document.getElementById) {
     var userpics = new Array();
@@ -1179,29 +1181,29 @@ if (document.getElementById) {
 }
 //--></script>
 USERPICS
-            $out .= "<tr id='userpic_list_row' valign='top'>";
-            $out .= "<th>" . LJ::help_icon("userpics", "", " ") . BML::ml('entryform.userpics') . "</th><td>";
-            $out .= LJ::html_select({'name' => 'prop_picture_keyword', 'id' => 'prop_picture_keyword',
-                                     'selected' => $opts->{'prop_picture_keyword'}, 'onchange' => "userpic_preview()",
-                                     'tabindex' => $tabindex->() },
-                                    "", BML::ml('entryform.opt.defpic'),
-                                    @pickws);
-            $out .= "</td></tr>\n";
-
-            $userpic_preview = "<script type='text/javascript' language='JavaScript'>\n<!--\ndocument.write(\"" . 
-                               LJ::ejs("<p id='userpic_preview' style='display: none'>" .
-                                       "<img src='' alt='selected userpic' id='userpic_preview_image' /></p>") .
-                               "\");\n//-->\n</script>" if $remote;
+                $out .= "<tr id='userpic_list_row' valign='top'>";
+                $out .= "<th>" . LJ::help_icon("userpics", "", " ") . BML::ml('entryform.userpics') . "</th><td>";
+                $out .= LJ::html_select({'name' => 'prop_picture_keyword', 'id' => 'prop_picture_keyword',
+                                         'selected' => $opts->{'prop_picture_keyword'}, 'onchange' => "userpic_preview()",
+                                         'tabindex' => $tabindex->() },
+                                        "", BML::ml('entryform.opt.defpic'),
+                                        @pickws);
+                $out .= "</td></tr>\n";
+                
+                $userpic_preview = "<script type='text/javascript' language='JavaScript'>\n<!--\ndocument.write(\"" . 
+                    LJ::ejs("<p id='userpic_preview' style='display: none'>" .
+                            "<img src='' alt='selected userpic' id='userpic_preview_image' /></p>") .
+                            "\");\n//-->\n</script>" if $remote;
+            }
+            $out .= "</table></td>";
+            if ($userpic_preview ne "") { $out .= "<td style='width: 104px; text-align: left'>$userpic_preview</td>"; }
         }
-        $out .= "</table></td>";
-        if ($userpic_preview ne "") { $out .= "<td style='width: 104px; text-align: left'>$userpic_preview</td>"; }
+        
+        $out .= "</tr></table>";
     }
-    
-    $out .= "</tr></table>";
-    
     ### Submit Bar
     {
-        $out .= "<div style='text-align: center'><div id='SubmitBar'>";
+        $out .= "<p style='text-align: center'><div id='SubmitBar'>";
         if ($opts->{'mode'} eq "update") {
             # communities the user can post in
             my $usejournal = $opts->{'usejournal'};
@@ -1237,8 +1239,14 @@ USERPICS
                 'tabindex' => $tabindex->(),
                 'onclick' => "return confirm('" . LJ::ejs(BML::ml('entryform.delete.confirm')) . "')" }) . "&nbsp;";
             
+
+            if (!$opts->{'disabled_spamdelete'}) {
+                $out .= LJ::html_submit('action:deletespam', BML::ml('entryform.deletespam'), {
+                    'onclick' => "return confirm('" . LJ::ejs(BML::ml('entryform.deletespam.confirm')) . "')",
+                    'tabindex' => $tabindex->() });
+            }
         }
-        if ($LJ::SPELLER) {
+        if ($LJ::SPELLER && !$opts->{'disabled_save'}) {
             my $onclick = "UpdateRTE('rte');" if $opts->{'richtext_on'};
             $out .= LJ::html_submit('action:spellcheck', BML::ml('entryform.spellcheck'), { 'onclick' => $onclick,
                                                                                             'tabindex' => $tabindex->() }) . "&nbsp;";
@@ -1249,7 +1257,8 @@ USERPICS
         $preview   .= "f.submit(); f.action=action; f.target='_self'; return false; ";
         $preview    = LJ::ejs(LJ::html_submit('action:preview', BML::ml('entryform.preview'), { 'onclick' => $preview,
                                                                                                 'tabindex' => $tabindex->() }));
-        $out .= <<PREVIEW;
+        if(!$opts->{'disabled_save'}) {
+            $out .= <<PREVIEW;
 <script type="text/javascript" language="JavaScript">
 <!--
 if (document.getElementById) {
@@ -1258,15 +1267,8 @@ if (document.getElementById) {
 //-->
 </script>
 PREVIEW
-
-        if ($opts->{'mode'} eq "edit" && !$opts->{'disabled_spamdelete'}) {
-            $out .= "<div style='text-align: center'>";
-            $out .= LJ::html_submit('action:deletespam', BML::ml('entryform.deletespam'), {
-                'onclick' => "return confirm('" . LJ::ejs(BML::ml('entryform.deletespam.confirm')) . "')",
-                'tabindex' => $tabindex->() });
-            $out .= "</div>";
         }
-        $out .= "</div></div>";
+        $out .= "</div></p>";
     }
     $out .= "</div>";
     return $out;
