@@ -43,23 +43,25 @@
              );
 
 
- my $dbs = LJ::get_dbs();
-
  unless ($LJ::UNICODE) {
      $body .= "<?h1 Not Supported h1?><?p This installation of LiveJournal does not support Unicode and therefore visiting this page is useless. p?>";
      return;
  }
 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
  unless ($remote) {
      $body .= "<?h1 Login first h1?><?p To convert existing information to UTF-8 you must first <a href=\"/login.bml?ret=1\">login</a>. p?>";
      return;
  }
 
+ my $dbcm = LJ::get_cluster_master($u);
+ my $dbh = LJ::get_db_writer();
+
+
  # avva, kinda improper usage of load_codes, but works i guess -brad
- LJ::load_codes($dbs, { "encname" => \%LJ::CACHE_ENCNAMES } )
+ LJ::load_codes({ "encname" => \%LJ::CACHE_ENCNAMES } )
      unless %LJ::CACHE_ENCNAMES;
- LJ::load_codes($dbs, { "encoding" => \%LJ::CACHE_ENCODINGS } )
+ LJ::load_codes({ "encoding" => \%LJ::CACHE_ENCODINGS } )
      unless %LJ::CACHE_ENCODINGS;
 
  # check arguments. There are three: mode, area, encid
@@ -105,10 +107,9 @@
 
  if ($mode eq 'browse') {
      # need to display the data in given encoding, if it is not UTF-8
-     my $dbcs = LJ::get_cluster_set($remote) if $remote->{'clusterid'};
      $body .= "<?h1 Browse h1?><?p You are browsing the area <br /><b>$areas{$area}->{'des'}</b>: p?>";
      my $browse = $areas{$area}->{'browse'};
-     my ($valid, $disp) = $browse->($dbs, $dbcs, $remote, $encid);
+     my ($valid, $disp) = $browse->($remote, $encid);
      if ($valid && !defined($FORM{'forceview'})) {
          $body .= "<?h1 No unconverted information h1?><?p There is no information in this area that is not valid UTF-8. Nothing needs to be done here. p?>";
          $body .= "<?p You can <b><a href=\"utf8convert.bml\">return to the area list</a></b> or <b><a href=\"utf8convert.bml?mode=browse&area=$area&encid=$encid&forceview=1\">force the information to be shown anyway</a></b>. p?>";
@@ -171,10 +172,9 @@
  }
 
  if ($mode eq 'save_do') {
-     my $dbcs = LJ::get_cluster_set($remote) if $remote->{'clusterid'};
      $body .= "<?h1 Saving h1?><?p Attempting to convert the area <br /><b>$areas{$area}->{'des'}</b>... p?>";
      my $save = $areas{$area}->{'save'};
-     my ($success, $message) = $save->($dbs, $dbcs, $remote, $encid);
+     my ($success, $message) = $save->($remote, $encid);
      if ($success) {
          $body .= "<?h1 Success h1?><?p Converted successfully. p?>";
          $body .= $message;
@@ -184,12 +184,11 @@
  }
 
  if ($mode eq 'saveall_do') {
-     my $dbcs = LJ::get_cluster_set($remote) if $remote->{'clusterid'};
      $body .= "<?h1 Saving h1?><?p Attempting to convert everything... p?>";
      foreach (@areanames) {
          $body .= "<?p Trying to convert <b>$areas{$_}->{'des'}</b>... p?>";
          my $save = $areas{$_}->{'save'};
-         my ($success, $message) = $save->($dbs, $dbcs, $remote, $encid);
+         my ($success, $message) = $save->($remote, $encid);
          if ($success) {
              $body .= "<?h1 Success h1?><?p Converted successfully. p?>";
              $body .= $message;
@@ -202,19 +201,18 @@
   return;
 
  sub browse_personals {
-     my ($dbs, $dbcs, $u, $encid) = @_;
-     my $db = $dbcs || $dbs;  # AVVA: what? -brad
-     my $dbr = $dbs->{'reader'};
+     my ($u, $encid) = @_;
+
      my $ret = "";
      my ($name, $bio, $groups);
 
-     LJ::load_user_props($dbr, $u, qw(url urlname));
+     LJ::load_user_props($u, qw(url urlname));
      $name = $u->{'name'};
      if ($u->{'has_bio'} eq "Y") {
-         ($bio) = LJ::dbs_selectrow_array($db, "SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
+         $bio = $dbcm->selectrow_array("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
      };
      $groups = "";
-     $sth = $dbr->prepare("SELECT groupname FROM friendgroup WHERE userid=$u->{'userid'}");
+     $sth = $dbh->prepare("SELECT groupname FROM friendgroup WHERE userid=$u->{'userid'}");
      $sth->execute;
      while (($_) = $sth->fetchrow_array) {
          $groups .= $_ . ' ';
@@ -237,13 +235,12 @@
  }
 
  sub browse_interests {
-     my ($dbs, $dbcs, $u, $encid) = @_;
-     my $dbh = $dbs->{'dbh'};
+     my ($u, $encid) = @_;
      my $ret = "";
      my $interests = "";
      my $sth = $dbh->prepare("SELECT i.interest FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$u->{'userid'}");
      $sth->execute;
-     while(($_) = $sth->fetchrow_array) {
+     while($_ = $sth->fetchrow_array) {
          $interests .= $_ . ' ';
      }
 
@@ -256,13 +253,12 @@
  }
 
  sub browse_pickwd {
-     my ($dbs, $dbcs, $u, $encid) = @_;
-     my $dbh = $dbs->{'dbh'};
+     my ($u, $encid) = @_;
      my $ret = "";
      my $kwds = "";
      my $sth = $dbh->prepare("SELECT k.keyword FROM keywords k, userpicmap up WHERE k.kwid=up.kwid AND up.userid=$u->{'userid'}");
      $sth->execute;
-     while(($_) = $sth->fetchrow_array) {
+     while($_ = $sth->fetchrow_array) {
          $kwds .= $_ . ' ';
      }
 
@@ -275,16 +271,14 @@
  }
 
  sub browse_polls {
-     my ($dbs, $dbcs, $u, $encid) = @_;
-     my $dbh = $dbs->{'dbh'};
-     my $dbr = $dbs->{'reader'};
+     my ($u, $encid) = @_;
      my $sth;
      my $ret = "";
      my $valid = 1;
 
      # first get some of the pollids of this user
      my @pollids;
-     $sth = $dbr->prepare("SELECT pollid FROM poll WHERE posterid=$u->{'userid'} ".
+     $sth = $dbh->prepare("SELECT pollid FROM poll WHERE posterid=$u->{'userid'} ".
                           "LIMIT 50");
      $sth->execute;
      while (my ($pid) = $sth->fetchrow_array) {
@@ -297,7 +291,7 @@
      my $pids = join(',', @pollids);
 
      my @strings; my $limit = 5; my $nlimit = 10;
-     $sth = $dbr->prepare("SELECT name FROM poll WHERE pollid IN ($pids)");
+     $sth = $dbh->prepare("SELECT name FROM poll WHERE pollid IN ($pids)");
      $sth->execute;
      while (my ($name) = $sth->fetchrow_array) {
          push @strings, $name if LJ::is_utf8($name) and --$limit >=0;
@@ -309,7 +303,7 @@
      $ret .= "p?>";
 
      $limit = 5; $nlimit = 10; @strings = ();
-     $sth = $dbr->prepare("SELECT qtext FROM pollquestion WHERE pollid IN ($pids)");
+     $sth = $dbh->prepare("SELECT qtext FROM pollquestion WHERE pollid IN ($pids)");
      $sth->execute;
      while (my ($question) = $sth->fetchrow_array) {
          push @strings, $question if LJ::is_utf8($question) and --$limit >=0;
@@ -321,7 +315,7 @@
      $ret .= "p?>";
 
      $limit = 5; $nlimit = 10; @strings = ();
-     $sth = $dbr->prepare("SELECT item FROM pollitem WHERE pollid IN ($pids)");
+     $sth = $dbh->prepare("SELECT item FROM pollitem WHERE pollid IN ($pids)");
      $sth->execute;
      while (my ($item) = $sth->fetchrow_array) {
          push @strings, $item if LJ::is_utf8($item) and --$limit >=0;
@@ -333,7 +327,7 @@
      $ret .= "p?>";
 
      $limit = 5; $nlimit = 10; @strings = ();
-     $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid IN ($pids)");
+     $sth = $dbh->prepare("SELECT value FROM pollresult WHERE pollid IN ($pids)");
      $sth->execute;
      while (my ($res) = $sth->fetchrow_array) {
          push @strings, $res if LJ::is_utf8($res) and --$limit >=0;
@@ -348,16 +342,13 @@
  }
 
  sub browse_styles {
-     my ($dbs, $dbcs, $u, $encid) = @_;
-     my $dbr = $dbs->{'reader'};
+     my ($u, $encid) = @_;
      my $ret = "";
      my $anystyles = 0;
      my $valid = 1;
 
-     my $quser = $dbr->quote($u->{'user'});
-
-     my $sth = $dbr->prepare("SELECT styleid, styledes, formatdata FROM style WHERE user=$quser");
-     $sth->execute;
+     my $sth = $dbh->prepare("SELECT styleid, styledes, formatdata FROM style WHERE user=?");
+     $sth->execute($u->{'user'});
      while (my ($styleid, $styledes, $fdata) = $sth->fetchrow_array) {
          $anystyles = 1;
          $valid = 0 unless LJ::is_utf8($styledes) && LJ::is_utf8($fdata);
@@ -376,7 +367,7 @@
      }
      unless ($anystyles) { $ret .= "<?p You have no styles defined. p?>"; }
     
-     my ($overrides) = LJ::dbs_selectrow_array($dbs, "SELECT override FROM overrides WHERE user=$quser");
+     my ($overrides) = $dbh->selectrow_array("SELECT override FROM overrides WHERE user=?", undef, $u->{'user'});
      if ($overrides) {
          $valid = 0 unless LJ::is_utf8($overrides);
          convert(\$overrides, $encid);
@@ -388,14 +379,13 @@
  }
 
  sub browse_memories {
-     my ($dbs, $dbcs, $u, $encid) = @_;
-     my $dbh = $dbs->{'dbh'};
-     my $dbr = $dbs->{'reader'};
+     my ($u, $encid) = @_;
      my $ret = "";
      my $valid = 1;
 
      $ret .= "<?p Keywords used in memories: p?><?p ";
-     my $sth = $dbr->prepare("SELECT DISTINCT k.keyword FROM keywords k, memkeyword mk, memorable m WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=$u->{'userid'}");
+     my $sth = $dbh->prepare("SELECT DISTINCT k.keyword FROM keywords k, memkeyword mk, memorable m ".
+                             "WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=$u->{'userid'}");
      $sth->execute;
      while (my ($kw) = $sth->fetchrow_array) {
          $valid = 0 unless LJ::is_utf8($kw);
@@ -404,7 +394,7 @@
      }
      $ret .= " p?>";
      $ret .= "<?p Sample of memory decriptions: p?><?p ";
-     $sth = $dbr->prepare("SELECT des FROM memorable WHERE userid=$u->{'userid'}");
+     $sth = $dbh->prepare("SELECT des FROM memorable WHERE userid=$u->{'userid'}");
      $sth->execute;
      my $limit = 15;
      while (my ($des) = $sth->fetchrow_array) {
@@ -417,15 +407,8 @@
      return $valid, $ret;
  }
 
-     
-
-
-
  sub save_personals {
-     my ($dbs, $dbcs, $u, $encid) = @_;
-     my $db = $dbcs || $dbs;  # AVVA: what? -brad
-     my $dbh = $dbs->{'dbh'};
-     my $dbr = $dbs->{'reader'};
+     my ($u, $encid) = @_;
      my $success = 1;
      my $message = "";
      my $sth;
@@ -442,25 +425,23 @@
      }
 
      # convert url/urlname
-     LJ::load_user_props($dbr, $u, qw(url urlname));
+     LJ::load_user_props($u, qw(url urlname));
      foreach my $prop (qw(url urlname)) {
          unless(LJ::is_utf8($u->{$prop})) {
              convert(\$u->{$prop}, $encid);
-             LJ::set_userprop($dbs, $u->{'userid'}, $prop, $u->{$prop});
+             LJ::set_userprop($u->{'userid'}, $prop, $u->{$prop});
              $message .= "<?p Converted userprop: $prop . p?>";
          }
      }
      
      # convert bio
      if ($u->{'has_bio'} eq "Y") {
-         ($bio) = LJ::dbs_selectrow_array($db, "SELECT bio FROM userbio WHERE userid=$userid");
+         $bio = $dbcm->selectrow_array("SELECT bio FROM userbio WHERE userid=$userid");
          unless (LJ::is_utf8($bio)) {
              convert(\$bio, $encid);
-             my $dbbio = $db->{'dbh'};
-             my $qbio = $dbbio->quote($bio);
-             $dbbio->do("UPDATE userbio SET bio=$qbio WHERE userid=$userid");
-             if ($dbh->err) {
-                 return 0, "Database error: $dbh->errstr";
+             $dbcm->do("UPDATE userbio SET bio=? WHERE userid=$userid", undef, $bio);
+             if ($dbcm->err) {
+                 return 0, "Database error: " . $dbcm->errstr;
              }
              $message .= "<?p Converted the bio. p?>";
          }
@@ -471,7 +452,7 @@
      $sth = $dbh->prepare("SELECT groupnum, groupname FROM friendgroup WHERE userid=$userid ORDER BY sortorder");
      $sth->execute;
      if ($dbh->err) {
-         return 0, "Database error: $dbh->errstr";
+         return 0, ("Database error: " . $dbh->errstr);
      }
 
      while ($_ = $sth->fetchrow_hashref) {
@@ -480,12 +461,11 @@
 
      my $converted_groups = 0;
 
-     foreach(keys %$groups) {
+     foreach (keys %$groups) {
          unless(LJ::is_utf8($groups->{$_})) {
              my $name = $groups->{$_};
              convert(\$name, $encid);
-             my $qname = $dbh->quote($name);
-             $dbh->do("UPDATE friendgroup SET groupname=$qname WHERE userid=$userid AND groupnum=$_");
+             $dbh->do("UPDATE friendgroup SET groupname=? WHERE userid=$userid AND groupnum=$_", undef, $name);
              if ($dbh->err) {
                  return 0, "Database error: $dbh->errstr";
              }
@@ -500,19 +480,13 @@
  }
 
  sub save_interests {
-     my ($dbs, $dbcs, $u, $encid) = @_;
-     my $dbh = $dbs->{'dbh'};
-     my $dbr = $dbs->{'reader'};
+     my ($u, $encid) = @_;
      my $success = 1;
      my $message = "";
      my $sth;
 
-     # this is basically a ripoff from editinfo.bml
-     # TODO: abstract into 
-     # LJ::change_interests($dbs, $u, $newinterests)
-     # or something like that
-     
-     $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$u->{'userid'}");
+     $sth = $dbh->prepare("SELECT i.interest, i.intid FROM interests i, userinterests ui ".
+                          "WHERE i.intid=ui.intid AND ui.userid=$u->{'userid'}");
      $sth->execute;
      my %interests = ();
      while ($_ = $sth->fetchrow_hashref) {
@@ -537,9 +511,7 @@
  } 
 
  sub save_pickwd {
-     my ($dbs, $dbcs, $u, $encid) = @_;
-     my $dbh = $dbs->{'dbh'};
-     my $dbr = $dbs->{'reader'};
+     my ($u, $encid) = @_;
      my $success = 1;
      my $message = "";
      my $sth;
@@ -547,7 +519,8 @@
 
      my %kwds;
 
-     my $sth = $dbr->prepare("SELECT k.keyword, k.kwid FROM keywords k, userpicmap up WHERE k.kwid=up.kwid AND up.userid=$userid");
+     my $sth = $dbh->prepare("SELECT k.keyword, k.kwid FROM keywords k, userpicmap up ".
+                             "WHERE k.kwid=up.kwid AND up.userid=$userid");
      $sth->execute;
      while($_ = $sth->fetchrow_hashref) {
          $kwds{$_->{'keyword'}} = $_->{'kwid'};
@@ -558,7 +531,7 @@
          $changed = 1;
          my $kw = $keyword;
          convert(\$kw, $encid);
-         my $newid = LJ::get_keyword_id($dbs, $kw);
+         my $newid = LJ::get_keyword_id($kw);
          $dbh->do("UPDATE userpicmap SET kwid=$newid WHERE userid=$userid AND kwid=$kwds{$keyword}");
      }
      if ($changed) {
@@ -568,9 +541,7 @@
  }
 
  sub save_polls {
-     my ($dbs, $dbcs, $u, $encid) = @_;
-     my $dbh = $dbs->{'dbh'};
-     my $dbr = $dbs->{'reader'};
+     my ($u, $encid) = @_;
      my $success = 1;
      my $message = "";
      my $sth;
@@ -578,7 +549,7 @@
 
      # convert poll names
      my @pollids;
-     $sth = $dbr->prepare("SELECT pollid, name FROM poll WHERE posterid=$u->{'userid'}");
+     $sth = $dbh->prepare("SELECT pollid, name FROM poll WHERE posterid=$u->{'userid'}");
      $sth->execute;
      while (my ($pid,$name) = $sth->fetchrow_array) {
          push @pollids, $pid;
@@ -596,7 +567,7 @@
 
      # convert poll questions
      $changed = 0;
-     $sth = $dbr->prepare("SELECT pollid, pollqid, qtext FROM pollquestion WHERE pollid IN ($pids)");
+     $sth = $dbh->prepare("SELECT pollid, pollqid, qtext FROM pollquestion WHERE pollid IN ($pids)");
      $sth->execute;
      while (my ($pid, $pqid, $text) = $sth->fetchrow_array) {
          next if LJ::is_utf8($text);
@@ -611,7 +582,7 @@
 
      # convert poll items
      $changed = 0;
-     $sth = $dbr->prepare("SELECT pollid, pollqid, pollitid, item FROM pollitem WHERE pollid IN ($pids)");
+     $sth = $dbh->prepare("SELECT pollid, pollqid, pollitid, item FROM pollitem WHERE pollid IN ($pids)");
      $sth->execute;
      while (my ($pid, $pqid, $pitid, $item) = $sth->fetchrow_array) {
          next if LJ::is_utf8($item);
@@ -626,7 +597,7 @@
 
      # convert poll results
      $changed = 0;
-     $sth = $dbr->prepare("SELECT pollid, pollqid, userid, value FROM pollresult WHERE pollid IN ($pids)");
+     $sth = $dbh->prepare("SELECT pollid, pollqid, userid, value FROM pollresult WHERE pollid IN ($pids)");
      $sth->execute;
      while (my ($pid, $pqid, $userid, $res) = $sth->fetchrow_array) {
          next if LJ::is_utf8($res);
@@ -644,17 +615,15 @@
  }
 
  sub save_styles {
-     my ($dbs, $dbcs, $u, $encid) = @_;
-     my $dbh = $dbs->{'dbh'};
-     my $dbr = $dbs->{'reader'};
+     my ($u, $encid) = @_;
      my $success = 1;
      my $message = "";
      my $sth;
      my $changed = 0;
 
-     my $quser = $dbr->quote($u->{'user'});
+     my $quser = $dbh->quote($u->{'user'});
 
-     my $sth = $dbr->prepare("SELECT styleid, styledes, formatdata FROM style WHERE user=$quser");
+     my $sth = $dbh->prepare("SELECT styleid, styledes, formatdata FROM style WHERE user=$quser");
      $sth->execute;
      while (my ($styleid, $styledes, $fdata) = $sth->fetchrow_array) { 
          next if LJ::is_utf8($styledes) && LJ::is_utf8($fdata);
@@ -669,7 +638,7 @@
          $message .= "<?p Converted styles. p?>";
      }
 
-     my ($overrides) = LJ::dbs_selectrow_array($dbs, "SELECT override FROM overrides WHERE user=$quser");
+     my ($overrides) = $dbh->selectrow_array("SELECT override FROM overrides WHERE user=$quser");
      if ($overrides && !LJ::is_utf8($overrides)) {
          convert(\$overrides, $encid);
          my $qoverrides = $dbh->quote($overrides);
@@ -681,15 +650,15 @@
  }
 
  sub save_memories {
-     my ($dbs, $dbcs, $u, $encid) = @_;
-     my $dbh = $dbs->{'dbh'};
-     my $dbr = $dbs->{'reader'};
+     my ($u, $encid) = @_;
      my $success = 1;
      my $message = "";
      my $changed = 0;
      my $userid = $u->{'userid'};
 
-     my $sth = $dbr->prepare("SELECT DISTINCT k.keyword, k.kwid FROM keywords k, memkeyword mk, memorable m WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=$u->{'userid'}");
+     my $sth = $dbh->prepare("SELECT DISTINCT k.keyword, k.kwid ".
+                             "FROM keywords k, memkeyword mk, memorable m ".
+                             "WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=$u->{'userid'}");
      $sth->execute;
      my %kwds;
      while (my ($keyword, $kwid) = $sth->fetchrow_array) {
@@ -700,7 +669,7 @@
          $changed = 1;
          my $kw = $keyword;
          convert(\$kw, $encid);
-         my $newid = LJ::get_keyword_id($dbs, $kw);
+         my $newid = LJ::get_keyword_id($kw);
          $dbh->do("UPDATE memkeyword SET kwid=$newid WHERE kwid=$kwds{$keyword}");
      }
      if ($changed) {
@@ -709,14 +678,13 @@
 
      # now the memory descriptions
      $changed = 0;
-     $sth = $dbr->prepare("SELECT memid, des FROM memorable WHERE userid=$u->{'userid'}");
+     $sth = $dbh->prepare("SELECT memid, des FROM memorable WHERE userid=$u->{'userid'}");
      $sth->execute;
      while (my ($memid, $des) = $sth->fetchrow_array) {
          next if LJ::is_utf8($des);
          $changed = 1;
          convert(\$des, $encid);
-         my $qdes = $dbh->quote($des);
-         $dbh->do("UPDATE memorable SET des=$qdes WHERE memid=$memid");
+         $dbh->do("UPDATE memorable SET des=? WHERE memid=$memid", undef, $des);
      }
      if ($changed) {
          $message .= "<?p Converted memory descriptions. p?>";
