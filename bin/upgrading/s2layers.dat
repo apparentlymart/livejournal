@@ -13,13 +13,14 @@ cleansimple/en          i18n            cleansimple/layout
 generator/layout        layout          core1
 generator/en            i18n            generator/layout
 generator/mintchoc      theme           generator/layout
-generator/purple      theme           generator/layout
-generator/ocean      theme           generator/layout
-generator/harvest      theme           generator/layout
-generator/jeweled      theme           generator/layout
+generator/purple        theme           generator/layout
+generator/ocean         theme           generator/layout
+generator/harvest       theme           generator/layout
+generator/jeweled       theme           generator/layout
 
 magazine/layout         layout          core1
 magazine/en             i18n            magazine/layout
+magazine/wonb           theme           magazine/layout
 
 notepad/layout          layout          core1
 notepad/en              i18n            notepad/layout

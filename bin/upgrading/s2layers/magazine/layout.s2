@@ -215,7 +215,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor)
     var string userpic = (defined $e.userpic ? "<img src='$e.userpic.url' />" : "");
     if ($e.new_day)
     {
-        "<h2>"; print $e.time->date_format("med"); "</h2>";
+        "<h2>" + $e.time->date_format("med") + "</h2>";
     }
     "<div class='H3Holder'>";
 
@@ -438,4 +438,22 @@ function DayPage::print_body ()
             $this->print_entry($e);
         }
     }
+}
+
+function print_theme_preview ()
+{
+  """<table width='100%' bgcolor='$*main_bgcolor' cellpadding='3' border='0'><tr valign='top'>
+<td width='30' bgcolor='$*sidebar_color'>&nbsp;</td>
+<td width='30'>&nbsp;</td>
+<td>
+<h2 style='background-color: $*headerbar_bgcolor; color: $*headerbar_fgcolor; border-bottom: thin solid $*headerbar_bevel_color; font: normal 1.3em Georgia, serif; line-height: 1.3;'>Dec. 22nd, 2002</h2>
+<div style='clear: both; padding-left: 2ex; border-left: thin solid $*border_color; border-bottom: thin solid $*border_color; margin-bottom: 1em; '>
+<h3 style='color: $*highlight_fgcolor; font: medium sans-serif'><span style='background-color: $*highlight_bgcolor; border-right: thin solid $*border_color; border-bottom: thin solid $*border_color; padding-right: 0.5ex;'>08:46 pm - <em style='color: $*meta_color; font-style: normal;'>subject</em></span></h3>
+<p style='margin-top: 0; text-align: justify; font-family: serif; font-size: 12pt; color: $*main_fgcolor;'>Words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words words</p>
+
+<div style='font-size: 0.7em; margin-top: -1em; text-align: right; font-size: 8pt; color: $*main_fgcolor;'>(<a style='color: $*link_color;' href='#'>1 comment</a>&nbsp;|&nbsp;<a style='color: $*link_color;' href='#'>Leave a comment</a>)</div>
+</div>
+
+</td></tr>
+</table>""";
 }
