@@ -608,8 +608,11 @@ sub db_logger
     my $r = shift;
     my $rl = $r->last;
 
+    my $uri = $r->uri;
     my $ctype = $rl->content_type;
+
     return if $ctype =~ m!^image/! and $LJ::DONT_LOG_IMAGES;
+    return if $uri =~ m!^/(img|userpic)/! and $LJ::DONT_LOG_IMAGES;
 
     my $dbl = LJ::get_dbh("logs");
     return unless $dbl;
@@ -647,7 +650,7 @@ sub db_logger
                 $rl->notes('langpref'),
                 $r->method,
                 $r->header_in("Host"),
-                $r->uri,
+                $uri,
                 scalar $r->args,
                 $rl->status,
                 $ctype,
