@@ -5589,7 +5589,6 @@ sub login_ip_banned
         my $bantime = $udbr->selectrow_array("SELECT time FROM loginstall WHERE ".
                                              "userid=$u->{'userid'} AND ip=INET_ATON(?)",
                                              undef, $ip);
-        Apache->request("bantime = $bantime");
         if ($bantime && $bantime > time() - $rateperiod) {
             return 1;
         }
