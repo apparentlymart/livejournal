@@ -707,16 +707,7 @@ $box{'lastnview'} =
         }
 
         my %logprops = ();
-        my %opts;
-        my $text;
-        $opts{'usemaster'} = 0;
-        if ($box->{'args'}->{'showtext'}) {
-            $opts{'prefersubject'} = 0;
-        } else {
-            $opts{'prefersubject'} = 1;
-        }
-        
-        $text = LJ::get_logtext2($u, $opts, @itemids);
+        my $text = LJ::get_logtext2($u, @itemids);
         
         my %posteru = ();  # map posterids to u objects
         LJ::load_userids_multiple($dbs, [map { $_->{'posterid'}, \$posteru{$_->{'posterid'}} } @items], [$u]);

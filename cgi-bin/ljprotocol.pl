@@ -1393,17 +1393,22 @@ sub getevents
     }
 
     ## load the text
-    my $text;
     my $gt_opts = {
-        'prefersubjects' => $req->{'prefersubject'} ,
         'usemaster' => $use_master,
     };
-    $text = LJ::get_logtext2($uowner, $gt_opts, @itemids);
+    my $text = LJ::get_logtext2($uowner, $gt_opts, @itemids);
 
     foreach my $i (@itemids)
     {
         my $t = $text->{$i};
         my $evt = $evt_from_itemid{$i};
+
+        # if they want subjects to be events, replace event
+        # with subject when requested.
+        if ($req->{'prefersubject'} && length($t->[0])) {
+            $t->[1] = $t->[0];  # event = subject
+            $t->[0] = undef;    # subject = undef
+        }
 
         # now that we have the subject, the event and the props, 
         # auto-translate them to UTF-8 if they're not in UTF-8.

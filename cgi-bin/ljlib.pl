@@ -2559,9 +2559,9 @@ sub can_view
 #      [func[LJ::get_talktext2]].
 # args: u, opts?, jitemid*
 # returns: hashref with keys being jitemids, values being [ $subject, $body ]
-# des-opts: Optional hashref of special options.  Currently only 'prefersubjects'
-#           key is supported, which returns subjects instead of events when
-#           there's a subject, and the subject always being undef.
+# des-opts: Optional hashref of special options.  Currently only 'usemaster'
+#           key is supported, which always returns a definitive copy,
+#           and not from a cache or slave database.
 # des-jitemid: List of jitemids to retrieve the subject & text for.
 # </LJFUNC>
 sub get_logtext2
@@ -2598,10 +2598,6 @@ sub get_logtext2
 
     return $lt unless %need;
 
-    my $snag_what = "subject, event";
-    $snag_what = "NULL, IF(LENGTH(subject), subject, event)"
-        if $opts->{'prefersubjects'};
-
     # pass 1 (slave) and pass 2 (master)
     foreach my $pass (1, 2) {
         next unless %need;
@@ -2611,7 +2607,7 @@ sub get_logtext2
         next unless $db;
         
         my $jitemid_in = join(", ", keys %need);
-        my $sth = $db->prepare("SELECT jitemid, $snag_what FROM logtext2 ".
+        my $sth = $db->prepare("SELECT jitemid, subject, event FROM logtext2 ".
                                "WHERE journalid=$journalid AND jitemid IN ($jitemid_in)");
         $sth->execute;
         while (my ($id, $subject, $event) = $sth->fetchrow_array) {
