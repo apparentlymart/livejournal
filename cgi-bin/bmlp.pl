@@ -747,7 +747,7 @@ sub bml_decode
     my $depth = 0;     # how many blocks we are deep of the *SAME* type.
 
   EAT:
-    while ($$inref && ! $BML_STOP_FLAG)
+    while ($$inref ne "" && ! $BML_STOP_FLAG)
     {
         # currently not in a BML tag... looking for one!
         if ($block eq "") {
