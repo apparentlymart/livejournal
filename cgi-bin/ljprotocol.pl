@@ -2238,6 +2238,12 @@ sub authenticate
     return fail($err,100) if ($u->{'statusvis'} eq "X");
     return fail($err,505) unless $u->{'clusterid'};
 
+    my $r = eval { Apache->request };
+    if ($r) {
+        $r->notes("ljuser" => $u->{'user'}) unless $r->notes("ljuser");
+        $r->notes("journalid" => $u->{'userid'}) unless $r->notes("journalid");
+    }
+
     my $ip_banned = 0;
     my $auth_check = sub {
         my $auth_meth = $req->{'auth_method'} || "clear";
@@ -2255,6 +2261,7 @@ sub authenticate
                                              \$ip_banned);
         }
         if ($auth_meth eq "cookie") {
+            return unless $r->header_in("X-LJ-Auth") eq "cookie";
             my $remote = LJ::get_remote();
             return $remote && $remote->{'user'} eq $username ? 1 : 0;
         }
@@ -2266,12 +2273,6 @@ sub authenticate
     {
         return fail($err,402) if $ip_banned;
         return fail($err,101);
-    }
-    
-    my $r = eval { Apache->request };
-    if ($r) {
-        $r->notes("ljuser" => $u->{'user'}) unless $r->notes("ljuser");
-        $r->notes("journalid" => $u->{'userid'}) unless $r->notes("journalid");
     }
 
     # remember the user record for later.
