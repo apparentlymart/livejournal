@@ -451,6 +451,8 @@ sub userpic_trans
     return 404 unless $r->uri =~ m!^/(?:userpic/)?(\d+)/(\d+)$!;
     my ($picid, $userid) = ($1, $2);
 
+    $r->notes("codepath" => "img.userpic");
+
     # we can safely do this without checking since we never re-use
     # picture IDs and don't let the contents get modified
     return HTTP_NOT_MODIFIED if $r->header_in('If-Modified-Since');

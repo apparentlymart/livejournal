@@ -16,6 +16,7 @@ sub handler
     my $r = shift;
     my $uri = $r->uri;
     my ($base, $ext, $extra) = $uri =~ m!^/palimg/(.+)\.(\w+)(.*)$!;
+    $r->notes("codepath" => "img.palimg");
     return 404 unless $base && $base !~ m!\.\.!;
 
     my $disk_file = "$LJ::HOME/htdocs/palimg/$base.$ext";
