@@ -19,7 +19,7 @@ body<=
     # editing is based on ability to grant supporthelp.  and throw an error if they
     # posted but can't edit.
     my $canedit = ($spcatid && LJ::check_priv($remote, 'admin', "supporthelp/$cats->{$spcatid}->{catkey}")) ||
-                  LJ::check_priv($remote, 'admin', 'supporthelp/*') ||
+                  LJ::check_priv($remote, 'admin', 'supporthelp') ||
                   LJ::check_priv($remote, 'admin', '*');
     return "<?h1 Error h1?><?p You do not have access to perform actions here. p?>"
         if LJ::did_post() && ! $canedit;
@@ -42,6 +42,18 @@ body<=
 
     my $ret = "<?h1 Stock Answers h1?>";
     my $self = "$LJ::SITEROOT/support/stock_answers.bml";
+
+    if ($POST{'action:delete'}) {
+        my $dbh = LJ::get_db_writer();
+        return "<?h1 Error h1?><?p Unable to get database handle.  Please try again. p?>"
+            unless $dbh;
+
+        my $ct = $dbh->do("DELETE FROM support_answers WHERE ansid = ? AND spcatid = ?",
+                          undef, $ansid, $spcatid);
+        return "<?h1 Error h1?><?p Error: " . $dbh->errstr . " p?>" if $dbh->err;
+        return "<?h1 Error h1?><?p No answer was found to delete? p?>" unless $ct;
+        return BML::redirect("$self?spcatid=$spcatid&deleted=1");
+    }
 
     if ($POST{'action:new'} || $POST{'action:save'}) {
         my ($subj, $body) = ($POST{subject}, $POST{body});
@@ -148,6 +160,8 @@ body<=
         $ret .= "<?p <strong>Answer added!</strong> p?>";
     } elsif ($GET{saved}) {
         $ret .= "<?p <strong>Changes saved!</strong> p?>";
+    } elsif ($GET{deleted}) {
+        $ret .= "<?p <strong>Answer deleted!</strong> p?>";
     }
 
     # bilevel sort, fun and messy
@@ -169,7 +183,10 @@ body<=
                 $ret .= LJ::html_textarea({ name => 'body', value => $body, rows => 15, cols => 80 });
                 $ret .= "<br />";
                 $ret .= "Last modified by " . LJ::ljuser($lmu) . " on " . LJ::mysql_time($lmt) . ".<br />";
-                $ret .= LJ::html_submit('action:save', "Save Changes") if $canedit;
+                if ($canedit) {
+                    $ret .= LJ::html_submit('action:save', "Save Changes");
+                    $ret .= LJ::html_submit('action:delete', "Delete Answer");
+                }
                 $ret .= "</form></li>";
             } else {
                 $ret .= "<li><a href='$self?spcatid=$spcatid&ansid=$ansid'>$subj</a></li>";
