@@ -432,6 +432,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
 
      $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.password.input.head1'}</div>";
      $ret .= $error_msg->('password', '<p class="formitemFlag">', '</p>');
+     $ret .= "<div class='formitemFlag'>$ML{'.password.secure'}</div>" if exists $errors{'password'};
      $ret .= "<div class='formitemDesc'>$ML{'.password.text'}</div>";
      my $pass_value = $errors{'password'} ? "" : $POST{'password1'};
      $ret .= LJ::html_text({'name' => 'password1', 'size' => 30, 'maxlength' => 31, 'type' => "password",

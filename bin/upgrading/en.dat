@@ -779,6 +779,8 @@ p?>
 
 /create.bml.password.input.head2=Re-type password:
 
+/create.bml.password.secure=You must choose a secure password that is not based on a dictionary word, your username, or your email address.
+
 /create.bml.password.text=Select a password.
 
 /create.bml.success.btn.enterinfo=Enter Personal Information
