@@ -488,7 +488,8 @@ BODY<=
                  $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
                  $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
                  $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
-                 $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$itemid>";
+                 $html .= "<INPUT TYPE=HIDDEN NAME=journal VALUE='$u->{'user'}'>" if $clustered;
+                 $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$ditemid>";
                  $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$paru->{'user'}\">";
                  $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $paru->{'password'})) . "\">";
                  my $newsub = $FORM{'subject'};
@@ -574,7 +575,8 @@ BODY<=
          $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
          $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
          $html .= "<INPUT TYPE=HIDDEN NAME=parenttalkid VALUE=$insertid>";
-         $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$itemid>";
+         $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$ditemid>";
+	 $html .= "<INPUT TYPE=HIDDEN NAME=journal VALUE='$u->{'user'}'>" if $clustered;
          $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$ujp->{'user'}\">";
          $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $ujp->{'password'})) . "\">";
          my $newsub = $FORM{'subject'};
