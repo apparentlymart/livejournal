@@ -414,7 +414,9 @@ sub recurse_post
 	my $datepost = "<font size='-1'>" . substr($post->{'datepost'}, 0, 16) . "</font>";
 	my $userpost = $post->{'userpost'};
 	my $user = "<i>(Anonymous)</i>";
-		
+	if ($post->{'deleted_poster'}) {
+	    $user = "<i>(Deleted user: $post->{'deleted_poster'})</i>";
+	}
 
 	if ($post->{'state'} eq "D") {
 	    $$ret .= "<p><a name='t$tid'></a><table><tr>";
