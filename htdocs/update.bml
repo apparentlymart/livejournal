@@ -347,6 +347,11 @@
         $$body .= <<RTE;
 <iframe id="testFrame" style="position: absolute; visibility: hidden; width: 0px; height: 0px;"></iframe>
 <script language="JavaScript" type="text/javascript" src="/js/browserdetect.js"></script>
+<script language='JavaScript' type='text/javascript'>
+    <!--
+        var siteroot = "$LJ::SITEROOT";
+    //-->
+</script>
 <script language="JavaScript" type="text/javascript" src="/js/richtext.js"></script>
 <script language='JavaScript' type='text/javascript'>
     <!--

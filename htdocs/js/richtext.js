@@ -8,7 +8,6 @@ var isRichText = false;
 var rng;
 var currentRTE;
 var textsize = 3;
-var siteroot = 'http://www.livejournal.com';
 
 function writeRichText(rte, postvar, html, width, height, buttons) {
     if (isRichText) {
@@ -294,7 +293,7 @@ function updateRTE(rte) {
 
         //Fixup.
         var content = oMessageFrame.contentWindow.document.body.innerHTML;
-        content = escapeChars('<br>','<br />',content);
+        content = escapeChars('<br>',' ',content); // we already add breaks on newlines.
         oHdnMessage.value = content;
 
         //exception for Mozilla
