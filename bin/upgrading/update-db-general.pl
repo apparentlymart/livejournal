@@ -3,9 +3,10 @@
 #
 
 mark_clustered("useridmap", "userbio", "syncupdates2", "cmdbuffer", "dudata",
-               "log2", "logtext2", "logsubject2", "logprop2", "logsec2", 
+               "log2", "logtext2", "logsubject2", "logprop2", "logsec2",
                "talk2", "talkprop2", "talktext2", "talkleft",
-               "userpicblob2", "events"
+               "userpicblob2", "events",
+               "s2style", "s2info", "s2source", "s2compiled",
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -1299,6 +1300,59 @@ CREATE TABLE events (
   eiarg       INT UNSIGNED NOT NULL,
   duserid   INT UNSIGNED NOT NULL,
   diarg     INT UNSIGNED NOT NULL
+)
+EOC
+
+# Begin S2 Stuff
+register_tablecreate("s2layers", <<'EOC'); # global
+CREATE TABLE s2layers
+(
+   s2lid INT UNSIGNED NOT NULL AUTO_INCREMENT,
+   PRIMARY KEY (s2lid),
+   b2lid INT UNSIGNED NOT NULL,
+   userid INT UNSIGNED NOT NULL,
+   type ENUM('core','i18nc','layout','theme','i18n','user') NOT NULL,
+   INDEX (userid),
+   INDEX (b2lid, type)
+)
+EOC
+
+register_tablecreate("s2style", <<'EOC'); # clustered
+CREATE TABLE s2style
+(
+    userid INT UNSIGNED NOT NULL,
+    type ENUM('core','i18nc','layout','theme','i18n','user') NOT NULL,
+    UNIQUE (userid, type),
+    s2lid INT UNSIGNED NOT NULL
+)
+EOC
+
+register_tablecreate("s2info", <<'EOC'); # clustered
+CREATE TABLE s2info
+(
+   s2lid INT UNSIGNED NOT NULL,
+   infokey   VARCHAR(80) NOT NULL,
+   value VARCHAR(255) NOT NULL,
+   PRIMARY KEY (s2lid, infokey)
+)
+EOC
+
+register_tablecreate("s2source", <<'EOC'); # clustered
+CREATE TABLE s2source
+(
+   s2lid INT UNSIGNED NOT NULL,
+   PRIMARY KEY (s2lid),
+   s2code MEDIUMBLOB
+)
+EOC
+
+register_tablecreate("s2compiled", <<'EOC'); # clustered
+CREATE TABLE s2compiled
+(
+   s2lid INT UNSIGNED NOT NULL,
+   PRIMARY KEY (s2lid),
+   comptime INT UNSIGNED NOT NULL,
+   compdata MEDIUMBLOB
 )
 EOC
 
