@@ -255,7 +255,8 @@ class Comment extends EntryLite
 {
     var Image subject_icon "Subject icon, or null.";
     var int talkid "Server stored ID number for this comment.";
-    var Comment[] replies;
+    var Comment[] replies "Comments replying to this comment.";
+    var bool full "True if all information is available for this comment.  False if only the subject, poster, and date are available.  (collapsed threads)";
 }
 
 ### Userinfo
@@ -489,9 +490,10 @@ class MonthPage extends Page
 
 class EntryPage extends Page
 {
-    var Entry entry;
-    var ItemRange comment_pages;
-    var Comment[] comments;
+    var Entry entry "Journal entry being viewed";
+    var ItemRange comment_pages "Represents what comment page is being displayed.";
+    var Comment[] comments "Comments to journal entry, or at least some of them.";
+    var bool viewing_thread "True if viewing a specific sub-thread of the comments.  Style may which to hide the journal entry at this point, since the focus is the comments.";
 }
 
 class ReplyPage extends Page
