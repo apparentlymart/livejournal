@@ -587,7 +587,7 @@ sub create_view_lastn
         $lastn_page{'head'} = "<meta name='robots' content='noindex,nofollow,noarchive' />\n";
         $lastn_page{'head'} .= "<meta name='googlebot' content='nosnippet' />\n";
     }
-    else if ($FORM{'skip'}) {
+    elsif ($FORM{'skip'}) {
         # if followed a skip link back, prevent it from going back further
         $lastn_page{'head'} = "<meta name=\"robots\" content=\"noindex,nofollow\" />\n";
     }
