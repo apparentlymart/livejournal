@@ -1651,6 +1651,18 @@ CREATE TABLE s1stylemap (
 )
 EOC
 
+# comment urls
+register_tablecreate("commenturls", <<'EOC'); # global
+CREATE TABLE commenturls (
+   posterid int unsigned NOT NULL,
+   journalid int unsigned NOT NULL,
+   jtalkid mediumint unsigned NOT NULL,
+   timecreate int unsigned NOT NULL,
+   url varchar(255) NOT NULL,
+   INDEX (timecreate)
+);
+EOC
+
 post_create("comminterests",
             "code" => sub {
                 my $dbh = shift;

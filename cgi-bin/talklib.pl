@@ -2073,6 +2073,22 @@ sub enter_comment {
         }
         LJ::MemCache::set([$journalu->{'userid'}, "talkprop:$journalu->{'userid'}:$jtalkid"], $hash);
     }
+
+    # record up to 25 (or $LJ::TALK_MAX_URLS) urls from a comment
+    if ($LJ::TALK_MAX_URLS && 
+        ( my %urls = map { $_ => 1 } LJ::get_urls($comment->{body}) ) &&
+        ( my $dbh = LJ::get_db_writer() )) # don't log if no db available
+    {
+        my (@bind, @vals);
+        while (my ($url, undef) = each %urls) {
+            push @bind, '(?,?,?,UNIX_TIMESTAMP(),?)';
+            push @vals, $posterid, $journalu->{userid}, $jtalkid, $url;
+            last if @bind >= $LJ::TALK_MAX_URLS;
+        }
+        my $bind = join(',', @bind);
+        $dbh->do("INSERT DELAYED INTO commenturls (posterid, journalid, jtalkid, timecreate, url) " .
+                 "VALUES $bind", undef, @vals);
+    }
     
     # update the "replycount" summary field of the log table
     if ($comment->{state} eq 'A') {
