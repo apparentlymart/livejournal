@@ -35,7 +35,7 @@
 <uid> frgmask:<uid>:<uid_friend>  -- scalar numeric mask, 15 minutes
 <uid> fgrp:<uid> == packed data, friendgroup rows for a given user
 <uid> friends:<uid> == packed data, friends rows for a user
-<uid> tu:<uid> == unixtime when user last updated
+<uid> tu:<uid> == packed number: unixtime when user last updated
       popsyn == 100 most read syndicated accounts [user, userid, synurl, numreaders], 1 hour
 
 <uid> upicinf:<uid> == packed data, userpic keywords
