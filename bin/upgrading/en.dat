@@ -297,7 +297,7 @@
 
 /community/settings.bml.label.maintainer=Maintainer:
 
-/community/settings.bml.label.maintainer.login=If this is not the maintainter account, <a href='/login.bml?ret=1'>login</a> as somebody else.
+/community/settings.bml.label.maintainer.login=If this is not the maintainer account, <a href='/login.bml?ret=1'>login</a> as somebody else.
 
 /community/settings.bml.label.membership=Membership
 
