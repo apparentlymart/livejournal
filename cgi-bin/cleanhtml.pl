@@ -55,8 +55,29 @@ sub clean
     }
 
     $action{'script'} = "eat";
-    my @attrstrip = qw(onabort onblur onchange onclick onerror onfocus onload
-                       onmouseout onmouseover onreset onselect onsubmit onunload);
+
+    my @attrstrip = qw(onabort onactivate onafterprint onafterupdate
+			onbeforeactivate onbeforecopy onbeforecut
+			onbeforedeactivate onbeforeeditfocus
+			onbeforepaste onbeforeprint onbeforeunload
+			onbeforeupdate onblur onbounce oncellchange
+			onchange onclick oncontextmenu oncontrolselect
+			oncopy oncut ondataavailable ondatasetchanged
+			ondatasetcomplete ondblclick ondeactivate
+			ondrag ondragend ondragenter ondragleave
+			ondragover ondragstart ondrop onerror
+			onerrorupdate onfilterchange onfinish onfocus
+			onfocusin onfocusout onhelp onkeydown
+			onkeypress onkeyup onlayoutcomplete onload
+			onlosecapture onmousedown onmouseenter
+			onmouseleave onmousemove onmouseout
+			onmouseover onmouseup onmousewheel onmove
+			onmoveend onmovestart onpaste onpropertychange
+			onreadystatechange onreset onresize
+			onresizeend onresizestart onrowenter onrowexit
+			onrowsdelete onrowsinserted onscroll onselect
+			onselectionchange onselectstart onstart onstop
+			onsubmit onunload);
 
     if (ref $opts->{'attrstrip'} eq "ARRAY") {
         foreach (@{$opts->{'attrstrip'}}) { push @attrstrip, $_; }
@@ -88,7 +109,7 @@ sub clean
                         $text =~ s/>/&gt;/g;
                     }
                     my $url = LJ::ehtml($cut);
-                    $newdata .= "<nobr><b>( <a href=\"$url\">$text</a> )</b></nobr>";
+                    $newdata .= "<b>(&nbsp;<a href=\"$url\">$text</a>&nbsp;)</b>";
                     last TOKEN;
                 } else {
                     next; # ignore the tag.
