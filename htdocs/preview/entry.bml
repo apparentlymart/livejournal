@@ -11,7 +11,7 @@
     my ($u, $up);
     if ($POST{'usejournal'}) {
         $u = LJ::load_user($POST{'usejournal'});
-        $up = $POST{'user'} || $remote;
+        $up = $POST{'user'} ? LJ::load_user($POST{'user'}) : $remote;
     } elsif ($POST{'user'}) {
         $u = LJ::load_user($POST{'user'});
     } else {
