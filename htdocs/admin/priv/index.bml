@@ -241,7 +241,8 @@
      $ret .= "<br /><b>Argument:</b> $args" if $args;
      $ret .= "</p>";
      
-     unless ($prec->{'is_public'} || remote_can_grant($pcode, $FORM{'viewarg'})) {
+     my ($check_priv, $check_arg) = split("/", $FORM{'viewarg'});
+     unless ($prec->{'is_public'} || ($pcode eq 'admin' && remote_can_grant($check_priv, $check_arg))) {
          $ret .= "<p><b>ERROR:</b> This privilege's access list is not public.</p>\n";
          return $ret;
      }
