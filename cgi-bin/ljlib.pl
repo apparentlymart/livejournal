@@ -4667,6 +4667,7 @@ sub load_userids_multiple
     while (@$map) {
         my $id = shift @$map;
         my $ref = shift @$map;
+        next unless int($id);
         push @{$need{$id}}, $ref;
 
         if ($LJ::REQ_CACHE_USER_ID{$id}) {
@@ -4758,7 +4759,7 @@ sub load_user
     return $set_req_cache->($u) if $u;
 
     # try to load from master if using memcache, otherwise from slave
-    $u = $get_user->(@LJ::MEMCACHE_SERVERS);
+    $u = $get_user->(scalar @LJ::MEMCACHE_SERVERS);
     return $u if $u;
 
     # if user doesn't exist in the LJ database, it's possible we're using
