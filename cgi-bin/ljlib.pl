@@ -3833,14 +3833,15 @@ sub load_user
 # name: LJ::load_userid
 # des: Loads a user record given a userid.
 # info: From the [dbarg[user]] table.
-# args: dbarg, userid, force?
+# args: dbarg?, userid, force?
 # des-userid: Userid of user to load.
 # des-force: If set to true, won't return cached user object.
 # returns: Hashref with keys being columns of [dbtable[user]] table.
 # </LJFUNC>
 sub load_userid
 {
-    my ($dbarg, $userid, $force) = @_;
+    my $dbarg = ref $_[0] ? shift : LJ::get_dbs();
+    my ($userid, $force) = @_;
     return undef unless $userid;
     
     return $LJ::REQ_CACHE_USER_ID{$userid} if
