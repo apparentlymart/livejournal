@@ -338,9 +338,11 @@ sub get_lock
 
     # get a lock from mysql
     $wait_time ||= 10;
-    $db->do("SELECT GET_LOCK(?,?)", undef, $lockname, $wait_time);
-    $LJ::LOCK_OUT{$dbrole} = $curr_sub;
+    $db->do("SELECT GET_LOCK(?,?)", undef, $lockname, $wait_time)
+        or return undef;
 
+    # successfully got a lock
+    $LJ::LOCK_OUT{$dbrole} = $curr_sub;
     return 1;
 }
 
