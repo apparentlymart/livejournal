@@ -349,11 +349,12 @@ sub get_log2_row
 
 sub get_log2_recent_log
 {
-    my ($u, $cid, $notafter) = @_;
+    my ($u, $cid, $rupdate, $notafter) = @_;
     my $jid = LJ::want_userid($u);
     $cid ||= $u->{'clusterid'} if ref $u;
+    my $update = $LJ::EndOfTime - $rupdate;
 
-    my $DATAVER = "1"; # 1 char
+    my $DATAVER = "2"; # 1 char
 
     my $memkey = [$jid, "log2lt:$jid"];
     my $lockkey = $memkey->[1];
@@ -365,10 +366,16 @@ sub get_log2_recent_log
     my $rows_decode = sub {
         return 0
             unless $rows && substr($rows, 0, 1) eq $DATAVER;
-        my $n = (length($rows) - 1 )/20;
+        my $tu = unpack("N", substr($rows, 1, 5));
+
+        # if update time we got from upstream is newer than recorded
+        # here, this data is unreliable
+        return 0 if $update > $tu;
+
+        my $n = (length($rows) - 5 )/20;
         for (my $i=0; $i<$n; $i++) {
             my ($posterid, $eventtime, $rlogtime, $allowmask, $ditemid) =
-                unpack("NNNNN", substr($rows, $i*20+1, 20));
+                unpack("NNNNN", substr($rows, $i*20+5, 20));
             next if $notafter and $rlogtime > $notafter;
             $eventtime = LJ::mysql_time($eventtime, 1);
             my $security = $allowmask == 0 ? 'private' :
@@ -390,10 +397,11 @@ sub get_log2_recent_log
         if $rows_decode->();
 
     my $db = LJ::get_cluster_master($cid);
-    my $used_slave = 0;
+    # if we use slave or didn't get some data, don't store in memcache
+    my $dont_store = 0; 
     unless ($db) {
         $db = LJ::get_cluster_reader($cid); 
-        $used_slave = 1;
+        $dont_store = 1;
         return undef unless $db;
     }
 
@@ -406,6 +414,27 @@ sub get_log2_recent_log
         return $ret;
     }
 
+    # get reliable update time from the db
+    # TODO: check userprop first
+    my $tu;
+    my $dbh = LJ::get_db_writer();
+    if ($dbh) {
+        $tu = $dbh->selectrow_array("SELECT UNIX_TIMESTAMP(timeupdate) " .
+                                    "FROM userusage WHERE userid=?",
+                                    undef, $jid);
+        # if no mistake, treat absence of row as tu==0 (new user)
+        $tu = 0 unless $tu || $dbh->err;
+
+        LJ::MemCache::set([$jid, "tu:$jid"], pack("N", $tu), 30*60)
+            if defined $tu;
+        # TODO: update userprop if necessary
+    }
+    
+    # if we didn't get tu, don't bother to memcache
+    $dont_store = 1 unless defined $tu;
+
+    # get reliable log2lt data from the db
+    
     my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14; # 2 weeks default
     
     my $sql = "SELECT jitemid, posterid, eventtime, rlogtime, " .
@@ -444,8 +473,8 @@ sub get_log2_recent_log
         }
     }
 
-    $rows = $DATAVER . $rows;
-    LJ::MemCache::set($memkey, $rows) unless $used_slave;
+    $rows = $DATAVER . pack("N", $tu) . $rows;
+    LJ::MemCache::set($memkey, $rows) unless $dont_store;
 
     $db->selectrow_array("SELECT RELEASE_LOCK(?)", undef, $lockkey);
     return $ret;
@@ -456,7 +485,8 @@ sub get_log2_recent_user
     my $opts = shift;
     my $ret = [];
 
-    my $log = LJ::get_log2_recent_log($opts->{'userid'}, $opts->{'clusterid'}, $opts->{'notafter'});
+    my $log = LJ::get_log2_recent_log($opts->{'userid'}, $opts->{'clusterid'},
+              $opts->{'rupdate'}, $opts->{'notafter'});
 
     my $left = $opts->{'itemshow'};
     my $notafter = $opts->{'notafter'};
@@ -1031,6 +1061,7 @@ sub get_friend_items
             'mask' => $gmask_from->{$friendid},
             'notafter' => $lastmax,
             'dateformat' => $opts->{'dateformat'},
+            'rupdate' => $fr->[1],
         });
         
         # stamp each with clusterid if from cluster, so ljviews and other
