@@ -166,7 +166,7 @@ body<=
      return "<center><b>$ML{'.search.title'}<img src='$LJ::IMGPREFIX/searchingdots.gif' alt='...' width='18' height='12' /></b><p>$ML{'.search.monkey'}</p></center>";
  }
 
- if ($POST{'s_com'} || $GET{'s_com'}) {
+ if ($POST{'com_do'} || $GET{'com_do'}) {
      $ret .= "<a href=\"/community/search.bml\">&lt;&lt; $ML{'.search.new'}</a><p>\n";
  } else {
      $ret .= "<a href=\"/directorysearch.bml\">&lt;&lt; $ML{'.search.new'}</a><p>\n";
