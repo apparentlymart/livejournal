@@ -61,7 +61,7 @@
  # Returns true if the remote user can grant the given priv
  sub remote_can_grant
  {
-     my ($priv, $arg) = @_;
+     my ($remote, $priv, $arg) = @_;
      return LJ::check_priv($remote, 'admin', $priv) || LJ::check_priv($remote, 'admin', '*') || LJ::check_priv($remote, 'admin', "$priv/$arg");
  }
 
@@ -80,7 +80,7 @@
                  $sth->execute;
                  my ($del_userid2, $prlid, $arg) = $sth->fetchrow_array;
 
-                 unless (remote_can_grant($priv{$prlid}->{'privcode'}, $arg)) {
+                 unless (remote_can_grant($remote, $priv{$prlid}->{'privcode'}, $arg)) {
                      $ret .= "ERROR: Invalid access to remove priv $priv{$prlid}->{'privcode'}.<br />";
                  } else {
                      if ($del_userid1 && $del_userid1 == $del_userid2)
@@ -103,7 +103,7 @@
              my $arg = $FORM{'arg'};
 
              if ($privcode) {
-                 if (remote_can_grant($privcode, $arg)) {
+                 if (remote_can_grant($remote, $privcode, $arg)) {
                      if (LJ::check_priv($u, $privcode, $arg)) {
                          $ret .= "ERROR: User already has specified priv <b>$privcode $arg</b>.<br />";
                      } else {
@@ -128,7 +128,7 @@
              my $qarg = $dbh->quote($arg);
              my $privcode = $priv{$privid}->{'privcode'};
              if ($privcode) {
-                 if (remote_can_grant($privcode, $arg)) {
+                 if (remote_can_grant($remote, $privcode, $arg)) {
                      if (LJ::check_priv($u, $privcode, $arg)) {
                          $ret .= "ERROR: User already has specified priv <b>$privcode $arg</b>.<br />";
                      }
@@ -180,7 +180,7 @@
      {
          my $prec = $priv{$prlid};
          my $pcode = $priv{$prlid}->{'privcode'};
-         my $can_grant = remote_can_grant($pcode, $arg);
+         my $can_grant = remote_can_grant($remote, $pcode, $arg);
 
          next unless ($prec->{'is_public'} || ($remote && $remote->{'userid'} == $userid) || $can_grant);
 
@@ -242,7 +242,7 @@
      $ret .= "</p>";
      
      my ($check_priv, $check_arg) = split("/", $FORM{'viewarg'});
-     unless ($prec->{'is_public'} || ($pcode eq 'admin' && remote_can_grant($check_priv, $check_arg))) {
+     unless ($prec->{'is_public'} || ($pcode eq 'admin' && remote_can_grant($remote, $check_priv, $check_arg))) {
          $ret .= "<p><b>ERROR:</b> This privilege's access list is not public.</p>\n";
          return $ret;
      }
@@ -261,14 +261,14 @@
      $sth->execute;
      $ret .= "<table cellpadding='5' cellspacing='1' border='1'><tr><td><b>Revoke</b></td><td><b>User</b></td><td><b>Arg</b></td></tr>\n";
 
-     my $showgrant = remote_can_grant($pcode, $FORM{'viewarg'});
+     my $showgrant = remote_can_grant($remote, $pcode, $FORM{'viewarg'});
      my $foundcount = 0;
 
      while ($_ = $sth->fetchrow_hashref) 
      {
          $foundcount++;
          $ret .= "<tr><td align='center'>";
-         if (remote_can_grant($priv{$priv}->{'privcode'}, $_->{'arg'}))
+         if (remote_can_grant($remote, $priv{$priv}->{'privcode'}, $_->{'arg'}))
          {
              $ret .= "<input type='checkbox' name=\"revoke:$_->{'prmid'}:$_->{'userid'}\" />";
          } else {
