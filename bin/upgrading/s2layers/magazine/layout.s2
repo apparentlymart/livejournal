@@ -136,7 +136,7 @@ function Page::lay_bottom_navigation() {}
 
 function print_stylesheet ()
 {
-    print $*page_background_image ? "body { background-image: url($*page_background_image); }" : "";
+    print clean_url($*page_background_image) != "" ? "body { background-image: url($*page_background_image); }" : "";
     """HTML {
     border-left: 1cm solid $*sidebar_color; 
     padding: 1cm;

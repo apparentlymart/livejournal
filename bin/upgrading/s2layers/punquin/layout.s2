@@ -128,7 +128,7 @@ set text_gotop = "Go to Top";
 function print_stylesheet ()
 {
     var string font = "$*font_base, $*font_fallback";
-    print $*page_background_image ? "body { background-image: url($*page_background_image); }" : "";
+    print clean_url($*page_background_image) != "" ? "body { background-image: url($*page_background_image); }" : "";
     print """
 body {
     background-color:  $*body_bgcolor;

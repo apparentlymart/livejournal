@@ -99,7 +99,7 @@ function Page::lay_bottom_navigation() { }
 
 function print_stylesheet ()
 {
-    var string backgroundurl = $*page_background_image ? "background-image: url($*page_background_image);" : "";
+    var string backgroundurl = clean_url($*page_background_image) != "" ? "background-image: url($*page_background_image);" : "";
     """body {
     $backgroundurl
     background-color: $*body_bgcolor;

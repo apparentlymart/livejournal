@@ -141,7 +141,7 @@ set text_view_userinfo = "userinfo";
 set text_website = "website";
 
 function print_stylesheet () {
-    print $*page_background_image ? "body { background-image: url($*page_background_image); }" : "";
+    print clean_url($*page_background_image) != "" ? "body { background-image: url($*page_background_image); }" : "";
 """body, td {
 """;
 if ($*font_base != "" or $*font_fallback != "none") {
