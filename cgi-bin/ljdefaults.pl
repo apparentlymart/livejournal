@@ -92,7 +92,7 @@
    
     $MAX_HINTS_LASTN ||= 100;
     $MAX_SCROLLBACK_FRIENDS ||= 1000;
-    $MAX_USERPIC_KEYWORDS ||= 5;
+    $MAX_USERPIC_KEYWORDS ||= 10;
 
     # set default capability limits if the site maintainer hasn't.
     {
