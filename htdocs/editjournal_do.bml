@@ -188,6 +188,9 @@ body<=
         # start edit form
         my $ret;
 
+        $ret .= "<div style='width: 90%'><form method='post' action='editjournal_do.bml$getextra'>\n";
+        $ret .= LJ::html_hidden('itemid', $ditemid) . "\n";
+
         # user clicked the preview button
         if ($POST{'action:preview'}) {
             my ($event, $subject) = ($POST{'event'}, $POST{'subject'});
@@ -206,9 +209,6 @@ body<=
 
         $ret .= "<?h1 $ML{'.title'} h1?>\n";
         $ret .= "<?p $ML{'.body'} p?>\n";
-
-        $ret .= "<div style='width: 90%'><form method='post' action='editjournal_do.bml$getextra'>\n";
-        $ret .= LJ::html_hidden('itemid', $ditemid) . "\n";
 
         # table of date/time info
         my ($year, $mon, $mday, $hour, $min) = split(/\D/, $res{"events_1_eventtime"});
@@ -232,6 +232,7 @@ body<=
         # event body
         my $postedby = " (Posted by: " . LJ::ljuser($res{'events_1_poster'}) . ")" if $usejournal;
         $ret .= "<p><b>$ML{'.event'}</b>$postedby<br />";
+        $res{'events_1_event'} = $POST{'event'} if $POST{'event'} && $POST{'action:preview'};
         $ret .= LJ::html_textarea({ 'name' => 'event', 'value' => LJ::durl($res{'events_1_event'}), 'rows' => '12',
                                     'cols' => '60', 'wrap' => 'soft', 'style' => 'width: 99%;' }) . "</p>\n";
 
