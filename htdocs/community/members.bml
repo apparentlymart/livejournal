@@ -68,7 +68,7 @@ body<=
             }
 
             # email recipient user to tell them about it
-            my $body = "An administrator of the $cname community has requested " .
+            my $body = "A maintainer of the $cname community has requested " .
                 "that you be added to the community.  If you do not wish to be " .
                 "added to $cname, just ignore this email.  However, if " .
                 "you would like to join the community, please click the link " .
@@ -99,26 +99,16 @@ body<=
         # need a db handle now
         my $dbh = LJ::get_db_writer();
 
-        # check that listed userids are actually members
-        # so we don't add them without going through
-        # authactions first
-        my $in = join(',', map { $dbh->quote($_) } split(',', $POST{'ids'}));
-        my $users = $dbh->selectcol_arrayref("SELECT friendid FROM friends " .
-                                             "WHERE userid=? AND friendid IN ($in)",
-                                             undef, $cid);
-        my %users = map { $_, 1} @$users;
-        my @userids = grep { defined $users{$_} } split(',', $POST{'ids'});
-
-        # build new $in from now-verified @userids
-        $in = join(',', map { $dbh->quote($_) } @userids);
-        my $other_maints = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser " .
-                                                 "WHERE userid=? AND type='A' " .
-                                                 "AND targetid NOT IN ($in)",
-                                                 undef, $cid);
+        my @userids = split(',', $POST{'ids'});
 
         # if we have $other_maints, then there are maintainers not in our
         # current view, so they will not be modified, so the user can delete
         # all maintainers from the current view
+        my $in = join(',', map { $dbh->quote($_) } @userids);
+        my $other_maints = $dbh->selectrow_array("SELECT COUNT(*) FROM reluser " .
+                                                 "WHERE userid=? AND type='A' " .
+                                                 "AND targetid NOT IN ($in)",
+                                                 undef, $cid);
 
         # users already in community
         my $maints = 0;
