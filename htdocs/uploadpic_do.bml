@@ -32,13 +32,15 @@ BODY<=
  unless ($u) { push @errors, "Invalid username"; }
  my $userid = $u->{'userid'}+0;
 
- if (scalar(@errors)==0 && !&valid_password($u->{'password'}, \%FORM)) { push @errors, "Incorrect password."; }
+ if (scalar(@errors)==0 && ! LJ::valid_password($u->{'password'}, \%FORM)) { 
+     push @errors, "Incorrect password."; 
+ }
 
  if ($FORM{'src'} eq "url" && $FORM{'urlpic'} !~ /^http:\/\//) {
      push @errors, "The address for the picture to be uploaded does not look correct.  It should start with <b>http://</b>";
  }
 
- return &bullet_errors(\@errors) if @errors;
+ return LJ::bullet_errors(\@errors) if @errors;
 
  # now we're authenticated
  my $ret = "";
@@ -61,7 +63,7 @@ BODY<=
      if ($too_big)
      {
 	 push @errors, "File size too big.  File cannot exceed 40K.";
-	 return &bullet_errors(\@errors) if @errors;
+	 return LJ::bullet_errors(\@errors) if @errors;
      }
  }
  elsif ($FORM{'src'} eq "url") 
@@ -82,7 +84,7 @@ BODY<=
 
      if (length($imagedata) > $MAXIMUM_UPLOAD) {
 	 push @errors, "File size too big.  File cannot exceed 40K.";
-	 return &bullet_errors(\@errors) if @errors;
+	 return LJ::bullet_errors(\@errors) if @errors;
      }
  }
  else {
@@ -94,18 +96,18 @@ BODY<=
  unless (defined $sx)
  {
      push @errors, $filetype;
-     return &bullet_errors(\@errors) if @errors;
+     return LJ::bullet_errors(\@errors) if @errors;
  }
  
  unless ($filetype eq "GIF" || $filetype eq "JPG" || $filetype eq "PNG")
  {
      push @errors, "Files of type $filetype are not supported.  You can only upload GIF, PNG or JPG files.  Nearly all image/photo programs can do this conversion for you.";
-     return &bullet_errors(\@errors) if @errors;
+     return LJ::bullet_errors(\@errors) if @errors;
  }
  if ($sx > 100 || $sy > 100)
  {
      push @errors, "The dimensions of your image (${sx}x${sy}) exceed maximum size.  Your picture can only be 100x100 pixels large.  Use a image/photo editing program to reduce the image to thumbnail-size.";
-     return &bullet_errors(\@errors) if @errors;
+     return LJ::bullet_errors(\@errors) if @errors;
  }
  
  $qsx = $sx+0;
@@ -126,7 +128,7 @@ BODY<=
  my $max = LJ::get_cap($u, "userpics");
  if ($count >= $max) {
      push @errors, "You are already at your limit of $max pictures.  You cannot upload this picture until you <A HREF=\"/editpics.bml\">delete one of your existing ones</A>.";
-     return &bullet_errors(\@errors) if @errors;     
+     return LJ::bullet_errors(\@errors) if @errors;     
  }
 
  # see if it's a duplicate

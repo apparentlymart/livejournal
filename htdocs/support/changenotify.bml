@@ -8,12 +8,13 @@ BODY<=
 
  my @errors = ();
  my $user = lc($FORM{'user'});
- my $hpassword = $FORM{'hpassword'} || &hash_password($FORM{'password'});
+ my $hpassword = $FORM{'hpassword'} || LJ::hash_password($FORM{'password'});
 
- &connect_db;
- my $quser = $dbh->quote($user);
+ my $dbs = LJ::get_dbs();
+ my $dbh = $dbs->{'dbh'};
+ my $dbr = $dbs->{'reader'};
 
- my $remote = LJ::get_remote($dbh);
+ my $remote = LJ::get_remote($dbs);
  my $mode = $FORM{'mode'} || "modify";
 
  unless ($remote) {
@@ -22,17 +23,7 @@ BODY<=
  if ($mode eq "save" && ! LJ::did_post) {
      push @errors, "(=REQUIREPOST=)";
  }
- if (@errors)
- {
-     my $ret = "";
-     $ret .= "(=BADCONTENT=)\n<UL>\n";		
-     foreach (@errors)
-     {
-         $ret .= "<LI>$_\n";
-     }
-     $ret .= "</UL>\n";
-     return $ret;
- }
+ return LJ::bullet_errors(\@errors) if @errors;
  
  LJ::Support::init_remote($dbh, $remote);
  my $cats = LJ::Support::load_cats($dbh);
@@ -41,8 +32,8 @@ BODY<=
  if ($mode eq "modify")
  {
      my $ret = "";
-     $ret .= "<form method=post>\n";
-     $ret .= "<input type=hidden name=mode value=save>\n";
+     $ret .= "<form method='post'>\n";
+     $ret .= "<input type='hidden' name='mode' value='save'>\n";
 
      $ret .= "(=H1 Change Notification Settings H1=)(=P Here you may select what categories of support requests you'd like to be notified about.  Choices are <B>off</B> (the default), <B>new</B> (you'll get notifications when a new support request in that category is posted) or <B>all</B> (you'll get notifications and then a copy of each comment/solution posted). P=)";
 

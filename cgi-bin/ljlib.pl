@@ -215,18 +215,6 @@ sub ago_text
 }
 
 
-sub bullet_errors
-{
-    my ($errorref) = @_;
-    my $ret = "(=BADCONTENT=)\n<UL>\n";
-    foreach (@{$errorref})
-    {
-	$ret .= "<LI>$_\n";
-    }
-    $ret .= "</UL>\n";
-    return $ret;
-}
-
 sub icq_send
 {
     my ($uin, $msg) = @_;
@@ -358,6 +346,17 @@ sub html_datetime
 }
 
 package LJ;
+
+sub bullet_errors
+{
+    my ($errorref) = @_;
+    my $ret = "(=BADCONTENT=)\n<ul>\n";
+    foreach (@{$errorref}) {
+	$ret .= "<li>$_</li>\n";
+    }
+    $ret .= "</ul>\n";
+    return $ret;
+}
 
 sub self_link
 {
