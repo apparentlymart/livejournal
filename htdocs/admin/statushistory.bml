@@ -9,23 +9,25 @@
      return "Sorry, you don't have access to view this page.";
  }
 
- my $where;
+ my @where;
  if ($FORM{'user'} ne "") {
      my $userid = LJ::get_userid($dbs, $FORM{'user'});
      unless ($userid) { return "unknown user"; }
-     $where .= "s.userid=$userid AND ";
+     push @where, "s.userid=$userid";
  }
 
  if ($FORM{'admin'} ne "") {
      my $userid = LJ::get_userid($dbs, $FORM{'admin'});
      unless ($userid) { return "unknown admin"; }
-     $where .= "s.adminid=$userid AND ";
+     push @where, "s.adminid=$userid";
  }
 
  if ($FORM{'type'} ne "") {
      my $qt = $dbh->quote($FORM{'type'});
-     $where .= "s.shtype=$qt AND ";
+     push @where, "s.shtype=$qt";
  }
+
+ my $where = join(" AND ", @where);
 
  unless ($where) {
      return <<'FORM';
@@ -39,9 +41,11 @@ Type: <input name='type' size=15>
 FORM
 }
 
- $sth = $dbr->prepare("SELECT u.user, ua.user, s.shtype, s.shdate, s.notes ".
-                      "FROM statushistory s, useridmap u, useridmap ua ".
-                      "WHERE $where s.adminid=ua.userid AND s.userid=u.userid ".
+ $sth = $dbr->prepare("SELECT u.user, ua.user, s.shtype, s.shdate, s.notes " .
+                      "FROM statushistory s " .
+                      "LEFT JOIN useridmap ua ON s.adminid=ua.userid " .
+                      "LEFT JOIN useridmap u ON s.userid=u.userid " .
+                      "WHERE $where " .
                       "ORDER BY s.shdate");
  $sth->execute;
  return $dbh->errstr if $dbh->err;
@@ -49,7 +53,7 @@ FORM
  my $ret;
  $ret .= "<table border=1 cellpadding=2>";
  $ret .= "<tr>";
- $ret .= join('', map { "<th>$_</th>" } qw(userid admin shtype shdate notes));
+ $ret .= join('', map { "<th>$_</th>" } qw(user admin shtype shdate notes));
  $ret .= "</tr>";
  while (my @r = $sth->fetchrow_array) {
      $ret .= "<tr>";
