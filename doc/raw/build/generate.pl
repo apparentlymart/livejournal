@@ -30,7 +30,7 @@ if ($opt_getxsl) {
         and die "Error extracting xsl-doxbook.tar.gz; have GNU tar?\n";
 }
 
-my $output_dir = "$home/htdocs/doc/temp";
+my $output_dir = "$home/htdocs/doc/server";
 my $docraw_dir = "$home/doc/raw";
 my $XSL = "$docraw_dir/build/xsl-docbook";
 open (F, "$XSL/VERSION");
