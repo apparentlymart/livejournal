@@ -45,19 +45,15 @@ my @toplevel = qw(htdocs cgi-bin bin doc sites src);
 
 my %status = ();   # $relfile -> $status
 
-if ($init)
-{
-# mark all cvs files for copying to main.
-init_from_cvs();
-$sync = 1;
-}
-else
-{
-# checks if files aren't in CVS, are newer than CVS, or if CVS is newer
-scan_main();
-
-# checks to see if new CVS files aren't in the main tree yet
-scan_cvs();
+if ($init) {
+    # mark all cvs files for copying to main.
+    init_from_cvs();
+    $sync = 1;
+} else {
+    # checks if files aren't in CVS, are newer than CVS, or if CVS is newer
+    scan_main();
+    # checks to see if new CVS files aren't in the main tree yet
+    scan_cvs();
 }
 
 my @files = scalar(@ARGV) ? @ARGV : sort keys %status;
@@ -182,6 +178,7 @@ sub scan_main
     {
 	my $dir = shift @dirs;
 	my $fulldir = "$maind/$dir";
+	mkdir $fulldir unless (-e $fulldir);
 	opendir (MD, $fulldir) or die "Can't open $fulldir.";
 	while (my $file = readdir(MD)) {
 	    if (-d "$fulldir/$file") {
