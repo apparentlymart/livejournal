@@ -687,11 +687,28 @@ sub moveUser {
                 $qry = "HANDLER $table READ `$idx` NEXT LIMIT $batch_size";
             } else {
                 # when we're first starting out, though, let's LIMIT as high as possible,
-                # since MySQL will only return rows matching the primary key,
+                # since MySQL (with InnoDB only?) will only return rows matching the primary key,
                 # so we'll try as big as possible, except for text tables, where the blobs
                 # could be 64k or so, in which case we protect the size of our initial read.
-                $batch_size = 10000;
-                $batch_size = 1000 if $table eq "logtext2" || $table eq "talktext2";
+
+                my $src_is_innodb = 0;  # FIXME: detect this?  but first verify HANDLER differences
+                if ($src_is_innodb) {
+                    $batch_size = 10000;
+                    $batch_size = 1000 if $table eq "logtext2" || $table eq "talktext2";
+                } else {
+                    # MyISAM's HANDLER behavior seems to be different.
+                    # it always returns batch_size, so we keep it
+                    # small to avoid seeks, even on the first query
+                    # (where InnoDB differs and stops when primary key
+                    # doesn't match)
+                    $batch_size = 25;
+                    if ($table eq "clustertrack2" || $table eq "userbio" || $table eq "s1usercache") {
+                        # we know these only have 1 row, so 2 will be enough to show
+                        # in one pass that we're done.
+                        $batch_size = 2;
+                    }
+                }
+
                 $qry = "HANDLER $table READ `$idx` = ($userid) LIMIT $batch_size";
                 $did_start = 1;
             }
