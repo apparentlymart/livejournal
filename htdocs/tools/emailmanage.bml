@@ -38,7 +38,7 @@ body<=
                                        { 'email' => $email,
                                          'time' => $time });
 
-                $dbh->do("DELETE FROM infohistory WHERE what='email' " .
+                $dbh->do("UPDATE infohistory SET what='emaildeleted' WHERE what='email' " .
                          "AND userid=? AND timechange=? AND oldvalue=?",
                          undef, $u->{'userid'}, $time, $email);
             }            
