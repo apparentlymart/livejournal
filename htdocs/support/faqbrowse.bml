@@ -34,6 +34,7 @@ body<=
  $sth->execute;
  if ($dbh->err) { return "<p>$sql</p><p>" . $dbh->errstr . "</p>"; }
 
+ my $count = 0;
  while (my ($faqid, $question, $answer, $lastmoduserid, 
             $lastmodtime, $unixmodtime) = $sth->fetchrow_array)
  {
@@ -69,8 +70,13 @@ body<=
      if ($lastmodwho) {
          $ret .= "<p align=\"right\"><b><?_ml .lastupdated _ml?></b><br />$lastmodwho, $lastmodtime</p>";
      }
+     $count++;
  }
-
+ if (!$count)
+ {
+     $ret .= "<p><b>$ML{'.error.nofaq'}</b></p>";
+ }
+ 
  return $ret;
 
 _code?>
