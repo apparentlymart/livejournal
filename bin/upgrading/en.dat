@@ -2214,7 +2214,17 @@ This could be because: <ol>
 
 /tools/memories.bml.filter.own=Only '[[user]]' entries
 
+/tools/memories.bml.form.filter=Filter entries by:
+
+/tools/memories.bml.form.sort=Sort entries by:
+
 /tools/memories.bml.form.switch=Switch
+
+/tools/memories.bml.sort.description=Description
+
+/tools/memories.bml.sort.journal=Journal
+
+/tools/memories.bml.sort.orderadded=Order Added
 
 /tools/memories.bml.title.keyword=Memorable [[keyword]] Posts
 
