@@ -2306,9 +2306,17 @@ register_alter(sub {
 
     if (column_type("spamreports", "report_type") eq '') {
         do_alter("spamreports", "ALTER TABLE spamreports " .
-                 "ADD report_type ENUM('entry','comment') NOT NULL DEFAULT 'comment' " .
-                 "AFTER posterid");
+                "ADD report_type ENUM('entry','comment') NOT NULL DEFAULT 'comment' " .
+                "AFTER posterid");
     }
+
+    if (column_type("commenturls", "ip") eq '') {
+        do_alter("commenturls",
+                "ALTER TABLE commenturls " .
+                "ADD ip VARCHAR(15) DEFAULT NULL " .
+                "AFTER journalid");
+    }
+
 
 });
 
