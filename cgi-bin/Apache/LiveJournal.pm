@@ -659,7 +659,8 @@ sub userpic_content
     if ($u->{dversion} > 6 && $pic->{location} eq 'mogile' ) {
         my $key = $u->mogfs_userpic_key( $picid );
 
-        if ( $r->header_in('X-Proxy-Capabilities') &&
+        if ( !$LJ::REPROXY_DISABLE{userpics} &&
+             $r->header_in('X-Proxy-Capabilities') &&
              $r->header_in('X-Proxy-Capabilities') =~ m{\breproxy-file\b}i )
         {
             my @paths = $LJ::MogileFS->get_paths( $key, 1 );
@@ -688,7 +689,8 @@ sub userpic_content
     }
 
     # dversion < 7 reproxy file path
-    if ( exists $LJ::PERLBAL_ROOT{userpics} &&
+    if ( !$LJ::REPROXY_DISABLE{userpics} &&
+         exists $LJ::PERLBAL_ROOT{userpics} &&
          $r->header_in('X-Proxy-Capabilities') &&
          $r->header_in('X-Proxy-Capabilities') =~ m{\breproxy-file\b}i )
     {

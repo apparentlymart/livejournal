@@ -199,6 +199,9 @@
     $MOGILEFS_CONFIG{classes}->{userpics}    ||= 3;
     $MOGILEFS_CONFIG{classes}->{captcha}     ||= 2;
 
+    # Default to allow all reproxying.
+    %REPROXY_DISABLE = () unless %REPROXY_DISABLE;
+
 }
 
 # no dependencies.

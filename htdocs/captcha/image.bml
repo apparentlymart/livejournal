@@ -5,8 +5,11 @@
     return "Error" unless $capid && $anum;
 
     # determine if we are talking to someone interested in reproxying for us
-    my $hdr = BML::get_client_header('X-Proxy-Capabilities');
-    my $can_reproxy = $hdr && $hdr =~ m{\breproxy-file\b}i;
+    my $can_reproxy = 0;
+    unless ($LJ::REPROXY_DISABLE{captchas}) {
+        my $hdr = BML::get_client_header('X-Proxy-Capabilities');
+        $can_reproxy = $hdr && $hdr =~ m{\breproxy-file\b}i;
+    }
 
     my $png;
     eval { $png = LJ::Captcha::get_visual_data($capid, $anum, $can_reproxy); };
