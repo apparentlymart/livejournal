@@ -573,6 +573,18 @@ CREATE TABLE syncupdates (
 ) 
 EOC
 
+register_tablecreate("syncupdates2", <<'EOC');
+CREATE TABLE syncupdates2 (
+  userid INT UNSIGNED NOT NULL,
+  atime DATETIME NOT NULL,
+  nodetype CHAR(1) NOT NULL,
+  nodeid MEDIUMINT UNSIGNED NOT NULL,
+  atype ENUM('create','update') NOT NULL DEFAULT 'create',
+  PRIMARY KEY  (userid,nodetype,nodeid),
+  KEY (userid,atime)
+) 
+EOC
+
 register_tablecreate("talk", <<'EOC');
 CREATE TABLE talk (
   talkid int(10) unsigned NOT NULL auto_increment,

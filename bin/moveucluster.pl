@@ -128,6 +128,9 @@ if ($sclust == 0)
 	$stmsg->(sprintf "$user: copy $done/$todo (%.2f%%) +${elapsed}s -${timeremain}s\n", 100*$percent);
     }
 
+    # before we start deleting, record they've moved servers.
+    $dbh->do("UPDATE user SET dversion=1, clusterid=$dclust WHERE userid=$userid");
+
     # if everything's good (nothing's died yet), then delete all from source
     $done = 0;
     $stime = time();
@@ -146,9 +149,7 @@ if ($sclust == 0)
 	$dbh->do("DELETE FROM userbio WHERE userid=$userid");
     }
 
-    $dbh->do("UPDATE user SET dversion=1, clusterid=$dclust WHERE userid=$userid");
-
-    # unset read-only bit
+    # unset read-only bit (marks the move is complete, also, and not aborted mid-delete)
     $dbh->do("UPDATE user SET caps=caps&~(1<<$readonly_bit) WHERE userid=$userid");
 
 }
@@ -172,6 +173,8 @@ sub deletefrom0_logitem
     foreach my $table (qw(logprop logtext logsubject log)) {
 	$dbh->do("DELETE FROM $table WHERE itemid=$itemid");
     }
+
+    $dbh->do("DELETE FROM syncupdates WHERE userid=$userid AND nodetype='L' AND nodeid=$itemid");
 }
 
 
@@ -236,6 +239,14 @@ sub movefrom0_logitem
 	    if $values;
     }
     
+    # copy its syncitems over
+    my $syncs = $dbh->selectrow_arrayref("SELECT atime, atype FROM syncupdates WHERE userid=$userid ".
+					 "AND nodetype='L' AND nodeid=$itemid");
+    if ($syncs) {
+	$dbch->do("REPLACE INTO syncupdates2 (userid, atime, nodetype, nodeid) VALUES ".
+		  "($userid, '$syncs->[0]', 'L', $jitemid)");
+    }
+
     # copy its talk shit over:
     my %newtalkids = (0 => 0);  # 0 maps back to 0 still
     my $talkids = $dbh->selectcol_arrayref("SELECT talkid FROM talk ".
