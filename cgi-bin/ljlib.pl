@@ -1302,7 +1302,7 @@ sub set_userprop
     my %action;  # $table -> {"replace"|"delete"} -> [ "($userid, $propid, $qvalue)" | propid ]
 
     foreach $propname (keys %$hash) {
-        my $p = LJ::get_prop("user", $propname) or 
+        my $p = LJ::get_prop("user", $propname) or
             die "Invalid userprop $propname passed to LJ::set_userprop.";
         my $table = $p->{'indexed'} ? "userprop" : "userproplite";
         if ($p->{datatype} eq 'blobchar') {
@@ -7373,11 +7373,11 @@ sub kill_session
 sub get_reluser_id {
     my $type = shift;
     return 0 if length $type == 1; # must be more than a single character
-    my $val = 
+    my $val =
         {
             'hide_comm_assoc' => 1,
-        }->{$type}+0;                   
-    return $val if $val;               
+        }->{$type}+0;
+    return $val if $val;
     return 0 unless $type =~ /^local-/;
     return LJ::run_hook('get_reluser_id', $type)+0;
 }
