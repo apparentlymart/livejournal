@@ -3,7 +3,7 @@ TITLE=>Interests
 BODY<=
 
 (=_CODE
-
+#line 6
  return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
 
  my $dbs = LJ::get_dbs();
@@ -91,9 +91,19 @@ BODY<=
      }
 
      my $ret = "";
-     $ret .= "(=H1 Similar Users H1=)(=P This tool lets you find users with the most similiar interests to a given user.  More fun stuff can be found on the <A HREF=\"/interests.bml\">interests page</A>. P=)";
-     $ret .= "<CENTER><FORM METHOD=GET><INPUT TYPE=HIDDEN NAME=mode VALUE=findsim_do>";
-     $ret .= "User: <INPUT NAME=user> <INPUT TYPE=SUBMIT VALUE=\"Find!\"></FORM></CENTER>";
+     $ret .= "(=H1 Similar Users H1=)(=P This tool lets you find users with the most similar interests to a given user.  More fun stuff can be found on the <A HREF=\"/interests.bml\">interests page</A>. P=)";
+     
+     my $remote = LJ::get_remote($dbs);
+     LJ::load_remote($dbs, $remote);
+     if (LJ::get_cap($remote, "findsim")) {
+         $ret .= "<center><form method='get'><input type='hidden' name='mode' value='findsim_do' />";
+         $ret .= "Similar to User: <input name='user' value='$remote->{'user'}' /> <input type='submit' value=\"Find!\" /></form><b>Please note:</b> Search will take several seconds.  Be patient.</center>";
+     } else {
+         $ret .= "(=P However, your account type doesn't let you use this tool. P=)";
+         unless ($remote) {
+             $ret .= "(=P You're also not <a href='/login.bml?ret=1'>logged in</a>, so your account type can't be determined. P=)";
+         }
+     }
      return $ret;
  }
 
@@ -103,44 +113,77 @@ BODY<=
          return "This is disabled temporarily.";
      }
 
+     my $remote = LJ::get_remote($dbs);
+     LJ::load_remote($dbs, $remote);
+     unless (LJ::get_cap($remote, "findsim")) {
+         return "Sorry, your account type doesn't let you use this tool.";
+     }
+
      my $ret = "";
-     my $userid = LJ::get_userid($dbs, $FORM{'user'});
-     return "(=H1 Error H1=)(=P Unknown user P=)" unless ($userid);
+     my $u = LJ::load_user($dbs, $FORM{'user'});
+     return "(=H1 Error H1=)(=P Unknown user P=)" unless $u;
 
-     $sth = $dbr->prepare("SELECT intid FROM userinterests WHERE userid=$userid");
+     my @ints;
+     my %intcount;
+     my $sth = $dbr->prepare("SELECT i.intid, i.intcount FROM userinterests ui, interests i ".
+                             "WHERE ui.userid=$u->{'userid'} AND ui.intid=i.intid");
      $sth->execute;
-     my @intids = ();
-     push @intids, $_->{'intid'} while ($_ = $sth->fetchrow_hashref);
+     while (my ($intid, $count) = $sth->fetchrow_array) {
+         push @ints, $intid;
+         $intcount{$intid} = $count || 1;
+     }
+     return "(=H1 Error H1=)(=P User (=LJUSER $u->{'user'} LJUSER=) has no defined interests. P=)" 
+         unless @ints;
 
-     return "(=H1 Error H1=)(=P User $FORM{'user'} has no defined interests. P=)" unless (@intids);
-    
-     my $intid_in = join(", ", @intids);
-     $ret .= "(=H1 Similar Users H1=)(=P The following are the most related users to $FORM{'user'}. P=)";
+     my %pt_count;
+     my %pt_weight;
+     foreach my $int (@ints) {
+         # the magic's in this limit clause.  that's what makes this work.  perfect 
+         # results?  no.  but who cares if somebody that lists "music" or "women"
+         # doesn't get an extra point towards matching you.  we care about more unique interests.
+         my $sth = $dbr->prepare("SELECT userid FROM userinterests WHERE intid=$int LIMIT 500");
+         $sth->execute;
+         while (my $uid = $sth->fetchrow_array) {
+             next if $uid == $u->{'userid'};
+             $pt_weight{$uid} += (1 / $intcount{$int});
+             $pt_count{$uid}++;
+         }
+     }
 
-     # what database to hit?
-     my $dbdir = LJ::get_dbh($LJ::DIR_DB_HOST);     
-     my $pfx = $LJ::DIR_DB ? "$LJ::DIR_DB." : "";
+     my %magic;  # balanced points
+     foreach (keys %pt_count) {
+         $magic{$_} = $pt_weight{$_}*20 + $pt_count{$_};
+     }
      
-     $sth = $dbdir->prepare("SELECT u.user, COUNT(*) AS 'count' ".
-                            "FROM ${pfx}user u, ${pfx}userinterests ui ".
-                            "WHERE u.userid=ui.userid AND u.statusvis='V' ".
-                            "AND ui.intid IN ($intid_in) ".
-                            "GROUP BY 1 ORDER BY 2 DESC, 1 ASC LIMIT 100");
+     my @matches = sort { $magic{$b} <=> $magic{$a} } keys %magic;
+     if (@matches > 150) { @matches = @matches[0..149]; }
+     my $sth = $dbr->prepare("SELECT userid, user FROM useridmap WHERE userid IN (" . join(",",@matches) . ")");
      $sth->execute;
-     $ret .= "<P><TABLE CELLPADDING=3><TR VALIGN=BOTTOM><TD><B>#</B></TD><TD><B>User</B></TD><TD><B>Similiar<BR>Interests</B></TD><TD><B>Percent Match</B></TD></TR>\n";
-     my $total = @intids;
-     my $count=0;
-     while ($_ = $sth->fetchrow_hashref)
+     my %username;
+     while (my ($id, $name) = $sth->fetchrow_array) {
+         $username{$id} = $name;
+     }
+
+     unless (@matches) {
+         return "(=H1 No Matches H1=)(=P No users are similar to (=LJUSER $u->{'user'} LJUSER=). P=)";
+     }
+
+     $ret .= "(=H1 Similar Users H1=)(=P The following are the most related users to (=LJUSER $u->{'user'} LJUSER=) P=)";
+
+     $ret .= "<p><table cellpadding='3'><tr valign='bottom'><td><b>#</b></td><td width='250'><b>User</b></td><td><b>Magic<br />Index</b></td></tr>\n";
+     my $count;
+     foreach my $uid (@matches) 
      {
          $count++;
-         my $percent = sprintf("%.1f", $_->{'count'}*100/$total);
-         $ret .= "<TR>";
-         $ret .= "<TD>$count</TD>";
-         $ret .= "<TD>(=LJUSER $_->{'user'} LJUSER=)</TD>";
-         $ret .= "<TD>$_->{'count'}</TD><TD>($percent%)</TD></TR>\n";
+         $ret .= "<tr>";
+         $ret .= "<td>$count</td>";
+         $ret .= "<td>(=LJUSER $username{$uid} LJUSER=)</td>";
+         $ret .= sprintf("<td>%.3f</td>", $magic{$uid});
+         $ret .= "</tr>\n";
      }
-     $ret .= "</TABLE>\n";
+     $ret .= "</table></p>\n";
 
+     $ret .= "(=H1 Magic Index? H1=)(=P Each matching user gets computed a magic index, which is a weighting of two factors:  the raw number of like interests, and some extra points for sharing uncommon interests. P=)";
      return $ret;
  }
 
@@ -193,7 +236,7 @@ BODY<=
      my $list;
      my $count = 0;
      $list .= "<UL>\n";
-     # FIXME: LIMIT 1000 is a temporary hack.  better solution:  paging.
+     # FIXME: LIMIT 1000 is a temporary hack.  better solution:  redirect to directory; allow for free users.
      $sth = $dbr->prepare("SELECT u.user, u.name FROM user u, userinterests ui WHERE u.userid=ui.userid AND ui.intid=$qintid AND u.journaltype='P' AND u.statusvis='V' ORDER BY u.user LIMIT 1000");
      $sth->execute;
      while (my ($iuser, $iname) = $sth->fetchrow_array) {
@@ -215,7 +258,7 @@ BODY<=
  $ret .= "(=H1 Interests H1=)(=P Here are some fun things you can do with interests.... P=)";
  $ret .= "<FORM METHOD=GET><UL>";
  $ret .= "<LI><A HREF=\"/interests.bml?view=popular\">View popular interests</A>\n";
- $ret .= "<LI><A HREF=\"/interests.bml?mode=findsim\">Find similiar people</A> -- see who has the most number of common interests with you\n" unless ($LJ::DISABLED{'interests-findsim'});
+ $ret .= "<LI><A HREF=\"/interests.bml?mode=findsim\">Find similar people</A> -- see who has the most number of common interests with you\n" unless ($LJ::DISABLED{'interests-findsim'});
  $ret .= "<LI>Find people interested in: <INPUT NAME=int SIZE=20><INPUT TYPE=SUBMIT VALUE=\"Find\">\n";
  $ret .= "</UL></FORM>\n";
  $ret .= "Don't have any interests listed?  Add some by going to the <A HREF=\"/editinfo.bml\">Edit Personal Info & Settings</A> page.";
