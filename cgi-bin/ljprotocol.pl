@@ -42,6 +42,7 @@ sub error_message
 	     "302" => "Can't edit post from requested journal",
 	     "303" => "Can't edit post in community journal",
 	     "304" => "Can't delete post in this community journal",
+	     "305" => "Action forbidden; account is suspended.",
 	     
 	     # Server Errors
 	     "500" => "Internal server error",
@@ -350,6 +351,9 @@ sub postevent
     return fail($err,150) if ($u->{'journaltype'} eq "C" || 
 			      $u->{'journaltype'} eq "S" ||
 			      $u->{'journaltype'} eq "N");
+
+    # suspended users can't post
+    return fail($err,305) if ($u->{'statusvis'} eq "S");
 
     #### clean up the event text        
     my $event = $req->{'event'};
