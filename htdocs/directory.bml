@@ -134,6 +134,7 @@ BODY<=
  }
 
  my $remote = LJ::get_remote($dbs);
+ LJ::load_remote($dbs, $remote);
 
  unless (LJ::check_priv($dbs, $remote, "betatest", "directory") ||
          LJ::get_cap($remote, "directory"))
