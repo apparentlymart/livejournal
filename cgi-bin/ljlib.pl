@@ -1182,6 +1182,7 @@ sub make_authas_select {
 # des: Registers an authaction to add a user to a
 #      community and sends an approval email
 # returns: Hashref; output of LJ::register_authaction()
+#          includes datecreate of old row if no new row was created
 # args: comm, u, attr?
 # des-comm: Community user object
 # des-u: User object to add to community
@@ -1191,14 +1192,23 @@ sub comm_member_request {
     my ($comm, $u, $attr) = @_;
     return undef unless ref $comm && ref $u;
 
+    my $arg = join("&", "targetid=$u->{'userid'}", map { "$_=1" } sort @$attr);
+
+    # check for duplicates
+    my $dbh = LJ::get_db_writer();
+    my $oldaa = $dbh->selectrow_hashref("SELECT aaid, authcode, datecreate FROM authactions " .
+                                        "WHERE userid=? AND arg1=? " .
+                                        "AND action='comm_invite' AND used='N' " .
+                                        "ORDER BY 1 DESC LIMIT 1",
+                                        undef, $comm->{'userid'}, $arg);
+    return $oldaa if $oldaa;
+
     # insert authactions row
-    $attr ||= [];
-    my $aa = LJ::register_authaction($comm->{'userid'}, 'comm_invite',
-                                     join("&", "targetid=$u->{'userid'}",
-                                          map { "$_=1" } @$attr) );
+    my $aa = LJ::register_authaction($comm->{'userid'}, 'comm_invite', $arg);
     return undef unless $aa;
 
     # email recipient user for confirmation
+    $attr ||= [];
     my %attr_map = ('member'     => "Member",
                     'admin'      => "Maintainer",
                     'post'       => "Poster",
@@ -1206,11 +1216,11 @@ sub comm_member_request {
                     'preapprove' => "Unmoderated",
                     );
 
-    my $cname = $comm->{'name'};
-    my $body = "A maintainer of the $cname community has requested that " .
+    my $cuser = $comm->{'user'};
+    my $body = "A maintainer of the $cuser community has requested that " .
         "you be added to the community with the following capabilities: " .
         join(", ", map { $attr_map{$_} } @$attr) . ".\n\n" .
-        "If you do not wish to be added to $cname, just ignore this email.  " .
+        "If you do not wish to be added to $cuser, just ignore this email.  " .
         "However, if you would like to join the community, please click " .
         "the link below to authorize this action.\n\n" .
         "     $LJ::SITEROOT/approve/$aa->{'aaid'}.$aa->{'authcode'}\n\n" .
@@ -1221,7 +1231,53 @@ sub comm_member_request {
         'from' => $LJ::ADMIN_EMAIL,
         'fromname' => $LJ::SITENAME,
         'charset' => 'utf-8',
-        'subject' => "Community Membership: $cname",
+        'subject' => "Community Membership: $cuser",
+        'body' => $body
+        });
+
+    return $aa;
+}
+
+# <LJFUNC>
+# name: LJ::shared_member_request
+# des: Registers an authaction to add a user to a
+#      shared journal and sends an approval email
+# returns: Hashref; output of LJ::register_authaction()
+#          includes datecreate of old row if no new row was created
+# args: ju, u, attr?
+# des-ju: Shared journal user object
+# des-u: User object to add to shared journal
+# </LJFUNC>
+sub shared_member_request {
+    my ($ju, $u) = @_;
+    return undef unless ref $ju && ref $u;
+
+    # check for duplicates
+    my $dbh = LJ::get_db_writer();
+    my $oldaa = $dbh->selectrow_hashref("SELECT aaid, authcode, datecreate FROM authactions " .
+                                        "WHERE userid=? AND action='shared_invite' AND used='N' " .
+                                        "ORDER BY 1 DESC LIMIT 1",
+                                        undef, $ju->{'userid'});
+    return $oldaa if $oldaa;
+
+    # insert authactions row
+    my $aa = LJ::register_authaction($ju->{'userid'}, 'shared_invite', "targetid=$u->{'userid'}");
+    return undef unless $aa;
+
+    my $body = "The maintainer of the $ju->{'user'} shared journal has requested that " .
+        "you be given posting access.\n\n" .
+        "If you do not wish to be added to this journal, just ignore this email.  " .
+        "However, if you would like to accept posting rights to $ju->{'user'}, click " .
+        "the link below to authorize this action.\n\n" .
+        "     $LJ::SITEROOT/approve/$aa->{'aaid'}.$aa->{'authcode'}\n\n" .
+        "Regards\n$LJ::SITENAME Team\n";
+
+    LJ::send_mail({
+        'to' => $u->{'email'},
+        'from' => $LJ::ADMIN_EMAIL,
+        'fromname' => $LJ::SITENAME,
+        'charset' => 'utf-8',
+        'subject' => "Community Membership: $ju->{'name'}",
         'body' => $body
         });
 
@@ -1245,8 +1301,7 @@ sub is_valid_authaction
     # used multiple times
     my $dbh = LJ::get_db_writer();
     my ($aaid, $auth) = @_;
-    return $dbh->selectrow_hashref("SELECT aaid, userid, datecreate, authcode, action, arg1 ".
-                                   "FROM authactions WHERE aaid=? AND authcode=?",
+    return $dbh->selectrow_hashref("SELECT * FROM authactions WHERE aaid=? AND authcode=?",
                                    undef, $aaid, $auth);
 }
 

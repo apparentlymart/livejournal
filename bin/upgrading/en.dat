@@ -107,6 +107,10 @@
 
 /community/manage.bml.title=Community Management
 
+/community/members.bml.error.alreadyadded=[[user]] was not added because they already have access to this community.
+
+/community/members.bml.error.alreadysent=[[user]] could not be added because they were already sent a confirmation email on: <i>[[datetime]]</i>.  Please wait for them to respond.
+
 /community/members.bml.error.invaliduser=Cannot add community or syndicated account: [[user]]
 
 /community/members.bml.error.noaccess=Only community maintainers are able to edit membership lists. You are not a maintainer of community [[comm]].

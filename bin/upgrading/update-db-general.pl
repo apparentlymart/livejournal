@@ -1809,6 +1809,16 @@ register_alter(sub {
                  "ALTER TABLE userproplist ADD cldversion TINYINT UNSIGNED NOT NULL AFTER indexed");
     }
 
+    unless (column_type("authactions", "used") &&
+            index_name("authactions", "INDEX:userid") &&
+            index_name("authactions", "INDEX:datecreate")) {
+
+        do_alter("authactions",
+                 "ALTER TABLE authactions " .
+                 "ADD used enum('Y', 'N') DEFAULT 'N' AFTER arg1, " .
+                 "ADD INDEX(userid), ADD INDEX(datecreate)");
+    }
+
 });
 
 1; # return true

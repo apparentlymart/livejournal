@@ -63,7 +63,6 @@ sub shared
 {
     my ($dbh, $remote, $args, $out) = @_;
     my $error = 0;
-    my $dbs = LJ::make_dbs_from_arg($dbh);
 
     unless (scalar(@$args) == 4) {
         $error = 1;
@@ -73,8 +72,10 @@ sub shared
     return 0 if ($error);
 
     my ($shared_user, $action, $target_user) = ($args->[1], $args->[2], $args->[3]);
-    my $shared_id = LJ::get_userid($dbh, $shared_user);
-    my $target_id = LJ::get_userid($dbh, $target_user);
+    my $shared = LJ::load_user($shared_user);
+    my $shared_id = $shared->{'userid'};
+    my $target = LJ::load_user($target_user);
+    my $target_id = $target->{'userid'};
 
     unless ($action eq "add" || $action eq "remove") {
         $error = 1;
@@ -84,16 +85,24 @@ sub shared
         $error = 1;
         push @$out, [ "error", "Invalid shared journal \"$shared_user\"" ];
     }
+    unless ($shared->{'journaltype'} eq 'S') {
+        $error = 1;
+        push @$out, [ "error", "\"$shared_user\" is not a shared journal" ];
+    }
     unless ($target_id) {
         $error = 1;
         push @$out, [ "error", "Invalid user \"$target_user\" to add/remove" ];
-    }
-    if ($target_id && $target_id==$shared_id) {
+    } elsif ($target_id == $shared_id) {
         $error = 1;
         push @$out, [ "error", "Target user can't be shared journal user." ];
     }
     
-    unless (LJ::check_rel($dbs, $shared_id, $remote, 'A') ||
+    if (LJ::check_rel($shared_id, $target_id, 'A')) {
+        $error = 1;
+        push @$out, [ "error", "User \"$target->{'user'}\" already has posting access to this shared journal." ];
+    }
+
+    unless (LJ::check_rel($shared_id, $remote, 'A') ||
             $remote->{'privarg'}->{'sharedjournal'}->{'all'}) 
     {
         $error = 1;
@@ -102,10 +111,18 @@ sub shared
     
     return 0 if ($error);    
     
-    my $dbs = LJ::make_dbs_from_arg($dbh);
     if ($action eq "add") {
-        LJ::set_rel($shared_id, $target_id, 'P');
-        push @$out, [ "info", "User \"$target_user\" can now post in \"$shared_user\"." ];
+        my $res = LJ::shared_member_request($shared, $target);
+        unless ($res) {
+            push @$out, [ 'error', "Could not add user." ];
+            return 0;
+        }
+        if ($res->{'datecreate'}) {
+            push @$out, [ 'error', "User \"$target->{'user'}\" already mailed on: $res->{'datecreate'}" ];
+            return 0;
+        }
+
+        push @$out, [ "info", "User \"$target_user\" has been sent a confirmation email and will be able to post in \"$shared_user\" once they confirm this action." ];
     } 
     if ($action eq "remove") {
         LJ::clear_rel($shared_id, $target_id, 'P');
@@ -147,9 +164,7 @@ sub community
     } 
     else 
     {
-        $sth = $dbh->prepare("SELECT userid, membership, postlevel FROM community WHERE userid=$com_id");
-        $sth->execute;
-        $ci = $sth->fetchrow_hashref;
+        $ci = $dbh->selectrow_hashref("SELECT userid, membership, postlevel FROM community WHERE userid=$com_id");
         
         unless ($ci) {
             $error = 1;
@@ -160,15 +175,14 @@ sub community
     unless ($target_id) {
         $error = 1;
         push @$out, [ "error", "Invalid user \"$target_user\" to add/remove" ];
+    } elsif ($target_id == $com_id) {
+        $error = 1;
+        push @$out, [ "error", "User \"$target_user\" can't be shared journal user." ];
     } elsif ($target->{'journaltype'} ne 'P') {
         $error = 1;
         push @$out, [ "error", "Cannot add community/syndicated account to community." ];
     }
 
-    if ($target_id && $target_id==$com_id) {
-        $error = 1;
-        push @$out, [ "error", "Target user can't be shared journal user." ];
-    }
     
     # user doesn't need admin priv to remove themselves from community
 
@@ -190,6 +204,10 @@ sub community
         my $res = LJ::comm_member_request($comm, $target, $attr);
         unless ($res) {
             push @$out, [ 'error', "Could not add user." ];
+            return 0;
+        }
+        if ($res->{'datecreate'}) {
+            push @$out, [ 'error', "User \"$target_user\" already mailed on: $res->{'datecreate'}" ];
             return 0;
         }
 

@@ -46,6 +46,7 @@ body<=
     # saving a form submission
     if ($POST{'action:update'}) {
 
+        my @userids = split(',', $POST{'ids'});
         my @saveattribs = split(',', $POST{'attribs'});
 
         # add new users
@@ -64,12 +65,20 @@ body<=
             my @attr = grep { defined $POST{"add_${num}_$_"} } @saveattribs;
             unless (@attr) {
                 push @add_errors, BML::ml('.error.noattr',
-                                          { 'user' => LJ::ljuser($POST{"add_$num"}) });
+                                          { 'user' => LJ::ljuser($POST{"add_$num"},
+                                            { 'type' => $target->{'journaltype'} }) });
                 next;
             }
 
             unless ($target->{'journaltype'} eq 'P') {
                 push @add_errors, BML::ml('.error.invaliduser',
+                                          { 'user' => LJ::ljuser($POST{"add_$num"},
+                                            { 'type' => $target->{'journaltype'} }) });
+                next;
+            }
+
+            if (grep { $target->{'userid'} == $_ } @userids) {
+                push @add_errors, BML::ml('.error.alreadyadded',
                                           { 'user' => LJ::ljuser($POST{"add_$num"},
                                             { 'type' => $target->{'journaltype'} }) });
                 next;
@@ -80,6 +89,13 @@ body<=
             unless ($aa) {
                 $ret .= "<?h1 $ML{'Error'} h1?><?p Error registering authaction. p?>";
                 return $ret;
+            }
+            if ($aa->{'datecreate'}) {
+                push @add_errors, BML::ml('.error.alreadysent',
+                                          { 'user' => LJ::ljuser($POST{"add_$num"},
+                                            { 'type' => $target->{'journaltype'} }),
+                                            'datetime' => $aa->{'datecreate'} 
+                                          });
             }
 
             $adding = 1;
@@ -98,8 +114,6 @@ body<=
         # need a db handle now
         my $dbh = LJ::get_db_writer();
 
-        my @userids = split(',', $POST{'ids'});
-
         # if we have $other_maints, then there are maintainers not in our
         # current view, so they will not be modified, so the user can delete
         # all maintainers from the current view
@@ -113,7 +127,7 @@ body<=
         my $maints = 0;
         foreach my $id (@userids) {
             $id = $id + 0;
-            foreach (@saveattribs) {
+            foreach (@allattribs) {
                 if ($POST{"edit_${id}_$_"}) {
                     $add{$_}->{$id} = 1;
                 } else {
