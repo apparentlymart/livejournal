@@ -27,6 +27,10 @@ general /editinfo.bml.tm.about
 general /editinfo.bml.topicdir.about
 general /editinfo.bml.topicdir.header
 
+general /friends/edit.bml.btn.proceed
+general /friends/edit.bml.edit.head
+general /friends/edit.bml.edit.text
+
 general /modify.bml.btn.proceed
 general /modify.bml.lostinfo.head
 general /modify.bml.lostinfo.text

@@ -1,26 +1,260 @@
 <?page
 title=><?_ML .title _ML?>
 body<=
-
-<?h1 <?_ML .edit.head _ML?> h1?><?p <?_ML .edit.text _ML?> p?>
-
-<form action="edit_do.bml" method="post">
-
-<?standout
-<table>
 <?_code
- return LJ::auth_fields(\%FORM);
- _code?>
-<tr><td colspan="2" align="center">
-<input type="submit" value="<?_ML .btn.proceed _ML?>"></td></tr>
-</table>
-standout?>
-</form>
+{
+    use strict;
+    use vars qw(%GET %POST);
 
-<?h1 <?_ML lostinfo.head _ML?> h1?> <?p <?_ML lostinfo.text _ML?> p?>
+    return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+    return "<?badinput?>" unless LJ::text_in(\%POST);
 
+    # this file used to be edit_do.bml, but edit.bml died, so we moved this
+    # functionality to edit.bml, but we don't want the translators to have to
+    # retranslate all of the phrases, so we're still using /edit_do.bml scope
+    BML::set_language_scope("/friends/edit_do.bml");
+
+    my $remote = LJ::get_remote();
+    return LJ::bad_input("You must be logged in to use this tool.")
+        unless $remote;
+
+    my $authas = $GET{'authas'} || $remote->{'user'};
+
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input("You could not be authenticated as the specified user.")
+        unless $u;
+
+    my $ret;
+
+    # no post, show edit form
+    unless (LJ::did_post()) {
+
+        # user switcher
+        $ret .= "<form action='edit.bml' method='get'>\n";
+        $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+        $ret .= "</form>\n\n";
+
+        $ret .= "<form method='post' name='editFriends' action='edit.bml?authas=$authas'>\n";
+
+        ### who has you defined as a friend?
+        my %res = ();
+        LJ::do_request({
+            "user" => $u->{'user'},
+            "mode" => "friendof",
+            "ver" => $LJ::PROTOCOL_VER,
+        }, \%res, { "noauth" => 1, 'u' => $u });
+
+        if ($res{'friendof_count'}) {
+            $ret .= "<?h1 $ML{'.fellowfriends.head'} h1?><?p $ML{'.fellowfriends.text'} p?>\n";
+            $ret .= "<p align='center'><table><tr bgcolor='<?emcolor?>'><td width='150'><b>$ML{'.user'}</b></td>";
+            $ret .= "<td width='150'><b>$ML{'.name'}</b></td></tr>\n";
+
+            for (my $i=1; $i <= $res{'friendof_count'}; $i++) {
+                $ret .= "<tr align='left'><td>" . LJ::ljuser($res{"friendof_${i}_user"}) . "</td>";
+                $ret .= "<td>" . LJ::eall($res{"friendof_${i}_name"}) . "</td></tr>\n";
+            }
+            $ret .= "</table></p>";
+        }
+
+        ### who do you have defined as a friend?
+        %res = ();
+        LJ::do_request({
+            "user" => $u->{'user'},
+            "mode" => "getfriends",
+            "ver" => $LJ::PROTOCOL_VER,
+        }, \%res, { "noauth" => 1, 'u' => $u });
+
+        if ($res{'friend_count'}) {
+            $ret .= "<?h1 $ML{'.yourfriends.head'} h1?><?p $ML{'.yourfriends.text'} p?>\n";
+            $ret .= "<p align='center'><table>\n";
+            $ret .= "<tr bgcolor='<?emcolor?>'><td width='150'><b>$ML{'.friend'}</b></td><td width='250'><b>$ML{'.name'}</b></td>";
+            $ret .= "<td align='center'><b>$ML{'.opt.delete'}</b></td></tr>\n";
+
+            for (my $i=1; $i<=$res{'friend_count'}; $i++) {
+                my $fruser = $res{"friend_${i}_user"};
+                my $bgcolor = $res{"friend_${i}_bg"} || "#FFFFFF";
+                my $fgcolor = $res{"friend_${i}_fg"} || "#000000";
+                my $status = $res{"friend_${i}_status"};
+                my $userlink = LJ::ljuser($fruser);
+                if ($status eq 'deleted' || $status eq 'purged' || $status eq 'suspended') {
+                    $userlink = "<strike>$userlink</strike>";
+                }
+
+                $ret .= "<tr align='left'><td>$userlink</td>";
+                $ret .= "<td bgcolor='$bgcolor'><font color='$fgcolor'>";
+                $ret .= "<label for='editfriend_delete_${fruser}'>" . LJ::eall($res{"friend_${i}_name"}) . "</label>";
+                $ret .= "</font></td><td align='center'>";
+                $ret .= LJ::html_check({ 'type' => 'check',
+                                         'name' => "editfriend_delete_${fruser}",
+                                         'id' => "editfriend_delete_${fruser}"});
+                $ret .= "</td></tr>\n";
+            }
+            $ret .= "</table></p>\n\n";
+            
+        } else {
+            $ret .= "<?h1 $ML{'.nofriends.head'} h1?><?p $ML{'.nofriends.text'} p?>\n\n";
+        }
+
+        ### add friends
+        $ret .= "<?h1 $ML{'.addfriends.head'} h1?><?p $ML{'.addfriends.text'} p?>\n";
+        $ret .= "<p align='center'><input type='button' value='$ML{'.btn.toggle'}' onClick='togglePreview(); return true;'></p>\n";
+
+        $ret .= "<p align='center'><table cellpadding='4'>\n";
+        $ret .= "<tr><td><b>$ML{'.friend'}</b></td><td><b>$ML{'.foreground'}</b></td><td><b>$ML{'.background'}</b></td></tr>\n";
+
+        # load the colors
+        my @color = ();
+        LJ::load_codes({ "color" => \@color });
+
+        for (my $i=0; $i<6; $i++) {
+            $ret .= "<tr><td>";
+            $ret .= LJ::html_text({ 'name' => "editfriend_add_${i}_user",
+                                    'size' => '15', 'maxlength' => '15',
+                                    'onchange' => "updatePreview(); return true;",
+                                    'onfocus' => "setFriend($i);" });
+            $ret .= "</td><td>";
+            $ret .= LJ::html_select({ 'name' => "editfriend_add_${i}_fg",
+                                      'selected' => '#000000',
+                                      'onchange' => "updatePreview(); return true;",
+                                      'onfocus' => "setFriend($i);" },
+                                      map { $_->{'code'}, $_->{'item'} } @color );
+            $ret .= "</td><td>";
+            $ret .= LJ::html_select({ 'name' => "editfriend_add_${i}_bg",
+                                      'selected' => '#ffffff',
+                                      'onchange' => "updatePreview(); return true;",
+                                      'onfocus' => "setFriend($i);" },
+                                      map { $_->{'code'}, $_->{'item'} } @color );
+
+            $ret .= "</td></tr>\n";
+        }
+        $ret .= "</table></p>\n";
+
+        ### color swatch
+        my $col = 0;
+        $ret .= "<p align='center'><table border='0' cellspacing='0' cellpadding='0'>";
+        foreach (@color) {
+            if ($col==0) { $ret .= "<tr>\n"; }
+            $col++;
+            my $ecolor = LJ::ehtml($_->{'item'});
+            $ret .= "<td bgcolor='$_->{'code'}'><img src='/img/dot.gif' width='14' height='14' title='$ecolor' alt='$ecolor' /></td>";
+            if ($col==23) { $ret .= "</tr>\n"; $col==0; }
+        }
+        
+        if ($col) { $ret .= "</tr>\n"; $col==0; }
+        $ret .= "</table>\n";
+        $ret .= "<font size='-2' face='Arial,Helvetica'>($ML{'.hover'})</font></p>";
+
+        $ret .= "<p>$ML{'.needmore'}</p>\n";
+        
+        ### ending submit block
+        $ret .= "<?h1 $ML{'.done.head'} h1?><?p $ML{'.done.text'} p?>\n";
+        $ret .= "<?standout " . LJ::html_submit(undef, $ML{'.btn.save'}) . " standout?>\n";
+        $ret .= "</form>\n";
+
+        return $ret;
+ }
+
+ # if they did a post, then process their changes
+ if (LJ::did_post()) {
+
+     my %request = ();
+     $request{'mode'} = "editfriends";
+     $request{'ver'} = $LJ::PROTOCOL_VER;
+     $request{'user'} = $u->{'user'};
+     foreach (grep { /^editfriend_/ } keys %POST) {
+         $request{$_} = $POST{$_};
+     }
+
+     my %response = ();
+     LJ::do_request(\%request, \%response, { 'noauth' => 1, 'u' => $u });
+
+     if ($response{'success'} eq "OK") {
+         # tell the user all is well
+         return "<?h1 $ML{'.success.head'} h1?><?p ".BML::ml(".success.text", {'url' => LJ::journal_base($u) . "/friends"})." p?>";
+     } else {
+         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.updating'} <ul><li><b>$response{'errmsg'}</b></ul> p?>\n";
+     }
+ }
+
+ return $ML{'error.unknownmode'};
+}
+_code?>
 <=body
+
+head<=
+<?_code
+{
+    use strict;
+    BML::set_language_scope("/friends/edit_do.bml");
+
+    my %ejs = map { $_, LJ::ejs($ML{".$_"}) } qw(mrcolor viewer textcolor bgcolor btn.close);
+
+    return qq{                      
+<script language="JavaScript"><!--
+
+previewOn = 0;
+lastFriend = 0;
+
+function setFriend (curfriend)
+{
+    lastFriend = curfriend;
+}
+
+function togglePreview()
+{
+   if (previewOn==0 || winPreview.closed) {
+       winPreview = window.open("", "preview", "toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=0,resizable=0,copyhistory=0,width=400,height=270");
+       previewOn = 1;
+       updatePreview();
+   } else {
+       winPreview.close();
+       previewOn = 0;
+   }
+}
+
+function updatePreview () {
+
+if (previewOn == 0 || winPreview.closed) { return; }
+
+frm = document.editFriends;
+
+dropdown = frm["editfriend_add_"+lastFriend+"_fg"]
+fg_color = dropdown.options[dropdown.selectedIndex].value;
+fg_color_text = dropdown.options[dropdown.selectedIndex].text;
+
+dropdown = frm["editfriend_add_"+lastFriend+"_bg"]
+bg_color = dropdown.options[dropdown.selectedIndex].value;
+bg_color_text = dropdown.options[dropdown.selectedIndex].text;
+
+user_name = frm["editfriend_add_"+lastFriend+"_user"].value;
+if (user_name.length==0) { user_name = "username"; }
+
+d = winPreview.document;
+d.open();
+d.write("<html><head><title>$ejs{'mrcolor'}</title></head><body bgcolor='#ffffff' text='#000000'>");
+d.write("<b><font face='Trebuchet MS, Arial, Helvetica' size='4' color='#000066'><i>$ejs{'viewer'}</i></font></b><hr />");
+d.write("<br /><table width='350' align='center' cellpadding='5'><tr valign='middle'>");
+d.write("<td width='80%'><b><font face='Arial, Helvetica' size='2'>");
+d.write("$ejs{'textcolor'}&nbsp; <font color='#000066'>" + fg_color_text);
+d.write("</font></b><br /></td><td width='20%' bgcolor=" + fg_color + ">&nbsp;</td>");
+d.write("</tr><tr><td width='80%'><b><font face='Arial, Helvetica' size='2'>");
+d.write("$ejs{'bgcolor'}&nbsp; <font color='#000066'>" + bg_color_text + "");
+d.write("</font></b><br></td><td width='20%' bgcolor=" + bg_color + ">&nbsp;</td>");
+d.write("</tr><tr><td><br /></tr><tr><td colspan='3' bgcolor=" + bg_color + "><font color=" + fg_color + ">");
+d.write("<b>" + user_name + "</b></td></tr></table><br />");
+d.write("<hr><form><div align='center'><input type='button' value='$ejs{'btn.close'}' onClick='self.close();'></div></form>");
+d.write("</body></html>");
+d.close();
+    }
+// -->
+</script>
+}; # end qq{ }
+
+}
+_code?>
+<=head
+
 page?><?_c <LJDEP>
 link: htdocs/create.bml, htdocs/lostinfo.bml
-post: htdocs/friends/edit_do.bml
+post: htdocs/friends/edit.bml
 </LJDEP> _c?>
