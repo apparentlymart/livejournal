@@ -7,23 +7,29 @@ use lib "$ENV{'LJHOME'}/cgi-bin";  # extra XML::Encoding files in cgi-bin/XML/*
 use LWP::UserAgent;
 use XML::RSS;
 require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
+use Data::Dumper;
 
 $maint{'synsuck'} = sub
 {
-    my $dbh = LJ::get_db_writer();
-    my $sth;
-
     my $verbose = $LJ::LJMAINT_VERBOSE;
-    
-    my $ua =  LWP::UserAgent->new("timeout" => 10);
 
-    $sth = $dbh->prepare("SELECT u.user, s.userid, s.synurl, s.lastmod, s.etag, s.numreaders ".
-                         "FROM user u, syndicated s ".
-                         "WHERE u.userid=s.userid AND ".
-                         "u.statusvis='V' AND s.checknext < NOW() ORDER BY s.checknext");
-    $sth->execute;
-    while (my ($user, $userid, $synurl, $lastmod, $etag, $readers) = $sth->fetchrow_array)
-    {
+    my %child_jobs; # child pid => userid
+
+    my $process_user = sub {
+        my $urow = shift;
+        return unless $urow;
+
+        # we're a child process now, need to invalidate caches and
+        # get a new database handle
+        LJ::start_request();
+
+        my $dbh = LJ::get_db_writer();
+
+        my $ua = LWP::UserAgent->new("timeout" => 10);
+
+        my ($user, $userid, $synurl, $lastmod, $etag, $readers) = 
+            map { $urow->{$_} } qw(user userid synurl lastmod etag readers);
+
         my $delay = sub {
             my $minutes = shift;
             my $status = shift;
@@ -32,7 +38,7 @@ $maint{'synsuck'} = sub
                      undef, $minutes, $status, $userid);
         };
 
-        print "Synsuck: $user ($synurl)\n" if $verbose;
+        print "[$$] Synsuck: $user ($synurl)\n" if $verbose;
 
         my $req = HTTP::Request->new("GET", $synurl);
         $req->header('If-Modified-Since', LJ::time_to_http($lastmod))
@@ -46,7 +52,7 @@ $maint{'synsuck'} = sub
             $content .= $_[0];
         }, 4096);
         if ($too_big) { $delay->(60, "toobig"); next; }
-
+        
         # check if not modified
         if ($res->status_line() =~ /^304/) {
             print "  not modified.\n" if $verbose;
@@ -178,7 +184,7 @@ $maint{'synsuck'} = sub
                      undef, $userid, $dig);
 
             $newcount++;
-            print "$dig - $it->{'title'}\n" if $verbose;
+            print "[$$] $dig - $it->{'title'}\n" if $verbose;
             $it->{'description'} =~ s/^\s+//;
             $it->{'description'} =~ s/\s+$//;
             
@@ -253,7 +259,7 @@ $maint{'synsuck'} = sub
             $delay->(30, "posterror");
             next;
         }
-
+            
         # update syndicated account's userinfo if necessary
         LJ::load_user_props($su, "url", "urlname");
         {
@@ -290,7 +296,7 @@ $maint{'synsuck'} = sub
 
         my $r_lastmod = LJ::http_to_time($res->header('Last-Modified'));
         my $r_etag = $res->header('ETag');
-
+            
         # decide when to poll next (in minutes). 
         # FIXME: this is super lame.  (use hints in RSS file!)
         my $int = $newcount ? 30 : 60;
@@ -310,7 +316,79 @@ $maint{'synsuck'} = sub
         $dbh->do("UPDATE syndicated SET checknext=DATE_ADD(NOW(), INTERVAL $int MINUTE), ".
                  "lastcheck=NOW(), lastmod=?, etag=?, laststatus=?, numreaders=? $updatenew ".
                  "WHERE userid=$userid", undef, $r_lastmod, $r_etag, $status, $readers);
+    };
+
+    ###
+    ### child process management
+    ###
+
+    # get the next user to be processed
+    my @all_users;
+    my $get_next_user = sub {
+        return shift @all_users if @all_users;
+
+        # need to get some more rows
+        my $dbh = LJ::get_db_writer();
+        my $current_jobs = join(",", map { $dbh->quote($_) } values %child_jobs);
+        my $in_sql = " AND u.userid NOT IN ($current_jobs)" if $current_jobs;
+        my $sth = $dbh->prepare("SELECT u.user, s.userid, s.synurl, s.lastmod, s.etag, s.numreaders " .
+                                "FROM user u, syndicated s " .
+                                "WHERE u.userid=s.userid AND u.statusvis='V' " .
+                                "AND s.checknext < NOW()$in_sql " .
+                                "ORDER BY s.checknext LIMIT 100");
+        $sth->execute;
+        while (my $urow = $sth->fetchrow_hashref) {
+            push @all_users, $urow;
+        }
+
+        return undef unless @all_users;
+        return shift @all_users;
+    };
+
+    # fork and manage child processes
+    my $max_threads = $LJ::SYNSUCK_MAX_THREADS || 1;
+    print "[$$] PARENT -- using $max_threads workers\n" if $verbose;
+
+    my $threads = 0;
+    my $userct = 0;
+    my $keep_forking = 1;
+    while (1) {
+        if ($threads < $max_threads && $keep_forking) {
+            my $urow = $get_next_user->();
+            $keep_forking = 0 unless $urow;
+
+            # spawn a new process
+            my $is_child = 0;
+            if (my $pid = fork) {
+                # we are a parent, nothing to do?
+                $child_jobs{$pid} = $urow->{'userid'};
+                $threads++;
+                $userct++;
+
+            } else {
+                # we are a child, do work
+                $is_child = 1;
+
+                # handles won't survive the fork
+                $LJ::DBIRole->disconnect_all();
+
+                $process_user->($urow);
+
+                # exit child process
+                exit 0;
+            }
+
+        # wait for child(ren) to die
+        } else {
+            my $child = wait();
+            last if $child == -1;
+            delete $child_jobs{$child};
+            $threads--;
+        }
     }
+
+    print "[$$] $userct users processed\n" if $verbose;
+    exit 0;
 };
 
 1;
