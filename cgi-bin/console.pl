@@ -1372,17 +1372,17 @@ sub syn_merge
     my ($dbh, $remote, $args, $out) = @_;
     my $err = sub { push @$out, [ "error", $_[0] ]; 0; };
 
-    return $err->("This command takes either 3 or 5 arguments.")
-        unless @$args == 4 || @$args == 6; # 0 is 'syn_merge'
+    return $err->("You are not authorized to use this command.")
+        unless ($remote && $remote->{'priv'}->{'syn_edit'});
+
+    return $err->("This command takes 5 arguments.")
+        unless @$args == 6; # 0 is 'syn_merge'
 
     return $err->("Second argument must be 'to'.")
         unless $args->[2] eq 'to';
 
     return $err->("Fourth argument must be 'using'.")
-        if @$args == 6 && $args->[4] ne 'using';
-
-    return $err->("You are not authorized to use this command.")
-        unless ($remote && $remote->{'priv'}->{'syn_edit'});
+        if $args->[4] ne 'using';
 
     my $from_user = LJ::canonical_username($args->[1]);
     my $from_u = LJ::load_user($from_user)
@@ -1399,47 +1399,41 @@ sub syn_merge
             unless $_->{statusvis} eq 'V';
     }
 
-    my $url = undef;
-    if (@$args == 6) {
-        $url = LJ::CleanHTML::canonical_url($args->[5])
-            or return $err->("Invalid url.");
-    }
+    my $url = LJ::CleanHTML::canonical_url($args->[5])
+        or return $err->("Invalid url.");
 
     # 1) set up redirection for 'from_user' -> 'to_user'
     LJ::update_user($from_u, { 'journaltype' => 'R', 'statusvis' => 'R' });
     LJ::set_userprop($from_u, 'renamedto' => $to_user)
         or return $err->("Unable to set userprop.  Database unavailable?");
 
-    # 2) update the url of the destination syndicated account, if applicable
-    if ($url) {
+    # 2) update the url of the destination syndicated account
+    # if the from_u's url is the same as what we're about to set the to_u's url to, then
+    # we'll get a duplicate key error.  if this is the case, our behavior will be to 
+    # swap the two.
+    my $urls = $dbh->selectall_hashref("SELECT userid, synurl FROM syndicated " .
+                                       "WHERE userid=? OR userid=?",
+                                       'userid', undef, $from_userid, $to_userid);
+    return $err->("Missing 'syndicated' rows: Possible corruption?")
+        unless $urls && $urls->{$from_userid} && $urls->{$to_userid};
 
-        # if the from_u's url is the same as what we're about to set the to_u's url to, then
-        # we'll get a duplicate key error.  if this is the case, our behavior will be to 
-        # swap the two.
-        my $urls = $dbh->selectall_hashref("SELECT userid, synurl FROM syndicated " .
-                                           "WHERE userid=? OR userid=?",
-                                           'userid', undef, $from_userid, $to_userid);
-        return $err->("Missing 'syndicated' rows: Possible corruption?")
-            unless $urls && $urls->{$from_userid} && $urls->{$to_userid};
+    if ($urls->{$from_userid}->{synurl} eq $url) {
 
-        if ($urls->{$from_userid}->{synurl} eq $url) {
+        # clear the to_u's synurl, we'll update it back in a sec
+        $dbh->do("UPDATE syndicated SET synurl=NULL WHERE userid=?",
+                 undef, $to_userid);
 
-            # clear the to_u's synurl, we'll update it back in a sec
-            $dbh->do("UPDATE syndicated SET synurl=NULL WHERE userid=?",
-                     undef, $to_userid);
-
-            # now update from_u's url to be to_u's old url
-            $dbh->do("UPDATE syndicated SET synurl=? WHERE userid=?",
-                     undef, $urls->{$to_userid}->{synurl}, $from_userid);
-            return $err->("Database Error: " . $dbh->errstr) if $dbh->err;
-        }
-
-        # after possibly swapping above, update the to_u's synurl
-        # ... should have no errors
+        # now update from_u's url to be to_u's old url
         $dbh->do("UPDATE syndicated SET synurl=? WHERE userid=?",
-                 undef, $url, $to_userid);
+                 undef, $urls->{$to_userid}->{synurl}, $from_userid);
         return $err->("Database Error: " . $dbh->errstr) if $dbh->err;
     }
+
+    # after possibly swapping above, update the to_u's synurl
+    # ... should have no errors
+    $dbh->do("UPDATE syndicated SET synurl=? WHERE userid=?",
+             undef, $url, $to_userid);
+    return $err->("Database Error: " . $dbh->errstr) if $dbh->err;
 
     # 3) make users who befriend 'from_user' now befriend 'to_user'
     #    'force' so we get master db and there's no row limit
@@ -1463,7 +1457,7 @@ sub syn_merge
     # log to statushistory
     foreach ($from_userid, $to_userid) {
         LJ::statushistory_add($_, $remote->{userid}, 'synd_merge',
-                              "Merged $from_user => $to_user using URL: " . ($url ? $url : 'none'));
+                              "Merged $from_user => $to_user using URL: $url");
     }
 
     push @$out, [ '', "Syndicated accounts merged: '$from_user' to '$to_user'" ];
