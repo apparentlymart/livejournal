@@ -1878,10 +1878,12 @@ sub editfriendgroups
     foreach my $friend (keys %{$req->{'groupmasks'}})
     {
         my $mask = int($req->{'groupmasks'}->{$friend}) | 1;
+        my $friendid = LJ::get_userid($dbh, $friend);
+
         $dbh->do("UPDATE friends SET groupmask=$mask ".
                  "WHERE userid=$userid AND friendid=?",
-                 undef, LJ::get_userid($dbh, $friend));
-        LJ::MemCache::set([$userid, "frgmask:$userid:$friend"], $mask);
+                 undef, $friendid);
+        LJ::MemCache::set([$userid, "frgmask:$userid:$friendid"], $mask);
     }
 
     # invalidate memcache of friends/groups
