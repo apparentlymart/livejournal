@@ -2768,7 +2768,9 @@ sub auth_digest {
     # nonce count implementation is broken and it doesn't send nc= or
     # always sends 1, this'll at least work due to leniency above
 
-    unless (abs($opts{'count'} - $attrs{'nc'}) <= 1) {
+    my $ncount = hex($attrs{'nc'});
+
+    unless (abs($opts{'count'} - $ncount) <= 1) {
         return $decline->(1);
     }
 
