@@ -3844,6 +3844,13 @@ sub set_remote
     1;
 }
 
+sub unset_remote
+{
+    $LJ::CACHED_REMOTE = 0;
+    $LJ::CACHE_REMOTE = undef;
+    1;
+}
+
 sub load_remote
 {
     # function is no longer used, since get_remote returns full objects.
