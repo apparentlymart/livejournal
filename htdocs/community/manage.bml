@@ -45,19 +45,46 @@ body<=
     $sth->execute;
     my $udbr;
     while (my ($uid, $clusterid, $user, $name) = $sth->fetchrow_array) {
-        $names{$uid} = [ $user, $name ]; 
+        $names{$uid} = [ $user, $name, -1 ]; 
         if ($mods{$uid}) {
             $udbr = LJ::get_cluster_reader($clusterid);
-            $modcount{$uid} = $udbr->selectrow_array("SELECT COUNT(*) FROM modlog WHERE journalid=$uid") || 0;
+            my $sql = "SELECT COUNT(*) FROM modlog WHERE journalid=$uid";
+            $modcount{$uid} = $names{$uid}[2] = $udbr->selectrow_array($sql) || 0;
         }
     }
  }
 
  # deleted and expunged communities won't show up in this
  if (%names) {
-    $ret .= "<table cellpadding='5'><tr><th>$ML{'.commlist.username'}</th>" .
-       "<th>$ML{'.commlist.title'}</th><th>$ML{'.commlist.actions'}</th></tr>";
-    foreach my $id (sort { $names{$a}->[0] cmp $names{$b}->[0] } keys %names) {
+
+    # Make up the first table row, linking to the other sort methods
+    my @snames;
+    $ret .= "<table cellpadding='5'><tr>";
+
+    if (!defined $GET{'sortby'} || $GET{'sortby'} eq 'username') {
+        $ret .= "<th>$ML{'.commlist.username'}</th>";
+        @snames = sort { $names{$a}->[0] cmp $names{$b}->[0] } keys %names;
+    } else {
+        $ret .= "<th><a href='".BML::self_link({'sortby' => 'username'}) . "'>$ML{'.commlist.username'}</a></th>";
+    }
+
+    if ($GET{'sortby'} eq 'title') {
+        $ret .= "<th>$ML{'.commlist.title'}</th>";
+        @snames = sort { $names{$a}->[1] cmp $names{$b}->[1] } keys %names;
+    } else {
+        $ret .= "<th><a href='".BML::self_link({'sortby' => 'title'}) . "'>$ML{'.commlist.title'}</a></th>";
+    }
+
+    $ret .= "<th>$ML{'.commlist.actions'}</th>";
+
+    if ($GET{'sortby'} eq 'mod') {
+        $ret .= "<th>$ML{'.commlist.moderation'}</th>";
+        @snames = sort { $names{$b}->[2] <=> $names{$a}->[2] } keys %names;
+    } elsif (defined $mods) {
+        $ret .= "<th><a href='".BML::self_link({'sortby' => 'mod'}) . "'>$ML{'.commlist.moderation'}</a></th>";
+    }
+
+    foreach my $id (@snames) {
         my $user = $names{$id}->[0];
         my $name = $names{$id}->[1];
         $ret .= "<tr><td><?ljcomm $user ljcomm?></td><td>" . LJ::eall($name) . "</td><td>";
@@ -69,12 +96,10 @@ body<=
             $ret .= BML::ml('Actionlink', {
                 'link'=>"<a href='/editinfo.bml?authas=$user'>$ML{'.commlist.actinfo'}</a>"}) . "&nbsp;&nbsp;";
         }
+        $ret .= "</td><td align='center'>";
         if ($mods{$id}) {
             my $num = $modcount{$id} || "0"; # relying on this to be <b>-wrapped
-            $ret .= BML::ml('Actionlink', {
-                'link'=>"<a href='/community/moderate.bml?comm=$user'>" .
-                    BML::ml('.commlist.actmoderate', {'num'=>$num}) . "</a>"}) .
-                    "&nbsp;&nbsp;";
+            $ret .= "<a href='/community/moderate.bml?comm=$user'>$num</a>";
         }
         $ret .= "</td></tr>";
     }
