@@ -116,6 +116,7 @@ propgroup presentation {
   property string page_background_image {
     des = "URL to an image to be used for the page background";
   }
+  property use external_stylesheet;
 }
 set show_entry_userpic = false;
 set view_entry_disabled = false;
@@ -251,17 +252,22 @@ ACRONYM {
 function Page::print () {
     var string title = $this->title();
 
-    """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
-<html>
-  <head>
-    <link rel="stylesheet" href="$.stylesheet_url" type="text/css" />
-    $.head_content
-    <title>$title</title>
+    """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">\n<html>\n<head>\n""";
+
+    if ($*external_stylesheet) {
+        println """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
+    } else {
+        println """<style type="text/css">"""; print_stylesheet(); "</style>";
+    }
+    $this->print_head();
+
+    """<title>$title</title>
   </head>
   <body>
     <h1>$title</h1>""";
 
-    var string website = ($.journal.website_url != "" ? "(<a href='$.journal.website_url'>$.journal.website_name</a>)" : "");
+    var string website_name = $.journal.website_name ? $.journal.website_name : $*text_website_default_name;
+    var string website = ($.journal.website_url != "" ? "(<a href='$.journal.website_url'>$website_name</a>)" : "");
 
     var string links;
     $links = $links + "(" + ($.view == "recent" ? 
@@ -325,11 +331,7 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     if ($p.view == "entry" and $*show_entrynav_icons)
     {
         print "<div style='text-align: center'>";
-        foreach var string key (["nav_prev","edit_entry","mem_add","tell_friend","nav_next"])
-        {
-            var Link link = $e->get_link($key);
-            if ($link) { print "$link "; }
-        }
+        $e->print_linkbar();
         print "</div>";
     }
 
@@ -568,11 +570,9 @@ function EntryPage::print_comment (Comment c) {
     if (defined $c.subject_icon) {
         $sub_icon = $c.subject_icon->as_string();
     }
-    "<div style='background-color: $background; color: $color; margin-top: 10px;'>";
-    "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%;'><tr valign='top'>";
-    var int td = 6;
+    "<a name='$c.anchor'></a><div style='background-color: $background; color: $color; margin-top: 10px; width: 100%'>";
+    "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
     if (defined $c.userpic and $*comment_userpic_style != "off") { 
-        $td = 7;
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
         # WARNING: this will later be done by the system (it'll be a
@@ -582,33 +582,43 @@ function EntryPage::print_comment (Comment c) {
             $w = $w / 2;
             $h = $h / 2;
         }
-        print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' alt='[User Picture]' /></td>";
+        print "<td style='width: 102px'><img src='$c.userpic.url' width='$w' height='$h' alt='[User Picture]' /></td>";
     }
-    print "<td align='left' style='white-space: nowrap'><strong>From:</strong> $poster</td>\n";
-    print "<td align='left' style='white-space: nowrap'><strong>Date:</strong> ";
-        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td>\n";
 
-    var Link lnk;
-    $lnk = $c->get_link("delete_comment"); "<td align='right'>$lnk</td>";
-    $lnk = $c->get_link("screen_comment"); "<td>$lnk</td>";
-    $lnk = $c->get_link("unscreen_comment"); "<td>$lnk</td>";
+    "<td style='width: 100%'><table style='width: 100%'><tr>";
 
-    print "<td align='right'><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td>\n</tr>\n";
-    print "<tr valign='top'><td colspan='$td' style='width: 95%'>";
-    if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>\n"; }
-    if ($c.metadata{"poster_ip"}) { print " (IP Address: " + $c.metadata{"poster_ip"} + ")"; }
+    ### From, date, etc
+    "<td align='left' style='width: 50%'>";
+      print "<table>";
+      print "<tr><th align='right'>From:</th><td>$poster</td></tr>\n";
+      print "<tr><th align='right'>Date:</th><td style='white-space: nowrap'>";
+        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td></tr>";
+      if ($c.metadata{"poster_ip"}) { print "<tr><th align='right'>IP Address:</th><td>(" + $c.metadata{"poster_ip"} + ")</td></tr>"; }
+    "</table></td>";
 
+    ### Gadgets
+    "<td align='right' style='width: 50%'>";
     if ($this.multiform_on) {
         " <label for='ljcomsel_$c.talkid'>$*text_multiform_check</label>";
         $c->print_multiform_check();
     }
+    $c->print_linkbar();
+    "</td></tr>";
 
-    print "</td></tr></table></div>";
-    print "<div style='margin-left: 5px'>$c.text</div>\n";
+    ### Subject / icon
+    print "<tr valign='top'><td style='width: 50%'>";
+    print (defined $c.subject_icon or $c.subject != "") ? "<h3>$c.subject_icon $c.subject</h3>" : "";
+    print "</td>";
+
+    ### Permalink
+    print "<td style='width: 50%' align='right'><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td></tr>";
+
+    print "</table></td></tr></table></div>";
+    print "<div style='margin-left: 5px'>$c.text</div>";
     print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>Reply to this</a>) ";
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
     if ($c.thread_url != "") { "(<a href='$c.thread_url'>Thread</a>) "; }
-    "</div>\n";
+    "</div>";
 }
 
 function ReplyPage::print_body () 

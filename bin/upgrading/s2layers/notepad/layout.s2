@@ -70,6 +70,7 @@ propgroup presentation {
   property bool show_entrynav_icons {
     des = "Toggle to show the next, memory, edit, etc icons on the entry view page";
   }
+  property use external_stylesheet;
 }
 set show_entry_userpic = false;
 set view_entry_disabled = false;
@@ -138,13 +139,16 @@ a:hover {
 function Page::print()
 {
     var string title = $this->title();
-    """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
- <head>
-  <title>$title</title>
-  $.head_content
-  <link rel="stylesheet" href="$.stylesheet_url" type="text/css" />
+    """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n<html>\n<head>\n""";
+
+    if ($*external_stylesheet) {
+        println """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
+    } else {
+        println """<style type="text/css">"""; print_stylesheet(); "</style>";
+    }
+    $this->print_head();
+
+    """<title>$title</title>
  </head>
  <body>
   <table width="70%" border="0" cellpadding="0" cellspacing="0">
@@ -265,16 +269,10 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
         }
     }
     $e.comments->print();
-
     if ($p.view == "entry" and $*show_entrynav_icons)
     {
-        foreach var string key (["nav_prev","edit_entry","mem_add","tell_friend","nav_next"])
-        {
-            var Link link = $e->get_link($key);
-            if ($link) { print " $link"; }
-        }
+        $e->print_linkbar();
     }
-
     """</td></tr><tr><td colspan="2"></td></tr></table>""";
     """<p align="center"><img src="$*imguri/hr.gif" width="345" height="23" alt='' /></p>""";
 }
@@ -427,27 +425,14 @@ function EntryPage::print_body ()
 }
 
 function EntryPage::print_comment (Comment c) {
-    var Color background; var Color color;
-    if ($c.screened) {
-        $background = $*comment_bar_screened_bgcolor;
-        $color = $*comment_bar_screened_fgcolor;
-    } elseif ($c.depth % 2) {
-        $background = $*comment_bar_one_bgcolor;
-        $color = $*comment_bar_one_fgcolor;
-    } else {
-        $background = $*comment_bar_two_bgcolor;
-        $color = $*comment_bar_two_fgcolor;
-    }
+    var Color barlight = $*color_comment_bar->clone();
+    $barlight->lightness(($barlight->lightness() + 255) / 2);
+    var Color barc = $c.depth % 2 ? $*color_comment_bar : $barlight;
     var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
-    var string sub_icon;
-    if (defined $c.subject_icon) {
-        $sub_icon = $c.subject_icon->as_string();
-    }
-    "<div style='background-color: $background; color: $color; margin-top: 10px;'>";
-    "<table cellpadding='2' cellspacing='0' summary='0' style='width: auto'><tr valign='top'>";
-    var int td = 6;
+
+    "<a name='$c.anchor'></a><div style='background-color: $barc; margin-top: 10px; width: 100%'>";
+    "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
     if (defined $c.userpic and $*comment_userpic_style != "off") { 
-        $td = 7;
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
         # WARNING: this will later be done by the system (it'll be a
@@ -457,32 +442,37 @@ function EntryPage::print_comment (Comment c) {
             $w = $w / 2;
             $h = $h / 2;
         }
-        print "<td rowspan='2'><img src='$c.userpic.url' width='$w' height='$h' alt='[User Picture]' /></td>";
+        print "<td style='width: 102px'><img src='$c.userpic.url' width='$w' height='$h' alt='' /></td>";
     }
-    print "<td align='left' style='white-space: nowrap'><strong>From:</strong> $poster</td>\n";
-    print "<td align='left' style='white-space: nowrap'><strong>Date:</strong> ";
-        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td>\n";
+    "<td><table style='width: 100%'><tr>";
 
-    var Link lnk;
-    $lnk = $c->get_link("delete_comment"); "<td align='right'>$lnk</td>";
-    $lnk = $c->get_link("screen_comment"); "<td>$lnk</td>";
-    $lnk = $c->get_link("unscreen_comment"); "<td>$lnk</td>";
+    "<td align='left' style='width: 50%'>";
+      print "<table>";
+      print "<tr><th align='right'>$*text_comment_from</th><td>$poster</td></tr>\n";
+      print "<tr><th align='right'>$*text_comment_date</th><td style='white-space: nowrap'>";
+        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td></tr>";
+      if ($c.metadata{"poster_ip"}) { print "<tr><th align='right'>$*text_comment_ipaddr</th><td>(" + $c.metadata{"poster_ip"} + ")</td></tr>"; }
+    "</table></td>";
 
-    print "<td align='right'><strong>(<a href='$c.permalink_url'>Link</a>)</strong></td>\n</tr>\n";
-    print "<tr valign='top'><td colspan='$td' style='width: 95%'>";
-    if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>\n"; }
-    if ($c.metadata{"poster_ip"}) { print " (IP Address: " + $c.metadata{"poster_ip"} + ")"; }
-
+    print "<td align='right' style='width: 50%'>";
     if ($this.multiform_on) {
-        " <label for='ljcomsel_$c.talkid'>$*text_multiform_check</label>";
+        " <label for='ljcomsel_$c.talkid'>$*text_multiform_check</label> ";
         $c->print_multiform_check();
     }
+    $c->print_linkbar();
+    "</td></tr>";
 
-    print "</td></tr></table></div>";
+    print "<tr valign='top'><td style='width: 50%'>";
+    if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>\n"; }
+    print "</td>";
+
+    print "<td style='width:50%;' align='right'><strong>(<a href='$c.permalink_url'>$*text_permalink</a>)</strong></td></tr>\n";
+    print "</table></td></tr></table></div>";
+
     print "<div style='margin-left: 5px'>$c.text</div>\n";
-    print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>Reply to this</a>) ";
-    if ($c.parent_url != "") { "(<a href='$c.parent_url'>Parent</a>) "; }
-    if ($c.thread_url != "") { "(<a href='$c.thread_url'>Thread</a>) "; }
+    print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>$*text_comment_reply</a>) ";
+    if ($c.parent_url != "") { "(<a href='$c.parent_url'>$*text_comment_parent</a>) "; }
+    if ($c.thread_url != "") { "(<a href='$c.thread_url'>$*text_comment_thread</a>) "; }
     "</div>\n";
 }
 

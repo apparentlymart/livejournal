@@ -113,6 +113,7 @@ propgroup presentation {
   property string page_background_image {
       des = "URL to an image to be used for the page background";
   }
+  property use external_stylesheet;
 }
 set show_entry_userpic = true;
 set page_recent_items = 20;
@@ -138,9 +139,10 @@ function captionbar (Page p) {
         $userpic = """<img src="$up_img.url" height="$up_img.height" width="$up_img.width" alt="[icon]" />""";
     }
 
+    var string website_name = $p.journal.website_name ? $p.journal.website_name : $*text_website_default_name;
     var string website;
     if ($p.journal.website_url != "") {
-        $website = """<tr><td>View:</td><td><a href="$p.journal.website_url">Website ($p.journal.website_name)</a>.</td></tr>""";
+        $website = """<tr><td>View:</td><td><a href="$p.journal.website_url">Website ($website_name)</a>.</td></tr>""";
     }
 
     var string links;
@@ -155,9 +157,10 @@ function captionbar (Page p) {
                        "<a href='$p.base_url/calendar/'>$*text_view_archive</a>") + ".</td></tr>\n";
     $links = "$links<tr><td>View:</td><td><a href='" + get_url($p.journal, "userinfo") + "'>$*text_view_userinfo</a>.</td></tr>";
 
+    var string captionbar_userpicbox_style = "background-color: $*captionbar_userpicbox_color";
     """
 <table height='100' class='captionbar' cellpadding='5' cellspacing='1'><tr>
-  <td class="captionbar-userpicbox" align='center' valign='center' width='100'>$userpic</td>
+  <td class="captionbar-userpicbox" align='center' valign='center' width='100' style='$captionbar_userpicbox_style'>$userpic</td>
   <td><b>$title</b><br />
     <table border='0'>
       $links
@@ -186,9 +189,11 @@ body {
 }
 .captionbar {
     width:             100%;
+    border:            1px solid $*border_color;
+}
+.captionbar, .captionbar td {
     background-color:  $*captionbar_mainbox_bgcolor;
     color:             $*captionbar_mainbox_fgcolor;
-    border:            1px solid $*border_color;
 }
 .captionbar-userpicbox {
     border-right:      1px solid $*border_color;
@@ -238,12 +243,16 @@ h3.page-header {
 function Page::print () 
 {
     var string title = $this->title();
-"""
-<html>
-<head>
-  <link rel="stylesheet" href="$.stylesheet_url" type="text/css"/>
-  $.head_content
-  <title>$title</title>
+    println "<html>\n<head>\n";
+
+    if ($*external_stylesheet) {
+        println """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
+    } else {
+        println """<style type="text/css">"""; print_stylesheet(); "</style>";
+    }
+    $this->print_head();
+
+    """<title>$title</title>
  </head>
  <body>
     """;
@@ -268,7 +277,7 @@ function print_box (string{} colors, string metapic, string{} meta, string conte
     "<tr><td><table border='0' width='100%'><tr>";
 
     if ($metapic) {
-        "<td width='100' valign='top' bgcolor='' align='center'>$metapic</td>";
+        "<td width='100' valign='top' align='center'>$metapic</td>";
     }
 
     "<td valign='top'><table border='0'>";
@@ -328,12 +337,14 @@ function print_entry (Page p, Entry e, Color bgcolor, Color fgcolor, bool hide_t
     {
         var string userpic = defined $e.userpic ? "<img src='$e.userpic.url' style=border: 0' />" : "";
         var string url = $e.journal->base_url() + "/";
+        $metapic = "<div style='background-color: $bgcolor'>";
         $metapic = "$metapic <a href='$url'>$userpic</a>";
         if ($e.journal.username != $e.poster.username) { 
             var string purl = $e.poster->base_url() + "/";
             $metapic = "$metapic<br /><font color='$fgcolor'>[<a href='$purl'>$e.poster.username</a>]</font>"; 
         } 
         if ($p.view == "friends") { $metapic = "$metapic<br /><font color='$fgcolor'><a href='$url'>$e.journal.username</a></font>"; }
+        $metapic = "$metapic</div>";
     }
     # Security Icon
     if ($e.security) {
@@ -639,25 +650,16 @@ function EntryPage::print_comment (Comment c) {
         $meta{"IP Address:"} = $c.metadata{"poster_ip"};
     }
 
-    if ($this.multiform_on) {
-    #    $meta{"<label for='ljcomsel_$c.talkid'>$*text_multiform_check</label>"} = $c->print_multiform_check();
-    }
-
     $footer = "(<a href='$c.reply_url'>Reply to this</a>) ";
     if ($c.parent_url != "") { $footer = "$footer (<a href='$c.parent_url'>Parent</a>) "; }
     if ($c.thread_url != "") { $footer = "$footer (<a href='$c.thread_url'>Thread</a>) "; }
 
-    var Link link;
-    $link = $c->get_link("delete_comment");   $footer = "$footer $link";
-    $link = $c->get_link("screen_comment");   $footer = "$footer $link";
-    $link = $c->get_link("unscreen_comment"); $footer = "$footer $link";
-
+    var Link link = new Link;
+    foreach var string k ($c.link_keyseq) {
+        $link = $c->get_link($k); $footer = "$footer $link";
+    }
+    println "<a name='$c.anchor'></a>";
     print_box($colors, $metapic, $meta, $c.text, $footer);
-}
-
-function ReplyPage::lay_captionbar_navigation()
-{
-
 }
 
 function ReplyPage::print_body () {

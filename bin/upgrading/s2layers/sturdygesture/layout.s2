@@ -41,7 +41,7 @@ propgroup fonts {
     property use font_fallback;
 }
 
-propgroup other {
+propgroup presentation {
     property string opt_navbar_pos {
         des = "Navigation Bar Location";
         values = "left|Left|right|Right";
@@ -94,6 +94,7 @@ propgroup other {
 
     property use use_shared_pic;
     property use linklist_support;
+    property use external_stylesheet;
 }
 
 
@@ -416,14 +417,17 @@ function Page::print_linklist() {
 function Page::print() {
     var string title = $this->title();
 
+"""<html>\n<head>\n""";
+
+    if ($*external_stylesheet) {
+        println """<link rel="stylesheet" href="$.stylesheet_url" type="text/css" />""";
+    } else {
+        println """<style type="text/css">"""; print_stylesheet(); "</style>";
+    }
+    $this->print_head();
+
+    "<title>"+$this->title()+"</title>";
 """
-<html>
-<head>
-<title>"""+$this->title()+"""</title>
-<style type="text/css">""";
-print_stylesheet();
-"""</style>
-$.head_content
 </head>
 <body class="$.view">
 <table border="0" cellpadding="0" cellspacing="0" width="100%">

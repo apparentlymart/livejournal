@@ -374,6 +374,14 @@ class Page
     "Call from [method[Page.print()]] to render parts of the view that are specific to the view, eg print
     the recent set of journal entries, recent friends entries, or rows of user information";
 
+    function print_head [fixed]
+    "Print server side supplied head content. This is a fixed function, so you can't override it. See 
+    [method[Page.print_custom_head()]] if you want to supply custom head content.";
+
+    function print_custom_head
+    "Layers can override this to add extra HTML to the head section of the HTML document. 
+    Note that layouts are not intended to override this method.";
+
     function print_linklist
     "Print the list of UserLink objects specified by the user.";
  
@@ -1111,6 +1119,12 @@ property bool linklist_support {
 }
 set linklist_support = true;
 
+property bool external_stylesheet {
+    des = "Use External Stylesheet";
+    note = "If true, a stylesheet link element will point to an external file containing the layout's CSS data.";
+}
+set external_stylesheet = false;
+
 ###[ global function implementations ]
 
 function lang_map_plural (int n) : int {
@@ -1306,11 +1320,9 @@ function server_sig() {
 }
 
 function Page::print() {
-    """<html>\n<head>\n<title>""";
-    print $this->title();
-    "</title>\n$.head_content";
-    if ($*font_base != "" or $*font_fallback != "none") {
+    "<html>\n<head>\n<title>"+$this->title()+"</title>\n";
 
+    if ($*font_base != "" or $*font_fallback != "none") {
 """<style type="text/css">
 <!--
 body, td, th, table, p, div {
@@ -1326,6 +1338,8 @@ body, td, th, table, p, div {
         }
         ";\n}\n--></style>\n";
     }
+
+    $this->print_head();
     "</head>\n<body>\n";
     if (defined $.journal.default_pic and
         $.view != "entry" and
@@ -1342,6 +1356,15 @@ body, td, th, table, p, div {
 
 function Page::print_body() {
     """<h2>No Default Renderer</h2><p>There is no body renderer for viewtype <tt>$.view</tt> defined.</p>""";
+}
+
+function Page::print_head() {
+    print $.head_content;
+    $this->print_custom_head();
+}
+
+function Page::print_custom_head() {
+    # blank
 }
 
 function Page::print_linklist() {
@@ -1413,7 +1436,7 @@ function Entry::print_metadata() {
     }
 }
 
-function EntryLite::print_linkbar() {
+function Comment::print_linkbar() {
     var Link link;
     foreach var string k ($.link_keyseq) {
         $link = $this->get_link($k);
@@ -1682,8 +1705,8 @@ function EntryPage::print_comment (Comment c) {
     var Color barc = $c.depth % 2 ? $*color_comment_bar : $barlight;
     var string poster = defined $c.poster ? $c.poster->as_string() : "<i>(Anonymous)</i>";
 
-    "<a name='$c.anchor'></a><div style='background: $barc; margin-top: 10px; padding: 2px'>";
-    "<table summary='0' style='width: 100%;'><tr valign='top'>";
+    "<a name='$c.anchor'></a><div style='background-color: $barc; margin-top: 10px; width: 100%'>";
+    "<table cellpadding='2' cellspacing='0' summary='0' style='width: 100%'><tr valign='top'>";
     if (defined $c.userpic and $*comment_userpic_style != "off") { 
         var int w = $c.userpic.width;
         var int h = $c.userpic.height;
@@ -1694,27 +1717,33 @@ function EntryPage::print_comment (Comment c) {
             $w = $w / 2;
             $h = $h / 2;
         }
-        print "<td><img src='$c.userpic.url' width='$w' height='$h' alt='' /></td>";
+        print "<td style='width: 102px'><img src='$c.userpic.url' width='$w' height='$h' alt='' /></td>";
     }
-    "<td align='left'>";
-    if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>\n"; }
-    print "<strong>$*text_comment_from</strong> $poster<br />\n";
-    print "<strong>$*text_comment_date</strong> ";
-        print $c.time->date_format("long") + " - " + $c.time->time_format();
-    if ($c.metadata{"poster_ip"}) { print " ($*text_comment_ipaddr " + $c.metadata{"poster_ip"} + ")"; }
-    print " <strong>(<a href='$c.permalink_url'>$*text_permalink</a>)</strong>\n";
+    "<td><table style='width: 100%'><tr>";
 
-    var Link link;
-    $link = $c->get_link("delete_comment"); " $link";
-    $link = $c->get_link("screen_comment"); " $link";
-    $link = $c->get_link("unscreen_comment"); " $link";
+    "<td align='left' style='width: 50%'>";
+      print "<table>";
+      print "<tr><th align='right'>$*text_comment_from</th><td>$poster</td></tr>\n";
+      print "<tr><th align='right'>$*text_comment_date</th><td style='white-space: nowrap'>";
+        print $c.time->date_format("long") + " - " + $c.time->time_format() + "</td></tr>";
+      if ($c.metadata{"poster_ip"}) { print "<tr><th align='right'>$*text_comment_ipaddr</th><td>(" + $c.metadata{"poster_ip"} + ")</td></tr>"; }
+    "</table></td>";
 
+    print "<td align='right' style='width: 50%'>";
     if ($this.multiform_on) {
         " <label for='ljcomsel_$c.talkid'>$*text_multiform_check</label> ";
         $c->print_multiform_check();
     }
+    $c->print_linkbar();
+    "</td></tr>";
 
-    print "</td></tr></table></div>";
+    print "<tr valign='top'><td style='width: 50%'>";
+    if (defined $c.subject_icon or $c.subject != "") { "<h3>$c.subject_icon $c.subject</h3>\n"; }
+    print "</td>";
+
+    print "<td style='width:50%;' align='right'><strong>(<a href='$c.permalink_url'>$*text_permalink</a>)</strong></td></tr>\n";
+    print "</table></td></tr></table></div>";
+
     print "<div style='margin-left: 5px'>$c.text</div>\n";
     print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>$*text_comment_reply</a>) ";
     if ($c.parent_url != "") { "(<a href='$c.parent_url'>$*text_comment_parent</a>) "; }
