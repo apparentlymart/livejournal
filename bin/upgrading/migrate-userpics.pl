@@ -15,23 +15,24 @@ use IPC::Open3;
 # aren't in mogile right now, and put them there
 
 # determine 
-my ($picker, $one, $ignoreempty, $dryrun, $user, $verify, $verbose);
-my $rv = GetOptions("picker=s"     => \$picker,
-                    "ignore-empty" => \$ignoreempty,
+my ($one, $ignoreempty, $dryrun, $user, $verify, $verbose, $clusters);
+my $rv = GetOptions("ignore-empty" => \$ignoreempty,
                     "one"          => \$one,
                     "dry-run"      => \$dryrun,
                     "user=s"       => \$user,
                     "verify"       => \$verify,
-                    "verbose"      => \$verbose,);
+                    "verbose"      => \$verbose,
+                    "clusters=s"   => \$clusters,);
 unless ($rv) {
     die <<ERRMSG;
 This script supports the following command line arguments:
 
-    --picker=/path/to/picker
-        Instruct us to use the picker program to get userids.
+    --clusters=X[-Y]
+        Only handle clusters in this range.  You can specify a
+        single number, or a range of two numbers with a dash.
 
     --user=username
-        Only move this particular user.  Not useable with --picker.
+        Only move this particular user.
         
     --one
         Only move one user.  (But it moves all their pictures.)
@@ -55,8 +56,6 @@ This script supports the following command line arguments:
         Be very chatty.
 ERRMSG
 }
-die "Options --user and --picker cannot be combined.\n"
-    if $picker && $user;
 
 # make sure ljconfig is setup right (or so we hope)
 die "Please define a 'userpics' class in your \%LJ::MOGILEFS_CONFIG\n"
@@ -64,49 +63,31 @@ die "Please define a 'userpics' class in your \%LJ::MOGILEFS_CONFIG\n"
 die "Unable to find MogileFS object (\%LJ::MOGILEFS_CONFIG not setup?)\n"
     unless $LJ::MogileFS;
 
-# if picker, set it up
-if ($picker) {
-    die "Error: picker path does not exist\n" unless -e $picker;
-
-    my ($p_in, $p_out, $p_pid);
-    $p_pid = open3($p_out, $p_in, $p_in, $picker);
-
-    # ask the picker for a userid
-    while (1) {
-        print $p_out "next_userid\n";
-        my $resp = <$p_in>;
-        last unless defined $resp;
-
-        if ($resp =~ /^userid (\d+)/) {
-            # got a userid, handle it
-            handle_userid($1);
-        } elsif ($resp =~ /^done/) {
-            # no more userids, end this run
-            last;
-        } else {
-            # don't know what they said, so die
-            die "Unknown line from picker: $resp";
-        }
-
-        # we're done if we only want one user
-        last if $one;
-    }
-
-    # close the picker, we're done
-    print "Closing picker...\n";
-    print $p_out "done\n";
-    waitpid $p_pid, 0;
-} elsif ($user) {
+# operation modes
+if ($user) {
     # move a single user
     my $u = LJ::load_user($user);
     die "No such user: $user\n" unless $u;
     handle_userid($u->{userid});
     
 } else {
+    # parse the clusters
+    my @clusters;
+    if ($clusters) {
+        if ($clusters =~ /^(\d+)(?:-(\d+))?$/) {
+            my ($min, $max) = map { $_ + 0 } ($1, $2 || $1);
+            push @clusters, $_ foreach $min..$max;
+        } else {
+            die "Error: --clusters argument not of right format.\n";
+        }
+    } else {
+        @clusters = @LJ::CLUSTERS;
+    }
+    
     # now iterate over the clusters to pick
-    my $ctotal = scalar(@LJ::CLUSTERS);
+    my $ctotal = scalar(@clusters);
     my $ccount = 0;
-    foreach my $cid (sort { $a <=> $b } @LJ::CLUSTERS) {
+    foreach my $cid (sort { $a <=> $b } @clusters) {
         # status report
         $ccount++;
         print "\nChecking cluster $cid...\n\n";
@@ -218,7 +199,8 @@ sub handle_userid {
 sub get_db_handle {
     my $cid = shift;
     
-    my $dbcm = LJ::get_cluster_master({ raw => 1 }, $cid);
+    my $dbcm = LJ::get_cluster_master({ raw => 1 }, $cid)
+        or die "ERROR: unable to get raw handle to cluster $cid\n";
     eval {
         $dbcm->do("SET wait_timeout = 28800");
     };
