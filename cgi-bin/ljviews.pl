@@ -1012,6 +1012,12 @@ sub create_view_lastn
     # Automatic Discovery of RSS/Atom
     $lastn_page{'head'} .= qq{<link rel="alternate" type="application/rss+xml" title="RSS" href="$journalbase/data/rss" />\n};
     $lastn_page{'head'} .= qq{<link rel="alternate" type="application/atom+xml" title="Atom" href="$journalbase/data/atom" />\n};
+    
+    # FOAF autodiscovery
+    my $foafurl = $u->{external_foaf_url} ? LJ::eurl($u->{external_foaf_url}) : "$journalbase/data/foaf";
+    my $digest = Digest::SHA1::sha1_hex('mailto:' . $u->{email});
+    $lastn_page{head} .= qq{<link rel="meta" type="application/rdf+xml" title="FOAF" href="$foafurl" />\n};
+    $lastn_page{head} .= qq{<meta name="foaf:maker" content="foaf:mbox_sha1sum '$digest'" />\n};
 
     $lastn_page{'head'} .= 
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'LASTN_HEAD'};
