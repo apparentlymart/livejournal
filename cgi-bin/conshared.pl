@@ -172,11 +172,15 @@ sub community
         push @$out, [ "error", "Target user can't be shared journal user." ];
     }
     
+    # user doesn't need sharedjournal priv to remove themselves from community
+
     unless ($remote->{'privarg'}->{'sharedjournal'}->{$com_user} ||
-            $remote->{'privarg'}->{'sharedjournal'}->{'all'}) 
+            $remote->{'privarg'}->{'sharedjournal'}->{'all'} ||
+            ($remote->{'user'} eq $target_user && $action eq "remove")) 
     {
+        my $modifier = $action eq "add" ? "to" : "from";
         $error = 1;
-        push @$out, [ "error", "You don't have access to add/remove users to this shared journal." ];
+        push @$out, [ "error", "You don't have access to $action users $modifier this shared journal." ];
     }
     
     return 0 if ($error);    
