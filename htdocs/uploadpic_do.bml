@@ -5,19 +5,15 @@ TITLE=>Get Upload
 BODY<=
 
 (=_CODE
-#line 9
 
-# return "Picture note uploaded.  Try again in 10 seconds... I'm changing something now.";
-
- use LWP::Simple;
+ use LWP::UserAgent;
  use Image::Size;
  use CGI qw(:standard);
- use Digest::MD5  qw(md5_base64);
+ use Digest::MD5 qw(md5_base64);
  my $query = new CGI;
 
  $MAXIMUM_UPLOAD = 40960;
    
- require 'ljlib.pl';
  $FORM{'user'} = $query->param('user');
  $FORM{'des'} = $query->param('des');
  $FORM{'src'} = $query->param('src');
@@ -37,6 +33,11 @@ BODY<=
  my $userid = $u->{'userid'}+0;
 
  if (scalar(@errors)==0 && !&valid_password($u->{'password'}, \%FORM)) { push @errors, "Incorrect password."; }
+
+ if ($FORM{'src'} eq "url" && $FORM{'urlpic'} !~ /^http:\/\//) {
+     push @errors, "The address for the picture to be uploaded does not look correct.  It should start with <b>http://</b>";
+ }
+
  return &bullet_errors(\@errors) if @errors;
 
  # now we're authenticated
@@ -69,7 +70,16 @@ BODY<=
      #$ret .= "(type=$type, size=$size, age=$age)";
      #return $ret;
 
-     $imagedata = get($FORM{'urlpic'});
+     my $ua = new LWP::UserAgent;
+     my $size = 0;
+     my $req = HTTP::Request->new('GET', $FORM{'urlpic'});
+     my $res = $ua->simple_request($req, sub { 
+	 my($data, $response, $protocol) = @_;
+	 $size += length($data);
+	 $imagedata .= $data;
+	 die if ($size > $MAXIMUM_UPLOAD);
+     }, 10_000);
+
      if (length($imagedata) > $MAXIMUM_UPLOAD) {
 	 push @errors, "File size too big.  File cannot exceed 40K.";
 	 return &bullet_errors(\@errors) if @errors;
