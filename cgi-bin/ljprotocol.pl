@@ -26,6 +26,7 @@ sub error_message
 	     "104" => "Error adding one or more friends",
 	     "150" => "Can't post as non-user",
 	     "151" => "Banned from journal",
+	     "152" => "Can't make back-dated entries in non-personal journal.",
 
 	     # Client Errors
 	     "200" => "Missing required argument(s)",
@@ -453,6 +454,11 @@ sub postevent
     return fail($err,151) if
         LJ::is_banned($dbs, $posterid, $ownerid);
     
+    # don't allow backdated posts in communities
+    return fail($err,152) if
+	($req->{'props'}->{"opt_backdated"} &&
+	 $uowner->{'journaltype'} ne "P");
+
     my $qownerid = $ownerid+0;
     my $qposterid = $posterid+0;
     
@@ -769,7 +775,12 @@ sub editevent
 	my $res = { 'itemid' => $qitemid };
 	return $res;
     }
-	
+
+    # don't allow backdated posts in communities
+    return fail($err,152) if
+	($req->{'props'}->{"opt_backdated"} &&
+	 $uowner->{'journaltype'} ne "P");
+    
     # updating an entry:
     return undef 
 	unless common_event_validation($dbs, $req, $err, $flags);
