@@ -27,8 +27,12 @@
     @LANGS = ("en") unless @LANGS;
     $DEFAULT_LANG ||= $LANGS[0];
 
-    $SITENAMESHORT = "LiveJournal";
-    $SITENAMEABBREV = "LJ";
+    $SITENAME ||= "NameNotConfigured.com";
+    unless ($SITENAMESHORT) {
+        $SITENAMESHORT = $SITENAME;
+        $SITENAMESHORT =~ s/\..*//;  # remove .net/.com/etc
+    }
+    $SITENAMEABBREV ||= "[??]";
 
     $NODB_MSG ||= "Database temporarily unavailable.  Try again shortly.";
     $MSG_READONLY_USER ||= "Database temporarily in read-only mode during maintenance.";
