@@ -9,12 +9,12 @@ use Apache::File ();
 use CGI;
 use Data::Dumper;
 
-my $config;     # loaded once
-my $cur_req;    # current request hash
-my $ML_GETTER;  # normally undef
-my %HOOK;
-my %langs;      # iso639-2 2-letter lang code -> BML lang code
-my (%FileModTime, %FileBlockData, %FileBlockFlags);
+use vars qw($config);     # loaded once
+use vars qw($cur_req);    # current request hash
+use vars qw($ML_GETTER);  # normally undef
+use vars qw(%HOOK);
+use vars qw(%Lang);       # iso639-2 2-letter lang code -> BML lang code
+use vars qw(%FileModTime %FileBlockData %FileBlockFlags);
 
 sub handler
 {
@@ -91,22 +91,16 @@ sub handler
         foreach my $is (split(/\s*,\s*/, $req->{'env'}->{'VarInitScript'})) {
             last unless load_look_from_initscript($req, $is, \$err);
         }
-        if ($err) {
-            print "Content-type: text/html\n\n";
-            print "<b>Error loading VarInitScript:</b><br />\n$err";
-            return 0;
-        }
+        return report_error($r, "<b>Error loading VarInitScript:</b><br />\n$err")
+            if $err;
     }
     
     if ($HOOK{'startup'}) {
         eval {
             $HOOK{'startup'}->();
         };
-        if ($@) {
-            print "Content-type: text/html\n\n";
-            print "<b>Error running startup hook:</b><br />\n$@";
-            return 0;
-        }
+        return report_error($r, "<b>Error running startup hook:</b><br />\n$@")
+            if $@;
     }
     
     load_look($req, "", "global");
@@ -141,9 +135,9 @@ sub handler
             } else {
                 $lang_weight{$_} = 1.0;
             }
-            if ($lang_weight{$_} > $winner_weight && defined $langs{$_}) {
+            if ($lang_weight{$_} > $winner_weight && defined $Lang{$_}) {
                 $winner_weight = $lang_weight{$_};
-                $req->{'lang'} = $langs{$_};
+                $req->{'lang'} = $Lang{$_};
             }
         }
     }
@@ -183,7 +177,7 @@ sub handler
             $notmod = 1;
         }
 
-        $r->header_out("Content-type", $content_type);
+        $r->content_type($content_type);
         
         $r->header_out("Cache-Control", "no-cache")
             if $req->{'env'}->{'NoCache'};
@@ -196,6 +190,18 @@ sub handler
     
     $r->print($html) unless $req->{'env'}->{'NoContent'};
     return OK;
+}
+
+sub report_error
+{
+    my $r = shift;
+    my $err = shift;
+    
+    $r->content_type("text/html");
+    $r->send_http_header();
+    $r->print($err);
+
+    return OK;  # TODO: something else?
 }
 
 sub load_config
@@ -287,8 +293,7 @@ sub deleteglob
 # $option_ref - hash ref to %BMLEnv
 sub bml_block
 {
-    my ($req, $type, $data) = @_;
-    my $option_ref = $req->{'env'};
+    my ($req, $type, $data, $option_ref) = @_;
     my $realtype = $type;
     my $previous_block = $req->{'BlockStack'}->[-1];
 
@@ -308,7 +313,7 @@ sub bml_block
         return inline_error("_CODE block failed to execute by permission settings")
             unless $option_ref->{'DO_CODE'};
 
-        my $ret = (eval("{\n package BMLCodeBlock; \n $data\n }\n"))[0];
+        my $ret = (eval("{\n package BMLCodeBlock; no strict; \n $data\n }\n"))[0];
         if ($@) { return "<B>[Error: $@]</B>"; }
     
         my $newhtml;
@@ -550,7 +555,7 @@ sub bml_decode
         # handle finished blocks
         if ($depth == 0) {
 
-            $$outref .= bml_block($req, $block, $data);    
+            $$outref .= bml_block($req, $block, $data, $opts);    
             $data = "";
             $block = "";
         }
@@ -606,10 +611,6 @@ sub load_look_from_initscript
     my ($req, $file, $errref) = @_;
     my $dummy;
     $errref ||= \$dummy;
-    unless (-e $file) {
-        $$errref = "Can't find VarInitScript: $file";
-        return 0;
-    }
 
     my $modtime;
     if ($req->{'env'}->{'CacheUntilHUP'} && $FileModTime{$file}) {
@@ -617,25 +618,28 @@ sub load_look_from_initscript
     } else {
         $modtime = (stat($file))[9];
     }
-    return 0 unless -e $modtime;
+    unless ($modtime) {
+        $$errref = "Can't find VarInitScript: $file";
+        return 0;
+    }
 
     note_mod_time($req, $modtime);
     if ($modtime > $FileModTime{$file})
     {
-        my $init;
-        open (IS, $file);
-        while (<IS>) {
-            $init .= $_;
+        unless (open (F, $file)) {
+            $$errref = "Couldn't open $file";
+            return 0;
         }
-        close IS;
+        my $init = join('', <F>);
+        close F;
 
         $req->{'varinit_file'} = $file;
-        eval($init);
+        my $ret = eval $init;
+
         if ($@) {
             $$errref = $@;
             return 0;
         }
-
         $FileModTime{$file} = $modtime;
     } 
     
@@ -808,8 +812,8 @@ sub register_block
     $type = uc($type);
 
     my $file = $Apache::BML::cur_req->{'varinit_file'};
-    $Apache::BML::FileBlockData->{$type} = $def;
-    $Apache::BML::FileBlockFlags->{$type} = $flags;
+    $Apache::BML::FileBlockData{$file}->{$type} = $def;
+    $Apache::BML::FileBlockFlags{$file}->{$type} = $flags;
     return 1;
 }
 
@@ -822,6 +826,7 @@ sub register_hook
 sub register_ml_getter
 {
     my $getter = shift;
+    $Apache::BML::cur_req->{'r'}->log_error("getter = $getter");
     $Apache::BML::ML_GETTER = $getter;
 }
 

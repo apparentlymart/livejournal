@@ -107,7 +107,7 @@ BODY<=
          my $shape = "POLY";
          if ($coords =~ /^[^,]+,[^,]+,[^,]+,[^,]+$/) { $shape = "RECTANGLE"; }
          $ret .= "<AREA SHAPE=$shape COORDS=\"$coords\" HREF=\"$LJ::DIRURI?loc_cn=US&loc_st=$state&opt_sort=ut\" onMouseOver=\"updateStatus('";
-         $ret .= BMLUtil::escapeall($state{$state});
+         $ret .= BML::eall($state{$state});
          $ret .= " - ";
          $ret .= ($count{'stateus'}->{$state}+0);
          $s = $count{'stateus'}->{$state} != 1 ? "s" : "";

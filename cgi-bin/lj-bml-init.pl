@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #
     
-require 'ljconfig.pl';
+require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
 BML::register_block("DOMAIN", "S", $LJ::DOMAIN);
 BML::register_block("IMGPREFIX", "S", $LJ::IMGPREFIX);
@@ -31,18 +31,18 @@ use LJ::TagGenerator ':html4';
 use Digest::MD5 qw(md5_hex);
 use MIME::Words;
 
-require 'imageconf.pl';
-require 'propparse.pl';
-require 'supportlib.pl';
-require 'ljlib.pl';
-require 'ljprotocol.pl';
-require 'cleanhtml.pl';
-require 'emailcheck.pl';
-require 'portal.pl';
-require 'talklib.pl';
-require 'topiclib.pl';
-require 'ljtodo.pl';
-require 'directorylib.pl';
+require "$ENV{'LJHOME'}/cgi-bin/imageconf.pl";
+require "$ENV{'LJHOME'}/cgi-bin/propparse.pl";
+require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljprotocol.pl";
+require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
+require "$ENV{'LJHOME'}/cgi-bin/emailcheck.pl";
+require "$ENV{'LJHOME'}/cgi-bin/portal.pl";
+require "$ENV{'LJHOME'}/cgi-bin/talklib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/topiclib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljtodo.pl";
+require "$ENV{'LJHOME'}/cgi-bin/directorylib.pl";
 
 # register BML multi-language hook
 BML::register_ml_getter(\&LJ::Lang::get_text_bml);

@@ -68,7 +68,7 @@ BODY<=
          foreach (grep { $_->{'user'} eq "system" } @{$styles{$view}})
          {
              my $selected = $_->{'styleid'}==$u->{"s1_${view}_style"} ? " SELECTED" : "";
-             $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . BMLUtil::escapeall($_->{'styledes'}) . "\n";
+             $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . BML::eall($_->{'styledes'}) . "\n";
          }
          my $exist_user_style = 0;
          foreach (grep { $_->{'user'} ne "system" } @{$styles{$view}})
@@ -79,7 +79,7 @@ BODY<=
                  $ret .= "<OPTION VALUE=\"\">--- User styles: ---\n";
              }
              my $selected = $_->{'styleid'}==$u->{"s1_${view}_style"} ? " SELECTED" : "";
-             $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . BMLUtil::escapeall($_->{'styledes'}) . "\n";
+             $ret .= "<OPTION VALUE=\"$_->{'styleid'}\"$selected>" . BML::eall($_->{'styledes'}) . "\n";
          }
          $ret .= "</SELECT></TD></TR>\n";
      }
@@ -190,7 +190,7 @@ BODY<=
      $ret .= "(=H1 Style Overrides H1=)(=P You can ignore this section.  This is for tweaking very specific things about your page layout.  See the <A HREF=\"/developer/\" TARGET=_blank>developer section</A> for details.  Also note that overrides are for overriding only one or two things about a style.  If you'd like to override everything, you need to <A HREF=\"/styles/create.bml\" TARGET=_blank>create your own style</A>. P=)(=P <FONT SIZE=+1><B>THIS IS <U>NOT</U> WHERE YOU TYPE YOUR JOURNAL!!</B></FONT> P=)\n";
      $ret .= "(=P Please note that not all style variables can be overridden. See the <a href=\"/developer/varlist.bml\">documentation</a> for more details. P=)\n";
      $ret .= "(=STANDOUT <B>Overrides:</B><BR><TEXTAREA NAME=\"overrides\" COLS=60 ROWS=8 WRAP=OFF>";
-     $ret .= BMLUtil::escapeall($overrides);
+     $ret .= BML::eall($overrides);
      $ret .= "</TEXTAREA> STANDOUT=)";
 
      $ret .= "(=H1 Journal Activation Status H1=)(=P If you want to delete or undelete your journal, this where you do it.  Once you delete your journal you have 30 days to undelete it, just in case you change your mind.  After 30 days, the journal will be permanently deleted and there will be no way to recover it. P=)";

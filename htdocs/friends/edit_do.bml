@@ -146,7 +146,7 @@ d.close();
              my $bgcolor = $res{"friend_${i}_bg"} || "#FFFFFF";
              my $fgcolor = $res{"friend_${i}_fg"} || "#000000";
              $ret .= "<tr align='left'><td>(=LJUSER $fruser LJUSER=)</td>";
-             $ret .= "<td bgcolor='$bgcolor'><font color='$fgcolor'>" . BMLUtil::escapeall($res{"friend_${i}_name"}) . "</font></td>";
+             $ret .= "<td bgcolor='$bgcolor'><font color='$fgcolor'>" . BML::eall($res{"friend_${i}_name"}) . "</font></td>";
              $ret .= "<td><input type='checkbox' value='1' name=\"editfriend_delete_${fruser}\"></td></tr>\n";
          }
          $ret .= "</table></center></p>\n";

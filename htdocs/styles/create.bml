@@ -42,7 +42,7 @@ P=)
      $ret .= "<UL>Choose base style to start with and edit:<BR><SELECT NAME=\"base_$view\"><OPTION VALUE=\"\">(None, or other below:)\n";
      foreach my $st (sort { $a->{'styledes'} cmp $b->{'styledes'} } @{$styles{$view}})
      {
-         $ret .= "<OPTION VALUE=\"$st->{'styleid'}\">" . &BMLUtil::escapeall($st->{'styledes'}) . "\n";
+         $ret .= "<OPTION VALUE=\"$st->{'styleid'}\">" . BML::eall($st->{'styledes'}) . "\n";
      }
      $ret .= "</SELECT>";
      $ret .= "<BR>Or, enter a non-system public Style ID#: <INPUT SIZE=5 NAME=\"basenum_$view\">";

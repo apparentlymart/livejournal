@@ -109,7 +109,7 @@ BODY<=
      my %htmlu = ();
      foreach my $v (qw(name email url urlname zip city url aolim jabber icq yahoo msn howhear bio))
      {
-         $htmlu{$v} = BMLUtil::escapeall($u->{$v});
+         $htmlu{$v} = BML::eall($u->{$v});
      }
 
      $ret .= "<P><TABLE WIDTH=100%>\n";
@@ -189,7 +189,7 @@ BODY<=
          my $sel = $_ eq $u->{'state'} ? " SELECTED" : "";
          $ret .= "<OPTION VALUE=\"$_\"$sel>$states{$_}\n";
      }
-     my $otherstate = BMLUtil::escapeall(defined($states{$u->{'state'}}) ? "" : $u->{'state'});
+     my $otherstate = BML::eall(defined($states{$u->{'state'}}) ? "" : $u->{'state'});
      $ret .= "</SELECT><BR>Or, type other state/province/territory: <INPUT NAME=stateother SIZE=20 MAXLENGTH=50 VALUE=\"$otherstate\"></TD></TR>\n";
 
      # zip
@@ -257,7 +257,7 @@ BODY<=
 
      {
          ### Interests
-         my $eints = BMLUtil::escapeall(join(", ", sort keys %interests));
+         my $eints = BML::eall(join(", ", sort keys %interests));
          if (LJ::text_in($eints)) {
              LJ::text_out(\$eints);
              $ret .= "(=H1 Interests H1=)(=P If you want other people to be able to search the directory and find you by interest, list below everything you're interested in, separated by commas.  Short single-word phrases are best.  <B>Rule of thumb:</B> You should be able to put the interest in the sentence \"I like ________\".  When referring to nouns, use the plural form for consistency.  \"I like DVDs\" instead of \"I like DVD\". P=)";

@@ -96,8 +96,8 @@ BODY<=
      $sth->execute;
      while ($sty = $sth->fetchrow_hashref)
      {
-         $ret .= "<OPTION VALUE=$sty->{'styleid'}>" . BMLUtil::escapeall($sty->{'type'});
-         $ret .= "($sty->{'styleid'}): " . BMLUtil::escapeall($sty->{'styledes'}) . "\n";
+         $ret .= "<OPTION VALUE=$sty->{'styleid'}>" . BML::eall($sty->{'type'});
+         $ret .= "($sty->{'styleid'}): " . BML::eall($sty->{'styledes'}) . "\n";
      }
      $ret .= "</SELECT><BR>";
      $ret .= "Action: <SELECT NAME=ide><OPTION VALUE=v2>Edit in Easy Mode<OPTION VALUE=v1>Edit in Raw Mode (Old)<OPTION VALUE=delete>Delete this style!</SELECT><FONT SIZE=1><BR><BR></FONT>";
@@ -136,7 +136,7 @@ BODY<=
      $ret .= " <A TARGET=preview HREF=\"/customview.cgi?username=$user&amp;styleid=$sty->{'styleid'}$extravars\">[Preview Current Style]</A> (must save below to see your changes, keep this window open and reload it whenever you save)";
      $ret .= "</TD></TR>\n";
      
-     $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style Description:</B></TD><TD><INPUT NAME=styledes SIZE=50 MAXLENGTH=50 VALUE=\"" . BMLUtil::escapeall($sty->{'styledes'}) . "\"></TD></TR>";
+     $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style Description:</B></TD><TD><INPUT NAME=styledes SIZE=50 MAXLENGTH=50 VALUE=\"" . BML::eall($sty->{'styledes'}) . "\"></TD></TR>";
 
      $ret .= "<TR><TD BGCOLOR=#D0D0D0><B>Style Options:</B></TD><TD><TABLE>\n";
      foreach my $opt (@style_opts)
@@ -221,7 +221,7 @@ BODY<=
                  
                  my $editrows = $prop->{'editrows'} || 5;
                  my $editcols = $prop->{'editcols'} || 70;
-                 my $estyval = BMLUtil::escapeall($styvar{$f});
+                 my $estyval = BML::eall($styvar{$f});
 
                  if ($vars->{$f}->{'props'}->{'override'} eq "only") {
                      $ret .= "<SPAN STYLE=\"background-color: #FFFF00\"><B>Override only.</B></SPAN>  Only end-users may override this.  You cannot define it in a style.";
@@ -241,7 +241,7 @@ if ($ide eq "v1") {
     
     $ret .= "<P><B>Style Variables:</B> <A TARGET=_blank HREF=\"/developer/views.bml#$sty->{'type'}\">(reference information)</A><BR>\n";
 $ret .= "<TEXTAREA ROWS=30 COLS=80 WRAP=OFF NAME=formatdata>";
-$ret .= BMLUtil::escapeall($sty->{'formatdata'});
+$ret .= BML::eall($sty->{'formatdata'});
 $ret .= "</TEXTAREA>\n";
 }
 
