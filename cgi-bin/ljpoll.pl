@@ -566,7 +566,7 @@ sub show_poll
 		my ($mid, $fetch);
 		# fetch two mids and average if even count, else grab absolute middle
 		$fetch = ($valcount % 2) ? 1 : 2;
-		my $mid = int(($valcount+1)/2);
+		$mid = int(($valcount+1)/2);
 		my $skip = $mid-1;
 		my $sql = "SELECT value FROM pollresult WHERE pollid=$pollid AND pollqid=$qid ORDER BY value+0 LIMIT $skip,$fetch";
 		$sth = $dbh->prepare($sql);
