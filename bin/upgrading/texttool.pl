@@ -165,7 +165,7 @@ popstruct() if $mode eq "popstruct" or $mode eq "load";
 poptext() if $mode eq "poptext" or $mode eq "load";
 copyfaq() if $mode eq "copyfaq" or $mode eq "load";
 makeusable() if $mode eq "makeusable" or $mode eq "load";
-dumptext() if $mode eq "dumptext";
+dumptext(@ARGV) if $mode eq "dumptext";
 newitems() if $mode eq "newitems";
 wipedb() if $mode eq "wipedb";
 remove(@ARGV) if $mode eq "remove" and scalar(@ARGV) == 2;
@@ -397,8 +397,11 @@ sub poptext
 
 sub dumptext
 {
+    my @langs = @_;
+    unless (@langs) { @langs = keys %lang_code; }
+
     $out->('Dumping text...', '+');
-    foreach my $lang (keys %lang_code)
+    foreach my $lang (@langs)
     {
         $out->("$lang");
         my $l = $lang_code{$lang};
