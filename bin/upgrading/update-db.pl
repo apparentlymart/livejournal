@@ -117,6 +117,21 @@ foreach my $s (@alters)
 
 if ($opt_pop)
 {
+    my $made_system;
+
+    # system user
+    my $su = LJ::load_user($dbh, "system");
+    unless ($su) {
+        print "System user not found. Creating with random password.\n";
+        my $pass = LJ::make_auth_code(10);
+        LJ::create_account($dbh, { 'user' => 'system',
+                                   'name' => 'System Account',
+                                   'password' => $pass })
+            || die "Failed to create system user.";
+        $su = LJ::load_user($dbh, "system") || die "Failed to load the newly created system user.";
+        $made_system = 1;
+    }
+
     # S1
     print "Populating public system styles (S1):\n";
     require "$ENV{'LJHOME'}/bin/upgrading/s1style-rw.pl";
@@ -158,11 +173,6 @@ if ($opt_pop)
     {
         my $LD = "s2layers"; # layers dir
 
-        # get the system account
-        my $su = LJ::load_user($dbh, "system");
-        unless ($su) {
-            die "No system user found.  Run \$LJHOME/bin/upgrading/make_system.pl\n";
-        }
         my $sysid = $su->{'userid'};
     
         # find existing re-distributed layers that are in the database
@@ -309,6 +319,8 @@ if ($opt_pop)
         close (BD);
     }
 
+    print "\nThe system user was created with a random password.\nRun \$LJHOME/bin/upgrading/make_system.pl to change its password and grant the necessary privileges."
+        if $made_system;
     print "\nRemember to also run:\n  bin/upgrading/texttool.pl load\n\n";
 }
 
