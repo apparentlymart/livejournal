@@ -748,44 +748,52 @@ sub friend
     if ($command eq "add" || $command eq "remove") 
     {
         my $friend = $args->[2];
+        my $err;
+        my $dbs = LJ::make_dbs_from_arg($dbh);
         my $fid = LJ::get_userid($dbh, $friend);
         if (! $fid) {
             push @$out, [ "error", "Unknown friend \"$friend\"" ];
             return 0;
         }
         if ($command eq "remove") {
-            $dbh->do("DELETE FROM friends WHERE userid=$quserid AND friendid=$fid");
-            if ($dbh->err) {
-                push @$out, [ "error", $dbh->errstr ];
+            my $oreq = LJ::Protocol::do_request($dbs, "editfriends", {
+                'username' => $remote->{'user'},
+                'ver'      => $LJ::PROTOCOL_VER,
+                'delete'   => [$friend],
+            }, \$err, {'noauth'=>1});
+            if($err) {
+                push @$out, [ "error", $err ];
             } else {
                 push @$out, [ "", "$friend removed from friends list" ];
             }
         } elsif ($command eq "add") {
-            $dbh->do("INSERT INTO friends (userid, friendid) VALUES ($quserid, $fid)");
-            if ($dbh->err) {
-                push @$out, [ "", "$friend was already a friend" ];
-            } else {
-                push @$out, [ "", "$friend added as a friend" ];
-            }
-
             my $group = $args->[3];
+            my $gmask = 0;
             if ($group ne "") {
                 my $qgroup = $dbh->quote($group);
-                my $sth = $dbh->prepare("SELECT groupnum FROM friendgroup WHERE userid=$quserid AND groupname=$qgroup");
-                $sth->execute;
-                my ($num) = $sth->fetchrow_array;
+                my $num = $dbh->selectrow_array("SELECT groupnum FROM friendgroup ".
+						"WHERE userid=$quserid AND groupname=$qgroup");
                 if ($num) {
-                    $dbh->do("UPDATE friends SET groupmask=groupmask | (1 << $num) WHERE userid=$quserid AND friendid=$fid");
-                    unless ($dbh->err) {
-                        push @$out, [ "", "$friend added to group \"$group\"" ];
-                    } else {
-                        push @$out, [ "error", $dbh->errstr ];
-                    }
+                    $gmask = 1 << $num;
                 } else {
                     push @$out, [ "error", "You don't have a group called \"$group\"" ];
                 }
             }
-                
+    
+            my $fhash = {'username' => $friend};
+            $fhash->{'groupmask'} = $gmask if $gmask;
+
+            my $oreq = LJ::Protocol::do_request($dbs, "editfriends", {
+                'username' => $remote->{'user'},
+                'ver'      => $LJ::PROTOCOL_VER,
+                'add'      => [$fhash],
+            }, \$err, {'noauth'=>1});
+            if($err) {
+                push @$out, [ "error", $err ];
+            } else {
+                push @$out, [ "", "$friend added as a friend" ];
+            }
+
         }
         return 1;
     }
