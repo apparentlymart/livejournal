@@ -564,8 +564,9 @@ function EntryPage::print_body () {
 
     print_entry($this, $.entry, null Color, null Color, $.viewing_thread);
 
-    if ($.entry.comments.enabled)
+    if ($.entry.comments.enabled and $.comment_pages.total_subitems > 0)
     {
+        $this->print_multiform_start();
         """<table width="$*box_width" cellpadding="2" cellspacing="0" border="0" summary="" class="entrybox">
 <tr align='left'>
 <td bgcolor="$*stronger_back" align="center">
@@ -576,10 +577,11 @@ function EntryPage::print_body () {
         """<tr align='left'>
 <td colspan="2" bgcolor="$*entry_back">""";
 
-        if ($.comment_pages.total_subitems > 0) {
-            $.comment_pages->print();
-            $this->print_comments($.comments);
-        }
+        $.comment_pages->print();
+        $this->print_comments($.comments);
+        $this->print_multiform_actionline();
+        $this->print_multiform_end();
+
         """</td></tr></table>
 </td></tr></table><p>""";
     }
@@ -627,6 +629,10 @@ function EntryPage::print_comment (Comment c) {
     $lnk = $c->get_link("delete_comment"); " $lnk";
     $lnk = $c->get_link("screen_comment"); " $lnk";
     $lnk = $c->get_link("unscreen_comment"); " $lnk";
+    if ($this.multiform_on) {
+        $c->print_multiform_check(); " <label for='ljcomsel_$c.talkid'>$*text_multiform_check</label>";
+    }
+
     print "</td></tr></table></div>";
     print "<div style='margin-left: 5px'>$c.text</div>";
     print "<div style='margin-top: 3px; font-size: smaller'>(<a href='$c.reply_url'>Reply to this</a>) ";

@@ -1482,6 +1482,55 @@ sub Color__darker {
     return $new;
 }
 
+sub Comment__get_link
+{
+    my ($ctx, $this, $key) = @_;
+    
+    if ($key eq "delete_comment" || $key eq "unscreen_comment" || $key eq "screen_comment") {
+        my $page = get_page();
+        my $u = $page->{'_u'};
+        my $post_user = $page->{'entry'} ? $page->{'entry'}->{'poster'}->{'username'} : undef;
+        my $com_user = $this->{'poster'} ? $this->{'poster'}->{'username'} : undef;
+        my $remote = LJ::get_remote();
+        if ($key eq "delete_comment") {
+            return undef unless LJ::Talk::can_delete($remote, $u, $post_user, $com_user);
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}",
+                'caption' => $ctx->[S2::PROPS]->{"text_multiform_opt_delete"},
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 22, 20),
+            };
+        }
+        if ($key eq "screen_comment") {
+            return undef if $this->{'screened'};
+            return undef unless LJ::Talk::can_screen($remote, $u, $post_user, $com_user);
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+                'caption' => $ctx->[S2::PROPS]->{"text_multiform_opt_screen"},
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_scr.gif", 22, 20),
+            };
+        }
+        if ($key eq "unscreen_comment") {
+            return undef unless $this->{'screened'};
+            return undef unless LJ::Talk::can_unscreen($remote, $u, $post_user, $com_user);
+            return {
+                '_type' => "Link",
+                'url' => "$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
+                'caption' => $ctx->[S2::PROPS]->{"text_multiform_opt_unscreen"},
+                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20),
+            };
+        }
+    }
+}
+
+sub Comment__print_multiform_check
+{
+    my ($ctx, $this) = @_;
+    my $tid = $this->{'talkid'} >> 8;
+    $S2::pout->("<input type='checkbox' name='selected_$tid' class='ljcomsel' id='ljcomsel_$this->{'talkid'}' />");
+}
+
 # class 'date'
 sub Date__day_of_week
 {
@@ -1573,48 +1622,6 @@ sub Entry__get_link
     my ($ctx, $this, $key) = @_;
     return undef;
 }
-
-sub Comment__get_link
-{
-    my ($ctx, $this, $key) = @_;
-    
-    if ($key eq "delete_comment" || $key eq "unscreen_comment" || $key eq "screen_comment") {
-        my $page = get_page();
-        my $u = $page->{'_u'};
-        my $post_user = $page->{'entry'} ? $page->{'entry'}->{'poster'}->{'username'} : undef;
-        my $com_user = $this->{'poster'} ? $this->{'poster'}->{'username'} : undef;
-        my $remote = LJ::get_remote();
-        if ($key eq "delete_comment") {
-            return undef unless LJ::Talk::can_delete($remote, $u, $post_user, $com_user);
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/delcomment.bml?journal=$u->{'user'}&amp;id=$this->{'talkid'}",
-                'caption' => "Delete",  # FIXME: get from context property
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_del.gif", 22, 20),
-            };
-        }
-        if ($key eq "screen_comment") {
-            return undef if $this->{'screened'};
-            return undef unless LJ::Talk::can_screen($remote, $u, $post_user, $com_user);
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/talkscreen.bml?mode=screen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-                'caption' => "Screen",  # FIXME: get from context property
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_scr.gif", 22, 20),
-            };
-        }
-        if ($key eq "unscreen_comment") {
-            return undef unless $this->{'screened'};
-            return undef unless LJ::Talk::can_unscreen($remote, $u, $post_user, $com_user);
-            return {
-                '_type' => "Link",
-                'url' => "$LJ::SITEROOT/talkscreen.bml?mode=unscreen&amp;journal=$u->{'user'}&amp;talkid=$this->{'talkid'}",
-                'caption' => "Unscreen",  # FIXME: get from context property
-                'icon' => LJ::S2::Image("$LJ::IMGPREFIX/btn_unscr.gif", 22, 20),
-            };
-        }
-    }
-}
     
 sub Entry__plain_subject
 {
@@ -1623,6 +1630,37 @@ sub Entry__plain_subject
     $this->{'_subject_plain'} = $this->{'subject'};
     LJ::CleanHTML::clean_subject_all(\$this->{'_subject_plain'});
     return $this->{'_subject_plain'};
+}
+
+sub EntryPage__print_multiform_actionline
+{
+    my ($ctx, $this) = @_;
+    return unless $this->{'multiform_on'};
+    my $pr = $ctx->[S2::PROPS];
+    $S2::pout->($pr->{'text_multiform_des'} . "\n" .
+                LJ::html_select({'name' => 'mode' },
+                                "" => "",
+                                map { $_ => $pr->{"text_multiform_opt_$_"} }
+                                qw(unscreen screen delete)) . "\n" .
+                LJ::html_submit('', $pr->{'text_multiform_btn'},
+                                { "onclick" => "return (document.multiform.mode.value != \"delete\") " .
+                                      "|| confirm(\"" . LJ::ejs($pr->{'text_multiform_conf_delete'}) . "\");" }));
+}
+
+sub EntryPage__print_multiform_end
+{
+    my ($ctx, $this) = @_;
+    return unless $this->{'multiform_on'};
+    $S2::pout->("</form>");
+}
+
+sub EntryPage__print_multiform_start
+{
+    my ($ctx, $this) = @_;
+    return unless $this->{'multiform_on'};
+    $S2::pout->("<form style='display: inline' method='post' action='$LJ::SITEROOT/talkmulti.bml' name='multiform'>\n" .
+                LJ::html_hidden("ditemid", $this->{'entry'}->{'itemid'},
+                                "journal", $this->{'entry'}->{'journal'}->{'username'}) . "\n");
 }
 
 sub Page__get_latest_month

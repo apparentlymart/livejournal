@@ -263,6 +263,8 @@ class Comment extends EntryLite
     var readonly string reply_url "URL to reply to this comment.";
     var readonly string thread_url "URL to view threaded rooted at this comment, or blank if comment has no children.";
     var readonly bool screened "True if comment is in screened state.";
+
+    function builtin print_multiform_check "Prints the select checkbox in CSS class 'ljcomsel' with DOM id 'ljcomsel_\$talkid' for a multi-action form started with [method[EntryPage.print_multiform_start()]].";
 }
 
 ### Userinfo
@@ -509,6 +511,10 @@ class EntryPage extends Page
     function print_comment(Comment comment) "Prints a full comment";
     function print_comment_partial(Comment comment) "Prints a collapsed comment";
 
+    var bool multiform_on "Set to true if the multi-action is to be printed, which requires both comments and applicable permissions for the remote user.";
+    function builtin print_multiform_start "Prints start of form tag and hidden elements to do a multi-comment action (multiple delete, screen, unscreen, etc...)";
+    function builtin print_multiform_end "Prints end of form tag to do a multi-comment action.";
+    function builtin print_multiform_actionline "Prints the line of the multiform giving instructions, options, and the submit button, using the text of the different \$*text_multiform_ properties.";
 }
 
 class ReplyForm 
@@ -882,6 +888,41 @@ property string text_month_screened_comments {
     des = "Text to indicate there are screened comments.";
 }
 set text_month_screened_comments = "w/ Screened";
+
+property string text_multiform_check {
+    des = "Text beside a comment multi-action checkbox.";
+}
+set text_multiform_check = "Select";
+
+property string text_multiform_des {
+    des = "Text on the multiform action line.";
+}
+set text_multiform_des = "Mass action on selected comments:";
+
+property string text_multiform_btn {
+    des = "Text on the multiform action button.";
+}
+set text_multiform_btn = "Perform Action";
+
+property string text_multiform_opt_unscreen {
+    des = "Text for the comment unscreening action";
+}
+set text_multiform_opt_unscreen = "Unscreen";
+
+property string text_multiform_opt_screen {
+    des = "Text for the comment screening action";
+}
+set text_multiform_opt_screen = "Screen";
+
+property string text_multiform_opt_delete {
+    des = "Text for the comment delete action";
+}
+set text_multiform_opt_delete = "Delete";
+
+property string text_multiform_conf_delete {
+    des = "Text for the confirming mass-delete action";
+}
+set text_multiform_conf_delete = "Delete selected comments?";
 
 property string font_base {
     des = "Preferred Font";

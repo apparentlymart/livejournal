@@ -9,16 +9,21 @@ sub EntryPage
     my ($u, $remote, $opts) = @_;
 
     my $get = $opts->{'getargs'};
-    my $dbr = LJ::get_db_reader();
 
     my $p = Page($u, $opts);
     $p->{'_type'} = "EntryPage";
     $p->{'view'} = "entry";
     $p->{'comment_pages'} = undef;
     $p->{'comments'} = [];
-
+    $p->{'comment_pages'} = undef;
+    
     my ($entry, $s2entry) = EntryPage_entry($u, $remote, $opts);
     return if $opts->{'handler_return'};
+
+    $p->{'multiform_on'} = $remote &&
+        ($remote->{'userid'} == $u->{'userid'} ||
+         $remote->{'userid'} == $entry->{'posterid'} ||
+         LJ::check_rel($u, $remote, 'A'));
 
     my $itemid = $entry->{'itemid'};
     my $ditemid = $entry->{'itemid'} * 256 + $entry->{'anum'};
@@ -159,7 +164,6 @@ sub EntryPage_entry
 
     my $r = $opts->{'r'};
     my $uri = $r->uri;
-    my $dbr = LJ::get_db_reader();
 
     my ($ditemid, $itemid, $anum);
     unless ($uri =~ /(\d+)\.html/) {
@@ -176,7 +180,7 @@ sub EntryPage_entry
         $opts->{'handler_return'} = 404;
         return;
     }
-    unless (LJ::can_view($dbr, $remote, $entry)) {
+    unless (LJ::can_view($remote, $entry)) {
         $opts->{'handler_return'} = 403;
         return;
     }
@@ -214,7 +218,7 @@ sub EntryPage_entry
     # format it
     LJ::CleanHTML::clean_subject(\$entry->{'subject'});
     LJ::CleanHTML::clean_event(\$entry->{'event'}, $entry->{'props'}->{'opt_preformatted'});
-    LJ::expand_embedded($dbr, $ditemid, $remote, \$entry->{'event'});
+    LJ::expand_embedded($ditemid, $remote, \$entry->{'event'});
 
     my $s2entry = Entry($u, {
         'subject' => $entry->{'subject'},
