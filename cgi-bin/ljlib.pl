@@ -34,7 +34,7 @@ $LJ::EndOfTime = 2147483647;
 # CMAX_ on character width (character means byte unless $LJ::UNICODE,
 # in which case it means a UTF-8 character).
 
-$LJ::BMAX_SUBJECT = 255;
+$LJ::BMAX_SUBJECT = 255;   # *_SUBJECT for journal events, not comments
 $LJ::CMAX_SUBJECT = 100;
 $LJ::BMAX_COMMENT = 9000;
 $LJ::CMAX_COMMENT = 4300;
@@ -44,7 +44,7 @@ $LJ::BMAX_NAME    = 100;
 $LJ::CMAX_NAME    = 50;
 $LJ::BMAX_KEYWORD = 80;
 $LJ::CMAX_KEYWORD = 40;
-$LJ::BMAX_PROP    = 255;
+$LJ::BMAX_PROP    = 255;   # logprop[2]/talkprop[2]/userproplite (not userprop)
 $LJ::CMAX_PROP    = 100;
 $LJ::BMAX_GRPNAME = 60;
 $LJ::CMAX_GRPNAME = 30;

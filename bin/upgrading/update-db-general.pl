@@ -189,7 +189,7 @@ EOC
 register_tablecreate("keywords", <<'EOC');
 CREATE TABLE keywords (
   kwid int(10) unsigned NOT NULL auto_increment,
-  keyword varchar(40) binary NOT NULL default '',
+  keyword varchar(80) binary NOT NULL default '',
   PRIMARY KEY  (kwid),
   UNIQUE KEY kwidx (keyword)
 ) 
@@ -701,10 +701,10 @@ CREATE TABLE todo (
   journalid int(10) unsigned NOT NULL default '0',
   posterid int(10) unsigned NOT NULL default '0',
   ownerid int(10) unsigned NOT NULL default '0',
-  statusline varchar(15) default NULL,
+  statusline varchar(40) default NULL,
   security enum('public','private','friends') NOT NULL default 'public',
-  subject varchar(40) default NULL,
-  des varchar(80) default NULL,
+  subject varchar(100) default NULL,
+  des varchar(255) default NULL,
   priority enum('1','2','3','4','5') NOT NULL default '3',
   datecreate datetime NOT NULL default '0000-00-00 00:00:00',
   dateupdate datetime default NULL,
@@ -1534,7 +1534,9 @@ register_alter(sub {
 
     if (column_type("user", "oldenc") eq "") {
         do_alter("user", "ALTER TABLE user ".
-                 "ADD oldenc TINYINT DEFAULT 0 NOT NULL");
+                 "ADD oldenc TINYINT DEFAULT 0 NOT NULL, ".
+                 "MODIFY name VARCHAR(100) NOT NULL"
+                 );
     }
 
     # widen columns to accomodate larger Unicode names
@@ -1542,35 +1544,24 @@ register_alter(sub {
         do_alter("friendgroup",
                  "ALTER TABLE friendgroup ".
                  "MODIFY groupname VARCHAR(60) NOT NULL");
-        do_alter("talktext",
-                 "ALTER TABLE talktext ".
-                 "MODIFY subject VARCHAR(255) NOT NULL");
-        do_alter("talktext2",
-                 "ALTER TABLE talktext2 ".
-                 "MODIFY subject VARCHAR(255) NOT NULL");
+    }
+    if (column_type("todo", "statusline") eq "varchar(15)") {
         do_alter("todo",
                  "ALTER TABLE todo ".
                  "MODIFY statusline VARCHAR(40) NOT NULL, " .
-                 "MODIFY subject VARCHAR(80) NOT NULL, " .
+                 "MODIFY subject VARCHAR(100) NOT NULL, " .
                  "MODIFY des VARCHAR(255) NOT NULL");
+    }
+    if (column_type("memorable", "des") eq "varchar(60)") {
         do_alter("memorable",
                  "ALTER TABLE memorable ".
                  "MODIFY des VARCHAR(150) NOT NULL");
-        do_alter("pollquestion",
-                 "ALTER TABLE pollquestion ".
-                 "MODIFY opts VARCHAR(50) NOT NULL");
-        do_alter("user",
-                 "ALTER TABLE user ".
-                 "MODIFY name VARCHAR(100) NOT NULL");
-        do_alter("userprop",
-                 "ALTER TABLE userprop ".
-                 "MODIFY value VARCHAR(255) NOT NULL");
+    }
+    if (column_type("keywords", "keyword") eq "varchar(40) binary") {
         do_alter("keywords",
                  "ALTER TABLE keywords ".
-                 "MODIFY keyword VARCHAR(80) NOT NULL");
+                 "MODIFY keyword VARCHAR(80) BINARY NOT NULL");
     }
-     
-
 
 });
 

@@ -256,7 +256,7 @@ BODY<=
 
  ## insertion
 
- $FORM{'subject'} = LJ::text_trim($FORM{'subject'}, $LJ::BMAX_SUBJECT, $LJ::CMAX_SUBJECT);
+ $FORM{'subject'} = LJ::text_trim($FORM{'subject'}, 100, 100);
  $FORM{'body'} = LJ::text_trim($FORM{'body'}, $LJ::BMAX_COMMENT, $LJ::CMAX_COMMENT);
 
  my $partid = $FORM{'parenttalkid'};
