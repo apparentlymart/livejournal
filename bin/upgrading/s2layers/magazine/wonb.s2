@@ -6,16 +6,16 @@ layerinfo "redist_uniq" = "magazine/wonb";
 
 set main_bgcolor = "#000000";
 set main_fgcolor = "#ffffff";
-set sidebar_color = "#777777";
-set headerbar_bgcolor = "#999999";
+set sidebar_color = "#555555";
+set headerbar_bgcolor = "#777777";
 set headerbar_fgcolor = "#ffffff";
 set headerbar_bevel_color = "#777777";
 set link_color = "#eeeeee";
 set alink_color = "#ffffff";
 set vlink_color = "#dddddd";
 set meta_color = "#ffffff";
-set highlight_bgcolor = "#c0c0c0";
-set highlight_fgcolor = "#000000";
+set highlight_bgcolor = "#999999";
+set highlight_fgcolor = "#dddddd";
 set border_color = "#ffffff";
 
 
