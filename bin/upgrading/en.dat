@@ -552,6 +552,8 @@ p?>
 
 /create.bml.error.email.nospaces=No spaces allowed in email address.  If you're on AOL, remember that your Internet Email address is your screen name with all spaces removed, followed by <b>@aol.com</b>
 
+/create.bml.errors.label=Please note the following problems and resubmit:
+
 /create.bml.error.password.asciionly=You can only use ASCII symbols in the password.
 
 /create.bml.error.password.blank=You must enter a password.
@@ -559,8 +561,6 @@ p?>
 /create.bml.error.password.nomatch=Passwords do not match.
 
 /create.bml.error.postrequired=POST required.
-
-/create.bml.error.seebelow=See errors below.
 
 /create.bml.error.username.blank=Please supply a name or handle/alias.
 

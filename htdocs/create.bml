@@ -385,10 +385,16 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      my $v;
 
      if (%errors) {
-         $ret .= "<div class='formitemFlag'>$ML{'.error.seebelow'}</div>";
+         my @errors_order = ('code', 'username', 'email', 'password', 'agree_tos', 'captcha');
+         my %errors_def;
+         $errors_def{$_} = 1 for @errors_order;
+         foreach my $key (keys %errors) { push @errors_order, $key unless $errors_def{$key}; }
+         $ret .= "<?standout <strong>$ML{'.errors.label'}</strong><ul><li>";
+         $ret .= join ("</li><li>", grep { $_ } map { $errors{$_} } @errors_order);
+         $ret .= "</li></ul> standout?>";
      }
 
-     $ret .= "<?p $ML{'.create.text'} p?>";
+     $ret .= "<?p $ML{'.create.text'} p?>" unless %errors;
      $ret .= "<form action=\"create.bml\" method=\"post\">\n";
      $ret .= LJ::html_hidden(mode => 'submit',
                              code => $code,
@@ -402,7 +408,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      $ret .= $error_msg->('username', '<p class="formitemFlag">', '</p>');
      $ret .= "<div class='formitemDesc'>" . BML::ml(".username.text", {'sitename' => $LJ::SITENAME}) . "</div>";
      $ret .= LJ::html_text({'name' => 'user', 'size' => 15, 'maxlength' => 15, 'value' => $v,});
-     $ret .= "<div class='formitemNote'>$ML{'.username.charsallowed'}</div>";
+     $ret .= "<div class='formitemNote'>$ML{'.username.charsallowed'}</div>" if (!%errors || exists $errors{'username'});
      $ret .= "</div></li>";
 
      ### email address
