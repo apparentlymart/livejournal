@@ -6358,7 +6358,7 @@ sub delete_all_comments {
                       undef, $u->{'userid'});
         }
         # decrement memcache
-        LJ::MemCache::decr([$u->{'userid'}, "talk2ct:$u->{'userid'}"], @$t);
+        LJ::MemCache::decr([$u->{'userid'}, "talk2ct:$u->{'userid'}"], scalar(@$t));
         $loop = 0 unless @$t == $chunk_size;
     }
     return 1;
