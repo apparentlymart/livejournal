@@ -205,27 +205,33 @@
  sub browse_personals {
      my ($dbs, $dbcs, $u, $encid) = @_;
      my $db = $dbcs || $dbs;  # AVVA: what? -brad
-     my $dbh = $dbs->{'dbh'};
+     my $dbr = $dbs->{'reader'};
      my $ret = "";
      my ($name, $bio, $groups);
+
+     LJ::load_user_props($dbr, $u, qw(url urlname));
      $name = $u->{'name'};
      if ($u->{'has_bio'} eq "Y") {
          ($bio) = LJ::dbs_selectrow_array($db, "SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
      };
      $groups = "";
-     $sth = $dbh->prepare("SELECT groupname FROM friendgroup WHERE userid=$u->{'userid'}");
+     $sth = $dbr->prepare("SELECT groupname FROM friendgroup WHERE userid=$u->{'userid'}");
      $sth->execute;
      while (($_) = $sth->fetchrow_array) {
          $groups .= $_ . ' ';
      };
 
-     my $valid = LJ::is_utf8($name . ' ' . $bio . ' ' . $groups);
+     my $valid = LJ::is_utf8($name . ' ' . $u->{'url'} . ' ' . $u->{'urlname'} . ' ' . $bio . ' ' . $groups);
 
      convert(\$name, $encid);
+     convert(\$u->{'url'}, $encid);
+     convert(\$u->{'urlname'}, $encid);
      convert(\$bio, $encid) if $bio;
      convert(\$groups, $encid);
 
      $ret = "<b>Name:</b> $name<br />";
+     $ret .= "<b>Website URL:</b> $u->{'url'}<br />";
+     $ret .= "<b>URL name:</b> $u->{'urlname'}<br />";
      $ret .= "<b>Bio:</b> $bio<br />" if $bio;
      $ret .= "<b>Names of friend groups:</b> $groups<br />";
      return $valid, $ret;
@@ -420,6 +426,7 @@
      my ($dbs, $dbcs, $u, $encid) = @_;
      my $db = $dbcs || $dbs;  # AVVA: what? -brad
      my $dbh = $dbs->{'dbh'};
+     my $dbr = $dbs->{'reader'};
      my $success = 1;
      my $message = "";
      my $sth;
@@ -437,6 +444,16 @@
              return 0, "Database error: $dbh->errstr";
          }
          $message .= "(=P Converted the name. P=)";
+     }
+
+     # convert url/urlname
+     LJ::load_user_props($dbr, $u, qw(url urlname));
+     foreach my $prop (qw(url urlname)) {
+         unless(LJ::is_utf8($u->{$prop})) {
+             convert(\$u->{$prop}, $encid);
+             LJ::set_userprop($dbs, $u->{'userid'}, $prop, $u->{$prop});
+             $message .= "(=P Converted userprop: $prop . P=)";
+         }
      }
      
      # convert bio
