@@ -18,7 +18,7 @@ sub get_sent_invites {
     return undef unless $cu;
 
     # now hit the database for their recent invites
-    my $dbcr = LJ::get_cluster_reader($cu);
+    my $dbcr = LJ::get_cluster_def_reader($cu);
     return LJ::error('db') unless $dbcr;
     my $data = $dbcr->selectall_arrayref('SELECT userid, maintid, recvtime, status, args FROM invitesent ' .
                                          'WHERE commid = ? AND recvtime > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
@@ -63,7 +63,7 @@ sub send_comm_invite {
     return LJ::error('comm_user_has_banned') if LJ::is_banned($cu, $u);
 
     # step 2: outstanding invite?
-    my $dbcr = LJ::get_cluster_reader($u);
+    my $dbcr = LJ::get_cluster_def_reader($u);
     return LJ::error('db') unless $dbcr;
     my $argstr = $dbcr->selectrow_array('SELECT args FROM inviterecv WHERE userid = ? AND commid = ? ' .
                                         'AND recvtime > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
@@ -71,7 +71,7 @@ sub send_comm_invite {
 
     # step 3: exceeded outstanding invitation limit?  only if no outstanding invite
     unless ($argstr) {
-        my $cdbcr = LJ::get_cluster_reader($cu);
+        my $cdbcr = LJ::get_cluster_def_reader($cu);
         return LJ::error('db') unless $cdbcr;
         my $count = $cdbcr->selectrow_array("SELECT COUNT(*) FROM invitesent WHERE commid = ? AND userid <> ? AND status = 'outstanding'",
                                             undef, $cu->{userid}, $u->{userid});
@@ -132,7 +132,7 @@ sub accept_comm_invite {
     return undef unless $u && $cu;
 
     # get their invite to make sure they have one
-    my $dbcr = LJ::get_cluster_reader($u);
+    my $dbcr = LJ::get_cluster_def_reader($u);
     return LJ::error('db') unless $dbcr;
     my $argstr = $dbcr->selectrow_array('SELECT args FROM inviterecv WHERE userid = ? AND commid = ? ' .
                                         'AND recvtime > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
@@ -186,7 +186,7 @@ sub reject_comm_invite {
     return undef unless $u && $cu;
 
     # get their invite to make sure they have one
-    my $dbcr = LJ::get_cluster_reader($u);
+    my $dbcr = LJ::get_cluster_def_reader($u);
     return LJ::error('db') unless $dbcr;
     my $test = $dbcr->selectrow_array('SELECT userid FROM inviterecv WHERE userid = ? AND commid = ? ' .
                                       'AND recvtime > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
@@ -221,7 +221,7 @@ sub get_pending_invites {
     return undef unless $u;
 
     # hit up database for invites and return them
-    my $dbcr = LJ::get_cluster_reader($u);
+    my $dbcr = LJ::get_cluster_def_reader($u);
     return LJ::error('db') unless $dbcr;
     my $pending = $dbcr->selectall_arrayref('SELECT commid, maintid, recvtime, args FROM inviterecv WHERE userid = ? ' .
                                             'AND recvtime > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))', 
