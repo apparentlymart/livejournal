@@ -1115,7 +1115,7 @@ sub talkform {
         $ret .= "if (document.getElementById) {\n";
         $ret .= "document.write(\"";
         if ($subjicon eq 'none') {
-            $ret .= LJ::ejs(LJ::Talk::show_none_image("id='subjectIconImage' style='cursor:hand' align='absmiddle' ".
+            $ret .= LJ::ejs(LJ::Talk::show_none_image("id='subjectIconImage' style='cursor:pointer;cursor:hand' align='absmiddle' ".
                                                       "onclick='subjectIconListToggle();' ".
                                                       "title='Click to change the subject icon'"));
         } else {
@@ -1123,7 +1123,7 @@ sub talkform {
                 foreach (@{$pics->{lists}->{$type}}) {
                     if ($_->{id} eq $subjicon) {
                         $ret .= LJ::Talk::show_image($pics, $subjicon, 
-                                                     "id='subjectIconImage' onclick='subjectIconListToggle();' style='cursor:hand'");
+                                                     "id='subjectIconImage' onclick='subjectIconListToggle();' style='cursor:pointer;cursor:hand'");
                         $foundicon = 1;
                         last;
                     }
@@ -1132,7 +1132,7 @@ sub talkform {
             }
         }
         if ($foundicon == 0 && $subjicon ne 'none') {
-            $ret .= LJ::ejs(LJ::Talk::show_none_image("id='subjectIconImage' style='cursor:hand' align='absmiddle' ".
+            $ret .= LJ::ejs(LJ::Talk::show_none_image("id='subjectIconImage' style='cursor:pointer;cursor:hand' align='absmiddle' ".
                                                       "onclick='subjectIconListToggle();' ".
                                                       "title='Click to change the subject icon'"));
         }
@@ -1152,7 +1152,7 @@ sub talkform {
                 $ret .= "document.write(\"";
                 $ret .= "<td valign='middle' align='center'>";
                 $ret .= LJ::Talk::show_none_image(
-                        "id='none' onclick='subjectIconChange(this);' style='cursor:hand' title='No subject icon'");
+                        "id='none' onclick='subjectIconChange(this);' style='cursor:pointer;cursor:hand' title='No subject icon'");
                 $ret .= "</td>\");\n";
             }
 
@@ -1161,7 +1161,7 @@ sub talkform {
                 $ret .= "document.write(\"";
                 $ret .= "<td valign='middle' align='center'>";
                 $ret .= LJ::Talk::show_image($pics, $_->{'id'}, 
-                        "id='$_->{'id'}' onclick='subjectIconChange(this);' style='cursor:hand'");
+                        "id='$_->{'id'}' onclick='subjectIconChange(this);' style='cursor:pointer;cursor:hand'");
                 $ret .= "</td>\");\n";
             }
             
