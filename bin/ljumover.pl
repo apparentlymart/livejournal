@@ -315,7 +315,7 @@ sub unlockStaleUsers () {
         $delsth,                # DELETE statement handle
         $row,                   # Selected row hashref
         $sock,                  # Query socket
-        %cachedReply,           # Cached replies
+        %cachedReply,           # Cached replies: {$instance => $bool} (running or not)
        );
 
     verboseMsg( "Cleaning up the in-progress table." );
@@ -343,7 +343,7 @@ sub unlockStaleUsers () {
     # Fetch each record, connecting to the given host/port for each
     # moverinstance and deleting users for those found not to be running.
     while (( $row = $selsth->fetchrow_hashref )) {
-        my ( $host, $port, $instance, $user ) =
+        my ( $host, $port, $instance, $userid ) =
             @{$row}{'moverhost','moverport','moverinstance','userid'};
         my $ip = join '.',
             reverse map { ($host >> $host * 8) & 0xff } 0..3;
@@ -351,7 +351,7 @@ sub unlockStaleUsers () {
         # If the host hasn't been contacted yet, do so now
         if ( !exists $cachedReply{$instance} ) {
             debugMsg( "Contacting mover at %s:%d (%s) for user %d",
-                      $ip, $port, $instance, $user );
+                      $ip, $port, $instance, $userid );
 
             # If the connection succeeds and replies with the correct response,
             # then the entry's okay
@@ -371,13 +371,13 @@ sub unlockStaleUsers () {
         # If the cached value indicates it's an invalid record, delete it.
         if ( !$cachedReply{$instance} ) {
             debugMsg( "Removing stale lock set by %s:%d on %s for uid %d",
-                      $host, $port, scalar localtime($row->{locktime}), $user );
+                      $host, $port, scalar localtime($row->{locktime}), $userid );
             LJ::update_user( $row->{user}, {raw => "caps=caps^(1<<$ReadOnlyBit)"} );
-            $delsth->execute( $user )
-                or abort( "execute: $user: ", $delsth->errstr );
+            $delsth->execute( $userid )
+                or abort( "execute: $userid: ", $delsth->errstr );
         } else {
             debugMsg( "Keeping lock set by %s:%d on %s for uid %d",
-                      $host, $port, scalar localtime($row->{locktime}), $user );
+                      $host, $port, scalar localtime($row->{locktime}), $userid );
         }
     }
     $delsth->finish;
@@ -791,15 +791,15 @@ sub start {
             # Now wrap a thread object around each user in the queue, which also
             # locks each one.
             @queue = map {
-                my $user = $_;
+                my $userRecord = $_;
                 last USER if $self->{_haltFlag} || $self->{_shutdownFlag};
-                $dest = $self->pickDestination( $user );
+                $dest = $self->pickDestination;
                 $self->debugMsg( "Creating a thread for user '%s' (%d -> %d)",
-                                 $user->[0], $user->[4], $dest );
+                                 $userRecord->[0], $userRecord->[4], $dest );
 
                 # Create a mover thread (sets the user's read-only bit).
-                $self->{userThreads}{$user->[1]} =
-                    Mover::Thread->new( @{$user}[0,1,4], $dest );
+                $self->{userThreads}{$userRecord->[1]} =
+                    Mover::Thread->new( @{$userRecord}[0,1,4], $dest );
             } @queue;
 
             # Wait for the read-only bit to sink in
@@ -924,7 +924,6 @@ sub reapChildren {
 ### Pick a destination cluster for the given user.
 sub pickDestination {
     my $self = shift or confess "Cannot be called as a function";
-    my $user = shift or confess "No user record specified";
 
     # Pick a destination, then rotate the list.
     my $dest = $self->{dests}[0];
@@ -1142,14 +1141,14 @@ BEGIN {
 ### given I<dest> cluster.
 sub new {
     my $class = shift;
-    my ( $user, $userid, $src, $dest ) = @_;
+    my ( $userRecord, $userid, $src, $dest ) = @_;
 
     # Lock the user
     LJ::update_user( $userid, {raw => "caps=caps|(1<<$ReadOnlyBit)"} );
 
     return bless {
         userid      => $userid,
-        user        => $user,
+        user        => $userRecord,
         src         => $src,
         dest        => $dest,
         pid         => undef,
@@ -1197,7 +1196,7 @@ sub unlock {
 
     if ( $self->{locked} ) {
         print STDERR "Unlocking user $self->{userid}.\n";
-        LJ::update_user( $self->{userid}, {raw => "caps=caps^(1<<$ReadOnlyBit)"} );
+        LJ::update_user( $self->{userid}, {raw => "caps=caps&~(1<<$ReadOnlyBit)"} );
         $self->{locked} = 0;
     }
 
