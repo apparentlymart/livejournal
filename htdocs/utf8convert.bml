@@ -675,7 +675,7 @@
      }
 
      my ($overrides) = LJ::dbs_selectrow_array($dbs, "SELECT override FROM overrides WHERE user=$quser");
-     if ($overrides && !LJ::utf_8($overrides)) {
+     if ($overrides && !LJ::is_utf8($overrides)) {
          convert(\$overrides, $encid);
          my $qoverrides = $dbh->quote($overrides);
          $dbh->do("UPDATE overrides SET override=$qoverrides WHERE user=$quser");
