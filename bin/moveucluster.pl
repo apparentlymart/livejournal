@@ -336,6 +336,9 @@ sub moveUser {
                  # }
     $tinfo = fetchTableInfo();
 
+    # see hack below
+    my $prop_icon = LJ::get_prop("talk", "subjecticon");
+
     # find readonly cap class, complain if not found
     my $readonly_bit = undef;
     foreach (keys %LJ::CAP) {
@@ -614,6 +617,14 @@ sub moveUser {
 
         my $insert = sub {
             my $r = shift;
+
+            # there was an old bug where we'd populate in the database
+            # the choice of "none" for comment subject icon, instead of
+            # just storing nothing.  this hack prevents migrating those.
+            return if
+                $table  eq "talkprop2" &&
+                $r->[2] == $prop_icon->{id} &&
+                $r->[3] eq "none";
 
             # now that we know it has something to delete (many tables are empty for users)
             unless ($pushed_delete++) {
