@@ -870,7 +870,8 @@ sub Entry
         my %pic;
         $e->{'mood_icon'} = Image($pic{'pic'}, $pic{'w'}, $pic{'h'})
             if LJ::get_mood_picture($theme, $mid, \%pic);
-        $e->{'metadata'}->{'mood'} = $LJ::CACHE_MOODS{$mid}->{'name'};
+        $e->{'metadata'}->{'mood'} = $LJ::CACHE_MOODS{$mid}->{'name'}
+            if defined $LJ::CACHE_MOODS{$mid};
     }
     if ($p->{'current_mood'}) {
         $e->{'metadata'}->{'mood'} = LJ::ehtml($p->{'current_mood'});

@@ -2128,6 +2128,7 @@ sub list_moods
     for (my $id = $mood_max+1; $id <= $LJ::CACHED_MOOD_MAX; $id++) {
         next unless defined $LJ::CACHE_MOODS{$id};
         my $mood = $LJ::CACHE_MOODS{$id};
+        next unless $mood->{'name'};
         push @$res, { 'id' => $id,
                       'name' => $mood->{'name'},
                       'parent' => $mood->{'parent'} };

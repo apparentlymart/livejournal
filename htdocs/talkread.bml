@@ -181,10 +181,11 @@ body<=
              my $theme = $up->{'moodthemeid'};
                LJ::load_mood_theme($dbs, $theme);
              my %pic;
+             my $name = defined $LJ::CACHE_MOODS{$mid} ? $LJ::CACHE_MOODS{$mid}->{'name'} : '';
              if (LJ::get_mood_picture($theme, $mid, \%pic)) {
-                 $current{'Mood'} = "<img src='$pic{'pic'}' align='absmiddle' width='$pic{'w'}' height='$pic{'h'}' vspace='1'> $LJ::CACHE_MOODS{$mid}->{'name'}";
+                 $current{'Mood'} = "<img src='$pic{'pic'}' align='absmiddle' width='$pic{'w'}' height='$pic{'h'}' vspace='1'> $name";
              } else {
-                 $current{'Mood'} = $LJ::CACHE_MOODS{$mid}->{'name'};
+                 $current{'Mood'} = $name;
              }
          }
      }

@@ -241,11 +241,12 @@ sub prepare_currents
         my $theme = $args->{'user'}->{'moodthemeid'};
         LJ::load_mood_theme($dbs, $theme);
         my %pic;
+        my $name = defined $LJ::CACHE_MOODS{$val} ? $LJ::CACHE_MOODS{$val}->{'name'} : '';
         if (LJ::get_mood_picture($theme, $val, \%pic)) {
             $currents{'Mood'} = "<img src=\"$pic{'pic'}\" align='absmiddle' width='$pic{'w'}' ".
-                "height='$pic{'h'}' vspace='1'> $LJ::CACHE_MOODS{$val}->{'name'}";
+                "height='$pic{'h'}' vspace='1'> $name";
         } else {
-            $currents{'Mood'} = $LJ::CACHE_MOODS{$val}->{'name'};
+            $currents{'Mood'} = $name;
         }
     }
     if (%currents) {

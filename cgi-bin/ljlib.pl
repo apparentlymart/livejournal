@@ -1293,7 +1293,8 @@ sub get_mood_picture
             $ref->{'moodid'} = $moodid;
             return 1;
         } else {
-            $moodid = $LJ::CACHE_MOODS{$moodid}->{'parent'};
+            $moodid = (defined $LJ::CACHE_MOODS{$moodid} ? 
+                       $LJ::CACHE_MOODS{$moodid}->{'parent'} : 0);
         }
     }
     while ($moodid);
