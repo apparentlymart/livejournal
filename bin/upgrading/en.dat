@@ -1847,7 +1847,7 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /manage/links.bml.about=Use the form below to create a list of links to appear on your journal. Links will only appear if this feature is supported by your S2 style.
 
-/manage/links.bml.about.blank=To create a blank line, etner a "-" for the title.
+/manage/links.bml.about.blank=To create a blank line, enter a "-" for the title.
 
 /manage/links.bml.about.heading=To create a heading, enter a title with no URL.
 
