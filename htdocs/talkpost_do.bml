@@ -481,10 +481,12 @@ BODY<=
                  LJ::load_talk_props($dbs, [$partid], \%props);
              }
              if ($props{$partid}->{'unknown8bit'}) {
-                 LJ::item_toutf8($dbs, $u, undef, \$parentcomment, {});
+                 LJ::item_toutf8($dbs, $u, \$textsubject, \$parentcomment, {});
+                 LJ::item_toutf8($dbs, $u, \$cleansubject, undef, {});
              }
          }
- 
+
+        
          if ($paruserid) {
              my $qparuserid = $dbr->quote($paruserid);
              $sth = $dbr->prepare("SELECT user, email, opt_htmlemail, password, status, ".
@@ -503,13 +505,18 @@ BODY<=
                      $debug .= "Parent mailed ($paru->{'user'}, $paru->{'email'})<br>\n";
                  }
                  $parentmailed = $paru->{'email'};
-                 my $encoding = $paru->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$paru->{'mailencoding'}} : "utf-8";
+                 my $encoding = $paru->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$paru->{'mailencoding'}} : "UTF-8";
                  my $part;
+
+                 my $headersubject = $textsubject;
+                 if ($LJ::UNICODE && $encoding ne "UTF-8") {
+                     $headersubject = Unicode::MapUTF8::from_utf8({-string=>$textsubject, -charset=>$encoding}); 
+                 }
 
                  my $fromname = $up->{'user'} ? "$up->{'user'} - LJ Comment" : "LiveJournal Comment";
                  my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
                                             'To' => $paru->{'email'},
-                                            'Subject' => ($textsubject || "Reply to your comment..."),
+                                            'Subject' => ($headersubject || "Reply to your comment..."),
                                             'Type' => 'multipart/alternative');
                  
                  my $text = "";
@@ -521,7 +528,7 @@ BODY<=
                  $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid\n\n";
                  $text .= "-- $LJ::SITENAME\n\n";
 
-                 if ($LJ::UNICODE && $encoding ne "utf-8") {
+                 if ($LJ::UNICODE && $encoding ne "UTF-8") {
                      $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding}); 
                  }
                  $part = $msg->attach('Type' => 'TEXT',
@@ -551,7 +558,7 @@ BODY<=
                  $html .= "<INPUT TYPE=HIDDEN NAME=itemid VALUE=$ditemid>";
                  $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$paru->{'user'}\">";
                  $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $paru->{'password'})) . "\">";
-                 $html .= "<input type=hidden name=encoding value=$encoding>" unless $encoding eq "utf-8";
+                 $html .= "<input type=hidden name=encoding value=$encoding>" unless $encoding eq "UTF-8";
                  my $newsub = $FORM{'subject'};
                  unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
                  $html .= "<B>Subject: </B> <INPUT NAME=subject SIZE=40 VALUE=\"" . LJ::ehtml($newsub) . "\">";
@@ -561,7 +568,7 @@ BODY<=
                  $html .= "<FONT SIZE=-1>(if you'd prefer to not get these updates, go to <A HREF=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</A> and turn off the relevant options)</FONT>\n";
                  $html .= "</BODY>\n";
 
-                 if ($LJ::UNICODE && $encoding ne "utf-8") {
+                 if ($LJ::UNICODE && $encoding ne "UTF-8") {
                      $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
                  }
 
@@ -601,13 +608,18 @@ BODY<=
          LJ::load_user_props($dbs, $ujp, 'mailencoding');
          LJ::load_codes($dbs, { "encoding" => \%LJ::CACHE_ENCODINGS } )
              unless %LJ::CACHE_ENCODINGS;
-         my $encoding = $ujp->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$ujp->{'mailencoding'}} : "utf-8";
+         my $encoding = $ujp->{'mailencoding'} ? $LJ::CACHE_ENCODINGS{$ujp->{'mailencoding'}} : "UTF-8";
          my $part;
+
+         my $headersubject = $textsubject;
+         if ($LJ::UNICODE && $encoding ne "UTF-8") {
+             $headersubject = Unicode::MapUTF8::from_utf8({-string=>$textsubject, -charset=>$encoding}); 
+         }
 
          my $fromname = $up->{'user'} ? "$up->{'user'} - LJ Comment" : "LiveJournal Comment";
          my $msg =  new MIME::Lite ('From' => "$LJ::BOGUS_EMAIL ($fromname)",
                                     'To' => $ujp->{'email'},
-                                    'Subject' => ($textsubject || "Reply to your post..."),
+                                    'Subject' => ($headersubject || "Reply to your post..."),
                                     'Type' => 'multipart/alternative');
          my $text = "";
          if ($parentcomment)  {
@@ -624,7 +636,7 @@ BODY<=
          $text .= "-- $LJ::SITENAME\n\n";
          $text .= "(if you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options)\n";
 
-         if ($LJ::UNICODE && $encoding ne "utf-8") {
+         if ($LJ::UNICODE && $encoding ne "UTF-8") {
              $text = Unicode::MapUTF8::from_utf8({-string=>$text, -charset=>$encoding}); 
          }
          $part = $msg->attach('Type' => 'TEXT',
@@ -662,7 +674,7 @@ BODY<=
          $html .= "<INPUT TYPE=HIDDEN NAME=journal VALUE='$u->{'user'}'>" if $clustered;
          $html .= "<INPUT TYPE=HIDDEN NAME=userpost VALUE=\"$ujp->{'user'}\">";
          $html .= "<INPUT TYPE=HIDDEN NAME=ecphash VALUE=\"" . LJ::ehtml(ecphash($itemid, $insertid, $ujp->{'password'})) . "\">";
-         $html .= "<input type=hidden name=encoding value=$encoding>" unless $encoding eq "utf-8";
+         $html .= "<input type=hidden name=encoding value=$encoding>" unless $encoding eq "UTF-8";
 
          my $newsub = $FORM{'subject'};
          unless ($FORM{'subject'} =~ /^Re:/) { $newsub = "Re: $newsub"; }
@@ -675,7 +687,7 @@ BODY<=
          $html .= "<FONT SIZE=-1>(if you'd prefer to not get these updates, go to <A HREF=\"$LJ::SITEROOT/editinfo.bml\">your user profile page</A> and turn off the relevant options)</FONT>\n";
          $html .= "</BODY>\n";
 
-         if ($LJ::UNICODE && $encoding ne "utf-8") {
+         if ($LJ::UNICODE && $encoding ne "UTF-8") {
              $html = Unicode::MapUTF8::from_utf8({-string=>$html, -charset=>$encoding}); 
          }
 
