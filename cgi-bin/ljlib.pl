@@ -547,6 +547,9 @@ sub get_friends {
     my $userid = LJ::want_userid($uuid);
     return unless $userid;
 
+    # memcache data version
+    my $ver = 1;
+
     my $packfmt = "NH6H6NC";
     my $packlen = 15;  # bytes
 
@@ -557,6 +560,11 @@ sub get_friends {
     my $memfriends = LJ::MemCache::get($memkey);
     if ($memfriends) {
         my %friends; # rows to be returned
+
+        # first byte of object is data version
+        # only version 1 is meaningful right now
+        my $memver = substr($memfriends, 0, 1, '');
+        return undef unless $memver == $ver;
 
         # get each $packlen-byte row
         while (length($memfriends) >= $packlen) {
@@ -586,8 +594,8 @@ sub get_friends {
     # database and insert those into memcache
     # then return rows that matched the given groupmask
 
-    my $mempack; # full packed string to insert into memcache
-    my %friends; # friends object to be returned, all groupmasks match
+    my $mempack = $ver; # full packed string to insert into memcache, byte 1 is dversion
+    my %friends;        # friends object to be returned, all groupmasks match
     my $dbh = LJ::get_db_writer();
     my $sth = $dbh->prepare("SELECT friendid, fgcolor, bgcolor, groupmask, showbydefault " .
                             "FROM friends WHERE userid=?");
