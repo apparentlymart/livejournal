@@ -1007,10 +1007,15 @@ sub create_view_lastn
     }
 
     $lastn_page{'events'} = "";
+    $lastn_page{'head'} = "";
+
+    if (LJ::are_hooks('s2_head_content_extra')) {
+        $lastn_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
+    }
 
     # if user has requested, or a skip back link has been followed, don't index or follow
     if ($u->{'opt_blockrobots'} || $get->{'skip'}) {
-        $lastn_page{'head'} = LJ::robot_meta_tags()
+        $lastn_page{'head'} .= LJ::robot_meta_tags()
     }
     if ($LJ::UNICODE) {
         $lastn_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}."\" />\n";
@@ -1394,9 +1399,15 @@ sub create_view_friends
                                        $u->{'name'} . $friends_page{'name-\'s'} . " Friends");
     $friends_page{'numitems'} = $vars->{'FRIENDS_OPT_ITEMS'} || 20;
 
+    $friends_page{'head'} = "";
+
+    if (LJ::are_hooks('s2_head_content_extra')) {
+        $friends_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
+    }
+
     ## never have spiders index friends pages (change too much, and some 
     ## people might not want to be indexed)
-    $friends_page{'head'} = LJ::robot_meta_tags();
+    $friends_page{'head'} .= LJ::robot_meta_tags();
     if ($LJ::UNICODE) {
         $friends_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
     }
@@ -1850,8 +1861,15 @@ sub create_view_calendar
     $calendar_page{'username'} = $user;
     $calendar_page{'title'} = LJ::ehtml($u->{'journaltitle'} ||
                                         $u->{'name'} . $calendar_page{'name-\'s'} . " Journal");
+
+    $calendar_page{'head'} = "";
+
+    if (LJ::are_hooks('s2_head_content_extra')) {
+        $calendar_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
+    }
+
     if ($u->{'opt_blockrobots'}) {
-        $calendar_page{'head'} = LJ::robot_meta_tags();
+        $calendar_page{'head'} .= LJ::robot_meta_tags();
     }
     if ($LJ::UNICODE) {
         $calendar_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
@@ -2071,8 +2089,14 @@ sub create_view_day
 
     my %day_page = ();
     $day_page{'username'} = $user;
+    $day_page{'head'} = "";
+
+    if (LJ::are_hooks('s2_head_content_extra')) {
+        $day_page{'head'} .= LJ::run_hook('s2_head_content_extra', $remote, $opts->{r});
+    }
+
     if ($u->{'opt_blockrobots'}) {
-        $day_page{'head'} = LJ::robot_meta_tags();
+        $day_page{'head'} .= LJ::robot_meta_tags();
     }
     if ($LJ::UNICODE) {
         $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset='.$opts->{'saycharset'}.'" />';
