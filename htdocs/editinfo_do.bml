@@ -31,7 +31,9 @@ BODY<=
  unless (LJ::auth_okay($u, $undef, $hpassword)) {
      return LJ::bad_input("Incorrect password");
  }
- 
+
+ return $LJ::MSG_READONLY_USER if LJ::get_cap($remote, "readonly");
+
  LJ::load_user_props($dbr, $u, "opt_whatemailshow",
 		     "opt_showtopicstuff", "country", "state", "city",
 		     "zip", "icq", "aolim", "yahoo", "msn", "url",
@@ -44,13 +46,15 @@ BODY<=
  my $user = $u->{'user'};
  my $quser = $dbr->quote($user);
 
- if ($u->{'has_bio'}) {
-     $sth = $dbr->prepare("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
-     $sth->execute;
-     $_ = $sth->fetchrow_hashref;
-     $u->{'bio'} = $_->{'bio'};
- }
+ my $dbcr;
+ $dbcr = LJ::get_cluster_reader($u) if $u->{'clusterid'};
 
+ my $db_bio = $dbcr || $dbr;
+
+ if ($u->{'has_bio'}) {
+     $u->{'bio'} = $db_bio->selectrow_array("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
+ }
+ 
  $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$u->{'userid'}");
  $sth->execute;
  my %interests = ();
@@ -548,11 +552,12 @@ BODY<=
      #### update their bio text
      if ($has_bio eq "N") {
 	 if ($u->{'has_bio'} eq "Y") {
-	     $dbh->do("DELETE FROM userbio WHERE userid=$u->{'userid'}");
+	     # had one, but not any more.
+	     $db_bio->do("DELETE FROM userbio WHERE userid=$u->{'userid'}");
 	 }
      } else {
 	 my $qbio = $dbh->quote($FORM{'bio'});
-	 $dbh->do("REPLACE INTO userbio (userid, bio) VALUES ($u->{'userid'}, $qbio)");
+	 $db_bio->do("REPLACE INTO userbio (userid, bio) VALUES ($u->{'userid'}, $qbio)");
      }
 
      #### update their text messaging info
