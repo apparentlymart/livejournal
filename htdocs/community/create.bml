@@ -56,7 +56,7 @@
      my $qcuser = $dbh->quote($cu->{'user'});
      $dbh->do("REPLACE INTO priv_map (prmid, userid, prlid, arg) SELECT NULL, $mu->{'userid'}, prlid, $qcuser FROM priv_list WHERE privcode='sharedjournal'");
 
-     $body .= "(=H1 Success H1=)(=P Your community is now setup. P=)";
+     $body .= "(=H1 Success H1=)(=P Your community is now set up. P=)";
      $body .= "(=P Relevant links: <UL><LI><A HREF=\"$LJ::SITEROOT/community/$cu->{'user'}/\">Community website<LI><A HREF=\"/userinfo.bml?user=$cu->{'user'}\">Community info</A><LI><A HREF=\"/admin/console/\">Admin console</A> - to add/remove people that are able to post</UL> P=)";
 
      return "";
