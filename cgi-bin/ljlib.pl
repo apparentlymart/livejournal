@@ -697,6 +697,20 @@ sub get_friend_itemids { return LJ::get_friend_itemids($dbh, @_); }
 
 package LJ;
 
+sub get_limit
+{
+    my $lname = shift;
+    my $accttype = shift;
+    my $default = shift;
+    
+    foreach my $k ($accttype, "") {
+	if (defined $LJ::LIMIT{$lname}->{$k}) {
+	    return $LJ::LIMIT{$lname}->{$k};
+	}
+    }
+    return $default;
+}
+
 sub load_user_props
 {
     my $dbh = shift;

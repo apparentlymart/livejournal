@@ -481,23 +481,31 @@ sub do_request
     {
 	## first, figure out who the current friends are to save us work later
 	my %curfriend;
+	my $friend_count = 0;
         $sth = $dbh->prepare("SELECT u.user FROM user u, friends f WHERE u.userid=f.friendid AND f.userid=$userid");
         $sth->execute;
 	while (my ($friend) = $sth->fetchrow_array) {
 	    $curfriend{$friend} = 1;
+	    $friend_count++;
 	}
 
         # perform the deletions
+      DELETEFRIEND:
         foreach (keys %{$req})
         {
 	    if (/^editfriend_delete_(\w+)/) 
 	    {
-		my $qfriend = $dbh->quote(lc($1));
-		my $friendid = LJ::get_userid($dbh, lc($1));
+		my $deluser = LJ::canonical_username($1);
+		next DELETEFRIEND unless ($curfriend{$deluser});
+
+		my $qfriend = $dbh->quote($deluser);
+		my $friendid = LJ::get_userid($dbh, $deluser);
 
 		## delete from friends table
 		$sth = $dbh->prepare("DELETE FROM friends WHERE userid=$userid AND friendid=$friendid");
 		$sth->execute;
+
+		$friend_count--;
 	    }
         }
 	
@@ -511,8 +519,23 @@ sub do_request
 	    if (/^editfriend_add_(\d+)_user/) 
 	    {
 		my $n = $1;
-		my $name = lc($req->{"editfriend_add_${n}_user"});
-		next ADDFRIEND unless ($name);
+		my $raw = $req->{"editfriend_add_${n}_user"};
+		my $name = LJ::canonical_username($raw);
+		next ADDFRIEND unless ($raw);
+		unless ($name) {
+		    $error_flag = 1;
+		    next ADDFRIEND;
+		}
+		
+		if (! $curfriend{$name}) {
+		    $friend_count++;
+		}
+
+		if ($friend_count > LJ::get_limit("friends", $paidfeatures, 250)) {
+		    $error_flag = 1;
+		    next ADDFRIEND;
+		}
+
 		my $fg = $req->{"editfriend_add_${n}_fg"} || "#000000";
 		my $bg = $req->{"editfriend_add_${n}_bg"} || "#FFFFFF"; 
 		if ($fg !~ /^\#[0-9A-F]{6,6}$/i || $bg !~ /^\#[0-9A-F]{6,6}$/i)
@@ -560,7 +583,7 @@ sub do_request
         if ($error_flag)
         {
 	  $res->{'success'} = "FAIL";
-	  $res->{'errmsg'} = "Client error: One or more of the friends you added was not added because the username was invalid.";
+	  $res->{'errmsg'} = "Client error: There was an error adding one or more of the users you selected as friends.";
 	  return;
         }
      
