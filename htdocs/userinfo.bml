@@ -107,7 +107,7 @@
  } elsif ($synd) {
      $title = $ML{'.title.syndicated'};
      $u->{'opt_whatemailshow'} = "N";  # don't show email
-     $verbosefriends=0;
+     $verbosefriends = 0;
  }
 
  if ($u->{'statusvis'} eq "S") {
@@ -501,7 +501,7 @@
      my $label = $com ? $ML{'.friends.comm'} : $ML{'.friends.user'};
      my $span = ($narrow_left-- >= 0) ? 1 : 2;
      $body .= "<tr><td align='right' valign='top'><b><a href='$LJ::SITEROOT/$dir/$user/friends'>$label</a>:</b></td><td colspan='$span'>";
-     if (!$verbosefriends && $res_fr{'friend_count'} > 500) {
+     if (!$verbosefriends || $res_fr{'friend_count'} > 500) {
          $body .= "<b>" . $res_fr{'friend_count'} . ":</b> ";
          $body .= "<a href='$LJ::DIRURI?s_fro=1&amp;fro_user=$u->{'user'}'>" . BML::ml('.label.viewlabel',{'label'=>$label}) . "</a>.";
      } elsif ($res_fr{'friend_count'}) {
