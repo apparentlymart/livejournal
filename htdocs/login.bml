@@ -239,9 +239,10 @@
             
             my ($banned, $ok);
             $banned = $ok = 0;
+            my $chal_opts = {};
 
             if ($POST{response}) {
-                $ok = LJ::challenge_check_login($u, $POST{chal}, $POST{response}, \$banned);
+                $ok = LJ::challenge_check_login($u, $POST{chal}, $POST{response}, \$banned, $chal_opts);
             } else {  # js disabled, fallback to plaintext
                 $ok = LJ::auth_okay($u, $password, undef, undef, \$banned);
             }
@@ -251,7 +252,13 @@
                 return;
             }
 
-            push @errors, "$ML{'error.badpassword'}" if $u && ! $ok;
+            if ($u && ! $ok) {
+                if ($chal_opts->{'expired'}) {
+                    push @errors, "Challenge expired.  Please try again.";
+                } else {
+                    push @errors, "$ML{'error.badpassword'}";
+                }
+            }
 
             if (@errors) {
                 $login_html->(@errors);

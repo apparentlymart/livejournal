@@ -2909,7 +2909,7 @@ sub challenge_check {
 # Return 1 on valid, 0 on invalid.
 sub challenge_check_login
 {
-    my ($u, $chal, $res, $banned) = @_;
+    my ($u, $chal, $res, $banned, $opts) = @_;
     return 0 unless $u;
     my $pass = $u->{'password'};
 
@@ -2924,7 +2924,7 @@ sub challenge_check_login
     }
 
     # check the challenge string validity
-    return 0 unless LJ::challenge_check($chal);
+    return 0 unless LJ::challenge_check($chal, $opts);
 
     # Validate password
     my $hashed = Digest::MD5::md5_hex($chal . Digest::MD5::md5_hex($pass));
