@@ -82,6 +82,10 @@
  my $remote_isowner = $remote && $remote->{'user'} eq $u->{'user'};
  my $remote_isfriend = LJ::is_friend($dbr, $u, $remote);
  my $com = $u->{'journaltype'} eq "C" ? 1 : 0;
+ my $synd;
+ if ($u->{'journaltype'} eq "Y") {
+     $synd = $dbr->selectrow_hashref("SELECT * FROM syndicated WHERE userid=$u->{'userid'}");
+ }
  my $dir = "users";
  
  ### load user props.  some don't apply to communities
@@ -99,6 +103,11 @@
  if ($com) {
      $title = $ML{'.title.communityinfo'};
      $dir = "community";
+ } elsif ($synd) {
+     $title = $ML{'.title.syndicated'};
+     $u->{'opt_whatemailshow'} = "N";  # don't show email
+     $u->{'url'} = $synd->{'synurl'};
+     $u->{'urlname'} = $synd->{'synurl'};
  }
 
  if ($u->{'statusvis'} eq "S") {

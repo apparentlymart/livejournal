@@ -1636,6 +1636,8 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /userinfo.bml.title.communityinfo=Community Info
 
+/userinfo.bml.title.syndicated=Syndicated Account
+
 /userinfo.bml.userinfo.body=Below is user information for [[username]].  If you are this user, you can edit your information (or choose what information is considered public) at <a href="[[siteroot]]/editinfo.bml">the Edit Info page</a>.
 
 /userinfo.bml.userinfo.name=User Information
