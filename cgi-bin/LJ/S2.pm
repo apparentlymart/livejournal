@@ -248,21 +248,21 @@ sub load_layers {
 
     # figure out what is process cached...that goes to DB always
     # if it's not in process cache, hit memcache first
-    my %need_db;
-    my %need_memc;
+    my %need_db;   # lid => compiled at time
+    my @need_memc; # lid, lid, lid, ...
 
     # initial sweep, anything loaded goes to db
     foreach my $lid (@lids) {
         if (my $loaded = S2::layer_loaded($lid)) {
             $need_db{$lid} = $loaded;
         } else {
-            $need_memc{$lid} = 1;
+            push @need_memc, $lid;
         }
     }
 
-    # attempt to get things in %need_memc from memcache
-    my $memc = LJ::MemCache::get_multi(map { [ $_, "s2c:$_"] } keys %need_memc);
-    foreach my $lid (keys %need_memc) {
+    # attempt to get things in @need_memc from memcache
+    my $memc = LJ::MemCache::get_multi(map { [ $_, "s2c:$_"] } @need_memc);
+    foreach my $lid (@need_memc) {
         if (my $row = $memc->{"s2c:$lid"}) {
             my ($updtime, $data) = @$row;
 
