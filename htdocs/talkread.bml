@@ -342,11 +342,9 @@ BODY<=
  }
  ####### end navcrap
 
- if ($navcrap) {
-     $ret .= "<p>$navcrap</p>";
- }
-
- unless ($logprops{$itemid}->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N") {
+ unless ($logprops{$itemid}->{'opt_nocomments'} or $u->{'opt_showtalklinks'} eq "N") 
+ {
+     $ret .= "<p>$navcrap</p>" if $navcrap;
      $ret .= "<center><b><a href='talkpost.bml?${jargent}itemid=$ditemid'>(Post a new comment)</a></b></center>";
 
      if ($post_count > 0) 
