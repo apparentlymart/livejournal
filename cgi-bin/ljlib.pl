@@ -2706,6 +2706,7 @@ sub get_remote
         return $cgi ? $cgi->cookie($_[0]) : $BML::COOKIE{$_[0]};
     };
 
+    my $sopts;
     my $validate = sub {
         my $a = shift;
         # let hooks reject credentials, or set criterr true:
@@ -2716,6 +2717,7 @@ sub get_remote
             'caps' => $a->{'caps'},
             'criterr' => $criterr,
             'cookiesource' => $cookie,
+            'sopts' => $sopts,
         };
         my @r = LJ::run_hooks("validate_get_remote", $hookparam);
         return undef if grep { ! $_->[0] } @r;
@@ -2735,7 +2737,9 @@ sub get_remote
     return $no_remote->("No session") 
         unless ($sessdata = $cookie->('ljsession'));
 
-    my ($authtype, $user, $sessid, $auth) = split(/:/, $sessdata);
+    
+    my ($authtype, $user, $sessid, $auth, $_sopts) = split(/:/, $sessdata);
+    $sopts = $_sopts;
 
     # fail unless authtype is 'ws' (more might be added in future)
     return $no_remote->("No ws auth") unless $authtype eq "ws";
