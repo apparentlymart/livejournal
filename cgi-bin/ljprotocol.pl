@@ -511,8 +511,9 @@ sub common_event_validation
     {
         if ($req->{'ver'} < 1) { # client doesn't support Unicode
             # only people should have unknown8bit entries.
+            my $uowner = $flags->{u_owner} || $flags->{u};
             return fail($err,207,'Posting in a community with international or special characters require a Unicode-capable LiveJournal client.  Download one at http://www.livejournal.com/download/.')
-                if $flags->{u}{journaltype} ne 'P';
+                if $uowner->{journaltype} ne 'P';
 
             # so rest of site can change chars to ? marks until
             # default user's encoding is set.  (legacy support)
