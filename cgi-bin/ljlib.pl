@@ -3058,7 +3058,7 @@ sub make_journal
 
     $opts->{'view'} = $view;
 
-    if ($stylesys == 2) {
+    if ($stylesys == 2 && $view ne 'rss') {
         return LJ::S2::make_journal($u, $styleid, $view, $remote, $opts);
     }
 
