@@ -195,6 +195,7 @@ propgroup presentation {
 
     property int leading_full_entries {
         des = "Number of entries on the Recent Entries page to display in full";
+        note = "Set to zero to display all recent entries in short form. Set to the same number of page items to display all recent entries in full form.";
     }
     set leading_full_entries = 5;
     property string page_content_width {
@@ -274,12 +275,17 @@ propgroup sidebar {
     set sidebar_position_five = "calendar";
 }
 propgroup text {
+    property string text_sidebar_link_separator {
+        des = "Leading text for links in the sidebar";
+    }
+    set text_sidebar_link_separator = "";
     property use text_meta_music;
     property use text_meta_mood;
-
-    property string text_sidebar_link_separator {
-        des = "Line separator for links in the sidebar";
-    }
+    property use text_post_comment;
+    property use text_read_comments;
+    property use text_post_comment_friends;
+    property use text_read_comments_friends;
+    property use text_website_default_name;
 }
 ################################################################################
 #
@@ -557,6 +563,9 @@ function print_entry_full (Page p, Entry e, Color bgcolor, Color fgcolor, bool h
 # 
 
 function prop_init() {
+
+    if ($*leading_full_entries > $*page_recent_items) { $*leading_full_entries = $*page_recent_items; }
+
     ### Main / Misc Colors
     if($*border_color.as_string == "")                { $*border_color = $*main_bgcolor->average($*main_fgcolor); }
     if($*title_speck_color.as_string == "")           { $*title_speck_color = $*title_bgcolor->darker(); }
@@ -626,7 +635,6 @@ p, td, blockquote {
     font-size: 1.0em; 
 }
 pre, code, kbd, tt {
-    font-size: 1.1em; 
     font-family: monospace;
 }
 a {
@@ -857,16 +865,12 @@ function RecentPage::print_body ()
     var int count = 0;
     foreach var Entry e ($.entries) {
         $count++;
-        if ($*leading_full_entries > 0) {
-            if ($count <= $*leading_full_entries) {
-                print_entry_full($this, $e, null Color, null Color, false);
-            } else {
-                print_entry_short($this, $e, null Color, null Color);
-            }
-            if ($count == $*leading_full_entries) { print_heading_bar("Other entries"); }
-        } else {
+        if ($count <= $*leading_full_entries) {
             print_entry_full($this, $e, null Color, null Color, false);
+        } else {
+            print_entry_short($this, $e, null Color, null Color);
         }
+        if ($count == $*leading_full_entries and $*leading_full_entries != $*page_recent_items) { print_heading_bar("Other entries"); }
     }
 }
 
