@@ -1618,7 +1618,7 @@ sub make_graphviz_dot_file
     my $sth;
     my $ret;
  
-    $sth = $dbh->prepare("SELECT *, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) AS 'secondsold' FROM user WHERE user=$quser");
+    $sth = $dbh->prepare("SELECT u.*, UNIX_TIMESTAMP()-UNIX_TIMESTAMP(uu.timeupdate) AS 'secondsold' FROM user u, userusage uu WHERE u.userid=uu.userid AND u.user=$quser");
     $sth->execute;
     my $u = $sth->fetchrow_hashref;
     
@@ -2171,7 +2171,7 @@ sub get_friend_itemids
 	}
     }
 
-    $sth = $dbh->prepare("SELECT u.userid, u.timeupdate FROM friends f, user u WHERE f.userid=$userid AND f.friendid=u.userid $filtersql AND u.statusvis='V'");
+    $sth = $dbh->prepare("SELECT u.userid, uu.timeupdate FROM friends f, userusage uu, user u WHERE f.userid=$userid AND f.friendid=uu.userid AND f.friendid=u.userid $filtersql AND u.statusvis='V'");
     $sth->execute;
 
     my @friends = ();
@@ -2528,7 +2528,7 @@ sub delete_item
 
     $dbh->do("DELETE FROM hintlastnview WHERE itemid=$itemid") unless ($quick);
     $dbh->do("DELETE FROM memorable WHERE itemid=$itemid");
-    $dbh->do("UPDATE user SET lastitemid=0 WHERE userid=$ownerid AND lastitemid=$itemid") unless ($quick);
+    $dbh->do("UPDATE userusage SET lastitemid=0 WHERE userid=$ownerid AND lastitemid=$itemid") unless ($quick);
     $dbh->do("DELETE FROM log WHERE itemid=$itemid");
     $dbh->do("DELETE FROM logtext WHERE itemid=$itemid");
     $dbh->do("DELETE FROM logsubject WHERE itemid=$itemid");
