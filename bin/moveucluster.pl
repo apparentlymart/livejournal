@@ -146,7 +146,7 @@ if ($sclust == 0)
 	$dbh->do("DELETE FROM userbio WHERE userid=$userid");
     }
 
-    $dbh->do("UPDATE user SET clusterid=$dclust WHERE userid=$userid");
+    $dbh->do("UPDATE user SET dversion=1, clusterid=$dclust WHERE userid=$userid");
 
     # unset read-only bit
     $dbh->do("UPDATE user SET caps=caps&~(1<<$readonly_bit) WHERE userid=$userid");

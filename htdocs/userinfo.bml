@@ -13,6 +13,7 @@
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
+ my $dbcr;
 	
  my $remote = LJ::get_remote($dbr);
 
@@ -47,7 +48,7 @@
 	 if ($userid && ! LJ::check_priv($dbs, $remote, "finduser"));
 
      my $where = $userid ? "userid=$userid" : "user=$quser";
-     $sth = $dbr->prepare("SELECT userid, user, statusvis, caps, has_bio, name, defaultpicid, txtmsg_status, allow_infoshow, bdate, allow_contactshow, opt_mangleemail, email, journaltype FROM user WHERE $where");
+     $sth = $dbr->prepare("SELECT userid, user, statusvis, caps, has_bio, name, defaultpicid, txtmsg_status, allow_infoshow, bdate, allow_contactshow, opt_mangleemail, email, journaltype, dversion, clusterid FROM user WHERE $where");
      $sth->execute;
      if ($dbr->err) { return $error->($dbr->errstr); }
      $u = $sth->fetchrow_hashref;
@@ -69,6 +70,10 @@
      $title = "Error";
      $body = "(=H1 Unknown user H1=)(=P There does not exist a user with the username <B>$user</B>.  Sorry. P=)";
      return;
+ }
+
+ if ($u->{'clusterid'}) {
+     $dbcr = LJ::get_dbh("cluster$u->{'clusterid'}slave");
  }
 
  my $remote_isfriend = LJ::is_friend($dbr, $u, $remote);
@@ -113,7 +118,8 @@
  $userid = $u->{'userid'};
 
  if ($u->{'has_bio'} eq "Y") {
-     $sth = $dbr->prepare("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
+     my $db = $dbcr || $dbr;
+     $sth = $db->prepare("SELECT bio FROM userbio WHERE userid=$u->{'userid'}");
      $sth->execute;
      $_ = $sth->fetchrow_hashref;
      $u->{'bio'} = $_->{'bio'};
@@ -141,15 +147,14 @@
  if ($u->{'opt_hidefriendofs'}) {
      $incfriendof = 0; 
  }
- &LJ::do_request($dbr, 
-		 { 'mode' => 'getfriends',
-		   'includefriendof' => $incfriendof,
-		   'user' => $u->{'user'}, }, 
-		 \%res_fr,
-		 { 'userid' => $u->{'userid'},
-		   'noauth' => 1,
-	       }); 
-
+ LJ::do_request($dbr, 
+		{ 'mode' => 'getfriends',
+		  'includefriendof' => $incfriendof,
+		  'user' => $u->{'user'}, }, 
+		\%res_fr,
+		{ 'userid' => $u->{'userid'},
+		  'noauth' => 1,
+	      }); 
 
  $u->{'name'} = LJ::ehtml($u->{'name'});
 
