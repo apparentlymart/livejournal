@@ -904,6 +904,7 @@ sub send_mail
     open (MAIL, "|$LJ::SENDMAIL");
     my $toname;
     if ($opt->{'toname'}) {
+	$opt->{'toname'} =~ s/[\n\t\(\)]//g;
 	$toname = " ($opt->{'toname'})";
     }
     print MAIL "To: $opt->{'to'}$toname\n";
