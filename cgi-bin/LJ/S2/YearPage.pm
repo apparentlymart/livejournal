@@ -38,29 +38,9 @@ sub YearPage
     my %FORM = ();
     LJ::decode_url_string($opts->{'args'}, \%FORM);
 
-    my ($db, $sql);
-    if ($u->{'clusterid'}) {
-        $db = LJ::get_cluster_reader($u);
-        $sql = "SELECT year, month, day, COUNT(*) AS 'count' ".
-            "FROM log2 WHERE journalid=? ".
-            "GROUP BY year, month, day";
-    } else {
-        $db = $dbr;
-        $sql = "SELECT year, month, day, COUNT(*) AS 'count' ".
-            "FROM log WHERE ownerid=? ".
-            "GROUP BY year, month, day";
-    }
-    
-    my $sth = $db->prepare($sql);
-    $sth->execute($u->{'userid'});
-
-    my (%count, $maxyear);
-    while (my ($year, $month, $day, $count) = $sth->fetchrow_array) {
-        $count{$year}->{$month}->{$day} = $count;
-        if ($year > $maxyear) { $maxyear = $year; }
-    }
-
-    my @years = sort { $a <=> $b } keys %count;
+    my $count = LJ::S2::get_journal_day_counts($p);
+    my @years = sort { $a <=> $b } keys %$count;
+    my $maxyear = @years ? $years[-1] : undef;
     my $year = $FORM{'year'};  # old form was /users/<user>/calendar?year=1999
 
     # but the new form is purtier:  */calendar/2001
@@ -71,8 +51,6 @@ sub YearPage
     # else... default to the year they last posted.
     $year ||= $maxyear;  
 
-    my $start_monday = 0;  # FIXME: check some property to see if weeks start on monday
-
     $p->{'year'} = $year;
     $p->{'years'} = [];
     foreach (@years) {
@@ -81,7 +59,29 @@ sub YearPage
 
     $p->{'months'} = [];
 
-    my $calmon = undef;
+    for my $month (1..12) {
+        push @{$p->{'months'}}, YearMonth($p, {
+            'month' => $month,
+            'year' => $year,
+        });
+    }
+
+    return $p;
+}
+
+sub YearMonth {
+    my ($p, $calmon) = @_;
+
+    my ($month, $year) = ($calmon->{'month'}, $calmon->{'year'});
+    $calmon->{'_type'} = 'YearMonth';
+    $calmon->{'weeks'} = [];
+    $calmon->{'url'} = "$LJ::SITEROOT/view/?type=month&user=$p->{'journal'}->{'username'}&y=$year&m=$month";
+
+    my $count = LJ::S2::get_journal_day_counts($p);
+    my $has_entries = $count->{$year} && $count->{$year}->{$month} ? 1 : 0;
+    $calmon->{'has_entries'} = $has_entries;
+
+    my $start_monday = 0;  # FIXME: check some property to see if weeks start on monday
     my $week = undef;
 
     my $flush_week = sub {
@@ -118,37 +118,19 @@ sub YearPage
 
     my $day_of_week = LJ::day_of_week($year, 1, 1);
 
-    for my $month (1..12) {
-        my $has_entries = $count{$year}->{$month} ? 1 : 0;
-        my $daysinmonth = LJ::days_in_month($month, $year);
+    my $daysinmonth = LJ::days_in_month($month, $year);
 
-        $calmon = YearMonth({
-            'month' => $month,
-            'year' => $year, 
-            'url' => "$LJ::SITEROOT/view/?type=month&user=$p->{'journal'}->{'username'}&y=$year&m=$month",
-            'weeks' => [],
-            'has_entries' => $has_entries,
-        });
-
-        for my $day (1..$daysinmonth) {
-            my $d = YearDay($u, $year, $month, $day, 
-                            $count{$year}->{$month}->{$day},
-                            $day_of_week+1);
-            $push_day->($d);
-            $day_of_week = ($day_of_week + 1) % 7;
-        }
-        $flush_week->(1); # end of month flag
-
-        push @{$p->{'months'}}, $calmon;
+    for my $day (1..$daysinmonth) {
+        # so we don't auto-vivify years/months
+        my $daycount = $has_entries ? $count->{$year}->{$month}->{$day} : 0;
+        my $d = YearDay($p->{'_u'}, $year, $month, $day, 
+                        $daycount, $day_of_week+1);
+        $push_day->($d);
+        $day_of_week = ($day_of_week + 1) % 7;
     }
-
-    return $p;
-}
-
-sub YearMonth {
-    my $opts = shift;
-    $opts->{'_type'} = 'YearMonth';
-    return $opts;
+    $flush_week->(1); # end of month flag
+ 
+    return $calmon;
 }
 
 sub YearYear {

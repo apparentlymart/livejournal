@@ -769,6 +769,37 @@ sub can_use_prop
     return $can;
 }
 
+sub get_journal_day_counts
+{
+    my ($s2page) = @_;
+    return $s2page->{'_day_counts'} if defined $s2page->{'_day_counts'};
+    
+    my $u = $s2page->{'_u'};
+    my $counts = {};
+
+    my ($db, $sql);
+    if ($u->{'clusterid'}) {
+        $db = LJ::get_cluster_reader($u);
+        $sql = "SELECT year, month, day, COUNT(*) AS 'count' ".
+            "FROM log2 WHERE journalid=? ".
+            "GROUP BY year, month, day";
+    } else {
+        $db = LJ::get_db_reader();
+        $sql = "SELECT year, month, day, COUNT(*) AS 'count' ".
+            "FROM log WHERE ownerid=? ".
+            "GROUP BY year, month, day";
+    }
+    
+    my $sth = $db->prepare($sql);
+    $sth->execute($u->{'userid'});
+
+    while (my ($year, $month, $day, $count) = $sth->fetchrow_array) {
+        $counts->{$year}->{$month}->{$day} = $count;
+    }
+    
+    return $s2page->{'_day_counts'} = $counts;
+}
+
 ## S2 object constructors
 
 sub CommentInfo
@@ -874,6 +905,7 @@ sub Page
     my $base_url = $u->{'_journalbase'};
     my $p = {
         '_type' => 'Page',
+        '_u' => $u,
         'view' => '',
         'journal' => User($u),
         'journal_type' => $u->{'journaltype'},
@@ -1127,6 +1159,33 @@ sub Entry__plain_subject
     LJ::CleanHTML::clean_subject_all(\$this->{'_subject_plain'});
     return $this->{'_subject_plain'};
 }
+
+sub Page__get_latest_month
+{
+    my ($ctx, $this) = @_;
+    return $this->{'_latest_month'} if defined $this->{'_latest_month'};
+    my $counts = LJ::S2::get_journal_day_counts($this);
+    my ($year, $month);
+    my @years = sort { $a <=> $b } keys %$counts;
+    if (@years) {
+        # year/month of last post
+        $year = $years[-1];
+        $month = (sort { $a <=> $b } keys %{$counts->{$year}})[-1];
+    } else {
+        # year/month of current date, if no posts
+        my @now = gmtime(time);
+        ($year, $month) = ($now[5]+1900, $now[4]+1);
+    }
+    return $this->{'_latest_month'} = LJ::S2::YearMonth($this, {
+        'year' => $year,
+        'month' => $month,
+    });
+}
+*RecentPage__get_latest_month = \&Page__get_latest_month;
+*DayPage__get_latest_month = \&Page__get_latest_month;
+*MonthPage__get_latest_month = \&Page__get_latest_month;
+*YearPage__get_latest_month = \&Page__get_latest_month;
+*FriendsPage__get_latest_month = \&Page__get_latest_month;
 
 sub YearMonth__month_format
 {

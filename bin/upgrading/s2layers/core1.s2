@@ -289,8 +289,8 @@ class Page
     function print_entry_poster(Entry e) 
     "Output a line of text which says who posted an entry (just \"user\", or \"user posting in somejournal\")";
 
-    function builtin get_this_month() : YearMonth
-    "Returns information about the current month, so that the page may include a mini-calendar or similar features.";
+    function builtin get_latest_month() : YearMonth
+    "Returns information about the latest month the user posted (or the current month, if no posts), so that the page may include a mini-calendar or similar features.";
 
 }
 
