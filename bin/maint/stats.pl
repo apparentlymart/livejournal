@@ -255,7 +255,7 @@ $maint{'genstats'} = sub
                                               "AND (c.clusterid IS NULL OR c.clusterid=?)" .
                                               "GROUP BY 1 ORDER BY 2");
                        $sth->execute($upc->{'id'}, $cid);
-                       die $db->errstr if $db->err;
+                       die "clusterid: $cid, " . $db->errstr if $db->err;
 
                        while ($_ = $sth->fetchrow_hashref) {
                            $ret{$_->{'value'}} += $_->{'count'};
@@ -345,7 +345,7 @@ $maint{'genstats'} = sub
                                               "WHERE up.upropid=? AND up.userid BETWEEN $low AND $high " .
                                               "AND (c.clusterid IS NULL OR c.clusterid=?) GROUP BY 1");
                        $sth->execute($upg->{'id'}, $cid);
-                       die $db->errstr if $db->err;
+                       die "clusterid: $cid, " . $db->errstr if $db->err;
 
                        while ($_ = $sth->fetchrow_hashref) {
                            $ret{$_->{'value'}} += $_->{'count'};
