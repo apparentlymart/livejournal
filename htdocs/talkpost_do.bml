@@ -54,8 +54,9 @@ BODY<=
 
  my $cookie_auth;
  if ($FORM{'usertype'} eq "cookieuser") {
-     return LJ::bad_input("Your login cookie seems to have disappeared?") 
+     push @errors, "Your login cookie seems to have disappeared?"
          unless ($remote && $remote->{'user'} eq $FORM{'cookieuser'});
+     return LJ::bad_input(@errors);
      
      $cookie_auth = 1;
      $FORM{'userpost'} = $remote->{'user'};
@@ -104,9 +105,10 @@ BODY<=
  # to reply to it
  ####  Check security before viewing this post
  unless (LJ::can_view($dbs, $up, $item)) {
-     return "(=H1 Error H1=)(=P You must be logged in or using a username/password to reply to this protected entry. P=)"
-         unless (defined $up);
-     return "(=H1 Error H1=)(=P You are not authorized to reply to this protected entry. P=)";
+     push @errors, "You must be logged in or using a username/password to reply to this protected entry."
+	 unless (defined $up);
+     push @errors, "You are not authorized to reply to this protected entry.";
+     return LJ::bad_input(@errors);     
  }
 
  if ($FORM{'usertype'} ne "user" && $u->{'opt_whocanreply'} ne "all") {
