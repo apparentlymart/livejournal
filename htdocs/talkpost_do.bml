@@ -26,7 +26,7 @@ body<=
     # clients. We call it later.
 
     my $remote_ip = LJ::get_remote_ip();
-    if ($FORM{'usertype'} eq "anonymous" && LJ::is_open_proxy($remote_ip)) {
+    if ($POST{'usertype'} eq "anonymous" && LJ::is_open_proxy($remote_ip)) {
         return "Your IP address ($remote_ip) is detected as an open proxy (a common source of spam) so comment access is denied.  If you do not believe you're accessing the net through an open proxy, please contact your ISP or this site's tech support to help resolve the problem.";
     }
 
