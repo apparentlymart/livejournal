@@ -46,7 +46,7 @@ sub get {
 sub get_stream {
     my ($self, $cid, $uid, $domain, $fmt, $bid, $callback) = @_;
     my $req = HTTP::Request->new(GET => make_path(@_));
-    my $res = $self->{ua}->request($req, $callback, 4096);
+    my $res = $self->{ua}->request($req, $callback, 1024*50);
     return $res->is_success;
 }
 
