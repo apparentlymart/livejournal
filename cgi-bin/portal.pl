@@ -900,6 +900,7 @@ $box{'update'} =
             if (! $opts->{'form'}->{'altlogin'} && $remote)
             {
                 LJ::do_request($dbs, { "mode" => "login",
+                                       "ver" => $LJ::PROTOCOL_VER,
                                         "user" => $remote->{'user'},
                                         "getpickws" => 1,
                                     }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });

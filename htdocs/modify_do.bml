@@ -5,6 +5,7 @@ BODY<=
 (=_CODE
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+ return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
 
  my @errors = ();
  my $user = LJ::canonical_username($FORM{'user'});
@@ -183,6 +184,7 @@ BODY<=
          $sth = $dbr->prepare("SELECT override FROM overrides WHERE user=$quser");
          $sth->execute;
          ($overrides) = $sth->fetchrow_array;
+         LJ::text_out(\$overrides);
      }
 
      $ret .= "(=H1 Style Overrides H1=)(=P You can ignore this section.  This is for tweaking very specific things about your page layout.  See the <A HREF=\"/developer/\" TARGET=_blank>developer section</A> for details.  Also note that overrides are for overriding only one or two things about a style.  If you'd like to override everything, you need to <A HREF=\"/styles/create.bml\" TARGET=_blank>create your own style</A>. P=)(=P <FONT SIZE=+1><B>THIS IS <U>NOT</U> WHERE YOU TYPE YOUR JOURNAL!!</B></FONT> P=)\n";

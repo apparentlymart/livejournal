@@ -36,6 +36,8 @@ sub error_message
              "204" => "Invalid metadata datatype",
              "205" => "Unknown metadata",
              "206" => "Invalid destination journal username.",
+             "207" => "Protocol version mismatch",
+             "208" => "Invalid text encoding",
 
              # Access Errors
              "300" => "Don't have access to shared/community journal",
@@ -75,6 +77,9 @@ sub do_request
     # get the request and response hash refs
     my ($dbs, $method, $req, $err, $flags) = @_;
 
+    # if version isn't specified explicitly, it's version 0
+    $req->{'ver'} = 0 unless defined $req->{'ver'};
+
     $flags ||= {};
     my @args = ($dbs, $req, $err, $flags);
 
@@ -105,19 +110,36 @@ sub login
 
     my $u = $flags->{'u'};
     my $res = {};
+    my $ver = $req->{'ver'};
+
+    ## check for version mismatches
+    ## non-Unicode installations can't handle versions >=1
+
+    return fail($err,207, "This installation does not support Unicode clients")
+        if $ver>=1 and not $LJ::UNICODE;    
 
     ## return a message to the client to be displayed (optional)
     login_message($dbs, $req, $res, $flags);
+    LJ::text_out(\$res->{'message'}) if $ver>=1 and defined $res->{'message'};
 
     ## report what shared journals this user may post in
     $res->{'usejournals'} = list_usejournals($dbs, $u);
 
     ## return their friend groups
     $res->{'friendgroups'} = list_friendgroups($dbs, $u);
+    if ($ver >=1 ) {
+        foreach (@{$res->{'friendgroups'}}) { 
+            LJ::text_out(\$_->{'name'});
+        }
+    }
 
     ## if they gave us a number of moods to get higher than, then return them
     if (defined $req->{'getmoods'}) {
         $res->{'moods'} = list_moods($dbs, $req->{'getmoods'});
+        if ($ver >= 1) {
+            # currently all moods are in English, but this might change
+            foreach (@{$res->{'moods'}}) { LJ::text_out(\$_->{'name'}) }
+        }
     }
 
     ### picture keywords, if they asked for them.
@@ -129,11 +151,24 @@ sub login
                 "$LJ::SITEROOT/userpic/$_->[1]"
             } @$pickws ];
         }
+        if ($ver >= 1) {
+            # validate all text
+            foreach(@{$res->{'pickws'}}) { LJ::text_out(\$_); }
+            foreach(@{$res->{'pickwurls'}}) { LJ::text_out(\$_); }
+        }
     }
 
     ## return client menu tree, if requested
     if ($req->{'getmenus'}) {
         $res->{'menus'} = hash_menus($dbs, $u);
+        if ($ver >= 1) {
+            # validate all text, just in case, even though currently
+            # it's all English
+            foreach (@{$res->{'menus'}}) {
+                LJ::text_out(\$_->{'text'});
+                LJ::text_out(\$_->{'url'}); # should be redundant
+            }
+	}
     }
 
     ## tell some users they can hit the fast servers later.
@@ -142,10 +177,16 @@ sub login
     ## user info
     $res->{'userid'} = $u->{'userid'};
     $res->{'fullname'} = $u->{'name'};
+    LJ::text_out(\$res->{'fullname'}) if $ver >= 1;
 
     ## update or add to clientusage table
     if ($req->{'clientversion'} =~ /^\S+\/\S+$/)  {
-        my $qclient = $dbh->quote($req->{'clientversion'});
+        my $client = $req->{'clientversion'};
+
+        return fail($err, 208, "Bad clientversion string")
+            if $ver >= 1 and not LJ::text_in($client);
+
+       	my $qclient = $dbh->quote($client);
         my $cu_sql = "REPLACE INTO clientusage (userid, clientid, lastlogin) " .
             "SELECT $u->{'userid'}, clientid, NOW() FROM clients WHERE client=$qclient";
         my $sth = $dbh->prepare($cu_sql);
@@ -170,6 +211,11 @@ sub getfriendgroups
     my $u = $flags->{'u'};
     my $res = {};
     $res->{'friendgroups'} = list_friendgroups($dbs, $u);
+    if ($req->{'ver'} >= 1) {
+        foreach (@{$res->{'friendgroups'}}) {
+	    LJ::text_out(\$_->{'name'});
+        }
+    }
     return $res;
 }
 
@@ -182,16 +228,27 @@ sub getfriends
     my $res = {};
     if ($req->{'includegroups'}) {
         $res->{'friendgroups'} = list_friendgroups($dbs, $u);
+	if ($req->{'ver'} >= 1) {
+	    foreach (@{$res->{'friendgroups'}}) {
+		LJ::text_out(\$_->{'name'});
+	      }
+	}
     }
     if ($req->{'includefriendof'}) {
         $res->{'friendofs'} = list_friends($dbs, $u, {
             'limit' => $req->{'friendoflimit'},
             'friendof' => 1,
         });
+        if ($req->{'ver'} >= 1) {
+            foreach(@{$res->{'friendofs'}}) { LJ::text_out(\$_->{'fullname'}) };
+        }
     }
     $res->{'friends'} = list_friends($dbs, $u, {
         'limit' => $req->{'friendlimit'}
     });
+    if ($req->{'ver'} >= 1) {
+        foreach(@{$res->{'friends'}}) { LJ::text_out(\$_->{'fullname'}) };
+    }
     return $res;
 }
 
@@ -206,6 +263,9 @@ sub friendof
         'friendof' => 1,
         'limit' => $req->{'friendoflimit'},
     });
+    if ($req->{'ver'} >= 1) {
+        foreach(@{$res->{'friendofs'}}) { LJ::text_out(\$_->{'fullname'}) };
+    }
     return $res;
 }
 
@@ -331,6 +391,14 @@ sub common_event_validation
         return fail($err,203,"Invalid minute value.");
     }
 
+    # column width
+
+    $req->{'subject'} = LJ::text_trim($req->{'subject'}, $LJ::BMAX_SUBJECT, $LJ::CMAX_SUBJECT);
+    $req->{'event'} = LJ::text_trim($req->{'event'}, $LJ::BMAX_EVENT, $LJ::CMAX_EVENT);
+    foreach (keys %{$req->{'props'}}) {
+        $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, $LJ::BMAX_PROP, $LJ::CMAX_PROP);
+    }
+
     # setup non-user meta-data.  it's important we define this here to
     # 0.  if it's not defined at all, then an editevent where a user
     # removes random 8bit data won't remove the metadata.  not that
@@ -340,15 +408,24 @@ sub common_event_validation
     $req->{'props'}->{'unknown8bit'} = 0;
 
     # non-ASCII?
-    if ($req->{'event'} =~ /[\x80-\xFF]/ || $req->{'subject'} =~ /[\x80-\xFF]/)
+    unless ( LJ::is_ascii($req->{'event'}) && 
+        LJ::is_ascii($req->{'subject'}) &&
+        LJ::is_ascii(join(' ', values %{$req->{'props'}}) ))
     {
-        if ($LJ::UNICODE) {
-            # TODO (avva): validate its UTF-8-ness, complain if not
-            #              well-formed, or has overlong characters
-        } else {
+        if ($req->{'ver'} < 1) { # client doesn't support Unicode
+            return fail($err,207,"only pure ASCII text is allowed for old clients; please upgrade your client") if $LJ::UNICODE_REQUIRE;
+
             # so rest of site can change chars to ? marks until
             # default user's encoding is set.  (legacy support)
             $req->{'props'}->{'unknown8bit'} = 1;
+        } else {
+            return fail($err,207, "This installation does not support Unicode clients") unless $LJ::UNICODE;
+            # validate that the text is valid UTF-8
+            if (!LJ::text_in($req->{'subject'}) ||
+                !LJ::text_in($req->{'event'}) ||
+                grep { !LJ::text_in($_) } values %{$req->{'props'}}) {
+                return fail($err, 208, "The text entered is not a valid UTF-8 stream");
+            }
         }
     }
 
@@ -1171,6 +1248,31 @@ sub getevents
         push @$events, $evt;
     }
 
+    # load properties. Even if the caller doesn't want them, we need
+    # them in Unicode installations to recognize older 8bit non-UF-8
+    # entries.
+    unless ($req->{'noprops'} && !$LJ::UNICODE) 
+    {
+	### do the properties now
+	$count = 0;
+	my %props = ();
+	if ($clustered) {
+            LJ::load_props($dbs, "log");
+            LJ::load_log_props2($dbcr, $ownerid, \@itemids, \%props);
+	} else {
+            LJ::load_log_props($dbcr, \@itemids, \%props);
+	}
+	foreach my $itemid (keys %props) {
+	    my $evt = $evt_from_itemid{$itemid};
+	    $evt->{'props'} = {};
+	    foreach my $name (keys %{$props{$itemid}}) {
+		my $value = $props{$itemid}->{$name};
+		$value =~ s/\n/ /g;
+		$evt->{'props'}->{$name} = $value;
+	    }
+	}
+    }
+
     ## load the text
     my $text;
     my $gt_opts = {
@@ -1186,15 +1288,37 @@ sub getevents
     {
         my $t = $text->{$i};
         my $evt = $evt_from_itemid{$i};
+
+        # now that we have the subject, the event and the props, 
+        # auto-translate them to UTF-8 if they're not in UTF-8.
+        if ($LJ::UNICODE && $req->{'ver'} >= 1 && 
+                $evt->{'props'}->{'unknown8bit'}) {
+            my $error = 0;
+            $t->[0] = LJ::text_convert($dbs, $t->[0], $uowner, \$error);
+            $t->[1] = LJ::text_convert($dbs, $t->[1], $uowner, \$error);
+            foreach (keys %{$evt->{'props'}}) {
+                $evt->{'props'}->{$_} = LJ::text_convert($dbs, 
+                    $evt->{'props'}->{$_}, $uowner, \$error);
+            }
+            return fail($err,208,"Cannot display non-Unicode posts unless default encoding has been selected")
+                if $error;
+        }
+ 
         if ($t->[0]) {
             $t->[0] =~ s/[\r\n]/ /g;
             $evt->{'subject'} = $t->[0];
         }
 
         # truncate
-        $t->[1] = substr($t->[1], 0, $req->{'truncate'}-3) . "..."
-            if ($req->{'truncate'} >= 4 && length($t->[1]) > $req->{'truncate'});
-
+        if ($req->{'truncate'} >= 4) {
+            if ($req->{'ver'} > 1) {
+                $t->[1] = LJ::text_trim($t->[1], $req->{'truncate'} - 3, 0);
+            } else {
+                $t->[1] = LJ::text_trim($t->[1], 0, $req->{'truncate'} - 3);
+            };
+            $t->[1] .= "...";
+        }
+        
         # line endings
         $t->[1] =~ s/\r//g;
         if ($req->{'lineendings'} eq "unix") {
@@ -1211,26 +1335,9 @@ sub getevents
         $evt->{'event'} = $t->[1];
     }
 
-    unless ($req->{'noprops'})
-    {
-        ### do the properties now
-        $count = 0;
-        my %props = ();
-        if ($clustered) {
-            LJ::load_props($dbs, "log");
-            LJ::load_log_props2($dbcr, $ownerid, \@itemids, \%props);
-        } else {
-            LJ::load_log_props($dbcr, \@itemids, \%props);
-        }
-        foreach my $itemid (keys %props) {
-            my $evt = $evt_from_itemid{$itemid};
-            $evt->{'props'} = {};
-            foreach my $name (keys %{$props{$itemid}}) {
-                my $value = $props{$itemid}->{$name};
-                $value =~ s/\n/ /g;
-                $evt->{'props'}->{$name} = $value;
-            }
-        }
+    # maybe we don't need the props after all
+    if ($req->{'noprops'}) {
+        foreach(@$events) { delete $_->{'props'}; }
     }
 
     return $res;
@@ -1315,6 +1422,9 @@ sub editfriends
             my $added = { 'username' => $aname,
                           'fullname' => $row->{'name'},
                       };
+            if ($req->{'ver'} >= 1) {
+                LJ::text_out(\$added->{'fullname'});
+            }
             push @{$res->{'added'}}, $added;
 
             my $qfg = LJ::color_todb($fg);
@@ -1380,6 +1490,20 @@ sub editfriendgroups
         $bitset{$bit} = 1;
     }
 
+    ## before we perform any DB operations, validate input text 
+    # (groups' names) for correctness so we can fail gracefully
+
+    if ($LJ::UNICODE) {
+        foreach my $bit (keys %{$req->{'set'}})
+        {
+            my $name = $req->{'set'}->{$bit}->{'name'};
+            return fail($err,207,"non-ASCII names require a Unicode-capable client")
+                if $req->{'ver'} < 1 and not LJ::ascii($name);
+            return fail($err,208,"Some of the group names aren't valid UTF-8 strings")
+                unless LJ::text_in($name);
+        }
+    }
+    
     ## figure out deletions we'll do later
     foreach my $bit (@{$req->{'delete'}})
     {
@@ -1408,8 +1532,8 @@ sub editfriendgroups
         $bit += 0;
         next unless ($bit >= 1 && $bit <= 30);
         my $sa = $req->{'set'}->{$bit};
-        my $name = $sa->{'name'};
-
+        my $name = LJ::text_trim($sa->{'name'}, $LJ::BMAX_GRPNAME, $LJ::CMAX_GRPNAME);
+        
         # setting it to name is like deleting it.
         unless ($name =~ /\S/) {
             push @{$req->{'delete'}}, $bit;
@@ -1802,7 +1926,7 @@ sub authenticate
         my $sth = $dbr->prepare("SELECT user, userid, journaltype, name, ".
                                 "password, status, statusvis, caps, ".
                                 "clusterid, dversion, ".
-                                "track FROM user WHERE user=$quser");
+                                "track, oldenc FROM user WHERE user=$quser");
         $sth->execute;
         $u = $sth->fetchrow_hashref;
     }

@@ -1164,9 +1164,21 @@ CREATE TABLE userusage
    timeupdate DATETIME,
    timecheck DATETIME,
    lastitemid INT UNSIGNED NOT NULL DEFAULT '0',
-   INDEX (timeupdate)   
+   INDEX (timeupdate)
 )
 EOC
+
+register_tablecreate("userupdate", <<'EOC');
+CREATE TABLE userupdate
+(
+   userid   INT UNSIGNED NOT NULL,
+   groupbit TINYINT UNSIGNED NOT NULL,
+   PRIMARY KEY (userid, groupbit),
+   timeupdate DATETIME NOT NULL,
+   INDEX (timeupdate)
+)
+EOC
+
 
 post_create("userusage",
             "sqltry" => "INSERT IGNORE INTO userusage (userid, timecreate, timeupdate, timecheck, lastitemid) SELECT userid, timecreate, timeupdate, timecheck, lastitemid FROM user",
@@ -1518,6 +1530,48 @@ register_alter(sub {
                  "MODIFY bgcolor MEDIUMINT UNSIGNED NOT NULL DEFAULT 16777215, ".
                  "MODIFY fgcolor MEDIUMINT UNSIGNED NOT NULL DEFAULT 0");
     }
+
+    # add the default encoding field, for recoding older pre-Unicode stuff
+
+    if (column_type("user", "oldenc") eq "") {
+        do_alter("user", "ALTER TABLE user ".
+                 "ADD oldenc TINYINT DEFAULT 0 NOT NULL");
+    }
+
+    # widen columns to accomodate larger Unicode names
+    if (column_type("friendgroup", "groupname") eq "varchar(30)") {
+        do_alter("friendgroup",
+                 "ALTER TABLE friendgroup ".
+                 "MODIFY groupname VARCHAR(60) NOT NULL");
+        do_alter("talktext",
+                 "ALTER TABLE talktext ".
+                 "MODIFY subject VARCHAR(255) NOT NULL");
+        do_alter("talktext2",
+                 "ALTER TABLE talktext2 ".
+                 "MODIFY subject VARCHAR(255) NOT NULL");
+        do_alter("todo",
+                 "ALTER TABLE todo ".
+                 "MODIFY statusline VARCHAR(40) NOT NULL, " .
+                 "MODIFY subject VARCHAR(80) NOT NULL, " .
+                 "MODIFY des VARCHAR(255) NOT NULL");
+        do_alter("memorable",
+                 "ALTER TABLE memorable ".
+                 "MODIFY des VARCHAR(150) NOT NULL");
+        do_alter("pollquestion",
+                 "ALTER TABLE pollquestion ".
+                 "MODIFY opts VARCHAR(50) NOT NULL");
+        do_alter("user",
+                 "ALTER TABLE user ".
+                 "MODIFY name VARCHAR(100) NOT NULL");
+        do_alter("userprop",
+                 "ALTER TABLE userprop ".
+                 "MODIFY value VARCHAR(255) NOT NULL");
+        do_alter("keywords",
+                 "ALTER TABLE keywords ".
+                 "MODIFY keyword VARCHAR(80) NOT NULL");
+    }
+     
+
 
 });
 

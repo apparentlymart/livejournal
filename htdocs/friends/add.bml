@@ -41,6 +41,7 @@
      LJ::do_request($dbh, {
          "user" => $remote->{'user'},
          "mode" => "editfriends",
+         "ver"  => $LJ::PROTOCOL_VER,
          "editfriend_add_1_user" => $user,
          "editfriend_add_1_fg" => $FORM{'editfriend_add_1_fg'}, 
          "editfriend_add_1_bg" => $FORM{'editfriend_add_1_bg'},
@@ -87,6 +88,7 @@
  my $err;
  my $greq = LJ::Protocol::do_request($dbs, "getfriendgroups", {
      'username' => $remote->{'user'},
+     'ver'      => $LJ::PROTOCOL_VER,
  }, \$err, { 'noauth' => 1 });
 
  if (@{$greq->{'friendgroups'}}) {

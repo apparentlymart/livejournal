@@ -13,6 +13,11 @@
      return;
  }
 
+ unless (LJ::text_in(\%FORM)) {
+     $body = "(=BADINPUT=)";
+     return;
+ }
+
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
@@ -60,6 +65,9 @@
      }
      if ($FORM{'did_spellcheck'} || $FORM{'do_spellcheck'}) {
          $FORM{'clientversion'} .= "s";
+     }
+     if ($LJ::UNICODE) {
+         $FORM{'ver'} = "1";
      }
      LJ::do_request($dbs, \%FORM, \%res, $flags);
      
@@ -220,6 +228,7 @@
              my $err;
              
              $res = LJ::Protocol::do_request($dbs, "login", {
+                 "ver" => $LJ::PROTOCOL_VER,
                  "username" => $remote->{'user'},
                  "getpickws" => 1,
              }, \$err, { 

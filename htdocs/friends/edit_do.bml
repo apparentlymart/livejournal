@@ -78,6 +78,7 @@ d.close();
 (=_CODE
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+ return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
 
  my @errors = ();
  my $user = lc($FORM{'user'});
@@ -105,7 +106,8 @@ d.close();
          "user" => $user,
          "password" => $FORM{'password'},
          "hpassword" => $FORM{'hpassword'},
-         "mode" => "friendof"
+         "mode" => "friendof",
+         "ver" => $LJ::PROTOCOL_VER,
          }, \%res, { "noauth" => 1 });
      if ($res{'friendof_count'})
      {
@@ -130,7 +132,8 @@ d.close();
          "user" => $user,
          "password" => $FORM{'password'},
          "hpassword" => $FORM{'hpassword'},
-         "mode" => "getfriends"
+         "mode" => "getfriends",
+         "ver" => $LJ::PROTOCOL_VER,
          }, \%res, { "noauth" => 1 });
 
      if ($res{'friend_count'})
@@ -215,6 +218,7 @@ d.close();
 
      my %request = ();
      $request{'mode'} = "editfriends";
+     $request{'ver'} = $LJ::PROTOCOL_VER;
      $request{'user'} = $FORM{'user'};
      $request{'password'} = $FORM{'password'};
      $request{'hpassword'} = $FORM{'hpassword'};

@@ -22,6 +22,7 @@
  $sth->execute;
  my $ci = $sth->fetchrow_hashref;
 
+ LJ::text_out(\$ci->{'name'});
  my $ecname = LJ::ehtml($ci->{'name'});
 
  ### does this community even exit?

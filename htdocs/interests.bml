@@ -4,6 +4,8 @@ BODY<=
 
 (=_CODE
 
+ return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
+
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
@@ -26,6 +28,7 @@ BODY<=
      while (my ($int, $count) = $sth->fetchrow_array)
      {
          next if ($count == 1);
+         LJ::text_out(\$int);
          my $eint = LJ::eurl($int);
          $ret .= "<TR><TD><A HREF=\"/interests.bml?int=$eint\">$int</A></TD><TD>$count</TD></TR>\n";
      }
@@ -52,6 +55,7 @@ BODY<=
          $sth = $dbh->prepare("SELECT interest FROM interests WHERE intid=$qintid");
          $sth->execute;
          my ($int) = $sth->fetchrow_array;
+         LJ::text_out(\$int);
 
          $ret .= "(=H1 Confirm H1=)";
          $ret .= "(=P To add <b>$int</b> as an interest, click the button below. ";

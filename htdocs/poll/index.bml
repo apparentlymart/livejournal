@@ -3,6 +3,11 @@
  $title = "Poll";
  $body = "";
 
+ unless (LJ::text_in(\%FORM)) {
+     $body = "(=BADINPUT=)";
+     return;
+ }
+
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};

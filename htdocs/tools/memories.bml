@@ -61,6 +61,7 @@
      while (my $mem = $sth->fetchrow_hashref)
      {
          my $eh_des = LJ::ehtml($mem->{'des'});
+         LJ::text_out(\$eh_des);
          my $edit = "";
          my $jargent = $mem->{'user'} ? "journal=$mem->{'user'}&amp;" : "";
          if ($remote && $remote->{'user'} eq $user) {
@@ -103,6 +104,7 @@
      my $noun = $row->{'count'}==1 ? "entry" : "entries";
      my $ue_keyword = LJ::eurl($row->{'keyword'});
      my $keyword = $row->{'keyword'};
+     LJ::text_out(\$keyword);
      if ($keyword eq "*") { $keyword = "Uncategorized"; }
      $body .= "<LI><B><A HREF=\"/tools/memories.bml?user=$user&amp;keyword=$ue_keyword&amp;filter=$filter\">$keyword</A></B>: $row->{'count'} $noun\n";
  }

@@ -48,7 +48,7 @@ BODY<=
 
  my $itemid = $init->{'itemid'}+0;
 
- my $item = LJ::Talk::get_journal_item($dbcs, $u, $itemid);
+ my $item = LJ::Talk::get_journal_item($dbs, $dbcs, $u, $itemid);
 
  if ($init->{'oldurl'} && $item) {
      $init->{'anum'} = $item->{'anum'};
@@ -59,18 +59,11 @@ BODY<=
      return "(=H1 Error H1=)(=P No such entry. P=)";
  }
 
+ my %logprops = %{$item->{'logprops'}};
+
  my $ditemid = $init->{'ditemid'}+0;
  my $page = int($FORM{'page'}) || 1;
  my $thread = $init->{'thread'};
-
- ### load the log properties
- my %logprops = ();
- if ($clustered) {
-     LJ::load_props($dbs, "log");
-     LJ::load_log_props2($dbcr, $u->{'userid'}, [ $itemid ], \%logprops);
- } else {
-     LJ::load_log_props($dbs, [ $init->{'itemid'} ], \%logprops);
- }
 
  ### load users
  my ($up);  # $up = user posted journal item
@@ -78,6 +71,8 @@ BODY<=
                                   $item->{'posterid'} => \$up,
                                   ], [ $u ]);
  LJ::load_user_props($dbs, $up, "opt_showtopicstuff");
+
+ LJ::text_out(\$u->{'name'});
 
  # check suspended
  return "(=H1 Suspended H1=)(=P This journal/poster is suspended. P=)"
@@ -111,6 +106,7 @@ BODY<=
      if ($logprops{$itemid}->{'picture_keyword'}) {
          $alt .= ": $logprops{$itemid}->{'picture_keyword'}";
      }
+     LJ::text_out(\$alt);
      $alt = LJ::ehtml($alt);
      $ret .= "<td><img src='/userpic/$picid' width='$userpics{$picid}->{'width'}' ".
          "height='$userpics{$picid}->{'height'}' align='absmiddle' ".
@@ -310,6 +306,16 @@ BODY<=
      LJ::load_talk_props2($dbcr, $u->{'userid'}, \@posts_to_load, \%posts);
  } else {
      LJ::load_talk_props($dbs, \@posts_to_load, \%posts);
+ }
+
+ if ($LJ::UNICODE) {
+     foreach (@posts_to_load) {
+         if ($posts{$_}->{'unknown8bit'}) {
+             LJ::item_toutf8($dbs, $u, \$posts{$_}->{'subject'},
+                             \$posts{$_}->{'body'},
+                             {});
+         }
+     }
  }
 
  my %user;

@@ -17,6 +17,10 @@
 
  $title = "Add to Memories";
  $body = "";
+ unless (LJ::text_in(\%FORM)) {
+     $body = "(=BADINPUT=)";
+     return;
+ }
 
  my %secopts = ( 'public' => "Public",
                  'friends' => "Your Friends",
@@ -105,6 +109,8 @@
 
      $des = LJ::ehtml($des);
      $keywords = LJ::ehtml($keywords);
+     LJ::text_out(\$des);
+     LJ::text_out(\$keywords);
 
      $body .= "(=H1 Add to memories... H1=)(=P To add the journal entry you were just viewing to your \"memories\", fill out the form below. P=)";
      $body .= "<FORM METHOD=POST>";
@@ -123,6 +129,7 @@
          $body .= "Or, you can also select keywords you've used in the past:<ul><select name=oldkeywords multiple size=$size>";
          foreach my $kw (@all_keywords) {
              my $sel = $selected_keyword{$kw} ? " selected" : "";
+             LJ::text_out(\$kw);
              $body .= "<option$sel>$kw</option>\n";
          }
          $body .= "</select></ul>Hold down 'Control' while clicking keywords to select multiple ones.";
@@ -198,6 +205,7 @@
          return;
      }
 
+     $FORM{'des'} = LJ::text_trim($FORM{'des'}, $LJ::BMAX_MEMORY, $LJ::CMAX_MEMORY);
      my $qdes = $dbh->quote($FORM{'des'});
      my $qsec = $dbh->quote($FORM{'security'});
 

@@ -3,9 +3,14 @@
  $title = "Edit Friend Groups";
  $body = "";
 
+ unless (LJ::text_in(\%FORM)) {
+     $body = "(=BADINPUT=)";
+     return;
+ }
+
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
- 
+
  my $remote = LJ::get_remote($dbs);
  unless ($remote) {
      $body = "(=H1 Login First H1=)(=P To edit your friend groups you must first <A HREF=\"/login.bml?ret=1\">log in</A>. P=)";
@@ -16,6 +21,7 @@
      my %res;
      $FORM{'mode'} = "editfriendgroups";
      $FORM{'user'} = $remote->{'user'};
+     $FORM{'ver'} = $LJ::PROTOCOL_VER;
      LJ::do_request($dbs, \%FORM, \%res, {
          'userid' => $remote->{'userid'},
          'noauth' => 1, 
@@ -32,6 +38,7 @@
  my %res;
  LJ::do_request($dbs, { 'mode' => 'getfriends',
                         'user' => $remote->{'user'}, 
+                        'ver'  => $LJ::PROTOCOL_VER,
                         'includegroups' => 1,
                     },
                 \%res, { 'userid' => $remote->{'userid'},

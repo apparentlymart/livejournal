@@ -213,7 +213,7 @@ sub topic_links
 
 sub get_journal_item
 {
-    my ($dbcs, $u, $itemid) = @_;
+    my ($dbs, $dbcs, $u, $itemid) = @_;
     my $clustered = $u->{'clusterid'};
     my $sql;
     if ($clustered) {
@@ -233,6 +233,21 @@ sub get_journal_item
     my $v = $lt->{$itemid};
     $item->{'subject'} = $v->[0];
     $item->{'event'} = $v->[1];
+
+    ### load the log properties
+    my %logprops = ();
+    if ($clustered) {
+        LJ::load_props($dbs, "log");
+        LJ::load_log_props2($dbcs->{'reader'}, $u->{'userid'}, [ $itemid ], \%logprops);
+    } else {
+        LJ::load_log_props($dbcs, [ $itemid ], \%logprops);
+    }
+    $item->{'logprops'} = \%logprops;
+
+    if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
+        LJ::item_toutf8($dbs, $u, \$item->{'subject'}, \$item->{'event'},
+                        $item->{'logprops'}->{$itemid});
+    }
     return $item;
 }
 

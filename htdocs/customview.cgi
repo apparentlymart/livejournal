@@ -22,6 +22,11 @@ while(LJ::start_request() &&
     if ($FORM{'type'} eq "xml") {
 	$ctype = "text/xml";
     }
+
+    if ($LJ::UNICODE) {
+        $ctype .= "; charset=utf-8";
+    }
+
     print "Content-type: $ctype\n";
 
     my $user = $FORM{'username'} || $FORM{'user'};

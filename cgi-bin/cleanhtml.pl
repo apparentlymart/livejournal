@@ -222,7 +222,15 @@ sub clean
             }
             if ($wordlength) {
                 # this treats normal characters and &entities; as single characters
-                $token->[1] =~ s/(([^&\s]|(&\#?\w{1,7};)){$wordlength})\B/$1<wbr>/g;
+                # also treats UTF-8 chars as single characters if $LJ::UNICODE
+                my $utf_longchar = '[\xc2-\xdf][\x80-\xbf]|\xe0[\xa0-\xbf][\x80-\xbf]|[\xe1-\xef][\x80-\xbf][\x80-\xbf]|\xf0[\x90-\xbf][\x80-\xbf][\x80-\xbf]|[\xf1-\xf7][\x80-\xbf][\x80-\xbf][\x80-\xbf]';
+                my $match;
+                if (not $LJ::UNICODE) {
+                    $match = '[^&\s]|(&\#?\w{1,7};)';
+                } else {
+                    $match = $utf_longchar . '|[^&\s\x80-\xff]|(&\#?\w{1,7};)';
+                }
+                $token->[1] =~ s/(($match){$wordlength})\B/$1<wbr>/go;
             } 
             if ($addbreaks) {
                 $token->[1] =~ s/\n/<br>/g;
@@ -235,6 +243,7 @@ sub clean
             ## want to make sure we delete any comment starts we see until
             ## the end, since they could both be used to comment out the 
             ## remainder of the page and also to sneak in back HTML/scripting
+
             ## However, we should keep these when $keepcomments is 1 so we don't
             ## remove CSS when being called from LJ::strip_bad_code.
             $token->[1] =~ s/<!--.*//s unless ($keepcomments);

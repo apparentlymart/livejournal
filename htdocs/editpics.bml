@@ -5,6 +5,11 @@
  $su = "";           # switch user bar
  @errors = ();
  
+ unless (LJ::text_in(\%FORM)) {
+     $body = "(=BADINPUT=)";
+     return;
+ }
+
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
@@ -137,6 +142,7 @@
  $sth = $dbr->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
  $sth->execute;
  while (my ($pic, $keyword) = $sth->fetchrow_array) {
+     LJ::text_out(\$keyword);
      push @{$keywords{$pic}}, $keyword;
  }
  

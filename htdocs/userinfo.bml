@@ -56,6 +56,7 @@
      $user = $u->{'user'} if $u;
      $userid = $u->{'userid'}+0 if $u;
 
+     LJ::text_out(\$u->{'name'});
      if ($u && $FORM{'mode'} eq "full") {
          $sth = $dbr->prepare("SELECT timeupdate, timecreate, ".
                               "UNIX_TIMESTAMP()-UNIX_TIMESTAMP(timeupdate) ".
@@ -126,6 +127,7 @@
      $sth->execute;
      $_ = $sth->fetchrow_hashref;
      $u->{'bio'} = $_->{'bio'};
+     LJ::text_out(\$u->{'bio'});
  }
 
  $sth = $dbr->prepare("SELECT i.interest, i.intcount, i.intid FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$u->{'userid'}");
@@ -152,6 +154,7 @@
  }
  LJ::do_request($dbr, 
                 { 'mode' => 'getfriends',
+                  'ver' => $LJ::PROTOCOL_VER,
                   'includefriendof' => $incfriendof,
                   'user' => $u->{'user'}, }, 
                 \%res_fr,
@@ -425,6 +428,7 @@
          $intcount++;
          next if ($intcount > 150);
          my $eint = LJ::eurl($_);
+         LJ::text_out(\$eint);
          if ($interests{$_}->{'intcount'} > 1) {
              if ($interests{$_}->{'common'}) {
                  $body .= "<B><A HREF=\"/interests.bml?int=$eint\">$_</A></B>, ";

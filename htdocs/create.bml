@@ -4,6 +4,8 @@ BODY<=
 (=_CODE 
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+
+ return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
  
  my $mode = $FORM{'mode'};
 
@@ -141,6 +143,10 @@ BODY<=
      }
      if (! $FORM{'password1'}) { 
          $errors{'password'} = "You must enter a password.";
+     }
+
+     unless (LJ::is_ascii($FORM{'password1'})) {
+         $errors{'password'} = "You can only use ASCII symbols in the password.";
      }
 
      if ($FORM{'under13'}) {

@@ -66,9 +66,13 @@ sub create_view_lastn
     if ($u->{'opt_blockrobots'}) {
         $lastn_page{'head'} = "<meta name=\"robots\" content=\"noindex\">\n";
     }
+
     if ($FORM{'skip'}) {
         # if followed a skip link back, prevent it from going back further
         $lastn_page{'head'} = "<meta name=\"robots\" content=\"noindex,nofollow\">\n";
+    }
+    if ($LJ::UNICODE) {
+        $lastn_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
     }
     $lastn_page{'head'} .= 
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'LASTN_HEAD'};
@@ -135,6 +139,10 @@ sub create_view_lastn
 
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
+
+	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
+	    LJ::item_toutf8($dbs, $u, \$subject, \$event, $logprops{$itemid});
+	}
 
         my %lastn_date_format = LJ::alldateparts_to_hash($alldatepart);
 
@@ -410,6 +418,9 @@ sub create_view_friends
     ## never have spiders index friends pages (change too much, and some 
     ## people might not want to be indexed)
     $friends_page{'head'} = "<meta name=\"robots\" content=\"noindex\">\n";
+    if ($LJ::UNICODE) {
+        $friends_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+    }
     $friends_page{'head'} .= 
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'FRIENDS_HEAD'};
 
@@ -508,7 +519,7 @@ sub create_view_friends
     my $ownersin = join(",", keys %owners);
 
     my %friends = ();
-    $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, f.fgcolor, f.bgcolor, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=$u->{'userid'} AND f.friendid IN ($ownersin)");
+    $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, f.fgcolor, f.bgcolor, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=$u->{'userid'} AND f.friendid IN ($ownersin)");
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
         next unless ($_->{'statusvis'} eq "V");  # ignore suspended/deleted users.
@@ -565,6 +576,10 @@ sub create_view_friends
             
         my $subject = $logtext->{$datakey}->[0];
         my $event = $logtext->{$datakey}->[1];
+
+        if ($LJ::UNICODE && $logprops{$datakey}->{'unknown8bit'}) {
+            LJ::item_toutf8($dbs, $friends{$friendid}, \$subject, \$event, $logprops{$datakey});
+        }
 
         my ($friend, $poster);
         $friend = $friends{$friendid}->{'user'};
@@ -799,6 +814,9 @@ sub create_view_calendar
     if ($u->{'opt_blockrobots'}) {
         $calendar_page{'head'} = "<meta name=\"robots\" content=\"noindex\">\n";
     }
+    if ($LJ::UNICODE) {
+        $calendar_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+    }
     $calendar_page{'head'} .=
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'CALENDAR_HEAD'};
     
@@ -1010,6 +1028,9 @@ sub create_view_day
     if ($u->{'opt_blockrobots'}) {
         $day_page{'head'} = "<meta name=\"robots\" content=\"noindex\">\n";
     }
+    if ($LJ::UNICODE) {
+        $day_page{'head'} .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+    }
     $day_page{'head'} .= 
         $vars->{'GLOBAL_HEAD'} . "\n" . $vars->{'DAY_HEAD'};
     $day_page{'name'} = LJ::ehtml($u->{'name'});
@@ -1129,6 +1150,10 @@ sub create_view_day
     {
         my $subject = $logtext->{$itemid}->[0];
         my $event = $logtext->{$itemid}->[1];
+
+	if ($LJ::UNICODE && $logprops{$itemid}->{'unknown8bit'}) {
+	    LJ::item_toutf8($dbs, $u, \$subject, \$event, $logprops{$itemid});
+	}
 
         my %day_date_format = LJ::alldateparts_to_hash($alldatepart);
 

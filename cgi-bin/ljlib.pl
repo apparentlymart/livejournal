@@ -16,14 +16,40 @@ use Text::Wrap;
 use MIME::Lite;
 use HTTP::Date qw();
 use IO::Socket;
+use Unicode::MapUTF8;
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 
+# $LJ::PROTOCOL_VER is the version of the client-server protocol
+# used uniformly by server code which uses the protocol.
+$LJ::PROTOCOL_VER = ($LJ::UNICODE ? "1" : "0");
+
 # constants
 $LJ::EndOfTime = 2147483647;
+
+# width constants. BMAX_ constants are restrictions on byte width,
+# CMAX_ on character width (character means byte unless $LJ::UNICODE,
+# in which case it means a UTF-8 character).
+
+$LJ::BMAX_SUBJECT = 255;
+$LJ::CMAX_SUBJECT = 100;
+$LJ::BMAX_COMMENT = 9000;
+$LJ::CMAX_COMMENT = 4300;
+$LJ::BMAX_MEMORY  = 150;
+$LJ::CMAX_MEMORY  = 80;
+$LJ::BMAX_NAME    = 100;
+$LJ::CMAX_NAME    = 50;
+$LJ::BMAX_KEYWORD = 80;
+$LJ::CMAX_KEYWORD = 40;
+$LJ::BMAX_PROP    = 255;
+$LJ::CMAX_PROP    = 100;
+$LJ::BMAX_GRPNAME = 60;
+$LJ::CMAX_GRPNAME = 30;
+$LJ::BMAX_EVENT   = 65535;
+$LJ::CMAX_EVENT   = 65535;
 
 # declare views (calls into ljviews.pl)
 @LJ::views = qw(lastn friends calendar day);
@@ -2700,6 +2726,7 @@ sub handle_caches
     %LJ::CACHE_USERPIC_SIZE = ();
     %LJ::CACHE_CODES = ();
     %LJ::CACHE_USERPROP = ();  # {$prop}->{ 'upropid' => ... , 'indexed' => 0|1 };
+    %LJ::CACHE_ENCODINGS = ();
     return 1;
 }
 
@@ -4524,6 +4551,7 @@ sub get_keyword_id
     my $dbarg = shift;
     my $kw = shift;
     unless ($kw =~ /\S/) { return 0; }
+    $kw = LJ::text_trim($kw, $LJ::BMAX_KEYWORD, $LJ::CMAX_KEYWORD);
 
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
@@ -5286,6 +5314,179 @@ sub event_register
     $dbc->do("INSERT INTO events (evtime, etype, ejournalid, eiarg, duserid, diarg) ".
              "VALUES (NOW(), $qetype, $qejid, $qeiarg, $qduserid, $qdiarg)");
     return $dbc->err ? 0 : 1;
+}
+
+# <LJFUNC>
+# name: LJ::is_ascii
+# des: checks if text is pure ASCII
+# args: text
+# des-text: text to check for being pure 7-bit ASCII text
+# returns: 1 if text is indeed pure 7-bit, 0 otherwise.
+# </LJFUNC>
+sub is_ascii {
+    my $text = shift;
+    return ($text !~ m/[\x00\x80-\xff]/);
+}
+
+# <LJFUNC>
+# name: LJ::is_utf8
+# des: check text for UTF-8 validity
+# args: text
+# des-text: text to check for UTF-8 validity
+# returns: 1 if text is a valid UTF-8 stream, 0 otherwise.
+# </LJFUNC>
+sub is_utf8 {
+    my $text = shift;
+
+    $text =~ m/^([\x00-\x7f]|[\xc2-\xdf][\x80-\xbf]|\xe0[\xa0-\xbf][\x80-\xbf]|[\xe1-\xef][\x80-\xbf][\x80-\xbf]|\xf0[\x90-\xbf][\x80-\xbf][\x80-\xbf]|[\xf1-\xf7][\x80-\xbf][\x80-\xbf][\x80-\xbf])*(.*)/;
+
+    return 1 unless $2;
+    return 0;
+}
+
+# <LJFUNC>
+# name: LJ::text_out
+# des: force outgoing text into valid UTF-8
+# args: text
+# des-text: reference to text to pass to output. Text if modified in-place.
+# returns: nothing.
+# </LJFUNC>
+sub text_out {
+    my $rtext = shift;
+
+    # if we're not Unicode, do nothing
+    return unless $LJ::UNICODE;
+
+    # is this valid UTF-8 already?
+    return if LJ::is_utf8($$rtext);
+
+    # no. Blot out all non-ASCII chars
+    $$rtext =~ s/[\x00\x80-\xff]/\?/g;
+    return;
+}
+
+# <LJFUNC>
+# name: LJ::text_in
+# des: do appropriate checks on input text. Should be called on all
+# user-generated text.
+# args: text
+# des-text: text to check
+# returns: 1 if the text is valid, 0 if not.
+# </LJFUNC>
+sub text_in {
+    my $text = shift;
+    return 1 unless $LJ::UNICODE;
+    if (ref ($text) eq "HASH") {
+        return ! (grep { !LJ::is_utf8($_) } values %{$text});
+    }
+    return LJ::is_utf8($text);
+}
+
+# <LJFUNC>
+# name: LJ::text_convert
+# des: convert old entries/comments to UTF-8 using user's default encoding
+# args: dbs, text, u, error
+# des-text: old possibly non-ASCII text to convert
+# des-u: user hashref of the journal's owner
+# des-error: ref to a scalar variable which is set to 1 on error 
+#            (when user has no default encoding defined, but 
+#            text needs to be translated)
+# returns: converted text or undef on error
+# </LJFUNC>
+
+sub text_convert {
+    my ($dbs, $text, $u, $error) = @_;
+
+    # maybe it's pure ASCII?
+    return $text if LJ::is_ascii($text);
+
+    # load encoding id->name mapping if it's not loaded yet
+    LJ::load_codes($dbs, { "encoding" => \%LJ::CACHE_ENCODINGS } )
+        unless %LJ::CACHE_ENCODINGS;
+
+    if ($u->{'oldenc'} == 0 || 
+        not defined $LJ::CACHE_ENCODINGS{$u->{'oldenc'}}) {
+        $$error = 1;
+        return undef;
+    };
+    
+    # convert!
+    my $name = $LJ::CACHE_ENCODINGS{$u->{'oldenc'}};
+    unless (Unicode::MapUTF8::utf8_supported_charset($name)) {
+        $$error = 1;
+        return undef;
+    }
+
+    return Unicode::MapUTF8::to_utf8({-string=>$text, -charset=>$name});
+}
+
+
+# <LJFUNC>
+# name: LJ::text_trim
+# des: truncate string according to requirements on byte length, char
+#      length, or both. "char length" means number of UTF-8 characters if
+#      $LJ::UNICODE is set, or the same thing as byte length otherwise.
+# args: text, byte_max, char_max
+# des-text: the string to trim
+# des-byte_max: maximum allowed length in bytes; if 0, there's no restriction
+# des-char_max: maximum allowed length in chars; if 0, there's no restriction
+# returns: the truncated string.
+
+sub text_trim {
+
+    my ($text, $byte_max, $char_max) = @_;
+    return $text unless $byte_max or $char_max;
+    if ($char_max == 0 || !$LJ::UNICODE) {
+        $byte_max = $char_max if $char_max and $char_max < $byte_max;
+        $byte_max = $char_max unless $byte_max;
+        return substr($text, 0, $byte_max);
+    }
+    my $cur = 0;
+    my $utf_char = "([\x00-\x7f]|[\xc0-\xdf].|[\xe0-\xef]..|[\xf0-\xf7]...)";
+
+    while ($text =~ m/$utf_char/gco) {
+	last unless $char_max;
+        last if $cur + length($1) > $byte_max and $byte_max;
+        $cur += length($1); 
+        $char_max--;
+    }
+    return substr($text,0,$cur);
+}
+        
+# <LJFUNC>
+# name: LJ::item_toutf8
+# des: convert one item's subject, text and props to UTF8.
+#      item can be an entry or a comment (in which cases props can be
+#      left empty, since there are no 8bit talkprops).
+# args: dbs, u, subject, text, props
+# des-u: user hashref of the journal's owner
+# des-subject: ref to the item's subject
+# des-text: ref to the item's text
+# des-props: hashref of the item's props
+# returns: nothing.
+
+sub item_toutf8 {
+    my ($dbs, $u, $subject, $text, $props) = @_;
+    return unless $LJ::UNICODE;
+
+    my $convert = sub {
+        my $rtext = shift;
+        my $error = 0;
+        my $res = LJ::text_convert($dbs, $$rtext, $u, \$error);
+        if ($error) {
+	    LJ::text_out($rtext);
+        } else {
+            $$rtext = $res;
+        };
+        return;
+    };
+
+    $convert->($subject);
+    $convert->($text);
+    foreach(keys %$props) {
+        $convert->(\$props->{$_});
+    }
+    return;
 }
 
 1;

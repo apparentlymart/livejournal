@@ -24,6 +24,7 @@ sub clean_poll
         'allow' => $poll_allow,
         'remove' => $poll_remove,
     });
+    LJ::text_out($ref);
 }
 
 

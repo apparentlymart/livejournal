@@ -6,6 +6,7 @@ BODY<=
 
  my $ret = "";
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
+ return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -31,6 +32,11 @@ BODY<=
  if ($clustered && $FORM{'itemid'}) {
      $FORM{'itemid'} = int($FORM{'itemid'} / 256);
  }
+
+ # add protocol version if we have Unicode support.
+ # it'll thus automatically be used in all get_request() calls.
+
+ $FORM{'ver'} = $PROTOCOL_VER;
 
  #### determine their mode
 
@@ -199,6 +205,7 @@ BODY<=
          my $gfg;
          $gfg = LJ::Protocol::do_request($dbs, "getfriendgroups", {
              'username' => $user,
+             'ver' => $LJ::PROTOCOL_VER,
          }, undef, {
              'noauth' => 1,
          }) unless $FORM{'usejournal'};

@@ -75,21 +75,20 @@ BODY<=
          $parpost->{'body'} = $tt->{$init->{'replyto'}}->[1];
      }
      
-
-     ## load meta-data
-     LJ::load_props($dbs, "talk");
-     if ($clustered) {
-         $sql = "SELECT tpropid, value FROM talkprop2 ".
-             "WHERE journalid=$u->{'userid'} AND jtalkid=$qparentid";
-     } else {
-         $sql = "SELECT tpropid, value FROM talkprop WHERE talkid=$qparentid";
-     }
-     ($sth = $dbcr->prepare($sql))->execute;
-     while (my ($tid, $value) = $sth->fetchrow_array) {
-         my $p = $LJ::CACHE_PROPID{'talk'}->{$tid};
-         $parpost->{$p->{'name'}} = $value;
-     }
+     ### load the talk properties
      
+     if ($clustered) { 
+         LJ::load_props($dbs, "talk");
+         LJ::load_talk_props2($dbcr, $u->{'userid'}, [ $init->{'replyto'} ], {$init->{'replyto'} => $parpost}); 
+     }
+     else {
+         LJ::load_talk_props($dbs, [ $init->{'replyto'} ], {$init->{'replyto'} => $parpost}); 
+     }
+
+     if($LJ::UNICODE && $parpost->{'unknown8bit'}) {
+         LJ::item_toutf8($dbs, $u, \$parpost->{'subject'}, \$parpost->{'body'}, {});
+     }
+
      $init->{'itemid'} = $parpost->{'itemid'};
      if ($clustered) {
          $init->{'ditemid'} = $parpost->{'itemid'}*256 + $parpost->{'anum'};
@@ -100,25 +99,8 @@ BODY<=
 
  my $itemid = $init->{'itemid'};
 
- ### load the log properties
- my %logprops;
- my %talkprops;
- if ($clustered) { 
-     LJ::load_props($dbs, "log");
-     LJ::load_log_props2($dbcr, $u->{'userid'}, [ $itemid ], \%logprops);
-     if ($init->{'replyto'}) { 
-         LJ::load_props($dbs, "talk");
-         LJ::load_talk_props2($dbcr, $u->{'userid'}, [ $init->{'replyto'} ], \%talkprops); 
-     }
- } else {
-     LJ::load_log_props($dbs, [ $itemid ], \%logprops);
-     if ($init->{'replyto'}) { 
-         LJ::load_talk_props($dbs, [ $init->{'replyto'} ], \%talkprops); 
-     }
- }
-
  ## load the journal item
- my $item = LJ::Talk::get_journal_item($dbcs, $u, $itemid);
+ my $item = LJ::Talk::get_journal_item($dbs, $dbcs, $u, $itemid);
 
  if ($init->{'oldurl'} && $item) {
      $init->{'anum'} = $item->{'anum'};
@@ -129,8 +111,9 @@ BODY<=
      return "(=H1 Error H1=)(=P No such entry. P=)";
  }
 
- my $ditemid = $init->{'ditemid'};
+ my %logprops = %{$item->{'logprops'}};
 
+ my $ditemid = $init->{'ditemid'};
 
  $parpost ||= $item;  # if there's no parent post, remote is reply to top-level item
 
@@ -171,7 +154,7 @@ BODY<=
  $ret .= "<p>";
  $ret .= "<table><tr valign='middle'>";
  my $picid = $ur->{'defaultpicid'};
- my $pickw = $init->{'replyto'} ? $talkprops{$init->{'replyto'}}->{'picture_keyword'} : $logprops{$itemid}->{'picture_keyword'};
+ my $pickw = $init->{'replyto'} ? $parpost->{'picture_keyword'} : $logprops{$itemid}->{'picture_keyword'};
 
  if ($pickw) {
      my $qkw = $dbr->quote($pickw);
@@ -393,6 +376,7 @@ BODY<=
  my %res;
  if ($remote) {
      LJ::do_request($dbs, { "mode" => "login",
+                            "ver" => ($LJ::UNICODE ? "1" : "0"),
                             "user" => $remote->{'user'},
                             "getpickws" => 1,
                         }, \%res, { "noauth" => 1, "userid" => $remote->{'userid'} });

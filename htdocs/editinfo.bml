@@ -5,6 +5,8 @@ BODY<=
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
+ return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
+
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
  my $dbr = $dbs->{'reader'};
@@ -49,8 +51,10 @@ BODY<=
                      "urlname", "gender", "jabber", "opt_blockrobots",
                      "opt_notalkicons", "opt_logcommentips",
                      "howhear", "opt_bdaymail", "opt_hidefriendofs",
-                     "sidx_bdate", "sidx_loc",
+                     "sidx_bdate", "sidx_loc", "mailencoding",
                      );
+
+ foreach (values %$u) { LJ::text_out(\$_); }
 
  my $quser = $dbr->quote($user);
 
@@ -61,6 +65,7 @@ BODY<=
  if ($u->{'has_bio'}) {
      $u->{'bio'} = LJ::dbs_selectrow_array($dbcs, "SELECT bio FROM userbio ".
                                            "WHERE userid=$u->{'userid'}");
+     LJ::text_out(\$u->{'bio'});
  }
 
  $sth = $dbr->prepare("SELECT i.interest, i.intid FROM interests i, userinterests ui WHERE i.intid=ui.intid AND ui.userid=$u->{'userid'}");
@@ -184,6 +189,7 @@ BODY<=
          $sth = $dbr->prepare("SELECT provider, number, security FROM txtmsg WHERE userid=$u->{'userid'}");
          $sth->execute;
          my $tminfo = $sth->fetchrow_hashref;
+         foreach (values %$tminfo) { LJ::text_out(\$_); }
 
          # text messaging
          $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Text Messaging<BR>(<A HREF=\"/support/faqbrowse.bml?faqid=30\">about this feature</A>)</TD><TD>";
@@ -235,6 +241,7 @@ BODY<=
      {
          ### Interests
          my $eints = BMLUtil::escapeall(join(", ", sort keys %interests));
+         LJ::text_out(\$eints);
          $ret .= "(=H1 Interests H1=)(=P If you want other people to be able to search the directory and find you by interest, list below everything you're interested in, separated by commas.  Short single-word phrases are best.  <B>Rule of thumb:</B> You should be able to put the interest in the sentence \"I like ________\".  When referring to nouns, use the plural form for consistency.  \"I like DVDs\" instead of \"I like DVD\". P=)";
          $ret .= "(=P <FONT COLOR=#009000><B>GOOD</B></FONT> Example: <B>biking, snow skiing, computers, dvds, mp3s, cheese, women</B> P=)";
          $ret .= "(=P <FONT COLOR=#FF0000><B>BAD</B></FONT> Example: <B>I like lots of bands and watching movies and talking to friends and going to clubs.</B>  That sort of stuff goes in your bio above. P=)";
@@ -354,6 +361,19 @@ BODY<=
      $checked = $u->{'opt_showtopicstuff'} ne "N" ? "CHECKED" : "";
      $ret .= "<TR VALIGN=MIDDLE><TD WIDTH=50 ALIGN=RIGHT><INPUT TYPE=CHECKBOX NAME=opt_showtopicstuff $checked></TD><TD><B>Show Topic Stuff</B></TD></TR>\n";
      $ret .= "<TR><TD>&nbsp;</TD><TD>If you check this, other users will be able to easily add your journal entries to the hierarchial <A HREF=\"/topics/\">topic directory</A>.</TD></TR>\n";
+
+     if ($LJ::UNICODE) {
+         $ret .= "<tr valign=middle><td width=50 align=right><input type=checkbox name=dummy_checkbox checked disabled></td><td><b>Encoding options</b></td></tr>";
+         LJ::load_codes($dbs, { "encname" => \%LJ::CACHE_ENCNAMES } )
+             unless %LJ::CACHE_ENCNAMES;
+         $ret .= "<tr><td>&nbsp;</td><td><p><b>Auto-translate older entries from: </b>";
+         $ret .= LJ::html_select({'name'=>'oldenc', 'selected'=>$u->{'oldenc'}}, %LJ::CACHE_ENCNAMES);
+         $ret .= "</p><p>Use this option to tell LiveJournal which encoding to to assume for your entries and comments entered before the site was converted to Unicode. If you write in English, choose \"Western European\" here.</p></td></tr>";
+         $ret .= "<tr><td>&nbsp;</td><td><p><b>Translate email notifications into: </b>";
+         $ret .= LJ::html_select({'name'=>'mailencoding', 'selected'=>$u->{'mailencoding'}}, %LJ::CACHE_ENCNAMES);
+         $ret .= "</p><p>In case you chose to receive message board replies by email, and your email client doesn't handle Unicode (UTF-8) messages very well, use this option to specify a different encoding into which LiveJournal will automatically translate the text of comments sent to you.</p></td></tr>";
+
+     }
 
      $ret .= "</TABLE>\n";
 
@@ -475,6 +495,7 @@ BODY<=
      }
 
      $FORM{'name'} =~ s/[\n\r]//g;
+     $FORM{'name'} = LJ::text_trim($FORM{'name'}, $LJ::BMAX_NAME, $LJ::CMAX_NAME);
 
      my $has_bio = ($FORM{'bio'} =~ /\S/) ? "Y" : "N";
      my $txtmsg_status = $FORM{'use_txtmsg'} ? "on" : "off";
@@ -500,6 +521,10 @@ BODY<=
          $update{'allow_contactshow'} = "F" if ($FORM{'contactshow_sec'} eq "F");
      } else {
          $update{'allow_contactshow'} = "N";
+     }
+
+     if (defined $FORM{'oldenc'}) {
+         $update{'oldenc'} = $FORM{'oldenc'};
      }
 
      # update 'user' table
@@ -556,7 +581,7 @@ BODY<=
                        "gender", "jabber", "opt_blockrobots",
                        "opt_notalkicons", "opt_logcommentips",
                        "opt_bdaymail", "opt_hidefriendofs",
-                       "sidx_bdate", "sidx_loc",
+                       "sidx_bdate", "sidx_loc", "mailencoding",
                        );	
 
          # this is only done once, then never appears again.

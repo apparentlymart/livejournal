@@ -13,6 +13,16 @@ To view this page you must first <a href="/login.bml?ret=1">go login</a>.
 P=)
 <=NEEDLOGIN
 
+BADINPUT<=
+(=H1 Bad Unicode input H1=)
+(=P
+Your browser sent some text which is not recognised as valid text in the
+UTF-8 encoding, as it should be. This might happen if you forced your browser 
+to view the previous page in some other encoding rather than UTF-8. It may
+also indicate a bug in the browser. If you cannot get around this error,
+contact us. 
+P=)
+<=BADINPUT
 
 REQUIREPOST<=
 {S}As a security precaution, the page you're viewing requires a POST request, 
