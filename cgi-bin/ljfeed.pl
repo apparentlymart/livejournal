@@ -260,7 +260,7 @@ sub create_view_atom
         $ret .= "    <title>$it->{subject}</title>\n"; # include empty tag if we don't have a subject.
         $ret .= "    <id>urn:$LJ::DOMAIN:atom1:$journalinfo->{u}{user}:$ditemid</id>\n";
         $ret .= "    <link>$journalinfo->{link}$ditemid.html</link>\n";
-        $ret .= "    <created>" . LJ::time_to_w3c($it->{createtime}, 'Z') . "</created>"
+        $ret .= "    <created>" . LJ::time_to_w3c($it->{createtime}, 'Z') . "</created>\n"
              if $it->{createtime} != $it->{modtime};
 
         my ($year, $mon, $mday, $hour, $min, $sec) = split(/ /, $it->{eventtime});
