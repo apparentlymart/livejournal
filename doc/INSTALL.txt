@@ -106,6 +106,7 @@ Now, install the following modules:
 	Mail::Address
 	Proc::ProcessTable
 	SOAP::Lite
+	Unicode::MapUTF8
 
 If you're using Debian this should get everything:
 
@@ -113,7 +114,8 @@ If you're using Debian this should get everything:
                   libsoap-lite-perl libgd-perl liburi-perl \
                   libimage-size-perl libdbd-mysql-perl libdbi-perl \
                   libnet-perl libdigest-md5-perl libgd-graph-perl \
-                  libgd-text-perl libcompress-zlib-perl
+                  libgd-text-perl libcompress-zlib-perl \
+		  libunicode-maputf8-perl
 
 NOTE: there used to be three custom LJ:: modules that needed
 installing.  We no longer install those in the system.  Instead LJ

@@ -50,6 +50,7 @@
    * -c doesn't need to scan maind.. perf.
    * -s with args doesn't need to scan everything, just args.
 * ljcom: automate username changes (payments and renaming)
+  - use a '^do:' table in qbuffferd
 * support: dakus wants to be able to mark requests as "still needs help"
 * LJ::delete_user()
 * require POST for all do actions (use LJ::did_post to check)
@@ -107,6 +108,7 @@
 * ability to further resrict HTML in comments in your journal:
   no marquee, no img, etc.
 * respect user.status=="L" --> never let be modified, deleted, purged, etc
+* journal-wide security: private, friends/group only, by password
 
 +--------------+
 | low priority |
