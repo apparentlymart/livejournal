@@ -809,7 +809,7 @@ p?>
 
 /customize/index.bml.s2.customize.header=Step 2: Customize Layout
 
-/customize/index.bml.s2.customize.language=The following languages are fully or partially support by this layout.
+/customize/index.bml.s2.customize.language=The following languages are fully or partially supported by this layout.
 
 /customize/index.bml.s2.customize.language.custom=(Custom)
 
@@ -2025,7 +2025,7 @@ You may wish to go back and try again, selecting fewer interests to add.
 
 /logout.bml.loggedout.text=You are now logged out.
 
-/logout.bml.logout.btn=Log out.
+/logout.bml.logout.btn=Log out
 
 /logout.bml.logout.head=Log out?
 
@@ -2139,7 +2139,7 @@ The site team
 
 /manage/index.bml.customization.customize=Customize Journal
 
-/manage/index.bml.customization.customize.about=Change the apearance of your journal
+/manage/index.bml.customization.customize.about=Change the appearance of your journal
 
 /manage/index.bml.customization.header=Customization
 
@@ -2406,7 +2406,7 @@ is required. To save yourself some time, you can <a href="/login.bml?ret=1">log 
 
 /modify_do.bml.success.head=Success
 
-/modify_do.bml.success.text=Your journal settings have been updated.  You can view your journal <a href="[[url]]">here</A>.
+/modify_do.bml.success.text=Your journal settings have been updated.  You can view your journal <a href="[[url]]">here</a>.
 
 /multisearch.bml.formaterror=Format Error
 
@@ -2561,7 +2561,7 @@ If you want to do a different type of search, check out the <a href='/directorys
 
 /register.bml.asterisk.name=* [[journal]]
 
-/register.bml.email.body|notes=This string is used to create an option in the "Word as user" drop down list to allow a user to view all of their journals. The * signifies that the acount, specified by [[jounral]], is not validated yet.
+/register.bml.email.body|notes=This string is used to create an option in the "Work as user" drop down list to allow a user to view all of their journals. The * signifies that the acount, specified by [[journal]], is not validated yet.
 /register.bml.email.body<<
 This is the validation email as you have requested.
 To complete validating your account, please visit this URL:
@@ -3254,7 +3254,7 @@ To delete a memory, you can edit it and remove the description, but you didn't a
 
 /tools/memadd.bml.keywords.text<<
   Why is this post memorable?
-  Enter zero to five keywords or categories so you can find it back later.
+  Enter up to five comma separated keywords or categories so you can find it later. You can also select keywords you've used in the past.
 .
 
 /tools/memadd.bml.login.enterinfo=Enter username and password of the account you wish to save the memory into.
