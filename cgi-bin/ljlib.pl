@@ -1902,7 +1902,7 @@ sub acct_code_decode
 # name: LJ::acct_code_check
 # des: Checks the validity of a given account code
 # returns: boolean; 0 on failure, 1 on validity. sets $$err on failure.
-# args: dbarg, code, err?, userid?
+# args: dbarg?, code, err?, userid?
 # des-code: account code to check
 # des-err: optional scalar ref to put error message into on failure
 # des-userid: optional userid which is allowed in the rcptid field,
@@ -1911,14 +1911,12 @@ sub acct_code_decode
 # </LJFUNC>
 sub acct_code_check
 {
-    my $dbarg = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $code = shift;
     my $err = shift;     # optional; scalar ref
     my $userid = shift;  # optional; acceptable userid (double-click proof)
 
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    my $dbh = LJ::get_db_writer();
 
     unless (length($code) == 12) {
         $$err = "Malformed code; not 12 characters.";
@@ -1927,21 +1925,9 @@ sub acct_code_check
 
     my ($acid, $auth) = acct_code_decode($code);
 
-    # are we sure this is what the master has?  if we have a slave, could be behind.
-    my $definitive = ! $dbs->{'has_slave'};
-
-    # try to load from slave
-    my $ac = $dbr->selectrow_hashref("SELECT userid, rcptid, auth FROM acctcode WHERE acid=$acid");
-
-    # if we loaded something, and that code's used, it must be what master has
-    if ($ac && $ac->{'rcptid'}) {
-        $definitive = 1;
-    }
-
-    # unless we're sure we have a clean record, load from master:
-    unless ($definitive) {
-        $ac = $dbh->selectrow_hashref("SELECT userid, rcptid, auth FROM acctcode WHERE acid=$acid");
-    }
+    my $ac = $dbh->selectrow_hashref("SELECT userid, rcptid, auth ".
+                                     "FROM acctcode WHERE acid=?", 
+                                     undef, $acid);
 
     unless ($ac && $ac->{'auth'} eq $auth) {
         $$err = "Invalid account code.";
@@ -1954,9 +1940,8 @@ sub acct_code_check
     }
 
     # is the journal this code came from suspended?
-    my $statusvis = LJ::dbs_selectrow_array($dbs, "SELECT statusvis FROM user ".
-                                            "WHERE userid=$ac->{'userid'}");
-    if ($statusvis eq "S") {
+    my $u = LJ::load_userid($ac->{'userid'});
+    if ($u && $u->{'statusvis'} eq "S") {
         $$err = "Code belongs to a suspended account.";
         return 0;
     }

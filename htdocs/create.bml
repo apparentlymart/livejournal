@@ -17,10 +17,6 @@ body<=
              : "getinfo"; 
  }
  
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
  my $remote = LJ::get_remote();
  
  my %errors;
@@ -41,11 +37,11 @@ body<=
      my $error;
      my $userid = 0;  # acceptable userid for double-click protection
      if ($mode eq "submit") {
-         my $u = LJ::load_user($dbs, $FORM{'user'});
+         my $u = LJ::load_user($FORM{'user'});
          $userid = $u->{'userid'};
      }
      $errors{'code'} = $error
-         unless (LJ::acct_code_check($dbs, $code, \$error, $userid));
+         unless (LJ::acct_code_check($code, \$error, $userid));
      if (%errors) {
          $mode = "entercode";
      } elsif ($mode eq "codesubmit") {
@@ -97,6 +93,7 @@ body<=
                              { 'new_user' => $user, 'email' => $email, 'name' => $name })
          if LJ::sysban_check('email', $email);
 
+     my $dbh = LJ::get_db_writer();
      my $quser = $dbh->quote($user);
      my $qemail = $dbh->quote($email);
      my $qname = $dbh->quote($name);
@@ -115,7 +112,7 @@ body<=
 
          # you can give people sharedjournal priv ahead of time to create
          # reserved communities:
-         next if LJ::check_priv($dbs, $remote, "sharedjournal", $user);
+         next if LJ::check_priv($remote, "sharedjournal", $user);
 
          $errors{'username'} = "$ML{'.error.username.reserved'}";
      }
@@ -132,7 +129,7 @@ body<=
              if $is_valid;
      }
      
-     my $u = LJ::load_user($dbs, $user);
+     my $u = LJ::load_user($user);
      my $second_submit = 0;
      if ($u) {
          my $in_use = 1;
@@ -235,13 +232,11 @@ body<=
 
          # if we have initial friends for new accounts, add them.
          foreach my $friend (@LJ::INITIAL_FRIENDS) {
-             my $friendid = LJ::get_userid($dbs, $friend);
-             LJ::add_friend($dbs, $userid, $friendid)
-                 if $friendid;
+             my $friendid = LJ::get_userid($friend);
+             LJ::add_friend($userid, $friendid) if $friendid;
          }
 
          LJ::run_hooks("post_create", {
-             'dbs' => $dbs,
              'userid' => $userid,
              'user' => $user,
              'code' => $FORM{'code'},
@@ -250,7 +245,7 @@ body<=
      
      my $aa = {};
      if ($userid) {
-         $aa = LJ::register_authaction($dbs, $userid, "validateemail", $email);
+         $aa = LJ::register_authaction($userid, "validateemail", $email);
      }
 
      my $body = BML::ml('email.newacct.body', {
@@ -286,7 +281,7 @@ body<=
              }
          }
          close TOS;
-         LJ::set_userprop($dbh, $nu, "legal_tosagree", join(', ', time(), $rev));
+         LJ::set_userprop($nu, "legal_tosagree", join(', ', time(), $rev));
      }
 
      # FIXME: we shouldn't auto-log people in who are creating
