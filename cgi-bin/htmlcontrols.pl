@@ -168,9 +168,10 @@ sub html_text
 
     my $disabled = $opts->{'disabled'} ? " disabled='disabled'" : "";
     my $ehtml = $opts->{'noescape'} ? 0 : 1;
+    my $type = $opts->{'type'} eq 'password' ? 'password' : 'text';
     my $ret;
-    $ret .= "<input type=\"text\"";
-    foreach (grep { ! /^(disabled|raw|noescape)$/ } keys %$opts) {
+    $ret .= "<input type=\"$type\"";
+    foreach (grep { ! /^(type|disabled|raw|noescape)$/ } keys %$opts) {
         $ret .= " $_=\"" . ($ehtml ? ehtml($opts->{$_}) : $opts->{$_}) . "\"";
     }
     if ($opts->{'raw'}) { $ret .= " $opts->{'raw'}"; }
