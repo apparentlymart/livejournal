@@ -57,7 +57,8 @@ body<=
         my ($success, $do_mail) = (0, 0);
         my $why_mail;
         my $prot_err;
-        
+        my $posturl;
+
         if ($mode eq 'approve_do') {
             my $res = LJ::Protocol::do_request($dbs, 'postevent', $req, \$prot_err, {'nomod'=>1, 'noauth'=>1});
             if ($res) { # succeeded
@@ -66,6 +67,7 @@ body<=
                 # does the poster want to know? if they have working email and notification on
                 ($do_mail, $why_mail) = (1, 'success')
                     if ($poster->{'opt_gettalkemail'} eq "Y" && $poster->{'status'} eq "A");
+                $posturl = LJ::item_link($c, $res->{'itemid'}, $res->{'anum'}) . "\n\n";
             } else {
                 $prot_err = LJ::Protocol::error_message($prot_err) if $prot_err;
                 $ret .= "<?h1 $ML{'Error'} h1?><?p " .
@@ -77,7 +79,7 @@ body<=
                 LJ::set_rel($dbs, $c, $poster, 'N');
                   $ret .= "<?h1 $ML{'.posted.appheader'} h1?><?p " .
                       BML::ml('.posted.apptext', {'user'=>"<?ljuser $poster->{'user'} ljuser?>"}) . " p?>";
-              }
+            }
         }   
         if ($mode eq 'reject_do') {
             $success = 1;
@@ -94,7 +96,7 @@ body<=
             my $to = $poster->{'email'};
             my $body = "Your message submitted to the moderated community $c->{'user'} ";
             if ($why_mail eq 'success') {
-                $body .= "has been approved and successfully posted.\n\n";
+                $body .= "has been approved and successfully posted.\n\n$posturl";
             } elsif ($why_mail eq 'proterror') {
                 $body .= "has been approved, but failed to be posted due to the following protocol error:\n$prot_err\n\n";
             } elsif ($why_mail eq 'reject') {
