@@ -9,14 +9,16 @@
 # hook: validate_get_remote
 # </LJDEP>
 
+package LJ;
+
 use strict;
 use DBI;
-use Digest::MD5 qw(md5_hex);
-use Text::Wrap;
-use MIME::Lite;
-use HTTP::Date qw();
-use IO::Socket;
-use Unicode::MapUTF8;
+use Digest::MD5 ();
+use Text::Wrap ();
+use MIME::Lite ();
+use HTTP::Date ();
+use IO::Socket ();
+use Unicode::MapUTF8 ();
 
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
@@ -28,30 +30,31 @@ require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 $LJ::PROTOCOL_VER = ($LJ::UNICODE ? "1" : "0");
 
 # constants
-$LJ::EndOfTime = 2147483647;
+use constant ENDOFTIME => 2147483647;
+$LJ::EndOfTime = 2147483647;  # for string interpolation
 
 # width constants. BMAX_ constants are restrictions on byte width,
 # CMAX_ on character width (character means byte unless $LJ::UNICODE,
 # in which case it means a UTF-8 character).
 
-$LJ::BMAX_SUBJECT = 255;   # *_SUBJECT for journal events, not comments
-$LJ::CMAX_SUBJECT = 100;
-$LJ::BMAX_COMMENT = 9000;
-$LJ::CMAX_COMMENT = 4300;
-$LJ::BMAX_MEMORY  = 150;
-$LJ::CMAX_MEMORY  = 80;
-$LJ::BMAX_NAME    = 100;
-$LJ::CMAX_NAME    = 50;
-$LJ::BMAX_KEYWORD = 80;
-$LJ::CMAX_KEYWORD = 40;
-$LJ::BMAX_PROP    = 255;   # logprop[2]/talkprop[2]/userproplite (not userprop)
-$LJ::CMAX_PROP    = 100;
-$LJ::BMAX_GRPNAME = 60;
-$LJ::CMAX_GRPNAME = 30;
-$LJ::BMAX_EVENT   = 65535;
-$LJ::CMAX_EVENT   = 65535;
-$LJ::BMAX_INTEREST = 100;
-$LJ::CMAX_INTEREST = 50;
+use constant BMAX_SUBJECT => 255; # *_SUBJECT for journal events, not comments
+use constant CMAX_SUBJECT => 100;
+use constant BMAX_COMMENT => 9000;
+use constant CMAX_COMMENT => 4300;
+use constant BMAX_MEMORY  => 150;
+use constant CMAX_MEMORY  => 80;
+use constant BMAX_NAME    => 100;
+use constant CMAX_NAME    => 50;
+use constant BMAX_KEYWORD => 80;
+use constant CMAX_KEYWORD => 40;
+use constant BMAX_PROP    => 255;   # logprop[2]/talkprop[2]/userproplite (not userprop)
+use constant CMAX_PROP    => 100;
+use constant BMAX_GRPNAME => 60;
+use constant CMAX_GRPNAME => 30;
+use constant BMAX_EVENT   => 65535;
+use constant CMAX_EVENT   => 65535;
+use constant BMAX_INTEREST => 100;
+use constant CMAX_INTEREST => 50;
 
 # declare some charset aliases
 # we need this at least for cases when the only name supported
@@ -71,23 +74,23 @@ $LJ::CMAX_INTEREST = 50;
 @LJ::views = qw(lastn friends calendar day);
 %LJ::viewinfo = (
                  "lastn" => {
-                     "creator" => \&create_view_lastn,
+                     "creator" => \&LJ::S1::create_view_lastn,
                      "des" => "Most Recent Events",
                  },
                  "calendar" => {
-                     "creator" => \&create_view_calendar,
+                     "creator" => \&LJ::S1::create_view_calendar,
                      "des" => "Calendar",
                  },
                  "day" => {
-                     "creator" => \&create_view_day,
+                     "creator" => \&LJ::S1::create_view_day,
                      "des" => "Day View",
                  },
                  "friends" => {
-                     "creator" => \&create_view_friends,
+                     "creator" => \&LJ::S1::create_view_friends,
                      "des" => "Friends View",
                  },
                  "rss" => {
-                     "creator" => \&create_view_rss,
+                     "creator" => \&LJ::S1::create_view_rss,
                      "des" => "RSS View (XML)",
                      "nostyle" => 1,
                  },
@@ -115,9 +118,6 @@ if ($SIG{'HUP'}) {
 } else {
     $SIG{'HUP'} = \&LJ::clear_caches;
 }
-
-
-package LJ;
 
 # <LJFUNC>
 # name: LJ::get_newids
@@ -811,7 +811,7 @@ sub auth_fields
         my $luser = $opts->{'user'} || $remote->{'user'};
         if ($opts->{'user'}) {
             $hpass = $form->{'hpassword'} || LJ::hash_password($form->{'password'});
-        } elsif ($remote && $BMLClient::COOKIE{"ljhpass"} =~ /^$luser:(.+)/) {
+        } elsif ($remote && $BML::COOKIE{"ljhpass"} =~ /^$luser:(.+)/) {
             $hpass = $1;
         }
 
@@ -2580,7 +2580,7 @@ sub get_remote
     $$criterr = 0;
 
     my $cookie = sub {
-        return $cgi ? $cgi->cookie($_[0]) : $BMLClient::COOKIE{$_[0]};
+        return $cgi ? $cgi->cookie($_[0]) : $BML::COOKIE{$_[0]};
     };
 
     my ($user, $userid, $caps);
@@ -2689,11 +2689,11 @@ sub load_remote
 sub get_remote_noauth
 {
     ### are they logged in?
-    my $remuser = $BMLClient::COOKIE{"ljuser"};
+    my $remuser = $BML::COOKIE{"ljuser"};
     return undef unless ($remuser =~ /^\w{1,15}$/);
 
-    ### does their login password match their login?
-    return undef unless ($BMLClient::COOKIE{"ljhpass"} =~ /^$remuser:(.+)/);
+    ### does their login pasAsword match their login?
+    return undef unless ($BML::COOKIE{"ljhpass"} =~ /^$remuser:(.+)/);
     return { 'user' => $remuser, };
 }
 
@@ -2790,6 +2790,9 @@ sub start_request
     if ($LJ::DBWEIGHTS_FROM_DB) {  # defined in ljconfig.pl
         $LJ::NEED_DBWEIGHTS = 1;
     }
+
+    # reset BML's cookies
+    eval { BML::reset_cookies() };
 
     return 1;
 }
@@ -4611,7 +4614,7 @@ sub get_keyword_id
     my $dbarg = shift;
     my $kw = shift;
     unless ($kw =~ /\S/) { return 0; }
-    $kw = LJ::text_trim($kw, $LJ::BMAX_KEYWORD, $LJ::CMAX_KEYWORD);
+    $kw = LJ::text_trim($kw, LJ::BMAX_KEYWORD, LJ::CMAX_KEYWORD);
 
     my $dbs = LJ::make_dbs_from_arg($dbarg);
     my $dbh = $dbs->{'dbh'};
@@ -5581,7 +5584,7 @@ sub set_interests
         next if $int =~ / .+ .+ .+ /;  # prevent sentences
         next if $int =~ /[\<\>]/;
         my ($bl, $cl) = LJ::text_length($int);
-        next if $bl > $LJ::BMAX_INTEREST or $cl > $LJ::CMAX_INTEREST;
+        next if $bl > LJ::BMAX_INTEREST or $cl > LJ::CMAX_INTEREST;
         $int_new{$int} = 1 unless $old->{$int};
         delete $int_del{$int};
     }

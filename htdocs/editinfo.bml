@@ -523,7 +523,7 @@ BODY<=
 
      my $newname = defined($FORM{'name_absent'}) ? $saved{'name'} : $FORM{'name'};
      $newname =~ s/[\n\r]//g;
-     $newname = LJ::text_trim($newname, $LJ::BMAX_NAME, $LJ::CMAX_NAME);
+     $newname = LJ::text_trim($newname, LJ::BMAX_NAME, LJ::CMAX_NAME);
 
      my $newbio = defined($FORM{'bio_absent'}) ? $saved{'bio'} : $FORM{'bio'};
      my $has_bio = ($newbio =~ /\S/) ? "Y" : "N";

@@ -10,7 +10,7 @@
 package LJ::Con;
 use strict;
 use vars qw(%cmd);
-use Text::Wrap;
+use Text::Wrap ();
 
 sub parse_line
 {

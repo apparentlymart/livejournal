@@ -155,7 +155,7 @@ LOAD_PAGE_INFO<=
 	   },
 	     );
  
- my $remuser = $BMLClient::COOKIE{'ljuser'};
+ my $remuser = $BML::COOKIE{'ljuser'};
  if ($remuser ne "" && $ENV{'REQUEST_URI'} ne "/logout.bml") 
  {
      my $subdomain = $remuser;

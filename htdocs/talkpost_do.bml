@@ -231,11 +231,11 @@ BODY<=
  }
 
  my ($bl, $cl) = LJ::text_length($FORM{'body'});
- if ($cl > $LJ::CMAX_COMMENT) {
-     push @errors, BML::ml('.error.manychars', {'current'=>$cl, 'limit'=>$LJ::CMAX_COMMENT});
+ if ($cl > LJ::CMAX_COMMENT) {
+     push @errors, BML::ml('.error.manychars', {'current'=>$cl, 'limit'=>LJ::CMAX_COMMENT});
 
- } elsif ($bl > $LJ::BMAX_COMMENT) {
-     push @errors, BML::ml('.error.manybytes', {'current'=>$bl, 'limit'=>$LJ::BMAX_COMMENT});
+ } elsif ($bl > LJ::BMAX_COMMENT) {
+     push @errors, BML::ml('.error.manybytes', {'current'=>$bl, 'limit'=>LJ::BMAX_COMMENT});
  }
  # the Subject can be silently shortened, no need to reject the whole comment
  $FORM{'subject'} = LJ::text_trim($FORM{'subject'}, 100, 100);

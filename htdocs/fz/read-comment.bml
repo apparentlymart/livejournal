@@ -101,9 +101,9 @@ if ($dbh->err) { die $dbh->errstr; }
      $ret .= "<FONT SIZE=+1 FACE=\"Arial,Helvetica\"><B>" . LJ::ehtml($ti->{'subject'} || "(no subject)") . "</B></FONT>";
      $ret .= "<BR>$user";
      
-     if ($BMLClient::COOKIE{"ljuser"}) {
-         if ($BMLClient::COOKIE{"ljuser"} eq $userpost ||
-             $BMLClient::COOKIE{"ljuser"} eq $u->{'user'})
+     if ($BML::COOKIE{"ljuser"}) {
+         if ($BML::COOKIE{"ljuser"} eq $userpost ||
+             $BML::COOKIE{"ljuser"} eq $u->{'user'})
          {
              $ret .= "<A HREF=\"/delcomment.bml?id=$id\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"/img/delcomment.gif\" WIDTH=22 HEIGHT=20 ALT=\"Click to delete\" BORDER=0></A>";
          }

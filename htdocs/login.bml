@@ -81,12 +81,12 @@
  
  my $etime = 0;
  if ($FORM{'expire'} eq "never") { $etime = time()+60*60*24*60; }
- BML::set_cookie("ljuser", $user, $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+ $COOKIE{'ljuser'} = [ $user, $etime ];
  eval { Apache->request->notes('ljuser' => $user); };
- BML::set_cookie("ljhpass", "$user:$hpassword", $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
- BML::set_cookie("permlogin", $FORM{'expire'} eq "never", $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+ $COOKIE{'ljhpass'} = [ "$user:$hpassword", $etime ];
+ $COOKIE{'permlogin'} = [ $FORM{'expire'} eq "never", $etime ];
  if ($bl) {
-     BML::set_cookie("langpref", $bl->{'lncode'} . "/" . time(), $etime, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+     $COOKIE{'langpref'} = [ $bl->{'lncode'} . "/" . time(), $etime ];
      BML::set_language($bl->{'lncode'});
  }
 

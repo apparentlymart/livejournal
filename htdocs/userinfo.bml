@@ -253,7 +253,7 @@
      my $picid = $u->{'defaultpicid'};
      my %pic;
      LJ::load_userpics($dbr, \%pic, [ $picid ]);
-     $body .= "<A HREF=\"/allpics.bml?user=$user\"><IMG SRC=\"/userpic/$picid\" WIDTH=$pic{$picid}->{'width'} HEIGHT=$pic{$picid}->{'height'} VSPACE=3 BORDER=0></A>";
+     $body .= "<a href=\"/allpics.bml?user=$user\"><img src=\"/userpic/$picid\" width='$pic{$picid}->{'width'}' height='$pic{$picid}->{'height'}' vspace='3' border='0'></a>";
  } else {
      $body .= "&nbsp;";
  }

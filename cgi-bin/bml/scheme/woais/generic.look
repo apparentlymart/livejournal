@@ -132,8 +132,8 @@ _CODE=)
  if ($ENV{'REQUEST_URI'} =~ /^\/log(in|out)/) {
      return "";
  }
- my $cooku = $BMLClient::COOKIE{"ljuser"};
- if ($cooku && $BMLClient::COOKIE{"ljhpass"} =~ /^$cooku:(.+)/) {
+ my $cooku = $BML::COOKIE{"ljuser"};
+ if ($cooku && $BML::COOKIE{"ljhpass"} =~ /^$cooku:(.+)/) {
      return "<B>Logged in:</B> $cooku, <A HREF=\"/logout.bml\">Logout</A>";
  } else {
      return "<B>Not Logged in.</B> <A HREF=\"/login.bml\">Login</A>";

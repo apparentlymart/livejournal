@@ -22,8 +22,12 @@ BML::register_block("SUPPORT_EMAIL", "S", $LJ::SUPPORT_EMAIL);
     BML::register_block("DL", "DS", $dl);
 }
 
-BML::register_hook("startup", \&LJ::start_request);
-BML::register_hook("startup", sub { 
+# set default path/domain for cookies
+BML::set_config("/", "CookieDomain" => $LJ::COOKIE_DOMAIN);
+BML::set_config("/", "CookiePath"   => $LJ::COOKIE_PATH);
+
+BML::register_hook("startup", sub {
+    LJ::start_request();
     eval {
         Apache->request->notes("ljuser" => $BML::COOKIE{'ljuser'});
     };
@@ -38,8 +42,10 @@ package BMLCodeBlock;
 use LJ::SpellCheck;
 use LJ::TextMessage;
 use LJ::TagGenerator ':html4';
-use Digest::MD5 qw(md5_hex);
+use Digest::MD5 qw(md5_hex); # TODO: don't import
 use MIME::Words;
+use LWP::UserAgent ();
+use Image::Size ();
 
 require "$ENV{'LJHOME'}/cgi-bin/imageconf.pl";
 require "$ENV{'LJHOME'}/cgi-bin/propparse.pl";
@@ -56,5 +62,13 @@ require "$ENV{'LJHOME'}/cgi-bin/directorylib.pl";
 
 # register BML multi-language hook
 BML::register_ml_getter(\&LJ::Lang::get_text_bml);
+
+# open a db connection to force DBI to autoload its driver code before
+# apache forks
+{
+    my $dbh = DBI->connect(LJ::_make_dbh_fdsn($LJ::DBINFO{'master'}));
+    my $num = $dbh->selectrow_array("SELECT COUNT(*) FROM stats");
+    $dbh->disconnect;
+}
 
 1;

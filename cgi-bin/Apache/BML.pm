@@ -7,7 +7,6 @@ use strict;
 use Apache::Constants qw(:common REDIRECT);
 use Apache::File ();
 use Apache::URI;
-use CGI;                  # unused, but pre-loaded.
 use Digest::MD5;
 
 use vars qw($config @confdirs);   # loaded once
@@ -31,12 +30,13 @@ my (%SchemeRefs);               # scheme -> key -> refs to %SchemeData scalars, 
     my $err;
     foreach my $is (split(/\s*,\s*/, $config->{'/'}->{'VarInitScript'})) {
         unless (load_look_from_initscript($is, \$err)) {
-            die "Error running VarInitScript ($is): $err\n";                
+            $config->{'/'}->{'_error'} .= "<p><b>Error running VarInitScript ($is):</b> $err</p>";
         }
     }
 }
 
 tie %BML::ML, 'BML::ML';
+tie %BML::COOKIE, 'BML::Cookie';
 
 sub handler
 {
@@ -90,11 +90,7 @@ sub handler
 
     # setup cookies
     *BMLCodeBlock::COOKIE = *BML::COOKIE;
-    %BML::COOKIE = ();
-    foreach (split(/;\s+/, $r->header_in("Cookie"))) {
-        next unless ($_ =~ /(.*)=(.*)/);
-        $BML::COOKIE{BML::durl($1)} = BML::durl($2);
-    }
+    BML::reset_cookies();
     
     # tied interface to BML::ml();
     *BMLCodeBlock::ML = *BML::ML;
@@ -184,8 +180,10 @@ sub handler
     BML::set_language(BML::decide_language());
 
     # print on the HTTP header
-    my $html;
-    bml_decode($req, \$bmlsource, \$html, { DO_CODE => $req->{'env'}->{'AllowCode'} });
+    my $html = $req->{'env'}->{'_error'};
+    
+    bml_decode($req, \$bmlsource, \$html, { DO_CODE => $req->{'env'}->{'AllowCode'} })
+        unless $html;
 
     # redirect, if set previously
     if ($req->{'location'}) {
@@ -203,7 +201,7 @@ sub handler
         $r->content_languages([ $rootlang ]);
     }
 
-    my $modtime = modified_time($req);
+    my $modtime_http = modified_time($req);
     my $notmod = 0;
 
     my $content_type = $req->{'content_type'} ||
@@ -214,7 +212,7 @@ sub handler
     {
         if ($ENV{'HTTP_IF_MODIFIED_SINCE'} &&
             ! $req->{'env'}->{'NoCache'} &&
-            $ENV{'HTTP_IF_MODIFIED_SINCE'} eq $modtime) 
+            $ENV{'HTTP_IF_MODIFIED_SINCE'} eq $modtime_http) 
         {
             print "Status: 304 Not Modified\n";
             $notmod = 1;
@@ -227,7 +225,7 @@ sub handler
             $r->no_cache(1);
         }
 
-        $r->header_out("Last-Modified", modified_time($req))
+        $r->header_out("Last-Modified", $modtime_http)
             if $req->{'env'}->{'Static'};
         $r->header_out("Cache-Control", "private, proxy-revalidate");
         $r->header_out("ETag", Digest::MD5::md5_hex($html));
@@ -330,7 +328,7 @@ sub deleteglob
     }
     if ($key ne "main::" && $key ne "DB::" && defined %entry
         && $key !~ /::$/
-        && $key !~ /^_</ && !($package eq "dumpvar" and $key eq "stab"))
+        && $key !~ /^_</ && $val ne "*BML::COOKIE")
     {
         undef %entry;
     }
@@ -458,7 +456,6 @@ sub bml_block
         if ($element{'STATIC'}) { $req->{'env'}->{'Static'} = 1; }
         if ($element{'NOHEADERS'}) { $req->{'env'}->{'NoHeaders'} = 1; }
         if ($element{'NOCONTENT'}) { $req->{'env'}->{'NoContent'} = 1; }
-#        if ($element{'NOFORMREAD'}) { $FORM_READ = 1; } # don't step on CGI.pm, if used
         if ($element{'LOCALBLOCKS'} && $req->{'env'}->{'AllowCode'}) {
             my (%localblock, %localflags);
             load_elements(\%localblock, $element{'LOCALBLOCKS'});
@@ -871,6 +868,67 @@ sub modified_time
 
 package BML;
 
+sub parse_multipart
+{
+    my ($dest, $error, $max_size) = @_;
+    my $r = Apache->request;
+    my $err = sub { $$error = $_[0]; return 0; };
+
+    my $size = $r->header_in("Content-length");
+    unless ($size) {
+        return $err->("No content-length header: can't parse");
+    }
+    if ($max_size && $size > $max_size) {
+        return $err->("[toolarge] Upload too large");
+    }
+    
+    my $sep;
+    unless ($r->header_in("Content-Type") =~ m!^multipart/form-data;\s*boundary=(\S+)!) {
+        return $err->("[unknowntype] Unknown content type");
+    }
+    $sep = $1;
+
+    my $content;
+    $r->read($content, $size);
+    my @lines = split(/\r\n/, $content);
+    my $line = shift @lines;
+    return $err->("[parse] Error parsing upload") unless $line eq "--$sep";
+
+    while (@lines) {
+        $line = shift @lines;
+        my %h;
+        while (defined $line && $line ne "") {
+            $line =~ /^(\S+?):\s*(.+)/;
+            $h{lc($1)} = $2;
+            $line = shift @lines;
+        }
+        while (defined $line && $line ne "--$sep") {
+            last if $line eq "--$sep--";
+            $h{'body'} .= "\r\n" if $h{'body'};
+            $h{'body'} .= $line;
+            $line = shift @lines;
+        }
+        if ($h{'content-disposition'} =~ /name="(\S+?)"/) {
+            my $name = $1 || $2;
+            $dest->{$name} = $h{'body'};
+        }
+    }
+
+    return 1;
+}
+
+sub reset_cookies
+{
+    %BML::COOKIE_R = ();
+    $BML::COOKIES_PARSED = 0;
+}
+
+sub set_config
+{
+    my ($path, $key, $val) = @_;
+    $Apache::BML::config->{$path}->{$key} = $val;
+}
+
 sub noparse
 {
     $Apache::BML::CodeBlockOpts{'raw'} = 1;
@@ -1153,6 +1211,11 @@ sub paging
 sub set_cookie
 {
     my ($name, $value, $expires, $path, $domain) = @_;
+    
+    my $req = $Apache::BML::cur_req;
+    my $e = $req->{'env'};
+    $path = $e->{'CookiePath'} unless defined $path;
+    $domain = $e->{'CookieDomain'} unless defined $domain;
 
     # let the domain argument be an array ref, so callers can set
     # cookies in both .foo.com and foo.com, for some broken old browsers.
@@ -1180,13 +1243,71 @@ sub set_cookie
     $cookie .= "; domain=$domain" if $domain;
 
     # use err_headers_out so we can set cookies along with a redirect
-    $Apache::BML::cur_req->{'r'}->err_headers_out->add("Set-Cookie" => $cookie);
+    $req->{'r'}->err_headers_out->add("Set-Cookie" => $cookie);
 
     if (defined $expires) {
-        $BML::COOKIE{$name} = $value;
+        $BML::COOKIE_R{$name} = $value;
     } else {
-        delete $BML::COOKIE{$name};
+        delete $BML::COOKIE_R{$name};
     }
+}
+
+# cookie support
+package BML::Cookie;
+
+sub TIEHASH {
+    my $class = shift;
+    my $self = {};
+    bless $self;
+    return $self;
+}
+
+sub FETCH {
+    my ($t, $key) = @_;
+    unless ($BML::COOKIES_PARSED) {
+        foreach (split(/;\s+/, Apache->request->header_in("Cookie"))) {
+            next unless ($_ =~ /(.*)=(.*)/);
+            $BML::COOKIE_R{BML::durl($1)} = BML::durl($2);
+        }
+        $BML::COOKIES_PARSED = 1;
+    }
+    return $BML::COOKIE_R{$key};
+}
+
+sub STORE {
+    my ($t, $key, $val) = @_;
+    my $etime = 0;
+    ($val, $etime) = @$val if ref $val eq "ARRAY";
+    $etime = undef unless $val ne "";
+    BML::set_cookie($key, $val, $etime);
+}
+
+sub DELETE {
+    my ($t, $key) = @_;
+    STORE($t, $key, undef);
+}
+
+sub CLEAR {
+    my ($t) = @_;
+    foreach (keys %BML::COOKIE_R) {
+        STORE($t, $_, undef);
+    }
+}
+
+sub EXISTS {
+    my ($t, $key) = @_;
+    return defined $BML::COOKIE_R{$key};
+}
+
+sub FIRSTKEY {
+    my ($t) = @_;
+    keys %BML::COOKIE_R;
+    return each %BML::COOKIE_R;
+}
+
+sub NEXTKEY {
+    my ($t, $key) = @_;
+    return each %BML::COOKIE_R;
 }
 
 # provide %BML::ML & %BMLCodeBlock::ML support:
@@ -1211,10 +1332,5 @@ sub FETCH {
 
 # do nothing
 sub CLEAR { }
-
-# deprecated:
-package BMLClient;
-*BMLClient::COOKIE = *BML::COOKIE;
-sub set_cookie { BML::set_cookie(@_); }
 
 1;

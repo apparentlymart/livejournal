@@ -8,10 +8,10 @@
 
  LJ::run_hooks("post_logout");
 
- if ($BMLClient::COOKIE{'ljuser'}) 
+ if ($BML::COOKIE{'ljuser'}) 
  {
      foreach (qw(ljuser ljhpass langpref permlogin)) {
-         BML::set_cookie($_, "", undef, $LJ::COOKIE_PATH, $LJ::COOKIE_DOMAIN);
+         delete $COOKIE{$_};
      }
      BML::set_language(BML::decide_language());
      $body .= "(=H1 Logged out H1=)\n";

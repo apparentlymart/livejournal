@@ -6,8 +6,7 @@ package Apache::LiveJournal;
 use strict;
 use Apache::Constants qw(:common REDIRECT HTTP_NOT_MODIFIED HTTP_MOVED_PERMANENTLY);
 use Apache::File ();
-use CGI;
-use XMLRPC::Transport::HTTP;
+use XMLRPC::Transport::HTTP ();
 
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl";
@@ -299,9 +298,8 @@ sub journal_content
         return OK;
     }
 
-    my $cgi = new CGI();
     my $criterr = 0;
-    my $remote = LJ::get_remote($dbs, \$criterr, $cgi);
+    my $remote = LJ::get_remote($dbs, \$criterr);
 
     # check for faked cookies here, since this is pretty central.
     if ($criterr) {
@@ -407,9 +405,8 @@ sub customview_content
 
     my $remote;
     if ($FORM{'checkcookies'}) {
-	my $cgi = new CGI;
 	my $criterr = 0;
-	$remote = LJ::get_remote($dbs, \$criterr, $cgi);
+	$remote = LJ::get_remote($dbs, \$criterr);
     }
 
     my $data = (LJ::make_journal($dbs, $user, "", $remote,

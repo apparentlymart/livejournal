@@ -1,27 +1,24 @@
-(=_INFO
-NOFORMREAD=>1
-_INFO=)(=PAGE
+(=PAGE
 TITLE=>Get Upload
 BODY<=
 
 (=_CODE
+#line 8
+ my $MAX_UPLOAD = 40960;
+ my $err;
 
- use LWP::UserAgent;
- use Image::Size;
- use CGI qw(:standard);
- use Digest::MD5 qw(md5_base64);
- my $query = new CGI;
-
- $MAXIMUM_UPLOAD = 40960;
-   
- $FORM{'user'} = $query->param('user');
- $FORM{'des'} = $query->param('des');
- $FORM{'src'} = $query->param('src');
- $FORM{'urlpic'} = $query->param('urlpic');
- $FORM{'password'} = $query->param('password');
- $FORM{'hpassword'} = $query->param('hpassword');
- $FORM{'make_default'} = $query->param('make_default');
- $FORM{'authas'} = $query->param('authas');
+ BML::parse_multipart(\%FORM, \$err, $MAX_UPLOAD);
+ if ($err) {
+     if ($err =~ /^\[(\S+?)\]/) { 
+         my $code = $1;
+         if ($code eq "toolarge") {
+             return LJ::bad_input(BML::ml("uploadpic.error.toolarge", 
+                                          { 'maxsize' => int($MAX_UPLOAD / 1024) . "kB" }));
+         }
+         $err = BML::ml("BML.parse_multipart.$1");
+     }
+     return LJ::bad_input($err);
+ }
 
  my $u;
  my $user;
@@ -33,7 +30,6 @@ BODY<=
 
  my $remote = LJ::get_remote($dbs);
 
- my $err;
  my $user = LJ::get_effective_user($dbs, {
      'form' => \%FORM,
      'out_u' => \$u,
@@ -61,27 +57,10 @@ BODY<=
  $authaslink ||= "?user=$user" if $FORM{'user'};
 
  my $ret = "";
- my $imagedata = "";
 
  if ($FORM{'src'} eq "file") 
  {
-     my $filename = $query->param("userpic");
-     my $BytesRead;
-     my $Buffer;
-     my $fh = $query->param('userpic');
-     
-     my $too_big = 0;
-     while (!$too_big && ($Bytes = read($fh,$Buffer,1024))) {
-         $BytesRead += $Bytes;
-         $imagedata .= $Buffer;
-         if ($BytesRead > $MAXIMUM_UPLOAD) { $too_big = 1; }
-     }
-
-     if ($too_big)
-     {
-         push @errors, "File size too big.  File cannot exceed 40K.";
-         return LJ::bad_input(@errors) if @errors;
-     }
+     # already loaded from multipart parse earlier
  }
  elsif ($FORM{'src'} eq "url") 
  {
@@ -95,13 +74,13 @@ BODY<=
      my $res = $ua->simple_request($req, sub { 
          my($data, $response, $protocol) = @_;
          $size += length($data);
-         $imagedata .= $data;
-         die if ($size > $MAXIMUM_UPLOAD);
+         $FORM{'userpic'} .= $data;
+         die if ($size > $MAX_UPLOAD);
      }, 10_000);
 
-     if (length($imagedata) > $MAXIMUM_UPLOAD) {
-         push @errors, "File size too big.  File cannot exceed 40K.";
-         return LJ::bad_input(@errors) if @errors;
+     if (length($FORM{'userpic'}) > $MAX_UPLOAD) {
+         return LJ::bad_input(BML::ml("uploadpic.error.toolarge", 
+                                      { 'maxsize' => int($MAX_UPLOAD / 1024) . "kB" }));
      }
  }
  else {
@@ -109,7 +88,7 @@ BODY<=
  }
    
 
- my ($sx, $sy, $filetype) = imgsize(\$imagedata);
+ my ($sx, $sy, $filetype) = Image::Size::imgsize(\$FORM{'userpic'});
  unless (defined $sx)
  {
      push @errors, $filetype;
@@ -134,7 +113,7 @@ BODY<=
  if ($filetype eq "PNG") { $qcontenttype = "'image/png'"; }
  if ($filetype eq "JPG") { $qcontenttype = "'image/jpeg'"; }
  
- my $base64 = md5_base64($imagedata);
+ my $base64 = Digest::MD5::md5_base64($FORM{'userpic'});
  my $qbase64 = $dbh->quote($base64);
  my $qdes = $dbh->quote($FORM{'des'} || scalar(localtime()));     
  
@@ -158,16 +137,13 @@ BODY<=
  ### if picture isn't a duplicate, insert it
  if ($picid == 0) 
  {
-     $qimagedata = $dbh->quote($imagedata);
-     undef $imagedata;
-
      ### insert the meta-data
      $sth = $dbh->prepare("INSERT INTO userpic (userid, contenttype, width, height, ".
                           "picdate, md5base64) VALUES ".
                           "($userid, $qcontenttype, $qsx, $qsy, NOW(), $qbase64)");
      $sth->execute;
      if ($dbh->err) {  return "<B>Error: </B> " . $dbh->errstr;  }
-     $picid = $sth->{'mysql_insertid'};
+     $picid = $dbh->{'mysql_insertid'};
 
      ### insert the blob
      my $dbb = $dbh;
@@ -176,9 +152,10 @@ BODY<=
          $dbb = LJ::get_cluster_master($u);
          return "<b>Error:</b> Database temporarily down for maintenance.  Try again in a few minutes." unless $dbb;
          $dbb->do("INSERT INTO userpicblob2 (userid, picid, imagedata) ".
-                  "VALUES ($userid, $picid, $qimagedata)");
+                  "VALUES ($userid, $picid, ?)", undef, $FORM{'userpic'});
      } else {
-         $dbb->do("INSERT INTO userpicblob (picid, imagedata) VALUES ($picid, $qimagedata)");
+         $dbb->do("INSERT INTO userpicblob (picid, imagedata) VALUES ($picid, ?)", 
+                  undef, $FORM{'userpic'});
      }
      if ($dbb->err) { return "<B>Error: </B> " . $dbb->errstr; }
  }
@@ -194,6 +171,6 @@ _CODE=)
 
 <=BODY
 PAGE=)(=_C <LJDEP>
-lib: LWP::UserAgent, Image::Size, CGI::, Digest::MD5
+lib: LWP::UserAgent, Image::Size, Digest::MD5
 link: htdocs/editpics.bml
 </LJDEP> _C=)

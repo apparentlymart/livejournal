@@ -201,5 +201,13 @@ talk.somebodywrote_comm=[[realname]] ([[userlink]]) wrote in [[commlink]],
 
 talk.threadlink=Thread
 
+uploadpic.error.toolarge=Image uploaded is too large.  File size cannot exceed [[maxsize]].
+
+BML.parse_multipart.toolarge=Upload too large
+
+BML.parse_multipart.unknowntype=Unknown content type
+
+BML.parse_multipart.parse=Error parsing upload
+
 Username=Username
 

@@ -1,26 +1,7 @@
 <VirtualHost www.ljsite.com>
-
-  ServerAdmin webmaster@ljsite.com
-  DocumentRoot /home/lj/htdocs 
   ServerName www.ljsite.com
   ServerAlias ljsite.com *.ljsite.com
 
-  DirectoryIndex index.html index.bml
-
-  PerlSetEnv       LJHOME /home/lj
-  PerlRequire      /home/lj/cgi-bin/modperl.pl
-  PerlInitHandler  +Apache::LiveJournal
-
-  # BML support
-  PerlSetEnv       BMLConfig $LJHOME/cgi-bin/bmlp.cfg
-  PerlModule       Apache::BML
-  <Files ~ "\.bml$">
-    SetHandler     perl-script
-    PerlHandler    Apache::BML
-  </Files>
-
-  <IfModule mod_userdir.c>
-    UserDir        disabled
-  </IfModule>
-
+  PerlSetEnv    LJHOME /home/lj
+  PerlRequire   /home/lj/cgi-bin/modperl.pl
 </VirtualHost>

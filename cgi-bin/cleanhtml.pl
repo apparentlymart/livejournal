@@ -8,7 +8,7 @@
 require "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 
 use strict;
-use HTML::TokeParser;
+use HTML::TokeParser ();
 
 #     &LJ::CleanHTML::clean(\$u->{'bio'}, { 
 #	 'wordlength' => 100,

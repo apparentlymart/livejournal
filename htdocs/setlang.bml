@@ -5,7 +5,7 @@
  return unless $l;
  if (LJ::did_post()) {
      my $etime = 0;
-     if ($BMLClient::COOKIE{'permlogin'}) {
+     if ($BML::COOKIE{'permlogin'}) {
          $etime = time()+60*60*24*60;
      }
      BML::set_cookie("langpref", $l->{'lncode'} . "/" . time(), $etime);

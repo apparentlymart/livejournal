@@ -1,11 +1,8 @@
 #!/usr/bin/perl
 #
 
-BEGIN {
-    unshift @INC, "$ENV{'LJHOME'}/cgi-bin";
-}
-
 use strict;
+use lib "$ENV{'LJHOME'}/cgi-bin";
 use LJ::Cache;
 
 package LJ::Lang;
@@ -154,7 +151,7 @@ sub load_lang_struct
 {
     return 1 if $LS_CACHED;
     my $dbr = LJ::get_dbh("slave", "master");
-    return 0 unless $dbr;
+    return set_error("No database available") unless $dbr;
     my $sth;
 
     $TXT_CACHE = new LJ::Cache { 'maxsize' => $LJ::LANG_CACHE_SIZE || 2000 };
@@ -309,7 +306,7 @@ sub get_text_bml
     my ($lang, $code) = @_;
     load_lang_struct() unless $LS_CACHED;
     my $l = $LN_CODE{$lang};
-    return unless $l;
+    return "?lang?" unless $l;
 
     my $text = $TXT_CACHE->get("$lang-$code");
     return $text if defined $text;

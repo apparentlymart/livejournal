@@ -395,10 +395,10 @@ sub common_event_validation
     # we only trim Unicode data
 
     if ($req->{'ver'} >=1 ) {
-        $req->{'subject'} = LJ::text_trim($req->{'subject'}, $LJ::BMAX_SUBJECT, $LJ::CMAX_SUBJECT);
-        $req->{'event'} = LJ::text_trim($req->{'event'}, $LJ::BMAX_EVENT, $LJ::CMAX_EVENT);
+        $req->{'subject'} = LJ::text_trim($req->{'subject'}, LJ::BMAX_SUBJECT, LJ::CMAX_SUBJECT);
+        $req->{'event'} = LJ::text_trim($req->{'event'}, LJ::BMAX_EVENT, LJ::CMAX_EVENT);
         foreach (keys %{$req->{'props'}}) {
-            $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, $LJ::BMAX_PROP, $LJ::CMAX_PROP);
+            $req->{'props'}->{$_} = LJ::text_trim($req->{'props'}->{$_}, LJ::BMAX_PROP, LJ::CMAX_PROP);
         }
     }
 
@@ -1572,7 +1572,7 @@ sub editfriendgroups
         $bit += 0;
         next unless ($bit >= 1 && $bit <= 30);
         my $sa = $req->{'set'}->{$bit};
-        my $name = LJ::text_trim($sa->{'name'}, $LJ::BMAX_GRPNAME, $LJ::CMAX_GRPNAME);
+        my $name = LJ::text_trim($sa->{'name'}, LJ::BMAX_GRPNAME, LJ::CMAX_GRPNAME);
         
         # setting it to name is like deleting it.
         unless ($name =~ /\S/) {

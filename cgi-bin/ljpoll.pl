@@ -4,7 +4,7 @@
 package LJ::Poll;
 
 use strict;
-use HTML::TokeParser;
+use HTML::TokeParser ();
 
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 

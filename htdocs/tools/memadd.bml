@@ -141,9 +141,9 @@
      $body .= "<input type=hidden name=mode value=\"save\">";
      $body .= "<TABLE cellpadding=4>";
 
-     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Description:</B></TD><TD><input name=des value=\"$des\" maxlength=$LJ::CMAX_MEMORY size=40><BR><FONT SIZE=-1>Give this journal entry a description that you can remember it by.  To delete this entry from your list of memorable posts, enter a blank description.</FONT></TD></TR>\n";
+     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Description:</B></TD><TD><input name=des value=\"$des\" maxlength=@{[ LJ::CMAX_MEMORY ]} size=40><BR><FONT SIZE=-1>Give this journal entry a description that you can remember it by.  To delete this entry from your list of memorable posts, enter a blank description.</FONT></TD></TR>\n";
      
-     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Keywords:</B></TD><TD><input name=keywords maxlength=$LJ::CMAX_KEYWORD size=40><BR><FONT SIZE=-1>Why is this post memorable?  Enter zero to five keywords or categories so you can find it back later.  ";
+     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Keywords:</B></TD><TD><input name=keywords maxlength=@{[ LJ::CMAX_KEYWORD ]} size=40><BR><FONT SIZE=-1>Why is this post memorable?  Enter zero to five keywords or categories so you can find it back later.  ";
 
      if (@all_keywords) {
          my $size = scalar(@all_keywords);
@@ -228,7 +228,7 @@
          return;
      }
 
-     $FORM{'des'} = LJ::text_trim($FORM{'des'}, $LJ::BMAX_MEMORY, $LJ::CMAX_MEMORY);
+     $FORM{'des'} = LJ::text_trim($FORM{'des'}, LJ::BMAX_MEMORY, LJ::CMAX_MEMORY);
      my $qdes = $dbh->quote($FORM{'des'});
      my $qsec = $dbh->quote($FORM{'security'});
 
