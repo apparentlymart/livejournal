@@ -434,9 +434,13 @@ sub create_view_foaf {
         LJ::text_out(\$int->[1]); # 1==interest
         $ret .= "    <foaf:interest dc:title=\"". LJ::exml($int->[1]) . "\" />\n";
     }
+
+    # check if the user has a "FOAF-knows" group
+    my $groups = LJ::get_friend_group($u->{userid}, { name => 'FOAF-knows' });
+    my $mask = $groups ? 1 << $groups->{groupnum} : 0;
     
     # now information on who you know, limited to a certain maximum number of users
-    my $friends = LJ::get_friends($u->{userid});
+    my $friends = LJ::get_friends($u->{userid}, $mask);
     my @ids = keys %$friends;
     @ids = splice(@ids, 0, $LJ::MAX_FOAF_FRIENDS) if @ids > $LJ::MAX_FOAF_FRIENDS;
     
