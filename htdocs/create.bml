@@ -415,7 +415,8 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
      $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.username.box.head'}</div>";
      $ret .= $error_msg->('username', '<p class="formitemFlag">', '</p>');
      $ret .= "<div class='formitemDesc'>" . BML::ml(".username.text", {'sitename' => $LJ::SITENAME}) . "</div>";
-     $ret .= LJ::html_text({'name' => 'user', 'size' => 15, 'maxlength' => 15, 'value' => $v,});
+     $ret .= LJ::html_text({'name' => 'user', 'size' => 15, 'maxlength' => 15, 'value' => $v, raw => 'style="<?loginboxstyle?>"' });
+     $ret .= "<br />" . BML::ml('.community', { aopts => "href='$LJ::SITEROOT/community/create.bml'" });
      $ret .= "<div class='formitemNote'>$ML{'.username.charsallowed'}</div>" if (!%errors || exists $errors{'username'});
      $ret .= "</div></li>";
 

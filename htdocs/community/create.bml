@@ -179,7 +179,8 @@ SUBMIT:
         $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.username.head'}</div>";
         $ret .= "<p class='formitemFlag'>$error</p>";
         $ret .= "<div class='formitemDesc'>" . BML::ml(".username.text", { sitename => $LJ::SITENAME }) . "</div>";
-        $ret .= LJ::html_text({'name' => 'user', 'size' => 15, 'maxlength' => 15, 'value' => $v,});
+        $ret .= LJ::html_text({'name' => 'user', 'size' => 15, 'maxlength' => 15, 'value' => $v, raw => 'style="<?commloginboxstyle?>"' });
+        $ret .= "<br />" . BML::ml('.person', { aopts => "href='$LJ::SITEROOT/create.bml'" });
         $ret .= "<div class='formitemNote'>$ML{'.username.charsallowed'}</div>" unless $error;
         $ret .= "</div></li>";
 
@@ -187,7 +188,7 @@ SUBMIT:
         $v = LJ::ehtml($FORM{'title'});
         $ret .= "<li><div class='formitem'><div class='formitemName'>$ML{'.name.head'}</div>";
         $ret .= "<div class='formitemDesc'>$ML{'.name.text'}</div>";
-        $ret .= LJ::html_text({ name => 'title', size => 80, maxlength => 80, value => $v, });
+        $ret .= LJ::html_text({ name => 'title', style => 'width: 60%;', maxlength => 80, value => $v, });
         $ret .= "</div></li>";
 
         # membership levels

@@ -166,6 +166,8 @@ Regards,
 
 /community/create.bml.name.text=What's the name of this community?  This will appear at the top of the community, and in the user directory should you choose to list the community in it.
 
+/community/create.bml.person=Would you rather <a [[aopts]]>create a personal journal</a>?
+
 /community/create.bml.success.btn.enterinfo=Enter Community Information
 
 /community/create.bml.success.head=Success!
@@ -720,6 +722,8 @@ p?>
 /create.bml.clusterselect.nocluster=No Cluster
 
 /create.bml.clusterselect.text=Please select the cluster you want to create this account on. <b>Note:</b>  This is a debugging/test option only.  In production, users won't pick this, or know anything about it.
+
+/create.bml.community=Would you rather <a [[aopts]]>create a community</a>?
 
 /create.bml.create.head=Creating a New Journal
 
