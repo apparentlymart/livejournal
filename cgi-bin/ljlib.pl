@@ -3444,29 +3444,61 @@ sub send_mail
 {
     my $opt = shift;
 
-    my $clean_name = sub {
-        my $name = shift;
-        $name =~ s/[\n\t\(\)]//g;
-        return $name ? " ($name)" : "";
+    my $msg = $opt;
+
+    # did they pass a MIME::Lite object already?
+    unless (ref $msg eq 'MIME::Lite') {
+
+        my $clean_name = sub {
+            my $name = shift;
+            return "" unless $name;
+            $name =~ s/[\n\t\(\)]//g;
+            return $name ? " ($name)" : "";
+        };
+
+        my $body = $opt->{'wrap'} ? Text::Wrap::wrap('','',$opt->{'body'}) : $opt->{'body'};
+        $msg = new MIME::Lite ('From' => "$opt->{'from'}" . $clean_name->($opt->{'fromname'}),
+                                  'To' => "$opt->{'to'}" . $clean_name->($opt->{'toname'}),
+                                  'Cc' => $opt->{'cc'},
+                                  'Bcc' => $opt->{'bcc'},
+                                  'Subject' => $opt->{'subject'},
+                                  'Data' => $body);
+
+        if ($opt->{'charset'} && ! (LJ::is_ascii($opt->{'body'}) && LJ::is_ascii($opt->{'subject'}))) {
+            $msg->attr("content-type.charset" => $opt->{'charset'});        
+        }
+
+        if ($opt->{'headers'}) {
+            $msg->add(%{$opt->{'headers'}});
+        }
+    }
+
+    # if send operation fails, buffer and send later
+    my $buffer = sub {
+
+        my $dbcm;
+        my $tries = 0;
+
+        # aim to try 10 times, but that's redundant if there are fewer clusters
+        my $maxtries = @LJ::CLUSTERS;
+        $maxtries = 10 if $maxtries > 10;
+
+        # select a random cluster master to insert to
+        while (! $dbcm && $tries < $maxtries) {
+            my $idx = int(rand() * @LJ::CLUSTERS);
+            $dbcm = LJ::get_cluster_master($LJ::CLUSTERS[$idx]);
+            $tries++;
+        }
+        return undef unless $dbcm;
+        
+        # try sending later
+        LJ::cmd_buffer_add($dbcm, 0, 'send_mail', Storable::freeze($msg));
     };
 
-    my $body = $opt->{'wrap'} ? Text::Wrap::wrap('','',$opt->{'body'}) : $opt->{'body'};
-    my $msg = new MIME::Lite ('From' => "$opt->{'from'}" . $clean_name->($opt->{'fromname'}),
-                              'To' => "$opt->{'to'}" . $clean_name->($opt->{'toname'}),
-                              'Cc' => $opt->{'cc'},
-                              'Bcc' => $opt->{'bcc'},
-                              'Subject' => $opt->{'subject'},
-                              'Data' => $body);
+    my $rv = eval { $msg->send && 1; };
+    return 1 if $rv;
+    return $buffer->($msg);
 
-    if ($opt->{'charset'} && ! (LJ::is_ascii($opt->{'body'}) && LJ::is_ascii($opt->{'subject'}))) {
-        $msg->attr("content-type.charset" => $opt->{'charset'});        
-    }
-
-    if ($opt->{'headers'}) {
-        $msg->add(%{$opt->{'headers'}});
-    }
-
-    return eval { $msg->send; 1; }
 }
 
 # <LJFUNC>
@@ -4417,21 +4449,24 @@ sub load_moods
 # </LJFUNC>
 sub cmd_buffer_add
 {
-    my ($db, $journalid, $cmd, $h_args) = @_;
+    my ($db, $journalid, $cmd, $args) = @_;
 
     return 0 unless $db;
-    $journalid += 0;
-    my $qcmd = $db->quote($cmd);
-    my $qargs;
-    if (ref $h_args eq "HASH") {
-        foreach (sort keys %$h_args) {
-            $qargs .= LJ::eurl($_) . "=" . LJ::eurl($h_args->{$_}) . "&";
+    return 0 unless $cmd;
+
+    my $arg_str;
+    if (ref $args eq 'HASH') {
+        foreach (sort keys %$args) {
+            $arg_str .= LJ::eurl($_) . "=" . LJ::eurl($args->{$_}) . "&";
         }
-        chop $qargs;
+        chop $arg_str;
+    } else {
+        $arg_str = $args;
     }
-    $qargs = $db->quote($qargs);
+
     $db->do("INSERT INTO cmdbuffer (journalid, cmd, instime, args) ".
-            "VALUES ($journalid, $qcmd, NOW(), $qargs)");
+            "VALUES (?, ?, NOW(), ?)", undef,
+            $journalid, $cmd, $arg_str);
 }
 
 # <LJFUNC>
@@ -4482,15 +4517,27 @@ sub cmd_buffer_flush
                 };
             },
         },
+        # emails that previously failed to send
+        'send_mail' => {
+            'arg_format' => 'raw',
+            'run' => sub {
+                my ($dbh, $db, $c) = @_;
+
+                my $msg = Storable::thaw($c->{'args'});
+                LJ::send_mail($msg);
+            }
+        }
     };
 
     my $code;
-    my $too_old = 0;   # 0 = never too old
+    my $too_old = 0;        # 0 = never too old
+    my $arg_format = 'url'; # 'raw' = don't urlencode
 
     # is it a built-in command?
     if ($cmds->{$cmd}) {
         $code = $cmds->{$cmd}->{$mode};
         $too_old = $cmds->{$cmd}->{"too_old"};
+        $arg_format = $cmds->{$cmd}->{"arg_format"};
         
     # otherwise it might be a site-local command
     } else {
@@ -4544,12 +4591,19 @@ sub cmd_buffer_flush
             # sadly, we have to do another query here to verify the job hasn't been
             # done by another thread.  (otherwise we could've done it above, instead
             # of just getting the id)
-            my $c = $db->selectrow_hashref("SELECT * FROM cmdbuffer WHERE cbid=$cbid");
+
+            my $c = $db->selectrow_hashref("SELECT cbid, journalid, cmd, instime, args " .
+                                           "FROM cmdbuffer WHERE cbid=?", undef, $cbid);
             next unless $c;
 
-            my $a = {};
-            LJ::decode_url_string($c->{'args'}, $a);
-            $c->{'args'} = $a;
+            if ($arg_format eq "url") {
+                my $a = {};
+                LJ::decode_url_string($c->{'args'}, $a);
+                $c->{'args'} = $a;
+            }
+            # otherwise, arg_format eq "raw"
+
+            # run handler
             $code->($dbh, $db, $c);
 
             $db->do("DELETE FROM cmdbuffer WHERE cbid=$cbid");

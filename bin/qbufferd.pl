@@ -150,7 +150,7 @@ while(not $working) {
 }
 
 # the actual work begins here
-my @all_jobs = qw(delitem weblogscom);
+my @all_jobs = qw(delitem weblogscom send_mail);
 foreach my $hook (keys %LJ::HOOKS) {
     next unless $hook =~ /^cmdbuf:(\w+):run$/;
     push @all_jobs, $1;

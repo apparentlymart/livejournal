@@ -1106,7 +1106,7 @@ sub mail_comments {
                         if $LJ::UNICODE;
                 }
 
-                $msg->send;
+                LJ::send_mail($msg);
             }
         }
     }
@@ -1181,7 +1181,7 @@ sub mail_comments {
                 if $LJ::UNICODE;
         }
         
-        $msg->send;
+        LJ::send_mail($msg);
     }
 }
 
