@@ -751,6 +751,14 @@ sub get_friend_group {
     return $find_grp->();
 }
 
+# <LJFUNC>
+# name: LJ::fill_groups_xmlrpc
+# des: Fills a hashref (presumably to be sent to an XMLRPC client, EG fotobilder)
+#      with user friend group information
+# args: u, ret
+# des-ret: a response hashref to fill with friend group data
+# returns: undef if called incorrectly, 1 otherwise
+# </LJFUNC>
 sub fill_groups_xmlrpc {
     my ($u, $ret) = @_;
     return undef unless ref $u && ref $ret;
