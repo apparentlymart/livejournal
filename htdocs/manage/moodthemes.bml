@@ -1,0 +1,362 @@
+<?page
+title=>Custom Mood Theme Editor
+
+head<=
+<script language="Javascript" type="text/javascript">
+    <!--
+
+    // Since JavaScript is dumb, we must get the page URL and save it here, to compare
+    // against later when we're seeing if we actually loaded an image or not...
+    var page_url = '<?_code return "$LJ::SITEROOT/manage/moodthemes.bml"; _code?>';
+
+    // Designed to update the fields for the image just changed as well as
+    // well as all those that inherit from it.
+    function update_children(id) {
+        if (! document.getElementById) return true;
+
+        var i = id+'img';
+        var url = document.getElementById(id);
+        var img = document.getElementById(i);
+
+        // If they actually have us something useful
+        if (url.value != "") {
+            var newimage = new Image();
+            newimage.src=url.value;
+
+            var oldurl = img.src;
+
+            // Update itself
+            img.src = url.value;
+            img.width = newimage.width;
+            img.height = newimage.height;
+
+            var w = id+'w';
+            var h = id+'h';
+            var width = document.getElementById(w);
+            var height = document.getElementById(h);
+            width.value = newimage.width;
+            height.value = newimage.height;
+
+            var form = document.getElementById('editform');
+            // Update everything to be its parent
+            for (var z = 0; z < form.elements.length; z++) {
+                var inherit = document.getElementById(form[z].id+'inherit');
+                var parent = document.getElementById(form[z].id+'parent');
+                if ((parent != undefined) && (inherit != undefined && inherit.checked == true)) {
+                    // our ids and stuff
+                    var pid = parent.value; // our parent's id
+                    var oid = form[z].id;   // our id
+
+                    // at this point we explode!
+                    var par_img = document.getElementById(pid+'img');
+                    if (par_img.src == page_url) {
+                        continue;
+                    }
+                    var our_img = document.getElementById(oid+'img');
+                    our_img.src = par_img.src;
+                    our_img.width = par_img.width;
+                    our_img.height = par_img.height;
+
+                    // now copy our_img info into text fields
+                    var our_url = document.getElementById(oid);
+                    var our_width = document.getElementById(oid+'w');
+                    var our_height = document.getElementById(oid+'h');
+                    our_url.value = par_img.src;
+                    our_width.value = par_img.width;
+                    our_height.value = par_img.height;
+                }
+            }
+        }
+        return false;
+    }
+
+    // Logic behind grabbing the parent when checking inherit
+    function enable(id, parent) {
+        if (! document.getElementById) return true;
+
+        var check = document.getElementById(id+'inherit');
+        var url = document.getElementById(id);
+        var w = document.getElementById(id+'w');
+        var h = document.getElementById(id+'h');
+
+        var fill = switchdisable(id, check, url, w, h);
+
+        var pi = document.getElementById(parent+'img');
+        // For some dumb reason an img tag with no source has the src of the pages url
+        if(fill && parent != id && pi.src != page_url) {
+            url.value = pi.src;
+            w.value = pi.width;
+            h.value = pi.height;
+            var i = document.getElementById(id+'img');
+            i.src = pi.src;
+            i.width = pi.width;
+            i.height = pi.height;
+        }
+    }
+
+    // If a set of fields is disabled, it enables them and vice versa
+    function switchdisable(id, check, url, w, h) {
+        if (! document.getElementById) return true;
+
+        if (check == undefined) {
+            var check = document.getElementById(id+'inherit');
+            var url = document.getElementById(id);
+            var w = document.getElementById(id+'w');
+            var h = document.getElementById(id+'h');
+        }
+
+        if (check.checked == true) {
+            url.disabled = true;
+            w.disabled = true;
+            h.disabled = true;
+            return true;
+        } else {
+            url.disabled = false;
+            w.disabled = false;
+            h.disabled = false;
+            return false;
+        }
+    }
+
+    // Since not all browsers support JS, we need to use JS to disable form fields
+    // instead of doing it in Perl land.
+    function pageload() {
+        if (! document.getElementById) return true;
+
+        var form = document.getElementById('editform');
+        if (form == undefined) {
+            return false;
+        }
+
+        for (var z = 0; z < form.elements.length; z++) {
+            var inherit = document.getElementById(form[z].id+'inherit');
+            if (inherit != undefined && inherit.checked == true) {
+                switchdisable(form[z].id, undefined, undefined, undefined, undefined);
+            }
+        }
+    }
+//    -->
+</script>
+<=head
+
+body<=
+<?p This page allows users to create and edit their custom mood themes. p?>
+
+<?_code
+    use strict;
+    use vars qw(%POST %GET);
+
+    my $ret;
+
+    my $remote = LJ::get_remote();
+    return "<?needlogin?>" unless $remote;
+
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input("You could not be authenticated as the specified user.")
+        unless $u;
+
+    return "Sorry, your account type does not allow creation of custom mood themes."
+        unless LJ::get_cap($u, "moodthemecreate");
+
+    # Populated with all the moods later in editform
+    my %lists;
+
+
+    #### Closure Definitions ####
+    my $make_tree;
+    $make_tree = sub {
+        my ($num, $tid) = @_;
+        return unless $lists{$num};
+
+        $ret .= "<ul>\n";
+
+        foreach my $mood (@{$lists{$num}}) {
+            $ret .= "<li><b>$mood->{'name'}</b>";
+            my %pic;
+            LJ::get_mood_picture($tid, $mood->{'id'}, \%pic);
+            $ret .= "<img id='$mood->{'id'}img' align='absmiddle' src=\"$pic{'pic'}\" width='$pic{'w'}' height='$pic{'h'}' hspace='2' vspace='2' /></li>\n";
+
+            # Figure out if this picture is really just inherited from a parent
+            my $inherited;
+            if ($pic{'moodid'} != $mood->{'id'}) {
+                $inherited = 1;
+            } else {
+                $inherited = 0;
+            }
+
+            $ret .= "<table>";
+            if ($mood->{'parent'}) {
+                $ret .= "<tr><td colspan='2'>Inherit from " . LJ::mood_name($mood->{'parent'}) . ": <input type='checkbox' name='$mood->{'id'}inherit' id='$mood->{'id'}inherit' onChange='enable($mood->{'id'}, $mood->{'parent'})' ";
+                $ret .= $inherited ? "checked='checked' />" : " />";
+                $ret .= "</td></tr>\n";
+            }
+            $ret .= "<tr><td>URL: </td><td><input type='text' name='$mood->{'id'}' id='$mood->{'id'}' value='$pic{'pic'}' size='75' onChange='update_children($mood->{'id'})' /></td></tr>\n";
+            $ret .= "<tr><td>Width: </td><td><input type='text' name='$mood->{'id'}w' id='$mood->{'id'}w' value='$pic{'w'}' size='4' /> Height: <input type='text' name='$mood->{'id'}h' id='$mood->{'id'}h' value='$pic{'h'}' size='4' /><br /><br /></td></tr>\n";
+            $ret .= "<input type='hidden' name='$mood->{'id'}parent' id='$mood->{'id'}parent' value='$mood->{'parent'}' />";
+            $ret .= "</table>\n";
+
+            $make_tree->($mood->{'id'}, $tid, 0);
+        }
+        $ret .= "</ul>\n";
+    };
+
+    my $editform = sub {
+        my $id = shift;
+
+        # Get a list of all possible moods
+        my $moods = LJ::get_moods();
+
+        foreach (sort { $moods->{$a}->{'name'} cmp $moods->{$b}->{'name'} } keys %$moods) {
+            my $m = $moods->{$_};
+            push @{$lists{$m->{'parent'}}}, $m;
+        }
+
+        $make_tree->(0, $id);
+    };
+
+
+    #### End Closure Definitions ####
+
+
+    if (LJ::did_post()) { # They actually did something, figure out what
+        my $themeid = $POST{'themeid'};
+        my $info;
+
+        # Make sure they can even edit this theme and fill in the $info variable for later use
+        if ($POST{'isnew'} != 1) {
+            my $dbr = LJ::get_db_reader();
+            my $sth = $dbr->prepare("SELECT name, des FROM moodthemes WHERE moodthemeid=? AND ownerid=?");
+            $sth->execute($POST{'themeid'}, $u->{'userid'});
+            $info = $sth->fetchrow_hashref;
+            return LJ::bad_input("You do not have permission to edit this theme.")
+                unless defined $info;
+        }
+
+        # We are either making changes to an existing theme or showing the edit form for a new theme
+        if ($POST{'edit'} == 1 || $POST{'isnew'} == 1) {
+            # Insert the new theme name and description into the db and grab its new themeid
+            if ($POST{'isnew'} == 1) {
+                return LJ::bad_input("You must specify a name and description for this theme.")
+                    unless LJ::trim($POST{'name'}) && LJ::trim($POST{'desc'});
+                my $dbh = LJ::get_db_writer();
+                $dbh->do("INSERT INTO moodthemes (ownerid, name, des, is_public) VALUES (?, ?, ?, 'N')", undef, $u->{'userid'}, $POST{'name'}, $POST{'desc'});
+                $themeid = $dbh->{'mysql_insertid'};
+                $info->{'name'} = $POST{'name'};
+                $info->{'des'} = $POST{'desc'};
+            }
+
+            $ret .= "<?hr?>\n";
+            $ret .= "<?h2 Editing Theme $info->{name} h2?>\n";
+
+            # User switcher
+            my $uri = "/manage/moodthemes.bml";
+            $uri .= "?authas=$authas" if $authas ne $remote->{'user'};
+
+            # Make the form
+            $ret .= "<?p <form action='$uri' method='POST' id='editform' name='editform'>\n";
+            $ret .= "<b>Theme Name:</b> <input type='text' name='name' value=\"$info->{name}\" />&nbsp;&nbsp;&nbsp;<b>Description:</b> <input type='text' name='desc' value=\"$info->{des}\" /><br /><br />\n";
+            $ret .= "<input type='hidden' name='themeid' value='$themeid' />\n";
+
+            # Actually make the editor form
+            $editform->($themeid);
+
+            $ret .= "<input type='submit' name='save' value='Save Changes' /></form> p?>\n";
+        } else  { # Save their changes
+            my $themeid = $POST{'themeid'};
+            my $dbh = LJ::get_db_writer();
+
+            # Update the name or description if needed
+            if ($info->{'name'} ne $POST{'name'} || $info->{'des'} ne $POST{'desc'}) {
+                $dbh->do("UPDATE moodthemes SET name=?, des=? WHERE moodthemeid=?", undef, $POST{'name'}, $POST{'desc'}, $POST{'themeid'});
+            }
+
+            # The fun part of figuring out what needs to be changed in the db
+            foreach my $key (keys %POST) {
+                # A key that is fully numeric signifies an actual mood theme.
+                # We then build off this id number to get other information needed
+                # about what the user specified.
+                if ($key =~ /(^\d+$)/) {
+                    my $mid = $1;
+                    my $width = $POST{$mid.'w'};
+                    my $height = $POST{$mid.'h'};
+                    my $picurl = $POST{$key};
+                    my $mname = LJ::mood_name($mid);
+
+                    if (($POST{$mid.'check'} ne 'checked') && (!$picurl || $width == 0 || $height == 0)) { # Delete this picture
+                        $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid=$themeid AND moodid=$mid");
+                        next;
+                    }
+
+                    if ($POST{$mid.'check'} eq 'checked') { # Inherited, thus don't represent it in the db
+                        $dbh->do("DELETE FROM moodthemedata WHERE moodthemeid=$themeid AND moodid=$mid");
+                        $ret .= "$mname($mid) was deleted and will now be represented by its parent.<br />\n";
+                    } else { # Not inherited, it is different than its parent or it is actually a parent
+                        my $qpicurl = $dbh->quote($picurl);
+                        $dbh->do("REPLACE INTO moodthemedata (moodthemeid, moodid, picurl, width, height) VALUES ($themeid, $mid, $qpicurl, $width, $height)");
+                        $ret .= "$mname($mid) is set to $picurl.<br />\n";
+                    }
+                }
+            }
+            # Kill any memcache data about this moodtheme
+            LJ::MemCache::delete([$themeid, "moodthemedata:$themeid"]);
+
+           $ret .= "<br />Changes have been successfully saved.<br /><br />\n";
+        }
+
+        $ret .= BML::ml('Backlink', {
+            'link' => '/manage/moodthemes.bml',
+            'text' => 'Return To Editor',
+        });
+    } else { # Show the first form to select user, which one to edit, or create a new one
+
+        # user switcher
+        $ret .= "<form action='/manage/moodthemes.bml' method='get'>\n";
+        $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} });
+        $ret .= "</form>\n\n";
+
+        $ret .= "<?p Go to the <a href='$LJ::SITEROOT/modify.bml'>Modify Journal page</a> to set your default mood theme. p?>";
+
+        # Make up the form to choose to edit a theme or create a new one
+        $ret .= "<table width='100%'><tr><td align='center'>\n";
+        $ret .= "<?h1 Your Mood Themes h1?>\n";
+        $ret .= "</td><td align='center'>\n";
+        $ret .= "<?h1 Create a New Theme h1?>\n";
+        $ret .= "</td></tr><tr><td align='center'>\n";
+
+        # Get data to figure out if they have any themes already
+        my $dbr = LJ::get_db_reader();
+        my $sth = $dbr->prepare("SELECT moodthemeid, name FROM moodthemes WHERE ownerid=?");
+        $sth->execute($u->{userid});
+        my @user_themes = ();
+        push @user_themes, $_ while $_ = $sth->fetchrow_hashref;
+
+        if (@user_themes) { # The have some custom themes already defined
+            my @opts = map {$_->{moodthemeid}, $_->{name}} @user_themes;
+            my $uri = "/manage/moodthemes.bml";
+            $uri .= "?authas=$authas" if $authas ne $remote->{'user'};
+            $ret .= "<form action='$uri' method='POST' id='selectform' name='selectform'>\n";
+            $ret .= LJ::html_select({'name' => 'themeid'}, @opts);
+            $ret .= "&nbsp;&nbsp;<input type='hidden' name='edit' value='1' /><input type='submit' name='editbut' value='Edit' /></form>\n";
+        } else {
+            $ret .= "<?p You have not yet made any custom mood themes. p?>\n";
+        }
+
+        $ret .= "</td><td align='center'>\n";
+        my $uri = "/manage/moodthemes.bml";
+        $uri .= "?authas=$authas" if $authas ne $remote->{'user'};
+        $ret .= "<form action='$uri' method='POST' id='editform' name='editform'>\n";
+        $ret .= "<?p Theme Name: <input type='text' name='name' length='30' />&nbsp;&nbsp;&nbsp;&nbsp;";
+        $ret .= "Description: <input type='text' name='desc' length='50' />\n";
+        $ret .= "<input type='hidden' name='isnew' value='1' />\n";
+        $ret .= "<input type='submit' name='create' value='Create Theme' /></form> p?>\n";
+        $ret .= "</td></tr>\n";
+        $ret .= "</table>\n";
+    }
+
+    return $ret;
+
+_code?>
+<=body
+bodyopts=> onload="pageload();"
+page?>
