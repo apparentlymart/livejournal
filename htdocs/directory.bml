@@ -145,7 +145,7 @@ BODY<=
      return "The directory is currently unavailable.";
  }
 
- if (LJ::Dir::do_search($dbs, \%FORM, \@matches, \%info)==0) {
+ if (LJ::Dir::do_search($dbr, $dbdir, \%FORM, \@matches, \%info)==0) {
      return "(=H1 Error H1=)(=P Error: $info{'errmsg'} P=)";
  }
  $info{'allwhat'} ||= "users";

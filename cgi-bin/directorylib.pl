@@ -24,8 +24,10 @@ my $MAX_RETURN_RESULT = 1000;
 my %filters = (
             'int' => { 'searcher' => \&search_int,
                        'validate' => \&validate_int, },
-            'fr' => { 'searcher' => \&search_fr, },
-            'fro' => { 'searcher' => \&search_fro, },
+            'fr' => { 'searcher' => \&search_fr,
+                      'validate' => \&validate_fr, },
+            'fro' => { 'searcher' => \&search_fro,
+                      'validate' => \&validate_fro, },
             'loc' => { 'validate' => \&validate_loc,
                        'searcher' => \&search_loc, },
             #'gen' => { 'validate' => \&validate_gen,
@@ -34,8 +36,8 @@ my %filters = (
                        'searcher' => \&search_age, },
             'ut' => { 'validate' => \&validate_ut,
                       'searcher' => \&search_ut, },
-            'sup' => { 'searcher' => \&search_sup, },
-            'com' => { 'searcher' => \&search_com, },
+            'com' => { 'searcher' => \&search_com,
+                       'validate' => \&validate_com, },
             );
 
 # validate all filter options
@@ -44,42 +46,35 @@ sub validate
 {
     my ($req, $errors) = @_;
     foreach my $f (sort keys %filters) {
-        if ($req->{"s_$f"} && $filters{$f}->{'validate'}) {
-            $filters{$f}->{'validate'}->($req, $errors);
-        }
+        next unless $filters{$f}->{'validate'};
+        $filters{$f}->{'validate'}->($req, $errors);
     }
 }
 
-#
-# entry point to do a search: give it 
+# entry point to do a search: give it
 #    a db-read handle
-#    db-master handle, 
+#    directory master (must be able to write to dirsearchres2)
 #    hashref of the request,
 #    a listref of where to put the user hashrefs returned,
 #    hashref of where to return results of the query
-
 sub do_search
 {
-    my ($dbh, $dbmaster, $req, $users, $info) = @_;
+    my ($dbr, $dbdir, $req, $users, $info) = @_;
     my $sth;
 
     # clear return buffers
-    @{$users} = ();  
-    %{$info} = ();  
+    @{$users} = ();
+    %{$info} = ();
 
     # load some stuff we'll need for searchers probably
-    LJ::load_props($dbh, "user");
+    LJ::load_props($dbr, "user");
 
     my @crits;
-    foreach my $f (sort keys %filters) 
+    foreach my $f (sort keys %filters)
     {
-        next unless ($req->{"s_$f"} && $filters{$f}->{'searcher'});
-        if ($filters{$f}->{'subrequest'}) {
-            $info->{'errmsg'} = "[Filter $f] cannot directly invoke sub-filter";
-            return 0;
-        }
+        next unless $filters{$f}->{'validate'}->($req, []);
 
-        my @criteria = $filters{$f}->{'searcher'}->($dbh, $req, $info);
+        my @criteria = $filters{$f}->{'searcher'}->($dbr, $req, $info);
         if (@criteria) {
             push @crits, @criteria;
         } else {
@@ -95,9 +90,6 @@ sub do_search
     }
 
     ########## time to build us some huge SQL statement.  yee haw.
-
-    # what database to hit?
-    my $pfx = $LJ::DIR_DB ? "$LJ::DIR_DB." : "";
 
     my $orderby;
 
@@ -122,11 +114,11 @@ sub do_search
         ### each search criteria has its own table aliases.  make those unique.
         my %map_alias = ();  # keep track of local -> global table alias mapping
 
-        foreach my $localalias (keys %{$crit->{'tables'}}) 
+        foreach my $localalias (keys %{$crit->{'tables'}})
         {
             my $table = $crit->{'tables'}->{$localalias};
             my $newalias;
-            
+
             # some tables might be used multiple times but they're
             # setup such that opening them multiple times is useless.
             if ($only_one_copy{$table}) {
@@ -144,7 +136,7 @@ sub do_search
 
             $map_alias{$localalias} = $newalias;
         }
-        
+
         ## add each condition to the where clause, after fixing up aliases
         foreach my $cond (@{$crit->{'conds'}}) {
             $cond =~ s/\{(\w+?)\}/$map_alias{$1}/g;
@@ -207,7 +199,7 @@ sub do_search
         return 0;
     }
 
-    my $qdig = $dbh->quote(md5_hex($sql));
+    my $qdig = $dbr->quote(md5_hex($sql));
     my $hit_cache = 0;
     my $count = 0;
     my @ids;
@@ -215,9 +207,9 @@ sub do_search
     ## let's see if it's cached.
     {
         my $csql = "SELECT userids FROM dirsearchres2 WHERE qdigest=$qdig AND dateins > DATE_SUB(NOW(), INTERVAL 15 MINUTE)";
-        my $sth = $dbmaster->prepare($csql);
+        my $sth = $dbdir->prepare($csql);
         $sth->execute;
-        if ($dbh->err) {  $info->{'errmsg'} = $dbh->errstr; return 0; }
+        if ($dbdir->err) {  $info->{'errmsg'} = $dbdir->errstr; return 0; }
 
         my ($ids) = $sth->fetchrow_array;
         if (defined $ids) {
@@ -233,19 +225,17 @@ sub do_search
     ## guess we'll have to query it.
     if (! $hit_cache)
     {
-        $sth = $dbh->prepare($sql);
+        $sth = $dbdir->prepare($sql);
         $sth->execute;
-        if ($dbh->err) { $info->{'errmsg'} = $dbh->errstr . "<p>SQL: $sql"; return 0; }
+        if ($dbdir->err) { $info->{'errmsg'} = $dbdir->errstr . "<p>SQL: $sql"; return 0; }
 
-        my %ids;
         while (my ($id) = $sth->fetchrow_array) {
-            $ids{$id} = 1;
+            push @ids, $id;
         }
-        @ids = keys %ids;
 
         # insert it into the cache
-        my $ids = $dbh->quote(join(",", @ids));
-        $dbmaster->do("REPLACE INTO dirsearchres2 (qdigest, dateins, userids) VALUES ($qdig, NOW(), $ids)");
+        my $ids = $dbdir->quote(join(",", @ids));
+        $dbdir->do("REPLACE INTO dirsearchres2 (qdigest, dateins, userids) VALUES ($qdig, NOW(), $ids)");
         $count = scalar(@ids);
     }
 
@@ -263,13 +253,13 @@ sub do_search
 
     ## now, get info on the ones we want.
     @ids = @ids[($info->{'first'}-1)..($info->{'last'}-1)];
-   
+
     my $in = join(",", grep { $_+0; } @ids);
     my $fsql = "SELECT $all_fields FROM $fromwhat WHERE u.userid IN ($in) $extrawhere2";
-    $sth = $dbh->prepare($fsql);
+    $sth = $dbr->prepare($fsql);
     $sth->execute;
 
-    my %u;    
+    my %u;
     while ($_ = $sth->fetchrow_hashref) {
         $u{$_->{'userid'}} = $_;
     }
@@ -313,32 +303,25 @@ sub validate_int
     my ($req, $errors) = @_;
 
     my $int = lc($req->{'int_like'});
-    $int =~ s/^[^\w\s]+//;
-    $int =~ s/[^\w\s]+$//;
-    unless ($int) {
-        push @$errors, "Blank or invalid interest.";
-    }
-    if ($int =~ / .+ .+ .+ /) {
-        push @$errors, "Interest shouldn't be a whole sentence.";
-    }
-    if (length($int) > 35) {
-        push @$errors, "Interest is too long.";
-    }
+    $int =~ s/^\s+//;
+    $int =~ s/\s+$//;
+    return 0 unless $int;
 
     $req->{'int_like'} = $int;
+    return 1;
 }
 
 sub search_int
 {
-    my ($dbh, $req, $info) = @_;
+    my ($dbr, $req, $info) = @_;
     my $arg = $req->{'int_like'};
     push @{$info->{'english'}}, "are interested in \"$arg\"";
 
     ## find interest id, if one doth exist.
-    my $qint = $dbh->quote($req->{'int_like'});
-    my $intid = $dbh->selectrow_array("SELECT intid FROM interests ".
+    my $qint = $dbr->quote($req->{'int_like'});
+    my $intid = $dbr->selectrow_array("SELECT intid FROM interests ".
                                       "WHERE interest=$qint");
-    $int += 0;
+    $intid += 0;
 
     return {
         'tables' => {
@@ -349,50 +332,19 @@ sub search_int
     };
 }
 
-######## HAVE A PICTURE? ##############3
-
-### NO INDEX!
-sub search_withpic
-{
-    my ($dbh, $req, $info) = @_;
-
-    push @{$info->{'english'}}, "have pictures uploaded";
-
-    return {
-        'conds' => [ "u.defaultpicid <> 0", ],
-    };
-}
-
-####### SUPPORTER?
-
-sub search_sup
-{
-    my ($dbh, $req, $info) = @_;
-
-    push @{$info->{'english'}}, "have supported $LJ::SITENAME by purchasing paid accounts";
-
-    return {
-        'tables' => {
-            'p' => 'payments',
-        },
-        'conds' => [  ],
-        'userid' => "{p}.userid",
-    };
-}
-
 ######## HAS FRIEND ##############
 
 sub search_fr
 {
-    my ($dbh, $req, $info) = @_;
+    my ($dbr, $req, $info) = @_;
 
     my $user = lc($req->{'fr_user'});
-    my $quser = $dbh->quote($user);
+    my $quser = $dbr->quote($user);
     my $arg = $user;
 
     push @{$info->{'english'}}, "consider \"$arg\" a friend";
 
-    my $friendid = LJ::get_userid($dbh, $user);
+    my $friendid = LJ::get_userid($dbr, $user);
 
     return {
         'tables' => {
@@ -408,15 +360,15 @@ sub search_fr
 
 sub search_fro
 {
-    my ($dbh, $req, $info) = @_;
+    my ($dbr, $req, $info) = @_;
 
     my $user = lc($req->{'fro_user'});
-    my $quser = $dbh->quote($user);
+    my $quser = $dbr->quote($user);
     my $arg = $user;
 
     push @{$info->{'english'}}, "are considered a friend by \"$arg\"";
 
-    my $userid = LJ::get_userid($dbh, $user);
+    my $userid = LJ::get_userid($dbr, $user);
 
     return {
         'tables' => {
@@ -433,22 +385,23 @@ sub search_fro
 sub validate_loc
 {
     my ($req, $errors) = @_;
-    
+    return 0 unless $req->{'loc_cn'};
+
     unless ($req->{'loc_cn'} =~ /^[A-Z]{2}$/) {
         push @$errors, "Invalid country for location search.";
-        return;
+        return 0;
     }
-    
+    return 1;
 }
 
 sub search_loc
 {
-    my ($dbh, $req, $info) = @_;
+    my ($dbr, $req, $info) = @_;
     my ($sth);
 
     my ($longcountry, $longstate, $longcity);
-    my $qcode = $dbh->quote(uc($req->{'loc_cn'}));
-    $sth = $dbh->prepare("SELECT item FROM codes WHERE type='country' AND code=$qcode");
+    my $qcode = $dbr->quote(uc($req->{'loc_cn'}));
+    $sth = $dbr->prepare("SELECT item FROM codes WHERE type='country' AND code=$qcode");
     $sth->execute;
     ($longcountry) = $sth->fetchrow_array;
 
@@ -461,17 +414,17 @@ sub search_loc
     $req->{'loc_ci'} = lc($req->{'loc_ci'});
     
     if ($req->{'loc_cn'} eq "US") {
-        my $qstate = $dbh->quote($req->{'loc_st'});
+        my $qstate = $dbr->quote($req->{'loc_st'});
         if (length($req->{'loc_st'}) > 2) {
             ## convert long state name into state code
-            $sth = $dbh->prepare("SELECT code FROM codes WHERE type='state' AND item=$qstate");
+            $sth = $dbr->prepare("SELECT code FROM codes WHERE type='state' AND item=$qstate");
             $sth->execute;
             my ($code) = $sth->fetchrow_array;
             if ($code) {
                 $req->{'loc_st'} = lc($code);
             }
         } else {
-            $sth = $dbh->prepare("SELECT item FROM codes WHERE type='state' AND code=$qstate");
+            $sth = $dbr->prepare("SELECT item FROM codes WHERE type='state' AND code=$qstate");
             $sth->execute;
             ($longstate) = $sth->fetchrow_array;
         }
@@ -508,20 +461,23 @@ sub search_loc
 sub validate_gen
 {
     my ($req, $errors) = @_;
+    return 0 unless $req->{'gen_sel'};
     unless ($req->{'gen_sel'} eq "M" ||
             $req->{'gen_sel'} eq "F")
     {
         push @$errors, "You must select either Male or Female when searching by gender.\n";
+        return 0;
     }
+    return 1;
 }
 
 sub search_gen
 {
-    my ($dbh, $req, $info) = @_;
+    my ($dbr, $req, $info) = @_;
     my $args = $req->{'gen_sel'};
 
     push @{$info->{'english'}}, "are " . ($args eq "M" ? "male" : "female");
-    my $qgen = $dbh->quote($args);
+    my $qgen = $dbr->quote($args);
 
     my $p = LJ::get_prop("user", "gender");
     unless ($p) {
@@ -531,8 +487,8 @@ sub search_gen
 
     return {
         'tables' => {
-            'up' => 'userprop', 
-        }, 
+            'up' => 'userprop',
+        },
         'conds' => [ "{up}.upropid=$p->{'id'}",
                      "{up}.value=$qgen",
                      ],
@@ -545,27 +501,30 @@ sub search_gen
 sub validate_age
 {
     my ($req, $errors) = @_;
+    return 0 if $req->{'age_min'} eq "" && $req->{'age_max'} eq "";
+
     for (qw(age_min age_max)) {
         unless ($req->{$_} =~ /^\d+$/) {
             push @$errors, "Both min and max age must be specified for an age query.";
-            return;	
+            return 0;
         }
     }
     if ($req->{'age_min'} > $req->{'age_max'}) {
         push @$errors, "Minimum age must be less than maximum age.";
-        return;	
+        return 0;
     }
     if ($req->{'age_min'} < 14) {
         push @$errors, "You cannot search for users under 14 years of age.";
-        return;
+        return 0;
     }
+    return 1;
 }
 
 sub search_age
 {
-    my ($dbh, $req, $info) = @_;
-    my $qagemin = $dbh->quote($req->{'age_min'});
-    my $qagemax = $dbh->quote($req->{'age_max'});
+    my ($dbr, $req, $info) = @_;
+    my $qagemin = $dbr->quote($req->{'age_min'});
+    my $qagemax = $dbr->quote($req->{'age_max'});
     my $args = "$req->{'age_min'}-$req->{'age_max'}";
 
     if ($req->{'age_min'} == $req->{'age_max'}) {
@@ -573,17 +532,17 @@ sub search_age
     } else {
         push @{$info->{'english'}}, "are between $req->{'age_min'} and $req->{'age_max'} years old";
     }
-    
+
     my $p = LJ::get_prop("user", "sidx_bdate");
     unless ($p) {
         $info->{'errmsg'} = "Userprop sidx_bdate doesn't exist. Run update-db.pl?";
         return;
     }
-    
+
     return {
         'tables' => {
-            'up' => 'userprop', 
-        }, 
+            'up' => 'userprop',
+        },
         'conds' => [ "{up}.upropid=$p->{'id'}",
                      "{up}.value BETWEEN DATE_SUB(NOW(), INTERVAL $qagemax YEAR) AND DATE_SUB(NOW(), INTERVAL $qagemin YEAR)",
                      ],
@@ -596,17 +555,17 @@ sub search_age
 sub validate_ut
 {
     my ($req, $errors) = @_;
-    for (qw(ut_days)) {
-        unless ($req->{$_} =~ /^\d+$/) {
-            push @$errors, "Days since last updated must be a postive, whole number.";
-            return;	
-        }
+    return 0 unless $req->{'utdays'};
+    unless ($req->{'utdays'} =~ /^\d+$/) {
+        push @$errors, "Days since last updated must be a postive, whole number.";
+        return;
     }
+    return 1;
 }
 
 sub search_ut
 {
-    my ($dbh, $req, $info) = @_;
+    my ($dbr, $req, $info) = @_;
     my $qdays = $req->{'ut_days'}+0;
 
     if ($qdays == 1) {
@@ -626,10 +585,16 @@ sub search_ut
 
 ######### community
 
+sub validate_com
+{
+    my ($req, $errors) = @_;
+    return 0 unless $req->{'com_do'};
+    return 1;
+}
+
 sub search_com
 {
-    my ($dbh, $req, $info) = @_;
-
+    my ($dbr, $req, $info) = @_;
     $info->{'allwhat'} = "communities";
 
     return {
