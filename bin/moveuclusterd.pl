@@ -46,6 +46,10 @@ decide how many users to lock per source cluster. The value is a multiple
 
 :TODO: finish documenting this.
 
+=item -v, --verbose
+
+Output the jobserver's log to STDERR.
+
 =back
 
 =head1 REQUIRES
@@ -114,6 +118,7 @@ MAIN: {
         $helpFlag,              # User requested help?
         $daemonFlag,            # Background after starting?
         $defaultRate,           # Default src cluster rate cmdline setting
+        $verboseFlag,           # Output the log or no?
         $server,                # JobServer object
         %config,                # JobServer configuration
         $port,                  # Port to listen on
@@ -130,6 +135,7 @@ MAIN: {
         'p|port=i'        => \$port,
         'r|defaultrate=i' => \$defaultRate,
         's|lockscale=i'   => \$lockScale,
+        'v|verbose'       => \$verboseFlag,
        ) or abortWithUsage();
 
     # If the -h flag was given, just show the usage and quit
@@ -146,12 +152,14 @@ MAIN: {
     # Create a new daemon object
     $server = new JobServer ( %config );
 
-    # Add a simple log handler until I get the telnet one working
-    my $tmplogger = sub {
-        my ( $level, $format, @args ) = @_;
-        printf STDERR "[$level] $format\n", @args;
-    };
-    $server->addLogHandler( 'tmplogger' => $tmplogger );
+    # Add a simple log handler if they've requested verbose output
+    if ( $verboseFlag ) {
+        my $tmplogger = sub {
+            my ( $level, $msg ) = @_;
+            print STDERR "[$level] $msg\n";
+        };
+        $server->addHandler( 'log' => $tmplogger );
+    }
 
     # Start the server
     $server->start();
@@ -188,6 +196,7 @@ BEGIN {
     use Data::Dumper    qw{Dumper};
     use Carp            qw{croak confess};
     use Time::HiRes     qw{gettimeofday tv_interval};
+    use POSIX           qw{};
 
     use fields (
         'clients',              # Connected client objects
@@ -214,7 +223,7 @@ BEGIN {
 ### Class globals
 
 # Default configuration
-our ( %DefaultConfig );
+our ( %DefaultConfig, %LogLevels );
 
 INIT {
 
@@ -231,6 +240,12 @@ INIT {
         defaultRate  => 1,              # The default src cluster rate
         lockScale    => 3,              # Scaling factor for locking users
        );
+
+    my $level = 0;
+    %LogLevels = map {
+        $_    => $level++,
+    } qw{debug info notice warn crit fatal};
+
 
     $Data::Dumper::Terse = 1;
     $Data::Dumper::Indent = 1;
@@ -400,11 +415,20 @@ sub disconnectClient {
                    $fd, $csock->peerhost, $csock->peerport );
 
     # Remove any event handlers registered for the client
-    $self->removeAllHandlers( $fd );
+    $self->removeHandlerFromAll( $fd );
     $self->unassignJobForClient( $fd );
 
     # Remove the client from our list
     delete $self->{clients}{ $fd };
+}
+
+
+### METHOD: clients( undef )
+### Get the list of clients (JobServer::Client objects) currently connected to
+### the server.
+sub clients {
+    my JobServer $self = shift;
+    return values %{$self->{clients}};
 }
 
 
@@ -416,13 +440,14 @@ sub addJobs {
     my @jobs = @_;
 
     my (
-        @responses,
-        $clusterid,
-        $job,
-        $userid,
-        $srcclusterid,
-        $dstclusterid,
+        @responses,             # Inline responses
+        $clusterid,             # Cluster iterator
+        $job,                   # Job object iterator
+        $userid,                # User id for user to move
+        $newJobCount,           # Count of jobs added to the queue
        );
+
+    $newJobCount = 0;
 
     # Iterate over job specifications
   JOB: for ( my $i = 0; $i <= $#jobs; $i++ ) {
@@ -445,9 +470,13 @@ sub addJobs {
         $self->{jobcounts}{$clusterid} ||= 0;
 
         $responses[$i] = "Added job ". ++$self->{totaljobs};
+        $newJobCount++;
     }
 
+    # Scan the task table for users to lock and then send notifications to
+    # anyone who's waiting on new jobs if there were any added.
     $self->prelockSomeUsers;
+    $self->handleEvent( 'add', $newJobCount ) if $newJobCount;
 
     return @responses;
 }
@@ -637,6 +666,7 @@ sub assignJobFromCluster {
 
     # Grab a job from the cluster's queue and add it to the assignments table.
     my $job = $self->{assignments}{$fdno} = shift @{$self->{jobs}{$clusterid}};
+    $job->setFetchtime;
 
     # Increment the job counter for that cluster and delete the queue if it's
     # empty.
@@ -763,7 +793,7 @@ sub requestJobFinish {
 
     # Otherwise mark the job as finished and advise the client that they can
     # proceed.
-    $job->finishTime( time );
+    $job->setFinishTime;
     $self->debugMsg( 2, 'Client %d finishing job %s',
                      $fdno, $job->stringify );
 
@@ -776,7 +806,7 @@ sub requestJobFinish {
 ### Return a hashref of job stats. The hashref will contain three arrays: the
 ### 'queued_jobs' array contains a line describing how many jobs are queued for
 ### each source cluster, the 'assigned_jobs' array contains a line per client
-### that's currently moving a user, and the 'footers' array contains some lines
+### that's currently moving a user, and the 'footer' array contains some lines
 ### of overall statistics about the server.
 sub getJobList {
     my JobServer $self = shift;
@@ -829,6 +859,17 @@ sub getJobList {
 }
 
 
+### METHOD: getSourceCount( undef )
+### Return a hash (or hashref in scalar context) of srcclusterids => # of
+### pending (queued) jobs.
+sub getJobCounts {
+    my JobServer $self = shift;
+    my %rhash = map { $_ => scalar @{$self->{jobs}{$_}} } keys %{$self->{jobs}};
+
+    return wantarray ? %rhash : \%rhash;
+}
+
+
 ### METHOD: shutdown( $agent )
 ### Shut the server down.
 sub shutdown {
@@ -853,67 +894,218 @@ sub shutdown {
 }
 
 
-### Handler methods
+#####################################################################
+###	E V E N T   S U B S Y S T E M   M E T H O D S
+#####################################################################
 
-### METHOD: removeAllHandlers( $key )
-### Remove all event callbacks for the specified I<key>. Returns the number of
-### handlers removed.
-sub removeAllHandlers {
+### METHOD: handleEvent( $type, @args )
+### Handle an event of the given I<type> with the specified I<args>.
+sub handleEvent {
     my JobServer $self = shift;
+    my ( $type, @args ) = @_;
+
+    # Invoke each registered handler for the given type
+    for my $func ( values %{$self->{handlers}{$type}} ) {
+        $func->( @args );
+    }
+}
+
+
+### METHOD: handlers( [$type] )
+### Return a hash of all registered handlers of the given I<type>, or all
+### handlers keyed by type if no type is specified.
+sub handlers {
+    my JobServer $self = shift;
+    my $type = shift || '';
+
+    my $rhash;
+
+    if ( $type ) {
+        $rhash = $self->{handlers}{$type};
+    } else {
+        $rhash = $self->{handlers};
+    }
+
+    return () unless $rhash;
+    return wantarray ? %$rhash : $rhash;
+}
+
+
+### METHOD: addHandlerToAll( $key, \&code )
+### Add the specified callback (I<code>) as an event handler for all implemented
+### event types. The associated I<key> can be used to later remove the
+### handler/s. Returns the number of event types subscribed to.
+sub addHandlerToAll {
+    my JobServer $self = shift;
+    my ( $key, $code ) = @_;
 
     my $count = 0;
     foreach my $type ( keys %{$self->{handlers}} ) {
-        my $method = sprintf 'remove%sHandler', ucfirst $type;
-        $count++ if $self->$method();
+        $count++ if $self->addHandler( $type, $key, $code );
     }
 
     return $count;
 }
 
 
-### METHOD: addLogHandler( $key, \&code )
-### Add a callback (I<code>) that handles log messages. The I<key> argument can
-### be used to later remove the handler.
-sub addLogHandler {
+### METHOD: removeHandlerFromAll( $key )
+### Remove all event callbacks for the specified I<key>. Returns the number of
+### handlers removed.
+sub removeHandlerFromAll {
     my JobServer $self = shift;
-    my ( $key, $code ) = @_;
+    my $key = shift;
 
-    $self->{handlers}{log}{ $key } = $code;
+    my $count = 0;
+    foreach my $type ( keys %{$self->{handlers}} ) {
+        $count++ if $self->removeHandler( $type, $key );
+    }
+
+    return $count;
 }
 
 
-### METHOD: removeLogHandler( $key )
-### Remove and return the logging callback associated with the specified I<key>.
-sub removeLogHandler {
+### METHOD: addHandler( $type, $key, \&code )
+### Add a callback (I<code>) that handles events of the given I<type>. The
+### I<key> argument can be used to later remove the handler.
+sub addHandler {
     my JobServer $self = shift;
-    my ( $key ) = @_;
+    my ( $type, $key, $code ) = @_;
+
+    $self->{handlers}{$type}{ $key } = $code;
+}
+
+
+### METHOD: removeHandler( $type, $key )
+### Remove and return the callback associated with the specified I<key> and
+### event I<type>.
+sub removeHandler {
+    my JobServer $self = shift;
+    my ( $type, $key ) = @_;
 
     no warnings 'uninitialized';
-    return delete $self->{handlers}{log}{ $key };
+    return delete $self->{handlers}{$type}{ $key };
 }
 
 
-### METHOD: addDebugHandler( $key, \&code )
-### Add a callback (I<code>) that handles log messages. The I<key> argument can
-### be used to later remove the handler.
-sub addDebugHandler {
+### METHOD: subscribe( $client=JobServer::Client, $type, $args )
+### Subscribe the given I<client> to the given I<type> of server events with the
+### given I<args>.
+sub subscribe {
     my JobServer $self = shift;
-    my ( $key, $code ) = @_;
+    my ( $client, $type, $args ) = @_;
 
-    $self->{handlers}{debug}{ $key } = $code;
+    my $method = sprintf( 'subscribe%sEvents', ucfirst $type );
+    my $func = $self->can( $method )
+        or die "No such event type '$type' (No $method method)";
+    $self->debugMsg( 2, "Subscribing client %d to %s events via %s(%s)",
+                     $client->fdno, $type, $method, $args );
+
+    return $func->( $self, $client, $args );
 }
 
 
-### METHOD: removeDebugHandler( $key )
-### Remove and return the debugging callback associated with the specified I<key>.
-sub removeDebugHandler {
+### METHOD: unsubscribe( $client=JobServer::Client, $type, $args )
+### Unsubscribe the given I<client> to the given I<type> of server events with the
+### given I<args>.
+sub unsubscribe {
     my JobServer $self = shift;
-    my ( $key ) = @_;
+    my ( $client, $type ) = @_;
 
-    no warnings 'uninitialized';
-    return delete $self->{handlers}{debug}{ $key };
+    my $method = sprintf( 'unsubscribe%sEvents', ucfirst $type );
+    my $func = $self->can( $method )
+        or die "No such event type '$type' (No $method method)";
+
+    return $func->( $self, $client );
 }
 
+
+### METHOD: subscribeLogEvents( $client, $level )
+### Register a log event handler for the specified I<client> at the given
+### I<level>, replacing any currently-extant one.
+sub subscribeLogEvents {
+    my JobServer $self = shift;
+    my ( $client, $level ) = @_;
+    my $ll = $LogLevels{ $level };
+
+    my $callback = sub {
+        my ( $loglevel, $msg ) = @_;
+        return () unless $LogLevels{$loglevel} >= $ll;
+        $client->eventMessage( 'log', "[$loglevel] $msg" );
+    };
+
+    $self->addHandler( 'log', $client->fdno, $callback );
+
+    return "Subscribed to log events for level '$level'";
+}
+
+
+### METHOD: unsubscribeLogEvents( $client )
+### Unregister the log handler registered for the given I<client>.
+sub unsubscribeLogEvents {
+    my JobServer $self = shift;
+    my $client = shift or croak "No client";
+
+    $self->removeHandler( 'log', $client->fdno );
+    return "Unsubscribed from log events.";
+}
+
+
+### METHOD: subscribeDebugEvents( $client, $level )
+### Register a debug event handler for the specified I<client> at the given
+### I<level>, replacing any currently-extant one.
+sub subscribeDebugEvents {
+    my JobServer $self = shift;
+    my ( $client, $level ) = @_;
+
+    my $callback = sub {
+        my ( $debuglevel, $msg ) = @_;
+        return () unless $debuglevel <= $level;
+        $client->eventMessage( 'debug', "[$debuglevel] $msg" );
+    };
+
+    $self->addHandler( 'debug', $client->fdno, $callback );
+
+    return "Subscribed to debug events for level '$level'";
+}
+
+
+### METHOD: unsubscribeDebugEvents( $client )
+### Unregister the debug handler registered for the given I<client>.
+sub unsubscribeDebugEvents {
+    my JobServer $self = shift;
+    my $client = shift or croak "No client";
+
+    $self->removeHandler( 'debug', $client->fdno );
+    return "Unsubscribed from debug events.";
+}
+
+
+### METHOD: subscribeAddEvents( $client, $level )
+### Register an 'add' event handler for the specified I<client>.
+sub subscribeAddEvents {
+    my JobServer $self = shift;
+    my $client = shift or croak "No client";
+
+    my $callback = sub {
+        my $count = shift;
+        $client->eventMessage( 'add', "$count jobs added" );
+    };
+
+    $self->addHandler( 'add', $client->fdno, $callback );
+
+    return "Subscribed to add events";
+}
+
+
+### METHOD: unsubscribeAddEvents( $client )
+### Unregister the 'add' handler registered for the given I<client>.
+sub unsubscribeAddEvents {
+    my JobServer $self = shift;
+    my $client = shift or croak "No client";
+
+    $self->removeHandler( 'add', $client->fdno );
+    return "Unsubscribed from add events.";
+}
 
 
 
@@ -944,9 +1136,9 @@ sub daemonize {
     umask 0;
 
     # Close standard file descriptors and reopen them to /dev/null
-    close STDIN && open STDIN, "</dev/null";
-    close STDOUT && open STDOUT, "+>&STDIN";
-    close STDERR && open STDERR, "+>&STDIN";
+    close STDIN && open STDIN, "/dev/null";
+    close STDOUT && open STDOUT, ">/dev/null";
+    close STDERR && open STDERR, "+>&STDOUT";
 }
 
 
@@ -981,28 +1173,38 @@ sub stubbornFork {
 }
 
 
+### METHOD: debugLevel( [$newLevel] )
+### Get/set the server's debugging level.
+sub debugLevel {
+    my JobServer $self = shift;
+
+    $self->{config}{debugLevel} = (shift || 0) if @_;
+    return $self->{config}{debugLevel};
+}
+
+
 ### METHOD: debugMsg( $level, $format, @args )
 ### If the debug level is C<$level> or above, and there are debug handlers
 ### defined, call each of them at the specified level with the given printf
 ### C<$format> and C<@args>.
 sub debugMsg {
-    my JobServer $self = shift or confess "Not a function";
+    my JobServer $self = shift;
     my $level = shift;
     my $debugLevel = $self->{config}{debugLevel};
     return unless $level && $debugLevel >= abs $level;
-    return unless %{$self->{handlers}{log}} || %{$self->{handlers}{debug}};
+    return unless %{$self->{handlers}{debug}};
 
-    my $message = shift;
-    $message =~ s{[\r\n]+$}{};
+    my $msg = shift;
+    $msg =~ s{[\r\n]+$}{};
 
     if ( $debugLevel > 1 ) {
         my $caller = caller;
-        $message = "<$caller> $message";
+        $msg = "<$caller> $msg";
     }
 
-    # :TODO: Add handlers code
-    for my $func ( values %{$self->{handlers}{debug}} ) { $func->( $message, @_ ) }
-    $self->logMsg( 'debug', $message, @_ );
+    # Call each subscribed debug event handler with the level and message.
+    $msg = $self->formatLogMsg( $msg, @_ );
+    $self->handleEvent( 'debug', $level, $msg );
 }
 
 
@@ -1010,35 +1212,31 @@ sub debugMsg {
 ### Call any log handlers that have been defined at the specified level with the
 ### given printf C<$format> and C<@args>.
 sub logMsg {
-    my $self = shift or confess "Not a function.";
+    my JobServer $self = shift;
     return () unless %{$self->{handlers}{log}};
+    my $level = shift or return ();
+    my $msg = $self->formatLogMsg( @_ );
 
-    my (
-        @args,
-        $level,
-        $objectName,
-        $format,
-       );
+    $self->handleEvent( 'log', $level, $msg );
+}
 
-    # Massage the format a bit to include the object it's coming from.
-    $level = shift;
-    $objectName = ref $self;
-    $format = sprintf( '%s: %s', $objectName, shift() );
+
+### METHOD: formatLogMsg( $level, 
+sub formatLogMsg {
+    my JobServer $self = shift;
+    my $format = shift;
+
+    # Fetch level and format and strip returns off the latter.
     $format =~ s{[\r\n]+$}{};
 
     # Turn any references or undefined values in the arglist into dumped strings
-    @args = map {
+    my @args = map {
         defined $_ ?
             (ref $_ ? Data::Dumper->Dumpxs([$_], [ref $_]) : $_) :
             '(undef)'
         } @_;
-
-    # Call the logging callback
-    for my $func ( values %{$self->{handlers}{log}} ) {
-        $func->( $level, $format, @args );
-    }
+    return sprintf( $format, @args );
 }
-
 
 
 #####################################################################
@@ -1048,7 +1246,8 @@ package JobServer::Job;
 use strict;
 
 BEGIN {
-    use Carp qw{croak confess};
+    use Carp        qw{croak confess};
+    use Time::HiRes qw{time};
 
     use lib "$ENV{LJHOME}/cgi-bin";
     require 'ljlib.pl';
@@ -1060,6 +1259,7 @@ BEGIN {
         'srcclusterid',         # The cluster id of the source cluster
         'dstclusterid',         # Cluster id of the destination cluster
         'prelocktime',          # Epoch time of prelock, 0 if not prelocked
+        'fetchtime',            # Time the job was given to a mover, 0 if unassigned
         'finishtime',           # Epoch time of server finish authorization
        );
 }
@@ -1110,8 +1310,9 @@ sub new {
     }
 
     $self->{server} = $server;
-    $self->{prelocktime} = 0;
-    $self->{finishtime} = 0;
+    $self->{prelocktime} = 0.0;
+    $self->{fetchtime} = 0.0;
+    $self->{finishtime} = 0.0;
 
     return $self;
 }
@@ -1148,7 +1349,9 @@ sub dstclusterid {
 ### Return a scalar containing the stringified representation of the job.
 sub stringify {
     my JobServer::Job $self = shift;
-    return sprintf '%d:%d:%d', @{$self}{'userid', 'srcclusterid', 'dstclusterid'};
+    return sprintf( '%d:%d:%d %0.1f',
+                    @{$self}{'userid', 'srcclusterid', 'dstclusterid'},
+                    $self->secondsSinceLock );
 }
 
 
@@ -1161,7 +1364,7 @@ sub prelock {
                                 {raw => "caps = caps | (1<<$ReadOnlyCapBit)"} );
 
     if ( $rval ) {
-        $self->{prelocktime} = time;
+        $self->setPrelocktime;
         $self->{server}->debugMsg( 4, q{Prelocked user %d}, $self->{userid} );
     } else {
         $self->{server}->logMsg( 'warn', q{Couldn't prelock user %d: %s},
@@ -1173,12 +1376,19 @@ sub prelock {
 
 
 ### METHOD: prelocktime( [$newprelocktime] )
-### Get/set the epoch time when the user record corresponding to the job's
-### C<userid> was set read-only.
+### Get the floating-point epoch time when the user record corresponding to the
+### job's C<userid> was set read-only.
 sub prelocktime {
     my JobServer::Job $self = shift;
-    $self->{prelocktime} = shift if @_;
     return $self->{prelocktime};
+}
+
+
+### METHOD: setPrelocktime( undef )
+### Set the prelocktime to the current floating-point epoch time.
+sub setPrelocktime {
+    my JobServer::Job $self = shift;
+    return $self->{prelocktime} = time;
 }
 
 
@@ -1187,7 +1397,7 @@ sub prelocktime {
 ### user isn't prelocked.
 sub secondsSinceLock {
     my JobServer::Job $self = shift;
-    return 0 unless $self->{prelocktime};
+    return 0.0 unless $self->{prelocktime};
     return time - $self->{prelocktime};
 }
 
@@ -1202,11 +1412,18 @@ sub isPrelocked {
 
 
 ### METHOD: finishTime( [$newtime] )
-### Returns the epoch time when the job was 'finished'.
+### Returns the floating-point epoch time when the job was 'finished'.
 sub finishTime {
     my JobServer::Job $self = shift;
-    $self->{finishtime} = shift if @_;
     return $self->{finishtime};
+}
+
+
+### METHOD: setFinishTime( undef )
+### Set the finishtime to the current floating-point epoch time.
+sub setFinishTime {
+    my JobServer::Job $self = shift;
+    return $self->{finishtime} = time;
 }
 
 
@@ -1226,6 +1443,39 @@ sub secondsSinceFinish {
 sub isFinished {
     my JobServer::Job $self = shift;
     return $self->{finishtime} != 0;
+}
+
+
+### METHOD: fetchtime( undef )
+### Get the floatin-point epoch time when the job was fetched by a mover.
+sub fetchtime {
+    my JobServer::Job $self = shift;
+    return $self->{fetchtime};
+}
+
+
+### METHOD: setFetchtime( undef )
+### Set the fetchtime to the current floating-point epoch time.
+sub setFetchtime {
+    my JobServer::Job $self = shift;
+    return $self->{fetchtime} = time;
+}
+
+
+### METHOD: secondsSinceFetch( undef )
+### Return the number of seconds since the job was fetched by a mover.
+sub secondsSinceFetch {
+    my JobServer::Job $self = shift;
+    return 0 unless $self->{fetchtime};
+    return time - $self->{fetchtime};
+}
+
+
+### METHOD: isFetched( undef )
+### Returns a true value if the job has been assigned to a mover.
+sub isFetched {
+    my JobServer::Job $self = shift;
+    return $self->{fetchtime} != 0;
 }
 
 
@@ -1256,9 +1506,9 @@ package JobServer::Client;
 # Props to Junior for lots of this code, stolen largely from the SPUD server.
 
 BEGIN {
-    use Carp qw{croak confess};
-    use base qw{Danga::Socket};
-    use fields qw{server state read_buf};
+    use Carp        qw{croak confess};
+    use base        qw{Danga::Socket};
+    use fields      qw{server state};
 }
 
 
@@ -1280,14 +1530,14 @@ INIT {
     #   ->cmd_foo_bar( "frobnitz", "4" )
     %CommandTable = (
 
-        # Form: get_job
+        # :TODO: Implement a 'desc' or 'longhelp' or something to augment the
+        # per-command help.
+
         get_job  => {
             help => "get a job (from mover)",
             args => qr{^$},
         },
 
-        # Form: add_jobs <userid>:<dstclusterid>
-        #       add_jobs <userid>:<dstclusterid>, <userid>:<dstclusterid>, ...
         add_jobs  => {
             help => "add one or more new jobs",
             form => "<userid>:<srcclusterid>:<dstclusterid>[, ...]",
@@ -1309,11 +1559,6 @@ INIT {
             help  => "check to see if a user is being moved",
             form  => "<userid>",
             args  => qr{^(\d+)$},
-        },
-
-        check_instance => {
-            help       => "get the random instance string for this mover",
-            args       => qr{^$},
         },
 
         list_jobs => {
@@ -1349,6 +1594,35 @@ INIT {
             args => qr{^(\d+)$},
         },
 
+        clients  => {
+            help => "Show a list of connected clients",
+            args => qr{^$},
+        },
+
+        subscribe  => {
+            help => "Subscribe to server events",
+            form => '<type> <args>',
+            args => qr{^(\w+)(?:\s+(.*))?$}i,
+        },
+
+        unsubscribe  => {
+            help => "Unsubscribe from server events",
+            form => '<type>',
+            args => qr{^(\w+)$},
+        },
+
+        handlers => {
+            help => "List the event handlers registered with the server.",
+            form => '[<type>]',
+            args => qr{^(\w+)?$},
+        },
+
+        debuglevel => {
+            help => "Get/set the debugging level of the server.",
+            form => '[<level>]',
+            args => qr{^([0-5])?$},
+        },
+
         help     => {
             help => "show list of commands or help for a particular command, if given.",
             form => "[<command>]",
@@ -1376,6 +1650,16 @@ sub new {
     $self->{state} = 'new';
 
     return $self;
+}
+
+
+### METHOD: state( [$newstate] )
+### Get/set the client's state message.
+sub state {
+    my JobServer::Client $self = shift;
+
+    $self->{state} = shift if @_;
+    return $self->{state};
 }
 
 
@@ -1483,8 +1767,8 @@ sub processLine {
 
     my (
         $cmd,                   # Command word
-        $args,                  # Argument string
-        $argpat,                # Argument-parsing pattern
+        $args,                  # Argument string from user
+        $cmdinfo,               # Command hashref
         @args,                  # Parsed arguments
         $method,                # Command method to call
        );
@@ -1500,10 +1784,10 @@ sub processLine {
     # command handler after parsing any arguments.
     if ( $cmd =~ $CommandPattern ) {
         $method = "cmd_$1";
-        $argpat = $CommandTable{ $1 }{args};
+        $cmdinfo = $CommandTable{ $1 };
 
         # Parse command arguments
-        if ( @args = ($args =~ $argpat) ) {
+        if ( @args = ($args =~ $cmdinfo->{args}) ) {
 
             # If the pattern didn't contain captures, throw away the args
             @args = () unless ( @+ > 1 );
@@ -1514,13 +1798,13 @@ sub processLine {
 
         # Valid command, but bad args
         else {
-            $self->errorResponse( "Malformed command args for '$cmd': '$args'." );
+            $self->errorResponse( "Usage: $cmd " . $cmdinfo->{form} );
         }
     }
 
     # Invalid command
     else {
-        $self->errorResponse( "Invalid or malformed command '$cmd'" );
+        $self->errorResponse( "Invalid command '$cmd'" );
     }
 
     return 1;
@@ -1571,7 +1855,7 @@ sub errorResponse {
 ### Send an 'OK' response containing the given I<msg> followed by one or more
 ### I<lines> of a multi-line response followed by an 'END'.
 sub multilineResponse {
-    my $self = shift or croak "Cannot be used as a function.";
+    my JobServer::Client $self = shift;
     my ( $msg, @lines ) = @_;
 
     chomp( @lines );
@@ -1580,6 +1864,40 @@ sub multilineResponse {
     $self->write( join("\r\n", @lines, "END") . "\r\n" );
 }
 
+
+### METHOD: eventMessage( $type, $msg )
+### Send an event notification I<msg> for the given I<type> to the client.
+sub eventMessage {
+    my JobServer::Client $self = shift;
+    my ( $type, $msg ) = @_;
+
+    1 while chomp( $type, $msg );
+    $self->write( "EVENT {$type} $msg\r\n" );
+}
+
+
+### FUNCTION: stringifyHandlers( \%handlers )
+### Stringify a hashref full of handler coderefs.
+sub stringifyHandlers {
+    my $handlers = shift or confess "No handlers argument";
+
+    my @rows = ();
+
+    foreach my $key ( keys %$handlers ) {
+        if ( ref $handlers->{$key} eq 'HASH' ) {
+            push( @rows,
+                  "  $key => {",
+                  map { "    $_" } stringifyHandlers($handlers->{$key}),
+                  "}" );
+        }
+
+        else {
+            push @rows, sprintf('%s -> %s', $key, $handlers->{$key});
+        }
+    }
+
+    return @rows;
+}
 
 
 
@@ -1596,7 +1914,10 @@ sub cmd_get_job {
     my $job = $self->{server}->getJob( $self );
 
     if ( $job ) {
-        $self->{state} = sprintf 'got job %d:%d:%d', @$job;
+        $self->{state} = 
+            sprintf( 'got job %d:%d:%d %0.2f',
+                     @$job,
+                     $job->secondsSinceLock );
         return $self->okayResponse( "JOB ". $job->stringify );
     } else {
         $self->{state} = 'idle (no jobs)';
@@ -1629,8 +1950,13 @@ sub cmd_add_jobs {
 sub cmd_source_counts {
     my JobServer::Client $self = shift;
     $self->{state} = 'source counts';
-    return $self->errorResponse( "Unimplemented command." );
+
+    my %counts = $self->{server}->getJobCounts;
+    my @lines = map { sprintf '%4d: %d', $_, $counts{$_} } sort keys %counts;
+
+    return $self->multilineResponse( 'Source counts:', @lines );
 }
+
 
 ### METHOD: cmd_stop_moves( undef )
 ### Command handler for the C<stop_moves> command.
@@ -1650,21 +1976,30 @@ sub cmd_stop_moves {
     $self->okayResponse( $msg );
 }
 
+
 ### METHOD: cmd_is_moving( undef )
 ### Command handler for the C<is_moving> command.
 sub cmd_is_moving {
     my JobServer::Client $self = shift;
+    my $userid = shift or croak "No userid";
+
     $self->{state} = 'is moving';
-    return $self->errorResponse( "Unimplemented command." );
+    $self->debugMsg( 2, "Checking to see if user %d is moving.", $userid );
+
+    my $job = $self->{server}->getJobForUser( $userid );
+    my $msg;
+
+    if ( $job ) {
+        $self->debugMsg( 3, "is_moving: Got a job for userid $userid" );
+        $msg = $job->fetchtime;
+    } else {
+        $self->debugMsg( 3, "is_moving: No job for userid $userid" );
+        $msg = "0";
+    }
+
+    return $self->okayResponse( $msg );
 }
 
-### METHOD: cmd_check_instance( undef )
-### Command handler for the C<check_instance> command.
-sub cmd_check_instance {
-    my JobServer::Client $self = shift;
-    $self->{state} = 'check instance';
-    return $self->errorResponse( "Unimplemented command." );
-}
 
 ### METHOD: cmd_list_jobs( undef )
 ### Command handler for the C<list_jobs> command.
@@ -1799,6 +2134,70 @@ sub cmd_lock {
 }
 
 
+### METHOD: cmd_clients( undef )
+### Command handler for the C<clients> command.
+sub cmd_clients {
+    my JobServer::Client $self = shift;
+
+    $self->{state} = 'list clients';
+
+    my @lines = map {
+        sprintf '%3d: %s', $_->fdno, $_->state;
+    } $self->{server}->clients;
+
+    return $self->multilineResponse( 'Clients: ', @lines );
+}
+
+
+
+### METHOD: cmd_subscribe( $type, $args )
+### Command handler for the C<subscribe> command.
+sub cmd_subscribe {
+    my JobServer::Client $self = shift;
+    my ( $type, $args ) = @_;
+
+    $self->{state} = 'subscribe to %s events';
+
+    my $msg = $self->{server}->subscribe( $self, $type, $args );
+    return $self->okayResponse( $msg );
+}
+
+
+
+### METHOD: cmd_unsubscribe( $type )
+### Command handler for the C<unsubscribe> command.
+sub cmd_unsubscribe {
+    my JobServer::Client $self = shift;
+    my ( $type ) = @_;
+
+    $self->{state} = 'unsubscribe from %s events';
+
+    my $msg = $self->{server}->unsubscribe( $self, $type );
+    return $self->okayResponse( $msg );
+}
+
+
+### METHOD: cmd_handlers( [$type] )
+### Command handler for the C<handlers> command.
+sub cmd_handlers {
+    my JobServer::Client $self = shift;
+    my $type = shift || '';
+
+    $self->{state} = 'handlers';
+
+    my $handlers = $self->{server}->handlers( $type );
+    my @res;
+
+    if ( $handlers ) {
+        @res = stringifyHandlers( $handlers );
+    } else {
+        @res = ("No handlers registered.");
+    }
+
+    $self->multilineResponse( "Handlers:", @res );
+}
+
+
 ### METHOD: cmd_quit( undef )
 ### Command handler for the C<quit> command.
 sub cmd_quit {
@@ -1810,6 +2209,29 @@ sub cmd_quit {
     $self->close;
 
     return 1;
+}
+
+
+### METHOD: cmd_debuglevel( [$newLevel] )
+### Command handler for the C<debuglevel> command.
+sub cmd_debuglevel {
+    my JobServer::Client $self = shift;
+    my $level = shift;
+
+    $self->{state} = 'debuglevel';
+    my $msg = '';
+
+    if ( defined $level ) {
+        my $oldLevel = $self->{server}->debugLevel;
+        my $newLevel = $self->{server}->debugLevel( $level );
+        $msg = "Debug level was $oldLevel; now $newLevel";
+    }
+
+    else {
+        $msg = "Debug level is " . $self->{server}->debugLevel;
+    }
+
+    return $self->okayResponse( $msg );
 }
 
 
@@ -1828,6 +2250,19 @@ sub cmd_shutdown {
     return 1;
 }
 
+
+### Template for new command handlers:
+
+# ### METHOD: cmd_foo( undef )
+# ### Command handler for the C<foo> command.
+# sub cmd_foo {
+#     my JobServer::Client $self = shift;
+# 
+#     $self->{state} = 'foo';
+#     return $self->errorResponse( "Not yet implemented." );
+# }
+# 
+# 
 
 
 
