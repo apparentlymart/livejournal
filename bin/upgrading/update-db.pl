@@ -151,7 +151,6 @@ if ($opt_pop)
         # update
         if ($existing) {
             if ($LJ::DONT_TOUCH_STYLES) {
-                print "skipping\n";
                 next;
             }
             my $ros = $dbh->do("UPDATE style SET formatdata=?, is_embedded=?, ".
