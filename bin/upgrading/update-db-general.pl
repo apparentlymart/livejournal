@@ -41,7 +41,7 @@ CREATE TABLE ban (
   banneduserid int(10) unsigned NOT NULL default '0',
   KEY (userid),
   PRIMARY KEY  (userid,banneduserid)
-) TYPE=ISAM PACK_KEYS=1
+) PACK_KEYS=1
 EOC
 
 register_tablecreate("clients", <<'EOC');
@@ -79,7 +79,7 @@ CREATE TABLE codes (
   sortorder smallint(6) NOT NULL default '0',
   PRIMARY KEY  (type,code),
   KEY (type)
-) TYPE=ISAM PACK_KEYS=1
+) PACK_KEYS=1
 EOC
 
 register_tablecreate("community", <<'EOC');
@@ -125,7 +125,7 @@ CREATE TABLE faq (
   lastmodtime datetime default NULL,
   lastmoduserid int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (faqid)
-) TYPE=ISAM PACK_KEYS=1
+) PACK_KEYS=1
 EOC
 
 register_tablecreate("faqcat", <<'EOC');
@@ -134,7 +134,7 @@ CREATE TABLE faqcat (
   faqcatname varchar(100) default NULL,
   catorder int(11) default '50',
   PRIMARY KEY  (faqcat)
-) TYPE=ISAM PACK_KEYS=1
+) PACK_KEYS=1
 EOC
 
 register_tablecreate("friendgroup", <<'EOC');
@@ -329,7 +329,7 @@ CREATE TABLE news_sent (
   KEY (newsnum),
   KEY (user),
   KEY (email)
-) TYPE=ISAM PACK_KEYS=1
+) PACK_KEYS=1
 EOC
 
 register_tablecreate("noderefs", <<'EOC');
@@ -347,7 +347,7 @@ CREATE TABLE overrides (
   user varchar(15) NOT NULL default '',
   override text,
   PRIMARY KEY  (user)
-) TYPE=ISAM PACK_KEYS=1
+) PACK_KEYS=1
 EOC
 
 register_tablecreate("poll", <<'EOC');
@@ -630,7 +630,7 @@ CREATE TABLE themecoltypes (
   des varchar(100) default NULL,
   sortorder smallint(5) unsigned default NULL,
   PRIMARY KEY  (coltype)
-) TYPE=ISAM PACK_KEYS=1
+) PACK_KEYS=1
 EOC
 
 register_tablecreate("themecustom", <<'EOC');
@@ -639,7 +639,7 @@ CREATE TABLE themecustom (
   coltype varchar(30) default NULL,
   color varchar(30) default NULL,
   KEY (user)
-) TYPE=ISAM PACK_KEYS=1
+) PACK_KEYS=1
 EOC
 
 register_tablecreate("themedata", <<'EOC');
@@ -648,7 +648,7 @@ CREATE TABLE themedata (
   coltype varchar(30) default NULL,
   color varchar(30) default NULL,
   KEY (themeid)
-) TYPE=ISAM PACK_KEYS=1
+) PACK_KEYS=1
 EOC
 
 register_tablecreate("themelist", <<'EOC');
@@ -656,7 +656,7 @@ CREATE TABLE themelist (
   themeid mediumint(8) unsigned NOT NULL auto_increment,
   name varchar(50) NOT NULL default '',
   PRIMARY KEY  (themeid)
-) TYPE=ISAM PACK_KEYS=1
+) PACK_KEYS=1
 EOC
 
 register_tablecreate("todo", <<'EOC');
@@ -894,7 +894,7 @@ CREATE TABLE zip (
   city varchar(100) NOT NULL default '',
   PRIMARY KEY  (zip),
   KEY (state)
-) TYPE=ISAM PACK_KEYS=1
+) PACK_KEYS=1
 EOC
 
 register_tablecreate("zips", <<'EOC');
