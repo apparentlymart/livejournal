@@ -32,6 +32,7 @@ BODY<=
  my $remote = &get_remote();
  LJ::Support::init_remote($dbh, $remote);
 
+
  # load category this request is in
  my $problemarea = $sp->{_cat}->{'catname'};
  my $catkey = $sp->{_cat}->{'catkey'};
@@ -40,12 +41,17 @@ BODY<=
      return "(=H1 Error H1=)(=P You don't have <b>supportread</b> priv on topic <b>$catkey</b>. P=)";
  }
 
- if ($remote && $remote->{'user'} eq $u->{'user'}) {
-     $owner_mode = 1;
- } elsif (LJ::Support::can_close($dbh, $sp, $remote)) {
+ if (LJ::Support::can_close($dbh, $sp, $remote)) {
      $owner_mode = 1;
  }
 
+# use Data::Dumper;
+# $ret .= "Owner: $owner_mode<br>\n";
+# $ret .= "Can_close: " . LJ::Support::can_close($dbh, $sp, $remote) . "<br>";
+# $ret .= "<pre>" . Dumper($remote) . "</pre>\n";
+# return $ret;
+
+ 
  my $domain = $email;
  $domain =~ s/^.+\@//; 
 
@@ -99,7 +105,7 @@ BODY<=
      $state .= "<A HREF=\"/userinfo.bml?user=$wuser&mode=full\"><IMG BORDER=0 SRC=\"$LJ::IMGPREFIX/userinfo.gif\" WIDTH=17 HEIGHT=17 ALIGN=ABSMIDDLE></A>)";
  }
  $ret .= "<tr><td align=right><b>Status:</b></td><td>$state";
- if ($state eq "open" && $owner_mode) {
+ if ($sp->{'state'} eq "open" && $owner_mode) {
      $ret .= ", <A HREF=\"act.bml?close;$sp->{'spid'};$sp->{'authcode'}\"><B>close without credit</B></A>";
  }
  $ret .= "</td></tr>\n";

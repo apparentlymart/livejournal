@@ -94,6 +94,7 @@ sub fill_request_with_cat
 sub is_poster
 {
     my ($sp, $remote) = @_;
+    return 0 unless ($remote);
     if ($sp->{'reqtype'} eq "email") {
 	if ($remote->{'email'} eq $sp->{'reqemail'} && $remote->{'status'} eq "A") {
 	    return 1;
