@@ -446,13 +446,17 @@ if ($opt_pop)
 }
 
 # make sure they don't have cluster0 users (support for that will be going away)
-my $cluster0 = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE clusterid=0");
-if ($cluster0) {
-    print "\n", "* "x35, "\nWARNING: You have $cluster0 users on cluster 0.\n\n".
-        "Support for that old database schema is deprecated and will be removed soon.\n".
-        "You should stop updating from CVS until you've moved all your users to a cluster \n".
-        "(probably cluster '1', which you can run on the same database). \n".
-        "See bin/moveucluster.pl for instructions.\n" . "* "x35 . "\n\n";
+# Note:  now cluster 0 means expunged (as well as statuvis 'X'), so there's
+# an option to disable the warning if you're running new code and know what's up.
+unless ($LJ::NOWARN{'cluster0'}) { 
+    my $cluster0 = $dbh->selectrow_array("SELECT COUNT(*) FROM user WHERE clusterid=0");
+    if ($cluster0) {
+        print "\n", "* "x35, "\nWARNING: You have $cluster0 users on cluster 0.\n\n".
+            "Support for that old database schema is deprecated and will be removed soon.\n".
+            "You should stop updating from CVS until you've moved all your users to a cluster \n".
+            "(probably cluster '1', which you can run on the same database). \n".
+            "See bin/moveucluster.pl for instructions.\n" . "* "x35 . "\n\n";
+    }
 }
 
 print "# Done.\n";
