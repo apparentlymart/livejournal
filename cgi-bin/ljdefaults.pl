@@ -227,7 +227,7 @@
     $MINIMAL_STYLE{'core'} ||= 'core1';
 
     # maximum size to cache s2compiled data
-    $MAX_S2COMPILED_CACHE_SIZE = 7500; # bytes
+    $MAX_S2COMPILED_CACHE_SIZE ||= 7500; # bytes
 
 }
 
