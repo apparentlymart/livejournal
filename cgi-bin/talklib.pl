@@ -770,7 +770,8 @@ sub talkform {
         my $default = " checked='checked'";
 
         # Anonymous
-        return $default if $type eq 'anonymous';
+        return $default if $type eq 'anonymous' &&
+                           $form->{'usertype'} eq 'anonymous';
 
         # Remote user, remote equals userpost
         return $default if $type eq 'remote' &&
