@@ -8,7 +8,7 @@ mark_clustered("useridmap", "userbio", "cmdbuffer", "dudata",
                "userpicblob2", "events",
                "ratelog", "loginstall", "sessions", "sessions_data",
                "fvcache", "s1usercache", "modlog", "modblob", "counter",
-               "userproplite2",
+               "userproplite2", "links",
                );
 
 register_tablecreate("adopt", <<'EOC');
@@ -1517,6 +1517,18 @@ CREATE TABLE comminterests (
   PRIMARY KEY  (userid,intid),
   KEY (intid)
 ) 
+EOC
+
+# links
+register_tablecreate("links", <<'EOC'); # clustered
+CREATE TABLE links (
+  journalid int(10) unsigned NOT NULL default '0',
+  ordernum tinyint(4) unsigned NOT NULL default '0',
+  parentnum tinyint(4) unsigned NOT NULL default '0',
+  url varchar(255) default NULL,
+  title varchar(255) NOT NULL default '',
+  KEY  (journalid)
+)
 EOC
 
 post_create("comminterests",

@@ -1,0 +1,71 @@
+<?page
+title=>Link List
+body<=
+<?_code
+{
+    use strict;
+    use vars qw(%GET %POST);
+
+    my $remote = LJ::get_remote();
+    return LJ::bad_input($ML{'error.noremote'})
+        unless $remote;
+
+    my $authas = $GET{'authas'} || $remote->{'user'};
+    my $u = LJ::get_authas_user($authas);
+    return LJ::bad_input($ML{'error.invalidauth'})
+        unless $u;
+
+    # need stylesys prop for error checking
+    LJ::load_user_props($u, "stylesys");
+
+    my $ret;
+
+    # authas switcher form
+    $ret .= "<form class='postheading' method='get' action='links.bml'>\n";
+    $ret .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
+    $ret .= "</form>\n\n";
+
+    # require S2
+    unless ($u->{'stylesys'} == 2) {
+        my $getextra = $u->{'userid'} == $remote->{'userid'} ? '' : "?authas=$u->{'user'}";
+        $ret .= "<?h1 S2 Required h1?>" .
+            "<?p The link list is only available on supported S2 styles. " .
+            "To switch to S2, see the <a href='$LJ::SITEROOT/customize/$getextra'>" .
+            "customize page</a>. p?>";
+
+        return $ret;
+    }
+
+    # build link object, either from db or form
+    my $linkobj;
+    if (LJ::did_post()) {
+        $linkobj = LJ::Links::make_linkobj_from_form($u, \%POST);
+    } else {
+        $linkobj = LJ::Links::load_linkobj($u, "master");
+    }
+
+    # save any changes to the database
+    if ($POST{'action:savelinks'}) {
+        LJ::Links::save_linkobj($u, $linkobj);
+        $ret .= "<p><b>Success!  Your links have been saved.</b></p>";
+    }
+
+    # intro paragraph
+    $ret .= "<?p Use the form below to create a list of links to appear on your journal. ";
+    $ret .= "Links will only appear if this feature is supported by your S2 style. p?>";
+    $ret .= "<ul>";
+    $ret .= "<li>To reorder links in the list, modify the order number at left (decimal numbers okay).</li>";
+    $ret .= "<li>To create a blank line, enter a \"-\" for the title.</li>";
+    $ret .= "<li>To create a heading, enter a title with no URL.</li>";
+    $ret .= "</ul>";
+
+    # link modify form
+    $ret .= "<form method='post' action='links.bml' style='margin-top: 1.5em;'>";
+    $ret .= LJ::Links::make_modify_form($u, $linkobj, \%POST);
+    $ret .= "</form>";
+
+    return $ret;
+}
+_code?>
+<=body
+page?>

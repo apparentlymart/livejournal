@@ -29,6 +29,7 @@ do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlang.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljfeed.pl";
+require "$ENV{'LJHOME'}/cgi-bin/ljlinks.pl";
 require "$ENV{'LJHOME'}/cgi-bin/cleanhtml.pl";
 require "$ENV{'LJHOME'}/cgi-bin/htmlcontrols.pl";
 

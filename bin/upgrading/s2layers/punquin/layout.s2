@@ -239,6 +239,14 @@ function print_sidebar(Page p) {
     # Userpic
     "</p>"; if($userpic != "") { "<div style='text-align:center'>$userpic</div>"; }
 
+    # Link List
+    if (size $p.linklist) {
+        if (not $p.linklist[0].is_heading) {
+            "<b>Links</b><br />";
+        }
+        $p->print_linklist();
+    }
+
     # End Table
     "</td></tr></table>\n<!-- End Main Sidebar -->";
 }

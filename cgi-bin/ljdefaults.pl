@@ -117,12 +117,15 @@
                       'mod_queue_per_poster' => 1,
                       'weblogscom' => 0,
                       'hide_email_after' => 0,
+                      'userlinks' => 5,
                       );
         foreach my $k (keys %defcap) {
             next if (defined $LJ::CAP_DEF{$k});
             $LJ::CAP_DEF{$k} = $defcap{$k};	    
         }
     }
+
+    # FIXME: should forcibly limit userlinks to 255 (tinyint)
 
     # set default userprop limits if site maintainer hasn't
     {

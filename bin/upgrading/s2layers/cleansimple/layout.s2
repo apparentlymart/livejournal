@@ -420,10 +420,28 @@ $website
 </ul>
 """;
     $this->lay_viewspec_nav();
-"""
-$userpic
-</td>
-""";
+"$userpic";
+
+if (size $.linklist) {
+    "<ul id='linklist'>";
+    if (not $.linklist[0].is_heading) {
+        "<li><b>Links</b></li>";
+    }
+    foreach var UserLink l ($.linklist) {
+        if ($l.title) {
+            if ($l.is_heading) {
+                "<li><b>$l.title</b></li>";
+            } else {
+                "<li><a href='$l.url'>$l.title</a></li>";
+            }
+        } else {
+            "<li>&nbsp;</li>";
+        }
+    }
+    "</ul>";
+}
+
+"</td>";
 }
 
 function Page::print ()

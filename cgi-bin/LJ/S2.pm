@@ -1045,6 +1045,9 @@ sub Page
     my $style = load_style($u->{'s2_style'});
     $stylemodtime = $style->{'modtime'} if $style->{'modtime'} > $stylemodtime;
 
+    my $linkobj = LJ::Links::load_linkobj($u);
+    my $linklist = [ map { UserLink($_) } @$linkobj ];
+
     my $p = {
         '_type' => 'Page',
         '_u' => $u,
@@ -1060,6 +1063,7 @@ sub Page
             'archive' => "$base_url/calendar",
             'friends' => "$base_url/friends",
         },
+        'linklist' => $linklist,
         'views_order' => [ 'recent', 'archive', 'friends', 'userinfo' ],
         'global_title' =>  LJ::ehtml($u->{'journaltitle'} || $u->{'name'}),
         'global_subtitle' => LJ::ehtml($u->{'journalsubtitle'}),
@@ -1170,6 +1174,22 @@ sub User
     $o->{'website_url'} = LJ::ehtml($u->{'url'});
     $o->{'website_name'} = LJ::ehtml($u->{'urlname'});
     return $o;
+}
+
+sub UserLink
+{
+    my $link = shift; # hashref
+
+    # a dash means pass to s2 as blank so it will just insert a blank line
+    $link->{'title'} = '' if $link->{'title'} eq "-";
+
+    return {
+        '_type' => 'UserLink',
+        'is_heading' => $link->{'url'} ? 0 : 1,
+        'url' => LJ::eurl($link->{'url'}),
+        'title' => LJ::ehtml($link->{'title'}),
+        'children' => $link->{'children'} || [], # TODO: implement parent-child relationships
+    };
 }
 
 sub UserLite

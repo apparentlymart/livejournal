@@ -202,6 +202,15 @@ class CommentInfo
     "Print the formatted link to the 'Post Comments' view";
 }
 
+class UserLink
+"A user-defined link to an outside resource."
+{
+    var readonly bool is_heading "Is this link a heading or category name?  If so, it has no url and a list of children.";
+    var readonly string title "The title or label for the link";
+    var readonly string url "The url to which the link points";
+    var readonly UserLink[] children "An array of child UserLink objects";
+}
+
 class UserLite
 "A 'lite' version of a [class[User]] which the system often has more readily-available than a full version."
 {
@@ -334,6 +343,9 @@ class Page
     var readonly string global_subtitle
     "A sub-title selected by the user for their whole journal.";
 
+    var readonly UserLink[] linklist
+    "An array of UserLink objects defined by the user to be displayed on their journal.";
+
     function print
     "The main entry point that LiveJournal calls. Layouts should override this to create HTML that's the
     same for all view types, and use \$this->title, \$this->head and \$this->body to include view-specific
@@ -351,6 +363,9 @@ class Page
     function print_body 
     "Call from [method[Page.print()]] to render parts of the view that are specific to the view, eg print
     the recent set of journal entries, recent friends entries, or rows of user information";
+
+    function print_linklist
+    "Print the list of UserLink objects specified by the user.";
  
     function print_entry(Entry e) 
     "Output a journal entry. Layouts should override this and the inherited versions in RecentPage, FriendsPage
@@ -1288,7 +1303,6 @@ body, td, th, table, p, div {
     }
     print "<h1>" + $this->title() + "</h1>\n";
 
-    #print_linklist($.views,$.view,$.viewsorder);
     $this->print_body();
     """\n<hr><address>""";
     server_sig();
@@ -1297,6 +1311,23 @@ body, td, th, table, p, div {
 
 function Page::print_body() {
     """<h2>No Default Renderer</h2><p>There is no body renderer for viewtype <tt>$.view</tt> defined.</p>""";
+}
+
+function Page::print_linklist() {
+    if (size $.linklist <= 0) {
+        return;
+    }
+
+    foreach var UserLink l ($.linklist) {
+        if ($l.title) {
+            if ($l.is_heading) {
+                "<b>$l.title</b>";
+            } else {
+                "<a href='$l.url'>$l.title</a>";
+            }
+        }
+        "<br />";
+    }
 }
 
 function Page::print_entry_poster(Entry e) {

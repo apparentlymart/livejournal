@@ -230,6 +230,7 @@ function RecentPage::lay_page_nav() {
                 navlinktext($.nav,true)+"</a></li>";
     }
     println "</ul>\n";
+    println "</div>\n";
 }
 function DayPage::lay_page_nav() {
     println "<div class=\"box\"><ul>";
@@ -360,6 +361,14 @@ $userpic
 
     if ($this->lay_show_firstnav()) {
         $this->lay_page_nav();
+    }
+
+    if (size $this.linklist) {
+        println "<div class=\"box\">";
+        println "<h2>Links</h2>\n";
+        println "<div style='margin: 0.5em;'>";
+        $this->print_linklist();
+        println "</div>";
     }
 
     "</td>";
