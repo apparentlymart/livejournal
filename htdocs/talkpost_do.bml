@@ -111,7 +111,7 @@ body<=
     }
 
     my $userpost = lc($FORM{'userpost'});
-    my $up;
+    my $up;             # user posting
     my $didlogin = 0;	# true if user logged in while commenting
 
     if ($FORM{'usertype'} eq "user") {
@@ -448,10 +448,12 @@ body<=
         $talkprop{'unknown8bit'} = 1 if $unknown8bit;
         $talkprop{'subjecticon'} = $subjecticon;
 
-        $talkprop{'picture_keyword'} = $FORM{'prop_picture_keyword'};
+        my $picture_keyword = $FORM{'prop_picture_keyword'};
         # do select and delete $talkprop{'picture_keyword'} if they're lying
-        my $pic = LJ::get_pic_from_keyword($u, $FORM{'prop_picture_keyword'});
-        $talkprop{'picture_keyword'} = '' if $pic->{'state'} eq 'I';
+        my $pic = LJ::get_pic_from_keyword($up, $picture_keyword);
+        undef $picture_keyword unless $pic && $pic->{'state'} eq 'N';
+        $talkprop{'picture_keyword'} = $picture_keyword;
+
 
         $talkprop{'opt_preformatted'} = $FORM{'prop_opt_preformatted'} ? 1 : 0;
         if ($u->{'opt_logcommentips'} eq "A" || 
@@ -509,20 +511,16 @@ body<=
         my $whouser = $up->{'user'} ? " ($up->{'user'})" : "";
         my $whouserhtml = $up->{'user'} ? " (<a href=\"$LJ::SITEROOT/userinfo.bml?user=$up->{'user'}\">$up->{'user'}</a>)" : "";
         my $whopic;
-        if ($up->{'defaultpicid'} || $FORM{'prop_picture_keyword'}) {
-            my $picid;
-            if ($FORM{'prop_picture_keyword'}) {
-                my $qkw = $dbr->quote($FORM{'prop_picture_keyword'});
-                $picid = $dbr->selectrow_array("SELECT m.picid FROM userpicmap m, keywords k ".
-                                               "WHERE m.userid=$up->{'userid'} AND m.kwid=k.kwid ".
-                                               "AND k.keyword=$qkw");
-            }
-            $picid ||= $up->{'defaultpicid'};
-            if ($picid) {
+        if ($up->{'defaultpicid'} || $pic) {
+            my $picid = $pic ? $pic->{'picid'} : $up->{'defaultpicid'};
+            unless ($pic) {
                 my %pics;
-                LJ::load_userpics($dbs, \%pics, [ $picid ]);
-                $whopic = "<img src=\"$LJ::USERPIC_ROOT/$picid/$up->{'userid'}\" align='absmiddle' ".
-                    "width='$pics{$picid}->{'width'}' height='$pics{$picid}->{'height'}' ".
+                LJ::load_userpics($dbs, \%pics, [ $up->{'defaultpicid'} ]);
+                $pic = $pics{$picid};
+            }
+            if ($pic) {
+                $whopic = "<img src=\"$LJ::USERPIC_ROOT/$picid/$pic->{'userid'}\" align='absmiddle' ".
+                    "width='$pic->{'width'}' height='$pic->{'height'}' ".
                     "hspace='1' vspace='2'> ";
             }
         }
