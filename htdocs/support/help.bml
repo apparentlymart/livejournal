@@ -305,7 +305,9 @@ body<=
          $show = 1;
      } elsif ($cats->{$sp->{'spcatid'}}->{'public_read'}) {
          my $cat_name = $cats->{$sp->{'spcatid'}}->{'catkey'};
-         if (LJ::check_priv($remote, 'supportviewscreened', $cat_name) || LJ::check_priv($remote, 'supportviewscreened')) {
+         my $c;
+         $c->{'_cat'} = $cats->{$sp->{'spcatid'}};
+         if (LJ::Support::can_read_screened($c, $remote)) {
              $show = 1;
              $screened_view[$sp->{'spid'}] = 1;
          } else {
