@@ -81,7 +81,7 @@ $maint{'genstats'} = sub
 	    my $first = $skip+1;
 	    my $last = $skip+$pagesize;
 	    print "  getting records $first-$last...\n";
-	    $sth = $dbr->prepare("SELECT DATE_FORMAT(uu.timecreate, '%Y-%m-%d') AS 'datereg', u.user, u.paidfeatures, FLOOR((TO_DAYS(NOW())-TO_DAYS(u.bdate))/365.25) AS 'age', UNIX_TIMESTAMP(uu.timeupdate) AS 'timeupdate', u.status, u.allow_getljnews, u.allow_getpromos FROM user u, userusage uu WHERE u.userid=uu.userid LIMIT $skip,$pagesize");
+	    $sth = $dbr->prepare("SELECT DATE_FORMAT(uu.timecreate, '%Y-%m-%d') AS 'datereg', u.user, u.caps, FLOOR((TO_DAYS(NOW())-TO_DAYS(u.bdate))/365.25) AS 'age', UNIX_TIMESTAMP(uu.timeupdate) AS 'timeupdate', u.status, u.allow_getljnews, u.allow_getpromos FROM user u, userusage uu WHERE u.userid=uu.userid LIMIT $skip,$pagesize");
 	    $sth->execute;
 	    while (my $rec = $sth->fetchrow_hashref)
 	    {
@@ -93,7 +93,8 @@ $maint{'genstats'} = sub
 		    }
 		}
 		
-		$account{$rec->{'paidfeatures'}}++;
+		my $paidfeatures = LJ::LJcom::acct_string($rec->{'caps'});
+		$account{$paidfeatures}++;
 		
 		unless ($rec->{'datereg'} eq $nowdate) {
 		    $newbyday{$rec->{'datereg'}}++;

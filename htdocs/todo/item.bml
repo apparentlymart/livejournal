@@ -1,7 +1,7 @@
 (=_CODE
 
  use strict;
- use vars qw($dbh $title $body %FORM);
+ use vars qw($title $body %FORM);
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -108,9 +108,14 @@
 	 }
 	 
 	 ## check to see if user's todo list is full
-	 if (($u->{'paidfeatures'} eq "off" || $u->{'paidfeatures'} eq "early") && $todo_count >= 25) {
+	 my $max_items = LJ::get_cap($u, "todomax");
+	 if ($todo_count >= $max_items) {
 	     $title = "Sorry...";
-	     $body .= "(=H1 Too many items... H1=)(=P Free users are limited to only 25 to-do items at a time.  You can read why <a href=\"/paidaccounts/whyextra.bml\">here</a>. P=)";
+	     my $atype = "account type";
+	     if ($LJ::HELPURL{'accounttype'}) {
+		 $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
+	     }
+	     $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time.  ";
 	     return "";
 	 }
 
@@ -171,9 +176,14 @@
 	 $disabled = "DISABLED";
      }
      
-     if (($u->{'paidfeatures'} eq "off" || $u->{'paidfeatures'} eq "early") && $todo_count >= 25) {
+     my $max_items = LJ::get_cap($u, "todomax");
+     if ($todo_count >= $max_items) {
 	 $title = "Sorry...";
-	 $body .= "(=H1 Too many items... H1=)(=P Free users are limited to only 25 to-do items at a time.  You can read why <a href=\"/paidaccounts/whyextra.bml\">here</a>. P=)";
+	 my $atype = "account type";
+	 if ($LJ::HELPURL{'accounttype'}) {
+	     $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
+	 }
+	 $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time.  ";
 	 return "";
      }
 
@@ -239,14 +249,16 @@
  ## categories
  $body .= "<tr valign=top><td><b>Security:</b></td><td>";
  {
-     if ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid") {
-
-	 $body .= LJ::html_select({ 'name' => 'security', 'selected' => $it->{'security'}, 'disabled' => $disabled },
+     my $todosec = LJ::get_cap($u, "todosec");
+     if ($todosec) {
+	 $body .= LJ::html_select({ 'name' => 'security', 
+				    'selected' => $it->{'security'}, 
+				    'disabled' => $disabled },
 			       "public" => "Public",
 			       "private" => "Private", 
 			       "friends" => $u->{'journaltype'} eq "C" ? "Community Members" : "Friends");
      } else {
-	 $body .= "<input type=hidden name=security value=\"public\">Users with <a href=\"/paidaccounts/\">paid accounts</a> can make private & friends-only to-do items. Read <a href=\"/paidaccounts/whyextra.bml\">why</a>.";
+	 $body .= "<input type=hidden name=security value=\"public\">Your account type doesn't permit non-public to-do items.";
      }
  }
  $body .= "</td></tr>";

@@ -123,10 +123,7 @@ BODY<=
  $sth = $dbh->prepare("SELECT COUNT(*) FROM userpic WHERE userid=$userid");
  $sth->execute;
  my ($count) = $sth->fetchrow_array;
- my $max = 3;
- if ($u->{'paidfeatures'} eq "early") { $max = 6; }
- elsif ($u->{'paidfeatures'} eq "paid") { $max = 10; }
- elsif ($u->{'paidfeatures'} eq "on") { $max = 15; }
+ my $max = LJ::get_cap($u, "userpics");
  if ($count >= $max) {
      push @errors, "You are already at your limit of $max pictures.  You cannot upload this picture until you <A HREF=\"/editpics.bml\">delete one of your existing ones</A>.";
      return &bullet_errors(\@errors) if @errors;     

@@ -17,7 +17,7 @@
 
  my $u = LJ::load_userid($dbs, $remote->{'userid'});
  $u->{'emailpref'} = $u->{'email'};
- if ($LJ::USER_EMAIL && ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid")) {
+ if ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail")) {
      $u->{'emailpref'} = $u->{'user'} . '@' . $LJ::USER_DOMAIN;
  }
  
@@ -56,7 +56,7 @@
  $body .= "<form method=post><input type=hidden name=mode value=mail>";
  $body .= "<table cellpadding=3 border=0>";
  
- $body .= "<tr><td align=right nowrap><b>From:</b></td><td><input name=fromname size=30 value=\"" . &ehtml($u->{'name'} || "$LJ::SITENAME User") . "\"></td></tr>\n";
+ $body .= "<tr><td align=right nowrap><b>From:</b></td><td><input name=fromname size=30 value=\"" . LJ::ehtml($u->{'name'} || "$LJ::SITENAME User") . "\"></td></tr>\n";
  $body .= "<tr><td align=right nowrap><b>&nbsp;</b></td><td>$u->{'emailpref'}</td></tr>\n"; 
 
  $body .= "<tr><td align=right nowrap><b>To (Name):</b></td><td><input name=toname size=30></td></tr>\n";
@@ -86,7 +86,7 @@
      my $quser = $dbh->quote($user);
      my $uj = LJ::load_user($dbs, $quser);
      my $url;
-     if ($uj->{'paidfeatures'} eq "on" || $uj->{'paidfeatures'} eq "paid") {
+     if (LJ::get_cap($uj, "userdomain")) {
 	 my $sub = $user;
 	 $sub =~ s/_/-/g;
 	 $url .= "http://$sub.$LJ::USER_DOMAIN/";
@@ -110,9 +110,9 @@
  }
 
  my $subject = "Check it out...";
- $body .= "<tr><td align=right nowrap><b>Subject:</b></td><td><input name=subject size=40 maxlength=60 value=\"" . &ehtml($subject) . "\"></td></tr>\n";
+ $body .= "<tr><td align=right nowrap><b>Subject:</b></td><td><input name=subject size=40 maxlength=60 value=\"" . LJ::ehtml($subject) . "\"></td></tr>\n";
 
- $body .= "<tr><td align=right nowrap valign=top><b>Body:</b></td><td><textarea name=body rows=15 cols=59 wrap=soft>" . &ehtml($msg) . "</textarea></td></tr>\n";
+ $body .= "<tr><td align=right nowrap valign=top><b>Body:</b></td><td><textarea name=body rows=15 cols=59 wrap=soft>" . LJ::ehtml($msg) . "</textarea></td></tr>\n";
  
  $body .= "<tr><td>&nbsp;</td><td><input type=submit value=\"Send email\"></td></tr>\n";
  $body .= "</table>";

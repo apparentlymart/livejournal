@@ -71,7 +71,7 @@ BODY<=
  ### account type
  ###
  $ret .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B><A HREF=\"/support/faqbrowse.bml?faqid=38\"><NOBR>Account type</NOBR></A>:</B></TD><TD>";
- $ret .= $LJ::acct_name{$u->{'paidfeatures'}} || "<I>Unknown</I>";
+ $ret .= LJ::name_caps($u->{'caps'}) || "<I>Unknown</I>";
  $ret .= "</TD></TR>\n";
 
  $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT><B>LiveJournal:</B></TD><TD>";

@@ -471,8 +471,8 @@ sub make_code {
      my $dbh = LJ::get_dbh("master");
      my $u = LJ::load_user($dbh, $remote->{'user'});
 
-     unless ($u->{'paidfeatures'} eq 'on' || $u->{'paidfeatures'} eq 'paid') {
-        $body = "(=H1 Paid Only H1=)(=P Sorry, but you must be a paid user to use the poll feature. P=)";
+     unless (LJ::get_cap($u, "makepoll")) {
+        $body = "(=H1 Sorry H1=)(=P Your account type does not permit you to use the poll creation feature. P=)";
         return '';
      }
  }

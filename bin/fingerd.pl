@@ -68,7 +68,7 @@ You can make queries in the following form:
 	# userinfo!
 	my $user = $1;
 	my $quser = $dbr->quote($user);
-	my $sth = $dbr->prepare("SELECT user, has_bio, paidfeatures, userid, name, email, bdate, allow_infoshow FROM user WHERE user=$quser");
+	my $sth = $dbr->prepare("SELECT user, has_bio, caps, userid, name, email, bdate, allow_infoshow FROM user WHERE user=$quser");
 	$sth->execute;
 	my $u = $sth->fetchrow_hashref;
 	unless ($u) {
@@ -85,6 +85,9 @@ You can make queries in the following form:
 	}
 	delete $u->{'has_bio'};
 
+	$u->{'accttype'} = LJ::name_caps($u->{'caps'});
+	delete $u->{'caps'};
+
 	if ($u->{'allow_infoshow'} eq "Y") {
   	    LJ::load_user_props($dbr, $u, "opt_whatemailshow",
 				"country", "state", "city", "zip",
@@ -98,7 +101,7 @@ You can make queries in the following form:
 	if ($u->{'opt_whatemailshow'} eq "L") {
 	    delete $u->{'email'};
 	} 
-	if ($LJ::USER_EMAIL && ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid")) {
+	if ($LJ::USER_EMAIL && LJ::get_cap($u, "useremail")) {
 	    if ($u->{'email'}) { $u->{'email'} .= ", "; }
 	    $u->{'email'} .= "$user\@$LJ::USER_DOMAIN";
 	}

@@ -157,20 +157,13 @@ BODY<=
      # zip
      $ret .= "<TR><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>ZIP Code</TD><TD><INPUT NAME=zip VALUE=\"$htmlu{'zip'}\" SIZE=6 MAXLENGTH=5> (5 digit ZIP code; US residents only)</TD></TR>\n";
 
-
-     # end personal info
-     $ret .= "</TABLE>\n";
-
-     ### paid user features
-     if ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid") 
+     # text messaging
+     if (LJ::get_cap($u, "textmessaging"))
      {
 	 $sth = $dbr->prepare("SELECT provider, number, security FROM txtmsg WHERE userid=$u->{'userid'}");
 	 $sth->execute;
 	 my $tminfo = $sth->fetchrow_hashref;
 
-	 $ret .= "(=H1 Paid-user Settings H1=)(=P The following options are only available to paid users. P=)";
-	 $ret .= "<P><TABLE WIDTH=100%>\n";
-	 
 	 # text messaging
 	 $ret .= "<TR VALIGN=TOP><TD ALIGN=RIGHT BGCOLOR=(=EMCOLOR=)>Text Messaging<BR>(<A HREF=\"/support/faqbrowse.bml?faqid=30\">about this feature</A>)</TD><TD>";
 	 $ret .= "<TABLE BORDER=0><TR><TD>";
@@ -202,10 +195,10 @@ BODY<=
 	 $ret .= " (<A HREF=\"/tools/textmessage.bml?mode=details\">details</A>)</TD></TR>";
 	 $ret .= "<TR><TD>Full phone #:</TD><TD><INPUT NAME=\"txtmsg_number\" SIZE=15 MAXLENGTH=40 VALUE=\"$tminfo->{'number'}\"></TD></TR>";
 	 $ret .= "</TABLE></TD></TR>\n";
-	 
-	 $ret .= "</TABLE>";
      }
 
+     # end personal info
+     $ret .= "</TABLE>\n";
 
      ### How heard Settings
      $ret .= "(=H1 About You H1=)(=P Here you can enter a little mini-biography about yourself that will show up on your user-info page.... P=)";

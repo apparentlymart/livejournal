@@ -159,9 +159,9 @@ BODY<=
      my $userid = $u->{'userid'}+0;
      unless ($second_submit)
      {
-	 my $paid   = ($LJ::EVERYONE_PAID  ? "on" : "off");
+	 my $caps   = int($LJ::NEWUSER_CAPS);
 	 my $status = ($LJ::EVERYONE_VALID ? 'A'  : 'N');
-	 $dbh->do("INSERT INTO user (user, email, password, status, paidfeatures, name, lastn_style, friends_style, calendar_style, day_style) VALUES ($quser, $qemail, $qpassword, '$status', '$paid', $qname, 1, 6, 2, 5)");
+	 $dbh->do("INSERT INTO user (user, email, password, status, caps, name, lastn_style, friends_style, calendar_style, day_style) VALUES ($quser, $qemail, $qpassword, '$status', $caps, $qname, 1, 6, 2, 5)");
 	 if ($dbh->err)
 	 {
 	     return "(=H1 Error H1=)(=P There was an error processing your request: <B>" . $dbh->errstr . "</B> P=)";

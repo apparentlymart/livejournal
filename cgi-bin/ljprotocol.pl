@@ -114,8 +114,9 @@ sub login
 	$res->{'menus'} = hash_menus($dbs, $u);
     }
 
+    ## FIXME: ljcom specific, use a hook.
     ## tell paid users they can hit the fast servers later.
-    if ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid") {
+    if ($u->{'caps'} & (8|4)) {   # perm or paid
 	$res->{'fastserver'} = 1;
     }
 
@@ -194,6 +195,13 @@ sub checkfriends
     my $u = $flags->{'u'};    
     my $res = {};
 
+    # return immediately if they can't use this mode
+    unless (LJ::get_cap_min($u, "checkfriends")) {
+	$res->{'new'} = 0;
+	$res->{'interval'} = 36000;  # tell client to bugger off
+	return $res;
+    }
+
     my $dbr = $dbs->{'reader'};
     my ($lastdate, $sth);
 
@@ -224,11 +232,8 @@ sub checkfriends
     
     $res->{'lastupdate'} = $update;
 
-    if ($u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "paid") {
-	$res->{'interval'} = 30;
-    } else {
-	$res->{'interval'} = 60;
-    }
+    my $interval = LJ::get_cap_min($u, "checkfriends_interval");
+    $res->{'interval'} = $interval;
 
     return $res;
 }
@@ -383,8 +388,8 @@ sub postevent
     my @polls = ();
     if (LJ::Poll::contains_new_poll(\$event))
     {
-	return fail($err,301,"Only users with paid accounts can create polls in their journals.")
-	    if ($u->{'paidfeatures'} ne "paid" && $u->{'paidfeatures'} ne "on");
+	return fail($err,301,"Your account type doesn't permit creating polls.")
+	    if (LJ::get_cap($u, "makepoll"));
 	
 	my $error = "";
 	@polls = LJ::Poll::parse($dbh, \$event, \$error, {
@@ -946,10 +951,9 @@ sub editfriends
 	}
 
 	$friend_count++ unless $curfriend{$aname};
-	
-	if ($friend_count > LJ::get_limit("friends", $u->{'paidfeatures'}, 1500)) {
-	    return fail($err,104);
-	}
+
+	return fail($err,104,"Exceeded max number of friends")
+	    if ($friend_count > LJ::get_cap($u, "maxfriends"));
 
 	my $fg = $fa->{'fgcolor'} || "#000000";
 	my $bg = $fa->{'bgcolor'} || "#FFFFFF"; 
@@ -1295,10 +1299,9 @@ sub hash_menus
 		{ 'text' => "Support", 
 		  'url' => "$LJ::SITEROOT/support/", }
 		];
-    
-    unless ($u->{'paidfeatures'} eq "on" || 
-	    $u->{'paidfeatures'} eq "paid") 
-    {
+
+    # FIXME: ljcom specific! make this whole function a hook!
+    unless ($u->{'caps'} & (8|4)) { # unless perm or paid
 	push @$menu, { 'text' => 'Upgrade your account',
 		       'url' => "$LJ::SITEROOT/paidaccounts/", };
     }
@@ -1383,7 +1386,7 @@ sub authenticate
 	my $dbr = $dbs->{'reader'};
 	my $quser = $dbr->quote($username);
 	my $sth = $dbr->prepare("SELECT user, userid, journaltype, name, ".
-				"paidfeatures, password, status, statusvis, ".
+				"password, status, statusvis, ".
 				"track FROM user WHERE user=$quser");
 	$sth->execute;
 	$u = $sth->fetchrow_hashref;
@@ -1424,7 +1427,7 @@ sub do_request
     %{$res} = ();                      # clear the given response hash
     $flags = {} unless (ref $flags eq "HASH");
 
-    my ($user, $userid, $journaltype, $name, $paidfeatures, $correctpassword, $status, $statusvis, $track, $sth);
+    my ($user, $userid, $journaltype, $name, $correctpassword, $status, $statusvis, $track, $sth);
     $user = &trim(lc($req->{'user'}));
     my $quser = $dbh->quote($user);
 

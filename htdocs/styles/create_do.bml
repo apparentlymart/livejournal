@@ -24,11 +24,8 @@ BODY<=
  my $u = LJ::load_user($dbs, $user);
  unless ($u) { push @errors, "Unknown user."; }
 
- unless ($u->{'paidfeatures'} eq "on" ||
-	 $u->{'paidfeatures'} eq "paid" ||
-	 $u->{'paidfeatures'} eq "early")
- {
-     push @errors, "Only users with <A HREF=\"/paidaccounts/\">paid accounts</A> may create styles.";
+ unless (LJ::get_cap($u, "styles")) {
+     push @errors, "Your account type doesn't permit you to make styles.";
  }
 
  if (! LJ::valid_password($u->{'password'}, \%FORM)) { push @errors, "Invalid password."; }

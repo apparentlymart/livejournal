@@ -15,9 +15,10 @@ BODY<=
  my $dbr = $dbs->{'reader'};
 
  my $quser = $dbh->quote($user);
-
+ 
  my $u = LJ::load_user($dbs, $user);
  unless ($u) { push @errors, "Invalid username"; }
+ my $capstyles = LJ::get_cap($u, "styles");
 
  LJ::load_user_props($dbs, $u, "opt_usesharedpic");
 
@@ -57,7 +58,7 @@ BODY<=
      ### LAYOUT OPTIONS
      ###
 
-     $and = ($u->{'paidfeatures'} eq "off") ? "  Users with free accounts are only able to select between a small number of default styles.  If you get a <A HREF=\"/paidaccounts/\">paid account</A> you'll be able to make your own styles." : "";
+     $and = $capstyles ? "" : "  Your account type only permits you to select between a small number of default styles. ";
      $ret .= "(=H2 Page Layout Style H2=)(=P Setting this controls how your journal is laid out on the screen. $and P=)<UL><TABLE><TR BGCOLOR=#D0D0D0><TD></TD><TD>Available Styles</TD></TR>\n";
      my %styles = ();
 
@@ -269,10 +270,9 @@ BODY<=
 	 # load all the properties to see which ones are overridable
 	 my @vars;
 	 LJ::load_objects_from_file("$LJ::HTDOCS/vars.dat", \@vars);
-	 my $is_paid = $u->{'paidfeatures'} eq "on" || $u->{'paidfeatures'} eq "on";
 	 foreach my $v (@vars) {
 	     my $ov = $v->{'props'}->{'override'}; 
-	     if ($ov eq "yes" || $ov eq "only" || $is_paid) {
+	     if ($ov eq "yes" || $ov eq "only" || $capstyles) {
 		 my $name = $v->{'name'};
 		 $ret .= "<B>$name</B><br>";
 		 if (defined $newoverrides{$name}) {
@@ -334,7 +334,7 @@ BODY<=
 		 push @picked, $sid;
 	     }
 	 }
-	 if ($u->{'paidfeatures'} eq "off") {
+	 unless ($capstyles) {
 	     # verify they haven't forged the style numbers
 	     my $in = join(",", 0, @picked);
 	     

@@ -127,6 +127,8 @@
     # if you define these, little help bubbles appear next to common
     # widgets to the URL you define:
     %HELPURL = (
+		#"accounttype" =>
+		#"",
 		#"security" => 
 		#"http://www.livejournal.com/support/faqbrowse.bml?faqid=24",
 		#"noautoformat" => 
@@ -136,6 +138,19 @@
 		#"iplogging" =>
 		#"http://www.livejournal.com/support/faqbrowse.bml?faqid=66",
 		);
+
+    # USER CAPABILITIES:
+    {
+	# default for new users: (16 bit unsigned int ... each bit is
+	# capability flag)
+	$NEWUSER_CAPS = 0;
+    
+	# capability sets (0..15).  set limits on each capability.
+	%CAP = (
+		'0' => {
+		},
+	    );
+    }
 
     # keep this next line.  it lets you upgrade LiveJournal without
     # having to change your config file.  if there is a new required

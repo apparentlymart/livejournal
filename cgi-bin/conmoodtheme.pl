@@ -66,16 +66,13 @@ sub moodtheme_create
 	return 0;
     }
 
-    $sth = $dbh->prepare("SELECT paidfeatures FROM user WHERE userid=$remote->{'userid'}");
-    $sth->execute;
-    my ($paidfeatures) = $sth->fetchrow_array;
-    unless ($paidfeatures eq "paid" || $paidfeatures eq "on") {
-	push @$out, [ "error", "Sorry, only users with paid accounts can create new mood themes." ];
+    my $u = LJ::load_userid($dbh, $remote->{'userid'});
+    unless (LJ::get_cap($u, "moodthemecreate")) {
+	push @$out, [ "error", "Sorry, your account type doesn't let you create new mood themes." ];
 	return 0;
     }
 
     my ($name, $des) = ($args->[1], $args->[2]);
-
     my $qname = $dbh->quote($name);
     my $qdes = $dbh->quote($des);
 

@@ -816,9 +816,6 @@ CREATE TABLE user (
   useoverrides char(1) NOT NULL default 'N',
   defaultpicid int(10) unsigned default NULL,
   has_bio enum('Y','N') NOT NULL default 'N',
-  paiduntil datetime default NULL,
-  paidreminder datetime default NULL,
-  paidfeatures enum('on','paid','off','early') NOT NULL default 'off',
   txtmsg_status enum('none','on','off') NOT NULL default 'none',
   track enum('no','yes') NOT NULL default 'no',
   is_system enum('Y','N') NOT NULL default 'N',
@@ -1106,6 +1103,27 @@ register_alter(sub {
 	do_alter("schematables",
 		 "ALTER TABLE schematables ADD ".
 		 "redist_where varchar(255) AFTER redist_mode");
+    }
+    
+    # upgrade people to the new capabilities system.  if they're
+    # using the the paidfeatures column already, we'll assign them
+    # the same capability bits that ljcom will be using.
+    if (column_type("user", "caps") eq "")
+    {
+	do_alter("user",
+		 "ALTER TABLE user ADD ".
+		 "caps SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER user");
+	do_sql("UPDATE user SET caps=16 WHERE paidfeatures='on'");
+	do_sql("UPDATE user SET caps=8  WHERE paidfeatures='paid'");
+	do_sql("UPDATE user SET caps=4  WHERE paidfeatures='early'");
+	do_sql("UPDATE user SET caps=2  WHERE paidfeatures='off'");
+    }
+
+    # axe this column (and its two related ones) if it exists.
+    if (column_type("user", "paidfeatures"))
+    {
+	do_alter("user",
+		 "ALTER TABLE user DROP paidfeatures, DROP paiduntil, DROP paidreminder");
     }
 
 });

@@ -583,6 +583,44 @@ sub get_query_string
 
 package LJ;
 
+sub name_caps
+{
+    return undef unless LJ::are_hooks("name_caps");
+    my $caps = shift;
+    my @r = LJ::run_hooks("name_caps", $caps);
+    return $r[0]->[0];
+}
+
+sub get_cap
+{
+    my $caps = shift;   # capability bitmask (16 bits), or user object
+    my $cname = shift;  # capability name
+    if (ref $caps eq "HASH") { $caps = $caps->{'caps'}; }
+    my $max = undef;
+    foreach my $bit (keys %LJ::CAP) {
+	next unless ($caps & (1 << $bit));
+	my $v = $LJ::CAP{$bit}->{$cname};
+	next unless (defined $v);
+	$max = $v if ($v > $max);
+    }
+    return $max;
+}
+
+sub get_cap_min
+{
+    my $caps = shift;   # capability bitmask (16 bits), or user object
+    my $cname = shift;  # capability name
+    if (ref $caps eq "HASH") { $caps = $caps->{'caps'}; }
+    my $min = undef;
+    foreach my $bit (keys %LJ::CAP) {
+	next unless ($caps & (1 << $bit));
+	my $v = $LJ::CAP{$bit}->{$cname};
+	next unless (defined $v);
+	$min = $v if ($v > $min);
+    }
+    return $min;
+}
+
 sub help_icon
 {
     my $topic = shift;
@@ -602,9 +640,11 @@ sub run_hooks
 {
     my $hookname = shift;
     my @args = shift;
+    my @ret;
     foreach my $hook (@{$LJ::HOOKS{$hookname}}) {
-	$hook->(@args);
+	push @ret, [ $hook->(@args) ];
     }
+    return @ret;
 }
 
 sub register_hook
@@ -806,20 +846,6 @@ sub img
 	return "<input type=\"image\" src=\"$LJ::IMGPREFIX$i->{'src'}\" width=\"$i->{'width'}\" height=\"$i->{'height'}\" alt=\"$i->{'alt'}\" border=0 name=\"$name\">";
     }
     return "<b>XXX</b>";
-}
-
-sub get_limit
-{
-    my $lname = shift;
-    my $accttype = shift;
-    my $default = shift;
-    
-    foreach my $k ($accttype, "") {
-	if (defined $LJ::LIMIT{$lname}->{$k}) {
-	    return $LJ::LIMIT{$lname}->{$k};
-	}
-    }
-    return $default;
 }
 
 sub load_user_props
@@ -1510,12 +1536,10 @@ sub make_journal
 	$styleid = $u->{"${view}_style"};
     }
 
-    if ($LJ::USER_VHOSTS && $opts->{'vhost'} eq "users" && $u->{'paidfeatures'} eq "off")
-    {
-	return "<B>Notice</B><BR>Addresses like <TT>http://<I>username</I>.$LJ::USER_DOMAIN</TT> only work for users with <A HREF=\"$LJ::SITEROOT/paidaccounts/\">paid accounts</A>.  The journal you're trying to view is available here:<UL><FONT FACE=\"Verdana,Arial\"><B><A HREF=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</A></B></FONT></UL>";
+    if ($LJ::USER_VHOSTS && $opts->{'vhost'} eq "users" && ! LJ::get_cap($u, "userdomain")) {
+	return "<b>Notice</b><br />Addresses like <tt>http://<i>username</i>.$LJ::USER_DOMAIN</tt> aren't enabled for this user's account type.  Instead, visit:<ul><font face=\"Verdana,Arial\"><b><a href=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</a></b></font></ul>";
     }
-    if ($opts->{'vhost'} eq "customview" && $u->{'paidfeatures'} eq "off")
-    {
+    if ($opts->{'vhost'} eq "customview" && ! LJ::get_cap($u, "userdomain")) {
 	return "<B>Notice</B><BR>Only users with <A HREF=\"$LJ::SITEROOT/paidaccounts/\">paid accounts</A> can create and embed styles.";
     }
     if ($opts->{'vhost'} eq "community" && $u->{'journaltype'} ne "C") {
@@ -1591,9 +1615,9 @@ sub html_check
     my $disabled = $opts->{'disabled'} ? " DISABLED" : "";
     my $ret;
     if ($opts->{'type'} eq "radio") {
-	$ret .= "<input type=radio ";
+	$ret .= "<input type=\"radio\" ";
     } else {
-	$ret .= "<input type=checkbox ";
+	$ret .= "<input type=\"checkbox\" ";
     }
     if ($opts->{'selected'}) { $ret .= " checked"; }
     if ($opts->{'name'}) { $ret .= " name=\"$opts->{'name'}\""; }
@@ -1608,11 +1632,11 @@ sub html_text
 
     my $disabled = $opts->{'disabled'} ? " DISABLED" : "";
     my $ret;
-    $ret .= "<input type=text";
+    $ret .= "<input type=\"text\"";
     if ($opts->{'size'}) { $ret .= " size=\"$opts->{'size'}\""; }
     if ($opts->{'maxlength'}) { $ret .= " maxlength=\"$opts->{'maxlength'}\""; }
-    if ($opts->{'name'}) { $ret .= " name=\"" . &ehtml($opts->{'name'}) . "\""; }
-    if ($opts->{'value'}) { $ret .= " value=\"" . &ehtml($opts->{'value'}) . "\""; }
+    if ($opts->{'name'}) { $ret .= " name=\"" . LJ::ehtml($opts->{'name'}) . "\""; }
+    if ($opts->{'value'}) { $ret .= " value=\"" . LJ::ehtml($opts->{'value'}) . "\""; }
     $ret .= "$disabled>";
     return $ret;
 }
