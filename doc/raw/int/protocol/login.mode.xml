@@ -1,0 +1,26 @@
+    <method name="login">
+      
+      <!-- parameters to XML-RPC method call -->
+      <arguments>
+	<struct count="1">
+	&authInfo;
+
+	</struct>
+      </arguments>
+      
+      <!-- return values from XML-RPC method call -->
+      <returns>
+	<struct count="1">
+	  
+	  <key name="usejournals" count="1?">
+	    <list count="1">
+	      <scalar count="0more">
+		<des>Journal usernames of communities that this user is allowed to post in.</des>
+	      </scalar>
+	    </list>
+	  </key>
+	  
+	</struct>
+      </returns>
+      
+    </method>
