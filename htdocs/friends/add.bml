@@ -22,6 +22,12 @@
  
  if ($FORM{'mode'} eq "add") 
  {
+     unless (LJ::did_post()) { 
+	 $title = "Error";
+	 $body = "(=H1 Error H1=)(=P (=REQUIREPOST=) P=)";
+	 return "";
+     }
+
      my %res = ();
      &LJ::do_request($dbh, {
 	 "user" => $remote->{'user'},

@@ -15,6 +15,8 @@
  unless ($user) { push @errors, "You must <A HREF=\"/login.bml\">enter a username</A>."; }
  if ($user =~ /[^\w]/) { push @errors, "Username contains invalid characters."; }
 
+ unless (LJ::did_post()) { push @errors, "(=REQUIREPOST=)"; }
+
  $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
  $sth->execute;
  my $u = $sth->fetchrow_hashref;
