@@ -37,9 +37,8 @@ body<=
 
  my $mode = "modify";
  $mode = "create" if $GET{'mode'} eq 'create';
- $mode = "update" if $POST{'mode'} eq 'update';
 
- if ($mode eq "update") 
+ if (LJ::did_post())
  {
      my $sth;
      my $cuser = LJ::canonical_username($POST{'cuser'});
@@ -54,24 +53,24 @@ body<=
      }
 
      # if we're changing rather than creating, check that we can
-     if ($POST{'oldmode'} eq 'modify' && !LJ::check_rel($dbs, $cu, $remote, 'A')) {
+     if ($mode eq 'modify' && !LJ::check_rel($dbs, $cu, $remote, 'A')) {
         $errors{'username'} = BML::ml('.error.noaccess', {'comm'=>$cuser});
      }
 
      # if we're creating, community password must match
-     if ($POST{'oldmode'} eq 'create' && $cu && !LJ::auth_okay($cu, $POST{'cpassword'})) {
+     if ($mode eq 'create' && $cu && !LJ::auth_okay($cu, $POST{'cpassword'})) {
          $errors{'password'} = $ML{'.error.badpassword'};
      }
 
-     if (%errors) {
-        $mode = $POST{'oldmode'}; # go back to the form and display errors
-     } else { # do the work
+     # if we found errors, we'll redisplay the form below.  otherwise,
+     # proceed.
+     unless (%errors) {
         my $cid = $cu->{'userid'};
         my $qmembership = $dbh->quote($POST{'membership'} eq "open" ? "open" : "closed");
         my $qpostlevel = $dbh->quote($POST{'postlevel'} eq "members" ? "members" : "select");
 
         $dbh->do("UPDATE user SET journaltype='C' WHERE userid=$cid");
-        if ($POST{'oldmode'} eq 'create') {
+        if ($mode eq 'create') {
            $dbh->do("REPLACE INTO community (userid, membership, postlevel) VALUES ($cid, $qmembership, $qpostlevel)");
            LJ::set_rel($dbs, $cu, $remote, 'A');
         } else {
@@ -83,7 +82,7 @@ body<=
         LJ::set_userprop($dbs, $cu->{'userid'}, 'nonmember_posting', $nonmembers);
  
         $ret .= "<?h1 $ML{'.success'} h1?>";
-        if ($POST{'oldmode'} eq 'create') {
+        if ($mode eq 'create') {
            $ret .= "<?p $ML{'.label.commcreated'} p?>";
         } else {
            $ret .= "<?p $ML{'.label.commchanged'} p?>";
@@ -127,7 +126,6 @@ body<=
  }
 
  $ret .= "<form method='post'><input type='hidden' name='mode' value='update'>";
- $ret .= "<input type='hidden' name='oldmode' value='$mode'>";
 
  if ($mode eq 'modify') {
     $ret .= "<?h1 $ML{'.label.changeheader'} h1?><?p $ML{'.label.changetext'} p?>";
