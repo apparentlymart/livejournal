@@ -224,8 +224,7 @@ sub trans
         %RQ = %$opts;
 
         # redirect communities to /community/<name>
-        my $dbr = LJ::get_db_reader();
-        my $u = LJ::load_user($dbr, $opts->{'user'});
+        my $u = LJ::load_user($opts->{'user'});
         if ($u && $u->{'journaltype'} eq "C" && 
             ($opts->{'vhost'} eq "" || $opts->{'vhost'} eq "tilde")) {
             my $newurl = $uri;
@@ -324,7 +323,7 @@ sub trans
         $host ne $LJ::DOMAIN && $host =~ /\./ &&
         $host =~ /[^\d\.]/)
     {
-        my $dbr = LJ::get_dbh("slave", "master");
+        my $dbr = LJ::get_db_reader();
         my $checkhost = lc($host);
         $checkhost =~ s/^www\.//i;
         $checkhost = $dbr->quote($checkhost);
@@ -529,7 +528,7 @@ sub userpic_content
 
     # else, get it from db.
     unless ($data) {
-        my $dbr = LJ::get_dbh("slave", "master");
+        my $dbr = LJ::get_db_reader();
         my $query = "SELECT p.state, p.userid, p.contenttype, UNIX_TIMESTAMP(p.picdate) ".
             "AS 'lastmod', u.clusterid, u.dversion FROM userpic p, user u WHERE ".
             "p.picid=$picid AND u.userid=p.userid";
