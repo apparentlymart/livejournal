@@ -91,7 +91,7 @@
         } else {
 
             # FIXME: needs translation 'standard'/'secure' and make the below ML strings.
-            my $secure = "[ Standard | <b>Secure</b> ]";
+            my $secure = "[ <a href='$LJ::SITEROOT/login.bml?nojs=1'>Standard</a> | <b>Secure</b> ]";
 
             if ($LJ::IS_SSL) {
                 $body .= "<input name='action:login' type='submit' value='$ML{'.login.btn.login'}' /> ".
@@ -115,8 +115,25 @@
                 }
 
                 $body .= "<input name='action:login' type='submit' value='$ML{'.login.btn.login'}' />";
-                $body .= "<br />" . "[ <b>Standard</b> | <a href='$LJ::SSLROOT/login.bml'>Secure</a> ]"
-                    if $LJ::USE_SSL;
+                if ($nojs) {
+                    # insecure now, but because they choose to not use javascript.  link to
+                    # javascript version of login if they seem to have javascript, otherwise
+                    # noscript to SSL
+                    $body .= "<script> document.write(\"<br />" . 
+                        LJ::ejs("[ <b>Standard</b> | <a href='$LJ::SITEROOT/login.bml'>Secure</a> ]") .
+                        "\"); </script>\n";
+                    if ($LJ::USE_SSL) {
+                        $body .= "<noscript>";
+                        $body .= "<br />" . "[ <b>Standard</b> | <a href='$LJ::SSLROOT/login.bml'>Secure</a> ]";
+                        $body .= "</noscript>";
+                    }
+                } else {
+                    # insecure now, and not because it was forced, so javascript doesn't work.
+                    # only way to get to secure now is via SSL, so link there
+                    $body .= "<br />" . "[ <b>Standard</b> | <a href='$LJ::SSLROOT/login.bml'>Secure</a> ]"
+                        if $LJ::USE_SSL;
+
+                }
 
                 $body .= "</noscript>" unless $nojs;
             }
