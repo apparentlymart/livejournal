@@ -129,19 +129,21 @@
  my @color = ();
  LJ::load_codes($dbs, { "color" => \@color });
 
- my $sel = $fr || { 'fgcolor' => '#000000',
-                    'bgcolor' => '#FFFFFF', };
+ my $sel = $fr || { 'fgcolor' => hex '000000',
+                    'bgcolor' => hex 'FFFFFF', };
 
  $ret .= "<TR>";
  $ret .= "<TD><SELECT NAME=\"editfriend_add_1_fg\">";
  foreach (@color) {
-     my $selected = $_->{'code'} eq $sel->{'fgcolor'} ? " SELECTED" : "";
+     my $color_int = hex (substr($_->{'code'},1));
+     my $selected = $color_int eq $sel->{'fgcolor'} ? " SELECTED" : "";
      $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
  }
  $ret .= "</SELECT></TD>\n";
  $ret .= "<TD><SELECT NAME=\"editfriend_add_1_bg\">";
  foreach (@color) {
-     my $selected = $_->{'code'} eq $sel->{'bgcolor'} ? " SELECTED" : "";
+     my $color_int = hex (substr($_->{'code'},1));
+     my $selected = $color_int eq $sel->{'bgcolor'} ? " SELECTED" : "";
      $ret .= "<OPTION VALUE=\"$_->{'code'}\"$selected>$_->{'item'}\n";
  }
  $ret .= "</SELECT></TD>\n";
