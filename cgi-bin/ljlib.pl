@@ -541,28 +541,37 @@ sub ago_text
 # des: Returns a form for either submitting username/password to a script or
 #      entering a new username/password.
 # returns: The built form
-# args: form, opts
+# args: form, opts?
 # des-form: The hash of form information, which is used to determine whether to
 #           get the current login info and display a concise form, or to display
 #           a login form.
+# des-opts: hashref containing 'user' key to force (finds/makes the hpassword)
 # </LJFUNC>
 sub auth_fields
 {
     my $form = shift;
+    my $opts = shift;
 
     my $remote = LJ::get_remote_noauth();
     my $ret = "";
-    if (!$form->{'altlogin'} && !$form->{'user'} && $remote) {
+    if ((!$form->{'altlogin'} && $remote) || $opts->{'user'}) 
+    {
 	my $hpass;
-	if ($BMLClient::COOKIE{"ljhpass"} =~ /^$remote->{'user'}:(.+)/) {
+	my $luser = $opts->{'user'} || $remote->{'user'};
+	if ($opts->{'user'}) {
+	    $hpass = $form->{'hpassword'} || LJ::hash_password($form->{'password'});
+	} elsif ($remote && $BMLClient::COOKIE{"ljhpass"} =~ /^$luser:(.+)/) {
 	    $hpass = $1;
 	}
+
 	my $alturl = $ENV{'REQUEST_URI'};
 	$alturl .= ($alturl =~ /\?/) ? "&amp;" : "?";
 	$alturl .= "altlogin=1";
 
-	$ret .= "<tr align='left'><td colspan='2' align='left'>You are currently logged in as <b>$remote->{'user'}</b>.<br />If this is not you, <a href='$alturl'>click here</a>.\n";
-	$ret .= "<input type='hidden' name='user' value='$remote->{'user'}'>\n";
+	$ret .= "<tr align='left'><td colspan='2' align='left'>You are currently logged in as <b>$luser</b>.";
+	$ret .= "<br />If this is not you, <a href='$alturl'>click here</a>.\n"
+	    unless $opts->{'noalt'};
+	$ret .= "<input type='hidden' name='user' value='$luser'>\n";
 	$ret .= "<input type='hidden' name='hpassword' value='$hpass'><br />&nbsp;\n";
 	$ret .= "</td></tr>\n";
     } else {

@@ -140,7 +140,16 @@
      }
      $body .= "<INPUT TYPE=HIDDEN NAME=oldmode VALUE=$mode>";
      $body .= "<TABLE><TR><TD><TABLE>";
-     $body .= LJ::auth_fields(\%FORM);
+     {
+	 my $opts = {};
+	 if ($remote && $FORM{'user'} && $FORM{'user'} ne $remote->{'user'}) {
+	     $opts = {
+		 'user' => $FORM{'user'},
+		 'noalt' => 1,  # so they don't lose their entry clicking GET url
+	     };
+	 }
+	 $body .= LJ::auth_fields(\%FORM, $opts);
+     }
      $body .= "</TABLE></TD><TD>";
 
      $body .= "<TABLE CELLSPACING=0 CELLPADDING=0>";
