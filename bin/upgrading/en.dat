@@ -2492,6 +2492,10 @@ For information on how to validate your email address, consult the documentation
 
 /syn/index.bml.invalid.cantadd=You can't add RSS feeds from this site.
 
+/syn/index.bml.invalid.http.text=There was an error retrieving this URL.  The server may be down or the content unavailable at this time.  Please verify the URL you have provided and try again.
+
+/syn/index.bml.invalid.http.title=Error retrieving content
+
 /syn/index.bml.invalid.inuse.text=That account name is already in use.
 
 /syn/index.bml.invalid.inuse.title=Username in use
@@ -2503,6 +2507,10 @@ For information on how to validate your email address, consult the documentation
 /syn/index.bml.invalid.needurl=You must enter either a syndicated account's username or URL to add a new feed.
 
 /syn/index.bml.invalid.notexist=No syndicated account exists with that username.
+
+/syn/index.bml.invalid.notrss.text=The URL provided does not appear to contain XML formatted data.
+
+/syn/index.bml.invalid.notrss.title=Data not XML formatted
 
 /syn/index.bml.invalid.overquota=Adding this feed would put you over your syndication account quota.
 

@@ -90,9 +90,16 @@ body<=
                 return "<?h1 $ML{'.invalid.needname.title'} h1?><?p $ML{'.invalid.needname.text'} p?>"
                     unless $acct;
                 
-                # MAYBE: see if it actually points to a valid syndication file
-                # naah, too much work here.  just let synsuck.pl detect its
-                # bogosity and delete it.
+                # create a safeagent to fetch the feed for validation purposes
+                my $sua = new SafeAgent;
+                my $content = $sua->fetch($url, 1024, 3);
+                return "<?h1 $ML{'.invalid.http.title'} h1?><?p $ML{'.invalid.http.text'} p?>"
+                    unless $content;
+                return "<?h1 $ML{'.invalid.notrss.title'} h1?><?p $ML{'.invalid.notrss.text'} p?>"
+                    unless $content =~ m/<\?xml/ &&                 # must have <?xml and a
+                           $content =~ m/<(\w+:)?(?:rss|feed|RDF)/; # <[?:]RDF <[?:]rss <[?:]atom
+                
+                # create the feed account
                 my $id = LJ::create_account({
                     'user' => $acct,
                     'name' => $acct,
