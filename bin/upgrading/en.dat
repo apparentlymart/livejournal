@@ -2774,7 +2774,9 @@ This could be because: <ol>
 
 /update.bml.full=Full Update Page
 
-/update.bml.htmlokay=HTML okay; by default, newlines will be auto-formatted to <tt>&lt;BR&gt;</tt>
+/update.bml.htmlokay.norich=(HTML okay; by default, newlines will be auto-formatted to <tt>&lt;br&gt;</tt>)
+
+/update.bml.htmlokay.rich=(HTML okay; by default, newlines will be auto-formatted to <tt>&lt;br&gt;</tt> - or, use the <a [[opts]]>rich text</a> mode.)
 
 /update.bml.localtime=Local time:
 

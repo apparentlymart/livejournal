@@ -63,7 +63,16 @@
     my $auth_missing = $POST{'user'} && ! $POST{'password'} && ! $user_is_remote; # user w/o password
     my $showform = $POST{'showform'} || $auth_missing;                            # show entry form
 
-    if ($did_post && ! $spellcheck_html && ! $showform) {
+    # richtext
+    # 'switched_rte_on' is only set when the user first enables rte.  We do this in a POST
+    #    so any pre-existing text in the event and subject fields aren't lost when going to RTE.
+    # 'rich' is used to keep RTE mode enabled between pages, such as spellchecks.
+    # The $GET{'rich'} is simply for user bookmarking / faq linking convenience.
+    my $enabled_rte = $POST{'switched_rte_on'};
+    my $richtext = 1 if $GET{rich} || $POST{rich} ||
+                        ($enabled_rte && ! $spellcheck_html);
+
+    if ($did_post && ! $spellcheck_html && ! $showform && ! $enabled_rte) {
 
         # what's our authentication scheme for subsequent protocol actions?
         my $flags = {};
@@ -138,11 +147,19 @@
                         );
 
             # copy some things from %POST
-            foreach (qw(event subject year mon day hour min
+            foreach (qw(subject year mon day hour min
                         prop_picture_keyword prop_current_moodid
                         prop_current_mood prop_current_music)) {
                 $req{$_} = $POST{$_};
             }
+
+            # Convert the rich text editor output back to parsable lj tags.
+            my $event = $POST{event};
+            if ($richtext) {
+                $event =~ s/&lt;lj-cut(.*?)&gt;/<lj-cut$1 \/>/ig;
+                $event =~ s/<span class="ljuser".*?userinfo\.bml\?user=(.+?)".*?<\/b><\/a>(?:<\/span>)?/<lj user="$1" \/>/ig;
+            }
+            $req{'event'} = $event;
 
             # copy some opts, but make sure they are 1 : 0 explicitly
             foreach (qw(preformatted nocomments backdated noemail)) {
@@ -212,6 +229,7 @@
         my $getextra;
         $getextra .= "altlogin=1&" if $GET{'altlogin'};
         $getextra .= "mode=full&" if $GET{'mode'} eq 'full';
+        $getextra .= "rich=1&" if $richtext;
         chop $getextra;
         $getextra = "?$getextra" if $getextra;
 
@@ -309,19 +327,54 @@
 
     # subject
     $$body .= "<table width='90%' align='center'; style='margin-top: 20px;'><tr><td>$ML{'.subject'}<br />";
-    $$body .= LJ::html_text({ 'name' => 'subject', 'value' => $POST{'subject'} || $GET{'subject'},
+    $$body .= LJ::html_text({ 'name' => 'subject', 'value' => $POST{subject} || $GET{subject},
                               'size' => '50', 'maxlength' => '100' }) . "\n";
-
 
     # display spell check results
     $$body .= "<p><b>$ML{'.spellchecked'}</b><br />$spellcheck_html</p>"
         if $spellcheck_html;
 
     # event
-    $$body .= "<p><b>$ML{'.event'}</b><br />";
-    $$body .= LJ::html_textarea({ 'name' => 'event', 'value' => $POST{'event'} || $GET{'event'},
-                                  'rows' => '10', 'cols' => '50', 'style' => 'width: 100%', 'wrap' => 'soft' });
-    $$body .= "<br /><?de ($ML{'.htmlokay'}) de?>";
+    $$body .= "<p><b>$ML{'.event'}</b>";
+    $$body .= "<br />";
+    if ($richtext) {
+        my $jevent = $POST{event} || $GET{event};
+        $jevent = LJ::ejs($jevent);
+
+        $$body .= LJ::html_hidden('rich', '1') . "\n";
+        $$body .= <<RTE;
+<iframe id="testFrame" style="position: absolute; visibility: hidden; width: 0px; height: 0px;"></iframe>
+<script language="JavaScript" type="text/javascript" src="/js/browserdetect.js"></script>
+<script language="JavaScript" type="text/javascript" src="/js/richtext.js"></script>
+<script language='JavaScript' type='text/javascript'>
+    <!--
+        writeRichText('rte', 'event', '$jevent', '100%', 300, true);
+    //-->
+</script>
+RTE
+    }
+    $$body .= LJ::html_textarea({ 'name' => 'event', 'value' => $POST{event} || $GET{event},
+            'rows' => '20', 'cols' => '50', 'style' => 'width: 100%', 'wrap' => 'soft' });
+    $$body .= '<noscript><?de ' . $ML{'.htmlokay.norich'} . ' de?></noscript>';
+
+    my $jrich = "<?de " . LJ::ejs(BML::ml(".htmlokay.rich", { 'opts' => 'href="#" onClick="enable_rte()"' })) . " de?>";
+    my $jnorich = "<?de " . LJ::ejs($ML{'.htmlokay.norich'}) . " de?>";
+    unless ($richtext || ($POST{do_spellcheck} && $richtext)) {
+        $$body .= <<RTE;
+<script language='JavaScript' type='text/javascript'>
+    <!--
+        var t = document.getElementById;
+        if (t) {
+            document.write('<input type="hidden" name="switched_rte_on" value="" />');
+            document.write("$jrich");
+        } else {
+            document.write("$jnorich");
+        }
+    //-->
+</script>
+RTE
+    }
+    $$body .= '<br />';
 
     # spell check checkbox
     if ($LJ::SPELLER) {
@@ -478,7 +531,10 @@
     $$body .= "</table>\n";
 
     # submit button
-    $$body .= "<p align='center' style='margin-top: 0px;'>" . LJ::html_submit(undef, $ML{'.btn.update'}) . "</p>\n";
+    $$body .= "<p align='center' style='margin-top: 0px;'>";
+    $$body .= "<input type='submit' value='$ML{'.btn.update'}' ";
+    $$body .= "onClick=\"updateRTE('rte')\"" if $richtext;
+    $$body .= "></p>\n";
 
     $$body .= "</form></div>";
 
@@ -642,6 +698,16 @@ head<=
             f.prop_current_mood.value ||
             f.prop_current_music.value) showfull();
 
+        return false;
+    }
+
+    function enable_rte () {
+        if (! document.getElementById) return false;
+
+        f = document.updateForm;
+        if (! f) return false;
+        f.switched_rte_on.value = 1;
+        f.submit();
         return false;
     }
 
