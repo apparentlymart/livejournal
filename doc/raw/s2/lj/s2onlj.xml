@@ -1,0 +1,20 @@
+<chapter id='&s2.idroot;s2onlj'>
+  <title>Using S2 on LiveJournal</title>
+  <section id='&s2.idroot;s2onlj.resources'>
+    <title>Resources</title>
+    <para><variablelist>
+      <varlistentry>
+        <term><ulink url="&siteroot;/customize/">Customization area</ulink></term>
+        <listitem><simpara>Regular end-user destination to select layouts and corresponding themes with pretty graphical previews, and graphical wizard to override text/colors.</simpara></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><ulink url="&siteroot;/customize/advanced/">Advanced area</ulink></term>
+        <listitem><simpara>Create styles &amp; layers. View the S2 source and documentation page of any public layer, notably the core layer and all the classes, functions and properties it provides.</simpara></listitem>
+      </varlistentry>
+    </variablelist></para>
+  </section>
+  <section id='&s2.idroot;s2onlj.layerguide'>
+    <title>Layer Guidelines</title>
+    <remark>FIXME: incorporate ideas from http://www.picpix.com/doc/layout_guide.</remark>
+  </section>
+</chapter>
