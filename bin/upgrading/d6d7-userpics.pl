@@ -222,6 +222,8 @@ my $move_user = sub {
     while (my ($kwid, $keyword) = each %kwidmap) {
         # reallocate counter
         my $newkwid = LJ::alloc_user_counter($u, 'K');
+        die "Error: unable to allocate type 'K' counter for $u->{user}($u->{userid})\n"
+            unless $newkwid;
         $mappings{$kwid} = $newkwid;
 
         # push data
