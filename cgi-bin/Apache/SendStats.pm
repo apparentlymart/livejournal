@@ -4,7 +4,7 @@
 package Apache::SendStats;
 
 BEGIN {
-    $LJ::HAVE_INLINE = eval "use Inline (C => 'DATA', DIRECTORY => \"\$ENV{'LJHOME'}/var\"); 1";
+    $LJ::HAVE_INLINE = eval "use Inline (C => 'DATA', DIRECTORY => \"\$ENV{'LJHOME'}/Inline\"); 1";
 }
 use strict;
 use IO::Socket::INET;
