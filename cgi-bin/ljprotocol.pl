@@ -196,7 +196,7 @@ sub checkfriends
     my $res = {};
 
     # return immediately if they can't use this mode
-    unless (LJ::get_cap_min($u, "checkfriends")) {
+    unless (LJ::get_cap($u, "checkfriends")) {
 	$res->{'new'} = 0;
 	$res->{'interval'} = 36000;  # tell client to bugger off
 	return $res;

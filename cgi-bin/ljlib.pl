@@ -691,7 +691,7 @@ sub get_cap_min
 	next unless ($caps & (1 << $bit));
 	my $v = $LJ::CAP{$bit}->{$cname};
 	next unless (defined $v);
-	$min = $v if ($v > $min);
+	$min = $v if (! defined $min || $v < $min);
     }
     return $min;
 }
