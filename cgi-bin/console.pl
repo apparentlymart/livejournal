@@ -330,6 +330,16 @@ $cmd{'getemail'} = {
 	       ],
     };
 
+$cmd{'get_maintainer'} = {
+    'def' => 'consuspend.pl',
+    'privs' => [qw(finduser)],
+    'des' => "Finds out the current maintainer(s) of a community",
+    'argsummary' => '<community name>',
+    'args' => [
+	       'community name' => "The username of the community you want to lookup.",
+	       ],
+    };
+    
 $cmd{'change_journal_type'} = {
     'privs' => [qw(changejournaltype)],
     'handler' => \&change_journal_type,
