@@ -135,11 +135,16 @@ Standard:
 	mod_expires
 	mod_actions
 	mod_rewrite
+	mod_mime_magic
 	mod_mime
-	mom_mime_magic
 
 Special:
 	mod_fastcgi     -- from http://www.fastcgi.com/
+
+NOTE: It is critical that mod_mime_magic appear in the Apache config
+      file before mod_mime, otherwise none of the LiveJournal pages
+      will work. See http://httpd.apache.org/docs/mod/mod_mime_magic.html
+      if you'd like more information.
 
 
 Configuring Apache
