@@ -441,7 +441,7 @@
 
                 # see where we're inserting this
                 my $target;
-                if ($LJ::USERPIC_MOGILEFS && $LJ::MogileFS) {
+                if ($u->{dversion} > 6 && $LJ::USERPIC_MOGILEFS) {
                     $target = 'mogile';
                 } elsif ($LJ::USERPIC_BLOBSERVER) {
                     $target = 'blob';
@@ -477,7 +477,7 @@
                 };
 
                 ### insert the blob
-                if ($LJ::USERPIC_MOGILEFS && $LJ::MogileFS && !$dberr) {
+                if ($target eq 'mogile' && !$dberr) {
                     my $fh = $LJ::MogileFS->new_file($u->mogfs_userpic_key($picid), 'userpics');
                     if (defined $fh) {
                         $fh->print($POST{'userpic'});
@@ -487,7 +487,7 @@
                         # fatal error, we couldn't get a filehandle to use
                         push @errors, $clean_err->("Unable to contact storage server.  Your picture has not been saved.");
                     }
-                } elsif ($LJ::USERPIC_BLOBSERVER && !$dberr) {
+                } elsif ($target eq 'blob' && !$dberr) {
                     my $et;
                     my $fmt = lc($filetype);
                     my $rv = LJ::Blob::put($u, "userpic", $fmt, $picid, $POST{'userpic'}, \$et);
