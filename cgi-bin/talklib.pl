@@ -1676,6 +1676,10 @@ sub mail_comments {
     if (my $ptid = $parent->{talkid}) {
         $par_msgid = generate_messageid("comment", $journalu,
                                         $ptid * 256 + $item->{anum});
+    } else {
+        # is a reply to the top-level
+        $par_msgid = $top_msgid;
+        $top_msgid = "";  # so it's not duplicated
     }
     # and this message ID
     my $this_msgid = generate_messageid("comment", $journalu, $dtalkid);
