@@ -55,6 +55,7 @@ body<=
 
      print MAIL "To: $email\n";
      print MAIL "From: $LJ::ADMIN_EMAIL ($LJ::SITENAME)\n";
+     print MAIL "Content-type: text/plain; charset=utf-8\n";
      print MAIL "Subject: $ML{'.lostpasswordmail.subject'}\n\n";
 
      print MAIL BML::ml('.lostpasswordmail.part1', {
