@@ -718,7 +718,7 @@ sub ago_text
 }
 
 # <LJFUNC>
-# class: components
+# class: component
 # name: LJ::auth_fields
 # des: Makes a login form.
 # info: Returns a form for either submitting username/password to a script or
@@ -1302,7 +1302,9 @@ sub get_urls
 # args: dbarg, url, posterid, itemid, journalid?
 # des-url: URL to log
 # des-posterid: Userid of person posting
-# des-itemid: Itemid URL appears in
+# des-itemid: Itemid URL appears in.  For non-clustered users, this is just
+#             the itemid.  For clustered users, this is the display itemid,
+#             which is the jitemid*256+anum from the [dbtable[log2]] table.
 # des-journalid: Optional, journal id of item, if item is clustered.  Otherwise
 #                this should be zero or undef.
 # </LJFUNC>
@@ -3643,17 +3645,25 @@ sub date_to_view_links
 
 # <LJFUNC>
 # name: LJ::item_link
-# class: 
-# des: 
-# info: 
-# args: 
-# des-: 
-# returns: 
+# class: component
+# des: Returns URL to view an individual journal item.
+# info: The returned URL may have an ampersand in it.  In an HTML/XML attribute,
+#       these must first be escaped by, say, [func[LJ::ehtml]].  This
+#       function doesn't return it pre-escaped because the caller may
+#       use it in, say, a plain-text email message.
+# args: u, itemid, anum?
+# des-itemid: Itemid of entry to link to.
+# des-anum: If present, $u is assumed to be on a cluster and itemid is assumed
+#           to not be a $ditemid already, and the $itemid will be turned into one
+#           by multiplying by 256 and adding $anum.
+# returns: scalar; unescaped URL string
 # </LJFUNC>
 sub item_link
 {
-    my ($u, $itemid) = @_;
-    return "$LJ::SITEROOT/talkread.bml?itemid=$itemid";
+    my ($u, $itemid, $anum) = @_;
+    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
+    my $ditemid = defined $anum ? ($itemid*256 + $anum) : $itemid;
+    return "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid";
 }
 
 # <LJFUNC>
@@ -3723,7 +3733,7 @@ sub make_graphviz_dot_file
 sub expand_embedded
 {
     my $dbarg = shift;
-    my $itemid = shift;
+    my $ditemid = shift;
     my $remote = shift;
     my $eventref = shift;
 
@@ -3734,7 +3744,7 @@ sub expand_embedded
     # TODO: This should send $dbs instead of $dbh when that function
     # is converted. In addition, when that occurs the make_dbs_from_arg
     # code above can be removed.
-    LJ::Poll::show_polls($dbh, $itemid, $remote, $eventref);
+    LJ::Poll::show_polls($dbh, $ditemid, $remote, $eventref);
 }
 
 # <LJFUNC>

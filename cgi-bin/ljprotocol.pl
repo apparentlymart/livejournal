@@ -497,6 +497,8 @@ sub postevent
 
     my $itemid = $dbcm->{'mysql_insertid'};
     return fail($err,501,"No itemid could be generated.") unless $itemid;
+
+    my $ditemid = $clustered ? ($itemid * 256 + $anum) : $itemid;
     
     ### finish embedding stuff now that we have the itemid
     {
@@ -505,7 +507,7 @@ sub postevent
 	### not going to check it for now.
 	
 	my $error = "";
-	LJ::Poll::register($dbh, \$event, \$error, $itemid, @polls);
+	LJ::Poll::register($dbh, \$event, \$error, $ditemid, @polls);
     }
     #### /embedding
     
@@ -515,7 +517,7 @@ sub postevent
     {
 	foreach my $url (LJ::get_urls($event)) {
 	    my $jid = $clustered ? $ownerid : 0;
-	    LJ::record_meme($dbs, $url, $posterid, $itemid, $jid);
+	    LJ::record_meme($dbs, $url, $posterid, $ditemid, $jid);
 	}
     }
 

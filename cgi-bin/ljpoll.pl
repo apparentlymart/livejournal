@@ -344,6 +344,7 @@ sub parse
     return @polls;
 }
 
+# note: $itemid is a $ditemid (display itemid, *256 + anum)
 sub register
 {
     my $dbh = shift;
@@ -364,7 +365,8 @@ sub register
 	my $qwhoview = $dbh->quote($popts{'whoview'});
 	my $qname = $dbh->quote($popts{'name'});
 
-	$sql = "INSERT INTO poll (itemid, journalid, posterid, whovote, whoview, name) values ($itemid, $popts{'journalid'}, $popts{'posterid'}, $qwhovote, $qwhoview, $qname)";
+	$sql = "INSERT INTO poll (itemid, journalid, posterid, whovote, whoview, name) VALUES ".
+	    "($itemid, $popts{'journalid'}, $popts{'posterid'}, $qwhovote, $qwhoview, $qname)";
 
 	$sth = $dbh->prepare($sql);				     
 	$sth->execute;

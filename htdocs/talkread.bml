@@ -79,7 +79,7 @@ BODY<=
 
  my $event = $item->{'event'};
 
- LJ::expand_embedded($dbs, $itemid, $remote, \$event);
+ LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
  $event = BML::ebml(LJ::CleanHTML::clean_event(\$event, $logprops{$itemid}->{'opt_preformatted'}));
  
  $ret .= "<p>";

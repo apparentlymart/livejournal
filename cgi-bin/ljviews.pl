@@ -191,22 +191,23 @@ sub create_view_lastn
 	    });
 	}
 
+	my $ditemid = $u->{'clusterid'} ? ($itemid * 256 + $item->{'anum'}) : $itemid;
+
 	LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-					       'cuturl' => LJ::item_link($u, $itemid), });
-	LJ::expand_embedded($dbs, $itemid, $remote, \$event);
+					       'cuturl' => LJ::item_link($u, $itemid, $item->{'anum'}), });
+	LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
         $lastn_event{'event'} = $event;
 
 	if ($u->{'opt_showtalklinks'} eq "Y" && 
 	    ! $logprops{$itemid}->{'opt_nocomments'}
 	    ) 
 	{
-	    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
-	    my $ditemid = $u->{'clusterid'} ? ($itemid * 256 + $item->{'anum'}) : $itemid;
+	    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
 	    $lastn_event{'talklinks'} = LJ::fill_var_props($vars, 'LASTN_TALK_LINKS', {
 		'itemid' => $ditemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$ditemid",
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'LASTN_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid&amp;nc=$replycount",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount == 1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
@@ -524,7 +525,7 @@ sub create_view_friends
     my $ownersin = join(",", keys %owners);
 
     my %friends = ();
-    $sth = $dbr->prepare("SELECT u.user, u.userid, f.fgcolor, f.bgcolor, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=$u->{'userid'} AND f.friendid IN ($ownersin)");
+    $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, f.fgcolor, f.bgcolor, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=$u->{'userid'} AND f.friendid IN ($ownersin)");
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
 	next unless ($_->{'statusvis'} eq "V");  # ignore suspended/deleted users.
@@ -539,7 +540,7 @@ sub create_view_friends
 	  "username" => $user,
         });
 
-	$$ret .= "<BASE TARGET=_top>" if ($FORM{'mode'} eq "framed");
+	$$ret .= "<base target='_top'>" if ($FORM{'mode'} eq "framed");
 	$$ret .= LJ::fill_var_props($vars, 'FRIENDS_PAGE', \%friends_page);
 	return 1;
     }
@@ -581,7 +582,7 @@ sub create_view_friends
 	my $event = $logtext->{$datakey}->[1];
 
 	my ($friend, $poster);
-	$friend = LJ::get_username($dbs, $friendid);
+	$friend = $friends{$friendid}->{'user'};
 	$poster = LJ::get_username($dbs, $posterid);
 	
 	$eventnum++;
@@ -637,9 +638,11 @@ sub create_view_friends
 	    });
 	}
 	
+	my $ditemid = $clusterid ? ($itemid * 256 + $item->{'anum'}) : $itemid;
+
 	LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$datakey}->{'opt_preformatted'},
-					       'cuturl' => LJ::item_link($u, $itemid), });
-	LJ::expand_embedded($dbs, $itemid, $remote, \$event);
+					       'cuturl' => LJ::item_link($friends{$friendid}, $itemid, $item->{'anum'}), });
+	LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
 	$friends_event{'event'} = $event;
 	
         # do the picture
@@ -662,7 +665,8 @@ sub create_view_friends
 		(! $u->{'opt_usesharedpic'} || ($posterid == $friendid))) 
 	    {
 		my $qkw = $dbh->quote($logprops{$datakey}->{'picture_keyword'});
-		my $sth = $dbh->prepare("SELECT m.picid FROM userpicmap m, keywords k WHERE m.userid=$posterid AND m.kwid=k.kwid AND k.keyword=$qkw");
+		my $sth = $dbh->prepare("SELECT m.picid FROM userpicmap m, keywords k ".
+					"WHERE m.userid=$posterid AND m.kwid=k.kwid AND k.keyword=$qkw");
 		$sth->execute;
 		my ($alt_picid) = $sth->fetchrow_array;
 		if ($alt_picid) {
@@ -698,14 +702,13 @@ sub create_view_friends
 	if ($friends{$friendid}->{'opt_showtalklinks'} eq "Y" &&
 	    ! $logprops{$datakey}->{'opt_nocomments'}
 	    ) {
-	    my $jarg = $clusterid ? "journal=$friend&amp;" : "";
-	    my $ditemid = $clusterid ? ($itemid * 256 + $item->{'anum'}) : $itemid;
+	    my $jarg = $clusterid ? "journal=$friend&" : "";
 
 	    $friends_event{'talklinks'} = LJ::fill_var_props($vars, 'FRIENDS_TALK_LINKS', {
 		'itemid' => $ditemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$ditemid",
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'FRIENDS_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid&amp;nc=$replycount",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount==1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
@@ -945,7 +948,7 @@ sub create_view_calendar
 	  $calendar_month{'yyyy'} = $year;
 	  $calendar_month{'yy'} = substr($year, 2, 2);
 	  $calendar_month{'weeks'} = "";
-	  $calendar_month{'urlmonthview'} = "$LJ::SITEROOT/view/?type=month&amp;user=$user&amp;y=$year&amp;m=$month";
+	  $calendar_month{'urlmonthview'} = "$LJ::SITEROOT/view/?type=month&user=$user&y=$year&m=$month";
 	  my $weeks = \$calendar_month{'weeks'};
 
 	  my %calendar_week = ();
@@ -1201,22 +1204,23 @@ sub create_view_day
 	    });
 	}
 
+	my $ditemid = $u->{'clusterid'} ? ($itemid*256 + $anum) : $itemid;
+
 	LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
-					       'cuturl' => LJ::item_link($u, $itemid), });
-	LJ::expand_embedded($dbs, $itemid, $remote, \$event);
+					       'cuturl' => LJ::item_link($u, $itemid, $anum), });
+	LJ::expand_embedded($dbs, $ditemid, $remote, \$event);
         $day_event{'event'} = $event;
 
 	if ($u->{'opt_showtalklinks'} eq "Y" &&
 	    ! $logprops{$itemid}->{'opt_nocomments'}
 	    ) {
-	    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
-	    my $ditemid = $u->{'clusterid'} ? ($itemid*256 + $anum) : $itemid;
+	    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&" : "";
 
 	    $day_event{'talklinks'} = LJ::fill_var_props($vars, 'DAY_TALK_LINKS', {
 		'itemid' => $ditemid,
 		'urlpost' => "$LJ::SITEROOT/talkpost.bml?${jarg}itemid=$ditemid",
 		'readlink' => $replycount ? LJ::fill_var_props($vars, 'DAY_TALK_READLINK', {
-		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid&amp;nc=$replycount",
+		    'urlread' => "$LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid",
 		    'messagecount' => $replycount,
 		    'mc-plural-s' => $replycount==1 ? "" : "s",
 		    'mc-plural-es' => $replycount == 1 ? "" : "es",
