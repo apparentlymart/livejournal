@@ -15,13 +15,13 @@ my $opt_prelocked = 0;
 my $opt_expungedel = 0;
 my $opt_ignorebit = 0;
 my $opt_verify = 0;
-exit 1 unless GetOptions('delete' => \$opt_del,
-                         'destdelete' => \$opt_destdel,
+exit 1 unless GetOptions('delete' => \$opt_del, # from source
+                         'destdelete' => \$opt_destdel, # from dest (if exists, before moving)
                          'verbose=i' => \$opt_verbose,
-                         'movemaster|mm' => \$opt_movemaster,
-                         'prelocked' => \$opt_prelocked,
-                         'expungedel' => \$opt_expungedel,
-                         'ignorebit' => \$opt_ignorebit,
+                         'movemaster|mm' => \$opt_movemaster, # use separate dedicated source
+                         'prelocked' => \$opt_prelocked, # don't do own locking; master does (harness, ljumover)
+                         'expungedel' => \$opt_expungedel, # mark as expunged if possible (+del to delete)
+                         'ignorebit' => \$opt_ignorebit, # ignore move in progress bit cap (force)
                          'verify' => \$opt_verify,  # slow verification pass (just for debug)
                          );
 my $optv = $opt_verbose;
@@ -34,9 +34,31 @@ $dbh->do("SET wait_timeout=28800");
 
 my $user = LJ::canonical_username(shift @ARGV);
 my $dclust = shift @ARGV;
+$dclust = 0 if !defined $dclust && $opt_expungedel;
 
 sub usage {
-    die "Usage:\n  movecluster.pl <user> <destination cluster #>\n";
+    die <<USAGE;
+moveucluster.pl [options] <user> [destination cluster name or number]
+
+Available options:
+    verbose=n       Set verbosity level to n (1 or 2).
+    verify          Verify count of copied rows to ensure accuracy (slow)
+    ignorebit       Ignore the move in progress bit (force user move)
+    prelocked       Do not do own locking; let harness handle (ljumover, etc)
+    movemaster      Enable usage of clusterNmovemaster roles for moving
+    delete          Delete data from source cluster when done moving
+    destdelete      Delete data from destination cluster before moving
+    expungedel      See below.
+
+The expungedel option is used to indicate that when a user is encountered
+with a statusvis of D (deleted journal) and they've been deleted for at
+least 31 days, instead of moving their data, mark the user as expunged.
+
+Further, if you specify the delete and expungedel options at the same time,
+if the user is expunged, all of their data will be deleted from the source
+cluster.  THIS IS IRREVERSIBLE AND YOU WILL NOT BE ASKED FOR CONFIRMATION.
+    
+USAGE
 }
 
 # check arguments
@@ -50,14 +72,19 @@ die "Failed to get move lock.\n"
 my $u = $dbh->selectrow_hashref("SELECT * FROM user WHERE user=?", undef, $user);
 die "Non-existent user $user.\n" unless $u;
 
-# get the destination DB handle, with a long timeout
-my $dbch = LJ::get_cluster_master({raw=>1}, $dclust);
-die "Undefined or down cluster \#$dclust\n" unless $dbch;
-$dbch->do("SET wait_timeout=28800");
+# if we want to delete the user, we don't need a destination cluster, so only get
+# one if we have a real valid destination cluster
+my $dbch;
+if ($dclust) {
+    # get the destination DB handle, with a long timeout
+    $dbch = LJ::get_cluster_master({raw=>1}, $dclust);
+    die "Undefined or down cluster \#$dclust\n" unless $dbch;
+    $dbch->do("SET wait_timeout=28800");
 
-# make sure any error is a fatal error.  no silent mistakes.
-$dbh->{'RaiseError'} = 1;
-$dbch->{'RaiseError'} = 1;
+    # make sure any error is a fatal error.  no silent mistakes.
+    $dbh->{'RaiseError'} = 1;
+    $dbch->{'RaiseError'} = 1;
+}
 
 # we can't move to the same cluster
 my $sclust = $u->{'clusterid'};
@@ -67,7 +94,7 @@ if ($sclust == $dclust) {
 
 # we don't support "cluster 0" (the really old format)
 die "This mover tool doesn't support moving from cluster 0.\n" unless $sclust;
-die "Can't move back to legacy cluster 0\n" unless $dclust;
+die "Can't move back to legacy cluster 0\n" unless $dclust || $opt_expungedel;
 
 # original cluster db handle.  (may be a movemaster (a slave))
 my $dbo;
@@ -146,7 +173,39 @@ if ($opt_expungedel && $u->{'statusvis'} eq "D" &&
     LJ::update_user($userid, { clusterid => 0,
                                statusvis => 'X',
                                raw => "caps=caps&~(1<<$readonly_bit), statusvisdate=NOW()" });
+
+    # now delete all content from user cluster for this user
+    if ($opt_del) {
+        print "Deleting expungeable user data...\n" if $optv;
+
+        # figure out if they have any S1 styles
+        my $styleids = $dboa->selectcol_arrayref("SELECT styleid FROM s1style WHERE userid = $userid");
+
+        # now delete from the main tables
+        foreach my $table (keys %$tinfo) {
+            my $pri = $tinfo->{$table}->{idxcol};
+            while ($dboa->do("DELETE FROM $table WHERE $pri=$userid LIMIT 1000") > 0) {
+                print "  deleted from $table\n" if $optv;
+            }
+        }
+
+        # and from the s1stylecache table
+        if (@$styleids) {
+            my $styleids_in = join(",", map { $dboa->quote($_) } @$styleids);
+            if ($dboa->do("DELETE FROM s1stylecache WHERE styleid IN ($styleids_in)") > 0) {
+                print "  deleted from s1stylecache\n" if $optv;
+            }
+        }
+    }
+    
     exit 0;
+}
+
+# if we get to this point we have to enforce that there's a destination cluster, because
+# apparently the user failed the expunge test
+if (!defined $dclust || !defined $dbch) {
+    die "User is not eligible for expunging.\n" if $opt_expungedel;
+    usage();
 }
 
 print "Moving '$u->{'user'}' from cluster $sclust to $dclust\n" if $optv >= 1;
@@ -509,7 +568,7 @@ sub fetch_tableinfo
 
         my $cols = $tinfo->{$table}{cols} = [];
         my $colnum = 0;
-        $sth = $dbch->prepare("DESCRIBE $table");
+        $sth = $dboa->prepare("DESCRIBE $table");
         $sth->execute;
         while (my $r = $sth->fetchrow_hashref) {
             push @$cols, $r->{'Field'};
