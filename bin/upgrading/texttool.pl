@@ -27,6 +27,7 @@ Where 'command' is one of:
   load         Runs the following three commands in order:
     popstruct  Populate lang data from text[-local].dat into db
     poptext    Populate text from en.dat, etc into database
+    copyfaq    If site is translating FAQ, copy FAQ data into trans area
     makeusable Setup internal indexes necessary after loading text
   dumptext     Dump lang text based on text[-local].dat information
   check        Check validity of text[-local].dat files
@@ -151,10 +152,11 @@ my $out = sub {
     }
 };
 
-my @good = qw(load popstruct poptext dumptext newitems wipedb makeusable);
+my @good = qw(load popstruct poptext dumptext newitems wipedb makeusable copyfaq);
 
 popstruct() if $mode eq "popstruct" or $mode eq "load";
 poptext() if $mode eq "poptext" or $mode eq "load";
+copyfaq() if $mode eq "copyfaq" or $mode eq "load";
 makeusable() if $mode eq "makeusable" or $mode eq "load";
 dumptext() if $mode eq "dumptext";
 newitems() if $mode eq "newitems";
@@ -198,6 +200,45 @@ sub makeusable
     };
     $rec->("en", $rec);
     $out->("-", "done.");
+}
+
+sub copyfaq
+{
+    my $domid = $dom_code{'faq'} ? $dom_code{'faq'}->{'dmid'} : 0;
+    return unless $domid && $opt_local_lang;
+
+    $out->("Copying FAQ...", '+');
+    my $ll = $lang_code{$opt_local_lang};
+    $out->('x', "Bogus --local-lang argument") unless $ll;
+    $out->('x', "Local-lang '$ll->{'lncode'}' parent isn't 'en'") unless $ll->{'parentlnid'} == 1;
+
+    my %existing;
+    $sth = $dbh->prepare("SELECT i.itcode FROM ml_items, ml_latest WHERE l.lnid=$ll->{'lnid'} AND dmid=$domid AND l.itid=i.itid AND i.dmid=$domid");
+    $sth->execute;
+    $existing{$_} = 1 while $_ = $sth->fetchrow_array;
+
+    # faq category
+    $sth = $dbh->prepare("SELECT faqcat, faqcatname FROM faqcat");
+    $sth->execute;
+    while (my ($cat, $name) = $sth->fetchrow_array) {
+        next if exists $existing{"cat.$cat"};
+        my $opts = { 'childrenlatest' => 1 };
+        LJ::Lang::set_text($dbh, $domid, $ll->{'lncode'}, "cat.$cat", $name, $opts);
+    }
+
+    # faq items
+    $sth = $dbh->prepare("SELECT faqid, question, answer FROM faq");
+    $sth->execute;
+    while (my ($faqid, $q, $a) = $sth->fetchrow_array) {
+        next if
+            exists $existing{"$faqid.1question"} and
+            exists $existing{"$faqid.2answer"};
+        my $opts = { 'childrenlatest' => 1 };
+        LJ::Lang::set_text($dbh, $domid, $ll->{'lncode'}, "$faqid.1question", $q, $opts);
+        LJ::Lang::set_text($dbh, $domid, $ll->{'lncode'}, "$faqid.2answer", $a, $opts);
+    }
+
+    $out->('-', "done.");
 }
 
 sub wipedb

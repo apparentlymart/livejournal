@@ -101,8 +101,12 @@
                                  );
          
          # top bar
-         $ret .= "<table bgcolor='#c0c0c0' width='100%'><tr><td><b>Code:</b> $it->{'itcode'}";
-         $ret .= "</td>";
+         $ret .= "<table bgcolor='#c0c0c0' width='100%'><tr><td><b>Code:</b> ";
+         if ($dmid != 1) {
+             my $d = LJ::Lang::get_dom_id($dmid);
+             $ret .= "[$d->{'uniq'}] ";
+         }
+         $ret .= "$it->{'itcode'}</td>";
          $ret .= "<td align='right'><b><a target='_new' href='help-severity.bml'>Sev</a>:</b> $lat->{'staleness'}</td>";
          $ret .= "</tr></table>";
 

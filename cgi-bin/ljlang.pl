@@ -125,6 +125,13 @@ sub get_dom
     return $DM_UNIQ{$dmcode};
 }
 
+sub get_dom_id
+{
+    my $dmid = shift;
+    load_lang_struct() unless $LS_CACHED;
+    return $DM_ID{$dmid};
+}
+
 sub get_domains
 {
     load_lang_struct() unless $LS_CACHED;
@@ -253,7 +260,6 @@ sub set_text
         $rec->($l, $rec);
         $dbh->do("INSERT IGNORE INTO ml_latest (lnid, dmid, itid, txtid, chgtime, staleness) ".
                  "VALUES $vals") if $vals;
-        print "VALS: $vals\n";
     }
     
     if ($opts->{'changeseverity'} && $l->{'children'} && @{$l->{'children'}}) {
