@@ -160,6 +160,15 @@ $maint{'synsuck'} = sub
         my $newcount = 0;
         my $errorflag = 0;
         foreach my $it (@items) {
+
+            # remove the SvUTF8 flag.  it's still UTF-8, but 
+            # we don't want perl knowing that and fucking stuff up
+            # for us behind our back in random places all over
+            # http://zilla.livejournal.org/show_bug.cgi?id=1037
+            foreach my $attr (qw(title description link)) {
+                $it->{$attr} = pack('C*', unpack('C*', $it->{$attr}));
+            }
+
             my $dig = LJ::md5_struct($it)->b64digest;
             next if $dbh->selectrow_array("SELECT COUNT(*) FROM synitem WHERE ".
                                           "userid=$userid AND item=?", undef,
