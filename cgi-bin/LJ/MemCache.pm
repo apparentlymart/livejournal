@@ -36,7 +36,7 @@ sub trigger_bucket_reconstruct {
 sub forget_dead_hosts { $memc->forget_dead_hosts(); }
 sub disconnect_all    { $memc->disconnect_all();    }
 
-sub delete    { $memc->delete(@_);    }
+sub delete    { $memc->delete(@_, 4);    }
 sub add       { $memc->add(@_);       }
 sub replace   { $memc->replace(@_);   }
 sub set       { $memc->set(@_);       }
