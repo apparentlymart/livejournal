@@ -161,6 +161,19 @@ body<=
 
      next if ($FORM{'state'} eq "green" && $barbg ne "bgcolor='#d0eed0'");
 
+     # fix up the subject if needed
+     if ($sp->{'subject'} =~ /^=\?(utf-8)?/i) {
+         my @subj_data;
+         @subj_data = MIME::Words::decode_mimewords($sp->{'subject'});
+         if (scalar(@subj_data)) {
+             if (!$1) {
+                 $sp->{'subject'} = Unicode::MapUTF8::to_utf8({-string=>$subj_data[0][0], -charset=>$subj_data[0][1]});
+             } else {
+                 $sp->{'subject'} = $subj_data[0][0];
+             }
+         }
+     }
+
      my $summary = LJ::ehtml($sp->{'subject'});
      my $secold = time() - $sp->{'timecreate'};
      my $age = LJ::ago_text($secold);
