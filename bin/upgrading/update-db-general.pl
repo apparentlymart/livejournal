@@ -997,7 +997,8 @@ CREATE TABLE infohistory (
 ) TYPE=MyISAM
 EOC
 
-### support changes
+
+### changes
 
 register_alter(sub {
     if (column_type("supportcat", "is_selectable") eq "")
