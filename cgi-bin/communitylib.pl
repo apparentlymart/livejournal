@@ -250,7 +250,7 @@ sub leave_community {
     return LJ::error('comm_not_found') unless $u && $cu;
 
     # defriend comm -> user
-    return LJ::error('comm_not_comm') unless $cu->{journaltype} eq 'C';
+    return LJ::error('comm_not_comm') unless $cu->{journaltype} =~ /[CS]/;
     my $ret = LJ::remove_friend($cu->{userid}, $u->{userid});
     return LJ::error('comm_not_member') unless $ret; # $ret = number of rows deleted, should be 1 if the user was in the comm
 
