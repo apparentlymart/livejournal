@@ -2896,6 +2896,7 @@ sub trim
 
 # returns true if $formref->{'password'} matches cleartext password or if
 # $formref->{'hpassword'} is the hash of the cleartext password
+# DEPRECTED: should use LJ::auth_okay
 sub valid_password
 {
     my ($clearpass, $formref) = @_;
