@@ -58,6 +58,12 @@ sub make_journal
         ${$opts->{'handle_with_bml_ref'}} = 1;
         return;
     }
+
+    # make sure capability supports it
+    if (($view eq "entry" || $view eq "reply") && ! LJ::get_cap($u, "s2view$view")) {
+        ${$opts->{'handle_with_bml_ref'}} = 1;
+        return;
+    }
     
     escape_context_props($ctx->[S2::PROPS]);
     

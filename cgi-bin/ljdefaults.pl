@@ -83,6 +83,8 @@
                       'moodthemecreate' => 1,
                       'styles' => 1,
                       's2styles' => 1,
+                      's2viewentry' => 1,
+                      's2viewreply' => 1,
                       's2stylesmax' => 10,
                       's2layersmax' => 50,
                       'textmessage' => 1,
