@@ -50,6 +50,8 @@ $LJ::BMAX_GRPNAME = 60;
 $LJ::CMAX_GRPNAME = 30;
 $LJ::BMAX_EVENT   = 65535;
 $LJ::CMAX_EVENT   = 65535;
+$LJ::BMAX_INTEREST = 100;
+$LJ::CMAX_INTEREST = 50;
 
 # declare some charset aliases
 # we need this at least for cases when the only name supported
@@ -5556,7 +5558,8 @@ sub set_interests
         next unless $int;
         next if $int =~ / .+ .+ .+ /;  # prevent sentences
         next if $int =~ /[\<\>]/;
-        next if length($int) > 35;
+        my ($bl, $cl) = LJ::text_length($int);
+        next if $bl > $LJ::BMAX_INTEREST or $cl > $LJ::CMAX_INTEREST;
         $int_new{$int} = 1 unless $old->{$int};
         delete $int_del{$int};
     }
