@@ -93,6 +93,10 @@ body<=
     return "Sorry, this entry already has the maximum number of comments allowed."
         if LJ::Talk::Post::over_maxcomments($journalu, $item->{'jitemid'});
 
+    # no replying to frozen comments
+    return $ML{'/talkpost.bml.error.noreply_frozen'} 
+        if $parent->{state} eq 'F';
+
     ## insertion
     my $wasscreened = ($parent->{state} eq 'S');
     my $err;
