@@ -72,7 +72,7 @@ body<=
      unless ($total_count) {
          return "<?h1 No support requests! h1?><?p The support queue is currently empty.  :-) p?>";
      }
-     $ret .= "<p>[<b>$total_count</b> total open requests]";
+     $ret .= "<p>[<b>$total_count</b> total open requests]</p>";
 
      $sth = $dbr->prepare("SELECT s.* FROM support s WHERE s.state='open' $filterwhere");
  }
@@ -129,7 +129,7 @@ body<=
  # /filter line
  
 
- $ret .= "<p><table cellpadding=4 cellspacing=1 border=1 bgcolor=#ffffff><tr bgcolor=#d0d0d0>\n";
+ $ret .= "<p><table cellpadding='4' cellspacing='1' border='1' bgcolor='#ffffff'><tr bgcolor='#d0d0d0'>\n";
  $ret .= "<td><b>ID#</b></td>\n";
  $ret .= "<td><b>Summary</b></td>\n";
  $ret .= "<td><b>Problem Area</b></td>\n";
@@ -143,22 +143,22 @@ body<=
      next unless (LJ::Support::can_read($sp, $remote));
 
      my $status = "open";
-     my $barbg = "BGCOLOR=#D0EED0";
-     if ($sp->{'timeclosed'}) { 
-         $status = "closed"; 
-         $barbg = "BGCOLOR=#EED0D0";
+     my $barbg = "bgcolor='#d0eed0'";
+     if ($sp->{'timeclosed'}) {
+         $status = "closed";
+         $barbg = "bgcolor='#eed0d0'";
      }
-     elsif ($sp->{'timelasthelp'} > $sp->{'timetouched'}+5) { 
-         $status = "answered<BR>awaiting close"; 
-         $barbg = "BGCOLOR=#EEEED0";
+     elsif ($sp->{'timelasthelp'} > $sp->{'timetouched'}+5) {
+         $status = "answered<br />awaiting close";
+         $barbg = "bgcolor='#eeeed0'";
      }
-     elsif ($sp->{'timelasthelp'} && $sp->{'timetouched'} > $sp->{'timelasthelp'}+5) { 
-         $status = "answered<BR><B>still needs help</B>"; 
-         $barbg = "BGCOLOR=#D0EED0";	 
+     elsif ($sp->{'timelasthelp'} && $sp->{'timetouched'} > $sp->{'timelasthelp'}+5) {
+         $status = "answered<br /><b>still needs help</b>";
+         $barbg = "bgcolor='#d0eed0'";
      }
-       
-     next if ($FORM{'state'} eq "green" && $barbg ne "BGCOLOR=#D0EED0");
-       
+
+     next if ($FORM{'state'} eq "green" && $barbg ne "bgcolor='#d0eed0'");
+
      my $summary = LJ::ehtml($sp->{'subject'});
      my $secold = time() - $sp->{'timecreate'};
      my $age = LJ::ago_text($secold);
@@ -166,17 +166,17 @@ body<=
      my $points = LJ::Support::calc_points($sp, $secold);
 
      unless ($status eq "closed") {
-         $status .= "<BR>($points point";
+         $status .= "<br />($points point";
          if ($points > 1) { $status .= "s"; }
          $status .= ")";
      }
 
-     $ret .= "<tr valign=top $barbg>\n";
+     $ret .= "<tr valign='top' $barbg>\n";
      $ret .= "<td><b><a href=\"see_request.bml?id=$sp->{'spid'}\">$sp->{'spid'}</a></b></td>\n";
      $ret .= "<td><b>$summary</b></td>\n";
      $ret .= "<td>$probarea</td>\n";
-     $ret .= "<td nowrap><font size=-1>$age</font></td>\n";
-     $ret .= "<td nowrap><font size=-1>$status</font></td>\n";
+     $ret .= "<td nowrap='nowrap'><font size='-1'>$age</font></td>\n";
+     $ret .= "<td nowrap='nowrap'><font size='-1'>$status</font></td>\n";
      $ret .= "</tr>";
 
  }
@@ -187,7 +187,7 @@ body<=
 _code?>
 
 <?hr?>
-Back to the <A HREF="./">support area</A>.
+<p>Back to the <a href="./">support area</a>.</p>
 
 <=body
 page?><?_c <LJDEP>

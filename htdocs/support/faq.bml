@@ -64,20 +64,20 @@ p?>
      next if $GET{'cat'} && $GET{'cat'} ne $faqcat;
      $ret .= "<?h2 ";
      $ret .= LJ::ehtml($faqcat{$faqcat}->{'faqcatname'});
-     $ret .= " (<a href=\"faqbrowse.bml?faqcat=$faqcat\">";
+     $ret .= " (<a href='faqbrowse.bml?faqcat=$faqcat'>";
      $ret .= "view all";
      $ret .= "</a>) h2?>\n";
-     $ret .= "<UL>\n";
+     $ret .= "<ul>\n";
      foreach my $faqid (sort { $faqq{$a}->{'sortorder'} <=> $faqq{$b}->{'sortorder'} } grep { $faqq{$_}->{'faqcat'} eq $faqcat } keys %faqq)
      {
          next unless ($faqq{$faqid}->{'question'});
          BML::note_mod_time($faqq{$faqid}->{'lastmodtime'});	 
          my $q = LJ::ehtml($faqq{$faqid}->{'question'});
          $q =~ s/^\s+//; $q =~ s/\s+$//;
-         $q =~ s/\n/<BR>/g;
-         $ret .= "<LI><A HREF=\"faqbrowse.bml?faqid=$faqid\">$q</A>\n";
+         $q =~ s/\n/<br />/g;
+         $ret .= "<li><a href='faqbrowse.bml?faqid=$faqid'>$q</a></li>\n";
      }
-     $ret .= "</UL>\n";
+     $ret .= "</ul>\n";
  }
 
 return $ret;
@@ -85,7 +85,7 @@ return $ret;
 _code?>
 
 <?hr?>
-Back to <A HREF="./">the support area</A>.
+<p>Back to <a href="./">the support area</a>.</p>
 
 <=body
 page?><?_c <LJDEP>

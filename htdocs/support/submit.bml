@@ -8,9 +8,9 @@ code=>0
 file=>support-currentproblems
 _include?>
 
-<p>From here you can ask a question about <?_code return $LJ::SITENAMESHORT; _code?>.  Make sure you&#39;ve already checked the <A HREF="faq.bml"><B>Frequently Asked Questions</B></A>.
+<p>From here you can ask a question about <?_code return $LJ::SITENAMESHORT; _code?>.  Make sure you&#39;ve already checked the <a href="faq.bml"><b>Frequently Asked Questions</b></a>.</p>
 
-<FORM METHOD=POST ACTION="submit_do.bml">
+<form method="post" action="submit_do.bml">
 
 <?_code
 
@@ -31,28 +31,27 @@ _include?>
  }
 
  $ret .= <<"END";
-<P><B>Your name:</B><BR>
-<INPUT NAME="reqname" SIZE=40 MAXLENGTH=50 VALUE=\"$eh{'name'}\">
-
-<P><B>Are you a $LJ::SITENAMESHORT user?</B><BR>
-<TABLE>
-<TR VALIGN=TOP>
-<TD ROWSPAN=2><INPUT TYPE="radio" NAME="reqtype" VALUE="user" CHECKED></TD><TD>Yes.</TD></TR>
-<TR><TD>Username: <INPUT NAME="user" SIZE=15 MAXLENGTH=15 VALUE=\"$eh{'user'}\">  Password: <INPUT TYPE=password NAME="password" SIZE=15 VALUE=\"$eh{'password'}\"><br />
-<?de (Replies to your request will be sent to the e-mail address associated with your $LJ::SITENAMESHORT account) de?></TD></TR>
-<TR VALIGN=TOP>
-<TD ROWSPAN=2><INPUT TYPE="radio" NAME="reqtype" VALUE="email"></TD><TD>No.</TD></TR>
-<TR><TD>Your email address: <INPUT NAME="email" SIZE=30 MAXLENGTH=70> (not shown to the public)
-</TABLE>
+<p><b>Your name:</b><br />
+<input name="reqname" size='40' maxlength='50' value=\"$eh{'name'}\" /></p>
+<p><b>Are you a $LJ::SITENAMESHORT user?</b><br />
+<table>
+<tr valign='top'>
+<td rowspan='2'><input type='radio' name='reqtype' value='user' checked='checked' /></td><td>Yes.</td></tr>
+<tr><td>Username: <input name='user' size='15' maxlength='15' value='$eh{'user'}' />  Password: <input type='password' name='password' size='15' value='$eh{'password'}' /><br />
+<?de (Replies to your request will be sent to the e-mail address associated with your $LJ::SITENAMESHORT account) de?></td></tr>
+<tr valign='top'>
+<td rowspan='2'><input type="radio" name="reqtype" value="email" /></td><td>No.</td></tr>
+<tr><td>Your email address: <input name="email" size='30' maxlength='70' /> (not shown to the public)</td></tr>
+</table>
 END
 
  return $ret;
 
 _code?>
 
-<P><B>Problem Area</B><BR>
+<p><b>Problem Area</b><br />
 Select what in particular you're having a problem with:
-<UL><SELECT NAME="spcatid">
+<div style='margin-left: 30px'><select name="spcatid">
 <?_code
  my $ret = "";
  my $dbr = LJ::get_db_reader();
@@ -60,30 +59,28 @@ Select what in particular you're having a problem with:
                          "WHERE is_selectable='1' ORDER BY sortorder");
  $sth->execute;
  while ($_ = $sth->fetchrow_hashref) {
-     $ret .= "<OPTION VALUE=$_->{'spcatid'}>$_->{'catname'}\n";
+     $ret .= "<option value='$_->{'spcatid'}'>$_->{'catname'}</option>\n";
  }
  return $ret;
 _code?>
-</SELECT></UL>
+</select></div></p>
 
-<P><B>Problem summary</B><BR>
+<p><b>Problem summary</b><br />
 Enter a descriptive one-line summary of the problem you're having.  A good example would be "Client crashes in friends dialog".  A bad example would be "URGENT! plz hlp me!!!! THX!!!".
-<UL>
-<INPUT NAME="subject" SIZE=40 MAXLENGTH=80>
-</UL>
+<div style='margin-left: 30px'>
+<input name="subject" size='40' maxlength='80' />
+</div></p>
 
-<P><B>Problem</B><BR>
-And finally, enter your support request.  If you want an intelligent fast answer, please <B>provide as much detail as possible</B>.  The only rule is do <B>NOT GIVE OUT YOUR PASSWORD</B> because many people could read this request, not just <?_code return $LJ::SITENAMESHORT; _code?> staff.
-<UL>
-<TEXTAREA NAME="message" ROWS=20 COLS=50 WRAP=SOFT></TEXTAREA>
-</UL>
+<p><b>Problem</b><br />
+And finally, enter your support request.  If you want an intelligent fast answer, please <b>provide as much detail as possible</b>.  The only rule is do <b>NOT GIVE OUT YOUR PASSWORD</b> because many people could read this request, not just <?_code return $LJ::SITENAMESHORT; _code?> staff.
+<div style='margin-left: 30px'>
+<textarea name="message" rows='20' cols='50'></textarea>
+</div></p>
 
-<P><B>Done?</B><BR>
-When done, press <INPUT TYPE=SUBMIT VALUE="Submit">.
-</FORM>
+<p><b>Done?</b><br />When done, press <input type='submit' value="Submit" />.</p></form>
 
 <?hr?>
-Back to the <A HREF="./">support area</A>.
+<p>Back to the <a href="./">support area</a>.</p>
 
 <=body
 page?><?_c <LJDEP>

@@ -44,7 +44,7 @@ The following people have helped other users in the support area:
  @rows = @{$items{'items'}};
 
  my $ret = $navbar;
- $ret .= "<p><table>";
+ $ret .= "<table>";
  my $rank = 0;
  my $lastpoints = 0;
  my $buildup = 0;
@@ -77,7 +77,7 @@ The following people have helped other users in the support area:
      my $name = LJ::ehtml($_->{'name'});
      $ret .= "<tr><td align=\"right\">$rank.</td><td>$change</td><td><?ljuser $_->{'user'} ljuser?> - $name</td><td><b>$_->{'points'} point$s</b></td></tr>\n";
  }
- $ret .= "</table></p>";
+ $ret .= "</table>";
  $ret .= "<p><b>$total</b> total supporting users, <b>$count</b> displayed.</p>";
  $ret .= $navbar;
  return $ret;

@@ -62,12 +62,12 @@ body<=
  
     my $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
     
-    return "Your $LJ::SITENAMESHORT support request has been filed and will be answered as soon as possible.  Your request tracking number is <B>$spid</B>.  You can track its progress here: <UL><A HREF=\"$url\">$url</A></UL>";    
+    return "Your $LJ::SITENAMESHORT support request has been filed and will be answered as soon as possible.  Your request tracking number is <B>$spid</B>.  You can track its progress here: <div style='margin-left: 30px'><a href='$url'>$url</a></div>";
 }
 _code?>
 
 <?hr?>
-Back to the <A HREF="./">support area</A>.
+<p>Back to the <a href="./">support area</a>.</p>
 
 <=body
 page?><?_c <LJDEP>

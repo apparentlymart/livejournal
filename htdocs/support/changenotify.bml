@@ -29,7 +29,7 @@ body<=
      $ret .= "<form method='post' action='changenotify.bml'>\n";
      $ret .= "<input type='hidden' name='mode' value='save' />\n";
 
-     $ret .= "<?h1 Change Notification Settings h1?><?p Here you may select what categories of support requests you'd like to be notified about.  Choices are <B>off</B> (the default), <B>new</B> (you'll get notifications when a new support request in that category is posted) or <B>all</B> (you'll get notifications and then a copy of each comment/solution posted). p?>";
+     $ret .= "<?h1 Change Notification Settings h1?><?p Here you may select what categories of support requests you'd like to be notified about.  Choices are <b>off</b> (the default), <b>new</b> (you'll get notifications when a new support request in that category is posted) or <b>all</b> (you'll get notifications and then a copy of each comment/solution posted). p?>";
 
      my %notify;
      my $dbr = LJ::get_db_reader();
@@ -44,28 +44,28 @@ body<=
          }
      }
 
-     my %valname = ("" => "Off.",
+     my %valname = ("off" => "Off.",
                     "new" => "New only.",
                     "all" => "All",
                     );
 
-     $ret .= "<UL>\n";
+     $ret .= "<div style='margin-left: 30px'>\n";
      foreach my $cat (@filter_cats) {
-         $ret .= "<P><SELECT NAME=\"spcatid_$cat->{'spcatid'}\">";
-         foreach my $val ("", "new", "all") {
+         $ret .= "<p><select name='spcatid_$cat->{'spcatid'}'>";
+         foreach my $val ("off", "new", "all") {
              my $sel = "";
-             if ($notify{$cat->{'spcatid'}} eq $val) { $sel = " SELECTED"; }
-             $ret .= "<OPTION VALUE=\"$val\"$sel>$valname{$val}\n";
+             if ($notify{$cat->{'spcatid'}} eq $val) { $sel = " selected='selected'"; }
+             $ret .= "<option value='$val'$sel>$valname{$val}</option>\n";
          }
-         $ret .= "</SELECT> $cat->{'catname'}\n";
+         $ret .= "</select> $cat->{'catname'}</p>\n";
      }
-     $ret .= "</UL>\n";
+     $ret .= "</div>\n";
 
 
      ### ending submit block
      $ret .= "<?h1 Done? h1?><?p When done, press the \"Save Changes\" button below... p?>\n";
-     $ret .= "<?standout <INPUT TYPE=SUBMIT VALUE=\"Save Changes\"> standout?>\n";
-     $ret .= "</FORM>\n";
+     $ret .= "<?standout <input type='submit' value='Save Changes' /> standout?>\n";
+     $ret .= "</form>\n";
 
      return $ret;
  }
