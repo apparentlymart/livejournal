@@ -4,14 +4,17 @@
 #
 
 use strict;
+use lib "$ENV{LJHOME}/cgi-bin";
+
 use Getopt::Long;
 use File::Path ();
 use File::Basename ();
 use File::Copy ();
 use Image::Size ();
-BEGIN { require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
-        require "$ENV{'LJHOME'}/cgi-bin/ljviews.pl"; }
+BEGIN { require "ljlib.pl";
+        require "ljviews.pl"; }
 use LJ::S2;
+use MogileFS;
 
 my $opt_sql = 0;
 my $opt_drop = 0;
