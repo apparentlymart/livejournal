@@ -31,7 +31,6 @@ my %stats = (); # { 'stat' => 'value' }
 my %handle;
 
 # database handle retrieval sub
-my $dbtime; # number of times we've gotten a handle so we can make them stale
 my $get_db_handles = sub {
     # figure out what cluster to load
     my $cid = shift(@_) + 0;
@@ -176,7 +175,6 @@ my $move_user = sub {
 
                 my $blob = LJ::Blob::get($u, "userpic", $fmt, $picid);
                 my $length = length($blob);
-                $blob = undef;
 
                 push @insertvars, $u->{'userid'}, $domainid, $picid, $length;
             }
