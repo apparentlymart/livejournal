@@ -96,6 +96,7 @@ sub run_task
     open (LOCK, ">$LOCKDIR/mainttask-$task");
     if (flock (LOCK, LOCK_EX|LOCK_NB)) {
         require "$MAINT/$maintinfo{$task}->{'source'}";
+        $LJ::LJMAINT_VERBOSE = $VERBOSE;
         &{ $maint{$task} }(@args);
     } else {
         print "Task '$task' already running.  Quitting.\n" if ($VERBOSE >= 1);

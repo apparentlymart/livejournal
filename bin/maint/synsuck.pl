@@ -14,6 +14,8 @@ $maint{'synsuck'} = sub
     my $dbh = $dbs->{'dbh'};
     my $dbr = $dbs->{'reader'};
     my $sth;
+
+    my $verbose = $LJ::LJMAINT_VERBOSE;
     
     my $ua =  LWP::UserAgent->new("timeout" => 10);
 
@@ -32,7 +34,7 @@ $maint{'synsuck'} = sub
                      undef, $minutes, $status, $userid);
         };
 
-        print "Synsuck: $user ($synurl)\n";
+        print "Synsuck: $user ($synurl)\n" if $verbose;
 
         my $req = HTTP::Request->new("GET", $synurl);
         $req->header('If-Modified-Since', LJ::time_to_http($lastmod))
@@ -49,7 +51,7 @@ $maint{'synsuck'} = sub
 
         # check if not modified
         if ($res->status_line() =~ /^304/) {
-            print "  not modified.\n";
+            print "  not modified.\n" if $verbose;
             $delay->($readers ? 60 : 24*60, "notmodified");
             next;
         }
@@ -78,7 +80,7 @@ $maint{'synsuck'} = sub
         if ($encoding =~ /^iso-8859-1$/i && $content =~ /[\x80-\x9F]/) {
             # They claimed they were iso-8859-1, but they are lying.
             # Assume it was Windows-1252.
-            print "Invalid ISO-8859-1; assuming Windows-1252...\n";
+            print "Invalid ISO-8859-1; assuming Windows-1252...\n" if $verbose;
             $content =~ s/encoding=([\"\'])(.+?)\1/encoding='windows-1252'/;
         }
 
@@ -89,7 +91,7 @@ $maint{'synsuck'} = sub
         };
         if ($@) {
             # parse error!
-            print "Parse error!\n";
+            print "Parse error!\n" if $verbose;
             $delay->(3*60, "parseerror");
             my $err = $@;
             $err =~ s! at /.*!!;
@@ -117,15 +119,15 @@ $maint{'synsuck'} = sub
             $sth->execute($userid);
             die $udbh->errstr if $udbh->err;
             while (my ($jitemid, $anum) = $sth->fetchrow_array) {
-                print "DELETE itemid: $jitemid, anum: $anum... \n";
+                print "DELETE itemid: $jitemid, anum: $anum... \n" if $verbose;
                 if (LJ::delete_item2($dbh, $udbh, $userid, $jitemid, 0, $anum)) {
-                    print "success.\n"; 
+                    print "success.\n" if $verbose;
                 } else {
-                    print "fail.\n";
+                    print "fail.\n" if $verbose;
                 }
             }
         } else {
-            print "WARNING: syndicated user not on a cluster.  can't delete old stuff.\n";
+            print "WARNING: syndicated user not on a cluster.  can't delete old stuff.\n" if $verbose;
         }
         
         # determine if link tags are good or not, where good means
@@ -169,7 +171,7 @@ $maint{'synsuck'} = sub
                      undef, $userid, $dig);
 
             $newcount++;
-            print "$dig - $it->{'title'}\n";
+            print "$dig - $it->{'title'}\n" if $verbose;
             $it->{'description'} =~ s/^\s+//;
             $it->{'description'} =~ s/\s+$//;
             
@@ -234,7 +236,7 @@ $maint{'synsuck'} = sub
                 # second value, so they sort correctly:
                 sleep 1 if $pre_time == $post_time;
             } else {
-                print "  Error: $err\n";
+                print "  Error: $err\n" if $verbose;
                 $errorflag = 1;
             }
         }
