@@ -21,6 +21,7 @@ die "Usage: blobify_userpics.pl <clusterid>\n"
 my $db = LJ::get_cluster_master($clusterid);
 die "Invalid/down cluster: $clusterid\n" unless $db;
 
+print "Getting count.\n";
 my $total = $db->selectrow_array("SELECT COUNT(*) FROM userpicblob2");
 my $done = 0;
 
@@ -28,6 +29,7 @@ my $loop = 1;
 while ($loop) {
     $loop = 0;
     LJ::start_request();  # shrink caches
+    print "Getting 200.\n";
     my $sth = $db->prepare("SELECT userid, picid, imagedata FROM userpicblob2 LIMIT 200");
     $sth->execute;
     while (my ($uid, $picid, $image) = $sth->fetchrow_array) {
@@ -58,7 +60,7 @@ while ($loop) {
         $db->do("DELETE FROM userpicblob2 WHERE userid=$uid AND picid=$picid");
 
         $done++;
-        printf " Moved $picid.$fmt ($done/$total = %.2f%%)\n", ($done / $total * 100);
+        printf " Moved $uid/$picid.$fmt ($done/$total = %.2f%%)\n", ($done / $total * 100);
     }
 }
 

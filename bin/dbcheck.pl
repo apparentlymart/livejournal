@@ -155,7 +155,7 @@ my $check = sub {
 	    }
 	} else {
 	    $diff = "XXXXXXX";
-	    push @errors, "Slave not running: $d->{name}";
+	    push @errors, "Slave not running: $d->{name}: $ss->{Last_error}";
 	}
     } else {
 	$diff = "-";  # not applicable

@@ -33,6 +33,16 @@ sub handler
     my $cleanup = $callback eq "PerlCleanupHandler";
     my $childinit = $callback eq "PerlChildInitHandler";
 
+    if ($LJ::TRACK_URL_ACTIVE)
+    {
+	my $key = "url_active:$LJ::SERVER_NAME:$$";
+	if ($cleanup) {
+	    LJ::MemCache::delete($key);
+	} else {
+	    LJ::MemCache::set($key, $r->uri . "(" . $r->method . "/" . scalar($r->args) . ")");
+	  }
+    }
+
     my ($active, $free) = count_servers();
 
     $free += $cleanup;
