@@ -128,6 +128,7 @@ my $replace_into = sub {
     }
 };
 
+my $bufread;
 
 if ($sclust == 0)
 {
@@ -145,6 +146,38 @@ if ($sclust == 0)
     my @itemids = reverse @{$dbh->selectcol_arrayref("SELECT itemid FROM log ".
                                                      "WHERE ownerid=$u->{'userid'} ".
                                                      "ORDER BY ownerid, rlogtime")};
+
+    my %bfd;  # buffer read data.  halfquery -> { 'rows' => { id => [] }, 
+              #                                   'remain' => [], 'loaded' => { id => 1 } }
+    $bufread = sub
+    {
+        my ($hq, $itemid) = @_;
+        if (not defined $bfd{$hq}->{'loaded'}->{$itemid})
+        {
+            if (not exists $bfd{$hq}->{'remain'}) {
+                $bfd{$hq}->{'remain'} = [ @itemids ];
+            }
+
+            my @todo;
+            for (1..20) {
+                next unless @{$bfd{$hq}->{'remain'}};
+                my $id = shift @{$bfd{$hq}->{'remain'}};
+                push @todo, $id;
+                $bfd{$hq}->{'loaded'}->{$id} = 1;
+            }
+
+            if (@todo) {
+                my $sql = "$hq WHERE itemid IN (" . join(",", @todo) . ")";
+                my $sth = $dbh->prepare($sql);
+                $sth->execute;
+                while (my $r = $sth->fetchrow_hashref) {
+                    push @{$bfd{$hq}->{'rows'}->{$r->{'itemid'}}}, $r;
+                }
+            }
+        }
+
+        return shift @{$bfd{$hq}->{'rows'}->{$itemid}};
+    };
 
     my $todo = @itemids;
     my $done = 0;
@@ -282,8 +315,8 @@ sub movefrom0_logitem
 {
     my $itemid = shift;
 
-    my $item = $dbh->selectrow_hashref("SELECT * FROM log WHERE itemid=$itemid");
-    my $itemtext = $dbh->selectrow_hashref("SELECT subject, event FROM logtext WHERE itemid=$itemid");
+    my $item = $bufread->("SELECT * FROM log", $itemid);
+    my $itemtext = $bufread->("SELECT itemid, subject, event FROM logtext", $itemid);
     return 1 unless $item && $itemtext;   # however that could happen.
 
     # we need to allocate a new jitemid (journal-specific itemid) for this item now.
@@ -334,13 +367,10 @@ sub movefrom0_logitem
     }
 
     # copy its logprop over:
-    my $logprops = $dbh->selectall_arrayref("SELECT propid, value FROM logprop WHERE itemid=$itemid");
-    if ($logprops) {
-        foreach (@$logprops) {
-            next unless $_->[1];
-            $replace_into->("logprop2", "(journalid, jitemid, propid, value)", 50,
-                            $userid, $jitemid, @$_);
-        }
+    while (my $lp = $bufread->("SELECT itemid, propid, value FROM logprop", $itemid)) {
+        next unless $lp->{'value'};
+        $replace_into->("logprop2", "(journalid, jitemid, propid, value)", 50,
+                        $userid, $jitemid, $lp->{'propid'}, $lp->{'value'});
     }
 
     # copy its syncitems over (always type 'create', since a new id)
