@@ -29,7 +29,7 @@ BODY<=
      my $pre = shift;
      my $post = shift;
      my $msg = $errors{$key};
-     return "" unless $msg;
+     return unless $msg;
      return "$pre(=INERR $msg INERR=)$post";
  };
  

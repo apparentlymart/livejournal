@@ -123,7 +123,7 @@ _INFO=)(=_CODE
 	    print "</livejournal>\n";
 	}
 
-	return "";
+	return;
 
 _CODE=)(=_C <LJDEP>
 </LJDEP> _C=)

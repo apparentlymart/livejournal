@@ -9,12 +9,12 @@
  if ($view ne "month") {
      $title = "Error";
      $body .= "Unknown view.";
-     return "";
+     return;
  }
  unless ($user) {
      $title = "Error";
      $body .= "No user given.";
-     return "";
+     return;
  }
  
  my $dbs = LJ::get_dbs();
@@ -25,7 +25,7 @@
  unless ($u) {
      $title = "Error";
      $body .= "User doesn't exist.";
-     return "";
+     return;
  }
 
  my $remote = LJ::get_remote($dbs);
@@ -137,7 +137,7 @@
  if ($lday) { $body .= "</table></dd>\n"; }
  $body .= "</dl>";
 
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

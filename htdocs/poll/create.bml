@@ -492,7 +492,7 @@ sub make_code {
  }
 
  # close off the CODE block
- return "";
+ return;
 
  _CODE=)
 (=PAGE 

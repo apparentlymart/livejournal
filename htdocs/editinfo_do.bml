@@ -4,7 +4,7 @@
      print "Location: $LJ::SITEROOT/editinfo.bml\n\n";
      exit;
  }
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>Edit Personal Information

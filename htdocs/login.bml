@@ -23,7 +23,7 @@ P=)
      my $eh_ref = LJ::ehtml($ENV{'HTTP_REFERER'});
      return "<input type=\"hidden\" NAME=\"ref\" value=\"$eh_ref\">\n";
  }
- return "";
+ return;
 _CODE=)
 </td></tr>
 <tr><td></td><td align="left"><input type="submit" value="Login...">

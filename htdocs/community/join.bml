@@ -12,7 +12,7 @@
  my $remote = LJ::get_remote($dbh);
  unless ($remote) {
      $body = "(=H1 Sorry.. H1=)(=P To join a community you must first <A HREF=\"/login.bml?ret=1\">log in</A>. P=)";
-     return "";
+     return;
  }
 
  ### get info about the community
@@ -64,16 +64,16 @@
      } else {
 	 $body .= "(=P Although you are now listed as a member, this community only allows posting by authorized users.  Contact <A HREF=\"/userinfo.bml?userid=$ci->{'ownerid'}\">the community maintainer</A> if you desire posting access. P=)";
      }
-     return "";
+     return;
      
  } else {
 
      $body .= "(=H1 You sure? H1=)(=P Press the button below to join the \"$ci->{'name'}\" community.";
      $body .= "<FORM METHOD=POST ACTION=\"join.bml\"><input type=hidden name=cuserid value=$cuserid><input type=hidden name=confirm value=1><center><input type=submit value=\"Join Community\"></FORM> P=)";
-     return "";
+     return;
  }
 
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

@@ -35,7 +35,7 @@
  
  unless ($res{'frgrp_maxnum'}) {
      $body = "(=H1 Sorry... H1=)(=P You cannot filter your friends list because you must first <A HREF=\"/friends/editgroups.bml\">setup your friend groups</A>. P=)";
-     return "";
+     return;
  }
 
  my %group;
@@ -59,7 +59,7 @@
 
  $body .= "<P><input type=submit value=\"View!\"> <input type=reset value=\"Clear\"></ul>If you want to edit your friends groups, <A HREF=\"editgroups.bml\">go here</A>.";
 
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

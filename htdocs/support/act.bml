@@ -15,7 +15,7 @@
  if ($action eq "close") {
      $title = "Request #$spid";
  }
- return "";
+ return;
  
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
@@ -81,7 +81,7 @@ BODY<=
      return "(=H1 Closed H1=)(=P The support request has been closed. P=)";
  }
 
- return "";
+ return;
 
 _CODE=)
 

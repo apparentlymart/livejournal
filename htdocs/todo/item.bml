@@ -30,7 +30,7 @@
      unless ($it) {
 	 $title = "Not found";
 	 $body = "(=H1 Not found H1=)(=P The requested to-do item was not found. P=)";
-	 return "";
+	 return;
      }
      
      $u = LJ::load_userid($dbs, $it->{'journalid'});
@@ -39,14 +39,14 @@
 	 unless ($remote && $remote->{'userid'} == $it->{'journalid'}) {
 	     $title = "Sorry...";
 	     $body = "(=H1 Security H1=)(=P The requested to-do item is private and can only be viewed by the owner. P=)";
-	     return "";
+	     return;
 	 }
      }
      if ($it->{'security'} eq "friends") {
 	 unless (LJ::is_friend($dbs, $u, $remote))
 	     $title = "Sorry...";
 	     $body = "(=H1 Security H1=)(=P The requested to-do item marked 'friends only' by the owner. P=)";
-	     return "";
+	     return;
 	 }
      }
 
@@ -70,7 +70,7 @@
      unless ($FORM{'subject'} =~ /\S+/) {
 	 $title = "Error";
 	 $body = "(=H1 Need a subject! H1=)(=P You can't have a to-do item without a subject.  That's the one mandatory field. P=)";
-	 return "";
+	 return;
      }
 
      my $todoid = $FORM{'id'}+0;
@@ -84,12 +84,12 @@
 	 unless ($permission{'edit'}) {
 	     $title = "Error";
 	     $body = "(=H1 Permission Denied H1=)(=P You don't have permission to edit a to-do item in this journal. P=)";
-	     return "";
+	     return;
 	 }
 
 	 $sth = $dbh->prepare("UPDATE todo SET statusline=$q{'statusline'}, subject=$q{'subject'}, security=$q{'security'}, des=$q{'des'}, priority=$q{'priority'}, datedue=$q{'datedue'}, progress=$q{'progress'}, dateupdate=NOW() WHERE todoid=$todoid");
 	 $sth->execute;
-	 if ($dbh->err) { $title = "Error"; $body = $dbh->errstr; return ""; }
+	 if ($dbh->err) { $title = "Error"; $body = $dbh->errstr; return; }
 	 
 	 $title = "Modified";
 	 $body = "(=H1 Success H1=)(=P The todo item was modified.  You can view it <a href=\"item.bml?id=$todoid\">here</a> or view the <a href=\"./?user=$u->{'user'}\">updated list</a>. P=)";
@@ -98,7 +98,7 @@
 	 unless ($permission{'add'}) {
 	     $title = "Error";
 	     $body .= "(=H1 Permission Denied H1=)(=P You don't have permission to add a to-do item to this journal. P=)";
-	     return "";
+	     return;
 	 }
 	 
 	 ## check to see if user's todo list is full
@@ -110,7 +110,7 @@
 		 $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
 	     }
 	     $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time.  P=)";
-	     return "";
+	     return;
 	 }
 
 	 $sth = $dbh->prepare("INSERT INTO todo (todoid, journalid, posterid, ownerid, statusline, security, subject, des, priority, datecreate, dateupdate, datedue, dateclosed, progress) VALUES (NULL, $u->{'userid'}, $remote->{'userid'}, $u->{'userid'}, $q{'statusline'}, $q{'security'}, $q{'subject'}, $q{'des'}, $q{'priority'}, NOW(), NULL, $q{'datedue'}, NULL, $q{'progress'})");
@@ -129,7 +129,7 @@
 	 if (scalar(@keywords) > 10) { 
 	     $title = "Error";
 	     $body = "(=H1 Error H1=)(=P Only 10 categories are allowed per to-do item. P=)";
-	     return "";
+	     return;
 	 }
 	 @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
 	 my @kwid;
@@ -138,7 +138,7 @@
 	     if (length($kw) > 20) {
 		 $title = "Error";
 		 $body = "(=H1 Error H1=)(=P This category exceeds the maximum allowed size: \"$kw\" P=)";
-		 return "";
+		 return;
 	     }
 	     
 	     my $kwid = LJ::get_keyword_id($dbh, $kw);
@@ -153,7 +153,7 @@
 	 }
 
      }
-     return "";
+     return;
  }
 
  if ($FORM{'mode'} eq "add") { 
@@ -178,7 +178,7 @@
 	     $atype = "<a href=\"$LJ::HELPURL{'accounttype'}\">$atype</a>";
 	 }
 	 $body .= "(=H1 Too many items... H1=)(=P Your $atype is limited to $max_items to-do items at a time. P=)";
-	 return "";
+	 return;
      }
 
  } else {
@@ -283,7 +283,7 @@
 
  $body .= "</FORM>\n";
 
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

@@ -36,11 +36,11 @@
      if ($error) {
 	 $title = "Error";
 	 $body .= $error;
-	 return "";
+	 return;
      }
      $title = "Submitted!";
      $body .= "(=H1 Thanks.... H1=)(=P Your poll answers have been submitted. P=)";
-     return "";
+     return;
  }
 
  unless ($pollid) {

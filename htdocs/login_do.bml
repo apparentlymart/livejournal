@@ -50,7 +50,7 @@
      print "Location: $FORM{'ref'}\n\n";
      $body = ""; 
      BML::finish();
-     return "";
+     return;
  }
  
  $body = "(=H1 Logged in! H1=)";
@@ -74,7 +74,7 @@
  $body .= "<li>...";
  $body .= "</ul>";
  
- return "";
+ return;
  
  _CODE=)(=_INFO
 NOCACHE=>1

@@ -8,7 +8,7 @@
  unless (defined $remote) {
      $title = "Add Memory";
      $body = "You must be <A HREF=\"/login.bml?ret=1\">logged in</A> to use this feature.  Go login and you'll be brought back here.";
-     return "";
+     return;
  }
 
  $title = "Add to Memories";
@@ -27,7 +27,7 @@
  unless ($log) {
      $title = "Error";
      $body = "No such journal entry";
-     return "";
+     return;
  }
 
  # check to see if it already is memorable (thus we're editing, not adding);
@@ -105,7 +105,7 @@
      $body .= "</td></tr>";
      $body .= "</TABLE>";
 
-     return "";
+     return;
  }
 
  if ($FORM{'mode'} eq "save") 
@@ -117,11 +117,11 @@
 	     $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
 	     $title = "Deleted";
 	     $body = "(=H1 Memory deleted H1=)(=P The journal entry previously described as \"$memory->{'des'}\" has been removed from your list of memorable posts P=)";
-	     return "";	     
+	     return;	     
 	 } else {
 	     $title = "Error";
 	     $body = "(=H1 No description H1=)(=P To add a journal entry to your list of memories, you need to provide a description.  To delete a memory, you can edit it and remove the description, but you didn't already have this entry in your memories. P=)";
-	     return "";
+	     return;
 	 }
      }
 
@@ -136,7 +136,7 @@
      if (scalar(@keywords) > 5) { 
 	 $title = "Error";
 	 $body = "(=H1 Error H1=)(=P Only 5 keywords/categories are allowed per memorable post. P=)";
-	 return "";
+	 return;
      }
      @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
      push @keywords, "*" unless (@keywords);
@@ -146,7 +146,7 @@
 	 if (length($kw) > 40) {
 	     $title = "Error";
 	     $body = "(=H1 Error H1=)(=P This keyword exceeds the maximum allowed size: \"$kw\" P=)";
-	     return "";
+	     return;
 	 }
 
 	 my $kwid = LJ::get_keyword_id($dbs, $kw);
@@ -156,7 +156,7 @@
      unless (exists $secopts{$FORM{'security'}}) {
 	 $title = "Error";
 	 $body = "Invalid or missing security option.";
-	 return "";
+	 return;
      }
 
      my $qdes = $dbh->quote($FORM{'des'});
@@ -189,13 +189,13 @@
 
      $title = "Added";
      $body = "(=H1 Success H1=)(=P Your list of memorable posts has been updated. P=)";
-     return "";
+     return;
  }
 
  $title = "Error";
  $body = "Unknown mode";
 
- return "";
+ return;
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)
 BODY<=

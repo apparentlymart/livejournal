@@ -49,7 +49,7 @@
      }
 
      $body .= "(=HR=)&lt;&lt; <a href='meme.bml'>Back to Meme Listing</a>";
-     return "";
+     return;
  }
 
  $body .= "(=H1 Top 40 $LJ::SITENAME Memes H1=)\n";
@@ -69,7 +69,7 @@
  }
  $body .= "</table>";
  $sth->finish;
- return "";
+ return;
  
 
 _CODE=)(=PAGE

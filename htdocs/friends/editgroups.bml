@@ -9,7 +9,7 @@
  my $remote = LJ::get_remote($dbs);
  unless ($remote) {
      $body = "(=H1 Login First H1=)(=P To edit your friend groups you must first <A HREF=\"/login.bml?ret=1\">log in</A>. P=)";
-     return "";
+     return;
  }
 
  if ($FORM{'mode'} eq "save") {
@@ -26,7 +26,7 @@
      } else {
 	 $body .= "(=H1 Error H1=)(=P Server says: <B>$res{'errmsg'}</B> P=)";
      }
-     return "";
+     return;
  }
 
  my %res;
@@ -316,7 +316,7 @@ END_JS
  $body .= "(=H1 Done? H1=)(=P When you're all done, press <INPUT TYPE=submit VALUE=\"Save\"> P=)\n";
  $body .= "</FORM>\n";
 
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

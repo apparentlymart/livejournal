@@ -103,7 +103,7 @@
 	 $body .= "</UL> P=)";
      }
      
-     return "";
+     return;
  }
 
  #### edit mode
@@ -191,7 +191,7 @@
      $body = "(=H1 No Pictures H1=)(=P You have no pictures uploaded.  To upload one, go <A HREF='/uploadpic.bml$authlink'>here</A>. P=)";
  }
  
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

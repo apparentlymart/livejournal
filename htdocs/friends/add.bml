@@ -13,14 +13,14 @@
  {
      $title = "Add Friend";
      $body = "(=H1 Login First H1=)(=P To add a user to your friends list you must first go and <A HREF=\"/login.bml?ret=1\">log in</A>.  If you don't already have an account you can <a href=\"/create.bml\">create one</a> to track your friend's journals. P=)";
-     return "";
+     return;
  }
 
  unless ($user && $userid) 
  {
      $title = "Error";
      $body = "Invalid or missing username given.  To add a friend, go to the <A HREF=\"/friends/edit.bml\">edit friends</A> page.";
-     return "";
+     return;
  }
  
  if ($FORM{'mode'} eq "add") 
@@ -28,7 +28,7 @@
      unless (LJ::did_post()) { 
 	 $title = "Error";
 	 $body = "(=H1 Error H1=)(=P (=REQUIREPOST=) P=)";
-	 return "";
+	 return;
      }
 
      my $gmask = 1;
@@ -56,7 +56,7 @@
 	 $title = "Error";
 	 $body = "(=H1 Error H1=)(=P $res{'errmsg'} P=)";
      }
-     return "";
+     return;
  }
 
  # check to see if user is already a friend.
@@ -151,7 +151,7 @@
 
  $body .= "</form>";
 
- return "";
+ return;
      
 _CODE=)
 (=PAGE

@@ -10,7 +10,7 @@
  my $remote = LJ::get_remote($dbs);
  unless ($remote) {
      $body .= "(=H1 Login first... H1=)(=P To use this feature, you must first <a href=\"/login.bml?ret=1\">login</a>. P=)";
-     return "";
+     return;
  }
 
  $body .= "Below are the birthdays for everybody that you list as a friend.";
@@ -32,7 +32,7 @@
      
  }
 
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

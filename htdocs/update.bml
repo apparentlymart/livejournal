@@ -10,7 +10,7 @@
 
  if ($LJ::SERVER_DOWN) {
      $body = LJ::server_down_html();
-     return "";
+     return;
  }
 
  my $dbs = LJ::get_dbs();
@@ -65,7 +65,7 @@
      else
      {
 	 $body .= "(=P Error logging on: <UL><LI><B>(=_EH $res{'errmsg'} _EH=)</B></UL> P=)";
-	 return "";
+	 return;
      }
 
      ## see if an "other" mood they typed in has an equivalent moodid
@@ -121,10 +121,10 @@
      else
      {
 	 $body .= "(=P Error updating journal: <UL><LI><B>(=_EH $res{'errmsg'} _EH=)</B></UL> P=)";
-	 return "";
+	 return;
      }
      
-     return "";     
+     return;     
  }
 
  if ($mode eq "" || $mode eq "full") 
@@ -317,7 +317,7 @@ JAVASCRIPT_STUFF
  unless ($remote) {
      $body .= "(=H1 Forget something? H1=)(=P If you forgot your username or password, <A HREF=\"lostinfo.bml\">recover it here!</A>. P=)";
  }
- return "";
+ return;
 }
 
 _CODE=)(=PAGE

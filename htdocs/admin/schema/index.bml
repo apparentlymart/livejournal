@@ -39,13 +39,13 @@
 	 $body .= "</td><td>$des</td></tr>\n";b
      }
      $body .= "</table>\n";
-     return "";
+     return;
  }
 
  if ($FORM{'mode'} eq "viewtable") 
  {
      my $table = $FORM{'table'};
-     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return ""; }
+     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return; }
      my $qtable = $dbh->quote($table);
 
      $sth = $dbh->prepare("SELECT des, public_browsable FROM schematables WHERE tablename=$qtable");
@@ -108,12 +108,12 @@
 	 $body .= "</tr>\n";
      }
      $body .= "</table>\n";
-     return "";	 
+     return;	 
  }
 
  if ($FORM{'mode'} eq "viewdata") {
      my $table = $FORM{'table'};
-     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return ""; }
+     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return; }
 
      my $MAX_ROWS = 100;
 
@@ -122,7 +122,7 @@
      $sth = $dbh->prepare("SELECT tablename, public_browsable, des FROM schematables WHERE tablename='$table'");
      $sth->execute;
      my ($tablename, $public, $des) = $sth->fetchrow_array;
-     unless ($public) { $body .= "This table's data is not public.\n"; return ""; }
+     unless ($public) { $body .= "This table's data is not public.\n"; return; }
 
      $sth = $dbh->prepare("SELECT * FROM $table LIMIT $MAX_ROWS");
      $sth->execute;
@@ -140,15 +140,15 @@
 	 $body .= "</tr>\n";
      }
      $body .= "</table>\n";
-     return "";
+     return;
  }
 
  # show form to enter documentation
  if ($FORM{'mode'} eq "doc") 
  {
-     unless ($can_doc) { $body .= "You don't have permissions to document the schema."; return ""; }
+     unless ($can_doc) { $body .= "You don't have permissions to document the schema."; return; }
      my $table = $FORM{'table'};
-     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return ""; }
+     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return; }
 
      $body .= "<a href=\"./\">&lt;&lt; Tables</a>(=H1 Document Table: $table H1=)";
 
@@ -191,15 +191,15 @@
      }
      $body .= "</table>\n";
      $body .= "<p><input type=submit value=\"Save Changes\"></form>";
-     return "";	 
+     return;	 
  }
 
  # save documentation
  if ($FORM{'mode'} eq "docsave") 
  {
-     unless ($can_doc) { $body .= "You don't have permissions to document the schema."; return ""; }
+     unless ($can_doc) { $body .= "You don't have permissions to document the schema."; return; }
      my $table = $FORM{'table'};
-     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return ""; }
+     if ($table !~ /^\w+$/) { $body = "Invalid table name!\n"; return; }
 
      $body .= "<a href=\"./\">&lt;&lt; Tables</a>(=H1 Document Table: $table H1=)";
 
@@ -217,7 +217,7 @@
 	 # no row exists, so insert
 	 $dbh->do("INSERT INTO schematables (tablename, public_browsable, des) VALUES ($qtable, '0', $qdes)");
      }
-     if ($dbh->err) { $body .= $dbh->errstr; return ""; }
+     if ($dbh->err) { $body .= $dbh->errstr; return; }
 
      my %olddes;
      my %newdes;
@@ -230,7 +230,7 @@
      ### check new descriptions (only for valid columns)
      $sth = $dbh->prepare("DESCRIBE $table");
      $sth->execute;
-     if ($dbh->err) { $body .= $dbh->errstr; return ""; }
+     if ($dbh->err) { $body .= $dbh->errstr; return; }
      while (my $row = $sth->fetchrow_hashref)
      {
 	 my $name = $row->{'Field'};
@@ -249,16 +249,16 @@
 	 }
 	 chop $sql;
 	 $dbh->do($sql);
-	 if ($dbh->err) { $body .= "[3] ($sql)<p>" . $dbh->errstr; return ""; }
+	 if ($dbh->err) { $body .= "[3] ($sql)<p>" . $dbh->errstr; return; }
      }
 
      $body .= "(=H1 Success H1=)(=P Documentation saved. <a href=\"./?mode=viewtable&amp;table=$table\">View</a>. P=)";
 
-     return "";	 
+     return;	 
  }
 
 
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

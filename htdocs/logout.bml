@@ -30,7 +30,7 @@
      $body .= "(=P You are already logged out. P=)";
  }
  
- return "";
+ return;
 
 _CODE=)
 (=_INFO

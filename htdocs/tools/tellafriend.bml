@@ -12,7 +12,7 @@
 
  unless ($remote) {
      $body .= "(=H1 Sorry... H1=)(=P To use the \"Tell a Friend\" feature, you must first <a href=\"/login.bml?ret=1\">login</a>.  P=)(=P If we didn't require you to login for this, we'd be essentially providing an anonymous email gateway and there'd be tons of people abusing it and harassing each other.  (We tried this on another website once...)  P=)";
-     return "";
+     return;
  }
 
  my $u = LJ::load_userid($dbs, $remote->{'userid'});
@@ -23,7 +23,7 @@
  
  unless ($u->{'status'} eq "A") {
      $body .= "(=H1 Sorry... H1=)(=P Your current email address ($u->{'email'}) isn't validated, so we can't let you use the \"Tell a Friend\" feature.  To validate your email address, have the confirmation email resent at the <a href=\"/lostinfo.bml\">lost information</a> page, and then follow the instructions in it when you get it. P=)";
-     return "";
+     return;
  }
  
  if ($FORM{'mode'} eq "mail") 
@@ -43,7 +43,7 @@
      });
 
      $body .= "(=H1 Sent! H1=)(=P $FORM{'toemail'} has been mailed. P=)";    
-     return "";
+     return;
  }
 
  $body .= "<form method=post><input type=hidden name=mode value=mail>";
@@ -111,7 +111,7 @@
  $body .= "</table>";
 
 
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

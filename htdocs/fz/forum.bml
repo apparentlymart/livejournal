@@ -12,7 +12,7 @@ my $dbr = $dbs->{'reader'};
 
 my $u = LJ::load_user($dbs, $user);
 unless ($u) {
-	return "";
+	return;
 }
 my $user = $u->{'user'};
 

@@ -7,7 +7,7 @@
  if ($LJ::SERVER_DOWN) {
      $title = "Sorry";
      $body = LJ::server_down_html();
-     return "";
+     return;
  }
 
  my $dbs = LJ::get_dbs();
@@ -59,7 +59,7 @@
  unless ($u) {
      $title = "Error";
      $body = "(=H1 Unknown user H1=)(=P There does not exist a user with the username <B>$user</B>.  Sorry. P=)";
-     return "";
+     return;
  }
 
  my $remote_isfriend = LJ::is_friend($dbr, $u, $remote);
@@ -86,12 +86,12 @@
  if ($u->{'statusvis'} eq "S") {
      $title = "Suspended Account";
      $body = "(=H1 Suspended H1=)(=P This journal has been either temporarily or permanently suspended by $LJ::SITENAME for policy violation.  If you are <B>$user</B>, contact us for more information P=)";
-     return "";
+     return;
  }
  if ($u->{'statusvis'} eq "D") {
      $title = "Deleted Account";
      $body = "(=H1 Deleted H1=)(=P This journal has been deleted.  If you are <B>$user</B>, you have a period of 30 days from the deletion time to undelete the journal.  After 30 days we will delete all content permanently from our servers. P=)";
-     return "";
+     return;
  }
 
  $user = $u->{'user'};
@@ -492,7 +492,7 @@
  unless ($FORM{'mode'} eq "full") {
      $body .= "</TABLE>\n";
      $body .= "<P><CENTER><I><A HREF=\"/userinfo.bml?user=$u->{'user'}&amp;mode=full\">(more details...)</A></I></CENTER>";
-     return "";
+     return;
  }
  
 
@@ -616,7 +616,7 @@ $body .= "</TABLE>\n";
 # removed until we run graphviz locally
 # $body .= "<P><A HREF=\"/friends/graph.bml?user=$user\"><B>Graph of friends</B></A>";
 
-return "";
+return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

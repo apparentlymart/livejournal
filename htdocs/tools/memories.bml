@@ -18,7 +18,7 @@
  unless ($userid) {
      $title = "Error";
      $body = "Missing or invalid username.";
-     return "";
+     return;
  }
 
  my %filters = ("all" => "All Memories",
@@ -70,7 +70,7 @@
 	 $body .= "<p><LI><A HREF=\"/talkread.bml?itemid=$mem->{'itemid'}\"><b>$eh_des</b></A>$edit<BR><FONT SIZE=-1><B>$mem->{'user'}</B> \@ $eventtime</FONT>";
      }
      $body .= "</UL>";
-     return "";
+     return;
  }
 
  $title = "Memorable Posts";
@@ -112,7 +112,7 @@
  } else {
      $body .= "</UL>";
 }
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

@@ -14,7 +14,7 @@
 	 print "Status: 302 Found\n";
 	 print "Location: $LJ::SITEROOT/talkread.bml?itemid=$1\n\n";
 	 BML::finish;
-	 return "";
+	 return;
      }
 
      my $user = lc($FORM{'q'});
@@ -37,7 +37,7 @@
 	 print "Status: 302 Found\n";
 	 print "Location: $url\n\n";
 	 BML::finish;
-	 return "";
+	 return;
      } else {
 	 print "Status: 302 Found\n";
 	 print "Location: $LJ::SITEROOT/random.bml\n\n";
@@ -45,7 +45,7 @@
 
 	 $title = "No user";
 	 $body = "(=H1 Error H1=)(=P You did not enter a username. P=)";
-	 return "";
+	 return;
      }
  }
 
@@ -55,11 +55,11 @@
 	 print "Status: 302 Found\n";
 	 print "Location: $LJ::SITEROOT/interests.bml?int=" . LJ::eurl($int) . "\n\n";
 	 BML::finish;
-	 return "";
+	 return;
      } else {
 	 $title = "No Interest";
 	 $body = "(=H1 Error H1=)(=P You did not enter an interest. P=)";
-	 return "";
+	 return;
      }
  }
 
@@ -68,7 +68,7 @@
      unless ($email) {
 	 $title = "No Address";
 	 $body = "(=H1 Error H1=)(=P You did not enter an email address. P=)";
-	 return "";
+	 return;
      } else {
 	 my $qemail = $dbr->quote($email);
 	 my $sth = $dbr->prepare("SELECT u.user, up.value FROM user u, userproplist upl, userprop up WHERE u.journaltype='P' AND u.statusvis='V' AND u.allow_infoshow='Y' AND u.email=$qemail AND u.userid=up.userid AND up.upropid=upl.upropid AND upl.name='opt_whatemailshow' ORDER BY u.userid");
@@ -81,11 +81,11 @@
 	     print "Status: 302 Found\n";
 	     print "Location: $LJ::SITEROOT/userinfo.bml?user=$user\n\n";
 	     BML::finish;
-	     return "";
+	     return;
 	 } else {
 	     $title = "No Match";
 	     $body = "(=H1 Sorry.. H1=)(=P No LiveJournal user is listed as having that email address, or they've chosen to have their address be private. P=)";
-	     return "";
+	     return;
 	 }
      }
  }
@@ -101,11 +101,11 @@
 	 print "Status: 302 Found\n";
 	 print "Location: $LJ::SITEROOT/userinfo.bml?user=$user\n\n";
 	 BML::finish;
-	 return "";
+	 return;
      } else {
 	 $title = "No Match";
 	 $body = "(=H1 Sorry.. H1=)(=P No LiveJournal found matching that search criteria. P=)";
-	 return "";
+	 return;
      }
      
  }
@@ -116,7 +116,7 @@
      if (@parts==0 || @parts>3) {
 	 $title = "Format Error";
 	 $body .= "(=H1 Search by Region H1=)(=P You can search by region in one of the following formats: <ul><li>Country<li>City *<li>City, State *<li>State, Country<li>City, State, Country</ul>Notes:<ul><li>* searching for only a city or a city and state defaults to assuming the country is the United States.<li>Country can either be the country's full name, or its two letter country code</ul>If you want to do a different type of search, check out the <a href=\"/directorysearch.bml\">directory search</a>. P=)";
-	 return "";
+	 return;
      }
      
      my ($qarg, $sth);
@@ -147,10 +147,10 @@
      print "Status: 302 Found\n";
      print "Location: $LJ::SITEROOT/directory.bml?s_loc=1&loc_cn=$country&loc_st=$state&loc_ci=$city&opt_sort=ut&opt_format=pics&opt_pagesize=50\n\n";
      BML::finish();
-     return "";
+     return;
  }
 
- return "";
+ return;
 
 _CODE=)(=PAGE
 TITLE=>(=_CODE return $title; _CODE=)

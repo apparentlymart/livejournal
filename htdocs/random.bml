@@ -12,7 +12,7 @@
  
  print "Location: $LJ::SITEROOT/users/$user/\n\n";
  
- return "";
+ return;
 
 _CODE=)(=_INFO
 NOHEADERS=>1
