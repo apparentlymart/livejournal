@@ -34,6 +34,14 @@ BML::register_hook("startup", sub {
     };
 });
 
+BML::register_hook("codeerror", sub {
+    my $msg = shift;
+    if ($msg =~ /Can\'t call method.*on an undefined value/) {
+        return "Sorry, database temporarily unavailable.";
+    }
+    return "<b>[Error: $msg]</b>";
+});
+
 if ($LJ::UNICODE) {
     BML::set_default_content_type("text/html; charset=utf-8");
 }
