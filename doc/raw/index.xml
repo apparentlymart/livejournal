@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE set SYSTEM "/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd" [
+<!ENTITY % content SYSTEM "entities/content.ent">
+%content;
+]>
+<set id="index" status="prelim">
+<setinfo>
+  <title>LiveJournal</title>
+  <subtitle>The Complete Documentation</subtitle>
+  <edition>LiveJournal Documentation Set Version 1.0</edition>
+  <authorgroup>
+    &author.jproulx;
+    &author.bradfitz;
+  </authorgroup>
+  <abstract>
+    <para>
+      This is the complete documentation of LiveJournal, which spans three books. Each book has been tailored to a specific audience, so most likely you will only need to reference one book.
+    </para>
+  </abstract>
+  <copyright>
+    <year>2001</year>
+    <holder>LiveJournal.com</holder>
+  </copyright>
+</setinfo>
+&lj.index;
+&ljp.book;
+</set>
