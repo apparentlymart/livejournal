@@ -136,17 +136,17 @@ d.close();
      if ($res{'friend_count'})
      {
          $ret .= "(=H1 Your Friends H1=)(=P You have the following friends currently defined: P=)\n";
-         $ret .= "<P><center><TABLE><TR><TD WIDTH=150><B>Friend</B></TD><TD WIDTH=250><B>Name</B></TD><TD ALIGN=CENTER><B>Delete?</B></TD></TR>\n";
+         $ret .= "<p><center><table><tr align='left'><td width='150'><b>Friend</b></td><td width='250'><b>Name</b></td><td align='center'><b>Delete?</b></td></tr>\n";
          for (my $i=1; $i<=$res{'friend_count'}; $i++)
          {
 	     my $fruser = $res{"friend_${i}_user"};
 	     my $bgcolor = $res{"friend_${i}_bg"} || "#FFFFFF";
 	     my $fgcolor = $res{"friend_${i}_fg"} || "#000000";
-	     $ret .= "<TR><TD>(=LJUSER $fruser LJUSER=)</FONT></TD>";
-	     $ret .= "<TD BGCOLOR=$bgcolor><FONT COLOR=$fgcolor>" . BMLUtil::escapeall($res{"friend_${i}_name"}) . "</FONT></TD>";
-	     $ret .= "<TD ALIGN=CENTER><INPUT TYPE=checkbox VALUE=1 NAME=\"editfriend_delete_${fruser}\"></TD></TR>\n";
+	     $ret .= "<tr><td align='left'>(=LJUSER $fruser LJUSER=)</td>";
+	     $ret .= "<td bgcolor='$bgcolor'><font color='$fgcolor'>" . BMLUtil::escapeall($res{"friend_${i}_name"}) . "</font></td>";
+	     $ret .= "<td align='center'><input type='checkbox' value='1' name=\"editfriend_delete_${fruser}\"></td></tr>\n";
          }
-         $ret .= "</TABLE></center>\n";
+         $ret .= "</table></center></p>\n";
          
      }
      else
