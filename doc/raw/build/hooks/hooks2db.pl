@@ -203,8 +203,8 @@ $hooks{'userinfo_rows'} = {
             'name' => "\%args",
             'keys' => [
                 {
-                    'desc' => "Resource Object",
-                    'name' => "dbs",
+                    'desc' => "Resource Object (read-only)",
+                    'name' => "dbr",
                 },
                 {
                     'desc' => "User object",
