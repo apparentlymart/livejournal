@@ -22,7 +22,7 @@ sub handler
     my $cleanup = $callback eq "PerlCleanupHandler";
     my $childinit = $callback eq "PerlChildInitHandler";
 
-    my ($free, $active) = count_servers();
+    my ($active, $free) = count_servers();
 
     $free += $cleanup;
     $free += $childinit;
