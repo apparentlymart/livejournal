@@ -23,6 +23,10 @@
     $SERVER_DOWN_MESSAGE = "$SITENAME is down right now while we upgrade.  It should be up in a few minutes.";
 
     $DOMAIN = "lj.com";
+
+    # regexp to match domains that could load the site
+    $DOMAIN_RE = "(www\.)?\Q$DOMAIN\E";
+
     $SITEROOT = "http://www.$DOMAIN";   # could add a port number after this, like :8080
     $IMGPREFIX = "$SITEROOT/img";    
     $FTPPREFIX = "ftp://ftp.$DOMAIN"; # leave blank or undefined if you're not running an FTP server
