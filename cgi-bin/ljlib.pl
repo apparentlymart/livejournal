@@ -73,11 +73,30 @@ sub is_valid_authaction
 }
 
 #  DEPRECATED.  use LJ:: versions.
+sub can_use_journal { &connect_db(); return LJ::can_use_journal($dbh, @_); }
+sub connect_db { $dbh = ($BMLPersist::dbh = LJ::get_dbh("master")); }
+sub days_in_month { return LJ::days_in_month(@_); }
+sub get_friend_itemids { return LJ::get_friend_itemids($dbh, @_); }
+sub get_recent_itemids { &connect_db(); return LJ::get_recent_itemids($dbh, @_); }
 sub get_remote { &connect_db(); return LJ::get_remote($dbh, @_); }
 sub get_remote_noauth { return LJ::get_remote_noauth(); }
+sub get_userid { return &LJ::get_userid($dbh, @_); }
+sub get_username { return &LJ::get_username($dbh, @_); }
+sub html_select { return LJ::html_select(@_); }
+sub load_codes {  &connect_db(); LJ::load_codes($dbh, @_); }
+sub load_log_props { &connect_db(); return LJ::load_log_props($dbh, @_); }
+sub load_mood_theme { &connect_db(); return LJ::load_mood_theme($dbh, @_); }
+sub load_moods { &connect_db(); return LJ::load_moods($dbh); }
+sub load_user_props { &connect_db(); LJ::load_user_props($dbh, @_); }
+sub load_user_theme { &connect_db(); return LJ::load_user_theme(@_); }
+sub load_userpics { return &LJ::load_userpics($dbh, @_); }
+sub make_journal { connect_db(); return LJ::make_journal($dbh, @_); }
+sub make_text_link { return LJ::make_text_link(@_); }
+sub parse_vars { return LJ::parse_vars(@_); }
 sub remote_has_priv { return LJ::remote_has_priv($dbh, @_); }
 sub send_mail { return LJ::send_mail(@_); }
-
+sub server_down_html { return LJ::server_down_html(); }
+sub strip_bad_code { return LJ::strip_bad_code(@_); }
 
 sub register_authaction
 {
@@ -106,7 +125,6 @@ sub register_authaction
 	     };
     }
 }
-
 
 sub auth_fields
 {
@@ -143,7 +161,6 @@ sub auth_fields
 sub valid_password { return &LJ::valid_password(@_); }
 sub hash_password { return md5_hex($_[0]); }
 
-
 sub remap_event_links
 {
     my ($eventref, $baseurl) = @_;
@@ -159,13 +176,6 @@ sub abs_url
     $uri =~ s/^"//;
 	$uri =~ s/"$//;
     return url($uri)->abs($base)->as_string;
-}
-
-# deprecated.  use LJ::load_user_props
-sub load_user_props
-{
-    &connect_db();
-    LJ::load_user_props($dbh, @_);
 }
 
 sub set_userprop
@@ -194,34 +204,6 @@ sub set_userprop
     $dbh->do("REPLACE INTO $table (userid, upropid, value) VALUES ($userid, $p->{'upropid'}, $value)");
 }
 
-
-sub load_moods
-{
-    return if ($LJ::CACHED_MOODS);
-    &connect_db();
-    my $sth = $dbh->prepare("SELECT moodid, mood, parentmood FROM moods");
-    $sth->execute;
-    while (my ($id, $mood, $parent) = $sth->fetchrow_array) {
-	$LJ::CACHE_MOODS{$id} = { 'name' => $mood, 'parent' => $parent };
-	if ($id > $LJ::CACHED_MOOD_MAX) { $LJ::CACHED_MOOD_MAX = $id; }
-    }
-    $LJ::CACHED_MOODS = 1;
-}
-
-sub load_mood_theme
-{
-    my $themeid = shift;
-    return if ($LJ::CACHE_MOOD_THEME{$themeid});
-
-    &connect_db();
-    $themeid += 0;
-    my $sth = $dbh->prepare("SELECT moodid, picurl, width, height FROM moodthemedata WHERE moodthemeid=$themeid");
-    $sth->execute;
-    while (my ($id, $pic, $w, $h) = $sth->fetchrow_array) {
-	$LJ::CACHE_MOOD_THEME{$themeid}->{$id} = { 'pic' => $pic, 'w' => $w, 'h' => $h };
-    }
-}
-
 ##
 ## returns 1 and populates %$retref if successful, else returns 0
 ##
@@ -245,24 +227,6 @@ sub get_mood_picture
     while ($moodid);
     return 0;
 }
-
-
-sub server_down_html
-{
-    return LJ::server_down_html();
-}
-
-sub make_journal
-{
-    connect_db();
-    return LJ::make_journal($dbh, @_);
-}
-
-## DEPRECATED:
-sub load_codes {  &connect_db(); LJ::load_codes($dbh, @_); }
-sub get_userid { return &LJ::get_userid($dbh, @_); }
-sub get_username { return &LJ::get_username($dbh, @_); }
-sub load_userpics { return &LJ::load_userpics($dbh, @_); }
 
 sub ago_text
 {
@@ -337,8 +301,6 @@ sub prepare_currents
 	}
     }
 }
-    
-
 
 sub fill_var_props
 {
@@ -513,11 +475,7 @@ sub age
     return "$age $unit";
 }
 
-# XXX DEPRECATED
-sub strip_bad_code
-{
-    return &LJ::strip_bad_code(@_);
-}
+
 
 sub self_link
 {
@@ -551,9 +509,6 @@ sub make_link
     return $url;
 }
 
-
-#### UTILITY 
-
 sub trim
 {
     my $a = $_[0];
@@ -568,27 +523,6 @@ sub durl
     $a =~ tr/+/ /;
     $a =~ s/%([a-fA-F0-9][a-fA-F0-9])/pack("C", hex($1))/eg;
     return $a;
-}
-
-sub can_use_journal {
-    &connect_db();
-    return &LJ::can_use_journal($dbh, @_);
-}
-sub get_recent_itemids {
-    &connect_db();
-    return &LJ::get_recent_itemids($dbh, @_);
-}
-sub load_log_props {
-    &connect_db();
-    return &LJ::load_log_props($dbh, @_);
-}
-sub days_in_month {
-    return &LJ::days_in_month(@_);
-}
-
-sub html_select
-{
-    return LJ::html_select(@_);
 }
 
 sub html_datetime_decode
@@ -643,28 +577,26 @@ sub get_query_string
     return $q;
 }
 
-# this is here only for upwards compatability.  the good function to use is
-# LJ::get_dbh, which this function now calls.
-sub connect_db
-{
-    $dbh = ($BMLPersist::dbh = LJ::get_dbh("master"));
-}
-
-sub parse_vars
-{
-    return &LJ::parse_vars(@_);
-}
-
-sub load_user_theme
-{
-    &connect_db();
-    return &LJ::load_user_theme(@_);
-}
-
-sub make_text_link { return LJ::make_text_link(@_); }
-sub get_friend_itemids { return LJ::get_friend_itemids($dbh, @_); }
 
 package LJ;
+
+sub load_mood_theme
+{
+    my $dbarg = shift;
+    my $themeid = shift;
+    return if ($LJ::CACHE_MOOD_THEME{$themeid});
+
+    my $dbs = make_dbs_from_arg($dbarg);
+    my $dbr = $dbs->{'reader'};
+
+    $themeid += 0;
+    my $sth = $dbr->prepare("SELECT moodid, picurl, width, height FROM moodthemedata WHERE moodthemeid=$themeid");
+    $sth->execute;
+    while (my ($id, $pic, $w, $h) = $sth->fetchrow_array) {
+	$LJ::CACHE_MOOD_THEME{$themeid}->{$id} = { 'pic' => $pic, 'w' => $w, 'h' => $h };
+    }
+    $sth->finish;
+}
 
 sub load_props
 {

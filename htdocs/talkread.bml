@@ -171,7 +171,7 @@ BODY<=
 	 my $mid = $logprops{$itemid}->{'current_moodid'};
 	 if ($mid) {
 	     my $theme = $up->{'moodthemeid'};
-	     &load_mood_theme($theme);
+  	     LJ::load_mood_theme($dbs, $theme);
 	     my %pic;
 	     if (&get_mood_picture($theme, $mid, \%pic)) {
 		 $current{'Mood'} = "<IMG SRC=\"$pic{'pic'}\" ALIGN=ABSMIDDLE WIDTH=$pic{'w'} HEIGHT=$pic{'h'} VSPACE=1> $LJ::CACHE_MOODS{$mid}->{'name'}";
