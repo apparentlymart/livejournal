@@ -16,6 +16,11 @@
 | dormando |
 +----------+
 
+* User journal stats
+  - how to obtain (log grepping vs. update set count=count+1)
+  - how to store/index
+  - code to do it all & view
+  - security userprop: who can view my journal's stats?
 * Netsaint on mayor.
 * Write new netsaint modules (warning if slaves are too far behind, 
   using an updated db_check script, etc.)
@@ -104,6 +109,8 @@ HIGH PRIORITY:
 
 MISC:
 
+* Syndicating channels:
+     http://www.livejournal.com/talkread.bml?itemid=14311193
 * htdocs/userpic: why use LJ::Cache at all if we're using disk now?
 * htdocs/userpic: doesn't clean disk cache yet
 * /fz/ joins on logtext (requires master) 
