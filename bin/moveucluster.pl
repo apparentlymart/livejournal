@@ -1,4 +1,12 @@
 #!/usr/bin/perl
+#
+# TODO:
+#   -- check CLUSTER_PAIR_ACTIVE a/b status before/after move for both
+#      src/dst and fail if modified.
+#   -- also check READ_ONLY and see if it changed as well.
+#   -- see we use HANDLER, check SHOW STATUS about flushes and
+#      don't commit move if there were any flushes (which resets handlers)
+#
 ##############################################################################
 
 =head1 NAME
@@ -418,7 +426,7 @@ sub moveUser {
     {
         die "Failed to set readonly bit on user: $user\n";
     }
-    $dbh->do("SELECT RELEASE_LOCK('moveucluster-$user')");
+    $dbh->do("SELECT RELEASE_LOCK('moveucluster-$u->{userid}')");
 
     unless ($opts->{prelocked}) {
         # wait a bit for writes to stop if journal is somewhat active (last week update)
