@@ -99,12 +99,14 @@ body<=
         # no existing style found, create a new one
         unless ($u->{'s2_style'}) {
             $style{'user'} = $style{'theme'} = $style{'i18nc'} = $style{'i18n'} = 0;
-            $style{'layout'} = $layid;
-            $style{'core'} = $coreid;
-            $implicit_style_create->();
         }
 
-        # if we're using an existing style, no need to modify style layers now
+        # even if we're using an existing style that we found by name (uniq), we need to
+        # set layout and core layers to make sure the style still has the proper layout
+        $style{'layout'} = $layid;
+        $style{'core'} = $coreid;
+
+        $implicit_style_create->();
 
         return BML::redirect("/customize/?journal=$u->{'user'}");
     }
@@ -124,7 +126,6 @@ body<=
         }
 
         $implicit_style_create->();
-        LJ::S2::set_style_layers($u, $u->{'s2_style'}, %style);
 
         return BML::redirect("/customize/layer.bml?w=user&journal=$authas");
     }
