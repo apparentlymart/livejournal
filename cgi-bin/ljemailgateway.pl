@@ -33,6 +33,8 @@ sub process {
     return $err->("No PIN specified.") unless $pin;
 
     my @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
+    return $err->("No allowed senders have been saved for your account.")
+        unless scalar(@address) > 0;
     my $ok = 0;
     foreach (@address) {
         $ok = 1 if lc eq lc($from);
@@ -42,6 +44,8 @@ sub process {
 
     return $err->("Email gateway access denied for your account type.")
         unless LJ::get_cap($u, "emailpost");
+
+    $body =~ s/^[\-_]{2,}\s*\r?\n.*//ms; # trim sigs
 
     my $req = {
         'usejournal' => $journal,
