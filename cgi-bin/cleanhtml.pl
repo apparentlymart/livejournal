@@ -126,7 +126,8 @@ sub clean
 		    # but the images directory).  also, force absolute URLs.
 		    if (($hash->{'src'} !~ m!^http://!) ||
 			(($hash->{'src'} =~ m!^http://$LJ::DOMAIN_RE/!) &&
-			 ($hash->{'src'} !~ m!^http://$LJ::DOMAIN_RE/img/!)))
+			 ($hash->{'src'} !~ m!^http://$LJ::DOMAIN_RE/img/!) &&
+			 ($hash->{'src'} !~ m!^http://$LJ::DOMAIN_RE/userpic/!)))
 		    {
 			$hash->{'src'} = "about:";
 		    }
