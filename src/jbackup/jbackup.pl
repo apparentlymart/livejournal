@@ -88,7 +88,8 @@ exit 1 unless
                "password=s" => \$opts{password},
                "md5pass=s" => \$opts{md5password},
                "alter-security=s" => \$opts{alter_security},
-               "confirm-alter" => \$opts{confirm_alter},);
+               "confirm-alter" => \$opts{confirm_alter},
+               "no-comments" => \$opts{no_comments},);
 
 # hit up .jbackup for other options
 if (-e "$ENV{HOME}/.jbackup") {
@@ -128,6 +129,7 @@ jbackup.pl -- journal database generator and formatter
 
   Data update options:
     --sync          Update or create the database.
+    --no-comments   Do not update comment information.  (Much faster.)
 
   Journal modification options:
     --alter-security=X  Change the security setting of your public entries.
@@ -283,6 +285,9 @@ sub do_sync {
     }
 
 ### COMMENT DOWNLOADING ###
+    # see if we shouldn't be doing this
+    return if $opts{no_comments};
+
     # first we hit up the server to get a session
     my $hash = call_xmlrpc('sessiongenerate', { expiration => 'short' });
     my $ljsession = $hash->{ljsession};
