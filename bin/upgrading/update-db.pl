@@ -273,6 +273,14 @@ sub load_table_columns
     }
 }
 
+sub table_relevant
+{
+    my $table = shift;
+    return 1 unless $cluster;
+    return 1 if $clustered_table{$table};
+    return 0;
+}
+
 sub column_type
 {
     my ($table, $col) = @_;

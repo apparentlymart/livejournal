@@ -1286,7 +1286,7 @@ register_alter(sub {
 		 "'comment', 'internal', 'screened') NOT NULL");
 	
     }
-    if (column_type("supportcat", "catkey") eq "") 
+    if (table_relevant("supportcat") && column_type("supportcat", "catkey") eq "") 
     {
 	do_alter("supportcat",
 		 "ALTER TABLE supportcat ADD catkey VARCHAR(25) AFTER spcatid");
@@ -1334,7 +1334,7 @@ register_alter(sub {
     # upgrade people to the new capabilities system.  if they're
     # using the the paidfeatures column already, we'll assign them
     # the same capability bits that ljcom will be using.
-    if (column_type("user", "caps") eq "")
+    if (table_relevant("user") && column_type("user", "caps") eq "")
     {
 	do_alter("user",
 		 "ALTER TABLE user ADD ".
@@ -1356,7 +1356,7 @@ register_alter(sub {
 		 "ALTER TABLE user DROP paidfeatures, DROP paiduntil, DROP paidreminder");
     }
 
-    if (column_type("log", "revttime") eq "")
+    if (table_relevant("log") && column_type("log", "revttime") eq "")
     {
 	do_alter("log",
 		 "ALTER TABLE log DROP INDEX eventtime, ADD COLUMN rlogtime INT UNSIGNED NOT NULL DEFAULT 0, ADD COLUMN revttime INT UNSIGNED NOT NULL DEFAULT 0, ADD INDEX rlogtime (ownerid, rlogtime), ADD INDEX revttime (ownerid, revttime), ADD INDEX posterid (posterid, ownerid)");
