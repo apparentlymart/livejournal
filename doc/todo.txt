@@ -3,37 +3,82 @@
 
 AWAITING MERGE:
 
-* option to strip target= on <a> on friends pages (halkeye)
-* goatctl
+* postevent duplicate locking (avva: somewhat good patch, is
+  going to improve it)
+
+SYSADMIN THINGS:
+
+* bugzilla
+
+* netsaint improvements
+
+SHERM:
+
+* billing systems
 
 DORMANDO:
 
-* statserv
-* netsaint
-* bugzilla
+* statserv (rate limiting detection daemon)
+
+* bandwidth limiting per-connection for free users
 
 AVVA:
 
-* utf8
-* releases
+-- username renames
+
+-- screened comments
+
+-- moderated communities
+
+-- releases
+
+DOCUMENTATION: (JPROULX)
+
+-- all LJFUNC, return values, semantics, uses.
+
+-- all dbtables: cross-ref everything, describe format of data
+   in columns, etc
+
+-- how to modify site-local text (like: en_LJ from en)
+
 
 ANYBODY:
+
+-- redo system of sending mail out.  ideally, LJ::send_mail tries
+   to use Net::SMTP first to $LJ::SMTP_SERVER and if that fails
+   or isn't defined, then puts it in a new database table to be
+   re-sent later.
+
+-- better RSS support
+
+-- community option management page
+
+     - create new community (with invite code)
+     - flip between communities (like editinfo.bml)
+     - change options
+     - add/remove members/posters/"sharedjournal" admins
+
+   shouldn't need to use console!  /community/create.bml should
+   die.
+
+-- Windows syncitem client.  Use Perl+Win::Forms+ActiveState compiler
+   ... make local GDBM/etc file.  Export to HTML/XML/etc from that
+   file.
+
+-- user journal stats (have most of plan)
+
+-- ESN system (Event/Subscription/Notification) (have plan/API)
+
+-- new logprop:  no_emails (comments on, emails off)
+
+-- new logprop:  comments_until = "yyyymmmdd" on which date talkpost
+   won't accept new comments or replies.
 
 * need a 'replyanywhere' priv that lets site admins reply in journals
   that are friends only, when the site admins aren't part of the
   community.
 
-* suspended/deleted users shouldn't show up in community journals
-
-* suspended/deleted talkread/post pages shouldn't show
-
-* need 
-
-* postevent duplicate locking (avva: somewhat good patch, is
-  going to improve it)
-
-* need a community admin page where the primary community
-  admin can give/remove 'sharedjournal' privs to secondary admins
+* suspended users shouldn't show up in community journals
 
 * fix LJ::get_itemid_{before|after} to respect security of $remote
 
@@ -66,10 +111,6 @@ talkleft_xfp investigation
 
 * journal titles vs. names:
     http://www.livejournal.com/talkread.bml?itemid=14018511
-
-* drop time* from user table.  (still used?)
-
-* directory.
 
 * S2.
 
@@ -115,18 +156,6 @@ MISC:
 * XHTML compliant everywhere
 * remove *_do.bml pages, merge into one page instead.
 
-+----------------+
-| Documentation: |
-+----------------+
-
-* LJDEP (halkeye, chrisg)
-* LJFUNC (bradfitz)
-* internals/system (dormando)
-* BML (avva)
-* guide
-* INSTALL
-    /inc/ protected
-
 +--------+
 | Future |
 +--------+
@@ -140,7 +169,6 @@ MISC:
    - allow touching by helpers
    - allow 5 minute locks
    - allow full email address to be shown to helpers
-* log merging 
 * use <label> and accesskey= everywhere, for accessibility and
   people that hate the mouse.
 * ability to further resrict HTML in comments in your journal:
