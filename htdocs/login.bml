@@ -98,20 +98,27 @@
                     "<img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' /><br />";
                 $body .= $secure;
             } else {
+                my $nojs = $GET{'nojs'};
+
                 my $login_btn_text = LJ::ejs($ML{'.login.btn.login'});
-                $body .= "<script>
-                    document.write(\"<input name='action:login' onclick='sendForm()' type='submit' value='$login_btn_text' />\");";
-                $body .= "
-                if (document.getElementById && document.getElementById('login')) {
-                    document.write(\"&nbsp; <img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' />\");
-                    document.write(\"<br />\");
-                    document.write(\"$secure\")
-                } ";
-                $body .= '</script>';
-                $body .= "<noscript><input name='action:login' type='submit' value='$ML{'.login.btn.login'}' />";
+                unless ($nojs) {
+                    $body .= "<script>
+                      document.write(\"<input name='action:login' onclick='sendForm()' type='submit' value='$login_btn_text' />\");";
+                    $body .= "
+                      if (document.getElementById && document.getElementById('login')) {
+                        document.write(\"&nbsp; <img src='$LJ::IMGPREFIX/icon_protected.gif' width='14' height='15' alt='secure login' align='middle' />\");
+                        document.write(\"<br />\");
+                        document.write(\"$secure\")
+                       } ";
+                    $body .= '</script>';
+                    $body .= "<noscript>";
+                }
+
+                $body .= "<input name='action:login' type='submit' value='$ML{'.login.btn.login'}' />";
                 $body .= "<br />" . "[ <b>Standard</b> | <a href='$LJ::SSLROOT/login.bml'>Secure</a> ]"
                     if $LJ::USE_SSL;
-                $body .= "</noscript>";
+
+                $body .= "</noscript>" unless $nojs;
             }
             $body .= LJ::help_icon('securelogin', '&nbsp;');
 
