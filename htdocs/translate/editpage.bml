@@ -194,6 +194,8 @@
          $num = 0;
      }
 
+     my $saved = 0;  # do any saves?
+
      for (my $i=1; $i<=$num; $i++)
      {
          next unless $FORM{"ed_$i"};
@@ -244,7 +246,7 @@
          
          # did anything even change, though?
          my $oldtext = $dbr->selectrow_array("SELECT text FROM ml_text WHERE dmid=$dom AND txtid=$lat->{'txtid'}");
-         if ($oldtext eq $text && $lat->{'staleness'} >= 2) {
+         if ($oldtext eq $text && $lat->{'staleness'} == 2) {
              push @errors, "Severity of source language change requires change in text for item '$itcode'";
              next;
          }
@@ -270,8 +272,11 @@
              push @errors, LJ::Lang::last_error();
          } else {
              push @info, "Saved: $itcode";
+             $saved = 1;
          }
      }
+
+     $dbh->do("UPDATE ml_langs SET lastupdate=NOW() WHERE lnid=$l->{'lnid'}") if $saved;
 
      if (@errors) {
          $ret .= "<b>ERRORS:</b><ul>";
