@@ -296,27 +296,29 @@ body<=
      $ret .= "<td>$probarea</td>\n";
      $ret .= "<td nowrap='nowrap'><font size='-1'>$age</font></td>\n";
 
-     # All depends on them having supportviewscreened for this category
-     # If a private category, do not show at all
      my $show = 0;
-     if (defined $screened_view[$sp->{'spid'}] && $screened_view[$sp->{'spid'}] == 0) {
-         $show = 0;
-     } elsif (defined $screened_view[$sp->{'spid'}] && $screened_view[$sp->{'spid'}] == 1) {
-         $show = 1;
-     } elsif ($cats->{$sp->{'spcatid'}}->{'public_read'}) {
-         my $cat_name = $cats->{$sp->{'spcatid'}}->{'catkey'};
-         my $c;
-         $c->{'_cat'} = $cats->{$sp->{'spcatid'}};
-         if (LJ::Support::can_read_screened($c, $remote)) {
+     if ($barbg eq 'green') {
+         # All depends on them having supportviewscreened for this category
+         # If a private category, do not show at all
+         if (defined $screened_view[$sp->{'spid'}] && $screened_view[$sp->{'spid'}] == 0) {
+             $show = 0;
+         } elsif (defined $screened_view[$sp->{'spid'}] && $screened_view[$sp->{'spid'}] == 1) {
              $show = 1;
-             $screened_view[$sp->{'spid'}] = 1;
+         } elsif ($cats->{$sp->{'spcatid'}}->{'public_read'}) {
+             my $cat_name = $cats->{$sp->{'spcatid'}}->{'catkey'};
+             my $c;
+             $c->{'_cat'} = $cats->{$sp->{'spcatid'}};
+             if (LJ::Support::can_read_screened($c, $remote)) {
+                 $show = 1;
+                 $screened_view[$sp->{'spid'}] = 1;
+             } else {
+                 $show = 0;
+                 $screened_view[$sp->{'spid'}] = 0;
+             }
          } else {
              $show = 0;
              $screened_view[$sp->{'spid'}] = 0;
          }
-     } else {
-         $show = 0;
-         $screened_view[$sp->{'spid'}] = 0;
      }
 
      $status .= "<br /><i>($sp->{'screened'} screened)</i>\n" if $show;
