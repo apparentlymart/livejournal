@@ -43,6 +43,10 @@
 * talklib.pl finishing (avva?)
 * store as UTF-8 in database (avva investigating)
 * ehtml current mood/music ?
+* bug: multiple talkread delete: /support/see_request.bml?id=10159
+* dakus: need to be able to mark support requests as "still needs help"
+* dakus: switch to next support request in category when closing one
+
 
 +-------------+
 | Cleanliness |
