@@ -51,7 +51,6 @@ require "$ENV{'LJHOME'}/cgi-bin/ljtodo.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljfeed.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljlinks.pl";
 require "$ENV{'LJHOME'}/cgi-bin/directorylib.pl";
-require "$ENV{'LJHOME'}/cgi-bin/ljemailgateway.pl";
 require "$ENV{'LJHOME'}/cgi-bin/emailcheck.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljmemories.pl";
 require "$ENV{'LJHOME'}/cgi-bin/ljmail.pl";

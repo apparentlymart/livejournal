@@ -8807,6 +8807,55 @@ sub is_open_proxy
     }
 }
 
+# Retreives an allowed email addr list for a given user object.
+# Returns a hashref with addresses / flags.
+# Used for ljemailgateway and manage/emailpost.bml
+sub get_allowed_senders {
+    my $u = shift;
+    my (%addr, @address);
+
+    LJ::load_user_props($u, 'emailpost_allowfrom');
+    @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
+    return undef unless scalar(@address) > 0;
+
+    my %flag_english = ( 'E' => 'get_errors' );
+
+    foreach my $add (@address) {
+        my $flags;
+        $flags = $1 if $add =~ s/\((.+)\)$//;
+        $addr{$add} = {};
+        if ($flags) {
+            $addr{$add}->{$flag_english{$_}} = 1 foreach split(//, $flags);
+        }
+    }
+
+    return \%addr;
+}
+
+# Inserts email addresses into the database.
+# Adds flags if needed.
+# Used in manage/emailpost.bml
+sub set_allowed_senders {
+    my ($u, $addr) = @_;
+    my %flag_letters = ( 'get_errors' => 'E' );
+
+    my @addresses;
+    foreach (keys %$addr) {
+        my $email = $_;
+        my $flags = $addr->{$_};
+        if (%$flags) {
+            $email .= '(';
+            foreach my $flag (keys %$flags) {
+                $email .= $flag_letters{$flag};
+            }
+            $email .= ')';
+        }
+        push(@addresses, $email);
+    }
+    close T;
+    LJ::set_userprop($u, "emailpost_allowfrom", join(", ", @addresses));
+}
+
 # loads an include file, given the bare name of the file.
 #   ($filename)
 # returns the text of the file.  if the file is specified in %LJ::FILEEDIT_VIA_DB

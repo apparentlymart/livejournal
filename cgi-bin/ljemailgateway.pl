@@ -42,7 +42,7 @@ sub process {
     my @froms = Mail::Address->parse($head->get('From:'));
     return unless @froms;
     my $from = $froms[0]->address;
-    my $addrlist = LJ::Emailpost::get_allowed_senders($u);
+    my $addrlist = LJ::get_allowed_senders($u);
     my $err_addr;
     foreach (keys %$addrlist) {
         if (lc($from) eq lc &&
@@ -421,53 +421,6 @@ sub process {
     return $err->(LJ::Protocol::error_message($post_error), { sendmail => 1}) if $post_error;
 
     return "Email post success";
-}
-
-# Retreives an allowed email addr list for a given user object.
-# Returns a hashref with addresses / flags.
-sub get_allowed_senders {
-    my $u = shift;
-    my (%addr, @address);
-
-    LJ::load_user_props($u, 'emailpost_allowfrom');
-    @address = split(/\s*,\s*/, $u->{emailpost_allowfrom});
-    return undef unless scalar(@address) > 0;
-
-    my %flag_english = ( 'E' => 'get_errors' );
-
-    foreach my $add (@address) {
-        my $flags;
-        $flags = $1 if $add =~ s/\((.+)\)$//;
-        $addr{$add} = {};
-        if ($flags) {
-            $addr{$add}->{$flag_english{$_}} = 1 foreach split(//, $flags);
-        }
-    }
-
-    return \%addr;
-}
-
-# Inserts email addresses into the database.
-# Adds flags if needed.
-sub set_allowed_senders {
-    my ($u, $addr) = @_;
-    my %flag_letters = ( 'get_errors' => 'E' );
-
-    my @addresses;
-    foreach (keys %$addr) {
-        my $email = $_;
-        my $flags = $addr->{$_};
-        if (%$flags) {
-            $email .= '(';
-            foreach my $flag (keys %$flags) {
-                $email .= $flag_letters{$flag};
-            }
-            $email .= ')';
-        }
-        push(@addresses, $email);
-    }
-    close T;
-    LJ::set_userprop($u, "emailpost_allowfrom", join(", ", @addresses));
 }
 
 # By default, returns first plain text entity from email message.
