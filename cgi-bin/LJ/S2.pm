@@ -22,6 +22,11 @@ use LJ::S2::ReplyPage;
 
 package LJ::S2;
 
+# TEMP HACK
+sub get_s2_reader {
+    return LJ::get_dbh("s2slave", "slave", "master");
+}
+
 sub make_journal
 {
     my ($u, $styleid, $view, $remote, $opts) = @_;
@@ -222,7 +227,7 @@ sub get_layers_of_user
     return $u->{'_s2layers'} if $u && $u->{'_s2layers'};
 
     my %layers;    # id -> {hashref}, uniq -> {same hashref}
-    my $dbr = LJ::get_db_reader();
+    my $dbr = LJ::S2::get_s2_reader();
 
     my $extrainfo = $is_system ? "'redist_uniq', " : "";
     my $sth = $dbr->prepare("SELECT i.infokey, i.value, l.s2lid, l.b2lid, l.type ".
@@ -282,7 +287,7 @@ sub get_style
     my $have_style = 0;
 
     if ($verify && $styleid) {
-        my $dbr = LJ::get_db_reader();
+        my $dbr = LJ::S2::get_s2_reader();
         my $style = $dbr->selectrow_hashref("SELECT * FROM s2styles WHERE styleid=$styleid");
         if (! $style && $u) {
             delete $u->{'s2_style'};
@@ -326,7 +331,7 @@ sub s2_context
     # when we can't get all the s2compiled stuff from memcache.
     # compare s2styles.modtime with s2compiled.comptime to see if memcache
     # version is accurate or not.
-    my $dbr = LJ::get_db_reader();
+    my $dbr = LJ::S2::get_s2_reader();
     my $modtime = S2::load_layers_from_db($dbr, @layers);
 
     # check that all critical layers loaded okay from the database, otherwise
@@ -454,7 +459,7 @@ sub load_user_styles
     my $opts = shift;
     return undef unless $u;
 
-    my $dbr = LJ::get_db_reader();
+    my $dbr = LJ::S2::get_s2_reader();
 
     my %styles;
     my $load_using = sub {
@@ -502,7 +507,7 @@ sub load_style
     my $id = shift;
     return undef unless $id;
 
-    $db ||= LJ::get_db_reader();
+    $db ||= LJ::S2::get_s2_reader();
     my $style = $db->selectrow_hashref("SELECT styleid, userid, name, modtime ".
                                        "FROM s2styles WHERE styleid=?",
                                        undef, $id);
@@ -591,7 +596,7 @@ sub set_style_layers
 
 sub load_layer
 {
-    my $db = ref $_[0] ? shift : LJ::get_db_reader();
+    my $db = ref $_[0] ? shift : LJ::S2::get_s2_reader();
     my $lid = shift;
 
     return $db->selectrow_hashref("SELECT s2lid, b2lid, userid, type ".
@@ -789,7 +794,7 @@ sub load_layer_info
     return 0 unless ref $listref eq "ARRAY";
     return 1 unless @$listref;
     my $in = join(',', map { $_+0 } @$listref);
-    my $dbr = LJ::get_db_reader();
+    my $dbr = LJ::S2::get_s2_reader();
     my $sth = $dbr->prepare("SELECT s2lid, infokey, value FROM s2info WHERE ".
                             "s2lid IN ($in)");
     $sth->execute;
