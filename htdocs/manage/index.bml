@@ -48,6 +48,15 @@ _code?>
          <dd><?_ml .customization.links.about _ml?></dd>
       </dl>
    </dd>
+   <dt><?_ml .customization.moodtheme.header _ml?></dt>
+    <dd>
+       <dl>
+          <dt><a href="/modify.bml"><?_ml .customization.moodtheme.set.header _ml?></a></dt>
+          <dd><?_ml .customization.moodtheme.set _ml?></dd>
+          <dt><a href="./moodthemes.bml"><?_ml .customization.moodtheme.editor.header _ml?></a></dt>
+          <dd><?_ml .customization.moodtheme.editor _ml?></dd>
+       </dl>
+    </dd>
 </dl>
 
 <?h1 <?_ml .entries.header _ml?> h1?>
