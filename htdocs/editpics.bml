@@ -28,24 +28,15 @@
         unless $u;
 
     my $returl = LJ::CleanHTML::canonical_url(LJ::durl($GET{'ret'}));
-
-    my $fotobilder = $returl ne '' && index $returl, $LJ::FB_DOMAIN >= 0
-        && defined $GET{'urlpic'} && $GET{'urlpic'} =~ m!$LJ::FB_SITEROOT/~?$remote->{'user'}/pic/! ? 1 : 0;
+    my $picurl = LJ::CleanHTML::canonical_url(LJ::durl($GET{'urlpic'}));
+    my $fotobilder = index($returl, $LJ::FB_DOMAIN >= 0) &&
+                     $picurl =~ m!^$LJ::FB_SITEROOT/~?$remote->{'user'}/pic/!;
 
     if ($fotobilder &&
         (LJ::check_referer($returl) || LJ::check_referer('/editpics.bml'))) {
 
         return $err->('Invalid referring site or redirection not allowed')
             unless $returl =~ /$LJ::FB_DOMAIN/ && LJ::get_cap($u, 'fb_account');
-    }
-
-    # extra arguments for get requests
-    my $getextra;
-    if ($authas ne $remote->{'user'}) {
-        $getextra = "?authas=$authas";
-        $getextra .= "&ret=" . LJ::eurl($returl) if $fotobilder;
-    } else {
-        $getextra = "?ret=" . LJ::eurl($returl) if $fotobilder;
     }
 
     if (LJ::get_cap($u, "readonly")) {
@@ -588,13 +579,36 @@
         # now fall through to edit page and show the updated userpic info
     }
 
+    if ($fotobilder && $GET{'md5sum'}) {
+        my $id;
+        if ($u->{'dversion'} > 6) {
+            $id = $dbcm->selectrow_array("SELECT picid FROM userpic2 WHERE userid=? " .
+                                         "AND md5base64=?", undef, $u->{'userid'}, $GET{'md5sum'});
+        } else {
+            $id = $dbh->selectrow_array("SELECT picid FROM userpic WHERE userid=? " .
+                                        "AND md5base64=?", undef, $u->{'userid'}, $GET{'md5sum'});
+        }
+
+        $fotobilder = 0 if $id;
+    }
+
+    # extra arguments for get requests
+    my $getextra;
+    if ($authas ne $remote->{'user'}) {
+        $getextra = "?authas=$authas";
+        $getextra .= "&ret=" . LJ::eurl($returl) if $fotobilder;
+    } else {
+        $getextra = "?ret=" . LJ::eurl($returl) if $fotobilder;
+    }
+
+
     # show the form to let people edit
     $title = "Edit User Pictures";
 
     # authas switcher form
     $body .= "<form method='get' action='editpics.bml'>\n";
     $body .= LJ::make_authas_select($remote, { 'authas' => $GET{'authas'} }) . "\n";
-    $body .= LJ::html_hidden('ret', $returl, 'urlpic', $GET{'urlpic'}) if $fotobilder;
+    $body .= LJ::html_hidden('ret', $returl, 'urlpic', $picurl) if $fotobilder;
     $body .= "</form>\n\n";
 
 
@@ -736,8 +750,8 @@
 
         if ($fotobilder) {
             $body .= "<tr><td colspan='3' align='center'>\n";
-            $body .= "<img src='" . LJ::CleanHTML::canonical_url($GET{'urlpic'}) . "' />";
-            $body .= LJ::html_hidden('src', 'url', 'urlpic', $GET{'urlpic'});
+            $body .= "<img src='$picurl' />";
+            $body .= LJ::html_hidden('src', 'url', 'urlpic', $picurl);
         } else {
             $body .= "<tr><td align='right'>\n";
             $body .= LJ::html_check({ 'type' => 'radio', 'name' => 'src', 'id' => 'radio_file',
