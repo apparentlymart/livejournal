@@ -44,21 +44,25 @@ BODY<=
 
  if ($action eq "close") {
      if ($sp->{'state'} eq "open") {
-	 $dbh->do("UPDATE support SET state='closed', timeclosed=UNIX_TIMESTAMP() WHERE spid=$spid");
 	 $splid += 0;
 	 if ($splid) {
-	     $sth = $dbh->prepare("SELECT userid, timelogged FROM supportlog WHERE splid=$splid");
+	     $sth = $dbh->prepare("SELECT userid, timelogged, spid, type FROM supportlog WHERE splid=$splid");
 	     $sth->execute;
-	     my ($userid, $timelogged) = $sth->fetchrow_array;
+	     my ($userid, $timelogged, $aspid, $type) = $sth->fetchrow_array;
+
+             if ($aspid != $spid) {
+                 return "(=H1 Error H1=)(=P The answer you credited for helping you out was not a response to your support request. If you copied a URL to get here, make sure you copied the entire URL correctly.P=)";
+             }
 
 	     ## can't credit yourself.
-	     if ($userid != $sp->{'requserid'}) {
+	     if ($userid != $sp->{'requserid'} && $type eq "answer") {
 		 my $cats = LJ::Support::load_cats($dbh, $sp->{'spcatid'});
 		 my $secold = $timelogged - $sp->{'timecreate'};
 		 my $points = LJ::Support::calc_points($sp, $secold);
 		 $dbh->do("INSERT INTO supportpoints (spid, userid, points) VALUES ($spid, $userid, $points)");
 	     }
 	 }
+         $dbh->do("UPDATE support SET state='closed', timeclosed=UNIX_TIMESTAMP() WHERE spid=$spid");
      }
 
      my $remote = LJ::get_remote($dbs);
