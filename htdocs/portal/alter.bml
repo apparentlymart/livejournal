@@ -125,8 +125,8 @@
  return;
 
 _code?><?page
-TITLE=><?_code return $title; _code?>
-BODY=><?_code return $body; _code?>
+title=><?_code return $title; _code?>
+body=><?_code return $body; _code?>
 page?><?_c <LJDEP>
 link: htdocs/portal/moz.bml, htdocs/portal/index.bml
 post: htdocs/portal/alter.bml

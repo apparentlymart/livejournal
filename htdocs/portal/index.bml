@@ -23,14 +23,14 @@
  return;
 
 _code?><?page
-TITLE=><?_code return $title; _code?>
+title=><?_code return $title; _code?>
 HEAD<=
 <?_c TODO: configurable meta tags could go here? _c?>
 <?_code
  return $head;
 _code?>
-<=HEAD
-BODYOPTS=><?_code return $bodyopts; _code?>
-BODY=><?_code return $body; _code?>
+<=head
+bodyopts=><?_code return $bodyopts; _code?>
+body=><?_code return $body; _code?>
 page?><?_c <LJDEP>
 </LJDEP> _c?>

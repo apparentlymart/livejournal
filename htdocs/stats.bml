@@ -1,5 +1,5 @@
 <?page
-TITLE=>Statistics
+title=>Statistics
 BODY<=
 
 <?h1 <?sitename?> Statistics h1?>
@@ -191,7 +191,7 @@ p?>
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/stats/, htdocs/support/faqbrowse.bml
 img: htdocs/img/bluedot.gif, htdocs/stats/postsbyday.png, htdocs/stats/postsbyweek.png, htdocs/stats/newbyday.png

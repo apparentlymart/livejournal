@@ -1,5 +1,5 @@
 <?page
-TITLE=>Create Style
+title=>Create Style
 BODY<=
 
 <?h1 Create a Style h1?>
@@ -60,7 +60,7 @@ standout?>
 
 </FORM>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/developer/embedding.bml, htdocs/developer/views.bml
 link: htdocs/paidaccounts/index.bml

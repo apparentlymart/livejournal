@@ -1,5 +1,5 @@
 <?page
-TITLE=>Export Journal
+title=>Export Journal
 
 BODY<=
 
@@ -65,7 +65,7 @@ standout?>
 If you forgot your username or password, <A HREF="lostinfo.bml">recover it here!</A>.
 p?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/lostinfo.bml
 post: htdocs/export_do.bml

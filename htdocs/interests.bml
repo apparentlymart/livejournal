@@ -1,5 +1,5 @@
 <?page
-TITLE=>Interests
+title=>Interests
 BODY<=
 
 <?_code
@@ -268,7 +268,7 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/interests.bml, htdocs/editinfo.bml
 post: htdocs/interests.bml

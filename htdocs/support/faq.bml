@@ -1,5 +1,5 @@
 <?page
-TITLE=>FAQ
+title=>FAQ
 BODY<=
 
 <?h1 Frequently Asked Questions h1?>
@@ -86,7 +86,7 @@ _code?>
 <?hr?>
 Back to <A HREF="./">the support area</A>.
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/support/faqbrowse.bml, htdocs/support/index.bml
 </LJDEP> _c?>

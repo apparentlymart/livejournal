@@ -1,5 +1,5 @@
 <?page
-TITLE=>Friends Tools
+title=>Friends Tools
 BODY<=
 
 LiveJournal has the concept of a "friends list".<p>
@@ -18,7 +18,7 @@ Your friends list is also used for posts with restricted access.<br>
 <li>On "Custom" posts, you can specify which friend groups can view your post.  (Custom security can only currently be used with the <a href="/download/">Windows client</a>.)
 </ul>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/friends/edit.bml, htdocs/friends/editgroups.bml
 link: htdocs/friends/filter.bml, htdocs/download/index.bml

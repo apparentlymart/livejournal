@@ -1,5 +1,5 @@
 <?page
-TITLE=>Translation Area
+title=>Translation Area
 BODY<=
 
 <?_code
@@ -68,5 +68,5 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?>

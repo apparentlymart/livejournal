@@ -116,10 +116,10 @@
  return;
 
 _code?><?page
-TITLE=><?_code return $title; _code?>
+title=><?_code return $title; _code?>
 BODY<=
 <?_code return $body; _code?>
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/tools/memories.bml, htdocs/tools/memadd.bml, htdocs/talkread.bml
 form: htdocs/tools/memories.bml

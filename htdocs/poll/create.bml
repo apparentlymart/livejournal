@@ -496,8 +496,8 @@ sub make_code {
 
  _code?>
 <?page 
-TITLE=><?_code return $title; _code?>
-BODY=><?_code return $body; _code?> 
+title=><?_code return $title; _code?>
+body=><?_code return $body; _code?> 
 page?><?_c <LJDEP>
 lib: LJ::img
 link: htdocs/support/faqbrowse.bml, htdocs/login.bml

@@ -1,7 +1,7 @@
 <?_info
-NOCACHE=>1
+nocache=>1
 _info?><?page
-TITLE=><?_ml .title _ml?>
+title=><?_ml .title _ml?>
 BODY<=
 
 <?_code
@@ -118,7 +118,7 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 </LJDEP> _c?>
 

@@ -1,5 +1,5 @@
 <?page
-TITLE=><?_ml .title _ml?>
+title=><?_ml .title _ml?>
 BODY<=
 
 <?_code
@@ -783,7 +783,7 @@ _code?>
 
 
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/lostinfo.bml, htdocs/userinfo.bml, htdocs/talkread.bml, htdocs/editinfo.bml
 post: htdocs/talkpost_do.bml

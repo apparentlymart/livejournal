@@ -1,5 +1,5 @@
 <?page
-TITLE=>Create New Journal
+title=>Create New Journal
 BODY<=
 <?_code 
 
@@ -353,7 +353,7 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/legal/privacy.bml
 post: htdocs/create.bml, htdocs/editinfo.bml

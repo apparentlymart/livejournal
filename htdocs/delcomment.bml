@@ -1,7 +1,7 @@
 <?_info
-NOCACHE=>1
+nocache=>1
 _info?><?page
-TITLE=>Delete Comment
+title=>Delete Comment
 BODY<=
 
 <?_code
@@ -136,7 +136,7 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/editinfo.bml
 post: htdocs/delcomment.bml

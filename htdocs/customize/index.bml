@@ -1,5 +1,5 @@
 <?page
-TITLE=>Customize
+title=>Customize
 BODY<=
 <?_code
 
@@ -94,5 +94,5 @@ BODY<=
  return $ret;
 
 _code?>
-<=BODY
+<=body
 page?>

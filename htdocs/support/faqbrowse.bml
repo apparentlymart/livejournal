@@ -1,5 +1,5 @@
 <?page
-TITLE=><?_ml .title _ml?>
+title=><?_ml .title _ml?>
 BODY<=
 
 <?_code
@@ -79,7 +79,7 @@ _code?>
 <?_ml .backfaq _ml?>
 <br /><?_ml .backsupport _ml?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/support/index.bml, htdocs/support/faq.bml
 </LJDEP> _c?>

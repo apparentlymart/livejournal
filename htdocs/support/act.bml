@@ -18,7 +18,7 @@
  return;
  
 _code?><?page
-TITLE=><?_code return $title; _code?>
+title=><?_code return $title; _code?>
 BODY<=
 <?_code
 
@@ -119,7 +119,7 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/support/see_request.bml
 </LJDEP> _c?>

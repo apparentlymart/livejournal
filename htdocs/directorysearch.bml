@@ -5,17 +5,17 @@ CRIT<=
 <td align='left' colspan='2'><b>%%name%%</b>
 </tr>
 <tr align='left'><td>&nbsp;</td><td>%%form%%</td></tr>
-<=CRIT
+<=crit
 BAR<=
 {FpRs}<tr bgcolor='<?emcolor?>' align='left'>
 <td>&nbsp;</td>
 <td><b>%%name%%</b></td>
 </tr>
 <tr align='left'><td>&nbsp;</td><td>%%form%%</td></tr>
-<=BAR
-<=LOCALBLOCKS
+<=bar
+<=localblocks
 _info?><?page
-TITLE=>Directory Search
+title=>Directory Search
 BODY<=
 
 <?h1 Search Directory h1?>
@@ -35,8 +35,8 @@ _code?>
 
 <!--- location --->
 <?crit
-NAME=>By Location
-CODE=>s_loc
+name=>By Location
+code=>s_loc
 FORM<=
 
 <table>
@@ -55,13 +55,13 @@ _code?>
 <tr><td align='right'>City:</td><td align='left'><input name="loc_ci"></td></tr>
 </table>
 
-<=FORM
+<=form
 crit?>
 
 <!---- update time ----->
 <?crit
-NAME=>By Journal Update Time
-CODE=>s_ut
+name=>By Journal Update Time
+code=>s_ut
 FORM<=
 Updated in last 
 <select name="ut_days">
@@ -70,57 +70,57 @@ Updated in last
 <option value="7">week</option>
 <option value="30">month</option>
 </select>
-<=FORM
+<=form
 crit?>
 
 <!---- age ----->
 <?crit
-NAME=>By Age
-CODE=>s_age
+name=>By Age
+code=>s_age
 FORM<=
 Between 
 <INPUT NAME="age_min" SIZE=3 MAXLENGTH=3> and 
 <INPUT NAME="age_max" SIZE=3 MAXLENGTH=3> years old.
-<=FORM
+<=form
 crit?>
 
 <?_c  DISABLED because of privacy policy.  add later when 'public gender' option
 <!---- gender ----->
 <?crit
-NAME=>By Gender
-CODE=>s_gen
+name=>By Gender
+code=>s_gen
 FORM<=
 User is: <SELECT NAME="gen_sel">
 <OPTION VALUE="" SELECTED>
 <OPTION VALUE="M">Male
 <OPTION VALUE="F">Female
 </SELECT>
-<=FORM
+<=form
 crit?>
 _c?>
 
 <!---- interest ----->
 <?crit
-NAME=>By Interest
-CODE=>s_int
+name=>By Interest
+code=>s_int
 FORM<=
 User likes: <INPUT NAME="int_like" SIZE=30>
-<=FORM
+<=form
 crit?>
 
 <!---- has friend ----->
 <?crit
-NAME=>Has Friend
-CODE=>s_fr
+name=>Has Friend
+code=>s_fr
 FORM<=
 User lists <INPUT NAME="fr_user" SIZE=15 MAXLENGTH=15> as a friend.
-<=FORM
+<=form
 crit?>
 
 <!---- friend of ----->
 <?crit
-NAME=>Friend of
-CODE=>s_fro
+name=>Friend of
+code=>s_fro
 FORM<=
 <INPUT NAME="fro_user" SIZE=15 MAXLENGTH=15> lists user as a friend.
 crit?>
@@ -128,8 +128,8 @@ crit?>
 <?_c  dead for now
 <!---- client used ----->
 <?crit
-NAME=>Client Usage
-CODE=>s_client
+name=>Client Usage
+code=>s_client
 FORM<=
 Has used update client named: <INPUT NAME="client_match" SIZE=20>
 crit?>
@@ -138,16 +138,16 @@ _c?>
 <?_c no index on this yet.  need a userprop boolean.
 <!----- other ------>
 <?bar
-NAME=>Other Criteria
+name=>Other Criteria
 FORM<=
 <INPUT TYPE=CHECKBOX NAME="s_withpic" VALUE=1> Only users with pictures
-<=FORM
+<=form
 bar?>
 _c?>
 
 <!---- output formatting ----->
 <?bar
-NAME=>Display Options
+name=>Display Options
 FORM<=
 
 <TABLE>
@@ -185,7 +185,7 @@ Records per page:
 </TD></TR>
 
 </TABLE>
-<=FORM
+<=form
 bar?>
 
 <!--- submit --->
@@ -199,7 +199,7 @@ bar?>
 
 </CENTER>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 form: htdocs/directory.bml
 </LJDEP> _c?>

@@ -1,5 +1,5 @@
 <?page
-TITLE=>Unsubscribe
+title=>Unsubscribe
 BODY<=
 
 <?_code
@@ -52,7 +52,7 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 post: htdocs/unsubscribe.bml
 link: htdocs/editinfo.bml

@@ -1,5 +1,5 @@
 <?page
-TITLE=>ForumZilla Support
+title=>ForumZilla Support
 BODY<=
 
 <?h1 A whole new way to browse... h1?>
@@ -22,5 +22,5 @@ If you have any questions or comments, mail <A HREF="mailto:<?admin_email?>"><?a
 p?>
 
 
-<=BODY
+<=body
 page?>

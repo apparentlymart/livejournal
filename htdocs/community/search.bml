@@ -7,7 +7,7 @@ CRIT<=
 <TD><B>%%name%%</B>
 </TR>
 <TR><TD>&nbsp;</TD><TD>%%form%%</TD></TR>
-<=CRIT
+<=crit
 BAR<=
 {F}
 <TR BGCOLOR=#D0D0D0>
@@ -15,10 +15,10 @@ BAR<=
 <TD><B>%%name%%</B>
 </TR>
 <TR><TD>&nbsp;</TD><TD>%%form%%</TD></TR>
-<=BAR
-<=LOCALBLOCKS
+<=bar
+<=localblocks
 _info?><?page
-TITLE=><?_ml .title _ml?>
+title=><?_ml .title _ml?>
 BODY<=
 
 <?h1 <?_ml .label.searchcomm _ml?> h1?>
@@ -36,8 +36,8 @@ p?>
 
 <!--- location --->
 <?crit
-NAME=><?_ml .label.bylocation _ml?>
-CODE=>s_loc
+name=><?_ml .label.bylocation _ml?>
+code=>s_loc
 FORM<=
 
 <TABLE>
@@ -61,13 +61,13 @@ _code?>
 <TR><TD ALIGN=RIGHT><?_ml .label.city _ml?></TD><TD><INPUT NAME="loc_ci"></TD></TR>
 </TABLE>
 
-<=FORM
+<=form
 crit?>
 
 <!---- update time ----->
 <?crit
-NAME=><?_ml .label.bytime _ml?>
-CODE=>s_ut
+name=><?_ml .label.bytime _ml?>
+code=>s_ut
 FORM<=
 <?_ml .label.updated _ml?>
 <SELECT NAME="ut_days">
@@ -76,38 +76,38 @@ FORM<=
 <OPTION VALUE="7"><?_ml .sel.week _ml?>
 <OPTION VALUE="30"><?_ml .sel.month _ml?>
 </SELECT>
-<=FORM
+<=form
 crit?>
 
 <!---- interest ----->
 <?crit
-NAME=><?_ml .label.byinterest _ml?>
-CODE=>s_int
+name=><?_ml .label.byinterest _ml?>
+code=>s_int
 FORM<=
 <?_ml .userlikes _ml?> <INPUT NAME="int_like" SIZE=30>
-<=FORM
+<=form
 crit?>
 
 <!---- has member ----->
 <?crit
-NAME=><?_ml .label.hasmember _ml?>
-CODE=>s_fr
+name=><?_ml .label.hasmember _ml?>
+code=>s_fr
 FORM<=
 <?_ml .contasmember _ml?>
-<=FORM
+<=form
 crit?>
 
 <!----- other ------>
 <?bar
-NAME=><?_ml .label.othercriteria _ml?>
+name=><?_ml .label.othercriteria _ml?>
 FORM<=
 <INPUT TYPE=CHECKBOX NAME="s_withpic" VALUE=1> <?_ml .checkbox.onlywithpics _ml?>
-<=FORM
+<=form
 bar?>
 
 <!---- output formatting ----->
 <?bar
-NAME=><?_ml .label.displayoptions _ml?>
+name=><?_ml .label.displayoptions _ml?>
 FORM<=
 
 <TABLE>
@@ -146,7 +146,7 @@ FORM<=
 </TD></TR>
 
 </TABLE>
-<=FORM
+<=form
 bar?>
 
 <!--- submit --->
@@ -160,7 +160,7 @@ bar?>
 
 </CENTER>
 
-<=BODY
+<=body
 page?>
 <?_c <LJDEP>
 form: htdocs/directory.bml

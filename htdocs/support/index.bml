@@ -1,5 +1,5 @@
 <?page
-TITLE=>LiveJournal Support
+title=>LiveJournal Support
 BODY<=
 
 <?h1 Welcome! h1?>
@@ -8,17 +8,17 @@ Welcome to the LiveJournal community support center.  Listed below are some of t
 p?>
 
 <?_include
-BML=>1
-CODE=>0
-FILE=>support-currentproblems
+bml=>1
+code=>0
+file=>support-currentproblems
 _include?>
 
 <?hr?>
 
 <?_include
-BML=>0
-CODE=>0
-FILE=>support-links
+bml=>0
+code=>0
+file=>support-links
 _include?>
 
 <?h1 Support Areas h1?><?p Here are the three major things you can do here in the support area. p?>
@@ -42,7 +42,7 @@ Got some extra time on your hands?  Help out a LiveJournal user that has an open
 </UL>
 
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/support/faq.bml, htdocs/support/submit.bml, htdocs/support/help.bml
 link: htdocs/support/highscores.bml, htdocs/support/changenotify.bml

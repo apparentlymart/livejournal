@@ -1,5 +1,5 @@
 <?page
-TITLE=>High Scores
+title=>High Scores
 BODY<=
 
 The following people have helped other users in the support area:
@@ -94,7 +94,7 @@ _code?>
 <?hr?>
 Back to the <A HREF="./">support area</A>.
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/admin/priv/index.bml, htdocs/support/index.bml
 </LJDEP> _c?>

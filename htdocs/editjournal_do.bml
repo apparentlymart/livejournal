@@ -1,5 +1,5 @@
 <?page
-TITLE=>Edit Journal Entry
+title=>Edit Journal Entry
 BODY<=
 
 <?_code
@@ -390,7 +390,7 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 post: htdocs/editjournal_do.bml
 link: htdocs/moodlist.bml, htdocs/users

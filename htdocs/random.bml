@@ -17,7 +17,7 @@
  return BML::redirect("$LJ::SITEROOT/");
 
 _code?><?_info
-NOHEADERS=>1
+noheaders=>1
 _info?><?_c <LJDEP>
 link: htdocs/users
 </LJDEP> _c?>

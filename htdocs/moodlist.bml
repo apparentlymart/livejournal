@@ -1,5 +1,5 @@
 <?page
-TITLE=>LiveJournal Moods
+title=>LiveJournal Moods
 BODY<=
 
 <?h1 Moods h1?>
@@ -75,7 +75,7 @@ p?>
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 form: htdocs/moodlist.bml
 link: htdocs/modify.bml

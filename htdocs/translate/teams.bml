@@ -1,5 +1,5 @@
 <?page
-TITLE=>Translation Teams
+title=>Translation Teams
 BODY<=
 
  <a href="./">&lt;&lt;</a> Back to progress page.
@@ -61,5 +61,5 @@ p?>
 
 _code?>
 
-<=BODY
+<=body
 page?>

@@ -1,5 +1,5 @@
 <?page
-TITLE=><?_ml .title _ml?>
+title=><?_ml .title _ml?>
 BODY<=
 
 <?_code
@@ -459,8 +459,8 @@ BODY<=
 
 _code?>
 
-<=BODY
-HEAD=><?_code return $head _code?>
+<=body
+head=><?_code return $head _code?>
 page?><?_c <LJDEP>
 post: htdocs/talkpost_do.bml
 img: htdocs/img/topic_add.gif, htdocs/img/btn_tellfriend.gif, htdocs/img/btn_next.gif

@@ -1,5 +1,5 @@
 <?_info
-NOCACHE=>1
+nocache=>1
 _info?><?_code
 
 $TRUNC_SUBJECT = 60;

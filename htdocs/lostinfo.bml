@@ -1,5 +1,5 @@
 <?page
-TITLE=><?_ml .title _ml?>
+title=><?_ml .title _ml?>
 BODY<=
 
 <FORM ACTION="lostinfo_do.bml" METHOD="POST">
@@ -28,7 +28,7 @@ standout?>
 
 </FORM>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 post: htdocs/lostinfo_do.bml
 </LJDEP> _c?>

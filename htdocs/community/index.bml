@@ -1,14 +1,14 @@
 <?page
-TITLE=><?_ml .title _ml?>
+title=><?_ml .title _ml?>
 BODY<=
 
 <?_include
-BML=>1
-CODE=>0
-FILE=>community
+bml=>1
+code=>0
+file=>community
 _include?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 # NONE
 </LJDEP> _c?>

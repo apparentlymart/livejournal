@@ -1,11 +1,11 @@
 <?page
-TITLE=>Submit Support Request
+title=>Submit Support Request
 BODY<=
 
 <?_include
-BML=>1
-CODE=>0
-FILE=>support-currentproblems
+bml=>1
+code=>0
+file=>support-currentproblems
 _include?>
 
 <p>From here you can ask a question about LiveJournal.  Make sure you've already checked the <A HREF="faq.bml"><B>Frequently Asked Questions</B></A>.
@@ -86,7 +86,7 @@ When done, press <INPUT TYPE=SUBMIT VALUE="Submit">.
 <?hr?>
 Back to the <A HREF="./">support area</A>.
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/support/faq.bml, htdocs/support/index.bml
 post: htdocs/support/submit_do.bml

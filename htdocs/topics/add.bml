@@ -1,5 +1,5 @@
 <?page
-TITLE=>Add to Topic
+title=>Add to Topic
 BODY<=
 <?_code
 
@@ -74,7 +74,7 @@ BODY<=
  return $ret;
 
 _code?>
-<=BODY
+<=body
 page?><?_c <LJDEP>
 post: htdocs/topics/add.bml
 link: htdocs/talkread.bml

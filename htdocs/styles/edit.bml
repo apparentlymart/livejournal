@@ -1,5 +1,5 @@
 <?page
-TITLE=>Edit Style
+title=>Edit Style
 
 BODY<=
 
@@ -21,7 +21,7 @@ standout?>
 
 </form>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/styles/create.bml, htdocs/developer/styles.bml
 post: htdocs/styles/edit_do.bml

@@ -1,5 +1,5 @@
 <?page
-TITLE=>Support Requests
+title=>Support Requests
 BODY<=
 
 <?_code
@@ -164,7 +164,7 @@ _code?>
 <?hr?>
 Back to the <A HREF="./">support area</A>.
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/support/help.bml, htdocs/support/see_request.bml
 link: htdocs/support/index.bml

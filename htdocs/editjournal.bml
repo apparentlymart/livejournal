@@ -1,5 +1,5 @@
 <?page
-TITLE=>Edit Journal Entries
+title=>Edit Journal Entries
 
 BODY<=
 
@@ -44,7 +44,7 @@ standout?>
 If you forgot your username or password, <A HREF="lostinfo.bml">recover it here!</A>.
 p?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 post: htdocs/editjournal_do.bml
 link: htdocs/lostinfo.bml

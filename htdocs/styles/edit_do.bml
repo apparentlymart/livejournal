@@ -1,5 +1,5 @@
 <?page
-TITLE=>Edit Style
+title=>Edit Style
 BODY<=
 
 <?_code
@@ -317,7 +317,7 @@ if ($FORM{'mode'} eq "savechanges")
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/styles/edit.bml, htdocs/developer/views.bml, htdocs/customview.cgi
 file: htdocs/vars.dat

@@ -1,5 +1,5 @@
 <?page
-TITLE=>Submit Request
+title=>Submit Request
 BODY<=
 
 <?_code
@@ -66,7 +66,7 @@ _code?>
 <?hr?>
 Back to the <A HREF="./">support area</A>.
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/support/see_request.bml, htdocs/support/index.bml
 </LJDEP> _c?>

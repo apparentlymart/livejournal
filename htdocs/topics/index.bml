@@ -248,14 +248,14 @@ $body .= "How does this all work?  <A HREF=\"/support/faqbrowse.bml?faqid=29\">R
 
  return;
 _code?><?page
-TITLE=><?_code return $title; _code?>
+title=><?_code return $title; _code?>
 BODY<=
 <?_code
 
 return $body;
 
 _code?>
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/topics/index.bml, htdocs/users, htdocs/userinfo.bml
 link: htdocs/topics/add.bml, htdocs/support/faqbrowse.bml, htdocs/talkread.bml

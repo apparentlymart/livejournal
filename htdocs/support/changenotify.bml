@@ -1,7 +1,7 @@
 <?_info
-NOCACHE=>1
+nocache=>1
 _info?><?page
-TITLE=>Change Notifications
+title=>Change Notifications
 BODY<=
 
 <?_code
@@ -101,7 +101,7 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/login.bml
 post: htdocs/support/changenotify.bml

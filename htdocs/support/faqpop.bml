@@ -1,5 +1,5 @@
 <?page
-TITLE=>Popular FAQs
+title=>Popular FAQs
 BODY<=
 
 <?h1 Popular Frequently Asked Questions h1?>
@@ -34,7 +34,7 @@ _code?>
 <?hr?>
 Back to <a href="./">the support area</a>.
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/support/faqbrowse.bml, htdocs/support/index.bml
 </LJDEP> _c?>

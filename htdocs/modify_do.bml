@@ -1,5 +1,5 @@
 <?page
-TITLE=>Modify Journal
+title=>Modify Journal
 BODY<=
 
 <?_code
@@ -393,7 +393,7 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/moodlist.bml, htdocs/developer/index.bml, htdocs/developer/varlist.bml, htdocs/styles/create.bml
 post: htdocs/modify_do.bml

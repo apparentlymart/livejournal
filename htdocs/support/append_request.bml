@@ -1,5 +1,5 @@
 <?page
-TITLE=>Append Request
+title=>Append Request
 BODY<=
 
 <?_code
@@ -121,7 +121,7 @@ _code?>
 Back to the <A HREF="help.bml">list of open requests</A>.<BR>
 Back to the <A HREF="./">support area</A>.
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/support/see_request.bml, htdocs/support/help.bml
 link: htdocs/support/index.bml

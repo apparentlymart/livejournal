@@ -1,5 +1,5 @@
 <?page
-TITLE=>Create Style
+title=>Create Style
 BODY<=
 
 <?_code
@@ -114,7 +114,7 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 post: htdocs/styles/edit_do.bml
 </LJDEP> _c?>

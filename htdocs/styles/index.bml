@@ -1,5 +1,5 @@
 <?page
-TITLE=>Custom Styles
+title=>Custom Styles
 BODY<=
 
 <?h1 Making your journal purty... h1?>
@@ -32,7 +32,7 @@ based on that style using the above link.</li>
 the Style Browser will let you browse through public styles
 created by other users.</li>
 </ul>
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/developer/embedding.bml, htdocs/developer/styles.bml
 link: htdocs/developer/index.bml, htdocs/paidaccounts/index.bml

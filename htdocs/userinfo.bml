@@ -711,9 +711,9 @@ $body .= "</table>\n";
 return;
 
 _code?><?page
-TITLE=><?_code return $title; _code?>
-BODY=><?_code return $body; _code?>
-HEAD=><?_code return $head; _code?>
+title=><?_code return $title; _code?>
+body=><?_code return $body; _code?>
+head=><?_code return $head; _code?>
 page?><?_c <LJDEP>
 lib: cgi-bin/ljlib.pl, cgi-bin/cleanhtml.pl
 link: htdocs/editinfo.bml, htdocs/userinfo.bml, htdocs/users

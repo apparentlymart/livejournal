@@ -1,7 +1,7 @@
 <?_info
-NOCACHE=>1
+nocache=>1
 _info?><?page
-TITLE=>Registration
+title=>Registration
 
 BODY<=
 
@@ -68,7 +68,7 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/editinfo.bml, htdocs/modify.bml, htdocs/update.bml
 </LJDEP> _c?>

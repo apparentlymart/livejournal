@@ -290,8 +290,8 @@
  return;
 
 _code?><?page
-TITLE=><?_code return $title; _code?>
-BODY=><?_code return $body; _code?><p><?standout <B>Note:</B> The to-do list system is in beta.  We're well aware it has a lot of work needed, and it definitely needs to be documented-- especially the security related things. standout?>
+title=><?_code return $title; _code?>
+body=><?_code return $body; _code?><p><?standout <B>Note:</B> The to-do list system is in beta.  We're well aware it has a lot of work needed, and it definitely needs to be documented-- especially the security related things. standout?>
 page?><?_c <LJDEP>
 link: htdocs/todo/index.bml, htdocs/todo/item.bml
 post: htdocs/todo/item.bml

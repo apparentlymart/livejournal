@@ -343,7 +343,7 @@ function settime() {
 
         now = new Date();
         f = document.updateForm;
-        // javascript's getYear method is really fucked up:
+        // javascripts getYear method is really fucked up:
         f.year.value = now.getYear() < 1900 ? now.getYear() + 1900 : now.getYear();
         f.mon.value = twodigit(now.getMonth()+1);
         f.day.value = twodigit(now.getDate());
@@ -361,9 +361,9 @@ JAVASCRIPT_STUFF
 }
 
 _code?><?page
-TITLE=><?_code return $_[1] ? $_[1]->{'title'} : $r_title; _code?>
-BODY=><?_code return $_[1] ? $_[1]->{'body'} : $r_body; _code?>
-BODYOPTS=><?_code return $_[1] ? $_[1]->{'bodyopts'} : $r_bodyopts; _code?>
+title=><?_code return $_[1] ? $_[1]->{'title'} : $r_title; _code?>
+body=><?_code return $_[1] ? $_[1]->{'body'} : $r_body; _code?>
+bodyopts=><?_code return $_[1] ? $_[1]->{'bodyopts'} : $r_bodyopts; _code?>
 page?><?_c <LJDEP>
 lib: LJ::SpellCheck
 link: htdocs/users, htdocs/download/index.bml, htdocs/moodlist.bml

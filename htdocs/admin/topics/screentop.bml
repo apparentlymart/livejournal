@@ -1,5 +1,5 @@
 <?page
-TITLE=>Screen Topics
+title=>Screen Topics
 BODY<=
 
 <?_code
@@ -82,7 +82,7 @@ BODY<=
 
 
 _code?>
-<=BODY
+<=body
 page?><?_c <LJDEP>
 post: htdocs/admin/topics/screentop_do.bml
 </LJDEP> _c?>

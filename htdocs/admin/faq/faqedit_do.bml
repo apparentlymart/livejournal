@@ -1,7 +1,7 @@
 <?_info
-NOCACHE=>1
+nocache=>1
 _info?><?page
-TITLE=><?_code return $FORM{'id'} ? "Edit FAQ Item #$FORM{'id'}" : "Add to FAQ"; _code?>
+title=><?_code return $FORM{'id'} ? "Edit FAQ Item #$FORM{'id'}" : "Add to FAQ"; _code?>
 BODY<=
 
 <CENTER>
@@ -108,7 +108,7 @@ BODY<=
  
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 lib: cgi-bin/ljlib.pl
 link: htdocs/admin/faq/index.bml

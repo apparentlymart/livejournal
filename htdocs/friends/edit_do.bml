@@ -1,5 +1,5 @@
 <?page
-TITLE=>Edit Friends
+title=>Edit Friends
 BODY<=
 
 <SCRIPT language="JavaScript"><!--
@@ -244,7 +244,7 @@ d.close();
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/users
 img: htdocs/img/dot.gif

@@ -1,5 +1,5 @@
 <?page
-TITLE=>Add to topic directory
+title=>Add to topic directory
 BODY<=
 <?_code
 
@@ -68,7 +68,7 @@ BODY<=
   return $ret;
 
 _code?>
-<=BODY
+<=body
 page?><?_c <LJDEP>
 form: htdocs/topics/additem.bml
 link: htdocs/topics/add.bml, htdocs/topics/addtopic.bml, htdocs/support/faqbrowse.bml

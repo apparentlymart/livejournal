@@ -14,7 +14,7 @@
  return;
 
 _code?><?page
-TITLE=><?_ml .title _ml?>
+title=><?_ml .title _ml?>
 BODY<=
 
 <?_code
@@ -68,5 +68,5 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?>

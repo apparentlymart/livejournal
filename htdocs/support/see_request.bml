@@ -1,5 +1,5 @@
 <?page
-TITLE=>Request #<?_code return ($FORM{'id'}+0); _code?>
+title=>Request #<?_code return ($FORM{'id'}+0); _code?>
 BODY<=
         
 <?_code
@@ -368,7 +368,7 @@ Back to the <A HREF="help.bml">list of open requests</A>.<BR>
 Back to the <A HREF="./">support area</A>.
 
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 link: htdocs/support/faqbrowse.bml, htdocs/styles/browse/styleinfo.bml
 link: htdocs/support/help.bml, htdocs/support/act.bml, htdocs/login.bml

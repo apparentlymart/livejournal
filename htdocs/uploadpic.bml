@@ -1,5 +1,5 @@
 <?page
-TITLE=>Upload Picture
+title=>Upload Picture
 
 BODY<=
 
@@ -28,7 +28,7 @@ p?>
 </table>
 standout?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 post: htdocs/uploadpic_do.bml
 </LJDEP> _c?>

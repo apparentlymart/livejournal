@@ -1,5 +1,5 @@
 <?page
-TITLE=><?_ml .title _ml?>
+title=><?_ml .title _ml?>
 BODY<=
 <?_code
 
@@ -713,7 +713,7 @@ BODY<=
 
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 lib: LJ::TextMessage, cgi-bin/ljlib.pl, cgi-bin/ljlang.pl
 link: htdocs/legal/privacy.bml, htdocs/support/faqbrowse.bml, htdocs/tools/textmessage.bml, htdocs/uploadpic.bml

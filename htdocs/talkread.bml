@@ -1,5 +1,5 @@
 <?page
-TITLE=><?_ml .title _ml?>
+title=><?_ml .title _ml?>
 BODY<=
 
 <?_code
@@ -615,8 +615,8 @@ LJ::strip_bad_code(\$ret);
 return $ret;
 
 _code?>
-<=BODY
-HEAD=><?_code return $_[1] ? $_[1]->{'head'} : $r_head _code?>
+<=body
+head=><?_code return $_[1] ? $_[1]->{'head'} : $r_head _code?>
 page?><?_c <LJDEP>
 link: htdocs/userinfo.bml, htdocs/go.bml, htdocs/tools/memadd.bml, htdocs/editjournal_do.bml, htdocs/topics/additem.bml
 link: htdocs/tools/tellafriend.bml, htdocs/talkpost.bml, htdocs/talkread.bml, htdocs/delcomment.bml

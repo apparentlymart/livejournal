@@ -1,5 +1,5 @@
 <?page
-TITLE=>Send a Text Message
+title=>Send a Text Message
 BODY<=
 <?_code
 
@@ -126,7 +126,7 @@ $ret .= "</FORM></UL>";
  }
 
 _code?>
-<=BODY
+<=body
 page?><?_c <LJDEP>
 lib: LJ::TextMessage
 link: htdocs/login.bml, htdocs/support/faqbrowse.bml

@@ -1,5 +1,5 @@
 <?page
-TITLE=>Get Upload
+title=>Get Upload
 BODY<=
 
 <?_code
@@ -169,7 +169,7 @@ BODY<=
  
 _code?>
 
-<=BODY
+<=body
 page?><?_c <LJDEP>
 lib: LWP::UserAgent, Image::Size, Digest::MD5
 link: htdocs/editpics.bml
