@@ -27,6 +27,8 @@
     new options you feel like setting.
   </para>
   &lj.install.ljconfig.vars;
+  &lj.install.ljconfig.helpurls;
+  &lj.install.ljconfig.disabled;
   &lj.install.ljconfig.dbinfo;
   &lj.install.ljconfig.caps;
 </chapter>

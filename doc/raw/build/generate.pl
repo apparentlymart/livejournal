@@ -134,6 +134,11 @@ system("./hooks2db.pl > $docraw_dir/lj.book/customize/hooks.ref.gen.xml")
 system("./hooks2db.pl > $docraw_dir/ljp.book/int/hooks.ref.gen.xml")
     and die "Error generating hooks reference\n";
 
+print "Generating Configuration Variable Reference\n";
+chdir "$docraw_dir/build/ljconfig" or die;
+system("./ljconfig2db.pl > $docraw_dir/lj.book/install/ljconfig.vars.gen.xml")
+    and die "Error generating ljconfig.pl variable reference\n";
+
 print "Converting to HTML\n";
 mkdir $output_dir, 0755 unless -d $output_dir;
 chdir $output_dir or die "Couldn't chdir to $output_dir\n";

@@ -4,7 +4,10 @@
  use strict;
 
  my %special = (
-     logprops => '<xref linkend="ljp.csp.proplist" />',
+     'logprops' => '<xref linkend="ljp.csp.proplist" />',
+     'ljhome' => '<link linkend="ljhome_var"><envar>$ENV{\'LJHOME\'}</envar></link>',
+     'helpurls' => '<xref linkend="lj.install.ljconfig.helpurls" />',
+     'disabled' => '<xref linkend="lj.install.ljconfig.disabled" />',
  );
 
  sub cleanse
@@ -32,6 +35,8 @@
          $string = "<link linkend=\"ljp.dbschema.$string\">$name</link>";
      } elsif($type eq "special") {
          $string = %special->{$string};
+     } elsif($type eq "ljconfig") {
+         $string = "<xref linkend=\"ljconfig.$string\" />";
      }
  }
 
