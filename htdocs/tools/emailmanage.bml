@@ -4,74 +4,93 @@ body<=
 
 <?_code
 {
+    use strict;
+    use vars qw(%POST);
+
     my $dbh = LJ::get_db_writer();
     
     my $ret;
-    my $remote = LJ::get_remote($dbh);
-    
-    unless ($remote) {
-        return "<?h1 Login Required h1?><?p You must first <a href='/login.bml?ret=1'>login</a> before using this tool. p?>";
-    }
+    my $remote = LJ::get_remote();
+    return "<?h1 $ML{'Error'} h1?><?p $ML{'error.noremote'} p?>"
+        unless $remote;
 
     my $firstdate = $dbh->selectrow_array(qq{
         SELECT MIN(timechange) FROM infohistory
-        WHERE userid=$remote->{'userid'} AND what='email'
+        WHERE userid=? AND what='email'
         AND oldvalue=?
-    }, undef, $remote->{'email'});
+    }, undef, $remote->{'userid'}, $remote->{'email'});
 
-    my $log;
+    my @deleted;
     if (LJ::did_post()) {
-        my $sth = $dbh->prepare("SELECT timechange, oldvalue FROM infohistory WHERE userid=$remote->{'userid'} AND what='email' ORDER BY timechange");
-        $sth->execute;
+        my $sth = $dbh->prepare("SELECT timechange, oldvalue " .
+                                "FROM infohistory WHERE userid=? " . 
+                                "AND what='email' ORDER BY timechange");
+        $sth->execute($remote->{'userid'});
         while (my ($time, $email) = $sth->fetchrow_array)
         {
-            my $checkname = "$email-$time";
             my $can_del = defined $firstdate && $time gt $firstdate;
-            if ($can_del && $FORM{$checkname}) {
-                $log .= "<p>Deleted: $email @ $time.</p>";
-                $dbh->do("DELETE FROM infohistory WHERE what='email' AND userid=$remote->{'userid'} AND timechange='$time' AND oldvalue=?", undef, $email);
+            if ($can_del && $POST{"$email-$time"}) {
+                push @deleted, BML::ml('.log.deleted', 
+                                       { 'email' => $email,
+                                         'time' => $time });
+
+                $dbh->do("DELETE FROM infohistory WHERE what='email' " .
+                         "AND userid=? AND timechange=? AND oldvalue=?",
+                         undef, $remote->{'userid'}, $time, $email);
             }            
         }
     }
     
-    $ret .= <<"ENDINTRO";
-<?h1 Description h1?>
-<?p
-This page lets you remove past email addresses that were used with your account.  By removing them, they'll no longer be able to have your password mailed to them.  This is useful if somebody discovered your password and hijacked your journal.  Simply have the new password mailed to your old address, change it back, remove the attacker's email address, and change your password.  And this time--- protect your email account so your password doesn't get stolen again!
-p?>
-<?p
-This page only lets you remove email addresses that were used after the first time you used the email address your account is currently validated with.  In particular, this means the attacker isn't able to remove your original email address.
-p?>
-<?hr?>
-ENDINTRO
+    # some explanatory text
+    $ret .= "<?h1 $ML{'.desc.title'} h1?>\n";
+    $ret .= "<?p $ML{'.desc.text'} p?>\n";
+    $ret .= "<?p $ML{'.desc.notfirst'} p?>\n";
+
+    $ret .= "<?hr?>\n";
 
     unless ($remote->{'status'} eq "A") {
-        $ret .= "<?h1 Email not validated h1?><?p To use this tool, your current email address ($remote->{'email'}) must be validated.  To do this, visit the <a href='/lostinfo.bml'>lost info</a> page, which will send you an authorization URL.  After visiting it, come back here. p?>";
+        $ret .= "<?h1 $ML{'.notvalidated.title'} h1?>\n";
+        $ret .= "<?p " . BML::ml('.notvalidated.text',
+                                 { 'email' => $remote->{'email'} }) . " p?>";
         return $ret;
     }
-    
-    my $sth = $dbh->prepare("SELECT timechange, oldvalue FROM infohistory WHERE userid=$remote->{'userid'} AND what='email' ORDER BY timechange");
-    $sth->execute;
+
+    # current address
+    $ret .= "<?h1 $ML{'.address.current.title'} h1?>\n";
+    $ret .= "<div style='margin: 20px 0 20px 30px;'><b>";
+    $ret .= "$remote->{'email'}</b></div>\n";
+
+    # old addresses
+    $ret .= "<?h1 $ML{'.address.old.title'} h1?>\n";
+    $ret .= "<?p $ML{'.address.old.text'} p?>";
 
     $ret .= "<form method='post'>";
-    $ret .= "<?h1 Old email addresses h1?><?p The following is a list of old email addresses that were used, and the time they were deactivated as the primary email address.  Check the ones you want to delete. p?>";
-    
-    $ret .= "<p><table border='1' cellpadding='2'>\n";
+    $ret .= "<table border='1' cellpadding='2' style='margin-bottom: 3px;'>\n";
+ 
+    my $sth = $dbh->prepare("SELECT timechange, oldvalue FROM infohistory " .
+                            "WHERE userid=$remote->{'userid'} AND what='email' " .
+                            "ORDER BY timechange");
+    $sth->execute;
     while (my ($time, $email) = $sth->fetchrow_array)
     {
-        my $checkname = LJ::eall("$email-$time");
         my $can_del = defined $firstdate && $time gt $firstdate;
-        my $dis = $can_del ? "" : " disabled='disabled'";
-        $ret .= "<tr><td><input type='checkbox' name='$checkname' $dis></td>";
+        $ret .= "<tr><td>" . LJ::html_check({ 'type' => 'check', 'name' => "$email-$time",
+                                              'disabled' => ! $can_del } ) . "</td>";
         $ret .= "<td>$email</td><td>$time</td></tr>\n";
-
     }
     $ret .= "</table>\n";
-    $ret .= "<input type='submit' value='Deleted Selected'></form>";
-    $ret .= "<p>Current email = $remote->{'email'}";
-    $ret .= $log;
-    return $ret;
 
+    $ret .= LJ::html_submit(undef, $ML{'.delete_selected'});
+    $ret .= "</form>";
+
+    if (@deleted) {
+        $ret .= "<?h1 $ML{'.log.deleted.title'} h1?>\n";
+        $ret .= "<ul>";
+        $ret .= "<li>$_</li>\n" foreach @deleted;
+        $ret .= "</ul>";
+    }
+
+    return $ret;
 }
 _code?>
 <=body

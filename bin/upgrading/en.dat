@@ -1945,6 +1945,48 @@ Please either clear the user textbox or select the relevant posting mode and try
 
 /talkscreen.bml.unscreened.title=Success
 
+/tools/emailmanage.bml.address.current.title=Current Address
+
+/tools/emailmanage.bml.address.old.text<<
+The following is a list of email addresses that were used with your account,
+and the time they were deactivated as the primary email address. Check the ones
+you wish to delete.
+.
+
+/tools/emailmanage.bml.address.old.title=Previous Addresses
+
+/tools/emailmanage.bml.delete_selected=Delete Selected
+
+/tools/emailmanage.bml.desc.notfirst<<
+This page only lets you remove email addresses that were used after the first time 
+you used the email address your account is currently validated with. In particular, 
+this means the attacker isn't able to remove your original email address.
+.
+
+/tools/emailmanage.bml.desc.text<<
+This page lets you remove past email addresses that were used with your account.
+By removing them, they'll no longer be able to have your password mailed to them.
+This is useful if somebody discovered your password and hijacked your journal. Simply
+have the new password mailed to your old address, change it back, and remove the
+attacker's email address.
+.
+
+/tools/emailmanage.bml.desc.title=Description
+
+/tools/emailmanage.bml.log.deleted=Deleted: [[email]] @ [[time]]
+
+/tools/emailmanage.bml.log.deleted.title=Changes Saved
+
+/tools/emailmanage.bml.notvalidated.text<<
+To use this tool, your current email address [[email]] must be validated.  
+To do this, visit the <a href='/lostinfo.bml'>lost info</a> page, which will 
+send you an authorization URL.  After visiting it, come back here.
+.
+
+/tools/emailmanage.bml.notvalidated.title=Email not validated
+
+/tools/emailmanage.bml.title=Email Management
+
 /tools/memadd.bml.add_previous<<
 <?h1 Add to memories... h1?>
 <?p To add the journal entry you were just viewing to your "memories", fill out the form below. p?>
