@@ -215,6 +215,9 @@ body<=
      $FORM{'subject'} = Unicode::MapUTF8::to_utf8({-string=>$FORM{'subject'}, -charset=>$FORM{'encoding'}});
  }
  
+ # unixify line-endings
+ $FORM{'body'} =~ s/\r\n/\n/g;
+
  # now check for UTF-8 correctness, it must hold
 
  return "<?badinput?>" unless LJ::text_in(\%FORM);
