@@ -106,7 +106,7 @@
              $keywords .= $kw;
              $selected_keyword{$kw} = 1;
          }
-         if (!$log || !($log->{'anum'} == $anum))
+         if (!$log || ($jid && $log->{'anum'} != $anum))
          {
              $dbh->do("DELETE FROM memorable WHERE memid=$memory->{'memid'}");
              $dbh->do("DELETE FROM memkeyword WHERE memid=$memory->{'memid'}");
@@ -116,7 +116,7 @@
          }
 
      } 
-     elsif (!$log || !($log->{'anum'} == $anum)) 
+     elsif (!$log || ($jid && $log->{'anum'} != $anum))
      {
          $title = "Error";
          $body = "No such journal entry.";
@@ -141,9 +141,9 @@
      $body .= "<input type=hidden name=mode value=\"save\">";
      $body .= "<TABLE cellpadding=4>";
 
-     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Description:</B></TD><TD><input name=des value=\"$des\" maxlength=60 size=40><BR><FONT SIZE=-1>Give this journal entry a description that you can remember it by.  To delete this entry from your list of memorable posts, enter a blank description.</FONT></TD></TR>\n";
+     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Description:</B></TD><TD><input name=des value=\"$des\" maxlength=$LJ::CMAX_MEMORY size=40><BR><FONT SIZE=-1>Give this journal entry a description that you can remember it by.  To delete this entry from your list of memorable posts, enter a blank description.</FONT></TD></TR>\n";
      
-     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Keywords:</B></TD><TD><input name=keywords maxlength=80 size=40><BR><FONT SIZE=-1>Why is this post memorable?  Enter zero to five keywords or categories so you can find it back later.  ";
+     $body .= "<TR><TD ALIGN=RIGHT VALIGN=TOP><B>Keywords:</B></TD><TD><input name=keywords maxlength=$LJ::CMAX_KEYWORD size=40><BR><FONT SIZE=-1>Why is this post memorable?  Enter zero to five keywords or categories so you can find it back later.  ";
 
      if (@all_keywords) {
          my $size = scalar(@all_keywords);
