@@ -320,13 +320,13 @@ sub get_lock
 # des: see if we COULD get a mysql lock on a given key/dbrole combination,
 #      but don't actually get it.
 # returns: undef if called improperly, true on success, die() on failure
-# args: db, dbrole
+# args: dbrole
 # des-dbrole: the role this lock should be gotten on, either 'global' or 'user'
 # </LJFUNC>
 sub may_lock
 {
-    my ($db, $dbrole) = @_;
-    return undef unless $db && ($dbrole eq 'global' || $dbrole eq 'user');
+    my $dbrole = shift;
+    return undef unless$dbrole eq 'global' || $dbrole eq 'user';
 
     # die if somebody already has a lock
     if ($LJ::LOCK_OUT{$dbrole}) {
