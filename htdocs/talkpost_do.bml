@@ -533,8 +533,10 @@ BODY<=
                  $text .= &indent("Subject: $cleansubject\n\n$FORM{'body'}");
                  $text .= "\n\nYou can view the discussion here:\n\n";
                  $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid&thread=$dtalkid\n\n";
-                 $text .= "Or you can reply to the comment directly here:\n\n";
+                 $text .= "You can reply to the comment directly here:\n\n";
                  $text .= "     $LJ::SITEROOT/talkpost.bml?${jarg}replyto=$dtalkid\n\n";
+                 $text .= "Or you can view all comments to the entry on this page:\n\n";
+                 $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid\n\n";
                  $text .= "-- $LJ::SITENAME\n\n";
 
                  if ($LJ::UNICODE && $encoding ne "UTF-8") {
@@ -559,7 +561,7 @@ BODY<=
                  LJ::CleanHTML::clean_comment(\$cleanbody, $FORM{'prop_opt_preformatted'});
                  $html .= &blockquote("<TT><B>Subject:</B> $cleansubject</TT> $icon<P>$cleanbody");
 
-                 $html .= "You can <a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid&amp;thread=$dtalkid\">view the thread</a> starting from this comment.<br />";
+                 $html .= "You can <a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid&amp;thread=$dtalkid\">view the thread</a> starting from this comment, or <a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">view all comments</a> to this entry.<br />";
                  $html .= "You can also reply <a href=\"$LJ::SITEROOT/talkpost.bml?${jargent}replyto=$dtalkid\">at the webpage</a>, or here:";
                  $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
                  $html .= "<INPUT TYPE=HIDDEN NAME=usertype VALUE=user>";
@@ -648,8 +650,10 @@ BODY<=
          $text .= &indent("Subject: $textsubject\n\n$FORM{'body'}");
          $text .= "\n\nYou can view the discussion here:\n\n";
          $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid&thread=$dtalkid\n\n";
-         $text .= "Or you can reply to the comment directly here:\n\n";
+         $text .= "You can reply to the comment directly here:\n\n";
          $text .= "     $LJ::SITEROOT/talkpost.bml?${jarg}replyto=$dtalkid\n\n";
+         $text .= "Or you can view all comments to the entry on this page:\n\n";
+         $text .= "     $LJ::SITEROOT/talkread.bml?${jarg}itemid=$ditemid\n\n";
          $text .= "-- $LJ::SITENAME\n\n";
          $text .= "(if you'd prefer to not get these updates, go to $LJ::SITEROOT/editinfo.bml and turn off the relevant options)\n";
 
@@ -683,7 +687,7 @@ BODY<=
          $html .= &blockquote("<TT><B>Subject: </B> $textsubject</TT> $icon<HR>$clean");
 
          # begin form
-         $html .= "You can <a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid&amp;thread=$dtalkid\">view the thread</a> starting from this comment.<br />";
+         $html .= "You can <a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid&amp;thread=$dtalkid\">view the thread</a> starting from this comment, or <a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">view all comments</a> to this entry.<br />";
          $html .= "You can also reply <a href=\"$LJ::SITEROOT/talkpost.bml?${jargent}replyto=$dtalkid\">at the webpage</a>, or here:";
 
          $html .= "<BLOCKQUOTE><FORM METHOD=POST TARGET=ljreply ACTION=\"$LJ::SITEROOT/talkpost_do.bml\">\n";
