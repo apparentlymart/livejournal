@@ -202,26 +202,27 @@ if ( $0 eq __FILE__ ) { MAIN() }
 
 
 #####################################################################
-### R I N G B U F F E R   C L A S S
+###	T I M E D   B U F F E R   C L A S S
 #####################################################################
-package RingBuffer;
+package TimedBuffer;
 
 BEGIN {
     use Carp qw{croak confess};
 }
 
-our $DefaultSize = 15;
+our $DefaultExpiration = 120;
 
-### (CONSTRUCTOR) METHOD: new( $size )
-### Create a new ring buffer of the specified I<size> and return it.
+### (CONSTRUCTOR) METHOD: new( $seconds )
+### Create a new timed buffer which will remove entries the specified number of
+### I<seconds> after being added.
 sub new {
     my $proto = shift;
     my $class = ref $proto || $proto;
-    my $size = shift || $DefaultSize;
+    my $seconds = shift || $DefaultExpiration;
 
     my $self = bless {
         buffer  => [],
-        size    => $size,
+        seconds => $seconds,
     }, $class;
 
     return $self;
@@ -229,16 +230,20 @@ sub new {
 
 
 ### METHOD: add( @items )
-### Add the given I<items> to the buffer, shifting off older ones if the number
-### of items in the buffer would exceed its size.
+### Add the given I<items> to the buffer, shifting off older ones if they are
+### expired.
 sub add {
     my $self = shift or confess "Cannot be used as a function";
     my @items = @_;
 
-    push @{$self->{buffer}}, @items;
-    splice @{$self->{buffer}}, 0, -$self->{size};
+    my $expiration = time - $self->{seconds};
+    my $buffer = $self->{buffer};
 
-    return scalar @{$self->{buffer}};
+    # Expire old entries and add the new ones
+    @$buffer = grep { $_->[1] > $expiration } @$buffer;
+    push @$buffer, map {[ $_, time ]} @items;
+
+    return scalar @$buffer;
 }
 
 
@@ -248,11 +253,18 @@ sub add {
 sub get {
     my $self = shift or confess "Cannot be used as a function";
 
+    my $expiration = time - $self->{seconds};
+    my $buffer = $self->{buffer};
+
+    # Expire old entries
+    @$buffer = grep { $_->[1] > $expiration } @$buffer;
+
+    # Return just the values from the buffer, either in a slice if they
+    # specified indexes, or the whole thing if not.
     if ( @_ ) {
-        croak "Index out of bounds" if grep { $_ >= $self->{size} } @_;
-        return @{$self->{buffer}}[ @_ ];
+        return map { $_->[0] } @{$buffer}[ @_ ];
     } else {
-        return @{$self->{buffer}};
+        return map { $_->[0] } @$buffer;
     }
 }
 
@@ -283,7 +295,7 @@ BEGIN {
         'raterules',            # Rules for building ratelimit table
         'jobcounts',            # Counts per cluster of running jobs
         'starttime',            # Server startup epoch time
-        'recentmoves',          # Ring buffer of recently-completed jobs
+        'recentmoves',          # Timed buffer of recently-completed jobs
        );
 
     use lib "$ENV{LJHOME}/cgi-bin";
@@ -378,8 +390,9 @@ sub new {
     $self->{ratelimits}  = {};  # Cached rate limits by srcclusterid
     $self->{jobcounts}   = {};  # Count of jobs by srcclusterid
 
-    # Create a ring buffer to contain the 200 most-recently-completed jobs
-    $self->{recentmoves} = new RingBuffer 200;
+    # Create a timed buffer to contain the jobs which have completed in the last
+    # 6 minutes.
+    $self->{recentmoves} = new TimedBuffer 360;
 
     # Merge the user-specified configuration with the defaults, with the user's
     # overriding.
@@ -519,7 +532,7 @@ sub raterules {
 
 
 ### METHOD: recentmoves( undef )
-### Get the JobServer::Job objects in the server's "recently-moved" ringbuffer.
+### Get the JobServer::Job objects in the server's "recently-moved" timedbuffer.
 sub recentmoves {
     my JobServer $self = shift;
     return $self->{recentmoves}->get;
@@ -839,7 +852,7 @@ sub unassignJobForClient {
         $src = $job->srcclusterid;
 
         # If the worker asked to finish it, assume it was completed and
-        # ringbuffer it for statistics.
+        # timedbuffer it for statistics.
         if ( $job->isFinished ) {
             $self->{recentmoves}->add( $job );
         }
@@ -997,13 +1010,20 @@ sub getJobList {
     push @{$stats{footer}},
         sprintf( "  %d queued jobs, %d assigned jobs for %d clusters",
                  $queuedCount, $assignedCount, scalar keys %{$self->{jobs}} );
-    push @{$stats{footer}},
-        sprintf( "  %d of %d total jobs assigned since %s (%0.1f/s)",
-                 $self->{totaljobs} - $queuedCount,
-                 $self->{totaljobs},
-                 scalar localtime($self->{starttime}),
-                 (time - $self->{starttime}) / ($self->{totaljobs}||0.005)
-                );
+
+    if ( $self->{totaljobs} ) {
+        push @{$stats{footer}},
+            sprintf( "  %d of %d total jobs assigned since %s (%0.1f/s)",
+                     $self->{totaljobs} - $queuedCount,
+                     $self->{totaljobs},
+                     scalar localtime($self->{starttime}),
+                     (time - $self->{starttime}) / ($self->{totaljobs})
+                    );
+    } else {
+        push @{$stats{footer}},
+            sprintf( "  No jobs assigned since startup (%s)",
+                     scalar localtime($self->{starttime}) );
+    }
 
     return \%stats;
 }
@@ -1963,7 +1983,7 @@ INIT {
         },
 
         ### Internal/debugging commands
-        ringbuffer => { args => qr{^$} },
+        timedbuffer => { args => qr{^$} },
 
        );
 
@@ -2692,16 +2712,17 @@ sub cmd_shutdown {
 }
 
 
-### METHOD: cmd_ringbuffer( undef )
-### Command handler for the C<ringbuffer> command. FOR DEBUGGING ONLY.
-sub cmd_ringbuffer {
+### METHOD: cmd_timedbuffer( undef )
+### Command handler for the C<timedbuffer> command. FOR DEBUGGING ONLY.
+sub cmd_timedbuffer {
     my JobServer::Client $self = shift;
 
-    $self->{state} = 'ringbuffer';
+    $self->{state} = 'timedbuffer';
     my @jobs = $self->{server}->recentmoves;
 
-    return $self->multilineResponse( "Server's ringbuffer:",
-                                     map { $_->prettyString } @jobs );
+    my $count = 1;
+    my @entries = map { sprintf '%3d. %s', $count++, $_->prettyString } @jobs;
+    return $self->multilineResponse( "Server's timedbuffer:", @entries );
 }
 
 
