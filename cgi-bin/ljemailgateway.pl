@@ -17,7 +17,6 @@ require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 require "$ENV{LJHOME}/cgi-bin/ljprotocol.pl";
 use MIME::Words ();
 use IO::Handle;
-use File::Temp ();
 
 sub process {
     my ($entity, $to) = @_;
@@ -56,7 +55,7 @@ sub process {
     my @froms = Mail::Address->parse($head->get('From:'));
     my $from = $froms[0]->address;
     my $content_type = $head->get('Content-type:');
-    my $tent = get_text_entity($entity);
+    my $tent = get_entity($entity, 'text');
     return $err->("Unable to find any text content in your mail") unless $tent;
     $subject = $head->get('Subject:');
     $body = $tent->bodyhandle->as_string;
@@ -135,7 +134,7 @@ sub process {
                 'invalid_key' => "Your PGP key is invalid.  Please upload a proper key.",
                 'not_signed' => "You specified PGP verification, but your message isn't PGP signed!");
         my $gpgcode = LJ::Emailpost::check_sig($u, $entity);
-        return $err->($gpg_errcodes{$gpgcode}) unless $gpgcode eq 'good';
+        return $err->($gpg_errcodes{$gpgcode}, $err_addr) unless $gpgcode eq 'good';
     }
 
     $body =~ s/^(?:\- )?[\-_]{2,}\s*\r?\n.*//ms; # trim sigs
@@ -177,6 +176,11 @@ sub process {
             $lj_headers{security} = 'private';
         }
     }
+
+    # FIXME: Pict posting integration should fit in here.
+    # my $ient = get_entity($entity, 'image');
+    # if ($ient) {
+      # my $img = $ient->bodyhandle;
 
     my $req = {
         'usejournal' => $journal,
@@ -244,39 +248,39 @@ sub set_allowed_senders {
     LJ::set_userprop($u, "emailpost_allowfrom", join(", ", @addresses));
 }
 
-# Yoinked from mailgate.  
-# Probably need to make this a lib somewhere.
-sub get_text_entity
+sub get_entity
 {
-    my $entity = shift;
+    my ($entity,$etype) = @_;
+    $etype ||= 'text';
 
     my $head = $entity->head;
-    my $mime_type =  $head->mime_type;
-    if ($mime_type eq "text/plain") {
+    my $mime_type = $head->mime_type;
+    if ($mime_type eq "text/plain" && $etype eq 'text') {
         return $entity;
     }
 
+    my $partcount = $entity->parts;
     if ($mime_type eq "multipart/alternative" ||
         $mime_type eq "multipart/signed" ||
         $mime_type eq "multipart/mixed") {
-        my $partcount = $entity->parts;
         for (my $i=0; $i<$partcount; $i++) {
             my $alte = $entity->parts($i);
-            return $alte if ($alte->mime_type eq "text/plain");
+            return $alte if $alte->mime_type eq "text/plain" &&
+                            $etype eq 'text';
+            return $alte if $alte->mime_type =~ /image\// &&
+                            $etype eq 'image';
         }
         return undef;
     }
 
-    if ($mime_type eq "multipart/related") {
-        my $partcount = $entity->parts;
+    if ($mime_type eq "multipart/related" && $etype eq 'text') {
         if ($partcount) {
-            return get_text_entity($entity->parts(0));
+            return get_entity($entity->parts(0), 'text');
         }
         return undef;
     }
 
     $entity->dump_skeleton(\*STDERR);
-    
     return undef;
 }
 

@@ -8,9 +8,11 @@ use strict;
 use MIME::Parser;
 use Mail::Address;
 use Unicode::MapUTF8 ();
+use File::Temp ();
 
 my $parser = new MIME::Parser;
-$parser->output_dir("/tmp");
+my $tmpdir = File::Temp::tempdir("ljmailgate_" . 'X' x 20, DIR=>'/tmp', CLEANUP=>1 );
+$parser->output_dir($tmpdir);
 
 # Don't leave /tmp files around for any reason.
 END { $parser->filer->purge; }
