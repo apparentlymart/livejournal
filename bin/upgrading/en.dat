@@ -166,6 +166,10 @@ p?>
 
 /community/join.bml.error.already.member=You are already a member of this community.
 
+/community/join.bml.error.statusvis.body=The account you are logged in as is not an active account.
+
+/community/join.bml.error.statusvis.title=Unable to Join Communities
+
 /community/join.bml.label.addtofriends=Add "[[maintainer]]" to friends list.<br>
 
 /community/join.bml.label.allowposting=This community allows posting by all members, so you now have access to post in it.  If you already have a LiveJournal client open on your computer, you'll have to log out and log back in for this journal to show up in your list of journals you can post to.

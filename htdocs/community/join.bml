@@ -14,7 +14,7 @@
 
  # bad statusvis?
  unless ($remote->{statusvis} eq 'V') {
-     $body = "<?h1 fuck h1?><?p go away bad statusvis, will strip this later p?>";
+     $body = "<?h1 $ML{'.error.statusvis.title'} h1?><?p $ML{'.error.statusvis.body'} p?>";
      return;
  }
 
