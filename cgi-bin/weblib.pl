@@ -531,16 +531,18 @@ sub get_crumb
 # name: LJ::check_referer
 # class: web
 # des: Checks if the user is coming from a given URI.
-# args: uri
+# args: uri?, referer?
 # des-uri: string; the URI we want the user to come from
+# des-referer: string; the location the user is posting from.  if not supplied,
+#   will be retrieved with BML::get_client_header.  in general, you don't want to
+#   pass this yourself unless you already have it or know we can't get it from BML.
 # returns: 1 if they're coming from that URI, else undef
 # </LJFUNC>
 sub check_referer {
-    my $uri = shift;
-    $uri ||= '';
+    my $uri = shift(@_) || '';
+    my $referer = shift(@_) || BML::get_client_header('Referer');
 
     # get referer and check
-    my $referer = BML::get_client_header('Referer');
     return 1 unless $referer;
     return 1 if $LJ::SITEROOT   && $referer =~ m!^$LJ::SITEROOT$uri!;
     return 1 if $LJ::DOMAIN     && $referer =~ m!^http://$LJ::DOMAIN$uri!;

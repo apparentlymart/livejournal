@@ -265,6 +265,13 @@ sub trans
         return OK;
     }
 
+    # now we know that the request is going to succeed, so do some checking if they have a defined
+    # referer.  clients and such don't, so ignore them.
+    my $referer = $r->header_in("Referer");
+    if ($referer && $r->method eq 'POST' && !LJ::check_referer('', $referer)) {
+       $r->log_error("REFERER WARNING: POST to " . $r->uri . " from " . $referer);
+    }
+
     my %GET = $r->args;
 
     # anti-squatter checking
