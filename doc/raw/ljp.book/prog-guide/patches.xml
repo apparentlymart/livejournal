@@ -1,0 +1,12 @@
+<chapter id="ljp.prog-guide.patches">
+  <title>Patches</title>
+  <itemizedlist>
+    <title>Patches</title>
+    <listitem><para>
+      All patches sent in should be in diff -u format.
+    </para></listitem>
+    <listitem><para>
+      Don't send in patches that comment out old code.  If we want the old code, we'll go get it from CVS.. that's what it's for.
+    </para></listitem>
+  </itemizedlist>
+</chapter>

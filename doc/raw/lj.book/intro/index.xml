@@ -1,0 +1,18 @@
+<part id="lj.intro.index">
+  <title>Introduction to LiveJournal</title>
+  <partintro>
+    <para>
+      Part I takes a look at the system that is LiveJournal, and how it can be used to create successful on-line communitites.
+    </para>
+    <para>
+      In addition, we offer a brief history on the actual LiveJournal site: (<ulink url="http://www.livejournal.com" />)
+    </para>
+    <para>
+      ...<emphasis>When the lawn gets overgrown we go, "Hey Frank! It's lunch time.... go eat the lawn!". It's really a win-win situation.</emphasis>...
+    </para>
+  </partintro>
+  &lj.intro.what_is;
+  &lj.intro.story;
+  &lj.intro.why;
+  &lj.intro.goat;
+</part>

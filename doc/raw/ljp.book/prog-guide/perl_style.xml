@@ -1,0 +1,15 @@
+<chapter id="ljp.prog-guide.perl">
+  <title>Perl Style</title>
+  <itemizedlist>
+    <title>Perl Style</title>
+    <listitem><para>
+      <computeroutput>foo()</computeroutput> looks prettier than <computeroutput>&amp;foo()</computeroutput>.  Let perl 4 die.
+    </para></listitem>
+    <listitem><para>
+      Lines longer than 80 characters are okay, but not great.
+    </para></listitem>
+    <listitem><para>
+      If you're in package LJ and calling an LJ::* API function, go ahead and type the extra four characters (LJ::) even  if they're not necessary... being explicit is nice for the reader.
+    </para></listitem>
+  </itemizedlist>
+</chapter>

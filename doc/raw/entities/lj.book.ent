@@ -1,0 +1,32 @@
+<!ENTITY lj.index                         SYSTEM "../lj.book/index.xml">
+
+<!-- Introduction to the System -->
+
+<!ENTITY lj.intro.index                   SYSTEM "../lj.book/intro/index.xml">
+<!ENTITY lj.intro.why                     SYSTEM "../lj.book/intro/why.xml">
+<!ENTITY lj.intro.what_is                 SYSTEM "../lj.book/intro/what_is.xml">
+<!ENTITY lj.intro.story                   SYSTEM "../lj.book/intro/story.xml">
+<!ENTITY lj.intro.goat                    SYSTEM "../lj.book/intro/goat.xml">
+
+<!-- Installation Procedures -->
+
+<!ENTITY lj.install.index                 SYSTEM "../lj.book/install/index.xml">
+<!ENTITY lj.install.general_setup         SYSTEM "../lj.book/install/general_setup.xml">
+<!ENTITY lj.install.apache_setup          SYSTEM "../lj.book/install/apache_setup.xml">
+<!ENTITY lj.install.perl_setup            SYSTEM "../lj.book/install/perl_setup.xml">
+<!ENTITY lj.install.mysql_setup           SYSTEM "../lj.book/install/mysql_setup.xml">
+<!ENTITY lj.install.ljconfig              SYSTEM "../lj.book/install/ljconfig.xml">
+<!ENTITY lj.install.schedule_tasks        SYSTEM "../lj.book/install/schedule_tasks.xml">
+<!ENTITY lj.install.finishing             SYSTEM "../lj.book/install/finishing.xml">
+
+<!-- Administration -->
+
+<!ENTITY lj.admin.index                   SYSTEM "../lj.book/admin/index.xml">
+<!ENTITY lj.admin.createusers             SYSTEM "../lj.book/admin/create_users.xml">
+<!ENTITY lj.admin.caps                    SYSTEM "../lj.book/admin/caps_list.xml">
+
+<!-- Features -->
+
+<!ENTITY lj.features.index                SYSTEM "../lj.book/features/index.xml">
+<!ENTITY lj.features.support              SYSTEM "../lj.book/features/support.xml">
+<!ENTITY lj.features.topics               SYSTEM "../lj.book/features/topics.xml">

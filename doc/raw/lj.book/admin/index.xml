@@ -1,0 +1,10 @@
+<part id="lj.admin" status="prelim">
+  <title>Administering a LiveJournal Site</title>
+  <partintro>
+    <para>
+	    Part III covers all of the functions necessary to fine tune and run your LiveJournal site.
+    </para>
+  </partintro>
+  &lj.admin.createusers;
+  &lj.admin.caps;
+</part>

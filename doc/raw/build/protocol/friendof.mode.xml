@@ -1,0 +1,29 @@
+<method name="friendof">
+<shortdes>
+Returns a list of which other LiveJournal users list this user as their friend.
+</shortdes>
+<des>
+Returns a "friends of" list for a specified user. An optional limit of returned friends can be supplied.
+</des>
+<arguments><struct count="1">
+
+&authInfo;
+
+<key name="friendoflimit" count="opt"><scalar><des>
+If set to a numeric value greater than zero, this mode will only return the number of results indicated. Useful only for building pretty lists for display which might have a button to view the full list nearby.
+</des></scalar></key>
+
+</struct></arguments>
+
+<!--===================[ RETURN ]==============================-->
+<returns><struct count="1">
+
+<key name="friendofs" count="1">
+<des>
+The list of people who list this user as a friend.
+</des>
+&friendsList;
+</key>
+  
+</struct></returns>    
+</method>

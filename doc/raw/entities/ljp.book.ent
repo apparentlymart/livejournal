@@ -1,0 +1,37 @@
+<!ENTITY ljp.book                               SYSTEM "../ljp.book/index.xml">
+
+<!-- Internals Chapters -->
+
+<!ENTITY ljp.int.index                          SYSTEM "../ljp.book/int/index.xml">
+<!ENTITY ljp.int.bml.faq                        SYSTEM "../ljp.book/int/bml_faq.xml">
+<!ENTITY ljp.int.cap_classes                    SYSTEM "../ljp.book/int/cap_classes.xml">
+
+<!-- Client/Server Protocol Reference -->
+
+<!ENTITY ljp.csp.index                          SYSTEM "../ljp.book/csp/index.xml">
+<!ENTITY ljp.csp.guide                          SYSTEM "../ljp.book/csp/cs.xml">
+
+<!-- XML-RPC Protocol -->
+
+<!ENTITY ljp.csp.xml-rpc.index                  SYSTEM "../ljp.book/csp/xml-rpc/index.xml">
+<!ENTITY ljp.csp.xml-rpc.protocol               SYSTEM "../ljp.book/csp/xml-rpc/protocol.gen.xml">
+
+<!-- Programming Guidelines Chapters -->
+
+<!ENTITY ljp.prog-guide.index                   SYSTEM "../ljp.book/prog-guide/index.xml">
+<!ENTITY ljp.prog-guide.security                SYSTEM "../ljp.book/prog-guide/security.xml">
+<!ENTITY ljp.prog-guide.database                SYSTEM "../ljp.book/prog-guide/database.xml">
+<!ENTITY ljp.prog-guide.general                 SYSTEM "../ljp.book/prog-guide/general.xml">
+<!ENTITY ljp.prog-guide.performance             SYSTEM "../ljp.book/prog-guide/performance.xml">
+<!ENTITY ljp.prog-guide.patches                 SYSTEM "../ljp.book/prog-guide/patches.xml">
+<!ENTITY ljp.prog-guide.perl_style              SYSTEM "../ljp.book/prog-guide/perl_style.xml">
+
+<!-- Database Schema -->
+
+<!ENTITY ljp.dbschema.index                     SYSTEM "../ljp.book/db/index.xml">
+<!ENTITY ljp.dbschema.ref                       SYSTEM "../ljp.book/db/schema.gen.xml">
+
+<!-- Application Programming Interface -->
+
+<!ENTITY ljp.api.index                          SYSTEM "../ljp.book/api/index.xml">
+<!ENTITY ljp.api.ref                            SYSTEM "../ljp.book/api/api.gen.xml">

@@ -1,0 +1,16 @@
+  <key name="username" count="1">
+  <scalar><des>
+    Username of user logging in.
+  </des></scalar>
+  </key>
+  <key name="password" count="opt">
+  <scalar><des>
+    Password of user logging in in plaintext.  Either this or "hpassword" must be present.
+  </des></scalar>
+  </key>
+  <key name="hpassword" count="opt">
+  <scalar><des>
+    MD5 digest of user's password.  Not much more secure than password, but at least it's not in plain text.
+  </des></scalar>
+  </key>
+

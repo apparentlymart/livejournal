@@ -1,0 +1,4 @@
+<!ENTITY % lj.book SYSTEM "lj.book.ent">
+<!ENTITY % ljp.book SYSTEM "ljp.book.ent">
+%lj.book;
+%ljp.book;

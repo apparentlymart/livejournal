@@ -1,0 +1,98 @@
+<chapter id="ljp.ref.cs.intro">
+  <chapterinfo>
+    <title>Introduction to the Client / Server Protocol</title>
+  </chapterinfo>
+
+  <title>Introduction to the Client / Server Protocol</title>
+
+  <note>
+    <para>Before reading this document, it is assumed you know at least some
+    basics about network programming, at least the whole idea of opening
+    sockets and reading/writing to them. If not, this might be kinda
+    confusing.</para>
+  </note>
+
+  <para>Basically, sending a LiveJournal request is like this:</para>
+
+  <procedure>
+    <title>Handshake</title>
+    <step>
+      <para>Open a socket to www.livejournal.com on port 80</para>
+    </step>
+
+    <step>
+      <para>Send an HTTP POST request, containing the request variables (mode,
+      user, password, etc...)</para>
+    </step>
+
+    <step>
+      <para>Read the socket to get the response. The response is really easy to
+      parse.</para>
+    </step>
+
+    <step>
+      <para>Close the socket. Do any approriate action based on the
+      server&amp;apos;s response.</para>
+    </step>
+  </procedure>
+
+  <para>For example, your client would output a request:
+  <programlisting>
+    <![CDATA[
+                    POST /interface/flat HTTP/1.0
+                    Host: www.livejournal.com
+                    Content-type: application/x-www-form-urlencoded
+                    Content-length: 34
+
+                    mode=login&user=test&password=test
+                    ]]>
+  </programlisting>
+  </para>
+
+  <para>And a typical response would be:
+  <programlisting>
+    <![CDATA[
+                    HTTP/1.1 200 OK
+                    Date: Sat, 23 Oct 1999 21:32:35 GMT
+                    Server: Apache/1.3.4 (Unix)
+                    Connection: close
+                    Content-Type: text/plain
+
+                    name
+                    Mr. Test Account
+                    success
+                    OK
+                    message
+                    Hello Test Account!
+                    ]]>
+  </programlisting>
+  </para>
+
+  <para>As a final feature, once you get that stuff working, is to implement
+  support for HTTP proxies. This is
+  <emphasis>very</emphasis>
+
+  easy. Give the user a checkbox if they want to use a proxy or not, and if so,
+  ask the proxy host and proxy port. Now, if they selected to use a proxy, do
+  not connect to www.livejournal.com and port 80, but instead connect to their
+  proxy host on whatever proxy port they specified. The rest is basically the
+  same, except for one difference. Instead of doing:
+  <programlisting>
+    <![CDATA[
+                    POST /interface/flat HTTP/1.0
+                    ]]>
+  </programlisting>
+
+  You would do:
+  <programlisting>
+    <![CDATA[
+                    POST http://www.livejournal.com/interface/flat HTTP/1.0
+                    ]]>
+  </programlisting>
+  </para>
+
+  <para>That line tells the proxy what host it needs to connect to in order to
+  make the real request. The rest of the HTTP you should leave just as you did
+  before.</para>
+</chapter>
+

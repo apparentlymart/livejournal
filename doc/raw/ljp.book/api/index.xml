@@ -1,0 +1,9 @@
+<part id="ljp.api" status="prelim">
+  <title>Application Programming Interface</title>
+  <partintro>
+    <para>
+      This is the complete API documentation.
+    </para>
+  </partintro>
+  &ljp.api.ref;
+</part>

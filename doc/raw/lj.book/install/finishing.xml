@@ -1,0 +1,47 @@
+<chapter id="lj.install.finishing">
+  <chapterinfo>
+    <title>Finishing Up</title>
+  </chapterinfo>
+  <title>Finishing Up</title>
+  <para>
+    You should now just about have a working LiveJournal installation. There are many things you can still do, but all are outside the scope of this document.
+  </para>
+  <para>
+  If you haven't restarted Apache, you'll want to do that now:
+    <screen>
+      <prompt>#</prompt> <userinput>apachectl restart</userinput>
+    </screen>
+  </para>
+  <formalpara>
+  <title>The system user</title>
+  <para>
+    To administrate your site properly, you will need to create the system user that'll have privileges to give privileges to other users:
+    <screen>
+      <prompt>$</prompt> <userinput>bin/upgrading/make_system.pl</userinput>
+    </screen>
+  </para>
+  <para>
+    It'll prompt you for the password to use for the system account and then sets it all up.
+  </para>
+  <para>
+    You now have the ability to login to your LJ site as user "system" with the password you set and then grant priviledges from the admin section to other users:
+  </para>
+  <para>
+    http://your-lj-server/admin/priv/
+  </para>
+  </formalpara>
+  <formalpara>
+  <title>Populating the text</title>
+    <para>
+      To fill your site with the necessary text to get started, you'll need to run our provided text tool:
+    </para>
+    <para>
+      <screen>
+        <prompt>$</prompt> <userinput>bin/upgrading/texttool.pl --load</userinput>
+      </screen>  
+    </para>
+  </formalpara>
+  <para>
+    If you have any questions, join the <ulink url="http://www.livejournal.com/users/lj_everywhere/info">"lj_everywhere"</ulink> community on LiveJournal.com and post your questions.  We'd love to help you out.
+  </para>
+</chapter>

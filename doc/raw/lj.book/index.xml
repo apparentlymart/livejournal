@@ -1,0 +1,21 @@
+<book id="lj.index">
+  <bookinfo>
+    <title>LiveJournal User Manual</title>
+    <edition>LiveJournal User Manual Version 1.0</edition>
+    <abstract>
+      <para>
+        We call this the all purpose LiveJournal owner's manual. A lot of people call it the complete documentation. The symantics are up to you.
+      </para>
+    </abstract>
+  </bookinfo>
+  <preface id="lj.preface">
+    <title>Preface</title>
+    <para>
+      This is a comprehensive manual aimed towards people wishing to use the LiveJournal set of tools for their online-community needs. Topics covered are installation, customization, and administration, with included information on built in LiveJournal features, and a breif glimpse into what LiveJournal is, and how it can be used to its fullest.
+    </para>
+  </preface>
+  &lj.intro.index;
+  &lj.install.index;
+  &lj.admin.index;
+  &lj.features.index;
+</book>

@@ -1,0 +1,25 @@
+  <part id="ljp.csp.protocol" status="prelim">
+    <title>Client/Server Protocol</title>
+    <partintro>
+      <para>
+        This client/server protocol is the aspect of LiveJournal that makes it a little more unique than other journal systems.
+      </para>
+      <para>
+        Currently there are two types of interfaces available to the LiveJournal protocol, the older "flat" interface, or the XML-RPC interface.
+        The XMLRPC interface is probably easiest to use, because there are quite a few XML-RPC resources available to developers in just about any programming language.
+        If you're in a situation that requires you to write your own interface wrapper, then the flat interface is probably best to use.
+      </para>
+      <note>
+        <para>
+          Internally, both interfaces are just wrappers around the same APIs.  Don't worry too much about which one you use, as they accomplish the same thing.
+        </para>
+      </note>
+      <note>
+        <para>
+	  The flat interface is not yet a part of this documentation.
+          If you wish to utilize it in place of XML-RPC, please visit <ulink url="http://www.livejournal.com/developer/protocol.bml" />
+        </para>
+      </note>
+    </partintro>
+    &ljp.csp.xml-rpc.index;
+  </part>

@@ -1,0 +1,155 @@
+<chapter id="ljp.int.cap_classes">
+  <title>Capabilities Classes</title>
+  <para>
+    The 'caps' column in the 'user' table is a 16 bit mask with a bit on for each capability class the user is a part of.  Each site can define their own capability classes in <filename>cgi-bin/ljconfig.pl</filename>.  Then, each capability class can define its own limits for the following things.  The <function>LJ::get_cap()</function> and <function>LJ::get_cap_min()</function> functions will consider the limits of all the classes the member is a part of and return the max or min limit, depending on what it's being used for in the code.
+  </para>
+  <para>
+    <variablelist>
+      <title>LiveJournal capabilities:</title>
+      <varlistentry>
+        <term>checkfriends</term>
+        <listitem>
+          <para>
+            boolean; user can use checkfriends
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>checkfriends_interval</term>
+        <listitem>
+          <para>
+            integer; time before clients can call "checkfriends" (use min)
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>findsim</term>
+        <listitem>
+          <para>
+            boolean; user is able to use the similar interests matching feature
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>friendsviewupdate</term>
+        <listitem>
+          <para>
+            integer: after how many seconds user see new friends view items
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>makepoll</term>
+        <listitem>
+          <para>
+            boolean; can user make a poll
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>maxfriends</term>
+        <listitem>
+          <para>
+            integer; number of friends that are allowed
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>moodthemecreate</term>
+        <listitem>
+          <para>
+            boolean; can create new mood themes
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>readonly</term>
+        <listitem>
+          <para>
+             boolean; no writes to the database for this journal are permitted.
+             <note>
+	       <para>
+	         This is used by cluster management tool:  a journal is readonly while it is being moved to another cluster.
+               </para>
+	     </note>
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>styles</term>
+        <listitem>
+          <para>
+            boolean; can user use &amp; create their own styles
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>textmessage</term>
+        <listitem>
+          <para>
+            boolean; can use text messaging
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>todomax</term>
+        <listitem>
+          <para>
+            integer: maximum number of todo items allowed
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>todosec</term>
+        <listitem>
+          <para>
+            integer: maximum number of todo items allowed
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>userdomain</term>
+        <listitem>
+          <para>
+            boolean; can view journal at http://user.$LJ::DOMAIN/
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>useremail</term>
+        <listitem>
+          <para>
+            boolean; has email address @$LJ::USER_DOMAIN
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>userpics</term>
+        <listitem>
+          <para>
+            int; maximum number of user pictures allowed
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <variablelist>
+      <title>LiveJournal.com Specific:</title>
+      <varlistentry>
+        <term>paid</term>
+        <listitem>
+          <para>
+            boolean; user has paid for their account type
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>fastserver</term>
+        <listitem>
+          <para>
+            boolean; access to fast servers
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </para>
+</chapter>

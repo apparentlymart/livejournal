@@ -1,0 +1,59 @@
+<chapter id="ljp.prog-guide.database">
+  <title>Database</title>
+  <itemizedlist>
+    <title>Database</title>
+    <listitem><para>
+      Check your db index usage... mysql's "EXPLAIN" is your friend.
+    </para></listitem>
+    <listitem><para>
+      Between LOCK TABLES &amp; UNLOCK TABLES, never call a subroutine.
+    </para></listitem>
+    <listitem><para>
+      Check the DB error code after an SQL statement.  Just because it worked once and the SQL is correct, that doesn't mean the table might not go corrupt, a disk might fill up, or index space within the file might not fill up.  Errors happen. Deal with them.
+    </para></listitem>
+    <listitem><para>
+      Preferred way to break up a long SQL query:
+      <programlisting>
+      $sth = $dbh->prepare("SELECT cola, colb, colc, cold FROM foo ".
+                           "WHERE colb&lt;&gt;cola AND colc=22");
+      </programlisting>
+    </para></listitem>
+    <listitem><para>
+      Note on variable naming:
+      <informaltable>
+        <tgroup cols="2">
+          <tbody>
+            <row>
+              <entry><computeroutput>$sth</computeroutput></entry>
+              <entry>statement handle</entry>
+            </row>
+            <row>
+              <entry><computeroutput>$dbh</computeroutput></entry>
+              <entry>one database handle (usually the master)</entry>
+            </row>
+            <row>
+              <entry><computeroutput>$dbs</computeroutput></entry>
+              <entry>set of database handles [master(, slave)]</entry>
+            </row>
+            <row>
+              <entry><computeroutput>$dbr</computeroutput></entry>
+              <entry>read-only slave db handle (used for selects)</entry>
+            </row>
+            <row>
+              <entry><computeroutput>$dbarg</computeroutput></entry>
+              <entry>argument that can take a $dbh/r or $dbs</entry>
+            </row>
+            <row>
+              <entry><computeroutput>$remote</computeroutput></entry>
+              <entry>hashref of remote user, based on cookies.  will contain 'userid' and 'user' params, unless faster get_remote_noauth was used, in which case only 'user' will be present.</entry>
+            </row>
+            <row>
+              <entry><computeroutput>$u</computeroutput></entry>
+              <entry>a user 'object' (a hashref)</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </para></listitem>
+  </itemizedlist>
+</chapter>

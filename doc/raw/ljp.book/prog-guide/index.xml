@@ -1,0 +1,14 @@
+<part id="ljp.prog-guide" status="prelim">
+  <title>Programming Guidelines</title>
+  <partintro>
+    <para>
+      Content that goes into CVS needs to follow these guidelines:
+    </para>
+  </partintro>
+  &ljp.prog-guide.general;
+  &ljp.prog-guide.security;
+  &ljp.prog-guide.database;
+  &ljp.prog-guide.performance;
+  &ljp.prog-guide.perl_style;
+  &ljp.prog-guide.patches;
+</part>

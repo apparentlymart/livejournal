@@ -1,0 +1,59 @@
+<method name="editfriends">
+<shortdes>
+Add, edit, or delete friends from the user's friends list.
+</shortdes>
+<des>
+Takes up to two lists, one of friends to delete and one of friends to add. Several options are allowed to be specified when adding a friend. It returns a verbose list of the friends added, if any were.
+</des>
+<arguments><struct count="1">
+
+&authInfo;
+
+<key name="delete" count="opt"><list count="1">
+<des>
+A list of variable of this form removes the friend users from the user's friend list. It is not an error to delete an already non-existant friend. The value should just be 1.
+</des>
+<scalar count="0more"><des>
+A username of a friend to remove.
+</des></scalar>
+</list></key>
+
+<key name="add" count="opt"><list count="1">
+<des>
+To add friends, send a variable list of this form.
+</des>
+<struct count="0more">
+  <key name="username" count="1"><scalar><des>
+      A username of a friend to remove.
+  </des></scalar></key>
+  <key name="fgcolor" count="opt"><scalar><des>
+      Sets the text color of the friend being added. This value is a HTML-style hex-triplet, and must either be of the form <emphasis>#rrggbb</emphasis> or not sent at all. By default, the value assumed is #000000, black.
+  </des></scalar></key>
+  <key name="bgcolor" count="opt"><scalar><des>
+      Sets the background color of the friend being added. This value is a HTML-style hex-triplet, and must either be of the form <emphasis>#rrggbb</emphasis> or not sent at all. By default, the value assumed is #FFFFFF, white.
+  </des></scalar></key>
+  <key name="groupmask" count="opt"><scalar><des>
+      Sets this user's groupmask. Only use this in clients if you've very recently loaded the friend groups. If your client has been loaded on the end user's desktop for days and you haven't loaded friend groups since it started, they may be inaccurate if they've modified their friend groups through the website or another client. In general, don't use this key unless you know what you're doing.
+  </des></scalar></key>
+</struct>
+</list></key>
+
+</struct></arguments>
+
+<!--===================[ RETURN ]==============================-->
+<returns><struct count="1">
+
+<key name="added" count="opt"><des>
+A list of the users who have been added with this transaction.
+</des>
+<list count="1"><struct count="0more">
+  <key name="username"><scalar><des>
+      The username of the friend that was added.
+  </des></scalar></key>
+  <key name="fullname"><scalar><des>
+      The full name of the friend that was added.
+  </des></scalar></key>
+</struct></list></key>
+
+</struct></returns>    
+</method>

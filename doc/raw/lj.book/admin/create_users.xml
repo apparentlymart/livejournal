@@ -1,0 +1,20 @@
+<chapter id="lj.admin.creatingusers">
+  <chapterinfo>
+    <title>Creating Users</title>
+  </chapterinfo>
+  <title>Creating Users</title>
+  <para>
+    Once you have your LiveJournal server tuned and tweaked, you're probably going to want to create some users and communitiies.
+  </para>
+  <para>
+    Creating users is relatively simple, and depends on which options you are using in your <filename>cgi-bin/ljconfig.pl</filename>.
+    <note>
+      <para>
+        If you are not using this file for your setup, then the default options defined in <filename>cgi-bin/ljdefaults.pl</filename> will be assumed.
+      </para>
+    </note>
+  </para>
+  <para>
+    If your service is live, simple visit <filename>create.bml</filename> in your <filename>htdocs/</filename> directory. With this page, you can create as many users as you'd like.
+  </para>
+</chapter>
