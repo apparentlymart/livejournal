@@ -1824,6 +1824,10 @@ The site team
 
 /manage/index.bml.information.editinfo.about=Edit your account information and various options
 
+/manage/index.bml.information.emailpost=Email Gateway Settings
+
+/manage/index.bml.information.emailpost.about=Manage your email addresses and PIN for post-by-email support
+
 /manage/index.bml.information.header=Account Information
 
 /manage/index.bml.information.siteopts.about=Select your preferred site layout &amp; language
