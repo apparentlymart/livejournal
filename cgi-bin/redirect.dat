@@ -28,3 +28,6 @@
 /faqbrowse.bml		/support/faqbrowse.bml
 /setscheme.bml          /manage/siteopts.bml
 /setlang.bml            /manage/siteopts.bml
+/uploadpic.bml          /editpics.bml
+/uploadpic_do.bml       /editpics.bml
+/modify_do.bml          /modify.bml
