@@ -49,6 +49,12 @@ sub get_subjecticons
     return \%subjecticon;
 }
 
+# entryid-commentid-emailrecipientpassword hash
+sub ecphash {
+    my ($itemid, $talkid, $password) = @_;
+    return "ecph-" . Digest::MD5::md5_hex($itemid . $talkid . $password);
+}
+
 # Returns talkurl with GET args added
 sub talkargs {
     my $talkurl = shift;
@@ -822,12 +828,6 @@ sub talkform {
 
 package LJ::Talk::Post;
 
-# entryid-commentid-password hash
-sub ecphash {
-    my ($itemid, $talkid, $password) = @_;
-    return "ecph-" . Digest::MD5::md5_hex($itemid . $talkid . $password);
-}
-
 sub format_text_mail {
     my ($targetu, $parent, $comment, $talkurl, $item) = @_;
     my $dtalkid = $comment->{talkid}*256 + $item->{anum};
@@ -986,7 +986,7 @@ sub format_html_mail {
             itemid       =>  $ditemid,
             journal      =>  $item->{journalu}{user},
             userpost     =>  $targetu->{user},
-            ecphash      =>  ecphash($item->{itemid}, $comment->{talkid}, $targetu->{password})
+            ecphash      =>  LJ::Talk::ecphash($item->{itemid}, $comment->{talkid}, $targetu->{password})
         );
 
         $html .= "<input type='hidden' name='encoding' value='$encoding' />" unless $encoding eq "UTF-8";
@@ -1322,8 +1322,6 @@ sub init {
     my ($form, $remote, $errret) = @_;
     my $sth;
 
-    my $init = LJ::Talk::init($form);
-
     my $err = sub {
         my $error = shift;
         push @$errret, $error;
@@ -1333,17 +1331,17 @@ sub init {
         return $err->($BML::ML{$_[0]});
     };
 
+    my $init = LJ::Talk::init($form);
+    return $err->($init->{error}) if $init->{error}; 
+
     my $journalu = $init->{'journalu'};
+    return $bmlerr->('talk.error.nojournal') unless $journalu;
+    return $err->($LJ::MSG_READONLY_USER) if LJ::get_cap($journalu, "readonly");
 
     my $r = Apache->request;
     $r->notes("journalid" => $journalu->{'userid'});
 
-    return $err->($init->{error}) if $init->{error}; 
-    return $bmlerr->('talk.error.nojournal') unless $journalu;
-    return $err->($LJ::MSG_READONLY_USER) if LJ::get_cap($journalu, "readonly");
-
     my $dbcm = LJ::get_cluster_master($journalu);
-
     return $bmlerr->('error.nodb') unless $dbcm;
 
     my $itemid = $init->{'itemid'}+0;
@@ -1378,9 +1376,15 @@ sub init {
         }
     }
 
+    # anonymous/cookie users cannot authenticate with ecphash
+    if ($form->{'ecphash'} && $form->{'usertype'} ne "user") {
+        $bmlerr->("$SC.error.badusername");
+        return undef;
+    }
+
     my $cookie_auth;
     if ($form->{'usertype'} eq "cookieuser") {
-        $bmlerr->('talk.error.lostcookie')
+        $bmlerr->("$SC.error.lostcookie")
             unless ($remote && $remote->{'user'} eq $form->{'cookieuser'});
         return undef if @$errret;
         
@@ -1423,12 +1427,25 @@ sub init {
                     $bmlerr->("$SC.error.postshared");
                 }
 
-                unless ($cookie_auth || 
-                        LJ::auth_okay($up, $form->{'password'}, $form->{'hpassword'}) ||
-                        LJ::Talk::Post::ecphash($itemid, $form->{'parenttalkid'}, $up->{'password'})
-                                eq $form->{'ecphash'} )
-                {
-                    $bmlerr->("$SC.error.badpassword");
+                # if we're already authenticated via cookie, then userpost was set
+                # to the authenticated username, so we got into this block, but we
+                # don't want to re-authenticate, so just skip this
+                unless ($cookie_auth) {
+
+                    # if ecphash present, authenticate on that
+                    if ($form->{'ecphash'}) {
+
+                        unless ($form->{'ecphash'} eq
+                                LJ::Talk::ecphash($itemid, $form->{'parenttalkid'}, $up->{'password'}))
+                        {
+                            $bmlerr->("$SC.error.badpassword");
+                        }
+
+                    # otherwise authenticate on username/password
+                    } elsif (! LJ::auth_okay($up, $form->{'password'}, $form->{'hpassword'}))
+                    {
+                        $bmlerr->("$SC.error.badpassword");
+                    }
                 }
 
                 # if the user chooses to log in, do so

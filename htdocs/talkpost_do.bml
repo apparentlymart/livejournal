@@ -16,21 +16,10 @@ body<=
 
     return LJ::server_down_html() if $LJ::SERVER_DOWN;
 
-    # will we accept a GET request?
-    my $get_okay = LJ::did_post();
-    unless ($get_okay) {
-        my $ref = $r->header_in('Referer');
-        
-        # allow hotmail
-        $get_okay = $ref =~
-            m!^http://
-                (?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|.+\.hotmail.msn.com)
-                /cgi-bin/(?:getmsg\?|postrd/)
-             !x;
-
-        # others?
-    }
-    return "POST required." unless $get_okay;
+    # normally require POST.  if an ecphash is specified, we'll let
+    # them through since they're coming from a comment page and
+    # validate the hash later.
+    return "POST required." unless LJ::did_post() || $FORM{'ecphash'};
 
     # as an exception, we do NOT call LJ::text_in() to check for bad
     # input, since it may be not in UTF-8 in replies coming from mail
