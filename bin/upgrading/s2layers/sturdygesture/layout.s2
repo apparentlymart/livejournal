@@ -722,3 +722,30 @@ function MonthPage::print_body {
     }
     "</dl>\n</div>\n";
 }
+
+
+### Handler for the theme previews
+
+function print_theme_preview() {
+"""
+<div style="padding: 1em; background: $*clr_page_back; color: $*clr_page_text;">
+<div style="border: 1px solid $*clr_page_text; margin: 1em; background: $*clr_box_back; color: $*clr_box_text;">
+<h2 style="color: $*clr_boxhead_text; background: $*clr_boxhead_back; font-size: 1em; padding: 4px; margin: 0;">Cir zuta besho cavu mabu</h2>
+<div style="margin: 1em;">
+Cir zuta besho cavu mabu. Jad dop fugu hige wiju. Jam nek sapu shek noshea, moz lolle jil hattou daz.
+Heck mippe giffou tipe pello, govo goof wachou fenu betui, mumu niffo puffu hivoo ziv! Sap gap jozo vem
+sushu jiwo peru diche gese zar. Zuk kah rec sok vapui, mumu. Puw wuti mufe bak jivo, zef kazou gipwew cus.
+Cev lepp gik fego rer. Tucku mickou jeck helou soopp! Vowa vov fawea pip wok. Heg fum heafsum pele.
+Piz kuzu louw rome puir. Pashi jog huku pobi ckush. Zuj bit wido guih biha. Som veh nelo ruh ruju.
+Coosh jecko nuh tutt tab. Zutt ckek vano fic der, hivu?
+</div>
+<div style="margin: 1em; text-align: right; clear: both;">
+<div style="float: left;"><span style="color: #0000ff; text-decoration: underline; cursor: hand;">$*text_permalink</span></div>&nbsp;
+</div>
+</div>
+</div>
+
+""";
+
+
+}
