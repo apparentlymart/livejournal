@@ -139,7 +139,7 @@ MAIN: {
     $config{host} = $host if $host;
     $config{port} = $port if $port;
     $config{daemon} = $daemonFlag;
-    $config{debugLevel} = $debugLevel;
+    $config{debugLevel} = $debugLevel || 0;
     $config{defaultRate} = $defaultRate if $defaultRate;
     $config{lockScale} = $lockScale if $lockScale;
 
@@ -326,7 +326,6 @@ sub start {
         LocalPort   => $self->{config}{port},
         Listen      => $self->{config}{listenQueue},
         ReuseAddr   => 1,
-        ReusePort   => 1,
         Blocking    => 0
             or die "new socket: $!";
 
@@ -406,7 +405,6 @@ sub disconnectClient {
 
     # Remove the client from our list
     delete $self->{clients}{ $fd };
-    return "Goodbye.";
 }
 
 
@@ -434,7 +432,7 @@ sub addJobs {
         ( $userid, $clusterid ) = ( $job->userid, $job->srcclusterid );
 
         # Check to be sure this job isn't already queued or in progress.
-        if ( exists $self->{users}{$userid} ) {
+        if ( $self->{users}{$userid} ) {
             $self->debugMsg( 2, "Request for duplicate job %s", $job->stringify );
             $responses[$i] = "Duplicate job for userid $userid";
             next JOB;
@@ -685,7 +683,9 @@ sub unassignJobForClient {
             $self->debugMsg( 3, "Client %d dropped job %s", $fdno, $job->stringify );
         }
 
-        # Decrement the job count for the cluster the job belonged to
+        # Delete the user's job and decrement the job count for the cluster the
+        # job belonged to
+        delete $self->{users}{ $job->userid };
         $self->{jobcounts}{ $src }--;
         $self->debugMsg( 3, "Cluster %d now has %d clients",
                          $src, $self->{jobcounts}{ $src } );
@@ -701,9 +701,7 @@ sub getJobForUser {
     my JobServer $self = shift;
     my $userid = shift or confess "No userid specified";
 
-    return exists $self->{users}{ $userid }
-        ? $self->{users}{ $userid }
-        : undef;
+    return $self->{users}{ $userid };
 }
 
 
@@ -751,7 +749,7 @@ sub requestJobFinish {
     $fdno = $client->fdno;
     if ( ! exists $self->{assignments}{$fdno} ) {
         $self->logMsg( 'warn', "Client $fdno: finish on unassigned job" );
-        return "Abort: Not assigned";
+        return undef;
     }
 
     # If the job the client was last assigned doesn't match the userid they've
@@ -760,8 +758,7 @@ sub requestJobFinish {
     if ( $job->userid != $userid ) {
         $self->logMsg( 'warn', "Client %d: finish for non-assigned job %s",
                        $fdno, $job->stringify );
-        return sprintf( "Abort: Mismatched userids (%d vs. %d)",
-                        $userid, $job->userid );
+        return undef;
     }
 
     # Otherwise mark the job as finished and advise the client that they can
@@ -770,57 +767,65 @@ sub requestJobFinish {
     $self->debugMsg( 2, 'Client %d finishing job %s',
                      $fdno, $job->stringify );
 
-    return 'OK';
+    return "Go ahead with job " . $job->stringify;
 }
 
 
 
 ### METHOD: getJobList( undef )
-### Return a list of job statistics, one line per source cluster.
+### Return a hashref of job stats. The hashref will contain three arrays: the
+### 'queued_jobs' array contains a line describing how many jobs are queued for
+### each source cluster, the 'assigned_jobs' array contains a line per client
+### that's currently moving a user, and the 'footers' array contains some lines
+### of overall statistics about the server.
 sub getJobList {
     my JobServer $self = shift;
 
     my (
-        @list,                  # The returned list of job stats
+        %stats,                 # The returned job stats
         $queuedCount,           # Number of queued jobs
         $assignedCount,         # Number of jobs currently assigned
         $job,                   # Job object iterator
         $rates,                 # Rate-limit table
        );
 
-    @list = ([], []);
+    %stats = ( queued_jobs => [], assigned_jobs => [], footer => [] );
     $queuedCount = $assignedCount = 0;
     $rates = $self->getClusterRateLimits;
 
     # The first sublist: queued jobs
     foreach my $clusterid ( sort keys %{$self->{jobs}} ) {
-        push @{$list[0]}, sprintf( "%3d: %5d jobs queued @ limit %d",
-                             $clusterid,
-                             scalar @{$self->{jobs}{$clusterid}},
-                             $rates->{$clusterid} );
+        push @{$stats{queued_jobs}},
+            sprintf( "%3d: %5d jobs queued @ limit %d",
+                     $clusterid,
+                     scalar @{$self->{jobs}{$clusterid}},
+                     $rates->{$clusterid} );
         $queuedCount += scalar @{$self->{jobs}{$clusterid}};
     }
 
     # Second sublist: assigned jobs
     foreach my $fdno ( sort keys %{$self->{assignments}} ) {
         $job = $self->{assignments}{$fdno};
-        push @{$list[1]}, sprintf( "%3d: working on moving %7d from %3d to %3d",
-                                $fdno, $job->userid, $job->srcclusterid,
-                                $job->dstclusterid );
+        push @{$stats{assigned_jobs}},
+            sprintf( "%3d: working on moving %7d from %3d to %3d",
+                     $fdno, $job->userid, $job->srcclusterid,
+                     $job->dstclusterid );
         $assignedCount++;
     }
 
     # Append the footer lines
-    push @list, sprintf( "  %d queued jobs, %d assigned jobs for %d clusters",
-                         $queuedCount, $assignedCount, scalar keys %{$self->{jobs}} );
-    push @list, sprintf( "  %d of %d total jobs assigned since %s (%0.1f/s)",
-                         $self->{totaljobs} - $queuedCount,
-                         $self->{totaljobs},
-                         scalar localtime($self->{starttime}),
-                         (time - $self->{starttime}) / ($self->{totaljobs}||0.005)
-                        );
+    push @{$stats{footer}},
+        sprintf( "  %d queued jobs, %d assigned jobs for %d clusters",
+                 $queuedCount, $assignedCount, scalar keys %{$self->{jobs}} );
+    push @{$stats{footer}},
+        sprintf( "  %d of %d total jobs assigned since %s (%0.1f/s)",
+                 $self->{totaljobs} - $queuedCount,
+                 $self->{totaljobs},
+                 scalar localtime($self->{starttime}),
+                 (time - $self->{starttime}) / ($self->{totaljobs}||0.005)
+                );
 
-    return wantarray ? @list : \@list;
+    return \%stats;
 }
 
 
@@ -836,12 +841,11 @@ sub shutdown {
     # Clear jobs so no more get handed out while clients are closing
     $self->{jobs} = {};
     $self->{users} = {};
-    $self->logMsg( 'notice', "Server shutdown by $agent" );
+    $self->logMsg( 'notice', "Server shutdown by %s", $agent->stringify );
 
     # Drop all clients
     foreach my $client ( values %{$self->{clients}} ) {
         $client->write( "Server shutdown.\r\n" );
-        $self->disconnectClient( $client );
         $client->close;
     }
 
@@ -1374,6 +1378,19 @@ sub new {
     return $self;
 }
 
+
+### METHOD: stringify( undef )
+### Return a string representation of the client object.
+sub stringify {
+    my JobServer::Client $self = shift;
+
+    return sprintf( '%s:%d',
+                    $self->{sock}->peerhost,
+                    $self->{sock}->peerport );
+}
+
+
+### METHOD: event_read( undef )
 ### Readable event callback -- read input from the client and append it to the
 ### read buffer. Then peel lines off the read buffer and send them to the line
 ### processor.
@@ -1383,7 +1400,6 @@ sub event_read {
     my $bref = $self->read( 1024 );
 
     if ( !defined $bref ) {
-        $self->{server}->disconnectClient( $self );
         $self->close;
         return undef;
     }
@@ -1391,12 +1407,22 @@ sub event_read {
     $self->{read_buf} .= $$bref;
 
     while ($self->{read_buf} =~ s/^(.+?)\r?\n//) {
-        my $line = $1;
-        my $output = $self->processLine( $line );
-        $self->write( "$output\r\n" ) if $output;
+        $self->processLine( $1 );
     }
 
 }
+
+
+### METHOD: close( undef )
+### Close the client connection after unregistering from the server --
+### overridden from Danga::Socket.
+sub close {
+    my JobServer::Client $self = shift;
+
+    $self->{server}->disconnectClient( $self ) if $self->{server};
+    $self->SUPER::close;
+}
+
 
 ### METHOD: sock( undef )
 ### Return the IO::Socket object that corresponds to this client.
@@ -1456,7 +1482,6 @@ sub processLine {
     my $line = shift or return undef;
 
     my (
-        $reply,                 # Reply to send back to client
         $cmd,                   # Command word
         $args,                  # Argument string
         $argpat,                # Argument-parsing pattern
@@ -1483,36 +1508,54 @@ sub processLine {
             # If the pattern didn't contain captures, throw away the args
             @args = () unless ( @+ > 1 );
 
-            eval { $reply = $self->$method(@args) };
-            if ( $@ ) { $reply = $self->error( $@ ) }
+            eval { $self->$method(@args) };
+            if ( $@ ) { $self->errorResponse($@) }
         }
 
         # Valid command, but bad args
         else {
-            $reply = $self->error( "Malformed command args for '$cmd': '$args'." );
+            $self->errorResponse( "Malformed command args for '$cmd': '$args'." );
         }
     }
 
     # Invalid command
     else {
-        $reply = $self->error( "Invalid or malformed command '$cmd'" );
+        $self->errorResponse( "Invalid or malformed command '$cmd'" );
     }
 
-    return $reply;
+    return 1;
 }
 
 
-### METHOD: error( @msg )
-### Build an error message from the given I<msg> parts and log it at level
-### 'error', then return an error message appropriate to send to the client.
-sub error {
+### METHOD: okayResponse( @msg )
+### Set an 'OK' response string made up of the I<msg> parts concatenated
+### together.
+sub okayResponse {
     my JobServer::Client $self = shift;
-    my $msg = @_ ? join('', @_) : "Unknown error";
+    my $msg = join( '', @_ );
 
-    # Remove up to 2 newlines
-    chomp( $msg ); chomp( $msg );
+    1 while chomp( $msg );
 
-    $self->{state} = 'error';
+    $self->debugMsg( 3, "[Client %s:%d] OK: %s",
+                     $self->{sock}->peerhost,
+                     $self->{sock}->peerport,
+                     $msg,
+                    );
+
+    $self->write( "OK $msg\r\n" );
+}
+
+
+### METHOD: errorResponse( @msg )
+### Send an 'ERR' response string made up of the I<msg> parts concatenated
+### together.
+sub errorResponse {
+    my JobServer::Client $self = shift;
+    my $msg = join( '', @_ );
+
+    # Trim newlines off the end of the message
+    1 while chomp( $msg );
+
     $self->logMsg( "error", "[Client %s:%d] ERR: %s",
                    $self->{sock}->peerhost,
                    $self->{sock}->peerport,
@@ -1520,8 +1563,24 @@ sub error {
                   );
 
     $msg =~ s{at \S+ line \d+\..*}{};
-    return "ERR: $msg";
+    $self->write( "ERR $msg\r\n" );
 }
+
+
+### METHOD: multilineResponse( $msg, @lines )
+### Send an 'OK' response containing the given I<msg> followed by one or more
+### I<lines> of a multi-line response followed by an 'END'.
+sub multilineResponse {
+    my $self = shift or croak "Cannot be used as a function.";
+    my ( $msg, @lines ) = @_;
+
+    chomp( @lines );
+
+    $self->okayResponse( $msg );
+    $self->write( join("\r\n", @lines, "END") . "\r\n" );
+}
+
+
 
 
 #####################################################################
@@ -1538,10 +1597,10 @@ sub cmd_get_job {
 
     if ( $job ) {
         $self->{state} = sprintf 'got job %d:%d:%d', @$job;
-        return "Job: ". $job->stringify;
+        return $self->okayResponse( "JOB ". $job->stringify );
     } else {
         $self->{state} = 'idle (no jobs)';
-        return "Idle";
+        return $self->okayResponse( "IDLE" );
     }
 }
 
@@ -1561,7 +1620,7 @@ sub cmd_add_jobs {
     my @responses = $self->{server}->addJobs( @tuples );
     $self->{state} = 'idle';
 
-    return join( "\r\n", @responses );
+    return $self->multilineResponse( "Done", @responses );
 }
 
 
@@ -1570,7 +1629,7 @@ sub cmd_add_jobs {
 sub cmd_source_counts {
     my JobServer::Client $self = shift;
     $self->{state} = 'source counts';
-    return $self->error( "Unimplemented command." );
+    return $self->errorResponse( "Unimplemented command." );
 }
 
 ### METHOD: cmd_stop_moves( undef )
@@ -1580,12 +1639,15 @@ sub cmd_stop_moves {
     my $allFlag = shift || '';
 
     $self->{state} = 'stop moves';
+    my $msg;
 
     if ( $allFlag ) {
-        return $self->{server}->stopAllJobs( $self );
+        $msg = $self->{server}->stopAllJobs( $self );
     } else {
-        return $self->{server}->stopNewJobs( $self );
+        $msg = $self->{server}->stopNewJobs( $self );
     }
+
+    $self->okayResponse( $msg );
 }
 
 ### METHOD: cmd_is_moving( undef )
@@ -1593,7 +1655,7 @@ sub cmd_stop_moves {
 sub cmd_is_moving {
     my JobServer::Client $self = shift;
     $self->{state} = 'is moving';
-    return $self->error( "Unimplemented command." );
+    return $self->errorResponse( "Unimplemented command." );
 }
 
 ### METHOD: cmd_check_instance( undef )
@@ -1601,7 +1663,7 @@ sub cmd_is_moving {
 sub cmd_check_instance {
     my JobServer::Client $self = shift;
     $self->{state} = 'check instance';
-    return $self->error( "Unimplemented command." );
+    return $self->errorResponse( "Unimplemented command." );
 }
 
 ### METHOD: cmd_list_jobs( undef )
@@ -1610,19 +1672,18 @@ sub cmd_list_jobs {
     my JobServer::Client $self = shift;
     $self->{state} = 'list jobs';
 
-    my @list = $self->{server}->getJobList;
+    my $stats = $self->{server}->getJobList;
 
-    return join( "\r\n",
-                 "",
-                 "-- Job List ---------------",
-                 "ScId  Jobs",
-                 @{$list[0]},
-                 "-- Assigned ---------------",
-                 "Clnt   Assignment",
-                 @{$list[1]},
-                 "---------------------------",
-                 @list[2..$#list],
-                 "" );
+    return $self->multilineResponse(
+        "Joblist:",
+        "Queued Jobs",
+        @{$stats->{queued_jobs}},
+        "",
+        "Assigned Jobs",
+        @{$stats->{assigned_jobs}},
+        "",
+        @{$stats->{footer}},
+       );
 }
 
 
@@ -1632,17 +1693,21 @@ sub cmd_set_rate {
     my JobServer::Client $self = shift;
     my ( $clusterid, $rate ) = @_;
 
+    my $msg;
+
     # Global rate
     if ( ! defined $rate ) {
         $rate = $clusterid;
         $self->{state} = "set global rate";
-        return $self->{server}->setGlobalRateLimit( $rate );
+        $msg = $self->{server}->setGlobalRateLimit( $rate );
     }
 
     else {
         $self->{state} = "set rate for cluster $clusterid";
-        return $self->{server}->setClusterRateLimit( $clusterid, $rate );
+        $msg = $self->{server}->setClusterRateLimit( $clusterid, $rate );
     }
+
+    return $self->okayResponse( $msg );
 }
 
 
@@ -1655,8 +1720,14 @@ sub cmd_finish {
 
     my ( $userid, $srcclusterid, $dstclusterid ) = split /:/, $spec, 3;
 
-    return $self->{server}->requestJobFinish( $self, $userid, $srcclusterid,
-                                              $dstclusterid );
+    my $msg = $self->{server}->requestJobFinish( $self, $userid, $srcclusterid,
+                                                 $dstclusterid );
+
+    if ( $msg ) {
+        return $self->okayResponse( $msg );
+    } else {
+        return $self->errorResponse( "Abort" );
+    }
 }
 
 
@@ -1667,35 +1738,37 @@ sub cmd_help {
     my $command = shift || '';
 
     $self->{state} = 'help';
+    my @response = ();
 
     # Either show help for a particular command
     if ( $command && exists $CommandTable{$command} ) {
         my $cmdinfo = $CommandTable{ $command };
         $cmdinfo->{form} ||= ''; # Non-existant form means no args
 
-        return join( "\r\n",
-                     "--- $command -----------------------------------",
-                     "",
-                     "  $command $cmdinfo->{form}",
-                     "",
-                     $cmdinfo->{help},
-                     "",
-                     "Pattern:",
-                     "  $cmdinfo->{args}",
-                     "",
-                    );
+        @response = (
+            "--- $command -----------------------------------",
+            "",
+            "  $command $cmdinfo->{form}",
+            "",
+            $cmdinfo->{help},
+            "",
+            "Pattern:",
+            "  $cmdinfo->{args}",
+            "",
+           );
     }
 
     else {
         my @cmds = map { "  $_" } sort keys %CommandTable;
-        return join( "\r\n",
-                     "Available commands:",
-                     "",
-                     @cmds,
-                     "",
-                    );
-
+        @response = (
+            "Available commands:",
+            "",
+            @cmds,
+            "",
+           );
     }
+
+    return $self->multilineResponse( "Help:", @response );
 }
 
 
@@ -1707,19 +1780,21 @@ sub cmd_lock {
 
     # Fetch the job for the requested user if possible
     my $job = $self->{server}->getJobForUser( $userid )
-        or return $self->error( "No such user '$userid'." );
+        or return $self->errorResponse( "No such user '$userid'." );
 
     if ( $job->isPrelocked ) {
-        return sprintf( "User %d already locked for %d seconds.",
-                        $userid, $job->secondsSinceLock );
+        my $msg = sprintf( "User %d already locked for %d seconds.",
+                           $userid, $job->secondsSinceLock );
+        return $self->errorResponse( $msg );
     }
 
     # Try to lock the user
     my $time = $job->prelock;
     if ( $time ) {
-        return "User $userid locked at: $time (". scalar localtime($time) .")";
+        my $msg = "User $userid locked at: $time (". scalar localtime($time) .")";
+        return $self->okayResponse( $msg );
     } else {
-        return $self->error( "Prelocking of user $userid failed." );
+        return $self->errorResponse( "Prelocking of user $userid failed." );
     }
 }
 
@@ -1731,11 +1806,10 @@ sub cmd_quit {
 
     $self->{state} = 'quitting';
 
-    my $msg = $self->{server}->disconnectClient( $self );
-    $self->write( "$msg\r\n" );
+    $self->okayResponse( "Goodbye" );
     $self->close;
 
-    return "";
+    return 1;
 }
 
 
@@ -1746,15 +1820,12 @@ sub cmd_shutdown {
 
     $self->{state} = 'shutdown';
 
-    my $strself = sprintf( '%s:%d',
-                           $self->{sock}->peerhost,
-                           $self->{sock}->peerport );
-
-    my $msg = $self->{server}->shutdown( $strself );
-    $self->write( "$msg\r\n" );
+    my $msg = $self->{server}->shutdown( $self );
+    $self->{server} = undef;
+    $self->okayResponse( $msg );
     $self->close;
 
-    return "";
+    return 1;
 }
 
 
