@@ -129,6 +129,12 @@ sub clean
         {
             my $tag = $token->[1];
 
+            # check for exploit using TIME namespace to set data and introduce javascript that
+            # would affect IE users.
+            if ($tag =~ m/:set$/ && $token->[2]->{attributename} =~ /^innerHTML$/i) {
+                next;
+            }
+
             # do some quick checking to see if this is an email address/URL, and if so, just
             # escape it and ignore it
             if ($tag =~ m!(?:\@|://)!) {
