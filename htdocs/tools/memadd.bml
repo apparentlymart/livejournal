@@ -89,6 +89,11 @@
  my $dbcr = LJ::get_cluster_reader($ju);
 
  my $log = LJ::get_log2_row($ju, $itemid);
+ unless ($log) {
+     $title = $ML{'Error'};
+     $body = "Error retrieving data to add a memory.";
+     return;
+ }
  my $subject = LJ::get_logtext2($ju, $itemid)->{$log->{jitemid}}[0];
 
  # if the entry is pre-UTF-8 conversion, the
@@ -117,6 +122,7 @@
  # get keywords user has used
  my $exist_kw = LJ::Memories::get_keywords($memoryu);
  unless ($exist_kw) {
+     $title = $ML{'Error'};
      $body = "Error fetching existing keywords.";
      return;
  }

@@ -41,12 +41,15 @@
 
         my $ju = LJ::load_userid($r->{'journalid'});
         my $lrow = LJ::get_log2_row($ju, $r->{'nodeid'});
-        my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
-
         my $hr_ago = sprintf("%.1f", ($now - $r->{'posttime'}) / 3600);
 
-        my $url = "$LJ::SITEROOT/users/$ju->{user}/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
-        $ret .= "$hr_ago hr ago: <a href='$url'>$url</a><br />\n";
+        if ($lrow) {
+            my $talkid = ($r->{'jtalkid'} << 8) + $lrow->{'anum'};
+            my $url = "$LJ::SITEROOT/users/$ju->{user}/$lrow->{ditemid}.html?thread=$talkid\#t$talkid";
+            $ret .= "$hr_ago hr ago in " . LJ::ljuser($ju) . ": <a href='$url'>$url</a><br />\n";
+        } else {
+            $ret .= "$hr_ago hr ago in " . LJ::ljuser($ju) . ": link unavailable<br />";
+        }
     }
 
     return $ret;

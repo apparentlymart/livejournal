@@ -497,6 +497,8 @@ sub get_log2_row
     }
 
     my $db = LJ::get_cluster_def_reader($u);
+    return undef unless $db;
+
     my $sql = "SELECT posterid, eventtime, logtime, security, allowmask, " .
               "anum FROM log2 WHERE journalid=? AND jitemid=?";
 
@@ -7168,8 +7170,10 @@ sub mark_entry_as_spam {
 
     my $dbcr = LJ::get_cluster_def_reader($journalu);
     my $dbh = LJ::get_db_writer();
+    return 0 unless $dbcr && $dbh;
 
     my $item = LJ::get_log2_row($journalu, $jitemid);
+    return 0 unless $item;
 	
     # step 1: get info we need
     my $logtext = LJ::get_logtext2($journalu, $jitemid);
