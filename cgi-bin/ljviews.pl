@@ -17,7 +17,7 @@ sub create_view_lastn
     
     my $user = $u->{'user'};
 
-    &load_user_props($u, "opt_blockrobots", "url", "urlname");
+    LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
 
     my %FORM = ();
     &get_form_data(\%FORM);
@@ -33,14 +33,14 @@ sub create_view_lastn
     $lastn_page{'username'} = $user;
     $lastn_page{'numitems'} = $vars->{'LASTN_OPT_ITEMS'} || 20;
 
-    my $journalbase = &LJ::journal_base($user, $opts->{'vhost'});
+    my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
     $lastn_page{'urlfriends'} = "$journalbase/friends";
     $lastn_page{'urlcalendar'} = "$journalbase/calendar";
 
     my %userpics;
     if ($u->{'defaultpicid'}) {
 	my $picid = $u->{'defaultpicid'};
-	&load_userpics(\%userpics, [ $picid ]);
+	LJ::load_userpics($dbs, \%userpics, [ $picid ]);
 	$lastn_page{'userpic'} = 
 	    &fill_var_props($vars, 'LASTN_USERPIC', {
 		"src" => "$LJ::SITEROOT/userpic/$picid",
@@ -96,8 +96,8 @@ sub create_view_lastn
 
     ### load the log properties
     my %logprops = ();
-    &load_log_props(\@itemids, \%logprops);
-    &load_moods();
+    LJ::load_log_props($dbs, \@itemids, \%logprops);
+    LJ::load_moods($dbs);
 
     my $logtext = LJ::get_logtext($dbs, @itemids);
 
@@ -167,15 +167,15 @@ sub create_view_lastn
         $lastn_event{'itemid'} = $itemid;
         $lastn_event{'datetime'} = &fill_var_props($vars, 'LASTN_DATE_FORMAT', \%lastn_date_format);
 	if ($subject) {
-	    &LJ::CleanHTML::clean_subject(\$subject);
+	    LJ::CleanHTML::clean_subject(\$subject);
 	    $lastn_event{'subject'} = &fill_var_props($vars, 'LASTN_SUBJECT', { 
 		"subject" => $subject,
 	    });
 	}
 
-	&LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
+	LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
 					       'cuturl' => LJ::item_link($u, $itemid), });
-	&LJ::expand_embedded($dbs, $itemid, $remote, \$event);
+	LJ::expand_embedded($dbs, $itemid, $remote, \$event);
         $lastn_event{'event'} = $event;
 
 	if ($u->{'opt_showtalklinks'} eq "Y" && 
@@ -207,7 +207,7 @@ sub create_view_lastn
 	{
 	    my %lastn_altposter = ();
 
-	    my $poster = &LJ::get_username($dbs, $posterid);
+	    my $poster = LJ::get_username($dbs, $posterid);
 	    $lastn_altposter{'poster'} = $poster;
 	    $lastn_altposter{'owner'} = $user;
 	    
@@ -232,7 +232,7 @@ sub create_view_lastn
 	    if ($picid) 
 	    {
 		my $pic = {};
-		&load_userpics($pic, [ $picid ]);
+		LJ::load_userpics($dbs, $pic, [ $picid ]);
 		$lastn_altposter{'pic'} = &fill_var_props($vars, 'LASTN_ALTPOSTER_PIC', {
 		    "src" => "$LJ::SITEROOT/userpic/$picid",
 		    "width" => $pic->{$picid}->{'width'},
@@ -349,7 +349,7 @@ sub create_view_friends
 	return 1;
     }
 
-    &load_user_props($u, "opt_usesharedpic", "url", "urlname");
+    LJ::load_user_props($dbs, $u, "opt_usesharedpic", "url", "urlname");
 
     my %friends_page = ();
     $friends_page{'name'} = &ehtml($u->{'name'});
@@ -371,7 +371,7 @@ sub create_view_friends
 	    });
     }
 
-    my $journalbase = &LJ::journal_base($user, $opts->{'vhost'});
+    my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
 
     $friends_page{'urlcalendar'} = "$journalbase/calendar";
     $friends_page{'urllastn'} = "$journalbase/";
@@ -482,13 +482,13 @@ sub create_view_friends
     
     ### load the log properties
     my %logprops = ();
-    &load_log_props(\@itemids, \%logprops);
-    &load_moods();
+    LJ::load_log_props($dbs, \@itemids, \%logprops);
+    LJ::load_moods($dbs);
 
     # load the pictures for the user
     my %userpics;
     my @picids = map { $friends{$_}->{'defaultpicid'} } keys %friends;
-    &load_userpics(\%userpics, [ @picids ]);
+    LJ::load_userpics($dbs, \%userpics, [ @picids ]);
 
     # load the text of the entries
     my $logtext = LJ::get_logtext($dbs, @itemids);
@@ -565,7 +565,7 @@ sub create_view_friends
 	$friends_event{'itemid'} = $itemid;
 	$friends_event{'datetime'} = &fill_var_props($vars, 'FRIENDS_DATE_FORMAT', \%friends_date_format);
 	if ($subject) {
-	    &LJ::CleanHTML::clean_subject(\$subject);
+	    LJ::CleanHTML::clean_subject(\$subject);
 	    $friends_event{'subject'} = &fill_var_props($vars, 'FRIENDS_SUBJECT', { 
 		"subject" => $subject,
 	    });
@@ -576,9 +576,9 @@ sub create_view_friends
 	    });
 	}
 	
-	&LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
+	LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
 					       'cuturl' => LJ::item_link($u, $itemid), });
-	&LJ::expand_embedded($dbs, $itemid, $remote, \$event);
+	LJ::expand_embedded($dbs, $itemid, $remote, \$event);
 	$friends_event{'event'} = $event;
 	
         # do the picture
@@ -594,7 +594,7 @@ sub create_view_friends
 		}
 		if ($posterdefpic{$posterid}) { 
 		    $picid = $posterdefpic{$posterid}; 
-		    &load_userpics(\%userpics, [ $picid ]);
+		    LJ::load_userpics($dbs, \%userpics, [ $picid ]);
 		}
 	    }
 	    if ($logprops{$itemid}->{'picture_keyword'} && 
@@ -605,7 +605,7 @@ sub create_view_friends
 		$sth->execute;
 		my ($alt_picid) = $sth->fetchrow_array;
 		if ($alt_picid) {
-		    &load_userpics(\%userpics, [ $alt_picid ]);
+		    LJ::load_userpics($dbs, \%userpics, [ $alt_picid ]);
 		    $picid = $alt_picid;
 		}
 	    }
@@ -750,7 +750,7 @@ sub create_view_calendar
     my $dbr = $dbs->{'reader'};
     
     my $user = $u->{'user'};
-    &load_user_props($u, "opt_blockrobots", "url", "urlname");
+    LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
     my %FORM = ();
     &get_form_data(\%FORM);
 
@@ -774,7 +774,7 @@ sub create_view_calendar
 	    });
     }
 
-    my $journalbase = &LJ::journal_base($user, $opts->{'vhost'});
+    my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
     
     $calendar_page{'urlfriends'} = "$journalbase/friends";
     $calendar_page{'urllastn'} = "$journalbase/";
@@ -956,7 +956,7 @@ sub create_view_day
 
     my $user = $u->{'user'};
 
-    &load_user_props($u, "opt_blockrobots", "url", "urlname");
+    LJ::load_user_props($dbs, $u, "opt_blockrobots", "url", "urlname");
     my %day_page = ();
     $day_page{'username'} = $user;
     if ($u->{'opt_blockrobots'}) {
@@ -975,7 +975,7 @@ sub create_view_day
 	    });
     }
 
-    my $journalbase = &LJ::journal_base($user, $opts->{'vhost'});
+    my $journalbase = LJ::journal_base($user, $opts->{'vhost'});
     $day_page{'urlfriends'} = "$journalbase/friends";
     $day_page{'urlcalendar'} = "$journalbase/calendar";
     $day_page{'urllastn'} = "$journalbase/";
@@ -1045,13 +1045,13 @@ END_SQL
 
     ### load the log properties
     my %logprops = ();
-    &load_log_props(\@itemids, \%logprops);
-    &load_moods();
+    LJ::load_log_props($dbs, \@itemids, \%logprops);
+    LJ::load_moods($dbs);
 
     my $logtext = LJ::get_logtext($dbs, @itemids);
 
     # load the log items
-    $sth = $dbh->prepare("SELECT itemid, security, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart' FROM log l WHERE itemid IN ($itemid_in) ORDER BY eventtime $optDESC, logtime $optDESC");
+    $sth = $dbr->prepare("SELECT itemid, security, replycount, DATE_FORMAT(eventtime, \"%a %W %b %M %y %Y %c %m %e %d %D %p %i %l %h %k %H\") AS 'alldatepart' FROM log l WHERE itemid IN ($itemid_in) ORDER BY eventtime $optDESC, logtime $optDESC");
     $sth->execute;
 
     my $events = "";
@@ -1097,15 +1097,15 @@ END_SQL
 	$day_event{'itemid'} = $itemid;
         $day_event{'datetime'} = &fill_var_props($vars, 'DAY_DATE_FORMAT', \%day_date_format);
 	if ($subject) {
-	    &LJ::CleanHTML::clean_subject(\$subject);
+	    LJ::CleanHTML::clean_subject(\$subject);
 	    $day_event{'subject'} = &fill_var_props($vars, 'DAY_SUBJECT', { 
 		"subject" => $subject,
 	    });
 	}
 
-	&LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
+	LJ::CleanHTML::clean_event(\$event, { 'preformatted' => $logprops{$itemid}->{'opt_preformatted'},
 					       'cuturl' => LJ::item_link($u, $itemid), });
-	&LJ::expand_embedded($dbs, $itemid, $remote, \$event);
+	LJ::expand_embedded($dbs, $itemid, $remote, \$event);
         $day_event{'event'} = $event;
 
 	if ($u->{'opt_showtalklinks'} eq "Y" &&

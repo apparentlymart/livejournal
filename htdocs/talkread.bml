@@ -25,7 +25,7 @@ BODY<=
 
  ### load the log properties
  my %logprops = ();
- &load_log_props([ $FORM{'itemid'} ], \%logprops);
+ LJ::load_log_props($dbs, [ $FORM{'itemid'} ], \%logprops);
 
  my $itemid = $FORM{'itemid'}+0;
  my $qitemid = $FORM{'itemid'}+0;
@@ -151,7 +151,7 @@ BODY<=
 
      my %current;
      if ($logprops{$itemid}->{'current_mood'} || $logprops{$itemid}->{'current_moodid'}) {
-	 &load_moods();
+	 LJ::load_moods($dbs);
 	 $current{'Mood'} = $logprops{$itemid}->{'current_mood'};
 	 my $mid = $logprops{$itemid}->{'current_moodid'};
 	 if ($mid) {
@@ -338,7 +338,7 @@ BODY<=
 	 $user{$_->{'user'}} = $_;
 	 push @pics_to_load, $_->{'defaultpicid'};
      }
-     &load_userpics(\%userpics, [ @pics_to_load ]);     
+     LJ::load_userpics($dbs, \%userpics, [ @pics_to_load ]);     
  }
 
  ########## make the navcrap
@@ -445,7 +445,7 @@ sub recurse_post
 			    $sth->execute;
 			    my ($alt_picid) = $sth->fetchrow_array;
 			    if ($alt_picid) {
-				&load_userpics(\%userpics, [ $alt_picid ]);
+				LJ::load_userpics($dbs, \%userpics, [ $alt_picid ]);
 				$picid = $alt_picid;
 			    }
 			}

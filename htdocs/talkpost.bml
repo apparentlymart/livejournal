@@ -39,7 +39,7 @@ BODY<=
  ### load the log properties
  my %logprops;
  my %talkprops;
- &load_log_props([ $FORM{'itemid'} ], \%logprops);
+ LJ::load_log_props($dbs, [ $FORM{'itemid'} ], \%logprops);
  if ($FORM{'replyto'}) { 
      LJ::load_talk_props($dbs, [ $FORM{'replyto'} ], \%talkprops); 
  }
@@ -177,7 +177,7 @@ BODY<=
  
  my %current;
  if ($logprops{$itemid}->{'current_mood'} || $logprops{$itemid}->{'current_moodid'}) {
-     &load_moods();
+     LJ::load_moods($dbs);
      $current{'Mood'} = $logprops{$itemid}->{'current_mood'};
      my $mid = $logprops{$itemid}->{'current_moodid'};
      if ($mid) {

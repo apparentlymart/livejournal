@@ -1424,7 +1424,7 @@ sub make_journal
     my %vars = ();
     # load the base style
     my $basevars = "";
-    &load_style_fast($dbh, $styleid, \$basevars, \$view);
+    LJ::load_style_fast($dbs, $styleid, \$basevars, \$view);
 
     # load the overrides
     my $overrides = "";
@@ -1439,7 +1439,7 @@ sub make_journal
     # populate the variable hash
     &parse_vars(\$basevars, \%vars);
     &parse_vars(\$overrides, \%vars);
-    &load_user_theme($dbh, $user, $u, \%vars);
+    LJ::load_user_theme($dbs, $user, $u, \%vars);
     
     # kinda free some memory
     $basevars = "";
