@@ -2642,8 +2642,8 @@ sub get_remote
             my $future = $sess->{'now'} + $sess_length;
             $udbh->do("UPDATE sessions SET timeexpire=$future WHERE ".
                       "userid=$u->{'userid'} AND sessid=$sess->{'sessid'}");
-            $udbh->do("UPDATE userusage SET timecheck=NOW() WHERE userid=?",
-                      undef, $u->{'userid'});
+            $dbh->do("UPDATE userusage SET timecheck=NOW() WHERE userid=?",
+                     undef, $u->{'userid'});
         }
     }
 
@@ -5596,8 +5596,9 @@ sub generate_session
     LJ::kill_sessions($udbh, $u->{'userid'}, @$old) if $old;
 
     # mark account as being used
-    $udbh->do("UPDATE userusage SET timecheck=NOW() WHERE userid=?",
-              undef, $u->{'userid'});
+    my $dbh = LJ::get_db_writer();
+    $dbh->do("UPDATE userusage SET timecheck=NOW() WHERE userid=?",
+             undef, $u->{'userid'});
 
     return $sess;
 }
