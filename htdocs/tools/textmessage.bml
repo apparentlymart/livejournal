@@ -31,8 +31,7 @@ BODY<=
      return $ret;
  }
 
- my $quser = $dbh->quote($user);
- my $u = LJ::load_user($dbs, $quser);
+ my $u = LJ::load_user($dbs, $user);
  unless ($u->{'txtmsg_status'} eq "on") {
      $ret .= "(=H1 Unavailable H1=)(=P This user has not setup their text messaging information at LiveJournal or they've turned it off. P=)";
      &add_footer();
