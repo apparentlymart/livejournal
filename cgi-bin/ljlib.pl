@@ -223,6 +223,10 @@ sub get_dbh {
     # supported options:
     #    'raw':  don't return a DBIx::StateKeeper object
 
+    unless (exists $opts->{'max_repl_lag'}) {
+	$opts->{'max_repl_lag'} = $LJ::MAX_REPL_LAG || 100_000;
+    }
+
     if ($LJ::DEBUG{'get_dbh'} && $_[0] ne "logs") {
         my $errmsg = "get_dbh(@_) at \n";
         my $i = 0;
