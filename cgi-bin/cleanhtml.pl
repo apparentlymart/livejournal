@@ -169,7 +169,8 @@ sub clean
                 foreach my $attr (keys %$hash)
                 {
                     $hash->{$attr} =~ s/[\t\n]//g;
-                    if ($hash->{$attr} =~ /(javascript|about):/i) { delete $hash->{$attr}; }
+                    # god IE is a fucking piece of shit:
+                    if ($hash->{$attr} =~ /(j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t|a\s*b\s*o\s*u\s*t)\s*:/i) { delete $hash->{$attr}; }
                 }
                 foreach my $attr (qw(href)) {
                     $hash->{$attr} =~ s/^lj:(?:\/\/)?(.*)$/ExpandLJURL($1)/ei
@@ -262,8 +263,8 @@ sub clean
 
             if ($opencount{'style'}) {
                 # remove anything that might run javascript code
-                $token->[1] =~ s/javascript://g;
-                $token->[1] =~ s/about://g;
+                $token->[1] =~ s/j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*://g;
+                $token->[1] =~ s/a\s*b\s*o\s*u\s*t\s*://g;
                 $token->[1] =~ s/expression//g;
             }
             my $auto_format = $addbreaks && 
