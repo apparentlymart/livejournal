@@ -156,7 +156,7 @@
      }
  }
 
- my $kwmap = LJ::Memories::get_keywords($u);
+ my $kwmap = LJ::Memories::get_keywords($u) || {};
 
  if ($GET{'keyword'})
  {
@@ -237,7 +237,7 @@
  $title = $ML{'.title.memorable'};
  $body .= BML::ml(".body.list_categories", { 'user' => $user });
 
- my $rows = LJ::Memories::get_keyword_counts($u, { security => $securities, filter => $filter });
+ my $rows = LJ::Memories::get_keyword_counts($u, { security => $securities, filter => $filter }) || {};
  my @sortedrows;
  push @sortedrows, { keyword => $kwmap->{$_}, count => $rows->{$_} }
     foreach keys %{$rows || {}};

@@ -167,7 +167,8 @@ sub get_keyword_counts {
 
     # get all of the user's memories that fit the filtering
     my $memories = LJ::Memories::get_by_user($u, { %{$opts || {}}, notext => 1 });
-    my @memids = map { $_+0 } keys %{$memories || {}};
+    return undef unless $memories;
+    my @memids = map { $_+0 } keys %$memories;
 
     # now let's get the keywords these memories use
     my $in = join ',', @memids;
@@ -176,14 +177,16 @@ sub get_keyword_counts {
         my $dbcr = LJ::get_cluster_reader($u);
         $kwids = $dbcr->selectcol_arrayref("SELECT kwid FROM memkeyword2 WHERE userid = ? AND memid IN ($in)",
                                            undef, $u->{userid});
+        return undef if $dbcr->err;
     } else {
         my $dbr = LJ::get_db_reader();
         $kwids = $dbr->selectcol_arrayref("SELECT kwid FROM memkeyword WHERE memid IN ($in)");
+        return undef if $dbr->err;
     }
 
     # and now combine them
     my %res;
-    $res{$_}++ foreach @{$kwids || []};
+    $res{$_}++ foreach @$kwids;
 
     # done, return
     return \%res;
@@ -289,7 +292,7 @@ sub _memory_getter {
             push @secs, $sec
                 if $sec =~ /^(?:public|friends|private)$/;
         }
-        $secwhere = "AND security IN (" . join(',', @secs) . ")";
+        $secwhere = "AND security IN (" . join(',', map { "'$_'" } @secs) . ")";
     }
     my $extrawhere;
     if ($opts->{filter} eq 'all') { $extrawhere = ''; }
@@ -325,6 +328,7 @@ sub _memory_getter {
 
     # general execution and fetching for return
     $sth->execute($u->{userid});
+    return undef if $sth->err;
     while ($_ = $sth->fetchrow_hashref()) {
         # we have to do this ditemid->jitemid to make old code work,
         # but this can probably go away at some point...
