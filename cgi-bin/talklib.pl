@@ -611,7 +611,7 @@ sub talkform {
     if ($parpost->{'state'} eq "S") {
         $ret .= "<br /><?p $BML::ML{'.warnscreened'} p?>";
     }
-    $ret .= "<form method='post' action='/talkpost_do.bml' id='postform'>";
+    $ret .= "<form method='post' action='$LJ::SITEROOT/talkpost_do.bml' id='postform'>";
 
     # hidden values
     my $parent = $replyto+0;
