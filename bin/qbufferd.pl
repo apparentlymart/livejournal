@@ -7,6 +7,7 @@
 use strict;
 use Getopt::Long
 require "$ENV{'LJHOME'}/cgi-bin/ljlib.pl";
+require "$ENV{'LJHOME'}/cgi-bin/supportlib.pl";
 
 my $opt_foreground;
 my $opt_debug;
@@ -157,7 +158,7 @@ while(not $working) {
 }
 
 # the actual work begins here
-my @all_jobs = qw(delitem weblogscom send_mail);
+my @all_jobs = qw(delitem weblogscom send_mail support_notify);
 foreach my $hook (keys %LJ::HOOKS) {
     next unless $hook =~ /^cmdbuf:(\w+):run$/;
     push @all_jobs, $1;

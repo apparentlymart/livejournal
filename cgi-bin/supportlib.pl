@@ -292,7 +292,7 @@ sub load_props
 
 sub load_request
 {
-    my $spid = shift;
+    my ($spid, $loadreq) = @_;
     my $sth;
 
     $spid += 0;
@@ -309,6 +309,12 @@ sub load_request
     $sth = $dbr->prepare("SELECT * FROM supportcat WHERE spcatid=$sp->{'spcatid'}");
     $sth->execute;
     $sp->{_cat} = $sth->fetchrow_hashref;
+
+    # now load the user's request text, if necessary
+    if ($loadreq) {
+        $sp->{body} = $dbr->selectrow_array("SELECT message FROM supportlog WHERE spid = ? AND type = 'req'",
+                                            undef, $sp->{spid});
+    }
 
     return $sp;
 }
@@ -419,10 +425,7 @@ sub file_request
     my $qreqemail = $dbh->quote($o->{'reqemail'});
     my $qspcatid = $o->{'spcatid'}+0;
 
-    my $scat = $dbh->selectrow_hashref(qq{
-        SELECT spcatid, catname, no_autoreply 
-        FROM supportcat WHERE spcatid=$qspcatid
-    });
+    my $scat = $cats->{$qspcatid}; 
 
     # make the authcode
     my $authcode = LJ::make_auth_code(15);
@@ -497,35 +500,26 @@ sub file_request
           'body' => $body  
           });
     }
-    
-    ########## send notifications
-    
-    $sth = $dbh->prepare("SELECT u.email FROM supportnotify sn, user u WHERE sn.userid=u.userid AND sn.spcatid=$qspcatid AND sn.level IN ('new', 'all')");
-    $sth->execute;
-    my @to_notify;
-    while ($_ = $sth->fetchrow_hashref) {
-        push @to_notify, $_->{'email'};
+
+    # buffer mail for sending:
+    # aim to try 10 times, but that's redundant if there are fewer clusters
+    my $maxtries = @LJ::CLUSTERS;
+    $maxtries = 10 if $maxtries > 10;
+
+    # select a random cluster master to insert to
+    my $cid;
+    my $tries = 0;
+    while (! $cid && $tries < $maxtries) {
+        my $idx = int(rand() * @LJ::CLUSTERS);
+        $cid = $LJ::CLUSTERS[$idx];
+        $tries++;
     }
+
+    # now really try sending later.  if we don't have a $cid, it isn't the end of the
+    # world.  support notifications are useful, but not required.
+    LJ::cmd_buffer_add($cid, 0, 'support_notify', { spid => $spid, type => 'new' }) if $cid;
     
-    $body = "A $LJ::SITENAME support request has been submitted regarding the following:\n\n";
-    $body .= "Category: $scat->{'catname'}\n";
-    $body .= "Subject:  $o->{'subject'}\n\n";
-    $body .= "You can track its progress or add information here:\n\n";
-    $body .= $url;
-    $body .= "\n\nIf you do not wish to receive notifications of incoming support requests, you may change your notification settings here:\n\n";
-    $body .= "$LJ::SITEROOT/support/changenotify.bml";
-    $body .= "\n\n" . "="x70 . "\n\n";
-    $body .= $o->{'body'};
-        
-    LJ::send_mail({ 
-        'bcc' => join(", ", @to_notify),
-        'from' => $LJ::BOGUS_EMAIL,
-        'fromname' => "$LJ::SITENAME Support",
-        'charset' => 'utf-8',
-        'subject' => "Support Request \#$spid",
-        'body' => $body
-        }) if @to_notify;
-    
+    # and we're done
     return $spid;
 }
 
@@ -581,42 +575,24 @@ sub append_request
     $dbh->do($sql);
     my $splid = $dbh->{'mysql_insertid'};
 
+    # buffer mail for sending:
+    # aim to try 10 times, but that's redundant if there are fewer clusters
+    my $maxtries = @LJ::CLUSTERS;
+    $maxtries = 10 if $maxtries > 10;
 
-    my $url = "$LJ::SITEROOT/support/see_request.bml?id=$spid";
-    
-    my $qspcatid = $sp->{'spcatid'}+0;
-    $sth = $dbh->prepare("SELECT u.email, u.userid, u.user ".
-                         "FROM supportnotify sn, user u WHERE ".
-                         "sn.userid=u.userid AND sn.spcatid=$qspcatid ".
-                         "AND sn.level IN ('all')");
-    $sth->execute;
-    my @to_notify;
-    while (my ($email, $userid, $user) = $sth->fetchrow_array) {
-        next if $posterid == $userid;
-        next if ($re->{'type'} eq "screened" &&
-                 ! can_read_screened($sp, LJ::make_remote($user, $userid)));
-        next if ($re->{'type'} eq "internal" &&
-                 ! can_read_internal($sp, LJ::make_remote($user, $userid)));
-        push @to_notify, $email;
+    # select a random cluster master to insert to
+    my $cid;
+    my $tries = 0;
+    while (! $cid && $tries < $maxtries) {
+        my $idx = int(rand() * @LJ::CLUSTERS);
+        $cid = $LJ::CLUSTERS[$idx];
+        $tries++;
     }
-    
-    my $body;
-    $body = "A follow-up to the request regarding \"$sp->{'subject'}\" has ";
-    $body .= "been submitted.  You can track its progress or add ";
-    $body .= "information here:\n\n  ";
-    $body .= $url;
-    $body .= "\n\n" . "="x70 . "\n\n";
-    $body .= $message;
-    
-    LJ::send_mail({ 
-        'bcc' => join(", ", @to_notify),
-        'from' => $LJ::BOGUS_EMAIL,
-        'fromname' => "$LJ::SITENAME Support",
-        'charset' => 'utf-8',
-        'subject' => "Re: Support Request \#$spid",
-        'body' => $body
-        }) if @to_notify;
-    
+
+    # now really try sending later.  if we don't have a $cid, it isn't the end of the
+    # world.  support notifications are useful, but not required.
+    LJ::cmd_buffer_add($cid, 0, 'support_notify', { spid => $spid, type => 'update', splid => $splid }) if $cid;
+
     return $splid;    
 }
 
