@@ -18,6 +18,9 @@ LiveJournal capabilities:
  * findsim
    boolean; user is able to use the similar interests matching feature
 
+ * friendsfriendsview
+   boolean; user's "friends of friends" /friendsfriends view is enabled
+
  * friendsviewupdate
    integer; after how many seconds user see new friends view items
 

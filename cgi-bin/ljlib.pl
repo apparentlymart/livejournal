@@ -89,6 +89,11 @@ use constant CMAX_INTEREST => 50;
                      "creator" => \&LJ::S1::create_view_friends,
                      "des" => "Friends View",
                  },
+                 "friendsfriends" => {
+                     "creator" => \&LJ::S1::create_view_friends,
+                     "des" => "Friends of Friends View",
+                     "styleof" => "friends",
+                 },
                  "rss" => {
                      "creator" => \&LJ::S1::create_view_rss,
                      "des" => "RSS View (XML)",
@@ -261,9 +266,7 @@ sub get_friend_items
     my $get_next_friend = sub
     {
         # return one if we already have some loaded.
-        if (@friends_buffer) {
-            return $friends_buffer[0];
-        }
+        return $friends_buffer[0] if @friends_buffer;
 
         # load another batch if we just started or
         # if we just finished a batch.
@@ -279,16 +282,56 @@ sub get_friend_items
 
             # return one if we just found some fine, else we're all
             # out and there's nobody else to load.
-            if (@friends_buffer) {
-                return $friends_buffer[0];
-            } else {
-                return undef;
-            }
+            return $friends_buffer[0] if @friends_buffer;
+            return undef;
         }
 
         # otherwise we must've run out.
         return undef;
     };
+
+    # friends of friends mode
+    $get_next_friend = sub
+    {
+        unless (@friends_buffer || $total_loaded) 
+        {
+            # load all user's friends
+            my %f;
+            my $sth = $dbh->prepare(qq{
+                SELECT f.friendid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate) 
+                FROM friends f, userusage uu WHERE f.userid=$userid AND f.friendid=uu.userid
+            });
+            $sth->execute;
+            while (my ($id, $time, $c) = $sth->fetchrow_array) {
+                $f{$id} = { 'userid' => $id, 'timeupdate' => $time, 'clusterid' => $c };
+            }
+            
+            # load some friends of friends (most 20 queries)
+            my %ff;
+            my $fct = 0;
+            foreach my $fid (sort { $f{$a}->{'timeupdate'} <=> $f{$b}->{'timeupdate'} } keys %f)
+            {
+                last if ++$fct > 20;
+                my $sth = $dbh->prepare(qq{
+                    SELECT u.userid, $LJ::EndOfTime-UNIX_TIMESTAMP(uu.timeupdate), u.clusterid 
+                    FROM friends f, userusage uu, user u WHERE f.userid=$fid AND
+                         f.friendid=uu.userid AND f.friendid=u.userid AND u.statusvis='V' AND 
+                         uu.timeupdate IS NOT NULL ORDER BY 2 LIMIT 100
+                });
+                $sth->execute;
+                while (my ($id, $time, $c) = $sth->fetchrow_array) {
+                    next if $f{$id};  # we don't wanna see our friends
+                    $ff{$id} = [ $id, $time, $c ];
+                }
+            }
+
+            @friends_buffer = sort { $a->[1] <=> $b->[1] } values %ff;
+            $total_loaded = 1;  # as flag in this case; so we don't reload later
+        }
+
+        return $friends_buffer[0] if @friends_buffer;
+        return undef;       
+    } if $opts->{'friendsoffriends'};
 
     my $loop = 1;
     my $max_age = $LJ::MAX_FRIENDS_VIEW_AGE || 3600*24*14;  # 2 week default.
@@ -3058,12 +3101,11 @@ sub make_journal
         $view ||= "lastn";    # default view when none specified explicitly in URLs
         if ($LJ::viewinfo{$view})  {
             $styleid = -1;    # to get past the return, then checked later for -1 and fixed, once user is loaded.
-            $view = $view;
         } else {
             $opts->{'badargs'} = 1;
         }
     }
-    return unless ($styleid);
+    return unless $styleid;
 
     my $quser = $dbh->quote($user);
     my $u;
@@ -3080,11 +3122,13 @@ sub make_journal
     }
 
     if ($styleid == -1) {
-        if ($u->{"${view}_style"}) {
+        my $eff_view = $LJ::viewinfo{$view}->{'styleof'} || $view;
+        
+        if ($u->{"${eff_view}_style"}) {
             # NOTE: old schema.  only here to make transition easier.  remove later.
-            $styleid = $u->{"${view}_style"};
+            $styleid = $u->{"${eff_view}_style"};
         } else {
-            my $prop = "s1_${view}_style";
+            my $prop = "s1_${eff_view}_style";
             unless (defined $u->{$prop}) {
               LJ::load_user_props($dbs, $u, $prop);
             }
@@ -3104,6 +3148,9 @@ sub make_journal
     if ($opts->{'vhost'} eq "community" && $u->{'journaltype'} ne "C") {
         return "<b>Notice</b><br />This account isn't a community journal.";
     }
+    if ($view eq "friendsfriends" && ! LJ::get_cap($u, "friendsfriendsview")) {
+        return "<b>Sorry</b><br />This user's account type doesn't permit showing friends of friends.";
+    }
 
     return "<h1>Error</h1>Journal has been deleted.  If you are <B>$user</B>, you have a period of 30 days to decide to undelete your journal." if ($u->{'statusvis'} eq "D");
     return "<h1>Error</h1>This journal has been suspended." if ($u->{'statusvis'} eq "S");
@@ -3112,8 +3159,8 @@ sub make_journal
     my %vars = ();
     # load the base style
     my $basevars = "";
-    LJ::load_style_fast($dbs, $styleid, \$basevars, \$view)
-        unless ($LJ::viewinfo{$view}->{'nostyle'});
+    LJ::load_style_fast($dbs, $styleid, \$basevars)
+        unless $LJ::viewinfo{$view}->{'nostyle'};
 
     # load the overrides
     my $overrides = "";
@@ -3140,6 +3187,8 @@ sub make_journal
     # instruct some function to make this specific view type
     return unless (defined $LJ::viewinfo{$view}->{'creator'});
     my $ret = "";
+
+    $opts->{'view'} = $view;
 
     # call the view creator w/ the buffer to fill and the construction variables
     &{$LJ::viewinfo{$view}->{'creator'}}($dbs, \$ret, $u, \%vars, $remote, $opts);

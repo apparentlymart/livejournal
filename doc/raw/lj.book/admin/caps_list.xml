@@ -26,6 +26,14 @@
         </listitem>
       </varlistentry>
       <varlistentry>
+        <term>friendsfriendsview</term>
+        <listitem>
+          <para>
+            boolean; user's "friends of friends" /friendsfriends view is enabled
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
         <term>friendsviewupdate</term>
         <listitem>
           <para>

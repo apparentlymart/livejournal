@@ -522,12 +522,18 @@ sub create_view_friends
         'owners' => \%owners,
         'itemids' => \@itemids,  #DIE
         'idsbycluster' => \%idsbycluster,
+        'friendsoffriends' => $opts->{'view'} eq "friendsfriends",
     });
 
     my $ownersin = join(",", keys %owners);
 
     my %friends = ();
-    $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, f.fgcolor, f.bgcolor, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=$u->{'userid'} AND f.friendid IN ($ownersin)");
+    unless ($opts->{'view'} eq "friendsfriends") {
+        $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, f.fgcolor, f.bgcolor, u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc FROM friends f, user u WHERE u.userid=f.friendid AND f.userid=$u->{'userid'} AND f.friendid IN ($ownersin)");
+    } else {
+        $sth = $dbr->prepare("SELECT u.user, u.userid, u.clusterid, '#000000', '#ffffff', u.name, u.defaultpicid, u.opt_showtalklinks, u.moodthemeid, u.statusvis, u.oldenc FROM user u WHERE u.userid IN ($ownersin)");
+    }
+
     $sth->execute;
     while ($_ = $sth->fetchrow_hashref) {
         next unless ($_->{'statusvis'} eq "V");  # ignore suspended/deleted users.
