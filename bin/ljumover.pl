@@ -169,7 +169,7 @@ sub abort (@);
 ### C O N F I G U R A T I O N   G L O B A L S
 ###############################################################################
 our (
-    $Debug, $VerboseFlag, $QuitFlag, $ClusterSpecRe, $CommandRe,
+    $Debug, $VerboseFlag, $ClusterSpecRe, $CommandRe,
     $ReadOnlyBit, $DaemonPid,
    );
 
@@ -250,7 +250,7 @@ MAIN: {
     # Load the commands from a command file
     if ( @ARGV == 1 && -f $ARGV[0] ) {
         debugMsg( "Command-file mode." );
-        $ifh = IO::File->open( $ARGV[0], O_RDONLY )
+        $ifh = IO::File->new( $ARGV[0], O_RDONLY )
             or abort( "open: $ARGV[0]: $!" );
 
         foreach $command ( $ifh->readlines ) {
