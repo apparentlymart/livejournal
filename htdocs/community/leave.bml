@@ -8,11 +8,13 @@
     $title = $ML{'.title'};
     $body = "";
 
-    my $remote = LJ::get_remote();
-    unless ($remote) {
-        $body = "<?h1 $ML{'Sorry'}.. h1?><?p $ML{'.label.logoutfirst'} p?>";
+    my $error = sub {
+        $body = "<?h1 $ML{'Error'} h1?><?p $_[0] p?>";
         return;
-    }
+    };
+
+    my $remote = LJ::get_remote();
+    return $error->($ML{'.label.logoutfirst'}) unless $remote;
 
     # get info about the community
     my $cuserid = $FORM{'cuserid'}+0;
@@ -20,16 +22,23 @@
              LJ::load_user($FORM{comm}) : # they gave us the comm name
              LJ::load_userid($cuserid);   # they gave us the comm id
 
-    # does this community even exist?
-    unless ($cu) {
-        $body = "<?h1 $ML{'Error'} h1?><?p $ML{'.label.infoerror'} p?>";
-        return;
-    }
+    # error check
+    return $error->($ML{'.label.infoerror'})
+        unless $cu && $cu->{journaltype} =~ /[CS]/;
 
     # used in both paths below
     my $ecname = LJ::ehtml($cu->{'name'});
 
     if ($FORM{confirm}) {
+        # get current list of maintainers to make sure the last one doesn't leave
+        my $maintids = LJ::load_rel_user($cu->{userid}, 'A');
+        return $error->($ML{'error.nodb'}) unless ref $maintids eq 'ARRAY';
+
+        # error if we're a maintainer and there are no others
+        my $ismaint     = grep { $_ == $remote->{userid} } @$maintids;
+        my $othermaints = grep { $_ != $remote->{userid} } @$maintids;
+        return $error->($ML{'.label.lastmaintainer'}) if $ismaint && !$othermaints;
+
         # remove user from community's friends list
         LJ::leave_community($remote, $cu, $FORM{removefriend});
 

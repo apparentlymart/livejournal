@@ -255,8 +255,9 @@ sub leave_community {
     return LJ::error('comm_not_member') unless $ret; # $ret = number of rows deleted, should be 1 if the user was in the comm
 
     # clear edges that effect this relationship
-    LJ::clear_rel($cu->{userid}, $u->{userid}, 'P'); # posting access
-    LJ::clear_rel($cu->{userid}, $u->{userid}, 'N'); # unmoderated flag
+    foreach my $edge (qw(P N A M)) {
+        LJ::clear_rel($cu->{userid}, $u->{userid}, $edge);
+    }
 
     # defriend user -> comm?
     return 1 unless $defriend;

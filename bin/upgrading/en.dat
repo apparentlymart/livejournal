@@ -258,6 +258,8 @@ p?>
 
 /community/leave.bml.label.infoerror=The specified community information is not valid.
 
+/community/leave.bml.label.lastmaintainer=You are not allowed to leave this community because you are the sole maintainer.  If you wish to leave the community, please appoint another maintainer and then try leaving again.
+
 /community/leave.bml.label.logoutfirst=To leave a community you must first <a href="/login.bml?ret=1">log in</a>.
 
 /community/leave.bml.label.removed=You are now removed from the <a href="/userinfo.bml?user=[[commuser]]">[[commname]] Community</a>
