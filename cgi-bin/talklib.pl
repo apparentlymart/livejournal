@@ -2171,8 +2171,7 @@ sub init {
             return $err->("Please confirm you are a human below.") unless $form->{answer};
             return if lc($form->{answer}) eq 'audio';
             my ($capid, $anum) = LJ::Captcha::session_check_code($form->{captcha_chal},
-                    $form->{answer},
-                    $journalu->{clusterid});
+                                                                 $form->{answer}, $journalu);
             return $err->("Incorrect response to spam robot challenge.") unless $capid && $anum;
             my $expire_u = $comment->{'u'} || LJ::load_user('system');
             LJ::Captcha::expire($capid, $anum, $expire_u->{userid});
