@@ -6,6 +6,7 @@ use strict;
 require "$ENV{LJHOME}/cgi-bin/ljconfig.pl";
 require "$ENV{LJHOME}/cgi-bin/ljlib.pl";
 use MIME::Words ();
+use XML::Simple;
 use IO::Handle;
 use LWP::UserAgent;
 use URI::Escape;
@@ -26,13 +27,17 @@ sub get_challenge
     my ($u, $ua, $err) = @_;
     return unless $u && $ua;
 
-    my $req = HTTP::Request->new(PUT => "$LJ::FB_SITEROOT/interface/upload");
-    $req->push_header("X-FB-Username" => $u->{'user'});
-    $req->push_header("X-FB-MakeChallenge" => 1);
-
+    my $req = HTTP::Request->new(GET => "$LJ::FB_SITEROOT/interface/simple");
+    $req->push_header("X-FB-Mode" => "GetChallenge");
+    $req->push_header("X-FB-User" => $u->{'user'});
+    
     my $res = $$ua->request($req);
     if ($res->is_success()) {
-        return scalar $res->header("X-FB-NewChallenge");
+
+        my $xmlres = XML::Simple::XMLin($res->content);
+        my $methres = $xmlres->{GetChallengeResponse};
+        return $methres->{Challenge};
+
     } else {
         $$err = $res->content();
         return;
@@ -55,7 +60,7 @@ sub do_upload
     }
 
     my $ua = LWP::UserAgent->new;
-    $ua->agent("LiveJournal_FBUpload/0.1");
+    $ua->agent("LiveJournal_FBUpload/0.2");
 
     my $err;
     my $chal = get_challenge($u, \$ua, \$err);
@@ -79,37 +84,48 @@ sub do_upload
     }
 
     my $basename = File::Basename::basename($opts->{'path'});
-    my $magic = substr($$rawdata, 0, 10);
-    $magic =~ s/(.)/lc sprintf("%02x",ord($1))/egs;
+    my $length = length $$rawdata;
     $opts->{'imgsec'} = 255 unless defined $opts->{'imgsec'};
     $opts->{'galname'} ||= 'LJ_emailpost';
 
-    my $req = HTTP::Request->new(PUT => "$LJ::FB_SITEROOT/interface/upload");
+    my $req = HTTP::Request->new(PUT => "$LJ::FB_SITEROOT/interface/simple");
     my %headers = (
-            'Content-Length'          => length($$rawdata),
-            'X-FB-Meta-Filename'      => uri_escape($basename),
-            'X-FB-Magic'              => $magic,
-            'X-FB-MD5'                => hash($$rawdata),
-            'X-FB-Username'           => $u->{'user'},
-            'X-FB-Auth'               => make_auth($chal, $u->{'password'}),
-            'X-FB-Security'           => $opts->{'imgsec'},
-            'X-FB-Gallery'            =>
-                    'name=' . (uri_escape($opts->{'galname'})) .  '&galsec=255',
-            );
+        'X-FB-Mode'                    => 'UploadPic',
+        'X-FB-UploadPic.ImageLength'   => $length,
+        'Content-Length'               => $length,
+        'X-FB-UploadPic.Meta.Filename' => uri_escape($basename),
+        'X-FB-UploadPic.MD5'           => hash($$rawdata),
+        'X-FB-User'                    => $u->{'user'},
+        'X-FB-Auth'                    => make_auth( $chal, $u->{'password'} ),
+        ':X-FB-UploadPic.Gallery._size'=> 1,
+        'X-FB-UploadPic.PicSec'        => $opts->{'imgsec'},
+        'X-FB-UploadPic.Gallery.0.GalName' => uri_escape( $opts->{'galname'} ),
+        'X-FB-UploadPic.Gallery.0.GalSec'  => 255
+    );
 
-    foreach my $hdr (keys %headers) {
-        $req->push_header($hdr, $headers{$hdr});
-    }
+    $req->push_header($_, $headers{$_}) foreach keys %headers;
 
     $req->content($$rawdata);
     my $res = $ua->request($req);
 
     my $res_code = $1 if $res->status_line =~ /^(\d+)/;
     if ($res->is_success) {
-        my $url = $1 if $res->content() =~ /URL: (\S+)/;
+        my $xmlres = XML::Simple::XMLin($res->content);
+        my $methres = $xmlres->{UploadPicResponse};
+
+        my $err_str = $xmlres->{Error}->{content} ||
+                      $methres->{Error}->{content};
+        if ($err_str) {
+            $$rv = "Protocol error during upload: $err_str";
+            return $xmlres->{Error}->{code} ||
+                   $methres->{Error}->{code};
+        }
+
+        # good at this point
+        my $url = $methres->{URL};
         return wantarray ? ($basename, $url) : $url;
     } else {
-        $$rv = "Error uploading pict: " . $res->content();
+        $$rv = "HTTP error uploading pict: " . $res->content();
         return $res_code;
     }
 
