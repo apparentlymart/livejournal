@@ -51,6 +51,7 @@ $maint{gen_audio_captchas} = sub {
         $sth,                   # Statement handle
         $count,                 # Count of currently-extant audio challenges
         $need,                  # How many we need to still create
+        $make,                  # how many we're actually going to create this round
         $tmpdir,                # Temporary working directory
         $code,                  # The generated challenge code
         $wav,                   # Wav file
@@ -84,9 +85,12 @@ $maint{gen_audio_captchas} = sub {
         print "already have enough.\n";
         return;
     } else {
-        $need = $MaxItems - $count;
-        print "generating $need new audio challenges.\n";
+        $make = $need = $MaxItems - $count;
+        $make = $LJ::CAPTCHA_AUDIO_MAKE 
+            if defined $LJ::CAPTCHA_AUDIO_MAKE && $make > $LJ::CAPTCHA_AUDIO_MAKE;
+        print "generating $make new audio challenges.\n";
     }
+
 
     # Load the system user for Blob::put() and create an auto-cleaning temp
     # directory for audio generation
@@ -102,7 +106,7 @@ $maint{gen_audio_captchas} = sub {
     $sth = $dbh->prepare( $sql ) or die "prepare: $sql: ", $dbh->errstr;
 
     # Generate the challenges
-    for ( my $i = 0; $i < $need; $i++ ) {
+    for ( my $i = 0; $i < $make; $i++ ) {
         print "Generating audio $i...";        
         ( $wav, $code ) = LJ::Captcha::generate_audio( $tmpdir );
         $data = readfile( $wav );
@@ -122,7 +126,7 @@ $maint{gen_audio_captchas} = sub {
         print "done.\n";
     }
 
-    print "done. Created $need new audio captchas.\n";
+    print "done. Created $make new audio captchas.\n";
     return 1;
 };
 
