@@ -280,6 +280,8 @@ $maint{'synsuck'} = sub
         LJ::load_user_props($su, "url", "urlname");
         {
             my $title = $rss->channel('title');
+            $title = $su->{'user'} unless LJ::is_utf8($title);
+            $title =~ s/[\n\r]//g;
             if ($title && $title ne $su->{'name'}) {
                 LJ::update_user($su, { name => $title });
                 LJ::set_userprop($su, "urlname", $title);
