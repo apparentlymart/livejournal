@@ -599,7 +599,7 @@ sub clean
     # finish up open links if we're extracting them
     if ($extractlinks && @canonical_urls) {
         while (my $url = LJ::ehtml(pop @canonical_urls)) {
-            $newdata .= "($url)";
+            $newdata .= "</b> ($url)";
             $opencount{'a'}--;
         }
     }
