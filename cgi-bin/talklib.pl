@@ -1225,7 +1225,14 @@ sub talkform {
     $ret .= "<div id='ljnohtmlsubj' class='ljdeem'>$BML::ML{'.nosubjecthtml'}</div></td></tr>\n";
 
     $ret .= "<tr><td align='right'>&nbsp;</td><td colspan='4'>";
-    $ret .= "$BML::ML{'.opt.noautoformat'}<input type='checkbox' value='1' name='prop_opt_preformatted' />";
+    $ret .= "$BML::ML{'.opt.noautoformat'}";
+    $ret .= LJ::html_check(
+        {
+            name  => 'prop_opt_preformatted',
+            value => 1,
+            selected => $form->{'prop_opt_preformatted'}
+        }
+    );
     $ret .= LJ::help_icon("noautoformat", " ");
     
     my %res;
