@@ -2598,8 +2598,8 @@ sub get_dbh
     }
 
     # already have a dbh of this type open?
-
-    if (ref $LJ::DBCACHE{$type}) {
+    if (ref $LJ::DBCACHE{$type}) 
+    {
         $dbh = $LJ::DBCACHE{$type};
 
 	# make sure connection is still good.
@@ -2613,7 +2613,6 @@ sub get_dbh
 
     # if we don't have a dbh cached already, which one would we try to
     # connect to?
-
     my $key;
     if ($type eq "slave") {
 	my $ct = $LJ::DBINFO{'slavecount'};
@@ -2639,12 +2638,14 @@ sub get_dbh
 
     # are we connecting to a slave that might be the master?
     # if so, we don't want to open up two connections.  (wasteful)
-    
     if (ref $LJ::DBCACHE{'master'} && $key ne 'master' && 
 	$LJ::DBINFO{$key}->{'host'} eq $LJ::DBINFO{'master'}->{'host'})
     {
 	$dbh = $LJ::DBCACHE{'master'};
-	return $dbh if ($dbh->selectrow_array("SELECT CONNECTION_ID()"));
+	if ($dbh->selectrow_array("SELECT CONNECTION_ID()")) {
+	    $LJ::DBCACHE{$type} = $dbh;
+	    return $dbh;
+	}
 	undef $dbh;
 	undef $LJ::DBCACHE{'master'};
     }
