@@ -151,11 +151,12 @@ sub DayPage
         });
         
         my $userlite_poster = $userlite_journal;
-        my $userpic = $p->{'journal'}->{'default_pic'};
+        my $pu = $u;
         if ($u->{'userid'} != $posterid) {
             $userlite_poster = $apu_lite{$posterid} or die "No apu_lite for posterid=$posterid";
-            $userpic = Image_userpic($apu{$posterid}, 0, $logprops{$itemid}->{'picture_keyword'});
+            $pu = $apu{$posterid};
         }
+        my $userpic = Image_userpic($pu, 0, $logprops{$itemid}->{'picture_keyword'});
 
         my $entry = Entry($u, {
             'subject' => $subject,
