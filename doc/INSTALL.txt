@@ -213,6 +213,7 @@ Assuming you've done everything above, all you have to do is:
 
    $ cd /home/lj
    $ bin/upgrading/update-db.pl --runsql --populate
+   $ bin/upgrading/texttool.pl load
 
 That'll bring your database schema up-to-date and populate it with any
 look-up data it needs.
