@@ -309,7 +309,7 @@
 
     # subject
     $$body .= "<table width='90%' align='center'; style='margin-top: 20px;'><tr><td>$ML{'.subject'}<br />";
-    $$body .= LJ::html_text({ 'name' => 'subject', 'value' => $POST{'subject'},
+    $$body .= LJ::html_text({ 'name' => 'subject', 'value' => $POST{'subject'} || $GET{'subject'},
                               'size' => '50', 'maxlength' => '100' }) . "\n";
 
 
