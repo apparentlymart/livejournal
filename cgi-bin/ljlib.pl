@@ -2896,6 +2896,13 @@ sub _get_posts_raw_wrapper {
     }
     my $rawposts = LJ::get_posts_raw($opts, @postids);
     
+    # add replycounts fields to props
+    if ($type eq "prop") {
+        while (my ($k, $v) = each %{$rawposts->{"replycount"}||{}}) {
+            $rawposts->{prop}{$k}{replycount} = $rawposts->{replycount}{$k};
+        }
+    }
+
     # translate colon-separated (new) to space-separated (old) keys.
     $ret ||= {};
     while (my ($id, $data) = each %{$rawposts->{$type}}) {
@@ -2909,8 +2916,9 @@ sub _get_posts_raw_wrapper {
 # name: LJ::get_posts_raw
 # des: Gets raw post data (text and props) efficiently from clusters.
 # info: Fetches posts from clusters, trying memcache and slaves first if available.
-# returns: hashref with keys being "jid:jitemid", values being hashrefs of
-#          { "text" => [ $subject, $body ], "props" => { ... } }.
+# returns: hashref with keys 'text', 'prop', or 'replycount', and values being
+#          hashrefs with keys "jid:jitemid".  values of that are as follows:
+#          text: [ $subject, $body ], props: { ... }, and replycount: scalar
 # args: opts?, id+
 # des-opts: An optional hashref of options:
 #            - memcache_only:  Don't fall back on the database.
@@ -2990,7 +2998,7 @@ sub get_posts_raw
             $ret->{prop}{$id} = $v;
         } elsif ($type eq "rp") {
             delete $needrc->{$cid}{$id};
-            $ret->{prop}{'replycount'} = int($v); # remove possible spaces
+            $ret->{replycount}{$id} = int($v); # remove possible spaces
         }
     }
     
@@ -3061,15 +3069,10 @@ sub get_posts_raw
             my $in = $make_in->(keys %$cneedrc);
             $sth = $db->prepare("SELECT journalid, jitemid, replycount FROM log2 WHERE $in");
             $sth->execute;
-            my %gotid;
             while (my ($jid, $jitemid, $rc) = $sth->fetchrow_array) {
                 my $id = "$jid:$jitemid";
-                $ret->{prop}{$id}{'replycount'} = $rc;
-                $gotid{$id} = 1;
-            }
-            foreach my $id (keys %gotid) {
-                my ($jid, $jitemid) = map { $_ + 0 } split(/:/, $id);
-                LJ::MemCache::add([$jid, "rp:$id"], $ret->{prop}{$id}{'replycount'});
+                $ret->{replycount}{$id} = $rc;
+                LJ::MemCache::add([$jid, "rp:$id"], $rc);
                 delete $cneedrc->{$id};
             }
         };
