@@ -743,11 +743,8 @@ sub postevent
     my $bytes = length($event) + length($req->{'subject'});
     LJ::dudata_set($dbcm, $ownerid, 'L', $itemid, $bytes);
 
-    my $qevent = $dbh->quote($event);
-    $event = "";
-    
     $dbcm->do("REPLACE INTO logtext2 (journalid, jitemid, subject, event) ".
-              "VALUES ($ownerid, $itemid, $qsubject, $qevent)");
+              "VALUES ($ownerid, $itemid, $qsubject, ?)", undef, $event);
     if ($dbcm->err) {
         my $msg = $dbcm->errstr;
         LJ::delete_item2($dbh, $dbcm, $ownerid, $itemid);   # roll-back
@@ -822,6 +819,19 @@ sub postevent
     my ($weeknum, $ubefore) = LJ::weekuu_parts(time());
     $dbh->do("REPLACE INTO weekuserusage (wknum, userid, ubefore) VALUES (?,?,?)",
              undef, $weeknum, $ownerid, $ubefore);
+
+    # run local site-specific actions
+    LJ::run_hooks("postpost", {
+        'itemid' => $itemid,
+        'anum' => $anum,
+        'journal' => $uowner,
+        'poster' => $u,
+        'event' => $event,
+        'subject' => $req->{'subject'},
+        'security' => $security,
+        'allowmask' => $qallowmask,
+        'props' => $req->{'props'},
+    });
 
     $res->{'itemid'} = $itemid;  # by request of mart
     $res->{'anum'} = $anum;

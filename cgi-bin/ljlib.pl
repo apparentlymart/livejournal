@@ -22,6 +22,7 @@ use HTTP::Date ();
 use Unicode::MapUTF8 ();
 use LJ::S2;
 use Time::Local ();
+use Storable ();
 
 do "$ENV{'LJHOME'}/cgi-bin/ljconfig.pl";
 do "$ENV{'LJHOME'}/cgi-bin/ljdefaults.pl";
@@ -3912,6 +3913,7 @@ sub cmd_buffer_flush
     my ($dbh, $db, $cmd, $userid) = @_;
     return 0 unless $cmd;
 
+    # built-in commands
     my $cmds = {
         'delitem' => {
             'run' => sub {
@@ -3922,12 +3924,32 @@ sub cmd_buffer_flush
             },
         },
     };
-    # TODO: call hook to augment dispatch table with site-defined commands
-    return 0 unless defined $cmds->{$cmd};
+
+    my ($run_cmd, $finish_cmd, $start_cmd);
+
+    # is it a built-in command?
+    if ($cmds->{$cmd}) {
+        $run_cmd = $cmds->{$cmd}->{'run'};
+        $finish_cmd = $cmds->{$cmd}->{'finish'};
+        $start_cmd = $cmds->{$cmd}->{'start'};
+
+    # otherwise it might be a site-local command
+    } else {
+        $run_cmd = $LJ::HOOKS{"cmdbuf:$cmd:run"}->[0]
+            if $LJ::HOOKS{"cmdbuf:$cmd:run"};
+        $start_cmd = $LJ::HOOKS{"cmdbuf:$cmd:start"}->[0]
+            if $LJ::HOOKS{"cmdbuf:$cmd:start"};
+        $finish_cmd = $LJ::HOOKS{"cmdbuf:$cmd:finish"}->[0]
+            if $LJ::HOOKS{"cmdbuf:$cmd:finish"};
+    }
+
+    return 0 unless $run_cmd;
+
+    $start_cmd->($dbh, $db) if $start_cmd;
 
     my $clist;
     my $loop = 1;
-    my $cd = $cmds->{$cmd};
+
     my $where = "cmd=" . $dbh->quote($cmd);
     if ($userid) {
         $where .= " AND journalid=" . $dbh->quote($userid);
@@ -3947,13 +3969,15 @@ sub cmd_buffer_flush
             my $a = {};
             LJ::decode_url_string($c->{'args'}, $a);
             $c->{'args'} = $a;
-            $cmds->{$cmd}->{'run'}->($dbh, $db, $c);
+            $run_cmd->($dbh, $db, $c);
 
             $db->do("DELETE FROM cmdbuffer WHERE cbid=$cbid");
             $db->do("SELECT RELEASE_LOCK('cbid-$cbid')");
         }
         $loop = 0 unless scalar(@$clist) == 20;
     }
+    $finish_cmd->($dbh, $db) if $finish_cmd;
+
     return 1;
 }
 
