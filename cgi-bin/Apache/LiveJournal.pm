@@ -627,7 +627,7 @@ sub userpic_content
 
     my $send_headers = sub {
         $r->content_type($mime);
-        $r->header_out("Content-length", $size);
+        $r->header_out("Content-length", $size+0);
         $r->header_out("Cache-Control", "no-transform");
         $r->header_out("Last-Modified", LJ::time_to_http($lastmod));
         $r->send_http_header();
