@@ -1712,8 +1712,10 @@ sub comm_member_request {
                     );
 
     my $cuser = $comm->{'user'};
-    my $body = "A maintainer of the $cuser community has requested that " .
-        "you be added to the community with the following capabilities: " .
+    my $body = "Dear $u->{'user'},\n";
+    $body .= "A maintainer of the $cuser community ($LJ::SITEROOT/community/$cuser/) " .
+        "has requested that you be added to the community with the following ".
+        "capabilities: " .
         join(", ", map { $attr_map{$_} } @$attr) . ".\n\n" .
         "If you do not wish to be added to $cuser, just ignore this email.  " .
         "However, if you would like to join the community, please click " .
