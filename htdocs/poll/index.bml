@@ -1,100 +1,98 @@
 <?_code
+{
 
- $title = "Poll";
- $body = "";
+    $title = "Poll";
+    $body = "";
 
+    # answers to checkbox questions are null-separated sequences
+    # since our inout correctness check rules out nulls, we change them
+    # to commas here rather than inside LJ::Poll::submit() .
+    foreach (values %FORM) {
+        s/\0/,/g;
+    }
+    unless (LJ::text_in(\%FORM)) {
+        $body = "<?badinput?>";
+        return;
+    }
 
+    my $remote = LJ::get_remote();
 
- # answers to checkbox questions are null-separated sequences
- # since our inout correctness check rules out nulls, we change them
- # to commas here rather than inside LJ::Poll::submit() .
- foreach (values %FORM) {
-     s/\0/,/g;
- }
- unless (LJ::text_in(\%FORM)) {
-     $body = "<?badinput?>";
-     return;
- }
+    my $pollid = ($FORM{'id'} || $FORM{'pollid'})+0;
 
- my $remote = LJ::get_remote();
+    unless ($pollid) {
+        $title = "Polls";
+        $body .= "This is the address to participate in a poll.  You've stumbled onto an address which does nothing right now.  If you'd like, you can <a href=\"create.bml\">create a new poll</a>.";
+        return;
+    }
 
- my $pollid = ($FORM{'id'} || $FORM{'pollid'})+0;
+    my $dbr = LJ::get_db_reader();
+    my $po = $dbr->selectrow_hashref("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name ".
+                                     "FROM poll WHERE pollid=?", undef, $pollid);
+    unless ($po) {
+        $title = "Error";
+        $body = "Poll not found.";
+        return;
+    }
 
- unless ($pollid) {
-     $title = "Polls";
-     $body .= "This is the address to participate in a poll.  You've stumbled onto an address which does nothing right now.  If you'd like, you can <a href=\"create.bml\">create a new poll</a>.";
-     return;
- }
+    my $u = LJ::load_userid($po->{'journalid'});
+    my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
 
- my $dbr = LJ::get_db_reader();
- my $po = $dbr->selectrow_hashref("SELECT itemid, whovote, journalid, posterid, whoview, whovote, name ".
-                                  "FROM poll WHERE pollid=?", undef, $pollid);
- unless ($po) {
-   $title = "Error";
-   $body = "Poll not found.";
-   return;
- }
+    my $mode = "";
+    foreach my $m ([ "enter", "Fill out Poll" ], [ "results" , "View Poll Results" ]) {
+        if ($FORM{'mode'} eq $m->[0]) {
+            $mode = $FORM{'mode'};
+            $body .= "<b>[ $m->[1] ]</b> ";
+        } else {
+            $body .= "<a href=\"$LJ::SITEROOT/poll/?id=$pollid&amp;mode=$m->[0]\">[ $m->[1] ]</a> ";
+        }
+    }
 
- my $u = LJ::load_userid($po->{'journalid'});
- my $jarg = $u->{'clusterid'} ? "journal=$u->{'user'}&amp;" : "";
+    # load the item being shown
+    my $udbr = LJ::get_cluster_reader($u);
+    my $itemid = int($po->{'itemid'} / 256);
+    my $anum = $po->{'itemid'} % 256;
+    my $log = $udbr->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=? AND anum=?",
+                                       undef, $u->{'userid'}, $itemid, $anum);
+    $log->{'ownerid'} = $log->{'journalid'};
+    unless ($log) {
+        return "Owning post deleted, so poll no longer accessible.";
+    }
 
- my $mode = "";
- foreach my $m ([ "enter", "Fill out Poll" ], [ "results" , "View Poll Results" ]) {
-     if ($FORM{'mode'} eq $m->[0]) {
-         $mode = $FORM{'mode'};
-         $body .= "<b>[ $m->[1] ]</b> ";
-     } else {
-         $body .= "<a href=\"$LJ::SITEROOT/poll/?id=$pollid&amp;mode=$m->[0]\">[ $m->[1] ]</a> ";
-     }
- }
+    unless (LJ::can_view($remote, $log)) {
+        $body = "Sorry, you're not permitted to see this poll.";
+        return;
+    }
 
- # load the item being shown
- my $udbr = LJ::get_cluster_reader($u);
- my $itemid = int($po->{'itemid'} / 256);
- my $anum = $po->{'itemid'} % 256;
- my $log = $udbr->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=? AND anum=?",
-                                     undef, $u->{'userid'}, $itemid, $anum);
- $log->{'ownerid'} = $log->{'journalid'};
- unless ($log) {
-     return "Owning post deleted, so poll no longer accessible.";
- }
-
- unless (LJ::can_view($remote, $log)) {
-     $body = "Sorry, you're not permitted to see this poll.";
-     return;
- }
-
- $body .= "<a href='" . LJ::item_link($u, $itemid, $anum) . "'>[ Discuss Results ]</a> ";
+    $body .= "<a href='" . LJ::item_link($u, $itemid, $anum) . "'>[ Discuss Results ]</a> ";
  
- if ($FORM{'mode'} eq "ans") { $mode = "ans"; } # also allowed, but not shown
+    if ($FORM{'mode'} eq "ans") { $mode = "ans"; } # also allowed, but not shown
 
- $body .= "<hr><p>";
+    $body .= "<hr><p>";
 
- if (defined $FORM{'poll-submit'})
- {
-     my $error;
-     LJ::Poll::submit($remote, \%FORM, \$error);
-     if ($error) {
-         $title = "Error";
-         $body .= $error;
-         return;
-     }
-     $title = "Submitted!";
-     $body .= "<?h1 Thanks.... h1?><?p Your poll answers have been submitted. p?>";
-     return;
- }
+    if (defined $FORM{'poll-submit'})
+    {
+        my $error;
+        LJ::Poll::submit($remote, \%FORM, \$error);
+        if ($error) {
+            $title = "Error";
+            $body .= $error;
+            return;
+        }
+        $title = "Submitted!";
+        $body .= "<?h1 Thanks.... h1?><?p Your poll answers have been submitted. p?>";
+        return;
+    }
 
+    my $opts = { 'mode' => $mode,
+                 'qid' => $FORM{'qid'},
+                 'prefill' => 1,
+             };
 
- my $opts = { 'mode' => $mode,
-              'qid' => $FORM{'qid'},
-              'prefill' => 1,
-          };
+    ## itemid 0 means no security is done to check that it's not hijacked:
+    $body .= LJ::Poll::show_poll(0, $remote, $pollid, $opts);
 
- ## itemid 0 means no security is done to check that it's not hijacked:
- $body .= LJ::Poll::show_poll(0, $remote, $pollid, $opts);
-
- return;
-
+    return;
+}
 _code?><?page
 title=><?_code return $title; _code?>
 body=><?_code return $body; _code?>
