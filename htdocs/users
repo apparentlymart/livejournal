@@ -134,6 +134,17 @@ unless ($ENV{'SERVER_SOFTWARE'}) {
 	next REQUEST;
     }
     
+    if ($mode eq "info") 
+    {
+	$user = LJ::canonical_username($user);
+	my $url = "$LJ::SITEROOT/userinfo.bml?user=$user";
+	print "Status: 302 Found\n";
+	print "Location: $url\n";
+	print "Content-type: text/html\n\n";
+	print "This journal's info page is located <a href=\"$url\">here</a>.";
+	next REQUEST;
+    }
+
     my $remote = LJ::get_remote($dbs, undef, $cgi);
 
     my %headers = ();

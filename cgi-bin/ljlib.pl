@@ -35,6 +35,11 @@ require "$ENV{'LJHOME'}/cgi-bin/ljpoll.pl";
 		     "creator" => \&create_view_friends,
 		     "des" => "Friends View",
 		 },
+		 "info" => {
+		     # just a redirect to userinfo.bml for now. 
+		     # in S2, will be a real view.
+		     "des" => "Profile Page",
+		 }
 		 );
 
 ## we want to set this right away, so when we get a HUP signal later
