@@ -53,6 +53,7 @@ sub error_message
              "102" => "Can't use custom/private security on shared/community journals.",
              "103" => "Poll error",
              "104" => "Error adding one or more friends",
+             "105" => "Challenge expired",
              "150" => "Can't post as non-user",
              "151" => "Banned from journal",
              "152" => "Can't make back-dated entries in non-personal journal.",
@@ -2328,6 +2329,7 @@ sub authenticate
     }
 
     my $ip_banned = 0;
+    my $chal_expired = 0;
     my $auth_check = sub {
         my $auth_meth = $req->{'auth_method'} || "clear";
         if ($auth_meth eq "clear") {
@@ -2338,10 +2340,14 @@ sub authenticate
                                  \$ip_banned);
         }
         if ($auth_meth eq "challenge") {
-            return LJ::challenge_check_login($u, 
-                                             $req->{'auth_challenge'},
-                                             $req->{'auth_response'},
-                                             \$ip_banned);
+            my $chal_opts = {};
+            my $chall_ok = LJ::challenge_check_login($u, 
+                                                     $req->{'auth_challenge'},
+                                                     $req->{'auth_response'},
+                                                     \$ip_banned,
+                                                     $chal_opts);
+            $chal_expired = 1 if $chal_opts->{expired};
+            return $chall_ok;
         }
         if ($auth_meth eq "cookie") {
             return unless $r && $r->header_in("X-LJ-Auth") eq "cookie";
@@ -2355,6 +2361,7 @@ sub authenticate
             $auth_check->() )
     {
         return fail($err,402) if $ip_banned;
+        return fail($err,105) if $chal_expired;
         return fail($err,101);
     }
 
