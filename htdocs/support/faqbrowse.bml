@@ -60,10 +60,13 @@
     }
 
     my $count = 0;
+    my $dbh;
     while (my ($faqid, $question, $answer, $lastmoduserid, 
                $lastmodtime, $unixmodtime) = $sth->fetchrow_array)
     {
-        my $dbh = LJ::get_db_writer();
+
+        $dbh ||= LJ::get_db_writer();
+
         # log this faq view
         $dbh->do("REPLACE INTO faquses (faqid, userid, dateview) ".
                  "VALUES ($faqid, ?, NOW())", undef, $remote->{'userid'}) if $remote;
@@ -89,7 +92,12 @@
         $a = LJ::auto_linkify($a);
 
         # display output
-        $$body .= "<?h1 $q h1?><div class='postheading' style='margin-left: 20px;'>$a</div>";
+        $$body .= "<?h1";
+        if ($faqcat) {
+            $$body .= " <a style='text-decoration: none;' " .
+                      "href='faqbrowse.bml?faqid=$faqid'>&bull;</a>";
+        }
+        $$body .= " $q h1?><div class='postheading' style='margin-left: 20px;'>$a</div>";
 
         my $lastmodwho = LJ::get_username($lastmoduserid);
         if ($lastmodwho) {
