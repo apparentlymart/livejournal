@@ -283,6 +283,16 @@ my %ljconfig =
    { scheme => 'opalcat', title => 'Opcalcat' },
 );",
             },
+            'force_empty_friends' => {
+                'desc' => "A hash of userids whose friends views should be disabled for performance reasons. This is useful if new accounts are auto-added to ".
+                          "another account upon creation (described in [ljconfig[initial_friends]]), as in most situations building a friends view for those ".
+                          "accounts would be superflous and taxing on your installation.",
+                'type' => "hash",
+                'example' => "(
+     234 => 1,
+     232252 => 1,
+);",
+            },
         },
 
         'portal' => {
