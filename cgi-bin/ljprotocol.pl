@@ -772,7 +772,7 @@ sub postevent
               "UNIX_TIMESTAMP($qeventtime), $rlogtime, $anum)");
     return $fail->($err,501,$dbcm->errstr) if $dbcm->err;
 
-    # set userprops.  FIXME: this should be moved to user clusters
+    # set userprops.
     {
         my %set_userprop;
         
