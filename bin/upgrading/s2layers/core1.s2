@@ -1024,8 +1024,8 @@ function lang_ordinal(int num) [notags] : string
     return $num+"th";
 }
 
-function lang_ordinal(string num) [notags] : string 
-"Make an ordinal number from a cardinal number"
+function lang_ordinal(string num) [notags, fixed] : string 
+"Make an ordinal number from a cardinal number.  Don't override this, since the core layer implementation just calls [func[lang_ordinal(int)]], which i18nc layers should override."
 {
     return lang_ordinal(int($num)); 
 }
