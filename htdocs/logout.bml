@@ -51,6 +51,10 @@
 
     # do they have any other sessions?
     my $udbr = LJ::get_cluster_reader($u);
+    unless ($udbr) {
+        $body = "<?h1 $ML{'Error'} h1?><?p $ML{'error.nodb'} p?>";
+        return undef;
+    }
 
     my $curid = $u->{'_session'}->{'sessid'} || 0;
 
