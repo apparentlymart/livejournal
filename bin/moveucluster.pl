@@ -347,6 +347,10 @@ sub movefrom0_logitem
     $replace_into->("syncupdates2", "(userid, atime, nodetype, nodeid, atype)", 50,
                     $userid, $item->{'logtime'}, 'L', $jitemid, 'create');
 
+
+    # now we're done for non-commented posts
+    return unless $item->{'replycount'};
+
     # copy its talk shit over:
     my %newtalkids = (0 => 0);  # 0 maps back to 0 still
     my $talkids = $dbh->selectcol_arrayref("SELECT talkid FROM talk ".
