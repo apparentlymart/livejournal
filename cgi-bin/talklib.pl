@@ -2444,6 +2444,12 @@ sub init {
         $$need_captcha =
             ($LJ::HUMAN_CHECK{anonpost} || $LJ::HUMAN_CHECK{authpost}) &&
             ! LJ::Talk::Post::check_rate($comment->{'u'}, $journalu);
+
+        # if the user is anonymous and the IP is marked, ignore rates and always human test.
+        $$need_captcha = $LJ::HUMAN_CHECK{anonpost} &&
+                         ! $comment->{'u'} &&
+                         LJ::sysban_check('talk_ip_test', LJ::get_remote_ip());
+
         if ($$need_captcha) {
             return $err->("Please confirm you are a human below.") unless $form->{answer};
             return if lc($form->{answer}) eq 'audio';
