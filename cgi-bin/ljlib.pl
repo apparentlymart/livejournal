@@ -4074,7 +4074,7 @@ sub end_request
 # </LJFUNC>
 sub disconnect_dbs {
     # clear cached handles
-    $LJ::DBIRole->disconnect_all();
+    $LJ::DBIRole->disconnect_all( { except => [qw(logs)] });
 
     # and cached trackers/keepers to partitioned dbs
     while (my ($role, $tk) = each %LJ::REQ_DBIX_TRACKER) {
