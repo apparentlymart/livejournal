@@ -131,6 +131,7 @@ body<=
 
     # choose layout
     my @layouts = map { $_, LJ::ehtml($pub->{$_}->{'name'}) }
+                 sort { $pub->{$a}->{'name'} cmp $pub->{$b}->{'name'} }
                  grep { /^\d+$/ && $pub->{$_}->{'type'} eq "layout" &&
                         LJ::S2::can_use_layer($u, $pub->{$_}->{'uniq'})  } keys %$pub;
     # add user ones
