@@ -215,7 +215,7 @@ body<=
  if ($info{'count'}) {
      if ($info{'pages'} > 1) {
          $navcrap .= "<BR>";
-         $navcrap .= BML::ml(".navcrap.xofy", {'curpage' => $info{'page'}, 'totpages' => $info{'pages'}, 'reca' => "$info{'first'}, 'recb' => $info{'last'}"});
+         $navcrap .= BML::ml(".navcrap.xofy", {'curpage' => $info{'page'}, 'totpages' => $info{'pages'}, 'reca' => $info{'first'}, 'recb' => $info{'last'}});
          $navcrap .= "<BR>";
          my $left = "<B>&lt;&lt;</B>";
          if ($info{'page'} > 1) { $left = "<A HREF=\"" . BML::self_link({ 'page' => $info{'page'}-1 }) . "\">$left</A>"; }
