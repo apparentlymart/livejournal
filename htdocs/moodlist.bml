@@ -57,22 +57,30 @@ body<=
 
         my $remote = LJ::get_remote();
 
-        # Check if the user is logged in and if so append their private mood themes
+        # Check if the user is logged in and didn't specify an owner.  If so append their private mood themes
         my $sth;
-        if($remote) {
+        if ($remote && ! $GET{'ownerid'}) {
             # FIXME: cache this.  it's small.
             $sth = $dbr->prepare("SELECT moodthemeid, name, is_public FROM moodthemes WHERE ownerid=?");
             $sth->execute($remote->{userid});
             @user_themes = ();
             push @user_themes, $_ while $_ = $sth->fetchrow_hashref;
-            @user_themes = sort { lc($a->{name}) cmp lc($b->{name}) } @user_themes;
+        } elsif ($GET{'ownerid'}) {
+            # FIXME: cache this.  it's small.
+            $sth = $dbr->prepare("SELECT moodthemeid, name, is_public FROM moodthemes WHERE ownerid=? AND moodthemeid=?");
+            $sth->execute($GET{'ownerid'}, $GET{'moodtheme'});
+            @user_themes = ();
+            push @user_themes, $_ while $_ = $sth->fetchrow_hashref;
         }
+
+        # Sort the user themes
+        @user_themes = sort { lc($a->{name}) cmp lc($b->{name}) } @user_themes;
 
         # See if the user can even view this theme
         my $theme = (grep { $_->{moodthemeid} == $GET{moodtheme} } (@themes, @user_themes))[0];
         if (! $theme) {
             # It isn't theirs, or they aren't logged in, and it isn't public and it actually exists
-            return LJ::bad_input("Not your theme or a system theme.");
+            return LJ::bad_input("You only have permission to view system mood themes, or user themes with a ownerid parameter.");
         } else {
             do_theme_detail($GET{'moodtheme'});
         }
@@ -153,17 +161,23 @@ body<=
    {
        my ($themeid) = @_;
 
-       $ret .= "<br /><table width='100%'><tr><td colspan='5' align='center'>" .
-           "<form action='moodlist.bml' method='GET'>";
+       $ret .= "<br /><table width='100%'><tr><td colspan='5' align='center'>";
 
-       my @opts = ((map {$_->{moodthemeid}, $_->{name}} @themes),
+       if ($GET{'ownerid'}) {
+           $ret .= "<div style='margin-bottom:15px; font-weight:bold'>";
+           $ret .= LJ::ehtml(@user_themes[0]->{name}) . ' - ';
+           $ret .= LJ::ljuser(LJ::get_username($GET{'ownerid'}));
+           $ret .= "</div></td></tr>";
+       } else {
+           my @opts = ((map {$_->{moodthemeid}, $_->{name}} @themes),
                    (@user_themes ? (0, "---") : ()),
                    (map {$_->{moodthemeid}, $_->{name}} @user_themes));
 
-       $ret .= LJ::html_select({'name' => "moodtheme", 'selected' => "$themeid"},
-                               @opts);
-
-       $ret .= "&nbsp;<input type='submit' value='View' /></form></td>";
+           $ret .= "<div style='margin-bottom:15px'><form action='moodlist.bml' method='GET'>";
+           $ret .= LJ::html_select({'name' => "moodtheme", 'selected' => "$themeid"},
+                                   @opts);
+           $ret .= "&nbsp;<input type='submit' value='View' /></form></div></td></tr>";
+       }
 
        # Output all the moods
        while (@mlist) {
