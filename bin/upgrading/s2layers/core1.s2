@@ -1622,7 +1622,7 @@ function EntryPage::print_body
 
     "<table>";
     if (defined $e.userpic) { 
-        print "<tr valign='middle'><td><img src='$e.userpic.url' /></td>"; 
+        print "<tr valign='middle'><td>$e.userpic</td>"; 
     }
     print "<td>"; 
     $e.poster->print();
@@ -1679,7 +1679,7 @@ function ReplyPage::print_body
     "<table>";
     if (defined $.replyto.poster) {
         if (defined $.replyto.userpic) { 
-            print "<tr valign='middle'><td><img src='$.replyto.userpic.url' /></td>"; 
+            print "<tr valign='middle'><td>$.replyto.userpic</td>"; 
         }
         print "<td>"; 
         $.replyto.poster->print();
