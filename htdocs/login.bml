@@ -10,11 +10,7 @@
     my $user = LJ::canonical_username($POST{'user'});
     my $password = $POST{'password'};
     
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-    
-    my $remote = LJ::get_remote($dbs);
+    my $remote = LJ::get_remote();
     my $cursess = $remote ? $remote->{'_session'} : undef;
 
     if (LJ::did_post()) {
@@ -76,7 +72,7 @@
 
         if ($do_login) {
 
-            my $u = LJ::load_user($dbs, $POST{'user'});
+            my $u = LJ::load_user($POST{'user'});
             unless ($u) { push @errors, "$ML{'error.username_notfound'}"; }
             
             my $banned = 0;
@@ -95,7 +91,7 @@
                 return;
             }
         
-            LJ::load_user_props($dbs, $u, "browselang", "schemepref");
+            LJ::load_user_props($u, "browselang", "schemepref");
             my $bl = LJ::Lang::get_lang($u->{'browselang'});
             
             my $bindip;

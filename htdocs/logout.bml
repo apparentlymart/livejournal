@@ -5,8 +5,7 @@
 
     $body = "";
 
-    my $dbs = LJ::get_dbs();
-    my $u = LJ::get_remote($dbs);
+    my $u = LJ::get_remote();
 
     unless ($u) {
         $body = "$ML{'.loggedout.already'}";

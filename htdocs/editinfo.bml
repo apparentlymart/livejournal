@@ -21,14 +21,12 @@ body<=
 
     ### user is now authenticated ###
 
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-    my $dbcs = LJ::get_cluster_set($u);
+    my $dbr = LJ::get_db_reader();
+    my $dbcm = LJ::get_cluster_master($u);
     my $sth;
 
     # load user props
-    LJ::load_user_props($dbr, $u, "opt_whatemailshow",
+    LJ::load_user_props($u, "opt_whatemailshow",
                         "country", "state", "city",
                         "zip", "icq", "aolim", "yahoo", "msn", "url",
                         "urlname", "gender", "jabber", "opt_blockrobots",
@@ -48,8 +46,8 @@ body<=
 
     # load and clean bio
     if ($u->{'has_bio'}) {
-        $u->{'bio'} = LJ::dbs_selectrow_array($dbcs, "SELECT bio FROM userbio ".
-                                              "WHERE userid=$u->{'userid'}");
+        $u->{'bio'} = $dbcm->selectrow_array("SELECT bio FROM userbio ".
+                                             "WHERE userid=$u->{'userid'}");
         $saved{'bio'} = $u->{'bio'};
         LJ::text_out(\$u->{'bio'});
     }
@@ -66,7 +64,7 @@ body<=
     # load state and country codes
     my %countries;
     my %states;
-    LJ::load_codes($dbs, { "country" => \%countries, "state" => \%states });
+    LJ::load_codes({ "country" => \%countries, "state" => \%states });
 
 
     ###
@@ -267,7 +265,7 @@ body<=
         {
             my $picid = $u->{'defaultpicid'};
             my %userpics = ();
-            LJ::load_userpics($dbs, \%userpics, [ $picid ]);
+            LJ::load_userpics(\%userpics, [ $picid ]);
             $ret .= "<a href='editpics.bml?authas=$u->{'user'}'><img src=\"$LJ::USERPIC_ROOT/$picid/$u->{'userid'}\" width='$userpics{$picid}->{'width'}' height='$userpics{$picid}->{'height'} alt='$u->{'user'}' border='0'></a>";
         } else
         {
@@ -460,8 +458,8 @@ body<=
         ### unicode options
         if ($LJ::UNICODE) {
             my (%old_encnames, %mail_encnames, %encodings);
-            LJ::load_codes($dbs, { "encoding" => \%encodings } );
-            LJ::load_codes($dbs, { "encname" => \%old_encnames } );
+            LJ::load_codes({ "encoding" => \%encodings } );
+            LJ::load_codes({ "encname" => \%old_encnames } );
             %mail_encnames = %old_encnames;
 
             # which encodings to show? For now, we just delete utf-8 from the old encodings
@@ -612,8 +610,9 @@ body<=
 
         return LJ::bad_input(@errors) if @errors;
 
-
         ### no errors
+
+        my $dbh = LJ::get_db_writer();
        
         my $email_changed = ($u->{'email'} ne $POST{'email'});
         if ($email_changed) {
@@ -743,7 +742,6 @@ body<=
 
         # update their bio text
         if (($u->{'bio'} ne $POST{'bio'}) && !defined($POST{'bio_absent'})) {
-            my $dbcm = $dbcs->{'dbh'};
             if ($has_bio eq "N") {
                 $dbcm->do("DELETE FROM userbio WHERE userid=?", undef, $u->{'userid'});
                 LJ::dudata_set($dbcm, $u->{'userid'}, 'B', 0, 0);
@@ -772,7 +770,7 @@ body<=
             if ($intcount > 150) {
                 return LJ::bad_input(BML::ml(".error.excessive_int", {'intcount' => $intcount}));
             }
-            LJ::set_interests($dbs, $u->{'userid'}, \%interests, \@ints);
+            LJ::set_interests($u->{'userid'}, \%interests, \@ints);
         }
 
         # now unban users they selected to be unbanned
@@ -784,7 +782,7 @@ body<=
         # actions if email changed
         if ($email_changed) {
             my $aa = {};
-            $aa = LJ::register_authaction($dbs, $u->{'userid'}, 
+            $aa = LJ::register_authaction($u->{'userid'}, 
                                           "validateemail", $POST{'email'});
 
             LJ::send_mail({

@@ -22,9 +22,6 @@ body<=
 
  my $ret = "";
  my %errors;
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
 
  my $remote = LJ::get_remote();
 
@@ -50,7 +47,7 @@ body<=
  {
      my $sth;
      my $cuser = LJ::canonical_username($POST{'cuser'});
-     my $cu = LJ::load_user($dbs, $cuser);
+     my $cu = LJ::load_user($cuser);
      
      unless ($cu) {
          $errors{'username'} = $ML{'.error.notfound'};
@@ -61,7 +58,7 @@ body<=
      }
 
      # if we're changing rather than creating, check that we can
-     if ($mode eq 'modify' && !LJ::check_rel($dbs, $cu, $remote, 'A')) {
+     if ($mode eq 'modify' && !LJ::check_rel($cu, $remote, 'A')) {
         $errors{'username'} = BML::ml('.error.noaccess', {'comm'=>$cuser});
      }
 
@@ -71,7 +68,7 @@ body<=
      }
 
      # disallow changing the journal type if the journal has entries
-     if ($mode eq 'create' && !%errors && !LJ::check_priv($dbh, $remote, "changejournaltype", "")) {
+     if ($mode eq 'create' && !%errors && !LJ::check_priv($remote, "changejournaltype", "")) {
          my $count;
          my $userid=$cu->{'userid'}+0;
          
@@ -84,6 +81,7 @@ body<=
      # if we found errors, we'll redisplay the form below.  otherwise,
      # proceed.
      unless (%errors) {
+        my $dbh = LJ::get_db_writer();
         my $cid = $cu->{'userid'};
         my $qmembership = $dbh->quote($POST{'membership'} eq "open" ? "open" : "closed");
         my $qpostlevel = $dbh->quote($POST{'postlevel'} eq "members" ? "members" : "select");
@@ -91,7 +89,7 @@ body<=
         $dbh->do("UPDATE user SET journaltype='C' WHERE userid=$cid");
         if ($mode eq 'create') {
            $dbh->do("REPLACE INTO community (userid, membership, postlevel) VALUES ($cid, $qmembership, $qpostlevel)");
-           LJ::set_rel($dbs, $cu, $remote, 'A');
+           LJ::set_rel($cu, $remote, 'A');
         } else {
            $dbh->do("UPDATE community SET membership=$qmembership, postlevel=$qpostlevel WHERE userid=$cid");
         }
@@ -132,7 +130,7 @@ body<=
 
  if ($mode eq 'modify') {
     $cname = LJ::canonical_username($GET{'comm'});
-    $c = LJ::load_user($dbs, $cname);
+    $c = LJ::load_user($cname);
     unless ($c) {
        $ret .= "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notfound'} p?>";
        return $ret;
@@ -141,9 +139,10 @@ body<=
        $ret = "<?h1 $ML{'Error'} h1?><?p $ML{'.error.notcomm'} p?>";
        return $ret;
     } 
+    my $dbr = LJ::get_db_reader();
     ($info{'membership'},$info{'postlevel'}) = 
-       LJ::dbs_selectrow_array($dbs, "SELECT membership,postlevel FROM community WHERE userid=$c->{'userid'}");
-    LJ::load_user_props($dbs, $c, "nonmember_posting", "moderated");
+        $dbr->selectrow_array("SELECT membership, postlevel FROM community WHERE userid=$c->{'userid'}");
+    LJ::load_user_props($c, "nonmember_posting", "moderated");
     $info{'nonmember_posting'} = $c->{'nonmember_posting'} ? 1 : 0;
     $info{'moderated'} = $c->{'moderated'} ? 1 : 0;
  }

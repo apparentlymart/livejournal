@@ -6,36 +6,23 @@ body<=
     use strict;
     use vars qw(%GET %POST %FORM);
 
-    return LJ::server_down_html() if $LJ::SERVER_DOWN;
-
-    my $dbs = LJ::get_dbs();
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-    my $sth;
-
-    return "Database temporarily unavailable." unless $dbh && $dbr;
-    
     my $ret;
-    my $remote = LJ::get_remote($dbs);
+    my $remote = LJ::get_remote();
 
     unless ($remote) {
         return "<?h1 Login Required h1?><?p Before you customize your journal, you must first <a href='/login.bml?ret=1'>login</a>. p?>";
     }
 
     my @journals = ($remote->{'user'});
-    push @journals, LJ::get_shared_journals($dbs, $remote);
+    push @journals, LJ::get_shared_journals($remote);
 
     my $journal = $GET{'journal'} || $remote->{'user'};
     unless (grep { $_ eq $journal } @journals) {  return BML::redirect("/customize/");  }
 
 
     my $u = $remote;
-    $u = LJ::load_user($dbs, $journal) unless $journal eq $remote->{'user'};
+    $u = LJ::load_user($journal) unless $journal eq $remote->{'user'};
     my $userid = $u->{'userid'};
-    
-    my $dbcs = LJ::get_cluster_set($u);
-    my $dbch = $dbcs->{'dbh'};
-    my $dbcr = $dbcs->{'reader'};
     
     return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
     
@@ -49,7 +36,7 @@ body<=
         $ret .= " <input type='submit' value='Switch'> p?></form>";
     }
     
-    LJ::load_user_props($dbs, $u, "stylesys", "s2_style");
+    LJ::load_user_props($u, "stylesys", "s2_style");
     $u->{'stylesys'} ||= 1;
     my $pub = LJ::S2::get_public_layers();
     my $userlay = LJ::S2::get_layers_of_user($u);
@@ -67,7 +54,7 @@ body<=
 
     if ($POST{'save:stylesys'}) {
         my $num = $POST{'stylesys'} == 2 ? 2 : 1;
-        LJ::set_userprop($dbh, $u, "stylesys", $num);
+        LJ::set_userprop($u, "stylesys", $num);
         return BML::redirect("/customize/?journal=$u->{'user'}");
     }
 
@@ -77,7 +64,7 @@ body<=
             die "ERROR: Failed to create new style.";
         }
         LJ::S2::set_style_layers($u, $u->{'s2_style'}, %style);
-        LJ::set_userprop($dbh, $u, "s2_style", $u->{'s2_style'});
+        LJ::set_userprop($u, "s2_style", $u->{'s2_style'});
     };
 
     if ($POST{'save:layout'}) {

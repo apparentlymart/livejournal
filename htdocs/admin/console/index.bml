@@ -5,12 +5,8 @@
 
  my ($ret, $sth);
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
  my $commands = $FORM{'commands'};
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  if ($commands) 
  {
@@ -40,7 +36,9 @@
 
          my @output;
          my $rv;
-         
+
+         # TODO: make the entire console library not take $db args.
+         my $dbh = LJ::get_db_writer();
          $rv = LJ::Con::execute($dbh, $remote, \@args, \@output);
          
          unless ($rv) { $ret .= "<P><B><FONT COLOR=#FF0000>Failed!</FONT></B>"; }

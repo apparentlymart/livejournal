@@ -17,12 +17,10 @@
      return $err->("Invalid UTF-8 Input");
  }
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
+ my $dbr = LJ::get_db_reader();
  my $sth;
 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
  return $err->("You must be logged in to edit your pictures.")
     unless $remote;
  
@@ -40,15 +38,16 @@
      return;
  }
 
- my $dbb = LJ::get_cluster_master($u);
- return $err->("Database temporarily unavailable.") unless $dbb;
- 
  ### save mode
 
  if ($POST{'mode'} eq "save") 
  {
+     my $dbh = LJ::get_db_writer();
+     my $dbcm = LJ::get_cluster_master($u);
+     return $err->("Database temporarily unavailable.") unless $dbh && $dbcm;
+
      my %exist_kwids;
-     $sth = $dbr->prepare("SELECT kwid, picid FROM userpicmap WHERE userid=?");
+     $sth = $dbh->prepare("SELECT kwid, picid FROM userpicmap WHERE userid=?");
      $sth->execute($u->{'userid'});
      while (my ($kwid, $picid) = $sth->fetchrow_array) {
          push @{$exist_kwids{$picid}}, $kwid;
@@ -58,7 +57,7 @@
      $dbh->do("DELETE FROM userpicmap WHERE userid=?", undef, $u->{'userid'});
 
      # select all of their userpics and iterate through them
-     $sth = $dbr->prepare("SELECT picid, width, height, state FROM userpic WHERE userid=?");
+     $sth = $dbh->prepare("SELECT picid, width, height, state FROM userpic WHERE userid=?");
      $sth->execute($u->{'userid'});
 
      my @inactive_picids;
@@ -83,7 +82,7 @@
          my @keywords = split(/\s*,\s*/, $POST{"kw_$pic->{'picid'}"});
          @keywords = grep { s/^\s+//; s/\s+$//; $_; } @keywords;
          foreach my $kw (@keywords) {
-             my $kwid = LJ::get_keyword_id($dbs, $kw);
+             my $kwid = LJ::get_keyword_id($kw);
              next unless $kwid;
 
              if ($picid_of_kwid{$kwid}) {
@@ -109,8 +108,8 @@
          # delete metadata from global
          $dbh->do("DELETE FROM userpic WHERE picid IN ($id_in)");
          # delete data from user cluster
-         $dbb->do("DELETE FROM userpicblob2 WHERE userid=$u->{'userid'} ".
-                  "AND picid IN ($id_in)");
+         $dbcm->do("DELETE FROM userpicblob2 WHERE userid=$u->{'userid'} ".
+                   "AND picid IN ($id_in)");
 
          # if any of the userpics they want to delete are active, then we want to 
          # re-run LJ::activate_userpics() - turns out it's faster to not check to 
@@ -156,7 +155,8 @@
  $body .= "</form>\n\n";
 
  my %keywords = ();
- $sth = $dbr->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
+ $sth = $dbr->prepare("SELECT m.picid, k.keyword FROM userpicmap m, keywords k ".
+                      "WHERE m.userid=$u->{'userid'} AND m.kwid=k.kwid");
  $sth->execute;
  while (my ($pic, $keyword) = $sth->fetchrow_array) {
      LJ::text_out(\$keyword);

@@ -667,7 +667,6 @@ sub journal_content
 sub customview_content
 {
     my $r = shift;
-    my $dbs = LJ::get_dbs();
 
     my %FORM = $r->args;
 
@@ -701,10 +700,10 @@ sub customview_content
     my $remote;
     if ($FORM{'checkcookies'}) {
 	my $criterr = 0;
-	$remote = LJ::get_remote($dbs, \$criterr);
+	$remote = LJ::get_remote(undef, \$criterr);
     }
 
-    my $data = (LJ::make_journal($dbs, $user, "", $remote,
+    my $data = (LJ::make_journal($user, "", $remote,
 				 { "nocache" => $FORM{'nocache'}, 
 				   "vhost" => "customview",
 				   "nooverride" => $nooverride,

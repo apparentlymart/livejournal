@@ -857,7 +857,7 @@ sub set_userprop
 #       back (usually in a URL you make for them) to prove they got it.  This
 #       function creates a secret, attaching what it's for and an optional argument.
 #       Background maintenance jobs keep track of cleaning up old unvalidated secrets.
-# args: dbarg, userid, action, arg?
+# args: dbarg?, userid, action, arg?
 # des-userid: Userid of user to register authaction for.
 # des-action: Action type to register.   Max chars: 50.
 # des-arg: Optional argument to attach to the action.  Max chars: 255.
@@ -868,9 +868,8 @@ sub set_userprop
 # </LJFUNC>
 sub register_authaction
 {
-    my $dbarg = shift;
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
+    my $dbh = LJ::get_db_writer();
 
     my $userid = shift;  $userid += 0;
     my $action = $dbh->quote(shift);
@@ -1186,19 +1185,18 @@ sub make_shared_select
 # name: LJ::get_shared_journals
 # des: Gets an array of shared journals a user has access to.
 # returns: An array of shared journals.
-# args: dbs, u
+# args: dbs?, u
 # </LJFUNC>
 sub get_shared_journals
 {
-    my $dbs = shift;
+    shift if ref $_[0] eq "LJ::DBSet";
     my $u = shift;
-    my $ids = LJ::load_rel_target($dbs, $u, 'A') || [];
+    my $ids = LJ::load_rel_target($u, 'A') || [];
 
     # have to get usernames;
-    my $dbr = $dbs->{'reader'};
-    my $in = join(",", map { $dbr->quote($_); } @$ids);
-    my $names = $dbr->selectcol_arrayref("SELECT user FROM user WHERE userid IN ($in)") || [];
-    return sort @$names;
+    my %users;
+    LJ::load_userids_multiple([ map { $_, \$users{$_} } @$ids ], [$u]);
+    return sort map { $_->{'user'} } values %users;
 }
 
 # <LJFUNC>
@@ -1397,21 +1395,21 @@ sub make_authas_select {
 # des: Validates a shared secret (authid/authcode pair)
 # info: See [func[LJ::register_authaction]].
 # returns: Hashref of authaction row from database.
-# args: dbarg, aaid, auth
+# args: dbarg?, aaid, auth
 # des-aaid: Integer; the authaction ID.
 # des-auth: String; the auth string. (random chars the client already got)
 # </LJFUNC>
 sub is_valid_authaction
 {
-    my $dbarg = shift;
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
 
-    # TODO: make this use slave if available (low usage/priority)
-    my ($aaid, $auth) = map { $dbh->quote($_) } @_;
-    my $sth = $dbh->prepare("SELECT aaid, userid, datecreate, authcode, action, arg1 FROM authactions WHERE aaid=$aaid AND authcode=$auth");
-    $sth->execute;
-    return $sth->fetchrow_hashref;
+    # we use the master db to avoid races where authactions could be
+    # used multiple times
+    my $dbh = LJ::get_db_writer();
+    my ($aaid, $auth) = @_;
+    return $dbh->selectrow_hashref("SELECT aaid, userid, datecreate, authcode, action, arg1 ".
+                                   "FROM authactions WHERE aaid=? AND authcode=?",
+                                   undef, $aaid, $auth);
 }
 
 # <LJFUNC>
@@ -4626,15 +4624,12 @@ sub mysql_time
 # </LJFUNC>
 sub get_keyword_id
 {
-    my $dbarg = shift;
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";
     my $kw = shift;
     unless ($kw =~ /\S/) { return 0; }
     $kw = LJ::text_trim($kw, LJ::BMAX_KEYWORD, LJ::CMAX_KEYWORD);
 
-    my $dbs = LJ::make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
-
+    my $dbh = LJ::get_db_writer();
     my $qkw = $dbh->quote($kw);
 
     # Making this a $dbr could cause problems due to the insertion of
@@ -5538,18 +5533,18 @@ sub item_toutf8
 # <LJFUNC>
 # name: LJ::set_interests
 # des: Change a user's interests
-# args: dbh, userid, old, new
+# args: dbarg?, userid, old, new
 # arg-old: hashref of old interests (hasing being interest => intid)
 # arg-new: listref of new interests
 # returns: 1
 # </LJFUNC>
 sub set_interests
 {
-    my ($dbarg, $userid, $old, $new) = @_;
-    my $dbs = make_dbs_from_arg($dbarg);
-    my $dbh = $dbs->{'dbh'};
-    my $dbr = $dbs->{'reader'};
+    shift @_ if ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db";    
 
+    my ($userid, $old, $new) = @_;
+
+    my $dbh = LJ::get_db_writer();
     my %int_new = ();
     my %int_del = %$old;  # assume deleting everything, unless in @$new
 
@@ -5585,7 +5580,7 @@ sub set_interests
         my @new_intids = ();  ## existing IDs we'll add for this user
 
         ## find existing IDs
-        my $sth = $dbr->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
+        my $sth = $dbh->prepare("SELECT interest, intid FROM interests WHERE interest IN ($int_in)");
         $sth->execute;
         while (my ($intr, $intid) = $sth->fetchrow_array) {
             push @new_intids, $intid;       # - we'll add this later.
