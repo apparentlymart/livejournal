@@ -92,7 +92,7 @@ You can make queries in the following form:
   	    LJ::load_user_props($dbr, $u, "opt_whatemailshow",
 				"country", "state", "city", "zip",
 				"aolim", "icq", "url", "urlname",
-				"gender", "yahoo", "msn");
+				"yahoo", "msn");
 	} else {
 	    $u->{'opt_whatemailshow'} = "N";
 	}
