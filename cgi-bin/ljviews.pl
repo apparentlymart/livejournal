@@ -1889,6 +1889,12 @@ sub create_view_rss
     }
 
     my $user = $u->{'user'};
+
+    if ($u->{'journaltype'} eq "R" && $u->{'renamedto'} ne "") {
+        $opts->{'redir'} = LJ::journal_base($u->{'renamedto'}, $opts->{'vhost'}) . "/rss";
+        return 1;
+    }
+
     foreach ("name", "url", "urlname") { LJ::text_out(\$u->{$_}); }
 
     ## load the itemids
