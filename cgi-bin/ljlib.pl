@@ -797,7 +797,7 @@ sub set_userprop
         my $p = LJ::get_prop("user", $propname) or next;
         my $table = $p->{'indexed'} ? "userprop" : "userproplite";
         $value = $hash->{$propname};
-        if (defined $value && $value ne "") {
+        if (defined $value && $value) {
             push @{$action{$table}->{"replace"}}, "($userid, $p->{'id'}, " . $dbh->quote($value) . ")";
         } else {
             push @{$action{$table}->{"delete"}}, $p->{'id'};
