@@ -150,15 +150,9 @@ sub do_search
     my $pagesize = $req->{'opt_pagesize'}+0 || 100;
     if ($pagesize > 200) { $pagesize = 200; }
     if ($pagesize < 5) { $pagesize = 5; }
-    my $fields;
 
     $req->{'opt_format'} ||= "pics";
-    if ($req->{'opt_format'} eq "pics") {
-        $fields .= ", u.defaultpicid";
-    } elsif ($req->{'opt_format'} eq "simple") {
-        $fields .= ", u.name";
-    } elsif ($req->{'opt_format'} eq "com") {
-        $fields .= ", u.name, c.membership, c.postlevel";
+    if ($req->{'opt_format'} eq "com") {
         $alias_used{'c'} = "community";
         $useridcol{"c.userid"} = 1;
     }
@@ -264,39 +258,34 @@ sub do_search
     if ($page == $pages) { $info->{'last'} = $count; }
 
     ## now, get info on the ones we want.
-    @ids = @ids[($info->{'first'}-1)..($info->{'last'}-1)];
-
-    my $in = join(",", grep { $_+0; } @ids);
-
-    unless ($in) { return 1; }
-
-    $alias_used{'u'} = "user";
-    $alias_used{'uu'} = "userusage";
-
-    $fromwhat = "";
-    my $joinwhere;
-    if ($req->{'opt_format'} eq "com") {
-	$fromwhat .= ", community c";
-	$joinwhere .= " AND c.userid=u.userid";
-    }
-    my $fsql = "SELECT u.userid, u.user, u.journaltype, ".
-	"UNIX_TIMESTAMP()-UNIX_TIMESTAMP(uu.timeupdate) AS 'secondsold' ".
-	$fields . " FROM user u, userusage uu $fromwhat ".
-	"WHERE u.userid IN ($in) AND u.statusvis='V' AND uu.userid=u.userid $joinwhere";
-    $sth = $dbr->prepare($fsql);
-    $sth->execute;
-
-    if ($dbr->err) {
-	$info->{'errmsg'} = "[getdata] $fsql == ".$dbr->errstr;
-	return 0;
-    }
+    @ids = grep{ $_+0 } @ids[($info->{'first'}-1)..($info->{'last'}-1)];
+    return 1 unless @ids;
 
     my %u;
-    while ($_ = $sth->fetchrow_hashref) {
-        $u{$_->{'userid'}} = $_;
+    LJ::load_userids_multiple([ map { $_ => \$u{$_} } @ids ]);
+    my $tu = LJ::get_timeupdate_multi(@ids);
+    my $now = time();
+
+    # need to get community info
+    if ($req->{'opt_format'} eq "com") {
+        my $in = join(',', @ids);
+        my $sth = $dbr->prepare("SELECT c.userid, c.membership, c.postlevel ".
+                                "FROM community ".
+                                "WHERE userid IN ($in)");
+        $sth->execute;
+        while (my ($uid, $mem, $postlev) = $sth->fetchrow_array) {
+            next unless $u{$uid};
+            $u{$uid}->{'membership'} = $mem;
+            $u{$uid}->{'postlevel'} = $postlev;
+        }
+        foreach (@ids) {
+            delete $u{$_} unless $u{$_}->{'membership'};
+        }
     }
 
     foreach my $id (@ids) {
+        next unless $u{$id} && $u{$id}->{'statusvis'} eq "V";
+        $u{$id}->{'secondsold'} = $tu->{$id} ? $now - $tu->{$id} : undef;
         push @$users, $u{$id} if $u{$id};
     }
 
@@ -381,12 +370,11 @@ sub search_fr
     my ($dbr, $req, $info) = @_;
 
     my $user = lc($req->{'fr_user'});
-    my $quser = $dbr->quote($user);
     my $arg = $user;
 
     push @{$info->{'english'}}, "consider \"$arg\" a friend";
 
-    my $friendid = LJ::get_userid($dbr, $user);
+    my $friendid = LJ::get_userid($user);
 
     return {
         'tables' => {
@@ -412,12 +400,11 @@ sub search_fro
     my ($dbr, $req, $info) = @_;
 
     my $user = lc($req->{'fro_user'});
-    my $quser = $dbr->quote($user);
     my $arg = $user;
 
     push @{$info->{'english'}}, "are considered a friend by \"$arg\"";
 
-    my $userid = LJ::get_userid($dbr, $user);
+    my $userid = LJ::get_userid($user);
 
     return {
         'tables' => {
