@@ -712,7 +712,7 @@ sub ensure_confirm
     return 1 if ($opt_sql && ($opt_confirm eq "all" or
                               $opt_confirm eq $area));
 
-    print STDERR "To proceeed with the necessary changes, rerun with -r --confirm=$area\n";
+    print STDERR "To proceed with the necessary changes, rerun with -r --confirm=$area\n";
     return 0;
 }
 
