@@ -355,7 +355,10 @@
         }
         $ret .= "</select></p>\n";
   
-        $ret .= "Poll Name: <i>(opt.)</i><br /><input type='text' name='name' size='50' maxlength='$RULES{'pollname'}->{'maxlength'}' value='" . LJ::ehtml($poll->{'name'}) . "' />\n"; 
+        $ret .= "Poll Name: <i>(opt.)</i><br />";
+        $ret .= LJ::html_text({ 'name' => 'name', 'size' => '50', 
+                                'maxlength' => $RULES{'pollname'}->{'maxlength'},
+                                'value' => $poll->{'name'} }) . "\n"; 
         
         $ret .= "</div>\n\n";
 
@@ -370,11 +373,9 @@
         for (my $q = 0; $q < $poll->{'count'}; $q++) {
             my $elem = $poll->{'pq'}->[$q];
             
-            $ret .= "<table border='0' cellspacing='0' cellpadding='0' width='90%'><tr>\n";
-            $ret .= "<td align='left' colspan='2'>\n";
             $ret .= "<?h2 Question #" . ($q + 1) . " - $TYPENAME{$elem->{'type'}} h2?>\n";
-            $ret .= "</td></tr>\n";
             
+            $ret .= "<table class='postheading' border='0' cellspacing='0' cellpadding='0' width='90%'>\n";
             $ret .= "<tr><td align='left' width='15%'>\n";
             
             # can't move the first element up
@@ -394,10 +395,13 @@
             $ret .= "<td align='left' valign='top'>\n";
             
             # question text and hidden fields
-            $ret .= LJ::html_hidden("pq_${q}_type", $elem->{'type'});
-            $ret .= LJ::html_hidden("pq_${q}_opts", $elem->{'opts'});
-            $ret .= "<br />Question:<br /><input type='text' name='pq_${q}_question' size='50' maxlength='$RULES{'question'}->{'maxlength'}' value='" . LJ::ehtml($elem->{"question"}) . "' />\n";
-            $ret .= "<br /><font size='1'><b>[" . $errors->[$q]->{'question'} ."]</b></font>\n" if $errors->[$q]->{'question'};
+            $ret .= LJ::html_hidden("pq_${q}_type", $elem->{'type'}, "pq_${q}_opts", $elem->{'opts'});
+            $ret .= "<br />Question:<br />";
+            $ret .= LJ::html_text({ 'name' => "pq_${q}_question", 'size' => '50',
+                                    'maxlength' => $RULES{'question'}->{'maxlength'},
+                                    'value' => $elem->{"question"} }) . "\n";
+            $ret .= "<br /><font size='1'><b>[" . $errors->[$q]->{'question'} ."]</b></font>\n"
+                if $errors->[$q]->{'question'};
             
             $ret .= "<div style='margin: 10px 0 10px 40px'>\n";
 
@@ -407,22 +411,23 @@
                 for (my $o = 0; $o < $elem->{'opts'}; $o++) {
                     $ret .= "<br />";
 
-                    $ret .= "<input type='radio' name='dummy_$q' /> " if $elem->{'type'} eq 'radio';
-                    $ret .= "<input type='checkbox' /> " if $elem->{'type'} eq 'check';
+                    $ret .= LJ::html_check({ 'type' => 'radio', 'name' => "dummy_$q" }) if $elem->{'type'} eq 'radio';
+                    $ret .= LJ::html_check({ 'type' => 'checkbox' }) if $elem->{'type'} eq 'check';
 
-                    $ret .= "<input type='text' name='pq_${q}_opt_$o' size='35' maxlength='$RULES{'items'}->{'maxlength'}' value='" . LJ::ehtml($elem->{'opt'}->[$o]) . "' />\n";
+                    $ret .= LJ::html_text({ 'type' => 'text', 'name' => "pq_${q}_opt_$o", 'size' => '35',
+                                            'maxlength' => $RULES{'items'}->{'maxlength'}, 'value' => $elem->{'opt'}->[$o] }) . "\n";
                     $ret .= "<br /><font size='1'><b>[" . $errors->[$q]->{$o}->{'items'} . "]</b></font>\n" if $errors->[$q]->{$o}->{"items"};
                 }
                 $ret .= $elem->{'opts'} < $RULES{'items'}->{'max'} 
-                    ? "<br /><input type='submit' name='request:$q:do' value='More &gt;&gt;' />\n" 
+                    ? "<br />" . LJ::html_submit("request:$q:do", undef, { 'raw' => " value='More &gt;&gt;'" }) . "\n"
                     : "<br /><?de [Option limit reached] de?>\n";
 
             # text type
             } elsif ($elem->{'type'} eq 'text') {
                 foreach my $atr ( qw(size maxlength) ) {
-                    $ret .= ucfirst($atr) . ": <input type='text' name='pq_${q}_$atr' value='";
-                    $ret .= LJ::ehtml($elem->{$atr} || $RULES{'text'}->{$atr});
-                    $ret .= "' size='3' maxlength='3' />\n";
+                    $ret .= ucfirst($atr) . ": ";
+                    $ret .= LJ::html_text({ 'name' => "pq_${q}_$atr", 'value' => $elem->{$atr} || $RULES{'text'}->{$atr},
+                                            'size' => '3', 'maxlength' => '3' }) . "\n";
                     $ret .= "<br /><font size='1'><b>[$errors->[$q]->{$atr}]</b></font>\n"
                         if $errors->[$q]->{$atr};
                 }
@@ -430,9 +435,10 @@
             # scale type
             } elsif ($elem->{'type'} eq 'scale') {
                 foreach my $atr ( qw(from to by) ) {
-                    $ret .= ' ' . ucfirst($atr) . ": <input type='text' name='pq_${q}_$atr' value='";
-                    $ret .= LJ::ehtml(defined $elem->{$atr} ? $elem->{$atr} : $RULES{'scale'}->{$atr});
-                    $ret .= "' size='3' maxlength='9' />\n";
+                    $ret .= ' ' . ucfirst($atr) . ": ";
+                    $ret .= LJ::html_text({ 'name' => "pq_${q}_$atr", 
+                                            'value' => defined $elem->{$atr} ? $elem->{$atr} : $RULES{'scale'}->{$atr},
+                                            'size' => '3', 'maxlength' => '9' }) . "\n";
                     $ret .= "<br /><font size='1'><b>[$errors->[$q]->{$atr}]</b></font>\n"
                         if $errors->[$q]->{$atr};
                 }
@@ -451,9 +457,9 @@
         if ($poll->{'count'} > 0) {
             $ret .= "<?h1 When you're done ... h1?>\n";
             $ret .= "<div style='margin: 20px 0 20px 40px'>\n";
-            $ret .= "<input type='submit' name='start_over' value='&larr; Start Over'>\n";
-            $ret .= "<input type='submit' name='see_code' value='See Code &rarr;'>\n";
-            $ret .= "<input type='submit' name='see_preview' value='Preview Poll &rarr;'>\n";
+            $ret .= LJ::html_submit('start_over', undef, { 'raw' => "value='&larr; Start Over'" }) . "\n";
+            $ret .= LJ::html_submit('see_code', undef, { 'raw' => "value='See Code &rarr;'" }) . "\n";
+            $ret .= LJ::html_submit('see_preview', undef, { 'raw' => "value='Preview Poll &rarr;'" }) . "\n";
             $ret .= "</div>\n";
         }
         
@@ -479,7 +485,7 @@
                 $ret .= "<option value='$_'>$TYPENAME{$_}</option>\n";
             }
             $ret .= "</select>\n";
-            $ret .= "<input type='submit' name='insert:$after:do' value='Insert' />\n";
+            $ret .= LJ::html_submit("insert:$after:do", 'Insert') . "\n";
         }
         $ret .= " standout?></div>\n";
         
@@ -511,7 +517,7 @@
         # edit poll
         $ret .= "<form method='post' action='create.bml' style='display: inline'>\n";
         $ret .= poll_hidden($poll);
-        $ret .= "<input type='submit' name='edit_poll' value='&larr; Edit Poll'>\n";
+        $ret .= LJ::html_submit('edit_poll', undef, { 'raw' => "value='&larr; Edit Poll'" }) . "\n";
 
         # need one more button, depending on which page they're currently on
         my ($name, $val) = $form->{'see_code'} 
@@ -523,10 +529,9 @@
 
         # submit button / form
         $ret .= "<form method='post' action='$LJ::SITEROOT/update.bml' style='display: inline'>\n";
-        $ret .= LJ::html_hidden('mode', 'full');
         my $code = make_code($poll);
-        $ret .= LJ::html_hidden('event', $code) . "\n";
-        $ret .= "<input type='submit' name='from_pollcreator' value='Post Poll &rarr;'>\n";
+        $ret .= LJ::html_hidden('mode', 'full', 'event', $code) . "\n";
+        $ret .= LJ::html_submit('from_pollcreator', undef, { 'raw' => "value='Post Poll &rarr;'" }) . "\n";
         $ret .= "</form>\n";
 
         # preview code or ... preview
@@ -535,9 +540,8 @@
         # viewing code, show preview button
         if ($form->{'see_code'}) {
             $ret .= "<form action='#'><div style='margin: 20px 0 20px 40px'>\n";
-            $ret .= "<textarea style='width: 90%' rows='16' cols='60'>";
-            $ret .= LJ::ehtml($code);
-            $ret .= "</textarea></form>\n";
+            $ret .= LJ::html_textarea({ 'style' => 'width: 90%', 'rows' => '16', 'cols' => '60', 'value' => $code });
+            $ret .= "</form>\n";
 
         # seeing preview, show code button
         } elsif ($form->{'see_preview'}) {
@@ -601,13 +605,12 @@
     {
         my $poll = shift;
 
-        my $ret;
-
+        my @elements = ();
         foreach my $k (keys %$poll) {
 
             # poll attributes
             unless (ref $poll->{$k} eq 'ARRAY') {
-                $ret .= LJ::html_hidden($k, $poll->{$k});
+                push @elements, ($k, $poll->{$k});
                 next;
             }
 
@@ -618,14 +621,14 @@
                 # question attributes
                 foreach my $atr (keys %$q) {
                     unless (ref $q->{$atr} eq 'ARRAY') {
-                        $ret .= LJ::html_hidden("${k}_${q_idx}_$atr", $q->{$atr});
+                        push @elements, ("${k}_${q_idx}_$atr", $q->{$atr});
                         next;
                     }
 
                     # radio/text/drop options
                     my $opt_idx = 0;
                     foreach my $o (@{$q->{$atr}}) {
-                        $ret .= LJ::html_hidden("${k}_${q_idx}_${atr}_$opt_idx", $o);
+                        push @elements, ("${k}_${q_idx}_${atr}_$opt_idx", $o);
                         $opt_idx++;
                     }
 
@@ -635,7 +638,7 @@
             }
         }
 
-        return $ret;
+        return LJ::html_hidden(@elements);
     }
 
     #######################################################
