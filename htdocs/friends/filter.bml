@@ -33,7 +33,7 @@
  
  
  unless ($res{'frgrp_maxnum'}) {
-     $body = "<?h1 Sorry... h1?><?p You cannot filter your friends list because you must first <A HREF=\"/friends/editgroups.bml\">setup your friend groups</A>. p?>";
+     $body = "<?h1 Sorry... h1?><?p You cannot filter your friends list because you must first <a href=\"/friends/editgroups.bml\">setup your friend groups</a>. p?>";
      return;
  }
 
@@ -48,15 +48,20 @@
  }
  
  $body .= "<?h1 Select groups... h1?><?p Check the group(s) of friends you want to view right now on your friends list. p?>";
- $body .= "<FORM METHOD=POST><input type=hidden name=user value=$remote->{'user'}><input type=hidden name=mode value=view><UL>";
+ $body .= "<form method='post' style='display: inline'>\n";
+ $body .= LJ::html_hidden("user", $remote->{'user'});
+ $body .= LJ::html_hidden("mode", "view");
+ $body .= "<div style='margin-left: 30px'>";
  
  foreach my $g (sort { $group{$a}->{'sortorder'} <=> $group{$b}->{'sortorder'} } keys %group)
  {
      my $url = "$LJ::SITEROOT/users/$remote->{'user'}/friends/" . LJ::eurl($group{$g}->{'name'});
-     $body .= "<INPUT TYPE=CHECKBOX VALUE=1 NAME=\"bit_$g\"> <a href=\"$url\">" . LJ::ehtml($group{$g}->{'name'}) . "</a><br>\n";
+     $body .= "<input type='checkbox' value='1' name=\"bit_$g\" /> <a href=\"$url\">" . LJ::ehtml($group{$g}->{'name'}) . "</a><br />\n";
  }
 
- $body .= "<P><input type=submit value=\"View!\"> <input type=reset value=\"Clear\"></ul>If you want to edit your friends groups, <A HREF=\"editgroups.bml\">go here</A>.";
+ $body .= "<input type='submit' value=\"View!\"> <input type='reset' value=\"Clear\"></div>";
+ $body .= "<?p If you want to edit your friends groups, <a href=\"editgroups.bml\">go here</a>. p?>";
+ $body .= "</form>";
 
  return;
 
