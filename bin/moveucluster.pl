@@ -147,37 +147,7 @@ if ($sclust == 0)
                                                      "WHERE ownerid=$u->{'userid'} ".
                                                      "ORDER BY ownerid, rlogtime")};
 
-    my %bfd;  # buffer read data.  halfquery -> { 'rows' => { id => [] }, 
-              #                                   'remain' => [], 'loaded' => { id => 1 } }
-    $bufread = sub
-    {
-        my ($amt, $hq, $itemid) = @_;
-        if (not defined $bfd{$hq}->{'loaded'}->{$itemid})
-        {
-            if (not exists $bfd{$hq}->{'remain'}) {
-                $bfd{$hq}->{'remain'} = [ @itemids ];
-            }
-
-            my @todo;
-            for (1..$amt) {
-                next unless @{$bfd{$hq}->{'remain'}};
-                my $id = shift @{$bfd{$hq}->{'remain'}};
-                push @todo, $id;
-                $bfd{$hq}->{'loaded'}->{$id} = 1;
-            }
-
-            if (@todo) {
-                my $sql = "$hq WHERE itemid IN (" . join(",", @todo) . ")";
-                my $sth = $dbh->prepare($sql);
-                $sth->execute;
-                while (my $r = $sth->fetchrow_hashref) {
-                    push @{$bfd{$hq}->{'rows'}->{$r->{'itemid'}}}, $r;
-                }
-            }
-        }
-
-        return shift @{$bfd{$hq}->{'rows'}->{$itemid}};
-    };
+    $bufread = make_buffer_reader("itemid", \@itemids);
 
     my $todo = @itemids;
     my $done = 0;
@@ -381,8 +351,9 @@ sub movefrom0_logitem
     my %newtalkids = (0 => 0);  # 0 maps back to 0 still
     my $talkids = $dbh->selectcol_arrayref("SELECT talkid FROM talk ".
                                            "WHERE nodetype='L' AND nodeid=$itemid");
+    my $treader = make_buffer_reader("talkid", $talkids);
     foreach my $t (sort { $a <=> $b } @$talkids) {
-        movefrom0_talkitem($t, $jitemid, \%newtalkids, $item);
+        movefrom0_talkitem($t, $jitemid, \%newtalkids, $item, $treader);
     }
 }
 
@@ -392,9 +363,10 @@ sub movefrom0_talkitem
     my $jitemid = shift;
     my $newtalkids = shift;
     my $logitem = shift;
+    my $treader = shift;
 
-    my $item = $dbh->selectrow_hashref("SELECT * FROM talk WHERE talkid=$talkid");
-    my $itemtext = $dbh->selectrow_hashref("SELECT subject, body FROM talktext WHERE talkid=$talkid");
+    my $item = $treader->(100, "SELECT * FROM talk", $talkid);
+    my $itemtext = $treader->(50, "SELECT talkid, subject, body FROM talktext", $talkid);
     return 1 unless $item && $itemtext;   # however that could happen.
 
     # abort if this is a stranded entry.  (shouldn't happen, anyway.  even if it does, it's 
@@ -440,13 +412,10 @@ sub movefrom0_talkitem
     }
 
     # copy its logprop over:
-    my $props = $dbh->selectall_arrayref("SELECT tpropid, value FROM talkprop WHERE talkid=$talkid");
-    if ($props) {
-        foreach (@$props) {
-            next unless $_->[1];
-            $replace_into->("talkprop2", "(journalid, jtalkid, tpropid, value)", 50,
-                            $userid, $jtalkid, @$_);
-        }
+    while (my $lp = $treader->(50, "SELECT talkid, tpropid, value FROM talkprop", $talkid)) {
+        next unless $lp->{'value'};
+        $replace_into->("talkprop2", "(journalid, jtalkid, tpropid, value)", 50,
+                        $userid, $jtalkid, $lp->{'tpropid'}, $lp->{'value'});
     }
 
     # note that poster commented here
@@ -462,6 +431,43 @@ sub movefrom0_talkitem
     }
 }
 
+sub make_buffer_reader
+{
+    my $pricol = shift;
+    my $valsref = shift;
+
+    my %bfd;  # buffer read data.  halfquery -> { 'rows' => { id => [] },
+              #                                   'remain' => [], 'loaded' => { id => 1 } }
+    return sub
+    {
+        my ($amt, $hq, $pid) = @_;
+        if (not defined $bfd{$hq}->{'loaded'}->{$pid})
+        {
+            if (not exists $bfd{$hq}->{'remain'}) {
+                $bfd{$hq}->{'remain'} = [ @$valsref ];
+            }
+
+            my @todo;
+            for (1..$amt) {
+                next unless @{$bfd{$hq}->{'remain'}};
+                my $id = shift @{$bfd{$hq}->{'remain'}};
+                push @todo, $id;
+                $bfd{$hq}->{'loaded'}->{$id} = 1;
+            }
+
+            if (@todo) {
+                my $sql = "$hq WHERE $pricol IN (" . join(",", @todo) . ")";
+                my $sth = $dbh->prepare($sql);
+                $sth->execute;
+                while (my $r = $sth->fetchrow_hashref) {
+                    push @{$bfd{$hq}->{'rows'}->{$r->{$pricol}}}, $r;
+                }
+            }
+        }
+
+        return shift @{$bfd{$hq}->{'rows'}->{$pid}};
+    };
+}
 
 1; # return true;
 
