@@ -4,47 +4,88 @@
 use strict;
 use Getopt::Long;
 
+my $XSL_VERSION_RECOMMENDED = "1.45";
+
 my $opt_clean;
-exit 1 unless GetOptions('clean' => \$opt_clean);
+my ($opt_myxsl, $opt_getxsl);
+exit 1 unless GetOptions('clean' => \$opt_clean,
+                         'myxsl' => \$opt_myxsl,
+                         'getxsl' => \$opt_getxsl,
+                         );
 
 my $home = $ENV{'LJHOME'};
 require "$home/cgi-bin/ljlib.pl";
 $ENV{'SGML_CATALOG_FILES'} = $LJ::CATALOG_FILES || "/usr/share/sgml/docbook/dtd/xml/4.1/docbook.cat";
 
 unless (-e $ENV{'SGML_CATALOG_FILES'}) {
-    die "Catalog files don't exist.\n";
+    die "Catalog files don't exist.  Either set $LJ::CATALOG_FILES, install docbook-xml (on Debian), or symlink $ENV{'SGML_CATALOG_FILES'} to XML DocBook 4.1's docbook.cat.";
+}
+
+if ($opt_getxsl) {
+    chdir "$home/doc/raw/build" or die "Where is build dir?";
+    unlink "xsl-docbook.tar.gz";
+    system("wget", "http://www.livejournal.org/misc/xsl-docbook.tar.gz")
+        and die "Error running wget.  Not installed?\n";
+    system("tar", "zxvf", "xsl-docbook.tar.gz")
+        and die "Error extracting xsl-doxbook.tar.gz; have GNU tar?\n";
 }
 
 my $output_dir = "$home/htdocs/doc/temp";
 my $docraw_dir = "$home/doc/raw";
-my $XSL = "$docraw_dir/build/xsl-docbook/html/chunk.xsl";
-unless (-e $XSL) {
-    die "chunk.xsl not found; have you extracted docbook-xsl package (version 1.45 recommended) under $docraw_dir/build and renamed/symlinked xsl-docbook to it?\n";
+my $XSL = "$docraw_dir/build/xsl-docbook";
+open (F, "$XSL/VERSION");
+my $XSL_VERSION;
+{ 
+    local $/ = undef; my $file = <F>; 
+    $XSL_VERSION = $1 if $file =~ /VERSION.+\>(.+?)\</;
 }
+close F;
+my $download;
+if ($XSL_VERSION && $XSL_VERSION ne $XSL_VERSION_RECOMMENDED && ! $opt_myxsl) {
+    print "\nUntested DocBook XSL found at $XSL.\n";
+    print "   Your version: $XSL_VERSION.\n";
+    print "    Recommended: $XSL_VERSION_RECOMMENDED.\n\n";
+    print "Options at this point.  Re-run with:\n";
+    print "    --myxsl    to proceed with yours, or\n";
+    print "    --getxsl   to install recommended XSL\n\n";
+    exit 1;
+}
+if (! $XSL_VERSION) {
+    print "\nDocBook XSL not found at $XSL.\n\nEither symlink that dir to the right ";
+    print "place (preferrably at version $XSL_VERSION_RECOMMENDED),\nor re-run with --getxsl ";
+    print "for me to do it for you.\n\n";
+    exit 1;
+}
+
 
 
 chdir "$docraw_dir/build" or die;
 
-print ("Generating API reference\n");
-system("api/api2db.pl > $docraw_dir/ljp.book/api/api.gen.xml");
+print "Generating API reference\n";
+system("api/api2db.pl > $docraw_dir/ljp.book/api/api.gen.xml")
+    and die "Errror generating API reference.\n";
 
-print ("Generating DB Schema reference\n");
+print "Generating DB Schema reference\n";
 chdir "$docraw_dir/build/db" or die;
-system("./dbschema.pl > dbschema.gen.xml");
-system("xsltproc -o schema.gen.xml db2ref.xsl dbschema.gen.xml");
-system("mv schema.gen.xml $docraw_dir/ljp.book/db/");
-system("rm dbschema.gen.xml");
+system("./dbschema.pl > dbschema.gen.xml")
+    and die "Error generating DB schema\n";
 
-print ("Generating XML-RPC protocol reference\n");
+system("xsltproc", "-o", "$docraw_dir/ljp.book/db/schema.gen.xml",
+       "db2ref.xsl", "dbschema.gen.xml")
+    and "Error transforming DB schema.\n";
+unlink "dbschema.gen.xml";
+
+print "Generating XML-RPC protocol reference\n";
 chdir "$docraw_dir/build/protocol" or die;
 system("xsltproc", "-o", "$docraw_dir/ljp.book/csp/xml-rpc/protocol.gen.xml",
        "xml-rpc2db.xsl", "xmlrpc.xml");
 
-print ("Converting to HTML\n");
+print "Converting to HTML\n";
 mkdir $output_dir, 0755 unless -d $output_dir;
 chdir $output_dir or die "Couldn't chdir to $output_dir\n";
 system("xsltproc --nonet --catalogs --stringparam use.id.as.filename 1 ".
-       "$XSL $docraw_dir/index.xml");
+       "$XSL/html/chunk.xsl $docraw_dir/index.xml")
+    and die "Error generating final HTML.\n";
 
 if ($opt_clean) {
     print "Removing Auto-generated files\n";
