@@ -164,8 +164,43 @@ sub can_read_internal
 {
     my ($dbh, $sp, $remote) = @_;    
     if (can_help($dbh, $sp, $remote)) { return 1; }
+    if (LJ::check_priv($dbh, $remote, "supportviewinternal", "")) { return 1; }
     my $catkey = $sp->{_cat}->{'catkey'};
     if (LJ::check_priv($dbh, $remote, "supportread", $catkey."+")) { return 1; }
+    if (LJ::check_priv($dbh, $remote, "supportviewinternal", $catkey)) { return 1; }
+    return 0;
+}
+
+sub can_make_internal
+{
+    my ($dbh, $sp, $remote) = @_;
+    if (can_help($dbh, $sp, $remote)) { return 1; }
+    if (LJ::check_priv($dbh, $remote, "supportmakeinternal", "")) { return 1; }
+    if (LJ::check_priv($dbh, $remote, "supportmakeinternal", $sp->{_cat}->{'catkey'})) { 
+        return 1; 
+    }
+    return 0;
+}
+
+sub can_read_screened
+{
+    my ($dbh, $sp, $remote) = @_;
+    if (can_help($dbh, $sp, $remote)) { return 1; }
+    if (LJ::check_priv($dbh, $remote, "supportviewscreened", "")) { return 1; }
+    if (LJ::check_priv($dbh, $remote, "supportviewscreened", $sp->{_cat}->{'catkey'})) {
+        return 1;
+    }
+    return 0;
+}
+
+sub can_perform_actions
+{
+    my ($dbh, $sp, $remote) = @_;
+    if (can_help($dbh, $sp, $remote)) { return 1; }
+    if (LJ::check_priv($dbh, $remote, "supportmovetouch", "")) { return 1; }
+    if (LJ::check_priv($dbh, $remote, "supportmovetouch", $sp->{_cat}->{'catkey'})) {
+        return 1;
+    }
     return 0;
 }
 
@@ -236,17 +271,14 @@ sub get_answer_types
         push @ans_type, ("screened" => "Screened Answer (if unsure)", 
                          "answer" => "Answer",                         
                          "comment" => "Comment or Question");
+    } elsif ($sp->{_cat}->{'allow_screened'}) {
+        push @ans_type, ("screened" => "Screened Answer");
     }
 
-    if (can_read_internal($dbh, $sp, $remote) &&
+    if (can_make_internal($dbh, $sp, $remote) &&
         ! $sp->{_cat}->{'public_help'})
     {
         push @ans_type, ("internal" => "Internal Comment / Action");
-        return @ans_type;
-    }
-    
-    if ($sp->{_cat}->{'allow_screened'}) {
-        push @ans_type, ("screened" => "Screened Answer");
     }
 
     return @ans_type;

@@ -54,14 +54,14 @@ body<=
  }
 
  if ($FORM{'changecat'} &&
-     ($type ne "internal" || ! LJ::Support::can_help($dbh, $sp, $remote)))
+     ($type ne "internal" || ! LJ::Support::can_perform_actions($dbh, $sp, $remote)))
  {
      return LJ::bad_input("To change a request's category, you must select \"Internal Comment ".
                        "/ Action\" and explain why you're changing it.");
  }
 
  if ($FORM{'touch'} &&
-     ($type ne "internal" || ! LJ::Support::can_help($dbh, $sp, $remote)))
+     ($type ne "internal" || ! LJ::Support::can_perform_actions($dbh, $sp, $remote)))
  {
      return LJ::bad_input("To touch this request, you must select \"Internal Comment ".
                        "/ Action\" and explain why you're touching it.");
