@@ -220,7 +220,7 @@ sub get_text_entity
 sub cleanup
 {
     my $now = time();
-    opendir TMP,  '/tmp' or return 0;
+    opendir TMP,  '/tmp' or return 1;
     my $limit = 0;
     foreach (readdir(TMP)) {
         next unless /^ljmailgate_/;
@@ -230,7 +230,6 @@ sub cleanup
         File::Path::rmtree("/tmp/$_") if $now - $modtime > 3600;
     }
     closedir TMP;
-    exit;
-    return 1;
+    return 0;
 }
 
