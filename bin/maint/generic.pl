@@ -25,7 +25,7 @@ $maint{joinmail} = sub {
     }
     my $mus = LJ::load_userids(@maintids);
  
-    # go through each birthday person and tell them happy birthday.
+    # tell the maintainers that they got new people.
     foreach my $row (@$pending) {
         my $cuser = $cus->{$row->[0]}{user};
         print "$cuser: $row->[1] invites: ";

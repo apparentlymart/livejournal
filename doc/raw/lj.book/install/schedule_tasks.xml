@@ -39,6 +39,7 @@ MAILTO=youremail@wherever.com
 5 2 * * 0 /home/lj/bin/ljmaint.pl genstats_weekly > /dev/null
 
 # Various tasks
+15 1 * * * /home/lj/bin/ljmaint.pl joinmail > /dev/null
 30 * * * * /home/lj/bin/ljmaint.pl synsuck > /dev/null
 5 2 * * 0 /home/lj/bin/ljmaint.pl memeclean > /dev/null
 
