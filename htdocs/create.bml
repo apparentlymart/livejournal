@@ -83,7 +83,8 @@ body<=
 
  # validate a code they've entered and throw them back to entercode
  # mode if it's invalid
- if ($LJ::USE_ACCT_CODES && ($mode eq "codesubmit" || $mode eq "submit"))
+ if ($code && $mode eq "submit" || # account codes turned off, but one specified anyway
+     $LJ::USE_ACCT_CODES && ($mode eq "codesubmit" || $mode eq "submit")) # account codes required
  {
      my $error;
      my $userid = 0;  # acceptable userid for double-click protection
@@ -281,7 +282,7 @@ if ( $LJ::HUMAN_CHECK{create} && $mode eq 'submit' && lc($POST{answer}) eq 'audi
          $dbh->do("REPLACE INTO userusage (userid, timecreate) VALUES ($userid, NOW())");
 
          # if we're using account codes on this site, mark the code as used
-         if ($LJ::USE_ACCT_CODES) {
+         if ($code) {
              my ($acid, $auth) = LJ::acct_code_decode($code);
              $dbh->do("UPDATE acctcode SET rcptid=$userid WHERE acid=$acid");
              if ($dbh->err) { return $dbh->errstr; }

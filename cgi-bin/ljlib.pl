@@ -2453,7 +2453,7 @@ sub acct_code_check
     }
 
     if ($ac->{'rcptid'} && $ac->{'rcptid'} != $userid) {
-        $$err = "This code has already been used.";
+        $$err = "This code has already been used: $code";
         return 0;
     }
 
