@@ -49,6 +49,30 @@
          $body .= "<a href=\"$LJ::SITEROOT/poll/?id=$pollid&amp;mode=$m->[0]\">[ $m->[1] ]</a> ";
      }
  }
+
+# load the item being shown
+{
+    my $id = $po->{'itemid'}+0;
+    my $log;
+    if ($u->{'clusterid'}) { 
+        $id = int($id / 256); 
+        my $udbr = LJ::get_cluster_reader($u);
+        $log = $udbr->selectrow_hashref("SELECT * FROM log2 WHERE journalid=? AND jitemid=? AND anum=?",
+                                        undef, $u->{'userid'}, int($po->{'itemid'} / 256), $po->{'itemid'} % 256);
+    } else {
+        $log = $dbr->selectrow_hashref("SELECT * FROM log WHERE itemid=?",
+                                       undef, $po->{'itemid'});
+    }
+    unless ($log) {
+        return "Owning post deleted, so poll no longer accessible.";
+    }
+
+    unless (LJ::can_view($dbs, $remote, $log)) {
+        $body = "Sorry, you're not permitted to see this poll.";
+        return;
+    }
+}
+
  $body .= "<a href=\"$LJ::SITEROOT/talkread.bml?${jarg}itemid=$po->{'itemid'}\">[ Discuss Results ]</a> ";
  
  if ($FORM{'mode'} eq "ans") { $mode = "ans"; } # also allowed, but not shown
