@@ -185,7 +185,8 @@ body<=
                 $ret .= "Last modified by " . LJ::ljuser($lmu) . " on " . LJ::mysql_time($lmt) . ".<br />";
                 if ($canedit) {
                     $ret .= LJ::html_submit('action:save', "Save Changes");
-                    $ret .= LJ::html_submit('action:delete', "Delete Answer");
+                    $ret .= LJ::html_submit('action:delete', "Delete Answer",
+                                            { onClick => 'return confirm("Are you sure you want to delete this stock answer?");' });
                 }
                 $ret .= "</form></li>";
             } else {
