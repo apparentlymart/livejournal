@@ -7172,7 +7172,7 @@ sub error
 sub nodb { 
     shift @_ if 
         ref $_[0] eq "LJ::DBSet" || ref $_[0] eq "DBI::db" ||
-        ref $_[0] eq "DBIx::StateKeeper";
+        ref $_[0] eq "DBIx::StateKeeper" || ref $_[0] eq "Apache::DBI::db";
 }
 
 sub isdb { return ref $_[0] && (ref $_[0] eq "DBI::db" || 
