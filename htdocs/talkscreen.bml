@@ -6,14 +6,10 @@ body<=
 
 <?_code
 
- my $dbs = LJ::get_dbs();
- my $dbh = $dbs->{'dbh'};
- my $dbr = $dbs->{'reader'};
-
  my $ret = "";
  my $mode = $FORM{'mode'};
 
- my $remote = LJ::get_remote($dbs);
+ my $remote = LJ::get_remote();
 
  unless ($remote) {
      return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.login'} p?>";
@@ -25,11 +21,10 @@ body<=
  # we need to find out: $u, $up (poster of the entry this is a comment to),
  # userpost (username of this comment's author). Then we can check permissions.
 
- my $u = LJ::load_user($dbs, $FORM{'journal'});
+ my $u = LJ::load_user($FORM{'journal'});
  return "<?h1 $ML{'Error'} h1?><?p $ML{'.talk.error.bogusargs'} p?>" unless $u;
- my $dbcs = LJ::get_cluster_set($u);
-
- my $dbcm = $dbcs->{'dbh'};
+ my $dbcm = LJ::get_cluster_master($u);
+ return "<?h1 $ML{'Error'} h1?><?p $ML{'error.nodb'} p?>" unless $dbcm;
 
  my $post;
  $qtalkid = int($qtalkid / 256);  # get rid of anum
@@ -46,11 +41,11 @@ body<=
 
  my $state = $post->{'state'};
 
- $u ||= LJ::load_userid($dbs, $post->{'journalid'});
+ $u ||= LJ::load_userid($post->{'journalid'});
  return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
  if ($post->{'posterid'}) {
-     $post->{'userpost'} = LJ::get_username($dbs, $post->{'posterid'});
+     $post->{'userpost'} = LJ::get_username($post->{'posterid'});
  }
 
  my $qitemid = $post->{'itemid'}+0;
@@ -59,13 +54,13 @@ body<=
  my ($posterid, $anum) = 
     $dbcm->selectrow_array("SELECT posterid, anum FROM log2 WHERE ".
                            "journalid=$u->{'userid'} AND jitemid=$qitemid");
- my $up = LJ::load_userid($dbs, $posterid);
+ my $up = LJ::load_userid($posterid);
 
  my $ditemid = $qitemid*256 + $anum;
 
  my $commentlink = LJ::journal_base($u) . "/$ditemid.html?view=$dtalkid#t$dtalkid";
- my $can_screen = LJ::Talk::can_screen($dbs, $remote, $u, $up, $post->{'userpost'});
- my $can_unscreen = LJ::Talk::can_unscreen($dbs, $remote, $u, $up, $post->{'userpost'});
+ my $can_screen = LJ::Talk::can_screen($remote, $u, $up, $post->{'userpost'});
+ my $can_unscreen = LJ::Talk::can_unscreen($remote, $u, $up, $post->{'userpost'});
 
  if ($mode eq 'screen') {
      return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.privs.screen'} p?>"
@@ -73,11 +68,11 @@ body<=
      unless ($FORM{'confirm'} eq 'Y' && LJ::did_post()) {
          $ret .= "<?h1 $ML{'.screen.sure.title'} h1?><?p $ML{'.screen.sure.body'} p?>";
          $ret .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
-         $ret .= "<input type='hidden' name='mode' value='screen'>\n";
-         $ret .= "<input type='hidden' name='talkid' value='$FORM{'talkid'}'>\n";
-         $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n";
-         $ret .= "<input type='hidden' name='confirm' value='Y'>\n";
-         $ret .= "<input type='submit' value='$ML{'.screen.doit'}'>";
+         $ret .= "<input type='hidden' name='mode' value='screen' />\n";
+         $ret .= "<input type='hidden' name='talkid' value='$FORM{'talkid'}' />\n";
+         $ret .= "<input type='hidden' name='journal' value='$u->{'user'}' />\n";
+         $ret .= "<input type='hidden' name='confirm' value='Y' />\n";
+         $ret .= "<input type='submit' value='$ML{'.screen.doit'}' />";
          $ret .= "</center>";
          $ret .= "</form>\n";
          return $ret;
@@ -94,11 +89,11 @@ body<=
      unless ($FORM{'confirm'} eq 'Y' && LJ::did_post()) {
          $ret .= "<?h1 $ML{'.unscreen.sure.title'} h1?><?p $ML{'.unscreen.sure.body'} p?>";
          $ret .= "<p><form method='POST' action='talkscreen.bml'><center>\n";
-         $ret .= "<input type='hidden' name='mode' value='unscreen'>\n";
-         $ret .= "<input type='hidden' name='talkid' value='$FORM{'talkid'}'>\n";
-         $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n";
-         $ret .= "<input type='hidden' name='confirm' value='Y'>\n";
-         $ret .= "<input type='submit' value='$ML{'.unscreen.doit'}'>";
+         $ret .= "<input type='hidden' name='mode' value='unscreen' />\n";
+         $ret .= "<input type='hidden' name='talkid' value='$FORM{'talkid'}' />\n";
+         $ret .= "<input type='hidden' name='journal' value='$u->{'user'}' />\n";
+         $ret .= "<input type='hidden' name='confirm' value='Y' />\n";
+         $ret .= "<input type='submit' value='$ML{'.unscreen.doit'}' />";
          $ret .= "</center>";
          $ret .= "</form>\n";
          return $ret;
