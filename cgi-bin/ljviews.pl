@@ -411,11 +411,12 @@ sub get_user_styles {
     return \%styles;
 }
 
+# includes formatdata row.
 sub get_style {
     my $styleid = shift;
     return unless $styleid;
 
-    my $memkey = [$styleid, "s1style:$styleid"];
+    my $memkey = [$styleid, "s1style_all:$styleid"];
     my $style = LJ::MemCache::get($memkey);
     return $style if $style;
 
@@ -576,6 +577,7 @@ sub update_style {
     
     # update memcache keys
     LJ::MemCache::delete([$styleid, "s1style:$styleid"]);
+    LJ::MemCache::delete([$styleid, "s1style_all:$styleid"]);
     LJ::MemCache::delete([$styleid, "s1styc:$styleid"]);
 
     return $rows;
@@ -611,6 +613,7 @@ sub delete_style {
 
     # clear out some memcache space
     LJ::MemCache::delete([$styleid, "s1style:$styleid"]);
+    LJ::MemCache::delete([$styleid, "s1style_all:$styleid"]);
     LJ::MemCache::delete([$styleid, "s1stylemap:$styleid"]);
     LJ::MemCache::delete([$styleid, "s1styc:$styleid"]);
 
