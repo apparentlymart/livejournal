@@ -89,6 +89,14 @@
      return;
  }
 
+ # account purged?
+ if ($u->{'statusvis'} eq "X") {
+     $title = $ML{'error.purged.title'};
+     $body = "<?h1 $ML{'error.purged.name'} h1?><?p $ML{'error.purged.text'} p?>";
+     BML::set_status(410); # 410 Gone
+     return;
+ }
+
  my $dbcr = LJ::get_cluster_reader($u);
  return $error->($ML{'error.nodb'}) unless $dbcr;
 
@@ -147,14 +155,6 @@
  $windowtitle = "$u->{'user'} - $title";
 
  $friends{'load'} = $friendsof{'load'} = 0 if $com && $u->{'dont_load_members'};
-
- # account purged?
- if ($u->{'statusvis'} eq "X") {
-     $title = $ML{'error.purged.title'};
-     $body = "<?h1 $ML{'error.purged.name'} h1?><?p $ML{'error.purged.text'} p?>";
-     BML::set_status(410); # 410 Gone
-     return;
- }
 
  # do they have the viewall priv?
  # there are no entries on this page, so we just check if they have any viewall, so viewsome
