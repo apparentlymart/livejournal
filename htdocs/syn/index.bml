@@ -59,6 +59,8 @@ body<=
             return "<?h1 Error h1?><?p Invalid URL p?>" unless
                 $url =~ m!^http://(.+?)/!;
             my $hostname = $1;
+            return "You can't add RSS feeds from this site."
+                if $hostname =~ /\Q$LJ::DOMAIN\E/i;
             return "Non-standard port number not allowed" 
                 if $hostname =~ /:/;
             return "IP addresses not allowed" 
