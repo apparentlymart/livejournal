@@ -416,8 +416,8 @@ body<=
 
     # last 1
     if ($POST{'selecttype'} eq "last") {
-        $req{'selecttype'} = 'lastn';
-        $req{'howmany'} = 1;
+        $req{'selecttype'} = 'one';
+        $req{'itemid'} = -1;
 
     # last n
     } elsif ($POST{'selecttype'} eq 'lastn') {
