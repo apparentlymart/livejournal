@@ -222,8 +222,8 @@ body<=
  }
 
  $ret .= "<?h2 $ML{'.label.modheader'} h2?><?p $ML{'.label.modtext'} p?><div class='opts'>";
- $ret .= "<input type='radio' id='nonopen' name='moderated' value='0'$optclosed /><label for='nonopen'> $ML{'.label.modisnt'}</label>";
- $ret .= "<p><input type='radio' id='nonclosed' name='moderated' value='1'$optopen /><label for='nonclosed'> $ML{'.label.modis'}</label>";
+ $ret .= "<input type='radio' id='radunmod' name='moderated' value='0'$optclosed /><label for='radunmod'> $ML{'.label.modisnt'}</label>";
+ $ret .= "<p><input type='radio' id='radmod' name='moderated' value='1'$optopen /><label for='radmod'> $ML{'.label.modis'}</label>";
  $ret .= "</div>\n";
 
  $ret .= "<center><input type='submit' value='" .
