@@ -61,4 +61,5 @@ standout?>
     return $ret;
 }
 _code?>
+<=body
 page?>
