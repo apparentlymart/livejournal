@@ -1,0 +1,167 @@
+(=_INFO
+NOFORMREAD=>1
+_INFO=)(=PAGE
+TITLE=>Get Upload
+BODY<=
+
+(=_CODE
+#line 9
+
+# return "Picture note uploaded.  Try again in 10 seconds... I'm changing something now.";
+
+ use LWP::Simple;
+ use Image::Size;
+ use CGI qw(:standard);
+ use Digest::MD5  qw(md5_base64);
+ my $query = new CGI;
+
+ $MAXIMUM_UPLOAD = 40960;
+   
+ require 'ljlib.pl';
+ $FORM{'user'} = $query->param('user');
+ $FORM{'des'} = $query->param('des');
+ $FORM{'src'} = $query->param('src');
+ $FORM{'urlpic'} = $query->param('urlpic');
+ $FORM{'password'} = $query->param('password');
+ $FORM{'hpassword'} = $query->param('hpassword');
+ $FORM{'make_default'} = $query->param('make_default');
+ my $user = lc(&trim($FORM{'user'}));
+ my @errors = ();
+
+ &connect_db;
+ my $quser = $dbh->quote($user);
+ $sth = $dbh->prepare("SELECT * FROM user WHERE user=$quser");
+ $sth->execute;
+ my $u = $sth->fetchrow_hashref;
+ unless ($u) { push @errors, "Invalid username"; }
+ my $userid = $u->{'userid'}+0;
+
+ if (scalar(@errors)==0 && !&valid_password($u->{'password'}, \%FORM)) { push @errors, "Incorrect password."; }
+ return &bullet_errors(\@errors) if @errors;
+
+ # now we're authenticated
+ my $ret = "";
+ my $imagedata = "";
+
+ if ($FORM{'src'} eq "file") 
+ {
+     my $filename = $query->param("userpic");
+     my $BytesRead;
+     my $Buffer;
+     my $fh = $query->param('userpic');
+     
+     my $too_big = 0;
+     while (!$too_big && ($Bytes = read($fh,$Buffer,1024))) {
+	 $BytesRead += $Bytes;
+	 $imagedata .= $Buffer;
+	 if ($BytesRead > $MAXIMUM_UPLOAD) { $too_big = 1; }
+     }
+
+     if ($too_big)
+     {
+	 push @errors, "File size too big.  File cannot exceed 40K.";
+	 return &bullet_errors(\@errors) if @errors;
+     }
+ }
+ elsif ($FORM{'src'} eq "url") 
+ {
+     #my ($type, $size, $age) = head($FORM{'urlpic'});
+     #$ret .= "(type=$type, size=$size, age=$age)";
+     #return $ret;
+
+     $imagedata = get($FORM{'urlpic'});
+     if (length($imagedata) > $MAXIMUM_UPLOAD) {
+	 push @errors, "File size too big.  File cannot exceed 40K.";
+	 return &bullet_errors(\@errors) if @errors;
+     }
+ }
+ else {
+     return "(=H1 Error H1=)(=P Unknown mode/source. P=)";
+ }
+   
+
+ my ($sx, $sy, $filetype) = imgsize(\$imagedata);
+ unless (defined $sx)
+ {
+     push @errors, $filetype;
+     return &bullet_errors(\@errors) if @errors;
+ }
+ 
+ unless ($filetype eq "GIF" || $filetype eq "JPG" || $filetype eq "PNG")
+ {
+     push @errors, "Files of type $filetype are not supported.  You can only upload GIF, PNG or JPG files.  Nearly all image/photo programs can do this conversion for you.";
+     return &bullet_errors(\@errors) if @errors;
+ }
+ if ($sx > 100 || $sy > 100)
+ {
+     push @errors, "The dimensions of your image (${sx}x${sy}) exceed maximum size.  Your picture can only be 100x100 pixels large.  Use a image/photo editing program to reduce the image to thumbnail-size.";
+     return &bullet_errors(\@errors) if @errors;
+ }
+ 
+ $qsx = $sx+0;
+ $qsy = $sy+0;
+ $qcontenttype = "''";
+ if ($filetype eq "GIF") { $qcontenttype = "'image/gif'"; }
+ if ($filetype eq "PNG") { $qcontenttype = "'image/png'"; }
+ if ($filetype eq "JPG") { $qcontenttype = "'image/jpeg'"; }
+ 
+ my $base64 = md5_base64($imagedata);
+ my $qbase64 = $dbh->quote($base64);
+ my $qdes = $dbh->quote($FORM{'des'} || scalar(localtime()));     
+ 
+ ## see if they have too many pictures uploaded
+ $sth = $dbh->prepare("SELECT COUNT(*) FROM userpic WHERE userid=$userid");
+ $sth->execute;
+ my ($count) = $sth->fetchrow_array;
+ my $max = 3;
+ if ($u->{'paidfeatures'} eq "early") { $max = 6; }
+ elsif ($u->{'paidfeatures'} eq "paid") { $max = 10; }
+ elsif ($u->{'paidfeatures'} eq "on") { $max = 15; }
+ if ($count >= $max) {
+     push @errors, "You are already at your limit of $max pictures.  You cannot upload this picture until you <A HREF=\"/editpics.bml\">delete one of your existing ones</A>.";
+     return &bullet_errors(\@errors) if @errors;     
+ }
+
+ # see if it's a duplicate
+ $sth = $dbh->prepare("SELECT picid FROM userpic WHERE userid=$userid AND contenttype=$qcontenttype AND md5base64=$qbase64");
+ $sth->execute;
+ if ($dbh->err) { die $dbh->errstr; }
+ if ($sth->rows) {
+     ($picid) = $sth->fetchrow_array;
+     $action = "existed";
+ } else {	
+     $picid = 0;	
+     $action = "inserted";	
+ }
+ 
+ ### if picture isn't a duplicate, insert it
+ if ($picid == 0) 
+ {
+     $qimagedata = $dbh->quote($imagedata);
+     undef $imagedata;
+
+     ### insert the meta-data
+     $sth = $dbh->prepare("INSERT INTO userpic (userid, contenttype, width, height, picdate, md5base64) VALUES ($userid, $qcontenttype, $qsx, $qsy, NOW(), $qbase64)");
+     $sth->execute;
+     if ($dbh->err) {  return "<B>Error: </B> " . $dbh->errstr;  }
+     $picid = $sth->{'mysql_insertid'};
+
+     ### insert the blob
+     $sth = $dbh->prepare("INSERT INTO userpicblob (picid, imagedata) VALUES ($picid, $qimagedata)");
+     $sth->execute;
+     if ($dbh->err) {  return "<B>Error: </B> " . $dbh->errstr;  }
+
+ }
+ 
+ if ($FORM{'make_default'}) {
+     $dbh->do("UPDATE user SET defaultpicid=$picid WHERE userid=$userid");
+     if ($dbh->err) { return $dbh->errstr; }
+ }
+ 
+ $nowtime = time();
+ return "(=H1 Success H1=)(=P <!-- $action : $picid --> Your image has been uploaded.  It looks like this: <P><CENTER><IMG SRC=\"/userpic/$picid\" WIDTH=$sx HEIGHT=$sy></CENTER> You can <a href=\"editpics.bml\">edit your picture keywords</a> to be able to use this picture selectively in the future. P=)(=P You can view your journal <A HREF=\"/users/${user}\">here</A>. P=)";
+ 
+_CODE=)
+
+<=BODY
+PAGE=)

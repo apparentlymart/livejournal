@@ -1,0 +1,33 @@
+(=PAGE
+TITLE=>Upload Picture
+
+BODY<=
+
+(=H1 Upload your Picture H1=)
+(=P
+Here you can upload a miniature picture that will be used to represent you through the LiveJournal site, in your journal, and in your friends' journals.  The following restrictions are placed on the file:
+<UL>
+<LI>File size must be less than 40k
+<LI>Image dimensions must be no larger than 100x100 pixels
+<LI>File format must be either PNG, GIF or JPG
+</UL>
+P=)
+
+<FORM ACTION="uploadpic_do.bml" METHOD="POST" ENCTYPE="multipart/form-data">
+
+(=STANDOUT
+<TABLE>
+(=_CODE
+ require 'ljlib.pl'; 
+ return &auth_fields();
+ _CODE=)
+<TR><TD><INPUT TYPE=RADIO NAME="src" VALUE="file" CHECKED> From File:</TD><TD><INPUT TYPE="file" NAME="userpic"></TD></TR>
+<TR><TD><INPUT TYPE=RADIO NAME="src" VALUE="url"> From URL:</TD><TD><INPUT NAME="urlpic" SIZE=40></TD></TR>
+<TR><TD></TD><TD><INPUT TYPE="CHECKBOX" NAME="make_default" CHECKED VALUE=1> Make this your default picture</FONT></TD></TR>
+<TR><TD></TD><TD><INPUT TYPE="SUBMIT" VALUE="Proceed..."></FONT></TD></TR>
+</TABLE>
+STANDOUT=)
+
+
+<=BODY
+PAGE=)
