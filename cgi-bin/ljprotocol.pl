@@ -757,6 +757,25 @@ sub postevent
     $dbh->do("UPDATE userusage SET timeupdate=NOW(), lastitemid=$itemid ".
              "WHERE userid=$qownerid");
 
+    # update user update table (on which friends views rely)
+    {
+        my @bits;
+        if ($req->{'security'} eq "public") {
+            push @bits, 31;  # 31 means public
+        } elsif ($req->{'security'} eq "private") {
+            push @bits, 32;  # 1<<32 doesn't exist (too big), but we'll use it in this table
+        } else {
+            for (my $i=0; $i<=30; $i++) {
+                next unless $qallowmask & (1<<$i);
+                push @bits, $i;
+            }
+        }
+        if (@bits) {
+            $dbh->do("REPLACE INTO userupdate (userid, groupbit, timeupdate) VALUES ".
+                     join(",", map { "($ownerid, $_, NOW())" } @bits));
+        }
+    }
+
     if ($u->{'track'} eq "yes") {
         # dear community, relax.  if we get a court order to provide data on somebody,
         # we're legally required to.  this doesn't enable us to do that.  it enables
@@ -1923,10 +1942,11 @@ sub authenticate
         my $dbr = $dbs->{'reader'};
         return fail($err,502) unless $dbr;
         my $quser = $dbr->quote($username);
+        my $other = $LJ::UNICODE ? ", oldenc" : "";
         my $sth = $dbr->prepare("SELECT user, userid, journaltype, name, ".
                                 "password, status, statusvis, caps, ".
                                 "clusterid, dversion, ".
-                                "track, oldenc FROM user WHERE user=$quser");
+                                "track $other FROM user WHERE user=$quser");
         $sth->execute;
         return fail($err,501,$dbr->errstr) if $dbr->err;
         $u = $sth->fetchrow_hashref;
