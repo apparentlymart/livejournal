@@ -65,6 +65,7 @@ unless ($dbh) {
 }
 foreach my $c (@LJ::CLUSTERS) {
     my $dbc = LJ::get_cluster_master($c);
+    next if $dbc;
     $err->("Couldn't get db handle for cluster \#$c");
 }
 
