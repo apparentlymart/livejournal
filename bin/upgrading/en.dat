@@ -317,9 +317,13 @@ p?>
 
 /community/members.bml.prevlink=<i>(Previous page...)</i>
 
+/community/members.bml.reinvited=[[user]] has been reinvited to join this community.
+
 /community/members.bml.settings=[<a href='[[link]]'>Settings</a>]
 
 /community/members.bml.success.header=Success
+
+/community/members.bml.success.invited=The following users have been successfully invited to this community with the listed privileges:
 
 /community/members.bml.success.message=Your changes have been successfully saved.
 

@@ -19,10 +19,10 @@ sub get_sent_invites {
 
     # now hit the database for their recent invites
     my $dbcr = LJ::get_cluster_reader($cu);
-    my $data = $dbcr->selectall_arrayref('SELECT userid, maintid, DATE_FORMAT(recvtime, "%Y-%m-%d"), status, args
-                                          FROM invitesent WHERE recvtime > DATE_SUB(NOW(), INTERVAL 30 DAY) AND commid = ?',
+    return LJ::error('db') unless $dbcr;
+    my $data = $dbcr->selectall_arrayref('SELECT userid, maintid, recvtime, status, args FROM invitesent ' .
+                                         'WHERE commid = ? AND recvtime > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
                                           undef, $cu->{userid});
-    return undef if $dbcr->err;
 
     # now break data down into usable format for caller
     my @res;
@@ -57,20 +57,22 @@ sub send_comm_invite {
     $u = LJ::want_user($u);
     $cu = LJ::want_user($cu);
     $mu = LJ::want_user($mu);
-    return unless $u && $cu && $mu;
+    return undef unless $u && $cu && $mu;
 
     # step 1: if the user has banned the community, don't accept the invite
     return LJ::error('comm_user_has_banned') if LJ::is_banned($cu, $u);
 
     # step 2: outstanding invite?
     my $dbcr = LJ::get_cluster_reader($u);
+    return LJ::error('db') unless $dbcr;
     my $argstr = $dbcr->selectrow_array('SELECT args FROM inviterecv WHERE userid = ? AND commid = ? ' .
-                                        'AND recvtime > DATE_SUB(NOW(), INTERVAL 30 DAY)',
+                                        'AND recvtime > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
                                         undef, $u->{userid}, $cu->{userid});
 
     # step 3: exceeded outstanding invitation limit?  only if no outstanding invite
     unless ($argstr) {
         my $cdbcr = LJ::get_cluster_reader($cu);
+        return LJ::error('db') unless $cdbcr;
         my $count = $cdbcr->selectrow_array("SELECT COUNT(*) FROM invitesent WHERE commid = ? AND userid <> ? AND status = 'outstanding'",
                                             undef, $cu->{userid}, $u->{userid});
         my $fr = LJ::get_friends($cu) || {};
@@ -84,9 +86,13 @@ sub send_comm_invite {
     
     # step 5: delete old stuff (lazy cleaning of invite tables)
     my $dbcm = LJ::get_cluster_master($u);
-    $dbcm->do('DELETE FROM inviterecv WHERE userid = ? AND recvtime < DATE_SUB(NOW(), INTERVAL 30 DAY)', undef, $u->{userid});
+    return LJ::error('db') unless $dbcm;
+    $dbcm->do('DELETE FROM inviterecv WHERE userid = ? AND ' .
+              'recvtime < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))', undef, $u->{userid});
     my $cdbcm = LJ::get_cluster_master($cu);
-    $cdbcm->do('DELETE FROM invitesent WHERE commid = ? AND recvtime < DATE_SUB(NOW(), INTERVAL 30 DAY)', undef, $cu->{userid});
+    return LJ::error('db') unless $cdbcm;
+    $cdbcm->do('DELETE FROM invitesent WHERE commid = ? AND ' .
+               'recvtime < UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))', undef, $cu->{userid});
 
     # step 6: branch here to update or insert
     if ($argstr) {
@@ -97,14 +103,14 @@ sub send_comm_invite {
                    undef, $newargstr, $cu->{userid}, $u->{userid});
     } else {
          # insert new data, as this is a new invite
-         $dbcm->do("INSERT INTO inviterecv VALUES (?, ?, ?, NOW(), ?)",
+         $dbcm->do("INSERT INTO inviterecv VALUES (?, ?, ?, UNIX_TIMESTAMP(), ?)",
                    undef, $u->{userid}, $cu->{userid}, $mu->{userid}, $newargstr);
-         $cdbcm->do("REPLACE INTO invitesent VALUES (?, ?, ?, NOW(), 'outstanding', ?)",
+         $cdbcm->do("REPLACE INTO invitesent VALUES (?, ?, ?, UNIX_TIMESTAMP(), 'outstanding', ?)",
                     undef, $cu->{userid}, $u->{userid}, $mu->{userid}, $newargstr);
     }
 
     # step 7: error check database work
-    return undef if $dbcm->err || $cdbcm->err;
+    return LJ::error('db') if $dbcm->err || $cdbcm->err;
 
     # success
     return 1;
@@ -127,8 +133,9 @@ sub accept_comm_invite {
 
     # get their invite to make sure they have one
     my $dbcr = LJ::get_cluster_reader($u);
+    return LJ::error('db') unless $dbcr;
     my $argstr = $dbcr->selectrow_array('SELECT args FROM inviterecv WHERE userid = ? AND commid = ? ' .
-                                        'AND recvtime > DATE_SUB(NOW(), INTERVAL 30 DAY)',
+                                        'AND recvtime > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
                                         undef, $u->{userid}, $cu->{userid});
     return undef unless $argstr;
 
@@ -152,9 +159,11 @@ sub accept_comm_invite {
 
     # now we can delete the invite and update the status on the other side
     my $dbcm = LJ::get_cluster_master($u);
+    return LJ::error('db') unless $dbcm;
     $dbcm->do("DELETE FROM inviterecv WHERE userid = ? AND commid = ?",
               undef, $u->{userid}, $cu->{userid});
     my $cdbcm = LJ::get_cluster_master($cu); # get community's cluster master
+    return LJ::error('db') unless $cdbcm;
     $cdbcm->do("UPDATE invitesent SET status = 'accepted' WHERE commid = ? AND userid = ?",
                undef, $cu->{userid}, $u->{userid});
 
@@ -178,16 +187,19 @@ sub reject_comm_invite {
 
     # get their invite to make sure they have one
     my $dbcr = LJ::get_cluster_reader($u);
+    return LJ::error('db') unless $dbcr;
     my $test = $dbcr->selectrow_array('SELECT userid FROM inviterecv WHERE userid = ? AND commid = ? ' .
-                                      'AND recvtime > DATE_SUB(NOW(), INTERVAL 30 DAY)',
+                                      'AND recvtime > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))',
                                       undef, $u->{userid}, $cu->{userid});
     return undef unless $test;
 
     # now just reject it
     my $dbcm = LJ::get_cluster_master($u);
+    return LJ::error('db') unless $dbcm;
     $dbcm->do("DELETE FROM inviterecv WHERE userid = ? AND commid = ?",
               undef, $u->{userid}, $cu->{userid});
     my $cdbcm = LJ::get_cluster_master($cu); # get community's cluster master
+    return LJ::error('db') unless $cdbcm;
     $cdbcm->do("UPDATE invitesent SET status = 'rejected' WHERE commid = ? AND userid = ?",
                undef, $cu->{userid}, $u->{userid});
 
@@ -210,8 +222,9 @@ sub get_pending_invites {
 
     # hit up database for invites and return them
     my $dbcr = LJ::get_cluster_reader($u);
-    my $pending = $dbcr->selectall_arrayref('SELECT commid, maintid, DATE_FORMAT(recvtime, "%Y-%m-%d"), args FROM inviterecv ' .
-                                            'WHERE userid = ? AND recvtime > DATE_SUB(NOW(), INTERVAL 30 DAY)', 
+    return LJ::error('db') unless $dbcr;
+    my $pending = $dbcr->selectall_arrayref('SELECT commid, maintid, recvtime, args FROM inviterecv WHERE userid = ? ' .
+                                            'AND recvtime > UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 30 DAY))', 
                                             undef, $u->{userid});
     return undef if $dbcr->err;
     return $pending;

@@ -41,7 +41,7 @@ body<=
     my $us = LJ::load_userids(@ids);
 
     # all possible attributes
-    my @allattribs = ('post', 'preapprove', 'moderate', 'admin');
+    my @allattribs = ('member', 'post', 'preapprove', 'moderate', 'admin');
 
     # see if they posted and if we should take actions
     if (LJ::did_post()) {
@@ -59,11 +59,11 @@ body<=
 
             # now take actions?
             if ($POST{"pending_$commid"} eq 'yes') {
-                LJ::accept_comm_invite($u, $us->{$commid});
-                push @accepted, [ $commid, $args ];
+                my $rval = LJ::accept_comm_invite($u, $us->{$commid});
+                push @accepted, [ $commid, $args ] if $rval;
             } elsif ($POST{"pending_$commid"} eq 'no') {
-                LJ::reject_comm_invite($u, $us->{$commid});
-                push @rejected, $commid;
+                my $rval = LJ::reject_comm_invite($u, $us->{$commid});
+                push @rejected, $commid if $rval;
             } else {
                 push @undecided, $commid;
             }
@@ -75,7 +75,7 @@ body<=
             foreach my $row (@accepted) {
                 $ret .= "<li>" . LJ::ljuser($us->{$row->[0]}, { type => 'C' }) . ": ";
                 foreach my $attrib (@allattribs) {
-                    $ret .= "$ML{'.label.$attrib'}, " if $row->[1]{$attrib};
+                    $ret .= "$ML{\".label.$attrib\"}, " if $row->[1]{$attrib};
                 }
                 chop $ret; chop $ret;
                 $ret .= "</li>\n";
@@ -113,13 +113,14 @@ body<=
         my $rstyle = ($rc++ & 1) ? "<?altcolor1?>" : "<?altcolor2?>";
         my $cu = $us->{$invite->[0]};
         my $key = "pending_$invite->[0]";
-        my @tags = ($ML{'.label.member'});
+        my @tags = ();
         my $args = {};
         LJ::decode_url_string($invite->[3], $args);
         foreach (@allattribs) {
             push @tags, $ML{".label.$_"} if $args->{$_};
         }
         my $ename = LJ::ehtml($cu->{name});
+        my $date = LJ::mysql_time($invite->[2]);
         
         # now generate HTML
         $ret .= "<tr style='background-color: $rstyle;'><td>" . LJ::ljuser($cu, { type => 'C' }) . " - $ename</td>";
@@ -130,7 +131,7 @@ body<=
         $ret .= " <label for='no$key'>$ML{'.decline'}</label></td>";
         $ret .= "</tr><tr>";
         $ret .= "<td colspan='4' style='background-color: $rstyle;'>";
-        $ret .= BML::ml('.fromline', { user => LJ::ljuser($us->{$invite->[1]}, { type => 'P' }), date => $invite->[2] });
+        $ret .= BML::ml('.fromline', { user => LJ::ljuser($us->{$invite->[1]}, { type => 'P' }), date => $date });
         $ret .= "</td></tr>\n";
     }
 

@@ -52,7 +52,6 @@ body<=
         my @saveattribs = split(',', $POST{'attribs'});
 
         # invite new users
-        my $adding = 0;
         my @to_add;
         my @add_errors;
         foreach my $num (1..5) {
@@ -100,14 +99,17 @@ body<=
 
         # now do the additions if any were needed
         my @fail;
+        my @invited;
         if (@to_add) {
             foreach my $row (@to_add) {
                 # good, let's extend an invite to this person
                 my ($target, $attrs) = @$row;
-                LJ::send_comm_invite($target, $c, $remote, $attrs)
-                    or push @fail, [ $target, LJ::last_error_code() ];
+                if (LJ::send_comm_invite($target, $c, $remote, $attrs)) {
+                    push @invited, $row;
+                } else {
+                    push @fail, [ $target, LJ::last_error_code() ];
+                }
             }
-            $adding = 1;
         }
         if (@fail) {
             my @bad;
@@ -193,6 +195,17 @@ body<=
         }
 
         # perform additions
+        my @msgs;
+        if (%{$add{'member'}}) {
+            foreach my $id (keys %{$add{'member'}}) {
+                next if $POST{"wm_$id"};
+                my $u = LJ::load_userid($id);
+                if (LJ::send_comm_invite($u, $c, $remote, [ 'member' ])) {
+                    # if it succeeded, push the reinvited information
+                    push @msgs, BML::ml('.reinvited', { user => LJ::ljuser($u, { type => 'P' }) });
+                }
+            }
+        }
         if (%{$add{'admin'}}) {
             my $in = join(',', map { "($cid, $_, 'A')" } keys %{$add{'admin'}});
             $dbh->do("REPLACE INTO reluser (userid,targetid,type) VALUES $in");
@@ -211,6 +224,21 @@ body<=
         }
 
         $ret .= "<?h1 $ML{'.success.header'} h1?><?p $ML{'.success.message'} p?>";
+        if (@msgs) {
+            $ret .= "<ul>";
+            $ret .= "<li>$_</li>\n" foreach @msgs;
+            $ret .= "</ul>";
+        }
+        if (@invited) {
+            $ret .= "<?p $ML{'.success.invited'} p?><ul>";
+            foreach my $row (@invited) {
+                $ret .= "<li>" . LJ::ljuser($row->[0], { type => 'P' }) . ": ";
+                $ret .= "$ML{\"/manage/invites.bml.label.$_\"}, " foreach @{$row->[1] || []};
+                chop $ret; chop $ret;
+                $ret .= "</li>\n";
+            }
+            $ret .= "</ul>";
+        }
         $ret .= "<?p " . BML::ml(".success.return", { 'link' => BML::get_uri() . "?comm=$cname" }) . " p?>";
 
         return $ret;
@@ -326,6 +354,7 @@ body<=
             $ret .= "<td align='center'>";
             $ret .= LJ::html_check({ 'name' => "edit_$_->{'userid'}_$key",
                                      'selected' => $_->{$key} });
+            $ret .= LJ::html_hidden("wm_$_->{userid}", 1) if $key eq 'member' && $_->{$key};
             $ret .= "</td>";
         }
         $ret .= "</tr>\n";

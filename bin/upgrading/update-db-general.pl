@@ -1779,7 +1779,7 @@ CREATE TABLE inviterecv (
     userid      INT(10) UNSIGNED NOT NULL,
     commid      INT(10) UNSIGNED NOT NULL,
     maintid     INT(10) UNSIGNED NOT NULL,
-    recvtime    TIMESTAMP NOT NULL,
+    recvtime    INT(10) UNSIGNED NOT NULL,
     args        VARCHAR(255),
     PRIMARY KEY (userid, commid)
 )
@@ -1791,7 +1791,7 @@ CREATE TABLE invitesent (
     commid      INT(10) UNSIGNED NOT NULL,
     userid      INT(10) UNSIGNED NOT NULL,
     maintid     INT(10) UNSIGNED NOT NULL,
-    recvtime    TIMESTAMP NOT NULL,
+    recvtime    INT(10) UNSIGNED NOT NULL,
     status      ENUM('accepted', 'rejected', 'outstanding') NOT NULL,
     args        VARCHAR(255),
     PRIMARY KEY (commid, userid)

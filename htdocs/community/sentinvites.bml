@@ -70,7 +70,8 @@ body<=
         $users{$id}{user} = $us->{$id}{user};
         $users{$id}{$_} = 1 foreach keys %{$invite->{args}};
         $users{$id}{status} = $invite->{status};
-        $users{$id}{date} = $invite->{recvtime};
+        $users{$id}{date} = LJ::mysql_time($invite->{recvtime});
+        $users{$id}{date} =~ s/\s.+$//; # we just want the date, ignore time
     }
 
     # hop out if there were no invites
@@ -146,7 +147,8 @@ body<=
     $showlinks .= LJ::html_submit(undef, 'Refresh');
     $showlinks .= "</form>";
 
-    my $sortlink = BML::get_uri() . "?comm=$cname&sort=";
+    my $filter = "&show=$GET{show}" if $GET{show};
+    my $sortlink = BML::get_uri() . "?comm=$cname$filter&sort=";
     $ret .= "<br /><div align='center'>$showlinks";
     $ret .= <<END; 
 <table class='borderedtable' cellpadding='2' cellspacing='0'>
