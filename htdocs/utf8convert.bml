@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = "UTF-8 Conversion Page";
  $body = "";
@@ -46,13 +46,13 @@
  my $dbs = LJ::get_dbs();
 
  unless ($LJ::UNICODE) {
-     $body .= "(=H1 Not Supported H1=)(=P This installation of LiveJournal does not support Unicode and therefore visiting this page is useless. P=)";
+     $body .= "<?h1 Not Supported h1?><?p This installation of LiveJournal does not support Unicode and therefore visiting this page is useless. p?>";
      return;
  }
 
  my $remote = LJ::get_remote($dbs);
  unless ($remote) {
-     $body .= "(=H1 Login first H1=)(=P To convert existing information to UTF-8 you must first <a href=\"/login.bml?ret=1\">login</a>. P=)";
+     $body .= "<?h1 Login first h1?><?p To convert existing information to UTF-8 you must first <a href=\"/login.bml?ret=1\">login</a>. p?>";
      return;
  }
 
@@ -70,36 +70,36 @@
 
  $mode = 'overview' unless defined $mode;
  if ( ($mode =~ m/^save.*/) && !$encid) {
-     $body .= "(=H1 Encoding not defined H1=)(=P Cannot save converted data without encoding information. P=)";
+     $body .= "<?h1 Encoding not defined h1?><?p Cannot save converted data without encoding information. p?>";
      return;
  }
 
  if ($mode eq 'overview') {
-     $body .= "(=H1 What is this page for? H1=)(=P This page is useful to those users who have maintained their journals since before LiveJournal switched to Unicode. LiveJournal's switch to Unicode means that all information that users submit to LiveJournal, including their entries, comments, bios, interests, etc. - all of this is stored internally in the UTF-8 encoding of the Unicode standard, which allows multiple languages and scripts to coexist within the same text. P=)";
-     $body .= "(=P However, the switch to Unicode also means that all prior information already stored in the database that is not in pure ASCII form must be augmented with information about the encoding it was submitted in. This information is known to the user who wrote that data - you - but not LiveJournal. P=)";
-     $body .= "(=P Entries and comments, which form the bulk of information stored inside LiveJournal's databases, are converted to UTF-8 on-the-fly using encoding information that you specify on the <a href=\"editinfo.bml\"><b>Personal Info</b></a> page. However, various types of miscellaneous information, such as picture keywords, your name, names of your friend groups, your interests, etc. must be explicitly converted. And this is the purpose of this page. P=)";
-     $body .= "(=P <b>If your journal is written in English, you always use English for communication in LiveJournal and never use even accent symbols of other West European languages, you do not need to use this page.</b> P=)";
+     $body .= "<?h1 What is this page for? h1?><?p This page is useful to those users who have maintained their journals since before LiveJournal switched to Unicode. LiveJournal's switch to Unicode means that all information that users submit to LiveJournal, including their entries, comments, bios, interests, etc. - all of this is stored internally in the UTF-8 encoding of the Unicode standard, which allows multiple languages and scripts to coexist within the same text. p?>";
+     $body .= "<?p However, the switch to Unicode also means that all prior information already stored in the database that is not in pure ASCII form must be augmented with information about the encoding it was submitted in. This information is known to the user who wrote that data - you - but not LiveJournal. p?>";
+     $body .= "<?p Entries and comments, which form the bulk of information stored inside LiveJournal's databases, are converted to UTF-8 on-the-fly using encoding information that you specify on the <a href=\"editinfo.bml\"><b>Personal Info</b></a> page. However, various types of miscellaneous information, such as picture keywords, your name, names of your friend groups, your interests, etc. must be explicitly converted. And this is the purpose of this page. p?>";
+     $body .= "<?p <b>If your journal is written in English, you always use English for communication in LiveJournal and never use even accent symbols of other West European languages, you do not need to use this page.</b> p?>";
 
-     $body .= "(=HR=)";
+     $body .= "<?hr?>";
      if ($remote->{'oldenc'}) {
-         $body .= "(=H1 Mass Conversion H1=)(=P We detect that you have defined the \"old encoding\" value of <b>$LJ::CACHE_ENCNAMES{$remote->{'oldenc'}}</b> on your personal info page. You can choose to mass-convert all your miscellaneous information to UTF-8 under the assumption that it is all stored in this encoding. <b>Do not</b> choose this option if you might have used some other encoding in the past (anywhere besides your entries and comments) while using LiveJournal. If you are not sure, use the <b>Conversion by Area</b> option below. P=)";
+         $body .= "<?h1 Mass Conversion h1?><?p We detect that you have defined the \"old encoding\" value of <b>$LJ::CACHE_ENCNAMES{$remote->{'oldenc'}}</b> on your personal info page. You can choose to mass-convert all your miscellaneous information to UTF-8 under the assumption that it is all stored in this encoding. <b>Do not</b> choose this option if you might have used some other encoding in the past (anywhere besides your entries and comments) while using LiveJournal. If you are not sure, use the <b>Conversion by Area</b> option below. p?>";
 
-         $body .= "(=P <form method='post' action='utf8convert.bml'>\n";
+         $body .= "<?p <form method='post' action='utf8convert.bml'>\n";
          $body .= "<input type=hidden name=mode value='saveall'>\n";
          $body .= "<input type=hidden name=encid value='" . $remote->{'oldenc'} . "'>\n";
          $body .= "<input type=submit value='Yes, mass-convert all my information!'>";
-         $body .= "</form> P=)(=HR=)";
+         $body .= "</form> p?><?hr?>";
      }
 
-     $body .= "(=H1 Conversion by Area H1=)(=P We have defined several areas of information that you might have stored in the past in non-ASCII encodings, and which therefore needs to be converted. You may visit each area in turn and see how the information you stored looks in various encodings, then choose the correct one and convert it to UTF-8. P=)";
-     $body .= "(=P Available areas are: P=)";
+     $body .= "<?h1 Conversion by Area h1?><?p We have defined several areas of information that you might have stored in the past in non-ASCII encodings, and which therefore needs to be converted. You may visit each area in turn and see how the information you stored looks in various encodings, then choose the correct one and convert it to UTF-8. p?>";
+     $body .= "<?p Available areas are: p?>";
     
      unless ($encid) { 
          $encid = ($remote->{'oldenc'} ? $remote->{'oldenc'} : '1'); 
      };
 
      foreach (@areanames) {
-         $body .= "(=P <b><a href=\"utf8convert.bml?mode=browse&amp;encid=$encid&amp;area=$_\">$areas{$_}->{'des'}</a></b> P=)";
+         $body .= "<?p <b><a href=\"utf8convert.bml?mode=browse&amp;encid=$encid&amp;area=$_\">$areas{$_}->{'des'}</a></b> p?>";
      }
 
  }
@@ -107,45 +107,45 @@
  if ($mode eq 'browse') {
      # need to display the data in given encoding, if it is not UTF-8
      my $dbcs = LJ::get_cluster_set($remote) if $remote->{'clusterid'};
-     $body .= "(=H1 Browse H1=)(=P You are browsing the area <br /><b>$areas{$area}->{'des'}</b>: P=)";
+     $body .= "<?h1 Browse h1?><?p You are browsing the area <br /><b>$areas{$area}->{'des'}</b>: p?>";
      my $browse = $areas{$area}->{'browse'};
      my ($valid, $disp) = $browse->($dbs, $dbcs, $remote, $encid);
      if ($valid && !defined($FORM{'forceview'})) {
-         $body .= "(=H1 No unconverted information H1=)(=P There is no information in this area that is not valid UTF-8. Nothing needs to be done here. P=)";
-         $body .= "(=P You can <b><a href=\"utf8convert.bml\">return to the area list</a></b> or <b><a href=\"utf8convert.bml?mode=browse&area=$area&encid=$encid&forceview=1\">force the information to be shown anyway</a></b>. P=)";
+         $body .= "<?h1 No unconverted information h1?><?p There is no information in this area that is not valid UTF-8. Nothing needs to be done here. p?>";
+         $body .= "<?p You can <b><a href=\"utf8convert.bml\">return to the area list</a></b> or <b><a href=\"utf8convert.bml?mode=browse&area=$area&encid=$encid&forceview=1\">force the information to be shown anyway</a></b>. p?>";
      } else {
-         $body .= "(=H1 Information needs to be converted H1=)";
-         $body .= "(=P Below your information is shown in the encoding <b>$LJ::CACHE_ENCNAMES{$encid}</b>. If it appears correct, press Save to convert and store it in the database. If some or all characters are displayed corrupted, you probably should choose another encoding from the list below and press Browse to see it displayed in that encoding. P=)";
-         $body .= "(=HR=)";
+         $body .= "<?h1 Information needs to be converted h1?>";
+         $body .= "<?p Below your information is shown in the encoding <b>$LJ::CACHE_ENCNAMES{$encid}</b>. If it appears correct, press Save to convert and store it in the database. If some or all characters are displayed corrupted, you probably should choose another encoding from the list below and press Browse to see it displayed in that encoding. p?>";
+         $body .= "<?hr?>";
          $body .= $disp;
-         $body .= "(=HR=)";
+         $body .= "<?hr?>";
 
-         $body .= "(=H1 Save H1=)(=P <form method='post' action='utf8convert.bml'>\n";
+         $body .= "<?h1 Save h1?><?p <form method='post' action='utf8convert.bml'>\n";
          $body .= "<input type=hidden name=mode value='save'>\n";
          $body .= "<input type=hidden name=area value=$area>\n";
          $body .= "<input type=hidden name=encid value='$encid'>\n";
          $body .= "<input type=submit value='Yes, save this text as in this encoding.'>";
-         $body .= "</form> P=)";
+         $body .= "</form> p?>";
 
-         $body .= "(=H1 Choose Another H1=)(=P <form method='post' action='utf8convert.bml'>\n";
+         $body .= "<?h1 Choose Another h1?><?p <form method='post' action='utf8convert.bml'>\n";
          $body .= "<input type=hidden name=mode value='browse'>\n";
          $body .= "<input type=hidden name=area value=$area>\n";
          $body .= LJ::html_select({'name'=>'encid', 'selected'=>$encid}, %LJ::CACHE_ENCNAMES);
          $body .= "<input type=submit value='Browse in different encoding.'>";
-         $body .= "</form> P=)";
+         $body .= "</form> p?>";
 
-         $body .= "(=P You can also <b><a href=\"utf8convert.bml\">go back to the area list</a></b>. P=)";
+         $body .= "<?p You can also <b><a href=\"utf8convert.bml\">go back to the area list</a></b>. p?>";
 
      };
  }
 
 
  if ($mode eq 'save') {
-     $body .= "(=H1 Save H1=)(=P You chose to save the area P=)<p align=center><b>$areas{$area}->{'des'}</b></p>(=P with the encoding value <b>$LJ::CACHE_ENCNAMES{$encid}</b>. P=)";
-     $body .= "(=P What this means, precisely, is that all text in that area which is not already in the UTF-8 format will be converted to UTF-8 under the assumption that currently it is stored in the encoding <b>$LJ::CACHE_ENCNAMES{$encid}</b> (the technical name of which is <b>$LJ::CACHE_ENCODINGS{$encid}</b>). If you chose a wrong encoding, the text will display incorrectly after the conversion. P=)";
-     $body .= "(=P Are you sure you want to proceed with this operation? P=)";
+     $body .= "<?h1 Save h1?><?p You chose to save the area p?><p align=center><b>$areas{$area}->{'des'}</b></p><?p with the encoding value <b>$LJ::CACHE_ENCNAMES{$encid}</b>. p?>";
+     $body .= "<?p What this means, precisely, is that all text in that area which is not already in the UTF-8 format will be converted to UTF-8 under the assumption that currently it is stored in the encoding <b>$LJ::CACHE_ENCNAMES{$encid}</b> (the technical name of which is <b>$LJ::CACHE_ENCODINGS{$encid}</b>). If you chose a wrong encoding, the text will display incorrectly after the conversion. p?>";
+     $body .= "<?p Are you sure you want to proceed with this operation? p?>";
      
-     $body .= "(=P <form method='post' action='utf8convert.bml'>\n";
+     $body .= "<?p <form method='post' action='utf8convert.bml'>\n";
      $body .= "<input type=hidden name=mode value='save_do'>\n";
      $body .= "<input type=hidden name=area value=$area>\n";
      $body .= "<input type=hidden name=encid value='$encid'>\n";
@@ -153,14 +153,14 @@
      $body .= "</form>";
      $body .= "<form method='post' action='utf8convert.bml'>\n";
      $body .= "<input type=submit value='No, go back to the area list.'>";
-     $body .= "</form> P=)";
+     $body .= "</form> p?>";
  }
 
  if ($mode eq 'saveall') {
-     $body .= "(=H1 Save All H1=)(=P You chose to save all the miscellaneous information available with the encoding value <b>$LJ::CACHE_ENCNAMES{$encid}</b>. P=)";
-     $body .= "(=P What this means, precisely, is that all text you have ever submitted to LiveJournal, except actual entries and comments, that is not already in the UTF-8 format will be converted to UTF-8 under the assumption that currently it is stored in the encoding <b>$LJ::CACHE_ENCNAMES{$encid}</b> (the technical name of which is <b>$LJ::CACHE_ENCODINGS{$encid}</b>). If you chose a wrong encoding, the text will display incorrectly after the conversion. P=)";
-     $body .= "(=P Are you sure you want to proceed with this operation? P=)";
-     $body .= "(=P <form method='post' action='utf8convert.bml'>\n";
+     $body .= "<?h1 Save All h1?><?p You chose to save all the miscellaneous information available with the encoding value <b>$LJ::CACHE_ENCNAMES{$encid}</b>. p?>";
+     $body .= "<?p What this means, precisely, is that all text you have ever submitted to LiveJournal, except actual entries and comments, that is not already in the UTF-8 format will be converted to UTF-8 under the assumption that currently it is stored in the encoding <b>$LJ::CACHE_ENCNAMES{$encid}</b> (the technical name of which is <b>$LJ::CACHE_ENCODINGS{$encid}</b>). If you chose a wrong encoding, the text will display incorrectly after the conversion. p?>";
+     $body .= "<?p Are you sure you want to proceed with this operation? p?>";
+     $body .= "<?p <form method='post' action='utf8convert.bml'>\n";
      $body .= "<input type=hidden name=mode value='saveall_do'>\n";
      $body .= "<input type=hidden name=area value=$area>\n";
      $body .= "<input type=hidden name=encid value='$encid'>\n";
@@ -168,34 +168,34 @@
      $body .= "</form>";
      $body .= "<form method='post' action='utf8convert.bml'>\n";
      $body .= "<input type=submit value='No, go back to the area list.'>";
-     $body .= "</form> P=)";
+     $body .= "</form> p?>";
  }
 
  if ($mode eq 'save_do') {
      my $dbcs = LJ::get_cluster_set($remote) if $remote->{'clusterid'};
-     $body .= "(=H1 Saving H1=)(=P Attempting to convert the area <br /><b>$areas{$area}->{'des'}</b>... P=)";
+     $body .= "<?h1 Saving h1?><?p Attempting to convert the area <br /><b>$areas{$area}->{'des'}</b>... p?>";
      my $save = $areas{$area}->{'save'};
      my ($success, $message) = $save->($dbs, $dbcs, $remote, $encid);
      if ($success) {
-         $body .= "(=H1 Success H1=)(=P Converted successfully. P=)";
+         $body .= "<?h1 Success h1?><?p Converted successfully. p?>";
          $body .= $message;
      } else {
-         $body .= "(=H1 Error H1=)(=P There was an error during the conversion. $message P=)";
+         $body .= "<?h1 Error h1?><?p There was an error during the conversion. $message p?>";
      }
  }
 
  if ($mode eq 'saveall_do') {
      my $dbcs = LJ::get_cluster_set($remote) if $remote->{'clusterid'};
-     $body .= "(=H1 Saving H1=)(=P Attempting to convert everything... P=)";
+     $body .= "<?h1 Saving h1?><?p Attempting to convert everything... p?>";
      foreach (@areanames) {
-         $body .= "(=P Trying to convert <b>$areas{$_}->{'des'}</b>... P=)";
+         $body .= "<?p Trying to convert <b>$areas{$_}->{'des'}</b>... p?>";
          my $save = $areas{$_}->{'save'};
          my ($success, $message) = $save->($dbs, $dbcs, $remote, $encid);
          if ($success) {
-             $body .= "(=H1 Success H1=)(=P Converted successfully. P=)";
+             $body .= "<?h1 Success h1?><?p Converted successfully. p?>";
              $body .= $message;
          } else {
-             $body .= "(=H1 Error H1=)(=P There was an error during the conversion. $message P=)";
+             $body .= "<?h1 Error h1?><?p There was an error during the conversion. $message p?>";
          }
      }
  }
@@ -305,9 +305,9 @@
          push @strings, $name if !LJ::is_utf8($name) and --$nlimit >=0;
          $valid = 0 unless LJ::is_utf8($name);
      }
-     $ret .= "(=P <b>Sample poll names:</b> P=)(=P ";
+     $ret .= "<?p <b>Sample poll names:</b> p?><?p ";
      foreach (@strings) { convert(\$_, $encid); $ret .= $_ . "<br />"; }
-     $ret .= "P=)";
+     $ret .= "p?>";
 
      $limit = 5; $nlimit = 10; @strings = ();
      $sth = $dbr->prepare("SELECT qtext FROM pollquestion WHERE pollid IN ($pids)");
@@ -317,9 +317,9 @@
          push @strings, $question if !LJ::is_utf8($question) and --$nlimit >=0;
          $valid = 0 unless LJ::is_utf8($question);
      }
-     $ret .= "(=P <b>Sample poll questions:</b> P=)(=P ";
+     $ret .= "<?p <b>Sample poll questions:</b> p?><?p ";
      foreach (@strings) { convert(\$_, $encid); $ret .= $_ . "<br />"; }
-     $ret .= "P=)";
+     $ret .= "p?>";
 
      $limit = 5; $nlimit = 10; @strings = ();
      $sth = $dbr->prepare("SELECT item FROM pollitem WHERE pollid IN ($pids)");
@@ -329,9 +329,9 @@
          push @strings, $item if !LJ::is_utf8($item) and --$nlimit >=0;
          $valid = 0 unless LJ::is_utf8($item);
      }
-     $ret .= "(=P <b>Sample poll answer choices:</b> P=)(=P ";
+     $ret .= "<?p <b>Sample poll answer choices:</b> p?><?p ";
      foreach (@strings) { convert(\$_, $encid); $ret .= $_ . "<br />"; }
-     $ret .= "P=)";
+     $ret .= "p?>";
 
      $limit = 5; $nlimit = 10; @strings = ();
      $sth = $dbr->prepare("SELECT value FROM pollresult WHERE pollid IN ($pids)");
@@ -341,9 +341,9 @@
          push @strings, $res if !LJ::is_utf8($res) and --$nlimit >=0;
          $valid = 0 unless LJ::is_utf8($res);
      }
-     $ret .= "(=P <b>Sample poll answers:</b> P=)(=P ";
+     $ret .= "<?p <b>Sample poll answers:</b> p?><?p ";
      foreach (@strings) { convert(\$_, $encid); $ret .= $_ . "<br />"; }
-     $ret .= "P=)";
+     $ret .= "p?>";
 
      return $valid, $ret;
  }
@@ -366,24 +366,24 @@
          convert(\$styledes, $encid);
          convert(\$fdata, $encid);
 
-         $ret .= "(=P <b>Style number:</b> $styleid<br />";
+         $ret .= "<?p <b>Style number:</b> $styleid<br />";
          $ret .= "<b>Description:</b> $styledes<br />";
          if ($utfdata) {
              $ret .= "<b>Format data:</b> valid UTF-8<br />";
          } else {
              $ret .= "<b>Format data:</b> contains non-Unicode characters (too large to display)<br />";
          }
-         $ret .= "P=)";
+         $ret .= "p?>";
      }
-     unless ($anystyles) { $ret .= "(=P You have no styles defined. P=)"; }
+     unless ($anystyles) { $ret .= "<?p You have no styles defined. p?>"; }
     
      my ($overrides) = LJ::dbs_selectrow_array($dbs, "SELECT override FROM overrides WHERE user=$quser");
      if ($overrides) {
          $valid = 0 unless LJ::is_utf8($overrides);
          convert(\$overrides, $encid);
-         $ret .= "(=P Overrides: P=)";
-         $ret .= "(=P $overrides P=)";
-     } else { $ret .= "(=P You have no overrides defined. P=)"; }
+         $ret .= "<?p Overrides: p?>";
+         $ret .= "<?p $overrides p?>";
+     } else { $ret .= "<?p You have no overrides defined. p?>"; }
 
      return $valid, $ret;
  }
@@ -395,7 +395,7 @@
      my $ret = "";
      my $valid = 1;
 
-     $ret .= "(=P Keywords used in memories: P=)(=P ";
+     $ret .= "<?p Keywords used in memories: p?><?p ";
      my $sth = $dbr->prepare("SELECT DISTINCT k.keyword FROM keywords k, memkeyword mk, memorable m WHERE k.kwid=mk.kwid AND mk.memid=m.memid AND m.userid=$u->{'userid'}");
      $sth->execute;
      while (my ($kw) = $sth->fetchrow_array) {
@@ -403,8 +403,8 @@
          convert(\$kw, $encid);
          $ret .= $kw . ' ';
      }
-     $ret .= " P=)";
-     $ret .= "(=P Sample of memory decriptions: P=)(=P ";
+     $ret .= " p?>";
+     $ret .= "<?p Sample of memory decriptions: p?><?p ";
      $sth = $dbr->prepare("SELECT des FROM memorable WHERE userid=$u->{'userid'}");
      $sth->execute;
      my $limit = 15;
@@ -413,7 +413,7 @@
          convert(\$des, $encid);
          $ret .= $des . "<br />" if --$limit >= 0;
      }
-     $ret .= " P=)";
+     $ret .= " p?>";
      
      return $valid, $ret;
  }
@@ -443,7 +443,7 @@
          if ($dbh->err) {
              return 0, "Database error: $dbh->errstr";
          }
-         $message .= "(=P Converted the name. P=)";
+         $message .= "<?p Converted the name. p?>";
      }
 
      # convert url/urlname
@@ -452,7 +452,7 @@
          unless(LJ::is_utf8($u->{$prop})) {
              convert(\$u->{$prop}, $encid);
              LJ::set_userprop($dbs, $u->{'userid'}, $prop, $u->{$prop});
-             $message .= "(=P Converted userprop: $prop . P=)";
+             $message .= "<?p Converted userprop: $prop . p?>";
          }
      }
      
@@ -467,7 +467,7 @@
              if ($dbh->err) {
                  return 0, "Database error: $dbh->errstr";
              }
-             $message .= "(=P Converted the bio. P=)";
+             $message .= "<?p Converted the bio. p?>";
          }
      }
 
@@ -498,7 +498,7 @@
          }
      }
      if ($converted_groups) {
-         $message .= "(=P Converted friend groups. P=)";
+         $message .= "<?p Converted friend groups. p?>";
      }
 
      return $success, $message;
@@ -567,7 +567,7 @@
          $dbh->do("UPDATE userpicmap SET kwid=$newid WHERE userid=$userid AND kwid=$kwds{$keyword}");
      }
      if ($changed) {
-         $message = "(=P Converted picture keywords. P=)";
+         $message = "<?p Converted picture keywords. p?>";
      }
      return 1, $message;
  }
@@ -594,7 +594,7 @@
          $changed = 1;
      }
      if ($changed) {
-         $message .= "(=P Converted poll names. P=)";
+         $message .= "<?p Converted poll names. p?>";
      }
 
      my $pids = join(',', @pollids);
@@ -611,7 +611,7 @@
          $changed = 1;
      }
      if ($changed) {
-         $message .= "(=P Converted poll questions. P=)";
+         $message .= "<?p Converted poll questions. p?>";
      }
 
      # convert poll items
@@ -626,7 +626,7 @@
          $changed = 1;
      }
      if ($changed) {
-         $message .= "(=P Converted poll items. P=)";
+         $message .= "<?p Converted poll items. p?>";
      }
 
      # convert poll results
@@ -641,7 +641,7 @@
          $changed = 1;
      }
      if ($changed) {
-         $message .= "(=P Converted poll results. P=)";
+         $message .= "<?p Converted poll results. p?>";
      }
 
      return 1, $message;
@@ -671,7 +671,7 @@
          $changed =1;
      }
      if ($changed) {
-         $message .= "(=P Converted styles. P=)";
+         $message .= "<?p Converted styles. p?>";
      }
 
      my ($overrides) = LJ::dbs_selectrow_array($dbs, "SELECT override FROM overrides WHERE user=$quser");
@@ -679,7 +679,7 @@
          convert(\$overrides, $encid);
          my $qoverrides = $dbh->quote($overrides);
          $dbh->do("UPDATE overrides SET override=$qoverrides WHERE user=$quser");
-         $message .= "(=P Converted overrides. P=)";
+         $message .= "<?p Converted overrides. p?>";
      }
      
      return 1, $message;
@@ -709,7 +709,7 @@
          $dbh->do("UPDATE memkeyword SET kwid=$newid WHERE kwid=$kwds{$keyword}");
      }
      if ($changed) {
-         $message .= "(=P Converted memory keywords. P=)";
+         $message .= "<?p Converted memory keywords. p?>";
      }
 
      # now the memory descriptions
@@ -724,7 +724,7 @@
          $dbh->do("UPDATE memorable SET des=$qdes WHERE memid=$memid");
      }
      if ($changed) {
-         $message .= "(=P Converted memory descriptions. P=)";
+         $message .= "<?p Converted memory descriptions. p?>";
      }
      
      return 1, $message;
@@ -742,7 +742,7 @@
      }
  }
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?>

@@ -1,34 +1,34 @@
-(=PAGE
-TITLE=>(=_ML .title _ML=)
+<?page
+TITLE=><?_ml .title _ml?>
 BODY<=
 
 <FORM ACTION="lostinfo_do.bml" METHOD="POST">
 
-(=H1 (=_ML .lostpassword.title _ML=) H1=)
-(=P
-(=_ML .lostpassword.text _ML=)
-P=)
+<?h1 <?_ml .lostpassword.title _ml?> h1?>
+<?p
+<?_ml .lostpassword.text _ml?>
+p?>
 
-(=STANDOUT
-(=_ML .enter_username _ML=)<BR>
+<?standout
+<?_ml .enter_username _ml?><BR>
 <INPUT TYPE="TEXT" NAME="user" SIZE="30" MAXLENGTH="70">
-<p>(=_ML .enter_email_optional _ML=)<br>
-<INPUT TYPE="TEXT" NAME="email_p" SIZE="30" MAXLENGTH="70"> <INPUT TYPE="SUBMIT" name="lostpass" VALUE="(=_ML .btn.proceed _ML=)">
-STANDOUT=)
+<p><?_ml .enter_email_optional _ml?><br>
+<INPUT TYPE="TEXT" NAME="email_p" SIZE="30" MAXLENGTH="70"> <INPUT TYPE="SUBMIT" name="lostpass" VALUE="<?_ml .btn.proceed _ml?>">
+standout?>
 
-(=H1 (=_ML .lostusername.title _ML=) H1=)
-(=P
-(=_ML .lostusername.text _ML=)
-P=)
+<?h1 <?_ml .lostusername.title _ml?> h1?>
+<?p
+<?_ml .lostusername.text _ml?>
+p?>
 
-(=STANDOUT
-(=_ML .enter_email _ML=)<BR>
-<INPUT TYPE="TEXT" NAME="email_u" SIZE="30" MAXLENGTH="70"> <INPUT TYPE="SUBMIT" name="lostuser" VALUE="(=_ML .btn.proceed _ML=)">
-STANDOUT=)
+<?standout
+<?_ml .enter_email _ml?><BR>
+<INPUT TYPE="TEXT" NAME="email_u" SIZE="30" MAXLENGTH="70"> <INPUT TYPE="SUBMIT" name="lostuser" VALUE="<?_ml .btn.proceed _ml?>">
+standout?>
 
 </FORM>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 post: htdocs/lostinfo_do.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

@@ -1,8 +1,8 @@
-(=PAGE
-TITLE=>(=_ML .title _ML=)
+<?page
+TITLE=><?_ml .title _ml?>
 BODY<=
 
-(=_CODE
+<?_code
 
  use strict;
  use vars qw($head %FORM %ML);
@@ -21,7 +21,7 @@ BODY<=
  my $init = LJ::Talk::init($dbs, \%FORM);
  my $u = $init->{'journalu'};
 
- return "(=H1 $ML{'Error'} H1=)(=P $init->{'error'} P=)" if $init->{'error'}; 
+ return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
  return $ML{'talk.error.nojournal'} unless $u;
  return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
@@ -60,7 +60,7 @@ BODY<=
      return $ML{'.error.noreplypost'} unless $parpost;
      
      unless ($parpost->{'nodetype'} eq "L" && $parpost->{'itemid'}) {
-         return "(=H1 $ML{'Error'} H1=)(=P $ML{'.error.cannotreplynopost'} P=)";
+         return "<?h1 $ML{'Error'} h1?><?p $ML{'.error.cannotreplynopost'} p?>";
      }
 
      ## load its text
@@ -108,7 +108,7 @@ BODY<=
  }
 
  unless ($item && $item->{'anum'} == $init->{'anum'}) {
-     return "(=H1 $ML{'Error'} H1=)(=P $ML{'talk.error.noentry'} P=)";
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
  }
 
  my %logprops = %{$item->{'logprops'}};
@@ -124,7 +124,7 @@ BODY<=
                                   ], [ $u ]);
 
  # check suspended
- return "(=H1 $ML{'talk.error.suspended.title'} H1=)(=P $ML{'talk.error.suspended'} P=)"
+ return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
  if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S");
 
  LJ::load_user_props($dbs, $u,  
@@ -191,7 +191,7 @@ BODY<=
                 'userlink' => LJ::ljuser($ur->{'user'}),
                )
          if $if_user;
-     $params{'commlink'} = "(=LJCOMM $u->{'user'} LJCOMM=)"
+     $params{'commlink'} = "<?ljcomm $u->{'user'} ljcomm?>"
          if $if_comm;
      if ($if_user || $if_comm) {
          $ret .= BML::ml($mlitem, \%params);
@@ -255,9 +255,9 @@ BODY<=
  ### security indicator
  my $sec = "";
  if ($parpost->{'security'} eq "private") {
-     $sec = "(=SECURITYPRIVATE=)";
+     $sec = "<?securityprivate?>";
  } elsif ($parpost->{'security'} eq "usemask") {
-     $sec = "(=SECURITYPROTECTED=)";
+     $sec = "<?securityprotected?>";
  }
 
  $sec .= "<br />\n" unless $sec eq "" or $parpost->{'subject'};
@@ -283,17 +283,17 @@ BODY<=
  
  # can a comment even be made?
  if ($logprops{$itemid}->{'opt_nocomments'}) {
-     $ret .= "(=H1 $ML{'Sorry'} H1=)(=P $ML{'.error.nocommentspost'} P=)";
+     $ret .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.error.nocommentspost'} p?>";
      LJ::strip_bad_code(\$ret);
      return $ret;
  }
  if ($u->{'opt_showtalklinks'} eq "N") {
-     $ret .= "(=H1 $ML{'Sorry'} H1=)(=P $ML{'.error.nocommentsjournal'} P=)";
+     $ret .= "<?h1 $ML{'Sorry'} h1?><?p $ML{'.error.nocommentsjournal'} p?>";
      LJ::strip_bad_code(\$ret);
      return $ret;
  }
 
- $ret .= "(=H1 $ML{'.postresponse'} H1=)";
+ $ret .= "<?h1 $ML{'.postresponse'} h1?>";
 
  $ret .= "<form method='post' action='talkpost_do.bml'>";
  # hidden values
@@ -362,7 +362,7 @@ BODY<=
  }
 
  # subject
- $ret .= "<tr valign='top'><td align='right'>$ML{'.opt.subject'}</td><td colspan='4'><input class='textbox' type='text' size='50' maxlength='100' name='subject' value=\"$basesubject\"><br />(=DE $ML{'.nosubjecthtml'} DE=)</td></tr>\n";
+ $ret .= "<tr valign='top'><td align='right'>$ML{'.opt.subject'}</td><td colspan='4'><input class='textbox' type='text' size='50' maxlength='100' name='subject' value=\"$basesubject\"><br /><?de $ML{'.nosubjecthtml'} de?></td></tr>\n";
 
  unless ($u->{'opt_notalkicons'})
  {
@@ -444,11 +444,11 @@ BODY<=
  }
 
 
- $ret .= "<br />(=DE $ML{'paraformat'}<br />  <b>$ML{'.allowedhtml'}</b>: ";
+ $ret .= "<br /><?de $ML{'paraformat'}<br />  <b>$ML{'.allowedhtml'}</b>: ";
  foreach (sort &LJ::CleanHTML::get_okay_comment_tags()) {
      $ret .= "&lt;$_&gt; ";
  }
- $ret .= "DE=)";
+ $ret .= "de?>";
 
 
  $ret .= "</td></tr></table>\n";
@@ -457,13 +457,13 @@ BODY<=
  LJ::strip_bad_code(\$ret);
  return $ret;
 
-_CODE=)
+_code?>
 
 <=BODY
-HEAD=>(=_CODE return $head _CODE=)
-PAGE=)(=_C <LJDEP>
+HEAD=><?_code return $head _code?>
+page?><?_c <LJDEP>
 post: htdocs/talkpost_do.bml
 img: htdocs/img/topic_add.gif, htdocs/img/btn_tellfriend.gif, htdocs/img/btn_next.gif
 link: htdocs/talkread.bml, htdocs/allpics.bml, htdocs/create.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 

@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
  
  $title = "User Info";
  $body = "";
@@ -24,7 +24,7 @@
 
  my $error = sub {
      my $e = shift;
-     $body = "(=H1 Error H1=)(=P $e P=)";
+     $body = "<?h1 Error h1?><?p $e p?>";
      return;
  };
 
@@ -71,7 +71,7 @@
 
  unless ($u) {
      $title = "Error";
-     $body = "(=H1 Unknown user H1=)(=P There does not exist a user with the username <B>$user</B>.  Sorry. P=)";
+     $body = "<?h1 Unknown user h1?><?p There does not exist a user with the username <B>$user</B>.  Sorry. p?>";
      return;
  }
 
@@ -103,17 +103,17 @@
 
  if ($u->{'statusvis'} eq "S") {
      $title = "Suspended Account";
-     $body = "(=H1 Suspended H1=)(=P This journal has been either temporarily or permanently suspended by $LJ::SITENAME for policy violation.  If you are <B>$user</B>, contact us for more information P=)";
+     $body = "<?h1 Suspended h1?><?p This journal has been either temporarily or permanently suspended by $LJ::SITENAME for policy violation.  If you are <B>$user</B>, contact us for more information p?>";
      return;
  }
  if ($u->{'statusvis'} eq "D") {
      $title = "Deleted Account";
-     $body = "(=H1 Deleted H1=)(=P This journal has been deleted.  If you are <B>$user</B>, you have a period of 30 days from the deletion time to undelete the journal.  After 30 days we will delete all content permanently from our servers. P=)";
+     $body = "<?h1 Deleted h1?><?p This journal has been deleted.  If you are <B>$user</B>, you have a period of 30 days from the deletion time to undelete the journal.  After 30 days we will delete all content permanently from our servers. p?>";
      return;
  }
  if ($u->{'statusvis'} eq "X") {
      $title = "Purged Account";
-     $body = "(=H1 Deleted H1=)(=P This journal has been deleted and purged.  This username will be available again shortly. P=)";
+     $body = "<?h1 Deleted h1?><?p This journal has been deleted and purged.  This username will be available again shortly. p?>";
      return;
  }
 
@@ -188,9 +188,9 @@
  }
 
  unless ($com) {
-     $body .= "(=H1 User Information H1=)(=P Below is user information for $u->{'name'}.  If you are this user, you can edit your information (or choose what information is considered public) at <A HREF=\"$LJ::SITEROOT/editinfo.bml\">the Edit Info page</A>. P=)";
+     $body .= "<?h1 User Information h1?><?p Below is user information for $u->{'name'}.  If you are this user, you can edit your information (or choose what information is considered public) at <A HREF=\"$LJ::SITEROOT/editinfo.bml\">the Edit Info page</A>. p?>";
  } else {
-     $body .= "(=H1 Community Information H1=)(=P Below is information about the \"$u->{'name'}\" community on LiveJournal. ";
+     $body .= "<?h1 Community Information h1?><?p Below is information about the \"$u->{'name'}\" community on LiveJournal. ";
      if ($ci) {
          my $cowner;
          if ($ci->{'membership'} eq "closed" || 
@@ -209,7 +209,7 @@
          }
         $body .= " You may <A HREF=\"/community/leave.bml?comm=$u->{'user'}\">leave the community</A> at any time.";
      }
-     $body .= " P=)";
+     $body .= " p?>";
  }
 
  my $add_friend = 0;
@@ -242,9 +242,9 @@
      push @linkele, "<A HREF=\"/tools/tellafriend.bml?user=$u->{'user'}\"><IMG ALIGN=ABSMIDDLE HSPACE=2 VSPACE=2 SRC=\"$LJ::IMGPREFIX/btn_tellfriend.gif\" WIDTH=22 HEIGHT=20 ALT=\"Tell a Friend!\" title=\"Tell a Friend!\" BORDER=0></A>";
 
      if (@linkele) {
-         $body .="(=STANDOUT ";
+         $body .="<?standout ";
          $body .= join("&nbsp;&nbsp;", @linkele);
-         $body .= " STANDOUT=)";
+         $body .= " standout?>";
      }
  }
 
@@ -710,11 +710,11 @@ $body .= "</table>\n";
 
 return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-HEAD=>(=_CODE return $head; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+HEAD=><?_code return $head; _code?>
+page?><?_c <LJDEP>
 lib: cgi-bin/ljlib.pl, cgi-bin/cleanhtml.pl
 link: htdocs/editinfo.bml, htdocs/userinfo.bml, htdocs/users
 link: htdocs/community/join.bml, htdocs/community/leave.bml, htdocs/friends/add.bml, htdocs/todo/index.bml
@@ -723,4 +723,4 @@ link: htdocs/tools/textmessage.bml, htdocs/interests.bml, htdocs/support/faqbrow
 link: htdocs/support/index.bml
 img: img/btn_addfriend.gif, img/btn_todo.gif, img/btn_memories.gif, img/btn_tellfriend.gif, img/talk/md10_thumbup.gif
 hook: userinfo_html_by_user, userinfo_rows
-</LJDEP> _C=)
+</LJDEP> _c?>

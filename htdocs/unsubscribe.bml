@@ -1,8 +1,8 @@
-(=PAGE
+<?page
 TITLE=>Unsubscribe
 BODY<=
 
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -12,7 +12,7 @@ BODY<=
  my $auth = $FORM{'auth'};
 
  unless ($aaid && $auth) {
-     return "(=H1 Error H1=)(=P How did you get to this page?  You should only get here via a link in a newsletter. P=)(=P Another way to unsubscribe from the newsletter is to visit the <a href=\"/editinfo.bml\">edit info</a> page and change the setting there. P=)";
+     return "<?h1 Error h1?><?p How did you get to this page?  You should only get here via a link in a newsletter. p?><?p Another way to unsubscribe from the newsletter is to visit the <a href=\"/editinfo.bml\">edit info</a> page and change the setting there. p?>";
  }
 
  if (($aa = LJ::is_valid_authaction($dbs, $aaid, $auth))
@@ -23,12 +23,12 @@ BODY<=
      {
          my $quid = $aa->{'userid'}+0;
          $dbh->do("UPDATE user SET allow_getljnews='N' WHERE userid=$quid");
-         return "(=H1 Done. H1=)(=P You won't get $LJ::SITENAME news anymore. P=)";
+         return "<?h1 Done. h1?><?p You won't get $LJ::SITENAME news anymore. p?>";
      } 
      else 
      {
          my $ret = "";
-         $ret .= "(=H1 Are you sure? H1=)(=P If you want to unsubscribe from the $LJ::SITENAME news mailing list, press the button below.... P=)";
+         $ret .= "<?h1 Are you sure? h1?><?p If you want to unsubscribe from the $LJ::SITENAME news mailing list, press the button below.... p?>";
          $ret .= "<FORM METHOD=POST ACTION=/unsubscribe.bml>\n";
          my $eaaid = LJ::ehtml($aaid);
          my $eauth = LJ::ehtml($auth);
@@ -45,15 +45,15 @@ BODY<=
  else 
  {
      my $blah = join(", ", %$aa);
-     return "(=H1 Error H1=)(=P The authorization code is invalid. $aa, $blah P=)";
+     return "<?h1 Error h1?><?p The authorization code is invalid. $aa, $blah p?>";
  }
      
 
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 post: htdocs/unsubscribe.bml
 link: htdocs/editinfo.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

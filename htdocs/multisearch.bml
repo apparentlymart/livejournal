@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = "";
  $body = "";
@@ -43,7 +43,7 @@
          return BML::redirect("$LJ::SITEROOT/interests.bml?int=" . LJ::eurl($int));
      } else {
          $title = "No Interest";
-         $body = "(=H1 Error H1=)(=P You did not enter an interest. P=)";
+         $body = "<?h1 Error h1?><?p You did not enter an interest. p?>";
          return;
      }
  }
@@ -52,7 +52,7 @@
      my $email = lc($FORM{'q'});
      unless ($email) {
          $title = "No Address";
-         $body = "(=H1 Error H1=)(=P You did not enter an email address. P=)";
+         $body = "<?h1 Error h1?><?p You did not enter an email address. p?>";
          return;
      } else {
          my $qemail = $dbr->quote($email);
@@ -66,7 +66,7 @@
              return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$user");
          } else {
              $title = "No Match";
-             $body = "(=H1 Sorry.. H1=)(=P No LiveJournal user is listed as having that email address, or they've chosen to have their address be private. P=)";
+             $body = "<?h1 Sorry.. h1?><?p No LiveJournal user is listed as having that email address, or they've chosen to have their address be private. p?>";
              return;
          }
      }
@@ -83,7 +83,7 @@
          return BML::redirect("$LJ::SITEROOT/userinfo.bml?user=$user");
      } else {
          $title = "No Match";
-         $body = "(=H1 Sorry.. H1=)(=P No LiveJournal found matching that search criteria. P=)";
+         $body = "<?h1 Sorry.. h1?><?p No LiveJournal found matching that search criteria. p?>";
          return;
      }
      
@@ -94,7 +94,7 @@
      my @parts = split(/\s*,\s*/, $FORM{'q'});
      if (@parts==0 || @parts>3) {
          $title = "Format Error";
-         $body .= "(=H1 Search by Region H1=)(=P You can search by region in one of the following formats: <ul><li>Country<li>City *<li>City, State *<li>State, Country<li>City, State, Country</ul>Notes:<ul><li>* searching for only a city or a city and state defaults to assuming the country is the United States.<li>Country can either be the country's full name, or its two letter country code</ul>If you want to do a different type of search, check out the <a href=\"/directorysearch.bml\">directory search</a>. P=)";
+         $body .= "<?h1 Search by Region h1?><?p You can search by region in one of the following formats: <ul><li>Country<li>City *<li>City, State *<li>State, Country<li>City, State, Country</ul>Notes:<ul><li>* searching for only a city or a city and state defaults to assuming the country is the United States.<li>Country can either be the country's full name, or its two letter country code</ul>If you want to do a different type of search, check out the <a href=\"/directorysearch.bml\">directory search</a>. p?>";
          return;
      }
      
@@ -129,11 +129,11 @@
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 link: htdocs/talkread.bml, htdocs/allpics.bml, htdocs/userinfo.bml, htdocs/random.bml
 link: htdocs/interests.bml, htdocs/directorysearch.bml, htdocs/directory.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 

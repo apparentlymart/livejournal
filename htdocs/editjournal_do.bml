@@ -1,12 +1,12 @@
-(=PAGE
+<?page
 TITLE=>Edit Journal Entry
 BODY<=
 
-(=_CODE
+<?_code
 
  my $ret = "";
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
- return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
+ return "<?badinput?>" unless LJ::text_in(\%FORM);
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -45,7 +45,7 @@ BODY<=
      $jump_to_item = 1;
      my $remote = LJ::get_remote($dbs);
      unless ($remote) {
-         return "(=H1 Error H1=)(=P You have to be logged in to directly edit a journal entry of yours. P=)";
+         return "<?h1 Error h1?><?p You have to be logged in to directly edit a journal entry of yours. p?>";
      }
      $user = $FORM{'user'} = $remote->{'user'};
      $userid = $remote->{'userid'};
@@ -91,7 +91,7 @@ BODY<=
  
      if ($res{'success'} eq "OK")
      {
-         $ret .= "(=H1 Pick an entry to edit.. H1=)(=P Select which item you want to edit and press the edit button at the bottom of the page. P=)\n";
+         $ret .= "<?h1 Pick an entry to edit.. h1?><?p Select which item you want to edit and press the edit button at the bottom of the page. p?>\n";
          $ret .= "<FORM METHOD=POST ACTION=\"editjournal_do.bml\">\n";
          $ret .= "<INPUT TYPE=HIDDEN NAME=\"mode\" VALUE=\"getevents\">\n";
          $ret .= "<INPUT TYPE=HIDDEN NAME=\"selecttype\" VALUE=\"one\">\n";
@@ -127,7 +127,7 @@ BODY<=
              $ret .= $event;
          }
          
-         $ret .= "(=H1 Press to continue... H1=)(=P After you select an item to edit or delete, press the Edit button below. P=)(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Edit Selected Entry\"> STANDOUT=)</FORM>\n";
+         $ret .= "<?h1 Press to continue... h1?><?p After you select an item to edit or delete, press the Edit button below. p?><?standout <INPUT TYPE=SUBMIT VALUE=\"Edit Selected Entry\"> standout?></FORM>\n";
          
          unless ($just_last) 
          {
@@ -140,8 +140,8 @@ BODY<=
      }
      else
      {
-         $ret .= "(=H1 Error H1=)\n";
-         $ret .= "(=P There was an error getting the journal entries to edit: <UL><LI><B>(=_EH $res{'errmsg'} _EH=)</B></UL> P=)";
+         $ret .= "<?h1 Error h1?>\n";
+         $ret .= "<?p There was an error getting the journal entries to edit: <UL><LI><B><?_eh $res{'errmsg'} _eh?></B></UL> p?>";
          return $ret;
      }
  }
@@ -199,7 +199,7 @@ BODY<=
          $userid = LJ::get_userid($dbs, $user);
          my $count = $res{'events_count'};
          unless ($count) {
-             return "(=H1 Error H1=)(=P Could not find selected journal entry. P=)";
+             return "<?h1 Error h1?><?p Could not find selected journal entry. p?>";
          }
 
          my $gfg;
@@ -219,7 +219,7 @@ BODY<=
              $res{'events_1_itemid'} * 256 + $res{'events_1_anum'} : 
              $res{'events_1_itemid'};
 
-         $ret .= "(=H1 Edit Journal Entry H1=)(=P Edit the fields of your journal entry you'd like to modify and press the save button at the bottom of the page.  To delete the entry, just delete all the text and press save... the entry will be deleted. P=)\n";
+         $ret .= "<?h1 Edit Journal Entry h1?><?p Edit the fields of your journal entry you'd like to modify and press the save button at the bottom of the page.  To delete the entry, just delete all the text and press save... the entry will be deleted. p?>\n";
          $ret .= "<FORM METHOD=POST ACTION=\"editjournal_do.bml\">\n";
          $ret .= "<INPUT TYPE=HIDDEN NAME=\"mode\" VALUE=\"editevent\">\n";
          $ret .= "<INPUT TYPE=HIDDEN NAME=\"user\" VALUE=\"$user\">\n";
@@ -350,7 +350,7 @@ BODY<=
          }
 
 
-         $ret .= "(=H1 Press to save... H1=)(=P After you're done editing your journal entry, press Save. P=)(=STANDOUT <INPUT TYPE=SUBMIT VALUE=\"Save Journal Entry\"> STANDOUT=)</FORM>\n";
+         $ret .= "<?h1 Press to save... h1?><?p After you're done editing your journal entry, press Save. p?><?standout <INPUT TYPE=SUBMIT VALUE=\"Save Journal Entry\"> standout?></FORM>\n";
          
          return $ret;
      }
@@ -363,35 +363,35 @@ BODY<=
              my $jargent = defined $res{'anum'} ? "journal=$journal&amp;" : "";
              my $ditemid = defined $res{'anum'} ? ($itemid * 256 + $res{'anum'}) : $itemid;
              if ($FORM{'event'} =~ /\S/) {
-                 return "(=H1 Success H1=)(=P Journal entry was modified.  You may view it ".
-                     "<a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">here</a>. P=)";
+                 return "<?h1 Success h1?><?p Journal entry was modified.  You may view it ".
+                     "<a href=\"$LJ::SITEROOT/talkread.bml?${jargent}itemid=$ditemid\">here</a>. p?>";
              } else {
-                 return "(=H1 Success H1=)(=P Journal entry was deleted. P=)";
+                 return "<?h1 Success h1?><?p Journal entry was deleted. p?>";
              }
          }
          else
          {
-             return "(=H1 Error H1=)(=P An error occured modifying your journal: <UL><LI><B>$res{'errmsg'}</B></UL> P=)";
+             return "<?h1 Error h1?><?p An error occured modifying your journal: <UL><LI><B>$res{'errmsg'}</B></UL> p?>";
          }
      }
      else
      {
-         $ret .= "(=H1 Error H1=)\n";
-         $ret .= "(=P You shouldn't get here.. P=)";
+         $ret .= "<?h1 Error h1?>\n";
+         $ret .= "<?p You shouldn't get here.. p?>";
          return $ret;
      }
  }
  else
  {
-     $ret .= "(=H1 Error H1=)\n";
-     $ret .= "(=P There was an error getting the journal entry to edit: <UL><LI><B>(=_EH $res{'errmsg'} _EH=)</B></UL> P=)";
+     $ret .= "<?h1 Error h1?>\n";
+     $ret .= "<?p There was an error getting the journal entry to edit: <UL><LI><B><?_eh $res{'errmsg'} _eh?></B></UL> p?>";
      return $ret;
  }
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 post: htdocs/editjournal_do.bml
 link: htdocs/moodlist.bml, htdocs/users
-</LJDEP> _C=)
+</LJDEP> _c?>

@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
  
  $body = "";
 
@@ -12,16 +12,16 @@
  my $dbr = $dbs->{'reader'};
  
  if ($FORM{'mode'} ne "login") {
-   $body .= "(=H1 Login H1=)\n";
-   $body .= "(=P\n";
-   $body .= "To login to (=SITENAME=), enter your username and password below.  <b>New Users:</b> To create an account, <a href='/create.bml'>go here</a>. \n";
-   $body .= "P=)\n";
-   $body .= "(=P You may also specify when your login expires.  By default your login will expire when you close your browser, which is best on public computers.  However, if you're the only user of your computer and nobody else has access to it, you may choose to remain logged in forever.\n";
-   $body .= "P=)\n";
+   $body .= "<?h1 Login h1?>\n";
+   $body .= "<?p\n";
+   $body .= "To login to <?sitename?>, enter your username and password below.  <b>New Users:</b> To create an account, <a href='/create.bml'>go here</a>. \n";
+   $body .= "p?>\n";
+   $body .= "<?p You may also specify when your login expires.  By default your login will expire when you close your browser, which is best on public computers.  However, if you're the only user of your computer and nobody else has access to it, you may choose to remain logged in forever.\n";
+   $body .= "p?>\n";
 
    $body .= "<form action='login.bml' method='post'>\n";
    $body .= "<input type='hidden' name='mode' value='login'>\n";
-   $body .= "(=STANDOUT\n";
+   $body .= "<?standout\n";
    $body .= "<table cellpadding='3'>\n";
    $body .= "<tr><td>Username:</td><td><input type='text' name='user' size='15' maxlength='15'></td></tr>\n";
    $body .= "<tr><td valign='top'>Password:</td><td><input type='password' name='password' size='15' maxlength='30'><br /><a href='/lostinfo.bml'><font face='Arial,Helvetica' size='1'>Forget?</font></a></td></tr>\n";
@@ -42,22 +42,22 @@
      $body .= "</td></tr>\n";
    }
    $body .= "</table>\n";
-   $body .= "STANDOUT=)\n";
+   $body .= "standout?>\n";
    $body .= "</form>\n";
 
-   $body .= "(=H1 Why login? H1=)\n";
-   $body .= "(=P\n";
+   $body .= "<?h1 Why login? h1?>\n";
+   $body .= "<?p\n";
    $body .= "There are some of the main benefits of logging in:\n";
    $body .= "<ul>\n";
    $body .= "<li>You won't have to enter your username/password anywhere on the site anymore.</li>\n";
    $body .= "<li>You'll be able to view \"protected\" journal entries from your friends that give you access to read them.</li>\n";
    $body .= "<li>A lot of features are only visible or accessible when you're logged in.</li>\n";
    $body .= "</ul>\n";
-   $body .= "P=)\n";
+   $body .= "p?>\n";
    return;
  }
  
- unless (LJ::did_post()) { push @errors, "(=REQUIREPOST=)"; }
+ unless (LJ::did_post()) { push @errors, "<?requirepost?>"; }
  
  my $quser = $dbh->quote($user);
  if (length($FORM{'user'}) > 15) { push @errors, "Username is too long, 15 character max"; }
@@ -102,21 +102,21 @@
      return BML::redirect("$FORM{'ref'}");
  }
  
- $body = "(=H1 Logged in! H1=)";
- $body .= "(=P You are now logged in. P=)";
+ $body = "<?h1 Logged in! h1?>";
+ $body .= "<?p You are now logged in. p?>";
  my $newexpire = "";
  my $switchtext = "";
  if ($FORM{'expire'} eq "never") {
      $switchtext = "Change expiration mode to SESSION ONLY";
-     $body .= "(=P Your login will <b>never expire</b>, so if you're at a public internet terminal, a school, library, or other place where people may be using this computer shortly, make sure you log out when you're done!  Or, change your login mode to expire when you close your browser: P=)";
+     $body .= "<?p Your login will <b>never expire</b>, so if you're at a public internet terminal, a school, library, or other place where people may be using this computer shortly, make sure you log out when you're done!  Or, change your login mode to expire when you close your browser: p?>";
  } else {
      $newexpire = "never";
      $switchtext = "Change expiration mode to NEVER";
-     $body .= "(=P Your login will expire after you close your browser.  If this is your own computer and you're the only user, you may want to set change your login expiration such that it never expires: P=)";
+     $body .= "<?p Your login will expire after you close your browser.  If this is your own computer and you're the only user, you may want to set change your login expiration such that it never expires: p?>";
  }
  $body .= "<form method=post><input type=hidden name=mode value=login><input type=hidden name=user value=$user><input type=hidden name=hpassword value='$hpassword'><input type=hidden name=expire value='$newexpire'><center><input type=submit value='" . LJ::ehtml($switchtext) . "'></center></form>";
  
- $body .= "(=H1 Links H1=)(=P In the future this page will have all sorts of links and relevant information, but for now here are a few places you may want to go: P=)";
+ $body .= "<?h1 Links h1?><?p In the future this page will have all sorts of links and relevant information, but for now here are a few places you may want to go: p?>";
  $body .= "<ul>";
  $body .= "<li>Your <a href='/users/$user/friends'>friends page</a>.";
  $body .= "<li>Your <a href='/todo/'>to-do list</a>.";
@@ -125,13 +125,13 @@
  
  return;
  
- _CODE=)(=_INFO
+ _code?><?_info
 NOCACHE=>1
-_INFO=)(=PAGE
+_info?><?page
 TITLE=>Login
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 hook: post_login login_formopts
 link: htdocs/login.bml, htdocs/todo/index.bml, htdocs/users, htdocs/create.bml, htdocs/lostinfo.bml
 post: htdocs/login.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

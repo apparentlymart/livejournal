@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -16,8 +16,8 @@
  # something went wrong, redirect them back to top of site... *shrug*
  return BML::redirect("$LJ::SITEROOT/");
 
-_CODE=)(=_INFO
+_code?><?_info
 NOHEADERS=>1
-_INFO=)(=_C <LJDEP>
+_info?><?_c <LJDEP>
 link: htdocs/users
-</LJDEP> _C=)
+</LJDEP> _c?>

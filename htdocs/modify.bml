@@ -1,31 +1,31 @@
-(=PAGE
+<?page
 TITLE=>Modify Journal
 BODY<=
 
-(=H1 Modify Your Journal H1=)
-(=P
+<?h1 Modify Your Journal h1?>
+<?p
 Enter your username and password to modify options that affect the appearance your journal.  If you'd like to add a new journal entry, you want to go <a href="update.bml">here</a>.
-P=)
+p?>
 
 <form action="modify_do.bml" method="post">
 
-(=STANDOUT
+<?standout
 <table>
-(=_CODE
+<?_code
  return LJ::auth_fields(\%FORM);
- _CODE=)
+ _code?>
 <tr><td colspan='2' align='center'><input type="submit" value="Proceed..."></td></tr>
 </table>
-STANDOUT=)
+standout?>
 
-(=H1 Forget something? H1=)
-(=P
+<?h1 Forget something? h1?>
+<?p
 If you forgot your username or password, <a href="lostinfo.bml">recover it here!</a>.
-P=)
+p?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 post: htdocs/modify_do.bml
 link: htdocs/update.bml, htdocs/lostinfo.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 

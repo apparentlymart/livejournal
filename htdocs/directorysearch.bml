@@ -1,47 +1,47 @@
-(=_INFO
+<?_info
 LOCALBLOCKS<=
 CRIT<=
-{FpRs}<tr bgcolor='(=EMCOLOR=)'>
-<td align='left' colspan='2'><b>%%NAME%%</b>
+{FpRs}<tr bgcolor='<?emcolor?>'>
+<td align='left' colspan='2'><b>%%name%%</b>
 </tr>
-<tr align='left'><td>&nbsp;</td><td>%%FORM%%</td></tr>
+<tr align='left'><td>&nbsp;</td><td>%%form%%</td></tr>
 <=CRIT
 BAR<=
-{FpRs}<tr bgcolor='(=EMCOLOR=)' align='left'>
+{FpRs}<tr bgcolor='<?emcolor?>' align='left'>
 <td>&nbsp;</td>
-<td><b>%%NAME%%</b></td>
+<td><b>%%name%%</b></td>
 </tr>
-<tr align='left'><td>&nbsp;</td><td>%%FORM%%</td></tr>
+<tr align='left'><td>&nbsp;</td><td>%%form%%</td></tr>
 <=BAR
 <=LOCALBLOCKS
-_INFO=)(=PAGE
+_info?><?page
 TITLE=>Directory Search
 BODY<=
 
-(=H1 Search Directory H1=)
-(=P
+<?h1 Search Directory h1?>
+<?p
 Fill in criteria below that you'd like to find user journals by.  The results returned are the intersection of all search criteria.  In other words, each restriction means "AND", not "OR".
-P=)
+p?>
 
-(=HR=)
+<?hr?>
 
 <CENTER>
 
-(=_CODE
+<?_code
  return "<form action='/directory.bml' method='get'>";
-_CODE=)
+_code?>
 
 <table cellpadding='4' cellspacing='0' border='0'>
 
 <!--- location --->
-(=CRIT
+<?crit
 NAME=>By Location
 CODE=>s_loc
 FORM<=
 
 <table>
 <tr><td align='right'>Country:</td><td align='left'>
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  LJ::load_codes($dbs, { "country" => \%countries });
@@ -49,17 +49,17 @@ FORM<=
      'name' => 'loc_cn',
  }, "", "", map { $_, $countries{$_} } "US", sort { $countries{$a} cmp $countries{$b} } keys %countries);
 
-_CODE=)
+_code?>
 </td></tr>
 <tr><td align='right'>State/Province:</td><td align='left'><input name="loc_st"></td></tr>
 <tr><td align='right'>City:</td><td align='left'><input name="loc_ci"></td></tr>
 </table>
 
 <=FORM
-CRIT=)
+crit?>
 
 <!---- update time ----->
-(=CRIT
+<?crit
 NAME=>By Journal Update Time
 CODE=>s_ut
 FORM<=
@@ -71,10 +71,10 @@ Updated in last
 <option value="30">month</option>
 </select>
 <=FORM
-CRIT=)
+crit?>
 
 <!---- age ----->
-(=CRIT
+<?crit
 NAME=>By Age
 CODE=>s_age
 FORM<=
@@ -82,11 +82,11 @@ Between
 <INPUT NAME="age_min" SIZE=3 MAXLENGTH=3> and 
 <INPUT NAME="age_max" SIZE=3 MAXLENGTH=3> years old.
 <=FORM
-CRIT=)
+crit?>
 
-(=_C  DISABLED because of privacy policy.  add later when 'public gender' option
+<?_c  DISABLED because of privacy policy.  add later when 'public gender' option
 <!---- gender ----->
-(=CRIT
+<?crit
 NAME=>By Gender
 CODE=>s_gen
 FORM<=
@@ -96,57 +96,57 @@ User is: <SELECT NAME="gen_sel">
 <OPTION VALUE="F">Female
 </SELECT>
 <=FORM
-CRIT=)
-_C=)
+crit?>
+_c?>
 
 <!---- interest ----->
-(=CRIT
+<?crit
 NAME=>By Interest
 CODE=>s_int
 FORM<=
 User likes: <INPUT NAME="int_like" SIZE=30>
 <=FORM
-CRIT=)
+crit?>
 
 <!---- has friend ----->
-(=CRIT
+<?crit
 NAME=>Has Friend
 CODE=>s_fr
 FORM<=
 User lists <INPUT NAME="fr_user" SIZE=15 MAXLENGTH=15> as a friend.
 <=FORM
-CRIT=)
+crit?>
 
 <!---- friend of ----->
-(=CRIT
+<?crit
 NAME=>Friend of
 CODE=>s_fro
 FORM<=
 <INPUT NAME="fro_user" SIZE=15 MAXLENGTH=15> lists user as a friend.
-CRIT=)
+crit?>
 
-(=_C  dead for now
+<?_c  dead for now
 <!---- client used ----->
-(=CRIT
+<?crit
 NAME=>Client Usage
 CODE=>s_client
 FORM<=
 Has used update client named: <INPUT NAME="client_match" SIZE=20>
-CRIT=)
-_C=)
+crit?>
+_c?>
 
-(=_C no index on this yet.  need a userprop boolean.
+<?_c no index on this yet.  need a userprop boolean.
 <!----- other ------>
-(=BAR
+<?bar
 NAME=>Other Criteria
 FORM<=
 <INPUT TYPE=CHECKBOX NAME="s_withpic" VALUE=1> Only users with pictures
 <=FORM
-BAR=)
-_C=)
+bar?>
+_c?>
 
 <!---- output formatting ----->
-(=BAR
+<?bar
 NAME=>Display Options
 FORM<=
 
@@ -186,10 +186,10 @@ Records per page:
 
 </TABLE>
 <=FORM
-BAR=)
+bar?>
 
 <!--- submit --->
-<TR BGCOLOR=(=EMCOLOR=)><TD COLSPAN=2 ALIGN=CENTER>
+<TR BGCOLOR=<?emcolor?>><TD COLSPAN=2 ALIGN=CENTER>
   <INPUT TYPE=SUBMIT VALUE="Search!">
   <INPUT TYPE=RESET VALUE="Clear Form">
 </TD></TR>
@@ -200,6 +200,6 @@ BAR=)
 </CENTER>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 form: htdocs/directory.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

@@ -1,59 +1,59 @@
-(=PAGE
-TITLE=>(=SITENAME=)
+<?page
+TITLE=><?sitename?>
 HEAD<=
-<meta name="description" content="(=SITENAME=) ... words words.">
+<meta name="description" content="<?sitename?> ... words words.">
 <meta name="keywords" content="diary,journal">
 <meta name="rating" content="General"> 
 <meta name="ROBOTS" content="All">
 <meta name="revisit-after" Content="14 days">
 <=HEAD
-BODYOPTS<=(=_CODE
+BODYOPTS<=<?_code
 #  return "onLoad=\""";
-	   _CODE=)
+	   _code?>
 <=BODYOPTS
 BODY<=
 
-(=H1 What is (=SITENAME=)? H1=)
-(=P
+<?h1 What is <?sitename?>? h1?>
+<?p
 Word words.
-P=)
-(=P
+p?>
+<?p
 You'll want to customize this page.  Read the docs/customizing.txt file.
-P=)
+p?>
 
 
-(=H1 Getting Started H1=)
-(=CHOICES
+<?h1 Getting Started h1?>
+<?choices
 ITEMS<=
-(=CHOICE Create A Journal|create.bml|Come and create your very own LiveJournal! CHOICE=)
-(=CHOICE Update Journal|update.bml|Update your LiveJournal from the web. CHOICE=)
+<?choice Create A Journal|create.bml|Come and create your very own LiveJournal! choice?>
+<?choice Update Journal|update.bml|Update your LiveJournal from the web. choice?>
 <=ITEMS
 ITEMSB<=
-(=CHOICE Download|/download/|Download the LiveJournal update tool for your computer. CHOICE=)
-(=CHOICE Modify Journal|modify.bml|Customize the your LiveJournal's appearance and options. CHOICE=)
+<?choice Download|/download/|Download the LiveJournal update tool for your computer. choice?>
+<?choice Modify Journal|modify.bml|Customize the your LiveJournal's appearance and options. choice?>
 <=ITEMSB
-CHOICES=)
+choices?>
 
-(=H1 Other Options H1=)
-(=CHOICES
+<?h1 Other Options h1?>
+<?choices
 ITEMS<=
-(=CHOICE Edit Personal Information|editinfo.bml|Edit your personal information and preferences.  CHOICE=)
-(=CHOICE Edit Journal Entries|editjournal.bml|Edit or delete journal entries you've made in the past.  CHOICE=)
+<?choice Edit Personal Information|editinfo.bml|Edit your personal information and preferences.  choice?>
+<?choice Edit Journal Entries|editjournal.bml|Edit or delete journal entries you've made in the past.  choice?>
 <=ITEMS
 ITEMSB<=
-(=CHOICE Edit Friends|/friends/edit.bml|Edit your list of online LiveJournal friends to track from your LiveJournal friends page.  CHOICE=)
+<?choice Edit Friends|/friends/edit.bml|Edit your list of online LiveJournal friends to track from your LiveJournal friends page.  choice?>
 <=ITEMSB
-CHOICES=)
+choices?>
 
-(=H1 Tech Support & Documentation H1=)
-(=CHOICES
+<?h1 Tech Support & Documentation h1?>
+<?choices
 ITEMS<=
-(=CHOICE Support|/support/|Mail the support team and get a quick answer to your question.  CHOICE=)
+<?choice Support|/support/|Mail the support team and get a quick answer to your question.  choice?>
 <=ITEMS
 ITEMSB<=
 
 <=ITEMSB
-CHOICES=)
+choices?>
 
 <=BODY
-PAGE=)
+page?>

@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 #BML:cache:update
 
  my $SELF = "/update.bml";
@@ -20,7 +20,7 @@
  }
 
  unless (LJ::text_in(\%FORM)) {
-     $$body = "(=BADINPUT=)";
+     $$body = "<?badinput?>";
      return;
  }
 
@@ -46,7 +46,7 @@
  if ($LJ::SPELLER && $FORM{'do_spellcheck'}) {
      $FCGI && $FCGI->Detach();  # hack work around for perl5.6+fcgi bad interaction
      my $s = new LJ::SpellCheck { 'spellcommand' => $LJ::SPELLER,
-                                  'color' => '(=HOTCOLOR=)', };
+                                  'color' => '<?hotcolor?>', };
      $spellcheck_html = $s->check_html(\$FORM{'event'});
      $FCGI && $FCGI->Attach();  # </hack>
  }
@@ -78,18 +78,18 @@
      }
      LJ::do_request($dbs, \%FORM, \%res, $flags);
      
-     $$body .= "(=H1 Logging in to server... H1=)\n";
+     $$body .= "<?h1 Logging in to server... h1?>\n";
      if ($res{'success'} eq "OK")
      {
          my $message = "";
          if ($res{'message'}) {
-             $message = "Also, the server has a message for you: <UL><LI><B>(=_EH $res{'message'} _EH=)</B></UL>";
+             $message = "Also, the server has a message for you: <UL><LI><B><?_eh $res{'message'} _eh?></B></UL>";
          }
-         $$body .= "(=P Login successful.  Hello, (=_EH $res{'name'} _EH=)! $message P=)";
+         $$body .= "<?p Login successful.  Hello, <?_eh $res{'name'} _eh?>! $message p?>";
      }
      else
      {
-         $$body .= "(=P Error logging on: <UL><LI><B>(=_EH $res{'errmsg'} _EH=)</B></UL> P=)";
+         $$body .= "<?p Error logging on: <UL><LI><B><?_eh $res{'errmsg'} _eh?></B></UL> p?>";
          return;
      }
 
@@ -126,7 +126,7 @@
      delete $FORM{'clientversion'};
      LJ::do_request($dbs, \%FORM, \%res, $flags);
      
-     $$body .= "(=H1 Updating journal... H1=)\n";
+     $$body .= "<?h1 Updating journal... h1?>\n";
      if ($res{'success'} eq "OK")
      {
          my $uri = "/users/$FORM{'user'}/";
@@ -141,11 +141,11 @@
                  $uri = "/users/$FORM{'usejournal'}/";
              }	 
          }
-         $$body .= "(=P Update successful.  You may view your updated journal <A HREF=\"$uri\">here</A>. P=)";
+         $$body .= "<?p Update successful.  You may view your updated journal <A HREF=\"$uri\">here</A>. p?>";
      }
      else
      {
-         $$body .= "(=P Error updating journal: <UL><LI><B>(=_EH $res{'errmsg'} _EH=)</B></UL> P=)";
+         $$body .= "<?p Error updating journal: <UL><LI><B><?_eh $res{'errmsg'} _eh?></B></UL> p?>";
          return;
      }
      
@@ -156,7 +156,7 @@
  {
      $$bodyopts = "onLoad=\"settime();\"";
      
-     $$body .= "(=H1 Update your Journal... H1=)(=P If you don't want to <A HREF=\"/download/\">download a client</A> for your computer, or if one doesn't exist for your computer, you may use this page to update your LiveJournal.  This is also useful if you're on vacation or away from your primary computer. P=)(=HR=)";
+     $$body .= "<?h1 Update your Journal... h1?><?p If you don't want to <A HREF=\"/download/\">download a client</A> for your computer, or if one doesn't exist for your computer, you may use this page to update your LiveJournal.  This is also useful if you're on vacation or away from your primary computer. p?><?hr?>";
      
      $$body .= "<FORM METHOD=POST ACTION=\"$SELF\" NAME=updateForm>";
      $$body .= "<INPUT TYPE=HIDDEN NAME=mode VALUE=update>";
@@ -220,7 +220,7 @@
      $$body .= "<textarea name=\"event\" cols=\"50\" rows=\"10\" wrap=\"soft\" style=\"width: 99%\">";
      $$body .= LJ::ehtml($FORM{'event'});
      $$body .= "</textarea>";
-     $$body .= "<BR>(=DE (HTML okay; by default, newlines will be auto-formatted to <TT>&lt;BR&gt;</TT>) DE=)";
+     $$body .= "<BR><?de (HTML okay; by default, newlines will be auto-formatted to <TT>&lt;BR&gt;</TT>) de?>";
      if ($LJ::SPELLER) {
          $$body .= "<BR><input type=checkbox name=do_spellcheck value=1 id=\"spellcheck\"> <label for=\"spellcheck\">Spell check entry before posting</label>";
      }
@@ -244,7 +244,7 @@
              });
          }
 
-         $$body .= "<TR><TD NOWRAP><INPUT TYPE=hidden NAME=webversion VALUE=full>(=H2 Optional Settings H2=)";
+         $$body .= "<TR><TD NOWRAP><INPUT TYPE=hidden NAME=webversion VALUE=full><?h2 Optional Settings h2?>";
      
          if (@{$res->{'usejournals'}}) {
              $$body .= "<P><B>Journal to post in: </B> ";
@@ -355,19 +355,19 @@ function settime() {
 JAVASCRIPT_STUFF
 
  unless ($remote) {
-     $$body .= "(=H1 Forget something? H1=)(=P If you forgot your username or password, <A HREF=\"lostinfo.bml\">recover it here!</A>. P=)";
+     $$body .= "<?h1 Forget something? h1?><?p If you forgot your username or password, <A HREF=\"lostinfo.bml\">recover it here!</A>. p?>";
  }
  return;
 }
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $_[1] ? $_[1]->{'title'} : $r_title; _CODE=)
-BODY=>(=_CODE return $_[1] ? $_[1]->{'body'} : $r_body; _CODE=)
-BODYOPTS=>(=_CODE return $_[1] ? $_[1]->{'bodyopts'} : $r_bodyopts; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $_[1] ? $_[1]->{'title'} : $r_title; _code?>
+BODY=><?_code return $_[1] ? $_[1]->{'body'} : $r_body; _code?>
+BODYOPTS=><?_code return $_[1] ? $_[1]->{'bodyopts'} : $r_bodyopts; _code?>
+page?><?_c <LJDEP>
 lib: LJ::SpellCheck
 link: htdocs/users, htdocs/download/index.bml, htdocs/moodlist.bml
 link: htdocs/update.bml, htdocs/lostinfo.bml, htdocs/support/faqbrowse.bml
 link: htdocs/allpics.bml
 post: htdocs/update.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

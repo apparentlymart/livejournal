@@ -1,10 +1,10 @@
-(=PAGE
+<?page
 TITLE=>Interests
 BODY<=
 
-(=_CODE
+<?_code
 #line 6
- return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
+ return "<?badinput?>" unless LJ::text_in(\%FORM);
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -18,7 +18,7 @@ BODY<=
  if ($FORM{'view'} eq "popular") 
  {
      my $ret = "";
-     $ret .= "(=H1 Popular Interests H1=)(=P The following are the most popular interests. P=)";
+     $ret .= "<?h1 Popular Interests h1?><?p The following are the most popular interests. p?>";
  
      $sth = $dbr->prepare("SELECT statkey, statval FROM stats WHERE ".
                           "statcat='pop_interests' ORDER BY statval DESC, statkey ASC");
@@ -41,7 +41,7 @@ BODY<=
      my $remote = LJ::get_remote($dbs);
      my $ret;
      unless ($remote) {
-         $ret .= "(=H1 Error H1=)(=P You have to be logged in to add an interest this way. P=)";
+         $ret .= "<?h1 Error h1?><?p You have to be logged in to add an interest this way. p?>";
          return $ret;
      }
      my $qintid = $FORM{'intid'}+0;
@@ -56,13 +56,13 @@ BODY<=
          my ($int) = $sth->fetchrow_array;
          LJ::text_out(\$int);
 
-         $ret .= "(=H1 Confirm H1=)";
-         $ret .= "(=P To add <b>$int</b> as an interest, click the button below. ";
+         $ret .= "<?h1 Confirm h1?>";
+         $ret .= "<?p To add <b>$int</b> as an interest, click the button below. ";
          $ret .= "<form method=post action=\"/interests.bml\">";
          $ret .= "<input type=hidden name=mode value=add>";
          $ret .= "<input type=hidden name=intid value=$qintid>";
          $ret .= "<center><input type=submit value=\"Add $int\"></center>";
-         $ret .= "</form> P=)";
+         $ret .= "</form> p?>";
          return $ret;	 
      }
 
@@ -70,7 +70,7 @@ BODY<=
      $sth->execute;
      my ($count) = $sth->fetchrow_array;
      if ($count >= 150) {
-         $ret .= "(=H1 Sorry.. H1=)(=P You already have 150 interests defined. P=)";
+         $ret .= "<?h1 Sorry.. h1?><?p You already have 150 interests defined. p?>";
          return $ret;
      }
    
@@ -79,7 +79,7 @@ BODY<=
          $dbh->do("UPDATE interests SET intcount=intcount+1 WHERE intid=$qintid");
      }
      
-     $ret .= "(=H1 Added! H1=)(=P The interest has been added to your list. P=)";
+     $ret .= "<?h1 Added! h1?><?p The interest has been added to your list. p?>";
      return $ret;
  }
 
@@ -90,7 +90,7 @@ BODY<=
      }
 
      my $ret = "";
-     $ret .= "(=H1 Similar Users H1=)(=P This tool lets you find users with the most similar interests to a given user.  More fun stuff can be found on the <A HREF=\"/interests.bml\">interests page</A>. P=)";
+     $ret .= "<?h1 Similar Users h1?><?p This tool lets you find users with the most similar interests to a given user.  More fun stuff can be found on the <A HREF=\"/interests.bml\">interests page</A>. p?>";
      
      my $remote = LJ::get_remote($dbs);
      LJ::load_remote($dbs, $remote);
@@ -98,9 +98,9 @@ BODY<=
          $ret .= "<center><form method='get'><input type='hidden' name='mode' value='findsim_do' />";
          $ret .= "Similar to User: <input name='user' value='$remote->{'user'}' /> <input type='submit' value=\"Find!\" /></form><b>Please note:</b> Search will take several seconds.  Be patient.</center>";
      } else {
-         $ret .= "(=P However, your account type doesn't let you use this tool. P=)";
+         $ret .= "<?p However, your account type doesn't let you use this tool. p?>";
          unless ($remote) {
-             $ret .= "(=P You're also not <a href='/login.bml?ret=1'>logged in</a>, so your account type can't be determined. P=)";
+             $ret .= "<?p You're also not <a href='/login.bml?ret=1'>logged in</a>, so your account type can't be determined. p?>";
          }
      }
      return $ret;
@@ -120,7 +120,7 @@ BODY<=
 
      my $ret = "";
      my $u = LJ::load_user($dbs, $FORM{'user'});
-     return "(=H1 Error H1=)(=P Unknown user P=)" unless $u;
+     return "<?h1 Error h1?><?p Unknown user p?>" unless $u;
 
      my @ints;
      my %intcount;
@@ -131,7 +131,7 @@ BODY<=
          push @ints, $intid;
          $intcount{$intid} = $count || 1;
      }
-     return "(=H1 Error H1=)(=P User (=LJUSER $u->{'user'} LJUSER=) has no defined interests. P=)" 
+     return "<?h1 Error h1?><?p User <?ljuser $u->{'user'} ljuser?> has no defined interests. p?>" 
          unless @ints;
 
      my %pt_count;
@@ -164,10 +164,10 @@ BODY<=
      }
 
      unless (@matches) {
-         return "(=H1 No Matches H1=)(=P No users are similar to (=LJUSER $u->{'user'} LJUSER=). P=)";
+         return "<?h1 No Matches h1?><?p No users are similar to <?ljuser $u->{'user'} ljuser?>. p?>";
      }
 
-     $ret .= "(=H1 Similar Users H1=)(=P The following are the most related users to (=LJUSER $u->{'user'} LJUSER=) P=)";
+     $ret .= "<?h1 Similar Users h1?><?p The following are the most related users to <?ljuser $u->{'user'} ljuser?> p?>";
 
      $ret .= "<p><table cellpadding='3'><tr valign='bottom'><td><b>#</b></td><td width='250'><b>User</b></td><td><b>Magic<br />Index</b></td></tr>\n";
      my $count;
@@ -176,13 +176,13 @@ BODY<=
          $count++;
          $ret .= "<tr>";
          $ret .= "<td>$count</td>";
-         $ret .= "<td>(=LJUSER $username{$uid} LJUSER=)</td>";
+         $ret .= "<td><?ljuser $username{$uid} ljuser?></td>";
          $ret .= sprintf("<td>%.3f</td>", $magic{$uid});
          $ret .= "</tr>\n";
      }
      $ret .= "</table></p>\n";
 
-     $ret .= "(=H1 Magic Index? H1=)(=P Each matching user gets computed a magic index, which is a weighting of two factors:  the raw number of like interests, and some extra points for sharing uncommon interests. P=)";
+     $ret .= "<?h1 Magic Index? h1?><?p Each matching user gets computed a magic index, which is a weighting of two factors:  the raw number of like interests, and some extra points for sharing uncommon interests. p?>";
      return $ret;
  }
 
@@ -193,12 +193,12 @@ BODY<=
      $sth = $dbr->prepare("SELECT interest, intid, intcount FROM interests WHERE $where");
      $sth->execute;
      ($interest, $intid, $intcount) = $sth->fetchrow_array;
-     unless ($interest) { return "(=H1 Error H1=)(=P Interest wasn't found. P=)"; }
+     unless ($interest) { return "<?h1 Error h1?><?p Interest wasn't found. p?>"; }
      $qintid = $intid+0;
      
      if ($intcount > 2000) {
          # hack, yes.  saves the database, though.
-         return "(=H1 Many matches H1=)(=P There are $intcount people and/or communities listing this as an interest.  A list won't be shown. P=)";
+         return "<?h1 Many matches h1?><?p There are $intcount people and/or communities listing this as an interest.  A list won't be shown. p?>";
      }
 
      my $ret = "";
@@ -214,12 +214,12 @@ BODY<=
          $count++;
          LJ::text_out(\$_->{'name'});
          my $name = LJ::ehtml($_->{'name'});
-         $list .= "<li>(=LJCOMM $_->{'user'} LJCOMM=) - $name\n";
+         $list .= "<li><?ljcomm $_->{'user'} ljcomm?> - $name\n";
      }
 
      my $s = $count > 1 ? "es" : "";
      if ($count) {
-         $ret .= "(=H1 Relevant Communities H1=)(=P The following communities are also interested in <b>\"$interest\"</b>. P=)";
+         $ret .= "<?h1 Relevant Communities h1?><?p The following communities are also interested in <b>\"$interest\"</b>. p?>";
          $ret .= "<p><b>$count match$s:</b><ul>";
          $ret .= $list;
          $ret .= "</ul></p>";
@@ -227,11 +227,11 @@ BODY<=
 
      ##### users
 
-     $ret .= "(=H1 Interested users H1=)(=P The following users are also interested in <b>\"$interest\"</b>.  ";
+     $ret .= "<?h1 Interested users h1?><?p The following users are also interested in <b>\"$interest\"</b>.  ";
      if ($remote) {
          $ret .= "If you're also interested in this and would like to be added to this list, <a href=\"/interests.bml?mode=add&amp;intid=$qintid\">click here</A>.  ";
      }
-     $ret .= "More fun stuff can be found on the <A HREF=\"/interests.bml\">interests page</A>. P=)";
+     $ret .= "More fun stuff can be found on the <A HREF=\"/interests.bml\">interests page</A>. p?>";
 
      my $list;
      my $count = 0;
@@ -243,7 +243,7 @@ BODY<=
          $count++;
          LJ::text_out(\$iname);
          my $name = LJ::ehtml($iname);
-         $list .= "<li>(=LJUSER $iuser LJUSER=) - $name\n";
+         $list .= "<li><?ljuser $iuser ljuser?> - $name\n";
      }
      $list .= "</ul>\n";
 
@@ -256,7 +256,7 @@ BODY<=
  }
 
  my $ret = "";
- $ret .= "(=H1 Interests H1=)(=P Here are some fun things you can do with interests.... P=)";
+ $ret .= "<?h1 Interests h1?><?p Here are some fun things you can do with interests.... p?>";
  $ret .= "<FORM METHOD=GET><UL>";
  $ret .= "<LI><A HREF=\"/interests.bml?view=popular\">View popular interests</A>\n";
  $ret .= "<LI><A HREF=\"/interests.bml?mode=findsim\">Find similar people</A> -- see who has the most number of common interests with you\n" unless ($LJ::DISABLED{'interests-findsim'});
@@ -266,11 +266,11 @@ BODY<=
  
  return $ret;
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/interests.bml, htdocs/editinfo.bml
 post: htdocs/interests.bml
 form: htdocs/interests.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

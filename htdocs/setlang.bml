@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  return unless $FORM{'lang'};
  my $l = LJ::Lang::get_lang($FORM{'lang'});
@@ -13,11 +13,11 @@
  }
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_ML .title _ML=)
+_code?><?page
+TITLE=><?_ml .title _ml?>
 BODY<=
 
-(=_CODE
+<?_code
 
  if ($FORM{'lang'}) {
      my $l = LJ::Lang::get_lang($FORM{'lang'});
@@ -36,7 +36,7 @@ BODY<=
  my $def = BML::get_language_default();
  my $curr = $FORM{'lang'} || BML::get_language();
  my $ret;
- $ret .= "(=_ML .select _ML=)<form method='post'>";
+ $ret .= "<?_ml .select _ml?><form method='post'>";
 
  my @q = ("en");
  @q = @LJ::LANGS if @LJ::LANGS;
@@ -62,11 +62,11 @@ BODY<=
 
  $ret .= "</td></tr></table>";
  
- $ret .= "<p><input type='submit' value='(=_ML .switch _ML=)'></p></form>";
+ $ret .= "<p><input type='submit' value='<?_ml .switch _ml?>'></p></form>";
  return $ret;
 
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)
+page?>

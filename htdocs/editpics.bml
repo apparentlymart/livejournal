@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = "Edit User Pictures";
  $body = "";
@@ -6,7 +6,7 @@
  @errors = ();
  
  unless (LJ::text_in(\%FORM)) {
-     $body = "(=BADINPUT=)";
+     $body = "<?badinput?>";
      return;
  }
 
@@ -32,13 +32,13 @@
  
  unless ($user) {
      
-     $body .= "(=H1 Authenticate H1=)(=P Enter the username and password of the journal you want to modify the user pictures for. P=)";
+     $body .= "<?h1 Authenticate h1?><?p Enter the username and password of the journal you want to modify the user pictures for. p?>";
      
      $body .= "<form method='post' action='editpics.bml'>";
-     $body .= "(=STANDOUT <table>\n";
+     $body .= "<?standout <table>\n";
      $body .= LJ::auth_fields_2($dbs, \%FORM);
      $body .= "<tr><td></td><td><input type='submit' value='Proceed...'></td></tr>";
-     $body .= "</table> STANDOUT=)\n";
+     $body .= "</table> standout?>\n";
      $body .= "</form>";
      return;
  }
@@ -123,12 +123,12 @@
          $dbh->do("UPDATE user SET defaultpicid=$new_default WHERE userid=$u->{'userid'}");
      }
 
-     $body .= "(=H1 Saved H1=)(=P Your new picture keywords and defaults have been saved.  You can view them <a href=\"/allpics.bml?user=$u->{'user'}\">here</a>. P=)";
+     $body .= "<?h1 Saved h1?><?p Your new picture keywords and defaults have been saved.  You can view them <a href=\"/allpics.bml?user=$u->{'user'}\">here</a>. p?>";
 
      if (@errors) {
-         $body .= "(=P Some errors occured, though, processing your request: <UL>";
+         $body .= "<?p Some errors occured, though, processing your request: <UL>";
          foreach (@errors) { $body .= "<LI>$_"; }
-         $body .= "</UL> P=)";
+         $body .= "</UL> p?>";
      }
      
      return;
@@ -156,13 +156,13 @@
 
      if ($piccount++ == 0) {
 
-         $body .= "(=H1 Current Pictures H1=)(=P Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, <a href='/uploadpic.bml$authlink'>go here</a>. P=)";
+         $body .= "<?h1 Current Pictures h1?><?p Here are the pictures you've uploaded in the past.  You can assign keywords to them so you can use them by keyword later, select which one to use as your default, or delete old ones.  To upload a new one, <a href='/uploadpic.bml$authlink'>go here</a>. p?>";
 
          if ($remote) {
              $body .= "<form method='post'>";
-             $body .= "(=H1 Switch Journal H1=)(=P Work with journal: ";
+             $body .= "<?h1 Switch Journal h1?><?p Work with journal: ";
              $body .= LJ::make_shared_select($dbs, $remote, \%FORM);
-             $body .= " <input type='submit' value='Switch'> P=)</form>";
+             $body .= " <input type='submit' value='Switch'> p?></form>";
          }
 
          $body .= "<form method='post'>";
@@ -217,16 +217,16 @@
      $body .= "</TABLE>";
      $body .= "</FORM>";
  } else {
-     $body = "(=H1 No Pictures H1=)(=P You have no pictures uploaded.  To upload one, go <A HREF='/uploadpic.bml$authlink'>here</A>. P=)";
+     $body = "<?h1 No Pictures h1?><?p You have no pictures uploaded.  To upload one, go <A HREF='/uploadpic.bml$authlink'>here</A>. p?>";
  }
  
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-SWITCHUSER=>(=_CODE return $su; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+SWITCHUSER=><?_code return $su; _code?>
+page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/allpics.bml, htdocs/uploadpic.bml
 post: htdocs/editpics.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

@@ -1,10 +1,10 @@
-(=_INFO
+<?_info
 NOCACHE=>1
-_INFO=)(=PAGE
+_info?><?page
 TITLE=>Delete Comment
 BODY<=
 
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -15,7 +15,7 @@ BODY<=
  my $remote = LJ::get_remote($dbs);
 
  unless ($remote) {
-     return "(=H1 Error H1=)(=P You must be logged in to delete a comment. P=)";
+     return "<?h1 Error h1?><?p You must be logged in to delete a comment. p?>";
  }
 
  my $qid = $FORM{'id'}+0;
@@ -24,7 +24,7 @@ BODY<=
  my $u;
  if ($FORM{'journal'}) {
      $u = LJ::load_user($dbs, $FORM{'journal'});
-     return "(=H1 Error H1=)(=P Bogus journal arg P=)" unless $u;
+     return "<?h1 Error h1?><?p Bogus journal arg p?>" unless $u;
      $clustered = 1;
      $dbcm = LJ::get_cluster_master($u);
  }
@@ -43,10 +43,10 @@ BODY<=
                                    "WHERE talkid=$qid");
  }
  unless ($tp) {
-     return "(=H1 Error H1=)(=P The comment doesn't even exist... P=)";
+     return "<?h1 Error h1?><?p The comment doesn't even exist... p?>";
  }
  if ($tp->{'state'} eq "D") {
-     return "(=H1 Error H1=)(=P This comment has already been deleted. P=)";
+     return "<?h1 Error h1?><?p This comment has already been deleted. p?>";
  }
 
  $u ||= LJ::load_userid($dbs, $tp->{'journalid'});
@@ -83,11 +83,11 @@ BODY<=
  }
 
  unless ($can_delete) {
-     return "(=H1 Error H1=)(=P A comment may only be deleted by the journal owner or the one who posted it. (pid=$tp->{'posterid'}; jid=$tp->{'journalid'}; ruid=$remote->{'userid'}) P=)";
+     return "<?h1 Error h1?><?p A comment may only be deleted by the journal owner or the one who posted it. (pid=$tp->{'posterid'}; jid=$tp->{'journalid'}; ruid=$remote->{'userid'}) p?>";
  }
 
  unless ($FORM{'confirm'} eq "Y") {
-     $ret .= "(=H1 Delete this comment? H1=)(=P Are you sure you want to delete this comment? P=)";
+     $ret .= "<?h1 Delete this comment? h1?><?p Are you sure you want to delete this comment? p?>";
      $ret .= "<P><FORM METHOD=POST ACTION=\"delcomment.bml\"><CENTER>\n";
      $ret .= "<INPUT TYPE=HIDDEN NAME=id VALUE=\"$FORM{'id'}\">\n";
      $ret .= "<input type='hidden' name='journal' value='$u->{'user'}'>\n" if $clustered;
@@ -130,14 +130,14 @@ BODY<=
      $and .= "Additionally, user <B>$tp->{'userpost'}</B> has been banned from commenting in your journal.";
  }
 
- $ret .= "(=H1 Deleted H1=)(=P The comment has been deleted. $and P=)";
+ $ret .= "<?h1 Deleted h1?><?p The comment has been deleted. $and p?>";
  $ret .= $dbh->errstr;
  return $ret;
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/editinfo.bml
 post: htdocs/delcomment.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

@@ -1,8 +1,8 @@
-(=PAGE
+<?page
 TITLE=>Get Upload
 BODY<=
 
-(=_CODE
+<?_code
 #line 8
  my $MAX_UPLOAD = 40960;
  my $err;
@@ -84,7 +84,7 @@ BODY<=
      }
  }
  else {
-     return "(=H1 Error H1=)(=P Unknown mode/source. P=)";
+     return "<?h1 Error h1?><?p Unknown mode/source. p?>";
  }
    
 
@@ -165,12 +165,12 @@ BODY<=
      if ($dbh->err) { return $dbh->errstr; }
  }
  
- return "(=H1 Success H1=)(=P Your image has been uploaded.  It looks like this: <p align='center'><img src='/userpic/$picid' width='$sx' height='$sy'></p>You can <a href=\"editpics.bml$authaslink\">edit your picture keywords</a> to be able to use this picture selectively in the future. P=)(=P You can view your journal <a href='/users/${user}'>here</a>. P=)";
+ return "<?h1 Success h1?><?p Your image has been uploaded.  It looks like this: <p align='center'><img src='/userpic/$picid' width='$sx' height='$sy'></p>You can <a href=\"editpics.bml$authaslink\">edit your picture keywords</a> to be able to use this picture selectively in the future. p?><?p You can view your journal <a href='/users/${user}'>here</a>. p?>";
  
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 lib: LWP::UserAgent, Image::Size, Digest::MD5
 link: htdocs/editpics.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

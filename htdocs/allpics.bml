@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = "";
  $body = "";
@@ -19,7 +19,7 @@
  my $u = LJ::load_user($dbs, $user);
  unless ($u) {
      $title = "User Pictures";
-     $body = "(=H1 Error H1=)(=P You need to specify a user parameter. P=)";
+     $body = "<?h1 Error h1?><?p You need to specify a user parameter. p?>";
      return;
  }
 
@@ -46,7 +46,7 @@
          if ($remote && $remote->{'user'} eq $u->{'user'}) {
              $edit = "You may be interested in <a href=\"/editpics.bml\">editing your picture keywords</a> or <a href=\"/uploadpic.bml\">uploading a new picture</a>.";
          }
-         $body .= "(=H1 Current Pictures H1=)(=P Here are the user pictures for (=LJUSER $user LJUSER=). $edit P=)";
+         $body .= "<?h1 Current Pictures h1?><?p Here are the user pictures for <?ljuser $user ljuser?>. $edit p?>";
           $body .= "<UL><TABLE CELLPADDING=5 BORDER=0 CELLSPACING=1>";
              
      }
@@ -71,14 +71,14 @@
  if ($piccount) {
      $body .= "</TABLE>";
  } else {
-     $body = "(=H1 No Pictures H1=)(=P You have no pictures uploaded.  To upload one, go <A HREF=\"/uploadpic.bml\">here</A>. P=)";
+     $body = "<?h1 No Pictures h1?><?p You have no pictures uploaded.  To upload one, go <A HREF=\"/uploadpic.bml\">here</A>. p?>";
  }
  
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 link: htdocs/editpics.bml, htdocs/uploadpic.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

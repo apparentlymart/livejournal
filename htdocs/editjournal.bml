@@ -1,27 +1,27 @@
-(=PAGE
+<?page
 TITLE=>Edit Journal Entries
 
 BODY<=
 
-(=H1 Edit Journal Entries H1=)
-(=P
+<?h1 Edit Journal Entries h1?>
+<?p
 Enter your username and password to modify or delete your past journal entries.
-P=)
+p?>
 
 <FORM ACTION="editjournal_do.bml" METHOD="POST">
 <INPUT TYPE=HIDDEN NAME=metamode VALUE="choose_editrange">
 
-(=STANDOUT
+<?standout
 <TABLE>
-(=_CODE
+<?_code
  return LJ::auth_fields(\%FORM);
- _CODE=)
+ _code?>
 <TR VALIGN=TOP><TD>View What Entries:</TD>
 <TD>
        <INPUT TYPE=RADIO NAME="selecttype" VALUE="last" CHECKED> Most recent entry<BR>
        <INPUT TYPE=RADIO NAME="selecttype" VALUE="lastn"> <INPUT NAME="howmany" SIZE=3 MAXLENGTH=2 VALUE="20"> most recent entries<BR>
        <INPUT TYPE=RADIO NAME="selecttype" VALUE="day"> Certain Day: 
-(=_CODE
+<?_code
 
 my $ret="";
 my (undef,undef,undef,$mday,$mon,$year,undef,undef,undef) = localtime(time);
@@ -32,21 +32,21 @@ $ret .= "<INPUT NAME=month SIZE=3 MAXLENGTH=2 VALUE=$mon>-";
 $ret .= "<INPUT NAME=day SIZE=3 MAXLENGTH=2 VALUE=$mday>\n";
 return $ret;
 
-_CODE=)
+_code?>
 
 </TD></TR>
 <TR><TD></TD><TD><INPUT TYPE="SUBMIT" VALUE="Proceed..."></TD></TR>
 </TABLE>
-STANDOUT=)
+standout?>
 
-(=H1 Forget something? H1=)
-(=P
+<?h1 Forget something? h1?>
+<?p
 If you forgot your username or password, <A HREF="lostinfo.bml">recover it here!</A>.
-P=)
+p?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 post: htdocs/editjournal_do.bml
 link: htdocs/lostinfo.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 

@@ -1,20 +1,20 @@
-(=PAGE
+<?page
 TITLE=>Export Journal
 
 BODY<=
 
-(=H1 Export Journal H1=)
-(=P
+<?h1 Export Journal h1?>
+<?p
 This feature lets you download your entire journal to a custom format for backup purposes.
-P=)
+p?>
 
 <form action="export_do.bml" method="post">
 
-(=STANDOUT
+<?standout
 <TABLE>
-(=_CODE
+<?_code
  return LJ::auth_fields(\%FORM);
- _CODE=)
+ _code?>
 <TR VALIGN=TOP><TD>Export what:</TD>
 <TD>
     <SELECT NAME="what">
@@ -58,15 +58,15 @@ P=)
 
 <TR><TD></TD><TD><INPUT TYPE="SUBMIT" VALUE="Proceed..."></TD></TR>
 </TABLE>
-STANDOUT=)
+standout?>
 
-(=H1 Forget something? H1=)
-(=P
+<?h1 Forget something? h1?>
+<?p
 If you forgot your username or password, <A HREF="lostinfo.bml">recover it here!</A>.
-P=)
+p?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/lostinfo.bml
 post: htdocs/export_do.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

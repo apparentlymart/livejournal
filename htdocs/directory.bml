@@ -1,8 +1,8 @@
-(=_CODE $head = ""; _CODE=)(=PAGE
+<?_code $head = ""; _code?><?page
 TITLE=>Search Results
 BODY<=
 
-(=_CODE
+<?_code
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
@@ -24,7 +24,7 @@ BODY<=
  {
      LJ::load_codes($dbs, { state => \%state, country => \%country  });
      $ret = "";
-     $ret .= "(=H1 Browse Journals by US State H1=)(=P Click a US state below to read journals from that state, or click a country name below the map to read journals from that country. P=)\n";
+     $ret .= "<?h1 Browse Journals by US State h1?><?p Click a US state below to read journals from that state, or click a country name below the map to read journals from that country. p?>\n";
      $ret .= "<FORM NAME=\"stateForm\"><P><CENTER>";
      $ret .= "<SCRIPT Language=\"JavaScript\"><!--\n document.write('<INPUT NAME=s TYPE=TEXT SIZE=30><BR>'); \n// --></SCRIPT>\n";
 
@@ -117,7 +117,7 @@ BODY<=
      $ret .= "</MAP>\n";
 
      # by country
-     $ret .= "(=H1 Browse Journals by Country H1=)(=P Select a country to read journals from that country...";
+     $ret .= "<?h1 Browse Journals by Country h1?><?p Select a country to read journals from that country...";
      $ret .= "<ul><table cellpadding=5><tr valign=top><td>";
      my $total = scalar(keys %{$count{'country'}});
      my $count = 0;
@@ -129,7 +129,7 @@ BODY<=
          if ($col==0 && $count > ($total/2)) { $ret .= "</td><td>"; $col = 1; }
      }
      $ret .= "</tr></table></ul>\n";
-     $ret .= " P=)\n";
+     $ret .= " p?>\n";
      return $ret;
  }
 
@@ -143,7 +143,7 @@ BODY<=
  }
 
  unless (LJ::Dir::do_search($dbr, $dbdir, \%FORM, \@matches, \%info)) {
-     return "(=H1 Error H1=)(=P Error: $info{'errmsg'} P=)";
+     return "<?h1 Error h1?><?p Error: $info{'errmsg'} p?>";
  }
 
  $info{'allwhat'} ||= "users";
@@ -189,7 +189,7 @@ BODY<=
 
  ########## make the navcrap
  my $navcrap;
- $navcrap .= "(=STANDOUT <CENTER><FONT FACE=\"Arial,Helvetica\" SIZE=-1><B>$info{'count'} matches</B>";
+ $navcrap .= "<?standout <CENTER><FONT FACE=\"Arial,Helvetica\" SIZE=-1><B>$info{'count'} matches</B>";
  if ($info{'count'}) {
      if ($info{'pages'} > 1) {
          $navcrap .= "<BR>Page $info{'page'} of $info{'pages'} shown (records $info{'first'}-$info{'last'})<BR>";
@@ -206,9 +206,9 @@ BODY<=
          }
          $navcrap .= "$right";
      }
-     $navcrap .= "</FONT></CENTER> STANDOUT=)\n";
+     $navcrap .= "</FONT></CENTER> standout?>\n";
  } else {
-     $navcrap .= "</CENTER> STANDOUT=)\n";
+     $navcrap .= "</CENTER> standout?>\n";
  }
  ####### end navcrap
 
@@ -240,7 +240,7 @@ BODY<=
                  if ($rec->{'city'}) {
                      $city = ", $rec->{'city'}";
                  }
-                 $ret .= "(=H1 $country$state$city H1=)<BR>";
+                 $ret .= "<?h1 $country$state$city h1?><BR>";
              }
          }
 
@@ -319,7 +319,7 @@ BODY<=
                  }
                  if ($pos > 1) { $ret .= "</TR>"; $pos = 1; }
                  $ret  .= "</TABLE>";
-                 $ret .= "(=H1 $country$state$city H1=)<BR>";
+                 $ret .= "<?h1 $country$state$city h1?><BR>";
                  $ret .= "<TABLE CELLPADDING=3>\n";
              }
          }
@@ -351,11 +351,11 @@ BODY<=
  return $ret;
 
 
-_CODE=)
+_code?>
 
 <=BODY
 HEAD<=
 <meta name="robots" content="noindex,nofollow">
-(=_CODE return $head; _CODE=)
+<?_code return $head; _code?>
 <=HEAD
-PAGE=)
+page?>

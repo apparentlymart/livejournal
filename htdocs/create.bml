@@ -1,11 +1,11 @@
-(=PAGE
+<?page
 TITLE=>Create New Journal
 BODY<=
-(=_CODE 
+<?_code 
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
- return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
+ return "<?badinput?>" unless LJ::text_in(\%FORM);
  
  my $mode = $FORM{'mode'};
 
@@ -41,7 +41,7 @@ BODY<=
      my $post = shift;
      my $msg = $errors{$key};
      return unless $msg;
-     return "$pre(=INERR $msg INERR=)$post";
+     return "$pre<?inerr $msg inerr?>$post";
  };
  
  # validate a code they've entered and throw them back to entercode
@@ -74,12 +74,12 @@ BODY<=
      $ret .= "<form method=\"post\" action=\"create.bml\">\n";
      $ret .= "<input type=\"hidden\" name=\"mode\" value=\"codesubmit\">\n";
 
-     $ret .= "(=H1 Welcome H1=)(=P To create a new account, enter an account creation code: P=)";
+     $ret .= "<?h1 Welcome h1?><?p To create a new account, enter an account creation code: p?>";
 
      $v = LJ::ehtml($FORM{'code'});
-     $ret .= "(=STANDOUT Code: <input type=\"text\" name=\"code\" value=\"$v\" size=\"13\" maxlength=\"12\"> <input type=\"submit\" value=\"Proceed...\">";
+     $ret .= "<?standout Code: <input type=\"text\" name=\"code\" value=\"$v\" size=\"13\" maxlength=\"12\"> <input type=\"submit\" value=\"Proceed...\">";
      $ret .= $error_msg->('code', '<br>');     
-     $ret .= " STANDOUT=)";
+     $ret .= " standout?>";
      $ret .= "</form>\n";
 
      open (REM, "$LJ::HOME/htdocs/inc/account-codes");
@@ -199,7 +199,7 @@ BODY<=
                   "VALUES ($quser, $qemail, $qpassword, '$status', $caps, $qname, $qclusterid, $qdversion)");
          if ($dbh->err)
          {
-             return "(=H1 Error H1=)(=P There was an error processing your request: <B>" . $dbh->errstr . "</B> P=)";
+             return "<?h1 Error h1?><?p There was an error processing your request: <B>" . $dbh->errstr . "</B> p?>";
          }
          $userid = $dbh->{'mysql_insertid'};
          $dbh->do("REPLACE INTO useridmap (userid, user) VALUES ($userid, $quser)");
@@ -257,9 +257,9 @@ BODY<=
      print MAIL $etemp;
      close MAIL;
      
-     $ret = "(=H1 Success! H1=)(=P Your journal has been created.  Important registration information has been emailed to <FONT FACE=Arial SIZE=+1><B>$email</B></FONT> containing further instructions.  <B>Note: </B>  You have exactly <I>seven days</I> to confirm your journal creation.  If you still haven't gone and set it up after seven days the username of <B>$user</B> will be automatically deleted and somebody else may use it. P=)";
-     $ret .= "(=P Your LiveJournal will be available at: P=)(=STANDOUT <FONT SIZE=+1 FACe=Arial><B><A HREF=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</A></B></FONT> STANDOUT=)";
-     $ret .= "(=P Now, please take the time to fill in some information about yourself.  It's mostly optional, but it lets us get an idea of who's using LiveJournal. P=)";
+     $ret = "<?h1 Success! h1?><?p Your journal has been created.  Important registration information has been emailed to <FONT FACE=Arial SIZE=+1><B>$email</B></FONT> containing further instructions.  <B>Note: </B>  You have exactly <I>seven days</I> to confirm your journal creation.  If you still haven't gone and set it up after seven days the username of <B>$user</B> will be automatically deleted and somebody else may use it. p?>";
+     $ret .= "<?p Your LiveJournal will be available at: p?><?standout <FONT SIZE=+1 FACe=Arial><B><A HREF=\"$LJ::SITEROOT/users/$user/\">$LJ::SITEROOT/users/$user/</A></B></FONT> standout?>";
+     $ret .= "<?p Now, please take the time to fill in some information about yourself.  It's mostly optional, but it lets us get an idea of who's using LiveJournal. p?>";
      
      $ret .= "<center><form method='post' action=\"/editinfo.bml\">";
      $ret .= "<INPUT TYPE=HIDDEN NAME=user VALUE=\"$user\">\n";
@@ -277,20 +277,20 @@ BODY<=
      my $ret;
      my $v;
 
-     $ret .= "(=H1 Creating a New Journal H1=)(=P Creating a new LiveJournal is easy, just follow the instructions below! P=)(=HR=)";
+     $ret .= "<?h1 Creating a New Journal h1?><?p Creating a new LiveJournal is easy, just follow the instructions below! p?><?hr?>";
      $ret .= "<form action=\"create.bml\" method=\"post\">\n";
      $ret .= "<input type=\"hidden\" name=\"mode\" value=\"submit\">\n";
      $ret .= "<input type=\"hidden\" name=\"code\" value=\"" . LJ::ehtml($FORM{'code'}) . "\">\n";     
 
-     $ret .= "(=H2 Username H2=)";
-     $ret .= "(=P Each $LJ::SITENAME user must have their own unique username.  Your username is what appears in the address to your journal and what you use to log into the $LJ::SITENAME server.  It also shows up when you post comments in other people's journal. P=)";
+     $ret .= "<?h2 Username h2?>";
+     $ret .= "<?p Each $LJ::SITENAME user must have their own unique username.  Your username is what appears in the address to your journal and what you use to log into the $LJ::SITENAME server.  It also shows up when you post comments in other people's journal. p?>";
      
      $v = LJ::ehtml($FORM{'user'});
-     $ret .= "(=STANDOUT <table><tr><td align=\"center\"><table><tr><td>Username:<br /><input value=\"$v\" type=\"text\" name=\"user\" size=\"15\" maxlength=\"15\"></td></tr></table></td></tr>";
+     $ret .= "<?standout <table><tr><td align=\"center\"><table><tr><td>Username:<br /><input value=\"$v\" type=\"text\" name=\"user\" size=\"15\" maxlength=\"15\"></td></tr></table></td></tr>";
      $ret .= "<tr><td>";
      $ret .= $error_msg->('username', '', '<br>');
      $ret .= "<font face=\"Arial,Helvetica\" size=\"-1\">&nbsp;<br />";
-     $ret .= "<b>Your journal will be at these addresses:</b><br />&nbsp;&nbsp;&nbsp;&nbsp;(=SITEROOT=)/users/<I>username</I>/<br />&nbsp;&nbsp;&nbsp;&nbsp;(=SITEROOT=)/<i>~username</i>/<br />";
+     $ret .= "<b>Your journal will be at these addresses:</b><br />&nbsp;&nbsp;&nbsp;&nbsp;<?siteroot?>/users/<I>username</I>/<br />&nbsp;&nbsp;&nbsp;&nbsp;<?siteroot?>/<i>~username</i>/<br />";
      if ($LJ::USER_VHOSTS) {
          unless ($LJ::EVERYONE_PAID) {
              $ret .= "<B>Or, for paid accounts:</B><BR>";
@@ -298,52 +298,52 @@ BODY<=
          $ret .= "&nbsp;&nbsp;&nbsp;&nbsp;http://<I>username</I>.$LJ::USER_DOMAIN/<br>";
      }
      $ret .= "</font></td></tr>";
-     $ret .= "</table> STANDOUT=)";
+     $ret .= "</table> standout?>";
 
      #### name
      $v = LJ::ehtml($FORM{'name'});
-     $ret .= "(=H2 Your Name H2=)(=P What's your name or handle?  This will appear at the top of your journal, and in the user directory should you choose to be listed in it.  You do not have to provide your full name or even your real name. P=)(=STANDOUT Name:<br /><input value=\"$v\" type=\"text\" name=\"name\" size=\"40\" maxlength=\"100\">";
+     $ret .= "<?h2 Your Name h2?><?p What's your name or handle?  This will appear at the top of your journal, and in the user directory should you choose to be listed in it.  You do not have to provide your full name or even your real name. p?><?standout Name:<br /><input value=\"$v\" type=\"text\" name=\"name\" size=\"40\" maxlength=\"100\">";
      $ret .= $error_msg->('name', '<br>', '');
-     $ret .= " STANDOUT=)";
+     $ret .= " standout?>";
      
-     $ret .= "(=H2 Your email address H2=)(=P For verification and security purposes, we need your email address.  It will be never ever, under any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a href=\"/legal/privacy.bml\" TARGET=\"privacy\">privacy policy</a> for more information. P=)";
+     $ret .= "<?h2 Your email address h2?><?p For verification and security purposes, we need your email address.  It will be never ever, under any circumstances, be sold or given away to spammers.  We hate that more than anything.  Read our <a href=\"/legal/privacy.bml\" TARGET=\"privacy\">privacy policy</a> for more information. p?>";
 
      ### email address
      $v = LJ::ehtml($FORM{'email'});     
-     $ret .= "(=STANDOUT <table width=\"250\"><tr><td valign=\"top\" align=\"left\">Email Address:<br /><input value=\"$v\" type=\"text\" name=\"email\" size=\"40\" maxlength=\"50\">";
+     $ret .= "<?standout <table width=\"250\"><tr><td valign=\"top\" align=\"left\">Email Address:<br /><input value=\"$v\" type=\"text\" name=\"email\" size=\"40\" maxlength=\"50\">";
      $ret .= $error_msg->('email', '<br>', '');
-     $ret .= "</td></tr></table> STANDOUT=)";
+     $ret .= "</td></tr></table> standout?>";
 
-     $ret .= "(=H2 Password H2=)(=P Select a password. P=)";
+     $ret .= "<?h2 Password h2?><?p Select a password. p?>";
 
      ### password
-     $ret .= "(=STANDOUT Password:<br /><input type=\"password\" name=\"password1\" size=\"30\" maxlength=\"30\"><br />Re-type password:<br /><input type=\"password\" name=\"password2\" size=\"30\" maxlength=\"30\">";
+     $ret .= "<?standout Password:<br /><input type=\"password\" name=\"password1\" size=\"30\" maxlength=\"30\"><br />Re-type password:<br /><input type=\"password\" name=\"password2\" size=\"30\" maxlength=\"30\">";
      $ret .= $error_msg->('password', '<br>', '');
-     $ret .= " STANDOUT=)";
+     $ret .= " standout?>";
      
      unless ($LJ::INTRANET)
      {
-         $ret .= "(=H2 Notice to AOL Users H2=)(=P If you are an <b>AOL User</b>, make sure you go to <b>Keyword: <i>Mail Controls</i></b> and <b>turn off</b> any of AOL's \"useful\" mail controls.  You must be able to receive mail from the Internet or you will not recieve your confirmation code.  If your parents have this restricted, perhaps you really shouldn't be using (=SITENAME=). P=)";
+         $ret .= "<?h2 Notice to AOL Users h2?><?p If you are an <b>AOL User</b>, make sure you go to <b>Keyword: <i>Mail Controls</i></b> and <b>turn off</b> any of AOL's \"useful\" mail controls.  You must be able to receive mail from the Internet or you will not recieve your confirmation code.  If your parents have this restricted, perhaps you really shouldn't be using <?sitename?>. p?>";
 
-         $ret .= "(=H2 Age H2=)(=P Are you under 13 years of age? <blockquote><input type=\"checkbox\" value=\"1\" name=\"under13\"> Yes, I am under 13 years old.</blockquote>  P=)";
+         $ret .= "<?h2 Age h2?><?p Are you under 13 years of age? <blockquote><input type=\"checkbox\" value=\"1\" name=\"under13\"> Yes, I am under 13 years old.</blockquote>  p?>";
      }
 
      if ($LJ::ALLOW_CLUSTER_SELECT) {
-         $ret .= "(=H2 Cluster Selection H2=)(=P Please select the cluster you want to create this ".
+         $ret .= "<?h2 Cluster Selection h2?><?p Please select the cluster you want to create this ".
              "account on. <b>Note:</b>  This is a debugging/test option only.  In production, users won't ".
-             "pick this, or know anything about it.  P=)";
-         $ret .= "(=STANDOUT Cluster:<br />";
+             "pick this, or know anything about it.  p?>";
+         $ret .= "<?standout Cluster:<br />";
          $ret .= LJ::html_select({ 'name' => 'cluster_id' },
                                  "0", "No Cluster", 
                                  map { $_, "Cluster $_" } @LJ::CLUSTERS);
-         $ret .= " STANDOUT=)"; 
+         $ret .= " standout?>"; 
      }
 
-     $ret .= "(=H2 Proceed H2=)(=P Press the button below and you're on your way to having your very own LiveJournal! P=)";
+     $ret .= "<?h2 Proceed h2?><?p Press the button below and you're on your way to having your very own LiveJournal! p?>";
 
-     $ret .= "(=STANDOUT <center><input type=\"submit\" value=\"Proceed...\"><br />";
+     $ret .= "<?standout <center><input type=\"submit\" value=\"Proceed...\"><br />";
      $ret .= "<font size=\"-1\">Only press <b>Proceed</b> <i>once</i>!!</font>";
-     $ret .= "</center> STANDOUT=)";
+     $ret .= "</center> standout?>";
      $ret .= "</form>";
 
      return $ret;
@@ -351,12 +351,12 @@ BODY<=
 
  return "Unknown mode: <b>$mode</b>";
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/legal/privacy.bml
 post: htdocs/create.bml, htdocs/editinfo.bml
 file: htdocs/inc/account-codes, htdocs/inc/email-welcome
 hook: post_create
-</LJDEP> _C=)
+</LJDEP> _c?>

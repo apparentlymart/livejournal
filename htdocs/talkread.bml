@@ -1,8 +1,8 @@
-(=PAGE
-TITLE=>(=_ML .title _ML=)
+<?page
+TITLE=><?_ml .title _ml?>
 BODY<=
 
-(=_CODE
+<?_code
 #BML:cache:talkread
 
  use strict;
@@ -46,7 +46,7 @@ BODY<=
  my $init = LJ::Talk::init($dbs, \%FORM);
  my $u = $init->{'journalu'};
 
- return "(=H1 $ML{'Error'} H1=)(=P $init->{'error'} P=)" if $init->{'error'}; 
+ return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
  return $ML{'talk.error.nojournal'} unless $u;
 
  my $clustered = $init->{'clustered'};
@@ -74,7 +74,7 @@ BODY<=
  }
 
  unless ($item && $item->{'anum'} == $init->{'anum'}) {
-     return "(=H1 $ML{'Error'} H1=)(=P $ML{'talk.error.noentry'} P=)";
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
  }
 
  my %logprops = %{$item->{'logprops'}};
@@ -93,7 +93,7 @@ BODY<=
  LJ::text_out(\$u->{'name'});
 
  # check suspended
- return "(=H1 $ML{'talk.error.suspended.title'} H1=)(=P $ML{'talk.error.suspended'} P=)"
+ return "<?h1 $ML{'talk.error.suspended.title'} h1?><?p $ML{'talk.error.suspended'} p?>"
  if ($u->{'statusvis'} eq "S" || $up->{'statusvis'} eq "S");
 
  my $remote = LJ::get_remote($dbs);
@@ -140,7 +140,7 @@ BODY<=
  } else {
      $ret .= BML::ml("talk.somebodywrote_comm", { 'realname' => BML::eall($up->{'name'}),
                                                   'userlink' => LJ::ljuser($up->{'user'}),
-                                                  'commlink' => "(=LJCOMM $u->{'user'} LJCOMM=)" });
+                                                  'commlink' => "<?ljcomm $u->{'user'} ljcomm?>" });
  }
 
  my $etime = $item->{'eventtime'};
@@ -192,9 +192,9 @@ BODY<=
      ### security indicator
      my $sec = "";
      if ($item->{'security'} eq "private") {
-         $sec = "(=SECURITYPRIVATE=)";
+         $sec = "<?securityprivate?>";
      } elsif ($item->{'security'} eq "usemask") {
-         $sec = "(=SECURITYPROTECTED=)";
+         $sec = "<?securityprotected?>";
      }
 
      $sec .= "<br />\n" unless $sec eq "" or $item->{'subject'};
@@ -402,7 +402,7 @@ BODY<=
  ########## make the navcrap
  my $navcrap;
  if ($pages > 1) {
-     $navcrap .= "(=STANDOUT <center><font face='Arial,Helvetica' size='-1'><b>";
+     $navcrap .= "<?standout <center><font face='Arial,Helvetica' size='-1'><b>";
      $navcrap .= BML::ml('.pageofpages',{'page'=>$page, 'total'=>$pages}) . "<br />";
      my $left = "<b>&lt;&lt;</b>";
      if ($page > 1) { $left = "<a href='" . LJ::self_link(\%FORM, { 'page' => $page-1 }) . "'>$left</a>"; }
@@ -416,7 +416,7 @@ BODY<=
          $navcrap .= "$link ";
      }
      $navcrap .= "$right";
-     $navcrap .= "</font></center> STANDOUT=)\n";
+     $navcrap .= "</font></center> standout?>\n";
  }
  ####### end navcrap
 
@@ -427,7 +427,7 @@ BODY<=
      return if ($mark->{$tid});
      $mark->{$tid} = 1;
 
-     my $bgcolor = ($opts->{'depth'} % 2) ? "(=EMCOLORLITE=)" : "(=EMCOLOR=)";
+     my $bgcolor = ($opts->{'depth'} % 2) ? "<?emcolorlite?>" : "<?emcolor?>";
      
      # find child messages (replys to $tid)
     my @childs = sort { $postref->{$a}->{'datepost'} cmp $postref->{$b}->{'datepost'} }
@@ -467,7 +467,7 @@ BODY<=
             $$ret .= "<td>$ML{'.replysuspended'}</td></tr></table>\n";
         } else {
             if ($userpost) {
-                $user = "(=LJUSER $userpost LJUSER=)";
+                $user = "<?ljuser $userpost ljuser?>";
             }
             my $icon = LJ::Talk::show_image($pics, $post->{'subjecticon'});
 
@@ -534,7 +534,7 @@ BODY<=
                 $$ret .= "</td></tr>";
                 $$ret .= "<tr><td>\n";
 
-                ## escape BML block codes.  so (=TAG ... TAG=) turns into (&#0061; ... TAG=)
+                ## escape BML block codes.  so <?tag ... tag?> turns into (&#0061; ... tag?>
                 $post->{'body'} =~ s/\(=/\(&\#0061\;/g;
                 LJ::CleanHTML::clean_comment(\$post->{'body'}, $post->{'opt_preformatted'});
                 $$ret .= $post->{'body'};
@@ -614,13 +614,13 @@ BODY<=
 LJ::strip_bad_code(\$ret);
 return $ret;
 
-_CODE=)
+_code?>
 <=BODY
-HEAD=>(=_CODE return $_[1] ? $_[1]->{'head'} : $r_head _CODE=)
-PAGE=)(=_C <LJDEP>
+HEAD=><?_code return $_[1] ? $_[1]->{'head'} : $r_head _code?>
+page?><?_c <LJDEP>
 link: htdocs/userinfo.bml, htdocs/go.bml, htdocs/tools/memadd.bml, htdocs/editjournal_do.bml, htdocs/topics/additem.bml
 link: htdocs/tools/tellafriend.bml, htdocs/talkpost.bml, htdocs/talkread.bml, htdocs/delcomment.bml
 img: htdocs/img/btn_prev.gif, htdocs/img/memadd.gif, htdocs/img/btn_edit.gif, htdocs/img/topic_add.gif, htdocs/img/btn_tellafriend.gif
 img: htdocs/img/btn_next.gif, htdocs/img/dot.gif, htdocs/img/delcomment.gif
-</LJDEP> _C=)
+</LJDEP> _c?>
 

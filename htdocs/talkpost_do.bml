@@ -1,8 +1,8 @@
-(=PAGE
-TITLE=>(=_ML .title _ML=)
+<?page
+TITLE=><?_ml .title _ml?>
 BODY<=
 
-(=_CODE
+<?_code
 
  use strict;
  use vars qw(%FORM %ML);
@@ -29,7 +29,7 @@ BODY<=
  my $init = LJ::Talk::init($dbs, \%FORM);
  my $u = $init->{'journalu'};
 
- return "(=H1 $ML{'Error'} H1=)(=P $init->{'error'} P=)" if $init->{'error'}; 
+ return "<?h1 $ML{'Error'} h1?><?p $init->{'error'} p?>" if $init->{'error'}; 
  return $ML{'talk.error.nojournal'} unless $u;
  return $LJ::MSG_READONLY_USER if LJ::get_cap($u, "readonly");
 
@@ -65,7 +65,7 @@ BODY<=
  }
 
  unless ($item && $item->{'anum'} == $init->{'anum'}) {
-     return "(=H1 $ML{'Error'} H1=)(=P $ML{'talk.error.noentry'} P=)";
+     return "<?h1 $ML{'Error'} h1?><?p $ML{'talk.error.noentry'} p?>";
  }
 
  my %logprops = %{$item->{'logprops'}};
@@ -217,7 +217,7 @@ BODY<=
  
  # now check for UTF-8 correctness, it must hold
 
- return "(=BADINPUT=)" unless LJ::text_in(\%FORM);
+ return "<?badinput?>" unless LJ::text_in(\%FORM);
 
  my $unknown8bit = 0;
  unless (LJ::is_ascii($FORM{'body'}) && LJ::is_ascii($FORM{'subject'})) {
@@ -252,7 +252,7 @@ BODY<=
  ## preview
 
  if ($FORM{'submitpreview'}) {
-     $ret .= "(=H1 $ML{'.preview.title'} H1=)(=P $ML{'.preview'} P=)(=HR=)";
+     $ret .= "<?h1 $ML{'.preview.title'} h1?><?p $ML{'.preview'} p?><?hr?>";
 
      my $event = $FORM{'body'};
      LJ::CleanHTML::clean_comment(\$event, $FORM{'prop_opt_preformatted'});
@@ -750,11 +750,11 @@ BODY<=
  # Yeah, we're done.
  my $commentlink = "talkread.bml?${jargent}itemid=$ditemid&amp;view=$dtalkid#t$dtalkid";
 
- $ret .= "(=H1 $ML{'.success.title'} H1=)";
- $ret .= "(=P " . BML::ml('.success.message', {'link'=>$commentlink}) . " P=)";
+ $ret .= "<?h1 $ML{'.success.title'} h1?>";
+ $ret .= "<?p " . BML::ml('.success.message', {'link'=>$commentlink}) . " p?>";
 
  if ($didlogin) {
-     $ret .= "(=P $ML{'.success.loggedin'} P=)";
+     $ret .= "<?p $ML{'.success.loggedin'} p?>";
  }
 
  if ($DEBUG) {
@@ -779,12 +779,12 @@ sub blockquote {
      return "<blockquote style='BORDER-LEFT: #000040 2px solid; MARGIN-LEFT: 0px; MARGIN-RIGHT: 0px; PADDING-LEFT: 15px; PADDING-RIGHT: 0px'>$a</blockquote>";
 }
 
-_CODE=)
+_code?>
 
 
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/lostinfo.bml, htdocs/userinfo.bml, htdocs/talkread.bml, htdocs/editinfo.bml
 post: htdocs/talkpost_do.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

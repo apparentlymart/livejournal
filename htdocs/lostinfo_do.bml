@@ -1,10 +1,10 @@
-(=_INFO
+<?_info
 NOCACHE=>1
-_INFO=)(=PAGE
-TITLE=>(=_ML .title _ML=)
+_info?><?page
+TITLE=><?_ml .title _ml?>
 BODY<=
 
-(=_CODE
+<?_code
 
  return LJ::server_down_html() if ($LJ::SERVER_DOWN);
 
@@ -75,7 +75,7 @@ BODY<=
      print MAIL "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
      close MAIL;
 
-     return "(=H1 $ML{'.password_mailed.title'} H1=)\n(=P $ML{'.password_mailed.text'} P=)";
+     return "<?h1 $ML{'.password_mailed.title'} h1?>\n<?p $ML{'.password_mailed.text'} p?>";
  }
 
 
@@ -111,14 +111,14 @@ BODY<=
      print MAIL "Regards,\n$LJ::SITENAME Team\n\n$LJ::SITEROOT/\n";
      close MAIL;
 
-     return "(=H1 $ML{'.username_mailed.title'} H1=)\n(=P $ML{'.username_mailed.text'} P=)";
+     return "<?h1 $ML{'.username_mailed.title'} h1?>\n<?p $ML{'.username_mailed.text'} p?>";
  }
 
  return $ML{'error.nobutton'};
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
-</LJDEP> _C=)
+page?><?_c <LJDEP>
+</LJDEP> _c?>
 

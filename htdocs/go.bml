@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  use strict;
  use vars qw(%FORM $title $body);
@@ -59,9 +59,9 @@
 
  return;
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 link: htdocs/talkread.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

@@ -1,18 +1,18 @@
-(=PAGE
+<?page
 TITLE=>LiveJournal Moods
 BODY<=
 
-(=H1 Moods H1=)
-(=P
-The following are server-supported moods on (=SITENAME=).  You can always enter your own, but these are the ones that can have pictures associated with them and can be searched on, etc.  You're encouraged to use these if possible.
-P=)
-(=P
+<?h1 Moods h1?>
+<?p
+The following are server-supported moods on <?sitename?>.  You can always enter your own, but these are the ones that can have pictures associated with them and can be searched on, etc.  You're encouraged to use these if possible.
+p?>
+<?p
 <B>To change the icons in your journal</B>, go to the <A HREF="/modify.bml">modify journal page</A> and select your preferred icon set.
-P=)
+p?>
 
-(=HR=)
+<?hr?>
 
-(=_CODE
+<?_code
  my $ret = "";
  my $sth;
 
@@ -73,11 +73,11 @@ P=)
      $ret .= "</UL>\n";
  }
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 form: htdocs/moodlist.bml
 link: htdocs/modify.bml
-</LJDEP> _C=)
+</LJDEP> _c?>
 

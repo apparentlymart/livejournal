@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  my @errors = ();
  my $user = lc($FORM{'user'});
@@ -14,22 +14,22 @@
          delete $COOKIE{$_};
      }
      BML::set_language(BML::decide_language());
-     $body .= "(=H1 Logged out H1=)\n";
-     $body .= "(=P You are now logged out. P=)";
+     $body .= "<?h1 Logged out h1?>\n";
+     $body .= "<?p You are now logged out. p?>";
 
  } else {
 
-     $body .= "(=H1 Already logged out H1=)\n";
-     $body .= "(=P You are already logged out. P=)";
+     $body .= "<?h1 Already logged out h1?>\n";
+     $body .= "<?p You are already logged out. p?>";
  }
  
  return;
 
-_CODE=)
-(=_INFO
+_code?>
+<?_info
 NOCACHE=>1
-_INFO=)(=PAGE
+_info?><?page
 TITLE=>Logout
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
-</LJDEP> _C=)
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
+</LJDEP> _c?>

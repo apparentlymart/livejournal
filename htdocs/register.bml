@@ -1,11 +1,11 @@
-(=_INFO
+<?_info
 NOCACHE=>1
-_INFO=)(=PAGE
+_info?><?page
 TITLE=>Registration
 
 BODY<=
 
-(=_CODE
+<?_code
 
  my $dbs = LJ::get_dbs();
  my $dbh = $dbs->{'dbh'};
@@ -53,11 +53,11 @@ BODY<=
  $dbh->do("UPDATE user SET status='A' WHERE userid=$u->{'userid'}");
 
  if ($u->{'status'} eq "T") {
-     $ret .= "(=H1 Registration Complete H1=)(=P Thanks!  Your new email address has now been verified. P=)";
+     $ret .= "<?h1 Registration Complete h1?><?p Thanks!  Your new email address has now been verified. p?>";
  }
  else 
  {
-     $ret .= "(=H1 Registration Complete H1=)(=P Thanks!  Your email address has now been verified.  From here, you may be interested in doing the following things: P=)<ul>";
+     $ret .= "<?h1 Registration Complete h1?><?p Thanks!  Your email address has now been verified.  From here, you may be interested in doing the following things: p?><ul>";
      $ret .= "<li><a href=\"/login.bml\"><b>Login</b></a> - so you don't have to enter your username and password everywhere";
      $ret .= "<li><a href=\"/editinfo.bml\"><b>Edit Personal Info</b></a> - fill out your user profile and set various settings";
      $ret .= "<li><a href=\"/modify.bml\"><b>Modify Journal</b></a> - modify the look of your journal";
@@ -66,9 +66,9 @@ BODY<=
 
  return $ret;
 
-_CODE=)
+_code?>
 
 <=BODY
-PAGE=)(=_C <LJDEP>
+page?><?_c <LJDEP>
 link: htdocs/login.bml, htdocs/editinfo.bml, htdocs/modify.bml, htdocs/update.bml
-</LJDEP> _C=)
+</LJDEP> _c?>

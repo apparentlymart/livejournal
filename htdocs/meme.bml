@@ -1,4 +1,4 @@
-(=_CODE
+<?_code
 
  $title = "Meme Tracker";
  $body = "";
@@ -16,7 +16,7 @@
      my $eurl = LJ::ehtml($url);
      my $uurl = LJ::eurl($url);
 
-     $body .= "(=H1 Who linked this? H1=)(=P The following journal entries link to:<blockquote><a href='$eurl'><b>$eurl</b></a></blockquote>P=)";
+     $body .= "<?h1 Who linked this? h1?><?p The following journal entries link to:<blockquote><a href='$eurl'><b>$eurl</b></a></blockquote>p?>";
 
      $body .= "<table>";
      $body .= "<tr align='left'><td width='100'><b>User</b></td><td><b>Post Link</b></td></tr>\n";
@@ -27,7 +27,7 @@
      while (my ($journal, $itemid) = $sth->fetchrow_array)
      {
          $body .= "<tr align='left'><td>";
-         $body .= "(=LJUSER $journal LJUSER=)" if $journal;
+         $body .= "<?ljuser $journal ljuser?>" if $journal;
          $body .= "</td>";
          my $jarg = $journal ? "journal=$journal&amp;" : "";
          $body .= "<td><a href='$LJ::SITEROOT/talkread.bml?${jarg}itemid=$itemid'>post</a></td>";
@@ -51,12 +51,12 @@
          $body .= "<p>[&nbsp;" . join("&nbsp;|&nbsp;", @pagers) . "&nbsp;]</p>";
      }
 
-     $body .= "(=HR=)&lt;&lt; <a href='meme.bml'>Back to Meme Listing</a>";
+     $body .= "<?hr?>&lt;&lt; <a href='meme.bml'>Back to Meme Listing</a>";
      return;
  }
 
- $body .= "(=H1 Top 40 $LJ::SITENAME Memes H1=)\n";
- $body .= "(=P From this page you can see the most popular URLs referenced recently. P=)(=HR=)";
+ $body .= "<?h1 Top 40 $LJ::SITENAME Memes h1?>\n";
+ $body .= "<?p From this page you can see the most popular URLs referenced recently. p?><?hr?>";
 
  $sth = $dbr->prepare("SELECT statkey, statval FROM stats WHERE statcat='popmeme' ORDER BY 2 DESC LIMIT 100");
  $sth->execute;
@@ -75,10 +75,10 @@
  return;
  
 
-_CODE=)(=PAGE
-TITLE=>(=_CODE return $title; _CODE=)
-BODY=>(=_CODE return $body; _CODE=)
-PAGE=)(=_C <LJDEP>
+_code?><?page
+TITLE=><?_code return $title; _code?>
+BODY=><?_code return $body; _code?>
+page?><?_c <LJDEP>
 link: htdocs/talkread.bml, htdocs/meme.bml
 lib: cgi-bin/cleanhtml.pl
-</LJDEP> _C=)
+</LJDEP> _c?>
