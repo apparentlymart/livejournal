@@ -662,6 +662,19 @@ $cmd{'syn_editurl'} = {
                ],
     };
 
+$cmd{'syn_merge'} = {
+    'handler' => \&syn_merge,
+    'privs' => [qw(syn_edit)],
+    'des' => "Merge two syndicated accounts into one, keeping an optionally specified url for the final. " .
+        "Sets up redirection between from_user and to_user, swapping feed urls if there will be a conflict.",
+    'argsummary' => '<from_user> to <to_user> [using <url>]',
+    'args' => [
+               'from_user' => "Syndicated account to merge into another.",
+               'to_user'   => "Syndicated account to merge 'from_user' into.",
+               'url'       => "Optional.  Url to use for 'to_user' once merge is complete.",
+               ],
+    };
+
 $cmd{'allow_open_proxy'} = {
     'handler' => \&allow_open_proxy,
     'privs' => [qw(allowopenproxy)],
@@ -1322,6 +1335,98 @@ sub syn_editurl
         push @$out, [ '', "URL for account $user changed to $newurl ." ];
     }
     return 1;
+}
+
+sub syn_merge
+{
+    my ($dbh, $remote, $args, $out) = @_;
+    my $err = sub { push @$out, [ "error", $_[0] ]; 0; };
+
+    return $err->("This command takes either 3 or 5 arguments.")
+        unless @$args == 4 || @$args == 6; # 0 is 'syn_merge'
+
+    return $err->("Second argument must be 'to'.")
+        unless $args->[2] eq 'to';
+
+    return $err->("Fourth argument must be 'using'.")
+        if @$args == 6 && $args->[4] ne 'using';
+
+    my $from_user = LJ::canonical_username($args->[1]);
+    my $from_u = LJ::load_user($from_user)
+        or return $err->("Invalid user: '$from_user'.");
+    my $from_userid = $from_u->{userid};
+
+    my $to_user = LJ::canonical_username($args->[3]);
+    my $to_u = LJ::load_user($to_user)
+        or return $err->("Invalid user: '$to_user'.");
+    my $to_userid = $to_u->{userid};
+
+    foreach ($to_u, $from_u) {
+        return $err->("Invalid user: '$_->{user}' (statusvis=$_->{statusvis}, already merged?)")
+            unless $_->{statusvis} eq 'V';
+    }
+
+    my $url = undef;
+    if (@$args == 6) {
+        $url = LJ::CleanHTML::canonical_url($args->[5])
+            or return $err->("Invalid url.");
+    }
+
+    # 1) set up redirection for 'from_user' -> 'to_user'
+    LJ::update_user($from_u, { 'journaltype' => 'R', 'statusvis' => 'R' });
+    LJ::set_userprop($from_u, 'renamedto' => $to_user);
+
+    # 2) update the url of the destination syndicated account, if applicable
+    if ($url) {
+
+        # if the from_u's url is the same as what we're about to set the to_u's url to, then
+        # we'll get a duplicate key error.  if this is the case, our behavior will be to 
+        # swap the two.
+        my $urls = $dbh->selectall_hashref("SELECT userid, synurl FROM syndicated " .
+                                           "WHERE userid=? OR userid=?",
+                                           'userid', undef, $from_userid, $to_userid);
+        return $err->("Missing 'syndicated' rows: Possible corruption?")
+            unless $urls && $urls->{$from_userid} && $urls->{$to_userid};
+
+        if ($urls->{$from_userid}->{synurl} eq $url) {
+
+            # clear the to_u's synurl, we'll update it back in a sec
+            $dbh->do("UPDATE syndicated SET synurl=NULL WHERE userid=?",
+                     undef, $to_userid);
+
+            # now update from_u's url to be to_u's old url
+            $dbh->do("UPDATE syndicated SET synurl=? WHERE userid=?",
+                     undef, $urls->{$to_userid}->{synurl}, $from_userid);
+            return $err->("Database Error: " . $dbh->errstr) if $dbh->err;
+        }
+
+        # after possibly swapping above, update the to_u's synurl
+        # ... should have no errors
+        $dbh->do("UPDATE syndicated SET synurl=? WHERE userid=?",
+                 undef, $url, $to_userid);
+        return $err->("Database Error: " . $dbh->errstr) if $dbh->err;
+    }
+
+    # 3) make users who befriend 'from_user' now befriend 'to_user'
+    #    'force' so we get master db and there's no row limit
+    if (my @ids = LJ::get_friendofs($from_u, { force => 1 } )) {
+
+        # update ignore so we don't raise duplicate key errors
+        $dbh->do("UPDATE IGNORE friends SET friendid=? WHERE friendid=?",
+                 undef, $to_userid, $from_userid);
+        return $err->("Database Error: " . $dbh->errstr) if $dbh->err;
+
+        # in the event that some rows in the update above caused a duplicate key error,
+        # we can delete the rows that weren't updated, since they don't need to be
+        # processed anyway
+        $dbh->do("DELETE FROM friends WHERE friendid=?", undef, $from_userid);
+        return $err->("Database Error: " . $dbh->errstr) if $dbh->err;
+
+        # clear memcache keys
+        LJ::memcache_kill($_, 'friend') foreach @ids;
+    }
+
+    push @$out, [ '', "Syndicated accounts merged: '$from_user' to '$to_user'" ];
 }
 
 sub reset_password
