@@ -434,11 +434,11 @@
       }
       if ($u->{'icq'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b>$ML{'.label.icquin'}</b></td><td colspan='$span'><img src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18' /> $u->{'icq'} (<b><a href='http://wwp.icq.com/scripts/search.dll?to=$u->{'icq'}'>$ML{'.label.adduser'}</a>, <a href='http://wwp.icq.com/scripts/contact.dll?msgto=$u->{'icq'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
+          $body .= "<tr><td align='right'><b>$ML{'.label.icquin'}</b></td><td colspan='$span'><img alt='ICQ status' src='http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5' height='18' width='18' /> $u->{'icq'} (<b><a href='http://wwp.icq.com/scripts/search.dll?to=$u->{'icq'}'>$ML{'.label.adduser'}</a>, <a href='http://wwp.icq.com/scripts/contact.dll?msgto=$u->{'icq'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
       }
       if ($u->{'yahoo'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
-          $body .= "<tr><td align='right'><b style='white-space: nowrap;'>$ML{'.label.yahooid'}</b></td><td colspan='$span'><img src='http://opi.yahoo.com/online?u=$u->{'yahoo'}&m=g&t=0' width='12' height='12' /> <a href='http://profiles.yahoo.com/$u->{'yahoo'}'>$u->{'yahoo'}</a> (<b><a href='http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=$u->{'yahoo'}'>$ML{'.label.adduser'}</a>, <a href='http://edit.yahoo.com/config/send_webmesg?.target=$u->{'yahoo'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
+          $body .= "<tr><td align='right'><b style='white-space: nowrap;'>$ML{'.label.yahooid'}</b></td><td colspan='$span'><img alt='Yahoo status' src='http://opi.yahoo.com/online?u=$u->{'yahoo'}&amp;m=g&amp;t=0' width='12' height='12' /> <a href='http://profiles.yahoo.com/$u->{'yahoo'}'>$u->{'yahoo'}</a> (<b><a href='http://edit.yahoo.com/config/set_buddygrp?.src=&amp;.cmd=a&amp;.bg=Friends&amp;.bdl=$u->{'yahoo'}'>$ML{'.label.adduser'}</a>, <a href='http://edit.yahoo.com/config/send_webmesg?.target=$u->{'yahoo'}'>$ML{'.label.sendmessage'}</a></b>) </td></tr>\n";
       }
       if ($u->{'msn'}) {
           my $span = ($narrow_left-- >= 0) ? 1 : 2;
