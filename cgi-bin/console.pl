@@ -644,9 +644,10 @@ $cmd{'allow_open_proxy'} = {
     'handler' => \&allow_open_proxy,
     'privs' => [qw(allowopenproxy)],
     'des' => "Marks an IP address as not being an open proxy for the next 24 hours.",
-    'argsummary' => '<ip>',
+    'argsummary' => '<ip> <forever>',
     'args' => [
                'ip' => "The IP address to mark as clear.",
+               'forever' => "Set to 'forever' if this proxy should be allowed forever.",
                ],
     };
 
@@ -1130,7 +1131,7 @@ sub allow_open_proxy
     my ($dbh, $remote, $args, $out) = @_;
     my $err = sub { push @$out, [ "error", $_[0] ]; 0; };
 
-    return $err->('This command requires 1 argument.') unless @$args == 2;
+    return $err->('This command requires 1 or 2 arguments.') unless @$args == 2 || @$args == 3;
 
     return $err->('You are not authorized to use this command.')
         unless $remote && $remote->{priv}->{allowopenproxy};
@@ -1141,11 +1142,14 @@ sub allow_open_proxy
     return $err->('That IP address is not an open proxy.')
         unless LJ::is_open_proxy($ip);
 
-    $dbh->do("REPLACE INTO openproxy VALUES (?, 'clear', UNIX_TIMESTAMP(), ?)",
+    my $forever = $args->[2];
+    my $asof = $forever ? "'0'" : "UNIX_TIMESTAMP()";
+    $dbh->do("REPLACE INTO openproxy VALUES (?, 'clear', $asof, ?)",
              undef, $ip, "Manual: $remote->{user}");
     return $err->($dbh->errstr) if $dbh->err;
 
-    push @$out, [ '', "$ip cleared for the next 24 hours." ];
+    my $period = $forever ? "forever" : "for the next 24 hours";
+    push @$out, [ '', "$ip cleared $period." ];
     return 1;
 }
 

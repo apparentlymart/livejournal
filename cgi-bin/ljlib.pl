@@ -7876,7 +7876,7 @@ sub is_open_proxy
                                        undef, $ip);
 
     # only cache 'clear' hosts for a day; 'proxy' for two days
-    $stat = undef if $stat && $stat->{'status'} eq "clear" && $stat->{'asof'} < time()-86400;
+    $stat = undef if $stat && $stat->{'status'} eq "clear" && $stat->{'asof'} > 0 && $stat->{'asof'} < time()-86400;
     $stat = undef if $stat && $stat->{'status'} eq "proxy" && $stat->{'asof'} < time()-2*86400;
 
     # open proxies are considered open forever, unless cleaned by another site-local mechanism
