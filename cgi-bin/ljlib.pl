@@ -6007,9 +6007,8 @@ sub mark_dirty {
     # friends dirtiness is only necessary to track
     # if we're exchange XMLRPC with fotobilder
     if ($what eq 'friends' && $LJ::FB_SITEROOT) {
-        my $udbh = LJ::get_cluster_master($u);
         push @LJ::CLEANUP_HANDLERS, sub {
-            my $res = LJ::cmd_buffer_add($udbh, $u->{userid}, 'dirty', { what => 'friends' });
+            my $res = LJ::cmd_buffer_add($u->{clusterid}, $u->{userid}, 'dirty', { what => 'friends' });
             };
     } else {
         return 1;
@@ -6027,7 +6026,7 @@ sub mark_dirty {
 #      is deleting a journal entry, which requires recursing through a lot
 #      of tables and deleting all the appropriate stuff.
 # args: db, journalid, cmd, hargs
-# des-db: Cluster master db handle to run command on.
+# des-db: Global db handle to run command on, or user clusterid if cluster
 # des-journalid: Journal id command affects.  This is indexed in the
 #                [dbtable[cmdbuffer]] table so that all of a user's queued
 #                actions can be run before that user is potentially moved
