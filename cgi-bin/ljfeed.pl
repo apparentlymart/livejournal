@@ -318,7 +318,8 @@ sub create_view_atom
     $ret .= LJ::run_hook("bot_director", "<!-- ", " -->");
 
     # AtomAPI interface
-    my $api = "$LJ::SITEROOT/interface/atomapi/$journalinfo->{'u'}->{'user'}";
+    my $api = "$LJ::SITEROOT/interface/atom";
+    $journalinfo->{link} ||= "$LJ::SITEROOT/users/$u->{user}/";
 
     # header
     unless ($opts->{'noheader'}) {
@@ -334,7 +335,7 @@ sub create_view_atom
             . "</modified>";
         
         # link to the AtomAPI version of this feed
-        $ret .= "<link rel='service.feed' type='application/x.atom+xml' title='AtomAPI-enabled feed' href='$api/feed' />";
+        $ret .= "<link rel='service.feed' type='application/x.atom+xml' title='$journalinfo->{title}' href='$api/feed' />";
 
         if ($opts->{'apilinks'}) {
             $ret .= "<link rel='service.post' type='application/x.atom+xml' title='Create a new post' href='$api/post' />";
@@ -348,7 +349,7 @@ sub create_view_atom
         my $itemid = $it->{itemid};
         my $ditemid = $it->{ditemid};
 
-        $ret .= "  <entry>\n";
+        $ret .= "  <entry xmlns=\"http://purl.org/atom/ns#\">\n";
         $ret .= "    <title mode='escaped'>$it->{subject}</title>\n"; # include empty tag if we don't have a subject.
         $ret .= "    <id>urn:lj:$LJ::DOMAIN:atom1:$journalinfo->{u}{user}:$ditemid</id>\n";
         $ret .= "    <link rel='alternate' type='text/html' href='$journalinfo->{link}$ditemid.html' />\n";

@@ -165,9 +165,9 @@ sub w3cdtf_to_time {
     # We can only use complete times, so anything which
     # doesn't feature the time part is considered invalid.
     
-    if ($tw3 =~ /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)(:\d\d)?$/) {
-        my ($year, $mon, $day, $hour, $min) = ($1,$2,$3,$4,$5);
-        return "$1-$2-$3 $4:$5";
+    if ($tw3 =~ /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)(?::(\d\d))?$/) {
+        my ($year, $mon, $day, $hour, $min, $sec) = ($1,$2,$3,$4,$5,$6);
+        return $sec ? "$1-$2-$3 $4:$5:$6" : "$1-$2-$3 $4:$5";
     }
     else {
         return undef;

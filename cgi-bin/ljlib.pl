@@ -3239,7 +3239,7 @@ sub auth_digest {
     # set the remote
     LJ::set_remote($u);
 
-    return 1;
+    return $u;
 }
 
 

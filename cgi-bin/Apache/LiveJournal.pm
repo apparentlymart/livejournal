@@ -522,8 +522,7 @@ sub trans
             $r->push_handlers(PerlHandler => \&Apache::LiveJournal::Interface::FotoBilder::handler);
             return OK;
         }
-        if ($int eq "flat" || $int eq "xmlrpc" || $int eq "blogger" ||
-                $int eq "atomapi") {
+        if ($int =~ /flat|xmlrpc|blogger|atom(?:api)?/) {
             $RQ{'interface'} = $int;
             $RQ{'is_ssl'} = $is_ssl;
             $r->push_handlers(PerlHandler => \&interface_content);
@@ -1120,7 +1119,7 @@ sub interface_content
         return OK;
     }
 
-    if ($RQ{'interface'} eq "atomapi") {
+    if ($RQ{'interface'} =~ /atom(?:api)?/) {
         # the interface package will set up all headers and
         # print everything
         Apache::LiveJournal::Interface::AtomAPI::handle($r);
