@@ -27,7 +27,8 @@
     return $err->($ML{'error.invalidauth'})
         unless $u;
 
-    my $fotobilder = defined $GET{'ret'} && index $GET{'ret'}, $LJ::FB_DOMAIN >= 0 ? 1 : 0;
+    my $fotobilder = defined $GET{'ret'} && index $GET{'ret'}, $LJ::FB_DOMAIN >= 0
+        && defined $GET{'urlpic'} && $GET{'urlpic'} =~ m!$LJ::FB_SITEROOT/~?$remote->{'user'}/pic/! ? 1 : 0;
 
     if ($fotobilder &&
         (LJ::check_referer($GET{'ret'}) || LJ::check_referer('/editpics.bml'))) {
@@ -733,7 +734,7 @@
 
         if ($fotobilder) {
             $body .= "<tr><td colspan='3' align='center'>\n";
-            $body .= "<img src='$GET{'urlpic'}' />";
+            $body .= "<img src='" . LJ::CleanHTML::canonical_url($GET{'urlpic'}) . "' />";
             $body .= LJ::html_hidden('src', 'url', 'urlpic', $GET{'urlpic'});
         } else {
             $body .= "<tr><td align='right'>\n";
