@@ -3,17 +3,18 @@ title=>Support Requests
 body<=
 
 <?_code
+ use strict;
+ use vars qw(%FORM);
+
  my ($ret, $sth);
  my $r = Apache->request;
 
  my $remote = LJ::get_remote();
  LJ::Support::init_remote($remote);
 
- if (!$remote->{'_priv'} && 
-     $r->header_in("Referer") eq "$LJ::SITEROOT/support/") 
- { 
-    return $ML{'.interim'}; 
- }
+ return $ML{'.interim'} if ((!$remote || $remote && !$remote->{'_priv'}) && 
+    $r->header_in("Referer") eq "$LJ::SITEROOT/support/");
+
  my $cats = LJ::Support::load_cats();
 
  my $filtercat = $FORM{'cat'};
@@ -69,7 +70,7 @@ body<=
  {
      $ret .= "<?h1 Open Support Requests h1?><?p Below are all support requests that are open (they just came in and haven't been touched yet) or answered (either awaiting to be closed by the person needing help, or the person requested they still need help).  The <a href=\"./help.bml?state=closed&amp;cat=$filtercat\">closed reports</a> are also available.  If you help somebody out and they confirm you helped them, you get the number of points indicated in the status column.  These points will show up on your userinfo page. p?>";
  
-     $total_count = $dbr->selectrow_array("SELECT COUNT(*) FROM support s WHERE s.state='open' $filterwhere");
+     my $total_count = $dbr->selectrow_array("SELECT COUNT(*) FROM support s WHERE s.state='open' $filterwhere");
      unless ($total_count) {
          return "<?h1 No support requests! h1?><?p The support queue is currently empty.  :-) p?>";
      }
@@ -125,7 +126,7 @@ body<=
  $ret .= "<td><b>Status</b></td>\n";
  $ret .= "</tr>";
 
- while ($sp = $sth->fetchrow_hashref)
+ while (my $sp = $sth->fetchrow_hashref)
  {
      LJ::Support::fill_request_with_cat($sp, $cats);
      next unless (LJ::Support::can_read($sp, $remote));
