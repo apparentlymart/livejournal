@@ -48,11 +48,18 @@ BODY<=
 
  # start quoting shit to insert
  my $itemid = $init->{'itemid'}+0;
- my $ditemid = $init->{'ditemid'}+0;
  my $item = LJ::Talk::get_journal_item($dbcs, $u, $itemid);
- unless ($item && ($init->{'oldurl'} || $item->{'anum'} == $init->{'anum'})) {
+
+ if ($init->{'oldurl'} && $item) {
+     $init->{'anum'} = $item->{'anum'};
+     $init->{'ditemid'} = $init->{'itemid'}*256 + $item->{'anum'};
+ }
+
+ unless ($item && $item->{'anum'} == $init->{'anum'}) {
      return "(=H1 Error H1=)(=P No such entry. P=)";
  }
+
+ my $ditemid = $init->{'ditemid'}+0;
 
  my %logprops;
  if ($clustered) {

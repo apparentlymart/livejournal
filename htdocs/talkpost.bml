@@ -96,7 +96,6 @@ BODY<=
  }
 
  my $itemid = $init->{'itemid'};
- my $ditemid = $init->{'ditemid'};
 
  ### load the log properties
  my %logprops;
@@ -117,9 +116,18 @@ BODY<=
 
  ## load the journal item
  my $item = LJ::Talk::get_journal_item($dbcs, $u, $itemid);
- unless ($item && ($init->{'oldurl'} || $item->{'anum'} == $init->{'anum'})) {
+
+ if ($init->{'oldurl'} && $item) {
+     $init->{'anum'} = $item->{'anum'};
+     $init->{'ditemid'} = $init->{'itemid'}*256 + $item->{'anum'};
+ }
+
+ unless ($item && $item->{'anum'} == $init->{'anum'}) {
      return "(=H1 Error H1=)(=P No such entry. P=)";
  }
+
+ my $ditemid = $init->{'ditemid'};
+
 
  $parpost ||= $item;  # if there's no parent post, remote is reply to top-level item
 

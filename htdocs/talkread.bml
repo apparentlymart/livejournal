@@ -48,14 +48,21 @@ BODY<=
  my $ret = "";
 
  my $itemid = $init->{'itemid'}+0;
+
+ my $item = LJ::Talk::get_journal_item($dbcs, $u, $itemid);
+
+ if ($init->{'oldurl'} && $item) {
+     $init->{'anum'} = $item->{'anum'};
+     $init->{'ditemid'} = $init->{'itemid'}*256 + $item->{'anum'};
+ }
+
+ unless ($item && $item->{'anum'} == $init->{'anum'}) {
+     return "(=H1 Error H1=)(=P No such entry. P=)";
+ }
+
  my $ditemid = $init->{'ditemid'}+0;
  my $page = int($FORM{'page'}) || 1;
  my $thread = int($FORM{'thread'}) || 0;
-
- my $item = LJ::Talk::get_journal_item($dbcs, $u, $itemid);
- unless ($item && ($init->{'oldurl'} || $item->{'anum'} == $init->{'anum'})) {
-     return "(=H1 Error H1=)(=P No such entry. P=)";
- }
 
  ### load the log properties
  my %logprops = ();
