@@ -6,14 +6,20 @@ use File::Temp  qw{tempdir};
 use File::Path  qw{rmtree};
 use File::Spec  qw{};
 
-our ( $FakeUserId, $ClusterId, $Digits, $DigitCount, $ExpireThreshold );
+our ( $FakeUserId, $ClusterId, $Digits, $DigitCount,
+      $ExpireThresUser, $ExpireThresNoUser );
 
 # Data for code-generation
 $Digits = "abcdefghkmnpqrstuvwzyz23456789";
 $DigitCount = length( $Digits );
 
-# Maximum age of an issued captcha, in seconds.
-$ExpireThreshold = ( 24 * 3600 ); # 24 hours
+# Maximum age of answered captchas.  this is just
+# for double-click protection.
+$ExpireThresUser   = 2 * 60;   # two minutes
+
+# 24 hours for captchas which were given out but not answered.
+# (they might leave their browser window open or something)
+$ExpireThresNoUser = 24 * 3600;  # 1 day
 
 
 #####################################################################
@@ -230,7 +236,6 @@ $maint{gen_image_captchas} = sub {
 $maint{clean_captchas} = sub {
     my (
         $u,                     # System user
-        $expiredate,            # unixtime of oldest-issued captcha to keep
         $expired,               # arrayref of arrayrefs of expired captchas
         $dbh,                   # Database handle (writer)
         $sql,                   # SQL statement
@@ -238,8 +243,6 @@ $maint{clean_captchas} = sub {
         $count,                 # Deletion count
         $err,                   # Error message reference for Blob::delete calls
        );
-
-    $expiredate = time() - $ExpireThreshold;
 
     print "-I- Cleaning captchas that have been used or were issued before ",
         scalar localtime($expiredate), "...\n";
@@ -250,12 +253,17 @@ $maint{clean_captchas} = sub {
             capid, type
         FROM captchas
         WHERE
-            userid > 0
-            AND ( issuetime <> 0 AND issuetime < ? )
-        LIMIT 500
+	    ( issuetime <> 0 AND issuetime < ? )
+	    OR
+            ( userid > 0
+	      AND ( issuetime <> 0 AND issuetime < ? )
+	      )
+        LIMIT 2500
     };
     $dbh = LJ::get_db_writer();
-    $expired = $dbh->selectall_arrayref( $sql, undef, $expiredate );
+    $expired = $dbh->selectall_arrayref( $sql, undef,
+					 time() - $ExpireThresNoUser,
+					 time() - $ExpireThresUser );
     die "selectall_arrayref: $sql: ", $dbh->errstr if $dbh->err;
 
     if ( @$expired ) {
