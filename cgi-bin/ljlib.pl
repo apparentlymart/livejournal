@@ -7744,15 +7744,20 @@ sub get_public_styles {
     # not cached, build from db
     my $sysid = LJ::get_userid("system");
 
+    # all cols *except* formatdata, which is big and unnecessary for most uses.
+    # it'll be loaded by LJ::S1::get_style
+    my $cols = "styleid, styledes, type, is_public, is_embedded, ".
+        "is_colorfree, opt_cache, has_ads, lastupdate";
+
     # first try new table
     my $dbh = LJ::get_db_writer();
-    my $sth = $dbh->prepare("SELECT * FROM s1style WHERE userid=?");
+    my $sth = $dbh->prepare("SELECT userid, $cols FROM s1style WHERE userid=?");
     $sth->execute($sysid);
     $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
 
     # fall back to old table
     unless (%$pubstyc) {
-        $sth = $dbh->prepare("SELECT * FROM style WHERE user='system' AND is_public='Y'");
+        $sth = $dbh->prepare("SELECT user, $cols FROM style WHERE user='system' AND is_public='Y'");
         $sth->execute();
         $pubstyc->{$_->{'styleid'}} = $_ while $_ = $sth->fetchrow_hashref;
     }

@@ -375,17 +375,22 @@ sub get_user_styles {
 
     my %styles;
 
+    # all cols *except* formatdata, which is big and unnecessary for most uses.
+    # it'll be loaded by LJ::S1::get_style
+    my $cols = "styleid, styledes, type, is_public, is_embedded, ".
+        "is_colorfree, opt_cache, has_ads, lastupdate";
+
     # new clustered table
     my ($db, $sth);
     if ($u->{'dversion'} >= 5) {
         $db = LJ::S1::get_s1style_reader($u);
-        $sth = $db->prepare("SELECT * FROM s1style WHERE userid=?");
+        $sth = $db->prepare("SELECT userid, $cols FROM s1style WHERE userid=?");
         $sth->execute($u->{'userid'});
 
     # old global table
     } else {
         $db = @LJ::MEMCACHE_SERVERS ? LJ::get_db_writer() : LJ::get_db_reader();
-        $sth = $db->prepare("SELECT * FROM style WHERE user=?");
+        $sth = $db->prepare("SELECT user, $cols FROM style WHERE user=?");
         $sth->execute($u->{'user'});
     }
 
