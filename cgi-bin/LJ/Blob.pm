@@ -1,7 +1,7 @@
 # Wrapper around BlobClient.
 
 use strict;
-use lib "$ENV{'LJHOME'}/cgi-bin/LJ";
+use lib "$ENV{'LJHOME'}/cgi-bin";
 use BlobClient;
 
 package LJ::Blob;
