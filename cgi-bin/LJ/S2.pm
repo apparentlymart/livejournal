@@ -52,11 +52,14 @@ sub make_journal
         return;
     }
 
-    eval {
-        my $lang = 'en';
-        LJ::run_hook('set_s2bml_lang', $ctx, \$lang);
-        BML::set_language($lang, \&LJ::Lang::get_text);
-    };
+    my $lang = 'en';
+    LJ::run_hook('set_s2bml_lang', $ctx, \$lang);
+
+    # note that's it's very important to pass LJ::Lang::get_text here explicitly
+    # rather than relying on BML::set_language's fallback mechanism, which won't
+    # work in this context since BML::cur_req won't be loaded if no BML requests
+    # have been served from this Apache process yet
+    BML::set_language($lang, \&LJ::Lang::get_text);
 
     # let layouts disable EntryPage / ReplyPage, using the BML version
     # instead.
