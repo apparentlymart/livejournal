@@ -278,7 +278,8 @@ $cmd{'deletetalk'} = {
     'des' => "Delete a comment.",
     'argsummary' => '<talkid>',
     'args' => [
-	       'itemid' => "The unique 'talkid' number of the comment to be deleted.",
+	       'itemid' => "The itemid of the post to have a comment deleted from it.",
+	       'talkid' => "The talkid of the comment to be deleted.",
 	       ],
     };
 
@@ -292,13 +293,34 @@ sub delete_talk
 	return 0;
     }
 
-    my $qtalkid = $args->[1]+0;
-    unless ($qtalkid > 0) {
-	push @$out, [ "error", "Argument must be a positive integer (the talkid)." ];
+    my $qitemid = $args->[1]+0;
+    unless ($qitemid > 0) {
+	push @$out, [ "error", "First argument must be a positive integer (the itemid)." ];
         return 0;
     }
+
+    my $qtalkid = $args->[2]+0;
+    unless ($qtalkid > 0) {
+	push @$out, [ "error", "Second argument must be a positive integer (the talkid)." ];
+        return 0;
+    }
+
+    my $sth;
+    $sth = $dbh->prepare("SELECT state FROM talk WHERE talkid=$qtalkid AND nodetype='L' AND nodeid=$qitemid");
+    $sth->execute;
+    my ($state) = $sth->fetchrow_array;
+
+    unless ($state) {
+	push @$out, [ "error", "No talkid with that number found for that itemid." ];
+	return 0;
+    }
+
+    if ($state eq "D") {
+	push @$out, [ "info", "talkid $qtalkid is already deleted" ];
+	return 1;
+    }
     
-    my $sth = $dbh->do("UPDATE talk SET state='D' WHERE talkid=$qtalkid");
+    $sth = $dbh->do("UPDATE talk SET state='D' WHERE talkid=$qtalkid");
     if ($dbh->err) { 
 	push @$out, [ "error", $dbh->errstr ];
 	return 0;
