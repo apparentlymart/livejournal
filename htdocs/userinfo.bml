@@ -338,7 +338,7 @@
       }
       if ($u->{'icq'}) {
 	  my $span = ($narrow_left-- >= 0) ? 1 : 2;
-	  $body .= "<TR><TD ALIGN=RIGHT><B><NOBR>ICQ UIN</NOBR>:</B></TD><TD COLSPAN=$span><IMG SRC=\"http://online.mirabilis.com/scripts/online.dll?icq=$u->{'icq'}&amp;img=5\" HEIGHT=18 WIDTH=18> $u->{'icq'} (<B><A HREF=\"http://wwp.icq.com/scripts/search.dll?to=$u->{'icq'}\">Add User</A>, <A HREF=\"http://wwp.icq.com/scripts/contact.dll?msgto=$u->{'icq'}\">Send Message</A></B>) </TD></TR>\n";
+	  $body .= "<TR><TD ALIGN=RIGHT><B><NOBR>ICQ UIN</NOBR>:</B></TD><TD COLSPAN=$span><IMG SRC=\"http://web.icq.com/whitepages/online?icq=$u->{'icq'}&amp;img=5\" height='18' width='18'> $u->{'icq'} (<B><A HREF=\"http://wwp.icq.com/scripts/search.dll?to=$u->{'icq'}\">Add User</A>, <A HREF=\"http://wwp.icq.com/scripts/contact.dll?msgto=$u->{'icq'}\">Send Message</A></B>) </TD></TR>\n";
       }
       if ($u->{'yahoo'}) {
 	  my $span = ($narrow_left-- >= 0) ? 1 : 2;
