@@ -152,13 +152,17 @@ body<=
             $id = $id + 0;
             foreach (@allattribs) {
                 if ($POST{"edit_${id}_$_"}) {
-                    $add{$_}->{$id} = 1;
+                    $add{$_}->{$id} = 1 unless $POST{"w_${id}_$_"};
                 } else {
-                    $delete{$_}->{$id} = 1;
+                    $delete{$_}->{$id} = 1 if $POST{"w_${id}_$_"};
                 }
             }
             $maints++ if $add{'admin'}->{$id};
         }
+        use Data::Dumper;
+        print STDERR Dumper(\%add);
+         print STDERR Dumper(\%delete);
+       die('1');
 
         # can't remove ALL maintainers, give them an error so they can
         # go back and decide who to keep
@@ -198,7 +202,7 @@ body<=
         my @msgs;
         if (%{$add{'member'}}) {
             foreach my $id (keys %{$add{'member'}}) {
-                next if $POST{"wm_$id"};
+                next if $POST{"w_member_$id"};
                 my $u = LJ::load_userid($id);
                 if (LJ::u_equals($u, $remote)) {
                     # you're allowed to add yourself as member
@@ -359,7 +363,7 @@ body<=
             $ret .= "<td align='center'>";
             $ret .= LJ::html_check({ 'name' => "edit_$_->{'userid'}_$key",
                                      'selected' => $_->{$key} });
-            $ret .= LJ::html_hidden("wm_$_->{userid}", 1) if $key eq 'member' && $_->{$key};
+            $ret .= LJ::html_hidden("w_$_->{userid}_$key", 1) if $_->{$key};
             $ret .= "</td>";
         }
         $ret .= "</tr>\n";
