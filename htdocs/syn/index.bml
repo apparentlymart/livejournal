@@ -189,7 +189,7 @@ body<=
                 $syn{$user} = $url;
                 $used += $cost;
             } else {
-                return "<?h1 $ML{'Sorry'} h1?><?p " . BML::ml ('.invalid.overquota.username', {'user' => LJ::ljuser($user)}) . " p?><?p " .
+                return "<?h1 $ML{'Sorry'} h1?><?p " . BML::ml ('.invalid.overquota.username', {'user' => LJ::ljuser($user, { 'type' => 'Y' })}) . " p?><?p " .
                         BML::ml('Backlink', {'link' => '/syn/', 'text' => $ML{'.back'}}) . " p?>";
             }
         } else {
@@ -217,7 +217,7 @@ body<=
         foreach my $user (sort { $count{$a} <=> $count{$b} } keys %count) {
             $ret .= "<tr>";
             $ret .= "<td><input type='checkbox' value='1' name='defriend_$user' /></td>";
-            $ret .= "<td>" . LJ::ljuser($user) . "</td>";
+            $ret .= "<td>" . LJ::ljuser($user, { 'type' => 'Y' }) . "</td>";
             $ret .= "<td><a href=\"$syn{$user}\">$syn{$user}</a></td>";
             $ret .= "<td align='right'>$count{$user}</td><td align='right'>";
             $ret .= sprintf("%.03f", $cost{$user});
@@ -240,7 +240,7 @@ body<=
             my $cost = LJ::syn_cost($count + 1);  # plus one because we're including ourselves, friendof-to-be
             $ret .= "<tr>";
             $ret .= "<td><input type='checkbox' value='1' name='add_$user' /></td>";
-            $ret .= "<td>" . LJ::ljuser($user) . "</td>";
+            $ret .= "<td>" . LJ::ljuser($user, { 'type' => 'Y' }) . "</td>";
             $ret .= "<td><a href=\"$url\">$url</a></td>";
             $ret .= "<td align='right'>$count</td><td align='right'>";
             $ret .= sprintf("%.03f", $cost);
